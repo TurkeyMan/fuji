@@ -5,7 +5,8 @@
 #if defined(_WINDOWS) || defined(_XBOX)
 #pragma pack(1)
 #endif
-struct TgaHeader {
+struct TgaHeader
+{
 	uint8 idLength;
 	uint8 colourMapType;
 	uint8 imageType;
@@ -39,7 +40,8 @@ Image::Image()
 
 Image::~Image()
 {
-	if(pixels != NULL) {
+	if(pixels != NULL)
+	{
 		Heap_TFree(pixels);
 		pixels = NULL;
 	}
@@ -64,23 +66,30 @@ void Image::Convert(ImageFormat toFormat)
 	if(toFormat == format)
 		return;
 
-	if((format == FUJI_BGRA) && (toFormat == FUJI_RGBA)) {
-		for(uint32 i=0; i < (width * height); i++) {
+	if((format == FUJI_BGRA) && (toFormat == FUJI_RGBA))
+	{
+		for(uint32 i=0; i < (width * height); i++)
+		{
 			temp = *p;
 			*p = *(p + 2);
 			*(p + 2) = temp;
 		
 			p += 4;
 		}
-	} else if((format == FUJI_BGR) && (toFormat == FUJI_RGB)) {
-		for(uint32 i=0; i < (width * height); i++) {
+	} 
+	else if((format == FUJI_BGR) && (toFormat == FUJI_RGB)) 
+	{
+		for(uint32 i=0; i < (width * height); i++)
+		{
 			temp = *p;
 			*p = *(p + 2);
 			*(p + 2) = temp;
 
 			p += 3;		
 		}
-	} else {
+	} 
+	else 
+	{
 		LOGD(STR("Unhandled conversion pair!"));
 	}
 }
@@ -103,7 +112,8 @@ void Image::VFlip(void)
 	top = (unsigned char *)pixels;
 	bottom = (unsigned char *)pixels + (width * (height - 1) * bytesPerPixel);
 
-	for(uint32 line=0; line < verticalRange; line++) {
+	for(uint32 line=0; line < verticalRange; line++)
+	{
 		memcpy(tempPixels, top, horizSpan);
 		memcpy(top, bottom, horizSpan);
 		memcpy(bottom, tempPixels, horizSpan);
@@ -127,7 +137,8 @@ Image * LoadTGA(const char *filename, bool flipped)
 	contents = (unsigned char *)File_Load(filename, &bytesRead);
 	Heap_ActivateTempMemOverride(false);
 	
-	if(contents == NULL || bytesRead < (sizeof(TgaHeader) + 1)) {
+	if(contents == NULL || bytesRead < (sizeof(TgaHeader) + 1))
+	{
 		return(NULL);
 	}
 
@@ -135,29 +146,34 @@ Image * LoadTGA(const char *filename, bool flipped)
 	struct TgaHeader *header = (struct TgaHeader *)position;
 	position += sizeof(struct TgaHeader);
 
-	if((header->imageType != 2) && (header->imageType != 10)) {
+	if((header->imageType != 2) && (header->imageType != 10))
+	{
 		LOGD(STR("Failed loading image: %s (Unhandled TGA type (%d))", filename, header->imageType));
 		Heap_TFree(contents);
 		return(NULL);
 	}
 
-	if((header->bpp != 24) && (header->bpp != 32)) {
+	if((header->bpp != 24) && (header->bpp != 32))
+	{
 		LOGD(STR("Failed loading image: %s (Invalid colour depth (%d))", filename, header->bpp));
 		Heap_TFree(contents);
 		return(NULL);
 	}
 
-	if((header->flags & 0xC0)) {
+	if((header->flags & 0xC0))
+	{
 		LOGD(STR("Failed loading image: %s (Interleaved images not supported)", filename));
 		Heap_TFree(contents);
 		return(NULL);
 	}
 
-	if((header->flags & 0x20) >> 5) {
+	if((header->flags & 0x20) >> 5)
+	{
 		isSavedFlipped = false;
 	}
 
-	if((position + header->idLength + (header->colourMapLength * header->colourMapBits * header->colourMapType)) >= contents + bytesRead) {
+	if((position + header->idLength + (header->colourMapLength * header->colourMapBits * header->colourMapType)) >= contents + bytesRead)
+	{
 		LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 		Heap_TFree(contents);
 		return(NULL);
@@ -166,11 +182,14 @@ Image * LoadTGA(const char *filename, bool flipped)
 	position += header->idLength;
 
 	Image *image = new Image;
-	if(header->bpp == 24) {
+	if(header->bpp == 24)
+	{
 		image->bitsPerPixel = 24;
 		image->bytesPerPixel = 3;
 		image->format = FUJI_BGR;
-	} else { // 32
+	}
+	else // 32
+	{
 		image->bitsPerPixel = 32;
 		image->bytesPerPixel = 4;
 		image->format = FUJI_BGRA;
@@ -181,30 +200,36 @@ Image * LoadTGA(const char *filename, bool flipped)
 
 	image->pixels = Heap_TAlloc(header->width * header->height * image->bytesPerPixel);
 
-	if(header->imageType == 10) { // The hard way
+	if(header->imageType == 10) // The hard way
+	{
 		uint32 pixelsRead = 0;
 
-		while(pixelsRead < (uint32)(header->width * header->height)) {
-			if(position >= contents + bytesRead) {
+		while(pixelsRead < (uint32)(header->width * header->height))
+		{
+			if(position >= contents + bytesRead)
+			{
 				LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 				delete image;
 				Heap_TFree(contents);
 				return(NULL);
 			}
 			
-			if(*position & 0x80) { // Run length packet
+			if(*position & 0x80) // Run length packet
+			{
 				uint8 length = ((*position) & 0x7F) + 1;
 				
 				position += 1;
 
-				if((position + image->bytesPerPixel) > contents + bytesRead) {
+				if((position + image->bytesPerPixel) > contents + bytesRead)
+				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					Heap_TFree(contents);
 					return(NULL);
 				}
 
-				if((pixelsRead + length) > (uint32)(header->width * header->height)) {
+				if((pixelsRead + length) > (uint32)(header->width * header->height))
+				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					Heap_TFree(contents);
@@ -212,12 +237,15 @@ Image * LoadTGA(const char *filename, bool flipped)
 				}
 
 				unsigned char pixel[4];
-				for(uint8 i = 0; i < image->bytesPerPixel; i++) {
+				for(uint8 i = 0; i < image->bytesPerPixel; i++)
+				{
 					pixel[i] = position[i];
 				}
 				
-				for(uint8 i = 0; i < length; i++) {
-					for(uint8 j = 0; j < image->bytesPerPixel; j++) {
+				for(uint8 i = 0; i < length; i++)
+				{
+					for(uint8 j = 0; j < image->bytesPerPixel; j++)
+					{
 						((unsigned char *)image->pixels)[(pixelsRead * image->bytesPerPixel) + j] = pixel[j];
 					}
 				
@@ -225,19 +253,23 @@ Image * LoadTGA(const char *filename, bool flipped)
 				}
 
 				position += image->bytesPerPixel;
-			} else { // Raw packet
+			}
+			else 
+			{ // Raw packet
 				uint8 length = ((*position) & 0x7F) + 1;
 
 				position += 1;
 
-				if((position + (image->bytesPerPixel * length)) > contents + bytesRead) {
+				if((position + (image->bytesPerPixel * length)) > contents + bytesRead)
+				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					Heap_TFree(contents);
 					return(NULL);
 				}
 			
-				if((pixelsRead + length) > (uint32)(header->width * header->height)) {
+				if((pixelsRead + length) > (uint32)(header->width * header->height))
+				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					Heap_TFree(contents);
@@ -249,8 +281,11 @@ Image * LoadTGA(const char *filename, bool flipped)
 				position += image->bytesPerPixel * length;
 			}
 		}
-	} else { // 2 - The easy way
-		if((position + (image->bytesPerPixel * (header->width * header->height))) > contents + bytesRead) {
+	}
+	else // 2 - The easy way
+	{
+		if((position + (image->bytesPerPixel * (header->width * header->height))) > contents + bytesRead)
+		{
 			LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 			delete image;
 			Heap_TFree(contents);
@@ -262,16 +297,20 @@ Image * LoadTGA(const char *filename, bool flipped)
 
 	Heap_TFree(contents);
 	
-	if(flipped) {
-		if(!isSavedFlipped) {
+	if(flipped)
+	{
+		if(!isSavedFlipped)
+		{
 			image->VFlip();
 		}
-	} else {
-		if(isSavedFlipped) {
+	}
+	else
+	{
+		if(isSavedFlipped)
+		{
 			image->VFlip();
 		}
 	}
 
 	return(image);
 }
-

@@ -1,14 +1,16 @@
 #if !defined(_IMAGE_H)
 #define _IMAGE_H
 
-typedef enum {
+typedef enum
+{
 	FUJI_RGBA,
 	FUJI_BGRA,
 	FUJI_RGB,
 	FUJI_BGR
 } ImageFormat;
 
-class Image {
+class Image
+{
 public:
 	Image();
 	~Image();
