@@ -18,6 +18,8 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState);
 void Input_GetKeyStateInternal(int id, KeyState *pGamepadState);
 void Input_GetMouseStateInternal(int id, MouseState *pGamepadState);
 
+float InputInternal_GetGamepadKeyMapping(int type, KeyState *pKeystate);
+
 // input device state
 struct DeviceStatus
 {

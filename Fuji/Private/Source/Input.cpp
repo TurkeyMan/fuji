@@ -17,6 +17,10 @@ static MouseState	prevMouseStates[Input_MaxInputID];
 float gamepadDeadZone = 0.3f;
 float mouseAccelleration = 1.0f;
 
+int numGamepads = 0;
+int numPointers = 0;
+int numKeyboards = 0;
+
 // DIK to ASCII mappings with shift, caps, and shift-caps tables
 char KEYtoASCII[256]			= {0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,'\t','q','w','e','r','t','y','u','i','o','p','[',']','\r',0,'a','s','d','f','g','h','j','k','l',';','\'','`',0,'\\','z','x','c','v','b','n','m',',','.','/',0,'*',0,' ',0,0,0,0,0,0,0,0,0,0,0,0,0,'7','8','9','-','4','5','6','+','1','2','3','0','.',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'=',0,0,0,'@',':','_',0,0,0,0,0,0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,',',0,'/',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -39,8 +43,10 @@ void Input_Update()
 {
 	int a, b;
 
+	// platform specific update
 	Input_UpdatePlatformSpecific();
 
+	// update state for each device
 	for(a=0; a<IDD_Max; a++)
 	{
 		for(b=0; b<Input_MaxInputID; b++)
@@ -49,23 +55,52 @@ void Input_Update()
 		}
 	}
 
+	// count number of gamepads
+	int maxGamepad = -1;
+	for(a=0; a<Input_MaxInputID; a++)
+	{
+		if(deviceStatus[IDD_Gamepad][a].available)
+			maxGamepad = a;
+	}
+	numGamepads = maxGamepad+1;
+
+	// update number of keyboards
+	int maxKB = -1;
+	for(a=0; a<Input_MaxInputID; a++)
+	{
+		if(deviceStatus[IDD_Keyboard][a].available)
+			maxKB = a;
+	}
+	numKeyboards = maxKB+1;
+
+	// update number of pointers
+	int maxMouse = -1;
+	for(a=0; a<Input_MaxInputID; a++)
+	{
+		if(deviceStatus[IDD_Mouse][a].available)
+			maxMouse = a;
+	}
+	numPointers = maxMouse+1;
+
+	// copy current states into last states
 	memcpy(prevGamepadStates, gamepadStates, sizeof(GamepadState) * Input_MaxInputID);
 	memcpy(prevKeyStates, keyStates, sizeof(KeyState) * Input_MaxInputID);
 	memcpy(prevMouseStates, mouseStates, sizeof(MouseState) * Input_MaxInputID);
 
-	for(a=0; a<Input_MaxInputID; a++)
+	// update gamepad state
+	for(a=0; a<numGamepads; a++)
 	{
 		if(Input_IsAvailable(IDD_Gamepad, a))
 			Input_GetGamepadStateInternal(a, &gamepadStates[a]);
 	}
 
-	for(a=0; a<Input_MaxInputID; a++)
+	for(a=0; a<numKeyboards; a++)
 	{
 		if(Input_IsAvailable(IDD_Keyboard, a))
 			Input_GetKeyStateInternal(a, &keyStates[a]);
 	}
 
-	for(a=0; a<Input_MaxInputID; a++)
+	for(a=0; a<numPointers; a++)
 	{
 		if(Input_IsAvailable(IDD_Mouse, a))
 			Input_GetMouseStateInternal(a, &mouseStates[a]);
@@ -77,7 +112,15 @@ bool Input_IsAvailable(int source, int sourceID)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	return deviceStatus[source][sourceID].available ? true : false;
+	bool available = deviceStatus[source][sourceID].available || numKeyboards;
+
+#if !defined(_RETAIL)
+	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
+	if(!available && source == IDD_Gamepad && sourceID == 0 && numKeyboards)
+		available = true;
+#endif
+
+	return available;
 }
 
 bool Input_IsConnected(int source, int sourceID)
@@ -85,14 +128,35 @@ bool Input_IsConnected(int source, int sourceID)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	return deviceStatus[source][sourceID].status == IDS_Disconnected ? false : true;
+	bool connected = deviceStatus[source][sourceID].status != IDS_Disconnected;
+
+#if !defined(_RETAIL)
+	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
+	if(!connected && source == IDD_Gamepad && sourceID == 0 && numKeyboards)
+	{
+		connected = Input_GetKeyboardStatusState(KSS_ScrollLock, 0);
+	}
+#endif
+
+	return connected;
 }
+
 bool Input_IsReady(int source, int sourceID)
 {
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	return deviceStatus[source][sourceID].status == IDS_Ready ? true : false;
+	bool ready = deviceStatus[source][sourceID].status == IDS_Ready;
+
+#if !defined(_RETAIL)
+	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
+	if(!ready && source == IDD_Gamepad && sourceID == 0 && numKeyboards)
+	{
+		ready = Input_GetKeyboardStatusState(KSS_ScrollLock, 0);
+	}
+#endif
+
+	return ready;
 }
 
 float Input_Read(int source, int sourceID, int type)
@@ -115,7 +179,20 @@ float Input_Read(int source, int sourceID, int type)
 	switch(source)
 	{
 		case IDD_Gamepad:
+		{
+#if defined(_RETAIL)
 			return gamepadStates[sourceID].values[type];
+#else
+			float value;
+
+			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
+				value = InputInternal_GetGamepadKeyMapping(type, &keyStates[0]);
+			else
+				value = gamepadStates[sourceID].values[type];
+
+			return value;
+#endif
+		}
 		case IDD_Mouse:
 			if(type < Mouse_MaxAxis)
 			{
@@ -154,7 +231,20 @@ bool Input_WasPressed(int source, int sourceID, int type)
 	switch(source)
 	{
 		case IDD_Gamepad:
+		{
+#if defined(_RETAIL)
 			return gamepadStates[sourceID].values[type] && !prevGamepadStates[sourceID].values[type];
+#else
+			bool value;
+
+			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
+				value = InputInternal_GetGamepadKeyMapping(type, &keyStates[0]) && !InputInternal_GetGamepadKeyMapping(type, &prevKeyStates[0]);
+			else
+				value = gamepadStates[sourceID].values[type] && !prevGamepadStates[sourceID].values[type];
+
+			return value;
+#endif
+		}
 		case IDD_Mouse:
 			if(type < Mouse_MaxAxis)
 			{
@@ -193,7 +283,20 @@ bool Input_WasReleased(int source, int sourceID, int type)
 	switch(source)
 	{
 		case IDD_Gamepad:
+		{
+#if defined(_RETAIL)
 			return !gamepadStates[sourceID].values[type] && prevGamepadStates[sourceID].values[type];
+#else
+			bool value;
+
+			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
+				value = !InputInternal_GetGamepadKeyMapping(type, &keyStates[0]) && InputInternal_GetGamepadKeyMapping(type, &prevKeyStates[0]);
+			else
+				value = !gamepadStates[sourceID].values[type] && prevGamepadStates[sourceID].values[type];
+
+			return value;
+#endif
+		}
 		case IDD_Mouse:
 			if(type < Mouse_MaxAxis)
 			{
@@ -214,41 +317,17 @@ bool Input_WasReleased(int source, int sourceID, int type)
 
 int Input_GetNumGamepads()
 {
-	int maxGamepad = -1;
-
-	for(int a=0; a<Input_MaxInputID; a++)
-	{
-		if(deviceStatus[IDD_Gamepad][a].available)
-			maxGamepad = a;
-	}
-
-	return maxGamepad+1;
+	return numGamepads;
 }
 
 int Input_GetNumKeyboards()
 {
-	int maxKB = -1;
-
-	for(int a=0; a<Input_MaxInputID; a++)
-	{
-		if(deviceStatus[IDD_Keyboard][a].available)
-			maxKB = a;
-	}
-
-	return maxKB+1;
+	return numKeyboards;
 }
 
 int Input_GetNumPointers()
 {
-	int maxMouse = -1;
-
-	for(int a=0; a<Input_MaxInputID; a++)
-	{
-		if(deviceStatus[IDD_Mouse][a].available)
-			maxMouse = a;
-	}
-
-	return maxMouse+1;
+	return numPointers;
 }
 
 void SetMouseMode(uint32 mouseMode)
@@ -258,7 +337,7 @@ void SetMouseMode(uint32 mouseMode)
 
 Vector3 Input_ReadMousePos(int mouseID)
 {
-	Vector3 pos;
+	Vector3 pos = Vector3::zero;
 
 	if(mouseID < 0)
 	{
@@ -279,7 +358,7 @@ Vector3 Input_ReadMousePos(int mouseID)
 
 Vector3 Input_ReadMouseDelta(int mouseID)
 {
-	Vector3 delta;
+	Vector3 delta = Vector3::zero;
 
 	if(mouseID < 0)
 	{
@@ -308,9 +387,9 @@ void Input_SetMouseAcceleration(float multiplier)
 #pragma message("SetMouseAcceleration")
 }
 
-char* Input_EnumerateString(int source, int sourceID, int type)
+const char* Input_EnumerateString(int source, int sourceID, int type)
 {
-	return "Unknown";
+	return "Input_EnumerateString() not written...";
 }
 
 void Input_SetDeadZone(float deadZone)
@@ -323,3 +402,41 @@ float Input_GetDeadZone()
 	return gamepadDeadZone;
 }
 
+// gamepad mappings..
+char gamepadMappingTable[] =
+{
+	Mapping_Cross, // Button_P2_Cross
+	Mapping_Circle, // Button_P2_Circle
+	Mapping_Box, // Button_P2_Box
+	Mapping_Triangle, // Button_P2_Triangle
+
+	Mapping_R1, // Button_P2_R1
+	Mapping_L1, // Button_P2_L1
+	Mapping_L2, // Button_P2_L2
+	Mapping_R2, // Button_P2_R2
+
+	Mapping_Start, // Button_P2_Start
+	Mapping_Select, // Button_P2_Select
+
+	Mapping_LThumb, // Button_P2_LThumb
+	Mapping_RThumb, // Button_P2_RThumb
+
+// general controller enums
+	Mapping_DUp, // Button_DUp
+	Mapping_DDown, // Button_DDown
+	Mapping_DLeft, // Button_DLeft
+	Mapping_DRight, // Button_DRight
+
+//	KEY_UP,	// Axis_LX,
+//	KEY_UP,	// Axis_LY,
+//	KEY_UP,	// Axis_RX,
+//	KEY_UP,	// Axis_RY,
+};
+
+float InputInternal_GetGamepadKeyMapping(int type, KeyState *pKeystate)
+{
+	if(!Input_GetKeyboardStatusState(KSS_ScrollLock, 0))
+		return 0.0f;
+
+	return pKeystate->keys[gamepadMappingTable[type]] ? 1.0f : 0.0f;
+}

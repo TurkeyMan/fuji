@@ -452,11 +452,6 @@ void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 		for(DWORD a=0; a<elements; a++) 
 		{
 			gKeyState[inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
-			if(inputBuffer[a].dwOfs==DIK_PAUSE)
-			{
-				// why am i doing this again?
-				gKeyState[DIK_PAUSE]=(char)0x80;
-			}
 		}
 	}
 
@@ -465,7 +460,7 @@ void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 #pragma message("This part is redundant, needs to DIK->KEY table")
 	for(int a=0; a<256; a++)
 	{
-		pKeys[0] = gKeyState[KEYtoDIK[a]] ? -1 : 0;
+		pKeys[a] = gKeyState[KEYtoDIK[a]] ? -1 : 0;
 	}
 }
 
@@ -536,17 +531,25 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 	}
 }
 
-char* Input_GetDeviceName(int source, int sourceID)
+const char* Input_GetDeviceName(int source, int sourceID)
 {
-	char *pText = NULL;
+	const char *pText = NULL;
 
 	switch(source)
 	{
 		case IDD_Gamepad:
+		{
+			if(strcmp(pGamepadMappings[sourceID]->pName, "default"))
+				pText = pGamepadMappings[sourceID]->pName;
+			else
+				pText = "Gamepad";
 			break;
+		}
 		case IDD_Mouse:
+			pText = "Mouse";
 			break;
 		case IDD_Keyboard:
+			pText = "Keyboard";
 			break;
 		default:
 			break;

@@ -6,6 +6,8 @@
 #include "Texture.h"
 #include "Display.h"
 
+#include <xgraphics.h>
+
 /**** Globals ****/
 
 /**** Functions ****/
@@ -54,7 +56,7 @@ Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uin
 
 		case TEXF_A8R8G8B8:
 		{
-			if(flags & TEX_VerticalMirror)
+			if(0)//flags & TEX_VerticalMirror)
 			{
 				(char*&)pData += width*height*sizeof(uint32);
 
@@ -67,7 +69,8 @@ Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uin
 			}
 			else
 			{
-				memcpy(rect.pBits, pData, width*height*sizeof(uint32));
+				XGSwizzleRect(pData, 0, NULL, rect.pBits, width, height, NULL, 4);
+//				memcpy(rect.pBits, pData, width*height*sizeof(uint32));
 			}
 			break;
 		}

@@ -1,6 +1,8 @@
 #if !defined(_VECTOR3_H)
 #define _VECTOR3_H
 
+#pragma warning(disable:4201)
+
 #include "Common.h"
 
 class Matrix;

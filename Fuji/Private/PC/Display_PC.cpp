@@ -248,6 +248,9 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	ShowWindow(apphWnd, SW_SHOW);
 	SetFocus(apphWnd);
 
+	D3DCAPS9 deviceCaps;
+	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &deviceCaps);
+
 	D3DFORMAT PixelFormat;
 
 	D3DPRESENT_PARAMETERS present;
@@ -290,14 +293,27 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	}
 
 	int b=0;
+	DWORD processing = D3DCREATE_MULTITHREADED;
+
+	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
+	{
+		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	}
+	else
+	{
+		LOGD("Warning: Hardware does not support HardwareVertexProcessing, Attempting to use SoftwareVertexProcessing instead..");
+		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	}
+
 	for(int a=0; a<2&&!b; a++)
 	{
 		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, true)==D3D_OK)
 		{
-			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_MULTITHREADED, &present, &pd3dDevice)))
+			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
 			{
+				LOGD("Error: Failed to create Direct3D device. Cant create game window.");
 				Display_DestroyWindow();
-				MessageBox(NULL,"No suitable hardware supported Display Mode could be found.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
+				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
 				return 4;
 			}
 			else b=1;

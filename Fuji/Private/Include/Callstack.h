@@ -1,6 +1,8 @@
 #if !defined(_CALLSTACK_H)
 #define _CALLSTACK_H
 
+#pragma warning (disable:4100)
+
 #if defined(_CALLSTACK_PROFILING)
 #include <map>
 #endif

@@ -26,6 +26,7 @@ class Vector3;
 	#endif
 #endif
 
+#pragma warning(disable:4127)
 // asserts that a condition is true, if it fails, it throws an error and breaks the debugger..
 #if !defined(_RETAIL)
 	#if defined(HARD_ASSERTS)

@@ -1,6 +1,8 @@
 #if !defined(_VECTOR4_H)
 #define _VECTOR4_H
 
+#pragma warning(disable:4201)
+
 #include "Common.h"
 #include "Vector3.h"
 

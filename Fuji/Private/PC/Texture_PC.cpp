@@ -13,7 +13,7 @@
 Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uint32 format, uint32 flags, uint32 *pPalette)
 {
 	HRESULT hr;
-	D3DFORMAT fmt;
+	D3DFORMAT fmt = D3DFMT_UNKNOWN;
 
 	Texture *pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
 	pTexture->refCount = 0;
@@ -94,7 +94,7 @@ Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uin
 Texture* Texture_CreateBlank(const Vector4 &colour, uint32 width, uint32 height, uint32 format)
 {
 	HRESULT hr;
-	D3DFORMAT fmt;
+	D3DFORMAT fmt = D3DFMT_UNKNOWN;
 
 	Texture *pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
 	pTexture->refCount = 0;

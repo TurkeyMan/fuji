@@ -25,13 +25,13 @@ Vector3 Input_ReadMouseDelta(int mouseID = -1);
 void	Input_SetMouseMode(int mode);
 void	Input_SetMouseAcceleration(float multiplier);
 
-char*	Input_EnumerateString(int source, int sourceID, int type);
+const char*	Input_EnumerateString(int source, int sourceID, int type);
 
 void	Input_SetDeadZone(float deadZone);
 float	Input_GetDeadZone();
 
 // these are platform specific
-char*	Input_GetDeviceName(int source, int sourceID);
+const char*	Input_GetDeviceName(int source, int sourceID);
 bool	Input_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);	// get the state of the keyboard status flags
 
 // input enums
