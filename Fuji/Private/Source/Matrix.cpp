@@ -108,8 +108,8 @@ Matrix& Matrix::SetRotation(const Vector3 &axis, float angle)
   float c,s,t;
 
   // do the trig
-  s = sinf(angle);
-  c = cosf(angle);
+  s = MFSin(angle);
+  c = MFCos(angle);
   t = 1.0f-c;
 
   // build the rotation matrix
@@ -136,15 +136,15 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
-#if defined(_LINUX) /* Not sure if this works yet */
+#if defined(_LINUX) || defined(_DC) /* Not sure if this works yet */
 	float sin_yaw, cos_yaw, sin_pitch, cos_pitch, sin_roll, cos_roll;
 
-	sin_yaw = sinf(yaw);
-	cos_yaw = cosf(yaw);
-	sin_pitch = sinf(pitch);
-	cos_pitch = cosf(pitch);
-	sin_roll = sinf(roll);
-	cos_roll = cosf(roll);
+	sin_yaw = MFSin(yaw);
+	cos_yaw = MFCos(yaw);
+	sin_pitch = MFSin(pitch);
+	cos_pitch = MFCos(pitch);
+	sin_roll = MFSin(roll);
+	cos_roll = MFCos(roll);
 
 	m[0][0] = cos_roll * cos_yaw - sin_pitch * sin_roll * sin_yaw;
 	m[0][1] = -cos_pitch * sin_roll;
@@ -178,37 +178,37 @@ Matrix& Matrix::SetRotationX(float angle)
 	m[0][1] = 0.0f;
 	m[0][2] = 0.0f;
 	m[1][0] = 0.0f;
-	m[1][1] = cosf(angle);
-	m[1][2] = sinf(angle);
+	m[1][1] = MFCos(angle);
+	m[1][2] = MFSin(angle);
 	m[2][0] = 0.0f;
-	m[2][1] = -sinf(angle);
-	m[2][2] = cosf(angle);
+	m[2][1] = -MFSin(angle);
+	m[2][2] = MFCos(angle);
 
 	return *this;
 }
 
 Matrix& Matrix::SetRotationY(float angle)
 {
-	m[0][0] = cosf(angle);
+	m[0][0] = MFCos(angle);
 	m[0][1] = 0.0f;
-	m[0][2] = -sinf(angle);
+	m[0][2] = -MFSin(angle);
 	m[1][0] = 0.0f;
 	m[1][1] = 1.0f;
 	m[1][2] = 0.0f;
-	m[2][0] = sinf(angle);
+	m[2][0] = MFSin(angle);
 	m[2][1] = 0.0f;
-	m[2][2] = cosf(angle);
+	m[2][2] = MFCos(angle);
 
 	return *this;
 }
 
 Matrix& Matrix::SetRotationZ(float angle)
 {
-	m[0][0] = cosf(angle);
-	m[0][1] = sinf(angle);
+	m[0][0] = MFCos(angle);
+	m[0][1] = MFSin(angle);
 	m[0][2] = 0.0f;
-	m[1][0] = -sinf(angle);
-	m[1][1] = cosf(angle);
+	m[1][0] = -MFSin(angle);
+	m[1][1] = MFCos(angle);
 	m[1][2] = 0.0f;
 	m[2][0] = 0.0f;
 	m[2][1] = 0.0f;
@@ -422,27 +422,27 @@ Vector4 Matrix::CalculateQuaternion()
 //		then identify which major diagonal element has the greatest
 //		value.
 //		Depending on this value, calculate the following:
-		if ((m[0][0] > m[1][1]) && (m[0][0] > m[2][2])) 
-		{ 
-			float S = (float)sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]) * 2; 
+		if ((m[0][0] > m[1][1]) && (m[0][0] > m[2][2]))
+		{
+			float S = (float)sqrt(1.0f + m[0][0] - m[1][1] - m[2][2]) * 2.0f;
 			t.x = 0.25f * S;
-			t.y = (m[0][1] + m[1][0] ) / S; 
-			t.z = (m[0][2] + m[2][0] ) / S; 
+			t.y = (m[0][1] + m[1][0] ) / S;
+			t.z = (m[0][2] + m[2][0] ) / S;
 			t.w = (m[1][2] - m[2][1] ) / S;
 		}
-		else if (m[1][1] > m[2][2]) 
-		{ 
-			float S = (float)sqrt(1.0 + m[1][1] - m[0][0] - m[2][2]) * 2; 
-			t.x = (m[0][1] + m[1][0]) / S; 
+		else if (m[1][1] > m[2][2])
+		{
+			float S = (float)sqrt(1.0f + m[1][1] - m[0][0] - m[2][2]) * 2.0f;
+			t.x = (m[0][1] + m[1][0]) / S;
 			t.y = 0.25f * S;
-			t.z = (m[1][2] + m[2][1]) / S; 
+			t.z = (m[1][2] + m[2][1]) / S;
 			t.w = (m[0][2] - m[2][0]) / S;
 		}
 		else
 		{ 
-			float S = (float)sqrt( 1.0 + m[2][2] - m[0][0] - m[1][1] ) * 2; 
-			t.x = (m[0][2] + m[2][0]) / S; 
-			t.y = (m[1][2] + m[2][1]) / S; 
+			float S = (float)sqrt(1.0f + m[2][2] - m[0][0] - m[1][1] ) * 2.0f;
+			t.x = (m[0][2] + m[2][0]) / S;
+			t.y = (m[1][2] + m[2][1]) / S;
 			t.z = 0.25f * S;
 			t.w = (m[0][1] - m[1][0]) / S;
 		}

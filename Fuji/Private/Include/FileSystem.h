@@ -52,6 +52,10 @@ struct File
 	HANDLE file;
 #elif defined(_LINUX)
 	int file;
+#elif defined(_DC)
+	int file;
+#else
+	int file;
 #endif
 #if defined(_DEBUG)
 	char filename[256];

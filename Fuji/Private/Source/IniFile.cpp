@@ -176,7 +176,7 @@ int IniFile::FindSection(char *pSection)
 
 	while(!EndOfFile())
 	{
-		if(IsSection() && !stricmp(GetName(), pSection)) return 1;
+		if(IsSection() && !StrCaseCmp(GetName(), pSection)) return 1;
 		GetNextSection();
 	}
 
@@ -198,7 +198,7 @@ int IniFile::FindLine(char *pName, char *pSection)
 		{
 			pTemp = GetName();
 			if(!pTemp) return 0;
-			if(!stricmp(pName, pTemp)) return 1;
+			if(!StrCaseCmp(pName, pTemp)) return 1;
 			GetNextLine();
 		}
 	}
@@ -210,7 +210,7 @@ int IniFile::FindLine(char *pName, char *pSection)
 		{
 			pTemp = GetName();
 			if(!pTemp) return 0;
-			if(!stricmp(pName, pTemp)) return 1;
+			if(!StrCaseCmp(pName, pTemp)) return 1;
 			GetNextLine();
 		}
 	}
@@ -293,12 +293,12 @@ bool IniFile::AsBool(int index)
 
 	INIASSERT(!IsNewline(*pOffset), STR("Not enough elements in array in entry %s", GetName()));
 
-	if(!strnicmp(pOffset, "true", 4))
+	if(!StrNCaseCmp(pOffset, "true", 4))
 	{
 		INIASSERT(*pOffset == NULL || IsWhite(pOffset[4]) || IsNewline(pOffset[4]) || pOffset[4] == ',' || pOffset[4] == ';' || pOffset[4] == '#' || (pOffset[4] == '/' && pOffset[5] == '/'), STR("Syntax error in entry '%s'", GetName()));
 		return true;
 	}
-	if(!strnicmp(pOffset, "false", 5))
+	if(!StrNCaseCmp(pOffset, "false", 5))
 	{
 		INIASSERT(*pOffset == NULL || IsWhite(pOffset[5]) || IsNewline(pOffset[5]) || pOffset[5] == ',' || pOffset[5] == ';' || pOffset[5] == '#' || (pOffset[5] == '/' && pOffset[6] == '/'), STR("Syntax error in entry '%s'", GetName()));
 		return false;

@@ -3,6 +3,8 @@
 #include "DebugMenu.h"
 #include "Input_PC.h"
 
+#include <stdio.h>
+
 void Display_ResetDisplay();
 
 IDirect3D9 *d3d9;
@@ -33,29 +35,7 @@ MenuItemStatic applyDisplayMode;
 
 int currentMode = 2;
 
-// resolution change callback
-void ChangeResCallback(MenuObject *pMenu, void *pData)
-{
-	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
-
-	if(pRes->data == 0)
-	{
-		currentMode = (currentMode == 0) ? numModes-1 : currentMode-1;
-	}
-	else if(pRes->data == 2)
-	{
-		currentMode = (currentMode == numModes-1) ? 0 : currentMode+1;
-	}
-
-	if(resList[currentMode][1] == 720)
-		sprintf(resStrings[1], "720p", resList[currentMode][0], resList[currentMode][1]);
-	else if(resList[currentMode][1] == 1080)
-		sprintf(resStrings[1], "1080p", resList[currentMode][0], resList[currentMode][1]);
-	else
-		sprintf(resStrings[1], "%dx%d", resList[currentMode][0], resList[currentMode][1]);
-	pRes->data = 1;
-}
-
+// apply display mode callback
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
 	display.fullscreenWidth = resList[currentMode][0];
@@ -79,6 +59,34 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 	{
 		Display_ResetDisplay();
 	}
+}
+
+// resolution change callback
+void ChangeResCallback(MenuObject *pMenu, void *pData)
+{
+	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
+
+	if(pRes->data == 1)
+	{
+		ApplyDisplayModeCallback(NULL, NULL);
+		return;
+	}
+	else if(pRes->data == 0)
+	{
+		currentMode = (currentMode == 0) ? numModes-1 : currentMode-1;
+	}
+	else if(pRes->data == 2)
+	{
+		currentMode = (currentMode == numModes-1) ? 0 : currentMode+1;
+	}
+
+	if(resList[currentMode][1] == 720)
+		sprintf(resStrings[1], "720p", resList[currentMode][0], resList[currentMode][1]);
+	else if(resList[currentMode][1] == 1080)
+		sprintf(resStrings[1], "1080p", resList[currentMode][0], resList[currentMode][1]);
+	else
+		sprintf(resStrings[1], "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+	pRes->data = 1;
 }
 
 // windows WndProc

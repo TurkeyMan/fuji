@@ -1,7 +1,10 @@
 #if !defined(_CALLSTACK_H)
 #define _CALLSTACK_H
 
+#if defined(_CALLSTACK_PROFILING)
 #include <map>
+#endif
+
 #include "Array.h"
 #include "System.h"
 
@@ -58,7 +61,9 @@ public:
 };
 #endif
 
+#if defined(_CALLSTACK_PROFILING)
 extern std::map<const char *, CallProfile> FunctionRegistry;
+#endif
 
 class FunctionCall
 {

@@ -56,6 +56,13 @@ float RandomUnit();
 float RandomRange(float min, float max);
 Vector3 RandomVector();
 
+// string functions
+inline int tolower(int c);
+inline int toupper(int c);
+int StrCaseCmp(const char *s1, const char *s2);
+int StrNCaseCmp(const char *s1, const char *s2, size_t n);
+
+
 // endian flipping
 #if defined(BIG_ENDIAN)
 #define FlipEndian(x) FLIP_ENDIAN(x)

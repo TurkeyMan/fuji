@@ -2,8 +2,6 @@
 #define _TEXTURE_H
 
 #include "DebugMenu.h"
-#include <map>
-#include <string>
 
 void Texture_InitModule();
 void Texture_DeinitModule();

@@ -282,9 +282,9 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 
 	for(i=0, j=0, inc=1; j<segments;)
 	{
-		siny = sinf(yWave);
+		siny = MFSin(yWave);
 
-		MFSetPosition(position.x + (sinf(around)*radius) * siny, position.y + cosf(yWave)*radius, position.z + (cosf(around)*radius) * siny);
+		MFSetPosition(position.x + (MFSin(around)*radius) * siny, position.y + MFCos(yWave)*radius, position.z + (MFCos(around)*radius) * siny);
 
 		yWave += yWaveInc;
 
@@ -300,18 +300,18 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 		}
 	}
 
-	siny = sinf(yWave);
-	MFSetPosition(position.x + (sinf(around)*radius) * siny, position.y + cosf(yWave)*radius, position.z + (cosf(around)*radius) * siny);
+	siny = MFSin(yWave);
+	MFSetPosition(position.x + (MFSin(around)*radius) * siny, position.y + MFCos(yWave)*radius, position.z + (MFCos(around)*radius) * siny);
 
 	MFEnd();
 
-	yWaveInc = fabsf(yWaveInc);
+	yWaveInc = MFAbs(yWaveInc);
 	yWave = yWaveInc;
 
 	for(i=0; i<slices; i++)
 	{
-		float cosy = cosf(yWave)*radius;
-		siny = sinf(yWave);
+		float cosy = MFCos(yWave)*radius;
+		siny = MFSin(yWave);
 		around = 0.0f;
 
 		MFBegin(segments+1);
@@ -319,7 +319,7 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 
 		for(int j=0; j<segments+1; j++)
 		{
-			MFSetPosition(position.x + (sinf(around)*radius)*siny, position.y + cosy, position.z + (cosf(around)*radius)*siny);
+			MFSetPosition(position.x + (MFSin(around)*radius)*siny, position.y + cosy, position.z + (MFCos(around)*radius)*siny);
 			around += aroundInc;
 		}
 
@@ -392,14 +392,14 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 
 	for(i=0, j=0, inc=1; j<segments;)
 	{
-		siny = sinf(yWave);
+		siny = MFSin(yWave);
 
-		MFSetPosition(sinf(around)*radius * siny, cosf(yWave)*radius + yAdd, cosf(around)*radius * siny);
+		MFSetPosition(MFSin(around)*radius * siny, MFCos(yWave)*radius + yAdd, MFCos(around)*radius * siny);
 
 		if(i == (slices+1)/2)
 		{
 			yAdd -= len * (float)inc;
-			MFSetPosition(sinf(around)*radius * siny, cosf(yWave)*radius + yAdd, cosf(around)*radius * siny);
+			MFSetPosition(MFSin(around)*radius * siny, MFCos(yWave)*radius + yAdd, MFCos(around)*radius * siny);
 		}
 
 		yWave += yWaveInc;
@@ -416,19 +416,19 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 		}
 	}
 
-	siny = sinf(yWave);
-	MFSetPosition(sinf(around)*radius * siny, cosf(yWave)*radius + yAdd, cosf(around)*radius * siny);
+	siny = MFSin(yWave);
+	MFSetPosition(MFSin(around)*radius * siny, MFCos(yWave)*radius + yAdd, MFCos(around)*radius * siny);
 
 	MFEnd();
 
-	yWaveInc = fabsf(yWaveInc);
+	yWaveInc = MFAbs(yWaveInc);
 	yWave = yWaveInc;
 	yAdd = len;
 
 	for(i=0; i<slices; i++)
 	{
-		float cosy = cosf(yWave)*radius;
-		siny = sinf(yWave);
+		float cosy = MFCos(yWave)*radius;
+		siny = MFSin(yWave);
 		around = 0.0f;
 
 		if(i == (slices+1)/2)
@@ -441,7 +441,7 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 
 		for(int j=0; j<segments+1; j++)
 		{
-			MFSetPosition(sinf(around)*radius*siny, cosy + yAdd, cosf(around)*radius*siny);
+			MFSetPosition(MFSin(around)*radius*siny, cosy + yAdd, MFCos(around)*radius*siny);
 			around += aroundInc;
 		}
 
@@ -462,7 +462,7 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 
 		for(int j=0; j<segments+1; j++)
 		{
-			MFSetPosition(sinf(around)*radius, yAdd, cosf(around)*radius);
+			MFSetPosition(MFSin(around)*radius, yAdd, MFCos(around)*radius);
 			around += aroundInc;
 		}
 
@@ -545,7 +545,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 			}
 			else
 			{
-				MFSetPosition(sinf(around)*radius, (i&2)?len:0.0f, cosf(around)*radius);
+				MFSetPosition(MFSin(around)*radius, (i&2)?len:0.0f, MFCos(around)*radius);
 			}
 		}
 
@@ -563,7 +563,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 
 			for(int j=0; j<segments+1; j++)
 			{
-				MFSetPosition(sinf(around)*radius, yOffset, cosf(around)*radius);
+				MFSetPosition(MFSin(around)*radius, yOffset, MFCos(around)*radius);
 				around += aroundInc;
 			}
 
@@ -608,7 +608,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 		MFSetPosition(0.0f, len, 0.0f);
 		for(i=0; i<segments; i++)
 		{
-			MFSetPosition(sinf(around)*radius, len, cosf(around)*radius);
+			MFSetPosition(MFSin(around)*radius, len, MFCos(around)*radius);
 			MFSetPosition(0.0f, len, 0.0f);
 			around += aroundInc;
 		}
@@ -624,7 +624,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		for(i=0; i<segments; i++)
 		{
-			MFSetPosition(sinf(around)*radius, 0.0f, cosf(around)*radius);
+			MFSetPosition(MFSin(around)*radius, 0.0f, MFCos(around)*radius);
 			MFSetPosition(0.0f, 0.0f, 0.0f);
 			around -= aroundInc;
 		}
@@ -639,7 +639,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 		around = 0.0f;
 		for(i=0; i<segments; i++)
 		{
-			float s = sinf(around), c=cosf(around);
+			float s = MFSin(around), c=MFCos(around);
 			MFSetNormal(s,0.0f,c);
 			MFSetPosition(s*radius, len, c*radius);
 			MFSetPosition(s*radius, 0.0f, c*radius);
@@ -682,7 +682,7 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, ui
 	for(i=0; i<segments; i++)
 	{
 		MFSetPosition(0.0f, 0.0f, 0.0f);
-		MFSetPosition(sinf(around)*span, 0.0f, cosf(around)*span);
+		MFSetPosition(MFSin(around)*span, 0.0f, MFCos(around)*span);
 		around += aroundInc;
 	}
 
@@ -708,7 +708,7 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, ui
 
 	for(int j=0; j<segments+1; j++)
 	{
-		MFSetPosition(sinf(around)*span, 0.0f, cosf(around)*span);
+		MFSetPosition(MFSin(around)*span, 0.0f, MFCos(around)*span);
 		around += aroundInc;
 	}
 
@@ -758,7 +758,7 @@ void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int
 
 	for(i=0; i<segments; i++)
 	{
-		float s=sinf(around), c=cosf(around);
+		float s=MFSin(around), c=MFCos(around);
 		if(wireframe)
 		{
 			if(i) MFSetPosition(s*radius, 0.0f, c*radius);
@@ -793,7 +793,7 @@ void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int
 
 	for(i=0; i<segments; i++)
 	{
-		MFSetPosition(sinf(around)*radius, 0.0f, cosf(around)*radius);
+		MFSetPosition(MFSin(around)*radius, 0.0f, MFCos(around)*radius);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 
 		around -= aroundInc;

@@ -161,7 +161,7 @@ bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 	{
 		if(pSearchMenu->pChildren[a]->type == MenuType_Menu)
 		{
-			if(!stricmp(pSearchMenu->pChildren[a]->name, pName))
+			if(!StrCaseCmp(pSearchMenu->pChildren[a]->name, pName))
 			{
 				DebugMenu_DestroyMenuTree((Menu*)pSearchMenu->pChildren[a]);
 				return true;
@@ -212,7 +212,7 @@ Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu)
 	{
 		if(pSearchMenu->pChildren[a]->type == MenuType_Menu)
 		{
-			if(!stricmp(pSearchMenu->pChildren[a]->name , name))
+			if(!StrCaseCmp(pSearchMenu->pChildren[a]->name , name))
 				return (Menu*)pSearchMenu->pChildren[a];
 
 			pResult = DebugMenu_GetMenuByName(name, (Menu*)pSearchMenu->pChildren[a]);
@@ -296,7 +296,7 @@ void Menu::Draw()
 
 	if(targetOffset != yOffset)
 	{
-		yOffset -= abs(yOffset-targetOffset) < 0.1f ? yOffset-targetOffset : (yOffset-targetOffset)*0.1f;
+		yOffset -= MFAbs(yOffset-targetOffset) < 0.1f ? yOffset-targetOffset : (yOffset-targetOffset)*0.1f;
 	}
 
 	currentPos = Vector(menuPosition.x+20.0f, menuPosition.y+50.0f + yOffset, 0.0f);
@@ -552,6 +552,11 @@ void MenuItemIntString::ListUpdate(bool selected)
 			if(!values[data])
 				data = 0;
 
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(0, Button_P2_Cross))
+		{
 			if(pCallback)
 				pCallback(this, pUserData);
 		}

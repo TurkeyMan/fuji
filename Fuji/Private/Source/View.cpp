@@ -41,7 +41,7 @@ void View::SetProjection(float fov)
 
 	float a = fov * 0.5f;
 
-	float h = cosf(a) / sinf(a);
+	float h = MFCos(a) / MFSin(a);
 	float w = h / (display.wide ? WIDE_ASPECT : STANDARD_ASPECT);
 
 	projection.m[0][0] = w;		projection.m[0][1] = 0.0f;	projection.m[0][2] = 0.0f;				projection.m[0][3] = 0.0f;

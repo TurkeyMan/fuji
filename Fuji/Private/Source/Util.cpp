@@ -16,12 +16,14 @@ uint32 stringOffset;
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {
-	char *pTemp = strrchr(pSourceFileName,'/');
-	if (!pTemp)
+	int x = strlen(pSourceFileName)-1;
+
+	while(x >= 0 && pSourceFileName[x] != '/' && pSourceFileName[x] != '\\')
 	{
-		pTemp = strrchr(pSourceFileName,'\\');
+		--x;
 	}
-	return (pTemp) ? pTemp+1 : pSourceFileName;
+
+	return x == -1 ? pSourceFileName : &pSourceFileName[x+1];
 }
 
 #if defined(_WINDOWS)
@@ -335,3 +337,60 @@ Vector3 RandomVector()
 	return t;
 }
 
+inline int tolower(int c)
+{
+	return (c >= 'A' && c <= 'Z') ? c+32 : c;
+}
+
+inline int toupper(int c)
+{
+	return (c >= 'a' && c <= 'z') ? c-32 : c;
+}
+
+int StrCaseCmp(const char *s1, const char *s2)
+{
+	while(*s1 != '\0' && tolower(*s1) == tolower(*s2))
+	{
+		s1++;
+		s2++;
+	}
+
+	return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
+}
+
+int StrNCaseCmp(const char *s1, const char *s2, size_t n)
+{
+	if(n == 0)
+		return 0;
+
+	while(n-- != 0 && tolower(*s1) == tolower(*s2))
+	{
+		if(n == 0 || *s1 == '\0' || *s2 == '\0')
+			break;
+		s1++;
+		s2++;
+	}
+
+	return tolower(*(unsigned char *) s1) - tolower(*(unsigned char *) s2);
+}
+
+
+char* StrRChr(const char *s, int i)
+{
+	const char *last = NULL;
+
+	if(i)
+	{
+		while(s=strchr(s, i))
+		{
+			last = s;
+			s++;
+		}
+	}
+	else
+	{
+		last = strchr(s, i);
+	}
+
+	return (char *) last;
+}

@@ -26,7 +26,7 @@ Texture *FindTexture(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!stricmp(pName, (*ppIterator)->name)) return *ppIterator;
+		if(!StrCaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
 
 		ppIterator++;
 	}

@@ -1,7 +1,6 @@
 #if !defined(_VECTOR4_H)
 #define _VECTOR4_H
 
-#include <math.h>
 #include "Common.h"
 #include "Vector3.h"
 
@@ -50,8 +49,8 @@ public:
 
 	inline float Dot(const Vector4 &vec) const { return x*vec.x + y*vec.y + z*vec.z + w*vec.w; }
 	inline float MagSquared() const { return x*x + y*y + z*z + w*w; }
-	inline float Magnitude() const { return sqrtf(x*x + y*y + z*z + w*w); }
-	inline Vector4& Normalise() { float l = sqrtf(x*x + y*y + z*z + w*w); *this /= l; return *this; }
+	inline float Magnitude() const { return MFSqrt(x*x + y*y + z*z + w*w); }
+	inline Vector4& Normalise() { float l = MFSqrt(x*x + y*y + z*z + w*w); *this /= l; return *this; }
 	inline Vector4& Lerp(const Vector4 &v, float t) { *this += (v-*this)*t; return *this; }
 
 	inline char* ToString() const { return STR("%.2f, %.2f, %.2f, %.2f", x, y, z, w); }

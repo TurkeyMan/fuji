@@ -21,14 +21,14 @@ struct TgaHeader
 	uint16 height;
 	uint8 bpp;
 	uint8 flags;
-} 
+}
 #if defined(_LINUX)
 __attribute__((packed))
 #endif
 ;
 
 #if defined(_WINDOWS) || defined(_XBOX)
-#pragma pack
+#pragma pack ()
 #endif
 
 Image::Image()
@@ -237,24 +237,26 @@ Image * LoadTGA(const char *filename, bool flipped)
 				}
 
 				unsigned char pixel[4];
-				for(uint8 i = 0; i < image->bytesPerPixel; i++)
+				uint8 i;
+
+				for(i = 0; i < image->bytesPerPixel; i++)
 				{
 					pixel[i] = position[i];
 				}
 				
-				for(uint8 i = 0; i < length; i++)
+				for(i = 0; i < length; i++)
 				{
 					for(uint8 j = 0; j < image->bytesPerPixel; j++)
 					{
 						((unsigned char *)image->pixels)[(pixelsRead * image->bytesPerPixel) + j] = pixel[j];
 					}
-				
+
 					++pixelsRead;
 				}
 
 				position += image->bytesPerPixel;
 			}
-			else 
+			else
 			{ // Raw packet
 				uint8 length = ((*position) & 0x7F) + 1;
 

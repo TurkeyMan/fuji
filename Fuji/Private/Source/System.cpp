@@ -184,7 +184,7 @@ int System_GameLoop()
 
 		while(!gQuit)
 		{
-	#if defined(_WINDOWS)
+	#if defined(_WINDOWS) || defined(_DC)
 			DoMessageLoop();
 	#elif defined(_LINUX)
 			CheckEvents();

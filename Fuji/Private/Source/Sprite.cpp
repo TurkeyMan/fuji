@@ -16,8 +16,6 @@ void Sprite::Create(const char *filename, int xFrame, int yFrames, uint32 colour
 	visible = false;
 }
 
-LitVertex triangle[6];
-
 void Sprite::Draw()
 {
 	// if not visible dont draw anything and just return
@@ -31,10 +29,10 @@ void Sprite::Draw()
 
 	world.SetIdentity();
 
-	world.m[0][0] = cosf(angle);
-	world.m[0][1] = sinf(angle);
-	world.m[1][0] = -sinf(angle);
-	world.m[1][1] = cosf(angle);
+	world.m[0][0] = MFCos(angle);
+	world.m[0][1] = MFSin(angle);
+	world.m[1][0] = -MFSin(angle);
+	world.m[1][1] = MFCos(angle);
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 

@@ -3,8 +3,6 @@
 
 #pragma warning(disable: 4345)
 
-#include <new>
-
 template<class T>
 class Array
 {

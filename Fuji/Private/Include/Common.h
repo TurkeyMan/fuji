@@ -21,6 +21,11 @@
 	#include <stdarg.h> // For varargs
 #endif
 
+#if defined(_DC)
+	#define _arch_dreamcast
+	#include <kos.h>
+#endif
+
 #if defined(_FUJI_UTIL)
 #if defined(_WINDOWS) || defined(_XBOX)
 	#include <Windows.h>
@@ -76,7 +81,7 @@ typedef char				int8;
 #endif
 
 // callstack profiling
-#if !defined(_RETAIL)
+#if !defined(_RETAIL) && !defined(_DEBUG)
 	#define _CALLSTACK_PROFILING
 
 	#if defined(_CALLSTACK_PROFILING) && !defined(_DEBUG)
@@ -100,18 +105,26 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
 
-// stricmp is a Win32/XBox only function
-#if !defined(_WINDOWS) && !defined(_XBOX)
-	#define stricmp strcasecmp
-	#define strnicmp strncasecmp
-#endif
-
-
+// additional includes
+#include "FujiMath.h"
 #include "Util.h"
 
 #if !defined(_FUJI_UTIL)
 	#include "Callstack.h"
 	#include "Heap.h"
+#endif
+
+// define a placement new if one dosent already exist..
+#if !defined(__PLACEMENT_NEW_INLINE)
+#define __PLACEMENT_NEW_INLINE
+inline void *__cdecl operator new(size_t, void *_Where)
+{	// construct array with placement at _Where
+	return (_Where);
+}
+
+inline void __cdecl operator delete(void *, void *)
+{	// delete if placement new fails
+}
 #endif
 
 #endif // _COMMON_H

@@ -64,7 +64,7 @@ void Game_Update();
 void Game_Draw();
 void Game_Deinit();
 
-#if defined(_WINDOWS)
+#if defined(_WINDOWS) || defined(_DC)
 	void DoMessageLoop();
 #elif defined(_LINUX)
 	void CheckEvents();

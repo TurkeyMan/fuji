@@ -19,11 +19,12 @@ public:
 	void Update();
 	void Reset();
 
-	inline void SetRate(double _rate)	{ rate=_rate; }
+	inline void SetRate(double _rate)	{ rate = _rate; }
 	inline double GetRate()				{ return rate; }
 
 	inline double TimeDeltaD()			{ return deltaD; }
 	inline float TimeDeltaF()			{ return deltaF; }
+	inline float SmoothDeltaF()			{ return smoothDeltaF; }
 
 	inline float GetFPS()				{ return (float)FPS; }
 
@@ -45,8 +46,7 @@ protected:
 	float deltaF;
 	double deltaD;
 
-	double history[AVERAGE_SAMPLES];
-	static int avgSamples;
+	float smoothDeltaF;
 
 	Timer *pReferenceTimer;
 
