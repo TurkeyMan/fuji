@@ -211,11 +211,11 @@ int System_GameLoop()
 
 		while(!gQuit)
 		{
-	#if defined(_WINDOWS) || defined(_DC)
+#if defined(_WINDOWS) || defined(_DC)
 			DoMessageLoop();
-	#elif defined(_LINUX)
+#elif defined(_LINUX)
 			CheckEvents();
-	#endif
+#endif
 			Callstack_BeginFrame();
 			System_UpdateTimeDelta();
 			gFrameCount++;

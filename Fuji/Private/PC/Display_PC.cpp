@@ -38,6 +38,8 @@ int currentMode = 2;
 // apply display mode callback
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
+	CALLSTACK;
+
 	display.fullscreenWidth = resList[currentMode][0];
 	display.fullscreenHeight = resList[currentMode][1];
 
@@ -64,6 +66,8 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 // resolution change callback
 void ChangeResCallback(MenuObject *pMenu, void *pData)
 {
+	CALLSTACK;
+
 	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
 
 	if(pRes->data == 1)
@@ -179,6 +183,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Display_DestroyWindow()
 {
+	CALLSTACK;
+
 	if(pd3dDevice)
 	{
 		pd3dDevice->Release();
@@ -350,6 +356,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 void Display_ResetDisplay()
 {
+	CALLSTACK;
+
 	D3DFORMAT PixelFormat;
 
 	D3DPRESENT_PARAMETERS present;
@@ -433,7 +441,6 @@ void Display_EndFrame()
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
-
 }
 
 void Display_SetClearColour(float r, float g, float b, float a)
@@ -446,13 +453,15 @@ void Display_SetClearColour(float r, float g, float b, float a)
 
 void Display_ClearScreen(uint32 flags)
 {
-	CALLSTACK;
+	CALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToARGB(), 1.0f, 0);
 }
 
 void SetViewport(float x, float y, float width, float height)
 {
+	CALLSTACK;
+
 	D3DVIEWPORT9 vp;
 	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
 	vp.Y = (DWORD)((y / 480.0f) * (float)display.height);
@@ -466,6 +475,8 @@ void SetViewport(float x, float y, float width, float height)
 
 void ResetViewport()
 {
+	CALLSTACK;
+
 	D3DVIEWPORT9 vp;
 	vp.X = 0;
 	vp.Y = 0;

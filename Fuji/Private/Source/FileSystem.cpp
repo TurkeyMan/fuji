@@ -6,6 +6,8 @@ File *gOpenFiles;
 
 void FileSystem_InitModule()
 {
+	CALLSTACK;
+
 	gOpenFiles = (File*)Heap_Alloc(sizeof(File) * gDefaults.filesys.maxOpenFiles);
 	memset(gOpenFiles, 0, sizeof(File) * gDefaults.filesys.maxOpenFiles);
 
@@ -17,6 +19,8 @@ void FileSystem_InitModule()
 
 void FileSystem_DeinitModule()
 {
+	CALLSTACK;
+
 #if defined(_DEBUG)
 	bool fileCloseRave = false;
 
@@ -38,6 +42,8 @@ void FileSystem_DeinitModule()
 
 char* File_SystemPath(const char *filename)
 {
+	CALLSTACK;
+
 #if defined(_XBOX)
 	return STR("D:\\Data\\%s", filename);
 #elif defined(_WINDOWS)
@@ -51,6 +57,8 @@ char* File_SystemPath(const char *filename)
 
 char* File_HomePath(const char *filename)
 {
+	CALLSTACK;
+
 #if defined(_XBOX)
 	return STR("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
@@ -62,6 +70,8 @@ char* File_HomePath(const char *filename)
 
 char* File_Load(const char *pFilename, uint32 *pBytesRead)
 {
+	CALLSTACK;
+
 	char *pBuffer = NULL;
 
 	if(pBytesRead) *pBytesRead = 0;

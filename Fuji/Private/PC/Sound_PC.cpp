@@ -47,6 +47,8 @@ MenuItemBool showSoundStats;
 
 void Sound_InitModule()
 {
+	CALLSTACK;
+
 	HRESULT hr;
 
 	gMusicTracks = (SoundMusic*)Heap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
@@ -80,6 +82,8 @@ void Sound_InitModule()
 
 void Sound_DeinitModule()
 {
+	CALLSTACK;
+
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
@@ -94,6 +98,8 @@ void Sound_DeinitModule()
 
 void Sound_Update()
 {
+	CALLSTACKc;
+
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
 		if(gMusicTracks[a].pDSMusicBuffer && gMusicTracks[a].playing)
@@ -105,6 +111,8 @@ void Sound_Update()
 
 void Sound_Draw()
 {
+	CALLSTACK;
+
 #if !defined(_RETAIL)
 	if(!showSoundStats) return;
 
@@ -230,57 +238,79 @@ void Sound_Draw()
 
 int Sound_LoadBank(const char *pFilename)
 {
+	CALLSTACK;
+
 	return -1;
 }
 
 void Sound_UnloadBank(int bankID)
 {
+	CALLSTACK;
+
 
 }
 
 int Sound_FindSound(const char *pSoundName, int searchBankID)
 {
+	CALLSTACK;
+
 	return -1;
 }
 
 void Sound_Play(int soundID)
 {
+	CALLSTACK;
+
 
 }
 
 void Sound_Stop(int soundID)
 {
+	CALLSTACK;
+
 
 }
 
 void Sound_Play3D(int soundID)
 {
+	CALLSTACK;
+
 
 }
 
 void Sound_Stop3D(int soundID)
 {
+	CALLSTACK;
+
 
 }
 
 void Sound_SetListenerPos(const Vector3& listenerPos)
 {
+	CALLSTACK;
+
 
 }
 
 
 void Sound_SetVolume(int soundID, float volume)
 {
+	CALLSTACK;
+
 
 }
 
 void Sound_SetMasterVolume(int soundID, float volume)
 {
+	CALLSTACK;
+
 //	pDSPrimaryBuffer->SetVolume();
 }
 
 void Sound_SetPlaybackRate(int soundID, float rate)
 {
+	CALLSTACK;
+
 
 }
 
@@ -341,6 +371,8 @@ long tellMemory_func(void *datasource)
 //
 int Sound_MusicPlay(const char *pFilename, bool pause)
 {
+	CALLSTACK;
+
 	int t = 0;
 
 	// find free music track
@@ -448,6 +480,8 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 void Sound_ServiceMusicBuffer(int trackID)
 {
+	CALLSTACK;
+
 	SoundMusic& track = gMusicTracks[trackID];
 
 	void *pData1, *pData2;
@@ -512,6 +546,8 @@ void Sound_ServiceMusicBuffer(int trackID)
 
 void Sound_MusicUnload(int track)
 {
+	CALLSTACK;
+
 	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
 
 	gMusicTracks[track].pInfo = NULL;
@@ -523,11 +559,15 @@ void Sound_MusicUnload(int track)
 
 void Sound_MusicSeek(int track, float seconds)
 {
+	CALLSTACK;
+
 	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
 }
 
 void Sound_MusicPause(int track, bool pause)
 {
+	CALLSTACK;
+
 	if(pause)
 	{
 		if(gMusicTracks[track].playing)
@@ -542,6 +582,8 @@ void Sound_MusicPause(int track, bool pause)
 
 void Sound_MusicSetVolume(int track, float volume)
 {
+	CALLSTACK;
+
 //	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }
 

@@ -18,16 +18,20 @@ uint32 currentVert;
 
 void Primitive_InitModule()
 {
+	CALLSTACK;
 
 }
 
 void Primitive_DeinitModule()
 {
+	CALLSTACK;
 
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
+	CALLSTACK;
+
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
@@ -42,6 +46,8 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 void MFBegin(uint32 vertexCount)
 {
+	CALLSTACK;
+
 	beginCount = vertexCount;
 	currentVert = 0;
 
@@ -53,6 +59,8 @@ void MFBegin(uint32 vertexCount)
 
 void MFSetMatrix(const Matrix &mat)
 {
+	CALLSTACK;
+
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
@@ -96,6 +104,8 @@ void MFSetPosition(const Vector3 &pos)
 
 void MFSetPosition(float x, float y, float z)
 {
+	CALLSTACK;
+
 	current.pos.x = x;
 	current.pos.y = y;
 	current.pos.z = z;
@@ -106,6 +116,8 @@ void MFSetPosition(float x, float y, float z)
 
 void MFEnd()
 {
+	CALLSTACK;
+
 	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
 
 	pd3dDevice->SetFVF(LitVertex::FVF);

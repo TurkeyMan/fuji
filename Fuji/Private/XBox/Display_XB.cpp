@@ -63,7 +63,7 @@ void Display_BeginFrame()
 
 void Display_EndFrame()
 {
-	CALLSTACK;
+	CALLSTACKc;
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
@@ -79,7 +79,7 @@ void Display_SetClearColour(float r, float g, float b, float a)
 
 void Display_ClearScreen(uint32 flags)
 {
-	CALLSTACK;
+	CALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToARGB(), 1.0f, 0);
 }

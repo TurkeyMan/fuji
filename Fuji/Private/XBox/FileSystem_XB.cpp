@@ -6,6 +6,8 @@ extern File *gOpenFiles;
 
 int File_Open(const char *pFilename, uint32 openFlags)
 {
+	CALLSTACK;
+
 	int fileID;
 
 	for(fileID=0; fileID<MAX_FILE_COUNT; fileID++)
@@ -44,12 +46,16 @@ int File_Open(const char *pFilename, uint32 openFlags)
 
 void File_Close(uint32 fileHandle)
 {
+	CALLSTACK;
+
 	CloseHandle(gOpenFiles[fileHandle].file);
 	gOpenFiles[fileHandle].file = NULL;
 }
 
 int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
+	CALLSTACK;
+
 	uint32 bytesRead;
 
 	ReadFile(gOpenFiles[fileHandle].file, (void*)pBuffer, bytes, (DWORD*)&bytesRead, NULL);
@@ -61,6 +67,8 @@ int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
+	CALLSTACK;
+
 	uint32 bytesWritten;
 
 	WriteFile(gOpenFiles[fileHandle].file, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
@@ -72,24 +80,30 @@ int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
+	CALLSTACK;
 
 	return 0;
 }
 
 int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
+	CALLSTACK;
 
 	return 0;
 }
 
 int File_Query(uint32 fileHandle)
 {
+	CALLSTACK;
+
 	if(!gOpenFiles[fileHandle].file) return FS_Unavailable;
 	return gOpenFiles[fileHandle].state;
 }
 
 int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
+	CALLSTACK;
+
 	if(!gOpenFiles[fileHandle].file) return -1;
 
 	DWORD method;
@@ -113,6 +127,8 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 
 uint32 File_GetSize(uint32 fileHandle)
 {
+	CALLSTACK;
+
 	if(!gOpenFiles[fileHandle].file) return -1;
 
 	if(gOpenFiles[fileHandle].len != -1) return gOpenFiles[fileHandle].len;
@@ -129,6 +145,8 @@ uint32 File_GetSize(uint32 fileHandle)
 
 uint32 File_GetSize(const char *pFilename)
 {
+	CALLSTACK;
+
 	DWORD fileSize = 0;
 
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
@@ -147,6 +165,8 @@ uint32 File_GetSize(const char *pFilename)
 
 bool File_Exists(const char *pFilename)
 {
+	CALLSTACK;
+
 	bool exists = false;
 
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
