@@ -29,7 +29,7 @@ public:
 #if defined(_XBOX)
 	IDirect3DTexture8 *texture;
 	D3DFORMAT format;
-#elif define(_WINDOWS)
+#elif defined(_WINDOWS)
 	IDirect3DTexture9 *texture;
 	D3DFORMAT format;
 #else

@@ -23,7 +23,7 @@ void Primitive_DeinitModule()
 
 }
 
-void BeginPrimitive(uint32 type, uint32 hint)
+void MFPrimitive(uint32 type, uint32 hint)
 {
 	primType = type & PT_PrimMask;
 
@@ -33,7 +33,7 @@ void BeginPrimitive(uint32 type, uint32 hint)
 	}
 }
 
-void PrimBegin(uint32 vertexCount)
+void MFBegin(uint32 vertexCount)
 {
 	beginCount = vertexCount;
 	currentVert = 0;
@@ -44,50 +44,50 @@ void PrimBegin(uint32 vertexCount)
 	current.normal.y = 1.0f;
 }
 
-void PrimSetMatrix(Matrix &mat)
+void MFSetMatrix(Matrix &mat)
 {
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
-void PrimSetColour(Vector4 &colour)
+void MFSetColour(Vector4 &colour)
 {
-	PrimSetColour(colour.x, colour.y, colour.z, colour.w);
+	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
 
-void PrimSetColour(float r, float g, float b, float a)
+void MFSetColour(float r, float g, float b, float a)
 {
 	current.colour = ((uint32)(r*255.0f))<<16 | ((uint32)(g*255.0f))<<8 | (uint32)(b*255.0f) | ((uint32)(a*255.0f))<<24;
 }
 
-void PrimSetColour(uint32 col)
+void MFSetColour(uint32 col)
 {
 	current.colour = col;
 }
 
-void PrimSetTexCoord1(float u, float v)
+void MFSetTexCoord1(float u, float v)
 {
 	current.u = u;
 	current.v = v;
 }
 
-void PrimSetNormal(Vector3 &normal)
+void MFSetNormal(Vector3 &normal)
 {
-	PrimSetNormal(normal.x, normal.y, normal.z);
+	MFSetNormal(normal.x, normal.y, normal.z);
 }
 
-void PrimSetNormal(float x, float y, float z)
+void MFSetNormal(float x, float y, float z)
 {
 	current.normal.x = x;
 	current.normal.y = y;
 	current.normal.z = z;
 }
 
-void PrimSetPosition(Vector3 &pos)
+void MFSetPosition(Vector3 &pos)
 {
-	PrimSetPosition(pos.x, pos.y, pos.z);
+	MFSetPosition(pos.x, pos.y, pos.z);
 }
 
-void PrimSetPosition(float x, float y, float z)
+void MFSetPosition(float x, float y, float z)
 {
 	current.pos.x = x;
 	current.pos.y = y;
@@ -97,7 +97,7 @@ void PrimSetPosition(float x, float y, float z)
 	++currentVert;
 }
 
-void PrimEnd()
+void MFEnd()
 {
 	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
 

@@ -239,29 +239,29 @@ void Menu::Draw()
 		dimensions.x = max(dimensions.x, dim.x);
 	}
 
-	BeginPrimitive(PT_TriStrip|PT_Untextured);
+	MFPrimitive(PT_TriStrip|PT_Untextured);
 
-	PrimBegin(4);
-	PrimSetColour(0x80000060);
-	PrimSetPosition(100, 100, 0);
-	PrimSetColour(0x800000B0);
-	PrimSetPosition(540, 100, 0);
-	PrimSetColour(0x80000080);
-	PrimSetPosition(100, 380, 0);
-	PrimSetColour(0x800000FF);
-	PrimSetPosition(540, 380, 0);
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0x80000060);
+	MFSetPosition(100, 100, 0);
+	MFSetColour(0x800000B0);
+	MFSetPosition(540, 100, 0);
+	MFSetColour(0x80000080);
+	MFSetPosition(100, 380, 0);
+	MFSetColour(0x800000FF);
+	MFSetPosition(540, 380, 0);
+	MFEnd();
 
-	PrimBegin(4);
-	PrimSetColour(0xA0000000);
-	PrimSetPosition(115, 145, 0);
-	PrimSetColour(0xA0000000);
-	PrimSetPosition(525, 145, 0);
-	PrimSetColour(0xA0000000);
-	PrimSetPosition(115, 365, 0);
-	PrimSetColour(0xA0000000);
-	PrimSetPosition(525, 365, 0);
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xA0000000);
+	MFSetPosition(115, 145, 0);
+	MFSetColour(0xA0000000);
+	MFSetPosition(525, 145, 0);
+	MFSetColour(0xA0000000);
+	MFSetPosition(115, 365, 0);
+	MFSetColour(0xA0000000);
+	MFSetPosition(525, 365, 0);
+	MFEnd();
 
 	debugFont.DrawText(110.0f, 105.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
@@ -272,18 +272,18 @@ void Menu::Draw()
 		if(selection==a)
 		{
 			float height = pChildren[a]->GetDimensions(requestedWidth).y;
-			BeginPrimitive(PT_TriStrip|PT_Untextured);
+			MFPrimitive(PT_TriStrip|PT_Untextured);
 
-			PrimBegin(4);
-			PrimSetColour(0xC0000080);
-			PrimSetPosition(115, currentPos.y, 0);
-			PrimSetColour(0xC00000D0);
-			PrimSetPosition(525, currentPos.y, 0);
-			PrimSetColour(0xC0000090);
-			PrimSetPosition(115, currentPos.y + height, 0);
-			PrimSetColour(0xC00000FF);
-			PrimSetPosition(525, currentPos.y + height, 0);
-			PrimEnd();
+			MFBegin(4);
+			MFSetColour(0xC0000080);
+			MFSetPosition(115, currentPos.y, 0);
+			MFSetColour(0xC00000D0);
+			MFSetPosition(525, currentPos.y, 0);
+			MFSetColour(0xC0000090);
+			MFSetPosition(115, currentPos.y + height, 0);
+			MFSetColour(0xC00000FF);
+			MFSetPosition(525, currentPos.y + height, 0);
+			MFEnd();
 		}
 
 		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
@@ -490,25 +490,25 @@ float MenuItemColour::ListDraw(bool selected, Vector3 pos, float maxWidth)
 
 	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
 
-	BeginPrimitive(PT_TriStrip|PT_Untextured);
+	MFPrimitive(PT_TriStrip|PT_Untextured);
 
-	PrimBegin(4);
-	PrimSetColour(0xFFFFFFFF);
-	PrimSetPosition(pos);
-	PrimSetPosition(pos + Vector(45.0f, 0.0f, 0.0f));
-	PrimSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
-	PrimSetPosition(pos + Vector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetPosition(pos);
+	MFSetPosition(pos + Vector(45.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFSetPosition(pos + Vector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFEnd();
 
 	pos += Vector(2.0f, 2.0f, 0.0f);
 
-	PrimBegin(4);
-	PrimSetColour(colour);
-	PrimSetPosition(pos);
-	PrimSetPosition(pos + Vector(41.0f, 0.0f, 0.0f));
-	PrimSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
-	PrimSetPosition(pos + Vector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(colour);
+	MFSetPosition(pos);
+	MFSetPosition(pos + Vector(41.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFSetPosition(pos + Vector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFEnd();
 
 	return MENU_FONT_HEIGHT*1.5f;
 }

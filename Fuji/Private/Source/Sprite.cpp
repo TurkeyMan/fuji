@@ -34,21 +34,21 @@ void Sprite::Draw()
 	pTexture->SetTexture();
 
 	// set texture
-	BeginPrimitive(PT_TriStrip);
+	MFPrimitive(PT_TriStrip);
 
-	PrimSetMatrix(world);
+	MFSetMatrix(world);
 
-	PrimBegin(4);
-	PrimSetColour(0xFFFFFFFF);
-	PrimSetTexCoord1(0,0);
-	PrimSetPosition((-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
-	PrimSetTexCoord1(1,0);
-	PrimSetPosition((1.0f-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
-	PrimSetTexCoord1(0,1);
-	PrimSetPosition((-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
-	PrimSetTexCoord1(1,1);
-	PrimSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetTexCoord1(0,0);
+	MFSetPosition((-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
+	MFSetTexCoord1(1,0);
+	MFSetPosition((1.0f-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
+	MFSetTexCoord1(0,1);
+	MFSetPosition((-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
+	MFSetTexCoord1(1,1);
+	MFSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
+	MFEnd();
 
 	SetOrtho(old);
 }

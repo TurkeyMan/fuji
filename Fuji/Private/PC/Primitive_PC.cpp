@@ -51,7 +51,7 @@ void PrimSetMatrix(Matrix &mat)
 
 void PrimSetColour(Vector4 &colour)
 {
-	PrimSetColour(colour.x, colour.y, colour.z, colour.w);
+	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
 
 void PrimSetColour(float r, float g, float b, float a)
@@ -72,7 +72,7 @@ void PrimSetTexCoord1(float u, float v)
 
 void PrimSetNormal(Vector3 &normal)
 {
-	PrimSetNormal(normal.x, normal.y, normal.z);
+	MFSetNormal(normal.x, normal.y, normal.z);
 }
 
 void PrimSetNormal(float x, float y, float z)
@@ -84,7 +84,7 @@ void PrimSetNormal(float x, float y, float z)
 
 void PrimSetPosition(Vector3 &pos)
 {
-	PrimSetPosition(pos.x, pos.y, pos.z);
+	MFSetPosition(pos.x, pos.y, pos.z);
 }
 
 void PrimSetPosition(float x, float y, float z)

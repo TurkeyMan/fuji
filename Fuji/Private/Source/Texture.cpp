@@ -117,25 +117,25 @@ float TextureBrowser::ListDraw(bool selected, Vector3 pos, float maxWidth)
 
 	pos += Vector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 
-	BeginPrimitive(PT_TriStrip|PT_Untextured);
+	MFPrimitive(PT_TriStrip|PT_Untextured);
 
-	PrimBegin(4);
-	PrimSetColour(0xFFFFFFFF);
-	PrimSetPosition(pos);
-	PrimSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
-	PrimSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
-	PrimSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetPosition(pos);
+	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFEnd();
 
 	pos += Vector(2.0f, 2.0f, 0.0f);
 
-	PrimBegin(4);
-	PrimSetColour(0xFF000000);
-	PrimSetPosition(pos);
-	PrimSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
-	PrimSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
-	PrimSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xFF000000);
+	MFSetPosition(pos);
+	MFSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
+	MFSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
+	MFSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
+	MFEnd();
 
 	float xaspect, yaspect;
 
@@ -152,17 +152,17 @@ float TextureBrowser::ListDraw(bool selected, Vector3 pos, float maxWidth)
 
 	pTexture->SetTexture();
 
-	PrimBegin(4);
-	PrimSetColour(0xFFFFFFFF);
-	PrimSetTexCoord1(0.0f,0.0f);
-	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
-	PrimSetTexCoord1(1.0f,0.0f);
-	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
-	PrimSetTexCoord1(0.0f,1.0f);
-	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
-	PrimSetTexCoord1(1.0f,1.0f);
-	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
-	PrimEnd();
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetTexCoord1(0.0f,0.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetTexCoord1(1.0f,0.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetTexCoord1(0.0f,1.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFSetTexCoord1(1.0f,1.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFEnd();
 
 	return TEX_SIZE + 8.0f;
 }
