@@ -5,11 +5,11 @@
 
 enum OpenFlags
 {
-	OF_Read = 0,
-	OF_Text = 0,
-	OF_Write = 1,
-	OF_Binary = 2,
-	OF_Async = 16
+	OF_Read		= 1,
+	OF_Write	= 2,
+	OF_Text		= 4,
+	OF_Binary	= 8,
+	OF_Async	= 16
 };
 
 enum FileOp

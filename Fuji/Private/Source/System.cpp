@@ -8,6 +8,7 @@
 #include "DebugMenu.h"
 #include "Timer.h"
 #include "Font.h"
+#include "IniFile.h"
 
 int gQuit = 0;
 int gRestart = 1;

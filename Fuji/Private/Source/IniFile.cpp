@@ -19,14 +19,31 @@ void IniFile::Create(char *pFilename)
 
 		pIniBuffer[size] = NULL;
 		pCurrent = pIniBuffer;
+
+		owned = true;
 	}
 	else
 		pIniBuffer = NULL;
 }
 
+void IniFile::CreateFromMemory(char *pMemory)
+{
+	pIniBuffer = new char[strlen(pMemory)+1];
+	strcpy(pIniBuffer, pMemory);
+	pCurrent = pIniBuffer;
+	owned = true;
+}
+
+void IniFile::CreateFromPointer(char *pPointer)
+{
+	pIniBuffer = pPointer;
+	pCurrent = pIniBuffer;
+	owned = false;
+}
+
 void IniFile::Release()
 {
-	if(pIniBuffer)
+	if(pIniBuffer && owned)
 	{
 		delete[] pIniBuffer;
 		pIniBuffer = NULL;
@@ -53,7 +70,7 @@ int IniFile::GetFirstLine()
 		break;
 	}
 
-	if(IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent)) return 1;
+	if((*pCurrent == '[' && IsAlphaNumeric(pCurrent[1]) && !IsNumeric(pCurrent[1])) || (IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent))) return 1;
 
 	DBGASSERT(*pCurrent == NULL, STR("Syntax Error in %s", pIniFilename));
 
@@ -62,7 +79,7 @@ int IniFile::GetFirstLine()
 
 int IniFile::GetNextLine()
 {
-	SeekNewline(pCurrent);
+	pCurrent = SeekNewline(pCurrent);
 
 	for(;;pCurrent++)
 	{
@@ -75,7 +92,7 @@ int IniFile::GetNextLine()
 		break;
 	}
 
-	if(*pCurrent == '[' || (IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent))) return 1;
+	if((*pCurrent == '[' && IsAlphaNumeric(pCurrent[1]) && !IsNumeric(pCurrent[1])) || (IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent))) return 1;
 
 	DBGASSERT(*pCurrent == NULL, STR("Syntax Error in %s", pIniFilename));
 
@@ -84,7 +101,7 @@ int IniFile::GetNextLine()
 
 int IniFile::GetNextSection()
 {
-	while(!EndOfFile());
+	while(!EndOfFile())
 	{
 		GetNextLine();
 		if(IsSection()) return 1;
@@ -97,7 +114,7 @@ int IniFile::FindSection(char *pSection)
 {
 	GetFirstLine();
 
-	while(!EndOfFile());
+	while(!EndOfFile())
 	{
 		if(IsSection() && !stricmp(GetName(), pSection)) return 1;
 		GetNextSection();
@@ -160,31 +177,81 @@ char* IniFile::GetName()
 
 bool IniFile::AsBool(int index)
 {
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
 	return false;
 }
 
 int IniFile::AsInt(int index)
 {
-	return 0;
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
+	char *pEnd, *pOffset = pCurrent;
+
+	while(IsAlphaNumeric(*pOffset)) pOffset++;
+
+	pOffset = SkipWhite(pOffset);
+
+	if(IsNewline(*pOffset) || *pOffset == ';' || *pOffset == '#' || (*pOffset == '/' && pOffset[1] == '/')) return 0;
+
+	if(*pOffset == '=')
+	{
+		pOffset++;
+		pOffset = SkipWhite(pOffset);
+	}
+
+	for(int a=0; a<index; a++)
+	{
+		while(IsAlphaNumeric(*pOffset) || *pOffset == '.') pOffset++;
+
+		pOffset = SkipWhite(pOffset);
+
+		if(*pOffset == ',')
+		{
+			pOffset++;
+			pOffset = SkipWhite(pOffset);
+		}
+	}
+
+	DBGASSERT(IsNewline(*pOffset), STR("Not enough elements in array in IniFile '%s', entry %s", pIniFilename, GetName()));
+	DBGASSERT(IsNumeric(*pOffset), STR("Entry '%s' is not a number in IniFile '%s'", GetName(), pIniFilename));
+
+	pEnd = pOffset;
+
+	while(IsNumeric(*pEnd)) pEnd++;
+
+	DBGASSERT(IsWhite(*pEnd) || IsNewline(*pEnd) || *pEnd == ',' || *pEnd == ';' || *pEnd == '#' || (*pEnd == '/' && pEnd[1] == '/'), STR("Syntax error in IniFile '%s', entry '%s'", pIniFilename, GetName()));
+
+	pEnd = STRn(pOffset, pEnd-pOffset);
+
+	return atoi(pEnd);
 }
 
 float IniFile::AsFloat(int index)
 {
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
 	return 0.0f;
 }
 
 char* IniFile::AsString()
 {
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
 	return "";
 }
 
 Vector3 IniFile::AsVector3()
 {
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
 	return Vector3::zero;
 }
 
 Vector4 IniFile::AsVector4()
 {
+	DBGASSERT(!IsSection(), "Cant get value of a section");
+
 	return Vector4::zero;
 }
 

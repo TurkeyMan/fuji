@@ -134,7 +134,7 @@ uint32 File_GetSize(const char *pFilename)
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
 		DWORD excess;
-		DWORD fileSize = GetFileSize(hFile, &excess);
+		fileSize = GetFileSize(hFile, &excess);
 		CloseHandle(hFile);
 
 		DBGASSERT(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");

@@ -7,7 +7,13 @@
 class IniFile
 {
 public:
+	// create an IniFile from a file
 	void Create(char *pFilename);
+	// create an IniFile from a *copy* of a memory location
+	void CreateFromMemory(char *pMemory);
+	// create an IniFile from a *direct reference* a memoryLocation
+	void CreateFromPointer(char *pPointer);
+	// release the IniFile
 	void Release();
 
 	bool EndOfFile();
@@ -36,6 +42,7 @@ protected:
 #endif
 	char *pIniBuffer;
 	char *pCurrent;
+	bool owned;
 };
 
 #endif
