@@ -1,55 +1,57 @@
 #define SAMPLE_BUFFER_SIZE 128//50000
 
 #define DIRECTINPUT_VERSION 0x0800
+#include <windows.h>
 #include <dinput.h>
 
 #include "Common.h"
 #include "Input.h"
+#include "Vector3.h"
 #include "Input_PC.h"
 
-float deadZone = 0.3f;
+BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
 
+void Input_SetCooperativeLevels();
 
-BOOL CALLBACK EnumKeyboardsCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
-BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
-BOOL CALLBACK EnumMousesCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
+void Input_UpdateKeyboard();
+void Input_UpdateMouse();
+void Input_UpdateJoystick();
 
 /*** Globals ***/
 
-IDirectInput8			*IDIN=NULL;
-LPDIRECTINPUTDEVICE8	IDIKeyboard[16]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-LPDIRECTINPUTDEVICE8	IDIJoystick[16]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-LPDIRECTINPUTDEVICE8	IDIMouse[16]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-int	meKeyboardCount=0;
-int	meJoystickCount=0;
-int	meMouseCount=0;
+IDirectInput8		*pDirectInput	 = NULL;
+IDirectInputDevice8	*pDIKeyboard	 = NULL;
+IDirectInputDevice8	*pDIMouse		 = NULL;
+IDirectInputDevice8	*pDIJoystick[16] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+
+int	gKeyboardCount	= 0;
+int	gJoystickCount	= 0;
+int	gMouseCount		= 0;
 
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
 
-char meKeys[16][256];
-//bool mdinKeysDown[256];
+char			gKeyState[16][256];
+char			gPrevKeyState[16][256];
+DIMOUSESTATE2	gMouseState[16];
+DIMOUSESTATE2	gPrevMouseState[16];
+DIJOYSTATE2		gJoyState[16];
+DIJOYSTATE2		gPrevJoyState[16];
 
-DIJOYSTATE2	meJoystick[16];
-DIJOYSTATE2	meJoyOld[16];
-DIMOUSESTATE2 meMouse[16];
+EventFunc pKeyEventFunc		= NULL;
+EventFunc pMouseEventFunc	= NULL;
+EventFunc pJoyEventFunc		= NULL;
 
-float meScreenMouseX=0.0f, meScreenMouseY=0.0f;
-float meScreenMouseRangeX=1023.0f, meScreenMouseRangeY=767.0f;
-float meScreenMouseWheel=0.0f;
-char meScreenMouseKey[5]={0,0,0,0,0};
+bool gExclusiveMouse = false;
+float deadZone = 0.3f;
 
-float meMouseSensitivity=1.0f;
+float meScreenMouseX = 0.0f, meScreenMouseY = 0.0f;
+float meScreenMouseRangeX = 639.0f, meScreenMouseRangeY = 479.0f;
+float meScreenMouseWheel = 0.0f;
+char meScreenMouseKey[5] = { 0, 0, 0, 0, 0 };
 
-float meDigitalRatio=0.5f;
-float meAnalogDeadZone=0.9f;
-int meAnalogMin=0;
-int meAnalogRange=32767;
-
-DIDEVICEOBJECTDATA InputBuffer[SAMPLE_BUFFER_SIZE];
-
-const long joyaxii[24]={0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
-const long joysliders[4]={6,50,58,66};
+const long joyaxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
+const long joysliders[4] = {6,50,58,66};
 
 char DIKtoCHAR[256] = {0,0,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',0,'a','s','d','f','g','h','j','k','l',';','\'','`',0,'\\','z','x','c','v','b','n','m',',','.','/',0,0,' ',0,0,0,0,0,0,0,0,0,0,0,0,0,'7','8','9','-','4','5','6','+','1','2','3','0','.',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'=',0,0,0,'@',':','_',0,0,0,0,0,0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,',',0,'/',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -57,21 +59,118 @@ void Input_InitModule()
 {
 	CALLSTACK;
 
-	inInit();
+	int a;
+
+	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
+
+	ZeroMemory(gKeyState,256*16);
+	ZeroMemory(gPrevKeyState,256*16);
+	ZeroMemory(&gMouseState,sizeof(DIMOUSESTATE2)*16);
+	ZeroMemory(&gPrevMouseState,sizeof(DIMOUSESTATE2)*16);
+	ZeroMemory(&gJoyState,sizeof(DIJOYSTATE2)*16);
+	ZeroMemory(&gPrevJoyState,sizeof(DIJOYSTATE2)*16);
+
+	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pDIKeyboard, NULL)))
+	{
+		pDIKeyboard->SetDataFormat(&c_dfDIKeyboard);
+	}
+	gKeyboardCount = 1;
+
+	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pDIMouse, NULL)))
+	{
+		pDIMouse->SetDataFormat(&c_dfDIMouse2);
+	}
+	gMouseCount = 1;
+
+	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+
+	for(a=0; a<gJoystickCount; a++)
+	{
+		if(pDIJoystick[a])
+		{
+			pDIJoystick[a]->SetDataFormat(&c_dfDIJoystick2);
+		}
+	}
+
+	Input_SetCooperativeLevels();
+
+/*
+	RAWINPUTDEVICE rid[] =
+	{
+		{0x1, 0x2, RIDEV_CAPTUREMOUSE, apphWnd},
+		{0x1, 0x6, NULL, apphWnd},
+	};
+
+	RegisterRawInputDevices(rid, sizeof(rid) / sizeof(rid[0]), sizeof(rid[0]));
+*/
 }
 
 void Input_DeinitModule()
 {
 	CALLSTACK;
 
-	inKillIn();
+	int a;
+
+	for(a=0; a<16; a++)
+	{
+		if(pDIJoystick[a])
+		{
+			pDIJoystick[a]->Unacquire();
+			pDIJoystick[a]->Release();
+			pDIJoystick[a] = NULL;
+		}
+	}
+	gJoystickCount=0;
+
+	if(pDIMouse)
+	{
+		pDIMouse->Unacquire();
+		pDIMouse->Release();
+		pDIMouse = NULL;
+	}
+	gMouseCount=0;
+
+	if(pDIKeyboard)
+	{
+		pDIKeyboard->Unacquire();
+		pDIKeyboard->Release();
+		pDIKeyboard = NULL;
+	}
+	gKeyboardCount=0;
+
+	if(pDirectInput)
+	{
+		pDirectInput->Release();
+		pDirectInput = NULL;
+	}
 }
 
 void Input_Update()
 {
 	CALLSTACK;
 
-	meProcessInput();
+	Input_UpdateKeyboard();
+	Input_UpdateMouse();
+	Input_UpdateJoystick();
+/*
+	if(gMouseState[0].lX)
+	{
+		meScreenMouseX+=gMouseState[0].lX*gMouseStateSensitivity;
+		if(meScreenMouseX<0.0f) meScreenMouseX=0.0f;
+		if(meScreenMouseX>meScreenMouseRangeX) meScreenMouseX=meScreenMouseRangeX;
+	}
+
+	if(gMouseState[0].lY)
+	{
+		meScreenMouseY+=gMouseState[0].lY*gMouseStateSensitivity;
+		if(meScreenMouseY<0.0f) meScreenMouseY=0.0f;
+		if(meScreenMouseY>meScreenMouseRangeY) meScreenMouseY=meScreenMouseRangeY;
+	}
+
+	meScreenMouseWheel=(float)gMouseState[0].lZ;
+
+	for(int a=0; a<5; a++) meScreenMouseKey[a]=gMouseState[0].rgbButtons[a];
+*/
 }
 
 float Input_ReadGamepad(int controlID, uint32 type)
@@ -85,52 +184,52 @@ float Input_ReadGamepad(int controlID, uint32 type)
 	switch(type)
 	{
 		case Button_A:
-			return (meJoystick[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
 		case Button_B:
-			return (meJoystick[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
 		case Button_X:
-			return (meJoystick[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
 		case Button_Y:
-			return (meJoystick[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
 		case Button_Black:
-			return (meJoystick[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
 		case Button_White:
-			return (meJoystick[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
 		case Button_LTrig:
-			return (meJoystick[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
 		case Button_RTrig:
-			return (meJoystick[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
 		case Button_Start:
-			return (meJoystick[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
 		case Button_Back:
-			return (meJoystick[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
 		case Button_LThumb:
-			return (meJoystick[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
 		case Button_RThumb:
-			return (meJoystick[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
 		case Button_DUp:
-			return (meJoystick[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
 		case Button_DDown:
-			return (meJoystick[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
 		case Button_DLeft:
-			return (meJoystick[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
 		case Button_DRight:
-			return (meJoystick[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
+			return (gJoyState[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
 
 		case Axis_LX:
-			inputValue = ((float)(meJoystick[controlID].lX - 32767)) / 32767.0f;
+			inputValue = ((float)(gJoyState[controlID].lX - 32767)) / 32767.0f;
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_LY:
-			inputValue = -(((float)(meJoystick[controlID].lY - 32767)) / 32767.0f);
+			inputValue = -(((float)(gJoyState[controlID].lY - 32767)) / 32767.0f);
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_RX:
-			inputValue = ((float)(meJoystick[controlID].lRz - 32767)) / 32767.0f;
+			inputValue = ((float)(gJoyState[controlID].lRz - 32767)) / 32767.0f;
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_RY:
-			inputValue = -(((float)(meJoystick[controlID].lZ - 32767)) / 32767.0f);
+			inputValue = -(((float)(gJoyState[controlID].lZ - 32767)) / 32767.0f);
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		default:
@@ -149,37 +248,37 @@ bool Input_WasPressed(int controlID, uint32 type)
 	switch(type)
 	{
 		case Button_A:
-			return meJoystick[controlID].rgbButtons[2]&0x80 && !(meJoyOld[controlID].rgbButtons[2]&0x80);
+			return gJoyState[controlID].rgbButtons[2]&0x80 && !(gPrevJoyState[controlID].rgbButtons[2]&0x80);
 		case Button_B:
-			return meJoystick[controlID].rgbButtons[1]&0x80 && !(meJoyOld[controlID].rgbButtons[1]&0x80);
+			return gJoyState[controlID].rgbButtons[1]&0x80 && !(gPrevJoyState[controlID].rgbButtons[1]&0x80);
 		case Button_X:
-			return meJoystick[controlID].rgbButtons[3]&0x80 && !(meJoyOld[controlID].rgbButtons[3]&0x80);
+			return gJoyState[controlID].rgbButtons[3]&0x80 && !(gPrevJoyState[controlID].rgbButtons[3]&0x80);
 		case Button_Y:
-			return meJoystick[controlID].rgbButtons[0]&0x80 && !(meJoyOld[controlID].rgbButtons[0]&0x80);
+			return gJoyState[controlID].rgbButtons[0]&0x80 && !(gPrevJoyState[controlID].rgbButtons[0]&0x80);
 		case Button_Black:
-			return meJoystick[controlID].rgbButtons[7]&0x80 && !(meJoyOld[controlID].rgbButtons[7]&0x80);
+			return gJoyState[controlID].rgbButtons[7]&0x80 && !(gPrevJoyState[controlID].rgbButtons[7]&0x80);
 		case Button_White:
-			return meJoystick[controlID].rgbButtons[6]&0x80 && !(meJoyOld[controlID].rgbButtons[6]&0x80);
+			return gJoyState[controlID].rgbButtons[6]&0x80 && !(gPrevJoyState[controlID].rgbButtons[6]&0x80);
 		case Button_LTrig:
-			return meJoystick[controlID].rgbButtons[4]&0x80 && !(meJoyOld[controlID].rgbButtons[4]&0x80);
+			return gJoyState[controlID].rgbButtons[4]&0x80 && !(gPrevJoyState[controlID].rgbButtons[4]&0x80);
 		case Button_RTrig:
-			return meJoystick[controlID].rgbButtons[5]&0x80 && !(meJoyOld[controlID].rgbButtons[5]&0x80);
+			return gJoyState[controlID].rgbButtons[5]&0x80 && !(gPrevJoyState[controlID].rgbButtons[5]&0x80);
 		case Button_Start:
-			return meJoystick[controlID].rgbButtons[9]&0x80 && !(meJoyOld[controlID].rgbButtons[9]&0x80);
+			return gJoyState[controlID].rgbButtons[9]&0x80 && !(gPrevJoyState[controlID].rgbButtons[9]&0x80);
 		case Button_Back:
-			return meJoystick[controlID].rgbButtons[8]&0x80 && !(meJoyOld[controlID].rgbButtons[8]&0x80);
+			return gJoyState[controlID].rgbButtons[8]&0x80 && !(gPrevJoyState[controlID].rgbButtons[8]&0x80);
 		case Button_LThumb:
-			return meJoystick[controlID].rgbButtons[10]&0x80 && !(meJoyOld[controlID].rgbButtons[10]&0x80);
+			return gJoyState[controlID].rgbButtons[10]&0x80 && !(gPrevJoyState[controlID].rgbButtons[10]&0x80);
 		case Button_RThumb:
-			return meJoystick[controlID].rgbButtons[11]&0x80 && !(meJoyOld[controlID].rgbButtons[11]&0x80);
+			return gJoyState[controlID].rgbButtons[11]&0x80 && !(gPrevJoyState[controlID].rgbButtons[11]&0x80);
 		case Button_DUp:
-			return meJoystick[controlID].rgbButtons[12]&0x80 && !(meJoyOld[controlID].rgbButtons[12]&0x80);
+			return gJoyState[controlID].rgbButtons[12]&0x80 && !(gPrevJoyState[controlID].rgbButtons[12]&0x80);
 		case Button_DDown:
-			return meJoystick[controlID].rgbButtons[14]&0x80 && !(meJoyOld[controlID].rgbButtons[14]&0x80);
+			return gJoyState[controlID].rgbButtons[14]&0x80 && !(gPrevJoyState[controlID].rgbButtons[14]&0x80);
 		case Button_DLeft:
-			return meJoystick[controlID].rgbButtons[15]&0x80 && !(meJoyOld[controlID].rgbButtons[15]&0x80);
+			return gJoyState[controlID].rgbButtons[15]&0x80 && !(gPrevJoyState[controlID].rgbButtons[15]&0x80);
 		case Button_DRight:
-			return meJoystick[controlID].rgbButtons[13]&0x80 && !(meJoyOld[controlID].rgbButtons[13]&0x80);
+			return gJoyState[controlID].rgbButtons[13]&0x80 && !(gPrevJoyState[controlID].rgbButtons[13]&0x80);
 	}
 
 	return false;
@@ -190,104 +289,93 @@ bool Input_IsConnected(int controlID)
 {
 	CALLSTACK;
 
-	return controlID < meGetJoystickCount();
+	return controlID < gJoystickCount;
 }
 
-int inInit()
+void SetGamepadEventHandler(EventFunc pEventFunc)
+{
+	pJoyEventFunc = pEventFunc;
+}
+
+int Input_GetNumKeyboards()
+{
+	return gKeyboardCount;
+}
+
+bool Input_ReadKeyboard(int keyboardID, uint32 key)
+{
+	return gKeyState[keyboardID+1][key] != 0;
+}
+
+bool Input_WasKeyPressed(int keyboardID, uint32 key)
+{
+	return gKeyState[keyboardID+1][key] && !gPrevKeyState[keyboardID+1][key];
+}
+
+void SetKeyboardEventHandler(EventFunc pEventFunc)
+{
+	pKeyEventFunc = pEventFunc;
+}
+
+int Input_GetNumPointers()
+{
+	return gMouseCount;
+}
+
+bool Input_ReadMouseKey(int mouseID, uint32 key)
+{
+	return false;
+}
+
+bool Input_WasMousePressed(int mouseID, uint32 key)
+{
+	return false;
+}
+
+void SetMouseEventHandler(EventFunc pEventFunc)
+{
+	pMouseEventFunc = pEventFunc;
+}
+
+void SetMouseMode(uint32 mouseMode)
+{
+
+}
+
+Vector3 Input_ReadMousePos(int mouseID)
+{
+	return Vector(0.0f, 0.0f, 0.0f);
+}
+
+void Input_SetCooperativeLevels()
 {
 	CALLSTACK;
 
 	int a;
 
-	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&IDIN, NULL))) return 1;
-
-	ZeroMemory(&meMouse,sizeof(DIMOUSESTATE2)*16);
-	ZeroMemory(meKeys,256*16);
-	//ZeroMemory(mdinKeysDown,256);
-
-	IDIN->EnumDevices(DI8DEVCLASS_KEYBOARD, EnumKeyboardsCallback, NULL, DIEDFL_ATTACHEDONLY);
-	for(a=0; a<meKeyboardCount; a++)
+	if(pDIKeyboard)
 	{
-		if(IDIKeyboard[a])
+		if(FAILED(pDIKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE)))
 		{
-			if(FAILED(IDIKeyboard[a]->SetDataFormat(&c_dfDIKeyboard)))
-			{
-				if(IDIKeyboard[a]) IDIKeyboard[a]->Release();
-				return true;
-			}
+			DBGASSERT(false, "Failed to set Keyboard cooperative level");
 		}
 	}
 
-	IDIN->EnumDevices(DI8DEVCLASS_POINTER, EnumMousesCallback, NULL, DIEDFL_ATTACHEDONLY);
-	for(a=0; a<meMouseCount; a++)
+	if(pDIMouse)
 	{
-		if(IDIMouse[a])
+		if(FAILED(pDIMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE))))
 		{
-			if(FAILED(IDIMouse[a]->SetDataFormat(&c_dfDIMouse2)))
-			{
-				if(IDIMouse[a]) IDIMouse[a]->Release();
-				return true;
-			}
+			DBGASSERT(false, "Failed to set Mouse cooperative level");
 		}
 	}
 
-	IDIN->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
-	for(a=0; a<meJoystickCount; a++)
+	for(a=0; a<gJoystickCount; a++)
 	{
-		if(IDIJoystick[a])
+		if(pDIJoystick[a])
 		{
-			if(FAILED(IDIJoystick[a]->SetDataFormat(&c_dfDIJoystick2)))
+			if(FAILED(pDIJoystick[a]->SetCooperativeLevel(apphWnd, DISCL_EXCLUSIVE | DISCL_FOREGROUND)))
 			{
-				if(IDIJoystick[a]) IDIJoystick[a]->Release();
-				return true;
-			}
-		}
-	}
-
-	return 0;
-}
-
-int inSetCooperativeLevels()
-{
-	CALLSTACK;
-
-	int a;
-
-	for(a=0; a<meKeyboardCount; a++)
-	{
-		if(IDIKeyboard[a])
-		{
-			if(FAILED(IDIKeyboard[a]->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND|DISCL_NOWINKEY|DISCL_NONEXCLUSIVE)))
-			{
-				if(IDIKeyboard[a]) IDIKeyboard[a]->Release();
-				IDIKeyboard[a]=NULL;
-				return 2;
-			}
-		}
-	}
-
-	for(a=0; a<meMouseCount; a++)
-	{
-		if(IDIMouse[a])
-		{
-			if(FAILED(IDIMouse[a]->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND|DISCL_EXCLUSIVE)))
-			{
-				if(IDIMouse[a]) IDIMouse[a]->Release();
-				IDIMouse[a]=NULL;
-				return 2;
-			}
-		}
-	}
-
-	for(a=0; a<meJoystickCount; a++)
-	{
-		if(IDIJoystick[a])
-		{
-			if(FAILED(IDIJoystick[a]->SetCooperativeLevel(apphWnd, DISCL_EXCLUSIVE|DISCL_FOREGROUND)))
-			{
-				if(IDIJoystick[a]) IDIJoystick[a]->Release();
-				IDIJoystick[a]=NULL;
-				return 3;
+				DBGASSERT(false, STR("Failed to set Gamepad %d cooperative level", a));
 			}
 		}
 	}
@@ -299,109 +387,20 @@ int inSetCooperativeLevels()
 	dipdw.diph.dwHow        = DIPH_DEVICE;
 	dipdw.dwData            = SAMPLE_BUFFER_SIZE;
 
-	for(a=0; a<meKeyboardCount; a++)
-	{
-		if(IDIKeyboard[a]) IDIKeyboard[a]->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
-	}
-
-	for(a=0; a<meMouseCount; a++)
-	{
-		if(IDIMouse[a]) IDIMouse[a]->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
-	}
-
-	return 0;
-}
-
-void inKillIn()
-{
-	CALLSTACK;
-
-	int a;
-
-	for(a=0; a<16; a++)
-	{
-		if(IDIJoystick[a])
-		{
-			IDIJoystick[a]->Unacquire();
-			IDIJoystick[a]->Release();
-			IDIJoystick[a]=NULL;
-		}
-	}
-	meJoystickCount=0;
-
-	for(a=0; a<16; a++)
-	{
-		if(IDIMouse[a])
-		{
-			IDIMouse[a]->Unacquire();
-			IDIMouse[a]->Release();
-			IDIMouse[a]=NULL;
-		}
-	}
-	meMouseCount=0;
-
-	for(a=0; a<16; a++)
-	{
-		if(IDIKeyboard[a])
-		{
-			IDIKeyboard[a]->Unacquire();
-			IDIKeyboard[a]->Release();
-			IDIKeyboard[a]=NULL;
-		}
-	}
-	meKeyboardCount=0;
-
-	if(IDIN)
-	{
-		IDIN->Release();
-		IDIN=NULL;
-	}
-}
-
-BOOL CALLBACK EnumKeyboardsCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
-{
-	CALLSTACK;
-
-	if(meKeyboardCount<16)
-	{
-		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIKeyboard[meKeyboardCount], NULL)))
-			return DIENUM_CONTINUE;
-
-		meKeyboardCount++;
-
-		return DIENUM_CONTINUE;
-	}
-
-	return DIENUM_STOP;
-}
-
-BOOL CALLBACK EnumMousesCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
-{
-	CALLSTACK;
-
-	if(meMouseCount<16)
-	{
-		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIMouse[meMouseCount], NULL)))
-			return DIENUM_CONTINUE;
-
-		meMouseCount++;
-
-		return DIENUM_CONTINUE;
-	}
-
-	return DIENUM_STOP;
+	if(pDIKeyboard) pDIKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
+	if(pDIMouse) pDIMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
 }
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
 	CALLSTACK;
 
-	if(meJoystickCount<16)
+	if(gJoystickCount<16)
 	{
-		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIJoystick[meJoystickCount], NULL)))
+		if(FAILED(pDirectInput->CreateDevice(pdidInstance->guidInstance, &pDIJoystick[gJoystickCount], NULL)))
 			return DIENUM_CONTINUE;
 
-		meJoystickCount++;
+		gJoystickCount++;
 
 		return DIENUM_CONTINUE;
 	}
@@ -409,227 +408,170 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 	return DIENUM_STOP;
 }
 
-void inAcquire(bool acquire)
+void Input_Acquire(bool acquire)
 {
 	CALLSTACK;
 
 	int a;
 
-	for(a=0; a<meKeyboardCount; a++)
+	if(pDIKeyboard)
 	{
-		if(IDIKeyboard[a])
-		{
-			if(acquire) IDIKeyboard[a]->Acquire();
-			else IDIKeyboard[a]->Unacquire();
-		}
+		if(acquire) pDIKeyboard->Acquire();
+		else pDIKeyboard->Unacquire();
 	}
 
-	for(a=0; a<meMouseCount; a++)
+	if(pDIMouse)
 	{
-		if(IDIMouse[a])
-		{
-			if(acquire) IDIMouse[a]->Acquire();
-			else IDIMouse[a]->Unacquire();
-		}
+		if(acquire) pDIMouse->Acquire();
+		else pDIMouse->Unacquire();
 	}
 
-	for(a=0; a<meJoystickCount; a++)
+	for(a=0; a<gJoystickCount; a++)
 	{
-		if(IDIJoystick[a])
+		if(pDIJoystick[a])
 		{
 			if(acquire)
 			{
-				if(FAILED(IDIJoystick[a]->Poll()))
+				if(FAILED(pDIJoystick[a]->Poll()))
 				{
-					IDIJoystick[a]->Acquire();
+					pDIJoystick[a]->Acquire();
 				}
 			}
-			else IDIJoystick[a]->Unacquire();
+			else pDIJoystick[a]->Unacquire();
 		}
 	}
 }
 
-void meSetScreenMouseSensitivity(float sens)
+void Input_UpdateKeyboard()
 {
 	CALLSTACK;
 
-	meMouseSensitivity=sens;
-}
+	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+	DWORD elements = SAMPLE_BUFFER_SIZE;
 
-void meProcessInput()
-{
-	CALLSTACK;
-
-	meUpdateKeyboard();
-	meUpdateMouse();
-	meUpdateJoystick();
-
-	if(meMouse[0].lX)
-	{
-		meScreenMouseX+=meMouse[0].lX*meMouseSensitivity;
-		if(meScreenMouseX<0.0f) meScreenMouseX=0.0f;
-		if(meScreenMouseX>meScreenMouseRangeX) meScreenMouseX=meScreenMouseRangeX;
-	}
-
-	if(meMouse[0].lY)
-	{
-		meScreenMouseY+=meMouse[0].lY*meMouseSensitivity;
-		if(meScreenMouseY<0.0f) meScreenMouseY=0.0f;
-		if(meScreenMouseY>meScreenMouseRangeY) meScreenMouseY=meScreenMouseRangeY;
-	}
-
-	meScreenMouseWheel=(float)meMouse[0].lZ;
-
-	for(int a=0; a<5; a++) meScreenMouseKey[a]=meMouse[0].rgbButtons[a];
-}
-
-void meUpdateKeyboard()
-{
-	CALLSTACK;
-
-	DWORD Elements=SAMPLE_BUFFER_SIZE;
 	HRESULT hr;
 
-	for(int c=0; c<meKeyboardCount; c++)
-	{
-		hr=IDIKeyboard[c]->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), InputBuffer, &Elements, 0 );
+	hr = pDIKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
 
-		if(hr!=DI_OK)
+	if(hr != DI_OK)
+	{
+		pDIKeyboard->Acquire();
+		return;
+	}
+	else
+	{
+		memcpy(gPrevKeyState, gKeyState, 256*16);
+
+		for(DWORD a=0; a<elements; a++) 
 		{
-			IDIKeyboard[c]->Acquire();
-			return;
+			gKeyState[0][inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
+			if(inputBuffer[a].dwOfs==DIK_PAUSE) gKeyState[0][DIK_PAUSE]=(char)0x80;
+
+			if(pKeyEventFunc)
+				pKeyEventFunc(inputBuffer[a].dwData ? IE_KeyDown : IE_KeyUp, inputBuffer[a].dwOfs, inputBuffer[a].dwTimeStamp);
 		}
-		else
+	}
+}
+
+void Input_UpdateMouse()
+{
+	CALLSTACK;
+
+	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+	DWORD elements = SAMPLE_BUFFER_SIZE;
+
+	HRESULT hr;
+
+	gMouseState[0].lX=0;
+	gMouseState[0].lY=0;
+	gMouseState[0].lZ=0;
+
+	hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+
+	if(hr != DI_OK)
+	{
+		pDIMouse->Acquire();
+		return;
+	}
+	else
+	{
+		for(DWORD a=0; a<elements; a++) 
 		{
-			for(DWORD a=0; a<Elements; a++) 
+			switch(inputBuffer[a].dwOfs)
 			{
-				meKeys[c][InputBuffer[a].dwOfs]=(char)InputBuffer[a].dwData;
-				if(InputBuffer[a].dwOfs==DIK_PAUSE) meKeys[c][DIK_PAUSE]=(char)0x80;
+				case DIMOFS_BUTTON0:
+					gMouseState[0].rgbButtons[0]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON1:
+					gMouseState[0].rgbButtons[1]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON2:
+					gMouseState[0].rgbButtons[2]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON3:
+					gMouseState[0].rgbButtons[3]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON4:
+					gMouseState[0].rgbButtons[4]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON5:
+					gMouseState[0].rgbButtons[5]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON6:
+					gMouseState[0].rgbButtons[6]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_BUTTON7:
+					gMouseState[0].rgbButtons[7]=(char)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_X:
+					gMouseState[0].lX+=inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_Y:
+					gMouseState[0].lY+=inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_Z:
+					gMouseState[0].lZ+=inputBuffer[a].dwData;
+					break;
+
+				default:
+					break;
 			}
 		}
 	}
 }
 
-void meUpdateMouse()
+void Input_UpdateJoystick()
 {
 	CALLSTACK;
 
-	DWORD Elements=SAMPLE_BUFFER_SIZE;
-	HRESULT hr;
-
-	for(int c=0; c<meMouseCount; c++)
+	for(int a=0; a<gJoystickCount; a++)
 	{
-		meMouse[c].lX=0;
-		meMouse[c].lY=0;
-		meMouse[c].lZ=0;
-
-		hr=IDIMouse[c]->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), InputBuffer, &Elements, 0 );
-
-		if(hr!=DI_OK)
+		if(pDIJoystick[a])
 		{
-			IDIMouse[c]->Acquire();
-			return;
-		}
-		else
-		{
-			for(DWORD a=0; a<Elements; a++) 
+			if(FAILED(pDIJoystick[a]->Poll()))
 			{
-				switch(InputBuffer[a].dwOfs)
-				{
-					case DIMOFS_BUTTON0:
-						meMouse[c].rgbButtons[0]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON1:
-						meMouse[c].rgbButtons[1]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON2:
-						meMouse[c].rgbButtons[2]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON3:
-						meMouse[c].rgbButtons[3]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON4:
-						meMouse[c].rgbButtons[4]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON5:
-						meMouse[c].rgbButtons[5]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON6:
-						meMouse[c].rgbButtons[6]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_BUTTON7:
-						meMouse[c].rgbButtons[7]=(char)InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_X:
-						meMouse[c].lX+=InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_Y:
-						meMouse[c].lY+=InputBuffer[a].dwData;
-						break;
-
-					case DIMOFS_Z:
-						meMouse[c].lZ+=InputBuffer[a].dwData;
-						break;
-
-					default:
-						break;
-				}
-			}
-		}
-	}
-}
-
-void meUpdateJoystick()
-{
-	CALLSTACK;
-
-	for(int a=0; a<meJoystickCount; a++)
-	{
-		if(IDIJoystick[a])
-		{
-			if(FAILED(IDIJoystick[a]->Poll()))
-			{
-				IDIJoystick[a]->Acquire();
+				pDIJoystick[a]->Acquire();
 				return;
 			}
 
-			meJoyOld[a] = meJoystick[a];
+			gPrevJoyState[a] = gJoyState[a];
 
-			IDIJoystick[a]->GetDeviceState(sizeof(DIJOYSTATE2), &meJoystick[a]);
+			pDIJoystick[a]->GetDeviceState(sizeof(DIJOYSTATE2), &gJoyState[a]);
 		}
 	}
 }
 
-void meSetScreenMouseRange(float x,float y)
-{
-	meScreenMouseRangeX=x;
-	meScreenMouseRangeY=y;
-}
-
-int meGetKeyboardCount()
-{
-	return meKeyboardCount;
-}
-
-int meGetMouseCount()
-{
-	return meMouseCount;
-}
-
-int meGetJoystickCount()
-{
-	return meJoystickCount;
-}
-
+/*
 void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 {
 	char			testKeys[16][256];
@@ -646,9 +588,9 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 
 	meProcessInput();
 
-	memcpy(testKeys, meKeys, (sizeof(char)*256)*meKeyboardCount);
-	memcpy(testJoystick, meJoystick, sizeof(DIJOYSTATE2)*meJoystickCount);
-	memcpy(&testMouse, &meMouse, sizeof(DIMOUSESTATE2)*meMouseCount);
+	memcpy(testKeys, meKeys, (sizeof(char)*256)*gKeyboardCount);
+	memcpy(testJoystick, gJoyState, sizeof(DIJOYSTATE2)*gJoystickCount);
+	memcpy(&testMouse, &gMouseState, sizeof(DIMOUSESTATE2)*gMouseCount);
 
 	do
 	{
@@ -656,7 +598,7 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 
 		if(ProcessFunc) ProcessFunc();
 
-		for(d=0; d<meKeyboardCount&&!complete; d++)
+		for(d=0; d<gKeyboardCount&&!complete; d++)
 		{
 			for(a=0; a<256&&!complete; a++)
 			{
@@ -680,11 +622,11 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 			}
 		}
 
-		for(d=0; d<meMouseCount&&!complete; d++)
+		for(d=0; d<gMouseCount&&!complete; d++)
 		{
 			for(a=0; a<3; a++)
 			{
-				tiaxis=&(meMouse[d].lX)+a;
+				tiaxis=&(gMouseState[d].lX)+a;
 				taxis=&(testMouse[d].lX)+a;
 
 				if(*tiaxis<-3)
@@ -724,11 +666,11 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 
 			for(b=0; b<8&&!complete; b++)
 			{
-				if(testMouse[d].rgbButtons[b] && !meMouse[d].rgbButtons[b]) testMouse[d].rgbButtons[b]=NULL;
-				if(!testMouse[d].rgbButtons[b] && meMouse[d].rgbButtons[b])
+				if(testMouse[d].rgbButtons[b] && !gMouseState[d].rgbButtons[b]) testMouse[d].rgbButtons[b]=NULL;
+				if(!testMouse[d].rgbButtons[b] && gMouseState[d].rgbButtons[b])
 				{
 					ctrl->Type = ME_CTRLTYPE_BUTTON;
-					ctrl->Data = &meMouse[d].rgbButtons[b];
+					ctrl->Data = &gMouseState[d].rgbButtons[b];
 					ctrl->Sign = NULL;
 
 					ctrl->Source = CTRL_MOUSE;
@@ -744,11 +686,11 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 			}
 		}
 
-		for(a=0; a<meJoystickCount&&!complete; a++)
+		for(a=0; a<gJoystickCount&&!complete; a++)
 		{
 			for(b=0; b<24&&!complete; b++)
 			{
-				tiaxis=&(meJoystick[a].lX)+joyaxii[b];
+				tiaxis=&(gJoyState[a].lX)+joyaxii[b];
 				taxis=&(testJoystick[a].lX)+joyaxii[b];
 
 				if(*tiaxis<(*taxis*0.5))
@@ -790,7 +732,7 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 			{
 				for(c=0; c<2&&!complete; c++)
 				{
-					tiaxis=&(meJoystick[a].lX)+joysliders[b]+c;
+					tiaxis=&(gJoyState[a].lX)+joysliders[b]+c;
 					taxis=&(testJoystick[a].lX)+joysliders[b]+c;
 
 					if(*tiaxis<(*taxis*0.5))
@@ -831,11 +773,11 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 
 			for(b=0; b<128&&!complete; b++)
 			{
-				if(testJoystick[a].rgbButtons[b] && !meJoystick[a].rgbButtons[b]) testJoystick[a].rgbButtons[b]=NULL;
-				if(!testJoystick[a].rgbButtons[b] && meJoystick[a].rgbButtons[b])
+				if(testJoystick[a].rgbButtons[b] && !gJoyState[a].rgbButtons[b]) testJoystick[a].rgbButtons[b]=NULL;
+				if(!testJoystick[a].rgbButtons[b] && gJoyState[a].rgbButtons[b])
 				{
 					ctrl->Type = ME_CTRLTYPE_BUTTON;
-					ctrl->Data = &meJoystick[a].rgbButtons[b];
+					ctrl->Data = &gJoyState[a].rgbButtons[b];
 					ctrl->Sign = NULL;
 
 					ctrl->Source = CTRL_JOYSTICK;
@@ -852,7 +794,8 @@ void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
 		}
 	} while(!complete);
 }
-
+*/
+/*
 int meDigitalReading(ME_CONTROL *ctrl)
 {
 	if(!ctrl->Data) return 0;
@@ -929,22 +872,7 @@ int meAnalogReading(ME_CONTROL *ctrl)
 
 	return x;
 }
-
-void meSetDigitalRatio(float ratio)
-{
-	meDigitalRatio = ratio;
-}
-
-void meSetAnalogRange(int Minimum, int Range)
-{
-	meAnalogMin=Minimum;
-	meAnalogRange=Range;
-}
-
-void meSetAnalogDeadZone(float DeadZone)
-{
-	meAnalogDeadZone=DeadZone;
-}
+*/
 
 void meEnumerateString(ME_CONTROL *ctrl, char *String)
 {
@@ -1550,7 +1478,7 @@ void meAcquireDataPointer(ME_CONTROL *ctrl)
 	{
 		case CTRL_KEY:
 			ctrl->Type=ME_CTRLTYPE_KEY;
-			ctrl->Data=&(meKeys[ctrl->Index][ctrl->Object]);
+			ctrl->Data=&(gKeyState[ctrl->Index][ctrl->Object]);
 			break;
 
 		case CTRL_JOYSTICK:
@@ -1558,12 +1486,12 @@ void meAcquireDataPointer(ME_CONTROL *ctrl)
 			{
 				case CTRL_JOYSTICK_BUTTON:
 				ctrl->Type = ME_CTRLTYPE_BUTTON;
-				ctrl->Data = &meJoystick[min(ctrl->Index, meJoystickCount-1)].rgbButtons[ctrl->Property];
+				ctrl->Data = &gJoyState[min(ctrl->Index, gJoystickCount-1)].rgbButtons[ctrl->Property];
 				return;
 
 				default:
 				ctrl->Type = ME_CTRLTYPE_AXIS;
-				ctrl->Data = &meJoystick[min(ctrl->Index, meJoystickCount-1)];
+				ctrl->Data = &gJoyState[min(ctrl->Index, gJoystickCount-1)];
 				float *tf = (float*)ctrl->Data;
 				tf += (ctrl->Object+(ctrl->Property));
 				ctrl->Data = tf;
@@ -1576,12 +1504,12 @@ void meAcquireDataPointer(ME_CONTROL *ctrl)
 			{
 				case CTRL_MOUSE_BUTTON:
 				ctrl->Type = ME_CTRLTYPE_BUTTON;
-				ctrl->Data = &meMouse[min(ctrl->Index, meMouseCount-1)].rgbButtons[ctrl->Property];
+				ctrl->Data = &gMouseState[min(ctrl->Index, gMouseCount-1)].rgbButtons[ctrl->Property];
 				return;
 
 				default:
 				ctrl->Type = ME_CTRLTYPE_AXIS;
-				ctrl->Data = &meMouse[min(ctrl->Index, meMouseCount-1)];
+				ctrl->Data = &gMouseState[min(ctrl->Index, gMouseCount-1)];
 				float *tf = (float*)ctrl->Data;
 				tf += (ctrl->Object+(ctrl->Property));
 				ctrl->Data = tf;
@@ -1597,66 +1525,3 @@ void meAcquireDataPointer(ME_CONTROL *ctrl)
 
 	meEnumerateString(ctrl, ctrl->Desc);
 }
-
-KEYPRESS::KEYPRESS()
-{
-	Key=NULL;
-	Pressed=false;
-	Control=NULL;
-}
-
-void KEYPRESS::SetControl(ME_CONTROL *control)
-{
-	Control=control;
-	Key=NULL;
-	Pointer=NULL;
-}
-
-void KEYPRESS::SetKey(DWORD key)
-{
-	Control=NULL;
-	Key=key;
-	Pointer=NULL;
-}
-
-void KEYPRESS::SetPointer(char *ptr)
-{
-	Control=NULL;
-	Key=NULL;
-	Pointer=ptr;
-}
-
-bool KEYPRESS::IsPressed()
-{
-	if(Key)
-	{
-		if(meKeys[0][Key] && !Pressed)
-		{
-			Pressed=true;
-			return true;
-		}
-		if(!meKeys[0][Key]) Pressed=false;
-	}
-	else if(Control)
-	{
-		if(meDigitalReading(Control) && !Pressed)
-		{
-			Pressed=true;
-			return true;
-		}
-		if(!meDigitalReading(Control)) Pressed=false;
-	}
-	else if(Pointer)
-	{
-		if((*Pointer) && !Pressed)
-		{
-			Pressed=true;
-			return true;
-		}
-		if(!(*Pointer)) Pressed=false;
-	}
-
-	return false;
-}
-
-

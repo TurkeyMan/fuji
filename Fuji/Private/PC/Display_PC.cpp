@@ -128,7 +128,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch(message)
 	{
 		case WM_ACTIVATE:
-			inAcquire(wParam != WA_INACTIVE);
+			Input_Acquire(wParam != WA_INACTIVE);
 
 			if(wParam != WA_INACTIVE)
 			{
@@ -173,11 +173,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				SetCursor(NULL);
 				return TRUE;
 			}*/
-			break;
-
-		case WM_CREATE:
-			inSetCooperativeLevels();
-			meSetScreenMouseRange((float)display.width-1, (float)display.height-1);
 			break;
 
 		case WM_MOVE:

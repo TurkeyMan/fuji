@@ -47,6 +47,9 @@
 #define CTRL_MOUSE_Z			2
 #define CTRL_MOUSE_BUTTON		3
 
+void Input_Acquire(bool acquire);
+
+
 class ME_CONTROL
 {
 public:
@@ -66,46 +69,9 @@ public:
 	~ME_CONTROL();
 };
 
-class KEYPRESS
-{
-public:
-	KEYPRESS();
-
-	void SetKey(DWORD key);
-	void SetControl(ME_CONTROL *control);
-	void SetPointer(char *ptr);
-	bool IsPressed();
-
-protected:
-	DWORD Key;
-	ME_CONTROL *Control;
-	char *Pointer;
-	bool Pressed;
-};
-
-int inInit();
-int inSetCooperativeLevels();
-void inKillIn();
-void inAcquire(bool acquire);
-
-void meProcessInput();
-void meUpdateKeyboard();
-void meUpdateMouse();
-void meUpdateJoystick();
-
-void meSetScreenMouseRange(float x,float y);
-void meSetScreenMouseSensitivity(float sens);
-
-int meGetKeyboardCount();
-int meGetMouseCount();
-int meGetJoystickCount();
-
 void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)());
 int meDigitalReading(ME_CONTROL *ctrl);
 int meAnalogReading(ME_CONTROL *ctrl);
-void meSetDigitalRatio(float ratio);
-void meSetAnalogRange(int Minimum, int Range);
-void meSetAnalogDeadZone(float DeadZone);
 
 void meEnumerateString(ME_CONTROL *ctrl, char *String);
 void meAcquireDataPointer(ME_CONTROL *ctrl);

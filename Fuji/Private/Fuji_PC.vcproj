@@ -125,6 +125,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath=".\Source\Animation.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
@@ -137,10 +140,31 @@
 				RelativePath=".\Source\Display.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\FileSystem.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Font.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Heap.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\IniFile.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Material.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Matrix.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Model.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\PtrList.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Shape.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Sprite.cpp">
@@ -152,15 +176,27 @@
 				RelativePath=".\Source\Texture.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\TileMap.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Util.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Vector.cpp">
 			</File>
+			<File
+				RelativePath=".\Source\View.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
+			<File
+				RelativePath=".\Include\Animation.h">
+			</File>
+			<File
+				RelativePath=".\Include\Array.h">
+			</File>
 			<File
 				RelativePath=".\Include\Callstack.h">
 			</File>
@@ -177,16 +213,40 @@
 				RelativePath=".\Include\Display.h">
 			</File>
 			<File
+				RelativePath=".\Include\FileSystem.h">
+			</File>
+			<File
 				RelativePath=".\Include\Font.h">
+			</File>
+			<File
+				RelativePath=".\Include\Heap.h">
+			</File>
+			<File
+				RelativePath=".\Include\IniFile.h">
 			</File>
 			<File
 				RelativePath=".\Include\Input.h">
 			</File>
 			<File
+				RelativePath=".\Include\Material.h">
+			</File>
+			<File
 				RelativePath=".\Include\Matrix.h">
 			</File>
 			<File
+				RelativePath=".\Include\Model.h">
+			</File>
+			<File
 				RelativePath=".\Include\Primitive.h">
+			</File>
+			<File
+				RelativePath=".\Include\PtrList.h">
+			</File>
+			<File
+				RelativePath=".\Include\Renderer.h">
+			</File>
+			<File
+				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">
@@ -196,6 +256,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Texture.h">
+			</File>
+			<File
+				RelativePath=".\Include\TileMap.h">
 			</File>
 			<File
 				RelativePath=".\Include\Timer.h">
@@ -209,6 +272,9 @@
 			<File
 				RelativePath=".\Include\Vector4.h">
 			</File>
+			<File
+				RelativePath=".\Include\View.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="PC"
@@ -217,10 +283,25 @@
 				RelativePath=".\Pc\Display_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Pc\FileSystem_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\Input_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Pc\Input_PC.h">
+			</File>
+			<File
+				RelativePath=".\Pc\Material_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\Primitive_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\Renderer_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\Renderer_PC.h">
 			</File>
 			<File
 				RelativePath=".\Pc\System_PC.cpp">
@@ -240,11 +321,53 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\FileSystem_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\Input_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\Material_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -258,6 +381,42 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\Renderer_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\Renderer_XB.h">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\System_XB.cpp">
@@ -267,11 +426,23 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\Timer_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>

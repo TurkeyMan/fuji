@@ -41,6 +41,23 @@ enum InputType
 	Axis_RY
 };
 
+enum InputEvent
+{
+	IE_Unknown = -1,
+	IE_None = 0,
+
+	IE_KeyDown,
+	IE_KeyUp,
+
+	IE_MouseKeyDown,
+	IE_MouseKeyUp,
+
+	IE_JoyButtonDown,
+	IE_JoyButtonUp,
+};
+
+typedef void (*EventFunc)(uint32 event, uint32 data, uint32 timestamp);
+
 void Input_InitModule();
 void Input_DeinitModule();
 void Input_Update();
@@ -49,4 +66,29 @@ float Input_ReadGamepad(int controlID, uint32 type);
 bool Input_WasPressed(int controlID, uint32 type);
 
 bool Input_IsConnected(int controlID);
+
+void SetGamepadEventHandler(EventFunc pEventFunc);
+
+int Input_GetNumKeyboards();
+bool Input_ReadKeyboard(int keyboardID, uint32 key);
+bool Input_WasKeyPressed(int keyboardID, uint32 type);
+
+void SetKeyboardEventHandler(EventFunc pEventFunc);
+
+enum MouseMode
+{
+	MM_Absolute,
+	MM_Incremental
+};
+
+int Input_GetNumPointers();
+
+bool Input_ReadMouseKey(int mouseID, uint32 key);
+bool Input_WasMousePressed(int mouseID, uint32 type);
+
+void SetMouseEventHandler(EventFunc pEventFunc);
+
+void SetMouseMode(uint32 mouseMode = MM_Absolute);
+Vector3 Input_ReadMousePos(int mouseID, uint32 key);
+
 #endif
