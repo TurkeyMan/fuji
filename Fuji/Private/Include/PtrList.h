@@ -1,7 +1,7 @@
 #if !defined(_PTRLIST_H)
 #define _PTRLIST_H
 
-void *gEmptyPtrListDL[2];
+extern void *gEmptyPtrListDL[2];
 
 template<class T>
 class PtrList
