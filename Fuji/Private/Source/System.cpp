@@ -90,10 +90,10 @@ void System_Update()
 	Input_Update();
 
 #if defined(_XBOX)
-	if(Input_ReadGamepad(0, Button_Start) && Input_ReadGamepad(0, Button_White) && Input_ReadGamepad(0, Button_LTrig) && Input_ReadGamepad(0, Button_RTrig))
+	if(Input_ReadGamepad(0, Button_XB_Start) && Input_ReadGamepad(0, Button_XB_White) && Input_ReadGamepad(0, Button_XB_LTrig) && Input_ReadGamepad(0, Button_XB_RTrig))
 		RestartCallback(NULL, NULL);
 #elif defined(_WINDOWS)
-	if(Input_ReadGamepad(0, Button_Start) && Input_ReadGamepad(0, Button_Select) && Input_ReadGamepad(0, Button_L1) && Input_ReadGamepad(0, Button_R1) && Input_ReadGamepad(0, Button_L2) && Input_ReadGamepad(0, Button_R2))
+	if(Input_ReadGamepad(0, Button_P2_Start) && Input_ReadGamepad(0, Button_P2_Select) && Input_ReadGamepad(0, Button_P2_L1) && Input_ReadGamepad(0, Button_P2_R1) && Input_ReadGamepad(0, Button_P2_L2) && Input_ReadGamepad(0, Button_P2_R2))
 		RestartCallback(NULL, NULL);
 #endif
 

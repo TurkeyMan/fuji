@@ -73,13 +73,13 @@ bool DebugMenu_IsEnabled()
 
 void DebugMenu_Update()
 {
-	if(!buttonsDown && Input_ReadGamepad(0, Button_LThumb) && Input_ReadGamepad(0, Button_RThumb))
+	if(!buttonsDown && Input_ReadGamepad(0, Button_XB_LThumb) && Input_ReadGamepad(0, Button_XB_RThumb))
 	{
 		debugMenuEnabled = !debugMenuEnabled;
 		buttonsDown = true;
 	}
 
-	if(buttonsDown && (!Input_ReadGamepad(0, Button_LThumb) || !Input_ReadGamepad(0, Button_RThumb)))
+	if(buttonsDown && (!Input_ReadGamepad(0, Button_XB_LThumb) || !Input_ReadGamepad(0, Button_XB_RThumb)))
 	{
 		buttonsDown = false;
 	}
@@ -90,7 +90,7 @@ void DebugMenu_Update()
 
 void DebugMenu_Draw()
 {
-	if(Input_ReadGamepad(0, Button_RTrig)) return;
+	if(Input_ReadGamepad(0, Button_XB_RTrig)) return;
 
 	bool o = View::GetCurrent()->SetOrtho(true);
 
@@ -232,7 +232,7 @@ void MenuObject::Draw()
 void MenuObject::Update()
 {
 	// allow back to parent
-	if(Input_WasPressed(0, Button_Y))
+	if(Input_WasPressed(0, Button_XB_Y))
 		pCurrentMenu = pParent;
 }
 
@@ -256,7 +256,7 @@ void Menu::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_A))
+		if(Input_WasPressed(0, Button_XB_A))
 			pCurrentMenu = this;
 	}
 }
@@ -378,7 +378,7 @@ void Menu::Update()
 	if(Input_WasPressed(0, Button_DDown))
 		selection = selection < numChildren-1 ? selection+1 : 0;
 
-	if(Input_WasPressed(0, Button_Y) && pParent)
+	if(Input_WasPressed(0, Button_XB_Y) && pParent)
 		pCurrentMenu = pParent;
 
 	for(int a=0; a<numChildren; a++)
@@ -402,7 +402,7 @@ float MenuItemStatic::ListDraw(bool selected, const Vector3 &pos, float maxWidth
 void MenuItemStatic::ListUpdate(bool selected)
 {
 	if(selected)
-		if(pCallback && Input_WasPressed(0, Button_A))
+		if(pCallback && Input_WasPressed(0, Button_XB_A))
 			pCallback(this, pUserData);
 }
 
@@ -424,8 +424,8 @@ void MenuItemInt::ListUpdate(bool selected)
 	{
 		int t = *pData;
 
-		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_X)) *pData = 0;
+		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_XB_X)) *pData = 0;
 
 		if(Input_WasPressed(0, Button_DLeft))
 		{
@@ -463,8 +463,8 @@ void MenuItemFloat::ListUpdate(bool selected)
 		float t = *pData;
 		float input;
 
-		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_X)) *pData = 0.0f;
+		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_XB_X)) *pData = 0.0f;
 
 		if(Input_WasPressed(0, Button_DLeft))
 		{
@@ -505,7 +505,7 @@ void MenuItemBool::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_DLeft) || Input_WasPressed(0, Button_DRight) || Input_WasPressed(0, Button_A))
+		if(Input_WasPressed(0, Button_DLeft) || Input_WasPressed(0, Button_DRight) || Input_WasPressed(0, Button_XB_A))
 		{
 			data = !data;
 
@@ -569,7 +569,7 @@ void MenuItemColour::Draw()
 
 void MenuItemColour::Update()
 {
-	if(Input_WasPressed(0, Button_Y)) pCurrentMenu = pParent;
+	if(Input_WasPressed(0, Button_XB_Y)) pCurrentMenu = pParent;
 }
 
 float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
@@ -607,7 +607,7 @@ void MenuItemColour::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_A))
+		if(Input_WasPressed(0, Button_XB_A))
 			pCurrentMenu = this;
 
 		if(Input_WasPressed(0, Button_DLeft))
@@ -650,8 +650,8 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 		Vector3 t = *pData;
 		float input;
 
-		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
+		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_XB_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
 
 		if((input=Input_ReadGamepad(0, Axis_RX)))
 		{

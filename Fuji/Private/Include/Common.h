@@ -21,7 +21,7 @@
 //#define _FUJI_SSE
 #endif
 
-// if SSE optimisations enabled, include SSE intrinsics header
+// if SSE optimisations are enabled, include SSE intrinsics header
 #if defined(_FUJI_SSE)
 #include "xmmintrin.h"
 #endif
@@ -60,7 +60,7 @@ typedef char				int8;
 	#define _CALLSTACK_PROFILING
 
 	#if defined(_CALLSTACK_PROFILING) && !defined(_DEBUG)
-		#define _CALLSTACK_MONITORING
+//		#define _CALLSTACK_MONITORING
 	#endif
 #endif
 
@@ -76,10 +76,6 @@ typedef char				int8;
 
 #if !defined(_FUJI_UTIL)
 	#include "Callstack.h"
-#endif
-
-
-#if !defined(_FUJI_UTIL)
 	#include "Heap.h"
 #endif
 

@@ -14,12 +14,13 @@ enum CustomDataType
 
 enum VertexFormat
 {
-	VF_Position = 1,
-	VF_Normal = 2,
-	VF_Colour = 4,
-	VF_Tex0 = 8,
-	VF_Tex1 = 16,
-	VF_Illum = 32
+	VF_Position = (1<<0),
+	VF_Colour	= (1<<1),
+	VF_Normal	= (1<<2),
+	VF_Illum	= (1<<3),
+	VF_Tengent	= (1<<4),
+
+	VF_TexMask	= (15<<12)
 };
 
 class ModelData
@@ -65,7 +66,7 @@ public:
 	struct CustomData
 	{
 		uint16 customDataType;
-		uint16 ustomDataCount;
+		uint16 count;
 		void *pData;
 		uint32 res;
 		uint32 res2;

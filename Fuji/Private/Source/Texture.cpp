@@ -104,7 +104,7 @@ void TextureBrowser::Draw()
 
 void TextureBrowser::Update()
 {
-	if(Input_WasPressed(0, Button_Y))
+	if(Input_WasPressed(0, Button_XB_Y))
 		pCurrentMenu = pParent;
 }
 

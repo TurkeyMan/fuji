@@ -133,26 +133,26 @@ float Input_ReadGamepad(int controlID, uint32 type)
 
 	switch(type)
 	{
-		case Button_A:
-		case Button_B:
-		case Button_X:
-		case Button_Y:
-		case Button_Black:
-		case Button_White:
-		case Button_LTrig:
-		case Button_RTrig:
+		case Button_XB_A:
+		case Button_XB_B:
+		case Button_XB_X:
+		case Button_XB_Y:
+		case Button_XB_Black:
+		case Button_XB_White:
+		case Button_XB_LTrig:
+		case Button_XB_RTrig:
 			return ((inputState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK) ? (float)inputState[controlID].Gamepad.bAnalogButtons[type] : 0.0f) / 255.0f;
 
-		case Button_Start:
+		case Button_XB_Start:
 			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
 
-		case Button_Back:
+		case Button_XB_Back:
 			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
 
-		case Button_LThumb:
+		case Button_XB_LThumb:
 			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
 
-		case Button_RThumb:
+		case Button_XB_RThumb:
 			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
 
 		case Button_DUp:
@@ -210,26 +210,26 @@ bool Input_WasPressed(int controlID, uint32 type)
 
 	switch(type)
 	{
-		case Button_A:
-		case Button_B:
-		case Button_X:
-		case Button_Y:
-		case Button_Black:
-		case Button_White:
-		case Button_LTrig:
-		case Button_RTrig:
+		case Button_XB_A:
+		case Button_XB_B:
+		case Button_XB_X:
+		case Button_XB_Y:
+		case Button_XB_Black:
+		case Button_XB_White:
+		case Button_XB_LTrig:
+		case Button_XB_RTrig:
 			return inputState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK && !(prevState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK);
 
-		case Button_Start:
+		case Button_XB_Start:
 			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START);
 
-		case Button_Back:
+		case Button_XB_Back:
 			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK);
 
-		case Button_LThumb:
+		case Button_XB_LThumb:
 			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB);
 
-		case Button_RThumb:
+		case Button_XB_RThumb:
 			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB);
 
 		case Button_DUp:

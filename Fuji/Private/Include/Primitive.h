@@ -23,7 +23,6 @@ enum PrimType
 void Primitive_InitModule();
 void Primitive_DeinitModule();
 
-
 void MFPrimitive(uint32 primType, uint32 hint = NULL);
 void MFBegin(uint32 vertexCount);
 

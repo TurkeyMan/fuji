@@ -3,33 +3,42 @@
 
 enum InputType
 {
-	Button_A		= 0,
-	Button_Cross	= 0,
-	Button_B		= 1,
-	Button_Circle	= 1,
-	Button_X		= 2,
-	Button_Box		= 2,
-	Button_Y		= 3,
-	Button_Triangle	= 3,
+// xbox controller enums
+	Button_XB_A			= 0,
+	Button_XB_B			= 1,
+	Button_XB_X			= 2,
+	Button_XB_Y			= 3,
 
-	Button_Black	= 4,
-	Button_R2		= 4,
-	Button_White	= 5,
-	Button_L2		= 5,
+	Button_XB_Black		= 4,
+	Button_XB_White		= 5,
 
-	Button_LTrig	= 6,
-	Button_L1		= 6,
-	Button_RTrig	= 7,
-	Button_R1		= 7,
+	Button_XB_LTrig		= 6,
+	Button_XB_RTrig		= 7,
 
-	Button_Start	= 8,
+	Button_XB_Start		= 8,
+	Button_XB_Back		= 9,
 
-	Button_Back		= 9,
-	Button_Select	= 9,
+	Button_XB_LThumb	= 10,
+	Button_XB_RThumb	= 11,
 
-	Button_LThumb	= 10,
-	Button_RThumb	= 11,
+// PSX controller enums
+	Button_P2_Cross		= 0,
+	Button_P2_Circle	= 1,
+	Button_P2_Box		= 2,
+	Button_P2_Triangle	= 3,
 
+	Button_P2_L1		= 6,
+	Button_P2_R1		= 7,
+	Button_P2_R2		= 4,
+	Button_P2_L2		= 5,
+
+	Button_P2_Start		= 8,
+	Button_P2_Select	= 9,
+
+	Button_P2_LThumb	= 10,
+	Button_P2_RThumb	= 11,
+
+// general controller enums
 	Button_DUp,
 	Button_DDown,
 	Button_DLeft,
