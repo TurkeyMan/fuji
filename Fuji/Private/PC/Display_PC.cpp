@@ -19,68 +19,40 @@ int wndX = 0, wndY = 0;
 
 bool initialised = false;
 
-char *resStrings[] = { "320x240", "400x300", "640x480", "800x600", "1024x768", "1152x864", "720p", "1280x960", "1280x1024", "1600x1200", "1080p", "1920x1440", NULL };
-MenuItemIntString resSelect(resStrings, 2);
+// i will dynamically construct a list later from supported resolution
+// provided by directx, verified by the monitor driver
+const int resList[][2] = { {320, 240}, {400, 300}, {640, 480}, {800, 600}, {1024, 768}, {1152, 864}, {1280, 720}, {1280, 1024}, {1600, 1200}, {1920, 1080}, {1920, 1440} };
+const int numModes = sizeof(resList) / (sizeof(int)*2);
 
+// debug menu resolution setting
+char pCurrentRes[16] = "####x####";
+char *resStrings[] = { "-", pCurrentRes, "+", NULL };
+
+MenuItemIntString resSelect(resStrings, 1);
+
+int currentMode = 2;
+
+// resolution change callback
 void ChangeResCallback(MenuObject *pMenu, void *pData)
 {
 	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
 
-	display.wide = false;
-
-	switch(pRes->data)
+	if(pRes->data == 0)
 	{
-		case 0:
-			display.fullscreenWidth = 320;
-			display.fullscreenHeight = 240;
-			break;
-		case 1:
-			display.fullscreenWidth = 400;
-			display.fullscreenHeight = 300;
-			break;
-		case 2:
-			display.fullscreenWidth = 640;
-			display.fullscreenHeight = 480;
-			break;
-		case 3:
-			display.fullscreenWidth = 800;
-			display.fullscreenHeight = 600;
-			break;
-		case 4:
-			display.fullscreenWidth = 1024;
-			display.fullscreenHeight = 768;
-			break;
-		case 5:
-			display.fullscreenWidth = 1152;
-			display.fullscreenHeight = 864;
-			break;
-		case 6:
-			display.fullscreenWidth = 1280;
-			display.fullscreenHeight = 720;
-			display.wide = true;
-			break;
-		case 7:
-			display.fullscreenWidth = 1280;
-			display.fullscreenHeight = 960;
-			break;
-		case 8:
-			display.fullscreenWidth = 1280;
-			display.fullscreenHeight = 1024;
-			break;
-		case 9:
-			display.fullscreenWidth = 1600;
-			display.fullscreenHeight = 1200;
-			break;
-		case 10:
-			display.fullscreenWidth = 1920;
-			display.fullscreenHeight = 1080;
-			display.wide = true;
-			break;
-		case 11:
-			display.fullscreenWidth = 1920;
-			display.fullscreenHeight = 1440;
-			break;
+		currentMode = (currentMode == 0) ? numModes-1 : currentMode-1;
 	}
+	else if(pRes->data == 2)
+	{
+		currentMode = (currentMode == numModes-1) ? 0 : currentMode+1;
+	}
+
+	display.fullscreenWidth = resList[currentMode][0];
+	display.fullscreenHeight = resList[currentMode][1];
+
+	sprintf(resStrings[1], "%dx%d", display.fullscreenWidth, display.fullscreenHeight);
+	pRes->data = 1;
+
+	display.wide = false;
 
 	display.width = display.fullscreenWidth;
 	display.height = display.fullscreenHeight;
@@ -97,6 +69,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	}
 }
 
+// windows WndProc
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	CALLSTACK;
@@ -349,6 +322,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	initialised = true;
 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
+	sprintf(resStrings[1], "%dx%d", resList[currentMode][0], resList[currentMode][1]);
 
 	return 0;
 }
