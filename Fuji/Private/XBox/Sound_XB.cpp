@@ -175,6 +175,8 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 	// load vorbis file
 	track.pVorbisBuffer = File_Load(pFilename, &track.size);
+	if(!track.pVorbisBuffer) return -1;
+
 	track.offset = 0;
 
 	// setup vorbis read callbacks
