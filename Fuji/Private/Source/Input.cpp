@@ -39,6 +39,8 @@ void Input_Update()
 {
 	int a, b;
 
+	Input_UpdatePlatformSpecific();
+
 	for(a=0; a<IDD_Max; a++)
 	{
 		for(b=0; b<Input_MaxInputID; b++)
@@ -98,7 +100,17 @@ float Input_Read(int source, int sourceID, int type)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	DBGASSERT(deviceStatus[source][sourceID].status == IDS_Ready, STR("Device not ready for reading input: Device %d, ID %d", source, sourceID))
+	if(sourceID == -1)
+	{
+		float value = 0.0f;
+
+		for(int a=0; a<Input_MaxInputID && !value; a++)
+		{
+			value = Input_Read(source, a, type);
+		}
+
+		return value;
+	}
 
 	switch(source)
 	{
@@ -127,7 +139,17 @@ bool Input_WasPressed(int source, int sourceID, int type)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	DBGASSERT(deviceStatus[source][sourceID].status == IDS_Ready, STR("Device not ready for reading input: Device %d, ID %d", source, sourceID))
+	if(sourceID == -1)
+	{
+		bool value = false;
+
+		for(int a=0; a<Input_MaxInputID && !value; a++)
+		{
+			value = Input_WasPressed(source, a, type);
+		}
+
+		return value;
+	}
 
 	switch(source)
 	{
@@ -156,7 +178,17 @@ bool Input_WasReleased(int source, int sourceID, int type)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	DBGASSERT(deviceStatus[source][sourceID].status == IDS_Ready, STR("Device not ready for reading input: Device %d, ID %d", source, sourceID))
+	if(sourceID == -1)
+	{
+		bool value = false;
+
+		for(int a=0; a<Input_MaxInputID && !value; a++)
+		{
+			value = Input_WasReleased(source, a, type);
+		}
+
+		return value;
+	}
 
 	switch(source)
 	{
