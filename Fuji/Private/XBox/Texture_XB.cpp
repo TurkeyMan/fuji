@@ -66,6 +66,8 @@ void Texture::Release()
 
 void Texture::SetTexture(int texUnit)
 {
+	DBGASSERT(this, "Texture Not Loaded.");
+
 	pd3dDevice->SetTexture(texUnit, texture);
 
 #if defined(_XBOX)
