@@ -99,7 +99,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
+				GlobalOptimizations="FALSE"
 				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="FALSE"
+				FavorSizeOrSpeed="0"
+				OptimizeForProcessor="0"
+				OptimizeForWindowsApplication="FALSE"
 				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB"
 				StringPooling="TRUE"
@@ -429,9 +434,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Source\TileMap.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Util.cpp">
 			</File>
 			<File
@@ -488,9 +490,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Texture.h">
-			</File>
-			<File
-				RelativePath=".\Include\TileMap.h">
 			</File>
 			<File
 				RelativePath=".\Include\Timer.h">
