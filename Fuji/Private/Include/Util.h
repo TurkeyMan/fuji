@@ -14,6 +14,8 @@ class Vector3;
 // triggers a debug BREAKPOINT
 #if defined(_WINDOWS) || defined(_XBOX)
 	#define BREAKPOINT { __asm { int 3 }; }
+#elif defined(_LINUX)
+	#define BREAKPOINT { asm("int $3"); }
 #else
 	#define BREAKPOINT
 

@@ -30,9 +30,10 @@ void Display_FreeModes();
 void Display_ResetDisplay();
 
 
-
 bool Display_GetModes(Resolution **_modes, char ***_modeStrings, bool fullscreen)
 {
+	CALLSTACK;
+	
 	SDL_Rect **rects;
 	uint32 flags = SDL_OPENGL;
 	uint32 numModes = 0;
@@ -49,15 +50,20 @@ bool Display_GetModes(Resolution **_modes, char ***_modeStrings, bool fullscreen
 	if(rects == (SDL_Rect **)-1) { /* Resolution is unrestricted, use the defaults */
 		modes = defaultModes;
 	
-		for(int i = 0; modes[i].width != 0; ++i) {
+		for(uint32 i = 0; modes[i].width != 0; ++i) {
 			++numModes;
 		}
 	} else {
-		for(int i = 0; rects[i] != NULL; ++i) {
+		for(uint32 i = 0; rects[i] != NULL; ++i) {
 			++numModes;
 		}
 	
 		modes = (Resolution *)Heap_Alloc(sizeof(Resolution) * (numModes + 1));
+		for(uint32 i = 0; i < numModes; i++) {
+			modes[i].width = rects[i]->w;
+			modes[i].height = rects[i]->h;
+		}
+		
 		modes[numModes].width = 0;
 		modes[numModes].height = 0;
 	}
@@ -77,10 +83,7 @@ bool Display_GetModes(Resolution **_modes, char ***_modeStrings, bool fullscreen
 	for(uint32 i = 0; i < numModes; ++i) {
 		uint32 amountWritten;
 
-		modes[i].width = rects[i]->w;
-		modes[i].height = rects[i]->h;
-
-		amountWritten = snprintf(p, 14, "%dx%d", rects[i]->w, rects[i]->h);
+		amountWritten = snprintf(p, 14, "%dx%d", modes[i].width, modes[i].height);
 		++amountWritten; // It doesn't include the \0 in this
 
 		// It returns the amount that _would_ have been written if it truncates
@@ -100,6 +103,8 @@ bool Display_GetModes(Resolution **_modes, char ***_modeStrings, bool fullscreen
 
 void Display_FreeModes()
 {
+	CALLSTACK;
+	
 	if(modes != NULL) {
 		if(modes != defaultModes) {
 			Heap_Free(modes);
@@ -158,7 +163,14 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 		fprintf(stderr, "Unable to create display\n");
 		return(1);
 	}
-	
+
+#if !defined(_DEBUG) // Really messes with the debugger
+	SDL_WM_GrabInput(SDL_GRAB_ON); // FIXME: Should provide a way to ungrab the input, a menu item perhaps?
+	SDL_ShowCursor(SDL_DISABLE);
+#endif
+
+	SDL_WM_SetCaption("Fuji Window", NULL);
+
 	Display_GetModes(NULL, NULL, !display.windowed);
 
 
@@ -177,7 +189,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
+	glEnable(GL_TEXTURE_2D);
+	
 	/* OpenGL uses a right handed coordinate system by default, yuck */
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

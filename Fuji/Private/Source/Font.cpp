@@ -15,7 +15,11 @@ void Font_InitModule()
 {
 	CALLSTACK;
 
+#if defined(_WIN32)
 	debugFont.LoadFont(File_SystemPath("Font\\Arial"));
+#else
+	debugFont.LoadFont(File_SystemPath("Font/Arial"));
+#endif
 }
 
 void Font_DeinitModule()

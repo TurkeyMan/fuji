@@ -13,9 +13,11 @@
 #endif
 
 #if defined(_LINUX)
-	#include <SDL/SDL.h>
+	#define GL_GLEXT_PROTOTYPES
 	#include <GL/gl.h>
+	#include <GL/glext.h>
 	#include <GL/glu.h>
+	#include <SDL/SDL.h>
 	#include <stdarg.h> // For varargs
 #endif
 

@@ -39,6 +39,8 @@ char* File_SystemPath(const char *filename)
 	return STR("D:\\Data\\%s", filename);
 #elif defined(_WINDOWS)
 	return STR("Data\\%s", filename);
+#elif defined(_LINUX)
+	return STR("Data/%s", filename);
 #else
 	return STR("%s", filename);
 #endif

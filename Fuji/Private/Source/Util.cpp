@@ -147,6 +147,32 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 		ExitProcess(0);
 	}
 }
+#elif defined(_LINUX)
+void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+{
+	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
+	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+
+	// build callstack log string for message box
+#if !defined(_RETAIL)
+	Callstack_Log();
+
+	char callstack[2048] = "";
+
+	for(int a=Callstack.size()-1; a>=0; a--)
+	{
+		char *pTemp = STR("  %-32s\n",Callstack[a]);
+//		char *pTemp = STR("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
+		if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
+		strcat(callstack, pTemp);
+	}
+
+#else
+	char callstack[] = "Not available in _RETAIL builds";
+#endif
+
+	LOGD(callstack);
+}
 #endif
 
 void hardAssert(const char *pReason, const char *pMessage, const char *pFile, int line)

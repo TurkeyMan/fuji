@@ -58,6 +58,8 @@ void Game_Deinit();
 
 #if defined(_WINDOWS)
 	void DoMessageLoop();
+#elif defined(_LINUX)
+	void CheckEvents();
 #endif
 
 #if defined(_LINUX)

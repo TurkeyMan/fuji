@@ -30,6 +30,8 @@ public:
 #elif defined(_WINDOWS)
 	IDirect3DTexture9 *texture;
 	D3DFORMAT format;
+#elif defined(_LINUX)
+	GLuint textureID;
 #else
 	// nothing
 #endif

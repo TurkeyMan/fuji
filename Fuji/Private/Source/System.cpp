@@ -175,6 +175,8 @@ int System_GameLoop()
 		{
 	#if defined(_WINDOWS)
 			DoMessageLoop();
+	#elif defined(_LINUX)
+			CheckEvents();
 	#endif
 			Callstack_BeginFrame();
 			System_UpdateTimeDelta();
