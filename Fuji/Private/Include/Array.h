@@ -14,7 +14,7 @@ public:
 
 	inline Array(int _count)
 	{
-		pData = (T*)realloc(pData, sizeof(T) * _count);
+		pData = (T*)malloc(sizeof(T) * _count);
 		allocated = count = _count;
 	}
 

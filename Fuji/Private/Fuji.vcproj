@@ -603,6 +603,9 @@
 			<File
 				RelativePath=".\Source\Vector.cpp">
 			</File>
+			<File
+				RelativePath=".\Source\View.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -681,6 +684,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Vector4.h">
+			</File>
+			<File
+				RelativePath=".\Include\View.h">
 			</File>
 		</Filter>
 		<Filter
@@ -863,6 +869,23 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="VertexShader"
+				Filter="">
+				<File
+					RelativePath=".\XBox\VertexShaders\Model_LS.vsh">
+				</File>
+				<File
+					RelativePath=".\XBox\VertexShaders\Model_S.vsh">
+				</File>
+				<File
+					RelativePath=".\XBox\VertexShaders\ModelRenderer.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="PixelShader"
+				Filter="">
+			</Filter>
 		</Filter>
 		<Filter
 			Name="PC"

@@ -2,6 +2,9 @@
 #include "Display.h"
 #include "DebugMenu.h"
 #include "Input_PC.h"
+#include "View.h"
+
+void Display_ResetDisplay();
 
 IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -11,6 +14,9 @@ float fieldOfView;
 
 extern HINSTANCE apphInstance;
 HWND apphWnd;
+int wndX = 0, wndY = 0;
+
+bool initialised = false;
 
 void Display_InitModule()
 {
@@ -19,17 +25,21 @@ void Display_InitModule()
 	int error;
 
 	// create the display
-	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
+	error = Display_CreateDisplay(640, 480, 32, 60, true, false, false, false);
 	if(error) return;
 
 	DebugMenu_AddMenu("Display Options", "Fuji Options");
+
+	View::defaultView.view.SetIdentity();
+	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
+	View::UseDefault();
 }
 
 void Display_DeinitModule()
 {
 	CALLSTACK("Display_DeinitModule");
 
-	DestroyDisplay();
+	Display_DestroyDisplay();
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -39,15 +49,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch(message)
 	{
 		case WM_ACTIVATE:
-			inAcquire(wParam != 0);
+			inAcquire(wParam != WA_INACTIVE);
+
+			if(wParam != WA_INACTIVE)
+			{
+				if(!display.windowed)
+				{
+					Display_ResetDisplay();
+				}
+			}
+			else
+			{
+			}
 			break;
 
 		case WM_SYSCOMMAND:
 		{
 			switch (wParam)
 			{
-				case SC_SCREENSAVE:
 				case SC_KEYMENU:
+					if(initialised && lParam == VK_RETURN)
+					{
+						display.windowed = !display.windowed;
+						Display_ResetDisplay();
+
+						if(display.windowed)
+						{
+							int xframe = GetSystemMetrics(SM_CXFRAME)*2;
+							int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
+							MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, false);
+						}
+					}
+
+				case SC_SCREENSAVE:
 				case SC_MONITORPOWER:
 				return 0;
 			}
@@ -65,6 +99,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_CREATE:
 			inSetCooperativeLevels();
 			meSetScreenMouseRange((float)display.width-1, (float)display.height-1);
+			break;
+
+		case WM_MOVE:
+			if(initialised && display.windowed)
+			{
+				wndX = LOWORD(lParam);
+				wndY = LOWORD(lParam);
+			}
+			break;
+
+		case WM_SIZE:
+			if(initialised && display.windowed && wParam != SIZE_MINIMIZED)
+			{
+				RECT r, cr;
+				GetWindowRect(apphWnd, &r);
+				GetClientRect(apphWnd, &cr);
+
+				wndX = r.left;
+				wndY = r.top;
+
+				display.width = cr.right - cr.left;
+				display.height = cr.bottom - cr.top;
+				Display_ResetDisplay();
+			}
 			break;
 
 		case WM_CLOSE:
@@ -92,15 +150,17 @@ void Display_DestroyWindow()
 	apphWnd = NULL;
 }
 
-int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
+int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
 	CALLSTACK("CreateDisplay");
 
-	display.width = width;
-	display.height = height;
+	display.fullscreenWidth = display.width = width;
+	display.fullscreenHeight = display.height = height;
 	display.refreshRate = rate;
 	display.colourDepth = 32;
 	display.windowed = true;
+	display.wide = false;
+	display.progressive = true;
 
 	WNDCLASS wc;
 
@@ -130,7 +190,7 @@ int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool tri
 	int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 	int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
 
-	if(!(apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, 0, 0, display.width + xframe, display.height + yframe, NULL, NULL, apphInstance, NULL)))
+	if(!(apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, display.width + xframe, display.height + yframe, NULL, NULL, apphInstance, NULL)))
 	{
 		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
 		return 3;
@@ -236,10 +296,61 @@ int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool tri
 	hr = d3d8->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentparams, &pd3dDevice);
 	if(hr != D3D_OK) return 2;
 */
+	initialised = true;
+
 	return 0;
 }
 
-void DestroyDisplay()
+void Display_ResetDisplay()
+{
+	D3DFORMAT PixelFormat;
+
+	D3DPRESENT_PARAMETERS present;
+	ZeroMemory(&present, sizeof(present));
+
+	if(!display.windowed)
+	{
+		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
+		present.Windowed						= FALSE;
+		present.BackBufferFormat				= (display.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth					= display.fullscreenWidth;
+		present.BackBufferHeight				= display.fullscreenHeight;
+		present.BackBufferCount					= 1;
+		present.EnableAutoDepthStencil			= TRUE;
+		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
+//		present.AutoDepthStencilFormat			= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
+		present.PresentationInterval			= D3DPRESENT_INTERVAL_ONE;
+//		present.PresentationInterval			= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+		present.hDeviceWindow					= apphWnd;
+
+		PixelFormat = present.BackBufferFormat;
+	}
+	else
+	{
+		D3DDISPLAYMODE d3ddm;
+		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+		present.SwapEffect              = D3DSWAPEFFECT_COPY;
+		present.Windowed                = TRUE;
+		present.BackBufferFormat        = d3ddm.Format;
+		present.BackBufferWidth			= display.width;
+		present.BackBufferHeight		= display.height;
+		present.BackBufferCount			= 1;
+		present.EnableAutoDepthStencil	= TRUE;
+		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
+		present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
+//		present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+//		present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+		present.hDeviceWindow			= apphWnd;
+
+		PixelFormat = d3ddm.Format;
+	}
+
+	pd3dDevice->Reset(&present);
+}
+
+void Display_DestroyDisplay()
 {
 	CALLSTACK("DestroyDisplay");
 

@@ -8,33 +8,32 @@
 enum RederTypeFlags
 {
 	// Material Flags
-	RT_Lit					= 0x00000001,	// L
-	RT_AlphaBlend			= 0x00000002,	// Al
-	RT_Additive				= 0x00000004,	// A
-	RT_Subtractive			= 0x00000006,	// S
+	RT_Lit					= 0x00000001,
+	RT_AlphaBlend			= 0x00000002,
+	RT_Additive				= 0x00000004,
+	RT_Subtractive			= 0x00000006,
 	RT_BlendMask			= 0x00000006,
 
-	RT_Omni					= 0x00000010,	// O
-	RT_Mask					= 0x00000020,	// M
+	RT_Omni					= 0x00000070,
+	RT_Mask					= 0x00000080,
 
-	RT_DoubleSided			= 0x00000040,	// Ds
+	RT_DoubleSided			= 0x00000100,
 
 	// Vertex Flags
-	RT_Weighted				= 0x00000700,	// W (Up to 8 bone influence)
-	RT_Tween				= 0x00000800,	// T
+	RT_Animated				= 0x00000700,	// (Up to 8 bone influence)
+	RT_Tween				= 0x00000800,
 
 	// Renderer Flags
-	RT_PerPixelLighting		= 0x00010000,	// P
-	RT_CelShading			= 0x00020000,	// C
-	RT_BumpMap				= 0x00040000,	// B
-	RT_NormalMap			= 0x00080000,	// N
-	RT_DetailTexture		= 0x00100000,	// D
-	RT_CubeEnvMap			= 0x00200000,	// Ec
-	RT_SphereEnvMap			= 0x00400000,	// E
-	RT_ScreenEnvMap			= 0x00800000,	// Es
-	RT_DiffuseMap2			= 0x01000000,	// D2
-	RT_LightMap				= 0x02000000,	// Lm
-	RT_Untextured			= 0x04000000,	// U
+	RT_PerPixelLighting		= 0x00010000,
+	RT_CelShading			= 0x00020000,
+	RT_BumpMap				= 0x00040000,
+	RT_NormalMap			= 0x00080000,
+	RT_DetailTexture		= 0x00100000,
+	RT_CubeEnvMap			= 0x00200000,
+	RT_SphereEnvMap			= 0x00400000,
+	RT_ScreenEnvMap			= 0x00800000,
+	RT_DiffuseMap2			= 0x01000000,
+	RT_LightMap				= 0x02000000,
 };
 
 enum MaterialFlags
@@ -45,24 +44,28 @@ enum MaterialFlags
 	MF_Additive				= 0x00000004,	// A
 	MF_Subtractive			= 0x00000006,	// S
 	MF_BlendMask			= 0x00000006,
+	MF_Specular				= 0x00000008,
 
-	MF_Omni					= 0x00000010,	// O
 	MF_Mask					= 0x00000020,	// M
 
 	MF_DoubleSided			= 0x00000040,	// Ds
 
 	// Renderer Flags
-	MF_PerPixelLighting		= 0x00010000,	// P
+	MF_DisplacementMap		= 0x00000000,	// D
+
+	MF_LitPerPixel			= 0x00010000,	// P
 	MF_CelShading			= 0x00020000,	// C
-	MF_BumpMap				= 0x00040000,	// B
-	MF_NormalMap			= 0x00080000,	// N
-	MF_DetailTexture		= 0x00100000,	// D
-	MF_CubeEnvMap			= 0x00200000,	// Ec
-	MF_SphereEnvMap			= 0x00400000,	// E
-	MF_ScreenEnvMap			= 0x00800000,	// Es
-	MF_DiffuseMap2			= 0x01000000,	// D2
-	MF_LightMap				= 0x02000000,	// Lm
-	MF_Untextured			= 0x04000000,	// U
+	MF_DiffuseMap			= 0x00080000,	// D
+	MF_DiffuseMap2			= 0x00100000,	// D2
+	MF_SphereEnvMap			= 0x00200000,	// E
+	MF_ScreenEnvMap			= 0x00400000,	// Es
+	MF_SpecularMap			= 0x00800000,	// Sp
+	MF_ReflectionMap		= 0x01000000,	// R
+	MF_BumpMap				= 0x02000000,	// B
+	MF_NormalMap			= 0x04080000,	// N
+	MF_DetailTexture		= 0x08000000,	// Dt
+	MF_LightMap				= 0x10000000,	// Lm
+	MF_CubeEnvMap			= 0x20000000,	// Ec
 };
 
 class Material

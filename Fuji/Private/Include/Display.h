@@ -7,8 +7,8 @@
 void Display_InitModule();
 void Display_DeinitModule();
 
-int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
-void DestroyDisplay();
+int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
+void Display_DestroyDisplay();
 void Display_BeginFrame();
 void Display_EndFrame();
 void ClearScreen();
@@ -19,21 +19,6 @@ bool SetOrtho(bool enable, float width = 640.0f, float height = 480.0f);
 void SetViewport(float x, float y, float width, float height);
 void ResetViewport();
 
-#if defined(_XBOX)
-
-struct DisplaySettings
-{
-	int width, height;
-	int rate;
-	bool wide;
-	bool progressive;
-};
-
-extern IDirect3DDevice8 *pd3dDevice;
-extern DisplaySettings display;
-
-#elif defined(_WINDOWS)
-
 struct DisplaySettings
 {
 	int width, height;
@@ -41,7 +26,16 @@ struct DisplaySettings
 	int refreshRate;
 	int colourDepth;
 	bool windowed;
+	bool wide;			// wide screen aspect
+	bool progressive;	// progressive scan
 };
+
+#if defined(_XBOX)
+
+extern IDirect3DDevice8 *pd3dDevice;
+extern DisplaySettings display;
+
+#elif defined(_WINDOWS)
 
 extern IDirect3DDevice9 *pd3dDevice;
 extern DisplaySettings display;

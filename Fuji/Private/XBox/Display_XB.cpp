@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Display.h"
 #include "DebugMenu.h"
+#include "View.h"
 
 IDirect3D8 *d3d8;
 IDirect3DDevice8 *pd3dDevice;
@@ -10,27 +11,31 @@ float fieldOfView;
 
 void Display_InitModule()
 {
-	CALLSTACK("Display_InitModule");
+	CALLSTACK;
 
 	int error;
 
 	// create the display
-	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
+	error = Display_CreateDisplay(640, 480, 32, 60, true, false, false, false);
 	if(error) return;
 
 	DebugMenu_AddMenu("Display Options", "Fuji Options");
+
+	View::defaultView.view.SetIdentity();
+	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
+	View::UseDefault();
 }
 
 void Display_DeinitModule()
 {
-	CALLSTACK("Display_DeinitModule");
+	CALLSTACK;
 
-	DestroyDisplay();
+	Display_DestroyDisplay();
 }
 
-int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
+int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK("CreateDisplay");
+	CALLSTACK;
 
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
@@ -38,7 +43,7 @@ int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool tri
 	display.width = width;
 	display.height = height;
 	display.progressive = progressive;
-	display.rate = rate;
+	display.refreshRate = rate;
 	display.wide = wide;
 
 	d3d8 = Direct3DCreate8(D3D_SDK_VERSION);
@@ -63,9 +68,9 @@ int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool tri
 	return 0;
 }
 
-void DestroyDisplay()
+void Display_DestroyDisplay()
 {
-	CALLSTACK("DestroyDisplay");
+	CALLSTACK;
 
 	pd3dDevice->Release();
 	d3d8->Release();
@@ -73,14 +78,14 @@ void DestroyDisplay()
 
 void Display_BeginFrame()
 {
-	CALLSTACK("Display_BeginFrame");
+	CALLSTACK;
 
 	pd3dDevice->BeginScene();
 }
 
 void Display_EndFrame()
 {
-	CALLSTACK("Display_EndFrame");
+	CALLSTACK;
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
@@ -88,14 +93,14 @@ void Display_EndFrame()
 
 void ClearScreen()
 {
-	CALLSTACK("ClearScreen");
+	CALLSTACK;
 
 	pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)
 {
-	CALLSTACK("SetProjection");
+	CALLSTACK;
 
 	D3DXMATRIX proj;
 
@@ -108,7 +113,7 @@ void SetProjection(float fov)
 
 bool SetOrtho(bool enable, float width, float height)
 {
-	CALLSTACK("SetOrtho");
+	CALLSTACK;
 
 	D3DXMATRIX proj;
 
@@ -136,6 +141,8 @@ bool SetOrtho(bool enable, float width, float height)
 
 void SetViewport(float x, float y, float width, float height)
 {
+	CALLSTACK;
+
 	D3DVIEWPORT8 vp;
 	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
 	vp.Y = (DWORD)((y / 480.0f) * (float)display.height);
@@ -149,6 +156,8 @@ void SetViewport(float x, float y, float width, float height)
 
 void ResetViewport()
 {
+	CALLSTACK;
+
 	D3DVIEWPORT8 vp;
 	vp.X = 0;
 	vp.Y = 0;

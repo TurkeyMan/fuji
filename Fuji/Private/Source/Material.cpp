@@ -112,28 +112,23 @@ void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 			{
 				pMat->materialType = (pMat->materialType & ~MF_Lit) | (!materialDefinitions.AsBool(0) ? MF_Lit : NULL);
 			}
-			else if(!stricmp(pName, "texture"))
-			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
-				pMat->textureCount++;
-			}
-			else if(!stricmp(pName, "diffuse"))
+			else if(!stricmp(pName, "diffusecolour"))
 			{
 				pMat->diffuse = materialDefinitions.AsVector4();
 			}
-			else if(!stricmp(pName, "ambient"))
+			else if(!stricmp(pName, "ambientcolour"))
 			{
 				pMat->ambient = materialDefinitions.AsVector4();
 			}
-			else if(!stricmp(pName, "specular"))
+			else if(!stricmp(pName, "specularcolour"))
 			{
 				pMat->specular = materialDefinitions.AsVector4();
 			}
-			else if(!stricmp(pName, "power"))
+			else if(!stricmp(pName, "specularpower"))
 			{
 				pMat->specularPow = materialDefinitions.AsFloat(0);
 			}
-			else if(!stricmp(pName, "emissive"))
+			else if(!stricmp(pName, "emissivecolour"))
 			{
 				pMat->illum = materialDefinitions.AsVector4();
 			}
@@ -165,39 +160,81 @@ void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 			{
 				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsInt(0) << 1);
 			}
+			else if(!stricmp(pName, "texture"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->textureCount++;
+			}
+			else if(!stricmp(pName, "diffusemap"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->diffuseMapIndex = pMat->textureCount;
+				pMat->textureCount++;
+			}
+			else if(!stricmp(pName, "diffusemap2"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->materialType |= MF_DiffuseMap2;
+				pMat->diffuseMap2Index = pMat->textureCount;
+				pMat->textureCount++;
+			}
 			else if(!stricmp(pName, "normalmap"))
 			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
 				pMat->materialType |= MF_NormalMap;
-				pMat->normalMapIndex = materialDefinitions.AsInt(0);
+				pMat->normalMapIndex = pMat->textureCount;
+				pMat->textureCount++;
 			}
 			else if(!stricmp(pName, "detailmap"))
 			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
 				pMat->materialType |= MF_DetailTexture;
-				pMat->detailMapIndex = materialDefinitions.AsInt(0);
+				pMat->detailMapIndex = pMat->textureCount;
+				pMat->textureCount++;
 			}
 			else if(!stricmp(pName, "envmap"))
 			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
 				pMat->materialType |= MF_SphereEnvMap;
-				pMat->envMapIndex = materialDefinitions.AsInt(0);
+				pMat->envMapIndex = pMat->textureCount;
+				pMat->textureCount++;
 			}
 			else if(!stricmp(pName, "lightmap"))
 			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
 				pMat->materialType |= MF_LightMap;
-				pMat->lightMapIndex = materialDefinitions.AsInt(0);
+				pMat->lightMapIndex = pMat->textureCount;
+				pMat->textureCount++;
+			}
+			else if(!stricmp(pName, "bumpmap"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->materialType |= MF_BumpMap;
+				pMat->bumpMapIndex = pMat->textureCount;
+				pMat->textureCount++;
+			}
+			else if(!stricmp(pName, "reflectionmap"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->materialType |= MF_BumpMap;
+				pMat->bumpMapIndex = pMat->textureCount;
+				pMat->textureCount++;
+			}
+			else if(!stricmp(pName, "specularmap"))
+			{
+				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->materialType |= MF_BumpMap;
+				pMat->bumpMapIndex = pMat->textureCount;
+				pMat->textureCount++;
 			}
 			else if(!stricmp(pName, "celshading"))
 			{
 				pMat->materialType |= MF_CelShading;
 	//				pMat-> = materialDefinitions.AsInt(0);
 			}
-			else if(!stricmp(pName, "bumpmap"))
-			{
-				pMat->materialType |= MF_BumpMap;
-				pMat->bumpMapIndex = materialDefinitions.AsInt(0);
-			}
 			else if(!stricmp(pName, "phong"))
 			{
-				pMat->materialType |= MF_PerPixelLighting;
+				pMat->materialType |= MF_LitPerPixel;
 	//				pMat-> = materialDefinitions.AsInt(0);
 			}
 

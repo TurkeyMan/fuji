@@ -7,17 +7,17 @@ Systems to Support:
 	Vector Class			* DONE (Manu)
 	Matrix Class			* WORKING (Manu)
 
-	View System
+	View System				* DONE (Manu)
 	Camera
 
-	Material	* WORKING (Manu)
-	Model		* WORkING (Manu)
-	Animation	* WORKING (Manu)
+	Material				* WORKING (Manu)
+	Model					* WORkING (Manu)
+	Animation				* WORKING (Manu)
 
 	Primitive Interface		* DONE (Manu)
 
 	Controller/Input I/O	* BASIC IMPLEMENTATION (Manu)
-	FileSystem				* WORKING (Manu)
+	FileSystem				* BASIC IMPLEMENTATION (Manu)
 	Networking
 
 	Sound
