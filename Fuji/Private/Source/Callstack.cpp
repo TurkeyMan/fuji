@@ -139,6 +139,9 @@ void Callstack_PrepareMonitoredData()
 		}
 	}
 }
+#endif
+
+#if defined(_CALLSTACK_PROFILING)
 
 void DrawUntexturedSprite(float x, float y, float w, float h, uint32 col)
 {
@@ -154,20 +157,18 @@ void DrawUntexturedSprite(float x, float y, float w, float h, uint32 col)
 	MFEnd();
 }
 
-#endif
-
-#if defined(_CALLSTACK_PROFILING)
 void Callstack_DrawProfile()
 {
 	CALLSTACK("Callstack_DrawProfile");
 
 	bool t = SetOrtho(true);
 
+	int a;
+
 #if defined(_CALLSTACK_MONITORING)
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&Matrix::identity);
 //	View::current.SetLocalToWorld(Matrix::identity);
 
-	int a;
 	float inc, across;
 	float width = 396;
 
@@ -210,17 +211,23 @@ void Callstack_DrawProfile()
 
 	if(drawCallstack)
 	{
-		std::map<std::string, CallProfile>::iterator i;
-		float y = 80;
+		DrawUntexturedSprite(90, 90, 460, 320, 0xB0000000);
 
-		for(i = FunctionRegistry.begin(); i!= FunctionRegistry.end(); i++)
+		std::map<std::string, CallProfile>::iterator i;
+		float y = 100;
+
+		for(i = FunctionRegistry.begin(), a=0; i!= FunctionRegistry.end() && a<19; i++, a++)
 		{
 			uint32 ms = (uint32)(i->second.total / (GetHighResolutionFrequency()/1000000));
 			double percent = (double)i->second.total/((double)GetHighResolutionFrequency() * 0.01/60.0);
 
-			debugFont.DrawTextf(100, y, 0, 20.0f, 0xFFFFFFFF, "%s(): %dµs - %.2f%% - %d calls", i->first.c_str(), ms, percent, i->second.calls);
-			y += 20.0f;
+			debugFont.DrawTextf(100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first.c_str());
+			debugFont.DrawTextf(300, y, 0, 15.0f, 0xFFFFFFFF, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);
+			y += 15.0f;
 		}
+
+		if(a = 19)
+			debugFont.DrawTextf(110, y, 0, 15.0f, 0xFFFFFF, "More...");
 	}
 
 	SetOrtho(t);

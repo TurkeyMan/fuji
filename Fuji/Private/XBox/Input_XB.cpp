@@ -92,6 +92,8 @@ void Input_DeinitModule()
 
 void Input_Update()
 {
+	CALLSTACKc("Input_Update");
+
 	CheckDeviceChanges(dsDevices);
 	CheckKeyboard();
 
@@ -108,6 +110,8 @@ void Input_Update()
 
 float Input_ReadGamepad(int controlID, uint32 type)
 {
+	CALLSTACKc("Input_ReadGamepad");
+
 	static DWORD dwStartLast = 0;
 	float inputValue;
 
@@ -184,6 +188,8 @@ float Input_ReadGamepad(int controlID, uint32 type)
 
 bool Input_WasPressed(int controlID, uint32 type)
 {
+	CALLSTACKc("Input_WasPressed");
+
 	static DWORD dwStartLast = 0;
 
 	if(controlID>3)
