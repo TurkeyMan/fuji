@@ -2,10 +2,10 @@ TODO:
 
 Systems to Support:
 
-	Debugging Tools
+	Debugging Tools			* WORKING (Manu)
 
-	Vector Class
-	Matrix Class
+	Vector Class			* DONE (Manu)
+	Matrix Class			* WORKING (Manu)
 
 	View System
 	Camera
@@ -14,7 +14,7 @@ Systems to Support:
 	Model
 	Animation
 
-	Primitive Interface
+	Primitive Interface		* DONE (Manu)
 
 	Controller/Input I/O
 	FileSystem
@@ -28,7 +28,7 @@ Systems to Support:
 
 	Particles
 	Post Processing (DOF/Bloom/HDR)
-	2D Stuff (Sprites and Stuff)
+	2D Stuff (Sprites and Stuff)		* WORKING (Manu)
 
 	Video Playback
 
@@ -38,7 +38,7 @@ Systems to Support:
 
 Wanted Features:
 
-	Texture Manager (Rather than texture class)
+	Texture Manager (Rather than texture class)	* DONE (Manu)
 
 	Input system needs calibration control
 	A combo of buttons to reset calibration
