@@ -31,10 +31,10 @@ void Sprite::Draw()
 
 	world.SetIdentity();
 
-	world.m[0][0] = (float)cos(angle);
-	world.m[0][1] = (float)sin(angle);
-	world.m[1][0] = (float)-sin(angle);
-	world.m[1][1] = (float)cos(angle);
+	world.m[0][0] = cosf(angle);
+	world.m[0][1] = sinf(angle);
+	world.m[1][0] = -sinf(angle);
+	world.m[1][1] = cosf(angle);
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 

@@ -147,37 +147,37 @@ Matrix& Matrix::SetRotationX(float angle)
 	m[0][1] = 0.0f;
 	m[0][2] = 0.0f;
 	m[1][0] = 0.0f;
-	m[1][1] = cos(angle);
-	m[1][2] = sin(angle);
+	m[1][1] = cosf(angle);
+	m[1][2] = sinf(angle);
 	m[2][0] = 0.0f;
-	m[2][1] = -sin(angle);
-	m[2][2] = cos(angle);
+	m[2][1] = -sinf(angle);
+	m[2][2] = cosf(angle);
 
 	return *this;
 }
 
 Matrix& Matrix::SetRotationY(float angle)
 {
-	m[0][0] = cos(angle);
+	m[0][0] = cosf(angle);
 	m[0][1] = 0.0f;
-	m[0][2] = -sin(angle);
+	m[0][2] = -sinf(angle);
 	m[1][0] = 0.0f;
 	m[1][1] = 1.0f;
 	m[1][2] = 0.0f;
-	m[2][0] = sin(angle);
+	m[2][0] = sinf(angle);
 	m[2][1] = 0.0f;
-	m[2][2] = cos(angle);
+	m[2][2] = cosf(angle);
 
 	return *this;
 }
 
 Matrix& Matrix::SetRotationZ(float angle)
 {
-	m[0][0] = cos(angle);
-	m[0][1] = sin(angle);
+	m[0][0] = cosf(angle);
+	m[0][1] = sinf(angle);
 	m[0][2] = 0.0f;
-	m[1][0] = -sin(angle);
-	m[1][1] = cos(angle);
+	m[1][0] = -sinf(angle);
+	m[1][1] = cosf(angle);
 	m[1][2] = 0.0f;
 	m[2][0] = 0.0f;
 	m[2][1] = 0.0f;
