@@ -139,43 +139,49 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 
 	DBGASSERT(id >=0 && id < 4, "Invalid Gamepad ID");
 	DBGASSERT(Input_IsAvailable(IDD_Gamepad, id), STR("Gamepad %d not available", id));
-	DBGASSERT(Input_IsReady(IDD_Gamepad, id), "Gamepad not ready");
 
-	if( dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id] )
+	if(Input_IsReady(IDD_Gamepad, id))
 	{
-		// Query latest state.
-		XInputGetState(hPads[id], &inputState[id]);
-	}
+		if( dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id] )
+		{
+			// Query latest state.
+			XInputGetState(hPads[id], &inputState[id]);
+		}
 
-	for(int a=0; a<8; a++)
+		for(int a=0; a<8; a++)
+		{
+			int button = inputState[id].Gamepad.bAnalogButtons[a];
+			pGamepadState->values[a] = ((button > XINPUT_GAMEPAD_MAX_CROSSTALK) ? button : 0) * (1.0f/255.0f);
+		}
+
+		pGamepadState->values[8] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+		pGamepadState->values[9] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+		pGamepadState->values[10] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
+		pGamepadState->values[11] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+		pGamepadState->values[12] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
+		pGamepadState->values[13] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
+		pGamepadState->values[14] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
+		pGamepadState->values[15] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+
+		float inputValue;
+		float deadZone = Input_GetDeadZone();
+
+		inputValue = ((float)inputState[id].Gamepad.sThumbLX) / 32767.0f;
+		pGamepadState->values[Axis_LX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		inputValue = ((float)inputState[id].Gamepad.sThumbLY) / 32767.0f;
+		pGamepadState->values[Axis_LY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		inputValue = ((float)inputState[id].Gamepad.sThumbRX) / 32767.0f;
+		pGamepadState->values[Axis_RX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		inputValue = ((float)inputState[id].Gamepad.sThumbRY) / 32767.0f;
+		pGamepadState->values[Axis_RY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+	}
+	else
 	{
-		int button = inputState[id].Gamepad.bAnalogButtons[a];
-		pGamepadState->values[a] = ((button > XINPUT_GAMEPAD_MAX_CROSSTALK) ? button : 0) * (1.0f/255.0f);
+		memset(pGamepadState, 0, sizeof(*pGamepadState));
 	}
-
-	pGamepadState->values[8] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
-	pGamepadState->values[9] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-	pGamepadState->values[10] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
-	pGamepadState->values[11] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
-	pGamepadState->values[12] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
-	pGamepadState->values[13] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
-	pGamepadState->values[14] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
-	pGamepadState->values[15] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
-
-	float inputValue;
-	float deadZone = Input_GetDeadZone();
-
-	inputValue = ((float)inputState[id].Gamepad.sThumbLX) / 32767.0f;
-	pGamepadState->values[Axis_LX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-	inputValue = ((float)inputState[id].Gamepad.sThumbLY) / 32767.0f;
-	pGamepadState->values[Axis_LY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-	inputValue = ((float)inputState[id].Gamepad.sThumbRX) / 32767.0f;
-	pGamepadState->values[Axis_RX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-	inputValue = ((float)inputState[id].Gamepad.sThumbRY) / 32767.0f;
-	pGamepadState->values[Axis_RY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 }
 
 void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
