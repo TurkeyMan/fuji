@@ -13,8 +13,9 @@
 #endif
 
 #if defined(_LINUX)
-	#include <gl/gl.h>
-	#include <gl/glu.h>
+	#include <GL/gl.h>
+	#include <GL/glu.h>
+	#include <stdarg.h> // For varargs
 #endif
 
 #if defined(_FUJI_UTIL)
@@ -80,12 +81,32 @@ typedef char				int8;
 #endif
 
 // useful macros
-#define Clamp(x,y,z) max((x), min((y),(z)))
+#if !defined(MIN)
+#define MIN(a, b) ((a) < (b)? (a) : (b))
+#endif
+
+#if !defined(MAX)
+#define MAX(a, b) ((a) > (b)? (a) : (b))
+#endif
+
+#define Clamp(x,y,z) MAX((x), MIN((y),(z)))
 
 #define ALIGN16(x) (((x)+15) & 0xFFFFFFF0)
 
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
+
+// stricmp is a Win32/XBox only function
+#if (!defined(_WIN32) && !defined(_XBOX))
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+
+// So is OutputDebugString
+#define OutputDebugString(s) fprintf(stderr, (s))
+#define LPCTSTR char *
+
+#endif
+
 
 #include "Util.h"
 

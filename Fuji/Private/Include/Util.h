@@ -45,6 +45,10 @@ void LOGD(const char *string);
 char* STR(const char *format, ...);
 char* STRn(const char *source, int n);
 
+// string utilities
+bool StrICompare(const char *s1, const char *s2);
+
+
 // random number functions
 uint32 Rand();
 float RandomUnit();
@@ -79,7 +83,7 @@ inline bool IsNewline(char c)
 
 inline char* SeekNewline(char *pC)
 {
-	while(!IsNewline(*pC) && *pC!=NULL) pC++;
+	while(!IsNewline(*pC) && *pC != 0) pC++;
 	while(IsNewline(*pC)) pC++;
 	return pC;
 }

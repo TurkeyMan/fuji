@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "Common.h"
 #include "Util.h"
 #include "Vector3.h"
@@ -170,11 +171,13 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		View::GetCurrent()->SetOrtho(true);
 
 		// Set some renderstates
+#if defined(_WINDOWS) || defined(_XBOX)		
 		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+#endif
 
 		Texture::UseNone();
 

@@ -31,9 +31,10 @@ Heap* CreateHeap(uint32 size, char *name)
 {
 	CALLSTACK;
 
-	for(int a=0; a<MAX_HEAP_COUNT; a++) if(!heapList[a].pHeap) break;
+	int a; /* The new ISO standard doesn't allow variables declared in for loops to be used outside the for loop */
+	for(a=0; a<MAX_HEAP_COUNT; a++) if(!heapList[a].pHeap) break;
 
-	DBGASSERT(a<MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
+	DBGASSERT(a < MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
 
 	Heap *pHeap = &heapList[a];
 
@@ -82,7 +83,8 @@ Resource* CreateResource(uint32 size, uint32 type = RES_Unknown)
 
 	size = ALIGN16(size);
 
-	for(int a=0; a<MAX_RESOURCES; a++) if(!resourceList[a].pData) break;
+	int a;
+	for(a=0; a<MAX_RESOURCES; a++) if(!resourceList[a].pData) break;
 
 	DBGASSERT(a<MAX_RESOURCES, "Exceeded MAX_RESOURCES resources's");
 
@@ -178,7 +180,7 @@ void *Heap_Realloc(void *pMem, uint32 bytes)
 #endif
 
 	// ummmmm... yeah need to keep record of what is allocated where... 
-	memcpy(pNew, pMem, min(bytes, bytes));
+	memcpy(pNew, pMem, MIN(bytes, bytes));
 
 	return pNew;
 }
@@ -188,7 +190,8 @@ void Heap_Free(void *pMem)
 	CALLSTACK;
 
 #if !defined(_RETAIL)
-	for(uint32 a=pCurrentHeap->allocCount-1; a>=0; a--)
+	uint32 a;
+	for(a=pCurrentHeap->allocCount-1; a>=0; a--)
 	{
 		if(pCurrentHeap->allocList[a].pAddress == pMem)
 		{

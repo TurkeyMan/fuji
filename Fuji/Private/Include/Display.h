@@ -38,15 +38,15 @@ struct DisplaySettings
 	bool progressive;	// progressive scan
 };
 
+extern DisplaySettings display;
+
 #if defined(_XBOX)
 
 extern IDirect3DDevice8 *pd3dDevice;
-extern DisplaySettings display;
 
 #elif defined(_WINDOWS)
 
 extern IDirect3DDevice9 *pd3dDevice;
-extern DisplaySettings display;
 
 #endif
 
@@ -109,7 +109,46 @@ struct FileVertex
 	float u,v;
 };
 
-#endif
+#elif defined(_LINUX)
+
+class Vec3
+{
+public:
+	inline void Set(float _x, float _y, float _z) { x=_x; y=_y; z=_z; }
+
+	GLfloat x,y,z;
+};
+
+struct Vertex
+{
+	Vec3 pos;
+	GLuint colour;
+};
+
+struct FontVertex
+{
+	Vec3 pos;
+	GLuint colour;
+	GLfloat u,v;
+};
+
+struct LitVertex
+{
+	Vec3 pos;
+	Vec3 normal;
+	GLuint colour;
+	GLfloat u,v;
+};
+
+struct FileVertex
+{
+	Vec3 pos;
+	Vec3 normal;
+	GLuint colour;
+	GLfloat u,v;
+};
+
+#endif // #if defined(_LINUX)
 
 #endif // _DISPLAY_H
 

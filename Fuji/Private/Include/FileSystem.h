@@ -1,6 +1,10 @@
 #if !defined(_FILESYSTEM_H)
 #define _FILESYSTEM_H
 
+#if defined(_LINUX)
+#include <stdio.h>
+#endif
+
 #define MAX_FILE_COUNT 14
 
 enum OpenFlags
@@ -46,6 +50,8 @@ struct File
 
 #if defined(_XBOX) || defined(_WINDOWS)
 	HANDLE file;
+#elif defined(_LINUX)
+	FILE *file;
 #endif
 #if defined(_DEBUG)
 	char filename[256];

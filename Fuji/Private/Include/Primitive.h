@@ -23,7 +23,7 @@ enum PrimType
 void Primitive_InitModule();
 void Primitive_DeinitModule();
 
-void MFPrimitive(uint32 primType, uint32 hint = NULL);
+void MFPrimitive(uint32 primType, uint32 hint = 0);
 void MFBegin(uint32 vertexCount);
 
 void MFSetMatrix(const Matrix &mat);

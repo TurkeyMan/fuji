@@ -13,9 +13,11 @@ PROCESSOR = 'athlon-xp' # Processor to tune for, doesn't break compatability
 BASENAME = 'Fuji'
 LIBS = ''
 CPPPATH = ['Include'] # Include files
+LIBPATH = [] # Link libraries
 SOURCEDIRS = ['Source']
+MASKEDFILES = ['Source/Model.cpp', 'Source/Texture.cpp', 'Source/DebugMenu.cpp', 'Source/Shape.cpp']
 BINDIR = 'Bin'
-CCFLAGS = '-Wall -pipe -mcpu=' + PROCESSOR
+CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe -mcpu=' + PROCESSOR
 CC = 'g++'
 
 # Find out what platform we're building on, and set the platform specific options for it
@@ -25,7 +27,9 @@ if(platform == 'posix'):
 
 if(platform == 'linux'): # It should be possible to use scons on Windows too
 	SOURCEDIRS.append('Linux')
-	LIBS = 'gl glx'
+	CPPPATH.append('/usr/X11R6/include')
+	LIBPATH.append('/usr/X11R6/lib')
+	LIBS = ['GL','X11']
 	CCFLAGS += ' -D_LINUX'
 else:
 	sys.stderr.write('Platform unsupported (use OS=linux) [%s]\n' % (platform,))
@@ -53,8 +57,23 @@ build_sources = []
 for dir in SOURCEDIRS:
 	sources = sources + glob.glob(dir + '/*.cpp')
 
-env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, LIBS = LIBS)
+new_sources = []
 
-#SourceSignatures('timestamp')
+# Remove any masked files
+for source in sources:
+	is_masked = 0
+	
+	for masked in MASKEDFILES:
+		if(masked == source):
+			is_masked = 1
+
+	if(not is_masked):
+		new_sources.append(source)
+
+sources = new_sources
+
+env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, LIBPATH = LIBPATH, LIBS = LIBS)
+
+env.SourceSignatures('timestamp')
 
 env.Program(target=BASENAME, source=sources)

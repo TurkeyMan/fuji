@@ -60,7 +60,7 @@ template<class T>
 class MFResource
 {
 public:
-	inline operator=(Resource *pR)	{ pResource = pR; }
+	inline T& operator=(Resource *pR)	{ pResource = pR; return(*this); }
 	inline T& operator*() const		{ return *(T*)pResource->pData; }
 	inline T* operator->() const	{ return (T*)pResource->pData; }
 	inline operator T*() const		{ return (T*)pResource->pData; }

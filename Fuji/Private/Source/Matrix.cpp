@@ -136,6 +136,33 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
+/*	
+	float cos_yaw, cos_pitch, cos_roll;
+
+	cos_yaw = cosf(yaw);
+	cos_pitch = cosf(pitch);
+	cos_roll = cosf(roll);
+	
+	m[0][0] = cos_yaw * cos_pitch;
+	m[0][1] = 0;
+	m[0][2] = 0;
+	m[0][3] = 0;
+	
+	m[1][0] = 0;
+	m[1][1] = cos_yaw * cos_roll;
+	m[1][2] = 0;
+	m[1][3] = 0;
+
+	m[2][0] = 0;
+	m[2][1] = 0;
+	m[2][2] = cos_pitch * cos_roll;
+	m[2][3] = 0;
+	
+	m[3][0] = 0;
+	m[3][1] = 0;
+	m[3][2] = 0;
+	m[3][3] = 1;
+*/	
 	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
 //	DBGASSERT(false, "Not Written...");
 	return *this;
