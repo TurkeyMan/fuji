@@ -68,8 +68,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 			dataLength = header.width * header.height * 3;
 		}
 
-		imageData = Heap_Alloc(dataLength);
-//		imageData = new unsigned char[dataLength];
+		imageData = Heap_TAlloc(dataLength);
 
 		File_Read(imageData, dataLength, handle);
 		File_Close(handle);
@@ -96,11 +95,11 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 
 		glGenTextures(1, &(pTexture->textureID));
 		glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 //		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 //		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+//		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		if(generateMipChain) {
 			gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, header.width, header.height, format, GL_UNSIGNED_BYTE, imageData);
@@ -108,8 +107,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, header.width, header.height, 0, format, GL_UNSIGNED_BYTE, imageData);
 		}
 
-//		delete imageData;
-		Heap_Free(imageData);
+		Heap_TFree(imageData);
 
 //		if(rv != 0) {
 //			LOGD(STR("Failed loading texture: %s (Unable to create OpenGL texture object)", filename));

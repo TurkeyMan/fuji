@@ -191,7 +191,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_TEXTURE_2D);
-	
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
 	return(0);
 }
 
