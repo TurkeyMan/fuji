@@ -1,0 +1,60 @@
+# This is a build file for "SCons" (http://www.scons.org/), a python based 
+# build tool
+#
+# It allows the project to be built on Unix/Linux, and may be able to provide
+# an alternative build system for win32 in the future.
+
+
+import glob
+import string
+import sys
+
+PROCESSOR = 'athlon-xp' # Processor to tune for, doesn't break compatability
+BASENAME = 'Fuji'
+LIBS = ''
+CPPPATH = ['Include'] # Include files
+SOURCEDIRS = ['Source']
+BINDIR = 'Bin'
+CCFLAGS = '-Wall -pipe -mcpu=' + PROCESSOR
+CC = 'g++'
+
+# Find out what platform we're building on, and set the platform specific options for it
+platform = str(ARGUMENTS.get('OS', Platform()))
+if(platform == 'posix'):
+	platform = 'linux'
+
+if(platform == 'linux'): # It should be possible to use scons on Windows too
+	SOURCEDIRS.append('Linux')
+	LIBS = 'gl glx'
+	CCFLAGS += ' -D_LINUX'
+else:
+	sys.stderr.write('Platform unsupported (use OS=linux) [%s]\n' % (platform,))
+	sys.exit(0)
+
+
+# Deal with the command line options
+build_type = ARGUMENTS.get('BUILD_TYPE', 'DEBUG')
+build_type = string.upper(build_type)
+
+if(build_type == 'DEBUG'):
+	CCFLAGS += ' -D_DEBUG -g'
+elif(build_type == 'RELEASE'):
+	CCFLAGS += ' -D_RELEASE -O3'
+elif(build_type == 'RETAIL'):
+	CCFLAGS += ' -D_RETAIL -O3'
+else:
+	sys.stderr.write('Invalid build type, use one of: BUILD_TYPE=(DEBUG|RELEASE|RETAIL)\n')
+	sys.exit(0)
+
+
+# Get the full list of all the source files
+sources = [] # Empty list to start with
+build_sources = []
+for dir in SOURCEDIRS:
+	sources = sources + glob.glob(dir + '/*.cpp')
+
+env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, LIBS = LIBS)
+
+#SourceSignatures('timestamp')
+
+env.Program(target=BASENAME, source=sources)

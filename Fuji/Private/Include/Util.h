@@ -25,9 +25,9 @@ class Vector3;
 // asserts that a condition is true, if it fails, it throws an error and breaks the debugger..
 #if !defined(_RETAIL)
 	#if defined(HARD_ASSERTS)
-		#define DBGASSERT(condition,str) { static ignore=false; if(!(condition) && !ignore) { hardAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
+		#define DBGASSERT(condition,str) { static bool ignore=false; if(!(condition) && !ignore) { hardAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
 	#else
-		#define DBGASSERT(condition,str) { static ignore=false; if(!(condition) && !ignore) { dbgAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
+		#define DBGASSERT(condition,str) { static bool ignore=false; if(!(condition) && !ignore) { dbgAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
 	#endif
 #else
 	#define DBGASSERT(x, y)

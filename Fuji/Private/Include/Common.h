@@ -12,6 +12,11 @@
 	#include <d3dx9.h>
 #endif
 
+#if defined(_LINUX)
+	#include <gl/gl.h>
+	#include <gl/glu.h>
+#endif
+
 #if defined(_FUJI_UTIL)
 	#include <Windows.h>
 #endif
@@ -40,8 +45,13 @@ typedef __m128				uint128;
 typedef unsigned int		uint128[4];
 #endif
 
+#if defined(__GNUC__)
+typedef unsigned long long	uint64;
+typedef long long 			int64;
+#else
 typedef unsigned __int64	uint64;
 typedef __int64				int64;
+#endif
 typedef unsigned int		uint32;
 typedef int					int32;
 typedef unsigned short		uint16;
@@ -54,6 +64,9 @@ typedef char				int8;
 #define PI 3.141592653589f
 #endif
 #define ALMOST_ZERO 0.000001f
+#if !defined(NULL) /* In case stdlib.h hasn't been included */
+#define NULL 0
+#endif
 
 // callstack profiling
 #if !defined(_RETAIL)

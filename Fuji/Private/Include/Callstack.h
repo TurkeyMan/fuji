@@ -9,7 +9,7 @@ void Callstack_InitModule();
 void Callstack_DeinitModule();
 
 #if !defined(_RETAIL)
-	extern Array<char *> Callstack;
+	extern Array<const char *> Callstack;
 
 #if defined(_CALLSTACK_MONITORING)
 
@@ -58,12 +58,12 @@ void Callstack_DeinitModule();
 	};
 #endif
 
-	extern std::map<char *, CallProfile> FunctionRegistry;
+	extern std::map<const char *, CallProfile> FunctionRegistry;
 
 	class FunctionCall
 	{
 	public:
-		inline FunctionCall(char *name, int profile)
+		inline FunctionCall(const char *name, int profile)
 		{
 			Callstack.push() = name;
 

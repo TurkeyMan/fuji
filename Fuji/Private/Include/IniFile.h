@@ -44,7 +44,7 @@ protected:
 	char pIniFilename[64];
 	int iniLine;
 	char *pLastNewline;
-	inline IsNewline(char c)
+	inline bool IsNewline(char c)
 	{
 		if(c=='\n' && pCurrent!=pLastNewline)
 		{
@@ -56,7 +56,7 @@ protected:
 	}
 	inline char* SeekNewline(char *pC)
 	{
-		while(!IsNewline(*pC) && *pC!=NULL) pC++;
+		while(!IsNewline(*pC) && *pC != 0) pC++;
 		while(IsNewline(*pC)) pC++;
 		return pC;
 	}
