@@ -8,6 +8,11 @@
 
 #define MENU_FONT_HEIGHT 20.0f
 
+#define MENU_X		100.0f
+#define MENU_Y		100.0f
+#define MENU_WIDTH	640.0f-MENU_X*2.0f
+#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
+
 class MenuObject;
 
 // (menu_item*, user_data*)
@@ -61,28 +66,35 @@ public:
 class MenuItemInt : public MenuObject
 {
 public:
-	MenuItemInt(int value = 0, int inc = 1) { type = MenuType_Int; data = value; increment = inc; }
+	MenuItemInt(int value = 0, int inc = 1, int minValue = -2147483647, int maxValue = 2147483647) { pData = &data; type = MenuType_Int; data = defaultValue = value; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
+	MenuItemInt(int *pPointer, int inc = 1, int minValue = -2147483647, int maxValue = 2147483647) { pData = pPointer; type = MenuType_Int; defaultValue = *pData; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
 	operator int() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
+	int *pData;
 	int data;
+	int minimumValue, maximumValue, defaultValue;
+
 	int increment;
 };
 
 class MenuItemFloat : public MenuObject
 {
 public:
-	MenuItemFloat(float value = 0.0f, float inc = 1.0f) { type = MenuType_Float; data = value; increment = inc; }
+	MenuItemFloat(float value = 0.0f, float inc = 1.0f, float minValue = -1000000000.0f, float maxValue = 1000000000.0f) { pData = &data; type = MenuType_Float; data = defaultValue = value; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
+	MenuItemFloat(float *pPointer, float inc = 1.0f, float minValue = -1000000000.0f, float maxValue = 1000000000.0f) { pData = pPointer; type = MenuType_Float; defaultValue = *pData; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
 	operator float() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
+	float *pData;
 	float data;
+	float minimumValue, maximumValue, defaultValue;
 	float increment;
 };
 
@@ -118,7 +130,8 @@ static Vector4 colourInit = {1,1,1,1};
 class MenuItemColour : public MenuObject
 {
 public:
-	MenuItemColour(Vector4 def = colourInit) { type = MenuType_Colour; colour = def; preset = 0; }
+	MenuItemColour(Vector4 def = colourInit) { pData = &colour; type = MenuType_Colour; colour = def; preset = 0; }
+	MenuItemColour(Vector4 *pColour) { pData = pColour; type = MenuType_Colour; preset = 0; }
 	operator Vector4() const { return colour; }
 	operator uint32() const { return (uint32)(colour.w*255.0f)<<24 | (uint32)(colour.x*255.0f)<<16 | (uint32)(colour.y*255.0f)<<8 | (uint32)(colour.z*255.0f); }
 
@@ -130,20 +143,16 @@ public:
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	Vector4 colour;
+	Vector4 *pData;
 
 	int preset;
 	static uint32 presets[10];
 };
 
-#define MENU_X		100.0f
-#define MENU_Y		100.0f
-#define MENU_WIDTH	640.0f-MENU_X*2.0f
-#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
-
 class Menu : public MenuObject
 {
 public:
-	Menu() { targetOffset = yOffset = 0.0f; menuX = MENU_X; menuY = MENU_Y; menuWidth = MENU_WIDTH; menuHeight = MENU_HEIGHT; }
+	Menu() { targetOffset = yOffset = 0.0f; }
 
 	virtual int GetSelected();
 	virtual int GetItemCount();
@@ -159,8 +168,10 @@ public:
 	int numChildren;
 	int selection;
 
-	float menuX, menuY, menuWidth, menuHeight;
 	float yOffset, targetOffset;
+
+	static float menuX, menuY, menuWidth, menuHeight;
+	static Vector4 colour, folderColour;
 };
 
 extern Menu rootMenu;

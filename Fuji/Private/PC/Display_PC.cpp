@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Display.h"
 #include "DebugMenu.h"
+#include "Input_PC.h"
 
 IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -38,6 +39,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch(message)
 	{
 		case WM_ACTIVATE:
+			inAcquire(wParam != 0);
 			break;
 
 		case WM_SYSCOMMAND:
@@ -61,6 +63,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_CREATE:
+			inSetCooperativeLevels();
+			meSetScreenMouseRange((float)display.width-1, (float)display.height-1);
 			break;
 
 		case WM_CLOSE:

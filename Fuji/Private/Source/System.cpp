@@ -12,7 +12,7 @@ int gQuit;
 uint32 gFrameCount = 0;
 
 MenuItemStatic quitOption;
-MenuItemFloat mf(0, 10);
+MenuItemFloat mf(0.0f, 10.0f);
 MenuItemInt mi;
 MenuItemBool mb;
 MenuItemColour col;
@@ -32,8 +32,6 @@ void System_Init()
 	CALLSTACK("System_Init");
 
 	DebugMenu_InitModule();
-
-	DebugMenu_AddMenu("Fuji Options", &rootMenu);
 
 	Callstack_InitModule();
 	Timer_InitModule();
@@ -94,7 +92,7 @@ void System_Draw()
 	debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
 	float rate = (float)gSystemTimer.GetRate();
 	if(rate != 1.0f)
-		debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %.2f", rate);
+		debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 	DebugMenu_Draw();
 

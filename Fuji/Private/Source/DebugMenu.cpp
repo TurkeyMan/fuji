@@ -12,6 +12,20 @@ Menu rootMenu;
 MenuObject *pCurrentMenu = &rootMenu;
 Vector3 debugMenuPos = { 50.0f, 50.0f, 0.0f };
 
+float Menu::menuX = MENU_X;
+float Menu::menuY = MENU_Y;
+float Menu::menuWidth = MENU_WIDTH;
+float Menu::menuHeight = MENU_HEIGHT;
+Vector4 Menu::colour = { 0.0f, 0.0f, 1.0f, 0.5f };
+Vector4 Menu::folderColour = { 0.5f, 0.627f, 1.0f, 1.0f };
+
+MenuItemFloat menuX(&Menu::menuX, 60.0f, 0.0f, 640.0f);
+MenuItemFloat menuY(&Menu::menuY, 60.0f, 0.0f, 480.0f);
+MenuItemFloat menuW(&Menu::menuWidth, 60.0f, 0.0f, 640.0f);
+MenuItemFloat menuH(&Menu::menuHeight, 60.0f, 0.0f, 480.0f);
+MenuItemColour menuCol(&Menu::colour);
+MenuItemColour menuItemCom(&Menu::folderColour);
+
 #define COLOUR_PRESETS 10
 uint32 MenuItemColour::presets[COLOUR_PRESETS] =
 {
@@ -37,6 +51,16 @@ void DebugMenu_InitModule()
 	rootMenu.pParent = NULL;
 	rootMenu.pUserData = NULL;
 	rootMenu.selection = 0;
+
+	DebugMenu_AddMenu("Fuji Options", &rootMenu);
+	DebugMenu_AddMenu("Debug Menu Options", "Fuji Options");
+
+	DebugMenu_AddItem("Menu X", "Debug Menu Options", &menuX);
+	DebugMenu_AddItem("Menu Y", "Debug Menu Options", &menuY);
+	DebugMenu_AddItem("Menu Width", "Debug Menu Options", &menuW);
+	DebugMenu_AddItem("Menu Height", "Debug Menu Options", &menuH);
+	DebugMenu_AddItem("Menu Colour", "Debug Menu Options", &menuCol);
+	DebugMenu_AddItem("Menu Item Colour", "Debug Menu Options", &menuItemCom);
 }
 
 void DebugMenu_DeinitModule()
@@ -211,7 +235,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFF80A0FF, name);
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToColour(), name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -267,13 +291,13 @@ void Menu::Draw()
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(0x80000060);
+	MFSetColour(colour*0.4f);
 	MFSetPosition(menuX, menuY, 0);
-	MFSetColour(0x800000B0);
+	MFSetColour(colour*0.8f);
 	MFSetPosition(menuX+menuWidth, menuY, 0);
-	MFSetColour(0x80000080);
+	MFSetColour(colour*0.6f);
 	MFSetPosition(menuX, menuY+menuHeight, 0);
-	MFSetColour(0x800000FF);
+	MFSetColour(colour);
 	MFSetPosition(menuX+menuWidth, menuY+menuHeight, 0);
 	MFEnd();
 
@@ -377,7 +401,7 @@ Vector3 MenuItemStatic::GetDimensions(float maxWidth)
 // MenuItemInt
 float MenuItemInt::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %d", name, data));
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %d", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -385,20 +409,25 @@ void MenuItemInt::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_B)) data = 0;
+		int t = *pData;
+
+		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_X)) *pData = 0;
 
 		if(Input_WasPressed(0, Button_DLeft))
 		{
-			data -= increment;
-			if(pCallback)
-				pCallback(this, pUserData);
+			*pData -= increment;
 		}
 		else if(Input_WasPressed(0, Button_DRight))
 		{
-			data += increment;
-			if(pCallback)
-				pCallback(this, pUserData);
+			*pData += increment;
 		}
+
+		if(*pData < minimumValue) *pData = maximumValue+(*pData-minimumValue);
+		if(*pData > maximumValue) *pData = minimumValue+(*pData-maximumValue);
+
+		if(pCallback && t != *pData)
+			pCallback(this, pUserData);
 	}
 }
 
@@ -410,7 +439,7 @@ Vector3 MenuItemInt::GetDimensions(float maxWidth)
 // MenuItemFloat
 float MenuItemFloat::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f", name, data));
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -418,27 +447,31 @@ void MenuItemFloat::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		float t = data;
+		float t = *pData;
 		float input;
 
-		if(Input_WasPressed(0, Button_B)) data = 0.0f;
+		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_X)) *pData = 0.0f;
 
 		if(Input_WasPressed(0, Button_DLeft))
 		{
-			data -= increment;
+			*pData -= increment;
 		}
 		else if(Input_WasPressed(0, Button_DRight))
 		{
-			data += increment;
+			*pData += increment;
 		}
 
 		if((input=Input_ReadGamepad(0, Axis_RX)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
-			data += input*increment*TIMEDELTA;
+			*pData += input*increment*TIMEDELTA;
 		}
 
-		if(pCallback && t != data)
+		if(*pData < minimumValue) *pData = maximumValue+(*pData-minimumValue);
+		if(*pData > maximumValue) *pData = minimumValue+(*pData-maximumValue);
+
+		if(pCallback && t != *pData)
 			pCallback(this, pUserData);
 	}
 }
@@ -528,7 +561,7 @@ void MenuItemColour::Update()
 
 float MenuItemColour::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, colour.ToColour()));
+	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToColour()));
 
 	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -545,7 +578,7 @@ float MenuItemColour::ListDraw(bool selected, Vector3 pos, float maxWidth)
 	pos += Vector(2.0f, 2.0f, 0.0f);
 
 	MFBegin(4);
-	MFSetColour(colour);
+	MFSetColour(*pData);
 	MFSetPosition(pos);
 	MFSetPosition(pos + Vector(41.0f, 0.0f, 0.0f));
 	MFSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
@@ -566,7 +599,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset <= 0 ? COLOUR_PRESETS-1 : preset-1;
 
-			colour.FromColour(presets[preset]);
+			pData->FromColour(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);
@@ -575,7 +608,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset >= COLOUR_PRESETS-1 ? 0 : preset+1;
 
-			colour.FromColour(presets[preset]);
+			pData->FromColour(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);
