@@ -18,6 +18,84 @@ int wndX = 0, wndY = 0;
 
 bool initialised = false;
 
+char *resStrings[] = { "320x240", "400x300", "640x480", "800x600", "1024x768", "1152x864", "720p", "1280x960", "1280x1024", "1600x1200", "1080p", "1920x1440", NULL };
+MenuItemIntString resSelect(resStrings, 2);
+
+void ChangeResCallback(MenuObject *pMenu, void *pData)
+{
+	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
+
+	display.wide = false;
+
+	switch(pRes->data)
+	{
+		case 0:
+			display.fullscreenWidth = 320;
+			display.fullscreenHeight = 240;
+			break;
+		case 1:
+			display.fullscreenWidth = 400;
+			display.fullscreenHeight = 300;
+			break;
+		case 2:
+			display.fullscreenWidth = 640;
+			display.fullscreenHeight = 480;
+			break;
+		case 3:
+			display.fullscreenWidth = 800;
+			display.fullscreenHeight = 600;
+			break;
+		case 4:
+			display.fullscreenWidth = 1024;
+			display.fullscreenHeight = 768;
+			break;
+		case 5:
+			display.fullscreenWidth = 1152;
+			display.fullscreenHeight = 864;
+			break;
+		case 6:
+			display.fullscreenWidth = 1280;
+			display.fullscreenHeight = 720;
+			display.wide = true;
+			break;
+		case 7:
+			display.fullscreenWidth = 1280;
+			display.fullscreenHeight = 960;
+			break;
+		case 8:
+			display.fullscreenWidth = 1280;
+			display.fullscreenHeight = 1024;
+			break;
+		case 9:
+			display.fullscreenWidth = 1600;
+			display.fullscreenHeight = 1200;
+			break;
+		case 10:
+			display.fullscreenWidth = 1920;
+			display.fullscreenHeight = 1080;
+			display.wide = true;
+			break;
+		case 11:
+			display.fullscreenWidth = 1920;
+			display.fullscreenHeight = 1440;
+			break;
+	}
+
+	display.width = display.fullscreenWidth;
+	display.height = display.fullscreenHeight;
+
+	if(display.windowed)
+	{
+		int xframe = GetSystemMetrics(SM_CXFRAME)*2;
+		int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
+		MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, true);
+	}
+	else
+	{
+		Display_ResetDisplay();
+	}
+}
+
 void Display_InitModule()
 {
 	CALLSTACK("Display_InitModule");
@@ -29,6 +107,7 @@ void Display_InitModule()
 	if(error) return;
 
 	DebugMenu_AddMenu("Display Options", "Fuji Options");
+	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 
 	View::defaultView.view.SetIdentity();
 	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
@@ -77,7 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						{
 							int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 							int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
-							MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, false);
+							MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, true);
 						}
 					}
 
@@ -116,8 +195,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				GetWindowRect(apphWnd, &r);
 				GetClientRect(apphWnd, &cr);
 
-				wndX = r.left;
-				wndY = r.top;
+				wndX = r.left < 640 ? r.left : 0;
+				wndY = r.top < 480 ? r.top : 0;
 
 				display.width = cr.right - cr.left;
 				display.height = cr.bottom - cr.top;
@@ -408,7 +487,7 @@ bool SetOrtho(bool enable, float width, float height)
 		float extend = 0.0f;
 
 		// correct for widescreen
-//		if(display.wide) extend = (((width/1.333333333f)*1.77777777778f)-width)/2.0f;
+		if(display.wide) extend = (((width/1.333333333f)*1.77777777778f)-width)/2.0f;
 
 		// construct and apply ortho projection
 		D3DXMatrixOrthoOffCenterLH(&proj, -extend, width + extend, height, 0, 0.0f, 1000.0f);
