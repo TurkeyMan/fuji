@@ -122,58 +122,40 @@ int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char 
 {
 	CALLSTACK("Font::DrawTextf");
 
+	char buffer[1024];
+
 	va_list args;
-
-	int len;
-	char *buffer;
-
 	va_start(args, format);
-	len = _vscprintf(format, args)+1;
-	buffer = new char[len];
 
 	vsprintf(buffer, format, args);
 
 	return DrawText(pos_x, pos_y, 0, height, colour, buffer);
-
-	delete[] buffer;
 }
 
 int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *format, ...)
 {
 	CALLSTACK("Font::DrawTextf");
 
+	char buffer[1024];
+
 	va_list args;
-
-	int len;
-	char *buffer;
-
 	va_start(args, format);
-	len = _vscprintf(format, args)+1;
-	buffer = new char[len];
 
 	vsprintf(buffer, format, args);
 
 	return DrawText(pos_x, pos_y, pos_z, height, colour, buffer);
-
-	delete[] buffer;
 }
 
 int Font::DrawTextf(Vector3 pos, float height, uint32 colour, char *format, ...)
 {
 	CALLSTACK("Font::DrawTextf");
 
+	char buffer[1024];
+
 	va_list args;
-
-	int len;
-	char *buffer;
-
 	va_start(args, format);
-	len = _vscprintf(format, args)+1;
-	buffer = new char[len];
 
 	vsprintf(buffer, format, args);
 
 	return DrawText(pos.x, pos.y, pos.z, height, colour, buffer);
-
-	delete[] buffer;
 }

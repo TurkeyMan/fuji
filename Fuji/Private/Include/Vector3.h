@@ -16,18 +16,18 @@ public:
 	static const Vector3 one;
 	static const Vector3 up;
 
-	inline Vector3 operator-()						{ Vector3 t; t.x=-x; t.y=-y; t.z=-z; return t; }
+	inline Vector3 operator-() const					{ Vector3 t; t.x=-x; t.y=-y; t.z=-z; return t; }
 
-	inline bool operator==(const Vector3 &v) const { return x==v.x && y==v.y && z==v.z; }
-	inline bool operator!=(const Vector3 &v) const { return x!=v.x || y!=v.y || z!=v.z; }
+	inline bool operator==(const Vector3 &v) const		{ return x==v.x && y==v.y && z==v.z; }
+	inline bool operator!=(const Vector3 &v) const		{ return x!=v.x || y!=v.y || z!=v.z; }
 
-	inline Vector3& operator=(const Vector3 &v)		{ x=v.x;	y=v.y;	z=v.z;	return *this; }
-	inline Vector3& operator+=(const Vector3 &v)	{ x+=v.x;	y+=v.y;	z+=v.z;	return *this; }
-	inline Vector3& operator-=(const Vector3 &v)	{ x-=v.x;	y-=v.y;	z-=v.z;	return *this; }
-	inline Vector3& operator*=(float f)				{ x*=f;		y*=f;	z*=f;	return *this; }
-	inline Vector3& operator*=(const Vector3 &v)	{ x*=v.x;	y*=v.y;	z*=v.z;	return *this; }
-	inline Vector3& operator/=(float f)				{ x/=f;		y/=f;	z/=f;	return *this; }
-	inline Vector3& operator/=(const Vector3 &v)	{ x/=v.x;	y/=v.y;	z/=v.z; return *this; }
+	inline Vector3& operator=(const Vector3 &v)			{ x=v.x;	y=v.y;	z=v.z;	return *this; }
+	inline Vector3& operator+=(const Vector3 &v)		{ x+=v.x;	y+=v.y;	z+=v.z;	return *this; }
+	inline Vector3& operator-=(const Vector3 &v)		{ x-=v.x;	y-=v.y;	z-=v.z;	return *this; }
+	inline Vector3& operator*=(float f)					{ x*=f;		y*=f;	z*=f;	return *this; }
+	inline Vector3& operator*=(const Vector3 &v)		{ x*=v.x;	y*=v.y;	z*=v.z;	return *this; }
+	inline Vector3& operator/=(float f)					{ x/=f;		y/=f;	z/=f;	return *this; }
+	inline Vector3& operator/=(const Vector3 &v)		{ x/=v.x;	y/=v.y;	z/=v.z; return *this; }
 
 	inline Vector3 operator+(const Vector3 &v) const	{ Vector3 t; t.x = x+v.x;	t.y = y+v.y;	t.z = z+v.z;	return t; }
 	inline Vector3 operator-(const Vector3 &v) const	{ Vector3 t; t.x = x-v.x;	t.y = y-v.y;	t.z = z-v.z;	return t; }
@@ -36,7 +36,7 @@ public:
 	inline Vector3 operator/(float f) const				{ Vector3 t; t.x = x/f;		t.y = y/f;		t.z = z/f;		return t; }
 	inline Vector3 operator/(const Vector3 &v) const	{ Vector3 t; t.x = x/v.x;	t.y = y/v.y;	t.z = z/v.z;	return t; }
 
-	inline Vector4& ToVector4() { return *(Vector4*)this; }
+	inline Vector4& ToVector4()							{ return *(Vector4*)this; }
 
 	inline float Dot(const Vector3 &vec) const { return x*vec.x + y*vec.y + z*vec.z; }
 	inline float MagSquared() const { return x*x + y*y + z*z; }

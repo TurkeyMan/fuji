@@ -12,17 +12,13 @@ Menu rootMenu;
 MenuObject *pCurrentMenu = &rootMenu;
 Vector3 debugMenuPos = { 50.0f, 50.0f, 0.0f };
 
-float Menu::menuX = MENU_X;
-float Menu::menuY = MENU_Y;
-float Menu::menuWidth = MENU_WIDTH;
-float Menu::menuHeight = MENU_HEIGHT;
+Vector3 Menu::menuPosition = { MENU_X, MENU_Y, 0.0f };
+Vector3 Menu::menuDimensions = { MENU_WIDTH, MENU_HEIGHT, 0.0f };
 Vector4 Menu::colour = { 0.0f, 0.0f, 1.0f, 0.5f };
 Vector4 Menu::folderColour = { 0.5f, 0.627f, 1.0f, 1.0f };
 
-MenuItemFloat menuX(&Menu::menuX, 60.0f, 0.0f, 640.0f);
-MenuItemFloat menuY(&Menu::menuY, 60.0f, 0.0f, 480.0f);
-MenuItemFloat menuW(&Menu::menuWidth, 60.0f, 0.0f, 640.0f);
-MenuItemFloat menuH(&Menu::menuHeight, 60.0f, 0.0f, 480.0f);
+MenuItemPosition2D menuPos(&Menu::menuPosition, 60.0f);
+MenuItemPosition2D menuDim(&Menu::menuDimensions, 60.0f);
 MenuItemColour menuCol(&Menu::colour);
 MenuItemColour menuItemCom(&Menu::folderColour);
 
@@ -55,10 +51,8 @@ void DebugMenu_InitModule()
 	DebugMenu_AddMenu("Fuji Options", &rootMenu);
 	DebugMenu_AddMenu("Debug Menu Options", "Fuji Options");
 
-	DebugMenu_AddItem("Menu X", "Debug Menu Options", &menuX);
-	DebugMenu_AddItem("Menu Y", "Debug Menu Options", &menuY);
-	DebugMenu_AddItem("Menu Width", "Debug Menu Options", &menuW);
-	DebugMenu_AddItem("Menu Height", "Debug Menu Options", &menuH);
+	DebugMenu_AddItem("Menu Position", "Debug Menu Options", &menuPos);
+	DebugMenu_AddItem("Menu Dimensions", "Debug Menu Options", &menuDim);
 	DebugMenu_AddItem("Menu Colour", "Debug Menu Options", &menuCol);
 	DebugMenu_AddItem("Menu Item Colour", "Debug Menu Options", &menuItemCom);
 }
@@ -252,7 +246,7 @@ void Menu::Draw()
 {
 	Vector3 dimensions = { 0.0f, 0.0f, 0.0f };
 	Vector3 currentPos;
-	float requestedWidth = menuWidth-40.0f;
+	float requestedWidth = menuDimensions.x-40.0f;
 	float selStart, selEnd;
 	int a;
 
@@ -271,9 +265,9 @@ void Menu::Draw()
 				targetOffset = -selStart;
 			}
 
-			if(selEnd > menuHeight - 75.0f - yOffset)
+			if(selEnd > menuDimensions.y - 75.0f - yOffset)
 			{
-				targetOffset = -(selEnd-(menuHeight-75.0f));
+				targetOffset = -(selEnd-(menuDimensions.y-75.0f));
 			}
 		}
 
@@ -286,22 +280,22 @@ void Menu::Draw()
 		yOffset -= abs(yOffset-targetOffset) < 0.1f ? yOffset-targetOffset : (yOffset-targetOffset)*0.1f;
 	}
 
-	currentPos = Vector(menuX+20.0f, menuY+50.0f + yOffset, 0.0f);
+	currentPos = Vector(menuPosition.x+20.0f, menuPosition.y+50.0f + yOffset, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
 	MFSetColour(colour*0.4f);
-	MFSetPosition(menuX, menuY, 0);
+	MFSetPosition(menuPosition.x, menuPosition.y, 0);
 	MFSetColour(colour*0.8f);
-	MFSetPosition(menuX+menuWidth, menuY, 0);
+	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y, 0);
 	MFSetColour(colour*0.6f);
-	MFSetPosition(menuX, menuY+menuHeight, 0);
+	MFSetPosition(menuPosition.x, menuPosition.y+menuDimensions.y, 0);
 	MFSetColour(colour);
-	MFSetPosition(menuX+menuWidth, menuY+menuHeight, 0);
+	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y+menuDimensions.y, 0);
 	MFEnd();
 
-	debugFont.DrawText(menuX+10.0f, menuY+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
+	debugFont.DrawText(menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
@@ -310,13 +304,13 @@ void Menu::Draw()
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 	MFBegin(4);
 	MFSetColour(0xA0000000);
-	MFSetPosition(menuX+15, menuY+45, 0);
+	MFSetPosition(menuPosition.x+15, menuPosition.y+45, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(menuX+menuWidth-15, menuY+45, 0);
+	MFSetPosition(menuPosition.x+menuDimensions.x-15, menuPosition.y+45, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(menuX+15, menuY+menuHeight-15, 0);
+	MFSetPosition(menuPosition.x+15, menuPosition.y+menuDimensions.y-15, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(menuX+menuWidth-15, menuY+menuHeight-15, 0);
+	MFSetPosition(menuPosition.x+menuDimensions.x-15, menuPosition.y+menuDimensions.y-15, 0);
 	MFEnd();
 
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESS);
@@ -324,13 +318,13 @@ void Menu::Draw()
 
 	for(a=0; a<numChildren; a++)
 	{
-		if(currentPos.y > menuY + menuHeight - 15.0f) break;
+		if(currentPos.y > menuPosition.y + menuDimensions.y - 15.0f) break;
 
 		if(selection==a)
 		{
 			float height = pChildren[a]->GetDimensions(requestedWidth).y;
 
-			if(currentPos.y + height < menuY + 45.0f)
+			if(currentPos.y + height < menuPosition.y + 45.0f)
 			{
 				currentPos.y += height;
 				continue;
@@ -340,13 +334,13 @@ void Menu::Draw()
 
 			MFBegin(4);
 			MFSetColour(0xC0000080);
-			MFSetPosition(menuX+15, currentPos.y, 0);
+			MFSetPosition(menuPosition.x+15, currentPos.y, 0);
 			MFSetColour(0xC00000D0);
-			MFSetPosition(menuX+menuWidth-15, currentPos.y, 0);
+			MFSetPosition(menuPosition.x+menuDimensions.x-15, currentPos.y, 0);
 			MFSetColour(0xC0000090);
-			MFSetPosition(menuX+15, currentPos.y + height, 0);
+			MFSetPosition(menuPosition.x+15, currentPos.y + height, 0);
 			MFSetColour(0xC00000FF);
-			MFSetPosition(menuX+menuWidth-15, currentPos.y + height, 0);
+			MFSetPosition(menuPosition.x+menuDimensions.x-15, currentPos.y + height, 0);
 			MFEnd();
 		}
 
@@ -619,4 +613,43 @@ void MenuItemColour::ListUpdate(bool selected)
 Vector3 MenuItemColour::GetDimensions(float maxWidth)
 {
 	return Vector(maxWidth, MENU_FONT_HEIGHT*1.5f, 0.0f);
+}
+
+// MenuItemPosition2D
+float MenuItemPosition2D::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemPosition2D::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		Vector3 t = *pData;
+		float input;
+
+		if(Input_WasPressed(0, Button_B)) *pData = defaultValue;
+		if(Input_WasPressed(0, Button_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
+
+		if((input=Input_ReadGamepad(0, Axis_RX)))
+		{
+			input = input < 0.0f ? -(input*input) : input*input;
+			pData->x += input*increment*TIMEDELTA;
+		}
+
+		if((input=Input_ReadGamepad(0, Axis_RY)))
+		{
+			input = input < 0.0f ? -(input*input) : input*input;
+			pData->y -= input*increment*TIMEDELTA;
+		}
+
+		if(pCallback && t != *pData)
+			pCallback(this, pUserData);
+	}
+}
+
+Vector3 MenuItemPosition2D::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
