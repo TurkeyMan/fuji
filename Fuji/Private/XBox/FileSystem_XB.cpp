@@ -86,7 +86,7 @@ uint32 File_Query(uint32 fileHandle)
 	return openFiles[fileHandle].state;
 }
 
-uint32 File_Seek(FileSeek relativity, uint32 bytes, uint32 fileHandle)
+int32 File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
 	if(!openFiles[fileHandle].file) return -1;
 

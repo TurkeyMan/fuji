@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 extern File openFiles[MAX_FILE_COUNT];
 
@@ -63,10 +64,10 @@ void File_Close(uint32 fileHandle)
 
 uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
-	int bytesRead;
+	ssize_t bytesRead;
 
 	bytesRead = read(openFiles[fileHandle].file, (void *)pBuffer, bytes);
-	if(bytesRead < 0)
+	if(bytesRead < 0) // read() returns -1 on error
 		bytesRead = 0;
 
 	openFiles[fileHandle].offset += bytesRead;
@@ -77,9 +78,15 @@ uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 // FIXME
 uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
-	uint32 bytesWritten;
+	ssize_t bytesWritten;
 
-//	bytesWritten = write();
+	bytesWritten = write(openFiles[fileHandle].file, pBuffer, (size_t)bytes);
+	if(bytesWritten < 0) // write() returns -1 on error
+		bytesWritten = 0;
+
+	openFiles[fileHandle].offset += bytesWritten;
+
+	return(bytesWritten);
 }
 
 uint32 File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
@@ -101,18 +108,64 @@ uint32 File_Query(uint32 fileHandle)
 	return(openFiles[fileHandle].state);
 }
 
-uint32 File_Seek(FileSeek relativity, uint32 bytes, uint32 fileHandle)
+int32 File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
+	off_t newOffset;
+	int whence;
+	
+	if(!openFiles[fileHandle].file) return -1;
+
+	switch(relativity)
+	{
+		case Seek_Begin:
+			whence = SEEK_SET;
+		case Seek_End:
+			whence = SEEK_END;
+		case Seek_Current:
+			whence = SEEK_CUR;
+	}
+
+	
+	newOffset = lseek(openFiles[fileHandle].file, bytes, whence);
+	if(newOffset != -1) {
+		openFiles[fileHandle].offset = newOffset;
+	}
+
+	return(openFiles[fileHandle].offset);
 }
 
 uint32 File_GetSize(uint32 fileHandle)
 {
+	struct stat fileStats;
+
+	if(fstat(openFiles[fileHandle].file, &fileStats) == -1) {
+		return(0);
+	}
+
+	return(fileStats.st_size);
 }
 
 uint32 File_GetSize(const char *pFilename)
 {
+	struct stat fileStats;
+
+	if(stat(pFilename, &fileStats) == -1) {
+		return(0);
+	}
+
+	return(fileStats.st_size);
 }
 
 bool File_Exists(const char *pFilename)
 {
+	struct stat fileStats;
+	int rv;
+
+	rv = stat(pFilename, &fileStats);
+	
+	if(rv == -1) {
+		return(false);
+	} else {
+		return(true);
+	}
 }

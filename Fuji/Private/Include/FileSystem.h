@@ -78,7 +78,7 @@ uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
 uint32 File_Query(uint32 fileHandle);
 
-uint32 File_Seek(FileSeek relativity, uint32 bytes, uint32 fileHandle);
+int32 File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle);
 
 uint32 File_GetSize(uint32 fileHandle);
 uint32 File_GetSize(const char *pFilename);
