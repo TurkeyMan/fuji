@@ -6,6 +6,18 @@
 #include "Texture.h"
 #include "Font.h"
 
+Font debugFont;
+
+void Font_InitModule()
+{
+	debugFont.LoadFont("D:\\Data\\Font\\ArialBlack");
+}
+
+void Font_DeinitModule()
+{
+	debugFont.Release();
+}
+
 int Font::LoadFont(char *filename)
 {
 	HANDLE file;
@@ -24,7 +36,7 @@ int Font::LoadFont(char *filename)
 
 	ReadFile(file, charwidths, 256, (LPDWORD)&bytesread, NULL);
 	CloseHandle(file);
-	
+
 	return 0;
 }
 
@@ -113,6 +125,11 @@ int Font::DrawText(float pos_x, float pos_y, float height, uint32 colour, char *
 	return DrawText(pos_x, pos_y, 0, height, colour, text, invert);
 }
 
+int Font::DrawText(Vector3 pos, float height, uint32 colour, char *text, bool invert)
+{
+	return DrawText(pos.x, pos.y, pos.z, height, colour, text, invert);
+}
+
 int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char *format, ...)
 {
 	va_list args;
@@ -145,6 +162,24 @@ int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 
 	vsprintf(buffer, format, args);
 
 	return DrawText(pos_x, pos_y, pos_z, height, colour, buffer);
+
+	delete[] buffer;
+}
+
+int Font::DrawTextf(Vector3 pos, float height, uint32 colour, char *format, ...)
+{
+	va_list args;
+
+	int len;
+	char *buffer;
+
+	va_start(args, format);
+	len = _vscprintf(format, args)+1;
+	buffer = new char[len];
+
+	vsprintf(buffer, format, args);
+
+	return DrawText(pos.x, pos.y, pos.z, height, colour, buffer);
 
 	delete[] buffer;
 }

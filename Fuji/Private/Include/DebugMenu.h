@@ -30,7 +30,7 @@ public:
 	virtual void Update();
 
 	// when being draw'n in a menu's list
-	virtual float ListDraw(bool selected, Vector3 pos) = 0;
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth) = 0;
 	virtual void ListUpdate(bool selected) = 0;
 	virtual Vector3 GetDimensions(float maxWidth) = 0;
 
@@ -49,7 +49,7 @@ public:
 	MenuItemInt(int value = 0, int inc = 1) { type = MenuType_Int; data = value; increment = inc; }
 	operator int() const { return data; }
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void Update(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -63,7 +63,7 @@ public:
 	MenuItemFloat(float value = 0.0f, float inc = 1.0f) { type = MenuType_Float; data = value; increment = inc; }
 	operator float() const { return data; }
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void Update(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -77,7 +77,7 @@ public:
 	MenuItemIntString(char *strings[], int value = 0) { type = MenuType_IntString; data = value; values = strings; }
 	operator int() const { return data; }
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void Update(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -91,7 +91,7 @@ public:
 	MenuItemBool(bool value = true) { type = MenuType_Bool; data = value; }
 	operator bool() const { return data; }
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void Update(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -105,7 +105,7 @@ public:
 	operator Vector4() const { return colour; }
 	operator uint32() const { return (uint32)(colour.w*255.0f)<<24 | (uint32)(colour.x*255.0f)<<16 | (uint32)(colour.y*255.0f)<<8 | (uint32)(colour.z*255.0f); }
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void Update(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -121,7 +121,7 @@ public:
 	virtual void Draw();
 	virtual void Update();
 
-	virtual float ListDraw(bool selected, Vector3 pos);
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
@@ -134,6 +134,8 @@ extern Menu rootMenu;
 
 void DebugMenu_InitModule();
 void DebugMenu_DeinitModule();
+
+bool DebugMenu_IsEnabled();
 
 void DebugMenu_Update();
 void DebugMenu_Draw();

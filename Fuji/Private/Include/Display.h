@@ -4,6 +4,9 @@
 #define WIDE_ASPECT 1.7777777777777777777777777777778f
 #define STANDARD_ASPECT 1.3333333333333333333333333333333f
 
+void Display_InitModule();
+void Display_DeinitModule();
+
 int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
 void DestroyDisplay();
 void Display_BeginFrame();

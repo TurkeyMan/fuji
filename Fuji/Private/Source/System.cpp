@@ -2,6 +2,7 @@
 #include "System.h"
 #include "Display.h"
 #include "Input.h"
+#include "Font.h"
 #include "Primitive.h"
 #include "DebugMenu.h"
 
@@ -13,14 +14,21 @@ float fps;
 void System_Init()
 {
 	DebugMenu_InitModule();
-	Primitive_InitModule();
+
+	DebugMenu_AddMenu("Fuji Options", &rootMenu);
+
+	Display_InitModule();
 	Input_InitModule();
+	Primitive_InitModule();
+	Font_InitModule();
 }
 
 void System_Deinit()
 {
-	Input_DeinitModule();
+	Font_DeinitModule();
 	Primitive_DeinitModule();
+	Input_DeinitModule();
+	Display_DeinitModule();
 	DebugMenu_DeinitModule();
 }
 
@@ -52,7 +60,8 @@ int System_GameLoop()
 		System_UpdateTimeDelta();
 
 		System_Update();
-		Game_Update();
+		if(!DebugMenu_IsEnabled())
+			Game_Update();
 		System_PostUpdate();
 
 		Display_BeginFrame();

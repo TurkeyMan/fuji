@@ -7,6 +7,20 @@ IDirect3DDevice8 *pd3dDevice;
 bool isortho = false;
 float fieldOfView;
 
+void Display_InitModule()
+{
+	int error;
+
+	// create the display
+	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
+	if(error) return;
+}
+
+void Display_DeinitModule()
+{
+	DestroyDisplay();
+}
+
 int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
 	D3DPRESENT_PARAMETERS presentparams;

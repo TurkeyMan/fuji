@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "Display.h"
 #include "DebugMenu.h"
 #include "Input.h"
 #include "Font.h"
@@ -29,6 +30,11 @@ void DebugMenu_DeinitModule()
 	DebugMenu_DestroyMenuTree(&rootMenu);
 }
 
+bool DebugMenu_IsEnabled()
+{
+	return debugMenuEnabled;
+}
+
 void DebugMenu_Update()
 {
 	if(!buttonsDown && Input_ReadGamepad(0, Button_LThumb) && Input_ReadGamepad(0, Button_RThumb))
@@ -37,7 +43,7 @@ void DebugMenu_Update()
 		buttonsDown = true;
 	}
 
-	if(buttonsDown && !Input_ReadGamepad(0, Button_LThumb) && !Input_ReadGamepad(0, Button_RThumb))
+	if(buttonsDown && (!Input_ReadGamepad(0, Button_LThumb) || !Input_ReadGamepad(0, Button_RThumb)))
 	{
 		buttonsDown = false;
 	}
@@ -48,8 +54,12 @@ void DebugMenu_Update()
 
 void DebugMenu_Draw()
 {
+	bool o = SetOrtho(true);
+
 	if(debugMenuEnabled)
 		pCurrentMenu->Draw();
+
+	SetOrtho(o);
 }
 
 void DebugMenu_AddItem(char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
@@ -173,10 +183,9 @@ int Menu::GetItemCount()
 	return numChildren;
 }
 
-float Menu::ListDraw(bool selected, Vector3 pos)
+float Menu::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-
-
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -189,21 +198,23 @@ void Menu::ListUpdate(bool selected)
 void Menu::Draw()
 {
 	Vector3 dimensions = { 0.0f, 0.0f, 0.0f };
-	Vector3 currentPos = Vector(0.0f, 0.0f, 0.0f);
+	Vector3 currentPos = Vector(100.0f, 200.0f, 0.0f);
 	float requestedWidth = 400.0f;
 	int a;
 
 	// get menu size
 	for(a=0; a<numChildren; a++)
 	{
-		dimensions += pChildren[a]->GetDimensions(requestedWidth);
+		Vector3 dim = pChildren[a]->GetDimensions(requestedWidth);
+		dimensions.y += dim.y;
+		dimensions.x = max(dimensions.x, dim.x);
 	}
 
 	// draw menu background
 
 	for(a=0; a<numChildren; a++)
 	{
-		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos);
+		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
 	}
 }
 
@@ -214,9 +225,9 @@ void Menu::Update()
 		selection = selection > 0 ? selection-1 : numChildren-1;
 
 	if(Input_WasPressed(0, Button_DDown))
-		selection = (selection+1)%numChildren;
+		selection = selection < numChildren-1 ? selection+1 : 0;
 
-	if(Input_WasPressed(0, Button_Y))
+	if(Input_WasPressed(0, Button_Y) && pParent)
 		pCurrentMenu = pParent;
 
 	for(int a=0; a<numChildren; a++)
@@ -227,5 +238,5 @@ void Menu::Update()
 
 Vector3 Menu::GetDimensions(float maxWidth)
 {
-	return Vector(0.0f, maxWidth, 0.0f);
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
