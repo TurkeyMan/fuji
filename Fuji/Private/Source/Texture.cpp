@@ -84,9 +84,9 @@ void Texture::SetTexture(int texUnit)
 #endif
 }
 
-void Texture::UseNone()
+void Texture::UseNone(int texUnit)
 {
-	pd3dDevice->SetTexture(0, NULL);
+	pd3dDevice->SetTexture(texUnit, NULL);
 }
 
 

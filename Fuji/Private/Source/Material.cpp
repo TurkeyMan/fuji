@@ -314,7 +314,7 @@ void Material::Use()
 	}
 	else
 	{
-		Texture::UseNone();
+		Texture::UseNone(0);
 	}
 
 	// choose renderer

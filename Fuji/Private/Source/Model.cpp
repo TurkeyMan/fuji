@@ -8,6 +8,8 @@
 
 Model* Model::Create(char *pFilename)
 {
+	CALLSTACK;
+
 	char *pModelData = File_Load(pFilename);
 	if(!pModelData) return NULL;
 
@@ -24,13 +26,13 @@ Model* Model::Create(char *pFilename)
 #if defined(_WINDOWS)
 	char *pData;
 
-	pd3dDevice->CreateVertexBuffer(sizeof(FileVertex)*pModel->pModelData->vertexCount, 0, FileVertex::FVF, D3DPOOL_DEFAULT, &pModel->pVertexBuffer, NULL);
-	pModel->pVertexBuffer->Lock(0, 0, (void**)&pData, D3DLOCK_DISCARD);
+	pd3dDevice->CreateVertexBuffer(sizeof(FileVertex)*pModel->pModelData->vertexCount, 0, FileVertex::FVF, D3DPOOL_MANAGED, &pModel->pVertexBuffer, NULL);
+	pModel->pVertexBuffer->Lock(0, 0, (void**)&pData, 0);
 	memcpy(pData, pModel->pModelData->pVertexData, sizeof(FileVertex)*pModel->pModelData->vertexCount);
 	pModel->pVertexBuffer->Unlock();
 
-	pd3dDevice->CreateIndexBuffer(sizeof(int)*pModel->pModelData->indexCount, 0, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &pModel->pIndexBuffer, NULL);
-	pModel->pIndexBuffer->Lock(0, 0, (void**)&pData, D3DLOCK_DISCARD);
+	pd3dDevice->CreateIndexBuffer(sizeof(int)*pModel->pModelData->indexCount, 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &pModel->pIndexBuffer, NULL);
+	pModel->pIndexBuffer->Lock(0, 0, (void**)&pData, 0);
 	memcpy(pData, pModel->pModelData->pIndexData, sizeof(int)*pModel->pModelData->indexCount);
 	pModel->pIndexBuffer->Unlock();
 
@@ -43,6 +45,8 @@ Model* Model::Create(char *pFilename)
 
 void Model::Draw()
 {
+	CALLSTACKc;
+
 	pd3dDevice->SetStreamSource(0, pVertexBuffer, 0, sizeof(FileVertex));
 	pd3dDevice->SetFVF(FileVertex::FVF);
 	pd3dDevice->SetIndices(pIndexBuffer);
@@ -56,6 +60,8 @@ void Model::Draw()
 
 void ModelData::FixUpPointers()
 {
+	CALLSTACK;
+
 	uint32 base = (uint32)((char*)this);
 	pName += base;
 
@@ -74,6 +80,7 @@ void ModelData::FixUpPointers()
 
 void ModelData::CollapsePointers()
 {
+	CALLSTACK;
 
 }
 

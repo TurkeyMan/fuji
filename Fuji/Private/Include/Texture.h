@@ -18,7 +18,7 @@ public:
 	void Release();
 	void SetTexture(int texUnit = 0);
 
-	static void UseNone();
+	static void UseNone(int texUnit = 0);
 
 	// data members
 	char name[64];

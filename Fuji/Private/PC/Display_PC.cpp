@@ -421,7 +421,22 @@ void Display_ResetDisplay()
 		PixelFormat = d3ddm.Format;
 	}
 
-	pd3dDevice->Reset(&present);
+	HRESULT hr;
+
+	hr = pd3dDevice->Reset(&present);
+
+	switch(hr)
+	{
+		case D3DERR_DEVICELOST:
+			MessageBox(0, "Reset: D3DERR_DEVICELOST", "Error!", MB_OK|MB_ICONERROR);
+			break;
+		case D3DERR_DRIVERINTERNALERROR:
+			MessageBox(0, "Reset: D3DERR_DRIVERINTERNALERROR", "Error!", MB_OK|MB_ICONERROR);
+			break;
+		case D3DERR_INVALIDCALL:
+			MessageBox(0, "Reset: D3DERR_INVALIDCALL", "Error!", MB_OK|MB_ICONERROR);
+			break;
+	}
 }
 
 void Display_DestroyDisplay()
