@@ -10,8 +10,9 @@ public:
 	inline void RemoveChildNode(GraphNode *pNode)
 	{
 		if(pNode == pChildren) pChildren = pChildren->pNext;
-		
-		for(GraphNode *pT = pChildren; pT && pT->pNext != pNode; pT = pT->pNext) {}
+
+		GraphNode *pT;
+		for(pT = pChildren; pT && pT->pNext != pNode; pT = pT->pNext) {}
 
 		if(pT) pT->pNext = pT->pNext->pNext;
 	}

@@ -45,10 +45,6 @@ void LOGD(const char *string);
 char* STR(const char *format, ...);
 char* STRn(const char *source, int n);
 
-// string utilities
-bool StrICompare(const char *s1, const char *s2);
-
-
 // random number functions
 uint32 Rand();
 float RandomUnit();

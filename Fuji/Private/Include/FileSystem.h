@@ -51,7 +51,7 @@ struct File
 #if defined(_XBOX) || defined(_WINDOWS)
 	HANDLE file;
 #elif defined(_LINUX)
-	FILE *file;
+	int file;
 #endif
 #if defined(_DEBUG)
 	char filename[256];
@@ -65,7 +65,8 @@ void FileSystem_DeinitModule();
 char* File_SystemPath(const char *filename);
 char* File_HomePath(const char *filename);
 
-uint32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
+/* FIXME: Is this right? */
+int32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
 void File_Close(uint32 fileHandle);
 
 char* File_Load(const char *pFilename);

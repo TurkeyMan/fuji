@@ -57,6 +57,10 @@ void Game_Deinit();
 	void DoMessageLoop();
 #endif
 
+#if defined(_LINUX)
+	void System_MessageBox(char *title, char *message);
+#endif
+
 extern uint32 gFrameCount;
 
 #endif // _SYSTEM_H

@@ -8,17 +8,16 @@
 import glob
 import string
 import sys
+import os
+import string
 
 PROCESSOR = 'athlon-xp' # Processor to tune for, doesn't break compatability
 BASENAME = 'Fuji'
-LIBS = ''
 CPPPATH = ['Include'] # Include files
-LIBPATH = [] # Link libraries
 SOURCEDIRS = ['Source']
 MASKEDFILES = []
 BINDIR = 'Bin'
 CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe -mcpu=' + PROCESSOR
-CC = 'g++'
 
 # Find out what platform we're building on, and set the platform specific options for it
 platform = str(ARGUMENTS.get('OS', Platform()))
@@ -28,8 +27,6 @@ if(platform == 'posix'):
 if(platform == 'linux'): # It should be possible to use scons on Windows too
 	SOURCEDIRS.append('Linux')
 	CPPPATH.append('/usr/X11R6/include')
-	LIBPATH.append('/usr/X11R6/lib')
-	LIBS = ['SDL' 'GL']
 	CCFLAGS += ' -D_LINUX'
 else:
 	sys.stderr.write('Platform unsupported (use OS=linux) [%s]\n' % (platform,))
@@ -72,7 +69,7 @@ for source in sources:
 
 sources = new_sources
 
-env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, LIBPATH = LIBPATH, LIBS = LIBS)
+env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, ENV = os.environ)
 
 env.SourceSignatures('timestamp')
 
