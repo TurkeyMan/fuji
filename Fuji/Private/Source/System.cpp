@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "System.h"
+#include "FileSystem.h"
 #include "Display.h"
 #include "Input.h"
 #include "Font.h"
@@ -32,11 +33,11 @@ void System_Init()
 	CALLSTACK("System_Init");
 
 	DebugMenu_InitModule();
-
 	Callstack_InitModule();
 	Timer_InitModule();
-
 	gSystemTimer.Init();
+
+	FileSystem_InitModule();
 
 	Display_InitModule();
 	Input_InitModule();
@@ -61,6 +62,9 @@ void System_Deinit()
 	Texture_DeinitModule();
 	Input_DeinitModule();
 	Display_DeinitModule();
+
+	FileSystem_DeinitModule();
+
 	Timer_DeinitModule();
 	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
