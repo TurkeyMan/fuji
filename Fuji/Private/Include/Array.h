@@ -66,6 +66,21 @@ public:
 		return pData[count-1];
 	}
 
+	inline T& push(T &x)
+	{
+		++count;
+
+		if(count >= allocated)
+		{
+			allocated *= 2;
+			pData = (T*)realloc(pData, sizeof(T) * allocated);
+		}
+
+		pData[count-1] = x;
+
+		return pData[count-1];
+	}
+
 	inline T& pop()
 	{
 		--count;

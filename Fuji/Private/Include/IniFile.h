@@ -31,6 +31,9 @@ public:
 	Vector4 AsVector4();
 
 protected:
+#if !defined(_RETAIL)
+	char pIniFilename[64];
+#endif
 	char *pIniBuffer;
 	char *pCurrent;
 };

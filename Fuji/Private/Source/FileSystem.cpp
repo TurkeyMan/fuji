@@ -43,3 +43,14 @@ char* File_SystemPath(const char *filename)
 	return STR("%s", filename);
 #endif
 }
+
+char* File_HomePath(const char *filename)
+{
+#if defined(_XBOX)
+	return STR("E:\\Home\\%s", filename);
+#elif defined(_WINDOWS)
+	return STR("Home\\%s", filename);
+#else
+	return STR("%s", filename);
+#endif
+}

@@ -21,8 +21,8 @@ enum FileOp
 
 enum FileState
 {
-	FS_Unavailable,
-	FS_Ready,
+	FS_Unavailable = -1,
+	FS_Ready = 0,
 	FS_Busy,
 	FS_Waiting
 };
@@ -57,6 +57,7 @@ void FileSystem_DeinitModule();
 
 
 char* File_SystemPath(const char *filename);
+char* File_HomePath(const char *filename);
 
 uint32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
 void File_Close(uint32 fileHandle);
@@ -67,8 +68,13 @@ uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
 uint32 File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
 uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
-uint32 File_Query();
+uint32 File_Query(uint32 fileHandle);
 
 uint32 File_Seek(FileSeek relativity, uint32 bytes, uint32 fileHandle);
+
+uint32 File_GetSize(uint32 fileHandle);
+uint32 File_GetSize(const char *pFilename);
+
+bool File_Exists(const char *pFilename);
 
 #endif

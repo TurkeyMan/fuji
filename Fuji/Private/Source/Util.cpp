@@ -263,6 +263,19 @@ char* STR(const char *format, ...)
 	return buffer;
 }
 
+char* STRn(const char *source, int n)
+{
+	char *buffer = &stringBuffer[stringOffset];
+
+	strncpy(buffer, source, n);
+
+	stringOffset += n+1;
+
+	if(stringOffset >= sizeof(stringBuffer) - 1024) stringOffset = 0;
+
+	return buffer;
+}
+
 uint32 Rand()
 {
 	return rand();

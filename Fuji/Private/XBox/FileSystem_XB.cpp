@@ -15,9 +15,17 @@ uint32 File_Open(const char *pFilename, uint32 openFlags)
 
 	if(fileID == MAX_FILE_COUNT) return -1;
 
-	openFiles[fileID].file = CreateFile(pFilename, (openFlags&OF_Write) ? GENERIC_WRITE : GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	DWORD access = ((openFlags&OF_Read) ? GENERIC_READ : NULL) | ((openFlags&OF_Write) ? GENERIC_WRITE : NULL);
+	DBGASSERT(access, "Neither OF_Read nor OF_Write specified.");
 
-	if(!openFiles[fileID].file) return -1;
+	openFiles[fileID].file = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, (openFlags&OF_Write) ? OPEN_ALWAYS : OPEN_EXISTING, NULL, NULL);
+
+	if(openFiles[fileID].file == INVALID_HANDLE_VALUE)
+	{
+		openFiles[fileID].file = 0;
+		return -1;
+	}
+	DBGASSERT(openFiles[fileID].file != 0, "Aparently CreateFile can return a valid handle of '0' ... THIS IS BAD! FIX ME!");
 
 	openFiles[fileID].state = FS_Ready;
 	openFiles[fileID].operation = FO_None;
@@ -44,6 +52,8 @@ uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 	ReadFile(openFiles[fileHandle].file, (void*)pBuffer, bytes, (DWORD*)&bytesRead, NULL);
 
+	openFiles[fileHandle].offset += bytesRead;
+
 	return bytesRead;
 }
 
@@ -52,6 +62,8 @@ uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	uint32 bytesWritten;
 
 	WriteFile(openFiles[fileHandle].file, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
+
+	openFiles[fileHandle].offset += bytesWritten;
 
 	return bytesWritten;
 }
@@ -68,14 +80,80 @@ uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	return 0;
 }
 
-uint32 File_Query()
+uint32 File_Query(uint32 fileHandle)
 {
-
-	return 0;
+	if(!openFiles[fileHandle].file) return FS_Unavailable;
+	return openFiles[fileHandle].state;
 }
 
 uint32 File_Seek(FileSeek relativity, uint32 bytes, uint32 fileHandle)
 {
+	if(!openFiles[fileHandle].file) return -1;
 
-	return 0;
+	DWORD method;
+
+	switch(relativity)
+	{
+		case Seek_Begin:
+			method = FILE_BEGIN;
+		case Seek_End:
+			method = FILE_END;
+		case Seek_Current:
+			method = FILE_CURRENT;
+	}
+
+	DWORD newPos = SetFilePointer(openFiles[fileHandle].file, bytes, NULL, method);
+
+	openFiles[fileHandle].offset = newPos;
+
+	return newPos;
+}
+
+uint32 File_GetSize(uint32 fileHandle)
+{
+	if(!openFiles[fileHandle].file) return -1;
+
+	if(openFiles[fileHandle].len != -1) return openFiles[fileHandle].len;
+
+	DWORD excess;
+	DWORD fileSize = GetFileSize(openFiles[fileHandle].file, &excess);
+
+	DBGASSERT(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
+
+	openFiles[fileHandle].len = fileSize;
+
+	return fileSize;
+}
+
+uint32 File_GetSize(const char *pFilename)
+{
+	DWORD fileSize = 0;
+
+	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+
+	if(hFile != INVALID_HANDLE_VALUE)
+	{
+		DWORD excess;
+		DWORD fileSize = GetFileSize(hFile, &excess);
+		CloseHandle(hFile);
+
+		DBGASSERT(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
+	}
+
+	return fileSize;
+}
+
+bool File_Exists(const char *pFilename)
+{
+	bool exists = false;
+
+	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+
+	if(hFile != INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(hFile);
+		exists = true;
+	}
+
+	return exists;
 }
