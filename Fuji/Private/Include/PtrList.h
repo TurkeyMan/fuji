@@ -35,7 +35,7 @@ template<class T>
 void PtrList<T>::Init(char* pGroupName, int maxElements)
 {
   CALLSTACK("PtrList::Init");
-
+/*
   if(maxElements==0)
   {
     ppMark = (T**)(&gEmptyPtrList[1]);
@@ -50,7 +50,7 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
     for(int i = 0; i<maxElements; ++i) *(++ppMark) = (T*)(0xdeadbeef);
     *(++ppMark) = 0;
   }
-
+*/
 #if defined(_MKDEBUG)
   pName = pGroupName;
 #endif
@@ -61,10 +61,11 @@ void PtrList<T>::Deinit()
 {
   CALLSTACK("PtrList::Deinit");
   DBGASSERT(ppMark!=0, "not initialised");
-
+/*
   while(*(--ppMark)!=0) {}
   if(ppMark!=(T**)(&gEmptyPtrList[0])) Heap_Free(ppMark);
   ppMark = 0;
+*/
 }
 
 template<class T>
@@ -161,7 +162,7 @@ template<class T>
 void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
 {
   CALLSTACK("PtrListDL::Init");
-
+/*
   if(maxElements==0)
   {
     ppMark = (T**)(&gEmptyPtrListDL[1]);
@@ -175,7 +176,7 @@ void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
     for(int i = 0; i<maxElements; ++i) pBegin = (T*)(int(*(++ppMark) = pBegin) + elementSize);
     *(++ppMark) = 0;
   }
-
+*/
 #if defined(_DBGASSERTS)
   pName = pGroupName;
 #endif
@@ -186,7 +187,7 @@ void PtrListDL<T>::Deinit()
 {
   CALLSTACK("PtrListDL::Deinit");
   DBGASSERT(ppMark!=0, "not initialised"); // stops double deinit's
-
+/*
   T* mem = (T*)(ppMark);  // initialise with a high value
   T** iterator = ppMark;
 
@@ -205,6 +206,7 @@ void PtrListDL<T>::Deinit()
     Heap_Free(mem);
   }
   ppMark = 0;
+*/
 }
 
 template<class T>
