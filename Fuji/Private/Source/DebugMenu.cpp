@@ -316,6 +316,23 @@ void Menu::Draw()
 
 	debugFont.DrawText(menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
+	Material::Find("SysLogoSmall")->Use();
+	float logoMargin = 5.0f;
+	float iconSize = 35.0f;
+
+	MFPrimitive(PT_TriStrip);
+	MFBegin(4);
+	MFSetColour(1,1,1,1);
+	MFSetTexCoord1(0,0);
+	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2 - iconSize, menuPosition.y + logoMargin, 0);
+	MFSetTexCoord1(1,0);
+	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2, menuPosition.y + logoMargin, 0);
+	MFSetTexCoord1(0,1);
+	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2 - iconSize, menuPosition.y + logoMargin + iconSize, 0);
+	MFSetTexCoord1(1,1);
+	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2, menuPosition.y + logoMargin + iconSize, 0);
+	MFEnd();
+
 #if defined(_WINDOWS) || defined(_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);

@@ -10,6 +10,25 @@
 
 #include "DebugMenu.h"
 
+enum TextureFormats
+{
+	TEXF_Unknown = 0,
+
+	TEXF_A8R8G8B8,
+	TEXF_R8G8B8,
+	TEXF_R5G6B5,
+	TEXF_X1R5G65B5,
+	TEXF_A8,
+
+	TEXF_I8,
+	TEXF_I4
+};
+
+enum CreateTextureFlags
+{
+	TEX_VerticalMirror = 1
+};
+
 void Texture_InitModule();
 void Texture_DeinitModule();
 
@@ -58,6 +77,9 @@ public:
 };
 
 Texture *FindTexture(const char *pName);
+
+Texture *Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uint32 format, uint32 flags = 0, uint32 *pPalette = 0);
+Texture *Texture_CreateBlank(const Vector4 &colour, uint32 width, uint32 height, uint32 format);
 
 extern PtrList<Texture> gTextureBank;
 

@@ -55,16 +55,13 @@ public:
 	// Static Methods
 	static Material* CreateDefault();
 	static Material* Create(const char *pName);
-	static void CreateMaterialFromDefinition(Material *pMat, const char *pDefinition);
+	static Material* CreateFromRawData(const char *pName, void *pData, uint32 width, uint32 height, uint32 format, uint32 flags = 0, uint32 *pPalette = 0);
+
 	inline static void UseNone() { pNone->Use(); }
+
 	inline static Material* GetCurrent() { return pCurrent; }
+
 	static Material* Find(const char *pName);
-
-	// Static Members
-	static Material *pCurrent;
-	static Material *pNone;
-
-	static IniFile materialDefinitions;
 
 	// Methods
 	void Release();
@@ -73,6 +70,15 @@ public:
 	void Update();
 
 	char* GetIDString();
+
+//protected:
+	static void CreateMaterialFromDefinition(Material *pMat, const char *pDefinition);
+
+	// Static Members
+	static Material *pCurrent;
+	static Material *pNone;
+
+	static IniFile materialDefinitions;
 
 	// Members
 	Vector4	diffuse;

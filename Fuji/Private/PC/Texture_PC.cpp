@@ -10,6 +10,154 @@
 
 /**** Functions ****/
 
+Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uint32 format, uint32 flags, uint32 *pPalette)
+{
+	HRESULT hr;
+	D3DFORMAT fmt;
+
+	Texture *pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
+	pTexture->refCount = 0;
+
+	switch(format)
+	{
+		case TEXF_Unknown:
+			DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+			break;
+
+		case TEXF_A8R8G8B8:
+			fmt = D3DFMT_A8R8G8B8;
+			break;
+
+		default:
+			DBGASSERT(false, "Texture format not yet supported..");
+	}
+
+	hr = pd3dDevice->CreateTexture(width, height, 1, 0, fmt, D3DPOOL_MANAGED, &pTexture->texture, NULL);
+
+	DBGASSERT(SUCCEEDED(hr), STR("CreateTexture failed: hr = 0x%08X", hr));
+
+	if(FAILED(hr))
+	{
+		LOGD("Couldnt Create Texture");
+		return NULL;
+	}
+
+	D3DLOCKED_RECT rect;
+
+	pTexture->texture->LockRect(0, &rect, NULL, 0);
+
+	switch(format)
+	{
+		case TEXF_Unknown:
+			DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+			break;
+
+		case TEXF_A8R8G8B8:
+		{
+			if(flags & TEX_VerticalMirror)
+			{
+				(char*&)pData += width*height*sizeof(uint32);
+
+				for(int a=0; a<height; a++)
+				{
+					(char*&)pData -= width*sizeof(uint32);
+					memcpy(rect.pBits, pData, width*sizeof(uint32));
+					(char*&)rect.pBits += width*sizeof(uint32);
+				}
+			}
+			else
+			{
+				memcpy(rect.pBits, pData, width*height*sizeof(uint32));
+			}
+			break;
+		}
+
+		default:
+			DBGASSERT(false, "Texture format not yet supported..");
+	}
+
+	pTexture->texture->UnlockRect(0);
+
+	static int createdCount = 0;
+
+	strcpy(pTexture->name, STR("CreateFromRawData%d", createdCount++));
+
+	pTexture->width = width;
+	pTexture->height = height;
+	pTexture->format = fmt;
+
+	pTexture->refCount++;
+
+	return pTexture;
+}
+
+Texture* Texture_CreateBlank(const Vector4 &colour, uint32 width, uint32 height, uint32 format)
+{
+	HRESULT hr;
+	D3DFORMAT fmt;
+
+	Texture *pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
+	pTexture->refCount = 0;
+
+	switch(format)
+	{
+		case TEXF_Unknown:
+			DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+			break;
+
+		case TEXF_A8R8G8B8:
+			fmt = D3DFMT_A8R8G8B8;
+			break;
+
+		default:
+			DBGASSERT(false, "Texture format not yet supported..");
+	}
+
+	hr = pd3dDevice->CreateTexture(width, height, 1, 0, fmt, D3DPOOL_DEFAULT, &pTexture->texture, NULL);
+
+	DBGASSERT(SUCCEEDED(hr), STR("CreateTexture failed: hr = 0x%08X", hr));
+
+	if(FAILED(hr))
+	{
+		LOGD("Couldnt Create Texture");
+		return NULL;
+	}
+
+	D3DLOCKED_RECT rect;
+
+	pTexture->texture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
+
+	switch(format)
+	{
+		case TEXF_Unknown:
+			DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+			break;
+
+		case TEXF_A8R8G8B8:
+		{
+			memset(rect.pBits, colour.ToARGB(), width*height*sizeof(uint32));
+			break;
+		}
+
+		default:
+			DBGASSERT(false, "Texture format not yet supported..");
+	}
+
+	pTexture->texture->UnlockRect(0);
+
+	static int blankCount = 0;
+
+	strcpy(pTexture->name, STR("CreateBlank%d", blankCount++));
+
+	pTexture->width = width;
+	pTexture->height = height;
+	pTexture->format = fmt;
+
+	pTexture->refCount++;
+
+	return pTexture;
+}
+
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
 	Texture *pTexture = FindTexture(filename);

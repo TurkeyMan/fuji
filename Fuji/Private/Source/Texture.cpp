@@ -34,6 +34,7 @@ Texture *FindTexture(const char *pName)
 	return NULL;
 }
 
+
 // texture browser
 TextureBrowser::TextureBrowser()
 {

@@ -9,6 +9,9 @@
 #include "FileSystem.h"
 #include "IniFile.h"
 
+#include "SysLogo-256.h"
+#include "SysLogo-64.h"
+
 /**** Globals ****/
 
 IniFile Material::materialDefinitions;
@@ -17,6 +20,9 @@ PtrListDL<Material> materialList;
 
 Material *Material::pCurrent = NULL;
 Material *Material::pNone = NULL;
+
+Material *pSysLogoLarge;
+Material *pSysLogoSmall;
 
 char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
 
@@ -34,6 +40,9 @@ void Material_InitModule()
 	}
 
 	Material::pNone = Material::Create("None");
+
+	pSysLogoLarge = Material::CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	pSysLogoLarge = Material::CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
 }
 
 void Material_DeinitModule()
@@ -92,7 +101,7 @@ Material* Material::CreateDefault()
 	pMat->specular = Vector4::zero;
 	pMat->specularPow = 0;
 
-	pMat->materialType = 0;
+	pMat->materialType = MF_AlphaBlend;
 	pMat->opaque = true;
 
 	pMat->refCount = 1;
@@ -324,6 +333,26 @@ Material* Material::Create(const char *pName)
 	return pMat;
 }
 
+Material* Material::CreateFromRawData(const char *pName, void *pData, uint32 width, uint32 height, uint32 format, uint32 flags, uint32 *pPalette)
+{
+	CALLSTACK;
+
+	Material *pMat = NULL;
+
+	// if material already exists, bump refCount
+
+	pMat = Material::CreateDefault();
+
+	pMat->pTextures[pMat->textureCount] = Texture_CreateFromRawData(pData, width, height, format, flags, pPalette);
+	pMat->diffuseMapIndex = pMat->textureCount;
+	pMat->textureCount++;
+	strcpy(pMat->name, pName);
+
+	pMat->refCount = 1;
+
+	return pMat;
+}
+
 void Material::Release()
 {
 	CALLSTACK;
@@ -346,6 +375,22 @@ void Material::Use()
 	CALLSTACK;
 
 	pCurrent = this;
+}
+
+Material* Material::Find(const char *pName)
+{
+	CALLSTACK;
+
+	Material **ppIterator = materialList.Begin();
+
+	while(*ppIterator)
+	{
+		if(!StrCaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
+
+		ppIterator++;
+	}
+
+	return NULL;
 }
 
 void Material::Update()

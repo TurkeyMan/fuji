@@ -182,7 +182,23 @@ void System_Draw()
 		debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+			debugFont.DrawTextf(80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+
+		Material::Find("SysLogoSmall")->Use();
+		float iconSize = 64.0f;
+
+		MFPrimitive(PT_TriStrip);
+		MFBegin(4);
+		MFSetColour(1,1,1,0.5f);
+		MFSetTexCoord1(0,0);
+		MFSetPosition(15, 410, 0);
+		MFSetTexCoord1(1,0);
+		MFSetPosition(70, 410, 0);
+		MFSetTexCoord1(0,1);
+		MFSetPosition(15, 465, 0);
+		MFSetTexCoord1(1,1);
+		MFSetPosition(70, 465, 0);
+		MFEnd();
 	}
 
 	DebugMenu_Draw();

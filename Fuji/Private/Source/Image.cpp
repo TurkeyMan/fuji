@@ -53,7 +53,7 @@ Image::~Image()
 void Image::Convert(ImageFormat toFormat)
 {
 	CALLSTACK;
-	
+
 	unsigned char *p = (unsigned char *)pixels;
 	unsigned char temp;
 
@@ -97,7 +97,7 @@ void Image::Convert(ImageFormat toFormat)
 void Image::VFlip(void)
 {
 	CALLSTACK;
-	
+
 	unsigned char *tempPixels, *top, *bottom;
 	uint32 verticalRange, horizSpan;
 
@@ -128,7 +128,7 @@ void Image::VFlip(void)
 Image * LoadTGA(const char *filename, bool flipped)
 {
 	CALLSTACK;
-	
+
 	unsigned char *contents, *position;
 	bool isSavedFlipped = true;
 
@@ -178,7 +178,7 @@ Image * LoadTGA(const char *filename, bool flipped)
 		Heap_TFree(contents);
 		return(NULL);
 	}
-	
+
 	position += header->idLength;
 
 	Image *image = new Image;
