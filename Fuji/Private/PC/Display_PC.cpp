@@ -23,7 +23,7 @@ bool initialised = false;
 
 // i will dynamically construct a list later from supported resolution
 // provided by directx, verified by the monitor driver
-const int resList[][2] = { {320, 240}, {400, 300}, {640, 480}, {800, 600}, {1024, 768}, {1152, 864}, {1280, 720}, {1280, 1024}, {1600, 1200}, {1920, 1080}, {1920, 1440} };
+const int resList[][2] = { {320, 240}, {400, 300}, {640, 480}, {800, 600}, {1024, 768}, {1152, 864}, {1280, 720}, {1280,800}, {1280, 1024}, {1600, 1200}, {1920, 1080}, {1920, 1200}, {1920, 1440} };
 const int numModes = sizeof(resList) / (sizeof(int)*2);
 
 // debug menu resolution setting
@@ -43,7 +43,7 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 
 	display.wide = false;
 
-	if(resList[currentMode][1] == 720 || resList[currentMode][1] == 1080)
+	if(resList[currentMode][1] == 720 || resList[currentMode][1] == 800 || resList[currentMode][1] == 1080 && (resList[currentMode][0] == 1920 || resList[currentMode][1] == 1200))
 		display.wide = true;
 
 	display.width = display.fullscreenWidth;
