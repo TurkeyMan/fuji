@@ -181,8 +181,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	
 	glEnable(GL_LINE_SMOOTH);
 	
-	glFrontFace(GL_CW);
-	glCullFace(GL_BACK);
+//	glFrontFace(GL_CW);
+//	glCullFace(GL_BACK);
 
 	glDisable(GL_LIGHTING);
 
@@ -191,13 +191,6 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	glEnable(GL_TEXTURE_2D);
 	
-	/* OpenGL uses a right handed coordinate system by default, yuck */
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	
-	glScalef(1.0f, 1.0f, -1.0f);
-	glPushMatrix(); /* Store the default at the top of the stack */
-
 	return(0);
 }
 
@@ -216,6 +209,8 @@ void Display_DestroyDisplay()
 void Display_BeginFrame()
 {
 	CALLSTACK;
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void Display_EndFrame()
@@ -229,18 +224,35 @@ void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACK;
 
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void SetProjection(float fov)
 {
 	CALLSTACK;
+	GLfloat matrix[16];
+
+	float height = sinf(fov / 2) / cosf(fov / 2);
+	float aspect = (float)display.width / (float)display.height;
+	float width = height * aspect;
+	
+	float nearZ = 0.1f;
+	float farZ = 1000.0f;
+	
+	matrix[0] = width;
+	matrix[5] = height;
+	matrix[10] = farZ / (farZ / nearZ);
+	matrix[12] = matrix[13] = 0.0f;
+	matrix[14] = -(nearZ * farZ)/(farZ - nearZ);
+
+	matrix[11] = 1.0f;
+	matrix[1] = matrix[2] = matrix[3] = matrix[4] = matrix[5] = matrix[7] = matrix[8] = matrix[9] = matrix[15] = 0;
 
 	fieldOfView = fov;
 
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fov, (float)display.width/(float)display.height, 0.1f, 1000.0f);	
+	glLoadMatrixf((GLfloat *)matrix);
 }
 
 bool SetOrtho(bool enable, float width, float height)
@@ -254,7 +266,19 @@ bool SetOrtho(bool enable, float width, float height)
 	glLoadIdentity();
 
 	if(enable) {
-		glOrtho(0, width -1 , height - 1, 0, 0.0f, 1000.0f);
+		float matrix[16];
+		float nearZ = 0.1f;
+		float farZ = 1000.0f;
+
+		matrix[0] = 2/(width);
+		matrix[5] = 2/(height);
+		matrix[10] = 1/(farZ - nearZ);
+		matrix[14] = nearZ / (nearZ - farZ);
+		matrix[15] = 1.0f;
+
+		matrix[1] = matrix[2] = matrix[3] = matrix[4] = matrix[6] = matrix[7] = matrix[8] = matrix[9] = matrix[11] = matrix[12] = matrix[13] = 0.0f;
+
+		glLoadMatrixf((GLfloat *)matrix);
 	} else {
 		SetProjection(fieldOfView);
 	}
