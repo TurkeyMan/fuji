@@ -12,13 +12,17 @@ Font debugFont;
 
 void Font_InitModule()
 {
+	CALLSTACK("Font_InitModule");
+
 	pd3dDevice->CreateVertexBuffer(2048*6*sizeof(FontVertex), NULL, NULL, NULL, &fontBuffer);
 
-	debugFont.LoadFont("D:\\Data\\Font\\ArialBlack");
+	debugFont.LoadFont("D:\\Data\\Font\\Arial");
 }
 
 void Font_DeinitModule()
 {
+	CALLSTACK("Font_DeinitModule");
+
 	debugFont.Release();
 
 	fontBuffer->Release();
@@ -26,6 +30,8 @@ void Font_DeinitModule()
 
 int Font::LoadFont(char *filename)
 {
+	CALLSTACK("Font::LoadFont");
+
 	HANDLE file;
 	char tempbuffer[1024];
 	uint32 bytesread;
@@ -48,11 +54,15 @@ int Font::LoadFont(char *filename)
 
 void Font::Release()
 {
+	CALLSTACK("Font::Release");
+
 	pTexture->Release();
 }
 
 int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *text, bool invert)
 {
+	CALLSTACKc("Font::DrawText");
+
 	FontVertex *v;
 	int textlen = strlen(text);
 
@@ -64,10 +74,10 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)(text[i] & 0x0F) * (float)(pTexture->width / 16);
-		y = (float)(text[i] >> 4) * (float)(pTexture->height / 16);
+		x = (float)((uint8)text[i] & 0x0F) * (float)(pTexture->width / 16);
+		y = (float)((uint8)text[i] >> 4) * (float)(pTexture->height / 16);
 
-		w = (float)charwidths[text[i]];
+		w = (float)charwidths[(uint8)text[i]];
 		h = (float)pTexture->height/16.0f;
 
 		x /= (float)pTexture->width;
@@ -135,6 +145,8 @@ int Font::DrawText(Vector3 pos, float height, uint32 colour, char *text, bool in
 
 int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char *format, ...)
 {
+	CALLSTACK("Font::DrawTextf");
+
 	va_list args;
 
 	int len;
@@ -153,6 +165,8 @@ int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char 
 
 int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *format, ...)
 {
+	CALLSTACK("Font::DrawTextf");
+
 	va_list args;
 
 	int len;
@@ -171,6 +185,8 @@ int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 
 
 int Font::DrawTextf(Vector3 pos, float height, uint32 colour, char *format, ...)
 {
+	CALLSTACK("Font::DrawTextf");
+
 	va_list args;
 
 	int len;

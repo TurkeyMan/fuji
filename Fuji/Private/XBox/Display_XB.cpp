@@ -10,6 +10,8 @@ float fieldOfView;
 
 void Display_InitModule()
 {
+	CALLSTACK("Display_InitModule");
+
 	int error;
 
 	// create the display
@@ -21,11 +23,15 @@ void Display_InitModule()
 
 void Display_DeinitModule()
 {
+	CALLSTACK("Display_DeinitModule");
+
 	DestroyDisplay();
 }
 
 int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
+	CALLSTACK("CreateDisplay");
+
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
 	
@@ -59,29 +65,38 @@ int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool tri
 
 void DestroyDisplay()
 {
+	CALLSTACK("DestroyDisplay");
+
 	pd3dDevice->Release();
 	d3d8->Release();
 }
 
 void Display_BeginFrame()
 {
+	CALLSTACK("Display_BeginFrame");
+
 	pd3dDevice->BeginScene();
 }
 
 void Display_EndFrame()
 {
+	CALLSTACK("Display_EndFrame");
+
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
-
 }
 
 void ClearScreen()
 {
+	CALLSTACK("ClearScreen");
+
 	pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)
 {
+	CALLSTACK("SetProjection");
+
 	D3DXMATRIX proj;
 
 	fieldOfView = fov;
@@ -93,6 +108,8 @@ void SetProjection(float fov)
 
 bool SetOrtho(bool enable, float width, float height)
 {
+	CALLSTACK("SetOrtho");
+
 	D3DXMATRIX proj;
 
 	bool t = isortho;

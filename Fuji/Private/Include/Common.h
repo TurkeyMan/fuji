@@ -15,6 +15,13 @@
 #define PI 3.141592653589f
 #define ALMOST_ZERO 0.000001f
 
+#if !defined(_RETAIL)
+	#define _CALLSTACK_PROFILING
+
+	#if defined(_CALLSTACK_PROFILING)
+		//#define _CALLSTACK_MONITORING
+	#endif
+#endif
 
 // Data Type Definition
 typedef unsigned int uint128[4];
@@ -27,6 +34,10 @@ typedef short int16;
 typedef unsigned char uint8;
 typedef char int8;
 
+// useful macros
+#define Clamp(x,y,z) max((x), min((y),(z)))
+
+#include "Callstack.h"
 #include "Util.h"
 
 #endif // _COMMON_H

@@ -5,8 +5,12 @@
 #include "Font.h"
 #include "Primitive.h"
 #include "DebugMenu.h"
+#include "Timer.h"
+#include "Font.h"
 
 int quit;
+uint32 gFrameCount = 0;
+
 MenuItemStatic quitOption;
 MenuItemFloat mf(0, 10);
 MenuItemInt mi;
@@ -16,8 +20,7 @@ MenuItemColour col;
 char *strings[] = { "Hello", "World", "Tang!", NULL };
 MenuItemIntString mis(strings);
 
-float TIMEDELTA = 0.0f;
-float fps;
+Timer gSystemTimer;
 
 void QuitCallback(MenuObject *pMenu, void *pData)
 {
@@ -26,9 +29,16 @@ void QuitCallback(MenuObject *pMenu, void *pData)
 
 void System_Init()
 {
+	CALLSTACK("System_Init");
+
 	DebugMenu_InitModule();
 
 	DebugMenu_AddMenu("Fuji Options", &rootMenu);
+
+	Callstack_InitModule();
+	Timer_InitModule();
+
+	gSystemTimer.Init();
 
 	Display_InitModule();
 	Input_InitModule();
@@ -46,32 +56,54 @@ void System_Init()
 
 void System_Deinit()
 {
+	CALLSTACK("System_Deinit");
+
 	Font_DeinitModule();
 	Primitive_DeinitModule();
 	Texture_DeinitModule();
 	Input_DeinitModule();
 	Display_DeinitModule();
+	Timer_DeinitModule();
+	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
 }
 
 void System_Update()
 {
+	CALLSTACKc("System_Update");
+
 	Input_Update();
 	DebugMenu_Update();
 }
 
 void System_PostUpdate()
 {
+	CALLSTACK("System_PostUpdate");
 
 }
 
 void System_Draw()
 {
+	CALLSTACKc("System_Draw");
+
+	bool o = SetOrtho(true);
+
+	Callstack_DrawProfile();
+
+	//FPS Display
+	debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
+	float rate = (float)gSystemTimer.GetRate();
+	if(rate != 1.0f)
+		debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %.2f", rate);
+
 	DebugMenu_Draw();
+
+	SetOrtho(o);
 }
 
 int System_GameLoop()
 {
+	CALLSTACK("System_GameLoop");
 	quit = 0;
 
 	System_Init();
@@ -79,7 +111,9 @@ int System_GameLoop()
 
 	while(!quit)
 	{
+		Callstack_BeginFrame();
 		System_UpdateTimeDelta();
+		gFrameCount++;
 
 		System_Update();
 		if(!DebugMenu_IsEnabled())
@@ -91,6 +125,7 @@ int System_GameLoop()
 		Game_Draw();
 		System_Draw();
 
+		Callstack_EndFrame();
 		Display_EndFrame();
 	}
 
@@ -102,25 +137,15 @@ int System_GameLoop()
 
 void System_UpdateTimeDelta()
 {
-	static uint64 frameStart = ReadPerformanceCounter();
-	static int updatefps = 0;
+	CALLSTACK("System_UpdateTimeDelta");
 
-	uint64 time = ReadPerformanceCounter();
-
-	TIMEDELTA = (float)((double)(time-frameStart)/(double)GetPerfprmanceFrequency());
-
-	if(!updatefps)
-	{
-		fps = 1.0f/TIMEDELTA;
-	}
-
-	updatefps++;
-	updatefps%=20;
-	frameStart = time;
+	gSystemTimer.Update();
 }
 
 float GetFPS()
 {
-	return (float)fps;
+	CALLSTACK("GetFPS");
+
+	return gSystemTimer.GetFPS();
 }
 

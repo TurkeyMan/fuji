@@ -73,15 +73,15 @@ void dbgAssert(char *pReason, char *pMessage, char *pFile, int line)
 
   // build callstack log string for message box
 #if defined(_DEBUG)
-  char callstack[2048] = "Not yet Available...";
-/*
+  char callstack[2048] = "";
+
   for(Callstack *pFunc = Callstack::pCallstack; pFunc; pFunc = pFunc->pParent)
   {
     char *pTemp = STR("  %-32s\t(%s)%s\n",pFunc->pStats->pFunctionName,ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
     if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
       strcat(callstack, pTemp);
   }
-*/
+
 #else
   char callstack[] = "Not available in _RETAIL builds";
 #endif

@@ -1,6 +1,8 @@
 #if !defined(_SYSTEM_H)
 #define _SYSTEM_H
 
+#include "Timer.h"
+
 uint64 ReadPerformanceCounter();
 uint64 GetPerfprmanceFrequency();
 
@@ -21,6 +23,7 @@ void Game_Update();
 void Game_Draw();
 void Game_Deinit();
 
-extern float TIMEDELTA;
+#define TIMEDELTA gSystemTimer.TimeDeltaF()
+extern Timer gSystemTimer;
 
 #endif // _SYSTEM_H
