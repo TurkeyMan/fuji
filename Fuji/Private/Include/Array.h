@@ -63,34 +63,12 @@ public:
 
 	inline T& push()
 	{
-		++count;
-
-		if(count >= allocated)
-		{
-			int oldAlloc = allocated;
-			allocated *= 2;
-			pData = (T*)realloc(pData, sizeof(T) * allocated);
-			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
-		}
-
-		return pData[count-1];
+		return pData[size()];
 	}
 
 	inline T& push(T &x)
 	{
-		++count;
-
-		if(count >= allocated)
-		{
-			int oldAlloc = allocated;
-			allocated *= 2;
-			pData = (T*)realloc(pData, sizeof(T) * allocated);
-			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
-		}
-
-		pData[count-1] = x;
-
-		return pData[count-1];
+		return pData[size()] = x;
 	}
 
 	inline T& pop()

@@ -12,7 +12,7 @@
 class Vector3;
 
 // triggers a debug BREAKPOINT
-#if defined(_WINDOWS) || defined(_XBOX)
+#if defined(_WINDOWS) || defined(_XBOX) || defined(_FUJI_UTIL)
 	#define BREAKPOINT { __asm { int 3 }; }
 #elif defined(_LINUX)
 	#define BREAKPOINT { asm("int $3"); }

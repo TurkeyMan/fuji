@@ -16,7 +16,7 @@ uint32 stringOffset;
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {
-	int x = strlen(pSourceFileName)-1;
+	int x = (int)strlen(pSourceFileName)-1;
 
 	while(x >= 0 && pSourceFileName[x] != '/' && pSourceFileName[x] != '\\')
 	{
