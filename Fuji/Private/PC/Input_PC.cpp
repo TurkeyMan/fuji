@@ -1,5 +1,6 @@
 #define SAMPLE_BUFFER_SIZE 128//50000
 
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
 #include "Common.h"
