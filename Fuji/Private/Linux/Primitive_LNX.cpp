@@ -71,7 +71,7 @@ void MFBegin(uint32 beginVertexCount)
 void MFSetMatrix(const Matrix &mat)
 {
 	glMatrixMode(GL_MODELVIEW);
-	glMultMatrixf((GLfloat *)&mat);
+	glLoadMatrixf((GLfloat *)&mat);
 }
 
 void MFSetColour(const Vector4 &colour)

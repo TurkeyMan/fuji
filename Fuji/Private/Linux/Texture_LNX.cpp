@@ -1,23 +1,7 @@
 #include "Common.h"
 #include "Texture.h"
 #include "FileSystem.h"
-
-struct TgaHeader {
-	uint8 idLength;
-	uint8 colourMapType;
-	uint8 imageType;
-
-	uint8 colourMapStart;
-	uint16 colourMapLength;
-	uint8 colourMapBits;
-
-	uint16 xStart;
-	uint16 yStart;
-	uint16 width;
-	uint16 height;
-	uint8 bpp;
-	uint8 flags;
-};
+#include "Image.h"
 
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
@@ -27,96 +11,53 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
 		pTexture->refCount = 0;
 	}
-	
+
 	if(!pTexture->refCount) {
-		int32 handle;
-		TgaHeader header;
-		void *imageData;
-
-		if((handle = File_Open(filename, OF_Read)) == -1) {
-			LOGD(STR("Failed loading texture: %s", filename));
-			return(NULL);
-		}
-
-		if(File_Read(&header, sizeof(header), handle) < sizeof(header)) {
-			LOGD(STR("Failed loading texture: %s", filename));
-			return(NULL);
-		}
-
-		if(header.imageType != 2) { // Can't handle RLE images
-			LOGD(STR("Failed loading texture: %s (Unhandled TGA type (%d))", filename, header.imageType));
-			File_Close(handle);
-			return(NULL);
-		}
-
-		if((header.bpp != 24) && (header.bpp != 32)) {
-			LOGD(STR("Failed loading texture: %s (Invalid image depth (%d))", filename, header.bpp));
-			File_Close(handle);
-		}
-
-		// Not interested in the image id, it's just a comment
-		File_Seek(Seek_Current, header.idLength, handle);
-
-		// Not interested in the colour map (oddly, the file format spec seems to indicate that an image can be truecolour, and still have a colourmapi, do this seek just in case. Obviously, nothing happens if colourMapType is 0)
-		File_Seek(Seek_Current, header.colourMapLength * header.colourMapBits * header.colourMapType, handle);
-
-		uint32 dataLength;
-		
-		if(header.bpp == 32) {
-			dataLength = header.width * header.height * 4;
-		} else {
-			dataLength = header.width * header.height * 3;
-		}
-
-		imageData = Heap_TAlloc(dataLength);
-
-		File_Read(imageData, dataLength, handle);
-		File_Close(handle);
-
 		GLint internalFormat;
 		GLenum format;
+		GLenum target;
+		Image *image;
 
-		if(header.bpp == 32) {
+		image = LoadTGA(filename, false);
+
+		for(uint32 i=0; i < image->width * image->height; i++) {
+			unsigned char *pixel = &(((unsigned char *)image->pixels)[i * image->bytesPerPixel]);
+			unsigned char temp;
+
+			temp = pixel[0];
+			pixel[0] = pixel[2];
+			pixel[2] = temp;
+		}
+
+		if(image->bitsPerPixel == 32) {
 			internalFormat = GL_RGBA;
-			format = GL_RGBA8;
-
-			// OpenGL can only handle RGBA, TGA provides ARGB
-			for(int32 i=0; i < (header.width * header.height); i++) {
-				unsigned char temp;
-
-				temp = ((unsigned char *)imageData)[(i * 4) + 3];
-				((unsigned char *)imageData)[(i * 4) + 3] = ((unsigned char *)imageData)[(i * 4)];
-				((unsigned char *)imageData)[(i * 4)] = temp;
-			}
+			format = GL_RGBA;
 		} else { // Must be 24
 			internalFormat = GL_RGB;
-			format = GL_RGBA8;
+			format = GL_RGB;
 		}
 
+		DBGASSERT(image->width == image->height, "Textures must be square!");
+
+		glEnable(GL_TEXTURE_2D);
 		glGenTextures(1, &(pTexture->textureID));
 		glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-//		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		
 		if(generateMipChain) {
-			gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, header.width, header.height, format, GL_UNSIGNED_BYTE, imageData);
+			gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, image->width, image->height, format, GL_UNSIGNED_BYTE, image->pixels);
 		} else {
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, header.width, header.height, 0, format, GL_UNSIGNED_BYTE, imageData);
+			glTexImage2D(target, 0, internalFormat, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->pixels);
 		}
 
-		Heap_TFree(imageData);
-
-//		if(rv != 0) {
-//			LOGD(STR("Failed loading texture: %s (Unable to create OpenGL texture object)", filename));
-//			return(NULL);
-//		}
-	
 		strcpy(pTexture->name, filename);
-		pTexture->width = header.width;
-		pTexture->height = header.height;
+		pTexture->width = image->width;
+		pTexture->height = image->height;
+
+		delete image;
 	}
 
 	pTexture->refCount++;
@@ -137,6 +78,7 @@ void Texture::SetTexture(int texUnit)
 {
 //	glActiveTexture(texUnit);
 	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //	glActiveTexture(0);
 }
 
