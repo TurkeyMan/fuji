@@ -10,6 +10,7 @@ enum ClearScreenFlags
 	CS_ZBuffer	= 2
 };
 
+// global functions
 void Display_InitModule();
 void Display_DeinitModule();
 
@@ -27,6 +28,7 @@ bool SetOrtho(bool enable, float width = 640.0f, float height = 480.0f);
 void SetViewport(float x, float y, float width, float height);
 void ResetViewport();
 
+// display settings
 struct DisplaySettings
 {
 	int width, height;
@@ -40,16 +42,36 @@ struct DisplaySettings
 
 extern DisplaySettings display;
 
+// renderable interface
+enum RenderFlags
+{
+	RF_OrderMask	= 0x0000000F,
+
+	RF_Transparent	= (1<<4),
+	RF_Terrain		= (1<<5),
+	RF_Overlay		= (1<<6),
+	RF_BelowWater	= (1<<7),
+	RF_AboveWater	= (1<<8),
+
+	RF_ForceInt		= 0x7FFFFFFF
+};
+
+class Renderable
+{
+public:
+	virtual void Draw() = 0;
+
+	uint32 flags;
+};
+
+// platform specific stuff
 #if defined(_XBOX)
-
-extern IDirect3DDevice8 *pd3dDevice;
-
+	extern IDirect3DDevice8 *pd3dDevice;
 #elif defined(_WINDOWS)
-
-extern IDirect3DDevice9 *pd3dDevice;
-
+	extern IDirect3DDevice9 *pd3dDevice;
 #endif
 
+// vertex formats.. to be removed later
 #if defined(_XBOX) || defined(_WINDOWS)
 
 class Vec3

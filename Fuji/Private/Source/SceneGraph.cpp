@@ -1,7 +1,8 @@
 #include "Common.h"
 #include "SceneGraph.h"
 
-SceneGraph gSceneGraph;
+// stores a 'soup' of objects int he scene
+PtrList<GraphObject> gObjectSoup;
 
 void SceneGraph_InitModule()
 {

@@ -4,8 +4,7 @@
 
 extern File openFiles[MAX_FILE_COUNT];
 
-/* FIXME: Did you mean int32? You're trying to return minus values */
-uint32 File_Open(const char *pFilename, uint32 openFlags)
+int File_Open(const char *pFilename, uint32 openFlags)
 {
 	int fileID;
 

@@ -65,8 +65,7 @@ void FileSystem_DeinitModule();
 char* File_SystemPath(const char *filename);
 char* File_HomePath(const char *filename);
 
-/* FIXME: Is this right? */
-int32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
+int File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
 void File_Close(uint32 fileHandle);
 
 char* File_Load(const char *pFilename);

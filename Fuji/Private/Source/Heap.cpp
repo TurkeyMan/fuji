@@ -134,6 +134,17 @@ void SetCurrentHeap(Heap *pHeap)
 	pCurrentHeap = pHeap;
 }
 
+void Heap_PushGroupName(const char *pGroupName)
+{
+	// TODO: push group name into group stack
+	// new allocation will reference this group name for identification
+}
+
+void Heap_PopGroupName()
+{
+
+}
+
 #if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile, uint32 line)
 #else

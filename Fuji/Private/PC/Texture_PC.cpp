@@ -12,7 +12,13 @@
 
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
-	Texture *pTexture = &gTextureBank[filename];
+	Texture *pTexture = FindTexture(filename);
+
+	if(!pTexture)
+	{
+		pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
+		pTexture->refCount = 0;
+	}
 
 	D3DSURFACE_DESC fontdesc;
 	HRESULT hr;

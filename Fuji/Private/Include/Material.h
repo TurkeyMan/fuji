@@ -121,6 +121,7 @@ public:
 	uint32 envMapIndex			: 3;
 	uint32 reflectionMapIndex	: 3;
 	uint32 normalMapIndex		: 3;
+	// glossMap?
 
 	uint32 cubeMapIndex			: 3; // some what if's
 	uint32 displacementMapIndex	: 3;

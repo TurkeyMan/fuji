@@ -11,8 +11,6 @@ void Texture_DeinitModule();
 class Texture
 {
 public:
-	Texture();
-
 	// member functions
 	static Texture* LoadTexture(const char *filename, bool generateMipChain = true);
 	void Release();
@@ -52,7 +50,9 @@ public:
 	int selection;
 };
 
-extern std::map<std::string, Texture> gTextureBank;
+Texture *FindTexture(const char *pName);
+
+extern PtrList<Texture> gTextureBank;
 
 
 #endif // _TEXTURE_H

@@ -5,11 +5,13 @@
 #include "Font.h"
 #include "Primitive.h"
 
-std::map<std::string, Texture> gTextureBank;
+PtrList<Texture> gTextureBank;
 TextureBrowser texBrowser;
 
 void Texture_InitModule()
 {
+	gTextureBank.Init("Texture Bank", gDefaults.texture.maxTextures);
+
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 }
 
@@ -18,9 +20,18 @@ void Texture_DeinitModule()
 
 }
 
-Texture::Texture()
+Texture *FindTexture(const char *pName)
 {
-	refCount = 0;
+	Texture **ppIterator = gTextureBank.Begin();
+
+	while(*ppIterator)
+	{
+		if(!stricmp(pName, (*ppIterator)->name)) return *ppIterator;
+
+		ppIterator++;
+	}
+
+	return NULL;
 }
 
 // texture browser
@@ -46,12 +57,12 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 {
 	Vector3 pos = _pos;
 
-	std::map<std::string, Texture>::iterator i;
-	i = gTextureBank.begin();
+	Texture **i;
+	i = gTextureBank.Begin();
 
 	for(int a=0; a<selection; a++) i++;
 
-	Texture *pTexture = &i->second;
+	Texture *pTexture = *i;
 
 	debugFont.DrawText(pos+Vector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s:", name));
 	debugFont.DrawText(pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s", pTexture->name));
@@ -113,7 +124,7 @@ void TextureBrowser::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		int texCount = gTextureBank.size();
+		int texCount = gTextureBank.GetLength();
 
 		if(Input_WasPressed(0, Button_DLeft))
 		{

@@ -4,7 +4,7 @@
 
 extern File openFiles[MAX_FILE_COUNT];
 
-uint32 File_Open(const char *pFilename, uint32 openFlags)
+int File_Open(const char *pFilename, uint32 openFlags)
 {
 	int fileID;
 

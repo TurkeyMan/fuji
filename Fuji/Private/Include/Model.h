@@ -1,6 +1,8 @@
 #if !defined(_MODEL_H)
 #define _MODEL_H
 
+#include "Display.h"
+#include "SceneGraph.h"
 #include "Matrix.h"
 
 class Animation;
@@ -25,6 +27,87 @@ enum VertexFormat
 	VF_TexMask	= (15<<12)
 };
 
+class MeshChunk;
+class ModelData;
+
+class Model : public Renderable
+{
+public:
+	static Model* Create(char *pFilename);
+	void Release();
+
+	virtual void Draw(Matrix *pLocalToWorld = NULL);
+
+	Matrix worldMatrix; 
+
+	ModelData *pModelData;
+	Animation *pAnimation;
+};
+
+class MeshChunk : public Renderable
+{
+public:
+	virtual void Draw(Matrix *pLocalToWorld = NULL);
+
+	uint16 vertexFormat;
+	uint16 vertexSize;
+	uint32 vertexCount;
+	uint32 vertexOffset;
+
+	uint32 indexCount;
+	uint32 indexOffset;
+
+	uint32 materialIndex;
+
+#if defined(_WINDOWS)
+	IDirect3DVertexBuffer9 *pVertexBuffer;
+	IDirect3DIndexBuffer9 *pIndexBuffer;
+#else
+	uint32 reserved[2];
+#endif
+};
+
+class ModelData
+{
+public:
+	uint32 IDtag;
+	char *pName;
+
+	uint16 meshChunkCount;
+	uint16 materialCount;
+	uint16 boneCount;
+	uint16 customDataCount;
+	uint32 flags;
+
+	MeshChunk *pMeshChunks;
+
+	struct MaterialData
+	{
+		char *pName;
+		char *pMaterialDescription;
+		Material *pMaterial;
+		uint32 reserved;
+	} *pMaterials;
+
+	struct CustomData
+	{
+		uint16 customDataType;
+		uint16 count;
+		void *pData;
+		uint32 res;
+		uint32 res2;
+	} *pCustomData;
+
+	void FixUpPointers();
+	void CollapsePointers();
+};
+
+extern PtrList<ModelData> gModelBank;
+
+////////////////////////////////////////
+// code beyond here is obsolete....
+////////////////////////////////////////
+/*
 class Subobject
 {
 public:
@@ -102,5 +185,5 @@ public:
 	IDirect3DIndexBuffer9 *pIndexBuffer;
 #endif
 };
-
+*/
 #endif

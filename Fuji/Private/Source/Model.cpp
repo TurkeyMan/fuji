@@ -9,11 +9,11 @@
 Model* Model::Create(char *pFilename)
 {
 	CALLSTACK;
-
+/*
 	char *pModelData = File_Load(pFilename);
 	if(!pModelData) return NULL;
 
-	Model *pModel = new Model;
+	Model *pModel = (Model*)Heap_Alloc(sizeof(Model));
 
 	pModel->pModelData = (ModelData*)pModelData;
 	pModel->pModelData->FixUpPointers();
@@ -22,8 +22,9 @@ Model* Model::Create(char *pFilename)
 	{
 		pModel->pModelData->pMaterials[a].pMaterial = Material::Create(pModel->pModelData->pMaterials[a].pName);
 	}
-
+*/
 #if defined(_WINDOWS)
+/*
 	char *pData;
 
 	pd3dDevice->CreateVertexBuffer(sizeof(FileVertex)*pModel->pModelData->vertexCount, 0, FileVertex::FVF, D3DPOOL_MANAGED, &pModel->pVertexBuffer, NULL);
@@ -35,15 +36,17 @@ Model* Model::Create(char *pFilename)
 	pModel->pIndexBuffer->Lock(0, 0, (void**)&pData, 0);
 	memcpy(pData, pModel->pModelData->pIndexData, sizeof(int)*pModel->pModelData->indexCount);
 	pModel->pIndexBuffer->Unlock();
-
+*/
 #endif
-
+/*
 	pModel->worldMatrix.SetIdentity();
 
 	return pModel;
+*/
+	return NULL;
 }
 
-void Model::Draw()
+void Model::Draw(Matrix *pLocalToWorld)
 {
 	CALLSTACKc;
 /*
@@ -67,10 +70,10 @@ void ModelData::FixUpPointers()
 
 	pName += base;
 	*((char**)&pMaterials) += base;
-	*((char**)&pSubobjects) += base;
+	*((char**)&pMeshChunks) += base;
 	*((char**)&pCustomData) += base;
-	pVertexData += base;
-	pIndexData += base;
+//	pVertexData += base;
+//	pIndexData += base;
 
 	for(int a=0; a<materialCount; a++)
 	{
@@ -93,9 +96,9 @@ void ModelData::CollapsePointers()
 
 	pName -= base;
 	*((char**)&pMaterials) -= base;
-	*((char**)&pSubobjects) -= base;
+	*((char**)&pMeshChunks) -= base;
 	*((char**)&pCustomData) -= base;
-	pVertexData -= base;
-	pIndexData -= base;
+//	pVertexData -= base;
+//	pIndexData -= base;
 }
 

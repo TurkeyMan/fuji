@@ -1,55 +1,90 @@
 #if !defined(_SCENEGRAPH_H)
 #define _SCENEGRAPH_H
 
+#include "PtrList.h"
 #include "Matrix.h"
+#include "BoundingVolume.h"
+
+enum GraphNodeFlags
+{
+	GN_Enabled	= (1<<0),
+
+	GN_ForceInt	= 0x7FFFFFFF
+};
+
+enum GraphObjectFlags
+{
+	GO_Enabled	= (1<<0),
+
+	GO_ForceInt	= 0x7FFFFFFF
+};
+
+enum GraphObjectType
+{
+
+	GOT_Model			= (1<<0),
+	GOT_Sprite			= (1<<1),
+	GOT_ParticleSystem	= (1<<2),
+	GOT_Collision		= (1<<3),
+
+	GOT_Custom			= (1<<16),
+
+	GOT_ForceInt		= 0x7FFFFFFF
+};
+
+class GraphNode;
+class GraphObject;
+
+class CommonData
+{
+public:
+	Matrix localTransform;
+	BoundingVolume boundingVolume; // points to bounding volume in the descriptor
+	uint32 flags;
+
+	GraphNode *pPropNode;
+	GraphNode *pColNode;
+	GraphNode *pVisNode;
+};
 
 class GraphNode
 {
 public:
-	inline void AddChildNode(GraphNode *pNode) { pNode->pNext = pChildren; pChildren = pNode; }
-	inline void RemoveChildNode(GraphNode *pNode)
-	{
-		if(pNode == pChildren) pChildren = pChildren->pNext;
-
-		GraphNode *pT;
-		for(pT = pChildren; pT && pT->pNext != pNode; pT = pT->pNext) {}
-
-		if(pT) pT->pNext = pT->pNext->pNext;
-	}
-
-	inline void Enable(bool enable = true) { enabled = enable; }
-	inline void Disable() { enabled = false; }
-
-	uint32 nodeType;
-	uint32 flags;
-
-	bool enabled;
+	void Update(const Vector4& updateRange);
+	void Draw(const Frustum& frustum);
 
 	GraphNode *pParent;
-	GraphNode *pChildren;
-	GraphNode *pNext;
+	GraphNode *pNextSibling;
+	GraphNode *pFirstChild;
 
-	Matrix localMatrix;
+	uint32 flags;
+	CommonData *pCommonData; // can be NULL
+
+	uint32 type;
+	GraphObject *pData; // can be NULL (simple list node)
 };
 
-class RenderableNode : public GraphNode
+class GraphObject
 {
 public:
-	virtual void Draw() = 0;
-
-	inline void Show(bool show = true) { visible = show; }
-	inline void Hide() { visible = false; }
-
-	bool visible;
-};
-
-class SceneGraph : public RenderableNode
-{
-public:
+	virtual void Update();
 	virtual void Draw();
 };
 
-extern SceneGraph gSceneGraph;
+class SceneGraph
+{
+public:
+	void Init(int maxNodes);
+	void Deinit();
+
+protected:
+	GraphNode *pRootNode;
+
+private:
+	PtrListDL<GraphNode> dynamicNodeList;
+};
+
+extern PtrList<GraphObject> gObjectSoup;
 
 void SceneGraph_InitModule();
 void SceneGraph_DeinitModule();

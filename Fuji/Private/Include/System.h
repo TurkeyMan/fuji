@@ -19,7 +19,10 @@ struct FujiDefaults
 		uint32 otrhoHeight;
 	} display;
 
-
+	struct TextureDefaults
+	{
+		uint32 maxTextures;
+	} texture;
 };
 
 extern FujiDefaults gDefaults;

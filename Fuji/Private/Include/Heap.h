@@ -82,6 +82,9 @@ void ReleaseMark(Heap *pHeap);
 
 void SetCurrentHeap(Heap *pHeap);
 
+void Heap_PushGroupName(const char *pGroupName);
+void Heap_PopGroupName();
+
 #if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
 void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line);

@@ -12,6 +12,31 @@
 #include "Font.h"
 #include "IniFile.h"
 
+FujiDefaults gDefaults = 
+{
+	// HeapDefaults
+	{
+		4*1024*1024,	// dynamicHeapSize
+		4*1024*1024,	// staticHeapSize
+		0,				// dynamicHeapCount
+		0				// staticHeapCount
+	},
+
+	// DisplayDefaults
+	{
+		640,			// otrhoWidth
+		480				// otrhoHeight
+	},
+
+	// TextureDefaults
+	{
+		1024			// maxTextures
+	}
+};
+
+
+Timer gSystemTimer;
+
 int gQuit = 0;
 int gRestart = 1;
 uint32 gFrameCount = 0;
@@ -19,8 +44,6 @@ float gSystemTimeDelta;
 
 MenuItemStatic quitOption;
 MenuItemStatic restartOption;
-
-Timer gSystemTimer;
 
 void QuitCallback(MenuObject *pMenu, void *pData)
 {
@@ -54,7 +77,7 @@ void System_Init()
 	Material_InitModule();
 	Primitive_InitModule();
 	Font_InitModule();
-	
+
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 

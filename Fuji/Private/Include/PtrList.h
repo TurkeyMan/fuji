@@ -1,6 +1,7 @@
 #if !defined(_PTRLIST_H)
 #define _PTRLIST_H
 
+extern void *gEmptyPtrList[2];
 extern void *gEmptyPtrListDL[2];
 
 template<class T>
@@ -44,7 +45,7 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
 	}
 	else
 	{
-		Heap_PushGroupName( pGroupName );
+		Heap_PushGroupName(pGroupName);
 		ppMark = (T**)(Heap_Alloc((maxElements + 2)*(int)sizeof(T*)));
 		Heap_PopGroupName();
 
