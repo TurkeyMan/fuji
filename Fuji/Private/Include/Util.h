@@ -1,7 +1,9 @@
 #if !defined(_UTIL_H)
 #define _UTIL_H
 
-#define HARD_ASSERTS
+#if defined(_XBOX)
+	#define HARD_ASSERTS
+#endif
 
 class Vector3;
 

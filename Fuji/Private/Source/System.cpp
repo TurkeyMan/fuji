@@ -76,6 +76,10 @@ void System_Update()
 	CALLSTACKc("System_Update");
 
 	Input_Update();
+
+	if(Input_ReadGamepad(0, Button_Start) && Input_ReadGamepad(0, Button_White) && Input_ReadGamepad(0, Button_LTrig) && Input_ReadGamepad(0, Button_RTrig))
+		RestartCallback(NULL, NULL);
+
 	DebugMenu_Update();
 }
 
