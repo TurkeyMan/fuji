@@ -34,9 +34,9 @@ if(platform == 'linux'): # It should be possible to use scons on Windows too
 elif(platform == 'DC'):
 	SOURCEDIRS.append('DC')
 	CPPPATH.append('DC')
-	CPPPATH.append('DC/kos-1.2.0/include')
-	CPPPATH.append('DC/kos-1.2.0/libc/include')
-	CPPPATH.append('DC/kos-1.2.0/kernel/arch/dreamcast/include')
+#	CPPPATH.append('DC/kos-1.2.0/include')
+#	CPPPATH.append('DC/kos-1.2.0/libc/include')
+#	CPPPATH.append('DC/kos-1.2.0/kernel/arch/dreamcast/include')
 	CCFLAGS += ' -D_DC'
 
 	CC = 'sh-elf-gcc'
