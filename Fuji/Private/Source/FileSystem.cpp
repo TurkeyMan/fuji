@@ -54,3 +54,17 @@ char* File_HomePath(const char *filename)
 	return STR("%s", filename);
 #endif
 }
+
+char* File_Load(const char *pFilename)
+{
+	uint32 filesize = File_GetSize(pFilename);
+	if(!filesize) return NULL;
+
+	char *pBuffer = (char*)Heap_Alloc(filesize);
+
+	uint32 handle = File_Open(pFilename);
+	File_Read(pBuffer, filesize, handle);
+	File_Close(handle);
+
+	return pBuffer;
+}

@@ -43,7 +43,7 @@ typedef char int8;
 // useful macros
 #define Clamp(x,y,z) max((x), min((y),(z)))
 
-#define ALIGN16(x) ((x+15) & 0xFFFFFFF0)
+#define ALIGN16(x) (((x)+15) & 0xFFFFFFF0)
 
 #include "Util.h"
 

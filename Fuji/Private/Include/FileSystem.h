@@ -62,6 +62,8 @@ char* File_HomePath(const char *filename);
 uint32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
 void File_Close(uint32 fileHandle);
 
+char* File_Load(const char *pFilename);
+
 uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);
 uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
 

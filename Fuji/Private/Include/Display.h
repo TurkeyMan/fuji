@@ -96,6 +96,19 @@ struct LitVertex
 	float u,v;
 };
 
+struct FileVertex
+{
+	enum
+	{
+		FVF = D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1
+	};
+
+	Vec3 pos;
+	Vec3 normal;
+	unsigned int colour;
+	float u,v;
+};
+
 #endif
 
 #endif // _DISPLAY_H

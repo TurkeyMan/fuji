@@ -5,6 +5,7 @@
 /**** Includes ****/
 
 #include "Common.h"
+#include "Display.h"
 #include "Texture.h"
 #include "Material.h"
 #include "FileSystem.h"
@@ -295,6 +296,7 @@ void Material::Use()
 	current = *this;
 
 	// set some render states
+	pTextures[this->diffuseMapIndex]->SetTexture(0);
 
 	// choose renderer
 

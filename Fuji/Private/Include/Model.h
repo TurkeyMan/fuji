@@ -4,6 +4,23 @@
 #include "Matrix.h"
 
 class Animation;
+class Material;
+
+enum CustomDataType
+{
+	CUST_VertexBuffer,
+	CUST_Cloth
+};
+
+enum VertexFormat
+{
+	VF_Position = 1,
+	VF_Normal = 2,
+	VF_Colour = 4,
+	VF_Tex0 = 8,
+	VF_Tex1 = 16,
+	VF_Illum = 32
+};
 
 class ModelData
 {
@@ -17,13 +34,33 @@ public:
 	uint16 customDataCount;
 	uint32 flags;
 
+	struct MaterialData
+	{
+		char *pName;
+		char *pMaterialDescription;
+		Material *pMaterial;
+		uint32 reserved;
+	} *pMaterials;
+
+	uint32 vertexCount;
+	char *pVertexData;
+	uint32 indexCount;
+	char *pIndexData;
+
 	struct Subobject
 	{
 		uint16 vertexFormat;
 		uint16 vertexSize;
 		uint32 vertexCount;
-		void *pVertexData;
-	} *pSubobject;
+		uint32 vertexOffset;
+
+		uint32 indexCount;
+		uint32 indexOffset;
+
+		uint32 materialIndex;
+
+		uint32 reserved[2];
+	} *pSubobjects;
 
 	struct CustomData
 	{
@@ -41,10 +78,20 @@ public:
 class Model
 {
 public:
+	static Model* Create(char *pFilename);
+
+	void Draw();
+
 	Matrix worldMatrix;
 
 	ModelData *pModelData;
 	Animation *pAnimation;
+	Matrix *pAnimMatrices;
+
+#if defined(_WINDOWS)
+	IDirect3DVertexBuffer9 *pVertexBuffer;
+	IDirect3DIndexBuffer9 *pIndexBuffer;
+#endif
 };
 
 #endif
