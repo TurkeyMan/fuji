@@ -103,9 +103,6 @@ void Input_UpdatePlatformSpecific()
 
 void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
 {
-	DBGASSERT(device >= 0 && device < IDD_Max, "Invalid Device");
-	DBGASSERT(id >= 0 && id < Input_MaxInputID, "Invalid device ID");
-
 	pDeviceStatus->available = false;
 	pDeviceStatus->status = IDS_Disconnected;
 
@@ -136,9 +133,6 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 {
 	CALLSTACK;
-
-	DBGASSERT(id >=0 && id < 4, "Invalid Gamepad ID");
-	DBGASSERT(Input_IsAvailable(IDD_Gamepad, id), STR("Gamepad %d not available", id));
 
 	if(Input_IsReady(IDD_Gamepad, id))
 	{
