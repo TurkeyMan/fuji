@@ -184,59 +184,154 @@ float Input_ReadGamepad(int controlID, uint32 type)
 	switch(type)
 	{
 		case Button_P2_Cross:
-			return (gJoyState[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_Circle:
-			return (gJoyState[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_Box:
-			return (gJoyState[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_Triangle:
-			return (gJoyState[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_R1:
-			return (gJoyState[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_L1:
-			return (gJoyState[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_L2:
-			return (gJoyState[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_R2:
-			return (gJoyState[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_Start:
-			return (gJoyState[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_Select:
-			return (gJoyState[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_LThumb:
-			return (gJoyState[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_P2_RThumb:
-			return (gJoyState[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_DUp:
-			return (gJoyState[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_DDown:
-			return (gJoyState[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_DLeft:
-			return (gJoyState[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
+			break;
 		case Button_DRight:
-			return (gJoyState[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
+			inputValue = (gJoyState[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
+			break;
 
 		case Axis_LX:
 			inputValue = ((float)(gJoyState[controlID].lX - 32767)) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			break;
 
 		case Axis_LY:
 			inputValue = -(((float)(gJoyState[controlID].lY - 32767)) / 32767.0f);
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			break;
 
 		case Axis_RX:
 			inputValue = ((float)(gJoyState[controlID].lRz - 32767)) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			break;
 
 		case Axis_RY:
 			inputValue = -(((float)(gJoyState[controlID].lZ - 32767)) / 32767.0f);
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			break;
 
 		default:
 			dprintf("Error: Undefined Control Pad Input Type\n\n");
 	}
 
-	return 0.0f;
+	if(controlID <= 0 && inputValue == 0.0f && Input_GetKeyboardStatusState(KSS_ScrollLock))
+	{
+		switch(type)
+		{
+			case Button_P2_Cross:
+				inputValue = Input_ReadKeyboard(DIK_H);
+				break;
+			case Button_P2_Circle:
+				inputValue = Input_ReadKeyboard(DIK_J);
+				break;
+			case Button_P2_Box:
+				inputValue = Input_ReadKeyboard(DIK_G);
+				break;
+			case Button_P2_Triangle:
+				inputValue = Input_ReadKeyboard(DIK_Y);
+				break;
+			case Button_P2_R1:
+				inputValue = Input_ReadKeyboard(DIK_K);
+				break;
+			case Button_P2_L1:
+				inputValue = Input_ReadKeyboard(DIK_F);
+				break;
+			case Button_P2_L2:
+				inputValue = Input_ReadKeyboard(DIK_D);
+				break;
+			case Button_P2_R2:
+				inputValue = Input_ReadKeyboard(DIK_L);
+				break;
+			case Button_P2_Start:
+				inputValue = Input_ReadKeyboard(DIK_SPACE);
+				break;
+			case Button_P2_Select:
+				inputValue = Input_ReadKeyboard(DIK_RALT);
+				break;
+			case Button_P2_LThumb:
+				inputValue = Input_ReadKeyboard(DIK_T);
+				break;
+			case Button_P2_RThumb:
+				inputValue = Input_ReadKeyboard(DIK_U);
+				break;
+			case Button_DUp:
+				inputValue = Input_ReadKeyboard(DIK_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DDown:
+				inputValue = Input_ReadKeyboard(DIK_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DLeft:
+				inputValue = Input_ReadKeyboard(DIK_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DRight:
+				inputValue = Input_ReadKeyboard(DIK_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+
+			case Axis_LX:
+				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
+					(Input_ReadKeyboard(DIK_LEFT) ? -1.0f : 0.0f) +
+					(Input_ReadKeyboard(DIK_RIGHT) ? 1.0f : 0.0f)
+					: 0.0f;
+				break;
+
+			case Axis_LY:
+				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
+					(Input_ReadKeyboard(DIK_DOWN) ? -1.0f : 0.0f) +
+					(Input_ReadKeyboard(DIK_UP) ? 1.0f : 0.0f)
+					: 0.0f;
+				break;
+
+			case Axis_RX:
+				break;
+
+			case Axis_RY:
+				break;
+		}
+	}
+
+	return inputValue;
 }
 
 bool Input_WasPressed(int controlID, uint32 type)
@@ -245,43 +340,116 @@ bool Input_WasPressed(int controlID, uint32 type)
 
 	if(!Input_IsConnected(controlID)) return 0.0f;
 
+	bool inputValue = false;
+
 	switch(type)
 	{
 		case Button_P2_Cross:
-			return gJoyState[controlID].rgbButtons[2]&0x80 && !(gPrevJoyState[controlID].rgbButtons[2]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[2]&0x80 && !(gPrevJoyState[controlID].rgbButtons[2]&0x80);
+			break;
 		case Button_P2_Circle:
-			return gJoyState[controlID].rgbButtons[1]&0x80 && !(gPrevJoyState[controlID].rgbButtons[1]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[1]&0x80 && !(gPrevJoyState[controlID].rgbButtons[1]&0x80);
+			break;
 		case Button_P2_Box:
-			return gJoyState[controlID].rgbButtons[3]&0x80 && !(gPrevJoyState[controlID].rgbButtons[3]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[3]&0x80 && !(gPrevJoyState[controlID].rgbButtons[3]&0x80);
+			break;
 		case Button_P2_Triangle:
-			return gJoyState[controlID].rgbButtons[0]&0x80 && !(gPrevJoyState[controlID].rgbButtons[0]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[0]&0x80 && !(gPrevJoyState[controlID].rgbButtons[0]&0x80);
+			break;
 		case Button_P2_R1:
-			return gJoyState[controlID].rgbButtons[7]&0x80 && !(gPrevJoyState[controlID].rgbButtons[7]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[7]&0x80 && !(gPrevJoyState[controlID].rgbButtons[7]&0x80);
+			break;
 		case Button_P2_L1:
-			return gJoyState[controlID].rgbButtons[6]&0x80 && !(gPrevJoyState[controlID].rgbButtons[6]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[6]&0x80 && !(gPrevJoyState[controlID].rgbButtons[6]&0x80);
+			break;
 		case Button_P2_L2:
-			return gJoyState[controlID].rgbButtons[4]&0x80 && !(gPrevJoyState[controlID].rgbButtons[4]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[4]&0x80 && !(gPrevJoyState[controlID].rgbButtons[4]&0x80);
+			break;
 		case Button_P2_R2:
-			return gJoyState[controlID].rgbButtons[5]&0x80 && !(gPrevJoyState[controlID].rgbButtons[5]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[5]&0x80 && !(gPrevJoyState[controlID].rgbButtons[5]&0x80);
+			break;
 		case Button_P2_Start:
-			return gJoyState[controlID].rgbButtons[9]&0x80 && !(gPrevJoyState[controlID].rgbButtons[9]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[9]&0x80 && !(gPrevJoyState[controlID].rgbButtons[9]&0x80);
+			break;
 		case Button_P2_Select:
-			return gJoyState[controlID].rgbButtons[8]&0x80 && !(gPrevJoyState[controlID].rgbButtons[8]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[8]&0x80 && !(gPrevJoyState[controlID].rgbButtons[8]&0x80);
+			break;
 		case Button_P2_LThumb:
-			return gJoyState[controlID].rgbButtons[10]&0x80 && !(gPrevJoyState[controlID].rgbButtons[10]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[10]&0x80 && !(gPrevJoyState[controlID].rgbButtons[10]&0x80);
+			break;
 		case Button_P2_RThumb:
-			return gJoyState[controlID].rgbButtons[11]&0x80 && !(gPrevJoyState[controlID].rgbButtons[11]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[11]&0x80 && !(gPrevJoyState[controlID].rgbButtons[11]&0x80);
+			break;
 		case Button_DUp:
-			return gJoyState[controlID].rgbButtons[12]&0x80 && !(gPrevJoyState[controlID].rgbButtons[12]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[12]&0x80 && !(gPrevJoyState[controlID].rgbButtons[12]&0x80);
+			break;
 		case Button_DDown:
-			return gJoyState[controlID].rgbButtons[14]&0x80 && !(gPrevJoyState[controlID].rgbButtons[14]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[14]&0x80 && !(gPrevJoyState[controlID].rgbButtons[14]&0x80);
+			break;
 		case Button_DLeft:
-			return gJoyState[controlID].rgbButtons[15]&0x80 && !(gPrevJoyState[controlID].rgbButtons[15]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[15]&0x80 && !(gPrevJoyState[controlID].rgbButtons[15]&0x80);
+			break;
 		case Button_DRight:
-			return gJoyState[controlID].rgbButtons[13]&0x80 && !(gPrevJoyState[controlID].rgbButtons[13]&0x80);
+			inputValue = gJoyState[controlID].rgbButtons[13]&0x80 && !(gPrevJoyState[controlID].rgbButtons[13]&0x80);
+			break;
 	}
 
-	return false;
+	if(controlID <= 0 && !inputValue && Input_GetKeyboardStatusState(KSS_ScrollLock))
+	{
+		switch(type)
+		{
+			case Button_P2_Cross:
+				inputValue = Input_WasKeyPressed(DIK_H);
+				break;
+			case Button_P2_Circle:
+				inputValue = Input_WasKeyPressed(DIK_J);
+				break;
+			case Button_P2_Box:
+				inputValue = Input_WasKeyPressed(DIK_G);
+				break;
+			case Button_P2_Triangle:
+				inputValue = Input_WasKeyPressed(DIK_Y);
+				break;
+			case Button_P2_R1:
+				inputValue = Input_WasKeyPressed(DIK_K);
+				break;
+			case Button_P2_L1:
+				inputValue = Input_WasKeyPressed(DIK_F);
+				break;
+			case Button_P2_L2:
+				inputValue = Input_WasKeyPressed(DIK_D);
+				break;
+			case Button_P2_R2:
+				inputValue = Input_WasKeyPressed(DIK_L);
+				break;
+			case Button_P2_Start:
+				inputValue = Input_WasKeyPressed(DIK_SPACE);
+				break;
+			case Button_P2_Select:
+				inputValue = Input_WasKeyPressed(DIK_RALT);
+				break;
+			case Button_P2_LThumb:
+				inputValue = Input_WasKeyPressed(DIK_T);
+				break;
+			case Button_P2_RThumb:
+				inputValue = Input_WasKeyPressed(DIK_U);
+				break;
+			case Button_DUp:
+				inputValue = Input_WasKeyPressed(DIK_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DDown:
+				inputValue = Input_WasKeyPressed(DIK_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DLeft:
+				inputValue = Input_WasKeyPressed(DIK_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+			case Button_DRight:
+				inputValue = Input_WasKeyPressed(DIK_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				break;
+		}
+	}
+
+	return inputValue;
 }
 
 // "Is Pad Connected" Function?
@@ -314,6 +482,32 @@ bool Input_WasKeyPressed(uint32 key, int keyboardID)
 	DBGASSERT(keyboardID >= -1 && keyboardID < gKeyboardCount, STR("Keyboard %d unavailable", keyboardID));
 
 	return gKeyState[keyboardID+1][key] && !gPrevKeyState[keyboardID+1][key];
+}
+
+bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
+{
+	SHORT ks = 0;
+
+	switch(keyboardState)
+	{
+		case KSS_NumLock:
+			ks = GetKeyState(VK_NUMLOCK);
+			break;
+
+		case KSS_CapsLock:
+			ks = GetKeyState(VK_CAPITAL);
+			break;
+
+		case KSS_ScrollLock:
+			ks = GetKeyState(VK_SCROLL);
+			break;
+
+		case KSS_Insert:
+			ks = GetKeyState(VK_INSERT);
+			break;
+	}
+
+	return (ks & 1) != 0;
 }
 
 void SetKeyboardEventHandler(EventFunc pEventFunc)

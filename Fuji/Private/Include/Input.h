@@ -65,6 +65,14 @@ enum InputEvent
 	IE_JoyButtonUp,
 };
 
+enum KeyboardStatusState
+{
+	KSS_NumLock,
+	KSS_CapsLock,
+	KSS_ScrollLock,
+	KSS_Insert
+};
+
 class ButtonMapping
 {
 public:
@@ -89,6 +97,8 @@ void SetGamepadEventHandler(EventFunc pEventFunc);
 int Input_GetNumKeyboards();
 bool Input_ReadKeyboard(uint32 key, int keyboardID = -1);
 bool Input_WasKeyPressed(uint32 key, int keyboardID = -1);
+
+bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);
 
 void SetKeyboardEventHandler(EventFunc pEventFunc);
 
