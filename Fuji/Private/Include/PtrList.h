@@ -29,7 +29,7 @@ public:
 protected:
 	T** ppMark;
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	char *pName;
 #endif
 };
