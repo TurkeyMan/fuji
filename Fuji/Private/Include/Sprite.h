@@ -44,7 +44,7 @@ private:
 
 	bool visible;
 
-	Texture texture;
+	Texture *pTexture;
 };
 
 #endif // _SPRITE_H

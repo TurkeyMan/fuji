@@ -6,16 +6,22 @@
 #include "Texture.h"
 #include "Font.h"
 
+IDirect3DVertexBuffer8 *fontBuffer;
+
 Font debugFont;
 
 void Font_InitModule()
 {
+	pd3dDevice->CreateVertexBuffer(2048*6*sizeof(FontVertex), NULL, NULL, NULL, &fontBuffer);
+
 	debugFont.LoadFont("D:\\Data\\Font\\ArialBlack");
 }
 
 void Font_DeinitModule()
 {
 	debugFont.Release();
+
+	fontBuffer->Release();
 }
 
 int Font::LoadFont(char *filename)
@@ -27,7 +33,7 @@ int Font::LoadFont(char *filename)
 	strcpy(tempbuffer, filename);
 	strcat(tempbuffer, ".tga");
 
-	texture.LoadTexture(tempbuffer);
+	pTexture = Texture::LoadTexture(tempbuffer);
 
 	strcpy(tempbuffer, filename);
 	strcat(tempbuffer, ".dat");
@@ -42,33 +48,32 @@ int Font::LoadFont(char *filename)
 
 void Font::Release()
 {
-	texture.ReleaseTexture();
+	pTexture->Release();
 }
 
 int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *text, bool invert)
 {
-	IDirect3DVertexBuffer8 *vb;
 	FontVertex *v;
 	int textlen = strlen(text);
 
+	DBGASSERT(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
+
 	float x,y,w,h, p, cwidth;
 
-	pd3dDevice->CreateVertexBuffer(textlen*6*sizeof(FontVertex), NULL, NULL, NULL, &vb);
-
-	vb->Lock(0, 0, (BYTE**)&v, NULL);
+	fontBuffer->Lock(0, 0, (BYTE**)&v, NULL);
 
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)(text[i] & 0x0F) * (float)(texture.width / 16);
-		y = (float)(text[i] >> 4) * (float)(texture.height / 16);
+		x = (float)(text[i] & 0x0F) * (float)(pTexture->width / 16);
+		y = (float)(text[i] >> 4) * (float)(pTexture->height / 16);
 
 		w = (float)charwidths[text[i]];
-		h = (float)texture.height/16.0f;
+		h = (float)pTexture->height/16.0f;
 
-		x /= (float)texture.width;
-		y /= (float)texture.height;
-		w /= (float)texture.width;
-		h /= (float)texture.height;
+		x /= (float)pTexture->width;
+		y /= (float)pTexture->height;
+		w /= (float)pTexture->width;
+		h /= (float)pTexture->height;
 
 		p = w/h;
 		cwidth = height*p;
@@ -107,15 +112,13 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 		pos_x += cwidth;
 	}
 
-	vb->Unlock();
+	fontBuffer->Unlock();
 
-	texture.SetTexture();
+	pTexture->SetTexture();
 
-	pd3dDevice->SetStreamSource(0, vb, sizeof(FontVertex));
+	pd3dDevice->SetStreamSource(0, fontBuffer, sizeof(FontVertex));
 	pd3dDevice->SetVertexShader(FontVertex::FVF);
 	pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, textlen*2);
-
-	vb->Release();
 
 	return 0;
 }

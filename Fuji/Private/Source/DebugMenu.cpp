@@ -12,6 +12,21 @@ Menu rootMenu;
 MenuObject *pCurrentMenu = &rootMenu;
 Vector3 debugMenuPos = { 50.0f, 50.0f, 0.0f };
 
+#define COLOUR_PRESETS 10
+uint32 MenuItemColour::presets[COLOUR_PRESETS] =
+{
+	0xFFFFFFFF, // white
+	0xFFFF0000, // red
+	0xFF00FF00, // green
+	0xFF0000FF, // blue
+	0xFFFFFF00, // yellow
+	0xFF00FFFF, // cyan
+	0xFFFF00FF, // magenta
+	0xFFFFAE00, // orange
+	0xFF0090FF, // sky blue
+	0xFF000000	// black
+};
+
 void DebugMenu_InitModule()
 {
 	// create root menu
@@ -54,6 +69,8 @@ void DebugMenu_Update()
 
 void DebugMenu_Draw()
 {
+	if(Input_ReadGamepad(0, Button_RTrig)) return;
+
 	bool o = SetOrtho(true);
 
 	if(debugMenuEnabled)
@@ -62,7 +79,7 @@ void DebugMenu_Draw()
 	SetOrtho(o);
 }
 
-void DebugMenu_AddItem(char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
+void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
 {
 	DBGASSERT(pParent, "Invalid parent menu.");
 	DBGASSERT(pParent->type == MenuType_Menu, STR("Cant add menu '%s', Parent is not of Menu type.", name));
@@ -81,7 +98,12 @@ void DebugMenu_AddItem(char *name, Menu *pParent, MenuObject *pObject, DebugCall
 	++pParent->numChildren;
 }
 
-void DebugMenu_AddMenu(char *name, Menu *pParent, DebugCallback callback, void *userData)
+void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback, void *userData)
+{
+	DebugMenu_AddItem(name, DebugMenu_GetMenuByName(pParentName), pObject, callback, userData);
+}
+
+void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, void *userData)
 {
 	DBGASSERT(pParent, "Invalid parent menu.");
 	DBGASSERT(pParent->type == MenuType_Menu, STR("Cant add menu '%s', Parent is not of Menu type.", name));
@@ -106,7 +128,12 @@ void DebugMenu_AddMenu(char *name, Menu *pParent, DebugCallback callback, void *
 	++pParent->numChildren;
 }
 
-bool DebugMenu_DestroyMenu(char *pName, Menu *pSearchMenu)
+void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback, void *userData)
+{
+	DebugMenu_AddMenu(name, DebugMenu_GetMenuByName(pParentName), callback, userData);
+}
+
+bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 {
 	for(int a=0; a<pSearchMenu->numChildren; a++)
 	{
@@ -140,7 +167,7 @@ void DebugMenu_DestroyMenuTree(Menu *pMenu)
 		delete pMenu;
 }
 
-Menu* DebugMenu_GetMenuByName(char *name, Menu *pSearchMenu)
+Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu)
 {
 	Menu *pResult = NULL;
 
@@ -184,7 +211,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, Vector3 pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, name);
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFF80A0FF, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -284,4 +311,237 @@ void Menu::Update()
 Vector3 Menu::GetDimensions(float maxWidth)
 {
 	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+// MenuItemStatic
+float MenuItemStatic::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, name);
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemStatic::ListUpdate(bool selected)
+{
+	if(selected)
+		if(pCallback && Input_WasPressed(0, Button_A))
+			pCallback(this, pUserData);
+}
+
+Vector3 MenuItemStatic::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+// MenuItemInt
+float MenuItemInt::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %d", name, data));
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemInt::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		if(Input_WasPressed(0, Button_B)) data = 0;
+
+		if(Input_WasPressed(0, Button_DLeft))
+		{
+			data -= increment;
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(0, Button_DRight))
+		{
+			data += increment;
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 MenuItemInt::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+// MenuItemFloat
+float MenuItemFloat::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f", name, data));
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemFloat::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		float t = data;
+		float input;
+
+		if(Input_WasPressed(0, Button_B)) data = 0.0f;
+
+		if(Input_WasPressed(0, Button_DLeft))
+		{
+			data -= increment;
+		}
+		else if(Input_WasPressed(0, Button_DRight))
+		{
+			data += increment;
+		}
+
+		if((input=Input_ReadGamepad(0, Axis_RX)))
+		{
+			input = input < 0.0f ? -(input*input) : input*input;
+			data += input*increment*TIMEDELTA;
+		}
+
+		if(pCallback && t != data)
+			pCallback(this, pUserData);
+	}
+}
+
+Vector3 MenuItemFloat::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+// MenuItemBool
+float MenuItemBool::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, data ? "true" : "false"));
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemBool::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		if(Input_WasPressed(0, Button_DLeft) || Input_WasPressed(0, Button_DRight) || Input_WasPressed(0, Button_A))
+		{
+			data = !data;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 MenuItemBool::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+// MenuItemIntString
+float MenuItemIntString::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, values[data]));
+	return MENU_FONT_HEIGHT;
+}
+
+void MenuItemIntString::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		if(Input_WasPressed(0, Button_DLeft))
+		{
+			--data;
+
+			if(data<0)
+				while(values[data+1]) data++;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(0, Button_DRight))
+		{
+			++data;
+
+			if(!values[data])
+				data = 0;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 MenuItemIntString::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+}
+
+
+// MenuItemColour
+
+void MenuItemColour::Draw()
+{
+
+}
+
+void MenuItemColour::Update()
+{
+
+}
+
+float MenuItemColour::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, colour.ToColour()));
+
+	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
+
+	BeginPrimitive(PT_TriStrip|PT_Untextured);
+
+	PrimBegin(4);
+	PrimSetColour(0xFFFFFFFF);
+	PrimSetPosition(pos);
+	PrimSetPosition(pos + Vector(45.0f, 0.0f, 0.0f));
+	PrimSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	PrimSetPosition(pos + Vector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	PrimEnd();
+
+	pos += Vector(2.0f, 2.0f, 0.0f);
+
+	PrimBegin(4);
+	PrimSetColour(colour);
+	PrimSetPosition(pos);
+	PrimSetPosition(pos + Vector(41.0f, 0.0f, 0.0f));
+	PrimSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	PrimSetPosition(pos + Vector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	PrimEnd();
+
+	return MENU_FONT_HEIGHT*1.5f;
+}
+
+void MenuItemColour::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		if(Input_WasPressed(0, Button_A))
+			pCurrentMenu = this;
+
+		if(Input_WasPressed(0, Button_DLeft))
+		{
+			preset = preset <= 0 ? COLOUR_PRESETS-1 : preset-1;
+
+			colour.FromColour(presets[preset]);
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(0, Button_DRight))
+		{
+			preset = preset >= COLOUR_PRESETS-1 ? 0 : preset+1;
+
+			colour.FromColour(presets[preset]);
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 MenuItemColour::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, MENU_FONT_HEIGHT*1.5f, 0.0f);
 }

@@ -8,11 +8,15 @@
 
 #define MENU_FONT_HEIGHT 20.0f
 
-typedef void (*DebugCallback)(void*, void*);
+class MenuObject;
+
+// (menu_item*, user_data*)
+typedef void (*DebugCallback)(MenuObject*, void*);
 
 enum MenuType
 {
 	MenuType_Menu,
+	MenuType_Static,
 	MenuType_Int,
 	MenuType_Float,
 	MenuType_IntString,
@@ -43,6 +47,16 @@ public:
 	DebugCallback pCallback;
 };
 
+class MenuItemStatic : public MenuObject
+{
+public:
+	MenuItemStatic() { type = MenuType_Static; }
+
+	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
+	virtual void ListUpdate(bool selected);
+	virtual Vector3 GetDimensions(float maxWidth);
+};
+
 class MenuItemInt : public MenuObject
 {
 public:
@@ -50,7 +64,7 @@ public:
 	operator int() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
-	virtual void Update(bool selected);
+	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	int data;
@@ -64,7 +78,7 @@ public:
 	operator float() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
-	virtual void Update(bool selected);
+	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	float data;
@@ -74,11 +88,11 @@ public:
 class MenuItemIntString : public MenuObject
 {
 public:
-	MenuItemIntString(char *strings[], int value = 0) { type = MenuType_IntString; data = value; values = strings; }
+	MenuItemIntString(char *strings[], int value = 0) { type = MenuType_IntString; data = value; values = strings; DBGASSERT(values[0] != NULL, "Must be at least one item in the strings array."); }
 	operator int() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
-	virtual void Update(bool selected);
+	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	int data;
@@ -88,28 +102,36 @@ public:
 class MenuItemBool : public MenuObject
 {
 public:
-	MenuItemBool(bool value = true) { type = MenuType_Bool; data = value; }
+	MenuItemBool(bool value = false) { type = MenuType_Bool; data = value; }
 	operator bool() const { return data; }
 
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
-	virtual void Update(bool selected);
+	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	bool data;
 };
 
+static Vector4 colourInit = {1,1,1,1};
+
 class MenuItemColour : public MenuObject
 {
 public:
-	MenuItemColour(Vector4 def = Vector4::one) { type = MenuType_Colour; colour = def; }
+	MenuItemColour(Vector4 def = colourInit) { type = MenuType_Colour; colour = def; preset = 0; }
 	operator Vector4() const { return colour; }
 	operator uint32() const { return (uint32)(colour.w*255.0f)<<24 | (uint32)(colour.x*255.0f)<<16 | (uint32)(colour.y*255.0f)<<8 | (uint32)(colour.z*255.0f); }
 
+	virtual void Draw();
+	virtual void Update();
+
 	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
-	virtual void Update(bool selected);
+	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	Vector4 colour;
+
+	int preset;
+	static uint32 presets[10];
 };
 
 class Menu : public MenuObject
@@ -131,6 +153,7 @@ public:
 };
 
 extern Menu rootMenu;
+extern MenuObject *pCurrentMenu;
 
 void DebugMenu_InitModule();
 void DebugMenu_DeinitModule();
@@ -140,11 +163,13 @@ bool DebugMenu_IsEnabled();
 void DebugMenu_Update();
 void DebugMenu_Draw();
 
-void DebugMenu_AddItem(char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddMenu(char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
-bool DebugMenu_DestroyMenu(char *name, Menu *pSearchMenu = &rootMenu);
+void DebugMenu_AddItem(const char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddMenu(const char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback = NULL, void *userData = NULL);
+bool DebugMenu_DestroyMenu(const char *name, Menu *pSearchMenu = &rootMenu);
 void DebugMenu_DestroyMenuTree(Menu *pMenu);
 
-Menu* DebugMenu_GetMenuByName(char *name, Menu *pSearchMenu = &rootMenu);
+Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = &rootMenu);
 
 #endif

@@ -512,6 +512,12 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Pc\Input_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\Primitive_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\System_PC.cpp">
 				<FileConfiguration
 					Name="Debug_XB|Xbox"

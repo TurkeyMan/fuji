@@ -1,37 +1,72 @@
 #include "Common.h"
 #include "Texture.h"
 #include "Display.h"
+#include "Input.h"
+#include "Font.h"
+#include "Primitive.h"
 
-int Texture::LoadTexture(char *filename, bool generateMipChain)
+std::map<std::string, Texture> gTextureBank;
+TextureBrowser texBrowser;
+
+void Texture_InitModule()
 {
+	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
+}
+
+void Texture_DeinitModule()
+{
+
+}
+
+Texture::Texture()
+{
+	refCount = 0;
+}
+
+Texture* Texture::LoadTexture(char *filename, bool generateMipChain)
+{
+	Texture *pTexture = &gTextureBank[filename];
+
 	D3DSURFACE_DESC fontdesc;
 	HRESULT hr;
 
-	hr = D3DXCreateTextureFromFileEx(pd3dDevice, filename, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, 0, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &texture);
-
-	DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
-	DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
-	DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
-	DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
-
-	if(hr != D3D_OK)
+	if(!pTexture->refCount)
 	{
-		LOGD(STR("Failed loading texture: %s", filename));
-		return 1;
+		hr = D3DXCreateTextureFromFileEx(pd3dDevice, filename, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, 0, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->texture);
+
+		DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
+		DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
+		DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
+		DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
+
+		if(hr != D3D_OK)
+		{
+			LOGD(STR("Failed loading texture: %s", filename));
+			return NULL;
+		}
+
+		strcpy(pTexture->name, filename);
+
+		pTexture->texture->GetLevelDesc(0, &fontdesc);
+
+		pTexture->width = fontdesc.Width;
+		pTexture->height = fontdesc.Height;
+		pTexture->format = fontdesc.Format;
 	}
 
-	texture->GetLevelDesc(0, &fontdesc);
+	pTexture->refCount++;
 
-	width = fontdesc.Width;
-	height = fontdesc.Height;
-	format = fontdesc.Format;
-
-	return 0;
+	return pTexture;
 }
 
-void Texture::ReleaseTexture()
+void Texture::Release()
 {
-	texture->Release();
+	refCount--;
+
+	if(!refCount)
+	{
+		texture->Release();
+	}
 }
 
 void Texture::SetTexture()
@@ -47,4 +82,117 @@ void Texture::UseNone()
 {
 	pd3dDevice->SetTexture(0, NULL);
 }
+
+
+// texture browser
+TextureBrowser::TextureBrowser()
+{
+	selection = 0;
+}
+
+void TextureBrowser::Draw()
+{
+
+}
+
+void TextureBrowser::Update()
+{
+	if(Input_WasPressed(0, Button_Y))
+		pCurrentMenu = pParent;
+}
+
+#define TEX_SIZE 64.0f
+float TextureBrowser::ListDraw(bool selected, Vector3 pos, float maxWidth)
+{
+	std::map<std::string, Texture>::iterator i;
+	i = gTextureBank.begin();
+
+	for(int a=0; a<selection; a++) i++;
+
+	Texture *pTexture = &i->second;
+
+	debugFont.DrawText(pos+Vector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s:", name));
+	debugFont.DrawText(pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s", pTexture->name));
+	debugFont.DrawText(pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("Dimensions: %dx%d Refs: %d", pTexture->width, pTexture->height, pTexture->refCount));
+
+	pos += Vector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
+
+	BeginPrimitive(PT_TriStrip|PT_Untextured);
+
+	PrimBegin(4);
+	PrimSetColour(0xFFFFFFFF);
+	PrimSetPosition(pos);
+	PrimSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	PrimSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	PrimSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	PrimEnd();
+
+	pos += Vector(2.0f, 2.0f, 0.0f);
+
+	PrimBegin(4);
+	PrimSetColour(0xFF000000);
+	PrimSetPosition(pos);
+	PrimSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
+	PrimSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
+	PrimSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
+	PrimEnd();
+
+	float xaspect, yaspect;
+
+	if(pTexture->width > pTexture->height)
+	{
+		xaspect = 0.5f;
+		yaspect = ((float)pTexture->height/(float)pTexture->width) * 0.5f;
+	}
+	else
+	{
+		yaspect = 0.5f;
+		xaspect = ((float)pTexture->width/(float)pTexture->height) * 0.5f;
+	}
+
+	pTexture->SetTexture();
+
+	PrimBegin(4);
+	PrimSetColour(0xFFFFFFFF);
+	PrimSetTexCoord1(0.0f,0.0f);
+	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	PrimSetTexCoord1(1.0f,0.0f);
+	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	PrimSetTexCoord1(0.0f,1.0f);
+	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	PrimSetTexCoord1(1.0f,1.0f);
+	PrimSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	PrimEnd();
+
+	return TEX_SIZE + 8.0f;
+}
+
+void TextureBrowser::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		int texCount = gTextureBank.size();
+
+		if(Input_WasPressed(0, Button_DLeft))
+		{
+			selection = selection <= 0 ? texCount-1 : selection-1;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(0, Button_DRight))
+		{
+			selection = selection >= texCount-1 ? 0 : selection+1;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 TextureBrowser::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
+}
+
 

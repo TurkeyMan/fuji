@@ -2,11 +2,14 @@
 #include "Texture.h"
 #include "Display.h"
 #include "Sprite.h"
+#include "Primitive.h"
 
 void Sprite::Create(char *filename, int xFrame, int yFrames, uint32 colourKey)
 {
-	texture.LoadTexture(filename);
+	pTexture = Texture::LoadTexture(filename);
 }
+
+LitVertex triangle[6];
 
 void Sprite::Draw()
 {
@@ -14,71 +17,45 @@ void Sprite::Draw()
 	if(!visible) return;
 
 	// set orthographic mode
-	int old = SetOrtho(true);
-
-	// vertex buffer for drawing the quad
-	IDirect3DVertexBuffer8 *vb;
-	FontVertex triangle[6];
-	FontVertex *v;
-
-	D3DXMATRIX world;
-
-	// fill out the vertex data
-	triangle[0].pos.Set((-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
-	triangle[0].colour = 0xFFFFFFFF;
-	triangle[0].u = 0; triangle[0].v = 0;
-	triangle[1].pos.Set((1.0f-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
-	triangle[1].colour = 0xFFFFFFFF;
-	triangle[1].u = 1; triangle[1].v = 0;
-	triangle[2].pos.Set((-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
-	triangle[2].colour = 0xFFFFFFFF;
-	triangle[2].u = 0; triangle[2].v = 1;
-
-	triangle[3].pos.Set((1.0f-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
-	triangle[3].colour = 0xFFFFFFFF;
-	triangle[3].u = 1; triangle[3].v = 0;
-	triangle[4].pos.Set((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
-	triangle[4].colour = 0xFFFFFFFF;
-	triangle[4].u = 1; triangle[4].v = 1;
-	triangle[5].pos.Set((-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
-	triangle[5].colour = 0xFFFFFFFF;
-	triangle[5].u = 0; triangle[5].v = 1;
-
-	// create the vertex buffer and copy in the vertex data
-	pd3dDevice->CreateVertexBuffer(6*sizeof(FontVertex), NULL, NULL, NULL, &vb);
-
-	vb->Lock(0, 0, (BYTE**)&v, NULL);
-	memcpy(v, &triangle[0], 6*sizeof(FontVertex));
-	vb->Unlock();
+	bool old = SetOrtho(true);
 
 	// generate rotation and translation matrix
-	D3DXMatrixIdentity(&world);
+	Matrix world;
 
-	world._11 = (float)cos(angle);
-	world._12 = (float)sin(angle);
-	world._21 = (float)-sin(angle);
-	world._22 = (float)cos(angle);
-	world._41 = position.x;
-	world._42 = position.y;
+	world.SetIdentity();
 
-	// apply matrix
-	pd3dDevice->SetTransform(D3DTS_WORLD, &world);
+	world.m[0][0] = (float)cos(angle);
+	world.m[0][1] = (float)sin(angle);
+	world.m[1][0] = (float)-sin(angle);
+	world.m[1][1] = (float)cos(angle);
+	world.m[3][0] = position.x;
+	world.m[3][1] = position.y;
+
+	pTexture->SetTexture();
 
 	// set texture
-	texture.SetTexture();
+	BeginPrimitive(PT_TriStrip);
 
-	// draw sprite
-	pd3dDevice->SetStreamSource(0, vb, sizeof(FontVertex));
-	pd3dDevice->SetVertexShader(FontVertex::FVF);
-	pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
+	PrimSetMatrix(world);
 
-	// release temporary vertex buffer
-	vb->Release();
+	PrimBegin(4);
+	PrimSetColour(0xFFFFFFFF);
+	PrimSetTexCoord1(0,0);
+	PrimSetPosition((-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
+	PrimSetTexCoord1(1,0);
+	PrimSetPosition((1.0f-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
+	PrimSetTexCoord1(0,1);
+	PrimSetPosition((-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
+	PrimSetTexCoord1(1,1);
+	PrimSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
+	PrimEnd();
+
+	SetOrtho(old);
 }
 
 void Sprite::Release()
 {
-	texture.ReleaseTexture();
+	pTexture->Release();
 }
 
 void Sprite::SetFlag(uint32 flag, bool enable)

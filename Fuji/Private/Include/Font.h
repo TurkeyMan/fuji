@@ -20,7 +20,7 @@ public:
 	int DrawTextf(Vector3 pos, float height, uint32 colour, char *format, ...);
 
 	// data members
-	Texture texture;
+	Texture *pTexture;
 	uint8 charwidths[256];
 };
 

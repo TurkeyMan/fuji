@@ -59,6 +59,19 @@ struct FontVertex
 	float u,v;
 };
 
+struct LitVertex
+{
+	enum
+	{
+		FVF = D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1
+	};
+
+	Vec3 pos;
+	Vec3 normal;
+	unsigned int colour;
+	float u,v;
+};
+
 extern IDirect3DDevice8 *pd3dDevice;
 extern DisplaySettings display;
 

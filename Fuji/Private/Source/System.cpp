@@ -7,9 +7,22 @@
 #include "DebugMenu.h"
 
 int quit;
+MenuItemStatic quitOption;
+MenuItemFloat mf(0, 10);
+MenuItemInt mi;
+MenuItemBool mb;
+MenuItemColour col;
+
+char *strings[] = { "Hello", "World", "Tang!", NULL };
+MenuItemIntString mis(strings);
 
 float TIMEDELTA = 0.0f;
 float fps;
+
+void QuitCallback(MenuObject *pMenu, void *pData)
+{
+	quit = 1;
+}
 
 void System_Init()
 {
@@ -19,14 +32,23 @@ void System_Init()
 
 	Display_InitModule();
 	Input_InitModule();
+	Texture_InitModule();
 	Primitive_InitModule();
 	Font_InitModule();
+
+	DebugMenu_AddItem("Test Float", "Fuji Options", &mf);
+	DebugMenu_AddItem("Test Int", "Fuji Options", &mi);
+	DebugMenu_AddItem("Test Bool", "Fuji Options", &mb);
+	DebugMenu_AddItem("Test IntString", "Fuji Options", &mis);
+	DebugMenu_AddItem("Test Colour", "Fuji Options", &col);
+	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 }
 
 void System_Deinit()
 {
 	Font_DeinitModule();
 	Primitive_DeinitModule();
+	Texture_DeinitModule();
 	Input_DeinitModule();
 	Display_DeinitModule();
 	DebugMenu_DeinitModule();

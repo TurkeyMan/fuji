@@ -16,7 +16,7 @@ void Display_InitModule()
 	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
 	if(error) return;
 
-	DebugMenu_AddMenu("Display Options", DebugMenu_GetMenuByName("Fuji Options"));
+	DebugMenu_AddMenu("Display Options", "Fuji Options");
 }
 
 void Display_DeinitModule()

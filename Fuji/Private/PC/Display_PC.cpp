@@ -1,11 +1,28 @@
 #include "Common.h"
 #include "Display.h"
+#include "DebugMenu.h"
 
 IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
 
 bool isortho = false;
 float fieldOfView;
+
+void Display_InitModule()
+{
+	int error;
+
+	// create the display
+	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
+	if(error) return;
+
+	DebugMenu_AddMenu("Display Options", "Fuji Options");
+}
+
+void Display_DeinitModule()
+{
+	DestroyDisplay();
+}
 
 int CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
