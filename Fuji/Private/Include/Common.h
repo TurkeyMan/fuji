@@ -37,6 +37,7 @@ typedef char int8;
 // useful macros
 #define Clamp(x,y,z) max((x), min((y),(z)))
 
+#include "Heap.h"
 #include "Callstack.h"
 #include "Util.h"
 

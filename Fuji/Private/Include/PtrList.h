@@ -1,6 +1,8 @@
 #if !defined(_PTRLIST_H)
 #define _PTRLIST_H
 
+void *gEmptyPtrListDL[2];
+
 template<class T>
 class PtrList
 {
@@ -34,8 +36,8 @@ protected:
 template<class T>
 void PtrList<T>::Init(char* pGroupName, int maxElements)
 {
-  CALLSTACK("PtrList::Init");
-/*
+  CALLSTACK;
+
   if(maxElements==0)
   {
     ppMark = (T**)(&gEmptyPtrList[1]);
@@ -50,7 +52,7 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
     for(int i = 0; i<maxElements; ++i) *(++ppMark) = (T*)(0xdeadbeef);
     *(++ppMark) = 0;
   }
-*/
+
 #if defined(_MKDEBUG)
   pName = pGroupName;
 #endif
@@ -59,18 +61,18 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
 template<class T>
 void PtrList<T>::Deinit()
 {
-  CALLSTACK("PtrList::Deinit");
+  CALLSTACK;
   DBGASSERT(ppMark!=0, "not initialised");
-/*
+
   while(*(--ppMark)!=0) {}
   if(ppMark!=(T**)(&gEmptyPtrList[0])) Heap_Free(ppMark);
   ppMark = 0;
-*/
 }
 
 template<class T>
 T* PtrList<T>::Create(T* p)
 {
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
   DBGASSERT(!IsFull(), STR("list %s full",pName));
   
@@ -80,7 +82,7 @@ T* PtrList<T>::Create(T* p)
 template<class T>
 void PtrList<T>::Destroy(T* p)
 {
-  CALLSTACK("PtrListDL::Destroy");
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
 
   T **iterator = ppMark;
@@ -99,7 +101,7 @@ void PtrList<T>::Destroy(T* p)
 template<class T>
 T** PtrList<T>::Find(T* p)
 {
-  CALLSTACK("PtrListDL::Destroy");
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
 
   T **iterator = ppMark;
@@ -117,6 +119,7 @@ T** PtrList<T>::Find(T* p)
 template<class T>
 void PtrList<T>::Destroy(T** p)
 {
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
   DBGASSERT(!IsEmpty(), STR("list %s is empty",pName));
 
@@ -161,10 +164,11 @@ protected:
 template<class T>
 void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
 {
-  CALLSTACK("PtrListDL::Init");
-/*
+  CALLSTACK;
+
   if(maxElements==0)
   {
+	  DBGASSERT(maxElements!=0, "List must have at least 1 element.");
     ppMark = (T**)(&gEmptyPtrListDL[1]);
   }
   else
@@ -176,7 +180,7 @@ void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
     for(int i = 0; i<maxElements; ++i) pBegin = (T*)(int(*(++ppMark) = pBegin) + elementSize);
     *(++ppMark) = 0;
   }
-*/
+
 #if defined(_DBGASSERTS)
   pName = pGroupName;
 #endif
@@ -185,9 +189,9 @@ void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
 template<class T>
 void PtrListDL<T>::Deinit()
 {
-  CALLSTACK("PtrListDL::Deinit");
+  CALLSTACK;
   DBGASSERT(ppMark!=0, "not initialised"); // stops double deinit's
-/*
+
   T* mem = (T*)(ppMark);  // initialise with a high value
   T** iterator = ppMark;
 
@@ -206,13 +210,12 @@ void PtrListDL<T>::Deinit()
     Heap_Free(mem);
   }
   ppMark = 0;
-*/
 }
 
 template<class T>
 void PtrListDL<T>::Destroy(T* p)
 {
-  CALLSTACK("PtrListDL::Destroy");
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
 
   T **iterator = ppMark;
@@ -231,7 +234,7 @@ void PtrListDL<T>::Destroy(T* p)
 template<class T>
 T** PtrListDL<T>::Find(T* p)
 {
-  CALLSTACK("PtrListDL::Destroy");
+  CALLSTACK;
   DBGASSERT(p!=0, "invalid parameter");
 
   T **iterator = ppMark;
