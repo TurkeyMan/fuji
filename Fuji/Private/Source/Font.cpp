@@ -64,6 +64,7 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 	float x,y,w,h, p, cwidth;
 
+	pTexture->SetTexture();
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);
@@ -100,8 +101,6 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 		pos_x += cwidth;
 	}
-
-	pTexture->SetTexture();
 
 	MFEnd();
 
