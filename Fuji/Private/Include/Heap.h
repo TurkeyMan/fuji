@@ -1,12 +1,25 @@
 #if !defined(_HEAP_H)
 #define _HEAP_H
 
-#define MAX_ALLOC_COUNT 2048
-#define HEAP_MARKERS 16
+#include "PtrList.h"
+
+#define MAX_HEAP_COUNT	6
+#define MAX_RESOURCES	254
+#define MAX_ALLOC_COUNT	2048
+#define HEAP_MARKERS	16
+
+enum ResType
+{
+	RES_Unknown = 0,
+	RES_Texture,
+	RES_Model,
+	RES_SoundBank,
+	RES_IniFile
+};
 
 struct MemAlloc
 {
-	void *pAddress;
+	char *pAddress;
 	uint32 bytes;
 
 	char *pFilename;
@@ -16,11 +29,11 @@ struct MemAlloc
 class Heap
 {
 public:
-	void *pHeap;
-	void *pAllocPointer;
+	char *pHeap;
+	char *pAllocPointer;
 	uint32 heapSize;
 
-	void *markStack[HEAP_MARKERS];
+	char *markStack[HEAP_MARKERS];
 	uint32 markCount;
 #if defined(_DEBUG)
 	uint32 markAlloc[HEAP_MARKERS];
@@ -32,23 +45,35 @@ public:
 #endif
 };
 
+class Resource
+{
+public:
+	void *pData;
+	uint32 bytes;
+	uint32 resourceType;
+	uint32 reserved;
+};
+
 template<class T>
 class MFResource
 {
 public:
-	inline operator=(T *pPtr) { pData = pPtr; };
-	inline T& operator*() { return *pData; };
-	inline T* operator->() { return pData; };
+	inline operator=(Resource *pR) { pResource = pR; }
+	inline T& operator*() const { return *(T*)pResource->pData; }
+	inline T* operator->() const { return (T*)pResource->pData; }
+	inline operator T*() const { return (T*)pResource->pData; }
 
-	T *pData;
-	uint32 bytes;
+	Resource *pResource;
 };
 
 void Heap_InitModule();
 void Heap_DeinitModule();
 
-void CreateHeap(Heap *pHeap, uint32 size, char *name);
+Heap* CreateHeap(uint32 size, char *name);
 void FreeHeap(Heap *pHeap);
+
+Resource* CreateResource(uint32 size, uint32 type);
+void ReleaseResource(Resource *pResource);
 
 void MarkHeap(Heap *pHeap);
 void ReleaseMark(Heap *pHeap);
@@ -56,13 +81,11 @@ void ReleaseMark(Heap *pHeap);
 void SetCurrentHeap(Heap *pHeap);
 
 #if defined(_DEBUG)
-#define Heap_Alloc(x) Managed_Alloc(x, __FILE__, __LINE__)
-void *Managed_Alloc(uint32 bytes, char *pFile, uint32 line);
-//void *Managed_Realloc(uint32 bytes, char *pFile, uint32 line);
+void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
+void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line);
 #else
-#define Heap_Alloc(x) Unmanaged_Alloc(x)
-void *Unmanaged_Alloc(uint32 bytes);
-//void *Unmanaged_Realloc(uint32 bytes);
+void *Heap_Alloc(uint32 bytes);
+void *Heap_Realloc(void *pMem, uint32 bytes);
 #endif
 void Heap_Free(void *pMem);
 

@@ -3,18 +3,21 @@
 
 #include "Vector4.h"
 #include "Texture.h"
+#include "IniFile.h"
 
 enum RederTypeFlags
 {
 	// Material Flags
 	RT_Lit					= 0x00000001,	// L
-	RT_Additive				= 0x00000002,	// A
-	RT_AlphaBlend			= 0x00000004,	// Al
+	RT_AlphaBlend			= 0x00000002,	// Al
+	RT_Additive				= 0x00000004,	// A
+	RT_Subtractive			= 0x00000006,	// S
+	RT_BlendMask			= 0x00000006,
 
-	RT_Omni					= 0x00000008,	// O
-	RT_Mask					= 0x00000010,	// M
+	RT_Omni					= 0x00000010,	// O
+	RT_Mask					= 0x00000020,	// M
 
-	RT_DoubleSided			= 0x00000020,	// Ds
+	RT_DoubleSided			= 0x00000040,	// Ds
 
 	// Vertex Flags
 	RT_Weighted				= 0x00000700,	// W (Up to 8 bone influence)
@@ -38,13 +41,15 @@ enum MaterialFlags
 {
 	// Material Flags
 	MF_Lit					= 0x00000001,	// L
-	MF_Additive				= 0x00000002,	// A
-	MF_AlphaBlend			= 0x00000004,	// Al
+	MF_AlphaBlend			= 0x00000002,	// Al
+	MF_Additive				= 0x00000004,	// A
+	MF_Subtractive			= 0x00000006,	// S
+	MF_BlendMask			= 0x00000006,
 
-	MF_Omni					= 0x00000008,	// O
-	MF_Mask					= 0x00000010,	// M
+	MF_Omni					= 0x00000010,	// O
+	MF_Mask					= 0x00000020,	// M
 
-	MF_DoubleSided			= 0x00000020,	// Ds
+	MF_DoubleSided			= 0x00000040,	// Ds
 
 	// Renderer Flags
 	MF_PerPixelLighting		= 0x00010000,	// P
@@ -62,8 +67,20 @@ enum MaterialFlags
 
 class Material
 {
+public:
+	static Material* CreateDefault();
+	static Material* Create(char *pName);
+	inline static void UseNone() { pNone->Use(); }
+
+	static Material *pCurrent;
+	static Material *pNone;
+
+	static IniFile materialDefinitions;
+
+	void Release();
 	void Use();
-	static void UseNone();
+
+	char* GetIDString();
 
 	Vector4	diffuse;
 	Vector4	ambient;
@@ -79,6 +96,11 @@ class Material
 	uint32	textureCount;
 
 	char name[32];
+
+	uint16	opaque	: 1;
+	uint16	flags	: 15;
+
+	uint16	refCount;
 
 	uint32 diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
 	uint32 diffuseMap2Index		: 3;
@@ -101,5 +123,8 @@ class Material
 	IDirect3DPixelShader9	*pPixelShader;
 #endif
 };
+
+void Material_InitModule();
+void Material_DeinitModule();
 
 #endif

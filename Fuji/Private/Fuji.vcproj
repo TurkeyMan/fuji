@@ -556,6 +556,9 @@
 				RelativePath=".\Source\IniFile.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Material.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Matrix.cpp">
 			</File>
 			<File
@@ -630,6 +633,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Input.h">
+			</File>
+			<File
+				RelativePath=".\Include\Material.h">
 			</File>
 			<File
 				RelativePath=".\Include\Matrix.h">

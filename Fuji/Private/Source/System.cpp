@@ -2,6 +2,7 @@
 #include "System.h"
 #include "FileSystem.h"
 #include "Display.h"
+#include "Material.h"
 #include "Input.h"
 #include "Font.h"
 #include "Primitive.h"
@@ -46,19 +47,25 @@ void System_Init()
 	Display_InitModule();
 	Input_InitModule();
 	Texture_InitModule();
+	Material_InitModule();
 	Primitive_InitModule();
 	Font_InitModule();
 	
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
+
+	MarkHeap(pCurrentHeap);
 }
 
 void System_Deinit()
 {
 	CALLSTACK;
 
+	ReleaseMark(pCurrentHeap);
+
 	Font_DeinitModule();
 	Primitive_DeinitModule();
+	Material_DeinitModule();
 	Texture_DeinitModule();
 	Input_DeinitModule();
 	Display_DeinitModule();

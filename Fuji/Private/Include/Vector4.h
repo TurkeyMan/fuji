@@ -3,9 +3,9 @@
 
 #include <math.h>
 #include "Common.h"
+#include "Vector3.h"
 
 class Matrix;
-class Vector3;
 
 class Vector4
 {
@@ -52,5 +52,6 @@ public:
 };
 
 inline Vector4 Vector(float x, float y, float z, float w) { Vector4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
+inline Vector4 Vector(Vector3 v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
 
 #endif

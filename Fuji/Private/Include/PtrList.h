@@ -126,13 +126,11 @@ void PtrList<T>::Destroy(T** p)
 	*p = *(ppMark++);
 }
 
-
-
 template<class T>
 class PtrListDL
 {
 public:
-	inline void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T));
+	inline void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T), void *pMem = NULL);
 	inline void Deinit();
 
 	inline T* Create() { DBGASSERT(!IsFull(), STR("list %s full",pName)); return *(--ppMark); };
@@ -140,6 +138,14 @@ public:
 
 	inline T** Begin()          { return ppMark; };
 	inline T** Find(T* p);
+
+	inline void Swap(T *p1, T *p2)
+	{
+		T *pT = p1;
+		p1 = p2;
+		p2 = pT;
+	}
+
 	inline void Destroy(T** p)  { DBGASSERT(p!=0, "invalid parameter"); DBGASSERT(!IsEmpty(), STR("list %s is empty",pName)); Swap(*(ppMark++), *p); };
 
 	inline void Clear()    { while(*ppMark!=0) ++ppMark; };
@@ -156,13 +162,13 @@ public:
 protected:
 	T** ppMark;
 
-#if defined(_DBGASSERTS)
+#if !defined(_RETAIL)
 	char *pName;
 #endif
 };
 
 template<class T>
-void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize)
+void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
 {
 	CALLSTACK;
 

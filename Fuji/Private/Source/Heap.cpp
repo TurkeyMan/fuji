@@ -1,24 +1,43 @@
 #include "Common.h"
+#include "Heap.h"
+
+Heap heapList[MAX_HEAP_COUNT];
+Resource resourceList[MAX_RESOURCES];
 
 Heap *pCurrentHeap = NULL;
 
-Heap gDefaultHeap;
-
 void Heap_InitModule()
 {
-	CreateHeap(&gDefaultHeap, 48*1024*1024, "GlobalHeap");
+	CALLSTACK;
 
-	pCurrentHeap = &gDefaultHeap;
+	memset(heapList, 0, sizeof(Heap) * MAX_HEAP_COUNT);
+	memset(resourceList, 0, sizeof(Resource) * MAX_RESOURCES);
+
+	Heap *pHeap = CreateHeap(8*1024*1024, "GlobalHeap");
+	pCurrentHeap = pHeap;
 }
 
 void Heap_DeinitModule()
 {
-	FreeHeap(&gDefaultHeap);
+	CALLSTACK;
+
+	for(int a=0; a<MAX_HEAP_COUNT; a++)
+	{
+		FreeHeap(&heapList[a]);
+	}
 }
 
-void CreateHeap(Heap *pHeap, uint32 size, char *name)
+Heap* CreateHeap(uint32 size, char *name)
 {
-//	pHeap->pAllocPointer = pHeap->pHeap = malloc(size);
+	CALLSTACK;
+
+	for(int a=0; a<MAX_HEAP_COUNT; a++) if(!heapList[a].pHeap) break;
+
+	DBGASSERT(a<MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
+
+	Heap *pHeap = &heapList[a];
+
+	pHeap->pAllocPointer = pHeap->pHeap = (char*)malloc(ALIGN16(size));
 	pHeap->heapSize = size;
 
 	pHeap->markCount = 0;
@@ -28,10 +47,14 @@ void CreateHeap(Heap *pHeap, uint32 size, char *name)
 
 	pHeap->allocCount = 0;
 #endif
+
+	return pHeap;
 }
 
 void FreeHeap(Heap *pHeap)
 {
+	CALLSTACK;
+
 #if defined(_DEBUG)
 	if(pHeap->allocCount)
 	{
@@ -48,10 +71,42 @@ void FreeHeap(Heap *pHeap)
 		LOGD(STR("\nTotal: %d bytes unfreed\n", total));
 	}
 #endif
+
+	free(pHeap->pHeap);
+	pHeap->pHeap = NULL;
+}
+
+Resource* CreateResource(uint32 size, uint32 type = RES_Unknown)
+{
+	CALLSTACK;
+
+	size = ALIGN16(size);
+
+	for(int a=0; a<MAX_RESOURCES; a++) if(!resourceList[a].pData) break;
+
+	DBGASSERT(a<MAX_RESOURCES, "Exceeded MAX_RESOURCES resources's");
+
+	Resource *pRes = &resourceList[a];
+
+	pRes->pData = Heap_Alloc(size);
+	pRes->bytes = size;
+	pRes->resourceType = type;
+
+	return pRes;
+}
+
+void ReleaseResource(Resource *pResource)
+{
+	CALLSTACK;
+
+	Heap_Free(pResource->pData);
+	pResource->pData = NULL;
 }
 
 void MarkHeap(Heap *pHeap)
 {
+	CALLSTACK;
+
 	pHeap->markStack[pHeap->markCount] = pHeap->pAllocPointer;
 #if defined(_DEBUG)
 	pHeap->markAlloc[pHeap->markCount] = pHeap->allocCount;
@@ -61,7 +116,15 @@ void MarkHeap(Heap *pHeap)
 
 void ReleaseMark(Heap *pHeap)
 {
+	CALLSTACK;
 
+	// list unfree'd alloc's
+
+	pHeap->markCount--;
+#if defined(_DEBUG)
+	pHeap->allocCount = pHeap->markAlloc[pHeap->markCount];
+#endif
+	pHeap->pAllocPointer = pHeap->markStack[pHeap->markCount];
 }
 
 void SetCurrentHeap(Heap *pHeap)
@@ -70,19 +133,22 @@ void SetCurrentHeap(Heap *pHeap)
 }
 
 #if defined(_DEBUG)
-void *Managed_Alloc(uint32 bytes, char *pFile, uint32 line)
+void *Heap_Alloc(uint32 bytes, char *pFile, uint32 line)
 #else
-void *Unmanaged_Alloc(uint32 bytes)
+void *Heap_Alloc(uint32 bytes)
 #endif
 {
-	CALLSTACKs("Heap_Alloc");
+	CALLSTACK;
 
-	void *pMem = malloc(bytes);
+	char *pMem = pCurrentHeap->pAllocPointer;
+	pCurrentHeap->pAllocPointer += ALIGN16(bytes);
+
+	pMem = (char*)malloc(bytes);
 
 #if defined(_DEBUG)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pMem;
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = bytes;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = ALIGN16(bytes);
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pFilename = pFile;
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
 	pCurrentHeap->allocCount++;
@@ -91,19 +157,21 @@ void *Unmanaged_Alloc(uint32 bytes)
 	return pMem;
 }
 
-/*
 #if defined(_DEBUG)
 void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line)
 #else
 void *Heap_Realloc(uint32 bytes)
 #endif
 {
-	void *pNew = malloc(bytes);
+	CALLSTACK;
 
-	memcpy(pNew, pMem, 
-	return malloc(bytes);
+	void *pNew = Heap_Alloc(ALIGN16(bytes), pFile, line);
+
+	// ummmmm... yeah need to keep record of what is allocated where... 
+	memcpy(pNew, pMem, min(bytes, bytes));
+
+	return pNew;
 }
-*/
 
 void Heap_Free(void *pMem)
 {

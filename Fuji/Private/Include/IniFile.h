@@ -39,10 +39,30 @@ public:
 protected:
 #if !defined(_RETAIL)
 	char pIniFilename[64];
+	int iniLine;
+	char *pLastNewline;
+	inline IsNewline(char c)
+	{
+		if(c=='\n' && pCurrent!=pLastNewline)
+		{
+			iniLine++;
+			pLastNewline = pCurrent;
+		}
+
+		return c=='\n' || c=='\r';
+	}
+	inline char* SeekNewline(char *pC)
+	{
+		while(!IsNewline(*pC) && *pC!=NULL) pC++;
+		while(IsNewline(*pC)) pC++;
+		return pC;
+	}
 #endif
 	char *pIniBuffer;
 	char *pCurrent;
 	bool owned;
+
+	inline char* GetFloat(char *pOffset, char **ppFloat);
 };
 
 #endif

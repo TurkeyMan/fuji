@@ -55,31 +55,37 @@ Matrix& Matrix::Translate(const Vector3 &trans)
 
 Matrix& Matrix::Rotate(const Vector3 &axis, float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::RotateQ(const Vector3 &axis, float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::RotateYPR(float yaw, float pitch, float roll)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::RotateX(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::RotateY(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::RotateZ(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
@@ -118,26 +124,31 @@ Matrix& Matrix::SetRotation(const Vector3 &axis, float angle)
 
 Matrix& Matrix::SetRotationQ(const Vector4 &q)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::SetRotationX(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::SetRotationY(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::SetRotationZ(float angle)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
@@ -164,11 +175,13 @@ Matrix& Matrix::Transpose3x3()
 
 Matrix& Matrix::Multiply(const Matrix &mat)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
 Matrix& Matrix::Multiply(const Matrix &mat1, const Matrix &mat2)
 {
+	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 

@@ -39,11 +39,17 @@ typedef char int8;
 // useful macros
 #define Clamp(x,y,z) max((x), min((y),(z)))
 
+#define ALIGN16(x) ((x+15) & 0xFFFFFFF0)
+
+#include "Util.h"
+
 #if !defined(_FUJI_UTIL)
-	#include "Heap.h"
 	#include "Callstack.h"
 #endif
 
-#include "Util.h"
+
+#if !defined(_FUJI_UTIL)
+	#include "Heap.h"
+#endif
 
 #endif // _COMMON_H
