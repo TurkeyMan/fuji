@@ -3,22 +3,20 @@
 
 #include "PtrList.h"
 
-#define MAX_HEAP_COUNT	6
-#define MAX_RESOURCES	254
-#define MAX_ALLOC_COUNT	2048
-#define HEAP_MARKERS	16
-
-enum ResType
+// heap type enum
+enum HeapType
 {
-	RES_Unknown = 0,
-	RES_PtrList,
-	RES_Texture,
-	RES_Model,
-	RES_SoundBank,
-	RES_IniFile,
-	RES_Collision
+	HEAP_Static,
+	HEAP_Dynamic,
+	HEAP_Defrag
 };
 
+// system allocation/deallocation
+void *malloc_aligned(size_t bytes);
+void *realloc_aligned(void *buffer, size_t bytes);
+void free_aligned(void *buffer);
+
+// records an allocation
 struct MemAlloc
 {
 	char *pAddress;
@@ -28,23 +26,42 @@ struct MemAlloc
 	int lineNumber;
 };
 
+// base heap class
 class Heap
 {
 public:
-	char *pHeap;
-	char *pAllocPointer;
-	uint32 heapSize;
+	// Heap Functions
+	virtual void Release() = 0;
 
-	char *markStack[HEAP_MARKERS];
-	uint32 markCount;
+	virtual void *Alloc(uint32 bytes) = 0;
+	virtual void *Realloc(void *pBuffer, uint32 bytes) = 0;
+	virtual void Free(void *pBuffer) = 0;
+
+	// Heap Members
+	char		*pHeap;
+	char		*pAllocPointer;
+	uint32		heapSize;
+	HeapType	heapType;
+
 #if !defined(_RETAIL)
-	uint32 markAlloc[HEAP_MARKERS];
-
-	char heapName[40];
-
-	MemAlloc allocList[MAX_ALLOC_COUNT];
-	uint32 allocCount;
+	char heapName[32];
 #endif
+};
+
+// static (mark/release) heap
+class StaticHeap
+{
+public:
+	// Static Heap Functions
+	virtual void Release();
+
+	virtual void *Alloc(uint32 bytes);
+	virtual void *Realloc(void *pBuffer, uint32 bytes);
+	virtual void Free(void *pBuffer);
+
+	// Static Heap Members
+	char **markStack;
+	uint32 markCount;
 };
 
 class Resource
@@ -65,58 +82,44 @@ public:
 	inline T* operator->() const	{ return (T*)pResource->pData; }
 	inline operator T*() const		{ return (T*)pResource->pData; }
 
-	uint32 resID;
+	Resource *pResource;
 };
 
+// heap module init/deinit
 void Heap_InitModule();
 void Heap_DeinitModule();
 
-Heap* CreateHeap(uint32 size, char *name);
-void FreeHeap(Heap *pHeap);
+// create a heap
+Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name);
 
-Resource* CreateResource(uint32 size, uint32 type);
-void ReleaseResource(Resource *pResource);
+// get/set the current heap
+Heap *Heap_SetCurrentHeap(Heap *pHeap);
+Heap *Heap_GetCurrentHeap();
 
-void MarkHeap(Heap *pHeap);
-void ReleaseMark(Heap *pHeap);
+// create a managed resource for dynamic/defragging heaps
+Resource* Heap_CreateResource(uint32 size, uint32 type);
+void Heap_ReleaseResource(Resource *pResource);
 
-void SetCurrentHeap(Heap *pHeap);
+// push/pop a heap marker for static heaps
+void Heap_MarkHeap();
+void Heap_ReleaseMark();
 
+// push/pop group markers (help keep track of allocation source)
 void Heap_PushGroupName(const char *pGroupName);
 void Heap_PopGroupName();
 
+// functions to allocate/free memory
 #if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
-void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line);
+void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
 #else
 void *Heap_Alloc(uint32 bytes);
 void *Heap_Realloc(void *pMem, uint32 bytes);
 #endif
 void Heap_Free(void *pMem);
 
-#if !defined(_RETAIL)
-#define Heap_New(T) Managed_New(new T, __FILE__, __LINE__)
-template<class T>
-T* Managed_New(T *pT, char *pFile, uint32 line);
-#else
-#define Heap_New(T) Managed_New(new T)
-template<class T>
-T* Unmanaged_New(T *pT);
-#endif
-template<class T>
-void Heap_Delete(T *pObject);
-
-/*
-template<class T>
-#if !defined(_RETAIL)
-T* Heap_NewArray(int arraySize, char *pFile, uint32 line);
-#else
-T* Heap_NewArray(int arraySize);
-#endif
-template<class T>
-void Heap_DeleteArray(T *pArray);
-*/
-
-extern Heap *pCurrentHeap;
+// for allocating in a temp mem heap
+void *Heap_TAlloc(uint32 bytes);
+void Heap_TFree(void *pMem);
 
 #endif

@@ -9,8 +9,8 @@ enum InputType
 	Button_XB_X			= 2,
 	Button_XB_Y			= 3,
 
-	Button_XB_Black		= 4,
-	Button_XB_White		= 5,
+	Button_XB_White		= 4,
+	Button_XB_Black		= 5,
 
 	Button_XB_LTrig		= 6,
 	Button_XB_RTrig		= 7,
@@ -27,10 +27,10 @@ enum InputType
 	Button_P2_Box		= 2,
 	Button_P2_Triangle	= 3,
 
-	Button_P2_L1		= 6,
-	Button_P2_R1		= 7,
-	Button_P2_R2		= 4,
-	Button_P2_L2		= 5,
+	Button_P2_L1		= 4,
+	Button_P2_R1		= 5,
+	Button_P2_R2		= 6,
+	Button_P2_L2		= 7,
 
 	Button_P2_Start		= 8,
 	Button_P2_Select	= 9,

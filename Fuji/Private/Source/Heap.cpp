@@ -1,20 +1,59 @@
 #include "Common.h"
 #include "Heap.h"
 
-Heap heapList[MAX_HEAP_COUNT];
-Resource resourceList[MAX_RESOURCES];
+#define MAX_HEAP_COUNT 16
 
+Heap *gpHeapList[MAX_HEAP_COUNT];
 Heap *pCurrentHeap = NULL;
+
+PtrListDL<Resource> gResourceList;
+
+void *malloc_aligned(size_t bytes)
+{
+	char *new_buffer;
+
+	new_buffer = (char*)malloc(bytes+16);
+
+	// make allocation 16 byte alligned
+	char offset = 16 - ((uint32)new_buffer & 0xF);
+	new_buffer += offset;
+	new_buffer[-1] = offset;
+
+	return new_buffer;
+}
+
+void *realloc_aligned(void *buffer, size_t bytes)
+{
+	void *new_buffer = malloc_aligned(ALIGN16(bytes));
+
+	// ummmmm... yeah need to keep record of what is allocated where... 
+	memcpy(new_buffer, buffer, Min(bytes, bytes));
+
+	free_aligned(buffer);
+
+	return new_buffer;
+}
+
+void free_aligned(void *buffer)
+{
+	// used to ensure 16 byte allignment
+	(char*&)buffer -= ((char*)buffer)[-1];
+
+	free(buffer);
+}
+
 
 void Heap_InitModule()
 {
 	CALLSTACK;
 
-	memset(heapList, 0, sizeof(Heap) * MAX_HEAP_COUNT);
-	memset(resourceList, 0, sizeof(Resource) * MAX_RESOURCES);
+	memset(gpHeapList, 0, sizeof(Heap*) * MAX_HEAP_COUNT);
 
-	Heap *pHeap = CreateHeap(gDefaults.heap.staticHeapSize, "GlobalHeap");
-	pCurrentHeap = pHeap;
+	gResourceList.Init("Heap Resource List", gDefaults.heap.maxResources);
+
+	// probably want to create the default heap here...
+	// but we'll let the system manage the memory for the time being
+	// all currently supports systems have memory managers
 }
 
 void Heap_DeinitModule()
@@ -23,45 +62,78 @@ void Heap_DeinitModule()
 
 	for(int a=0; a<MAX_HEAP_COUNT; a++)
 	{
-		FreeHeap(&heapList[a]);
+		if(gpHeapList[a])
+			gpHeapList[a]->Release();
 	}
 }
 
-Heap* CreateHeap(uint32 size, char *name)
+Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 {
 	CALLSTACK;
 
-	int a; /* The new ISO standard doesn't allow variables declared in for loops to be used outside the for loop */
-	for(a=0; a<MAX_HEAP_COUNT; a++) if(!heapList[a].pHeap) break;
+	// find an empty heap pointer
+	int heapIndex;
+	for(heapIndex=0; heapIndex<MAX_HEAP_COUNT && gpHeapList[heapIndex]; heapIndex++);
+	DBGASSERT(heapIndex < MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
 
-	DBGASSERT(a < MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
+	// only 16 byte alligned blocks can be allocated
+	size = ALIGN16(size);
 
-	Heap *pHeap = &heapList[a];
+	// calculate the offset of the start of the heap memory
+	uint32 heapStart;
 
-	pHeap->pAllocPointer = pHeap->pHeap = (char*)malloc(ALIGN16(size));
-	pHeap->heapSize = size;
+	switch(type)
+	{
+	case HEAP_Static:
+		heapStart = ALIGN16(sizeof(StaticHeap)) + ALIGN16(sizeof(char*) * gDefaults.heap.maxStaticMarkers);
 
-	pHeap->markCount = 0;
+	default:
+		DBGASSERT(0, "Unknown Heap Type");
+	}
+
+	// FIXME: i think you need to call new on a class with a vf-table?
+	// will need a placement new or something.... :/
+	Heap *pHeap = (Heap*)malloc_aligned(size + heapStart);
+
+	// fill heap structure
+	pHeap->pHeap			= (char*)pHeap + heapStart;
+	pHeap->pAllocPointer	= (char*)pHeap + heapStart;
+	pHeap->heapSize			= size;
+	pHeap->heapType			= type;
 
 #if !defined(_RETAIL)
 	strcpy(pHeap->heapName, name);
-
-	pHeap->allocCount = 0;
 #endif
 
-	return pHeap;
+	// fill heap type specific data
+	switch(type)
+	{
+	case HEAP_Static:
+		StaticHeap *pStaticHeap = (StaticHeap*)pHeap;
+
+		pStaticHeap->markStack = (char**)pHeap + ALIGN16(sizeof(StaticHeap));
+		pStaticHeap->markCount = 0;
+	}
+
+	// add to list
+	gpHeapList[heapIndex] = pHeap;
+
+	// return heap
+	return (Heap*)pHeap;
 }
 
-void FreeHeap(Heap *pHeap)
+void StaticHeap::Release()
 {
 	CALLSTACK;
 
 #if !defined(_RETAIL)
+	// list unfreed allocations
+/*
 	if(pHeap->allocCount)
 	{
 		uint32 total = 0;
 
-		LOGD(STR("\nFreeHeap(): %d allocations were not freed:\n-----------------------------------------\n", pHeap->allocCount));
+		LOGD(STR("\StaticHeap::Release(): %d allocations were not freed in heap '%s':\n-----------------------------------------\n", allocCount, heapName));
 
 		for(uint32 a=0; a<pHeap->allocCount; a++)
 		{
@@ -71,15 +143,26 @@ void FreeHeap(Heap *pHeap)
 
 		LOGD(STR("\nTotal: %d bytes unfreed\n", total));
 	}
+*/
 #endif
 
-	free(pHeap->pHeap);
-	pHeap->pHeap = NULL;
+	// find and delete heap pointer
+	int heapIndex;
+	for(heapIndex=0; heapIndex<MAX_HEAP_COUNT && gpHeapList[heapIndex] != (Heap*)this; heapIndex++);
+
+	DBGASSERT(heapIndex < MAX_HEAP_COUNT, "Heap not found");
+
+	gpHeapList[heapIndex] = NULL;
+
+	// FIXME: i think i need to call delete on a class with a vf-table?
+	free_aligned(this);
 }
 
-Resource* CreateResource(uint32 size, uint32 type = RES_Unknown)
+Resource* Heap_CreateResource(uint32 size)
 {
 	CALLSTACK;
+/*
+	DBGASSERT(pCurrentHeap->heapType == HEAP_Defrag, "Can't allocate resource");
 
 	size = ALIGN16(size);
 
@@ -95,43 +178,55 @@ Resource* CreateResource(uint32 size, uint32 type = RES_Unknown)
 	pRes->resourceType = type;
 
 	return pRes;
+*/
+	return NULL;
 }
 
-void ReleaseResource(Resource *pResource)
+void Heap_ReleaseResource(Resource *pResource)
 {
 	CALLSTACK;
-
+/*
 	Heap_Free(pResource->pData);
 	pResource->pData = NULL;
+*/
 }
 
-void MarkHeap(Heap *pHeap)
+void Heap_MarkHeap()
 {
 	CALLSTACK;
-
+/*
 	pHeap->markStack[pHeap->markCount] = pHeap->pAllocPointer;
 #if !defined(_RETAIL)
 	pHeap->markAlloc[pHeap->markCount] = pHeap->allocCount;
 #endif
 	pHeap->markCount++;
+*/
 }
 
-void ReleaseMark(Heap *pHeap)
+void Heap_ReleaseMark()
 {
 	CALLSTACK;
 
 	// list unfree'd alloc's
-
+/*
 	pHeap->markCount--;
 #if !defined(_RETAIL)
 	pHeap->allocCount = pHeap->markAlloc[pHeap->markCount];
 #endif
 	pHeap->pAllocPointer = pHeap->markStack[pHeap->markCount];
+*/
 }
 
-void SetCurrentHeap(Heap *pHeap)
+Heap *Heap_SetCurrentHeap(Heap *pHeap)
 {
+	Heap *pTemp = pCurrentHeap;
 	pCurrentHeap = pHeap;
+	return pTemp;
+}
+
+Heap *Heap_GetCurrentHeap()
+{
+	return pCurrentHeap;
 }
 
 void Heap_PushGroupName(const char *pGroupName)
@@ -153,16 +248,17 @@ void *Heap_Alloc(uint32 bytes)
 {
 	CALLSTACK;
 
-	char *pMem = pCurrentHeap->pAllocPointer;
-	pCurrentHeap->pAllocPointer += ALIGN16(bytes);
+	char *pMem;
 
-	pMem = (char*)malloc(bytes+16);
-
-	// make allocation 16 byte alligned
-	char offset = 16 - ((uint32)pMem & 0xF);
-	pMem += offset;
-	pMem[-1] = offset;
-
+	if(pCurrentHeap)
+	{
+		pMem = (char*)pCurrentHeap->Alloc(bytes);
+	}
+	else
+	{
+        pMem = (char*)malloc_aligned(bytes);
+	}
+/*
 #if !defined(_RETAIL)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pMem;
@@ -171,9 +267,7 @@ void *Heap_Alloc(uint32 bytes)
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
 	pCurrentHeap->allocCount++;
 #endif
-
-	ASSERT_ALLIGN16(pMem);
-
+*/
 	return pMem;
 }
 
@@ -185,24 +279,22 @@ void *Heap_Realloc(void *pMem, uint32 bytes)
 {
 	CALLSTACK;
 
-#if !defined(_RETAIL)
-	void *pNew = Heap_Alloc(ALIGN16(bytes), pFile, line);
-#else
-	void *pNew = Heap_Alloc(ALIGN16(bytes));
-#endif
+	if(pCurrentHeap)
+	{
+		pMem = (char*)pCurrentHeap->Realloc(pMem, bytes);
+	}
+	else
+	{
+        pMem = (char*)realloc_aligned(pMem, bytes);
+	}
 
-	// ummmmm... yeah need to keep record of what is allocated where... 
-	memcpy(pNew, pMem, Min(bytes, bytes));
-
-	Heap_Free(pMem);
-
-	return pNew;
+	return pMem;
 }
 
 void Heap_Free(void *pMem)
 {
 	CALLSTACK;
-
+/*
 #if !defined(_RETAIL)
 	uint32 a;
 	for(a=pCurrentHeap->allocCount-1; a>=0; a--)
@@ -216,54 +308,24 @@ void Heap_Free(void *pMem)
 
 	DBGASSERT(a >= 0, STR("Memory not allocated at address: 0x%08X.", pMem));
 #endif
-
-	// used to ensure 16 byte allignment
-	(char*&)pMem -= ((char*)pMem)[-1];
-
-	free(pMem);
-}
-
-#if !defined(_RETAIL)
-template<class T>
-T* Managed_New(T *pT, char *pFile, uint32 line)
-{
-#else
-template<class T>
-T* Unmanaged_New(T *pT)
-{
-#endif
-#if !defined(_RETAIL)
-	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pT;
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = sizeof(T);
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].pFilename = pFile;
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
-	pCurrentHeap->allocCount++;
-#endif
-
-	return pT;
-}
-
-template<class T>
-void Heap_Delete(T *pObject)
-{
-	delete pObject;
-}
-
-/*
-template<class T>
-#if !defined(_RETAIL)
-T* Heap_NewArray(int arraySize, char *pFile, uint32 line)
-#else
-T* Heap_NewArray(int arraySize)
-#endif
-{
-	return new T[arraySize];
-}
-
-template<class T>
-void Heap_DeleteArray(T *pArray)
-{
-	delete[] pArray;
-}
 */
+	if(pCurrentHeap)
+	{
+		pCurrentHeap->Free(pMem);
+	}
+	else
+	{
+        free_aligned(pMem);
+	}
+}
+
+void *Heap_TAlloc(uint32 bytes)
+{
+	return malloc_aligned(bytes);
+}
+
+void Heap_TFree(void *pMem)
+{
+	free_aligned(pMem);
+}
+

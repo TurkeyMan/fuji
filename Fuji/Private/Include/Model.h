@@ -16,15 +16,17 @@ enum CustomDataType
 
 enum VertexFormat
 {
-	VF_Position = (1<<0),
-	VF_Colour	= (1<<1),
-	VF_Normal	= (1<<2),
-	VF_Illum	= (1<<3),
-	VF_Tengent	= (1<<4),
-	VF_BiNormal	= (1<<5),
-	VF_Specular	= (1<<6),
+	VF_Position = (1<<0),	// position
 
-	VF_TexMask	= (15<<12)
+	VF_Colour	= (1<<1),	// diffuse colour
+	VF_Illum	= (1<<3),	// illumination colour
+	VF_Specular	= (1<<6),	// specular colour
+
+	VF_Normal	= (1<<2),	// normal vectors
+	VF_Tengent	= (1<<4),	// tangent vectors
+	VF_BiNormal	= (1<<5),	// binormal vectors
+
+	VF_TexMask	= (15<<12)	// bits 12, 13, 14 and 15: 0x0000F000 // number of tex coords
 };
 
 class MeshChunk;
@@ -62,6 +64,9 @@ public:
 #if defined(_WINDOWS)
 	IDirect3DVertexBuffer9 *pVertexBuffer;
 	IDirect3DIndexBuffer9 *pIndexBuffer;
+#elif defined(_XBOX)
+	IDirect3DVertexBuffer8 *pVertexBuffer;
+	IDirect3DIndexBuffer8 *pIndexBuffer;
 #else
 	uint32 reserved[2];
 #endif

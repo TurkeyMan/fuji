@@ -19,7 +19,9 @@ FujiDefaults gDefaults =
 		4*1024*1024,	// dynamicHeapSize
 		4*1024*1024,	// staticHeapSize
 		0,				// dynamicHeapCount
-		0				// staticHeapCount
+		0,				// staticHeapCount
+		256,			// maxResources
+		2048			// maxStaticMarkers
 	},
 
 	// DisplayDefaults
@@ -31,6 +33,11 @@ FujiDefaults gDefaults =
 	// TextureDefaults
 	{
 		1024			// maxTextures
+	},
+
+	// MaterialDefaults
+	{
+		254				// maxMaterials
 	}
 };
 
@@ -81,14 +88,14 @@ void System_Init()
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
-	MarkHeap(pCurrentHeap);
+	Heap_MarkHeap();
 }
 
 void System_Deinit()
 {
 	CALLSTACK;
 
-	ReleaseMark(pCurrentHeap);
+	Heap_ReleaseMark();
 
 	Font_DeinitModule();
 	Primitive_DeinitModule();

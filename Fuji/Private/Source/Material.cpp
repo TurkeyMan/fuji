@@ -1,7 +1,5 @@
 /**** Defines ****/
 
-#define MAX_MATERIALS 254
-
 /**** Includes ****/
 
 #include "Common.h"
@@ -28,7 +26,7 @@ void Material_InitModule()
 {
 	CALLSTACK;
 
-	materialList.Init("Material List", MAX_MATERIALS);
+	materialList.Init("Material List", gDefaults.material.maxMaterials);
 
 	if(Material::materialDefinitions.Create(File_SystemPath("Materials.ini")))
 	{

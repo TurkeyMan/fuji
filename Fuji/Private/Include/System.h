@@ -11,6 +11,9 @@ struct FujiDefaults
 		uint32 staticHeapSize;
 		uint32 dynamicHeapCount;
 		uint32 staticHeapCount;
+
+		uint32 maxResources;
+		uint32 maxStaticMarkers;
 	} heap;
 
 	struct DisplayDefaults
@@ -23,6 +26,11 @@ struct FujiDefaults
 	{
 		uint32 maxTextures;
 	} texture;
+
+	struct MaterialDefaults
+	{
+		uint32 maxMaterials;
+	} material;
 };
 
 extern FujiDefaults gDefaults;
