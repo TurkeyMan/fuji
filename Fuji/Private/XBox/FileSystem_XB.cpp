@@ -18,6 +18,8 @@ int File_Open(const char *pFilename, uint32 openFlags)
 	DWORD access = ((openFlags&OF_Read) ? GENERIC_READ : NULL) | ((openFlags&OF_Write) ? GENERIC_WRITE : NULL);
 	DBGASSERT(access, "Neither OF_Read nor OF_Write specified.");
 
+	FixXBoxFilename(pFilename);
+
 	gOpenFiles[fileID].file = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, (openFlags&OF_Write) ? OPEN_ALWAYS : OPEN_EXISTING, NULL, NULL);
 
 	if(gOpenFiles[fileID].file == INVALID_HANDLE_VALUE)

@@ -12,6 +12,8 @@
 
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
+	FixXBoxFilename(filename);
+
 	Texture *pTexture = FindTexture(filename);
 
 	if(!pTexture)
