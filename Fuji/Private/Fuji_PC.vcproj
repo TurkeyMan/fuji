@@ -215,6 +215,12 @@
 				RelativePath=".\Source\IniFile.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Input.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Input_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\Material.cpp">
 			</File>
 			<File

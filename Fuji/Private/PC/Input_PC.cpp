@@ -30,6 +30,7 @@ struct GamepadInfo
 
 	int axisMapping[4];
 	int buttonMapping[16];
+	bool usePOV;
 
 	GamepadInfo *pNext;
 };
@@ -330,7 +331,17 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 			if(id < gGamepadCount)
 			{
 				pDeviceStatus->available = true;
-				pDeviceStatus->status = IDS_Ready;
+
+				DIDEVCAPS caps;
+				memset(&caps, 0, sizeof(DIDEVCAPS));
+				caps.dwSize = sizeof(DIDEVCAPS);
+
+				pDIJoystick[id]->GetCapabilities(&caps);
+
+				if(caps.dwFlags & DIDC_ATTACHED)
+				{
+					pDeviceStatus->status = IDS_Ready;
+				}
 			}
 			break;
 
@@ -382,7 +393,7 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 			pGamepadState->values[a] = joyState.rgbButtons[pGamepadMappings[id]->buttonMapping[a]] ? 1.0f : 0.0f;
 	}
 
-	if(pGamepadMappings[id]->buttonMapping[Button_DUp] == -1)
+	if(pGamepadMappings[id]->usePOV)
 	{
 		// read from POV
 		DWORD pov = joyState.rgdwPOV[0];
@@ -625,6 +636,19 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 			return DIENUM_CONTINUE;
 
 		pGamepadMappings[gGamepadCount] = GetGamepadInfo(pdidInstance->tszProductName);
+
+		if(pGamepadMappings[gGamepadCount]->usePOV)
+		{
+			DIDEVCAPS caps;
+			memset(&caps, 0, sizeof(DIDEVCAPS));
+			caps.dwSize = sizeof(DIDEVCAPS);
+
+			pDIJoystick[gGamepadCount]->GetCapabilities(&caps);
+
+			if(caps.dwPOVs < 1)
+				pGamepadMappings[gGamepadCount]->usePOV = false;
+		}
+
 		gGamepadCount++;
 
 		return DIENUM_CONTINUE;
@@ -691,6 +715,7 @@ void LoadGamepadMappings()
 
 	// create default
 	pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen("default") + 1);
+	pGI->usePOV = true;
 	pGI->pName = (char*)&pGI[1];
 	strcpy(pGI->pName, "default");
 
@@ -719,6 +744,7 @@ void LoadGamepadMappings()
 			if(ini.IsSection())
 			{
 				pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
+				pGI->usePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				strcpy(pGI->pName, pName);
 
@@ -806,6 +832,10 @@ void LoadGamepadMappings()
 				else if(!stricmp(pName, "Button_DRight"))
 				{
 					pGI->buttonMapping[15] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "IgnorePOV"))
+				{
+					pGI->usePOV = false;
 				}
 			}
 
