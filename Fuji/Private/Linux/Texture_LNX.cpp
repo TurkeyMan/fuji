@@ -6,7 +6,7 @@ struct TgaHeader {
 	uint8 idLength;
 	uint8 colourMapType;
 	uint8 imageType;
-	
+
 	uint8 colourMapStart;
 	uint16 colourMapLength;
 	uint8 colourMapBits;
@@ -31,7 +31,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 	if(!pTexture->refCount) {
 		int32 handle;
 		TgaHeader header;
-		void *imageData;	
+		void *imageData;
 
 		if((handle = File_Open(filename, OF_Read)) == -1) {
 			LOGD(STR("Failed loading texture: %s", filename));
@@ -67,7 +67,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		} else {
 			dataLength = header.width * header.height * 3;
 		}
-	
+
 		imageData = Heap_Alloc(dataLength);
 //		imageData = new unsigned char[dataLength];
 
@@ -80,11 +80,11 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		if(header.bpp == 32) {
 			internalFormat = GL_RGBA;
 			format = GL_RGBA8;
-		
+
 			// OpenGL can only handle RGBA, TGA provides ARGB
 			for(int32 i=0; i < (header.width * header.height); i++) {
 				unsigned char temp;
-			
+
 				temp = ((unsigned char *)imageData)[(i * 4) + 3];
 				((unsigned char *)imageData)[(i * 4) + 3] = ((unsigned char *)imageData)[(i * 4)];
 				((unsigned char *)imageData)[(i * 4)] = temp;

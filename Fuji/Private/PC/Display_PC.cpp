@@ -446,47 +446,6 @@ void Display_ClearScreen(uint32 flags)
 	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), 0x00000030, 1.0f, 0);
 }
 
-void SetProjection(float fov)
-{
-	CALLSTACK;
-
-	D3DXMATRIX proj;
-
-	fieldOfView = fov;
-
-	// construct and apply perspective projection
-	D3DXMatrixPerspectiveFovLH(&proj, fov, ((float)display.width/(float)display.height), 0.1f, 1000.0f);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, &proj);
-}
-
-bool SetOrtho(bool enable, float width, float height)
-{
-	CALLSTACK;
-
-	D3DXMATRIX proj;
-
-	bool t = isortho;
-	isortho = enable;
-
-	if(enable)
-	{
-		float extend = 0.0f;
-
-		// correct for widescreen
-		if(display.wide) extend = (((width/1.333333333f)*1.77777777778f)-width)/2.0f;
-
-		// construct and apply ortho projection
-		D3DXMatrixOrthoOffCenterLH(&proj, -extend, width + extend, height, 0, 0.0f, 1000.0f);
-		pd3dDevice->SetTransform(D3DTS_PROJECTION, &proj);
-	}
-	else
-	{
-		SetProjection(fieldOfView);
-	}
-
-	return t;
-}
-
 void SetViewport(float x, float y, float width, float height)
 {
 	D3DVIEWPORT9 vp;

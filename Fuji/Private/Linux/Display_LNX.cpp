@@ -228,64 +228,6 @@ void Display_ClearScreen(uint32 flags)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void SetProjection(float fov)
-{
-	CALLSTACK;
-	GLfloat matrix[16];
-
-	float height = sinf(fov / 2) / cosf(fov / 2);
-	float aspect = (float)display.width / (float)display.height;
-	float width = height * aspect;
-	
-	float nearZ = 0.1f;
-	float farZ = 1000.0f;
-	
-	matrix[0] = width;
-	matrix[5] = height;
-	matrix[10] = farZ / (farZ / nearZ);
-	matrix[12] = matrix[13] = 0.0f;
-	matrix[14] = -(nearZ * farZ)/(farZ - nearZ);
-
-	matrix[11] = 1.0f;
-	matrix[1] = matrix[2] = matrix[3] = matrix[4] = matrix[5] = matrix[7] = matrix[8] = matrix[9] = matrix[15] = 0;
-
-	fieldOfView = fov;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf((GLfloat *)matrix);
-}
-
-bool SetOrtho(bool enable, float width, float height)
-{
-	CALLSTACK;
-
-	bool t = isortho;
-	isortho = enable;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	if(enable) {
-		float matrix[16];
-		float nearZ = 0.1f;
-		float farZ = 1000.0f;
-
-		matrix[0] = 2/(width);
-		matrix[5] = 2/(height);
-		matrix[10] = 1/(farZ - nearZ);
-		matrix[14] = nearZ / (nearZ - farZ);
-		matrix[15] = 1.0f;
-
-		matrix[1] = matrix[2] = matrix[3] = matrix[4] = matrix[6] = matrix[7] = matrix[8] = matrix[9] = matrix[11] = matrix[12] = matrix[13] = 0.0f;
-
-		glLoadMatrixf((GLfloat *)matrix);
-	} else {
-		SetProjection(fieldOfView);
-	}
-
-	return(t);
-}
-
 void SetViewport(float x, float y, float width, float height)
 {
 	CALLSTACK;

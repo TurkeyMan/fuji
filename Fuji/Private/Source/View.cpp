@@ -48,8 +48,6 @@ void View::SetProjection(float fov)
 	projection.m[1][0] = 0.0f;	projection.m[1][1] = h;		projection.m[1][2] = 0.0f;				projection.m[1][3] = 0.0f;
 	projection.m[2][0] = 0.0f;	projection.m[2][1] = 0.0f;	projection.m[2][2] = zf/(zf-zn);		projection.m[2][3] = 1.0f;
 	projection.m[3][0] = 0.0f;	projection.m[3][1] = 0.0f;	projection.m[3][2] = -zn*zf/(zf-zn);	projection.m[3][3] = 0.0f;
-
-//	D3DXMatrixPerspectiveFovLH((D3DXMATRIX*)&projection, fov, (display.wide ? WIDE_ASPECT : STANDARD_ASPECT), 0.1f, 10000.0f);
 }
 
 bool View::SetOrtho(bool enabled, float width, float height)
@@ -79,8 +77,6 @@ bool View::SetOrtho(bool enabled, float width, float height)
 		projection.m[1][0] = 0.0f;			projection.m[1][1] = 2.0f/(t-b);	projection.m[1][2] = 0.0f;			projection.m[1][3] = 0.0f;
 		projection.m[2][0] = 0.0f;			projection.m[2][1] = 0.0f;			projection.m[2][2] = 1.0f/(zf-zn);	projection.m[2][3] = 0.0f;
 		projection.m[3][0] = (l+r)/(l-r);	projection.m[3][1] = (t+b)/(b-t);	projection.m[3][2] = zn/(zn-zf);	projection.m[3][3] = 1.0f;
-
-//		D3DXMatrixOrthoOffCenterLH((D3DXMATRIX*)&projection, -extend, width + extend, height, 0, 0.0f, 1000.0f);
 	}
 	else
 	{

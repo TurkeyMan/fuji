@@ -18,6 +18,16 @@ void Primitive_DeinitModule()
 void MFPrimitive(uint32 type, uint32 hint)
 {
 	primType = type & PT_PrimMask;
+
+	if(type & PT_Untextured)
+	{
+		Texture::UseNone();
+	}
+
+	//***** this needs to do these things
+//	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
+//	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
+//	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
 }
 
 void MFBegin(uint32 beginVertexCount)
