@@ -29,7 +29,7 @@ void FileSystem_InitModule();
 void FileSystem_DeinitModule();
 
 
-char* File_SystemPath(char *filename);
+char* File_SystemPath(const char *filename);
 
 uint32 File_Open(const char *pFilename, uint32 openFlags);
 void File_Close(uint32 fileHandle);

@@ -23,7 +23,7 @@ Texture::Texture()
 	refCount = 0;
 }
 
-Texture* Texture::LoadTexture(char *filename, bool generateMipChain)
+Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
 	Texture *pTexture = &gTextureBank[filename];
 

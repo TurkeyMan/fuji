@@ -14,7 +14,7 @@ void FileSystem_DeinitModule()
 	file.Deinit();
 }
 
-char* File_SystemPath(char *filename)
+char* File_SystemPath(const char *filename)
 {
 #if defined(_XBOX)
 	return STR("D:\\Data\\%s", filename);

@@ -14,7 +14,7 @@ public:
 	Texture();
 
 	// member functions
-	static Texture* LoadTexture(char *filename, bool generateMipChain = true);
+	static Texture* LoadTexture(const char *filename, bool generateMipChain = true);
 	void Release();
 	void SetTexture();
 

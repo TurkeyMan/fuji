@@ -4,7 +4,7 @@
 #include "Sprite.h"
 #include "Primitive.h"
 
-void Sprite::Create(char *filename, int xFrame, int yFrames, uint32 colourKey)
+void Sprite::Create(const char *filename, int xFrame, int yFrames, uint32 colourKey)
 {
 	pTexture = Texture::LoadTexture(filename);
 

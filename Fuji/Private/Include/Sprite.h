@@ -7,7 +7,7 @@
 class Sprite
 {
 public:
-	void Create(char *filename, int xFrame = 1, int yFrames = 1, uint32 colourKey = 0x00000000);
+	void Create(const char *filename, int xFrame = 1, int yFrames = 1, uint32 colourKey = 0x00000000);
 	void Draw();
 	void Release();
 

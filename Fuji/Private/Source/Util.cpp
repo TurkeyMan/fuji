@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include "Common.h"
+#include "Display.h"
 #include "Util.h"
 #include "Vector3.h"
+#include "Primitive.h"
+#include "Font.h"
 
 char stringBuffer[1024*128];
 uint32 stringOffset;
@@ -9,24 +12,32 @@ uint32 stringOffset;
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {
-  char *pTemp = strrchr(pSourceFileName,'/');
-  if (!pTemp)
-  {
-    pTemp = strrchr(pSourceFileName,'\\');
-  }
-  return (pTemp) ? pTemp+1 : pSourceFileName;
+	char *pTemp = strrchr(pSourceFileName,'/');
+	if (!pTemp)
+	{
+		pTemp = strrchr(pSourceFileName,'\\');
+	}
+	return (pTemp) ? pTemp+1 : pSourceFileName;
+}
+
+void Callstack_Log()
+{
+	for(int a=Callstack.size()-1; a>=0; a--)
+	{
+		LOGD(STR(Callstack[a].c_str()));
+	}
 }
 
 #if defined(_XBOX)
 
-void dbgAssert(char *pReason, char *pMessage, char *pFile, int line)
+void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
-//  TimerInfo time,diff;
-//  Timer_GetSystemTime(&time);
-//  Timer_GetDifference(&diff,&startTime,&time);
+//	TimerInfo time,diff;
+//	Timer_GetSystemTime(&time);
+//	Timer_GetDifference(&diff,&startTime,&time);
 
-  LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
-  LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
+	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
 /*
   char *pDayStr = gNullStr;
   switch (time.day)
@@ -50,58 +61,138 @@ void dbgAssert(char *pReason, char *pMessage, char *pFile, int line)
   }
   LOGD(STR("Time : (%d%s):%02d:%02d:%02d (%02d:%02d:%02d from start)",time.day,pDayStr,time.hours,time.minutes,time.seconds,diff.day*24+diff.hours,diff.minutes,diff.seconds));
 */
+
+	Callstack_Log();
 }
 
 #elif defined(_WINDOWS)
 
-bool Debug_MsgBox(char *pMessageText, char *pTitle, char *pTime)
+bool Debug_MsgBox(const char *pMessageText, const char *pTitle, const char *pTime)
 {
-  bool bResult = false;
+	bool bResult = false;
 
-  if(IDYES == MessageBox(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
-  {
-    bResult = true;
-  }
+	if(IDYES == MessageBox(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
+	{
+		bResult = true;
+	}
 
-  return bResult;
+	return bResult;
 }
 
-void dbgAssert(char *pReason, char *pMessage, char *pFile, int line)
+void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
-  LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
-  LOGD(STR("Assertion Failure: File '%s', Line %d",pFile,line));
-//  Callstack_Log();
+	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
+	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+	Callstack_Log();
 
-  // build callstack log string for message box
+	// build callstack log string for message box
 #if defined(_DEBUG)
-  char callstack[2048] = "";
+	char callstack[2048] = "";
 
-  for(uint32 a=0; a<Callstack.size(); a++)
-  {
-    char *pTemp = STR("  %-32s\n",Callstack[a].c_str());
-//    char *pTemp = STR("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
-    if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
-      strcat(callstack, pTemp);
-  }
+	for(uint32 a=Callstack.size()-1; a>=0; a--)
+	{
+		char *pTemp = STR("  %-32s\n",Callstack[a].c_str());
+//		char *pTemp = STR("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
+		if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
+		strcat(callstack, pTemp);
+	}
 
 #else
-  char callstack[] = "Not available in _RETAIL builds";
+	char callstack[] = "Not available in _RETAIL builds";
 #endif
 
-  // query for debug or exit of process
-  if(!Debug_MsgBox(STR("Failed Condition: (%s)\n%s\nFile: %s\nLine: %d\n\nCallstack:\n%s", pReason, pMessage, pFile, line, callstack),
-                              "Assertion Failure, do you wish to debug?",
-                              "timewouldgohere"))
-  {
-    ExitProcess(0);
-  }
+	// query for debug or exit of process
+	if(!Debug_MsgBox(STR("Failed Condition: (%s)\n%s\nFile: %s\nLine: %d\n\nCallstack:\n%s", pReason, pMessage, pFile, line, callstack),
+						"Assertion Failure, do you wish to debug?",
+						"timewouldgohere"))
+	{
+		ExitProcess(0);
+	}
 }
 #endif
+
+void hardAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+{
+	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
+	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+	Callstack_Log();
+
+	while(1)
+	{
+#if defined(_WINDOWS)
+		DoMessageLoop();
+#endif
+		System_UpdateTimeDelta();
+		gFrameCount++;
+
+		System_Update();
+
+		Display_BeginFrame();
+
+		SetOrtho(true);
+
+		// Set some renderstates
+		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
+		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+
+		Texture::UseNone();
+
+		MFPrimitive(PT_TriStrip);
+
+		MFBegin(4);
+		MFSetColour(0xFF000000);
+		MFSetPosition(0, 0, 0);
+		MFSetPosition(640, 0, 0);
+		MFSetPosition(0, 480, 0);
+		MFSetPosition(640, 480, 0);
+		MFEnd();
+
+		if(!(((uint32)gSystemTimer.GetSecondsF()) % 2))
+		{
+			MFBegin(4);
+			MFSetColour(0xFFFF0000);
+			MFSetPosition(50, 50, 0);
+			MFSetPosition(590, 50, 0);
+			MFSetPosition(50, 110, 0);
+			MFSetPosition(590, 110, 0);
+			MFEnd();
+
+			MFBegin(4);
+			MFSetColour(0xFF000000);
+			MFSetPosition(55, 55, 0);
+			MFSetPosition(585, 55, 0);
+			MFSetPosition(55, 105, 0);
+			MFSetPosition(585, 105, 0);
+			MFEnd();
+		}
+
+		debugFont.DrawTextf(110, 60, 20, 0xFFFF0000, "Software Failure. Press left mouse button to continue");
+		debugFont.DrawTextf(240, 80, 20, 0xFFFF0000, "Guru Meditation: ");
+
+		debugFont.DrawTextf(80, 120, 20, 0xFFFF0000, "Assertion Failure:");
+		debugFont.DrawTextf(80, 140, 20, 0xFFFF0000, STR("Failed Condition: (%s):", pReason));
+		debugFont.DrawTextf(80, 160, 20, 0xFFFF0000, STR("File: %s, Line: %d", pFile, line));
+		debugFont.DrawTextf(80, 190, 20, 0xFFFF0000, STR("Message: %s", pMessage));
+
+		debugFont.DrawTextf(80, 230, 20, 0xFFFF0000, "Callstack:");
+		float y = 250.0f;
+		for(int a=Callstack.size()-1; a>=0; a--)
+		{
+			debugFont.DrawTextf(100, y, 20, 0xFFFF0000, Callstack[a].c_str());
+			y+=20.0f;
+		}
+
+		Display_EndFrame();
+	}
+}
 
 //
 // This just does OutputDebugString using a format string.
 //
-int dprintf(char *format, ...)
+int dprintf(const char *format, ...)
 {
 	char *buffer[2048];
 	va_list arglist;
@@ -116,13 +207,13 @@ int dprintf(char *format, ...)
 	return nRes;
 }
 
-void LOGD(char *string)
+void LOGD(const char *string)
 {
 	OutputDebugString(string);
 	OutputDebugString("\n");
 }
 
-char* STR(char *format, ...)
+char* STR(const char *format, ...)
 {
 	va_list arglist;
 	char *buffer = &stringBuffer[stringOffset];
