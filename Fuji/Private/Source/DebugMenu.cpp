@@ -226,13 +226,13 @@ void Menu::Draw()
 	PrimEnd();
 
 	PrimBegin(4);
-	PrimSetColour(0x60000000);
+	PrimSetColour(0xA0000000);
 	PrimSetPosition(115, 145, 0);
-	PrimSetColour(0x60000000);
+	PrimSetColour(0xA0000000);
 	PrimSetPosition(525, 145, 0);
-	PrimSetColour(0x60000000);
+	PrimSetColour(0xA0000000);
 	PrimSetPosition(115, 365, 0);
-	PrimSetColour(0x60000000);
+	PrimSetColour(0xA0000000);
 	PrimSetPosition(525, 365, 0);
 	PrimEnd();
 
