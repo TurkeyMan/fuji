@@ -12,21 +12,21 @@ Font debugFont;
 
 void Font_InitModule()
 {
-	CALLSTACK("Font_InitModule");
+	CALLSTACK;
 
 	debugFont.LoadFont(File_SystemPath("Font\\Arial"));
 }
 
 void Font_DeinitModule()
 {
-	CALLSTACK("Font_DeinitModule");
+	CALLSTACK;
 
 	debugFont.Release();
 }
 
 int Font::LoadFont(char *filename)
 {
-	CALLSTACK("Font::LoadFont");
+	CALLSTACK;
 
 	HANDLE file;
 	char tempbuffer[1024];
@@ -50,14 +50,14 @@ int Font::LoadFont(char *filename)
 
 void Font::Release()
 {
-	CALLSTACK("Font::Release");
+	CALLSTACK;
 
 	pTexture->Release();
 }
 
 int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *text, bool invert)
 {
-	CALLSTACKc("Font::DrawText");
+	CALLSTACKc;
 
 	int textlen = strlen(text);
 
@@ -121,7 +121,7 @@ int Font::DrawText(Vector3 pos, float height, uint32 colour, char *text, bool in
 
 int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char *format, ...)
 {
-	CALLSTACK("Font::DrawTextf");
+	CALLSTACK;
 
 	char buffer[1024];
 
@@ -135,7 +135,7 @@ int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, char 
 
 int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, char *format, ...)
 {
-	CALLSTACK("Font::DrawTextf");
+	CALLSTACK;
 
 	char buffer[1024];
 
@@ -149,7 +149,7 @@ int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 
 
 int Font::DrawTextf(Vector3 pos, float height, uint32 colour, char *format, ...)
 {
-	CALLSTACK("Font::DrawTextf");
+	CALLSTACK;
 
 	char buffer[1024];
 

@@ -226,7 +226,7 @@ void Callstack_DrawProfile()
 			y += 15.0f;
 		}
 
-		if(a = 19)
+		if(a == 19)
 			debugFont.DrawTextf(110, y, 0, 15.0f, 0xFFFFFF, "More...");
 	}
 

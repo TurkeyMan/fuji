@@ -79,22 +79,25 @@ void Callstack_DeinitModule();
 
 	extern std::map<std::string, CallProfile> FunctionRegistry;
 
-	#define CALLSTACK(x) FunctionCall callstack(x, 0)
-	#define CALLSTACKc(x) FunctionCall callstack(x, 1)
+	#define CALLSTACK FunctionCall callstack(__FUNCTION__, 0);
+	#define CALLSTACKc FunctionCall callstack(__FUNCTION__, 1);
+	#define CALLSTACKs(s) FunctionCall callstack(s, 1);
 
 	void Callstack_DrawProfile();
 #else
 	#define Callstack_BeginFrame()
-	#define CALLSTACK(x)
-	#define CALLSTACKc(x)
+	#define CALLSTACK
+	#define CALLSTACKc
+	#define CALLSTACKs(s)
 	#define Callstack_DrawProfile()
 	#define Callstack_EndFrame()
 #endif
 
 #else
 
-	#define CALLSTACK(x)
-	#define CALLSTACKc(x)
+	#define CALLSTACK
+	#define CALLSTACKc
+	#define CALLSTACKs(s)
 	#define Callstack_DrawProfile()
 	#define Callstack_EndFrame()
 

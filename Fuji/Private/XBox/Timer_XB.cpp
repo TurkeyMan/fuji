@@ -53,12 +53,13 @@ void Timer::Init()
 	accumulator=0;
 	lastUpdate=0;
 
-	lastCall = GetHighResolutionTime();
+	thisCall = lastCall = GetHighResolutionTime();
 	freq = GetHighResolutionFrequency();
 
 	FPS=0.0;
 
 	memset(history, 0, sizeof(history));
+	avgSamples = 0;
 
 	deltaD=0.0;
 	deltaF=0.0f;

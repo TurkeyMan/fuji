@@ -18,8 +18,8 @@
 #if !defined(_RETAIL)
 	#define _CALLSTACK_PROFILING
 
-	#if defined(_CALLSTACK_PROFILING)
-		//#define _CALLSTACK_MONITORING
+	#if defined(_CALLSTACK_PROFILING) && !defined(_DEBUG)
+//		#define _CALLSTACK_MONITORING
 	#endif
 #endif
 
