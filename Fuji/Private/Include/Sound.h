@@ -5,7 +5,7 @@ void Sound_InitModule();
 void Sound_DeinitModule();
 
 void Sound_Update();
-
+void Sound_Draw();
 
 int Sound_LoadBank(const char *pFilename);
 void Sound_UnloadBank(int bankID);

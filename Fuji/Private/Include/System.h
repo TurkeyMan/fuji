@@ -36,6 +36,11 @@ struct FujiDefaults
 	{
 		uint32 maxOpenFiles;
 	} filesys;
+
+	struct SoundDefaults
+	{
+		int maxMusicTracks;
+	} sound;
 };
 
 extern FujiDefaults gDefaults;

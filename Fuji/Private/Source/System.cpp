@@ -45,6 +45,11 @@ FujiDefaults gDefaults =
 	// FileSystemDefaults
 	{
 		256				// maxOpenFiles
+	},
+
+	// SoundDefaults
+	{
+		4				// maxMusicTracks
 	}
 };
 
@@ -166,6 +171,8 @@ void System_Draw()
 #if !defined(_RETAIL)
 	View::UseDefault();
 	bool o = View::GetCurrent()->SetOrtho(true);
+
+	Sound_Draw();
 
 	Callstack_DrawProfile();
 
