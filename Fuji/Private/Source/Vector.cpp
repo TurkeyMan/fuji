@@ -7,3 +7,25 @@ const Vector3 Vector3::up = {0,1,0,0};
 
 const Vector4 Vector4::zero = {0,0,0,0};
 const Vector4 Vector4::one = {1,1,1,1};
+
+
+Vector3& Vector3::ApplyMatrix(const Matrix &mat)
+{
+	return *this;
+}
+
+Vector3& Vector3::ApplyMatrix3x3(const Matrix &mat)
+{
+return *this;
+}
+
+Vector4& Vector4::ApplyMatrix(const Matrix &mat)
+{
+return *this;
+}
+
+Vector4& Vector4::ApplyMatrix3x3(const Matrix &mat)
+{
+return *this;
+}
+
