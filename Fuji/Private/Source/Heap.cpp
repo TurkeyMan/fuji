@@ -122,42 +122,6 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	return (Heap*)pHeap;
 }
 
-void StaticHeap::Release()
-{
-	CALLSTACK;
-
-#if !defined(_RETAIL)
-	// list unfreed allocations
-/*
-	if(pHeap->allocCount)
-	{
-		uint32 total = 0;
-
-		LOGD(STR("\StaticHeap::Release(): %d allocations were not freed in heap '%s':\n-----------------------------------------\n", allocCount, heapName));
-
-		for(uint32 a=0; a<pHeap->allocCount; a++)
-		{
-			LOGD(STR("%s(%d) : Address: 0x%08X, %d bytes.", pHeap->allocList[a].pFilename, pHeap->allocList[a].lineNumber, pHeap->allocList[a].pAddress, pHeap->allocList[a].bytes));
-			total += pHeap->allocList[a].bytes;
-		}
-
-		LOGD(STR("\nTotal: %d bytes unfreed\n", total));
-	}
-*/
-#endif
-
-	// find and delete heap pointer
-	int heapIndex;
-	for(heapIndex=0; heapIndex<MAX_HEAP_COUNT && gpHeapList[heapIndex] != (Heap*)this; heapIndex++);
-
-	DBGASSERT(heapIndex < MAX_HEAP_COUNT, "Heap not found");
-
-	gpHeapList[heapIndex] = NULL;
-
-	// FIXME: i think i need to call delete on a class with a vf-table?
-	free_aligned(this);
-}
-
 Resource* Heap_CreateResource(uint32 size)
 {
 	CALLSTACK;
@@ -329,3 +293,58 @@ void Heap_TFree(void *pMem)
 	free_aligned(pMem);
 }
 
+
+/*** Static Heap ***/
+
+void *StaticHeap::Alloc(uint32 bytes)
+{
+	// TODO: static heap alloc
+	return NULL;
+}
+
+void *StaticHeap::Realloc(void *pBuffer, uint32 bytes)
+{
+	// TODO: static heap realloc
+	return NULL;
+}
+
+void StaticHeap::Free(void *pBuffer)
+{
+	// TODO: static heap free
+}
+
+void StaticHeap::Release()
+{
+	CALLSTACK;
+
+#if !defined(_RETAIL)
+	// list unfreed allocations
+/*
+	if(pHeap->allocCount)
+	{
+		uint32 total = 0;
+
+		LOGD(STR("\StaticHeap::Release(): %d allocations were not freed in heap '%s':\n-----------------------------------------\n", allocCount, heapName));
+
+		for(uint32 a=0; a<pHeap->allocCount; a++)
+		{
+			LOGD(STR("%s(%d) : Address: 0x%08X, %d bytes.", pHeap->allocList[a].pFilename, pHeap->allocList[a].lineNumber, pHeap->allocList[a].pAddress, pHeap->allocList[a].bytes));
+			total += pHeap->allocList[a].bytes;
+		}
+
+		LOGD(STR("\nTotal: %d bytes unfreed\n", total));
+	}
+*/
+#endif
+
+	// find and delete heap pointer
+	int heapIndex;
+	for(heapIndex=0; heapIndex<MAX_HEAP_COUNT && gpHeapList[heapIndex] != (Heap*)this; heapIndex++);
+
+	DBGASSERT(heapIndex < MAX_HEAP_COUNT, "Heap not found");
+
+	gpHeapList[heapIndex] = NULL;
+
+	// FIXME: i think i need to call delete on a class with a vf-table?
+	free_aligned(this);
+}
