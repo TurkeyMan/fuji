@@ -9,110 +9,110 @@ void Callstack_InitModule();
 void Callstack_DeinitModule();
 
 #if !defined(_RETAIL)
-	extern Array<const char *> Callstack;
+extern Array<const char *> Callstack;
 
 #if defined(_CALLSTACK_MONITORING)
 
-	class CallProfile;
+class CallProfile;
 
-	class MonitorCall
-	{
-	public:
-		MonitorCall(bool enter, CallProfile *ptr, uint64 time)
-		: start(enter), timestamp(time) { profilePtr = ptr; }
+class MonitorCall
+{
+public:
+	inline MonitorCall(bool enter, CallProfile *ptr, uint64 time)
+	: start(enter), timestamp(time) { profilePtr = ptr; }
 
-		bool start;
-		CallProfile *profilePtr;
-		uint64 timestamp;
-	};
+	bool start;
+	CallProfile *profilePtr;
+	uint64 timestamp;
+};
 
-	struct MonitorInfo
-	{
-		MonitorInfo() { frameStart = frameFinish = frameEnd = overheadTime = 0; frames = 1; }
+struct MonitorInfo
+{
+	MonitorInfo() { frameStart = frameFinish = frameEnd = overheadTime = 0; frames = 1; }
 
-		int64 frameStart;
-		int64 frameFinish;
-		int64 frameEnd;
-		int64 overheadTime;
-		Array<MonitorCall> calls;
-		int frames;
-		double divide;
-	};
+	int64 frameStart;
+	int64 frameFinish;
+	int64 frameEnd;
+	int64 overheadTime;
+	Array<MonitorCall> calls;
+	int frames;
+	double divide;
+};
 
 #endif
 
 #if defined(_CALLSTACK_PROFILING)
-	class CallProfile
-	{
-	public:
-		CallProfile();
+class CallProfile
+{
+public:
+	CallProfile();
 
-		int calls;
+	int calls;
 
-		int64 thisCall;
-		int64 total;
+	int64 thisCall;
+	int64 total;
 
 #if defined(_CALLSTACK_MONITORING)
-		uint32 colour;
+	uint32 colour;
 #endif
-	};
+};
 #endif
 
-	extern std::map<const char *, CallProfile> FunctionRegistry;
+extern std::map<const char *, CallProfile> FunctionRegistry;
 
-	class FunctionCall
+class FunctionCall
+{
+public:
+	inline FunctionCall(const char *name, int profile)
 	{
-	public:
-		inline FunctionCall(const char *name, int profile)
+		Callstack.push() = name;
+
+#if defined(_CALLSTACK_PROFILING)
+		profiling = false;
+
+		if(profile)
 		{
-			Callstack.push() = name;
+			profiling = true;
 
-#if defined(_CALLSTACK_PROFILING)
-			profiling = false;
+			pProfile = &FunctionRegistry[name];
+			pProfile->calls++;
 
-			if(profile)
-			{
-				profiling = true;
+			int64 temp;
+			temp = RDTSC();
 
-				pProfile = &FunctionRegistry[name];
-				pProfile->calls++;
-
-				int64 temp;
-				temp = RDTSC();
-
-				pProfile->thisCall = temp;
+			pProfile->thisCall = temp;
 
 #if defined(_CALLSTACK_MONITORING)
-				monitorInfo.calls.push_back(MonitorCall(true, &t, temp));
-#endif
-			}
+			monitorInfo.calls.push_back(MonitorCall(true, &t, temp));
 #endif
 		}
+#endif
+	}
 
-		inline ~FunctionCall()
-		{
+	inline ~FunctionCall()
+	{
 #if defined(_CALLSTACK_PROFILING)
-			if(profiling)
-			{
-				int64 temp;
-				temp = RDTSC();
+		if(profiling)
+		{
+			int64 temp;
+			temp = RDTSC();
 
 #if defined(_CALLSTACK_MONITORING)
-				monitorInfo.calls.push_back(MonitorCall(false, &t, temp));
+			monitorInfo.calls.push_back(MonitorCall(false, &t, temp));
 #endif
 
-				pProfile->total += temp-pProfile->thisCall;
-			}
-#endif
-
-			Callstack.pop();
+			pProfile->total += temp-pProfile->thisCall;
 		}
+#endif
+
+		Callstack.pop();
+	}
 
 #if defined(_CALLSTACK_PROFILING)
-		bool profiling;
-		CallProfile *pProfile;
+	bool profiling;
+	CallProfile *pProfile;
 #endif
-	};
+};
 
 #if defined(_CALLSTACK_PROFILING)
 	void Callstack_BeginFrame();

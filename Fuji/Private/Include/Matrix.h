@@ -2,7 +2,7 @@
 #define _MATRIX_H
 
 #include "Vector3.h"
-class Vector4;
+#include "Vector4.h"
 
 class Matrix
 {
@@ -51,27 +51,27 @@ public:
 
 	Matrix& Inverse();
 
-	Matrix& ClearW();
-
 	Vector4 CalculateQuaternion();
 
-	Vector3 GetXAxis3() const;
-	Vector3 GetYAxis3() const;
-	Vector3 GetZAxis3() const;
-	Vector3 GetTrans3() const;
-	Vector4 GetXAxis4() const;
-	Vector4 GetYAxis4() const;
-	Vector4 GetZAxis4() const;
-	Vector4 GetTrans4() const;
+	inline Matrix& ClearW() { m[0][3]=0.0f; m[1][3]=0.0f; m[2][3]=0.0f; m[3][3]=1.0f; return *this; }
 
-	void SetXAxis(const Vector3 &v);
-	void SetYAxis(const Vector3 &v);
-	void SetZAxis(const Vector3 &v);
-	void SetTrans(const Vector3 &v);
-	void SetXAxis(const Vector4 &v);
-	void SetYAxis(const Vector4 &v);
-	void SetZAxis(const Vector4 &v);
-	void SetTrans(const Vector4 &v);
+	inline Vector3 GetXAxis3() const { Vector3 t; t.x = m[0][0]; t.y = m[0][1]; t.z = m[0][2]; return t; }
+	inline Vector3 GetYAxis3() const { Vector3 t; t.x = m[1][0]; t.y = m[1][1]; t.z = m[1][2]; return t; }
+	inline Vector3 GetZAxis3() const { Vector3 t; t.x = m[2][0]; t.y = m[2][1]; t.z = m[2][2]; return t; }
+	inline Vector3 GetTrans3() const { Vector3 t; t.x = m[3][0]; t.y = m[3][1]; t.z = m[3][2]; return t; }
+	inline Vector4 GetXAxis4() const { Vector4 t; t.x = m[0][0]; t.y = m[0][1]; t.z = m[0][2]; t.w = m[0][3]; return t; }
+	inline Vector4 GetYAxis4() const { Vector4 t; t.x = m[1][0]; t.y = m[1][1]; t.z = m[1][2]; t.w = m[1][3]; return t; }
+	inline Vector4 GetZAxis4() const { Vector4 t; t.x = m[2][0]; t.y = m[2][1]; t.z = m[2][2]; t.w = m[2][3]; return t; }
+	inline Vector4 GetTrans4() const { Vector4 t; t.x = m[3][0]; t.y = m[3][1]; t.z = m[3][2]; t.w = m[3][3]; return t; }
+
+	inline void SetXAxis(const Vector3 &v) { m[0][0] = v.x; m[0][1] = v.y; m[0][2] = v.z; }
+	inline void SetYAxis(const Vector3 &v) { m[1][0] = v.x; m[1][1] = v.y; m[1][2] = v.z; }
+	inline void SetZAxis(const Vector3 &v) { m[2][0] = v.x; m[2][1] = v.y; m[2][2] = v.z; }
+	inline void SetTrans(const Vector3 &v) { m[3][0] = v.x; m[3][1] = v.y; m[3][2] = v.z; }
+	inline void SetXAxis(const Vector4 &v) { m[0][0] = v.x; m[0][1] = v.y; m[0][2] = v.z; m[0][3] = v.w; }
+	inline void SetYAxis(const Vector4 &v) { m[1][0] = v.x; m[1][1] = v.y; m[1][2] = v.z; m[1][3] = v.w; }
+	inline void SetZAxis(const Vector4 &v) { m[2][0] = v.x; m[2][1] = v.y; m[2][2] = v.z; m[2][3] = v.w; }
+	inline void SetTrans(const Vector4 &v) { m[3][0] = v.x; m[3][1] = v.y; m[3][2] = v.z; m[3][3] = v.w; }
 
 	inline char* ToString() const { return STR("| %.2f, %.2f, %.2f, %.2f |\n| %.2f, %.2f, %.2f, %.2f |\n| %.2f, %.2f, %.2f, %.2f |\n| %.2f, %.2f, %.2f, %.2f |", m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1], m[1][2], m[1][3], m[2][0], m[2][1], m[2][2], m[2][3], m[3][0], m[3][1], m[3][2], m[3][3]); }
 };

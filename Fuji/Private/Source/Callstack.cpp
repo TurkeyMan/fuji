@@ -32,10 +32,10 @@ void Callstack_DeinitModule()
 
 /**** Globals ****/
 
-Array<char *> Callstack;
+Array<const char *> Callstack;
 
 #if defined(_CALLSTACK_PROFILING)
-std::map<char *, CallProfile> FunctionRegistry;
+std::map<const char *, CallProfile> FunctionRegistry;
 #endif
 
 #if defined(_CALLSTACK_MONITORING)
@@ -214,7 +214,7 @@ void Callstack_DrawProfile()
 	{
 		DrawUntexturedSprite(90, 90, 460, 320, 0xB0000000);
 
-		std::map<char *, CallProfile>::iterator i;
+		std::map<const char *, CallProfile>::iterator i;
 		float y = 100;
 
 		for(i = FunctionRegistry.begin(), a=0; i!= FunctionRegistry.end() && a<19; i++, a++)
@@ -250,7 +250,7 @@ void Callstack_BeginFrame()
 	monitorInfo.calls.clear();
 #endif
 
-	std::map<char *, CallProfile>::iterator i;
+	std::map<const char *, CallProfile>::iterator i;
 
 	for(i=FunctionRegistry.begin(); i!=FunctionRegistry.end(); i++)
 	{

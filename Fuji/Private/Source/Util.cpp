@@ -151,7 +151,7 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 void hardAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
 	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
-	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+	LOGD(STR("Failed Condition: %s\n%s", pReason, pMessage));
 	Callstack_Log();
 
 	while(1)
@@ -211,7 +211,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		debugFont.DrawTextf(240, 80, 20, 0xFFFF0000, "Guru Meditation: ");
 
 		debugFont.DrawTextf(80, 120, 20, 0xFFFF0000, "Assertion Failure:");
-		debugFont.DrawTextf(80, 140, 20, 0xFFFF0000, STR("Failed Condition: (%s):", pReason));
+		debugFont.DrawTextf(80, 140, 20, 0xFFFF0000, STR("Failed Condition: %s", pReason));
 		debugFont.DrawTextf(80, 160, 20, 0xFFFF0000, STR("File: %s, Line: %d", pFile, line));
 		debugFont.DrawTextf(80, 190, 20, 0xFFFF0000, STR("Message: %s", pMessage));
 

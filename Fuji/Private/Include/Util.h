@@ -1,9 +1,11 @@
 #if !defined(_UTIL_H)
 #define _UTIL_H
 
+//#define HARD_ASSERTS
+
 // this will print the assert message and the current
 // callstack on the screen and enter an infinite draw loop 
-#if defined(_XBOX)
+#if defined(_XBOX) && !defined(HARD_ASSERTS)
 	#define HARD_ASSERTS
 #endif
 
