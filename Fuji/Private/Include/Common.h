@@ -18,7 +18,9 @@
 #endif
 
 #if defined(_FUJI_UTIL)
+#if defined(WIN32)
 	#include <Windows.h>
+#endif
 #endif
 
 // SSE optimisations for xbox and PC?

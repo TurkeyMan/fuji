@@ -19,6 +19,8 @@ enum VertexFormat
 	VF_Normal	= (1<<2),
 	VF_Illum	= (1<<3),
 	VF_Tengent	= (1<<4),
+	VF_BiNormal	= (1<<5),
+	VF_Specular	= (1<<6),
 
 	VF_TexMask	= (15<<12)
 };
