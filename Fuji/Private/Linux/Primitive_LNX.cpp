@@ -18,12 +18,12 @@ void Primitive_DeinitModule()
 void MFPrimitive(uint32 type, uint32 hint)
 {
 	primType = type & PT_PrimMask;
-	vertexCount = 0;
 }
 
-void MFBegin(uint32 vertexCount)
+void MFBegin(uint32 beginVertexCount)
 {
-	beginCount = vertexCount;
+	beginCount = beginVertexCount;
+	vertexCount = 0;
 
 	switch(primType)
 	{
