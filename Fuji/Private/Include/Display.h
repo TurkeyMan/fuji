@@ -20,6 +20,8 @@ void Display_BeginFrame();
 void Display_EndFrame();
 void Display_ClearScreen(uint32 flags = CS_Colour|CS_ZBuffer);
 
+void Display_SetClearColour(float r, float g, float b, float a);
+
 /*
 void SetProjection(float fov);
 bool SetOrtho(bool enable, float width = 640.0f, float height = 480.0f);

@@ -9,6 +9,8 @@ IDirect3DDevice8 *pd3dDevice;
 bool isortho = false;
 float fieldOfView;
 
+extern Vector4 gClearColour;
+
 int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
 	CALLSTACK;
@@ -67,11 +69,19 @@ void Display_EndFrame()
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
+void Display_SetClearColour(float r, float g, float b, float a)
+{
+	gClearColour.x = r;
+	gClearColour.y = g;
+	gClearColour.z = b;
+	gClearColour.w = a;
+}
+
 void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACK;
 
-	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), 0x00000030, 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToARGB(), 1.0f, 0);
 }
 
 void SetViewport(float x, float y, float width, float height)

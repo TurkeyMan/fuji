@@ -45,8 +45,8 @@ public:
 	inline Vector4 operator/(const Vector4 &v) const	{ Vector4 t; t.x = x/v.x;	t.y = y/v.y;	t.z = z/v.z;	t.w = w/v.w;	return t; }
 
 	inline Vector3& ToVector3() { return *(Vector3*)this; }
-	inline uint32 ToColour() { return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
-	inline Vector4& FromColour(uint32 col) { x = (float)((col&0xFF0000)>>16)/255.0f; y = (float)((col&0xFF00)>>8)/255.0f; z = (float)(col&0xFF)/255.0f; w = (float)((col&0xFF000000)>>24)/255.0f; return *this; }
+	inline uint32 ToARGB() { return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
+	inline Vector4& FromARGB(uint32 col) { x = (float)((col&0xFF0000)>>16)/255.0f; y = (float)((col&0xFF00)>>8)/255.0f; z = (float)(col&0xFF)/255.0f; w = (float)((col&0xFF000000)>>24)/255.0f; return *this; }
 
 	inline float Dot(const Vector4 &vec) const { return x*vec.x + y*vec.y + z*vec.z + w*vec.w; }
 	inline float MagSquared() const { return x*x + y*y + z*z + w*w; }

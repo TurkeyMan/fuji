@@ -5,6 +5,8 @@
 
 DisplaySettings display;
 
+Vector4 gClearColour = Vector(0.f,0.f,0.22f,1.f);
+
 void Display_InitModule()
 {
 	CALLSTACK;

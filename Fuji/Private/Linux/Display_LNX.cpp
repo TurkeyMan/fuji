@@ -24,6 +24,7 @@ SDL_Surface *screen;
 bool isortho = false;
 float fieldOfView;
 
+extern Vector4 gClearColour;
 
 bool Display_GetModes(Resolution **_modes, char ***_modeStrings, bool fullscreen);
 void Display_FreeModes();
@@ -220,11 +221,19 @@ void Display_EndFrame()
 	SDL_GL_SwapBuffers();
 }
 
+void Display_SetClearColour(float r, float g, float b, float a)
+{
+	gClearColour.x = r;
+	gClearColour.y = g;
+	gClearColour.z = b;
+	gClearColour.w = a;
+}
+
 void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACK;
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 

@@ -248,7 +248,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToColour(), name);
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToARGB(), name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -580,7 +580,7 @@ float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 {
 	Vector3 pos = _pos;
 
-	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToColour()));
+	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToARGB()));
 
 	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -618,7 +618,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset <= 0 ? COLOUR_PRESETS-1 : preset-1;
 
-			pData->FromColour(presets[preset]);
+			pData->FromARGB(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);
@@ -627,7 +627,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset >= COLOUR_PRESETS-1 ? 0 : preset+1;
 
-			pData->FromColour(presets[preset]);
+			pData->FromARGB(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);
