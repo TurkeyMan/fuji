@@ -58,7 +58,7 @@ void Callstack_Log()
 {
 	for(int a=Callstack.size()-1; a>=0; a--)
 	{
-		LOGD(STR(Callstack[a].c_str()));
+		LOGD(STR("%s", Callstack[a]));
 	}
 }
 
@@ -113,7 +113,7 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 
 	for(int a=Callstack.size()-1; a>=0; a--)
 	{
-		char *pTemp = STR("  %-32s\n",Callstack[a].c_str());
+		char *pTemp = STR("  %-32s\n",Callstack[a]);
 //		char *pTemp = STR("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
 		if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
 		strcat(callstack, pTemp);
@@ -203,7 +203,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		float y = 250.0f;
 		for(int a=Callstack.size()-1; a>=0; a--)
 		{
-			debugFont.DrawTextf(100, y, 20, 0xFFFF0000, Callstack[a].c_str());
+			debugFont.DrawTextf(100, y, 20, 0xFFFF0000, Callstack[a]);
 			y+=20.0f;
 		}
 

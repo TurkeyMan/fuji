@@ -31,10 +31,10 @@ void Callstack_DeinitModule()
 
 /**** Globals ****/
 
-std::vector<std::string> Callstack;
+Array<char *> Callstack;
 
 #if defined(_CALLSTACK_PROFILING)
-std::map<std::string, CallProfile> FunctionRegistry;
+std::map<char *, CallProfile> FunctionRegistry;
 #endif
 
 #if defined(_CALLSTACK_MONITORING)
@@ -61,7 +61,7 @@ std::map<std::string, CallProfile> FunctionRegistry;
 
 	static double monitorDispEnd, monitorDispFinish, monitorDispOverhead;
 
-	static std::vector<MonitorDisplayList> displayList;
+	static Array<MonitorDisplayList> displayList;
 
 #endif
 
@@ -213,7 +213,7 @@ void Callstack_DrawProfile()
 	{
 		DrawUntexturedSprite(90, 90, 460, 320, 0xB0000000);
 
-		std::map<std::string, CallProfile>::iterator i;
+		std::map<char *, CallProfile>::iterator i;
 		float y = 100;
 
 		for(i = FunctionRegistry.begin(), a=0; i!= FunctionRegistry.end() && a<19; i++, a++)
@@ -221,7 +221,7 @@ void Callstack_DrawProfile()
 			uint32 ms = (uint32)(i->second.total / (GetHighResolutionFrequency()/1000000));
 			double percent = (double)i->second.total/((double)GetHighResolutionFrequency() * 0.01/60.0);
 
-			debugFont.DrawTextf(100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first.c_str());
+			debugFont.DrawTextf(100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first);
 			debugFont.DrawTextf(300, y, 0, 15.0f, 0xFFFFFFFF, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);
 			y += 15.0f;
 		}
@@ -249,7 +249,7 @@ void Callstack_BeginFrame()
 	monitorInfo.calls.clear();
 #endif
 
-	std::map<std::string, CallProfile>::iterator i;
+	std::map<char *, CallProfile>::iterator i;
 
 	for(i=FunctionRegistry.begin(); i!=FunctionRegistry.end(); i++)
 	{
@@ -274,52 +274,6 @@ void Callstack_EndFrame()
 	monitorInfo.frameFinish = GetHighResolutionTime();
 }
 #endif
-
-FunctionCall::FunctionCall(char *name, int profile)
-{
-	Callstack.push_back(name);
-
-#if defined(_CALLSTACK_PROFILING)
-	profiling = false;
-
-	if(profile)
-	{
-		int64 temp = GetHighResolutionTime();
-
-		profiling = true;
-
-		CallProfile &t = FunctionRegistry[name];
-
-		t.calls++;
-		t.thisCall = temp;
-
-#if defined(_CALLSTACK_MONITORING)
-		monitorInfo.calls.push_back(MonitorCall(true, &t, temp));
-#endif
-	}
-#endif
-}
-
-FunctionCall::~FunctionCall()
-{
-#if defined(_CALLSTACK_PROFILING)
-	if(profiling)
-	{
-		int64 temp;
-		temp = GetHighResolutionTime();
-
-		CallProfile &t = FunctionRegistry[Callstack.back()];
-
-#if defined(_CALLSTACK_MONITORING)
-		monitorInfo.calls.push_back(MonitorCall(false, &t, temp));
-#endif
-
-		t.total += temp-t.thisCall;
-	}
-#endif
-
-	Callstack.pop_back();
-}
 
 #if defined(_CALLSTACK_PROFILING)
 CallProfile::CallProfile()

@@ -2,14 +2,14 @@
 #define _CALLSTACK_H
 
 #include <map>
-#include <vector>
-#include <string>
+#include "Array.h"
+#include "Timer.h"
 
 void Callstack_InitModule();
 void Callstack_DeinitModule();
 
 #if !defined(_RETAIL)
-	extern std::vector<std::string> Callstack;
+	extern Array<char *> Callstack;
 
 #if defined(_CALLSTACK_MONITORING)
 
@@ -34,22 +34,12 @@ void Callstack_DeinitModule();
 		int64 frameFinish;
 		int64 frameEnd;
 		int64 overheadTime;
-		std::vector<MonitorCall> calls;
+		Array<MonitorCall> calls;
 		int frames;
 		double divide;
 	};
 
 #endif
-
-	class FunctionCall
-	{
-	public:
-		FunctionCall(char *name, int profile);
-		virtual ~FunctionCall();
-#if defined(_CALLSTACK_PROFILING)
-		bool profiling;
-#endif
-	};
 
 #if defined(_CALLSTACK_PROFILING)
 	class CallProfile
@@ -68,6 +58,62 @@ void Callstack_DeinitModule();
 	};
 #endif
 
+	extern std::map<char *, CallProfile> FunctionRegistry;
+
+	class FunctionCall
+	{
+	public:
+		inline FunctionCall(char *name, int profile)
+		{
+			Callstack.push() = name;
+
+#if defined(_CALLSTACK_PROFILING)
+			profiling = false;
+
+			if(profile)
+			{
+				profiling = true;
+
+				pProfile = &FunctionRegistry[name];
+				pProfile->calls++;
+
+				int64 temp;
+				temp = GetHighResolutionTime();
+
+				pProfile->thisCall = temp;
+
+#if defined(_CALLSTACK_MONITORING)
+				monitorInfo.calls.push_back(MonitorCall(true, &t, temp));
+#endif
+			}
+#endif
+		}
+
+		inline ~FunctionCall()
+		{
+#if defined(_CALLSTACK_PROFILING)
+			if(profiling)
+			{
+				int64 temp;
+				temp = GetHighResolutionTime();
+
+#if defined(_CALLSTACK_MONITORING)
+				monitorInfo.calls.push_back(MonitorCall(false, &t, temp));
+#endif
+
+				pProfile->total += temp-pProfile->thisCall;
+			}
+#endif
+
+			Callstack.pop();
+		}
+
+#if defined(_CALLSTACK_PROFILING)
+		bool profiling;
+		CallProfile *pProfile;
+#endif
+	};
+
 #if defined(_CALLSTACK_PROFILING)
 	void Callstack_BeginFrame();
 
@@ -76,8 +122,6 @@ void Callstack_DeinitModule();
 	#else
 		#define Callstack_EndFrame()
 	#endif
-
-	extern std::map<std::string, CallProfile> FunctionRegistry;
 
 	#define CALLSTACK FunctionCall callstack(__FUNCTION__, 0);
 	#define CALLSTACKc FunctionCall callstack(__FUNCTION__, 1);
