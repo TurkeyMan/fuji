@@ -59,6 +59,12 @@ void Display_BeginFrame()
 	CALLSTACK;
 
 	pd3dDevice->BeginScene();
+
+	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
+	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 
 void Display_EndFrame()

@@ -1,7 +1,7 @@
 #if !defined(_SPRITE_H)
 #define _SPRITE_H
 
-#include "Texture.h"
+#include "Material.h"
 #include "Vector3.h"
 
 class Sprite
@@ -44,7 +44,7 @@ private:
 
 	bool visible;
 
-	Texture *pTexture;
+	Material *pMaterial;
 };
 
 #endif // _SPRITE_H

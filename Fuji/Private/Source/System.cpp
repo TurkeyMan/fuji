@@ -39,7 +39,7 @@ FujiDefaults gDefaults =
 
 	// MaterialDefaults
 	{
-		254				// maxMaterials
+		2048			// maxMaterials
 	},
 
 	// FileSystemDefaults

@@ -8,7 +8,7 @@
 uint32 renderStates[RS_Max];
 uint32 currentRenderStates[RS_Max];
 
-Material *pCurrentmaterial = NULL;
+Material *pCurrentMaterial = NULL;
 uint32 renderSource = NULL;
 View *pCurrentView = NULL;
 

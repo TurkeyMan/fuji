@@ -49,6 +49,8 @@ Model* Model::Create(char *pFilename)
 void Model::Draw(Matrix *pLocalToWorld)
 {
 	CALLSTACKc;
+
+	Renderer_SetRenderer(0, 0, RS_Model);
 /*
 	pd3dDevice->SetStreamSource(0, pVertexBuffer, 0, sizeof(FileVertex));
 	pd3dDevice->SetFVF(FileVertex::FVF);

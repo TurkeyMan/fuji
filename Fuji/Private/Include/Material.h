@@ -8,34 +8,13 @@
 
 enum RederTypeFlags
 {
-	// Material Flags
-	RT_Lit					= 0x00000001,
-	RT_AlphaBlend			= 0x00000002,
-	RT_Additive				= 0x00000004,
-	RT_Subtractive			= 0x00000006,
-	RT_BlendMask			= 0x00000006,
-	MF_Specular				= 0x00000008,
-
-	RT_Omni					= 0x00000070,
-	RT_Mask					= 0x00000080,
-
-	RT_DoubleSided			= 0x00000100,
-
 	// Vertex Flags
-	RT_Animated				= 0x00000700,	// (Up to 8 bone influence)
-	RT_Tween				= 0x00000800,
+	RT_Animated				= 0x00000007,	// (Up to 8 bone influence)
+	RT_Tween				= 0x00000008,
 
-	// Renderer Flags
-	RT_PerPixelLighting		= 0x00010000,
-	RT_CelShading			= 0x00020000,
-	RT_BumpMap				= 0x00040000,
-	RT_NormalMap			= 0x00080000,
-	RT_DetailTexture		= 0x00100000,
-	RT_CubeEnvMap			= 0x00200000,
-	RT_SphereEnvMap			= 0x00400000,
-	RT_ScreenEnvMap			= 0x00800000,
-	RT_DiffuseMap2			= 0x01000000,
-	RT_LightMap				= 0x02000000,
+	RT_Omni					= 0x00000010,
+
+	RT_Untextured			= 0x00000020
 };
 
 enum MaterialFlags
@@ -78,11 +57,11 @@ public:
 	static Material* Create(const char *pName);
 	static void CreateMaterialFromDefinition(Material *pMat, const char *pDefinition);
 	inline static void UseNone() { pNone->Use(); }
-	inline static Material* GetCurrent() { return &current; }
+	inline static Material* GetCurrent() { return pCurrent; }
 	static Material* Find(const char *pName);
 
 	// Static Members
-	static Material current;
+	static Material *pCurrent;
 	static Material *pNone;
 
 	static IniFile materialDefinitions;

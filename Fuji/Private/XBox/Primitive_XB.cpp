@@ -28,16 +28,19 @@ void Primitive_DeinitModule()
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
+	uint32 rendererFlags = 0;
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		Texture::UseNone();
+		rendererFlags |= RT_Untextured;
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
 	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
+
+	Renderer_SetRenderer(rendererFlags, 0, RS_MFPrimitive);
 }
 
 void MFBegin(uint32 vertexCount)

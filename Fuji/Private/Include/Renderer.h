@@ -28,7 +28,7 @@ enum RenderState
 void Renderer_InitModule();
 void Renderer_DeinitModule();
 
-void SetRenderer(uint32 renderType, uint32 flags = NULL, uint32 renderSource = RS_Custom);
+void Renderer_SetRenderer(uint32 additionalRendererFlags, uint32 flags = NULL, uint32 renderSource = RS_Custom);
 
 uint32 SetRenderStateOverride(uint32 renderState, uint32 value);
 uint32 GetRenderStateOverride(uint32 renderState);

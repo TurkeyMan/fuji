@@ -15,7 +15,7 @@ IniFile Material::materialDefinitions;
 
 PtrListDL<Material> materialList;
 
-Material Material::current;
+Material *Material::pCurrent = NULL;
 Material *Material::pNone = NULL;
 
 char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
@@ -307,7 +307,9 @@ Material* Material::Create(const char *pName)
 			LOGD(STR("No material definition for '%s'. Using default material.\n", pName));
 
 			pMat = Material::CreateDefault();
-			Texture *pTex = Texture::LoadTexture(pTexName);
+			pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(pTexName);
+			pMat->diffuseMapIndex = pMat->textureCount;
+			pMat->textureCount++;
 
 			pMat->refCount = 1;
 		}
@@ -343,24 +345,7 @@ void Material::Use()
 {
 	CALLSTACK;
 
-	current = *this;
-
-	// set some render states
-	if(pTextures[this->diffuseMapIndex])
-	{
-		pTextures[this->diffuseMapIndex]->SetTexture(0);
-
-		pd3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-		pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DXMATRIX*)&textureMatrix);
-	}
-	else
-	{
-		Texture::UseNone(0);
-	}
-
-	// choose renderer
-
-	// configure renderer
+	pCurrent = this;
 }
 
 void Material::Update()

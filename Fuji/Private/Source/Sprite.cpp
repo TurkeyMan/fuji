@@ -7,11 +7,11 @@
 
 void Sprite::Create(const char *filename, int xFrame, int yFrames, uint32 colourKey)
 {
-	pTexture = Texture::LoadTexture(filename);
+	pMaterial = Material::Create(filename);
 
 	pivot = Vector(0.0f, 0.0f);
 	position = Vector(0.0f, 0.0f);
-	scale = Vector((float)pTexture->width, (float)pTexture->height);
+	scale = Vector((float)pMaterial->pTextures[0]->width, (float)pMaterial->pTextures[0]->height);
 	angle = 0.0f;
 	visible = false;
 }
@@ -36,7 +36,7 @@ void Sprite::Draw()
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 
-	pTexture->SetTexture();
+	pMaterial->Use();
 
 	// set texture
 	MFPrimitive(PT_TriStrip);
@@ -60,7 +60,7 @@ void Sprite::Draw()
 
 void Sprite::Release()
 {
-	pTexture->Release();
+	pMaterial->Release();
 }
 
 void Sprite::SetFlag(uint32 flag, bool enable)
