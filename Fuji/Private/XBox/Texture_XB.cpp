@@ -12,9 +12,9 @@
 
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 {
-	FixXBoxFilename(filename);
+	char *pXFilename = FixXBoxFilename(filename);
 
-	Texture *pTexture = FindTexture(filename);
+	Texture *pTexture = FindTexture(pXFilename);
 
 	if(!pTexture)
 	{
@@ -27,7 +27,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 
 	if(!pTexture->refCount)
 	{
-		hr = D3DXCreateTextureFromFileEx(pd3dDevice, filename, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->texture);
+		hr = D3DXCreateTextureFromFileEx(pd3dDevice, pXFilename, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->texture);
 
 		DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
 		DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
@@ -36,11 +36,11 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 
 		if(hr != D3D_OK)
 		{
-			LOGD(STR("Failed loading texture: %s", filename));
+			LOGD(STR("Failed loading texture: %s", pXFilename));
 			return NULL;
 		}
 
-		strcpy(pTexture->name, filename);
+		strcpy(pTexture->name, pXFilename);
 
 		pTexture->texture->GetLevelDesc(0, &imageDesc);
 

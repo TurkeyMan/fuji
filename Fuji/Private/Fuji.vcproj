@@ -26,7 +26,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -43,7 +43,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -78,7 +80,9 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -107,7 +111,7 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -125,7 +129,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -159,7 +165,9 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -213,7 +221,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="_DEBUG;_XBOX;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -230,7 +238,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"/>
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -280,7 +290,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;PROFILE;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -297,7 +307,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"/>
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -347,7 +359,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -364,7 +376,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"/>
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -389,7 +403,7 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -406,7 +420,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -441,7 +457,9 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLinkerTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -496,7 +514,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -513,7 +531,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/$(ProjectName).lib"/>
+				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -882,6 +902,27 @@
 				RelativePath=".\XBox\Renderer_XB.h">
 			</File>
 			<File
+				RelativePath=".\XBox\Sound_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\XBox\System_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1109,6 +1150,33 @@
 			</File>
 			<File
 				RelativePath=".\Pc\Renderer_PC.h">
+			</File>
+			<File
+				RelativePath=".\Pc\Sound_PC.cpp">
+				<FileConfiguration
+					Name="Debug_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Profile_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Pc\System_PC.cpp">

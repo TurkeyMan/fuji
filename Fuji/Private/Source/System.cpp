@@ -12,6 +12,7 @@
 #include "Font.h"
 #include "IniFile.h"
 #include "Renderer.h"
+#include "Sound.h"
 
 FujiDefaults gDefaults = 
 {
@@ -85,6 +86,8 @@ void System_Init()
 	Display_InitModule();
 	Input_InitModule();
 
+	Sound_InitModule();
+
 	Renderer_InitModule();
 	Texture_InitModule();
 	Material_InitModule();
@@ -110,6 +113,8 @@ void System_Deinit()
 	Material_DeinitModule();
 	Texture_DeinitModule();
 	Renderer_DeinitModule();
+
+	Sound_DeinitModule();
 
 	Input_DeinitModule();
 	Display_DeinitModule();
@@ -145,6 +150,7 @@ void System_Update()
 #endif
 
 	Material_Update();
+	Sound_Update();
 }
 
 void System_PostUpdate()

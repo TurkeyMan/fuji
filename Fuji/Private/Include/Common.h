@@ -11,7 +11,7 @@
 	#define DEBUG_KEYBOARD
 	#include <xtl.h>
 
-	void FixXBoxFilename(const char *pFilename);
+	char*  FixXBoxFilename(const char *pFilename);
 #endif
 
 // Standard platform includes

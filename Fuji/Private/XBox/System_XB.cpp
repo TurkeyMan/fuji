@@ -24,16 +24,18 @@ uint64 GetTSCFrequency()
 	return freq;
 }
 
-void FixXBoxFilename(const char *pFilename)
+char* FixXBoxFilename(const char *pFilename)
 {
-	if(!pFilename) return;
+	if(!pFilename) return NULL;
 
 	int len = strlen(pFilename);
 
-	char *pName = const_cast<char*>(pFilename);
+	char *pXFilename = STR("%s", pFilename);
 
 	for(int a=0; a<len; a++)
 	{
-		if(pName[a] == '/') pName[a] = '\\';
+		if(pXFilename[a] == '/') pXFilename[a] = '\\';
 	}
+
+	return pXFilename;
 }
