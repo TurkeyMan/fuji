@@ -4,6 +4,7 @@
 #include "Vector4.h"
 #include "Texture.h"
 #include "IniFile.h"
+#include "Matrix.h"
 
 enum RederTypeFlags
 {
@@ -13,6 +14,7 @@ enum RederTypeFlags
 	RT_Additive				= 0x00000004,
 	RT_Subtractive			= 0x00000006,
 	RT_BlendMask			= 0x00000006,
+	MF_Specular				= 0x00000008,
 
 	RT_Omni					= 0x00000070,
 	RT_Mask					= 0x00000080,
@@ -44,14 +46,14 @@ enum MaterialFlags
 	MF_Additive				= 0x00000004,	// A
 	MF_Subtractive			= 0x00000006,	// S
 	MF_BlendMask			= 0x00000006,
-	MF_Specular				= 0x00000008,
 
 	MF_Mask					= 0x00000020,	// M
-
 	MF_DoubleSided			= 0x00000040,	// Ds
+	MF_CullMode				= 0x000000C0,	// Ds
+	MF_Animating			= 0x00000100,
 
 	// Renderer Flags
-	MF_DisplacementMap		= 0x00000000,	// D
+	MF_DisplacementMap		= 0x80000000,	// D
 
 	MF_LitPerPixel			= 0x00010000,	// P
 	MF_CelShading			= 0x00020000,	// C
@@ -62,7 +64,7 @@ enum MaterialFlags
 	MF_SpecularMap			= 0x00800000,	// Sp
 	MF_ReflectionMap		= 0x01000000,	// R
 	MF_BumpMap				= 0x02000000,	// B
-	MF_NormalMap			= 0x04080000,	// N
+	MF_NormalMap			= 0x04000000,	// N
 	MF_DetailTexture		= 0x08000000,	// Dt
 	MF_LightMap				= 0x10000000,	// Lm
 	MF_CubeEnvMap			= 0x20000000,	// Ec
@@ -73,11 +75,11 @@ class Material
 public:
 	// Static Methods
 	static Material* CreateDefault();
-	static Material* Create(char *pName);
-	static void CreateMaterialFromDefinition(Material *pMat, char *pDefinition);
+	static Material* Create(const char *pName);
+	static void CreateMaterialFromDefinition(Material *pMat, const char *pDefinition);
 	inline static void UseNone() { pNone->Use(); }
 	inline static Material* GetCurrent() { return &current; }
-	static Material* Find(char *pName);
+	static Material* Find(const char *pName);
 
 	// Static Members
 	static Material current;
@@ -88,6 +90,8 @@ public:
 	// Methods
 	void Release();
 	void Use();
+
+	void Update();
 
 	char* GetIDString();
 
@@ -104,6 +108,10 @@ public:
 
 	Texture *pTextures[8];
 	uint32	textureCount;
+
+	Matrix	textureMatrix;
+	int uFrames, vFrames, curFrame;
+	float frameTime, curTime;
 
 	char name[32];
 
@@ -129,5 +137,7 @@ public:
 
 void Material_InitModule();
 void Material_DeinitModule();
+
+void Material_Update();
 
 #endif

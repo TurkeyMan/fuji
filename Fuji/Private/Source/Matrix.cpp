@@ -95,6 +95,15 @@ Matrix& Matrix::RotateZ(float angle)
 	return *this;
 }
 
+Matrix& Matrix::Scale(const Vector3& scale)
+{
+	Matrix mat;
+	mat.SetIdentity();
+	mat.SetScale(scale);
+	Multiply4x4(mat);
+	return *this;
+}
+
 Matrix& Matrix::SetTranslation(const Vector3 &trans)
 {
 	m[3][0] = trans.x;
@@ -213,6 +222,21 @@ Matrix& Matrix::SetRotationZ(float angle)
 	m[2][0] = 0.0f;
 	m[2][1] = 0.0f;
 	m[2][2] = 1.0f;
+
+	return *this;
+}
+
+Matrix& Matrix::SetScale(const Vector3& scale)
+{
+	m[0][0] = scale.x;
+	m[0][1] = 0.0f;
+	m[0][2] = 0.0f;
+	m[1][0] = 0.0f;
+	m[1][1] = scale.y;
+	m[1][2] = 0.0f;
+	m[2][0] = 0.0f;
+	m[2][1] = 0.0f;
+	m[2][2] = scale.z;
 
 	return *this;
 }

@@ -8,11 +8,11 @@ class IniFile
 {
 public:
 	// create an IniFile from a file
-	int Create(char *pFilename);
+	int Create(const char *pFilename);
 	// create an IniFile from a *copy* of a memory location
-	void CreateFromMemory(char *pMemory);
+	void CreateFromMemory(const char *pMemory);
 	// create an IniFile from a *direct reference* a memoryLocation
-	void CreateFromPointer(char *pPointer);
+	void CreateFromPointer(const char *pPointer);
 	// release the IniFile
 	void Release();
 
@@ -26,8 +26,8 @@ public:
 	void PushMarker();
 	void PopMarker();
 
-	int FindSection(char *pSection);
-	int FindLine(char *pName, char *pSection = NULL);
+	int FindSection(const char *pSection);
+	int FindLine(const char *pName, const char *pSection = NULL);
 
 	bool IsSection();
 	char* GetName();

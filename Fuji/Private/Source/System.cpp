@@ -143,6 +143,8 @@ void System_Update()
 #if !defined(_RETAIL)
 	DebugMenu_Update();
 #endif
+
+	Material_Update();
 }
 
 void System_PostUpdate()

@@ -45,6 +45,18 @@ void Material_DeinitModule()
 	materialList.Deinit();
 }
 
+void Material_Update()
+{
+	Material **ppMatIterator = materialList.Begin();
+
+	while(*ppMatIterator)
+	{
+		(*ppMatIterator)->Update();
+		ppMatIterator++;
+	}
+
+}
+
 char* Material::GetIDString()
 {
 	CALLSTACK;
@@ -85,10 +97,17 @@ Material* Material::CreateDefault()
 
 	pMat->refCount = 1;
 
+	pMat->textureMatrix = Matrix::identity;
+	pMat->curTime = 0.0f;
+	pMat->frameTime = 0.0f;
+	pMat->uFrames = 1;
+	pMat->vFrames = 1;
+	pMat->curFrame = 0;
+
 	return pMat;
 }
 
-void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
+void Material::CreateMaterialFromDefinition(Material *pMat, const char *pDefinition)
 {
 	CALLSTACK;
 
@@ -245,13 +264,23 @@ void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 				pMat->materialType |= MF_LitPerPixel;
 	//				pMat-> = materialDefinitions.AsInt(0);
 			}
+			else if(!StrCaseCmp(pName, "animated"))
+			{
+				pMat->materialType |= MF_Animating;
+				pMat->uFrames = materialDefinitions.AsInt(0);
+				pMat->vFrames = materialDefinitions.AsInt(1);
+				pMat->frameTime = materialDefinitions.AsFloat(2);
+
+				pMat->textureMatrix.SetIdentity();
+				pMat->textureMatrix.Scale(Vector(1.0f/(float)pMat->uFrames, 1.0f/(float)pMat->vFrames, 1.0f));
+			}
 
 			materialDefinitions.GetNextLine();
 		}
 	}
 }
 
-Material* Material::Create(char *pName)
+Material* Material::Create(const char *pName)
 {
 	CALLSTACK;
 
@@ -320,6 +349,9 @@ void Material::Use()
 	if(pTextures[this->diffuseMapIndex])
 	{
 		pTextures[this->diffuseMapIndex]->SetTexture(0);
+
+		pd3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+		pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DXMATRIX*)&textureMatrix);
 	}
 	else
 	{
@@ -330,4 +362,23 @@ void Material::Use()
 
 	// configure renderer
 }
+
+void Material::Update()
+{
+	if(materialType & MF_Animating)
+	{
+		curTime += TIMEDELTA;
+
+		while(curTime >= frameTime)
+		{
+			curTime -= frameTime;
+
+			curFrame++;
+			curFrame = curFrame % (uFrames*vFrames);
+
+			textureMatrix.SetZAxis(Vector((1.0f/(float)uFrames) * (float)(curFrame%uFrames), (1.0f/(float)vFrames) * (float)(curFrame/vFrames), 0.0f));
+		}
+	}
+}
+
 

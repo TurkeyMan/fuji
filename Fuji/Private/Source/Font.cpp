@@ -5,6 +5,7 @@
 #include "Display.h"
 #include "FileSystem.h"
 #include "Texture.h"
+#include "Material.h"
 #include "Font.h"
 #include "Primitive.h"
 #include "FileSystem.h"
@@ -32,10 +33,10 @@ int Font::LoadFont(const char *filename)
 	uint32 hfile;
 	char tempbuffer[1024];
 
-	strcpy(tempbuffer, filename);
-	strcat(tempbuffer, ".tga");
+	int a;
+	for(a=strlen(filename); a>0 && filename[a-1] != '\\' && filename[a-1] != '/'; a--) {}
 
-	pTexture = Texture::LoadTexture(tempbuffer);
+	pMaterial = Material::Create(&filename[a]);
 
 	strcpy(tempbuffer, filename);
 	strcat(tempbuffer, ".dat");
@@ -51,7 +52,7 @@ void Font::Release()
 {
 	CALLSTACK;
 
-	pTexture->Release();
+	pMaterial->Release();
 }
 
 int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert)
@@ -64,23 +65,23 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 	float x,y,w,h, p, cwidth;
 
-	pTexture->SetTexture();
+	pMaterial->Use();
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);
 
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)((uint8)text[i] & 0x0F) * (float)(pTexture->width / 16);
-		y = (float)((uint8)text[i] >> 4) * (float)(pTexture->height / 16);
+		x = (float)((uint8)text[i] & 0x0F) * (float)(pMaterial->pTextures[0]->width / 16);
+		y = (float)((uint8)text[i] >> 4) * (float)(pMaterial->pTextures[0]->height / 16);
 
 		w = (float)charwidths[(uint8)text[i]];
-		h = (float)pTexture->height/16.0f;
+		h = (float)pMaterial->pTextures[0]->height/16.0f;
 
-		x /= (float)pTexture->width;
-		y /= (float)pTexture->height;
-		w /= (float)pTexture->width;
-		h /= (float)pTexture->height;
+		x /= (float)pMaterial->pTextures[0]->width;
+		y /= (float)pMaterial->pTextures[0]->height;
+		w /= (float)pMaterial->pTextures[0]->width;
+		h /= (float)pMaterial->pTextures[0]->height;
 
 		p = w/h;
 		cwidth = height*p;

@@ -9,7 +9,7 @@
 #define INIASSERT(reason, rave)
 #endif
 
-int IniFile::Create(char *pFilename)
+int IniFile::Create(const char *pFilename)
 {
 	CALLSTACK;
 
@@ -42,7 +42,7 @@ int IniFile::Create(char *pFilename)
 	return 0;
 }
 
-void IniFile::CreateFromMemory(char *pMemory)
+void IniFile::CreateFromMemory(const char *pMemory)
 {
 	CALLSTACK;
 
@@ -55,14 +55,14 @@ void IniFile::CreateFromMemory(char *pMemory)
 	owned = true;
 }
 
-void IniFile::CreateFromPointer(char *pPointer)
+void IniFile::CreateFromPointer(const char *pPointer)
 {
 	CALLSTACK;
 
 #if !defined(_RETAIL)
 	strcpy(pIniFilename, "Pointer");
 #endif
-	pIniBuffer = pPointer;
+	pIniBuffer = (char*)pPointer;
 	pCurrent = pIniBuffer;
 	owned = false;
 }
@@ -168,7 +168,7 @@ void IniFile::PopMarker()
 	pCurrent = pCurrentStack[currentHeight];
 }
 
-int IniFile::FindSection(char *pSection)
+int IniFile::FindSection(const char *pSection)
 {
 	CALLSTACK;
 
@@ -183,7 +183,7 @@ int IniFile::FindSection(char *pSection)
 	return 0;
 }
 
-int IniFile::FindLine(char *pName, char *pSection)
+int IniFile::FindLine(const char *pName, const char *pSection)
 {
 	CALLSTACK;
 

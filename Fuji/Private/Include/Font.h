@@ -1,7 +1,7 @@
 #if !defined(_FONT_H)
 #define _FONT_H
 
-#include "Texture.h"
+#include "Material.h"
 #include "Vector3.h"
 
 class Font
@@ -20,7 +20,7 @@ public:
 	int DrawTextf(const Vector3 &pos, float height, uint32 colour, const char *format, ...);
 
 	// data members
-	Texture *pTexture;
+	Material *pMaterial;
 	uint8 charwidths[256];
 };
 

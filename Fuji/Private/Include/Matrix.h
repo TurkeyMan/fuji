@@ -24,6 +24,7 @@ public:
 	Matrix& RotateX(float angle);
 	Matrix& RotateY(float angle);
 	Matrix& RotateZ(float angle);
+	Matrix& Scale(const Vector3& scale);
 
 	Matrix& SetTranslation(const Vector3 &trans);
 	Matrix& SetRotation(const Vector3 &axis, float angle);
@@ -32,6 +33,7 @@ public:
 	Matrix& SetRotationX(float angle);
 	Matrix& SetRotationY(float angle);
 	Matrix& SetRotationZ(float angle);
+	Matrix& SetScale(const Vector3& scale);
 
 	Matrix& LookAt(const Vector3& pos, const Vector3& at, const Vector3& up = Vector3::up);
 
