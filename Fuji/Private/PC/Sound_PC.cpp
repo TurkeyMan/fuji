@@ -69,8 +69,7 @@ void Sound_InitModule()
 	hr = pDirectSound->CreateSoundBuffer(&desc, &pDSPrimaryBuffer, NULL);
 	DBGASSERT(SUCCEEDED(hr), "Failed to create the Primary Sound Buffer");
 
-//	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_PRIORITY);
-	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_NORMAL);
+	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_PRIORITY);
 	DBGASSERT(SUCCEEDED(hr), "Failed to set the DirectSound cooperative level");
 
 #if !defined(_RETAIL)
