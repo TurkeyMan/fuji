@@ -62,7 +62,7 @@ Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uin
 				{
 					(char*&)pData -= width*sizeof(uint32);
 					memcpy(rect.pBits, pData, width*sizeof(uint32));
-					(char*&)rect.pBits += width*sizeof(uint32);
+					(char*&)rect.pBits += rect.Pitch;
 				}
 			}
 			else
