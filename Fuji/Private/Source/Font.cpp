@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "Display.h"
+#include "FileSystem.h"
 #include "Texture.h"
 #include "Font.h"
 #include "Primitive.h"

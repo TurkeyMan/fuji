@@ -385,10 +385,22 @@
 				RelativePath=".\Source\Display.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\FileSystem.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Font.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Heap.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\IniFile.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Matrix.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Sprite.cpp">
@@ -425,7 +437,16 @@
 				RelativePath=".\Include\Display.h">
 			</File>
 			<File
+				RelativePath=".\Include\FileSystem.h">
+			</File>
+			<File
 				RelativePath=".\Include\Font.h">
+			</File>
+			<File
+				RelativePath=".\Include\Heap.h">
+			</File>
+			<File
+				RelativePath=".\Include\IniFile.h">
 			</File>
 			<File
 				RelativePath=".\Include\Input.h">
@@ -435,6 +456,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Primitive.h">
+			</File>
+			<File
+				RelativePath=".\Include\PtrList.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">

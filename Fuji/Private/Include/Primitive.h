@@ -27,14 +27,14 @@ void Primitive_DeinitModule();
 void MFPrimitive(uint32 primType, uint32 hint = NULL);
 void MFBegin(uint32 vertexCount);
 
-void MFSetMatrix(Matrix &mat);
-void MFSetColour(Vector4 &colour);
+void MFSetMatrix(const Matrix &mat);
+void MFSetColour(const Vector4 &colour);
 void MFSetColour(float r, float g, float b, float a = 1.0f);
 void MFSetColour(uint32 col);
 void MFSetTexCoord1(float u, float v);
-void MFSetNormal(Vector3 &normal);
+void MFSetNormal(const Vector3 &normal);
 void MFSetNormal(float x, float y, float z);
-void MFSetPosition(Vector3 &pos);
+void MFSetPosition(const Vector3 &pos);
 void MFSetPosition(float x, float y, float z);
 
 void MFEnd();

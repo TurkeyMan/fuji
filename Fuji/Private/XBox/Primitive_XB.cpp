@@ -44,12 +44,12 @@ void MFBegin(uint32 vertexCount)
 	current.normal.y = 1.0f;
 }
 
-void MFSetMatrix(Matrix &mat)
+void MFSetMatrix(const Matrix &mat)
 {
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
-void MFSetColour(Vector4 &colour)
+void MFSetColour(const Vector4 &colour)
 {
 	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
@@ -70,7 +70,7 @@ void MFSetTexCoord1(float u, float v)
 	current.v = v;
 }
 
-void MFSetNormal(Vector3 &normal)
+void MFSetNormal(const Vector3 &normal)
 {
 	MFSetNormal(normal.x, normal.y, normal.z);
 }
@@ -82,7 +82,7 @@ void MFSetNormal(float x, float y, float z)
 	current.normal.z = z;
 }
 
-void MFSetPosition(Vector3 &pos)
+void MFSetPosition(const Vector3 &pos)
 {
 	MFSetPosition(pos.x, pos.y, pos.z);
 }

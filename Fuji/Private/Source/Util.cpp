@@ -6,17 +6,6 @@
 char stringBuffer[1024*128];
 uint32 stringOffset;
 
-char* File_SystemPath(char *filename)
-{
-#if defined(_XBOX)
-	return STR("D:\\Data\\%s", filename);
-#elif defined(_WINDOWS)
-	return STR("Data\\%s", filename);
-#else
-	return STR("%s", filename);
-#endif
-}
-
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {

@@ -11,8 +11,6 @@ class Vector3;
 #define DBGASSERT(x, y)
 #endif
 
-char* File_SystemPath(char *filename);
-
 void dbgAssert(char *pReason, char *pMessage, char *pFile, int line);
 int dprintf(char *format, ...);
 void LOGD(char *string);
