@@ -16,6 +16,9 @@ void ClearScreen();
 void SetProjection(float fov);
 bool SetOrtho(bool enable, float width = 640.0f, float height = 480.0f);
 
+void SetViewport(float x, float y, float width, float height);
+void ResetViewport();
+
 #if defined(_XBOX)
 
 struct DisplaySettings

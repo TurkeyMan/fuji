@@ -135,9 +135,16 @@ public:
 	static uint32 presets[10];
 };
 
+#define MENU_X		100.0f
+#define MENU_Y		100.0f
+#define MENU_WIDTH	640.0f-MENU_X*2.0f
+#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
+
 class Menu : public MenuObject
 {
 public:
+	Menu() { targetOffset = yOffset = 0.0f; menuX = MENU_X; menuY = MENU_Y; menuWidth = MENU_WIDTH; menuHeight = MENU_HEIGHT; }
+
 	virtual int GetSelected();
 	virtual int GetItemCount();
 
@@ -151,6 +158,9 @@ public:
 	MenuObject *pChildren[MENU_MAX_CHILDREN];
 	int numChildren;
 	int selection;
+
+	float menuX, menuY, menuWidth, menuHeight;
+	float yOffset, targetOffset;
 };
 
 extern Menu rootMenu;

@@ -227,67 +227,109 @@ void Menu::ListUpdate(bool selected)
 void Menu::Draw()
 {
 	Vector3 dimensions = { 0.0f, 0.0f, 0.0f };
-	Vector3 currentPos = Vector(120.0f, 150.0f, 0.0f);
-	float requestedWidth = 400.0f;
+	Vector3 currentPos;
+	float requestedWidth = menuWidth-40.0f;
+	float selStart, selEnd;
 	int a;
 
 	// get menu size
 	for(a=0; a<numChildren; a++)
 	{
 		Vector3 dim = pChildren[a]->GetDimensions(requestedWidth);
+
+		if(selection==a)
+		{
+			selStart = dimensions.y;
+			selEnd = selStart + dim.y;
+
+			if(selStart < -yOffset)
+			{
+				targetOffset = -selStart;
+			}
+
+			if(selEnd > menuHeight - 75.0f - yOffset)
+			{
+				targetOffset = -(selEnd-(menuHeight-75.0f));
+			}
+		}
+
 		dimensions.y += dim.y;
 		dimensions.x = max(dimensions.x, dim.x);
 	}
+
+	if(targetOffset != yOffset)
+	{
+		yOffset -= abs(yOffset-targetOffset) < 0.1f ? yOffset-targetOffset : (yOffset-targetOffset)*0.1f;
+	}
+
+	currentPos = Vector(menuX+20.0f, menuY+50.0f + yOffset, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
 	MFSetColour(0x80000060);
-	MFSetPosition(100, 100, 0);
+	MFSetPosition(menuX, menuY, 0);
 	MFSetColour(0x800000B0);
-	MFSetPosition(540, 100, 0);
+	MFSetPosition(menuX+menuWidth, menuY, 0);
 	MFSetColour(0x80000080);
-	MFSetPosition(100, 380, 0);
+	MFSetPosition(menuX, menuY+menuHeight, 0);
 	MFSetColour(0x800000FF);
-	MFSetPosition(540, 380, 0);
+	MFSetPosition(menuX+menuWidth, menuY+menuHeight, 0);
 	MFEnd();
 
+	debugFont.DrawText(menuX+10.0f, menuY+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
+
+	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+	pd3dDevice->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
+
+	MFPrimitive(PT_TriStrip|PT_Untextured);
 	MFBegin(4);
 	MFSetColour(0xA0000000);
-	MFSetPosition(115, 145, 0);
+	MFSetPosition(menuX+15, menuY+45, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(525, 145, 0);
+	MFSetPosition(menuX+menuWidth-15, menuY+45, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(115, 365, 0);
+	MFSetPosition(menuX+15, menuY+menuHeight-15, 0);
 	MFSetColour(0xA0000000);
-	MFSetPosition(525, 365, 0);
+	MFSetPosition(menuX+menuWidth-15, menuY+menuHeight-15, 0);
 	MFEnd();
 
-	debugFont.DrawText(110.0f, 105.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
-
-	// draw menu background
+	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESS);
+	pd3dDevice->SetRenderState(D3DRS_STENCILREF, 0);
 
 	for(a=0; a<numChildren; a++)
 	{
+		if(currentPos.y > menuY + menuHeight - 15.0f) break;
+
 		if(selection==a)
 		{
 			float height = pChildren[a]->GetDimensions(requestedWidth).y;
+
+			if(currentPos.y + height < menuY + 45.0f)
+			{
+				currentPos.y += height;
+				continue;
+			}
+
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 
 			MFBegin(4);
 			MFSetColour(0xC0000080);
-			MFSetPosition(115, currentPos.y, 0);
+			MFSetPosition(menuX+15, currentPos.y, 0);
 			MFSetColour(0xC00000D0);
-			MFSetPosition(525, currentPos.y, 0);
+			MFSetPosition(menuX+menuWidth-15, currentPos.y, 0);
 			MFSetColour(0xC0000090);
-			MFSetPosition(115, currentPos.y + height, 0);
+			MFSetPosition(menuX+15, currentPos.y + height, 0);
 			MFSetColour(0xC00000FF);
-			MFSetPosition(525, currentPos.y + height, 0);
+			MFSetPosition(menuX+menuWidth-15, currentPos.y + height, 0);
 			MFEnd();
 		}
 
 		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
 	}
+
+	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
 }
 
 void Menu::Update()
@@ -481,7 +523,7 @@ void MenuItemColour::Draw()
 
 void MenuItemColour::Update()
 {
-
+	if(Input_WasPressed(0, Button_Y)) pCurrentMenu = pParent;
 }
 
 float MenuItemColour::ListDraw(bool selected, Vector3 pos, float maxWidth)

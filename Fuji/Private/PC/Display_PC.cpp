@@ -306,3 +306,29 @@ bool SetOrtho(bool enable, float width, float height)
 
 	return t;
 }
+
+void SetViewport(float x, float y, float width, float height)
+{
+	D3DVIEWPORT9 vp;
+	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
+	vp.Y = (DWORD)((y / 480.0f) * (float)display.height);
+	vp.Width = (DWORD)((width / 640.0f) * (float)display.width);
+	vp.Height = (DWORD)((height / 480.0f) * (float)display.height);
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
+}
+
+void ResetViewport()
+{
+	D3DVIEWPORT9 vp;
+	vp.X = 0;
+	vp.Y = 0;
+	vp.Width = display.width;
+	vp.Height = display.height;
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
+}

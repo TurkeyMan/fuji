@@ -90,7 +90,7 @@ void ClearScreen()
 {
 	CALLSTACK("ClearScreen");
 
-	pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)
@@ -132,4 +132,30 @@ bool SetOrtho(bool enable, float width, float height)
 	}
 
 	return t;
+}
+
+void SetViewport(float x, float y, float width, float height)
+{
+	D3DVIEWPORT8 vp;
+	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
+	vp.Y = (DWORD)((y / 480.0f) * (float)display.height);
+	vp.Width = (DWORD)((width / 640.0f) * (float)display.width);
+	vp.Height = (DWORD)((height / 480.0f) * (float)display.height);
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
+}
+
+void ResetViewport()
+{
+	D3DVIEWPORT8 vp;
+	vp.X = 0;
+	vp.Y = 0;
+	vp.Width = display.width;
+	vp.Height = display.height;
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
 }
