@@ -218,7 +218,7 @@ void Callstack_DrawProfile()
 			uint32 ms = (uint32)(i->second.total / (GetHighResolutionFrequency()/1000000));
 			double percent = (double)i->second.total/((double)GetHighResolutionFrequency() * 0.01/60.0);
 
-			debugFont.DrawTextf(100, y, 0, 20.0f, 0xFFFFFFFF, "%s(): %dµs - %.2f%%", i->first.c_str(), ms, percent);
+			debugFont.DrawTextf(100, y, 0, 20.0f, 0xFFFFFFFF, "%s(): %dµs - %.2f%% - %d calls", i->first.c_str(), ms, percent, i->second.calls);
 			y += 20.0f;
 		}
 	}
