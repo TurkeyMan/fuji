@@ -30,4 +30,6 @@ extern Timer gSystemTimer;
 	void DoMessageLoop();
 #endif
 
+extern uint32 gFrameCount;
+
 #endif // _SYSTEM_H

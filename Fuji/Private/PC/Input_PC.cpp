@@ -110,19 +110,19 @@ float Input_ReadGamepad(int controlID, uint32 type)
 			return (meJoystick[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
 
 		case Axis_LX:
-			inputValue = ((float)(meJoystick[controlID].lX - 32768)) / 32767.0f;
+			inputValue = ((float)(meJoystick[controlID].lX - 32767)) / 32767.0f;
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_LY:
-			inputValue = -(((float)(meJoystick[controlID].lY - 32768)) / 32767.0f);
+			inputValue = -(((float)(meJoystick[controlID].lY - 32767)) / 32767.0f);
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_RX:
-			inputValue = ((float)(meJoystick[controlID].lRz - 32768)) / 32767.0f;
+			inputValue = ((float)(meJoystick[controlID].lRz - 32767)) / 32767.0f;
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		case Axis_RY:
-			inputValue = -(((float)(meJoystick[controlID].lZ - 32768)) / 32767.0f);
+			inputValue = -(((float)(meJoystick[controlID].lZ - 32767)) / 32767.0f);
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		default:
