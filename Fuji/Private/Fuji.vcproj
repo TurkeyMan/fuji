@@ -429,6 +429,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\TileMap.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Util.cpp">
 			</File>
 			<File
@@ -485,6 +488,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Texture.h">
+			</File>
+			<File
+				RelativePath=".\Include\TileMap.h">
 			</File>
 			<File
 				RelativePath=".\Include\Timer.h">

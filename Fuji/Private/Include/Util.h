@@ -14,7 +14,7 @@ class Vector3;
 		#define DBGASSERT(condition,str) { static ignore=false; if(!(condition) && !ignore) { dbgAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
 	#endif
 #else
-#define DBGASSERT(x, y)
+	#define DBGASSERT(x, y)
 #endif
 
 void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line);
