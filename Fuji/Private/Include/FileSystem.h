@@ -70,21 +70,21 @@ char* File_SystemPath(const char *filename);
 char* File_HomePath(const char *filename);
 
 int File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
-void File_Close(uint32 fileHandle);
+void File_Close(int fileHandle);
 
 char* File_Load(const char *pFilename, uint32 *pBytesRead = NULL);
 
-int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);
-int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_Read(void *pBuffer, uint32 bytes, int fileHandle);
+int File_Write(void *pBuffer, uint32 bytes, int fileHandle);
 
-int File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
-int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_ReadAsync(void *pBuffer, uint32 bytes, int fileHandle);
+int File_WriteAsync(void *pBuffer, uint32 bytes, int fileHandle);
 
-int File_Query(uint32 fileHandle);
+int File_Query(int fileHandle);
 
-int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle);
+int File_Seek(FileSeek relativity, int32 bytes, int fileHandle);
 
-uint32 File_GetSize(uint32 fileHandle);
+uint32 File_GetSize(int fileHandle);
 uint32 File_GetSize(const char *pFilename);
 
 bool File_Exists(const char *pFilename);

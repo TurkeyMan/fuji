@@ -382,7 +382,8 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	SoundMusic& track = gMusicTracks[t];
 
 	// load vorbis file
-	track.pVorbisBuffer = File_Load(pFilename, &track.size);
+	const char *pFile = File_SystemPath(pFilename);
+	track.pVorbisBuffer = File_Load(pFile, &track.size);
 	if(!track.pVorbisBuffer) return -1;
 
 	track.offset = 0;
@@ -418,7 +419,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	WAVEFORMATEX wfx;
 
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
-	wfx.nChannels = track.pInfo->channels;
+	wfx.nChannels = (WORD)track.pInfo->channels;
 	wfx.nSamplesPerSec = track.pInfo->rate;
 	wfx.wBitsPerSample = 16;
 	wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample/8);

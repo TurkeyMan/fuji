@@ -26,7 +26,8 @@ void Input_UpdateJoystick();
 
 struct GamepadInfo
 {
-	char *pName;
+	char * pName;
+	const char * const * ppButtonNameStrings;
 
 	int axisMapping[4];
 	int buttonMapping[16];
@@ -228,6 +229,88 @@ uint8 KEYtoDIK[256] =
 	DIK_YEN  // KEY_YEN,			// japanese keyboard
 };
 
+const char * const DefaultButtons[] =
+{
+// Default controller enums
+	"Button 1",
+	"Button 2",
+	"Button 3",
+	"Button 4",
+	"Button 5",
+	"Button 6",
+	"Button 7",
+	"Button 8",
+	"Button 9",
+	"Button 10",
+	"Button 11",
+	"Button 12",
+
+// general controller enums
+	"Digital Up",
+	"Digital Down",
+	"Digital Left",
+	"Digital Right",
+	"Analog X-Axis",
+	"Analog Y-Axis",
+	"Analog RX-Axis",
+	"Analog RY-Axis"
+};
+
+const char * const XBoxButtons[] =
+{
+// xbox controller enums
+	"A",
+	"B",
+	"X",
+	"Y",
+	"Black",
+	"White",
+	"Left Trigger",
+	"Right Trigger",
+	"Start",
+	"Back",
+	"Left Thumb",
+	"Right Thumb",
+
+// general controller enums
+	"DPad Up",
+	"DPad Down",
+	"DPad Left",
+	"DPad Right",
+	"Left Analog X-Axis",
+	"Left Analog Y-Axis",
+	"Right Analog X-Axis",
+	"Right Analog Y-Axis"
+};
+
+const char * const PS2Buttons[] =
+{
+// PSX controller enums
+	"Cross",
+	"Circle",
+	"Box",
+	"Triangle",
+	"R1",
+	"L1",
+	"L2",
+	"R2",
+	"Start",
+	"Select",
+	"Left Thumb",
+	"Right Thumb",
+
+// general controller enums
+	"DPad Up",
+	"DPad Down",
+	"DPad Left",
+	"DPad Right",
+	"Left Analog X-Axis",
+	"Left Analog Y-Axis",
+	"Right Analog X-Axis",
+	"Right Analog Y-Axis"
+};
+
+/**** Platform Specific Functions ****/
 
 void Input_InitModulePlatformSpecific()
 {
@@ -385,48 +468,48 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 		}
 
 		pDIJoystick[id]->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
-	}
 
-	for(a=0; a<16; a++)
-	{
-		if(pGamepadMappings[id]->buttonMapping[a] > -1)
-			pGamepadState->values[a] = joyState.rgbButtons[pGamepadMappings[id]->buttonMapping[a]] ? 1.0f : 0.0f;
-	}
-
-	if(pGamepadMappings[id]->usePOV)
-	{
-		// read from POV
-		DWORD pov = joyState.rgdwPOV[0];
-
-		bool POVCentered = (LOWORD(pov) == 0xFFFF);
-
-		if(!POVCentered)
+		for(a=0; a<16; a++)
 		{
-			if((pov >= 0 && pov <= 4500) || (pov >= 31500 && pov <= 36000))
-				pGamepadState->values[Button_DUp] = 1.0f;
-			if((pov >= 4500 && pov <= 13500))
-				pGamepadState->values[Button_DRight] = 1.0f;
-			if((pov >= 13500 && pov <= 22500))
-				pGamepadState->values[Button_DDown] = 1.0f;
-			if((pov >= 22500 && pov <= 31500))
-				pGamepadState->values[Button_DLeft] = 1.0f;
+			if(pGamepadMappings[id]->buttonMapping[a] > -1)
+				pGamepadState->values[a] = joyState.rgbButtons[pGamepadMappings[id]->buttonMapping[a]] ? 1.0f : 0.0f;
 		}
-	}
 
-	float *pGamepadAxis = &pGamepadState->values[Axis_LX];
-	LONG *pSourceAxis = (LONG*)&joyState;
-
-	float deadZone = Input_GetDeadZone();
-
-	for(a=0; a<4; a++)
-	{
-		if(pGamepadMappings[id]->axisMapping[a] > -1)
+		if(pGamepadMappings[id]->usePOV)
 		{
-			float inputValue = ((float)(pSourceAxis[pGamepadMappings[id]->axisMapping[a]] - 32767.0f)) * (1.0f/32767.0f);
-			pGamepadAxis[a] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			// read from POV
+			DWORD pov = joyState.rgdwPOV[0];
 
-			if(a&1) // y axis's need to be inverted.. direct input seems to like to report them upside down ;)
-				pGamepadAxis[a] = -pGamepadAxis[a];
+			bool POVCentered = (LOWORD(pov) == 0xFFFF);
+
+			if(!POVCentered)
+			{
+				if((pov >= 0 && pov <= 4500) || (pov >= 31500 && pov <= 36000))
+					pGamepadState->values[Button_DUp] = 1.0f;
+				if((pov >= 4500 && pov <= 13500))
+					pGamepadState->values[Button_DRight] = 1.0f;
+				if((pov >= 13500 && pov <= 22500))
+					pGamepadState->values[Button_DDown] = 1.0f;
+				if((pov >= 22500 && pov <= 31500))
+					pGamepadState->values[Button_DLeft] = 1.0f;
+			}
+		}
+
+		float *pGamepadAxis = &pGamepadState->values[Axis_LX];
+		LONG *pSourceAxis = (LONG*)&joyState;
+
+		float deadZone = Input_GetDeadZone();
+
+		for(a=0; a<4; a++)
+		{
+			if(pGamepadMappings[id]->axisMapping[a] > -1)
+			{
+				float inputValue = ((float)(pSourceAxis[pGamepadMappings[id]->axisMapping[a]] - 32767.0f)) * (1.0f/32767.0f);
+				pGamepadAxis[a] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+				if(a&1) // y axis's need to be inverted.. direct input seems to like to report them upside down ;)
+					pGamepadAxis[a] = -pGamepadAxis[a];
+			}
 		}
 	}
 }
@@ -556,6 +639,11 @@ const char* Input_GetDeviceName(int source, int sourceID)
 	}
 
 	return pText;
+}
+
+const char* Input_GetGamepadButtonName(int sourceID, int type)
+{
+	return pGamepadMappings[sourceID]->ppButtonNameStrings[type];
 }
 
 bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
@@ -720,6 +808,7 @@ void LoadGamepadMappings()
 	pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen("default") + 1);
 	pGI->usePOV = true;
 	pGI->pName = (char*)&pGI[1];
+	pGI->ppButtonNameStrings = DefaultButtons;
 	strcpy(pGI->pName, "default");
 
 	pGI->pNext = pGamepadMappingRegistry;
@@ -749,6 +838,7 @@ void LoadGamepadMappings()
 				pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
 				pGI->usePOV = true;
 				pGI->pName = (char*)&pGI[1];
+				pGI->ppButtonNameStrings = DefaultButtons;
 				strcpy(pGI->pName, pName);
 
 				pGI->pNext = pGamepadMappingRegistry;
@@ -839,6 +929,27 @@ void LoadGamepadMappings()
 				else if(!stricmp(pName, "IgnorePOV"))
 				{
 					pGI->usePOV = false;
+				}
+				else if(!stricmp(pName, "ButtonStrings"))
+				{
+					char *pStrings = ini.AsString();
+
+					if(!stricmp(pStrings, "XBox"))
+					{
+						pGI->ppButtonNameStrings = XBoxButtons;
+					}
+					else if(!stricmp(pStrings, "Playstation"))
+					{
+						pGI->ppButtonNameStrings = PS2Buttons;
+					}
+					else
+					{
+						LOGD(STR("Error: Gamepad button strings '%s' unavailable for gamepad type '%s'.", pStrings, pGI->pName));
+					}
+				}
+				else
+				{
+					LOGD(STR("Error: Unknown controller property '%s' in gamepad '%s'.", pName, pGI->pName));
 				}
 			}
 

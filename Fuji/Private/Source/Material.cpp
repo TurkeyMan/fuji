@@ -12,17 +12,26 @@
 #include "SysLogo-256.h"
 #include "SysLogo-64.h"
 
+/**** internal functions ****/
+
+void		MaterialInternal_Update(Material *pMaterial);
+const char*	MaterialInternal_GetIDString(Material *pMaterial);
+
+Material*	MaterialInternal_CreateDefault(const char *pName);
+void		MaterialInternal_InitialiseFromDefinition(Material *pMat, const char *pDefinition);
+
 /**** Globals ****/
 
-IniFile Material::materialDefinitions;
+IniFile gMaterialDefinitions;
 
 PtrListDL<Material> materialList;
 
-Material *Material::pCurrent = NULL;
-Material *Material::pNone = NULL;
+Material *pCurrentMaterial = NULL;
 
-Material *pSysLogoLarge;
-Material *pSysLogoSmall;
+Material *pNoneMaterial = NULL;
+Material *pWhiteMaterial = NULL;
+Material *pSysLogoLarge = NULL;
+Material *pSysLogoSmall = NULL;
 
 char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
 
@@ -34,22 +43,36 @@ void Material_InitModule()
 
 	materialList.Init("Material List", gDefaults.material.maxMaterials);
 
-	if(Material::materialDefinitions.Create(File_SystemPath("Materials.ini")))
+	if(gMaterialDefinitions.Create(File_SystemPath("Materials.ini")))
 	{
-		DBGASSERT(false, "Failed to load Materials.ini");
+		LOGD("Failed to load Materials.ini");
 	}
 
-	Material::pNone = Material::Create("None");
+	// create the logo textures from raw data
+	Texture *pSysLogoLargeTexture = Texture_CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	Texture *pSysLogoSmallTexture = Texture_CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
 
-	pSysLogoLarge = Material::CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	pSysLogoLarge = Material::CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	// create standard materials
+	pNoneMaterial = Material_Create("_None");
+	pWhiteMaterial = Material_Create("_White");
+	pSysLogoLarge = Material_Create("SysLogoLarge");
+	pSysLogoSmall = Material_Create("SysLogoSmall");
+
+	// release a reference to the logo textures
+	Texture_Destroy(pSysLogoLargeTexture);
+	Texture_Destroy(pSysLogoSmallTexture);
 }
 
 void Material_DeinitModule()
 {
 	CALLSTACK;
 
-	Material::materialDefinitions.Release();
+	Material_Destroy(pNoneMaterial);
+	Material_Destroy(pWhiteMaterial);
+	Material_Destroy(pSysLogoLarge);
+	Material_Destroy(pSysLogoSmall);
+
+	gMaterialDefinitions.Release();
 
 	materialList.Deinit();
 }
@@ -60,13 +83,97 @@ void Material_Update()
 
 	while(*ppMatIterator)
 	{
-		(*ppMatIterator)->Update();
+		MaterialInternal_Update(*ppMatIterator);
 		ppMatIterator++;
 	}
-
 }
 
-char* Material::GetIDString()
+// interface functions
+
+Material* Material_Create(const char *pName)
+{
+	CALLSTACK;
+
+	Material *pMat = Material_Find(pName);
+
+	if(!pMat)
+	{
+		pMat = MaterialInternal_CreateDefault(pName);
+
+		if(gMaterialDefinitions.FindSection(pName))
+		{
+			MaterialInternal_InitialiseFromDefinition(pMat, pName);
+		}
+		else
+		{
+			Texture *pTexture = Texture_Create(pName);
+
+			pMat->pTextures[0] = pTexture;
+			pMat->diffuseMapIndex = 0;
+			pMat->textureCount = 1;
+		}
+	}
+
+	pMat->refCount++;
+
+	return pMat;
+}
+
+int Material_Destroy(Material *pMaterial)
+{
+	CALLSTACK;
+
+	pMaterial->refCount--;
+
+	if(!pMaterial->refCount)
+	{
+		for(uint16 a=0; a<pMaterial->textureCount; a++)
+		{
+			Texture_Destroy(pMaterial->pTextures[a]);
+		}
+
+		materialList.Destroy(pMaterial);
+
+		return 0;
+	}
+
+	return pMaterial->refCount;
+}
+
+Material* Material_Find(const char *pName)
+{
+	CALLSTACK;
+
+	Material **ppIterator = materialList.Begin();
+
+	while(*ppIterator)
+	{
+		if(!StrCaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
+
+		ppIterator++;
+	}
+
+	return NULL;
+}
+
+Material* Material_GetCurrent()
+{
+	return pCurrentMaterial;
+}
+
+void Material_Use(Material *pMaterial)
+{
+	pCurrentMaterial = pMaterial;
+}
+
+void Material_UseWhite()
+{
+	Material_Use(pWhiteMaterial);
+}
+
+
+// internal functions
+const char* MaterialInternal_GetIDString()
 {
 	CALLSTACK;
 /*
@@ -83,182 +190,181 @@ char* Material::GetIDString()
 	return NULL;
 }
 
-Material* Material::CreateDefault()
+Material* MaterialInternal_CreateDefault(const char *pName)
 {
 	CALLSTACK;
 
-	static int defaultCount = 0;
-
 	Material *pMat = materialList.Create();
-
 	memset(pMat, 0, sizeof(Material));
 
-	strcpy(pMat->name, STR("Default%d", defaultCount++));;
+	strcpy(pMat->name, pName);
 
 	pMat->ambient = Vector4::one;
 	pMat->diffuse = Vector4::one;
+/*
 	pMat->illum = Vector4::zero;
 	pMat->specular = Vector4::zero;
 	pMat->specularPow = 0;
-
+*/
 	pMat->materialType = MF_AlphaBlend;
 	pMat->opaque = true;
 
-	pMat->refCount = 1;
-
 	pMat->textureMatrix = Matrix::identity;
-	pMat->curTime = 0.0f;
-	pMat->frameTime = 0.0f;
 	pMat->uFrames = 1;
 	pMat->vFrames = 1;
+/*
+	pMat->curTime = 0.0f;
+	pMat->frameTime = 0.0f;
 	pMat->curFrame = 0;
 
+	pMat->refCount = 0;
+*/
 	return pMat;
 }
 
-void Material::CreateMaterialFromDefinition(Material *pMat, const char *pDefinition)
+void MaterialInternal_InitialiseFromDefinition(Material *pMat, const char *pDefinition)
 {
 	CALLSTACK;
 
-	if(materialDefinitions.FindSection(pDefinition))
+	if(gMaterialDefinitions.FindSection(pDefinition))
 	{
-		materialDefinitions.GetNextLine();
+		gMaterialDefinitions.GetNextLine();
 
-		while(!materialDefinitions.EndOfFile() && !materialDefinitions.IsSection())
+		while(!gMaterialDefinitions.EndOfFile() && !gMaterialDefinitions.IsSection())
 		{
-			char *pName = materialDefinitions.GetName();
+			char *pName = gMaterialDefinitions.GetName();
 			if(!StrCaseCmp(pName, "alias"))
 			{
-				materialDefinitions.PushMarker();
+				gMaterialDefinitions.PushMarker();
 
-				char *pAlias = materialDefinitions.AsString();
+				char *pAlias = gMaterialDefinitions.AsString();
 
-				if(materialDefinitions.FindSection(pAlias))
+				if(gMaterialDefinitions.FindSection(pAlias))
 				{
-					CreateMaterialFromDefinition(pMat, pAlias);
+					MaterialInternal_InitialiseFromDefinition(pMat, pAlias);
 				}
 
-				materialDefinitions.PopMarker();
+				gMaterialDefinitions.PopMarker();
 			}
 			else if(!StrCaseCmp(pName, "lit"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Lit) | (materialDefinitions.AsBool(0) ? MF_Lit : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Lit) | (gMaterialDefinitions.AsBool(0) ? MF_Lit : NULL);
 			}
 			else if(!StrCaseCmp(pName, "prelit"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Lit) | (!materialDefinitions.AsBool(0) ? MF_Lit : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Lit) | (!gMaterialDefinitions.AsBool(0) ? MF_Lit : NULL);
 			}
 			else if(!StrCaseCmp(pName, "diffusecolour"))
 			{
-				pMat->diffuse = materialDefinitions.AsVector4();
+				pMat->diffuse = gMaterialDefinitions.AsVector4();
 			}
 			else if(!StrCaseCmp(pName, "ambientcolour"))
 			{
-				pMat->ambient = materialDefinitions.AsVector4();
+				pMat->ambient = gMaterialDefinitions.AsVector4();
 			}
 			else if(!StrCaseCmp(pName, "specularcolour"))
 			{
-				pMat->specular = materialDefinitions.AsVector4();
+				pMat->specular = gMaterialDefinitions.AsVector4();
 			}
 			else if(!StrCaseCmp(pName, "specularpower"))
 			{
-				pMat->specularPow = materialDefinitions.AsFloat(0);
+				pMat->specularPow = gMaterialDefinitions.AsFloat(0);
 			}
 			else if(!StrCaseCmp(pName, "emissivecolour"))
 			{
-				pMat->illum = materialDefinitions.AsVector4();
+				pMat->illum = gMaterialDefinitions.AsVector4();
 			}
 			else if(!StrCaseCmp(pName, "mask"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Mask) | (materialDefinitions.AsBool(0) ? MF_Mask : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Mask) | (gMaterialDefinitions.AsBool(0) ? MF_Mask : NULL);
 			}
 			else if(!StrCaseCmp(pName, "doublesided"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (materialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (gMaterialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
 			}
 			else if(!StrCaseCmp(pName, "backfacecull"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (!materialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (!gMaterialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
 			}
 			else if(!StrCaseCmp(pName, "additive"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsBool(0) ? MF_Additive : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (gMaterialDefinitions.AsBool(0) ? MF_Additive : NULL);
 			}
 			else if(!StrCaseCmp(pName, "subtractive"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsBool(0) ? MF_Subtractive : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (gMaterialDefinitions.AsBool(0) ? MF_Subtractive : NULL);
 			}
 			else if(!StrCaseCmp(pName, "alpha"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsBool(0) ? MF_AlphaBlend : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (gMaterialDefinitions.AsBool(0) ? MF_AlphaBlend : NULL);
 			}
 			else if(!StrCaseCmp(pName, "blend"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsInt(0) << 1);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (gMaterialDefinitions.AsInt(0) << 1);
 			}
 			else if(!StrCaseCmp(pName, "texture"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "diffusemap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->diffuseMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "diffusemap2"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_DiffuseMap2;
 				pMat->diffuseMap2Index = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "normalmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_NormalMap;
 				pMat->normalMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "detailmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_DetailTexture;
 				pMat->detailMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "envmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_SphereEnvMap;
 				pMat->envMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "lightmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_LightMap;
 				pMat->lightMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "bumpmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "reflectionmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
 			else if(!StrCaseCmp(pName, "specularmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(File_SystemPath(materialDefinitions.AsString()));
+				pMat->pTextures[pMat->textureCount] = Texture_Create(gMaterialDefinitions.AsString());
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
@@ -266,147 +372,43 @@ void Material::CreateMaterialFromDefinition(Material *pMat, const char *pDefinit
 			else if(!StrCaseCmp(pName, "celshading"))
 			{
 				pMat->materialType |= MF_CelShading;
-	//				pMat-> = materialDefinitions.AsInt(0);
+	//				pMat-> = gMaterialDefinitions.AsInt(0);
 			}
 			else if(!StrCaseCmp(pName, "phong"))
 			{
 				pMat->materialType |= MF_LitPerPixel;
-	//				pMat-> = materialDefinitions.AsInt(0);
+	//				pMat-> = gMaterialDefinitions.AsInt(0);
 			}
 			else if(!StrCaseCmp(pName, "animated"))
 			{
 				pMat->materialType |= MF_Animating;
-				pMat->uFrames = materialDefinitions.AsInt(0);
-				pMat->vFrames = materialDefinitions.AsInt(1);
-				pMat->frameTime = materialDefinitions.AsFloat(2);
+				pMat->uFrames = gMaterialDefinitions.AsInt(0);
+				pMat->vFrames = gMaterialDefinitions.AsInt(1);
+				pMat->frameTime = gMaterialDefinitions.AsFloat(2);
 
 				pMat->textureMatrix.SetIdentity();
 				pMat->textureMatrix.Scale(Vector(1.0f/(float)pMat->uFrames, 1.0f/(float)pMat->vFrames, 1.0f));
 			}
 
-			materialDefinitions.GetNextLine();
+			gMaterialDefinitions.GetNextLine();
 		}
 	}
 }
 
-Material* Material::Create(const char *pName)
+void MaterialInternal_Update(Material *pMaterial)
 {
-	CALLSTACK;
-
-	Material *pMat = NULL;
-
-	// if material already exists, bump refCount
-
-	if(materialDefinitions.FindSection(pName))
+	if(pMaterial->materialType & MF_Animating)
 	{
-		pMat = Material::CreateDefault();
+		pMaterial->curTime += TIMEDELTA;
 
-		strcpy(pMat->name, pName);
-
-		CreateMaterialFromDefinition(pMat, pName);
-
-		pMat->refCount = 1;
-	}
-	else
-	{
-		char *pTexName = File_SystemPath(STR("%s.tga", pName));
-
-		if(File_Exists(pTexName))
+		while(pMaterial->curTime >= pMaterial->frameTime)
 		{
-			LOGD(STR("No material definition for '%s'. Using default material.\n", pName));
+			pMaterial->curTime -= pMaterial->frameTime;
 
-			pMat = Material::CreateDefault();
-			pMat->pTextures[pMat->textureCount] = Texture::LoadTexture(pTexName);
-			pMat->diffuseMapIndex = pMat->textureCount;
-			pMat->textureCount++;
+			pMaterial->curFrame++;
+			pMaterial->curFrame = pMaterial->curFrame % (pMaterial->uFrames*pMaterial->vFrames);
 
-			pMat->refCount = 1;
-		}
-		else
-		{
-			LOGD(STR("No material definition or texture found for material '%s'. Using 'None'.\n", pName));
-
-			pMat = Material::Create("None");
-		}
-	}
-
-	return pMat;
-}
-
-Material* Material::CreateFromRawData(const char *pName, void *pData, uint32 width, uint32 height, uint32 format, uint32 flags, uint32 *pPalette)
-{
-	CALLSTACK;
-
-	Material *pMat = NULL;
-
-	// if material already exists, bump refCount
-
-	pMat = Material::CreateDefault();
-
-	pMat->pTextures[pMat->textureCount] = Texture_CreateFromRawData(pData, width, height, format, flags, pPalette);
-	pMat->diffuseMapIndex = pMat->textureCount;
-	pMat->textureCount++;
-	strcpy(pMat->name, pName);
-
-	pMat->refCount = 1;
-
-	return pMat;
-}
-
-void Material::Release()
-{
-	CALLSTACK;
-
-	refCount--;
-
-	if(!refCount)
-	{
-		for(uint16 a=0; a<textureCount; a++)
-		{
-			pTextures[a]->Release();
-		}
-
-		materialList.Destroy(materialList.Find(this));
-	}
-}
-
-void Material::Use()
-{
-	CALLSTACK;
-
-	pCurrent = this;
-}
-
-Material* Material::Find(const char *pName)
-{
-	CALLSTACK;
-
-	Material **ppIterator = materialList.Begin();
-
-	while(*ppIterator)
-	{
-		if(!StrCaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
-
-		ppIterator++;
-	}
-
-	return NULL;
-}
-
-void Material::Update()
-{
-	if(materialType & MF_Animating)
-	{
-		curTime += TIMEDELTA;
-
-		while(curTime >= frameTime)
-		{
-			curTime -= frameTime;
-
-			curFrame++;
-			curFrame = curFrame % (uFrames*vFrames);
-
-			textureMatrix.SetZAxis(Vector((1.0f/(float)uFrames) * (float)(curFrame%uFrames), (1.0f/(float)vFrames) * (float)(curFrame/vFrames), 0.0f));
+			pMaterial->textureMatrix.SetZAxis(Vector((1.0f/(float)pMaterial->uFrames) * (float)(pMaterial->curFrame%pMaterial->uFrames), (1.0f/(float)pMaterial->vFrames) * (float)(pMaterial->curFrame/pMaterial->vFrames), 0.0f));
 		}
 	}
 }

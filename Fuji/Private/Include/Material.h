@@ -6,6 +6,25 @@
 #include "IniFile.h"
 #include "Matrix.h"
 
+struct Material;
+
+// material functions
+void Material_InitModule();
+void Material_DeinitModule();
+
+void Material_Update();
+
+// interface functions
+Material*	Material_Create(const char *pName);
+int			Material_Destroy(Material *pMaterial);
+Material*	Material_Find(const char *pName);
+
+Material*	Material_GetCurrent();
+
+void		Material_Use(Material *pMaterial);
+void		Material_UseWhite();
+
+// some enums
 enum RederTypeFlags
 {
 	// Vertex Flags
@@ -49,37 +68,8 @@ enum MaterialFlags
 	MF_CubeEnvMap			= 0x20000000,	// Ec
 };
 
-class Material
+struct Material
 {
-public:
-	// Static Methods
-	static Material* CreateDefault();
-	static Material* Create(const char *pName);
-	static Material* CreateFromRawData(const char *pName, void *pData, uint32 width, uint32 height, uint32 format, uint32 flags = 0, uint32 *pPalette = 0);
-
-	inline static void UseNone() { pNone->Use(); }
-
-	inline static Material* GetCurrent() { return pCurrent; }
-
-	static Material* Find(const char *pName);
-
-	// Methods
-	void Release();
-	void Use();
-
-	void Update();
-
-	char* GetIDString();
-
-//protected:
-	static void CreateMaterialFromDefinition(Material *pMat, const char *pDefinition);
-
-	// Static Members
-	static Material *pCurrent;
-	static Material *pNone;
-
-	static IniFile materialDefinitions;
-
 	// Members
 	Vector4	diffuse;
 	Vector4	ambient;
@@ -119,10 +109,5 @@ public:
 	uint32 cubeMapIndex			: 3; // some what if's
 	uint32 displacementMapIndex	: 3;
 };
-
-void Material_InitModule();
-void Material_DeinitModule();
-
-void Material_Update();
 
 #endif

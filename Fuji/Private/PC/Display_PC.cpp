@@ -213,7 +213,9 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	WNDCLASS wc;
 
-	if(!(d3d9 = Direct3DCreate9(D3D_SDK_VERSION)))
+	d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+
+	if(!d3d9)
 	{
 		MessageBox(NULL,"Unable to Create the D3D Device.","Error!",MB_OK|MB_ICONERROR);
 		return 1;
@@ -239,7 +241,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 	int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
 
-	if(!(apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, display.width + xframe, display.height + yframe, NULL, NULL, apphInstance, NULL)))
+	apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, display.width + xframe, display.height + yframe, NULL, NULL, apphInstance, NULL);
+    if(!apphWnd)
 	{
 		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
 		return 3;
@@ -320,7 +323,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 		}
 		else
 		{
-			if(a=0)
+			if(a == 0)
 			{
 				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
 			}
@@ -477,7 +480,7 @@ void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToARGB(), 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
 void SetViewport(float x, float y, float width, float height)

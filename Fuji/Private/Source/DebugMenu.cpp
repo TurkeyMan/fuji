@@ -248,7 +248,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToARGB(), name);
+	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToPackedColour(), name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -316,7 +316,7 @@ void Menu::Draw()
 
 	debugFont.DrawText(menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
-	Material::Find("SysLogoSmall")->Use();
+	Material_Use(Material_Find("SysLogoSmall"));
 	float logoMargin = 5.0f;
 	float iconSize = 35.0f;
 
@@ -602,7 +602,7 @@ float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 {
 	Vector3 pos = _pos;
 
-	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToARGB()));
+	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToPackedColour()));
 
 	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -640,7 +640,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset <= 0 ? COLOUR_PRESETS-1 : preset-1;
 
-			pData->FromARGB(presets[preset]);
+			pData->FromPackedColour(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);
@@ -649,7 +649,7 @@ void MenuItemColour::ListUpdate(bool selected)
 		{
 			preset = preset >= COLOUR_PRESETS-1 ? 0 : preset+1;
 
-			pData->FromARGB(presets[preset]);
+			pData->FromPackedColour(presets[preset]);
 
 			if(pCallback)
 				pCallback(this, pUserData);

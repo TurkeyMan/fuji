@@ -48,7 +48,7 @@ int File_Open(const char *pFilename, uint32 openFlags)
 	return fileID;
 }
 
-void File_Close(uint32 fileHandle)
+void File_Close(int fileHandle)
 {
 	CALLSTACK;
 
@@ -56,7 +56,7 @@ void File_Close(uint32 fileHandle)
 	gOpenFiles[fileHandle].file = NULL;
 }
 
-int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_Read(void *pBuffer, uint32 bytes, int fileHandle)
 {
 	CALLSTACK;
 
@@ -69,7 +69,7 @@ int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	return bytesRead;
 }
 
-int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_Write(void *pBuffer, uint32 bytes, int fileHandle)
 {
 	CALLSTACK;
 
@@ -82,21 +82,21 @@ int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	return bytesWritten;
 }
 
-int File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_ReadAsync(void *pBuffer, uint32 bytes, int fileHandle)
 {
 	CALLSTACK;
 
 	return 0;
 }
 
-int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_WriteAsync(void *pBuffer, uint32 bytes, int fileHandle)
 {
 	CALLSTACK;
 
 	return 0;
 }
 
-int File_Query(uint32 fileHandle)
+int File_Query(int fileHandle)
 {
 	CALLSTACK;
 
@@ -104,7 +104,7 @@ int File_Query(uint32 fileHandle)
 	return gOpenFiles[fileHandle].state;
 }
 
-int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
+int File_Seek(FileSeek relativity, int32 bytes, int fileHandle)
 {
 	CALLSTACK;
 
@@ -129,7 +129,7 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 	return newPos;
 }
 
-uint32 File_GetSize(uint32 fileHandle)
+uint32 File_GetSize(int fileHandle)
 {
 	CALLSTACK;
 

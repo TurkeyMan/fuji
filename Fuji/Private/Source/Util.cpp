@@ -193,7 +193,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
 #endif
 
-		Texture::UseNone();
+		pd3dDevice->SetTexture(0, NULL);
 
 		MFPrimitive(PT_TriStrip);
 

@@ -16,7 +16,7 @@ void Font_InitModule()
 {
 	CALLSTACK;
 
-	debugFont.LoadFont(File_SystemPath("Font/Arial"));
+	debugFont.LoadFont("Font/Arial");
 }
 
 void Font_DeinitModule()
@@ -26,24 +26,26 @@ void Font_DeinitModule()
 	debugFont.Release();
 }
 
-int Font::LoadFont(const char *filename)
+int Font::LoadFont(const char *pFilename)
 {
 	CALLSTACK;
 
-	uint32 hfile;
+	int hFile;
 	char tempbuffer[1024];
 
 	int a;
-	for(a=strlen(filename); a>0 && filename[a-1] != '\\' && filename[a-1] != '/'; a--) {}
+	for(a=strlen(pFilename); a>0 && pFilename[a-1] != '\\' && pFilename[a-1] != '/'; a--) {}
 
-	pMaterial = Material::Create(&filename[a]);
+	pMaterial = Material_Create(&pFilename[a]);
 
-	strcpy(tempbuffer, filename);
+	strcpy(tempbuffer, pFilename);
 	strcat(tempbuffer, ".dat");
 
-	hfile = File_Open(tempbuffer, OF_Read|OF_Binary);
-	File_Read(charwidths, 256, hfile);
-	File_Close(hfile);
+	hFile = File_Open(File_SystemPath(tempbuffer), OF_Read|OF_Binary);
+	DBGASSERT(hFile >= 0, STR("Unable to open charinfo file for font '%s'", pFilename));
+
+	File_Read(charwidths, 256, hFile);
+	File_Close(hFile);
 
 	return 0;
 }
@@ -52,7 +54,7 @@ void Font::Release()
 {
 	CALLSTACK;
 
-	pMaterial->Release();
+	Material_Destroy(pMaterial);
 }
 
 int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert)
@@ -65,7 +67,7 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 	float x,y,w,h, p, cwidth;
 
-	pMaterial->Use();
+	Material_Use(pMaterial);
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);

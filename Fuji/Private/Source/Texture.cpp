@@ -5,22 +5,34 @@
 #include "Font.h"
 #include "Primitive.h"
 
-PtrList<Texture> gTextureBank;
+// globals
+PtrListDL<Texture> gTextureBank;
 TextureBrowser texBrowser;
 
+char blankBuffer[8*8*4];
+
+Texture *pNoneTexture;
+Texture *pWhiteTexture;
+
+// functions
 void Texture_InitModule()
 {
 	gTextureBank.Init("Texture Bank", gDefaults.texture.maxTextures);
 
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
+
+	// create white texture (used by white material)
+	pNoneTexture = Texture_CreateBlank("_None", Vector(1.0f, 0.0f, 0.5, 1.0f));
+	pWhiteTexture = Texture_CreateBlank("_White", Vector4::one);
 }
 
 void Texture_DeinitModule()
 {
-
+	Texture_Destroy(pNoneTexture);
+	Texture_Destroy(pWhiteTexture);
 }
 
-Texture *FindTexture(const char *pName)
+Texture* Texture_FindTexture(const char *pName)
 {
 	Texture **ppIterator = gTextureBank.Begin();
 
@@ -34,6 +46,17 @@ Texture *FindTexture(const char *pName)
 	return NULL;
 }
 
+Texture* Texture_CreateBlank(const char *pName, const Vector4 &colour)
+{
+	uint32 *pPixels = (uint32*)blankBuffer;
+
+	for(int a=0; a<8*8; a++)
+	{
+		pPixels[a] = colour.ToPackedColour();
+	}
+
+	return Texture_CreateFromRawData(pName, pPixels, 8, 8, TEXF_A8R8G8B8, 0);
+}
 
 // texture browser
 TextureBrowser::TextureBrowser()
@@ -104,7 +127,10 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 		xaspect = ((float)pTexture->width/(float)pTexture->height) * 0.5f;
 	}
 
-	pTexture->SetTexture();
+	pd3dDevice->SetTexture(0, pTexture->pTexture);
+	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
 	MFBegin(4);
 	MFSetColour(0xFFFFFFFF);

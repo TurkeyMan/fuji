@@ -5,9 +5,9 @@
 #include "Sprite.h"
 #include "Primitive.h"
 
-void Sprite::Create(const char *filename, int xFrame, int yFrames, uint32 colourKey)
+void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colourKey)
 {
-	pMaterial = Material::Create(filename);
+	pMaterial = Material_Create(pFilename);
 
 	pivot = Vector(0.0f, 0.0f);
 	position = Vector(0.0f, 0.0f);
@@ -36,7 +36,7 @@ void Sprite::Draw()
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 
-	pMaterial->Use();
+	Material_Use(pMaterial);
 
 	// set texture
 	MFPrimitive(PT_TriStrip);
@@ -60,7 +60,7 @@ void Sprite::Draw()
 
 void Sprite::Release()
 {
-	pMaterial->Release();
+	Material_Destroy(pMaterial);
 }
 
 void Sprite::SetFlag(uint32 flag, bool enable)

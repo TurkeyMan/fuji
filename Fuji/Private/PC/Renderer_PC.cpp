@@ -6,21 +6,24 @@
 
 #include "Renderer_PC.h"
 
-extern Material *pCurrentMaterial;
+extern Material *pSetMaterial;
 extern View *pCurrentView;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
 void Renderer_SetRenderer(uint32 rendererFlags, uint32 flags, uint32 newRenderSource)
 {
-	Material *pMat = Material::GetCurrent();
+	Material *pMat = Material_GetCurrent();
 
-	if(pCurrentMaterial != pMat || (currentRenderFlags&RT_Untextured) != (rendererFlags&RT_Untextured))
+	if(pSetMaterial != pMat || (currentRenderFlags&RT_Untextured) != (rendererFlags&RT_Untextured))
 	{
 		// set some render states
 		if(pMat->pTextures[pMat->diffuseMapIndex] && !(rendererFlags & RT_Untextured))
 		{
-			pMat->pTextures[pMat->diffuseMapIndex]->SetTexture(0);
+			pd3dDevice->SetTexture(0, pMat->pTextures[pMat->diffuseMapIndex]->pTexture);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
 			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
@@ -30,11 +33,11 @@ void Renderer_SetRenderer(uint32 rendererFlags, uint32 flags, uint32 newRenderSo
 		}
 		else
 		{
-			Texture::UseNone(0);
+			pd3dDevice->SetTexture(0, NULL);
 		}
 	}
 
-	if(pCurrentMaterial != pMat)
+	if(pSetMaterial != pMat)
 	{
 		switch(pMat->materialType&MF_BlendMask)
 		{
@@ -61,7 +64,7 @@ void Renderer_SetRenderer(uint32 rendererFlags, uint32 flags, uint32 newRenderSo
 		}
 	}
 
-	pCurrentMaterial = pMat;
+	pSetMaterial = pMat;
 	renderSource = newRenderSource;
 	currentRenderFlags = rendererFlags;
 }

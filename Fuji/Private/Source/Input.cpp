@@ -387,9 +387,27 @@ void Input_SetMouseAcceleration(float multiplier)
 #pragma message("SetMouseAcceleration")
 }
 
-const char* Input_EnumerateString(int source, int sourceID, int type)
+const char* Input_EnumerateString(int source, int sourceID, int type, bool includeDevice)
 {
-	return "Input_EnumerateString() not written...";
+	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
+
+	switch(source)
+	{
+		case IDD_Gamepad:
+			return STR("%s %s", includeDevice ? Input_GetDeviceName(source, sourceID) : "", Input_GetGamepadButtonName(sourceID, type));
+		case IDD_Mouse:
+			if(type < Mouse_MaxAxis)
+			{
+
+			}
+			else
+			{
+				return STR("%s Button %d", includeDevice ? Input_GetDeviceName(source, sourceID) : "", type - Mouse_MaxAxis + 1);
+			}
+			break;
+		case IDD_Keyboard:
+			break;
+	}
 }
 
 void Input_SetDeadZone(float deadZone)

@@ -6,7 +6,7 @@
 #include "Matrix.h"
 
 class Animation;
-class Material;
+struct Material;
 
 enum CustomDataType
 {

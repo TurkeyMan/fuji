@@ -10,6 +10,27 @@
 
 #include "DebugMenu.h"
 
+struct Texture;
+
+// functions
+void Texture_InitModule();
+void Texture_DeinitModule();
+
+// interface functions
+Texture* Texture_Create(const char *pName, bool generateMipChain = true);
+Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
+Texture* Texture_CreateRenderTarget(const char *pName, int width, int height);
+
+int Texture_Destroy(Texture *pTexture);	// returns new reference count..
+
+// platform independant functions
+Texture* Texture_FindTexture(const char *pName);
+Texture* Texture_CreateBlank(const char *pName, const Vector4 &colour);
+
+// this is TEMPORARY! and must die soon!
+void Texture_UseNone();
+
+// some enum's
 enum TextureFormats
 {
 	TEXF_Unknown = 0,
@@ -29,19 +50,9 @@ enum CreateTextureFlags
 	TEX_VerticalMirror = 1
 };
 
-void Texture_InitModule();
-void Texture_DeinitModule();
-
-class Texture
+// texture structure
+struct Texture
 {
-public:
-	// member functions
-	static Texture* LoadTexture(const char *filename, bool generateMipChain = true);
-	void Release();
-	void SetTexture(int texUnit = 0);
-
-	static void UseNone(int texUnit = 0);
-
 	// data members
 	char name[64];
 
@@ -49,10 +60,10 @@ public:
 	int width, height;
 
 #if defined(_XBOX)
-	IDirect3DTexture8 *texture;
+	IDirect3DTexture8 *pTexture;
 	D3DFORMAT format;
 #elif defined(_WINDOWS)
-	IDirect3DTexture9 *texture;
+	IDirect3DTexture9 *pTexture;
 	D3DFORMAT format;
 #elif defined(_LINUX)
 	GLuint textureID;
@@ -61,6 +72,7 @@ public:
 #endif
 };
 
+// a debug menu texture information display object
 class TextureBrowser : public MenuObject
 {
 public:
@@ -75,13 +87,5 @@ public:
 
 	int selection;
 };
-
-Texture *FindTexture(const char *pName);
-
-Texture *Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uint32 format, uint32 flags = 0, uint32 *pPalette = 0);
-Texture *Texture_CreateBlank(const Vector4 &colour, uint32 width, uint32 height, uint32 format);
-
-extern PtrList<Texture> gTextureBank;
-
 
 #endif // _TEXTURE_H

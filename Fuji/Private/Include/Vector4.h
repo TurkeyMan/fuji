@@ -51,8 +51,15 @@ public:
 	inline operator float*()			{ return (float*)this; }
 	inline operator float*() const		{ return (float*)this; }
 
-	inline uint32 ToARGB() const			{ return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
-	inline Vector4& FromARGB(uint32 col)	{ x = (float)((col&0xFF0000)>>16)/255.0f; y = (float)((col&0xFF00)>>8)/255.0f; z = (float)(col&0xFF)/255.0f; w = (float)((col&0xFF000000)>>24)/255.0f; return *this; }
+	// each platform should pack a colour up into its own native 32bit format..
+#if defined(_WINPC) || defined(_XBOX)
+	// 'BGRA' in order of bytes
+	inline uint32 ToPackedColour() const			{ return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
+	inline Vector4& FromPackedColour(uint32 col)	{ x = (float)((col&0xFF0000)>>16) * (1.0f/255.0f); y = (float)((col&0xFF00)>>8) * (1.0f/255.0f); z = (float)(col&0xFF) * (1.0f/255.0f); w = (float)((col&0xFF000000)>>24) * (1.0f/255.0f); return *this; }
+#else
+	inline uint32 ToPackedColour() const			{ return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
+	inline Vector4& FromPackedColour(uint32 col)	{ x = (float)((col&0xFF0000)>>16) * (1.0f/255.0f); y = (float)((col&0xFF00)>>8) * (1.0f/255.0f); z = (float)(col&0xFF) * (1.0f/255.0f); w = (float)((col&0xFF000000)>>24) * (1.0f/255.0f); return *this; }
+#endif
 
 	inline float Dot(const Vector4 &vec) const { return x*vec.x + y*vec.y + z*vec.z + w*vec.w; }
 	inline float MagSquared() const { return x*x + y*y + z*z + w*w; }

@@ -34,7 +34,7 @@ FujiDefaults gDefaults =
 
 	// TextureDefaults
 	{
-		1024			// maxTextures
+		256			// maxTextures
 	},
 
 	// MaterialDefaults
@@ -184,8 +184,8 @@ void System_Draw()
 		if(rate != 1.0f)
 			debugFont.DrawTextf(80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
-		Material::Find("SysLogoSmall")->Use();
-		float iconSize = 64.0f;
+		Material_Use(Material_Find("SysLogoSmall"));
+		const float iconSize = 55.0f;
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
@@ -193,11 +193,11 @@ void System_Draw()
 		MFSetTexCoord1(0,0);
 		MFSetPosition(15, 410, 0);
 		MFSetTexCoord1(1,0);
-		MFSetPosition(70, 410, 0);
+		MFSetPosition(15+iconSize, 410, 0);
 		MFSetTexCoord1(0,1);
-		MFSetPosition(15, 465, 0);
+		MFSetPosition(15, 410+iconSize, 0);
 		MFSetTexCoord1(1,1);
-		MFSetPosition(70, 465, 0);
+		MFSetPosition(15+iconSize, 410+iconSize, 0);
 		MFEnd();
 	}
 
