@@ -44,6 +44,10 @@ public:
 	inline Vector3 operator/(const Vector3 &v) const	{ Vector3 t; t.x = x/v.x;	t.y = y/v.y;	t.z = z/v.z;	return t; }
 
 	inline Vector4& ToVector4()							{ return *(Vector4*)this; }
+	inline Vector4& ToVector4()	const					{ return *(Vector4*)this; }
+
+	inline operator float*()							{ return (float*)this; }
+	inline operator float*() const						{ return (float*)this; }
 
 	inline float Dot(const Vector3 &vec) const { return x*vec.x + y*vec.y + z*vec.z; }
 	inline float MagSquared() const { return x*x + y*y + z*z; }
@@ -61,6 +65,8 @@ public:
 	Vector3& ApplyMatrix(const Matrix &mat);
 	Vector3& ApplyMatrix3x3(const Matrix &mat);
 };
+
+inline Vector3 operator*(float f, Vector3 v) { v.x *= f; v.y *= f; v.z *= f; return v; }
 
 inline Vector3 Vector(float x, float y, float z = 0.0f) { Vector3 t; t.x = x; t.y = y; t.z = z; return t; }
 

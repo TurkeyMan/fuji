@@ -43,7 +43,12 @@ public:
 	inline Vector4 operator/(float f) const				{ Vector4 t; t.x = x/f;		t.y = y/f;		t.z = z/f;		t.w = w/f;		return t; }
 	inline Vector4 operator/(const Vector4 &v) const	{ Vector4 t; t.x = x/v.x;	t.y = y/v.y;	t.z = z/v.z;	t.w = w/v.w;	return t; }
 
-	inline Vector3& ToVector3() { return *(Vector3*)this; }
+	inline Vector3& ToVector3()			{ return *(Vector3*)this; }
+	inline Vector3& ToVector3() const	{ return *(Vector3*)this; }
+
+	inline operator float*()			{ return (float*)this; }
+	inline operator float*() const		{ return (float*)this; }
+
 	inline uint32 ToARGB() { return ((uint32)(w*255.0f)<<24) | ((uint32)(x*255.0f)<<16) | ((uint32)(y*255.0f)<<8) | (uint32)(z*255.0f); }
 	inline Vector4& FromARGB(uint32 col) { x = (float)((col&0xFF0000)>>16)/255.0f; y = (float)((col&0xFF00)>>8)/255.0f; z = (float)(col&0xFF)/255.0f; w = (float)((col&0xFF000000)>>24)/255.0f; return *this; }
 
@@ -58,6 +63,8 @@ public:
 	Vector4& ApplyMatrix(const Matrix &mat);
 	Vector4& ApplyMatrix3x3(const Matrix &mat);
 };
+
+inline Vector4 operator*(float f, Vector4 v) { v.x *= f; v.y *= f; v.z *= f; v.w *= f; return v; }
 
 inline Vector4 Vector(float x, float y, float z, float w) { Vector4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
 inline Vector4 Vector(const Vector3 &v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
