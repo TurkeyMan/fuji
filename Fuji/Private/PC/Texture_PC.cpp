@@ -20,7 +20,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		pTexture->refCount = 0;
 	}
 
-	D3DSURFACE_DESC fontdesc;
+	D3DSURFACE_DESC imageDesc;
 	HRESULT hr;
 
 	if(!pTexture->refCount)
@@ -40,11 +40,11 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 
 		strcpy(pTexture->name, filename);
 
-		pTexture->texture->GetLevelDesc(0, &fontdesc);
+		pTexture->texture->GetLevelDesc(0, &imageDesc);
 
-		pTexture->width = fontdesc.Width;
-		pTexture->height = fontdesc.Height;
-		pTexture->format = fontdesc.Format;
+		pTexture->width = imageDesc.Width;
+		pTexture->height = imageDesc.Height;
+		pTexture->format = imageDesc.Format;
 	}
 
 	pTexture->refCount++;

@@ -56,6 +56,25 @@ float RandomUnit();
 float RandomRange(float min, float max);
 Vector3 RandomVector();
 
+// endian flipping
+#if defined(BIG_ENDIAN)
+#define FlipEndian(x) FLIP_ENDIAN(x)
+#else
+#define FlipEndian(x)
+#endif
+
+template <typename T>
+inline void FLIP_ENDIAN(T *pData)
+{
+	register char t[sizeof(T)];
+	for(int a=0; a<sizeof(T); a++)
+	{
+		t[a] = pData[(sizeof(T)-1)-a];
+	}
+
+	*pData = *(T*)t;
+}
+
 // some useful string parsing functions
 inline bool IsWhite(char c)
 {
