@@ -9,6 +9,23 @@
 #include "Vector3.h"
 #include "Input_PC.h"
 
+#define MAPPING_UP			DIK_UP
+#define MAPPING_DOWN		DIK_DOWN
+#define MAPPING_LEFT		DIK_LEFT
+#define MAPPING_RIGHT		DIK_RIGHT
+#define MAPPING_X			DIK_H
+#define MAPPING_CIRCLE		DIK_J
+#define MAPPING_TRIANGLE	DIK_Y
+#define MAPPING_BOX			DIK_G
+#define MAPPING_START		DIK_SPACE
+#define MAPPING_SELECT		DIK_RALT
+#define MAPPING_L1			DIK_F
+#define MAPPING_L2			DIK_D
+#define MAPPING_R1			DIK_K
+#define MAPPING_R2			DIK_L
+#define MAPPING_L3			DIK_T
+#define MAPPING_R3			DIK_U
+
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
 
 void Input_SetCooperativeLevels();
@@ -261,65 +278,65 @@ float Input_ReadGamepad(int controlID, uint32 type)
 		switch(type)
 		{
 			case Button_P2_Cross:
-				inputValue = Input_ReadKeyboard(DIK_H);
+				inputValue = Input_ReadKeyboard(MAPPING_X);
 				break;
 			case Button_P2_Circle:
-				inputValue = Input_ReadKeyboard(DIK_J);
+				inputValue = Input_ReadKeyboard(MAPPING_CIRCLE);
 				break;
 			case Button_P2_Box:
-				inputValue = Input_ReadKeyboard(DIK_G);
+				inputValue = Input_ReadKeyboard(MAPPING_BOX);
 				break;
 			case Button_P2_Triangle:
-				inputValue = Input_ReadKeyboard(DIK_Y);
+				inputValue = Input_ReadKeyboard(MAPPING_TRIANGLE);
 				break;
 			case Button_P2_R1:
-				inputValue = Input_ReadKeyboard(DIK_K);
+				inputValue = Input_ReadKeyboard(MAPPING_R1);
 				break;
 			case Button_P2_L1:
-				inputValue = Input_ReadKeyboard(DIK_F);
+				inputValue = Input_ReadKeyboard(MAPPING_L1);
 				break;
 			case Button_P2_L2:
-				inputValue = Input_ReadKeyboard(DIK_D);
+				inputValue = Input_ReadKeyboard(MAPPING_L2);
 				break;
 			case Button_P2_R2:
-				inputValue = Input_ReadKeyboard(DIK_L);
+				inputValue = Input_ReadKeyboard(MAPPING_R2);
 				break;
 			case Button_P2_Start:
-				inputValue = Input_ReadKeyboard(DIK_SPACE);
+				inputValue = Input_ReadKeyboard(MAPPING_START);
 				break;
 			case Button_P2_Select:
-				inputValue = Input_ReadKeyboard(DIK_RALT);
+				inputValue = Input_ReadKeyboard(MAPPING_SELECT);
 				break;
 			case Button_P2_LThumb:
-				inputValue = Input_ReadKeyboard(DIK_T);
+				inputValue = Input_ReadKeyboard(MAPPING_L3);
 				break;
 			case Button_P2_RThumb:
-				inputValue = Input_ReadKeyboard(DIK_U);
+				inputValue = Input_ReadKeyboard(MAPPING_R3);
 				break;
 			case Button_DUp:
-				inputValue = Input_ReadKeyboard(DIK_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_ReadKeyboard(MAPPING_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DDown:
-				inputValue = Input_ReadKeyboard(DIK_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_ReadKeyboard(MAPPING_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DLeft:
-				inputValue = Input_ReadKeyboard(DIK_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_ReadKeyboard(MAPPING_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DRight:
-				inputValue = Input_ReadKeyboard(DIK_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_ReadKeyboard(MAPPING_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 
 			case Axis_LX:
 				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
-					(Input_ReadKeyboard(DIK_LEFT) ? -1.0f : 0.0f) +
-					(Input_ReadKeyboard(DIK_RIGHT) ? 1.0f : 0.0f)
+					(Input_ReadKeyboard(MAPPING_LEFT) ? -1.0f : 0.0f) +
+					(Input_ReadKeyboard(MAPPING_RIGHT) ? 1.0f : 0.0f)
 					: 0.0f;
 				break;
 
 			case Axis_LY:
 				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
-					(Input_ReadKeyboard(DIK_DOWN) ? -1.0f : 0.0f) +
-					(Input_ReadKeyboard(DIK_UP) ? 1.0f : 0.0f)
+					(Input_ReadKeyboard(MAPPING_DOWN) ? -1.0f : 0.0f) +
+					(Input_ReadKeyboard(MAPPING_UP) ? 1.0f : 0.0f)
 					: 0.0f;
 				break;
 
@@ -399,52 +416,52 @@ bool Input_WasPressed(int controlID, uint32 type)
 		switch(type)
 		{
 			case Button_P2_Cross:
-				inputValue = Input_WasKeyPressed(DIK_H);
+				inputValue = Input_WasKeyPressed(MAPPING_X);
 				break;
 			case Button_P2_Circle:
-				inputValue = Input_WasKeyPressed(DIK_J);
+				inputValue = Input_WasKeyPressed(MAPPING_CIRCLE);
 				break;
 			case Button_P2_Box:
-				inputValue = Input_WasKeyPressed(DIK_G);
+				inputValue = Input_WasKeyPressed(MAPPING_BOX);
 				break;
 			case Button_P2_Triangle:
-				inputValue = Input_WasKeyPressed(DIK_Y);
+				inputValue = Input_WasKeyPressed(MAPPING_TRIANGLE);
 				break;
 			case Button_P2_R1:
-				inputValue = Input_WasKeyPressed(DIK_K);
+				inputValue = Input_WasKeyPressed(MAPPING_R1);
 				break;
 			case Button_P2_L1:
-				inputValue = Input_WasKeyPressed(DIK_F);
+				inputValue = Input_WasKeyPressed(MAPPING_L1);
 				break;
 			case Button_P2_L2:
-				inputValue = Input_WasKeyPressed(DIK_D);
+				inputValue = Input_WasKeyPressed(MAPPING_L2);
 				break;
 			case Button_P2_R2:
-				inputValue = Input_WasKeyPressed(DIK_L);
+				inputValue = Input_WasKeyPressed(MAPPING_R2);
 				break;
 			case Button_P2_Start:
-				inputValue = Input_WasKeyPressed(DIK_SPACE);
+				inputValue = Input_WasKeyPressed(MAPPING_START);
 				break;
 			case Button_P2_Select:
-				inputValue = Input_WasKeyPressed(DIK_RALT);
+				inputValue = Input_WasKeyPressed(MAPPING_SELECT);
 				break;
 			case Button_P2_LThumb:
-				inputValue = Input_WasKeyPressed(DIK_T);
+				inputValue = Input_WasKeyPressed(MAPPING_L3);
 				break;
 			case Button_P2_RThumb:
-				inputValue = Input_WasKeyPressed(DIK_U);
+				inputValue = Input_WasKeyPressed(MAPPING_R3);
 				break;
 			case Button_DUp:
-				inputValue = Input_WasKeyPressed(DIK_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_WasKeyPressed(MAPPING_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DDown:
-				inputValue = Input_WasKeyPressed(DIK_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_WasKeyPressed(MAPPING_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DLeft:
-				inputValue = Input_WasKeyPressed(DIK_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_WasKeyPressed(MAPPING_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 			case Button_DRight:
-				inputValue = Input_WasKeyPressed(DIK_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
+				inputValue = Input_WasKeyPressed(MAPPING_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
 				break;
 		}
 	}
