@@ -12,8 +12,8 @@ import os
 import string
 import re
 
-CC = None
-CXX = None
+CC = 'gcc'
+CXX = 'g++'
 BASENAME = 'Fuji'
 CPPPATH = ['Include'] # Include files
 SOURCEDIRS = ['Source']
