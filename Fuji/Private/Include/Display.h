@@ -1,6 +1,13 @@
 #if !defined(_DISPLAY_H)
 #define _DISPLAY_H
 
+#if defined(_LINUX)
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glu.h>
+#endif
+
 #define WIDE_ASPECT 1.7777777777777777777777777777778f
 #define STANDARD_ASPECT 1.3333333333333333333333333333333f
 

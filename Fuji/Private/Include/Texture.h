@@ -1,6 +1,13 @@
 #if !defined(_TEXTURE_H)
 #define _TEXTURE_H
 
+#if defined(_LINUX)
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <GL/glu.h>
+#endif
+
 #include "DebugMenu.h"
 
 void Texture_InitModule();

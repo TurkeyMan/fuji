@@ -2,73 +2,75 @@
 #include "System.h"
 #include "Input.h"
 
+#include <sys/time.h>
+#include <X11/Xlib.h>
+
+extern Display *xdisplay;
+extern Window window;
+extern Atom wm_delete_window;
+
 extern int gQuit;
 
 int main(int argc, char **argv)
 {
-	// Might as well do this now instead of initialising each component individually in the modules
-	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK) == -1) {
-		fprintf(stderr, "Unable to initialise SDL\n");
-		exit(1);
-	}
-
 	System_GameLoop();
-
-	SDL_Quit();
 }
 
-
-// Spy uses these, but I guess it should really be using the timer class. So this is temporary.
 
 uint64 RDTSC()
 {
 	CALLSTACK;
-	
-	static Uint32 lastTime = 0;
-	static uint64 bigCounter = 0;
-	Uint32 thisTime;
 
-	thisTime = SDL_GetTicks();
+	static bool firstcall=1;
+	static struct timeval last;
+	struct timeval current;
 
-
-	Uint32 difference;
-
-	if(thisTime < lastTime) {
-		difference = (0xFFFFFFFF - lastTime) + (thisTime + 1);
+	if(firstcall) {
+		gettimeofday(&last, NULL);
+		firstcall = 0;
+		return(0);
 	} else {
-		difference = thisTime - lastTime;
-	}
-
-	lastTime = thisTime;
-	bigCounter += difference;
+		struct timeval diff;
 	
-	return(bigCounter);
+		gettimeofday(&current, NULL);
+		diff.tv_sec = current.tv_sec - last.tv_sec;
+		diff.tv_usec = current.tv_usec - last.tv_usec;
+	
+		return(((uint64)diff.tv_sec) * 1000000 + ((uint64)diff.tv_usec));
+	}
 }
 
 uint64 GetTSCFrequency()
 {
 	CALLSTACK;
 	
-	return(1000);
+	return(1000000);
 }
 
 void CheckEvents()
 {
 	CALLSTACK;
+
+	XEvent event;
 	
-	SDL_Event event;
-	
-	while(SDL_PollEvent(&event)) {
+	while(XPending(xdisplay)) {
+		XNextEvent(xdisplay, &event);
 		switch(event.type) {
-			case SDL_KEYDOWN:
-				//Input_KeyDown(event.key);
-				break;
-			case SDL_KEYUP:
-				//Input_KeyUp(event.key);
-				break;
-			
-			case SDL_QUIT:
-				gQuit = true;
+			case ClientMessage:
+				Atom atom;
+				
+				if(event.xclient.format == 8) {
+					atom = event.xclient.data.b[0];
+				} else if(event.xclient.format == 16) {
+					atom = event.xclient.data.s[0];
+				} else if(event.xclient.format == 32) {
+					atom = event.xclient.data.l[0];
+				}
+				
+				if(atom == wm_delete_window) {
+					gQuit = 1;
+				}
+
 				break;
 		}
 	}

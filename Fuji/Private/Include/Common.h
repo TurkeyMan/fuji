@@ -1,11 +1,19 @@
 #if !defined(_COMMON_H)
 #define _COMMON_H
 
+// Compiler definitions
+#if defined(__GNUC__)
+#include <new>
+#define __cdecl __attribute__((__cdecl__))
+#define _cdecl __attribute__((__cdecl__))
+#endif
+
 #if defined(_XBOX)
 	#define DEBUG_KEYBOARD
 	#include <xtl.h>
 #endif
 
+// Standard platform includes
 #if defined(_WINDOWS)
 	#include <Windows.h>
 	#include <d3d9.h>
@@ -13,12 +21,9 @@
 #endif
 
 #if defined(_LINUX)
-	#define GL_GLEXT_PROTOTYPES
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-	#include <GL/glu.h>
-	#include <SDL/SDL.h>
 	#include <stdarg.h> // For varargs
+	#include <stdlib.h> // For realloc, malloc
+	#include <string.h> // For strcpy
 #endif
 
 #if defined(_DC)
@@ -115,7 +120,7 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #endif
 
 // define a placement new if one dosent already exist..
-#if !defined(__PLACEMENT_NEW_INLINE)
+#if !defined(__PLACEMENT_NEW_INLINE) && !defined(__GNUC__)
 #define __PLACEMENT_NEW_INLINE
 inline void *__cdecl operator new(size_t, void *_Where)
 {	// construct array with placement at _Where
