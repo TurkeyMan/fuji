@@ -13,6 +13,7 @@
 #endif
 
 #if defined(_LINUX)
+	#include <SDL/SDL.h>
 	#include <GL/gl.h>
 	#include <GL/glu.h>
 	#include <stdarg.h> // For varargs

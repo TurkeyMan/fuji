@@ -136,35 +136,39 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
-/*	
-	float cos_yaw, cos_pitch, cos_roll;
+#if defined(_LINUX) /* Not sure if this works yet */
+	float sin_yaw, cos_yaw, sin_pitch, cos_pitch, sin_roll, cos_roll;
 
+	sin_yaw = sinf(yaw);
 	cos_yaw = cosf(yaw);
+	sin_pitch = sinf(pitch);
 	cos_pitch = cosf(pitch);
+	sin_roll = sinf(roll);
 	cos_roll = cosf(roll);
-	
-	m[0][0] = cos_yaw * cos_pitch;
-	m[0][1] = 0;
-	m[0][2] = 0;
+
+	m[0][0] = cos_roll * cos_yaw - sin_pitch * sin_roll * sin_yaw;
+	m[0][1] = -cos_pitch * sin_roll;
+	m[0][2] = -cos_yaw * sin_pitch * sin_roll + cos_roll * sin_yaw;
 	m[0][3] = 0;
-	
-	m[1][0] = 0;
-	m[1][1] = cos_yaw * cos_roll;
-	m[1][2] = 0;
+
+	m[1][0] = cos_yaw * sin_roll + cos_roll * sin_pitch * sin_yaw;
+	m[1][1] = cos_pitch * cos_roll;
+	m[1][2] = -cos_roll * cos_yaw * sin_pitch + sin_roll + sin_yaw;
 	m[1][3] = 0;
 
-	m[2][0] = 0;
-	m[2][1] = 0;
-	m[2][2] = cos_pitch * cos_roll;
+	m[2][0] = -cos_pitch * sin_yaw;
+	m[2][1] = sin_pitch;
+	m[2][2] = cos_pitch * cos_yaw;
 	m[2][3] = 0;
-	
-	m[3][0] = 0;
-	m[3][1] = 0;
-	m[3][2] = 0;
+
+	m[3][0] = m[3][1] = m[3][2] = 0;
 	m[3][3] = 1;
-*/	
+#else
+
 	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
 //	DBGASSERT(false, "Not Written...");
+#endif	
+	
 	return *this;
 }
 

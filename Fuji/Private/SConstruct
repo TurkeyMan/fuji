@@ -15,7 +15,7 @@ LIBS = ''
 CPPPATH = ['Include'] # Include files
 LIBPATH = [] # Link libraries
 SOURCEDIRS = ['Source']
-MASKEDFILES = ['Source/Model.cpp', 'Source/Texture.cpp', 'Source/DebugMenu.cpp', 'Source/Shape.cpp']
+MASKEDFILES = []
 BINDIR = 'Bin'
 CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe -mcpu=' + PROCESSOR
 CC = 'g++'
@@ -29,7 +29,7 @@ if(platform == 'linux'): # It should be possible to use scons on Windows too
 	SOURCEDIRS.append('Linux')
 	CPPPATH.append('/usr/X11R6/include')
 	LIBPATH.append('/usr/X11R6/lib')
-	LIBS = ['GL','X11']
+	LIBS = ['SDL' 'GL']
 	CCFLAGS += ' -D_LINUX'
 else:
 	sys.stderr.write('Platform unsupported (use OS=linux) [%s]\n' % (platform,))
@@ -76,4 +76,4 @@ env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, LIBPATH = LIBPATH, LIBS 
 
 env.SourceSignatures('timestamp')
 
-env.Program(target=BASENAME, source=sources)
+env.StaticLibrary(target=BASENAME, source=sources)

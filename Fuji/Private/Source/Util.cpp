@@ -242,7 +242,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 //
 int dprintf(const char *format, ...)
 {
-	char *buffer[2048];
+	char buffer[2048];
 	va_list arglist;
 	int nRes = 0;
 

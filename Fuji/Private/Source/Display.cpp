@@ -18,7 +18,7 @@ void Display_InitModule()
 	if(error) return;
 
 	View::defaultView.view.SetIdentity();
-	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
+	View::defaultView.SetProjection((PI*2.0f)*0.16666f);
 	View::defaultView.viewProj = View::defaultView.projection;
 	View::defaultView.viewProjDirty = false;
 	View::defaultView.isOrtho = false;
