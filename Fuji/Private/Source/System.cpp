@@ -41,9 +41,7 @@ FujiDefaults gDefaults =
 	}
 };
 
-
-Timer gSystemTimer;
-
+bool gDrawSystemInfo = true;
 int gQuit = 0;
 int gRestart = 1;
 uint32 gFrameCount = 0;
@@ -73,7 +71,7 @@ void System_Init()
 	Callstack_InitModule();
 
 	Timer_InitModule();
-	gSystemTimer.Init();
+	gSystemTimer.Init(NULL);
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
 	FileSystem_InitModule();
@@ -122,10 +120,13 @@ void System_Update()
 #if defined(_XBOX)
 	if(Input_ReadGamepad(0, Button_XB_Start) && Input_ReadGamepad(0, Button_XB_White) && Input_ReadGamepad(0, Button_XB_LTrig) && Input_ReadGamepad(0, Button_XB_RTrig))
 		RestartCallback(NULL, NULL);
-#elif defined(_WINDOWS)
+#else//if defined(_WINDOWS)
 	if(Input_ReadGamepad(0, Button_P2_Start) && Input_ReadGamepad(0, Button_P2_Select) && Input_ReadGamepad(0, Button_P2_L1) && Input_ReadGamepad(0, Button_P2_R1) && Input_ReadGamepad(0, Button_P2_L2) && Input_ReadGamepad(0, Button_P2_R2))
 		RestartCallback(NULL, NULL);
 #endif
+
+	if(Input_ReadGamepad(0, Button_P2_L1) && Input_ReadGamepad(0, Button_P2_L2) && Input_WasPressed(0, Button_P2_LThumb))
+		gDrawSystemInfo = !gDrawSystemInfo;
 
 #if !defined(_RETAIL)
 	DebugMenu_Update();
@@ -148,11 +149,14 @@ void System_Draw()
 
 	Callstack_DrawProfile();
 
-	//FPS Display
-	debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
-	float rate = (float)gSystemTimer.GetRate();
-	if(rate != 1.0f)
-		debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+	if(gDrawSystemInfo)
+	{
+		//FPS Display
+		debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
+		float rate = (float)gSystemTimer.GetRate();
+		if(rate != 1.0f)
+			debugFont.DrawTextf(50.0f, 420.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+	}
 
 	DebugMenu_Draw();
 

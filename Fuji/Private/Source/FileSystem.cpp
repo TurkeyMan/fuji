@@ -38,7 +38,7 @@ char* File_SystemPath(const char *filename)
 #if defined(_XBOX)
 	return STR("D:\\Data\\%s", filename);
 #elif defined(_WINDOWS)
-	return STR("Data\\%s", filename);
+	return STR("Data/%s", filename);
 #elif defined(_LINUX)
 	return STR("Data/%s", filename);
 #else
@@ -51,22 +51,32 @@ char* File_HomePath(const char *filename)
 #if defined(_XBOX)
 	return STR("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
-	return STR("Home\\%s", filename);
+	return STR("Home/%s", filename);
 #else
 	return STR("%s", filename);
 #endif
 }
 
-char* File_Load(const char *pFilename)
+char* File_Load(const char *pFilename, uint32 *pBytesRead)
 {
-	uint32 filesize = File_GetSize(pFilename);
-	if(!filesize) return NULL;
+	if(pBytesRead) *pBytesRead = 0;
+
+	uint32 handle = File_Open(pFilename);
+	if(handle < 0) return NULL;
+
+	uint32 filesize = File_GetSize(handle);
+	if(filesize == 0)
+	{
+		File_Close(handle);
+		return NULL;
+	}
 
 	char *pBuffer = (char*)Heap_Alloc(filesize);
 
-	uint32 handle = File_Open(pFilename);
 	File_Read(pBuffer, filesize, handle);
 	File_Close(handle);
+
+	if(pBytesRead) *pBytesRead = filesize;
 
 	return pBuffer;
 }

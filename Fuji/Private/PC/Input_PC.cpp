@@ -183,29 +183,29 @@ float Input_ReadGamepad(int controlID, uint32 type)
 
 	switch(type)
 	{
-		case Button_XB_A:
+		case Button_P2_Cross:
 			return (gJoyState[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_B:
+		case Button_P2_Circle:
 			return (gJoyState[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_X:
+		case Button_P2_Box:
 			return (gJoyState[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_Y:
+		case Button_P2_Triangle:
 			return (gJoyState[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_Black:
+		case Button_P2_R1:
 			return (gJoyState[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_White:
+		case Button_P2_L1:
 			return (gJoyState[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_LTrig:
+		case Button_P2_L2:
 			return (gJoyState[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_RTrig:
+		case Button_P2_R2:
 			return (gJoyState[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_Start:
+		case Button_P2_Start:
 			return (gJoyState[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_Back:
+		case Button_P2_Select:
 			return (gJoyState[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_LThumb:
+		case Button_P2_LThumb:
 			return (gJoyState[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
-		case Button_XB_RThumb:
+		case Button_P2_RThumb:
 			return (gJoyState[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
 		case Button_DUp:
 			return (gJoyState[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
@@ -247,29 +247,29 @@ bool Input_WasPressed(int controlID, uint32 type)
 
 	switch(type)
 	{
-		case Button_XB_A:
+		case Button_P2_Cross:
 			return gJoyState[controlID].rgbButtons[2]&0x80 && !(gPrevJoyState[controlID].rgbButtons[2]&0x80);
-		case Button_XB_B:
+		case Button_P2_Circle:
 			return gJoyState[controlID].rgbButtons[1]&0x80 && !(gPrevJoyState[controlID].rgbButtons[1]&0x80);
-		case Button_XB_X:
+		case Button_P2_Box:
 			return gJoyState[controlID].rgbButtons[3]&0x80 && !(gPrevJoyState[controlID].rgbButtons[3]&0x80);
-		case Button_XB_Y:
+		case Button_P2_Triangle:
 			return gJoyState[controlID].rgbButtons[0]&0x80 && !(gPrevJoyState[controlID].rgbButtons[0]&0x80);
-		case Button_XB_Black:
+		case Button_P2_R1:
 			return gJoyState[controlID].rgbButtons[7]&0x80 && !(gPrevJoyState[controlID].rgbButtons[7]&0x80);
-		case Button_XB_White:
+		case Button_P2_L1:
 			return gJoyState[controlID].rgbButtons[6]&0x80 && !(gPrevJoyState[controlID].rgbButtons[6]&0x80);
-		case Button_XB_LTrig:
+		case Button_P2_L2:
 			return gJoyState[controlID].rgbButtons[4]&0x80 && !(gPrevJoyState[controlID].rgbButtons[4]&0x80);
-		case Button_XB_RTrig:
+		case Button_P2_R2:
 			return gJoyState[controlID].rgbButtons[5]&0x80 && !(gPrevJoyState[controlID].rgbButtons[5]&0x80);
-		case Button_XB_Start:
+		case Button_P2_Start:
 			return gJoyState[controlID].rgbButtons[9]&0x80 && !(gPrevJoyState[controlID].rgbButtons[9]&0x80);
-		case Button_XB_Back:
+		case Button_P2_Select:
 			return gJoyState[controlID].rgbButtons[8]&0x80 && !(gPrevJoyState[controlID].rgbButtons[8]&0x80);
-		case Button_XB_LThumb:
+		case Button_P2_LThumb:
 			return gJoyState[controlID].rgbButtons[10]&0x80 && !(gPrevJoyState[controlID].rgbButtons[10]&0x80);
-		case Button_XB_RThumb:
+		case Button_P2_RThumb:
 			return gJoyState[controlID].rgbButtons[11]&0x80 && !(gPrevJoyState[controlID].rgbButtons[11]&0x80);
 		case Button_DUp:
 			return gJoyState[controlID].rgbButtons[12]&0x80 && !(gPrevJoyState[controlID].rgbButtons[12]&0x80);

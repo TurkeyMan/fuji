@@ -8,10 +8,13 @@
 void Timer_InitModule();
 void Timer_DeinitModule(); 
 
+class Timer;
+extern Timer gSystemTimer;
+
 class Timer
 {
 public:
-	void Init();
+	void Init(Timer *pRefTimer = &gSystemTimer);
 
 	void Update();
 	void Reset();
@@ -45,6 +48,7 @@ protected:
 	double history[AVERAGE_SAMPLES];
 	static int avgSamples;
 
+	Timer *pReferenceTimer;
 
 	uint32 flags;
 

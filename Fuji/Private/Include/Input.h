@@ -29,8 +29,8 @@ enum InputType
 
 	Button_P2_L1		= 4,
 	Button_P2_R1		= 5,
-	Button_P2_R2		= 6,
-	Button_P2_L2		= 7,
+	Button_P2_L2		= 6,
+	Button_P2_R2		= 7,
 
 	Button_P2_Start		= 8,
 	Button_P2_Select	= 9,

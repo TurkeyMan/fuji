@@ -701,6 +701,9 @@
 				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
+				RelativePath=".\Include\Sound.h">
+			</File>
+			<File
 				RelativePath=".\Include\Sprite.h">
 			</File>
 			<File
@@ -720,6 +723,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Vector4.h">
+			</File>
+			<File
+				RelativePath=".\Include\Video.h">
 			</File>
 			<File
 				RelativePath=".\Include\View.h">

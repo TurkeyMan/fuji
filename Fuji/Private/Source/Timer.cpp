@@ -13,6 +13,8 @@ int Timer::avgSamples = AVERAGE_SAMPLES;
 
 MenuItemFloat playRate(1.0f, 1.0f, 0.0f, 100.0f);
 
+Timer gSystemTimer;
+
 /**** Functions ****/
 
 void UpdateRate(MenuObject *pObject, void *pData)
@@ -30,7 +32,7 @@ void Timer_DeinitModule()
 
 }
 
-void Timer::Init()
+void Timer::Init(Timer *pRefTimer)
 {
 	accumulator=0;
 	lastUpdate=0;
@@ -49,6 +51,8 @@ void Timer::Init()
 	rate=1.0f;
 
 	fixed=false;
+
+	pReferenceTimer = pRefTimer;
 }
 
 
@@ -65,19 +69,19 @@ void Timer::Update()
 	{
 		if(fixed)
 		{
-			lastCall=thisCall;
+			lastCall = thisCall;
 			thisCall = RDTSC();
 
-			lastUpdate=accumulator;
-			accumulator+=freq/fixedFPS;
+			lastUpdate = accumulator;
+			accumulator += freq/fixedFPS;
 		}
 		else
 		{
-			lastCall=thisCall;
+			lastCall = thisCall;
 			thisCall = RDTSC();
 
-			lastUpdate=accumulator;
-			accumulator+=(uint64)((thisCall-lastCall)*rate);
+			lastUpdate = accumulator;
+			accumulator += (uint64)((thisCall-lastCall)*rate);
 		}
 
 		deltaD=(double)(accumulator-lastUpdate)/freq;
