@@ -149,7 +149,7 @@ float RandomUnit()
 	return (float)rand() / RAND_MAX;
 }
 
-float RandomRange(float min , float max)
+float RandomRange(float min, float max)
 {
 	return ((float)rand()/RAND_MAX)*(max-min) + min;
 }
