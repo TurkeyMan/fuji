@@ -68,10 +68,12 @@ void Heap_Free(void *pMem);
 
 #if defined(_DEBUG)
 #define Heap_New(T) Managed_New(new T, __FILE__, __LINE__)
-void* Managed_New(void *pT, char *pFile, uint32 line);
+template<class T>
+T* Managed_New(T *pT, char *pFile, uint32 line);
 #else
 #define Heap_New(T) Managed_New(new T)
-void* Unmanaged_New(void *pT);
+template<class T>
+T* Unmanaged_New(T *pT);
 #endif
 template<class T>
 void Heap_Delete(T *pObject);

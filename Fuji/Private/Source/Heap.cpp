@@ -126,15 +126,18 @@ void Heap_Free(void *pMem)
 }
 
 #if defined(_DEBUG)
-void* Managed_New(void *pT, char *pFile, uint32 line)
-#else
-void* Unmanaged_New(void *pT)
-#endif
+template<class T>
+T* Managed_New(T *pT, char *pFile, uint32 line)
 {
+#else
+template<class T>
+T* Unmanaged_New(T *pT)
+{
+#endif
 #if defined(_DEBUG)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pMem;
-	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = bytes;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pT;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = sizeof(T);
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pFilename = pFile;
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
 	pCurrentHeap->allocCount++;

@@ -128,7 +128,8 @@ void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, 
 	DBGASSERT(strlen(name) < 64, "Max of 64 characters in Menu Name.");
 	DBGASSERT(pParent->numChildren < MENU_MAX_CHILDREN, STR("Maximum number of items in menu: '&s'", pParent->name)); 
 
-	Menu *pMenu = Heap_New(Menu);
+//	Menu *pMenu = Heap_New(Menu);
+	Menu *pMenu = new Menu;
 
 	strcpy(pMenu->name, name);
 	pMenu->type = MenuType_Menu;
