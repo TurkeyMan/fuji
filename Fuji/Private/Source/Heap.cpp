@@ -13,7 +13,7 @@ void Heap_InitModule()
 	memset(heapList, 0, sizeof(Heap) * MAX_HEAP_COUNT);
 	memset(resourceList, 0, sizeof(Resource) * MAX_RESOURCES);
 
-	Heap *pHeap = CreateHeap(8*1024*1024, "GlobalHeap");
+	Heap *pHeap = CreateHeap(gDefaults.heap.staticHeapSize, "GlobalHeap");
 	pCurrentHeap = pHeap;
 }
 

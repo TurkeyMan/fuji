@@ -46,7 +46,7 @@ void File_Close(uint32 fileHandle)
 	openFiles[fileHandle].file = NULL;
 }
 
-uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	uint32 bytesRead;
 
@@ -57,7 +57,7 @@ uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	return bytesRead;
 }
 
-uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	uint32 bytesWritten;
 
@@ -68,25 +68,25 @@ uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 	return bytesWritten;
 }
 
-uint32 File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 
 	return 0;
 }
 
-uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
+int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 
 	return 0;
 }
 
-uint32 File_Query(uint32 fileHandle)
+int File_Query(uint32 fileHandle)
 {
 	if(!openFiles[fileHandle].file) return FS_Unavailable;
 	return openFiles[fileHandle].state;
 }
 
-int32 File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
+int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
 	if(!openFiles[fileHandle].file) return -1;
 

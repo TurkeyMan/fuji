@@ -70,15 +70,15 @@ void File_Close(uint32 fileHandle);
 
 char* File_Load(const char *pFilename);
 
-uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);
-uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
-uint32 File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
-uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
+int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
-uint32 File_Query(uint32 fileHandle);
+int File_Query(uint32 fileHandle);
 
-int32 File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle);
+int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle);
 
 uint32 File_GetSize(uint32 fileHandle);
 uint32 File_GetSize(const char *pFilename);
