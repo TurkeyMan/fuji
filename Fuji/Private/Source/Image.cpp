@@ -185,7 +185,7 @@ Image * LoadTGA(const char *filename, bool flipped)
 		uint32 pixelsRead = 0;
 
 		while(pixelsRead < (uint32)(header->width * header->height)) {
-			if((uint32)position >= bytesRead) {
+			if(position >= contents + bytesRead) {
 				LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 				delete image;
 				Heap_TFree(contents);
@@ -193,7 +193,7 @@ Image * LoadTGA(const char *filename, bool flipped)
 			}
 			
 			if(*position & 0x80) { // Run length packet
-				uint8 length = *position & 0x7F;
+				uint8 length = ((*position) & 0x7F) + 1;
 				
 				position += 1;
 
@@ -213,18 +213,20 @@ Image * LoadTGA(const char *filename, bool flipped)
 
 				unsigned char pixel[4];
 				for(uint8 i = 0; i < image->bytesPerPixel; i++) {
-					pixel[i] = *(position++);
+					pixel[i] = position[i];
 				}
 				
 				for(uint8 i = 0; i < length; i++) {
 					for(uint8 j = 0; j < image->bytesPerPixel; j++) {
-						((unsigned char *)image->pixels)[pixelsRead + j] = pixel[j];
+						((unsigned char *)image->pixels)[(pixelsRead * image->bytesPerPixel) + j] = pixel[j];
 					}
 				
 					++pixelsRead;
 				}
+
+				position += image->bytesPerPixel;
 			} else { // Raw packet
-				uint8 length = *position & 0x7F;
+				uint8 length = ((*position) & 0x7F) + 1;
 
 				position += 1;
 
@@ -242,7 +244,7 @@ Image * LoadTGA(const char *filename, bool flipped)
 					return(NULL);
 				}
 			
-				memcpy(&(((unsigned char *)image->pixels)[pixelsRead]), position, length * image->bytesPerPixel);
+				memcpy(&(((unsigned char *)image->pixels)[pixelsRead * image->bytesPerPixel]), position, length * image->bytesPerPixel);
 				pixelsRead += length;
 				position += image->bytesPerPixel * length;
 			}
