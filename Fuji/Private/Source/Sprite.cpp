@@ -7,6 +7,11 @@
 void Sprite::Create(char *filename, int xFrame, int yFrames, uint32 colourKey)
 {
 	pTexture = Texture::LoadTexture(filename);
+
+	pivot = Vector(0.0f, 0.0f);
+	position = Vector(0.0f, 0.0f);
+	scale = Vector((float)pTexture->width, (float)pTexture->height);
+	angle = 0.0f;
 }
 
 LitVertex triangle[6];
