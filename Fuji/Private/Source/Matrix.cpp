@@ -145,7 +145,7 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
-#if defined(_LINUX) || defined(_DC) /* Not sure if this works yet */
+//#if defined(_LINUX) || defined(_DC) /* Not sure if this works yet */
 	float sin_yaw, cos_yaw, sin_pitch, cos_pitch, sin_roll, cos_roll;
 
 	sin_yaw = MFSin(yaw);
@@ -172,12 +172,12 @@ Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 
 	m[3][0] = m[3][1] = m[3][2] = 0;
 	m[3][3] = 1;
-#else
+//#else
 
-	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
+//	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
 //	DBGASSERT(false, "Not Written...");
-#endif	
-	
+//#endif	
+
 	return *this;
 }
 

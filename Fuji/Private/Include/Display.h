@@ -81,6 +81,7 @@ public:
 #endif
 
 // vertex formats.. to be removed later
+#if !defined(_FUJI_UTIL)
 #if defined(_XBOX) || defined(_WINDOWS)
 
 class Vec3
@@ -180,6 +181,7 @@ struct FileVertex
 };
 
 #endif // #if defined(_LINUX)
+#endif // #!define(_FUJI_UTIL)
 
 #endif // _DISPLAY_H
 
