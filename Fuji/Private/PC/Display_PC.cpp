@@ -2,7 +2,6 @@
 #include "Display.h"
 #include "DebugMenu.h"
 #include "Input_PC.h"
-#include "View.h"
 
 void Display_ResetDisplay();
 
@@ -94,31 +93,6 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	{
 		Display_ResetDisplay();
 	}
-}
-
-void Display_InitModule()
-{
-	CALLSTACK;
-
-	int error;
-
-	// create the display
-	error = Display_CreateDisplay(640, 480, 32, 60, true, false, false, false);
-	if(error) return;
-
-	DebugMenu_AddMenu("Display Options", "Fuji Options");
-	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
-
-	View::defaultView.view.SetIdentity();
-	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
-	View::UseDefault();
-}
-
-void Display_DeinitModule()
-{
-	CALLSTACK;
-
-	Display_DestroyDisplay();
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -371,6 +345,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	if(hr != D3D_OK) return 2;
 */
 	initialised = true;
+
+	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 
 	return 0;
 }

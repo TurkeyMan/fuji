@@ -25,6 +25,12 @@ enum VertexFormat
 	VF_TexMask	= (15<<12)
 };
 
+class Subobject
+{
+public:
+
+};
+
 class ModelData
 {
 public:
