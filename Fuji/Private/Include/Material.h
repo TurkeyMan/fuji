@@ -71,8 +71,10 @@ public:
 	static Material* CreateDefault();
 	static Material* Create(char *pName);
 	inline static void UseNone() { pNone->Use(); }
+	inline static Material* GetCurrent() { return &current; }
+	static Material* Find(char *pName);
 
-	static Material *pCurrent;
+	static Material current;
 	static Material *pNone;
 
 	static IniFile materialDefinitions;
@@ -114,7 +116,7 @@ public:
 
 	uint32 cubeMapIndex			: 3; // some what if's
 	uint32 displacementMapIndex	: 3;
-
+/*
 #if defined(_XBOX)
 	DWORD	vertexShader;
 	DWORD	pixelShader;
@@ -122,6 +124,7 @@ public:
 	IDirect3DVertexShader9	*pVertexShader;
 	IDirect3DPixelShader9	*pPixelShader;
 #endif
+*/
 };
 
 void Material_InitModule();

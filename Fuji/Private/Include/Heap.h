@@ -35,7 +35,7 @@ public:
 
 	char *markStack[HEAP_MARKERS];
 	uint32 markCount;
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	uint32 markAlloc[HEAP_MARKERS];
 
 	char heapName[40];
@@ -80,7 +80,7 @@ void ReleaseMark(Heap *pHeap);
 
 void SetCurrentHeap(Heap *pHeap);
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
 void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line);
 #else
@@ -89,7 +89,7 @@ void *Heap_Realloc(void *pMem, uint32 bytes);
 #endif
 void Heap_Free(void *pMem);
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 #define Heap_New(T) Managed_New(new T, __FILE__, __LINE__)
 template<class T>
 T* Managed_New(T *pT, char *pFile, uint32 line);
@@ -103,7 +103,7 @@ void Heap_Delete(T *pObject);
 
 /*
 template<class T>
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 T* Heap_NewArray(int arraySize, char *pFile, uint32 line);
 #else
 T* Heap_NewArray(int arraySize);

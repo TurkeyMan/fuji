@@ -16,7 +16,7 @@ IniFile Material::materialDefinitions;
 
 PtrListDL<Material> materialList;
 
-Material *Material::pCurrent = NULL;
+Material Material::current;
 Material *Material::pNone = NULL;
 
 char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
@@ -138,6 +138,10 @@ Material* Material::Create(char *pName)
 			{
 				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (materialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
 			}
+			else if(!stricmp(pName, "backfacecull"))
+			{
+				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (!materialDefinitions.AsBool(0) ? MF_DoubleSided : NULL);
+			}
 			else if(!stricmp(pName, "additive"))
 			{
 				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (materialDefinitions.AsBool(0) ? MF_Additive : NULL);
@@ -225,3 +229,15 @@ void Material::Release()
 		materialList.Destroy(materialList.Find(this));
 	}
 }
+
+void Material::Use()
+{
+	current = *this;
+
+	// set some render states
+
+	// choose renderer
+
+	// configure renderer
+}
+

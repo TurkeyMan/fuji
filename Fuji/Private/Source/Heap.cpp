@@ -42,7 +42,7 @@ Heap* CreateHeap(uint32 size, char *name)
 
 	pHeap->markCount = 0;
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	strcpy(pHeap->heapName, name);
 
 	pHeap->allocCount = 0;
@@ -55,7 +55,7 @@ void FreeHeap(Heap *pHeap)
 {
 	CALLSTACK;
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	if(pHeap->allocCount)
 	{
 		uint32 total = 0;
@@ -108,7 +108,7 @@ void MarkHeap(Heap *pHeap)
 	CALLSTACK;
 
 	pHeap->markStack[pHeap->markCount] = pHeap->pAllocPointer;
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	pHeap->markAlloc[pHeap->markCount] = pHeap->allocCount;
 #endif
 	pHeap->markCount++;
@@ -121,7 +121,7 @@ void ReleaseMark(Heap *pHeap)
 	// list unfree'd alloc's
 
 	pHeap->markCount--;
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	pHeap->allocCount = pHeap->markAlloc[pHeap->markCount];
 #endif
 	pHeap->pAllocPointer = pHeap->markStack[pHeap->markCount];
@@ -132,7 +132,7 @@ void SetCurrentHeap(Heap *pHeap)
 	pCurrentHeap = pHeap;
 }
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile, uint32 line)
 #else
 void *Heap_Alloc(uint32 bytes)
@@ -145,7 +145,7 @@ void *Heap_Alloc(uint32 bytes)
 
 	pMem = (char*)malloc(bytes);
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pMem;
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = ALIGN16(bytes);
@@ -157,15 +157,19 @@ void *Heap_Alloc(uint32 bytes)
 	return pMem;
 }
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile, uint32 line)
 #else
-void *Heap_Realloc(uint32 bytes)
+void *Heap_Realloc(void *pMem, uint32 bytes)
 #endif
 {
 	CALLSTACK;
 
+#if !defined(_RETAIL)
 	void *pNew = Heap_Alloc(ALIGN16(bytes), pFile, line);
+#else
+	void *pNew = Heap_Alloc(ALIGN16(bytes));
+#endif
 
 	// ummmmm... yeah need to keep record of what is allocated where... 
 	memcpy(pNew, pMem, min(bytes, bytes));
@@ -177,7 +181,7 @@ void Heap_Free(void *pMem)
 {
 	CALLSTACK;
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	for(uint32 a=pCurrentHeap->allocCount-1; a>=0; a--)
 	{
 		if(pCurrentHeap->allocList[a].pAddress == pMem)
@@ -193,7 +197,7 @@ void Heap_Free(void *pMem)
 	free(pMem);
 }
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 template<class T>
 T* Managed_New(T *pT, char *pFile, uint32 line)
 {
@@ -202,7 +206,7 @@ template<class T>
 T* Unmanaged_New(T *pT)
 {
 #endif
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pT;
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = sizeof(T);
@@ -222,7 +226,7 @@ void Heap_Delete(T *pObject)
 
 /*
 template<class T>
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 T* Heap_NewArray(int arraySize, char *pFile, uint32 line)
 #else
 T* Heap_NewArray(int arraySize)

@@ -69,18 +69,18 @@ void Texture::Release()
 	}
 }
 
-void Texture::SetTexture()
+void Texture::SetTexture(int texUnit)
 {
-	pd3dDevice->SetTexture(0, texture);
+	pd3dDevice->SetTexture(texUnit, texture);
 
 #if defined(_XBOX)
-	pd3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetTextureStageState(texUnit, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetTextureStageState(texUnit, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetTextureStageState(texUnit, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
 #elif defined(_WINDOWS)
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetSamplerState(texUnit, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetSamplerState(texUnit, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetSamplerState(texUnit, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 #endif
 }
 

@@ -5,6 +5,8 @@
 #include "Matrix.h"
 #include "Primitive.h"
 #include "Texture.h"
+#include "Renderer.h"
+#include "Material.h"
 
 LitVertex primBuffer[1024];
 LitVertex current;
