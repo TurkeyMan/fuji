@@ -14,6 +14,12 @@ int Texture::LoadTexture(char *filename, bool generateMipChain)
 	DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 	DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
+	if(hr != D3D_OK)
+	{
+		LOGD(STR("Failed loading texture: %s", filename));
+		return 1;
+	}
+
 	texture->GetLevelDesc(0, &fontdesc);
 
 	width = fontdesc.Width;

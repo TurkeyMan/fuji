@@ -4,6 +4,7 @@
 #include "Vector4.h"
 #include "Matrix.h"
 #include "Primitive.h"
+#include "Texture.h"
 
 #define PRIM_FVF (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX0)
 struct PrimVertex
@@ -37,7 +38,7 @@ void BeginPrimitive(uint32 type, uint32 hint)
 
 	if(type & PT_Untextured)
 	{
-		pd3dDevice->SetTexture(0, NULL);
+		Texture::UseNone();
 	}
 }
 

@@ -61,7 +61,7 @@ void Display_EndFrame()
 
 void ClearScreen()
 {
-	pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, 0x00000030, 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)
