@@ -159,11 +159,11 @@ Matrix& Matrix::SetRotationY(float angle)
 {
 	m[0][0] = cos(angle);
 	m[0][1] = 0.0f;
-	m[0][2] = sin(angle);
+	m[0][2] = -sin(angle);
 	m[1][0] = 0.0f;
 	m[1][1] = 1.0f;
 	m[1][2] = 0.0f;
-	m[2][0] = -sin(angle);
+	m[2][0] = sin(angle);
 	m[2][1] = 0.0f;
 	m[2][2] = cos(angle);
 

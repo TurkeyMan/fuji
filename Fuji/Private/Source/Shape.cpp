@@ -343,7 +343,7 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 	MFSetColour(0xFF0000FF);
 	MFSetPosition(position.x, position.y, position.z);
 	MFSetPosition(position.x, position.y, position.z + radius * 0.5f);
-	MFEnd();  
+	MFEnd();
 }
 
 // draw's a capsule from a start and end point and a position.w

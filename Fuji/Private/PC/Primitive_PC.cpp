@@ -36,6 +36,8 @@ void MFPrimitive(uint32 type, uint32 hint)
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
+	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
 }
 
 void MFBegin(uint32 vertexCount)
@@ -47,9 +49,6 @@ void MFBegin(uint32 vertexCount)
 	current.colour = 0xFFFFFFFF;
 	current.normal.x = current.normal.z = 0.0f;
 	current.normal.y = 1.0f;
-
-	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
 }
 
 void MFSetMatrix(const Matrix &mat)
@@ -117,10 +116,10 @@ void MFEnd()
 			pd3dDevice->DrawPrimitiveUP(D3DPT_POINTLIST, beginCount, primBuffer, sizeof(LitVertex));
 			break;
 		case PT_LineList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, beginCount-1, primBuffer, sizeof(LitVertex));
+			pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, beginCount/2, primBuffer, sizeof(LitVertex));
 			break;
 		case PT_LineStrip:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, beginCount/2, primBuffer, sizeof(LitVertex));
+			pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, beginCount-1, primBuffer, sizeof(LitVertex));
 			break;
 		case PT_TriList:
 			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, beginCount/3, primBuffer, sizeof(LitVertex));
