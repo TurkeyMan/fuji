@@ -11,7 +11,7 @@ void FileSystem_InitModule()
 
 void FileSystem_DeinitModule()
 {
-//	file.Deinit();
+	file.Deinit();
 }
 
 char* File_SystemPath(char *filename)

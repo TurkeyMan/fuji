@@ -379,6 +379,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\DebugMenu.cpp">
+				<FileConfiguration
+					Name="Debug_XB|Xbox">
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Source\Display.cpp">

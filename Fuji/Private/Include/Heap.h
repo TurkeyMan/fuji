@@ -66,15 +66,17 @@ void *Unmanaged_Alloc(uint32 bytes);
 #endif
 void Heap_Free(void *pMem);
 
-template<class T>
 #if defined(_DEBUG)
-T* Heap_New(char *pFile, uint32 line);
+#define Heap_New(T) Managed_New(new T, __FILE__, __LINE__)
+void* Managed_New(void *pT, char *pFile, uint32 line);
 #else
-T* Heap_New();
+#define Heap_New(T) Managed_New(new T)
+void* Unmanaged_New(void *pT);
 #endif
 template<class T>
 void Heap_Delete(T *pObject);
 
+/*
 template<class T>
 #if defined(_DEBUG)
 T* Heap_NewArray(int arraySize, char *pFile, uint32 line);
@@ -83,6 +85,7 @@ T* Heap_NewArray(int arraySize);
 #endif
 template<class T>
 void Heap_DeleteArray(T *pArray);
+*/
 
 extern Heap *pCurrentHeap;
 

@@ -125,14 +125,22 @@ void Heap_Free(void *pMem)
 	free(pMem);
 }
 
-template<class T>
 #if defined(_DEBUG)
-T* Heap_New(char *pFile, uint32 line)
+void* Managed_New(void *pT, char *pFile, uint32 line)
 #else
-T* Heap_New()
+void* Unmanaged_New(void *pT)
 #endif
 {
-	return new T;
+#if defined(_DEBUG)
+	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].pAddress = pMem;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].bytes = bytes;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].pFilename = pFile;
+	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
+	pCurrentHeap->allocCount++;
+#endif
+
+	return pT;
 }
 
 template<class T>
@@ -141,6 +149,7 @@ void Heap_Delete(T *pObject)
 	delete pObject;
 }
 
+/*
 template<class T>
 #if defined(_DEBUG)
 T* Heap_NewArray(int arraySize, char *pFile, uint32 line)
@@ -156,3 +165,4 @@ void Heap_DeleteArray(T *pArray)
 {
 	delete[] pArray;
 }
+*/
