@@ -8,6 +8,8 @@ Heap *pCurrentHeap = NULL;
 
 PtrListDL<Resource> gResourceList;
 
+bool gTempMemOverride = false;
+
 void *malloc_aligned(size_t bytes)
 {
 	char *new_buffer;
@@ -212,6 +214,11 @@ void *Heap_Alloc(uint32 bytes)
 {
 	CALLSTACK;
 
+	if(gTempMemOverride)
+	{
+		return Heap_TAlloc(bytes);
+	}
+
 	char *pMem;
 
 	if(pCurrentHeap)
@@ -258,6 +265,13 @@ void *Heap_Realloc(void *pMem, uint32 bytes)
 void Heap_Free(void *pMem)
 {
 	CALLSTACK;
+
+	if(gTempMemOverride)
+	{
+		Heap_TFree(pMem);
+		return;
+	}
+
 /*
 #if !defined(_RETAIL)
 	uint32 a;
@@ -293,6 +307,10 @@ void Heap_TFree(void *pMem)
 	free_aligned(pMem);
 }
 
+void Heap_ActivateTempMemOverride(bool activate)
+{
+	gTempMemOverride = activate;
+}
 
 /*** Static Heap ***/
 

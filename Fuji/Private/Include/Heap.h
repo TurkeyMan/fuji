@@ -122,4 +122,6 @@ void Heap_Free(void *pMem);
 void *Heap_TAlloc(uint32 bytes);
 void Heap_TFree(void *pMem);
 
+void Heap_ActivateTempMemOverride(bool activate = true);
+
 #endif
