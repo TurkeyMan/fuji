@@ -1,6 +1,8 @@
 #include "Common.h"
-#include "Input.h"
 #include "Vector3.h"
+
+#include "Input.h"
+#include "../Source/Input_Internal.h"
 
 /*** Structures ***/
 
@@ -28,7 +30,6 @@ void CheckKeyboard();
 char	chMUDrives[4][2];
 HANDLE	hPads[4];
 XINPUT_STATE inputState[4];
-XINPUT_STATE prevState[4];
 
 DEVICE_STATE dsDevices[] =
 {
@@ -40,11 +41,9 @@ DEVICE_STATE dsDevices[] =
 };
 #define NUM_DEVICE_STATES   (sizeof(dsDevices)/sizeof(*dsDevices))
 
-float deadZone = 0.3f;
-
 /*** Functions ***/
 
-void Input_InitModule()
+void Input_InitModulePlatformSpecific()
 {
 	CALLSTACK;
 
@@ -88,230 +87,152 @@ void Input_InitModule()
     }
 }
 
-void Input_DeinitModule()
+void Input_DeinitModulePlatformSpecific()
 {
 	CALLSTACK;
 
 }
 
-void Input_Update()
+void Input_UpdatePlatformSpecific()
 {
 	CALLSTACKc;
 
 	CheckDeviceChanges(dsDevices);
-	CheckKeyboard();
-
-	for(int a=0; a<4; a++)
-	{
-		if( dsDevices[DS_GAMEPAD].dwState & 1 << a && hPads[a] )
-		{
-			// Query latest state.
-			memcpy(&prevState[a], &inputState[a], sizeof(inputState[a]));
-			XInputGetState(hPads[a], &inputState[a]);
-		}
-	}
 }
 
-float Input_ReadGamepad(int controlID, uint32 type)
+
+void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
 {
-	CALLSTACKc;
+	DBGASSERT(device >= 0 && device < IDD_Max, "Invalid Device");
+	DBGASSERT(id >= 0 && id < Input_MaxInputID, "Invalid device ID");
 
-	static DWORD dwStartLast = 0;
-	float inputValue;
+	pDeviceStatus->available = false;
+	pDeviceStatus->status = IDS_Disconnected;
 
-	if(controlID>3)
+	switch(device)
 	{
-		OutputDebugString("Error: Invalid Control ID\n\n");
-		return 0.0f;
-	}
+		case IDD_Gamepad:
+			if(id < 4)
+			{
+				pDeviceStatus->available = true;
+				pDeviceStatus->status = (dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id]) ? IDS_Ready : IDS_Disconnected;
+			}
+			break;
 
-	if(controlID > -1)
-	{
-		if(!(dsDevices[DS_GAMEPAD].dwState & 1 << controlID && hPads[controlID])) return 0.0f;
-	}
-	else return 0.0f;
+		case IDD_Mouse:
+#pragma message("work muose")
+			break;
 
-	switch(type)
-	{
-		case Button_XB_A:
-		case Button_XB_B:
-		case Button_XB_X:
-		case Button_XB_Y:
-		case Button_XB_Black:
-		case Button_XB_White:
-		case Button_XB_LTrig:
-		case Button_XB_RTrig:
-			return ((inputState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK) ? (float)inputState[controlID].Gamepad.bAnalogButtons[type] : 0.0f) / 255.0f;
-
-		case Button_XB_Start:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
-
-		case Button_XB_Back:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-
-		case Button_XB_LThumb:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
-
-		case Button_XB_RThumb:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
-
-		case Button_DUp:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
-
-		case Button_DDown:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
-
-		case Button_DLeft:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
-
-		case Button_DRight:
-			return (inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
-
-		case Axis_LX:
-			inputValue = ((float)inputState[controlID].Gamepad.sThumbLX) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		case Axis_LY:
-			inputValue = ((float)inputState[controlID].Gamepad.sThumbLY) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		case Axis_RX:
-			inputValue = ((float)inputState[controlID].Gamepad.sThumbRX) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		case Axis_RY:
-			inputValue = ((float)inputState[controlID].Gamepad.sThumbRY) / 32767.0f;
-			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+		case IDD_Keyboard:
+#pragma message("work keyboard")
+			break;
 
 		default:
-			OutputDebugString("Error: Undefined Control Pad Input Type\n\n");
+			DBGASSERT(false, "Invalid Input Device");
+			break;
 	}
-
-	return 0.0f;
 }
 
-bool Input_WasPressed(int controlID, uint32 type)
-{
-	CALLSTACKc;
-
-	static DWORD dwStartLast = 0;
-
-	if(controlID>3)
-	{
-		OutputDebugString("Error: Invalid Control ID\n\n");
-		return false;
-	}
-
-	if(controlID > -1)
-	{
-		if(!(dsDevices[DS_GAMEPAD].dwState & 1 << controlID && hPads[controlID])) return false;
-	}
-	else return false;
-
-	switch(type)
-	{
-		case Button_XB_A:
-		case Button_XB_B:
-		case Button_XB_X:
-		case Button_XB_Y:
-		case Button_XB_Black:
-		case Button_XB_White:
-		case Button_XB_LTrig:
-		case Button_XB_RTrig:
-			return inputState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK && !(prevState[controlID].Gamepad.bAnalogButtons[type]>XINPUT_GAMEPAD_MAX_CROSSTALK);
-
-		case Button_XB_Start:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_START);
-
-		case Button_XB_Back:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_BACK);
-
-		case Button_XB_LThumb:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB);
-
-		case Button_XB_RThumb:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB);
-
-		case Button_DUp:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP);
-
-		case Button_DDown:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN);
-
-		case Button_DLeft:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT);
-
-		case Button_DRight:
-			return inputState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT && !(prevState[controlID].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT);
-
-		default:
-			OutputDebugString("Error: Undefined Control Pad Input Type\n\n");
-	}
-
-	return false;
-}
-
-// "Is Pad Connected" Function?
-bool Input_IsConnected(int controlID)
+void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 {
 	CALLSTACK;
 
-	return dsDevices[DS_GAMEPAD].dwState & 1 << controlID && hPads[controlID];
+	DBGASSERT(id >=0 && id < 4, "Invalid Gamepad ID");
+	DBGASSERT(Input_IsAvailable(IDD_Gamepad, id), STR("Gamepad %d not available", id));
+	DBGASSERT(Input_IsReady(IDD_Gamepad, id), "Gamepad not ready");
+
+	if( dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id] )
+	{
+		// Query latest state.
+		XInputGetState(hPads[id], &inputState[id]);
+	}
+
+	for(int a=0; a<8; a++)
+	{
+		int button = inputState[id].Gamepad.bAnalogButtons[a];
+		pGamepadState->values[a] = ((button > XINPUT_GAMEPAD_MAX_CROSSTALK) ? button : 0) * (1.0f/255.0f);
+	}
+
+	pGamepadState->values[8] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+	pGamepadState->values[9] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+	pGamepadState->values[10] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
+	pGamepadState->values[11] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+	pGamepadState->values[12] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
+	pGamepadState->values[13] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
+	pGamepadState->values[14] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
+	pGamepadState->values[15] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+
+	float inputValue;
+	float deadZone = Input_GetDeadZone();
+
+	inputValue = ((float)inputState[id].Gamepad.sThumbLX) / 32767.0f;
+	pGamepadState->values[Axis_LX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+	inputValue = ((float)inputState[id].Gamepad.sThumbLY) / 32767.0f;
+	pGamepadState->values[Axis_LY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+	inputValue = ((float)inputState[id].Gamepad.sThumbRX) / 32767.0f;
+	pGamepadState->values[Axis_RX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+	inputValue = ((float)inputState[id].Gamepad.sThumbRY) / 32767.0f;
+	pGamepadState->values[Axis_RY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 }
 
-void SetGamepadEventHandler(EventFunc pEventFunc)
+void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 {
-	
+	CALLSTACK;
+
+	CheckKeyboard();
+
+#pragma message("XBox keyboard?")
 }
 
-int Input_GetNumKeyboards()
+void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 {
-	return 0;
+	CALLSTACK;
+
+#pragma message("XBox mouse?")
 }
 
-bool Input_ReadKeyboard(int keyboardID, uint32 key)
+char* Input_GetDeviceName(int source, int sourceID)
 {
-	return false;
+	char *pText = NULL;
+
+	switch(source)
+	{
+		case IDD_Gamepad:
+			break;
+		case IDD_Mouse:
+			break;
+		case IDD_Keyboard:
+			break;
+		default:
+			break;
+	}
+
+	return pText;
 }
 
-bool Input_WasKeyPressed(int keyboardID, uint32 key)
+bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
-	return false;
-}
+	SHORT ks = 0;
 
-void SetKeyboardEventHandler(EventFunc pEventFunc)
-{
+	switch(keyboardState)
+	{
+		case KSS_NumLock:
+			break;
 
-}
+		case KSS_CapsLock:
+			break;
 
-int Input_GetNumPointers()
-{
-	return 0;
-}
+		case KSS_ScrollLock:
+			break;
 
-bool Input_ReadMouseKey(int mouseID, uint32 key)
-{
-	return false;
-}
+		case KSS_Insert:
+			break;
+	}
 
-bool Input_WasMousePressed(int mouseID, uint32 key)
-{
-	return false;
-}
-
-void SetMouseEventHandler(EventFunc pEventFunc)
-{
-
-}
-
-void SetMouseMode(uint32 mouseMode)
-{
-
-}
-
-Vector3 Input_ReadMousePos(int mouseID)
-{
-	return Vector(0.0f, 0.0f, 0.0f);
+	return (ks & 1) != 0;
 }
 
 //

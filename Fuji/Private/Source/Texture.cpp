@@ -49,7 +49,7 @@ void TextureBrowser::Draw()
 
 void TextureBrowser::Update()
 {
-	if(Input_WasPressed(0, Button_XB_Y))
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y))
 		pCurrentMenu = pParent;
 }
 
@@ -127,14 +127,14 @@ void TextureBrowser::ListUpdate(bool selected)
 	{
 		int texCount = gTextureBank.GetLength();
 
-		if(Input_WasPressed(0, Button_DLeft))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
 		{
 			selection = selection <= 0 ? texCount-1 : selection-1;
 
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(0, Button_DRight))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
 		{
 			selection = selection >= texCount-1 ? 0 : selection+1;
 

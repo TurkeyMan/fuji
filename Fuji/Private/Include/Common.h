@@ -9,6 +9,7 @@
 
 #if defined(_XBOX)
 	#define DEBUG_KEYBOARD
+	#define DEBUG_MOUSE
 	#include <xtl.h>
 
 	char*  FixXBoxFilename(const char *pFilename);

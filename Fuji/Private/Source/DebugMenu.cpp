@@ -73,13 +73,13 @@ bool DebugMenu_IsEnabled()
 
 void DebugMenu_Update()
 {
-	if(!buttonsDown && Input_ReadGamepad(0, Button_XB_LThumb) && Input_ReadGamepad(0, Button_XB_RThumb))
+	if(!buttonsDown && Input_Read(IDD_Gamepad, 0, Button_XB_LThumb) && Input_Read(IDD_Gamepad, 0, Button_XB_RThumb))
 	{
 		debugMenuEnabled = !debugMenuEnabled;
 		buttonsDown = true;
 	}
 
-	if(buttonsDown && (!Input_ReadGamepad(0, Button_XB_LThumb) || !Input_ReadGamepad(0, Button_XB_RThumb)))
+	if(buttonsDown && (!Input_Read(IDD_Gamepad, 0, Button_XB_LThumb) || !Input_Read(IDD_Gamepad, 0, Button_XB_RThumb)))
 	{
 		buttonsDown = false;
 	}
@@ -90,7 +90,7 @@ void DebugMenu_Update()
 
 void DebugMenu_Draw()
 {
-	if(Input_ReadGamepad(0, Button_XB_RTrig)) return;
+	if(Input_Read(IDD_Gamepad, 0, Button_XB_RTrig)) return;
 
 	bool o = View::GetCurrent()->SetOrtho(true);
 
@@ -232,7 +232,7 @@ void MenuObject::Draw()
 void MenuObject::Update()
 {
 	// allow back to parent
-	if(Input_WasPressed(0, Button_XB_Y))
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y))
 		pCurrentMenu = pParent;
 }
 
@@ -256,7 +256,7 @@ void Menu::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_XB_A))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_A))
 			pCurrentMenu = this;
 	}
 }
@@ -393,13 +393,13 @@ void Menu::Draw()
 void Menu::Update()
 {
 	// test controls and move cursor
-	if(Input_WasPressed(0, Button_DUp))
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_DUp))
 		selection = selection > 0 ? selection-1 : numChildren-1;
 
-	if(Input_WasPressed(0, Button_DDown))
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_DDown))
 		selection = selection < numChildren-1 ? selection+1 : 0;
 
-	if(Input_WasPressed(0, Button_XB_Y) && pParent)
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y) && pParent)
 		pCurrentMenu = pParent;
 
 	for(int a=0; a<numChildren; a++)
@@ -423,7 +423,7 @@ float MenuItemStatic::ListDraw(bool selected, const Vector3 &pos, float maxWidth
 void MenuItemStatic::ListUpdate(bool selected)
 {
 	if(selected)
-		if(pCallback && Input_WasPressed(0, Button_XB_A))
+		if(pCallback && Input_WasPressed(IDD_Gamepad, 0, Button_XB_A))
 			pCallback(this, pUserData);
 }
 
@@ -445,14 +445,14 @@ void MenuItemInt::ListUpdate(bool selected)
 	{
 		int t = *pData;
 
-		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_XB_X)) *pData = 0;
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_X)) *pData = 0;
 
-		if(Input_WasPressed(0, Button_DLeft))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
 		{
 			*pData -= increment;
 		}
-		else if(Input_WasPressed(0, Button_DRight))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
 		{
 			*pData += increment;
 		}
@@ -484,19 +484,19 @@ void MenuItemFloat::ListUpdate(bool selected)
 		float t = *pData;
 		float input;
 
-		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_XB_X)) *pData = 0.0f;
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_X)) *pData = 0.0f;
 
-		if(Input_WasPressed(0, Button_DLeft))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
 		{
 			*pData -= increment;
 		}
-		else if(Input_WasPressed(0, Button_DRight))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
 		{
 			*pData += increment;
 		}
 
-		if((input=Input_ReadGamepad(0, Axis_RX)))
+		if((input=Input_Read(IDD_Gamepad, 0, Axis_RX)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			*pData += input*increment*TIMEDELTA;
@@ -526,7 +526,7 @@ void MenuItemBool::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_DLeft) || Input_WasPressed(0, Button_DRight) || Input_WasPressed(0, Button_XB_A))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft) || Input_WasPressed(IDD_Gamepad, 0, Button_DRight) || Input_WasPressed(IDD_Gamepad, 0, Button_XB_A))
 		{
 			data = !data;
 
@@ -552,7 +552,7 @@ void MenuItemIntString::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_DLeft))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
 		{
 			--data;
 
@@ -562,7 +562,7 @@ void MenuItemIntString::ListUpdate(bool selected)
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(0, Button_DRight))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
 		{
 			++data;
 
@@ -572,7 +572,7 @@ void MenuItemIntString::ListUpdate(bool selected)
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(0, Button_P2_Cross))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_P2_Cross))
 		{
 			if(pCallback)
 				pCallback(this, pUserData);
@@ -595,7 +595,7 @@ void MenuItemColour::Draw()
 
 void MenuItemColour::Update()
 {
-	if(Input_WasPressed(0, Button_XB_Y)) pCurrentMenu = pParent;
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y)) pCurrentMenu = pParent;
 }
 
 float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
@@ -633,10 +633,10 @@ void MenuItemColour::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		if(Input_WasPressed(0, Button_XB_A))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_A))
 			pCurrentMenu = this;
 
-		if(Input_WasPressed(0, Button_DLeft))
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
 		{
 			preset = preset <= 0 ? COLOUR_PRESETS-1 : preset-1;
 
@@ -645,7 +645,7 @@ void MenuItemColour::ListUpdate(bool selected)
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(0, Button_DRight))
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
 		{
 			preset = preset >= COLOUR_PRESETS-1 ? 0 : preset+1;
 
@@ -676,16 +676,16 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 		Vector3 t = *pData;
 		float input;
 
-		if(Input_WasPressed(0, Button_XB_B)) *pData = defaultValue;
-		if(Input_WasPressed(0, Button_XB_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_B)) *pData = defaultValue;
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
 
-		if((input=Input_ReadGamepad(0, Axis_RX)))
+		if((input=Input_Read(IDD_Gamepad, 0, Axis_RX)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			pData->x += input*increment*TIMEDELTA;
 		}
 
-		if((input=Input_ReadGamepad(0, Axis_RY)))
+		if((input=Input_Read(IDD_Gamepad, 0, Axis_RY)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			pData->y -= input*increment*TIMEDELTA;

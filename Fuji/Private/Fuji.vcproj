@@ -29,7 +29,7 @@
 				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
 				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
@@ -586,6 +586,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\IniFile.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Input.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Input_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Material.cpp">

@@ -5,26 +5,14 @@
 #include <dinput.h>
 
 #include "Common.h"
-#include "Input.h"
 #include "Vector3.h"
-#include "Input_PC.h"
 
-#define MAPPING_UP			DIK_UP
-#define MAPPING_DOWN		DIK_DOWN
-#define MAPPING_LEFT		DIK_LEFT
-#define MAPPING_RIGHT		DIK_RIGHT
-#define MAPPING_X			DIK_H
-#define MAPPING_CIRCLE		DIK_J
-#define MAPPING_TRIANGLE	DIK_Y
-#define MAPPING_BOX			DIK_G
-#define MAPPING_START		DIK_SPACE
-#define MAPPING_SELECT		DIK_RALT
-#define MAPPING_L1			DIK_F
-#define MAPPING_L2			DIK_D
-#define MAPPING_R1			DIK_K
-#define MAPPING_R2			DIK_L
-#define MAPPING_L3			DIK_T
-#define MAPPING_R3			DIK_U
+#include "Input.h"
+#include "../Source/Input_Internal.h"
+
+#include "FileSystem.h"
+#include "IniFile.h"
+#include "Heap.h"
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
 
@@ -34,58 +22,222 @@ void Input_UpdateKeyboard();
 void Input_UpdateMouse();
 void Input_UpdateJoystick();
 
+/*** Structure definitions ***/
+
+struct GamepadInfo
+{
+	char *pName;
+
+	int axisMapping[4];
+	int buttonMapping[16];
+
+	GamepadInfo *pNext;
+};
+
+GamepadInfo *GetGamepadInfo(const char *pGamepad);
+void LoadGamepadMappings();
+
 /*** Globals ***/
 
-IDirectInput8		*pDirectInput	 = NULL;
-IDirectInputDevice8	*pDIKeyboard	 = NULL;
-IDirectInputDevice8	*pDIMouse		 = NULL;
-IDirectInputDevice8	*pDIJoystick[16] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+IDirectInput8		*pDirectInput					= NULL;
+IDirectInputDevice8	*pDIKeyboard					= NULL;
+IDirectInputDevice8	*pDIMouse						= NULL;
+IDirectInputDevice8	*pDIJoystick[Input_MaxInputID]	= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
+GamepadInfo *pGamepadMappings[Input_MaxInputID]		= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+
+int	gGamepadCount	= 0;
 int	gKeyboardCount	= 0;
-int	gJoystickCount	= 0;
 int	gMouseCount		= 0;
 
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
 
-char			gKeyState[16][256];
-char			gPrevKeyState[16][256];
-DIMOUSESTATE2	gMouseState[16];
-DIMOUSESTATE2	gPrevMouseState[16];
-DIJOYSTATE2		gJoyState[16];
-DIJOYSTATE2		gPrevJoyState[16];
-
-EventFunc pKeyEventFunc		= NULL;
-EventFunc pMouseEventFunc	= NULL;
-EventFunc pJoyEventFunc		= NULL;
+char gKeyState[256];
 
 bool gExclusiveMouse = false;
 float deadZone = 0.3f;
 
-float meScreenMouseX = 0.0f, meScreenMouseY = 0.0f;
-float meScreenMouseRangeX = 639.0f, meScreenMouseRangeY = 479.0f;
-float meScreenMouseWheel = 0.0f;
-char meScreenMouseKey[5] = { 0, 0, 0, 0, 0 };
+float mouseMultiplier = 1.0f;
 
-const long joyaxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
-const long joysliders[4] = {6,50,58,66};
+// windows mouse (WM_MOUSE messages)
+float screenMouseX = 0.0f, screenMouseY = 0.0f;
+float screenMouseRangeX = 639.0f, screenMouseRangeY = 479.0f;
+float screenMouseWheel = 0.0f;
+char screenMouseKey[5] = { 0, 0, 0, 0, 0 };
 
-char DIKtoCHAR[256] = {0,0,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',0,'a','s','d','f','g','h','j','k','l',';','\'','`',0,'\\','z','x','c','v','b','n','m',',','.','/',0,0,' ',0,0,0,0,0,0,0,0,0,0,0,0,0,'7','8','9','-','4','5','6','+','1','2','3','0','.',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'=',0,0,0,'@',':','_',0,0,0,0,0,0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,',',0,'/',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+const long joyAxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
+const long joySliders[4] = {6,50,58,66};
 
-void Input_InitModule()
+GamepadInfo *pGamepadMappingRegistry = NULL;
+
+
+// KEY to DIK mapping table
+uint8 KEYtoDIK[256] =
+{
+	0, // KEY_NONE = 0,
+	DIK_UP, // KEY_UP,
+	DIK_DOWN, // KEY_DOWN,
+	DIK_LEFT, // KEY_LEFT,
+	DIK_RIGHT, // KEY_RIGHT,
+	DIK_APPS, // KEY_APPS,			// on windows keyboards
+	DIK_LWIN, // KEY_LWIN,			// on windows keyboards
+	DIK_RWIN, // KEY_RWIN,			// on windows keyboards
+	DIK_BACK, // KEY_BACKSPACE,
+	DIK_TAB, // KEY_TAB,
+	DIK_SYSRQ, // KEY_PRINTSCREEN,
+	DIK_SCROLL, // KEY_SCROLLLOCK,
+	DIK_PAUSE, // KEY_BREAK,
+	DIK_RETURN, // KEY_RETURN,
+	DIK_F1, // KEY_F1,
+	DIK_F2, // KEY_F2,
+	DIK_F3, // KEY_F3,
+	DIK_F4, // KEY_F4,
+	DIK_F5, // KEY_F5,
+	DIK_F6, // KEY_F6,
+	DIK_F7, // KEY_F7,
+	DIK_F8, // KEY_F8,
+	DIK_F9, // KEY_F9,
+	DIK_F10, // KEY_F10,
+	DIK_F11, // KEY_F11,
+	DIK_F12, // KEY_F12,
+	DIK_OEM_102, // KEY_OEM_102,		// on german keyboard
+	DIK_ESCAPE, // KEY_ESCAPE,
+	DIK_MYCOMPUTER, // KEY_MYCOMPUTER,		// on multimedia keyboards
+	DIK_MAIL, // KEY_MAIL,			// on multimedia keyboards
+	DIK_CALCULATOR, // KEY_CALCULATOR,		// on multimedia keyboards
+	DIK_STOP, // KEY_STOP,			// japanese keyboard
+	DIK_SPACE, // KEY_SPACE,
+	DIK_INSERT, // KEY_INSERT,
+	DIK_DELETE, // KEY_DELETE,
+	DIK_HOME, // KEY_HOME,
+	DIK_END, // KEY_END,
+	DIK_PRIOR, // KEY_PAGEUP,
+	DIK_NEXT, // KEY_PAGEDOWN,
+	DIK_APOSTROPHE, // KEY_APOSTROPHE,
+	DIK_ABNT_C1, // KEY_ABNT_C1,		// on brazilian keyboard
+	DIK_ABNT_C2, // KEY_ABNT_C2,		// on brazilian keyboard
+	DIK_MULTIPLY, // KEY_ASTERISK,
+	DIK_ADD, // KEY_PLUS,
+	DIK_COMMA, // KEY_COMMA,
+	DIK_MINUS, // KEY_HYPHEN,
+	DIK_PERIOD, // KEY_PERIOD,
+	DIK_SLASH, // KEY_SLASH,
+	DIK_0, // KEY_0,
+	DIK_1, // KEY_1,
+	DIK_2, // KEY_2,
+	DIK_3, // KEY_3,
+	DIK_4, // KEY_4,
+	DIK_5, // KEY_5,
+	DIK_6, // KEY_6,
+	DIK_7, // KEY_7,
+	DIK_8, // KEY_8,
+	DIK_9, // KEY_9,
+	DIK_NUMPADCOMMA, // KEY_NUMPADCOMMA,	// japanese keyboard
+	DIK_SEMICOLON, // KEY_SEMICOLON,
+	DIK_NUMPADEQUALS, // KEY_NUMPADEQUALS,	// japanese keyboard
+	DIK_EQUALS, // KEY_EQUALS,
+	DIK_SLEEP, // KEY_SLEEP,			// on windows keyboards
+	DIK_WAKE, // KEY_WAKE,			// on windows keyboards
+	DIK_POWER, // KEY_POWER,			// on windows keyboards
+	DIK_A, // KEY_A,
+	DIK_B, // KEY_B,
+	DIK_C, // KEY_C,
+	DIK_D, // KEY_D,
+	DIK_E, // KEY_E,
+	DIK_F, // KEY_F,
+	DIK_G, // KEY_G,
+	DIK_H, // KEY_H,
+	DIK_I, // KEY_I,
+	DIK_J, // KEY_J,
+	DIK_K, // KEY_K,
+	DIK_L, // KEY_L,
+	DIK_M, // KEY_M,
+	DIK_N, // KEY_N,
+	DIK_O, // KEY_O,
+	DIK_P, // KEY_P,
+	DIK_Q, // KEY_Q,
+	DIK_R, // KEY_R,
+	DIK_S, // KEY_S,
+	DIK_T, // KEY_T,
+	DIK_U, // KEY_U,
+	DIK_V, // KEY_V,
+	DIK_W, // KEY_W,
+	DIK_X, // KEY_X,
+	DIK_Y, // KEY_Y,
+	DIK_Z, // KEY_Z,
+	DIK_UNDERLINE, // KEY_UNDERLINE,		// japanese keyboard
+	DIK_LBRACKET, // KEY_LBRACKET,
+	DIK_BACKSLASH, // KEY_BACKSLASH,
+	DIK_RBRACKET, // KEY_RBRACKET,
+	DIK_F13, // KEY_F13,			// japanese keyboard
+	DIK_F14, // KEY_F14,			// japanese keyboard
+	DIK_GRAVE, // KEY_GRAVE,
+	DIK_F15, // KEY_F15,			// japanese keyboard
+	DIK_UNLABELED, // KEY_UNLABELED,		// japanese keyboard
+	DIK_LCONTROL, // KEY_LCONTROL,
+	DIK_LMENU, // KEY_LALT,
+	DIK_LSHIFT, // KEY_LSHIFT,
+	DIK_RCONTROL, // KEY_RCONTROL,
+	DIK_RMENU, // KEY_RALT,
+	DIK_RSHIFT, // KEY_RSHIFT,
+	DIK_CAPITAL, // KEY_CAPITAL,
+
+	DIK_NUMLOCK, // KEY_NUMLOCK,
+	DIK_DIVIDE, // KEY_DIVIDE,
+	DIK_SUBTRACT, // KEY_SUBTRACT,
+	DIK_DECIMAL, // KEY_DECIMAL
+	DIK_NUMPAD0, // KEY_NUMPAD0,
+	DIK_NUMPAD1, // KEY_NUMPAD1,
+	DIK_NUMPAD2, // KEY_NUMPAD2,
+	DIK_NUMPAD3, // KEY_NUMPAD3,
+	DIK_NUMPAD4, // KEY_NUMPAD4,
+	DIK_NUMPAD5, // KEY_NUMPAD5,
+	DIK_NUMPAD6, // KEY_NUMPAD6,
+	DIK_NUMPAD7, // KEY_NUMPAD7,
+	DIK_NUMPAD8, // KEY_NUMPAD8,
+	DIK_NUMPAD9, // KEY_NUMPAD9,
+	DIK_NUMPADENTER, // KEY_NUMPADENTER,
+
+	DIK_PLAYPAUSE, // KEY_PLAYPAUSE,		// on multimedia keyboards
+	DIK_MEDIASTOP, // KEY_MEDIASTOP,		// on multimedia keyboards
+	DIK_MEDIASELECT, // KEY_MEDIASELECT,	// on multimedia keyboards
+	DIK_NEXTTRACK, // KEY_NEXTTRACK,		// on multimedia keyboards
+	DIK_PREVTRACK, // KEY_PREVTRACK,		// on multimedia keyboards
+
+	DIK_VOLUMEDOWN, // KEY_VOLUMEDOWN,		// on multimedia keyboards
+	DIK_VOLUMEUP, // KEY_VOLUMEUP,		// on multimedia keyboards
+	DIK_MUTE, // KEY_MUTE,			// on multimedia keyboards
+
+	DIK_WEBBACK, // KEY_WEBBACK,		// on multimedia keyboards
+	DIK_WEBFAVORITES, // KEY_WEBFAVORITES,	// on multimedia keyboards
+	DIK_WEBFORWARD, // KEY_WEBFORWARD,		// on multimedia keyboards
+	DIK_WEBHOME, // KEY_WEBHOME,		// on multimedia keyboards
+	DIK_WEBREFRESH, // KEY_WEBREFRESH,		// on multimedia keyboards
+	DIK_WEBSEARCH, // KEY_WEBSEARCH,		// on multimedia keyboards
+	DIK_WEBSTOP, // KEY_WEBSTOP,		// on multimedia keyboards
+
+	DIK_AT, // KEY_AT,				// japanese keyboard
+	DIK_AX, // KEY_AX,				// japanese keyboard
+	DIK_COLON, // KEY_COLON,			// japanese keyboard
+	DIK_CONVERT, // KEY_CONVERT,		// japanese keyboard
+	DIK_KANA, // KEY_KANA,			// japanese keyboard
+	DIK_KANJI, // KEY_KANJI,			// japanese keyboard
+	DIK_NOCONVERT, // KEY_NOCONVERT,		// japanese keyboard
+	DIK_YEN  // KEY_YEN,			// japanese keyboard
+};
+
+
+void Input_InitModulePlatformSpecific()
 {
 	CALLSTACK;
 
 	int a;
 
-	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
+	ZeroMemory(gKeyState,256);
+	LoadGamepadMappings();
 
-	ZeroMemory(gKeyState,256*16);
-	ZeroMemory(gPrevKeyState,256*16);
-	ZeroMemory(&gMouseState,sizeof(DIMOUSESTATE2)*16);
-	ZeroMemory(&gPrevMouseState,sizeof(DIMOUSESTATE2)*16);
-	ZeroMemory(&gJoyState,sizeof(DIJOYSTATE2)*16);
-	ZeroMemory(&gPrevJoyState,sizeof(DIJOYSTATE2)*16);
+	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
 
 	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pDIKeyboard, NULL)))
 	{
@@ -101,7 +253,7 @@ void Input_InitModule()
 
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
 
-	for(a=0; a<gJoystickCount; a++)
+	for(a=0; a<gGamepadCount; a++)
 	{
 		if(pDIJoystick[a])
 		{
@@ -122,7 +274,7 @@ void Input_InitModule()
 */
 }
 
-void Input_DeinitModule()
+void Input_DeinitModulePlatformSpecific()
 {
 	CALLSTACK;
 
@@ -137,7 +289,7 @@ void Input_DeinitModule()
 			pDIJoystick[a] = NULL;
 		}
 	}
-	gJoystickCount=0;
+	gGamepadCount=0;
 
 	if(pDIMouse)
 	{
@@ -162,343 +314,241 @@ void Input_DeinitModule()
 	}
 }
 
-void Input_Update()
+void Input_UpdatePlatformSpecific()
 {
-	CALLSTACK;
 
-	Input_UpdateKeyboard();
-	Input_UpdateMouse();
-	Input_UpdateJoystick();
-/*
-	if(gMouseState[0].lX)
-	{
-		meScreenMouseX+=gMouseState[0].lX*gMouseStateSensitivity;
-		if(meScreenMouseX<0.0f) meScreenMouseX=0.0f;
-		if(meScreenMouseX>meScreenMouseRangeX) meScreenMouseX=meScreenMouseRangeX;
-	}
-
-	if(gMouseState[0].lY)
-	{
-		meScreenMouseY+=gMouseState[0].lY*gMouseStateSensitivity;
-		if(meScreenMouseY<0.0f) meScreenMouseY=0.0f;
-		if(meScreenMouseY>meScreenMouseRangeY) meScreenMouseY=meScreenMouseRangeY;
-	}
-
-	meScreenMouseWheel=(float)gMouseState[0].lZ;
-
-	for(int a=0; a<5; a++) meScreenMouseKey[a]=gMouseState[0].rgbButtons[a];
-*/
 }
 
-float Input_ReadGamepad(int controlID, uint32 type)
+void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
 {
-	CALLSTACK;
+	DBGASSERT(device >= 0 && device < IDD_Max, "Invalid Device");
+	DBGASSERT(id >= 0 && id < Input_MaxInputID, "Invalid device ID");
 
-	float inputValue;
+	pDeviceStatus->available = false;
+	pDeviceStatus->status = IDS_Disconnected;
 
-	if(!Input_IsConnected(controlID)) return 0.0f;
-
-	switch(type)
+	switch(device)
 	{
-		case Button_P2_Cross:
-			inputValue = (gJoyState[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_Circle:
-			inputValue = (gJoyState[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_Box:
-			inputValue = (gJoyState[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_Triangle:
-			inputValue = (gJoyState[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_R1:
-			inputValue = (gJoyState[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_L1:
-			inputValue = (gJoyState[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_L2:
-			inputValue = (gJoyState[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_R2:
-			inputValue = (gJoyState[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_Start:
-			inputValue = (gJoyState[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_Select:
-			inputValue = (gJoyState[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_LThumb:
-			inputValue = (gJoyState[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_P2_RThumb:
-			inputValue = (gJoyState[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_DUp:
-			inputValue = (gJoyState[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_DDown:
-			inputValue = (gJoyState[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_DLeft:
-			inputValue = (gJoyState[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
-			break;
-		case Button_DRight:
-			inputValue = (gJoyState[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
+		case IDD_Gamepad:
+			if(id < gGamepadCount)
+			{
+				pDeviceStatus->available = true;
+				pDeviceStatus->status = IDS_Ready;
+			}
 			break;
 
-		case Axis_LX:
-			inputValue = ((float)(gJoyState[controlID].lX - 32767)) / 32767.0f;
-			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+		case IDD_Mouse:
+			if(id < gMouseCount)
+			{
+				pDeviceStatus->available = true;
+				pDeviceStatus->status = IDS_Ready;
+			}
 			break;
 
-		case Axis_LY:
-			inputValue = -(((float)(gJoyState[controlID].lY - 32767)) / 32767.0f);
-			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-			break;
-
-		case Axis_RX:
-			inputValue = ((float)(gJoyState[controlID].lRz - 32767)) / 32767.0f;
-			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-			break;
-
-		case Axis_RY:
-			inputValue = -(((float)(gJoyState[controlID].lZ - 32767)) / 32767.0f);
-			inputValue = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+		case IDD_Keyboard:
+			if(id < gKeyboardCount)
+			{
+				pDeviceStatus->available = true;
+				pDeviceStatus->status = IDS_Ready;
+			}
 			break;
 
 		default:
-			dprintf("Error: Undefined Control Pad Input Type\n\n");
+			DBGASSERT(false, "Invalid Input Device");
+			break;
 	}
-
-	if(controlID <= 0 && inputValue == 0.0f && Input_GetKeyboardStatusState(KSS_ScrollLock))
-	{
-		switch(type)
-		{
-			case Button_P2_Cross:
-				inputValue = Input_ReadKeyboard(MAPPING_X);
-				break;
-			case Button_P2_Circle:
-				inputValue = Input_ReadKeyboard(MAPPING_CIRCLE);
-				break;
-			case Button_P2_Box:
-				inputValue = Input_ReadKeyboard(MAPPING_BOX);
-				break;
-			case Button_P2_Triangle:
-				inputValue = Input_ReadKeyboard(MAPPING_TRIANGLE);
-				break;
-			case Button_P2_R1:
-				inputValue = Input_ReadKeyboard(MAPPING_R1);
-				break;
-			case Button_P2_L1:
-				inputValue = Input_ReadKeyboard(MAPPING_L1);
-				break;
-			case Button_P2_L2:
-				inputValue = Input_ReadKeyboard(MAPPING_L2);
-				break;
-			case Button_P2_R2:
-				inputValue = Input_ReadKeyboard(MAPPING_R2);
-				break;
-			case Button_P2_Start:
-				inputValue = Input_ReadKeyboard(MAPPING_START);
-				break;
-			case Button_P2_Select:
-				inputValue = Input_ReadKeyboard(MAPPING_SELECT);
-				break;
-			case Button_P2_LThumb:
-				inputValue = Input_ReadKeyboard(MAPPING_L3);
-				break;
-			case Button_P2_RThumb:
-				inputValue = Input_ReadKeyboard(MAPPING_R3);
-				break;
-			case Button_DUp:
-				inputValue = Input_ReadKeyboard(MAPPING_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DDown:
-				inputValue = Input_ReadKeyboard(MAPPING_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DLeft:
-				inputValue = Input_ReadKeyboard(MAPPING_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DRight:
-				inputValue = Input_ReadKeyboard(MAPPING_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-
-			case Axis_LX:
-				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
-					(Input_ReadKeyboard(MAPPING_LEFT) ? -1.0f : 0.0f) +
-					(Input_ReadKeyboard(MAPPING_RIGHT) ? 1.0f : 0.0f)
-					: 0.0f;
-				break;
-
-			case Axis_LY:
-				inputValue = Input_GetKeyboardStatusState(KSS_CapsLock) ? 
-					(Input_ReadKeyboard(MAPPING_DOWN) ? -1.0f : 0.0f) +
-					(Input_ReadKeyboard(MAPPING_UP) ? 1.0f : 0.0f)
-					: 0.0f;
-				break;
-
-			case Axis_RX:
-				break;
-
-			case Axis_RY:
-				break;
-		}
-	}
-
-	return inputValue;
 }
 
-bool Input_WasPressed(int controlID, uint32 type)
+void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 {
 	CALLSTACK;
 
-	if(!Input_IsConnected(controlID)) return 0.0f;
+	DBGASSERT(id >=0 && id < gGamepadCount, "Invalid Gamepad ID");
+	DBGASSERT(Input_IsAvailable(IDD_Gamepad, id), STR("Gamepad %d not available", id));
+	DBGASSERT(Input_IsReady(IDD_Gamepad, id), "Gamepad not ready");
 
-	bool inputValue = false;
+	DIJOYSTATE2 joyState;
+	int a;
 
-	switch(type)
+	memset(pGamepadState, 0, sizeof(*pGamepadState));
+
+	if(pDIJoystick[id])
 	{
-		case Button_P2_Cross:
-			inputValue = gJoyState[controlID].rgbButtons[2]&0x80 && !(gPrevJoyState[controlID].rgbButtons[2]&0x80);
-			break;
-		case Button_P2_Circle:
-			inputValue = gJoyState[controlID].rgbButtons[1]&0x80 && !(gPrevJoyState[controlID].rgbButtons[1]&0x80);
-			break;
-		case Button_P2_Box:
-			inputValue = gJoyState[controlID].rgbButtons[3]&0x80 && !(gPrevJoyState[controlID].rgbButtons[3]&0x80);
-			break;
-		case Button_P2_Triangle:
-			inputValue = gJoyState[controlID].rgbButtons[0]&0x80 && !(gPrevJoyState[controlID].rgbButtons[0]&0x80);
-			break;
-		case Button_P2_R1:
-			inputValue = gJoyState[controlID].rgbButtons[7]&0x80 && !(gPrevJoyState[controlID].rgbButtons[7]&0x80);
-			break;
-		case Button_P2_L1:
-			inputValue = gJoyState[controlID].rgbButtons[6]&0x80 && !(gPrevJoyState[controlID].rgbButtons[6]&0x80);
-			break;
-		case Button_P2_L2:
-			inputValue = gJoyState[controlID].rgbButtons[4]&0x80 && !(gPrevJoyState[controlID].rgbButtons[4]&0x80);
-			break;
-		case Button_P2_R2:
-			inputValue = gJoyState[controlID].rgbButtons[5]&0x80 && !(gPrevJoyState[controlID].rgbButtons[5]&0x80);
-			break;
-		case Button_P2_Start:
-			inputValue = gJoyState[controlID].rgbButtons[9]&0x80 && !(gPrevJoyState[controlID].rgbButtons[9]&0x80);
-			break;
-		case Button_P2_Select:
-			inputValue = gJoyState[controlID].rgbButtons[8]&0x80 && !(gPrevJoyState[controlID].rgbButtons[8]&0x80);
-			break;
-		case Button_P2_LThumb:
-			inputValue = gJoyState[controlID].rgbButtons[10]&0x80 && !(gPrevJoyState[controlID].rgbButtons[10]&0x80);
-			break;
-		case Button_P2_RThumb:
-			inputValue = gJoyState[controlID].rgbButtons[11]&0x80 && !(gPrevJoyState[controlID].rgbButtons[11]&0x80);
-			break;
-		case Button_DUp:
-			inputValue = gJoyState[controlID].rgbButtons[12]&0x80 && !(gPrevJoyState[controlID].rgbButtons[12]&0x80);
-			break;
-		case Button_DDown:
-			inputValue = gJoyState[controlID].rgbButtons[14]&0x80 && !(gPrevJoyState[controlID].rgbButtons[14]&0x80);
-			break;
-		case Button_DLeft:
-			inputValue = gJoyState[controlID].rgbButtons[15]&0x80 && !(gPrevJoyState[controlID].rgbButtons[15]&0x80);
-			break;
-		case Button_DRight:
-			inputValue = gJoyState[controlID].rgbButtons[13]&0x80 && !(gPrevJoyState[controlID].rgbButtons[13]&0x80);
-			break;
+		if(FAILED(pDIJoystick[id]->Poll()))
+		{
+			pDIJoystick[id]->Acquire();
+			return;
+		}
+
+		pDIJoystick[id]->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
 	}
 
-	if(controlID <= 0 && !inputValue && Input_GetKeyboardStatusState(KSS_ScrollLock))
+	for(a=0; a<16; a++)
 	{
-		switch(type)
+		if(pGamepadMappings[id]->buttonMapping[a] > -1)
+			pGamepadState->values[a] = joyState.rgbButtons[pGamepadMappings[id]->buttonMapping[a]] ? 1.0f : 0.0f;
+	}
+
+	if(pGamepadMappings[id]->buttonMapping[Button_DUp] == -1)
+	{
+		// read from POV
+		DWORD pov = joyState.rgdwPOV[0];
+
+		bool POVCentered = (LOWORD(pov) == 0xFFFF);
+
+		if(!POVCentered)
 		{
-			case Button_P2_Cross:
-				inputValue = Input_WasKeyPressed(MAPPING_X);
-				break;
-			case Button_P2_Circle:
-				inputValue = Input_WasKeyPressed(MAPPING_CIRCLE);
-				break;
-			case Button_P2_Box:
-				inputValue = Input_WasKeyPressed(MAPPING_BOX);
-				break;
-			case Button_P2_Triangle:
-				inputValue = Input_WasKeyPressed(MAPPING_TRIANGLE);
-				break;
-			case Button_P2_R1:
-				inputValue = Input_WasKeyPressed(MAPPING_R1);
-				break;
-			case Button_P2_L1:
-				inputValue = Input_WasKeyPressed(MAPPING_L1);
-				break;
-			case Button_P2_L2:
-				inputValue = Input_WasKeyPressed(MAPPING_L2);
-				break;
-			case Button_P2_R2:
-				inputValue = Input_WasKeyPressed(MAPPING_R2);
-				break;
-			case Button_P2_Start:
-				inputValue = Input_WasKeyPressed(MAPPING_START);
-				break;
-			case Button_P2_Select:
-				inputValue = Input_WasKeyPressed(MAPPING_SELECT);
-				break;
-			case Button_P2_LThumb:
-				inputValue = Input_WasKeyPressed(MAPPING_L3);
-				break;
-			case Button_P2_RThumb:
-				inputValue = Input_WasKeyPressed(MAPPING_R3);
-				break;
-			case Button_DUp:
-				inputValue = Input_WasKeyPressed(MAPPING_UP) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DDown:
-				inputValue = Input_WasKeyPressed(MAPPING_DOWN) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DLeft:
-				inputValue = Input_WasKeyPressed(MAPPING_LEFT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
-			case Button_DRight:
-				inputValue = Input_WasKeyPressed(MAPPING_RIGHT) && !Input_GetKeyboardStatusState(KSS_CapsLock);
-				break;
+			if((pov >= 0 && pov <= 4500) || (pov >= 31500 && pov <= 36000))
+				pGamepadState->values[Button_DUp] = 1.0f;
+			if((pov >= 4500 && pov <= 13500))
+				pGamepadState->values[Button_DRight] = 1.0f;
+			if((pov >= 13500 && pov <= 22500))
+				pGamepadState->values[Button_DDown] = 1.0f;
+			if((pov >= 22500 && pov <= 31500))
+				pGamepadState->values[Button_DLeft] = 1.0f;
 		}
 	}
 
-	return inputValue;
+	float *pGamepadAxis = &pGamepadState->values[Axis_LX];
+	LONG *pSourceAxis = (LONG*)&joyState;
+
+	float deadZone = Input_GetDeadZone();
+
+	for(a=0; a<4; a++)
+	{
+		if(pGamepadMappings[id]->axisMapping[a] > -1)
+		{
+			float inputValue = ((float)(pSourceAxis[pGamepadMappings[id]->axisMapping[a]] - 32767.0f)) * (1.0f/32767.0f);
+			pGamepadAxis[a] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+			if(a&1) // y axis's need to be inverted.. direct input seems to like to report them upside down ;)
+				pGamepadAxis[a] = -pGamepadAxis[a];
+		}
+	}
 }
 
-// "Is Pad Connected" Function?
-bool Input_IsConnected(int controlID)
+void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 {
 	CALLSTACK;
 
-	return controlID < gJoystickCount;
+	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+	DWORD elements = SAMPLE_BUFFER_SIZE;
+
+	HRESULT hr;
+
+	hr = pDIKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+
+	if(hr != DI_OK)
+	{
+		pDIKeyboard->Acquire();
+		return;
+	}
+	else
+	{
+		for(DWORD a=0; a<elements; a++) 
+		{
+			gKeyState[inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
+			if(inputBuffer[a].dwOfs==DIK_PAUSE)
+			{
+				// why am i doing this again?
+				gKeyState[DIK_PAUSE]=(char)0x80;
+			}
+		}
+	}
+
+	uint8 *pKeys = pKeyState->keys;
+
+#pragma message("This part is redundant, needs to DIK->KEY table")
+	for(int a=0; a<256; a++)
+	{
+		pKeys[0] = gKeyState[KEYtoDIK[a]] ? -1 : 0;
+	}
 }
 
-void SetGamepadEventHandler(EventFunc pEventFunc)
+void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 {
-	pJoyEventFunc = pEventFunc;
+	CALLSTACK;
+
+	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+	DWORD elements = SAMPLE_BUFFER_SIZE;
+
+	HRESULT hr;
+
+	hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+
+	if(hr != DI_OK)
+	{
+		pDIMouse->Acquire();
+		return;
+	}
+	else
+	{
+		for(DWORD a=0; a<elements; a++) 
+		{
+			switch(inputBuffer[a].dwOfs)
+			{
+				case DIMOFS_BUTTON0:
+					pMouseState->buttonState[0] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON1:
+					pMouseState->buttonState[1] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON2:
+					pMouseState->buttonState[2] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON3:
+					pMouseState->buttonState[3] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON4:
+					pMouseState->buttonState[4] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON5:
+					pMouseState->buttonState[5] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON6:
+					pMouseState->buttonState[6] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+				case DIMOFS_BUTTON7:
+					pMouseState->buttonState[7] = inputBuffer[a].dwData ? -1 : 0;
+					break;
+
+				case DIMOFS_X:
+					pMouseState->values[Mouse_XPos]  += (float)inputBuffer[a].dwData;
+					pMouseState->values[Mouse_XDelta] = (float)inputBuffer[a].dwData;
+					break;
+				case DIMOFS_Y:
+					pMouseState->values[Mouse_YPos]  += (float)inputBuffer[a].dwData;
+					pMouseState->values[Mouse_YDelta] = (float)inputBuffer[a].dwData;
+					break;
+
+				case DIMOFS_Z:
+					pMouseState->values[Mouse_Wheel]  = (float)inputBuffer[a].dwData;
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
 }
 
-int Input_GetNumKeyboards()
+char* Input_GetDeviceName(int source, int sourceID)
 {
-	return gKeyboardCount;
-}
+	char *pText = NULL;
 
-bool Input_ReadKeyboard(uint32 key, int keyboardID)
-{
-	DBGASSERT(keyboardID >= -1 && keyboardID < gKeyboardCount, STR("Keyboard %d unavailable", keyboardID));
+	switch(source)
+	{
+		case IDD_Gamepad:
+			break;
+		case IDD_Mouse:
+			break;
+		case IDD_Keyboard:
+			break;
+		default:
+			break;
+	}
 
-	return gKeyState[keyboardID+1][key] != 0;
-}
-
-bool Input_WasKeyPressed(uint32 key, int keyboardID)
-{
-	DBGASSERT(keyboardID >= -1 && keyboardID < gKeyboardCount, STR("Keyboard %d unavailable", keyboardID));
-
-	return gKeyState[keyboardID+1][key] && !gPrevKeyState[keyboardID+1][key];
+	return pText;
 }
 
 bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
@@ -527,47 +577,7 @@ bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
 	return (ks & 1) != 0;
 }
 
-void SetKeyboardEventHandler(EventFunc pEventFunc)
-{
-	pKeyEventFunc = pEventFunc;
-}
-
-int Input_GetNumPointers()
-{
-	return gMouseCount;
-}
-
-bool Input_ReadMouseKey(uint32 key, int mouseID)
-{
-	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
-
-	return false;
-}
-
-bool Input_WasMousePressed(uint32 key, int mouseID)
-{
-	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
-
-	return false;
-}
-
-void SetMouseEventHandler(EventFunc pEventFunc)
-{
-	pMouseEventFunc = pEventFunc;
-}
-
-void SetMouseMode(uint32 mouseMode)
-{
-
-}
-
-Vector3 Input_ReadMousePos(int mouseID)
-{
-	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
-
-	return Vector(0.0f, 0.0f, 0.0f);
-}
-
+// internal functions
 void Input_SetCooperativeLevels()
 {
 	CALLSTACK;
@@ -590,7 +600,7 @@ void Input_SetCooperativeLevels()
 		}
 	}
 
-	for(a=0; a<gJoystickCount; a++)
+	for(a=0; a<gGamepadCount; a++)
 	{
 		if(pDIJoystick[a])
 		{
@@ -616,12 +626,13 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 {
 	CALLSTACK;
 
-	if(gJoystickCount<16)
+	if(gGamepadCount<16)
 	{
-		if(FAILED(pDirectInput->CreateDevice(pdidInstance->guidInstance, &pDIJoystick[gJoystickCount], NULL)))
+		if(FAILED(pDirectInput->CreateDevice(pdidInstance->guidInstance, &pDIJoystick[gGamepadCount], NULL)))
 			return DIENUM_CONTINUE;
 
-		gJoystickCount++;
+		pGamepadMappings[gGamepadCount] = GetGamepadInfo(pdidInstance->tszProductName);
+		gGamepadCount++;
 
 		return DIENUM_CONTINUE;
 	}
@@ -647,7 +658,7 @@ void Input_Acquire(bool acquire)
 		else pDIMouse->Unacquire();
 	}
 
-	for(a=0; a<gJoystickCount; a++)
+	for(a=0; a<gGamepadCount; a++)
 	{
 		if(pDIJoystick[a])
 		{
@@ -663,703 +674,128 @@ void Input_Acquire(bool acquire)
 	}
 }
 
-void Input_UpdateKeyboard()
+GamepadInfo *GetGamepadInfo(const char *pGamepad)
 {
-	CALLSTACK;
-
-	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
-	DWORD elements = SAMPLE_BUFFER_SIZE;
-
-	HRESULT hr;
-
-	hr = pDIKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
-
-	if(hr != DI_OK)
+	for(GamepadInfo *pT = pGamepadMappingRegistry; pT; pT = pT->pNext)
 	{
-		pDIKeyboard->Acquire();
-		return;
+		if(!strcmp(pT->pName, pGamepad))
+			return pT;
 	}
-	else
-	{
-		memcpy(gPrevKeyState, gKeyState, 256*16);
 
-		for(DWORD a=0; a<elements; a++) 
-		{
-			gKeyState[0][inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
-			if(inputBuffer[a].dwOfs==DIK_PAUSE) gKeyState[0][DIK_PAUSE]=(char)0x80;
+	const char *pDefault = "default";
 
-			if(pKeyEventFunc)
-				pKeyEventFunc(inputBuffer[a].dwData ? IE_KeyDown : IE_KeyUp, inputBuffer[a].dwOfs, inputBuffer[a].dwTimeStamp);
-		}
-	}
+	if(pDefault != pGamepad)
+		return GetGamepadInfo(pDefault);
+
+	return NULL;
 }
 
-void Input_UpdateMouse()
+void LoadGamepadMappings()
 {
-	CALLSTACK;
+	// load GamepadMappings.ini
+	GamepadInfo *pGI = NULL;
+	IniFile ini;
 
-	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
-	DWORD elements = SAMPLE_BUFFER_SIZE;
+	ini.Create(File_SystemPath("GamepadMappings.ini"));
+	ini.GetFirstLine();
 
-	HRESULT hr;
-
-	gMouseState[0].lX=0;
-	gMouseState[0].lY=0;
-	gMouseState[0].lZ=0;
-
-	hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
-
-	if(hr != DI_OK)
+	while(!ini.EndOfFile())
 	{
-		pDIMouse->Acquire();
-		return;
-	}
-	else
-	{
-		for(DWORD a=0; a<elements; a++) 
+		char *pName = ini.GetName();
+
+		if(ini.IsSection())
 		{
-			switch(inputBuffer[a].dwOfs)
+			pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
+			pGI->pName = (char*)&pGI[1];
+			strcpy(pGI->pName, pName);
+
+			pGI->pNext = pGamepadMappingRegistry;
+			pGamepadMappingRegistry = pGI;
+		}
+		else
+		{
+			if(!stricmp(pName, "Axis_LX"))
 			{
-				case DIMOFS_BUTTON0:
-					gMouseState[0].rgbButtons[0]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON1:
-					gMouseState[0].rgbButtons[1]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON2:
-					gMouseState[0].rgbButtons[2]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON3:
-					gMouseState[0].rgbButtons[3]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON4:
-					gMouseState[0].rgbButtons[4]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON5:
-					gMouseState[0].rgbButtons[5]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON6:
-					gMouseState[0].rgbButtons[6]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_BUTTON7:
-					gMouseState[0].rgbButtons[7]=(char)inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_X:
-					gMouseState[0].lX+=inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_Y:
-					gMouseState[0].lY+=inputBuffer[a].dwData;
-					break;
-
-				case DIMOFS_Z:
-					gMouseState[0].lZ+=inputBuffer[a].dwData;
-					break;
-
-				default:
-					break;
+				pGI->axisMapping[0] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Axis_LY"))
+			{
+				pGI->axisMapping[1] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Axis_RX"))
+			{
+				pGI->axisMapping[2] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Axis_RY"))
+			{
+				pGI->axisMapping[3] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Cross"))
+			{
+				pGI->buttonMapping[0] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Circle"))
+			{
+				pGI->buttonMapping[1] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Box"))
+			{
+				pGI->buttonMapping[2] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Triangle"))
+			{
+				pGI->buttonMapping[3] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_R1"))
+			{
+				pGI->buttonMapping[4] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_L1"))
+			{
+				pGI->buttonMapping[5] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_L2"))
+			{
+				pGI->buttonMapping[6] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_R2"))
+			{
+				pGI->buttonMapping[7] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Start"))
+			{
+				pGI->buttonMapping[8] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_Select"))
+			{
+				pGI->buttonMapping[9] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_LThumb"))
+			{
+				pGI->buttonMapping[10] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_P2_RThumb"))
+			{
+				pGI->buttonMapping[11] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_DUp"))
+			{
+				pGI->buttonMapping[12] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_DDown"))
+			{
+				pGI->buttonMapping[13] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_DLeft"))
+			{
+				pGI->buttonMapping[14] = ini.AsInt(0);
+			}
+			else if(!stricmp(pName, "Button_DRight"))
+			{
+				pGI->buttonMapping[15] = ini.AsInt(0);
 			}
 		}
+
+		ini.GetNextLine();
 	}
-}
-
-void Input_UpdateJoystick()
-{
-	CALLSTACK;
-
-	for(int a=0; a<gJoystickCount; a++)
-	{
-		if(pDIJoystick[a])
-		{
-			if(FAILED(pDIJoystick[a]->Poll()))
-			{
-				pDIJoystick[a]->Acquire();
-				return;
-			}
-
-			gPrevJoyState[a] = gJoyState[a];
-
-			pDIJoystick[a]->GetDeviceState(sizeof(DIJOYSTATE2), &gJoyState[a]);
-		}
-	}
-}
-
-char* Input_EnumerateString(ButtonMapping *pMap)
-{
-	char *pString;
-
-	if(pMap->source==CTRL_JOYSTICK)
-	{
-		pString = STR("Joy %d ", pMap->sourceIndex);
-
-		switch(pMap->control)
-		{
-			case CTRL_JOYSTICK_X:
-				pString = STR("%s %sX-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_Y:
-				pString = STR("%s %sY-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_Z:
-				pString = STR("%s %sZ-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_RX:
-				pString = STR("%s %sX-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_RY:
-				pString = STR("%s %sY-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_RZ:
-				pString = STR("%s %sZ-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_SLIDER:
-				pString = STR("%s %sSlider", pString, "");
-				break;
-			case CTRL_JOYSTICK_BUTTON:
-				pString = STR("%s Button", pString);
-				break;
-			case CTRL_JOYSTICK_VX:
-				pString = STR("%s %sVX-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VY:
-				pString = STR("%s %sVY-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VZ:
-				pString = STR("%s %sVZ-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VRX:
-				pString = STR("%s %sVX-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VRY:
-				pString = STR("%s %sVY-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VRZ:
-				pString = STR("%s %sVZ-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_VSLIDER:
-				pString = STR("%s %sVSlider", pString, "");
-				break;
-			case CTRL_JOYSTICK_AX:
-				pString = STR("%s %sAX-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_AY:
-				pString = STR("%s %sAY-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_AZ:
-				pString = STR("%s %sAZ-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_ARX:
-				pString = STR("%s %sAX-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_ARY:
-				pString = STR("%s %sAY-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_ARZ:
-				pString = STR("%s %sAZ-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_ASLIDER:
-				pString = STR("%s %sASlider", pString, "");
-				break;
-			case CTRL_JOYSTICK_FX:
-				pString = STR("%s %sFX-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FY:
-				pString = STR("%s %sFY-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FZ:
-				pString = STR("%s %sFZ-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FRX:
-				pString = STR("%s %sFX-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FRY:
-				pString = STR("%s %sFY-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FRZ:
-				pString = STR("%s %sFZ-Rotation-Axis", pString, "");
-				break;
-			case CTRL_JOYSTICK_FSLIDER:
-				pString = STR("%s %sFSlider", pString, "");
-				break;
-			default:
-				pString = STR("%s Unknown", pString);
-				break;
-		}
-	}
-	else if(pMap->source==CTRL_MOUSE)
-	{
-		pString = STR("Mouse %d ", pMap->sourceIndex);
-
-		switch(pMap->control)
-		{
-			case CTRL_MOUSE_X:
-				pString = STR("%s %sX-Axis", pString, "");
-				break;
-			case CTRL_MOUSE_Y:
-				pString = STR("%s %sY-Axis", pString, "");
-				break;
-			case CTRL_MOUSE_Z:
-				pString = STR("%s Wheel %s", pString, "");
-				break;
-			case CTRL_MOUSE_BUTTON:
-				pString = STR("%s Button", pString);
-				break;
-			default:
-				pString = STR("%s Unknown", pString);
-				break;
-		}
-	}
-	else if(pMap->source==CTRL_KEY)
-	{
-//		pString = STR("Keyboard %d ", pMap->sourceIndex);
-
-		switch(pMap->control)
-		{
-			case DIK_0:
-				pString = STR("0");
-				break;
-			case DIK_1:
-				pString = STR("1");
-				break;
-			case DIK_2:
-				pString = STR("2");
-				break;
-			case DIK_3:
-				pString = STR("3");
-				break;
-			case DIK_4:
-				pString = STR("4");
-				break;
-			case DIK_5:
-				pString = STR("5");
-				break;
-			case DIK_6:
-				pString = STR("6");
-				break;
-			case DIK_7:
-				pString = STR("7");
-				break;
-			case DIK_8:
-				pString = STR("8");
-				break;
-			case DIK_9:
-				pString = STR("9");
-				break;
-			case DIK_A:
-				pString = STR("A");
-				break;
-			case DIK_ABNT_C1:
-				pString = STR("ABTN C1");
-				break;
-			case DIK_ABNT_C2:
-				pString = STR("ABTN C2");
-				break;
-			case DIK_ADD:
-				pString = STR("Numpad Plus");
-				break;
-			case DIK_APOSTROPHE:
-				pString = STR("Apostrophe");
-				break;
-			case DIK_APPS:
-				pString = STR("Apps");
-				break;
-			case DIK_AT:
-				pString = STR("AT");
-				break;
-			case DIK_AX:
-				pString = STR("AX");
-				break;
-			case DIK_B:
-				pString = STR("B");
-				break;
-			case DIK_BACK:
-				pString = STR("Backspace");
-				break;
-			case DIK_BACKSLASH:
-				pString = STR("Backslash");
-				break;
-			case DIK_C:
-				pString = STR("C");
-				break;
-			case DIK_CALCULATOR:
-				pString = STR("Calculator");
-				break;
-			case DIK_CAPITAL:
-				pString = STR("CapsLock");
-				break;
-			case DIK_COLON:
-				pString = STR("Colon");
-				break;
-			case DIK_COMMA:
-				pString = STR("Comma");
-				break;
-			case DIK_CONVERT:
-				pString = STR("Convert");
-				break;
-			case DIK_D:
-				pString = STR("D");
-				break;
-			case DIK_DECIMAL:
-				pString = STR("Numpad Decimal");
-				break;
-			case DIK_DELETE:
-				pString = STR("Del");
-				break;
-			case DIK_DIVIDE:
-				pString = STR("Numpad Slash");
-				break;
-			case DIK_DOWN:
-				pString = STR("Down");
-				break;
-			case DIK_E:
-				pString = STR("E");
-				break;
-			case DIK_END:
-				pString = STR("End");
-				break;
-			case DIK_EQUALS:
-				pString = STR("Equals");
-				break;
-			case DIK_ESCAPE:
-				pString = STR("Escape");
-				break;
-			case DIK_F:
-				pString = STR("F");
-				break;
-			case DIK_F1:
-				pString = STR("F1");
-				break;
-			case DIK_F2:
-				pString = STR("F2");
-				break;
-			case DIK_F3:
-				pString = STR("F3");
-				break;
-			case DIK_F4:
-				pString = STR("F4");
-				break;
-			case DIK_F5:
-				pString = STR("F5");
-				break;
-			case DIK_F6:
-				pString = STR("F6");
-				break;
-			case DIK_F7:
-				pString = STR("F7");
-				break;
-			case DIK_F8:
-				pString = STR("F8");
-				break;
-			case DIK_F9:
-				pString = STR("F9");
-				break;
-			case DIK_F10:
-				pString = STR("F10");
-				break;
-			case DIK_F11:
-				pString = STR("F11");
-				break;
-			case DIK_F12:
-				pString = STR("F12");
-				break;
-			case DIK_F13:
-				pString = STR("F13");
-				break;
-			case DIK_F14:
-				pString = STR("F14");
-				break;
-			case DIK_F15:
-				pString = STR("F15");
-				break;
-			case DIK_G:
-				pString = STR("G");
-				break;
-			case DIK_GRAVE:
-				pString = STR("Grave");
-				break;
-			case DIK_H:
-				pString = STR("H");
-				break;
-			case DIK_HOME:
-				pString = STR("Home");
-				break;
-			case DIK_I:
-				pString = STR("I");
-				break;
-			case DIK_INSERT:
-				pString = STR("Insert");
-				break;
-			case DIK_J:
-				pString = STR("J");
-				break;
-			case DIK_K:
-				pString = STR("K");
-				break;
-			case DIK_KANA:
-				pString = STR("Kana");
-				break;
-			case DIK_KANJI:
-				pString = STR("Kanji");
-				break;
-			case DIK_L:
-				pString = STR("L");
-				break;
-			case DIK_LBRACKET:
-				pString = STR("LSqrBracket");
-				break;
-			case DIK_LCONTROL:
-				pString = STR("LCtrl");
-				break;
-			case DIK_LEFT:
-				pString = STR("Left");
-				break;
-			case DIK_LMENU:
-				pString = STR("LAtl");
-				break;
-			case DIK_LSHIFT:
-				pString = STR("LShift");
-				break;
-			case DIK_LWIN:
-				pString = STR("LWin");
-				break;
-			case DIK_M:
-				pString = STR("M");
-				break;
-			case DIK_MAIL:
-				pString = STR("Mail");
-				break;
-			case DIK_MEDIASELECT:
-				pString = STR("Media Select");
-				break;
-			case DIK_MEDIASTOP:
-				pString = STR("Media Stop");
-				break;
-			case DIK_MINUS:
-				pString = STR("Minus");
-				break;
-			case DIK_MULTIPLY:
-				pString = STR("Numpad Multiply");
-				break;
-			case DIK_MUTE:
-				pString = STR("Mute");
-				break;
-			case DIK_MYCOMPUTER:
-				pString = STR("My Computer");
-				break;
-			case DIK_N:
-				pString = STR("N");
-				break;
-			case DIK_NEXT:
-				pString = STR("PgDn");
-				break;
-			case DIK_NEXTTRACK:
-				pString = STR("Next Track");
-				break;
-			case DIK_NOCONVERT:
-				pString = STR("No Convert");
-				break;
-			case DIK_NUMLOCK:
-				pString = STR("NumLock");
-				break;
-			case DIK_NUMPAD0:
-				pString = STR("Numpad 0");
-				break;
-			case DIK_NUMPAD1:
-				pString = STR("Numpad 1");
-				break;
-			case DIK_NUMPAD2:
-				pString = STR("Numpad 2");
-				break;
-			case DIK_NUMPAD3:
-				pString = STR("Numpad 3");
-				break;
-			case DIK_NUMPAD4:
-				pString = STR("Numpad 4");
-				break;
-			case DIK_NUMPAD5:
-				pString = STR("Numpad 5");
-				break;
-			case DIK_NUMPAD6:
-				pString = STR("Numpad 6");
-				break;
-			case DIK_NUMPAD7:
-				pString = STR("Numpad 7");
-				break;
-			case DIK_NUMPAD8:
-				pString = STR("Numpad 8");
-				break;
-			case DIK_NUMPAD9:
-				pString = STR("Numpad 9");
-				break;
-			case DIK_NUMPADCOMMA:
-				pString = STR("Numpad Comma");
-				break;
-			case DIK_NUMPADENTER:
-				pString = STR("Numpad Enter");
-				break;
-			case DIK_NUMPADEQUALS:
-				pString = STR("Numpad Equals");
-				break;
-			case DIK_O:
-				pString = STR("O");
-				break;
-			case DIK_OEM_102:
-				pString = STR("OEM 102");
-				break;
-			case DIK_P:
-				pString = STR("P");
-				break;
-			case DIK_PAUSE:
-				pString = STR("Pause");
-				break;
-			case DIK_PERIOD:
-				pString = STR("Period");
-				break;
-			case DIK_PLAYPAUSE:
-				pString = STR("PlayPause");
-				break;
-			case DIK_POWER:
-				pString = STR("Power");
-				break;
-			case DIK_PREVTRACK:
-				pString = STR("Prev Track");
-				break;
-			case DIK_PRIOR:
-				pString = STR("PgUp");
-				break;
-			case DIK_Q:
-				pString = STR("Q");
-				break;
-			case DIK_R:
-				pString = STR("R");
-				break;
-			case DIK_RBRACKET:
-				pString = STR("RSqrBracket");
-				break;
-			case DIK_RCONTROL:
-				pString = STR("RCtrl");
-				break;
-			case DIK_RETURN:
-				pString = STR("Enter");
-				break;
-			case DIK_RIGHT:
-				pString = STR("Right");
-				break;
-			case DIK_RMENU:
-				pString = STR("RAlt");
-				break;
-			case DIK_RSHIFT:
-				pString = STR("RShift");
-				break;
-			case DIK_RWIN:
-				pString = STR("RWin");
-				break;
-			case DIK_S:
-				pString = STR("S");
-				break;
-			case DIK_SCROLL:
-				pString = STR("ScrollLock");
-				break;
-			case DIK_SEMICOLON:
-				pString = STR("Semicolon");
-				break;
-			case DIK_SLASH:
-				pString = STR("Slash");
-				break;
-			case DIK_SLEEP:
-				pString = STR("Sleep");
-				break;
-			case DIK_SPACE:
-				pString = STR("Space");
-				break;
-			case DIK_STOP:
-				pString = STR("Stop");
-				break;
-			case DIK_SUBTRACT:
-				pString = STR("Numpad Minus");
-				break;
-			case DIK_SYSRQ:
-				pString = STR("SysRq");
-				break;
-			case DIK_T:
-				pString = STR("T");
-				break;
-			case DIK_TAB:
-				pString = STR("Tab");
-				break;
-			case DIK_U:
-				pString = STR("U");
-				break;
-			case DIK_UNDERLINE:
-				pString = STR("Underscore");
-				break;
-			case DIK_UNLABELED:
-				pString = STR("Unlabeled");
-				break;
-			case DIK_UP:
-				pString = STR("Up");
-				break;
-			case DIK_V:
-				pString = STR("V");
-				break;
-			case DIK_VOLUMEDOWN:
-				pString = STR("Volume Down");
-				break;
-			case DIK_VOLUMEUP:
-				pString = STR("Volume Up");
-				break;
-			case DIK_W:
-				pString = STR("W");
-				break;
-			case DIK_WAKE:
-				pString = STR("Wake");
-				break;
-			case DIK_WEBBACK:
-				pString = STR("Web Back");
-				break;
-			case DIK_WEBFAVORITES:
-				pString = STR("Web Favorites");
-				break;
-			case DIK_WEBFORWARD:
-				pString = STR("Web Foreward");
-				break;
-			case DIK_WEBHOME:
-				pString = STR("Web Home");
-				break;
-			case DIK_WEBREFRESH:
-				pString = STR("Web Refresh");
-				break;
-			case DIK_WEBSEARCH:
-				pString = STR("Web Search");
-				break;
-			case DIK_WEBSTOP:
-				pString = STR("Web Stop");
-				break;
-			case DIK_X:
-				pString = STR("X");
-				break;
-			case DIK_Y:
-				pString = STR("Y");
-				break;
-			case DIK_YEN:
-				pString = STR("Yen");
-				break;
-			case DIK_Z:
-				pString = STR("Z");
-				break;
-			default:
-				pString = STR("Unknown");
-				break;
-		}
-	}
-
-	return pString;
 }

@@ -236,7 +236,18 @@ char* IniFile::GetName()
 	if(IsSection()) pStart++;
 	pEnd = pStart;
 
-	while(IsAlphaNumeric(*pEnd)) pEnd++;
+	if(IsSection())
+	{
+		while(*pEnd != ']')
+		{
+			DBGASSERT(*pEnd != NULL || *pEnd != '\n', "Section header does not have closing ']'");
+			pEnd++;
+		}
+	}
+	else
+	{
+		while(IsAlphaNumeric(*pEnd)) pEnd++;
+	}
 
 	return STRn(pStart, pEnd-pStart);
 }
@@ -244,9 +255,11 @@ char* IniFile::GetName()
 inline char* IniFile::GetFloat(char *pOffset, char **ppFloat)
 {
 	CALLSTACK;
-	INIASSERT(IsNumeric(*pOffset), STR("Entry '%s' is not a number", GetName()));
+	INIASSERT(IsNumeric(*pOffset) || (*pOffset == '-' && IsNumeric(pOffset[1])), STR("Entry '%s' is not a number", GetName()));
 
 	char *pEnd = pOffset;
+
+	if(*pEnd == '-') pEnd++;
 
 	int dotFound = 1;
 	while(IsNumeric(*pEnd) || (*pEnd == '.' && dotFound--)) pEnd++;

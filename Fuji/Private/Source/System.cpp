@@ -140,14 +140,14 @@ void System_Update()
 	Input_Update();
 
 #if defined(_XBOX)
-	if(Input_ReadGamepad(0, Button_XB_Start) && Input_ReadGamepad(0, Button_XB_White) && Input_ReadGamepad(0, Button_XB_LTrig) && Input_ReadGamepad(0, Button_XB_RTrig))
+	if(Input_Read(IDD_Gamepad, 0, Button_XB_Start) && Input_Read(IDD_Gamepad, 0, Button_XB_White) && Input_Read(IDD_Gamepad, 0, Button_XB_LTrig) && Input_Read(IDD_Gamepad, 0, Button_XB_RTrig))
 		RestartCallback(NULL, NULL);
 #else//if defined(_WINDOWS)
-	if(Input_ReadGamepad(0, Button_P2_Start) && Input_ReadGamepad(0, Button_P2_Select) && Input_ReadGamepad(0, Button_P2_L1) && Input_ReadGamepad(0, Button_P2_R1) && Input_ReadGamepad(0, Button_P2_L2) && Input_ReadGamepad(0, Button_P2_R2))
+	if(Input_Read(IDD_Gamepad, 0, Button_P2_Start) && Input_Read(IDD_Gamepad, 0, Button_P2_Select) && Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_R1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_Read(IDD_Gamepad, 0, Button_P2_R2))
 		RestartCallback(NULL, NULL);
 #endif
 
-	if(Input_ReadGamepad(0, Button_P2_L1) && Input_ReadGamepad(0, Button_P2_L2) && Input_WasPressed(0, Button_P2_LThumb))
+	if(Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_WasPressed(IDD_Gamepad, 0, Button_P2_LThumb))
 		gDrawSystemInfo = !gDrawSystemInfo;
 
 #if !defined(_RETAIL)
