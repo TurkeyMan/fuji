@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include "Common.h"
-#include "Display.h"
 #include "Util.h"
 #include "Vector3.h"
+#if !defined(_FUJI_UTIL)
+#include "Display.h"
 #include "Primitive.h"
 #include "Font.h"
+#endif
 
 char stringBuffer[1024*128];
 uint32 stringOffset;
@@ -19,6 +21,38 @@ char *ModuleName(char *pSourceFileName)
 	}
 	return (pTemp) ? pTemp+1 : pSourceFileName;
 }
+
+#if defined(_WINDOWS)
+
+bool Debug_MsgBox(const char *pMessageText, const char *pTitle, const char *pTime)
+{
+	bool bResult = false;
+
+	if(IDYES == MessageBox(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
+	{
+		bResult = true;
+	}
+
+	return bResult;
+}
+
+#endif
+
+#if defined(_FUJI_UTIL)
+
+void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+{
+	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
+	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
+
+	// query for debug or exit of process
+	if(!Debug_MsgBox(STR("Failed Condition: (%s)\n%s\nFile: %s\nLine: %d", pReason, pMessage, pFile, line), "Assertion Failure, do you wish to debug?", "timewouldgohere"))
+	{
+		ExitProcess(0);
+	}
+}
+
+#else
 
 void Callstack_Log()
 {
@@ -66,18 +100,6 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 }
 
 #elif defined(_WINDOWS)
-
-bool Debug_MsgBox(const char *pMessageText, const char *pTitle, const char *pTime)
-{
-	bool bResult = false;
-
-	if(IDYES == MessageBox(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
-	{
-		bResult = true;
-	}
-
-	return bResult;
-}
 
 void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
@@ -188,6 +210,8 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		Display_EndFrame();
 	}
 }
+
+#endif
 
 //
 // This just does OutputDebugString using a format string.

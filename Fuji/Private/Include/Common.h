@@ -12,7 +12,9 @@
 	#include <d3dx9.h>
 #endif
 
+#if !defined(PI)
 #define PI 3.141592653589f
+#endif
 #define ALMOST_ZERO 0.000001f
 
 #if !defined(_RETAIL)
@@ -37,8 +39,11 @@ typedef char int8;
 // useful macros
 #define Clamp(x,y,z) max((x), min((y),(z)))
 
-#include "Heap.h"
-#include "Callstack.h"
+#if !defined(_FUJI_UTIL)
+	#include "Heap.h"
+	#include "Callstack.h"
+#endif
+
 #include "Util.h"
 
 #endif // _COMMON_H
