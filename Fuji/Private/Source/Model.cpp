@@ -46,7 +46,7 @@ Model* Model::Create(char *pFilename)
 void Model::Draw()
 {
 	CALLSTACKc;
-
+/*
 	pd3dDevice->SetStreamSource(0, pVertexBuffer, 0, sizeof(FileVertex));
 	pd3dDevice->SetFVF(FileVertex::FVF);
 	pd3dDevice->SetIndices(pIndexBuffer);
@@ -56,6 +56,7 @@ void Model::Draw()
 		pModelData->pMaterials[pModelData->pSubobjects[a].materialIndex].pMaterial->Use();
 		pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, pModelData->pSubobjects[a].indexOffset, 0, pModelData->pSubobjects[a].indexCount, 0, pModelData->pSubobjects[a].indexCount/3);
 	}
+*/
 }
 
 void ModelData::FixUpPointers()
@@ -63,8 +64,8 @@ void ModelData::FixUpPointers()
 	CALLSTACK;
 
 	uint32 base = (uint32)((char*)this);
-	pName += base;
 
+	pName += base;
 	*((char**)&pMaterials) += base;
 	*((char**)&pSubobjects) += base;
 	*((char**)&pCustomData) += base;
@@ -82,5 +83,19 @@ void ModelData::CollapsePointers()
 {
 	CALLSTACK;
 
+	uint32 base = (uint32)((char*)this);
+
+	for(int a=0; a<materialCount; a++)
+	{
+		pMaterials[a].pName -= base;
+		pMaterials[a].pMaterialDescription -= base;
+	}
+
+	pName -= base;
+	*((char**)&pMaterials) -= base;
+	*((char**)&pSubobjects) -= base;
+	*((char**)&pCustomData) -= base;
+	pVertexData -= base;
+	pIndexData -= base;
 }
 

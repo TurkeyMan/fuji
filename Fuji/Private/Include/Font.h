@@ -13,11 +13,11 @@ public:
 
 	int DrawText(float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert = false);
 	int DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert = false);
-	int DrawText(Vector3 pos, float height, uint32 colour, const char *text, bool invert = false);
+	int DrawText(const Vector3 &pos, float height, uint32 colour, const char *text, bool invert = false);
 
 	int DrawTextf(float pos_x, float pos_y, float height, uint32 colour, const char *format, ...);
 	int DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...);
-	int DrawTextf(Vector3 pos, float height, uint32 colour, const char *format, ...);
+	int DrawTextf(const Vector3 &pos, float height, uint32 colour, const char *format, ...);
 
 	// data members
 	Texture *pTexture;

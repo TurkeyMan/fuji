@@ -219,8 +219,8 @@ void Callstack_DrawProfile()
 
 		for(i = FunctionRegistry.begin(), a=0; i!= FunctionRegistry.end() && a<19; i++, a++)
 		{
-			uint32 ms = (uint32)(i->second.total / (GetHighResolutionFrequency()/1000000));
-			double percent = (double)i->second.total/((double)GetHighResolutionFrequency() * 0.01/60.0);
+			uint32 ms = (uint32)(i->second.total / (RDTSC()/1000000));
+			double percent = (double)i->second.total/((double)GetTSCFrequency() * 0.01/60.0);
 
 			debugFont.DrawTextf(100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first);
 			debugFont.DrawTextf(300, y, 0, 15.0f, 0xFFFFFFFF, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);
@@ -241,7 +241,7 @@ void Callstack_BeginFrame()
 	CALLSTACK("Callstack_BeginFrame");
 
 #if defined(_CALLSTACK_MONITORING)
-	monitorInfo.frameEnd = GetHighResolutionTime();
+	monitorInfo.frameEnd = RDTSC();
 
 	Callstack_PrepareMonitoredData();
 
@@ -263,7 +263,7 @@ void Callstack_BeginFrame()
 	}
 
 #if defined(_CALLSTACK_MONITORING)
-	monitorInfo.frameStart = GetHighResolutionTime();
+	monitorInfo.frameStart = RDTSC();
 	monitorInfo.overheadTime += monitorInfo.frameStart - monitorInfo.frameEnd;
 #endif
 }
@@ -272,7 +272,7 @@ void Callstack_BeginFrame()
 #if defined(_CALLSTACK_MONITORING)
 void Callstack_EndFrame()
 {
-	monitorInfo.frameFinish = GetHighResolutionTime();
+	monitorInfo.frameFinish = RDTSC();
 }
 #endif
 

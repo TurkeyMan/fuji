@@ -13,14 +13,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	System_GameLoop();
 }
 
-uint64 ReadPerformanceCounter()
+uint64 RDTSC()
 {
 	uint64 tickCount;
 	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
 	return tickCount;
 }
 
-uint64 GetPerfprmanceFrequency()
+uint64 GetTSCFrequency()
 {
 	uint64 freq;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);

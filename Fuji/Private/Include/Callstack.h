@@ -3,7 +3,7 @@
 
 #include <map>
 #include "Array.h"
-#include "Timer.h"
+#include "System.h"
 
 void Callstack_InitModule();
 void Callstack_DeinitModule();
@@ -78,7 +78,7 @@ void Callstack_DeinitModule();
 				pProfile->calls++;
 
 				int64 temp;
-				temp = GetHighResolutionTime();
+				temp = RDTSC();
 
 				pProfile->thisCall = temp;
 
@@ -95,7 +95,7 @@ void Callstack_DeinitModule();
 			if(profiling)
 			{
 				int64 temp;
-				temp = GetHighResolutionTime();
+				temp = RDTSC();
 
 #if defined(_CALLSTACK_MONITORING)
 				monitorInfo.calls.push_back(MonitorCall(false, &t, temp));

@@ -15,24 +15,6 @@ MenuItemFloat playRate(1.0f, 1.0f, 0.0f, 100.0f);
 
 /**** Functions ****/
 
-uint64 GetHighResolutionTime()
-{
-	uint64 t;
-
-	QueryPerformanceCounter((LARGE_INTEGER*)&t);
-
-	return t;
-}
-
-uint64 GetHighResolutionFrequency()
-{
-	uint64 t;
-
-	QueryPerformanceFrequency((LARGE_INTEGER*)&t);
-
-	return t;
-}
-
 void UpdateRate(MenuObject *pObject, void *pData)
 {
 	gSystemTimer.SetRate(((MenuItemFloat*)pObject)->data);
@@ -53,8 +35,8 @@ void Timer::Init()
 	accumulator=0;
 	lastUpdate=0;
 
-	thisCall = lastCall = GetHighResolutionTime();
-	freq = GetHighResolutionFrequency();
+	thisCall = lastCall = RDTSC();
+	freq = GetTSCFrequency();
 
 	FPS=0.0;
 
@@ -84,7 +66,7 @@ void Timer::Update()
 		if(fixed)
 		{
 			lastCall=thisCall;
-			thisCall = GetHighResolutionTime();
+			thisCall = RDTSC();
 
 			lastUpdate=accumulator;
 			accumulator+=freq/fixedFPS;
@@ -92,7 +74,7 @@ void Timer::Update()
 		else
 		{
 			lastCall=thisCall;
-			thisCall = GetHighResolutionTime();
+			thisCall = RDTSC();
 
 			lastUpdate=accumulator;
 			accumulator+=(uint64)((thisCall-lastCall)*rate);
@@ -129,46 +111,11 @@ void Timer::Reset()
 	accumulator=0;
 	lastUpdate=0;
 
-	lastCall = GetHighResolutionTime();
+	lastCall = RDTSC();
 
 	FPS=0.0;
 	deltaD=0.0;
 	deltaF=0.0f;
-}
-
-void Timer::SetRate(double _rate)
-{
-	rate=_rate;
-}
-
-double Timer::GetRate()
-{
-	return rate;
-}
-
-double Timer::TimeDeltaD()
-{
-	return deltaD;
-}
-
-float Timer::TimeDeltaF()
-{
-	return deltaF;
-}
-
-float Timer::GetFPS()
-{
-	return (float)FPS;
-}
-
-double Timer::GetSecondsD()
-{
-	return (double)accumulator/freq;
-}
-
-float Timer::GetSecondsF()
-{
-	return (float)accumulator/freq;	
 }
 
 void Timer::Pause(bool pause)
@@ -180,22 +127,6 @@ void Timer::Pause(bool pause)
 	else
 	{
 		UNFLAG(flags, Timer_Paused);
-		thisCall = GetHighResolutionTime();
+		thisCall = RDTSC();
 	}
-}
-
-bool Timer::IsPaused()
-{
-	return (flags&Timer_Paused)?true:false;
-}
-
-void Timer::SetFixed(int fps)
-{
-	fixed=true;
-	fixedFPS=fps;
-}
-
-void Timer::SetFree()
-{
-	fixed=false;
 }

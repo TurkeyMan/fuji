@@ -49,6 +49,7 @@ void Material_DeinitModule()
 
 char* Material::GetIDString()
 {
+	CALLSTACK;
 /*
 	char *id = &stringBuffer[stringBufferOffset];
 	*id = NULL;
@@ -65,6 +66,8 @@ char* Material::GetIDString()
 
 Material* Material::CreateDefault()
 {
+	CALLSTACK;
+
 	static int defaultCount = 0;
 
 	Material *pMat = materialList.Create();
@@ -89,6 +92,8 @@ Material* Material::CreateDefault()
 
 void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 {
+	CALLSTACK;
+
 	if(materialDefinitions.FindSection(pDefinition))
 	{
 		materialDefinitions.GetNextLine();
@@ -250,6 +255,8 @@ void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 
 Material* Material::Create(char *pName)
 {
+	CALLSTACK;
+
 	Material *pMat = NULL;
 
 	// if material already exists, bump refCount
@@ -290,6 +297,8 @@ Material* Material::Create(char *pName)
 
 void Material::Release()
 {
+	CALLSTACK;
+
 	refCount--;
 
 	if(!refCount)
@@ -305,6 +314,8 @@ void Material::Release()
 
 void Material::Use()
 {
+	CALLSTACK;
+
 	current = *this;
 
 	// set some render states

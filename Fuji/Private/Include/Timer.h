@@ -5,14 +5,8 @@
 
 #define Timer_Paused	0x0001
 
-#define UNFLAG(x, y) (x^=x&y)
-#define FLAG(x, y) (x|=y)
-
 void Timer_InitModule();
 void Timer_DeinitModule(); 
-
-uint64 GetHighResolutionTime();
-uint64 GetHighResolutionFrequency();
 
 class Timer
 {
@@ -22,22 +16,22 @@ public:
 	void Update();
 	void Reset();
 
-	void SetRate(double rate);
-	double GetRate();
+	inline void SetRate(double _rate)	{ rate=_rate; }
+	inline double GetRate()				{ return rate; }
 
-	double TimeDeltaD();
-	float TimeDeltaF();
+	inline double TimeDeltaD()			{ return deltaD; }
+	inline float TimeDeltaF()			{ return deltaF; }
 
-	float GetFPS();
+	inline float GetFPS()				{ return (float)FPS; }
 
-	double GetSecondsD();
-	float GetSecondsF();
+	inline double GetSecondsD()			{ return (double)accumulator/freq; }
+	inline float GetSecondsF()			{ return (float)accumulator/freq; }
 
 	void Pause(bool pause);
-	bool IsPaused();
+	inline bool IsPaused()				{ return (flags&Timer_Paused)?true:false; }
 
-	void SetFixed(int fps);
-	void SetFree();
+	inline void SetFixed(int fps)		{ fixed=true; fixedFPS=fps; }
+	inline void SetFree()				{ fixed=false; }
 
 protected:
 	uint64 accumulator, lastUpdate, thisCall, lastCall, freq;

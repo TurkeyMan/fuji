@@ -45,7 +45,7 @@ public:
 	virtual void Draw();
 	virtual void Update();
 
-	virtual float ListDraw(bool selected, Vector3 pos, float maxWidth);
+	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
 	virtual Vector3 GetDimensions(float maxWidth);
 

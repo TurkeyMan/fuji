@@ -15,6 +15,7 @@
 int gQuit = 0;
 int gRestart = 1;
 uint32 gFrameCount = 0;
+float gSystemTimeDelta;
 
 MenuItemStatic quitOption;
 MenuItemStatic restartOption;
@@ -40,8 +41,10 @@ void System_Init()
 
 	DebugMenu_InitModule();
 	Callstack_InitModule();
+
 	Timer_InitModule();
 	gSystemTimer.Init();
+	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
 	FileSystem_InitModule();
 
@@ -131,6 +134,11 @@ int System_GameLoop()
 {
 	CALLSTACK;
 
+	// allow's game to set defaults and what not
+	// before the system begins initialisation
+	Game_InitSystem();
+
+	// initialise the system and create displays etc..
 	System_Init();
 
 	while(gRestart)
@@ -176,12 +184,6 @@ void System_UpdateTimeDelta()
 	CALLSTACK;
 
 	gSystemTimer.Update();
-}
-
-float GetFPS()
-{
-	CALLSTACK;
-
-	return gSystemTimer.GetFPS();
+	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 }
 

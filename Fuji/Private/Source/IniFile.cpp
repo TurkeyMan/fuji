@@ -73,7 +73,7 @@ void IniFile::Release()
 
 	if(pIniBuffer && owned)
 	{
-		delete[] pIniBuffer;
+		Heap_Free(pIniBuffer);
 		pIniBuffer = NULL;
 	}
 }

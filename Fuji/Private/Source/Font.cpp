@@ -113,7 +113,7 @@ int Font::DrawText(float pos_x, float pos_y, float height, uint32 colour, const 
 	return DrawText(pos_x, pos_y, 0, height, colour, text, invert);
 }
 
-int Font::DrawText(Vector3 pos, float height, uint32 colour, const char *text, bool invert)
+int Font::DrawText(const Vector3 &pos, float height, uint32 colour, const char *text, bool invert)
 {
 	return DrawText(pos.x, pos.y, pos.z, height, colour, text, invert);
 }
@@ -146,7 +146,7 @@ int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 
 	return DrawText(pos_x, pos_y, pos_z, height, colour, buffer);
 }
 
-int Font::DrawTextf(Vector3 pos, float height, uint32 colour, const char *format, ...)
+int Font::DrawTextf(const Vector3 &pos, float height, uint32 colour, const char *format, ...)
 {
 	CALLSTACK;
 

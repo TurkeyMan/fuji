@@ -109,8 +109,10 @@ void TextureBrowser::Update()
 }
 
 #define TEX_SIZE 64.0f
-float TextureBrowser::ListDraw(bool selected, Vector3 pos, float maxWidth)
+float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
 {
+	Vector3 pos = _pos;
+
 	std::map<std::string, Texture>::iterator i;
 	i = gTextureBank.begin();
 

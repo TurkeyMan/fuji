@@ -3,10 +3,39 @@
 
 #include "Timer.h"
 
-uint64 ReadPerformanceCounter();
-uint64 GetPerfprmanceFrequency();
+struct FujiDefaults
+{
+	struct HeapDefaults
+	{
+		uint32 dynamicHeapSize;
+		uint32 staticHeapSize;
+		uint32 dynamicHeapCount;
+		uint32 staticHeapCount;
+	} heap;
 
-float GetFPS();
+	struct DisplayDefaults
+	{
+		uint32 otrhoWidth;
+		uint32 otrhoHeight;
+	} display;
+
+
+};
+
+extern FujiDefaults gDefaults;
+
+// Timer Related
+
+// Read Time Stamp Counter
+uint64 RDTSC();
+uint64 GetTSCFrequency();
+
+// System Timer
+extern Timer gSystemTimer;
+extern float gSystemTimeDelta;
+
+#define GetFPS() gSystemTimer.GetFPS()
+#define TIMEDELTA gSystemTimeDelta
 
 int System_GameLoop();
 
@@ -18,13 +47,11 @@ void System_PostUpdate();
 void System_Draw();
 void System_Deinit();
 
+void Game_InitSystem();
 void Game_Init();
 void Game_Update();
 void Game_Draw();
 void Game_Deinit();
-
-#define TIMEDELTA gSystemTimer.TimeDeltaF()
-extern Timer gSystemTimer;
 
 #if defined(_WINDOWS)
 	void DoMessageLoop();

@@ -7,10 +7,18 @@
 class Matrix;
 class Vector4;
 
-class Vector3
+class _ALIGN16 Vector3
 {
 public:
-	float x,y,z,anon;
+	union
+	{
+		struct
+		{
+			float x,y,z,anon;
+		};
+
+		uint128 packed;
+	};
 
 	static const Vector3 zero;
 	static const Vector3 one;

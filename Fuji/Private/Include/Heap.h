@@ -11,10 +11,12 @@
 enum ResType
 {
 	RES_Unknown = 0,
+	RES_PtrList,
 	RES_Texture,
 	RES_Model,
 	RES_SoundBank,
-	RES_IniFile
+	RES_IniFile,
+	RES_Collision
 };
 
 struct MemAlloc
@@ -58,12 +60,12 @@ template<class T>
 class MFResource
 {
 public:
-	inline operator=(Resource *pR) { pResource = pR; }
-	inline T& operator*() const { return *(T*)pResource->pData; }
-	inline T* operator->() const { return (T*)pResource->pData; }
-	inline operator T*() const { return (T*)pResource->pData; }
+	inline operator=(Resource *pR)	{ pResource = pR; }
+	inline T& operator*() const		{ return *(T*)pResource->pData; }
+	inline T* operator->() const	{ return (T*)pResource->pData; }
+	inline operator T*() const		{ return (T*)pResource->pData; }
 
-	Resource *pResource;
+	uint32 resID;
 };
 
 void Heap_InitModule();

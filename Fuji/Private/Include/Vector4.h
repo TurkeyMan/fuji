@@ -7,18 +7,27 @@
 
 class Matrix;
 
-class Vector4
+class _ALIGN16 Vector4
 {
 public:
-	float x,y,z,w;
+	union
+	{
+		struct
+		{
+			float x,y,z,w;
+		};
+
+		uint128 packed;
+	};
 
 	static const Vector4 zero;
 	static const Vector4 one;
+	static const Vector4 identity;
 
 	inline Vector4 operator-()						{ Vector4 t; t.x=-x; t.y=-y;	t.z=-z;	t.w=-w; return t; }
 
-	inline bool operator==(const Vector4 &v) const { return x==v.x && y==v.y && z==v.z && w==v.w; }
-	inline bool operator!=(const Vector4 &v) const { return x!=v.x || y!=v.y || z!=v.z || w!=v.w; }
+	inline bool operator==(const Vector4 &v) const	{ return x==v.x && y==v.y && z==v.z && w==v.w; }
+	inline bool operator!=(const Vector4 &v) const	{ return x!=v.x || y!=v.y || z!=v.z || w!=v.w; }
 
 	inline Vector4& operator=(const Vector4 &v)		{ x=v.x;	y=v.y;	z=v.z;	w=v.w;	return *this; }
 	inline Vector4& operator+=(const Vector4 &v)	{ x+=v.x;	y+=v.y;	z+=v.z;	w+=v.w;	return *this; }
@@ -52,6 +61,6 @@ public:
 };
 
 inline Vector4 Vector(float x, float y, float z, float w) { Vector4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
-inline Vector4 Vector(Vector3 v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
+inline Vector4 Vector(const Vector3 &v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
 
 #endif

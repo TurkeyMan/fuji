@@ -34,7 +34,7 @@ void View::SetProjection(float fov)
 	viewProjDirty = true;
 
 	// construct and apply perspective projection
-	D3DXMatrixPerspectiveFovLH((D3DXMATRIX*)&projection, fov, (display.wide ? WIDE_ASPECT : STANDARD_ASPECT), 0.1f, 1000.0f);
+	D3DXMatrixPerspectiveFovLH((D3DXMATRIX*)&projection, fov, (display.wide ? WIDE_ASPECT : STANDARD_ASPECT), 0.1f, 10000.0f);
 }
 
 bool View::SetOrtho(bool enabled, float width, float height)

@@ -143,7 +143,11 @@ void *Heap_Alloc(uint32 bytes)
 	char *pMem = pCurrentHeap->pAllocPointer;
 	pCurrentHeap->pAllocPointer += ALIGN16(bytes);
 
-	pMem = (char*)malloc(bytes);
+	pMem = (char*)malloc(bytes+16);
+
+	char offset = 16 - ((uint32)pMem & 0xF);
+	pMem += offset;
+	pMem[-1] = offset;
 
 #if !defined(_RETAIL)
 	DBGASSERT(pCurrentHeap->allocCount < MAX_ALLOC_COUNT, "Exceeded alloc count!");
@@ -153,6 +157,8 @@ void *Heap_Alloc(uint32 bytes)
 	pCurrentHeap->allocList[pCurrentHeap->allocCount].lineNumber = line;
 	pCurrentHeap->allocCount++;
 #endif
+
+	ASSERT_ALLIGN16(pMem);
 
 	return pMem;
 }
@@ -193,6 +199,8 @@ void Heap_Free(void *pMem)
 
 	DBGASSERT(a >= 0, STR("Memory not allocated at address: 0x%08X.", pMem));
 #endif
+
+	(char*&)pMem -= ((char*)pMem)[-1];
 
 	free(pMem);
 }

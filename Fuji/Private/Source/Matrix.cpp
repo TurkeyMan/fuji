@@ -136,7 +136,8 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
-	DBGASSERT(false, "Not Written...");
+	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
+//	DBGASSERT(false, "Not Written...");
 	return *this;
 }
 
