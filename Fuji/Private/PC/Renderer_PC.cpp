@@ -1,9 +1,10 @@
 #include "Common.h"
-#include "Renderer_PC.h"
 #include "Material.h"
 #include "Model.h"
 #include "Animation.h"
 #include "View.h"
+
+#include "Renderer_PC.h"
 
 extern Material *pCurrentMaterial;
 extern View *pCurrentView;
