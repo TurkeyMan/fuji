@@ -141,6 +141,7 @@ void Callstack_DeinitModule();
 
 #else
 
+	#define Callstack_BeginFrame()
 	#define CALLSTACK
 	#define CALLSTACKc
 	#define CALLSTACKs(s)
@@ -148,6 +149,6 @@ void Callstack_DeinitModule();
 	#define Callstack_DrawProfile()
 	#define Callstack_EndFrame()
 
-#endif
+#endif // _RETAIL
 
 #endif // _CALLSTACK_H

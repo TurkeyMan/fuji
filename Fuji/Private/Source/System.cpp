@@ -31,7 +31,7 @@ void RestartCallback(MenuObject *pMenu, void *pData)
 
 void System_Init()
 {
-	CALLSTACK("System_Init");
+	CALLSTACK;
 
 	Heap_InitModule();
 
@@ -54,7 +54,7 @@ void System_Init()
 
 void System_Deinit()
 {
-	CALLSTACK("System_Deinit");
+	CALLSTACK;
 
 	Font_DeinitModule();
 	Primitive_DeinitModule();
@@ -73,26 +73,34 @@ void System_Deinit()
 
 void System_Update()
 {
-	CALLSTACKc("System_Update");
+	CALLSTACKc;
 
 	Input_Update();
 
+#if defined(_XBOX)
 	if(Input_ReadGamepad(0, Button_Start) && Input_ReadGamepad(0, Button_White) && Input_ReadGamepad(0, Button_LTrig) && Input_ReadGamepad(0, Button_RTrig))
 		RestartCallback(NULL, NULL);
+#elif defined(_WINDOWS)
+	if(Input_ReadGamepad(0, Button_Start) && Input_ReadGamepad(0, Button_Select) && Input_ReadGamepad(0, Button_L1) && Input_ReadGamepad(0, Button_R1) && Input_ReadGamepad(0, Button_L2) && Input_ReadGamepad(0, Button_R2))
+		RestartCallback(NULL, NULL);
+#endif
 
+#if !defined(_RETAIL)
 	DebugMenu_Update();
+#endif
 }
 
 void System_PostUpdate()
 {
-	CALLSTACK("System_PostUpdate");
+	CALLSTACK;
 
 }
 
 void System_Draw()
 {
-	CALLSTACKc("System_Draw");
+	CALLSTACKc;
 
+#if !defined(_RETAIL)
 	bool o = SetOrtho(true);
 
 	Callstack_DrawProfile();
@@ -106,11 +114,12 @@ void System_Draw()
 	DebugMenu_Draw();
 
 	SetOrtho(o);
+#endif
 }
 
 int System_GameLoop()
 {
-	CALLSTACK("System_GameLoop");
+	CALLSTACK;
 
 	System_Init();
 
@@ -154,14 +163,14 @@ int System_GameLoop()
 
 void System_UpdateTimeDelta()
 {
-	CALLSTACK("System_UpdateTimeDelta");
+	CALLSTACK;
 
 	gSystemTimer.Update();
 }
 
 float GetFPS()
 {
-	CALLSTACK("GetFPS");
+	CALLSTACK;
 
 	return gSystemTimer.GetFPS();
 }

@@ -10,14 +10,14 @@ Systems to Support:
 	View System
 	Camera
 
-	Material
-	Model
-	Animation
+	Material	* WORKING (Manu)
+	Model		* WORkING (Manu)
+	Animation	* WORKING (Manu)
 
 	Primitive Interface		* DONE (Manu)
 
-	Controller/Input I/O
-	FileSystem
+	Controller/Input I/O	* BASIC IMPLEMENTATION (Manu)
+	FileSystem				* WORKING (Manu)
 	Networking
 
 	Sound
@@ -32,7 +32,7 @@ Systems to Support:
 
 	Video Playback
 
-	Max Exporter.. :(
+	Max Exporter.. :(	* WORKING (Manu)
 
 	TTF Native Support
 

@@ -54,6 +54,8 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 
 #else
 
+#if !defined(_RETAIL)
+
 void Callstack_Log()
 {
 	for(int a=Callstack.size()-1; a>=0; a--)
@@ -105,10 +107,11 @@ void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int
 {
 	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
 	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
-	Callstack_Log();
 
 	// build callstack log string for message box
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
+	Callstack_Log();
+
 	char callstack[2048] = "";
 
 	for(int a=Callstack.size()-1; a>=0; a--)
@@ -199,6 +202,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		debugFont.DrawTextf(80, 160, 20, 0xFFFF0000, STR("File: %s, Line: %d", pFile, line));
 		debugFont.DrawTextf(80, 190, 20, 0xFFFF0000, STR("Message: %s", pMessage));
 
+#if !defined(_RETAIL)
 		debugFont.DrawTextf(80, 230, 20, 0xFFFF0000, "Callstack:");
 		float y = 250.0f;
 		for(int a=Callstack.size()-1; a>=0; a--)
@@ -206,12 +210,16 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 			debugFont.DrawTextf(100, y, 20, 0xFFFF0000, Callstack[a]);
 			y+=20.0f;
 		}
+#else
+		debugFont.DrawTextf(80, 230, 20, 0xFFFF0000, "Callstack not available in _RETAIL builds");
+#endif
 
 		Display_EndFrame();
 	}
 }
 
-#endif
+#endif // _RETAIL
+#endif // _FUJI_UTIL
 
 //
 // This just does OutputDebugString using a format string.

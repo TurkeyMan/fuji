@@ -45,6 +45,8 @@ float deadZone = 0.3f;
 
 void Input_InitModule()
 {
+	CALLSTACK;
+
     XDEVICE_PREALLOC_TYPE xdpt[] =
 	{
         {XDEVICE_TYPE_GAMEPAD, 4},
@@ -87,12 +89,13 @@ void Input_InitModule()
 
 void Input_DeinitModule()
 {
+	CALLSTACK;
 
 }
 
 void Input_Update()
 {
-	CALLSTACKc("Input_Update");
+	CALLSTACKc;
 
 	CheckDeviceChanges(dsDevices);
 	CheckKeyboard();
@@ -110,7 +113,7 @@ void Input_Update()
 
 float Input_ReadGamepad(int controlID, uint32 type)
 {
-	CALLSTACKc("Input_ReadGamepad");
+	CALLSTACKc;
 
 	static DWORD dwStartLast = 0;
 	float inputValue;
@@ -188,7 +191,7 @@ float Input_ReadGamepad(int controlID, uint32 type)
 
 bool Input_WasPressed(int controlID, uint32 type)
 {
-	CALLSTACKc("Input_WasPressed");
+	CALLSTACKc;
 
 	static DWORD dwStartLast = 0;
 
@@ -250,7 +253,9 @@ bool Input_WasPressed(int controlID, uint32 type)
 // "Is Pad Connected" Function?
 bool Input_IsConnected(int controlID)
 {
-   return dsDevices[DS_GAMEPAD].dwState & 1 << controlID && hPads[controlID];
+	CALLSTACK;
+
+	return dsDevices[DS_GAMEPAD].dwState & 1 << controlID && hPads[controlID];
 }
 
 //
@@ -258,6 +263,8 @@ bool Input_IsConnected(int controlID)
 //
 void CheckDeviceChanges(DEVICE_STATE *pdsDevices)
 {
+	CALLSTACK;
+
 	DWORD dwInsert, dwRemove;
 	int i;
 
@@ -278,29 +285,30 @@ void CheckDeviceChanges(DEVICE_STATE *pdsDevices)
 
 void HandleDeviceChanges(XPP_DEVICE_TYPE *pxdt, DWORD dwInsert, DWORD dwRemove)
 {
-    DWORD iPort, iSlot, dwMask;
+	CALLSTACK;
+
+	DWORD iPort, iSlot, dwMask;
 	//DWORD dwErr;
-    char szDrive[] = "X:\\";
+	char szDrive[] = "X:\\";
 
+	if( XDEVICE_TYPE_GAMEPAD == pxdt || XDEVICE_TYPE_DEBUG_KEYBOARD == pxdt )
+	{
+		for( iPort = 0; iPort < 4; iPort++ )
+		{
+			// Close removals.
+			if( (1 << iPort & dwRemove) && hPads[iPort] )
+			{
+				XInputClose( hPads[iPort] );
+				hPads[iPort] = 0;
+			}
 
-    if( XDEVICE_TYPE_GAMEPAD == pxdt || XDEVICE_TYPE_DEBUG_KEYBOARD == pxdt )
-    {
-        for( iPort = 0; iPort < 4; iPort++ )
-        {
-            // Close removals.
-            if( (1 << iPort & dwRemove) && hPads[iPort] )
-            {
-                XInputClose( hPads[iPort] );
-                hPads[iPort] = 0;
-            }
-
-            // Open insertions.
-            if( 1 << iPort & dwInsert )
-            {
-                hPads[iPort] = XInputOpen( pxdt, iPort, XDEVICE_NO_SLOT, NULL );
-            }
-        }
-    }
+			// Open insertions.
+			if( 1 << iPort & dwInsert )
+			{
+				hPads[iPort] = XInputOpen( pxdt, iPort, XDEVICE_NO_SLOT, NULL );
+			}
+		}
+	}
 
     else if( XDEVICE_TYPE_MEMORY_UNIT == pxdt )
     {
@@ -338,6 +346,8 @@ void HandleDeviceChanges(XPP_DEVICE_TYPE *pxdt, DWORD dwInsert, DWORD dwRemove)
 //
 void ShowMUInfo(char chDrive)
 {
+	CALLSTACK;
+
 	WCHAR szName[MAX_MUNAME + 1];
 	ULARGE_INTEGER uliFreeAvail, uliFree, uliTotal;
 	char szDrive[] = "X:\\";
@@ -359,6 +369,8 @@ void ShowMUInfo(char chDrive)
 //
 void EnumSavedGames(char chDrive)
 {
+	CALLSTACK;
+
 	HANDLE hFind;
 	XGAME_FIND_DATA xgfd;
 	char szDrive[] = "X:\\";
@@ -387,6 +399,8 @@ void EnumSavedGames(char chDrive)
 //
 HANDLE GetFirstController()
 {
+	CALLSTACK;
+
 	HANDLE hPad = 0;
 	int i;
 
@@ -405,6 +419,8 @@ HANDLE GetFirstController()
 
 void CheckKeyboard()
 {
+	CALLSTACK;
+
 	XINPUT_DEBUG_KEYSTROKE ks;
 	CHAR szOut[2] = "X";
 

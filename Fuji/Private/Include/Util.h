@@ -9,7 +9,7 @@ class Vector3;
 
 #define BREAKPOINT { __asm { int 3 }; }
 
-#if defined(_DEBUG)
+#if !defined(_RETAIL)
 	#if defined(HARD_ASSERTS)
 		#define DBGASSERT(condition,str) { static ignore=false; if(!(condition) && !ignore) { hardAssert(#condition, str, __FILE__, __LINE__); BREAKPOINT; ignore=true; } }
 	#else

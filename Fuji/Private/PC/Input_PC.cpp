@@ -55,21 +55,29 @@ char DIKtoCHAR[256] = {0,0,'1','2','3','4','5','6','7','8','9','0','-','=','\b',
 
 void Input_InitModule()
 {
+	CALLSTACK;
+
 	inInit();
 }
 
 void Input_DeinitModule()
 {
+	CALLSTACK;
+
 	inKillIn();
 }
 
 void Input_Update()
 {
+	CALLSTACK;
+
 	meProcessInput();
 }
 
 float Input_ReadGamepad(int controlID, uint32 type)
 {
+	CALLSTACK;
+
 	float inputValue;
 
 	if(!Input_IsConnected(controlID)) return 0.0f;
@@ -134,6 +142,8 @@ float Input_ReadGamepad(int controlID, uint32 type)
 
 bool Input_WasPressed(int controlID, uint32 type)
 {
+	CALLSTACK;
+
 	if(!Input_IsConnected(controlID)) return 0.0f;
 
 	switch(type)
@@ -178,11 +188,15 @@ bool Input_WasPressed(int controlID, uint32 type)
 // "Is Pad Connected" Function?
 bool Input_IsConnected(int controlID)
 {
+	CALLSTACK;
+
 	return controlID < meGetJoystickCount();
 }
 
 int inInit()
 {
+	CALLSTACK;
+
 	int a;
 
 	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&IDIN, NULL))) return 1;
@@ -235,6 +249,8 @@ int inInit()
 
 int inSetCooperativeLevels()
 {
+	CALLSTACK;
+
 	int a;
 
 	for(a=0; a<meKeyboardCount; a++)
@@ -298,6 +314,8 @@ int inSetCooperativeLevels()
 
 void inKillIn()
 {
+	CALLSTACK;
+
 	int a;
 
 	for(a=0; a<16; a++)
@@ -342,6 +360,8 @@ void inKillIn()
 
 BOOL CALLBACK EnumKeyboardsCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
+	CALLSTACK;
+
 	if(meKeyboardCount<16)
 	{
 		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIKeyboard[meKeyboardCount], NULL)))
@@ -357,6 +377,8 @@ BOOL CALLBACK EnumKeyboardsCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 
 BOOL CALLBACK EnumMousesCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
+	CALLSTACK;
+
 	if(meMouseCount<16)
 	{
 		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIMouse[meMouseCount], NULL)))
@@ -372,6 +394,8 @@ BOOL CALLBACK EnumMousesCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pCo
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
+	CALLSTACK;
+
 	if(meJoystickCount<16)
 	{
 		if(FAILED(IDIN->CreateDevice(pdidInstance->guidInstance, &IDIJoystick[meJoystickCount], NULL)))
@@ -387,6 +411,8 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 
 void inAcquire(bool acquire)
 {
+	CALLSTACK;
+
 	int a;
 
 	for(a=0; a<meKeyboardCount; a++)
@@ -425,11 +451,15 @@ void inAcquire(bool acquire)
 
 void meSetScreenMouseSensitivity(float sens)
 {
+	CALLSTACK;
+
 	meMouseSensitivity=sens;
 }
 
 void meProcessInput()
 {
+	CALLSTACK;
+
 	meUpdateKeyboard();
 	meUpdateMouse();
 	meUpdateJoystick();
@@ -455,6 +485,8 @@ void meProcessInput()
 
 void meUpdateKeyboard()
 {
+	CALLSTACK;
+
 	DWORD Elements=SAMPLE_BUFFER_SIZE;
 	HRESULT hr;
 
@@ -480,6 +512,8 @@ void meUpdateKeyboard()
 
 void meUpdateMouse()
 {
+	CALLSTACK;
+
 	DWORD Elements=SAMPLE_BUFFER_SIZE;
 	HRESULT hr;
 
@@ -556,6 +590,8 @@ void meUpdateMouse()
 
 void meUpdateJoystick()
 {
+	CALLSTACK;
+
 	for(int a=0; a<meJoystickCount; a++)
 	{
 		if(IDIJoystick[a])
