@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "Common.h"
 #include "Util.h"
+#include "Vector3.h"
 
 char stringBuffer[1024*128];
 uint32 stringOffset;
@@ -137,3 +138,30 @@ char* STR(char *format, ...)
 
 	return buffer;
 }
+
+uint32 Rand()
+{
+	return rand();
+}
+
+float RandomUnit()
+{
+	return (float)rand() / RAND_MAX;
+}
+
+float RandomRange(float min , float max)
+{
+	return ((float)rand()/RAND_MAX)*(max-min) + min;
+}
+
+Vector3 RandomVector()
+{
+	Vector3 t;
+
+	t.x = RandomUnit();
+	t.y = RandomUnit();
+	t.z = RandomUnit();
+
+	return t;
+}
+
