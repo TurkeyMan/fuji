@@ -11,7 +11,7 @@
 
 int Timer::avgSamples = AVERAGE_SAMPLES;
 
-MenuItemFloat playRate(1.0f, 1.0f);
+MenuItemFloat playRate(1.0f, 1.0f, 0.0f, 100.0f);
 
 /**** Functions ****/
 

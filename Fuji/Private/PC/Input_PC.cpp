@@ -6,7 +6,8 @@
 #include "Input.h"
 #include "Input_PC.h"
 
-//#include "meMemTrack.h"
+float deadZone = 0.3f;
+
 
 BOOL CALLBACK EnumKeyboardsCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext);
@@ -29,6 +30,7 @@ char meKeys[16][256];
 //bool mdinKeysDown[256];
 
 DIJOYSTATE2	meJoystick[16];
+DIJOYSTATE2	meJoyOld[16];
 DIMOUSESTATE2 meMouse[16];
 
 float meScreenMouseX=0.0f, meScreenMouseY=0.0f;
@@ -41,7 +43,7 @@ float meMouseSensitivity=1.0f;
 float meDigitalRatio=0.5f;
 float meAnalogDeadZone=0.9f;
 int meAnalogMin=0;
-int meAnalogRange=5;
+int meAnalogRange=32767;
 
 DIDEVICEOBJECTDATA InputBuffer[SAMPLE_BUFFER_SIZE];
 
@@ -67,12 +69,107 @@ void Input_Update()
 
 float Input_ReadGamepad(int controlID, uint32 type)
 {
+	float inputValue;
+
+	if(!Input_IsConnected(controlID)) return 0.0f;
+
+	switch(type)
+	{
+		case Button_A:
+			return (meJoystick[controlID].rgbButtons[2]&0x80) ? 1.0f : 0.0f;
+		case Button_B:
+			return (meJoystick[controlID].rgbButtons[1]&0x80) ? 1.0f : 0.0f;
+		case Button_X:
+			return (meJoystick[controlID].rgbButtons[3]&0x80) ? 1.0f : 0.0f;
+		case Button_Y:
+			return (meJoystick[controlID].rgbButtons[0]&0x80) ? 1.0f : 0.0f;
+		case Button_Black:
+			return (meJoystick[controlID].rgbButtons[7]&0x80) ? 1.0f : 0.0f;
+		case Button_White:
+			return (meJoystick[controlID].rgbButtons[6]&0x80) ? 1.0f : 0.0f;
+		case Button_LTrig:
+			return (meJoystick[controlID].rgbButtons[4]&0x80) ? 1.0f : 0.0f;
+		case Button_RTrig:
+			return (meJoystick[controlID].rgbButtons[5]&0x80) ? 1.0f : 0.0f;
+		case Button_Start:
+			return (meJoystick[controlID].rgbButtons[9]&0x80) ? 1.0f : 0.0f;
+		case Button_Back:
+			return (meJoystick[controlID].rgbButtons[8]&0x80) ? 1.0f : 0.0f;
+		case Button_LThumb:
+			return (meJoystick[controlID].rgbButtons[10]&0x80) ? 1.0f : 0.0f;
+		case Button_RThumb:
+			return (meJoystick[controlID].rgbButtons[11]&0x80) ? 1.0f : 0.0f;
+		case Button_DUp:
+			return (meJoystick[controlID].rgbButtons[12]&0x80) ? 1.0f : 0.0f;
+		case Button_DDown:
+			return (meJoystick[controlID].rgbButtons[14]&0x80) ? 1.0f : 0.0f;
+		case Button_DLeft:
+			return (meJoystick[controlID].rgbButtons[15]&0x80) ? 1.0f : 0.0f;
+		case Button_DRight:
+			return (meJoystick[controlID].rgbButtons[13]&0x80) ? 1.0f : 0.0f;
+
+		case Axis_LX:
+			inputValue = ((float)(meJoystick[controlID].lX - 32768)) / 32767.0f;
+			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		case Axis_LY:
+			inputValue = -(((float)(meJoystick[controlID].lY - 32768)) / 32767.0f);
+			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		case Axis_RX:
+			inputValue = ((float)(meJoystick[controlID].lRz - 32768)) / 32767.0f;
+			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		case Axis_RY:
+			inputValue = -(((float)(meJoystick[controlID].lZ - 32768)) / 32767.0f);
+			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+
+		default:
+			OutputDebugString("Error: Undefined Control Pad Input Type\n\n");
+	}
 
 	return 0.0f;
 }
 
 bool Input_WasPressed(int controlID, uint32 type)
 {
+	if(!Input_IsConnected(controlID)) return 0.0f;
+
+	switch(type)
+	{
+		case Button_A:
+			return meJoystick[controlID].rgbButtons[2]&0x80 && !(meJoyOld[controlID].rgbButtons[2]&0x80);
+		case Button_B:
+			return meJoystick[controlID].rgbButtons[1]&0x80 && !(meJoyOld[controlID].rgbButtons[1]&0x80);
+		case Button_X:
+			return meJoystick[controlID].rgbButtons[3]&0x80 && !(meJoyOld[controlID].rgbButtons[3]&0x80);
+		case Button_Y:
+			return meJoystick[controlID].rgbButtons[0]&0x80 && !(meJoyOld[controlID].rgbButtons[0]&0x80);
+		case Button_Black:
+			return meJoystick[controlID].rgbButtons[7]&0x80 && !(meJoyOld[controlID].rgbButtons[7]&0x80);
+		case Button_White:
+			return meJoystick[controlID].rgbButtons[6]&0x80 && !(meJoyOld[controlID].rgbButtons[6]&0x80);
+		case Button_LTrig:
+			return meJoystick[controlID].rgbButtons[4]&0x80 && !(meJoyOld[controlID].rgbButtons[4]&0x80);
+		case Button_RTrig:
+			return meJoystick[controlID].rgbButtons[5]&0x80 && !(meJoyOld[controlID].rgbButtons[5]&0x80);
+		case Button_Start:
+			return meJoystick[controlID].rgbButtons[9]&0x80 && !(meJoyOld[controlID].rgbButtons[9]&0x80);
+		case Button_Back:
+			return meJoystick[controlID].rgbButtons[8]&0x80 && !(meJoyOld[controlID].rgbButtons[8]&0x80);
+		case Button_LThumb:
+			return meJoystick[controlID].rgbButtons[10]&0x80 && !(meJoyOld[controlID].rgbButtons[10]&0x80);
+		case Button_RThumb:
+			return meJoystick[controlID].rgbButtons[11]&0x80 && !(meJoyOld[controlID].rgbButtons[11]&0x80);
+		case Button_DUp:
+			return meJoystick[controlID].rgbButtons[12]&0x80 && !(meJoyOld[controlID].rgbButtons[12]&0x80);
+		case Button_DDown:
+			return meJoystick[controlID].rgbButtons[14]&0x80 && !(meJoyOld[controlID].rgbButtons[14]&0x80);
+		case Button_DLeft:
+			return meJoystick[controlID].rgbButtons[15]&0x80 && !(meJoyOld[controlID].rgbButtons[15]&0x80);
+		case Button_DRight:
+			return meJoystick[controlID].rgbButtons[13]&0x80 && !(meJoyOld[controlID].rgbButtons[13]&0x80);
+	}
 
 	return false;
 }
@@ -467,6 +564,8 @@ void meUpdateJoystick()
 				IDIJoystick[a]->Acquire();
 				return;
 			}
+
+			meJoyOld[a] = meJoystick[a];
 
 			IDIJoystick[a]->GetDeviceState(sizeof(DIJOYSTATE2), &meJoystick[a]);
 		}
