@@ -98,8 +98,8 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 		if(generateMipChain) {
@@ -137,14 +137,14 @@ void Texture::Release()
 
 void Texture::SetTexture(int texUnit)
 {
-	glActiveTexture(texUnit);
+//	glActiveTexture(texUnit);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glActiveTexture(0);
+//	glActiveTexture(0);
 }
 
 void Texture::UseNone(int texUnit)
 {
-	glActiveTexture(texUnit);
+//	glActiveTexture(texUnit);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(0);
+//	glActiveTexture(0);
 }

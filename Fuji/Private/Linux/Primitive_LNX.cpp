@@ -1,5 +1,7 @@
 #include "Common.h"
 #include "Primitive.h"
+#include "View.h"
+#include "Texture.h"
 
 // FIXME
 
@@ -23,6 +25,12 @@ void MFPrimitive(uint32 type, uint32 hint)
 	{
 		Texture::UseNone();
 	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((GLfloat *)View::GetCurrent()->GetWorldToViewMatrix()->m);
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf((GLfloat *)View::GetCurrent()->GetViewToScreenMatrix()->m);
+	glDepthRange(0.0f, 1.0f);
 
 	//***** this needs to do these things
 //	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
