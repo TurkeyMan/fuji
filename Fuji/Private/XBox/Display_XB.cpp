@@ -39,7 +39,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
-	
+
 	display.width = width;
 	display.height = height;
 	display.progressive = progressive;
