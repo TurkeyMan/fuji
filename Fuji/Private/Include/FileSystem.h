@@ -6,6 +6,7 @@
 enum OpenFlags
 {
 	OF_Read = 0,
+	OF_Text = 0,
 	OF_Write = 1,
 	OF_Binary = 2,
 	OF_Async = 16
@@ -46,6 +47,9 @@ struct File
 #if defined(_XBOX) || defined(_WINDOWS)
 	HANDLE file;
 #endif
+#if defined(_DEBUG)
+	char filename[256];
+#endif
 };
 
 void FileSystem_InitModule();
@@ -54,7 +58,7 @@ void FileSystem_DeinitModule();
 
 char* File_SystemPath(const char *filename);
 
-uint32 File_Open(const char *pFilename, uint32 openFlags);
+uint32 File_Open(const char *pFilename, uint32 openFlags = OF_Read|OF_Binary);
 void File_Close(uint32 fileHandle);
 
 uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);

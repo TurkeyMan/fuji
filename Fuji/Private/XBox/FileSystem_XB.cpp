@@ -25,12 +25,17 @@ uint32 File_Open(const char *pFilename, uint32 openFlags)
 	openFiles[fileID].offset = 0;
 	openFiles[fileID].len = -1;
 
+#if defined(_DEBUG)
+	strcpy(openFiles[fileID].filename, pFilename);
+#endif
+
 	return fileID;
 }
 
 void File_Close(uint32 fileHandle)
 {
 	CloseHandle(openFiles[fileHandle].file);
+	openFiles[fileHandle].file = NULL;
 }
 
 uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)

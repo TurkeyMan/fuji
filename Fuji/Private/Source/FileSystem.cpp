@@ -6,12 +6,31 @@ File openFiles[MAX_FILE_COUNT];
 
 void FileSystem_InitModule()
 {
-
+	for(int a=0; a<MAX_FILE_COUNT; a++)
+	{
+		openFiles[a].file = NULL;
+	}
 }
 
 void FileSystem_DeinitModule()
 {
+#if defined(_DEBUG)
+	bool fileCloseRave = false;
 
+	for(int a=0; a<MAX_FILE_COUNT; a++)
+	{
+		if(openFiles[a].file)
+		{
+			if(!fileCloseRave)
+			{
+				LOGD("FileSystem left open file's:");
+				fileCloseRave = true;
+			}
+
+			LOGD(STR("  %s", openFiles[a].filename));
+		}
+	}
+#endif
 }
 
 char* File_SystemPath(const char *filename)
