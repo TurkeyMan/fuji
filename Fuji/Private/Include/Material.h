@@ -70,6 +70,7 @@ class Material
 public:
 	static Material* CreateDefault();
 	static Material* Create(char *pName);
+	static void CreateMaterialFromDefinition(Material *pMat, char *pDefinition);
 	inline static void UseNone() { pNone->Use(); }
 	inline static Material* GetCurrent() { return &current; }
 	static Material* Find(char *pName);

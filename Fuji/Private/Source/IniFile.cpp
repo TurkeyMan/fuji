@@ -11,6 +11,8 @@
 
 void IniFile::Create(char *pFilename)
 {
+	CALLSTACK;
+
 	uint32 size = File_GetSize(pFilename);
 
 	if(size)
@@ -27,6 +29,8 @@ void IniFile::Create(char *pFilename)
 		pIniBuffer[size] = NULL;
 		pCurrent = pIniBuffer;
 
+		currentHeight = 0;
+
 		owned = true;
 	}
 	else
@@ -35,6 +39,8 @@ void IniFile::Create(char *pFilename)
 
 void IniFile::CreateFromMemory(char *pMemory)
 {
+	CALLSTACK;
+
 #if !defined(_RETAIL)
 	strcpy(pIniFilename, "Memory");
 #endif
@@ -46,6 +52,8 @@ void IniFile::CreateFromMemory(char *pMemory)
 
 void IniFile::CreateFromPointer(char *pPointer)
 {
+	CALLSTACK;
+
 #if !defined(_RETAIL)
 	strcpy(pIniFilename, "Pointer");
 #endif
@@ -56,6 +64,8 @@ void IniFile::CreateFromPointer(char *pPointer)
 
 void IniFile::Release()
 {
+	CALLSTACK;
+
 	if(pIniBuffer && owned)
 	{
 		delete[] pIniBuffer;
@@ -65,11 +75,15 @@ void IniFile::Release()
 
 bool IniFile::EndOfFile()
 {
+	CALLSTACK;
+
 	return *pCurrent == NULL;
 }
 
 int IniFile::GetFirstLine()
 {
+	CALLSTACK;
+
 #if !defined(_RETAIL)
 	iniLine = 1;
 	pLastNewline = NULL;
@@ -96,6 +110,8 @@ int IniFile::GetFirstLine()
 
 int IniFile::GetNextLine()
 {
+	CALLSTACK;
+
 	pCurrent = SeekNewline(pCurrent);
 
 	for(;;pCurrent++)
@@ -118,6 +134,8 @@ int IniFile::GetNextLine()
 
 int IniFile::GetNextSection()
 {
+	CALLSTACK;
+
 	while(!EndOfFile())
 	{
 		GetNextLine();
@@ -127,8 +145,28 @@ int IniFile::GetNextSection()
 	return 0;
 }
 
+void IniFile::PushMarker()
+{
+	CALLSTACK;
+	DBGASSERT(currentHeight < 10, "Mark Stack Overflow");
+
+	pCurrentStack[currentHeight] = pCurrent;
+	++currentHeight;
+}
+
+void IniFile::PopMarker()
+{
+	CALLSTACK;
+	DBGASSERT(currentHeight > 0, "Mark Stack Underflow");
+
+	--currentHeight;
+	pCurrent = pCurrentStack[currentHeight];
+}
+
 int IniFile::FindSection(char *pSection)
 {
+	CALLSTACK;
+
 	GetFirstLine();
 
 	while(!EndOfFile())
@@ -142,6 +180,8 @@ int IniFile::FindSection(char *pSection)
 
 int IniFile::FindLine(char *pName, char *pSection)
 {
+	CALLSTACK;
+
 	char *pTemp;
 
 	if(pSection)
@@ -175,11 +215,15 @@ int IniFile::FindLine(char *pName, char *pSection)
 
 bool IniFile::IsSection()
 {
+	CALLSTACK;
+
 	return *pCurrent == '[';
 }
 
 char* IniFile::GetName()
 {
+	CALLSTACK;
+
 	char *pEnd, *pStart = pCurrent;
 
 	if(EndOfFile()) return NULL;
@@ -194,6 +238,7 @@ char* IniFile::GetName()
 
 inline char* IniFile::GetFloat(char *pOffset, char **ppFloat)
 {
+	CALLSTACK;
 	INIASSERT(IsNumeric(*pOffset), STR("Entry '%s' is not a number", GetName()));
 
 	char *pEnd = pOffset;
@@ -211,6 +256,7 @@ inline char* IniFile::GetFloat(char *pOffset, char **ppFloat)
 
 bool IniFile::AsBool(int index)
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pNumber, *pOffset = pCurrent;
@@ -261,6 +307,7 @@ bool IniFile::AsBool(int index)
 
 int IniFile::AsInt(int index)
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pNumber, *pOffset = pCurrent;
@@ -299,6 +346,7 @@ int IniFile::AsInt(int index)
 
 float IniFile::AsFloat(int index)
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pNumber, *pOffset = pCurrent;
@@ -337,6 +385,7 @@ float IniFile::AsFloat(int index)
 
 char* IniFile::AsString()
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pEnd, *pOffset = pCurrent;
@@ -375,6 +424,7 @@ char* IniFile::AsString()
 
 Vector3 IniFile::AsVector3()
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pNumber, *pOffset = pCurrent;
@@ -418,6 +468,7 @@ Vector3 IniFile::AsVector3()
 
 Vector4 IniFile::AsVector4()
 {
+	CALLSTACK;
 	INIASSERT(!IsSection(), "Cant get value of a section");
 
 	char *pNumber, *pOffset = pCurrent;
@@ -459,4 +510,3 @@ Vector4 IniFile::AsVector4()
 
 	return output;
 }
-

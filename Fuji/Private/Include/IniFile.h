@@ -23,6 +23,9 @@ public:
 	int GetNextLine();
 	int GetNextSection();
 
+	void PushMarker();
+	void PopMarker();
+
 	int FindSection(char *pSection);
 	int FindLine(char *pName, char *pSection = NULL);
 
@@ -60,6 +63,8 @@ protected:
 #endif
 	char *pIniBuffer;
 	char *pCurrent;
+	char *pCurrentStack[10];
+	int currentHeight;
 	bool owned;
 
 	inline char* GetFloat(char *pOffset, char **ppFloat);

@@ -82,22 +82,29 @@ Material* Material::CreateDefault()
 	return pMat;
 }
 
-Material* Material::Create(char *pName)
+void Material::CreateMaterialFromDefinition(Material *pMat, char *pDefinition)
 {
-	Material *pMat = NULL;
-
-	if(materialDefinitions.FindSection(pName))
+	if(materialDefinitions.FindSection(pDefinition))
 	{
-		pMat = Material::CreateDefault();
-
-		strcpy(pMat->name, pName);
-
 		materialDefinitions.GetNextLine();
 
 		while(!materialDefinitions.EndOfFile() && !materialDefinitions.IsSection())
 		{
 			char *pName = materialDefinitions.GetName();
-			if(!stricmp(pName, "lit"))
+			if(!stricmp(pName, "alias"))
+			{
+				materialDefinitions.PushMarker();
+
+				char *pAlias = materialDefinitions.AsString();
+
+				if(materialDefinitions.FindSection(pAlias))
+				{
+					CreateMaterialFromDefinition(pMat, pAlias);
+				}
+
+				materialDefinitions.PopMarker();
+			}
+			else if(!stricmp(pName, "lit"))
 			{
 				pMat->materialType = (pMat->materialType & ~MF_Lit) | (materialDefinitions.AsBool(0) ? MF_Lit : NULL);
 			}
@@ -181,7 +188,7 @@ Material* Material::Create(char *pName)
 			else if(!stricmp(pName, "celshading"))
 			{
 				pMat->materialType |= MF_CelShading;
-//				pMat-> = materialDefinitions.AsInt(0);
+	//				pMat-> = materialDefinitions.AsInt(0);
 			}
 			else if(!stricmp(pName, "bumpmap"))
 			{
@@ -191,11 +198,27 @@ Material* Material::Create(char *pName)
 			else if(!stricmp(pName, "phong"))
 			{
 				pMat->materialType |= MF_PerPixelLighting;
-//				pMat-> = materialDefinitions.AsInt(0);
+	//				pMat-> = materialDefinitions.AsInt(0);
 			}
 
 			materialDefinitions.GetNextLine();
 		}
+	}
+}
+
+Material* Material::Create(char *pName)
+{
+	Material *pMat = NULL;
+
+	// if material already exists, bump refCount
+
+	if(materialDefinitions.FindSection(pName))
+	{
+		pMat = Material::CreateDefault();
+
+		strcpy(pMat->name, pName);
+
+		CreateMaterialFromDefinition(pMat, pName);
 
 		pMat->refCount = 1;
 	}

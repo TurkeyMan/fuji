@@ -1,5 +1,5 @@
-#if !defined(_RENDERER_H)
-#define _RENDERER_H
+#if !defined(_RENDERER_XB_H)
+#define _RENDERER_XB_H
 
 
 
