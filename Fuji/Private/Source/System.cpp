@@ -9,23 +9,24 @@
 #include "Timer.h"
 #include "Font.h"
 
-int gQuit;
+int gQuit = 0;
+int gRestart = 1;
 uint32 gFrameCount = 0;
 
 MenuItemStatic quitOption;
-MenuItemFloat mf(0.0f, 10.0f);
-MenuItemInt mi;
-MenuItemBool mb;
-MenuItemColour col;
-
-char *strings[] = { "Hello", "World", "Tang!", NULL };
-MenuItemIntString mis(strings);
+MenuItemStatic restartOption;
 
 Timer gSystemTimer;
 
 void QuitCallback(MenuObject *pMenu, void *pData)
 {
 	gQuit = 1;
+}
+
+void RestartCallback(MenuObject *pMenu, void *pData)
+{
+	gQuit = 1;
+	gRestart = 1;
 }
 
 void System_Init()
@@ -44,12 +45,8 @@ void System_Init()
 	Texture_InitModule();
 	Primitive_InitModule();
 	Font_InitModule();
-
-	DebugMenu_AddItem("Test Float", "Fuji Options", &mf);
-	DebugMenu_AddItem("Test Int", "Fuji Options", &mi);
-	DebugMenu_AddItem("Test Bool", "Fuji Options", &mb);
-	DebugMenu_AddItem("Test IntString", "Fuji Options", &mis);
-	DebugMenu_AddItem("Test Colour", "Fuji Options", &col);
+	
+	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 }
 
@@ -106,35 +103,42 @@ void System_Draw()
 int System_GameLoop()
 {
 	CALLSTACK("System_GameLoop");
-	gQuit = 0;
 
 	System_Init();
-	Game_Init();
 
-	while(!gQuit)
+	while(gRestart)
 	{
-#if defined(_WINDOWS)
-		DoMessageLoop();
-#endif
-		Callstack_BeginFrame();
-		System_UpdateTimeDelta();
-		gFrameCount++;
+		gRestart = 0;
+		gQuit = 0;
 
-		System_Update();
-		if(!DebugMenu_IsEnabled())
-			Game_Update();
-		System_PostUpdate();
+		Game_Init();
 
-		Display_BeginFrame();
+		while(!gQuit)
+		{
+	#if defined(_WINDOWS)
+			DoMessageLoop();
+	#endif
+			Callstack_BeginFrame();
+			System_UpdateTimeDelta();
+			gFrameCount++;
 
-		Game_Draw();
-		System_Draw();
+			System_Update();
+			if(!DebugMenu_IsEnabled())
+				Game_Update();
+			System_PostUpdate();
 
-		Callstack_EndFrame();
-		Display_EndFrame();
+			Display_BeginFrame();
+
+			Game_Draw();
+			System_Draw();
+
+			Callstack_EndFrame();
+			Display_EndFrame();
+		}
+
+		Game_Deinit();
 	}
 
-	Game_Deinit();
 	System_Deinit();
 
 	return gQuit;

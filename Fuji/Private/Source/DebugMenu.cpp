@@ -173,11 +173,26 @@ bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 
 void DebugMenu_DestroyMenuTree(Menu *pMenu)
 {
-	for(int a=0; a<pMenu->numChildren; a++)
+	int a;
+
+	for(a=0; a<pMenu->numChildren; a++)
 	{
 		if(pMenu->pChildren[a]->type == MenuType_Menu)
 		{
 			DebugMenu_DestroyMenuTree((Menu*)pMenu->pChildren[a]);
+		}
+	}
+
+	if(pMenu->pParent)
+	{
+		for(a=0; a<pMenu->pParent->numChildren; a++)
+		{
+			if(pMenu->pParent->pChildren[a] == pMenu)
+			{
+				pMenu->pParent->pChildren[a] = pMenu->pParent->pChildren[pMenu->pParent->numChildren-1];
+				pMenu->pParent->numChildren--;
+				break;
+			}
 		}
 	}
 
