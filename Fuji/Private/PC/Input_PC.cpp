@@ -689,106 +689,129 @@ void LoadGamepadMappings()
 	GamepadInfo *pGI = NULL;
 	IniFile ini;
 
-	ini.Create(File_SystemPath("GamepadMappings.ini"));
-	ini.GetFirstLine();
+	// create default
+	pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen("default") + 1);
+	pGI->pName = (char*)&pGI[1];
+	strcpy(pGI->pName, "default");
 
-	while(!ini.EndOfFile())
+	pGI->pNext = pGamepadMappingRegistry;
+	pGamepadMappingRegistry = pGI;
+
+	for(int a=0; a<16; a++)
 	{
-		char *pName = ini.GetName();
+		pGI->buttonMapping[a] = a;
+	}
 
-		if(ini.IsSection())
+	for(int a=0; a<4; a++)
+	{
+		pGI->axisMapping[a] = a;
+	}
+
+	// read GameMappings.ini file
+	if(!ini.Create(File_SystemPath("GamepadMappings.ini")))
+	{
+		ini.GetFirstLine();
+
+		while(!ini.EndOfFile())
 		{
-			pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
-			pGI->pName = (char*)&pGI[1];
-			strcpy(pGI->pName, pName);
+			char *pName = ini.GetName();
 
-			pGI->pNext = pGamepadMappingRegistry;
-			pGamepadMappingRegistry = pGI;
-		}
-		else
-		{
-			if(!stricmp(pName, "Axis_LX"))
+			if(ini.IsSection())
 			{
-				pGI->axisMapping[0] = ini.AsInt(0);
+				pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
+				pGI->pName = (char*)&pGI[1];
+				strcpy(pGI->pName, pName);
+
+				pGI->pNext = pGamepadMappingRegistry;
+				pGamepadMappingRegistry = pGI;
 			}
-			else if(!stricmp(pName, "Axis_LY"))
+			else
 			{
-				pGI->axisMapping[1] = ini.AsInt(0);
+				if(!stricmp(pName, "Axis_LX"))
+				{
+					pGI->axisMapping[0] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Axis_LY"))
+				{
+					pGI->axisMapping[1] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Axis_RX"))
+				{
+					pGI->axisMapping[2] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Axis_RY"))
+				{
+					pGI->axisMapping[3] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Cross"))
+				{
+					pGI->buttonMapping[0] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Circle"))
+				{
+					pGI->buttonMapping[1] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Box"))
+				{
+					pGI->buttonMapping[2] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Triangle"))
+				{
+					pGI->buttonMapping[3] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_R1"))
+				{
+					pGI->buttonMapping[4] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_L1"))
+				{
+					pGI->buttonMapping[5] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_L2"))
+				{
+					pGI->buttonMapping[6] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_R2"))
+				{
+					pGI->buttonMapping[7] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Start"))
+				{
+					pGI->buttonMapping[8] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_Select"))
+				{
+					pGI->buttonMapping[9] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_LThumb"))
+				{
+					pGI->buttonMapping[10] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_P2_RThumb"))
+				{
+					pGI->buttonMapping[11] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_DUp"))
+				{
+					pGI->buttonMapping[12] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_DDown"))
+				{
+					pGI->buttonMapping[13] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_DLeft"))
+				{
+					pGI->buttonMapping[14] = ini.AsInt(0);
+				}
+				else if(!stricmp(pName, "Button_DRight"))
+				{
+					pGI->buttonMapping[15] = ini.AsInt(0);
+				}
 			}
-			else if(!stricmp(pName, "Axis_RX"))
-			{
-				pGI->axisMapping[2] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Axis_RY"))
-			{
-				pGI->axisMapping[3] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Cross"))
-			{
-				pGI->buttonMapping[0] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Circle"))
-			{
-				pGI->buttonMapping[1] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Box"))
-			{
-				pGI->buttonMapping[2] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Triangle"))
-			{
-				pGI->buttonMapping[3] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_R1"))
-			{
-				pGI->buttonMapping[4] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_L1"))
-			{
-				pGI->buttonMapping[5] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_L2"))
-			{
-				pGI->buttonMapping[6] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_R2"))
-			{
-				pGI->buttonMapping[7] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Start"))
-			{
-				pGI->buttonMapping[8] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_Select"))
-			{
-				pGI->buttonMapping[9] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_LThumb"))
-			{
-				pGI->buttonMapping[10] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_P2_RThumb"))
-			{
-				pGI->buttonMapping[11] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_DUp"))
-			{
-				pGI->buttonMapping[12] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_DDown"))
-			{
-				pGI->buttonMapping[13] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_DLeft"))
-			{
-				pGI->buttonMapping[14] = ini.AsInt(0);
-			}
-			else if(!stricmp(pName, "Button_DRight"))
-			{
-				pGI->buttonMapping[15] = ini.AsInt(0);
-			}
+
+			ini.GetNextLine();
 		}
 
-		ini.GetNextLine();
+		ini.Release();
 	}
 }

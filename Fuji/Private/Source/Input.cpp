@@ -85,7 +85,7 @@ bool Input_IsConnected(int source, int sourceID)
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
 
-	return deviceStatus[source][sourceID].status == IDS_Disconnected ? true : false;
+	return deviceStatus[source][sourceID].status == IDS_Disconnected ? false : true;
 }
 bool Input_IsReady(int source, int sourceID)
 {

@@ -130,7 +130,7 @@ int IniFile::GetNextLine()
 		break;
 	}
 
-	if((*pCurrent == '[' && IsAlphaNumeric(pCurrent[1]) && !IsNumeric(pCurrent[1])) || (IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent))) return 1;
+	if((*pCurrent == '[' && IsAlphaNumeric(pCurrent[1])) || (IsAlphaNumeric(*pCurrent) && !IsNumeric(*pCurrent))) return 1;
 
 	INIASSERT(*pCurrent == NULL, "Syntax Error");
 
