@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Display.h"
+#include "DebugMenu.h"
 
 IDirect3D8 *d3d8;
 IDirect3DDevice8 *pd3dDevice;
@@ -14,6 +15,8 @@ void Display_InitModule()
 	// create the display
 	error = CreateDisplay(640, 480, 32, 60, true, false, false, false);
 	if(error) return;
+
+	DebugMenu_AddMenu("Display Options", DebugMenu_GetMenuByName("Fuji Options"));
 }
 
 void Display_DeinitModule()

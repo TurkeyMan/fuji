@@ -151,8 +151,7 @@ Menu* DebugMenu_GetMenuByName(char *name, Menu *pSearchMenu)
 			if(!stricmp(pSearchMenu->pChildren[a]->name , name))
 				return (Menu*)pSearchMenu->pChildren[a];
 
-			if(!pResult)
-				pResult = DebugMenu_GetMenuByName(name, (Menu*)pSearchMenu->pChildren[a]);
+			pResult = DebugMenu_GetMenuByName(name, (Menu*)pSearchMenu->pChildren[a]);
 
 			if(pResult) return pResult;
 		}
@@ -191,14 +190,17 @@ float Menu::ListDraw(bool selected, Vector3 pos, float maxWidth)
 
 void Menu::ListUpdate(bool selected)
 {
-	if(Input_WasPressed(0, Button_A))
-		pCurrentMenu = this;
+	if(selected)
+	{
+		if(Input_WasPressed(0, Button_A))
+			pCurrentMenu = this;
+	}
 }
 
 void Menu::Draw()
 {
 	Vector3 dimensions = { 0.0f, 0.0f, 0.0f };
-	Vector3 currentPos = Vector(100.0f, 200.0f, 0.0f);
+	Vector3 currentPos = Vector(120.0f, 150.0f, 0.0f);
 	float requestedWidth = 400.0f;
 	int a;
 
@@ -210,10 +212,53 @@ void Menu::Draw()
 		dimensions.x = max(dimensions.x, dim.x);
 	}
 
+	BeginPrimitive(PT_TriStrip|PT_Untextured);
+
+	PrimBegin(4);
+	PrimSetColour(0x80000060);
+	PrimSetPosition(100, 100, 0);
+	PrimSetColour(0x800000B0);
+	PrimSetPosition(540, 100, 0);
+	PrimSetColour(0x80000080);
+	PrimSetPosition(100, 380, 0);
+	PrimSetColour(0x800000FF);
+	PrimSetPosition(540, 380, 0);
+	PrimEnd();
+
+	PrimBegin(4);
+	PrimSetColour(0x60000000);
+	PrimSetPosition(115, 145, 0);
+	PrimSetColour(0x60000000);
+	PrimSetPosition(525, 145, 0);
+	PrimSetColour(0x60000000);
+	PrimSetPosition(115, 365, 0);
+	PrimSetColour(0x60000000);
+	PrimSetPosition(525, 365, 0);
+	PrimEnd();
+
+	debugFont.DrawText(110.0f, 105.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
+
 	// draw menu background
 
 	for(a=0; a<numChildren; a++)
 	{
+		if(selection==a)
+		{
+			float height = pChildren[a]->GetDimensions(requestedWidth).y;
+			BeginPrimitive(PT_TriStrip|PT_Untextured);
+
+			PrimBegin(4);
+			PrimSetColour(0xC0000080);
+			PrimSetPosition(115, currentPos.y, 0);
+			PrimSetColour(0xC00000D0);
+			PrimSetPosition(525, currentPos.y, 0);
+			PrimSetColour(0xC0000090);
+			PrimSetPosition(115, currentPos.y + height, 0);
+			PrimSetColour(0xC00000FF);
+			PrimSetPosition(525, currentPos.y + height, 0);
+			PrimEnd();
+		}
+
 		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
 	}
 }

@@ -13,7 +13,11 @@ enum PrimType
 	PT_LineStrip,
 	PT_TriList,
 	PT_TriStrip,
-	PT_TriFan
+	PT_TriFan,
+	PT_PrimMask = 0x07,
+
+	PT_Prelit = 64,
+	PT_Untextured = 128
 };
 
 void Primitive_InitModule();

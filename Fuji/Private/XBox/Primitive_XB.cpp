@@ -33,7 +33,12 @@ void Primitive_DeinitModule()
 
 void BeginPrimitive(uint32 type, uint32 hint)
 {
-	primType = type;
+	primType = type & PT_PrimMask;
+
+	if(type & PT_Untextured)
+	{
+		pd3dDevice->SetTexture(0, NULL);
+	}
 }
 
 void PrimBegin(uint32 vertexCount)
