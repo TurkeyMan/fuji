@@ -21,7 +21,8 @@ enum MenuType
 	MenuType_Float,
 	MenuType_IntString,
 	MenuType_Bool,
-	MenuType_Colour
+	MenuType_Colour,
+	MenuType_TextureBrowser
 };
 
 class Menu;

@@ -73,9 +73,15 @@ void Texture::SetTexture()
 {
 	pd3dDevice->SetTexture(0, texture);
 
+#if defined(_XBOX)
+	pd3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+	pd3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+#elif defined(_WINDOWS)
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+#endif
 }
 
 void Texture::UseNone()
@@ -88,6 +94,7 @@ void Texture::UseNone()
 TextureBrowser::TextureBrowser()
 {
 	selection = 0;
+	type = MenuType_TextureBrowser;
 }
 
 void TextureBrowser::Draw()
