@@ -586,6 +586,9 @@
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Renderer.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\SceneGraph.cpp">
 			</File>
 			<File

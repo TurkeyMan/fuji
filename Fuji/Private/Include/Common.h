@@ -3,7 +3,6 @@
 
 // Compiler definitions
 #if defined(__GNUC__)
-#include <new>
 #define __cdecl __attribute__((__cdecl__))
 #define _cdecl __attribute__((__cdecl__))
 #endif
@@ -29,6 +28,10 @@
 #if defined(_DC)
 	#define _arch_dreamcast
 	#include <kos.h>
+	#include <stdarg.h> // For varargs
+	#include <stdlib.h>
+	#include <string.h>
+	#include <math.h>
 #endif
 
 #if defined(_FUJI_UTIL)
@@ -113,25 +116,14 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #define FLAG(x, y) (x|=y)
 
 // additional includes
+#include <new>
+
 #include "FujiMath.h"
 #include "Util.h"
 
 #if !defined(_FUJI_UTIL)
 	#include "Callstack.h"
 	#include "Heap.h"
-#endif
-
-// define a placement new if one dosent already exist..
-#if !defined(__PLACEMENT_NEW_INLINE) && !defined(__GNUC__)
-#define __PLACEMENT_NEW_INLINE
-inline void *__cdecl operator new(size_t, void *_Where)
-{	// construct array with placement at _Where
-	return (_Where);
-}
-
-inline void __cdecl operator delete(void *, void *)
-{	// delete if placement new fails
-}
 #endif
 
 #endif // _COMMON_H

@@ -31,6 +31,11 @@ struct FujiDefaults
 	{
 		uint32 maxMaterials;
 	} material;
+
+	struct FileSystemDefaults
+	{
+		uint32 maxOpenFiles;
+	} filesys;
 };
 
 extern FujiDefaults gDefaults;

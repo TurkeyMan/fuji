@@ -71,7 +71,7 @@ if(cc != None):
 # C++ compiler to use
 cxx = ARGUMENTS.get('CXX')
 if(cxx != None):
-	CXX = str(cc)
+	CXX = str(cxx)
 
 
 # Get the full list of all the source files
@@ -95,7 +95,7 @@ for source in sources:
 
 sources = new_sources
 
-env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, ENV = os.environ)
+env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, ENV = os.environ, tools=['mingw'])
 
 # Optional options
 if(CC != None):

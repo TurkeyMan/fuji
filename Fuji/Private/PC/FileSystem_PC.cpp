@@ -2,7 +2,7 @@
 #include "Filesystem.h"
 #include "PtrList.h"
 
-extern File openFiles[MAX_FILE_COUNT];
+extern File *gOpenFiles;
 
 int File_Open(const char *pFilename, uint32 openFlags)
 {
@@ -10,7 +10,7 @@ int File_Open(const char *pFilename, uint32 openFlags)
 
 	for(fileID=0; fileID<MAX_FILE_COUNT; fileID++)
 	{
-		if(!openFiles[fileID].file) break;
+		if(!gOpenFiles[fileID].file) break;
 	}
 
 	if(fileID == MAX_FILE_COUNT) return -1;
@@ -18,23 +18,29 @@ int File_Open(const char *pFilename, uint32 openFlags)
 	DWORD access = ((openFlags&OF_Read) ? GENERIC_READ : NULL) | ((openFlags&OF_Write) ? GENERIC_WRITE : NULL);
 	DBGASSERT(access, "Neither OF_Read nor OF_Write specified.");
 
-	openFiles[fileID].file = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, (openFlags&OF_Write) ? OPEN_ALWAYS : OPEN_EXISTING, NULL, NULL);
+	gOpenFiles[fileID].file = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, (openFlags&OF_Write) ? OPEN_ALWAYS : OPEN_EXISTING, NULL, NULL);
 
-	if(openFiles[fileID].file == INVALID_HANDLE_VALUE)
+	if(gOpenFiles[fileID].file == INVALID_HANDLE_VALUE)
 	{
-		openFiles[fileID].file = 0;
+		gOpenFiles[fileID].file = 0;
 		return -1;
 	}
-	DBGASSERT(openFiles[fileID].file != 0, "Aparently CreateFile can return a valid handle of '0' ... THIS IS BAD! FIX ME!");
+	DBGASSERT(gOpenFiles[fileID].file != 0, "Aparently CreateFile can return a valid handle of '0' ... THIS IS BAD! FIX ME!");
 
-	openFiles[fileID].state = FS_Ready;
-	openFiles[fileID].operation = FO_None;
-	openFiles[fileID].createFlags = openFlags;
-	openFiles[fileID].offset = 0;
-	openFiles[fileID].len = -1;
+	gOpenFiles[fileID].state = FS_Ready;
+	gOpenFiles[fileID].operation = FO_None;
+	gOpenFiles[fileID].createFlags = openFlags;
+	gOpenFiles[fileID].offset = 0;
+
+	DWORD excess;
+	DWORD fileSize = GetFileSize(gOpenFiles[fileID].file, &excess);
+
+	DBGASSERT(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
+
+	gOpenFiles[fileID].len = fileSize;
 
 #if defined(_DEBUG)
-	strcpy(openFiles[fileID].filename, pFilename);
+	strcpy(gOpenFiles[fileID].filename, pFilename);
 #endif
 
 	return fileID;
@@ -42,17 +48,17 @@ int File_Open(const char *pFilename, uint32 openFlags)
 
 void File_Close(uint32 fileHandle)
 {
-	CloseHandle(openFiles[fileHandle].file);
-	openFiles[fileHandle].file = NULL;
+	CloseHandle(gOpenFiles[fileHandle].file);
+	gOpenFiles[fileHandle].file = NULL;
 }
 
 int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	uint32 bytesRead;
 
-	ReadFile(openFiles[fileHandle].file, (void*)pBuffer, bytes, (DWORD*)&bytesRead, NULL);
+	ReadFile(gOpenFiles[fileHandle].file, (void*)pBuffer, bytes, (DWORD*)&bytesRead, NULL);
 
-	openFiles[fileHandle].offset += bytesRead;
+	gOpenFiles[fileHandle].offset += bytesRead;
 
 	return bytesRead;
 }
@@ -61,9 +67,9 @@ int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	uint32 bytesWritten;
 
-	WriteFile(openFiles[fileHandle].file, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
+	WriteFile(gOpenFiles[fileHandle].file, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
 
-	openFiles[fileHandle].offset += bytesWritten;
+	gOpenFiles[fileHandle].offset += bytesWritten;
 
 	return bytesWritten;
 }
@@ -82,13 +88,13 @@ int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_Query(uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return FS_Unavailable;
-	return openFiles[fileHandle].state;
+	if(!gOpenFiles[fileHandle].file) return FS_Unavailable;
+	return gOpenFiles[fileHandle].state;
 }
 
 int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return -1;
+	if(!gOpenFiles[fileHandle].file) return -1;
 
 	DWORD method;
 
@@ -102,27 +108,18 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 			method = FILE_CURRENT;
 	}
 
-	DWORD newPos = SetFilePointer(openFiles[fileHandle].file, bytes, NULL, method);
+	DWORD newPos = SetFilePointer(gOpenFiles[fileHandle].file, bytes, NULL, method);
 
-	openFiles[fileHandle].offset = newPos;
+	gOpenFiles[fileHandle].offset = newPos;
 
 	return newPos;
 }
 
 uint32 File_GetSize(uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return -1;
+	if(!gOpenFiles[fileHandle].file) return 0;
 
-	if(openFiles[fileHandle].len != -1) return openFiles[fileHandle].len;
-
-	DWORD excess;
-	DWORD fileSize = GetFileSize(openFiles[fileHandle].file, &excess);
-
-	DBGASSERT(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
-
-	openFiles[fileHandle].len = fileSize;
-
-	return fileSize;
+	return gOpenFiles[fileHandle].len;
 }
 
 uint32 File_GetSize(const char *pFilename)

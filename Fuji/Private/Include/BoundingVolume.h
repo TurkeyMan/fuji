@@ -16,7 +16,8 @@ class Frustum
 public:
 	Vector4 left, right, top, bottom, hither, yon;
 
-	bool SphereWithin(const Vector4& sphere);
+	// return 0 (outside), 1 (inside), 2 (intersecting)
+	int SphereWithin(const Vector4& sphere);
 };
 
 #endif

@@ -2,13 +2,16 @@
 #include "FileSystem.h"
 #include "PtrList.h"
 
-File openFiles[MAX_FILE_COUNT];
+File *gOpenFiles;
 
 void FileSystem_InitModule()
 {
+	gOpenFiles = (File*)Heap_Alloc(sizeof(File) * gDefaults.filesys.maxOpenFiles);
+	memset(gOpenFiles, 0, sizeof(File) * gDefaults.filesys.maxOpenFiles);
+
 	for(int a=0; a<MAX_FILE_COUNT; a++)
 	{
-		openFiles[a].file = NULL;
+		gOpenFiles[a].file = NULL;
 	}
 }
 
@@ -19,7 +22,7 @@ void FileSystem_DeinitModule()
 
 	for(int a=0; a<MAX_FILE_COUNT; a++)
 	{
-		if(openFiles[a].file)
+		if(gOpenFiles[a].file)
 		{
 			if(!fileCloseRave)
 			{
@@ -27,7 +30,7 @@ void FileSystem_DeinitModule()
 				fileCloseRave = true;
 			}
 
-			LOGD(STR("  %s", openFiles[a].filename));
+			LOGD(STR("  %s", gOpenFiles[a].filename));
 		}
 	}
 #endif

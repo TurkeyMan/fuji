@@ -11,6 +11,7 @@
 #include "Timer.h"
 #include "Font.h"
 #include "IniFile.h"
+#include "Renderer.h"
 
 FujiDefaults gDefaults = 
 {
@@ -78,8 +79,11 @@ void System_Init()
 
 	Display_InitModule();
 	Input_InitModule();
+
+	Renderer_InitModule();
 	Texture_InitModule();
 	Material_InitModule();
+
 	Primitive_InitModule();
 	Font_InitModule();
 
@@ -97,8 +101,11 @@ void System_Deinit()
 
 	Font_DeinitModule();
 	Primitive_DeinitModule();
+
 	Material_DeinitModule();
 	Texture_DeinitModule();
+	Renderer_DeinitModule();
+
 	Input_DeinitModule();
 	Display_DeinitModule();
 

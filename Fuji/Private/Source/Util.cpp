@@ -337,16 +337,6 @@ Vector3 RandomVector()
 	return t;
 }
 
-inline int tolower(int c)
-{
-	return (c >= 'A' && c <= 'Z') ? c+32 : c;
-}
-
-inline int toupper(int c)
-{
-	return (c >= 'a' && c <= 'z') ? c-32 : c;
-}
-
 int StrCaseCmp(const char *s1, const char *s2)
 {
 	while(*s1 != '\0' && tolower(*s1) == tolower(*s2))

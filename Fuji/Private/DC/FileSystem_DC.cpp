@@ -2,7 +2,7 @@
 #include "FileSystem.h"
 #include "PtrList.h"
 
-extern File openFiles[MAX_FILE_COUNT];
+extern File *gOpenFiles;
 
 int File_Open(const char *pFilename, uint32 openFlags)
 {
@@ -10,7 +10,7 @@ int File_Open(const char *pFilename, uint32 openFlags)
 
 	for(fileID=0; fileID<MAX_FILE_COUNT; fileID++)
 	{
-		if(!openFiles[fileID].file) break;
+		if(!gOpenFiles[fileID].file) break;
 	}
 
 	if(fileID == MAX_FILE_COUNT) return -1;
@@ -23,7 +23,7 @@ int File_Open(const char *pFilename, uint32 openFlags)
 void File_Close(uint32 fileHandle)
 {
 
-	openFiles[fileHandle].file = NULL;
+	gOpenFiles[fileHandle].file = NULL;
 }
 
 int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
@@ -32,7 +32,7 @@ int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 
 
-	openFiles[fileHandle].offset += bytesRead;
+	gOpenFiles[fileHandle].offset += bytesRead;
 
 	return bytesRead;
 }
@@ -43,7 +43,7 @@ int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 
 
-	openFiles[fileHandle].offset += bytesWritten;
+	gOpenFiles[fileHandle].offset += bytesWritten;
 
 	return bytesWritten;
 }
@@ -62,26 +62,23 @@ int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_Query(uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return FS_Unavailable;
-	return openFiles[fileHandle].state;
+	if(!gOpenFiles[fileHandle].file) return FS_Unavailable;
+	return gOpenFiles[fileHandle].state;
 }
 
 int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return -1;
+	if(!gOpenFiles[fileHandle].file) return -1;
 
 
-	return openFiles[fileHandle].offset;
+	return gOpenFiles[fileHandle].offset;
 }
 
 uint32 File_GetSize(uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) return -1;
+	if(!gOpenFiles[fileHandle].file) return 0;
 
-	if(openFiles[fileHandle].len != -1) return openFiles[fileHandle].len;
-
-
-	return 0;
+	return gOpenFiles[fileHandle].len;
 }
 
 uint32 File_GetSize(const char *pFilename)

@@ -3,22 +3,22 @@
 
 int main()
 {
+//	kos_init_all(ALL_ENABLE, ROMDISK_NONE);
+
 	System_GameLoop();
+
+//	kos_shutdown_all();
 
 	return 0;
 }
 
 uint64 RDTSC()
 {
-	uint64 tickCount = 0;
-
-	return tickCount;
+	return timer_ms_gettime64();
 }
 
 uint64 GetTSCFrequency()
 {
-	uint64 freq = 0;
-
-	return freq;
+	return 1000;
 }
 

@@ -7,14 +7,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-extern File openFiles[MAX_FILE_COUNT];
+extern File gOpenFiles[MAX_FILE_COUNT];
 
 int File_Open(const char *pFilename, uint32 openFlags)
 {
 	int32 fileID;
 
 	for(fileID = 0; fileID < MAX_FILE_COUNT; fileID++) {
-		if(!openFiles[fileID].file) break;
+		if(!gOpenFiles[fileID].file) break;
 	}
 
 	if(fileID == MAX_FILE_COUNT) {
@@ -35,22 +35,22 @@ int File_Open(const char *pFilename, uint32 openFlags)
 		DBGASSERT(0, "Neither OF_Read nor OF_Write specified.");
 	}
 
-	openFiles[fileID].file = open(pFilename, flags);
+	gOpenFiles[fileID].file = open(pFilename, flags);
 
-	if(openFiles[fileID].file == -1) {
-		openFiles[fileID].file = 0;
+	if(gOpenFiles[fileID].file == -1) {
+		gOpenFiles[fileID].file = 0;
 		return(-1);
 	}
 	
 
-	openFiles[fileID].state = FS_Ready;
-	openFiles[fileID].operation = FO_None;
-	openFiles[fileID].createFlags = openFlags;
-	openFiles[fileID].offset = 0;
-	openFiles[fileID].len = 0;
+	gOpenFiles[fileID].state = FS_Ready;
+	gOpenFiles[fileID].operation = FO_None;
+	gOpenFiles[fileID].createFlags = openFlags;
+	gOpenFiles[fileID].offset = 0;
+	gOpenFiles[fileID].len = 0;
 
 #if defined(_DEBUG)
-	strcpy(openFiles[fileID].filename, pFilename);
+	strcpy(gOpenFiles[fileID].filename, pFilename);
 #endif
 
 	return fileID;
@@ -58,19 +58,19 @@ int File_Open(const char *pFilename, uint32 openFlags)
 
 void File_Close(uint32 fileHandle)
 {
-	close(openFiles[fileHandle].file);
-	openFiles[fileHandle].file = 0;
+	close(gOpenFiles[fileHandle].file);
+	gOpenFiles[fileHandle].file = 0;
 }
 
 int File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	ssize_t bytesRead;
 
-	bytesRead = read(openFiles[fileHandle].file, (void *)pBuffer, bytes);
+	bytesRead = read(gOpenFiles[fileHandle].file, (void *)pBuffer, bytes);
 	if(bytesRead < 0) // read() returns -1 on error
 		bytesRead = 0;
 
-	openFiles[fileHandle].offset += bytesRead;
+	gOpenFiles[fileHandle].offset += bytesRead;
 
 	return(bytesRead);
 }
@@ -80,11 +80,11 @@ int File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle)
 {
 	ssize_t bytesWritten;
 
-	bytesWritten = write(openFiles[fileHandle].file, pBuffer, (size_t)bytes);
+	bytesWritten = write(gOpenFiles[fileHandle].file, pBuffer, (size_t)bytes);
 	if(bytesWritten < 0) // write() returns -1 on error
 		bytesWritten = 0;
 
-	openFiles[fileHandle].offset += bytesWritten;
+	gOpenFiles[fileHandle].offset += bytesWritten;
 
 	return(bytesWritten);
 }
@@ -101,11 +101,11 @@ int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_Query(uint32 fileHandle)
 {
-	if(!openFiles[fileHandle].file) {
+	if(!gOpenFiles[fileHandle].file) {
 		return((uint32)FS_Unavailable);
 	}
 
-	return(openFiles[fileHandle].state);
+	return(gOpenFiles[fileHandle].state);
 }
 
 int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
@@ -113,7 +113,7 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 	off_t newOffset;
 	int whence;
 	
-	if(!openFiles[fileHandle].file) return -1;
+	if(!gOpenFiles[fileHandle].file) return -1;
 
 	switch(relativity)
 	{
@@ -126,19 +126,19 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 	}
 
 	
-	newOffset = lseek(openFiles[fileHandle].file, bytes, whence);
+	newOffset = lseek(gOpenFiles[fileHandle].file, bytes, whence);
 	if(newOffset != -1) {
-		openFiles[fileHandle].offset = newOffset;
+		gOpenFiles[fileHandle].offset = newOffset;
 	}
 
-	return(openFiles[fileHandle].offset);
+	return(gOpenFiles[fileHandle].offset);
 }
 
 uint32 File_GetSize(uint32 fileHandle)
 {
 	struct stat fileStats;
 
-	if(fstat(openFiles[fileHandle].file, &fileStats) == -1) {
+	if(fstat(gOpenFiles[fileHandle].file, &fileStats) == -1) {
 		return(0);
 	}
 
