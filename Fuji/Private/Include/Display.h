@@ -4,6 +4,12 @@
 #define WIDE_ASPECT 1.7777777777777777777777777777778f
 #define STANDARD_ASPECT 1.3333333333333333333333333333333f
 
+enum ClearScreenFlags
+{
+	CS_Colour	= 1,
+	CS_ZBuffer	= 2
+};
+
 void Display_InitModule();
 void Display_DeinitModule();
 
@@ -11,10 +17,12 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 void Display_DestroyDisplay();
 void Display_BeginFrame();
 void Display_EndFrame();
-void ClearScreen();
+void Display_ClearScreen(uint32 flags = CS_Colour|CS_ZBuffer);
 
+/*
 void SetProjection(float fov);
 bool SetOrtho(bool enable, float width = 640.0f, float height = 480.0f);
+*/
 
 void SetViewport(float x, float y, float width, float height);
 void ResetViewport();

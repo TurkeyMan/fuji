@@ -73,19 +73,25 @@ Matrix& Matrix::RotateYPR(float yaw, float pitch, float roll)
 
 Matrix& Matrix::RotateX(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	Matrix rot;
+	rot.SetRotationX(angle);
+	Multiply3x3(rot);
 	return *this;
 }
 
 Matrix& Matrix::RotateY(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	Matrix rot;
+	rot.SetRotationY(angle);
+	Multiply3x3(rot);
 	return *this;
 }
 
 Matrix& Matrix::RotateZ(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	Matrix rot;
+	rot.SetRotationZ(angle);
+	Multiply3x3(rot);
 	return *this;
 }
 
@@ -136,19 +142,46 @@ Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 
 Matrix& Matrix::SetRotationX(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	m[0][0] = 1.0f;
+	m[0][1] = 0.0f;
+	m[0][2] = 0.0f;
+	m[1][0] = 0.0f;
+	m[1][1] = cos(angle);
+	m[1][2] = sin(angle);
+	m[2][0] = 0.0f;
+	m[2][1] = -sin(angle);
+	m[2][2] = cos(angle);
+
 	return *this;
 }
 
 Matrix& Matrix::SetRotationY(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	m[0][0] = cos(angle);
+	m[0][1] = 0.0f;
+	m[0][2] = sin(angle);
+	m[1][0] = 0.0f;
+	m[1][1] = 1.0f;
+	m[1][2] = 0.0f;
+	m[2][0] = -sin(angle);
+	m[2][1] = 0.0f;
+	m[2][2] = cos(angle);
+
 	return *this;
 }
 
 Matrix& Matrix::SetRotationZ(float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	m[0][0] = cos(angle);
+	m[0][1] = sin(angle);
+	m[0][2] = 0.0f;
+	m[1][0] = -sin(angle);
+	m[1][1] = cos(angle);
+	m[1][2] = 0.0f;
+	m[2][0] = 0.0f;
+	m[2][1] = 0.0f;
+	m[2][2] = 1.0f;
+
 	return *this;
 }
 
@@ -175,13 +208,151 @@ Matrix& Matrix::Transpose3x3()
 
 Matrix& Matrix::Multiply(const Matrix &mat)
 {
-	DBGASSERT(false, "Not Written...");
+	Matrix t;
+
+	t.m[0][0] = m[0][0]*mat.m[0][0] + m[0][1]*mat.m[1][0] + m[0][2]*mat.m[2][0];
+	t.m[0][1] = m[0][0]*mat.m[0][1] + m[0][1]*mat.m[1][1] + m[0][2]*mat.m[2][1];
+	t.m[0][2] = m[0][0]*mat.m[0][2] + m[0][1]*mat.m[1][2] + m[0][2]*mat.m[2][2];
+	t.m[1][0] = m[1][0]*mat.m[0][0] + m[1][1]*mat.m[1][0] + m[1][2]*mat.m[2][0];
+	t.m[1][1] = m[1][0]*mat.m[0][1] + m[1][1]*mat.m[1][1] + m[1][2]*mat.m[2][1];
+	t.m[1][2] = m[1][0]*mat.m[0][2] + m[1][1]*mat.m[1][2] + m[1][2]*mat.m[2][2];
+	t.m[2][0] = m[2][0]*mat.m[0][0] + m[2][1]*mat.m[1][0] + m[2][2]*mat.m[2][0];
+	t.m[2][1] = m[2][0]*mat.m[0][1] + m[2][1]*mat.m[1][1] + m[2][2]*mat.m[2][1];
+	t.m[2][2] = m[2][0]*mat.m[0][2] + m[2][1]*mat.m[1][2] + m[2][2]*mat.m[2][2];
+	t.m[3][0] = m[3][0]*mat.m[0][0] + m[3][1]*mat.m[1][0] + m[3][2]*mat.m[2][0] + mat.m[3][0];
+	t.m[3][1] = m[3][0]*mat.m[0][1] + m[3][1]*mat.m[1][1] + m[3][2]*mat.m[2][1] + mat.m[3][1];
+	t.m[3][2] = m[3][0]*mat.m[0][2] + m[3][1]*mat.m[1][2] + m[3][2]*mat.m[2][2] + mat.m[3][2];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2];
+	m[3][0] = t.m[3][0]; m[3][1] = t.m[3][1]; m[3][2] = t.m[3][2];
+
 	return *this;
 }
 
 Matrix& Matrix::Multiply(const Matrix &mat1, const Matrix &mat2)
 {
-	DBGASSERT(false, "Not Written...");
+	Matrix t;
+
+	t.m[0][0] = mat1.m[0][0]*mat2.m[0][0] + mat1.m[0][1]*mat2.m[1][0] + mat1.m[0][2]*mat2.m[2][0];
+	t.m[0][1] = mat1.m[0][0]*mat2.m[0][1] + mat1.m[0][1]*mat2.m[1][1] + mat1.m[0][2]*mat2.m[2][1];
+	t.m[0][2] = mat1.m[0][0]*mat2.m[0][2] + mat1.m[0][1]*mat2.m[1][2] + mat1.m[0][2]*mat2.m[2][2];
+	t.m[1][0] = mat1.m[1][0]*mat2.m[0][0] + mat1.m[1][1]*mat2.m[1][0] + mat1.m[1][2]*mat2.m[2][0];
+	t.m[1][1] = mat1.m[1][0]*mat2.m[0][1] + mat1.m[1][1]*mat2.m[1][1] + mat1.m[1][2]*mat2.m[2][1];
+	t.m[1][2] = mat1.m[1][0]*mat2.m[0][2] + mat1.m[1][1]*mat2.m[1][2] + mat1.m[1][2]*mat2.m[2][2];
+	t.m[2][0] = mat1.m[2][0]*mat2.m[0][0] + mat1.m[2][1]*mat2.m[1][0] + mat1.m[2][2]*mat2.m[2][0];
+	t.m[2][1] = mat1.m[2][0]*mat2.m[0][1] + mat1.m[2][1]*mat2.m[1][1] + mat1.m[2][2]*mat2.m[2][1];
+	t.m[2][2] = mat1.m[2][0]*mat2.m[0][2] + mat1.m[2][1]*mat2.m[1][2] + mat1.m[2][2]*mat2.m[2][2];
+	t.m[3][0] = mat1.m[3][0]*mat2.m[0][0] + mat1.m[3][1]*mat2.m[1][0] + mat1.m[3][2]*mat2.m[2][0] + mat2.m[3][0];
+	t.m[3][1] = mat1.m[3][0]*mat2.m[0][1] + mat1.m[3][1]*mat2.m[1][1] + mat1.m[3][2]*mat2.m[2][1] + mat2.m[3][1];
+	t.m[3][2] = mat1.m[3][0]*mat2.m[0][2] + mat1.m[3][1]*mat2.m[1][2] + mat1.m[3][2]*mat2.m[2][2] + mat2.m[3][2];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2];
+	m[3][0] = t.m[3][0]; m[3][1] = t.m[3][1]; m[3][2] = t.m[3][2];
+
+	return *this;
+}
+
+Matrix& Matrix::Multiply4x4(const Matrix &mat)
+{
+	Matrix t;
+
+	t.m[0][0] = m[0][0]*mat.m[0][0] + m[0][1]*mat.m[1][0] + m[0][2]*mat.m[2][0] + m[0][3]*mat.m[3][0];
+	t.m[0][1] = m[0][0]*mat.m[0][1] + m[0][1]*mat.m[1][1] + m[0][2]*mat.m[2][1] + m[0][3]*mat.m[3][1];
+	t.m[0][2] = m[0][0]*mat.m[0][2] + m[0][1]*mat.m[1][2] + m[0][2]*mat.m[2][2] + m[0][3]*mat.m[3][2];
+	t.m[0][3] = m[0][0]*mat.m[0][3] + m[0][1]*mat.m[1][3] + m[0][2]*mat.m[2][3] + m[0][3]*mat.m[3][3];
+	t.m[1][0] = m[1][0]*mat.m[0][0] + m[1][1]*mat.m[1][0] + m[1][2]*mat.m[2][0] + m[1][3]*mat.m[3][0];
+	t.m[1][1] = m[1][0]*mat.m[0][1] + m[1][1]*mat.m[1][1] + m[1][2]*mat.m[2][1] + m[1][3]*mat.m[3][1];
+	t.m[1][2] = m[1][0]*mat.m[0][2] + m[1][1]*mat.m[1][2] + m[1][2]*mat.m[2][2] + m[1][3]*mat.m[3][2];
+	t.m[1][3] = m[1][0]*mat.m[0][3] + m[1][1]*mat.m[1][3] + m[1][2]*mat.m[2][3] + m[1][3]*mat.m[3][3];
+	t.m[2][0] = m[2][0]*mat.m[0][0] + m[2][1]*mat.m[1][0] + m[2][2]*mat.m[2][0] + m[2][3]*mat.m[3][0];
+	t.m[2][1] = m[2][0]*mat.m[0][1] + m[2][1]*mat.m[1][1] + m[2][2]*mat.m[2][1] + m[2][3]*mat.m[3][1];
+	t.m[2][2] = m[2][0]*mat.m[0][2] + m[2][1]*mat.m[1][2] + m[2][2]*mat.m[2][2] + m[2][3]*mat.m[3][2];
+	t.m[2][3] = m[2][0]*mat.m[0][3] + m[2][1]*mat.m[1][3] + m[2][2]*mat.m[2][3] + m[2][3]*mat.m[3][3];
+	t.m[3][0] = m[3][0]*mat.m[0][0] + m[3][1]*mat.m[1][0] + m[3][2]*mat.m[2][0] + m[3][3]*mat.m[3][0];
+	t.m[3][1] = m[3][0]*mat.m[0][1] + m[3][1]*mat.m[1][1] + m[3][2]*mat.m[2][1] + m[3][3]*mat.m[3][1];
+	t.m[3][2] = m[3][0]*mat.m[0][2] + m[3][1]*mat.m[1][2] + m[3][2]*mat.m[2][2] + m[3][3]*mat.m[3][2];
+	t.m[3][3] = m[3][0]*mat.m[0][3] + m[3][1]*mat.m[1][3] + m[3][2]*mat.m[2][3] + m[3][3]*mat.m[3][3];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2]; m[0][3] = t.m[0][3];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2]; m[1][3] = t.m[1][3];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2]; m[2][3] = t.m[2][3];
+	m[3][0] = t.m[3][0]; m[3][1] = t.m[3][1]; m[3][2] = t.m[3][2]; m[3][3] = t.m[3][3];
+
+	return *this;
+}
+
+Matrix& Matrix::Multiply4x4(const Matrix &mat1, const Matrix &mat2)
+{
+	Matrix t;
+
+	t.m[0][0] = mat1.m[0][0]*mat2.m[0][0] + mat1.m[0][1]*mat2.m[1][0] + mat1.m[0][2]*mat2.m[2][0] + mat1.m[0][3]*mat2.m[3][0];
+	t.m[0][1] = mat1.m[0][0]*mat2.m[0][1] + mat1.m[0][1]*mat2.m[1][1] + mat1.m[0][2]*mat2.m[2][1] + mat1.m[0][3]*mat2.m[3][1];
+	t.m[0][2] = mat1.m[0][0]*mat2.m[0][2] + mat1.m[0][1]*mat2.m[1][2] + mat1.m[0][2]*mat2.m[2][2] + mat1.m[0][3]*mat2.m[3][2];
+	t.m[0][3] = mat1.m[0][0]*mat2.m[0][3] + mat1.m[0][1]*mat2.m[1][3] + mat1.m[0][2]*mat2.m[2][3] + mat1.m[0][3]*mat2.m[3][3];
+	t.m[1][0] = mat1.m[1][0]*mat2.m[0][0] + mat1.m[1][1]*mat2.m[1][0] + mat1.m[1][2]*mat2.m[2][0] + mat1.m[1][3]*mat2.m[3][0];
+	t.m[1][1] = mat1.m[1][0]*mat2.m[0][1] + mat1.m[1][1]*mat2.m[1][1] + mat1.m[1][2]*mat2.m[2][1] + mat1.m[1][3]*mat2.m[3][1];
+	t.m[1][2] = mat1.m[1][0]*mat2.m[0][2] + mat1.m[1][1]*mat2.m[1][2] + mat1.m[1][2]*mat2.m[2][2] + mat1.m[1][3]*mat2.m[3][2];
+	t.m[1][3] = mat1.m[1][0]*mat2.m[0][3] + mat1.m[1][1]*mat2.m[1][3] + mat1.m[1][2]*mat2.m[2][3] + mat1.m[1][3]*mat2.m[3][3];
+	t.m[2][0] = mat1.m[2][0]*mat2.m[0][0] + mat1.m[2][1]*mat2.m[1][0] + mat1.m[2][2]*mat2.m[2][0] + mat1.m[2][3]*mat2.m[3][0];
+	t.m[2][1] = mat1.m[2][0]*mat2.m[0][1] + mat1.m[2][1]*mat2.m[1][1] + mat1.m[2][2]*mat2.m[2][1] + mat1.m[2][3]*mat2.m[3][1];
+	t.m[2][2] = mat1.m[2][0]*mat2.m[0][2] + mat1.m[2][1]*mat2.m[1][2] + mat1.m[2][2]*mat2.m[2][2] + mat1.m[2][3]*mat2.m[3][2];
+	t.m[2][3] = mat1.m[2][0]*mat2.m[0][3] + mat1.m[2][1]*mat2.m[1][3] + mat1.m[2][2]*mat2.m[2][3] + mat1.m[2][3]*mat2.m[3][3];
+	t.m[3][0] = mat1.m[3][0]*mat2.m[0][0] + mat1.m[3][1]*mat2.m[1][0] + mat1.m[3][2]*mat2.m[2][0] + mat1.m[3][3]*mat2.m[3][0];
+	t.m[3][1] = mat1.m[3][0]*mat2.m[0][1] + mat1.m[3][1]*mat2.m[1][1] + mat1.m[3][2]*mat2.m[2][1] + mat1.m[3][3]*mat2.m[3][1];
+	t.m[3][2] = mat1.m[3][0]*mat2.m[0][2] + mat1.m[3][1]*mat2.m[1][2] + mat1.m[3][2]*mat2.m[2][2] + mat1.m[3][3]*mat2.m[3][2];
+	t.m[3][3] = mat1.m[3][0]*mat2.m[0][3] + mat1.m[3][1]*mat2.m[1][3] + mat1.m[3][2]*mat2.m[2][3] + mat1.m[3][3]*mat2.m[3][3];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2]; m[0][3] = t.m[0][3];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2]; m[1][3] = t.m[1][3];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2]; m[2][3] = t.m[2][3];
+	m[3][0] = t.m[3][0]; m[3][1] = t.m[3][1]; m[3][2] = t.m[3][2]; m[3][3] = t.m[3][3];
+
+	return *this;
+}
+
+Matrix& Matrix::Multiply3x3(const Matrix &mat)
+{
+	Matrix t;
+
+	t.m[0][0] = m[0][0]*mat.m[0][0] + m[0][1]*mat.m[1][0] + m[0][2]*mat.m[2][0];
+	t.m[0][1] = m[0][0]*mat.m[0][1] + m[0][1]*mat.m[1][1] + m[0][2]*mat.m[2][1];
+	t.m[0][2] = m[0][0]*mat.m[0][2] + m[0][1]*mat.m[1][2] + m[0][2]*mat.m[2][2];
+	t.m[1][0] = m[1][0]*mat.m[0][0] + m[1][1]*mat.m[1][0] + m[1][2]*mat.m[2][0];
+	t.m[1][1] = m[1][0]*mat.m[0][1] + m[1][1]*mat.m[1][1] + m[1][2]*mat.m[2][1];
+	t.m[1][2] = m[1][0]*mat.m[0][2] + m[1][1]*mat.m[1][2] + m[1][2]*mat.m[2][2];
+	t.m[2][0] = m[2][0]*mat.m[0][0] + m[2][1]*mat.m[1][0] + m[2][2]*mat.m[2][0];
+	t.m[2][1] = m[2][0]*mat.m[0][1] + m[2][1]*mat.m[1][1] + m[2][2]*mat.m[2][1];
+	t.m[2][2] = m[2][0]*mat.m[0][2] + m[2][1]*mat.m[1][2] + m[2][2]*mat.m[2][2];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2];
+
+	return *this;
+}
+
+Matrix& Matrix::Multiply3x3(const Matrix &mat1, const Matrix &mat2)
+{
+	Matrix t;
+
+	t.m[0][0] = mat1.m[0][0]*mat2.m[0][0] + mat1.m[0][1]*mat2.m[1][0] + mat1.m[0][2]*mat2.m[2][0];
+	t.m[0][1] = mat1.m[0][0]*mat2.m[0][1] + mat1.m[0][1]*mat2.m[1][1] + mat1.m[0][2]*mat2.m[2][1];
+	t.m[0][2] = mat1.m[0][0]*mat2.m[0][2] + mat1.m[0][1]*mat2.m[1][2] + mat1.m[0][2]*mat2.m[2][2];
+	t.m[1][0] = mat1.m[1][0]*mat2.m[0][0] + mat1.m[1][1]*mat2.m[1][0] + mat1.m[1][2]*mat2.m[2][0];
+	t.m[1][1] = mat1.m[1][0]*mat2.m[0][1] + mat1.m[1][1]*mat2.m[1][1] + mat1.m[1][2]*mat2.m[2][1];
+	t.m[1][2] = mat1.m[1][0]*mat2.m[0][2] + mat1.m[1][1]*mat2.m[1][2] + mat1.m[1][2]*mat2.m[2][2];
+	t.m[2][0] = mat1.m[2][0]*mat2.m[0][0] + mat1.m[2][1]*mat2.m[1][0] + mat1.m[2][2]*mat2.m[2][0];
+	t.m[2][1] = mat1.m[2][0]*mat2.m[0][1] + mat1.m[2][1]*mat2.m[1][1] + mat1.m[2][2]*mat2.m[2][1];
+	t.m[2][2] = mat1.m[2][0]*mat2.m[0][2] + mat1.m[2][1]*mat2.m[1][2] + mat1.m[2][2]*mat2.m[2][2];
+
+	m[0][0] = t.m[0][0]; m[0][1] = t.m[0][1]; m[0][2] = t.m[0][2];
+	m[1][0] = t.m[1][0]; m[1][1] = t.m[1][1]; m[1][2] = t.m[1][2];
+	m[2][0] = t.m[2][0]; m[2][1] = t.m[2][1]; m[2][2] = t.m[2][2];
+
 	return *this;
 }
 

@@ -5,6 +5,7 @@
 
 #include "Common.h"
 #include "Display.h"
+#include "View.h"
 #include "Timer.h"
 #include "Primitive.h"
 #include "System.h"
@@ -161,7 +162,7 @@ void Callstack_DrawProfile()
 {
 	CALLSTACK("Callstack_DrawProfile");
 
-	bool t = SetOrtho(true);
+	bool t = View::GetCurrent()->SetOrtho(true);
 
 	int a;
 
@@ -230,7 +231,7 @@ void Callstack_DrawProfile()
 			debugFont.DrawTextf(110, y, 0, 15.0f, 0xFFFFFF, "More...");
 	}
 
-	SetOrtho(t);
+	View::GetCurrent()->SetOrtho(t);
 }
 #endif
 

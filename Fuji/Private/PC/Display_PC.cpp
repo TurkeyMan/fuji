@@ -98,7 +98,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 
 void Display_InitModule()
 {
-	CALLSTACK("Display_InitModule");
+	CALLSTACK;
 
 	int error;
 
@@ -116,14 +116,14 @@ void Display_InitModule()
 
 void Display_DeinitModule()
 {
-	CALLSTACK("Display_DeinitModule");
+	CALLSTACK;
 
 	Display_DestroyDisplay();
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CALLSTACK("WndProc");
+	CALLSTACK;
 
 	switch(message)
 	{
@@ -231,7 +231,7 @@ void Display_DestroyWindow()
 
 int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK("CreateDisplay");
+	CALLSTACK;
 
 	display.fullscreenWidth = display.width = width;
 	display.fullscreenHeight = display.height = height;
@@ -431,7 +431,7 @@ void Display_ResetDisplay()
 
 void Display_DestroyDisplay()
 {
-	CALLSTACK("DestroyDisplay");
+	CALLSTACK;
 
 	pd3dDevice->Release();
 	d3d9->Release();
@@ -439,30 +439,30 @@ void Display_DestroyDisplay()
 
 void Display_BeginFrame()
 {
-	CALLSTACK("Display_BeginFrame");
+	CALLSTACK;
 
 	pd3dDevice->BeginScene();
 }
 
 void Display_EndFrame()
 {
-	CALLSTACK("Display_EndFrame");
+	CALLSTACK;
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
 
 }
 
-void ClearScreen()
+void Display_ClearScreen(uint32 flags)
 {
-	CALLSTACK("ClearScreen");
+	CALLSTACK;
 
-	pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)
 {
-	CALLSTACK("SetProjection");
+	CALLSTACK;
 
 	D3DXMATRIX proj;
 
@@ -475,7 +475,7 @@ void SetProjection(float fov)
 
 bool SetOrtho(bool enable, float width, float height)
 {
-	CALLSTACK("SetOrtho");
+	CALLSTACK;
 
 	D3DXMATRIX proj;
 

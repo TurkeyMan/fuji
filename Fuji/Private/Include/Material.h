@@ -71,6 +71,7 @@ enum MaterialFlags
 class Material
 {
 public:
+	// Static Methods
 	static Material* CreateDefault();
 	static Material* Create(char *pName);
 	static void CreateMaterialFromDefinition(Material *pMat, char *pDefinition);
@@ -78,16 +79,19 @@ public:
 	inline static Material* GetCurrent() { return &current; }
 	static Material* Find(char *pName);
 
+	// Static Members
 	static Material current;
 	static Material *pNone;
 
 	static IniFile materialDefinitions;
 
+	// Methods
 	void Release();
 	void Use();
 
 	char* GetIDString();
 
+	// Members
 	Vector4	diffuse;
 	Vector4	ambient;
 	Vector4	specular;
@@ -120,15 +124,6 @@ public:
 
 	uint32 cubeMapIndex			: 3; // some what if's
 	uint32 displacementMapIndex	: 3;
-/*
-#if defined(_XBOX)
-	DWORD	vertexShader;
-	DWORD	pixelShader;
-#elif defined(_WINDOWS)
-	IDirect3DVertexShader9	*pVertexShader;
-	IDirect3DPixelShader9	*pPixelShader;
-#endif
-*/
 };
 
 void Material_InitModule();

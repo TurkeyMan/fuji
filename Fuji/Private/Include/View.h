@@ -6,11 +6,17 @@
 class View
 {
 public:
+	View();
+
+	// Static Methods
+	static View* GetCurrent();
+	static void UseDefault();
+
+	// Satic Members
 	static View currentView;
 	static View defaultView;
 
-	static View* GetCurrent();
-	static void UseDefault();
+	// Methods
 	void Use();
 
 	void SetProjection(float fov);
@@ -18,8 +24,20 @@ public:
 
 	void SetCameraMatrix(const Matrix &viewMat);
 
+	inline Matrix *GetWorldToViewMatrix() { return &view; }
+	inline Matrix *GetViewToScreenMatrix() { return &projection; }
+
+	Matrix *GetWorldToScreenMatrix();
+
+	Matrix *GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput);
+	Matrix *GetLocalToView(const Matrix& localToWorld, Matrix *pOutput);
+
+	// Members
 	Matrix projection;
 	Matrix view;
+
+	Matrix viewProj;
+	bool viewProjDirty;
 
 	float FOV;
 	bool isOrtho;

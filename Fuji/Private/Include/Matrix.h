@@ -39,8 +39,11 @@ public:
 	Matrix& Transpose3x3();
 
 	Matrix& Multiply(const Matrix& mat);
-	Matrix& Multiply3x3(const Matrix& mat);
 	Matrix& Multiply(const Matrix& mat1, const Matrix& mat2);
+	Matrix& Multiply4x4(const Matrix& mat);
+	Matrix& Multiply4x4(const Matrix& mat1, const Matrix& mat2);
+	Matrix& Multiply3x3(const Matrix& mat);
+	Matrix& Multiply3x3(const Matrix& mat1, const Matrix& mat2);
 
 	Vector4 TransformVector(const Vector4& vec);
 	Vector3 TransformVector3(const Vector3& vec);

@@ -2,6 +2,7 @@
 #include "System.h"
 #include "FileSystem.h"
 #include "Display.h"
+#include "View.h"
 #include "Material.h"
 #include "Input.h"
 #include "Font.h"
@@ -109,7 +110,8 @@ void System_Draw()
 	CALLSTACKc;
 
 #if !defined(_RETAIL)
-	bool o = SetOrtho(true);
+	View::UseDefault();
+	bool o = View::GetCurrent()->SetOrtho(true);
 
 	Callstack_DrawProfile();
 
@@ -121,7 +123,7 @@ void System_Draw()
 
 	DebugMenu_Draw();
 
-	SetOrtho(o);
+	View::GetCurrent()->SetOrtho(o);
 #endif
 }
 

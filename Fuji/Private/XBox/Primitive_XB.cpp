@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Display.h"
+#include "View.h"
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix.h"
@@ -33,6 +34,8 @@ void MFPrimitive(uint32 type, uint32 hint)
 	{
 		Texture::UseNone();
 	}
+
+	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
 }
 
 void MFBegin(uint32 vertexCount)
@@ -44,6 +47,9 @@ void MFBegin(uint32 vertexCount)
 	current.colour = 0xFFFFFFFF;
 	current.normal.x = current.normal.z = 0.0f;
 	current.normal.y = 1.0f;
+
+	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
 }
 
 void MFSetMatrix(const Matrix &mat)

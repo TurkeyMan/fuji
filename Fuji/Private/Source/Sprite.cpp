@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Texture.h"
 #include "Display.h"
+#include "View.h"
 #include "Sprite.h"
 #include "Primitive.h"
 
@@ -23,7 +24,7 @@ void Sprite::Draw()
 	if(!visible) return;
 
 	// set orthographic mode
-	bool old = SetOrtho(true);
+	bool old = View::GetCurrent()->SetOrtho(true);
 
 	// generate rotation and translation matrix
 	Matrix world;
@@ -56,7 +57,7 @@ void Sprite::Draw()
 	MFSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
 	MFEnd();
 
-	SetOrtho(old);
+	View::GetCurrent()->SetOrtho(old);
 }
 
 void Sprite::Release()

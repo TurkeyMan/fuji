@@ -23,6 +23,9 @@ void Display_InitModule()
 
 	View::defaultView.view.SetIdentity();
 	View::defaultView.SetProjection((D3DX_PI*2.0f)*0.16666f);
+	View::defaultView.viewProj = View::defaultView.projection;
+	View::defaultView.viewProjDirty = false;
+	View::defaultView.isOrtho = false;
 	View::UseDefault();
 }
 
@@ -91,11 +94,11 @@ void Display_EndFrame()
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
-void ClearScreen()
+void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACK;
 
-	pd3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL, 0x00000030, 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), 0x00000030, 1.0f, 0);
 }
 
 void SetProjection(float fov)

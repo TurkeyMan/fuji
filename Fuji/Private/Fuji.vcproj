@@ -571,6 +571,9 @@
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Shape.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Sprite.cpp">
 			</File>
 			<File
@@ -663,6 +666,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Renderer.h">
+			</File>
+			<File
+				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">

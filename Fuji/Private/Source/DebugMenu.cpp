@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "Display.h"
+#include "View.h"
 #include "DebugMenu.h"
 #include "Input.h"
 #include "Font.h"
@@ -89,12 +90,12 @@ void DebugMenu_Draw()
 {
 	if(Input_ReadGamepad(0, Button_RTrig)) return;
 
-	bool o = SetOrtho(true);
+	bool o = View::GetCurrent()->SetOrtho(true);
 
 	if(debugMenuEnabled)
 		pCurrentMenu->Draw();
 
-	SetOrtho(o);
+	View::GetCurrent()->SetOrtho(o);
 }
 
 void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)

@@ -6,6 +6,7 @@
 #include "Display.h"
 #include "Primitive.h"
 #include "Font.h"
+#include "View.h"
 #endif
 
 char stringBuffer[1024*128];
@@ -154,7 +155,8 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 
 		Display_BeginFrame();
 
-		SetOrtho(true);
+		View::UseDefault();
+		View::GetCurrent()->SetOrtho(true);
 
 		// Set some renderstates
 		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
