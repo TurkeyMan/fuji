@@ -49,7 +49,7 @@ public:
 };
 
 // static (mark/release) heap
-class StaticHeap
+class StaticHeap : public Heap
 {
 public:
 	// Static Heap Functions

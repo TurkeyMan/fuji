@@ -562,6 +562,9 @@
 				RelativePath=".\Source\Heap.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Image.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\IniFile.cpp">
 			</File>
 			<File
@@ -663,6 +666,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Heap.h">
+			</File>
+			<File
+				RelativePath=".\Include\Image.h">
 			</File>
 			<File
 				RelativePath=".\Include\IniFile.h">

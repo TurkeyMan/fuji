@@ -59,21 +59,21 @@ char* File_HomePath(const char *filename)
 
 char* File_Load(const char *pFilename, uint32 *pBytesRead)
 {
+	char *pBuffer = NULL;
+
 	if(pBytesRead) *pBytesRead = 0;
 
 	uint32 handle = File_Open(pFilename);
 	if(handle < 0) return NULL;
 
 	uint32 filesize = File_GetSize(handle);
-	if(filesize == 0)
+
+	if(filesize)
 	{
-		File_Close(handle);
-		return NULL;
+		pBuffer = (char*)Heap_Alloc(filesize);
+		File_Read(pBuffer, filesize, handle);
 	}
 
-	char *pBuffer = (char*)Heap_Alloc(filesize);
-
-	File_Read(pBuffer, filesize, handle);
 	File_Close(handle);
 
 	if(pBytesRead) *pBytesRead = filesize;

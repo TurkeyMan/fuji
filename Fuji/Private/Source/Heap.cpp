@@ -56,6 +56,9 @@ void Heap_InitModule()
 	// probably want to create the default heap here...
 	// but we'll let the system manage the memory for the time being
 	// all currently supports systems have memory managers
+/*
+	pCurrentHeap = Heap_CreateHeap(gDefaults.heap.staticHeapSize, HEAP_Static, "Default Static Heap");
+*/
 }
 
 void Heap_DeinitModule()
@@ -84,18 +87,20 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	// calculate the offset of the start of the heap memory
 	uint32 heapStart;
 
+	Heap *pHeap;
+
 	switch(type)
 	{
 	case HEAP_Static:
 		heapStart = ALIGN16(sizeof(StaticHeap)) + ALIGN16(sizeof(char*) * gDefaults.heap.maxStaticMarkers);
 
+		pHeap = (Heap*)malloc_aligned(size + heapStart);
+		pHeap = (Heap*)new(pHeap) StaticHeap();
+		break;
+
 	default:
 		DBGASSERT(0, "Unknown Heap Type");
 	}
-
-	// FIXME: i think you need to call new on a class with a vf-table?
-	// will need a placement new or something.... :/
-	Heap *pHeap = (Heap*)malloc_aligned(size + heapStart);
 
 	// fill heap structure
 	pHeap->pHeap			= (char*)pHeap + heapStart;
@@ -316,19 +321,26 @@ void Heap_ActivateTempMemOverride(bool activate)
 
 void *StaticHeap::Alloc(uint32 bytes)
 {
-	// TODO: static heap alloc
-	return NULL;
+	char *pMem = pAllocPointer;
+	pAllocPointer += ALIGN16(bytes);
+	return pMem;
 }
 
 void *StaticHeap::Realloc(void *pBuffer, uint32 bytes)
 {
 	// TODO: static heap realloc
+
+	// check if it was the last thing allocated and push the alloc pointer foreward a little...
+	// otherwise assert
+
 	return NULL;
 }
 
 void StaticHeap::Free(void *pBuffer)
 {
 	// TODO: static heap free
+
+	// remove from the allocation list
 }
 
 void StaticHeap::Release()

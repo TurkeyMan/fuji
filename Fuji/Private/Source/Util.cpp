@@ -73,7 +73,7 @@ void Callstack_Log()
 {
 	for(int a=Callstack.size()-1; a>=0; a--)
 	{
-		LOGD(STR("%s", Callstack[a]));
+		LOGD(STR("  %s", Callstack[a]));
 	}
 }
 
