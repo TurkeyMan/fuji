@@ -302,13 +302,17 @@ int Input_GetNumKeyboards()
 	return gKeyboardCount;
 }
 
-bool Input_ReadKeyboard(int keyboardID, uint32 key)
+bool Input_ReadKeyboard(uint32 key, int keyboardID)
 {
+	DBGASSERT(keyboardID >= -1 && keyboardID < gKeyboardCount, STR("Keyboard %d unavailable", keyboardID));
+
 	return gKeyState[keyboardID+1][key] != 0;
 }
 
-bool Input_WasKeyPressed(int keyboardID, uint32 key)
+bool Input_WasKeyPressed(uint32 key, int keyboardID)
 {
+	DBGASSERT(keyboardID >= -1 && keyboardID < gKeyboardCount, STR("Keyboard %d unavailable", keyboardID));
+
 	return gKeyState[keyboardID+1][key] && !gPrevKeyState[keyboardID+1][key];
 }
 
@@ -322,13 +326,17 @@ int Input_GetNumPointers()
 	return gMouseCount;
 }
 
-bool Input_ReadMouseKey(int mouseID, uint32 key)
+bool Input_ReadMouseKey(uint32 key, int mouseID)
 {
+	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
+
 	return false;
 }
 
-bool Input_WasMousePressed(int mouseID, uint32 key)
+bool Input_WasMousePressed(uint32 key, int mouseID)
 {
+	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
+
 	return false;
 }
 
@@ -344,6 +352,8 @@ void SetMouseMode(uint32 mouseMode)
 
 Vector3 Input_ReadMousePos(int mouseID)
 {
+	DBGASSERT(mouseID >= -1 && mouseID < gMouseCount, STR("Mouse %d unavailable", mouseID));
+
 	return Vector(0.0f, 0.0f, 0.0f);
 }
 

@@ -70,8 +70,8 @@ bool Input_IsConnected(int controlID);
 void SetGamepadEventHandler(EventFunc pEventFunc);
 
 int Input_GetNumKeyboards();
-bool Input_ReadKeyboard(int keyboardID, uint32 key);
-bool Input_WasKeyPressed(int keyboardID, uint32 type);
+bool Input_ReadKeyboard(uint32 key, int keyboardID = -1);
+bool Input_WasKeyPressed(uint32 key, int keyboardID = -1);
 
 void SetKeyboardEventHandler(EventFunc pEventFunc);
 
@@ -83,12 +83,12 @@ enum MouseMode
 
 int Input_GetNumPointers();
 
-bool Input_ReadMouseKey(int mouseID, uint32 key);
-bool Input_WasMousePressed(int mouseID, uint32 type);
+bool Input_ReadMouseKey(uint32 key, int mouseID = -1);
+bool Input_WasMousePressed(uint32 key, int mouseID = -1);
 
 void SetMouseEventHandler(EventFunc pEventFunc);
 
 void SetMouseMode(uint32 mouseMode = MM_Absolute);
-Vector3 Input_ReadMousePos(int mouseID, uint32 key);
+Vector3 Input_ReadMousePos(int mouseID = -1);
 
 #endif
