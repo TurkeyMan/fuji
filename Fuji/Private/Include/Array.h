@@ -40,7 +40,7 @@ public:
 			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 		}
 
-		count = MAX(count, x+1);
+		count = Max(count, x+1);
 
 		return pData[x];
 	}

@@ -291,7 +291,7 @@ void Menu::Draw()
 		}
 
 		dimensions.y += dim.y;
-		dimensions.x = MAX(dimensions.x, dim.x);
+		dimensions.x = Max(dimensions.x, dim.x);
 	}
 
 	if(targetOffset != yOffset)

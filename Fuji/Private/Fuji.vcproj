@@ -1120,6 +1120,10 @@
 				</FileConfiguration>
 			</File>
 		</Filter>
+		<Filter
+			Name="Linux"
+			Filter="">
+		</Filter>
 		<File
 			RelativePath=".\Todo.txt">
 		</File>

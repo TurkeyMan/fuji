@@ -233,7 +233,7 @@ float Input_ReadGamepad(int controlID, uint32 type)
 			return (abs(inputValue) > deadZone) ? inputValue : 0.0f;
 
 		default:
-			OutputDebugString("Error: Undefined Control Pad Input Type\n\n");
+			dprintf("Error: Undefined Control Pad Input Type\n\n");
 	}
 
 	return 0.0f;

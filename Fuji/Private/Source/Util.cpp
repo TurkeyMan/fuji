@@ -238,7 +238,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 #endif // _FUJI_UTIL
 
 //
-// This just does OutputDebugString using a format string.
+// Output a formatted string to the debugger.
 //
 int dprintf(const char *format, ...)
 {
@@ -249,7 +249,12 @@ int dprintf(const char *format, ...)
 	va_start(arglist, format);
 
 	nRes = vsprintf((char*)buffer, format, arglist);
+
+#if defined(WIN32)
 	OutputDebugString((LPCTSTR)buffer);
+#else
+	fprintf(stderr, buffer);
+#endif
 
 	va_end(arglist);
 	return nRes;
@@ -257,8 +262,7 @@ int dprintf(const char *format, ...)
 
 void LOGD(const char *string)
 {
-	OutputDebugString(string);
-	OutputDebugString("\n");
+	dprintf("%s\n", string);
 }
 
 char* STR(const char *format, ...)

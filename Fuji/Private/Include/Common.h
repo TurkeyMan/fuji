@@ -55,6 +55,7 @@ typedef long long 			int64;
 typedef unsigned __int64	uint64;
 typedef __int64				int64;
 #endif
+
 typedef unsigned int		uint32;
 typedef int					int32;
 typedef unsigned short		uint16;
@@ -80,31 +81,26 @@ typedef char				int8;
 	#endif
 #endif
 
+// Min/Max
+template <class T>
+inline T Min(T a, T b) { return a < b ? a : b; }
+template <class T>
+inline T Max(T a, T b) { return a > b ? a : b; }
+
+// clamps so that: x <= y <= z
+template <class T>
+inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
+
 // useful macros
-#if !defined(MIN)
-#define MIN(a, b) ((a) < (b)? (a) : (b))
-#endif
-
-#if !defined(MAX)
-#define MAX(a, b) ((a) > (b)? (a) : (b))
-#endif
-
-#define Clamp(x,y,z) MAX((x), MIN((y),(z)))
-
 #define ALIGN16(x) (((x)+15) & 0xFFFFFFF0)
 
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
 
 // stricmp is a Win32/XBox only function
-#if (!defined(_WIN32) && !defined(_XBOX))
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
-
-// So is OutputDebugString
-#define OutputDebugString(s) fprintf(stderr, (s))
-#define LPCTSTR char *
-
+#if !defined(_WINDOWS) && !defined(_XBOX)
+	#define stricmp strcasecmp
+	#define strnicmp strncasecmp
 #endif
 
 

@@ -65,4 +65,9 @@ public:
 
 inline Vector3 Vector(float x, float y, float z = 0.0f) { Vector3 t; t.x = x; t.y = y; t.z = z; return t; }
 
+template <>
+inline Vector3 Min(Vector3 a, Vector3 b) { Vector3 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; return t; }
+template <>
+inline Vector3 Max(Vector3 a, Vector3 b) { Vector3 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; return t; }
+
 #endif

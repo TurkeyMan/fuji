@@ -180,7 +180,7 @@ void *Heap_Realloc(void *pMem, uint32 bytes)
 #endif
 
 	// ummmmm... yeah need to keep record of what is allocated where... 
-	memcpy(pNew, pMem, MIN(bytes, bytes));
+	memcpy(pNew, pMem, Min(bytes, bytes));
 
 	return pNew;
 }

@@ -63,4 +63,9 @@ public:
 inline Vector4 Vector(float x, float y, float z, float w) { Vector4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
 inline Vector4 Vector(const Vector3 &v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
 
+template <>
+inline Vector4 Min(Vector4 a, Vector4 b) { Vector4 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
+template <>
+inline Vector4 Max(Vector4 a, Vector4 b) { Vector4 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
+
 #endif
