@@ -61,6 +61,7 @@ typedef __m128				uint128;
 typedef unsigned int		uint128[4];
 #endif
 
+#if !defined(_DC) // Bloody Kallistos defines all these
 #if defined(__GNUC__)
 typedef unsigned long long	uint64;
 typedef long long 			int64;
@@ -75,6 +76,7 @@ typedef unsigned short		uint16;
 typedef short				int16;
 typedef unsigned char		uint8;
 typedef char				int8;
+#endif
 
 // defined values
 #if !defined(PI)

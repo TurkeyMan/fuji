@@ -57,8 +57,10 @@ float RandomRange(float min, float max);
 Vector3 RandomVector();
 
 // string functions
+#if !defined(_DC) // Kallistos defines these
 inline int tolower(int c);
 inline int toupper(int c);
+#endif
 int StrCaseCmp(const char *s1, const char *s2);
 int StrNCaseCmp(const char *s1, const char *s2, size_t n);
 

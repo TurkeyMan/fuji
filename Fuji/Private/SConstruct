@@ -11,13 +11,15 @@ import sys
 import os
 import string
 
-PROCESSOR = 'athlon-xp' # Processor to tune for, doesn't break compatability
+CC = None
+CXX = None
 BASENAME = 'Fuji'
 CPPPATH = ['Include'] # Include files
 SOURCEDIRS = ['Source']
 MASKEDFILES = []
 BINDIR = 'Bin'
-CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe -mcpu=' + PROCESSOR
+CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe'
+
 
 # Find out what platform we're building on, and set the platform specific options for it
 platform = str(ARGUMENTS.get('OS', Platform()))
@@ -28,8 +30,17 @@ if(platform == 'linux'): # It should be possible to use scons on Windows too
 	SOURCEDIRS.append('Linux')
 	CPPPATH.append('/usr/X11R6/include')
 	CCFLAGS += ' -D_LINUX'
+elif(platform == 'DC'):
+	SOURCEDIRS.append('DC')
+	CPPPATH.append('DC/kos-1.2.0/include')
+	CPPPATH.append('DC/kos-1.2.0/libc/include')
+	CPPPATH.append('DC/kos-1.2.0/kernel/arch/dreamcast/include')
+	CCFLAGS += ' -D_DC'
+
+	CC = 'sh-elf-gcc'
+	CXX = 'sh-elf-g++'
 else:
-	sys.stderr.write('Platform unsupported (use OS=linux) [%s]\n' % (platform,))
+	sys.stderr.write('Platform unsupported (use OS=linux or OS=DC) [%s]\n' % (platform,))
 	sys.exit(0)
 
 
@@ -46,6 +57,21 @@ elif(build_type == 'RETAIL'):
 else:
 	sys.stderr.write('Invalid build type, use one of: BUILD_TYPE=(DEBUG|RELEASE|RETAIL)\n')
 	sys.exit(0)
+
+# Processor tuning
+processor = ARGUMENTS.get('PROCESSOR')
+if(processor != None):
+	CCFLAGS += ' -mcpu=' + str(processor)
+
+# C compiler to use
+cc = ARGUMENTS.get('CC')
+if(cc != None):
+	CC = str(cc)
+
+# C++ compiler to use
+cxx = ARGUMENTS.get('CXX')
+if(cxx != None):
+	CXX = str(cc)
 
 
 # Get the full list of all the source files
@@ -71,6 +97,15 @@ sources = new_sources
 
 env = Environment(CCFLAGS = CCFLAGS, CPPPATH = CPPPATH, ENV = os.environ)
 
+# Optional options
+if(CC != None):
+	env['CC'] = CC
+
+if(CXX != None):
+	env['CXX'] = CXX
+
+
+# Set it to use timestamps to determine if a rebuild is neceesary, instead of MD5 hashes
 env.SourceSignatures('timestamp')
 
 env.StaticLibrary(target=BASENAME, source=sources)
