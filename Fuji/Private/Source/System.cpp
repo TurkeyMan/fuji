@@ -33,6 +33,8 @@ void System_Init()
 {
 	CALLSTACK("System_Init");
 
+	Heap_InitModule();
+
 	DebugMenu_InitModule();
 	Callstack_InitModule();
 	Timer_InitModule();
@@ -65,6 +67,8 @@ void System_Deinit()
 	Timer_DeinitModule();
 	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
+
+	Heap_DeinitModule();
 }
 
 void System_Update()

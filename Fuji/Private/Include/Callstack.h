@@ -81,7 +81,8 @@ void Callstack_DeinitModule();
 
 	#define CALLSTACK FunctionCall callstack(__FUNCTION__, 0);
 	#define CALLSTACKc FunctionCall callstack(__FUNCTION__, 1);
-	#define CALLSTACKs(s) FunctionCall callstack(s, 1);
+	#define CALLSTACKs(s) FunctionCall callstack(s, 0);
+	#define CALLSTACKcs(s) FunctionCall callstack(s, 1);
 
 	void Callstack_DrawProfile();
 #else
@@ -89,6 +90,7 @@ void Callstack_DeinitModule();
 	#define CALLSTACK
 	#define CALLSTACKc
 	#define CALLSTACKs(s)
+	#define CALLSTACKcs(s)
 	#define Callstack_DrawProfile()
 	#define Callstack_EndFrame()
 #endif
@@ -98,6 +100,7 @@ void Callstack_DeinitModule();
 	#define CALLSTACK
 	#define CALLSTACKc
 	#define CALLSTACKs(s)
+	#define CALLSTACKcs(s)
 	#define Callstack_DrawProfile()
 	#define Callstack_EndFrame()
 
