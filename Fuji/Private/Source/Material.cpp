@@ -30,7 +30,11 @@ void Material_InitModule()
 
 	materialList.Init("Material List", MAX_MATERIALS);
 
-	Material::materialDefinitions.Create(File_SystemPath("Materials.ini"));
+	if(Material::materialDefinitions.Create(File_SystemPath("Materials.ini")))
+	{
+		DBGASSERT(false, "Failed to load Materials.ini");
+	}
+
 	Material::pNone = Material::Create("None");
 }
 
@@ -266,10 +270,18 @@ Material* Material::Create(char *pName)
 
 		if(File_Exists(pTexName))
 		{
+			LOGD(STR("No material definition for '%s'. Using default material.\n", pName));
+
 			pMat = Material::CreateDefault();
 			Texture *pTex = Texture::LoadTexture(pTexName);
 
 			pMat->refCount = 1;
+		}
+		else
+		{
+			LOGD(STR("No material definition or texture found for material '%s'. Using 'None'.\n", pName));
+
+			pMat = Material::Create("None");
 		}
 	}
 
@@ -296,7 +308,14 @@ void Material::Use()
 	current = *this;
 
 	// set some render states
-	pTextures[this->diffuseMapIndex]->SetTexture(0);
+	if(pTextures[this->diffuseMapIndex])
+	{
+		pTextures[this->diffuseMapIndex]->SetTexture(0);
+	}
+	else
+	{
+		Texture::UseNone();
+	}
 
 	// choose renderer
 

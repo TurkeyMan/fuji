@@ -9,7 +9,7 @@
 #define INIASSERT(reason, rave)
 #endif
 
-void IniFile::Create(char *pFilename)
+int IniFile::Create(char *pFilename)
 {
 	CALLSTACK;
 
@@ -34,7 +34,12 @@ void IniFile::Create(char *pFilename)
 		owned = true;
 	}
 	else
+	{
 		pIniBuffer = NULL;
+		return 1;
+	}
+
+	return 0;
 }
 
 void IniFile::CreateFromMemory(char *pMemory)

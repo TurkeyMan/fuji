@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="Fuji"
+	ProjectGUID="{456B787C-0FA4-4F3F-88F8-87FE5CC9553F}"
 	SccProjectName=""
 	SccAuxPath=""
 	SccLocalPath=""
@@ -67,6 +68,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Xbox"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool

@@ -8,7 +8,7 @@ class IniFile
 {
 public:
 	// create an IniFile from a file
-	void Create(char *pFilename);
+	int Create(char *pFilename);
 	// create an IniFile from a *copy* of a memory location
 	void CreateFromMemory(char *pMemory);
 	// create an IniFile from a *direct reference* a memoryLocation
