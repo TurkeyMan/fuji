@@ -1,6 +1,10 @@
 #if !defined(_ARRAY_H)
 #define _ARRAY_H
 
+#pragma warning(disable: 4345)
+
+#include <new>
+
 template<class T>
 class Array
 {
@@ -8,6 +12,7 @@ public:
 	inline Array()
 	{
 		pData = (T*)malloc(sizeof(T) * 16);
+		for(int a=0; a<16; a++) new(&pData[a]) T();
 		allocated = 16;
 		count = 0;
 	}
@@ -15,6 +20,7 @@ public:
 	inline Array(int _count)
 	{
 		pData = (T*)malloc(sizeof(T) * _count);
+		for(int a=0; a<_count; a++) new(&pData[a]) T();
 		allocated = count = _count;
 	}
 
@@ -27,9 +33,11 @@ public:
 	{
 		if(x >= allocated)
 		{
+			int oldAlloc = allocated;
 			while(x >= allocated) allocated *= 2;
 
 			pData = (T*)realloc(pData, sizeof(T) * allocated);
+			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 		}
 
 		count = max(count, x+1);
@@ -43,9 +51,11 @@ public:
 	{
 		if(x >= allocated)
 		{
+			int oldAlloc = allocated;
 			while(x >= allocated) allocated *= 2;
 
 			pData = (T*)realloc(pData, sizeof(T) * allocated);
+			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 		}
 
 		count = x;
@@ -59,8 +69,10 @@ public:
 
 		if(count >= allocated)
 		{
+			int oldAlloc = allocated;
 			allocated *= 2;
 			pData = (T*)realloc(pData, sizeof(T) * allocated);
+			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 		}
 
 		return pData[count-1];
@@ -72,8 +84,10 @@ public:
 
 		if(count >= allocated)
 		{
+			int oldAlloc = allocated;
 			allocated *= 2;
 			pData = (T*)realloc(pData, sizeof(T) * allocated);
+			for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 		}
 
 		pData[count-1] = x;

@@ -37,6 +37,17 @@ bool Debug_MsgBox(const char *pMessageText, const char *pTitle, const char *pTim
 	return bResult;
 }
 
+#else
+
+bool Debug_MsgBox(const char *pMessageText, const char *pTitle, const char *pTime)
+{
+	bool bResult = false;
+
+	printf("%s: %s", pTitle, pMessageText);
+
+	return bResult;
+}
+
 #endif
 
 #if defined(_FUJI_UTIL)
@@ -270,6 +281,7 @@ char* STRn(const char *source, int n)
 	char *buffer = &stringBuffer[stringOffset];
 
 	strncpy(buffer, source, n);
+	buffer[n] = NULL;
 
 	stringOffset += n+1;
 

@@ -581,957 +581,574 @@ void Input_UpdateJoystick()
 	}
 }
 
-/*
-void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)())
+char* Input_EnumerateString(ButtonMapping *pMap)
 {
-	char			testKeys[16][256];
-	DIJOYSTATE2		testJoystick[16];
-	DIMOUSESTATE2	testMouse[16];
+	char *pString;
 
-	int complete=0;
-
-	long  *tiaxis=NULL;
-	long  *taxis=NULL;
-	//char t[100];
-
-	int a,b,c,d;
-
-	meProcessInput();
-
-	memcpy(testKeys, meKeys, (sizeof(char)*256)*gKeyboardCount);
-	memcpy(testJoystick, gJoyState, sizeof(DIJOYSTATE2)*gJoystickCount);
-	memcpy(&testMouse, &gMouseState, sizeof(DIMOUSESTATE2)*gMouseCount);
-
-	do
+	if(pMap->source==CTRL_JOYSTICK)
 	{
-		meProcessInput();
+		pString = STR("Joy %d ", pMap->sourceIndex);
 
-		if(ProcessFunc) ProcessFunc();
-
-		for(d=0; d<gKeyboardCount&&!complete; d++)
-		{
-			for(a=0; a<256&&!complete; a++)
-			{
-				if(testKeys[d][a] && !meKeys[d][a]) testKeys[d][a]=NULL;
-				if(!testKeys[d][a] && meKeys[d][a])
-				{
-					ctrl->Type = ME_CTRLTYPE_KEY;
-					ctrl->Data = &meKeys[d][a];
-					ctrl->Sign = NULL;
-
-					ctrl->Source = CTRL_KEY;
-					ctrl->Index = d;
-
-					ctrl->Object = a;
-					ctrl->Property = NULL;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-			}
-		}
-
-		for(d=0; d<gMouseCount&&!complete; d++)
-		{
-			for(a=0; a<3; a++)
-			{
-				tiaxis=&(gMouseState[d].lX)+a;
-				taxis=&(testMouse[d].lX)+a;
-
-				if(*tiaxis<-3)
-				{
-					ctrl->Type = ME_CTRLTYPE_AXIS;
-					ctrl->Data = tiaxis;
-					ctrl->Sign = -1;
-
-					ctrl->Source = CTRL_MOUSE;
-					ctrl->Index = d;
-
-					ctrl->Object = a;
-					ctrl->Property = NULL;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-
-				if(*tiaxis>3)
-				{
-					ctrl->Type = ME_CTRLTYPE_AXIS;
-					ctrl->Data = tiaxis;
-					ctrl->Sign = 1;
-
-					ctrl->Source = CTRL_MOUSE;
-					ctrl->Index = d;
-
-					ctrl->Object = a;
-					ctrl->Property = NULL;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-			}
-
-			for(b=0; b<8&&!complete; b++)
-			{
-				if(testMouse[d].rgbButtons[b] && !gMouseState[d].rgbButtons[b]) testMouse[d].rgbButtons[b]=NULL;
-				if(!testMouse[d].rgbButtons[b] && gMouseState[d].rgbButtons[b])
-				{
-					ctrl->Type = ME_CTRLTYPE_BUTTON;
-					ctrl->Data = &gMouseState[d].rgbButtons[b];
-					ctrl->Sign = NULL;
-
-					ctrl->Source = CTRL_MOUSE;
-					ctrl->Index = d;
-
-					ctrl->Object = CTRL_MOUSE_BUTTON;
-					ctrl->Property = b;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-			}
-		}
-
-		for(a=0; a<gJoystickCount&&!complete; a++)
-		{
-			for(b=0; b<24&&!complete; b++)
-			{
-				tiaxis=&(gJoyState[a].lX)+joyaxii[b];
-				taxis=&(testJoystick[a].lX)+joyaxii[b];
-
-				if(*tiaxis<(*taxis*0.5))
-				{
-					ctrl->Type = ME_CTRLTYPE_AXIS;
-					ctrl->Data = tiaxis;
-					ctrl->Sign = -1;
-
-					ctrl->Source = CTRL_JOYSTICK;
-					ctrl->Index = a;
-
-					ctrl->Object = joyaxii[b];
-					ctrl->Property = NULL;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-
-				if(*tiaxis>(*taxis*1.5))
-				{
-					ctrl->Type = ME_CTRLTYPE_AXIS;
-					ctrl->Data = tiaxis;
-					ctrl->Sign = 1;
-
-					ctrl->Source = CTRL_JOYSTICK;
-					ctrl->Index = a;
-
-					ctrl->Object = joyaxii[b];
-					ctrl->Property = NULL;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-			}
-
-			for(b=0; b<4&&!complete; b++)
-			{
-				for(c=0; c<2&&!complete; c++)
-				{
-					tiaxis=&(gJoyState[a].lX)+joysliders[b]+c;
-					taxis=&(testJoystick[a].lX)+joysliders[b]+c;
-
-					if(*tiaxis<(*taxis*0.5))
-					{
-						ctrl->Type = ME_CTRLTYPE_AXIS;
-						ctrl->Data = tiaxis;
-						ctrl->Sign = -1;
-
-						ctrl->Source = CTRL_JOYSTICK;
-						ctrl->Index = a;
-
-						ctrl->Object = joysliders[b];
-						ctrl->Property = c;
-
-						meEnumerateString(ctrl, ctrl->Desc);
-
-						complete++;
-					}
-
-					if(*tiaxis>(*taxis*1.5))
-					{
-						ctrl->Type = ME_CTRLTYPE_AXIS;
-						ctrl->Data = tiaxis;
-						ctrl->Sign = 1;
-
-						ctrl->Source = CTRL_JOYSTICK;
-						ctrl->Index = a;
-
-						ctrl->Object = joysliders[b];
-						ctrl->Property = c;
-
-						meEnumerateString(ctrl, ctrl->Desc);
-
-						complete++;
-					}
-				}
-			}
-
-			for(b=0; b<128&&!complete; b++)
-			{
-				if(testJoystick[a].rgbButtons[b] && !gJoyState[a].rgbButtons[b]) testJoystick[a].rgbButtons[b]=NULL;
-				if(!testJoystick[a].rgbButtons[b] && gJoyState[a].rgbButtons[b])
-				{
-					ctrl->Type = ME_CTRLTYPE_BUTTON;
-					ctrl->Data = &gJoyState[a].rgbButtons[b];
-					ctrl->Sign = NULL;
-
-					ctrl->Source = CTRL_JOYSTICK;
-					ctrl->Index = a;
-
-					ctrl->Object = CTRL_JOYSTICK_BUTTON;
-					ctrl->Property = b;
-
-					meEnumerateString(ctrl, ctrl->Desc);
-
-					complete++;
-				}
-			}
-		}
-	} while(!complete);
-}
-*/
-/*
-int meDigitalReading(ME_CONTROL *ctrl)
-{
-	if(!ctrl->Data) return 0;
-
-	long t=NULL;
-	int x=0;
-
-	switch(ctrl->Type)
-	{
-		case ME_CTRLTYPE_KEY:
-		case ME_CTRLTYPE_BUTTON:
-			if(*(char*)(ctrl->Data)) x=1;
-			break;
-		case ME_CTRLTYPE_AXIS:
-			if(ctrl->Source==CTRL_JOYSTICK)
-			{
-				t=*(long*)(ctrl->Data);
-				t-=32768;
-				t*=ctrl->Sign;
-				if(t>=(32768*meDigitalRatio)) x=1;
-			}
-			else if(ctrl->Source==CTRL_MOUSE)
-			{
-				if(ctrl->Sign>0 && *(long*)(ctrl->Data)>0) x=1;
-				else if(ctrl->Sign<0 && *(long*)(ctrl->Data)<0) x=1;
-			}
-			break;
-		default:
-			x=0;
-			break;
-	}
-
-	return x;
-}
-
-int meAnalogReading(ME_CONTROL *ctrl)
-{
-	if(!ctrl->Data) return 0;
-
-	float t=NULL;
-	int x=meAnalogMin;
-
-	switch(ctrl->Type)
-	{
-		case ME_CTRLTYPE_KEY:
-		case ME_CTRLTYPE_BUTTON:
-			if(*(char*)(ctrl->Data)) x=meAnalogMin+meAnalogRange;
-			break;
-		case ME_CTRLTYPE_AXIS:
-			if(ctrl->Source==CTRL_JOYSTICK)
-			{
-				t=(float)(*(long*)(ctrl->Data));
-				t-=32768;
-				t*=ctrl->Sign;
-				if(t<0) t=0;
-				else
-				{
-					t/=(32768*meAnalogDeadZone)/((float)meAnalogRange);
-					if(t>(float)meAnalogRange) t=(float)meAnalogRange;
-				}
-				t+=meAnalogMin;
-				x=(int)t;
-			}
-			else if(ctrl->Source==CTRL_MOUSE)
-			{
-				if(ctrl->Sign>0 && *(long*)(ctrl->Data)>0) x=*(long*)(ctrl->Data);
-				else if(ctrl->Sign<0 && *(long*)(ctrl->Data)<0) x=-*(long*)(ctrl->Data);
-			}
-			break;
-		default:
-			x=meAnalogMin;
-			break;
-	}
-
-	return x;
-}
-*/
-
-void meEnumerateString(ME_CONTROL *ctrl, char *String)
-{
-	if(ctrl->Source==CTRL_JOYSTICK)
-	{
-		sprintf(String, "Joy %d ", ctrl->Index);
-
-		switch(ctrl->Object)
+		switch(pMap->control)
 		{
 			case CTRL_JOYSTICK_X:
-				sprintf(String, "%s %sX-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sX-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_Y:
-				sprintf(String, "%s %sY-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sY-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_Z:
-				sprintf(String, "%s %sZ-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sZ-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_RX:
-				sprintf(String, "%s %sX-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sX-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_RY:
-				sprintf(String, "%s %sY-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sY-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_RZ:
-				sprintf(String, "%s %sZ-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sZ-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_SLIDER:
-				sprintf(String, "%s %sSlider %d", String, ctrl->Sign==1?"+":"-", ctrl->Property);
+				pString = STR("%s %sSlider", pString, "");
 				break;
 			case CTRL_JOYSTICK_BUTTON:
-				sprintf(String, "%s Button %d", String, ctrl->Property);
+				pString = STR("%s Button", pString);
 				break;
 			case CTRL_JOYSTICK_VX:
-				sprintf(String, "%s %sVX-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVX-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VY:
-				sprintf(String, "%s %sVY-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVY-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VZ:
-				sprintf(String, "%s %sVZ-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVZ-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VRX:
-				sprintf(String, "%s %sVX-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVX-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VRY:
-				sprintf(String, "%s %sVY-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVY-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VRZ:
-				sprintf(String, "%s %sVZ-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sVZ-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_VSLIDER:
-				sprintf(String, "%s %sVSlider %d", String, ctrl->Sign==1?"+":"-", ctrl->Property);
+				pString = STR("%s %sVSlider", pString, "");
 				break;
 			case CTRL_JOYSTICK_AX:
-				sprintf(String, "%s %sAX-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAX-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_AY:
-				sprintf(String, "%s %sAY-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAY-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_AZ:
-				sprintf(String, "%s %sAZ-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAZ-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_ARX:
-				sprintf(String, "%s %sAX-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAX-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_ARY:
-				sprintf(String, "%s %sAY-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAY-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_ARZ:
-				sprintf(String, "%s %sAZ-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sAZ-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_ASLIDER:
-				sprintf(String, "%s %sASlider %d", String, ctrl->Sign==1?"+":"-", ctrl->Property);
+				pString = STR("%s %sASlider", pString, "");
 				break;
 			case CTRL_JOYSTICK_FX:
-				sprintf(String, "%s %sFX-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFX-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FY:
-				sprintf(String, "%s %sFY-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFY-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FZ:
-				sprintf(String, "%s %sFZ-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFZ-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FRX:
-				sprintf(String, "%s %sFX-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFX-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FRY:
-				sprintf(String, "%s %sFY-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFY-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FRZ:
-				sprintf(String, "%s %sFZ-Rotation-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sFZ-Rotation-Axis", pString, "");
 				break;
 			case CTRL_JOYSTICK_FSLIDER:
-				sprintf(String, "%s %sFSlider %d", String, ctrl->Sign==1?"+":"-", ctrl->Property);
+				pString = STR("%s %sFSlider", pString, "");
 				break;
 			default:
-				strcat(String, "Unknown");
+				pString = STR("%s Unknown", pString);
 				break;
 		}
 	}
-	else if(ctrl->Source==CTRL_MOUSE)
+	else if(pMap->source==CTRL_MOUSE)
 	{
-		sprintf(String, "Mouse %d ", ctrl->Index);
+		pString = STR("Mouse %d ", pMap->sourceIndex);
 
-		switch(ctrl->Object)
+		switch(pMap->control)
 		{
 			case CTRL_MOUSE_X:
-				sprintf(String, "%s %sX-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sX-Axis", pString, "");
 				break;
 			case CTRL_MOUSE_Y:
-				sprintf(String, "%s %sY-Axis", String, ctrl->Sign==1?"+":"-");
+				pString = STR("%s %sY-Axis", pString, "");
 				break;
 			case CTRL_MOUSE_Z:
-				sprintf(String, "%s Wheel %s", String, ctrl->Sign==1?"Up":"Down");
+				pString = STR("%s Wheel %s", pString, "");
 				break;
 			case CTRL_MOUSE_BUTTON:
-				sprintf(String, "%s Button %d", String, ctrl->Property);
+				pString = STR("%s Button", pString);
 				break;
 			default:
-				strcat(String, "Unknown");
+				pString = STR("%s Unknown", pString);
 				break;
 		}
 	}
-	else if(ctrl->Source==CTRL_KEY)
+	else if(pMap->source==CTRL_KEY)
 	{
-		sprintf(String, "Keyboard %d ", ctrl->Index);
+//		pString = STR("Keyboard %d ", pMap->sourceIndex);
 
-		switch(ctrl->Object)
+		switch(pMap->control)
 		{
 			case DIK_0:
-				strcat(String, "0");
+				pString = STR("0");
 				break;
 			case DIK_1:
-				strcat(String, "1");
+				pString = STR("1");
 				break;
 			case DIK_2:
-				strcat(String, "2");
+				pString = STR("2");
 				break;
 			case DIK_3:
-				strcat(String, "3");
+				pString = STR("3");
 				break;
 			case DIK_4:
-				strcat(String, "4");
+				pString = STR("4");
 				break;
 			case DIK_5:
-				strcat(String, "5");
+				pString = STR("5");
 				break;
 			case DIK_6:
-				strcat(String, "6");
+				pString = STR("6");
 				break;
 			case DIK_7:
-				strcat(String, "7");
+				pString = STR("7");
 				break;
 			case DIK_8:
-				strcat(String, "8");
+				pString = STR("8");
 				break;
 			case DIK_9:
-				strcat(String, "9");
+				pString = STR("9");
 				break;
 			case DIK_A:
-				strcat(String, "A");
+				pString = STR("A");
 				break;
 			case DIK_ABNT_C1:
-				strcat(String, "ABTN C1");
+				pString = STR("ABTN C1");
 				break;
 			case DIK_ABNT_C2:
-				strcat(String, "ABTN C2");
+				pString = STR("ABTN C2");
 				break;
 			case DIK_ADD:
-				strcat(String, "Numpad Plus");
+				pString = STR("Numpad Plus");
 				break;
 			case DIK_APOSTROPHE:
-				strcat(String, "Apostrophe");
+				pString = STR("Apostrophe");
 				break;
 			case DIK_APPS:
-				strcat(String, "Apps");
+				pString = STR("Apps");
 				break;
 			case DIK_AT:
-				strcat(String, "AT");
+				pString = STR("AT");
 				break;
 			case DIK_AX:
-				strcat(String, "AX");
+				pString = STR("AX");
 				break;
 			case DIK_B:
-				strcat(String, "B");
+				pString = STR("B");
 				break;
 			case DIK_BACK:
-				strcat(String, "Backspace");
+				pString = STR("Backspace");
 				break;
 			case DIK_BACKSLASH:
-				strcat(String, "Backslash");
+				pString = STR("Backslash");
 				break;
 			case DIK_C:
-				strcat(String, "C");
+				pString = STR("C");
 				break;
 			case DIK_CALCULATOR:
-				strcat(String, "Calculator");
+				pString = STR("Calculator");
 				break;
 			case DIK_CAPITAL:
-				strcat(String, "CapsLock");
+				pString = STR("CapsLock");
 				break;
 			case DIK_COLON:
-				strcat(String, "Colon");
+				pString = STR("Colon");
 				break;
 			case DIK_COMMA:
-				strcat(String, "Comma");
+				pString = STR("Comma");
 				break;
 			case DIK_CONVERT:
-				strcat(String, "Convert");
+				pString = STR("Convert");
 				break;
 			case DIK_D:
-				strcat(String, "D");
+				pString = STR("D");
 				break;
 			case DIK_DECIMAL:
-				strcat(String, "Numpad Decimal");
+				pString = STR("Numpad Decimal");
 				break;
 			case DIK_DELETE:
-				strcat(String, "Del");
+				pString = STR("Del");
 				break;
 			case DIK_DIVIDE:
-				strcat(String, "Numpad Slash");
+				pString = STR("Numpad Slash");
 				break;
 			case DIK_DOWN:
-				strcat(String, "Down");
+				pString = STR("Down");
 				break;
 			case DIK_E:
-				strcat(String, "E");
+				pString = STR("E");
 				break;
 			case DIK_END:
-				strcat(String, "End");
+				pString = STR("End");
 				break;
 			case DIK_EQUALS:
-				strcat(String, "Equals");
+				pString = STR("Equals");
 				break;
 			case DIK_ESCAPE:
-				strcat(String, "Escape");
+				pString = STR("Escape");
 				break;
 			case DIK_F:
-				strcat(String, "F");
+				pString = STR("F");
 				break;
 			case DIK_F1:
-				strcat(String, "F1");
+				pString = STR("F1");
 				break;
 			case DIK_F2:
-				strcat(String, "F2");
+				pString = STR("F2");
 				break;
 			case DIK_F3:
-				strcat(String, "F3");
+				pString = STR("F3");
 				break;
 			case DIK_F4:
-				strcat(String, "F4");
+				pString = STR("F4");
 				break;
 			case DIK_F5:
-				strcat(String, "F5");
+				pString = STR("F5");
 				break;
 			case DIK_F6:
-				strcat(String, "F6");
+				pString = STR("F6");
 				break;
 			case DIK_F7:
-				strcat(String, "F7");
+				pString = STR("F7");
 				break;
 			case DIK_F8:
-				strcat(String, "F8");
+				pString = STR("F8");
 				break;
 			case DIK_F9:
-				strcat(String, "F9");
+				pString = STR("F9");
 				break;
 			case DIK_F10:
-				strcat(String, "F10");
+				pString = STR("F10");
 				break;
 			case DIK_F11:
-				strcat(String, "F11");
+				pString = STR("F11");
 				break;
 			case DIK_F12:
-				strcat(String, "F12");
+				pString = STR("F12");
 				break;
 			case DIK_F13:
-				strcat(String, "F13");
+				pString = STR("F13");
 				break;
 			case DIK_F14:
-				strcat(String, "F14");
+				pString = STR("F14");
 				break;
 			case DIK_F15:
-				strcat(String, "F15");
+				pString = STR("F15");
 				break;
 			case DIK_G:
-				strcat(String, "G");
+				pString = STR("G");
 				break;
 			case DIK_GRAVE:
-				strcat(String, "Grave");
+				pString = STR("Grave");
 				break;
 			case DIK_H:
-				strcat(String, "H");
+				pString = STR("H");
 				break;
 			case DIK_HOME:
-				strcat(String, "Home");
+				pString = STR("Home");
 				break;
 			case DIK_I:
-				strcat(String, "I");
+				pString = STR("I");
 				break;
 			case DIK_INSERT:
-				strcat(String, "Insert");
+				pString = STR("Insert");
 				break;
 			case DIK_J:
-				strcat(String, "J");
+				pString = STR("J");
 				break;
 			case DIK_K:
-				strcat(String, "K");
+				pString = STR("K");
 				break;
 			case DIK_KANA:
-				strcat(String, "Kana");
+				pString = STR("Kana");
 				break;
 			case DIK_KANJI:
-				strcat(String, "Kanji");
+				pString = STR("Kanji");
 				break;
 			case DIK_L:
-				strcat(String, "L");
+				pString = STR("L");
 				break;
 			case DIK_LBRACKET:
-				strcat(String, "LSqrBracket");
+				pString = STR("LSqrBracket");
 				break;
 			case DIK_LCONTROL:
-				strcat(String, "LCtrl");
+				pString = STR("LCtrl");
 				break;
 			case DIK_LEFT:
-				strcat(String, "Left");
+				pString = STR("Left");
 				break;
 			case DIK_LMENU:
-				strcat(String, "LAtl");
+				pString = STR("LAtl");
 				break;
 			case DIK_LSHIFT:
-				strcat(String, "LShift");
+				pString = STR("LShift");
 				break;
 			case DIK_LWIN:
-				strcat(String, "LWin");
+				pString = STR("LWin");
 				break;
 			case DIK_M:
-				strcat(String, "M");
+				pString = STR("M");
 				break;
 			case DIK_MAIL:
-				strcat(String, "Mail");
+				pString = STR("Mail");
 				break;
 			case DIK_MEDIASELECT:
-				strcat(String, "Media Select");
+				pString = STR("Media Select");
 				break;
 			case DIK_MEDIASTOP:
-				strcat(String, "Media Stop");
+				pString = STR("Media Stop");
 				break;
 			case DIK_MINUS:
-				strcat(String, "Minus");
+				pString = STR("Minus");
 				break;
 			case DIK_MULTIPLY:
-				strcat(String, "Numpad Multiply");
+				pString = STR("Numpad Multiply");
 				break;
 			case DIK_MUTE:
-				strcat(String, "Mute");
+				pString = STR("Mute");
 				break;
 			case DIK_MYCOMPUTER:
-				strcat(String, "My Computer");
+				pString = STR("My Computer");
 				break;
 			case DIK_N:
-				strcat(String, "N");
+				pString = STR("N");
 				break;
 			case DIK_NEXT:
-				strcat(String, "PgDn");
+				pString = STR("PgDn");
 				break;
 			case DIK_NEXTTRACK:
-				strcat(String, "Next Track");
+				pString = STR("Next Track");
 				break;
 			case DIK_NOCONVERT:
-				strcat(String, "No Convert");
+				pString = STR("No Convert");
 				break;
 			case DIK_NUMLOCK:
-				strcat(String, "NumLock");
+				pString = STR("NumLock");
 				break;
 			case DIK_NUMPAD0:
-				strcat(String, "Numpad 0");
+				pString = STR("Numpad 0");
 				break;
 			case DIK_NUMPAD1:
-				strcat(String, "Numpad 1");
+				pString = STR("Numpad 1");
 				break;
 			case DIK_NUMPAD2:
-				strcat(String, "Numpad 2");
+				pString = STR("Numpad 2");
 				break;
 			case DIK_NUMPAD3:
-				strcat(String, "Numpad 3");
+				pString = STR("Numpad 3");
 				break;
 			case DIK_NUMPAD4:
-				strcat(String, "Numpad 4");
+				pString = STR("Numpad 4");
 				break;
 			case DIK_NUMPAD5:
-				strcat(String, "Numpad 5");
+				pString = STR("Numpad 5");
 				break;
 			case DIK_NUMPAD6:
-				strcat(String, "Numpad 6");
+				pString = STR("Numpad 6");
 				break;
 			case DIK_NUMPAD7:
-				strcat(String, "Numpad 7");
+				pString = STR("Numpad 7");
 				break;
 			case DIK_NUMPAD8:
-				strcat(String, "Numpad 8");
+				pString = STR("Numpad 8");
 				break;
 			case DIK_NUMPAD9:
-				strcat(String, "Numpad 9");
+				pString = STR("Numpad 9");
 				break;
 			case DIK_NUMPADCOMMA:
-				strcat(String, "Numpad Comma");
+				pString = STR("Numpad Comma");
 				break;
 			case DIK_NUMPADENTER:
-				strcat(String, "Numpad Enter");
+				pString = STR("Numpad Enter");
 				break;
 			case DIK_NUMPADEQUALS:
-				strcat(String, "Numpad Equals");
+				pString = STR("Numpad Equals");
 				break;
 			case DIK_O:
-				strcat(String, "O");
+				pString = STR("O");
 				break;
 			case DIK_OEM_102:
-				strcat(String, "OEM 102");
+				pString = STR("OEM 102");
 				break;
 			case DIK_P:
-				strcat(String, "P");
+				pString = STR("P");
 				break;
 			case DIK_PAUSE:
-				strcat(String, "Pause");
+				pString = STR("Pause");
 				break;
 			case DIK_PERIOD:
-				strcat(String, "Period");
+				pString = STR("Period");
 				break;
 			case DIK_PLAYPAUSE:
-				strcat(String, "PlayPause");
+				pString = STR("PlayPause");
 				break;
 			case DIK_POWER:
-				strcat(String, "Power");
+				pString = STR("Power");
 				break;
 			case DIK_PREVTRACK:
-				strcat(String, "Prev Track");
+				pString = STR("Prev Track");
 				break;
 			case DIK_PRIOR:
-				strcat(String, "PgUp");
+				pString = STR("PgUp");
 				break;
 			case DIK_Q:
-				strcat(String, "Q");
+				pString = STR("Q");
 				break;
 			case DIK_R:
-				strcat(String, "R");
+				pString = STR("R");
 				break;
 			case DIK_RBRACKET:
-				strcat(String, "RSqrBracket");
+				pString = STR("RSqrBracket");
 				break;
 			case DIK_RCONTROL:
-				strcat(String, "RCtrl");
+				pString = STR("RCtrl");
 				break;
 			case DIK_RETURN:
-				strcat(String, "Enter");
+				pString = STR("Enter");
 				break;
 			case DIK_RIGHT:
-				strcat(String, "Right");
+				pString = STR("Right");
 				break;
 			case DIK_RMENU:
-				strcat(String, "RAlt");
+				pString = STR("RAlt");
 				break;
 			case DIK_RSHIFT:
-				strcat(String, "RShift");
+				pString = STR("RShift");
 				break;
 			case DIK_RWIN:
-				strcat(String, "RWin");
+				pString = STR("RWin");
 				break;
 			case DIK_S:
-				strcat(String, "S");
+				pString = STR("S");
 				break;
 			case DIK_SCROLL:
-				strcat(String, "ScrollLock");
+				pString = STR("ScrollLock");
 				break;
 			case DIK_SEMICOLON:
-				strcat(String, "Semicolon");
+				pString = STR("Semicolon");
 				break;
 			case DIK_SLASH:
-				strcat(String, "Slash");
+				pString = STR("Slash");
 				break;
 			case DIK_SLEEP:
-				strcat(String, "Sleep");
+				pString = STR("Sleep");
 				break;
 			case DIK_SPACE:
-				strcat(String, "Space");
+				pString = STR("Space");
 				break;
 			case DIK_STOP:
-				strcat(String, "Stop");
+				pString = STR("Stop");
 				break;
 			case DIK_SUBTRACT:
-				strcat(String, "Numpad Minus");
+				pString = STR("Numpad Minus");
 				break;
 			case DIK_SYSRQ:
-				strcat(String, "SysRq");
+				pString = STR("SysRq");
 				break;
 			case DIK_T:
-				strcat(String, "T");
+				pString = STR("T");
 				break;
 			case DIK_TAB:
-				strcat(String, "Tab");
+				pString = STR("Tab");
 				break;
 			case DIK_U:
-				strcat(String, "U");
+				pString = STR("U");
 				break;
 			case DIK_UNDERLINE:
-				strcat(String, "Underscore");
+				pString = STR("Underscore");
 				break;
 			case DIK_UNLABELED:
-				strcat(String, "Unlabeled");
+				pString = STR("Unlabeled");
 				break;
 			case DIK_UP:
-				strcat(String, "Up");
+				pString = STR("Up");
 				break;
 			case DIK_V:
-				strcat(String, "V");
+				pString = STR("V");
 				break;
 			case DIK_VOLUMEDOWN:
-				strcat(String, "Volume Down");
+				pString = STR("Volume Down");
 				break;
 			case DIK_VOLUMEUP:
-				strcat(String, "Volume Up");
+				pString = STR("Volume Up");
 				break;
 			case DIK_W:
-				strcat(String, "W");
+				pString = STR("W");
 				break;
 			case DIK_WAKE:
-				strcat(String, "Wake");
+				pString = STR("Wake");
 				break;
 			case DIK_WEBBACK:
-				strcat(String, "Web Back");
+				pString = STR("Web Back");
 				break;
 			case DIK_WEBFAVORITES:
-				strcat(String, "Web Favorites");
+				pString = STR("Web Favorites");
 				break;
 			case DIK_WEBFORWARD:
-				strcat(String, "Web Foreward");
+				pString = STR("Web Foreward");
 				break;
 			case DIK_WEBHOME:
-				strcat(String, "Web Home");
+				pString = STR("Web Home");
 				break;
 			case DIK_WEBREFRESH:
-				strcat(String, "Web Refresh");
+				pString = STR("Web Refresh");
 				break;
 			case DIK_WEBSEARCH:
-				strcat(String, "Web Search");
+				pString = STR("Web Search");
 				break;
 			case DIK_WEBSTOP:
-				strcat(String, "Web Stop");
+				pString = STR("Web Stop");
 				break;
 			case DIK_X:
-				strcat(String, "X");
+				pString = STR("X");
 				break;
 			case DIK_Y:
-				strcat(String, "Y");
+				pString = STR("Y");
 				break;
 			case DIK_YEN:
-				strcat(String, "Yen");
+				pString = STR("Yen");
 				break;
 			case DIK_Z:
-				strcat(String, "Z");
+				pString = STR("Z");
 				break;
 			default:
-				strcat(String, "Unknown");
+				pString = STR("Unknown");
 				break;
 		}
 	}
-}
 
-ME_CONTROL::ME_CONTROL()
-{
-	Type=ME_CTRLTYPE_UNDEFINED;
-	Data=NULL;
-	Sign=0;
-
-	Source=CTRL_UNDEFINED;
-	Index=0;
-
-	Object=NULL;
-	Property=0;
-
-	Desc[0]=NULL;
-}
-
-ME_CONTROL::~ME_CONTROL()
-{
-	Type=ME_CTRLTYPE_UNDEFINED;
-	Data=NULL;
-	Sign=0;
-
-	Source=CTRL_UNDEFINED;
-	Index=0;
-
-	Object=NULL;
-	Property=0;
-
-	Desc[0]=NULL;
-}
-
-void meAcquireDataPointer(ME_CONTROL *ctrl)
-{
-	switch(ctrl->Source)
-	{
-		case CTRL_KEY:
-			ctrl->Type=ME_CTRLTYPE_KEY;
-			ctrl->Data=&(gKeyState[ctrl->Index][ctrl->Object]);
-			break;
-
-		case CTRL_JOYSTICK:
-			switch(ctrl->Object)
-			{
-				case CTRL_JOYSTICK_BUTTON:
-				ctrl->Type = ME_CTRLTYPE_BUTTON;
-				ctrl->Data = &gJoyState[min(ctrl->Index, gJoystickCount-1)].rgbButtons[ctrl->Property];
-				return;
-
-				default:
-				ctrl->Type = ME_CTRLTYPE_AXIS;
-				ctrl->Data = &gJoyState[min(ctrl->Index, gJoystickCount-1)];
-				float *tf = (float*)ctrl->Data;
-				tf += (ctrl->Object+(ctrl->Property));
-				ctrl->Data = tf;
-				return;
-			}
-			break;
-
-		case CTRL_MOUSE:
-			switch(ctrl->Object)
-			{
-				case CTRL_MOUSE_BUTTON:
-				ctrl->Type = ME_CTRLTYPE_BUTTON;
-				ctrl->Data = &gMouseState[min(ctrl->Index, gMouseCount-1)].rgbButtons[ctrl->Property];
-				return;
-
-				default:
-				ctrl->Type = ME_CTRLTYPE_AXIS;
-				ctrl->Data = &gMouseState[min(ctrl->Index, gMouseCount-1)];
-				float *tf = (float*)ctrl->Data;
-				tf += (ctrl->Object+(ctrl->Property));
-				ctrl->Data = tf;
-				return;
-			}
-			break;
-
-		default:
-			ctrl->Type=ME_CTRLTYPE_UNDEFINED;
-			ctrl->Data=NULL;
-			break;
-	}
-
-	meEnumerateString(ctrl, ctrl->Desc);
+	return pString;
 }

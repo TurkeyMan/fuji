@@ -56,6 +56,14 @@ enum InputEvent
 	IE_JoyButtonUp,
 };
 
+class ButtonMapping
+{
+public:
+	int source;
+	int sourceIndex;
+	int control;
+};
+
 typedef void (*EventFunc)(uint32 event, uint32 data, uint32 timestamp);
 
 void Input_InitModule();
@@ -90,5 +98,7 @@ void SetMouseEventHandler(EventFunc pEventFunc);
 
 void SetMouseMode(uint32 mouseMode = MM_Absolute);
 Vector3 Input_ReadMousePos(int mouseID = -1);
+
+char* Input_EnumerateString(ButtonMapping *pMap);
 
 #endif

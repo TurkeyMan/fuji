@@ -12,6 +12,10 @@
 	#include <d3dx9.h>
 #endif
 
+#if defined(_FUJI_UTIL)
+	#include <Windows.h>
+#endif
+
 #if !defined(PI)
 #define PI 3.141592653589f
 #endif

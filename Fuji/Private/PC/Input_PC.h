@@ -48,33 +48,6 @@
 
 void Input_Acquire(bool acquire);
 
-
-class ME_CONTROL
-{
-public:
-	char Type;
-	void *Data;
-	int Sign;
-
-	int Source;
-	int Index;
-
-	int Object;
-	int Property;
-
-	char Desc[30];
-
-	ME_CONTROL();
-	~ME_CONTROL();
-};
-
-void meGetInput(ME_CONTROL *ctrl, void (*ProcessFunc)());
-int meDigitalReading(ME_CONTROL *ctrl);
-int meAnalogReading(ME_CONTROL *ctrl);
-
-void meEnumerateString(ME_CONTROL *ctrl, char *String);
-void meAcquireDataPointer(ME_CONTROL *ctrl);
-
 const char DIK2ASCIILC[256]={NULL,NULL,'1','2','3','4','5','6','7','8','9','0','-','=','\b','\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',NULL,'a','s','d','f','g','h','j','k','l',';','\'','`',NULL,'\\','z','x','c','v','b','n','m',',','.','/',NULL,'*',NULL,' ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'7','8','9','-','4','5','6','+','1','2','3','0','.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'=',NULL,NULL,NULL,'@',':','_',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\n',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,',',NULL,'/',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 const char DIK2ASCIIUC[256]={NULL,NULL,'!','@','#','$','%','^','&','*','(',')','_','+',NULL,NULL,'Q','W','E','R','T','Y','U','I','O','P','{','}',NULL,NULL,'A','S','D','F','G','H','J','K','L',':','"','~',NULL,'|','Z','X','C','V','B','N','M','<','>','?',NULL,'*',NULL,' ',NULL};
 
