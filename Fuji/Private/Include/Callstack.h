@@ -9,6 +9,7 @@ void Callstack_InitModule();
 void Callstack_DeinitModule();
 
 #if !defined(_RETAIL)
+	extern std::vector<std::string> Callstack;
 
 #if defined(_CALLSTACK_MONITORING)
 

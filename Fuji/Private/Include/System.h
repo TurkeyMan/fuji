@@ -26,4 +26,8 @@ void Game_Deinit();
 #define TIMEDELTA gSystemTimer.TimeDeltaF()
 extern Timer gSystemTimer;
 
+#if defined(_WINDOWS)
+	void DoMessageLoop();
+#endif
+
 #endif // _SYSTEM_H

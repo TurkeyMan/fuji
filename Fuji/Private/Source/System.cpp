@@ -8,7 +8,7 @@
 #include "Timer.h"
 #include "Font.h"
 
-int quit;
+int gQuit;
 uint32 gFrameCount = 0;
 
 MenuItemStatic quitOption;
@@ -24,7 +24,7 @@ Timer gSystemTimer;
 
 void QuitCallback(MenuObject *pMenu, void *pData)
 {
-	quit = 1;
+	gQuit = 1;
 }
 
 void System_Init()
@@ -104,13 +104,16 @@ void System_Draw()
 int System_GameLoop()
 {
 	CALLSTACK("System_GameLoop");
-	quit = 0;
+	gQuit = 0;
 
 	System_Init();
 	Game_Init();
 
-	while(!quit)
+	while(!gQuit)
 	{
+#if defined(_WINDOWS)
+		DoMessageLoop();
+#endif
 		Callstack_BeginFrame();
 		System_UpdateTimeDelta();
 		gFrameCount++;
@@ -132,7 +135,7 @@ int System_GameLoop()
 	Game_Deinit();
 	System_Deinit();
 
-	return quit;
+	return gQuit;
 }
 
 void System_UpdateTimeDelta()

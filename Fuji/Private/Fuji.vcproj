@@ -42,6 +42,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib"
 				OutputFile=".\Fuji___Win32_Debug\Fuji.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -117,6 +118,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib"
 				OutputFile=".\Release\Fuji.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool

@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Timer.h"
 #include "System.h"
+#include "DebugMenu.h"
 
 /**** Globals ****/
 

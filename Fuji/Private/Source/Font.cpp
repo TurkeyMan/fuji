@@ -5,8 +5,7 @@
 #include "Display.h"
 #include "Texture.h"
 #include "Font.h"
-
-IDirect3DVertexBuffer8 *fontBuffer;
+#include "Primitive.h"
 
 Font debugFont;
 
@@ -14,9 +13,7 @@ void Font_InitModule()
 {
 	CALLSTACK("Font_InitModule");
 
-	pd3dDevice->CreateVertexBuffer(2048*6*sizeof(FontVertex), NULL, NULL, NULL, &fontBuffer);
-
-	debugFont.LoadFont("D:\\Data\\Font\\Arial");
+	debugFont.LoadFont(File_SystemPath("Font\\Arial"));
 }
 
 void Font_DeinitModule()
@@ -24,8 +21,6 @@ void Font_DeinitModule()
 	CALLSTACK("Font_DeinitModule");
 
 	debugFont.Release();
-
-	fontBuffer->Release();
 }
 
 int Font::LoadFont(char *filename)
@@ -63,14 +58,15 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 {
 	CALLSTACKc("Font::DrawText");
 
-	FontVertex *v;
 	int textlen = strlen(text);
 
 	DBGASSERT(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
 
 	float x,y,w,h, p, cwidth;
 
-	fontBuffer->Lock(0, 0, (BYTE**)&v, NULL);
+	MFPrimitive(PT_TriList|PT_Prelit);
+
+	MFBegin(textlen*2*3);
 
 	for(int i=0; i<textlen; i++)
 	{
@@ -88,47 +84,26 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 		p = w/h;
 		cwidth = height*p;
 
-		v->pos.Set(pos_x, pos_y, pos_z);
-		v->colour = colour;
-		v->u = x;
-		v->v = y;
-		v++;
-		v->pos.Set(pos_x + cwidth, pos_y + (invert?-height:height), pos_z);
-		v->colour = colour;
-		v->u = x+w;
-		v->v = y+h;
-		v++;
-		v->pos.Set(pos_x, pos_y + (invert?-height:height), pos_z);
-		v->colour = colour;
-		v->u = x;
-		v->v = y+h;
-		v++;
-		v->pos.Set(pos_x, pos_y, pos_z);
-		v->colour = colour;
-		v->u = x;
-		v->v = y;
-		v++;
-		v->pos.Set(pos_x + cwidth, pos_y, pos_z);
-		v->colour = colour;
-		v->u = x+w;
-		v->v = y;
-		v++;
-		v->pos.Set(pos_x + cwidth, pos_y + (invert?-height:height), pos_z);
-		v->colour = colour;
-		v->u = x+w;
-		v->v = y+h;
-		v++;
+		MFSetColour(colour);
+		MFSetTexCoord1(x, y);
+		MFSetPosition(pos_x, pos_y, pos_z);
+		MFSetTexCoord1(x+w, y+h);
+		MFSetPosition(pos_x + cwidth, pos_y + (invert?-height:height), pos_z);
+		MFSetTexCoord1(x, y+h);
+		MFSetPosition(pos_x, pos_y + (invert?-height:height), pos_z);
+		MFSetTexCoord1(x, y);
+		MFSetPosition(pos_x, pos_y, pos_z);
+		MFSetTexCoord1(x+w, y);
+		MFSetPosition(pos_x + cwidth, pos_y, pos_z);
+		MFSetTexCoord1(x+w, y+h);
+		MFSetPosition(pos_x + cwidth, pos_y + (invert?-height:height), pos_z);
 
 		pos_x += cwidth;
 	}
 
-	fontBuffer->Unlock();
-
 	pTexture->SetTexture();
 
-	pd3dDevice->SetStreamSource(0, fontBuffer, sizeof(FontVertex));
-	pd3dDevice->SetVertexShader(FontVertex::FVF);
-	pd3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, 0, textlen*2);
+	MFEnd();
 
 	return 0;
 }

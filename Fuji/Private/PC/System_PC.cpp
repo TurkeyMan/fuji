@@ -1,8 +1,15 @@
 #include "Common.h"
 #include "System.h"
 
+HINSTANCE apphInstance;
+extern int gQuit;
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
+	apphInstance = hInstance;
+
+	srand(GetTickCount());
+
 	System_GameLoop();
 }
 
@@ -20,3 +27,17 @@ uint64 GetPerfprmanceFrequency()
 	return freq;
 }
 
+void DoMessageLoop()
+{
+	MSG msg;
+
+	while(PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	{
+		if(!GetMessage(&msg, NULL, 0, 0)) gQuit=true;
+		else
+		{
+			TranslateMessage(&msg); 
+			DispatchMessage(&msg);
+		}
+	}
+}

@@ -6,6 +6,17 @@
 char stringBuffer[1024*128];
 uint32 stringOffset;
 
+char* File_SystemPath(char *filename)
+{
+#if defined(_XBOX)
+	return STR("D:\\Data\\%s", filename);
+#elif defined(_WINDOWS)
+	return STR("Data\\%s", filename);
+#else
+	return STR("%s", filename);
+#endif
+}
+
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {
@@ -76,9 +87,10 @@ void dbgAssert(char *pReason, char *pMessage, char *pFile, int line)
 #if defined(_DEBUG)
   char callstack[2048] = "";
 
-  for(Callstack *pFunc = Callstack::pCallstack; pFunc; pFunc = pFunc->pParent)
+  for(uint32 a=0; a<Callstack.size(); a++)
   {
-    char *pTemp = STR("  %-32s\t(%s)%s\n",pFunc->pStats->pFunctionName,ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
+    char *pTemp = STR("  %-32s\n",Callstack[a].c_str());
+//    char *pTemp = STR("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? STR(" [%s]",pFunc->pComment) : "");
     if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
       strcat(callstack, pTemp);
   }

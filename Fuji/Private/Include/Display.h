@@ -26,7 +26,26 @@ struct DisplaySettings
 	bool progressive;
 };
 
+extern IDirect3DDevice8 *pd3dDevice;
+extern DisplaySettings display;
 
+#elif defined(_WINDOWS)
+
+struct DisplaySettings
+{
+	int width, height;
+	int fullscreenWidth, fullscreenHeight;
+	int refreshRate;
+	int colourDepth;
+	bool windowed;
+};
+
+extern IDirect3DDevice9 *pd3dDevice;
+extern DisplaySettings display;
+
+#endif
+
+#if defined(_XBOX) || defined(_WINDOWS)
 
 class Vec3
 {
@@ -72,10 +91,7 @@ struct LitVertex
 	float u,v;
 };
 
-extern IDirect3DDevice8 *pd3dDevice;
-extern DisplaySettings display;
-
-#endif // _XBOX
+#endif
 
 #endif // _DISPLAY_H
 
