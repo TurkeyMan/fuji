@@ -66,7 +66,7 @@ char* File_Load(const char *pFilename, uint32 *pBytesRead)
 
 	if(pBytesRead) *pBytesRead = 0;
 
-	uint32 handle = File_Open(pFilename);
+	int handle = File_Open(pFilename);
 	if(handle < 0) return NULL;
 
 	uint32 filesize = File_GetSize(handle);
