@@ -1,0 +1,46 @@
+TODO:
+
+Systems to Support:
+
+	Debugging Tools
+
+	Vector Class
+	Matrix Class
+
+	View System
+	Camera
+
+	Material
+	Model
+	Animation
+
+	Primitive Interface
+
+	Controller/Input I/O
+	FileSystem
+	Networking
+
+	Sound
+
+	Collision
+
+	Physics
+
+	Particles
+	Post Processing (DOF/Bloom/HDR)
+	2D Stuff (Sprites and Stuff)
+
+	Video Playback
+
+	Max Exporter.. :(
+
+	TTF Native Support
+
+Wanted Features:
+
+	Texture Manager (Rather than texture class)
+
+	Input system needs calibration control
+	A combo of buttons to reset calibration
+	Needs to cache input state for each frame
+
