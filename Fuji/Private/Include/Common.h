@@ -19,7 +19,7 @@
 #endif
 
 #if defined(_FUJI_UTIL)
-#if defined(WIN32)
+#if defined(_WINDOWS) || defined(_XBOX)
 	#include <Windows.h>
 #endif
 #endif

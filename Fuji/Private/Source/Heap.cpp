@@ -147,6 +147,7 @@ void *Heap_Alloc(uint32 bytes)
 
 	pMem = (char*)malloc(bytes+16);
 
+	// make allocation 16 byte alligned
 	char offset = 16 - ((uint32)pMem & 0xF);
 	pMem += offset;
 	pMem[-1] = offset;
@@ -182,6 +183,8 @@ void *Heap_Realloc(void *pMem, uint32 bytes)
 	// ummmmm... yeah need to keep record of what is allocated where... 
 	memcpy(pNew, pMem, Min(bytes, bytes));
 
+	Heap_Free(pMem);
+
 	return pNew;
 }
 
@@ -203,6 +206,7 @@ void Heap_Free(void *pMem)
 	DBGASSERT(a >= 0, STR("Memory not allocated at address: 0x%08X.", pMem));
 #endif
 
+	// used to ensure 16 byte allignment
 	(char*&)pMem -= ((char*)pMem)[-1];
 
 	free(pMem);

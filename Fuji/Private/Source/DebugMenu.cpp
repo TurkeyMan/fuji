@@ -316,6 +316,7 @@ void Menu::Draw()
 
 	debugFont.DrawText(menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
+#if defined(_WINDOWS) || defined(_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 	pd3dDevice->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
@@ -334,6 +335,7 @@ void Menu::Draw()
 
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESS);
 	pd3dDevice->SetRenderState(D3DRS_STENCILREF, 0);
+#endif
 
 	for(a=0; a<numChildren; a++)
 	{
@@ -366,7 +368,9 @@ void Menu::Draw()
 		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
 	}
 
+#if defined(_WINDOWS) || defined(_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+#endif
 }
 
 void Menu::Update()

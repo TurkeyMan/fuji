@@ -250,7 +250,7 @@ int dprintf(const char *format, ...)
 
 	nRes = vsprintf((char*)buffer, format, arglist);
 
-#if defined(WIN32)
+#if defined(_WINDOWS) || defined(_XBOX)
 	OutputDebugString((LPCTSTR)buffer);
 #else
 	fprintf(stderr, buffer);
