@@ -12,6 +12,7 @@ void Sprite::Create(char *filename, int xFrame, int yFrames, uint32 colourKey)
 	position = Vector(0.0f, 0.0f);
 	scale = Vector((float)pTexture->width, (float)pTexture->height);
 	angle = 0.0f;
+	visible = false;
 }
 
 LitVertex triangle[6];
