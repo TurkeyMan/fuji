@@ -10,13 +10,14 @@ import string
 import sys
 import os
 import string
+import re
 
 CC = None
 CXX = None
 BASENAME = 'Fuji'
 CPPPATH = ['Include'] # Include files
 SOURCEDIRS = ['Source']
-MASKEDFILES = []
+MASKEDFILES = ['Source/MFGadgets.cpp']
 BINDIR = 'Bin'
 CCFLAGS = '-Wall -Wno-unknown-pragmas -pipe'
 
@@ -32,6 +33,7 @@ if(platform == 'linux'): # It should be possible to use scons on Windows too
 	CCFLAGS += ' -D_LINUX'
 elif(platform == 'DC'):
 	SOURCEDIRS.append('DC')
+	CPPPATH.append('DC')
 	CPPPATH.append('DC/kos-1.2.0/include')
 	CPPPATH.append('DC/kos-1.2.0/libc/include')
 	CPPPATH.append('DC/kos-1.2.0/kernel/arch/dreamcast/include')
@@ -85,7 +87,10 @@ new_sources = []
 # Remove any masked files
 for source in sources:
 	is_masked = 0
-	
+
+	sys.stderr.write(source + '\n')
+	source = re.sub('\\\\', '/', source) #
+
 	for masked in MASKEDFILES:
 		if(masked == source):
 			is_masked = 1
