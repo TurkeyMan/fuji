@@ -58,7 +58,7 @@ Texture* Texture_CreateFromRawData(void *pData, uint32 width, uint32 height, uin
 			{
 				(char*&)pData += width*height*sizeof(uint32);
 
-				for(int a=0; a<height; a++)
+				for(int a=0; a<(int)height; a++)
 				{
 					(char*&)pData -= width*sizeof(uint32);
 					memcpy(rect.pBits, pData, width*sizeof(uint32));

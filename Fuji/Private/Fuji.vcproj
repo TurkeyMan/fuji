@@ -1917,6 +1917,9 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\SConstruct">
+		</File>
+		<File
 			RelativePath=".\Todo.txt">
 		</File>
 	</Files>

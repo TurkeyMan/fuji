@@ -41,8 +41,22 @@ elif(platform == 'DC'):
 
 	CC = 'sh-elf-gcc'
 	CXX = 'sh-elf-g++'
+elif(platform == 'PS2'):
+	SOURCEDIRS.append('PS2')
+	CPPPATH.append('PS2')
+	CCFLAGS += ' -D_PS2'
+
+	CC = 'ee-elf-gcc'
+	CXX = 'ee-elf-g++'
+elif(platform == 'GCN'):
+	SOURCEDIRS.append('GCN')
+	CPPPATH.append('GCN')
+	CCFLAGS += ' -D_GCN'
+
+	CC = 'ppc-elf-gcc'
+	CXX = 'ppc-elf-g++'
 else:
-	sys.stderr.write('Platform unsupported (use OS=linux or OS=DC) [%s]\n' % (platform,))
+	sys.stderr.write('Platform unsupported (use OS=linux|DC|PS2|GCN) [%s]\n' % (platform,))
 	sys.exit(0)
 
 

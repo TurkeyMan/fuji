@@ -22,6 +22,7 @@ void Renderer_SetRenderer(uint32 rendererFlags, uint32 flags, uint32 newRenderSo
 			pMat->pTextures[pMat->diffuseMapIndex]->SetTexture(0);
 
 			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 			pd3dDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
 			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DXMATRIX*)&pMat->textureMatrix);
