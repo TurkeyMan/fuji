@@ -54,6 +54,15 @@ void Sound_InitModule()
 
 void Sound_DeinitModule()
 {
+	for(int a=0; a<sizeof(gMusicTracks)/sizeof(SoundMusic); a++)
+	{
+		if(gMusicTracks[a].pDSMusicBuffer)
+		{
+			Sound_MusicUnload(a);
+		}
+	}
+
+	pDSPrimaryBuffer->Release();
 	pDirectSound->Release();
 }
 
@@ -117,7 +126,7 @@ void Sound_SetVolume(int soundID, float volume)
 
 void Sound_SetMasterVolume(int soundID, float volume)
 {
-
+//	pDSPrimaryBuffer->SetVolume();
 }
 
 void Sound_SetPlaybackRate(int soundID, float rate)
@@ -343,6 +352,8 @@ void Sound_ServiceMusicBuffer(int trackID)
 
 void Sound_MusicUnload(int track)
 {
+	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
+
 	ov_clear(&gMusicTracks[track].vorbisFile);
 
 	gMusicTracks[track].pDSMusicBuffer->Release();
@@ -351,16 +362,25 @@ void Sound_MusicUnload(int track)
 
 void Sound_MusicSeek(int track, float seconds)
 {
-
+	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
 }
 
 void Sound_MusicPause(int track, bool pause)
 {
-
+	if(pause)
+	{
+		if(gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Stop();
+	}
+	else
+	{
+		if(!gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
+	}
 }
 
 void Sound_MusicSetVolume(int track, float volume)
 {
-
+//	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }
 

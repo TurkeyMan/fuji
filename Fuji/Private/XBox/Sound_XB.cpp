@@ -249,15 +249,17 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 	track.pDSMusicBuffer->Unlock(pData1, bytes1, pData2, bytes2);
 
+	track.pDSMusicBuffer->Play(0, 0, DSBPLAY_FROMSTART|DSBPLAY_LOOPING);
+
 	// dont begin playback is we start paused
 	if(pause)
 	{
+		track.pDSMusicBuffer->Pause(DSBPAUSE_PAUSE);
 		track.playing = false;
 		return t;
 	}
 
 	// play buffer
-	track.pDSMusicBuffer->Play(0, 0, DSBPLAY_FROMSTART|DSBPLAY_LOOPING);
 	track.playing = true;
 
 	return t;
@@ -326,6 +328,8 @@ void Sound_ServiceMusicBuffer(int trackID)
 
 void Sound_MusicUnload(int track)
 {
+	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
+
 	ov_clear(&gMusicTracks[track].vorbisFile);
 
 	gMusicTracks[track].pDSMusicBuffer->Release();
@@ -334,16 +338,25 @@ void Sound_MusicUnload(int track)
 
 void Sound_MusicSeek(int track, float seconds)
 {
-
+	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
 }
 
 void Sound_MusicPause(int track, bool pause)
 {
-
+	if(pause)
+	{
+		if(gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Pause(DSBPAUSE_PAUSE);
+	}
+	else
+	{
+		if(!gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Pause(DSBPAUSE_RESUME);
+	}
 }
 
 void Sound_MusicSetVolume(int track, float volume)
 {
-
+//	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }
 
