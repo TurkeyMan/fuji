@@ -3,26 +3,49 @@
 
 #define MAX_FILE_COUNT 14
 
+enum OpenFlags
+{
+	OF_Read = 0,
+	OF_Write = 1,
+	OF_Binary = 2,
+	OF_Async = 16
+};
+
+enum FileOp
+{
+	FO_None,
+	FO_Read,
+	FO_Write
+};
+
+enum FileState
+{
+	FS_Unavailable,
+	FS_Ready,
+	FS_Busy,
+	FS_Waiting
+};
+
+enum FileSeek
+{
+	Seek_Begin,
+	Seek_End,
+	Seek_Current
+};
+
 struct File
 {
 	uint32 offset;
 	uint32 len;
 
-	uint32 operation;
-	uint32 state;
+	uint32 operation;	// current operation
+	uint32 state;		// current activity state
 
-#if defined(_XBOX)
+	uint32 createFlags;	// creat flags
+
+#if defined(_XBOX) || defined(_WINDOWS)
 	HANDLE file;
-#elif defined(_WINDOWS)
-	FILE *file;
 #endif
-};
-
-enum FileSeek
-{
-	FS_Begin,
-	FS_End,
-	FS_Current
 };
 
 void FileSystem_InitModule();
@@ -34,11 +57,11 @@ char* File_SystemPath(const char *filename);
 uint32 File_Open(const char *pFilename, uint32 openFlags);
 void File_Close(uint32 fileHandle);
 
-uint32 File_Read(const char *pBuffer, uint32 bytes, uint32 fileHandle);
-uint32 File_Write(const char *pBuffer, uint32 bytes, uint32 fileHandle);
+uint32 File_Read(void *pBuffer, uint32 bytes, uint32 fileHandle);
+uint32 File_Write(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
-uint32 File_ReadAsync(const char *pBuffer, uint32 bytes, uint32 fileHandle);
-uint32 File_WriteAsync(const char *pBuffer, uint32 bytes, uint32 fileHandle);
+uint32 File_ReadAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
+uint32 File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle);
 
 uint32 File_Query();
 

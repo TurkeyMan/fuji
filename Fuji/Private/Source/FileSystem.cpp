@@ -2,16 +2,16 @@
 #include "Filesystem.h"
 #include "PtrList.h"
 
-PtrListDL<File> file;
+File openFiles[MAX_FILE_COUNT];
 
 void FileSystem_InitModule()
 {
-	file.Init("File Handles", MAX_FILE_COUNT);
+
 }
 
 void FileSystem_DeinitModule()
 {
-	file.Deinit();
+
 }
 
 char* File_SystemPath(const char *filename)

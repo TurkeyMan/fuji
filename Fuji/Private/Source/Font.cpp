@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Font.h"
 #include "Primitive.h"
+#include "FileSystem.h"
 
 Font debugFont;
 
@@ -28,9 +29,8 @@ int Font::LoadFont(const char *filename)
 {
 	CALLSTACK;
 
-	HANDLE file;
+	uint32 hfile;
 	char tempbuffer[1024];
-	uint32 bytesread;
 
 	strcpy(tempbuffer, filename);
 	strcat(tempbuffer, ".tga");
@@ -40,10 +40,9 @@ int Font::LoadFont(const char *filename)
 	strcpy(tempbuffer, filename);
 	strcat(tempbuffer, ".dat");
 
-	file = CreateFile(tempbuffer, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-
-	ReadFile(file, charwidths, 256, (LPDWORD)&bytesread, NULL);
-	CloseHandle(file);
+	hfile = File_Open(tempbuffer, OF_Read|OF_Binary);
+	File_Read(charwidths, 256, hfile);
+	File_Close(hfile);
 
 	return 0;
 }
