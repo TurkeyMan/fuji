@@ -112,7 +112,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
 				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
