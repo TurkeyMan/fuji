@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="Fuji"
+	ProjectGUID="{E91A06AB-9465-4300-9C3E-15A5275E22FE}"
 	SccProjectName=""
 	SccAuxPath=""
 	SccLocalPath=""
@@ -23,7 +24,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -40,8 +41,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib"
-				OutputFile=".\Fuji___Win32_Debug\Fuji.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -76,8 +78,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -93,8 +95,63 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib"
-				OutputFile=".\Release\Fuji.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="3081"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Retail|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\vorbis\include\"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
+				StringPooling="TRUE"
+				RuntimeLibrary="4"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough=""
+				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
+				OutputFile="$(OutDir)/$(ProjectName).lib"
+				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -128,6 +185,9 @@
 				RelativePath=".\Source\Animation.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\BoundingVolume.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
@@ -149,6 +209,9 @@
 				RelativePath=".\Source\Heap.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\Image.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\IniFile.cpp">
 			</File>
 			<File
@@ -161,7 +224,19 @@
 				RelativePath=".\Source\Model.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\ParticleSystem.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Prop.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\PtrList.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Renderer.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\SceneGraph.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Shape.cpp">
@@ -177,6 +252,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\TileMap.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Timer.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Util.cpp">
@@ -196,6 +274,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Array.h">
+			</File>
+			<File
+				RelativePath=".\Include\BoundingVolume.h">
 			</File>
 			<File
 				RelativePath=".\Include\Callstack.h">
@@ -219,7 +300,13 @@
 				RelativePath=".\Include\Font.h">
 			</File>
 			<File
+				RelativePath=".\Include\FujiMath.h">
+			</File>
+			<File
 				RelativePath=".\Include\Heap.h">
+			</File>
+			<File
+				RelativePath=".\Include\Image.h">
 			</File>
 			<File
 				RelativePath=".\Include\IniFile.h">
@@ -237,7 +324,13 @@
 				RelativePath=".\Include\Model.h">
 			</File>
 			<File
+				RelativePath=".\Include\ParticleSystem.h">
+			</File>
+			<File
 				RelativePath=".\Include\Primitive.h">
+			</File>
+			<File
+				RelativePath=".\Include\Prop.h">
 			</File>
 			<File
 				RelativePath=".\Include\PtrList.h">
@@ -246,7 +339,13 @@
 				RelativePath=".\Include\Renderer.h">
 			</File>
 			<File
+				RelativePath=".\Include\SceneGraph.h">
+			</File>
+			<File
 				RelativePath=".\Include\Shape.h">
+			</File>
+			<File
+				RelativePath=".\Include\Sound.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">
@@ -271,6 +370,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Vector4.h">
+			</File>
+			<File
+				RelativePath=".\Include\Video.h">
 			</File>
 			<File
 				RelativePath=".\Include\View.h">
@@ -304,10 +406,13 @@
 				RelativePath=".\Pc\Renderer_PC.h">
 			</File>
 			<File
+				RelativePath=".\Pc\Sound_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\System_PC.cpp">
 			</File>
 			<File
-				RelativePath=".\Pc\Timer_PC.cpp">
+				RelativePath=".\Pc\Texture_PC.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -327,6 +432,12 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\FileSystem_XB.cpp">
@@ -338,6 +449,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -357,6 +474,12 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\Material_XB.cpp">
@@ -368,6 +491,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -387,6 +516,12 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\Renderer_XB.cpp">
@@ -398,6 +533,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -417,6 +558,33 @@
 					<Tool
 						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\Sound_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\XBox\System_XB.cpp">
@@ -432,9 +600,15 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\XBox\Timer_XB.cpp">
+				RelativePath=".\XBox\Texture_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="TRUE">
@@ -443,6 +617,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
