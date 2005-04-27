@@ -34,11 +34,12 @@ FujiDefaults gDefaults =
 
 	// TextureDefaults
 	{
-		256			// maxTextures
+		256				// maxTextures
 	},
 
 	// MaterialDefaults
 	{
+		32,				// maxMaterialDefs
 		2048			// maxMaterials
 	},
 

@@ -825,7 +825,7 @@ void LoadGamepadMappings()
 	}
 
 	// read GameMappings.ini file
-	if(!ini.Create(File_SystemPath("GamepadMappings.ini")))
+	if(!ini.Create("GamepadMappings.ini"))
 	{
 		ini.GetFirstLine();
 

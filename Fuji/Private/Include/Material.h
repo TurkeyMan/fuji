@@ -15,6 +15,11 @@ void Material_DeinitModule();
 void Material_Update();
 
 // interface functions
+int			Material_AddDefinitionsFile(const char *pName, const char *pFilename);
+int			Material_AddDefinitionsFileInMemory(const char *pName, const char *pBuffer);
+int			Material_AddDefinitionsIniFile(const char *pName, IniFile *pMatDefs);
+void		Material_RemoveDefinitions(const char *pName);
+
 Material*	Material_Create(const char *pName);
 int			Material_Destroy(Material *pMaterial);
 Material*	Material_Find(const char *pName);

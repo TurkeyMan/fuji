@@ -13,7 +13,8 @@ int IniFile::Create(const char *pFilename)
 {
 	CALLSTACK;
 
-	uint32 size = File_GetSize(pFilename);
+	const char *pFile = File_SystemPath(pFilename);
+	uint32 size = File_GetSize(pFile);
 
 	if(size)
 	{
@@ -22,7 +23,7 @@ int IniFile::Create(const char *pFilename)
 #endif
 		pIniBuffer = (char*)Heap_Alloc(size+1);
 
-		uint32 file = File_Open(pFilename);
+		uint32 file = File_Open(pFile);
 		File_Read(pIniBuffer, size, file);
 		File_Close(file);
 

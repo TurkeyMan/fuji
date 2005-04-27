@@ -51,7 +51,8 @@ uint32 Chunk::GetLength()
 {
 	uint32 length = 0;
 
-	for(std::list<Chunk *>::iterator i = subChunks.begin(); i != subChunks.end(); ++i) {
+	for(std::list<Chunk *>::iterator i = subChunks.begin(); i != subChunks.end(); ++i)
+	{
 		length += (*i)->GetLength();
 	}
 
@@ -60,7 +61,8 @@ uint32 Chunk::GetLength()
 
 void Chunk::Clear()
 {
-	for(std::list<Chunk *>::iterator i = subChunks.begin(); i != subChunks.end(); ++i) {
+	for(std::list<Chunk *>::iterator i = subChunks.begin(); i != subChunks.end(); ++i)
+	{
 		delete *i;
 	}
 
@@ -70,22 +72,30 @@ void Chunk::Clear()
 bool Chunk::FindSubChunk(ChunkID &id, std::list<Chunk *>::iterator *result, const std::list<Chunk *>::iterator *startingPos, const std::list<Chunk *>::iterator *endingPos)
 {
 	std::list<Chunk *>::iterator newStartingPos, newEndingPos;
-	
-	if(startingPos != NULL) {
+
+	if(startingPos != NULL)
+	{
 		newStartingPos = *startingPos;
-	} else {
+	}
+	else
+	{
 		newStartingPos = subChunks.begin();
 	}
 
-	if(endingPos != NULL) {
+	if(endingPos != NULL)
+	{
 		newEndingPos = *endingPos;
 		++newEndingPos;
-	} else {
+	}
+	else
+	{
 		newEndingPos = subChunks.end();
 	}
 
-	for(std::list<Chunk *>::iterator i = 0; i != newEndingPos; ++i) {
-		if((*i)->id == id) {
+	for(std::list<Chunk *>::iterator i = 0; i != newEndingPos; ++i)
+	{
+		if((*i)->id == id)
+		{
 			*result = i;
 			return(true);
 		}
@@ -100,21 +110,25 @@ void Chunk::ChildrenHandler(const uint8 *data, const uint32 maxLength)
 	uint32 maxChunkSize;
 	Chunk *newChunk;
 
-	while(currentPos < maxLength) {
-		if(currentPos < (ChunkID::length + 4)) { // Minimum chunk size (ID + Length)
+	while(currentPos < maxLength)
+	{
+		// Minimum chunk size (ID + Length)
+		if(currentPos < (ChunkID::length + 4))
+		{
 			throw CFE_OutOfData("Ran out of data while searching for subChunks");
 		}
-	
+
 		uint32 chunkLength;
 		chunkLength = *(uint32 *)(data + currentPos + ChunkID::length + 4);
 
 		maxChunkSize = maxLength - currentPos;
 		newChunk = ChildFactory(ChunkID(data), maxLength - currentPos);
-		if(newChunk != NULL) {
+		if(newChunk != NULL)
+		{
 			newChunk->Decode(data, maxLength - currentPos);
 			subChunks.push_back(newChunk);
 		}
-	
+
 		currentPos += chunkLength;
 	}
 }

@@ -110,16 +110,21 @@ int File_Seek(FileSeek relativity, int32 bytes, int fileHandle)
 
 	if(!gOpenFiles[fileHandle].file) return -1;
 
-	DWORD method;
+	DWORD method = 0;
 
 	switch(relativity)
 	{
 		case Seek_Begin:
 			method = FILE_BEGIN;
+			break;
 		case Seek_End:
 			method = FILE_END;
+			break;
 		case Seek_Current:
 			method = FILE_CURRENT;
+			break;
+		default:
+			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	DWORD newPos = SetFilePointer(gOpenFiles[fileHandle].file, bytes, NULL, method);

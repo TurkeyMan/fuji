@@ -29,6 +29,7 @@ struct FujiDefaults
 
 	struct MaterialDefaults
 	{
+		uint32 maxMaterialDefs;
 		uint32 maxMaterials;
 	} material;
 
