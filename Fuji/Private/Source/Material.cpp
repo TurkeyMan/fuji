@@ -518,8 +518,7 @@ void MaterialInternal_InitialiseFromDefinition(IniFile *pDefIni, Material *pMat,
 				pMat->vFrames = pDefIni->AsInt(1);
 				pMat->frameTime = pDefIni->AsFloat(2);
 
-				pMat->textureMatrix.SetIdentity();
-				pMat->textureMatrix.Scale(Vector(1.0f/(float)pMat->uFrames, 1.0f/(float)pMat->vFrames, 1.0f));
+				pMat->textureMatrix.SetScale(Vector(1.0f/(float)pMat->uFrames, 1.0f/(float)pMat->vFrames, 1.0f));
 			}
 
 			pDefIni->GetNextLine();

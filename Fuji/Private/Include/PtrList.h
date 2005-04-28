@@ -54,7 +54,7 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
 		*(++ppMark) = 0;
 	}
 
-#if defined(_MKDEBUG)
+#if !defined(_RETAIL)
 	pName = pGroupName;
 #endif
 }
@@ -140,14 +140,19 @@ public:
 	inline T** Begin()			{ return ppMark; };
 	inline T** Find(T* p);
 
-	inline void Swap(T *p1, T *p2)
+	inline void Swap(T **p1, T **p2)
 	{
-		T *pT = p1;
-		p1 = p2;
-		p2 = pT;
+		T *pT = *p1;
+		*p1 = *p2;
+		*p2 = pT;
 	}
 
-	inline void Destroy(T** p)	{ DBGASSERT(p!=0, "invalid parameter"); DBGASSERT(!IsEmpty(), STR("list %s is empty",pName)); Swap(*(ppMark++), *p); };
+	inline void Destroy(T** p)
+	{
+		DBGASSERT(p!=0, "invalid parameter");
+		DBGASSERT(!IsEmpty(), STR("list %s is empty",pName));
+		Swap(ppMark++, p);
+	};
 
 	inline void Clear()			{ while(*ppMark!=0) ++ppMark; };
 
@@ -188,7 +193,7 @@ void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void
 		*(++ppMark) = 0;
 	}
 
-#if defined(_DBGASSERTS)
+#if !defined(_RETAIL)
 	pName = pGroupName;
 #endif
 }

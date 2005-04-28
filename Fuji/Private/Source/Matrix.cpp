@@ -67,45 +67,43 @@ Matrix& Matrix::RotateQ(const Vector3 &axis, float angle)
 
 Matrix& Matrix::RotateYPR(float yaw, float pitch, float roll)
 {
-	DBGASSERT(false, "Not Written...");
-	return *this;
+	Matrix mat;
+	mat.SetRotationYPR(yaw, pitch, roll);
+	return Multiply(mat, *this);
 }
 
 Matrix& Matrix::RotateX(float angle)
 {
 	Matrix rot;
 	rot.SetRotationX(angle);
-	Multiply3x3(rot);
-	return *this;
+	return Multiply3x3(rot);
 }
 
 Matrix& Matrix::RotateY(float angle)
 {
 	Matrix rot;
 	rot.SetRotationY(angle);
-	Multiply3x3(rot);
-	return *this;
+	return 	Multiply3x3(rot);
 }
 
 Matrix& Matrix::RotateZ(float angle)
 {
 	Matrix rot;
 	rot.SetRotationZ(angle);
-	Multiply3x3(rot);
-	return *this;
+	return 	Multiply3x3(rot);
 }
 
 Matrix& Matrix::Scale(const Vector3& scale)
 {
 	Matrix mat;
-	mat.SetIdentity();
 	mat.SetScale(scale);
-	Multiply4x4(mat);
-	return *this;
+	return Multiply(mat);
 }
 
 Matrix& Matrix::SetTranslation(const Vector3 &trans)
 {
+	m[0][1] = m[0][2] = m[0][3] = m[1][0] = m[1][2] = m[1][3] = m[2][0] = m[2][1] = m[2][3] = 0.0f;
+	m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
 	m[3][0] = trans.x;
 	m[3][1] = trans.y;
 	m[3][2] = trans.z;
@@ -114,27 +112,30 @@ Matrix& Matrix::SetTranslation(const Vector3 &trans)
 
 Matrix& Matrix::SetRotation(const Vector3 &axis, float angle)
 {
-  float c,s,t;
+	float c,s,t;
 
-  // do the trig
-  s = MFSin(angle);
-  c = MFCos(angle);
-  t = 1.0f-c;
+	// do the trig
+	s = MFSin(angle);
+	c = MFCos(angle);
+	t = 1.0f-c;
 
-  // build the rotation matrix
-  m[0][0] = t*axis.x*axis.x + c;
-  m[1][0] = t*axis.x*axis.y - s*axis.z;
-  m[2][0] = t*axis.x*axis.z + s*axis.y;
+	// build the rotation matrix
+	m[0][0] = t*axis.x*axis.x + c;
+	m[1][0] = t*axis.x*axis.y - s*axis.z;
+	m[2][0] = t*axis.x*axis.z + s*axis.y;
 
-  m[0][1] = t*axis.x*axis.y + s*axis.z;
-  m[1][1] = t*axis.y*axis.y + c;
-  m[2][1] = t*axis.y*axis.z - s*axis.x;
+	m[0][1] = t*axis.x*axis.y + s*axis.z;
+	m[1][1] = t*axis.y*axis.y + c;
+	m[2][1] = t*axis.y*axis.z - s*axis.x;
 
-  m[0][2] = t*axis.x*axis.z - s*axis.y;
-  m[1][2] = t*axis.y*axis.z + s*axis.x;
-  m[2][2] = t*axis.z*axis.z + c;
+	m[0][2] = t*axis.x*axis.z - s*axis.y;
+	m[1][2] = t*axis.y*axis.z + s*axis.x;
+	m[2][2] = t*axis.z*axis.z + c;
 
-  return *this;
+	m[3][0] = m[3][1] = m[3][2] = m[0][3]= m[1][3] = m[2][3] = 0.0f;
+	m[3][3] = 1.0f;
+
+	return *this;
 }
 
 Matrix& Matrix::SetRotationQ(const Vector4 &q)
@@ -145,38 +146,30 @@ Matrix& Matrix::SetRotationQ(const Vector4 &q)
 
 Matrix& Matrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
-//#if defined(_LINUX) || defined(_DC) /* Not sure if this works yet */
-	float sin_yaw, cos_yaw, sin_pitch, cos_pitch, sin_roll, cos_roll;
+	float cosy = MFCos(yaw);
+	float siny = MFSin(yaw);
+	float cosp = MFCos(pitch);
+	float sinp = MFSin(pitch);
+	float cosr = MFCos(roll);
+	float sinr = MFSin(roll);
 
-	sin_yaw = MFSin(yaw);
-	cos_yaw = MFCos(yaw);
-	sin_pitch = MFSin(pitch);
-	cos_pitch = MFCos(pitch);
-	sin_roll = MFSin(roll);
-	cos_roll = MFCos(roll);
+	m[0][0] =  cosr * cosy + sinp * sinr * siny;
+	m[0][1] =  cosp * sinr;
+	m[0][2] =  cosy * sinp * sinr - cosr * siny;
+	m[0][3] =  0.0f;
 
-	m[0][0] = cos_roll * cos_yaw - sin_pitch * sin_roll * sin_yaw;
-	m[0][1] = -cos_pitch * sin_roll;
-	m[0][2] = -cos_yaw * sin_pitch * sin_roll + cos_roll * sin_yaw;
-	m[0][3] = 0;
+	m[1][0] = -cosy * sinr + cosr * sinp * siny;
+	m[1][1] =  cosp * cosr;
+	m[1][2] =  cosr * cosy * sinp + sinr * siny;
+	m[1][3] =  0.0f;
 
-	m[1][0] = cos_yaw * sin_roll + cos_roll * sin_pitch * sin_yaw;
-	m[1][1] = cos_pitch * cos_roll;
-	m[1][2] = -cos_roll * cos_yaw * sin_pitch + sin_roll + sin_yaw;
-	m[1][3] = 0;
+	m[2][0] =  cosp * siny;
+	m[2][1] = -sinp;
+	m[2][2] =  cosp * cosy;
+	m[2][3] =  0.0f;
 
-	m[2][0] = -cos_pitch * sin_yaw;
-	m[2][1] = sin_pitch;
-	m[2][2] = cos_pitch * cos_yaw;
-	m[2][3] = 0;
-
-	m[3][0] = m[3][1] = m[3][2] = 0;
-	m[3][3] = 1;
-//#else
-
-//	D3DXMatrixRotationYawPitchRoll((D3DXMATRIX*)this, yaw, pitch, roll);
-//	DBGASSERT(false, "Not Written...");
-//#endif	
+	m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 
 	return *this;
 }
@@ -192,6 +185,8 @@ Matrix& Matrix::SetRotationX(float angle)
 	m[2][0] = 0.0f;
 	m[2][1] = -MFSin(angle);
 	m[2][2] = MFCos(angle);
+	m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 
 	return *this;
 }
@@ -207,6 +202,8 @@ Matrix& Matrix::SetRotationY(float angle)
 	m[2][0] = MFSin(angle);
 	m[2][1] = 0.0f;
 	m[2][2] = MFCos(angle);
+	m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 
 	return *this;
 }
@@ -222,6 +219,8 @@ Matrix& Matrix::SetRotationZ(float angle)
 	m[2][0] = 0.0f;
 	m[2][1] = 0.0f;
 	m[2][2] = 1.0f;
+	m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 
 	return *this;
 }
@@ -229,14 +228,12 @@ Matrix& Matrix::SetRotationZ(float angle)
 Matrix& Matrix::SetScale(const Vector3& scale)
 {
 	m[0][0] = scale.x;
-	m[0][1] = 0.0f;
-	m[0][2] = 0.0f;
-	m[1][0] = 0.0f;
+	m[0][1] = m[0][2] = m[0][3] = m[1][0] = 0.0f;
 	m[1][1] = scale.y;
-	m[1][2] = 0.0f;
-	m[2][0] = 0.0f;
-	m[2][1] = 0.0f;
+	m[1][2] = m[1][3] = m[2][0] = m[2][1] = 0.0f;
 	m[2][2] = scale.z;
+	m[2][3] = m[3][0] = m[3][1] = m[3][2] = 0.0f;
+	m[3][3] = 1.0f;
 
 	return *this;
 }
