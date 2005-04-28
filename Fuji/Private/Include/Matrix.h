@@ -66,10 +66,10 @@ public:
 	inline Vector4 GetZAxis4() const { Vector4 t; t.x = m[2][0]; t.y = m[2][1]; t.z = m[2][2]; t.w = m[2][3]; return t; }
 	inline Vector4 GetTrans4() const { Vector4 t; t.x = m[3][0]; t.y = m[3][1]; t.z = m[3][2]; t.w = m[3][3]; return t; }
 
-	inline void SetXAxis(const Vector3 &v) { m[0][0] = v.x; m[0][1] = v.y; m[0][2] = v.z; }
-	inline void SetYAxis(const Vector3 &v) { m[1][0] = v.x; m[1][1] = v.y; m[1][2] = v.z; }
-	inline void SetZAxis(const Vector3 &v) { m[2][0] = v.x; m[2][1] = v.y; m[2][2] = v.z; }
-	inline void SetTrans(const Vector3 &v) { m[3][0] = v.x; m[3][1] = v.y; m[3][2] = v.z; }
+	inline void SetXAxis(const Vector3 &v) { m[0][0] = v.x; m[0][1] = v.y; m[0][2] = v.z; m[0][3] = 0.0f; }
+	inline void SetYAxis(const Vector3 &v) { m[1][0] = v.x; m[1][1] = v.y; m[1][2] = v.z; m[1][3] = 0.0f; }
+	inline void SetZAxis(const Vector3 &v) { m[2][0] = v.x; m[2][1] = v.y; m[2][2] = v.z; m[2][3] = 0.0f; }
+	inline void SetTrans(const Vector3 &v) { m[3][0] = v.x; m[3][1] = v.y; m[3][2] = v.z; m[3][3] = 1.0f; }
 	inline void SetXAxis(const Vector4 &v) { m[0][0] = v.x; m[0][1] = v.y; m[0][2] = v.z; m[0][3] = v.w; }
 	inline void SetYAxis(const Vector4 &v) { m[1][0] = v.x; m[1][1] = v.y; m[1][2] = v.z; m[1][3] = v.w; }
 	inline void SetZAxis(const Vector4 &v) { m[2][0] = v.x; m[2][1] = v.y; m[2][2] = v.z; m[2][3] = v.w; }

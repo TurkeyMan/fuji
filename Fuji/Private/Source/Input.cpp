@@ -22,7 +22,162 @@ int numPointers = 0;
 int numKeyboards = 0;
 
 // DIK to ASCII mappings with shift, caps, and shift-caps tables
-char KEYtoASCII[256]			= {0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,'\t','q','w','e','r','t','y','u','i','o','p','[',']','\r',0,'a','s','d','f','g','h','j','k','l',';','\'','`',0,'\\','z','x','c','v','b','n','m',',','.','/',0,'*',0,' ',0,0,0,0,0,0,0,0,0,0,0,0,0,'7','8','9','-','4','5','6','+','1','2','3','0','.',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'=',0,0,0,'@',':','_',0,0,0,0,0,0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,',',0,'/',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+const char KEYtoASCII[256]			= {0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,'\t','q','w','e','r','t','y','u','i','o','p','[',']','\r',0,'a','s','d','f','g','h','j','k','l',';','\'','`',0,'\\','z','x','c','v','b','n','m',',','.','/',0,'*',0,' ',0,0,0,0,0,0,0,0,0,0,0,0,0,'7','8','9','-','4','5','6','+','1','2','3','0','.',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'=',0,0,0,'@',':','_',0,0,0,0,0,0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,',',0,'/',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+const char * const gKeyNames[] =
+{
+	"None",
+	"Up",
+	"Down",
+	"Left",
+	"Right",
+	"Apps",			// on windows keyboards
+	"LWin",			// on windows keyboards
+	"RWin",			// on windows keyboards
+	"Backspace",
+	"Tab",
+	"PrintScreen",
+	"ScrollLock",
+	"Break",
+	"Return",
+	"F1",
+	"F2",
+	"F3",
+	"F4",
+	"F5",
+	"F6",
+	"F7",
+	"F8",
+	"F9",
+	"F10",
+	"F11",
+	"F12",
+	"OEM_102",		// on german keyboard
+	"Escape",
+	"MyComputer",		// on multimedia keyboards
+	"Mail",			// on multimedia keyboards
+	"Calculator",		// on multimedia keyboards
+	"Stop",			// japanese keyboard
+	"Space",
+	"Insert",
+	"Delete",
+	"Home",
+	"End",
+	"PageUp",
+	"PageDown",
+	"Apostrophe",
+	"ABNT_C1",		// on brazilian keyboard
+	"ABNT_C2",		// on brazilian keyboard
+	"Asterisk",
+	"Plus",
+	"Comma",
+	"Hyphen",
+	"Period",
+	"Slash",
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"NumPadComma",	// japanese keyboard
+	"Semicolon",
+	"NumPadEquals",	// japanese keyboard
+	"Equals",
+	"Sleep",			// on windows keyboards
+	"Wake",			// on windows keyboards
+	"Power",			// on windows keyboards
+	"A",
+	"B",
+	"C",
+	"D",
+	"E",
+	"F",
+	"G",
+	"H",
+	"I",
+	"J",
+	"K",
+	"L",
+	"M",
+	"N",
+	"O",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"U",
+	"V",
+	"W",
+	"X",
+	"Y",
+	"Z",
+	"Underline",		// japanese keyboard
+	"LBracket",
+	"Backslash",
+	"RBracket",
+	"F13",			// japanese keyboard
+	"F14",			// japanese keyboard
+	"Grave",
+	"F15",			// japanese keyboard
+	"Unlabeled",		// japanese keyboard
+	"LControl",
+	"LAlt",
+	"LShift",
+	"RControl",
+	"RAlt",
+	"RShift",
+	"Capital",
+
+	"NumLock",
+	"Divide",
+	"Subtract",
+	"Decimal",
+
+	"NumPad0",
+	"NumPad1",
+	"NumPad2",
+	"NumPad3",
+	"NumPad4",
+	"NumPad5",
+	"NumPad6",
+	"NumPad7",
+	"NumPad8",
+	"NumPad9",
+	"NumPadEnter",
+
+	"PlayPause",		// on multimedia keyboards
+	"MediaStop",		// on multimedia keyboards
+	"MediaSelect",	// on multimedia keyboards
+	"NextTrack",		// on multimedia keyboards
+	"PrevTrack",		// on multimedia keyboards
+
+	"VolumeDown",		// on multimedia keyboards
+	"VolumeUp",		// on multimedia keyboards
+	"Mute",			// on multimedia keyboards
+
+	"WebBack",		// on multimedia keyboards
+	"WebFavorites",	// on multimedia keyboards
+	"WebForeward",		// on multimedia keyboards
+	"WebHome",		// on multimedia keyboards
+	"WebRefresh",		// on multimedia keyboards
+	"WebSearch",		// on multimedia keyboards
+	"WebStop",		// on multimedia keyboards
+
+	"AT",				// japanese keyboard
+	"AX",				// japanese keyboard
+	"Colon",			// japanese keyboard
+	"Convert",		// japanese keyboard
+	"Kana",			// japanese keyboard
+	"Kanji",			// japanese keyboard
+	"NoConvert",		// japanese keyboard
+	"Yen",			// japanese keyboard
+};
 
 // Functions
 void Input_InitModule()
@@ -387,14 +542,14 @@ void Input_SetMouseAcceleration(float multiplier)
 #pragma message("SetMouseAcceleration")
 }
 
-const char* Input_EnumerateString(int source, int sourceID, int type, bool includeDevice)
+const char* Input_EnumerateString(int source, int sourceID, int type, bool includeDevice, bool includeDeviceID)
 {
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
 
 	switch(source)
 	{
 		case IDD_Gamepad:
-			return STR("%s %s", includeDevice ? Input_GetDeviceName(source, sourceID) : "", Input_GetGamepadButtonName(sourceID, type));
+			return STR("%s%s %s", includeDevice ? Input_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", Input_GetGamepadButtonName(sourceID, type));
 		case IDD_Mouse:
 			if(type < Mouse_MaxAxis)
 			{
@@ -402,12 +557,13 @@ const char* Input_EnumerateString(int source, int sourceID, int type, bool inclu
 			}
 			else
 			{
-				return STR("%s Button %d", includeDevice ? Input_GetDeviceName(source, sourceID) : "", type - Mouse_MaxAxis + 1);
+				return STR("%s%s Button %d", includeDevice ? Input_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", type - Mouse_MaxAxis + 1);
 			}
-			break;
 		case IDD_Keyboard:
-			break;
+			return STR("%s%s %s", includeDevice ? Input_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", gKeyNames[type]);
 	}
+
+	return "";
 }
 
 void Input_SetDeadZone(float deadZone)

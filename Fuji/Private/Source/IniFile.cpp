@@ -421,19 +421,31 @@ char* IniFile::AsString()
 		pOffset = SkipWhite(pOffset);
 	}
 
-	INIASSERT(*pOffset == '\"', STR("Entry %s not a string", GetName()));
+	char *pString;
 
-	pOffset++;
-	pEnd = pOffset;
+	if(*pOffset == '\"')
+	{
+		pOffset++;
+		pEnd = pOffset;
 
-	while(*pEnd != NULL && *pEnd != '\"' && !IsNewline(*pEnd)) pEnd++;
+		while(*pEnd != NULL && *pEnd != '\"' && !IsNewline(*pEnd)) pEnd++;
 
-	INIASSERT(!IsNewline(*pEnd), "Illegal end of line in string literal");
-	INIASSERT(*pEnd != NULL, "Unexpected end of file");
+		INIASSERT(!IsNewline(*pEnd), "Illegal end of line in string literal");
+		INIASSERT(*pEnd != NULL, "Unexpected end of file");
 
-	char *pString = STRn(pOffset, pEnd-pOffset);
+		pString = STRn(pOffset, pEnd-pOffset);
+		pOffset = pEnd+1;
+	}
+	else
+	{
+		pEnd = pOffset;
 
-	pOffset = pEnd+1;
+		while(IsAlphaNumeric(*pEnd)) pEnd++;
+
+		pString = STRn(pOffset, pEnd-pOffset);
+		pOffset = pEnd;
+	}
+
 	pOffset = SkipWhite(pOffset);
 
 	INIASSERT(*pOffset == NULL || IsNewline(*pOffset) || *pOffset == ';' || *pOffset == '#' || (*pOffset == '/' && pOffset[1] == '/'), "Syntax Error");

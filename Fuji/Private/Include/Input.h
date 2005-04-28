@@ -25,7 +25,7 @@ Vector3 Input_ReadMouseDelta(int mouseID = -1);
 void	Input_SetMouseMode(int mode);
 void	Input_SetMouseAcceleration(float multiplier);
 
-const char*	Input_EnumerateString(int source, int sourceID, int type, bool includeDevice = false);
+const char*	Input_EnumerateString(int source, int sourceID, int type, bool includeDevice = false, bool includeDeviceID = false);
 
 void	Input_SetDeadZone(float deadZone);
 float	Input_GetDeadZone();
@@ -155,191 +155,192 @@ enum KeyboardStatusState
 
 enum KeyboardType
 {
-	KEY_UNKNOWN = -1,
+	Key_Unknown = -1,
 
-	KEY_NONE = 0,
-	KEY_UP,
-	KEY_DOWN,
-	KEY_LEFT,
-	KEY_RIGHT,
-	KEY_APPS,			// on windows keyboards
-	KEY_LWIN,			// on windows keyboards
-	KEY_RWIN,			// on windows keyboards
-	KEY_BACKSPACE,
-	KEY_TAB,
-	KEY_PRINTSCREEN,
-	KEY_SCROLLLOCK,
-	KEY_BREAK,
-	KEY_RETURN,
-	KEY_F1,
-	KEY_F2,
-	KEY_F3,
-	KEY_F4,
-	KEY_F5,
-	KEY_F6,
-	KEY_F7,
-	KEY_F8,
-	KEY_F9,
-	KEY_F10,
-	KEY_F11,
-	KEY_F12,
-	KEY_OEM_102,		// on german keyboard
-	KEY_ESCAPE,
-	KEY_MYCOMPUTER,		// on multimedia keyboards
-	KEY_MAIL,			// on multimedia keyboards
-	KEY_CALCULATOR,		// on multimedia keyboards
-	KEY_STOP,			// japanese keyboard
-	KEY_SPACE,
-	KEY_INSERT,
-	KEY_DELETE,
-	KEY_HOME,
-	KEY_END,
-	KEY_PAGEUP,
-	KEY_PAGEDOWN,
-	KEY_APOSTROPHE,
-	KEY_ABNT_C1,		// on brazilian keyboard
-	KEY_ABNT_C2,		// on brazilian keyboard
-	KEY_ASTERISK,
-	KEY_PLUS,
-	KEY_COMMA,
-	KEY_HYPHEN,
-	KEY_PERIOD,
-	KEY_SLASH,
-	KEY_0,
-	KEY_1,
-	KEY_2,
-	KEY_3,
-	KEY_4,
-	KEY_5,
-	KEY_6,
-	KEY_7,
-	KEY_8,
-	KEY_9,
-	KEY_NUMPADCOMMA,	// japanese keyboard
-	KEY_SEMICOLON,
-	KEY_NUMPADEQUALS,	// japanese keyboard
-	KEY_EQUALS,
-	KEY_SLEEP,			// on windows keyboards
-	KEY_WAKE,			// on windows keyboards
-	KEY_POWER,			// on windows keyboards
-	KEY_A,
-	KEY_B,
-	KEY_C,
-	KEY_D,
-	KEY_E,
-	KEY_F,
-	KEY_G,
-	KEY_H,
-	KEY_I,
-	KEY_J,
-	KEY_K,
-	KEY_L,
-	KEY_M,
-	KEY_N,
-	KEY_O,
-	KEY_P,
-	KEY_Q,
-	KEY_R,
-	KEY_S,
-	KEY_T,
-	KEY_U,
-	KEY_V,
-	KEY_W,
-	KEY_X,
-	KEY_Y,
-	KEY_Z,
-	KEY_UNDERLINE,		// japanese keyboard
-	KEY_LBRACKET,
-	KEY_BACKSLASH,
-	KEY_RBRACKET,
-	KEY_F13,			// japanese keyboard
-	KEY_F14,			// japanese keyboard
-	KEY_GRAVE,
-	KEY_F15,			// japanese keyboard
-	KEY_UNLABELED,		// japanese keyboard
-	KEY_LCONTROL,
-	KEY_LALT,
-	KEY_LSHIFT,
-	KEY_RCONTROL,
-	KEY_RALT,
-	KEY_RSHIFT,
-	KEY_CAPITAL,
+	Key_None = 0,
+	Key_Up,
+	Key_Down,
+	Key_Left,
+	Key_Right,
+	Key_Apps,			// on windows keyboards
+	Key_LWin,			// on windows keyboards
+	Key_RWin,			// on windows keyboards
+	Key_Backspace,
+	Key_Tab,
+	Key_PrintScreen,
+	Key_ScrollLock,
+	Key_Break,
+	Key_Return,
+	Key_F1,
+	Key_F2,
+	Key_F3,
+	Key_F4,
+	Key_F5,
+	Key_F6,
+	Key_F7,
+	Key_F8,
+	Key_F9,
+	Key_F10,
+	Key_F11,
+	Key_F12,
+	Key_OEM_102,		// on german keyboard
+	Key_Escape,
+	Key_MyComputer,		// on multimedia keyboards
+	Key_Mail,			// on multimedia keyboards
+	Key_Calculator,		// on multimedia keyboards
+	Key_Stop,			// japanese keyboard
+	Key_Space,
+	Key_Insert,
+	Key_Delete,
+	Key_Home,
+	Key_End,
+	Key_PageUp,
+	Key_PageDown,
+	Key_Apostrophe,
+	Key_ABNT_C1,		// on brazilian keyboard
+	Key_ABNT_C2,		// on brazilian keyboard
+	Key_Asterisk,
+	Key_Plus,
+	Key_Comma,
+	Key_Hyphen,
+	Key_Period,
+	Key_Slash,
+	Key_0,
+	Key_1,
+	Key_2,
+	Key_3,
+	Key_4,
+	Key_5,
+	Key_6,
+	Key_7,
+	Key_8,
+	Key_9,
+	Key_NumPadComma,	// japanese keyboard
+	Key_Semicolon,
+	Key_NumPadEquals,	// japanese keyboard
+	Key_Equals,
+	Key_Sleep,			// on windows keyboards
+	Key_Wake,			// on windows keyboards
+	Key_Power,			// on windows keyboards
+	Key_A,
+	Key_B,
+	Key_C,
+	Key_D,
+	Key_E,
+	Key_F,
+	Key_G,
+	Key_H,
+	Key_I,
+	Key_J,
+	Key_K,
+	Key_L,
+	Key_M,
+	Key_N,
+	Key_O,
+	Key_P,
+	Key_Q,
+	Key_R,
+	Key_S,
+	Key_T,
+	Key_U,
+	Key_V,
+	Key_W,
+	Key_X,
+	Key_Y,
+	Key_Z,
+	Key_Underline,		// japanese keyboard
+	Key_LBracket,
+	Key_Backslash,
+	Key_RBracket,
+	Key_F13,			// japanese keyboard
+	Key_F14,			// japanese keyboard
+	Key_Grave,
+	Key_F15,			// japanese keyboard
+	Key_Unlabeled,		// japanese keyboard
+	Key_LControl,
+	Key_LAlt,
+	Key_LShift,
+	Key_RControl,
+	Key_RAlt,
+	Key_RShift,
+	Key_Capital,
 
-	KEY_NUMLOCK,
-	KEY_DIVIDE,
-	KEY_SUBTRACT,
-	KEY_DECIMAL,
+	Key_NumLock,
+	Key_Divide,
+	Key_Subtract,
+	Key_Decimal,
 
-	KEY_NUMPAD0,
-	KEY_NUMPAD1,
-	KEY_NUMPAD2,
-	KEY_NUMPAD3,
-	KEY_NUMPAD4,
-	KEY_NUMPAD5,
-	KEY_NUMPAD6,
-	KEY_NUMPAD7,
-	KEY_NUMPAD8,
-	KEY_NUMPAD9,
-	KEY_NUMPADENTER,
+	Key_NumPad0,
+	Key_NumPad1,
+	Key_NumPad2,
+	Key_NumPad3,
+	Key_NumPad4,
+	Key_NumPad5,
+	Key_NumPad6,
+	Key_NumPad7,
+	Key_NumPad8,
+	Key_NumPad9,
+	Key_NumPadEnter,
 
-	KEY_PLAYPAUSE,		// on multimedia keyboards
-	KEY_MEDIASTOP,		// on multimedia keyboards
-	KEY_MEDIASELECT,	// on multimedia keyboards
-	KEY_NEXTTRACK,		// on multimedia keyboards
-	KEY_PREVTRACK,		// on multimedia keyboards
+	Key_PlayPause,		// on multimedia keyboards
+	Key_MediaStop,		// on multimedia keyboards
+	Key_MediaSelect,	// on multimedia keyboards
+	Key_NextTrack,		// on multimedia keyboards
+	Key_PrevTrack,		// on multimedia keyboards
 
-	KEY_VOLUMEDOWN,		// on multimedia keyboards
-	KEY_VOLUMEUP,		// on multimedia keyboards
-	KEY_MUTE,			// on multimedia keyboards
+	Key_VolumeDown,		// on multimedia keyboards
+	Key_VolumeUp,		// on multimedia keyboards
+	Key_Mute,			// on multimedia keyboards
 
-	KEY_WEBBACK,		// on multimedia keyboards
-	KEY_WEBFAVORITES,	// on multimedia keyboards
-	KEY_WEBFORWARD,		// on multimedia keyboards
-	KEY_WEBHOME,		// on multimedia keyboards
-	KEY_WEBREFRESH,		// on multimedia keyboards
-	KEY_WEBSEARCH,		// on multimedia keyboards
-	KEY_WEBSTOP,		// on multimedia keyboards
+	Key_WebBack,		// on multimedia keyboards
+	Key_WebFavorites,	// on multimedia keyboards
+	Key_WebForeward,		// on multimedia keyboards
+	Key_WebHome,		// on multimedia keyboards
+	Key_WebRefresh,		// on multimedia keyboards
+	Key_WebSearch,		// on multimedia keyboards
+	Key_WebStop,		// on multimedia keyboards
 
-	KEY_AT,				// japanese keyboard
-	KEY_AX,				// japanese keyboard
-	KEY_COLON,			// japanese keyboard
-	KEY_CONVERT,		// japanese keyboard
-	KEY_KANA,			// japanese keyboard
-	KEY_KANJI,			// japanese keyboard
-	KEY_NOCONVERT,		// japanese keyboard
-	KEY_YEN,			// japanese keyboard
+	Key_AT,				// japanese keyboard
+	Key_AX,				// japanese keyboard
+	Key_Colon,			// japanese keyboard
+	Key_Convert,		// japanese keyboard
+	Key_Kana,			// japanese keyboard
+	Key_Kanji,			// japanese keyboard
+	Key_NoConvert,		// japanese keyboard
+	Key_Yen,			// japanese keyboard
 
-	KEY_ForceInt	= 0x7FFFFFFF
+	Key_Max,
+	Key_ForceInt	= 0x7FFFFFFF
 };
 
 enum KeyGamepadMapping
 {
-	Mapping_Cross		= KEY_D,
-	Mapping_Circle		= KEY_F,
-	Mapping_Box			= KEY_S,
-	Mapping_Triangle	= KEY_E,
+	Mapping_Cross		= Key_D,
+	Mapping_Circle		= Key_F,
+	Mapping_Box			= Key_S,
+	Mapping_Triangle	= Key_E,
 
-	Mapping_R1			= KEY_G,
-	Mapping_L1			= KEY_A,
-	Mapping_L2			= KEY_Q,
-	Mapping_R2			= KEY_T,
+	Mapping_R1			= Key_G,
+	Mapping_L1			= Key_A,
+	Mapping_L2			= Key_Q,
+	Mapping_R2			= Key_T,
 
-	Mapping_Start		= KEY_RETURN,
-	Mapping_Select		= KEY_RSHIFT,
+	Mapping_Start		= Key_Return,
+	Mapping_Select		= Key_RShift,
 
-	Mapping_LThumb		= KEY_W,
-	Mapping_RThumb		= KEY_R,
+	Mapping_LThumb		= Key_W,
+	Mapping_RThumb		= Key_R,
 
 // general controller enums
-	Mapping_DUp			= KEY_UP,
-	Mapping_DDown		= KEY_DOWN,
-	Mapping_DLeft		= KEY_LEFT,
-	Mapping_DRight		= KEY_RIGHT,
+	Mapping_DUp			= Key_Up,
+	Mapping_DDown		= Key_Down,
+	Mapping_DLeft		= Key_Left,
+	Mapping_DRight		= Key_Right,
 
-//	Mapping_Cross		= KEY_UP,			// Axis_LX,
-//	Mapping_Cross		= KEY_UP,			// Axis_LY,
-//	Mapping_Cross		= KEY_UP,			// Axis_RX,
-//	Mapping_Cross		= KEY_UP,			// Axis_RY,
+//	Mapping_Cross		= Key_Up,			// Axis_LX,
+//	Mapping_Cross		= Key_Up,			// Axis_LY,
+//	Mapping_Cross		= Key_Up,			// Axis_RX,
+//	Mapping_Cross		= Key_Up,			// Axis_RY,
 };
 
 #endif

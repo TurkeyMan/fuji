@@ -241,6 +241,37 @@ Matrix& Matrix::SetScale(const Vector3& scale)
 	return *this;
 }
 
+Matrix& Matrix::LookAt(const Vector3& pos, const Vector3& at, const Vector3& up)
+{
+#pragma message("this could be majorly optimised!!")
+	Vector3 zAxis, xAxis, yAxis, trans;
+
+	// calculate forewards
+	zAxis = at-pos;
+	zAxis.Normalise();
+
+	// calculate right
+	xAxis = up.Cross(zAxis);
+	xAxis.Normalise();
+
+	// calculate up
+	yAxis = zAxis.Cross(xAxis);
+	yAxis.Normalise();
+
+	// calculate translation
+//	trans.x = -pos.Dot(xAxis);
+//	trans.y = -pos.Dot(yAxis);
+//	trans.z = -pos.Dot(zAxis);
+	trans = pos;
+
+	SetXAxis(xAxis);
+	SetYAxis(yAxis);
+	SetZAxis(zAxis);
+	SetTrans(trans);
+
+	return *this;
+}
+
 Matrix& Matrix::Transpose()
 {
 	register float t;
@@ -412,18 +443,69 @@ Matrix& Matrix::Multiply3x3(const Matrix &mat1, const Matrix &mat2)
 	return *this;
 }
 
+// matrix inverse shamelessly takes from some math book...
+#define ACCUMULATE    \
+	if(temp >= 0.0)   \
+		pos += temp;  \
+	else              \
+		neg += temp;
+
+#define PRECISION_LIMIT (1.0e-10)
+
 Matrix& Matrix::Inverse()
 {
-	Matrix tempm = *this;
+	Matrix out;
+	register float det_1;
+	float pos, neg, temp;
 
-	tempm.Transpose3x3();
-	tempm.m[3][0] = -m[3][0]*m[0][0] + m[3][1]*m[0][1] + m[3][2]*m[0][2] + m[3][3]*m[0][3]; //pMatrix->Translation4().Dot(pMatrix->XAxis4());
-	tempm.m[3][1] = -m[3][0]*m[1][0] + m[3][1]*m[1][1] + m[3][2]*m[1][2] + m[3][3]*m[1][3]; //pMatrix->Translation4().Dot(pMatrix->YAxis4());
-	tempm.m[3][2] = -m[3][0]*m[2][0] + m[3][1]*m[2][1] + m[3][2]*m[2][2] + m[3][3]*m[2][3]; //pMatrix->Translation4().Dot(pMatrix->ZAxis4());
-	tempm.ClearW();
-	*this = tempm;
+	//	* Calculate the determinant of submatrix A and determine if the
+	//	* the matrix is singular as limited by the double precision
+	//	* floating-point data representation.
+	pos = neg = 0.0;
+	temp =  m[0][0] * m[1][1] * m[2][2];
+	ACCUMULATE
+	temp =  m[0][1] * m[1][2] * m[2][0];
+	ACCUMULATE
+	temp =  m[0][2] * m[1][0] * m[2][1];
+	ACCUMULATE
+	temp = -m[0][2] * m[1][1] * m[2][0];
+	ACCUMULATE
+	temp = -m[0][1] * m[1][0] * m[2][2];
+	ACCUMULATE
+	temp = -m[0][0] * m[1][2] * m[2][1];
+	ACCUMULATE
+	det_1 = pos + neg;
 
-	return *this;
+	// Is the submatrix A singular?
+	if ((det_1 == 0.0f) || (fabsf(det_1 / (pos - neg)) < PRECISION_LIMIT))
+	{
+		// Matrix M has no inverse
+		LOGD("Matrix::Inverse: Singular matrix (Matrix has no inverse)...\n");
+		return *this;
+	}
+
+	// Calculate inverse(A) = adj(A) / det(A)
+	det_1 = 1.0f / det_1;
+	out.m[0][0] =  (m[1][1]*m[2][2] - m[1][2]*m[2][1]) * det_1;
+	out.m[1][0] = -(m[1][0]*m[2][2] - m[1][2]*m[2][0]) * det_1;
+	out.m[2][0] =  (m[1][0]*m[2][1] - m[1][1]*m[2][0]) * det_1;
+	out.m[0][1] = -(m[0][1]*m[2][2] - m[0][2]*m[2][1]) * det_1;
+	out.m[1][1] =  (m[0][0]*m[2][2] - m[0][2]*m[2][0]) * det_1;
+	out.m[2][1] = -(m[0][0]*m[2][1] - m[0][1]*m[2][0]) * det_1;
+	out.m[0][2] =  (m[0][1]*m[1][2] - m[0][2]*m[1][1]) * det_1;
+	out.m[1][2] = -(m[0][0]*m[1][2] - m[0][2]*m[1][0]) * det_1;
+	out.m[2][2] =  (m[0][0]*m[1][1] - m[0][1]*m[1][0]) * det_1;
+
+	// Calculate -C * inverse(A)
+	out.m[3][0] = -(m[3][0]*out.m[0][0] + m[3][1]*out.m[1][0] + m[3][2]*out.m[2][0]);
+	out.m[3][1] = -(m[3][0]*out.m[0][1] + m[3][1]*out.m[1][1] + m[3][2]*out.m[2][1]);
+	out.m[3][2] = -(m[3][0]*out.m[0][2] + m[3][1]*out.m[1][2] + m[3][2]*out.m[2][2]);
+
+	// Fill in last column
+	out.m[0][3] = out.m[1][3] = out.m[2][3] = 0.0f;
+	out.m[3][3] = 1.0f;
+
+	return *this = out;
 }
 
 Vector4 Matrix::CalculateQuaternion()

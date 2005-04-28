@@ -40,9 +40,15 @@ void MFPrimitive(uint32 type, uint32 hint)
 		rendererFlags |= RT_Untextured;
 	}
 
+	View *pCurrent = View::GetCurrent();
+
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
-	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)pCurrent->GetViewToScreenMatrix());
+
+	if(!pCurrent->isOrtho)
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)pCurrent->GetWorldToViewMatrix());
+	else
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&Matrix::identity);
 
 	Renderer_SetRenderer(rendererFlags, 0, RS_MFPrimitive);
 }
