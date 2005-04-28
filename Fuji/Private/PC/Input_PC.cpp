@@ -547,6 +547,23 @@ void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 	}
 }
 
+void GetWindowMousePos(float *pX, float *pY)
+{
+	POINT mouse;
+	RECT client;
+	GetCursorPos(&mouse);
+	ScreenToClient(apphWnd, &mouse);
+	GetClientRect(apphWnd, &client);
+
+	mouse.x = Max(mouse.x, client.left);
+	mouse.y = Max(mouse.y, client.top);
+	mouse.x = Min(mouse.x, client.right-1);
+	mouse.y = Min(mouse.y, client.bottom-1);
+
+	*pX = (float)mouse.x;
+	*pY = (float)mouse.y;
+}
+
 void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 {
 	CALLSTACK;
@@ -555,6 +572,11 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 	DWORD elements = SAMPLE_BUFFER_SIZE;
 
 	HRESULT hr;
+
+	pMouseState->values[Mouse_XDelta] = 0.0f;
+	pMouseState->values[Mouse_YDelta] = 0.0f;
+	pMouseState->values[Mouse_Wheel] = 0.0f;
+	pMouseState->values[Mouse_Wheel2] = 0.0f;
 
 	hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
 
@@ -593,24 +615,33 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 				case DIMOFS_BUTTON7:
 					pMouseState->buttonState[7] = inputBuffer[a].dwData ? -1 : 0;
 					break;
-
+/*
 				case DIMOFS_X:
-					pMouseState->values[Mouse_XPos]  += (float)inputBuffer[a].dwData;
-					pMouseState->values[Mouse_XDelta] = (float)inputBuffer[a].dwData;
+					pMouseState->values[Mouse_XPos]  += (float)((int)inputBuffer[a].dwData);
+					pMouseState->values[Mouse_XDelta] = (float)((int)inputBuffer[a].dwData);
 					break;
 				case DIMOFS_Y:
-					pMouseState->values[Mouse_YPos]  += (float)inputBuffer[a].dwData;
-					pMouseState->values[Mouse_YDelta] = (float)inputBuffer[a].dwData;
+					pMouseState->values[Mouse_YPos]  += (float)((int)inputBuffer[a].dwData);
+					pMouseState->values[Mouse_YDelta] = (float)((int)inputBuffer[a].dwData);
 					break;
-
+*/
 				case DIMOFS_Z:
-					pMouseState->values[Mouse_Wheel]  = (float)inputBuffer[a].dwData;
+					pMouseState->values[Mouse_Wheel]  = (float)((int)inputBuffer[a].dwData) / 120.0f;
 					break;
 
 				default:
 					break;
 			}
 		}
+
+		// get the mouse position and delta's from the absolute screen position on PC
+		float x, y;
+		GetWindowMousePos(&x, &y);
+
+		pMouseState->values[Mouse_XDelta] = x - pMouseState->values[Mouse_XPos];
+		pMouseState->values[Mouse_YDelta] = y - pMouseState->values[Mouse_YPos];
+		pMouseState->values[Mouse_XPos] = x;
+		pMouseState->values[Mouse_YPos] = y;
 	}
 }
 
