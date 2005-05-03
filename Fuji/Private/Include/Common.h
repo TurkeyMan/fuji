@@ -20,6 +20,16 @@
 	#include <Windows.h>
 	#include <d3d9.h>
 	#include <d3dx9.h>
+
+	// this defines weather to take mouse[0]'s coords from the windows cursor or from
+	// DirectInput's accumulated input events
+	#define USE_WINDOWS_MOUSE_COORDS
+
+	// this allows DirectInupt to manage the system mouse
+	#define ALLOW_DI_MOUSE
+
+	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
+	#define ALLOW_RAW_INPUT
 #endif
 
 #if defined(_LINUX)
@@ -43,19 +53,15 @@
 
 // SSE optimisations for xbox and PC?
 #if defined(_XBOX) || defined(_WINDOWS)
-//#define _FUJI_SSE
+//	#define _FUJI_SSE
 #endif
 
 // if SSE optimisations are enabled, include SSE intrinsics header
 #if defined(_FUJI_SSE)
-#include "xmmintrin.h"
-#endif
-
-// _ALIGN16 define
-#if defined(_FUJI_SSE)
-#define _ALIGN16 _MM_ALIGN16
+	#include "xmmintrin.h"
+	#define _ALIGN16 _MM_ALIGN16
 #else
-#define _ALIGN16
+	#define _ALIGN16
 #endif
 
 // Data Type Definition
@@ -115,6 +121,13 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
+
+// a generic rect structure used by many subsystems
+struct MFRect
+{
+	float x, y;
+	float width, height;
+};
 
 // additional includes
 #include <new>

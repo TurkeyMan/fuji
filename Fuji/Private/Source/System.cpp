@@ -51,6 +51,13 @@ FujiDefaults gDefaults =
 	// SoundDefaults
 	{
 		4				// maxMusicTracks
+	},
+
+	// InputDefaults
+	{
+		true,			// allowMultipleMice
+		true,			// mouseZeroIsSystemMouse
+		true			// systemMouseUseWindowsCursor
 	}
 };
 

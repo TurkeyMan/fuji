@@ -317,7 +317,7 @@ bool Input_IsReady(int source, int sourceID)
 float Input_Read(int source, int sourceID, int type)
 {
 	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < Input_MaxInputID, "Invalid DeviceID");
+	DBGASSERT(sourceID >= -1 && source < Input_MaxInputID, "Invalid DeviceID");
 
 	if(sourceID == -1)
 	{

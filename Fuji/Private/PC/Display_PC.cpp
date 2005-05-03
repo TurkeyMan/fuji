@@ -1,3 +1,6 @@
+#define _WIN32_WINNT 0x501
+#define WM_INPUT 0x00FF
+
 #include "Common.h"
 #include "Display.h"
 #include "DebugMenu.h"
@@ -6,6 +9,10 @@
 #include <stdio.h>
 
 void Display_ResetDisplay();
+
+#if defined(ALLOW_RAW_INPUT)
+int HandleRawMouseMessage(HANDLE hDevice);
+#endif
 
 IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -175,7 +182,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_CLOSE:
 			PostQuitMessage(0);
 			return 0;
-			break;
+
+#if defined(ALLOW_RAW_INPUT)
+		case WM_INPUT:
+			if(gDefaults.input.allowMultipleMice)
+			{
+				HandleRawMouseMessage((HRAWINPUT)lParam);
+				return 0;
+			}
+#endif
 	}
 
     return DefWindowProc(hWnd, message, wParam, lParam);

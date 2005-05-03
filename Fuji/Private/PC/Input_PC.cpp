@@ -1,10 +1,11 @@
+#define DIRECTINPUT_VERSION 0x0800
+#define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
+
 #define SAMPLE_BUFFER_SIZE 128//50000
 
-#define DIRECTINPUT_VERSION 0x0800
-#include <windows.h>
+#include "Common.h"
 #include <dinput.h>
 
-#include "Common.h"
 #include "Vector3.h"
 
 #include "Input.h"
@@ -13,6 +14,18 @@
 #include "FileSystem.h"
 #include "IniFile.h"
 #include "Heap.h"
+
+#if defined(ALLOW_RAW_INPUT)
+	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
+	#define MAX_RAW_MOUSE_BUTTONS 5
+
+	typedef WINUSERAPI INT (WINAPI *pGetRawInputDeviceList)(OUT PRAWINPUTDEVICELIST pRawInputDeviceList, IN OUT PINT puiNumDevices, IN UINT cbSize);
+	typedef WINUSERAPI INT(WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize, IN UINT cbSizeHeader);
+	typedef WINUSERAPI INT(WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize);
+	typedef WINUSERAPI BOOL (WINAPI *pRegisterRawInputDevices)(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
+
+	int InitRawMouse(bool _includeRDPMouse);
+#endif
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
 
@@ -23,6 +36,24 @@ void Input_UpdateMouse();
 void Input_UpdateJoystick();
 
 /*** Structure definitions ***/
+
+#if defined(ALLOW_RAW_INPUT)
+struct RawMouse
+{
+	HANDLE deviceHandle;
+
+	int x, xDelta;
+	int y, yDelta;
+	int zDelta;
+
+	bool isAbsolute;
+	bool isVirtualDesktop;
+
+	int buttonPressed[MAX_RAW_MOUSE_BUTTONS];
+
+	char buttonNames[MAX_RAW_MOUSE_BUTTONS][64];
+};
+#endif
 
 struct GamepadInfo
 {
@@ -62,17 +93,22 @@ float deadZone = 0.3f;
 
 float mouseMultiplier = 1.0f;
 
-// windows mouse (WM_MOUSE messages)
-float screenMouseX = 0.0f, screenMouseY = 0.0f;
-float screenMouseRangeX = 639.0f, screenMouseRangeY = 479.0f;
-float screenMouseWheel = 0.0f;
-char screenMouseKey[5] = { 0, 0, 0, 0, 0 };
-
 const long joyAxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
 const long joySliders[4] = {6,50,58,66};
 
 GamepadInfo *pGamepadMappingRegistry = NULL;
 
+#if defined(ALLOW_RAW_INPUT)
+pGetRawInputDeviceList _GRIDL;
+pGetRawInputData _GRID;
+pGetRawInputDeviceInfoA _GRIDIA;
+pRegisterRawInputDevices _RRID;
+
+RawMouse *pRawMice = NULL;
+int rawMouseCount;
+
+BOOL includeRDPMouse;
+#endif
 
 // KEY to DIK mapping table
 uint8 KEYtoDIK[256] =
@@ -329,11 +365,25 @@ void Input_InitModulePlatformSpecific()
 	}
 	gKeyboardCount = 1;
 
-	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pDIMouse, NULL)))
+#if defined(ALLOW_RAW_INPUT)
+	if(gDefaults.input.allowMultipleMice)
 	{
-		pDIMouse->SetDataFormat(&c_dfDIMouse2);
+		InitRawMouse(false);
+
+		if(rawMouseCount > 1)
+			gMouseCount = rawMouseCount;
 	}
-	gMouseCount = 1;
+#endif
+#if defined(ALLOW_DI_MOUSE)
+	if(gMouseCount == 0)
+	{
+		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pDIMouse, NULL)))
+		{
+			pDIMouse->SetDataFormat(&c_dfDIMouse2);
+		}
+		gMouseCount = 1;
+	}
+#endif
 
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
 
@@ -346,16 +396,6 @@ void Input_InitModulePlatformSpecific()
 	}
 
 	Input_SetCooperativeLevels();
-
-/*
-	RAWINPUTDEVICE rid[] =
-	{
-		{0x1, 0x2, RIDEV_CAPTUREMOUSE, apphWnd},
-		{0x1, 0x6, NULL, apphWnd},
-	};
-
-	RegisterRawInputDevices(rid, sizeof(rid) / sizeof(rid[0]), sizeof(rid[0]));
-*/
 }
 
 void Input_DeinitModulePlatformSpecific()
@@ -373,15 +413,17 @@ void Input_DeinitModulePlatformSpecific()
 			pDIJoystick[a] = NULL;
 		}
 	}
-	gGamepadCount=0;
+	gGamepadCount = 0;
 
+#if defined(ALLOW_DI_MOUSE)
 	if(pDIMouse)
 	{
 		pDIMouse->Unacquire();
 		pDIMouse->Release();
 		pDIMouse = NULL;
 	}
-	gMouseCount=0;
+	gMouseCount = 0;
+#endif
 
 	if(pDIKeyboard)
 	{
@@ -389,7 +431,7 @@ void Input_DeinitModulePlatformSpecific()
 		pDIKeyboard->Release();
 		pDIKeyboard = NULL;
 	}
-	gKeyboardCount=0;
+	gKeyboardCount = 0;
 
 	if(pDirectInput)
 	{
@@ -568,72 +610,105 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 {
 	CALLSTACK;
 
-	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
-	DWORD elements = SAMPLE_BUFFER_SIZE;
-
-	HRESULT hr;
-
-	pMouseState->values[Mouse_XDelta] = 0.0f;
-	pMouseState->values[Mouse_YDelta] = 0.0f;
-	pMouseState->values[Mouse_Wheel] = 0.0f;
-	pMouseState->values[Mouse_Wheel2] = 0.0f;
-
-	hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
-
-	if(hr != DI_OK)
+#if defined(ALLOW_DI_MOUSE)
+	if(id == 0 && gMouseCount == 1)
 	{
-		pDIMouse->Acquire();
-		return;
-	}
-	else
-	{
-		for(DWORD a=0; a<elements; a++) 
+		DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+		DWORD elements = SAMPLE_BUFFER_SIZE;
+
+		HRESULT hr;
+
+		pMouseState->values[Mouse_XDelta] = 0.0f;
+		pMouseState->values[Mouse_YDelta] = 0.0f;
+		pMouseState->values[Mouse_Wheel] = 0.0f;
+		pMouseState->values[Mouse_Wheel2] = 0.0f;
+
+		hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+
+		if(hr != DI_OK)
 		{
-			switch(inputBuffer[a].dwOfs)
+			pDIMouse->Acquire();
+			return;
+		}
+		else
+		{
+			for(DWORD a=0; a<elements; a++) 
 			{
-				case DIMOFS_BUTTON0:
-					pMouseState->buttonState[0] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON1:
-					pMouseState->buttonState[1] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON2:
-					pMouseState->buttonState[2] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON3:
-					pMouseState->buttonState[3] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON4:
-					pMouseState->buttonState[4] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON5:
-					pMouseState->buttonState[5] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON6:
-					pMouseState->buttonState[6] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-				case DIMOFS_BUTTON7:
-					pMouseState->buttonState[7] = inputBuffer[a].dwData ? -1 : 0;
-					break;
-/*
-				case DIMOFS_X:
-					pMouseState->values[Mouse_XPos]  += (float)((int)inputBuffer[a].dwData);
-					pMouseState->values[Mouse_XDelta] = (float)((int)inputBuffer[a].dwData);
-					break;
-				case DIMOFS_Y:
-					pMouseState->values[Mouse_YPos]  += (float)((int)inputBuffer[a].dwData);
-					pMouseState->values[Mouse_YDelta] = (float)((int)inputBuffer[a].dwData);
-					break;
-*/
-				case DIMOFS_Z:
-					pMouseState->values[Mouse_Wheel]  = (float)((int)inputBuffer[a].dwData) / 120.0f;
-					break;
-
-				default:
-					break;
+				switch(inputBuffer[a].dwOfs)
+				{
+					case DIMOFS_BUTTON0:
+						pMouseState->buttonState[0] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON1:
+						pMouseState->buttonState[1] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON2:
+						pMouseState->buttonState[2] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON3:
+						pMouseState->buttonState[3] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON4:
+						pMouseState->buttonState[4] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON5:
+						pMouseState->buttonState[5] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON6:
+						pMouseState->buttonState[6] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_BUTTON7:
+						pMouseState->buttonState[7] = inputBuffer[a].dwData ? -1 : 0;
+						break;
+					case DIMOFS_X:
+						pMouseState->values[Mouse_XPos]  += (float)((int)inputBuffer[a].dwData);
+						pMouseState->values[Mouse_XDelta] = (float)((int)inputBuffer[a].dwData);
+						break;
+					case DIMOFS_Y:
+						pMouseState->values[Mouse_YPos]  += (float)((int)inputBuffer[a].dwData);
+						pMouseState->values[Mouse_YDelta] = (float)((int)inputBuffer[a].dwData);
+						break;
+					case DIMOFS_Z:
+						pMouseState->values[Mouse_Wheel]  = (float)((int)inputBuffer[a].dwData) / 120.0f;
+						break;
+					default:
+						break;
+				}
 			}
 		}
+	}
+	else
+#endif
+	{
+#if defined(ALLOW_RAW_INPUT)
+		if(gDefaults.input.allowMultipleMice)
+		{
+			// read from the raw mouse
+			for(int a=0; a<MAX_RAW_MOUSE_BUTTONS; a++)
+			{
+				pMouseState->buttonState[a] = pRawMice[id].buttonPressed[a] ? -1 : 0;
+			}
 
+			if(id != 0 || !gDefaults.input.mouseZeroIsSystemMouse || !gDefaults.input.systemMouseUseWindowsCursor)
+			{
+				pMouseState->values[Mouse_XPos] = (float)pRawMice[id].x;
+				pMouseState->values[Mouse_YPos] = (float)pRawMice[id].y;
+				pMouseState->values[Mouse_XDelta] = (float)pRawMice[id].xDelta;
+				pMouseState->values[Mouse_YDelta] = (float)pRawMice[id].yDelta;
+			}
+			pMouseState->values[Mouse_Wheel] = (float)pRawMice[id].zDelta;
+
+			// reset the deltas
+			pRawMice[id].xDelta = 0;
+			pRawMice[id].yDelta = 0;
+			pRawMice[id].zDelta = 0;
+		}
+#endif
+	}
+
+#if defined(USE_WINDOWS_MOUSE_COORDS)
+	if(id == 0 && gDefaults.input.mouseZeroIsSystemMouse && gDefaults.input.systemMouseUseWindowsCursor)
+	{
 		// get the mouse position and delta's from the absolute screen position on PC
 		float x, y;
 		GetWindowMousePos(&x, &y);
@@ -643,6 +718,10 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 		pMouseState->values[Mouse_XPos] = x;
 		pMouseState->values[Mouse_YPos] = y;
 	}
+#endif
+
+	// clamp absolute mouse coords to mouse rect
+	//....
 }
 
 const char* Input_GetDeviceName(int source, int sourceID)
@@ -990,3 +1069,307 @@ void LoadGamepadMappings()
 		ini.Release();
 	}
 }
+
+
+/**** Raw Mouse Functions ****/
+#if defined(ALLOW_RAW_INPUT)
+
+int RegisterRawMouse(void)
+{
+	// This function registers to receive the WM_INPUT messages
+	RAWINPUTDEVICE rid[1]; // Register only for mouse messages from wm_input.  
+
+	//register to get wm_input messages
+	rid[0].usUsagePage = 0x01;
+	rid[0].usUsage = 0x02;
+//	rid[0].dwFlags = RIDEV_CAPTUREMOUSE; // this denies the mouse activating other windows
+	rid[0].dwFlags = 0;// RIDEV_NOLEGACY;   // adds HID mouse and also ignores legacy mouse messages
+
+#if 1
+	rid[0].dwFlags |= RIDEV_INPUTSINK;
+	rid[0].hwndTarget = apphWnd;
+#else
+	rid[0].hwndTarget = NULL;
+#endif
+
+	// Register to receive the WM_INPUT message for any change in mouse (buttons, wheel, and movement will all generate the same message)
+	DBGASSERT(_RRID(rid, sizeof(rid)/sizeof(rid[0]), sizeof(rid[0])), "Error: RegisterRawInputDevices() failed");
+
+	return 0;
+}
+
+bool IsRDPMouse(const char *pName)
+{
+	return !strncmp(pName, "\\??\\Root#RDP_MOU#0000#", 22);
+}
+
+int InitRawMouse(bool _includeRDPMouse)
+{
+	// "0" to exclude, "1" to include
+
+	int nInputDevices, i, j;
+	RAWINPUTDEVICELIST *pRawInputDeviceList;
+
+	int currentmouse = 0;
+	int nSize;
+	char pName[256];
+
+	// Return 0 if rawinput is not available
+	HMODULE user32 = LoadLibrary("user32.dll");
+	if (!user32)
+	{
+		LOGD("Cant open user32.dll");
+		return 1;
+	}
+
+	_RRID = (pRegisterRawInputDevices)GetProcAddress(user32,"RegisterRawInputDevices");
+	if (!_RRID)
+	{
+		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		return 1;
+	}
+
+	_GRIDL = (pGetRawInputDeviceList)GetProcAddress(user32,"GetRawInputDeviceList");
+	if (!_GRIDL)
+	{
+		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		return 1;
+	}
+
+	_GRIDIA = (pGetRawInputDeviceInfoA)GetProcAddress(user32,"GetRawInputDeviceInfoA");
+	if (!_GRIDIA)
+	{
+		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		return 1;
+	}
+
+	_GRID = (pGetRawInputData)GetProcAddress(user32,"GetRawInputData");
+	if (!_GRID)
+	{
+		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		return 1;
+	}
+
+	rawMouseCount = 0;
+	includeRDPMouse = _includeRDPMouse;
+
+	// 1st call to GetRawInputDeviceList: Pass NULL to get the number of devices.
+	if(_GRIDL(NULL, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) != 0)
+	{
+		DBGASSERT(false, "Error: Unable to count raw input devices.");
+		return 1;
+	}
+
+	// Allocate the array to hold the DeviceList
+	pRawInputDeviceList = (RAWINPUTDEVICELIST*)malloc(sizeof(RAWINPUTDEVICELIST) * nInputDevices);
+
+	// 2nd call to GetRawInputDeviceList: Pass the pointer to our DeviceList and GetRawInputDeviceList() will fill the array
+	if(_GRIDL(pRawInputDeviceList, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) == -1)
+	{
+		DBGASSERT(false, "Error: Unable to get raw input device list.");
+		return 1;
+	}
+
+	// Loop through all devices and count the mice
+	for(i = 0; i < nInputDevices; i++)
+	{
+		if(pRawInputDeviceList[i].dwType == RIM_TYPEMOUSE)
+		{
+			nSize = 256;
+			if((int)_GRIDIA(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, pName, &nSize) < 0)
+			{
+				DBGASSERT(false, "Error: Unable to get raw input device name.");
+				return 1;
+			} 
+
+			// Count this mouse for allocation if it's not an RDP mouse or if we want to include the rdp mouse
+			if(includeRDPMouse || !IsRDPMouse(pName))
+			{
+				rawMouseCount++;
+			}
+		}
+	}
+
+	if(rawMouseCount < 2)
+	{
+		// we only found 1 mouse, so we will use DirectInput instead (Its probably more stable) ;)
+		free(pRawInputDeviceList);
+		return 0;
+	}
+
+	// add system mouse is requested
+	if(gDefaults.input.mouseZeroIsSystemMouse)
+	{
+		++rawMouseCount;
+		++currentmouse;
+	}
+
+	// Allocate the array for the raw mice
+	pRawMice = (RawMouse*)malloc(sizeof(RawMouse) * rawMouseCount);
+	ZeroMemory(pRawMice, sizeof(RawMouse) * rawMouseCount);
+
+	// Loop through all devices and set the device handles and initialize the mouse values
+	for(i = 0; i < nInputDevices; i++)
+	{
+		if(pRawInputDeviceList[i].dwType == RIM_TYPEMOUSE)
+		{
+			nSize = 256;
+			if((int)_GRIDIA(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, pName, &nSize) < 0)
+			{
+				DBGASSERT(false, "Error: Unable to get raw input device name.");
+				return 1;
+			} 
+
+			// Add this mouse to the array if it's not an RDPMouse or if we wish to include the RDP mouse
+			if(includeRDPMouse || !IsRDPMouse(pName))
+			{
+				pRawMice[currentmouse].deviceHandle = pRawInputDeviceList[i].hDevice;
+				currentmouse++;
+			}
+		}
+	}
+
+	// free the RAWINPUTDEVICELIST
+	free(pRawInputDeviceList);
+
+	for(i = 0; i < rawMouseCount; i++)
+	{
+		for(j = 0; j < MAX_RAW_MOUSE_BUTTONS; j++)
+		{
+			// Create the name for this button
+			strcpy(pRawMice[i].buttonNames[j], STR("Button %i", j));
+		}
+	}
+
+	// finally, register to recieve raw input WM_INPUT messages
+	DBGASSERT(RegisterRawMouse() == 0, "Error: Unable to register raw input.");
+
+	return 0;  
+}
+
+int ReadRawInput(RAWINPUT *pRaw)
+{
+	// should be static when I get around to it
+	int i;
+
+	for(i = 0 ; i < rawMouseCount; i++)
+	{
+		if(pRawMice[i].deviceHandle == pRaw->header.hDevice)
+		{
+			if(pRaw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)			pRawMice[i].isAbsolute = 1;
+			else														pRawMice[i].isAbsolute = 0;
+//			else if (pRaw->data.mouse.usFlags & MOUSE_MOVE_RELATIVE)	pRawMice[i].isAbsolute = 0;
+			if(pRaw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)		pRawMice[i].isVirtualDesktop = 1;
+			else														pRawMice[i].isVirtualDesktop = 0;
+
+			// Update the values for the specified mouse
+			if(pRawMice[i].isAbsolute)
+			{
+				pRawMice[i].xDelta = pRaw->data.mouse.lLastX - pRawMice[i].x;
+				pRawMice[i].yDelta = pRaw->data.mouse.lLastY - pRawMice[i].y;
+				pRawMice[i].x = pRaw->data.mouse.lLastX;
+				pRawMice[i].y = pRaw->data.mouse.lLastY;
+			}
+			else
+			{
+				pRawMice[i].xDelta = pRaw->data.mouse.lLastX;
+				pRawMice[i].yDelta = pRaw->data.mouse.lLastY;
+				pRawMice[i].x += pRaw->data.mouse.lLastX;
+				pRawMice[i].y += pRaw->data.mouse.lLastY;
+			}
+
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) pRawMice[i].buttonPressed[0] = 1;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP)   pRawMice[i].buttonPressed[0] = 0;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) pRawMice[i].buttonPressed[1] = 1;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP)   pRawMice[i].buttonPressed[1] = 0;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) pRawMice[i].buttonPressed[2] = 1;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP)   pRawMice[i].buttonPressed[2] = 0;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) pRawMice[i].buttonPressed[3] = 1;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP)   pRawMice[i].buttonPressed[3] = 0;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) pRawMice[i].buttonPressed[4] = 1;
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP)   pRawMice[i].buttonPressed[4] = 0;
+
+			if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
+			{
+				// If the current message has a mouse_wheel message
+				if ((SHORT)pRaw->data.mouse.usButtonData > 0)
+				{
+					pRawMice[i].zDelta++;
+				}
+				if ((SHORT)pRaw->data.mouse.usButtonData < 0)
+				{
+					pRawMice[i].zDelta--;
+				}
+			}
+
+			// Feed the values for every mouse into the system mouse
+			if(gDefaults.input.mouseZeroIsSystemMouse)
+			{
+				if(pRawMice[i].isAbsolute)
+				{
+					pRawMice[RAW_SYS_MOUSE].xDelta = pRaw->data.mouse.lLastX - pRawMice[i].x;
+					pRawMice[RAW_SYS_MOUSE].yDelta = pRaw->data.mouse.lLastY - pRawMice[i].y;
+					pRawMice[RAW_SYS_MOUSE].x = pRaw->data.mouse.lLastX;
+					pRawMice[RAW_SYS_MOUSE].y = pRaw->data.mouse.lLastY;
+				}
+				else
+				{ // relative
+					pRawMice[RAW_SYS_MOUSE].xDelta = pRaw->data.mouse.lLastX;
+					pRawMice[RAW_SYS_MOUSE].yDelta = pRaw->data.mouse.lLastY;
+					pRawMice[RAW_SYS_MOUSE].x += pRaw->data.mouse.lLastX;
+					pRawMice[RAW_SYS_MOUSE].y += pRaw->data.mouse.lLastY;
+				}
+
+				// This is innacurate:  If 2 mice have their buttons down and I lift up on one, this will register the
+				//   system mouse as being "up".  I checked out on my windows desktop, and Microsoft was just as
+				//   lazy as I'm going to be.  Drag an icon with the 2 left mouse buttons held down & let go of one.
+
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_DOWN) pRawMice[0].buttonPressed[0] = 1;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_1_UP) pRawMice[0].buttonPressed[0] = 0;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_DOWN) pRawMice[0].buttonPressed[1] = 1;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_2_UP) pRawMice[0].buttonPressed[1] = 0;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_DOWN) pRawMice[0].buttonPressed[2] = 1;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_3_UP) pRawMice[0].buttonPressed[2] = 0;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) pRawMice[0].buttonPressed[3] = 1;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP) pRawMice[0].buttonPressed[3] = 0;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) pRawMice[0].buttonPressed[4] = 1;
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP) pRawMice[0].buttonPressed[4] = 0;
+
+				// If an absolute mouse is triggered, sys mouse will be considered absolute till the end of time.
+				if(pRaw->data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE)		pRawMice[RAW_SYS_MOUSE].isAbsolute = 1;
+				// Same goes for virtual desktop
+				if(pRaw->data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP)	pRawMice[RAW_SYS_MOUSE].isVirtualDesktop = 1;
+
+				if(pRaw->data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
+				{      // If the current message has a mouse_wheel message
+					if((SHORT)pRaw->data.mouse.usButtonData > 0)
+					{
+						pRawMice[RAW_SYS_MOUSE].zDelta++;
+					}
+					if((SHORT)pRaw->data.mouse.usButtonData < 0)
+					{
+						pRawMice[RAW_SYS_MOUSE].zDelta--;
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int HandleRawMouseMessage(HANDLE hDevice)
+{
+	char pBuffer[sizeof(RAWINPUT)];
+	int size = sizeof(RAWINPUT);
+
+	if(!pRawMice)
+		return 1;
+
+	DBGASSERT(_GRID((HRAWINPUT)hDevice, RID_INPUT, pBuffer, &size, sizeof(RAWINPUTHEADER)) > -1, "Error: Couldn't read RawInput data. RawInput buffer overflow?");
+	ReadRawInput((RAWINPUT*)pBuffer);
+
+	return 0;
+}
+
+#endif

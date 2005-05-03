@@ -42,6 +42,13 @@ struct FujiDefaults
 	{
 		int maxMusicTracks;
 	} sound;
+
+	struct InputDefaults
+	{
+		bool allowMultipleMice;
+		bool mouseZeroIsSystemMouse;
+		bool systemMouseUseWindowsCursor;
+	} input;
 };
 
 extern FujiDefaults gDefaults;

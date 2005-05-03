@@ -24,6 +24,7 @@ Vector3 Input_ReadMousePos(int mouseID = -1);
 Vector3 Input_ReadMouseDelta(int mouseID = -1);
 void	Input_SetMouseMode(int mode);
 void	Input_SetMouseAcceleration(float multiplier);
+void	Input_SetMouseClippingRect(int mouseID, MFRect *pRect);
 
 const char*	Input_EnumerateString(int source, int sourceID, int type, bool includeDevice = false, bool includeDeviceID = false);
 
