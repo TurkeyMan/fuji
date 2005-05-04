@@ -327,9 +327,6 @@
 				RelativePath=".\Include\Matrix.h">
 			</File>
 			<File
-				RelativePath=".\Include\MFGadgets.h">
-			</File>
-			<File
 				RelativePath=".\Include\Model.h">
 			</File>
 			<File
