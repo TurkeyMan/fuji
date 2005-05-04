@@ -10,25 +10,27 @@
 #include "Primitive.h"
 #include "FileSystem.h"
 
-Font debugFont;
+Font *gpDebugFont;
 
 void Font_InitModule()
 {
 	CALLSTACK;
 
-	debugFont.LoadFont("Font/Arial");
+	gpDebugFont = Font_Create("Font/Arial");
 }
 
 void Font_DeinitModule()
 {
 	CALLSTACK;
 
-	debugFont.Release();
+	Font_Destroy(gpDebugFont);
 }
 
-int Font::LoadFont(const char *pFilename)
+Font* Font_Create(const char *pFilename)
 {
 	CALLSTACK;
+
+	Font *pFont = NULL;
 
 	int hFile;
 	char tempbuffer[1024];
@@ -36,28 +38,34 @@ int Font::LoadFont(const char *pFilename)
 	int a;
 	for(a=strlen(pFilename); a>0 && pFilename[a-1] != '\\' && pFilename[a-1] != '/'; a--) {}
 
-	pMaterial = Material_Create(&pFilename[a]);
-
-	strcpy(tempbuffer, pFilename);
-	strcat(tempbuffer, ".dat");
-
 	hFile = File_Open(File_SystemPath(tempbuffer), OF_Read|OF_Binary);
-	DBGASSERT(hFile >= 0, STR("Unable to open charinfo file for font '%s'", pFilename));
+	DBGASSERT(hFile > -1, STR("Unable to open charinfo file for font '%s'", pFilename));
 
-	File_Read(charwidths, 256, hFile);
-	File_Close(hFile);
+	if(hFile > -1)
+	{
+		pFont = (Font*)Heap_Alloc(sizeof(Font));
 
-	return 0;
+		pFont->pMaterial = Material_Create(&pFilename[a]);
+
+		strcpy(tempbuffer, pFilename);
+		strcat(tempbuffer, ".dat");
+
+		File_Read(pFont->charwidths, 256, hFile);
+		File_Close(hFile);
+	}
+
+	return pFont;
 }
 
-void Font::Release()
+void Font_Destroy(Font *pFont)
 {
 	CALLSTACK;
 
-	Material_Destroy(pMaterial);
+	Material_Destroy(pFont->pMaterial);
+	Heap_Free(pFont);
 }
 
-int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert)
 {
 	CALLSTACKc;
 
@@ -67,23 +75,23 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 
 	float x,y,w,h, p, cwidth;
 
-	Material_Use(pMaterial);
+	Material_Use(pFont->pMaterial);
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);
 
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)((uint8)text[i] & 0x0F) * (float)(pMaterial->pTextures[0]->width / 16);
-		y = (float)((uint8)text[i] >> 4) * (float)(pMaterial->pTextures[0]->height / 16);
+		x = (float)((uint8)text[i] & 0x0F) * (float)(pFont->pMaterial->pTextures[0]->width / 16);
+		y = (float)((uint8)text[i] >> 4) * (float)(pFont->pMaterial->pTextures[0]->height / 16);
 
-		w = (float)charwidths[(uint8)text[i]];
-		h = (float)pMaterial->pTextures[0]->height/16.0f;
+		w = (float)pFont->charwidths[(uint8)text[i]];
+		h = (float)pFont->pMaterial->pTextures[0]->height/16.0f;
 
-		x /= (float)pMaterial->pTextures[0]->width;
-		y /= (float)pMaterial->pTextures[0]->height;
-		w /= (float)pMaterial->pTextures[0]->width;
-		h /= (float)pMaterial->pTextures[0]->height;
+		x /= (float)pFont->pMaterial->pTextures[0]->width;
+		y /= (float)pFont->pMaterial->pTextures[0]->height;
+		w /= (float)pFont->pMaterial->pTextures[0]->width;
+		h /= (float)pFont->pMaterial->pTextures[0]->height;
 
 		p = w/h;
 		cwidth = height*p;
@@ -110,17 +118,17 @@ int Font::DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 c
 	return 0;
 }
 
-int Font::DrawText(float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert)
 {
-	return DrawText(pos_x, pos_y, 0, height, colour, text, invert);
+	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, text, invert);
 }
 
-int Font::DrawText(const Vector3 &pos, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *text, bool invert)
 {
-	return DrawText(pos.x, pos.y, pos.z, height, colour, text, invert);
+	return Font_DrawText(pFont, pos.x, pos.y, pos.z, height, colour, text, invert);
 }
 
-int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -131,10 +139,10 @@ int Font::DrawTextf(float pos_x, float pos_y, float height, uint32 colour, const
 
 	vsprintf(buffer, format, args);
 
-	return DrawText(pos_x, pos_y, 0, height, colour, buffer);
+	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, buffer);
 }
 
-int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -145,10 +153,10 @@ int Font::DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 
 
 	vsprintf(buffer, format, args);
 
-	return DrawText(pos_x, pos_y, pos_z, height, colour, buffer);
+	return Font_DrawText(pFont, pos_x, pos_y, pos_z, height, colour, buffer);
 }
 
-int Font::DrawTextf(const Vector3 &pos, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -159,5 +167,5 @@ int Font::DrawTextf(const Vector3 &pos, float height, uint32 colour, const char 
 
 	vsprintf(buffer, format, args);
 
-	return DrawText(pos.x, pos.y, pos.z, height, colour, buffer);
+	return Font_DrawText(pFont, pos.x, pos.y, pos.z, height, colour, buffer);
 }

@@ -224,24 +224,24 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 			MFEnd();
 		}
 
-		debugFont.DrawTextf(110, 60, 20, 0xFFFF0000, "Software Failure. Press left mouse button to continue");
-		debugFont.DrawTextf(240, 80, 20, 0xFFFF0000, "Guru Meditation: ");
+		Font_DrawTextf(gpDebugFont, 110, 60, 20, 0xFFFF0000, "Software Failure. Press left mouse button to continue");
+		Font_DrawTextf(gpDebugFont, 240, 80, 20, 0xFFFF0000, "Guru Meditation: ");
 
-		debugFont.DrawTextf(80, 120, 20, 0xFFFF0000, "Assertion Failure:");
-		debugFont.DrawTextf(80, 140, 20, 0xFFFF0000, STR("Failed Condition: %s", pReason));
-		debugFont.DrawTextf(80, 160, 20, 0xFFFF0000, STR("File: %s, Line: %d", pFile, line));
-		debugFont.DrawTextf(80, 190, 20, 0xFFFF0000, STR("Message: %s", pMessage));
+		Font_DrawTextf(gpDebugFont, 80, 120, 20, 0xFFFF0000, "Assertion Failure:");
+		Font_DrawTextf(gpDebugFont, 80, 140, 20, 0xFFFF0000, STR("Failed Condition: %s", pReason));
+		Font_DrawTextf(gpDebugFont, 80, 160, 20, 0xFFFF0000, STR("File: %s, Line: %d", pFile, line));
+		Font_DrawTextf(gpDebugFont, 80, 190, 20, 0xFFFF0000, STR("Message: %s", pMessage));
 
 #if !defined(_RETAIL)
-		debugFont.DrawTextf(80, 230, 20, 0xFFFF0000, "Callstack:");
+		Font_DrawTextf(gpDebugFont, 80, 230, 20, 0xFFFF0000, "Callstack:");
 		float y = 250.0f;
 		for(int a=Callstack.size()-1; a>=0; a--)
 		{
-			debugFont.DrawTextf(100, y, 20, 0xFFFF0000, Callstack[a]);
+			Font_DrawTextf(gpDebugFont, 100, y, 20, 0xFFFF0000, Callstack[a]);
 			y+=20.0f;
 		}
 #else
-		debugFont.DrawTextf(80, 230, 20, 0xFFFF0000, "Callstack not available in _RETAIL builds");
+		Font_DrawTextf(gpDebugFont, 80, 230, 20, 0xFFFF0000, "Callstack not available in _RETAIL builds");
 #endif
 
 		Display_EndFrame();

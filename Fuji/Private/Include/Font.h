@@ -4,22 +4,12 @@
 #include "Material.h"
 #include "Vector3.h"
 
-class Font
+#if defined(DrawText)
+#undef DrawText
+#endif
+
+struct Font
 {
-public:
-	// member functions
-	int LoadFont(const char *filename);
-	void Release();
-
-	int DrawText(float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert = false);
-	int DrawText(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert = false);
-	int DrawText(const Vector3 &pos, float height, uint32 colour, const char *text, bool invert = false);
-
-	int DrawTextf(float pos_x, float pos_y, float height, uint32 colour, const char *format, ...);
-	int DrawTextf(float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...);
-	int DrawTextf(const Vector3 &pos, float height, uint32 colour, const char *format, ...);
-
-	// data members
 	Material *pMaterial;
 	uint8 charwidths[256];
 };
@@ -27,6 +17,18 @@ public:
 void Font_InitModule();
 void Font_DeinitModule();
 
-extern Font debugFont;
+// member functions
+Font* Font_Create(const char *filename);
+void Font_Destroy(Font *pFont);
+
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert = false);
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert = false);
+int Font_DrawText(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *text, bool invert = false);
+
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *format, ...);
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...);
+int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *format, ...);
+
+extern Font *gpDebugFont;
 
 #endif // _FONT_H

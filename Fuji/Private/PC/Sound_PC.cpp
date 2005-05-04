@@ -122,10 +122,10 @@ void Sound_Draw()
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
 		{
-			debugFont.DrawTextf(20.0f, y, 20.0f, 0xFFFFFF00, "Track %d: %s", a, gMusicTracks[a].name);
+			Font_DrawTextf(gpDebugFont, 20.0f, y, 20.0f, 0xFFFFFF00, "Track %d: %s", a, gMusicTracks[a].name);
 			y += 20.0f;
 
-			debugFont.DrawTextf(30.0f, y, 20.0f, 0xFFFFFFFF, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, 0xFFFFFFFF, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
 			y += 20.0f;
 
 			static float bitrate = 0.0f;
@@ -134,10 +134,10 @@ void Sound_Draw()
 			if(br)
 				bitrate = (float)br*0.02f + bitrate * 0.98f;
 
-			debugFont.DrawTextf(30.0f, y, 20.0f, 0xFFFFFFFF, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, 0xFFFFFFFF, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
 			y += 20.0f;
 
-			debugFont.DrawTextf(30.0f, y, 20.0f, 0xFFFFFFFF, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, 0xFFFFFFFF, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
 			y += 25.0f;
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
@@ -172,7 +172,7 @@ void Sound_Draw()
 
 			y += 30.0f;
 
-			debugFont.DrawTextf(30.0f, y, 20.0f, 0xFFFFFFFF, "Buffer:");
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, 0xFFFFFFFF, "Buffer:");
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 

@@ -195,10 +195,10 @@ void System_Draw()
 	if(gDrawSystemInfo)
 	{
 		//FPS Display
-		debugFont.DrawTextf(500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
+		Font_DrawTextf(gpDebugFont, 500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			debugFont.DrawTextf(80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+			Font_DrawTextf(gpDebugFont, 80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		Material_Use(Material_Find("SysLogoSmall"));
 		const float iconSize = 55.0f;

@@ -249,7 +249,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToPackedColour(), name);
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : folderColour.ToPackedColour(), name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -315,7 +315,7 @@ void Menu::Draw()
 	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y+menuDimensions.y, 0);
 	MFEnd();
 
-	debugFont.DrawText(menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
+	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
 	Material_Use(Material_Find("SysLogoSmall"));
 	float logoMargin = 5.0f;
@@ -417,7 +417,7 @@ Vector3 Menu::GetDimensions(float maxWidth)
 // MenuItemStatic
 float MenuItemStatic::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, name);
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -436,7 +436,7 @@ Vector3 MenuItemStatic::GetDimensions(float maxWidth)
 // MenuItemInt
 float MenuItemInt::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %d", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %d", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -474,7 +474,7 @@ Vector3 MenuItemInt::GetDimensions(float maxWidth)
 // MenuItemFloat
 float MenuItemFloat::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -519,7 +519,7 @@ Vector3 MenuItemFloat::GetDimensions(float maxWidth)
 // MenuItemBool
 float MenuItemBool::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, data ? "true" : "false"));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, data ? "true" : "false"));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -545,7 +545,7 @@ Vector3 MenuItemBool::GetDimensions(float maxWidth)
 // MenuItemIntString
 float MenuItemIntString::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, values[data]));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %s", name, values[data]));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -603,7 +603,7 @@ float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 {
 	Vector3 pos = _pos;
 
-	debugFont.DrawText(pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToPackedColour()));
+	Font_DrawText(gpDebugFont, pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: 0x%08X", name, pData->ToPackedColour()));
 
 	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -666,7 +666,7 @@ Vector3 MenuItemColour::GetDimensions(float maxWidth)
 // MenuItemPosition2D
 float MenuItemPosition2D::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	debugFont.DrawText(pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
 	return MENU_FONT_HEIGHT;
 }
 
