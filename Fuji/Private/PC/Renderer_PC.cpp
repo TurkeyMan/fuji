@@ -7,7 +7,6 @@
 #include "Renderer_PC.h"
 
 extern Material *pSetMaterial;
-extern View *pCurrentView;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 

@@ -37,8 +37,8 @@ void MFPrimitive(uint32 type, uint32 hint)
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
-	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)View::GetCurrent()->GetWorldToViewMatrix());
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)View::GetCurrent()->GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
 
 	Renderer_SetRenderer(rendererFlags, 0, RS_MFPrimitive);
 }
@@ -48,10 +48,29 @@ void MFBegin(uint32 vertexCount)
 	beginCount = vertexCount;
 	currentVert = 0;
 
-	current.u = current.v = 0.0f;
-	current.colour = 0xFFFFFFFF;
-	current.normal.x = current.normal.z = 0.0f;
-	current.normal.y = 1.0f;
+	pd3dDevice->SetVertexShader(LitVertex::FVF);
+
+	switch(primType)
+	{
+		case PT_PointList:
+			pd3dDevice->Begin(D3DPT_POINTLIST);
+			break;
+		case PT_LineList:
+			pd3dDevice->Begin(D3DPT_LINELIST);
+			break;
+		case PT_LineStrip:
+			pd3dDevice->Begin(D3DPT_LINESTRIP);
+			break;
+		case PT_TriList:
+			pd3dDevice->Begin(D3DPT_TRIANGLELIST);
+			break;
+		case PT_TriStrip:
+			pd3dDevice->Begin(D3DPT_TRIANGLESTRIP);
+			break;
+		case PT_TriFan:
+			pd3dDevice->Begin(D3DPT_TRIANGLEFAN);
+			break;
+	}
 }
 
 void MFSetMatrix(const Matrix &mat)
@@ -61,49 +80,43 @@ void MFSetMatrix(const Matrix &mat)
 
 void MFSetColour(const Vector4 &colour)
 {
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, colour.x, colour.y, colour.z, colour.w);
 }
 
 void MFSetColour(float r, float g, float b, float a)
 {
-	current.colour = ((uint32)(r*255.0f))<<16 | ((uint32)(g*255.0f))<<8 | (uint32)(b*255.0f) | ((uint32)(a*255.0f))<<24;
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, r, g, b, a);
 }
 
 void MFSetColour(uint32 col)
 {
-	current.colour = col;
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, float((col>>16)&0xFF) / 255.0f, float((col>>8)&0xFF) / 255.0f, float(col&0xFF) / 255.0f, float((col>>24)&0xFF) / 255.0f);
 }
 
 void MFSetTexCoord1(float u, float v)
 {
-	current.u = u;
-	current.v = v;
+	pd3dDevice->SetVertexData2f(D3DVSDE_TEXCOORD0, u, v);
 }
 
 void MFSetNormal(const Vector3 &normal)
 {
-	MFSetNormal(normal.x, normal.y, normal.z);
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, normal.x, normal.y, normal.z, 0.0f);
 }
 
 void MFSetNormal(float x, float y, float z)
 {
-	current.normal.x = x;
-	current.normal.y = y;
-	current.normal.z = z;
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
 }
 
 void MFSetPosition(const Vector3 &pos)
 {
-	MFSetPosition(pos.x, pos.y, pos.z);
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+	++currentVert;
 }
 
 void MFSetPosition(float x, float y, float z)
 {
-	current.pos.x = x;
-	current.pos.y = y;
-	current.pos.z = z;
-
-	primBuffer[currentVert] = current;
+	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
 	++currentVert;
 }
 
@@ -111,27 +124,5 @@ void MFEnd()
 {
 	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
 
-	pd3dDevice->SetVertexShader(LitVertex::FVF);
-
-	switch(primType)
-	{
-		case PT_PointList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_POINTLIST, beginCount, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, beginCount/2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineStrip:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, beginCount-1, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, beginCount/3, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriStrip:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriFan:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
-	}
+	pd3dDevice->End();
 }

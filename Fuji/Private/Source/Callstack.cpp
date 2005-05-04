@@ -162,7 +162,8 @@ void Callstack_DrawProfile()
 {
 	CALLSTACK("Callstack_DrawProfile");
 
-	bool t = View::GetCurrent()->SetOrtho(true);
+	View_Push();
+	View_SetOrtho();
 
 	int a;
 
@@ -231,7 +232,7 @@ void Callstack_DrawProfile()
 			debugFont.DrawTextf(110, y, 0, 15.0f, 0xFFFFFF, "More...");
 	}
 
-	View::GetCurrent()->SetOrtho(t);
+	View_Pop();
 }
 #endif
 

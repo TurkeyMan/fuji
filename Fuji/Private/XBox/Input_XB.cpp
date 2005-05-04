@@ -41,6 +41,33 @@ DEVICE_STATE dsDevices[] =
 };
 #define NUM_DEVICE_STATES   (sizeof(dsDevices)/sizeof(*dsDevices))
 
+const char * const XBoxButtons[] =
+{
+// xbox controller enums
+	"A",
+	"B",
+	"X",
+	"Y",
+	"Black",
+	"White",
+	"Left Trigger",
+	"Right Trigger",
+	"Start",
+	"Back",
+	"Left Thumb",
+	"Right Thumb",
+
+// general controller enums
+	"DPad Up",
+	"DPad Down",
+	"DPad Left",
+	"DPad Right",
+	"Left Analog X-Axis",
+	"Left Analog Y-Axis",
+	"Right Analog X-Axis",
+	"Right Analog Y-Axis"
+};
+
 /*** Functions ***/
 
 void Input_InitModulePlatformSpecific()
@@ -194,23 +221,31 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 #pragma message("XBox mouse?")
 }
 
-char* Input_GetDeviceName(int source, int sourceID)
+const char* Input_GetDeviceName(int source, int sourceID)
 {
-	char *pText = NULL;
+	const char *pText = NULL;
 
 	switch(source)
 	{
 		case IDD_Gamepad:
+			pText = "Gamepad";
 			break;
 		case IDD_Mouse:
+			pText = "Mouse";
 			break;
 		case IDD_Keyboard:
+			pText = "Keyboard";
 			break;
 		default:
 			break;
 	}
 
 	return pText;
+}
+
+const char* Input_GetGamepadButtonName(int sourceID, int type)
+{
+	return XBoxButtons[type];
 }
 
 bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)

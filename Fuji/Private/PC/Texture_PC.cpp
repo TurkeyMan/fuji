@@ -126,8 +126,6 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 			D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 		}
 
-		static int createdCount = 0;
-
 		strcpy(pTexture->name, pName);
 
 		pTexture->width = width;
