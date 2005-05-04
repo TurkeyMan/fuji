@@ -22,7 +22,8 @@ void Sprite::Draw()
 	if(!visible) return;
 
 	// set orthographic mode
-	bool old = View::GetCurrent()->SetOrtho(true);
+	View_Push();
+	View_SetOrtho();
 
 	// generate rotation and translation matrix
 	Matrix world;
@@ -55,7 +56,7 @@ void Sprite::Draw()
 	MFSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
 	MFEnd();
 
-	View::GetCurrent()->SetOrtho(old);
+	View_Pop();
 }
 
 void Sprite::Release()

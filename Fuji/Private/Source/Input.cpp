@@ -191,7 +191,7 @@ void Input_InitModule()
 
 void Input_DeinitModule()
 {
-	Input_InitModulePlatformSpecific();
+	Input_DeinitModulePlatformSpecific();
 }
 
 void Input_Update()

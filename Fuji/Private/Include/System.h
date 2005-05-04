@@ -22,6 +22,11 @@ struct FujiDefaults
 		uint32 otrhoHeight;
 	} display;
 
+	struct ViewDefaults
+	{
+		int maxViewsOnStack;
+	} view;
+
 	struct TextureDefaults
 	{
 		uint32 maxTextures;

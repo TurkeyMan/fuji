@@ -16,8 +16,6 @@ void Shape_DrawQuad(float x, float y, float x2, float y2, uint32 colour, float s
 {
 	CALLSTACK;
 
-	bool t=View::GetCurrent()->SetOrtho(true);
-
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
@@ -42,16 +40,12 @@ void Shape_DrawQuad(float x, float y, float x2, float y2, uint32 colour, float s
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-
-	View::GetCurrent()->SetOrtho(t);
 }
 
 void Shape_DrawQuad(const Vector3& pos, float w, float h, uint32 colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
-	bool t=View::GetCurrent()->SetOrtho(true);
-
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
@@ -76,15 +70,11 @@ void Shape_DrawQuad(const Vector3& pos, float w, float h, uint32 colour, float s
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-
-	View::GetCurrent()->SetOrtho(t);
 }
 
 void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, uint32 colour)
 {
 	CALLSTACK;
-
-	bool t=View::GetCurrent()->SetOrtho(true);
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -102,15 +92,11 @@ void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, uint32 colou
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-
-	View::GetCurrent()->SetOrtho(t);
 }
 
 void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, uint32 colour)
 {
 	CALLSTACK;
-
-	bool t=View::GetCurrent()->SetOrtho(true);
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -128,8 +114,6 @@ void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, uint32 colou
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
-
-	View::GetCurrent()->SetOrtho(t);
 }
 
 // draw a box from a min and a max

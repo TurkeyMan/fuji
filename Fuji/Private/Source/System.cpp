@@ -32,6 +32,11 @@ FujiDefaults gDefaults =
 		480				// otrhoHeight
 	},
 
+	// ViewDefaults
+	{
+		16				// maxViewsOnStack
+	},
+
 	// TextureDefaults
 	{
 		256				// maxTextures
@@ -96,6 +101,7 @@ void System_Init()
 
 	FileSystem_InitModule();
 
+	View_InitModule();
 	Display_InitModule();
 	Input_InitModule();
 
@@ -131,6 +137,7 @@ void System_Deinit()
 
 	Input_DeinitModule();
 	Display_DeinitModule();
+	View_DeinitModule();
 
 	FileSystem_DeinitModule();
 
@@ -177,8 +184,9 @@ void System_Draw()
 	CALLSTACKc;
 
 #if !defined(_RETAIL)
-	View::UseDefault();
-	bool o = View::GetCurrent()->SetOrtho(true);
+	View_Push();
+	View_SetDefault();
+	View_SetOrtho();
 
 	Sound_Draw();
 
@@ -211,7 +219,7 @@ void System_Draw()
 
 	DebugMenu_Draw();
 
-	View::GetCurrent()->SetOrtho(o);
+	View_Pop();
 #endif
 }
 

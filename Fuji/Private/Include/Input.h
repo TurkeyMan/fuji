@@ -1,6 +1,8 @@
 #if !defined(_INPUT_H)
 #define _INPUT_H
 
+#include "View.h"
+
 #define Input_MaxInputID	16
 
 // interface functions

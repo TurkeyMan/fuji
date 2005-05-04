@@ -92,12 +92,13 @@ void DebugMenu_Draw()
 {
 	if(Input_Read(IDD_Gamepad, 0, Button_XB_RTrig)) return;
 
-	bool o = View::GetCurrent()->SetOrtho(true);
+	View_Push();
+	View_SetOrtho();
 
 	if(debugMenuEnabled)
 		pCurrentMenu->Draw();
 
-	View::GetCurrent()->SetOrtho(o);
+	View_Pop();
 }
 
 void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)

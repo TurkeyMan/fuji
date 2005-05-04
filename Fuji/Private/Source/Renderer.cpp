@@ -9,7 +9,6 @@ uint32 renderStates[RS_Max];
 uint32 currentRenderStates[RS_Max];
 
 Material *pSetMaterial;
-View *pCurrentView = NULL;
 uint32 renderSource = NULL;
 uint32 currentRenderFlags = NULL;
 

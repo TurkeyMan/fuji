@@ -122,13 +122,6 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
 
-// a generic rect structure used by many subsystems
-struct MFRect
-{
-	float x, y;
-	float width, height;
-};
-
 // additional includes
 #include <new>
 

@@ -3,43 +3,48 @@
 
 #include "Matrix.h"
 
-class View
+struct MFRect
 {
-public:
-	View();
+	float x, y;
+	float width, height;
+};
 
-	// Static Methods
-	static View* GetCurrent();
-	static void UseDefault();
+void View_InitModule();
+void View_DeinitModule();
 
-	// Satic Members
-	static View currentView;
+void View_Push();
+void View_Pop();
+
+void View_SetDefault();
+
+void View_SetProjection(float fov = 0.0f, float aspectRatio = 0.0f);
+void View_SetOrtho(MFRect *pOrthoRect = NULL);
+bool View_IsOrtho();
+
+void View_SetCameraMatrix(const Matrix &viewMat);
+
+const Matrix& View_GetWorldToViewMatrix();
+const Matrix& View_GetViewToScreenMatrix();
+const Matrix& View_GetWorldToScreenMatrix();
+
+Matrix* View_GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput);
+Matrix* View_GetLocalToView(const Matrix& localToWorld, Matrix *pOutput);
+
+struct View
+{
 	static View defaultView;
+	static MFRect defaultOrthoRect;
 
-	// Methods
-	void Use();
-
-	void SetProjection(float fov);
-	bool SetOrtho(bool enabled, float width = 640.0f, float height = 480.0f);
-
-	void SetCameraMatrix(const Matrix &viewMat);
-
-	inline Matrix *GetWorldToViewMatrix() { return &view; }
-	inline Matrix *GetViewToScreenMatrix() { return &projection; }
-
-	Matrix *GetWorldToScreenMatrix();
-
-	Matrix *GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput);
-	Matrix *GetLocalToView(const Matrix& localToWorld, Matrix *pOutput);
-
-	// Members
 	Matrix projection;
 	Matrix view;
 
 	Matrix viewProj;
 	bool viewProjDirty;
 
-	float FOV;
+	float fov;
+	float aspectRatio;
+
+	MFRect orthoRect;
 	bool isOrtho;
 };
 

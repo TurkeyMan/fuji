@@ -5,115 +5,168 @@
 #include <math.h>
 
 View View::defaultView;
-View View::currentView;
+MFRect View::defaultOrthoRect;
 
-View::View()
+View *gpViewStack = NULL;
+View *pCurrentView = NULL;
+
+void View_InitModule()
 {
-	*this = defaultView;
+	// allocate view stack
+	gpViewStack = (View*)Heap_Alloc(sizeof(View) * gDefaults.view.maxViewsOnStack);
+
+	// set default ortho rect
+	View::defaultOrthoRect.x = 0.0f;
+	View::defaultOrthoRect.y = 0.0f;
+	View::defaultOrthoRect.width = 640.0f;
+	View::defaultOrthoRect.height = 480.0f;
+
+	// initialise default view
+	memset(&View::defaultView, 0, sizeof(View));
+	pCurrentView = &View::defaultView;
+
+	View_SetOrtho(&View::defaultOrthoRect);
+	View_SetProjection((PI*2.0f)*0.16666f, STANDARD_ASPECT);
+	View_SetCameraMatrix(Matrix::identity);
+	View_GetWorldToScreenMatrix();
+
+	pCurrentView = gpViewStack;
+	View_SetDefault();
 }
 
-View* View::GetCurrent()
+void View_DeinitModule()
 {
-	return &currentView;
+	/// free view stack
+	if(gpViewStack)
+	{
+		Heap_Free(gpViewStack);
+		gpViewStack = NULL;
+	}
 }
 
-void View::UseDefault()
+void View_Push()
 {
-	currentView = defaultView;
+	DBGASSERT(pCurrentView - gpViewStack < (int)gDefaults.view.maxViewsOnStack, "Error: Exceeded maximum views on the stack. Increase 'gDefaults.view.maxViewsOnStack'.");
+
+	// push view pointer foreward
+	pCurrentView++;
+	*pCurrentView = pCurrentView[-1];
 }
 
-void View::Use()
+void View_Pop()
 {
-	currentView = *this;
+	DBGASSERT(pCurrentView > gpViewStack, "Error: No views on the stack!");
+
+	pCurrentView--;
 }
 
-void View::SetProjection(float fov)
+
+void View_SetDefault()
+{
+	*pCurrentView = View::defaultView;
+}
+
+void View_SetProjection(float _fov, float _aspectRatio)
 {
 	CALLSTACK;
 
-	FOV = fov;
-	isOrtho = false;
-	viewProjDirty = true;
+	if(_fov)
+	{
+		pCurrentView->fov = _fov;
+	}
+
+	if(_aspectRatio)
+	{
+		pCurrentView->aspectRatio = _aspectRatio;
+	}
+
+	pCurrentView->isOrtho = false;
+	pCurrentView->viewProjDirty = true;
 
 	// construct and apply perspective projection
 	float zn = 0.1f;
 	float zf = 10000.0f;
 
-	float a = fov * 0.5f;
+	float a = pCurrentView->fov * 0.5f;
 
 	float h = MFCos(a) / MFSin(a);
-	float w = h / (display.wide ? WIDE_ASPECT : STANDARD_ASPECT);
+	float w = h / pCurrentView->aspectRatio;
 
-	projection.m[0][0] = w;		projection.m[0][1] = 0.0f;	projection.m[0][2] = 0.0f;				projection.m[0][3] = 0.0f;
-	projection.m[1][0] = 0.0f;	projection.m[1][1] = h;		projection.m[1][2] = 0.0f;				projection.m[1][3] = 0.0f;
-	projection.m[2][0] = 0.0f;	projection.m[2][1] = 0.0f;	projection.m[2][2] = zf/(zf-zn);		projection.m[2][3] = 1.0f;
-	projection.m[3][0] = 0.0f;	projection.m[3][1] = 0.0f;	projection.m[3][2] = -zn*zf/(zf-zn);	projection.m[3][3] = 0.0f;
+	pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
+	pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
+	pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = zf/(zf-zn);		pCurrentView->projection.m[2][3] = 1.0f;
+	pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
 }
 
-bool View::SetOrtho(bool enabled, float width, float height)
+void View_SetOrtho(MFRect *pOrthoRect)
 {
 	CALLSTACK;
 
-	bool t = isOrtho;
-	isOrtho = enabled;
+	pCurrentView->viewProjDirty = true;
+	pCurrentView->isOrtho = true;
 
-	if(enabled)
+	if(pOrthoRect)
 	{
-		float extend = 0.0f;
-		viewProjDirty = true;
-
-		// correct for widescreen
-		if(display.wide) extend = (((width/1.333333333f)*1.77777777778f)-width)/2.0f;
-
-		// construct and apply ortho projection
-		float l = -extend;
-		float r = width + extend;
-		float b = height;
-		float t = 0.0f;
-		float zn = 0.0f;
-		float zf = 1000.0f;
-
-		projection.m[0][0] = 2.0f/(r-l);	projection.m[0][1] = 0.0f;			projection.m[0][2] = 0.0f;			projection.m[0][3] = 0.0f;
-		projection.m[1][0] = 0.0f;			projection.m[1][1] = 2.0f/(t-b);	projection.m[1][2] = 0.0f;			projection.m[1][3] = 0.0f;
-		projection.m[2][0] = 0.0f;			projection.m[2][1] = 0.0f;			projection.m[2][2] = 1.0f/(zf-zn);	projection.m[2][3] = 0.0f;
-		projection.m[3][0] = (l+r)/(l-r);	projection.m[3][1] = (t+b)/(b-t);	projection.m[3][2] = zn/(zn-zf);	projection.m[3][3] = 1.0f;
-	}
-	else
-	{
-		SetProjection(FOV);
+		pCurrentView->orthoRect = *pOrthoRect;
 	}
 
-	return t;
+	// construct and apply ortho projection
+	float l = pCurrentView->orthoRect.x;
+	float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
+	float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
+	float t = pCurrentView->orthoRect.y;
+	float zn = 0.0f;
+	float zf = 1000.0f;
+
+	pCurrentView->projection.m[0][0] = 2.0f/(r-l);	pCurrentView->projection.m[0][1] = 0.0f;		pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
+	pCurrentView->projection.m[1][0] = 0.0f;		pCurrentView->projection.m[1][1] = 2.0f/(t-b);	pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
+	pCurrentView->projection.m[2][0] = 0.0f;		pCurrentView->projection.m[2][1] = 0.0f;		pCurrentView->projection.m[2][2] = 1.0f/(zf-zn);	pCurrentView->projection.m[2][3] = 0.0f;
+	pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
 }
 
-void View::SetCameraMatrix(const Matrix &viewMat)
+bool View_IsOrtho()
 {
-	view = viewMat;
-	viewProjDirty = true;
+	return pCurrentView->isOrtho;
 }
 
-Matrix* View::GetWorldToScreenMatrix()
+void View_SetCameraMatrix(const Matrix &viewMat)
 {
-	if(viewProjDirty)
+	pCurrentView->view = viewMat;
+	pCurrentView->viewProjDirty = true;
+}
+
+const Matrix& View_GetWorldToViewMatrix()
+{
+	return pCurrentView->view;
+}
+
+const Matrix& View_GetViewToScreenMatrix()
+{
+	return pCurrentView->projection;
+}
+
+const Matrix& View_GetWorldToScreenMatrix()
+{
+	if(pCurrentView->viewProjDirty)
 	{
-		viewProj.Multiply(view, projection);
-		viewProjDirty = false;
+		pCurrentView->viewProj.Multiply(pCurrentView->view, pCurrentView->projection);
+		pCurrentView->viewProjDirty = false;
 	}
 
-	return &viewProj;
+	return pCurrentView->viewProj;
 }
 
-Matrix *View::GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput)
+Matrix* View_GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, view);
-	pOutput->Multiply(projection);
+	pOutput->Multiply(localToWorld, pCurrentView->view);
+	pOutput->Multiply(pCurrentView->projection);
 
 	return pOutput;
 }
 
-Matrix *View::GetLocalToView(const Matrix& localToWorld, Matrix *pOutput)
+Matrix* View_GetLocalToView(const Matrix& localToWorld, Matrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, view);
+	pOutput->Multiply(localToWorld, pCurrentView->view);
 
 	return pOutput;
 }

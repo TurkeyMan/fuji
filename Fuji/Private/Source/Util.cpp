@@ -181,8 +181,8 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 
 		Display_BeginFrame();
 
-		View::UseDefault();
-		View::GetCurrent()->SetOrtho(true);
+		View_SetDefault();
+		View_SetOrtho();
 
 		// Set some renderstates
 #if defined(_WINDOWS) || defined(_XBOX)		
