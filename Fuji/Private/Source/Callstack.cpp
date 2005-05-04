@@ -223,13 +223,13 @@ void Callstack_DrawProfile()
 			uint32 ms = (uint32)(i->second.total / (RDTSC()/1000000));
 			double percent = (double)i->second.total/((double)GetTSCFrequency() * 0.01/60.0);
 
-			debugFont.DrawTextf(100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first);
-			debugFont.DrawTextf(300, y, 0, 15.0f, 0xFFFFFFFF, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);
+			Font_DrawTextf(gpDebugFont, 100, y, 0, 15.0f, 0xFFFFFFFF, "%s()", i->first);
+			Font_DrawTextf(gpDebugFont, 300, y, 0, 15.0f, 0xFFFFFFFF, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);
 			y += 15.0f;
 		}
 
 		if(a == 19)
-			debugFont.DrawTextf(110, y, 0, 15.0f, 0xFFFFFF, "More...");
+			Font_DrawTextf(gpDebugFont, 110, y, 0, 15.0f, 0xFFFFFF, "More...");
 	}
 
 	View_Pop();
