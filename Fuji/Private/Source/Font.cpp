@@ -32,13 +32,10 @@ Font* Font_Create(const char *pFilename)
 
 	Font *pFont = NULL;
 
-	int hFile;
-	char tempbuffer[1024];
-
 	int a;
 	for(a=strlen(pFilename); a>0 && pFilename[a-1] != '\\' && pFilename[a-1] != '/'; a--) {}
 
-	hFile = File_Open(File_SystemPath(STR("%s.dat", pFilename)), OF_Read|OF_Binary);
+	int hFile = File_Open(File_SystemPath(STR("%s.dat", pFilename)), OF_Read|OF_Binary);
 	DBGASSERT(hFile > -1, STR("Unable to open charinfo file for font '%s'", pFilename));
 
 	if(hFile > -1)

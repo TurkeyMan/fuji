@@ -21,10 +21,6 @@ void Sprite::Draw()
 	// if not visible dont draw anything and just return
 	if(!visible) return;
 
-	// set orthographic mode
-	View_Push();
-	View_SetOrtho();
-
 	// generate rotation and translation matrix
 	Matrix world;
 
@@ -55,8 +51,6 @@ void Sprite::Draw()
 	MFSetTexCoord1(1,1);
 	MFSetPosition((1.0f-pivot.x) * scale.x, (1.0f-pivot.y) * scale.y, 0);
 	MFEnd();
-
-	View_Pop();
 }
 
 void Sprite::Release()
