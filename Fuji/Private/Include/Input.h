@@ -260,7 +260,7 @@ enum KeyboardType
 	Key_RControl,
 	Key_RAlt,
 	Key_RShift,
-	Key_Capital,
+	Key_CapsLock,
 
 	Key_NumLock,
 	Key_Divide,
