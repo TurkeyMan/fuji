@@ -17,7 +17,7 @@ void *malloc_aligned(size_t bytes)
 	new_buffer = (char*)malloc(bytes+16);
 
 	// make allocation 16 byte alligned
-	char offset = 16 - ((uint32)new_buffer & 0xF);
+	char offset = 16 - (char)((uint32)new_buffer & 0xF);
 	new_buffer += offset;
 	new_buffer[-1] = offset;
 
@@ -85,9 +85,8 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	size = ALIGN16(size);
 
 	// calculate the offset of the start of the heap memory
-	uint32 heapStart;
-
-	Heap *pHeap;
+	uint32 heapStart = 0;
+	Heap *pHeap = NULL;
 
 	switch(type)
 	{
