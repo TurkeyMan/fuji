@@ -3,8 +3,6 @@
 
 #pragma warning(disable:4201)
 
-#include "Common.h"
-
 class Matrix;
 class Vector4;
 
