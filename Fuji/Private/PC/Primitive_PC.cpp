@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Display.h"
+#include "Display_Internal.h"
 #include "View.h"
 #include "Vector3.h"
 #include "Vector4.h"

@@ -1,13 +1,13 @@
 #include "Common.h"
-#include "Display.h"
-#include "View.h"
+#include "Display_Internal.h"
+#include "Texture_Internal.h"
+#include "Material_Internal.h"
+#include "View_Internal.h"
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix.h"
 #include "Primitive.h"
-#include "Texture.h"
 #include "Renderer.h"
-#include "Material.h"
 
 LitVertex primBuffer[1024];
 LitVertex current;

@@ -1,10 +1,11 @@
 #include <stdio.h>
 
 #include "Common.h"
+#include "System_Internal.h"
 #include "Util.h"
 #include "Vector3.h"
 #if !defined(_FUJI_UTIL)
-#include "Display.h"
+#include "Display_Internal.h"
 #include "Primitive.h"
 #include "Font.h"
 #include "View.h"

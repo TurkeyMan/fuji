@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Display.h"
+#include "Display_Internal.h"
 #include "DebugMenu.h"
 #include "View.h"
 

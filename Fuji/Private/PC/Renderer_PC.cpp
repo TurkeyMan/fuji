@@ -1,5 +1,7 @@
 #include "Common.h"
-#include "Material.h"
+#include "Texture_Internal.h"
+#include "Material_Internal.h"
+#include "Display_Internal.h"
 #include "Model.h"
 #include "Animation.h"
 #include "View.h"

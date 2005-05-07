@@ -1,18 +1,9 @@
 #if !defined(_MATERIAL_H)
 #define _MATERIAL_H
 
-#include "Vector4.h"
-#include "Texture.h"
 #include "IniFile.h"
-#include "Matrix.h"
 
 struct Material;
-
-// material functions
-void Material_InitModule();
-void Material_DeinitModule();
-
-void Material_Update();
 
 // interface functions
 int			Material_AddDefinitionsFile(const char *pName, const char *pFilename);
@@ -71,48 +62,6 @@ enum MaterialFlags
 	MF_DetailTexture		= 0x08000000,	// Dt
 	MF_LightMap				= 0x10000000,	// Lm
 	MF_CubeEnvMap			= 0x20000000,	// Ec
-};
-
-struct Material
-{
-	// Members
-	Vector4	diffuse;
-	Vector4	ambient;
-	Vector4	specular;
-	Vector4	illum;
-	float	specularPow;
-
-	uint32	maskColour;
-
-	uint32	materialType;
-
-	Texture *pTextures[8];
-	uint32	textureCount;
-
-	Matrix	textureMatrix;
-	int uFrames, vFrames, curFrame;
-	float frameTime, curTime;
-
-	char name[32];
-
-	uint16	opaque	: 1;
-	uint16	flags	: 15;
-
-	uint16	refCount;
-
-	uint32 diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
-	uint32 diffuseMap2Index		: 3;
-	uint32 lightMapIndex		: 3;
-	uint32 specularMapIndex		: 3;
-	uint32 bumpMapIndex			: 3;
-	uint32 detailMapIndex		: 3;
-	uint32 envMapIndex			: 3;
-	uint32 reflectionMapIndex	: 3;
-	uint32 normalMapIndex		: 3;
-	// glossMap?
-
-	uint32 cubeMapIndex			: 3; // some what if's
-	uint32 displacementMapIndex	: 3;
 };
 
 #endif

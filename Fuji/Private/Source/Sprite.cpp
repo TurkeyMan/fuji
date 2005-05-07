@@ -1,5 +1,6 @@
 #include "Common.h"
-#include "Texture.h"
+#include "Texture_Internal.h"
+#include "Material_Internal.h"
 #include "Display.h"
 #include "View.h"
 #include "Sprite.h"

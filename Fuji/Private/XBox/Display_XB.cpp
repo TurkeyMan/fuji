@@ -1,7 +1,7 @@
 #include "Common.h"
-#include "Display.h"
-#include "DebugMenu.h"
-#include "View.h"
+#include "Display_Internal.h"
+#include "DebugMenu_Internal.h"
+#include "View_Internal.h"
 
 IDirect3D8 *d3d8;
 IDirect3DDevice8 *pd3dDevice;

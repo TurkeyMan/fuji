@@ -1,24 +1,20 @@
 #if !defined(_DEBUGMENU_H)
 #define _DEBUGMENU_H
 
-#include "Vector3.h"
-#include "Vector4.h"
-
+// menu configuration
 #define MENU_MAX_MENUS 32
 #define MENU_MAX_CHILDREN 32
 
-#define MENU_FONT_HEIGHT 20.0f
-
-#define MENU_X		100.0f
-#define MENU_Y		100.0f
-#define MENU_WIDTH	640.0f-MENU_X*2.0f
-#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
+#include "Vector3.h"
+#include "Vector4.h"
 
 class MenuObject;
+class Menu;
 
-// (menu_item*, user_data*)
+//                           (menu_item*, user_data*)
 typedef void (*DebugCallback)(MenuObject*, void*);
 
+// menu type enums
 enum MenuType
 {
 	MenuType_Menu,
@@ -32,8 +28,20 @@ enum MenuType
 	MenuType_TextureBrowser
 };
 
-class Menu;
+// interface functions
+bool DebugMenu_IsEnabled();
+Menu* DebugMenu_GetRootMenu();
 
+void DebugMenu_AddItem(const char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddMenu(const char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
+void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback = NULL, void *userData = NULL);
+bool DebugMenu_DestroyMenu(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
+void DebugMenu_DestroyMenuTree(Menu *pMenu);
+
+Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
+
+// menu items
 class MenuObject
 {
 public:
@@ -192,25 +200,5 @@ public:
 	static Vector3 menuPosition, menuDimensions;
 	static Vector4 colour, folderColour;
 };
-
-extern Menu rootMenu;
-extern MenuObject *pCurrentMenu;
-
-void DebugMenu_InitModule();
-void DebugMenu_DeinitModule();
-
-bool DebugMenu_IsEnabled();
-
-void DebugMenu_Update();
-void DebugMenu_Draw();
-
-void DebugMenu_AddItem(const char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddMenu(const char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback = NULL, void *userData = NULL);
-bool DebugMenu_DestroyMenu(const char *name, Menu *pSearchMenu = &rootMenu);
-void DebugMenu_DestroyMenuTree(Menu *pMenu);
-
-Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = &rootMenu);
 
 #endif

@@ -1,6 +1,6 @@
 #include "Common.h"
-#include "Display.h"
-#include "View.h"
+#include "Display_Internal.h"
+#include "View_Internal.h"
 
 #include <math.h>
 

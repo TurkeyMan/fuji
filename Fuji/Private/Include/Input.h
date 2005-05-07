@@ -3,13 +3,7 @@
 
 #include "View.h"
 
-#define Input_MaxInputID	16
-
 // interface functions
-void	Input_InitModule();
-void	Input_DeinitModule();
-void	Input_Update();
-
 bool	Input_IsAvailable(int source, int sourceID);
 bool	Input_IsConnected(int source, int sourceID);
 bool	Input_IsReady(int source, int sourceID);
@@ -314,36 +308,6 @@ enum KeyboardType
 
 	Key_Max,
 	Key_ForceInt	= 0x7FFFFFFF
-};
-
-enum KeyGamepadMapping
-{
-	Mapping_Cross		= Key_D,
-	Mapping_Circle		= Key_F,
-	Mapping_Box			= Key_S,
-	Mapping_Triangle	= Key_E,
-
-	Mapping_R1			= Key_G,
-	Mapping_L1			= Key_A,
-	Mapping_L2			= Key_Q,
-	Mapping_R2			= Key_T,
-
-	Mapping_Start		= Key_Return,
-	Mapping_Select		= Key_RShift,
-
-	Mapping_LThumb		= Key_W,
-	Mapping_RThumb		= Key_R,
-
-// general controller enums
-	Mapping_DUp			= Key_Up,
-	Mapping_DDown		= Key_Down,
-	Mapping_DLeft		= Key_Left,
-	Mapping_DRight		= Key_Right,
-
-//	Mapping_Cross		= Key_Up,			// Axis_LX,
-//	Mapping_Cross		= Key_Up,			// Axis_LY,
-//	Mapping_Cross		= Key_Up,			// Axis_RX,
-//	Mapping_Cross		= Key_Up,			// Axis_RY,
 };
 
 #endif

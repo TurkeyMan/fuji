@@ -1,7 +1,7 @@
 #include "Common.h"
-#include "Display.h"
+#include "Display_Internal.h"
 #include "View.h"
-#include "DebugMenu.h"
+#include "DebugMenu_Internal.h"
 #include "Input.h"
 #include "Font.h"
 #include "Primitive.h"
@@ -64,6 +64,11 @@ void DebugMenu_DeinitModule()
 {
 	// destroy all menu's
 	DebugMenu_DestroyMenuTree(&rootMenu);
+}
+
+Menu* DebugMenu_GetRootMenu()
+{
+	return &rootMenu;
 }
 
 bool DebugMenu_IsEnabled()

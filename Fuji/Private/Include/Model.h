@@ -35,7 +35,7 @@ enum VertexFormat
 class MeshChunk;
 class ModelData;
 
-class Model : public Renderable
+class Model
 {
 public:
 	static Model* Create(char *pFilename);
@@ -49,7 +49,7 @@ public:
 	Animation *pAnimation;
 };
 
-class MeshChunk : public Renderable
+class MeshChunk
 {
 public:
 	virtual void Draw(Matrix *pLocalToWorld = NULL);

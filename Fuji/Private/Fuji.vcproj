@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,13 +26,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -96,8 +96,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -111,14 +111,14 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
@@ -130,7 +130,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -181,7 +181,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_XB|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)Lib/libFuji_$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
@@ -213,15 +213,15 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_XB|Xbox"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="_DEBUG;_XBOX;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -229,7 +229,7 @@
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -239,7 +239,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -250,6 +250,7 @@
 		</Configuration>
 		<Configuration
 			Name="Profile_XB|Win32"
+			OutputDirectory="$(SolutionDir)Lib/libFuji_$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
@@ -281,8 +282,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile_XB|Xbox"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -290,7 +291,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;PROFILE;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -298,7 +299,7 @@
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -308,7 +309,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -319,6 +320,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_XB|Win32"
+			OutputDirectory="$(SolutionDir)Lib/libFuji_$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
@@ -350,8 +352,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_XB|Xbox"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -359,7 +361,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -367,7 +369,7 @@
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -377,7 +379,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -388,8 +390,8 @@
 		</Configuration>
 		<Configuration
 			Name="Retail|Win32"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -403,14 +405,14 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
@@ -421,7 +423,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -473,7 +475,7 @@
 		</Configuration>
 		<Configuration
 			Name="Retail_XB|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)Lib/libFuji_$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1">
 			<Tool
@@ -505,8 +507,8 @@
 		</Configuration>
 		<Configuration
 			Name="Retail_XB|Xbox"
-			OutputDirectory="$(ProjectDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)Lib"
+			IntermediateDirectory="Build/$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -514,7 +516,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\XBox\;\Projects\Fuji\XBox\vorbis\include\"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -522,7 +524,7 @@
 				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
-				PrecompiledHeaderFile="$(OutDir)/$(ProjectName).pch"
+				PrecompiledHeaderFile="$(IntDir)/$(ProjectName).pch"
 				AssemblerListingLocation="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="FALSE"
@@ -532,7 +534,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalDependencies="vorbisfile_static.lib ogg_static.lib"
-				OutputFile="$(OutDir)/$(ProjectName).lib"
+				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\XBox\vorbis\lib\"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -570,7 +572,13 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\DebugMenu_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\Display.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Display_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\FileSystem.cpp">
@@ -595,6 +603,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\Material.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Material_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Matrix.cpp">
@@ -627,6 +638,9 @@
 				RelativePath=".\Source\System.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\System_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\Texture.cpp">
 				<FileConfiguration
 					Name="Debug_XB|Xbox">
@@ -648,6 +662,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\Texture_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\Timer.cpp">
 			</File>
 			<File
@@ -658,6 +675,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\View.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\View_Internal.h">
 			</File>
 		</Filter>
 		<Filter

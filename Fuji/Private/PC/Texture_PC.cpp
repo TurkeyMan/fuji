@@ -3,8 +3,8 @@
 /**** Includes ****/
 
 #include "Common.h"
-#include "Texture.h"
-#include "Display.h"
+#include "Texture_Internal.h"
+#include "Display_Internal.h"
 #include "Filesystem.h"
 
 /**** Globals ****/
@@ -159,10 +159,4 @@ int Texture_Destroy(Texture *pTexture)
 	}
 
 	return pTexture->refCount;
-}
-
-// delete me!!
-void Texture_UseNone()
-{
-	pd3dDevice->SetTexture(0, NULL);
 }

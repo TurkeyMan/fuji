@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "System.h"
+#include "System_Internal.h"
 
 void main()
 {

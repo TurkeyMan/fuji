@@ -2,8 +2,8 @@
 #define WM_INPUT 0x00FF
 
 #include "Common.h"
-#include "Display.h"
-#include "DebugMenu.h"
+#include "Display_Internal.h"
+#include "DebugMenu_Internal.h"
 #include "Input_PC.h"
 
 #include <stdio.h>

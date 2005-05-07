@@ -4,8 +4,8 @@
 
 #include "Common.h"
 #include "Display.h"
-#include "Texture.h"
-#include "Material.h"
+#include "Texture_Internal.h"
+#include "Material_Internal.h"
 #include "FileSystem.h"
 #include "IniFile.h"
 

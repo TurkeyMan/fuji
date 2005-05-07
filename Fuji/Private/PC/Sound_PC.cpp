@@ -4,6 +4,7 @@
 #include "PtrList.h"
 #include "Font.h"
 #include "Primitive.h"
+#include "DebugMenu_Internal.h"
 
 #include <dsound.h>
 #include <vorbis/vorbisfile.h>

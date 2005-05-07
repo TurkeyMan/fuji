@@ -71,32 +71,13 @@ extern float gSystemTimeDelta;
 #define GetFPS() gSystemTimer.GetFPS()
 #define TIMEDELTA gSystemTimeDelta
 
-int System_GameLoop();
+extern uint32 gFrameCount;
 
-void System_UpdateTimeDelta();
-
-void System_Init();
-void System_Update();
-void System_PostUpdate();
-void System_Draw();
-void System_Deinit();
-
+// these MUST be implemented by the game
 void Game_InitSystem();
 void Game_Init();
 void Game_Update();
 void Game_Draw();
 void Game_Deinit();
-
-#if defined(_WINDOWS) || defined(_DC)
-	void DoMessageLoop();
-#elif defined(_LINUX)
-	void CheckEvents();
-#endif
-
-#if defined(_LINUX)
-	void System_MessageBox(char *title, char *message);
-#endif
-
-extern uint32 gFrameCount;
 
 #endif // _SYSTEM_H

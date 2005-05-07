@@ -3,7 +3,7 @@
 
 #include "Display.h"
 
-class ParticleSystem : public Renderable
+class ParticleSystem
 {
 
 };

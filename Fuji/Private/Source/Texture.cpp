@@ -1,6 +1,6 @@
 #include "Common.h"
-#include "Texture.h"
-#include "Display.h"
+#include "Texture_Internal.h"
+#include "Display_Internal.h"
 #include "Input.h"
 #include "Font.h"
 #include "Primitive.h"
