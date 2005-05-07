@@ -551,9 +551,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\Source\Animation.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\BoundingVolume.cpp">
 			</File>
 			<File
@@ -611,22 +608,10 @@
 				RelativePath=".\Source\Matrix.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Model.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\ParticleSystem.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\Prop.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Renderer.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\SceneGraph.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Shape.cpp">
@@ -684,9 +669,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\Animation.h">
-			</File>
-			<File
 				RelativePath=".\Include\Array.h">
 			</File>
 			<File
@@ -735,25 +717,13 @@
 				RelativePath=".\Include\Matrix.h">
 			</File>
 			<File
-				RelativePath=".\Include\Model.h">
-			</File>
-			<File
-				RelativePath=".\Include\ParticleSystem.h">
-			</File>
-			<File
 				RelativePath=".\Include\Primitive.h">
-			</File>
-			<File
-				RelativePath=".\Include\Prop.h">
 			</File>
 			<File
 				RelativePath=".\Include\PtrList.h">
 			</File>
 			<File
 				RelativePath=".\Include\Renderer.h">
-			</File>
-			<File
-				RelativePath=".\Include\SceneGraph.h">
 			</File>
 			<File
 				RelativePath=".\Include\Shape.h">

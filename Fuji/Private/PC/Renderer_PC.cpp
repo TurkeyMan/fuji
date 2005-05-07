@@ -2,9 +2,7 @@
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
 #include "Display_Internal.h"
-#include "Model.h"
-#include "Animation.h"
-#include "View.h"
+#include "View_Internal.h"
 
 #include "Renderer_PC.h"
 

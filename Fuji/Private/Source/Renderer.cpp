@@ -1,8 +1,6 @@
 #include "Common.h"
 #include "Renderer.h"
 #include "Material.h"
-#include "Model.h"
-#include "Animation.h"
 #include "View.h"
 
 uint32 renderStates[RS_Max];
