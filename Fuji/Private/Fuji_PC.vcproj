@@ -278,6 +278,12 @@
 				Name="FileSystem"
 				Filter="">
 				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory.h">
+				</File>
+				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp">
 				</File>
 				<File

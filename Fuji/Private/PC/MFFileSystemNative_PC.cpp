@@ -94,6 +94,8 @@ int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asy
 {
 	CALLSTACK;
 
+	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+
 	uint32 bytesWritten;
 	WriteFile(fileHandle->pFilesysData, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
 	fileHandle->offset += bytesWritten;

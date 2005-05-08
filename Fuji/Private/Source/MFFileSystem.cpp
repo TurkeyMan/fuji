@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
+#include "FileSystem/MFFileSystemMemory.h"
 #include "Ptrlist.h"
 
 PtrListDL<MFFile> gOpenFiles;
@@ -10,6 +11,7 @@ MFFileSystemCallbacks **ppFileSystemList;
 
 // internal filesystems
 FileSystemHandle hNativeFileSystem = -1;
+FileSystemHandle hMemoryFileSystem = -1;
 
 void MFFileSystem_InitModule()
 {
@@ -21,11 +23,13 @@ void MFFileSystem_InitModule()
 
 	// mount filesystems
 	MFFileSystemNative_InitModule();
+	MFFileSystemMemory_InitModule();
 }
 
 void MFFileSystem_DeinitModule()
 {
 	// dismount filesystems
+	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
 
 	Heap_Free(ppFileSystemList);

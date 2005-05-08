@@ -35,6 +35,7 @@ enum MFFileState
 
 // handle to the internal filesystems
 extern FileSystemHandle hNativeFileSystem;
+extern FileSystemHandle hMemoryFileSystem;
 
 
 // interface functions
