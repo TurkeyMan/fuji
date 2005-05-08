@@ -15,19 +15,22 @@ void MFFileSystemNative_Unregister()
 
 }
 
-void* MFFileSystemNative_Mount(void *pMountData, uint32 flags)
+int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 {
+	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
-	return NULL;
+	// find all files and build TOC
+
+	return 0;
 }
 
-MFFile* MFFileSystemNative_Open(const char *pFilename, uint32 openFlags)
+MFFile* MFFileSystemNative_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags)
 {
 	MFOpenDataNative openData;
 
 	openData.cbSize = sizeof(MFOpenDataNative);
 	openData.openFlags = openFlags;
-	openData.pFilename = pFilename;
+	openData.pFilename = pTOCEntry->pName;
 
 	return MFFile_Open(hNativeFileSystem, &openData);
 }

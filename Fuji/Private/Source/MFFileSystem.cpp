@@ -6,6 +6,10 @@
 
 PtrListDL<MFFile> gOpenFiles;
 
+PtrListDL<MFMount> gMounts;
+MFMount **ppMountList;
+int gMountCount = 0;
+
 PtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
 MFFileSystemCallbacks **ppFileSystemList;
 
@@ -16,8 +20,12 @@ FileSystemHandle hMemoryFileSystem = -1;
 void MFFileSystem_InitModule()
 {
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
-	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
 
+	gMounts.Init("FileSystem Mounts", gDefaults.filesys.maxFileSystemMounts);
+	ppMountList = (MFMount**)Heap_Alloc(sizeof(MFMount*) * gDefaults.filesys.maxFileSystemMounts);
+	memset(ppMountList, 0, sizeof(MFMount*) * gDefaults.filesys.maxFileSystemMounts);
+
+	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
 	ppFileSystemList = (MFFileSystemCallbacks**)Heap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 	memset(ppFileSystemList, 0, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 
@@ -35,6 +43,7 @@ void MFFileSystem_DeinitModule()
 	Heap_Free(ppFileSystemList);
 
 	pFileSystemCallbacks.Deinit();
+	gMounts.Deinit();
 	gOpenFiles.Deinit();
 }
 
@@ -205,15 +214,70 @@ long MFFile_StdTell(void* fileHandle)
 // mounted filesystem access
 
 // mount a filesystem
-int MFFileSystem_Mount(FileSystemHandle fileSystem, void *pMountData, uint32 flags)
+int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData, uint32 flags)
 {
 	CALLSTACK;
 
-	void *pMount = ppFileSystemList[fileSystem]->FSMount(pMountData, flags);
+	MFMount *pMount = gMounts.Create();
+	memset(pMount, 0, sizeof(MFMount));
 
-	// do something with the mount data....
+	pMount->mountFlags = flags;
+	pMount->fileSystem = fileSystem;
 
-	return pMount == NULL;
+	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
+
+	if(result < 0)
+	{
+		gMounts.Destroy(pMount);
+		return -1;
+	}
+
+	ppMountList[gMountCount] = pMount;
+	++gMountCount;
+
+	return gMountCount;
+}
+
+MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries)
+{
+	const char *pSearchString = pFilename;
+	int nameLen = strlen(pFilename);
+	int a;
+
+	bool isDirectory = false;
+	for(a=0; a<nameLen; a++)
+	{
+		if(pFilename[a] == '/')
+		{
+			isDirectory = true;
+			pSearchString = STRn(pFilename, a);
+			pFilename += a+1;
+			break;
+		}
+	}
+
+	for(a=0; a<numEntries; a++)
+	{
+		if(!stricmp(pFilename, pEntry[a].pName))
+		{
+			if(isDirectory)
+			{
+				if(pEntry[a].flags & MFTF_Directory)
+				{
+					return MFFileSystem_GetTocEntry(pFilename, (MFTOCEntry*)pEntry[a].pFilesysData, pEntry[a].size);
+				}
+			}
+			else
+			{
+				if(!(pEntry[a].flags & MFTF_Directory))
+				{
+					return &pEntry[a];
+				}
+			}
+		}
+	}
+
+	return NULL;
 }
 
 // open a file from the mounted filesystem stack
@@ -222,9 +286,27 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
     int fileSystem = -1;
 
 	// find file in filesystem stack
+	int mountID = gMountCount-1;
 
-	// the FSOpen callback needs to be changed to recieve a TOCEntry
-	ppFileSystemList[fileSystem]->FSOpen(pFilename, openFlags);
+	MFMount *pMount = NULL;
+	MFTOCEntry *pEntry = NULL;
+
+	// search from the top of the stack downwards...
+	while(mountID >= 0)
+	{
+		pMount = ppMountList[mountID];
+
+		// recurse toc
+		pEntry = MFFileSystem_GetTocEntry(pFilename, pMount->pEntries, pMount->numFiles);
+
+		if(pEntry)
+		{
+			// open the file from a mount
+			return ppFileSystemList[fileSystem]->FSOpen(pMount, pEntry, openFlags);
+		}
+
+		--mountID;
+	}
 
 	return NULL;
 }
@@ -232,22 +314,60 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 // read/write a file to a filesystem
 char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 {
-	return NULL;
+	char *pBuffer = NULL;
+
+	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+
+	if(hFile)
+	{
+		int size = MFFile_GetSize(hFile);
+
+		if(size > 0)
+		{
+			char *pBuffer = (char*)Heap_Alloc(size);
+
+			MFFile_Read(hFile, pBuffer, size);
+		}
+
+		MFFile_Close(hFile);
+	}
+
+	return pBuffer;
 }
 
 void MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
 {
-
+	DBGASSERT(false, "Not Written....");
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
-uint32 MFFileSystem_GetSize(const char *pFilename)
+int MFFileSystem_GetSize(const char *pFilename)
 {
-	return 0;
+	int size = 0;
+
+	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+
+	if(hFile)
+	{
+		size = MFFile_GetSize(hFile);
+		MFFile_Close(hFile);
+	}
+
+	return size;
 }
 
 // returns true if the file can be found within the mounted filesystem stack
 bool MFFileSystem_Exists(const char *pFilename)
 {
-	return false;
+	bool exists = false;
+
+	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+
+	if(hFile)
+	{
+		exists = true;
+		MFFile_Close(hFile);
+	}
+
+	return exists;
 }

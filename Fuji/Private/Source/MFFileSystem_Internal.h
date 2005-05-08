@@ -29,23 +29,37 @@ struct MFFile
 	FileSystemHandle filesystem;	// filesystem that created the file
 	void *pFilesysData;				// extra data related to the file
 
+	AsyncOperationCompletedCallback pAsyncCallback;
+
 #if !defined(_RETAIL)
 	char fileIdentifier[256];
 #endif
 };
 
 // mounted filesystem management
-struct TOCEntry
+
+enum MFTOCFlags
+{
+	MFTF_Directory = 1,
+};
+
+struct MFTOCEntry
 {
 	uint32 flags;
-	const char *pName;
-	const char *pData;
+	char *pName;
+	void *pFilesysData;
 	uint32 size;
 };
 
 struct MFMount
 {
-	TOCEntry *pFirstEntry;
+	FileSystemHandle fileSystem;
+	uint32 mountFlags;
+
+	MFTOCEntry *pEntries;
+	uint32 numFiles;
+
+	void *pFilesysData;
 };
 
 
@@ -57,8 +71,8 @@ struct MFFileSystemCallbacks
 	void (*RegisterFS)();
 	void (*UnregisterFS)();
 
-	void* (*FSMount)(void *, uint32);
-	MFFile* (*FSOpen)(const char*, uint32);
+	int (*FSMount)(MFMount*, MFMountData*);
+	MFFile* (*FSOpen)(MFMount*, MFTOCEntry*, uint32);
 
 	int (*Open)(MFFile*, MFOpenData*);
 	int (*Close)(MFFile*);

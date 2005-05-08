@@ -2,6 +2,7 @@
 #define _MFFILESYSTEM_H
 
 struct MFFile;
+struct MFMount;
 typedef MFFile* MFFileHandle;
 typedef int FileSystemHandle;
 typedef void (*AsyncOperationCompletedCallback)(MFFile *);
@@ -85,11 +86,19 @@ long MFFile_StdTell(void* stream);
 // mount flags
 enum MFMountFlags
 {
-	MFMF_FlattenDirectoryStructure	// flattens the directory heirarchy
+	MFMF_FlattenDirectoryStructure = 1,	// flattens the directory heirarchy
+	MFMF_Recursive = 2					// recurse into subdirectories when building TOC
+};
+
+// open file base data
+struct MFMountData
+{
+	int cbSize;
+	uint32 flags;
 };
 
 // mount a filesystem
-int MFFileSystem_Mount(FileSystemHandle fileSystem, void *pMountData, uint32 flags);
+int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData, uint32 flags);
 
 // open a file from the mounted filesystem stack
 MFFileHandle MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
@@ -99,7 +108,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL);
 void MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size);
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
-uint32 MFFileSystem_GetSize(const char *pFilename);
+int MFFileSystem_GetSize(const char *pFilename);
 
 // returns true if the file can be found within the mounted filesystem stack
 bool MFFileSystem_Exists(const char *pFilename);

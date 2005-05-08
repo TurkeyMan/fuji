@@ -6,6 +6,12 @@ struct MFOpenDataNative : public MFOpenData
 	const char *pFilename;
 };
 
+// open file base data
+struct MFMountDataNative : public MFMountData
+{
+	const char *pPath;
+};
+
 // internal functions
 void MFFileSystemNative_InitModule();
 void MFFileSystemNative_DeinitModule();
@@ -14,8 +20,8 @@ void MFFileSystemNative_DeinitModule();
 void MFFileSystemNative_Register();
 void MFFileSystemNative_Unregister();
 
-void* MFFileSystemNative_Mount(void *pMountData, uint32 flags);
-MFFile* MFFileSystemNative_Open(const char *pFilename, uint32 openFlags);
+int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData);
+MFFile* MFFileSystemNative_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags);
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileNative_Close(MFFile* fileHandle);

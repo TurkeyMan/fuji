@@ -41,6 +41,7 @@ struct FujiDefaults
 	struct FileSystemDefaults
 	{
 		uint32 maxOpenFiles;
+		uint32 maxFileSystemMounts;
 		uint32 maxFileSystems;
 		uint32 maxFileSystemStackSize;
 	} filesys;

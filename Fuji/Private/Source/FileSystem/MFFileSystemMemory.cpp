@@ -44,13 +44,13 @@ void MFFileSystemMemory_Unregister()
 
 }
 
-void* MFFileSystemMemory_Mount(void *pMountData, uint32 flags)
+int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 	// cant mount a memory filesystem
-	return NULL;
+	return -1;
 }
 
-MFFile* MFFileSystemMemory_Open(const char *pFilename, uint32 openFlags)
+MFFile* MFFileSystemMemory_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags)
 {
 	// no mounted memory filesystems
 	return NULL;

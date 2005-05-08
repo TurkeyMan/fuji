@@ -24,8 +24,8 @@ void MFFileSystemMemory_DeinitModule();
 void MFFileSystemMemory_Register();
 void MFFileSystemMemory_Unregister();
 
-void* MFFileSystemMemory_Mount(void *pMountData, uint32 flags);
-MFFile* MFFileSystemMemory_Open(const char *pFilename, uint32 openFlags);
+int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData);
+MFFile* MFFileSystemMemory_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags);
 
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileMemory_Close(MFFile* fileHandle);
