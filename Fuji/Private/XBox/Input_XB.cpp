@@ -1,8 +1,7 @@
 #include "Common.h"
 #include "Vector3.h"
 
-#include "Input.h"
-#include "../Source/Input_Internal.h"
+#include "Input_Internal.h"
 
 /*** Structures ***/
 

@@ -5,7 +5,7 @@
 #include "Common.h"
 #include "Texture_Internal.h"
 #include "Display_Internal.h"
-#include "Filesystem.h"
+#include "MFFileSystem_Internal.h"
 
 #include <xgraphics.h>
 

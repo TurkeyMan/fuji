@@ -3,12 +3,13 @@
 
 #include "Common.h"
 #include "Display.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
+#include "FileSystem/MFFileSystemNative.h"
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
 #include "Font.h"
 #include "Primitive.h"
-#include "FileSystem.h"
+#include "MFFileSystem.h"
 
 Font *gpDebugFont;
 
@@ -35,17 +36,22 @@ Font* Font_Create(const char *pFilename)
 	int a;
 	for(a=strlen(pFilename); a>0 && pFilename[a-1] != '\\' && pFilename[a-1] != '/'; a--) {}
 
-	int hFile = File_Open(File_SystemPath(STR("%s.dat", pFilename)), OF_Read|OF_Binary);
-	DBGASSERT(hFile > -1, STR("Unable to open charinfo file for font '%s'", pFilename));
+	MFOpenDataNative openData;
+	openData.cbSize = sizeof(MFOpenDataNative);
+	openData.openFlags = MFOF_Read|MFOF_Binary;
+	openData.pFilename = MFFile_SystemPath(STR("%s.dat", pFilename));
 
-	if(hFile > -1)
+	MFFile* hFile = MFFile_Open(hNativeFileSystem, &openData);
+	DBGASSERT(hFile, STR("Unable to open charinfo file for font '%s'", pFilename));
+
+	if(hFile)
 	{
 		pFont = (Font*)Heap_Alloc(sizeof(Font));
 
 		pFont->pMaterial = Material_Create(&pFilename[a]);
 
-		File_Read(pFont->charwidths, 256, hFile);
-		File_Close(hFile);
+		MFFile_Read(hFile, pFont->charwidths, 256);
+		MFFile_Close(hFile);
 	}
 
 	return pFont;

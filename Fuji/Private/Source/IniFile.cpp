@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "IniFile.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
+#include "FileSystem/MFFileSystemNative.h"
 #include "Util.h"
 
 #if !defined(_RETAIL)
@@ -13,8 +14,8 @@ int IniFile::Create(const char *pFilename)
 {
 	CALLSTACK;
 
-	const char *pFile = File_SystemPath(pFilename);
-	uint32 size = File_GetSize(pFile);
+	const char *pFile = MFFile_SystemPath(pFilename);
+	uint32 size = MFFileNative_GetSize(pFile);
 
 	if(size)
 	{
@@ -23,9 +24,14 @@ int IniFile::Create(const char *pFilename)
 #endif
 		pIniBuffer = (char*)Heap_Alloc(size+1);
 
-		uint32 file = File_Open(pFile);
-		File_Read(pIniBuffer, size, file);
-		File_Close(file);
+		MFOpenDataNative openData;
+		openData.cbSize = sizeof(MFOpenDataNative);
+		openData.openFlags = MFOF_Read|MFOF_Binary;
+		openData.pFilename = pFile;
+
+		MFFileHandle hFile = MFFile_Open(hNativeFileSystem, &openData);
+		MFFile_Read(hFile, pIniBuffer, size);
+		MFFile_Close(hFile);
 
 		pIniBuffer[size] = NULL;
 		pCurrent = pIniBuffer;

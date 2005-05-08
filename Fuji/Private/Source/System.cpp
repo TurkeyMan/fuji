@@ -5,7 +5,7 @@
 #include "Material_Internal.h"
 #include "Input_Internal.h"
 #include "View_Internal.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
 #include "Font.h"
 #include "Primitive.h"
 #include "DebugMenu.h"
@@ -51,7 +51,9 @@ FujiDefaults gDefaults =
 
 	// FileSystemDefaults
 	{
-		256				// maxOpenFiles
+		128,			// maxOpenFiles
+		16,				// maxFileSystems
+		16,				// maxFileSystemStackSize
 	},
 
 	// SoundDefaults
@@ -100,7 +102,7 @@ void System_Init()
 	gSystemTimer.Init(NULL);
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
-	FileSystem_InitModule();
+	MFFileSystem_InitModule();
 
 	View_InitModule();
 	Display_InitModule();
@@ -140,7 +142,7 @@ void System_Deinit()
 	Display_DeinitModule();
 	View_DeinitModule();
 
-	FileSystem_DeinitModule();
+	MFFileSystem_DeinitModule();
 
 	Timer_DeinitModule();
 	Callstack_DeinitModule();

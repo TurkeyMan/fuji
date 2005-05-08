@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
 #include "PtrList.h"
 
 extern File *gOpenFiles;

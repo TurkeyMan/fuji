@@ -41,6 +41,8 @@ struct FujiDefaults
 	struct FileSystemDefaults
 	{
 		uint32 maxOpenFiles;
+		uint32 maxFileSystems;
+		uint32 maxFileSystemStackSize;
 	} filesys;
 
 	struct SoundDefaults

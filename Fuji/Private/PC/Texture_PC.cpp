@@ -5,7 +5,8 @@
 #include "Common.h"
 #include "Texture_Internal.h"
 #include "Display_Internal.h"
-#include "Filesystem.h"
+#include "MFFileSystem_Internal.h"
+#include "FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 
@@ -21,13 +22,22 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 
 	if(!pTexture)
 	{
-		const char *pFileName = File_SystemPath(STR("%s.tga", pName));
+		const char *pFileName = MFFile_SystemPath(STR("%s.tga", pName));
 
-		if(!File_Exists(pFileName))
+		MFOpenDataNative openData;
+		openData.cbSize = sizeof(MFOpenDataNative);
+		openData.openFlags = MFOF_Read|MFOF_Binary;
+		openData.pFilename = pFileName;
+
+		MFFileHandle hFile = MFFile_Open(hNativeFileSystem, &openData);
+
+		if(!hFile)
 		{
 			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
 			return Texture_Create("_None");
 		}
+
+		MFFile_Close(hFile);
 
 		pTexture = gTextureBank.Create();
 		pTexture->refCount = 0;

@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
 #include "Sound.h"
 #include "PtrList.h"
 #include "Font.h"

@@ -1,5 +1,6 @@
 #include "Common.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
+#include "FileSystem/MFFileSystemNative.h"
 #include "Sound.h"
 #include "PtrList.h"
 #include "Font.h"
@@ -18,12 +19,8 @@ struct SoundMusic
 	OggVorbis_File vorbisFile;
 
 	vorbis_info *pInfo;
-	char *pVorbisBuffer;
 
 	IDirectSoundBuffer *pDSMusicBuffer;
-
-	uint32 size;
-	uint32 offset;
 
 	uint32 bufferSize;
 	uint32 playBackOffset;
@@ -316,55 +313,9 @@ void Sound_SetPlaybackRate(int soundID, float rate)
 }
 
 
-//
-// VORBIS MEMORY READING FUNCTIONS
-//
-size_t readMemory_func(void *ptr, size_t size, size_t nmemb, void *datasource)
+int SoundPC_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	uint32 readSize = Min(size*nmemb, pMusic->size-pMusic->offset);
-	memcpy(ptr, &pMusic->pVorbisBuffer[pMusic->offset], readSize);
-	pMusic->offset += readSize;
-
-	return readSize;
-}
-
-int seekMemory_func(void *datasource, ogg_int64_t offset, int whence)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	switch(whence)
-	{
-		case SEEK_SET:
-			pMusic->offset = (int)offset;
-			break;
-		case SEEK_CUR:
-			pMusic->offset += (int)offset;
-			break;
-		case SEEK_END:
-			pMusic->offset = pMusic->size - (int)offset;
-			break;
-	}
-
-	return pMusic->offset;
-}
-
-int closeMemory_func(void *datasource)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	Heap_Free(pMusic->pVorbisBuffer);
-	pMusic->pVorbisBuffer = NULL;
-
-	return 0;
-}
-
-long tellMemory_func(void *datasource)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	return pMusic->offset;
+	return MFFile_StdSeek(datasource, (long)offset, whence);
 }
 
 //
@@ -383,23 +334,25 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	SoundMusic& track = gMusicTracks[t];
 
 	// load vorbis file
-	const char *pFile = File_SystemPath(pFilename);
-	track.pVorbisBuffer = File_Load(pFile, &track.size);
-	if(!track.pVorbisBuffer) return -1;
+	MFOpenDataNative openData;
+	openData.cbSize = sizeof(MFOpenDataNative);
+	openData.openFlags = MFOF_Read|MFOF_Binary;
+	openData.pFilename = MFFile_SystemPath(pFilename);
 
-	track.offset = 0;
+	MFFile* hFile = MFFile_Open(hNativeFileSystem, &openData);
+	if(!hFile)
+		return -1;
 
 	// setup vorbis read callbacks
 	ov_callbacks callbacks;
-	callbacks.read_func = readMemory_func;
-	callbacks.seek_func = seekMemory_func;
-	callbacks.close_func = closeMemory_func;
-	callbacks.tell_func = tellMemory_func;
+	callbacks.read_func = MFFile_StdRead;
+	callbacks.seek_func = SoundPC_VorbisSeek;
+	callbacks.close_func = MFFile_StdClose;
+	callbacks.tell_func = MFFile_StdTell;
 
 	// open vorbis file
-	if(ov_test_callbacks(&track, &track.vorbisFile, NULL, 0, callbacks))
+	if(ov_test_callbacks(hFile, &track.vorbisFile, NULL, 0, callbacks))
 	{
-		Heap_Free(track.pVorbisBuffer);
 		DBGASSERT(false, "Not a vorbis file.");
 		return -1;
 	}

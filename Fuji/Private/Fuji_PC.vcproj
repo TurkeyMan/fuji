@@ -203,9 +203,6 @@
 				RelativePath=".\Source\Display_Internal.h">
 			</File>
 			<File
-				RelativePath=".\Source\FileSystem.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Font.cpp">
 			</File>
 			<File
@@ -231,6 +228,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\Matrix.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFFileSystem.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFFileSystem_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\PtrList.cpp">
@@ -271,6 +274,16 @@
 			<File
 				RelativePath=".\Source\View_Internal.h">
 			</File>
+			<Filter
+				Name="FileSystem"
+				Filter="">
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemNative.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -297,9 +310,6 @@
 				RelativePath=".\Include\Display.h">
 			</File>
 			<File
-				RelativePath=".\Include\FileSystem.h">
-			</File>
-			<File
 				RelativePath=".\Include\Font.h">
 			</File>
 			<File
@@ -322,6 +332,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Matrix.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFFileSystem.h">
 			</File>
 			<File
 				RelativePath=".\Include\Primitive.h">
@@ -373,9 +386,6 @@
 				RelativePath=".\Pc\Display_PC.cpp">
 			</File>
 			<File
-				RelativePath=".\Pc\FileSystem_PC.cpp">
-			</File>
-			<File
 				RelativePath=".\Pc\Input_PC.cpp">
 			</File>
 			<File
@@ -383,6 +393,9 @@
 			</File>
 			<File
 				RelativePath=".\Pc\Material_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFFileSystemNative_PC.cpp">
 			</File>
 			<File
 				RelativePath=".\Pc\Primitive_PC.cpp">

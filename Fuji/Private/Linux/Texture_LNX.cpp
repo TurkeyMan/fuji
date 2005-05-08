@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "Texture.h"
-#include "FileSystem.h"
+#include "MFFileSystem_Internal.h"
 #include "Image.h"
 
 Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
