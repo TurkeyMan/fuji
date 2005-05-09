@@ -3,71 +3,69 @@
 //================================================
 // USAGE
 //
-// MFIni ini("global.model");
-// MFIniIterator iterate(ini);
-// while (iterate.Curr())
+// MFIni *pIni = MFIni::Create("MyIniFile.ini");
+// MFIniLine *pLine = pIni->GetFirstLine();
+// while (pLine)
 // {
-//   if (iterate.Curr().IsString(0, "Group")
+//   if (pLine->IsString(0, "Group")
 //   {
-//     ProcessGroup(iterate);
+//     ProcessGroup(pLine);
 //   }
-//   iterate.Next();
+//   pLine = pLine->Next();
 // }
 //================================================
-
-class MFIniIterator
-{
-public:
-	// create an iterator - starting from first line in INI file
-	MFIniIterator(const MFIni &ini);
-	
-	// create an iterator - will continue from current line in another iterator
-	MFiniIterator(const MFIniIterator &iterator);
-
-	// init from an existing iterator
-	void Init(const MFIniIterator &iterator);
-
-	// line accessors
-	const MFIniLine &Curr()			{ return pLine; };
-	const MFIniLine &Next();
-	const MFIniLine &Prev();
-	const MFIniLine &Sub();
-
-private:
-	MFIni *pIni;
-	MFIniLine *pLine;
-};
+class MFStringCache;
 
 class MFIniLine
 {
+friend class MFIni;
 public:
+	MFIniLine *Next();
+	MFIniLine *Sub();
+
 	int GetStringCount();
 	bool IsString(int index, const char *pString);
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);
-	MFVector3 GetVector(int index);
+	bool GetBool(int index);
 
-	int GetSubLineCount();
-	MFIniLine *GetSubLine();
-
-private:
-	int dataCount;							// number of data strings for this line
-	const char **pDataStrings;	// pointer to array of data strings
-	int subLineCount;						// how many sublines are we pointing to?
-	MFIniLine *pSubLines;				// pointer to start of sublines (or NULL if no sub section)
+protected:
+	class MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
+	int subtreeLineCount;		// total number of sublines before next line at this level
+	uint32 firstString;         // first index of MFIni::pStrings for line string data
+	int16 stringCount;			// how many data strings on this line
+	int16 terminate;			// is this the last subline at this level?
 };
 
 class MFIni
 {
+friend class MFIniLine;
 public:
-	MFIni(const char *pFilename);
-	~MFini();
+	static MFIni *Create(const char *pFilename);
+	static void Destroy(MFIni *pIni);
+	MFIniLine *GetFirstLine();
 
 protected:
-	char name[128];
-	int nmbrOfLines;
-	MFIniLine *pLines;
-	const char **ppStrings;
-	MFStringCache *pCache;
+	char name[64];              // name of file
+	char *pMem;                 // memory from File Load
+
+	MFIniLine *pLines;          // array of lines that index the ini file
+	int lineCount;
+
+	const char **pStrings;      // array of string pointers (tokens) into the ini file
+	int stringCount;
+
+	MFStringCache *pCache;      // string cache
+
+	// scans text at "pSrc" for a single token
+	// pTokenStart will point to first Char in the token
+	// pTokenEnd will point to the last Char in the token
+	// return TRUE if a token was found
+	// '{', '}' and '/n' are also treated as tokens
+	static const char *ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer);
+
+	// use recursion to scan in the lines & strings
+	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd);
+	void InitLine(MFIniLine *pLine);
 };
