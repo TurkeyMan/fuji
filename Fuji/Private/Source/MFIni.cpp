@@ -3,7 +3,7 @@
 //
 
 #include "common.h"
-#include "FileSystem.h"
+#include "MFFileSystem.h"
 #include "MFIni.h"
 #include "MFStringCache.h"
 
@@ -58,7 +58,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
 
 	uint32 memSize;
-	char *pMem = File_Load(pFilename, &memSize);
+	char *pMem = MFFileSystem_Load(pFilename, &memSize);
 
 	// load text file
 	strcpy(pMFIni->name, pFilename);
@@ -80,6 +80,14 @@ MFIni *MFIni::Create(const char *pFilename)
 	// TODO: copy lines, strings & cache to save on memory
 
 	return pMFIni;
+}
+
+void MFIni::Destroy(MFIni *pIni)
+{
+	Heap_Free(pIni->pLines);
+	Heap_Free(pIni->pStrings);
+	MFStringCache::Destroy(pIni->pCache);
+	Heap_Free(pIni);
 }
 
 // returns how many lines it found
@@ -107,8 +115,9 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 			// new sub section
 			int oldLineCount = ++lineCount;
-			pSrc = ScanRecursive(pSrc, pSrc);
+			pSrc = ScanRecursive(pSrc, pSrcEnd);
 			pCurrLine->subtreeLineCount = lineCount - oldLineCount;
+			lineCount--;
 		}
 		else if (tokenLength == 1 && tokenBuffer[0] == '}')
 		{
@@ -117,9 +126,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			if (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 			{
 				pCurrLine->terminate = 1;
-				pCurrLine++;
 				lineCount++;
-				InitLine(pCurrLine);
 			}
 			return pSrc;
 		}
@@ -127,13 +134,20 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		{
 			if (bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
 			{
-				pCurrLine++;
 				lineCount++;
+				pCurrLine = &pLines[lineCount];
 				InitLine(pCurrLine);
 			}
+			bNewLine = false;
 			pStrings[stringCount++] = pCache->Add(tokenBuffer);
 			pCurrLine->stringCount++;
 		}
+	}
+
+	if (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
+	{
+		pCurrLine->terminate = 1;
+		lineCount++;
 	}
 	return pSrc;
 }
@@ -195,4 +209,9 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	}
 
 	return NULL;
+}
+
+MFIniLine *MFIni::GetFirstLine()
+{
+	return pLines;
 }

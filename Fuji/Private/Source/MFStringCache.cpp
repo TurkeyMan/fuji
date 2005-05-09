@@ -38,7 +38,7 @@ const char *MFStringCache::Add(const char *pNewString)
 		pCurr += length+1;
 	}
 
-	DBGASSERT(&pCurr[newLength+1] > &pMem[size], "No memory for string!");
+	DBGASSERT(&pCurr[newLength+1] < &pMem[size], "No memory for string!");
 
 	strcpy(pCurr, pNewString);
 	pCurr[newLength]=0;
