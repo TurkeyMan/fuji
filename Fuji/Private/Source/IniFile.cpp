@@ -1,7 +1,6 @@
 #include "Common.h"
 #include "IniFile.h"
-#include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "MFFileSystem.h"
 #include "Util.h"
 
 #if !defined(_RETAIL)
@@ -14,39 +13,38 @@ int IniFile::Create(const char *pFilename)
 {
 	CALLSTACK;
 
-	const char *pFile = MFFile_SystemPath(pFilename);
-	uint32 size = MFFileNative_GetSize(pFile);
+	int result = 1;
+	pIniBuffer = NULL;
 
-	if(size)
+	MFFileHandle hFile = MFFileSystem_Open(pFilename);
+
+	if(hFile)
 	{
+		uint32 size = MFFile_GetSize(hFile);
+
+		if(size)
+		{
 #if !defined(_RETAIL)
-		strcpy(pIniFilename, pFilename);
+			strcpy(pIniFilename, pFilename);
 #endif
-		pIniBuffer = (char*)Heap_Alloc(size+1);
+			pIniBuffer = (char*)Heap_Alloc(size+1);
 
-		MFOpenDataNative openData;
-		openData.cbSize = sizeof(MFOpenDataNative);
-		openData.openFlags = MFOF_Read|MFOF_Binary;
-		openData.pFilename = pFile;
+			MFFile_Read(hFile, pIniBuffer, size);
 
-		MFFileHandle hFile = MFFile_Open(hNativeFileSystem, &openData);
-		MFFile_Read(hFile, pIniBuffer, size);
+			pIniBuffer[size] = NULL;
+			pCurrent = pIniBuffer;
+
+			currentHeight = 0;
+
+			owned = true;
+
+			result = 0;
+		}
+
 		MFFile_Close(hFile);
-
-		pIniBuffer[size] = NULL;
-		pCurrent = pIniBuffer;
-
-		currentHeight = 0;
-
-		owned = true;
-	}
-	else
-	{
-		pIniBuffer = NULL;
-		return 1;
 	}
 
-	return 0;
+	return result;
 }
 
 void IniFile::CreateFromMemory(const char *pMemory)

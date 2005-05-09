@@ -15,11 +15,167 @@ void MFFileSystemNative_Unregister()
 
 }
 
+int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
+{
+	WIN32_FIND_DATA findData;
+	HANDLE hFind;
+
+	int numFiles = 0;
+
+	*pStringLengths += strlen(pFindPattern) + 1;
+
+	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+
+	while(hFind != INVALID_HANDLE_VALUE)
+	{
+		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		{
+			if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				if(recursive)
+				{
+					if(flatten)
+					{
+						numFiles += MFFileSystemNative_GetNumEntries(STR("%s%s/", pFindPattern, findData.cFileName), recursive, flatten, pStringLengths);
+					}
+					else
+					{
+						*pStringLengths += strlen(findData.cFileName) + 1;
+						++numFiles;
+					}
+				}
+			}
+			else
+			{
+				*pStringLengths += strlen(findData.cFileName) + 1;
+				++numFiles;
+			}
+		}
+
+		if(!FindNextFile(hFind, &findData))
+		{
+			FindClose(hFind);
+			hFind = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	return numFiles;
+}
+
+MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
+{
+	WIN32_FIND_DATA findData;
+	HANDLE hFind;
+
+	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+
+	char *pCurrentDir = pStringCache;
+	strcpy(pCurrentDir, pFindPattern);
+	pStringCache += strlen(pCurrentDir) + 1;
+
+	while(hFind != INVALID_HANDLE_VALUE)
+	{
+		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		{
+			if(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				if(recursive)
+				{
+					if(flatten)
+					{
+						pToc = MFFileSystemNative_BuildToc(STR("%s%s/", pFindPattern, findData.cFileName), pToc, pParent, pStringCache, recursive, flatten);
+					}
+					else
+					{
+						const char *pNewPath = STR("%s%s/", pFindPattern, findData.cFileName);
+
+						int stringCacheSize = 0;
+						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
+
+						if(pToc->size)
+						{
+							strcpy(pStringCache, findData.cFileName);
+							pToc->pName = pStringCache;
+							pStringCache += strlen(pStringCache)+1;
+
+							pToc->flags = MFTF_Directory;
+							pToc->pFilesysData = pCurrentDir;
+							pToc->pParent = pParent;
+
+							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
+							pToc->pChild = (MFTOCEntry*)Heap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
+
+							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
+							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
+
+							++pToc;
+						}
+					}
+				}
+			}
+			else
+			{
+				strcpy(pStringCache, findData.cFileName);
+				pToc->pName = pStringCache;
+				pStringCache += strlen(pStringCache)+1;
+
+				pToc->pFilesysData = pCurrentDir;
+
+				pToc->pParent = pParent;
+				pToc->pChild = NULL;
+
+				pToc->flags = 0;
+				pToc->size = 0;
+
+				++pToc;
+			}
+		}
+
+		if(!FindNextFile(hFind, &findData))
+		{
+			FindClose(hFind);
+			hFind = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	return pToc;
+}
+
 int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
-	// find all files and build TOC
+	MFMountDataNative *pMountNative = (MFMountDataNative*)pMountData;
+
+	WIN32_FIND_DATA findData;
+	HANDLE hFind;
+
+	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
+	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
+
+	const char *pFindPattern = pMountNative->pPath;
+
+	if(pFindPattern[strlen(pFindPattern)-1] != '/')
+		pFindPattern = STR("%s/", pFindPattern);
+
+	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+
+	if(hFind == INVALID_HANDLE_VALUE)
+	{
+		LOGD(STR("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
+		return -1;
+	}
+
+	FindClose(hFind);
+
+	int stringCacheSize = 0;
+	pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPattern, recursive, flatten, &stringCacheSize);
+
+	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
+	pMount->pEntries = (MFTOCEntry*)Heap_Alloc(sizeOfToc + stringCacheSize);
+
+	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
+	MFFileSystemNative_BuildToc(pFindPattern, pMount->pEntries, NULL, pStringCache, recursive, flatten);
 
 	return 0;
 }
@@ -30,7 +186,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 o
 
 	openData.cbSize = sizeof(MFOpenDataNative);
 	openData.openFlags = openFlags;
-	openData.pFilename = pTOCEntry->pName;
+	openData.pFilename = STR("%s%s", (char*)pTOCEntry->pFilesysData, pTOCEntry->pName);
 
 	return MFFile_Open(hNativeFileSystem, &openData);
 }

@@ -45,8 +45,12 @@ enum MFTOCFlags
 
 struct MFTOCEntry
 {
-	uint32 flags;
+	MFTOCEntry *pChild;
+	MFTOCEntry *pParent;
+
 	char *pName;
+	uint32 flags;
+
 	void *pFilesysData;
 	uint32 size;
 };

@@ -334,12 +334,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	SoundMusic& track = gMusicTracks[t];
 
 	// load vorbis file
-	MFOpenDataNative openData;
-	openData.cbSize = sizeof(MFOpenDataNative);
-	openData.openFlags = MFOF_Read|MFOF_Binary;
-	openData.pFilename = MFFile_SystemPath(pFilename);
-
-	MFFile* hFile = MFFile_Open(hNativeFileSystem, &openData);
+	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
 		return -1;
 

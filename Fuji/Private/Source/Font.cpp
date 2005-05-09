@@ -17,7 +17,7 @@ void Font_InitModule()
 {
 	CALLSTACK;
 
-	gpDebugFont = Font_Create("Font/Arial");
+	gpDebugFont = Font_Create("Arial");
 }
 
 void Font_DeinitModule()
@@ -33,22 +33,14 @@ Font* Font_Create(const char *pFilename)
 
 	Font *pFont = NULL;
 
-	int a;
-	for(a=strlen(pFilename); a>0 && pFilename[a-1] != '\\' && pFilename[a-1] != '/'; a--) {}
-
-	MFOpenDataNative openData;
-	openData.cbSize = sizeof(MFOpenDataNative);
-	openData.openFlags = MFOF_Read|MFOF_Binary;
-	openData.pFilename = MFFile_SystemPath(STR("%s.dat", pFilename));
-
-	MFFile* hFile = MFFile_Open(hNativeFileSystem, &openData);
+	MFFile* hFile = MFFileSystem_Open(STR("%s.dat", pFilename));
 	DBGASSERT(hFile, STR("Unable to open charinfo file for font '%s'", pFilename));
 
 	if(hFile)
 	{
 		pFont = (Font*)Heap_Alloc(sizeof(Font));
 
-		pFont->pMaterial = Material_Create(&pFilename[a]);
+		pFont->pMaterial = Material_Create(pFilename);
 
 		MFFile_Read(hFile, pFont->charwidths, 256);
 		MFFile_Close(hFile);

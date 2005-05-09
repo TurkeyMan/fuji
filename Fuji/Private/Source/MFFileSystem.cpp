@@ -32,6 +32,13 @@ void MFFileSystem_InitModule()
 	// mount filesystems
 	MFFileSystemNative_InitModule();
 	MFFileSystemMemory_InitModule();
+
+	MFMountDataNative mountData;
+	mountData.cbSize = sizeof(MFMountDataNative);
+	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
+	mountData.pPath = MFFile_SystemPath();
+
+	MFFileSystem_Mount(hNativeFileSystem, &mountData);
 }
 
 void MFFileSystem_DeinitModule()
@@ -214,14 +221,14 @@ long MFFile_StdTell(void* fileHandle)
 // mounted filesystem access
 
 // mount a filesystem
-int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData, uint32 flags)
+int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData)
 {
 	CALLSTACK;
 
 	MFMount *pMount = gMounts.Create();
 	memset(pMount, 0, sizeof(MFMount));
 
-	pMount->mountFlags = flags;
+	pMount->mountFlags = pMountData->flags;
 	pMount->fileSystem = fileSystem;
 
 	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
@@ -258,13 +265,13 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 
 	for(a=0; a<numEntries; a++)
 	{
-		if(!stricmp(pFilename, pEntry[a].pName))
+		if(!stricmp(pSearchString, pEntry[a].pName))
 		{
 			if(isDirectory)
 			{
 				if(pEntry[a].flags & MFTF_Directory)
 				{
-					return MFFileSystem_GetTocEntry(pFilename, (MFTOCEntry*)pEntry[a].pFilesysData, pEntry[a].size);
+					return MFFileSystem_GetTocEntry(pFilename, pEntry[a].pChild, pEntry[a].size);
 				}
 			}
 			else
@@ -283,8 +290,6 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 // open a file from the mounted filesystem stack
 MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
-    int fileSystem = -1;
-
 	// find file in filesystem stack
 	int mountID = gMountCount-1;
 
@@ -302,7 +307,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		if(pEntry)
 		{
 			// open the file from a mount
-			return ppFileSystemList[fileSystem]->FSOpen(pMount, pEntry, openFlags);
+			return ppFileSystemList[mountID]->FSOpen(pMount, pEntry, openFlags);
 		}
 
 		--mountID;
@@ -324,9 +329,9 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 		if(size > 0)
 		{
-			char *pBuffer = (char*)Heap_Alloc(size);
+			pBuffer = (char*)Heap_Alloc(size);
 
-			MFFile_Read(hFile, pBuffer, size);
+			*pBytesRead = MFFile_Read(hFile, pBuffer, size);
 		}
 
 		MFFile_Close(hFile);

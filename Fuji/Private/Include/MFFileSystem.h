@@ -14,7 +14,9 @@ enum MFOpenFlags
 	MFOF_Write	= 2,
 	MFOF_Text	= 4,
 	MFOF_Binary	= 8,
-	MFOF_Async	= 16
+	MFOF_Async	= 16,
+
+	MFMF_ForceInt = 0x7FFFFFFF
 };
 
 // seek offset
@@ -87,7 +89,10 @@ long MFFile_StdTell(void* stream);
 enum MFMountFlags
 {
 	MFMF_FlattenDirectoryStructure = 1,	// flattens the directory heirarchy
-	MFMF_Recursive = 2					// recurse into subdirectories when building TOC
+	MFMF_Recursive = 2,					// recurse into subdirectories when building TOC
+	MFMF_DontCacheTOC = 4,				// dosent take a local memory copy of the TOC (useful for filesystems read from memory)
+
+	MFMF_ForceUInt = 0xFFFFFFFF
 };
 
 // open file base data
@@ -98,7 +103,7 @@ struct MFMountData
 };
 
 // mount a filesystem
-int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData, uint32 flags);
+int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData);
 
 // open a file from the mounted filesystem stack
 MFFileHandle MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
