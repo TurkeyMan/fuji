@@ -21,7 +21,9 @@ void MFFileSystemNative_Register();
 void MFFileSystemNative_Unregister();
 
 int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData);
-MFFile* MFFileSystemNative_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags);
+int MFFileSystemNative_Dismount(MFMount *pMount);
+
+MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 openFlags);
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileNative_Close(MFFile* fileHandle);
@@ -29,6 +31,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileNative_Tell(MFFile* fileHandle);
+
 MFFileState MFFileNative_Query(MFFile* fileHandle);
 int MFFileNative_GetSize(MFFile* fileHandle);
 

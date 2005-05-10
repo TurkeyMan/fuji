@@ -25,7 +25,9 @@ void MFFileSystemMemory_Register();
 void MFFileSystemMemory_Unregister();
 
 int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData);
-MFFile* MFFileSystemMemory_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags);
+int MFFileSystemMemory_Dismount(MFMount *pMount);
+
+MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 openFlags);
 
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileMemory_Close(MFFile* fileHandle);
@@ -33,6 +35,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 int MFFileMemory_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
 int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileMemory_Tell(MFFile* fileHandle);
+
 MFFileState MFFileMemory_Query(MFFile* fileHandle);
 int MFFileMemory_GetSize(MFFile* fileHandle);
 

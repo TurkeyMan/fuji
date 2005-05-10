@@ -1,3 +1,5 @@
+//#define _USE_LIBVORBIS
+
 #include "Common.h"
 #include "MFFileSystem_Internal.h"
 #include "Sound.h"
@@ -6,21 +8,21 @@
 #include "Primitive.h"
 #include "DebugMenu_Internal.h"
 
+#if defined(_USE_LIBVORBIS)
 #include <vorbis/vorbisfile.h>
+#endif
 
 struct SoundMusic
 {
 	char name[256];
 
+#if defined(_USE_LIBVORBIS)
 	OggVorbis_File vorbisFile;
 
 	vorbis_info *pInfo;
-	char *pVorbisBuffer;
+#endif
 
 	IDirectSoundBuffer *pDSMusicBuffer;
-
-	uint32 size;
-	uint32 offset;
 
 	uint32 bufferSize;
 	uint32 playBackOffset;
@@ -87,6 +89,7 @@ void Sound_Draw()
 
 	float y = 20.0f;
 
+#if defined(_USE_LIBVORBIS)
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
@@ -202,6 +205,7 @@ void Sound_Draw()
 		}
 	}
 #endif
+#endif
 }
 
 
@@ -283,57 +287,12 @@ void Sound_SetPlaybackRate(int soundID, float rate)
 
 }
 
-
-//
-// VORBIS MEMORY READING FUNCTIONS
-//
-size_t readMemory_func(void *ptr, size_t size, size_t nmemb, void *datasource)
+#if defined(_USE_LIBVORBIS)
+int SoundXB_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	uint32 readSize = Min(size*nmemb, pMusic->size-pMusic->offset);
-	memcpy(ptr, &pMusic->pVorbisBuffer[pMusic->offset], readSize);
-	pMusic->offset += readSize;
-
-	return readSize;
+	return MFFile_StdSeek(datasource, (long)offset, whence);
 }
-
-int seekMemory_func(void *datasource, ogg_int64_t offset, int whence)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	switch(whence)
-	{
-		case SEEK_SET:
-			pMusic->offset = (int)offset;
-			break;
-		case SEEK_CUR:
-			pMusic->offset += (int)offset;
-			break;
-		case SEEK_END:
-			pMusic->offset = pMusic->size - (int)offset;
-			break;
-	}
-
-	return pMusic->offset;
-}
-
-int closeMemory_func(void *datasource)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	Heap_Free(pMusic->pVorbisBuffer);
-	pMusic->pVorbisBuffer = NULL;
-
-	return 0;
-}
-
-long tellMemory_func(void *datasource)
-{
-	SoundMusic *pMusic = (SoundMusic*)datasource;
-
-	return pMusic->offset;
-}
+#endif
 
 //
 // Vorbis Music Functions
@@ -344,29 +303,28 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 	int t = 0;
 
+#if defined(_USE_LIBVORBIS)
 	// fine free music track
 	while(gMusicTracks[t].pDSMusicBuffer && t < gDefaults.sound.maxMusicTracks) t++;
 	if(t == gDefaults.sound.maxMusicTracks) return -1;
 
 	SoundMusic& track = gMusicTracks[t];
 
-	// load vorbis file
-	track.pVorbisBuffer = File_Load(pFilename, &track.size);
-	if(!track.pVorbisBuffer) return -1;
-
-	track.offset = 0;
+	// open vorbis file
+	MFFile* hFile = MFFileSystem_Open(pFilename);
+	if(!hFile)
+		return -1;
 
 	// setup vorbis read callbacks
 	ov_callbacks callbacks;
-	callbacks.read_func = readMemory_func;
-	callbacks.seek_func = seekMemory_func;
-	callbacks.close_func = closeMemory_func;
-	callbacks.tell_func = tellMemory_func;
+	callbacks.read_func = MFFile_StdRead;
+	callbacks.seek_func = SoundXB_VorbisSeek;
+	callbacks.close_func = MFFile_StdClose;
+	callbacks.tell_func = MFFile_StdTell;
 
 	// open vorbis file
-	if(ov_test_callbacks(&track, &track.vorbisFile, NULL, 0, callbacks))
+	if(ov_test_callbacks(hFile, &track.vorbisFile, NULL, 0, callbacks))
 	{
-		Heap_Free(track.pVorbisBuffer);
 		DBGASSERT(false, "Not a vorbis file.");
 		return -1;
 	}
@@ -379,12 +337,15 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	// get vorbis file info
 	track.pInfo = ov_info(&track.vorbisFile, -1);
 
+	track.trackLength = (float)ov_time_total(&track.vorbisFile, -1);
+	track.currentTime = 0.0f;
+
 	// fill out DSBuffer creation data
 	DSBUFFERDESC desc;
 	WAVEFORMATEX wfx;
 
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
-	wfx.nChannels = track.pInfo->channels;
+	wfx.nChannels = (WORD)track.pInfo->channels;
 	wfx.nSamplesPerSec = track.pInfo->rate;
 	wfx.wBitsPerSample = 16;
 	wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample/8);
@@ -442,6 +403,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 	// play buffer
 	track.playing = true;
+#endif
 
 	return t;
 }
@@ -450,6 +412,7 @@ void Sound_ServiceMusicBuffer(int trackID)
 {
 	CALLSTACK;
 
+#if defined(_USE_LIBVORBIS)
 	SoundMusic& track = gMusicTracks[trackID];
 
 	void *pData1, *pData2;
@@ -510,12 +473,14 @@ void Sound_ServiceMusicBuffer(int trackID)
 
 	// update playback time
 	track.currentTime = (float)ov_time_tell(&track.vorbisFile);
+#endif
 }
 
 void Sound_MusicUnload(int track)
 {
 	CALLSTACK;
 
+#if defined(_USE_LIBVORBIS)
 	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
 
 	gMusicTracks[track].pInfo = NULL;
@@ -523,13 +488,16 @@ void Sound_MusicUnload(int track)
 
 	gMusicTracks[track].pDSMusicBuffer->Release();
 	gMusicTracks[track].pDSMusicBuffer = NULL;
+#endif
 }
 
 void Sound_MusicSeek(int track, float seconds)
 {
 	CALLSTACK;
 
+#if defined(_USE_LIBVORBIS)
 	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
+#endif
 }
 
 void Sound_MusicPause(int track, bool pause)

@@ -6,8 +6,7 @@
 #include "Display.h"
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
-#include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "MFFileSystem.h"
 #include "IniFile.h"
 
 #include "SysLogo-256.h"

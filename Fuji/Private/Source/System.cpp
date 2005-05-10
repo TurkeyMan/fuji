@@ -52,7 +52,6 @@ FujiDefaults gDefaults =
 	// FileSystemDefaults
 	{
 		128,			// maxOpenFiles
-		16,				// maxFileSystemMounts
 		16,				// maxFileSystems
 		16,				// maxFileSystemStackSize
 	},

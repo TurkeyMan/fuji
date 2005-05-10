@@ -13,6 +13,7 @@ void MFFileSystemMemory_InitModule()
 	fsCallbacks.RegisterFS = MFFileSystemMemory_Register;
 	fsCallbacks.UnregisterFS = MFFileSystemMemory_Unregister;
 	fsCallbacks.FSMount = MFFileSystemMemory_Mount;
+	fsCallbacks.FSDismount = MFFileSystemMemory_Dismount;
 	fsCallbacks.FSOpen = MFFileSystemMemory_Open;
 	fsCallbacks.Open = MFFileMemory_Open;
 	fsCallbacks.Close = MFFileMemory_Close;
@@ -50,7 +51,13 @@ int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData)
 	return -1;
 }
 
-MFFile* MFFileSystemMemory_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags)
+int MFFileSystemMemory_Dismount(MFMount *pMount)
+{
+	// cant mount a memory filesystem
+	return -1;
+}
+
+MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
 	// no mounted memory filesystems
 	return NULL;

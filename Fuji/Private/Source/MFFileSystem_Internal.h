@@ -3,6 +3,8 @@
 
 #include "MFFileSystem.h"
 
+struct MFTOCEntry;
+
 // asynchronous file operations
 enum MFFileOp
 {
@@ -14,6 +16,9 @@ enum MFFileOp
 // internal functions
 void MFFileSystem_InitModule();
 void MFFileSystem_DeinitModule();
+
+MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries);
+void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries);
 
 // open file structure
 struct MFFile
@@ -59,6 +64,11 @@ struct MFMount
 {
 	FileSystemHandle fileSystem;
 	uint32 mountFlags;
+	const char *pMountpoint;
+	int priority;
+
+	MFMount *pPrev;
+	MFMount *pNext;
 
 	MFTOCEntry *pEntries;
 	uint32 numFiles;
@@ -76,7 +86,9 @@ struct MFFileSystemCallbacks
 	void (*UnregisterFS)();
 
 	int (*FSMount)(MFMount*, MFMountData*);
-	MFFile* (*FSOpen)(MFMount*, MFTOCEntry*, uint32);
+	int (*FSDismount)(MFMount*);
+
+	MFFile* (*FSOpen)(MFMount*, const char *, uint32);
 
 	int (*Open)(MFFile*, MFOpenData*);
 	int (*Close)(MFFile*);
@@ -84,6 +96,7 @@ struct MFFileSystemCallbacks
 	int (*Write)(MFFile*, void*, uint32, bool);
 	int (*Seek)(MFFile*, int, MFFileSeek);
 	int (*Tell)(MFFile*);
+
 	MFFileState (*Query)(MFFile*);
 	int (*GetSize)(MFFile*);
 };

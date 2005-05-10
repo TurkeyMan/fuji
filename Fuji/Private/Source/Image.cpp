@@ -1,7 +1,6 @@
 #include "Common.h"
 #include "Image.h"
-#include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "MFFileSystem.h"
 
 #if defined(_WINDOWS) || defined(_XBOX)
 #pragma pack(1)

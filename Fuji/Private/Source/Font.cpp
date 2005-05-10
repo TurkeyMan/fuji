@@ -3,8 +3,7 @@
 
 #include "Common.h"
 #include "Display.h"
-#include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "MFFileSystem.h"
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
 #include "Font.h"

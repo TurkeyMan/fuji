@@ -333,7 +333,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 	SoundMusic& track = gMusicTracks[t];
 
-	// load vorbis file
+	// open vorbis file
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
 		return -1;

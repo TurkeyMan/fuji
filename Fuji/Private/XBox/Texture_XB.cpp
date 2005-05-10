@@ -22,9 +22,12 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 
 	if(!pTexture)
 	{
-		char *pFileName = FixXBoxFilename(File_SystemPath(STR("%s.tga", pName)));
+		const char *pFileName = STR("%s.tga", pName);
 
-		if(!File_Exists(pFileName))
+		uint32 fileSize;
+		char *pBuffer = MFFileSystem_Load(pFileName, &fileSize);
+
+		if(!pBuffer)
 		{
 			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
 			return Texture_Create("_None");
@@ -36,18 +39,16 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 		D3DSURFACE_DESC imageDesc;
 		HRESULT hr;
 
-		hr = D3DXCreateTextureFromFileEx(pd3dDevice, pFileName, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->pTexture);
+		hr = D3DXCreateTextureFromFileInMemoryEx(pd3dDevice, pBuffer, fileSize, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->pTexture);
 
 		DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
 		DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
 		DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 		DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
-		if(hr != D3D_OK)
-		{
-			LOGD(STR("Failed loading texture: %s", pFileName));
-			return NULL;
-		}
+		DBGASSERT(hr == D3D_OK, STR("Failed to create texture '%s'.", pFileName));
+
+		Heap_Free(pBuffer);
 
 		strcpy(pTexture->name, pName);
 

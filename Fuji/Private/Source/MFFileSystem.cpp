@@ -6,9 +6,8 @@
 
 PtrListDL<MFFile> gOpenFiles;
 
-PtrListDL<MFMount> gMounts;
-MFMount **ppMountList;
-int gMountCount = 0;
+MFMount *pMountList = NULL;
+MFMount *pMountListEnd = NULL;
 
 PtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
 MFFileSystemCallbacks **ppFileSystemList;
@@ -20,10 +19,6 @@ FileSystemHandle hMemoryFileSystem = -1;
 void MFFileSystem_InitModule()
 {
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
-
-	gMounts.Init("FileSystem Mounts", gDefaults.filesys.maxFileSystemMounts);
-	ppMountList = (MFMount**)Heap_Alloc(sizeof(MFMount*) * gDefaults.filesys.maxFileSystemMounts);
-	memset(ppMountList, 0, sizeof(MFMount*) * gDefaults.filesys.maxFileSystemMounts);
 
 	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
 	ppFileSystemList = (MFFileSystemCallbacks**)Heap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
@@ -37,6 +32,8 @@ void MFFileSystem_InitModule()
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 	mountData.pPath = MFFile_SystemPath();
+	mountData.priority = MFMP_Normal;
+	mountData.pMountpoint = "data";
 
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
 }
@@ -50,7 +47,6 @@ void MFFileSystem_DeinitModule()
 	Heap_Free(ppFileSystemList);
 
 	pFileSystemCallbacks.Deinit();
-	gMounts.Deinit();
 	gOpenFiles.Deinit();
 }
 
@@ -60,6 +56,20 @@ FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbac
 	{
 		if(ppFileSystemList[a] == NULL)
 		{
+			DBGASSERT(pCallbacks->RegisterFS, "No RegisterFS function supplied.");
+			DBGASSERT(pCallbacks->UnregisterFS, "No UnregisterFS function supplied.");
+			DBGASSERT(pCallbacks->FSMount, "No FSMount function supplied.");
+			DBGASSERT(pCallbacks->FSDismount, "No FSDismount function supplied.");
+			DBGASSERT(pCallbacks->FSOpen, "No FSOpen function supplied.");
+			DBGASSERT(pCallbacks->Open, "No Open function supplied.");
+			DBGASSERT(pCallbacks->Close, "No Close function supplied.");
+			DBGASSERT(pCallbacks->Read, "No Read function supplied.");
+			DBGASSERT(pCallbacks->Write, "No Write function supplied.");
+			DBGASSERT(pCallbacks->Seek, "No Seek function supplied.");
+			DBGASSERT(pCallbacks->Tell, "No Tell function supplied.");
+			DBGASSERT(pCallbacks->Query, "No Query function supplied.");
+			DBGASSERT(pCallbacks->GetSize, "No GetSize function supplied.");
+
 			ppFileSystemList[a] = pFileSystemCallbacks.Create();
 			memcpy(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
 
@@ -225,24 +235,86 @@ int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData)
 {
 	CALLSTACK;
 
-	MFMount *pMount = gMounts.Create();
+	MFMount *pMount = (MFMount*)Heap_Alloc(sizeof(MFMount) + strlen(pMountData->pMountpoint) + 1);
 	memset(pMount, 0, sizeof(MFMount));
 
 	pMount->mountFlags = pMountData->flags;
 	pMount->fileSystem = fileSystem;
+	pMount->priority = pMountData->priority;
+	pMount->pMountpoint = (const char*)&pMount[1];
+	strcpy((char*)&pMount[1], pMountData->pMountpoint);
 
 	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
 
 	if(result < 0)
 	{
-		gMounts.Destroy(pMount);
+		Heap_Free(pMount);
 		return -1;
 	}
 
-	ppMountList[gMountCount] = pMount;
-	++gMountCount;
+	// hook it up..
+	if(!pMountList)
+	{
+		pMountList = pMountListEnd = pMount;
+		pMount->pPrev = pMount->pNext = NULL;
+	}
+	else
+	{
+		MFMount *pT = pMountList;
 
-	return gMountCount;
+		while(pT && pT->priority < pMount->priority)
+			pT = pT->pNext;
+
+		if(pT)
+		{
+			if(pT == pMountList)
+				pMountList = pMount;
+
+			pMount->pPrev = pT->pPrev;
+			pMount->pNext = pT;
+			pT->pPrev = pMount;
+		}
+		else
+		{
+			pMount->pPrev = pMountListEnd;
+			pMountListEnd->pNext = pMount;
+			pMountListEnd = pMount;
+		}
+	}
+
+	return 0;
+}
+
+int MFFileSystem_Dismount(const char *pMountpoint)
+{
+	MFMount *pT = pMountList;
+
+	while(pT && stricmp(pMountpoint, pT->pMountpoint))
+		pT = pT->pNext;
+
+	if(pT)
+	{
+		// dismount
+		ppFileSystemList[pT->fileSystem]->FSDismount(pT);
+
+		// remove mount
+		if(pMountList == pT)
+			pMountList = pT->pNext;
+		if(pMountListEnd == pT)
+			pMountListEnd = pT->pPrev;
+
+		if(pT->pNext)
+			pT->pNext->pPrev = pT->pPrev;
+		if(pT->pPrev)
+			pT->pPrev->pNext = pT->pNext;
+
+		Heap_Free(pT);
+
+		return 0;
+	}
+
+	// coundnt find mount..
+	return -1;
 }
 
 MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries)
@@ -287,30 +359,59 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 	return NULL;
 }
 
+void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
+{
+	for(int a=0; a<numEntries; a++)
+	{
+		if(pEntry[a].flags & MFTF_Directory)
+		{
+			MFFileSystem_ReleaseToc(pEntry[a].pChild, pEntry[a].size);
+		}
+	}
+
+	Heap_Free(pEntry);
+}
+
 // open a file from the mounted filesystem stack
 MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
-	// find file in filesystem stack
-	int mountID = gMountCount-1;
+	MFMount *pMount = pMountList;
+	const char *pMountpoint = NULL;
 
-	MFMount *pMount = NULL;
-	MFTOCEntry *pEntry = NULL;
-
-	// search from the top of the stack downwards...
-	while(mountID >= 0)
+	// search for a mountpoint
+	int len = strlen(pFilename);
+	for(int a=0; a<len; a++)
 	{
-		pMount = ppMountList[mountID];
-
-		// recurse toc
-		pEntry = MFFileSystem_GetTocEntry(pFilename, pMount->pEntries, pMount->numFiles);
-
-		if(pEntry)
+		if(pFilename[a] == ':')
 		{
-			// open the file from a mount
-			return ppFileSystemList[mountID]->FSOpen(pMount, pEntry, openFlags);
+			pMountpoint = STRn(pFilename, a);
+			pFilename += a+1;
+			break;
 		}
 
-		--mountID;
+		if(pFilename[a] == '.')
+		{
+			// if we have found a dot, this cant be a mountpoint
+			// (mountpoints may only be alphanumeric)			
+			break;
+		}
+	}
+
+	// search for file through the mount list...
+	while(pMount)
+	{
+		int onlyexclusive = pMount->mountFlags & MFMF_OnlyAllowExclusiveAccess;
+
+		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !stricmp(pMountpoint, pMount->pMountpoint)))
+		{
+			// open the file from a mount
+			MFFileHandle hFile = ppFileSystemList[pMount->fileSystem]->FSOpen(pMount, pFilename, openFlags);
+
+			if(hFile)
+				return hFile;
+		}
+
+		pMount = pMount->pNext;
 	}
 
 	return NULL;

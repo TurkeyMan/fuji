@@ -91,8 +91,19 @@ enum MFMountFlags
 	MFMF_FlattenDirectoryStructure = 1,	// flattens the directory heirarchy
 	MFMF_Recursive = 2,					// recurse into subdirectories when building TOC
 	MFMF_DontCacheTOC = 4,				// dosent take a local memory copy of the TOC (useful for filesystems read from memory)
+	MFMF_OnlyAllowExclusiveAccess = 8,	// this will exclude this mount from any non-specific filesystem operations (filenames explicitly directed to this mount using 'device:')
 
 	MFMF_ForceUInt = 0xFFFFFFFF
+};
+
+// these are just a general default or guideline, priorities can really be any number
+enum MFMountPriority
+{
+	MFMP_VeryHigh = 0,
+	MFMP_AboveNormal = 5,
+	MFMP_Normal = 10,
+	MFMP_BelowNormal = 15,
+	MFMP_VeryLow = 20
 };
 
 // open file base data
@@ -100,10 +111,13 @@ struct MFMountData
 {
 	int cbSize;
 	uint32 flags;
+	const char *pMountpoint;
+	int priority;
 };
 
 // mount a filesystem
 int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData);
+int MFFileSystem_Dismount(const char *pMountpoint);
 
 // open a file from the mounted filesystem stack
 MFFileHandle MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);

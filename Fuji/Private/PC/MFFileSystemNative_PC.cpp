@@ -180,17 +180,6 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	return 0;
 }
 
-MFFile* MFFileSystemNative_Open(MFMount *pMount, MFTOCEntry *pTOCEntry, uint32 openFlags)
-{
-	MFOpenDataNative openData;
-
-	openData.cbSize = sizeof(MFOpenDataNative);
-	openData.openFlags = openFlags;
-	openData.pFilename = STR("%s%s", (char*)pTOCEntry->pFilesysData, pTOCEntry->pName);
-
-	return MFFile_Open(hNativeFileSystem, &openData);
-}
-
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	CALLSTACK;
