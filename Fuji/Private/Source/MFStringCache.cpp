@@ -2,7 +2,7 @@
 // Mount Fuji Simple string cache.
 //
 //=============================================================================
-#include "common.h"
+#include "Common.h"
 #include "MFStringCache.h"
 
 MFStringCache *MFStringCache::Create(int maxSize)

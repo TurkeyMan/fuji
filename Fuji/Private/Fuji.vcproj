@@ -611,6 +611,12 @@
 				RelativePath=".\Source\MFFileSystem_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFIni.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFStringCache.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
@@ -734,6 +740,12 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFIni.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFStringCache.h">
 			</File>
 			<File
 				RelativePath=".\Include\Primitive.h">

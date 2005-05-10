@@ -2,7 +2,7 @@
 // MFIni.cpp
 //
 
-#include "common.h"
+#include "Common.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"
 #include "MFStringCache.h"
