@@ -212,9 +212,6 @@
 				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\IniFile.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Input.cpp">
 			</File>
 			<File
@@ -332,9 +329,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Image.h">
-			</File>
-			<File
-				RelativePath=".\Include\IniFile.h">
 			</File>
 			<File
 				RelativePath=".\Include\Input.h">

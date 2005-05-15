@@ -14,6 +14,9 @@
 //   pLine = pLine->Next();
 // }
 //================================================
+#include "Vector3.h"
+#include "Vector4.h"
+
 class MFStringCache;
 
 class MFIniLine
@@ -23,12 +26,17 @@ public:
 	MFIniLine *Next();
 	MFIniLine *Sub();
 
+	// find a 2 string entry (ie. "label data")
+	MFIniLine *FindEntry(const char *pLabel, const char *pData);
+
 	int GetStringCount();
 	bool IsString(int index, const char *pString);
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);
 	bool GetBool(int index);
+	Vector3 GetVector3(int index);
+	Vector4 GetVector4(int index);
 
 protected:
 	class MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
@@ -44,6 +52,8 @@ friend class MFIniLine;
 public:
 	static MFIni *Create(const char *pFilename);
 	static void Destroy(MFIni *pIni);
+
+	// get first line, all further parsing is done through the Line interface
 	MFIniLine *GetFirstLine();
 
 protected:

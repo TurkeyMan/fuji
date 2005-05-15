@@ -7,7 +7,7 @@
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
 #include "MFFileSystem.h"
-#include "IniFile.h"
+#include "MFIni.h"
 
 #include "SysLogo-256.h"
 #include "SysLogo-64.h"
@@ -19,7 +19,7 @@ void		MaterialInternal_Update(Material *pMaterial);
 const char*	MaterialInternal_GetIDString(Material *pMaterial);
 
 Material*	MaterialInternal_CreateDefault(const char *pName);
-void		MaterialInternal_InitialiseFromDefinition(IniFile *pDefIni, Material *pMat, const char *pDefinition);
+void		MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, Material *pMat, const char *pDefinition);
 
 
 /**** Globals ****/
@@ -27,7 +27,7 @@ void		MaterialInternal_InitialiseFromDefinition(IniFile *pDefIni, Material *pMat
 struct MaterialDefinition
 {
 	const char *pName;
-	IniFile *pIniFile;
+	MFIni *pIni;
 	bool ownsIni;
 
 	MaterialDefinition *pNextDefinition;
@@ -36,7 +36,6 @@ struct MaterialDefinition
 void Material_DestroyDefinition(MaterialDefinition *pDefinition);
 
 PtrListDL<MaterialDefinition> gMaterialDefList;
-PtrListDL<IniFile> gMaterialDefInis;
 MaterialDefinition *pDefinitionRegistry = NULL;
 
 PtrListDL<Material> gMaterialList;
@@ -58,7 +57,6 @@ void Material_InitModule()
 	CALLSTACK;
 
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
-	gMaterialDefInis.Init("Material Definitions Ini Files", gDefaults.material.maxMaterialDefs);
 
 	gMaterialList.Init("Material List", gDefaults.material.maxMaterials);
 
@@ -103,7 +101,6 @@ void Material_DeinitModule()
 	gMaterialList.Deinit();
 
 	gMaterialDefList.Deinit();
-	gMaterialDefInis.Deinit();
 }
 
 void Material_Update()
@@ -123,13 +120,10 @@ int Material_AddDefinitionsFile(const char *pName, const char *pFilename)
 	MaterialDefinition *pDef = gMaterialDefList.Create();
 
 	pDef->pName = pName;
-	pDef->pIniFile = gMaterialDefInis.Create();
-
-	if(pDef->pIniFile->Create(pFilename))
+	pDef->pIni = MFIni::Create(pFilename);
+	if (!pDef->pIni)
 	{
-		gMaterialDefInis.Destroy(pDef->pIniFile);
 		gMaterialDefList.Destroy(pDef);
-
 		LOGD("Error: Couldnt create material definitions...");
 		return 1;
 	}
@@ -142,27 +136,12 @@ int Material_AddDefinitionsFile(const char *pName, const char *pFilename)
 	return 0;
 }
 
-int Material_AddDefinitionsFileInMemory(const char *pName, const char *pBuffer)
+int Material_AddDefinitionsIniFile(const char *pName, MFIni *pMatDefs)
 {
 	MaterialDefinition *pDef = gMaterialDefList.Create();
 
 	pDef->pName = pName;
-	pDef->pIniFile = gMaterialDefInis.Create();
-	pDef->pIniFile->CreateFromPointer(pBuffer);
-	pDef->ownsIni = true;
-
-	pDef->pNextDefinition = pDefinitionRegistry;
-	pDefinitionRegistry = pDef;
-
-	return 0;
-}
-
-int Material_AddDefinitionsIniFile(const char *pName, IniFile *pMatDefs)
-{
-	MaterialDefinition *pDef = gMaterialDefList.Create();
-
-	pDef->pName = pName;
-	pDef->pIniFile = pMatDefs;
+	pDef->pIni = pMatDefs;
 	pDef->ownsIni = false;
 
 	pDef->pNextDefinition = pDefinitionRegistry;
@@ -175,9 +154,8 @@ void Material_DestroyDefinition(MaterialDefinition *pDefinition)
 {
 	if(pDefinition->ownsIni)
 	{
-		pDefinition->pIniFile->Release();
-		gMaterialDefInis.Destroy(pDefinition->pIniFile);
-		pDefinition->pIniFile = NULL;
+		MFIni::Destroy(pDefinition->pIni);
+		pDefinition->pIni = NULL;
 	}
 
 	gMaterialDefList.Destroy(pDefinition);
@@ -223,12 +201,12 @@ Material* Material_Create(const char *pName)
 		pMat = MaterialInternal_CreateDefault(pName);
 
 		MaterialDefinition *pDef = pDefinitionRegistry;
-
 		while(pDef)
 		{
-			if(pDef->pIniFile->FindSection(pName))
+			MFIniLine *pLine = pDef->pIni->GetFirstLine()->FindEntry("Material",pName);
+			if (pLine)
 			{
-				MaterialInternal_InitialiseFromDefinition(pDef->pIniFile, pMat, pName);
+				MaterialInternal_InitialiseFromDefinition(pDef->pIni, pMat, pName);
 				break;
 			}
 
@@ -353,175 +331,167 @@ Material* MaterialInternal_CreateDefault(const char *pName)
 	return pMat;
 }
 
-void MaterialInternal_InitialiseFromDefinition(IniFile *pDefIni, Material *pMat, const char *pDefinition)
+void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, Material *pMat, const char *pDefinition)
 {
 	CALLSTACK;
 
-	if(pDefIni->FindSection(pDefinition))
+	MFIniLine *pLine;
+	if (pLine = pDefIni->GetFirstLine()->FindEntry("material",pDefinition))
 	{
-		pDefIni->GetNextLine();
-
-		while(!pDefIni->EndOfFile() && !pDefIni->IsSection())
+		pLine = pLine->Sub();
+		while (pLine)
 		{
-			char *pName = pDefIni->GetName();
-			if(!StrCaseCmp(pName, "alias"))
+			if (pLine->IsString(0,"alias"))
 			{
 #pragma message("Alias's should be able to come from other material ini's")
-				pDefIni->PushMarker();
 
-				char *pAlias = pDefIni->AsString();
-
-				if(pDefIni->FindSection(pAlias))
-				{
-					MaterialInternal_InitialiseFromDefinition(pDefIni, pMat, pAlias);
-				}
-
-				pDefIni->PopMarker();
+				const char *pAlias = pLine->GetString(1);
+				MaterialInternal_InitialiseFromDefinition(pDefIni, pMat, pAlias);
 			}
-			else if(!StrCaseCmp(pName, "lit"))
+			else if(pLine->IsString(0, "lit"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Lit) | (pDefIni->AsBool(0) ? MF_Lit : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Lit) | (pLine->GetBool(1) ? MF_Lit : NULL);
 			}
-			else if(!StrCaseCmp(pName, "prelit"))
+			else if(pLine->IsString(0, "prelit"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Lit) | (!pDefIni->AsBool(0) ? MF_Lit : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Lit) | (!pLine->GetBool(1) ? MF_Lit : NULL);
 			}
-			else if(!StrCaseCmp(pName, "diffusecolour"))
+			else if(pLine->IsString(0, "diffusecolour"))
 			{
-				pMat->diffuse = pDefIni->AsVector4();
+				pMat->diffuse = pLine->GetVector4(1);
 			}
-			else if(!StrCaseCmp(pName, "ambientcolour"))
+			else if(pLine->IsString(0, "ambientcolour"))
 			{
-				pMat->ambient = pDefIni->AsVector4();
+				pMat->ambient = pLine->GetVector4(1);
 			}
-			else if(!StrCaseCmp(pName, "specularcolour"))
+			else if(pLine->IsString(0, "specularcolour"))
 			{
-				pMat->specular = pDefIni->AsVector4();
+				pMat->specular = pLine->GetVector4(1);
 			}
-			else if(!StrCaseCmp(pName, "specularpower"))
+			else if(pLine->IsString(0, "specularpower"))
 			{
-				pMat->specularPow = pDefIni->AsFloat(0);
+				pMat->specularPow = pLine->GetFloat(1);
 			}
-			else if(!StrCaseCmp(pName, "emissivecolour"))
+			else if(pLine->IsString(0, "emissivecolour"))
 			{
-				pMat->illum = pDefIni->AsVector4();
+				pMat->illum = pLine->GetVector4(1);
 			}
-			else if(!StrCaseCmp(pName, "mask"))
+			else if(pLine->IsString(0, "mask"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_Mask) | (pDefIni->AsBool(0) ? MF_Mask : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_Mask) | (pLine->GetBool(1) ? MF_Mask : NULL);
 			}
-			else if(!StrCaseCmp(pName, "doublesided"))
+			else if(pLine->IsString(0, "doublesided"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (pDefIni->AsBool(0) ? MF_DoubleSided : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (pLine->GetBool(1) ? MF_DoubleSided : NULL);
 			}
-			else if(!StrCaseCmp(pName, "backfacecull"))
+			else if(pLine->IsString(0, "backfacecull"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (!pDefIni->AsBool(0) ? MF_DoubleSided : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_DoubleSided) | (!pLine->GetBool(1) ? MF_DoubleSided : NULL);
 			}
-			else if(!StrCaseCmp(pName, "additive"))
+			else if(pLine->IsString(0, "additive"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pDefIni->AsBool(0) ? MF_Additive : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pLine->GetBool(1) ? MF_Additive : NULL);
 			}
-			else if(!StrCaseCmp(pName, "subtractive"))
+			else if(pLine->IsString(0, "subtractive"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pDefIni->AsBool(0) ? MF_Subtractive : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pLine->GetBool(1) ? MF_Subtractive : NULL);
 			}
-			else if(!StrCaseCmp(pName, "alpha"))
+			else if(pLine->IsString(0, "alpha"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pDefIni->AsBool(0) ? MF_AlphaBlend : NULL);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pLine->GetBool(1) ? MF_AlphaBlend : NULL);
 			}
-			else if(!StrCaseCmp(pName, "blend"))
+			else if(pLine->IsString(0, "blend"))
 			{
-				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pDefIni->AsInt(0) << 1);
+				pMat->materialType = (pMat->materialType & ~MF_BlendMask) | (pLine->GetInt(1) << 1);
 			}
-			else if(!StrCaseCmp(pName, "texture"))
+			else if(pLine->IsString(0, "texture"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "diffusemap"))
+			else if(pLine->IsString(0, "diffusemap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->diffuseMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "diffusemap2"))
+			else if(pLine->IsString(0, "diffusemap2"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_DiffuseMap2;
 				pMat->diffuseMap2Index = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "normalmap"))
+			else if(pLine->IsString(0, "normalmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_NormalMap;
 				pMat->normalMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "detailmap"))
+			else if(pLine->IsString(0, "detailmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_DetailTexture;
 				pMat->detailMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "envmap"))
+			else if(pLine->IsString(0, "envmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_SphereEnvMap;
 				pMat->envMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "lightmap"))
+			else if(pLine->IsString(0, "lightmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_LightMap;
 				pMat->lightMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "bumpmap"))
+			else if(pLine->IsString(0, "bumpmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "reflectionmap"))
+			else if(pLine->IsString(0, "reflectionmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "specularmap"))
+			else if(pLine->IsString(0, "specularmap"))
 			{
-				pMat->pTextures[pMat->textureCount] = Texture_Create(pDefIni->AsString());
+				pMat->pTextures[pMat->textureCount] = Texture_Create(pLine->GetString(1));
 				pMat->materialType |= MF_BumpMap;
 				pMat->bumpMapIndex = pMat->textureCount;
 				pMat->textureCount++;
 			}
-			else if(!StrCaseCmp(pName, "celshading"))
+			else if(pLine->IsString(0, "celshading"))
 			{
 				pMat->materialType |= MF_CelShading;
 	//				pMat-> = gMaterialDefinitions.AsInt(0);
 			}
-			else if(!StrCaseCmp(pName, "phong"))
+			else if(pLine->IsString(0, "phong"))
 			{
 				pMat->materialType |= MF_LitPerPixel;
 	//				pMat-> = gMaterialDefinitions.AsInt(0);
 			}
-			else if(!StrCaseCmp(pName, "animated"))
+			else if(pLine->IsString(0, "animated"))
 			{
 				pMat->materialType |= MF_Animating;
-				pMat->uFrames = pDefIni->AsInt(0);
-				pMat->vFrames = pDefIni->AsInt(1);
-				pMat->frameTime = pDefIni->AsFloat(2);
+				pMat->uFrames = pLine->GetInt(1);
+				pMat->vFrames = pLine->GetInt(2);
+				pMat->frameTime = pLine->GetFloat(3);
 
 				pMat->textureMatrix.SetScale(Vector(1.0f/(float)pMat->uFrames, 1.0f/(float)pMat->vFrames, 1.0f));
 			}
 
-			pDefIni->GetNextLine();
+			pLine = pLine->Next();
 		}
 	}
 }

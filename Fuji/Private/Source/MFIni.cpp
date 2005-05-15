@@ -40,13 +40,45 @@ float MFIniLine::GetFloat(int index)
 
 int MFIniLine::GetInt(int index)
 {
+	if (index >= this->stringCount)
+	{
+		return 0;
+	}
 	return atoi(GetString(index));
 }
 
 bool MFIniLine::GetBool(int index)
 {
+	if (index >= this->stringCount)
+	{
+		return false;
+	}
 	return atoi(GetString(index)) != 0;
 }
+
+Vector3 MFIniLine::GetVector3(int index)
+{
+	return Vector(GetFloat(index), GetFloat(index+1), GetFloat(index+2));
+}
+
+Vector4 MFIniLine::GetVector4(int index)
+{
+	return Vector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
+}
+
+// find a 2 string entry (ie. "label data")
+MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
+{
+	MFIniLine *pLine = this;
+	while (pLine)
+	{
+		if (pLine->IsString(0, pLabel) && pLine->IsString(1, pData))
+			return pLine;
+		pLine = pLine->Next();
+	}
+	return NULL;
+}
+
 
 #define MAX_LINES (32000)
 #define MAX_STRINGS (64000)
@@ -101,7 +133,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	const char **pCurrString = &pStrings[stringCount];
 
 	InitLine(pCurrLine);
-	while (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer))
+	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer)))
 	{
 		// newline
 		tokenLength = strlen(tokenBuffer);
@@ -139,6 +171,9 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 				InitLine(pCurrLine);
 			}
 			bNewLine = false;
+
+			LOGD(STR("Line %d: String %d: %s",lineCount,stringCount,tokenBuffer));
+
 			pStrings[stringCount++] = pCache->Add(tokenBuffer);
 			pCurrLine->stringCount++;
 		}
@@ -205,6 +240,8 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	if (pDst != pTokenBuffer)
 	{
 		*pDst++ = 0;
+		if (*pSrc == ',')
+			pSrc++;
 		return pSrc;
 	}
 

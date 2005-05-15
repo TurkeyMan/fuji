@@ -498,6 +498,9 @@ void Sound_MusicUnload(int track)
 {
 	CALLSTACK;
 
+	// bad tracks, just ignore
+	if (track == -1) return;
+
 	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
 
 	gMusicTracks[track].pInfo = NULL;

@@ -8,8 +8,8 @@
 
 #include "Vector3.h"
 #include "Input_Internal.h"
-#include "IniFile.h"
 #include "Heap.h"
+#include "MFIni.h"
 
 #if defined(ALLOW_RAW_INPUT)
 	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
@@ -908,7 +908,7 @@ void LoadGamepadMappings()
 {
 	// load GamepadMappings.ini
 	GamepadInfo *pGI = NULL;
-	IniFile ini;
+	MFIni *pIni;
 
 	// create default
 	pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen("default") + 1);
@@ -931,138 +931,141 @@ void LoadGamepadMappings()
 	}
 
 	// read GameMappings.ini file
-	if(!ini.Create("GamepadMappings.ini"))
+	if(pIni = MFIni::Create("GamepadMappings.ini"))
 	{
-		ini.GetFirstLine();
+		MFIniLine *pLine;
+		pLine = pIni->GetFirstLine();
 
-		while(!ini.EndOfFile())
+		while(pLine)
 		{
-			char *pName = ini.GetName();
-
-			if(ini.IsSection())
+			if (pLine->IsString(0, "Gamepad"))
 			{
+				const char *pName = pLine->GetString(1);
 				pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
 				pGI->usePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;
 				strcpy(pGI->pName, pName);
-
 				pGI->pNext = pGamepadMappingRegistry;
 				pGamepadMappingRegistry = pGI;
-			}
-			else
-			{
-				if(!stricmp(pName, "Axis_LX"))
-				{
-					pGI->axisMapping[0] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Axis_LY"))
-				{
-					pGI->axisMapping[1] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Axis_RX"))
-				{
-					pGI->axisMapping[2] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Axis_RY"))
-				{
-					pGI->axisMapping[3] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Cross"))
-				{
-					pGI->buttonMapping[0] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Circle"))
-				{
-					pGI->buttonMapping[1] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Box"))
-				{
-					pGI->buttonMapping[2] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Triangle"))
-				{
-					pGI->buttonMapping[3] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_R1"))
-				{
-					pGI->buttonMapping[4] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_L1"))
-				{
-					pGI->buttonMapping[5] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_L2"))
-				{
-					pGI->buttonMapping[6] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_R2"))
-				{
-					pGI->buttonMapping[7] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Start"))
-				{
-					pGI->buttonMapping[8] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_Select"))
-				{
-					pGI->buttonMapping[9] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_LThumb"))
-				{
-					pGI->buttonMapping[10] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_P2_RThumb"))
-				{
-					pGI->buttonMapping[11] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_DUp"))
-				{
-					pGI->buttonMapping[12] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_DDown"))
-				{
-					pGI->buttonMapping[13] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_DLeft"))
-				{
-					pGI->buttonMapping[14] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "Button_DRight"))
-				{
-					pGI->buttonMapping[15] = ini.AsInt(0);
-				}
-				else if(!stricmp(pName, "IgnorePOV"))
-				{
-					pGI->usePOV = false;
-				}
-				else if(!stricmp(pName, "ButtonStrings"))
-				{
-					char *pStrings = ini.AsString();
 
-					if(!stricmp(pStrings, "XBox"))
+				MFIniLine *pPadLine = pLine->Sub();
+				while (pPadLine)
+				{
+					const char *pField = pPadLine->GetString(0);
+					if (!stricmp(pField, "Axis_LX"))
 					{
-						pGI->ppButtonNameStrings = XBoxButtons;
+						pGI->axisMapping[0] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pStrings, "Playstation"))
+					else if(!stricmp(pField, "Axis_LY"))
 					{
-						pGI->ppButtonNameStrings = PS2Buttons;
+						pGI->axisMapping[1] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Axis_RX"))
+					{
+						pGI->axisMapping[2] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Axis_RY"))
+					{
+						pGI->axisMapping[3] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Cross"))
+					{
+						pGI->buttonMapping[0] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Circle"))
+					{
+						pGI->buttonMapping[1] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Box"))
+					{
+						pGI->buttonMapping[2] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Triangle"))
+					{
+						pGI->buttonMapping[3] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_R1"))
+					{
+						pGI->buttonMapping[4] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_L1"))
+					{
+						pGI->buttonMapping[5] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_L2"))
+					{
+						pGI->buttonMapping[6] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_R2"))
+					{
+						pGI->buttonMapping[7] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Start"))
+					{
+						pGI->buttonMapping[8] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_Select"))
+					{
+						pGI->buttonMapping[9] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_LThumb"))
+					{
+						pGI->buttonMapping[10] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_P2_RThumb"))
+					{
+						pGI->buttonMapping[11] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_DUp"))
+					{
+						pGI->buttonMapping[12] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_DDown"))
+					{
+						pGI->buttonMapping[13] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_DLeft"))
+					{
+						pGI->buttonMapping[14] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "Button_DRight"))
+					{
+						pGI->buttonMapping[15] = pPadLine->GetInt(1);
+					}
+					else if(!stricmp(pField, "IgnorePOV"))
+					{
+						pGI->usePOV = false;
+					}
+					else if(!stricmp(pField, "ButtonStrings"))
+					{
+						const char *pStrings = pPadLine->GetString(1);
+						if(!stricmp(pStrings, "XBox"))
+						{
+							pGI->ppButtonNameStrings = XBoxButtons;
+						}
+						else if(!stricmp(pStrings, "Playstation"))
+						{
+							pGI->ppButtonNameStrings = PS2Buttons;
+						}
+						else
+						{
+							LOGD(STR("Error: Gamepad button strings '%s' unavailable for gamepad type '%s'.", pStrings, pGI->pName));
+						}
 					}
 					else
 					{
-						LOGD(STR("Error: Gamepad button strings '%s' unavailable for gamepad type '%s'.", pStrings, pGI->pName));
+						LOGD(STR("Error: Unknown controller property '%s' in gamepad '%s'.", pName, pGI->pName));
 					}
-				}
-				else
-				{
-					LOGD(STR("Error: Unknown controller property '%s' in gamepad '%s'.", pName, pGI->pName));
+
+					pPadLine = pPadLine->Next();
 				}
 			}
 
-			ini.GetNextLine();
+			pLine = pLine->Next();
 		}
 
-		ini.Release();
+		MFIni::Destroy(pIni);
 	}
 }
 

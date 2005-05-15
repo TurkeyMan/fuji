@@ -1,14 +1,12 @@
 #if !defined(_MATERIAL_H)
 #define _MATERIAL_H
 
-#include "IniFile.h"
-
+class MFIni;
 struct Material;
 
 // interface functions
 int			Material_AddDefinitionsFile(const char *pName, const char *pFilename);
-int			Material_AddDefinitionsFileInMemory(const char *pName, const char *pBuffer);
-int			Material_AddDefinitionsIniFile(const char *pName, IniFile *pMatDefs);
+int			Material_AddDefinitionsIniFile(const char *pName, MFIni *pMatDefs);
 void		Material_RemoveDefinitions(const char *pName);
 
 Material*	Material_Create(const char *pName);

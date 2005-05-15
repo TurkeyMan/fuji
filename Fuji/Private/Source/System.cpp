@@ -11,7 +11,6 @@
 #include "DebugMenu.h"
 #include "Timer.h"
 #include "Font.h"
-#include "IniFile.h"
 #include "Renderer.h"
 #include "Sound.h"
 
