@@ -38,6 +38,10 @@ public:
 	Vector3 GetVector3(int index);
 	Vector4 GetVector4(int index);
 
+	// Log the contents of this line, and following lines to the screen
+	// Mainly for debugging purposes
+	void DumpRecursive(int depth);
+
 protected:
 	class MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
 	int subtreeLineCount;		// total number of sublines before next line at this level
@@ -73,7 +77,7 @@ protected:
 	// pTokenEnd will point to the last Char in the token
 	// return TRUE if a token was found
 	// '{', '}' and '/n' are also treated as tokens
-	static const char *ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer);
+	static const char *ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection);
 
 	// use recursion to scan in the lines & strings
 	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd);

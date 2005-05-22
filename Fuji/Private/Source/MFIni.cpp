@@ -133,7 +133,8 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	const char **pCurrString = &pStrings[stringCount];
 
 	InitLine(pCurrLine);
-	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer)))
+	bool bIsSection;
+	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)))
 	{
 		// newline
 		tokenLength = strlen(tokenBuffer);
@@ -172,8 +173,11 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			}
 			bNewLine = false;
 
-			LOGD(STR("Line %d: String %d: %s",lineCount,stringCount,tokenBuffer));
-
+			if (bIsSection)
+			{
+				pStrings[stringCount++] = pCache->Add("section");
+				pCurrLine->stringCount++;
+			}
 			pStrings[stringCount++] = pCache->Add(tokenBuffer);
 			pCurrLine->stringCount++;
 		}
@@ -197,10 +201,10 @@ void MFIni::InitLine(MFIniLine *pLine)
 	pLine->terminate = 0;
 }
 
-const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer)
+const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection)
 {
 	// skip white space
-	while (pSrc < pSrcEnd && (*pSrc == ' ' || *pSrc == '\t' || *pSrc == 0xa)) pSrc++;
+	while (pSrc < pSrcEnd && (*pSrc == ' ' || *pSrc == '\t' || *pSrc == 0xa || (stringCount==1 && *pSrc == '='))) pSrc++;
 
 	// end of file?
 	if (pSrc == pSrcEnd)
@@ -219,10 +223,25 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 
 	// find end of token
 	bool bInQuotes = false;
+	int sectionDepth = 0;
+	*pbIsSection = false;
 	while (pSrc < pSrcEnd && *pSrc != 0xd
-		    && (bInQuotes || (*pSrc != ' ' && *pSrc != '/t' && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
+		    && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && *pSrc != ' ' && *pSrc != '/t' && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
 	{
-		if (*pSrc == '"')
+		if (!bInQuotes && *pSrc == '[')
+		{
+			sectionDepth++;
+			*pbIsSection = true;
+			pSrc++;
+		}
+		else if (!bInQuotes && *pSrc == ']')
+		{
+			sectionDepth--;
+			if (sectionDepth < 0)
+				LOGD("Error - Missing '['");
+			pSrc++;
+		}
+		else if (*pSrc == '"')
 		{
 			bInQuotes = !bInQuotes;
 			pSrc++;
@@ -252,3 +271,38 @@ MFIniLine *MFIni::GetFirstLine()
 {
 	return pLines;
 }
+
+// Log the contents of this line, and following lines to the screen
+// Mainly for debugging purposes
+void MFIniLine::DumpRecursive(int depth)
+{
+	char prefix[256];
+	int c;
+	for (c=0; c<depth*2; c++)
+	{
+		prefix[c] = ' ';
+	}
+	prefix[c]=0;
+
+	MFIniLine *pLine = this;
+
+	char buffer[256];
+	while (pLine)
+	{
+		strcpy(buffer,prefix);
+		for (int i=0; i<pLine->GetStringCount(); i++)
+		{
+			strcat(buffer, STR("'%s'",pLine->GetString(i)));
+			strcat(buffer, "  ");
+		}
+		LOGD(buffer);
+		if (pLine->Sub())
+		{
+			LOGD(STR("%s{",prefix));
+			pLine->Sub()->DumpRecursive(depth+1);
+			LOGD(STR("%s}",prefix));
+		}
+		pLine = pLine->Next();
+	}
+}
+
