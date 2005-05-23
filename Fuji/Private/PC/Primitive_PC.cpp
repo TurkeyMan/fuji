@@ -48,7 +48,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
 
-	Renderer_SetRenderer(rendererFlags, 0, RS_MFPrimitive);
+	Renderer_SetRenderer(rendererFlags, 0, RS_ImmediateMode);
 }
 
 void MFBegin(uint32 vertexCount)

@@ -34,7 +34,7 @@ void Sprite::Draw()
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 
-	Material_Use(pMaterial);
+	Material_SetMaterial(pMaterial);
 
 	// set texture
 	MFPrimitive(PT_TriStrip);

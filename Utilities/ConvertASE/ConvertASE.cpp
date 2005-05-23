@@ -3,16 +3,16 @@
 #include <conio.h>
 
 #include "Common.h"
-#include "F3D.h"
+#include "F3DFile.h"
 
 char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*));
 
 F3DFile model;
-F3DMaterial *pMaterial = NULL;
+//F3DMaterial *pMaterial = NULL;
 
-F3DSubObject *pSub = NULL;
-F3DBone *pBone = NULL;
-F3DRefPoint *pRefPoint = NULL;
+//F3DSubObject *pSub = NULL;
+//F3DBone *pBone = NULL;
+//F3DRefPoint *pRefPoint = NULL;
 int nodeType = -1;
 
 char* GetInt(char *pFilePtr, int *pInt)
@@ -951,6 +951,8 @@ int main(int argc, char *argv[])
 
 	for(a=(int)strlen(pSource); a>0 && pSource[a-1] != '.'; a--);
 
+	pFile = new F3DFile;
+
 	if(!stricmp(&pSource[a], "f3d"))
 	{
 		a = model.ReadFromDisk(pSource);
@@ -991,6 +993,8 @@ int main(int argc, char *argv[])
 		printf("Unrecognised source file format.\n");
 		return 1;
 	}
+
+	delete pFile;
 
 	return 0;
 }

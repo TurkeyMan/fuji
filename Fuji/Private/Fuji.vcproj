@@ -614,6 +614,12 @@
 				RelativePath=".\Source\MFIni.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFModel.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFModel_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFStringCache.cpp">
 			</File>
 			<File
@@ -689,6 +695,28 @@
 					RelativePath=".\Source\FileSystem\MFFileSystemNative.h">
 				</File>
 			</Filter>
+			<Filter
+				Name="Synth"
+				Filter="">
+				<File
+					RelativePath=".\Source\Synth\Amplifier.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Synth\LFO.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Synth\Mixer.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Synth\OutputFilter.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Synth\PhaseInverter.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Synth\Synth.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -745,6 +773,9 @@
 				RelativePath=".\Include\MFIni.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFModel.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFStringCache.h">
 			</File>
 			<File
@@ -789,6 +820,28 @@
 			<File
 				RelativePath=".\Include\View.h">
 			</File>
+			<Filter
+				Name="Synth"
+				Filter="">
+				<File
+					RelativePath=".\Include\Synth\Amplifier.h">
+				</File>
+				<File
+					RelativePath=".\Include\Synth\LFO.h">
+				</File>
+				<File
+					RelativePath=".\Include\Synth\Mixer.h">
+				</File>
+				<File
+					RelativePath=".\Include\Synth\OutputFilter.h">
+				</File>
+				<File
+					RelativePath=".\Include\Synth\PhaseInverter.h">
+				</File>
+				<File
+					RelativePath=".\Include\Synth\Synth.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="XBox"

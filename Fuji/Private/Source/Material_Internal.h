@@ -55,5 +55,33 @@ struct Material
 	uint32 displacementMapIndex	: 3;
 };
 
+struct MFMeshChunk
+{
+#if defined(_WINDOWS)
+	// interface pointers
+	IDirect3DVertexBuffer9 *pVertexBuffer;
+	IDirect3DIndexBuffer9 *pIndexBuffer;
+	IDirect3DVertexDeclaration9 *pVertexDeclaration;
+
+	// model data
+	const char *pVertexData;
+	uint32 vertexDataSize;
+
+	const char *pIndexData;
+	uint32 indexDataSize;
+
+	// vertex format declaration
+	D3DVERTEXELEMENT9 *pVertexElements;
+
+	// matrix batching data
+	int matrixBatchSize;
+	uint16 *pBatchIndices;
+#elif defined(_XBOX)
+	// some vertex buffer type thing...
+#endif
+
+	uint32 numVertices;
+	uint32 vertexStride;
+};
 
 #endif

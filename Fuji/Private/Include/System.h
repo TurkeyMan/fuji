@@ -38,6 +38,11 @@ struct FujiDefaults
 		uint32 maxMaterials;
 	} material;
 
+	struct ModelDefaults
+	{
+		uint32 maxModels;
+	} model;
+
 	struct FileSystemDefaults
 	{
 		uint32 maxOpenFiles;

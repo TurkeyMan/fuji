@@ -57,7 +57,6 @@ void Material_InitModule()
 	CALLSTACK;
 
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
-
 	gMaterialList.Init("Material List", gDefaults.material.maxMaterials);
 
 	if(Material_AddDefinitionsFile("Materials.ini", "Materials.ini"))
@@ -99,7 +98,6 @@ void Material_DeinitModule()
 	}
 
 	gMaterialList.Deinit();
-
 	gMaterialDefList.Deinit();
 }
 
@@ -136,7 +134,7 @@ int Material_AddDefinitionsFile(const char *pName, const char *pFilename)
 	return 0;
 }
 
-int Material_AddDefinitionsIniFile(const char *pName, MFIni *pMatDefs)
+int Material_AddDefinitionsIni(const char *pName, MFIni *pMatDefs)
 {
 	MaterialDefinition *pDef = gMaterialDefList.Create();
 
@@ -270,14 +268,29 @@ Material* Material_GetCurrent()
 	return pCurrentMaterial;
 }
 
-void Material_Use(Material *pMaterial)
+void Material_SetMaterial(Material *pMaterial)
 {
+	if(!pMaterial)
+		pMaterial = Material_GetStockMaterial(Mat_White);
+
 	pCurrentMaterial = pMaterial;
 }
 
-void Material_UseWhite()
+Material* Material_GetStockMaterial(StockMaterials materialIdentifier)
 {
-	Material_Use(pWhiteMaterial);
+	switch(materialIdentifier)
+	{
+		case Mat_White:
+			return pWhiteMaterial;
+		case Mat_Unavailable:
+			return pNoneMaterial;
+		case Mat_SysLogoSmall:
+			return pSysLogoSmall;
+		case Mat_SysLogoLarge:
+			return pSysLogoLarge;
+	}
+
+	return NULL;
 }
 
 
@@ -335,13 +348,14 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, Material *pMat, c
 {
 	CALLSTACK;
 
-	MFIniLine *pLine;
-	if (pLine = pDefIni->GetFirstLine()->FindEntry("material",pDefinition))
+	MFIniLine *pLine = pDefIni->GetFirstLine()->FindEntry("material",pDefinition);
+
+	if(pLine)
 	{
 		pLine = pLine->Sub();
-		while (pLine)
+		while(pLine)
 		{
-			if (pLine->IsString(0,"alias"))
+			if(pLine->IsString(0,"alias"))
 			{
 #pragma message("Alias's should be able to come from other material ini's")
 

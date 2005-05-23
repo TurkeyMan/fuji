@@ -66,7 +66,7 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 
 	float x,y,w,h, p, cwidth;
 
-	Material_Use(pFont->pMaterial);
+	Material_SetMaterial(pFont->pMaterial);
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);

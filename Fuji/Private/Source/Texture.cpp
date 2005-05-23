@@ -30,6 +30,8 @@ void Texture_DeinitModule()
 {
 	Texture_Destroy(pNoneTexture);
 	Texture_Destroy(pWhiteTexture);
+
+	gTextureBank.Deinit();
 }
 
 Texture* Texture_FindTexture(const char *pName)

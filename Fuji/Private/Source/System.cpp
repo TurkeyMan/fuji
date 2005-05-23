@@ -48,6 +48,11 @@ FujiDefaults gDefaults =
 		2048			// maxMaterials
 	},
 
+	// ModelDefaults
+	{
+		256				// maxModels
+	},
+
 	// FileSystemDefaults
 	{
 		128,			// maxOpenFiles
@@ -202,7 +207,7 @@ void System_Draw()
 		if(rate != 1.0f)
 			Font_DrawTextf(gpDebugFont, 80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
-		Material_Use(Material_Find("SysLogoSmall"));
+		Material_SetMaterial(Material_GetStockMaterial(Mat_SysLogoSmall));
 		const float iconSize = 55.0f;
 
 		MFPrimitive(PT_TriStrip);

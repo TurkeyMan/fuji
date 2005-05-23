@@ -55,7 +55,7 @@ void Heap_InitModule()
 
 	// probably want to create the default heap here...
 	// but we'll let the system manage the memory for the time being
-	// all currently supports systems have memory managers
+	// all currently supported systems have memory managers
 /*
 	pCurrentHeap = Heap_CreateHeap(gDefaults.heap.staticHeapSize, HEAP_Static, "Default Static Heap");
 */

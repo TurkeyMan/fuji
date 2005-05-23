@@ -4,19 +4,39 @@
 class MFIni;
 struct Material;
 
+// stock (built-in) materials
+enum StockMaterials
+{
+	Mat_White,
+	Mat_Unavailable,
+	Mat_SysLogoSmall,
+	Mat_SysLogoLarge,
+
+	Mat_Max,
+	Mat_ForceInt = 0x7FFFFFFF
+};
+
 // interface functions
+
+// manage definitions files
 int			Material_AddDefinitionsFile(const char *pName, const char *pFilename);
-int			Material_AddDefinitionsIniFile(const char *pName, MFIni *pMatDefs);
+int			Material_AddDefinitionsIni(const char *pName, MFIni *pMatDefs);
 void		Material_RemoveDefinitions(const char *pName);
 
+// create/destroy
 Material*	Material_Create(const char *pName);
 int			Material_Destroy(Material *pMaterial);
-Material*	Material_Find(const char *pName);
 
+Material*	Material_Find(const char *pName);
+Material*	Material_GetStockMaterial(StockMaterials materialIdentifier);
+
+// get/set the current material
+void		Material_SetMaterial(Material *pMaterial);
 Material*	Material_GetCurrent();
 
-void		Material_Use(Material *pMaterial);
-void		Material_UseWhite();
+// material control
+void		Material_SetParameter(const char *pParameterName, float *pValues, int numValues);
+
 
 // some enums
 enum RederTypeFlags

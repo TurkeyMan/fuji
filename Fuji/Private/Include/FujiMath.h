@@ -66,6 +66,15 @@ inline float MFSqrt(float x)
 #endif
 }
 
+inline float MFPow(float x, float y)
+{
+#if !defined(_DC)
+	return powf(x, y);
+#else
+	return (float)pow((float)x, (float)y);
+#endif
+}
+
 template <typename T>
 inline T MFAbs(T x)
 {

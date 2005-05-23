@@ -16,8 +16,8 @@
 	#define MAX_RAW_MOUSE_BUTTONS 5
 
 	typedef WINUSERAPI INT (WINAPI *pGetRawInputDeviceList)(OUT PRAWINPUTDEVICELIST pRawInputDeviceList, IN OUT PINT puiNumDevices, IN UINT cbSize);
-	typedef WINUSERAPI INT(WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize, IN UINT cbSizeHeader);
-	typedef WINUSERAPI INT(WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize);
+	typedef WINUSERAPI INT (WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize, IN UINT cbSizeHeader);
+	typedef WINUSERAPI INT (WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize);
 	typedef WINUSERAPI BOOL (WINAPI *pRegisterRawInputDevices)(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
 
 	int InitRawMouse(bool _includeRDPMouse);
@@ -931,7 +931,9 @@ void LoadGamepadMappings()
 	}
 
 	// read GameMappings.ini file
-	if(pIni = MFIni::Create("GamepadMappings.ini"))
+	pIni = MFIni::Create("GamepadMappings.ini");
+
+	if(pIni)
 	{
 		MFIniLine *pLine;
 		pLine = pIni->GetFirstLine();

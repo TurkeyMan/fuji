@@ -31,10 +31,14 @@ void MFFileSystem_InitModule()
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
-	mountData.pPath = MFFile_SystemPath();
 	mountData.priority = MFMP_Normal;
 	mountData.pMountpoint = "data";
+	mountData.pPath = MFFile_SystemPath();
+	MFFileSystem_Mount(hNativeFileSystem, &mountData);
 
+	mountData.flags = MFMF_Recursive;
+	mountData.pMountpoint = "home";
+	mountData.pPath = MFFile_HomePath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
 }
 

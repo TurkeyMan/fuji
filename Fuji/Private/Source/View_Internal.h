@@ -20,6 +20,7 @@ struct View
 	bool viewProjDirty;
 
 	float fov;
+	float nearPlane, farPlane;
 	float aspectRatio;
 
 	MFRect orthoRect;

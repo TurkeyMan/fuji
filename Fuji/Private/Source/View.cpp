@@ -26,7 +26,7 @@ void View_InitModule()
 	pCurrentView = &View::defaultView;
 
 	View_SetOrtho(&View::defaultOrthoRect);
-	View_SetProjection((PI*2.0f)*0.16666f, STANDARD_ASPECT);
+	View_SetProjection((PI*2.0f)*0.16666f, 0.1f, 1000.0f, STANDARD_ASPECT);
 	View_SetCameraMatrix(Matrix::identity);
 	View_GetWorldToScreenMatrix();
 
@@ -66,26 +66,25 @@ void View_SetDefault()
 	*pCurrentView = View::defaultView;
 }
 
-void View_SetProjection(float _fov, float _aspectRatio)
+void View_SetProjection(float _fov, float _nearPlane, float _farPlane, float _aspectRatio)
 {
 	CALLSTACK;
 
 	if(_fov)
-	{
 		pCurrentView->fov = _fov;
-	}
-
+	if(_nearPlane)
+		pCurrentView->nearPlane = _nearPlane;
+	if(_farPlane)
+		pCurrentView->farPlane = _farPlane;
 	if(_aspectRatio)
-	{
 		pCurrentView->aspectRatio = _aspectRatio;
-	}
 
 	pCurrentView->isOrtho = false;
 	pCurrentView->viewProjDirty = true;
 
 	// construct and apply perspective projection
-	float zn = 0.1f;
-	float zf = 10000.0f;
+	float zn = pCurrentView->nearPlane;
+	float zf = pCurrentView->farPlane;
 
 	float a = pCurrentView->fov * 0.5f;
 

@@ -16,7 +16,7 @@ void View_Pop();
 
 void View_SetDefault();
 
-void View_SetProjection(float fov = 0.0f, float aspectRatio = 0.0f);
+void View_SetProjection(float fov = 0.0f, float nearPlane = 0.0f, float farPlane = 0.0f, float aspectRatio = 0.0f);
 void View_SetOrtho(MFRect *pOrthoRect = NULL);
 bool View_IsOrtho();
 
