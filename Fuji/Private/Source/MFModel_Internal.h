@@ -45,7 +45,7 @@ struct MFModel
 
 struct MFModelTemplate
 {
-	uint32 version;
+	uint32 IDtag;
 
 	char *pName;
 
@@ -53,7 +53,7 @@ struct MFModelTemplate
 	DataChunk *pDataChunks;
 };
 
-struct SubObject
+struct SubObjectChunk
 {
 	char *pSubObjectName;
 	Material *pMaterial;
@@ -62,7 +62,7 @@ struct SubObject
 	MFMeshChunk *pMeshChunk;
 };
 
-struct Bone
+struct BoneChunk
 {
 	Vector3 boneOrigin;
 	char *pBoneName;
@@ -70,9 +70,22 @@ struct Bone
 	uint32 reserved[3];
 };
 
-struct Materials
+struct MaterialsChunk
 {
+	char *pIniName;
 	char *pIniBuffer;
 };
+
+struct ImageChunk
+{
+	char *pImageName;
+
+	char *pImageData;
+	int dataSize;
+
+	int width, height;
+	int format;
+};
+
 
 #endif

@@ -1,4 +1,6 @@
 #include "Common.h"
+#include "PtrList.h"
+#include "System.h"
 #include "MFModel_Internal.h"
 
 PtrListDL<MFModel> gModelBank;

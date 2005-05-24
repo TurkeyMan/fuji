@@ -4,6 +4,10 @@
 #include "Common.h"
 #include "Array.h"
 #include "F3D.h"
+#include "Heap.h"
+
+#include "MFModel_Internal.h"
+#include "Material_Internal.h"
 
 int F3DFile::ReadFromDisk(char *pFilename)
 {
@@ -355,11 +359,12 @@ void F3DFile::WriteMDL(char *pFilename, int system)
 {
 	char *pFile;
 	char *pOffset;
-	ModelData *pModelData;
 
 	int a, index;
 	uint32 b;
-/*
+
+	MFModelTemplate *pModelData;
+
 	FILE *file = fopen(pFilename, "wb");
 
 	if(!file)
@@ -369,21 +374,15 @@ void F3DFile::WriteMDL(char *pFilename, int system)
 	}
 
 	pFile = (char*)malloc(1024*1024*10);
-	pModelData = (ModelData*)pFile;
+	pModelData = (MFModelTemplate*)pFile;
 
-	pModelData->IDtag = MAKEFOURCC('M','D','L','1');
-
-	pModelData->meshChunkCount = meshChunk.subObjects.size();
-	pModelData->materialCount = materialChunk.materials.size();
-	pModelData->boneCount = skeletonChunk.bones.size();
-	pModelData->customDataCount = 0;
-	pModelData->flags = 0;
-
-	// calculate custom data
-#if defined(_WINDOWS) || defined(_XBOX)
-	// add one for vertex buffers
-//	pModelData->customDataCount++;
-#endif
+	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
+/*
+//	pModelData->meshChunkCount = meshChunk.subObjects.size();
+//	pModelData->materialCount = materialChunk.materials.size();
+//	pModelData->boneCount = skeletonChunk.bones.size();
+//	pModelData->customDataCount = 0;
+//	pModelData->flags = 0;
 
 	// write file
 	pOffset = pFile + ALIGN16(sizeof(ModelData));
@@ -519,11 +518,11 @@ void F3DFile::WriteMDL(char *pFilename, int system)
 	}
 
 	fwrite(pFile, 1, pOffset - pFile, file);
+*/
 
 	fclose(file);
 
 	free(pFile);
-*/
 }
 
 void F3DFile::Optimise()
