@@ -49,7 +49,7 @@ void MFModel_Draw(MFModel *pModel)
 				pd3dDevice->SetVertexDeclaration(pSubobjects[a].pMeshChunks[b].pVertexDeclaration);
 				pd3dDevice->SetStreamSource(0, pSubobjects[a].pMeshChunks[b].pVertexBuffer, 0, pSubobjects[a].pMeshChunks[b].vertexStride);
 				pd3dDevice->SetIndices(pSubobjects[a].pMeshChunks[b].pIndexBuffer);
-				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX0);
+				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
 				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pSubobjects[a].pMeshChunks[b].numVertices, 0, pSubobjects[a].pMeshChunks[b].numVertices/3);
 			}
 		}
@@ -227,7 +227,7 @@ MFModel* MFModel_Create(const char *pFilename)
 						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 						{
 							pd3dDevice->CreateVertexDeclaration(pSubobjects[a].pMeshChunks[b].pVertexElements, &pSubobjects[a].pMeshChunks[b].pVertexDeclaration);
-							pd3dDevice->CreateVertexBuffer(pSubobjects[a].pMeshChunks[b].vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX0, D3DPOOL_MANAGED, &pSubobjects[a].pMeshChunks[b].pVertexBuffer, NULL);
+							pd3dDevice->CreateVertexBuffer(pSubobjects[a].pMeshChunks[b].vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pSubobjects[a].pMeshChunks[b].pVertexBuffer, NULL);
 							pd3dDevice->CreateIndexBuffer(pSubobjects[a].pMeshChunks[b].indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pSubobjects[a].pMeshChunks[b].pIndexBuffer, NULL);
 
 							void *pData;

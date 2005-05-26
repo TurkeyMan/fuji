@@ -87,5 +87,5 @@ Chunk * ConstelRootChunk::ChildFactory(ChunkID &_id, const uint32 maxLength)
 // *** ConstelFile ***
 ConstelFile::ConstelFile()
 {
-//	status->Print("Constructing ConstelFile\r\n");
+	status->Print("Constructing F3DFile\r\n");
 }

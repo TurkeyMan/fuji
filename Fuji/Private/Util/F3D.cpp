@@ -518,7 +518,7 @@ void F3DFile::WriteMDL(char *pFilename, int system)
 					pVert[c].normal[1] = normal.y;
 					pVert[c].normal[2] = normal.z;
 					pVert[c].colour = colour;
-					pVert[c].uv[0] = uv.z;
+					pVert[c].uv[0] = uv.x;
 					pVert[c].uv[1] = uv.y;
 				}
 
