@@ -3,6 +3,7 @@
 //
 //=============================================================================
 #include "Common.h"
+#include "Heap.h"
 #include "MFStringCache.h"
 
 MFStringCache *MFStringCache::Create(int maxSize)
@@ -26,10 +27,10 @@ const char *MFStringCache::Add(const char *pNewString)
 
 	// find the string
 	char *pCurr = pMem;
-	int newLength = strlen(pNewString)+1;
+	int newLength = (int)strlen(pNewString)+1;
 	while (pCurr[0] && pCurr < &pMem[size])
 	{
-		int length = strlen(pCurr);
+		int length = (int)strlen(pCurr);
 		if (!strcmpi(pCurr, pNewString))
 		{
 			// found string

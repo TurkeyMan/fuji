@@ -44,7 +44,7 @@ void free_aligned(void *buffer)
 	free(buffer);
 }
 
-
+#if !defined(_FUJI_UTIL)
 void Heap_InitModule()
 {
 	CALLSTACK;
@@ -209,6 +209,7 @@ void Heap_PopGroupName()
 {
 
 }
+#endif // !defined(_FUJI_UTIL)
 
 #if !defined(_RETAIL)
 void *Heap_Alloc(uint32 bytes, char *pFile, uint32 line)

@@ -3,6 +3,7 @@
 #include "Display_Internal.h"
 #include "Texture_Internal.h"
 #include "Material_Internal.h"
+#include "MFModel_Internal.h"
 #include "Input_Internal.h"
 #include "View_Internal.h"
 #include "MFFileSystem_Internal.h"
@@ -120,6 +121,8 @@ void System_Init()
 	Texture_InitModule();
 	Material_InitModule();
 
+	MFModel_InitModule();
+
 	Primitive_InitModule();
 	Font_InitModule();
 
@@ -137,6 +140,8 @@ void System_Deinit()
 
 	Font_DeinitModule();
 	Primitive_DeinitModule();
+
+	MFModel_DeinitModule();
 
 	Material_DeinitModule();
 	Texture_DeinitModule();

@@ -15,7 +15,7 @@ enum DataChunkType
 	CT_Bones,
 	CT_Tags,
 	CT_Materials,
-	CT_EmbeddedTextures,
+	CT_BinaryFilesystem,
 
 	CT_Max,
 	CT_ForceInt = 0x7FFFFFFF
@@ -29,6 +29,8 @@ struct DataChunk
 	uint32 reserved;
 };
 
+DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType chunkID);
+
 struct MFModel
 {
 	Matrix worldMatrix;
@@ -39,52 +41,50 @@ struct MFModel
 	// * subobject colours
 
 	MFModelTemplate *pTemplate;
-
-	int refCount;
 };
 
 struct MFModelTemplate
 {
 	uint32 IDtag;
 
-	char *pName;
+	const char *pName;
 
 	int numDataChunks;
 	DataChunk *pDataChunks;
+
+	int refCount;
 };
 
 struct SubObjectChunk
 {
-	char *pSubObjectName;
+	const char *pSubObjectName;
 	Material *pMaterial;
 
 	int numMeshChunks;
-	MFMeshChunk *pMeshChunk;
+	MFMeshChunk *pMeshChunks;
 };
 
 struct BoneChunk
 {
 	Vector3 boneOrigin;
-	char *pBoneName;
+	const char *pBoneName;
+	const char *pParentName;
+
+	uint32 reserved[2];
+};
+
+struct TagChunk
+{
+	Matrix tagMatrix;
+	const char *pTagName;
 
 	uint32 reserved[3];
 };
 
-struct MaterialsChunk
+struct BinaryFilesystemChunk
 {
-	char *pIniName;
-	char *pIniBuffer;
-};
-
-struct ImageChunk
-{
-	char *pImageName;
-
-	char *pImageData;
-	int dataSize;
-
-	int width, height;
-	int format;
+	// this is a binary archive that can be mounted and accessed with the memory filesystem..
+	// it could contain texture data, or other relevant model related data..
 };
 
 

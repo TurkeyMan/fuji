@@ -8,7 +8,7 @@ Oscillator::Oscillator(float _frequency, float _amplitude, WaveType _waveType)
 	frequency = _frequency;
 	amplitude = _amplitude;
 
-	lastTime = 0.0f;
+	lastTime = 0;
 	phase = 0.0f;
 
 	base = 0.0f;

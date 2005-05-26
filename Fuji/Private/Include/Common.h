@@ -131,6 +131,11 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #if !defined(_FUJI_UTIL)
 	#include "Callstack.h"
 	#include "Heap.h"
+#else
+	#define CALLSTACK
+	#define CALLSTACKc
+	#define CALLSTACKs(s)
+	#define CALLSTACKcs(s)
 #endif
 
 #endif // _COMMON_H

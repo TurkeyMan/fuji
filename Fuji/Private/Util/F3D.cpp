@@ -5,6 +5,7 @@
 #include "Array.h"
 #include "F3D.h"
 #include "Heap.h"
+#include "MFStringCache.h"
 
 #include "MFModel_Internal.h"
 #include "Material_Internal.h"
@@ -357,11 +358,7 @@ struct FileVertex
 
 void F3DFile::WriteMDL(char *pFilename, int system)
 {
-	char *pFile;
-	char *pOffset;
-
-	int a, index;
-	uint32 b;
+	int a, b, c;
 
 	MFModelTemplate *pModelData;
 
@@ -373,156 +370,263 @@ void F3DFile::WriteMDL(char *pFilename, int system)
 		return;
 	}
 
-	pFile = (char*)malloc(1024*1024*10);
+	MFStringCache *pStringCache;
+	pStringCache = MFStringCache::Create(1024*1024);
+
+	char *pFile;
+	char *pOffset;
+
+	const int maxFileSize = 1024*1024*4;
+
+	pFile = (char*)malloc_aligned(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
+	memset(pFile, 0, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
+	DataChunk *pDataHeaders = (DataChunk*)(pFile+ALIGN16(sizeof(MFModelTemplate)));
+
 	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
-/*
-//	pModelData->meshChunkCount = meshChunk.subObjects.size();
-//	pModelData->materialCount = materialChunk.materials.size();
-//	pModelData->boneCount = skeletonChunk.bones.size();
-//	pModelData->customDataCount = 0;
-//	pModelData->flags = 0;
+	pModelData->pName = pStringCache->Add(name);
 
-	// write file
-	pOffset = pFile + ALIGN16(sizeof(ModelData));
+	int numChunks = 0;
+	int meshChunkIndex = -1;
+	int skeletonChunkIndex = -1;
+	int tagChunkIndex = -1;
+	int dataChunkIndex = -1;
 
-	ModelData::MaterialData *pMaterials = (ModelData::MaterialData*)pOffset;
-	pModelData->pMaterials = (ModelData::MaterialData*)(pOffset - pFile);
-
-	pOffset += ALIGN16(sizeof(ModelData::MaterialData) * pModelData->materialCount);
-
-	ModelData::Subobject *pSubObjects = (ModelData::Subobject*)pOffset;
-	pModelData->pSubobjects = (ModelData::Subobject*)(pOffset - pFile);
-
-	pOffset += ALIGN16(sizeof(ModelData::Subobject) * pModelData->subobjectCount);
-
-	ModelData::CustomData *pCustomData = (ModelData::CustomData*)pOffset;
-	pModelData->pCustomData = (ModelData::CustomData*)(pOffset - pFile);
-
-	pOffset += ALIGN16(sizeof(ModelData::CustomData) * pModelData->customDataCount);
-
-	uint32 vertOffset = 0;
-	uint32 indexOffset = 0;
-	pModelData->pVertexData = (char*)(pOffset - pFile);
-	pModelData->vertexCount = 0;
-	pModelData->indexCount = 0;
-
-	for(a=0; a<pModelData->subobjectCount; a++)
+	// figure out number of chunks somehow.....
+	if(GetMeshChunk()->subObjects.size())
 	{
-		pSubObjects[a].vertexFormat = VF_Position|VF_Normal|VF_Colour|VF_Tex0;
-		pSubObjects[a].vertexSize = sizeof(FileVertex);
-		pSubObjects[a].vertexCount = meshChunk.subObjects[a].vertices.size();
-		pSubObjects[a].vertexOffset = vertOffset;
-		vertOffset += pSubObjects[a].vertexCount;
-		pModelData->vertexCount += pSubObjects[a].vertexCount;
+		meshChunkIndex = numChunks++;
+		pDataHeaders[meshChunkIndex].chunkType = CT_SubObjects;
+	}
 
-		pSubObjects[a].indexCount = meshChunk.subObjects[a].triangles.size()*3;
-		pSubObjects[a].indexOffset = indexOffset;
-		indexOffset += pSubObjects[a].indexCount;
-		pModelData->indexCount += pSubObjects[a].indexCount;
+	if(GetSkeletonChunk()->bones.size())
+	{
+		skeletonChunkIndex = numChunks++;
+		pDataHeaders[skeletonChunkIndex].chunkType = CT_Bones;
+	}
 
-		pSubObjects[a].materialIndex = meshChunk.subObjects[a].materialIndex;
+	if(GetRefPointChunk()->refPoints.size())
+	{
+		tagChunkIndex = numChunks++;
+		pDataHeaders[tagChunkIndex].chunkType = CT_Tags;
+	}
 
-		pSubObjects[a].reserved[0] = pSubObjects[a].reserved[0] = 0;
+	// then do something with them....
+	pModelData->numDataChunks = numChunks;
+	pModelData->pDataChunks = pDataHeaders;
 
-		for(b=0; b<pSubObjects[a].vertexCount; b++)
+	pOffset = (char*)pDataHeaders + ALIGN16(sizeof(DataChunk)*numChunks);
+
+	// write out mesh data
+	if(meshChunkIndex > -1)
+	{
+		SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pOffset;
+
+		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
+		pDataHeaders[meshChunkIndex].count = GetMeshChunk()->subObjects.size();
+
+		pOffset += ALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
+
+		for(a=0; a<pDataHeaders[meshChunkIndex].count; a++)
 		{
-			index = meshChunk.subObjects[a].vertices[b].position;
-			((FileVertex*)pOffset)[b].pos.x = meshChunk.subObjects[a].positions[index].x;
-			((FileVertex*)pOffset)[b].pos.y = meshChunk.subObjects[a].positions[index].y;
-			((FileVertex*)pOffset)[b].pos.z = meshChunk.subObjects[a].positions[index].z;
+			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
+			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
 
-			index = meshChunk.subObjects[a].vertices[b].normal;
-			if(index != -1)
+			pSubobjectChunk[a].pSubObjectName = pStringCache->Add(sub.name);
+			pSubobjectChunk[a].pMaterial = (Material*)pStringCache->Add(GetMaterialChunk()->materials.pData[sub.materialIndex].name);
+			pSubobjectChunk[a].numMeshChunks = sub.matSubobjects.size();
+			pSubobjectChunk[a].pMeshChunks = pMeshChunks;
+
+			pOffset += ALIGN16(sizeof(MFMeshChunk)*pSubobjectChunk[a].numMeshChunks);
+
+			// fill out msh chunk, and build mesh...
+			for(b=0; b<pSubobjectChunk[a].numMeshChunks; b++)
 			{
-				((FileVertex*)pOffset)[b].normal.x = meshChunk.subObjects[a].normals[index].x;
-				((FileVertex*)pOffset)[b].normal.y = meshChunk.subObjects[a].normals[index].y;
-				((FileVertex*)pOffset)[b].normal.z = meshChunk.subObjects[a].normals[index].z;
+				struct Vert
+				{
+					float pos[3];
+					float normal[3];
+					uint32 colour;
+					float uv[2];
+				};
+
+				int numVertices = sub.matSubobjects.pData[b].vertices.size();
+				int numIndices = sub.matSubobjects.pData[b].triangles.size()*3;
+
+				pSubobjectChunk[a].pMeshChunks[b].numVertices = numVertices;
+				pSubobjectChunk[a].pMeshChunks[b].vertexStride = sizeof(Vert);
+				pSubobjectChunk[a].pMeshChunks[b].vertexDataSize = numVertices * pSubobjectChunk[a].pMeshChunks[b].vertexStride;
+				pSubobjectChunk[a].pMeshChunks[b].indexDataSize = numIndices*sizeof(uint16);
+
+				// write declaration
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].Stream = 0;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].Offset = 0;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[0].UsageIndex = 0;
+
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].Stream = 0;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].Offset = 12;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[1].UsageIndex = 0;
+
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].Stream = 0;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].Offset = 24;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[2].UsageIndex = 0;
+
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].Stream = 0;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].Offset = 28;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[3].UsageIndex = 0;
+
+				D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+				pSubobjectChunk[a].pMeshChunks[b].pVertexElements[4] = endMacro;
+
+				pOffset += ALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
+
+				// write vertices
+				pSubobjectChunk[a].pMeshChunks[b].pVertexData = pOffset;
+				Vert *pVert = (Vert*)pOffset;
+
+				for(c=0; c<numVertices; c++)
+				{
+					int posIndex = sub.matSubobjects.pData[b].vertices.pData[c].position;
+					int normalIndex = sub.matSubobjects.pData[b].vertices.pData[c].normal;
+					int uvIndex = sub.matSubobjects.pData[b].vertices.pData[c].uv1;
+					int colourIndex = sub.matSubobjects.pData[b].vertices.pData[c].colour;
+
+					const Vector3 &pos = posIndex > -1 ? sub.positions.pData[posIndex] : Vector(0,0,0);
+					const Vector3 &normal = normalIndex > -1 ? sub.normals.pData[normalIndex] : Vector(0,1,0);
+					const Vector3 &uv = uvIndex > -1 ? sub.uvs.pData[uvIndex] : Vector(0,0,0);
+					uint32 colour = colourIndex > -1 ? sub.colours.pData[colourIndex].ToPackedColour() : 0xFFFFFFFF;
+
+					pVert[c].pos[0] = pos.x;
+					pVert[c].pos[1] = pos.y;
+					pVert[c].pos[2] = pos.z;
+					pVert[c].normal[0] = normal.x;
+					pVert[c].normal[1] = normal.y;
+					pVert[c].normal[2] = normal.z;
+					pVert[c].colour = colour;
+					pVert[c].uv[0] = uv.z;
+					pVert[c].uv[1] = uv.y;
+				}
+
+				pOffset += ALIGN16(sizeof(Vert)*numVertices);
+
+				// write indices
+				pSubobjectChunk[a].pMeshChunks[b].pIndexData = pOffset;
+				uint16 *pIndices = (uint16*)pOffset;
+
+				int triCount = numIndices/3;
+
+				for(c=0; c<triCount; c++)
+				{
+					pIndices[0] = sub.matSubobjects.pData[b].triangles.pData[c].v[0];
+					pIndices[1] = sub.matSubobjects.pData[b].triangles.pData[c].v[1];
+					pIndices[2] = sub.matSubobjects.pData[b].triangles.pData[c].v[2];
+
+					pIndices += 3;
+				}
+
+				pOffset += ALIGN16(sizeof(uint16)*numIndices);
 			}
-			else
+		}
+	}
+
+	// write out skeleton data
+	if(skeletonChunkIndex > -1)
+	{
+		BoneChunk *pBoneChunk = (BoneChunk*)pOffset;
+
+		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
+		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->bones.size();
+
+		pOffset += ALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
+
+		for(a=0; a<pDataHeaders[skeletonChunkIndex].count; a++)
+		{
+			pBoneChunk[a].pBoneName = pStringCache->Add(GetSkeletonChunk()->bones[a].name);
+			pBoneChunk[a].pParentName = pStringCache->Add(GetSkeletonChunk()->bones[a].parentName);
+			pBoneChunk[a].boneOrigin = GetSkeletonChunk()->bones[a].worldMatrix.GetTrans3();
+		}
+	}
+
+	// wite strings to end of file
+	memcpy(pOffset, pStringCache->GetCache(), pStringCache->GetSize());
+
+	uint32 stringBase = (uint32)pStringCache->GetCache() - ((uint32)pOffset - (uint32)pFile);
+	pOffset += pStringCache->GetSize(); // pOffset now equals the file size..
+
+	// un-fix-up all the pointers...
+	uint32 base = (uint32)pModelData;
+
+	pModelData->pName -= stringBase;
+
+	for(a=0; a<pModelData->numDataChunks; a++)
+	{
+		switch(pModelData->pDataChunks[a].chunkType)
+		{
+			case CT_SubObjects:
 			{
-				((FileVertex*)pOffset)[b].normal.x = 0.0f;
-				((FileVertex*)pOffset)[b].normal.y = 1.0f;
-				((FileVertex*)pOffset)[b].normal.z = 0.0f;
+				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pModelData->pDataChunks[a].pData;
+
+				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				{
+					pSubobjectChunk[b].pSubObjectName -= stringBase;
+					pSubobjectChunk[b].pMaterial = (Material*)((char*)pSubobjectChunk[b].pMaterial - stringBase);
+
+					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
+					{
+						pSubobjectChunk[b].pMeshChunks[c].pVertexData -= base;
+						pSubobjectChunk[b].pMeshChunks[c].pIndexData -= base;
+						(char*&)pSubobjectChunk[b].pMeshChunks[c].pVertexElements -= base;
+					}
+
+					(char*&)pSubobjectChunk[b].pMeshChunks -= base;
+				}
+				break;
 			}
 
-			index = meshChunk.subObjects[a].vertices[b].uv1;
-			if(index != -1)
+			case CT_Bones:
 			{
-				((FileVertex*)pOffset)[b].u = meshChunk.subObjects[a].uvs[index].x;
-				((FileVertex*)pOffset)[b].v = meshChunk.subObjects[a].uvs[index].y;
-			}
-			else
-			{
-				((FileVertex*)pOffset)[b].u = 0.0f;
-				((FileVertex*)pOffset)[b].v = 0.0f;
+				BoneChunk *pBoneChunk = (BoneChunk*)pModelData->pDataChunks[a].pData;
+
+				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				{
+					pBoneChunk[b].pBoneName -= stringBase;
+					pBoneChunk[b].pParentName -= stringBase;
+				}
+				break;
 			}
 
-			index = meshChunk.subObjects[a].vertices[b].colour;
-			if(index != -1)
+			case CT_Tags:
 			{
-				((FileVertex*)pOffset)[b].colour = meshChunk.subObjects[a].colours[index].ToColour();
-			}
-			else
-			{
-				((FileVertex*)pOffset)[b].colour = 0xFFFFFFFF;
+				break;
 			}
 		}
 
-		pOffset += sizeof(FileVertex) * pSubObjects[a].vertexCount;
+		(char*&)pModelData->pDataChunks[a].pData -= base;
 	}
+	(char*&)pModelData->pDataChunks -= base;
 
-//	pOffset = ALIGN16(pOffset);
-
-	pModelData->pIndexData = (char*)(pOffset - pFile);
-
-	for(a=0; a<pModelData->subobjectCount; a++)
-	{
-		for(b=0; b<pSubObjects[a].indexCount/3; b++)
-		{
-			((int*)pOffset)[0] = meshChunk.subObjects[a].triangles[b].v[0];
-			((int*)pOffset)[1] = meshChunk.subObjects[a].triangles[b].v[1];
-			((int*)pOffset)[2] = meshChunk.subObjects[a].triangles[b].v[2];
-			pOffset += sizeof(int)*3;
-		}
-	}
-
-//	pOffset = ALIGN16(pOfset);
-
-	for(a=0; a<pModelData->customDataCount; a++)
-	{
-		pCustomData[a].customDataType;
-		pCustomData[a].ustomDataCount;
-		pCustomData[a].pData;
-		pCustomData[a].res;
-		pCustomData[a].res2;
-	}
-
-	strcpy(pOffset, name);
-	pModelData->pName = (char*)(pOffset - pFile);
-	pOffset += strlen(name)+1;
-
-	for(a=0; a<pModelData->materialCount; a++)
-	{
-		strcpy(pOffset, materialChunk.materials[a].name);
-		pMaterials[a].pName = (char*)(pOffset - pFile);
-		pOffset += strlen(pOffset)+1;
-
-		*pOffset = NULL;
-		pMaterials[a].pMaterialDescription = (char*)(pOffset - pFile);
-		pOffset++;
-
-		pMaterials[a].pMaterial = NULL;
-		pMaterials[a].reserved = 0;
-	}
-
-	fwrite(pFile, 1, pOffset - pFile, file);
-*/
-
+	// write to disk..
+	uint32 fileSize = (uint32)pOffset - base;
+	fwrite(pFile, fileSize, 1, file);
 	fclose(file);
 
-	free(pFile);
+	// we're done!!!! clean up..
+	free_aligned(pFile);
 }
 
 void F3DFile::Optimise()

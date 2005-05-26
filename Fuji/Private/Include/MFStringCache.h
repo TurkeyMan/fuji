@@ -10,6 +10,9 @@ public:
 	static void Destroy(MFStringCache *pCache);
 	const char *Add(const char *pNewString);
 
+	const char *GetCache() { return pMem; }
+	int GetSize() { return uint32(Add("")) - (uint32)pMem; }
+
 protected:
 	int size;
 	char *pMem;

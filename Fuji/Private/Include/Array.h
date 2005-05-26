@@ -63,12 +63,12 @@ public:
 
 	inline T& push()
 	{
-		return pData[size()];
+		return operator[](size());
 	}
 
 	inline T& push(T &x)
 	{
-		return pData[size()] = x;
+		return operator[](size()) = x;
 	}
 
 	inline T& pop()
@@ -80,7 +80,7 @@ public:
 
 	inline T& front()
 	{
-		return pData[0];
+		return operator[](0);
 	}
 
 	inline T& back()

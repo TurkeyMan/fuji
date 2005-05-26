@@ -57,7 +57,7 @@ struct Material
 
 struct MFMeshChunk
 {
-#if defined(_WINDOWS)
+//#if defined(_WINDOWS)
 	// interface pointers
 	IDirect3DVertexBuffer9 *pVertexBuffer;
 	IDirect3DIndexBuffer9 *pIndexBuffer;
@@ -76,9 +76,9 @@ struct MFMeshChunk
 	// matrix batching data
 	int matrixBatchSize;
 	uint16 *pBatchIndices;
-#elif defined(_XBOX)
+//#elif defined(_XBOX)
 	// some vertex buffer type thing...
-#endif
+//#endif
 
 	uint32 numVertices;
 	uint32 vertexStride;

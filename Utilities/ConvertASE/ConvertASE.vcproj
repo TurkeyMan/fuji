@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Util; \Projects\Fuji\Include; \Projects\ExporterPlugin"
+				AdditionalIncludeDirectories="\Projects\Fuji\Util;\Projects\Fuji\Source\;\Projects\Fuji\Include;\Projects\ExporterPlugin"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_FUJI_UTIL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -141,7 +141,19 @@
 					RelativePath="..\..\Fuji\Util\F3D.cpp">
 				</File>
 				<File
+					RelativePath="..\..\Fuji\Source\Heap.cpp">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Source\Material_Internal.h">
+				</File>
+				<File
 					RelativePath="..\..\Fuji\Source\Matrix.cpp">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Source\MFModel_Internal.h">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Source\MFStringCache.cpp">
 				</File>
 				<File
 					RelativePath="..\..\Fuji\Source\Util.cpp">
@@ -154,16 +166,28 @@
 				Name="Include"
 				Filter="">
 				<File
-					RelativePath="..\Fuji\Include\Array.h">
+					RelativePath="..\..\Fuji\Include\Array.h">
 				</File>
 				<File
-					RelativePath="..\Fuji\Include\Common.h">
+					RelativePath="..\..\Fuji\Include\Common.h">
 				</File>
 				<File
 					RelativePath="..\..\Fuji\Util\F3D.h">
 				</File>
 				<File
+					RelativePath="..\..\Fuji\Include\Heap.h">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Include\Material.h">
+				</File>
+				<File
 					RelativePath="..\Fuji\Include\Matrix.h">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Include\MFModel.h">
+				</File>
+				<File
+					RelativePath="..\..\Fuji\Include\MFStringCache.h">
 				</File>
 				<File
 					RelativePath="..\Fuji\Include\Util.h">

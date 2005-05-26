@@ -43,14 +43,14 @@ class F3DVertex
 public:
 	F3DVertex();
 
-	uint32 position;
-	uint32 normal;
-	uint32 biNormal;
-	uint32 tangent;
-	uint32 uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8;
-	uint32 colour;
-	uint32 illum;
-	uint32 bone[4];
+	int position;
+	int normal;
+	int biNormal;
+	int tangent;
+	int uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8;
+	int colour;
+	int illum;
+	int bone[4];
 	float weight[4];
 };
 
