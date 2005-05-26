@@ -97,6 +97,8 @@ void System_Init()
 {
 	CALLSTACK;
 
+	CrcInit();
+
 	Heap_InitModule();
 
 	DebugMenu_InitModule();

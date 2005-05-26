@@ -385,3 +385,34 @@ char* StrRChr(const char *s, int i)
 
 	return (char *) last;
 }
+
+// CRC functions
+uint32 crc32_table[256];
+#define CRC32_POLY 0x04c11db7
+void CrcInit()
+{
+	int i, j;
+	uint32 c;
+
+	for (i = 0; i < 256; ++i)
+	{
+		for (c = i << 24, j = 8; j > 0; --j)
+		{
+			c = c & 0x80000000 ? (c << 1) ^ CRC32_POLY : (c << 1);
+		}
+		crc32_table[i] = c;
+	}
+}
+
+// generate a unique Crc number for this buffer
+uint32 Crc(char *buffer, int length)
+{
+	char *p;
+	uint32 crc;
+
+	crc = 0xffffffff;       /* preload shift register, per CRC-32 spec */
+	for (p = buffer; length > 0; ++p, --length)
+		crc = (crc << 8) ^ crc32_table[(crc >> 24) ^ *p];
+	return ~crc;            /* transmit complement, per CRC-32 spec */
+}
+

@@ -58,6 +58,9 @@ Vector3 RandomVector();
 int StrCaseCmp(const char *s1, const char *s2);
 int StrNCaseCmp(const char *s1, const char *s2, size_t n);
 
+// CRC functions
+void CrcInit(); // generates some crc tables - system should call this once
+uint32 Crc(char *buffer, int length); // generate a unique Crc number for this buffer
 
 // endian flipping
 #if defined(BIG_ENDIAN)
