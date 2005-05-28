@@ -27,7 +27,7 @@ public:
 	virtual void Clear();
 	virtual void Encode(uint8 *data) = 0;
 	virtual void Decode(const uint8 *data, const uint32 maxLength) = 0;
-	
+
 	bool FindSubChunk(ChunkID &_id, std::list<Chunk *>::iterator *result, const std::list<Chunk *>::iterator *startingPos = NULL, const std::list<Chunk *>::iterator *endingPos = NULL);
 
 	ChunkID id;

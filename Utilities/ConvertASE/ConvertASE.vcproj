@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="\Projects\Fuji\Include; \Projects\ExporterPlugin"
+				AdditionalIncludeDirectories="\Projects\Fuji\Util;\Projects\Fuji\Source\;\Projects\Fuji\Include;\Projects\ExporterPlugin"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
