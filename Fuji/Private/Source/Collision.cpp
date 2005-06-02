@@ -3,6 +3,26 @@
 
 #define EPSILON 0.000001f
 
+// returns nearest point on a line segment [a,b]
+Vector3 Collision_NearestPointOnLine(const Vector3& lineStart, const Vector3& lineEnd, const Vector3& point)
+{
+	// calculate lines ray
+	Vector3 ray = lineEnd - lineStart;
+
+	// see if a is the nearest point
+	float dot_ta = ray.Dot(point - lineStart);
+	if(dot_ta <= 0.0f)
+		return lineStart;
+
+	// see if b is the nearest point
+	float dot_tb = (-ray).Dot(point - lineEnd);
+	if(dot_tb <= 0.0f)
+		return lineEnd;
+
+	// return nearest point on line segment
+	return lineStart + (ray*dot_ta) / (dot_ta + dot_tb);
+}
+
 bool Collision_SphereSphereTest(const Vector3 &pos1, float radius1, const Vector3 &pos2, float radius2)
 {
 	return (pos2 - pos1).MagSquared() < radius1*radius1 + radius2*radius2;
