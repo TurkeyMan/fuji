@@ -6,12 +6,13 @@
 #include "Heap.h"
 #include "MFStringCache.h"
 
-MFStringCache *MFStringCache::Create(int maxSize)
+MFStringCache *MFStringCache::Create(uint32 maxSize)
 {
 	MFStringCache *pCache = (MFStringCache *)Heap_Alloc(sizeof(MFStringCache));
 	pCache->size = maxSize;
 	pCache->pMem = (char *)Heap_Alloc(maxSize);
 	pCache->pMem[0] = 0;
+	pCache->used = 1;
 	return pCache;
 }
 
@@ -43,5 +44,6 @@ const char *MFStringCache::Add(const char *pNewString)
 
 	strcpy(pCurr, pNewString);
 	pCurr[newLength]=0;
+	used = (uint32)&pCurr[newLength] - (uint32)pMem + 1;
 	return pCurr;
 }
