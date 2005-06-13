@@ -16,7 +16,7 @@ enum MFOpenFlags
 	MFOF_Binary	= 8,
 	MFOF_Async	= 16,
 
-	MFMF_ForceInt = 0x7FFFFFFF
+	MFOF_ForceInt = 0x7FFFFFFF
 };
 
 // seek offset

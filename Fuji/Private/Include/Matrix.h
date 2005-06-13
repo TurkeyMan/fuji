@@ -38,7 +38,9 @@ public:
 	Matrix& LookAt(const Vector3& pos, const Vector3& at, const Vector3& up = Vector3::up);
 
 	Matrix& Transpose();
+	Matrix& Transpose(const Matrix &matrix);
 	Matrix& Transpose3x3();
+	Matrix& Transpose3x3(const Matrix &matrix);
 
 	Matrix& Multiply(const Matrix& mat);
 	Matrix& Multiply(const Matrix& mat1, const Matrix& mat2);
@@ -51,7 +53,8 @@ public:
 	Vector3 TransformVector3(const Vector3& vec);
 	Vector3 TransformVector3x3(const Vector3& vec);
 
-	Matrix& Inverse();
+	Matrix& Inverse() { return Inverse(*this); }
+	Matrix& Inverse(const Matrix &matrix);
 
 	Vector4 CalculateQuaternion();
 

@@ -5,10 +5,12 @@
 #include "Display.h"
 #include "MFFileSystem.h"
 #include "Texture_Internal.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "Font.h"
 #include "Primitive.h"
 #include "MFFileSystem.h"
+
+#include "Materials/Mat_Standard.h"
 
 Font *gpDebugFont;
 
@@ -39,7 +41,8 @@ Font* Font_Create(const char *pFilename)
 	{
 		pFont = (Font*)Heap_Alloc(sizeof(Font));
 
-		pFont->pMaterial = Material_Create(pFilename);
+		pFont->pMaterial = MFMaterial_Create(pFilename);
+		DBGASSERT(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
 
 		MFFile_Read(hFile, pFont->charwidths, 256);
 		MFFile_Close(hFile);
@@ -52,7 +55,7 @@ void Font_Destroy(Font *pFont)
 {
 	CALLSTACK;
 
-	Material_Destroy(pFont->pMaterial);
+	MFMaterial_Destroy(pFont->pMaterial);
 	Heap_Free(pFont);
 }
 
@@ -60,29 +63,31 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 {
 	CALLSTACKc;
 
+	Mat_Standard_Data *pData = (Mat_Standard_Data*)pFont->pMaterial->pInstanceData;
+
 	int textlen = strlen(text);
 
 	DBGASSERT(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
 
 	float x,y,w,h, p, cwidth;
 
-	Material_SetMaterial(pFont->pMaterial);
+	MFMaterial_SetMaterial(pFont->pMaterial);
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);
 
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)((uint8)text[i] & 0x0F) * (float)(pFont->pMaterial->pTextures[0]->width / 16);
-		y = (float)((uint8)text[i] >> 4) * (float)(pFont->pMaterial->pTextures[0]->height / 16);
+		x = (float)((uint8)text[i] & 0x0F) * (float)(pData->pTextures[0]->width / 16);
+		y = (float)((uint8)text[i] >> 4) * (float)(pData->pTextures[0]->height / 16);
 
 		w = (float)pFont->charwidths[(uint8)text[i]];
-		h = (float)pFont->pMaterial->pTextures[0]->height/16.0f;
+		h = (float)pData->pTextures[0]->height/16.0f;
 
-		x /= (float)pFont->pMaterial->pTextures[0]->width;
-		y /= (float)pFont->pMaterial->pTextures[0]->height;
-		w /= (float)pFont->pMaterial->pTextures[0]->width;
-		h /= (float)pFont->pMaterial->pTextures[0]->height;
+		x /= (float)pData->pTextures[0]->width;
+		y /= (float)pData->pTextures[0]->height;
+		w /= (float)pData->pTextures[0]->width;
+		h /= (float)pData->pTextures[0]->height;
 
 		p = w/h;
 		cwidth = height*p;

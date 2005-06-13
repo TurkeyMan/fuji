@@ -1,7 +1,7 @@
 #if !defined(_FONT_H)
 #define _FONT_H
 
-#include "Material.h"
+#include "MFMaterial.h"
 #include "Vector3.h"
 
 #if defined(DrawText)
@@ -10,7 +10,7 @@
 
 struct Font
 {
-	Material *pMaterial;
+	MFMaterial *pMaterial;
 	uint8 charwidths[256];
 };
 

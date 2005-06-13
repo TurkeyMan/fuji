@@ -25,10 +25,12 @@ void View_InitModule()
 	memset(&View::defaultView, 0, sizeof(View));
 	pCurrentView = &View::defaultView;
 
+	pCurrentView->cameraMatrix = Matrix::identity;
+	pCurrentView->view = Matrix::identity;
+	pCurrentView->viewProj = Matrix::identity;
+
 	View_SetOrtho(&View::defaultOrthoRect);
-	View_SetProjection((PI*2.0f)*0.16666f, 0.1f, 1000.0f, STANDARD_ASPECT);
-	View_SetCameraMatrix(Matrix::identity);
-	View_GetWorldToScreenMatrix();
+	View_SetProjection((PI*2.0f)*0.16666f, STANDARD_ASPECT, 0.1f, 1000.0f);
 
 	pCurrentView = gpViewStack;
 	View_SetDefault();
@@ -66,7 +68,7 @@ void View_SetDefault()
 	*pCurrentView = View::defaultView;
 }
 
-void View_SetProjection(float _fov, float _nearPlane, float _farPlane, float _aspectRatio)
+void View_SetProjection(float _fov, float _aspectRatio, float _nearPlane, float _farPlane)
 {
 	CALLSTACK;
 
@@ -97,6 +99,14 @@ void View_SetProjection(float _fov, float _nearPlane, float _farPlane, float _as
 	pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
 }
 
+void View_GetProjection(float *pFov, float *pAspectRatio, float *pNearPlane, float *pFarPlane)
+{
+	*pFov = pCurrentView->fov;
+	*pAspectRatio = pCurrentView->aspectRatio;
+	*pNearPlane = pCurrentView->nearPlane;
+	*pFarPlane = pCurrentView->farPlane;
+}
+
 void View_SetOrtho(MFRect *pOrthoRect)
 {
 	CALLSTACK;
@@ -123,19 +133,36 @@ void View_SetOrtho(MFRect *pOrthoRect)
 	pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
 }
 
+void View_GetOrtho(MFRect *pOrthoRect)
+{
+	*pOrthoRect = pCurrentView->orthoRect;
+}
+
 bool View_IsOrtho()
 {
 	return pCurrentView->isOrtho;
 }
 
-void View_SetCameraMatrix(const Matrix &viewMat)
+void View_SetCameraMatrix(const Matrix &cameraMatrix)
 {
-	pCurrentView->view = viewMat;
+	pCurrentView->cameraMatrix = cameraMatrix;
+	pCurrentView->viewDirty = true;
 	pCurrentView->viewProjDirty = true;
+}
+
+const Matrix& View_GetCameraMatrix()
+{
+	return pCurrentView->cameraMatrix;
 }
 
 const Matrix& View_GetWorldToViewMatrix()
 {
+	if(pCurrentView->viewDirty)
+	{
+		pCurrentView->view.Inverse(pCurrentView->cameraMatrix);
+		pCurrentView->viewDirty = false;
+	}
+
 	return pCurrentView->view;
 }
 
@@ -148,7 +175,7 @@ const Matrix& View_GetWorldToScreenMatrix()
 {
 	if(pCurrentView->viewProjDirty)
 	{
-		pCurrentView->viewProj.Multiply(pCurrentView->view, pCurrentView->projection);
+		pCurrentView->viewProj.Multiply(View_GetWorldToViewMatrix(), pCurrentView->projection);
 		pCurrentView->viewProjDirty = false;
 	}
 

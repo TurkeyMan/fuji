@@ -1,7 +1,7 @@
 #include "Common.h"
 #include "Display_Internal.h"
 #include "Texture_Internal.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "View_Internal.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -28,19 +28,22 @@ void Primitive_DeinitModule()
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
-	uint32 rendererFlags = 0;
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		rendererFlags |= RT_Untextured;
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
-	pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
 
-	Renderer_SetRenderer(rendererFlags, 0, RS_MFPrimitive);
+	if(View_IsOrtho())
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&Matrix::identity);
+	else
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
+
+	Renderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)

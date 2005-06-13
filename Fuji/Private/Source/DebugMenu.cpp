@@ -322,7 +322,7 @@ void Menu::Draw()
 
 	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, 0xFFFFB080, name);
 
-	Material_SetMaterial(Material_GetStockMaterial(Mat_SysLogoSmall));
+	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
 	float logoMargin = 5.0f;
 	float iconSize = 35.0f;
 

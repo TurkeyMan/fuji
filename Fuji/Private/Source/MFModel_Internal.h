@@ -2,7 +2,7 @@
 #define _MFMODEL_INTERNAL_H
 
 #include "MFModel.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 
 struct MFModelTemplate;
 
@@ -58,7 +58,7 @@ struct MFModelTemplate
 struct SubObjectChunk
 {
 	const char *pSubObjectName;
-	Material *pMaterial;
+	MFMaterial *pMaterial;
 
 	int numMeshChunks;
 	MFMeshChunk *pMeshChunks;

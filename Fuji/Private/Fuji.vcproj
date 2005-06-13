@@ -593,12 +593,6 @@
 				RelativePath=".\Source\Input_Internal.h">
 			</File>
 			<File
-				RelativePath=".\Source\Material.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\Material_Internal.h">
-			</File>
-			<File
 				RelativePath=".\Source\Matrix.cpp">
 			</File>
 			<File
@@ -609,6 +603,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFIni.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFMaterial.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFMaterial_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFModel.cpp">
@@ -624,6 +624,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\Renderer.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Renderer_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Shape.cpp">
@@ -714,6 +717,16 @@
 					RelativePath=".\Source\Synth\Synth.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="Materials"
+				Filter="">
+				<File
+					RelativePath=".\Source\Materials\Mat_Standard.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Materials\Mat_Standard.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -755,9 +768,6 @@
 				RelativePath=".\Include\Input.h">
 			</File>
 			<File
-				RelativePath=".\Include\Material.h">
-			</File>
-			<File
 				RelativePath=".\Include\Matrix.h">
 			</File>
 			<File
@@ -765,6 +775,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFIni.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMaterial.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFModel.h">
@@ -883,7 +896,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\XBox\Material_XB.cpp">
+				RelativePath=".\XBox\MFFileSystemNative_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="TRUE">
@@ -904,25 +917,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\XBox\MFFileSystemNative_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
+				RelativePath=".\XBox\MFMaterial_XB.cpp">
 			</File>
 			<File
 				RelativePath=".\XBox\Primitive_XB.cpp">
@@ -1117,7 +1112,7 @@
 				RelativePath=".\Pc\Input_PC.h">
 			</File>
 			<File
-				RelativePath=".\Pc\Material_PC.cpp">
+				RelativePath=".\Pc\MFFileSystemNative_PC.cpp">
 				<FileConfiguration
 					Name="Debug_XB|Xbox"
 					ExcludedFromBuild="TRUE">
@@ -1144,31 +1139,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Pc\MFFileSystemNative_PC.cpp">
-				<FileConfiguration
-					Name="Debug_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
+				RelativePath=".\Pc\MFMaterial_PC.cpp">
 			</File>
 			<File
 				RelativePath=".\Pc\Primitive_PC.cpp">
@@ -1309,6 +1280,13 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="Materials"
+				Filter="">
+				<File
+					RelativePath=".\Pc\Materials\Mat_Standard_PC.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Linux"

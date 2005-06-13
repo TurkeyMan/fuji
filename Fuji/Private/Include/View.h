@@ -16,11 +16,16 @@ void View_Pop();
 
 void View_SetDefault();
 
-void View_SetProjection(float fov = 0.0f, float nearPlane = 0.0f, float farPlane = 0.0f, float aspectRatio = 0.0f);
+void View_SetProjection(float fov = 0.0f, float aspectRatio = 0.0f, float nearPlane = 0.0f, float farPlane = 0.0f);
+void View_GetProjection(float *pFov, float *pAspectRatio, float *pNearPlane, float *pFarPlane);
+
 void View_SetOrtho(MFRect *pOrthoRect = NULL);
+void View_GetOrtho(MFRect *pOrthoRect);
+
 bool View_IsOrtho();
 
 void View_SetCameraMatrix(const Matrix &cameraMatrix);
+const Matrix& View_GetCameraMatrix();
 
 const Matrix& View_GetWorldToViewMatrix();
 const Matrix& View_GetViewToScreenMatrix();

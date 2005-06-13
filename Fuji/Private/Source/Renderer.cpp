@@ -1,14 +1,12 @@
 #include "Common.h"
-#include "Renderer.h"
-#include "Material.h"
+#include "Renderer_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "View.h"
 
 uint32 renderStates[RS_Max];
 uint32 currentRenderStates[RS_Max];
 
-Material *pSetMaterial;
-uint32 renderSource = NULL;
-uint32 currentRenderFlags = NULL;
+extern MFMaterial *pCurrentMaterial;
 
 void Renderer_InitModule()
 {
@@ -19,6 +17,11 @@ void Renderer_InitModule()
 void Renderer_DeinitModule()
 {
 
+}
+
+int Renderer_Begin()
+{
+	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial);
 }
 
 uint32 SetRenderStateOverride(uint32 renderState, uint32 value)

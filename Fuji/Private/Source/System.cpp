@@ -2,7 +2,7 @@
 #include "System_Internal.h"
 #include "Display_Internal.h"
 #include "Texture_Internal.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
 #include "Input_Internal.h"
 #include "View_Internal.h"
@@ -12,7 +12,7 @@
 #include "DebugMenu.h"
 #include "Timer.h"
 #include "Font.h"
-#include "Renderer.h"
+#include "Renderer_Internal.h"
 #include "Sound.h"
 
 FujiDefaults gDefaults = 
@@ -45,6 +45,7 @@ FujiDefaults gDefaults =
 
 	// MaterialDefaults
 	{
+		32,				// maxMaterialTypes
 		32,				// maxMaterialDefs
 		2048			// maxMaterials
 	},
@@ -119,7 +120,7 @@ void System_Init()
 
 	Renderer_InitModule();
 	Texture_InitModule();
-	Material_InitModule();
+	MFMaterial_InitModule();
 
 	MFModel_InitModule();
 
@@ -143,7 +144,7 @@ void System_Deinit()
 
 	MFModel_DeinitModule();
 
-	Material_DeinitModule();
+	MFMaterial_DeinitModule();
 	Texture_DeinitModule();
 	Renderer_DeinitModule();
 
@@ -183,7 +184,7 @@ void System_Update()
 	DebugMenu_Update();
 #endif
 
-	Material_Update();
+	MFMaterial_Update();
 	Sound_Update();
 }
 
@@ -214,7 +215,7 @@ void System_Draw()
 		if(rate != 1.0f)
 			Font_DrawTextf(gpDebugFont, 80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
-		Material_SetMaterial(Material_GetStockMaterial(Mat_SysLogoSmall));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
 		const float iconSize = 55.0f;
 
 		MFPrimitive(PT_TriStrip);

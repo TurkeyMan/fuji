@@ -1,18 +1,23 @@
 #include "Common.h"
 #include "Texture_Internal.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "Display.h"
 #include "View.h"
 #include "Sprite.h"
 #include "Primitive.h"
 
+#include "Materials/Mat_Standard.h"
+
 void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colourKey)
 {
-	pMaterial = Material_Create(pFilename);
+	pMaterial = MFMaterial_Create(pFilename);
+
+	DBGASSERT(!strcmp(pMaterial->pType->pTypeName, "Standard"), "Sprites MUST be created from a 'Standard' material.");
+	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
 	pivot = Vector(0.0f, 0.0f);
 	position = Vector(0.0f, 0.0f);
-	scale = Vector((float)pMaterial->pTextures[0]->width, (float)pMaterial->pTextures[0]->height);
+	scale = Vector((float)pData->pTextures[0]->width, (float)pData->pTextures[0]->height);
 	angle = 0.0f;
 	visible = false;
 }
@@ -34,7 +39,7 @@ void Sprite::Draw()
 	world.m[3][0] = position.x;
 	world.m[3][1] = position.y;
 
-	Material_SetMaterial(pMaterial);
+	MFMaterial_SetMaterial(pMaterial);
 
 	// set texture
 	MFPrimitive(PT_TriStrip);
@@ -56,7 +61,7 @@ void Sprite::Draw()
 
 void Sprite::Release()
 {
-	Material_Destroy(pMaterial);
+	MFMaterial_Destroy(pMaterial);
 }
 
 void Sprite::SetFlag(uint32 flag, bool enable)

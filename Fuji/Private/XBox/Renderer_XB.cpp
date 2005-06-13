@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "Texture_Internal.h"
-#include "Material_Internal.h"
+#include "MFMaterial_Internal.h"
 #include "View_Internal.h"
 #include "Display_Internal.h"
 
@@ -12,7 +12,7 @@ extern uint32 currentRenderFlags;
 
 void Renderer_SetRenderer(uint32 rendererFlags, uint32 flags, uint32 newRenderSource)
 {
-	Material *pMat = Material_GetCurrent();
+	Material *pMat = MFMaterial_GetCurrent();
 
 	if(pSetMaterial != pMat || (currentRenderFlags&RT_Untextured) != (rendererFlags&RT_Untextured))
 	{

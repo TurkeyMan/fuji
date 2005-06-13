@@ -1,7 +1,7 @@
 #if !defined(_SPRITE_H)
 #define _SPRITE_H
 
-#include "Material.h"
+#include "MFMaterial.h"
 #include "Vector3.h"
 
 class Sprite
@@ -44,7 +44,7 @@ private:
 
 	bool visible;
 
-	Material *pMaterial;
+	MFMaterial *pMaterial;
 };
 
 #endif // _SPRITE_H

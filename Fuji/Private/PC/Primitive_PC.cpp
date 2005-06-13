@@ -7,7 +7,7 @@
 #include "Primitive.h"
 #include "Texture.h"
 #include "Renderer.h"
-#include "Material.h"
+#include "MFMaterial.h"
 
 LitVertex primBuffer[1024];
 LitVertex current;
@@ -32,12 +32,11 @@ void MFPrimitive(uint32 type, uint32 hint)
 {
 	CALLSTACK;
 
-	uint32 rendererFlags = 0;
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		rendererFlags |= RT_Untextured;
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
@@ -48,7 +47,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
 
-	Renderer_SetRenderer(rendererFlags, 0, RS_ImmediateMode);
+	Renderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)

@@ -13,17 +13,19 @@ struct View
 	static View defaultView;
 	static MFRect defaultOrthoRect;
 
-	Matrix projection;
-	Matrix view;
+	MFRect orthoRect;
 
+	Matrix projection;
+	Matrix cameraMatrix;
+	Matrix view;
 	Matrix viewProj;
-	bool viewProjDirty;
 
 	float fov;
 	float nearPlane, farPlane;
 	float aspectRatio;
 
-	MFRect orthoRect;
+	bool viewDirty;
+	bool viewProjDirty;
 	bool isOrtho;
 };
 

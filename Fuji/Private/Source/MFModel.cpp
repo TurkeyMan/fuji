@@ -40,9 +40,8 @@ void MFModel_Draw(MFModel *pModel)
 
 		for(int a=0; a<pChunk->count; a++)
 		{
-			Material_SetMaterial(pSubobjects[a].pMaterial);
-
-			Renderer_SetRenderer(0, 0, RS_MeshChunk);
+			MFMaterial_SetMaterial(pSubobjects[a].pMaterial);
+			Renderer_Begin();
 
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
@@ -114,7 +113,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 						(char*&)pSubobjectChunk[b].pMeshChunks += base;
 
 						pSubobjectChunk[b].pSubObjectName += base;
-						pSubobjectChunk[b].pMaterial = (Material*)((char*)pSubobjectChunk[b].pMaterial + base);
+						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial + base);
 					}
 
 					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
@@ -136,7 +135,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 					if(!load)
 					{
 						pSubobjectChunk[b].pSubObjectName -= base;
-						pSubobjectChunk[b].pMaterial = (Material*)((char*)pSubobjectChunk[b].pMaterial - base);
+						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - base);
 
 						(char*&)pSubobjectChunk[b].pMeshChunks -= base;
 					}
@@ -222,7 +221,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 					for(int a=0; a<pChunk->count; a++)
 					{
-						pSubobjects[a].pMaterial = Material_Create((char*)pSubobjects[a].pMaterial);
+						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
 
 						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 						{

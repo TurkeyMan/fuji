@@ -281,12 +281,64 @@ Matrix& Matrix::Transpose()
 	return *this;
 }
 
+Matrix& Matrix::Transpose(const Matrix &mat)
+{
+	if(this == &mat)
+	{
+		return Transpose();
+	}
+
+	m[0][0] = mat.m[0][0];
+	m[0][1] = mat.m[1][0];
+	m[0][2] = mat.m[2][0];
+	m[0][3] = mat.m[3][0];
+	m[1][0] = mat.m[0][1];
+	m[1][1] = mat.m[1][1];
+	m[1][2] = mat.m[2][1];
+	m[1][3] = mat.m[3][1];
+	m[2][0] = mat.m[0][2];
+	m[2][1] = mat.m[1][2];
+	m[2][2] = mat.m[2][2];
+	m[2][3] = mat.m[3][2];
+	m[3][0] = mat.m[0][3];
+	m[3][1] = mat.m[1][3];
+	m[3][2] = mat.m[2][3];
+	m[3][3] = mat.m[3][3];
+
+	return *this;
+}
+
 Matrix& Matrix::Transpose3x3()
 {
 	register float t;
 	t=m[1][0]; m[1][0]=m[0][1]; m[0][1]=t;
 	t=m[2][0]; m[2][0]=m[0][2]; m[0][2]=t;
 	t=m[2][1]; m[2][1]=m[1][2]; m[1][2]=t;
+	return *this;
+}
+
+Matrix& Matrix::Transpose3x3(const Matrix &mat)
+{
+	if(this == &mat)
+		return Transpose3x3();
+
+	m[0][0] = mat.m[0][0];
+	m[0][1] = mat.m[1][0];
+	m[0][2] = mat.m[2][0];
+	m[0][3] = mat.m[0][3];
+	m[1][0] = mat.m[0][1];
+	m[1][1] = mat.m[1][1];
+	m[1][2] = mat.m[2][1];
+	m[1][3] = mat.m[1][3];
+	m[2][0] = mat.m[0][2];
+	m[2][1] = mat.m[1][2];
+	m[2][2] = mat.m[2][2];
+	m[2][3] = mat.m[2][3];
+	m[3][0] = mat.m[3][0];
+	m[3][1] = mat.m[3][1];
+	m[3][2] = mat.m[3][2];
+	m[3][3] = mat.m[3][3];
+
 	return *this;
 }
 
@@ -440,7 +492,7 @@ Matrix& Matrix::Multiply3x3(const Matrix &mat1, const Matrix &mat2)
 	return *this;
 }
 
-// matrix inverse shamelessly takes from some math book...
+// matrix inverse shamelessly taken from some math book...
 #define ACCUMULATE    \
 	if(temp >= 0.0)   \
 		pos += temp;  \
@@ -449,7 +501,7 @@ Matrix& Matrix::Multiply3x3(const Matrix &mat1, const Matrix &mat2)
 
 #define PRECISION_LIMIT (1.0e-10)
 
-Matrix& Matrix::Inverse()
+Matrix& Matrix::Inverse(const Matrix &mat)
 {
 	Matrix out;
 	register float det_1;
@@ -459,17 +511,17 @@ Matrix& Matrix::Inverse()
 	//	* the matrix is singular as limited by the double precision
 	//	* floating-point data representation.
 	pos = neg = 0.0;
-	temp =  m[0][0] * m[1][1] * m[2][2];
+	temp =  mat.m[0][0] * mat.m[1][1] * mat.m[2][2];
 	ACCUMULATE
-	temp =  m[0][1] * m[1][2] * m[2][0];
+	temp =  mat.m[0][1] * mat.m[1][2] * mat.m[2][0];
 	ACCUMULATE
-	temp =  m[0][2] * m[1][0] * m[2][1];
+	temp =  mat.m[0][2] * mat.m[1][0] * mat.m[2][1];
 	ACCUMULATE
-	temp = -m[0][2] * m[1][1] * m[2][0];
+	temp = -mat.m[0][2] * mat.m[1][1] * mat.m[2][0];
 	ACCUMULATE
-	temp = -m[0][1] * m[1][0] * m[2][2];
+	temp = -mat.m[0][1] * mat.m[1][0] * mat.m[2][2];
 	ACCUMULATE
-	temp = -m[0][0] * m[1][2] * m[2][1];
+	temp = -mat.m[0][0] * mat.m[1][2] * mat.m[2][1];
 	ACCUMULATE
 	det_1 = pos + neg;
 
@@ -483,20 +535,20 @@ Matrix& Matrix::Inverse()
 
 	// Calculate inverse(A) = adj(A) / det(A)
 	det_1 = 1.0f / det_1;
-	out.m[0][0] =  (m[1][1]*m[2][2] - m[1][2]*m[2][1]) * det_1;
-	out.m[1][0] = -(m[1][0]*m[2][2] - m[1][2]*m[2][0]) * det_1;
-	out.m[2][0] =  (m[1][0]*m[2][1] - m[1][1]*m[2][0]) * det_1;
-	out.m[0][1] = -(m[0][1]*m[2][2] - m[0][2]*m[2][1]) * det_1;
-	out.m[1][1] =  (m[0][0]*m[2][2] - m[0][2]*m[2][0]) * det_1;
-	out.m[2][1] = -(m[0][0]*m[2][1] - m[0][1]*m[2][0]) * det_1;
-	out.m[0][2] =  (m[0][1]*m[1][2] - m[0][2]*m[1][1]) * det_1;
-	out.m[1][2] = -(m[0][0]*m[1][2] - m[0][2]*m[1][0]) * det_1;
-	out.m[2][2] =  (m[0][0]*m[1][1] - m[0][1]*m[1][0]) * det_1;
+	out.m[0][0] =  (mat.m[1][1]*mat.m[2][2] - mat.m[1][2]*mat.m[2][1]) * det_1;
+	out.m[1][0] = -(mat.m[1][0]*mat.m[2][2] - mat.m[1][2]*mat.m[2][0]) * det_1;
+	out.m[2][0] =  (mat.m[1][0]*mat.m[2][1] - mat.m[1][1]*mat.m[2][0]) * det_1;
+	out.m[0][1] = -(mat.m[0][1]*mat.m[2][2] - mat.m[0][2]*mat.m[2][1]) * det_1;
+	out.m[1][1] =  (mat.m[0][0]*mat.m[2][2] - mat.m[0][2]*mat.m[2][0]) * det_1;
+	out.m[2][1] = -(mat.m[0][0]*mat.m[2][1] - mat.m[0][1]*mat.m[2][0]) * det_1;
+	out.m[0][2] =  (mat.m[0][1]*mat.m[1][2] - mat.m[0][2]*mat.m[1][1]) * det_1;
+	out.m[1][2] = -(mat.m[0][0]*mat.m[1][2] - mat.m[0][2]*mat.m[1][0]) * det_1;
+	out.m[2][2] =  (mat.m[0][0]*mat.m[1][1] - mat.m[0][1]*mat.m[1][0]) * det_1;
 
 	// Calculate -C * inverse(A)
-	out.m[3][0] = -(m[3][0]*out.m[0][0] + m[3][1]*out.m[1][0] + m[3][2]*out.m[2][0]);
-	out.m[3][1] = -(m[3][0]*out.m[0][1] + m[3][1]*out.m[1][1] + m[3][2]*out.m[2][1]);
-	out.m[3][2] = -(m[3][0]*out.m[0][2] + m[3][1]*out.m[1][2] + m[3][2]*out.m[2][2]);
+	out.m[3][0] = -(mat.m[3][0]*out.m[0][0] + mat.m[3][1]*out.m[1][0] + mat.m[3][2]*out.m[2][0]);
+	out.m[3][1] = -(mat.m[3][0]*out.m[0][1] + mat.m[3][1]*out.m[1][1] + mat.m[3][2]*out.m[2][1]);
+	out.m[3][2] = -(mat.m[3][0]*out.m[0][2] + mat.m[3][1]*out.m[1][2] + mat.m[3][2]*out.m[2][2]);
 
 	// Fill in last column
 	out.m[0][3] = out.m[1][3] = out.m[2][3] = 0.0f;
