@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Font.h"
 #include "Primitive.h"
+#include "PtrList.h"
 
 // globals
 PtrListDL<Texture> gTextureBank;
@@ -108,13 +109,26 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 
 	pos += Vector(2.0f, 2.0f, 0.0f);
 
-	MFBegin(4);
-	MFSetColour(0xFF000000);
-	MFSetPosition(pos);
-	MFSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
-	MFSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
-	MFSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
-	MFEnd();
+	const int numSquares = 7;
+	for(int a=0; a<numSquares; a++)
+	{
+		for(int b=0; b<numSquares; b++)
+		{
+			float x, y, w, h;
+			w = TEX_SIZE/(float)numSquares;
+			h = TEX_SIZE/(float)numSquares;
+			x = pos.x + (float)b*w;
+			y = pos.y + (float)a*h;
+
+			MFBegin(4);
+			MFSetColour(((a+b)&1) ? 0xFFC0C0C0 : 0xFF303030);
+			MFSetPosition(x,y,0);
+			MFSetPosition(x+w,y,0);
+			MFSetPosition(x,y+h,0);
+			MFSetPosition(x+w,y+h,0);
+			MFEnd();
+		}
+	}
 
 	float xaspect, yaspect;
 

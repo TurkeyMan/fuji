@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Display_Internal.h"
 #include "View_Internal.h"
+#include "System.h"
 
 #include <math.h>
 
@@ -16,10 +17,10 @@ void View_InitModule()
 	gpViewStack = (View*)Heap_Alloc(sizeof(View) * gDefaults.view.maxViewsOnStack);
 
 	// set default ortho rect
-	View::defaultOrthoRect.x = 0.0f;
-	View::defaultOrthoRect.y = 0.0f;
-	View::defaultOrthoRect.width = 640.0f;
-	View::defaultOrthoRect.height = 480.0f;
+	View::defaultOrthoRect.x = gDefaults.view.orthoMinX;
+	View::defaultOrthoRect.y = gDefaults.view.orthoMinY;
+	View::defaultOrthoRect.width = gDefaults.view.orthoMaxX;
+	View::defaultOrthoRect.height = gDefaults.view.orthoMaxY;
 
 	// initialise default view
 	memset(&View::defaultView, 0, sizeof(View));
@@ -30,7 +31,7 @@ void View_InitModule()
 	pCurrentView->viewProj = Matrix::identity;
 
 	View_SetOrtho(&View::defaultOrthoRect);
-	View_SetProjection((PI*2.0f)*0.16666f, STANDARD_ASPECT, 0.1f, 1000.0f);
+	View_SetProjection(DEGREES(gDefaults.view.defaultFOV), gDefaults.view.defaultAspect, gDefaults.view.defaultNearPlane, gDefaults.view.defaultFarPlane);
 
 	pCurrentView = gpViewStack;
 	View_SetDefault();

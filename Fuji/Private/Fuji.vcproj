@@ -1050,6 +1050,14 @@
 				Name="PixelShader"
 				Filter="">
 			</Filter>
+			<Filter
+				Name="Materials"
+				Filter="">
+			</Filter>
+			<Filter
+				Name="FileSystem"
+				Filter="">
+			</Filter>
 		</Filter>
 		<Filter
 			Name="PC"
@@ -1110,33 +1118,6 @@
 			</File>
 			<File
 				RelativePath=".\Pc\Input_PC.h">
-			</File>
-			<File
-				RelativePath=".\Pc\MFFileSystemNative_PC.cpp">
-				<FileConfiguration
-					Name="Debug_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Pc\MFMaterial_PC.cpp">
@@ -1285,6 +1266,13 @@
 				Filter="">
 				<File
 					RelativePath=".\Pc\Materials\Mat_Standard_PC.cpp">
+				</File>
+			</Filter>
+			<Filter
+				Name="FileSystem"
+				Filter="">
+				<File
+					RelativePath=".\Pc\FileSystem\MFFileSystemNative_PC.cpp">
 				</File>
 			</Filter>
 		</Filter>

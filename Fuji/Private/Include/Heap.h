@@ -1,8 +1,6 @@
 #if !defined(_HEAP_H)
 #define _HEAP_H
 
-#include "PtrList.h"
-
 // heap type enum
 enum HeapType
 {

@@ -6,6 +6,8 @@
 #include "Texture.h"
 #include "Matrix.h"
 
+#include "DebugMenu_Internal.h"
+
 struct MFMaterialType;
 
 // material functions
@@ -43,6 +45,12 @@ struct MFMaterialParamaterInfo
 
 struct MFMeshChunk
 {
+
+};
+
+#if defined(_WINDOWS)
+struct MFMeshChunk_PC : public MFMeshChunk
+{
 //#if defined(_WINDOWS)
 	// interface pointers
 	IDirect3DVertexBuffer9 *pVertexBuffer;
@@ -68,6 +76,23 @@ struct MFMeshChunk
 
 	uint32 numVertices;
 	uint32 vertexStride;
+};
+#endif
+
+// a debug menu material information display object
+class MaterialBrowser : public MenuObject
+{
+public:
+	MaterialBrowser();
+
+	virtual void Draw();
+	virtual void Update();
+
+	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual void ListUpdate(bool selected);
+	virtual Vector3 GetDimensions(float maxWidth);
+
+	int selection;
 };
 
 #endif

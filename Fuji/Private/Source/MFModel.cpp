@@ -24,6 +24,7 @@ void MFModel_Draw(MFModel *pModel)
 {
 	CALLSTACK;
 
+#if defined(_WINDOWS)
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&pModel->worldMatrix);
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
 
@@ -45,14 +46,17 @@ void MFModel_Draw(MFModel *pModel)
 
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				pd3dDevice->SetVertexDeclaration(pSubobjects[a].pMeshChunks[b].pVertexDeclaration);
-				pd3dDevice->SetStreamSource(0, pSubobjects[a].pMeshChunks[b].pVertexBuffer, 0, pSubobjects[a].pMeshChunks[b].vertexStride);
-				pd3dDevice->SetIndices(pSubobjects[a].pMeshChunks[b].pIndexBuffer);
+				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
+
+				pd3dDevice->SetVertexDeclaration(pMC->pVertexDeclaration);
+				pd3dDevice->SetStreamSource(0, pMC->pVertexBuffer, 0, pMC->vertexStride);
+				pd3dDevice->SetIndices(pMC->pIndexBuffer);
 				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
-				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pSubobjects[a].pMeshChunks[b].numVertices, 0, pSubobjects[a].pMeshChunks[b].numVertices/3);
+				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC->numVertices, 0, pMC->numVertices/3);
 			}
 		}
 	}
+#endif
 }
 
 DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType chunkID)
@@ -118,18 +122,22 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
 					{
+#if defined(_WINDOWS)
+						MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjectChunk[b].pMeshChunks[c];
+
 						if(load)
 						{
-							pSubobjectChunk[b].pMeshChunks[c].pVertexData += base;
-							pSubobjectChunk[b].pMeshChunks[c].pIndexData += base;
-							(char*&)pSubobjectChunk[b].pMeshChunks[c].pVertexElements += base;
+							pMC->pVertexData += base;
+							pMC->pIndexData += base;
+							(char*&)pMC->pVertexElements += base;
 						}
 						else
 						{
-							pSubobjectChunk[b].pMeshChunks[c].pVertexData -= base;
-							pSubobjectChunk[b].pMeshChunks[c].pIndexData -= base;
-							(char*&)pSubobjectChunk[b].pMeshChunks[c].pVertexElements -= base;
+							pMC->pVertexData -= base;
+							pMC->pIndexData -= base;
+							(char*&)pMC->pVertexElements -= base;
 						}
+#endif
 					}
 
 					if(!load)
@@ -225,18 +233,22 @@ MFModel* MFModel_Create(const char *pFilename)
 
 						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 						{
-							pd3dDevice->CreateVertexDeclaration(pSubobjects[a].pMeshChunks[b].pVertexElements, &pSubobjects[a].pMeshChunks[b].pVertexDeclaration);
-							pd3dDevice->CreateVertexBuffer(pSubobjects[a].pMeshChunks[b].vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pSubobjects[a].pMeshChunks[b].pVertexBuffer, NULL);
-							pd3dDevice->CreateIndexBuffer(pSubobjects[a].pMeshChunks[b].indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pSubobjects[a].pMeshChunks[b].pIndexBuffer, NULL);
+#if defined(_WINDOWS)
+							MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
+
+							pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
+							pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
+							pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
 
 							void *pData;
-							pSubobjects[a].pMeshChunks[b].pVertexBuffer->Lock(0, 0, &pData, 0);
-							memcpy(pData, pSubobjects[a].pMeshChunks[b].pVertexData, pSubobjects[a].pMeshChunks[b].vertexDataSize);
-							pSubobjects[a].pMeshChunks[b].pVertexBuffer->Unlock();
+							pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
+							memcpy(pData, pMC->pVertexData, pMC->vertexDataSize);
+							pMC->pVertexBuffer->Unlock();
 
-							pSubobjects[a].pMeshChunks[b].pIndexBuffer->Lock(0, 0, &pData, 0);
-							memcpy(pData, pSubobjects[a].pMeshChunks[b].pIndexData, pSubobjects[a].pMeshChunks[b].indexDataSize);
-							pSubobjects[a].pMeshChunks[b].pIndexBuffer->Unlock();
+							pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
+							memcpy(pData, pMC->pIndexData, pMC->indexDataSize);
+							pMC->pIndexBuffer->Unlock();
+#endif
 						}
 					}
 				}

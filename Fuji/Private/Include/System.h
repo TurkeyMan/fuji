@@ -25,6 +25,14 @@ struct FujiDefaults
 	struct ViewDefaults
 	{
 		int maxViewsOnStack;
+		float defaultFOV;
+		float defaultAspect;
+		float defaultNearPlane;
+		float defaultFarPlane;
+		float orthoMinX;
+		float orthoMinY;
+		float orthoMaxX;
+		float orthoMaxY;
 	} view;
 
 	struct TextureDefaults

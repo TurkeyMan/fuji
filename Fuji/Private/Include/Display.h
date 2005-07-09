@@ -1,8 +1,18 @@
 #if !defined(_DISPLAY_H)
 #define _DISPLAY_H
 
-#define WIDE_ASPECT 1.7777777777777777777777777777778f
-#define STANDARD_ASPECT 1.3333333333333333333333333333333f
+enum DisplayAspect
+{
+	Aspect_1x1,
+	Aspect_4x3,
+	Aspect_16x9,
+	Aspect_16x10,
+
+	Aspect_Max,
+	Aspect_ForceInt = 0x7FFFFFFF
+};
+
+extern float AspectRatio[Aspect_Max];
 
 enum ClearScreenFlags
 {

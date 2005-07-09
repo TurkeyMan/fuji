@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "PtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemMemory.h"
 

@@ -47,6 +47,13 @@
 	#include <math.h>
 #endif
 
+#if defined(_PSP)
+	#include <stdarg.h>
+	#include <stdlib.h>
+	#include <string.h>
+	#include <ctype.h>
+#endif
+
 #if defined(_FUJI_UTIL)
 	#include <Windows.h>
 #endif
@@ -96,6 +103,8 @@ typedef char				int8;
 #if !defined(NULL) /* In case stdlib.h hasn't been included */
 #define NULL 0
 #endif
+
+#define DEGREES(a) (0.017453292519943295769236907684886f * a)
 
 // callstack profiling
 #if !defined(_RETAIL) && !defined(_DEBUG)

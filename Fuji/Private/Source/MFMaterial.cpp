@@ -8,6 +8,11 @@
 #include "MFMaterial_Internal.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"
+#include "PtrList.h"
+
+#include "Primitive.h"
+#include "Font.h"
+#include "Input.h"
 
 #include "SysLogo-256.h"
 #include "SysLogo-64.h"
@@ -51,6 +56,8 @@ char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E"
 
 void Mat_Standard_Register();
 
+MaterialBrowser matBrowser;
+
 /**** Functions ****/
 
 void MFMaterial_InitModule()
@@ -60,6 +67,8 @@ void MFMaterial_InitModule()
 	gMaterialRegistry.Init("Material Registry", gDefaults.material.maxMaterialTypes);
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
 	gMaterialList.Init("Material List", gDefaults.material.maxMaterials);
+
+	DebugMenu_AddItem("Material Browser", "Fuji Options", &matBrowser);
 
 	Mat_Standard_Register();
 
@@ -545,4 +554,120 @@ int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIn
 	return 0;
 }
 
+
+// material browser
+MaterialBrowser::MaterialBrowser()
+{
+	selection = 0;
+	type = MenuType_TextureBrowser;
+}
+
+void MaterialBrowser::Draw()
+{
+
+}
+
+void MaterialBrowser::Update()
+{
+	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y))
+		pCurrentMenu = pParent;
+}
+
+#define TEX_SIZE 64.0f
+float MaterialBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
+{
+	Vector3 pos = _pos;
+
+	MFMaterial **i;
+	i = gMaterialList.Begin();
+
+	for(int a=0; a<selection; a++) i++;
+
+	MFMaterial *pMaterial = *i;
+
+	Font_DrawText(gpDebugFont, pos+Vector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s:", name));
+	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("%s", pMaterial->pName));
+	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? 0xFFFFFF00 : 0xFFFFFFFF, STR("Type: %s Refs: %d", pMaterial->pType->pTypeName, pMaterial->refCount));
+
+	pos += Vector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
+
+	MFPrimitive(PT_TriStrip|PT_Untextured);
+
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetPosition(pos);
+	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFEnd();
+
+	pos += Vector(2.0f, 2.0f, 0.0f);
+
+	const int numSquares = 7;
+	for(int a=0; a<numSquares; a++)
+	{
+		for(int b=0; b<numSquares; b++)
+		{
+			float x, y, w, h;
+			w = TEX_SIZE/(float)numSquares;
+			h = TEX_SIZE/(float)numSquares;
+			x = pos.x + (float)b*w;
+			y = pos.y + (float)a*h;
+
+			MFBegin(4);
+			MFSetColour(((a+b)&1) ? 0xFFC0C0C0 : 0xFF303030);
+			MFSetPosition(x,y,0);
+			MFSetPosition(x+w,y,0);
+			MFSetPosition(x,y+h,0);
+			MFSetPosition(x+w,y+h,0);
+			MFEnd();
+		}
+	}
+
+	MFMaterial_SetMaterial(pMaterial);
+
+	MFPrimitive(PT_TriStrip);
+
+	MFBegin(4);
+	MFSetColour(0xFFFFFFFF);
+	MFSetTexCoord1(0.0f,0.0f);
+	MFSetPosition(pos);
+	MFSetTexCoord1(1.0f,0.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
+	MFSetTexCoord1(0.0f,1.0f);
+	MFSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
+	MFSetTexCoord1(1.0f,1.0f);
+	MFSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
+	MFEnd();
+
+	return TEX_SIZE + 8.0f;
+}
+
+void MaterialBrowser::ListUpdate(bool selected)
+{
+	if(selected)
+	{
+		int texCount = gMaterialList.GetLength();
+
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
+		{
+			selection = selection <= 0 ? texCount-1 : selection-1;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
+		{
+			selection = selection >= texCount-1 ? 0 : selection+1;
+
+			if(pCallback)
+				pCallback(this, pUserData);
+		}
+	}
+}
+
+Vector3 MaterialBrowser::GetDimensions(float maxWidth)
+{
+	return Vector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
+}
 

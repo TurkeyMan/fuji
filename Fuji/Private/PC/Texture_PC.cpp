@@ -6,6 +6,7 @@
 #include "Texture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
+#include "PtrList.h"
 #include "FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/

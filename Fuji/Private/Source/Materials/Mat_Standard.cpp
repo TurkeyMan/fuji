@@ -107,10 +107,10 @@ void Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 	switch(paramaterIndex)
 	{
 		case 0: // lit
-			pData->materialType = (pData->materialType & ~MF_Lit) | (paramater ? MF_Lit : NULL);
+			pData->materialType = (pData->materialType & ~MF_Lit) | (paramater ? MF_Lit : 0);
 			break;
 		case 1: // prelit
-			pData->materialType = (pData->materialType & ~MF_Lit) | (!paramater ? MF_Lit : NULL);
+			pData->materialType = (pData->materialType & ~MF_Lit) | (!paramater ? MF_Lit : 0);
 			break;
 		case 2: // diffusecolour
 			pData->diffuse = *(Vector4*)paramater;
@@ -128,22 +128,22 @@ void Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 			pData->illum = *(Vector4*)paramater;
 			break;
 		case 7: // mask
-			pData->materialType = (pData->materialType & ~MF_Mask) | (paramater ? MF_Mask : NULL);
+			pData->materialType = (pData->materialType & ~MF_Mask) | (paramater ? MF_Mask : 0);
 			break;
 		case 8: // doublesided
-			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (paramater ? MF_DoubleSided : NULL);
+			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (paramater ? MF_DoubleSided : 0);
 			break;
 		case 9: // backfacecull
-			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (!paramater ? MF_DoubleSided : NULL);
+			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (!paramater ? MF_DoubleSided : 0);
 			break;
 		case 10: // additive
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Additive : NULL);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Additive : 0);
 			break;
 		case 11: // subtractive
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Subtractive : NULL);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Subtractive : 0);
 			break;
 		case 12: // alpha
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_AlphaBlend : NULL);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_AlphaBlend : 0);
 			break;
 		case 13: // blend
 			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)paramater << 1);
@@ -231,7 +231,7 @@ uint32 Mat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 //	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 	DBGASSERT(false, "Not Written");
 
-	return NULL;
+	return 0;
 }
 
 int Mat_Standard_GetNumParams()

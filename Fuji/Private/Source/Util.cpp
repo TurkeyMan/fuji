@@ -192,9 +192,9 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-#endif
 
 		pd3dDevice->SetTexture(0, NULL);
+#endif
 
 		MFPrimitive(PT_TriStrip);
 
@@ -303,7 +303,7 @@ char* STRn(const char *source, int n)
 	char *buffer = &stringBuffer[stringOffset];
 
 	strncpy(buffer, source, n);
-	buffer[n] = NULL;
+	buffer[n] = 0;
 
 	stringOffset += n+1;
 

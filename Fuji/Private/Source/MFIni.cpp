@@ -226,7 +226,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	int sectionDepth = 0;
 	*pbIsSection = false;
 	while (pSrc < pSrcEnd && *pSrc != 0xd
-		    && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && *pSrc != ' ' && *pSrc != '/t' && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
+		    && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && *pSrc != ' ' && *pSrc != '\t' && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
 	{
 		if (!bInQuotes && *pSrc == '[')
 		{

@@ -35,7 +35,15 @@ FujiDefaults gDefaults =
 
 	// ViewDefaults
 	{
-		16				// maxViewsOnStack
+		16,				// maxViewsOnStack
+		60.0f,			// defaultFOV;
+		4.0f/3.0f,		// defaultAspect;
+		0.1f,			// defaultNearPlane;
+		1000.0f,		// defaultFarPlane;
+		0.0f,			// orthoMinX
+		0.0f,			// orthoMinY
+		640.0f,			// orthoMaxX
+		480.0f			// orthoMaxY
 	},
 
 	// TextureDefaults

@@ -3,6 +3,14 @@
 #include "DebugMenu.h"
 #include "View.h"
 
+float AspectRatio[Aspect_Max] = 
+{
+	1.0f,
+	1.3333333333333333333333333333333f,
+	1.7777777777777777777777777777778f,
+	1.6f
+};
+
 DisplaySettings display;
 
 Vector4 gClearColour = Vector(0.f,0.f,0.22f,1.f);
