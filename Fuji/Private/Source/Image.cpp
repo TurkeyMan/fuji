@@ -31,14 +31,14 @@ __attribute__((packed))
 #pragma pack ()
 #endif
 
-Image::Image()
+FujiImage::FujiImage()
 {
 	pixels = NULL;
 	width = height = 0;
 	bitsPerPixel = bytesPerPixel = 0;
 }
 
-Image::~Image()
+FujiImage::~FujiImage()
 {
 	if(pixels != NULL)
 	{
@@ -50,7 +50,7 @@ Image::~Image()
 	bitsPerPixel = bytesPerPixel = 0;
 }
 
-void Image::Convert(ImageFormat toFormat)
+void FujiImage::Convert(ImageFormat toFormat)
 {
 	CALLSTACK;
 
@@ -94,7 +94,7 @@ void Image::Convert(ImageFormat toFormat)
 	}
 }
 
-void Image::VFlip(void)
+void FujiImage::VFlip(void)
 {
 	CALLSTACK;
 
@@ -125,7 +125,7 @@ void Image::VFlip(void)
 	Heap_TFree(tempPixels);
 }
 
-Image * LoadTGA(const char *filename, bool flipped)
+FujiImage* LoadTGA(const char *filename, bool flipped)
 {
 	CALLSTACK;
 
@@ -181,7 +181,7 @@ Image * LoadTGA(const char *filename, bool flipped)
 
 	position += header->idLength;
 
-	Image *image = new Image;
+	FujiImage *image = new FujiImage;
 	if(header->bpp == 24)
 	{
 		image->bitsPerPixel = 24;

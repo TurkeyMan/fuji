@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 
 #include "Common.h"
 #include "System_Internal.h"

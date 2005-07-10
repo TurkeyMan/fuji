@@ -7,14 +7,6 @@
 #define _cdecl __attribute__((__cdecl__))
 #endif
 
-#if defined(_XBOX)
-	#define DEBUG_KEYBOARD
-	#define DEBUG_MOUSE
-	#include <xtl.h>
-
-	char*  FixXBoxFilename(const char *pFilename);
-#endif
-
 // Standard platform includes
 #if defined(_WINDOWS)
 	#include <Windows.h>
@@ -30,6 +22,14 @@
 
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
+#endif
+
+#if defined(_XBOX)
+	#define DEBUG_KEYBOARD
+	#define DEBUG_MOUSE
+	#include <xtl.h>
+
+	char*  FixXBoxFilename(const char *pFilename);
 #endif
 
 #if defined(_LINUX)
@@ -48,10 +48,23 @@
 #endif
 
 #if defined(_PSP)
+	#include <pspkernel.h>
+
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>
-	#include <ctype.h>
+#endif
+
+#if defined(_PS2)
+	#include <stdarg.h>
+	#include <stdlib.h>
+	#include <string.h>
+#endif
+
+#if defined(_GC)
+	#include <stdarg.h>
+	#include <stdlib.h>
+	#include <string.h>
 #endif
 
 #if defined(_FUJI_UTIL)

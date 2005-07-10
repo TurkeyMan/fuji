@@ -9,11 +9,11 @@ typedef enum
 	FUJI_BGR
 } ImageFormat;
 
-class Image
+class FujiImage
 {
 public:
-	Image();
-	~Image();
+	FujiImage();
+	~FujiImage();
 	void Convert(ImageFormat toFormat);
 	void VFlip(void);
 
@@ -27,6 +27,6 @@ public:
 	void *pixels;
 };
 
-Image * LoadTGA(const char *filename, bool flipped=true);
+FujiImage* LoadTGA(const char *filename, bool flipped=true);
 
 #endif

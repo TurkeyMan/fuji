@@ -32,7 +32,7 @@ const char *MFStringCache::Add(const char *pNewString)
 	while (pCurr[0] && pCurr < &pMem[size])
 	{
 		int length = (int)strlen(pCurr);
-		if (!strcmpi(pCurr, pNewString))
+		if (!stricmp(pCurr, pNewString))
 		{
 			// found string
 			return pCurr;
