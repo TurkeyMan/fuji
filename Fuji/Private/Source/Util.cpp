@@ -268,6 +268,8 @@ int dprintf(const char *format, ...)
 
 #if defined(_WINDOWS) || defined(_XBOX)
 	OutputDebugString((LPCTSTR)buffer);
+#elif defined(_PSP)
+	printf(buffer);
 #else
 	fprintf(stderr, buffer);
 #endif

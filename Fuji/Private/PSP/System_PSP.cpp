@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
 //	srand(GetTickCount());
 
-	System_GameLoop();
+//	System_GameLoop();
 }
 
 uint64 RDTSC()
