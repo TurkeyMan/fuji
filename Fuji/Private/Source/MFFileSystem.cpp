@@ -108,6 +108,8 @@ char* MFFile_SystemPath(const char *filename)
 	return STR("Data/%s", filename);
 #elif defined(_LINUX)
 	return STR("Data/%s", filename);
+#elif defined(_PSP)
+	return STR("ms0:/PSP/GAME/FUJI/Data/%s", filename);
 #else
 	return STR("%s", filename);
 #endif
@@ -121,6 +123,8 @@ char* MFFile_HomePath(const char *filename)
 	return STR("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
 	return STR("Home/%s", filename);
+#elif defined(_PSP)
+	return STR("ms0:/PSP/GAME/FUJI/Home/%s", filename);
 #else
 	return STR("%s", filename);
 #endif
@@ -436,7 +440,10 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 		{
 			pBuffer = (char*)Heap_Alloc(size);
 
-			*pBytesRead = MFFile_Read(hFile, pBuffer, size);
+			int bytesRead = MFFile_Read(hFile, pBuffer, size);
+
+			if(pBytesRead)
+				*pBytesRead = bytesRead;
 		}
 
 		MFFile_Close(hFile);

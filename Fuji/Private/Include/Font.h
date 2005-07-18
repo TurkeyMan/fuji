@@ -21,13 +21,13 @@ void Font_DeinitModule();
 Font* Font_Create(const char *filename);
 void Font_Destroy(Font *pFont);
 
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert = false);
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert = false);
-int Font_DrawText(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *text, bool invert = false);
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *text, bool invert = false);
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *text, bool invert = false);
+int Font_DrawText(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *text, bool invert = false);
 
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *format, ...);
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...);
-int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *format, ...);
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *format, ...);
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *format, ...);
+int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *format, ...);
 
 extern Font *gpDebugFont;
 

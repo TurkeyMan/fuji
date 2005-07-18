@@ -80,8 +80,16 @@
 #if defined(_FUJI_SSE)
 	#include "xmmintrin.h"
 	#define _ALIGN16 _MM_ALIGN16
+#elif defined(_PSP) || defined(_PS2)
+	#define _ALIGN16 __attribute__((aligned(16)))
 #else
 	#define _ALIGN16
+#endif
+
+#if defined(__GNUC__)
+	#define _PACKED __attribute__((packed))
+#else
+	#define _PACKED
 #endif
 
 // Data Type Definition

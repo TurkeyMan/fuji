@@ -3,10 +3,17 @@
 
 #define MENU_FONT_HEIGHT 20.0f
 
-#define MENU_X		100.0f
-#define MENU_Y		100.0f
-#define MENU_WIDTH	640.0f-MENU_X*2.0f
-#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
+#if !defined(_PSP)
+	#define MENU_X		100.0f
+	#define MENU_Y		100.0f
+	#define MENU_WIDTH	640.0f-MENU_X*2.0f
+	#define MENU_HEIGHT	480.0f-MENU_Y*2.0f
+#else
+	#define MENU_X		50.0f
+	#define MENU_Y		20.0f
+	#define MENU_WIDTH	480.0f-MENU_X*2.0f
+	#define MENU_HEIGHT	272.0f-MENU_Y*2.0f
+#endif
 
 #include "DebugMenu.h"
 

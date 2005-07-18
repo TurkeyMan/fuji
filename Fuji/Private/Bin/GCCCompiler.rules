@@ -7,7 +7,7 @@
 		<CustomBuildRule
 			Name="GCCCompiler"
 			DisplayName="GCC Compiler"
-			CommandLine="[gccexe] [includepaths] [preprocessordefines] [optimization] [compilemode] [march] [mcpu] [language] [outputfile] $(InputPath)"
+			CommandLine="[gccexe] [includepaths] [preprocessordefines] [optimization] [compilemode] [warninglevel] [march] [mcpu] [language] [outputfile] $(InputPath)"
 			Outputs="$(InputName).o"
 			FileExtensions="*.g;*.gpp"
 			ExecutionDescription="$(InputFileName)"
@@ -91,6 +91,26 @@
 							Value="3"
 							Switch="-E"
 							DisplayName="Output Preprocessed"
+						/>
+					</Values>
+				</EnumProperty>
+				<EnumProperty
+					Name="warninglevel"
+					DisplayName="Warning Level"
+					Description="Level of warnings to show"
+					PropertyPageName="Compiler"
+					DefaultValue="1"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							Switch=""
+							DisplayName="Default (Disabled)"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="-Wall"
+							DisplayName="All"
 						/>
 					</Values>
 				</EnumProperty>

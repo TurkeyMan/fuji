@@ -59,9 +59,9 @@ void Font_Destroy(Font *pFont)
 	Heap_Free(pFont);
 }
 
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *text, bool invert)
 {
-	CALLSTACKc;
+	CALLSTACK;
 
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pFont->pMaterial->pInstanceData;
 
@@ -75,6 +75,8 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 	MFPrimitive(PT_TriList|PT_Prelit);
 
 	MFBegin(textlen*2*3);
+
+	MFSetColour(colour);
 
 	for(int i=0; i<textlen; i++)
 	{
@@ -92,7 +94,6 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 		p = w/h;
 		cwidth = height*p;
 
-		MFSetColour(colour);
 		MFSetTexCoord1(x, y);
 		MFSetPosition(pos_x, pos_y, pos_z);
 		MFSetTexCoord1(x+w, y+h);
@@ -114,17 +115,17 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 	return 0;
 }
 
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *text, bool invert)
 {
 	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, text, invert);
 }
 
-int Font_DrawText(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *text, bool invert)
 {
 	return Font_DrawText(pFont, pos.x, pos.y, pos.z, height, colour, text, invert);
 }
 
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -138,7 +139,7 @@ int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, uint32 c
 	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, buffer);
 }
 
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -152,7 +153,7 @@ int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float hei
 	return Font_DrawText(pFont, pos_x, pos_y, pos_z, height, colour, buffer);
 }
 
-int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, uint32 colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *format, ...)
 {
 	CALLSTACK;
 

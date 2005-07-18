@@ -8,6 +8,10 @@
 #include "MFFileSystem_Internal.h"
 #include "PtrList.h"
 #include "FileSystem/MFFileSystemNative.h"
+#include "Image.h"
+
+#include <pspdisplay.h>
+#include <pspgu.h>
 
 /**** Globals ****/
 
@@ -25,6 +29,37 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 	{
 		pTexture = gTextureBank.Create();
 		pTexture->refCount = 0;
+
+		const char *pFileName = STR("%s.tga", pName);
+
+		FujiImage *pImage = LoadTGA(pFileName, false);
+		pImage->Convert(FUJI_RGBA);
+
+		uint32 numPixels = pImage->width * pImage->height;
+
+		pTexture->pImageData = (char*)Heap_Alloc(numPixels * 2);
+
+		uint32 *pSrcData = (uint32*)pImage->pixels;
+		uint16 *pData = (uint16*)pTexture->pImageData;
+
+		for(int a=0; a<numPixels; a++)
+		{
+			*pData = ((*pSrcData & 0xF0) >> 4) |
+						((*pSrcData & 0xF000) >> 8) |
+						((*pSrcData & 0xF00000) >> 12) |
+						((*pSrcData & 0xF0000000) >> 16);
+
+			++pSrcData;
+			++pData;
+		}
+
+		strcpy(pTexture->name, pName);
+
+		pTexture->width = pImage->width;
+		pTexture->height = pImage->height;
+		pTexture->format = GU_PSM_4444;
+
+		delete pImage;
 	}
 
 	pTexture->refCount++;
@@ -40,6 +75,59 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 	{
 		pTexture = gTextureBank.Create();
 		pTexture->refCount = 0;
+
+		int numPixels = width * height;
+
+		pTexture->pImageData = (char*)Heap_Alloc(numPixels * 2);
+
+		uint32 *pSrcData = (uint32*)pData;
+		uint16 *pData = (uint16*)pTexture->pImageData;
+
+		switch(format)
+		{
+			case TEXF_A8R8G8B8:
+			{
+				if(flags & TEX_VerticalMirror)
+				{
+					pSrcData += numPixels;
+
+					for(int a=0; a<(int)height; a++)
+					{
+						pSrcData -= width;
+
+						for(int b=0; b<(int)width; b++)
+						{
+							*pData = ((pSrcData[b] & 0xF0) << 4) |
+									((pSrcData[b] & 0xF000) >> 8) |
+									((pSrcData[b] & 0xF00000) >> 20) |
+									((pSrcData[b] & 0xF0000000) >> 16);
+
+							++pData;
+						}
+					}
+				}
+				else
+				{
+					for(int a=0; a<numPixels; a++)
+					{
+						*pData = ((*pSrcData & 0xF0) << 4) |
+								((*pSrcData & 0xF000) >> 8) |
+								((*pSrcData & 0xF00000) >> 20) |
+								((*pSrcData & 0xF0000000) >> 16);
+
+						++pSrcData;
+						++pData;
+					}
+				}
+				break;
+			}
+		}
+
+		strcpy(pTexture->name, pName);
+
+		pTexture->width = width;
+		pTexture->height = height;
+		pTexture->format = GU_PSM_4444;
 	}
 
 	pTexture->refCount++;
@@ -61,6 +149,8 @@ int Texture_Destroy(Texture *pTexture)
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
 	{
+		Heap_Free(pTexture->pImageData);
+
 		gTextureBank.Destroy(pTexture);
 
 		return 0;

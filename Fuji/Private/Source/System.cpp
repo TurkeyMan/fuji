@@ -29,8 +29,13 @@ FujiDefaults gDefaults =
 
 	// DisplayDefaults
 	{
-		640,			// otrhoWidth
-		480				// otrhoHeight
+#if !defined(_PSP)
+		640,			// displayWidth
+		480				// displayHeight
+#else
+		480,			// displayWidth
+		272				// displayHeight
+#endif
 	},
 
 	// ViewDefaults
@@ -180,19 +185,28 @@ void System_Update()
 #if defined(_XBOX)
 	if(Input_Read(IDD_Gamepad, 0, Button_XB_Start) && Input_Read(IDD_Gamepad, 0, Button_XB_White) && Input_Read(IDD_Gamepad, 0, Button_XB_LTrig) && Input_Read(IDD_Gamepad, 0, Button_XB_RTrig))
 		RestartCallback(NULL, NULL);
+#elif defined(_PSP)
+	if(Input_Read(IDD_Gamepad, 0, Button_DLeft) && Input_Read(IDD_Gamepad, 0, Button_PP_Circle) && Input_Read(IDD_Gamepad, 0, Button_PP_L) && Input_Read(IDD_Gamepad, 0, Button_PP_R))
+		RestartCallback(NULL, NULL);
 #else//if defined(_WINDOWS)
 	if(Input_Read(IDD_Gamepad, 0, Button_P2_Start) && Input_Read(IDD_Gamepad, 0, Button_P2_Select) && Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_R1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_Read(IDD_Gamepad, 0, Button_P2_R2))
 		RestartCallback(NULL, NULL);
 #endif
 
+#if defined(_PSP)
+	if(Input_Read(IDD_Gamepad, 0, Button_DLeft) && Input_Read(IDD_Gamepad, 0, Button_PP_L) && Input_WasPressed(IDD_Gamepad, 0, Button_PP_Start))
+		gDrawSystemInfo = !gDrawSystemInfo;
+#else
 	if(Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_WasPressed(IDD_Gamepad, 0, Button_P2_LThumb))
 		gDrawSystemInfo = !gDrawSystemInfo;
+#endif
 
 #if !defined(_RETAIL)
 	DebugMenu_Update();
 #endif
 
 	MFMaterial_Update();
+
 	Sound_Update();
 }
 
@@ -209,7 +223,15 @@ void System_Draw()
 #if !defined(_RETAIL)
 	View_Push();
 	View_SetDefault();
-	View_SetOrtho();
+
+	MFRect rect;
+
+	rect.x = 0.0f;
+	rect.y = 0.0f;
+	rect.width = gDefaults.display.displayWidth;
+	rect.height = gDefaults.display.displayHeight;
+
+	View_SetOrtho(&rect);
 
 	Sound_Draw();
 
@@ -218,25 +240,27 @@ void System_Draw()
 	if(gDrawSystemInfo)
 	{
 		//FPS Display
-		Font_DrawTextf(gpDebugFont, 500.0f, 30.0f, 0, 20.0f, 0xFFFFFF00, "FPS: %.2f", GetFPS());
+		Font_DrawTextf(gpDebugFont, gDefaults.display.displayWidth-140.0f, 30.0f, 0, 20.0f, Vector(1,1,0,1), "FPS: %.2f", GetFPS());
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			Font_DrawTextf(gpDebugFont, 80.0f, 430.0f, 0, 20.0f, 0xFFFF0000, "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, Vector(1,0,0,1), "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
 		const float iconSize = 55.0f;
+
+		float yOffset = gDefaults.display.displayHeight-70.0f;
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
 		MFSetColour(1,1,1,0.5f);
 		MFSetTexCoord1(0,0);
-		MFSetPosition(15, 410, 0);
+		MFSetPosition(15, yOffset, 0);
 		MFSetTexCoord1(1,0);
-		MFSetPosition(15+iconSize, 410, 0);
+		MFSetPosition(15+iconSize, yOffset, 0);
 		MFSetTexCoord1(0,1);
-		MFSetPosition(15, 410+iconSize, 0);
+		MFSetPosition(15, yOffset+iconSize, 0);
 		MFSetTexCoord1(1,1);
-		MFSetPosition(15+iconSize, 410+iconSize, 0);
+		MFSetPosition(15+iconSize, yOffset+iconSize, 0);
 		MFEnd();
 	}
 
@@ -271,6 +295,7 @@ int System_GameLoop()
 #elif defined(_LINUX)
 			CheckEvents();
 #endif
+
 			Callstack_BeginFrame();
 			System_UpdateTimeDelta();
 			gFrameCount++;

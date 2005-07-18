@@ -21,11 +21,7 @@ struct TgaHeader
 	uint16 height;
 	uint8 bpp;
 	uint8 flags;
-}
-#if defined(_LINUX)
-__attribute__((packed))
-#endif
-;
+} _PACKED;
 
 #if defined(_WINDOWS) || defined(_XBOX)
 #pragma pack ()
@@ -66,29 +62,29 @@ void FujiImage::Convert(ImageFormat toFormat)
 	if(toFormat == format)
 		return;
 
-	if((format == FUJI_BGRA) && (toFormat == FUJI_RGBA))
+	if((format == FUJI_BGRA && toFormat == FUJI_RGBA) || (format == FUJI_RGBA && toFormat == FUJI_BGRA))
 	{
 		for(uint32 i=0; i < (width * height); i++)
 		{
-			temp = *p;
-			*p = *(p + 2);
-			*(p + 2) = temp;
+			temp = p[0];
+			p[0] = p[2];
+			p[2] = temp;
 
 			p += 4;
 		}
-	} 
-	else if((format == FUJI_BGR) && (toFormat == FUJI_RGB)) 
+	}
+	else if((format == FUJI_BGR && toFormat == FUJI_RGB) || (format == FUJI_RGB && toFormat == FUJI_BGR)) 
 	{
 		for(uint32 i=0; i < (width * height); i++)
 		{
-			temp = *p;
-			*p = *(p + 2);
-			*(p + 2) = temp;
+			temp = p[0];
+			p[0] = p[2];
+			p[2] = temp;
 
 			p += 3;
 		}
-	} 
-	else 
+	}
+	else
 	{
 		LOGD(STR("Unhandled conversion pair!"));
 	}
@@ -133,10 +129,11 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	bool isSavedFlipped = true;
 
 	uint32 bytesRead;
+
 	Heap_ActivateTempMemOverride(true);
 	contents = (unsigned char *)MFFileSystem_Load(filename, &bytesRead);
 	Heap_ActivateTempMemOverride(false);
-	
+
 	if(contents == NULL || bytesRead < (sizeof(TgaHeader) + 1))
 	{
 		return(NULL);

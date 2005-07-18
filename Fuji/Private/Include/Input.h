@@ -90,13 +90,25 @@ enum GamepadType
 	Button_P2_LThumb	= 10,
 	Button_P2_RThumb	= 11,
 
+// PSP controller enums
+	Button_PP_Cross		= 0,
+	Button_PP_Circle	= 1,
+	Button_PP_Box		= 2,
+	Button_PP_Triangle	= 3,
+
+	Button_PP_L			= 6,
+	Button_PP_R			= 7,
+
+	Button_PP_Start		= 8,
+	Button_PP_Select	= 9,
+
 // general controller enums
-	Button_DUp,
+	Button_DUp = 12,
 	Button_DDown,
 	Button_DLeft,
 	Button_DRight,
 
-	Axis_LX,
+	Axis_LX = 16,
 	Axis_LY,
 	Axis_RX,
 	Axis_RY,

@@ -6,6 +6,9 @@
 
 #include "../../Source/Materials/Mat_Standard.h"
 
+#include <pspdisplay.h>
+#include <pspgu.h>
+
 static MFMaterial *pSetMaterial;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
@@ -29,9 +32,48 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
+	sceGuAmbientColor(0xFFFFFFFF);
+
 	if(pSetMaterial != pMaterial)
 	{
+		// set some render states
+		if(pData->pTextures[pData->diffuseMapIndex])
+		{
+			Texture *pTexture = pData->pTextures[pData->diffuseMapIndex];
 
+			sceGuSetStatus(GU_TEXTURE_2D, GU_TRUE);
+
+			sceGuTexMode(pTexture->format, 0, 0, 0);
+			sceGuTexImage(0, pTexture->width, pTexture->height, pTexture->width, pTexture->pImageData);
+			sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+			sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+			sceGuTexScale(pData->textureMatrix.GetXAxis3().Magnitude(), pData->textureMatrix.GetYAxis3().Magnitude());
+			sceGuTexOffset(pData->textureMatrix.GetTrans3().x, pData->textureMatrix.GetTrans3().y);
+//			sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&pData->textureMatrix);
+		}
+		else
+		{
+			sceGuSetStatus(GU_TEXTURE_2D, GU_FALSE);
+		}
+
+		switch(pData->materialType&MF_BlendMask)
+		{
+			case 0:
+				sceGuSetStatus(GU_BLEND, GU_FALSE);
+				break;
+			case MF_AlphaBlend:
+				sceGuSetStatus(GU_BLEND, GU_TRUE);
+				sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+				break;
+			case MF_Additive:
+				sceGuSetStatus(GU_BLEND, GU_TRUE);
+				sceGuBlendFunc(GU_ADD, GU_SRC_COLOR, GU_DST_COLOR, 0, 0);
+				break;
+			case MF_Subtractive:
+				sceGuSetStatus(GU_BLEND, GU_TRUE);
+				sceGuBlendFunc(GU_SUBTRACT, GU_SRC_COLOR, GU_DST_COLOR, 0, 0);
+				break;
+		}
 	}
 
 	return 0;

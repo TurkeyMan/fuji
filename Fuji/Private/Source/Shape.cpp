@@ -12,7 +12,7 @@
 
 /**** Functions ****/
 
-void Shape_DrawQuad(float x, float y, float x2, float y2, uint32 colour, float su, float sv, float du, float dv)
+void Shape_DrawQuad(float x, float y, float x2, float y2, const Vector4& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -42,7 +42,7 @@ void Shape_DrawQuad(float x, float y, float x2, float y2, uint32 colour, float s
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawQuad(const Vector3& pos, float w, float h, uint32 colour, float su, float sv, float du, float dv)
+void Shape_DrawQuad(const Vector3& pos, float w, float h, const Vector4& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -72,7 +72,7 @@ void Shape_DrawQuad(const Vector3& pos, float w, float h, uint32 colour, float s
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, uint32 colour)
+void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const Vector4& colour)
 {
 	CALLSTACK;
 
@@ -94,7 +94,7 @@ void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, uint32 colou
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, uint32 colour)
+void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, const Vector4& colour)
 {
 	CALLSTACK;
 
@@ -117,7 +117,7 @@ void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, uint32 colou
 }
 
 // draw a box from a min and a max
-void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -245,7 +245,7 @@ void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, uint32 colour, 
 }
 
 // draw's a sphere .. position.w defines position.w
-void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int slices, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -331,7 +331,7 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 }
 
 // draw's a capsule from a start and end point and a position.w
-void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -481,7 +481,7 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 }
 
 // draw's a cylinder from a position position.w and height
-void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -636,7 +636,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 }
 
 // draw's a plane from a position normal and span
-void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -672,7 +672,7 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, ui
 
 	float normalLen = span*0.25f;
 
-	MFSetColour(0x00FFFF00 | (colour & 0xFF000000));
+	MFSetColour(Vector(1,1,0,colour.w));
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
@@ -699,7 +699,7 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, ui
 	MFEnd();
 }
 
-void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int segments, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int segments, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -789,7 +789,7 @@ void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int
 	MFEnd();
 }
 
-void Shape_DrawArrow(const Vector3& pos, const Vector3& dir, float length, float radius, uint32 colour, const Matrix &mat, bool wireframe)
+void Shape_DrawArrow(const Vector3& pos, const Vector3& dir, float length, float radius, const Vector4& colour, const Matrix &mat, bool wireframe)
 {
 	CALLSTACK;
 	Vector3 v = dir;
@@ -841,8 +841,8 @@ void Shape_DrawTransform(const Matrix& _mat, float scale, bool lite)
 	}
 	else
 	{
-		Shape_DrawArrow(Vector3::zero, Vector(1.0f,0.0f,0.0f), scale, scale * 0.02f, 0xFFFF0000, _mat);
-		Shape_DrawArrow(Vector3::zero, Vector(0.0f,1.0f,0.0f), scale, scale * 0.02f, 0xFF00FF00, _mat);
-		Shape_DrawArrow(Vector3::zero, Vector(0.0f,0.0f,1.0f), scale, scale * 0.02f, 0xFF0000FF, _mat);
+		Shape_DrawArrow(Vector3::zero, Vector(1.0f,0.0f,0.0f), scale, scale * 0.02f, Vector(1,0,0,1), _mat);
+		Shape_DrawArrow(Vector3::zero, Vector(0.0f,1.0f,0.0f), scale, scale * 0.02f, Vector(0,1,0,1), _mat);
+		Shape_DrawArrow(Vector3::zero, Vector(0.0f,0.0f,1.0f), scale, scale * 0.02f, Vector(0,0,1,1), _mat);
 	}
 }

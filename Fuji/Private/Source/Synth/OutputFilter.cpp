@@ -218,7 +218,7 @@ void OutputFilter::Draw()
 
 	float y = 100.0f;
 
-	Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, 0xFFFFFFFF, "Buffer:");
+	Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, Vector4::one, "Buffer:");
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
@@ -281,7 +281,7 @@ void OutputFilter::Draw()
 	float width = 40.0f;
 	y += width + 10.0f;
 
-	Font_DrawTextf(gpDebugFont, 30.0f, y-10.0f, 20.0f, 0xFFFFFFFF, "Wave:");
+	Font_DrawTextf(gpDebugFont, 30.0f, y-10.0f, 20.0f, Vector4::one, "Wave:");
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 

@@ -18,8 +18,8 @@ struct FujiDefaults
 
 	struct DisplayDefaults
 	{
-		uint32 otrhoWidth;
-		uint32 otrhoHeight;
+		uint32 displayWidth;
+		uint32 displayHeight;
 	} display;
 
 	struct ViewDefaults

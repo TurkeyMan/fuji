@@ -32,6 +32,9 @@ struct Texture
 	D3DFORMAT format;
 #elif defined(_LINUX)
 	GLuint textureID;
+#elif defined(_PSP)
+	char *pImageData;
+	uint32 format;
 #else
 	// nothing
 #endif
