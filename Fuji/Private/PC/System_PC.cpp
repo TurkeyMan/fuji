@@ -13,20 +13,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	System_GameLoop();
 }
 
-uint64 RDTSC()
-{
-	uint64 tickCount;
-	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
-	return tickCount;
-}
-
-uint64 GetTSCFrequency()
-{
-	uint64 freq;
-	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-	return freq;
-}
-
 void DoMessageLoop()
 {
 	MSG msg;
@@ -40,4 +26,34 @@ void DoMessageLoop()
 			DispatchMessage(&msg);
 		}
 	}
+}
+
+void System_InitModulePlatformSpecific()
+{
+}
+
+void System_DeinitModulePlatformSpecific()
+{
+}
+
+void System_UpdatePlatformSpecific()
+{
+}
+
+void System_DrawPlatformSpecific()
+{
+}
+
+uint64 RDTSC()
+{
+	uint64 tickCount;
+	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
+	return tickCount;
+}
+
+uint64 GetTSCFrequency()
+{
+	uint64 freq;
+	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+	return freq;
 }

@@ -52,6 +52,20 @@ MFMaterial *pWhiteMaterial = NULL;
 MFMaterial *pSysLogoLarge = NULL;
 MFMaterial *pSysLogoSmall = NULL;
 
+#if defined(_PSP)
+#include "connected.h"
+#include "disconnected.h"
+#include "power.h"
+#include "charging.h"
+#include "usb_icon.h"
+
+MFMaterial *pConnected;
+MFMaterial *pDisconnected;
+MFMaterial *pPower;
+MFMaterial *pCharging;
+MFMaterial *pUSB;
+#endif
+
 char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
 
 void Mat_Standard_Register();
@@ -90,16 +104,47 @@ void MFMaterial_InitModule()
 	// release a reference to the logo textures
 	Texture_Destroy(pSysLogoLargeTexture);
 	Texture_Destroy(pSysLogoSmallTexture);
+
+#if defined(_PSP)
+	// create PSP specific stock materials
+	Texture *pConnectedTexture = Texture_CreateFromRawData("connected", connected_data, connected_width, connected_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	Texture *pDisconnectedTexture = Texture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	Texture *pPowerTexture = Texture_CreateFromRawData("power", power_data, power_width, power_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	Texture *pChargingTexture = Texture_CreateFromRawData("charging", charging_data, charging_width, charging_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	Texture *pUSBTexture = Texture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+
+	pConnected = MFMaterial_Create("connected");
+	pDisconnected = MFMaterial_Create("disconnected");
+	pPower = MFMaterial_Create("power");
+	pCharging = MFMaterial_Create("charging");
+	pUSB = MFMaterial_Create("usb_icon");
+
+	Texture_Destroy(pConnectedTexture);
+	Texture_Destroy(pDisconnectedTexture);
+	Texture_Destroy(pPowerTexture);
+	Texture_Destroy(pChargingTexture);
+	Texture_Destroy(pUSBTexture);
+#endif
 }
 
 void MFMaterial_DeinitModule()
 {
 	CALLSTACK;
 
+	// destroy stock materials
 	MFMaterial_Destroy(pNoneMaterial);
 	MFMaterial_Destroy(pWhiteMaterial);
 	MFMaterial_Destroy(pSysLogoLarge);
 	MFMaterial_Destroy(pSysLogoSmall);
+
+#if defined(_PSP)
+	// destroy PSP specific stock materials
+	MFMaterial_Destroy(pConnected);
+	MFMaterial_Destroy(pDisconnected);
+	MFMaterial_Destroy(pPower);
+	MFMaterial_Destroy(pCharging);
+	MFMaterial_Destroy(pUSB);
+#endif
 
 	MaterialDefinition *pDef = pDefinitionRegistry;
 
@@ -364,6 +409,20 @@ MFMaterial* MFMaterial_GetStockMaterial(StockMaterials materialIdentifier)
 			return pSysLogoSmall;
 		case Mat_SysLogoLarge:
 			return pSysLogoLarge;
+#if defined(_PSP)
+		case Mat_USB:
+			return pUSB;
+		case Mat_Connected:
+			return pConnected;
+		case Mat_Disconnected:
+			return pDisconnected;
+		case Mat_Power:
+			return pPower;
+		case Mat_Charging:
+			return pCharging;
+#endif
+		default:
+			DBGASSERT(false, "Invalid Stock Material");
 	}
 
 	return NULL;
@@ -424,7 +483,7 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat,
 			{
 				LOGD("'alias' MUST be the first parameter in a material definition... Ignored.");
 
-#pragma message("fix me")
+DBGASSERT(false, "Fix Me!!!");
 //				const char *pAlias = pLine->GetString(1);
 //				MaterialInternal_InitialiseFromDefinition(pDefIni, pMat, pAlias);
 			}

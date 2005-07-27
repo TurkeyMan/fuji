@@ -14,6 +14,12 @@ void System_PostUpdate();
 void System_Draw();
 void System_Deinit();
 
+void System_InitModulePlatformSpecific();
+void System_DeinitModulePlatformSpecific();
+
+void System_UpdatePlatformSpecific();
+void System_DrawPlatformSpecific();
+
 #if defined(_WINDOWS) || defined(_DC)
 	void DoMessageLoop();
 #elif defined(_LINUX)

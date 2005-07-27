@@ -175,6 +175,9 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 			{
 				break;
 			}
+
+			default:
+				break;
 		}
 
 		if(!load)

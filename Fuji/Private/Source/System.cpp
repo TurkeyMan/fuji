@@ -85,6 +85,11 @@ FujiDefaults gDefaults =
 		true,			// allowMultipleMice
 		true,			// mouseZeroIsSystemMouse
 		true			// systemMouseUseWindowsCursor
+	},
+
+	// MiscellaneousDefaults
+	{
+		true			// enableUSBOnStartup
 	}
 };
 
@@ -118,6 +123,8 @@ void System_Init()
 
 	DebugMenu_InitModule();
 	Callstack_InitModule();
+
+	System_InitModulePlatformSpecific();
 
 	Timer_InitModule();
 	gSystemTimer.Init(NULL);
@@ -170,6 +177,9 @@ void System_Deinit()
 	MFFileSystem_DeinitModule();
 
 	Timer_DeinitModule();
+
+	System_DeinitModulePlatformSpecific();
+
 	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
 
@@ -179,6 +189,8 @@ void System_Deinit()
 void System_Update()
 {
 	CALLSTACKc;
+
+	System_UpdatePlatformSpecific();
 
 	Input_Update();
 
@@ -228,10 +240,13 @@ void System_Draw()
 
 	rect.x = 0.0f;
 	rect.y = 0.0f;
-	rect.width = gDefaults.display.displayWidth;
-	rect.height = gDefaults.display.displayHeight;
+	rect.width = (float)gDefaults.display.displayWidth;
+	rect.height = (float)gDefaults.display.displayHeight;
 
 	View_SetOrtho(&rect);
+
+	// should be the first thing rendered so we only display game vertices
+	DrawMFPrimitiveStats();
 
 	Sound_Draw();
 
@@ -240,7 +255,16 @@ void System_Draw()
 	if(gDrawSystemInfo)
 	{
 		//FPS Display
-		Font_DrawTextf(gpDebugFont, gDefaults.display.displayWidth-140.0f, 30.0f, 0, 20.0f, Vector(1,1,0,1), "FPS: %.2f", GetFPS());
+#if defined(_PSP)
+		float x = gDefaults.display.displayWidth-100.0f;
+		float y = 10.0f;
+#else
+		float x = gDefaults.display.displayWidth-140.0f;
+		float y = 30.0f;
+#endif
+
+		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, Vector(1,1,0,1), "FPS: %.2f", GetFPS());
+
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
 			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, Vector(1,0,0,1), "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
@@ -262,6 +286,8 @@ void System_Draw()
 		MFSetTexCoord1(1,1);
 		MFSetPosition(15+iconSize, yOffset+iconSize, 0);
 		MFEnd();
+
+		System_DrawPlatformSpecific();
 	}
 
 	DebugMenu_Draw();

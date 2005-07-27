@@ -26,6 +26,11 @@ void Primitive_DeinitModule()
 
 }
 
+void DrawMFPrimitiveStats()
+{
+
+}
+
 void MFPrimitive(uint32 type, uint32 hint)
 {
 	primType = type & PT_PrimMask;

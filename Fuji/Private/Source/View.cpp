@@ -378,7 +378,7 @@ bool View::SetOrtho(bool bActivate, float orthoWidth, float orthoHeight)
  
       //clipToScreenMatrix.m[0][0] = gDisplay.orthoWidth * (float)(clipMaxX - clipMinX + 1)/640.0f * 0.5f * ((pRenderTexture ? pRenderTexture->width : gDisplay.drawWidth) / gDisplay.orthoWidth);
       //clipToScreenMatrix.m[1][1] = -gDisplay.orthoHeight * (float)(clipMaxY - clipMinY + 1)/448.0f * 0.5f * ((pRenderTexture ? pRenderTexture->height : gDisplay.drawHeight) / gDisplay.orthoHeight);
-    clipToScreenMatrix.m[0][0] = gDisplay.orthoWidth * (float)(clipMaxX - clipMinX + 1)/640.0f * 0.5f;//* ((pRenderTexture ? pRenderTexture->width : gDisplay.orthoWidth) / gDisplay.orthoWidth);
+    clipToScreenMatrix.m[0][0] = gDisplay.orthoWidth * (float)(clipMaxX - clipMinX + 1)/640.0f * 0.5f;// * ((pRenderTexture ? pRenderTexture->width : gDisplay.orthoWidth) / gDisplay.orthoWidth);
       clipToScreenMatrix.m[1][1] = -gDisplay.orthoHeight * (float)(clipMaxY - clipMinY + 1)/512.0f * 0.5f;// * ((pRenderTexture ? pRenderTexture->height : gDisplay.orthoHeight) / gDisplay.orthoHeight);
     clipToScreenMatrix.m[2][2] = 16777215.0f;
     clipToScreenMatrix.m[3][2] = 0.0f;
@@ -406,14 +406,14 @@ bool View::SetOrtho(bool bActivate, float orthoWidth, float orthoHeight)
 }
  
  
-//**********************************************************************
-//* Function:     Init
-//* Author:       James Podesta
-//* Date:         23/01/2001
-//* Description:  Init full screen viewport
-//* Parameters:   void
-//* Returns:      void
-//**********************************************************************
+// **********************************************************************
+// * Function:     Init
+// * Author:       James Podesta
+// * Date:         23/01/2001
+// * Description:  Init full screen viewport
+// * Parameters:   void
+// * Returns:      void
+// **********************************************************************
 void View::Init(float topLeftX, float topLeftY, float bottomRightX, float bottomRightY)
 {
   MKVector3 pos, target;
@@ -479,17 +479,17 @@ void View::Init(float topLeftX, float topLeftY, float bottomRightX, float bottom
 };
  
  
-//**********************************************************************
-//* Function:     SetRenderArea
-//* Author:       James Podesta
-//* Date:         23/01/2001
-//* Description:  set the render area on the rendering target (screen/texture) in 640x512 coordinates
-//* Parameters:   topLeftX
-//*               topLeftY
-//*               bottomRightX
-//*               bottomRightY
-//* Returns:      void
-//**********************************************************************
+// **********************************************************************
+// * Function:     SetRenderArea
+// * Author:       James Podesta
+// * Date:         23/01/2001
+// * Description:  set the render area on the rendering target (screen/texture) in 640x512 coordinates
+// * Parameters:   topLeftX
+// *               topLeftY
+// *               bottomRightX
+// *               bottomRightY
+// * Returns:      void
+// **********************************************************************
  
 void View::SetRenderArea(float topLeftX, float topLeftY, float bottomRightX, float bottomRightY)
 {

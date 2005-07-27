@@ -2,6 +2,10 @@
 #include "Heap.h"
 #include "PtrList.h"
 
+#if defined(_PSP)
+#include <psputils.h>
+#endif
+
 #define MAX_HEAP_COUNT 16
 
 Heap *gpHeapList[MAX_HEAP_COUNT];
@@ -73,6 +77,22 @@ void Heap_DeinitModule()
 	}
 }
 
+void* Heap_GetUncachedPointer(void *pPointer)
+{
+#if defined(_PSP)
+	pPointer = (void*)((uint32)pPointer | 0x40000000); // enable uncached mode
+#endif
+
+	return pPointer;
+}
+
+void Heap_FlushDCache()
+{
+#if defined(_PSP)
+	sceKernelDcacheWritebackAll();
+#endif
+}
+
 Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 {
 	CALLSTACK;
@@ -115,11 +135,17 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	// fill heap type specific data
 	switch(type)
 	{
-	case HEAP_Static:
-		StaticHeap *pStaticHeap = (StaticHeap*)pHeap;
+		case HEAP_Static:
+		{
+			StaticHeap *pStaticHeap = (StaticHeap*)pHeap;
 
-		pStaticHeap->markStack = (char**)pHeap + ALIGN16(sizeof(StaticHeap));
-		pStaticHeap->markCount = 0;
+			pStaticHeap->markStack = (char**)pHeap + ALIGN16(sizeof(StaticHeap));
+			pStaticHeap->markCount = 0;
+			break;
+		}
+
+		default:
+			break;
 	}
 
 	// add to list

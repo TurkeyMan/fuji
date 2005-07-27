@@ -210,8 +210,8 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	// find file length
 	SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
-	DBGASSERT(fileSize < 4294967296ULL, "Fuji does not support files larger than 4,294,967,295 bytes.");
-	pFile->length = (uint32)fileSize;
+	DBGASSERT(fileSize < 2147483648LL, "Fuji does not support files larger than 2,147,483,647 bytes.");
+	pFile->length = (int)fileSize;
 
 	// return to start of file
 	sceIoLseek32(hFile, 0, SEEK_SET);

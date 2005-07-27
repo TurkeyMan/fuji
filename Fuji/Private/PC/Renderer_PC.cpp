@@ -23,7 +23,7 @@ void RendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffe
 	pd3dDevice->SetStreamSource(stream, pVertexBuffer, offset, stride);
 }
 
-void RendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer, int baseIndex)
+void RendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
 {
 	pd3dDevice->SetIndices(pIndexBuffer);
 }
@@ -98,7 +98,7 @@ void RendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *p
 	pd3dDevice->GetSamplerState(sampler, type, (DWORD*)pValue);
 }
 
-void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCFV_Type type, int *pNumBytesWritten)
+void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
 {
 	int numBytes = 0;
 
@@ -172,14 +172,14 @@ void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCFV_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid PCFV_Type");
+			DBGASSERT(false, "Invalid PCVF_Type");
 	}
 
 	if(pNumBytesWritten)
 		*pNumBytesWritten = numBytes;
 }
 
-void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCFV_Type type, int *pNumComponentsWritten)
+void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
 {
 	int numComponents = 0;
 
@@ -239,7 +239,7 @@ void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCFV_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid PCFV_Type");
+			DBGASSERT(false, "Invalid PCVF_Type");
 	}
 
 	if(pNumComponentsWritten)

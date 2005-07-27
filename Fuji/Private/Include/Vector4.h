@@ -1,7 +1,9 @@
 #if !defined(_VECTOR4_H)
 #define _VECTOR4_H
 
+#if defined(_MSC_VER)
 #pragma warning(disable:4201)
+#endif
 
 #include "Vector3.h"
 

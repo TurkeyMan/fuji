@@ -241,7 +241,7 @@ int Mat_Standard_GetNumParams()
 
 MFMaterialParamaterInfo* Mat_Standard_GetParamaterInfo(int paramaterIndex)
 {
-	DBGASSERT(paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), STR("Invalid paramater id %d.", paramaterIndex));
+	DBGASSERT((uint32)paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), STR("Invalid paramater id %d.", paramaterIndex));
 
 	return &paramaterInformation[paramaterIndex];
 }

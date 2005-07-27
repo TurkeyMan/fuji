@@ -70,6 +70,11 @@ struct FujiDefaults
 		bool mouseZeroIsSystemMouse;
 		bool systemMouseUseWindowsCursor;
 	} input;
+
+	struct MiscellaneousDefaults
+	{
+		bool enableUSBOnStartup;
+	} misc;
 };
 
 extern FujiDefaults gDefaults;

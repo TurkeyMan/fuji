@@ -51,6 +51,8 @@ enum RenderFlags
 class Renderable
 {
 public:
+	virtual ~Renderable();
+
 	virtual void Draw() = 0;
 
 	uint32 flags;

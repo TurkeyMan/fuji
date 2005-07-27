@@ -25,10 +25,6 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 {
 	CALLSTACK;
 
-//	pspDebugScreenInit();
-//	pspDebugScreenSetBackColor(0xFF400000);
-//	pspDebugScreenClear();
-
 	sceGuInit();
 
 	sceGuStart(GU_DIRECT, displayList);

@@ -1,7 +1,9 @@
 #if !defined(_VECTOR3_H)
 #define _VECTOR3_H
 
+#if defined(_MSC_VER)
 #pragma warning(disable:4201)
+#endif
 
 class Matrix;
 class Vector4;

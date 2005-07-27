@@ -8,34 +8,65 @@
 #include "Texture.h"
 #include "Renderer.h"
 #include "MFMaterial.h"
+#include "Font.h"
+#include "DebugMenu_Internal.h"
 
 #include <pspdisplay.h>
 #include <pspgu.h>
 
-#define NUM_VERTS 2048
-struct Vertex
+#define NUM_VERTS 4096
+struct ImmediateVertex
 {
 	float u, v;
 	unsigned int colour;
 	float x,y,z;
 };
 
-struct Vertex __attribute__((aligned(16))) primBuffer[NUM_VERTS];
-Vertex current;
+struct ImmediateVertex __attribute__((aligned(16))) primBuffer[NUM_VERTS];
+ImmediateVertex current;
+
+ImmediateVertex *pPrimBuffer = NULL;
 
 uint32 primType = 0;
 uint32 beginCount = 0;
 uint32 startVert = 0;
 uint32 currentVert = 0;
 
+const char *pPrimStrings[] = { "Disabled", "Enabled", NULL };
+MenuItemIntString showPrimitiveStats(pPrimStrings, 0);
+
 void Primitive_InitModule()
 {
 	CALLSTACK;
+
+	DebugMenu_AddItem("Show Primitive Stats", "Fuji Options", &showPrimitiveStats, NULL, NULL);
+
+	pPrimBuffer = (ImmediateVertex*)Heap_GetUncachedPointer(primBuffer);
+//	pPrimBuffer = primBuffer;
 }
 
 void Primitive_DeinitModule()
 {
 	CALLSTACK;
+}
+
+void DrawMFPrimitiveStats()
+{
+	if(showPrimitiveStats)
+	{
+		MFMaterial_SetMaterial(NULL);
+
+		MFPrimitive(PT_TriStrip);
+		MFBegin(4);
+		MFSetColour(0,0,0,0.8f);
+		MFSetPosition(70, 252, 0);
+		MFSetPosition(70, 20, 0);
+		MFSetPosition(410, 252, 0);
+		MFSetPosition(410, 20, 0);
+		MFEnd();
+
+		Font_DrawTextf(gpDebugFont, 90.0f, 40.0f, 0, 20.0f, Vector(1,1,0,1), "NumVerts: %d", currentVert);
+	}
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
@@ -66,7 +97,8 @@ void MFBegin(uint32 vertexCount)
 
 	beginCount = vertexCount;
 	startVert = currentVert;
-//	currentVert = 0;
+
+	DBGASSERT(startVert+vertexCount < NUM_VERTS, STR("Exceeded primitive vertex cache %d", NUM_VERTS));
 }
 
 void MFSetMatrix(const Matrix &mat)
@@ -121,9 +153,8 @@ void MFSetPosition(float x, float y, float z)
 	current.y = y;
 	current.z = z;
 
-	primBuffer[currentVert] = current;
+	pPrimBuffer[currentVert] = current;
 	++currentVert;
-	DBGASSERT(currentVert < NUM_VERTS, STR("Exceeded primitive vertex cache %d", NUM_VERTS));
 }
 
 void MFEnd()
@@ -159,6 +190,6 @@ void MFEnd()
 			break;
 	}
 
-	sceKernelDcacheWritebackAll();
-	sceGuDrawArray(pt, GU_TEXTURE_32BITF|GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D, beginCount, 0, &primBuffer[startVert]);
+//	Heap_FlushDCache();
+	sceGuDrawArray(pt, GU_TEXTURE_32BITF|GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D, beginCount, 0, &pPrimBuffer[startVert]);
 }

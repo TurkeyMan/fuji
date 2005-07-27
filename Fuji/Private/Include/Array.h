@@ -1,7 +1,9 @@
 #if !defined(_ARRAY_H)
 #define _ARRAY_H
 
+#if defined(_MSC_VER)
 #pragma warning(disable: 4345)
+#endif
 
 template<class T>
 class Array

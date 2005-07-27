@@ -28,6 +28,8 @@ struct MemAlloc
 class Heap
 {
 public:
+	virtual ~Heap() {}
+
 	// Heap Functions
 	virtual void Release() = 0;
 
@@ -86,6 +88,10 @@ public:
 // heap module init/deinit
 void Heap_InitModule();
 void Heap_DeinitModule();
+
+// memory related functions
+void* Heap_GetUncachedPointer(void *pPointer);
+void  Heap_FlushDCache();
 
 // create a heap
 Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name);

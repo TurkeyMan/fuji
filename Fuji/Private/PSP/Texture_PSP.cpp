@@ -39,17 +39,27 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 
 		pTexture->pImageData = (char*)Heap_Alloc(numPixels * 2);
 
-		uint32 *pSrcData = (uint32*)pImage->pixels;
+		char *pSrcData = (char*)pImage->pixels;
 		uint16 *pData = (uint16*)pTexture->pImageData;
 
-		for(int a=0; a<numPixels; a++)
+		for(uint32 a=0; a<numPixels; a++)
 		{
-			*pData = ((*pSrcData & 0xF0) >> 4) |
-						((*pSrcData & 0xF000) >> 8) |
-						((*pSrcData & 0xF00000) >> 12) |
-						((*pSrcData & 0xF0000000) >> 16);
+			if(pImage->bitsPerPixel == 32)
+			{
+				*pData = ((pSrcData[0] & 0xF0) >> 4) |
+						  (pSrcData[1] & 0xF0) |
+						 ((pSrcData[2] & 0xF0) << 4) |
+						 ((pSrcData[3] & 0xF0) << 8);
+			}
+			else if(pImage->bitsPerPixel == 24)
+			{
+				*pData = ((pSrcData[0] & 0xF0) >> 4) |
+						  (pSrcData[1] & 0xF0) |
+						 ((pSrcData[2] & 0xF0) << 4) |
+						  0xF000;
+			}
 
-			++pSrcData;
+			pSrcData += pImage->bytesPerPixel;
 			++pData;
 		}
 

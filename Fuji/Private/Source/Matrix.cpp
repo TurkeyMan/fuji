@@ -6,10 +6,10 @@
 const Matrix Matrix::identity = 
 {
 	{
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+		{ 1.0f, 0.0f, 0.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 0.0f },
+		{ 0.0f, 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 0.0f, 0.0f, 1.0f }
 	}
 };
 
@@ -240,7 +240,6 @@ Matrix& Matrix::SetScale(const Vector3& scale)
 
 Matrix& Matrix::LookAt(const Vector3& pos, const Vector3& at, const Vector3& up)
 {
-#pragma message("this could be majorly optimised!!")
 	Vector3 zAxis, xAxis, yAxis, trans;
 
 	// calculate forewards

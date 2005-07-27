@@ -487,7 +487,7 @@ int Input_GetNumPointers()
 
 void SetMouseMode(uint32 mouseMode)
 {
-#pragma message("Set Mouse Mode")
+	DBGASSERT(false, "SetMouseMode not written");
 }
 
 Vector3 Input_ReadMousePos(int mouseID)
@@ -498,7 +498,7 @@ Vector3 Input_ReadMousePos(int mouseID)
 	{
 		for(int a=0; a<Input_MaxInputID; a++)
 		{
-#pragma message("ReadANYMouse")
+			DBGASSERT(false, "Reading any mouse not written");
 		}
 	}
 	else
@@ -519,7 +519,7 @@ Vector3 Input_ReadMouseDelta(int mouseID)
 	{
 		for(int a=0; a<Input_MaxInputID; a++)
 		{
-#pragma message("ReadANYMouse")
+			DBGASSERT(false, "Reading any mouse delta not written");
 		}
 	}
 	else
@@ -534,12 +534,12 @@ Vector3 Input_ReadMouseDelta(int mouseID)
 
 void Input_SetMouseMode(int mode)
 {
-#pragma message("SetMouseMode")
+	DBGASSERT(false, "SetMouseMode not written");
 }
 
 void Input_SetMouseAcceleration(float multiplier)
 {
-#pragma message("SetMouseAcceleration")
+	DBGASSERT(false, "SetMouseAcceleration not written");
 }
 
 const char* Input_EnumerateString(int source, int sourceID, int type, bool includeDevice, bool includeDeviceID)
@@ -612,5 +612,5 @@ float InputInternal_GetGamepadKeyMapping(int type, KeyState *pKeystate)
 	if(!Input_GetKeyboardStatusState(KSS_ScrollLock, 0))
 		return 0.0f;
 
-	return pKeystate->keys[gamepadMappingTable[type]] ? 1.0f : 0.0f;
+	return pKeystate->keys[(int)gamepadMappingTable[type]] ? 1.0f : 0.0f;
 }

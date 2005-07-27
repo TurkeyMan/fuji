@@ -560,7 +560,7 @@ Vector3 MenuItemBool::GetDimensions(float maxWidth)
 // MenuItemIntString
 float MenuItemIntString::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %s", name, values[data]));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %s", name, ppValues[data]));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -573,7 +573,7 @@ void MenuItemIntString::ListUpdate(bool selected)
 			--data;
 
 			if(data<0)
-				while(values[data+1]) data++;
+				while(ppValues[data+1]) data++;
 
 			if(pCallback)
 				pCallback(this, pUserData);
@@ -582,7 +582,7 @@ void MenuItemIntString::ListUpdate(bool selected)
 		{
 			++data;
 
-			if(!values[data])
+			if(!ppValues[data])
 				data = 0;
 
 			if(pCallback)

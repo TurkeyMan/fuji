@@ -35,7 +35,7 @@ const int numModes = sizeof(resList) / (sizeof(int)*2);
 
 // debug menu resolution setting
 char pCurrentRes[16] = "####x####";
-char *resStrings[] = { "-", pCurrentRes, "+", NULL };
+const char *resStrings[] = { "-", pCurrentRes, "+", NULL };
 
 MenuItemIntString resSelect(resStrings, 1);
 MenuItemStatic applyDisplayMode;
@@ -92,11 +92,11 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	}
 
 	if(resList[currentMode][1] == 720)
-		sprintf(resStrings[1], "720p", resList[currentMode][0], resList[currentMode][1]);
+		sprintf(pCurrentRes, "720p", resList[currentMode][0], resList[currentMode][1]);
 	else if(resList[currentMode][1] == 1080)
-		sprintf(resStrings[1], "1080p", resList[currentMode][0], resList[currentMode][1]);
+		sprintf(pCurrentRes, "1080p", resList[currentMode][0], resList[currentMode][1]);
 	else
-		sprintf(resStrings[1], "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+		sprintf(pCurrentRes, "%dx%d", resList[currentMode][0], resList[currentMode][1]);
 	pRes->data = 1;
 }
 
@@ -383,7 +383,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 	DebugMenu_AddItem("Apply", "Display Options", &applyDisplayMode, ApplyDisplayModeCallback);
-	sprintf(resStrings[1], "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+	sprintf(pCurrentRes, "%dx%d", resList[currentMode][0], resList[currentMode][1]);
 
 	return 0;
 }

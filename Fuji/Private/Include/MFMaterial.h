@@ -13,6 +13,13 @@ enum StockMaterials
 	Mat_Unavailable,
 	Mat_SysLogoSmall,
 	Mat_SysLogoLarge,
+#if defined(_PSP)
+	Mat_USB,
+	Mat_Connected,
+	Mat_Disconnected,
+	Mat_Power,
+	Mat_Charging,
+#endif
 
 	Mat_Max,
 	Mat_ForceInt = 0x7FFFFFFF

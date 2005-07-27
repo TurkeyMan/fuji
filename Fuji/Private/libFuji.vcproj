@@ -365,10 +365,11 @@
 				Name="GCCCompiler"
 				ExecutionBucket="6"
 				AdditionalDependencies=""
+				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
 				includepaths="D:\Projects\Fuji\Source\;D:\Projects\Fuji\Include\;D:\Projects\Fuji\PSP\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
-				warninglevel="0"
-				optimization="1"
+				warninglevel="1"
+				optimization="3"
 				preprocessordefines="_PSP;_DEBUG;_LIB"
 			/>
 			<Tool

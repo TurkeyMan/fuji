@@ -1,7 +1,7 @@
 #if !defined(_RENDERER_PC_H)
 #define _RENDERER_PC_H
 
-enum PCFV_Type
+enum PCVF_Type
 {
 	PCVF_Float4,
 	PCVF_Float3,
@@ -21,8 +21,8 @@ enum PCFV_Type
 	PCVF_Float16_2,
 	PCVF_Float16_4,
 
-	PCFV_Max,
-	PCFV_ForceInt = 0x7FFFFFFF
+	PCVF_Max,
+	PCVF_ForceInt = 0x7FFFFFFF
 };
 
 void RendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture);
@@ -48,7 +48,7 @@ void RendererPC_SetDefaultSamplerStates();
 void RendererPC_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value);
 void RendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue);
 
-void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCFV_Type type);
-void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCFV_Type type);
+void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type);
+void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type);
 
 #endif

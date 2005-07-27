@@ -45,6 +45,8 @@ Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = DebugMenu_Ge
 class MenuObject
 {
 public:
+	virtual ~MenuObject() {}
+
 	// when selected as current menu
 	virtual void Draw();
 	virtual void Update();
@@ -111,7 +113,7 @@ public:
 class MenuItemIntString : public MenuObject
 {
 public:
-	MenuItemIntString(char *strings[], int value = 0) { type = MenuType_IntString; data = value; values = strings; DBGASSERT(values[0] != NULL, "Must be at least one item in the strings array."); }
+	MenuItemIntString(const char *ppStrings[], int value = 0) { type = MenuType_IntString; data = value; ppValues = ppStrings; DBGASSERT(ppValues[0] != NULL, "Must be at least one item in the strings array."); }
 	operator int() const { return data; }
 
 	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
@@ -119,7 +121,7 @@ public:
 	virtual Vector3 GetDimensions(float maxWidth);
 
 	int data;
-	char **values;
+	const char **ppValues;
 };
 
 class MenuItemBool : public MenuObject
