@@ -68,13 +68,11 @@ public:
 	Vector3& ApplyMatrix3x3(const Matrix &mat);
 };
 
-inline Vector3 operator*(float f, Vector3 v) { v.x *= f; v.y *= f; v.z *= f; return v; }
+inline Vector3 operator*(float f, const Vector3 &v) { Vector3 t; t.x = v.x*f; t.y = v.y*f; t.z = v.z*f; return t; }
 
 inline Vector3 Vector(float x, float y, float z = 0.0f) { Vector3 t; t.x = x; t.y = y; t.z = z; return t; }
 
-template <>
-inline Vector3 Min(Vector3 a, Vector3 b) { Vector3 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; return t; }
-template <>
-inline Vector3 Max(Vector3 a, Vector3 b) { Vector3 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; return t; }
+inline Vector3 Min(const Vector3 &a, const Vector3 &b) { Vector3 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; return t; }
+inline Vector3 Max(const Vector3 &a, const Vector3 &b) { Vector3 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; return t; }
 
 #endif

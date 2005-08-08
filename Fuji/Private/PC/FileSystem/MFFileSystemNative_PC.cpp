@@ -238,7 +238,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 
@@ -274,6 +274,9 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 	}
 
 	uint32 newPos = SetFilePointer(fileHandle->pFilesysData, bytes, NULL, method);
+	if(newPos == INVALID_SET_FILE_POINTER)
+		return -1;
+
 	fileHandle->offset = newPos;
 	return newPos;
 }

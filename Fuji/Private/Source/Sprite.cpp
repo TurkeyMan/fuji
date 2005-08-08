@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display.h"
 #include "View.h"
@@ -17,7 +17,7 @@ void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colou
 
 	pivot = Vector(0.0f, 0.0f);
 	position = Vector(0.0f, 0.0f);
-	scale = Vector((float)pData->pTextures[0]->width, (float)pData->pTextures[0]->height);
+	scale = Vector((float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width, (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height);
 	angle = 0.0f;
 	visible = false;
 }

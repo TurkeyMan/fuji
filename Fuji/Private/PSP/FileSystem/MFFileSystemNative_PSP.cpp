@@ -245,7 +245,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 
@@ -311,7 +311,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 	if(hFile > 0)
 	{
 		SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
-		DBGASSERT(fileSize < 4294967296ULL, "Fuji does not support files larger than 4,294,967,295 bytes.");
+		DBGASSERT(fileSize < (SceOff)4294967296ULL, "Fuji does not support files larger than 4,294,967,295 bytes.");
 		fileSize = (uint32)fileSize;
 
 		sceIoClose(hFile);

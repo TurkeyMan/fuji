@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "Display.h"
 #include "MFFileSystem.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Font.h"
 #include "Primitive.h"
@@ -78,18 +78,21 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 
 	MFSetColour(colour);
 
+	float texWidth = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width;
+	float texHeight = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height;
+
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)((uint8)text[i] & 0x0F) * (float)(pData->pTextures[0]->width / 16);
-		y = (float)((uint8)text[i] >> 4) * (float)(pData->pTextures[0]->height / 16);
+		x = (float)((uint8)text[i] & 0x0F) * (float)(pData->pTextures[0]->pTemplateData->pSurfaces[0].width / 16);
+		y = (float)((uint8)text[i] >> 4) * (float)(pData->pTextures[0]->pTemplateData->pSurfaces[0].height / 16);
 
 		w = (float)pFont->charwidths[(uint8)text[i]];
-		h = (float)pData->pTextures[0]->height/16.0f;
+		h = texHeight*(1.0f/16.0f);
 
-		x /= (float)pData->pTextures[0]->width;
-		y /= (float)pData->pTextures[0]->height;
-		w /= (float)pData->pTextures[0]->width;
-		h /= (float)pData->pTextures[0]->height;
+		x /= texWidth;
+		y /= texHeight;
+		w /= texWidth;
+		h /= texHeight;
 
 		p = w/h;
 		cwidth = height*p;

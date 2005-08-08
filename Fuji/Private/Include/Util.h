@@ -84,6 +84,20 @@ inline void FLIP_ENDIAN(T *pData)
 	*pData = *(T*)t;
 }
 
+template<typename T>
+inline void FixUp(T* &pPointer, void *pBase, int fix)
+{
+	if(pPointer)
+	{
+		int offset = (uint32)((char*)pBase);
+
+		if(!fix)
+			offset = -offset;
+
+		pPointer = (T*)((char*)pPointer + offset);
+	}
+}
+
 // some useful string parsing functions
 inline bool IsWhite(char c)
 {

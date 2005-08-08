@@ -9,32 +9,62 @@
 #endif
 
 #include "DebugMenu_Internal.h"
-#include "Texture.h"
+#include "MFTexture.h"
 
 // functions
-void Texture_InitModule();
-void Texture_DeinitModule();
+void MFTexture_InitModule();
+void MFTexture_DeinitModule();
+
+// texture TemplateData
+struct MFTextureSurfaceLevel;
+
+struct MFTextureTemplateData
+{
+	uint32 magicNumber;
+
+	MFTextureFormats imageFormat;
+	uint32 platformFormat;
+
+	int mipLevels;
+	int opaque;
+
+	uint32 res[2];
+
+	MFTextureSurfaceLevel *pSurfaces;
+};
+
+struct MFTextureSurfaceLevel
+{
+	int width, height;
+	int bitsPerPixel;
+
+	int xBlocks, yBlocks;
+	int bitsPerBlock;
+
+	char *pImageData;
+	int bufferLength;
+
+	char *pPaletteEntries;
+	int paletteBufferLength;
+
+	uint32 res[2];
+};
 
 // texture structure
-struct Texture
+struct MFTexture
 {
 	// data members
 	char name[64];
 
+	MFTextureTemplateData *pTemplateData;
 	int refCount;
-	int width, height;
 
 #if defined(_XBOX)
 	IDirect3DTexture8 *pTexture;
-	D3DFORMAT format;
 #elif defined(_WINDOWS)
 	IDirect3DTexture9 *pTexture;
-	D3DFORMAT format;
 #elif defined(_LINUX)
 	GLuint textureID;
-#elif defined(_PSP)
-	char *pImageData;
-	uint32 format;
 #else
 	// nothing
 #endif
@@ -55,5 +85,9 @@ public:
 
 	int selection;
 };
+
+extern const char * const gpMFTextureFormatStrings[TexFmt_Max];
+extern uint32 gMFTextureBitsPerPixel[TexFmt_Max];
+extern uint32 gMFTexturePlatformFormat[TexFmt_Max];
 
 #endif

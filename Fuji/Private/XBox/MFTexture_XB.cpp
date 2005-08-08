@@ -3,7 +3,7 @@
 /**** Includes ****/
 
 #include "Common.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "PtrList.h"
@@ -12,14 +12,14 @@
 
 /**** Globals ****/
 
-extern PtrListDL<Texture> gTextureBank;
-extern Texture *pNoneTexture;
+extern PtrListDL<MFTexture> gTextureBank;
+extern MFTexture *pNoneTexture;
 
 /**** Functions ****/
 
-Texture* Texture_Create(const char *pName, bool generateMipChain)
+MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
@@ -31,7 +31,7 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 		if(!pBuffer)
 		{
 			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
-			return Texture_Create("_None");
+			return MFTexture_Create("_None");
 		}
 
 		pTexture = gTextureBank.Create();
@@ -55,9 +55,38 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 
 		pTexture->pTexture->GetLevelDesc(0, &imageDesc);
 
-		pTexture->width = imageDesc.Width;
-		pTexture->height = imageDesc.Height;
-		pTexture->format = imageDesc.Format;
+		// create template data
+		uint32 levelCount = pTexture->pTexture->GetLevelCount();
+
+		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
+
+		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
+		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
+
+		pTexture->pTexture->GetLevelDesc(0, &imageDesc);
+		pTexture->pTemplateData->imageFormat = TexFmt_Unknown;
+		pTexture->pTemplateData->platformFormat = imageDesc.Format;
+
+		int a;
+
+		for(a=0; a<TexFmt_Max; a++)
+		{
+			if((int)gMFTexturePlatformFormat[a] == imageDesc.Format)
+			{
+				pTexture->pTemplateData->imageFormat = (MFTextureFormats)a;
+				break;
+			}
+		}
+
+		pTexture->pTemplateData->mipLevels = levelCount;
+
+		for(a=0; a<(int)levelCount; a++)
+		{
+			pTexture->pTexture->GetLevelDesc(a, &imageDesc);
+
+			pTexture->pTemplateData->pSurfaces[a].width = imageDesc.Width;
+			pTexture->pTemplateData->pSurfaces[a].height = imageDesc.Height;
+		}
 	}
 
 	pTexture->refCount++;
@@ -65,24 +94,25 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
 		pTexture = gTextureBank.Create();
 		pTexture->refCount = 0;
 
+		D3DSURFACE_DESC imageDesc;
 		HRESULT hr;
 		D3DFORMAT fmt = D3DFMT_UNKNOWN;
 
 		switch(format)
 		{
-			case TEXF_Unknown:
+			case TexFmt_Unknown:
 				DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
 				break;
-			case TEXF_A8R8G8B8:
+			case TexFmt_A8R8G8B8:
 				fmt = D3DFMT_A8R8G8B8;
 				break;
 			default:
@@ -104,11 +134,11 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 
 		switch(format)
 		{
-			case TEXF_Unknown:
+			case TexFmt_Unknown:
 				DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
 				break;
 
-			case TEXF_A8R8G8B8:
+			case TexFmt_A8R8G8B8:
 			{
 				if(0)//flags & TEX_VerticalMirror)
 				{
@@ -137,9 +167,27 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 
 		strcpy(pTexture->name, pName);
 
-		pTexture->width = width;
-		pTexture->height = height;
-		pTexture->format = fmt;
+		// create template data
+		uint32 levelCount = pTexture->pTexture->GetLevelCount();
+
+		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
+
+		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
+		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
+
+		pTexture->pTexture->GetLevelDesc(0, &imageDesc);
+		pTexture->pTemplateData->imageFormat = format;
+		pTexture->pTemplateData->platformFormat = imageDesc.Format;
+
+		pTexture->pTemplateData->mipLevels = levelCount;
+
+		for(int a=0; a<(int)levelCount; a++)
+		{
+			pTexture->pTexture->GetLevelDesc(a, &imageDesc);
+
+			pTexture->pTemplateData->pSurfaces[a].width = imageDesc.Width;
+			pTexture->pTemplateData->pSurfaces[a].height = imageDesc.Height;
+		}
 	}
 
 	pTexture->refCount++;
@@ -147,14 +195,14 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 	return pTexture;
 }
 
-Texture* Texture_CreateRenderTarget(const char *pName, int width, int height)
+MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	DBGASSERT(false, "Not Written...");
 
 	return NULL;
 }
 
-int Texture_Destroy(Texture *pTexture)
+int MFTexture_Destroy(MFTexture *pTexture)
 {
 	pTexture->refCount--;
 

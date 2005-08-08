@@ -11,12 +11,8 @@
 #include <unistd.h>
 #endif
 
-void FreeDirectoryEntries(std::vector<char *> &entries)
+void FreeDirectoryEntries(std::vector<std::string> &entries)
 {
-	for(unsigned int i = 0; i < entries.size(); i++) {
-		delete[] entries[i];
-	}
-	
 	entries.clear();
 }
 
@@ -25,113 +21,111 @@ void FreeDirectoryEntries(std::vector<char *> &entries)
 
 bool GetCurrentDir(char *dir, int maxlen)
 {
-	if(maxlen == 0) { // This is valid on Windows & Linux but not on some POSIXes, best enforce it
-		return(false);
-	}
-	
-	return((_getcwd(dir, maxlen) != NULL));
+	// This is valid on Windows & Linux but not on some POSIXes, best enforce it
+	if(maxlen == 0)
+		return false;
+
+	return (_getcwd(dir, maxlen) != NULL);
 }
 
-int GetDirectoryEntries(const char *directory, std::vector<char *> &entries)
+int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries)
 {
 	int numEntries = 0;
+	char tempDir[256];
 
 	FreeDirectoryEntries(entries);
-	
-	char *tempDir = new char[strlen(directory) + 4];
+
 	strcpy(tempDir, directory);
-	strcat(tempDir, "\\*");
+	strcat(tempDir, "*");
 
 	WIN32_FIND_DATAA findData;
-	HANDLE dirHandle = FindFirstFileA(tempDir, &findData);
-	delete[] tempDir;
-	if(dirHandle == INVALID_HANDLE_VALUE) {
-		return(0);
-	}
+	HANDLE dirHandle = FindFirstFile(tempDir, &findData);
 
-	if(strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
-		tempDir = new char[strlen(findData.cFileName) + 1];	
-		strcpy(tempDir, findData.cFileName);
-		entries.push_back(tempDir);
-		++numEntries;
-	}
+	if(dirHandle == INVALID_HANDLE_VALUE)
+		return 0;
 
-	while(FindNextFileA(dirHandle, &findData)) {
-		if(strcmp(findData.cFileName, ".") != 0 && strcmp(findData.cFileName, "..") != 0) {
-			tempDir = new char[strlen(findData.cFileName) + 1];
-			strcpy(tempDir, findData.cFileName);
-			entries.push_back(tempDir);
+	BOOL more = true;
+
+	while(more)
+	{
+		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		{
+			// check if it matches any exclude patterns...
+
+			// if not
+			entries.push_back(findData.cFileName);
 			++numEntries;
 		}
+
+		more = FindNextFile(dirHandle, &findData);
 	}
 
-	return(numEntries);
+	return numEntries;
 }
 
 bool IsDirectory(const char *entry)
 {
 	DWORD attr = GetFileAttributes(entry);
-	if(attr == INVALID_FILE_ATTRIBUTES) {
-		return(false);
-	}
-	
-	return(((attr & FILE_ATTRIBUTE_DIRECTORY) != 0));
+	if(attr == INVALID_FILE_ATTRIBUTES)
+		return false;
+
+	return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
 #else // *** POSIX CODE ***
 
 bool GetCurrentDirectory(char *dir, int maxlen)
 {
-	if(maxlen == 0) { // This is valid on Windows & Linux but not on some POSIXes, best enforce it
-		return(false);
-	}
-	
-	return((getcwd(dir, maxlen) != NULL));
+	// This is valid on Windows & Linux but not on some POSIXes, best enforce it
+	if(maxlen == 0)
+		return false;
+
+	return getcwd(dir, maxlen) != NULL;
 }
 
-int GetDirectoryEntries(const char *directory, std::vector<char *> &entries)
+int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries)
 {
 	int numEntries = 0;
 	struct dirent *entry;
 
 	FreeDirectoryEntries(entries);
-	
-	char *tempDir = new char[strlen(directory) + 4];
+
+	char *tempDir = malloc(strlen(directory) + 4);
 	strcpy(tempDir, directory);
-	strcat(tempDir, "\\*");
+	strcat(tempDir, "*");
 
 	DIR *dirHandle = opendir(tempDir);
-	delete[] tempDir;
-	if(dirHandle == NULL) {
-		return(0);
-	}
+	free(tempDir);
+	if(dirHandle == NULL)
+		return 0;
 
 	vectorOut.push_back(std::string(findData.cFileName));
 
-	while(readdir(dirHandle)) {
-		if((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0)) {
+	while(readdir(dirHandle))
+	{
+		if((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0))
+		{
 			tempDir = new char[strlen(entry->d_name) + 1];
 			strcpy(tempDir, entry->d_name);
 			entries.push_back(tempDir);
-			
+
 			++numEntries;
 		}
 	}
 
 	closedir(dirHandle);
 
-	return(numEntries);
+	return numEntries;
 }
 
 bool IsDirectory(const char *entry)
 {
 	struct stat statbuf;
-	
-	if(stat(entry, &statbuf) < 0) {
-		return(false);
-	}
 
-	return(S_ISDIR(statbuf.st_mode));
+	if(stat(entry, &statbuf) < 0)
+		return false;
+
+	return S_ISDIR(statbuf.st_mode);
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include "Common.h"
 #include "System_Internal.h"
 #include "Display_Internal.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
 #include "Input_Internal.h"
@@ -139,7 +139,7 @@ void System_Init()
 	Sound_InitModule();
 
 	Renderer_InitModule();
-	Texture_InitModule();
+	MFTexture_InitModule();
 	MFMaterial_InitModule();
 
 	MFModel_InitModule();
@@ -165,7 +165,7 @@ void System_Deinit()
 	MFModel_DeinitModule();
 
 	MFMaterial_DeinitModule();
-	Texture_DeinitModule();
+	MFTexture_DeinitModule();
 	Renderer_DeinitModule();
 
 	Sound_DeinitModule();

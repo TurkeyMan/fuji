@@ -6,7 +6,7 @@ struct MFOpenDataMemory : public MFOpenData
 	char *pMemoryPointer;
 	int fileSize;		// pass -1 for an unknown or unlimited file size (WARNING: this is dangerous)
 	uint32 allocated;	// pass 0 to specify no upper limit to the memory file (WARNING: this is dangerous!)
-	bool ownsMemory;	// this calls Heap_Free() on the memory pointer when the file is closed.
+	bool ownsMemory;	// this tells the filesystem to call Heap_Free() on the memory when the file is closed.
 };
 
 struct MFFileMemoryData
@@ -32,7 +32,7 @@ MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 o
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileMemory_Close(MFFile* fileHandle);
 int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
-int MFFileMemory_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
+int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async);
 int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileMemory_Tell(MFFile* fileHandle);
 

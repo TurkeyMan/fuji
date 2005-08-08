@@ -121,7 +121,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 	return bytesToCopy;
 }
 
-int MFFileMemory_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 

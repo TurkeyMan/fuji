@@ -1,6 +1,10 @@
 #if !defined(_DEBUGMENU_H)
 #define _DEBUGMENU_H
 
+#if defined(_MSC_VER)
+#pragma warning(disable: 4324)
+#endif
+
 // menu configuration
 #define MENU_MAX_MENUS 32
 #define MENU_MAX_CHILDREN 32

@@ -16,6 +16,8 @@ enum MFOpenFlags
 	MFOF_Binary	= 8,
 	MFOF_Async	= 16,
 
+	MFOF_User	= 256,
+
 	MFOF_ForceInt = 0x7FFFFFFF
 };
 
@@ -39,6 +41,7 @@ enum MFFileState
 // handle to the internal filesystems
 extern FileSystemHandle hNativeFileSystem;
 extern FileSystemHandle hMemoryFileSystem;
+extern FileSystemHandle hZipFileSystem;
 
 
 // interface functions
@@ -62,7 +65,7 @@ int MFFile_Close(MFFileHandle fileHandle);
 
 // read/write functions
 int MFFile_Read(MFFileHandle fileHandle, void *pBuffer, uint32 bytes, bool async = false);
-int MFFile_Write(MFFileHandle fileHandle, void *pBuffer, uint32 bytes, bool async = false);
+int MFFile_Write(MFFileHandle fileHandle, const void *pBuffer, uint32 bytes, bool async = false);
 
 // offset management (these are stdio function signature compliant)
 int MFFile_Seek(MFFileHandle fileHandle, int bytes, MFFileSeek relativity);

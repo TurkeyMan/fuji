@@ -17,9 +17,9 @@ extern Texture *pNoneTexture;
 /**** Functions ****/
 
 // interface functions
-Texture* Texture_Create(const char *pName, bool generateMipChain)
+Texture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
@@ -32,9 +32,9 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+Texture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
@@ -47,14 +47,14 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 	return pTexture;
 }
 
-Texture* Texture_CreateRenderTarget(const char *pName, int width, int height)
+Texture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	DBGASSERT(false, "Not Written...");
 
 	return NULL;
 }
 
-int Texture_Destroy(Texture *pTexture)
+int MFTexture_Destroy(Texture *pTexture)
 {
 	pTexture->refCount--;
 

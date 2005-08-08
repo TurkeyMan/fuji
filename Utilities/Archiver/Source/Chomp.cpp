@@ -8,8 +8,8 @@ bool Chomp(char *str, char toChomp)
 
 	if(str[len - 1] == toChomp) {
 		str[len - 1] = '\0';
-		return(true);
+		return true;
 	}
 
-	return(false);
+	return false;
 }

@@ -93,7 +93,7 @@ struct MFFileSystemCallbacks
 	int (*Open)(MFFile*, MFOpenData*);
 	int (*Close)(MFFile*);
 	int (*Read)(MFFile*, void*, uint32, bool);
-	int (*Write)(MFFile*, void*, uint32, bool);
+	int (*Write)(MFFile*, const void*, uint32, bool);
 	int (*Seek)(MFFile*, int, MFFileSeek);
 	int (*Tell)(MFFile*);
 

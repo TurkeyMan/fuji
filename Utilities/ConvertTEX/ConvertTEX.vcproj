@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Archiver"
-	ProjectGUID="{04D10BFB-5D21-4FFC-9278-371E09689C26}"
+	Name="ConvertTEX"
+	ProjectGUID="{B19024CD-ABE6-4407-87FA-EB26D01018E9}"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -19,8 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Include;../..//Fuji/Include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -32,11 +31,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PCRE\Debug\PCRE.lib"
-				OutputFile="$(OutDir)/Archiver.exe"
+				OutputFile="$(OutDir)/ConvertTEX.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Archiver.pdb"
+				ProgramDatabaseFile="$(OutDir)/ConvertTEX.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -68,8 +66,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include;../..//Fuji/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -79,11 +76,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PCRE\Release\PCRE.lib"
-				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
+				OutputFile="/Projects/Fuji/Bin/ConvertTEX.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
@@ -117,13 +113,13 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Source\Chomp.cpp">
+				RelativePath=".\IntImage.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\FS.cpp">
+				RelativePath=".\LoadTarga.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Main.cpp">
+				RelativePath=".\main.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -131,10 +127,13 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Include\Chomp.h">
+				RelativePath=".\ConvertTex.h">
 			</File>
 			<File
-				RelativePath=".\Include\FS.h">
+				RelativePath=".\IntImage.h">
+			</File>
+			<File
+				RelativePath=".\LoadTarga.h">
 			</File>
 		</Filter>
 		<Filter

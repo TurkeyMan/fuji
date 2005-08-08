@@ -237,7 +237,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 

@@ -5,7 +5,7 @@
 #include "Vector4.h"
 #include "Matrix.h"
 #include "Primitive.h"
-#include "Texture.h"
+#include "MFTexture.h"
 #include "Renderer.h"
 #include "MFMaterial.h"
 #include "Font.h"

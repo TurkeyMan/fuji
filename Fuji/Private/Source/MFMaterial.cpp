@@ -4,7 +4,7 @@
 
 #include "Common.h"
 #include "Display.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"
@@ -92,8 +92,8 @@ void MFMaterial_InitModule()
 	}
 
 	// create the logo textures from raw data
-	Texture *pSysLogoLargeTexture = Texture_CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	Texture *pSysLogoSmallTexture = Texture_CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
 
 	// create standard materials
 	pNoneMaterial = MFMaterial_Create("_None");
@@ -102,16 +102,16 @@ void MFMaterial_InitModule()
 	pSysLogoSmall = MFMaterial_Create("SysLogoSmall");
 
 	// release a reference to the logo textures
-	Texture_Destroy(pSysLogoLargeTexture);
-	Texture_Destroy(pSysLogoSmallTexture);
+	MFTexture_Destroy(pSysLogoLargeTexture);
+	MFTexture_Destroy(pSysLogoSmallTexture);
 
 #if defined(_PSP)
 	// create PSP specific stock materials
-	Texture *pConnectedTexture = Texture_CreateFromRawData("connected", connected_data, connected_width, connected_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	Texture *pDisconnectedTexture = Texture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	Texture *pPowerTexture = Texture_CreateFromRawData("power", power_data, power_width, power_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	Texture *pChargingTexture = Texture_CreateFromRawData("charging", charging_data, charging_width, charging_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
-	Texture *pUSBTexture = Texture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, TEXF_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pConnectedTexture = MFTexture_CreateFromRawData("connected", connected_data, connected_width, connected_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pDisconnectedTexture = MFTexture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pPowerTexture = MFTexture_CreateFromRawData("power", power_data, power_width, power_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pChargingTexture = MFTexture_CreateFromRawData("charging", charging_data, charging_width, charging_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pUSBTexture = MFTexture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
 
 	pConnected = MFMaterial_Create("connected");
 	pDisconnected = MFMaterial_Create("disconnected");
@@ -119,11 +119,11 @@ void MFMaterial_InitModule()
 	pCharging = MFMaterial_Create("charging");
 	pUSB = MFMaterial_Create("usb_icon");
 
-	Texture_Destroy(pConnectedTexture);
-	Texture_Destroy(pDisconnectedTexture);
-	Texture_Destroy(pPowerTexture);
-	Texture_Destroy(pChargingTexture);
-	Texture_Destroy(pUSBTexture);
+	MFTexture_Destroy(pConnectedTexture);
+	MFTexture_Destroy(pDisconnectedTexture);
+	MFTexture_Destroy(pPowerTexture);
+	MFTexture_Destroy(pChargingTexture);
+	MFTexture_Destroy(pUSBTexture);
 #endif
 }
 

@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "View_Internal.h"
@@ -106,7 +106,7 @@ void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
-		Texture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->pTextures[a]);
 	}
 
 	Heap_Free(pMaterial->pInstanceData);

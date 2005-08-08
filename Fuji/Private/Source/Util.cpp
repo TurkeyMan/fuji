@@ -5,6 +5,7 @@
 #include "System_Internal.h"
 #include "Util.h"
 #include "Vector3.h"
+
 #if !defined(_FUJI_UTIL)
 #include "Display_Internal.h"
 #include "Primitive.h"

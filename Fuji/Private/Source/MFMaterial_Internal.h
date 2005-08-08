@@ -3,7 +3,7 @@
 
 #include "MFMaterial.h"
 #include "Vector4.h"
-#include "Texture.h"
+#include "MFTexture.h"
 #include "Matrix.h"
 
 #include "DebugMenu_Internal.h"

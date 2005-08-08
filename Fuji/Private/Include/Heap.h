@@ -113,15 +113,21 @@ void Heap_PushGroupName(const char *pGroupName);
 void Heap_PopGroupName();
 
 // functions to allocate/free memory
-#if !defined(_RETAIL)
-void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
-void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
-#else
-void *Heap_Alloc(uint32 bytes);
-void *Heap_Realloc(void *pMem, uint32 bytes);
-#endif
-void Heap_Free(void *pMem);
+#if !defined(_FUJI_UTIL)
+	#if !defined(_RETAIL)
+		void *Heap_Alloc(uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
+		void *Heap_Realloc(void *pMem, uint32 bytes, char *pFile = __FILE__, uint32 line = __LINE__);
+	#else
+		void *Heap_Alloc(uint32 bytes);
+		void *Heap_Realloc(void *pMem, uint32 bytes);
+	#endif
 
+	void Heap_Free(void *pMem);
+#else
+	#define Heap_Alloc malloc
+	#define Heap_Realloc realloc
+	#define Heap_Free free
+#endif
 // for allocating in a temp mem heap
 void *Heap_TAlloc(uint32 bytes);
 void Heap_TFree(void *pMem);

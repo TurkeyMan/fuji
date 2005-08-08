@@ -78,14 +78,12 @@ public:
 	Vector4& ApplyMatrix3x3(const Matrix &mat);
 };
 
-inline Vector4 operator*(float f, Vector4 v) { v.x *= f; v.y *= f; v.z *= f; v.w *= f; return v; }
+inline Vector4 operator*(float f, const Vector4 &v) { Vector4 t; t.x = v.x*f; t.y = v.y*f; t.z = v.z*f; t.w = v.w*f; return t; }
 
 inline Vector4 Vector(float x, float y, float z, float w) { Vector4 t; t.x = x; t.y = y; t.z = z; t.w = w; return t; }
 inline Vector4 Vector(const Vector3 &v, float w) { Vector4 t; t.x = v.x; t.y = v.y; t.z = v.z; t.w = w; return t; }
 
-template <>
-inline Vector4 Min(Vector4 a, Vector4 b) { Vector4 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
-template <>
-inline Vector4 Max(Vector4 a, Vector4 b) { Vector4 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
+inline Vector4 Min(const Vector4 &a, const Vector4 &b) { Vector4 t; t.x = a.x < b.x ? a.x : b.x; t.y = a.y < b.y ? a.y : b.y; t.z = a.z < b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
+inline Vector4 Max(const Vector4 &a, const Vector4 &b) { Vector4 t; t.x = a.x > b.x ? a.x : b.x; t.y = a.y > b.y ? a.y : b.y; t.z = a.z > b.z ? a.z : b.z; t.w = a.w < b.w ? a.w : b.w; return t; }
 
 #endif

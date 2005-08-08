@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "Display_Internal.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "View_Internal.h"
 #include "Vector3.h"

@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "View_Internal.h"

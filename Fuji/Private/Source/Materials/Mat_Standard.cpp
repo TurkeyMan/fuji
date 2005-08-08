@@ -149,51 +149,51 @@ void Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)paramater << 1);
 			break;
 		case 14: // texture
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->textureCount++;
 			break;
 		case 15: // diffusemap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->diffuseMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 16: // diffusemap2
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->diffuseMap2Index = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 17: // normalmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->normalMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 18: // detailmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->detailMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 19: // envmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->envMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 20: // lightmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->lightMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 21: // bumpmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->bumpMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 22: // reflectionmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->reflectionMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case 23: // specularmap
-			pData->pTextures[pData->textureCount] = Texture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
 			pData->specularMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;

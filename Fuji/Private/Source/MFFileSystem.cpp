@@ -2,6 +2,7 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "FileSystem/MFFileSystemMemory.h"
+#include "FileSystem/MFFileSystemZipFile.h"
 #include "Ptrlist.h"
 
 PtrListDL<MFFile> gOpenFiles;
@@ -15,6 +16,7 @@ MFFileSystemCallbacks **ppFileSystemList;
 // internal filesystems
 FileSystemHandle hNativeFileSystem = -1;
 FileSystemHandle hMemoryFileSystem = -1;
+FileSystemHandle hZipFileSystem = -1;
 
 void MFFileSystem_InitModule()
 {
@@ -27,11 +29,27 @@ void MFFileSystem_InitModule()
 	// mount filesystems
 	MFFileSystemNative_InitModule();
 	MFFileSystemMemory_InitModule();
+	MFFileSystemZipFile_InitModule();
+/*
+	MFOpenDataNative open;
+	open.cbSize = sizeof(MFOpenDataNative);
+	open.openFlags = MFOF_Read|MFOF_Binary;
+	open.pFilename =  MFFile_SystemPath("Data.zip");
+	MFFileHandle h = MFFile_Open(hNativeFileSystem, &open);
 
+	MFMountDataZipFile zipMountData;
+	zipMountData.cbSize = sizeof(MFMountDataZipFile);
+	zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
+	zipMountData.priority = MFMP_Normal;
+	zipMountData.pMountpoint = "data";
+	zipMountData.zipArchiveHandle = h;
+	MFFileSystem_Mount(hZipFileSystem, &zipMountData);
+*/
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
-	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 	mountData.priority = MFMP_Normal;
+
+	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 	mountData.pMountpoint = "data";
 	mountData.pPath = MFFile_SystemPath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
@@ -45,6 +63,7 @@ void MFFileSystem_InitModule()
 void MFFileSystem_DeinitModule()
 {
 	// dismount filesystems
+	MFFileSystemZipFile_DeinitModule();
 	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
 
@@ -172,7 +191,7 @@ int MFFile_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 	return ppFileSystemList[fileHandle->filesystem]->Read(fileHandle, pBuffer, bytes, async);
 }
 
-int MFFile_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 
@@ -227,12 +246,13 @@ int MFFile_StdClose(void* fileHandle)
 
 int MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
 {
-	return MFFile_Seek((MFFileHandle)fileHandle, (int)bytes, (MFFileSeek)relativity);
+	int seek = MFFile_Seek((MFFileHandle)fileHandle, (int)bytes, (MFFileSeek)relativity);
+	return seek < 0 ? seek : 0;
 }
 
 long MFFile_StdTell(void* fileHandle)
 {
-	return (int)MFFile_Tell((MFFileHandle)fileHandle);
+	return (long)MFFile_Tell((MFFileHandle)fileHandle);
 }
 
 //////////////////////////////

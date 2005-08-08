@@ -28,7 +28,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileNative_Close(MFFile* fileHandle);
 int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
-int MFFileNative_Write(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async);
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileNative_Tell(MFFile* fileHandle);
 

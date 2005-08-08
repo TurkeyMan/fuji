@@ -5,9 +5,9 @@
 //
 // MFIni *pIni = MFIni::Create("MyIniFile.ini");
 // MFIniLine *pLine = pIni->GetFirstLine();
-// while (pLine)
+// while(pLine)
 // {
-//   if (pLine->IsString(0, "Group")
+//   if(pLine->IsString(0, "Group"))
 //   {
 //     ProcessGroup(pLine);
 //   }
@@ -55,6 +55,7 @@ class MFIni
 friend class MFIniLine;
 public:
 	static MFIni *Create(const char *pFilename);
+	static MFIni *CreateFromMemory(const char *pMemory);
 	static void Destroy(MFIni *pIni);
 
 	// get first line, all further parsing is done through the Line interface

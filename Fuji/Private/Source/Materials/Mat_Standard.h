@@ -46,7 +46,7 @@ struct Mat_Standard_Data
 
 	uint32	materialType;
 
-	Texture *pTextures[8];
+	MFTexture *pTextures[8];
 	uint32	textureCount;
 
 	Matrix	textureMatrix;

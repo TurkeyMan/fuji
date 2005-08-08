@@ -7,6 +7,10 @@
 #include "MFIni.h"
 #include "MFStringCache.h"
 
+#if defined(_FUJI_UTIL)
+#include <stdio.h>
+#endif
+
 //=============================================================================
 MFIniLine *MFIniLine::Next()
 {
@@ -87,14 +91,31 @@ MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 // Create INI file
 MFIni *MFIni::Create(const char *pFilename)
 {
-	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
-
 	uint32 memSize;
-	char *pMem = MFFileSystem_Load(pFilename, &memSize);
 
 	// load text file
-	strcpy(pMFIni->name, pFilename);
+#if !defined(_FUJI_UTIL)
+	char *pMem = MFFileSystem_Load(pFilename, &memSize);
+#else
+	FILE *pFile = fopen(pFilename, "rb");
+
+	if(!pFile)
+		return NULL;
+
+	fseek(pFile, 0, SEEK_END);
+	memSize = ftell(pFile);
+	fseek(pFile, 0, SEEK_SET);
+
+	char *pMem = (char*)malloc(memSize);
+	fread(pMem, 1, memSize, pFile);
+	fclose(pFile);
+#endif
+
 	DBGASSERT(pMem != NULL, "Didn't load it!");
+
+	// allocate ini file
+	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
+	strcpy(pMFIni->name, pFilename);
 
 	// allocate temporary buffer for strings & lines
 	pMFIni->pLines = (MFIniLine *)Heap_Alloc(sizeof(MFIniLine)*MAX_LINES);
@@ -104,7 +125,36 @@ MFIni *MFIni::Create(const char *pFilename)
 	// scan though the file
 	pMFIni->lineCount = 0;
 	pMFIni->stringCount = 0;
-	char *pIn = pMem;
+//	char *pIn = pMem;
+
+	// scan text file
+	pMFIni->ScanRecursive(pMem, pMem+memSize);
+
+	// TODO: copy lines, strings & cache to save on memory
+
+	return pMFIni;
+}
+
+MFIni *MFIni::CreateFromMemory(const char *pMemory)
+{
+	DBGASSERT(pMemory, "Cant create ini from NULL buffer");
+
+	uint32 memSize = (uint32)strlen(pMemory);
+	const char *pMem = pMemory;
+
+	// allocate ini file
+	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
+	strcpy(pMFIni->name, "Memory Ini");
+
+	// allocate temporary buffer for strings & lines
+	pMFIni->pLines = (MFIniLine *)Heap_Alloc(sizeof(MFIniLine)*MAX_LINES);
+	pMFIni->pStrings = (const char **)Heap_Alloc(4*MAX_STRINGS);
+	pMFIni->pCache = MFStringCache::Create(MAX_STRINGCACHE);
+
+	// scan though the file
+	pMFIni->lineCount = 0;
+	pMFIni->stringCount = 0;
+//	const char *pIn = pMem;
 
 	// scan text file
 	pMFIni->ScanRecursive(pMem, pMem+memSize);
@@ -137,7 +187,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)))
 	{
 		// newline
-		tokenLength = strlen(tokenBuffer);
+		tokenLength = (int)strlen(tokenBuffer);
 		if (tokenLength == 1 && tokenBuffer[0] == 0xd)
 		{
 			bNewLine = true;
@@ -204,7 +254,26 @@ void MFIni::InitLine(MFIniLine *pLine)
 const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection)
 {
 	// skip white space
-	while (pSrc < pSrcEnd && (*pSrc == ' ' || *pSrc == '\t' || *pSrc == 0xa || (stringCount==1 && *pSrc == '='))) pSrc++;
+	while (pSrc < pSrcEnd)
+	{
+		// skip comment lines
+		if ((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (pSrc[0] == '#'))
+		{
+			while (pSrc < pSrcEnd && pSrc[0] != 0xd)
+			{
+				pSrc++;
+			}
+			if (pSrc == pSrcEnd)
+				return NULL;
+		}
+
+		// check if we have found some non-whitespace
+		if (pSrc[0] != ' ' && pSrc[0] != '\t' && pSrc[0] != 0xa && (stringCount!=1 || pSrc[0] != '='))
+//		if (pSrc[0] != ' ' && pSrc[0] != '\t' && pSrc[0] != 0xd && pSrc[0] != 0xa && (stringCount!=1 || pSrc[0] != '='))
+			break;
+
+		pSrc++;
+	}
 
 	// end of file?
 	if (pSrc == pSrcEnd)
@@ -248,10 +317,6 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 		else
 		{
-			if (*pSrc == '\\')
-			{
-				pSrc++;
-			}
 			*pDst++ = *pSrc++;
 		}
 	}

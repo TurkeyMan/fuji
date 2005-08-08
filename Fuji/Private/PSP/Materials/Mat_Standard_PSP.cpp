@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Texture_Internal.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "View_Internal.h"
@@ -39,12 +39,16 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
-			Texture *pTexture = pData->pTextures[pData->diffuseMapIndex];
+			MFTexture *pTexture = pData->pTextures[pData->diffuseMapIndex];
 
 			sceGuSetStatus(GU_TEXTURE_2D, GU_TRUE);
 
-			sceGuTexMode(pTexture->format, 0, 0, 0);
-			sceGuTexImage(0, pTexture->width, pTexture->height, pTexture->width, pTexture->pImageData);
+			int width = pTexture->pTemplateData->pSurfaces[0].width;
+			int height = pTexture->pTemplateData->pSurfaces[0].height;
+			char *pImageData = pTexture->pTemplateData->pSurfaces[0].pImageData;
+
+			sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, 0);
+			sceGuTexImage(0, width, height, width, pImageData);
 			sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 			sceGuTexFilter(GU_LINEAR, GU_LINEAR);
 			sceGuTexScale(pData->textureMatrix.GetXAxis3().Magnitude(), pData->textureMatrix.GetYAxis3().Magnitude());
@@ -107,7 +111,7 @@ void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
-		Texture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->pTextures[a]);
 	}
 
 	Heap_Free(pMaterial->pInstanceData);

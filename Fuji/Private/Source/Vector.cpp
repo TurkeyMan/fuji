@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "MFVector.h"
 #include "Matrix.h"
 
 const Vector3 Vector3::zero = Vector(0.0f, 0.0f, 0.0f);
@@ -11,6 +12,10 @@ const Vector4 Vector4::zero = Vector(0.0f, 0.0f, 0.0f, 0.0f);
 const Vector4 Vector4::one = Vector(1.0f, 1.0f, 1.0f, 1.0f);
 const Vector4 Vector4::identity = Vector(0.0f, 0.0f, 0.0f, 1.0f);
 
+const MFVector MFVector::zero = MakeVector(0.0f, 0.0f, 0.0f, 0.0f);
+const MFVector MFVector::one = MakeVector(1.0f, 1.0f, 1.0f, 1.0f);
+const MFVector MFVector::identity = MakeVector(0.0f, 0.0f, 0.0f, 1.0f);
+const MFVector MFVector::up = MakeVector(0.0f, 1.0f, 0.0f, 1.0f);
 
 Vector3& Vector3::ApplyMatrix(const Matrix &mat)
 {

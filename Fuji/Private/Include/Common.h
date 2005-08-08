@@ -80,7 +80,9 @@
 #if defined(_FUJI_SSE)
 	#include "xmmintrin.h"
 	#define _ALIGN16 _MM_ALIGN16
-#elif defined(_PSP) || defined(_PS2)
+#elif defined(_MSC_VER)
+	#define _ALIGN16 __declspec(align(16))
+#elif defined(__GNUC__)
 	#define _ALIGN16 __attribute__((aligned(16)))
 #else
 	#define _ALIGN16
@@ -120,7 +122,9 @@ typedef char				int8;
 #if !defined(PI)
 #define PI 3.141592653589f
 #endif
+
 #define ALMOST_ZERO 0.000001f
+
 #if !defined(NULL) /* In case stdlib.h hasn't been included */
 #define NULL 0
 #endif
@@ -158,14 +162,7 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 #include "FujiMath.h"
 #include "Util.h"
 
-#if !defined(_FUJI_UTIL)
-	#include "Callstack.h"
-	#include "Heap.h"
-#else
-	#define CALLSTACK
-	#define CALLSTACKc
-	#define CALLSTACKs(s)
-	#define CALLSTACKcs(s)
-#endif
+#include "Callstack.h"
+#include "Heap.h"
 
 #endif // _COMMON_H
