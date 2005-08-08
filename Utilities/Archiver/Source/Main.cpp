@@ -4,6 +4,8 @@
 #include "MFIni.h"
 #include "FS.h"
 
+#include "pcre.h"
+
 enum TargetPlatform
 {
 	TP_Unknown = -1,
@@ -35,6 +37,7 @@ int ProcessIniFile(const char *pIniFile, const char *pWorkingDir, TargetPlatform
 void Replace(std::string &string, std::string subString, std::string newString);
 
 std::vector<std::string> excludePatterns;
+std::vector<pcre*> reHandles;
 std::vector<std::string> sources;
 
 std::map<std::string, std::string> userVariables;
@@ -42,12 +45,17 @@ std::map<std::string, std::string> extensionHandlers;
 
 std::vector<std::string> filesToProcess;
 
+std::string output;
+
 int main(int argc, char **argv)
 {
 	TargetPlatform platform = TP_Unknown;
 	char iniFileName[256] = "";
 	char workingDir[256] = "";
+	char outPath[256] = "";
 	int a;
+
+	bool outputRawFile = false;
 
 	// process command line
 	for(a=1; a<argc; a++)
@@ -119,6 +127,36 @@ int main(int argc, char **argv)
 		sources.push_back(workingDir);
 	}
 
+	if(IsDirectory(output.c_str()))
+	{
+		outputRawFile = true;
+
+		if(output[output.size()-1] == '/' || output[output.size()-1] == '\\')
+		{
+			output.resize(output.size()-1);
+		}
+
+		strcpy(outPath, output.c_str());
+	}
+	else
+	{
+		// dont handle output archives yet
+	}
+
+	// build regular expression handles
+	for(a=0; a<(int)excludePatterns.size(); a++)
+	{
+		const char *errorString;
+		int errorOffset;
+
+		pcre *pRE = pcre_compile(excludePatterns[a].c_str(), PCRE_CASELESS|PCRE_DOLLAR_ENDONLY, &errorString, &errorOffset, NULL);
+
+		if(!pRE)
+			printf(STR("%d: %s", errorOffset, errorString));
+		else
+			reHandles.push_back(pRE);
+	}
+
 	// do stuff
 	for(a=0; a<(int)sources.size(); a++)
 	{
@@ -149,8 +187,8 @@ int main(int argc, char **argv)
 		if(x >= 0 || y >= 0)
 		{
 			fileName = &fullName.c_str()[max(x,y)+1];
-			filePath[max(x,y) + 1] = 0;
-		}	
+			filePath[max(x,y)] = 0;
+		}
 		else
 			fileName = fullName.c_str();
 
@@ -173,6 +211,8 @@ int main(int argc, char **argv)
 			customTool = true;
 		}
 
+		printf("%s\n", fileName.c_str());
+
 		// run custom tool
 		if(customTool)
 		{
@@ -189,6 +229,8 @@ int main(int argc, char **argv)
 			Replace(commandLine, "$(ext)", pExt);
 			Replace(commandLine, "%platform%", platformStrings[platform]);
 			Replace(commandLine, "$(platform)", platformStrings[platform]);
+			Replace(commandLine, "%outpath%", outPath);
+			Replace(commandLine, "$(outpath)", outPath);
 
 			// execute tool
 			system(commandLine.c_str());
@@ -196,6 +238,42 @@ int main(int argc, char **argv)
 		else
 		{
 			// copy file to archive as is
+			if(outputRawFile)
+			{
+				// copy the file
+				FILE *pRead = fopen(fullName.c_str(), "rb");
+
+				if(pRead)
+				{
+					FILE *pWrite = fopen(STR("%s/%s", outPath, fileName.c_str()), "wb");
+
+					if(pWrite)
+					{
+						fseek(pRead, 0, SEEK_END);
+						size_t fileSize = ftell(pRead);
+						fseek(pRead, 0, SEEK_SET);
+
+						char *pBuffer = (char*)malloc(fileSize);
+						
+						fread(pBuffer, 1, fileSize, pRead);
+						fwrite(pWrite, 1, fileSize, pWrite);
+
+						free(pBuffer);
+
+						fclose(pWrite);
+					}
+					else
+					{
+						printf("  Couldnt open output file...\n");
+					}
+
+					fclose(pRead);
+				}
+				else
+				{
+					printf("  Couldnt open file...\n");
+				}
+			}
 		}
 	}
 
@@ -245,6 +323,16 @@ int ProcessIniFile(const char *pIniFile, const char *pWorkingDir, TargetPlatform
 
 					sources.push_back(source);
 
+					pSub = pSub->Next();
+				}
+			}
+			else if(pLine->IsString(1, "output"))
+			{
+				MFIniLine *pSub = pLine->Sub();
+
+				while(pSub)
+				{
+					output = pSub->GetString(0);
 					pSub = pSub->Next();
 				}
 			}
@@ -360,17 +448,36 @@ void Traverse(const char *dir)
 			strcpy(testEntry, dir);
 			strcat(testEntry, entries[i].c_str());
 
-			if(IsDirectory(testEntry))
-			{
+			bool isDir = IsDirectory(testEntry);
+			bool excluded = false;
+
+			if(isDir)
 				strcat(testEntry, "/");
 
-				// if passes regular expressions, scan folder
-				Traverse(testEntry);
-			}
-			else
+			// test exclude patterns
+			for(int j=0; j<(int)reHandles.size(); j++)
 			{
-				// if passes regular expressions, add to list
-				filesToProcess.push_back(testEntry);
+				int x = pcre_exec(reHandles[j], NULL, testEntry, (int)strlen(testEntry), 0, 0, NULL, 0);
+
+				if(x > -1)
+				{
+					excluded = true;
+					break;
+				}
+			}
+
+			if(!excluded)
+			{
+				if(isDir)
+				{
+					// if passes regular expressions, scan folder
+					Traverse(testEntry);
+				}
+				else
+				{
+					// if passes regular expressions, add to list
+					filesToProcess.push_back(testEntry);
+				}
 			}
 		}
 

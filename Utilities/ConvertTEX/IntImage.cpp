@@ -1,10 +1,6 @@
-#include <windows.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "Common.h"
 
 #include "IntImage.h"
-
 
 void DestroyImage(SourceImage *pImage)
 {

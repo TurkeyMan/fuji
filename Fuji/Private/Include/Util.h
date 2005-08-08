@@ -89,7 +89,7 @@ inline void FixUp(T* &pPointer, void *pBase, int fix)
 {
 	if(pPointer)
 	{
-		int offset = (uint32)((char*)pBase);
+		int offset = (int&)pBase;
 
 		if(!fix)
 			offset = -offset;

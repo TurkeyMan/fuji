@@ -45,18 +45,4 @@ enum ImageFormats
 	TexFmt_Max
 };
 
-template<class T>
-inline void FixUp(T* &pPointer, void *pBase, int fix)
-{
-	if(pPointer)
-	{
-		int offset = (int&)pBase;
-
-		if(!fix)
-			offset = -offset;
-
-		pPointer = (T*)((char*)pPointer + offset);
-	}
-}
-
 #endif

@@ -1,7 +1,4 @@
-#include <windows.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "Common.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"
@@ -460,6 +457,7 @@ int main(int argc, char *argv[])
 
 	free(pOutputBuffer);
 
+	printf(STR("> %s", outFile));
 	// done! :)
 
 	return 0;
@@ -690,41 +688,6 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 					++pSource;
 				}
 			}
-			break;
-		}
-
-		case TexFmt_I8:
-		{
-			break;
-		}
-
-		case TexFmt_I4:
-		{
-			break;
-		}
-
-		case TexFmt_DXT1:
-		{
-			break;
-		}
-
-		case TexFmt_DXT2:
-		{
-			break;
-		}
-
-		case TexFmt_DXT3:
-		{
-			break;
-		}
-
-		case TexFmt_DXT4:
-		{
-			break;
-		}
-
-		case TexFmt_DXT5:
-		{
 			break;
 		}
 

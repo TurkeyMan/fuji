@@ -44,6 +44,6 @@ const char *MFStringCache::Add(const char *pNewString)
 
 	strcpy(pCurr, pNewString);
 	pCurr[newLength]=0;
-	used = (uint32)&pCurr[newLength] - (uint32)pMem + 1;
+	used = ((uint32&)pCurr + newLength) - (uint32&)pMem + 1;
 	return pCurr;
 }
