@@ -33,7 +33,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="PCRE\Debug\PCRE.lib"
-				OutputFile="$(OutDir)/Archiver.exe"
+				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/Archiver.pdb"
@@ -68,8 +68,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include;../../Fuji/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_FUJI_UTIL"
+				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_WINDOWS;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

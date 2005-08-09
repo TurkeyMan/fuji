@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 
 				if(b == TexFmt_Max)
 				{
-					printf("Unknown texture format '%s'..", pFormatString);
+					printf("Unknown texture format '%s'..\n", pFormatString);
 					return 1;
 				}
 			}
@@ -282,13 +282,13 @@ int main(int argc, char *argv[])
 
 	if(platform == TP_Unknown)
 	{
-		printf("No platform specified...");
+		printf("No platform specified...\n");
 		return 1;
 	}
 
 	if(!fileName[0])
 	{
-		printf("No file specified...");
+		printf("No file specified...\n");
 		return 1;
 	}
 
@@ -317,13 +317,13 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Unsupported source image format..");
+		printf("Unsupported source image format..\n");
 		return 1;
 	}
 
 	if(!pImage)
 	{
-		printf("Unable to load source image...");
+		printf("Unable to load source image...\n");
 		return 2;
 	}
 
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
 	// verify format is available on target platform
 	if((platformAvailability[(int)targetFormat] & (uint32)BIT(platform)) == 0)
 	{
-		printf("Desired texture format is unavailable on target platform..");
+		printf("Desired texture format is unavailable on target platform..\n");
 		return 1;
 	}
 
@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
 
 	free(pOutputBuffer);
 
-	printf(STR("> %s", outFile));
+	printf(STR("> %s\n", outFile));
 	// done! :)
 
 	return 0;
@@ -693,7 +693,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		default:
 		{
-			printf("Conversion for target type not yet support...");
+			printf("Conversion for target type not yet support...\n");
 			return 1;
 		}
 	}

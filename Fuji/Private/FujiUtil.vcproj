@@ -60,7 +60,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="/Projects/Fuji/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_FUJI_UTIL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_CONSOLE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

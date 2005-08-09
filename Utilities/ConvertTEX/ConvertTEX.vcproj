@@ -32,7 +32,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/ConvertTEX.exe"
+				OutputFile="/Projects/Fuji/Bin/ConvertTEX.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/ConvertTEX.pdb"
@@ -68,7 +68,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../../Fuji/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_FUJI_UTIL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_CONSOLE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

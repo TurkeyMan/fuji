@@ -33,7 +33,7 @@ const char * const platformStrings[] =
 };
 
 void Traverse(const char *dir);
-int ProcessIniFile(const char *pIniFile, const char *pWorkingDir, TargetPlatform platform);
+int ProcessIniFile(const char *pIniFile, TargetPlatform platform);
 void Replace(std::string &string, std::string subString, std::string newString);
 
 std::vector<std::string> excludePatterns;
@@ -62,23 +62,16 @@ int main(int argc, char **argv)
 	{
 		if(argv[a][0] == '-' || argv[a][0] == '/')
 		{
-			if(!stricmp(&argv[a][1], "pc"))
+			for(int b=0; b<TP_Max; b++)
 			{
-				platform = TP_PC;
+				if(!stricmp(&argv[a][1], platformStrings[b]))
+				{
+					platform = (TargetPlatform)b;
+					break;
+				}
 			}
-			else if(!stricmp(&argv[a][1], "linux") || !stricmp(&argv[a][1], "lnx"))
-			{
-				platform = TP_Linux;
-			}
-			else if(!stricmp(&argv[a][1], "xbox") || !stricmp(&argv[a][1], "xb"))
-			{
-				platform = TP_XBox;
-			}
-			else if(!stricmp(&argv[a][1], "psp"))
-			{
-				platform = TP_PSP;
-			}
-			else if(!strnicmp(&argv[a][1], "ini", 3))
+
+			if(!strnicmp(&argv[a][1], "ini", 3))
 			{
 				const char *pIniString = &argv[a][4];
 
@@ -116,10 +109,15 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Unable to retrieve current working directory\r\n");
 	}
 
+	strcat(workingDir, "/");
+
 	// read ini file
 	if(iniFileName[0])
 	{
-		ProcessIniFile(iniFileName, workingDir, platform);
+		ProcessIniFile(iniFileName, platform);
+
+		Replace(output, "%platform%", platformStrings[platform]);
+		Replace(output, "$(platform)", platformStrings[platform]);
 	}
 
 	if(!sources.size())
@@ -217,6 +215,8 @@ int main(int argc, char **argv)
 		if(customTool)
 		{
 			// fill command line environment variables
+			Replace(commandLine, "%outpath%", outPath);
+			Replace(commandLine, "$(outpath)", outPath);
 			Replace(commandLine, "%fullname%", fullName);
 			Replace(commandLine, "$(fullname)", fullName);
 			Replace(commandLine, "%filepath%", filePath);
@@ -229,8 +229,6 @@ int main(int argc, char **argv)
 			Replace(commandLine, "$(ext)", pExt);
 			Replace(commandLine, "%platform%", platformStrings[platform]);
 			Replace(commandLine, "$(platform)", platformStrings[platform]);
-			Replace(commandLine, "%outpath%", outPath);
-			Replace(commandLine, "$(outpath)", outPath);
 
 			// execute tool
 			system(commandLine.c_str());
@@ -256,7 +254,7 @@ int main(int argc, char **argv)
 						char *pBuffer = (char*)malloc(fileSize);
 						
 						fread(pBuffer, 1, fileSize, pRead);
-						fwrite(pWrite, 1, fileSize, pWrite);
+						fwrite(pBuffer, 1, fileSize, pWrite);
 
 						free(pBuffer);
 
@@ -290,7 +288,7 @@ void Replace(std::string &string, std::string subString, std::string newString)
 	}
 }
 
-int ProcessIniFile(const char *pIniFile, const char *pWorkingDir, TargetPlatform platform)
+int ProcessIniFile(const char *pIniFile, TargetPlatform platform)
 {
 	MFIni *pIni = MFIni::Create(pIniFile);
 

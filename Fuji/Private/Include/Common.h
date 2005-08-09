@@ -69,6 +69,7 @@
 
 #if defined(_FUJI_UTIL)
 	#include <Windows.h>
+	#include <stdio.h>
 #endif
 
 // SSE optimisations for xbox and PC?
