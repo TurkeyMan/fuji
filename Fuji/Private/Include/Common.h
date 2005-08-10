@@ -7,6 +7,27 @@
 #define _cdecl __attribute__((__cdecl__))
 #endif
 
+// an enum to define all platforms supported by fuji
+enum FujiPlatforms
+{
+	FP_Unknown = -1,
+
+	FP_PC = 0,
+	FP_XBox,
+	FP_Linux,
+	FP_PSP,
+	FP_PS2,
+	FP_DC,
+	FP_GC,
+	FP_OSX,
+	FP_Amiga,
+
+	FP_Max
+};
+
+// extern to platform name strings
+extern const char * const gPlatformStrings[FP_Max];
+
 // Standard platform includes
 #if defined(_WINDOWS)
 	#include <Windows.h>
@@ -22,49 +43,51 @@
 
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
-#endif
 
-#if defined(_XBOX)
+	#define gCurrentPlatform FP_PC
+#elif defined(_XBOX)
 	#define DEBUG_KEYBOARD
 	#define DEBUG_MOUSE
 	#include <xtl.h>
 
 	char*  FixXBoxFilename(const char *pFilename);
-#endif
 
-#if defined(_LINUX)
+	#define gCurrentPlatform FP_XBox
+#elif defined(_LINUX)
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 	#include <string.h> // For strcpy
-#endif
 
-#if defined(_DC)
+	#define gCurrentPlatform FP_Linux
+#elif defined(_PSP)
+	#include <pspkernel.h>
+
+	#include <stdarg.h>
+	#include <stdlib.h>
+	#include <string.h>
+
+	#define gCurrentPlatform FP_PSP
+#elif defined(_PS2)
+	#include <stdarg.h>
+	#include <stdlib.h>
+	#include <string.h>
+
+	#define gCurrentPlatform FP_PS2
+#elif defined(_DC)
 	#define _arch_dreamcast
 	#include <kos.h>
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h>
 	#include <string.h>
 	#include <math.h>
-#endif
 
-#if defined(_PSP)
-	#include <pspkernel.h>
-
+	#define gCurrentPlatform FP_DC
+#elif defined(_GC)
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>
-#endif
 
-#if defined(_PS2)
-	#include <stdarg.h>
-	#include <stdlib.h>
-	#include <string.h>
-#endif
-
-#if defined(_GC)
-	#include <stdarg.h>
-	#include <stdlib.h>
-	#include <string.h>
+	#define gCurrentPlatform FP_GC
 #endif
 
 #if defined(_FUJI_UTIL)
@@ -156,6 +179,14 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 
 #define UNFLAG(x, y) (x&=~y)
 #define FLAG(x, y) (x|=y)
+
+#define BIT(x) (1<<(x))
+
+#ifndef MAKEFOURCC
+    #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
+                ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |       \
+                ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
+#endif /* defined(MAKEFOURCC) */
 
 // additional includes
 #include <new>

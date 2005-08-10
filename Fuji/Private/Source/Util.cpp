@@ -23,6 +23,20 @@ uint32 stringOffset;
 
 extern int gQuit;
 
+// platform name strings
+const char * const gPlatformStrings[] =
+{
+	"PC",
+	"XB",
+	"LNX",
+	"PSP",
+	"PS2",
+	"DC",
+	"GC",
+	"OSX",
+	"AMI"
+};
+
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
 {

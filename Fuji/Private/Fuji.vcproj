@@ -626,6 +626,9 @@
 				RelativePath=".\Source\MFTexture_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFTextureUtil.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File

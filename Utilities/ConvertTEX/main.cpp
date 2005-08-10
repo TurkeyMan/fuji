@@ -1,4 +1,5 @@
 #include "Common.h"
+#include "MFTexture_Internal.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"
@@ -7,218 +8,12 @@
 #include <d3d8.h>
 #include <xgraphics.h>
 
-
-const char * const pFormatStrings[TexFmt_Max] =
-{
-	"A8R8G8B8",
-	"A8B8G8R8",
-	"A2R10G10B10",
-	"A2B10G10R10",
-	"A16B16G16R16",
-	"R5G6B5",
-	"A1R5G5B5",
-	"A4R4G4B4",
-	"A4B4G4R4",
-	"ABGR_F16",
-	"ABGR_F32",
-	"I8",
-	"I4",
-	"DXT1",
-	"DXT2",
-	"DXT3",
-	"DXT4",
-	"DXT5"
-};
-
-uint32 platformAvailability[TexFmt_Max] =
-{
-	BIT(TP_PC)|BIT(TP_XBox),	// TexFmt_A8R8G8B8
-	BIT(TP_PSP),				// TexFmt_A8B8G8R8
-
-	BIT(TP_PC),					// TexFmt_A2R10G10B10
-	BIT(TP_PC),					// TexFmt_A2B10G10R10
-	BIT(TP_PC),					// TexFmt_A16B16G16R16
-
-	BIT(TP_PC),					// TexFmt_R5G6B5
-	BIT(TP_PC),					// TexFmt_A1R5G5B5
-
-	BIT(TP_PC),					// TexFmt_A4R4G4B4
-	BIT(TP_PSP),				// TexFmt_A4B4G4R4
-
-	BIT(TP_PC),					// TexFmt_ABGR_F16
-	BIT(TP_PC),					// TexFmt_ABGR_F32
-
-	BIT(TP_PSP),				// TexFmt_I8
-	BIT(TP_PSP),				// TexFmt_I4
-
-	BIT(TP_PC)|BIT(TP_XBox)|BIT(TP_PSP),	// TexFmt_DXT1
-	BIT(TP_PC)|BIT(TP_XBox),				// TexFmt_DXT2
-	BIT(TP_PC)|BIT(TP_XBox)|BIT(TP_PSP),	// TexFmt_DXT3
-	BIT(TP_PC)|BIT(TP_XBox),				// TexFmt_DXT4
-	BIT(TP_PC)|BIT(TP_XBox)|BIT(TP_PSP)		// TexFmt_DXT5
-};
-
-uint32 bitsPerPixel[TexFmt_Max] =
-{
-	32,	// TexFmt_A8R8G8B8
-	32,	// TexFmt_A8B8G8R8
-
-	32,	// TexFmt_A2R10G10B10
-	32,	// TexFmt_A2B10G10R10
-	64,	// TexFmt_A16B16G16R16
-
-	16,	// TexFmt_R5G6B5
-	16,	// TexFmt_A1R5G5B5
-
-	16,	// TexFmt_A4R4G4B4
-	16,	// TexFmt_A4B4G4R4
-
-	64,	// TexFmt_ABGR_F16
-	128,// TexFmt_ABGR_F32
-
-	8,	// TexFmt_I8
-	4,	// TexFmt_I4
-
-	4,	// TexFmt_DXT1
-	8,	// TexFmt_DXT2
-	8,	// TexFmt_DXT3
-	8,	// TexFmt_DXT4
-	8	// TexFmt_DXT5
-};
-
-uint32 platformFormat[TP_Max][TexFmt_Max] =
-{
-	{ // PC
-		21,	// D3DFMT_A8R8G8B8		// TexFmt_A8R8G8B8
-		32,	// D3DFMT_A8B8G8R8		// TexFmt_A8B8G8R8
-		35,	// D3DFMT_A2R10G10B10	// TexFmt_A2R10G10B10
-		31,	// D3DFMT_A2B10G10R10	// TexFmt_A2B10G10R10
-		36,	// D3DFMT_A16B16G16R16	// TexFmt_A16B16G16R16
-		23,	// D3DFMT_R5G6B5		// TexFmt_R5G6B5
-		25,	// D3DFMT_A1R5G5B5		// TexFmt_A1R5G5B5
-		26,	// D3DFMT_A4R4G4B4		// TexFmt_A4R4G4B4
-		0,	//						// TexFmt_A4B4G4R4
-		113,// D3DFMT_A16B16G16R16F	// TexFmt_ABGR_F16
-		116,// D3DFMT_A32B32G32R32F	// TexFmt_ABGR_F32
-		41,	// D3DFMT_P8			// TexFmt_I8
-		0,	//						// TexFmt_I4
-		MAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// TexFmt_DXT1
-		MAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// TexFmt_DXT2
-		MAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// TexFmt_DXT3
-		MAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// TexFmt_DXT4
-		MAKEFOURCC('D', 'X', 'T', '5')	// D3DFMT_DXT5	// TexFmt_DXT5
-	},
-
-	{ // XBox
-		0, // TexFmt_A8R8G8B8
-		0, // TexFmt_A8B8G8R8
-		0, // TexFmt_A2R10G10B10
-		0, // TexFmt_A2B10G10R10
-		0, // TexFmt_A16B16G16R16
-		0, // TexFmt_R5G6B5
-		0, // TexFmt_A1R5G5B5
-		0, // TexFmt_A4R4G4B4
-		0, // TexFmt_A4B4G4R4
-		0, // TexFmt_ABGR_F16
-		0, // TexFmt_ABGR_F32
-		0, // TexFmt_I8
-		0, // TexFmt_I4
-		0, // TexFmt_DXT1
-		0, // TexFmt_DXT2
-		0, // TexFmt_DXT3
-		0, // TexFmt_DXT4
-		0  // TexFmt_DXT5
-	},
-
-	{ // Linux
-		0, // TexFmt_A8R8G8B8
-		0, // TexFmt_A8B8G8R8
-		0, // TexFmt_A2R10G10B10
-		0, // TexFmt_A2B10G10R10
-		0, // TexFmt_A16B16G16R16
-		0, // TexFmt_R5G6B5
-		0, // TexFmt_A1R5G5B5
-		0, // TexFmt_A4R4G4B4
-		0, // TexFmt_A4B4G4R4
-		0, // TexFmt_ABGR_F16
-		0, // TexFmt_ABGR_F32
-		0, // TexFmt_I8
-		0, // TexFmt_I4
-		0, // TexFmt_DXT1
-		0, // TexFmt_DXT2
-		0, // TexFmt_DXT3
-		0, // TexFmt_DXT4
-		0  // TexFmt_DXT5
-	},
-
-	{ // PSP
-		0,	//					TexFmt_A8R8G8B8
-		3,	// SCEGU_PF8888, //	TexFmt_A8B8G8R8
-		0,	//					TexFmt_A2R10G10B10
-		0,	//					TexFmt_A2B10G10R10
-		0,	//					TexFmt_A16B16G16R16
-		0,	// SCEGU_PF5650, //	TexFmt_R5G6B5
-		1,	// SCEGU_PF5551, //	TexFmt_A1R5G5B5
-		0,	//					TexFmt_A4R4G4B4
-		2,	// SCEGU_PF4444, //	TexFmt_A4B4G4R4
-		0,	//					TexFmt_ABGR_F16
-		0,	//					TexFmt_ABGR_F32
-		5,	// SCEGU_PFIDX8, //	TexFmt_I8
-		4,	// SCEGU_PFIDX4, //	TexFmt_I4
-		8,	// SCEGU_PFDXT1, //	TexFmt_DXT1
-		0,	//					TexFmt_DXT2
-		9,	// SCEGU_PFDXT3, //	TexFmt_DXT3
-		0,	//					TexFmt_DXT4
-		10	// SCEGU_PFDXT5, //	TexFmt_DXT5
-	}
-};
-
-// texture TemplateData
-
-struct MFTextureSurfaceLevel;
-
-struct MFTextureTemplateData
-{
-	uint32 magicNumber;
-
-	ImageFormats imageFormat;
-	uint32 platformFormat;
-
-	int mipLevels;
-	int opaque;
-
-	uint32 res[2];
-
-	MFTextureSurfaceLevel *pSurfaces;
-};
-
-struct MFTextureSurfaceLevel
-{
-	int width, height;
-	int bitsPerPixel;
-
-	int xBlocks, yBlocks;
-	int bitsPerBlock;
-
-	char *pImageData;
-	int bufferLength;
-
-	char *pPaletteEntries;
-	int paletteBufferLength;
-
-	uint32 res[2];
-};
-
-////////////////////////////////
-
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, ImageFormats targetFormat);
-
-////////////////////////////////
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormats targetFormat);
 
 int main(int argc, char *argv[])
 {
-	TargetPlatform platform = TP_Unknown;
-	ImageFormats targetFormat = TexFmt_Unknown;
+	FujiPlatforms platform = FP_Unknown;
+	MFTextureFormats targetFormat = TexFmt_Unknown;
 
 	char fileName[256] = "";
 	char outFile[256] = "";
@@ -232,23 +27,16 @@ int main(int argc, char *argv[])
 	{
 		if(argv[a][0] == '-' || argv[a][0] == '/')
 		{
-			if(!stricmp(&argv[a][1], "pc"))
+			for(int b=0; b<FP_Max; b++)
 			{
-				platform = TP_PC;
+				if(!stricmp(&argv[a][1], gPlatformStrings[b]))
+				{
+					platform = (FujiPlatforms)b;
+					break;
+				}
 			}
-			else if(!stricmp(&argv[a][1], "linux") || !stricmp(&argv[a][1], "lnx"))
-			{
-				platform = TP_Linux;
-			}
-			else if(!stricmp(&argv[a][1], "xbox") || !stricmp(&argv[a][1], "xb"))
-			{
-				platform = TP_XBox;
-			}
-			else if(!stricmp(&argv[a][1], "psp"))
-			{
-				platform = TP_PSP;
-			}
-			else if(!stricmp(&argv[a][1], "format"))
+
+			if(!stricmp(&argv[a][1], "format"))
 			{
 				const char *pFormatString = &argv[a][7];
 
@@ -257,7 +45,7 @@ int main(int argc, char *argv[])
 
 				for(int b=0; b<TexFmt_Max; b++)
 				{
-					if(!stricmp(pFormatString, pFormatStrings[b]))
+					if(!stricmp(pFormatString, gpMFTextureFormatStrings[b]))
 					{
 						(int&)targetFormat = b;
 						break;
@@ -280,7 +68,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if(platform == TP_Unknown)
+	if(platform == FP_Unknown)
 	{
 		printf("No platform specified...\n");
 		return 1;
@@ -333,26 +121,26 @@ int main(int argc, char *argv[])
 		// choose target format..
 		switch(platform)
 		{
-			case TP_PC:
+			case FP_PC:
 				targetFormat = TexFmt_A8R8G8B8;
 				break;
 
-			case TP_XBox:
+			case FP_XBox:
 				targetFormat = TexFmt_A8R8G8B8;
 				break;
 
-			case TP_Linux:
+			case FP_Linux:
 				targetFormat = TexFmt_A8B8G8R8;
 				break;
 
-			case TP_PSP:
+			case FP_PSP:
 				targetFormat = TexFmt_A4B4G4R4;
 				break;
 		};
 	}
 
 	// verify format is available on target platform
-	if((platformAvailability[(int)targetFormat] & (uint32)BIT(platform)) == 0)
+	if((gMFTexturePlatformAvailability[(int)targetFormat] & (uint32)BIT(platform)) == 0)
 	{
 		printf("Desired texture format is unavailable on target platform..\n");
 		return 1;
@@ -367,7 +155,7 @@ int main(int argc, char *argv[])
 
 	for(a=0; a<pImage->mipLevels; a++)
 	{
-		imageBytes += (pImage->pLevels[a].width*pImage->pLevels[a].height * bitsPerPixel[(int)targetFormat]) / 8;
+		imageBytes += (pImage->pLevels[a].width*pImage->pLevels[a].height * gMFTextureBitsPerPixel[(int)targetFormat]) / 8;
 
 		// add palette
 		uint32 paletteBytes = 0;
@@ -389,7 +177,7 @@ int main(int argc, char *argv[])
 	pTemplate->magicNumber = MAKEFOURCC('F','T','E','X');
 
 	pTemplate->imageFormat = targetFormat;
-	pTemplate->platformFormat = platformFormat[(int)platform][(int)targetFormat];
+	pTemplate->platformFormat = gMFTexturePlatformFormat[(int)platform][(int)targetFormat];
 
 	pTemplate->mipLevels = pImage->mipLevels;
 	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
@@ -404,14 +192,14 @@ int main(int argc, char *argv[])
 
 		pSurfaceLevels[a].width = pImage->pLevels[a].width;
 		pSurfaceLevels[a].height = pImage->pLevels[a].height;
-		pSurfaceLevels[a].bitsPerPixel = bitsPerPixel[(int)targetFormat];
+		pSurfaceLevels[a].bitsPerPixel = gMFTextureBitsPerPixel[(int)targetFormat];
 
 		pSurfaceLevels[a].xBlocks = -1;
 		pSurfaceLevels[a].yBlocks = -1;
 		pSurfaceLevels[a].bitsPerBlock = -1;
 
 		pSurfaceLevels[a].pImageData = pDataPointer;
-		pSurfaceLevels[a].bufferLength = (pImage->pLevels[a].width*pImage->pLevels[a].height * bitsPerPixel[(int)targetFormat]) / 8;
+		pSurfaceLevels[a].bufferLength = (pImage->pLevels[a].width*pImage->pLevels[a].height * gMFTextureBitsPerPixel[(int)targetFormat]) / 8;
 		pDataPointer += pSurfaceLevels[a].bufferLength;
 
 		uint32 paletteBytes = 0;
@@ -463,7 +251,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, ImageFormats targetFormat)
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormats targetFormat)
 {
 	// convert image...
 	int width = pSourceSurface->width;

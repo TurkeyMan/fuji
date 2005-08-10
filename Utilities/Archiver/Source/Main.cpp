@@ -6,34 +6,8 @@
 
 #include "pcre.h"
 
-enum TargetPlatform
-{
-	TP_Unknown = -1,
-
-	TP_PC = 0,
-	TP_XBox,
-	TP_Linux,
-	TP_PSP,
-	TP_PS2,
-	TP_DC,
-	TP_GC,
-
-	TP_Max
-};
-
-const char * const platformStrings[] =
-{
-	"PC",
-	"XB",
-	"LNX",
-	"PSP",
-	"PS2",
-	"DC",
-	"GC"
-};
-
 void Traverse(const char *dir);
-int ProcessIniFile(const char *pIniFile, TargetPlatform platform);
+int ProcessIniFile(const char *pIniFile, FujiPlatforms platform);
 void Replace(std::string &string, std::string subString, std::string newString);
 
 std::vector<std::string> excludePatterns;
@@ -49,7 +23,7 @@ std::string output;
 
 int main(int argc, char **argv)
 {
-	TargetPlatform platform = TP_Unknown;
+	FujiPlatforms platform = FP_Unknown;
 	char iniFileName[256] = "";
 	char workingDir[256] = "";
 	char outPath[256] = "";
@@ -62,11 +36,11 @@ int main(int argc, char **argv)
 	{
 		if(argv[a][0] == '-' || argv[a][0] == '/')
 		{
-			for(int b=0; b<TP_Max; b++)
+			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], platformStrings[b]))
+				if(!stricmp(&argv[a][1], gPlatformStrings[b]))
 				{
-					platform = (TargetPlatform)b;
+					platform = (FujiPlatforms)b;
 					break;
 				}
 			}
@@ -98,7 +72,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(platform == TP_Unknown)
+	if(platform == FP_Unknown)
 	{
 		printf("No platform specified...\n");
 		return 1;
@@ -116,8 +90,8 @@ int main(int argc, char **argv)
 	{
 		ProcessIniFile(iniFileName, platform);
 
-		Replace(output, "%platform%", platformStrings[platform]);
-		Replace(output, "$(platform)", platformStrings[platform]);
+		Replace(output, "%platform%", gPlatformStrings[platform]);
+		Replace(output, "$(platform)", gPlatformStrings[platform]);
 	}
 
 	if(!sources.size())
@@ -227,8 +201,8 @@ int main(int argc, char **argv)
 			Replace(commandLine, "$(filepart)", filePart);
 			Replace(commandLine, "%ext%", pExt);
 			Replace(commandLine, "$(ext)", pExt);
-			Replace(commandLine, "%platform%", platformStrings[platform]);
-			Replace(commandLine, "$(platform)", platformStrings[platform]);
+			Replace(commandLine, "%platform%", gPlatformStrings[platform]);
+			Replace(commandLine, "$(platform)", gPlatformStrings[platform]);
 
 			// execute tool
 			system(commandLine.c_str());
@@ -288,7 +262,7 @@ void Replace(std::string &string, std::string subString, std::string newString)
 	}
 }
 
-int ProcessIniFile(const char *pIniFile, TargetPlatform platform)
+int ProcessIniFile(const char *pIniFile, FujiPlatforms platform)
 {
 	MFIni *pIni = MFIni::Create(pIniFile);
 
@@ -373,10 +347,10 @@ int ProcessIniFile(const char *pIniFile, TargetPlatform platform)
 							uint32 platformFlag = 0;
 							int platformID = 0;
 
-							for(platformID = 0; platformID < TP_Max; platformID++)
+							for(platformID = 0; platformID < FP_Max; platformID++)
 							{
-								int strLen = (int)strlen(platformStrings[platformID]);
-								if(!strnicmp(pString, platformStrings[platformID], strLen))
+								int strLen = (int)strlen(gPlatformStrings[platformID]);
+								if(!strnicmp(pString, gPlatformStrings[platformID], strLen))
 								{
 									platformFlag = 1 << platformID;
 									pString += strLen;

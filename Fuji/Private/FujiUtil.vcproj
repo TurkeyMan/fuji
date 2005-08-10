@@ -104,6 +104,12 @@
 				RelativePath="Source\MFStringCache.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFTexture_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFTextureUtil.cpp">
+			</File>
+			<File
 				RelativePath="Source\Util.cpp">
 			</File>
 		</Filter>
@@ -119,6 +125,9 @@
 			</File>
 			<File
 				RelativePath="Include\MFStringCache.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFTexture.h">
 			</File>
 			<File
 				RelativePath="Include\Util.h">

@@ -8,7 +8,6 @@
 #include <GL/glu.h>
 #endif
 
-#include "DebugMenu_Internal.h"
 #include "MFTexture.h"
 
 // functions
@@ -70,7 +69,10 @@ struct MFTexture
 #endif
 };
 
+#if !defined(_FUJI_UTIL)
 // a debug menu texture information display object
+#include "DebugMenu_Internal.h"
+
 class TextureBrowser : public MenuObject
 {
 public:
@@ -85,9 +87,11 @@ public:
 
 	int selection;
 };
+#endif
 
 extern const char * const gpMFTextureFormatStrings[TexFmt_Max];
+extern uint32 gMFTexturePlatformAvailability[TexFmt_Max];
 extern uint32 gMFTextureBitsPerPixel[TexFmt_Max];
-extern uint32 gMFTexturePlatformFormat[TexFmt_Max];
+extern uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max];
 
 #endif

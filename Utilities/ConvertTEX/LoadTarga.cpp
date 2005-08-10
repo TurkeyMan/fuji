@@ -38,7 +38,6 @@ SourceImage* LoadTarga(const char *pFilename)
 	pImage->pLevels[0].height = pHeader->height;
 
 	Pixel *pPixel = pImage->pLevels[0].pData;
-///////////////////////////////
 
 	unsigned char *pPosition;
 	bool isSavedFlipped = true;

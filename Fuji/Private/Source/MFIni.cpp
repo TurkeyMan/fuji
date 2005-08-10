@@ -180,7 +180,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	char tokenBuffer[256];
 
 	MFIniLine *pCurrLine = &pLines[lineCount];
-	const char **pCurrString = &pStrings[stringCount];
+//	const char **pCurrString = &pStrings[stringCount];
 
 	InitLine(pCurrLine);
 	bool bIsSection;

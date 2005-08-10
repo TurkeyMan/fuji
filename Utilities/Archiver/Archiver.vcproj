@@ -32,11 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PCRE\Debug\PCRE.lib"
 				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/Archiver.pdb"
+				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -69,7 +68,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_WINDOWS;_FUJI_UTIL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -79,11 +78,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PCRE\Release\PCRE.lib"
 				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"/>
