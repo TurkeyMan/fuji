@@ -41,11 +41,11 @@ Font* Font_Create(const char *pFilename)
 	{
 		pFont = (Font*)Heap_Alloc(sizeof(Font));
 
-		pFont->pMaterial = MFMaterial_Create(pFilename);
-		DBGASSERT(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
-
 		MFFile_Read(hFile, pFont->charwidths, 256);
 		MFFile_Close(hFile);
+
+		pFont->pMaterial = MFMaterial_Create(pFilename);
+		DBGASSERT(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
 	}
 
 	return pFont;

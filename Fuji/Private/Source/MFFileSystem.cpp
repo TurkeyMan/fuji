@@ -30,11 +30,12 @@ void MFFileSystem_InitModule()
 	MFFileSystemNative_InitModule();
 	MFFileSystemMemory_InitModule();
 	MFFileSystemZipFile_InitModule();
-/*
+
+//*
 	MFOpenDataNative open;
 	open.cbSize = sizeof(MFOpenDataNative);
 	open.openFlags = MFOF_Read|MFOF_Binary;
-	open.pFilename =  MFFile_SystemPath("Data.zip");
+	open.pFilename =  MFFile_SystemPath("Data_PC.zip");
 	MFFileHandle h = MFFile_Open(hNativeFileSystem, &open);
 
 	MFMountDataZipFile zipMountData;
@@ -44,16 +45,18 @@ void MFFileSystem_InitModule()
 	zipMountData.pMountpoint = "data";
 	zipMountData.zipArchiveHandle = h;
 	MFFileSystem_Mount(hZipFileSystem, &zipMountData);
-*/
+//*/
+
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.priority = MFMP_Normal;
 
+/*
 	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 	mountData.pMountpoint = "data";
 	mountData.pPath = MFFile_SystemPath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
-
+*/
 	mountData.flags = MFMF_Recursive;
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();

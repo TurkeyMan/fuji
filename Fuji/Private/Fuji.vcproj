@@ -26,7 +26,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\PC\zlib\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -43,7 +43,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib minizlib.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\;\Projects\Fuji\PC\zlib\lib\"
 				SuppressStartupBanner="TRUE"/>
@@ -111,7 +111,7 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\PC\zlib\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -129,7 +129,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib zlib.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\; \Projects\Fuji\PC\zlib\lib\"
 				SuppressStartupBanner="TRUE"/>
@@ -405,7 +405,7 @@
 				FavorSizeOrSpeed="0"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\PC\zlib\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -422,7 +422,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib zlib.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\; \Projects\Fuji\PC\zlib\lib\"
 				SuppressStartupBanner="TRUE"/>
@@ -2516,6 +2516,310 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
+		</Filter>
+		<Filter
+			Name="Lib"
+			Filter="">
+			<Filter
+				Name="zzip"
+				Filter="">
+				<File
+					RelativePath=".\Lib\zzip\__debug.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__dirent.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__hints.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__mmap.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\_config.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\_msvc.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\autoconf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\conf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\dir.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\err.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fetch.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fetch.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\file.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\file.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\format.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fseeko.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fseeko.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\info.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\info.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\lib.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\mmapped.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\mmapped.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\plugin.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\plugin.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\stat.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\stdint.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\types.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\write.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\zip.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\zzip.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="zlib"
+				Filter="">
+				<File
+					RelativePath=".\Lib\zlib\adler32.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\compress.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\crc32.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\crc32.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\deflate.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\deflate.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\example.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\gzio.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\infback.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffast.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffast.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffixed.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inflate.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inflate.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inftrees.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inftrees.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\minigzip.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\trees.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\trees.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\uncompr.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zconf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zconf.in.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zlib.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zutil.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zutil.h">
+				</File>
+				<Filter
+					Name="minizip"
+					Filter="">
+					<File
+						RelativePath=".\Lib\zlib\minizip\crypt.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\ioapi.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\ioapi.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\iowin32.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\iowin32.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\miniunz.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\minizip.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\mztools.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\mztools.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\unzip.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\unzip.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\zip.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_XB|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Profile_XB|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Profile_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_XB|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_XB|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\zip.h">
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\SConstruct">

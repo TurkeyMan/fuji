@@ -4,11 +4,16 @@
 #include "MFIni.h"
 #include "FS.h"
 
+#include <direct.h>
+
 #include "pcre.h"
+#include "zlib/minizip/zip.h"
 
 void Traverse(const char *dir);
 int ProcessIniFile(const char *pIniFile, FujiPlatforms platform);
 void Replace(std::string &string, std::string subString, std::string newString);
+void CopyFile(const char *pSource, const char *pDest);
+void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName);
 
 std::vector<std::string> excludePatterns;
 std::vector<pcre*> reHandles;
@@ -27,9 +32,10 @@ int main(int argc, char **argv)
 	char iniFileName[256] = "";
 	char workingDir[256] = "";
 	char outPath[256] = "";
+	zipFile zip = 0;
 	int a;
 
-	bool outputRawFile = false;
+	bool outputRawFiles = false;
 
 	// process command line
 	for(a=1; a<argc; a++)
@@ -99,20 +105,59 @@ int main(int argc, char **argv)
 		sources.push_back(workingDir);
 	}
 
-	if(IsDirectory(output.c_str()))
+	if(output[output.size()-1] == '/' || output[output.size()-1] == '\\')
 	{
-		outputRawFile = true;
-
-		if(output[output.size()-1] == '/' || output[output.size()-1] == '\\')
-		{
-			output.resize(output.size()-1);
-		}
-
+		outputRawFiles = true;
+		output.resize(output.size()-1);
 		strcpy(outPath, output.c_str());
+	}
+	else if(!stricmp(&(output.c_str()[output.size()-4]), ".zip"))
+	{
+		// output is zip file
+/*
+		std::string::size_type lastSlash = output.rfind('/');
+		if(lastSlash == std::string::npos)
+			lastSlash = output.rfind('\\');
+
+		if(lastSlash != std::string::npos)
+		{
+			strcpy(outPath, output.c_str());
+			outPath[lastSlash] = 0;
+		}
+*/
+		strcpy(outPath, output.c_str());
+		outPath[output.size()-4] = 0;
+
+		zip = zipOpen(output.c_str(), 0);
+
+		if(!zip)
+		{
+			printf(STR("Failed to open zip file '%s'", output.c_str()));
+			return 1;
+		}
 	}
 	else
 	{
-		// dont handle output archives yet
+		LOGD(STR("Invalid output filename '%s'", output));
+		return 1;
+	}
+
+	// create output folder if it doesn't exist
+	char testPath[256] = "";
+
+	char *pPathPart = strtok(outPath, "/\\");
+
+	while(pPathPart)
+	{
+		strcat(testPath, pPathPart);
+		strcat(testPath, "/");
+
+		if(!IsDirectory(testPath))
+		{
+			mkdir(testPath);
+		}
+
+		pPathPart = strtok(NULL, "/\\");
 	}
 
 	// build regular expression handles
@@ -210,43 +255,41 @@ int main(int argc, char **argv)
 		else
 		{
 			// copy file to archive as is
-			if(outputRawFile)
+			if(outputRawFiles)
 			{
-				// copy the file
-				FILE *pRead = fopen(fullName.c_str(), "rb");
-
-				if(pRead)
-				{
-					FILE *pWrite = fopen(STR("%s/%s", outPath, fileName.c_str()), "wb");
-
-					if(pWrite)
-					{
-						fseek(pRead, 0, SEEK_END);
-						size_t fileSize = ftell(pRead);
-						fseek(pRead, 0, SEEK_SET);
-
-						char *pBuffer = (char*)malloc(fileSize);
-						
-						fread(pBuffer, 1, fileSize, pRead);
-						fwrite(pBuffer, 1, fileSize, pWrite);
-
-						free(pBuffer);
-
-						fclose(pWrite);
-					}
-					else
-					{
-						printf("  Couldnt open output file...\n");
-					}
-
-					fclose(pRead);
-				}
-				else
-				{
-					printf("  Couldnt open file...\n");
-				}
+				CopyFile(fullName.c_str(), STR("%s/%s", outPath, fileName.c_str()));
+			}
+			else
+			{
+				AddToZip(zip, fullName.c_str(), fileName.c_str());
 			}
 		}
+	}
+
+	if(!outputRawFiles)
+	{
+		// add processed files to zip..
+		FreeDirectoryEntries(filesToProcess);
+		GetDirectoryEntries(STR("%s/", outPath), filesToProcess);
+
+		for(a=0; a<(int)filesToProcess.size(); a++)
+		{
+			std::string fullName = std::string(outPath) + "/" + filesToProcess[a];
+			std::string fileName = filesToProcess[a];
+
+			AddToZip(zip, fullName.c_str(), fileName.c_str());
+		}
+
+		zipClose(zip, NULL);
+
+		// remove processed files..
+		for(a=0; a<(int)filesToProcess.size(); a++)
+		{
+			remove(STR("%s/%s", outPath, filesToProcess[a].c_str()));
+		}
+
+		// remove intermediate folder
+		rmdir(outPath);
 	}
 
 	return 0;
@@ -455,4 +498,66 @@ void Traverse(const char *dir)
 
 		FreeDirectoryEntries(entries);
 	}
+}
+
+void CopyFile(const char *pSource, const char *pDest)
+{
+	// copy the file
+	FILE *pRead = fopen(pSource, "rb");
+
+	if(pRead)
+	{
+		FILE *pWrite = fopen(pDest, "wb");
+
+		if(pWrite)
+		{
+			fseek(pRead, 0, SEEK_END);
+			size_t fileSize = ftell(pRead);
+			fseek(pRead, 0, SEEK_SET);
+
+			char *pBuffer = (char*)malloc(fileSize);
+			
+			fread(pBuffer, 1, fileSize, pRead);
+			fwrite(pBuffer, 1, fileSize, pWrite);
+
+			free(pBuffer);
+
+			fclose(pWrite);
+		}
+		else
+		{
+			printf("  Couldnt open output file...\n");
+		}
+
+		fclose(pRead);
+	}
+	else
+	{
+		printf("  Couldnt open file...\n");
+	}
+}
+
+void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName)
+{
+	char *pBuffer;
+
+	FILE *pFile = fopen(pSourceFile, "rb");
+
+	if(!pFile)
+	{
+		printf(STR("Error writing file 's' to zip, Unable to open file..", pSourceFile));
+		return;
+	}
+
+	fseek(pFile, 0, SEEK_END);
+	int fileLen = ftell(pFile);
+	fseek(pFile, 0, SEEK_SET);
+
+	pBuffer = (char*)malloc(fileLen);
+	fread(pBuffer, 1, fileLen, pFile);
+	fclose(pFile);
+
+	int z = zipOpenNewFileInZip(zip, pSourceFileName, NULL, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
+	zipWriteInFileInZip(zip, pBuffer, fileLen);
+	zipCloseFileInZip(zip);
 }

@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include"
+				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_FUJI_UTIL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -67,7 +67,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include"
+				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
