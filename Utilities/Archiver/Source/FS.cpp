@@ -60,6 +60,8 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 		more = FindNextFile(dirHandle, &findData);
 	}
 
+	FindClose(dirHandle);
+
 	return numEntries;
 }
 

@@ -7,7 +7,6 @@
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "PtrList.h"
-#include "FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 
@@ -17,79 +16,29 @@ extern MFTexture *pNoneTexture;
 /**** Functions ****/
 
 // interface functions
-MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	HRESULT hr;
+	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 
-	if(!pTexture)
-	{
-		const char *pFileName = STR("%s.tga", pName);
+	// create texture
+	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, (D3DFORMAT)pTemplate->platformFormat, D3DPOOL_MANAGED, &pTexture->pTexture);
 
-		uint32 fileSize;
-		char *pBuffer = MFFileSystem_Load(pFileName, &fileSize);
+	DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
+	DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
+	DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
+	DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
-		if(!pBuffer)
-		{
-			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
-			return MFTexture_Create("_None");
-		}
+	DBGASSERT(hr == D3D_OK, STR("Failed to create texture '%s'.", pTexture->name));
 
-		pTexture = gTextureBank.Create();
-		pTexture->refCount = 0;
+	// copy image data
+	D3DLOCKED_RECT rect;
+	pTexture->pTexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
+	memcpy(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
+	pTexture->pTexture->UnlockRect(0);
 
-		D3DSURFACE_DESC imageDesc;
-		HRESULT hr;
-
-		hr = D3DXCreateTextureFromFileInMemoryEx(pd3dDevice, pBuffer, fileSize, 0, 0, generateMipChain ? 0 : 1, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &pTexture->pTexture);
-
-		DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
-		DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
-		DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
-		DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
-
-		DBGASSERT(hr == D3D_OK, STR("Failed to create texture '%s'.", pFileName));
-
-		Heap_Free(pBuffer);
-
-		strcpy(pTexture->name, pName);
-
-		// create template data
-		uint32 levelCount = pTexture->pTexture->GetLevelCount();
-
-		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-		pTexture->pTexture->GetLevelDesc(0, &imageDesc);
-		pTexture->pTemplateData->imageFormat = TexFmt_Unknown;
-		pTexture->pTemplateData->platformFormat = imageDesc.Format;
-
-		int a;
-
-		for(a=0; a<TexFmt_Max; a++)
-		{
-			if((int)gMFTexturePlatformFormat[a] == imageDesc.Format)
-			{
-				pTexture->pTemplateData->imageFormat = (MFTextureFormats)a;
-				break;
-			}
-		}
-
-		pTexture->pTemplateData->mipLevels = levelCount;
-
-		for(a=0; a<(int)levelCount; a++)
-		{
-			pTexture->pTexture->GetLevelDesc(a, &imageDesc);
-
-			pTexture->pTemplateData->pSurfaces[a].width = imageDesc.Width;
-			pTexture->pTemplateData->pSurfaces[a].height = imageDesc.Height;
-		}
-	}
-
-	pTexture->refCount++;
-
-	return pTexture;
+	// filter mip levels
+	D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 }
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)

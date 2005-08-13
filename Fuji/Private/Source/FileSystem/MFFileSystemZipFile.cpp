@@ -145,10 +145,12 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 		}
 		else
 		{
+			int a;
+
 			strcpy(pStringCache, fileName);
 			pToc->pFilesysData = pStringCache;
 
-			for(int a=fileLen; --a;)
+			for(a=fileLen; --a;)
 			{
 				if(pStringCache[a] == '/')
 					break;

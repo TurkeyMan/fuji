@@ -7,7 +7,6 @@
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "PtrList.h"
-#include "FileSystem/MFFileSystemNative.h"
 #include "Image.h"
 
 #include <pspdisplay.h>
@@ -21,78 +20,9 @@ extern MFTexture *pNoneTexture;
 /**** Functions ****/
 
 // interface functions
-MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
-
-	if(!pTexture)
-	{
-		pTexture = gTextureBank.Create();
-		pTexture->refCount = 0;
-
-		const char *pFileName = STR("%s.tex", pName);
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)MFFileSystem_Load(pFileName);
-
-		if(!pTexture->pTemplateData)
-		{
-			const char *pFileName = STR("%s.tga", pName);
-
-			FujiImage *pImage = LoadTGA(pFileName, false);
-			pImage->Convert(FUJI_RGBA);
-
-			uint32 numPixels = pImage->width * pImage->height;
-
-			char *pImageData = (char*)Heap_Alloc(numPixels * 2);
-
-			char *pSrcData = (char*)pImage->pixels;
-			uint16 *pData = (uint16*)pImageData;
-
-			for(uint32 a=0; a<numPixels; a++)
-			{
-				if(pImage->bitsPerPixel == 32)
-				{
-					*pData = ((pSrcData[0] & 0xF0) >> 4) |
-							(pSrcData[1] & 0xF0) |
-							((pSrcData[2] & 0xF0) << 4) |
-							((pSrcData[3] & 0xF0) << 8);
-				}
-				else if(pImage->bitsPerPixel == 24)
-				{
-					*pData = ((pSrcData[0] & 0xF0) >> 4) |
-							(pSrcData[1] & 0xF0) |
-							((pSrcData[2] & 0xF0) << 4) |
-							0xF000;
-				}
-
-				pSrcData += pImage->bytesPerPixel;
-				++pData;
-			}
-
-			strcpy(pTexture->name, pName);
-
-			// create template data
-			char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
-
-			pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-			pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-			pTexture->pTemplateData->imageFormat = TexFmt_A4B4G4R4;
-			pTexture->pTemplateData->platformFormat = GU_PSM_4444;
-
-			pTexture->pTemplateData->mipLevels = 1;
-
-			pTexture->pTemplateData->pSurfaces[0].width = pImage->width;
-			pTexture->pTemplateData->pSurfaces[0].height = pImage->height;
-			pTexture->pTemplateData->pSurfaces[0].pImageData = pImageData;
-
-			delete pImage;
-		}
-	}
-
-	pTexture->refCount++;
-
-	return pTexture;
+	// no processing required on PSP..
 }
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)

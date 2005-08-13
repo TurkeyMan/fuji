@@ -31,32 +31,34 @@ void MFFileSystem_InitModule()
 	MFFileSystemMemory_InitModule();
 	MFFileSystemZipFile_InitModule();
 
-//*
 	MFOpenDataNative open;
 	open.cbSize = sizeof(MFOpenDataNative);
 	open.openFlags = MFOF_Read|MFOF_Binary;
-	open.pFilename =  MFFile_SystemPath("Data_PC.zip");
+	open.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", gPlatformStrings[gCurrentPlatform]));
 	MFFileHandle h = MFFile_Open(hNativeFileSystem, &open);
-
-	MFMountDataZipFile zipMountData;
-	zipMountData.cbSize = sizeof(MFMountDataZipFile);
-	zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
-	zipMountData.priority = MFMP_Normal;
-	zipMountData.pMountpoint = "data";
-	zipMountData.zipArchiveHandle = h;
-	MFFileSystem_Mount(hZipFileSystem, &zipMountData);
-//*/
 
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.priority = MFMP_Normal;
 
-/*
-	mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
-	mountData.pMountpoint = "data";
-	mountData.pPath = MFFile_SystemPath();
-	MFFileSystem_Mount(hNativeFileSystem, &mountData);
-*/
+	if(h)
+	{
+		MFMountDataZipFile zipMountData;
+		zipMountData.cbSize = sizeof(MFMountDataZipFile);
+		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
+		zipMountData.priority = MFMP_Normal;
+		zipMountData.pMountpoint = "data";
+		zipMountData.zipArchiveHandle = h;
+		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
+	}
+	else
+	{
+		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
+		mountData.pMountpoint = "data";
+		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), gPlatformStrings[gCurrentPlatform]);
+		MFFileSystem_Mount(hNativeFileSystem, &mountData);
+	}
+
 	mountData.flags = MFMF_Recursive;
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();

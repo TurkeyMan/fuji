@@ -24,7 +24,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -78,7 +78,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -132,7 +132,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\"
+				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -245,10 +245,22 @@
 				RelativePath=".\Source\MFStringCache.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFTexture.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFTexture_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFTextureUtil.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Renderer.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\Renderer_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Shape.cpp">
@@ -261,12 +273,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\System_Internal.h">
-			</File>
-			<File
-				RelativePath=".\Source\Texture.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\Texture_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Timer.cpp">
@@ -297,6 +303,12 @@
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemNative.h">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.h">
 				</File>
 			</Filter>
 			<Filter
@@ -390,6 +402,15 @@
 				RelativePath=".\Include\MFStringCache.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFTexture.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFVector.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFVector.inl">
+			</File>
+			<File
 				RelativePath=".\Include\Primitive.h">
 			</File>
 			<File
@@ -409,9 +430,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\System.h">
-			</File>
-			<File
-				RelativePath=".\Include\Texture.h">
 			</File>
 			<File
 				RelativePath=".\Include\Timer.h">
@@ -470,6 +488,9 @@
 				RelativePath=".\Pc\MFMaterial_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Pc\MFTexture_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\Primitive_PC.cpp">
 			</File>
 			<File
@@ -483,9 +504,6 @@
 			</File>
 			<File
 				RelativePath=".\Pc\System_PC.cpp">
-			</File>
-			<File
-				RelativePath=".\Pc\Texture_PC.cpp">
 			</File>
 			<Filter
 				Name="Materials"
@@ -570,6 +588,27 @@
 			</File>
 			<File
 				RelativePath=".\XBox\MFMaterial_XB.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBox\MFTexture_XB.cpp">
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="TRUE">
@@ -694,27 +733,244 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\XBox\Texture_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
+		</Filter>
+		<Filter
+			Name="Lib"
+			Filter="">
+			<Filter
+				Name="zlib"
+				Filter="">
+				<File
+					RelativePath=".\Lib\zlib\adler32.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\compress.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\crc32.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\crc32.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\deflate.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\deflate.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\example.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\gzio.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\infback.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffast.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffast.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inffixed.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inflate.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inflate.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inftrees.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\inftrees.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\minigzip.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\trees.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\trees.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\uncompr.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zconf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zconf.in.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zlib.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zutil.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zlib\zutil.h">
+				</File>
+				<Filter
+					Name="minizip"
+					Filter="">
+					<File
+						RelativePath=".\Lib\zlib\minizip\crypt.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\ioapi.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\ioapi.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\iowin32.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\iowin32.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\miniunz.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\minizip.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\mztools.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\mztools.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\unzip.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\unzip.h">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\zip.c">
+					</File>
+					<File
+						RelativePath=".\Lib\zlib\minizip\zip.h">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="zzip"
+				Filter="">
+				<File
+					RelativePath=".\Lib\zzip\__debug.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__dirent.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__hints.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\__mmap.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\_config.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\_msvc.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\autoconf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\conf.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\dir.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\err.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fetch.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fetch.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\file.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\file.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\format.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fseeko.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\fseeko.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\info.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\info.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\lib.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\mmapped.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\mmapped.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\plugin.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\plugin.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\stat.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\stdint.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\types.h">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\write.c">
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\zip.c">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail|Win32">
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Lib\zzip\zzip.h">
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\Todo.txt">

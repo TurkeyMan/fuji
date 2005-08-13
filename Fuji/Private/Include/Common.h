@@ -184,8 +184,8 @@ inline T Clamp(T x, T y, T z) { return Max(x, Min(y, z)); }
 
 #ifndef MAKEFOURCC
     #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
-                ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |       \
-                ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
+                ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) |       \
+                ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
 #endif /* defined(MAKEFOURCC) */
 
 // additional includes

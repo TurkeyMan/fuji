@@ -423,7 +423,7 @@ char* StrRChr(const char *s, int i)
 
 	if(i)
 	{
-		while((s=strchr(s, i)))
+		while((s=strchr(s, i)) != NULL)
 		{
 			last = s;
 			s++;

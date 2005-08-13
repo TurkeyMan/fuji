@@ -10,13 +10,17 @@
 
 #include "MFTexture.h"
 
+// foreward declarations
+struct MFTexture;
+struct MFTextureSurfaceLevel;
+
 // functions
 void MFTexture_InitModule();
 void MFTexture_DeinitModule();
 
-// texture TemplateData
-struct MFTextureSurfaceLevel;
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
 
+// texture TemplateData
 struct MFTextureTemplateData
 {
 	uint32 magicNumber;

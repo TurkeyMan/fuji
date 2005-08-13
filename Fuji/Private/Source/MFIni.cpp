@@ -184,7 +184,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 	InitLine(pCurrLine);
 	bool bIsSection;
-	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)))
+	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)) != NULL)
 	{
 		// newline
 		tokenLength = (int)strlen(tokenBuffer);

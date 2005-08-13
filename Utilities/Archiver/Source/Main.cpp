@@ -5,6 +5,7 @@
 #include "FS.h"
 
 #include <direct.h>
+#include <errno.h>
 
 #include "pcre.h"
 #include "zlib/minizip/zip.h"

@@ -5,6 +5,7 @@
 #include "Font.h"
 #include "Primitive.h"
 #include "PtrList.h"
+#include "MFFileSystem_Internal.h"
 
 #if defined(_PSP)
 	#include <pspdisplay.h>
@@ -52,6 +53,46 @@ MFTexture* MFTexture_FindTexture(const char *pName)
 	}
 
 	return NULL;
+}
+
+MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
+{
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
+
+	if(!pTexture)
+	{
+		uint32 fileSize;
+
+		const char *pFileName = STR("%s.tex", pName);
+
+		MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)MFFileSystem_Load(pFileName, &fileSize);
+
+		if(!pTemplate)
+		{
+			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
+			return MFTexture_Create("_None");
+		}
+
+		FixUp(pTemplate->pSurfaces, pTemplate, 1);
+
+		for(int a=0; a<pTemplate->mipLevels; a++)
+		{
+			FixUp(pTemplate->pSurfaces[a].pImageData, pTemplate, 1);
+			FixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
+		}
+
+		pTexture = gTextureBank.Create();
+
+		pTexture->refCount = 0;
+		pTexture->pTemplateData = pTemplate;
+		strcpy(pTexture->name, pName);
+
+		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
+	}
+
+	pTexture->refCount++;
+
+	return pTexture;
 }
 
 MFTexture* MFTexture_CreateBlank(const char *pName, const Vector4 &colour)
