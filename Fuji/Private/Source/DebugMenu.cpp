@@ -11,19 +11,19 @@ bool buttonsDown;
 
 Menu rootMenu;
 MenuObject *pCurrentMenu = &rootMenu;
-Vector3 debugMenuPos = Vector(50.0f, 50.0f, 0.0f);
+MFVector debugMenuPos = MakeVector(50.0f, 50.0f, 0.0f);
 
-Vector3 Menu::menuPosition = Vector(MENU_X, MENU_Y, 0.0f);
-Vector3 Menu::menuDimensions = Vector(MENU_WIDTH, MENU_HEIGHT, 0.0f);
-Vector4 Menu::colour = Vector(0.0f, 0.0f, 1.0f, 0.5f);
-Vector4 Menu::folderColour = Vector(0.5f, 0.627f, 1.0f, 1.0f);
+MFVector Menu::menuPosition = MakeVector(MENU_X, MENU_Y, 0.0f);
+MFVector Menu::menuDimensions = MakeVector(MENU_WIDTH, MENU_HEIGHT, 0.0f);
+MFVector Menu::colour = MakeVector(0.0f, 0.0f, 1.0f, 0.5f);
+MFVector Menu::folderColour = MakeVector(0.5f, 0.627f, 1.0f, 1.0f);
 
 MenuItemPosition2D menuPos(&Menu::menuPosition, 60.0f);
 MenuItemPosition2D menuDim(&Menu::menuDimensions, 60.0f);
 MenuItemColour menuCol(&Menu::colour);
 MenuItemColour menuItemCom(&Menu::folderColour);
 
-const Vector4 MenuItemColour::colourInit = Vector(1.0f, 1.0f, 1.0f, 1.0f);
+const MFVector MenuItemColour::colourInit = MakeVector(1.0f, 1.0f, 1.0f, 1.0f);
 
 #define COLOUR_PRESETS 10
 uint32 MenuItemColour::presets[COLOUR_PRESETS] =
@@ -260,9 +260,9 @@ int Menu::GetItemCount()
 	return numChildren;
 }
 
-float Menu::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float Menu::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : folderColour, name);
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : folderColour, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -277,8 +277,8 @@ void Menu::ListUpdate(bool selected)
 
 void Menu::Draw()
 {
-	Vector3 dimensions = Vector(0.0f, 0.0f, 0.0f);
-	Vector3 currentPos;
+	MFVector dimensions = MakeVector(0.0f, 0.0f, 0.0f);
+	MFVector currentPos;
 	float requestedWidth = menuDimensions.x-40.0f;
 	float selStart, selEnd;
 	int a;
@@ -286,7 +286,7 @@ void Menu::Draw()
 	// get menu size
 	for(a=0; a<numChildren; a++)
 	{
-		Vector3 dim = pChildren[a]->GetDimensions(requestedWidth);
+		MFVector dim = pChildren[a]->GetDimensions(requestedWidth);
 
 		if(selection==a)
 		{
@@ -313,7 +313,7 @@ void Menu::Draw()
 		yOffset -= MFAbs(yOffset-targetOffset) < 0.1f ? yOffset-targetOffset : (yOffset-targetOffset)*0.1f;
 	}
 
-	currentPos = Vector(menuPosition.x+20.0f, menuPosition.y+50.0f + yOffset, 0.0f);
+	currentPos = MakeVector(menuPosition.x+20.0f, menuPosition.y+50.0f + yOffset, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
@@ -328,7 +328,7 @@ void Menu::Draw()
 	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y+menuDimensions.y, 0);
 	MFEnd();
 
-	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, Vector(1,0.6875f,0.5f,1), name);
+	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
 
 	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
 	float logoMargin = 5.0f;
@@ -424,15 +424,15 @@ void Menu::Update()
 	}
 }
 
-Vector3 Menu::GetDimensions(float maxWidth)
+MFVector Menu::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 // MenuItemStatic
-float MenuItemStatic::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemStatic::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, name);
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -443,15 +443,15 @@ void MenuItemStatic::ListUpdate(bool selected)
 			pCallback(this, pUserData);
 }
 
-Vector3 MenuItemStatic::GetDimensions(float maxWidth)
+MFVector MenuItemStatic::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 // MenuItemInt
-float MenuItemInt::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemInt::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %d", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %d", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -481,15 +481,15 @@ void MenuItemInt::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemInt::GetDimensions(float maxWidth)
+MFVector MenuItemInt::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 // MenuItemFloat
-float MenuItemFloat::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemFloat::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %.2f", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %.2f", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -526,15 +526,15 @@ void MenuItemFloat::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemFloat::GetDimensions(float maxWidth)
+MFVector MenuItemFloat::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 // MenuItemBool
-float MenuItemBool::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemBool::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %s", name, data ? "true" : "false"));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %s", name, data ? "true" : "false"));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -552,15 +552,15 @@ void MenuItemBool::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemBool::GetDimensions(float maxWidth)
+MFVector MenuItemBool::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 // MenuItemIntString
-float MenuItemIntString::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemIntString::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %s", name, ppValues[data]));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %s", name, ppValues[data]));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -596,9 +596,9 @@ void MenuItemIntString::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemIntString::GetDimensions(float maxWidth)
+MFVector MenuItemIntString::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }
 
 
@@ -614,32 +614,32 @@ void MenuItemColour::Update()
 	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y)) pCurrentMenu = pParent;
 }
 
-float MenuItemColour::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
+float MenuItemColour::ListDraw(bool selected, const MFVector &_pos, float maxWidth)
 {
-	Vector3 pos = _pos;
+	MFVector pos = _pos;
 
-	Font_DrawText(gpDebugFont, pos+Vector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: 0x%08X", name, pData->ToPackedColour()));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: 0x%08X", name, pData->ToPackedColour()));
 
-	pos += Vector(maxWidth - 55.0f, 2.0f, 0.0f);
+	pos += MakeVector(maxWidth - 55.0f, 2.0f, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
 	MFSetColour(0xFFFFFFFF);
 	MFSetPosition(pos);
-	MFSetPosition(pos + Vector(45.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
-	MFSetPosition(pos + Vector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(45.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
 	MFEnd();
 
-	pos += Vector(2.0f, 2.0f, 0.0f);
+	pos += MakeVector(2.0f, 2.0f, 0.0f);
 
 	MFBegin(4);
 	MFSetColour(*pData);
 	MFSetPosition(pos);
-	MFSetPosition(pos + Vector(41.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + Vector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
-	MFSetPosition(pos + Vector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(41.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
 	MFEnd();
 
 	return MENU_FONT_HEIGHT*1.5f;
@@ -673,15 +673,15 @@ void MenuItemColour::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemColour::GetDimensions(float maxWidth)
+MFVector MenuItemColour::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT*1.5f, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT*1.5f, 0.0f);
 }
 
 // MenuItemPosition2D
-float MenuItemPosition2D::ListDraw(bool selected, const Vector3 &pos, float maxWidth)
+float MenuItemPosition2D::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -689,11 +689,11 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		Vector3 t = *pData;
+		MFVector t = *pData;
 		float input;
 
 		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_B)) *pData = defaultValue;
-		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_X)) *pData = Vector(0.0f, 0.0f, 0.0f);
+		if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_X)) *pData = MakeVector(0.0f, 0.0f, 0.0f);
 
 		if((input=Input_Read(IDD_Gamepad, 0, Axis_RX)))
 		{
@@ -712,7 +712,7 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MenuItemPosition2D::GetDimensions(float maxWidth)
+MFVector MenuItemPosition2D::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
+	return MakeVector(maxWidth, MENU_FONT_HEIGHT, 0.0f);
 }

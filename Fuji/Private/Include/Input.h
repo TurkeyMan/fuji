@@ -4,28 +4,28 @@
 #include "View.h"
 
 // interface functions
-bool	Input_IsAvailable(int source, int sourceID);
-bool	Input_IsConnected(int source, int sourceID);
-bool	Input_IsReady(int source, int sourceID);
+bool	 Input_IsAvailable(int source, int sourceID);
+bool	 Input_IsConnected(int source, int sourceID);
+bool	 Input_IsReady(int source, int sourceID);
 
-float	Input_Read(int source, int sourceID, int type);
-bool	Input_WasPressed(int source, int sourceID, int type);
-bool	Input_WasReleased(int source, int sourceID, int type);
+float	 Input_Read(int source, int sourceID, int type);
+bool	 Input_WasPressed(int source, int sourceID, int type);
+bool	 Input_WasReleased(int source, int sourceID, int type);
 
-int		Input_GetNumGamepads();
-int		Input_GetNumKeyboards();
-int		Input_GetNumPointers();
+int		 Input_GetNumGamepads();
+int		 Input_GetNumKeyboards();
+int		 Input_GetNumPointers();
 
-Vector3 Input_ReadMousePos(int mouseID = -1);
-Vector3 Input_ReadMouseDelta(int mouseID = -1);
-void	Input_SetMouseMode(int mode);
-void	Input_SetMouseAcceleration(float multiplier);
-void	Input_SetMouseClippingRect(int mouseID, MFRect *pRect);
+MFVector Input_ReadMousePos(int mouseID = -1);
+MFVector Input_ReadMouseDelta(int mouseID = -1);
+void	 Input_SetMouseMode(int mode);
+void	 Input_SetMouseAcceleration(float multiplier);
+void	 Input_SetMouseClippingRect(int mouseID, MFRect *pRect);
 
 const char*	Input_EnumerateString(int source, int sourceID, int type, bool includeDevice = false, bool includeDeviceID = false);
 
-void	Input_SetDeadZone(float deadZone);
-float	Input_GetDeadZone();
+void	 Input_SetDeadZone(float deadZone);
+float	 Input_GetDeadZone();
 
 // these are platform specific
 const char*	Input_GetDeviceName(int source, int sourceID);

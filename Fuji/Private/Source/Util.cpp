@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "System_Internal.h"
 #include "Util.h"
-#include "Vector3.h"
+#include "MFVector.h"
 
 #if !defined(_FUJI_UTIL)
 #include "Display_Internal.h"
@@ -249,24 +249,24 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 			MFEnd();
 		}
 
-		Font_DrawTextf(gpDebugFont, 110, 60, 20, Vector(1,0,0,1), "Software Failure. Press left mouse button to continue");
-		Font_DrawTextf(gpDebugFont, 240, 80, 20, Vector(1,0,0,1), "Guru Meditation: ");
+		Font_DrawTextf(gpDebugFont, 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue");
+		Font_DrawTextf(gpDebugFont, 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
 
-		Font_DrawTextf(gpDebugFont, 80, 120, 20, Vector(1,0,0,1), "Assertion Failure:");
-		Font_DrawTextf(gpDebugFont, 80, 140, 20, Vector(1,0,0,1), STR("Failed Condition: %s", pReason));
-		Font_DrawTextf(gpDebugFont, 80, 160, 20, Vector(1,0,0,1), STR("File: %s, Line: %d", pFile, line));
-		Font_DrawTextf(gpDebugFont, 80, 190, 20, Vector(1,0,0,1), STR("Message: %s", pMessage));
+		Font_DrawTextf(gpDebugFont, 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
+		Font_DrawTextf(gpDebugFont, 80, 140, 20, MakeVector(1,0,0,1), STR("Failed Condition: %s", pReason));
+		Font_DrawTextf(gpDebugFont, 80, 160, 20, MakeVector(1,0,0,1), STR("File: %s, Line: %d", pFile, line));
+		Font_DrawTextf(gpDebugFont, 80, 190, 20, MakeVector(1,0,0,1), STR("Message: %s", pMessage));
 
 #if !defined(_RETAIL)
-		Font_DrawTextf(gpDebugFont, 80, 230, 20, Vector(1,0,0,1), "Callstack:");
+		Font_DrawTextf(gpDebugFont, 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
 		float y = 250.0f;
 		for(int a=Callstack.size()-1; a>=0; a--)
 		{
-			Font_DrawTextf(gpDebugFont, 100, y, 20, Vector(1,0,0,1), Callstack[a]);
+			Font_DrawTextf(gpDebugFont, 100, y, 20, MakeVector(1,0,0,1), Callstack[a]);
 			y+=20.0f;
 		}
 #else
-		Font_DrawTextf(gpDebugFont, 80, 230, 20, Vector(1,0,0,1), "Callstack not available in _RETAIL builds");
+		Font_DrawTextf(gpDebugFont, 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
 #endif
 
 		Display_EndFrame();
@@ -378,15 +378,9 @@ float RandomRange(float min, float max)
 	return ((float)rand()/RAND_MAX)*(max-min) + min;
 }
 
-Vector3 RandomVector()
+MFVector RandomVector()
 {
-	Vector3 t;
-
-	t.x = RandomUnit();
-	t.y = RandomUnit();
-	t.z = RandomUnit();
-
-	return t;
+	return MakeVector(RandomUnit(), RandomUnit(), RandomUnit(), RandomUnit());
 }
 
 int StrCaseCmp(const char *s1, const char *s2)

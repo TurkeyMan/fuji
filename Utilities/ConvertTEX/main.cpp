@@ -36,11 +36,11 @@ int main(int argc, char *argv[])
 				}
 			}
 
-			if(!stricmp(&argv[a][1], "format"))
+			if(!strnicmp(&argv[a][1], "format", 6))
 			{
 				const char *pFormatString = &argv[a][7];
 
-				while(pFormatString[0] != 0 || pFormatString[0] == ' ' || pFormatString[0] == '\t' || pFormatString[0] == '=')
+				while(pFormatString[0] == ' ' || pFormatString[0] == '\t' || pFormatString[0] == '=')
 				 ++pFormatString;
 
 				for(int b=0; b<TexFmt_Max; b++)
@@ -57,6 +57,24 @@ int main(int argc, char *argv[])
 					printf("Unknown texture format '%s'..\n", pFormatString);
 					return 1;
 				}
+			}
+			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
+			{
+				// print version
+				return 0;
+			}
+			else if(!stricmp(&argv[a][1], "l") || !stricmp(&argv[a][1], "list"))
+			{
+				// list formats for platform
+				for(int f=0; f<TexFmt_Max; f++)
+				{
+					if(gMFTexturePlatformAvailability[f] & 1<<(uint32)platform)
+					{
+						printf("%s\n", gpMFTextureFormatStrings[f]);
+					}
+				}
+				gets(outFile);
+				return 0;
 			}
 		}
 		else
@@ -263,6 +281,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	switch(targetFormat)
 	{
 		case TexFmt_A8R8G8B8:
+		case TexFmt_XB_A8R8G8B8:
 		{
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
@@ -282,6 +301,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_A8B8G8R8:
+		case TexFmt_XB_A8B8G8R8:
 		{
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
@@ -358,6 +378,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_R5G6B5:
+		case TexFmt_XB_R5G6B5:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -376,6 +397,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_A1R5G5B5:
+		case TexFmt_XB_A1R5G5B5:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -395,6 +417,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_A4R4G4B4:
+		case TexFmt_XB_A4R4G4B4:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -484,6 +507,18 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			printf("Conversion for target type not yet support...\n");
 			return 1;
 		}
+	}
+
+	// xbox supports swizzled formats..
+	if(targetFormat >= TexFmt_XB_A8R8G8B8)
+	{
+		uint32 bytesperpixel = gMFTextureBitsPerPixel[targetFormat] / 8;
+		uint32 imageBytes = width * height * bytesperpixel;
+
+		char *pBuffer = (char*)malloc(imageBytes);
+		XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+		memcpy(pOutputSurface->pImageData, pBuffer, imageBytes);
+		free(pBuffer);
 	}
 
 	return 0;

@@ -87,13 +87,13 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	memset(pData, 0, sizeof(Mat_Standard_Data));
 
-	pData->ambient = Vector4::one;
-	pData->diffuse = Vector4::one;
+	pData->ambient = MFVector::one;
+	pData->diffuse = MFVector::one;
 
 	pData->materialType = MF_AlphaBlend;
 	pData->opaque = true;
 
-	pData->textureMatrix = Matrix::identity;
+	pData->textureMatrix = MFMatrix::identity;
 	pData->uFrames = 1;
 	pData->vFrames = 1;
 }

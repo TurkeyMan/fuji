@@ -29,7 +29,7 @@ void MFModel_Draw(MFModel *pModel)
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
 
 	if(View_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&Matrix::identity);
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
 
@@ -266,8 +266,8 @@ MFModel* MFModel_Create(const char *pFilename)
 
 	MFModel *pModel = (MFModel*)Heap_Alloc(sizeof(MFModel));
 
-	pModel->worldMatrix = Matrix::identity;
-	pModel->modelColour = Vector4::one;
+	pModel->worldMatrix = MFMatrix::identity;
+	pModel->modelColour = MFVector::one;
 	pModel->pTemplate = pTemplate;
 
 	++pTemplate->refCount;
@@ -290,12 +290,12 @@ void MFModel_Destroy(MFModel *pModel)
 }
 
 
-void MFModel_SetWorldMatrix(MFModel *pModel, const Matrix &worldMatrix)
+void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 {
 	pModel->worldMatrix = worldMatrix;
 }
 
-void MFModel_SetColour(MFModel *pModel, const Vector4 &colour)
+void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
 {
 	pModel->modelColour = colour;
 }

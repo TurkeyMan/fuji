@@ -1,9 +1,8 @@
 #include "Common.h"
 #include "Display_Internal.h"
 #include "View.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
 #include "Primitive.h"
 #include "MFTexture.h"
 #include "Renderer.h"
@@ -44,11 +43,11 @@ void MFPrimitive(uint32 type, uint32 hint)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
 	}
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&Matrix::identity);
+	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&MFMatrix::identity);
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
 
 	if(View_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&Matrix::identity);
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
 
@@ -68,14 +67,14 @@ void MFBegin(uint32 vertexCount)
 	current.normal.y = 1.0f;
 }
 
-void MFSetMatrix(const Matrix &mat)
+void MFSetMatrix(const MFMatrix &mat)
 {
 	CALLSTACK;
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
-void MFSetColour(const Vector4 &colour)
+void MFSetColour(const MFVector &colour)
 {
 	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
@@ -96,7 +95,7 @@ void MFSetTexCoord1(float u, float v)
 	current.v = v;
 }
 
-void MFSetNormal(const Vector3 &normal)
+void MFSetNormal(const MFVector &normal)
 {
 	MFSetNormal(normal.x, normal.y, normal.z);
 }
@@ -108,7 +107,7 @@ void MFSetNormal(float x, float y, float z)
 	current.normal.z = z;
 }
 
-void MFSetPosition(const Vector3 &pos)
+void MFSetPosition(const MFVector &pos)
 {
 	MFSetPosition(pos.x, pos.y, pos.z);
 }

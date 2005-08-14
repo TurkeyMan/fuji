@@ -258,7 +258,7 @@ void Sound_Stop3D(int soundID)
 
 }
 
-void Sound_SetListenerPos(const Vector3& listenerPos)
+void Sound_SetListenerPos(const MFVector& listenerPos)
 {
 	CALLSTACK;
 

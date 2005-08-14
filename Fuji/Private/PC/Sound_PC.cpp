@@ -120,10 +120,10 @@ void Sound_Draw()
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
 		{
-			Font_DrawTextf(gpDebugFont, 20.0f, y, 20.0f, Vector(1,1,0,1), "Track %d: %s", a, gMusicTracks[a].name);
+			Font_DrawTextf(gpDebugFont, 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Track %d: %s", a, gMusicTracks[a].name);
 			y += 20.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, Vector4::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
 			y += 20.0f;
 
 			static float bitrate = 0.0f;
@@ -132,10 +132,10 @@ void Sound_Draw()
 			if(br)
 				bitrate = (float)br*0.02f + bitrate * 0.98f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, Vector4::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
 			y += 20.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, Vector4::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
 			y += 25.0f;
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
@@ -161,7 +161,7 @@ void Sound_Draw()
 			MFSetPosition(615.0f, y+20.0f, 0.0f);
 			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(Vector(0.5f, 0.5f, 1, 1));
+			MFSetColour(MakeVector(0.5f, 0.5f, 1, 1));
 			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayback+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayback-1.0f, y+21.0f, 0.0f);
@@ -170,7 +170,7 @@ void Sound_Draw()
 
 			y += 30.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, Vector4::one, "Buffer:");
+			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "Buffer:");
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 
@@ -280,21 +280,17 @@ void Sound_Stop3D(int soundID)
 {
 	CALLSTACK;
 
-
 }
 
-void Sound_SetListenerPos(const Vector3& listenerPos)
+void Sound_SetListenerPos(const MFVector& listenerPos)
 {
 	CALLSTACK;
 
-
 }
-
 
 void Sound_SetVolume(int soundID, float volume)
 {
 	CALLSTACK;
-
 
 }
 
@@ -308,7 +304,6 @@ void Sound_SetMasterVolume(int soundID, float volume)
 void Sound_SetPlaybackRate(int soundID, float rate)
 {
 	CALLSTACK;
-
 
 }
 

@@ -1,7 +1,7 @@
 #if !defined(_MFTEXTURE_H)
 #define _MFTEXTURE_H
 
-#include "Vector4.h"
+#include "MFVector.h"
 
 struct MFTexture;
 
@@ -10,18 +10,25 @@ enum MFTextureFormats
 {
 	TexFmt_Unknown = -1,
 
-	TexFmt_A8R8G8B8,	// PC/XBox
-	TexFmt_A8B8G8R8,	// PSP
+	TexFmt_A8R8G8B8,	// XBox/PC
+	TexFmt_A8B8G8R8,	// XBox/PSP/DX9
+	TexFmt_B8G8R8A8,	// XBox
+	TexFmt_R8G8B8A8,	// XBox
 
 	TexFmt_A2R10G10B10,	// DX9
 	TexFmt_A2B10G10R10,	// DX9
+
 	TexFmt_A16B16G16R16,// DX9
 
-	TexFmt_R5G6B5,		// PC
-	TexFmt_A1R5G5B5,	// PC
+	TexFmt_R5G6B5,		// PC/XBox
+	TexFmt_R6G5B5,		// XBox
 
-	TexFmt_A4R4G4B4,	// PC
+	TexFmt_A1R5G5B5,	// PC/XBox
+	TexFmt_R5G5B5A1,	// XBox
+
+	TexFmt_A4R4G4B4,	// PC/XBox
 	TexFmt_A4B4G4R4,	// PSP
+	TexFmt_R4G4B4A4,	// XBox
 
 	TexFmt_ABGR_F16,	// DX9  s1-e5-m10 - seeeeemmmmmmmmmm
 	TexFmt_ABGR_F32,	// DX9
@@ -29,11 +36,25 @@ enum MFTextureFormats
 	TexFmt_I8,			// PSP
 	TexFmt_I4,			// PSP
 
-	TexFmt_DXT1,		// PSP/PC/XBox
-	TexFmt_DXT2,
-	TexFmt_DXT3,		// PSP/PC/XBox
-	TexFmt_DXT4,
-	TexFmt_DXT5,		// PSP/PC/XBox
+	TexFmt_DXT1,		// PC/XBox/PSP
+	TexFmt_DXT2,		// PC/XBox
+	TexFmt_DXT3,		// PC/XBox/PSP
+	TexFmt_DXT4,		// PC/XBox
+	TexFmt_DXT5,		// PC/XBox/PSP
+
+	TexFmt_XB_A8R8G8B8,	// XBox
+	TexFmt_XB_A8B8G8R8,	// XBox
+	TexFmt_XB_B8G8R8A8,	// XBox
+	TexFmt_XB_R8G8B8A8,	// XBox
+
+	TexFmt_XB_R5G6B5,	// XBox
+	TexFmt_XB_R6G5B5,	// XBox
+
+	TexFmt_XB_A1R5G5B5,	// XBox
+	TexFmt_XB_R5G5B5A1,	// XBox
+
+	TexFmt_XB_A4R4G4B4,	// XBox
+	TexFmt_XB_R4G4B4A4,	// XBox
 
 	TexFmt_Max
 };
@@ -53,6 +74,6 @@ int MFTexture_Destroy(MFTexture *pTexture);	// returns new reference count..
 
 // platform independant functions
 MFTexture* MFTexture_FindTexture(const char *pName);
-MFTexture* MFTexture_CreateBlank(const char *pName, const Vector4 &colour);
+MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
 
 #endif // _TEXTURE_H

@@ -60,14 +60,19 @@ bool MFIniLine::GetBool(int index)
 	return atoi(GetString(index)) != 0;
 }
 
-Vector3 MFIniLine::GetVector3(int index)
+MFVector MFIniLine::GetVector2(int index)
 {
-	return Vector(GetFloat(index), GetFloat(index+1), GetFloat(index+2));
+	return MakeVector(GetFloat(index), GetFloat(index+1));
 }
 
-Vector4 MFIniLine::GetVector4(int index)
+MFVector MFIniLine::GetVector3(int index)
 {
-	return Vector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
+	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2));
+}
+
+MFVector MFIniLine::GetVector4(int index)
+{
+	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
 }
 
 // find a 2 string entry (ie. "label data")

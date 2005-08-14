@@ -33,8 +33,8 @@ DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType c
 
 struct MFModel
 {
-	Matrix worldMatrix;
-	Vector4 modelColour;
+	MFMatrix worldMatrix;
+	MFVector modelColour;
 
 	// subobject flags
 	// * enabled flags
@@ -66,7 +66,7 @@ struct SubObjectChunk
 
 struct BoneChunk
 {
-	Vector3 boneOrigin;
+	MFVector boneOrigin;
 	const char *pBoneName;
 	const char *pParentName;
 
@@ -75,7 +75,7 @@ struct BoneChunk
 
 struct TagChunk
 {
-	Matrix tagMatrix;
+	MFMatrix tagMatrix;
 	const char *pTagName;
 
 	uint32 reserved[3];

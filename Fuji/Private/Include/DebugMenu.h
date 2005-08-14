@@ -9,8 +9,7 @@
 #define MENU_MAX_MENUS 32
 #define MENU_MAX_CHILDREN 32
 
-#include "Vector3.h"
-#include "Vector4.h"
+#include "MFVector.h"
 
 class MenuObject;
 class Menu;
@@ -56,9 +55,9 @@ public:
 	virtual void Update();
 
 	// when being draw'n in a menu's list
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth) = 0;
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth) = 0;
 	virtual void ListUpdate(bool selected) = 0;
-	virtual Vector3 GetDimensions(float maxWidth) = 0;
+	virtual MFVector GetDimensions(float maxWidth) = 0;
 
 	char name[64];
 	uint32 type;
@@ -74,9 +73,9 @@ class MenuItemStatic : public MenuObject
 public:
 	MenuItemStatic() { type = MenuType_Static; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 };
 
 class MenuItemInt : public MenuObject
@@ -86,9 +85,9 @@ public:
 	MenuItemInt(int *pPointer, int inc = 1, int minValue = -2147483647, int maxValue = 2147483647) { pData = pPointer; type = MenuType_Int; defaultValue = *pData; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
 	operator int() const { return *pData; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	int *pData;
 	int data;
@@ -104,9 +103,9 @@ public:
 	MenuItemFloat(float *pPointer, float inc = 1.0f, float minValue = -1000000000.0f, float maxValue = 1000000000.0f) { pData = pPointer; type = MenuType_Float; defaultValue = *pData; increment = inc; minimumValue = minValue; maximumValue = maxValue; }
 	operator float() const { return *pData; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	float *pData;
 	float data;
@@ -120,9 +119,9 @@ public:
 	MenuItemIntString(const char *ppStrings[], int value = 0) { type = MenuType_IntString; data = value; ppValues = ppStrings; DBGASSERT(ppValues[0] != NULL, "Must be at least one item in the strings array."); }
 	operator int() const { return data; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	int data;
 	const char **ppValues;
@@ -134,9 +133,9 @@ public:
 	MenuItemBool(bool value = false) { type = MenuType_Bool; data = value; }
 	operator bool() const { return data; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	bool data;
 };
@@ -144,41 +143,41 @@ public:
 class MenuItemColour : public MenuObject
 {
 public:
-	MenuItemColour(const Vector4 &def = colourInit) { pData = &colour; type = MenuType_Colour; colour = def; preset = 0; }
-	MenuItemColour(Vector4 *pColour) { pData = pColour; type = MenuType_Colour; preset = 0; }
-	operator Vector4() const { return *pData; }
+	MenuItemColour(const MFVector &def = colourInit) { pData = &colour; type = MenuType_Colour; colour = def; preset = 0; }
+	MenuItemColour(MFVector *pColour) { pData = pColour; type = MenuType_Colour; preset = 0; }
+	operator MFVector() const { return *pData; }
 	operator uint32() const { return (uint32)(pData->w*255.0f)<<24 | (uint32)(pData->x*255.0f)<<16 | (uint32)(pData->y*255.0f)<<8 | (uint32)(pData->z*255.0f); }
 
 	virtual void Draw();
 	virtual void Update();
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
-	Vector4 colour;
-	Vector4 *pData;
+	MFVector colour;
+	MFVector *pData;
 
 	int preset;
 	static uint32 presets[10];
 
-	static const Vector4 colourInit;
+	static const MFVector colourInit;
 };
 
 class MenuItemPosition2D : public MenuObject
 {
 public:
-	MenuItemPosition2D(const Vector3 &value, float inc = 1.0f) { pData = &data; type = MenuType_Position2D; data = defaultValue = value; increment = inc; }
-	MenuItemPosition2D(Vector3 *pPointer, float inc = 1.0f) { pData = pPointer; type = MenuType_Position2D; defaultValue = *pData; increment = inc; }
-	operator Vector3() const { return *pData; }
+	MenuItemPosition2D(const MFVector &value, float inc = 1.0f) { pData = &data; type = MenuType_Position2D; data = defaultValue = value; increment = inc; }
+	MenuItemPosition2D(MFVector *pPointer, float inc = 1.0f) { pData = pPointer; type = MenuType_Position2D; defaultValue = *pData; increment = inc; }
+	operator MFVector() const { return *pData; }
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
-	Vector3 *pData;
-	Vector3 data;
-	Vector3 defaultValue;
+	MFVector *pData;
+	MFVector data;
+	MFVector defaultValue;
 	float increment;
 };
 
@@ -193,9 +192,9 @@ public:
 	virtual void Draw();
 	virtual void Update();
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	MenuObject *pChildren[MENU_MAX_CHILDREN];
 	int numChildren;
@@ -203,8 +202,8 @@ public:
 
 	float yOffset, targetOffset;
 
-	static Vector3 menuPosition, menuDimensions;
-	static Vector4 colour, folderColour;
+	static MFVector menuPosition, menuDimensions;
+	static MFVector colour, folderColour;
 };
 
 #endif

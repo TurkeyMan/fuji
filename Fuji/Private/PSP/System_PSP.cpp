@@ -216,7 +216,7 @@ void System_DrawPlatformSpecific()
 
 			MFPrimitive(PT_TriStrip);
 			MFBegin(4);
-			MFSetColour((USBState & PSP_USB_CONNECTION_ESTABLISHED) ? Vector(1,1,0,1) : Vector(0,0,0,1));
+			MFSetColour((USBState & PSP_USB_CONNECTION_ESTABLISHED) ? MakeVector(1,1,0,1) : MakeVector(0,0,0,1));
 			MFSetTexCoord1(0,1);
 			MFSetPosition(10, 26, 0);
 			MFSetTexCoord1(0,0);
@@ -231,7 +231,7 @@ void System_DrawPlatformSpecific()
 
 			MFPrimitive(PT_TriStrip);
 			MFBegin(4);
-			MFSetColour(Vector4::one);
+			MFSetColour(MFVector::one);
 			MFSetTexCoord1(0,1);
 			MFSetPosition(43, 26, 0);
 			MFSetTexCoord1(0,0);
@@ -254,7 +254,7 @@ void System_DrawPlatformSpecific()
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
-		MFSetColour(Vector4::one);
+		MFSetColour(MFVector::one);
 		MFSetPosition(390, 262, 0);
 		MFSetPosition(390, 246, 0);
 		MFSetPosition(454, 262, 0);
@@ -281,7 +281,7 @@ void System_DrawPlatformSpecific()
 
 			MFPrimitive(PT_TriStrip);
 			MFBegin(4);
-			MFSetColour(Vector4::one);
+			MFSetColour(MFVector::one);
 			MFSetTexCoord1(0,1);
 			MFSetPosition(454, 262, 0);
 			MFSetTexCoord1(0,0);
@@ -299,7 +299,7 @@ void System_DrawPlatformSpecific()
 
 			MFPrimitive(PT_TriStrip);
 			MFBegin(4);
-			MFSetColour(Vector4::one);
+			MFSetColour(MFVector::one);
 			MFSetTexCoord1(0,1);
 			MFSetPosition(372, 262, 0);
 			MFSetTexCoord1(0,0);
@@ -344,18 +344,18 @@ void System_DrawPlatformSpecific()
 		MFSetPosition(410, 20, 0);
 		MFEnd();
 
-		Font_DrawText(gpDebugFont, 90.0f, 30.0f, 0, 20.0f, Vector(1,1,0,1), "System Status");
+		Font_DrawText(gpDebugFont, 90.0f, 30.0f, 0, 20.0f, MakeVector(1,1,0,1), "System Status");
 
-		Font_DrawTextf(gpDebugFont, 100.0f, 60.0f, 0, 20.0f, Vector4::one, "Clock/Ram/Bus Rate: %d/%d/%d", cpuFreq, ramFreq, busFreq);
+		Font_DrawTextf(gpDebugFont, 100.0f, 60.0f, 0, 20.0f, MFVector::one, "Clock/Ram/Bus Rate: %d/%d/%d", cpuFreq, ramFreq, busFreq);
 
-		Font_DrawTextf(gpDebugFont, 100.0f, 90.0f, 0, 20.0f, Vector4::one, "Power Source: %s", powerConnected ? "External" : "Battery");
-		Font_DrawTextf(gpDebugFont, 100.0f, 110.0f, 0, 20.0f, Vector4::one, "Battery %s", batteryAvailable ? STR("Connected%s", charging ? " (Charging...)" : "") : "Disconnected");
+		Font_DrawTextf(gpDebugFont, 100.0f, 90.0f, 0, 20.0f, MFVector::one, "Power Source: %s", powerConnected ? "External" : "Battery");
+		Font_DrawTextf(gpDebugFont, 100.0f, 110.0f, 0, 20.0f, MFVector::one, "Battery %s", batteryAvailable ? STR("Connected%s", charging ? " (Charging...)" : "") : "Disconnected");
 
-		Font_DrawTextf(gpDebugFont, 100.0f, 140.0f, 0, 20.0f, Vector4::one, "Battery Level: %s", batteryAvailable ? STR("%d%%%s", batteryPercent, powerConnected ? "" : STR(" (%dh %dm)", hours, minutes)) : "N/A");
-		Font_DrawTextf(gpDebugFont, 100.0f, 160.0f, 0, 20.0f, Vector4::one, "Battery Temperature: %s", batteryAvailable ? STR("%dc", batteryTemp) : "N/A");
-		Font_DrawTextf(gpDebugFont, 100.0f, 180.0f, 0, 20.0f, Vector4::one, "Battery Voltage: %s", batteryAvailable ? STR("%.1fv", batteryVolts) : "N/A");
+		Font_DrawTextf(gpDebugFont, 100.0f, 140.0f, 0, 20.0f, MFVector::one, "Battery Level: %s", batteryAvailable ? STR("%d%%%s", batteryPercent, powerConnected ? "" : STR(" (%dh %dm)", hours, minutes)) : "N/A");
+		Font_DrawTextf(gpDebugFont, 100.0f, 160.0f, 0, 20.0f, MFVector::one, "Battery Temperature: %s", batteryAvailable ? STR("%dc", batteryTemp) : "N/A");
+		Font_DrawTextf(gpDebugFont, 100.0f, 180.0f, 0, 20.0f, MFVector::one, "Battery Voltage: %s", batteryAvailable ? STR("%.1fv", batteryVolts) : "N/A");
 
-		Font_DrawTextf(gpDebugFont, 100.0f, 210.0f, 0, 20.0f, Vector4::one, "USB: %s, %s, %s", usbEnabled ? "Enabled" : "Disabled", usbConnected ? "Connected" : "Disconnected", usbActive ? "Active" : "Inactive");
+		Font_DrawTextf(gpDebugFont, 100.0f, 210.0f, 0, 20.0f, MFVector::one, "USB: %s, %s, %s", usbEnabled ? "Enabled" : "Disabled", usbConnected ? "Connected" : "Disconnected", usbActive ? "Active" : "Inactive");
 	}
 }
 

@@ -1,6 +1,6 @@
 #include "Common.h"
 #include "Input.h"
-#include "Vector3.h"
+#include "MFVector.h"
 
 // FIXME
 
@@ -77,7 +77,7 @@ void SetMouseMode(uint32 mouseMode)
 {
 }
 
-Vector3 Input_ReadMousePos(int mouseID)
+MFVector Input_ReadMousePos(int mouseID)
 {
 }
 

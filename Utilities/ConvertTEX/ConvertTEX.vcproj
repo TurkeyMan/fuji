@@ -32,8 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="/Projects/Fuji/Bin/ConvertTEX.exe"
+				AdditionalDependencies="xgraphics.lib"
+				OutputFile="\Projects\Fuji\Bin\ConvertTEX.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/ConvertTEX.pdb"
 				SubSystem="1"
@@ -78,8 +80,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="/Projects/Fuji/Bin/ConvertTEX.exe"
+				AdditionalDependencies="xgraphics.lib"
+				OutputFile="\Projects\Fuji\Bin\ConvertTEX.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"

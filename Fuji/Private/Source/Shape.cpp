@@ -12,7 +12,7 @@
 
 /**** Functions ****/
 
-void Shape_DrawQuad(float x, float y, float x2, float y2, const Vector4& colour, float su, float sv, float du, float dv)
+void Shape_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -42,7 +42,7 @@ void Shape_DrawQuad(float x, float y, float x2, float y2, const Vector4& colour,
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawQuad(const Vector3& pos, float w, float h, const Vector4& colour, float su, float sv, float du, float dv)
+void Shape_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -72,7 +72,7 @@ void Shape_DrawQuad(const Vector3& pos, float w, float h, const Vector4& colour,
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const Vector4& colour)
+void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVector& colour)
 {
 	CALLSTACK;
 
@@ -94,7 +94,7 @@ void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const Vector
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, const Vector4& colour)
+void Shape_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVector& colour)
 {
 	CALLSTACK;
 
@@ -117,7 +117,7 @@ void Shape_DrawUntexturedQuad(const Vector3& pos, float w, float h, const Vector
 }
 
 // draw a box from a min and a max
-void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -160,7 +160,7 @@ void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, const Vector4& 
 
 		MFEnd();
 
-		Vector3 center = boxMin + ((boxMax-boxMin)*0.5f);
+		MFVector center = boxMin + ((boxMax-boxMin)*0.5f);
 
 		// draw the axii's
 		MFBegin(2);
@@ -245,7 +245,7 @@ void Shape_DrawBox(const Vector3 &boxMin, const Vector3 &boxMax, const Vector4& 
 }
 
 // draw's a sphere .. position.w defines position.w
-void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -331,7 +331,7 @@ void Shape_DrawSphere(const Vector3 &position, float radius, int segments, int s
 }
 
 // draw's a capsule from a start and end point and a position.w
-void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -340,11 +340,11 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 	DBGASSERT(segments >= 3, "DrawCapsule requires at least 3 segments!");
 	DBGASSERT(slices >= 1, "DrawCapsule requires at least 1 slices!");
 
-	Matrix m, m2 = mat;
+	MFMatrix m, m2 = mat;
 
-	Vector3 t = endPoint-startPoint;
-	float len = t.Magnitude();
-	t /= len;
+	MFVector t = endPoint-startPoint;
+	float len = t.Magnitude3();
+	t *= 1.0f/len;
 
 	// if capsule has no length .. might as well just draw a sphere ..
 	if(len<0.1f)
@@ -353,10 +353,10 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 		return;
 	}
 
-	m.SetYAxis(t);
-	m.SetZAxis(m.GetYAxis3().Cross(Vector(13.67f, 3.72f, 0.0f)).Normalise()); // cross product with a magic vector
-	m.SetXAxis(m.GetZAxis3().Cross(m.GetYAxis3()).Normalise());
-	m.SetTrans(startPoint);
+	m.SetYAxis3(t);
+	m.SetZAxis3(m.GetYAxis().Cross3(MakeVector(13.67f, 3.72f, 0.0f)).Normalise3()); // cross product with a magic vector
+	m.SetXAxis3(m.GetZAxis().Cross3(m.GetYAxis()).Normalise3());
+	m.SetTrans3(startPoint);
 	m.ClearW();
 
 	m2.Multiply(m, m2);
@@ -457,7 +457,7 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 
 	m2=mat;
 	m.SetIdentity();
-	m.SetTrans(startPoint);
+	m.SetTrans3(startPoint);
 	m2.Multiply(m, m2);
 
 	MFSetMatrix(m2);
@@ -481,22 +481,22 @@ void Shape_DrawCapsule(const Vector3 &startPoint, const Vector3 &endPoint, float
 }
 
 // draw's a cylinder from a position position.w and height
-void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, float radius, int segments, int slices, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
 	DBGASSERT(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
-	Matrix m, m2 = mat;
+	MFMatrix m, m2 = mat;
 
-	Vector3 t = endPoint-startPoint;
-	float len = t.Magnitude();
-	t /= len;
+	MFVector t = endPoint-startPoint;
+	float len = t.Magnitude3();
+	t *= 1.0f/len;
 
-	m.SetYAxis(t);
-	m.SetZAxis(m.GetYAxis3().Cross(Vector(13.67f, 3.72f, 0.0f)).Normalise()); // cross product with a magic vector
-	m.SetXAxis(m.GetZAxis3().Cross(m.GetYAxis3()).Normalise());
-	m.SetTrans(startPoint);
+	m.SetYAxis3(t);
+	m.SetZAxis3(m.GetYAxis().Cross3(MakeVector(13.67f, 3.72f, 0.0f)).Normalise3()); // cross product with a magic vector
+	m.SetXAxis3(m.GetZAxis().Cross3(m.GetYAxis()).Normalise3());
+	m.SetTrans3(startPoint);
 	m.ClearW();
 
 	m2.Multiply(m, m2);
@@ -558,7 +558,7 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 
 		m2=mat;
 		m.SetIdentity();
-		m.SetTrans(startPoint);
+		m.SetTrans3(startPoint);
 		m2.Multiply(m, m2);
 
 		MFSetMatrix(m2);
@@ -636,18 +636,18 @@ void Shape_DrawCylinder(const Vector3 &startPoint, const Vector3 &endPoint, floa
 }
 
 // draw's a plane from a position normal and span
-void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
 	int segments = 12;
 
-	Matrix m, m2 = mat;
+	MFMatrix m, m2 = mat;
 
-	m.SetYAxis(normal);
-	m.SetZAxis(m.GetYAxis3().Cross(Vector(13.67f, 3.72f, 0.0f)).Normalise()); // cross product with a magic vector
-	m.SetXAxis(m.GetZAxis3().Cross(m.GetYAxis3()).Normalise());
-	m.SetTrans(point);
+	m.SetYAxis3(normal);
+	m.SetZAxis3(m.GetYAxis().Cross3(MakeVector(13.67f, 3.72f, 0.0f)).Normalise3()); // cross product with a magic vector
+	m.SetXAxis3(m.GetZAxis().Cross3(m.GetYAxis()).Normalise3());
+	m.SetTrans3(point);
 	m.ClearW();
 
 	m2.Multiply(m, m2);
@@ -672,7 +672,7 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, co
 
 	float normalLen = span*0.25f;
 
-	MFSetColour(Vector(1,1,0,colour.w));
+	MFSetColour(MakeVector(1,1,0,colour.w));
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
@@ -699,22 +699,22 @@ void Shape_DrawPlane(const Vector3 &point, const Vector3 &normal, float span, co
 	MFEnd();
 }
 
-void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int segments, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
 	DBGASSERT(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
-	Matrix m, m2 = mat;
+	MFMatrix m, m2 = mat;
 
-	Vector3 t = point-base;
-	float height = t.Magnitude();
-	t /= height;
+	MFVector t = point-base;
+	float height = t.Magnitude3();
+	t *= 1.0f/height;
 
-	m.SetYAxis(t);
-	m.SetZAxis(m.GetYAxis3().Cross(Vector(13.67f, 3.72f, 0.0f)).Normalise()); // cross product with a magic vector
-	m.SetXAxis(m.GetZAxis3().Cross(m.GetYAxis3()).Normalise());
-	m.SetTrans(base);
+	m.SetYAxis3(t);
+	m.SetZAxis3(m.GetYAxis().Cross3(MakeVector(13.67f, 3.72f, 0.0f)).Normalise3()); // cross product with a magic vector
+	m.SetXAxis3(m.GetZAxis().Cross3(m.GetYAxis()).Normalise3());
+	m.SetTrans3(base);
 	m.ClearW();
 
 	m2.Multiply(m, m2);
@@ -789,11 +789,11 @@ void Shape_DrawCone(const Vector3 &base, const Vector3 &point, float radius, int
 	MFEnd();
 }
 
-void Shape_DrawArrow(const Vector3& pos, const Vector3& dir, float length, float radius, const Vector4& colour, const Matrix &mat, bool wireframe)
+void Shape_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
-	Vector3 v = dir;
-	v.Normalise();
+	MFVector v = dir;
+	v.Normalise3();
 
 	v*= length * 0.7f;
 	if(radius == 0.0f)
@@ -812,7 +812,7 @@ void Shape_DrawArrow(const Vector3& pos, const Vector3& dir, float length, float
 	Shape_DrawCone(pos+v, pos+v+v*0.25f, length*0.03f + radius*2.0f, 5, colour, mat, wireframe);
 }
 
-void Shape_DrawTransform(const Matrix& _mat, float scale, bool lite)
+void Shape_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 {
 	CALLSTACK;
 
@@ -835,14 +835,14 @@ void Shape_DrawTransform(const Matrix& _mat, float scale, bool lite)
 		MFSetPosition(0.0f,0.0f,scale*0.8f);
 		MFEnd();
 
-		//MFShape_DrawCone(Vector(scale*0.8f,0.0f,0.0f), Vector(scale,0.0f,0.0f), scale*0.04f, 5, MFVector(1.0f, 0.0f, 0.0f, 1.0f), _mat);
-		//MFShape_DrawCone(Vector(0.0f, scale*0.8f,0.0f), Vector(0.0f,scale,0.0f), scale*0.04f, 5, MFVector(0.0f, 1.0f, 0.0f, 1.0f), _mat);
-		//MFShape_DrawCone(Vector(0.0f, 0.0f, scale*0.8f), Vector(0.0f,0.0f,scale), scale*0.04f, 5, MFVector(0.0f, 0.0f, 1.0f, 1.0f), _mat);
+		//MFShape_DrawCone(MakeVector(scale*0.8f,0.0f,0.0f), MakeVector(scale,0.0f,0.0f), scale*0.04f, 5, MakeVector(1.0f, 0.0f, 0.0f, 1.0f), _mat);
+		//MFShape_DrawCone(MakeVector(0.0f, scale*0.8f,0.0f), MakeVector(0.0f,scale,0.0f), scale*0.04f, 5, MakeVector(0.0f, 1.0f, 0.0f, 1.0f), _mat);
+		//MFShape_DrawCone(MakeVector(0.0f, 0.0f, scale*0.8f), MakeVector(0.0f,0.0f,scale), scale*0.04f, 5, MakeVector(0.0f, 0.0f, 1.0f, 1.0f), _mat);
 	}
 	else
 	{
-		Shape_DrawArrow(Vector3::zero, Vector(1.0f,0.0f,0.0f), scale, scale * 0.02f, Vector(1,0,0,1), _mat);
-		Shape_DrawArrow(Vector3::zero, Vector(0.0f,1.0f,0.0f), scale, scale * 0.02f, Vector(0,1,0,1), _mat);
-		Shape_DrawArrow(Vector3::zero, Vector(0.0f,0.0f,1.0f), scale, scale * 0.02f, Vector(0,0,1,1), _mat);
+		Shape_DrawArrow(MFVector::zero, MakeVector(1.0f,0.0f,0.0f), scale, scale * 0.02f, MakeVector(1,0,0,1), _mat);
+		Shape_DrawArrow(MFVector::zero, MakeVector(0.0f,1.0f,0.0f), scale, scale * 0.02f, MakeVector(0,1,0,1), _mat);
+		Shape_DrawArrow(MFVector::zero, MakeVector(0.0f,0.0f,1.0f), scale, scale * 0.02f, MakeVector(0,0,1,1), _mat);
 	}
 }

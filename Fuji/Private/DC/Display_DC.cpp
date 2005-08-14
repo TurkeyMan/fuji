@@ -5,7 +5,7 @@
 bool isortho = false;
 float fieldOfView;
 
-extern Vector4 gClearColour;
+extern MFVector gClearColour;
 
 void Display_DestroyWindow()
 {

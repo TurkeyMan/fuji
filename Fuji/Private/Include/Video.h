@@ -9,7 +9,7 @@ public:
 
 	void Release();
 
-	void SetDrawingRect(const Vector3& topLeft, const Vector3& bottomRight); // set the drawing rect in ortho space
+	void SetDrawingRect(const MFVector& topLeft, const MFVector& bottomRight); // set the drawing rect in ortho space
 
 	float GetTotalTime(); // return total playback time in seconds
 	float GetTimeRemaining();
@@ -23,7 +23,7 @@ public:
 
 	void Reset(); // reset to start
 
-	Vector3 drawTopLeft, drawBrottomRight;
+	MFVector drawTopLeft, drawBrottomRight;
 };
 
 Video* Video_CreateStreaming(const char *pFilename);

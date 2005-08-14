@@ -2,9 +2,8 @@
 #define _PRIMITIVE_H
 
 #include "System.h"
-#include "Matrix.h"
-#include "Vector3.h"
-#include "Vector4.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
 
 enum PrimType
 {
@@ -28,14 +27,14 @@ void DrawMFPrimitiveStats();
 void MFPrimitive(uint32 primType, uint32 hint = 0);
 void MFBegin(uint32 vertexCount);
 
-void MFSetMatrix(const Matrix &mat);
-void MFSetColour(const Vector4 &colour);
+void MFSetMatrix(const MFMatrix &mat);
+void MFSetColour(const MFVector &colour);
 void MFSetColour(float r, float g, float b, float a = 1.0f);
 void MFSetColour(uint32 col);
 void MFSetTexCoord1(float u, float v);
-void MFSetNormal(const Vector3 &normal);
+void MFSetNormal(const MFVector &normal);
 void MFSetNormal(float x, float y, float z);
-void MFSetPosition(const Vector3 &pos);
+void MFSetPosition(const MFVector &pos);
 void MFSetPosition(float x, float y, float z);
 
 void MFEnd();

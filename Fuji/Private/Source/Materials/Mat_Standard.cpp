@@ -95,7 +95,7 @@ void Mat_Standard_Update(MFMaterial *pMaterial)
 			pData->curFrame++;
 			pData->curFrame = pData->curFrame % (pData->uFrames*pData->vFrames);
 
-			pData->textureMatrix.SetZAxis(Vector((1.0f/(float)pData->uFrames) * (float)(pData->curFrame%pData->uFrames), (1.0f/(float)pData->vFrames) * (float)(pData->curFrame/pData->vFrames), 0.0f));
+			pData->textureMatrix.SetZAxis3(MakeVector((1.0f/(float)pData->uFrames) * (float)(pData->curFrame%pData->uFrames), (1.0f/(float)pData->vFrames) * (float)(pData->curFrame/pData->vFrames), 0.0f));
 		}
 	}
 }
@@ -113,19 +113,19 @@ void Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 			pData->materialType = (pData->materialType & ~MF_Lit) | (!paramater ? MF_Lit : 0);
 			break;
 		case 2: // diffusecolour
-			pData->diffuse = *(Vector4*)paramater;
+			pData->diffuse = *(MFVector*)paramater;
 			break;
 		case 3: // ambientcolour
-			pData->ambient = *(Vector4*)paramater;
+			pData->ambient = *(MFVector*)paramater;
 			break;
 		case 4: // specularcolour
-			pData->specular = *(Vector4*)paramater;
+			pData->specular = *(MFVector*)paramater;
 			break;
 		case 5: // specularpower
 			pData->specularPow = *(float*)paramater;
 			break;
 		case 6: // emissivecolour
-			pData->illum = *(Vector4*)paramater;
+			pData->illum = *(MFVector*)paramater;
 			break;
 		case 7: // mask
 			pData->materialType = (pData->materialType & ~MF_Mask) | (paramater ? MF_Mask : 0);
@@ -220,7 +220,7 @@ void Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 					break;
 			}
 
-			pData->textureMatrix.SetScale(Vector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
+			pData->textureMatrix.SetScale(MakeVector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
 			break;
 		}
 	}

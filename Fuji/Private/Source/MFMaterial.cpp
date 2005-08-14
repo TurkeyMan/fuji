@@ -530,14 +530,14 @@ DBGASSERT(false, "Fix Me!!!");
 
 						case ParamType_Vector3:
 						{
-							Vector3 vector = pLine->GetVector3(a+1);
+							MFVector vector = pLine->GetVector3(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
 							break;
 						}
 
 						case ParamType_Vector4:
 						{
-							Vector4 vector = pLine->GetVector4(a+1);
+							MFVector vector = pLine->GetVector4(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
 							break;
 						}
@@ -633,9 +633,9 @@ void MaterialBrowser::Update()
 }
 
 #define TEX_SIZE 64.0f
-float MaterialBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
+float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWidth)
 {
-	Vector3 pos = _pos;
+	MFVector pos = _pos;
 
 	MFMaterial **i;
 	i = gMaterialList.Begin();
@@ -644,23 +644,23 @@ float MaterialBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWid
 
 	MFMaterial *pMaterial = *i;
 
-	Font_DrawText(gpDebugFont, pos+Vector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s:", name));
-	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s", pMaterial->pName));
-	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("Type: %s Refs: %d", pMaterial->pType->pTypeName, pMaterial->refCount));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s:", name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s", pMaterial->pName));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("Type: %s Refs: %d", pMaterial->pType->pTypeName, pMaterial->refCount));
 
-	pos += Vector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
+	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
 	MFSetColour(0xFFFFFFFF);
 	MFSetPosition(pos);
-	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
-	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
 	MFEnd();
 
-	pos += Vector(2.0f, 2.0f, 0.0f);
+	pos += MakeVector(2.0f, 2.0f, 0.0f);
 
 	const int numSquares = 7;
 	for(int a=0; a<numSquares; a++)
@@ -692,11 +692,11 @@ float MaterialBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWid
 	MFSetTexCoord1(0.0f,0.0f);
 	MFSetPosition(pos);
 	MFSetTexCoord1(1.0f,0.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE, 0.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE, 0.0f, 0.0f));
 	MFSetTexCoord1(0.0f,1.0f);
-	MFSetPosition(pos + Vector(0.0f, TEX_SIZE, 0.0f));
+	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE, 0.0f));
 	MFSetTexCoord1(1.0f,1.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE, TEX_SIZE, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE, TEX_SIZE, 0.0f));
 	MFEnd();
 
 	return TEX_SIZE + 8.0f;
@@ -725,8 +725,8 @@ void MaterialBrowser::ListUpdate(bool selected)
 	}
 }
 
-Vector3 MaterialBrowser::GetDimensions(float maxWidth)
+MFVector MaterialBrowser::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
+	return MakeVector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
 }
 

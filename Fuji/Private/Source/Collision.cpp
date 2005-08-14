@@ -4,28 +4,28 @@
 #define EPSILON 0.000001f
 
 // returns nearest point on a line segment [a,b]
-Vector3 Collision_NearestPointOnLine(const Vector3& lineStart, const Vector3& lineEnd, const Vector3& point)
+MFVector Collision_NearestPointOnLine(const MFVector& lineStart, const MFVector& lineEnd, const MFVector& point)
 {
 	// calculate lines ray
-	Vector3 ray = lineEnd - lineStart;
+	MFVector ray = lineEnd - lineStart;
 
 	// see if a is the nearest point
-	float dot_ta = ray.Dot(point - lineStart);
+	float dot_ta = ray.Dot3(point - lineStart);
 	if(dot_ta <= 0.0f)
 		return lineStart;
 
 	// see if b is the nearest point
-	float dot_tb = (-ray).Dot(point - lineEnd);
+	float dot_tb = (-ray).Dot3(point - lineEnd);
 	if(dot_tb <= 0.0f)
 		return lineEnd;
 
 	// return nearest point on line segment
-	return lineStart + (ray*dot_ta) / (dot_ta + dot_tb);
+	return lineStart + (ray * dot_ta*(1.0f / (dot_ta + dot_tb)));
 }
 
-bool Collision_SphereSphereTest(const Vector3 &pos1, float radius1, const Vector3 &pos2, float radius2)
+bool Collision_SphereSphereTest(const MFVector &pos1, float radius1, const MFVector &pos2, float radius2)
 {
-	return (pos2 - pos1).MagSquared() < radius1*radius1 + radius2*radius2;
+	return (pos2 - pos1).MagSquared3() < radius1*radius1 + radius2*radius2;
 }
 
 bool Collision_RaySphereTest()
@@ -34,15 +34,15 @@ bool Collision_RaySphereTest()
 	return false;
 }
 
-bool Collision_RayPlaneTest(const Vector3& rayPos, const Vector3& rayDir, const Vector4& plane, float *pT, Vector3 *pIntersectPoint)
+bool Collision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pT, MFVector *pIntersectPoint)
 {
-	float a = plane.ToVector3().Dot(rayDir);
+	float a = plane.Dot3(rayDir);
 
 	// if ray is parallel to plane
 	if(a > -EPSILON && a < EPSILON)
 		return false;
 
-	float t = -(plane.x*rayPos.x + plane.y*rayPos.y + plane.z*rayPos.z + plane.w) / a;
+	float t = -rayPos.DotH(plane) / a;
 
 	if(pT) *pT = t;
 
@@ -53,16 +53,16 @@ bool Collision_RayPlaneTest(const Vector3& rayPos, const Vector3& rayDir, const 
 	return true;
 }
 
-bool Collision_SpherePlaneTest(const Vector4& sphere, const Vector4& plane, Vector3 *pIntersectPoint)
+bool Collision_SpherePlaneTest(const MFVector& sphere, const MFVector& plane, MFVector *pIntersectPoint)
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
 
-bool Collision_RayTriTest(const Vector3& rayPos, const Vector3& rayDir, const Vector3& p0,  const Vector3& p1, const Vector3& p2, float *pT, float *pU, float *pV, Vector3 *pIntersectionPoint)
+bool Collision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV, MFVector *pIntersectionPoint)
 {
-	Vector3	edge1, edge2, tvec, pvec, qvec;
+	MFVector	edge1, edge2, tvec, pvec, qvec;
 	float	det, inv_det;
 	float	u, v;
 
@@ -71,10 +71,10 @@ bool Collision_RayTriTest(const Vector3& rayPos, const Vector3& rayDir, const Ve
 	edge2 = p2 - p0;
 
 	/* begin calculating determinant - also used to calculate U parameter */
-	pvec.Cross(rayDir, edge2);
+	pvec.Cross3(rayDir, edge2);
 
 	/* if determinant is near zero, ray lies in plane of triangle */
-	det = edge1.Dot(pvec);
+	det = edge1.Dot3(pvec);
 
 	if(det > -EPSILON && det < EPSILON)
 		return false;
@@ -84,20 +84,20 @@ bool Collision_RayTriTest(const Vector3& rayPos, const Vector3& rayDir, const Ve
 	tvec = rayPos - p0;
 
 	/* calculate U parameter and test bounds */
-	u = tvec.Dot(pvec) * inv_det;
+	u = tvec.Dot3(pvec) * inv_det;
 	if(u < 0.0f || u > 1.0f)
 		return false;
 
 	/* prepare to test V parameter */
-	qvec.Cross(tvec, edge1);
+	qvec.Cross3(tvec, edge1);
 
 	/* calculate V parameter and test bounds */
-	v = rayDir.Dot(qvec) * inv_det;
+	v = rayDir.Dot3(qvec) * inv_det;
 	if(v < 0.0f || u + v > 1.0f)
 		return false;
 
 	/* calculate t, ray intersects triangle */
-	if(pT) *pT = edge2.Dot(qvec) * inv_det;
+	if(pT) *pT = edge2.Dot3(qvec) * inv_det;
 
 	if(pU)
 	{
@@ -114,9 +114,9 @@ bool Collision_RayTriTest(const Vector3& rayPos, const Vector3& rayDir, const Ve
 }
 
 // culls backfaces
-bool Collision_RayTriCullTest(const Vector3& rayPos, const Vector3& rayDir, const Vector3& p0,  const Vector3& p1, const Vector3& p2, float *pT, float *pU, float *pV, Vector3 *pIntersectionPoint)
+bool Collision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV, MFVector *pIntersectionPoint)
 {
-	Vector3	edge1, edge2, tvec, pvec, qvec;
+	MFVector	edge1, edge2, tvec, pvec, qvec;
 	float	det, inv_det;
 	float	u, v;
 
@@ -125,10 +125,10 @@ bool Collision_RayTriCullTest(const Vector3& rayPos, const Vector3& rayDir, cons
 	edge2 = p2 - p0;
 
 	/* begin calculating determinant - also used to calculate U parameter */
-	pvec.Cross(rayDir, edge2);
+	pvec.Cross3(rayDir, edge2);
 
 	/* if determinant is near zero, ray lies in plane of triangle */
-	det = edge1.Dot(pvec);
+	det = edge1.Dot3(pvec);
 
 	if (det < EPSILON)
 		return false;
@@ -137,15 +137,15 @@ bool Collision_RayTriCullTest(const Vector3& rayPos, const Vector3& rayDir, cons
 	tvec = rayPos - p0;
 
 	/* calculate U parameter and test bounds */
-	u = tvec.Dot(pvec);
+	u = tvec.Dot3(pvec);
 	if (u < 0.0f || u > det)
 		return false;
 
 	/* prepare to test V parameter */
-	qvec.Cross(tvec, edge1);
+	qvec.Cross3(tvec, edge1);
 
 	/* calculate V parameter and test bounds */
-	v = rayDir.Dot(qvec);
+	v = rayDir.Dot3(qvec);
 	if (v < 0.0f || u + v > det)
 		return false;
 
@@ -156,7 +156,7 @@ bool Collision_RayTriCullTest(const Vector3& rayPos, const Vector3& rayDir, cons
 		u *= inv_det;
 		v *= inv_det;
 
-		if(pT) *pT = edge2.Dot(qvec) * inv_det;
+		if(pT) *pT = edge2.Dot3(qvec) * inv_det;
 
 		if(pU)
 		{
@@ -173,13 +173,13 @@ bool Collision_RayTriCullTest(const Vector3& rayPos, const Vector3& rayDir, cons
 	return true;
 }
 
-bool Collision_SphereTriTest(const Vector4& sphere, const Vector3& p0,  const Vector3& p1, const Vector3& p2, Vector3 *pIntersectionPoint)
+bool Collision_SphereTriTest(const MFVector& sphere, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
-bool Collision_PlaneTriTest(const Vector4& plane, const Vector3& p0,  const Vector3& p1, const Vector3& p2, Vector3 *pIntersectionPoint)
+bool Collision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
@@ -257,9 +257,9 @@ bool Collision_PlaneTriTest(const Vector4& plane, const Vector3& p0,  const Vect
   }                                         \
 }
 
-bool coplanar_tri_tri(const Vector3& N, const Vector3& V0, const Vector3& V1, const Vector3& V2, const Vector3& U0, const Vector3& U1, const Vector3& U2)
+bool coplanar_tri_tri(const MFVector& N, const MFVector& V0, const MFVector& V1, const MFVector& V2, const MFVector& U0, const MFVector& U1, const MFVector& U2)
 {
-	Vector3 A;
+	MFVector A;
 	short i0,i1;
 
 	/* first project onto an axis-aligned plane, that maximizes the area */
@@ -340,11 +340,11 @@ bool coplanar_tri_tri(const Vector3& N, const Vector3& V0, const Vector3& V1, co
 	} \
 }
 
-bool Collision_TriTriTest(const Vector3& V0,  const Vector3& V1, const Vector3& V2, const Vector3& U0,  const Vector3& U1, const Vector3& U2)
+bool Collision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVector& V2, const MFVector& U0,  const MFVector& U1, const MFVector& U2)
 {
-	Vector3 E1, E2;
-	Vector3 N1, N2;
-	Vector3 D;
+	MFVector E1, E2;
+	MFVector N1, N2;
+	MFVector D;
 
 	float d1,d2;
 	float du0,du1,du2,dv0,dv1,dv2;
@@ -361,14 +361,14 @@ bool Collision_TriTriTest(const Vector3& V0,  const Vector3& V1, const Vector3& 
 	/* compute plane equation of triangle(V0,V1,V2) */
 	E1 = V1-V0;
 	E2 = V2-V0;
-	N1.Cross(E1, E2);
-	d1 = -N1.Dot(V0);
+	N1.Cross3(E1, E2);
+	d1 = -N1.Dot3(V0);
 	/* plane equation 1: N1.X+d1=0 */
 
 	/* put U0,U1,U2 into plane equation 1 to compute signed distances to the plane*/
-	du0 = N1.Dot(U0) + d1;
-	du1 = N1.Dot(U1) + d1;
-	du2 = N1.Dot(U2) + d1;
+	du0 = N1.Dot3(U0) + d1;
+	du1 = N1.Dot3(U1) + d1;
+	du2 = N1.Dot3(U2) + d1;
 
 	/* coplanarity robustness check */
 	if(fabsf(du0)<EPSILON) du0=0.0f;
@@ -384,14 +384,14 @@ bool Collision_TriTriTest(const Vector3& V0,  const Vector3& V1, const Vector3& 
 	/* compute plane of triangle (U0,U1,U2) */
 	E1 = U1 - U0;
 	E2 = U2 - U0;
-	N2.Cross(E1, E2);
-	d2 = -N2.Dot(U0);
+	N2.Cross3(E1, E2);
+	d2 = -N2.Dot3(U0);
 	/* plane equation 2: N2.X+d2=0 */
 
 	/* put V0,V1,V2 into plane equation 2 */
-	dv0 = N2.Dot(V0) + d2;
-	dv1 = N2.Dot(V1) + d2;
-	dv2 = N2.Dot(V2) + d2;
+	dv0 = N2.Dot3(V0) + d2;
+	dv1 = N2.Dot3(V1) + d2;
+	dv2 = N2.Dot3(V2) + d2;
 
 	if(fabsf(dv0)<EPSILON) dv0=0.0;
 	if(fabsf(dv1)<EPSILON) dv1=0.0;
@@ -404,7 +404,7 @@ bool Collision_TriTriTest(const Vector3& V0,  const Vector3& V1, const Vector3& 
 		return false;				/* no intersection occurs */
 
 	/* compute direction of intersection line */
-	D.Cross(N1, N2);
+	D.Cross3(N1, N2);
 
 	/* compute and index to the largest component of D */
 	max = fabsf(D.x);

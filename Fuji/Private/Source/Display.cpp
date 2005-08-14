@@ -13,7 +13,7 @@ float AspectRatio[Aspect_Max] =
 
 DisplaySettings display;
 
-Vector4 gClearColour = Vector(0.f,0.f,0.22f,1.f);
+MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 void Display_InitModule()
 {

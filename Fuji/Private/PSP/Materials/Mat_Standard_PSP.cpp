@@ -51,8 +51,8 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 			sceGuTexImage(0, width, height, width, pImageData);
 			sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 			sceGuTexFilter(GU_LINEAR, GU_LINEAR);
-			sceGuTexScale(pData->textureMatrix.GetXAxis3().Magnitude(), pData->textureMatrix.GetYAxis3().Magnitude());
-			sceGuTexOffset(pData->textureMatrix.GetTrans3().x, pData->textureMatrix.GetTrans3().y);
+			sceGuTexScale(pData->textureMatrix.GetXAxis().Magnitude3(), pData->textureMatrix.GetYAxis().Magnitude3());
+			sceGuTexOffset(pData->textureMatrix.GetTrans().x, pData->textureMatrix.GetTrans().y);
 //			sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&pData->textureMatrix);
 		}
 		else
@@ -92,13 +92,13 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	memset(pData, 0, sizeof(Mat_Standard_Data));
 
-	pData->ambient = Vector4::one;
-	pData->diffuse = Vector4::one;
+	pData->ambient = MFVector::one;
+	pData->diffuse = MFVector::one;
 
 	pData->materialType = MF_AlphaBlend;
 	pData->opaque = true;
 
-	pData->textureMatrix = Matrix::identity;
+	pData->textureMatrix = MFMatrix::identity;
 	pData->uFrames = 1;
 	pData->vFrames = 1;
 }

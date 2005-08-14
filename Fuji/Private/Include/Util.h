@@ -9,7 +9,7 @@
 	#define HARD_ASSERTS
 #endif
 
-class Vector3;
+class MFVector;
 
 // triggers a debug BREAKPOINT
 #if defined(_WINDOWS) || defined(_XBOX) || defined(_FUJI_UTIL)
@@ -54,7 +54,7 @@ char* STRn(const char *source, int n);
 uint32 Rand();
 float RandomUnit();
 float RandomRange(float min, float max);
-Vector3 RandomVector();
+MFVector RandomVector();
 
 // string functions
 int StrCaseCmp(const char *s1, const char *s2);

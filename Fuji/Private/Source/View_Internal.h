@@ -15,10 +15,10 @@ struct View
 
 	MFRect orthoRect;
 
-	Matrix projection;
-	Matrix cameraMatrix;
-	Matrix view;
-	Matrix viewProj;
+	MFMatrix projection;
+	MFMatrix cameraMatrix;
+	MFMatrix view;
+	MFMatrix viewProj;
 
 	float fov;
 	float nearPlane, farPlane;

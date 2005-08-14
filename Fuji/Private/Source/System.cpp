@@ -263,11 +263,11 @@ void System_Draw()
 		float y = 30.0f;
 #endif
 
-		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, Vector(1,1,0,1), "FPS: %.2f", GetFPS());
+		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", GetFPS());
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, Vector(1,0,0,1), "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
+			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, MakeVector(1,0,0,1), "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
 		const float iconSize = 55.0f;

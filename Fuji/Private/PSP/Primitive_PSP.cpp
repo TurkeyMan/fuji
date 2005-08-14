@@ -1,9 +1,8 @@
 #include "Common.h"
 #include "Display_Internal.h"
 #include "View.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
 #include "Primitive.h"
 #include "MFTexture.h"
 #include "Renderer.h"
@@ -65,7 +64,7 @@ void DrawMFPrimitiveStats()
 		MFSetPosition(410, 20, 0);
 		MFEnd();
 
-		Font_DrawTextf(gpDebugFont, 90.0f, 40.0f, 0, 20.0f, Vector(1,1,0,1), "NumVerts: %d", currentVert);
+		Font_DrawTextf(gpDebugFont, 90.0f, 40.0f, 0, 20.0f, MakeVector(1,1,0,1), "NumVerts: %d", currentVert);
 	}
 }
 
@@ -80,11 +79,11 @@ void MFPrimitive(uint32 type, uint32 hint)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
 	}
 
-	sceGuSetMatrix(GU_MODEL, (ScePspFMatrix4*)&Matrix::identity);
+	sceGuSetMatrix(GU_MODEL, (ScePspFMatrix4*)&MFMatrix::identity);
 	sceGuSetMatrix(GU_PROJECTION, (ScePspFMatrix4*)&View_GetViewToScreenMatrix());
 
 	if(View_IsOrtho())
-		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&Matrix::identity);
+		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&MFMatrix::identity);
 	else
 		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&View_GetWorldToViewMatrix());
 
@@ -101,13 +100,13 @@ void MFBegin(uint32 vertexCount)
 	DBGASSERT(startVert+vertexCount < NUM_VERTS, STR("Exceeded primitive vertex cache %d", NUM_VERTS));
 }
 
-void MFSetMatrix(const Matrix &mat)
+void MFSetMatrix(const MFMatrix &mat)
 {
 	CALLSTACK;
 	sceGuSetMatrix(2, (ScePspFMatrix4*)&mat);
 }
 
-void MFSetColour(const Vector4 &colour)
+void MFSetColour(const MFVector &colour)
 {
 	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
@@ -131,7 +130,7 @@ void MFSetTexCoord1(float u, float v)
 	current.v = v;
 }
 
-void MFSetNormal(const Vector3 &normal)
+void MFSetNormal(const MFVector &normal)
 {
 	MFSetNormal(normal.x, normal.y, normal.z);
 }
@@ -140,7 +139,7 @@ void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetPosition(const Vector3 &pos)
+void MFSetPosition(const MFVector &pos)
 {
 	MFSetPosition(pos.x, pos.y, pos.z);
 }

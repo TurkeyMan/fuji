@@ -2,9 +2,9 @@
 #define _MATERIAL_INTERNAL_H
 
 #include "MFMaterial.h"
-#include "Vector4.h"
+#include "MFVector.h"
 #include "MFTexture.h"
-#include "Matrix.h"
+#include "MFMatrix.h"
 
 #include "DebugMenu_Internal.h"
 
@@ -88,9 +88,9 @@ public:
 	virtual void Draw();
 	virtual void Update();
 
-	virtual float ListDraw(bool selected, const Vector3 &pos, float maxWidth);
+	virtual float ListDraw(bool selected, const MFVector &pos, float maxWidth);
 	virtual void ListUpdate(bool selected);
-	virtual Vector3 GetDimensions(float maxWidth);
+	virtual MFVector GetDimensions(float maxWidth);
 
 	int selection;
 };

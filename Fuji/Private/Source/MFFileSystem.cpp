@@ -18,6 +18,8 @@ FileSystemHandle hNativeFileSystem = -1;
 FileSystemHandle hMemoryFileSystem = -1;
 FileSystemHandle hZipFileSystem = -1;
 
+MFFileHandle hDataArchive = NULL;
+
 void MFFileSystem_InitModule()
 {
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
@@ -31,24 +33,24 @@ void MFFileSystem_InitModule()
 	MFFileSystemMemory_InitModule();
 	MFFileSystemZipFile_InitModule();
 
-	MFOpenDataNative open;
-	open.cbSize = sizeof(MFOpenDataNative);
-	open.openFlags = MFOF_Read|MFOF_Binary;
-	open.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", gPlatformStrings[gCurrentPlatform]));
-	MFFileHandle h = MFFile_Open(hNativeFileSystem, &open);
+	MFOpenDataNative dataArchive;
+	dataArchive.cbSize = sizeof(MFOpenDataNative);
+	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
+	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", gPlatformStrings[gCurrentPlatform]));
+	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
 
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.priority = MFMP_Normal;
 
-	if(h)
+	if(hDataArchive)
 	{
 		MFMountDataZipFile zipMountData;
 		zipMountData.cbSize = sizeof(MFMountDataZipFile);
 		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		zipMountData.priority = MFMP_Normal;
 		zipMountData.pMountpoint = "data";
-		zipMountData.zipArchiveHandle = h;
+		zipMountData.zipArchiveHandle = hDataArchive;
 		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
 	}
 	else
@@ -67,6 +69,11 @@ void MFFileSystem_InitModule()
 
 void MFFileSystem_DeinitModule()
 {
+	if(hDataArchive)
+	{
+		MFFile_Close(hDataArchive);
+	}
+
 	// dismount filesystems
 	MFFileSystemZipFile_DeinitModule();
 	MFFileSystemMemory_DeinitModule();

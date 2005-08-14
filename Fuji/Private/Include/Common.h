@@ -97,7 +97,7 @@ extern const char * const gPlatformStrings[FP_Max];
 
 // SSE optimisations for xbox and PC?
 #if defined(_XBOX) || defined(_WINDOWS)
-//	#define _FUJI_SSE
+	#define _FUJI_SSE
 #endif
 
 // if SSE optimisations are enabled, include SSE intrinsics header

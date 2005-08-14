@@ -1,7 +1,7 @@
 #if !defined(_VIEW_H)
 #define _VIEW_H
 
-#include "Matrix.h"
+#include "MFMatrix.h"
 
 // rect structure
 struct MFRect
@@ -24,14 +24,14 @@ void View_GetOrtho(MFRect *pOrthoRect);
 
 bool View_IsOrtho();
 
-void View_SetCameraMatrix(const Matrix &cameraMatrix);
-const Matrix& View_GetCameraMatrix();
+void View_SetCameraMatrix(const MFMatrix &cameraMatrix);
+const MFMatrix& View_GetCameraMatrix();
 
-const Matrix& View_GetWorldToViewMatrix();
-const Matrix& View_GetViewToScreenMatrix();
-const Matrix& View_GetWorldToScreenMatrix();
+const MFMatrix& View_GetWorldToViewMatrix();
+const MFMatrix& View_GetViewToScreenMatrix();
+const MFMatrix& View_GetWorldToScreenMatrix();
 
-Matrix* View_GetLocalToScreen(const Matrix& localToWorld, Matrix *pOutput);
-Matrix* View_GetLocalToView(const Matrix& localToWorld, Matrix *pOutput);
+MFMatrix* View_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput);
+MFMatrix* View_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput);
 
 #endif

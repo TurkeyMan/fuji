@@ -1,5 +1,5 @@
 #include "Common.h"
-#include "Vector3.h"
+#include "MFVector.h"
 #include "Input.h"
 #include "Input_Internal.h"
 
@@ -490,9 +490,9 @@ void SetMouseMode(uint32 mouseMode)
 	DBGASSERT(false, "SetMouseMode not written");
 }
 
-Vector3 Input_ReadMousePos(int mouseID)
+MFVector Input_ReadMousePos(int mouseID)
 {
-	Vector3 pos = Vector3::zero;
+	MFVector pos = MFVector::identity;
 
 	if(mouseID < 0)
 	{
@@ -511,9 +511,9 @@ Vector3 Input_ReadMousePos(int mouseID)
 	return pos;
 }
 
-Vector3 Input_ReadMouseDelta(int mouseID)
+MFVector Input_ReadMouseDelta(int mouseID)
 {
-	Vector3 delta = Vector3::zero;
+	MFVector delta = MFVector::zero;
 
 	if(mouseID < 0)
 	{

@@ -218,9 +218,6 @@
 				RelativePath=".\Source\Input_Internal.h">
 			</File>
 			<File
-				RelativePath=".\Source\Matrix.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\MFFileSystem.cpp">
 			</File>
 			<File
@@ -234,6 +231,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFMaterial_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFMatrix.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFModel.cpp">
@@ -384,9 +384,6 @@
 				RelativePath=".\Include\Input.h">
 			</File>
 			<File
-				RelativePath=".\Include\Matrix.h">
-			</File>
-			<File
 				RelativePath=".\Include\MFFileSystem.h">
 			</File>
 			<File
@@ -394,6 +391,12 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFMaterial.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMatrix.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMatrix.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFModel.h">
@@ -759,9 +762,6 @@
 					RelativePath=".\Lib\zlib\deflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\example.c">
-				</File>
-				<File
 					RelativePath=".\Lib\zlib\gzio.c">
 				</File>
 				<File
@@ -787,9 +787,6 @@
 				</File>
 				<File
 					RelativePath=".\Lib\zlib\inftrees.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\minigzip.c">
 				</File>
 				<File
 					RelativePath=".\Lib\zlib\trees.c">
@@ -826,18 +823,6 @@
 					</File>
 					<File
 						RelativePath=".\Lib\zlib\minizip\ioapi.h">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\iowin32.c">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\iowin32.h">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\miniunz.c">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\minizip.c">
 					</File>
 					<File
 						RelativePath=".\Lib\zlib\minizip\mztools.c">

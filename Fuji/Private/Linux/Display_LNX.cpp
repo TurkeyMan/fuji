@@ -60,7 +60,7 @@ Atom wm_delete_window;
 bool isortho = false;
 float fieldOfView;
 
-extern Vector4 gClearColour;
+extern MFVector gClearColour;
 
 static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);

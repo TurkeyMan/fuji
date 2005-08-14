@@ -36,39 +36,39 @@ enum MaterialFlags
 struct Mat_Standard_Data
 {
 	// Members
-	Vector4	diffuse;
-	Vector4	ambient;
-	Vector4	specular;
-	Vector4	illum;
-	float	specularPow;
+	MFVector	diffuse;
+	MFVector	ambient;
+	MFVector	specular;
+	MFVector	illum;
+	float		specularPow;
 
-	uint32	maskColour;
+	uint32		maskColour;
 
-	uint32	materialType;
+	uint32		materialType;
 
-	MFTexture *pTextures[8];
-	uint32	textureCount;
+	MFTexture  *pTextures[8];
+	uint32		textureCount;
 
-	Matrix	textureMatrix;
-	int uFrames, vFrames, curFrame;
-	float frameTime, curTime;
+	MFMatrix	textureMatrix;
+	int			uFrames, vFrames, curFrame;
+	float		frameTime, curTime;
 
-	uint16	opaque	: 1;
-	uint16	flags	: 15;
+	uint16		opaque	: 1;
+	uint16		flags	: 15;
 
-	uint32 diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
-	uint32 diffuseMap2Index		: 3;
-	uint32 lightMapIndex		: 3;
-	uint32 specularMapIndex		: 3;
-	uint32 bumpMapIndex			: 3;
-	uint32 detailMapIndex		: 3;
-	uint32 envMapIndex			: 3;
-	uint32 reflectionMapIndex	: 3;
-	uint32 normalMapIndex		: 3;
+	uint32		diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
+	uint32		diffuseMap2Index		: 3;
+	uint32		lightMapIndex		: 3;
+	uint32		specularMapIndex		: 3;
+	uint32		bumpMapIndex			: 3;
+	uint32		detailMapIndex		: 3;
+	uint32		envMapIndex			: 3;
+	uint32		reflectionMapIndex	: 3;
+	uint32		normalMapIndex		: 3;
 	// glossMap?
 
-	uint32 cubeMapIndex			: 3; // some what if's
-	uint32 displacementMapIndex	: 3;
+	uint32		cubeMapIndex			: 3; // some what if's
+	uint32		displacementMapIndex	: 3;
 };
 
 int       Mat_Standard_RegisterMaterial(void *pPlatformData);

@@ -2,7 +2,7 @@
 #define _SPRITE_H
 
 #include "MFMaterial.h"
-#include "Vector3.h"
+#include "MFVector.h"
 
 class Sprite
 {
@@ -13,14 +13,14 @@ public:
 
 	void SetFlag(uint32 flag, bool enable = true);
 
-	void Move(const Vector3 &pos);
-	Vector3 GetPos(); 
+	void Move(const MFVector &pos);
+	MFVector GetPos(); 
 
-	void Scale(const Vector3 &pos);
-	Vector3 GetScale();
+	void Scale(const MFVector &pos);
+	MFVector GetScale();
 
-	void SetPivot(const Vector3 &pivot);
-	Vector3 GetPivot();
+	void SetPivot(const MFVector &pivot);
+	MFVector GetPivot();
 
 	void Rotate(float angle);
 	float GetRotation();
@@ -30,9 +30,9 @@ public:
 	void Enable(bool enable = true);
 
 private:
-	Vector3 pivot;
-	Vector3 position;
-	Vector3 scale;
+	MFVector pivot;
+	MFVector position;
+	MFVector scale;
 	float angle;
 
 	int xFrames, yFrames;

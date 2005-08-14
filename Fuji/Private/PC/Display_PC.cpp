@@ -20,7 +20,7 @@ IDirect3DDevice9 *pd3dDevice;
 bool isortho = false;
 float fieldOfView;
 
-extern Vector4 gClearColour;
+extern MFVector gClearColour;
 
 extern HINSTANCE apphInstance;
 HWND apphWnd;

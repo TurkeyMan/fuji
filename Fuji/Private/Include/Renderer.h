@@ -1,7 +1,7 @@
 #if !defined(_RENDERER_H)
 #define _RENDERER_H
 
-class Matrix;
+class MFMatrix;
 struct MFMeshChunk;
 
 // renderer interface
@@ -11,7 +11,7 @@ int  Renderer_Begin(); // returns number of passes remaining..
 
 // renderer setup
 //void Renderer_SetLocalToWorldMatrix(const Matrix &localToWorldMatrix); // Matrix[0] == localToWorld (use SetMatrices)
-void Renderer_SetMatrices(Matrix *pMatrices, int numMatrices);
+void Renderer_SetMatrices(MFMatrix *pMatrices, int numMatrices);
 
 // render a mesh chunk
 void Renderer_RenderMeshChunk(MFMeshChunk *pMeshChunk);

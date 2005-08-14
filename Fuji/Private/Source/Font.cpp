@@ -1,6 +1,3 @@
-#include <string.h>
-#include <stdio.h>
-
 #include "Common.h"
 #include "Display.h"
 #include "MFFileSystem.h"
@@ -11,6 +8,9 @@
 #include "MFFileSystem.h"
 
 #include "Materials/Mat_Standard.h"
+
+#include <string.h>
+#include <stdio.h>
 
 Font *gpDebugFont;
 
@@ -59,7 +59,7 @@ void Font_Destroy(Font *pFont)
 	Heap_Free(pFont);
 }
 
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const MFVector &colour, const char *text, bool invert)
 {
 	CALLSTACK;
 
@@ -118,17 +118,17 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 	return 0;
 }
 
-int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, float pos_x, float pos_y, float height, const MFVector &colour, const char *text, bool invert)
 {
 	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, text, invert);
 }
 
-int Font_DrawText(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *text, bool invert)
+int Font_DrawText(Font *pFont, const MFVector &pos, float height, const MFVector &colour, const char *text, bool invert)
 {
 	return Font_DrawText(pFont, pos.x, pos.y, pos.z, height, colour, text, invert);
 }
 
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, const Vector4 &colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, const MFVector &colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -142,7 +142,7 @@ int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float height, const Ve
 	return Font_DrawText(pFont, pos_x, pos_y, 0, height, colour, buffer);
 }
 
-int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const Vector4 &colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const MFVector &colour, const char *format, ...)
 {
 	CALLSTACK;
 
@@ -156,7 +156,7 @@ int Font_DrawTextf(Font *pFont, float pos_x, float pos_y, float pos_z, float hei
 	return Font_DrawText(pFont, pos_x, pos_y, pos_z, height, colour, buffer);
 }
 
-int Font_DrawTextf(Font *pFont, const Vector3 &pos, float height, const Vector4 &colour, const char *format, ...)
+int Font_DrawTextf(Font *pFont, const MFVector &pos, float height, const MFVector &colour, const char *format, ...)
 {
 	CALLSTACK;
 

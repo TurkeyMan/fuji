@@ -12,8 +12,8 @@ void MFModel_Destroy(MFModel *pModel);
 void MFModel_Draw(MFModel *pModel);
 
 // set model data
-void MFModel_SetWorldMatrix(MFModel *pModel, const Matrix &worldMatrix);
-void MFModel_SetColour(MFModel *pModel, const Vector4 &colour);
+void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix);
+void MFModel_SetColour(MFModel *pModel, const MFVector &colour);
 
 // get model info
 const char* MFModel_GetName();
@@ -28,13 +28,13 @@ MFMeshChunk* MFModel_GetMeshChunk(int subobjectIndex, int meshChunkIndex);
 // bone structure
 int MFModel_GetNumBones();
 const char* MFModel_GetBoneName(int boneIndex);
-const Vector3& MFModel_GetBoneOrigin(int boneIndex);
+const MFVector& MFModel_GetBoneOrigin(int boneIndex);
 int MFModel_GetBoneIndex(const char *pName);
 
 // tag's
 int MFModel_GetNumTags();
 const char* MFModel_GetTagName(int tagIndex);
-const Vector3& MFModel_GetTagMatrix(int tagIndex);
+const MFVector& MFModel_GetTagMatrix(int tagIndex);
 int MFModel_GetTagIndex(const char *pName);
 
 // ... etc

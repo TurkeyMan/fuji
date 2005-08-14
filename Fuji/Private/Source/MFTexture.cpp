@@ -29,8 +29,8 @@ void MFTexture_InitModule()
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
 	// create white texture (used by white material)
-	pNoneTexture = MFTexture_CreateBlank("_None", Vector(1.0f, 0.0f, 0.5, 1.0f));
-	pWhiteTexture = MFTexture_CreateBlank("_White", Vector4::one);
+	pNoneTexture = MFTexture_CreateBlank("_None", MakeVector(1.0f, 0.0f, 0.5, 1.0f));
+	pWhiteTexture = MFTexture_CreateBlank("_White", MFVector::one);
 }
 
 void MFTexture_DeinitModule()
@@ -95,7 +95,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-MFTexture* MFTexture_CreateBlank(const char *pName, const Vector4 &colour)
+MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 {
 	uint32 *pPixels = (uint32*)blankBuffer;
 
@@ -126,9 +126,9 @@ void TextureBrowser::Update()
 }
 
 #define TEX_SIZE 64.0f
-float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidth)
+float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWidth)
 {
-	Vector3 pos = _pos;
+	MFVector pos = _pos;
 
 	MFTexture **i;
 	i = gTextureBank.Begin();
@@ -137,23 +137,23 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 
 	MFTexture *pTexture = *i;
 
-	Font_DrawText(gpDebugFont, pos+Vector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s:", name));
-	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%s", pTexture->name));
-	Font_DrawText(gpDebugFont, pos+Vector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? Vector(1,1,0,1) : Vector4::one, STR("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, gpMFTextureFormatStrings[(int)pTexture->pTemplateData->imageFormat], pTexture->refCount));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s:", name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s", pTexture->name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, gpMFTextureFormatStrings[(int)pTexture->pTemplateData->imageFormat], pTexture->refCount));
 
-	pos += Vector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
+	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
 	MFSetColour(0xFFFFFFFF);
 	MFSetPosition(pos);
-	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + Vector(0.0f, TEX_SIZE + 4.0f, 0.0f));
-	MFSetPosition(pos + Vector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
 	MFEnd();
 
-	pos += Vector(2.0f, 2.0f, 0.0f);
+	pos += MakeVector(2.0f, 2.0f, 0.0f);
 
 	const int numSquares = 7;
 	for(int a=0; a<numSquares; a++)
@@ -210,7 +210,7 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 	sceGuTexFilter(GU_LINEAR, GU_LINEAR);
 	sceGuTexScale(1.0f, 1.0f);
 	sceGuTexOffset(0.0f, 0.0f);
-	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&Matrix::identity);
+	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
 #else
 	DBGASSERT(false, "Not supported on this platform...");
 #endif
@@ -218,13 +218,13 @@ float TextureBrowser::ListDraw(bool selected, const Vector3 &_pos, float maxWidt
 	MFBegin(4);
 	MFSetColour(0xFFFFFFFF);
 	MFSetTexCoord1(0.0f,0.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(1.0f,0.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(0.0f,1.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(1.0f,1.0f);
-	MFSetPosition(pos + Vector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
 	MFEnd();
 
 	return TEX_SIZE + 8.0f;
@@ -253,9 +253,9 @@ void TextureBrowser::ListUpdate(bool selected)
 	}
 }
 
-Vector3 TextureBrowser::GetDimensions(float maxWidth)
+MFVector TextureBrowser::GetDimensions(float maxWidth)
 {
-	return Vector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
+	return MakeVector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
 }
 
 

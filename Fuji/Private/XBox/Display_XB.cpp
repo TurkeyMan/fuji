@@ -9,7 +9,7 @@ IDirect3DDevice8 *pd3dDevice;
 bool isortho = false;
 float fieldOfView;
 
-extern Vector4 gClearColour;
+extern MFVector gClearColour;
 
 int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {

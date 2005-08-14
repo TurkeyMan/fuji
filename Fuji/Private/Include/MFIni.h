@@ -14,8 +14,7 @@
 //   pLine = pLine->Next();
 // }
 //================================================
-#include "Vector3.h"
-#include "Vector4.h"
+#include "MFVector.h"
 
 class MFStringCache;
 
@@ -35,8 +34,9 @@ public:
 	float GetFloat(int index);
 	int GetInt(int index);
 	bool GetBool(int index);
-	Vector3 GetVector3(int index);
-	Vector4 GetVector4(int index);
+	MFVector GetVector2(int index);
+	MFVector GetVector3(int index);
+	MFVector GetVector4(int index);
 
 	// Log the contents of this line, and following lines to the screen
 	// Mainly for debugging purposes

@@ -163,9 +163,6 @@
 					RelativePath=".\Lib\zlib\deflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\example.c">
-				</File>
-				<File
 					RelativePath=".\Lib\zlib\gzio.c">
 				</File>
 				<File
@@ -191,9 +188,6 @@
 				</File>
 				<File
 					RelativePath=".\Lib\zlib\inftrees.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\minigzip.c">
 				</File>
 				<File
 					RelativePath=".\Lib\zlib\trees.c">
@@ -230,18 +224,6 @@
 					</File>
 					<File
 						RelativePath=".\Lib\zlib\minizip\ioapi.h">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\iowin32.c">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\iowin32.h">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\miniunz.c">
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\minizip.c">
 					</File>
 					<File
 						RelativePath=".\Lib\zlib\minizip\mztools.c">

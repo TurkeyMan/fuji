@@ -1,4 +1,4 @@
-#include <Matrix.h>
+#include "MFMatrix.h"
 
 inline MFVector MFVector::operator-()
 {
@@ -147,10 +147,12 @@ inline MFVector MFVector::operator/(float f) const
 {
 	MFVector t;
 
-	t.x = x/f;
-	t.y = y/f;
-	t.z = z/f;
-	t.w = w/f;
+	f = 1.0f/f;
+
+	t.x = x*f;
+	t.y = y*f;
+	t.z = z*f;
+	t.w = w*f;
 
 	return t;
 }
@@ -165,6 +167,132 @@ inline MFVector MFVector::operator/(const MFVector &v) const
 	t.w = w/v.w;
 
 	return t;
+}
+*/
+
+inline MFVector& MFVector::Add3(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x + v2.x;
+	y = v1.y + v2.y;
+	z = v1.z + v2.z;
+	return *this;
+}
+
+inline MFVector& MFVector::Sub3(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x - v2.x;
+	y = v1.y - v2.y;
+	z = v1.z - v2.z;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul3(const MFVector &v1, float f)
+{
+	x = v1.x * f;
+	y = v1.y * f;
+	z = v1.z * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul3(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x * v2.x;
+	y = v1.y * v2.y;
+	z = v1.z * v2.z;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad3(const MFVector &v1, float f, const MFVector &v3)
+{
+	x = v1.x * f + v3.x;
+	y = v1.y * f + v3.y;
+	z = v1.z * f + v3.z;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad3(const MFVector &v1, const MFVector &v2, const MFVector &v3)
+{
+	x = v1.x * v2.x + v3.x;
+	y = v1.y * v2.y + v3.y;
+	z = v1.z * v2.z + v3.z;
+	return *this;
+}
+
+/*
+inline MFVector& MFVector::Div3(const MFVector &v1, float f)
+{
+	f = 1.0f / f;
+	x = v1.x * f;
+	y = v1.y * f;
+	z = v1.z * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Div3(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x / v2.x;
+	y = v1.y / v2.y;
+	z = v1.z / v2.z;
+	return *this;
+}
+*/
+
+inline MFVector& MFVector::Add2(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x + v2.x;
+	y = v1.y + v2.y;
+	return *this;
+}
+
+inline MFVector& MFVector::Sub2(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x - v2.x;
+	y = v1.y - v2.y;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul2(const MFVector &v1, float f)
+{
+	x = v1.x * f;
+	y = v1.y * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul2(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x * v2.x;
+	y = v1.y * v2.y;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad2(const MFVector &v1, float f, const MFVector &v3)
+{
+	x = v1.x * f + v3.x;
+	y = v1.y * f + v3.y;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad2(const MFVector &v1, const MFVector &v2, const MFVector &v3)
+{
+	x = v1.x * v2.x + v3.x;
+	y = v1.y * v2.y + v3.y;
+	return *this;
+}
+
+/*
+inline MFVector& MFVector::Div2(const MFVector &v1, float f)
+{
+	f = 1.0f / f;
+	x = v1.x * f;
+	y = v1.y * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Div2(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x / v2.x;
+	y = v1.y / v2.y;
+	return *this;
 }
 */
 
@@ -244,7 +372,7 @@ inline float MFVector::Dot2(const MFVector &vec) const
 
 //inline MFVector MFVector::Cross4(const MFVector &vec) const;
 
-inline MFVector MFVector::Cross(const MFVector &v) const
+inline MFVector MFVector::Cross3(const MFVector &v) const
 {
 	MFVector t;
 
@@ -263,7 +391,7 @@ inline float MFVector::Cross2(const MFVector &vec) const
 
 //inline MFVector& MFVector::Cross4(const MFVector &vec, const MFVector &vec2);
 
-inline MFVector& MFVector::Cross(const MFVector &v, const MFVector &v2)
+inline MFVector& MFVector::Cross3(const MFVector &v, const MFVector &v2)
 {
 	x = v.y*v2.z - v.z*v2.y;
 	y = v.z*v2.x - v.x*v2.z;
@@ -272,6 +400,7 @@ inline MFVector& MFVector::Cross(const MFVector &v, const MFVector &v2)
 	return *this;
 }
 
+/*
 inline MFVector& MFVector::ApplyMatrix(const Matrix &mat)
 {
 	float _x=x, _y=y, _z=z, _w=w;
@@ -305,13 +434,14 @@ inline MFVector& MFVector::ApplyMatrix3x3(const Matrix &mat)
 
 	return *this;
 }
+*/
 
 inline float MFVector::MagSquared4() const
 {
 	return x*x + y*y + z*z + w*w;
 }
 
-inline float MFVector::MagSquared() const
+inline float MFVector::MagSquared3() const
 {
 	return x*x + y*y + z*z;
 }
@@ -326,7 +456,7 @@ inline float MFVector::Magnitude4() const
 	return MFSqrt(x*x + y*y + z*z + w*w);
 }
 
-inline float MFVector::Magnitude() const
+inline float MFVector::Magnitude3() const
 {
 	return MFSqrt(x*x + y*y + z*z);
 }
@@ -343,7 +473,7 @@ inline MFVector& MFVector::Normalise4()
 	return *this;
 }
 
-inline MFVector& MFVector::Normalise()
+inline MFVector& MFVector::Normalise3()
 {
 	float l = MFSqrt(x*x + y*y + z*z);
 	*this *= 1.0f/l;
@@ -359,7 +489,7 @@ inline MFVector& MFVector::Normalise2()
 
 inline float MFVector::Distance(const MFVector &v) const
 {
-	return (v-*this).Magnitude();
+	return (v-*this).Magnitude3();
 }
 
 inline float MFVector::GetAngle(const MFVector &ref)
@@ -428,15 +558,13 @@ inline MFVector MakeVector(float x, float y, float z, float w)
 	return t;
 }
 
-inline MFVector MakeVector(const Vector3 &v, float w)
+inline MFVector MakeVector(const MFVector &v, float w)
 {
 	MFVector t;
-
 	t.x = v.x;
 	t.y = v.y;
 	t.z = v.z;
 	t.w = w;
-
 	return t;
 }
 

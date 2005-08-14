@@ -15,9 +15,9 @@ void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colou
 	DBGASSERT(!strcmp(pMaterial->pType->pTypeName, "Standard"), "Sprites MUST be created from a 'Standard' material.");
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
-	pivot = Vector(0.0f, 0.0f);
-	position = Vector(0.0f, 0.0f);
-	scale = Vector((float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width, (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height);
+	pivot = MakeVector(0.0f, 0.0f);
+	position = MakeVector(0.0f, 0.0f);
+	scale = MakeVector((float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width, (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height);
 	angle = 0.0f;
 	visible = false;
 }
@@ -28,7 +28,7 @@ void Sprite::Draw()
 	if(!visible) return;
 
 	// generate rotation and translation matrix
-	Matrix world;
+	MFMatrix world;
 
 	world.SetIdentity();
 
@@ -92,14 +92,14 @@ void Sprite::Enable(bool enable)
 	visible = enable;
 }
 
-void Sprite::Move(const Vector3 &pos)
+void Sprite::Move(const MFVector &pos)
 {
 	position = pos;
 }
 
-Vector3 Sprite::GetPos()
+MFVector Sprite::GetPos()
 {
-	Vector3 t;
+	MFVector t;
 
 	t.x = position.x;
 	t.y = position.y;
@@ -108,14 +108,14 @@ Vector3 Sprite::GetPos()
 	return t;
 }
 
-void Sprite::Scale(const Vector3 &_scale)
+void Sprite::Scale(const MFVector &_scale)
 {
 	scale = _scale;
 }
 
-Vector3 Sprite::GetScale()
+MFVector Sprite::GetScale()
 {
-	Vector3 t;
+	MFVector t;
 
 	t.x = scale.x;
 	t.y = scale.y;
@@ -124,14 +124,14 @@ Vector3 Sprite::GetScale()
 	return t;
 }
 
-void Sprite::SetPivot(const Vector3 &_pivot)
+void Sprite::SetPivot(const MFVector &_pivot)
 {
 	pivot = _pivot;
 }
 
-Vector3 Sprite::GetPivot()
+MFVector Sprite::GetPivot()
 {
-	Vector3 t;
+	MFVector t;
 
 	t.x = pivot.x;
 	t.y = pivot.y;

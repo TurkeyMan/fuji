@@ -18,7 +18,7 @@ void Sound_Stop(int soundID);
 void Sound_Play3D(int soundID);
 void Sound_Stop3D(int soundID);
 
-void Sound_SetListenerPos(const Vector3& listenerPos);
+void Sound_SetListenerPos(const MFVector& listenerPos);
 
 void Sound_SetVolume(int soundID, float volume);
 void Sound_SetMasterVolume(int soundID, float volume);

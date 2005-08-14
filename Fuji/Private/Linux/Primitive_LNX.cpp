@@ -77,7 +77,7 @@ void MFSetMatrix(const Matrix &mat)
 	glLoadMatrixf((GLfloat *)&mat);
 }
 
-void MFSetColour(const Vector4 &colour)
+void MFSetColour(const MFVector &colour)
 {
 	glColor4f(colour.x, colour.y, colour.z, colour.w);
 }
@@ -97,12 +97,12 @@ void MFSetTexCoord1(float u, float v)
 	glTexCoord2f(u, v);
 }
 
-void MFSetNormal(const Vector3 &normal)
+void MFSetNormal(const MFVector &normal)
 {
 	glNormal3f(normal.x, normal.y, normal.z);
 }
 
-void MFSetPosition(const Vector3 &pos)
+void MFSetPosition(const MFVector &pos)
 {
 	glVertex3f(pos.x, pos.y, pos.z);
 
