@@ -160,7 +160,7 @@ void DrawUntexturedSprite(float x, float y, float w, float h, uint32 col)
 
 void Callstack_DrawProfile()
 {
-	CALLSTACK("Callstack_DrawProfile");
+//	CALLSTACK("Callstack_DrawProfile");
 
 	View_Push();
 	View_SetOrtho();
@@ -239,7 +239,7 @@ void Callstack_DrawProfile()
 #if defined(_CALLSTACK_PROFILING)
 void Callstack_BeginFrame()
 {
-	CALLSTACK("Callstack_BeginFrame");
+//	CALLSTACK("Callstack_BeginFrame");
 
 #if defined(_CALLSTACK_MONITORING)
 	monitorInfo.frameEnd = RDTSC();

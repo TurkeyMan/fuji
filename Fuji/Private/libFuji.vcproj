@@ -5,6 +5,7 @@
 	Name="libFuji"
 	ProjectGUID="{692AD46F-7D1C-4C2B-89B4-9DA4EEF1EF89}"
 	RootNamespace="libFuji"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -366,7 +367,7 @@
 				AdditionalDependencies=""
 				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
-				includepaths="D:\Projects\Fuji\Source\;D:\Projects\Fuji\Include\;D:\Projects\Fuji\PSP\;C:\cygwin\usr\local\pspdev\psp\sdk\include;D:\Projects\Fuji\Lib\;D:\Projects\Fuji\Lib\zlib\;D:\Projects\Fuji\Lib\zzip\"
+				includepaths="D:\Projects\Fuji\Source\;D:\Projects\Fuji\Include\;D:\Projects\Fuji\PSP\;C:\cygwin\usr\local\pspdev\psp\sdk\include;D:\Projects\Fuji\Lib\;D:\Projects\Fuji\Lib\zlib\"
 				warninglevel="1"
 				optimization="3"
 				preprocessordefines="_PSP;_DEBUG;_LIB"
@@ -476,6 +477,7 @@
 			<Tool
 				Name="GCCCompiler"
 				ExecutionBucket="6"
+				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
 				includepaths="D:\Projects\Fuji\Source\;D:\Projects\Fuji\Include\;D:\Projects\Fuji\PSP\;C:\cygwin\usr\local\pspdev\psp\sdk\include;D:\Projects\Fuji\Lib\;D:\Projects\Fuji\Lib\zlib\"
 				preprocessordefines="_PSP;NDEBUG;_LIB;_RELEASE"
@@ -585,6 +587,7 @@
 			<Tool
 				Name="GCCCompiler"
 				ExecutionBucket="6"
+				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
 				includepaths="D:\Projects\Fuji\Source\;D:\Projects\Fuji\Include\;D:\Projects\Fuji\PSP\;C:\cygwin\usr\local\pspdev\psp\sdk\include;D:\Projects\Fuji\Lib\;D:\Projects\Fuji\Lib\zlib\"
 				preprocessordefines="_PSP;NDEBUG;_LIB;_RETAIL"
@@ -2560,6 +2563,83 @@
 				>
 				<FileConfiguration
 					Name="Debug_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_GC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_GC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_GC|Win32"
 					>
 					<Tool
 						Name="GCCCompiler"

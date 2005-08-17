@@ -15,9 +15,11 @@ const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 
 	"R5G6B5",
 	"R6G5B5",
+	"B6G5R5",
 
 	"A1R5G5B5",
 	"R5G5B5A1",
+	"A1B5G5R5",
 
 	"A4R4G4B4",
 	"A4B4G4R4",
@@ -35,55 +37,79 @@ const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 	"DXT4",
 	"DXT5",
 
-	"XB_A8R8G8B8",
-	"XB_A8B8G8R8",
-	"XB_B8G8R8A8",
-	"XB_R8G8B8A8",
+	"PSP_DXT1",
+	"PSP_DXT3",
+	"PSP_DXT5",
 
-	"XB_R5G6B5",
-	"XB_R6G5B5",
+	// platform specific swizzled formats
+	"XB_A8R8G8B8s",
+	"XB_A8B8G8R8s",
+	"XB_B8G8R8A8s",
+	"XB_R8G8B8A8s",
 
-	"XB_A1R5G5B5",
-	"XB_R5G5B5A1",
+	"XB_R5G6B5s",
+	"XB_R6G5B5s",
 
-	"XB_A4R4G4B4",
-	"XB_R4G4B4A4",
+	"XB_A1R5G5B5s",
+	"XB_R5G5B5A1s",
+
+	"XB_A4R4G4B4s",
+	"XB_R4G4B4A4s",
+
+	"PSP_A8B8G8R8s",
+	"PSP_B5G6R5s",
+	"PSP_A1B5G5R5s",
+	"PSP_A4B4G4R4s",
+
+	"PSP_I8s",
+	"PSP_I4s",
+
+	"PSP_DXT1s",
+	"PSP_DXT3s",
+	"PSP_DXT5s",
 };
 
 uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
-	BIT(FP_PC)|BIT(FP_XBox),			// TexFmt_A8R8G8B8
-	BIT(FP_PSP)|BIT(FP_XBox),			// TexFmt_A8B8G8R8
-	BIT(FP_XBox),						// TexFmt_B8G8R8A8
-	BIT(FP_XBox),						// TexFmt_R8G8B8A8
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_A8R8G8B8
+	BIT(FP_PSP)|BIT(FP_XBox),	// TexFmt_A8B8G8R8
+	BIT(FP_XBox),				// TexFmt_B8G8R8A8
+	BIT(FP_XBox),				// TexFmt_R8G8B8A8
 
-	BIT(FP_PC),							// TexFmt_A2R10G10B10
-	BIT(FP_PC),							// TexFmt_A2B10G10R10
+	BIT(FP_PC),					// TexFmt_A2R10G10B10
+	BIT(FP_PC),					// TexFmt_A2B10G10R10
 
-	BIT(FP_PC),							// TexFmt_A16B16G16R16
+	BIT(FP_PC),					// TexFmt_A16B16G16R16
 
-	BIT(FP_PC)|BIT(FP_XBox)|BIT(FP_PSP),// TexFmt_R5G6B5
-	BIT(FP_XBox),						// TexFmt_R6G5B5
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_R5G6B5
+	BIT(FP_XBox),				// TexFmt_R6G5B5
+	BIT(FP_PSP),				// TexFmt_B5G6R5
 
-	BIT(FP_PC)|BIT(FP_XBox)|BIT(FP_PSP),// TexFmt_A1R5G5B5
-	BIT(FP_XBox),						// TexFmt_R5G5B5A1
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_A1R5G5B5
+	BIT(FP_XBox),				// TexFmt_R5G5B5A1
+	BIT(FP_PSP),				// TexFmt_A1B5G5R5
 
-	BIT(FP_PC)|BIT(FP_XBox),			// TexFmt_A4R4G4B4
-	BIT(FP_PSP),						// TexFmt_A4B4G4R4
-	BIT(FP_XBox),						// TexFmt_R4G4B4A4
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_A4R4G4B4
+	BIT(FP_PSP),				// TexFmt_A4B4G4R4
+	BIT(FP_XBox),				// TexFmt_R4G4B4A4
 
-	BIT(FP_PC),							// TexFmt_ABGR_F16
-	BIT(FP_PC),							// TexFmt_ABGR_F32
+	BIT(FP_PC),					// TexFmt_ABGR_F16
+	BIT(FP_PC),					// TexFmt_ABGR_F32
 
-	BIT(FP_PSP)|BIT(FP_XBox),			// TexFmt_I8
-	BIT(FP_PSP),						// TexFmt_I4
+	BIT(FP_PSP)|BIT(FP_XBox),	// TexFmt_I8
+	BIT(FP_PSP),				// TexFmt_I4
 
-	BIT(FP_PC)|BIT(FP_XBox)|BIT(FP_PSP),// TexFmt_DXT1
-	BIT(FP_PC)|BIT(FP_XBox),			// TexFmt_DXT2
-	BIT(FP_PC)|BIT(FP_XBox)|BIT(FP_PSP),// TexFmt_DXT3
-	BIT(FP_PC)|BIT(FP_XBox),			// TexFmt_DXT4
-	BIT(FP_PC)|BIT(FP_XBox)|BIT(FP_PSP),// TexFmt_DXT5
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_DXT1
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_DXT2
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_DXT3
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_DXT4
+	BIT(FP_PC)|BIT(FP_XBox),	// TexFmt_DXT5
 
+	BIT(FP_PSP),	// TexFmt_PSP_DXT1
+	BIT(FP_PSP),	// TexFmt_PSP_DXT3
+	BIT(FP_PSP),	// TexFmt_PSP_DXT5
+
+	// platform specific swizzled formats
 	BIT(FP_XBox),	// TexFmt_XB_A8R8G8B8
 	BIT(FP_XBox),	// TexFmt_XB_A8B8G8R8
 	BIT(FP_XBox),	// TexFmt_XB_B8G8R8A8
@@ -97,6 +123,18 @@ uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 
 	BIT(FP_XBox),	// TexFmt_XB_A4R4G4B4
 	BIT(FP_XBox),	// TexFmt_XB_R4G4B4A4
+
+	BIT(FP_PSP),	// TexFmt_PSP_A8B8G8R8s
+	BIT(FP_PSP),	// TexFmt_PSP_B5G6R5s
+	BIT(FP_PSP),	// TexFmt_PSP_A1B5G5R5s
+	BIT(FP_PSP),	// TexFmt_PSP_A4B4G4R4s
+
+	BIT(FP_PSP),	// TexFmt_PSP_I8s
+	BIT(FP_PSP),	// TexFmt_PSP_I4s
+
+	BIT(FP_PSP),	// TexFmt_PSP_DXT1s
+	BIT(FP_PSP),	// TexFmt_PSP_DXT3s
+	BIT(FP_PSP),	// TexFmt_PSP_DXT5s
 };
 
 uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
@@ -113,9 +151,11 @@ uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
 
 	16,	// TexFmt_R5G6B5
 	16,	// TexFmt_R6G5B5
+	16,	// TexFmt_B5G6R5
 
 	16,	// TexFmt_A1R5G5B5
 	16,	// TexFmt_R5G5B5A1
+	16,	// TexFmt_A1B5G5R5
 
 	16,	// TexFmt_A4R4G4B4
 	16,	// TexFmt_A4B4G4R4
@@ -133,6 +173,10 @@ uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
 	8,	// TexFmt_DXT4
 	8,	// TexFmt_DXT5
 
+	4,	// TexFmt_PSP_DXT1
+	8,	// TexFmt_PSP_DXT3
+	8,	// TexFmt_PSP_DXT5
+
 	32,	// TexFmt_XB_A8R8G8B8
 	32,	// TexFmt_XB_A8B8G8R8
 	32,	// TexFmt_XB_B8G8R8A8
@@ -146,6 +190,18 @@ uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
 
 	16,	// TexFmt_XB_A4R4G4B4
 	16,	// TexFmt_XB_R4G4B4A4
+
+	32,	// TexFmt_PSP_A8B8G8R8s
+	16,	// TexFmt_PSP_B5G6R5s
+	16,	// TexFmt_PSP_A1B5G5R5s
+	16,	// TexFmt_PSP_A4B4G4R4s
+
+	8,	// TexFmt_PSP_I8s
+	4,	// TexFmt_PSP_I4s
+
+	4,	// TexFmt_PSP_DXT1s
+	8,	// TexFmt_PSP_DXT3s
+	8,	// TexFmt_PSP_DXT5s
 };
 
 uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
@@ -163,9 +219,11 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		23,	// D3DFMT_R5G6B5		// TexFmt_R5G6B5
 		0,	//						// TexFmt_R6G5B5
+		0,	//						// TexFmt_B5G6R5
 
-		25,	// D3DFMT_A1R5G5B5		// TexFmt_A1R5G5B5
+		0,	// D3DFMT_A1R5G5B5		// TexFmt_A1R5G5B5
 		0,	//						// TexFmt_R5G5B5A1
+		25,	//						// TexFmt_A1B5G5R5
 
 		26,	// D3DFMT_A4R4G4B4		// TexFmt_A4R4G4B4
 		0,	//						// TexFmt_A4B4G4R4
@@ -183,6 +241,10 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		MAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// TexFmt_DXT4
 		MAKEFOURCC('D', 'X', 'T', '5'),	// D3DFMT_DXT5	// TexFmt_DXT5
 
+		0,	// TexFmt_PSP_DXT1
+		0,	// TexFmt_PSP_DXT3
+		0,	// TexFmt_PSP_DXT5
+
 		0,	// TexFmt_XB_A8R8G8B8
 		0,	// TexFmt_XB_A8B8G8R8
 		0,	// TexFmt_XB_B8G8R8A8
@@ -196,6 +258,18 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0,	// TexFmt_XB_A4R4G4B4
 		0,	// TexFmt_XB_R4G4B4A4
+
+		0,	// TexFmt_PSP_A8B8G8R8s
+		0,	// TexFmt_PSP_B5G6R5s
+		0,	// TexFmt_PSP_A1B5G5R5s
+		0,	// TexFmt_PSP_A4B4G4R4s
+
+		0,	// TexFmt_PSP_I8s
+		0,	// TexFmt_PSP_I4s
+
+		0,	// TexFmt_PSP_DXT1s
+		0,	// TexFmt_PSP_DXT3s
+		0,	// TexFmt_PSP_DXT5s
 	},
 
 	{ // XBox
@@ -211,9 +285,11 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0x11,	// TexFmt_R5G6B5
 		0x37,	// TexFmt_R6G5B5
+		0,		// TexFmt_B5G6R5
 
 		0x10,	// TexFmt_A1R5G5B5
 		0x3D,	// TexFmt_R5G5B5A1
+		0,		// TexFmt_A1B5G5R5
 
 		0x1D,	// TexFmt_A4R4G4B4
 		0,		// TexFmt_A4B4G4R4
@@ -231,6 +307,10 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		0xF,	// TexFmt_DXT4
 		0xF,	// TexFmt_DXT5
 
+		0,		// TexFmt_PSP_DXT1
+		0,		// TexFmt_PSP_DXT3
+		0,		// TexFmt_PSP_DXT5
+
 		0x6,	// TexFmt_XB_A8R8G8B8
 		0x3A,	// TexFmt_XB_A8B8G8R8
 		0x3B,	// TexFmt_XB_B8G8R8A8
@@ -244,6 +324,18 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0x4,	// TexFmt_XB_A4R4G4B4
 		0x39,	// TexFmt_XB_R4G4B4A4
+
+		0,		// TexFmt_PSP_A8B8G8R8s
+		0,		// TexFmt_PSP_B5G6R5s
+		0,		// TexFmt_PSP_A1B5G5R5s
+		0,		// TexFmt_PSP_A4B4G4R4s
+
+		0,		// TexFmt_PSP_I8s
+		0,		// TexFmt_PSP_I4s
+
+		0,		// TexFmt_PSP_DXT1s
+		0,		// TexFmt_PSP_DXT3s
+		0,		// TexFmt_PSP_DXT5s
 	},
 
 	{ // Linux
@@ -259,9 +351,11 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0,	// TexFmt_R5G6B5
 		0,	// TexFmt_R6G5B5
+		0,	// TexFmt_B5G6R5
 
 		0,	// TexFmt_A1R5G5B5
 		0,	// TexFmt_R5G5B5A1
+		0,	// TexFmt_A1B5G5R5
 
 		0,	// TexFmt_A4R4G4B4
 		0,	// TexFmt_A4B4G4R4
@@ -279,6 +373,10 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		0,	// TexFmt_DXT4
 		0,	// TexFmt_DXT5
 
+		0,	// TexFmt_DXT1
+		0,	// TexFmt_DXT3
+		0,	// TexFmt_DXT5
+
 		0,	// TexFmt_XB_A8R8G8B8
 		0,	// TexFmt_XB_A8B8G8R8
 		0,	// TexFmt_XB_B8G8R8A8
@@ -292,6 +390,18 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0,	// TexFmt_XB_A4R4G4B4
 		0,	// TexFmt_XB_R4G4B4A4
+
+		0,	// TexFmt_PSP_A8B8G8R8s
+		0,	// TexFmt_PSP_B5G6R5s
+		0,	// TexFmt_PSP_A1B5G5R5s
+		0,	// TexFmt_PSP_A4B4G4R4s
+
+		0,	// TexFmt_PSP_I8s
+		0,	// TexFmt_PSP_I4s
+
+		0,	// TexFmt_PSP_DXT1s
+		0,	// TexFmt_PSP_DXT3s
+		0,	// TexFmt_PSP_DXT5s
 	},
 
 	{ // PSP
@@ -305,11 +415,13 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0,	//				 // TexFmt_A16B16G16R16
 
-		0,	// SCEGU_PF5650, //	TexFmt_R5G6B5
+		0,	//				 //	TexFmt_R5G6B5
 		0,	//				 // TexFmt_R6G5B5
+		0,	// SCEGU_PF5650, // TexFmt_B5G6R5
 
-		1,	// SCEGU_PF5551, //	TexFmt_A1R5G5B5
+		0,	//               //	TexFmt_A1R5G5B5
 		0,	//				 // TexFmt_R5G5B5A1
+		1,	// SCEGU_PF5551, //	TexFmt_A1B5G5R5
 
 		0,	//				 // TexFmt_A4R4G4B4
 		2,	// SCEGU_PF4444, //	TexFmt_A4B4G4R4
@@ -321,11 +433,15 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		5,	// SCEGU_PFIDX8, //	TexFmt_I8
 		4,	// SCEGU_PFIDX4, //	TexFmt_I4
 
-		8,	// SCEGU_PFDXT1, //	TexFmt_DXT1
-		0,	//					TexFmt_DXT2
-		9,	// SCEGU_PFDXT3, //	TexFmt_DXT3
-		0,	//					TexFmt_DXT4
-		10,	// SCEGU_PFDXT5, //	TexFmt_DXT5
+		0,	//				 // TexFmt_DXT1
+		0,	//				 // TexFmt_DXT2
+		0,	//				 // TexFmt_DXT3
+		0,	//				 // TexFmt_DXT4
+		0,	//				 // TexFmt_DXT5
+
+		8,	// SCEGU_PFDXT1, //	TexFmt_PSP_DXT1
+		9,	// SCEGU_PFDXT3, //	TexFmt_PSP_DXT3
+		10,	// SCEGU_PFDXT5, //	TexFmt_PSP_DXT5
 
 		0,	//				 // TexFmt_XB_A8R8G8B8
 		0,	//				 // TexFmt_XB_A8B8G8R8
@@ -340,6 +456,18 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 
 		0,	//				 // TexFmt_XB_A4R4G4B4
 		0,	//				 // TexFmt_XB_R4G4B4A4
+
+		3,	// SCEGU_PF8888, //	TexFmt_PSP_A8B8G8R8s
+		0,	// SCEGU_PF5650, // TexFmt_PSP_B5G6R5s
+		1,	// SCEGU_PF5551, //	TexFmt_PSP_A1B5G5R5s
+		2,	// SCEGU_PF4444, //	TexFmt_PSP_A4B4G4R4s
+
+		5,	// SCEGU_PFIDX8, //	TexFmt_PSP_I8s
+		4,	// SCEGU_PFIDX4, //	TexFmt_PSP_I4s
+
+		8,	// SCEGU_PFDXT1, //	TexFmt_PSP_DXT1s
+		9,	// SCEGU_PFDXT3, //	TexFmt_PSP_DXT3s
+		10,	// SCEGU_PFDXT5, //	TexFmt_PSP_DXT5s
 	}
 };
 

@@ -8,7 +8,17 @@
 #include <d3d8.h>
 #include <xgraphics.h>
 
+void LOGERROR(const char *pFormat, ...)
+{
+	va_list arglist;
+	va_start(arglist, pFormat);
+
+	vprintf(pFormat, arglist);
+	getc(stdin);
+}
+
 int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormats targetFormat);
+void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormats format);
 
 int main(int argc, char *argv[])
 {
@@ -63,7 +73,7 @@ int main(int argc, char *argv[])
 				// print version
 				return 0;
 			}
-			else if(!stricmp(&argv[a][1], "l") || !stricmp(&argv[a][1], "list"))
+			else if(!stricmp(&argv[a][1], "l") || !stricmp(&argv[a][1], "listavailable"))
 			{
 				// list formats for platform
 				for(int f=0; f<TexFmt_Max; f++)
@@ -72,6 +82,29 @@ int main(int argc, char *argv[])
 					{
 						printf("%s\n", gpMFTextureFormatStrings[f]);
 					}
+				}
+				gets(outFile);
+				return 0;
+			}
+			else if(!stricmp(&argv[a][1], "a") || !stricmp(&argv[a][1], "listall"))
+			{
+				// list formats for platform
+				for(int f=0; f<TexFmt_Max; f++)
+				{
+					printf("%s\t", gpMFTextureFormatStrings[f]);
+
+					bool printPipe = false;
+
+					for(int g = 0; g<FP_Max; g++)
+					{
+						if(gMFTexturePlatformAvailability[f] & 1<<(uint32)g)
+						{
+							printf("%s%s", printPipe ? "|" : "", gPlatformStrings[g]);
+							printPipe = true;
+						}
+					}
+
+					printf("\n", gpMFTextureFormatStrings[f]);
 				}
 				gets(outFile);
 				return 0;
@@ -88,13 +121,13 @@ int main(int argc, char *argv[])
 
 	if(platform == FP_Unknown)
 	{
-		printf("No platform specified...\n");
+		LOGERROR("No platform specified...\n");
 		return 1;
 	}
 
 	if(!fileName[0])
 	{
-		printf("No file specified...\n");
+		LOGERROR("No file specified...\n");
 		return 1;
 	}
 
@@ -123,14 +156,20 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Unsupported source image format..\n");
+		LOGERROR("Unsupported source image format..\n");
 		return 1;
 	}
 
 	if(!pImage)
 	{
-		printf("Unable to load source image...\n");
+		LOGERROR("Unable to load source image...\n");
 		return 2;
+	}
+
+	// chuck some source image warnings
+	if(pImage->pLevels[0].width < 8 || pImage->pLevels[0].height < 8)
+	{
+		LOGERROR("Textures should be a minimum of 8x8 pixels.\n");
 	}
 
 	// choose target image format
@@ -152,16 +191,28 @@ int main(int argc, char *argv[])
 				break;
 
 			case FP_PSP:
-				targetFormat = TexFmt_A4B4G4R4;
+				if(pImage->opaque)
+					targetFormat = TexFmt_PSP_B5G6R5s;
+				else if(pImage->oneBitAlpha)
+					targetFormat = TexFmt_PSP_A1B5G5R5s;
+				else
+					targetFormat = TexFmt_PSP_A4B4G4R4s;
+
 				break;
 		};
 	}
 
-	// verify format is available on target platform
-	if((gMFTexturePlatformAvailability[(int)targetFormat] & (uint32)BIT(platform)) == 0)
+	// check minimum pitch
+	if((pImage->pLevels[0].width*gMFTextureBitsPerPixel[targetFormat]) / 8 < 64)
 	{
-		printf("Desired texture format is unavailable on target platform..\n");
+		LOGERROR("Textures should have a minimum pitch of 64 bytes.\n");
 		return 1;
+	}
+
+	// check power of 2 dimensions
+	if(0)
+	{
+		LOGERROR("Texture dimensions are not a power of 2.\n");
 	}
 
 	//
@@ -196,6 +247,16 @@ int main(int argc, char *argv[])
 
 	pTemplate->imageFormat = targetFormat;
 	pTemplate->platformFormat = gMFTexturePlatformFormat[(int)platform][(int)targetFormat];
+
+	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
+		pTemplate->swizzled = 1;
+
+	if(pImage->opaque = true)
+		pTemplate->alpha = 0;
+	else if(pImage->oneBitAlpha)
+		pTemplate->alpha = 3;
+	else
+		pTemplate->alpha = 1;
 
 	pTemplate->mipLevels = pImage->mipLevels;
 	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
@@ -254,7 +315,7 @@ int main(int argc, char *argv[])
 
 	if(!pFile)
 	{
-		printf("Couldnt open output file...\n");
+		LOGERROR("Couldnt open output file...\n");
 		return 1;
 	}
 
@@ -281,7 +342,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	switch(targetFormat)
 	{
 		case TexFmt_A8R8G8B8:
-		case TexFmt_XB_A8R8G8B8:
+		case TexFmt_XB_A8R8G8B8s:
 		{
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
@@ -301,7 +362,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_A8B8G8R8:
-		case TexFmt_XB_A8B8G8R8:
+		case TexFmt_XB_A8B8G8R8s:
 		{
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
@@ -313,6 +374,46 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 								((uint32)(pSource->b*255.0f) & 0xFF) << 16 |
 								((uint32)(pSource->g*255.0f) & 0xFF) << 8 |
 								((uint32)(pSource->r*255.0f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_B8G8R8A8:
+		case TexFmt_XB_B8G8R8A8s:
+		{
+			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint32)(pSource->b*255.0f) & 0xFF) << 24 |
+								((uint32)(pSource->g*255.0f) & 0xFF) << 16 |
+								((uint32)(pSource->r*255.0f) & 0xFF) << 8 |
+								((uint32)(pSource->a*255.0f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R8G8B8A8:
+		case TexFmt_XB_R8G8B8A8s:
+		{
+			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint32)(pSource->r*255.0f) & 0xFF) << 24 |
+								((uint32)(pSource->g*255.0f) & 0xFF) << 16 |
+								((uint32)(pSource->b*255.0f) & 0xFF) << 8 |
+								((uint32)(pSource->a*255.0f) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
@@ -378,7 +479,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_R5G6B5:
-		case TexFmt_XB_R5G6B5:
+		case TexFmt_XB_R5G6B5s:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -396,8 +497,46 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			break;
 		}
 
+		case TexFmt_R6G5B5:
+		case TexFmt_XB_R6G5B5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->r*63.0f) & 0x3F) << 10 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
+								((uint16)(pSource->b*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_B5G6R5:
+		case TexFmt_PSP_B5G6R5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->b*31.0f) & 0x1F) << 11 |
+								((uint16)(pSource->g*63.0f) & 0x3F) << 5 |
+								((uint16)(pSource->r*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
 		case TexFmt_A1R5G5B5:
-		case TexFmt_XB_A1R5G5B5:
+		case TexFmt_XB_A1R5G5B5s:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -416,8 +555,48 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			break;
 		}
 
+		case TexFmt_R5G5B5A1:
+		case TexFmt_XB_R5G5B5A1s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) |
+								((uint16)(pSource->r*31.0f) & 0x1F) << 11 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 6 |
+								((uint16)(pSource->b*31.0f) & 0x1F) << 1;
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A1B5G5R5:
+		case TexFmt_PSP_A1B5G5R5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) << 15 |
+								((uint16)(pSource->b*31.0f) & 0x1F) << 10 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
+								((uint16)(pSource->r*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
 		case TexFmt_A4R4G4B4:
-		case TexFmt_XB_A4R4G4B4:
+		case TexFmt_XB_A4R4G4B4s:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -437,6 +616,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		case TexFmt_A4B4G4R4:
+		case TexFmt_PSP_A4B4G4R4s:
 		{
 			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
 
@@ -448,6 +628,26 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 								((uint16)(pSource->b*15.0f) & 0xF) << 8 |
 								((uint16)(pSource->g*15.0f) & 0xF) << 4 |
 								((uint16)(pSource->r*15.0f) & 0xF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R4G4B4A4:
+		case TexFmt_XB_R4G4B4A4s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->r*15.0f) & 0xF) << 12 |
+								((uint16)(pSource->g*15.0f) & 0xF) << 8 |
+								((uint16)(pSource->b*15.0f) & 0xF) << 4 |
+								((uint16)(pSource->a*15.0f) & 0xF);
 					++pTarget;
 					++pSource;
 				}
@@ -504,19 +704,30 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		default:
 		{
-			printf("Conversion for target type not yet support...\n");
+			LOGERROR("Conversion for target type '%s' not yet support...\n", gpMFTextureFormatStrings[targetFormat]);
 			return 1;
 		}
 	}
 
-	// xbox supports swizzled formats..
-	if(targetFormat >= TexFmt_XB_A8R8G8B8)
+	// test for swizzled format..
+	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
 	{
+		uint32 imageBytes = (width * height * gMFTextureBitsPerPixel[targetFormat]) / 8;
 		uint32 bytesperpixel = gMFTextureBitsPerPixel[targetFormat] / 8;
-		uint32 imageBytes = width * height * bytesperpixel;
 
 		char *pBuffer = (char*)malloc(imageBytes);
-		XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+
+		if(targetFormat >= TexFmt_XB_A8R8G8B8s && targetFormat <= TexFmt_XB_R4G4B4A4s)
+		{
+			// swizzle for xbox
+			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+		}
+		else if(targetFormat >= TexFmt_PSP_A8B8G8R8s && targetFormat <= TexFmt_PSP_DXT5s)
+		{
+			// swizzle for PSP
+			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);
+		}
+
 		memcpy(pOutputSurface->pImageData, pBuffer, imageBytes);
 		free(pBuffer);
 	}
@@ -524,3 +735,39 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	return 0;
 }
 
+void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormats format)
+{
+	uint32 blockx, blocky;
+	uint32 j;
+
+	// calculate width in bytes
+	width = (width * gMFTextureBitsPerPixel[format]) / 8;
+
+	uint32 width_blocks = (width / 16);
+	uint32 height_blocks = (height / 8);
+
+	uint32 src_pitch = (width-16)/4;
+	uint32 src_row = width * 8;
+
+	const char* ysrc = in;
+	uint32* dst = (uint32*)out;
+
+	for(blocky = 0; blocky < height_blocks; ++blocky)
+	{
+		const char* xsrc = ysrc;
+		for(blockx = 0; blockx < width_blocks; ++blockx)
+		{
+			const uint32* src = (uint32*)xsrc;
+			for(j = 0; j < 8; ++j)
+			{
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				src += src_pitch;
+			}
+			xsrc += 16;
+		}
+		ysrc += src_row;
+	}
+}

@@ -1,8 +1,8 @@
 #include "Common.h"
 
+#include "ConvertTex.h"
 #include "IntImage.h"
 #include "LoadTarga.h"
-
 
 SourceImage* LoadTarga(const char *pFilename)
 {
@@ -47,21 +47,21 @@ SourceImage* LoadTarga(const char *pFilename)
 
 	if((pHeader->imageType != 2) && (pHeader->imageType != 10))
 	{
-		LOGD(STR("Failed loading image: %s (Unhandled TGA type (%d))\n", pFilename, pHeader->imageType));
+		LOGERROR("Failed loading image: %s (Unhandled TGA type (%d))\n", pFilename, pHeader->imageType);
 		free(pTarga);
 		return NULL;
 	}
 
 	if((pHeader->bpp != 24) && (pHeader->bpp != 32))
 	{
-		LOGD(STR("Failed loading image: %s (Invalid colour depth (%d))", pFilename, pHeader->bpp));
+		LOGERROR("Failed loading image: %s (Invalid colour depth (%d))", pFilename, pHeader->bpp);
 		free(pTarga);
 		return NULL;
 	}
 
 	if((pHeader->flags & 0xC0))
 	{
-		LOGD(STR("Failed loading image: %s (Interleaved images not supported)", pFilename));
+		LOGERROR("Failed loading image: %s (Interleaved images not supported)", pFilename);
 		free(pTarga);
 		return NULL;
 	}
@@ -90,7 +90,7 @@ SourceImage* LoadTarga(const char *pFilename)
 		{
 			if(pPosition >= pTarga + imageSize)
 			{
-				LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+				LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 				free(pTarga);
 				return NULL;
 			}
@@ -103,14 +103,14 @@ SourceImage* LoadTarga(const char *pFilename)
 
 				if((pPosition + bytesPerPixel) > pTarga + imageSize)
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+					LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 					free(pTarga);
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+					LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 					free(pTarga);
 					return NULL;
 				}
@@ -142,14 +142,14 @@ SourceImage* LoadTarga(const char *pFilename)
 
 				if((pPosition + (bytesPerPixel * length)) > pTarga + imageSize)
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+					LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 					free(pTarga);
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+					LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 					free(pTarga);
 					return NULL;
 				}
@@ -177,7 +177,7 @@ SourceImage* LoadTarga(const char *pFilename)
 	{
 		if((pPosition + (bytesPerPixel * (pHeader->width * pHeader->height))) > pTarga + imageSize)
 		{
-			LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+			LOGERROR("Failed loading image: %s (Unexpected end of file)", pFilename);
 			free(pTarga);
 			return NULL;
 		}
@@ -209,6 +209,14 @@ SourceImage* LoadTarga(const char *pFilename)
 	}
 
 	free(pTarga);
+
+	if(isSavedFlipped)
+	{
+		FlipImage(pImage);
+	}
+
+	// scan for alpha information
+	ScanImage(pImage);
 
 	return pImage;
 }

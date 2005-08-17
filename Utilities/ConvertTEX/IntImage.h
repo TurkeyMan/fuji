@@ -21,12 +21,16 @@ struct SourceImageLevel
 
 struct SourceImage
 {
+	SourceImageLevel *pLevels;
 	int mipLevels;
 
-	SourceImageLevel *pLevels;
+	bool opaque;
+	bool oneBitAlpha;
 };
 
 void DestroyImage(SourceImage *pImage);
 void FilterMipMaps(int numMipLevels, uint32 mipFilterOptions);
+void ScanImage(SourceImage *pImage);
+void FlipImage(SourceImage *pImage);
 
 #endif

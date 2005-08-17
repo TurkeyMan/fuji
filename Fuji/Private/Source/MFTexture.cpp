@@ -204,7 +204,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	int height = pTexture->pTemplateData->pSurfaces[0].height;
 	char *pImageData = pTexture->pTemplateData->pSurfaces[0].pImageData;
 
-	sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, 0);
+	sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, pTexture->pTemplateData->swizzled);
 	sceGuTexImage(0, width, height, width, pImageData);
 	sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 	sceGuTexFilter(GU_LINEAR, GU_LINEAR);
