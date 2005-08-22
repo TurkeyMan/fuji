@@ -7,6 +7,11 @@
 #define _cdecl __attribute__((__cdecl__))
 #endif
 
+#if defined(_MSC_VER)
+#pragma warning(disable: 4201)
+#endif
+
+
 // an enum to define all platforms supported by fuji
 enum FujiPlatforms
 {

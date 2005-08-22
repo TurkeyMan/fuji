@@ -621,6 +621,12 @@
 				RelativePath=".\Source\MFModel_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFSockets.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSockets_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFStringCache.cpp">
 			</File>
 			<File
@@ -685,11 +691,6 @@
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp">
-					<FileConfiguration
-						Name="Debug_XB|Xbox">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.h">
@@ -808,6 +809,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFModel.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFSockets.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFStringCache.h">
@@ -1349,6 +1353,9 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Pc\MFSockets_PC.cpp">
 			</File>
 			<File
 				RelativePath=".\Pc\MFTexture_PC.cpp">
