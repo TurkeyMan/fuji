@@ -8,7 +8,7 @@
 #include <errno.h>
 
 #include "pcre.h"
-#include "zlib/minizip/zip.h"
+#include "minizip/zip.h"
 
 void Traverse(const char *dir);
 int ProcessIniFile(const char *pIniFile, FujiPlatforms platform);

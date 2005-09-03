@@ -24,7 +24,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -43,7 +43,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -78,7 +78,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -97,7 +97,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -132,7 +132,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="\Projects\Fuji\Source\;\Projects\Fuji\Include\;\Projects\Fuji\PC\;\Projects\Fuji\PC\vorbis\include\;\Projects\Fuji\Lib\"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -151,7 +151,7 @@
 				Name="VCLibrarianTool"
 				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="\Projects\Fuji\PC\vorbis\lib\"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

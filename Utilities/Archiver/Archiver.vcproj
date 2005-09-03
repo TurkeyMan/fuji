@@ -12,14 +12,14 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
+			OutputDirectory="$(ProjectDir)..\..\Fuji\Bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include;\Projects\Fuji\Lib\"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)..\..\Fuji\Include&quot;;PCRE\Include;&quot;$(ProjectDir)..\..\Fuji\Lib&quot;;&quot;$(ProjectDir)..\..\Fuji\Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_FUJI_UTIL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -32,7 +32,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
+				OutputFile="$(OutDir)\Archiver.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/$(ProjectName).pdb"
@@ -61,13 +61,13 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
+			OutputDirectory="$(ProjectDir)..\..\Fuji\Bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="Include;../../Fuji/Include;PCRE/Include;\Projects\Fuji\Lib\"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)..\..\Fuji\Include&quot;;PCRE\Include;&quot;$(ProjectDir)..\..\Fuji\Lib&quot;;&quot;$(ProjectDir)..\..\Fuji\Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
@@ -78,7 +78,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="/Projects/Fuji/Bin/Archiver.exe"
+				OutputFile="$(OutDir)\Archiver.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
