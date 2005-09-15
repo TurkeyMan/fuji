@@ -44,28 +44,32 @@ int MFSockets_CloseSocket(MFSocket socket)
 	return closesocket((SOCKET)socket);
 }
 
-sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress &address, int *pAddrLen)
+sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLen)
 {
-	sockaddr *pSockAddr = NULL;
 	*pAddrLen = 0;
 
-	if(address.family == MFAF_Inet)
-	{
-		DBGASSERT(address.cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
+	if(!pAddress)
+		return NULL;
 
-		MFSocketAddressInet &inet = (MFSocketAddressInet&)address;
+	sockaddr *pSockAddr = NULL;
+
+	if(pAddress->family == MFAF_Inet)
+	{
+		DBGASSERT(pAddress->cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
+
+		MFSocketAddressInet *pInet = (MFSocketAddressInet*)pAddress;
 
 		static sockaddr_in ain;
 		pSockAddr = (sockaddr*)&ain;
 		*pAddrLen = sizeof(sockaddr_in);
 
 		memset(&ain, 0, sizeof(sockaddr_in));
-		ain.sin_family = (short)inet.family;
-		ain.sin_addr.S_un.S_un_b.s_b1 = inet.address.b1;
-		ain.sin_addr.S_un.S_un_b.s_b2 = inet.address.b2;
-		ain.sin_addr.S_un.S_un_b.s_b3 = inet.address.b3;
-		ain.sin_addr.S_un.S_un_b.s_b4 = inet.address.b4;
-		ain.sin_port = (uint16)inet.port;
+		ain.sin_family = (short)pInet->family;
+		ain.sin_addr.S_un.S_un_b.s_b1 = pInet->address.b1;
+		ain.sin_addr.S_un.S_un_b.s_b2 = pInet->address.b2;
+		ain.sin_addr.S_un.S_un_b.s_b3 = pInet->address.b3;
+		ain.sin_addr.S_un.S_un_b.s_b4 = pInet->address.b4;
+		ain.sin_port = (uint16)pInet->port;
 		HostToBigEndian(&ain.sin_port);
 	}
 	else
@@ -111,7 +115,7 @@ MFSocketAddress* MFSocketsPC_GetSocketAddress(const sockaddr *pSockAddress)
 int MFSockets_Bind(MFSocket socket, const MFSocketAddress &address)
 {
 	int addrLen = 0;
-	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(address, &addrLen);
+	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(&address, &addrLen);
 	DBGASSERT(pSockAddr, "Invalid socket address...");
 
 	return bind((SOCKET)socket, pSockAddr, addrLen);
@@ -120,7 +124,7 @@ int MFSockets_Bind(MFSocket socket, const MFSocketAddress &address)
 int MFSockets_Connect(MFSocket socket, const MFSocketAddress &address)
 {
 	int addrLen = 0;
-	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(address, &addrLen);
+	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(&address, &addrLen);
 	DBGASSERT(pSockAddr, "Invalid socket address...");
 
 	return connect((SOCKET)socket, pSockAddr, addrLen);
@@ -163,7 +167,7 @@ int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uin
 
 	if(pAddress)
 	{
-		pSockAddr = MFSocketsPC_GetSockaddr(*pAddress, &addrLen);
+		pSockAddr = MFSocketsPC_GetSockaddr(pAddress, &addrLen);
 		DBGASSERT(pSockAddr, "Invalid socket address...");
 	}
 
@@ -219,7 +223,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 		hint.ai_socktype = (int)pHint->type;
 		hint.ai_protocol = (int)pHint->protocol;
 		hint.ai_canonname = (char*)pHint->pCanonName;
-		hint.ai_addr = MFSocketsPC_GetSockaddr(*pHint->pAddress, (int*)&hint.ai_addrlen);
+		hint.ai_addr = MFSocketsPC_GetSockaddr(pHint->pAddress, (int*)&hint.ai_addrlen);
 		hint.ai_next = NULL;
 	}
 
@@ -251,4 +255,19 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 	}
 
 	return result;
+}
+
+int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const void* optval, int optlen)
+{
+
+	if(option == MFSO_NonBlocking)
+	{
+		DBGASSERT(optlen == sizeof(uint32), "optval must be an unsigned int defining the blocking mode.");
+
+		return ioctlsocket((SOCKET)socket, FIONBIO, (u_long*)optval);
+	}
+	else
+	{
+		return setsockopt((SOCKET)socket, SOL_SOCKET, option, (const char *)optval, optlen);
+	}
 }
