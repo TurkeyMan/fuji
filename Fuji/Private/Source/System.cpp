@@ -14,6 +14,7 @@
 #include "Font.h"
 #include "Renderer_Internal.h"
 #include "Sound.h"
+#include "MFSockets_Internal.h"
 
 FujiDefaults gDefaults = 
 {
@@ -130,6 +131,8 @@ void System_Init()
 	gSystemTimer.Init(NULL);
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
+	MFSockets_InitModule();
+
 	MFFileSystem_InitModule();
 
 	View_InitModule();
@@ -175,6 +178,8 @@ void System_Deinit()
 	View_DeinitModule();
 
 	MFFileSystem_DeinitModule();
+
+	MFSockets_DeinitModule();
 
 	Timer_DeinitModule();
 
