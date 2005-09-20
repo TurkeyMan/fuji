@@ -639,6 +639,9 @@
 				RelativePath=".\Source\MFTextureUtil.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFVector.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
@@ -664,9 +667,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\Util.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\Vector.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\View.cpp">

@@ -48,7 +48,7 @@ struct MFMeshChunk
 
 };
 
-#if defined(_WINDOWS)
+#if defined(_WINDOWS) || defined(_FUJI_UTIL)
 struct MFMeshChunk_PC : public MFMeshChunk
 {
 //#if defined(_WINDOWS)

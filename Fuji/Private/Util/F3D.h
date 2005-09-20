@@ -2,9 +2,8 @@
 #define _F3D_H
 
 #include "Array.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
 
 enum F3DChunkType
 {
@@ -59,7 +58,7 @@ class F3DTriangle
 public:
 	int v[3];
 	int reserved;
-	Vector3 normal;
+	MFVector normal;
 };
 
 struct F3DMatSub
@@ -118,13 +117,13 @@ public:
 
 	Array<F3DMaterialSubobject> matSubobjects;
 
-	Array<Vector3> positions;
-	Array<Vector3> normals;
-	Array<Vector3> biNormals;
-	Array<Vector3> tangents;
-	Array<Vector3> uvs;
-	Array<Vector4> colours;
-	Array<Vector3> illumination;
+	Array<MFVector> positions;
+	Array<MFVector> normals;
+	Array<MFVector> biNormals;
+	Array<MFVector> tangents;
+	Array<MFVector> uvs;
+	Array<MFVector> colours;
+	Array<MFVector> illumination;
 };
 
 class F3DMeshChunk
@@ -138,8 +137,8 @@ class F3DBone
 public:
 	F3DBone();
 
-	Matrix worldMatrix;
-	Matrix localMatrix;
+	MFMatrix worldMatrix;
+	MFMatrix localMatrix;
 	char name[64];
 	char parentName[64];
 
@@ -155,16 +154,16 @@ public:
 class F3DAnimationChunk
 {
 public:
-	Array<Array<Matrix> > keyframes;
+	Array<Array<MFMatrix> > keyframes;
 };
 
 class F3DMaterial
 {
 public:
-	Vector4 diffuse;
-	Vector4 ambient;
-	Vector4 emissive;
-	Vector4 specular;
+	MFVector diffuse;
+	MFVector ambient;
+	MFVector emissive;
+	MFVector specular;
 	float specularLevel;
 	float glossiness;
 
@@ -181,8 +180,8 @@ public:
 class F3DRefPoint
 {
 public:
-	Matrix worldMatrix;
-	Matrix localMatrix;
+	MFMatrix worldMatrix;
+	MFMatrix localMatrix;
 	uint16 bone[4];
 	float weight[4];
 	char name[64];
@@ -203,7 +202,7 @@ public:
 	void ReadFromMemory(char *pMemory);
 
 	int ReadASE(char *pFilename);
-	void WriteMDL(char *pFilename, int system);
+	void WriteMDL(char *pFilename, FujiPlatforms platform);
 
 	void Optimise();
 	void ProcessSkeletonData();

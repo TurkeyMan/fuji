@@ -7,7 +7,7 @@
 
 char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*));
 
-F3DFile model;
+extern F3DFile model;
 F3DMaterial *pMaterial = NULL;
 
 F3DSubObject *pSub = NULL;
@@ -337,47 +337,47 @@ char* ReadBone(char *pFilePtr, char *pToken)
 	}
 	else if(!stricmp(pToken, "*TM_ROW0"))
 	{
-		Vector4 v;
+		MFVector v;
 
 		pFilePtr = GetFloat(pFilePtr, &v.x);
 		pFilePtr = GetFloat(pFilePtr, &v.y);
 		pFilePtr = GetFloat(pFilePtr, &v.z);
 		v.w = 0.0f;
 
-		pBone->worldMatrix.SetXAxis(v);
+		pBone->worldMatrix.SetXAxis4(v);
 	}
 	else if(!stricmp(pToken, "*TM_ROW1"))
 	{
-		Vector4 v;
+		MFVector v;
 
 		pFilePtr = GetFloat(pFilePtr, &v.x);
 		pFilePtr = GetFloat(pFilePtr, &v.y);
 		pFilePtr = GetFloat(pFilePtr, &v.z);
 		v.w = 0.0f;
 
-		pBone->worldMatrix.SetYAxis(v);
+		pBone->worldMatrix.SetYAxis4(v);
 	}
 	else if(!stricmp(pToken, "*TM_ROW2"))
 	{
-		Vector4 v;
+		MFVector v;
 
 		pFilePtr = GetFloat(pFilePtr, &v.x);
 		pFilePtr = GetFloat(pFilePtr, &v.y);
 		pFilePtr = GetFloat(pFilePtr, &v.z);
 		v.w = 0.0f;
 
-		pBone->worldMatrix.SetZAxis(v);
+		pBone->worldMatrix.SetZAxis4(v);
 	}
 	else if(!stricmp(pToken, "*TM_ROW3"))
 	{
-		Vector4 v;
+		MFVector v;
 
 		pFilePtr = GetFloat(pFilePtr, &v.x);
 		pFilePtr = GetFloat(pFilePtr, &v.y);
 		pFilePtr = GetFloat(pFilePtr, &v.z);
 		v.w = 1.0f;
 
-		pBone->worldMatrix.SetTrans(v);
+		pBone->worldMatrix.SetTrans4(v);
 	}
 	else if(!stricmp(pToken, "*TM_POS"))
 	{
@@ -868,129 +868,6 @@ int F3DFile::ReadASE(char *pFilename)
 	ParseFile(file);
 
 	free(file);
-
-	return 0;
-}
-
-int main(int argc, char *argv[])
-{
-	int a, b;
-
-	char pSource[1024] = { NULL };
-	char pDest[1024] = { NULL };
-
-	int system = -1;
-
-	for(a=1; a<argc; a++)
-	{
-		if(argv[a][0] == '-')
-		{
-			if(!stricmp(argv[a], "-pc"))
-			{
-				system = 0;
-			}
-			else if(!stricmp(argv[a], "-xbox"))
-			{
-				system = 1;
-			}
-			else
-			{
-				printf("Unknown parameter: %s\n", argv[a]);
-				return 1;
-			}
-		}
-		else
-		{
-			if(!stricmp(argv[a], "f3d"))
-			{
-				strcpy(pDest, pSource);
-				for(b=(int)strlen(pDest); b && pDest[b]!='.'; b--);
-				if(b)
-				{
-					pDest[b] = NULL;
-					strcat(pDest, ".f3d");
-				}
-			}
-			else if(!stricmp(argv[a], "mdl"))
-			{
-				strcpy(pDest, pSource);
-				for(b=(int)strlen(pDest); b && pDest[b]!='.'; b--);
-				if(b)
-				{
-					pDest[b] = NULL;
-					strcat(pDest, ".mdl");
-				}
-			}
-			else if(!pSource[0])
-			{
-				strcpy(pSource, argv[a]);
-			}
-			else if(!pDest[0])
-			{
-				strcpy(pDest, argv[a]);
-			}
-			else
-			{
-				printf("Too many arguments.\n");
-				return 1;
-			}
-		}
-	}
-
-	if(!pSource)
-	{
-		printf("No source file specified.\n");
-		return 1;
-	}
-
-	if(!pDest)
-	{
-		printf("No output file specified.\n");
-		return 1;
-	}
-
-	for(a=(int)strlen(pSource); a>0 && pSource[a-1] != '.'; a--);
-
-	if(!stricmp(&pSource[a], "f3d"))
-	{
-		a = model.ReadFromDisk(pSource);
-		if(a) return a;
-	}
-	else if(!stricmp(&pSource[a], "ase"))
-	{
-		a = model.ReadASE(pSource);
-		if(a) return a;
-
-		model.ProcessSkeletonData();
-		model.Optimise();
-	}
-	else
-	{
-		printf("Unrecognised source file format.\n");
-		return 1;
-	}
-
-	for(a=(int)strlen(pDest); a>0 && pDest[a-1] != '.'; a--);
-
-	if(!stricmp(&pDest[a], "f3d"))
-	{
-		model.WriteToDisk(pDest);
-	}
-	else if(!stricmp(&pDest[a], "mdl"))
-	{
-		if(system == -1)
-		{
-			printf("No system specified, use -pc|-xbox.\n");
-			return 1;
-		}
-
-		model.WriteMDL(pDest, system);
-	}
-	else
-	{
-		printf("Unrecognised source file format.\n");
-		return 1;
-	}
 
 	return 0;
 }
