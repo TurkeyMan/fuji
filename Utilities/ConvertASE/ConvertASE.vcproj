@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
+			OutputDirectory="$(ProjectDir)..\..\Fuji\Bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			CharacterSet="2">
@@ -32,7 +32,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/ConvertASE.exe"
+				OutputFile="$(OutDir)\ConvertASE.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/ConvertASE.pdb"
@@ -61,7 +61,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
+			OutputDirectory="$(ProjectDir)..\..\Fuji\Bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			CharacterSet="2">
@@ -78,7 +78,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/ConvertASE.exe"
+				OutputFile="$(OutDir)\ConvertASE.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
