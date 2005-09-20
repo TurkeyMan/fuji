@@ -513,15 +513,15 @@ void CopyFile(const char *pSource, const char *pDest)
 		if(pWrite)
 		{
 			fseek(pRead, 0, SEEK_END);
-			size_t fileSize = ftell(pRead);
+			uint32 fileSize = ftell(pRead);
 			fseek(pRead, 0, SEEK_SET);
 
-			char *pBuffer = (char*)malloc(fileSize);
+			char *pBuffer = (char*)Heap_Alloc(fileSize);
 			
 			fread(pBuffer, 1, fileSize, pRead);
 			fwrite(pBuffer, 1, fileSize, pWrite);
 
-			free(pBuffer);
+			Heap_Free(pBuffer);
 
 			fclose(pWrite);
 		}
@@ -554,11 +554,13 @@ void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName)
 	int fileLen = ftell(pFile);
 	fseek(pFile, 0, SEEK_SET);
 
-	pBuffer = (char*)malloc(fileLen);
+	pBuffer = (char*)Heap_Alloc(fileLen);
 	fread(pBuffer, 1, fileLen, pFile);
 	fclose(pFile);
 
 	int z = zipOpenNewFileInZip(zip, pSourceFileName, NULL, NULL, 0, NULL, 0, NULL, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
 	zipWriteInFileInZip(zip, pBuffer, fileLen);
 	zipCloseFileInZip(zip);
+
+	Heap_Free(pBuffer);
 }

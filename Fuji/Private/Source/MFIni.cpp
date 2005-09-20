@@ -111,7 +111,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	memSize = ftell(pFile);
 	fseek(pFile, 0, SEEK_SET);
 
-	char *pMem = (char*)malloc(memSize);
+	char *pMem = (char*)Heap_Alloc(memSize);
 	fread(pMem, 1, memSize, pFile);
 	fclose(pFile);
 #endif

@@ -28,14 +28,14 @@ int F3DFile::ReadFromDisk(char *pFilename)
 	filesize = ftell(infile);
 	fseek(infile, 0, SEEK_SET);
 
-	file = (char*)malloc(filesize);
+	file = (char*)Heap_Alloc(filesize);
 	fread(file, 1, filesize, infile);
 
 	fclose(infile);
 
 	ReadFromMemory(file);
 
-	free(file);
+	Heap_Free(file);
 
 	return 0;
 }
@@ -177,7 +177,7 @@ void F3DFile::WriteToDisk(char *pFilename)
 		return;
 	}
 
-	pFile = (char*)malloc(1024*1024*10);
+	pFile = (char*)Heap_Alloc(1024*1024*10);
 	pHeader = (F3DHeader*)pFile;
 
 	pHeader->ID = MAKEFOURCC('M','F','3','D');
@@ -288,7 +288,7 @@ void F3DFile::WriteToDisk(char *pFilename)
 
 	fclose(file);
 
-	free(pFile);
+	Heap_Free(pFile);
 }
 
 void F3DFile::ReadFromMemory(char *pMemory)
@@ -499,7 +499,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 
 	const int maxFileSize = 1024*1024*4;
 
-	pFile = (char*)malloc_aligned(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
+	pFile = (char*)Heap_Alloc(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
 	memset(pFile, 0, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
@@ -668,7 +668,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	fclose(file);
 
 	// we're done!!!! clean up..
-	free_aligned(pFile);
+	Heap_Free(pFile);
 }
 
 void F3DFile::Optimise()

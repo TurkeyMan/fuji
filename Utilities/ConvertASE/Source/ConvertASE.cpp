@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	FujiPlatforms platform = FP_Unknown;
 	char source[1024] = "";
 	char dest[1024] = "";
-	int a, b;
+	int a;
 
 	// process command line
 	for(a=1; a<argc; a++)

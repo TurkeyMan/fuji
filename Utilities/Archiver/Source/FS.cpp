@@ -92,12 +92,12 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	FreeDirectoryEntries(entries);
 
-	char *tempDir = malloc(strlen(directory) + 4);
+	char *tempDir = Heap_Alloc(strlen(directory) + 4);
 	strcpy(tempDir, directory);
 	strcat(tempDir, "*");
 
 	DIR *dirHandle = opendir(tempDir);
-	free(tempDir);
+	Heap_Free(tempDir);
 	if(dirHandle == NULL)
 		return 0;
 
