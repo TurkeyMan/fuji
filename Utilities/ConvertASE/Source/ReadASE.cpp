@@ -1,7 +1,3 @@
-#include <windows.h>
-#include <stdio.h>
-#include <conio.h>
-
 #include "Common.h"
 #include "F3D.h"
 

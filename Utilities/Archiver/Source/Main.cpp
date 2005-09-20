@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
 			{
 				printf("%.2f", (float)VERSION/100.0f);
-				return 0;
+				return VERSION;
 			}
 		}
 		else

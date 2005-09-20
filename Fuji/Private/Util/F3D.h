@@ -197,11 +197,12 @@ public:
 class F3DFile
 {
 public:
-	int ReadFromDisk(char *pFilename);
-	void WriteToDisk(char *pFilename);
-	void ReadFromMemory(char *pMemory);
-
+	int ReadF3D(char *pFilename);
+	int ReadF3DFromMemory(char *pMemory);
 	int ReadASE(char *pFilename);
+	int ReadDAE(char *pFilename);
+
+	void WriteF3D(char *pFilename);
 	void WriteMDL(char *pFilename, FujiPlatforms platform);
 
 	void Optimise();

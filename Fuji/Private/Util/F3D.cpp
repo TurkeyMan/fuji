@@ -10,7 +10,7 @@
 #include "MFModel_Internal.h"
 #include "MFMaterial_Internal.h"
 
-int F3DFile::ReadFromDisk(char *pFilename)
+int F3DFile::ReadF3D(char *pFilename)
 {
 	FILE *infile;
 	char *file = NULL;
@@ -33,7 +33,7 @@ int F3DFile::ReadFromDisk(char *pFilename)
 
 	fclose(infile);
 
-	ReadFromMemory(file);
+	ReadF3DFromMemory(file);
 
 	Heap_Free(file);
 
@@ -162,7 +162,7 @@ void F3DFile::ExportMaterial(char* &pData, char *pBase)
 	pData += size;
 }
 
-void F3DFile::WriteToDisk(char *pFilename)
+void F3DFile::WriteF3D(char *pFilename)
 {
 	char *pFile;
 	char *pOffset;
@@ -291,7 +291,7 @@ void F3DFile::WriteToDisk(char *pFilename)
 	Heap_Free(pFile);
 }
 
-void F3DFile::ReadFromMemory(char *pMemory)
+int F3DFile::ReadF3DFromMemory(char *pMemory)
 {
 	F3DHeader *pHeader = (F3DHeader*)pMemory;
 	F3DChunkDesc *pChunks;
@@ -299,7 +299,7 @@ void F3DFile::ReadFromMemory(char *pMemory)
 	if(pHeader->ID != MAKEFOURCC('M','F','3','D'))
 	{
 		printf("Not an F3D file.");
-		return;
+		return 1;
 	}
 
 	printf("Reading F3D file version %d.%d", pHeader->major, pHeader->minor);
@@ -341,6 +341,8 @@ void F3DFile::ReadFromMemory(char *pMemory)
 			break;
 		}
 	}
+
+	return 0;
 }
 
 struct Vec3
@@ -359,14 +361,16 @@ struct FileVertex
 void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset)
 {
 	int numMeshChunks = sub.matSubobjects.size();
-
 	int a, b;
+
+	// increment size of MeshChunk_PC structure
+	pOffset += ALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
+
+	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
 	// fill out msh chunk, and build mesh...
 	for(a=0; a<numMeshChunks; a++)
 	{
-		MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)&pMeshChunks[a];
-
 		struct Vert
 		{
 			float pos[3];
@@ -378,51 +382,53 @@ void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *
 		int numVertices = sub.matSubobjects.pData[a].vertices.size();
 		int numIndices = sub.matSubobjects.pData[a].triangles.size()*3;
 
-		pMeshChunk->numVertices = numVertices;
-		pMeshChunk->vertexStride = sizeof(Vert);
-		pMeshChunk->vertexDataSize = numVertices * pMeshChunk->vertexStride;
-		pMeshChunk->indexDataSize = numIndices*sizeof(uint16);
+		pMeshChunk[a].numVertices = numVertices;
+		pMeshChunk[a].vertexStride = sizeof(Vert);
+		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
+		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
+
+		// setup pointers
+		pMeshChunk[a].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+		pOffset += ALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
+		pMeshChunk[a].pVertexData = pOffset;
+		pOffset += ALIGN16(sizeof(Vert)*numVertices);
+		pMeshChunk[a].pIndexData = pOffset;
+		pOffset += ALIGN16(sizeof(uint16)*numIndices);
 
 		// write declaration
-		pMeshChunk->pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+		pMeshChunk[a].pVertexElements[0].Stream = 0;
+		pMeshChunk[a].pVertexElements[0].Offset = 0;
+		pMeshChunk[a].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[a].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[a].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
+		pMeshChunk[a].pVertexElements[0].UsageIndex = 0;
 
-		pMeshChunk->pVertexElements[0].Stream = 0;
-		pMeshChunk->pVertexElements[0].Offset = 0;
-		pMeshChunk->pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk->pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk->pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
-		pMeshChunk->pVertexElements[0].UsageIndex = 0;
+		pMeshChunk[a].pVertexElements[1].Stream = 0;
+		pMeshChunk[a].pVertexElements[1].Offset = 12;
+		pMeshChunk[a].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[a].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[a].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
+		pMeshChunk[a].pVertexElements[1].UsageIndex = 0;
 
-		pMeshChunk->pVertexElements[1].Stream = 0;
-		pMeshChunk->pVertexElements[1].Offset = 12;
-		pMeshChunk->pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk->pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk->pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
-		pMeshChunk->pVertexElements[1].UsageIndex = 0;
+		pMeshChunk[a].pVertexElements[2].Stream = 0;
+		pMeshChunk[a].pVertexElements[2].Offset = 24;
+		pMeshChunk[a].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
+		pMeshChunk[a].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[a].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
+		pMeshChunk[a].pVertexElements[2].UsageIndex = 0;
 
-		pMeshChunk->pVertexElements[2].Stream = 0;
-		pMeshChunk->pVertexElements[2].Offset = 24;
-		pMeshChunk->pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
-		pMeshChunk->pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk->pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
-		pMeshChunk->pVertexElements[2].UsageIndex = 0;
-
-		pMeshChunk->pVertexElements[3].Stream = 0;
-		pMeshChunk->pVertexElements[3].Offset = 28;
-		pMeshChunk->pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
-		pMeshChunk->pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk->pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
-		pMeshChunk->pVertexElements[3].UsageIndex = 0;
+		pMeshChunk[a].pVertexElements[3].Stream = 0;
+		pMeshChunk[a].pVertexElements[3].Offset = 28;
+		pMeshChunk[a].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
+		pMeshChunk[a].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[a].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
+		pMeshChunk[a].pVertexElements[3].UsageIndex = 0;
 
 		D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-		pMeshChunk->pVertexElements[4] = endMacro;
-
-		pOffset += ALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
+		pMeshChunk[a].pVertexElements[4] = endMacro;
 
 		// write vertices
-		pMeshChunk->pVertexData = pOffset;
-		Vert *pVert = (Vert*)pOffset;
-		pOffset += ALIGN16(sizeof(Vert)*numVertices);
+		Vert *pVert = (Vert*)pMeshChunk[a].pVertexData;
 
 		for(b=0; b<numVertices; b++)
 		{
@@ -448,9 +454,7 @@ void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *
 		}
 
 		// write indices
-		pMeshChunk->pIndexData = pOffset;
-		uint16 *pIndices = (uint16*)pOffset;
-		pOffset += ALIGN16(sizeof(uint16)*numIndices);
+		uint16 *pIndices = (uint16*)pMeshChunk[a].pIndexData;
 
 		int triCount = numIndices/3;
 
@@ -553,12 +557,11 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 		{
 			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
-			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
-			pOffset += ALIGN16(sizeof(MFMeshChunk)*pSubobjectChunk[a].numMeshChunks);
-
 			pSubobjectChunk[a].pSubObjectName = pStringCache->Add(sub.name);
 			pSubobjectChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials.pData[sub.materialIndex].name);
 			pSubobjectChunk[a].numMeshChunks = sub.matSubobjects.size();
+
+			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
 			pSubobjectChunk[a].pMeshChunks = pMeshChunks;
 
 			// build platform specific mesh chunk

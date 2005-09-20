@@ -120,6 +120,9 @@
 			<File
 				RelativePath=".\Source\ReadASE.cpp">
 			</File>
+			<File
+				RelativePath=".\Source\ReadDAE.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

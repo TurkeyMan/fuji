@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
 			{
 				printf("%.2f", (float)VERSION/100.0f);
-				return 0;
+				return VERSION;
 			}
 		}
 		else
@@ -72,11 +72,13 @@ int main(int argc, char *argv[])
 	// read source file
 	if(!stricmp(&source[a], "f3d"))
 	{
-		a = model.ReadFromDisk(source);
+		// read .f3d file
+		a = model.ReadF3D(source);
 		if(a) return a;
 	}
 	else if(!stricmp(&source[a], "ase"))
 	{
+		// read .ase file
 		a = model.ReadASE(source);
 		if(a) return a;
 
@@ -86,13 +88,11 @@ int main(int argc, char *argv[])
 	else if(!stricmp(&source[a], "dae"))
 	{
 		// read collada file...
-/*
-		a = model.ReadDAE(pSource);
+		a = model.ReadDAE(source);
 		if(a) return a;
 
 		model.ProcessSkeletonData();
 		model.Optimise();
-*/
 	}
 	else
 	{
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 	// write output file
 	if(!stricmp(&dest[a], "f3d"))
 	{
-		model.WriteToDisk(dest);
+		model.WriteF3D(dest);
 	}
 	else if(!stricmp(&dest[a], "mdl"))
 	{
@@ -132,6 +132,8 @@ int main(int argc, char *argv[])
 		printf("Unrecognised output file format.\n");
 		return 1;
 	}
+
+	printf("> %s\n", dest);
 
 	return 0;
 }
