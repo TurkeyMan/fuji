@@ -4,17 +4,20 @@
 #include <stdio.h>
 #include <conio.h>
 
-#include "Common.h"
+#include "Fuji.h"
 #include "F3D.h"
+#include "System.h"
 
-F3DFile model;
+F3DFile *pModel;
 
 int main(int argc, char *argv[])
 {
-	FujiPlatforms platform = FP_Unknown;
+	MFPlatform platform = FP_Unknown;
 	char source[1024] = "";
 	char dest[1024] = "";
 	int a;
+
+	pModel = new F3DFile;
 
 	// process command line
 	for(a=1; a<argc; a++)
@@ -23,9 +26,9 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], gPlatformStrings[b]))
+				if(!stricmp(&argv[a][1], System_GetPlatformName(b)))
 				{
-					platform = (FujiPlatforms)b;
+					platform = (MFPlatform)b;
 					break;
 				}
 			}
@@ -73,32 +76,43 @@ int main(int argc, char *argv[])
 	if(!stricmp(&source[a], "f3d"))
 	{
 		// read .f3d file
-		a = model.ReadF3D(source);
+		a = pModel->ReadF3D(source);
 		if(a) return a;
 	}
 	else if(!stricmp(&source[a], "ase"))
 	{
 		// read .ase file
-		a = model.ReadASE(source);
+		a = pModel->ReadASE(source);
 		if(a) return a;
-
-		model.ProcessSkeletonData();
-		model.Optimise();
 	}
 	else if(!stricmp(&source[a], "dae"))
 	{
 		// read collada file...
-		a = model.ReadDAE(source);
+		a = pModel->ReadDAE(source);
 		if(a) return a;
-
-		model.ProcessSkeletonData();
-		model.Optimise();
+	}
+	else if(!stricmp(&source[a], "md2"))
+	{
+		// read MD2 file... (Quake2)
+		a = pModel->ReadMD2(source);
+		if(a) return a;
+	}
+	else if(!stricmp(&source[a], "pk3"))
+	{
+		// read MD3 file... (Quake3)
+		a = pModel->ReadMD3(source);
+		if(a) return a;
 	}
 	else
 	{
 		printf("Unrecognised source file format.\n");
 		return 1;
 	}
+
+	// process model
+	pModel->ProcessSkeletonData();
+	pModel->Optimise();
+	pModel->StripModel();
 
 	// generate output filename
 	if(!dest[0])
@@ -115,7 +129,7 @@ int main(int argc, char *argv[])
 	// write output file
 	if(!stricmp(&dest[a], "f3d"))
 	{
-		model.WriteF3D(dest);
+		pModel->WriteF3D(dest);
 	}
 	else if(!stricmp(&dest[a], "mdl"))
 	{
@@ -125,7 +139,7 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-		model.WriteMDL(dest, platform);
+		pModel->WriteMDL(dest, platform);
 	}
 	else
 	{
@@ -134,6 +148,8 @@ int main(int argc, char *argv[])
 	}
 
 	printf("> %s\n", dest);
+
+	delete pModel;
 
 	return 0;
 }

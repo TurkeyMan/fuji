@@ -1,9 +1,9 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "F3D.h"
 
 char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*));
 
-extern F3DFile model;
+extern F3DFile *pModel;
 F3DMaterial *pMaterial = NULL;
 
 F3DSubObject *pSub = NULL;
@@ -145,7 +145,7 @@ char* ReadSceneChunk(char *pFilePtr, char *pToken)
 			return pFilePtr;
 		}
 
-		strcpy(model.name, pName);
+		strcpy(pModel->name, pName);
 
 		printf("Model: %s\n", pName);
 	}
@@ -281,7 +281,7 @@ char* ReadMaterialChunk(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetInt(pFilePtr, &count);
 
-		model.GetMaterialChunk()->materials.resize(count);
+		pModel->GetMaterialChunk()->materials.resize(count);
 
 		printf("Found %d materials.\n", count);
 	}
@@ -291,7 +291,7 @@ char* ReadMaterialChunk(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetInt(pFilePtr, &matID);
 
-		pMaterial = &model.GetMaterialChunk()->materials[matID];
+		pMaterial = &pModel->GetMaterialChunk()->materials[matID];
 
 		pFilePtr = ProcessBlock(pFilePtr, "*MATERIAL", ReadMaterial);
 	}
@@ -653,7 +653,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 		// if exporting geometry, add a subobject
 		if(nodeType & 1)
 		{
-			pSub = &model.GetMeshChunk()->subObjects.push();
+			pSub = &pModel->GetMeshChunk()->subObjects.push();
 
 			if(strlen(pNodeName) > 63)
 			{
@@ -666,13 +666,13 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 		// if exporting a bone, add a bone
 		if(nodeType & 2)
 		{
-			pBone = &model.GetSkeletonChunk()->bones.push();
+			pBone = &pModel->GetSkeletonChunk()->bones.push();
 		}
 
 		// if exporting a refPoint, add a refPoint
 		if(nodeType & 4)
 		{
-			pRefPoint = &model.GetRefPointChunk()->refPoints.push();
+			pRefPoint = &pModel->GetRefPointChunk()->refPoints.push();
 
 			if(strlen(pNodeName) > 63)
 			{
@@ -717,7 +717,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 	{
 		if(nodeType & 1)
 		{
-			pFilePtr = GetInt(pFilePtr, &pSub->materialIndex);
+			pFilePtr = GetInt(pFilePtr, &pSub->matSubobjects[0].materialIndex);
 		}
 	}
 	else
@@ -774,7 +774,7 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 	return pFilePtr;
 }
 
-void ParseFile(char *pFilePtr)
+void ParseASEFile(char *pFilePtr)
 {
 	char *pEnd;
 	char *pToken;
@@ -861,7 +861,7 @@ int F3DFile::ReadASE(char *pFilename)
 
 	fclose(infile);
 
-	ParseFile(file);
+	ParseASEFile(file);
 
 	free(file);
 

@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"

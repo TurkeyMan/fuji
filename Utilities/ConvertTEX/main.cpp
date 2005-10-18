@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFTexture_Internal.h"
 
 #include "ConvertTex.h"
@@ -17,13 +17,13 @@ void LOGERROR(const char *pFormat, ...)
 	getc(stdin);
 }
 
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormats targetFormat);
-void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormats format);
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat);
+void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format);
 
 int main(int argc, char *argv[])
 {
-	FujiPlatforms platform = FP_Unknown;
-	MFTextureFormats targetFormat = TexFmt_Unknown;
+	MFPlatform platform = FP_Unknown;
+	MFTextureFormat targetFormat = TexFmt_Unknown;
 
 	char fileName[256] = "";
 	char outFile[256] = "";
@@ -39,9 +39,9 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], gPlatformStrings[b]))
+				if(!stricmp(&argv[a][1], System_GetPlatformString(b)))
 				{
-					platform = (FujiPlatforms)b;
+					platform = (MFPlatform)b;
 					break;
 				}
 			}
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 				for(int b=0; b<TexFmt_Max; b++)
 				{
-					if(!stricmp(pFormatString, gpMFTextureFormatStrings[b]))
+					if(!stricmp(pFormatString, MFTexture_GetFormatString(b)))
 					{
 						(int&)targetFormat = b;
 						break;
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
 				// list formats for platform
 				for(int f=0; f<TexFmt_Max; f++)
 				{
-					if(gMFTexturePlatformAvailability[f] & 1<<(uint32)platform)
+					if(MFTexture_IsAvailableOnPlatform(f, platform))
 					{
-						printf("%s\n", gpMFTextureFormatStrings[f]);
+						printf("%s\n", MFTexture_GetFormatString(f));
 					}
 				}
 				gets(outFile);
@@ -91,20 +91,20 @@ int main(int argc, char *argv[])
 				// list formats for platform
 				for(int f=0; f<TexFmt_Max; f++)
 				{
-					printf("%s\t", gpMFTextureFormatStrings[f]);
+					printf("%s\t", MFTexture_GetFormatString(f));
 
 					bool printPipe = false;
 
 					for(int g = 0; g<FP_Max; g++)
 					{
-						if(gMFTexturePlatformAvailability[f] & 1<<(uint32)g)
+						if(MFTexture_IsAvailableOnPlatform(f, g))
 						{
-							printf("%s%s", printPipe ? "|" : "", gPlatformStrings[g]);
+							printf("%s%s", printPipe ? "|" : "", System_GetPlatformString(g));
 							printPipe = true;
 						}
 					}
 
-					printf("\n", gpMFTextureFormatStrings[f]);
+					printf("\n", MFTexture_GetFormatString(f));
 				}
 				gets(outFile);
 				return 0;
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 	}
 
 	// check minimum pitch
-	if((pImage->pLevels[0].width*gMFTextureBitsPerPixel[targetFormat]) / 8 < 64)
+	if((pImage->pLevels[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 < 64)
 	{
 		LOGERROR("Textures should have a minimum pitch of 64 bytes.\n");
 		return 1;
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 
 	for(a=0; a<pImage->mipLevels; a++)
 	{
-		imageBytes += (pImage->pLevels[a].width*pImage->pLevels[a].height * gMFTextureBitsPerPixel[(int)targetFormat]) / 8;
+		imageBytes += (pImage->pLevels[a].width*pImage->pLevels[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
 
 		// add palette
 		uint32 paletteBytes = 0;
@@ -271,14 +271,14 @@ int main(int argc, char *argv[])
 
 		pSurfaceLevels[a].width = pImage->pLevels[a].width;
 		pSurfaceLevels[a].height = pImage->pLevels[a].height;
-		pSurfaceLevels[a].bitsPerPixel = gMFTextureBitsPerPixel[(int)targetFormat];
+		pSurfaceLevels[a].bitsPerPixel = MFTexture_GetBitsPerPixel(targetFormat);
 
 		pSurfaceLevels[a].xBlocks = -1;
 		pSurfaceLevels[a].yBlocks = -1;
 		pSurfaceLevels[a].bitsPerBlock = -1;
 
 		pSurfaceLevels[a].pImageData = pDataPointer;
-		pSurfaceLevels[a].bufferLength = (pImage->pLevels[a].width*pImage->pLevels[a].height * gMFTextureBitsPerPixel[(int)targetFormat]) / 8;
+		pSurfaceLevels[a].bufferLength = (pImage->pLevels[a].width*pImage->pLevels[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
 		pDataPointer += pSurfaceLevels[a].bufferLength;
 
 		uint32 paletteBytes = 0;
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormats targetFormat)
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat)
 {
 	// convert image...
 	int width = pSourceSurface->width;
@@ -704,7 +704,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		default:
 		{
-			LOGERROR("Conversion for target type '%s' not yet support...\n", gpMFTextureFormatStrings[targetFormat]);
+			LOGERROR("Conversion for target type '%s' not yet support...\n", MFTexture_GetFormatString(targetFormat));
 			return 1;
 		}
 	}
@@ -712,8 +712,8 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	// test for swizzled format..
 	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
 	{
-		uint32 imageBytes = (width * height * gMFTextureBitsPerPixel[targetFormat]) / 8;
-		uint32 bytesperpixel = gMFTextureBitsPerPixel[targetFormat] / 8;
+		uint32 imageBytes = (width * height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
+		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
 
 		char *pBuffer = (char*)malloc(imageBytes);
 
@@ -735,13 +735,13 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	return 0;
 }
 
-void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormats format)
+void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format)
 {
 	uint32 blockx, blocky;
 	uint32 j;
 
 	// calculate width in bytes
-	width = (width * gMFTextureBitsPerPixel[format]) / 8;
+	width = (width * MFTexture_GetBitsPerPixel(format)) / 8;
 
 	uint32 width_blocks = (width / 16);
 	uint32 height_blocks = (height / 8);

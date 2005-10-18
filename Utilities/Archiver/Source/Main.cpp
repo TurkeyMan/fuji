@@ -1,6 +1,6 @@
 #define VERSION 100
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFIni.h"
 #include "FS.h"
 
@@ -11,7 +11,7 @@
 #include "minizip/zip.h"
 
 void Traverse(const char *dir);
-int ProcessIniFile(const char *pIniFile, FujiPlatforms platform);
+int ProcessIniFile(const char *pIniFile, MFPlatform platform);
 void Replace(std::string &string, std::string subString, std::string newString);
 void CopyFile(const char *pSource, const char *pDest);
 void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName);
@@ -29,7 +29,7 @@ std::string output;
 
 int main(int argc, char **argv)
 {
-	FujiPlatforms platform = FP_Unknown;
+	MFPlatform platform = FP_Unknown;
 	char iniFileName[256] = "";
 	char workingDir[256] = "";
 	char outPath[256] = "";
@@ -45,9 +45,9 @@ int main(int argc, char **argv)
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], gPlatformStrings[b]))
+				if(!stricmp(&argv[a][1], System_GetPlatformString(b)))
 				{
-					platform = (FujiPlatforms)b;
+					platform = (MFPlatform)b;
 					break;
 				}
 			}
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
 	{
 		ProcessIniFile(iniFileName, platform);
 
-		Replace(output, "%platform%", gPlatformStrings[platform]);
-		Replace(output, "$(platform)", gPlatformStrings[platform]);
+		Replace(output, "%platform%", System_GetPlatformString(platform));
+		Replace(output, "$(platform)", System_GetPlatformString(platform));
 	}
 
 	if(!sources.size())
@@ -247,8 +247,8 @@ int main(int argc, char **argv)
 			Replace(commandLine, "$(filepart)", filePart);
 			Replace(commandLine, "%ext%", pExt);
 			Replace(commandLine, "$(ext)", pExt);
-			Replace(commandLine, "%platform%", gPlatformStrings[platform]);
-			Replace(commandLine, "$(platform)", gPlatformStrings[platform]);
+			Replace(commandLine, "%platform%", System_GetPlatformString(platform));
+			Replace(commandLine, "$(platform)", System_GetPlatformString(platform));
 
 			// execute tool
 			system(commandLine.c_str());
@@ -306,7 +306,7 @@ void Replace(std::string &string, std::string subString, std::string newString)
 	}
 }
 
-int ProcessIniFile(const char *pIniFile, FujiPlatforms platform)
+int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 {
 	MFIni *pIni = MFIni::Create(pIniFile);
 
@@ -393,8 +393,8 @@ int ProcessIniFile(const char *pIniFile, FujiPlatforms platform)
 
 							for(platformID = 0; platformID < FP_Max; platformID++)
 							{
-								int strLen = (int)strlen(gPlatformStrings[platformID]);
-								if(!strnicmp(pString, gPlatformStrings[platformID], strLen))
+								int strLen = (int)strlen(System_GetPlatformString(platform));
+								if(!strnicmp(pString, System_GetPlatformString(platform), strLen))
 								{
 									platformFlag = 1 << platformID;
 									pString += strLen;
