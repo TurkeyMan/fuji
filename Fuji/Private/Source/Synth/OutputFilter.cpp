@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Primitive.h"
 #include "Font.h"
 #include "Synth/OutputFilter.h"
@@ -101,14 +101,14 @@ void OutputFilter::Update()
 
 					for(int a=0; a<numSamples; a++)
 					{
-						pSamples[a].left = (int16)(Clamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
+						pSamples[a].left = (int16)(MFClamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
 					}
 
 					pRSource->GetSamples(pSourceBuffer, numSamples);
 
 					for(int a=0; a<numSamples; a++)
 					{
-						pSamples[a].right = (int16)(Clamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
+						pSamples[a].right = (int16)(MFClamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
 					}
 				}
 				else
@@ -117,7 +117,7 @@ void OutputFilter::Update()
 
 					for(int a=0; a<numSamples; a++)
 					{
-						pSamples[a].right = pSamples[a].left = (int16)(Clamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
+						pSamples[a].right = pSamples[a].left = (int16)(MFClamp(0.0f, pSourceBuffer[a], 1.0f) * 32767.0f);
 					}
 				}
 
@@ -185,14 +185,14 @@ void OutputFilter::Reset()
 
 				for(int b=0; b<numSamples; b++)
 				{
-					pSamples[b].left = (int16)(Clamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
+					pSamples[b].left = (int16)(MFClamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
 				}
 
 				pRSource->GetSamples(pSourceBuffer, numSamples);
 
 				for(int b=0; b<numSamples; b++)
 				{
-					pSamples[b].right = (int16)(Clamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
+					pSamples[b].right = (int16)(MFClamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
 				}
 			}
 			else
@@ -201,7 +201,7 @@ void OutputFilter::Reset()
 
 				for(int b=0; b<numSamples; b++)
 				{
-					pSamples[b].right = pSamples[b].left = (int16)(Clamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
+					pSamples[b].right = pSamples[b].left = (int16)(MFClamp(0.0f, pSourceBuffer[b], 1.0f) * 32767.0f);
 				}
 			}
 

@@ -25,7 +25,7 @@ struct MFTextureTemplateData
 {
 	uint32 magicNumber;
 
-	MFTextureFormats imageFormat;
+	MFTextureFormat imageFormat;
 	uint32 platformFormat;
 
 	int mipLevels;
@@ -98,9 +98,6 @@ public:
 };
 #endif
 
-extern const char * const gpMFTextureFormatStrings[TexFmt_Max];
-extern uint32 gMFTexturePlatformAvailability[TexFmt_Max];
-extern uint32 gMFTextureBitsPerPixel[TexFmt_Max];
 extern uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max];
 
 #endif

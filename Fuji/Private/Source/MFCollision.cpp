@@ -1,70 +1,100 @@
-#include "Common.h"
-#include "Collision.h"
+#include "Fuji.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
+#include "MFCollision.h"
 
-#define EPSILON 0.000001f
 
-// returns nearest point on a line segment [a,b]
-MFVector Collision_NearestPointOnLine(const MFVector& lineStart, const MFVector& lineEnd, const MFVector& point)
+bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, float *pTime)
 {
-	// calculate lines ray
-	MFVector ray = lineEnd - lineStart;
+	MFVector diff = rayPos - spherePos;
 
-	// see if a is the nearest point
-	float dot_ta = ray.Dot3(point - lineStart);
-	if(dot_ta <= 0.0f)
-		return lineStart;
+	float b = diff.Dot3(rayDir);
+	float c = diff.MagSquared3() - radius;
+	float d = b*b - c;
 
-	// see if b is the nearest point
-	float dot_tb = (-ray).Dot3(point - lineEnd);
-	if(dot_tb <= 0.0f)
-		return lineEnd;
+	if(d <= 0.0f)
+		return false;
 
-	// return nearest point on line segment
-	return lineStart + (ray * dot_ta*(1.0f / (dot_ta + dot_tb)));
+	float t = -b - MFSqrt(d);
+
+	if(t<0.0f) return false;
+
+	if(pTime)
+		*pTime = t;
+	return true;
 }
 
-bool Collision_SphereSphereTest(const MFVector &pos1, float radius1, const MFVector &pos2, float radius2)
-{
-	return (pos2 - pos1).MagSquared3() < radius1*radius1 + radius2*radius2;
-}
-
-bool Collision_RaySphereTest()
-{
-	DBGASSERT(false, "Not Written!");
-	return false;
-}
-
-bool Collision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pT, MFVector *pIntersectPoint)
+bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pTime)
 {
 	float a = plane.Dot3(rayDir);
 
 	// if ray is parallel to plane
-	if(a > -EPSILON && a < EPSILON)
+	if(a > -MFALMOST_ZERO && a < MFALMOST_ZERO)
 		return false;
 
 	float t = -rayPos.DotH(plane) / a;
 
-	if(pT) *pT = t;
-
 	if(t<0.0f) return false;
 
-	if(pIntersectPoint) *pIntersectPoint = rayPos + rayDir*t;
-
+	if(pTime)
+		*pTime = t;
 	return true;
 }
 
-bool Collision_SpherePlaneTest(const MFVector& sphere, const MFVector& plane, MFVector *pIntersectPoint)
+bool MFCollision_SpherePlaneTest(const MFVector& spherePos, float radius, const MFVector& plane, MFCollisionResult *pResult)
 {
-	DBGASSERT(false, "Not Written!");
-	return false;
+	if(!pResult)
+	{
+		return spherePos.DotH(plane) < radius;
+	}
+	else
+	{
+		float d = spherePos.DotH(plane);
+
+		pResult->bCollide = d < radius;
+
+		if(pResult->bCollide)
+		{
+			pResult->depth = radius - d;
+			pResult->normal = plane;
+			pResult->intersectionPoint.Mad3(pResult->normal, -(d + pResult->depth*0.5f), spherePos);
+		}
+
+		return pResult->bCollide;
+	}
 }
 
-
-bool Collision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV, MFVector *pIntersectionPoint)
+bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFVector &pos2, float radius2, MFCollisionResult *pResult)
 {
-	MFVector	edge1, edge2, tvec, pvec, qvec;
-	float	det, inv_det;
-	float	u, v;
+	MFVector diff = pos2 - pos1;
+
+	if(!pResult)
+	{
+		return diff.MagSquared3() < radius1*radius1 + radius2*radius2;
+	}
+	else
+	{
+		float length = diff.Magnitude3();
+		float totalRadius = radius1 + radius2;
+
+		pResult->bCollide = length < totalRadius;
+
+		if(pResult->bCollide)
+		{
+			pResult->depth = totalRadius - length;
+			pResult->normal = -diff.Normalise3();
+			pResult->intersectionPoint = diff * ((length / totalRadius) * (radius1 / radius2));
+		}
+
+		return pResult->bCollide;
+	}
+}
+
+bool MFCollision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV)
+{
+	MFVector edge1, edge2, tvec, pvec, qvec;
+	float det, inv_det;
+	float u, v;
 
 	/* find vectors for two edges sharing vert0 */
 	edge1 = p1 - p0;
@@ -76,7 +106,7 @@ bool Collision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const 
 	/* if determinant is near zero, ray lies in plane of triangle */
 	det = edge1.Dot3(pvec);
 
-	if(det > -EPSILON && det < EPSILON)
+	if(det > -MFALMOST_ZERO && det < MFALMOST_ZERO)
 		return false;
 	inv_det = 1.0f / det;
 
@@ -105,16 +135,11 @@ bool Collision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const 
 		*pV = v;
 	}
 
-	if(pIntersectionPoint)
-	{
-		*pIntersectionPoint = p0*(1.0f-u-v) + p1*u + p2*v;
-	}
-
 	return true;
 }
 
 // culls backfaces
-bool Collision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV, MFVector *pIntersectionPoint)
+bool MFCollision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV, MFVector *pIntersectionPoint)
 {
 	MFVector	edge1, edge2, tvec, pvec, qvec;
 	float	det, inv_det;
@@ -130,7 +155,7 @@ bool Collision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, co
 	/* if determinant is near zero, ray lies in plane of triangle */
 	det = edge1.Dot3(pvec);
 
-	if (det < EPSILON)
+	if (det < MFALMOST_ZERO)
 		return false;
 
 	/* calculate distance from vert0 to ray origin */
@@ -173,13 +198,13 @@ bool Collision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, co
 	return true;
 }
 
-bool Collision_SphereTriTest(const MFVector& sphere, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
+bool MFCollision_SphereTriTest(const MFVector& sphere, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
-bool Collision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
+bool MFCollision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
@@ -340,7 +365,7 @@ bool coplanar_tri_tri(const MFVector& N, const MFVector& V0, const MFVector& V1,
 	} \
 }
 
-bool Collision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVector& V2, const MFVector& U0,  const MFVector& U1, const MFVector& U2)
+bool MFCollision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVector& V2, const MFVector& U0,  const MFVector& U1, const MFVector& U2)
 {
 	MFVector E1, E2;
 	MFVector N1, N2;
@@ -371,9 +396,9 @@ bool Collision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVecto
 	du2 = N1.Dot3(U2) + d1;
 
 	/* coplanarity robustness check */
-	if(fabsf(du0)<EPSILON) du0=0.0f;
-	if(fabsf(du1)<EPSILON) du1=0.0f;
-	if(fabsf(du2)<EPSILON) du2=0.0f;
+	if(fabsf(du0)<MFALMOST_ZERO) du0=0.0f;
+	if(fabsf(du1)<MFALMOST_ZERO) du1=0.0f;
+	if(fabsf(du2)<MFALMOST_ZERO) du2=0.0f;
 
 	du0du1 = du0*du1;
 	du0du2 = du0*du2;
@@ -393,9 +418,9 @@ bool Collision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVecto
 	dv1 = N2.Dot3(V1) + d2;
 	dv2 = N2.Dot3(V2) + d2;
 
-	if(fabsf(dv0)<EPSILON) dv0=0.0;
-	if(fabsf(dv1)<EPSILON) dv1=0.0;
-	if(fabsf(dv2)<EPSILON) dv2=0.0;
+	if(fabsf(dv0)<MFALMOST_ZERO) dv0=0.0;
+	if(fabsf(dv1)<MFALMOST_ZERO) dv1=0.0;
+	if(fabsf(dv2)<MFALMOST_ZERO) dv2=0.0;
 
 	dv0dv1 = dv0*dv1;
 	dv0dv2 = dv0*dv2;
@@ -449,25 +474,25 @@ bool Collision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVecto
 	return true;
 }
 
-bool Collision_RayHull()
+bool MFCollision_RayHull()
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
-bool Collision_SphereHull()
+bool MFCollision_SphereHull()
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
-bool Collision_HullHull()
+bool MFCollision_HullHull()
 {
 	DBGASSERT(false, "Not Written!");
 	return false;
 }
 
-bool Collision_TriHull()
+bool MFCollision_TriHull()
 {
 	DBGASSERT(false, "Not Written!");
 	return false;

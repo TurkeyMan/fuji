@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 
@@ -247,7 +247,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 	uint32 bytesWritten;
 	WriteFile(fileHandle->pFilesysData, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
 	fileHandle->offset += bytesWritten;
-	fileHandle->length = Max(fileHandle->offset, (uint32)fileHandle->length);
+	fileHandle->length = MFMax(fileHandle->offset, (uint32)fileHandle->length);
 
 	return bytesWritten;
 }

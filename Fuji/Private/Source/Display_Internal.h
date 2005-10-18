@@ -11,17 +11,17 @@
 #include "Display.h"
 
 // internal functions
-void Display_InitModule();
-void Display_DeinitModule();
+void MFDisplay_InitModule();
+void MFDisplay_DeinitModule();
 
 // these are used by Fuji internally and not exposed to the game
-int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
-void Display_DestroyDisplay();
-void Display_BeginFrame();
-void Display_EndFrame();
+int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
+void MFDisplay_DestroyDisplay();
+void MFDisplay_BeginFrame();
+void MFDisplay_EndFrame();
 
 // display settings
-struct DisplaySettings
+struct MFDisplaySettings
 {
 	int width, height;
 	int fullscreenWidth, fullscreenHeight;
@@ -32,26 +32,26 @@ struct DisplaySettings
 	bool progressive;	// progressive scan
 };
 
-extern DisplaySettings display;
+extern MFDisplaySettings gDisplay;
 
 // renderable interface
-enum RenderFlags
+enum MFRenderFlags
 {
-	RF_OrderMask	= 0x0000000F,
+	MFRF_OrderMask	= 0x0000000F,
 
-	RF_Transparent	= (1<<4),
-	RF_Terrain		= (1<<5),
-	RF_Overlay		= (1<<6),
-	RF_BelowWater	= (1<<7),
-	RF_AboveWater	= (1<<8),
+	MFRF_Transparent	= (1<<4),
+	MFRF_Terrain		= (1<<5),
+	MFRF_Overlay		= (1<<6),
+	MFRF_BelowWater	= (1<<7),
+	MFRF_AboveWater	= (1<<8),
 
-	RF_ForceInt		= 0x7FFFFFFF
+	MFRF_ForceInt		= 0x7FFFFFFF
 };
 
-class Renderable
+class MFRenderable
 {
 public:
-	virtual ~Renderable();
+	virtual ~MFRenderable();
 
 	virtual void Draw() = 0;
 

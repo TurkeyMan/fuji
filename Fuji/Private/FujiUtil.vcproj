@@ -106,6 +106,9 @@
 				RelativePath="Source\MFIni.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFMatrix.cpp">
+			</File>
+			<File
 				RelativePath="Source\MFStringCache.cpp">
 			</File>
 			<File
@@ -125,6 +128,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\Include\Array.h">
+			</File>
 			<File
 				RelativePath="Include\Common.h">
 			</File>

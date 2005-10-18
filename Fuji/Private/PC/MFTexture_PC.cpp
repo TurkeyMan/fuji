@@ -2,15 +2,15 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 
 /**** Globals ****/
 
-extern PtrListDL<MFTexture> gTextureBank;
+extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
 /**** Functions ****/
@@ -41,7 +41,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 

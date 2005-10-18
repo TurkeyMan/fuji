@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "System_Internal.h"
 
 int main()

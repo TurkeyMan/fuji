@@ -7,22 +7,13 @@
 
 class MFMatrix;
 
-class _ALIGN16 MFVector
+MFALIGN_BEGIN(16)
+class MFVector
 {
 public:
-	union
+	struct
 	{
-		struct
-		{
-			float x,y,z,w;
-		};
-/*
-		struct
-		{
-			uint64 xy, zw;
-		};
-*/
-		uint128 packed;
+		float x,y,z,w;
 	};
 
 	static const MFVector zero;
@@ -31,99 +22,100 @@ public:
 	static const MFVector up;
 
 	// general purpose vector operators
-	inline MFVector operator-();
+	MFVector operator-();
 
-	inline bool operator==(const MFVector &v) const;
-	inline bool operator!=(const MFVector &v) const;
+	bool operator==(const MFVector &v) const;
+	bool operator!=(const MFVector &v) const;
 
-	inline MFVector& operator=(const MFVector &v);
-	inline MFVector& operator+=(const MFVector &v);
-	inline MFVector& operator-=(const MFVector &v);
-	inline MFVector& operator*=(float f);
-	inline MFVector& operator*=(const MFVector &v);
-//	inline MFVector& operator/=(float f);			// Since division operators shoudl NEVER really be used anyway, i wont expose them..
-//	inline MFVector& operator/=(const MFVector &v);	// teach people to write code properly ;)
+	MFVector& operator=(const MFVector &v);
+	MFVector& operator+=(const MFVector &v);
+	MFVector& operator-=(const MFVector &v);
+	MFVector& operator*=(float f);
+	MFVector& operator*=(const MFVector &v);
+//	MFVector& operator/=(float f);			// Since division operators shoudl NEVER really be used anyway, i wont expose them..
+//	MFVector& operator/=(const MFVector &v);	// teach people to write code properly ;)
 
-	inline MFVector operator+(const MFVector &v) const;
-	inline MFVector operator-(const MFVector &v) const;
-	inline MFVector operator*(float f) const;
-	inline MFVector operator*(const MFVector &v) const;
-//	inline MFVector operator/(float f) const;
-//	inline MFVector operator/(const MFVector &v) const;
+	MFVector operator+(const MFVector &v) const;
+	MFVector operator-(const MFVector &v) const;
+	MFVector operator*(float f) const;
+	MFVector operator*(const MFVector &v) const;
+//	MFVector operator/(float f) const;
+//	MFVector operator/(const MFVector &v) const;
 
 	// these are some functions for the fastest possible implementations on all platforms
 	// NOTE: These functions do NOT preserve the 'w' component!
-	inline MFVector& Add3(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Sub3(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Mul3(const MFVector &v1, float f);
-	inline MFVector& Mul3(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Mad3(const MFVector &v1, float f, const MFVector &v3);
-	inline MFVector& Mad3(const MFVector &v1, const MFVector &v2, const MFVector &v3);
-//	inline MFVector& Div3(const MFVector &v1, float f);
-//	inline MFVector& Div3(const MFVector &v1, const MFVector &v2);
+	MFVector& Add3(const MFVector &v1, const MFVector &v2);
+	MFVector& Sub3(const MFVector &v1, const MFVector &v2);
+	MFVector& Mul3(const MFVector &v1, float f);
+	MFVector& Mul3(const MFVector &v1, const MFVector &v2);
+	MFVector& Mad3(const MFVector &v1, float f, const MFVector &v3);
+	MFVector& Mad3(const MFVector &v1, const MFVector &v2, const MFVector &v3);
+//	MFVector& Div3(const MFVector &v1, float f);
+//	MFVector& Div3(const MFVector &v1, const MFVector &v2);
 
 	// NOTE: These functions do NOT preserve the 'z' or 'w' components!
-	inline MFVector& Add2(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Sub2(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Mul2(const MFVector &v1, float f);
-	inline MFVector& Mul2(const MFVector &v1, const MFVector &v2);
-	inline MFVector& Mad2(const MFVector &v1, float f, const MFVector &v3);
-	inline MFVector& Mad2(const MFVector &v1, const MFVector &v2, const MFVector &v3);
-//	inline MFVector& Div2(const MFVector &v1, float f);
-//	inline MFVector& Div2(const MFVector &v1, const MFVector &v2);
+	MFVector& Add2(const MFVector &v1, const MFVector &v2);
+	MFVector& Sub2(const MFVector &v1, const MFVector &v2);
+	MFVector& Mul2(const MFVector &v1, float f);
+	MFVector& Mul2(const MFVector &v1, const MFVector &v2);
+	MFVector& Mad2(const MFVector &v1, float f, const MFVector &v3);
+	MFVector& Mad2(const MFVector &v1, const MFVector &v2, const MFVector &v3);
+//	MFVector& Div2(const MFVector &v1, float f);
+//	MFVector& Div2(const MFVector &v1, const MFVector &v2);
 
-	inline operator float*();
-	inline operator float*() const;
+	operator float*();
+	operator float*() const;
 
-	inline uint32 ToPackedColour() const;			// WARNING: this function produces different results on all hardware
-	inline MFVector& FromPackedColour(uint32 col);
+	uint32 ToPackedColour() const;			// WARNING: this function produces different results on all hardware
+	MFVector& FromPackedColour(uint32 col);
 
-	inline float Dot4(const MFVector &vec) const;
-	inline float DotH(const MFVector &vec4) const;
-	inline float Dot3(const MFVector &vec) const;
-	inline float Dot2(const MFVector &vec) const;
+	float Dot4(const MFVector &vec) const;
+	float DotH(const MFVector &vec4) const;
+	float Dot3(const MFVector &vec) const;
+	float Dot2(const MFVector &vec) const;
 
-//	inline MFVector Cross4(const MFVector &vec) const;
-	inline MFVector Cross3(const MFVector &vec) const;
-	inline float Cross2(const MFVector &vec) const;
+//	MFVector Cross4(const MFVector &vec) const;
+	MFVector Cross3(const MFVector &vec) const;
+	float Cross2(const MFVector &vec) const;
 
-//	inline MFVector& Cross4(const MFVector &vec, const MFVector &vec2);
-	inline MFVector& Cross3(const MFVector &vec, const MFVector &vec2);
+//	MFVector& Cross4(const MFVector &vec, const MFVector &vec2);
+	MFVector& Cross3(const MFVector &vec, const MFVector &vec2);
 
 /*
-	inline MFVector& ApplyMatrix(const Matrix &matrix);
-	inline MFVector& ApplyMatrixH(const Matrix &matrix);
-	inline MFVector& ApplyMatrix3x3(const Matrix &matrix);
+	MFVector& ApplyMatrix(const Matrix &matrix);
+	MFVector& ApplyMatrixH(const Matrix &matrix);
+	MFVector& ApplyMatrix3x3(const Matrix &matrix);
 */
 
-	inline float MagSquared4() const;
-	inline float MagSquared3() const;
-	inline float MagSquared2() const;
-	inline float Magnitude4() const;
-	inline float Magnitude3() const;
-	inline float Magnitude2() const;
-	inline MFVector& Normalise4();
-	inline MFVector& Normalise3();
-	inline MFVector& Normalise2();
+	float MagSquared4() const;
+	float MagSquared3() const;
+	float MagSquared2() const;
+	float Magnitude4() const;
+	float Magnitude3() const;
+	float Magnitude2() const;
+	MFVector& Normalise4();
+	MFVector& Normalise3();
+	MFVector& Normalise2();
 
-	inline float Distance(const MFVector &v) const;
-	inline float GetAngle(const MFVector &ref = up);
+	float Distance(const MFVector &v) const;
+	float GetAngle(const MFVector &ref = up);
 
-	inline MFVector& Lerp(const MFVector &v, float t);
+	MFVector& Lerp(const MFVector &v, float t);
 
-	inline char* ToString4() const;
-	inline char* ToString3() const;
-	inline char* ToString2() const;
-};
+	char* ToString4() const;
+	char* ToString3() const;
+	char* ToString2() const;
+}
+MFALIGN_END(16);
 
-inline MFVector operator*(float f, const MFVector &v);
+MFVector operator*(float f, const MFVector &v);
 
-inline MFVector MakeVector(float f);
-inline MFVector MakeVector(float x, float y, float z = 0.0f, float w = 1.0f);
-inline MFVector MakeVector(const MFVector &v, float w);
+MFVector MakeVector(float f);
+MFVector MakeVector(float x, float y, float z = 0.0f, float w = 1.0f);
+MFVector MakeVector(const MFVector &v, float w);
 
-inline MFVector Min(const MFVector &a, const MFVector &b);
-inline MFVector Max(const MFVector &a, const MFVector &b);
+MFVector MFMin(const MFVector &a, const MFVector &b);
+MFVector MFMax(const MFVector &a, const MFVector &b);
 
 #include "MFVector.inl"
 

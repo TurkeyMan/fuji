@@ -5,7 +5,7 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Timer.h"
 #include "System.h"
 #include "DebugMenu.h"
@@ -38,8 +38,8 @@ void Timer::Init(Timer *pRefTimer)
 	accumulator = 0;
 	lastUpdate = 0;
 
-	thisCall = lastCall = RDTSC();
-	freq = GetTSCFrequency();
+	thisCall = lastCall = System_ReadRTC();
+	freq = System_GetRTCFrequency();
 
 	FPS = 60.0;
 
@@ -61,7 +61,7 @@ void Timer::Update()
 		if(fixed)
 		{
 			lastCall = thisCall;
-			thisCall = RDTSC();
+			thisCall = System_ReadRTC();
 
 			lastUpdate = accumulator;
 			accumulator += freq/fixedFPS;
@@ -69,7 +69,7 @@ void Timer::Update()
 		else
 		{
 			lastCall = thisCall;
-			thisCall = RDTSC();
+			thisCall = System_ReadRTC();
 
 			lastUpdate = accumulator;
 			accumulator += (uint64)((thisCall-lastCall)*rate);
@@ -97,7 +97,7 @@ void Timer::Reset()
 	accumulator = 0;
 	lastUpdate = 0;
 
-	lastCall = RDTSC();
+	lastCall = System_ReadRTC();
 
 	smoothDeltaF = 1.0f/60.0f;
 }
@@ -106,7 +106,7 @@ void Timer::Pause(bool pause)
 {
 	if(pause)
 	{
-		FLAG(flags, Timer_Paused);
+		MFFLAG(flags, Timer_Paused);
 
 		deltaD = 0.0;
 		deltaF = 0.0f;
@@ -115,8 +115,8 @@ void Timer::Pause(bool pause)
 	}
 	else
 	{
-		UNFLAG(flags, Timer_Paused);
-		thisCall = RDTSC();
+		MFUNFLAG(flags, Timer_Paused);
+		thisCall = System_ReadRTC();
 
 		smoothDeltaF = 1.0f/60.0f;
 		FPS = 60.0;

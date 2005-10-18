@@ -2,7 +2,7 @@
 // Mount Fuji Simple string cache.
 //
 //=============================================================================
-#include "Common.h"
+#include "Fuji.h"
 #include "Heap.h"
 #include "MFStringCache.h"
 

@@ -1,6 +1,6 @@
 //#define _USE_LIBVORBIS
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "Sound.h"
 #include "PtrList.h"

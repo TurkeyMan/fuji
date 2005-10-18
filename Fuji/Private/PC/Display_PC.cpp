@@ -1,14 +1,14 @@
 #define _WIN32_WINNT 0x501
 #define WM_INPUT 0x00FF
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "Input_PC.h"
 
 #include <stdio.h>
 
-void Display_ResetDisplay();
+void MFDisplay_ResetDisplay();
 
 #if defined(ALLOW_RAW_INPUT)
 int HandleRawMouseMessage(HANDLE hDevice);
@@ -47,26 +47,26 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
 	CALLSTACK;
 
-	display.fullscreenWidth = resList[currentMode][0];
-	display.fullscreenHeight = resList[currentMode][1];
+	gDisplay.fullscreenWidth = resList[currentMode][0];
+	gDisplay.fullscreenHeight = resList[currentMode][1];
 
-	display.wide = false;
+	gDisplay.wide = false;
 
 	if(resList[currentMode][1] == 720 || resList[currentMode][1] == 800 || resList[currentMode][1] == 1080 && (resList[currentMode][0] == 1920 || resList[currentMode][1] == 1200))
-		display.wide = true;
+		gDisplay.wide = true;
 
-	display.width = display.fullscreenWidth;
-	display.height = display.fullscreenHeight;
+	gDisplay.width = gDisplay.fullscreenWidth;
+	gDisplay.height = gDisplay.fullscreenHeight;
 
-	if(display.windowed)
+	if(gDisplay.windowed)
 	{
 		int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 		int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
-		MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, true);
+		MoveWindow(apphWnd, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, true);
 	}
 	else
 	{
-		Display_ResetDisplay();
+		MFDisplay_ResetDisplay();
 	}
 }
 
@@ -112,9 +112,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			if(wParam != WA_INACTIVE)
 			{
-				if(!display.windowed)
+				if(!gDisplay.windowed)
 				{
-					Display_ResetDisplay();
+					MFDisplay_ResetDisplay();
 				}
 			}
 			else
@@ -129,14 +129,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case SC_KEYMENU:
 					if(initialised && lParam == VK_RETURN)
 					{
-						display.windowed = !display.windowed;
-						Display_ResetDisplay();
+						gDisplay.windowed = !gDisplay.windowed;
+						MFDisplay_ResetDisplay();
 
-						if(display.windowed)
+						if(gDisplay.windowed)
 						{
 							int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 							int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
-							MoveWindow(apphWnd, wndX, wndY, display.width + xframe, display.height + yframe, true);
+							MoveWindow(apphWnd, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, true);
 						}
 					}
 
@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_MOVE:
-			if(initialised && display.windowed)
+			if(initialised && gDisplay.windowed)
 			{
 				wndX = LOWORD(lParam);
 				wndY = LOWORD(lParam);
@@ -164,7 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_SIZE:
-			if(initialised && display.windowed && wParam != SIZE_MINIMIZED)
+			if(initialised && gDisplay.windowed && wParam != SIZE_MINIMIZED)
 			{
 				RECT r, cr;
 				GetWindowRect(apphWnd, &r);
@@ -173,9 +173,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				wndX = r.left < 640 ? r.left : 0;
 				wndY = r.top < 480 ? r.top : 0;
 
-				display.width = cr.right - cr.left;
-				display.height = cr.bottom - cr.top;
-				Display_ResetDisplay();
+				gDisplay.width = cr.right - cr.left;
+				gDisplay.height = cr.bottom - cr.top;
+				MFDisplay_ResetDisplay();
 			}
 			break;
 
@@ -196,7 +196,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void Display_DestroyWindow()
+void MFDisplay_DestroyWindow()
 {
 	CALLSTACK;
 
@@ -214,17 +214,17 @@ void Display_DestroyWindow()
 	apphWnd = NULL;
 }
 
-int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
+int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
 	CALLSTACK;
 
-	display.fullscreenWidth = display.width = width;
-	display.fullscreenHeight = display.height = height;
-	display.refreshRate = rate;
-	display.colourDepth = 32;
-	display.windowed = true;
-	display.wide = false;
-	display.progressive = true;
+	gDisplay.fullscreenWidth = gDisplay.width = width;
+	gDisplay.fullscreenHeight = gDisplay.height = height;
+	gDisplay.refreshRate = rate;
+	gDisplay.colourDepth = 32;
+	gDisplay.windowed = true;
+	gDisplay.wide = false;
+	gDisplay.progressive = true;
 
 	WNDCLASS wc;
 
@@ -256,7 +256,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 	int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
 
-	apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, display.width + xframe, display.height + yframe, NULL, NULL, apphInstance, NULL);
+	apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, NULL, NULL, apphInstance, NULL);
     if(!apphWnd)
 	{
 		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
@@ -274,13 +274,13 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
 
-	if(!display.windowed)
+	if(!gDisplay.windowed)
 	{
 		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
 		present.Windowed						= FALSE;
-		present.BackBufferFormat				= (display.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth					= display.width;
-		present.BackBufferHeight				= display.height;
+		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth					= gDisplay.width;
+		present.BackBufferHeight				= gDisplay.height;
 		present.BackBufferCount					= 2;
 		present.EnableAutoDepthStencil			= TRUE;
 		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
@@ -330,7 +330,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
 			{
 				LOGD("Error: Failed to create Direct3D device. Cant create game window.");
-				Display_DestroyWindow();
+				MFDisplay_DestroyWindow();
 				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
 				return 4;
 			}
@@ -345,7 +345,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 			else
 			{
 				MessageBox(NULL,"No suitable hardware supported Display Mode could be found.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
-				Display_DestroyWindow();
+				MFDisplay_DestroyWindow();
 				return 5;
 			}
 		}
@@ -388,7 +388,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	return 0;
 }
 
-void Display_ResetDisplay()
+void MFDisplay_ResetDisplay()
 {
 	CALLSTACK;
 
@@ -397,13 +397,13 @@ void Display_ResetDisplay()
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
 
-	if(!display.windowed)
+	if(!gDisplay.windowed)
 	{
 		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
 		present.Windowed						= FALSE;
-		present.BackBufferFormat				= (display.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth					= display.fullscreenWidth;
-		present.BackBufferHeight				= display.fullscreenHeight;
+		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth					= gDisplay.fullscreenWidth;
+		present.BackBufferHeight				= gDisplay.fullscreenHeight;
 		present.BackBufferCount					= 1;
 		present.EnableAutoDepthStencil			= TRUE;
 		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
@@ -423,8 +423,8 @@ void Display_ResetDisplay()
 		present.SwapEffect              = D3DSWAPEFFECT_COPY;
 		present.Windowed                = TRUE;
 		present.BackBufferFormat        = d3ddm.Format;
-		present.BackBufferWidth			= display.width;
-		present.BackBufferHeight		= display.height;
+		present.BackBufferWidth			= gDisplay.width;
+		present.BackBufferHeight		= gDisplay.height;
 		present.BackBufferCount			= 1;
 		present.EnableAutoDepthStencil	= TRUE;
 		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
@@ -454,7 +454,7 @@ void Display_ResetDisplay()
 	}
 }
 
-void Display_DestroyDisplay()
+void MFDisplay_DestroyDisplay()
 {
 	CALLSTACK;
 
@@ -462,7 +462,7 @@ void Display_DestroyDisplay()
 	d3d9->Release();
 }
 
-void Display_BeginFrame()
+void MFDisplay_BeginFrame()
 {
 	CALLSTACK;
 
@@ -475,7 +475,7 @@ void Display_BeginFrame()
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 
-void Display_EndFrame()
+void MFDisplay_EndFrame()
 {
 	CALLSTACK;
 
@@ -483,7 +483,7 @@ void Display_EndFrame()
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
 }
 
-void Display_SetClearColour(float r, float g, float b, float a)
+void MFDisplay_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -491,37 +491,37 @@ void Display_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void Display_ClearScreen(uint32 flags)
+void MFDisplay_ClearScreen(uint32 flags)
 {
 	CALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
-void SetViewport(float x, float y, float width, float height)
+void MFDisplay_SetViewport(float x, float y, float width, float height)
 {
 	CALLSTACK;
 
 	D3DVIEWPORT9 vp;
-	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
-	vp.Y = (DWORD)((y / 480.0f) * (float)display.height);
-	vp.Width = (DWORD)((width / 640.0f) * (float)display.width);
-	vp.Height = (DWORD)((height / 480.0f) * (float)display.height);
+	vp.X = (DWORD)((x / 640.0f) * (float)gDisplay.width);
+	vp.Y = (DWORD)((y / 480.0f) * (float)gDisplay.height);
+	vp.Width = (DWORD)((width / 640.0f) * (float)gDisplay.width);
+	vp.Height = (DWORD)((height / 480.0f) * (float)gDisplay.height);
 	vp.MinZ = 0.0f;
 	vp.MaxZ = 1.0f;
 
 	pd3dDevice->SetViewport(&vp);
 }
 
-void ResetViewport()
+void MFDisplay_ResetViewport()
 {
 	CALLSTACK;
 
 	D3DVIEWPORT9 vp;
 	vp.X = 0;
 	vp.Y = 0;
-	vp.Width = display.width;
-	vp.Height = display.height;
+	vp.Width = gDisplay.width;
+	vp.Height = gDisplay.height;
 	vp.MinZ = 0.0f;
 	vp.MaxZ = 1.0f;
 

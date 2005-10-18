@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "View_Internal.h"
 #include "System.h"
@@ -31,7 +31,7 @@ void View_InitModule()
 	pCurrentView->viewProj = MFMatrix::identity;
 
 	View_SetOrtho(&View::defaultOrthoRect);
-	View_SetProjection(DEGREES(gDefaults.view.defaultFOV), gDefaults.view.defaultAspect, gDefaults.view.defaultNearPlane, gDefaults.view.defaultFarPlane);
+	View_SetProjection(MFDEGREES(gDefaults.view.defaultFOV), gDefaults.view.defaultAspect, gDefaults.view.defaultNearPlane, gDefaults.view.defaultFarPlane);
 
 	pCurrentView = gpViewStack;
 	View_SetDefault();
@@ -94,17 +94,10 @@ void View_SetProjection(float _fov, float _aspectRatio, float _nearPlane, float 
 	float h = MFCos(a) / MFSin(a);
 	float w = h / pCurrentView->aspectRatio;
 
-#if 1//!defined(_PSP)
 	pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
 	pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
 	pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = zf/(zf-zn);		pCurrentView->projection.m[2][3] = 1.0f;
 	pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
-#else
-	pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
-	pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
-	pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = (zf+zn)/(zn-zf);	pCurrentView->projection.m[2][3] = -1.0f;
-	pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = 2.0f*(zf*zn)/(zn-zf); pCurrentView->projection.m[3][3] = 0.0f;
-#endif
 }
 
 void View_GetProjection(float *pFov, float *pAspectRatio, float *pNearPlane, float *pFarPlane)

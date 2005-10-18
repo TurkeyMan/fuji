@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "PtrList.h"
 

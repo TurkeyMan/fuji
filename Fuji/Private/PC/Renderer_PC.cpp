@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"

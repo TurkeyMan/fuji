@@ -3,7 +3,7 @@
 
 #define SAMPLE_BUFFER_SIZE 128//50000
 
-#include "Common.h"
+#include "Fuji.h"
 #include <dinput.h>
 
 #include "MFVector.h"
@@ -593,10 +593,10 @@ void GetWindowMousePos(float *pX, float *pY)
 	ScreenToClient(apphWnd, &mouse);
 	GetClientRect(apphWnd, &client);
 
-	mouse.x = Max(mouse.x, client.left);
-	mouse.y = Max(mouse.y, client.top);
-	mouse.x = Min(mouse.x, client.right-1);
-	mouse.y = Min(mouse.y, client.bottom-1);
+	mouse.x = MFMax(mouse.x, client.left);
+	mouse.y = MFMax(mouse.y, client.top);
+	mouse.x = MFMin(mouse.x, client.right-1);
+	mouse.y = MFMin(mouse.y, client.bottom-1);
 
 	*pX = (float)mouse.x;
 	*pY = (float)mouse.y;

@@ -65,32 +65,20 @@ void CrcInit(); // generates some crc tables - system should call this once
 uint32 Crc(char *buffer, int length); // generate a unique Crc number for this buffer
 
 // endian flipping
-#if defined(BIG_ENDIAN)
-#define HostToBigEndian(x)
+#if defined(MFBIG_ENDIAN)
+#define MFEndian_HostToBig(x)
+#define MFEndian_HostToLittle(x) MFEndian_Flip(x)
+#define MFEndian_LittleToHost(x) MFEndian_Flip(x)
+#define MFEndian_BigToHost(x)
 #else
-#define HostToBigEndian(x) FlipEndian(x)
-#endif
-
-#if defined(BIG_ENDIAN)
-#define HostToLittleEndian(x) FlipEndian(x)
-#else
-#define HostToLittleEndian(x)
-#endif
-
-#if defined(BIG_ENDIAN)
-#define LittleToHostEndian(x) FlipEndian(x)
-#else
-#define LittleToHostEndian(x)
-#endif
-
-#if defined(BIG_ENDIAN)
-#define BigToHostEndian(x)
-#else
-#define BigToHostEndian(x) FlipEndian(x)
+#define MFEndian_HostToBig(x) MFEndian_Flip(x)
+#define MFEndian_HostToLittle(x)
+#define MFEndian_LittleToHost(x)
+#define MFEndian_BigToHost(x) MFEndian_Flip(x)
 #endif
 
 template <typename T>
-inline void FlipEndian(T *pData)
+inline void MFEndian_Flip(T *pData)
 {
 	register char t[sizeof(T)];
 	const char *pBytes = (const char*)pData;

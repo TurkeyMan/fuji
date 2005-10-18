@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "View.h"
 #include "MFVector.h"

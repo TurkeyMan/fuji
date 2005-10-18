@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "FujiMath.h"
 #include "Synth/PhaseInverter.h"
 

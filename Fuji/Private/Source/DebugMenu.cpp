@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "View.h"
 #include "DebugMenu_Internal.h"
@@ -305,7 +305,7 @@ void Menu::Draw()
 		}
 
 		dimensions.y += dim.y;
-		dimensions.x = Max(dimensions.x, dim.x);
+		dimensions.x = MFMax(dimensions.x, dim.x);
 	}
 
 	if(targetOffset != yOffset)

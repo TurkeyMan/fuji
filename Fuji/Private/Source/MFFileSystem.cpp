@@ -1,16 +1,16 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "FileSystem/MFFileSystemMemory.h"
 #include "FileSystem/MFFileSystemZipFile.h"
-#include "Ptrlist.h"
+#include "MFPtrList.h"
 
-PtrListDL<MFFile> gOpenFiles;
+MFPtrListDL<MFFile> gOpenFiles;
 
 MFMount *pMountList = NULL;
 MFMount *pMountListEnd = NULL;
 
-PtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
+MFPtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
 MFFileSystemCallbacks **ppFileSystemList;
 
 // internal filesystems
@@ -36,7 +36,7 @@ void MFFileSystem_InitModule()
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
-	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", gPlatformStrings[gCurrentPlatform]));
+	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", System_GetPlatformName(System_GetCurrentPlatform())));
 	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
 
 	MFMountDataNative mountData;
@@ -57,7 +57,7 @@ void MFFileSystem_InitModule()
 	{
 		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		mountData.pMountpoint = "data";
-		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), gPlatformStrings[gCurrentPlatform]);
+		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), System_GetPlatformName(System_GetCurrentPlatform()));
 		MFFileSystem_Mount(hNativeFileSystem, &mountData);
 	}
 

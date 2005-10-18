@@ -9,14 +9,14 @@
 #include <map>
 #endif
 
-#include "Array.h"
+#include "MFArray.h"
 #include "System.h"
 
 void Callstack_InitModule();
 void Callstack_DeinitModule();
 
 #if !defined(_RETAIL) && !defined(_FUJI_UTIL)
-extern Array<const char *> Callstack;
+extern MFArray<const char *> Callstack;
 
 #if defined(_CALLSTACK_MONITORING)
 

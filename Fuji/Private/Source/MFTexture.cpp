@@ -1,10 +1,10 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "Input.h"
 #include "Font.h"
 #include "Primitive.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 
 #if defined(_PSP)
@@ -13,7 +13,7 @@
 #endif
 
 // globals
-PtrListDL<MFTexture> gTextureBank;
+MFPtrListDL<MFTexture> gTextureBank;
 TextureBrowser texBrowser;
 
 char blankBuffer[8*8*4];
@@ -139,7 +139,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 
 	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s:", name));
 	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s", pTexture->name));
-	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, gpMFTextureFormatStrings[(int)pTexture->pTemplateData->imageFormat], pTexture->refCount));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, MFTexture_GetFormatString(pTexture->pTemplateData->imageFormat), pTexture->refCount));
 
 	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 

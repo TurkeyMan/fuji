@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <d3d9.h>
 
-#include "Common.h"
-#include "Array.h"
+#include "Fuji.h"
+#include "MFArray.h"
 #include "F3D.h"
 #include "Heap.h"
 #include "MFStringCache.h"
@@ -45,7 +45,7 @@ void F3DFile::ImportMesh(F3DMesh *pMesh, char *pBase)
 	F3DSubObject &sub = meshChunk.subObjects.push();
 
 	memcpy(sub.name, pMesh->name, 64);
-	sub.materialIndex = pMesh->materialIndex;
+//	sub.materialIndex = pMesh->materialIndex;
 
 	F3DMatSub *pMatSubs = (F3DMatSub*)(pBase + pMesh->pMatSubOffset);
 
@@ -53,26 +53,26 @@ void F3DFile::ImportMesh(F3DMesh *pMesh, char *pBase)
 	for(uint32 a=0; a<pMesh->matSubCount; a++)
 	{
 		sub.matSubobjects[a].triangles.resize(pMatSubs[a].triangleCount);
-		memcpy(sub.matSubobjects[a].triangles.pData, pBase + pMatSubs[a].pTriangleOffset, sizeof(sub.matSubobjects[a].triangles[0])*pMatSubs[a].triangleCount);
+		memcpy(sub.matSubobjects[a].triangles.getpointer(), pBase + pMatSubs[a].pTriangleOffset, sizeof(sub.matSubobjects[a].triangles[0])*pMatSubs[a].triangleCount);
 
 		sub.matSubobjects[a].vertices.resize(pMatSubs[a].vertexCount);
-		memcpy(sub.matSubobjects[a].vertices.pData, pBase + pMatSubs[a].pVertexOffset, sizeof(sub.matSubobjects[a].vertices[0])*pMatSubs[a].vertexCount);
+		memcpy(sub.matSubobjects[a].vertices.getpointer(), pBase + pMatSubs[a].pVertexOffset, sizeof(sub.matSubobjects[a].vertices[0])*pMatSubs[a].vertexCount);
 	}
 
 	sub.positions.resize(pMesh->positionCount);
-	memcpy(sub.positions.pData, pBase + pMesh->pPositionOffset, sizeof(sub.positions[0])*pMesh->positionCount);
+	memcpy(sub.positions.getpointer(), pBase + pMesh->pPositionOffset, sizeof(sub.positions[0])*pMesh->positionCount);
 
 	sub.uvs.resize(pMesh->texCount);
-	memcpy(sub.uvs.pData, pBase + pMesh->pTexOffset, sizeof(sub.uvs[0])*pMesh->texCount);
+	memcpy(sub.uvs.getpointer(), pBase + pMesh->pTexOffset, sizeof(sub.uvs[0])*pMesh->texCount);
 
 	sub.normals.resize(pMesh->normalCount);
-	memcpy(sub.normals.pData, pBase + pMesh->pNormalOffset, sizeof(sub.normals[0])*pMesh->normalCount);
+	memcpy(sub.normals.getpointer(), pBase + pMesh->pNormalOffset, sizeof(sub.normals[0])*pMesh->normalCount);
 
 	sub.colours.resize(pMesh->colourCount);
-	memcpy(sub.colours.pData, pBase + pMesh->pColourOffset, sizeof(sub.colours[0])*pMesh->colourCount);
+	memcpy(sub.colours.getpointer(), pBase + pMesh->pColourOffset, sizeof(sub.colours[0])*pMesh->colourCount);
 
 	sub.illumination.resize(pMesh->illumCount);
-	memcpy(sub.illumination.pData, pBase + pMesh->pIllumOffset, sizeof(sub.illumination[0])*pMesh->illumCount);
+	memcpy(sub.illumination.getpointer(), pBase + pMesh->pIllumOffset, sizeof(sub.illumination[0])*pMesh->illumCount);
 }
 
 void F3DFile::ExportMesh(char* &pData, char *pBase)
@@ -85,7 +85,7 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 		pMesh[a].size = sizeof(F3DMesh);
 		pData += pMesh[a].size;
 		memcpy(pMesh[a].name, meshChunk.subObjects[a].name, 64);
-		pMesh[a].materialIndex = meshChunk.subObjects[a].materialIndex;
+//		pMesh[a].materialIndex = meshChunk.subObjects[a].materialIndex;
 
 		pMesh[a].matSubCount = meshChunk.subObjects[a].matSubobjects.size();
 //		pMesh[a].triangleCount = meshChunk.subObjects[a].triangles.size();
@@ -111,38 +111,38 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 			pMatSubs[b].vertexCount = meshChunk.subObjects[a].matSubobjects[b].vertices.size();
 
 			size = pMatSubs[b].triangleCount * sizeof(meshChunk.subObjects[a].matSubobjects[b].triangles[0]);
-			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].triangles.pData, size);
+			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].triangles.getpointer(), size);
 			pMatSubs[b].pTriangleOffset = (uint32)(pData - pBase);
 			pData += size;
 
 			size = pMatSubs[b].vertexCount * sizeof(meshChunk.subObjects[a].matSubobjects[b].vertices[0]);
-			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].vertices.pData, size);
+			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].vertices.getpointer(), size);
 			pMatSubs[b].pVertexOffset = (uint32)(pData - pBase);
 			pData += size;
 		}
 
 		size = pMesh[a].positionCount * sizeof(meshChunk.subObjects[a].positions[0]);
-		memcpy(pData, meshChunk.subObjects[a].positions.pData, size);
+		memcpy(pData, meshChunk.subObjects[a].positions.getpointer(), size);
 		pMesh[a].pPositionOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].texCount * sizeof(meshChunk.subObjects[a].uvs[0]);
-		memcpy(pData, meshChunk.subObjects[a].uvs.pData, size);
+		memcpy(pData, meshChunk.subObjects[a].uvs.getpointer(), size);
 		pMesh[a].pTexOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].normalCount * sizeof(meshChunk.subObjects[a].normals[0]);
-		memcpy(pData, meshChunk.subObjects[a].normals.pData, size);
+		memcpy(pData, meshChunk.subObjects[a].normals.getpointer(), size);
 		pMesh[a].pNormalOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].colourCount * sizeof(meshChunk.subObjects[a].colours[0]);
-		memcpy(pData, meshChunk.subObjects[a].colours.pData, size);
+		memcpy(pData, meshChunk.subObjects[a].colours.getpointer(), size);
 		pMesh[a].pColourOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].illumCount * sizeof(meshChunk.subObjects[a].illumination[0]);
-		memcpy(pData, meshChunk.subObjects[a].illumination.pData, size);
+		memcpy(pData, meshChunk.subObjects[a].illumination.getpointer(), size);
 		pMesh[a].pIllumOffset = (uint32)(pData - pBase);
 		pData += size;
 	}
@@ -151,14 +151,14 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 void F3DFile::ExportSkeleton(char* &pData, char *pBase)
 {
 	int size = sizeof(F3DBone)*skeletonChunk.bones.size();
-	memcpy(pData, skeletonChunk.bones.pData, size);
+	memcpy(pData, skeletonChunk.bones.getpointer(), size);
 	pData += size;
 }
 
 void F3DFile::ExportMaterial(char* &pData, char *pBase)
 {
 	int size = sizeof(F3DMaterial)*materialChunk.materials.size();
-	memcpy(pData, materialChunk.materials.pData, size);
+	memcpy(pData, materialChunk.materials.getpointer(), size);
 	pData += size;
 }
 
@@ -358,13 +358,13 @@ struct FileVertex
 	float u,v;
 };
 
-void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset)
+void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache)
 {
 	int numMeshChunks = sub.matSubobjects.size();
 	int a, b;
 
 	// increment size of MeshChunk_PC structure
-	pOffset += ALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
 
 	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
@@ -379,21 +379,23 @@ void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *
 			float uv[2];
 		};
 
-		int numVertices = sub.matSubobjects.pData[a].vertices.size();
-		int numIndices = sub.matSubobjects.pData[a].triangles.size()*3;
+		int numVertices = sub.matSubobjects[a].vertices.size();
+		int numIndices = sub.matSubobjects[a].triangles.size()*3;
 
 		pMeshChunk[a].numVertices = numVertices;
 		pMeshChunk[a].vertexStride = sizeof(Vert);
 		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
 		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
 
+		pMeshChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+
 		// setup pointers
 		pMeshChunk[a].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
-		pOffset += ALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
+		pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
 		pMeshChunk[a].pVertexData = pOffset;
-		pOffset += ALIGN16(sizeof(Vert)*numVertices);
+		pOffset += MFALIGN16(sizeof(Vert)*numVertices);
 		pMeshChunk[a].pIndexData = pOffset;
-		pOffset += ALIGN16(sizeof(uint16)*numIndices);
+		pOffset += MFALIGN16(sizeof(uint16)*numIndices);
 
 		// write declaration
 		pMeshChunk[a].pVertexElements[0].Stream = 0;
@@ -432,15 +434,15 @@ void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *
 
 		for(b=0; b<numVertices; b++)
 		{
-			int posIndex = sub.matSubobjects.pData[a].vertices.pData[b].position;
-			int normalIndex = sub.matSubobjects.pData[a].vertices.pData[b].normal;
-			int uvIndex = sub.matSubobjects.pData[a].vertices.pData[b].uv1;
-			int colourIndex = sub.matSubobjects.pData[a].vertices.pData[b].colour;
+			int posIndex = sub.matSubobjects[a].vertices[b].position;
+			int normalIndex = sub.matSubobjects[a].vertices[b].normal;
+			int uvIndex = sub.matSubobjects[a].vertices[b].uv1;
+			int colourIndex = sub.matSubobjects[a].vertices[b].colour;
 
-			const MFVector &pos = posIndex > -1 ? sub.positions.pData[posIndex] : MFVector::zero;
-			const MFVector &normal = normalIndex > -1 ? sub.normals.pData[normalIndex] : MFVector::up;
-			const MFVector &uv = uvIndex > -1 ? sub.uvs.pData[uvIndex] : MFVector::zero;
-			uint32 colour = colourIndex > -1 ? sub.colours.pData[colourIndex].ToPackedColour() : 0xFFFFFFFF;
+			const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
+			const MFVector &normal = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
+			const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
+			uint32 colour = colourIndex > -1 ? sub.colours[colourIndex].ToPackedColour() : 0xFFFFFFFF;
 
 			pVert[b].pos[0] = pos.x;
 			pVert[b].pos[1] = pos.y;
@@ -460,28 +462,30 @@ void WriteMeshChunk_PC(MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *
 
 		for(b=0; b<triCount; b++)
 		{
-			pIndices[0] = sub.matSubobjects.pData[a].triangles.pData[b].v[0];
-			pIndices[1] = sub.matSubobjects.pData[a].triangles.pData[b].v[1];
-			pIndices[2] = sub.matSubobjects.pData[a].triangles.pData[b].v[2];
+			pIndices[0] = sub.matSubobjects[a].triangles[b].v[0];
+			pIndices[1] = sub.matSubobjects[a].triangles[b].v[1];
+			pIndices[2] = sub.matSubobjects[a].triangles[b].v[2];
 
 			pIndices += 3;
 		}
 	}
 }
 
-void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base)
+void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
 {
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
+		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
+
 		pMC[a].pVertexData -= base;
 		pMC[a].pIndexData -= base;
 		(char*&)pMC[a].pVertexElements -= base;
 	}
 }
 
-void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
+void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 {
 	int a, b;
 
@@ -507,7 +511,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	memset(pFile, 0, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
-	DataChunk *pDataHeaders = (DataChunk*)(pFile+ALIGN16(sizeof(MFModelTemplate)));
+	DataChunk *pDataHeaders = (DataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
 	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
 	pModelData->pName = pStringCache->Add(name);
@@ -541,7 +545,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	pModelData->numDataChunks = numChunks;
 	pModelData->pDataChunks = pDataHeaders;
 
-	pOffset = (char*)pDataHeaders + ALIGN16(sizeof(DataChunk)*numChunks);
+	pOffset = (char*)pDataHeaders + MFALIGN16(sizeof(DataChunk)*numChunks);
 
 	// write out mesh data
 	if(meshChunkIndex > -1)
@@ -551,14 +555,14 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
 		pDataHeaders[meshChunkIndex].count = GetMeshChunk()->subObjects.size();
 
-		pOffset += ALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
+		pOffset += MFALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
 
 		for(a=0; a<pDataHeaders[meshChunkIndex].count; a++)
 		{
 			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
 			pSubobjectChunk[a].pSubObjectName = pStringCache->Add(sub.name);
-			pSubobjectChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials.pData[sub.materialIndex].name);
+//			pSubobjectChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
 			pSubobjectChunk[a].numMeshChunks = sub.matSubobjects.size();
 
 			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
@@ -568,7 +572,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 			switch(platform)
 			{
 				case FP_PC:
-					WriteMeshChunk_PC(pMeshChunks, sub, pOffset);
+					WriteMeshChunk_PC(this, pMeshChunks, sub, pOffset, pStringCache);
 					break;
 				case FP_XBox:
 				case FP_Linux:
@@ -586,7 +590,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	if(skeletonChunkIndex > -1)
 	{
 		BoneChunk *pBoneChunk = (BoneChunk*)pOffset;
-		pOffset += ALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
+		pOffset += MFALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
 
 		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
 		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->bones.size();
@@ -602,11 +606,12 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	// wite strings to end of file
 	memcpy(pOffset, pStringCache->GetCache(), pStringCache->GetSize());
 
-	uint32 stringBase = (uint32)pStringCache->GetCache() - ((uint32)pOffset - (uint32)pFile);
+	char *pCache = pStringCache->GetCache();
+	uint32 stringBase = (uint32&)pCache - ((uint32&)pOffset - (uint32&)pFile);
 	pOffset += pStringCache->GetSize(); // pOffset now equals the file size..
 
 	// un-fix-up all the pointers...
-	uint32 base = (uint32)pModelData;
+	uint32 base = (uint32&)pModelData;
 
 	pModelData->pName -= stringBase;
 
@@ -621,12 +626,12 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 				for(b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
 					pSubobjectChunk[b].pSubObjectName -= stringBase;
-					pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - stringBase);
+//					pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - stringBase);
 
 					switch(platform)
 					{
 						case FP_PC:
-							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base);
+							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
 							break;
 						case FP_XBox:
 						case FP_Linux:
@@ -666,7 +671,7 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 	(char*&)pModelData->pDataChunks -= base;
 
 	// write to disk..
-	uint32 fileSize = (uint32)pOffset - base;
+	uint32 fileSize = (uint32&)pOffset - base;
 	fwrite(pFile, fileSize, 1, file);
 	fclose(file);
 
@@ -676,13 +681,24 @@ void F3DFile::WriteMDL(char *pFilename, FujiPlatforms platform)
 
 void F3DFile::Optimise()
 {
-	// optimise mesh and stuff
+	// for each subobject
+		// if matstrips use the same material, merge the data
 
-	// minimise normals
+		// for each matstrip
+			// remove vertices not referenced by triangles
 
-	// minimise verts
+			// remove vertex data not referenced by vertices
 
+			// remove all duplicate vertex data
 
+			// remove diplicate vertices
+		// end for
+	// end for
+}
+
+void F3DFile::StripModel()
+{
+	// run stripper on model
 }
 
 void F3DFile::ProcessSkeletonData()
@@ -690,10 +706,26 @@ void F3DFile::ProcessSkeletonData()
 	// generate localMatrix and stuff..
 }
 
+int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
+{
+	for(int a=0; a<materials.size(); a++)
+	{
+		if(!stricmp(pName, materials[a].name))
+			return a;
+	}
+
+	return -1;
+}
+
+F3DMaterialSubobject::F3DMaterialSubobject()
+{
+	materialIndex = 0;
+}
+
 F3DSubObject::F3DSubObject()
 {
 	memset(name, 0, 64);
-	materialIndex = 0;
+//	materialIndex = 0;
 }
 
 F3DBone::F3DBone()
@@ -701,6 +733,9 @@ F3DBone::F3DBone()
 	memset(name, 0, 64);
 	memset(parentName, 0, 64);
 	memset(options, 0, 1024);
+
+	localMatrix = MFMatrix::identity;
+	worldMatrix = MFMatrix::identity;
 }
 
 F3DVertex::F3DVertex()
@@ -714,3 +749,28 @@ F3DVertex::F3DVertex()
 	weight[0] = weight[1] = weight[2] = weight[3] = 0.0f;
 }
 
+F3DMaterial::F3DMaterial()
+{
+	diffuse = MFVector::one;
+	ambient = MFVector::one;
+	emissive = MFVector::zero;
+	specular = MFVector::zero;
+	specularLevel = 0.0f;
+	glossiness = 0.0f;
+
+	strcpy(name, "");
+	for(int a=0; a<8; a++)
+	{
+		strcpy(maps[a], "");
+	}
+}
+
+F3DRefPoint::F3DRefPoint()
+{
+	worldMatrix = MFMatrix::identity;
+	localMatrix = MFMatrix::identity;
+	bone[0] = -1; bone[1] = -1; bone[2] = -1; bone[3] = -1;
+	weight[0] = 0.0f; weight[1] = 0.0f; weight[2] = 0.0f; weight[3] = 0.0f;
+	strcpy(name, "");
+	strcpy(options, "");
+}

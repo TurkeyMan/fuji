@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "System.h"
 #include "Input.h"
 

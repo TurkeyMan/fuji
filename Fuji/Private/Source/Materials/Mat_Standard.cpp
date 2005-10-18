@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 
 #include "MFMaterial_Internal.h"
 #include "Materials/Mat_Standard.h"

@@ -1,15 +1,38 @@
 #if !defined(_RENDERER_H)
 #define _RENDERER_H
 
-class MFMatrix;
+#include "MFMatrix.h"
 struct MFMeshChunk;
 
-// renderer interface
+// Renderer Interface
 
-// renderer setup
+// Renderer Enums
+enum MatrixType
+{
+	MFMT_Unknown,
+
+	// these can be set directly
+	MFMT_WorldMatrix,
+	MFMT_CameraMatrix,
+	MFMT_ProjectionMatrix,
+
+	// these can not be set directly, only read
+	MFMT_ViewMatrix,
+	MFMT_WorldViewMatrix,
+	MFMT_ViewProjectionMatrix,
+	MFMT_WorldViewProjectionMatrix,
+
+	MFMT_Max,
+	MFMT_ForceInt = 0x7FFFFFFF
+};
+
+// Renderer Setup
 int  Renderer_Begin(); // returns number of passes remaining..
 
-// renderer setup
+// Get and Set the matrices used for geometry transformation
+const MFMatrix& MKRenderer_GetMatrix(MatrixType type, MFMatrix *pMatrix);
+void MKRenderer_SetMatrix(MatrixType type, const MFMatrix &matrix);
+
 //void Renderer_SetLocalToWorldMatrix(const Matrix &localToWorldMatrix); // Matrix[0] == localToWorld (use SetMatrices)
 void Renderer_SetMatrices(MFMatrix *pMatrices, int numMatrices);
 

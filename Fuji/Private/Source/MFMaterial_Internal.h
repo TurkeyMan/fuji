@@ -45,7 +45,7 @@ struct MFMaterialParamaterInfo
 
 struct MFMeshChunk
 {
-
+	MFMaterial *pMaterial;
 };
 
 #if defined(_WINDOWS) || defined(_FUJI_UTIL)

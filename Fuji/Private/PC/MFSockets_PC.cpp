@@ -4,7 +4,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFSockets.h"
 
 static WSADATA wsData;
@@ -70,7 +70,7 @@ sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLen
 		ain.sin_addr.S_un.S_un_b.s_b3 = pInet->address.b3;
 		ain.sin_addr.S_un.S_un_b.s_b4 = pInet->address.b4;
 		ain.sin_port = (uint16)pInet->port;
-		HostToBigEndian(&ain.sin_port);
+		MFEndian_HostToBig(&ain.sin_port);
 	}
 	else
 	{
@@ -96,7 +96,7 @@ MFSocketAddress* MFSocketsPC_GetSocketAddress(const sockaddr *pSockAddress)
 		inet.family = MFAF_Inet;
 
 		uint16 t = ain->sin_port;
-		BigToHostEndian(&t);
+		MFEndian_BigToHost(&t);
 		inet.port = (int)t;
 
 		inet.address.b1 = ain->sin_addr.S_un.S_un_b.s_b1;

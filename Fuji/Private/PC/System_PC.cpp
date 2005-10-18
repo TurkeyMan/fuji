@@ -1,8 +1,10 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "System_Internal.h"
 
 HINSTANCE apphInstance;
 extern int gQuit;
+
+MFPlatform gCurrentPlatform = FP_PC;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
@@ -13,7 +15,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	System_GameLoop();
 }
 
-void DoMessageLoop()
+void System_InitModulePlatformSpecific()
+{
+}
+
+void System_DeinitModulePlatformSpecific()
+{
+}
+
+void System_HandleEventsPlatformSpecific()
 {
 	MSG msg;
 
@@ -28,14 +38,6 @@ void DoMessageLoop()
 	}
 }
 
-void System_InitModulePlatformSpecific()
-{
-}
-
-void System_DeinitModulePlatformSpecific()
-{
-}
-
 void System_UpdatePlatformSpecific()
 {
 }
@@ -44,14 +46,14 @@ void System_DrawPlatformSpecific()
 {
 }
 
-uint64 RDTSC()
+uint64 System_ReadRTC()
 {
 	uint64 tickCount;
 	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
 	return tickCount;
 }
 
-uint64 GetTSCFrequency()
+uint64 System_GetRTCFrequency()
 {
 	uint64 freq;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);

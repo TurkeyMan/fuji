@@ -3,6 +3,7 @@
 
 #include "MFVector.h"
 
+MFALIGN_BEGIN(16)
 class MFMatrix
 {
 public:
@@ -14,9 +15,9 @@ public:
 	bool operator==(const MFMatrix& mat) const;
 	bool operator!=(const MFMatrix& mat) const;
 
-	inline MFMatrix& SetIdentity();
+	MFMatrix& SetIdentity();
 
-	inline MFMatrix& Translate(const MFVector &trans);
+	MFMatrix& Translate(const MFVector &trans);
 	MFMatrix& Rotate(const MFVector &axis, float angle);
 	MFMatrix& RotateQ(const MFVector &q);
 	MFMatrix& RotateYPR(float yaw, float pitch, float roll);
@@ -48,37 +49,38 @@ public:
 	MFMatrix& Multiply3x3(const MFMatrix& mat);
 	MFMatrix& Multiply3x3(const MFMatrix& mat1, const MFMatrix& mat2);
 
-	inline MFVector TransformVector(const MFVector& vec) const;
-	inline MFVector TransformVectorH(const MFVector& vec) const;
-	inline MFVector TransformVector3(const MFVector& vec) const;
+	MFVector TransformVector(const MFVector& vec) const;
+	MFVector TransformVectorH(const MFVector& vec) const;
+	MFVector TransformVector3(const MFVector& vec) const;
 
 	MFMatrix& Inverse() { return Inverse(*this); }
 	MFMatrix& Inverse(const MFMatrix &matrix);
 
 	MFVector CalculateQuaternion();
 
-	inline MFMatrix& ClearW();
+	MFMatrix& ClearW();
 
-	inline const MFVector& GetXAxis() const;
-	inline const MFVector& GetYAxis() const;
-	inline const MFVector& GetZAxis() const;
-	inline const MFVector& GetTrans() const;
+	const MFVector& GetXAxis() const;
+	const MFVector& GetYAxis() const;
+	const MFVector& GetZAxis() const;
+	const MFVector& GetTrans() const;
 
-	inline void SetXAxis3(const MFVector &v);
-	inline void SetYAxis3(const MFVector &v);
-	inline void SetZAxis3(const MFVector &v);
-	inline void SetTrans3(const MFVector &v);
-	inline void SetXAxis4(const MFVector &v);
-	inline void SetYAxis4(const MFVector &v);
-	inline void SetZAxis4(const MFVector &v);
-	inline void SetTrans4(const MFVector &v);
+	void SetXAxis3(const MFVector &v);
+	void SetYAxis3(const MFVector &v);
+	void SetZAxis3(const MFVector &v);
+	void SetTrans3(const MFVector &v);
+	void SetXAxis4(const MFVector &v);
+	void SetYAxis4(const MFVector &v);
+	void SetZAxis4(const MFVector &v);
+	void SetTrans4(const MFVector &v);
 
-	inline char* ToString() const;
-};
+	char* ToString() const;
+}
+MFALIGN_END(16);
 
-inline MFVector ApplyMatrix(const MFVector& vector, const MFMatrix &matrix);
-inline MFVector ApplyMatrixH(const MFVector& vector, const MFMatrix &matrix);
-inline MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
+MFVector ApplyMatrix(const MFVector& vector, const MFMatrix &matrix);
+MFVector ApplyMatrixH(const MFVector& vector, const MFMatrix &matrix);
+MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
 
 #include "MFMatrix.inl"
 

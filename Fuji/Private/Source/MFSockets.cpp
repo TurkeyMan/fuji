@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFSockets.h"
 
 MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4)

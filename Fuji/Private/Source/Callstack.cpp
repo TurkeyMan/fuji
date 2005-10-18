@@ -3,7 +3,7 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Display.h"
 #include "View.h"
 #include "Timer.h"
@@ -32,7 +32,7 @@ void Callstack_DeinitModule()
 
 /**** Globals ****/
 
-Array<const char *> Callstack;
+MFArray<const char *> Callstack;
 
 #if defined(_CALLSTACK_PROFILING)
 std::map<const char *, CallProfile> FunctionRegistry;

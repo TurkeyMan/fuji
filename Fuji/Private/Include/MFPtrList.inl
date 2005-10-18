@@ -1,41 +1,6 @@
-#if !defined(_PTRLIST_H)
-#define _PTRLIST_H
-
-extern void *gEmptyPtrList[2];
-extern void *gEmptyPtrListDL[2];
 
 template<class T>
-class PtrList
-{
-public:
-	inline void Init(char* pGroupName, int maxElements);
-	inline void Deinit();
-
-	inline T* Create(T* p);
-	void Destroy(T* p);
-
-	inline T** Begin()			{ return ppMark; }
-	inline T** Find(T* p);
-	inline void Destroy(T** p);
-
-	inline void Clear()			{ while(*ppMark!=0) ++ppMark; }
-
-	inline int GetLength()		{ T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark; }
-	inline int GetMaxElements()	{ T** iterator = ppMark; while(*(--iterator)!=0); return ppMark - iterator - 1 + GetLength(); }
-
-	inline bool IsFull()		{ return *(ppMark - 1)==0; }
-	inline bool IsEmpty()		{ return *ppMark==0; }
-
-protected:
-	T** ppMark;
-
-#if !defined(_RETAIL)
-	char *pName;
-#endif
-};
-
-template<class T>
-void PtrList<T>::Init(char* pGroupName, int maxElements)
+void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 {
 	CALLSTACK;
 
@@ -60,7 +25,7 @@ void PtrList<T>::Init(char* pGroupName, int maxElements)
 }
 
 template<class T>
-void PtrList<T>::Deinit()
+void MFPtrList<T>::Deinit()
 {
 	CALLSTACK;
 	DBGASSERT(ppMark!=0, "not initialised");
@@ -71,7 +36,7 @@ void PtrList<T>::Deinit()
 }
 
 template<class T>
-T* PtrList<T>::Create(T* p)
+T* MFPtrList<T>::Create(T* p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -81,7 +46,7 @@ T* PtrList<T>::Create(T* p)
 }
 
 template<class T>
-void PtrList<T>::Destroy(T* p)
+void MFPtrList<T>::Destroy(T* p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -100,7 +65,7 @@ void PtrList<T>::Destroy(T* p)
 }
 
 template<class T>
-T** PtrList<T>::Find(T* p)
+T** MFPtrList<T>::Find(T* p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -118,7 +83,7 @@ T** PtrList<T>::Find(T* p)
 }
 
 template<class T>
-void PtrList<T>::Destroy(T** p)
+void MFPtrList<T>::Destroy(T** p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -128,53 +93,7 @@ void PtrList<T>::Destroy(T** p)
 }
 
 template<class T>
-class PtrListDL
-{
-public:
-	inline void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T), void *pMem = NULL);
-	inline void Deinit();
-
-	inline T* Create()			{ DBGASSERT(!IsFull(), STR("list %s full",pName)); return *(--ppMark); };
-	inline void Destroy(T* p);
-
-	inline T** Begin()			{ return ppMark; };
-	inline T** Find(T* p);
-
-	inline void Swap(T **p1, T **p2)
-	{
-		T *pT = *p1;
-		*p1 = *p2;
-		*p2 = pT;
-	}
-
-	inline void Destroy(T** p)
-	{
-		DBGASSERT(p!=0, "invalid parameter");
-		DBGASSERT(!IsEmpty(), STR("list %s is empty",pName));
-		Swap(ppMark++, p);
-	};
-
-	inline void Clear()			{ while(*ppMark!=0) ++ppMark; };
-
-	inline int GetLength()		{ T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark; };
-	inline int GetMaxElements()	{ T** iterator = ppMark; while(*(--iterator)!=0) {} return ppMark - iterator - 1 + GetLength(); }
-
-	inline bool IsFull()		{ return *(ppMark - 1)==0; };
-	inline bool IsEmpty()		{ return *ppMark==0; };
-
-
-	inline T** BeginDead()		{ return ppMark - 1; };
-
-protected:
-	T** ppMark;
-
-#if !defined(_RETAIL)
-	char *pName;
-#endif
-};
-
-template<class T>
-void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
+void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
 {
 	CALLSTACK;
 
@@ -199,7 +118,7 @@ void PtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void
 }
 
 template<class T>
-void PtrListDL<T>::Deinit()
+void MFPtrListDL<T>::Deinit()
 {
 	CALLSTACK;
 	DBGASSERT(ppMark!=0, "not initialised"); // stops double deinit's
@@ -225,7 +144,7 @@ void PtrListDL<T>::Deinit()
 }
 
 template<class T>
-void PtrListDL<T>::Destroy(T* p)
+void MFPtrListDL<T>::Destroy(T* p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -244,7 +163,7 @@ void PtrListDL<T>::Destroy(T* p)
 }
 
 template<class T>
-T** PtrListDL<T>::Find(T* p)
+T** MFPtrListDL<T>::Find(T* p)
 {
 	CALLSTACK;
 	DBGASSERT(p!=0, "invalid parameter");
@@ -260,5 +179,3 @@ T** PtrListDL<T>::Find(T* p)
 	};
 	return NULL;
 }
-
-#endif

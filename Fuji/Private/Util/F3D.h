@@ -1,7 +1,7 @@
 #if !defined(_F3D_H)
 #define _F3D_H
 
-#include "Array.h"
+#include "MFArray.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
 
@@ -75,7 +75,7 @@ struct F3DMesh
 {
 	char name[64];
 
-	uint32 materialIndex;
+//	uint32 materialIndex;
 	uint32 size;
 
 	uint32 matSubCount;
@@ -100,10 +100,12 @@ struct F3DMesh
 class F3DMaterialSubobject
 {
 public:
+	F3DMaterialSubobject();
+
 	int materialIndex;
 
-	Array<F3DTriangle> triangles;
-	Array<F3DVertex> vertices;
+	MFArray<F3DTriangle> triangles;
+	MFArray<F3DVertex> vertices;
 };
 
 class F3DSubObject
@@ -113,23 +115,23 @@ public:
 
 	char name[64];
 
-	int materialIndex;
+//	int materialIndex;
 
-	Array<F3DMaterialSubobject> matSubobjects;
+	MFArray<F3DMaterialSubobject> matSubobjects;
 
-	Array<MFVector> positions;
-	Array<MFVector> normals;
-	Array<MFVector> biNormals;
-	Array<MFVector> tangents;
-	Array<MFVector> uvs;
-	Array<MFVector> colours;
-	Array<MFVector> illumination;
+	MFArray<MFVector> positions;
+	MFArray<MFVector> normals;
+	MFArray<MFVector> biNormals;
+	MFArray<MFVector> tangents;
+	MFArray<MFVector> uvs;
+	MFArray<MFVector> colours;
+	MFArray<MFVector> illumination;
 };
 
 class F3DMeshChunk
 {
 public:
-	Array<F3DSubObject> subObjects;
+	MFArray<F3DSubObject> subObjects;
 };
 
 class F3DBone
@@ -148,18 +150,20 @@ public:
 class F3DSkeletonChunk
 {
 public:
-	Array<F3DBone> bones;
+	MFArray<F3DBone> bones;
 };
 
 class F3DAnimationChunk
 {
 public:
-	Array<Array<MFMatrix> > keyframes;
+	MFArray<MFArray<MFMatrix> > keyframes;
 };
 
 class F3DMaterial
 {
 public:
+	F3DMaterial();
+
 	MFVector diffuse;
 	MFVector ambient;
 	MFVector emissive;
@@ -174,12 +178,16 @@ public:
 class F3DMaterialChunk
 {
 public:
-	Array<F3DMaterial> materials;
+	int GetMaterialIndexByName(const char *pName);
+
+	MFArray<F3DMaterial> materials;
 };
 
 class F3DRefPoint
 {
 public:
+	F3DRefPoint();
+
 	MFMatrix worldMatrix;
 	MFMatrix localMatrix;
 	uint16 bone[4];
@@ -191,7 +199,7 @@ public:
 class F3DRefPointChunk
 {
 public:
-	Array<F3DRefPoint> refPoints;
+	MFArray<F3DRefPoint> refPoints;
 };
 
 class F3DFile
@@ -201,12 +209,15 @@ public:
 	int ReadF3DFromMemory(char *pMemory);
 	int ReadASE(char *pFilename);
 	int ReadDAE(char *pFilename);
+	int ReadMD2(char *pFilename);
+	int ReadMD3(char *pFilename);
 
 	void WriteF3D(char *pFilename);
-	void WriteMDL(char *pFilename, FujiPlatforms platform);
+	void WriteMDL(char *pFilename, MFPlatform platform);
 
-	void Optimise();
 	void ProcessSkeletonData();
+	void Optimise();
+	void StripModel();
 
 	F3DMeshChunk *GetMeshChunk() { return &meshChunk; }
 	F3DSkeletonChunk *GetSkeletonChunk() { return &skeletonChunk; }

@@ -3,7 +3,7 @@
 
 #include "Timer.h"
 
-struct FujiDefaults
+struct MFDefaults
 {
 	struct HeapDefaults
 	{
@@ -77,13 +77,22 @@ struct FujiDefaults
 	} misc;
 };
 
-extern FujiDefaults gDefaults;
+extern MFDefaults gDefaults;
+
+// Fuji sustem functions
+
+MFPlatform System_GetCurrentPlatform();
+
+const char * const System_GetPlatformString(int platform);
+const char * const System_GetPlatformName(int platform);
+
+MFEndian System_GetPlatformEndian(int platform);
 
 // Timer Related
 
 // Read Time Stamp Counter
-uint64 RDTSC();
-uint64 GetTSCFrequency();
+uint64 System_ReadRTC();
+uint64 System_GetRTCFrequency();
 
 // System Timer
 extern Timer gSystemTimer;

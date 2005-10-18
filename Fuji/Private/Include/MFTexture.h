@@ -6,7 +6,7 @@
 struct MFTexture;
 
 // some enum's
-enum MFTextureFormats
+enum MFTextureFormat
 {
 	TexFmt_Unknown = -1,
 
@@ -86,7 +86,7 @@ enum CreateTextureFlags
 
 // interface functions
 MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height);
 
 int MFTexture_Destroy(MFTexture *pTexture);	// returns new reference count..
@@ -94,5 +94,13 @@ int MFTexture_Destroy(MFTexture *pTexture);	// returns new reference count..
 // platform independant functions
 MFTexture* MFTexture_FindTexture(const char *pName);
 MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
+
+// format functions
+const char * const MFTexture_GetFormatString(int format);
+
+uint32 MFTexture_GetPlatformAvailability(int format);
+bool MFTexture_IsAvailableOnPlatform(int format, int platform);
+
+int MFTexture_GetBitsPerPixel(int format);
 
 #endif // _TEXTURE_H

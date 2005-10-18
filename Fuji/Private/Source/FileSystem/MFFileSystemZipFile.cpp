@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemZipFile.h"
 
@@ -382,13 +382,13 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 	switch(relativity)
 	{
 		case MFSeek_Begin:
-			newPos = Min(bytes, pFile->length);
+			newPos = MFMin(bytes, pFile->length);
 			break;
 		case MFSeek_End:
-			newPos = Max(0, pFile->length - bytes);
+			newPos = MFMax(0, pFile->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = Clamp(0, (int)pFile->offset + bytes, pFile->length);
+			newPos = MFClamp(0, (int)pFile->offset + bytes, pFile->length);
 			break;
 		default:
 			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
@@ -399,7 +399,7 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 	return newPos;
 }
 
-#else
+#else // !defined(_USE_ZZLIB)
 
 #include "zzip/zzip.h"
 #include "zzip/plugin.h"

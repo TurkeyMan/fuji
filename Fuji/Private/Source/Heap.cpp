@@ -1,6 +1,6 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Heap.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 
 #if defined(_PSP)
 #include <psputils.h>
@@ -11,7 +11,7 @@
 Heap *gpHeapList[MAX_HEAP_COUNT];
 Heap *pCurrentHeap = NULL;
 
-PtrListDL<Resource> gResourceList;
+MFPtrListDL<Resource> gResourceList;
 
 bool gTempMemOverride = false;
 
@@ -22,7 +22,7 @@ void *malloc_aligned(size_t bytes)
 	new_buffer = (char*)malloc(bytes+16);
 
 	// make allocation 16 byte alligned
-	char offset = 16 - (char)((uint32)new_buffer & 0xF);
+	char offset = 16 - (char)((uint32&)new_buffer & 0xF);
 	new_buffer += offset;
 	new_buffer[-1] = offset;
 
@@ -31,10 +31,10 @@ void *malloc_aligned(size_t bytes)
 
 void *realloc_aligned(void *buffer, size_t bytes)
 {
-	void *new_buffer = malloc_aligned(ALIGN16(bytes));
+	void *new_buffer = malloc_aligned(MFALIGN(bytes, 16));
 
 	// ummmmm... yeah need to keep record of what is allocated where... 
-	memcpy(new_buffer, buffer, Min(bytes, bytes));
+	memcpy(new_buffer, buffer, MFMin(bytes, bytes));
 
 	free_aligned(buffer);
 
@@ -103,7 +103,7 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	DBGASSERT(heapIndex < MAX_HEAP_COUNT, "Exceeded MAX_HEAP_COUNT heap's");
 
 	// only 16 byte alligned blocks can be allocated
-	size = ALIGN16(size);
+	size = MFALIGN(size, 16);
 
 	// calculate the offset of the start of the heap memory
 	uint32 heapStart = 0;
@@ -112,7 +112,7 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 	switch(type)
 	{
 	case HEAP_Static:
-		heapStart = ALIGN16(sizeof(StaticHeap)) + ALIGN16(sizeof(char*) * gDefaults.heap.maxStaticMarkers);
+		heapStart = MFALIGN(sizeof(StaticHeap), 16) + MFALIGN(sizeof(char*) * gDefaults.heap.maxStaticMarkers, 16);
 
 		pHeap = (Heap*)malloc_aligned(size + heapStart);
 		pHeap = (Heap*)new(pHeap) StaticHeap();
@@ -139,7 +139,7 @@ Heap* Heap_CreateHeap(uint32 size, HeapType type, char *name)
 		{
 			StaticHeap *pStaticHeap = (StaticHeap*)pHeap;
 
-			pStaticHeap->markStack = (char**)pHeap + ALIGN16(sizeof(StaticHeap));
+			pStaticHeap->markStack = (char**)pHeap + MFALIGN(sizeof(StaticHeap), 16);
 			pStaticHeap->markCount = 0;
 			break;
 		}
@@ -349,7 +349,7 @@ void Heap_ActivateTempMemOverride(bool activate)
 void *StaticHeap::Alloc(uint32 bytes)
 {
 	char *pMem = pAllocPointer;
-	pAllocPointer += ALIGN16(bytes);
+	pAllocPointer += MFALIGN(bytes, 16);
 	return pMem;
 }
 

@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "FujiMath.h"
 #include "Synth/LFO.h"
 
@@ -23,12 +23,12 @@ float Oscillator::GetValue()
 
 		float period = (float)(time-lastTime) * SYNTH_SAMPLEPERIOD;
 
-		phase += period*(pFrequencyParamater ? pFrequencyParamater->GetValue() : frequency)*PI*2.0f;
+		phase += period*(pFrequencyParamater ? pFrequencyParamater->GetValue() : frequency)*MFPI*2.0f;
 
 		lastTime = time;
 
-		if(phase > PI*2.0f)
-			phase -= PI*2.0f;
+		if(phase > MFPI*2.0f)
+			phase -= MFPI*2.0f;
 	}
 
 	float a = pAmplitudeParamater ? pAmplitudeParamater->GetValue() : amplitude;

@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Primitive.h"
 #include "View.h"
 #include "Texture.h"

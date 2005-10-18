@@ -2,13 +2,13 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Display.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 
 #include "Primitive.h"
 #include "Font.h"
@@ -39,11 +39,11 @@ struct MaterialDefinition
 
 void MFMaterial_DestroyDefinition(MaterialDefinition *pDefinition);
 
-PtrListDL<MaterialDefinition> gMaterialDefList;
+MFPtrListDL<MaterialDefinition> gMaterialDefList;
 MaterialDefinition *pDefinitionRegistry = NULL;
 
-PtrList<MFMaterial> gMaterialList;
-PtrList<MFMaterialType> gMaterialRegistry;
+MFPtrList<MFMaterial> gMaterialList;
+MFPtrList<MFMaterialType> gMaterialRegistry;
 
 MFMaterial *pCurrentMaterial = NULL;
 

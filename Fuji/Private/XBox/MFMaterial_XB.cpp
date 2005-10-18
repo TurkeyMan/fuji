@@ -1,2 +1,2 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFMaterial.h"

@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Common.h"
+#include "Fuji.h"
 #include "System_Internal.h"
 #include "Util.h"
 #include "MFVector.h"
+#include "MFPtrList.h"
 
 #if !defined(_FUJI_UTIL)
 #include "Display_Internal.h"
@@ -18,13 +19,18 @@
 #include <pspdebug.h>
 #endif
 
-char stringBuffer[1024*128];
-uint32 stringOffset;
+void System_HandleEventsPlatformSpecific();
+
+static char stringBuffer[1024*128];
+static uint32 stringOffset;
 
 extern int gQuit;
 
-// platform name strings
-const char * const gPlatformStrings[] =
+void *gEmptyPtrList[2];
+void *gEmptyPtrListDL[2];
+
+// platform strings/names
+static const char * const gPlatformStrings[FP_Max] =
 {
 	"PC",
 	"XB",
@@ -34,8 +40,55 @@ const char * const gPlatformStrings[] =
 	"DC",
 	"GC",
 	"OSX",
-	"AMI"
+	"AMI",
+	"X360",
+	"PS3"
 };
+
+static const char * const gPlatformNames[FP_Max] =
+{
+	"PC",
+	"XBox",
+	"Linux",
+	"Playstation Portable",
+	"Playstation 2",
+	"Dreamcast",
+	"Gamecube",
+	"Mac OSX",
+	"Amiga",
+	"XBox 360",
+	"Platstation 3"
+};
+
+static MFEndian gPlatformEndian[FP_Max] =
+{
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_BigEndian,
+	MFEndian_BigEndian,
+	MFEndian_LittleEndian,
+	MFEndian_BigEndian,
+	MFEndian_BigEndian,
+};
+
+const char * const System_GetPlatformString(int platform)
+{
+	return gPlatformStrings[platform];
+}
+
+const char * const System_GetPlatformName(int platform)
+{
+	return gPlatformNames[platform];
+}
+
+MFEndian System_GetPlatformEndian(int platform)
+{
+	return gPlatformEndian[platform];
+}
 
 // Return only the last portion of the module name (exclude the path)
 char *ModuleName(char *pSourceFileName)
@@ -196,15 +249,14 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 #if !defined(_PSP)
 	while(1)
 	{
-#if defined(_WINDOWS)
-		DoMessageLoop();
-#endif
+		System_HandleEventsPlatformSpecific();
+
 		System_UpdateTimeDelta();
 		gFrameCount++;
 
 		System_Update();
 
-		Display_BeginFrame();
+		MFDisplay_BeginFrame();
 
 		View_SetDefault();
 		View_SetOrtho();
@@ -269,7 +321,7 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 		Font_DrawTextf(gpDebugFont, 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
 #endif
 
-		Display_EndFrame();
+		MFDisplay_EndFrame();
 	}
 #else
 	const char *pString;

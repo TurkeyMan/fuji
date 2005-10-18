@@ -1,11 +1,11 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "FujiMath.h"
 #include "Synth/Synth.h"
 
 float GetWave(WaveType waveType, float phase)
 {
-	if(phase >= PI*2.0f)
-		phase = fmodf(phase, PI*2.0f);
+	if(phase >= MFPI*2.0f)
+		phase = fmodf(phase, MFPI*2.0f);
 
 	switch(waveType)
 	{
@@ -14,13 +14,13 @@ float GetWave(WaveType waveType, float phase)
 		case WT_CoSine:
 			return MFCos(phase);
 		case WT_Triangle:
-			return phase >= PI ? -((phase-PI)*((1.0f/PI) * 2.0f) - 1.0f) : phase*((1.0f/PI) * 2.0f) - 1.0f;
+			return phase >= MFPI ? -((phase-MFPI)*((1.0f/MFPI) * 2.0f) - 1.0f) : phase*((1.0f/MFPI) * 2.0f) - 1.0f;
 		case WT_Square:
-			return phase >= PI ? 1.0f : -1.0f;
+			return phase >= MFPI ? 1.0f : -1.0f;
 		case WT_UpSaw:
-			return -1.0f + phase*(1.0f/PI);
+			return -1.0f + phase*(1.0f/MFPI);
 		case WT_DownSaw:
-			return 1.0f - phase*(1.0f/PI);
+			return 1.0f - phase*(1.0f/MFPI);
 	}
 
 	return 0.0f;

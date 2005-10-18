@@ -1,9 +1,9 @@
-#include "Common.h"
-#include "PtrList.h"
+#include "Fuji.h"
+#include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemMemory.h"
 
-PtrListDL<MFFileMemoryData> gMemoryFiles;
+MFPtrListDL<MFFileMemoryData> gMemoryFiles;
 
 void MFFileSystemMemory_InitModule()
 {
@@ -113,7 +113,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
-	uint32 bytesToCopy = fileHandle->length > -1 ? Min(bytes, (uint32)fileHandle->length - fileHandle->offset) : bytes;
+	uint32 bytesToCopy = fileHandle->length > -1 ? MFMin(bytes, (uint32)fileHandle->length - fileHandle->offset) : bytes;
 
 	memcpy(pBuffer, &pMem->pMemoryPointer[fileHandle->offset], bytesToCopy);
 	fileHandle->offset += bytesToCopy;
@@ -129,12 +129,12 @@ int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
-	uint32 bytesToCopy = pMem->allocated ? Min(bytes, pMem->allocated - fileHandle->offset) : bytes;
+	uint32 bytesToCopy = pMem->allocated ? MFMin(bytes, pMem->allocated - fileHandle->offset) : bytes;
 
 	memcpy(&pMem->pMemoryPointer[fileHandle->offset], pBuffer, bytesToCopy);
 
 	fileHandle->offset += bytesToCopy;
-	fileHandle->length = Max((int)fileHandle->offset, fileHandle->length);
+	fileHandle->length = MFMax((int)fileHandle->offset, fileHandle->length);
 
 	return bytesToCopy;
 }
@@ -148,13 +148,13 @@ int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 	switch(relativity)
 	{
 		case MFSeek_Begin:
-			newPos = Min(bytes, fileHandle->length);
+			newPos = MFMin(bytes, fileHandle->length);
 			break;
 		case MFSeek_End:
-			newPos = Max(0, fileHandle->length - bytes);
+			newPos = MFMax(0, fileHandle->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = Clamp(0, (int)fileHandle->offset + bytes, fileHandle->length);
+			newPos = MFClamp(0, (int)fileHandle->offset + bytes, fileHandle->length);
 			break;
 		default:
 			DBGASSERT(false, "Invalid 'relativity' for file seeking.");

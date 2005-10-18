@@ -1,5 +1,5 @@
-#include "Common.h"
-#include "PtrList.h"
+#include "Fuji.h"
+#include "MFPtrList.h"
 #include "System.h"
 #include "MFModel_Internal.h"
 #include "MFFileSystem.h"
@@ -8,7 +8,7 @@
 #include "Display_Internal.h"
 #include "Renderer.h"
 
-PtrList<MFModelTemplate> gModelBank;
+MFPtrList<MFModelTemplate> gModelBank;
 
 void MFModel_InitModule()
 {
@@ -18,45 +18,6 @@ void MFModel_InitModule()
 void MFModel_DeinitModule()
 {
 	gModelBank.Deinit();
-}
-
-void MFModel_Draw(MFModel *pModel)
-{
-	CALLSTACK;
-
-#if defined(_WINDOWS)
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&pModel->worldMatrix);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
-
-	if(View_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
-	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
-
-	DataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, CT_SubObjects);
-
-	if(pChunk)
-	{
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
-
-		for(int a=0; a<pChunk->count; a++)
-		{
-			MFMaterial_SetMaterial(pSubobjects[a].pMaterial);
-			Renderer_Begin();
-
-			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
-			{
-				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
-
-				pd3dDevice->SetVertexDeclaration(pMC->pVertexDeclaration);
-				pd3dDevice->SetStreamSource(0, pMC->pVertexBuffer, 0, pMC->vertexStride);
-				pd3dDevice->SetIndices(pMC->pIndexBuffer);
-				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
-				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC->numVertices, 0, pMC->numVertices/3);
-			}
-		}
-	}
-#endif
 }
 
 DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType chunkID)
@@ -80,7 +41,7 @@ MFModelTemplate* MFModel_FindTemplate(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!StrCaseCmp(pName, (char*)(*ppIterator)->IDtag)) return *ppIterator;
+		if(!StrCaseCmp(pName, (*ppIterator)->pFilename)) return *ppIterator;
 
 		ppIterator++;
 	}
@@ -117,33 +78,18 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 						(char*&)pSubobjectChunk[b].pMeshChunks += base;
 
 						pSubobjectChunk[b].pSubObjectName += base;
-						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial + base);
+//						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial + base);
 					}
 
 					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
 					{
-#if defined(_WINDOWS)
-						MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjectChunk[b].pMeshChunks[c];
-
-						if(load)
-						{
-							pMC->pVertexData += base;
-							pMC->pIndexData += base;
-							(char*&)pMC->pVertexElements += base;
-						}
-						else
-						{
-							pMC->pVertexData -= base;
-							pMC->pIndexData -= base;
-							(char*&)pMC->pVertexElements -= base;
-						}
-#endif
+						MFModel_FixUpMeshChunk(&pSubobjectChunk[b].pMeshChunks[c], base, load);
 					}
 
 					if(!load)
 					{
 						pSubobjectChunk[b].pSubObjectName -= base;
-						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - base);
+//						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - base);
 
 						(char*&)pSubobjectChunk[b].pMeshChunks -= base;
 					}
@@ -215,10 +161,10 @@ MFModel* MFModel_Create(const char *pFilename)
 				DBGASSERT(*(uint32*)pTemplateData == 0x324c444d, "Incorrect MFModel version.");
 
 				// store filename for later reference
-				strcpy(&pTemplateData[size], pFilename);
-				(char*&)(*pTemplateData) = &pTemplateData[size];
-
 				pTemplate = (MFModelTemplate*)pTemplateData;
+
+				strcpy(&pTemplateData[size], pFilename);
+				pTemplate->pFilename = &pTemplateData[size];
 
 				gModelBank.Create(pTemplate);
 
@@ -232,26 +178,11 @@ MFModel* MFModel_Create(const char *pFilename)
 
 					for(int a=0; a<pChunk->count; a++)
 					{
-						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
+//						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
 
 						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 						{
-#if defined(_WINDOWS)
-							MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
-
-							pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
-							pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
-							pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
-
-							void *pData;
-							pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
-							memcpy(pData, pMC->pVertexData, pMC->vertexDataSize);
-							pMC->pVertexBuffer->Unlock();
-
-							pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
-							memcpy(pData, pMC->pIndexData, pMC->indexDataSize);
-							pMC->pIndexBuffer->Unlock();
-#endif
+							MFModel_CreateMeshChunk(&pSubobjects[a].pMeshChunks[b]);
 						}
 					}
 				}
@@ -281,7 +212,22 @@ void MFModel_Destroy(MFModel *pModel)
 
 	if(!pModel->pTemplate->refCount)
 	{
-		// destroy d3d data...
+		DataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, CT_SubObjects);
+
+		if(pChunk)
+		{
+			SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+
+			for(int a=0; a<pChunk->count; a++)
+			{
+//				MFMaterial_Destroy(pSubobjects[a].pMaterial);
+
+				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
+				{
+					MFModel_DestroyMeshChunk(&pSubobjects[a].pMeshChunks[b]);
+				}
+			}
+		}
 
 		Heap_Free(pModel->pTemplate);
 	}

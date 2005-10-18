@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Display.h"
 #include "View.h"
 #include "DebugMenu.h"

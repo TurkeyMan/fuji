@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "MFVector.h"
 #include "Input.h"
 #include "Input_Internal.h"

@@ -9,6 +9,10 @@ struct MFModelTemplate;
 void MFModel_InitModule();
 void MFModel_DeinitModule();
 
+void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk);
+void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk);
+void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load);
+
 enum DataChunkType
 {
 	CT_SubObjects,
@@ -45,7 +49,11 @@ struct MFModel
 
 struct MFModelTemplate
 {
-	uint32 IDtag;
+	union
+	{
+		uint32 IDtag;
+		const char *pFilename;
+	};
 
 	const char *pName;
 
@@ -58,7 +66,7 @@ struct MFModelTemplate
 struct SubObjectChunk
 {
 	const char *pSubObjectName;
-	MFMaterial *pMaterial;
+//	MFMaterial *pMaterial;
 
 	int numMeshChunks;
 	MFMeshChunk *pMeshChunks;

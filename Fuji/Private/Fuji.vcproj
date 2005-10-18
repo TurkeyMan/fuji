@@ -561,9 +561,6 @@
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Collision.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\DebugMenu.cpp">
 				<FileConfiguration
 					Name="Debug_XB|Xbox">
@@ -595,6 +592,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\Input_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFCollision.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFFileSystem.cpp">
@@ -640,9 +640,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFVector.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\PtrList.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Renderer.cpp">
@@ -757,19 +754,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\Array.h">
-			</File>
-			<File
 				RelativePath=".\Include\BoundingVolume.h">
 			</File>
 			<File
 				RelativePath=".\Include\Callstack.h">
-			</File>
-			<File
-				RelativePath=".\Include\Collision.h">
-			</File>
-			<File
-				RelativePath=".\Include\Common.h">
 			</File>
 			<File
 				RelativePath=".\Include\DebugMenu.h">
@@ -779,6 +767,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\Font.h">
+			</File>
+			<File
+				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
 				RelativePath=".\Include\FujiMath.h">
@@ -791,6 +782,18 @@
 			</File>
 			<File
 				RelativePath=".\Include\Input.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFArray.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFArray.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFCollision.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFCollision.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
@@ -811,6 +814,12 @@
 				RelativePath=".\Include\MFModel.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFPtrList.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFPtrList.inl">
+			</File>
+			<File
 				RelativePath=".\Include\MFSockets.h">
 			</File>
 			<File
@@ -818,6 +827,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFTexture.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFTypes.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFVector.h">
@@ -1343,6 +1355,33 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Retail_XB|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Pc\MFModel_PC.cpp">
+				<FileConfiguration
+					Name="Debug_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Profile_XB|Xbox"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_XB|Xbox"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -3193,6 +3232,10 @@
 					</File>
 				</Filter>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Null"
+			Filter="">
 		</Filter>
 		<File
 			RelativePath=".\SConstruct">

@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "View_Internal.h"

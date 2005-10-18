@@ -495,7 +495,7 @@ inline float MFVector::Distance(const MFVector &v) const
 inline float MFVector::GetAngle(const MFVector &ref)
 {
 	float d = MFACos(Dot3(ref));
-	return (Cross2(ref) >= 0.0f) ? d : 2.0f*PI - d;
+	return (Cross2(ref) >= 0.0f) ? d : 2.0f*MFPI - d;
 }
 
 
@@ -569,7 +569,7 @@ inline MFVector MakeVector(const MFVector &v, float w)
 }
 
 
-inline MFVector Min(const MFVector &a, const MFVector &b)
+inline MFVector MFMin(const MFVector &a, const MFVector &b)
 {
 	MFVector t;
 
@@ -581,7 +581,7 @@ inline MFVector Min(const MFVector &a, const MFVector &b)
 	return t;
 }
 
-inline MFVector Max(const MFVector &a, const MFVector &b)
+inline MFVector MFMax(const MFVector &a, const MFVector &b)
 {
 	MFVector t;
 

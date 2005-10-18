@@ -2,7 +2,7 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "Display.h"
 #include "View.h"
 #include "Primitive.h"
@@ -253,8 +253,8 @@ void Shape_DrawSphere(const MFVector &position, float radius, int segments, int 
 	DBGASSERT(slices >= 1, "DrawSphere requires at least 1 slices!");
 
 	int i, j, inc;
-	float around = 0.0f, aroundInc = (PI*2.0f)/(float)segments;
-	float yWave=0.0f, yWaveInc = PI/((float)slices+1.0f);
+	float around = 0.0f, aroundInc = (MFPI*2.0f)/(float)segments;
+	float yWave=0.0f, yWaveInc = MFPI/((float)slices+1.0f);
 	float siny;
 
 	MFPrimitive(PT_LineStrip|PT_Prelit|PT_Untextured);
@@ -362,8 +362,8 @@ void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, flo
 	m2.Multiply(m, m2);
 
 	int i, j, inc;
-	float around = 0.0f, aroundInc = (PI*2.0f)/(float)segments;
-	float yWave=0.0f, yWaveInc = PI/((float)slices+1.0f);
+	float around = 0.0f, aroundInc = (MFPI*2.0f)/(float)segments;
+	float yWave=0.0f, yWaveInc = MFPI/((float)slices+1.0f);
 	float yAdd = len;
 	float siny;
 
@@ -502,7 +502,7 @@ void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, fl
 	m2.Multiply(m, m2);
 
 	int i, j, inc;
-	float aroundInc = (PI*2.0f)/(float)segments;
+	float aroundInc = (MFPI*2.0f)/(float)segments;
 	float around = 0.0f;
 
 	if(wireframe)
@@ -600,7 +600,7 @@ void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, fl
 		MFEnd();
 
 		// top cap
-		around = PI*2;
+		around = MFPI*2;
 
 		MFBegin((segments+1)*2);
 		MFSetColour(colour);
@@ -654,7 +654,7 @@ void Shape_DrawPlane(const MFVector &point, const MFVector &normal, float span, 
 
 	int i;
 
-	float aroundInc = (PI*2.0f)/(float)segments;
+	float aroundInc = (MFPI*2.0f)/(float)segments;
 	float around = -aroundInc;
 
 	MFPrimitive(PT_LineList|PT_Prelit|PT_Untextured);
@@ -720,7 +720,7 @@ void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, i
 	m2.Multiply(m, m2);
 
 	int i;
-	float aroundInc = (PI*2.0f)/(float)segments;
+	float aroundInc = (MFPI*2.0f)/(float)segments;
 	float around = 0.0f;
 
 	if(wireframe)
@@ -768,7 +768,7 @@ void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, i
 
 	MFSetColour(colour);
 
-	around = PI*2.0f;
+	around = MFPI*2.0f;
 
 	if(!wireframe)
 	{

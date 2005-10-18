@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "System_Internal.h"
 #include "Display_Internal.h"
 #include "MFTexture_Internal.h"
@@ -16,7 +16,14 @@
 #include "Sound.h"
 #include "MFSockets_Internal.h"
 
-FujiDefaults gDefaults = 
+// externs
+void System_HandleEventsPlatformSpecific();
+
+// extern to platform
+extern MFPlatform gCurrentPlatform;
+
+// local variables
+MFDefaults gDefaults = 
 {
 	// HeapDefaults
 	{
@@ -136,7 +143,7 @@ void System_Init()
 	MFFileSystem_InitModule();
 
 	View_InitModule();
-	Display_InitModule();
+	MFDisplay_InitModule();
 	Input_InitModule();
 
 	Sound_InitModule();
@@ -174,7 +181,7 @@ void System_Deinit()
 	Sound_DeinitModule();
 
 	Input_DeinitModule();
-	Display_DeinitModule();
+	MFDisplay_DeinitModule();
 	View_DeinitModule();
 
 	MFFileSystem_DeinitModule();
@@ -321,11 +328,7 @@ int System_GameLoop()
 
 		while(!gQuit)
 		{
-#if defined(_WINDOWS)
-			DoMessageLoop();
-#elif defined(_LINUX)
-			CheckEvents();
-#endif
+			System_HandleEventsPlatformSpecific();
 
 			Callstack_BeginFrame();
 			System_UpdateTimeDelta();
@@ -336,13 +339,13 @@ int System_GameLoop()
 				Game_Update();
 			System_PostUpdate();
 
-			Display_BeginFrame();
+			MFDisplay_BeginFrame();
 
 			Game_Draw();
 			System_Draw();
 
 			Callstack_EndFrame();
-			Display_EndFrame();
+			MFDisplay_EndFrame();
 		}
 
 		Game_Deinit();
@@ -361,3 +364,7 @@ void System_UpdateTimeDelta()
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 }
 
+MFPlatform System_GetCurrentPlatform()
+{
+	return gCurrentPlatform;
+}
