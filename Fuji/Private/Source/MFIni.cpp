@@ -116,7 +116,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	fclose(pFile);
 #endif
 
-	DBGASSERT(pMem != NULL, "Didn't load it!");
+	DBGASSERT(pMem != NULL, "Couldnt load .ini file!");
 
 	// allocate ini file
 	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));

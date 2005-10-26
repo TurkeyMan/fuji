@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "Display_Internal.h"
-#include "View.h"
+#include "MFView.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
 #include "Primitive.h"
@@ -44,12 +44,12 @@ void MFPrimitive(uint32 type, uint32 hint)
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&MFMatrix::identity);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&MFView_GetViewToScreenMatrix());
 
-	if(View_IsOrtho())
+	if(MFView_IsOrtho())
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
 	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFView_GetWorldToViewMatrix());
 
 	Renderer_Begin();
 }

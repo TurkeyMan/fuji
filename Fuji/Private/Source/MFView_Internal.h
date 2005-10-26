@@ -1,16 +1,16 @@
-#if !defined(_VIEW_INTERNAL_H)
-#define _VIEW_INTERNAL_H
+#if !defined(_MFVIEW_INTERNAL_H)
+#define _MFVIEW_INTERNAL_H
 
-#include "View.h"
+#include "MFView.h"
 
 // internal functions
-void View_InitModule();
-void View_DeinitModule();
+void MFView_InitModule();
+void MFView_DeinitModule();
 
 // view structure
-struct View
+struct MFView
 {
-	static View defaultView;
+	static MFView defaultView;
 	static MFRect defaultOrthoRect;
 
 	MFRect orthoRect;

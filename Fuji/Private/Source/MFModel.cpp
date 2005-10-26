@@ -1,9 +1,9 @@
 #include "Fuji.h"
 #include "MFPtrList.h"
-#include "System.h"
+#include "MFSystem.h"
 #include "MFModel_Internal.h"
 #include "MFFileSystem.h"
-#include "View.h"
+#include "MFView.h"
 
 #include "Display_Internal.h"
 #include "Renderer.h"

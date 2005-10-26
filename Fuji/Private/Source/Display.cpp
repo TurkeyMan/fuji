@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu.h"
-#include "View.h"
+#include "MFView.h"
 
 MFDisplaySettings gDisplay;
 

@@ -7,7 +7,7 @@
 #include <dinput.h>
 
 #include "MFVector.h"
-#include "Input_Internal.h"
+#include "MFInput_Internal.h"
 #include "Heap.h"
 #include "MFIni.h"
 
@@ -25,16 +25,12 @@
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
 
-void Input_SetCooperativeLevels();
-
-void Input_UpdateKeyboard();
-void Input_UpdateMouse();
-void Input_UpdateJoystick();
+void MFInputPC_SetCooperativeLevels();
 
 /*** Structure definitions ***/
 
 #if defined(ALLOW_RAW_INPUT)
-struct RawMouse
+struct MFRawMouse
 {
 	HANDLE deviceHandle;
 
@@ -51,7 +47,7 @@ struct RawMouse
 };
 #endif
 
-struct GamepadInfo
+struct MFGamepadInfo
 {
 	char * pName;
 	const char * const * ppButtonNameStrings;
@@ -60,50 +56,50 @@ struct GamepadInfo
 	int buttonMapping[16];
 	bool usePOV;
 
-	GamepadInfo *pNext;
+	MFGamepadInfo *pNext;
 };
 
-GamepadInfo *GetGamepadInfo(const char *pGamepad);
-void LoadGamepadMappings();
+MFGamepadInfo *MFInputPC_GetGamepadInfo(const char *pGamepad);
+void MFInputPC_LoadGamepadMappings();
 
 /*** Globals ***/
 
-IDirectInput8		*pDirectInput					= NULL;
-IDirectInputDevice8	*pDIKeyboard					= NULL;
-IDirectInputDevice8	*pDIMouse						= NULL;
-IDirectInputDevice8	*pDIJoystick[Input_MaxInputID]	= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static IDirectInput8		*pDirectInput						= NULL;
+static IDirectInputDevice8	*pDIKeyboard						= NULL;
+static IDirectInputDevice8	*pDIMouse							= NULL;
+static IDirectInputDevice8	*pDIJoystick[MFInput_MaxInputID]	= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
-GamepadInfo *pGamepadMappings[Input_MaxInputID]		= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static MFGamepadInfo *pGamepadMappings[MFInput_MaxInputID]		= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
-int	gGamepadCount	= 0;
-int	gKeyboardCount	= 0;
-int	gMouseCount		= 0;
+static int	gGamepadCount	= 0;
+static int	gKeyboardCount	= 0;
+static int	gMouseCount		= 0;
 
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
 
-char gKeyState[256];
+static char gKeyState[256];
 
-bool gExclusiveMouse = false;
-float deadZone = 0.3f;
+static bool gExclusiveMouse = false;
+static float deadZone = 0.3f;
 
-float mouseMultiplier = 1.0f;
+static float mouseMultiplier = 1.0f;
 
-const long joyAxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
-const long joySliders[4] = {6,50,58,66};
+static const long joyAxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
+static const long joySliders[4] = {6,50,58,66};
 
-GamepadInfo *pGamepadMappingRegistry = NULL;
+static MFGamepadInfo *pGamepadMappingRegistry = NULL;
 
 #if defined(ALLOW_RAW_INPUT)
-pGetRawInputDeviceList _GRIDL;
-pGetRawInputData _GRID;
-pGetRawInputDeviceInfoA _GRIDIA;
-pRegisterRawInputDevices _RRID;
+static pGetRawInputDeviceList _GRIDL;
+static pGetRawInputData _GRID;
+static pGetRawInputDeviceInfoA _GRIDIA;
+static pRegisterRawInputDevices _RRID;
 
-RawMouse *pRawMice = NULL;
-int rawMouseCount;
+static MFRawMouse *pRawMice = NULL;
+static int rawMouseCount;
 
-BOOL includeRDPMouse;
+static BOOL includeRDPMouse;
 #endif
 
 // KEY to DIK mapping table
@@ -344,14 +340,14 @@ const char * const PS2Buttons[] =
 
 /**** Platform Specific Functions ****/
 
-void Input_InitModulePlatformSpecific()
+void MFInput_InitModulePlatformSpecific()
 {
 	CALLSTACK;
 
 	int a;
 
 	ZeroMemory(gKeyState,256);
-	LoadGamepadMappings();
+	MFInputPC_LoadGamepadMappings();
 
 	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
 
@@ -391,10 +387,10 @@ void Input_InitModulePlatformSpecific()
 		}
 	}
 
-	Input_SetCooperativeLevels();
+	MFInputPC_SetCooperativeLevels();
 }
 
-void Input_DeinitModulePlatformSpecific()
+void MFInput_DeinitModulePlatformSpecific()
 {
 	CALLSTACK;
 
@@ -436,12 +432,12 @@ void Input_DeinitModulePlatformSpecific()
 	}
 }
 
-void Input_UpdatePlatformSpecific()
+void MFInput_UpdatePlatformSpecific()
 {
 
 }
 
-void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
+void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
 {
 	pDeviceStatus->available = false;
 	pDeviceStatus->status = IDS_Disconnected;
@@ -488,7 +484,7 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 	}
 }
 
-void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
+void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
 	CALLSTACK;
 
@@ -536,7 +532,7 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 		float *pGamepadAxis = &pGamepadState->values[Axis_LX];
 		LONG *pSourceAxis = (LONG*)&joyState;
 
-		float deadZone = Input_GetDeadZone();
+		float deadZone = MFInput_GetDeadZone();
 
 		for(a=0; a<4; a++)
 		{
@@ -552,7 +548,7 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 	}
 }
 
-void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	CALLSTACK;
 
@@ -602,7 +598,7 @@ void GetWindowMousePos(float *pX, float *pY)
 	*pY = (float)mouse.y;
 }
 
-void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
 	CALLSTACK;
 
@@ -720,7 +716,7 @@ void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 	//....
 }
 
-const char* Input_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceName(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -747,12 +743,12 @@ const char* Input_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* Input_GetGamepadButtonName(int sourceID, int type)
+const char* MFInput_GetGamepadButtonName(int button, int sourceID)
 {
-	return pGamepadMappings[sourceID]->ppButtonNameStrings[type];
+	return pGamepadMappings[sourceID]->ppButtonNameStrings[button];
 }
 
-bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
+bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	SHORT ks = 0;
 
@@ -779,7 +775,7 @@ bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
 }
 
 // internal functions
-void Input_SetCooperativeLevels()
+void MFInputPC_SetCooperativeLevels()
 {
 	CALLSTACK;
 
@@ -832,7 +828,7 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 		if(FAILED(pDirectInput->CreateDevice(pdidInstance->guidInstance, &pDIJoystick[gGamepadCount], NULL)))
 			return DIENUM_CONTINUE;
 
-		pGamepadMappings[gGamepadCount] = GetGamepadInfo(pdidInstance->tszProductName);
+		pGamepadMappings[gGamepadCount] = MFInputPC_GetGamepadInfo(pdidInstance->tszProductName);
 
 		if(pGamepadMappings[gGamepadCount]->usePOV)
 		{
@@ -854,7 +850,7 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 	return DIENUM_STOP;
 }
 
-void Input_Acquire(bool acquire)
+void MFInputPC_Acquire(bool acquire)
 {
 	CALLSTACK;
 
@@ -888,9 +884,9 @@ void Input_Acquire(bool acquire)
 	}
 }
 
-GamepadInfo *GetGamepadInfo(const char *pGamepad)
+MFGamepadInfo *MFInputPC_GetGamepadInfo(const char *pGamepad)
 {
-	for(GamepadInfo *pT = pGamepadMappingRegistry; pT; pT = pT->pNext)
+	for(MFGamepadInfo *pT = pGamepadMappingRegistry; pT; pT = pT->pNext)
 	{
 		if(!strcmp(pT->pName, pGamepad))
 			return pT;
@@ -899,19 +895,19 @@ GamepadInfo *GetGamepadInfo(const char *pGamepad)
 	const char *pDefault = "default";
 
 	if(pDefault != pGamepad)
-		return GetGamepadInfo(pDefault);
+		return MFInputPC_GetGamepadInfo(pDefault);
 
 	return NULL;
 }
 
-void LoadGamepadMappings()
+void MFInputPC_LoadGamepadMappings()
 {
 	// load GamepadMappings.ini
-	GamepadInfo *pGI = NULL;
+	MFGamepadInfo *pGI = NULL;
 	MFIni *pIni;
 
 	// create default
-	pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen("default") + 1);
+	pGI = (MFGamepadInfo*)Heap_Alloc(sizeof(MFGamepadInfo) + strlen("default") + 1);
 	pGI->usePOV = true;
 	pGI->pName = (char*)&pGI[1];
 	pGI->ppButtonNameStrings = DefaultButtons;
@@ -943,7 +939,7 @@ void LoadGamepadMappings()
 			if (pLine->IsString(0, "Gamepad"))
 			{
 				const char *pName = pLine->GetString(1);
-				pGI = (GamepadInfo*)Heap_Alloc(sizeof(GamepadInfo) + strlen(pName) + 1);
+				pGI = (MFGamepadInfo*)Heap_Alloc(sizeof(MFGamepadInfo) + strlen(pName) + 1);
 				pGI->usePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;
@@ -1206,8 +1202,8 @@ int InitRawMouse(bool _includeRDPMouse)
 	}
 
 	// Allocate the array for the raw mice
-	pRawMice = (RawMouse*)malloc(sizeof(RawMouse) * rawMouseCount);
-	ZeroMemory(pRawMice, sizeof(RawMouse) * rawMouseCount);
+	pRawMice = (MFRawMouse*)malloc(sizeof(MFRawMouse) * rawMouseCount);
+	ZeroMemory(pRawMice, sizeof(MFRawMouse) * rawMouseCount);
 
 	// Loop through all devices and set the device handles and initialize the mouse values
 	for(i = 0; i < nInputDevices; i++)

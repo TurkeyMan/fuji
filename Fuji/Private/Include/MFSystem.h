@@ -79,29 +79,46 @@ struct MFDefaults
 
 extern MFDefaults gDefaults;
 
-// Fuji sustem functions
+enum MFCallbacks
+{
+	MFCB_Unknown = -1,
 
-MFPlatform System_GetCurrentPlatform();
+	MFCB_Update = 0,
+	MFCB_Draw,
+	MFCB_Init,
+	MFCB_Deinit,
 
-const char * const System_GetPlatformString(int platform);
-const char * const System_GetPlatformName(int platform);
+	MFCB_HandleSystemMessages,
 
-MFEndian System_GetPlatformEndian(int platform);
+	MFCB_DisplayLost,
+	MFCB_DisplayReset,
+
+	MFCB_VerticalBlank,
+
+	MFCB_Max,
+	MFCB_ForceInt = 0x7FFFFFFF
+};
+
+// Fuji system functions
+
+MFPlatform MFSystem_GetCurrentPlatform();
+
+const char * const MFSystem_GetPlatformString(int platform);
+const char * const MFSystem_GetPlatformName(int platform);
+
+MFEndian MFSystem_GetPlatformEndian(int platform);
 
 // Timer Related
 
 // Read Time Stamp Counter
-uint64 System_ReadRTC();
-uint64 System_GetRTCFrequency();
+uint64 MFSystem_ReadRTC();
+uint64 MFSystem_GetRTCFrequency();
 
 // System Timer
-extern Timer gSystemTimer;
-extern float gSystemTimeDelta;
+float MFSystem_TimeDelta();
 
-#define GetFPS() gSystemTimer.GetFPS()
-#define TIMEDELTA gSystemTimeDelta
-
-extern uint32 gFrameCount;
+float MFSystem_GetFPS();
+uint32 MFSystem_GetFrameCounter();
 
 // these MUST be implemented by the game
 void Game_InitSystem();
@@ -109,5 +126,7 @@ void Game_Init();
 void Game_Update();
 void Game_Draw();
 void Game_Deinit();
+
+#include "MFSystem.inl"
 
 #endif // _SYSTEM_H

@@ -1,11 +1,11 @@
 #include "Fuji.h"
-#include "System_Internal.h"
+#include "MFSystem_Internal.h"
 #include "Display_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
-#include "Input_Internal.h"
-#include "View_Internal.h"
+#include "MFInput_Internal.h"
+#include "MFView_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "Font.h"
 #include "Primitive.h"
@@ -17,7 +17,7 @@
 #include "MFSockets_Internal.h"
 
 // externs
-void System_HandleEventsPlatformSpecific();
+void MFSystem_HandleEventsPlatformSpecific();
 
 // extern to platform
 extern MFPlatform gCurrentPlatform;
@@ -121,7 +121,7 @@ void RestartCallback(MenuObject *pMenu, void *pData)
 	gRestart = 1;
 }
 
-void System_Init()
+void MFSystem_Init()
 {
 	CALLSTACK;
 
@@ -132,7 +132,7 @@ void System_Init()
 	DebugMenu_InitModule();
 	Callstack_InitModule();
 
-	System_InitModulePlatformSpecific();
+	MFSystem_InitModulePlatformSpecific();
 
 	Timer_InitModule();
 	gSystemTimer.Init(NULL);
@@ -142,9 +142,9 @@ void System_Init()
 
 	MFFileSystem_InitModule();
 
-	View_InitModule();
+	MFView_InitModule();
 	MFDisplay_InitModule();
-	Input_InitModule();
+	MFInput_InitModule();
 
 	Sound_InitModule();
 
@@ -163,7 +163,7 @@ void System_Init()
 	Heap_MarkHeap();
 }
 
-void System_Deinit()
+void MFSystem_Deinit()
 {
 	CALLSTACK;
 
@@ -180,9 +180,9 @@ void System_Deinit()
 
 	Sound_DeinitModule();
 
-	Input_DeinitModule();
+	MFInput_DeinitModule();
 	MFDisplay_DeinitModule();
-	View_DeinitModule();
+	MFView_DeinitModule();
 
 	MFFileSystem_DeinitModule();
 
@@ -190,7 +190,7 @@ void System_Deinit()
 
 	Timer_DeinitModule();
 
-	System_DeinitModulePlatformSpecific();
+	MFSystem_DeinitModulePlatformSpecific();
 
 	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
@@ -198,30 +198,30 @@ void System_Deinit()
 	Heap_DeinitModule();
 }
 
-void System_Update()
+void MFSystem_Update()
 {
 	CALLSTACKc;
 
-	System_UpdatePlatformSpecific();
+	MFSystem_UpdatePlatformSpecific();
 
-	Input_Update();
+	MFInput_Update();
 
 #if defined(_XBOX)
-	if(Input_Read(IDD_Gamepad, 0, Button_XB_Start) && Input_Read(IDD_Gamepad, 0, Button_XB_White) && Input_Read(IDD_Gamepad, 0, Button_XB_LTrig) && Input_Read(IDD_Gamepad, 0, Button_XB_RTrig))
+	if(MFInput_Read(Button_XB_Start, IDD_Gamepad) && MFInput_Read(Button_XB_White, IDD_Gamepad) && MFInput_Read(Button_XB_LTrig, IDD_Gamepad) MF&& Input_Read(Button_XB_RTrig, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #elif defined(_PSP)
-	if(Input_Read(IDD_Gamepad, 0, Button_DLeft) && Input_Read(IDD_Gamepad, 0, Button_PP_Circle) && Input_Read(IDD_Gamepad, 0, Button_PP_L) && Input_Read(IDD_Gamepad, 0, Button_PP_R))
+	if(MFInput_Read(Button_DLeft, IDD_Gamepad) && MFInput_Read(Button_PP_Circle, IDD_Gamepad) && MFInput_Read(Button_PP_L, IDD_Gamepad) && MFInput_Read(Button_PP_R, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #else//if defined(_WINDOWS)
-	if(Input_Read(IDD_Gamepad, 0, Button_P2_Start) && Input_Read(IDD_Gamepad, 0, Button_P2_Select) && Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_R1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_Read(IDD_Gamepad, 0, Button_P2_R2))
+	if(MFInput_Read(Button_P2_Start, IDD_Gamepad) && MFInput_Read(Button_P2_Select, IDD_Gamepad) && MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_R1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_Read(Button_P2_R2, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #endif
 
 #if defined(_PSP)
-	if(Input_Read(IDD_Gamepad, 0, Button_DLeft) && Input_Read(IDD_Gamepad, 0, Button_PP_L) && Input_WasPressed(IDD_Gamepad, 0, Button_PP_Start))
+	if(MFInput_Read(Button_DLeft, IDD_Gamepad) && MFInput_Read(Button_PP_L, IDD_Gamepad) && MFInput_WasPressed(Button_PP_Start, IDD_Gamepad))
 		gDrawSystemInfo = !gDrawSystemInfo;
 #else
-	if(Input_Read(IDD_Gamepad, 0, Button_P2_L1) && Input_Read(IDD_Gamepad, 0, Button_P2_L2) && Input_WasPressed(IDD_Gamepad, 0, Button_P2_LThumb))
+	if(MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_WasPressed(Button_P2_LThumb, IDD_Gamepad))
 		gDrawSystemInfo = !gDrawSystemInfo;
 #endif
 
@@ -234,19 +234,19 @@ void System_Update()
 	Sound_Update();
 }
 
-void System_PostUpdate()
+void MFSystem_PostUpdate()
 {
 	CALLSTACK;
 
 }
 
-void System_Draw()
+void MFSystem_Draw()
 {
 	CALLSTACKc;
 
 #if !defined(_RETAIL)
-	View_Push();
-	View_SetDefault();
+	MFView_Push();
+	MFView_SetDefault();
 
 	MFRect rect;
 
@@ -255,7 +255,7 @@ void System_Draw()
 	rect.width = (float)gDefaults.display.displayWidth;
 	rect.height = (float)gDefaults.display.displayHeight;
 
-	View_SetOrtho(&rect);
+	MFView_SetOrtho(&rect);
 
 	// should be the first thing rendered so we only display game vertices
 	DrawMFPrimitiveStats();
@@ -275,7 +275,7 @@ void System_Draw()
 		float y = 30.0f;
 #endif
 
-		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", GetFPS());
+		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
@@ -299,16 +299,16 @@ void System_Draw()
 		MFSetPosition(15+iconSize, yOffset+iconSize, 0);
 		MFEnd();
 
-		System_DrawPlatformSpecific();
+		MFSystem_DrawPlatformSpecific();
 	}
 
 	DebugMenu_Draw();
 
-	View_Pop();
+	MFView_Pop();
 #endif
 }
 
-int System_GameLoop()
+int MFSystem_GameLoop()
 {
 	CALLSTACK;
 
@@ -317,7 +317,7 @@ int System_GameLoop()
 	Game_InitSystem();
 
 	// initialise the system and create displays etc..
-	System_Init();
+	MFSystem_Init();
 
 	while(gRestart)
 	{
@@ -328,21 +328,21 @@ int System_GameLoop()
 
 		while(!gQuit)
 		{
-			System_HandleEventsPlatformSpecific();
+			MFSystem_HandleEventsPlatformSpecific();
 
 			Callstack_BeginFrame();
-			System_UpdateTimeDelta();
+			MFSystem_UpdateTimeDelta();
 			gFrameCount++;
 
-			System_Update();
+			MFSystem_Update();
 			if(!DebugMenu_IsEnabled())
 				Game_Update();
-			System_PostUpdate();
+			MFSystem_PostUpdate();
 
 			MFDisplay_BeginFrame();
 
 			Game_Draw();
-			System_Draw();
+			MFSystem_Draw();
 
 			Callstack_EndFrame();
 			MFDisplay_EndFrame();
@@ -351,12 +351,12 @@ int System_GameLoop()
 		Game_Deinit();
 	}
 
-	System_Deinit();
+	MFSystem_Deinit();
 
 	return gQuit;
 }
 
-void System_UpdateTimeDelta()
+void MFSystem_UpdateTimeDelta()
 {
 	CALLSTACK;
 
@@ -364,7 +364,12 @@ void System_UpdateTimeDelta()
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 }
 
-MFPlatform System_GetCurrentPlatform()
+float MFSystem_GetFPS()
+{
+	return gSystemTimer.GetFPS();
+}
+
+MFPlatform MFSystem_GetCurrentPlatform()
 {
 	return gCurrentPlatform;
 }

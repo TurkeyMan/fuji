@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
-#include "Input.h"
+#include "MFInput.h"
 #include "Font.h"
 #include "Primitive.h"
 #include "MFPtrList.h"
@@ -121,7 +121,7 @@ void TextureBrowser::Draw()
 
 void TextureBrowser::Update()
 {
-	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y))
+	if(MFInput_WasPressed(Button_XB_Y, IDD_Gamepad))
 		pCurrentMenu = pParent;
 }
 
@@ -236,14 +236,14 @@ void TextureBrowser::ListUpdate(bool selected)
 	{
 		int texCount = gTextureBank.GetLength();
 
-		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
+		if(MFInput_WasPressed(Button_DLeft, IDD_Gamepad))
 		{
 			selection = selection <= 0 ? texCount-1 : selection-1;
 
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
+		else if(MFInput_WasPressed(Button_DRight, IDD_Gamepad))
 		{
 			selection = selection >= texCount-1 ? 0 : selection+1;
 

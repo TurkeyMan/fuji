@@ -7,7 +7,7 @@
 
 #include "Fuji.h"
 #include "Timer.h"
-#include "System.h"
+#include "MFSystem.h"
 #include "DebugMenu.h"
 
 /**** Globals ****/
@@ -38,8 +38,8 @@ void Timer::Init(Timer *pRefTimer)
 	accumulator = 0;
 	lastUpdate = 0;
 
-	thisCall = lastCall = System_ReadRTC();
-	freq = System_GetRTCFrequency();
+	thisCall = lastCall = MFSystem_ReadRTC();
+	freq = MFSystem_GetRTCFrequency();
 
 	FPS = 60.0;
 
@@ -61,7 +61,7 @@ void Timer::Update()
 		if(fixed)
 		{
 			lastCall = thisCall;
-			thisCall = System_ReadRTC();
+			thisCall = MFSystem_ReadRTC();
 
 			lastUpdate = accumulator;
 			accumulator += freq/fixedFPS;
@@ -69,7 +69,7 @@ void Timer::Update()
 		else
 		{
 			lastCall = thisCall;
-			thisCall = System_ReadRTC();
+			thisCall = MFSystem_ReadRTC();
 
 			lastUpdate = accumulator;
 			accumulator += (uint64)((thisCall-lastCall)*rate);
@@ -97,7 +97,7 @@ void Timer::Reset()
 	accumulator = 0;
 	lastUpdate = 0;
 
-	lastCall = System_ReadRTC();
+	lastCall = MFSystem_ReadRTC();
 
 	smoothDeltaF = 1.0f/60.0f;
 }
@@ -116,7 +116,7 @@ void Timer::Pause(bool pause)
 	else
 	{
 		MFUNFLAG(flags, Timer_Paused);
-		thisCall = System_ReadRTC();
+		thisCall = MFSystem_ReadRTC();
 
 		smoothDeltaF = 1.0f/60.0f;
 		FPS = 60.0;

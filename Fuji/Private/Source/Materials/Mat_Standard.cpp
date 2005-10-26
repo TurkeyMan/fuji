@@ -86,7 +86,7 @@ void Mat_Standard_Update(MFMaterial *pMaterial)
 
 	if(pData->materialType & MF_Animating)
 	{
-		pData->curTime += TIMEDELTA;
+		pData->curTime += MFSystem_TimeDelta();
 
 		while(pData->curTime >= pData->frameTime)
 		{

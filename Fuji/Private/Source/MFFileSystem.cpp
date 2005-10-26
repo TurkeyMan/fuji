@@ -36,7 +36,7 @@ void MFFileSystem_InitModule()
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
-	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", System_GetPlatformName(System_GetCurrentPlatform())));
+	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform())));
 	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
 
 	MFMountDataNative mountData;
@@ -57,7 +57,7 @@ void MFFileSystem_InitModule()
 	{
 		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		mountData.pMountpoint = "data";
-		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), System_GetPlatformName(System_GetCurrentPlatform()));
+		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform()));
 		MFFileSystem_Mount(hNativeFileSystem, &mountData);
 	}
 

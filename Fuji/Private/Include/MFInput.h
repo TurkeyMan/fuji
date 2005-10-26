@@ -1,39 +1,37 @@
 #if !defined(_INPUT_H)
 #define _INPUT_H
 
-#include "View.h"
-
 // interface functions
-bool	 Input_IsAvailable(int source, int sourceID);
-bool	 Input_IsConnected(int source, int sourceID);
-bool	 Input_IsReady(int source, int sourceID);
+bool	 MFInput_IsAvailable(int source, int sourceID);
+bool	 MFInput_IsConnected(int source, int sourceID);
+bool	 MFInput_IsReady(int source, int sourceID);
 
-float	 Input_Read(int source, int sourceID, int type);
-bool	 Input_WasPressed(int source, int sourceID, int type);
-bool	 Input_WasReleased(int source, int sourceID, int type);
+float	 MFInput_Read(int button, int source, int sourceID = 0);
+bool	 MFInput_WasPressed(int button, int source, int sourceID = 0);
+bool	 MFInput_WasReleased(int button, int source, int sourceID = 0);
 
-int		 Input_GetNumGamepads();
-int		 Input_GetNumKeyboards();
-int		 Input_GetNumPointers();
+int		 MFInput_GetNumGamepads();
+int		 MFInput_GetNumKeyboards();
+int		 MFInput_GetNumPointers();
 
-MFVector Input_ReadMousePos(int mouseID = -1);
-MFVector Input_ReadMouseDelta(int mouseID = -1);
-void	 Input_SetMouseMode(int mode);
-void	 Input_SetMouseAcceleration(float multiplier);
-void	 Input_SetMouseClippingRect(int mouseID, MFRect *pRect);
+MFVector MFInput_ReadMousePos(int mouseID = -1);
+MFVector MFInput_ReadMouseDelta(int mouseID = -1);
+void	 MFInput_SetMouseMode(int mode);
+void	 MFInput_SetMouseAcceleration(float multiplier);
+void	 MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
 
-const char*	Input_EnumerateString(int source, int sourceID, int type, bool includeDevice = false, bool includeDeviceID = false);
+const char*	MFInput_EnumerateString(int button, int source, int sourceID = 0, bool includeDevice = false, bool includeDeviceID = false);
 
-void	 Input_SetDeadZone(float deadZone);
-float	 Input_GetDeadZone();
+void	 MFInput_SetDeadZone(float deadZone);
+float	 MFInput_GetDeadZone();
 
 // these are platform specific
-const char*	Input_GetDeviceName(int source, int sourceID);
-const char* Input_GetGamepadButtonName(int sourceID, int type);
-bool	Input_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);	// get the state of the keyboard status flags
+const char*	MFInput_GetDeviceName(int source, int sourceID);
+const char* MFInput_GetGamepadButtonName(int button, int sourceID);
+bool	MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);	// get the state of the keyboard status flags
 
 // input enums
-enum InputDevice
+enum MFInputDevice
 {
 	IDD_Gamepad,
 	IDD_Mouse,
@@ -43,7 +41,7 @@ enum InputDevice
 	IDD_ForceInt = 0x7FFFFFFF
 };
 
-enum InputDeviceStatus
+enum MFInputDeviceStatus
 {
 	IDS_Disconnected = 0,
 	IDS_Ready = 1,
@@ -53,7 +51,7 @@ enum InputDeviceStatus
 	IDS_ForceInt = 0x7FFFFFFF
 };
 
-enum GamepadType
+enum MFGamepadButton
 {
 // xbox controller enums
 	Button_XB_A			= 0,
@@ -118,7 +116,7 @@ enum GamepadType
 };
 
 // mouse stuff
-enum MouseMode
+enum MFMouseMode
 {
 	MouseMode_Shared,		// this will continue to share the mouse with the system
 	MouseMode_Exclusive,	// this will make the game take exclusive access to the mouse, (not applicable to consoles)
@@ -127,7 +125,7 @@ enum MouseMode
 	MouseMode_ForceInt	= 0x7FFFFFFF
 };
 
-enum MouseType
+enum MFMouseButton
 {
 	Mouse_XPos,
 	Mouse_YPos,
@@ -154,7 +152,7 @@ enum MouseType
 };
 
 // keyboard stuff
-enum KeyboardStatusState
+enum MFKeyboardStatusState
 {
 	KSS_NumLock,
 	KSS_CapsLock,
@@ -162,7 +160,7 @@ enum KeyboardStatusState
 	KSS_Insert
 };
 
-enum KeyboardType
+enum MFKeyboardButton
 {
 	Key_Unknown = -1,
 

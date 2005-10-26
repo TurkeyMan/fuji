@@ -1,7 +1,7 @@
 #if !defined(_PRIMITIVE_H)
 #define _PRIMITIVE_H
 
-#include "System.h"
+#include "MFSystem.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
 

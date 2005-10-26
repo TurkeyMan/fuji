@@ -5,10 +5,10 @@
 
 #include "Fuji.h"
 #include "Display.h"
-#include "View.h"
+#include "MFView.h"
 #include "Timer.h"
 #include "Primitive.h"
-#include "System.h"
+#include "MFSystem.h"
 #include "Font.h"
 #include "DebugMenu.h"
 
@@ -162,8 +162,8 @@ void Callstack_DrawProfile()
 {
 //	CALLSTACK("Callstack_DrawProfile");
 
-	View_Push();
-	View_SetOrtho();
+	MFView_Push();
+	MFView_SetOrtho();
 
 	int a;
 
@@ -232,7 +232,7 @@ void Callstack_DrawProfile()
 			Font_DrawTextf(gpDebugFont, 110, y, 0, 15.0f, MFVector::one, "More...");
 	}
 
-	View_Pop();
+	MFView_Pop();
 }
 #endif
 

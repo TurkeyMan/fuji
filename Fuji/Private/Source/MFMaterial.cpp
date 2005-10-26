@@ -12,7 +12,7 @@
 
 #include "Primitive.h"
 #include "Font.h"
-#include "Input.h"
+#include "MFInput.h"
 
 #include "SysLogo-256.h"
 #include "SysLogo-64.h"
@@ -628,7 +628,7 @@ void MaterialBrowser::Draw()
 
 void MaterialBrowser::Update()
 {
-	if(Input_WasPressed(IDD_Gamepad, 0, Button_XB_Y))
+	if(MFInput_WasPressed(Button_XB_Y, IDD_Gamepad))
 		pCurrentMenu = pParent;
 }
 
@@ -708,14 +708,14 @@ void MaterialBrowser::ListUpdate(bool selected)
 	{
 		int texCount = gMaterialList.GetLength();
 
-		if(Input_WasPressed(IDD_Gamepad, 0, Button_DLeft))
+		if(MFInput_WasPressed(Button_DLeft, IDD_Gamepad))
 		{
 			selection = selection <= 0 ? texCount-1 : selection-1;
 
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
-		else if(Input_WasPressed(IDD_Gamepad, 0, Button_DRight))
+		else if(MFInput_WasPressed(Button_DRight, IDD_Gamepad))
 		{
 			selection = selection >= texCount-1 ? 0 : selection+1;
 

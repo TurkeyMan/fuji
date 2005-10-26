@@ -2,7 +2,7 @@
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display.h"
-#include "View.h"
+#include "MFView.h"
 #include "Sprite.h"
 #include "Primitive.h"
 

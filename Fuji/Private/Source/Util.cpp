@@ -2,7 +2,7 @@
 #include <ctype.h>
 
 #include "Fuji.h"
-#include "System_Internal.h"
+#include "MFSystem_Internal.h"
 #include "Util.h"
 #include "MFVector.h"
 #include "MFPtrList.h"
@@ -11,7 +11,7 @@
 #include "Display_Internal.h"
 #include "Primitive.h"
 #include "Font.h"
-#include "View.h"
+#include "MFView.h"
 #endif
 
 #if defined(_PSP)
@@ -19,7 +19,7 @@
 #include <pspdebug.h>
 #endif
 
-void System_HandleEventsPlatformSpecific();
+void MFSystem_HandleEventsPlatformSpecific();
 
 static char stringBuffer[1024*128];
 static uint32 stringOffset;
@@ -75,17 +75,17 @@ static MFEndian gPlatformEndian[FP_Max] =
 	MFEndian_BigEndian,
 };
 
-const char * const System_GetPlatformString(int platform)
+const char * const MFSystem_GetPlatformString(int platform)
 {
 	return gPlatformStrings[platform];
 }
 
-const char * const System_GetPlatformName(int platform)
+const char * const MFSystem_GetPlatformName(int platform)
 {
 	return gPlatformNames[platform];
 }
 
-MFEndian System_GetPlatformEndian(int platform)
+MFEndian MFSystem_GetPlatformEndian(int platform)
 {
 	return gPlatformEndian[platform];
 }
@@ -249,17 +249,17 @@ void hardAssert(const char *pReason, const char *pMessage, const char *pFile, in
 #if !defined(_PSP)
 	while(1)
 	{
-		System_HandleEventsPlatformSpecific();
+		MFSystem_HandleEventsPlatformSpecific();
 
-		System_UpdateTimeDelta();
+		MFSystem_UpdateTimeDelta();
 		gFrameCount++;
 
-		System_Update();
+		MFSystem_Update();
 
 		MFDisplay_BeginFrame();
 
-		View_SetDefault();
-		View_SetOrtho();
+		MFView_SetDefault();
+		MFView_SetOrtho();
 
 		// Set some renderstates
 #if defined(_WINDOWS) || defined(_XBOX)		

@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "System_Internal.h"
+#include "MFSystem_Internal.h"
 
 HINSTANCE apphInstance;
 extern int gQuit;
@@ -12,18 +12,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	srand(GetTickCount());
 
-	System_GameLoop();
+	MFSystem_GameLoop();
 }
 
-void System_InitModulePlatformSpecific()
+void MFSystem_InitModulePlatformSpecific()
 {
 }
 
-void System_DeinitModulePlatformSpecific()
+void MFSystem_DeinitModulePlatformSpecific()
 {
 }
 
-void System_HandleEventsPlatformSpecific()
+void MFSystem_HandleEventsPlatformSpecific()
 {
 	MSG msg;
 
@@ -38,22 +38,22 @@ void System_HandleEventsPlatformSpecific()
 	}
 }
 
-void System_UpdatePlatformSpecific()
+void MFSystem_UpdatePlatformSpecific()
 {
 }
 
-void System_DrawPlatformSpecific()
+void MFSystem_DrawPlatformSpecific()
 {
 }
 
-uint64 System_ReadRTC()
+uint64 MFSystem_ReadRTC()
 {
 	uint64 tickCount;
 	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
 	return tickCount;
 }
 
-uint64 System_GetRTCFrequency()
+uint64 MFSystem_GetRTCFrequency()
 {
 	uint64 freq;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);

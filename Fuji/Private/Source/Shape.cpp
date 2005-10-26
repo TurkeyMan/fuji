@@ -4,7 +4,7 @@
 
 #include "Fuji.h"
 #include "Display.h"
-#include "View.h"
+#include "MFView.h"
 #include "Primitive.h"
 #include "Shape.h"
 

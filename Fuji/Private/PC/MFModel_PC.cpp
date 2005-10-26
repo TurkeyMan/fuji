@@ -1,9 +1,9 @@
 #include "Fuji.h"
 #include "MFPtrList.h"
-#include "System.h"
+#include "MFSystem.h"
 #include "MFModel_Internal.h"
 #include "MFFileSystem.h"
-#include "View.h"
+#include "MFView.h"
 
 #include "Display_Internal.h"
 #include "Renderer.h"
@@ -13,12 +13,12 @@ void MFModel_Draw(MFModel *pModel)
 	CALLSTACK;
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&pModel->worldMatrix);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&View_GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&MFView_GetViewToScreenMatrix());
 
-	if(View_IsOrtho())
+	if(MFView_IsOrtho())
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
 	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&View_GetWorldToViewMatrix());
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFView_GetWorldToViewMatrix());
 
 	DataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, CT_SubObjects);
 

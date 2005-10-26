@@ -132,7 +132,7 @@
 				RelativePath=".\Include\Array.h">
 			</File>
 			<File
-				RelativePath="Include\Common.h">
+				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
 				RelativePath=".\Include\Heap.h">

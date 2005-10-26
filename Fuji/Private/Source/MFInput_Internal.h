@@ -1,36 +1,36 @@
 #if !defined(_INPUT_INTERNAL_H)
 #define _INPUT_INTERNAL_H
 
-#include "Input.h"
+#include "MFInput.h"
 
-#define Input_MaxInputID	16
+#define MFInput_MaxInputID	16
 
 // foreward declarations
-struct DeviceStatus;
+struct MFDeviceStatus;
 
-struct GamepadState;
-struct KeyState;
-struct MouseState;
+struct MFGamepadState;
+struct MFKeyState;
+struct MFMouseState;
 
 // internal functions
-void Input_InitModule();
-void Input_DeinitModule();
-void Input_Update();
+void MFInput_InitModule();
+void MFInput_DeinitModule();
+void MFInput_Update();
 
-void Input_InitModulePlatformSpecific();
-void Input_DeinitModulePlatformSpecific();
-void Input_UpdatePlatformSpecific();
+void MFInput_InitModulePlatformSpecific();
+void MFInput_DeinitModulePlatformSpecific();
+void MFInput_UpdatePlatformSpecific();
 
-void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus);
+void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus);
 
-void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState);
-void Input_GetKeyStateInternal(int id, KeyState *pGamepadState);
-void Input_GetMouseStateInternal(int id, MouseState *pGamepadState);
+void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState);
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pGamepadState);
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pGamepadState);
 
-float InputInternal_GetGamepadKeyMapping(int type, KeyState *pKeystate);
+float MFInputInternal_GetGamepadKeyMapping(int type, MFKeyState *pKeystate);
 
 // gamepad emulation key mapping
-enum KeyGamepadMapping
+enum MFKeyGamepadMapping
 {
 	Mapping_Cross		= Key_D,
 	Mapping_Circle		= Key_F,
@@ -61,26 +61,26 @@ enum KeyGamepadMapping
 };
 
 // input device state
-struct DeviceStatus
+struct MFDeviceStatus
 {
 	bool available;
 	int status;
 };
 
 // this may be expanded in the future
-struct GamepadState
+struct MFGamepadState
 {
 	float values[GamepadType_Max];
 };
 
 // state of a keyboard
-struct KeyState
+struct MFKeyState
 {
 	uint8 keys[256];
 };
 
 // state of a mouse
-struct MouseState
+struct MFMouseState
 {
 	float values[Mouse_MaxAxis];
 	uint8 buttonState[8];

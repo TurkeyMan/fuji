@@ -4,7 +4,7 @@
 #include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
-#include "Input_PC.h"
+#include "MFInput_PC.h"
 
 #include <stdio.h>
 
@@ -108,7 +108,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch(message)
 	{
 		case WM_ACTIVATE:
-			Input_Acquire(wParam != WA_INACTIVE);
+			MFInputPC_Acquire(wParam != WA_INACTIVE);
 
 			if(wParam != WA_INACTIVE)
 			{

@@ -41,7 +41,7 @@ class MFVector;
 #endif
 
 // assert a pointer is 16 byte alligned
-#define ASSERT_ALLIGN16(x) DBGASSERT(!((uint32)((void*)(x))&0xF), STR("Pointer not 16 byte alligned: 0x%X", (void*)(x)))
+#define ASSERT_ALLIGN16(x) DBGASSERT(!((uint32)((void*)(x))&0xF), STR("Pointer not 16 byte alligned: 0x%08X", (void*)(x)))
 
 void dbgAssert(const char *pReason, const char *pMessage, const char *pFile, int line);
 void hardAssert(const char *pReason, const char *pMessage, const char *pFile, int line);

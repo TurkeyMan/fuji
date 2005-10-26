@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "Renderer_Internal.h"
 #include "MFMaterial_Internal.h"
-#include "View.h"
+#include "MFView.h"
 
 uint32 renderStates[RS_Max];
 uint32 currentRenderStates[RS_Max];

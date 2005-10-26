@@ -32,4 +32,11 @@ typedef char				int8;
 
 #endif
 
+// rect structure
+struct MFRect
+{
+	float x, y;
+	float width, height;
+};
+
 #endif // _MFTYPES_H
