@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], System_GetPlatformString(b)))
+				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
@@ -97,8 +97,8 @@ int main(int argc, char **argv)
 	{
 		ProcessIniFile(iniFileName, platform);
 
-		Replace(output, "%platform%", System_GetPlatformString(platform));
-		Replace(output, "$(platform)", System_GetPlatformString(platform));
+		Replace(output, "%platform%", MFSystem_GetPlatformString(platform));
+		Replace(output, "$(platform)", MFSystem_GetPlatformString(platform));
 	}
 
 	if(!sources.size())
@@ -247,8 +247,8 @@ int main(int argc, char **argv)
 			Replace(commandLine, "$(filepart)", filePart);
 			Replace(commandLine, "%ext%", pExt);
 			Replace(commandLine, "$(ext)", pExt);
-			Replace(commandLine, "%platform%", System_GetPlatformString(platform));
-			Replace(commandLine, "$(platform)", System_GetPlatformString(platform));
+			Replace(commandLine, "%platform%", MFSystem_GetPlatformString(platform));
+			Replace(commandLine, "$(platform)", MFSystem_GetPlatformString(platform));
 
 			// execute tool
 			system(commandLine.c_str());
@@ -393,8 +393,8 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 
 							for(platformID = 0; platformID < FP_Max; platformID++)
 							{
-								int strLen = (int)strlen(System_GetPlatformString(platform));
-								if(!strnicmp(pString, System_GetPlatformString(platform), strLen))
+								int strLen = (int)strlen(MFSystem_GetPlatformString(platformID));
+								if(!strnicmp(pString, MFSystem_GetPlatformString(platformID), strLen))
 								{
 									platformFlag = 1 << platformID;
 									pString += strLen;
@@ -402,10 +402,24 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 								}
 							}
 
-							if(!platformFlag && !strnicmp(pString, "all", 3))
+							if(!platformFlag)
 							{
-								platformFlag = 0xFFFFFFFF;
-								pString += 3;
+								if(!strnicmp(pString, "all", 3))
+								{
+									platformFlag = 0xFFFFFFFF;
+									pString += 3;
+								}
+								else
+								{
+									const char *pUnknownPlatform = pString;
+
+									while(IsAlphaNumeric(*pString))
+										++pString;
+
+									pUnknownPlatform = STRn(pUnknownPlatform, (uint32&)pString - (uint32&)pUnknownPlatform);
+
+									printf("Unknown platform '%s' in ini file.\n", pUnknownPlatform);
+								}
 							}
 
 							// apply bitwise modifiers
