@@ -1,3 +1,30 @@
+/**
+ * @file MFTypes.h
+ * @brief Standard types used by the Mount Fuji Engine.
+ * @author Manu Evans
+ * @defgroup MFTypes Standard Types
+ * @{
+ */
+
+/** @typedef uint128
+ * 128 bit unsigned integer value. */
+/** @typedef uint64
+ * 64 bit unsigned integer value. */
+/** @typedef int64
+ * 64 bit signed integer value. */
+/** @typedef uint32
+ * 32 bit unsigned integer value. */
+/** @typedef int32
+ * 32 bit signed integer value. */
+/** @typedef uint16
+ * 16 bit unsigned integer value. */
+/** @typedef int16
+ * 16 bit signed integer value. */
+/** @typedef uint8
+ * 8 bit unsigned integer value. */
+/** @typedef int8
+ * 8 bit signed integer value. */
+
 #if !defined(_MFTYPES_H)
 #define _MFTYPES_H
 
@@ -32,11 +59,17 @@ typedef char				int8;
 
 #endif
 
-// rect structure
+/**
+ * Represents a spacial rectangle.
+ */
 struct MFRect
 {
-	float x, y;
-	float width, height;
+	float x; /**< X coordinate of rectangle */
+	float y; /**< Y coordinate of rectangle */
+	float width; /**< Width of rectangle */
+	float height; /**< Height of rectangle */
 };
 
 #endif // _MFTYPES_H
+
+/** @} */

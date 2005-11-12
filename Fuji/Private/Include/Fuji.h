@@ -1,3 +1,13 @@
+/**
+ * @file Fuji.h
+ * @brief Mount Fuji Engine main include file.
+ * This is the main include file for the Mount Fuji Engine.
+ * This file MUST be included before any other includes.
+ * @author Manu Evans
+ * @defgroup Fuji General
+ * @{
+ */
+
 #if !defined(_FUJI_H)
 #define _FUJI_H
 
@@ -12,40 +22,46 @@
 #endif
 
 
-// Fuji system wide enum's
-
+/**
+ * Defines a Fuji platform at runtime.
+ * These are generally used to communicate current or target platform at runtime.
+ */
 enum MFPlatform
 {
-	FP_Unknown = -1,
+	FP_Unknown = -1, /**< Unknown platform */
 
-	FP_PC = 0,
-	FP_XBox,
-	FP_Linux,
-	FP_PSP,
-	FP_PS2,
-	FP_DC,
-	FP_GC,
-	FP_OSX,
-	FP_Amiga,
-	FP_XBox360,
-	FP_PS3,
+	FP_PC = 0,	/**< PC */
+	FP_XBox,	/**< XBox */
+	FP_Linux,	/**< Linux */
+	FP_PSP,		/**< Playstation Portable */
+	FP_PS2,		/**< Playstation 2 */
+	FP_DC,		/**< Dreamcast */
+	FP_GC,		/**< Gamecube */
+	FP_OSX,		/**< MacOSX */
+	FP_Amiga,	/**< Amiga */
+	FP_XBox360,	/**< XBox360 */
+	FP_PS3,		/**< Playstation 3 */
 
-	FP_Max
+	FP_Max,		/**< Max platform */
+	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
 };
 
+/**
+ * Defines a platform endian.
+ * Generally used to communicate current or target platform endian at runtime.
+ */
 enum MFEndian
 {
-	MFEndian_Unknown = -1,
+	MFEndian_Unknown = -1,		/**< Unknown endian */
 
-	MFEndian_LittleEndian,
-	MFEndian_BigEndian,
+	MFEndian_LittleEndian = 0,	/**< Little Endian */
+	MFEndian_BigEndian,			/**< Big Endian */
 
-	MFEndian_ForceInt = 0x7FFFFFFF,
+	MFEndian_ForceInt = 0x7FFFFFFF	/**< Force the enum to an int */
 };
 
 
 // Standard platform includes
-
 #if defined(_WINDOWS)
 
 	#include <stdlib.h>
@@ -167,12 +183,23 @@ enum MFEndian
 // Useful templates
 
 // Min/Max
+/**
+ * Returns the minimum of \a a and \a b.
+ * Returns the minimum of \a a and \a b.
+ */
 template <class T>
 inline T MFMin(T a, T b) { return a < b ? a : b; }
+/**
+ * Returns the maximum of \a a and \a b.
+ * Returns the maximum of \a a and \a b.
+ */
 template <class T>
 inline T MFMax(T a, T b) { return a > b ? a : b; }
 
-// clamps so that: x <= y <= z
+/**
+ * Clamps values such that: \a x <= \a y <= \a z.
+ * Clamps values such that: \a x <= \a y <= \a z.
+ */
 template <class T>
 inline T MFClamp(T x, T y, T z) { return MFMax(x, MFMin(y, z)); }
 
@@ -199,3 +226,5 @@ inline T MFClamp(T x, T y, T z) { return MFMax(x, MFMin(y, z)); }
 #include "Callstack.h"
 
 #endif // _FUJI_H
+
+/** @} */
