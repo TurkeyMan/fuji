@@ -82,7 +82,7 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
 	CALLSTACK;
 
-	pMaterial->pInstanceData = Heap_Alloc(sizeof(Mat_Standard_Data));
+	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(Mat_Standard_Data));
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
 	memset(pData, 0, sizeof(Mat_Standard_Data));

@@ -7,6 +7,10 @@
 #include "Renderer_Internal.h"
 #include "Renderer_PC.h"
 
+#include <d3d9.h>
+
+extern IDirect3DDevice9 *pd3dDevice;
+
 // direct3d management fucntions
 void RendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
 {

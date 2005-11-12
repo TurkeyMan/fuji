@@ -8,7 +8,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 	Texture *pTexture = FindTexture(filename);
 
 	if(!pTexture) {
-		pTexture = gTextureBank.Create((Texture*)Heap_Alloc(sizeof(Texture)));
+		pTexture = gTextureBank.Create((Texture*)MFHeap_Alloc(sizeof(Texture)));
 		pTexture->refCount = 0;
 	}
 

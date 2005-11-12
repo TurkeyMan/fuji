@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "Image.h"
 #include "MFFileSystem.h"
 
@@ -38,7 +39,7 @@ FujiImage::~FujiImage()
 {
 	if(pixels != NULL)
 	{
-		Heap_TFree(pixels);
+		MFHeap_Free(pixels);
 		pixels = NULL;
 	}
 
@@ -103,7 +104,7 @@ void FujiImage::VFlip(void)
 	verticalRange = height / 2;
 	horizSpan = bytesPerPixel * width;
 
-	tempPixels = (unsigned char *)Heap_TAlloc(horizSpan);
+	tempPixels = (unsigned char *)MFHeap_Alloc(horizSpan, MFHeap_GetHeap(MFHT_ActiveTemporary));
 
 	top = (unsigned char *)pixels;
 	bottom = (unsigned char *)pixels + (width * (height - 1) * bytesPerPixel);
@@ -118,7 +119,7 @@ void FujiImage::VFlip(void)
 		bottom -= horizSpan;
 	}
 
-	Heap_TFree(tempPixels);
+	MFHeap_Free(tempPixels);
 }
 
 FujiImage* LoadTGA(const char *filename, bool flipped)
@@ -130,9 +131,9 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 	uint32 bytesRead;
 
-	Heap_ActivateTempMemOverride(true);
+	MFHeap_SetHeapOverride(MFHeap_GetHeap(MFHT_ActiveTemporary));
 	contents = (unsigned char *)MFFileSystem_Load(filename, &bytesRead);
-	Heap_ActivateTempMemOverride(false);
+	MFHeap_SetHeapOverride(NULL);
 
 	if(contents == NULL || bytesRead < (sizeof(TgaHeader) + 1))
 	{
@@ -146,21 +147,21 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	if((header->imageType != 2) && (header->imageType != 10))
 	{
 		LOGD(STR("Failed loading image: %s (Unhandled TGA type (%d))", filename, header->imageType));
-		Heap_TFree(contents);
+		MFHeap_Free(contents);
 		return(NULL);
 	}
 
 	if((header->bpp != 24) && (header->bpp != 32))
 	{
 		LOGD(STR("Failed loading image: %s (Invalid colour depth (%d))", filename, header->bpp));
-		Heap_TFree(contents);
+		MFHeap_Free(contents);
 		return(NULL);
 	}
 
 	if((header->flags & 0xC0))
 	{
 		LOGD(STR("Failed loading image: %s (Interleaved images not supported)", filename));
-		Heap_TFree(contents);
+		MFHeap_Free(contents);
 		return(NULL);
 	}
 
@@ -172,7 +173,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	if((position + header->idLength + (header->colourMapLength * header->colourMapBits * header->colourMapType)) >= contents + bytesRead)
 	{
 		LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
-		Heap_TFree(contents);
+		MFHeap_Free(contents);
 		return(NULL);
 	}
 
@@ -195,7 +196,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	image->width = header->width;
 	image->height = header->height;
 
-	image->pixels = Heap_TAlloc(header->width * header->height * image->bytesPerPixel);
+	image->pixels = MFHeap_Alloc(header->width * header->height * image->bytesPerPixel, MFHeap_GetHeap(MFHT_ActiveTemporary));
 
 	if(header->imageType == 10) // The hard way
 	{
@@ -207,7 +208,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 			{
 				LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 				delete image;
-				Heap_TFree(contents);
+				MFHeap_Free(contents);
 				return(NULL);
 			}
 
@@ -221,7 +222,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
-					Heap_TFree(contents);
+					MFHeap_Free(contents);
 					return(NULL);
 				}
 
@@ -229,7 +230,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
-					Heap_TFree(contents);
+					MFHeap_Free(contents);
 					return(NULL);
 				}
 
@@ -263,7 +264,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
-					Heap_TFree(contents);
+					MFHeap_Free(contents);
 					return(NULL);
 				}
 
@@ -271,7 +272,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 				{
 					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
-					Heap_TFree(contents);
+					MFHeap_Free(contents);
 					return(NULL);
 				}
 
@@ -287,15 +288,15 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 		{
 			LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
 			delete image;
-			Heap_TFree(contents);
+			MFHeap_Free(contents);
 			return(NULL);
 		}
 
 		memcpy(image->pixels, position, header->width * header->height * image->bytesPerPixel);
 	}
 
-	Heap_TFree(contents);
-	
+	MFHeap_Free(contents);
+
 	if(flipped)
 	{
 		if(!isSavedFlipped)

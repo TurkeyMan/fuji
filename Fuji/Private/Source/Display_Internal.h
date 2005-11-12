@@ -1,13 +1,6 @@
 #if !defined(_DISPLAY_INTERNAL_H)
 #define _DISPLAY_INTERNAL_H
 
-#if defined(_LINUX)
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
-#endif
-
 #include "Display.h"
 
 // internal functions
@@ -57,14 +50,7 @@ public:
 
 	uint32 flags;
 };
-
-// platform specific stuff
-#if defined(_XBOX)
-	extern IDirect3DDevice8 *pd3dDevice;
-#elif defined(_WINDOWS)
-	extern IDirect3DDevice9 *pd3dDevice;
-#endif
-
+/*
 // vertex formats.. to be removed later
 #if !defined(_FUJI_UTIL)
 #if defined(_XBOX) || defined(_WINDOWS)
@@ -167,5 +153,5 @@ struct FileVertex
 
 #endif // #if defined(_LINUX)
 #endif // #!define(_FUJI_UTIL)
-
+*/
 #endif

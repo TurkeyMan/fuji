@@ -1,8 +1,10 @@
 
+#include "MFHeap.h"
+
 template<class T>
 inline MFArray<T>::MFArray()
 {
-	pData = (T*)malloc(sizeof(T) * 16);
+	pData = (T*)MFHeap_Alloc(sizeof(T) * 16);
 	for(int a=0; a<16; a++) new(&pData[a]) T();
 	allocated = 16;
 	count = 0;
@@ -11,7 +13,7 @@ inline MFArray<T>::MFArray()
 template<class T>
 inline MFArray<T>::MFArray(int _count)
 {
-	pData = (T*)malloc(sizeof(T) * _count);
+	pData = (T*)MFHeap_Alloc(sizeof(T) * _count);
 	for(int a=0; a<_count; a++) new(&pData[a]) T();
 	allocated = count = _count;
 }
@@ -19,7 +21,7 @@ inline MFArray<T>::MFArray(int _count)
 template<class T>
 inline MFArray<T>::~MFArray()
 {
-	free(pData);
+	MFHeap_Free(pData);
 }
 
 template<class T>
@@ -30,7 +32,7 @@ inline T& MFArray<T>::operator[](int x)
 		int oldAlloc = allocated;
 		while(x >= allocated) allocated *= 2;
 
-		pData = (T*)realloc(pData, sizeof(T) * allocated);
+		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
 		for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 	}
 
@@ -60,7 +62,7 @@ inline void MFArray<T>::resize(int x)
 		int oldAlloc = allocated;
 		while(x >= allocated) allocated *= 2;
 
-		pData = (T*)realloc(pData, sizeof(T) * allocated);
+		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
 		for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
 	}
 

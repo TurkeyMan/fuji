@@ -1,6 +1,8 @@
 #if !defined(_PTRLIST_H)
 #define _PTRLIST_H
 
+#include "MFHeap.h"
+
 extern void *gEmptyPtrList[2];
 extern void *gEmptyPtrListDL[2];
 

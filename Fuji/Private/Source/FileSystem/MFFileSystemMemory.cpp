@@ -98,7 +98,7 @@ int MFFileMemory_Close(MFFile* fileHandle)
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
 	if(pMem->ownsMemory)
-		Heap_Free(pMem->pMemoryPointer);
+		MFHeap_Free(pMem->pMemoryPointer);
 
 	gMemoryFiles.Destroy(pMem);
 

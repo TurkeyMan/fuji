@@ -1,6 +1,42 @@
 #if !defined(_MAT_STANDARD_H)
 #define _MAT_STANDARD_H
 
+enum MFMat_Standard_Paramaters
+{
+	MFMatStandard_Unknown = -1,
+
+	MFMatStandard_Lit = 0,
+	MFMatStandard_Prelit,
+	MFMatStandard_DiffuseColour,
+	MFMatStandard_AmbientColour,
+	MFMatStandard_SpecularColour,
+	MFMatStandard_SpecularPower,
+	MFMatStandard_EmissiveColour,
+	MFMatStandard_Mask,
+	MFMatStandard_DoubleSided,
+	MFMatStandard_BackfaceCull,
+	MFMatStandard_Additive,
+	MFMatStandard_Subtractive,
+	MFMatStandard_Alpha,
+	MFMatStandard_Blend,
+	MFMatStandard_Texture,
+	MFMatStandard_DifuseMap,
+	MFMatStandard_DiffuseMap2,
+	MFMatStandard_NormalMap,
+	MFMatStandard_DetailMap,
+	MFMatStandard_EnvMap,
+	MFMatStandard_LightMap,
+	MFMatStandard_BumpMap,
+	MFMatStandard_ReflectionMap,
+	MFMatStandard_SpecularMap,
+	MFMatStandard_CelShading,
+	MFMatStandard_Phong,
+	MFMatStandard_Animated,
+
+	MFMatStandard_Max,
+	MFMatStandard_ForceInt = 0x7FFFFFFF
+};
+
 enum MaterialFlags
 {
 	// Material Flags
@@ -33,7 +69,7 @@ enum MaterialFlags
 	MF_CubeEnvMap			= 0x20000000,	// Ec
 };
 
-struct Mat_Standard_Data
+struct MFMat_Standard_Data
 {
 	// Members
 	MFVector	diffuse;
@@ -71,15 +107,15 @@ struct Mat_Standard_Data
 	uint32		displacementMapIndex	: 3;
 };
 
-int       Mat_Standard_RegisterMaterial(void *pPlatformData);
-void      Mat_Standard_UnregisterMaterial();
-void      Mat_Standard_CreateInstance(MFMaterial *pMaterial);
-void      Mat_Standard_DestroyInstance(MFMaterial *pMaterial);
-int       Mat_Standard_Begin(MFMaterial *pMaterial);
-void      Mat_Standard_Update(MFMaterial *pMaterial);
-void      Mat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 paramater);
-uint32    Mat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex);
-int       Mat_Standard_GetNumParams();
-MFMaterialParamaterInfo* Mat_Standard_GetParamaterInfo(int paramaterIndex);
+int       MFMat_Standard_RegisterMaterial(void *pPlatformData);
+void      MFMat_Standard_UnregisterMaterial();
+void      MFMat_Standard_CreateInstance(MFMaterial *pMaterial);
+void      MFMat_Standard_DestroyInstance(MFMaterial *pMaterial);
+int       MFMat_Standard_Begin(MFMaterial *pMaterial);
+void      MFMat_Standard_Update(MFMaterial *pMaterial);
+void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 paramater);
+uint32    MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex);
+int       MFMat_Standard_GetNumParams();
+MFMaterialParamaterInfo* MFMat_Standard_GetParamaterInfo(int paramaterIndex);
 
 #endif

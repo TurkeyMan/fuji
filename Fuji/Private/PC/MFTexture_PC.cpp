@@ -3,15 +3,20 @@
 /**** Includes ****/
 
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "MFPtrList.h"
 
+#include <d3dx9.h>
+
 /**** Globals ****/
 
 extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
+
+extern IDirect3DDevice9 *pd3dDevice;
 
 /**** Functions ****/
 
@@ -115,7 +120,8 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		// create template data
 		uint32 levelCount = pTexture->pTexture->GetLevelCount();
 
-		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
+		char *pTemplate;
+		pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
@@ -154,7 +160,7 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
 	{
-		Heap_Free(pTexture->pTemplateData);
+		MFHeap_Free(pTexture->pTemplateData);
 		pTexture->pTexture->Release();
 		gTextureBank.Destroy(pTexture);
 

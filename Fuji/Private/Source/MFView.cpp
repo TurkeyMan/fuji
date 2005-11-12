@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 #include "MFSystem.h"
@@ -14,7 +15,7 @@ MFView *pCurrentView = NULL;
 void MFView_InitModule()
 {
 	// allocate view stack
-	gpViewStack = (MFView*)Heap_Alloc(sizeof(MFView) * gDefaults.view.maxViewsOnStack);
+	gpViewStack = (MFView*)MFHeap_Alloc(sizeof(MFView) * gDefaults.view.maxViewsOnStack);
 
 	// set default ortho rect
 	MFView::defaultOrthoRect.x = gDefaults.view.orthoMinX;
@@ -44,7 +45,7 @@ void MFView_DeinitModule()
 	/// free view stack
 	if(gpViewStack)
 	{
-		Heap_Free(gpViewStack);
+		MFHeap_Free(gpViewStack);
 		gpViewStack = NULL;
 	}
 }

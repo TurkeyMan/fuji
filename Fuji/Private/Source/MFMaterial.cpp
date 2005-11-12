@@ -16,6 +16,13 @@
 
 #include "SysLogo-256.h"
 #include "SysLogo-64.h"
+#if defined(_PSP)
+#include "connected.h"
+#include "disconnected.h"
+#include "power.h"
+#include "charging.h"
+#include "usb_icon.h"
+#endif
 
 
 /**** internal functions ****/
@@ -51,24 +58,13 @@ MFMaterial *pNoneMaterial = NULL;
 MFMaterial *pWhiteMaterial = NULL;
 MFMaterial *pSysLogoLarge = NULL;
 MFMaterial *pSysLogoSmall = NULL;
+MFMaterial *pConnected = NULL;
+MFMaterial *pDisconnected = NULL;
+MFMaterial *pPower = NULL;
+MFMaterial *pCharging = NULL;
+MFMaterial *pUSB = NULL;
 
-#if defined(_PSP)
-#include "connected.h"
-#include "disconnected.h"
-#include "power.h"
-#include "charging.h"
-#include "usb_icon.h"
-
-MFMaterial *pConnected;
-MFMaterial *pDisconnected;
-MFMaterial *pPower;
-MFMaterial *pCharging;
-MFMaterial *pUSB;
-#endif
-
-char matDesc[32][4] = {"M","Na","Ds","Ad","T","","A","A3","L","Ls","Le","Dm","E","Es","","","P","C","B","N","D","Ec","E","Es","D2","Lm","D","U","","","",""};
-
-void Mat_Standard_Register();
+void MFMat_Standard_Register();
 
 MaterialBrowser matBrowser;
 
@@ -84,7 +80,7 @@ void MFMaterial_InitModule()
 
 	DebugMenu_AddItem("Material Browser", "Fuji Options", &matBrowser);
 
-	Mat_Standard_Register();
+	MFMat_Standard_Register();
 
 	if(MFMaterial_AddDefinitionsFile("Materials.ini", "Materials.ini"))
 	{
@@ -263,10 +259,13 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 {
 	CALLSTACK;
 
-	MFMaterialType *pMatType = (MFMaterialType*)Heap_Alloc(sizeof(MFMaterialType) + strlen(pName) + 1);
+	MFMaterialType *pMatType;
+	pMatType = (MFMaterialType*)MFHeap_Alloc(sizeof(MFMaterialType) + strlen(pName) + 1);
 
 	pMatType->pTypeName = (char*)&pMatType[1];
 	strcpy(pMatType->pTypeName, pName);
+
+	DBGASSERT(pMatType->materialCallbacks.pBegin, "Material must supply Begin() callback.");
 
 	memcpy(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
@@ -309,7 +308,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 
 	if(!pMat)
 	{
-		pMat = (MFMaterial*)Heap_Alloc(sizeof(MFMaterial) + strlen(pName) + 1);
+		pMat = (MFMaterial*)MFHeap_Alloc(sizeof(MFMaterial) + strlen(pName) + 1);
 		memset(pMat, 0, sizeof(MFMaterial));
 
 		pMat->pName = (char*)&pMat[1];
@@ -391,36 +390,38 @@ MFMaterial* MFMaterial_GetCurrent()
 
 void MFMaterial_SetMaterial(MFMaterial *pMaterial)
 {
+	CALLSTACK;
+
 	if(!pMaterial)
-		pMaterial = MFMaterial_GetStockMaterial(Mat_White);
+		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
 
 	pCurrentMaterial = pMaterial;
 }
 
-MFMaterial* MFMaterial_GetStockMaterial(StockMaterials materialIdentifier)
+MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
 {
+	CALLSTACK;
+
 	switch(materialIdentifier)
 	{
-		case Mat_White:
+		case MFMat_White:
 			return pWhiteMaterial;
-		case Mat_Unavailable:
+		case MFMat_Unavailable:
 			return pNoneMaterial;
-		case Mat_SysLogoSmall:
+		case MFMat_SysLogoSmall:
 			return pSysLogoSmall;
-		case Mat_SysLogoLarge:
+		case MFMat_SysLogoLarge:
 			return pSysLogoLarge;
-#if defined(_PSP)
-		case Mat_USB:
+		case MFMat_USB:
 			return pUSB;
-		case Mat_Connected:
+		case MFMat_Connected:
 			return pConnected;
-		case Mat_Disconnected:
+		case MFMat_Disconnected:
 			return pDisconnected;
-		case Mat_Power:
+		case MFMat_Power:
 			return pPower;
-		case Mat_Charging:
+		case MFMat_Charging:
 			return pCharging;
-#endif
 		default:
 			DBGASSERT(false, "Invalid Stock Material");
 	}
@@ -471,7 +472,8 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat,
 			pMat->pType = MaterialInternal_GetMaterialType("Standard");
 		}
 
-		pMat->pType->materialCallbacks.pCreateInstance(pMat);
+		if(pMat->pType->materialCallbacks.pCreateInstance)
+			pMat->pType->materialCallbacks.pCreateInstance(pMat);
 
 		while(pLine)
 		{
@@ -496,49 +498,55 @@ DBGASSERT(false, "Fix Me!!!");
 
 				for(int a=0; a<numArgs; a++)
 				{
-					ParamType pt = MFMaterial_GetParamaterArgType(pMat, paramIndex, a);
+					MFParamType pt = MFMaterial_GetParamaterArgType(pMat, paramIndex, a);
 
 					switch(pt)
 					{
-						case ParamType_String:
+						case MFParamType_String:
 						{
 							const char *pString = pLine->GetString(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)pString);
 							break;
 						}
 
-						case ParamType_Float:
+						case MFParamType_Float:
 						{
 							float value = pLine->GetFloat(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32&)value);
 							break;
 						}
 
-						case ParamType_Int:
+						case MFParamType_Int:
 						{
 							int value = pLine->GetStringCount() > 1 ? pLine->GetInt(a+1) : 1;
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32&)value);
 							break;
 						}
 
-						case ParamType_Bool:
+						case MFParamType_Bool:
 						{
 							bool value = pLine->GetStringCount() > 1 ? pLine->GetBool(a+1) : true;
 							MFMaterial_SetParamater(pMat, paramIndex, a, value ? 1 : 0);
 							break;
 						}
 
-						case ParamType_Vector3:
+						case MFParamType_Vector3:
 						{
 							MFVector vector = pLine->GetVector3(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
 							break;
 						}
 
-						case ParamType_Vector4:
+						case MFParamType_Vector4:
 						{
 							MFVector vector = pLine->GetVector4(a+1);
 							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
+							break;
+						}
+
+						case MFParamType_Matrix:
+						{
+							DBGASSERT(false, "Cant read a matrix from an ini file... yet...");
 							break;
 						}
 
@@ -555,13 +563,18 @@ DBGASSERT(false, "Fix Me!!!");
 
 int MFMaterial_GetNumParamaters(MFMaterial *pMaterial)
 {
-	return pMaterial->pType->materialCallbacks.pGetNumParams();
+	CALLSTACK;
+
+	return pMaterial->pType->materialCallbacks.pGetNumParams ? pMaterial->pType->materialCallbacks.pGetNumParams() : 0;
 }
 
 const char* MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterIndex)
 {
+	CALLSTACK;
+
 	MFMaterialParamaterInfo *pInfo;
 
+	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->pParamaterName;
@@ -569,13 +582,17 @@ const char* MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterInde
 
 int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pParameterName)
 {
+	CALLSTACK;
+
 	MFMaterialParamaterInfo *pInfo;
 
-	int numParams = pMaterial->pType->materialCallbacks.pGetNumParams();
+	int numParams = MFMaterial_GetNumParamaters(pMaterial);
 
 	for(int a=0; a<numParams; a++)
 	{
+		DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 		pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(a);
+
 		if(!stricmp(pInfo->pParamaterName, pParameterName))
 			return a;
 	}
@@ -585,17 +602,23 @@ int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pPar
 
 int MFMaterial_GetNumParamaterArgs(MFMaterial *pMaterial, int paramaterIndex)
 {
+	CALLSTACK;
+
 	MFMaterialParamaterInfo *pInfo;
 
+	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->numArgs;
 }
 
-ParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
+MFParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
 {
+	CALLSTACK;
+
 	MFMaterialParamaterInfo *pInfo;
 
+	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->pArgTypes[argIndex];
@@ -603,11 +626,17 @@ ParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterInd
 
 void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 value)
 {
+	CALLSTACK;
+
+	DBGASSERT(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, paramaterIndex, argIndex, value);
 }
 
 int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
 {
+	CALLSTACK;
+
+	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
 	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex);
 
 	return 0;

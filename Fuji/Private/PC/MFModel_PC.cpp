@@ -8,17 +8,19 @@
 #include "Display_Internal.h"
 #include "Renderer.h"
 
+extern IDirect3DDevice9 *pd3dDevice;
+
 void MFModel_Draw(MFModel *pModel)
 {
 	CALLSTACK;
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&pModel->worldMatrix);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&MFView_GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&pModel->worldMatrix);
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&MFView_GetViewToScreenMatrix());
 
 	if(MFView_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFMatrix::identity);
 	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFView_GetWorldToViewMatrix());
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
 
 	DataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, CT_SubObjects);
 

@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "Display.h"
 #include "MFFileSystem.h"
 #include "MFTexture_Internal.h"
@@ -39,7 +40,7 @@ Font* Font_Create(const char *pFilename)
 
 	if(hFile)
 	{
-		pFont = (Font*)Heap_Alloc(sizeof(Font));
+		pFont = (Font*)MFHeap_Alloc(sizeof(Font));
 
 		MFFile_Read(hFile, pFont->charwidths, 256);
 		MFFile_Close(hFile);
@@ -56,14 +57,14 @@ void Font_Destroy(Font *pFont)
 	CALLSTACK;
 
 	MFMaterial_Destroy(pFont->pMaterial);
-	Heap_Free(pFont);
+	MFHeap_Free(pFont);
 }
 
 int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float height, const MFVector &colour, const char *text, bool invert)
 {
 	CALLSTACK;
 
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pFont->pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pFont->pMaterial->pInstanceData;
 
 	int textlen = strlen(text);
 

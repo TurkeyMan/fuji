@@ -8,7 +8,7 @@
 
 #include "MFVector.h"
 #include "MFInput_Internal.h"
-#include "Heap.h"
+#include "MFHeap.h"
 #include "MFIni.h"
 
 #if defined(ALLOW_RAW_INPUT)
@@ -907,7 +907,7 @@ void MFInputPC_LoadGamepadMappings()
 	MFIni *pIni;
 
 	// create default
-	pGI = (MFGamepadInfo*)Heap_Alloc(sizeof(MFGamepadInfo) + strlen("default") + 1);
+	pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + strlen("default") + 1);
 	pGI->usePOV = true;
 	pGI->pName = (char*)&pGI[1];
 	pGI->ppButtonNameStrings = DefaultButtons;
@@ -939,7 +939,7 @@ void MFInputPC_LoadGamepadMappings()
 			if (pLine->IsString(0, "Gamepad"))
 			{
 				const char *pName = pLine->GetString(1);
-				pGI = (MFGamepadInfo*)Heap_Alloc(sizeof(MFGamepadInfo) + strlen(pName) + 1);
+				pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + strlen(pName) + 1);
 				pGI->usePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;

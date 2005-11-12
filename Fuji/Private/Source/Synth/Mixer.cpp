@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "FujiMath.h"
 #include "Synth/Mixer.h"
 
@@ -52,9 +53,9 @@ void Mixer::GetSamples(float *pOutputBuffer, int numSamples)
 void Mixer::SetBufferSize(int numSamples)
 {
 	if(pBuffer)
-		Heap_Free(pBuffer);
+		MFHeap_Free(pBuffer);
 
-	pBuffer = (float*)Heap_Alloc(sizeof(float)*numSamples);
+	pBuffer = (float*)MFHeap_Alloc(sizeof(float)*numSamples);
 
 	pSource1->SetBufferSize(numSamples);
 	pSource2->SetBufferSize(numSamples);

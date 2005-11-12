@@ -7,6 +7,9 @@
 #include "Primitive.h"
 #include "DebugMenu_Internal.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <Mmreg.h>
 #include <dsound.h>
 #include <vorbis/vorbisfile.h>
 
@@ -49,7 +52,7 @@ void Sound_InitModule()
 
 	HRESULT hr;
 
-	gMusicTracks = (SoundMusic*)Heap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
+	gMusicTracks = (SoundMusic*)MFHeap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
 	memset(gMusicTracks, 0, sizeof(SoundMusic)*gDefaults.sound.maxMusicTracks);
 
 	DirectSoundCreate8(NULL, &pDirectSound, NULL);

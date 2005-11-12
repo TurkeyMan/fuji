@@ -13,7 +13,7 @@ void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colou
 	pMaterial = MFMaterial_Create(pFilename);
 
 	DBGASSERT(!strcmp(pMaterial->pType->pTypeName, "Standard"), "Sprites MUST be created from a 'Standard' material.");
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	pivot = MakeVector(0.0f, 0.0f);
 	position = MakeVector(0.0f, 0.0f);

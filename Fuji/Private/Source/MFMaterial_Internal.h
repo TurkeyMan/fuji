@@ -1,6 +1,10 @@
 #if !defined(_MATERIAL_INTERNAL_H)
 #define _MATERIAL_INTERNAL_H
 
+#if defined(_WINDOWS)
+#include <d3d9.h>
+#endif
+
 #include "MFMaterial.h"
 #include "MFVector.h"
 #include "MFTexture.h"
@@ -33,14 +37,6 @@ struct MFMaterial
 	void *pInstanceData;
 
 	int refCount;
-};
-
-struct MFMaterialParamaterInfo
-{
-	const char *pParamaterName;
-
-	ParamType *pArgTypes;
-	int numArgs;
 };
 
 struct MFMeshChunk

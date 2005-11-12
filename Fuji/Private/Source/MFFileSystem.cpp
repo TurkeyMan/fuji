@@ -25,7 +25,7 @@ void MFFileSystem_InitModule()
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
 
 	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
-	ppFileSystemList = (MFFileSystemCallbacks**)Heap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 	memset(ppFileSystemList, 0, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 
 	// mount filesystems
@@ -79,7 +79,7 @@ void MFFileSystem_DeinitModule()
 	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
 
-	Heap_Free(ppFileSystemList);
+	MFHeap_Free(ppFileSystemList);
 
 	pFileSystemCallbacks.Deinit();
 	gOpenFiles.Deinit();
@@ -275,7 +275,8 @@ int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData)
 {
 	CALLSTACK;
 
-	MFMount *pMount = (MFMount*)Heap_Alloc(sizeof(MFMount) + strlen(pMountData->pMountpoint) + 1);
+	MFMount *pMount;
+	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + strlen(pMountData->pMountpoint) + 1);
 	memset(pMount, 0, sizeof(MFMount));
 
 	pMount->mountFlags = pMountData->flags;
@@ -288,7 +289,7 @@ int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData)
 
 	if(result < 0)
 	{
-		Heap_Free(pMount);
+		MFHeap_Free(pMount);
 		return -1;
 	}
 
@@ -348,7 +349,7 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 		if(pT->pPrev)
 			pT->pPrev->pNext = pT->pNext;
 
-		Heap_Free(pT);
+		MFHeap_Free(pT);
 
 		return 0;
 	}
@@ -409,7 +410,7 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 		}
 	}
 
-	Heap_Free(pEntry);
+	MFHeap_Free(pEntry);
 }
 
 // open a file from the mounted filesystem stack
@@ -470,7 +471,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 		if(size > 0)
 		{
-			pBuffer = (char*)Heap_Alloc(size);
+			pBuffer = (char*)MFHeap_Alloc(size);
 
 			int bytesRead = MFFile_Read(hFile, pBuffer, size);
 

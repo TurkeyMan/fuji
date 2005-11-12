@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
 #include "Display_Internal.h"
 #include "MFTexture_Internal.h"
@@ -27,11 +28,7 @@ MFDefaults gDefaults =
 {
 	// HeapDefaults
 	{
-		4*1024*1024,	// dynamicHeapSize
-		4*1024*1024,	// staticHeapSize
-		0,				// dynamicHeapCount
-		0,				// staticHeapCount
-		256,			// maxResources
+		4096,			// maxAllocations
 		2048			// maxStaticMarkers
 	},
 
@@ -127,7 +124,7 @@ void MFSystem_Init()
 
 	CrcInit();
 
-	Heap_InitModule();
+	MFHeap_InitModule();
 
 	DebugMenu_InitModule();
 	Callstack_InitModule();
@@ -160,14 +157,14 @@ void MFSystem_Init()
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
-	Heap_MarkHeap();
+	MFHeap_Mark();
 }
 
 void MFSystem_Deinit()
 {
 	CALLSTACK;
 
-	Heap_ReleaseMark();
+	MFHeap_Release();
 
 	Font_DeinitModule();
 	Primitive_DeinitModule();
@@ -195,7 +192,7 @@ void MFSystem_Deinit()
 	Callstack_DeinitModule();
 	DebugMenu_DeinitModule();
 
-	Heap_DeinitModule();
+	MFHeap_DeinitModule();
 }
 
 void MFSystem_Update()
@@ -281,7 +278,7 @@ void MFSystem_Draw()
 		if(rate != 1.0f)
 			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, MakeVector(1,0,0,1), "Rate: %s", STR(rate == 0.0f ? "Paused" : "%.2f", rate));
 
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 		const float iconSize = 55.0f;
 
 		float yOffset = gDefaults.display.displayHeight-70.0f;

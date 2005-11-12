@@ -46,7 +46,7 @@ void Renderer_EndVertices();
 void Renderer_EndImmediate();
 
 // renderer settings
-uint32 Renderer_SetRendererOverride(uint32 renderState, uint32 value);
-uint32 Renderer_GetRendererOverride(uint32 renderState);
+uint32 Renderer_SetRenderstateOverride(uint32 renderState, uint32 value);
+uint32 Renderer_GetRenderstateOverride(uint32 renderState);
 
 #endif

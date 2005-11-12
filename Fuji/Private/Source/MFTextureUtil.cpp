@@ -235,11 +235,11 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		41,	// D3DFMT_P8			// TexFmt_I8
 		0,	//						// TexFmt_I4
 
-		MAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// TexFmt_DXT1
-		MAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// TexFmt_DXT2
-		MAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// TexFmt_DXT3
-		MAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// TexFmt_DXT4
-		MAKEFOURCC('D', 'X', 'T', '5'),	// D3DFMT_DXT5	// TexFmt_DXT5
+		MFMAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// TexFmt_DXT1
+		MFMAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// TexFmt_DXT2
+		MFMAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// TexFmt_DXT3
+		MFMAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// TexFmt_DXT4
+		MFMAKEFOURCC('D', 'X', 'T', '5'),	// D3DFMT_DXT5	// TexFmt_DXT5
 
 		0,	// TexFmt_PSP_DXT1
 		0,	// TexFmt_PSP_DXT3

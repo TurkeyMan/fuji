@@ -6,6 +6,11 @@
 #include "Font.h"
 #include "Primitive.h"
 
+#if defined(_WINDOWS)
+#include <d3d9.h>
+extern IDirect3DDevice9 *pd3dDevice;
+#endif
+
 bool debugMenuEnabled;
 bool buttonsDown;
 
@@ -330,7 +335,7 @@ void Menu::Draw()
 
 	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
 
-	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_SysLogoSmall));
+	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 	float logoMargin = 5.0f;
 	float iconSize = 35.0f;
 

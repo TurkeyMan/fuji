@@ -1,6 +1,8 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "Primitive.h"
 #include "Font.h"
+
 #include "Synth/OutputFilter.h"
 
 extern IDirectSound8 *pDirectSound;
@@ -18,7 +20,7 @@ void OutputFilter::Create(int _bufferLength, int _updateLength)
 	pLSource = NULL;
 	pRSource = NULL;
 
-	pSourceBuffer = (float*)Heap_Alloc(sizeof(float) * updateLength);
+	pSourceBuffer = (float*)MFHeap_Alloc(sizeof(float) * updateLength);
 
 	// fill out DSBuffer creation data
 	DSBUFFERDESC desc;

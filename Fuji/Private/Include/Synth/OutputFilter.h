@@ -2,6 +2,10 @@
 #define _OUTPUTFILTER_H
 
 #include "Synth.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <Mmreg.h>
 #include <dsound.h>
 
 class OutputFilter : public Filter

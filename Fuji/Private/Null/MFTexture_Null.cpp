@@ -32,7 +32,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		strcpy(pTexture->name, pName);
 
 		// create template data
-		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
+		char *pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));

@@ -87,7 +87,7 @@ public:
 			pProfile->calls++;
 
 			int64 temp;
-			temp = RDTSC();
+			temp = MFSystem_ReadRTC();
 
 			pProfile->thisCall = temp;
 
@@ -104,7 +104,7 @@ public:
 		if(profiling)
 		{
 			int64 temp;
-			temp = RDTSC();
+			temp = MFSystem_ReadRTC();
 
 #if defined(_CALLSTACK_MONITORING)
 			monitorInfo.calls.push_back(MonitorCall(false, &t, temp));

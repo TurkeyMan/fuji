@@ -1,11 +1,8 @@
 #if !defined(_TEXTURE_INTERNAL_H)
 #define _TEXTURE_INTERNAL_H
 
-#if defined(_LINUX)
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
-#include <GL/glu.h>
+#if defined(_WINDOWS)
+#include <d3d9.h>
 #endif
 
 #include "MFTexture.h"

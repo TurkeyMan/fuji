@@ -8,12 +8,40 @@
 #include "Renderer.h"
 #include "MFMaterial.h"
 
+#include <d3d9.h>
+
+struct LitVertex
+{
+	enum
+	{
+		FVF = D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1
+	};
+
+	struct LitPos
+	{
+		float x, y, z;
+	} pos;
+
+	struct LitNormal
+	{
+		float x, y, z;
+	} normal;
+
+	unsigned int colour;
+
+	float u,v;
+};
+
 LitVertex primBuffer[1024];
 LitVertex current;
 
 uint32 primType;
 uint32 beginCount;
 uint32 currentVert;
+
+extern IDirect3DDevice9 *pd3dDevice;
+
+/*** functions ***/
 
 void Primitive_InitModule()
 {
@@ -40,16 +68,16 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 	if(type & PT_Untextured)
 	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 	}
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&MFMatrix::identity);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&MFView_GetViewToScreenMatrix());
+	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&MFMatrix::identity);
+	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&MFView_GetViewToScreenMatrix());
 
 	if(MFView_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFMatrix::identity);
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFMatrix::identity);
 	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFView_GetWorldToViewMatrix());
+		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
 
 	Renderer_Begin();
 }

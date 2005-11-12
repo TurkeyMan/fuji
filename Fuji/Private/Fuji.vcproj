@@ -582,9 +582,6 @@
 				RelativePath=".\Source\Font.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Heap.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
@@ -595,6 +592,18 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFFileSystem_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFHeap.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Source\MFHeap_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFIni.cpp">
@@ -628,6 +637,18 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFStringCache.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="0"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Source\MFSystem.cpp">
@@ -775,9 +796,6 @@
 				RelativePath=".\Include\FujiMath.h">
 			</File>
 			<File
-				RelativePath=".\Include\Heap.h">
-			</File>
-			<File
 				RelativePath=".\Include\Image.h">
 			</File>
 			<File
@@ -794,6 +812,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFHeap.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFIni.h">
@@ -848,9 +869,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Primitive.h">
-			</File>
-			<File
-				RelativePath=".\Include\PtrList.h">
 			</File>
 			<File
 				RelativePath=".\Include\Renderer.h">
@@ -1332,6 +1350,12 @@
 			</File>
 			<File
 				RelativePath=".\Pc\MFTexture_PC.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"/>
+				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug_XB|Xbox"
 					ExcludedFromBuild="TRUE">
@@ -3139,6 +3163,9 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Null\MFHeap_Null.cpp">
 			</File>
 			<File
 				RelativePath=".\Null\MFInput_Null.cpp">

@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemZipFile.h"
 
@@ -226,7 +227,7 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 	pMount->numFiles = MFFileSystemZipFile_GetNumEntries(zipFile, recursive, flatten, &stringCacheSize);
 
 	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)Heap_Alloc(sizeOfToc + stringCacheSize);
+	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
 	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
 	MFFileSystemZipFile_BuildToc(zipFile, pMount->pEntries, NULL, pStringCache, recursive, flatten);
@@ -563,7 +564,7 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 	pMount->numFiles = MFFileSystemZipFile_GetNumEntries(pDir, recursive, flatten, &stringCacheSize);
 
 	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)Heap_Alloc(sizeOfToc + stringCacheSize);
+	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
 	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
 	MFFileSystemZipFile_BuildToc(pDir, pMount->pEntries, NULL, pStringCache, recursive, flatten);

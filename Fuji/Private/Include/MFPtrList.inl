@@ -10,9 +10,9 @@ void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 	}
 	else
 	{
-		Heap_PushGroupName(pGroupName);
-		ppMark = (T**)(Heap_Alloc((maxElements + 2)*(int)sizeof(T*)));
-		Heap_PopGroupName();
+		MFHeap_PushGroupName(pGroupName);
+		ppMark = (T**)(MFHeap_Alloc((maxElements + 2)*(int)sizeof(T*)));
+		MFHeap_PopGroupName();
 
 		*ppMark = 0;
 		for(int i = 0; i<maxElements; ++i) *(++ppMark) = (T*)(0xdeadbeef);
@@ -31,7 +31,7 @@ void MFPtrList<T>::Deinit()
 	DBGASSERT(ppMark!=0, "not initialised");
 
 	while(*(--ppMark)!=0) {}
-	if(ppMark!=(T**)(&gEmptyPtrList[0])) Heap_Free(ppMark);
+	if(ppMark!=(T**)(&gEmptyPtrList[0])) MFHeap_Free(ppMark);
 	ppMark = 0;
 }
 
@@ -104,7 +104,7 @@ void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, vo
 	}
 	else
 	{
-		ppMark = (T**)Heap_Alloc(maxElements*elementSize + (maxElements + 2)*(int)sizeof(T*));
+		ppMark = (T**)MFHeap_Alloc(maxElements*elementSize + (maxElements + 2)*(int)sizeof(T*));
 
 		T* pBegin = (T*)(ppMark);
 		*(ppMark = (T**)(int(pBegin) + maxElements*elementSize)) = 0;
@@ -138,7 +138,7 @@ void MFPtrListDL<T>::Deinit()
 			if(*iterator<mem) mem = *iterator;
 			++iterator;
 		};
-		Heap_Free(mem);
+		MFHeap_Free(mem);
 	}
 	ppMark = 0;
 }

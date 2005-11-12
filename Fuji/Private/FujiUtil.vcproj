@@ -100,7 +100,10 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\Source\Heap.cpp">
+				RelativePath=".\Source\MFHeap.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFHeap_Internal.h">
 			</File>
 			<File
 				RelativePath="Source\MFIni.cpp">
@@ -135,7 +138,7 @@
 				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
-				RelativePath=".\Include\Heap.h">
+				RelativePath=".\Include\MFHeap.h">
 			</File>
 			<File
 				RelativePath="Include\MFIni.h">
@@ -277,6 +280,13 @@
 			</File>
 			<File
 				RelativePath=".\Util\F3D.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="Null"
+			Filter="">
+			<File
+				RelativePath=".\Null\MFHeap_Null.cpp">
 			</File>
 		</Filter>
 	</Files>

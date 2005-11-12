@@ -10,29 +10,29 @@ Systems to Support:
 	View System				* DONE (Manu)
 	Camera
 
-	Material				* WORKING (Manu)
-	Model					* WORkING (Manu)
+	Material				* BASIC IMPLEMENTATION (Manu)
+	Model					* BASIC IMPLEMENTATION (Manu)
 	Animation				* WORKING (Manu)
 
 	Primitive Interface		* DONE (Manu)
 
 	Controller/Input I/O	* BASIC IMPLEMENTATION (Manu)
 	FileSystem				* BASIC IMPLEMENTATION (Manu)
-	Networking
+	Networking				* BASIC IMPLEMENTATION (Manu)
 
 	Sound
 
-	Collision
+	Collision				* WORKING (Manu)
 
 	Physics
 
 	Particles
 	Post Processing (DOF/Bloom/HDR)
-	2D Stuff (Sprites and Stuff)		* WORKING (Manu)
+	2D Stuff (Sprites and Stuff)	* WORKING (Manu)
 
 	Video Playback
 
-	Max Exporter.. :(	* WORKING (Manu)
+	Max Exporter.. :(		* WORKING (Manu)
 
 	TTF Native Support
 
@@ -40,7 +40,7 @@ Wanted Features:
 
 	Texture Manager (Rather than texture class)	* DONE (Manu)
 
-	Input system needs calibration control
-	A combo of buttons to reset calibration
-	Needs to cache input state for each frame
+	Input system needs calibration control		
+	A combo of buttons to reset calibration		
+	Needs to cache input state for each frame	
 

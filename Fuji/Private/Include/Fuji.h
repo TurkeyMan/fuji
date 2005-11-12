@@ -47,9 +47,10 @@ enum MFEndian
 // Standard platform includes
 
 #if defined(_WINDOWS)
-	#include <Windows.h>
-	#include <d3d9.h>
-	#include <d3dx9.h>
+
+	#include <stdlib.h>
+	#include <memory.h>
+	#include <string.h>
 
 	// this defines weather to take mouse[0]'s coords from the windows cursor or from
 	// DirectInput's accumulated input events
@@ -62,7 +63,9 @@ enum MFEndian
 	#define ALLOW_RAW_INPUT
 
 //	#define _FUJI_SSE
+
 #elif defined(_XBOX)
+
 	#define DEBUG_KEYBOARD
 	#define DEBUG_MOUSE
 	#include <xtl.h>
@@ -70,38 +73,52 @@ enum MFEndian
 	char*  FixXBoxFilename(const char *pFilename);
 
 //	#define _FUJI_SSE
+
 #elif defined(_LINUX)
+
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 	#include <string.h> // For strcpy
+
 #elif defined(_PSP)
+
 	#include <pspkernel.h>
 
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>
+
 #elif defined(_PS2)
+
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>
+
 #elif defined(_DC)
+
 	#define _arch_dreamcast
 	#include <kos.h>
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h>
 	#include <string.h>
 	#include <math.h>
+
 #elif defined(_GC)
+
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>
 
 	#define MFBIG_ENDIAN
+
 #endif
 
 #if defined(_FUJI_UTIL)
+
+	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 	#include <stdio.h>
+
 #endif
 
 
@@ -144,10 +161,7 @@ enum MFEndian
 #define MFUNFLAG(x, y) ((x)&=~(y))
 #define MFFLAG(x, y) ((x)|=(y))
 #define MFBIT(x) (1<<(x))
-
-#if !defined(MAKEFOURCC)
-#define MAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
-#endif
+#define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
 
 
 // Useful templates
@@ -183,6 +197,5 @@ inline T MFClamp(T x, T y, T z) { return MFMax(x, MFMin(y, z)); }
 #include "Util.h"
 
 #include "Callstack.h"
-#include "Heap.h"
 
 #endif // _FUJI_H

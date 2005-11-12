@@ -1,5 +1,9 @@
 #include "Fuji.h"
 #include "MFSystem_Internal.h"
+#include "MFHeap.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 HINSTANCE apphInstance;
 extern int gQuit;
@@ -11,6 +15,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	apphInstance = hInstance;
 
 	srand(GetTickCount());
+
+	char *pbuffer;
+
+	pbuffer = (char*)MFHeap_Alloc(1000);
 
 	MFSystem_GameLoop();
 }

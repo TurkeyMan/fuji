@@ -3,14 +3,17 @@
 //
 //=============================================================================
 #include "Fuji.h"
-#include "Heap.h"
+#include "MFHeap.h"
 #include "MFStringCache.h"
 
 MFStringCache *MFStringCache::Create(uint32 maxSize)
 {
-	MFStringCache *pCache = (MFStringCache *)Heap_Alloc(sizeof(MFStringCache));
+	MFStringCache *pCache;
+	pCache = (MFStringCache *)MFHeap_Alloc(sizeof(MFStringCache));
 	pCache->size = maxSize;
-	pCache->pMem = (char *)Heap_Alloc(maxSize);
+	__asm nop
+	pCache->pMem = (char *)MFHeap_Alloc(maxSize);
+	__asm nop
 	pCache->pMem[0] = 0;
 	pCache->used = 1;
 	return pCache;
@@ -18,8 +21,8 @@ MFStringCache *MFStringCache::Create(uint32 maxSize)
 
 void MFStringCache::Destroy(MFStringCache *pCache)
 {
-	Heap_Free(pCache->pMem);
-	Heap_Free(pCache);
+	MFHeap_Free(pCache->pMem);
+	MFHeap_Free(pCache);
 }
 
 const char *MFStringCache::Add(const char *pNewString)

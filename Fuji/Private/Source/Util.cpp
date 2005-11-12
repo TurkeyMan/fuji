@@ -19,6 +19,11 @@
 #include <pspdebug.h>
 #endif
 
+#if defined(_WINDOWS) || defined(_XBOX)		
+#include <d3d9.h>
+extern IDirect3DDevice9 *pd3dDevice;
+#endif
+
 void MFSystem_HandleEventsPlatformSpecific();
 
 static char stringBuffer[1024*128];

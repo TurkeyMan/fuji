@@ -4,7 +4,7 @@
 #include "Fuji.h"
 #include "MFArray.h"
 #include "F3D.h"
-#include "Heap.h"
+#include "MFHeap.h"
 #include "MFStringCache.h"
 
 #include "MFModel_Internal.h"
@@ -28,14 +28,14 @@ int F3DFile::ReadF3D(char *pFilename)
 	filesize = ftell(infile);
 	fseek(infile, 0, SEEK_SET);
 
-	file = (char*)Heap_Alloc(filesize);
+	file = (char*)MFHeap_Alloc(filesize);
 	fread(file, 1, filesize, infile);
 
 	fclose(infile);
 
 	ReadF3DFromMemory(file);
 
-	Heap_Free(file);
+	MFHeap_Free(file);
 
 	return 0;
 }
@@ -177,7 +177,7 @@ void F3DFile::WriteF3D(char *pFilename)
 		return;
 	}
 
-	pFile = (char*)Heap_Alloc(1024*1024*10);
+	pFile = (char*)MFHeap_Alloc(1024*1024*10);
 	pHeader = (F3DHeader*)pFile;
 
 	pHeader->ID = MAKEFOURCC('M','F','3','D');
@@ -288,7 +288,7 @@ void F3DFile::WriteF3D(char *pFilename)
 
 	fclose(file);
 
-	Heap_Free(pFile);
+	MFHeap_Free(pFile);
 }
 
 int F3DFile::ReadF3DFromMemory(char *pMemory)
@@ -507,7 +507,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 	const int maxFileSize = 1024*1024*4;
 
-	pFile = (char*)Heap_Alloc(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
+	pFile = (char*)MFHeap_Alloc(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
 	memset(pFile, 0, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
@@ -676,7 +676,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	fclose(file);
 
 	// we're done!!!! clean up..
-	Heap_Free(pFile);
+	MFHeap_Free(pFile);
 }
 
 void F3DFile::Optimise()

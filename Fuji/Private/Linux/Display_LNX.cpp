@@ -100,7 +100,7 @@ static bool GetModes(Resolution **_modes, bool fullscreen)
 		originalVidMode = vidModes[0];
 		numModes = (uint32)numModeLines;
 	
-		modes = (Resolution *)Heap_Alloc(sizeof(Resolution) * (numModes + 1));
+		modes = (Resolution *)MFHeap_Alloc(sizeof(Resolution) * (numModes + 1));
 
 		for(int32 i = 0; i < numModes; i++) {
 			modes[i].width = vidModes[i]->hdisplay;
@@ -121,7 +121,7 @@ static bool GetModes(Resolution **_modes, bool fullscreen)
 
 static void SetSingleMode(Resolution **modes)
 {
-	*modes = (Resolution *)Heap_Alloc(sizeof(Resolution) * 2);
+	*modes = (Resolution *)MFHeap_Alloc(sizeof(Resolution) * 2);
 
 	(*modes)[0].width = DisplayWidth(xdisplay, screen);
 	(*modes)[0].height = DisplayHeight(xdisplay, screen);

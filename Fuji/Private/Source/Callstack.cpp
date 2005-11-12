@@ -220,8 +220,8 @@ void Callstack_DrawProfile()
 
 		for(i = FunctionRegistry.begin(), a=0; i!= FunctionRegistry.end() && a<19; i++, a++)
 		{
-			uint32 ms = (uint32)(i->second.total / (RDTSC()/1000000));
-			double percent = (double)i->second.total/((double)GetTSCFrequency() * 0.01/60.0);
+			uint32 ms = (uint32)(i->second.total / (MFSystem_ReadRTC()/1000000));
+			double percent = (double)i->second.total/((double)MFSystem_GetRTCFrequency() * 0.01/60.0);
 
 			Font_DrawTextf(gpDebugFont, 100, y, 0, 15.0f, MFVector::one, "%s()", i->first);
 			Font_DrawTextf(gpDebugFont, 300, y, 0, 15.0f, MFVector::one, "%dµs - %.2f%% - %d calls", ms, percent, i->second.calls);

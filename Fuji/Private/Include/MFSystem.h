@@ -7,13 +7,8 @@ struct MFDefaults
 {
 	struct HeapDefaults
 	{
-		uint32 dynamicHeapSize;
-		uint32 staticHeapSize;
-		uint32 dynamicHeapCount;
-		uint32 staticHeapCount;
-
-		uint32 maxResources;
-		uint32 maxStaticMarkers;
+		uint32 maxAllocations;
+		uint32 maxStaticHeapMarkers;
 	} heap;
 
 	struct DisplayDefaults
@@ -100,15 +95,12 @@ enum MFCallbacks
 };
 
 // Fuji system functions
-
 MFPlatform MFSystem_GetCurrentPlatform();
 
 const char * const MFSystem_GetPlatformString(int platform);
 const char * const MFSystem_GetPlatformName(int platform);
 
 MFEndian MFSystem_GetPlatformEndian(int platform);
-
-// Timer Related
 
 // Read Time Stamp Counter
 uint64 MFSystem_ReadRTC();

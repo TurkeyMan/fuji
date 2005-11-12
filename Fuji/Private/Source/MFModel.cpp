@@ -154,7 +154,7 @@ MFModel* MFModel_Create(const char *pFilename)
 				char *pTemplateData;
 
 				// allocate memory and load file
-				pTemplateData = (char*)Heap_Alloc(size + strlen(pFilename) + 1);
+				pTemplateData = (char*)MFHeap_Alloc(size + strlen(pFilename) + 1);
 				MFFile_Read(hFile, pTemplateData, size);
 
 				// check ID string
@@ -195,7 +195,8 @@ MFModel* MFModel_Create(const char *pFilename)
 	if(!pTemplate)
 		return NULL;
 
-	MFModel *pModel = (MFModel*)Heap_Alloc(sizeof(MFModel));
+	MFModel *pModel;
+	pModel = (MFModel*)MFHeap_Alloc(sizeof(MFModel));
 
 	pModel->worldMatrix = MFMatrix::identity;
 	pModel->modelColour = MFVector::one;
@@ -229,10 +230,10 @@ void MFModel_Destroy(MFModel *pModel)
 			}
 		}
 
-		Heap_Free(pModel->pTemplate);
+		MFHeap_Free(pModel->pTemplate);
 	}
 
-	Heap_Free(pModel);
+	MFHeap_Free(pModel);
 }
 
 

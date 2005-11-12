@@ -100,7 +100,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 							pToc->pParent = pParent;
 
 							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
-							pToc->pChild = (MFTOCEntry*)Heap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
+							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
 
 							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
 							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
@@ -169,7 +169,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPattern, recursive, flatten, &stringCacheSize);
 
 	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)Heap_Alloc(sizeOfToc + stringCacheSize);
+	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
 	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
 	MFFileSystemNative_BuildToc(pFindPattern, pMount->pEntries, NULL, pStringCache, recursive, flatten);

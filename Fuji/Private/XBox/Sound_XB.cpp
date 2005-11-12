@@ -51,7 +51,7 @@ void Sound_InitModule()
 
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 
-	gMusicTracks = (SoundMusic*)Heap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
+	gMusicTracks = (SoundMusic*)MFHeap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
 	memset(gMusicTracks, 0, sizeof(SoundMusic)*gDefaults.sound.maxMusicTracks);
 
 #if !defined(_RETAIL)

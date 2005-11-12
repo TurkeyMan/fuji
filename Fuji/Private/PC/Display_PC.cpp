@@ -7,6 +7,7 @@
 #include "MFInput_PC.h"
 
 #include <stdio.h>
+#include <d3d9.h>
 
 void MFDisplay_ResetDisplay();
 

@@ -3,6 +3,7 @@
 //
 
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"
 #include "MFStringCache.h"
@@ -111,7 +112,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	memSize = ftell(pFile);
 	fseek(pFile, 0, SEEK_SET);
 
-	char *pMem = (char*)Heap_Alloc(memSize);
+	char *pMem = (char*)MFHeap_Alloc(memSize);
 	fread(pMem, 1, memSize, pFile);
 	fclose(pFile);
 #endif
@@ -119,12 +120,13 @@ MFIni *MFIni::Create(const char *pFilename)
 	DBGASSERT(pMem != NULL, "Couldnt load .ini file!");
 
 	// allocate ini file
-	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
+	MFIni *pMFIni;
+	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
 	strcpy(pMFIni->name, pFilename);
 
 	// allocate temporary buffer for strings & lines
-	pMFIni->pLines = (MFIniLine *)Heap_Alloc(sizeof(MFIniLine)*MAX_LINES);
-	pMFIni->pStrings = (const char **)Heap_Alloc(4*MAX_STRINGS);
+	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
+	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
 	pMFIni->pCache = MFStringCache::Create(MAX_STRINGCACHE);
 
 	// scan though the file
@@ -148,12 +150,13 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 	const char *pMem = pMemory;
 
 	// allocate ini file
-	MFIni *pMFIni = (MFIni *)Heap_Alloc(sizeof(MFIni));
+	MFIni *pMFIni;
+	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
 	strcpy(pMFIni->name, "Memory Ini");
 
 	// allocate temporary buffer for strings & lines
-	pMFIni->pLines = (MFIniLine *)Heap_Alloc(sizeof(MFIniLine)*MAX_LINES);
-	pMFIni->pStrings = (const char **)Heap_Alloc(4*MAX_STRINGS);
+	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
+	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
 	pMFIni->pCache = MFStringCache::Create(MAX_STRINGCACHE);
 
 	// scan though the file
@@ -171,10 +174,10 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 
 void MFIni::Destroy(MFIni *pIni)
 {
-	Heap_Free(pIni->pLines);
-	Heap_Free(pIni->pStrings);
+	MFHeap_Free(pIni->pLines);
+	MFHeap_Free(pIni->pStrings);
 	MFStringCache::Destroy(pIni->pCache);
-	Heap_Free(pIni);
+	MFHeap_Free(pIni);
 }
 
 // returns how many lines it found
