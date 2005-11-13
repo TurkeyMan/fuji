@@ -100,6 +100,12 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
+				RelativePath=".\Source\MFDebug.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFDebug_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFHeap.cpp">
 			</File>
 			<File
@@ -110,6 +116,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFMatrix.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFString.cpp">
 			</File>
 			<File
 				RelativePath="Source\MFStringCache.cpp">
@@ -144,7 +153,19 @@
 				RelativePath="Include\MFIni.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFMath.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMath.inl">
+			</File>
+			<File
 				RelativePath=".\Include\MFMatrix.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFString.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFString.inl">
 			</File>
 			<File
 				RelativePath="Include\MFStringCache.h">

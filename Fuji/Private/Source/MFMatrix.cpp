@@ -40,13 +40,13 @@ bool MFMatrix::operator!=(const MFMatrix& mat) const
 
 MFMatrix& MFMatrix::Rotate(const MFVector &axis, float angle)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 	return *this;
 }
 
 MFMatrix& MFMatrix::RotateQ(const MFVector &q)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 	return *this;
 }
 
@@ -125,7 +125,7 @@ MFMatrix& MFMatrix::SetRotation(const MFVector &axis, float angle)
 
 MFMatrix& MFMatrix::SetRotationQ(const MFVector &q)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 	return *this;
 }
 
@@ -513,7 +513,7 @@ MFMatrix& MFMatrix::Inverse(const MFMatrix &mat)
 	if ((det_1 == 0.0f) || (fabsf(det_1 / (pos - neg)) < PRECISION_LIMIT))
 	{
 		// MFMatrix M has no inverse
-		LOGD("MFMatrix::Inverse: Singular matrix (Matrix has no inverse)...\n");
+		MFDebug_Warn(3, "MFMatrix::Inverse: Singular matrix (Matrix has no inverse)...\n");
 		return *this;
 	}
 

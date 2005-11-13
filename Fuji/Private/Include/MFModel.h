@@ -1,29 +1,110 @@
+/**
+ * @file MFModel.h
+ * @brief A set of functions for managing and rendering 3D models.
+ * @author Manu Evans
+ * @defgroup MFModel Model Management
+ * @{
+ */
+
 #if !defined(_MFMODEL_INTERNAL_H)
 #define _MFMODEL_INTERNAL_H
 
+/**
+ * @struct MFModel
+ * Represents a Fuji model.
+ */
 struct MFModel;
+
 struct MFMeshChunk;
 
-// create/destroy
+/**
+ * Creates a model from the filesystem.
+ * Creates a model from the filesystem.
+ * @param pFilename Filename of model to load.
+ * @return Returns a new instance of the specified model.
+ * @see MFModel_Destroy()
+ * @see MFModel_Draw()
+ */
 MFModel* MFModel_Create(const char *pFilename);
+
+/**
+ * Dstroy a model.
+ * Destroys a model instance.
+ * @param pModel Model instance to be destroyed.
+ * @return None.
+ * @see MFModel_Create()
+ * @see MFModel_Draw()
+ */
 void MFModel_Destroy(MFModel *pModel);
 
-// draw model
+/**
+ * Draw a model.
+ * Renders a model using the current scene configuration.
+ * @param pModel Model instance to render.
+ * @return None.
+ * @see MFModel_Create()
+ */
 void MFModel_Draw(MFModel *pModel);
 
-// set model data
+/**
+ * Set the model world matrix.
+ * Sets the models local to world matrix.
+ * @param pModel Model instance.
+ * @param worldMatrix World matrix to assign to the model.
+ * @return None.
+ * @see MFModel_Draw()
+ */
 void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix);
-void MFModel_SetColour(MFModel *pModel, const MFVector &colour);
 
-// get model info
-const char* MFModel_GetName();
+/**
+ * Set the model colour.
+ * Sets the models colour.
+ * @param pModel Model instance.
+ * @param colour Colour to assign to the model instance.
+ * @return None.
+ * @see MFModel_Create()
+ */
+void MFModel_Draw(MFModel *pModel, const MFVector &colour);
 
-// get subobject info
-int MFModel_GetNumSubObjects();
-int MFModel_GetSubObjectIndex(const char *pSubobjectName);
-const char* MFModel_GetSubObjectName(int index);
+/**
+ * Get a models name.
+ * Gets the name of a model.
+ * @param pModel Model instance.
+ * @return The models name.
+ * @see MFModel_Create()
+ */
+const char* MFModel_GetName(MFModel *pModel);
 
-MFMeshChunk* MFModel_GetMeshChunk(int subobjectIndex, int meshChunkIndex);
+/**
+ * Get the number of subobjects.
+ * Get the number of subobjects in a model.
+ * @param pModel Model instance.
+ * @return The number of subobjects in \a pModel.
+ * @see MFModel_Create()
+ */
+int MFModel_GetNumSubObjects(MFModel *pModel);
+
+/**
+ * Get the index of a named subobject.
+ * Gets the index of a named subobject.
+ * @param pModel Model instance.
+ * @param pSubobjectName Name of a subobject.
+ * @return The index of the named subobject. If the subobject doesn't exist, -1 is returned.
+ * @see MFModel_GetSubObjectName()
+ */
+int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName);
+
+/**
+ * Get the name of a specified subobject.
+ * Get the name of a specified subobject.
+ * @param pModel Model instance.
+ * @param index Subobject index.
+ * @return The subobjects name.
+ * @see MFModel_GetNumSubObjects()
+ */
+const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
+
+MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 
 // bone structure
 int MFModel_GetNumBones();
@@ -40,3 +121,5 @@ int MFModel_GetTagIndex(const char *pName);
 // ... etc
 
 #endif
+
+/** @} */

@@ -101,7 +101,7 @@ float MFRSqrt(float x);
  * Raises a value to an arbitrary power.
  * @param x The base value.
  * @param y The power to raise.
- * @return Returns /a x raised to the power of /a y.
+ * @return Returns \a x raised to the power of \a y.
  * @see MFSqrt()
  */
 float MFPow(float x, float y);
@@ -109,7 +109,7 @@ float MFPow(float x, float y);
 /**
  * Calculates the absolute of a value.
  * Calculates the absolute of a value.
- * @return The absolute of /a x.
+ * @return The absolute of \a x.
  * @see MFClamp()
  */
 template <typename T>
@@ -140,6 +140,35 @@ T MFMax(T a, T b);
  */
 template <class T>
 T MFClamp(T x, T y, T z);
+
+/**
+ * Get a pseudo-random number.
+ * Get a pseudo-random number.
+ * @return Returns a pseudo random number.
+ * @see MFRand_Unit()
+ * @see MFRand_Range()
+ */
+uint32 MFRand();
+
+/**
+ * Get a pseudo-random number between 0.0f and 1.0f.
+ * Get a pseudo-random number between 0.0f and 1.0f.
+ * @return Returns a pseudo-random number betwen 0.0f and 1.0f.
+ * @see MFRand()
+ * @see MFRand_Range()
+ */
+float MFRand_Unit();
+
+/**
+ * Get a pseudo-random number within a specified range.
+ * Get a pseudo-random number within a specified range.
+ * @param min Minimum value.
+ * @param max Maximum value.
+ * @return Returns a pseudo-random number between \a min and \a max.
+ * @see MFRand()
+ * @see MFRand_Unit()
+ */
+float MFRand_Range(float min, float max);
 
 #include "MFMath.inl"
 

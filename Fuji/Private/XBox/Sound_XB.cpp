@@ -325,7 +325,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	// open vorbis file
 	if(ov_test_callbacks(hFile, &track.vorbisFile, NULL, 0, callbacks))
 	{
-		DBGASSERT(false, "Not a vorbis file.");
+		MFDebug_Assert(false, "Not a vorbis file.");
 		return -1;
 	}
 

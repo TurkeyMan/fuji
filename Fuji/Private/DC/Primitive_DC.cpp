@@ -91,5 +91,5 @@ void MFEnd()
 {
 	CALLSTACK;
 
-	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
+	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 }

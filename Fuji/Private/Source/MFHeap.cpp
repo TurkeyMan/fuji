@@ -74,11 +74,15 @@ void MFHeap_SetLineAndFile(int line, char *pFile)
 void MFHeap_InitModule()
 {
 	CALLSTACK;
+
+	MFHeap_InitModulePlatformSpecific();
 }
 
 void MFHeap_DeinitModule()
 {
 	CALLSTACK;
+
+	MFHeap_DeinitModulePlatformSpecific();
 }
 
 void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
@@ -117,7 +121,7 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 	CALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
-	DBGASSERT(MFHeap_ValidateMemory(pMem), STR("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
+	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
@@ -136,11 +140,20 @@ void MFHeap_Free(void *pMem)
 	CALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
-	DBGASSERT(MFHeap_ValidateMemory(pMem), STR("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
+	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
 	pAllocHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pAllocHeap->pHeapData);
+}
+
+// get the size of an allocation
+uint32 MFHeap_GetAllocSize(void *pMemory)
+{
+	CALLSTACK;
+
+	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
+	return pHeader->size;
 }
 
 // get a heap pointer
@@ -159,7 +172,7 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap)
 		case MFHT_External:
 			return &gExternalHeap;
 		case MFHT_Custom:
-			DBGASSERT(gCustomHeap.pCallbacks->pMalloc, "No custom heap registered!");
+			MFDebug_Assert(gCustomHeap.pCallbacks->pMalloc, "No custom heap registered!");
 			return &gCustomHeap;
 	}
 
@@ -170,7 +183,7 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap)
 MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
 {
 	CALLSTACK;
-	DBGASSERT(pHeap, "Invalid heap");
+	MFDebug_Assert(pHeap, "Invalid heap");
 
 	return pHeap->pTempHeap ? pHeap->pTempHeap : pHeap;
 }

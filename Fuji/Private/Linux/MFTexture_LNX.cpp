@@ -37,7 +37,7 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 			format = GL_RGB;
 		}
 
-		DBGASSERT(image->width == image->height, "Textures must be square!");
+		MFDebug_Assert(image->width == image->height, "Textures must be square!");
 
 		glEnable(GL_TEXTURE_2D);
 		glGenTextures(1, &(pTexture->textureID));

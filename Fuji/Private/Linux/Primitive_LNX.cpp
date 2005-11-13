@@ -67,7 +67,7 @@ void MFBegin(uint32 beginVertexCount)
 		glBegin(GL_TRIANGLE_FAN);
 		break;
 	default:
-		DBGASSERT(false, "Unsupported PrimType");
+		MFDebug_Assert(false, "Unsupported PrimType");
 	};
 }
 
@@ -120,5 +120,5 @@ void MFEnd()
 {
 	glEnd();
 
-	DBGASSERT(beginCount == vertexCount, "Incorrect number of vertices in MFPrimitive block");
+	MFDebug_Assert(beginCount == vertexCount, "Incorrect number of vertices in MFPrimitive block");
 }

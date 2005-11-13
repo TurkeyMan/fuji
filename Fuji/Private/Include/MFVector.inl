@@ -508,17 +508,17 @@ inline MFVector& MFVector::Lerp(const MFVector &v, float t)
 
 inline char* MFVector::ToString4() const
 {
-	return STR("%.2f, %.2f, %.2f, %.2f", x, y, z, w);
+	return MFStr("%.2f, %.2f, %.2f, %.2f", x, y, z, w);
 }
 
 inline char* MFVector::ToString3() const
 {
-	return STR("%.2f, %.2f, %.2f", x, y, z);
+	return MFStr("%.2f, %.2f, %.2f", x, y, z);
 }
 
 inline char* MFVector::ToString2() const
 {
-	return STR("%.2f, %.2f", x, y);
+	return MFStr("%.2f, %.2f", x, y);
 }
 
 inline MFVector operator*(float f, const MFVector &v)
@@ -591,4 +591,9 @@ inline MFVector MFMax(const MFVector &a, const MFVector &b)
 	t.w = a.w > b.w ? a.w : b.w;
 
 	return t;
+}
+
+inline MFVector MFRand_Vector()
+{
+	return MakeVector(MFRand_Range(-1.0f, 1.0f), MFRand_Range(-1.0f, 1.0f), MFRand_Range(-1.0f, 1.0f), MFRand_Range(-1.0f, 1.0f));
 }

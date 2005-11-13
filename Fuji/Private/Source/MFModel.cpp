@@ -20,9 +20,9 @@ void MFModel_DeinitModule()
 	gModelBank.Deinit();
 }
 
-DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType chunkID)
+MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID)
 {
-	DataChunk *pChunk = NULL;
+	MFModelDataChunk *pChunk = NULL;
 
 	for(int a=0; a<pModelTemplate->numDataChunks; a++)
 	{
@@ -41,7 +41,7 @@ MFModelTemplate* MFModel_FindTemplate(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!StrCaseCmp(pName, (*ppIterator)->pFilename)) return *ppIterator;
+		if(!MFString_CaseCmp(pName, (*ppIterator)->pFilename)) return *ppIterator;
 
 		ppIterator++;
 	}
@@ -67,7 +67,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 		switch(pTemplate->pDataChunks[a].chunkType)
 		{
-			case CT_SubObjects:
+			case MFCT_SubObjects:
 			{
 				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pTemplate->pDataChunks[a].pData;
 
@@ -97,7 +97,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 				break;
 			}
 
-			case CT_Bones:
+			case MFCT_Bones:
 			{
 				BoneChunk *pBoneChunk = (BoneChunk*)pTemplate->pDataChunks[a].pData;
 
@@ -117,7 +117,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 				break;
 			}
 
-			case CT_Tags:
+			case MFCT_Tags:
 			{
 				break;
 			}
@@ -158,7 +158,7 @@ MFModel* MFModel_Create(const char *pFilename)
 				MFFile_Read(hFile, pTemplateData, size);
 
 				// check ID string
-				DBGASSERT(*(uint32*)pTemplateData == 0x324c444d, "Incorrect MFModel version.");
+				MFDebug_Assert(*(uint32*)pTemplateData == 0x324c444d, "Incorrect MFModel version.");
 
 				// store filename for later reference
 				pTemplate = (MFModelTemplate*)pTemplateData;
@@ -170,7 +170,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 				MFModel_FixUp(pTemplate, true);
 
-				DataChunk *pChunk =	MFModel_GetDataChunk(pTemplate, CT_SubObjects);
+				MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFCT_SubObjects);
 
 				if(pChunk)
 				{
@@ -213,7 +213,7 @@ void MFModel_Destroy(MFModel *pModel)
 
 	if(!pModel->pTemplate->refCount)
 	{
-		DataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, CT_SubObjects);
+		MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFCT_SubObjects);
 
 		if(pChunk)
 		{

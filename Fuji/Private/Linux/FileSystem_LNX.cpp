@@ -32,7 +32,7 @@ int File_Open(const char *pFilename, uint32 openFlags)
 	} else if(openFlags & OF_Write) {
 		flags = O_WRONLY | O_CREAT;
 	} else {
-		DBGASSERT(0, "Neither OF_Read nor OF_Write specified.");
+		MFDebug_Assert(0, "Neither OF_Read nor OF_Write specified.");
 	}
 
 	gOpenFiles[fileID].file = open(pFilename, flags);

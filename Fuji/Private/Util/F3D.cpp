@@ -511,7 +511,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	memset(pFile, 0, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
-	DataChunk *pDataHeaders = (DataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
+	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
 	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
 	pModelData->pName = pStringCache->Add(name);
@@ -526,26 +526,26 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	if(GetMeshChunk()->subObjects.size())
 	{
 		meshChunkIndex = numChunks++;
-		pDataHeaders[meshChunkIndex].chunkType = CT_SubObjects;
+		pDataHeaders[meshChunkIndex].chunkType = MFCT_SubObjects;
 	}
 
 	if(GetSkeletonChunk()->bones.size())
 	{
 		skeletonChunkIndex = numChunks++;
-		pDataHeaders[skeletonChunkIndex].chunkType = CT_Bones;
+		pDataHeaders[skeletonChunkIndex].chunkType = MFCT_Bones;
 	}
 
 	if(GetRefPointChunk()->refPoints.size())
 	{
 		tagChunkIndex = numChunks++;
-		pDataHeaders[tagChunkIndex].chunkType = CT_Tags;
+		pDataHeaders[tagChunkIndex].chunkType = MFCT_Tags;
 	}
 
 	// then do something with them....
 	pModelData->numDataChunks = numChunks;
 	pModelData->pDataChunks = pDataHeaders;
 
-	pOffset = (char*)pDataHeaders + MFALIGN16(sizeof(DataChunk)*numChunks);
+	pOffset = (char*)pDataHeaders + MFALIGN16(sizeof(MFModelDataChunk)*numChunks);
 
 	// write out mesh data
 	if(meshChunkIndex > -1)
@@ -619,7 +619,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	{
 		switch(pModelData->pDataChunks[a].chunkType)
 		{
-			case CT_SubObjects:
+			case MFCT_SubObjects:
 			{
 				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pModelData->pDataChunks[a].pData;
 
@@ -648,7 +648,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				break;
 			}
 
-			case CT_Bones:
+			case MFCT_Bones:
 			{
 				BoneChunk *pBoneChunk = (BoneChunk*)pModelData->pDataChunks[a].pData;
 
@@ -660,7 +660,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				break;
 			}
 
-			case CT_Tags:
+			case MFCT_Tags:
 			{
 				break;
 			}

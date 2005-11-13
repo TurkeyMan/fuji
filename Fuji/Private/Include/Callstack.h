@@ -18,6 +18,8 @@ void Callstack_DeinitModule();
 #if !defined(_RETAIL) && !defined(_FUJI_UTIL)
 extern MFArray<const char *> Callstack;
 
+void Callstack_Log();
+
 #if defined(_CALLSTACK_MONITORING)
 
 class CallProfile;

@@ -1,3 +1,11 @@
+/**
+ * @file MFMatrix.h
+ * @brief Describes the Mount Fuji Engine matrix class.
+ * @author Manu Evans
+ * @defgroup MFMatrix Matrix math Class
+ * @{
+ */
+
 #if !defined(_MFMATRIX_H)
 #define _MFMATRIX_H
 
@@ -84,4 +92,89 @@ MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
 
 #include "MFMatrix.inl"
 
-#endif
+// this is to make doxygen happy...
+#if 0
+
+/**
+ * Matrix class to perform various matrix operations.
+ * Matrix class used throughout Fuji. Optimised for each platform.
+ */
+class MFMatrix
+{
+public:
+	float m[4][4]; /**< 4x4 array of floats */
+
+	static const MFMatrix identity;	/**< Constant identity matrix */
+
+
+	MFMatrix& operator=(const MFMatrix& mat);	/**< Equals operator. */
+	bool operator==(const MFMatrix& mat) const;	/**< Comparison operator. */
+	bool operator!=(const MFMatrix& mat) const;	/**< Not-equals operator. */
+
+	MFMatrix& SetIdentity();	/**< Set the matrix to identity */
+
+	MFMatrix& Translate(const MFVector &trans);					/**< Translates the matrix */
+	MFMatrix& Rotate(const MFVector &axis, float angle);		/**< Rotates the matrix about an axis */
+	MFMatrix& RotateQ(const MFVector &q);						/**< Rotates the matrix by a quaternion */
+	MFMatrix& RotateYPR(float yaw, float pitch, float roll);	/**< Rotates the matrix arbitrarily */
+	MFMatrix& RotateX(float angle);			/**< Rotates the matrix about the X axis */
+	MFMatrix& RotateY(float angle);			/**< Rotates the matrix about the Y axis */
+	MFMatrix& RotateZ(float angle);			/**< Rotates the matrix about the Z axis */
+	MFMatrix& Scale(const MFVector& scale);	/**< Scales the matrix */
+
+	MFMatrix& SetTranslation(const MFVector &trans);				/**< Set the matrix translation */
+	MFMatrix& SetRotation(const MFVector &axis, float angle);		/**< Set the matrix rotation */
+	MFMatrix& SetRotationQ(const MFVector &q);						/**< Set the matrix rotation to a quaternion */
+	MFMatrix& SetRotationYPR(float yaw, float pitch, float roll);	/**< Set the matrix rotation to a specified pitch yaw and roll */
+	MFMatrix& SetRotationX(float angle);		/**< Sets the rotation to rotate about the X axis */
+	MFMatrix& SetRotationY(float angle);		/**< Sets the rotation to rotate about the Y axis */
+	MFMatrix& SetRotationZ(float angle);		/**< Sets the rotation to rotate about the Z axis */
+	MFMatrix& SetScale(const MFVector& scale);	/**< Sets the scale of the matrix */
+
+	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);	/**< Build a matrix that looks from one point to another */
+
+	MFMatrix& Transpose();							/**< Transpose the matrix */
+	MFMatrix& Transpose(const MFMatrix &matrix);	/**< Sets the matrix to the transpose of another */
+	MFMatrix& Transpose3x3();						/**< Transpose the 3x3 portion of the matrix */
+	MFMatrix& Transpose3x3(const MFMatrix &matrix);	/**< Sets the matrix to the transpose of another 3x3 matrix */
+
+	MFMatrix& Multiply(const MFMatrix& mat);							/**< Multiply the matrix by another */
+	MFMatrix& Multiply(const MFMatrix& mat1, const MFMatrix& mat2);		/**< Set the matrix to the product of 2 matrices */
+	MFMatrix& Multiply4x4(const MFMatrix& mat);							/**< Multiply the matrix by another full 4x4 matrix */
+	MFMatrix& Multiply4x4(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 full 4x4 matrices matrices */
+	MFMatrix& Multiply3x3(const MFMatrix& mat);							/**< Multiply the 3x3 matrix by another 3x3 matrix */
+	MFMatrix& Multiply3x3(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 3x3 matrices matrices */
+
+	MFVector TransformVector(const MFVector& vec) const;	/**< Transform a vector by the matrix */
+	MFVector TransformVectorH(const MFVector& vec) const;	/**< Transform a vector by the matrix assuming 1.0 in the vector's W component */
+	MFVector TransformVector3(const MFVector& vec) const;	/**< Transform a 3D vector by a rotation matrix */
+
+	MFMatrix& Inverse() { return Inverse(*this); }	/**< Inverse the matrix */
+	MFMatrix& Inverse(const MFMatrix &matrix);		/**< Set this matrix to the inverse of another matrix */
+
+	MFVector CalculateQuaternion();	/**< Calculate a quaternion from the matrix */
+
+	MFMatrix& ClearW();	/**< Clear the matrix W column */
+
+	const MFVector& GetXAxis() const;	/**< Get the matrices X axis */
+	const MFVector& GetYAxis() const;	/**< Get the matrices Y axis */
+	const MFVector& GetZAxis() const;	/**< Get the matrices Z axis */
+	const MFVector& GetTrans() const;	/**< Get the matrices translation vector */
+
+	void SetXAxis3(const MFVector &v);	/**< Set the matrices X axis to a 3D vector */
+	void SetYAxis3(const MFVector &v);	/**< Set the matrices Y axis to a 3D vector */
+	void SetZAxis3(const MFVector &v);	/**< Set the matrices Z axis to a 3D vector */
+	void SetTrans3(const MFVector &v);	/**< Set the matrices translation to a 3D vector */
+	void SetXAxis4(const MFVector &v);	/**< Set the matrices X axis to a 4D vector */
+	void SetYAxis4(const MFVector &v);	/**< Set the matrices Y axis to a 4D vector */
+	void SetZAxis4(const MFVector &v);	/**< Set the matrices Z axis to a 4D vector */
+	void SetTrans4(const MFVector &v);	/**< Set the matrices translation to a 4D vector */
+
+	char* ToString() const;	/**< Generate a string that represents the matrix */
+};
+
+#endif // make doxygen happy
+
+#endif // _MFMATRIX_H
+
+/** @} */

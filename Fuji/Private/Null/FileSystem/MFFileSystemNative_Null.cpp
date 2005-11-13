@@ -21,7 +21,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 
 	*pStringLengths += strlen(pFindPattern) + 1;
 
-	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
@@ -33,7 +33,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 				{
 					if(flatten)
 					{
-						numFiles += MFFileSystemNative_GetNumEntries(STR("%s%s/", pFindPattern, findData.cFileName), recursive, flatten, pStringLengths);
+						numFiles += MFFileSystemNative_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.cFileName), recursive, flatten, pStringLengths);
 					}
 					else
 					{
@@ -65,7 +65,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 
-	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
 	char *pCurrentDir = pStringCache;
 	strcpy(pCurrentDir, pFindPattern);
@@ -81,11 +81,11 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 				{
 					if(flatten)
 					{
-						pToc = MFFileSystemNative_BuildToc(STR("%s%s/", pFindPattern, findData.cFileName), pToc, pParent, pStringCache, recursive, flatten);
+						pToc = MFFileSystemNative_BuildToc(MFStr("%s%s/", pFindPattern, findData.cFileName), pToc, pParent, pStringCache, recursive, flatten);
 					}
 					else
 					{
-						const char *pNewPath = STR("%s%s/", pFindPattern, findData.cFileName);
+						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.cFileName);
 
 						int stringCacheSize = 0;
 						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
@@ -142,7 +142,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 /*
-	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
+	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataNative *pMountNative = (MFMountDataNative*)pMountData;
 
@@ -155,13 +155,13 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	const char *pFindPattern = pMountNative->pPath;
 
 	if(pFindPattern[strlen(pFindPattern)-1] != '/')
-		pFindPattern = STR("%s/", pFindPattern);
+		pFindPattern = MFStr("%s/", pFindPattern);
 
-	hFind = FindFirstFile(STR("%s*", pFindPattern), &findData);
+	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
 	if(hFind == INVALID_HANDLE_VALUE)
 	{
-		LOGD(STR("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
+		LOGD(MFStr("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
 		return -1;
 	}
 
@@ -183,11 +183,11 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	CALLSTACK;
 
-	DBGASSERT(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
+	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
 
 	char *pAccess = (pOpenData->openFlags&MFOF_Write) ? "wb" : ((pOpenData->openFlags&MFOF_Read) ? "rb" : NULL);
-	DBGASSERT(pAccess, "Neither MFOF_Read nor MFOF_Write specified.");
+	MFDebug_Assert(pAccess, "Neither MFOF_Read nor MFOF_Write specified.");
 
 	pFile->pFilesysData = fopen(pNative->pFilename, pAccess);
 
@@ -227,7 +227,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	uint32 bytesRead;
 	bytesRead = fread(pBuffer, 1, bytes, (FILE*)fileHandle->pFilesysData);
@@ -240,7 +240,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	uint32 bytesWritten;
 	bytesWritten = fwrite(pBuffer, 1, bytes, (FILE*)fileHandle->pFilesysData);
@@ -268,7 +268,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			method = SEEK_CUR;
 			break;
 		default:
-			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	fseek((FILE*)fileHandle->pFilesysData, bytes, method);

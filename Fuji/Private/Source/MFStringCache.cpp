@@ -27,7 +27,7 @@ void MFStringCache::Destroy(MFStringCache *pCache)
 
 const char *MFStringCache::Add(const char *pNewString)
 {
-	DBGASSERT(pNewString, "Cannot add NULL string");
+	MFDebug_Assert(pNewString, "Cannot add NULL string");
 
 	// find the string
 	char *pCurr = pMem;
@@ -43,7 +43,7 @@ const char *MFStringCache::Add(const char *pNewString)
 		pCurr += length+1;
 	}
 
-	DBGASSERT(&pCurr[newLength+1] < &pMem[size], "No memory for string!");
+	MFDebug_Assert(&pCurr[newLength+1] < &pMem[size], "No memory for string!");
 
 	strcpy(pCurr, pNewString);
 	pCurr[newLength]=0;

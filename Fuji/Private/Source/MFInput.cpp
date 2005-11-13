@@ -267,8 +267,8 @@ void MFInput_Update()
 
 bool MFInput_IsAvailable(int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	bool available = deviceStatus[source][sourceID].available || gNumKeyboards;
 
@@ -283,8 +283,8 @@ bool MFInput_IsAvailable(int source, int sourceID)
 
 bool MFInput_IsConnected(int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	bool connected = deviceStatus[source][sourceID].status != IDS_Disconnected;
 
@@ -301,8 +301,8 @@ bool MFInput_IsConnected(int source, int sourceID)
 
 bool MFInput_IsReady(int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	bool ready = deviceStatus[source][sourceID].status == IDS_Ready;
 
@@ -319,8 +319,8 @@ bool MFInput_IsReady(int source, int sourceID)
 
 float MFInput_Read(int button, int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= -1 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= -1 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	if(sourceID == -1)
 	{
@@ -371,8 +371,8 @@ float MFInput_Read(int button, int source, int sourceID)
 
 bool MFInput_WasPressed(int button, int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	if(sourceID == -1)
 	{
@@ -423,8 +423,8 @@ bool MFInput_WasPressed(int button, int source, int sourceID)
 
 bool MFInput_WasReleased(int button, int source, int sourceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	DBGASSERT(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
 
 	if(sourceID == -1)
 	{
@@ -490,7 +490,7 @@ int MFInput_GetNumPointers()
 
 void MFSetMouseMode(uint32 mouseMode)
 {
-	DBGASSERT(false, "SetMouseMode not written");
+	MFDebug_Assert(false, "SetMouseMode not written");
 }
 
 MFVector MFInput_ReadMousePos(int mouseID)
@@ -501,7 +501,7 @@ MFVector MFInput_ReadMousePos(int mouseID)
 	{
 		for(int a=0; a<MFInput_MaxInputID; a++)
 		{
-			DBGASSERT(false, "Reading any mouse not written");
+			MFDebug_Assert(false, "Reading any mouse not written");
 		}
 	}
 	else
@@ -522,7 +522,7 @@ MFVector MFInput_ReadMouseDelta(int mouseID)
 	{
 		for(int a=0; a<MFInput_MaxInputID; a++)
 		{
-			DBGASSERT(false, "Reading any mouse delta not written");
+			MFDebug_Assert(false, "Reading any mouse delta not written");
 		}
 	}
 	else
@@ -537,22 +537,22 @@ MFVector MFInput_ReadMouseDelta(int mouseID)
 
 void MFInput_SetMouseMode(int mode)
 {
-	DBGASSERT(false, "SetMouseMode not written");
+	MFDebug_Assert(false, "SetMouseMode not written");
 }
 
 void MFInput_SetMouseAcceleration(float multiplier)
 {
-	DBGASSERT(false, "SetMouseAcceleration not written");
+	MFDebug_Assert(false, "SetMouseAcceleration not written");
 }
 
 const char* MFInput_EnumerateString(int button, int source, int sourceID, bool includeDevice, bool includeDeviceID)
 {
-	DBGASSERT(source >= 0 && source < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
 
 	switch(source)
 	{
 		case IDD_Gamepad:
-			return STR("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", MFInput_GetGamepadButtonName(button, sourceID));
+			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", MFInput_GetGamepadButtonName(button, sourceID));
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
@@ -560,10 +560,10 @@ const char* MFInput_EnumerateString(int button, int source, int sourceID, bool i
 			}
 			else
 			{
-				return STR("%s%s Button %d", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", button - Mouse_MaxAxis + 1);
+				return MFStr("%s%s Button %d", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", button - Mouse_MaxAxis + 1);
 			}
 		case IDD_Keyboard:
-			return STR("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? STR("(%d)", sourceID) : "", gKeyNames[button]);
+			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", gKeyNames[button]);
 	}
 
 	return "";

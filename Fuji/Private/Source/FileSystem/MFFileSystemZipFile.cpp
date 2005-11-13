@@ -96,7 +96,7 @@ int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flat
 	// search through files in zip archive
 	while(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
 	{
-		DBGASSERT(zipFileIndex == UNZ_OK, "Error in .zip file.");
+		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
 
 		char fileName[256];
 
@@ -130,7 +130,7 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 	// search through files in zip archive
 	while(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
 	{
-		DBGASSERT(zipFileIndex == UNZ_OK, "Error in .zip file.");
+		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
 
 		char fileName[256];
 
@@ -187,18 +187,18 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 {
-	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
+	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
 
 	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
 	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
 
-	DBGASSERT(flatten, ".zip file currently only supports a flattened directory structure.");
+	MFDebug_Assert(flatten, ".zip file currently only supports a flattened directory structure.");
 
 	if(!recursive)
 	{
-		LOGD("Warning: Zip filesystem mounted WITHOUT 'Recursive' flag. Zip file will be mounted recursive anyway.");
+		MFDebug_Warn(3, "Zip filesystem mounted WITHOUT 'Recursive' flag. Zip file will be mounted recursive anyway.");
 	}
 
 	// attempt to open zipfile..
@@ -217,7 +217,7 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	if(!zipFile)
 	{
-		LOGD("FileSystem: Supplied file handle is not a valid .zip file.");
+		MFDebug_Warn(1, "FileSystem: Supplied file handle is not a valid .zip file.");
 		return -1;
 	}
 
@@ -258,7 +258,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 		openData.cbSize = sizeof(MFOpenDataZipFile);
 		openData.openFlags = openFlags | OFZip_AlreadyMounted;
 		openData.zipArchiveHandle = (MFFileHandle)pMount->pFilesysData;
-		openData.pFilename = STR("%s%s", pTOCEntry->pFilesysData ? STR("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
+		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? MFStr("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
 
 		hFile = MFFile_Open(hZipFileSystem, &openData);
 	}
@@ -270,7 +270,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	CALLSTACK;
 
-	DBGASSERT(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
+	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
 	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
 
 	pFile->state = MFFS_Ready;
@@ -304,7 +304,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	if(!zipFile)
 	{
-		LOGD("FileSystem: Supplied file handle is not a valid .zip file.");
+		MFDebug_Warn(1, "FileSystem: Supplied file handle is not a valid .zip file.");
 		return -1;
 	}
 
@@ -315,7 +315,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	if(result != UNZ_OK)
 	{
-		DBGASSERT(false, STR("Couldnt locate file '%s' in .zip file", pZipFile->pFilename));
+		MFDebug_Assert(false, MFStr("Couldnt locate file '%s' in .zip file", pZipFile->pFilename));
 		return -1;
 	}
 
@@ -354,7 +354,7 @@ int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	uint32 bytesRead;
 	bytesRead = unzReadCurrentFile((unzFile)pFile->pFilesysData, pBuffer, bytes);
@@ -367,7 +367,7 @@ int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool a
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	// write
 
@@ -392,7 +392,7 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 			newPos = MFClamp(0, (int)pFile->offset + bytes, pFile->length);
 			break;
 		default:
-			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	unzSetOffset((unzFile)pFile->pFilesysData, (uint32)newPos);
@@ -524,14 +524,14 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MF
 
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 {
-	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
+	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
 
 	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
 	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
 
-	DBGASSERT(flatten, ".zip file currently only supports a flattened directory structure.");
+	MFDebug_Assert(flatten, ".zip file currently only supports a flattened directory structure.");
 
 	if(!recursive)
 	{
@@ -595,7 +595,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 		openData.cbSize = sizeof(MFOpenDataZipFile);
 		openData.openFlags = openFlags | OFZip_AlreadyMounted;
 		openData.zipArchiveHandle = (MFFileHandle)pMount->pFilesysData;
-		openData.pFilename = STR("%s%s", pTOCEntry->pFilesysData ? STR("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
+		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? MFStr("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
 
 		hFile = MFFile_Open(hZipFileSystem, &openData);
 	}
@@ -607,7 +607,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	CALLSTACK;
 
-	DBGASSERT(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
+	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
 	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
 
 	pFile->state = MFFS_Ready;
@@ -684,7 +684,7 @@ int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	uint32 bytesRead;
 	bytesRead = zzip_fread(pBuffer, 1, bytes, (ZZIP_FILE*)pFile->pFilesysData);
@@ -697,7 +697,7 @@ int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool a
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	// write
 
@@ -722,7 +722,7 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 			newPos = Clamp(0, (int)pFile->offset + bytes, pFile->length);
 			break;
 		default:
-			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	zzip_seek((ZZIP_FILE*)pFile->pFilesysData, newPos, SEEK_SET);

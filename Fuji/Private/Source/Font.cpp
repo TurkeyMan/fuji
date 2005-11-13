@@ -35,8 +35,8 @@ Font* Font_Create(const char *pFilename)
 
 	Font *pFont = NULL;
 
-	MFFile* hFile = MFFileSystem_Open(STR("%s.dat", pFilename));
-	DBGASSERT(hFile, STR("Unable to open charinfo file for font '%s'", pFilename));
+	MFFile* hFile = MFFileSystem_Open(MFStr("%s.dat", pFilename));
+	MFDebug_Assert(hFile, MFStr("Unable to open charinfo file for font '%s'", pFilename));
 
 	if(hFile)
 	{
@@ -46,7 +46,7 @@ Font* Font_Create(const char *pFilename)
 		MFFile_Close(hFile);
 
 		pFont->pMaterial = MFMaterial_Create(pFilename);
-		DBGASSERT(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
+		MFDebug_Assert(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
 	}
 
 	return pFont;
@@ -68,7 +68,7 @@ int Font_DrawText(Font *pFont, float pos_x, float pos_y, float pos_z, float heig
 
 	int textlen = strlen(text);
 
-	DBGASSERT(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
+	MFDebug_Assert(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
 
 	float x,y,w,h, p, cwidth;
 

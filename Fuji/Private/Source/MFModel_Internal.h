@@ -13,27 +13,29 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load);
 
-enum DataChunkType
+enum MFModelDataChunkType
 {
-	CT_SubObjects,
-	CT_Bones,
-	CT_Tags,
-	CT_Materials,
-	CT_BinaryFilesystem,
+	MFCT_Unknown = -1,
 
-	CT_Max,
-	CT_ForceInt = 0x7FFFFFFF
+	MFCT_SubObjects = 0,
+	MFCT_Bones,
+	MFCT_Tags,
+	MFCT_Materials,
+	MFCT_BinaryFilesystem,
+
+	MFCT_Max,
+	MFCT_ForceInt = 0x7FFFFFFF
 };
 
-struct DataChunk
+struct MFModelDataChunk
 {
-	DataChunkType chunkType;
+	MFModelDataChunkType chunkType;
 	int count;
 	void *pData;
 	uint32 reserved;
 };
 
-DataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, DataChunkType chunkID);
+MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID);
 
 struct MFModel
 {
@@ -58,7 +60,7 @@ struct MFModelTemplate
 	const char *pName;
 
 	int numDataChunks;
-	DataChunk *pDataChunks;
+	MFModelDataChunk *pDataChunks;
 
 	int refCount;
 };

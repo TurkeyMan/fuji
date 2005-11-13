@@ -320,7 +320,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	}
 	else
 	{
-		LOGD("Warning: Hardware does not support HardwareVertexProcessing, Attempting to use SoftwareVertexProcessing instead..");
+		MFDebug_Warn(2, "Hardware does not support HardwareVertexProcessing, Attempting to use SoftwareVertexProcessing instead..");
 		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 	}
 
@@ -330,7 +330,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		{
 			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
 			{
-				LOGD("Error: Failed to create Direct3D device. Cant create game window.");
+				MFDebug_Error("Failed to create Direct3D device. Cant create game window.");
 				MFDisplay_DestroyWindow();
 				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
 				return 4;

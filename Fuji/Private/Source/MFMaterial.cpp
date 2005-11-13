@@ -84,7 +84,7 @@ void MFMaterial_InitModule()
 
 	if(MFMaterial_AddDefinitionsFile("Materials.ini", "Materials.ini"))
 	{
-		LOGD("Warning: Failed to load Materials.ini");
+		MFDebug_Warn(3, "Failed to load Materials.ini");
 	}
 
 	// create the logo textures from raw data
@@ -183,7 +183,7 @@ int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
 	if (!pDef->pIni)
 	{
 		gMaterialDefList.Destroy(pDef);
-		LOGD("Error: Couldnt create material definitions...");
+		MFDebug_Warn(2, "Couldnt create material definitions...");
 		return 1;
 	}
 
@@ -265,7 +265,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	pMatType->pTypeName = (char*)&pMatType[1];
 	strcpy(pMatType->pTypeName, pName);
 
-	DBGASSERT(pMatType->materialCallbacks.pBegin, "Material must supply Begin() callback.");
+	MFDebug_Assert(pMatType->materialCallbacks.pBegin, "Material must supply Begin() callback.");
 
 	memcpy(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
@@ -278,7 +278,7 @@ void Materual_UnregisterMaterialType(const char *pName)
 
 	MFMaterialType *pMatType = MaterialInternal_GetMaterialType(pName);
 
-	DBGASSERT(pMatType, STR("Material type '%s' doesn't exist!", pName));
+	MFDebug_Assert(pMatType, MFStr("Material type '%s' doesn't exist!", pName));
 
 	if(pMatType)
 		gMaterialRegistry.Destroy(pMatType);
@@ -292,7 +292,7 @@ MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName)
 
 	while(*ppIterator)
 	{
-		if(!StrCaseCmp(pTypeName, (*ppIterator)->pTypeName)) return *ppIterator;
+		if(!MFString_CaseCmp(pTypeName, (*ppIterator)->pTypeName)) return *ppIterator;
 
 		ppIterator++;
 	}
@@ -375,7 +375,7 @@ MFMaterial* MFMaterial_Find(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!StrCaseCmp(pName, (*ppIterator)->pName)) return *ppIterator;
+		if(!MFString_CaseCmp(pName, (*ppIterator)->pName)) return *ppIterator;
 
 		ppIterator++;
 	}
@@ -423,7 +423,7 @@ MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
 		case MFMat_Charging:
 			return pCharging;
 		default:
-			DBGASSERT(false, "Invalid Stock Material");
+			MFDebug_Assert(false, "Invalid Stock Material");
 	}
 
 	return NULL;
@@ -479,13 +479,13 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat,
 		{
 			if(pLine->IsString(0,"type"))
 			{
-				LOGD(STR("'type' MUST be the first parameter in a material definition... Ignored, Using type '%s'.", pMat->pType->pTypeName));
+				MFDebug_Warn(2, MFStr("'type' MUST be the first parameter in a material definition... Ignored, Using type '%s'.", pMat->pType->pTypeName));
 			}
 			else if(pLine->IsString(0,"alias"))
 			{
-				LOGD("'alias' MUST be the first parameter in a material definition... Ignored.");
+				MFDebug_Warn(2, "'alias' MUST be the first parameter in a material definition... Ignored.");
 
-DBGASSERT(false, "Fix Me!!!");
+MFDebug_Assert(false, "Fix Me!!!");
 //				const char *pAlias = pLine->GetString(1);
 //				MaterialInternal_InitialiseFromDefinition(pDefIni, pMat, pAlias);
 			}
@@ -546,12 +546,12 @@ DBGASSERT(false, "Fix Me!!!");
 
 						case MFParamType_Matrix:
 						{
-							DBGASSERT(false, "Cant read a matrix from an ini file... yet...");
+							MFDebug_Assert(false, "Cant read a matrix from an ini file... yet...");
 							break;
 						}
 
 						default:
-							DBGASSERT(false, "Unknown parameter type..");
+							MFDebug_Assert(false, "Unknown parameter type..");
 					}
 				}
 			}
@@ -574,7 +574,7 @@ const char* MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterInde
 
 	MFMaterialParamaterInfo *pInfo;
 
-	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->pParamaterName;
@@ -590,7 +590,7 @@ int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pPar
 
 	for(int a=0; a<numParams; a++)
 	{
-		DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
+		MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 		pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(a);
 
 		if(!stricmp(pInfo->pParamaterName, pParameterName))
@@ -606,7 +606,7 @@ int MFMaterial_GetNumParamaterArgs(MFMaterial *pMaterial, int paramaterIndex)
 
 	MFMaterialParamaterInfo *pInfo;
 
-	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->numArgs;
@@ -618,7 +618,7 @@ MFParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterI
 
 	MFMaterialParamaterInfo *pInfo;
 
-	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParamaterInfo, "Material does not supply a GetParamaterInfo() function.");
 	pInfo = (MFMaterialParamaterInfo*)pMaterial->pType->materialCallbacks.pGetParamaterInfo(paramaterIndex);
 
 	return pInfo->pArgTypes[argIndex];
@@ -628,7 +628,7 @@ void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argI
 {
 	CALLSTACK;
 
-	DBGASSERT(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, paramaterIndex, argIndex, value);
 }
 
@@ -636,7 +636,7 @@ int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIn
 {
 	CALLSTACK;
 
-	DBGASSERT(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
 	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex);
 
 	return 0;
@@ -673,9 +673,9 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 
 	MFMaterial *pMaterial = *i;
 
-	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s:", name));
-	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s", pMaterial->pName));
-	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("Type: %s Refs: %d", pMaterial->pType->pTypeName, pMaterial->refCount));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pMaterial->pName));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("Type: %s Refs: %d", pMaterial->pType->pTypeName, pMaterial->refCount));
 
 	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 

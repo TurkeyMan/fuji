@@ -200,13 +200,13 @@ bool MFCollision_RayTriCullTest(const MFVector& rayPos, const MFVector& rayDir, 
 
 bool MFCollision_SphereTriTest(const MFVector& sphere, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }
 
 bool MFCollision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }
 
@@ -476,24 +476,24 @@ bool MFCollision_TriTriTest(const MFVector& V0,  const MFVector& V1, const MFVec
 
 bool MFCollision_RayHull()
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }
 
 bool MFCollision_SphereHull()
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }
 
 bool MFCollision_HullHull()
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }
 
 bool MFCollision_TriHull()
 {
-	DBGASSERT(false, "Not Written!");
+	MFDebug_Assert(false, "Not Written!");
 	return false;
 }

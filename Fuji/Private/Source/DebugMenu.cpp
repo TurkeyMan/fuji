@@ -121,10 +121,10 @@ void DebugMenu_Draw()
 
 void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
 {
-	DBGASSERT(pParent, "Invalid parent menu.");
-	DBGASSERT(pParent->type == MenuType_Menu, STR("Cant add menu '%s', Parent is not of Menu type.", name));
-	DBGASSERT(strlen(name) < 64, "Max of 64 characters in Menu Name.");
-	DBGASSERT(pParent->numChildren < MENU_MAX_CHILDREN, STR("Maximum number of items in menu: '&s'", pParent->name)); 
+	MFDebug_Assert(pParent, "Invalid parent menu.");
+	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
+	MFDebug_Assert(strlen(name) < 64, "Max of 64 characters in Menu Name.");
+	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '&s'", pParent->name)); 
 
 	strcpy(pObject->name, name);
 
@@ -145,10 +145,10 @@ void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pO
 
 void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, void *userData)
 {
-	DBGASSERT(pParent, "Invalid parent menu.");
-	DBGASSERT(pParent->type == MenuType_Menu, STR("Cant add menu '%s', Parent is not of Menu type.", name));
-	DBGASSERT(strlen(name) < 64, "Max of 64 characters in Menu Name.");
-	DBGASSERT(pParent->numChildren < MENU_MAX_CHILDREN, STR("Maximum number of items in menu: '&s'", pParent->name)); 
+	MFDebug_Assert(pParent, "Invalid parent menu.");
+	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
+	MFDebug_Assert(strlen(name) < 64, "Max of 64 characters in Menu Name.");
+	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '&s'", pParent->name)); 
 
 //	Menu *pMenu = Heap_New(Menu);
 	Menu *pMenu = new Menu;
@@ -180,7 +180,7 @@ bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 	{
 		if(pSearchMenu->pChildren[a]->type == MenuType_Menu)
 		{
-			if(!StrCaseCmp(pSearchMenu->pChildren[a]->name, pName))
+			if(!MFString_CaseCmp(pSearchMenu->pChildren[a]->name, pName))
 			{
 				DebugMenu_DestroyMenuTree((Menu*)pSearchMenu->pChildren[a]);
 				return true;
@@ -231,7 +231,7 @@ Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu)
 	{
 		if(pSearchMenu->pChildren[a]->type == MenuType_Menu)
 		{
-			if(!StrCaseCmp(pSearchMenu->pChildren[a]->name , name))
+			if(!MFString_CaseCmp(pSearchMenu->pChildren[a]->name , name))
 				return (Menu*)pSearchMenu->pChildren[a];
 
 			pResult = DebugMenu_GetMenuByName(name, (Menu*)pSearchMenu->pChildren[a]);
@@ -456,7 +456,7 @@ MFVector MenuItemStatic::GetDimensions(float maxWidth)
 // MenuItemInt
 float MenuItemInt::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %d", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %d", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -494,7 +494,7 @@ MFVector MenuItemInt::GetDimensions(float maxWidth)
 // MenuItemFloat
 float MenuItemFloat::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %.2f", name, *pData));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -539,7 +539,7 @@ MFVector MenuItemFloat::GetDimensions(float maxWidth)
 // MenuItemBool
 float MenuItemBool::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %s", name, data ? "true" : "false"));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, data ? "true" : "false"));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -565,7 +565,7 @@ MFVector MenuItemBool::GetDimensions(float maxWidth)
 // MenuItemIntString
 float MenuItemIntString::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %s", name, ppValues[data]));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, ppValues[data]));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -623,7 +623,7 @@ float MenuItemColour::ListDraw(bool selected, const MFVector &_pos, float maxWid
 {
 	MFVector pos = _pos;
 
-	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: 0x%08X", name, pData->ToPackedColour()));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: 0x%08X", name, pData->ToPackedColour()));
 
 	pos += MakeVector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -686,7 +686,7 @@ MFVector MenuItemColour::GetDimensions(float maxWidth)
 // MenuItemPosition2D
 float MenuItemPosition2D::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s: %.2f, %.2f", name, pData->x, pData->y));
+	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f, %.2f", name, pData->x, pData->y));
 	return MENU_FONT_HEIGHT;
 }
 

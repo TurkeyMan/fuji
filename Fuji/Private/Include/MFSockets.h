@@ -1,6 +1,19 @@
+/**
+ * @file MFSockets.h
+ * @brief Mount Fuji Engine Sockets implementation.
+ * This provides sockets and network access.
+ * @author Manu Evans
+ * @defgroup MFSockets Sockets Interface
+ * @{
+ */
+
 #if !defined(_MFSOCKETS_H)
 #define _MFSOCKETS_H
 
+/**
+ * Represents a Fuji socket.
+ * Represents a Fuji socket.
+ */
 typedef void* MFSocket;
 
 // MFSockets enum's
@@ -157,3 +170,5 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const void* optval, int optlen);
 
 #endif
+
+/** @} */

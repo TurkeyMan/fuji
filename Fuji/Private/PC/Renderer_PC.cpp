@@ -176,7 +176,7 @@ void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid PCVF_Type");
+			MFDebug_Assert(false, "Invalid PCVF_Type");
 	}
 
 	if(pNumBytesWritten)
@@ -243,7 +243,7 @@ void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid PCVF_Type");
+			MFDebug_Assert(false, "Invalid PCVF_Type");
 	}
 
 	if(pNumComponentsWritten)

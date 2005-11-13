@@ -47,7 +47,7 @@ MFTexture* MFTexture_FindTexture(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!StrCaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
+		if(!MFString_CaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
 
 		ppIterator++;
 	}
@@ -63,13 +63,13 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 	{
 		uint32 fileSize;
 
-		const char *pFileName = STR("%s.tex", pName);
+		const char *pFileName = MFStr("%s.tex", pName);
 
 		MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)MFFileSystem_Load(pFileName, &fileSize);
 
 		if(!pTemplate)
 		{
-			LOGD(STR("Texture '%s' does not exist. Using '_None'.\n", pFileName));
+			MFDebug_Warn(2, MFStr("Texture '%s' does not exist. Using '_None'.\n", pFileName));
 			return MFTexture_Create("_None");
 		}
 
@@ -137,9 +137,9 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 
 	MFTexture *pTexture = *i;
 
-	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s:", name));
-	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%s", pTexture->name));
-	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, STR("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, MFTexture_GetFormatString(pTexture->pTemplateData->imageFormat), pTexture->refCount));
+	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->name));
+	Font_DrawText(gpDebugFont, pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, MFTexture_GetFormatString(pTexture->pTemplateData->imageFormat), pTexture->refCount));
 
 	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 
@@ -214,7 +214,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	sceGuTexOffset(0.0f, 0.0f);
 	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
 #else
-	DBGASSERT(false, "Not supported on this platform...");
+	MFDebug_Assert(false, "Not supported on this platform...");
 #endif
 
 	MFBegin(4);

@@ -34,6 +34,14 @@ void Callstack_DeinitModule()
 
 MFArray<const char *> Callstack;
 
+void Callstack_Log()
+{
+	for(int a=Callstack.size()-1; a>=0; a--)
+	{
+		MFDebug_Message(MFStr("  %s", Callstack[a]));
+	}
+}
+
 #if defined(_CALLSTACK_PROFILING)
 std::map<const char *, CallProfile> FunctionRegistry;
 #endif

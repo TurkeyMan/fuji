@@ -155,7 +155,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
  * @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
  * @see MFTexture_Create()
  */
-int MFTexture_Destroy(MFTexture *pTexture);	// returns new reference count..
+int MFTexture_Destroy(MFTexture *pTexture);
 
 /**
  * Find an existing texture.

@@ -1,6 +1,11 @@
 
+#include "MFHeap.h"
+
+extern void *gEmptyPtrList[2];
+extern void *gEmptyPtrListDL[2];
+
 template<class T>
-void MFPtrList<T>::Init(char* pGroupName, int maxElements)
+inline void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 {
 	CALLSTACK;
 
@@ -25,10 +30,10 @@ void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 }
 
 template<class T>
-void MFPtrList<T>::Deinit()
+inline void MFPtrList<T>::Deinit()
 {
 	CALLSTACK;
-	DBGASSERT(ppMark!=0, "not initialised");
+	MFDebug_Assert(ppMark!=0, "not initialised");
 
 	while(*(--ppMark)!=0) {}
 	if(ppMark!=(T**)(&gEmptyPtrList[0])) MFHeap_Free(ppMark);
@@ -36,20 +41,20 @@ void MFPtrList<T>::Deinit()
 }
 
 template<class T>
-T* MFPtrList<T>::Create(T* p)
+inline T* MFPtrList<T>::Create(T* p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
-	DBGASSERT(!IsFull(), STR("list %s full",pName));
+	MFDebug_Assert(p!=0, "invalid parameter");
+	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName));
 
 	return *(--ppMark) = p;
 }
 
 template<class T>
-void MFPtrList<T>::Destroy(T* p)
+inline void MFPtrList<T>::Destroy(T* p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
+	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
 	while(*iterator!=0)
@@ -61,14 +66,20 @@ void MFPtrList<T>::Destroy(T* p)
 		}
 		++iterator;
 	}
-	DBGASSERT(false, STR("item not found in list %s",pName));
+	MFDebug_Assert(false, MFStr("item not found in list %s",pName));
 }
 
 template<class T>
-T** MFPtrList<T>::Find(T* p)
+inline T** MFPtrList<T>::Begin()
+{
+	return ppMark;
+}
+
+template<class T>
+inline T** MFPtrList<T>::Find(T* p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
+	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
 	while(*iterator!=0)
@@ -83,23 +94,54 @@ T** MFPtrList<T>::Find(T* p)
 }
 
 template<class T>
-void MFPtrList<T>::Destroy(T** p)
+inline void MFPtrList<T>::Destroy(T** p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
-	DBGASSERT(!IsEmpty(), STR("list %s is empty",pName));
+	MFDebug_Assert(p!=0, "invalid parameter");
+	MFDebug_Assert(!IsEmpty(), MFStr("list %s is empty",pName));
 
 	*p = *(ppMark++);
 }
 
 template<class T>
-void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
+inline void MFPtrList<T>::Clear()
+{
+	while(*ppMark!=0) ++ppMark;
+}
+
+template<class T>
+inline int MFPtrList<T>::GetLength()
+{
+	T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark;
+}
+
+template<class T>
+inline int MFPtrList<T>::GetMaxElements()
+{
+	T** iterator = ppMark; while(*(--iterator)!=0); return ppMark - iterator - 1 + GetLength();
+}
+
+template<class T>
+inline bool MFPtrList<T>::IsFull()
+{
+	return *(ppMark - 1)==0;
+}
+
+template<class T>
+inline bool MFPtrList<T>::IsEmpty()
+{
+	return *ppMark==0;
+}
+
+
+template<class T>
+inline void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
 {
 	CALLSTACK;
 
 	if(maxElements==0)
 	{
-		DBGASSERT(maxElements!=0, "List must have at least 1 element.");
+		MFDebug_Assert(maxElements!=0, "List must have at least 1 element.");
 		ppMark = (T**)(&gEmptyPtrListDL[1]);
 	}
 	else
@@ -118,10 +160,10 @@ void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, vo
 }
 
 template<class T>
-void MFPtrListDL<T>::Deinit()
+inline void MFPtrListDL<T>::Deinit()
 {
 	CALLSTACK;
-	DBGASSERT(ppMark!=0, "not initialised"); // stops double deinit's
+	MFDebug_Assert(ppMark!=0, "not initialised"); // stops double deinit's
 
 	T* mem = (T*)(ppMark);  // initialise with a high value
 	T** iterator = ppMark;
@@ -144,10 +186,16 @@ void MFPtrListDL<T>::Deinit()
 }
 
 template<class T>
-void MFPtrListDL<T>::Destroy(T* p)
+inline T* MFPtrListDL<T>::Create()
+{
+	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName)); return *(--ppMark);
+};
+
+template<class T>
+inline void MFPtrListDL<T>::Destroy(T* p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
+	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
 	while(*iterator!=0)
@@ -159,14 +207,20 @@ void MFPtrListDL<T>::Destroy(T* p)
 		};
 		++iterator;
 	};
-	DBGASSERT(false, STR("List %s, item not found",pName));
+	MFDebug_Assert(false, MFStr("List %s, item not found",pName));
 }
 
 template<class T>
-T** MFPtrListDL<T>::Find(T* p)
+inline T** MFPtrListDL<T>::Begin()
+{
+	return ppMark;
+};
+
+template<class T>
+inline T** MFPtrListDL<T>::Find(T* p)
 {
 	CALLSTACK;
-	DBGASSERT(p!=0, "invalid parameter");
+	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
 	while(*iterator!=0)
@@ -178,4 +232,56 @@ T** MFPtrListDL<T>::Find(T* p)
 		++iterator;
 	};
 	return NULL;
+}
+
+template<class T>
+inline void MFPtrListDL<T>::Swap(T **p1, T **p2)
+{
+	T *pT = *p1;
+	*p1 = *p2;
+	*p2 = pT;
+}
+
+template<class T>
+inline void MFPtrListDL<T>::Destroy(T** p)
+{
+	MFDebug_Assert(p!=0, "invalid parameter");
+	MFDebug_Assert(!IsEmpty(), MFStr("list %s is empty",pName));
+	Swap(ppMark++, p);
+}
+
+template<class T>
+inline void MFPtrListDL<T>::Clear()
+{
+	while(*ppMark!=0) ++ppMark;
+}
+
+template<class T>
+inline int MFPtrListDL<T>::GetLength()
+{
+	T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark;
+}
+
+template<class T>
+inline int MFPtrListDL<T>::GetMaxElements()
+{
+	T** iterator = ppMark; while(*(--iterator)!=0) {} return ppMark - iterator - 1 + GetLength();
+}
+
+template<class T>
+inline bool MFPtrListDL<T>::IsFull()
+{
+	return *(ppMark - 1)==0;
+}
+
+template<class T>
+inline bool MFPtrListDL<T>::IsEmpty()
+{
+	return *ppMark==0;
+}
+
+template<class T>
+inline T** MFPtrListDL<T>::BeginDead()
+{
+	return ppMark - 1;
 }

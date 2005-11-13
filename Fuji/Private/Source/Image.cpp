@@ -87,7 +87,7 @@ void FujiImage::Convert(ImageFormat toFormat)
 	}
 	else
 	{
-		LOGD(STR("Unhandled conversion pair!"));
+		MFDebug_Warn(1, MFStr("Unhandled conversion pair!"));
 	}
 }
 
@@ -146,21 +146,21 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 	if((header->imageType != 2) && (header->imageType != 10))
 	{
-		LOGD(STR("Failed loading image: %s (Unhandled TGA type (%d))", filename, header->imageType));
+		MFDebug_Error(MFStr("Failed loading image: %s (Unhandled TGA type (%d))", filename, header->imageType));
 		MFHeap_Free(contents);
 		return(NULL);
 	}
 
 	if((header->bpp != 24) && (header->bpp != 32))
 	{
-		LOGD(STR("Failed loading image: %s (Invalid colour depth (%d))", filename, header->bpp));
+		MFDebug_Error(MFStr("Failed loading image: %s (Invalid colour depth (%d))", filename, header->bpp));
 		MFHeap_Free(contents);
 		return(NULL);
 	}
 
 	if((header->flags & 0xC0))
 	{
-		LOGD(STR("Failed loading image: %s (Interleaved images not supported)", filename));
+		MFDebug_Error(MFStr("Failed loading image: %s (Interleaved images not supported)", filename));
 		MFHeap_Free(contents);
 		return(NULL);
 	}
@@ -172,7 +172,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 	if((position + header->idLength + (header->colourMapLength * header->colourMapBits * header->colourMapType)) >= contents + bytesRead)
 	{
-		LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+		MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 		MFHeap_Free(contents);
 		return(NULL);
 	}
@@ -206,7 +206,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 		{
 			if(position >= contents + bytesRead)
 			{
-				LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+				MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 				delete image;
 				MFHeap_Free(contents);
 				return(NULL);
@@ -220,7 +220,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 				if((position + image->bytesPerPixel) > contents + bytesRead)
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+					MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					MFHeap_Free(contents);
 					return(NULL);
@@ -228,7 +228,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 				if((pixelsRead + length) > (uint32)(header->width * header->height))
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+					MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					MFHeap_Free(contents);
 					return(NULL);
@@ -262,7 +262,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 				if((position + (image->bytesPerPixel * length)) > contents + bytesRead)
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+					MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					MFHeap_Free(contents);
 					return(NULL);
@@ -270,7 +270,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 
 				if((pixelsRead + length) > (uint32)(header->width * header->height))
 				{
-					LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+					MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 					delete image;
 					MFHeap_Free(contents);
 					return(NULL);
@@ -286,7 +286,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	{
 		if((position + (image->bytesPerPixel * (header->width * header->height))) > contents + bytesRead)
 		{
-			LOGD(STR("Failed loading image: %s (Unexpected end of file)", filename));
+			MFDebug_Error(MFStr("Failed loading image: %s (Unexpected end of file)", filename));
 			delete image;
 			MFHeap_Free(contents);
 			return(NULL);

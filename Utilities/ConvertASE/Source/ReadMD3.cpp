@@ -102,7 +102,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 			for(; pT > pSkin && pT[-1] != '\n'; --pT) { }
 
 			// get subobject name
-			char *pSubName = STRn(pT, (int)(pTok - (uint32&)pT));
+			char *pSubName = MFStrN(pT, (int)(pTok - (uint32&)pT));
 
 			++pTok;
 
@@ -111,7 +111,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 				for(pT = pTok; *pT != NULL && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 				// get texture name
-				char *pMaterialName = STRn(pTok, (int)(pT - (uint32&)pTok));
+				char *pMaterialName = MFStrN(pTok, (int)(pT - (uint32&)pTok));
 
 				for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
 				pT[strlen(pT) - 4] = 0;
@@ -153,7 +153,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 			for(pT = pTok; *pT != NULL && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 			// get texture name
-			char *pMaterialName = STRn(pTok, (int)(pT - (uint32&)pTok));
+			char *pMaterialName = MFStrN(pTok, (int)(pT - (uint32&)pTok));
 
 			for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
 			pT[strlen(pT) - 4] = 0;
@@ -253,7 +253,7 @@ int F3DFile::ReadMD3(char *pFilename)
 
 	while(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
 	{
-		DBGASSERT(zipFileIndex == UNZ_OK, "Error in .zip file.");
+		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
 
 		char fileName[256];
 
@@ -271,7 +271,7 @@ int F3DFile::ReadMD3(char *pFilename)
 			uint32 bytesRead = unzReadCurrentFile(zipFile, pBuffer, fileInfo.uncompressed_size);
 			unzCloseCurrentFile(zipFile);
 
-			DBGASSERT(bytesRead == fileInfo.uncompressed_size, "Incorrect number of bytes read..");
+			MFDebug_Assert(bytesRead == fileInfo.uncompressed_size, "Incorrect number of bytes read..");
 
 			// get subobject and model name..
 			int a, b;
@@ -320,7 +320,7 @@ int F3DFile::ReadMD3(char *pFilename)
 				uint32 skinBytesRead = unzReadCurrentFile(zipFile, pSkinFile, skinInfo.uncompressed_size);
 				unzCloseCurrentFile(zipFile);
 
-				DBGASSERT(skinBytesRead == skinInfo.uncompressed_size, "Incorrect number of bytes read..");
+				MFDebug_Assert(skinBytesRead == skinInfo.uncompressed_size, "Incorrect number of bytes read..");
 			}
 
 			zipFileIndex = unzLocateFile(zipFile, fileName, 0);

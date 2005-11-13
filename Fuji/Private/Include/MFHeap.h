@@ -69,6 +69,12 @@ void* MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap = NULL);
  */
 void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
 
+// these are here to satisfy doxygen
+#if 0
+void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
+void* MFHeap_Realloc(void *pMem, uint32 bytes);
+#endif
+
 /**
  * Frees a block of memory.
  * Frees an allocated block of memory.
@@ -78,6 +84,15 @@ void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
  * @see MFHeap_Realloc()
  */
 void  MFHeap_Free(void *pMem);
+
+/**
+ * Get the size of an allocation.
+ * Get the size of a fuji allocation.
+ * @param pMemory Pointer to an allocated block of memory.
+ * @return Size of memory specified by \a pMemory.
+ * @see MFHeap_Alloc()
+ */
+uint32 MFHeap_GetAllocSize(void *pMemory);
 
 /**
  * Get a Heap pointer.
@@ -218,12 +233,6 @@ void MFHeap_PopGroupName();
 	// compiled out in retail
 	#define MFHeap_Alloc MFHeap_AllocInternal
 	#define MFHeap_Realloc MFHeap_ReallocInternal
-#endif
-
-// these are here to satisfy doxygen
-#if 0
-void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
-void* MFHeap_Realloc(void *pMem, uint32 bytes);
 #endif
 
 #endif // _MFHEAP_H

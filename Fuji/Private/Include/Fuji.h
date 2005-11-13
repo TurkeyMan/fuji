@@ -132,6 +132,7 @@ enum MFEndian
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
 	#include <stdio.h>
+	#include <stdlib.h>
 
 #endif
 
@@ -182,11 +183,12 @@ enum MFEndian
 
 #include "MFTypes.h"
 #include "MFMath.h"
+#include "MFString.h"
+#include "MFDebug.h"
 
 #include <new>
 
 #include "Util.h"
-
 
 /*** Callstack profiling ***/
 

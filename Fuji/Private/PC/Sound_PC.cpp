@@ -1,11 +1,11 @@
 #include "Fuji.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
-#include "Sound.h"
 #include "MFPtrList.h"
 #include "Font.h"
 #include "Primitive.h"
 #include "DebugMenu_Internal.h"
+#include "Sound.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -70,10 +70,10 @@ void Sound_InitModule()
 
 	// create the DSBuffer
 	hr = pDirectSound->CreateSoundBuffer(&desc, &pDSPrimaryBuffer, NULL);
-	DBGASSERT(SUCCEEDED(hr), "Failed to create the Primary Sound Buffer");
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create the Primary Sound Buffer");
 
 	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_PRIORITY);
-	DBGASSERT(SUCCEEDED(hr), "Failed to set the DirectSound cooperative level");
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to set the DirectSound cooperative level");
 
 #if !defined(_RETAIL)
 	DebugMenu_AddMenu("Sound Options", "Fuji Options");
@@ -346,7 +346,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	// open vorbis file
 	if(ov_test_callbacks(hFile, &track.vorbisFile, NULL, 0, callbacks))
 	{
-		DBGASSERT(false, "Not a vorbis file.");
+		MFDebug_Assert(false, "Not a vorbis file.");
 		return -1;
 	}
 

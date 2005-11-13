@@ -133,13 +133,13 @@ int main(int argc, char **argv)
 
 		if(!zip)
 		{
-			printf(STR("Failed to open zip file '%s'", output.c_str()));
+			printf("Failed to open zip file '%s'", output.c_str());
 			return 1;
 		}
 	}
 	else
 	{
-		LOGD(STR("Invalid output filename '%s'", output));
+		printf("Invalid output filename '%s'", output);
 		return 1;
 	}
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 		pcre *pRE = pcre_compile(excludePatterns[a].c_str(), PCRE_CASELESS|PCRE_DOLLAR_ENDONLY, &errorString, &errorOffset, NULL);
 
 		if(!pRE)
-			printf(STR("%d: %s", errorOffset, errorString));
+			printf(MFStr("%d: %s", errorOffset, errorString));
 		else
 			reHandles.push_back(pRE);
 	}
@@ -258,7 +258,7 @@ int main(int argc, char **argv)
 			// copy file to archive as is
 			if(outputRawFiles)
 			{
-				CopyFile(fullName.c_str(), STR("%s/%s", outPath, fileName.c_str()));
+				CopyFile(fullName.c_str(), MFStr("%s/%s", outPath, fileName.c_str()));
 			}
 			else
 			{
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
 	{
 		// add processed files to zip..
 		FreeDirectoryEntries(filesToProcess);
-		GetDirectoryEntries(STR("%s/", outPath), filesToProcess);
+		GetDirectoryEntries(MFStr("%s/", outPath), filesToProcess);
 
 		for(a=0; a<(int)filesToProcess.size(); a++)
 		{
@@ -286,7 +286,7 @@ int main(int argc, char **argv)
 		// remove processed files..
 		for(a=0; a<(int)filesToProcess.size(); a++)
 		{
-			remove(STR("%s/%s", outPath, filesToProcess[a].c_str()));
+			remove(MFStr("%s/%s", outPath, filesToProcess[a].c_str()));
 		}
 
 		// remove intermediate folder
@@ -413,10 +413,10 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 								{
 									const char *pUnknownPlatform = pString;
 
-									while(IsAlphaNumeric(*pString))
+									while(MFIsAlphaNumeric(*pString))
 										++pString;
 
-									pUnknownPlatform = STRn(pUnknownPlatform, (uint32&)pString - (uint32&)pUnknownPlatform);
+									pUnknownPlatform = MFStrN(pUnknownPlatform, (uint32&)pString - (uint32&)pUnknownPlatform);
 
 									printf("Unknown platform '%s' in ini file.\n", pUnknownPlatform);
 								}
@@ -560,7 +560,7 @@ void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName)
 
 	if(!pFile)
 	{
-		printf(STR("Error writing file 's' to zip, Unable to open file..", pSourceFile));
+		printf("Error writing file 's' to zip, Unable to open file..", pSourceFile);
 		return;
 	}
 

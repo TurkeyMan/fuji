@@ -249,8 +249,8 @@ void Shape_DrawSphere(const MFVector &position, float radius, int segments, int 
 {
 	CALLSTACK;
 
-	DBGASSERT(segments >= 3, "DrawSphere requires at least 3 segments!");
-	DBGASSERT(slices >= 1, "DrawSphere requires at least 1 slices!");
+	MFDebug_Assert(segments >= 3, "DrawSphere requires at least 3 segments!");
+	MFDebug_Assert(slices >= 1, "DrawSphere requires at least 1 slices!");
 
 	int i, j, inc;
 	float around = 0.0f, aroundInc = (MFPI*2.0f)/(float)segments;
@@ -337,8 +337,8 @@ void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, flo
 
 	slices += 1 - (slices&0x1);
 
-	DBGASSERT(segments >= 3, "DrawCapsule requires at least 3 segments!");
-	DBGASSERT(slices >= 1, "DrawCapsule requires at least 1 slices!");
+	MFDebug_Assert(segments >= 3, "DrawCapsule requires at least 3 segments!");
+	MFDebug_Assert(slices >= 1, "DrawCapsule requires at least 1 slices!");
 
 	MFMatrix m, m2 = mat;
 
@@ -485,7 +485,7 @@ void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, fl
 {
 	CALLSTACK;
 
-	DBGASSERT(segments >= 3, "DrawCylinder requires at least 3 segments!");
+	MFDebug_Assert(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
 	MFMatrix m, m2 = mat;
 
@@ -703,7 +703,7 @@ void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, i
 {
 	CALLSTACK;
 
-	DBGASSERT(segments >= 3, "DrawCylinder requires at least 3 segments!");
+	MFDebug_Assert(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
 	MFMatrix m, m2 = mat;
 

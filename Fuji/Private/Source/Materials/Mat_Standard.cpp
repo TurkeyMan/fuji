@@ -229,7 +229,7 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
 {
 //	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
-	DBGASSERT(false, "Not Written");
+	MFDebug_Assert(false, "Not Written");
 
 	return 0;
 }
@@ -241,7 +241,7 @@ int MFMat_Standard_GetNumParams()
 
 MFMaterialParamaterInfo* MFMat_Standard_GetParamaterInfo(int paramaterIndex)
 {
-	DBGASSERT((uint32)paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), STR("Invalid paramater id %d.", paramaterIndex));
+	MFDebug_Assert((uint32)paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), MFStr("Invalid paramater id %d.", paramaterIndex));
 
 	return &paramaterInformation[paramaterIndex];
 }

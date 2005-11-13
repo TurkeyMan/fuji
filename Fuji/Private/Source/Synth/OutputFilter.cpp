@@ -11,7 +11,7 @@ void OutputFilter::Create(int _bufferLength, int _updateLength)
 {
 	CALLSTACK;
 
-	DBGASSERT(_bufferLength%_updateLength == 0, "bufferLength is not a multiple of updateLength.");
+	MFDebug_Assert(_bufferLength%_updateLength == 0, "bufferLength is not a multiple of updateLength.");
 
 	bufferLength = _bufferLength;
 	updateLength = _updateLength;

@@ -479,7 +479,7 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid Input Device");
+			MFDebug_Assert(false, "Invalid Input Device");
 			break;
 	}
 }
@@ -785,7 +785,7 @@ void MFInputPC_SetCooperativeLevels()
 	{
 		if(FAILED(pDIKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE)))
 		{
-			DBGASSERT(false, "Failed to set Keyboard cooperative level");
+			MFDebug_Assert(false, "Failed to set Keyboard cooperative level");
 		}
 	}
 
@@ -793,7 +793,7 @@ void MFInputPC_SetCooperativeLevels()
 	{
 		if(FAILED(pDIMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE))))
 		{
-			DBGASSERT(false, "Failed to set Mouse cooperative level");
+			MFDebug_Assert(false, "Failed to set Mouse cooperative level");
 		}
 	}
 
@@ -803,7 +803,7 @@ void MFInputPC_SetCooperativeLevels()
 		{
 			if(FAILED(pDIJoystick[a]->SetCooperativeLevel(apphWnd, DISCL_EXCLUSIVE | DISCL_FOREGROUND)))
 			{
-				DBGASSERT(false, STR("Failed to set Gamepad %d cooperative level", a));
+				MFDebug_Assert(false, MFStr("Failed to set Gamepad %d cooperative level", a));
 			}
 		}
 	}
@@ -1048,12 +1048,12 @@ void MFInputPC_LoadGamepadMappings()
 						}
 						else
 						{
-							LOGD(STR("Error: Gamepad button strings '%s' unavailable for gamepad type '%s'.", pStrings, pGI->pName));
+							MFDebug_Warn(2, MFStr("Gamepad button strings '%s' unavailable for gamepad type '%s'.", pStrings, pGI->pName));
 						}
 					}
 					else
 					{
-						LOGD(STR("Error: Unknown controller property '%s' in gamepad '%s'.", pName, pGI->pName));
+						MFDebug_Warn(3, MFStr("Unknown controller property '%s' in gamepad '%s'.", pName, pGI->pName));
 					}
 
 					pPadLine = pPadLine->Next();
@@ -1090,7 +1090,7 @@ int RegisterRawMouse(void)
 #endif
 
 	// Register to receive the WM_INPUT message for any change in mouse (buttons, wheel, and movement will all generate the same message)
-	DBGASSERT(_RRID(rid, sizeof(rid)/sizeof(rid[0]), sizeof(rid[0])), "Error: RegisterRawInputDevices() failed");
+	MFDebug_Assert(_RRID(rid, sizeof(rid)/sizeof(rid[0]), sizeof(rid[0])), "Error: RegisterRawInputDevices() failed");
 
 	return 0;
 }
@@ -1115,35 +1115,35 @@ int InitRawMouse(bool _includeRDPMouse)
 	HMODULE user32 = LoadLibrary("user32.dll");
 	if (!user32)
 	{
-		LOGD("Cant open user32.dll");
+		MFDebug_Warn(1, "Cant open user32.dll");
 		return 1;
 	}
 
 	_RRID = (pRegisterRawInputDevices)GetProcAddress(user32,"RegisterRawInputDevices");
 	if (!_RRID)
 	{
-		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		MFDebug_Warn(1, "Failed to initialise RawInput. Addition mouse devices will not be available.");
 		return 1;
 	}
 
 	_GRIDL = (pGetRawInputDeviceList)GetProcAddress(user32,"GetRawInputDeviceList");
 	if (!_GRIDL)
 	{
-		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		MFDebug_Warn(1, "Failed to initialise RawInput. Addition mouse devices will not be available.");
 		return 1;
 	}
 
 	_GRIDIA = (pGetRawInputDeviceInfoA)GetProcAddress(user32,"GetRawInputDeviceInfoA");
 	if (!_GRIDIA)
 	{
-		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		MFDebug_Warn(1, "Failed to initialise RawInput. Addition mouse devices will not be available.");
 		return 1;
 	}
 
 	_GRID = (pGetRawInputData)GetProcAddress(user32,"GetRawInputData");
 	if (!_GRID)
 	{
-		LOGD("Failed to initialise RawInput. Addition mouse devices will not be available.");
+		MFDebug_Warn(1, "Failed to initialise RawInput. Addition mouse devices will not be available.");
 		return 1;
 	}
 
@@ -1153,7 +1153,7 @@ int InitRawMouse(bool _includeRDPMouse)
 	// 1st call to GetRawInputDeviceList: Pass NULL to get the number of devices.
 	if(_GRIDL(NULL, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) != 0)
 	{
-		DBGASSERT(false, "Error: Unable to count raw input devices.");
+		MFDebug_Assert(false, "Error: Unable to count raw input devices.");
 		return 1;
 	}
 
@@ -1163,7 +1163,7 @@ int InitRawMouse(bool _includeRDPMouse)
 	// 2nd call to GetRawInputDeviceList: Pass the pointer to our DeviceList and GetRawInputDeviceList() will fill the array
 	if(_GRIDL(pRawInputDeviceList, &nInputDevices, sizeof(RAWINPUTDEVICELIST)) == -1)
 	{
-		DBGASSERT(false, "Error: Unable to get raw input device list.");
+		MFDebug_Assert(false, "Error: Unable to get raw input device list.");
 		return 1;
 	}
 
@@ -1175,7 +1175,7 @@ int InitRawMouse(bool _includeRDPMouse)
 			nSize = 256;
 			if((int)_GRIDIA(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, pName, &nSize) < 0)
 			{
-				DBGASSERT(false, "Error: Unable to get raw input device name.");
+				MFDebug_Assert(false, "Error: Unable to get raw input device name.");
 				return 1;
 			} 
 
@@ -1213,7 +1213,7 @@ int InitRawMouse(bool _includeRDPMouse)
 			nSize = 256;
 			if((int)_GRIDIA(pRawInputDeviceList[i].hDevice, RIDI_DEVICENAME, pName, &nSize) < 0)
 			{
-				DBGASSERT(false, "Error: Unable to get raw input device name.");
+				MFDebug_Assert(false, "Error: Unable to get raw input device name.");
 				return 1;
 			} 
 
@@ -1234,12 +1234,12 @@ int InitRawMouse(bool _includeRDPMouse)
 		for(j = 0; j < MAX_RAW_MOUSE_BUTTONS; j++)
 		{
 			// Create the name for this button
-			strcpy(pRawMice[i].buttonNames[j], STR("Button %i", j));
+			strcpy(pRawMice[i].buttonNames[j], MFStr("Button %i", j));
 		}
 	}
 
 	// finally, register to recieve raw input WM_INPUT messages
-	DBGASSERT(RegisterRawMouse() == 0, "Error: Unable to register raw input.");
+	MFDebug_Assert(RegisterRawMouse() == 0, "Error: Unable to register raw input.");
 
 	return 0;  
 }
@@ -1363,7 +1363,7 @@ int HandleRawMouseMessage(HANDLE hDevice)
 	if(!pRawMice)
 		return 1;
 
-	DBGASSERT(_GRID((HRAWINPUT)hDevice, RID_INPUT, pBuffer, &size, sizeof(RAWINPUTHEADER)) > -1, "Error: Couldn't read RawInput data. RawInput buffer overflow?");
+	MFDebug_Assert(_GRID((HRAWINPUT)hDevice, RID_INPUT, pBuffer, &size, sizeof(RAWINPUTHEADER)) > -1, "Error: Couldn't read RawInput data. RawInput buffer overflow?");
 	ReadRawInput((RAWINPUT*)pBuffer);
 
 	return 0;

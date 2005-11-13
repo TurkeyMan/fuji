@@ -44,7 +44,7 @@ inline T& MFArray<T>::operator[](int x)
 template<class T>
 inline const T& MFArray<T>::operator[](int x) const
 {
-	DBGASSERT(x < count, "Index out of bounds.");
+	MFDebug_Assert(x < count, "Index out of bounds.");
 	return pData[x];
 }
 

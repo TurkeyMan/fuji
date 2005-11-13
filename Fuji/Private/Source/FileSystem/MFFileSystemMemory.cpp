@@ -68,7 +68,7 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	CALLSTACK;
 
-	DBGASSERT(pOpenData->cbSize == sizeof(MFOpenDataMemory), "Incorrect size for MFOpenDataMemory structure. Invalid pOpenData.");
+	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataMemory), "Incorrect size for MFOpenDataMemory structure. Invalid pOpenData.");
 	MFOpenDataMemory *pMemory = (MFOpenDataMemory*)pOpenData;
 
 	pFile->pFilesysData = gMemoryFiles.Create();
@@ -85,7 +85,7 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pMem->ownsMemory = pMemory->ownsMemory;
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, STR("Memory: 0x%08X", pMem->pMemoryPointer));
+	strcpy(pFile->fileIdentifier, MFStr("Memory: 0x%08X", pMem->pMemoryPointer));
 #endif
 
 	return 0;
@@ -109,7 +109,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
@@ -125,7 +125,7 @@ int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 {
 	CALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
@@ -157,7 +157,7 @@ int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			newPos = MFClamp(0, (int)fileHandle->offset + bytes, fileHandle->length);
 			break;
 		default:
-			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	fileHandle->offset = (uint32)newPos;

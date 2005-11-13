@@ -16,7 +16,7 @@ char* GetInt(char *pFilePtr, int *pInt)
 	char *pEnd, *pToken;
 	bool negative = false;
 
-	pFilePtr = SkipWhite(pFilePtr);
+	pFilePtr = MFSkipWhite(pFilePtr);
 
 	if(*pFilePtr == '-')
 	{
@@ -25,16 +25,16 @@ char* GetInt(char *pFilePtr, int *pInt)
 	}
 
 	pEnd = pFilePtr;
-	while(IsNumeric(*pEnd)) pEnd++;
+	while(MFIsNumeric(*pEnd)) pEnd++;
 
-	if(!IsWhite(*pEnd) && !IsNewline(*pEnd) && *pEnd != NULL)
+	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != NULL)
 	{
 		printf("Error: GetInt() found non numeric character.\n");
 		*pInt = 0;
 		return pFilePtr;
 	}
 
-	pToken = STRn(pFilePtr, (int)(pEnd - pFilePtr));
+	pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd;
 
 	*pInt = atoi(pToken);
@@ -49,7 +49,7 @@ char* GetFloat(char *pFilePtr, float *pFloat)
 	bool negative = false;
 	int dotFound = 1;
 
-	pFilePtr = SkipWhite(pFilePtr);
+	pFilePtr = MFSkipWhite(pFilePtr);
 
 	if(*pFilePtr == '-')
 	{
@@ -58,12 +58,12 @@ char* GetFloat(char *pFilePtr, float *pFloat)
 	}
 
 	pEnd = pFilePtr;
-	while(IsNumeric(*pEnd) || (*pEnd == '.' && dotFound--)) pEnd++;
+	while(MFIsNumeric(*pEnd) || (*pEnd == '.' && dotFound--)) pEnd++;
 
-	pToken = STRn(pFilePtr, (int)(pEnd-pFilePtr));
+	pToken = MFStrN(pFilePtr, (int)(pEnd-pFilePtr));
 	if(*pEnd == 'f') pEnd++;
 
-	if(!IsWhite(*pEnd) && !IsNewline(*pEnd) && *pEnd != NULL)
+	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != NULL)
 	{
 		printf("Error: GetFloat() found non numeric character.\n");
 		*pFloat = 0.0f;
@@ -82,7 +82,7 @@ char* GetString(char *pFilePtr, char **ppString)
 {
 	char *pEnd;
 
-	pFilePtr = SkipWhite(pFilePtr);
+	pFilePtr = MFSkipWhite(pFilePtr);
 
 	if(*pFilePtr != '\"')
 	{
@@ -94,7 +94,7 @@ char* GetString(char *pFilePtr, char **ppString)
 	pFilePtr++;
 
 	pEnd = pFilePtr;
-	while(*pEnd != '\"' && *pEnd != NULL && !IsNewline(*pEnd)) pEnd++;
+	while(*pEnd != '\"' && *pEnd != NULL && !MFIsNewline(*pEnd)) pEnd++;
 
 	if(*pEnd != '\"')
 	{
@@ -103,7 +103,7 @@ char* GetString(char *pFilePtr, char **ppString)
 		return pFilePtr;
 	}
 
-	*ppString = STRn(pFilePtr, (int)(pEnd - pFilePtr));
+	*ppString = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd + 1;
 
 	return pFilePtr;
@@ -113,10 +113,10 @@ char* GetLabel(char *pFilePtr, char **ppString)
 {
 	char *pEnd;
 
-	pFilePtr = SkipWhite(pFilePtr);
+	pFilePtr = MFSkipWhite(pFilePtr);
 
 	pEnd = pFilePtr;
-	while(*pEnd != ':' && *pEnd != NULL && !IsNewline(*pEnd)) pEnd++;
+	while(*pEnd != ':' && *pEnd != NULL && !MFIsNewline(*pEnd)) pEnd++;
 
 	if(*pEnd != ':')
 	{
@@ -125,7 +125,7 @@ char* GetLabel(char *pFilePtr, char **ppString)
 		return pFilePtr;
 	}
 
-	*ppString = STRn(pFilePtr, (int)(pEnd - pFilePtr));
+	*ppString = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd + 1;
 
 	return pFilePtr;
@@ -736,7 +736,7 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 	int braceCount = 0;
 	bool inQuote = false;
 
-	pFilePtr = SkipWhite(pFilePtr);
+	pFilePtr = MFSkipWhite(pFilePtr);
 
 	if(*pFilePtr != '{')
 	{
@@ -763,9 +763,9 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 
 		pEnd = pFilePtr;
 
-		while(!IsWhite(*pEnd) && *pEnd != NULL) pEnd++;
+		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
 
-		pToken = STRn(pFilePtr, (int)(pEnd - pFilePtr));
+		pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
 
 		pFilePtr = BlockFunc(pFilePtr, pToken);
@@ -797,9 +797,9 @@ void ParseASEFile(char *pFilePtr)
 
 		pEnd = pFilePtr;
 
-		while(!IsWhite(*pEnd) && *pEnd != NULL) pEnd++;
+		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
 
-		pToken = STRn(pFilePtr, (int)(pEnd - pFilePtr));
+		pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
 
 		if(!stricmp(pToken, "*3DSMAX_ASCIIEXPORT"))

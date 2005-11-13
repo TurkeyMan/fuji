@@ -117,7 +117,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	fclose(pFile);
 #endif
 
-	DBGASSERT(pMem != NULL, "Couldnt load .ini file!");
+	MFDebug_Assert(pMem != NULL, "Couldnt load .ini file!");
 
 	// allocate ini file
 	MFIni *pMFIni;
@@ -144,7 +144,7 @@ MFIni *MFIni::Create(const char *pFilename)
 
 MFIni *MFIni::CreateFromMemory(const char *pMemory)
 {
-	DBGASSERT(pMemory, "Cant create ini from NULL buffer");
+	MFDebug_Assert(pMemory, "Cant create ini from NULL buffer");
 
 	uint32 memSize = (uint32)strlen(pMemory);
 	const char *pMem = pMemory;
@@ -202,7 +202,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		}
 		else if (tokenLength == 1 && tokenBuffer[0] == '{')
 		{
-			DBGASSERT(bNewLine, "open bracket must be at start of line!");
+			MFDebug_Assert(bNewLine, "open bracket must be at start of line!");
 
 			// new sub section
 			int oldLineCount = ++lineCount;
@@ -212,7 +212,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		}
 		else if (tokenLength == 1 && tokenBuffer[0] == '}')
 		{
-			DBGASSERT(bNewLine, "close bracket must be at start of line!");
+			MFDebug_Assert(bNewLine, "close bracket must be at start of line!");
 
 			if (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 			{
@@ -315,7 +315,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		{
 			sectionDepth--;
 			if (sectionDepth < 0)
-				LOGD("Error - Missing '['");
+				MFDebug_Warn(1, "Malformed ini file, Missing '['");
 			pSrc++;
 		}
 		else if (*pSrc == '"')
@@ -365,15 +365,15 @@ void MFIniLine::DumpRecursive(int depth)
 		strcpy(buffer,prefix);
 		for (int i=0; i<pLine->GetStringCount(); i++)
 		{
-			strcat(buffer, STR("'%s'",pLine->GetString(i)));
+			strcat(buffer, MFStr("'%s'",pLine->GetString(i)));
 			strcat(buffer, "  ");
 		}
-		LOGD(buffer);
+		MFDebug_Message(buffer);
 		if (pLine->Sub())
 		{
-			LOGD(STR("%s{",prefix));
+			MFDebug_Message(MFStr("%s{",prefix));
 			pLine->Sub()->DumpRecursive(depth+1);
-			LOGD(STR("%s}",prefix));
+			MFDebug_Message(MFStr("%s}",prefix));
 		}
 		pLine = pLine->Next();
 	}

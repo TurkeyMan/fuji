@@ -153,7 +153,7 @@ void RendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid XBVF_Type");
+			MFDebug_Assert(false, "Invalid XBVF_Type");
 	}
 
 	if(pNumBytesWritten)
@@ -226,7 +226,7 @@ void RendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type t
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid XBVF_Type");
+			MFDebug_Assert(false, "Invalid XBVF_Type");
 	}
 
 	if(pNumComponentsWritten)

@@ -151,7 +151,7 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 			break;
 
 		default:
-			DBGASSERT(false, "Invalid Input Device");
+			MFDebug_Assert(false, "Invalid Input Device");
 			break;
 	}
 }

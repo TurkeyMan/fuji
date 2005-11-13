@@ -1,6 +1,8 @@
 #if !defined(_RENDERER_INTERNAL_H)
 #define _RENDERER_INTERNAL_H
 
+#include "Renderer.h"
+
 // init/deinit
 void Renderer_InitModule();
 void Renderer_DeinitModule();
@@ -19,7 +21,5 @@ enum RenderState
 
 	RS_Max
 };
-
-#include "Renderer.h"
 
 #endif

@@ -258,7 +258,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	
 	int glXMajor, glXMinor;
 	if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3)) {
-		LOGD(STR("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
+		LOGD(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
 		Display_DestroyDisplay();
 		return(1);
 	}

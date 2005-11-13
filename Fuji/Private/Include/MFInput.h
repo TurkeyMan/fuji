@@ -1,174 +1,373 @@
+/**
+ * @file MFInput.h
+ * @brief Provide access to the systems user input devices.
+ * @author Manu Evans
+ * @defgroup MFInput Input Functions
+ * @{
+ */
+
 #if !defined(_INPUT_H)
 #define _INPUT_H
 
-// interface functions
-bool	 MFInput_IsAvailable(int source, int sourceID);
-bool	 MFInput_IsConnected(int source, int sourceID);
-bool	 MFInput_IsReady(int source, int sourceID);
+#include "MFVector.h"
 
-float	 MFInput_Read(int button, int source, int sourceID = 0);
-bool	 MFInput_WasPressed(int button, int source, int sourceID = 0);
-bool	 MFInput_WasReleased(int button, int source, int sourceID = 0);
+/**
+ * Tests is an input device is available.
+ * Tests is an input device is available.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns true if the device is available.
+ * @see MFInput_IsConnected()
+ * @see MFInput_IsReady()
+ */
+bool MFInput_IsAvailable(int source, int sourceID);
+/**
+ * Tests is an input device is connected.
+ * Tests is an input device is connected.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns true if the device is connected.
+ * @see MFInput_IsAvailable()
+ * @see MFInput_IsReady()
+ */
+bool MFInput_IsConnected(int source, int sourceID);
 
-int		 MFInput_GetNumGamepads();
-int		 MFInput_GetNumKeyboards();
-int		 MFInput_GetNumPointers();
+/**
+ * Tests is an input device is ready.
+ * Tests is an input device is ready.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns true if the device is ready.
+ * @see MFInput_IsAvailable()
+ * @see MFInput_IsConnected()
+ */
+bool MFInput_IsReady(int source, int sourceID);
 
+/**
+ * Read input from a device.
+ * Read input from a device.
+ * @param button The button on the device to read.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns a float representing the input state.
+ * @see MFInput_WasPressed()
+ * @see MFInput_WasReleased()
+ */
+float MFInput_Read(int button, int source, int sourceID = 0);
+
+/**
+ * Test if a button was pressed this frame.
+ * Test if a button was pressed this frame.
+ * @param button The button on the device to test.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns true if the button was pressed this frame.
+ * @see MFInput_Read()
+ * @see MFInput_WasReleased()
+ */
+bool MFInput_WasPressed(int button, int source, int sourceID = 0);
+
+/**
+ * Test if a button was released this frame.
+ * Test if a button was released this frame.
+ * @param button The button on the device to test.
+ * @param source The source device. This should be a member of the MFInputDevice enum.
+ * @param sourceID The source device index.
+ * @return Returns true if the button was released this frame.
+ * @see MFInput_Read()
+ * @see MFInput_WasPressed()
+ */
+bool MFInput_WasReleased(int button, int source, int sourceID = 0);
+
+/**
+ * Get the number of available gamepads.
+ * Get the number of available gamepads.
+ * @return Returns the number of gamepads available to the system.
+ * @see MFInput_GetNumKeyboards()
+ * @see MFInput_GetNumPointers()
+ */
+int MFInput_GetNumGamepads();
+
+/**
+ * Get the number of available keyboards.
+ * Get the number of available keyboards.
+ * @return Returns the number of keyboards available to the system.
+ * @see MFInput_GetNumGamepads()
+ * @see MFInput_GetNumPointers()
+ */
+int MFInput_GetNumKeyboards();
+
+/**
+ * Get the number of available pointers.
+ * Get the number of available pointers.
+ * @return Returns the number of pointers available to the system.
+ * @see MFInput_GetNumGamepads()
+ * @see MFInput_GetNumKeyboards()
+ */
+int MFInput_GetNumPointers();
+
+/**
+ * Read the absolute position of the mouse pointer.
+ * Read the absolute position of the mouse pointer.
+ * @param mouseID Index of the mouse to read.
+ * @return Returns a vector representing the absolute position of the mouse.
+ */
 MFVector MFInput_ReadMousePos(int mouseID = -1);
+
+/**
+ * Read the mouse movement delta for this frame.
+ * Read the mouse movement delta for this frame.
+ * @param mouseID Index of the mouse to read.
+ * @return Returns a vector representing the mouse movement delta for this frame.
+ */
 MFVector MFInput_ReadMouseDelta(int mouseID = -1);
-void	 MFInput_SetMouseMode(int mode);
-void	 MFInput_SetMouseAcceleration(float multiplier);
-void	 MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
 
-const char*	MFInput_EnumerateString(int button, int source, int sourceID = 0, bool includeDevice = false, bool includeDeviceID = false);
+/**
+ * Set the mouse access mode.
+ * Set the mouse access mode.
+ * @param mode Set the mouse access mode, this should be a value from the MFMouseMode enumerated type.
+ * @return None.
+ */
+void MFInput_SetMouseMode(int mode);
 
-void	 MFInput_SetDeadZone(float deadZone);
-float	 MFInput_GetDeadZone();
+/**
+ * Set the mouse movement multiplier.
+ * Set the mouse movement multiplier.
+ * @param multiplier The new mouse movement multiplier.
+ * @return None.
+ */
+void MFInput_SetMouseAcceleration(float multiplier);
 
-// these are platform specific
+/**
+ * Sets a clipping rect for the mouse pointer.
+ * Restricts the mouse movement to a specified rect.
+ * @param mouseID Target mouse index.
+ * @param pRect A rect in screen space to restrict the mouse. NULL to reset the rect to the full screen.
+ * @return None.
+ */
+void MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
+
+/**
+ * Generate a string representing the input button/device configuration.
+ * Generate a string representing the input button/device configuration.
+ * @param button The button on the device.
+ * @param source The device to read the name from.
+ * @param sourceID The device index.
+ * @param includeDevice If true, the device name is included in the generated string.
+ * @param includeDeviceID If true, the device index is included in the generated string.
+ * @return Returns a string representing the button name and optionally the device name and index.
+ */
+const char* MFInput_EnumerateString(int button, int source, int sourceID = 0, bool includeDevice = false, bool includeDeviceID = false);
+
+/**
+ * Set the analog dead zone.
+ * Set the analog dead zone.
+ * @param deadZone The new analog dead zone.
+ * @return None.
+ */
+void MFInput_SetDeadZone(float deadZone);
+
+/**
+ * Get the analog dead zone.
+ * Get the analog dead zone.
+ * @return Returns the current analog dead zone.
+ */
+float MFInput_GetDeadZone();
+
+/**
+ * Get a device name.
+ * Get a device name.
+ * @param source The device to fetch the name of.
+ * @param sourceID The device index.
+ * @return Returns the name of the target device.
+ */
 const char*	MFInput_GetDeviceName(int source, int sourceID);
-const char* MFInput_GetGamepadButtonName(int button, int sourceID);
-bool	MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);	// get the state of the keyboard status flags
 
-// input enums
+/**
+ * Get the button name from a gamepad.
+ * Get the button name from a gamepad.
+ * @param button Gamepad button ID.
+ * @param sourceID Gamepad index.
+ * @return Returns the name of the specified button of the specified device.
+ */
+const char* MFInput_GetGamepadButtonName(int button, int sourceID);
+
+/**
+ * Get the state of the keyboard status flags.
+ * Get the state of the keyboard status flags.
+ * @param keyboardState Value from the MFKeyboardStatusState enumerated type.
+ * @param keyboardID Keyboard index.
+ * @return Returns the state of the keyboards status bit.
+ */
+bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);
+
+/**
+ * Input devices.
+ * These are available input devices.
+ */
 enum MFInputDevice
 {
-	IDD_Gamepad,
-	IDD_Mouse,
-	IDD_Keyboard,
+	IDD_Gamepad,	/**< Gamepad device */
+	IDD_Mouse,		/**< Mouse or pointer device */
+	IDD_Keyboard,	/**< Keyboard device */
 
-	IDD_Max,
-	IDD_ForceInt = 0x7FFFFFFF
+	IDD_Max,		/**< Maximum device */
+	IDD_ForceInt = 0x7FFFFFFF	/**< Force device to an int type */
 };
 
+/**
+ * Input device status.
+ * These are possible device states.
+ */
 enum MFInputDeviceStatus
 {
-	IDS_Disconnected = 0,
-	IDS_Ready = 1,
-	IDS_Waiting,
+	IDS_Disconnected = 0,	/**< Device is disconnected */
+	IDS_Ready = 1,			/**< Device is ready for reading */
+	IDS_Waiting,			/**< Device is waiting for initialisation */
 
-	IDS_Max,
-	IDS_ForceInt = 0x7FFFFFFF
+	IDS_Max,				/**< Maximum device state */
+	IDS_ForceInt = 0x7FFFFFFF	/**< Force device state to an int type */
 };
 
+/**
+ * Enums to access gamepad buttons.
+ * These represent the buttons on a gamepad.
+ */
 enum MFGamepadButton
 {
 // xbox controller enums
-	Button_XB_A			= 0,
-	Button_XB_B			= 1,
-	Button_XB_X			= 2,
-	Button_XB_Y			= 3,
+	Button_XB_A			= 0,	/**< A button on an XBox gamepad */
+	Button_XB_B			= 1,	/**< B button on an XBox gamepad */
+	Button_XB_X			= 2,	/**< X button on an XBox gamepad */
+	Button_XB_Y			= 3,	/**< Y button on an XBox gamepad */
 
-	Button_XB_Black		= 4,
-	Button_XB_White		= 5,
+	Button_XB_Black		= 4,	/**< Black button on an XBox gamepad */
+	Button_XB_White		= 5,	/**< White button on an XBox gamepad */
 
-	Button_XB_LTrig		= 6,
-	Button_XB_RTrig		= 7,
+	Button_XB_LTrig		= 6,	/**< Left trigger on an XBox gamepad */
+	Button_XB_RTrig		= 7,	/**< Right trigger on an XBox gamepad */
 
-	Button_XB_Start		= 8,
-	Button_XB_Back		= 9,
+	Button_XB_Start		= 8,	/**< Start button on an XBox gamepad */
+	Button_XB_Back		= 9,	/**< Back button on an XBox gamepad */
 
-	Button_XB_LThumb	= 10,
-	Button_XB_RThumb	= 11,
+	Button_XB_LThumb	= 10,	/**< Left Thumbstick button on an XBox gamepad */
+	Button_XB_RThumb	= 11,	/**< Right Thumbstick button on an XBox gamepad */
 
 // PSX controller enums
-	Button_P2_Cross		= 0,
-	Button_P2_Circle	= 1,
-	Button_P2_Box		= 2,
-	Button_P2_Triangle	= 3,
+	Button_P2_Cross		= 0,	/**< Cross button on a Playstation or PS2 gamepad */
+	Button_P2_Circle	= 1,	/**< Circle button on a Playstation or PS2 gamepad */
+	Button_P2_Box		= 2,	/**< Box button on a Playstation or PS2 gamepad */
+	Button_P2_Triangle	= 3,	/**< Triangle button on a Playstation or PS2 gamepad */
 
-	Button_P2_R1		= 4,
-	Button_P2_L1		= 5,
-	Button_P2_L2		= 6,
-	Button_P2_R2		= 7,
+	Button_P2_R1		= 4,	/**< R1 trigger on a Playstation or PS2 gamepad */
+	Button_P2_L1		= 5,	/**< L1 trigger on a Playstation or PS2 gamepad */
+	Button_P2_L2		= 6,	/**< L2 trigger on a Playstation or PS2 gamepad */
+	Button_P2_R2		= 7,	/**< R2 trigger on a Playstation or PS2 gamepad */
 
-	Button_P2_Start		= 8,
-	Button_P2_Select	= 9,
+	Button_P2_Start		= 8,	/**< Start button on a Playstation or PS2 gamepad */
+	Button_P2_Select	= 9,	/**< Select button on a Playstation or PS2 gamepad */
 
-	Button_P2_LThumb	= 10,
-	Button_P2_RThumb	= 11,
+	Button_P2_LThumb	= 10,	/**< Left Thumbstick button on a Playstation or PS2 gamepad */
+	Button_P2_RThumb	= 11,	/**< Right Thumbstick button on a Playstation or PS2 gamepad */
 
 // PSP controller enums
-	Button_PP_Cross		= 0,
-	Button_PP_Circle	= 1,
-	Button_PP_Box		= 2,
-	Button_PP_Triangle	= 3,
+	Button_PP_Cross		= 0,	/**< Cross button on the PSP gamepad */
+	Button_PP_Circle	= 1,	/**< Circle button on the PSP gamepad */
+	Button_PP_Box		= 2,	/**< Box button on the PSP gamepad */
+	Button_PP_Triangle	= 3,	/**< Triangle button on the PSP gamepad */
 
-	Button_PP_L			= 6,
-	Button_PP_R			= 7,
+	Button_PP_L			= 6,	/**< L trigger on the PSP gamepad */
+	Button_PP_R			= 7,	/**< R trigger on the PSP gamepad */
 
-	Button_PP_Start		= 8,
-	Button_PP_Select	= 9,
+	Button_PP_Start		= 8,	/**< Start button on the PSP gamepad */
+	Button_PP_Select	= 9,	/**< Select button on the PSP gamepad */
 
 // general controller enums
-	Button_DUp = 12,
-	Button_DDown,
-	Button_DLeft,
-	Button_DRight,
+	Button_DUp = 12,			/**< Up on the digital pad */
+	Button_DDown,				/**< Down on the digital pad */
+	Button_DLeft,				/**< Left on the digital pad */
+	Button_DRight,				/**< Right on the digital pad */
 
-	Axis_LX = 16,
-	Axis_LY,
-	Axis_RX,
-	Axis_RY,
+	Axis_LX = 16,				/**< X-Axis on the Left analog stick */
+	Axis_LY,					/**< Y-Axis on the Left analog stick */
+	Axis_RX,					/**< X-Axis on the Right analog stick */
+	Axis_RY,					/**< Y-Axis on the Right analog stick */
 
-	GamepadType_Max,
-	GamepadType_ForceInt	= 0x7FFFFFFF
+	GamepadType_Max,			/**< Maximum gamepad button id */
+	GamepadType_ForceInt	= 0x7FFFFFFF	/**< Force button ID to an int type */
 };
 
-// mouse stuff
+/**
+ * Mouse access modes.
+ * These are mouse access modes.
+ */
 enum MFMouseMode
 {
-	MouseMode_Shared,		// this will continue to share the mouse with the system
-	MouseMode_Exclusive,	// this will make the game take exclusive access to the mouse, (not applicable to consoles)
+	MouseMode_Shared,		/**< Continue to share the mouse with the system */
+	MouseMode_Exclusive,	/**< The game take exclusive access to the mouse, (not applicable to consoles) */
 
-	MouseMode_Max,
-	MouseMode_ForceInt	= 0x7FFFFFFF
+	MouseMode_Max,			/**< Maximum mouse mode */
+	MouseMode_ForceInt	= 0x7FFFFFFF	/**< Force mouse mode to an int type */
 };
 
+/**
+ * Enums to access mouse buttons.
+ * These represent the buttons on a mouse.
+ */
 enum MFMouseButton
 {
-	Mouse_XPos,
-	Mouse_YPos,
+	Mouse_XPos,		/**< The mouses absolute position on the X-Axis */
+	Mouse_YPos,		/**< The mouses absolute position on the Y-Axis */
 
-	Mouse_XDelta,
-	Mouse_YDelta,
+	Mouse_XDelta,	/**< The mouses movement delta on the X-Axis */
+	Mouse_YDelta,	/**< The mouses movement delta on the Y-Axis */
 
-	Mouse_Wheel,
-	Mouse_Wheel2,	// rare on mouses
+	Mouse_Wheel,	/**< The mouses wheel delta */
+	Mouse_Wheel2,	/**< The mouses second wheel delta (rare on mouses) */ 
 
-	Mouse_MaxAxis,	// max axis enum
+	Mouse_MaxAxis,	/**< Max axis enum */
 
-	Mouse_LeftButton = Mouse_MaxAxis,
-	Mouse_RightButton,
-	Mouse_MiddleButton,
-	Mouse_Extra1,
-	Mouse_Extra2,
-	Mouse_Extra3,
-	Mouse_Extra4,
-	Mouse_Extra5,
+	Mouse_LeftButton = Mouse_MaxAxis,	/**< Left mouse button */
+	Mouse_RightButton,	/**< Right mouse button */
+	Mouse_MiddleButton,	/**< Middle mouse button */
+	Mouse_Extra1,		/**< Extra mouse button 1 (often maps to 'back') */
+	Mouse_Extra2,		/**< Extra mouse button 2 (often maps to 'foreward') */
+	Mouse_Extra3,		/**< Extra mouse button 3 */
+	Mouse_Extra4,		/**< Extra mouse button 4 */
+	Mouse_Extra5,		/**< Extra mouse button 5 */
 
-	Mouse_Max,
-	Mouse_ForceInt	= 0x7FFFFFFF
+	Mouse_Max,			/**< Maximum mouse button */
+	Mouse_ForceInt	= 0x7FFFFFFF	/**< Force mouse button to an int type */
 };
 
-// keyboard stuff
+/**
+ * Keyboard status flags.
+ * These represent the various state keys on the keyboard.
+ */
 enum MFKeyboardStatusState
 {
-	KSS_NumLock,
-	KSS_CapsLock,
-	KSS_ScrollLock,
-	KSS_Insert
+	KSS_NumLock,		/**< Numlock state */
+	KSS_CapsLock,		/**< Capslock state */
+	KSS_ScrollLock,		/**< Scroll lock state */
+	KSS_Insert,			/**< Insert state */
+
+	KSS_Max,			/**< Maximum keyboard state */
+	KSS_ForceInt	= 0x7FFFFFFF	/**< Force keyboard state to an int type */
 };
 
+/**
+ * Keyboard key enums.
+ * These represent all the keys on the keyboard.
+ */
 enum MFKeyboardButton
 {
-	Key_Unknown = -1,
+	Key_Unknown = -1,	/**< Unknown key */
 
-	Key_None = 0,
-	Key_Up,
-	Key_Down,
-	Key_Left,
-	Key_Right,
+	Key_None = 0,		/**< Represents no key */
+	Key_Up,				/**< Up arrow key */
+	Key_Down,			/**< Down arrow key */
+	Key_Left,			/**< Left arrow key */
+	Key_Right,			/**< Right arrow key */
 	Key_Apps,			// on windows keyboards
 	Key_LWin,			// on windows keyboards
 	Key_RWin,			// on windows keyboards
@@ -301,7 +500,7 @@ enum MFKeyboardButton
 
 	Key_WebBack,		// on multimedia keyboards
 	Key_WebFavorites,	// on multimedia keyboards
-	Key_WebForeward,		// on multimedia keyboards
+	Key_WebForeward,	// on multimedia keyboards
 	Key_WebHome,		// on multimedia keyboards
 	Key_WebRefresh,		// on multimedia keyboards
 	Key_WebSearch,		// on multimedia keyboards
@@ -321,3 +520,5 @@ enum MFKeyboardButton
 };
 
 #endif
+
+/** @} */

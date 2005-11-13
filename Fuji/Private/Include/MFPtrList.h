@@ -1,32 +1,27 @@
 #if !defined(_PTRLIST_H)
 #define _PTRLIST_H
 
-#include "MFHeap.h"
-
-extern void *gEmptyPtrList[2];
-extern void *gEmptyPtrListDL[2];
-
 template<class T>
 class MFPtrList
 {
 public:
-	inline void Init(char* pGroupName, int maxElements);
-	inline void Deinit();
+	void Init(char* pGroupName, int maxElements);
+	void Deinit();
 
-	inline T* Create(T* p);
+	T* Create(T* p);
 	void Destroy(T* p);
 
-	inline T** Begin()			{ return ppMark; }
-	inline T** Find(T* p);
-	inline void Destroy(T** p);
+	T** Begin();
+	T** Find(T* p);
+	void Destroy(T** p);
 
-	inline void Clear()			{ while(*ppMark!=0) ++ppMark; }
+	void Clear();
 
-	inline int GetLength()		{ T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark; }
-	inline int GetMaxElements()	{ T** iterator = ppMark; while(*(--iterator)!=0); return ppMark - iterator - 1 + GetLength(); }
+	int GetLength();
+	int GetMaxElements();
 
-	inline bool IsFull()		{ return *(ppMark - 1)==0; }
-	inline bool IsEmpty()		{ return *ppMark==0; }
+	bool IsFull();
+	bool IsEmpty();
 
 protected:
 	T** ppMark;
@@ -41,38 +36,28 @@ template<class T>
 class MFPtrListDL
 {
 public:
-	inline void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T), void *pMem = NULL);
-	inline void Deinit();
+	void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T), void *pMem = NULL);
+	void Deinit();
 
-	inline T* Create()			{ DBGASSERT(!IsFull(), STR("list %s full",pName)); return *(--ppMark); };
-	inline void Destroy(T* p);
+	T* Create();
+	void Destroy(T* p);
 
-	inline T** Begin()			{ return ppMark; };
-	inline T** Find(T* p);
+	T** Begin();
+	T** Find(T* p);
 
-	inline void Swap(T **p1, T **p2)
-	{
-		T *pT = *p1;
-		*p1 = *p2;
-		*p2 = pT;
-	}
+	void Swap(T **p1, T **p2);
 
-	inline void Destroy(T** p)
-	{
-		DBGASSERT(p!=0, "invalid parameter");
-		DBGASSERT(!IsEmpty(), STR("list %s is empty",pName));
-		Swap(ppMark++, p);
-	};
+	void Destroy(T** p);
 
-	inline void Clear()			{ while(*ppMark!=0) ++ppMark; };
+	void Clear();
 
-	inline int GetLength()		{ T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark; };
-	inline int GetMaxElements()	{ T** iterator = ppMark; while(*(--iterator)!=0) {} return ppMark - iterator - 1 + GetLength(); }
+	int GetLength();
+	int GetMaxElements();
 
-	inline bool IsFull()		{ return *(ppMark - 1)==0; };
-	inline bool IsEmpty()		{ return *ppMark==0; };
+	bool IsFull();
+	bool IsEmpty();
 
-	inline T** BeginDead()		{ return ppMark - 1; };
+	T** BeginDead();
 
 protected:
 	T** ppMark;

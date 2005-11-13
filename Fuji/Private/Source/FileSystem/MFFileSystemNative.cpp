@@ -48,7 +48,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 
 		openData.cbSize = sizeof(MFOpenDataNative);
 		openData.openFlags = openFlags;
-		openData.pFilename = STR("%s%s", (char*)pTOCEntry->pFilesysData, pTOCEntry->pName);
+		openData.pFilename = MFStr("%s%s", (char*)pTOCEntry->pFilesysData, pTOCEntry->pName);
 
 		hFile = MFFile_Open(hNativeFileSystem, &openData);
 	}

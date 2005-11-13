@@ -2,7 +2,7 @@
  * @file MFVector.h
  * @brief Describes the Mount Fuji Engine vector class.
  * @author Manu Evans
- * @defgroup MFVector Vector Class
+ * @defgroup MFVector Vector math Class
  * @{
  */
 
@@ -126,9 +126,17 @@ MFVector MakeVector(const MFVector &v, float w);
 MFVector MFMin(const MFVector &a, const MFVector &b);
 MFVector MFMax(const MFVector &a, const MFVector &b);
 
-#include "MFVector.inl"
+/**
+ * Generates a random vector.
+ * Generates a random vector within a unit cube.
+ * @return A random vector within a unit cube.
+ * @see MFRand()
+ * @see MFRand_Unit()
+ * @see MFRand_Range()
+ */
+MFVector MFRand_Vector();
 
-#endif
+#include "MFVector.inl"
 
 // this is to make doxygen happy...
 #if 0
@@ -221,6 +229,8 @@ public:
 	char* ToString2() const;	/**< Convert 2D vector to a string. */
 };
 
-#endif
+#endif // make doxygen happy
+
+#endif // _MFVECTOR_H
 
 /** @} */

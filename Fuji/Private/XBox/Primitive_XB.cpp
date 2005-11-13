@@ -129,7 +129,7 @@ void MFSetPosition(float x, float y, float z)
 
 void MFEnd()
 {
-	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
+	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
 	pd3dDevice->End();
 }

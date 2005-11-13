@@ -52,7 +52,7 @@ void MFView_DeinitModule()
 
 void MFView_Push()
 {
-	DBGASSERT(pCurrentView - gpViewStack < (int)gDefaults.view.maxViewsOnStack, "Error: Exceeded maximum views on the stack. Increase 'gDefaults.view.maxViewsOnStack'.");
+	MFDebug_Assert(pCurrentView - gpViewStack < (int)gDefaults.view.maxViewsOnStack, "Error: Exceeded maximum views on the stack. Increase 'gDefaults.view.maxViewsOnStack'.");
 
 	// push view pointer foreward
 	pCurrentView++;
@@ -61,7 +61,7 @@ void MFView_Push()
 
 void MFView_Pop()
 {
-	DBGASSERT(pCurrentView > gpViewStack, "Error: No views on the stack!");
+	MFDebug_Assert(pCurrentView > gpViewStack, "Error: No views on the stack!");
 
 	pCurrentView--;
 }

@@ -81,8 +81,8 @@ void ParseMD2File(char *pFile, uint32 length)
 
 	MD2Header *pHeader = (MD2Header*)pFile;
 
-	DBGASSERT(pHeader->ident == (('2'<<24) | ('P'<<16) | ('D'<<8) | 'I'), "Invalid MD2 header.");
-	DBGASSERT(pHeader->version == 8, "Invalid MD2 version.");
+	MFDebug_Assert(pHeader->ident == (('2'<<24) | ('P'<<16) | ('D'<<8) | 'I'), "Invalid MD2 header.");
+	MFDebug_Assert(pHeader->version == 8, "Invalid MD2 version.");
 
 	(char*&)pHeader->skins += (uint32&)pHeader;
 	(char*&)pHeader->st += (uint32&)pHeader;

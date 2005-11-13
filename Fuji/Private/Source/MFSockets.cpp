@@ -17,20 +17,20 @@ MFInetAddress MFSockets_MakeInetAddrssFromString(const char *pIPString)
 {
 	MFInetAddress a;
 
-	const char *pToken = strtok(STR(pIPString), ".");
-	DBGASSERT(pToken, "Malformed IP string.");
+	const char *pToken = strtok(MFStr(pIPString), ".");
+	MFDebug_Assert(pToken, "Malformed IP string.");
 	a.b1 = (uint8)atoi(pToken);
 
 	pToken = strtok(NULL, ".");
-	DBGASSERT(pToken, "Malformed IP string.");
+	MFDebug_Assert(pToken, "Malformed IP string.");
 	a.b2 = (uint8)atoi(pToken);
 
 	pToken = strtok(NULL, ".");
-	DBGASSERT(pToken, "Malformed IP string.");
+	MFDebug_Assert(pToken, "Malformed IP string.");
 	a.b3 = (uint8)atoi(pToken);
 
 	pToken = strtok(NULL, ".");
-	DBGASSERT(pToken, "Malformed IP string.");
+	MFDebug_Assert(pToken, "Malformed IP string.");
 	a.b4 = (uint8)atoi(pToken);
 
 	return a;
@@ -57,7 +57,7 @@ MFInet6Address MFSockets_MakeInet6AddrssFromString(const char *pIP6String)
 	MFInet6Address a;
 	memset(&a, 0, sizeof(MFInet6Address));
 
-	DBGASSERT(false, "Not written!");
+	MFDebug_Assert(false, "Not written!");
 /*
 	int numColons = 0;
 
@@ -98,11 +98,11 @@ const char* MFSockets_GetInetAddressString(const MFSocketAddress &address)
 	if(address.family != MFAF_Inet)
 		return "";
 
-	DBGASSERT(address.cbSize == sizeof(MFSocketAddressInet), "Invalid size for MFSocketAddressInet structure");
+	MFDebug_Assert(address.cbSize == sizeof(MFSocketAddressInet), "Invalid size for MFSocketAddressInet structure");
 
 	MFSocketAddressInet &inet = (MFSocketAddressInet&)address;
 
-	return STR("%d.%d.%d.%d", inet.address.b1, inet.address.b2, inet.address.b3, inet.address.b4);
+	return MFStr("%d.%d.%d.%d", inet.address.b1, inet.address.b2, inet.address.b3, inet.address.b4);
 }
 
 const char* MFSockets_GetInet6AddressString(const MFSocketAddress &address)
@@ -110,10 +110,10 @@ const char* MFSockets_GetInet6AddressString(const MFSocketAddress &address)
 	if(address.family != MFAF_Inet6)
 		return "";
 
-	DBGASSERT(address.cbSize == sizeof(MFSocketAddressInet6), "Invalid size for MFSocketAddressInet6 structure");
+	MFDebug_Assert(address.cbSize == sizeof(MFSocketAddressInet6), "Invalid size for MFSocketAddressInet6 structure");
 
 	MFSocketAddressInet6 &inet = (MFSocketAddressInet6&)address;
 
-	return STR("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X", inet.address.s[0], inet.address.s[1], inet.address.s[2], inet.address.s[3], inet.address.s[4], inet.address.s[5], inet.address.s[6], inet.address.s[7]);
+	return MFStr("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X", inet.address.s[0], inet.address.s[1], inet.address.s[2], inet.address.s[3], inet.address.s[4], inet.address.s[5], inet.address.s[6], inet.address.s[7]);
 }
 

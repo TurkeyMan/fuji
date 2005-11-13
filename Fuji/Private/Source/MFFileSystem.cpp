@@ -36,7 +36,7 @@ void MFFileSystem_InitModule()
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
-	dataArchive.pFilename =  MFFile_SystemPath(STR("Data_%s.zip", MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform())));
+	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data_%s.zip", MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform())));
 	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
 
 	MFMountDataNative mountData;
@@ -57,7 +57,7 @@ void MFFileSystem_InitModule()
 	{
 		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		mountData.pMountpoint = "data";
-		mountData.pPath = STR("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform()));
+		mountData.pPath = MFStr("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform()));
 		MFFileSystem_Mount(hNativeFileSystem, &mountData);
 	}
 
@@ -91,19 +91,19 @@ FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbac
 	{
 		if(ppFileSystemList[a] == NULL)
 		{
-			DBGASSERT(pCallbacks->RegisterFS, "No RegisterFS function supplied.");
-			DBGASSERT(pCallbacks->UnregisterFS, "No UnregisterFS function supplied.");
-			DBGASSERT(pCallbacks->FSMount, "No FSMount function supplied.");
-			DBGASSERT(pCallbacks->FSDismount, "No FSDismount function supplied.");
-			DBGASSERT(pCallbacks->FSOpen, "No FSOpen function supplied.");
-			DBGASSERT(pCallbacks->Open, "No Open function supplied.");
-			DBGASSERT(pCallbacks->Close, "No Close function supplied.");
-			DBGASSERT(pCallbacks->Read, "No Read function supplied.");
-			DBGASSERT(pCallbacks->Write, "No Write function supplied.");
-			DBGASSERT(pCallbacks->Seek, "No Seek function supplied.");
-			DBGASSERT(pCallbacks->Tell, "No Tell function supplied.");
-			DBGASSERT(pCallbacks->Query, "No Query function supplied.");
-			DBGASSERT(pCallbacks->GetSize, "No GetSize function supplied.");
+			MFDebug_Assert(pCallbacks->RegisterFS, "No RegisterFS function supplied.");
+			MFDebug_Assert(pCallbacks->UnregisterFS, "No UnregisterFS function supplied.");
+			MFDebug_Assert(pCallbacks->FSMount, "No FSMount function supplied.");
+			MFDebug_Assert(pCallbacks->FSDismount, "No FSDismount function supplied.");
+			MFDebug_Assert(pCallbacks->FSOpen, "No FSOpen function supplied.");
+			MFDebug_Assert(pCallbacks->Open, "No Open function supplied.");
+			MFDebug_Assert(pCallbacks->Close, "No Close function supplied.");
+			MFDebug_Assert(pCallbacks->Read, "No Read function supplied.");
+			MFDebug_Assert(pCallbacks->Write, "No Write function supplied.");
+			MFDebug_Assert(pCallbacks->Seek, "No Seek function supplied.");
+			MFDebug_Assert(pCallbacks->Tell, "No Tell function supplied.");
+			MFDebug_Assert(pCallbacks->Query, "No Query function supplied.");
+			MFDebug_Assert(pCallbacks->GetSize, "No GetSize function supplied.");
 
 			ppFileSystemList[a] = pFileSystemCallbacks.Create();
 			memcpy(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
@@ -114,14 +114,14 @@ FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbac
 		}
 	}
 
-	DBGASSERT(false, STR("Exceeded maximum of %d Filesystems. Modify 'gDefaults.filesys.maxFileSystems'.", gDefaults.filesys.maxFileSystems));
+	MFDebug_Assert(false, MFStr("Exceeded maximum of %d Filesystems. Modify 'gDefaults.filesys.maxFileSystems'.", gDefaults.filesys.maxFileSystems));
 
 	return -1;
 }
 
 void MFFileSystem_UnregisterFileSystem(FileSystemHandle filesystemHandle)
 {
-	DBGASSERT(ppFileSystemList[filesystemHandle], "Filesystem not mounted");
+	MFDebug_Assert(ppFileSystemList[filesystemHandle], "Filesystem not mounted");
 
 	ppFileSystemList[filesystemHandle]->UnregisterFS();
 	pFileSystemCallbacks.Destroy(ppFileSystemList[filesystemHandle]);
@@ -134,15 +134,15 @@ char* MFFile_SystemPath(const char *filename)
 	CALLSTACK;
 
 #if defined(_XBOX)
-	return STR("D:\\Data\\%s", filename);
+	return MFStr("D:\\Data\\%s", filename);
 #elif defined(_WINDOWS)
-	return STR("Data/%s", filename);
+	return MFStr("Data/%s", filename);
 #elif defined(_LINUX)
-	return STR("Data/%s", filename);
+	return MFStr("Data/%s", filename);
 #elif defined(_PSP)
-	return STR("ms0:/PSP/GAME/FUJI/Data/%s", filename);
+	return MFStr("ms0:/PSP/GAME/FUJI/Data/%s", filename);
 #else
-	return STR("%s", filename);
+	return MFStr("%s", filename);
 #endif
 }
 
@@ -151,13 +151,13 @@ char* MFFile_HomePath(const char *filename)
 	CALLSTACK;
 
 #if defined(_XBOX)
-	return STR("E:\\Home\\%s", filename);
+	return MFStr("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
-	return STR("Home/%s", filename);
+	return MFStr("Home/%s", filename);
 #elif defined(_PSP)
-	return STR("ms0:/PSP/GAME/FUJI/Home/%s", filename);
+	return MFStr("ms0:/PSP/GAME/FUJI/Home/%s", filename);
 #else
-	return STR("%s", filename);
+	return MFStr("%s", filename);
 #endif
 }
 
@@ -370,7 +370,7 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 		if(pFilename[a] == '/')
 		{
 			isDirectory = true;
-			pSearchString = STRn(pFilename, a);
+			pSearchString = MFStrN(pFilename, a);
 			pFilename += a+1;
 			break;
 		}
@@ -425,7 +425,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 	{
 		if(pFilename[a] == ':')
 		{
-			pMountpoint = STRn(pFilename, a);
+			pMountpoint = MFStrN(pFilename, a);
 			pFilename += a+1;
 			break;
 		}
@@ -487,7 +487,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 void MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
 {
-	DBGASSERT(false, "Not Written....");
+	MFDebug_Assert(false, "Not Written....");
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm

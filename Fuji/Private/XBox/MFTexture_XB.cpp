@@ -25,12 +25,12 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// create texture
 	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, (D3DFORMAT)pTemplate->platformFormat, D3DPOOL_MANAGED, &pTexture->pTexture);
 
-	DBGASSERT(hr != D3DERR_NOTAVAILABLE, STR("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
-	DBGASSERT(hr != D3DERR_OUTOFVIDEOMEMORY, STR("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
-	DBGASSERT(hr != D3DERR_INVALIDCALL, STR("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
-	DBGASSERT(hr != D3DXERR_INVALIDDATA, STR("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
+	MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
+	MFDebug_Assert(hr != D3DERR_OUTOFVIDEOMEMORY, MFStr("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
+	MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
+	MFDebug_Assert(hr != D3DXERR_INVALIDDATA, MFStr("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
-	DBGASSERT(hr == D3D_OK, STR("Failed to create texture '%s'.", pTexture->name));
+	MFDebug_Assert(hr == D3D_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
 
 	// copy image data
 	D3DLOCKED_RECT rect;
@@ -58,18 +58,18 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		switch(format)
 		{
 			case TexFmt_Unknown:
-				DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+				MFDebug_Assert(false, "Invalid Texture format: 'TEXF_Unknown'");
 				break;
 			case TexFmt_A8R8G8B8:
 				fmt = D3DFMT_A8R8G8B8;
 				break;
 			default:
-				DBGASSERT(false, "Texture format not yet supported..");
+				MFDebug_Assert(false, "Texture format not yet supported..");
 		}
 
 		hr = pd3dDevice->CreateTexture(width, height, generateMipChain ? 0 : 1, 0, fmt, 0, &pTexture->pTexture);
 
-		DBGASSERT(SUCCEEDED(hr), STR("CreateTexture failed: hr = 0x%08X", hr));
+		MFDebug_Assert(SUCCEEDED(hr), MFStr("CreateTexture failed: hr = 0x%08X", hr));
 		if(FAILED(hr))
 		{
 			LOGD("Couldnt Create Texture");
@@ -83,7 +83,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		switch(format)
 		{
 			case TexFmt_Unknown:
-				DBGASSERT(false, "Invalid Texture format: 'TEXF_Unknown'");
+				MFDebug_Assert(false, "Invalid Texture format: 'TEXF_Unknown'");
 				break;
 
 			case TexFmt_A8R8G8B8:
@@ -108,7 +108,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 			}
 
 			default:
-				DBGASSERT(false, "Texture format not yet supported..");
+				MFDebug_Assert(false, "Texture format not yet supported..");
 		}
 
 		pTexture->pTexture->UnlockRect(0);
@@ -145,7 +145,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
 }

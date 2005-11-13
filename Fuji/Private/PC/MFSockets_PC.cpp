@@ -16,7 +16,7 @@ void MFSockets_InitModule()
 
 	error = WSAStartup(MAKEWORD(2, 0), &wsData);
 
-	DBGASSERT(error == 0, "Winsock failed to start..");
+	MFDebug_Assert(error == 0, "Winsock failed to start..");
 
 	// check for correct version
 	if(LOBYTE(wsData.wVersion) != 2 || HIBYTE(wsData.wVersion) != 0)
@@ -55,7 +55,7 @@ sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLen
 
 	if(pAddress->family == MFAF_Inet)
 	{
-		DBGASSERT(pAddress->cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
+		MFDebug_Assert(pAddress->cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
 
 		MFSocketAddressInet *pInet = (MFSocketAddressInet*)pAddress;
 
@@ -74,7 +74,7 @@ sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLen
 	}
 	else
 	{
-		DBGASSERT(false, "Unsupported socket family.");
+		MFDebug_Assert(false, "Unsupported socket family.");
 	}
 
 	return pSockAddr;
@@ -106,7 +106,7 @@ MFSocketAddress* MFSocketsPC_GetSocketAddress(const sockaddr *pSockAddress)
 	}
 	else
 	{
-		DBGASSERT(false, "Unsupported socket family.");
+		MFDebug_Assert(false, "Unsupported socket family.");
 	}
 
 	return pSockAddr;
@@ -116,7 +116,7 @@ int MFSockets_Bind(MFSocket socket, const MFSocketAddress &address)
 {
 	int addrLen = 0;
 	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(&address, &addrLen);
-	DBGASSERT(pSockAddr, "Invalid socket address...");
+	MFDebug_Assert(pSockAddr, "Invalid socket address...");
 
 	return bind((SOCKET)socket, pSockAddr, addrLen);
 }
@@ -125,7 +125,7 @@ int MFSockets_Connect(MFSocket socket, const MFSocketAddress &address)
 {
 	int addrLen = 0;
 	sockaddr *pSockAddr = MFSocketsPC_GetSockaddr(&address, &addrLen);
-	DBGASSERT(pSockAddr, "Invalid socket address...");
+	MFDebug_Assert(pSockAddr, "Invalid socket address...");
 
 	return connect((SOCKET)socket, pSockAddr, addrLen);
 }
@@ -168,7 +168,7 @@ int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uin
 	if(pAddress)
 	{
 		pSockAddr = MFSocketsPC_GetSockaddr(pAddress, &addrLen);
-		DBGASSERT(pSockAddr, "Invalid socket address...");
+		MFDebug_Assert(pSockAddr, "Invalid socket address...");
 	}
 
 	return sendto((SOCKET)socket, pBuffer, bufferLength, flags, pSockAddr, addrLen);
@@ -229,7 +229,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 
 	int result = getaddrinfo(pAddress, pServiceName, pHint ? &hint : NULL, &pSockAddr);
 
-	DBGASSERT(!result, "getaddrinfo failed.");
+	MFDebug_Assert(!result, "getaddrinfo failed.");
 
 	if(!result)
 	{
@@ -249,7 +249,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 			pAI = pAI->ai_next;
 		}
 
-		DBGASSERT(!pAI, STR("Too many address results returned. (>%d)", maxNumAddresses));
+		MFDebug_Assert(!pAI, MFStr("Too many address results returned. (>%d)", maxNumAddresses));
 
 		*ppAddressInfo = addressInfo;
 	}
@@ -262,7 +262,7 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 
 	if(option == MFSO_NonBlocking)
 	{
-		DBGASSERT(optlen == sizeof(uint32), "optval must be an unsigned int defining the blocking mode.");
+		MFDebug_Assert(optlen == sizeof(uint32), "optval must be an unsigned int defining the blocking mode.");
 
 		return ioctlsocket((SOCKET)socket, FIONBIO, (u_long*)optval);
 	}

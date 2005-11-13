@@ -53,7 +53,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
 }
