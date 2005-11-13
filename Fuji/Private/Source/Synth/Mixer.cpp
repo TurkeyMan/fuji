@@ -1,6 +1,5 @@
 #include "Fuji.h"
 #include "MFHeap.h"
-#include "FujiMath.h"
 #include "Synth/Mixer.h"
 
 Mixer::Mixer()

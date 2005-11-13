@@ -11,7 +11,8 @@
 #if !defined(_FUJI_H)
 #define _FUJI_H
 
-// Compiler definitions
+/*** Compiler definitions ***/
+
 #if defined(__GNUC__)
 #define __cdecl __attribute__((__cdecl__))
 #define _cdecl __attribute__((__cdecl__))
@@ -61,7 +62,8 @@ enum MFEndian
 };
 
 
-// Standard platform includes
+/*** Platform specific defines and includes ***/
+
 #if defined(_WINDOWS)
 
 	#include <stdlib.h>
@@ -78,8 +80,6 @@ enum MFEndian
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
 
-//	#define _FUJI_SSE
-
 #elif defined(_XBOX)
 
 	#define DEBUG_KEYBOARD
@@ -87,8 +87,6 @@ enum MFEndian
 	#include <xtl.h>
 
 	char*  FixXBoxFilename(const char *pFilename);
-
-//	#define _FUJI_SSE
 
 #elif defined(_LINUX)
 
@@ -138,7 +136,7 @@ enum MFEndian
 #endif
 
 
-// Compiler compatibility macros
+/*** Compiler compatibility macros ***/
 
 #if defined(_MSC_VER)
 	#define MFALIGN_BEGIN(n) __declspec(align(n))
@@ -158,12 +156,12 @@ enum MFEndian
 #endif
 
 
-// Fuji types
+/*** Fuji Types ***/
 
 #include "MFTypes.h"
 
 
-// Defines and macros
+/*** Defines and macros ***/
 
 #if !defined(NULL) /* In case stdlib.h hasn't been included */
 #define NULL 0
@@ -180,33 +178,18 @@ enum MFEndian
 #define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
 
 
-// Useful templates
+/*** Additional includes ***/
 
-// Min/Max
-/**
- * Returns the minimum of \a a and \a b.
- * Returns the minimum of \a a and \a b.
- */
-template <class T>
-inline T MFMin(T a, T b) { return a < b ? a : b; }
-/**
- * Returns the maximum of \a a and \a b.
- * Returns the maximum of \a a and \a b.
- */
-template <class T>
-inline T MFMax(T a, T b) { return a > b ? a : b; }
+#include "MFTypes.h"
+#include "MFMath.h"
 
-/**
- * Clamps values such that: \a x <= \a y <= \a z.
- * Clamps values such that: \a x <= \a y <= \a z.
- */
-template <class T>
-inline T MFClamp(T x, T y, T z) { return MFMax(x, MFMin(y, z)); }
+#include <new>
+
+#include "Util.h"
 
 
-// Fuji defines
+/*** Callstack profiling ***/
 
-// callstack profiling
 #if !defined(_RETAIL) && !defined(_DEBUG)
 	#define _CALLSTACK_PROFILING
 
@@ -215,15 +198,8 @@ inline T MFClamp(T x, T y, T z) { return MFMax(x, MFMin(y, z)); }
 	#endif
 #endif
 
-
-// Additional includes
-
-#include <new>
-
-#include "FujiMath.h"
-#include "Util.h"
-
 #include "Callstack.h"
+
 
 #endif // _FUJI_H
 

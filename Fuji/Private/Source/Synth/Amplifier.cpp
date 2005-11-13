@@ -1,7 +1,5 @@
 #include "Fuji.h"
-#include "FujiMath.h"
 #include "Synth/Amplifier.h"
-
 
 void Amplifier::Reset()
 {

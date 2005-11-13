@@ -1,5 +1,4 @@
 #include "Fuji.h"
-#include "FujiMath.h"
 #include "Synth/PhaseInverter.h"
 
 void PhaseInverter::SetSource(Filter *_pSource)

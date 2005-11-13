@@ -793,9 +793,6 @@
 				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
-				RelativePath=".\Include\FujiMath.h">
-			</File>
-			<File
 				RelativePath=".\Include\Image.h">
 			</File>
 			<File
@@ -824,6 +821,12 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFMaterial.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMath.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMath.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFMatrix.h">

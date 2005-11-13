@@ -1,5 +1,4 @@
 #include "Fuji.h"
-#include "FujiMath.h"
 #include "Synth/Synth.h"
 
 float GetWave(WaveType waveType, float phase)

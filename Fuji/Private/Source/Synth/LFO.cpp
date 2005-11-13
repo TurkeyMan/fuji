@@ -1,5 +1,4 @@
 #include "Fuji.h"
-#include "FujiMath.h"
 #include "Synth/LFO.h"
 
 Oscillator::Oscillator(float _frequency, float _amplitude, WaveType _waveType)
