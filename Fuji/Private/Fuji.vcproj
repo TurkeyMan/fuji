@@ -639,6 +639,9 @@
 				RelativePath=".\Source\MFSockets_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFSound_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFString.cpp">
 			</File>
 			<File
@@ -856,6 +859,9 @@
 				RelativePath=".\Include\MFSockets.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFSound.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFString.h">
 			</File>
 			<File
@@ -893,9 +899,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Shape.h">
-			</File>
-			<File
-				RelativePath=".\Include\Sound.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">
@@ -1370,6 +1373,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Pc\MFSound_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\MFSystem_PC.cpp">
 			</File>
 			<File
@@ -1557,57 +1563,6 @@
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\Pc\Sound_PC.cpp">
-				<FileConfiguration
-					Name="Debug_XB|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile_XB|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_XB|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail_XB|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail_XB|Xbox"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
 			<Filter

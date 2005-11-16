@@ -46,6 +46,6 @@ uint32 MFFileZipFile_GetSize(const char* pFilename);
 bool MFFileZipFile_Exists(const char* pFilename);
 
 // handle to the ZipFile filesystem
-extern FileSystemHandle hZipFileSystem;
+extern MFFileSystemHandle hZipFileSystem;
 
 #endif

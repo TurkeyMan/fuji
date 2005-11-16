@@ -14,7 +14,7 @@
 #include "Timer.h"
 #include "Font.h"
 #include "Renderer_Internal.h"
-#include "Sound.h"
+#include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
 
 // externs
@@ -143,7 +143,7 @@ void MFSystem_Init()
 	MFDisplay_InitModule();
 	MFInput_InitModule();
 
-	Sound_InitModule();
+	MFSound_InitModule();
 
 	Renderer_InitModule();
 	MFTexture_InitModule();
@@ -175,7 +175,7 @@ void MFSystem_Deinit()
 	MFTexture_DeinitModule();
 	Renderer_DeinitModule();
 
-	Sound_DeinitModule();
+	MFSound_DeinitModule();
 
 	MFInput_DeinitModule();
 	MFDisplay_DeinitModule();
@@ -228,7 +228,7 @@ void MFSystem_Update()
 
 	MFMaterial_Update();
 
-	Sound_Update();
+	MFSound_Update();
 }
 
 void MFSystem_PostUpdate()
@@ -257,7 +257,7 @@ void MFSystem_Draw()
 	// should be the first thing rendered so we only display game vertices
 	DrawMFPrimitiveStats();
 
-	Sound_Draw();
+	MFSound_Draw();
 
 	Callstack_DrawProfile();
 

@@ -31,10 +31,10 @@ struct MFFile
 
 	uint32 createFlags;				// creat flags
 
-	FileSystemHandle filesystem;	// filesystem that created the file
+	MFFileSystemHandle filesystem;	// filesystem that created the file
 	void *pFilesysData;				// extra data related to the file
 
-	AsyncOperationCompletedCallback pAsyncCallback;
+	MFAsyncOperationCompletedCallback pAsyncCallback;
 
 #if !defined(_RETAIL)
 	char fileIdentifier[256];
@@ -62,7 +62,7 @@ struct MFTOCEntry
 
 struct MFMount
 {
-	FileSystemHandle fileSystem;
+	MFFileSystemHandle fileSystem;
 	uint32 mountFlags;
 	const char *pMountpoint;
 	int priority;
@@ -101,7 +101,7 @@ struct MFFileSystemCallbacks
 	int (*GetSize)(MFFile*);
 };
 
-FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks);
-void MFFileSystem_UnregisterFileSystem(FileSystemHandle filesystemHandle);
+MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks);
+void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle);
 
 #endif

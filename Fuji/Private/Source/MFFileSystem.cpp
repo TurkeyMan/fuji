@@ -14,9 +14,9 @@ MFPtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
 MFFileSystemCallbacks **ppFileSystemList;
 
 // internal filesystems
-FileSystemHandle hNativeFileSystem = -1;
-FileSystemHandle hMemoryFileSystem = -1;
-FileSystemHandle hZipFileSystem = -1;
+MFFileSystemHandle hNativeFileSystem = -1;
+MFFileSystemHandle hMemoryFileSystem = -1;
+MFFileSystemHandle hZipFileSystem = -1;
 
 MFFileHandle hDataArchive = NULL;
 
@@ -85,7 +85,7 @@ void MFFileSystem_DeinitModule()
 	gOpenFiles.Deinit();
 }
 
-FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks)
+MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks)
 {
 	for(uint32 a=0; a<gDefaults.filesys.maxFileSystems; a++)
 	{
@@ -119,7 +119,7 @@ FileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbac
 	return -1;
 }
 
-void MFFileSystem_UnregisterFileSystem(FileSystemHandle filesystemHandle)
+void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 {
 	MFDebug_Assert(ppFileSystemList[filesystemHandle], "Filesystem not mounted");
 
@@ -132,6 +132,8 @@ void MFFileSystem_UnregisterFileSystem(FileSystemHandle filesystemHandle)
 char* MFFile_SystemPath(const char *filename)
 {
 	CALLSTACK;
+
+	filename ? filename : "";
 
 #if defined(_XBOX)
 	return MFStr("D:\\Data\\%s", filename);
@@ -150,6 +152,8 @@ char* MFFile_HomePath(const char *filename)
 {
 	CALLSTACK;
 
+	filename ? filename : "";
+
 #if defined(_XBOX)
 	return MFStr("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
@@ -163,7 +167,7 @@ char* MFFile_HomePath(const char *filename)
 
 ///////////////////////////
 // file access functions
-MFFile* MFFile_Open(FileSystemHandle fileSystem, MFOpenData *pOpenData)
+MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 {
 	CALLSTACK;
 
@@ -270,8 +274,34 @@ long MFFile_StdTell(void* fileHandle)
 //////////////////////////////
 // mounted filesystem access
 
+// return a handle to a specific filesystem
+MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle)
+{
+	switch(fileSystemHandle)
+	{
+		case MFFSH_NativeFileSystem:
+			MFDebug_Assert(hNativeFileSystem > -1, "Native filesystem is not available...");
+			if(hNativeFileSystem < 0)
+				MFDebug_Error("Native filesystem is not available...");
+			return hNativeFileSystem;
+		case MFFSH_MemoryFileSystem:
+			MFDebug_Assert(hMemoryFileSystem > -1, "Memory file filesystem is not available...");
+			if(hMemoryFileSystem < 0)
+				MFDebug_Error("Memory file filesystem is not available...");
+			return hMemoryFileSystem;
+		case MFFSH_ZipFileSystem:
+			MFDebug_Assert(hZipFileSystem > -1, "Zip file filesystem is not available...");
+			if(hZipFileSystem < 0)
+				MFDebug_Error("Zip file filesystem is not available...");
+			return hZipFileSystem;
+		default:
+			MFDebug_Error(MFStr("Invalid filesystem handle: %d", fileSystemHandle));
+			return -1;
+	}
+}
+
 // mount a filesystem
-int MFFileSystem_Mount(FileSystemHandle fileSystem, MFMountData *pMountData)
+int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 {
 	CALLSTACK;
 
@@ -485,9 +515,11 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 	return pBuffer;
 }
 
-void MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
+int MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
 {
 	MFDebug_Assert(false, "Not Written....");
+
+	return -1;
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm

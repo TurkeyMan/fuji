@@ -40,6 +40,6 @@ uint32 MFFileNative_GetSize(const char* pFilename);
 bool MFFileNative_Exists(const char* pFilename);
 
 // handle to the native filesystem
-extern FileSystemHandle hNativeFileSystem;
+extern MFFileSystemHandle hNativeFileSystem;
 
 #endif

@@ -40,6 +40,6 @@ MFFileState MFFileMemory_Query(MFFile* fileHandle);
 int MFFileMemory_GetSize(MFFile* fileHandle);
 
 // handle to the Memory filesystem
-extern FileSystemHandle hMemoryFileSystem;
+extern MFFileSystemHandle hMemoryFileSystem;
 
 #endif
