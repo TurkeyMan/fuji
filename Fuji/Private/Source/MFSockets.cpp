@@ -78,21 +78,6 @@ MFInet6Address MFSockets_MakeInet6AddrssFromString(const char *pIP6String)
 	return a;
 }
 
-const char* MFSockets_GetAddressString(const MFSocketAddress &address)
-{
-	switch(address.family)
-	{
-		case MFAF_Inet:
-			return MFSockets_GetInetAddressString(address);
-		case MFAF_Inet6:
-			return MFSockets_GetInet6AddressString(address);
-		default:
-			break;
-	}
-
-	return "";
-}
-
 const char* MFSockets_GetInetAddressString(const MFSocketAddress &address)
 {
 	if(address.family != MFAF_Inet)
@@ -114,6 +99,20 @@ const char* MFSockets_GetInet6AddressString(const MFSocketAddress &address)
 
 	MFSocketAddressInet6 &inet = (MFSocketAddressInet6&)address;
 
-	return MFStr("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X", inet.address.s[0], inet.address.s[1], inet.address.s[2], inet.address.s[3], inet.address.s[4], inet.address.s[5], inet.address.s[6], inet.address.s[7]);
+	return MFStr("%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X", inet.address.s[0], inet.address.s[1], inet.address.s[2], inet.address.s[3], inet.address.s[4], inet.address.s[5], inet.address.s[6], inet.address.s[7]);
 }
 
+const char* MFSockets_GetAddressString(const MFSocketAddress &address)
+{
+	switch(address.family)
+	{
+		case MFAF_Inet:
+			return MFSockets_GetInetAddressString(address);
+		case MFAF_Inet6:
+			return MFSockets_GetInet6AddressString(address);
+		default:
+			break;
+	}
+
+	return "";
+}

@@ -1,26 +1,70 @@
-//
-// Mount Fuji FString Cache
-//
-// just a quick and simple string cache
-//
-class MFStringCache
-{
-public:
-	static MFStringCache *Create(uint32 maxSize);
-	static void Destroy(MFStringCache *pCache);
-	const char *Add(const char *pNewString);
+/**
+ * @file MFStringCache.h
+ * @brief Provides a quick and simple string cache.
+ * @author James Podesta
+ * @defgroup MFStringCache String Cache
+ * @{
+ */
 
-	// get cache for direct read/write
-	char *GetCache() { return pMem; }
+#if !defined(_MFSTRINGCACHE_H)
+#define _MFSTRINGCACHE_H
 
-	// get the actual used size of the cache
-	uint32 GetSize() { return used; }
-	
-	// use this if you have filled the cache yourself
-	void SetSize(uint32 _used) { used = _used; }
+/**
+ * @struct MFStringCache
+ * Represents a Fuji String Cache.
+ */
+struct MFStringCache;
 
-protected:
-	uint32 size;
-	uint32 used;
-	char *pMem;
-};
+/**
+ * Create a string cache.
+ * Creates a string cache.
+ * @param maxSize First byte.
+ * @return Returns a handle to the newly created string cache.
+ */
+MFStringCache* MFStringCache_Create(uint32 maxSize);
+
+/**
+ * Destroy a string cache.
+ * Destroys a string cache.
+ * @param pCache String cache to destroy.
+ * @return None.
+ */
+void MFStringCache_Destroy(MFStringCache *pCache);
+
+/**
+ * Add a string to a string cache.
+ * Adds a string to a string cache.
+ * @param pCache Target string cache.
+ * @param pNewString String to add to the cache.
+ * @return Returns a pointer to the string in the string cache.
+ */
+const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
+
+/**
+ * Get a pointer to the cache memory.
+ * Get a pointer to cache memory for direct read/write.
+ * @param pCache Target string cache.
+ * @return Returns a pointer to the string in the string cache.
+ */
+char* MFStringCache_GetCache(MFStringCache *pCache);
+
+/**
+ * Get the actual used size of a string cache.
+ * Gets the actual used size of a string cache.
+ * @param pCache Target string cache.
+ * @return Returns the number of bytes currently used.
+ */
+uint32 MFStringCache_GetSize(MFStringCache *pCache);
+
+/**
+ * Set the number of bytes used in a string cache.
+ * Sets the number of bytes used in a string cache. Use this if you have filled the cache yourself.
+ * @param pCache Target string cache.
+ * @param used New number of bytes used.
+ * @return None.
+ */
+void MFStringCache_SetSize(MFStringCache *pCache, uint32 used);
+
+#endif
+
+/** @} */

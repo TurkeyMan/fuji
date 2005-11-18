@@ -21,6 +21,7 @@
  * @see MFInput_IsReady()
  */
 bool MFInput_IsAvailable(int source, int sourceID);
+
 /**
  * Tests is an input device is connected.
  * Tests is an input device is connected.

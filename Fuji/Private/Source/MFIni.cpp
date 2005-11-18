@@ -127,7 +127,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	// allocate temporary buffer for strings & lines
 	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
 	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
-	pMFIni->pCache = MFStringCache::Create(MAX_STRINGCACHE);
+	pMFIni->pCache = MFStringCache_Create(MAX_STRINGCACHE);
 
 	// scan though the file
 	pMFIni->lineCount = 0;
@@ -157,7 +157,7 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 	// allocate temporary buffer for strings & lines
 	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
 	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
-	pMFIni->pCache = MFStringCache::Create(MAX_STRINGCACHE);
+	pMFIni->pCache = MFStringCache_Create(MAX_STRINGCACHE);
 
 	// scan though the file
 	pMFIni->lineCount = 0;
@@ -176,7 +176,7 @@ void MFIni::Destroy(MFIni *pIni)
 {
 	MFHeap_Free(pIni->pLines);
 	MFHeap_Free(pIni->pStrings);
-	MFStringCache::Destroy(pIni->pCache);
+	MFStringCache_Destroy(pIni->pCache);
 	MFHeap_Free(pIni);
 }
 
@@ -233,10 +233,10 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 			if (bIsSection)
 			{
-				pStrings[stringCount++] = pCache->Add("section");
+				pStrings[stringCount++] = MFStringCache_Add(pCache, "section");
 				pCurrLine->stringCount++;
 			}
-			pStrings[stringCount++] = pCache->Add(tokenBuffer);
+			pStrings[stringCount++] = MFStringCache_Add(pCache, tokenBuffer);
 			pCurrLine->stringCount++;
 		}
 	}

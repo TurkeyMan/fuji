@@ -16,7 +16,7 @@
 //================================================
 #include "MFVector.h"
 
-class MFStringCache;
+struct MFStringCache;
 
 class MFIniLine
 {
