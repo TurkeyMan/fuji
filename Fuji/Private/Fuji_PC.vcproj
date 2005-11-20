@@ -41,7 +41,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -95,7 +95,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -149,7 +149,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -188,9 +188,6 @@
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Collision.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\DebugMenu.cpp">
 			</File>
 			<File
@@ -206,16 +203,13 @@
 				RelativePath=".\Source\Font.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Heap.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Input.cpp">
+				RelativePath=".\Source\MFCollision.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Input_Internal.h">
+				RelativePath=".\Source\MFDebug.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFFileSystem.cpp">
@@ -224,7 +218,19 @@
 				RelativePath=".\Source\MFFileSystem_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFHeap.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFHeap_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFIni.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFInput.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFInput_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFMaterial.cpp">
@@ -242,7 +248,31 @@
 				RelativePath=".\Source\MFModel_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFRenderer.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFRenderer_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFSockets.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSockets_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFSound_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFString.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFStringCache.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSystem.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSystem_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFTexture.cpp">
@@ -254,13 +284,13 @@
 				RelativePath=".\Source\MFTextureUtil.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\PtrList.cpp">
+				RelativePath=".\Source\MFVector.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Renderer.cpp">
+				RelativePath=".\Source\MFView.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Renderer_Internal.h">
+				RelativePath=".\Source\MFView_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\Shape.cpp">
@@ -269,29 +299,20 @@
 				RelativePath=".\Source\Sprite.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\System.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\System_Internal.h">
-			</File>
-			<File
 				RelativePath=".\Source\Timer.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Util.cpp">
 			</File>
-			<File
-				RelativePath=".\Source\Vector.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\View.cpp">
-			</File>
-			<File
-				RelativePath=".\Source\View_Internal.h">
-			</File>
 			<Filter
 				Name="FileSystem"
 				Filter="">
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.h">
+				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp">
 				</File>
@@ -348,19 +369,10 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\Array.h">
-			</File>
-			<File
 				RelativePath=".\Include\BoundingVolume.h">
 			</File>
 			<File
 				RelativePath=".\Include\Callstack.h">
-			</File>
-			<File
-				RelativePath=".\Include\Collision.h">
-			</File>
-			<File
-				RelativePath=".\Include\Common.h">
 			</File>
 			<File
 				RelativePath=".\Include\DebugMenu.h">
@@ -372,25 +384,49 @@
 				RelativePath=".\Include\Font.h">
 			</File>
 			<File
-				RelativePath=".\Include\FujiMath.h">
-			</File>
-			<File
-				RelativePath=".\Include\Heap.h">
+				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
 				RelativePath=".\Include\Image.h">
 			</File>
 			<File
-				RelativePath=".\Include\Input.h">
+				RelativePath=".\Include\IniFile.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFArray.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFArray.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFCollision.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFCollision.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFDebug.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFHeap.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFIni.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFInput.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFMaterial.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMath.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFMath.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFMatrix.h">
@@ -402,10 +438,40 @@
 				RelativePath=".\Include\MFModel.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFPtrList.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFPtrList.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFRenderer.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFSockets.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFSound.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFString.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFString.inl">
+			</File>
+			<File
 				RelativePath=".\Include\MFStringCache.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFSystem.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFSystem.inl">
+			</File>
+			<File
 				RelativePath=".\Include\MFTexture.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFTypes.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFVector.h">
@@ -414,25 +480,16 @@
 				RelativePath=".\Include\MFVector.inl">
 			</File>
 			<File
+				RelativePath=".\Include\MFView.h">
+			</File>
+			<File
 				RelativePath=".\Include\Primitive.h">
-			</File>
-			<File
-				RelativePath=".\Include\PtrList.h">
-			</File>
-			<File
-				RelativePath=".\Include\Renderer.h">
 			</File>
 			<File
 				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
-				RelativePath=".\Include\Sound.h">
-			</File>
-			<File
 				RelativePath=".\Include\Sprite.h">
-			</File>
-			<File
-				RelativePath=".\Include\System.h">
 			</File>
 			<File
 				RelativePath=".\Include\Timer.h">
@@ -441,16 +498,7 @@
 				RelativePath=".\Include\Util.h">
 			</File>
 			<File
-				RelativePath=".\Include\Vector3.h">
-			</File>
-			<File
-				RelativePath=".\Include\Vector4.h">
-			</File>
-			<File
 				RelativePath=".\Include\Video.h">
-			</File>
-			<File
-				RelativePath=".\Include\View.h">
 			</File>
 			<Filter
 				Name="Synth"
@@ -482,31 +530,43 @@
 				RelativePath=".\Pc\Display_PC.cpp">
 			</File>
 			<File
-				RelativePath=".\Pc\Input_PC.cpp">
+				RelativePath=".\Pc\MFDebug_PC.cpp">
 			</File>
 			<File
-				RelativePath=".\Pc\Input_PC.h">
+				RelativePath=".\Pc\MFHeap_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFInput_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFInput_PC.h">
 			</File>
 			<File
 				RelativePath=".\Pc\MFMaterial_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFModel_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFRenderer_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFRenderer_PC.h">
+			</File>
+			<File
+				RelativePath=".\Pc\MFSockets_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFSound_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFSystem_PC.cpp">
 			</File>
 			<File
 				RelativePath=".\Pc\MFTexture_PC.cpp">
 			</File>
 			<File
 				RelativePath=".\Pc\Primitive_PC.cpp">
-			</File>
-			<File
-				RelativePath=".\Pc\Renderer_PC.cpp">
-			</File>
-			<File
-				RelativePath=".\Pc\Renderer_PC.h">
-			</File>
-			<File
-				RelativePath=".\Pc\Sound_PC.cpp">
-			</File>
-			<File
-				RelativePath=".\Pc\System_PC.cpp">
 			</File>
 			<Filter
 				Name="Materials"
@@ -522,220 +582,6 @@
 					RelativePath=".\Pc\FileSystem\MFFileSystemNative_PC.cpp">
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="XBox"
-			Filter="">
-			<File
-				RelativePath=".\XBox\Display_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\FileSystem_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\Input_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\MFMaterial_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\MFTexture_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\Primitive_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\Renderer_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\Renderer_XB.h">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\Sound_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\XBox\System_XB.cpp">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Retail|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
 		</Filter>
 		<Filter
 			Name="Lib"
