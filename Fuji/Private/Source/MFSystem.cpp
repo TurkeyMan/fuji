@@ -13,7 +13,7 @@
 #include "DebugMenu.h"
 #include "Timer.h"
 #include "Font.h"
-#include "Renderer_Internal.h"
+#include "MFRenderer_Internal.h"
 #include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
 
@@ -78,6 +78,8 @@ MFDefaults gDefaults =
 		128,			// maxOpenFiles
 		16,				// maxFileSystems
 		16,				// maxFileSystemStackSize
+		8,				// maxHTTPFiles
+		512				// maxHTTPFileCache
 	},
 
 	// SoundDefaults
@@ -145,7 +147,7 @@ void MFSystem_Init()
 
 	MFSound_InitModule();
 
-	Renderer_InitModule();
+	MFRenderer_InitModule();
 	MFTexture_InitModule();
 	MFMaterial_InitModule();
 
@@ -173,7 +175,7 @@ void MFSystem_Deinit()
 
 	MFMaterial_DeinitModule();
 	MFTexture_DeinitModule();
-	Renderer_DeinitModule();
+	MFRenderer_DeinitModule();
 
 	MFSound_DeinitModule();
 

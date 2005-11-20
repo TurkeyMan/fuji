@@ -27,20 +27,6 @@ struct MFDisplaySettings
 
 extern MFDisplaySettings gDisplay;
 
-// renderable interface
-enum MFRenderFlags
-{
-	MFRF_OrderMask	= 0x0000000F,
-
-	MFRF_Transparent	= (1<<4),
-	MFRF_Terrain		= (1<<5),
-	MFRF_Overlay		= (1<<6),
-	MFRF_BelowWater	= (1<<7),
-	MFRF_AboveWater	= (1<<8),
-
-	MFRF_ForceInt		= 0x7FFFFFFF
-};
-
 class MFRenderable
 {
 public:

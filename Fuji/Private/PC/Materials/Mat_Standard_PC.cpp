@@ -4,7 +4,7 @@
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
-#include "Renderer_PC.h"
+#include "MFRenderer_PC.h"
 #include "../../Source/Materials/Mat_Standard.h"
 
 static MFMaterial *pSetMaterial;
@@ -37,43 +37,43 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
-			RendererPC_SetTexture(0, pData->pTextures[pData->diffuseMapIndex]->pTexture);
-			RendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			RendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			RendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetTexture(0, pData->pTextures[pData->diffuseMapIndex]->pTexture);
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
-			RendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			RendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
-			RendererPC_SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
 			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&pData->textureMatrix);
 		}
 		else
 		{
-			RendererPC_SetTexture(0, NULL);
+			MFRendererPC_SetTexture(0, NULL);
 		}
 
 		switch(pData->materialType&MF_BlendMask)
 		{
 			case 0:
-				RendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				RendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				RendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 				break;
 			case MF_AlphaBlend:
-				RendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				RendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				RendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
 			case MF_Additive:
-				RendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				RendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				RendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 			case MF_Subtractive:
-				RendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				RendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-				RendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
+				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 				break;
 		}
 	}

@@ -4,105 +4,105 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 
-#include "Renderer_Internal.h"
-#include "Renderer_PC.h"
+#include "MFRenderer_Internal.h"
+#include "MFRenderer_PC.h"
 
 #include <d3d9.h>
 
 extern IDirect3DDevice9 *pd3dDevice;
 
 // direct3d management fucntions
-void RendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
+void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
 {
 	pd3dDevice->SetTexture(stage, pTexture);
 }
 
-void RendererPC_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
+void MFRendererPC_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
 {
 	pd3dDevice->SetVertexShader(pVertexShader);
 }
 
-void RendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
+void MFRendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
 {
 	pd3dDevice->SetStreamSource(stream, pVertexBuffer, offset, stride);
 }
 
-void RendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
+void MFRendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
 {
 	pd3dDevice->SetIndices(pIndexBuffer);
 }
 
-void RendererPC_ApplyGPUStates()
+void MFRendererPC_ApplyGPUStates()
 {
 
 }
 
-void RendererPC_SetDefaultGPUStates()
+void MFRendererPC_SetDefaultGPUStates()
 {
 
 }
 
-void RendererPC_ApplyRenderStates()
+void MFRendererPC_ApplyRenderStates()
 {
 
 }
 
-void RendererPC_SetDefaultRenderStates()
+void MFRendererPC_SetDefaultRenderStates()
 {
 
 }
 
-void RendererPC_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
+void MFRendererPC_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
 {
 	pd3dDevice->SetRenderState(type, value);
 }
 
-void RendererPC_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
+void MFRendererPC_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
 {
 	pd3dDevice->GetRenderState(type, (DWORD*)pValue);
 }
 
-void RendererPC_ApplyTextureStageStates()
+void MFRendererPC_ApplyTextureStageStates()
 {
 
 }
 
-void RendererPC_SetDefaultTextureStageStates()
+void MFRendererPC_SetDefaultTextureStageStates()
 {
 
 }
 
-void RendererPC_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
+void MFRendererPC_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
 {
 	pd3dDevice->SetTextureStageState(stage, type, value);
 }
 
-void RendererPC_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
+void MFRendererPC_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
 {
 	pd3dDevice->GetTextureStageState(stage, type, (DWORD*)pValue);
 }
 
-void RendererPC_ApplySamplerStates()
+void MFRendererPC_ApplySamplerStates()
 {
 
 }
 
-void RendererPC_SetDefaultSamplerStates()
+void MFRendererPC_SetDefaultSamplerStates()
 {
 
 }
 
-void RendererPC_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
+void MFRendererPC_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
 {
 	pd3dDevice->SetSamplerState(sampler, type, value);
 }
 
-void RendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
+void MFRendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
 {
 	pd3dDevice->GetSamplerState(sampler, type, (DWORD*)pValue);
 }
 
-void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
+void MFRendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
 {
 	int numBytes = 0;
 
@@ -183,7 +183,7 @@ void RendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type t
 		*pNumBytesWritten = numBytes;
 }
 
-void RendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
+void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
 {
 	int numComponents = 0;
 

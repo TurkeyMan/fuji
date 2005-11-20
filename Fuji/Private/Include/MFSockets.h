@@ -235,6 +235,13 @@ const char* MFSockets_GetAddressString(const MFSocketAddress &address);
 // MFSockets interface functions
 
 /**
+ * Check if the Fuji socket layer is active.
+ * Check if the Fuji socket layer is active.
+ * @return Returns true if the Fuji socket layer is active and ready for use.
+ */
+bool MFSockets_IsActive();
+
+/**
  * Create a socket.
  * Creates a socket that is bound to a specific service provider.
  * @param addressFamily Address family specification.
@@ -266,7 +273,7 @@ int MFSockets_Bind(MFSocket socket, const MFSocketAddress &address);
  * Establishes a connection to a specified socket.
  * @param socket Descriptor identifying an unconnected socket.
  * @param address Addres of socket to which the connection should be established.
- * @return If no error occurs, 0 is returnd.
+ * @return If no error occurs, 0 is returned.
  */
 int MFSockets_Connect(MFSocket socket, const MFSocketAddress &address);
 

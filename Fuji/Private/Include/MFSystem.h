@@ -71,6 +71,8 @@ struct MFDefaults
 		uint32 maxOpenFiles;			/**< Maximum open files */
 		uint32 maxFileSystems;			/**< Maximum file systems */
 		uint32 maxFileSystemStackSize;	/**< Maximum file system stack size */
+		uint32 maxHTTPFiles;			/**< Maximum number of concurrent HTTP files */
+		uint32 maxHTTPFileCache;		/**< Maximum size of HTTP file cache */
 	} filesys;
 
 	/** Sound Defaults. */

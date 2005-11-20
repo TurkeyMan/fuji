@@ -3,6 +3,7 @@
 #include "FileSystem/MFFileSystemNative.h"
 #include "FileSystem/MFFileSystemMemory.h"
 #include "FileSystem/MFFileSystemZipFile.h"
+#include "FileSystem/MFFileSystemHTTP.h"
 #include "MFPtrList.h"
 
 MFPtrListDL<MFFile> gOpenFiles;
@@ -17,6 +18,8 @@ MFFileSystemCallbacks **ppFileSystemList;
 MFFileSystemHandle hNativeFileSystem = -1;
 MFFileSystemHandle hMemoryFileSystem = -1;
 MFFileSystemHandle hZipFileSystem = -1;
+MFFileSystemHandle hHTTPFileSystem = -1;
+MFFileSystemHandle hFTPFileSystem = -1;
 
 MFFileHandle hDataArchive = NULL;
 
@@ -32,6 +35,7 @@ void MFFileSystem_InitModule()
 	MFFileSystemNative_InitModule();
 	MFFileSystemMemory_InitModule();
 	MFFileSystemZipFile_InitModule();
+	MFFileSystemHTTP_InitModule();
 
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
@@ -65,6 +69,17 @@ void MFFileSystem_InitModule()
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
+
+	if(hHTTPFileSystem != -1)
+	{
+		// register the network filesystems
+		MFMountDataHTTP mountDataHTTP;
+		mountDataHTTP.cbSize = sizeof(MFMountDataHTTP);
+		mountDataHTTP.pMountpoint = "http";
+		mountDataHTTP.priority = MFMP_Normal + 1;
+		mountDataHTTP.flags = MFMF_OnlyAllowExclusiveAccess;
+		MFFileSystem_Mount(hHTTPFileSystem, &mountDataHTTP);
+	}
 }
 
 void MFFileSystem_DeinitModule()
@@ -74,7 +89,7 @@ void MFFileSystem_DeinitModule()
 		MFFile_Close(hDataArchive);
 	}
 
-	// dismount filesystems
+	MFFileSystemHTTP_DeinitModule();
 	MFFileSystemZipFile_DeinitModule();
 	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
@@ -294,6 +309,16 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 			if(hZipFileSystem < 0)
 				MFDebug_Error("Zip file filesystem is not available...");
 			return hZipFileSystem;
+		case MFFSH_HTTPFileSystem:
+			MFDebug_Assert(hHTTPFileSystem > -1, "HTTP file filesystem is not available...");
+			if(hHTTPFileSystem < 0)
+				MFDebug_Error("HTTP file filesystem is not available...");
+			return hHTTPFileSystem;
+		case MFFSH_FTPFileSystem:
+			MFDebug_Assert(hFTPFileSystem > -1, "FTP file filesystem is not available...");
+			if(hFTPFileSystem < 0)
+				MFDebug_Error("FTP file filesystem is not available...");
+			return hFTPFileSystem;
 		default:
 			MFDebug_Error(MFStr("Invalid filesystem handle: %d", fileSystemHandle));
 			return -1;

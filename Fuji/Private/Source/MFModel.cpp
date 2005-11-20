@@ -6,7 +6,7 @@
 #include "MFView.h"
 
 #include "Display_Internal.h"
-#include "Renderer.h"
+#include "MFRenderer.h"
 
 MFPtrList<MFModelTemplate> gModelBank;
 

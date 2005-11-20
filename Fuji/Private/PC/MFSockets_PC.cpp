@@ -10,25 +10,31 @@
 static WSADATA wsData;
 static bool wsActive = false;
 
-void MFSockets_InitModule()
+int MFSockets_InitModulePlatformSpecific()
 {
 	int error;
 
 	error = WSAStartup(MAKEWORD(2, 0), &wsData);
 
-	MFDebug_Assert(error == 0, "Winsock failed to start..");
+	if(error != 0)
+	{
+		MFDebug_Warn(1, "Winsock failed to start..");
+		return 0;
+	}
 
 	// check for correct version
 	if(LOBYTE(wsData.wVersion) != 2 || HIBYTE(wsData.wVersion) != 0)
 	{
 		// incorrect WinSock version
 		WSACleanup();
+		return 0;
 	}
 
 	wsActive = true;
+	return 1;
 }
 
-void MFSockets_DeinitModule()
+void MFSockets_DeinitModulePlatformSpecific()
 {
 	if(wsActive)
 		WSACleanup();
@@ -229,9 +235,20 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 
 	int result = getaddrinfo(pAddress, pServiceName, pHint ? &hint : NULL, &pSockAddr);
 
-	MFDebug_Assert(!result, "getaddrinfo failed.");
+	if(result)
+	{
+		// some error
 
-	if(!result)
+		switch(result)
+		{
+			case WSAHOST_NOT_FOUND:
+				MFDebug_Warn(4, MFStr("Host not found: '%s'", pAddress));
+				break;
+			default:
+				MFDebug_Assert(!result, "getaddrinfo failed.");
+		}
+	}
+	else
 	{
 		addrinfo *pAI = pSockAddr;
 

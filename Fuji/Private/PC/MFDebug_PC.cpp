@@ -6,7 +6,7 @@
 // Output a string to the debugger.
 void MFDebug_Message(const char *pMessage)
 {
-	OutputDebugString((LPCTSTR)pMessage);
+	OutputDebugString((LPCTSTR)MFStr("%s\n", pMessage));
 }
 
 bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)

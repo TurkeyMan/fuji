@@ -1,5 +1,22 @@
 #include "Fuji.h"
-#include "MFSockets.h"
+#include "MFSockets_Internal.h"
+
+static int gIsInitialised = 0;
+
+void MFSockets_InitModule()
+{
+	gIsInitialised = MFSockets_InitModulePlatformSpecific();
+}
+
+void MFSockets_DeinitModule()
+{
+	MFSockets_DeinitModulePlatformSpecific();
+}
+
+bool MFSockets_IsActive()
+{
+	return gIsInitialised != 0;
+}
 
 MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4)
 {

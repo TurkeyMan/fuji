@@ -5,7 +5,7 @@
 #include "MFMatrix.h"
 #include "Primitive.h"
 #include "MFTexture.h"
-#include "Renderer.h"
+#include "MFRenderer.h"
 #include "MFMaterial.h"
 
 #include <d3d9.h>
@@ -79,7 +79,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
 
-	Renderer_Begin();
+	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)

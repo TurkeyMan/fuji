@@ -1,11 +1,12 @@
 #include "Fuji.h"
 #include "MFSockets.h"
 
-void MFSockets_InitModule()
+int MFSockets_InitModulePlatformSpecific()
 {
+	return 0;
 }
 
-void MFSockets_DeinitModule()
+void MFSockets_DeinitModulePlatformSpecific()
 {
 }
 

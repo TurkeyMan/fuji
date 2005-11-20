@@ -285,6 +285,8 @@ enum MFFileSystemHandles
 	MFFSH_NativeFileSystem = 0,	/**< The native operating system FileSystem */
 	MFFSH_MemoryFileSystem,		/**< Memory file FileSystem */
 	MFFSH_ZipFileSystem,		/**< Zip file FileSystem */
+	MFFSH_HTTPFileSystem,		/**< FTTP file FileSystem */
+	MFFSH_FTPFileSystem,		/**< FTP file FileSystem */
 
 	MFFSH_Max,					/**< Maximum FileSystem */
 	MFFSH_ForceInt = 0x7FFFFFFF	/**< Force FileSystem to an int type */

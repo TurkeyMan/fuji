@@ -10,7 +10,7 @@ void MFSystem_HandleEventsPlatformSpecific();
 // Output a string to the debugger.
 void MFDebug_Message(const char *pMessage)
 {
-	fprintf(stderr, pMessage);
+	fprintf(stderr, MFStr("%s\n", pMessage));
 }
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)

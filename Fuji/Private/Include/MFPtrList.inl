@@ -112,13 +112,17 @@ inline void MFPtrList<T>::Clear()
 template<class T>
 inline int MFPtrList<T>::GetLength()
 {
-	T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark;
+	T** iterator = ppMark;
+	while(*iterator!=0) ++iterator;
+	return iterator - ppMark;
 }
 
 template<class T>
 inline int MFPtrList<T>::GetMaxElements()
 {
-	T** iterator = ppMark; while(*(--iterator)!=0); return ppMark - iterator - 1 + GetLength();
+	T** iterator = ppMark;
+	while(*(--iterator)!=0);
+	return ppMark - iterator - 1 + GetLength();
 }
 
 template<class T>
@@ -188,7 +192,8 @@ inline void MFPtrListDL<T>::Deinit()
 template<class T>
 inline T* MFPtrListDL<T>::Create()
 {
-	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName)); return *(--ppMark);
+	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName));
+	return *(--ppMark);
 };
 
 template<class T>
@@ -259,13 +264,17 @@ inline void MFPtrListDL<T>::Clear()
 template<class T>
 inline int MFPtrListDL<T>::GetLength()
 {
-	T** iterator = ppMark; while(*iterator!=0) ++iterator; return iterator - ppMark;
+	T** iterator = ppMark;
+	while(*iterator!=0) ++iterator;
+	return iterator - ppMark;
 }
 
 template<class T>
 inline int MFPtrListDL<T>::GetMaxElements()
 {
-	T** iterator = ppMark; while(*(--iterator)!=0) {} return ppMark - iterator - 1 + GetLength();
+	T** iterator = ppMark;
+	while(*(--iterator)!=0) {}
+	return ppMark - iterator - 1 + GetLength();
 }
 
 template<class T>

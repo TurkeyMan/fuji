@@ -6,7 +6,7 @@
 #include "MFView.h"
 
 #include "Display_Internal.h"
-#include "Renderer.h"
+#include "MFRenderer.h"
 
 extern IDirect3DDevice9 *pd3dDevice;
 
@@ -35,7 +35,7 @@ void MFModel_Draw(MFModel *pModel)
 				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
 
 				MFMaterial_SetMaterial(pMC->pMaterial);
-				Renderer_Begin();
+				MFRenderer_Begin();
 
 				pd3dDevice->SetVertexDeclaration(pMC->pVertexDeclaration);
 				pd3dDevice->SetStreamSource(0, pMC->pVertexBuffer, 0, pMC->vertexStride);
