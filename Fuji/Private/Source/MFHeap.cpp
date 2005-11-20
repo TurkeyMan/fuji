@@ -128,7 +128,6 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 	void *pNew = MFHeap_AllocInternal(bytes, pAllocHeap);
 
 	memcpy(pNew, pMem, MFMin(bytes, pHeader->size));
-	(char*&)pMem -= pHeader->alignment;
 
 	MFHeap_Free(pMem);
 

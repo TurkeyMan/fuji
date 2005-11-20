@@ -387,7 +387,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
 		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
 
-		pMeshChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
 
 		// setup pointers
 		pMeshChunk[a].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
@@ -500,7 +500,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	}
 
 	MFStringCache *pStringCache;
-	pStringCache = MFStringCache::Create(1024*1024);
+	pStringCache = MFStringCache_Create(1024*1024);
 
 	char *pFile;
 	char *pOffset;
@@ -514,7 +514,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
 	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
-	pModelData->pName = pStringCache->Add(name);
+	pModelData->pName = MFStringCache_Add(pStringCache, name);
 
 	int numChunks = 0;
 	int meshChunkIndex = -1;
@@ -561,7 +561,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		{
 			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
-			pSubobjectChunk[a].pSubObjectName = pStringCache->Add(sub.name);
+			pSubobjectChunk[a].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
 //			pSubobjectChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
 			pSubobjectChunk[a].numMeshChunks = sub.matSubobjects.size();
 
@@ -597,18 +597,18 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 		for(a=0; a<pDataHeaders[skeletonChunkIndex].count; a++)
 		{
-			pBoneChunk[a].pBoneName = pStringCache->Add(GetSkeletonChunk()->bones[a].name);
-			pBoneChunk[a].pParentName = pStringCache->Add(GetSkeletonChunk()->bones[a].parentName);
+			pBoneChunk[a].pBoneName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].name);
+			pBoneChunk[a].pParentName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].parentName);
 			pBoneChunk[a].boneOrigin = GetSkeletonChunk()->bones[a].worldMatrix.GetTrans();
 		}
 	}
 
 	// wite strings to end of file
-	memcpy(pOffset, pStringCache->GetCache(), pStringCache->GetSize());
+	memcpy(pOffset, MFStringCache_GetCache(pStringCache), MFStringCache_GetSize(pStringCache));
 
-	char *pCache = pStringCache->GetCache();
+	char *pCache = MFStringCache_GetCache(pStringCache);
 	uint32 stringBase = (uint32&)pCache - ((uint32&)pOffset - (uint32&)pFile);
-	pOffset += pStringCache->GetSize(); // pOffset now equals the file size..
+	pOffset += MFStringCache_GetSize(pStringCache); // pOffset now equals the file size..
 
 	// un-fix-up all the pointers...
 	uint32 base = (uint32&)pModelData;
