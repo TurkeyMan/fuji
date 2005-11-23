@@ -548,6 +548,9 @@
 				RelativePath=".\Pc\MFModel_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Pc\MFPrimitive_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\MFRenderer_PC.cpp">
 			</File>
 			<File
@@ -564,9 +567,6 @@
 			</File>
 			<File
 				RelativePath=".\Pc\MFTexture_PC.cpp">
-			</File>
-			<File
-				RelativePath=".\Pc\Primitive_PC.cpp">
 			</File>
 			<Filter
 				Name="Materials"
