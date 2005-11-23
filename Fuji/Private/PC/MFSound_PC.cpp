@@ -3,7 +3,7 @@
 #include "FileSystem/MFFileSystemNative.h"
 #include "MFPtrList.h"
 #include "Font.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "DebugMenu_Internal.h"
 #include "MFSound_Internal.h"
 

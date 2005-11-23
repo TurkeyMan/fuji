@@ -10,7 +10,7 @@
 #include "MFIni.h"
 #include "MFPtrList.h"
 
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "Font.h"
 #include "MFInput.h"
 

@@ -4,7 +4,7 @@
 #include "Display.h"
 #include "MFView.h"
 #include "Sprite.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 
 #include "Materials/Mat_Standard.h"
 

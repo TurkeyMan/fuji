@@ -3,7 +3,7 @@
 #include "MFView.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "MFTexture.h"
 #include "MFRenderer.h"
 #include "MFMaterial.h"
@@ -43,19 +43,19 @@ extern IDirect3DDevice9 *pd3dDevice;
 
 /*** functions ***/
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
 	CALLSTACK;
 
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
 	CALLSTACK;
 
 }
 
-void DrawMFPrimitiveStats()
+void MFPrimitive_DrawStats()
 {
 
 }

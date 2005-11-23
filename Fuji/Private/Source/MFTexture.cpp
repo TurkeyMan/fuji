@@ -3,7 +3,7 @@
 #include "Display_Internal.h"
 #include "MFInput.h"
 #include "Font.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 

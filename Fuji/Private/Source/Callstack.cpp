@@ -7,7 +7,7 @@
 #include "Display.h"
 #include "MFView.h"
 #include "Timer.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "MFSystem.h"
 #include "Font.h"
 #include "DebugMenu.h"

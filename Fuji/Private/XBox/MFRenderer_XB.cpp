@@ -2,7 +2,7 @@
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
-#include "View_Internal.h"
+#include "MFView_Internal.h"
 
 #include "Renderer_Internal.h"
 #include "Renderer_XB.h"

@@ -5,7 +5,7 @@
 #include "Fuji.h"
 #include "Display.h"
 #include "MFView.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "Shape.h"
 
 /**** Globals ****/

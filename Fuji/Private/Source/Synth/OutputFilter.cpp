@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFHeap.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "Font.h"
 
 #include "Synth/OutputFilter.h"

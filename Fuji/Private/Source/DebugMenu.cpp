@@ -4,7 +4,7 @@
 #include "DebugMenu_Internal.h"
 #include "MFInput.h"
 #include "Font.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 
 #if defined(_WINDOWS)
 #include <d3d9.h>

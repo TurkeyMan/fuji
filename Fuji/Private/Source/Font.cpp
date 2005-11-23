@@ -5,7 +5,7 @@
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Font.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "MFFileSystem.h"
 
 #include "Materials/Mat_Standard.h"

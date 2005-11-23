@@ -9,7 +9,7 @@
 #include "MFView_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "Font.h"
-#include "Primitive.h"
+#include "MFPrimitive_Internal.h"
 #include "DebugMenu.h"
 #include "Timer.h"
 #include "Font.h"
@@ -153,7 +153,7 @@ void MFSystem_Init()
 
 	MFModel_InitModule();
 
-	Primitive_InitModule();
+	MFPrimitive_InitModule();
 	Font_InitModule();
 
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
@@ -169,7 +169,7 @@ void MFSystem_Deinit()
 	MFHeap_Release();
 
 	Font_DeinitModule();
-	Primitive_DeinitModule();
+	MFPrimitive_DeinitModule();
 
 	MFModel_DeinitModule();
 
@@ -257,7 +257,7 @@ void MFSystem_Draw()
 	MFView_SetOrtho(&rect);
 
 	// should be the first thing rendered so we only display game vertices
-	DrawMFPrimitiveStats();
+	MFPrimitive_DrawStats();
 
 	MFSound_Draw();
 
