@@ -2,8 +2,9 @@
 #include "Display_Internal.h"
 #include "MFView.h"
 #include "DebugMenu_Internal.h"
+#include "MFMaterial.h"
 #include "MFInput.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "MFPrimitive.h"
 
 #if defined(_WINDOWS)
@@ -267,7 +268,7 @@ int Menu::GetItemCount()
 
 float Menu::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : folderColour, name);
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : folderColour, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -333,7 +334,7 @@ void Menu::Draw()
 	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y+menuDimensions.y, 0);
 	MFEnd();
 
-	Font_DrawText(gpDebugFont, menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
+	MFFont_DrawText(MFFont_GetDebugFont(), menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
 
 	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 	float logoMargin = 5.0f;
@@ -437,7 +438,7 @@ MFVector Menu::GetDimensions(float maxWidth)
 // MenuItemStatic
 float MenuItemStatic::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, name);
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, name);
 	return MENU_FONT_HEIGHT;
 }
 
@@ -456,7 +457,7 @@ MFVector MenuItemStatic::GetDimensions(float maxWidth)
 // MenuItemInt
 float MenuItemInt::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %d", name, *pData));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %d", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -494,7 +495,7 @@ MFVector MenuItemInt::GetDimensions(float maxWidth)
 // MenuItemFloat
 float MenuItemFloat::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f", name, *pData));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f", name, *pData));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -539,7 +540,7 @@ MFVector MenuItemFloat::GetDimensions(float maxWidth)
 // MenuItemBool
 float MenuItemBool::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, data ? "true" : "false"));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, data ? "true" : "false"));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -565,7 +566,7 @@ MFVector MenuItemBool::GetDimensions(float maxWidth)
 // MenuItemIntString
 float MenuItemIntString::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, ppValues[data]));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %s", name, ppValues[data]));
 	return MENU_FONT_HEIGHT;
 }
 
@@ -623,7 +624,7 @@ float MenuItemColour::ListDraw(bool selected, const MFVector &_pos, float maxWid
 {
 	MFVector pos = _pos;
 
-	Font_DrawText(gpDebugFont, pos+MakeVector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: 0x%08X", name, pData->ToPackedColour()));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, MENU_FONT_HEIGHT*0.25f, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: 0x%08X", name, pData->ToPackedColour()));
 
 	pos += MakeVector(maxWidth - 55.0f, 2.0f, 0.0f);
 
@@ -686,7 +687,7 @@ MFVector MenuItemColour::GetDimensions(float maxWidth)
 // MenuItemPosition2D
 float MenuItemPosition2D::ListDraw(bool selected, const MFVector &pos, float maxWidth)
 {
-	Font_DrawText(gpDebugFont, pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f, %.2f", name, pData->x, pData->y));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos, MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s: %.2f, %.2f", name, pData->x, pData->y));
 	return MENU_FONT_HEIGHT;
 }
 

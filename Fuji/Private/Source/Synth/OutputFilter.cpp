@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFHeap.h"
 #include "MFPrimitive.h"
-#include "Font.h"
+#include "MFFont.h"
 
 #include "Synth/OutputFilter.h"
 
@@ -220,7 +220,7 @@ void OutputFilter::Draw()
 
 	float y = 100.0f;
 
-	Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "Buffer:");
+	MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
@@ -283,7 +283,7 @@ void OutputFilter::Draw()
 	float width = 40.0f;
 	y += width + 10.0f;
 
-	Font_DrawTextf(gpDebugFont, 30.0f, y-10.0f, 20.0f, MFVector::one, "Wave:");
+	MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y-10.0f, 20.0f, MFVector::one, "Wave:");
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 

@@ -10,7 +10,7 @@
 #if !defined(_FUJI_UTIL)
 #include "Display_Internal.h"
 #include "MFPrimitive.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "MFView.h"
 #endif
 

@@ -2,7 +2,7 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "MFPtrList.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "MFPrimitive.h"
 #include "DebugMenu_Internal.h"
 #include "MFSound_Internal.h"
@@ -123,10 +123,10 @@ void MFSound_Draw()
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
 		{
-			Font_DrawTextf(gpDebugFont, 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Track %d: %s", a, gMusicTracks[a].name);
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Track %d: %s", a, gMusicTracks[a].name);
 			y += 20.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
 			y += 20.0f;
 
 			static float bitrate = 0.0f;
@@ -135,10 +135,10 @@ void MFSound_Draw()
 			if(br)
 				bitrate = (float)br*0.02f + bitrate * 0.98f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
 			y += 20.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
 			y += 25.0f;
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
@@ -173,7 +173,7 @@ void MFSound_Draw()
 
 			y += 30.0f;
 
-			Font_DrawTextf(gpDebugFont, 30.0f, y, 20.0f, MFVector::one, "Buffer:");
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 

@@ -10,6 +10,8 @@
 
 #include <d3d9.h>
 
+static bool gRenderQuads = false;
+
 struct LitVertex
 {
 	enum
@@ -66,6 +68,14 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 	primType = type & PT_PrimMask;
 
+	if(primType == PT_QuadList)
+	{
+		primType = PT_TriList;
+		gRenderQuads = true;
+	}
+	else
+		gRenderQuads = false;
+
 	if(type & PT_Untextured)
 	{
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
@@ -86,7 +96,11 @@ void MFBegin(uint32 vertexCount)
 {
 	CALLSTACK;
 
-	beginCount = vertexCount;
+	if(gRenderQuads)
+		beginCount = vertexCount * 3;
+	else
+		beginCount = vertexCount;
+
 	currentVert = 0;
 
 	current.u = current.v = 0.0f;
@@ -148,7 +162,31 @@ void MFSetPosition(float x, float y, float z)
 	current.pos.y = y;
 	current.pos.z = z;
 
-	primBuffer[currentVert] = current;
+	if(gRenderQuads && (currentVert & 1))
+	{
+		LitVertex &prev = primBuffer[currentVert - 1];
+
+		primBuffer[currentVert + 0] = prev;
+		primBuffer[currentVert + 1] = prev;
+		primBuffer[currentVert + 2] = current;
+		primBuffer[currentVert + 3] = current;
+		primBuffer[currentVert + 4] = current;
+
+		primBuffer[currentVert + 0].pos.x = current.pos.x;
+		primBuffer[currentVert + 1].pos.y = current.pos.y;
+		primBuffer[currentVert + 2].pos.x = prev.pos.x;
+		primBuffer[currentVert + 3].pos.y = prev.pos.y;
+
+		primBuffer[currentVert + 0].u = current.u;
+		primBuffer[currentVert + 1].v = current.v;
+		primBuffer[currentVert + 2].u = prev.u;
+		primBuffer[currentVert + 3].v = prev.v;
+
+		currentVert += 4;
+	}
+	else
+		primBuffer[currentVert] = current;
+
 	++currentVert;
 }
 

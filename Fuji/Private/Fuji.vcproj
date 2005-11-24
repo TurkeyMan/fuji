@@ -579,9 +579,6 @@
 				RelativePath=".\Source\Display_Internal.h">
 			</File>
 			<File
-				RelativePath=".\Source\Font.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
@@ -595,6 +592,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFFileSystem_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFFont.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFFont_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFHeap.cpp">
@@ -805,9 +808,6 @@
 				RelativePath=".\Include\Display.h">
 			</File>
 			<File
-				RelativePath=".\Include\Font.h">
-			</File>
-			<File
 				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
@@ -830,6 +830,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFFont.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFHeap.h">

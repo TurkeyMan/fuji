@@ -9,7 +9,7 @@
 #include "Timer.h"
 #include "MFPrimitive.h"
 #include "MFSystem.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "DebugMenu.h"
 
 #if defined(_CALLSTACK_PROFILING)

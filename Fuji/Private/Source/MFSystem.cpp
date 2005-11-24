@@ -8,11 +8,11 @@
 #include "MFInput_Internal.h"
 #include "MFView_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "Font.h"
+#include "MFFont_Internal.h"
 #include "MFPrimitive_Internal.h"
 #include "DebugMenu.h"
 #include "Timer.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "MFRenderer_Internal.h"
 #include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
@@ -154,7 +154,7 @@ void MFSystem_Init()
 	MFModel_InitModule();
 
 	MFPrimitive_InitModule();
-	Font_InitModule();
+	MFFont_InitModule();
 
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
@@ -168,7 +168,7 @@ void MFSystem_Deinit()
 
 	MFHeap_Release();
 
-	Font_DeinitModule();
+	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();
 
 	MFModel_DeinitModule();
@@ -274,11 +274,11 @@ void MFSystem_Draw()
 		float y = 30.0f;
 #endif
 
-		Font_DrawTextf(gpDebugFont, x, y, 0, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
+		MFFont_DrawTextf(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			Font_DrawTextf(gpDebugFont, 80.0f, gDefaults.display.displayHeight-50.0f, 0, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 80.0f, gDefaults.display.displayHeight-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 		const float iconSize = 55.0f;

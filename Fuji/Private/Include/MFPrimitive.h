@@ -24,6 +24,7 @@ enum PrimType
 	PT_TriList,			/**< Triangle List */
 	PT_TriStrip,		/**< Triangle Strip */
 	PT_TriFan,			/**< Triangle Fan */
+	PT_QuadList,		/**< Quad List */
 	PT_PrimMask = 0x07,	/**< Primitive type mask */
 
 	PT_Prelit = 64,		/**< Instructs the renderer to disable lighting */
