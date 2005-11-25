@@ -137,6 +137,165 @@ void MFSetPosition(float x, float y, float z);
  */
 void MFEnd();
 
+/**
+ * Draw a textured square.
+ * Draws a textured square.
+ * @param x X coordinate of square.
+ * @param y Y coordinate of square.
+ * @param w Width of square.
+ * @param h Height of square.
+ * @param colour Colour of square.
+ * @param su Source U coordinate.
+ * @param sv Source V coordinate.
+ * @param du Destination U coordinate.
+ * @param dv Destination V coordinate.
+ * @return None.
+ */
+void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour=MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+
+/**
+ * Draw a textured square.
+ * Draws a textured square.
+ * @param min Min coordinate of the square.
+ * @param max Max coordinate of the square.
+ * @param colour Colour of square.
+ * @param su Source U coordinate.
+ * @param sv Source V coordinate.
+ * @param du Destination U coordinate.
+ * @param dv Destination V coordinate.
+ * @return None.
+ */
+void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector &colour=MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+
+/**
+ * Draw an untextured square.
+ * Draws an untextured square.
+ * @param x X coordinate of square.
+ * @param y Y coordinate of square.
+ * @param w Width of square.
+ * @param h Height of square.
+ * @param colour Colour of square.
+ * @return None.
+ */
+void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector &colour=MFVector::one);
+
+/**
+ * Draw an untextured square.
+ * Draws an untextured square.
+ * @param min Min coordinate of the square.
+ * @param max Max coordinate of the square.
+ * @param colour Colour of square.
+ * @return None.
+ */
+void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector &colour=MFVector::one);
+
+/**
+ * Draw a box.
+ * Draws a box.
+ * @param boxMin Min coordinate of the box.
+ * @param boxMax Max coordinate of the box.
+ * @param colour Colour of box.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the box in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw a sphere.
+ * Draws a sphere.
+ * @param position Position of the sphere.
+ * @param radius Radius of the sphere.
+ * @param segments Number of segments (Subdivisions around the sphere).
+ * @param slices Number of slices (Subdivisions down the sphere).
+ * @param colour Colour of sphere.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the sphere in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw a capsule.
+ * Draws a capsule.
+ * @param startPoint Point in the center of the first end sphere.
+ * @param endPoint Point in the center of the second end sphere.
+ * @param radius Radius of the capsule.
+ * @param segments Number of segments (Subdivisions around the capsule).
+ * @param slices Number of slices (Subdivisions down the capsule).
+ * @param colour Colour of capsule.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the capsule in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw a cylinder.
+ * Draws a cylinder.
+ * @param startPoint Point in the center of the first end.
+ * @param endPoint Point in the center of the second end.
+ * @param radius Radius of the cylinder.
+ * @param segments Number of segments (Subdivisions around the cylinder).
+ * @param slices Number of slices (Subdivisions down the cylinder).
+ * @param colour Colour of cylinder.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the cylinder in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw a disc representing a plane.
+ * Draws a disc representing a plane.
+ * @param point Point on the plane where the plane will be drawn.
+ * @param normal The planes	normal vector.
+ * @param span How far the plane spans from the point.
+ * @param colour Colour of plane.
+ * @param mat World matrix for plane.
+ * @param wireframe Renders the plane in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw a cone.
+ * Draws a cone.
+ * @param base Point in the center of the base.
+ * @param point The tip of the cone.
+ * @param radius Radius of the base of the cone.
+ * @param segments Number of segments (Subdivisions around the cone).
+ * @param colour Colour of cone.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the cone in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments = 8, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+
+/**
+ * Draw an arrow.
+ * Draws an arrow.
+ * @param pos Point at the base of the arrow.
+ * @param dir Direction of the arrow.
+ * @param length The length of the arrow.
+ * @param radius Radius of the arrow.
+ * @param colour Colour of the arrow.
+ * @param mat World matrix for rendering.
+ * @param wireframe Renders the arrow in wireframe.
+ * @return None.
+ */
+void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = false);
+
+/**
+ * Draw a transform.
+ * Draws a transform used for visualising a matrix.
+ * @param mat Matrix representing the transform to render.
+ * @param scale Scale for the transform.
+ * @param lite Renders the transform as axis lines as lines instead of solid cylinders.
+ * @return None.
+ */
+void MFPrimitive_DrawTransform(const MFMatrix& mat, float scale, bool lite = false);
+
 #endif // _MFPRIMITIVE_H
 
 /** @} */

@@ -555,9 +555,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\Source\BoundingVolume.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
@@ -580,6 +577,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\Image.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFBoundingVolume.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFCollision.cpp">
@@ -634,6 +634,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFModel_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFPrimitive.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFPrimitive_Internal.h">
@@ -694,9 +697,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFView_Internal.h">
-			</File>
-			<File
-				RelativePath=".\Source\Shape.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Sprite.cpp">
@@ -796,9 +796,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\BoundingVolume.h">
-			</File>
-			<File
 				RelativePath=".\Include\Callstack.h">
 			</File>
 			<File
@@ -818,6 +815,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFArray.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFBoundingVolume.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFCollision.h">
@@ -908,9 +908,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFView.h">
-			</File>
-			<File
-				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">

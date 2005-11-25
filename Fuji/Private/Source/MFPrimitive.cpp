@@ -6,13 +6,12 @@
 #include "Display.h"
 #include "MFView.h"
 #include "MFPrimitive.h"
-#include "Shape.h"
 
 /**** Globals ****/
 
 /**** Functions ****/
 
-void Shape_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -42,7 +41,7 @@ void Shape_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	CALLSTACK;
 
@@ -72,7 +71,7 @@ void Shape_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colou
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVector& colour)
 {
 	CALLSTACK;
 
@@ -94,7 +93,7 @@ void Shape_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVect
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void Shape_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVector& colour)
 {
 	CALLSTACK;
 
@@ -117,7 +116,7 @@ void Shape_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVec
 }
 
 // draw a box from a min and a max
-void Shape_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -245,7 +244,7 @@ void Shape_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVecto
 }
 
 // draw's a sphere .. position.w defines position.w
-void Shape_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -331,7 +330,7 @@ void Shape_DrawSphere(const MFVector &position, float radius, int segments, int 
 }
 
 // draw's a capsule from a start and end point and a position.w
-void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -349,7 +348,7 @@ void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, flo
 	// if capsule has no length .. might as well just draw a sphere ..
 	if(len<0.1f)
 	{
-		Shape_DrawSphere(startPoint, radius, segments, slices, colour, mat, wireframe);
+		MFPrimitive_DrawSphere(startPoint, radius, segments, slices, colour, mat, wireframe);
 		return;
 	}
 
@@ -481,7 +480,7 @@ void Shape_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, flo
 }
 
 // draw's a cylinder from a position position.w and height
-void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -636,7 +635,7 @@ void Shape_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, fl
 }
 
 // draw's a plane from a position normal and span
-void Shape_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -699,7 +698,7 @@ void Shape_DrawPlane(const MFVector &point, const MFVector &normal, float span, 
 	MFEnd();
 }
 
-void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 
@@ -789,7 +788,7 @@ void Shape_DrawCone(const MFVector &base, const MFVector &point, float radius, i
 	MFEnd();
 }
 
-void Shape_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	CALLSTACK;
 	MFVector v = dir;
@@ -807,12 +806,12 @@ void Shape_DrawArrow(const MFVector& pos, const MFVector& dir, float length, flo
 		MFEnd();
 	}
 	else
-		Shape_DrawCylinder(pos, pos+v, radius, 5, 0, colour, mat, wireframe);
+		MFPrimitive_DrawCylinder(pos, pos+v, radius, 5, 0, colour, mat, wireframe);
 
-	Shape_DrawCone(pos+v, pos+v+v*0.25f, length*0.03f + radius*2.0f, 5, colour, mat, wireframe);
+	MFPrimitive_DrawCone(pos+v, pos+v+v*0.25f, length*0.03f + radius*2.0f, 5, colour, mat, wireframe);
 }
 
-void Shape_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
+void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 {
 	CALLSTACK;
 
@@ -835,14 +834,14 @@ void Shape_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 		MFSetPosition(0.0f,0.0f,scale*0.8f);
 		MFEnd();
 
-		//MFShape_DrawCone(MakeVector(scale*0.8f,0.0f,0.0f), MakeVector(scale,0.0f,0.0f), scale*0.04f, 5, MakeVector(1.0f, 0.0f, 0.0f, 1.0f), _mat);
-		//MFShape_DrawCone(MakeVector(0.0f, scale*0.8f,0.0f), MakeVector(0.0f,scale,0.0f), scale*0.04f, 5, MakeVector(0.0f, 1.0f, 0.0f, 1.0f), _mat);
-		//MFShape_DrawCone(MakeVector(0.0f, 0.0f, scale*0.8f), MakeVector(0.0f,0.0f,scale), scale*0.04f, 5, MakeVector(0.0f, 0.0f, 1.0f, 1.0f), _mat);
+		//MFPrimitive_DrawCone(MakeVector(scale*0.8f,0.0f,0.0f), MakeVector(scale,0.0f,0.0f), scale*0.04f, 5, MakeVector(1.0f, 0.0f, 0.0f, 1.0f), _mat);
+		//MFPrimitive_DrawCone(MakeVector(0.0f, scale*0.8f,0.0f), MakeVector(0.0f,scale,0.0f), scale*0.04f, 5, MakeVector(0.0f, 1.0f, 0.0f, 1.0f), _mat);
+		//MFPrimitive_DrawCone(MakeVector(0.0f, 0.0f, scale*0.8f), MakeVector(0.0f,0.0f,scale), scale*0.04f, 5, MakeVector(0.0f, 0.0f, 1.0f, 1.0f), _mat);
 	}
 	else
 	{
-		Shape_DrawArrow(MFVector::zero, MakeVector(1.0f,0.0f,0.0f), scale, scale * 0.02f, MakeVector(1,0,0,1), _mat);
-		Shape_DrawArrow(MFVector::zero, MakeVector(0.0f,1.0f,0.0f), scale, scale * 0.02f, MakeVector(0,1,0,1), _mat);
-		Shape_DrawArrow(MFVector::zero, MakeVector(0.0f,0.0f,1.0f), scale, scale * 0.02f, MakeVector(0,0,1,1), _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(1.0f,0.0f,0.0f), scale, scale * 0.02f, MakeVector(1,0,0,1), _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,1.0f,0.0f), scale, scale * 0.02f, MakeVector(0,1,0,1), _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,0.0f,1.0f), scale, scale * 0.02f, MakeVector(0,0,1,1), _mat);
 	}
 }

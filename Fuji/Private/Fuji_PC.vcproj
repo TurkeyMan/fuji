@@ -182,9 +182,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\Source\BoundingVolume.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\Callstack.cpp">
 			</File>
 			<File
@@ -200,10 +197,10 @@
 				RelativePath=".\Source\Display_Internal.h">
 			</File>
 			<File
-				RelativePath=".\Source\Font.cpp">
+				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
-				RelativePath=".\Source\Image.cpp">
+				RelativePath=".\Source\MFBoundingVolume.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFCollision.cpp">
@@ -216,6 +213,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFFileSystem_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFFont.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFHeap.cpp">
@@ -246,6 +246,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFModel_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFPrimitive.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFRenderer.cpp">
@@ -291,9 +294,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFView_Internal.h">
-			</File>
-			<File
-				RelativePath=".\Source\Shape.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\Sprite.cpp">
@@ -369,9 +369,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\BoundingVolume.h">
-			</File>
-			<File
 				RelativePath=".\Include\Callstack.h">
 			</File>
 			<File
@@ -379,9 +376,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Display.h">
-			</File>
-			<File
-				RelativePath=".\Include\Font.h">
 			</File>
 			<File
 				RelativePath=".\Include\Fuji.h">
@@ -399,6 +393,9 @@
 				RelativePath=".\Include\MFArray.inl">
 			</File>
 			<File
+				RelativePath=".\Include\MFBoundingVolume.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFCollision.h">
 			</File>
 			<File
@@ -409,6 +406,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFFileSystem.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFFont.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFHeap.h">
@@ -436,6 +436,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFModel.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFPrimitive.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFPtrList.h">
@@ -484,9 +487,6 @@
 			</File>
 			<File
 				RelativePath=".\Include\Primitive.h">
-			</File>
-			<File
-				RelativePath=".\Include\Shape.h">
 			</File>
 			<File
 				RelativePath=".\Include\Sprite.h">
