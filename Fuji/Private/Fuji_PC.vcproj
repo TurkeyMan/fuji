@@ -135,7 +135,7 @@
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough=""
