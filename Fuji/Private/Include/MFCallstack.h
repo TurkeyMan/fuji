@@ -1,3 +1,11 @@
+/**
+ * @file MFCallstack.h
+ * @brief Runtime callstack management.
+ * @author Manu Evans
+ * @defgroup MFCallstack Callstack Management
+ * @{
+ */
+
 #if !defined(_MFCALLSTACK_H)
 #define _MFCALLSTACK_H
 
@@ -63,7 +71,21 @@ public:
 
 // functions
 
+/**
+ * Log the callback to the console.
+ * Logs the callback to the console.
+ * @return None. 
+ */
 void MFCallstack_Log();
+
+/**
+ * Get a string containing the current callstack.
+ * Get2 a string containing the current callstack.
+ * @return Pointer to a string containing the current callstack.
+ * @remarks The string is allocated in the circular temporary string buffer, results should not be stored long term.
+ */
 const char* MFCallstack_GetCallstackString();
 
 #endif // _MFCALLSTACK_H
+
+/** @} */

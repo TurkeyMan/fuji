@@ -182,9 +182,6 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath=".\Source\Callstack.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\DebugMenu.cpp">
 			</File>
 			<File
@@ -201,6 +198,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFBoundingVolume.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFCallstack.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFCallstack_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFCollision.cpp">
@@ -369,9 +372,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath=".\Include\Callstack.h">
-			</File>
-			<File
 				RelativePath=".\Include\DebugMenu.h">
 			</File>
 			<File
@@ -394,6 +394,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFBoundingVolume.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFCallstack.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFCollision.h">
