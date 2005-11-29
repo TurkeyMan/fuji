@@ -12,20 +12,20 @@ extern uint32 currentRenderFlags;
 
 int Mat_Standard_RegisterMaterial(void *pPlatformData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 void Mat_Standard_UnregisterMaterial()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 int Mat_Standard_Begin(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
@@ -80,7 +80,7 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 
 void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(Mat_Standard_Data));
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
@@ -100,7 +100,7 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 

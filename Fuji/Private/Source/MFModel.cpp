@@ -35,7 +35,7 @@ MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelD
 
 MFModelTemplate* MFModel_FindTemplate(const char *pName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFModelTemplate **ppIterator = gModelBank.Begin();
 

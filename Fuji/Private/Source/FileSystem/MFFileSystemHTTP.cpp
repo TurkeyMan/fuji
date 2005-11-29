@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFSystem.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemHTTP.h"
 #include "MFSockets.h"
@@ -171,7 +172,7 @@ bool MFFileHTTP_RequestHeader(const char *pServer, int port, const char *pPath, 
 
 int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataHTTP), "Incorrect size for MFOpenDataHTTP structure. Invalid pOpenData.");
 	MFOpenDataHTTP *pHTTP = (MFOpenDataHTTP*)pOpenData;
@@ -326,7 +327,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileHTTP_Close(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gHTTPFiles.Destroy((MFFileHTTPData*)fileHandle->pFilesysData);
 
@@ -335,21 +336,21 @@ int MFFileHTTP_Close(MFFile* fileHandle)
 
 int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 int MFFileHTTP_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int newPos = 0;
 
@@ -374,18 +375,18 @@ int MFFileHTTP_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 
 int MFFileHTTP_Tell(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return (int)fileHandle->offset;
 }
 
 MFFileState MFFileHTTP_Query(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->state;
 }
 
 int MFFileHTTP_GetSize(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->length;
 }

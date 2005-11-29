@@ -13,7 +13,7 @@ extern MFVector gClearColour;
 
 int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
@@ -48,7 +48,7 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 void Display_DestroyDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->Release();
 	d3d8->Release();
@@ -56,7 +56,7 @@ void Display_DestroyDisplay()
 
 void Display_BeginFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->BeginScene();
 
@@ -69,7 +69,7 @@ void Display_BeginFrame()
 
 void Display_EndFrame()
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
@@ -85,14 +85,14 @@ void Display_SetClearColour(float r, float g, float b, float a)
 
 void Display_ClearScreen(uint32 flags)
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, (CS_Colour ? D3DCLEAR_TARGET : NULL)|(CS_ZBuffer ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
 void SetViewport(float x, float y, float width, float height)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DVIEWPORT8 vp;
 	vp.X = (DWORD)((x / 640.0f) * (float)display.width);
@@ -107,7 +107,7 @@ void SetViewport(float x, float y, float width, float height)
 
 void ResetViewport()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DVIEWPORT8 vp;
 	vp.X = 0;

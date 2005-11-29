@@ -10,6 +10,7 @@
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
 #include "MFIni.h"
+#include "MFSystem.h"
 
 #if defined(ALLOW_RAW_INPUT)
 	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
@@ -342,7 +343,7 @@ const char * const PS2Buttons[] =
 
 void MFInput_InitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int a;
 
@@ -392,7 +393,7 @@ void MFInput_InitModulePlatformSpecific()
 
 void MFInput_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int a;
 
@@ -486,7 +487,7 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DIJOYSTATE2 joyState;
 	int a;
@@ -550,7 +551,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
 	DWORD elements = SAMPLE_BUFFER_SIZE;
@@ -600,7 +601,7 @@ void GetWindowMousePos(float *pX, float *pY)
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if defined(ALLOW_DI_MOUSE)
 	if(id == 0 && gMouseCount == 1)
@@ -777,7 +778,7 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 // internal functions
 void MFInputPC_SetCooperativeLevels()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int a;
 
@@ -821,7 +822,7 @@ void MFInputPC_SetCooperativeLevels()
 
 BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(gGamepadCount<16)
 	{
@@ -852,7 +853,7 @@ BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* 
 
 void MFInputPC_Acquire(bool acquire)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int a;
 

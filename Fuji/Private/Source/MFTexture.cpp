@@ -6,6 +6,7 @@
 #include "MFPrimitive.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
+#include "MFSystem.h"
 
 #if defined(_PSP)
 	#include <pspdisplay.h>

@@ -181,7 +181,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
@@ -216,7 +216,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileNative_Close(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	fclose((FILE*)fileHandle->pFilesysData);
 
@@ -225,7 +225,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 
 int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -238,7 +238,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -252,7 +252,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DWORD method = 0;
 
@@ -282,25 +282,25 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 
 int MFFileNative_Tell(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->offset;
 }
 
 MFFileState MFFileNative_Query(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->state;
 }
 
 int MFFileNative_GetSize(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->length;
 }
 
 uint32 MFFileNative_GetSize(const char* pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	uint32 fileSize = 0;
 	FILE *pFile = fopen(pFilename, "rb");
@@ -316,7 +316,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 bool MFFileNative_Exists(const char* pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	bool exists = false;
 

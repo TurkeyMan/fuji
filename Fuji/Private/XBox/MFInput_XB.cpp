@@ -71,7 +71,7 @@ const char * const XBoxButtons[] =
 
 void Input_InitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
     XDEVICE_PREALLOC_TYPE xdpt[] =
 	{
@@ -115,13 +115,13 @@ void Input_InitModulePlatformSpecific()
 
 void Input_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void Input_UpdatePlatformSpecific()
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	CheckDeviceChanges(dsDevices);
 }
@@ -158,7 +158,7 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 
 void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(Input_IsReady(IDD_Gamepad, id))
 	{
@@ -206,7 +206,7 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 
 void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	CheckKeyboard();
 
@@ -215,7 +215,7 @@ void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
 
 void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #pragma message("XBox mouse?")
 }
@@ -274,7 +274,7 @@ bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
 //
 void CheckDeviceChanges(DEVICE_STATE *pdsDevices)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DWORD dwInsert, dwRemove;
 	int i;
@@ -296,7 +296,7 @@ void CheckDeviceChanges(DEVICE_STATE *pdsDevices)
 
 void HandleDeviceChanges(XPP_DEVICE_TYPE *pxdt, DWORD dwInsert, DWORD dwRemove)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DWORD iPort, iSlot, dwMask;
 	//DWORD dwErr;
@@ -357,7 +357,7 @@ void HandleDeviceChanges(XPP_DEVICE_TYPE *pxdt, DWORD dwInsert, DWORD dwRemove)
 //
 void ShowMUInfo(char chDrive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	WCHAR szName[MAX_MUNAME + 1];
 	ULARGE_INTEGER uliFreeAvail, uliFree, uliTotal;
@@ -380,7 +380,7 @@ void ShowMUInfo(char chDrive)
 //
 void EnumSavedGames(char chDrive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	HANDLE hFind;
 	XGAME_FIND_DATA xgfd;
@@ -410,7 +410,7 @@ void EnumSavedGames(char chDrive)
 //
 HANDLE GetFirstController()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	HANDLE hPad = 0;
 	int i;
@@ -430,7 +430,7 @@ HANDLE GetFirstController()
 
 void CheckKeyboard()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	XINPUT_DEBUG_KEYSTROKE ks;
 	CHAR szOut[2] = "X";

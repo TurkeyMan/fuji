@@ -12,7 +12,7 @@ extern IDirect3DDevice9 *pd3dDevice;
 
 void MFModel_Draw(MFModel *pModel)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&pModel->worldMatrix);
 	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&MFView_GetViewToScreenMatrix());

@@ -5,6 +5,7 @@
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "MFInput_PC.h"
+#include "MFSystem.h"
 
 #include <stdio.h>
 #include <d3d9.h>
@@ -46,7 +47,7 @@ int currentMode = 2;
 // apply display mode callback
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gDisplay.fullscreenWidth = resList[currentMode][0];
 	gDisplay.fullscreenHeight = resList[currentMode][1];
@@ -74,7 +75,7 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 // resolution change callback
 void ChangeResCallback(MenuObject *pMenu, void *pData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MenuItemIntString *pRes = static_cast<MenuItemIntString*>(pMenu);
 
@@ -104,7 +105,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 // windows WndProc
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	switch(message)
 	{
@@ -199,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void MFDisplay_DestroyWindow()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(pd3dDevice)
 	{
@@ -217,7 +218,7 @@ void MFDisplay_DestroyWindow()
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gDisplay.fullscreenWidth = gDisplay.width = width;
 	gDisplay.fullscreenHeight = gDisplay.height = height;
@@ -391,7 +392,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 void MFDisplay_ResetDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DFORMAT PixelFormat;
 
@@ -457,7 +458,7 @@ void MFDisplay_ResetDisplay()
 
 void MFDisplay_DestroyDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->Release();
 	d3d9->Release();
@@ -465,7 +466,7 @@ void MFDisplay_DestroyDisplay()
 
 void MFDisplay_BeginFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->BeginScene();
 
@@ -478,7 +479,7 @@ void MFDisplay_BeginFrame()
 
 void MFDisplay_EndFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->EndScene();
 	pd3dDevice->Present(NULL, NULL, NULL, NULL);
@@ -494,14 +495,14 @@ void MFDisplay_SetClearColour(float r, float g, float b, float a)
 
 void MFDisplay_ClearScreen(uint32 flags)
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
 void MFDisplay_SetViewport(float x, float y, float width, float height)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DVIEWPORT9 vp;
 	vp.X = (DWORD)((x / 640.0f) * (float)gDisplay.width);
@@ -516,7 +517,7 @@ void MFDisplay_SetViewport(float x, float y, float width, float height)
 
 void MFDisplay_ResetViewport()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	D3DVIEWPORT9 vp;
 	vp.X = 0;

@@ -9,6 +9,7 @@
 #include "MFFileSystem.h"
 #include "MFIni.h"
 #include "MFPtrList.h"
+#include "MFSystem.h"
 
 #include "MFPrimitive.h"
 #include "MFFont.h"
@@ -72,7 +73,7 @@ MaterialBrowser matBrowser;
 
 void MFMaterial_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gMaterialRegistry.Init("Material Registry", gDefaults.material.maxMaterialTypes);
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
@@ -125,7 +126,7 @@ void MFMaterial_InitModule()
 
 void MFMaterial_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	// destroy stock materials
 	MFMaterial_Destroy(pNoneMaterial);
@@ -158,7 +159,7 @@ void MFMaterial_DeinitModule()
 
 void MFMaterial_Update()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterial **ppMatIterator = gMaterialList.Begin();
 
@@ -174,7 +175,7 @@ void MFMaterial_Update()
 // interface functions
 int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MaterialDefinition *pDef = gMaterialDefList.Create();
 
@@ -197,7 +198,7 @@ int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
 
 int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MaterialDefinition *pDef = gMaterialDefList.Create();
 
@@ -213,7 +214,7 @@ int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs)
 
 void MFMaterial_DestroyDefinition(MaterialDefinition *pDefinition)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(pDefinition->ownsIni)
 	{
@@ -226,7 +227,7 @@ void MFMaterial_DestroyDefinition(MaterialDefinition *pDefinition)
 
 void MFMaterial_RemoveDefinitions(const char *pName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MaterialDefinition *pDef = pDefinitionRegistry;
 
@@ -257,7 +258,7 @@ void MFMaterial_RemoveDefinitions(const char *pName)
 
 void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialType *pMatType;
 	pMatType = (MFMaterialType*)MFHeap_Alloc(sizeof(MFMaterialType) + strlen(pName) + 1);
@@ -274,7 +275,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 
 void Materual_UnregisterMaterialType(const char *pName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialType *pMatType = MaterialInternal_GetMaterialType(pName);
 
@@ -286,7 +287,7 @@ void Materual_UnregisterMaterialType(const char *pName)
 
 MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialType **ppIterator = gMaterialRegistry.Begin();
 
@@ -302,7 +303,7 @@ MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName)
 
 MFMaterial* MFMaterial_Create(const char *pName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterial *pMat = MFMaterial_Find(pName);
 
@@ -351,7 +352,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 
 int MFMaterial_Destroy(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pMaterial->refCount--;
 
@@ -369,7 +370,7 @@ int MFMaterial_Destroy(MFMaterial *pMaterial)
 
 MFMaterial* MFMaterial_Find(const char *pName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterial **ppIterator = gMaterialList.Begin();
 
@@ -390,7 +391,7 @@ MFMaterial* MFMaterial_GetCurrent()
 
 void MFMaterial_SetMaterial(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(!pMaterial)
 		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
@@ -400,7 +401,7 @@ void MFMaterial_SetMaterial(MFMaterial *pMaterial)
 
 MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	switch(materialIdentifier)
 	{
@@ -433,7 +434,7 @@ MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
 // internal functions
 const char* MaterialInternal_GetIDString()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 /*
 	char *id = &stringBuffer[stringBufferOffset];
 	*id = NULL;
@@ -450,7 +451,7 @@ const char* MaterialInternal_GetIDString()
 
 void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat, const char *pDefinition)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFIniLine *pLine = pDefIni->GetFirstLine()->FindEntry("material", pDefinition);
 
@@ -563,14 +564,14 @@ MFDebug_Assert(false, "Fix Me!!!");
 
 int MFMaterial_GetNumParamaters(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return pMaterial->pType->materialCallbacks.pGetNumParams ? pMaterial->pType->materialCallbacks.pGetNumParams() : 0;
 }
 
 const char* MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterIndex)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialParamaterInfo *pInfo;
 
@@ -582,7 +583,7 @@ const char* MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterInde
 
 int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pParameterName)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialParamaterInfo *pInfo;
 
@@ -602,7 +603,7 @@ int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pPar
 
 int MFMaterial_GetNumParamaterArgs(MFMaterial *pMaterial, int paramaterIndex)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialParamaterInfo *pInfo;
 
@@ -614,7 +615,7 @@ int MFMaterial_GetNumParamaterArgs(MFMaterial *pMaterial, int paramaterIndex)
 
 MFParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterialParamaterInfo *pInfo;
 
@@ -626,7 +627,7 @@ MFParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterI
 
 void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 value)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, paramaterIndex, argIndex, value);
@@ -634,7 +635,7 @@ void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argI
 
 int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
 	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex);

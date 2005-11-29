@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFSystem.h"
 
 #include "MFMaterial_Internal.h"
 #include "Materials/Mat_Standard.h"

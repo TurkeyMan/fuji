@@ -1,11 +1,12 @@
 #include "Fuji.h"
-#include "MFFileSystem_Internal.h"
+#include "MFFileSystem.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "MFPtrList.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
-#include "DebugMenu_Internal.h"
+#include "DebugMenu.h"
 #include "MFSound_Internal.h"
+#include "MFSystem.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -48,7 +49,7 @@ MenuItemBool showSoundStats;
 
 void MFSound_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	HRESULT hr;
 
@@ -83,7 +84,7 @@ void MFSound_InitModule()
 
 void MFSound_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
@@ -99,7 +100,7 @@ void MFSound_DeinitModule()
 
 void MFSound_Update()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
@@ -112,7 +113,7 @@ void MFSound_Update()
 
 void MFSound_Draw()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if !defined(_RETAIL)
 	if(!showSoundStats) return;
@@ -239,67 +240,67 @@ void MFSound_Draw()
 
 int MFSound_LoadBank(const char *pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 void MFSound_UnloadBank(int bankID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 int MFSound_FindSound(const char *pSoundName, int searchBankID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 int MFSound_Play(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 int MFSound_Play3D(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 void MFSound_Stop(int voice)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void MFSound_SetListenerPos(const MFMatrix& listenerPos)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFSound_SetVolume(int voice, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFSound_SetPlaybackRate(int voice, float rate)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFSound_SetMasterVolume(float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	pDSPrimaryBuffer->SetVolume();
 }
@@ -315,7 +316,7 @@ int MFSoundPC_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 //
 int MFSound_MusicPlay(const char *pFilename, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int t = 0;
 
@@ -422,7 +423,7 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 
 void MFSound_ServiceMusicBuffer(int trackID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFSoundMusic& track = gMusicTracks[trackID];
 
@@ -488,7 +489,7 @@ void MFSound_ServiceMusicBuffer(int trackID)
 
 void MFSound_MusicUnload(int track)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	// bad tracks, just ignore
 	if (track == -1) return;
@@ -504,14 +505,14 @@ void MFSound_MusicUnload(int track)
 
 void MFSound_MusicSeek(int track, float seconds)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
 }
 
 void MFSound_MusicPause(int track, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(pause)
 	{
@@ -527,7 +528,7 @@ void MFSound_MusicPause(int track, bool pause)
 
 void MFSound_MusicSetVolume(int track, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }

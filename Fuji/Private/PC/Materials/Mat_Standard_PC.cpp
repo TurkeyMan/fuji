@@ -15,20 +15,20 @@ extern IDirect3DDevice9 *pd3dDevice;
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
@@ -83,7 +83,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Standard_Data));
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
@@ -103,7 +103,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 

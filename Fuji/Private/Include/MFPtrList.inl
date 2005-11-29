@@ -7,7 +7,7 @@ extern void *gEmptyPtrListDL[2];
 template<class T>
 inline void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(maxElements==0)
 	{
@@ -32,7 +32,7 @@ inline void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 template<class T>
 inline void MFPtrList<T>::Deinit()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(ppMark!=0, "not initialised");
 
 	while(*(--ppMark)!=0) {}
@@ -43,7 +43,7 @@ inline void MFPtrList<T>::Deinit()
 template<class T>
 inline T* MFPtrList<T>::Create(T* p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName));
 
@@ -53,7 +53,7 @@ inline T* MFPtrList<T>::Create(T* p)
 template<class T>
 inline void MFPtrList<T>::Destroy(T* p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
@@ -78,7 +78,7 @@ inline T** MFPtrList<T>::Begin()
 template<class T>
 inline T** MFPtrList<T>::Find(T* p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
@@ -96,7 +96,7 @@ inline T** MFPtrList<T>::Find(T* p)
 template<class T>
 inline void MFPtrList<T>::Destroy(T** p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 	MFDebug_Assert(!IsEmpty(), MFStr("list %s is empty",pName));
 
@@ -141,7 +141,7 @@ inline bool MFPtrList<T>::IsEmpty()
 template<class T>
 inline void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(maxElements==0)
 	{
@@ -166,7 +166,7 @@ inline void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementS
 template<class T>
 inline void MFPtrListDL<T>::Deinit()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(ppMark!=0, "not initialised"); // stops double deinit's
 
 	T* mem = (T*)(ppMark);  // initialise with a high value
@@ -199,7 +199,7 @@ inline T* MFPtrListDL<T>::Create()
 template<class T>
 inline void MFPtrListDL<T>::Destroy(T* p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;
@@ -224,7 +224,7 @@ inline T** MFPtrListDL<T>::Begin()
 template<class T>
 inline T** MFPtrListDL<T>::Find(T* p)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(p!=0, "invalid parameter");
 
 	T **iterator = ppMark;

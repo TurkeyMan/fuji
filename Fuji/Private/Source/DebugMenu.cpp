@@ -6,6 +6,7 @@
 #include "MFInput.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
+#include "MFSystem.h"
 
 #if defined(_WINDOWS)
 #include <d3d9.h>

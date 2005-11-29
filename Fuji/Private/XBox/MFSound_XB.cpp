@@ -47,7 +47,7 @@ MenuItemBool showSoundStats;
 
 void Sound_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 
@@ -62,14 +62,14 @@ void Sound_InitModule()
 
 void Sound_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pDirectSound->Release();
 }
 
 void Sound_Update()
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
@@ -82,7 +82,7 @@ void Sound_Update()
 
 void Sound_Draw()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if !defined(_RETAIL)
 	if(!showSoundStats) return;
@@ -211,56 +211,56 @@ void Sound_Draw()
 
 int Sound_LoadBank(const char *pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 void Sound_UnloadBank(int bankID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 int Sound_FindSound(const char *pSoundName, int searchBankID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
 void Sound_Play(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_Stop(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_Play3D(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_Stop3D(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_SetListenerPos(const MFVector& listenerPos)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
@@ -268,21 +268,21 @@ void Sound_SetListenerPos(const MFVector& listenerPos)
 
 void Sound_SetVolume(int soundID, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_SetMasterVolume(int soundID, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
 
 void Sound_SetPlaybackRate(int soundID, float rate)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 
 }
@@ -299,7 +299,7 @@ int SoundXB_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 //
 int Sound_MusicPlay(const char *pFilename, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int t = 0;
 
@@ -410,7 +410,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 
 void Sound_ServiceMusicBuffer(int trackID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if defined(_USE_LIBVORBIS)
 	SoundMusic& track = gMusicTracks[trackID];
@@ -478,7 +478,7 @@ void Sound_ServiceMusicBuffer(int trackID)
 
 void Sound_MusicUnload(int track)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if defined(_USE_LIBVORBIS)
 	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
@@ -493,7 +493,7 @@ void Sound_MusicUnload(int track)
 
 void Sound_MusicSeek(int track, float seconds)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 #if defined(_USE_LIBVORBIS)
 	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
@@ -502,7 +502,7 @@ void Sound_MusicSeek(int track, float seconds)
 
 void Sound_MusicPause(int track, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(pause)
 	{
@@ -518,7 +518,7 @@ void Sound_MusicPause(int track, bool pause)
 
 void Sound_MusicSetVolume(int track, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }

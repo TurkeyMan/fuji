@@ -44,24 +44,14 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 
 	// build callstack log string for message box
 #if !defined(_RETAIL)
-	Callstack_Log();
-
-	char callstack[2048] = "";
-
-	for(int a=Callstack.size()-1; a>=0; a--)
-	{
-		char *pTemp = MFStr("  %-32s\n",Callstack[a]);
-//		char *pTemp = MFStr("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? MFStr(" [%s]",pFunc->pComment) : "");
-		if(strlen(callstack) + strlen(pTemp) < sizeof(callstack) - 1)
-		strcat(callstack, pTemp);
-	}
-
+	MFCallstack_Log();
+	const char *pCallstack = MFCallstack_GetCallstackString();
 #else
-	char callstack[] = "Not available in _RETAIL builds";
+	const char *pCallstack = "Not available in _RETAIL builds";
 #endif
 
 	// query for debug or exit of process
-	if(!MFDebugPC_MsgBox(MFStr("Failed Condition: (%s)\n%s\nFile: %s\nLine: %d\n\nCallstack:\n%s", pReason, pMessage, pFile, line, callstack), "Assertion Failure, do you wish to debug?"))
+	if(!MFDebugPC_MsgBox(MFStr("Failed Condition: (%s)\n%s\nFile: %s\nLine: %d\n\nCallstack:\n%s", pReason, pMessage, pFile, line, pCallstack), "Assertion Failure, do you wish to debug?"))
 	{
 		ExitProcess(0);
 	}

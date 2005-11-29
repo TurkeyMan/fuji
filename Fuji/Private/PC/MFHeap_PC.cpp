@@ -8,13 +8,13 @@ static HANDLE gMainHeap = NULL;
 
 void MFHeap_InitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFHeap_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(HeapValidate(gMainHeap, 0, NULL), "System Heap corruption detected!!");
 }
@@ -22,7 +22,7 @@ void MFHeap_DeinitModulePlatformSpecific()
 // use CRT memory functions
 void* MFHeap_SystemMalloc(uint32 bytes)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(!gMainHeap)
 		gMainHeap = GetProcessHeap();
@@ -32,14 +32,14 @@ void* MFHeap_SystemMalloc(uint32 bytes)
 
 void* MFHeap_SystemRealloc(void *buffer, uint32 bytes)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return HeapReAlloc(gMainHeap, 0, buffer, bytes);
 }
 
 void MFHeap_SystemFree(void *buffer)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(HeapValidate(gMainHeap, 0, buffer), "System heap corruption detected!");
 	HeapFree(gMainHeap, 0, buffer);

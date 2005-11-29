@@ -1,6 +1,8 @@
 #if !defined(_SYNTH_H)
 #define _SYNTH_H
 
+#include "MFSystem.h"
+
 #define SYNTH_SAMPLERATE 44100
 #define SYNTH_SAMPLEPERIOD (1.0f/44100.0f)
 

@@ -13,7 +13,7 @@
 
 void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour, float su, float sv, float du, float dv)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -43,7 +43,7 @@ void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& 
 
 void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -73,7 +73,7 @@ void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector&
 
 void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVector& colour)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -95,7 +95,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const 
 
 void MFPrimitive_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVector& colour)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	D3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
@@ -118,7 +118,7 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector& pos, float w, float h, const
 // draw a box from a min and a max
 void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(wireframe)
 	{
@@ -246,7 +246,7 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 // draw's a sphere .. position.w defines position.w
 void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(segments >= 3, "DrawSphere requires at least 3 segments!");
 	MFDebug_Assert(slices >= 1, "DrawSphere requires at least 1 slices!");
@@ -332,7 +332,7 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
 // draw's a capsule from a start and end point and a position.w
 void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	slices += 1 - (slices&0x1);
 
@@ -482,7 +482,7 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 // draw's a cylinder from a position position.w and height
 void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
@@ -637,7 +637,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 // draw's a plane from a position normal and span
 void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int segments = 12;
 
@@ -700,7 +700,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
 
 void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(segments >= 3, "DrawCylinder requires at least 3 segments!");
 
@@ -790,7 +790,7 @@ void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float rad
 
 void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFVector v = dir;
 	v.Normalise3();
 
@@ -813,7 +813,7 @@ void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float lengt
 
 void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(lite)
 	{

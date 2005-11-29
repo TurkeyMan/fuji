@@ -14,7 +14,7 @@ const float MFAspect_16x10 = 16.0f/10.0f;
 
 void MFDisplay_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int error;
 
@@ -27,7 +27,7 @@ void MFDisplay_InitModule()
 
 void MFDisplay_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDisplay_DestroyDisplay();
 }

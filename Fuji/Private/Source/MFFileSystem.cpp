@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFSystem.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "FileSystem/MFFileSystemMemory.h"
@@ -146,7 +147,7 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 // interface functions
 char* MFFile_SystemPath(const char *filename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	filename ? filename : "";
 
@@ -165,7 +166,7 @@ char* MFFile_SystemPath(const char *filename)
 
 char* MFFile_HomePath(const char *filename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	filename ? filename : "";
 
@@ -184,7 +185,7 @@ char* MFFile_HomePath(const char *filename)
 // file access functions
 MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFFile *pFile = gOpenFiles.Create();
 
@@ -204,7 +205,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 
 int MFFile_Close(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int fileID = fileHandle->filesystem;
 
@@ -217,14 +218,14 @@ int MFFile_Close(MFFile* fileHandle)
 // read/write functions
 int MFFile_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->Read(fileHandle, pBuffer, bytes, async);
 }
 
 int MFFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->Write(fileHandle, pBuffer, bytes, async);
 }
@@ -232,14 +233,14 @@ int MFFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool asy
 // offset management (these are stdio function signature compliant)
 int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->Seek(fileHandle, bytes, relativity);
 }
 
 int MFFile_Tell(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->Tell(fileHandle);
 }
@@ -247,7 +248,7 @@ int MFFile_Tell(MFFile* fileHandle)
 // return the state of a file
 MFFileState MFFile_Query(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->Query(fileHandle);
 }
@@ -255,7 +256,7 @@ MFFileState MFFile_Query(MFFile* fileHandle)
 // get file stream length (retuurs -1 for an undefined stream length)
 int MFFile_GetSize(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->GetSize(fileHandle);
 }
@@ -328,7 +329,7 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 // mount a filesystem
 int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMount *pMount;
 	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + strlen(pMountData->pMountpoint) + 1);

@@ -12,7 +12,7 @@ MFMatrix gTransformationMatrices[MFMT_Max];
 
 void MFRenderer_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	memset(gRenderStates, 0, sizeof(gRenderStates));
 	memset(gCurrentRenderStates, -1, sizeof(gCurrentRenderStates));
@@ -25,34 +25,34 @@ void MFRenderer_InitModule()
 
 void MFRenderer_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 int MFRenderer_Begin()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial);
 }
 
 const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return gTransformationMatrices[type];
 }
 
 void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gTransformationMatrices[type] = matrix;
 }
 
 uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	uint32 t = gRenderStates[renderState];
 	gRenderStates[renderState] = value;
@@ -62,7 +62,7 @@ uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value)
 
 uint32 MFRenderer_GetRenderStateOverride(uint32 renderState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return gRenderStates[renderState];
 }

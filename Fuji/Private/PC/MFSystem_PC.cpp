@@ -12,6 +12,8 @@ MFPlatform gCurrentPlatform = FP_PC;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
+	MFCALLSTACK;
+
 	apphInstance = hInstance;
 
 	srand(GetTickCount());
@@ -33,6 +35,8 @@ void MFSystem_DeinitModulePlatformSpecific()
 
 void MFSystem_HandleEventsPlatformSpecific()
 {
+	MFCALLSTACK;
+
 	MSG msg;
 
 	while(PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))

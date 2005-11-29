@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFCallstack_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
 #include "Display_Internal.h"
@@ -122,14 +123,14 @@ void RestartCallback(MenuObject *pMenu, void *pData)
 
 void MFSystem_Init()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	CrcInit();
 
 	MFHeap_InitModule();
 
 	DebugMenu_InitModule();
-	Callstack_InitModule();
+	MFCallstack_InitModule();
 
 	MFSystem_InitModulePlatformSpecific();
 
@@ -164,7 +165,7 @@ void MFSystem_Init()
 
 void MFSystem_Deinit()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFHeap_Release();
 
@@ -191,7 +192,7 @@ void MFSystem_Deinit()
 
 	MFSystem_DeinitModulePlatformSpecific();
 
-	Callstack_DeinitModule();
+	MFCallstack_DeinitModule();
 	DebugMenu_DeinitModule();
 
 	MFHeap_DeinitModule();
@@ -199,7 +200,7 @@ void MFSystem_Deinit()
 
 void MFSystem_Update()
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 	MFSystem_UpdatePlatformSpecific();
 
@@ -235,13 +236,13 @@ void MFSystem_Update()
 
 void MFSystem_PostUpdate()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFSystem_Draw()
 {
-	CALLSTACKc;
+	MFCALLSTACKc;
 
 #if !defined(_RETAIL)
 	MFView_Push();
@@ -261,7 +262,7 @@ void MFSystem_Draw()
 
 	MFSound_Draw();
 
-	Callstack_DrawProfile();
+	MFCallstack_Draw();
 
 	if(gDrawSystemInfo)
 	{
@@ -309,7 +310,7 @@ void MFSystem_Draw()
 
 int MFSystem_GameLoop()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	// allow's game to set defaults and what not
 	// before the system begins initialisation
@@ -329,7 +330,7 @@ int MFSystem_GameLoop()
 		{
 			MFSystem_HandleEventsPlatformSpecific();
 
-			Callstack_BeginFrame();
+			MFCallstack_BeginFrame();
 			MFSystem_UpdateTimeDelta();
 			gFrameCount++;
 
@@ -343,7 +344,7 @@ int MFSystem_GameLoop()
 			Game_Draw();
 			MFSystem_Draw();
 
-			Callstack_EndFrame();
+			MFCallstack_EndFrame();
 			MFDisplay_EndFrame();
 		}
 
@@ -357,7 +358,7 @@ int MFSystem_GameLoop()
 
 void MFSystem_UpdateTimeDelta()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gSystemTimer.Update();
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();

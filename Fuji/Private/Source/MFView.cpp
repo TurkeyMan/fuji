@@ -86,7 +86,7 @@ void MFView_SetAspectRatio(float aspectRatio)
 
 void MFView_SetProjection()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pCurrentView->isOrtho = false;
 	pCurrentView->viewProjDirty = true;
@@ -108,7 +108,7 @@ void MFView_SetProjection()
 
 void MFView_SetOrtho(MFRect *pOrthoRect)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pCurrentView->viewProjDirty = true;
 	pCurrentView->isOrtho = true;

@@ -5,6 +5,8 @@
 
 void MFFileSystemZipFile_InitModule()
 {
+	MFCALLSTACK;
+
 	MFFileSystemCallbacks fsCallbacks;
 
 	fsCallbacks.RegisterFS = MFFileSystemZipFile_Register;
@@ -26,6 +28,8 @@ void MFFileSystemZipFile_InitModule()
 
 void MFFileSystemZipFile_DeinitModule()
 {
+	MFCALLSTACK;
+
 	MFFileSystem_UnregisterFileSystem(hZipFileSystem);
 }
 
@@ -88,6 +92,8 @@ int ztesterror_file_func(voidpf opaque, voidpf stream)
 
 int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flatten, int *pStringLengths)
 {
+	MFCALLSTACK;
+
 	// count files and calculate string cache length
 	int numFiles = 0;
 
@@ -125,6 +131,8 @@ int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flat
 
 MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
 {
+	MFCALLSTACK;
+
 	int zipFileIndex = unzGoToFirstFile(zipFile);
 
 	// search through files in zip archive
@@ -187,6 +195,8 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
@@ -237,6 +247,8 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileSystemZipFile_Dismount(MFMount *pMount)
 {
+	MFCALLSTACK;
+
 	MFFileSystem_ReleaseToc(pMount->pEntries, pMount->numFiles);
 
 	unzClose((unzFile)pMount->pFilesysData);
@@ -246,6 +258,8 @@ int MFFileSystemZipFile_Dismount(MFMount *pMount)
 
 MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
+	MFCALLSTACK;
+
 	MFFileHandle hFile = NULL;
 
 	// recurse toc
@@ -268,7 +282,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 
 int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
 	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
@@ -336,7 +350,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileZipFile_Close(MFFile* pFile)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	unzCloseCurrentFile((unzFile)pFile->pFilesysData);
 
@@ -352,7 +366,7 @@ int MFFileZipFile_Close(MFFile* pFile)
 
 int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -365,7 +379,7 @@ int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 
 int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -376,7 +390,7 @@ int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool a
 
 int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int newPos = 0;
 
@@ -441,6 +455,8 @@ zzip_off_t zsize_file_func(int fd)
 //int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flatten, int *pStringLengths)
 int MFFileSystemZipFile_GetNumEntries(ZZIP_DIR *zipFile, bool recursive, bool flatten, int *pStringLengths)
 {
+	MFCALLSTACK;
+
 	// count files and calculate string cache length
 	int numFiles = 0;
 
@@ -471,6 +487,8 @@ int MFFileSystemZipFile_GetNumEntries(ZZIP_DIR *zipFile, bool recursive, bool fl
 
 MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
 {
+	MFCALLSTACK;
+
 	ZZIP_DIRENT *pDirEnt;
 
 	// search through files in zip archive
@@ -524,6 +542,8 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MF
 
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
@@ -574,6 +594,8 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileSystemZipFile_Dismount(MFMount *pMount)
 {
+	MFCALLSTACK;
+
 	MFFileSystem_ReleaseToc(pMount->pEntries, pMount->numFiles);
 
 	zzip_closedir((ZZIP_DIR*)pMount->pFilesysData);
@@ -583,6 +605,8 @@ int MFFileSystemZipFile_Dismount(MFMount *pMount)
 
 MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
+	MFCALLSTACK;
+
 	MFFileHandle hFile = NULL;
 
 	// recurse toc
@@ -605,7 +629,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 
 int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
 	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
@@ -663,7 +687,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileZipFile_Close(MFFile* pFile)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	ZZIP_DIR *pDir = ((ZZIP_FILE*)pFile->pFilesysData)->dir;
 
@@ -682,7 +706,7 @@ int MFFileZipFile_Close(MFFile* pFile)
 
 int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -695,7 +719,7 @@ int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
 
 int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -706,7 +730,7 @@ int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool a
 
 int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int newPos = 0;
 
@@ -734,18 +758,18 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 
 int MFFileZipFile_Tell(MFFile* pFile)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return (int)pFile->offset;
 }
 
 MFFileState MFFileZipFile_Query(MFFile* pFile)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return pFile->state;
 }
 
 int MFFileZipFile_GetSize(MFFile* pFile)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return pFile->length;
 }

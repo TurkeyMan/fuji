@@ -9,7 +9,7 @@ extern IDirectSound8 *pDirectSound;
 
 void OutputFilter::Create(int _bufferLength, int _updateLength)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(_bufferLength%_updateLength == 0, "bufferLength is not a multiple of updateLength.");
 

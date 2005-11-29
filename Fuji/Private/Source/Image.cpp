@@ -49,7 +49,7 @@ FujiImage::~FujiImage()
 
 void FujiImage::Convert(ImageFormat toFormat)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	unsigned char *p = (unsigned char *)pixels;
 	unsigned char temp;
@@ -93,7 +93,7 @@ void FujiImage::Convert(ImageFormat toFormat)
 
 void FujiImage::VFlip(void)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	unsigned char *tempPixels, *top, *bottom;
 	uint32 verticalRange, horizSpan;
@@ -124,7 +124,7 @@ void FujiImage::VFlip(void)
 
 FujiImage* LoadTGA(const char *filename, bool flipped)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	unsigned char *contents, *position;
 	bool isSavedFlipped = true;

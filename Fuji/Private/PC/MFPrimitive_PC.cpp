@@ -47,13 +47,13 @@ extern IDirect3DDevice9 *pd3dDevice;
 
 void MFPrimitive_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 void MFPrimitive_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
@@ -64,7 +64,7 @@ void MFPrimitive_DrawStats()
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	primType = type & PT_PrimMask;
 
@@ -94,7 +94,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 void MFBegin(uint32 vertexCount)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(gRenderQuads)
 		beginCount = vertexCount * 3;
@@ -111,7 +111,7 @@ void MFBegin(uint32 vertexCount)
 
 void MFSetMatrix(const MFMatrix &mat)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
@@ -156,7 +156,7 @@ void MFSetPosition(const MFVector &pos)
 
 void MFSetPosition(float x, float y, float z)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	current.pos.x = x;
 	current.pos.y = y;
@@ -192,7 +192,7 @@ void MFSetPosition(float x, float y, float z)
 
 void MFEnd()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 

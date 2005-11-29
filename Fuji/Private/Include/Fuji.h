@@ -80,6 +80,9 @@ enum MFEndian
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
 
+	// disable 'unreferenced formal parameter'
+	#pragma warning(disable:4100)
+
 #elif defined(_XBOX)
 
 	#define DEBUG_KEYBOARD
@@ -190,17 +193,12 @@ enum MFEndian
 
 #include "Util.h"
 
+
 /*** Callstack profiling ***/
 
-#if !defined(_RETAIL) && !defined(_DEBUG)
-	#define _CALLSTACK_PROFILING
+#define _ENABLE_CALLSTACK_PROFILING
 
-	#if defined(_CALLSTACK_PROFILING) && !defined(_DEBUG)
-//		#define _CALLSTACK_MONITORING
-	#endif
-#endif
-
-#include "Callstack.h"
+#include "MFCallstack.h"
 
 
 #endif // _FUJI_H

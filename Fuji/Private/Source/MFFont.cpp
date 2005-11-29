@@ -17,21 +17,21 @@ MFFont *gpDebugFont;
 
 void MFFont_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gpDebugFont = MFFont_Create("Arial");
 }
 
 void MFFont_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFFont_Destroy(gpDebugFont);
 }
 
 MFFont* MFFont_Create(const char *pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFFont *pFont = NULL;
 
@@ -54,7 +54,7 @@ MFFont* MFFont_Create(const char *pFilename)
 
 void MFFont_Destroy(MFFont *pFont)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMaterial_Destroy(pFont->pMaterial);
 	MFHeap_Free(pFont);
@@ -67,7 +67,7 @@ MFFont* MFFont_GetDebugFont()
 
 int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pFont->pMaterial->pInstanceData;
 
@@ -127,7 +127,7 @@ int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVecto
 
 int MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	char buffer[1024];
 
@@ -141,7 +141,7 @@ int MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFV
 
 int MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	char buffer[1024];
 

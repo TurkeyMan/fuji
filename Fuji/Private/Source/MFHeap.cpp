@@ -73,21 +73,21 @@ void MFHeap_SetLineAndFile(int line, char *pFile)
 
 void MFHeap_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFHeap_InitModulePlatformSpecific();
 }
 
 void MFHeap_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFHeap_DeinitModulePlatformSpecific();
 }
 
 void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFHeap *pAllocHeap = pOverrideHeap ? pOverrideHeap : (pHeap ? pHeap : pActiveHeap);
 
@@ -118,7 +118,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 
 void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
@@ -136,7 +136,7 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 
 void MFHeap_Free(void *pMem)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
@@ -149,7 +149,7 @@ void MFHeap_Free(void *pMem)
 // get the size of an allocation
 uint32 MFHeap_GetAllocSize(void *pMemory)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
 	return pHeader->size;
@@ -158,7 +158,7 @@ uint32 MFHeap_GetAllocSize(void *pMemory)
 // get a heap pointer
 MFHeap* MFHeap_GetHeap(MFHeapType heap)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	switch(heap)
 	{
@@ -181,7 +181,7 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap)
 // gets the temp heap associated with a heap
 MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	MFDebug_Assert(pHeap, "Invalid heap");
 
 	return pHeap->pTempHeap ? pHeap->pTempHeap : pHeap;
@@ -217,7 +217,7 @@ void MFHeap_Release(MFHeap *pHeap)
 // register a custom heap that can be used by the game
 void MFHeap_RegisterCustomHeap(MFMemoryCallbacks *pCallbacks, void *pUserData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	*gCustomHeap.pCallbacks = *pCallbacks;
 	gCustomHeap.pHeapData = pUserData;
@@ -232,7 +232,7 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap)
 // validate a block of memory. returns false if memory had been corrupted.
 bool MFHeap_ValidateMemory(void *pMemory)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
 	return memcmp((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;

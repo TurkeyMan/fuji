@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFSystem.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemMemory.h"
@@ -66,7 +67,7 @@ MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 o
 
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataMemory), "Incorrect size for MFOpenDataMemory structure. Invalid pOpenData.");
 	MFOpenDataMemory *pMemory = (MFOpenDataMemory*)pOpenData;
@@ -93,7 +94,7 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileMemory_Close(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
@@ -107,7 +108,7 @@ int MFFileMemory_Close(MFFile* fileHandle)
 
 int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -123,7 +124,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
@@ -141,7 +142,7 @@ int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int newPos = 0;
 
@@ -166,18 +167,18 @@ int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 
 int MFFileMemory_Tell(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return (int)fileHandle->offset;
 }
 
 MFFileState MFFileMemory_Query(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->state;
 }
 
 int MFFileMemory_GetSize(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	return fileHandle->length;
 }
