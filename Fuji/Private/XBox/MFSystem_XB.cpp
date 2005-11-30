@@ -3,10 +3,6 @@
 
 void main()
 {
-	SYSTEMTIME s;
-	GetSystemTime(&s);
-	srand(s.wMilliseconds|(s.wSecond<<16));
-
 	System_GameLoop();
 }
 

@@ -74,15 +74,16 @@ inline T MFClamp(T x, T y, T z)
 	return MFMax(x, MFMin(y, z));
 }
 
-inline uint32 MFRand()
-{
-	return rand();
-}
-
 inline float MFRand_Unit()
 {
-	return (float)rand() / RAND_MAX;
+	return (float)MFRand()*(float)(1.0/4294967295.0); 
 }
+
+inline double MFRand_Double() 
+{ 
+	uint32 a=MFRand()>>5, b=MFRand()>>6; 
+	return (a*67108864.0+b)*(1.0/9007199254740992.0); 
+} 
 
 inline float MFRand_Range(float min, float max)
 {

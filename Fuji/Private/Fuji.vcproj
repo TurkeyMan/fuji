@@ -630,6 +630,9 @@
 				RelativePath=".\Source\MFMaterial_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFMath.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFMatrix.cpp">
 			</File>
 			<File

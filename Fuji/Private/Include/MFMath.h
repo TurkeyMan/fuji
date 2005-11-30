@@ -142,9 +142,18 @@ template <class T>
 T MFClamp(T x, T y, T z);
 
 /**
+ * Seed the random number generator.
+ * Seeds the random number generator.
+ * @return None.
+ * @see MFRand()
+ * @see MFRand_Unit()
+ */
+void MFRand_Seed(uint32 seed);
+
+/**
  * Get a pseudo-random number.
  * Get a pseudo-random number.
- * @return Returns a pseudo random number.
+ * @return Returns a pseudo random number in the range of 0 to 2^32-1 (4294967295).
  * @see MFRand_Unit()
  * @see MFRand_Range()
  */
@@ -158,6 +167,15 @@ uint32 MFRand();
  * @see MFRand_Range()
  */
 float MFRand_Unit();
+
+/**
+ * Get a pseudo-random double precision number between 0.0f and 1.0f.
+ * Get a pseudo-random double precision number between 0.0f and 1.0f.
+ * @return Returns a double precision pseudo-random number betwen 0.0f and 1.0f.
+ * @see MFRand()
+ * @see MFRand_Unit()
+ */
+double MFRand_Double();
 
 /**
  * Get a pseudo-random number within a specified range.
