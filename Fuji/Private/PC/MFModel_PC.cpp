@@ -53,17 +53,32 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
 
-	pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
-	pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
-	pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
+	HRESULT hr;
+
+	// create D3D interfaces
+	hr = pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+	hr = pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex buffer..");
+	hr = pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create index buffer..");
 
 	void *pData;
-	pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
+
+	// fill vertex buffer
+	hr = pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+
 	memcpy(pData, pMC->pVertexData, pMC->vertexDataSize);
+
 	pMC->pVertexBuffer->Unlock();
 
-	pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
+	// fill index buffer
+	hr = pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+
 	memcpy(pData, pMC->pIndexData, pMC->indexDataSize);
+
 	pMC->pIndexBuffer->Unlock();
 }
 

@@ -89,7 +89,7 @@ void  MFHeap_Free(void *pMem);
  * Get the size of an allocation.
  * Get the size of a fuji allocation.
  * @param pMemory Pointer to an allocated block of memory.
- * @return Size of memory specified by \a pMemory.
+ * @return Size, in bytes, of the block of memory that \a pMemory points to.
  * @see MFHeap_Alloc()
  */
 uint32 MFHeap_GetAllocSize(void *pMemory);

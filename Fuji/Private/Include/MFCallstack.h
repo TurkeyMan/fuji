@@ -14,7 +14,7 @@
 	#define _MFCALLSTACK
 
 //	#if !defined(_DEBUG) && defined(_ENABLE_CALLSTACK_PROFILING)
-	#if defined(_ENABLE_CALLSTACK_PROFILING)
+	#if defined(_ENABLE_CALLSTACK_PROFILING) && !defined(_FUJI_UTIL)
 		#define _MFCALLSTACK_PROFILING
 	#endif
 #endif

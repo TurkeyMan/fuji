@@ -590,10 +590,11 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	if(skeletonChunkIndex > -1)
 	{
 		BoneChunk *pBoneChunk = (BoneChunk*)pOffset;
-		pOffset += MFALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
 
 		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
 		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->bones.size();
+
+		pOffset += MFALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
 
 		for(a=0; a<pDataHeaders[skeletonChunkIndex].count; a++)
 		{
@@ -603,7 +604,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		}
 	}
 
-	// wite strings to end of file
+	// write strings to end of file
 	memcpy(pOffset, MFStringCache_GetCache(pStringCache), MFStringCache_GetSize(pStringCache));
 
 	char *pCache = MFStringCache_GetCache(pStringCache);

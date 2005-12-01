@@ -2,6 +2,8 @@
 
 #include "Fuji.h"
 #include "MFIni.h"
+#include "MFHeap.h"
+#include "MFSystem.h"
 #include "FS.h"
 
 #include <direct.h>
@@ -531,7 +533,7 @@ void CopyFile(const char *pSource, const char *pDest)
 			fseek(pRead, 0, SEEK_SET);
 
 			char *pBuffer = (char*)MFHeap_Alloc(fileSize);
-			
+
 			fread(pBuffer, 1, fileSize, pRead);
 			fwrite(pBuffer, 1, fileSize, pWrite);
 

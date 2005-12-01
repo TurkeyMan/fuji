@@ -149,7 +149,7 @@ char* MFFile_SystemPath(const char *filename)
 {
 	MFCALLSTACK;
 
-	filename ? filename : "";
+	filename = filename ? filename : "";
 
 #if defined(_XBOX)
 	return MFStr("D:\\Data\\%s", filename);
@@ -168,7 +168,7 @@ char* MFFile_HomePath(const char *filename)
 {
 	MFCALLSTACK;
 
-	filename ? filename : "";
+	filename = filename ? filename : "";
 
 #if defined(_XBOX)
 	return MFStr("E:\\Home\\%s", filename);

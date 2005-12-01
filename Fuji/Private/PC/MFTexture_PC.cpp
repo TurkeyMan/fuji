@@ -38,7 +38,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 	// copy image data
 	D3DLOCKED_RECT rect;
-	pTexture->pTexture->LockRect(0, &rect, NULL, D3DLOCK_DISCARD);
+	pTexture->pTexture->LockRect(0, &rect, NULL, 0);
 	memcpy(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
 	pTexture->pTexture->UnlockRect(0);
 

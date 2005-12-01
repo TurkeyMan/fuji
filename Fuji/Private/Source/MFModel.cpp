@@ -143,7 +143,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 	if(!pTemplate)
 	{
-		MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+		MFFileHandle hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 
 		if(hFile)
 		{
@@ -158,7 +158,7 @@ MFModel* MFModel_Create(const char *pFilename)
 				MFFile_Read(hFile, pTemplateData, size);
 
 				// check ID string
-				MFDebug_Assert(*(uint32*)pTemplateData == 0x324c444d, "Incorrect MFModel version.");
+				MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
 
 				// store filename for later reference
 				pTemplate = (MFModelTemplate*)pTemplateData;
