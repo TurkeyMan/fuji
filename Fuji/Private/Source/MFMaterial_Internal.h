@@ -71,6 +71,7 @@ struct MFMeshChunk_PC : public MFMeshChunk
 //#endif
 
 	uint32 numVertices;
+	uint32 numIndices;
 	uint32 vertexStride;
 };
 #endif

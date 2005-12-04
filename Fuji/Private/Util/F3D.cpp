@@ -380,9 +380,11 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		};
 
 		int numVertices = sub.matSubobjects[a].vertices.size();
-		int numIndices = sub.matSubobjects[a].triangles.size()*3;
+		int numTriangles = sub.matSubobjects[a].triangles.size();
+		int numIndices = numTriangles*3;
 
 		pMeshChunk[a].numVertices = numVertices;
+		pMeshChunk[a].numIndices = numIndices;
 		pMeshChunk[a].vertexStride = sizeof(Vert);
 		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
 		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
@@ -458,9 +460,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		// write indices
 		uint16 *pIndices = (uint16*)pMeshChunk[a].pIndexData;
 
-		int triCount = numIndices/3;
-
-		for(b=0; b<triCount; b++)
+		for(b=0; b<numTriangles; b++)
 		{
 			pIndices[0] = sub.matSubobjects[a].triangles[b].v[0];
 			pIndices[1] = sub.matSubobjects[a].triangles[b].v[1];

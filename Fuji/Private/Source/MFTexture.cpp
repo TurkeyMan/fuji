@@ -30,7 +30,11 @@ void MFTexture_InitModule()
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
 	// create white texture (used by white material)
-	pNoneTexture = MFTexture_CreateBlank("_None", MakeVector(1.0f, 0.0f, 0.5, 1.0f));
+	if(MFFileSystem_Exists("_None.tex"))
+		pNoneTexture = MFTexture_Create("_None", true);
+	else
+		pNoneTexture = MFTexture_CreateBlank("_None", MakeVector(1.0f, 0.0f, 0.5, 1.0f));
+
 	pWhiteTexture = MFTexture_CreateBlank("_White", MFVector::one);
 }
 

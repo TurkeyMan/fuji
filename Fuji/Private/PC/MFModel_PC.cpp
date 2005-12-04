@@ -41,7 +41,7 @@ void MFModel_Draw(MFModel *pModel)
 				pd3dDevice->SetStreamSource(0, pMC->pVertexBuffer, 0, pMC->vertexStride);
 				pd3dDevice->SetIndices(pMC->pIndexBuffer);
 				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
-				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC->numVertices, 0, pMC->numVertices/3);
+				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC->numVertices, 0, pMC->numIndices);
 			}
 		}
 	}
@@ -67,7 +67,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 	// fill vertex buffer
 	hr = pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vettex buffer..");
 
 	memcpy(pData, pMC->pVertexData, pMC->vertexDataSize);
 
@@ -75,7 +75,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 	// fill index buffer
 	hr = pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock index buffer..");
 
 	memcpy(pData, pMC->pIndexData, pMC->indexDataSize);
 
