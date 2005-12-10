@@ -12,6 +12,9 @@
 #include <d3d9.h>
 extern IDirect3DDevice9 *pd3dDevice;
 #endif
+#if defined(_XBOX)
+extern IDirect3DDevice8 *pd3dDevice;
+#endif
 
 bool debugMenuEnabled;
 bool buttonsDown;

@@ -1,5 +1,5 @@
-#if !defined(_RENDERER_XB_H)
-#define _RENDERER_XB_H
+#if !defined(_MFRENDERER_XB_H)
+#define _MFRENDERER_XB_H
 
 enum XBVF_Type
 {
@@ -27,25 +27,25 @@ enum XBVF_Type
 	XBVF_ForceInt = 0x7FFFFFFF
 };
 
-void RendererXB_SetTexture(int stage, IDirect3DTexture8 *pTexture);
-void RendererXB_SetVertexShader(uint32 vsHandle);
-void RendererXB_SetStreamSource(int stream, IDirect3DVertexBuffer8 *pVertexBuffer, int stride);
-void RendererXB_SetIndices(IDirect3DIndexBuffer8 *pIndexBuffer, int baseIndex);
+void MFRendererXB_SetTexture(int stage, IDirect3DTexture8 *pTexture);
+void MFRendererXB_SetVertexShader(uint32 vsHandle);
+void MFRendererXB_SetStreamSource(int stream, IDirect3DVertexBuffer8 *pVertexBuffer, int stride);
+void MFRendererXB_SetIndices(IDirect3DIndexBuffer8 *pIndexBuffer, int baseIndex);
 
-void RendererXB_ApplyGPUStates();
-void RendererXB_SetDefaultGPUStates();
+void MFRendererXB_ApplyGPUStates();
+void MFRendererXB_SetDefaultGPUStates();
 
-void RendererXB_ApplyRenderStates();
-void RendererXB_SetDefaultRenderStates();
-void RendererXB_SetRenderState(D3DRENDERSTATETYPE type, uint32 value);
-void RendererXB_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue);
+void MFRendererXB_ApplyRenderStates();
+void MFRendererXB_SetDefaultRenderStates();
+void MFRendererXB_SetRenderState(D3DRENDERSTATETYPE type, uint32 value);
+void MFRendererXB_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue);
 
-void RendererXB_ApplyTextureStageStates();
-void RendererXB_SetDefaultTextureStageStates();
-void RendererXB_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value);
-void RendererXB_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue);
+void MFRendererXB_ApplyTextureStageStates();
+void MFRendererXB_SetDefaultTextureStageStates();
+void MFRendererXB_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value);
+void MFRendererXB_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue);
 
-void RendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type type);
-void RendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type type);
+void MFRendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type type);
+void MFRendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type type);
 
 #endif

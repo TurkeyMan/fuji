@@ -3,27 +3,31 @@
 /**** Includes ****/
 
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 
 #include <xgraphics.h>
 
 /**** Globals ****/
 
-extern PtrListDL<MFTexture> gTextureBank;
+extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
+
+extern IDirect3DDevice8 *pd3dDevice;
 
 /**** Functions ****/
 
+// interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
 	HRESULT hr;
 	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 
 	// create texture
-	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, (D3DFORMAT)pTemplate->platformFormat, D3DPOOL_MANAGED, &pTexture->pTexture);
+	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, (D3DFORMAT)pTemplate->platformFormat, 0, &pTexture->pTexture);
 
 	MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
 	MFDebug_Assert(hr != D3DERR_OUTOFVIDEOMEMORY, MFStr("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
@@ -42,7 +46,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -72,7 +76,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		MFDebug_Assert(SUCCEEDED(hr), MFStr("CreateTexture failed: hr = 0x%08X", hr));
 		if(FAILED(hr))
 		{
-			LOGD("Couldnt Create Texture");
+			MFDebug_Warn(2, "Couldnt Create Texture");
 			return NULL;
 		}
 

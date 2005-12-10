@@ -1,18 +1,19 @@
 //#define _USE_LIBVORBIS
 
 #include "Fuji.h"
-#include "MFFileSystem_Internal.h"
-#include "Sound.h"
-#include "PtrList.h"
-#include "Font.h"
-#include "Primitive.h"
-#include "DebugMenu_Internal.h"
+#include "MFFileSystem.h"
+#include "MFPtrList.h"
+#include "MFFont.h"
+#include "MFPrimitive.h"
+#include "DebugMenu.h"
+#include "MFSound_Internal.h"
+#include "MFSystem.h"
 
 #if defined(_USE_LIBVORBIS)
 #include <vorbis/vorbisfile.h>
 #endif
 
-struct SoundMusic
+struct MFSoundMusic
 {
 	char name[256];
 
@@ -33,26 +34,26 @@ struct SoundMusic
 	bool playing;
 };
 
-void Sound_ServiceMusicBuffer(int track);
+void MFSound_ServiceMusicBuffer(int track);
 
 
 IDirectSound8 *pDirectSound;
 
-SoundMusic *gMusicTracks;
+MFSoundMusic *gMusicTracks;
 
 #if !defined(_RETAIL)
 MenuItemBool showSoundStats;
 #endif
 
 
-void Sound_InitModule()
+void MFSound_InitModule()
 {
 	MFCALLSTACK;
 
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 
-	gMusicTracks = (SoundMusic*)MFHeap_Alloc(sizeof(SoundMusic) * gDefaults.sound.maxMusicTracks);
-	memset(gMusicTracks, 0, sizeof(SoundMusic)*gDefaults.sound.maxMusicTracks);
+	gMusicTracks = (MFSoundMusic*)MFHeap_Alloc(sizeof(MFSoundMusic) * gDefaults.sound.maxMusicTracks);
+	memset(gMusicTracks, 0, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
 
 #if !defined(_RETAIL)
 	DebugMenu_AddMenu("Sound Options", "Fuji Options");
@@ -60,14 +61,14 @@ void Sound_InitModule()
 #endif
 }
 
-void Sound_DeinitModule()
+void MFSound_DeinitModule()
 {
 	MFCALLSTACK;
 
 	pDirectSound->Release();
 }
 
-void Sound_Update()
+void MFSound_Update()
 {
 	MFCALLSTACKc;
 
@@ -75,12 +76,12 @@ void Sound_Update()
 	{
 		if(gMusicTracks[a].pDSMusicBuffer && gMusicTracks[a].playing)
 		{
-			Sound_ServiceMusicBuffer(a);
+			MFSound_ServiceMusicBuffer(a);
 		}
 	}
 }
 
-void Sound_Draw()
+void MFSound_Draw()
 {
 	MFCALLSTACK;
 
@@ -209,86 +210,73 @@ void Sound_Draw()
 }
 
 
-int Sound_LoadBank(const char *pFilename)
+int MFSound_LoadBank(const char *pFilename)
 {
 	MFCALLSTACK;
 
 	return -1;
 }
 
-void Sound_UnloadBank(int bankID)
+void MFSound_UnloadBank(int bankID)
 {
 	MFCALLSTACK;
 
-
 }
 
-int Sound_FindSound(const char *pSoundName, int searchBankID)
+int MFSound_FindSound(const char *pSoundName, int searchBankID)
 {
 	MFCALLSTACK;
 
 	return -1;
 }
 
-void Sound_Play(int soundID)
+int MFSound_Play(int soundID)
 {
 	MFCALLSTACK;
 
+	return 0;
+}
+
+int MFSound_Play3D(int soundID)
+{
+	MFCALLSTACK;
+
+	return 0;
+}
+
+void MFSound_Stop(int soundID)
+{
+	MFCALLSTACK;
 
 }
 
-void Sound_Stop(int soundID)
+void MFSound_SetListenerPos(const MFVector& listenerPos)
 {
 	MFCALLSTACK;
-
-
-}
-
-void Sound_Play3D(int soundID)
-{
-	MFCALLSTACK;
-
-
-}
-
-void Sound_Stop3D(int soundID)
-{
-	MFCALLSTACK;
-
-
-}
-
-void Sound_SetListenerPos(const MFVector& listenerPos)
-{
-	MFCALLSTACK;
-
 
 }
 
 
-void Sound_SetVolume(int soundID, float volume)
+void MFSound_SetVolume(int soundID, float volume)
 {
 	MFCALLSTACK;
-
 
 }
 
-void Sound_SetMasterVolume(int soundID, float volume)
+void MFSound_SetMasterVolume(int soundID, float volume)
 {
 	MFCALLSTACK;
-
 
 }
 
-void Sound_SetPlaybackRate(int soundID, float rate)
+void MFSound_SetPlaybackRate(int soundID, float rate)
 {
 	MFCALLSTACK;
-
 
 }
 
 #if defined(_USE_LIBVORBIS)
-int SoundXB_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
+int MFSoundXB_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
 	return MFFile_StdSeek(datasource, (long)offset, whence);
 }
@@ -297,7 +285,7 @@ int SoundXB_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 //
 // Vorbis Music Functions
 //
-int Sound_MusicPlay(const char *pFilename, bool pause)
+int MFSound_MusicPlay(const char *pFilename, bool pause)
 {
 	MFCALLSTACK;
 
@@ -408,7 +396,7 @@ int Sound_MusicPlay(const char *pFilename, bool pause)
 	return t;
 }
 
-void Sound_ServiceMusicBuffer(int trackID)
+void MFSound_ServiceMusicBuffer(int trackID)
 {
 	MFCALLSTACK;
 
@@ -476,7 +464,7 @@ void Sound_ServiceMusicBuffer(int trackID)
 #endif
 }
 
-void Sound_MusicUnload(int track)
+void MFSound_MusicUnload(int track)
 {
 	MFCALLSTACK;
 
@@ -491,7 +479,7 @@ void Sound_MusicUnload(int track)
 #endif
 }
 
-void Sound_MusicSeek(int track, float seconds)
+void MFSound_MusicSeek(int track, float seconds)
 {
 	MFCALLSTACK;
 
@@ -500,7 +488,7 @@ void Sound_MusicSeek(int track, float seconds)
 #endif
 }
 
-void Sound_MusicPause(int track, bool pause)
+void MFSound_MusicPause(int track, bool pause)
 {
 	MFCALLSTACK;
 
@@ -516,7 +504,7 @@ void Sound_MusicPause(int track, bool pause)
 	}
 }
 
-void Sound_MusicSetVolume(int track, float volume)
+void MFSound_MusicSetVolume(int track, float volume)
 {
 	MFCALLSTACK;
 

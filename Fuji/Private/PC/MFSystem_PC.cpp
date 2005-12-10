@@ -16,10 +16,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	apphInstance = hInstance;
 
-	char *pbuffer;
-
-	pbuffer = (char*)MFHeap_Alloc(1000);
-
 	MFSystem_GameLoop();
 }
 

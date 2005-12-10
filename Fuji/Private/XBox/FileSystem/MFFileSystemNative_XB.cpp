@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 
@@ -159,7 +160,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	if(hFind == INVALID_HANDLE_VALUE)
 	{
-		LOGD(MFStr("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
+		MFDebug_Warn(1, MFStr("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
 		return -1;
 	}
 
@@ -246,7 +247,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 	uint32 bytesWritten;
 	WriteFile(fileHandle->pFilesysData, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
 	fileHandle->offset += bytesWritten;
-	fileHandle->length = Max(fileHandle->offset, (uint32)fileHandle->length);
+	fileHandle->length = MFMax(fileHandle->offset, (uint32)fileHandle->length);
 
 	return bytesWritten;
 }

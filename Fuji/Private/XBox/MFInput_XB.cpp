@@ -1,7 +1,6 @@
 #include "Fuji.h"
 #include "MFVector.h"
-
-#include "Input_Internal.h"
+#include "MFInput_Internal.h"
 
 /*** Structures ***/
 
@@ -69,7 +68,7 @@ const char * const XBoxButtons[] =
 
 /*** Functions ***/
 
-void Input_InitModulePlatformSpecific()
+void MFInput_InitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -113,21 +112,20 @@ void Input_InitModulePlatformSpecific()
     }
 }
 
-void Input_DeinitModulePlatformSpecific()
+void MFInput_DeinitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
 }
 
-void Input_UpdatePlatformSpecific()
+void MFInput_UpdatePlatformSpecific()
 {
 	MFCALLSTACKc;
 
 	CheckDeviceChanges(dsDevices);
 }
 
-
-void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
+void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
 {
 	pDeviceStatus->available = false;
 	pDeviceStatus->status = IDS_Disconnected;
@@ -143,11 +141,9 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 			break;
 
 		case IDD_Mouse:
-#pragma message("work muose")
 			break;
 
 		case IDD_Keyboard:
-#pragma message("work keyboard")
 			break;
 
 		default:
@@ -156,13 +152,13 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 	}
 }
 
-void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
+void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
 	MFCALLSTACK;
 
-	if(Input_IsReady(IDD_Gamepad, id))
+	if(MFInput_IsReady(IDD_Gamepad, id))
 	{
-		if( dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id] )
+		if(dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id])
 		{
 			// Query latest state.
 			XInputGetState(hPads[id], &inputState[id]);
@@ -184,7 +180,7 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 		pGamepadState->values[15] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
 
 		float inputValue;
-		float deadZone = Input_GetDeadZone();
+		float deadZone = MFInput_GetDeadZone();
 
 		inputValue = ((float)inputState[id].Gamepad.sThumbLX) / 32767.0f;
 		pGamepadState->values[Axis_LX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
@@ -204,23 +200,19 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 	}
 }
 
-void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	MFCALLSTACK;
 
 	CheckKeyboard();
-
-#pragma message("XBox keyboard?")
 }
 
-void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
 	MFCALLSTACK;
-
-#pragma message("XBox mouse?")
 }
 
-const char* Input_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceName(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -242,12 +234,12 @@ const char* Input_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* Input_GetGamepadButtonName(int sourceID, int type)
+const char* MFInput_GetGamepadButtonName(int button, int sourceID)
 {
-	return XBoxButtons[type];
+	return XBoxButtons[button];
 }
 
-bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
+bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	SHORT ks = 0;
 
@@ -363,14 +355,11 @@ void ShowMUInfo(char chDrive)
 	ULARGE_INTEGER uliFreeAvail, uliFree, uliTotal;
 	char szDrive[] = "X:\\";
 
-
 	*szDrive = chDrive;
 	GetDiskFreeSpaceEx( szDrive, &uliFreeAvail, &uliTotal, &uliFree );
 	XMUNameFromDriveLetter( chDrive, szName, MAX_MUNAME + 1 );
 
-	dprintf( "MU %c: (%S) free: %u total: %u.\r\n",
-				chDrive, szName,
-				uliFreeAvail.LowPart, uliTotal.LowPart ); 
+	MFDebug_Message(MFStr("MU %c: (%S) free: %u total: %u.\r\n", chDrive, szName, uliFreeAvail.LowPart, uliTotal.LowPart)); 
 
 	EnumSavedGames( *szDrive );
 }

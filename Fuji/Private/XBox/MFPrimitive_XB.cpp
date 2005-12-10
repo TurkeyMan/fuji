@@ -1,12 +1,34 @@
 #include "Fuji.h"
 #include "Display_Internal.h"
-#include "MFTexture_Internal.h"
-#include "MFMaterial_Internal.h"
-#include "View_Internal.h"
+#include "MFView.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
-#include "Primitive.h"
-#include "Renderer.h"
+#include "MFPrimitive.h"
+#include "MFTexture.h"
+#include "MFRenderer.h"
+#include "MFMaterial.h"
+
+struct LitVertex
+{
+	enum
+	{
+		FVF = D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1
+	};
+
+	struct LitPos
+	{
+		float x, y, z;
+	} pos;
+
+	struct LitNormal
+	{
+		float x, y, z;
+	} normal;
+
+	unsigned int colour;
+
+	float u,v;
+};
 
 LitVertex primBuffer[1024];
 LitVertex current;
@@ -15,28 +37,34 @@ uint32 primType;
 uint32 beginCount;
 uint32 currentVert;
 
-void Primitive_InitModule()
+extern IDirect3DDevice8 *pd3dDevice;
+
+/*** functions ***/
+
+void MFPrimitive_InitModule()
 {
 
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
 
 }
 
-void DrawMFPrimitiveStats()
+void MFPrimitive_DrawStats()
 {
 
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
+	MFCALLSTACK;
+
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 	}
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&MFMatrix::identity);
@@ -47,12 +75,18 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&MFView_GetWorldToViewMatrix());
 
-	Renderer_Begin();
+	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)
 {
-	beginCount = vertexCount;
+	MFCALLSTACK;
+
+	if(primType == PT_QuadList)
+		beginCount = vertexCount * 2;
+	else
+		beginCount = vertexCount;
+
 	currentVert = 0;
 
 	pd3dDevice->SetVertexShader(LitVertex::FVF);
@@ -77,11 +111,16 @@ void MFBegin(uint32 vertexCount)
 		case PT_TriFan:
 			pd3dDevice->Begin(D3DPT_TRIANGLEFAN);
 			break;
+		case PT_QuadList:
+			pd3dDevice->Begin(D3DPT_QUADLIST);
+			break;
 	}
 }
 
 void MFSetMatrix(const MFMatrix &mat)
 {
+	MFCALLSTACK;
+
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
@@ -117,18 +156,44 @@ void MFSetNormal(float x, float y, float z)
 
 void MFSetPosition(const MFVector &pos)
 {
-	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+	if(primType == PT_QuadList && (currentVert & 1))
+	{
+		// if we're rendering quads, we need to insert the top-right and botom-left verts
+		// TODO: need to keep the last vert
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+
+		// and the final vert
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+	}
+	else
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+
 	++currentVert;
 }
 
 void MFSetPosition(float x, float y, float z)
 {
-	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
+	if(primType == PT_QuadList && (currentVert & 1))
+	{
+		// if we're rendering quads, we need to insert the top-right and botom-left verts
+		// TODO: need to keep the last vert
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
+
+		// and the final vert
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
+	}
+	else
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, x, y, z, 0.0f);
+
 	++currentVert;
 }
 
 void MFEnd()
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
 	pd3dDevice->End();

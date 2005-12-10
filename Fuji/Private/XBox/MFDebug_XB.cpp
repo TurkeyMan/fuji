@@ -1,4 +1,11 @@
 #include "Fuji.h"
+#include "MFSystem_Internal.h"
+#include "Display_Internal.h"
+#include "MFFont.h"
+#include "MFView.h"
+#include "MFPrimitive.h"
+
+extern IDirect3DDevice8 *pd3dDevice;
 
 // Output a string to the debugger.
 void MFDebug_Message(const char *pMessage)
@@ -8,37 +15,77 @@ void MFDebug_Message(const char *pMessage)
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
-//	TimerInfo time,diff;
-//	Timer_GetSystemTime(&time);
-//	Timer_GetDifference(&diff,&startTime,&time);
+	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
+	MFDebug_Message(MFStr("Failed Condition: %s\n%s", pReason, pMessage));
+#if !defined(_RETAIL)
+	MFCallstack_Log();
+#endif
 
-	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
-	LOGD(STR("Failed Condition: (%s)\n%s", pReason, pMessage));
-/*
-	char *pDayStr = gNullStr;
-	switch (time.day)
+	while(1)
 	{
-		case 1: 
-		case 21:
-		case 31:
-			pDayStr = "st"; 
-			break;
-		case 2: 
-		case 22:
-		case 32:
-			pDayStr = "nd"; 
-			break;
-		case 3:
-		case 23:
-		case 33:
-			pDayStr = "rd"; 
-			break;
-		default:
-			pDayStr = "th";
-			break;
-	}
-	LOGD(STR("Time : (%d%s):%02d:%02d:%02d (%02d:%02d:%02d from start)",time.day,pDayStr,time.hours,time.minutes,time.seconds,diff.day*24+diff.hours,diff.minutes,diff.seconds));
-*/
+		MFSystem_UpdateTimeDelta();
+		gFrameCount++;
 
-	Callstack_Log();
+		MFSystem_Update();
+
+		MFDisplay_BeginFrame();
+
+		MFView_SetDefault();
+		MFView_SetOrtho();
+
+		// Set some renderstates
+		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
+		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
+
+		pd3dDevice->SetTexture(0, NULL);
+
+		MFPrimitive(PT_TriStrip);
+
+		MFBegin(4);
+		MFSetColour(0xFF000000);
+		MFSetPosition(0, 0, 0);
+		MFSetPosition(640, 0, 0);
+		MFSetPosition(0, 480, 0);
+		MFSetPosition(640, 480, 0);
+		MFEnd();
+
+		if(!(((uint32)gSystemTimer.GetSecondsF()) % 2))
+		{
+			MFBegin(4);
+			MFSetColour(0xFFFF0000);
+			MFSetPosition(50, 50, 0);
+			MFSetPosition(590, 50, 0);
+			MFSetPosition(50, 110, 0);
+			MFSetPosition(590, 110, 0);
+			MFEnd();
+
+			MFBegin(4);
+			MFSetColour(0xFF000000);
+			MFSetPosition(55, 55, 0);
+			MFSetPosition(585, 55, 0);
+			MFSetPosition(55, 105, 0);
+			MFSetPosition(585, 105, 0);
+			MFEnd();
+		}
+
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
+
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 140, 20, MakeVector(1,0,0,1), MFStr("Failed Condition: %s", pReason));
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 160, 20, MakeVector(1,0,0,1), MFStr("File: %s, Line: %d", pFile, line));
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 190, 20, MakeVector(1,0,0,1), MFStr("Message: %s", pMessage));
+
+#if !defined(_RETAIL)
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 100, 250.0f, 20, MakeVector(1,0,0,1), MFCallstack_GetCallstackString());
+#else
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
+#endif
+
+		MFDisplay_EndFrame();
+	}
 }

@@ -1,6 +1,5 @@
 #include "Fuji.h"
 #include "MFFileSystem.h"
-#include "FileSystem/MFFileSystemNative.h"
 #include "MFPtrList.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"

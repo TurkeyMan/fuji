@@ -1,8 +1,17 @@
 #include "Fuji.h"
+#include "MFSystem_Internal.h"
+#include "Display_Internal.h"
+#include "MFFont.h"
+#include "MFView.h"
+#include "MFPrimitive.h"
 
-#if defined(_WINDOWS) || defined(_XBOX)		
+#if defined(_WINDOWS)
 #include <d3d9.h>
 extern IDirect3DDevice9 *pd3dDevice;
+#endif
+#if defined(_XBOX)
+#include <stdio.h>
+extern IDirect3DDevice8 *pd3dDevice;
 #endif
 
 void MFSystem_HandleEventsPlatformSpecific();
@@ -15,9 +24,11 @@ void MFDebug_Message(const char *pMessage)
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
-	LOGD(MFStr("%s(%d) : Assertion Failure.",pFile,line));
-	LOGD(MFStr("Failed Condition: %s\n%s", pReason, pMessage));
-	Callstack_Log();
+	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
+	MFDebug_Message(MFStr("Failed Condition: %s\n%s", pReason, pMessage));
+#if !defined(_RETAIL)
+	MFCallstack_Log();
+#endif
 
 	while(1)
 	{
@@ -73,24 +84,19 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 			MFEnd();
 		}
 
-		Font_DrawTextf(gpDebugFont, 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue");
-		Font_DrawTextf(gpDebugFont, 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
 
-		Font_DrawTextf(gpDebugFont, 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
-		Font_DrawTextf(gpDebugFont, 80, 140, 20, MakeVector(1,0,0,1), MFStr("Failed Condition: %s", pReason));
-		Font_DrawTextf(gpDebugFont, 80, 160, 20, MakeVector(1,0,0,1), MFStr("File: %s, Line: %d", pFile, line));
-		Font_DrawTextf(gpDebugFont, 80, 190, 20, MakeVector(1,0,0,1), MFStr("Message: %s", pMessage));
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 140, 20, MakeVector(1,0,0,1), MFStr("Failed Condition: %s", pReason));
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 160, 20, MakeVector(1,0,0,1), MFStr("File: %s, Line: %d", pFile, line));
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 190, 20, MakeVector(1,0,0,1), MFStr("Message: %s", pMessage));
 
 #if !defined(_RETAIL)
-		Font_DrawTextf(gpDebugFont, 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
-		float y = 250.0f;
-		for(int a=Callstack.size()-1; a>=0; a--)
-		{
-			Font_DrawTextf(gpDebugFont, 100, y, 20, MakeVector(1,0,0,1), Callstack[a]);
-			y+=20.0f;
-		}
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 100, 250.0f, 20, MakeVector(1,0,0,1), MFCallstack_GetCallstackString());
 #else
-		Font_DrawTextf(gpDebugFont, 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
 #endif
 
 		MFDisplay_EndFrame();

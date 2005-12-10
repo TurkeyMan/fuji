@@ -4,81 +4,83 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 
-#include "Renderer_Internal.h"
-#include "Renderer_XB.h"
+#include "MFRenderer_Internal.h"
+#include "MFRenderer_XB.h"
+
+extern IDirect3DDevice8 *pd3dDevice;
 
 // direct3d management fucntions
-void RendererXB_SetTexture(int stage, IDirect3DTexture8 *pTexture)
+void MFRendererXB_SetTexture(int stage, IDirect3DTexture8 *pTexture)
 {
 	pd3dDevice->SetTexture(stage, pTexture);
 }
 
-void RendererXB_SetVertexShader(uint32 vsHandle)
+void MFRendererXB_SetVertexShader(uint32 vsHandle)
 {
 	pd3dDevice->SetVertexShader(vsHandle);
 }
 
-void RendererXB_SetStreamSource(int stream, IDirect3DVertexBuffer8 *pVertexBuffer, int stride)
+void MFRendererXB_SetStreamSource(int stream, IDirect3DVertexBuffer8 *pVertexBuffer, int stride)
 {
 	pd3dDevice->SetStreamSource((uint32)stream, pVertexBuffer, stride);
 }
 
-void RendererXB_SetIndices(IDirect3DIndexBuffer8 *pIndexBuffer, int baseIndex)
+void MFRendererXB_SetIndices(IDirect3DIndexBuffer8 *pIndexBuffer, int baseIndex)
 {
 	pd3dDevice->SetIndices(pIndexBuffer, baseIndex);
 }
 
-void RendererXB_ApplyGPUStates()
+void MFRendererXB_ApplyGPUStates()
 {
 
 }
 
-void RendererXB_SetDefaultGPUStates()
+void MFRendererXB_SetDefaultGPUStates()
 {
 
 }
 
-void RendererXB_ApplyRenderStates()
+void MFRendererXB_ApplyRenderStates()
 {
 
 }
 
-void RendererXB_SetDefaultRenderStates()
+void MFRendererXB_SetDefaultRenderStates()
 {
 
 }
 
-void RendererXB_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
+void MFRendererXB_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
 {
 	pd3dDevice->SetRenderState(type, value);
 }
 
-void RendererXB_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
+void MFRendererXB_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
 {
 	pd3dDevice->GetRenderState(type, (DWORD*)pValue);
 }
 
-void RendererXB_ApplyTextureStageStates()
+void MFRendererXB_ApplyTextureStageStates()
 {
 
 }
 
-void RendererXB_SetDefaultTextureStageStates()
+void MFRendererXB_SetDefaultTextureStageStates()
 {
 
 }
 
-void RendererXB_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
+void MFRendererXB_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
 {
 	pd3dDevice->SetTextureStageState(stage, type, value);
 }
 
-void RendererXB_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
+void MFRendererXB_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
 {
 	pd3dDevice->GetTextureStageState(stage, type, (DWORD*)pValue);
 }
 
-void RendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type type, int *pNumBytesWritten)
+void MFRendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type type, int *pNumBytesWritten)
 {
 	int numBytes = 0;
 
@@ -160,7 +162,7 @@ void RendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type t
 		*pNumBytesWritten = numBytes;
 }
 
-void RendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type type, int *pNumComponentsWritten)
+void MFRendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type type, int *pNumComponentsWritten)
 {
 	int numComponents = 0;
 

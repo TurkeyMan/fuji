@@ -440,6 +440,8 @@ void MFInput_UpdatePlatformSpecific()
 
 void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
 {
+	MFCALLSTACK;
+
 	pDeviceStatus->available = false;
 	pDeviceStatus->status = IDS_Disconnected;
 
