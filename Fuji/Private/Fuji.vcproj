@@ -796,6 +796,12 @@
 				<File
 					RelativePath=".\Source\Materials\Mat_Standard.h">
 				</File>
+				<File
+					RelativePath=".\Source\Materials\MFMat_Effect.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Materials\MFMat_Effect.h">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -1488,6 +1494,9 @@
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Pc\Materials\MFMat_Effect_PC.cpp">
 				</File>
 			</Filter>
 			<Filter
@@ -2733,6 +2742,27 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Retail_XB|Xbox"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Null\MFMat_Effect_Null.cpp">
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>

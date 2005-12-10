@@ -66,6 +66,7 @@ MFMaterial *pCharging = NULL;
 MFMaterial *pUSB = NULL;
 
 void MFMat_Standard_Register();
+void MFMat_Effect_Register();
 
 MaterialBrowser matBrowser;
 
@@ -82,6 +83,7 @@ void MFMaterial_InitModule()
 	DebugMenu_AddItem("Material Browser", "Fuji Options", &matBrowser);
 
 	MFMat_Standard_Register();
+	MFMat_Effect_Register();
 
 	if(MFMaterial_AddDefinitionsFile("Materials.ini", "Materials.ini"))
 	{

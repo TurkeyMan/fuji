@@ -131,51 +131,15 @@
 			<File
 				RelativePath=".\Source\ReadMD3.cpp">
 			</File>
+			<File
+				RelativePath=".\Source\ReadMEMD2.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\ReadMEMD2.h">
+			</File>
 			<Filter
 				Name="Lib"
 				Filter="">
-				<File
-					RelativePath=".\Lib\ascii.h">
-				</File>
-				<File
-					RelativePath=".\Lib\asciitab.h">
-				</File>
-				<File
-					RelativePath=".\Lib\iasciitab.h">
-				</File>
-				<File
-					RelativePath=".\Lib\latin1tab.h">
-				</File>
-				<File
-					RelativePath=".\Lib\nametab.h">
-				</File>
-				<File
-					RelativePath=".\Lib\utf8tab.h">
-				</File>
-				<File
-					RelativePath=".\Lib\xmldef.h">
-				</File>
-				<File
-					RelativePath=".\Lib\xmlparse.c">
-				</File>
-				<File
-					RelativePath=".\Lib\xmlparse.h">
-				</File>
-				<File
-					RelativePath=".\Lib\xmlrole.c">
-				</File>
-				<File
-					RelativePath=".\Lib\xmlrole.h">
-				</File>
-				<File
-					RelativePath=".\Lib\xmltok.c">
-				</File>
-				<File
-					RelativePath=".\Lib\xmltok.h">
-				</File>
-				<File
-					RelativePath=".\Lib\xmltok_impl.h">
-				</File>
 				<Filter
 					Name="zlib"
 					Filter="">
@@ -285,6 +249,28 @@
 							RelativePath="..\..\Fuji\Lib\zlib\minizip\zip.h">
 						</File>
 					</Filter>
+				</Filter>
+				<Filter
+					Name="tinyxml"
+					Filter="">
+					<File
+						RelativePath=".\Lib\tinyxml\tinystr.cpp">
+					</File>
+					<File
+						RelativePath=".\Lib\tinyxml\tinystr.h">
+					</File>
+					<File
+						RelativePath=".\Lib\tinyxml\tinyxml.cpp">
+					</File>
+					<File
+						RelativePath=".\Lib\tinyxml\tinyxml.h">
+					</File>
+					<File
+						RelativePath=".\Lib\tinyxml\tinyxmlerror.cpp">
+					</File>
+					<File
+						RelativePath=".\Lib\tinyxml\tinyxmlparser.cpp">
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

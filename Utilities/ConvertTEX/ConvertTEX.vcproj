@@ -122,6 +122,9 @@
 				RelativePath=".\IntImage.cpp">
 			</File>
 			<File
+				RelativePath=".\LoadBMP.cpp">
+			</File>
+			<File
 				RelativePath=".\LoadTarga.cpp">
 			</File>
 			<File
@@ -137,6 +140,9 @@
 			</File>
 			<File
 				RelativePath=".\IntImage.h">
+			</File>
+			<File
+				RelativePath=".\LoadBMP.h">
 			</File>
 			<File
 				RelativePath=".\LoadTarga.h">

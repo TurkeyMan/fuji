@@ -73,7 +73,7 @@ SourceImage* LoadTarga(const char *pFilename)
 
 	if((pPosition + pHeader->idLength + (pHeader->colourMapLength * pHeader->colourMapBits * pHeader->colourMapType)) >= pTarga + imageSize)
 	{
-		LOGD(STR("Failed loading image: %s (Unexpected end of file)", pFilename));
+		MFDebug_Message(MFStr("Failed loading image: %s (Unexpected end of file)", pFilename));
 		free(pTarga);
 		return NULL;
 	}

@@ -72,6 +72,12 @@ int main(int argc, char *argv[])
 	// find source file extension
 	for(a=(int)strlen(source); a>0 && source[a-1] != '.'; a--);
 
+	// initialise the strings
+	strcpy(pModel->name, "");
+	strcpy(pModel->author, "");
+	strcpy(pModel->authoringTool, "");
+	strcpy(pModel->copyrightString, "");
+
 	// read source file
 	if(!stricmp(&source[a], "f3d"))
 	{
@@ -101,6 +107,12 @@ int main(int argc, char *argv[])
 	{
 		// read MD3 file... (Quake3)
 		a = pModel->ReadMD3(source);
+		if(a) return a;
+	}
+	else if(!stricmp(&source[a], "me2"))
+	{
+		// read MEMD2 file... (Manu Engine)
+		a = pModel->ReadMEMD2(source);
 		if(a) return a;
 	}
 	else

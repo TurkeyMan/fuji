@@ -211,6 +211,7 @@ public:
 	int ReadDAE(char *pFilename);
 	int ReadMD2(char *pFilename);
 	int ReadMD3(char *pFilename);
+	int ReadMEMD2(char *pFilename);
 
 	void WriteF3D(char *pFilename);
 	void WriteMDL(char *pFilename, MFPlatform platform);
@@ -226,6 +227,9 @@ public:
 	F3DAnimationChunk *GetAnimationChunk() { return &animationChunk; }
 
 	char name[256];
+	char author[256];
+	char authoringTool[256];
+	char copyrightString[256];
 
 	F3DMeshChunk meshChunk;
 	F3DSkeletonChunk skeletonChunk;

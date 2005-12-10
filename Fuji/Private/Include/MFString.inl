@@ -32,7 +32,20 @@ inline char* MFSeekNewline(char *pC)
 	return pC;
 }
 
+inline const char* MFSeekNewline(const char *pC)
+{
+	while(!MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
 inline char* MFSkipWhite(char *pC)
+{
+	while(MFIsWhite(*pC)) pC++;
+	return pC;
+}
+
+inline const char* MFSkipWhite(const char *pC)
 {
 	while(MFIsWhite(*pC)) pC++;
 	return pC;

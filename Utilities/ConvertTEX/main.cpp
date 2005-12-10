@@ -1,9 +1,11 @@
 #include "Fuji.h"
 #include "MFTexture_Internal.h"
+#include "MFSystem.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"
 #include "LoadTarga.h"
+#include "LoadBMP.h"
 
 #include <d3d8.h>
 #include <xgraphics.h>
@@ -39,7 +41,7 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], System_GetPlatformString(b)))
+				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
@@ -99,7 +101,7 @@ int main(int argc, char *argv[])
 					{
 						if(MFTexture_IsAvailableOnPlatform(f, g))
 						{
-							printf("%s%s", printPipe ? "|" : "", System_GetPlatformString(g));
+							printf("%s%s", printPipe ? "|" : "", MFSystem_GetPlatformString(g));
 							printPipe = true;
 						}
 					}
@@ -153,6 +155,10 @@ int main(int argc, char *argv[])
 	if(!stricmp(&fileName[fileNameLen-3], "tga"))
 	{
 		pImage = LoadTarga(fileName);
+	}
+	else if(!stricmp(&fileName[fileNameLen-3], "bmp"))
+	{
+		pImage = LoadBMP(fileName);
 	}
 	else
 	{
@@ -324,7 +330,7 @@ int main(int argc, char *argv[])
 
 	free(pOutputBuffer);
 
-	printf(STR("> %s\n", outFile));
+	printf(MFStr("> %s\n", outFile));
 	// done! :)
 
 	return 0;
