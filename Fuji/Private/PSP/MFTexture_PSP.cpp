@@ -2,11 +2,11 @@
 
 /**** Includes ****/
 
-#include "Common.h"
+#include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 #include "Image.h"
 
 #include <pspdisplay.h>
@@ -14,7 +14,7 @@
 
 /**** Globals ****/
 
-extern PtrListDL<MFTexture> gTextureBank;
+extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
 /**** Functions ****/
@@ -25,7 +25,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// no processing required on PSP..
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormats format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -36,7 +36,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		int numPixels = width * height;
 
-		char *pImageData= (char*)Heap_Alloc(numPixels * 2);
+		char *pImageData= (char*)MFHeap_Alloc(numPixels * 2);
 
 		uint32 *pSrcData = (uint32*)pData;
 		uint16 *pData = (uint16*)pImageData;
@@ -81,14 +81,14 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 			}
 
 			default:
-				DBGASSERT(false, "Source format not supported...");
+				MFDebug_Assert(false, "Source format not supported...");
 				break;
 		}
 
 		strcpy(pTexture->name, pName);
 
 		// create template data
-		char *pTemplate = (char*)Heap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
+		char *pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
@@ -110,7 +110,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
 }
@@ -122,8 +122,8 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
 	{
-		Heap_Free(pTexture->pTemplateData);
-		Heap_Free(pTexture->pTemplateData->pSurfaces[0].pImageData);
+		MFHeap_Free(pTexture->pTemplateData);
+		MFHeap_Free(pTexture->pTemplateData->pSurfaces[0].pImageData);
 
 		gTextureBank.Destroy(pTexture);
 

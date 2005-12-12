@@ -1,5 +1,5 @@
-#if !defined(_MAT_STANDARD_H)
-#define _MAT_STANDARD_H
+#if !defined(_MFMAT_STANDARD_H)
+#define _MFMAT_STANDARD_H
 
 enum MFMat_Standard_Paramaters
 {

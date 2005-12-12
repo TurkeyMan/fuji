@@ -24,5 +24,5 @@ void MFMat_Effect_Register()
 
 void MFMat_Effect_Update(MFMaterial *pMaterial)
 {
-	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
+//	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 }

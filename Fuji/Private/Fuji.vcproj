@@ -791,16 +791,16 @@
 				Name="Materials"
 				Filter="">
 				<File
-					RelativePath=".\Source\Materials\Mat_Standard.cpp">
-				</File>
-				<File
-					RelativePath=".\Source\Materials\Mat_Standard.h">
-				</File>
-				<File
 					RelativePath=".\Source\Materials\MFMat_Effect.cpp">
 				</File>
 				<File
 					RelativePath=".\Source\Materials\MFMat_Effect.h">
+				</File>
+				<File
+					RelativePath=".\Source\Materials\MFMat_Standard.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\Materials\MFMat_Standard.h">
 				</File>
 			</Filter>
 		</Filter>
@@ -1235,7 +1235,7 @@
 				Name="Materials"
 				Filter="">
 				<File
-					RelativePath=".\XBox\Materials\Mat_Standard_XB.cpp">
+					RelativePath=".\XBox\Materials\MFMat_Standard_XB.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1673,7 +1673,34 @@
 				Name="Materials"
 				Filter="">
 				<File
-					RelativePath=".\Pc\Materials\Mat_Standard_PC.cpp">
+					RelativePath=".\Pc\Materials\MFMat_Effect_PC.cpp">
+					<FileConfiguration
+						Name="Debug_XB|Xbox"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Profile_XB|Xbox"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_XB|Xbox"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_XB|Xbox"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Pc\Materials\MFMat_Standard_PC.cpp">
 					<FileConfiguration
 						Name="Debug_XB|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1712,33 +1739,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Retail_XB|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Pc\Materials\MFMat_Effect_PC.cpp">
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Profile_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_XB|Xbox"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2955,7 +2955,28 @@
 				Name="Materials"
 				Filter="">
 				<File
-					RelativePath=".\Null\Materials\Mat_Standard_Null.cpp">
+					RelativePath=".\Null\Materials\MFMat_Effect_Null.cpp">
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Null\Materials\MFMat_Standard_Null.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2994,27 +3015,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Retail_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Null\MFMat_Effect_Null.cpp">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>

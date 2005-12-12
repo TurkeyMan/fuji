@@ -3,14 +3,19 @@
 
 #define SAMPLE_BUFFER_SIZE 128//50000
 
-#include "Fuji.h"
-#include <dinput.h>
+#define MFWHEEL_DELTA 120 
 
+#define MFAXIS(x) ((x)<<6)
+#define MFGETAXIS(x) (((x)&AID_AxisMask)>>6)
+
+#include "Fuji.h"
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
 #include "MFIni.h"
 #include "MFSystem.h"
+
+#include <dinput.h>
 
 #if defined(ALLOW_RAW_INPUT)
 	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
@@ -24,9 +29,35 @@
 	int InitRawMouse(bool _includeRDPMouse);
 #endif
 
-BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdpDirectInputstance, VOID* pContext);
+void MFInputPC_LoadGamepadMappings();
 
-void MFInputPC_SetCooperativeLevels();
+
+/*** Enums ***/
+
+// Button masks for the controller button map's
+enum MFButtonMasks
+{
+  // masks for the button field
+  AID_ButtonMask = 0x003F, // max 64 buttons (6 bits)
+  AID_AxisMask   = 0x1FC0, // axis offset (must be shifted down 6 bits)
+  AID_Analog     = 0x4000, // use the analog axis, if not present on the controller, the button will be read
+  AID_Negative   = 0x8000, // if this flag is present, the axis will be inverted
+  AID_Clamp      = 0x2000, // clamps to only allow the positive range
+
+  // use these enum's to reference analog axii's
+  AID_X        = MFAXIS(0)  | AID_Analog,
+  AID_Y        = MFAXIS(1)  | AID_Analog,
+  AID_Z        = MFAXIS(2)  | AID_Analog,
+  AID_Rx       = MFAXIS(3)  | AID_Analog,
+  AID_Ry       = MFAXIS(4)  | AID_Analog,
+  AID_Rz       = MFAXIS(5)  | AID_Analog,
+  AID_Slider1  = MFAXIS(6)  | AID_Analog,
+  AID_Slider2  = MFAXIS(7)  | AID_Analog,
+  AID_Vx       = MFAXIS(43) | AID_Analog,
+  AID_Vy       = MFAXIS(44) | AID_Analog,
+  AID_Vz       = MFAXIS(45) | AID_Analog,
+};
+
 
 /*** Structure definitions ***/
 
@@ -50,31 +81,42 @@ struct MFRawMouse
 
 struct MFGamepadInfo
 {
-	char * pName;
-	const char * const * ppButtonNameStrings;
+	const char *pName;
+	const char *pIdentifier;
 
-	int axisMapping[4];
-	int buttonMapping[16];
-	bool usePOV;
+	const int *pButtonMap;
+	const char **ppButtonNameStrings;
+
+	bool bUsePOV;
 
 	MFGamepadInfo *pNext;
 };
 
-MFGamepadInfo *MFInputPC_GetGamepadInfo(const char *pGamepad);
-void MFInputPC_LoadGamepadMappings();
+struct MFGamepadPC
+{
+	IDirectInputDevice8	*pDevice;
+	IDirectInputEffect *pForceFeedback;
+
+	MFGamepadInfo *pGamepadInfo;
+
+	DIDEVCAPS caps;
+
+	int  forceFeedbackState;
+	bool bUsePOV;
+};
+
 
 /*** Globals ***/
 
-static IDirectInput8		*pDirectInput						= NULL;
-static IDirectInputDevice8	*pDIKeyboard						= NULL;
-static IDirectInputDevice8	*pDIMouse							= NULL;
-static IDirectInputDevice8	*pDIJoystick[MFInput_MaxInputID]	= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static IDirectInput8 *pDirectInput = NULL;
+static IDirectInputDevice8 *pKeyboard = NULL;
+static IDirectInputDevice8 *pMouse = NULL;
 
-static MFGamepadInfo *pGamepadMappings[MFInput_MaxInputID]		= {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+static MFGamepadPC gPCJoysticks[MFInput_MaxInputID];
 
-static int	gGamepadCount	= 0;
-static int	gKeyboardCount	= 0;
-static int	gMouseCount		= 0;
+static int gGamepadCount = 0;
+static int gKeyboardCount = 0;
+static int gMouseCount = 0;
 
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
@@ -86,10 +128,365 @@ static float deadZone = 0.3f;
 
 static float mouseMultiplier = 1.0f;
 
-static const long joyAxii[24] = {0,1,2,3,4,5,44,45,46,47,48,49,52,53,54,55,56,57,60,61,62,63,64,65};
-static const long joySliders[4] = {6,50,58,66};
 
-static MFGamepadInfo *pGamepadMappingRegistry = NULL;
+// Button Mappings
+static const int gStandardButtonID[GamepadType_Max] = 
+{
+  0,   // Button_A
+  1,   // Button_B
+  2,   // Button_X
+  3,   // Button_Y
+  4,   // Button_White
+  5,   // Button_Black
+  6,   // Button_LeftTrigger
+  7,   // Button_RightTrigger
+  8,   // Button_Start
+  9,   // Button_Back
+  10,  // Button_LeftThumb
+  11,  // Button_RightThumb
+  12,  // Button_DUp
+  13,  // Button_DDown
+  14,  // Button_DLeft
+  15,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Rx,               // Button_ThumbRX
+  AID_Ry | AID_Negative // Button_ThumbRY
+};
+
+static const int gPS2ButtonID[GamepadType_Max] = 
+{
+  2,   // Button_A
+  1,   // Button_B
+  3,   // Button_X
+  0,   // Button_Y
+  6,   // Button_White
+  7,   // Button_Black
+  4,   // Button_LeftTrigger
+  5,   // Button_RightTrigger
+  9,   // Button_Start
+  8,   // Button_Back
+  10,  // Button_LeftThumb
+  11,  // Button_RightThumb
+  12,  // Button_DUp
+  14,  // Button_DDown
+  15,  // Button_DLeft
+  13,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Rz,               // Button_ThumbRX
+  AID_Z | AID_Negative  // Button_ThumbRY
+};
+
+static const int gTitaniumButtonID[GamepadType_Max] = 
+{
+  2,   // Button_A
+  1,   // Button_B
+  3,   // Button_X
+  0,   // Button_Y
+  6,   // Button_White
+  7,   // Button_Black
+  4,   // Button_LeftTrigger
+  5,   // Button_RightTrigger
+  8,   // Button_Start
+  9,   // Button_Back
+  10,  // Button_LeftThumb
+  11,  // Button_RightThumb
+  -1,  // Button_DUp
+  -1,  // Button_DDown
+  -1,  // Button_DLeft
+  -1,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Z,                // Button_ThumbRX
+  AID_Rz | AID_Negative // Button_ThumbRY
+};
+
+static const int gXBCDButtonID[GamepadType_Max] = 
+{
+  0,   // Button_A
+  1,   // Button_B
+  2,   // Button_X
+  3,   // Button_Y
+  5,   // Button_White
+  4,   // Button_Black
+  10 | AID_Z,  // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+  11 | AID_Rz, // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+  6,   // Button_Start
+  7,   // Button_Back
+  8,   // Button_LeftThumb
+  9,   // Button_RightThumb
+  12,  // Button_DUp
+  14,  // Button_DDown
+  15,  // Button_DLeft
+  13,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Rx,               // Button_ThumbRX
+  AID_Ry | AID_Negative // Button_ThumbRY
+};
+
+static const int gLogitechDualActionButtonID[GamepadType_Max] = 
+{
+  1,   // Button_A
+  2,   // Button_B
+  0,   // Button_X
+  3,   // Button_Y
+  4,   // Button_White
+  5,   // Button_Black
+  6,   // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+  7,   // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+  9,   // Button_Start
+  8,   // Button_Back
+  10,  // Button_LeftThumb
+  11,  // Button_RightThumb
+  -1,  // Button_DUp
+  -1,  // Button_DDown
+  -1,  // Button_DLeft
+  -1,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Z,                // Button_ThumbRX
+  AID_Rz | AID_Negative // Button_ThumbRY
+};
+
+static const int gXBox360ButtonID[GamepadType_Max] = 
+{
+  0,   // Button_A
+  1,   // Button_B
+  2,   // Button_X
+  3,   // Button_Y
+  4,   // Button_White
+  5,   // Button_Black
+  AID_Z | AID_Clamp,				// Button_LeftTrigger  // use negative range of clamped z axis
+  AID_Z | AID_Negative | AID_Clamp,	// Button_RightTrigger // use positive range of clamped z axis
+  7,   // Button_Start
+  6,   // Button_Back
+  8,  // Button_LeftThumb
+  9,  // Button_RightThumb
+  -1,  // Button_DUp
+  -1,  // Button_DDown
+  -1,  // Button_DLeft
+  -1,  // Button_DRight
+  AID_X,                // Button_ThumbLX
+  AID_Y | AID_Negative, // Button_ThumbLY
+  AID_Rx,               // Button_ThumbRX
+  AID_Ry | AID_Negative // Button_ThumbRY
+};
+
+// Button Names
+static const char * gStandardButtonNames[GamepadType_Max] =
+{
+  "Button 0",     // Button_A
+  "Button 1",     // Button_B
+  "Button 2",     // Button_X
+  "Button 3",     // Button_Y
+  "Button 4",     // Button_White
+  "Button 5",     // Button_Black
+  "Button 6",     // Button_LeftTrigger
+  "Button 7",     // Button_RightTrigger
+  "Button 8",     // Button_Start
+  "Button 9",     // Button_Back
+  "Button 10",    // Button_LeftThumb
+  "Button 11",    // Button_RightThumb
+  "POV Up",       // Button_DUp
+  "POV Down",     // Button_DDown
+  "POV Left",     // Button_DLeft
+  "POV Right",    // Button_DRight
+  "Analog X-Axis",  // Button_ThumbLX
+  "Analog Y-Axis",  // Button_ThumbLY
+  "Analog RX-Axis", // Button_ThumbRX
+  "Analog RY-Axis"  // Button_ThumbRY
+};
+
+static const char * gPS2ButtonNames[GamepadType_Max] =
+{
+  "Cross",        // Button_A
+  "Circle",       // Button_B
+  "Box",          // Button_X
+  "Triangle",     // Button_Y
+  "L1",           // Button_White
+  "R1",           // Button_Black
+  "L2",           // Button_LeftTrigger
+  "R2",           // Button_RightTrigger
+  "Start",        // Button_Start
+  "Select",       // Button_Back
+  "L3",           // Button_LeftThumb
+  "R3",           // Button_RightThumb
+  "DPad Up",      // Button_DUp
+  "DPad Down",    // Button_DDown
+  "DPad Left",    // Button_DLeft
+  "DPad Right",   // Button_DRight
+  "Left X-Axis",  // Button_ThumbLX
+  "Left Y-Axis",  // Button_ThumbLY
+  "Right X-Axis", // Button_ThumbRX
+  "Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gXBoxButtonNames[GamepadType_Max] =
+{
+  "A",            // Button_A
+  "B",            // Button_B
+  "X",            // Button_X
+  "Y",            // Button_Y
+  "White",        // Button_White
+  "Black",        // Button_Black
+  "L-Trigger",    // Button_LeftTrigger
+  "R-Trigger",    // Button_RightTrigger
+  "Start",        // Button_Start
+  "Back",         // Button_Back
+  "L-Thumb",      // Button_LeftThumb
+  "R-Thumb",      // Button_RightThumb
+  "DPad Up",      // Button_DUp
+  "DPad Down",    // Button_DDown
+  "DPad Left",    // Button_DLeft
+  "DPad Right",   // Button_DRight
+  "Left X-Axis",  // Button_ThumbLX
+  "Left Y-Axis",  // Button_ThumbLY
+  "Right X-Axis", // Button_ThumbRX
+  "Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gLogitechDualActionButtonNames[GamepadType_Max] =
+{
+  "2",            // Button_A
+  "3",            // Button_B
+  "1",            // Button_X
+  "4",            // Button_Y
+  "5",            // Button_White
+  "6",            // Button_Black
+  "7",            // Button_LeftTrigger
+  "8",            // Button_RightTrigger
+  "10",           // Button_Start
+  "9",            // Button_Back
+  "L-Thumb",      // Button_LeftThumb
+  "R-Thumb",      // Button_RightThumb
+  "DPad Up",      // Button_DUp
+  "DPad Down",    // Button_DDown
+  "DPad Left",    // Button_DLeft
+  "DPad Right",   // Button_DRight
+  "Left X-Axis",  // Button_ThumbLX
+  "Left Y-Axis",  // Button_ThumbLY
+  "Right X-Axis", // Button_ThumbRX
+  "Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gXBox360ButtonNames[GamepadType_Max] =
+{
+  "A",            // Button_A
+  "B",            // Button_B
+  "X",            // Button_X
+  "Y",            // Button_Y
+  "LB",           // Button_White
+  "RB",           // Button_Black
+  "LT",           // Button_LeftTrigger
+  "RT",           // Button_RightTrigger
+  "Start",        // Button_Start
+  "Back",         // Button_Back
+  "L-Thumb",      // Button_LeftThumb
+  "R-Thumb",      // Button_RightThumb
+  "DPad Up",      // Button_DUp
+  "DPad Down",    // Button_DDown
+  "DPad Left",    // Button_DLeft
+  "DPad Right",   // Button_DRight
+  "Left X-Axis",  // Button_ThumbLX
+  "Left Y-Axis",  // Button_ThumbLY
+  "Right X-Axis", // Button_ThumbRX
+  "Right Y-Axis"  // Button_ThumbRY
+};
+
+// Gamepad Info
+static MFGamepadInfo gGamepadDescriptors[] =
+{
+  // default mappings
+  {
+    "Unknown Gamepad",
+    "",
+    gStandardButtonID,
+    gStandardButtonNames,
+    true,
+	&gGamepadDescriptors[1]
+  },
+
+  // standard PS2 adapter
+  {
+    "PS2 Gamepad",
+    "4 axis 16 button joystick",
+    gPS2ButtonID,
+    gPS2ButtonNames,
+    false,
+	&gGamepadDescriptors[2]
+  },
+
+  // different identities of the titanium adapters
+  {
+    "PS2 Gamepad",
+    "SmartJoy PLUS USB Adapter",
+    gTitaniumButtonID,
+    gPS2ButtonNames,
+    true,
+	&gGamepadDescriptors[3]
+  },
+
+  {
+    "PS2 Gamepad",
+    "SmartJoy PLUS Adapter",
+    gTitaniumButtonID,
+    gPS2ButtonNames,
+    true,
+	&gGamepadDescriptors[4]
+  },
+
+  {
+    "PS2 Gamepad",
+    "USB Force Feedback Joypad (MP-8888)",
+    gTitaniumButtonID,
+    gPS2ButtonNames,
+    true,
+	&gGamepadDescriptors[5]
+  },
+
+  {
+    "PS2 Gamepad",
+    "MP-8888 USB Joypad",
+    gTitaniumButtonID,
+    gPS2ButtonNames,
+    true,
+	&gGamepadDescriptors[6]
+  },
+
+  // xbox gamepad
+  {
+    "XBox Gamepad",
+    "XBCD XBox Gamepad",
+    gXBCDButtonID,
+    gXBoxButtonNames,
+    true,
+	&gGamepadDescriptors[7]
+  },
+
+  // logitech dual action
+  {
+    "Logitech Dual Action",
+    "Logitech Dual Action",
+    gLogitechDualActionButtonID,
+    gLogitechDualActionButtonNames,
+    true,
+	&gGamepadDescriptors[8]
+  },
+
+  // xbox 360 wired gamepad
+  {
+    "XBox 360 Gamepad",
+    "XBOX 360 For Windows (Controller)",
+    gXBox360ButtonID,
+    gXBox360ButtonNames,
+    true,
+	NULL
+  }
+};
+
+static MFGamepadInfo *pGamepadMappingRegistry = gGamepadDescriptors;
 
 #if defined(ALLOW_RAW_INPUT)
 static pGetRawInputDeviceList _GRIDL;
@@ -258,106 +655,143 @@ uint8 KEYtoDIK[256] =
 	DIK_YEN  // KEY_YEN,			// japanese keyboard
 };
 
-const char * const DefaultButtons[] =
-{
-// Default controller enums
-	"Button 1",
-	"Button 2",
-	"Button 3",
-	"Button 4",
-	"Button 5",
-	"Button 6",
-	"Button 7",
-	"Button 8",
-	"Button 9",
-	"Button 10",
-	"Button 11",
-	"Button 12",
-
-// general controller enums
-	"Digital Up",
-	"Digital Down",
-	"Digital Left",
-	"Digital Right",
-	"Analog X-Axis",
-	"Analog Y-Axis",
-	"Analog RX-Axis",
-	"Analog RY-Axis"
-};
-
-const char * const XBoxButtons[] =
-{
-// xbox controller enums
-	"A",
-	"B",
-	"X",
-	"Y",
-	"Black",
-	"White",
-	"Left Trigger",
-	"Right Trigger",
-	"Start",
-	"Back",
-	"Left Thumb",
-	"Right Thumb",
-
-// general controller enums
-	"DPad Up",
-	"DPad Down",
-	"DPad Left",
-	"DPad Right",
-	"Left Analog X-Axis",
-	"Left Analog Y-Axis",
-	"Right Analog X-Axis",
-	"Right Analog Y-Axis"
-};
-
-const char * const PS2Buttons[] =
-{
-// PSX controller enums
-	"Cross",
-	"Circle",
-	"Box",
-	"Triangle",
-	"R1",
-	"L1",
-	"L2",
-	"R2",
-	"Start",
-	"Select",
-	"Left Thumb",
-	"Right Thumb",
-
-// general controller enums
-	"DPad Up",
-	"DPad Down",
-	"DPad Left",
-	"DPad Right",
-	"Left Analog X-Axis",
-	"Left Analog Y-Axis",
-	"Right Analog X-Axis",
-	"Right Analog Y-Axis"
-};
 
 /**** Platform Specific Functions ****/
+
+// DirectInput Enumeration Callback
+static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+{
+	MFCALLSTACK;
+
+	HRESULT hr;
+
+	// attempt to create device
+	hr = pDirectInput->CreateDevice(lpddi->guidInstance, &gPCJoysticks[gGamepadCount].pDevice, NULL);
+
+	if(FAILED(hr))
+	{
+		MFDebug_Warn(1, "Failed to create gamepad device.");
+		return DIENUM_CONTINUE;
+	}
+
+	// get the device caps
+	memset(&gPCJoysticks[gGamepadCount].caps, 0, sizeof(DIDEVCAPS));
+	gPCJoysticks[gGamepadCount].caps.dwSize = sizeof(DIDEVCAPS);
+
+	gPCJoysticks[gGamepadCount].pDevice->GetCapabilities(&gPCJoysticks[gGamepadCount].caps);
+
+	// find matching device descriptor
+	MFGamepadInfo *pInfo = pGamepadMappingRegistry;
+	for(; pInfo; pInfo = pInfo->pNext)
+	{
+		if(!strcmp(pInfo->pIdentifier, lpddi->tszProductName))
+			break;
+	}
+
+	if(!pInfo)
+	{
+		// use default descriptor
+		gPCJoysticks[gGamepadCount].pGamepadInfo = pGamepadMappingRegistry;
+		MFDebug_Warn(1, MFStr("Found an unknown gamepad '%s', using default mappings.", lpddi->tszProductName));
+	}
+	else
+	{
+		// use applicable descriptor
+		gPCJoysticks[gGamepadCount].pGamepadInfo = pInfo;
+		MFDebug_Warn(2, MFStr("Found gamepad: %s '%s'.", pInfo->pName, pInfo->pIdentifier));
+	}
+
+	// test if device uses a POV for the digital directions
+	if(gPCJoysticks[gGamepadCount].caps.dwPOVs && gPCJoysticks[gGamepadCount].pGamepadInfo->bUsePOV)
+		gPCJoysticks[gGamepadCount].bUsePOV = true;
+	else
+		gPCJoysticks[gGamepadCount].bUsePOV = false;
+
+	// initialise the device
+	hr = gPCJoysticks[gGamepadCount].pDevice->SetDataFormat(&c_dfDIJoystick2);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to set gamepad data format.");
+
+	// set device cooperative level
+	hr = gPCJoysticks[gGamepadCount].pDevice->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND|DISCL_EXCLUSIVE);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to set gamepad cooperative level.");
+
+	// check for force feedback availability
+	if(gPCJoysticks[gGamepadCount].caps.dwFlags & DIDC_FORCEFEEDBACK)
+	{
+		// This application needs only one effect: Applying raw forces.
+		DWORD           rgdwAxes[2]     = { DIJOFS_X, DIJOFS_Y };
+		LONG            rglDirection[2] = { 0, 0 };
+		DICONSTANTFORCE cf              = { 0 };
+
+		DIEFFECT eff;
+		ZeroMemory( &eff, sizeof(eff) );
+		eff.dwSize                  = sizeof(DIEFFECT);
+		eff.dwFlags                 = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+		eff.dwDuration              = INFINITE;
+		eff.dwSamplePeriod          = 0;
+		eff.dwGain                  = DI_FFNOMINALMAX;
+		eff.dwTriggerButton         = DIEB_NOTRIGGER;
+		eff.dwTriggerRepeatInterval = 0;
+		eff.cAxes                   = 2;
+		eff.rgdwAxes                = rgdwAxes;
+		eff.rglDirection            = rglDirection;
+		eff.lpEnvelope              = 0;
+		eff.cbTypeSpecificParams    = sizeof(DICONSTANTFORCE);
+		eff.lpvTypeSpecificParams   = &cf;
+		eff.dwStartDelay            = 0;
+
+		hr = gPCJoysticks[gGamepadCount].pDevice->CreateEffect(GUID_ConstantForce, &eff, &gPCJoysticks[gGamepadCount].pForceFeedback, NULL);
+
+		if(FAILED(hr))
+		{
+			MFDebug_Warn(1, MFStr("Gamepad claims to support force feedback for device '%s', but DirectInput failed to create the effect.", gPCJoysticks[gGamepadCount].pGamepadInfo->pIdentifier));
+		}
+	}
+
+	// attempt to acquire the device
+	gPCJoysticks[gGamepadCount].pDevice->Acquire();
+
+	gGamepadCount++;
+
+	if(gGamepadCount >= MFInput_MaxInputID)
+		return DIENUM_STOP;
+
+	return DIENUM_CONTINUE;
+}
 
 void MFInput_InitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
-	int a;
-
+	// initialise runtime data
 	ZeroMemory(gKeyState,256);
+	ZeroMemory(gPCJoysticks, sizeof(gPCJoysticks));
+
+	// load additional gamepad mappings...
 	MFInputPC_LoadGamepadMappings();
 
+	// create the direct inpur device
 	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
 
-	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pDIKeyboard, NULL)))
+	// for setting the sample buffer
+	DIPROPDWORD dipdw;
+	dipdw.diph.dwSize       = sizeof(DIPROPDWORD);
+	dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+	dipdw.diph.dwObj        = 0;
+	dipdw.diph.dwHow        = DIPH_DEVICE;
+	dipdw.dwData            = SAMPLE_BUFFER_SIZE;
+
+	// create keyboard device
+	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pKeyboard, NULL)))
 	{
-		pDIKeyboard->SetDataFormat(&c_dfDIKeyboard);
+		pKeyboard->SetDataFormat(&c_dfDIKeyboard);
+		pKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE);
+		pKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
+		pKeyboard->Acquire();
 	}
 	gKeyboardCount = 1;
 
+	// create mouse device/s
 #if defined(ALLOW_RAW_INPUT)
 	if(gDefaults.input.allowMultipleMice)
 	{
@@ -370,25 +804,19 @@ void MFInput_InitModulePlatformSpecific()
 #if defined(ALLOW_DI_MOUSE)
 	if(gMouseCount == 0)
 	{
-		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pDIMouse, NULL)))
+		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pMouse, NULL)))
 		{
-			pDIMouse->SetDataFormat(&c_dfDIMouse2);
+			pMouse->SetDataFormat(&c_dfDIMouse2);
+			pMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE));
+			pMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
+			pMouse->Acquire();
 		}
 		gMouseCount = 1;
 	}
 #endif
 
+	// enumerate gamepads
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
-
-	for(a=0; a<gGamepadCount; a++)
-	{
-		if(pDIJoystick[a])
-		{
-			pDIJoystick[a]->SetDataFormat(&c_dfDIJoystick2);
-		}
-	}
-
-	MFInputPC_SetCooperativeLevels();
 }
 
 void MFInput_DeinitModulePlatformSpecific()
@@ -397,32 +825,32 @@ void MFInput_DeinitModulePlatformSpecific()
 
 	int a;
 
-	for(a=0; a<16; a++)
+	for(a=0; a<MFInput_MaxInputID; a++)
 	{
-		if(pDIJoystick[a])
+		if(gPCJoysticks[a].pDevice)
 		{
-			pDIJoystick[a]->Unacquire();
-			pDIJoystick[a]->Release();
-			pDIJoystick[a] = NULL;
+			gPCJoysticks[a].pDevice->Unacquire();
+			gPCJoysticks[a].pDevice->Release();
+			gPCJoysticks[a].pDevice = NULL;
 		}
 	}
 	gGamepadCount = 0;
 
 #if defined(ALLOW_DI_MOUSE)
-	if(pDIMouse)
+	if(pMouse)
 	{
-		pDIMouse->Unacquire();
-		pDIMouse->Release();
-		pDIMouse = NULL;
+		pMouse->Unacquire();
+		pMouse->Release();
+		pMouse = NULL;
 	}
 	gMouseCount = 0;
 #endif
 
-	if(pDIKeyboard)
+	if(pKeyboard)
 	{
-		pDIKeyboard->Unacquire();
-		pDIKeyboard->Release();
-		pDIKeyboard = NULL;
+		pKeyboard->Unacquire();
+		pKeyboard->Release();
+		pKeyboard = NULL;
 	}
 	gKeyboardCount = 0;
 
@@ -456,7 +884,7 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 				memset(&caps, 0, sizeof(DIDEVCAPS));
 				caps.dwSize = sizeof(DIDEVCAPS);
 
-				pDIJoystick[id]->GetCapabilities(&caps);
+				gPCJoysticks[id].pDevice->GetCapabilities(&caps);
 
 				if(caps.dwFlags & DIDC_ATTACHED)
 				{
@@ -491,61 +919,103 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
 	MFCALLSTACK;
 
-	DIJOYSTATE2 joyState;
-	int a;
+	HRESULT hr;
 
 	memset(pGamepadState, 0, sizeof(*pGamepadState));
 
-	if(pDIJoystick[id])
+	// poll the gamepad
+	hr = gPCJoysticks[id].pDevice->Poll(); 
+
+	if(FAILED(hr))
 	{
-		if(FAILED(pDIJoystick[id]->Poll()))
+		// attempt to recover the device
+		hr = gPCJoysticks[id].pDevice->Acquire();
+
+		if(SUCCEEDED(hr))
 		{
-			pDIJoystick[id]->Acquire();
-			return;
-		}
-
-		pDIJoystick[id]->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
-
-		for(a=0; a<16; a++)
-		{
-			if(pGamepadMappings[id]->buttonMapping[a] > -1)
-				pGamepadState->values[a] = joyState.rgbButtons[pGamepadMappings[id]->buttonMapping[a]] ? 1.0f : 0.0f;
-		}
-
-		if(pGamepadMappings[id]->usePOV)
-		{
-			// read from POV
-			DWORD pov = joyState.rgdwPOV[0];
-
-			bool POVCentered = (LOWORD(pov) == 0xFFFF);
-
-			if(!POVCentered)
+			if(gPCJoysticks[id].pForceFeedback && gPCJoysticks[id].forceFeedbackState)
 			{
-				if((pov >= 0 && pov <= 4500) || (pov >= 31500 && pov <= 36000))
-					pGamepadState->values[Button_DUp] = 1.0f;
-				if((pov >= 4500 && pov <= 13500))
-					pGamepadState->values[Button_DRight] = 1.0f;
-				if((pov >= 13500 && pov <= 22500))
-					pGamepadState->values[Button_DDown] = 1.0f;
-				if((pov >= 22500 && pov <= 31500))
-					pGamepadState->values[Button_DLeft] = 1.0f;
+				// restart the vibration effect
+				gPCJoysticks[id].pForceFeedback->Start(1, 0);
 			}
 		}
+	}
 
-		float *pGamepadAxis = &pGamepadState->values[Axis_LX];
-		LONG *pSourceAxis = (LONG*)&joyState;
+	// read gamepad
+	if(SUCCEEDED(hr))
+	{
+		DIJOYSTATE2 joyState;
 
-		float deadZone = MFInput_GetDeadZone();
+		// get device state
+		hr = gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
 
-		for(a=0; a<4; a++)
+		if(SUCCEEDED(hr))
 		{
-			if(pGamepadMappings[id]->axisMapping[a] > -1)
-			{
-				float inputValue = ((float)(pSourceAxis[pGamepadMappings[id]->axisMapping[a]] - 32767.0f)) * (1.0f/32767.0f);
-				pGamepadAxis[a] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+			const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
+			LONG *pAxii = (LONG*)&joyState;
 
-				if(a&1) // y axis's need to be inverted.. direct input seems to like to report them upside down ;)
-					pGamepadAxis[a] = -pGamepadAxis[a];
+			// convert input to float data
+			for(int a=0; a<GamepadType_Max; a++)
+			{
+				if(pButtonMap[a] == -1)
+					continue;
+
+				int axisID = MFGETAXIS(pButtonMap[a]);
+				bool readAnalog = false;
+
+				// test if analog input is present
+				if(pButtonMap[a] & AID_Analog)
+				{
+					DIDEVICEOBJECTINSTANCE axisInfo;
+					axisInfo.dwSize = sizeof(DIDEVICEOBJECTINSTANCE);
+
+					hr = gPCJoysticks[id].pDevice->GetObjectInfo(&axisInfo, axisID<<2, DIPH_BYOFFSET);
+
+					if(SUCCEEDED(hr))
+						readAnalog = true;
+				}
+
+				// if we are not reading the analog axis
+				if(!readAnalog)
+				{
+					// read digital button
+					pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
+				}
+				else
+				{
+					// read an analog axis
+					pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
+				}
+
+				// invert any buttons with the AID_Negative flag
+				pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
+				// clamp any butons with the AID_Clamp flag to the positive range
+				pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
+			}
+
+			// if device has a pov, and we want to read from it
+			if(gPCJoysticks[id].bUsePOV)
+			{
+				// read POV
+				DWORD pov = joyState.rgdwPOV[0];
+				bool POVCentered = (LOWORD(pov) == 0xFFFF);
+
+				if(POVCentered)
+				{
+					// POV is centered
+					pGamepadState->values[Button_DUp] = 0.0f;
+					pGamepadState->values[Button_DDown] = 0.0f;
+					pGamepadState->values[Button_DLeft] = 0.0f;
+					pGamepadState->values[Button_DRight] = 0.0f;
+				}
+				else
+				{
+					// read POV (or more appropriately titled, POS)
+					pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
+					pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
+					pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
+					pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+				}
 			}
 		}
 	}
@@ -560,11 +1030,11 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 
 	HRESULT hr;
 
-	hr = pDIKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+	hr = pKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
 
 	if(hr != DI_OK)
 	{
-		pDIKeyboard->Acquire();
+		pKeyboard->Acquire();
 		return;
 	}
 	else
@@ -618,11 +1088,11 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 		pMouseState->values[Mouse_Wheel] = 0.0f;
 		pMouseState->values[Mouse_Wheel2] = 0.0f;
 
-		hr = pDIMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+		hr = pMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
 
 		if(hr != DI_OK)
 		{
-			pDIMouse->Acquire();
+			pMouse->Acquire();
 			return;
 		}
 		else
@@ -727,10 +1197,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 	{
 		case IDD_Gamepad:
 		{
-			if(strcmp(pGamepadMappings[sourceID]->pName, "default"))
-				pText = pGamepadMappings[sourceID]->pName;
-			else
-				pText = "Gamepad";
+			pText = gPCJoysticks[sourceID].pGamepadInfo->pName;
 			break;
 		}
 		case IDD_Mouse:
@@ -748,7 +1215,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 
 const char* MFInput_GetGamepadButtonName(int button, int sourceID)
 {
-	return pGamepadMappings[sourceID]->ppButtonNameStrings[button];
+	return gPCJoysticks[sourceID].pGamepadInfo->ppButtonNameStrings[button];
 }
 
 bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
@@ -778,156 +1245,46 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 }
 
 // internal functions
-void MFInputPC_SetCooperativeLevels()
-{
-	MFCALLSTACK;
-
-	int a;
-
-	if(pDIKeyboard)
-	{
-		if(FAILED(pDIKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE)))
-		{
-			MFDebug_Assert(false, "Failed to set Keyboard cooperative level");
-		}
-	}
-
-	if(pDIMouse)
-	{
-		if(FAILED(pDIMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE))))
-		{
-			MFDebug_Assert(false, "Failed to set Mouse cooperative level");
-		}
-	}
-
-	for(a=0; a<gGamepadCount; a++)
-	{
-		if(pDIJoystick[a])
-		{
-			if(FAILED(pDIJoystick[a]->SetCooperativeLevel(apphWnd, DISCL_EXCLUSIVE | DISCL_FOREGROUND)))
-			{
-				MFDebug_Assert(false, MFStr("Failed to set Gamepad %d cooperative level", a));
-			}
-		}
-	}
-
-	DIPROPDWORD dipdw;
-	dipdw.diph.dwSize       = sizeof(DIPROPDWORD);
-	dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-	dipdw.diph.dwObj        = 0;
-	dipdw.diph.dwHow        = DIPH_DEVICE;
-	dipdw.dwData            = SAMPLE_BUFFER_SIZE;
-
-	if(pDIKeyboard) pDIKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
-	if(pDIMouse) pDIMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
-}
-
-BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE* pdidInstance, VOID* pContext)
-{
-	MFCALLSTACK;
-
-	if(gGamepadCount<16)
-	{
-		if(FAILED(pDirectInput->CreateDevice(pdidInstance->guidInstance, &pDIJoystick[gGamepadCount], NULL)))
-			return DIENUM_CONTINUE;
-
-		pGamepadMappings[gGamepadCount] = MFInputPC_GetGamepadInfo(pdidInstance->tszProductName);
-
-		if(pGamepadMappings[gGamepadCount]->usePOV)
-		{
-			DIDEVCAPS caps;
-			memset(&caps, 0, sizeof(DIDEVCAPS));
-			caps.dwSize = sizeof(DIDEVCAPS);
-
-			pDIJoystick[gGamepadCount]->GetCapabilities(&caps);
-
-			if(caps.dwPOVs < 1)
-				pGamepadMappings[gGamepadCount]->usePOV = false;
-		}
-
-		gGamepadCount++;
-
-		return DIENUM_CONTINUE;
-	}
-
-	return DIENUM_STOP;
-}
-
 void MFInputPC_Acquire(bool acquire)
 {
 	MFCALLSTACK;
 
 	int a;
 
-	if(pDIKeyboard)
+	if(pKeyboard)
 	{
-		if(acquire) pDIKeyboard->Acquire();
-		else pDIKeyboard->Unacquire();
+		if(acquire) pKeyboard->Acquire();
+		else pKeyboard->Unacquire();
 	}
 
-	if(pDIMouse)
+	if(pMouse)
 	{
-		if(acquire) pDIMouse->Acquire();
-		else pDIMouse->Unacquire();
+		if(acquire) pMouse->Acquire();
+		else pMouse->Unacquire();
 	}
 
 	for(a=0; a<gGamepadCount; a++)
 	{
-		if(pDIJoystick[a])
+		if(gPCJoysticks[a].pDevice)
 		{
 			if(acquire)
 			{
-				if(FAILED(pDIJoystick[a]->Poll()))
+				if(FAILED(gPCJoysticks[a].pDevice->Poll()))
 				{
-					pDIJoystick[a]->Acquire();
+					gPCJoysticks[a].pDevice->Acquire();
 				}
 			}
-			else pDIJoystick[a]->Unacquire();
+			else gPCJoysticks[a].pDevice->Unacquire();
 		}
 	}
 }
 
-MFGamepadInfo *MFInputPC_GetGamepadInfo(const char *pGamepad)
-{
-	for(MFGamepadInfo *pT = pGamepadMappingRegistry; pT; pT = pT->pNext)
-	{
-		if(!strcmp(pT->pName, pGamepad))
-			return pT;
-	}
-
-	const char *pDefault = "default";
-
-	if(pDefault != pGamepad)
-		return MFInputPC_GetGamepadInfo(pDefault);
-
-	return NULL;
-}
-
 void MFInputPC_LoadGamepadMappings()
 {
+/*
 	// load GamepadMappings.ini
 	MFGamepadInfo *pGI = NULL;
 	MFIni *pIni;
-
-	// create default
-	pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + strlen("default") + 1);
-	pGI->usePOV = true;
-	pGI->pName = (char*)&pGI[1];
-	pGI->ppButtonNameStrings = DefaultButtons;
-	strcpy(pGI->pName, "default");
-
-	pGI->pNext = pGamepadMappingRegistry;
-	pGamepadMappingRegistry = pGI;
-
-	for(int a=0; a<16; a++)
-	{
-		pGI->buttonMapping[a] = a;
-	}
-
-	for(int a=0; a<4; a++)
-	{
-		pGI->axisMapping[a] = a;
-	}
 
 	// read GameMappings.ini file
 	pIni = MFIni::Create("GamepadMappings.ini");
@@ -939,11 +1296,11 @@ void MFInputPC_LoadGamepadMappings()
 
 		while(pLine)
 		{
-			if (pLine->IsString(0, "Gamepad"))
+			if(pLine->IsString(0, "Gamepad"))
 			{
 				const char *pName = pLine->GetString(1);
 				pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + strlen(pName) + 1);
-				pGI->usePOV = true;
+				pGI->bUsePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;
 				strcpy(pGI->pName, pName);
@@ -1068,6 +1425,7 @@ void MFInputPC_LoadGamepadMappings()
 
 		MFIni::Destroy(pIni);
 	}
+*/
 }
 
 

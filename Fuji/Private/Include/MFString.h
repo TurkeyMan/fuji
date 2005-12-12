@@ -89,6 +89,16 @@ bool MFIsAlphaNumeric(char c);
 bool MFIsNewline(char c);
 
 /**
+ * Converts a character to lower case.
+ */
+int MFToLower(int c);
+
+/**
+ * Converts a character to lower case.
+ */
+int MFToUpper(int c);
+
+/**
  * Returns a pointer to the start of the next line in the provided string.
  */
 char* MFSeekNewline(char *pC);
@@ -100,6 +110,6 @@ char* MFSkipWhite(char *pC);
 
 #include "MFString.inl"
 
-#endif _MFSTRING_H
+#endif // _MFSTRING_H
 
 /** @} */

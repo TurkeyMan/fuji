@@ -93,7 +93,7 @@ const char* MFCallstack_GetCallstackString()
 		char *pTemp = MFStr("  %-32s\n",pCallstack[a]);
 		int tempLen = (int)strlen(pTemp);
 //		char *pTemp = MFStr("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? MFStr(" [%s]",pFunc->pComment) : "");
-		if(bufferUsed + tempLen < sizeof(callstack) - 1)
+		if(bufferUsed + tempLen < (int)sizeof(callstack) - 1)
 		{
 			strcat(callstack, pTemp);
 			bufferUsed += tempLen;
@@ -155,7 +155,8 @@ MFFunctionProfileTotals* MFCallstackInternal_GetProfileTotals(const char *pFunct
 {
 	MFCALLSTACK;
 
-	for(int a=0; a<gNumProfileTotals; a++)
+	int a;
+	for(a=0; a<gNumProfileTotals; a++)
 	{
 		if(gProfileTotals[a].pFunctionName == pFunction)
 		{

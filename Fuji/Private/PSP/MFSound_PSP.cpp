@@ -1,143 +1,125 @@
-#include "Common.h"
-#include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
-#include "Sound.h"
-#include "PtrList.h"
-#include "Font.h"
-#include "Primitive.h"
-#include "DebugMenu_Internal.h"
+#include "Fuji.h"
+#include "MFFileSystem.h"
+#include "MFPtrList.h"
+#include "MFFont.h"
+#include "MFPrimitive.h"
+#include "DebugMenu.h"
+#include "MFSound_Internal.h"
 
-void Sound_InitModule()
+void MFSound_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_DeinitModule()
+void MFSound_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_Update()
+void MFSound_Update()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_Draw()
+void MFSound_Draw()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 
-int Sound_LoadBank(const char *pFilename)
+int MFSound_LoadBank(const char *pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
-void Sound_UnloadBank(int bankID)
+void MFSound_UnloadBank(int bankID)
 {
-	CALLSTACK;
-
+	MFCALLSTACK;
 }
 
-int Sound_FindSound(const char *pSoundName, int searchBankID)
+int MFSound_FindSound(const char *pSoundName, int searchBankID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return -1;
 }
 
-void Sound_Play(int soundID)
+int MFSound_Play(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-
+	return 0;
 }
 
-void Sound_Stop(int soundID)
+int MFSound_Play3D(int soundID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-
+	return 0;
 }
 
-void Sound_Play3D(int soundID)
+void MFSound_Stop(int soundID)
 {
-	CALLSTACK;
-
-
+	MFCALLSTACK;
 }
 
-void Sound_Stop3D(int soundID)
+void MFSound_SetListenerPos(const MFVector& listenerPos)
 {
-	CALLSTACK;
-
-
+	MFCALLSTACK;
 }
 
-void Sound_SetListenerPos(const MFVector& listenerPos)
+void MFSound_SetVolume(int soundID, float volume)
 {
-	CALLSTACK;
-
-
+	MFCALLSTACK;
 }
 
-
-void Sound_SetVolume(int soundID, float volume)
+void MFSound_SetMasterVolume(int soundID, float volume)
 {
-	CALLSTACK;
-
-
-}
-
-void Sound_SetMasterVolume(int soundID, float volume)
-{
-	CALLSTACK;
+	MFCALLSTACK;
 
 //	pDSPrimaryBuffer->SetVolume();
 }
 
-void Sound_SetPlaybackRate(int soundID, float rate)
+void MFSound_SetPlaybackRate(int soundID, float rate)
 {
-	CALLSTACK;
-
-
+	MFCALLSTACK;
 }
 
 
 //
 // Music Functions
 //
-int Sound_MusicPlay(const char *pFilename, bool pause)
+int MFSound_MusicPlay(const char *pFilename, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
-void Sound_ServiceMusicBuffer(int trackID)
+void MFSound_ServiceMusicBuffer(int trackID)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_MusicUnload(int track)
+void MFSound_MusicUnload(int track)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_MusicSeek(int track, float seconds)
+void MFSound_MusicSeek(int track, float seconds)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_MusicPause(int track, bool pause)
+void MFSound_MusicPause(int track, bool pause)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Sound_MusicSetVolume(int track, float volume)
+void MFSound_MusicSetVolume(int track, float volume)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 

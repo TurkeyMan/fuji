@@ -12,6 +12,10 @@ void MFSystem_DeinitModulePlatformSpecific()
 {
 }
 
+void MFSystem_HandleEventsPlatformSpecific()
+{
+}
+
 void MFSystem_UpdatePlatformSpecific()
 {
 }

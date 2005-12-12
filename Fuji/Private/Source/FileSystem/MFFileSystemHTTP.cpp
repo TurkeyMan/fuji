@@ -6,7 +6,6 @@
 #include "MFPtrList.h"
 
 static MFPtrListDL<MFFileHTTPData> gHTTPFiles;
-static int gHTTPFileSize;
  
 void MFFileSystemHTTP_InitModule()
 {
@@ -192,7 +191,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 		if(MFFileHTTP_RequestHeader(pServer, pHTTP->port, pPath, headerBuffer, 2048))
 		{
 			// there was an error
-			return NULL;
+			return 1;
 		}
 
 		if(!MFString_CaseCmpN(headerBuffer, "HTTP", 4))
@@ -235,22 +234,22 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 			else if(errorCode == 404)
 			{
 				MFDebug_Warn(2, MFStr("HTTP response code 404: Not Found", errorCode));
-				return NULL;
+				return 2;
 			}
 			else if(errorCode == 400)
 			{
 				MFDebug_Warn(2, MFStr("HTTP response code 400: Bad Request", errorCode));
-				return NULL;
+				return 3;
 			}
 			else if(errorCode == 401)
 			{
 				MFDebug_Warn(2, MFStr("HTTP response code 401: Unauthorized", errorCode));
-				return NULL;
+				return 4;
 			}
 			else if(errorCode == 403)
 			{
 				MFDebug_Warn(2, MFStr("HTTP response code 403: Forbidden", errorCode));
-				return NULL;
+				return 5;
 			}
 			else if(errorCode >= 100 && errorCode < 200)
 			{
@@ -264,7 +263,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 			else
 			{
 				MFDebug_Warn(2, MFStr("HTTP server has returned an unknown response code %d", errorCode));
-				return NULL;
+				return 6;
 			}
 		}
 		else

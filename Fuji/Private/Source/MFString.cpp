@@ -41,13 +41,13 @@ char* MFStrN(const char *pSource, int n)
 
 int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
-	while(*pSource1 != '\0' && tolower(*pSource1) == tolower(*pSource2))
+	while(*pSource1 != '\0' && MFToLower(*pSource1) == MFToLower(*pSource2))
 	{
 		pSource1++;
 		pSource2++;
 	}
 
-	return tolower(*(unsigned char *)pSource1) - tolower(*(unsigned char *)pSource2);
+	return MFToLower(*(unsigned char *)pSource1) - MFToLower(*(unsigned char *)pSource2);
 }
 
 int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
@@ -55,7 +55,7 @@ int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 	if(n == 0)
 		return 0;
 
-	while(n-- != 0 && tolower(*pSource1) == tolower(*pSource2))
+	while(n-- != 0 && MFToLower(*pSource1) == MFToLower(*pSource2))
 	{
 		if(n == 0 || *pSource1 == '\0' || *pSource2 == '\0')
 			break;
@@ -63,7 +63,7 @@ int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 		pSource2++;
 	}
 
-	return tolower(*(unsigned char *)pSource1) - tolower(*(unsigned char *)pSource2);
+	return MFToLower(*(unsigned char *)pSource1) - MFToLower(*(unsigned char *)pSource2);
 }
 
 char* MFString_RChr(const char *pSource, int c)

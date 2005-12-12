@@ -1,4 +1,4 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
@@ -21,9 +21,9 @@ static unsigned int __attribute__((aligned(16))) displayList[262144];
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
 #define ZBUF_SIZE (BUF_WIDTH SCR_HEIGHT * 2) /* zbuffer seems to be 16-bit? */
 
-int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
+int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuInit();
 
@@ -51,35 +51,35 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	return 0;
 }
 
-void Display_DestroyWindow()
+void MFDisplay_DestroyWindow()
 {
 }
 
-void Display_ResetDisplay()
+void MFDisplay_ResetDisplay()
 {
 }
 
-void Display_DestroyDisplay()
+void MFDisplay_DestroyDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuTerm();
 }
 
 extern uint32 currentVert;
 
-void Display_BeginFrame()
+void MFDisplay_BeginFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	currentVert = 0;
 
 	sceGuStart(0, displayList);
 }
 
-void Display_EndFrame()
+void MFDisplay_EndFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuFinish();
 	sceGuSync(0, 0);
@@ -88,7 +88,7 @@ void Display_EndFrame()
 	sceGuSwapBuffers();
 }
 
-void Display_SetClearColour(float r, float g, float b, float a)
+void MFDisplay_SetClearColour(float r, float g, float b, float a)
 {
 	clearColour = ((uint32)(a*255.0f) << 24) |
 				  ((uint32)(b*255.0f) << 16) |
@@ -99,23 +99,23 @@ void Display_SetClearColour(float r, float g, float b, float a)
 	sceGuClearDepth(0xFFFF);
 }
 
-void Display_ClearScreen(uint32 flags)
+void MFDisplay_ClearScreen(uint32 flags)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuClear( ((flags&CS_Colour) ? GU_COLOR_BUFFER_BIT : NULL) | ((flags&CS_ZBuffer) ? GU_DEPTH_BUFFER_BIT : NULL) );
 }
 
-void SetViewport(float x, float y, float width, float height)
+void MFDisplay_SetViewport(float x, float y, float width, float height)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuViewport(2048 + (int)x, 2048 + (int)y, (int)width, (int)height);
 }
 
-void ResetViewport()
+void MFDisplay_ResetViewport()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceGuViewport(2048, 2048, SCR_WIDTH, SCR_HEIGHT);
 }

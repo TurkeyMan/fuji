@@ -6,7 +6,7 @@
 #include "Sprite.h"
 #include "MFPrimitive.h"
 
-#include "Materials/Mat_Standard.h"
+#include "Materials/MFMat_Standard.h"
 
 void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colourKey)
 {

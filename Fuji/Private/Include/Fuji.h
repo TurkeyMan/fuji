@@ -99,8 +99,6 @@ enum MFEndian
 
 #elif defined(_PSP)
 
-	#include <pspkernel.h>
-
 	#include <stdarg.h>
 	#include <stdlib.h>
 	#include <string.h>

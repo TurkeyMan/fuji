@@ -1,7 +1,9 @@
 #include "Fuji.h"
 #include "MFInput_Internal.h"
 
+#include <pspkernel.h>
 #include <pspdebug.h>
+#include <stdio.h>
 
 extern int gQuit;
 
@@ -12,29 +14,29 @@ void MFDebug_Message(const char *pMessage)
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
-	LOGD(STR("%s(%d) : Assertion Failure.",pFile,line));
-	LOGD(STR("Failed Condition: %s\n%s", pReason, pMessage));
-	Callstack_Log();
+	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
+	MFDebug_Message(MFStr("Failed Condition: %s\n%s", pReason, pMessage));
+	MFCallstack_Log();
 
 	const char *pString;
 
 	pspDebugScreenSetXY(35 - 9, 13);
 	pspDebugScreenPrintf("Assertion Failure!");
 
-	pString = STR("%s(%d)", pFile, line);
+	pString = MFStr("%s(%d)", pFile, line);
 	pspDebugScreenSetXY(35 - (strlen(pString)>>1), 15);
 	pspDebugScreenPrintf(pString);
 
-	pString = STR("Failed Condition: %s", pReason);
+	pString = MFStr("Failed Condition: %s", pReason);
 	pspDebugScreenSetXY(35 - (strlen(pString)>>1), 17);
 	pspDebugScreenPrintf(pString);
 
 	pspDebugScreenSetXY(35 - (strlen(pMessage)>>1), 18);
 	pspDebugScreenPrintf(pMessage);
 
-	while(!Input_WasPressed(IDD_Gamepad, 0, Button_P2_Start))
+	while(!MFInput_WasPressed(Button_P2_Start, IDD_Gamepad, 0))
 	{
-		Input_Update();
+		MFInput_Update();
 
 		if(gQuit)
 			sceKernelExitGame();

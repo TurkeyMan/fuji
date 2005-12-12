@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include <psputils.h>
 
+void MFHeap_InitModulePlatformSpecific()
+{
+}
+
+void MFHeap_DeinitModulePlatformSpecific()
+{
+}
+
 // use CRT memory functions
 void* MFHeap_SystemMalloc(uint32 bytes)
 {

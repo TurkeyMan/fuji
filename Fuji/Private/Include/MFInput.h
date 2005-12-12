@@ -242,8 +242,8 @@ enum MFGamepadButton
 	Button_XB_X			= 2,	/**< X button on an XBox gamepad */
 	Button_XB_Y			= 3,	/**< Y button on an XBox gamepad */
 
-	Button_XB_Black		= 4,	/**< Black button on an XBox gamepad */
-	Button_XB_White		= 5,	/**< White button on an XBox gamepad */
+	Button_XB_White		= 4,	/**< White button on an XBox gamepad */
+	Button_XB_Black		= 5,	/**< Black button on an XBox gamepad */
 
 	Button_XB_LTrig		= 6,	/**< Left trigger on an XBox gamepad */
 	Button_XB_RTrig		= 7,	/**< Right trigger on an XBox gamepad */
@@ -260,8 +260,8 @@ enum MFGamepadButton
 	Button_P2_Box		= 2,	/**< Box button on a Playstation or PS2 gamepad */
 	Button_P2_Triangle	= 3,	/**< Triangle button on a Playstation or PS2 gamepad */
 
-	Button_P2_R1		= 4,	/**< R1 trigger on a Playstation or PS2 gamepad */
-	Button_P2_L1		= 5,	/**< L1 trigger on a Playstation or PS2 gamepad */
+	Button_P2_L1		= 4,	/**< L1 trigger on a Playstation or PS2 gamepad */
+	Button_P2_R1		= 5,	/**< R1 trigger on a Playstation or PS2 gamepad */
 	Button_P2_L2		= 6,	/**< L2 trigger on a Playstation or PS2 gamepad */
 	Button_P2_R2		= 7,	/**< R2 trigger on a Playstation or PS2 gamepad */
 

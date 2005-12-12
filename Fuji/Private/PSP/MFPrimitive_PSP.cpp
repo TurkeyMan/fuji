@@ -1,13 +1,14 @@
-#include "Common.h"
+#include "Fuji.h"
+#include "MFHeap.h"
 #include "Display_Internal.h"
-#include "View.h"
+#include "MFView.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
-#include "Primitive.h"
+#include "MFPrimitive.h"
 #include "MFTexture.h"
-#include "Renderer.h"
+#include "MFRenderer.h"
 #include "MFMaterial.h"
-#include "Font.h"
+#include "MFFont.h"
 #include "DebugMenu_Internal.h"
 
 #include <pspdisplay.h>
@@ -34,22 +35,22 @@ uint32 currentVert = 0;
 const char *pPrimStrings[] = { "Disabled", "Enabled", NULL };
 MenuItemIntString showPrimitiveStats(pPrimStrings, 0);
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	DebugMenu_AddItem("Show Primitive Stats", "Fuji Options", &showPrimitiveStats, NULL, NULL);
 
-	pPrimBuffer = (ImmediateVertex*)Heap_GetUncachedPointer(primBuffer);
+	pPrimBuffer = (ImmediateVertex*)MFHeap_GetUncachedPointer(primBuffer);
 //	pPrimBuffer = primBuffer;
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void DrawMFPrimitiveStats()
+void MFPrimitive_DrawStats()
 {
 	if(showPrimitiveStats)
 	{
@@ -64,45 +65,45 @@ void DrawMFPrimitiveStats()
 		MFSetPosition(410, 20, 0);
 		MFEnd();
 
-		Font_DrawTextf(gpDebugFont, 90.0f, 40.0f, 0, 20.0f, MakeVector(1,1,0,1), "NumVerts: %d", currentVert);
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 90.0f, 40.0f, 20.0f, MakeVector(1,1,0,1), "NumVerts: %d", currentVert);
 	}
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 	}
 
 	sceGuSetMatrix(GU_MODEL, (ScePspFMatrix4*)&MFMatrix::identity);
-	sceGuSetMatrix(GU_PROJECTION, (ScePspFMatrix4*)&View_GetViewToScreenMatrix());
+	sceGuSetMatrix(GU_PROJECTION, (ScePspFMatrix4*)&MFView_GetViewToScreenMatrix());
 
-	if(View_IsOrtho())
+	if(MFView_IsOrtho())
 		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&MFMatrix::identity);
 	else
-		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&View_GetWorldToViewMatrix());
+		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&MFView_GetWorldToViewMatrix());
 
-	Renderer_Begin();
+	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	beginCount = vertexCount;
 	startVert = currentVert;
 
-	DBGASSERT(startVert+vertexCount < NUM_VERTS, STR("Exceeded primitive vertex cache %d", NUM_VERTS));
+	MFDebug_Assert(startVert+vertexCount < NUM_VERTS, MFStr("Exceeded primitive vertex cache %d", NUM_VERTS));
 }
 
 void MFSetMatrix(const MFMatrix &mat)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 	sceGuSetMatrix(2, (ScePspFMatrix4*)&mat);
 }
 
@@ -146,7 +147,7 @@ void MFSetPosition(const MFVector &pos)
 
 void MFSetPosition(float x, float y, float z)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	current.x = x;
 	current.y = y;
@@ -158,9 +159,9 @@ void MFSetPosition(float x, float y, float z)
 
 void MFEnd()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	DBGASSERT(currentVert - startVert == beginCount, "Incorrect number of vertices.");
+	MFDebug_Assert(currentVert - startVert == beginCount, "Incorrect number of vertices.");
 
 	int pt = 0;
 
@@ -185,7 +186,7 @@ void MFEnd()
 			pt = GU_TRIANGLE_FAN;
 			break;
 		default:
-			DBGASSERT(false, "Unknown Primitive Type..");
+			MFDebug_Assert(false, "Unknown Primitive Type..");
 			break;
 	}
 

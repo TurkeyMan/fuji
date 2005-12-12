@@ -8,7 +8,7 @@
 #include "MFPrimitive.h"
 #include "MFFileSystem.h"
 
-#include "Materials/Mat_Standard.h"
+#include "Materials/MFMat_Standard.h"
 
 #include <string.h>
 #include <stdio.h>

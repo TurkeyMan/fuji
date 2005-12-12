@@ -25,6 +25,16 @@ inline bool MFIsNewline(char c)
 	return c=='\n' || c=='\r';
 }
 
+inline int MFToLower(int c)
+{
+	return c | 0x20;
+}
+
+inline int MFToUpper(int c)
+{
+	return c & ~0x20;
+}
+
 inline char* MFSeekNewline(char *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;

@@ -92,7 +92,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	MFHeap *pAllocHeap = pOverrideHeap ? pOverrideHeap : (pHeap ? pHeap : pActiveHeap);
 
 	int pad = 0;
-	while(pad < sizeof(MFAllocHeader))
+	while(pad < (int)sizeof(MFAllocHeader))
 		pad += heapAlignment;
 
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(bytes + pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes, pAllocHeap->pHeapData);
@@ -173,6 +173,8 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap)
 		case MFHT_Custom:
 			MFDebug_Assert(gCustomHeap.pCallbacks->pMalloc, "No custom heap registered!");
 			return &gCustomHeap;
+		default:
+			break;
 	}
 
 	return NULL;

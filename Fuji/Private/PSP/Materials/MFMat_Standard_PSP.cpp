@@ -1,10 +1,11 @@
-#include "Common.h"
+#include "Fuji.h"
+#include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
-#include "View_Internal.h"
+#include "MFView_Internal.h"
 
-#include "../../Source/Materials/Mat_Standard.h"
+#include "../../Source/Materials/MFMat_Standard.h"
 
 #include <pspdisplay.h>
 #include <pspgu.h>
@@ -13,24 +14,24 @@ static MFMaterial *pSetMaterial;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
-int Mat_Standard_RegisterMaterial(void *pPlatformData)
+int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
-void Mat_Standard_UnregisterMaterial()
+void MFMat_Standard_UnregisterMaterial()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
-int Mat_Standard_Begin(MFMaterial *pMaterial)
+int MFMat_Standard_Begin(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	sceGuAmbientColor(0xFFFFFFFF);
 
@@ -83,14 +84,14 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 	return 0;
 }
 
-void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	pMaterial->pInstanceData = Heap_Alloc(sizeof(Mat_Standard_Data));
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Standard_Data));
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
-	memset(pData, 0, sizeof(Mat_Standard_Data));
+	memset(pData, 0, sizeof(MFMat_Standard_Data));
 
 	pData->ambient = MFVector::one;
 	pData->diffuse = MFVector::one;
@@ -103,16 +104,16 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->vFrames = 1;
 }
 
-void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
 		MFTexture_Destroy(pData->pTextures[a]);
 	}
 
-	Heap_Free(pMaterial->pInstanceData);
+	MFHeap_Free(pMaterial->pInstanceData);
 }

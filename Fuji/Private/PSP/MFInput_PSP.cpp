@@ -1,8 +1,8 @@
-#include "Common.h"
+#include "Fuji.h"
 
 #include "MFVector.h"
-#include "Input_Internal.h"
-#include "Heap.h"
+#include "MFInput_Internal.h"
+#include "MFHeap.h"
 #include "MFIni.h"
 
 #include <pspctrl.h>
@@ -50,9 +50,9 @@ const char * const PSPButtons[] =
 
 /**** Platform Specific Functions ****/
 
-void Input_InitModulePlatformSpecific()
+void MFInput_InitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	memset(gKeyState, 0, 256);
 
@@ -60,17 +60,17 @@ void Input_InitModulePlatformSpecific()
 	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
 }
 
-void Input_DeinitModulePlatformSpecific()
+void MFInput_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Input_UpdatePlatformSpecific()
+void MFInput_UpdatePlatformSpecific()
 {
 	sceCtrlReadBufferPositive(&padData, 1);
 }
 
-void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
+void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
 {
 	if(device == IDD_Gamepad && id == 0)
 	{
@@ -84,11 +84,11 @@ void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStat
 	}
 }
 
-void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
+void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	memset(pGamepadState, 0, sizeof(GamepadState));
+	memset(pGamepadState, 0, sizeof(MFGamepadState));
 
 	pGamepadState->values[Button_P2_Cross] = (padData.Buttons & PSP_CTRL_CROSS) ? 1.0f : 0.0f;
 	pGamepadState->values[Button_P2_Circle] = (padData.Buttons & PSP_CTRL_CIRCLE) ? 1.0f : 0.0f;
@@ -120,21 +120,21 @@ void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
 	if(fabsf(pGamepadState->values[Axis_LY]) < deadZone) pGamepadState->values[Axis_LY] = 0.0f;
 }
 
-void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	memset(pKeyState, 0, sizeof(KeyState));
+	memset(pKeyState, 0, sizeof(MFKeyState));
 }
 
-void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	memset(pMouseState, 0, sizeof(MouseState));
+	memset(pMouseState, 0, sizeof(MFMouseState));
 }
 
-const char* Input_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceName(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -158,14 +158,14 @@ const char* Input_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* Input_GetGamepadButtonName(int sourceID, int type)
+const char* MFInput_GetGamepadButtonName(int button, int sourceID)
 {
-	DBGASSERT(sourceID < 1, "Only one gamepad available on PSP...");
+	MFDebug_Assert(sourceID < 1, "Only one gamepad available on PSP...");
 
-	return PSPButtons[type];
+	return PSPButtons[button];
 }
 
-bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
+bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	switch(keyboardState)
 	{

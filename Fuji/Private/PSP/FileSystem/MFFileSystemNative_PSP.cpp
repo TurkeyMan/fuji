@@ -1,4 +1,5 @@
-#include "Common.h"
+#include "Fuji.h"
+#include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 
@@ -39,7 +40,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 				{
 					if(flatten)
 					{
-						numFiles += MFFileSystemNative_GetNumEntries(STR("%s%s/", pFindPattern, findData.d_name), recursive, flatten, pStringLengths);
+						numFiles += MFFileSystemNative_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.d_name), recursive, flatten, pStringLengths);
 					}
 					else
 					{
@@ -58,7 +59,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 		findStatus = sceIoDread(hFind, &findData);
 	}
 
-	DBGASSERT(findStatus == 0, "Error scanning directory...");
+	MFDebug_Assert(findStatus == 0, "Error scanning directory...");
 
 	sceIoDclose(hFind);
 
@@ -90,11 +91,11 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 				{
 					if(flatten)
 					{
-						pToc = MFFileSystemNative_BuildToc(STR("%s%s/", pFindPattern, findData.d_name), pToc, pParent, pStringCache, recursive, flatten);
+						pToc = MFFileSystemNative_BuildToc(MFStr("%s%s/", pFindPattern, findData.d_name), pToc, pParent, pStringCache, recursive, flatten);
 					}
 					else
 					{
-						const char *pNewPath = STR("%s%s/", pFindPattern, findData.d_name);
+						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.d_name);
 
 						int stringCacheSize = 0;
 						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
@@ -110,7 +111,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 							pToc->pParent = pParent;
 
 							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
-							pToc->pChild = (MFTOCEntry*)Heap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
+							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
 
 							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
 							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
@@ -141,7 +142,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 		findStatus = sceIoDread(hFind, &findData);
 	}
 
-	DBGASSERT(findStatus == 0, "Error scanning directory...");
+	MFDebug_Assert(findStatus == 0, "Error scanning directory...");
 
 	sceIoDclose(hFind);
 
@@ -150,7 +151,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 {
-	DBGASSERT(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
+	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
 
 	MFMountDataNative *pMountNative = (MFMountDataNative*)pMountData;
 
@@ -160,13 +161,13 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	const char *pFindPattern = pMountNative->pPath;
 
 	if(pFindPattern[strlen(pFindPattern)-1] != '/')
-		pFindPattern = STR("%s/", pFindPattern);
+		pFindPattern = MFStr("%s/", pFindPattern);
 
 	SceUID hFind = sceIoDopen(pFindPattern);
 
 	if(hFind < 0)
 	{
-		LOGD(STR("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
+		MFDebug_Warn(1, MFStr("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
 		return -1;
 	}
 
@@ -176,7 +177,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPattern, recursive, flatten, &stringCacheSize);
 
 	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)Heap_Alloc(sizeOfToc + stringCacheSize);
+	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
 	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
 	MFFileSystemNative_BuildToc(pFindPattern, pMount->pEntries, NULL, pStringCache, recursive, flatten);
@@ -186,19 +187,19 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	DBGASSERT(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
+	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
 
 	int access = ((pOpenData->openFlags&MFOF_Read) ? PSP_O_RDONLY : NULL) | ((pOpenData->openFlags&MFOF_Write) ? PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC : NULL);
-	DBGASSERT(access, "Neither MFOF_Read nor MFOF_Write specified.");
+	MFDebug_Assert(access, "Neither MFOF_Read nor MFOF_Write specified.");
 
 	SceUID hFile = sceIoOpen(pNative->pFilename, access, 0777);
 
 	if(hFile < 0)
 	{
-		DBGASSERT(hFile >= 0, STR("File does not exist: '%s'", pNative->pFilename));
+		MFDebug_Assert(hFile >= 0, MFStr("File does not exist: '%s'", pNative->pFilename));
 		return -1;
 	}
 
@@ -210,7 +211,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	// find file length
 	SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
-	DBGASSERT(fileSize < 2147483648LL, "Fuji does not support files larger than 2,147,483,647 bytes.");
+	MFDebug_Assert(fileSize < 2147483648LL, "Fuji does not support files larger than 2,147,483,647 bytes.");
 	pFile->length = (int)fileSize;
 
 	// return to start of file
@@ -225,7 +226,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileNative_Close(MFFile* fileHandle)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sceIoClose((SceUID)fileHandle->pFilesysData);
 
@@ -234,9 +235,9 @@ int MFFileNative_Close(MFFile* fileHandle)
 
 int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	int bytesRead;
 	bytesRead = sceIoRead((SceUID)fileHandle->pFilesysData, pBuffer, bytes);
@@ -247,21 +248,21 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	DBGASSERT(async == false, "Asynchronous Filesystem not yet supported...");
+	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	int bytesWritten;
 	bytesWritten = sceIoWrite((SceUID)fileHandle->pFilesysData, pBuffer, bytes);
 	fileHandle->offset += (uint32)bytesWritten;
-	fileHandle->length = Max(fileHandle->offset, (uint32)fileHandle->length);
+	fileHandle->length = MFMax(fileHandle->offset, (uint32)fileHandle->length);
 
 	return bytesWritten;
 }
 
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int method = 0;
 
@@ -277,7 +278,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			method = SEEK_CUR;
 			break;
 		default:
-			DBGASSERT(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	SceOff newPos = sceIoLseek((SceUID)fileHandle->pFilesysData, bytes, method);
@@ -302,7 +303,7 @@ int MFFileNative_GetSize(MFFile* fileHandle)
 
 uint32 MFFileNative_GetSize(const char* pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	uint32 fileSize = 0;
 
@@ -311,7 +312,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 	if(hFile > 0)
 	{
 		SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
-		DBGASSERT(fileSize < (SceOff)4294967296ULL, "Fuji does not support files larger than 4,294,967,295 bytes.");
+		MFDebug_Assert(fileSize < (SceOff)4294967296ULL, "Fuji does not support files larger than 4,294,967,295 bytes.");
 		fileSize = (uint32)fileSize;
 
 		sceIoClose(hFile);
@@ -322,7 +323,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 bool MFFileNative_Exists(const char* pFilename)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	bool exists = false;
 
