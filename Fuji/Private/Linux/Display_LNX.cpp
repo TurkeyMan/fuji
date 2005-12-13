@@ -24,7 +24,8 @@ char *resMenuItems[] = {"-", modeString, "+", NULL};
 MenuItemIntString resSelect(resMenuItems, 1);
 MenuItemStatic applyDisplayMode;
 
-const int glAttrsSingle[] = {
+const int glAttrsSingle[] =
+{
 	GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, /* Don't need to draw to anything else */
 	GLX_DEPTH_SIZE, 16,
 	GLX_STENCIL_SIZE, 8,
@@ -32,7 +33,8 @@ const int glAttrsSingle[] = {
 	None
 };
 
-const int glAttrsDouble[] = {
+const int glAttrsDouble[] =
+{
 	GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
 	GLX_DEPTH_SIZE, 16,
 	GLX_STENCIL_SIZE, 8,
@@ -79,20 +81,26 @@ static bool GetModes(Resolution **_modes, bool fullscreen)
 
 	int numModeLines;
 
-	if(!fullscreen) {
+	if(!fullscreen)
+	{
 		modes = defaultModes;
 
-		for(uint32 i = 0; modes[i].width != 0; ++i) {
+		for(uint32 i = 0; modes[i].width != 0; ++i)
+		{
 			++numModes;
 		}
-	} else {
+	}
+	else
+	{
 		int throwaway;
-		if(!XF86VidModeQueryExtension(xdisplay, &throwaway, &throwaway)) {
+		if(!XF86VidModeQueryExtension(xdisplay, &throwaway, &throwaway))
+		{
 			SetSingleMode(_modes);
 			return(true);
 		}
 		
-		if((!XF86VidModeGetAllModeLines(xdisplay, screen, &numModeLines, &vidModes)) || numModeLines < 2) {
+		if((!XF86VidModeGetAllModeLines(xdisplay, screen, &numModeLines, &vidModes)) || numModeLines < 2)
+		{
 			SetSingleMode(_modes);
 			return(true);
 		}
@@ -102,7 +110,8 @@ static bool GetModes(Resolution **_modes, bool fullscreen)
 	
 		modes = (Resolution *)MFHeap_Alloc(sizeof(Resolution) * (numModes + 1));
 
-		for(int32 i = 0; i < numModes; i++) {
+		for(int32 i = 0; i < numModes; i++)
+		{
 			modes[i].width = vidModes[i]->hdisplay;
 			modes[i].height = vidModes[i]->vdisplay;
 			modes[i].refresh = ((float)vidModes[i]->dotclock / (float)vidModes[i]->htotal) / (float)vidModes[i]->htotal;
@@ -140,15 +149,18 @@ static void FreeModes()
 {
 	CALLSTACK;
 	
-	if(modes != NULL) {
-		if(modes != defaultModes) {
+	if(modes != NULL)
+	{
+		if(modes != defaultModes)
+		{
 			Heap_Free(modes);
 		}
 		
 		modes = NULL;
 	}
 
-	if(vidModes != NULL) {
+	if(vidModes != NULL)
+	{
 		XFree(vidModes);
 		vidModes = NULL;
 	}
@@ -157,8 +169,10 @@ static void FreeModes()
 static bool FindMode(Resolution *modes, int width, int height)
 {
 	currentMode = -1;
-	for(int32 i=0; i < numModes; i++) {
-		if(width == modes[i].width && height == modes[i].height) {
+	for(int32 i=0; i < numModes; i++)
+	{
+		if(width == modes[i].width && height == modes[i].height)
+		{
 			currentMode = i;
 			break;
 		}
@@ -171,14 +185,19 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 {
 	MenuItemIntString *pRes = (MenuItemIntString *)pMenu;
 
-	if(pRes->data == 0) {
+	if(pRes->data == 0)
+	{
 		selectedMode--;
-		if(selectedMode < 0) {
+		if(selectedMode < 0)
+		{
 			selectedMode = numModes - 1;
 		}
-	} else if(pRes->data == 2) {
+	}
+	else if(pRes->data == 2)
+	{
 		selectedMode++;
-		if(selectedMode == numModes) {
+		if(selectedMode == numModes)
+		{
 			selectedMode = 0;
 		}
 	}
@@ -216,7 +235,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 
 
-	if(!(xdisplay = XOpenDisplay(NULL))) {
+	if(!(xdisplay = XOpenDisplay(NULL)))
+	{
 		LOGD("Unable to open display");
 		Display_DestroyDisplay();
 		return(1);
@@ -226,20 +246,25 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	rootWindow = RootWindow(xdisplay, screen);
 
 	GetModes(&modes, !display.windowed);
-	if(!FindMode(modes, width, height)) {
-		if(!display.windowed) { // Try windowed mode
+	if(!FindMode(modes, width, height))
+	{
+		if(!display.windowed)
+		{ // Try windowed mode
 			LOGD("No suitable modes for fullscreen mode, trying windowed mode");
 			
 			display.windowed = true;
 
 			FreeModes();
 			GetModes(&modes, false);
-			if(!FindMode(modes, width, height)) {
+			if(!FindMode(modes, width, height))
+			{
 				LOGD("No suitable modes found");
 				Display_DestroyDisplay();
 				return(1);
 			}
-		} else {
+		}
+		else
+		{
 			LOGD("No suitable modes found");
 			Display_DestroyDisplay();
 			return(1);
@@ -250,14 +275,16 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 	DebugMenu_AddItem("Apply", "Display Options", &applyDisplayMode, ApplyDisplayModeCallback);
 
-	if(!glXQueryExtension(xdisplay, NULL, NULL)) {
+	if(!glXQueryExtension(xdisplay, NULL, NULL))
+	{
 		LOGD("GLX extension not available");
 		Display_DestroyDisplay();
 		return(1);
 	}
 	
 	int glXMajor, glXMinor;
-	if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3)) {
+	if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3))
+	{
 		LOGD(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
 		Display_DestroyDisplay();
 		return(1);
@@ -269,8 +296,10 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 
 	// Set full screen mode, if necessary
-	if(!display.windowed && numModes > 1) {
-		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode])) {
+	if(!display.windowed && numModes > 1)
+	{
+		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]))
+		{
 			LOGD("Unable to switch screenmodes, defaulting to windowed mode");
 			Display_DestroyDisplay();
 			return(1);
@@ -281,23 +310,27 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	GLXFBConfig *fbConfigs;
 	int numConfigs;
 	fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
-	if(numConfigs == 0) {
+	if(numConfigs == 0)
+	{
 		fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
-		if(numConfigs == 0) {
+		if(numConfigs == 0)
+		{
 			LOGD("Unable to obtain a suitable glX FBConfig");
 			Display_DestroyDisplay();
 			return(1);
 		}
 	}
 
-	if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL) {
+	if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL)
+	{
 		LOGD("Unable to obtain a visualInfo structure for the associated FBConfig");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();		
 		return(1);
 	}
 
-	if(visualInfo->depth < 16) {
+	if(visualInfo->depth < 16)
+	{
 		LOGD("Need at least a 16 bit screen!");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();		
@@ -305,7 +338,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	}
 
 	
-	if(!(colorMap = XCreateColormap(xdisplay, rootWindow, visualInfo->visual, AllocNone))) {
+	if(!(colorMap = XCreateColormap(xdisplay, rootWindow, visualInfo->visual, AllocNone)))
+	{
 		LOGD("Unable to create colourmap");
 		XFree(fbConfigs);
 		XFree(visualInfo);
@@ -320,7 +354,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	windowAttrs.border_pixel = BlackPixel(xdisplay, screen);
 	windowAttrs.background_pixel = BlackPixel(xdisplay, screen);
 	
-	if(!(window = XCreateWindow(xdisplay, rootWindow, 0, 0, width, height, 0, visualInfo->depth, InputOutput, visualInfo->visual, CWBackPixel | CWBorderPixel | CWCursor | CWColormap | CWEventMask, &windowAttrs))) {
+	if(!(window = XCreateWindow(xdisplay, rootWindow, 0, 0, width, height, 0, visualInfo->depth, InputOutput, visualInfo->visual, CWBackPixel | CWBorderPixel | CWCursor | CWColormap | CWEventMask, &windowAttrs)))
+	{
 		LOGD("Unable to create X Window");
 		XFree(fbConfigs);
 		XFree(visualInfo);
@@ -331,7 +366,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	// Tell the window manager not to allow our window to be resized.  But some window managers can ignore me and do it anyway.  Typical X-Windows.
 
-	if((sizeHints = XAllocSizeHints()) == NULL) {
+	if((sizeHints = XAllocSizeHints()) == NULL)
+	{
 		LOGD("Unable to alloc XSizeHints structure, out of memory?");
 		XFree(fbConfigs);
 		XFree(visualInfo);
@@ -351,7 +387,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	
 	
 	XWMHints *wmHints;
-	if((wmHints = XAllocWMHints()) == NULL) {
+	if((wmHints = XAllocWMHints()) == NULL)
+	{
 		LOGD("Unable to alloc XWMHints structure, out of memory?");
 		XFree(fbConfigs);
 		XFree(visualInfo);
@@ -363,7 +400,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	wmHints->flags = InputHint | StateHint;
 	wmHints->input = true;
 	wmHints->initial_state = NormalState;
-	if(!XSetWMHints(xdisplay, window, wmHints)) {
+	if(!XSetWMHints(xdisplay, window, wmHints))
+	{
 		LOGD("Unable to set WM hints for window");
 		XFree(fbConfigs);
 		XFree(visualInfo);
@@ -375,7 +413,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	// Tell the window manager that I want to be notified if the window's closed
 	wm_delete_window = XInternAtom(xdisplay, "WM_DELETE_WINDOW", false);
-	if(!XSetWMProtocols(xdisplay, window, &wm_delete_window, 1)) {
+	if(!XSetWMProtocols(xdisplay, window, &wm_delete_window, 1))
+	{
 		LOGD("Unable to set Window Manager protocols");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();		
@@ -383,7 +422,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	}
 
 
-	if(!XMapRaised(xdisplay, window)) {
+	if(!XMapRaised(xdisplay, window))
+	{
 		LOGD("Unable to map new window");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();		
@@ -396,14 +436,16 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	XFree(visualInfo);
 
-	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL))) {
+	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
+	{
 		LOGD("Unable to associate window with a GLXWindow");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();
 		return(1);
 	}
 
-	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true))) {
+	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true)))
+	{
 		LOGD("Unable to create GLXContext");
 		XFree(fbConfigs);
 		Display_DestroyDisplay();
@@ -412,7 +454,8 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 
 	XFree(fbConfigs);
 
-	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext)) {
+	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext))
+	{
 		LOGD("Unable to bind GLXContext");
 		Display_DestroyDisplay();
 		return(1);
@@ -422,15 +465,18 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	const char *glVersionStr = (const char *)glGetString(GL_VERSION);
 	int32 majorGLVersion, minorGLVersion;
 
-	if(sscanf(glVersionStr, "%d.%d.%*d", &majorGLVersion, &minorGLVersion) != 2) {
-		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2) {
+	if(sscanf(glVersionStr, "%d.%d.%*d", &majorGLVersion, &minorGLVersion) != 2)
+	{
+		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2)
+		{
 			LOGD("Unable to determine OpenGl version");
 			Display_DestroyDisplay();
 			return(1);
 		}
 	}
 
-	if(majorGLVersion == 1 && minorGLVersion < 4) {
+	if(majorGLVersion == 1 && minorGLVersion < 4)
+	{
 		LOGD("Need at least OpenGL version 1.4");
 		Display_DestroyDisplay();
 		return(1);
@@ -439,8 +485,10 @@ int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, 
 	// Might want to check for extensions here
 
 
-	if(!display.windowed && numModes > 1) {
-		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode])) {
+	if(!display.windowed && numModes > 1)
+	{
+		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]))
+		{
 			LOGD("Unable to set screen mode");
 			Display_DestroyDisplay();
 			return(1);
@@ -483,7 +531,8 @@ static void Display_ResetDisplay()
 	XSetWMNormalHints(xdisplay, window, sizeHints);
 	XResizeWindow(xdisplay, window, display.width, display.height);
 
-	if(!display.windowed && numModes > 1) {
+	if(!display.windowed && numModes > 1)
+	{
 		XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]);
 	
 		XGrabPointer(xdisplay, window, True, ButtonPressMask, GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
@@ -502,36 +551,43 @@ void Display_DestroyDisplay()
 {
 	CALLSTACK;
 
-	if((!display.windowed) && (originalVidMode != NULL) && xdisplay != NULL && numModes > 1) {
+	if((!display.windowed) && (originalVidMode != NULL) && xdisplay != NULL && numModes > 1)
+	{
 		XF86VidModeSwitchToMode(xdisplay, screen, originalVidMode);
 	}
 
-	if(glXContext != NULL) {
+	if(glXContext != NULL)
+	{
 		glXDestroyContext(xdisplay, glXContext);
 		glXContext = NULL;
 	}
 
-	if(glXWindow != 0) {
+	if(glXWindow != 0)
+	{
 		glXDestroyWindow(xdisplay, glXWindow);
 		glXWindow = 0;
 	}
 
-	if(sizeHints != NULL) {
+	if(sizeHints != NULL)
+	{
 		XFree(sizeHints);
 		sizeHints = NULL;
 	}
 
-	if(window != 0) {
+	if(window != 0)
+	{
 		XDestroyWindow(xdisplay, window);
 		window = 0;
 	}
 
-	if(colorMap != 0) {
+	if(colorMap != 0)
+	{
 		XFreeColormap(xdisplay, colorMap);
 		colorMap = 0L;
 	}
 
-	if(xdisplay != NULL) {
+	if(xdisplay != NULL)
+	{
 		XCloseDisplay(xdisplay);
 		xdisplay = NULL;
 	}

@@ -16,62 +16,87 @@ int main(int argc, char **argv)
 	System_GameLoop();
 }
 
-
-uint64 RDTSC()
+void MFSystem_InitModulePlatformSpecific()
 {
-	CALLSTACK;
-
-	static bool firstcall=1;
-	static struct timeval last;
-	struct timeval current;
-
-	if(firstcall) {
-		gettimeofday(&last, NULL);
-		firstcall = 0;
-		return(0);
-	} else {
-		struct timeval diff;
-	
-		gettimeofday(&current, NULL);
-		diff.tv_sec = current.tv_sec - last.tv_sec;
-		diff.tv_usec = current.tv_usec - last.tv_usec;
-	
-		return(((uint64)diff.tv_sec) * 1000000 + ((uint64)diff.tv_usec));
-	}
 }
 
-uint64 GetTSCFrequency()
+void MFSystem_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
-	
-	return(1000000);
 }
 
-void CheckEvents()
+void MFSystem_HandleEventsPlatformSpecific()
 {
 	CALLSTACK;
 
 	XEvent event;
 	
-	while(XPending(xdisplay)) {
+	while(XPending(xdisplay))
+	{
 		XNextEvent(xdisplay, &event);
-		switch(event.type) {
+		switch(event.type)
+		{
 			case ClientMessage:
 				Atom atom;
 				
-				if(event.xclient.format == 8) {
+				if(event.xclient.format == 8)
+				{
 					atom = event.xclient.data.b[0];
-				} else if(event.xclient.format == 16) {
+				}
+				else if(event.xclient.format == 16)
+				{
 					atom = event.xclient.data.s[0];
-				} else if(event.xclient.format == 32) {
+				}
+				else if(event.xclient.format == 32)
+				{
 					atom = event.xclient.data.l[0];
 				}
 				
-				if(atom == wm_delete_window) {
+				if(atom == wm_delete_window)
+				{
 					gQuit = 1;
 				}
-
 				break;
 		}
 	}
+}
+
+void MFSystem_UpdatePlatformSpecific()
+{
+}
+
+void MFSystem_DrawPlatformSpecific()
+{
+}
+
+uint64 MFSystem_ReadRTC()
+{
+	MFCALLSTACK;
+
+	static bool firstcall=1;
+	static struct timeval last;
+	struct timeval current;
+
+	if(firstcall)
+	{
+		gettimeofday(&last, NULL);
+		firstcall = 0;
+		return(0);
+	}
+	else
+	{
+		struct timeval diff;
+
+		gettimeofday(&current, NULL);
+		diff.tv_sec = current.tv_sec - last.tv_sec;
+		diff.tv_usec = current.tv_usec - last.tv_usec;
+
+		return(((uint64)diff.tv_sec) * 1000000 + ((uint64)diff.tv_usec));
+	}
+}
+
+uint64 MFSystem_GetRTCFrequency()
+{
+	MFCALLSTACK;
+	
+	return(1000000);
 }

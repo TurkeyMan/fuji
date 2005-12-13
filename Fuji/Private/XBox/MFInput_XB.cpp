@@ -170,29 +170,19 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 			pGamepadState->values[a] = ((button > XINPUT_GAMEPAD_MAX_CROSSTALK) ? button : 0) * (1.0f/255.0f);
 		}
 
-		pGamepadState->values[8] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
-		pGamepadState->values[9] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-		pGamepadState->values[10] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
-		pGamepadState->values[11] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
-		pGamepadState->values[12] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
-		pGamepadState->values[13] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
-		pGamepadState->values[14] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
-		pGamepadState->values[15] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_XB_Start] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_XB_Back] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_XB_LThumb] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_XB_RThumb] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_DUp] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_DDown] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_DLeft] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
+		pGamepadState->values[Button_DRight] = (inputState[id].Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
 
-		float inputValue;
-		float deadZone = MFInput_GetDeadZone();
-
-		inputValue = ((float)inputState[id].Gamepad.sThumbLX) / 32767.0f;
-		pGamepadState->values[Axis_LX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		inputValue = ((float)inputState[id].Gamepad.sThumbLY) / 32767.0f;
-		pGamepadState->values[Axis_LY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		inputValue = ((float)inputState[id].Gamepad.sThumbRX) / 32767.0f;
-		pGamepadState->values[Axis_RX] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
-
-		inputValue = ((float)inputState[id].Gamepad.sThumbRY) / 32767.0f;
-		pGamepadState->values[Axis_RY] = (abs(inputValue) > deadZone) ? inputValue : 0.0f;
+		pGamepadState->values[Axis_LX] = MFMin((float)inputState[id].Gamepad.sThumbLX / 32767.0f, 1.0f);
+		pGamepadState->values[Axis_LY] = MFMin((float)inputState[id].Gamepad.sThumbLY / 32767.0f, 1.0f);
+		pGamepadState->values[Axis_RX] = MFMin((float)inputState[id].Gamepad.sThumbRX / 32767.0f, 1.0f);
+		pGamepadState->values[Axis_RY] = MFMin((float)inputState[id].Gamepad.sThumbRY / 32767.0f, 1.0f);
 	}
 	else
 	{

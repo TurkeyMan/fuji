@@ -41,7 +41,7 @@ void MFFileSystem_InitModule()
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
-	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data_%s.zip", MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform())));
+	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
 	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
 
 	MFMountDataNative mountData;

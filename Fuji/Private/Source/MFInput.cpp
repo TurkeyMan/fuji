@@ -57,9 +57,9 @@ const char * const gKeyNames[] =
 	"F12",
 	"OEM_102",		// on german keyboard
 	"Escape",
-	"MyComputer",		// on multimedia keyboards
+	"MyComputer",	// on multimedia keyboards
 	"Mail",			// on multimedia keyboards
-	"Calculator",		// on multimedia keyboards
+	"Calculator",	// on multimedia keyboards
 	"Stop",			// japanese keyboard
 	"Space",
 	"Insert",
@@ -91,9 +91,9 @@ const char * const gKeyNames[] =
 	"Semicolon",
 	"NumPadEquals",	// japanese keyboard
 	"Equals",
-	"Sleep",			// on windows keyboards
+	"Sleep",		// on windows keyboards
 	"Wake",			// on windows keyboards
-	"Power",			// on windows keyboards
+	"Power",		// on windows keyboards
 	"A",
 	"B",
 	"C",
@@ -120,7 +120,7 @@ const char * const gKeyNames[] =
 	"X",
 	"Y",
 	"Z",
-	"Underline",		// japanese keyboard
+	"Underline",	// japanese keyboard
 	"LBracket",
 	"Backslash",
 	"RBracket",
@@ -128,7 +128,7 @@ const char * const gKeyNames[] =
 	"F14",			// japanese keyboard
 	"Grave",
 	"F15",			// japanese keyboard
-	"Unlabeled",		// japanese keyboard
+	"Unlabeled",	// japanese keyboard
 	"LControl",
 	"LAlt",
 	"LShift",
@@ -154,31 +154,31 @@ const char * const gKeyNames[] =
 	"NumPad9",
 	"NumPadEnter",
 
-	"PlayPause",		// on multimedia keyboards
-	"MediaStop",		// on multimedia keyboards
+	"PlayPause",	// on multimedia keyboards
+	"MediaStop",	// on multimedia keyboards
 	"MediaSelect",	// on multimedia keyboards
-	"NextTrack",		// on multimedia keyboards
-	"PrevTrack",		// on multimedia keyboards
+	"NextTrack",	// on multimedia keyboards
+	"PrevTrack",	// on multimedia keyboards
 
-	"VolumeDown",		// on multimedia keyboards
+	"VolumeDown",	// on multimedia keyboards
 	"VolumeUp",		// on multimedia keyboards
 	"Mute",			// on multimedia keyboards
 
 	"WebBack",		// on multimedia keyboards
 	"WebFavorites",	// on multimedia keyboards
-	"WebForeward",		// on multimedia keyboards
+	"WebForeward",	// on multimedia keyboards
 	"WebHome",		// on multimedia keyboards
-	"WebRefresh",		// on multimedia keyboards
-	"WebSearch",		// on multimedia keyboards
+	"WebRefresh",	// on multimedia keyboards
+	"WebSearch",	// on multimedia keyboards
 	"WebStop",		// on multimedia keyboards
 
-	"AT",				// japanese keyboard
-	"AX",				// japanese keyboard
-	"Colon",			// japanese keyboard
+	"AT",			// japanese keyboard
+	"AX",			// japanese keyboard
+	"Colon",		// japanese keyboard
 	"Convert",		// japanese keyboard
 	"Kana",			// japanese keyboard
-	"Kanji",			// japanese keyboard
-	"NoConvert",		// japanese keyboard
+	"Kanji",		// japanese keyboard
+	"NoConvert",	// japanese keyboard
 	"Yen",			// japanese keyboard
 };
 
@@ -195,6 +195,16 @@ void MFInput_InitModule()
 void MFInput_DeinitModule()
 {
 	MFInput_DeinitModulePlatformSpecific();
+}
+
+void MFInputInternal_ApplySphericalDeadZone(float *pX, float *pY)
+{
+	float length = MFSqrt(*pX**pX + *pY**pY);
+
+	float scale = 1.0f / length * MFClamp(0.0f, (length - gGamepadDeadZone) / (1.0f - gGamepadDeadZone), 1.0f);
+
+	*pX *= scale;
+	*pY *= scale;
 }
 
 void MFInput_Update()
@@ -249,7 +259,13 @@ void MFInput_Update()
 	for(a=0; a<gNumGamepads; a++)
 	{
 		if(MFInput_IsAvailable(IDD_Gamepad, a))
+		{
 			MFInput_GetGamepadStateInternal(a, &gGamepadStates[a]);
+
+			// apply analog deadzone to axiis
+			MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_LX], &gGamepadStates[a].values[Axis_LY]);
+			MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_RX], &gGamepadStates[a].values[Axis_RY]);
+		}
 	}
 
 	for(a=0; a<gNumKeyboards; a++)

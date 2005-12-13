@@ -3,16 +3,18 @@
 #include "MFFileSystem_Internal.h"
 #include "Image.h"
 
-Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
+MFTexture* MFTexture_LoadTexture(const char *filename, bool generateMipChain)
 {
 	Texture *pTexture = FindTexture(filename);
 
-	if(!pTexture) {
+	if(!pTexture)
+	{
 		pTexture = gTextureBank.Create((Texture*)MFHeap_Alloc(sizeof(Texture)));
 		pTexture->refCount = 0;
 	}
 
-	if(!pTexture->refCount) {
+	if(!pTexture->refCount)
+	{
 		GLint internalFormat;
 		GLenum format;
 		GLenum target;
@@ -20,7 +22,8 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 
 		image = LoadTGA(filename, false);
 
-		for(uint32 i=0; i < image->width * image->height; i++) {
+		for(uint32 i=0; i < image->width * image->height; i++)
+		{
 			unsigned char *pixel = &(((unsigned char *)image->pixels)[i * image->bytesPerPixel]);
 			unsigned char temp;
 
@@ -29,10 +32,13 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 			pixel[2] = temp;
 		}
 
-		if(image->bitsPerPixel == 32) {
+		if(image->bitsPerPixel == 32)
+		{
 			internalFormat = GL_RGBA;
 			format = GL_RGBA;
-		} else { // Must be 24
+		}
+		else
+		{ // Must be 24
 			internalFormat = GL_RGB;
 			format = GL_RGB;
 		}
@@ -47,9 +53,12 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		
-		if(generateMipChain) {
+		if(generateMipChain)
+		{
 			gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, image->width, image->height, format, GL_UNSIGNED_BYTE, image->pixels);
-		} else {
+		}
+		else
+		{
 			glTexImage2D(target, 0, internalFormat, image->width, image->height, 0, format, GL_UNSIGNED_BYTE, image->pixels);
 		}
 
@@ -65,16 +74,17 @@ Texture* Texture::LoadTexture(const char *filename, bool generateMipChain)
 	return(pTexture);
 }
 
-void Texture::Release()
+void MFTexture_Destroy()
 {
 	refCount--;
 	
-	if(!refCount) {
+	if(!refCount)
+	{
 		glDeleteTextures(1, &textureID);
 	}
 }
 
-void Texture::SetTexture(int texUnit)
+void MFTexture_SetTexture(int texUnit)
 {
 //	glActiveTexture(texUnit);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -82,7 +92,7 @@ void Texture::SetTexture(int texUnit)
 //	glActiveTexture(0);
 }
 
-void Texture::UseNone(int texUnit)
+void MFTexture_UseNone(int texUnit)
 {
 //	glActiveTexture(texUnit);
 	glBindTexture(GL_TEXTURE_2D, 0);

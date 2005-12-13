@@ -124,8 +124,6 @@ extern HWND apphWnd;
 static char gKeyState[256];
 
 static bool gExclusiveMouse = false;
-static float deadZone = 0.3f;
-
 static float mouseMultiplier = 1.0f;
 
 

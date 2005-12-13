@@ -13,31 +13,42 @@ int File_Open(const char *pFilename, uint32 openFlags)
 {
 	int32 fileID;
 
-	for(fileID = 0; fileID < MAX_FILE_COUNT; fileID++) {
+	for(fileID = 0; fileID < MAX_FILE_COUNT; fileID++)
+	{
 		if(!gOpenFiles[fileID].file) break;
 	}
 
-	if(fileID == MAX_FILE_COUNT) {
+	if(fileID == MAX_FILE_COUNT)
+	{
 		return(-1);
 	}
 
 	int flags;
 	
-	if(openFlags & OF_Read) {
-		if(openFlags & OF_Write) {
+	if(openFlags & OF_Read)
+	{
+		if(openFlags & OF_Write)
+		{
 			flags = O_RDWR | O_CREAT;
-		} else {
+		}
+		else
+		{
 			flags = O_RDONLY;
 		}
-	} else if(openFlags & OF_Write) {
+	}
+	else if(openFlags & OF_Write)
+	{
 		flags = O_WRONLY | O_CREAT;
-	} else {
+	}
+	else
+	{
 		MFDebug_Assert(0, "Neither OF_Read nor OF_Write specified.");
 	}
 
 	gOpenFiles[fileID].file = open(pFilename, flags);
 
-	if(gOpenFiles[fileID].file == -1) {
+	if(gOpenFiles[fileID].file == -1)
+	{
 		gOpenFiles[fileID].file = 0;
 		return(-1);
 	}
@@ -101,7 +112,8 @@ int File_WriteAsync(void *pBuffer, uint32 bytes, uint32 fileHandle)
 
 int File_Query(uint32 fileHandle)
 {
-	if(!gOpenFiles[fileHandle].file) {
+	if(!gOpenFiles[fileHandle].file)
+	{
 		return((uint32)FS_Unavailable);
 	}
 
@@ -127,7 +139,8 @@ int File_Seek(FileSeek relativity, int32 bytes, uint32 fileHandle)
 
 	
 	newOffset = lseek(gOpenFiles[fileHandle].file, bytes, whence);
-	if(newOffset != -1) {
+	if(newOffset != -1)
+	{
 		gOpenFiles[fileHandle].offset = newOffset;
 	}
 
@@ -138,7 +151,8 @@ uint32 File_GetSize(uint32 fileHandle)
 {
 	struct stat fileStats;
 
-	if(fstat(gOpenFiles[fileHandle].file, &fileStats) == -1) {
+	if(fstat(gOpenFiles[fileHandle].file, &fileStats) == -1)
+	{
 		return(0);
 	}
 
@@ -149,7 +163,8 @@ uint32 File_GetSize(const char *pFilename)
 {
 	struct stat fileStats;
 
-	if(stat(pFilename, &fileStats) == -1) {
+	if(stat(pFilename, &fileStats) == -1)
+	{
 		return(0);
 	}
 
@@ -163,9 +178,12 @@ bool File_Exists(const char *pFilename)
 
 	rv = stat(pFilename, &fileStats);
 	
-	if(rv == -1) {
+	if(rv == -1)
+	{
 		return(false);
-	} else {
+	}
+	else
+	{
 		return(true);
 	}
 }

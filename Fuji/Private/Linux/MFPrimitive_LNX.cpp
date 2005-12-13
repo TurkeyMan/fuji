@@ -9,11 +9,15 @@ uint32 primType;
 uint32 vertexCount;
 uint32 beginCount;
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
+{
+}
+
+void MFPrimitive_DrawStats()
 {
 }
 

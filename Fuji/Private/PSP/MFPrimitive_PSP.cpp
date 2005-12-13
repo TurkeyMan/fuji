@@ -185,6 +185,9 @@ void MFEnd()
 		case PT_TriFan:
 			pt = GU_TRIANGLE_FAN;
 			break;
+		case PT_QuadList:
+			pt = GU_SPRITES;
+			break;
 		default:
 			MFDebug_Assert(false, "Unknown Primitive Type..");
 			break;
