@@ -85,7 +85,7 @@ void UnpackVertex(MEMD2_VERTEX *in, MEMesh2 *msh, float scale, F3DSubObject &sub
 	normal = gNormTable[in->n[1]][in->n[0]];
 }
 
-int ReadMesh(char** buf, int frmcount, float scale, DWORD flags)
+int ReadMesh(char** buf, int frmcount, float scale, uint32 flags)
 {
 	if(!*buf) return 1;
 

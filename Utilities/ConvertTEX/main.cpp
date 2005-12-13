@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
 	memset(pTemplate, 0, sizeof(MFTextureTemplateData));
 
-	pTemplate->magicNumber = MAKEFOURCC('F','T','E','X');
+	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
 
 	pTemplate->imageFormat = targetFormat;
 	pTemplate->platformFormat = gMFTexturePlatformFormat[(int)platform][(int)targetFormat];

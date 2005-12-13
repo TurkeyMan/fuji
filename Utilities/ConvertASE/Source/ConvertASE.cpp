@@ -1,9 +1,5 @@
 #define VERSION 100
 
-#include <windows.h>
-#include <stdio.h>
-#include <conio.h>
-
 #include "Fuji.h"
 #include "F3D.h"
 #include "MFSystem.h"

@@ -7,7 +7,6 @@
 #include "FS.h"
 
 #include <direct.h>
-#include <errno.h>
 
 #include "pcre.h"
 #include "minizip/zip.h"
@@ -206,8 +205,8 @@ int main(int argc, char **argv)
 
 		if(x >= 0 || y >= 0)
 		{
-			fileName = &fullName.c_str()[max(x,y)+1];
-			filePath[max(x,y)] = 0;
+			fileName = &fullName.c_str()[MFMax(x,y)+1];
+			filePath[MFMax(x,y)] = 0;
 		}
 		else
 			fileName = fullName.c_str();
