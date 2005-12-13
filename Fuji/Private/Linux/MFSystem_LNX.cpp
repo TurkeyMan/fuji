@@ -1,5 +1,6 @@
 #include "Fuji.h"
-#include "System.h"
+#include "MFSystem_Internal.h"
+#include "MFHeap.h"
 #include "Input.h"
 
 #include <sys/time.h>
@@ -10,6 +11,8 @@ extern Window window;
 extern Atom wm_delete_window;
 
 extern int gQuit;
+
+MFPlatform gCurrentPlatform = FP_Linux;
 
 int main(int argc, char **argv)
 {
