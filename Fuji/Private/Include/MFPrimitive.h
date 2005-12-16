@@ -2,7 +2,7 @@
  * @file MFPrimitive.h
  * @brief Provides access to a basic immediate mode renderer.
  * @author Manu Evans
- * @defgroup MFPrimitive Immediate Mode Interface
+ * @defgroup MFPrimitive Immediate Mode Renderer
  * @{
  */
 

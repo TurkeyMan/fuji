@@ -41,8 +41,8 @@ public:
 	MFVector& operator-=(const MFVector &v);
 	MFVector& operator*=(float f);
 	MFVector& operator*=(const MFVector &v);
-//	MFVector& operator/=(float f);			// Since division operators shoudl NEVER really be used anyway, i wont expose them..
-//	MFVector& operator/=(const MFVector &v);	// teach people to write code properly ;)
+//	MFVector& operator/=(float f);				// Since division operators should never really be used anyway, i wont expose them..
+//	MFVector& operator/=(const MFVector &v);	// might help get people in the habit of using reciprocals.. :P
 
 	MFVector operator+(const MFVector &v) const;
 	MFVector operator-(const MFVector &v) const;
