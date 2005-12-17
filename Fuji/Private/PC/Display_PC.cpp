@@ -4,7 +4,6 @@
 #include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
-#include "MFInput_PC.h"
 #include "MFSystem.h"
 
 #include <stdio.h>
@@ -12,6 +11,7 @@
 
 void MFDisplay_ResetDisplay();
 
+void MFInputPC_Acquire(bool acquire);
 #if defined(ALLOW_RAW_INPUT)
 int HandleRawMouseMessage(HANDLE hDevice);
 #endif

@@ -125,18 +125,17 @@ void MFInput_UpdatePlatformSpecific()
 	CheckDeviceChanges(dsDevices);
 }
 
-void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
-	pDeviceStatus->available = false;
-	pDeviceStatus->status = IDS_Disconnected;
-
 	switch(device)
 	{
 		case IDD_Gamepad:
 			if(id < 4)
 			{
-				pDeviceStatus->available = true;
-				pDeviceStatus->status = (dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id]) ? IDS_Ready : IDS_Disconnected;
+				if(dsDevices[DS_GAMEPAD].dwState & 1 << id && hPads[id])
+					return IDS_Ready;
+				else
+					return IDS_Disconnected;
 			}
 			break;
 
@@ -150,6 +149,8 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 			MFDebug_Assert(false, "Invalid Input Device");
 			break;
 	}
+
+	return IDS_Unavailable;
 }
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
@@ -202,7 +203,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	MFCALLSTACK;
 }
 
-const char* MFInput_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -224,7 +225,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* MFInput_GetGamepadButtonName(int button, int sourceID)
+const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
 	return XBoxButtons[button];
 }

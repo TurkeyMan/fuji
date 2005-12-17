@@ -19,10 +19,9 @@ void MFInput_UpdatePlatformSpecific()
 {
 }
 
-void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
-	pDeviceStatus->available = false;
-	pDeviceStatus->status = IDS_Disconnected;
+	return IDS_Unavailable;
 }
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
@@ -40,12 +39,12 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	memset(pMouseState, 0, sizeof(MFMouseState));
 }
 
-const char* MFInput_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
 	return "Null Input Device";
 }
 
-const char* MFInput_GetGamepadButtonName(int button, int sourceID)
+const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
 	return "Null Input Device";
 }

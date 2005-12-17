@@ -70,18 +70,12 @@ void MFInput_UpdatePlatformSpecific()
 	sceCtrlReadBufferPositive(&padData, 1);
 }
 
-void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
 	if(device == IDD_Gamepad && id == 0)
-	{
-		pDeviceStatus->available = true;
-		pDeviceStatus->status = IDS_Ready;
-	}
-	else
-	{
-		pDeviceStatus->available = false;
-		pDeviceStatus->status = IDS_Disconnected;
-	}
+		return IDS_Ready;
+
+	return IDS_Unavailable;
 }
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
@@ -90,21 +84,16 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 	memset(pGamepadState, 0, sizeof(MFGamepadState));
 
-	pGamepadState->values[Button_P2_Cross] = (padData.Buttons & PSP_CTRL_CROSS) ? 1.0f : 0.0f;
-	pGamepadState->values[Button_P2_Circle] = (padData.Buttons & PSP_CTRL_CIRCLE) ? 1.0f : 0.0f;
-	pGamepadState->values[Button_P2_Box] = (padData.Buttons & PSP_CTRL_SQUARE) ? 1.0f : 0.0f;
-	pGamepadState->values[Button_P2_Triangle] = (padData.Buttons & PSP_CTRL_TRIANGLE) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_Cross] = (padData.Buttons & PSP_CTRL_CROSS) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_Circle] = (padData.Buttons & PSP_CTRL_CIRCLE) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_Box] = (padData.Buttons & PSP_CTRL_SQUARE) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_Triangle] = (padData.Buttons & PSP_CTRL_TRIANGLE) ? 1.0f : 0.0f;
 
-	pGamepadState->values[Button_P2_R1] = 0.0f;
-	pGamepadState->values[Button_P2_L1] = 0.0f;
-	pGamepadState->values[Button_P2_L2] = (padData.Buttons & PSP_CTRL_LTRIGGER) ? 1.0f : 0.0f;
-	pGamepadState->values[Button_P2_R2] = (padData.Buttons & PSP_CTRL_RTRIGGER) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_L] = (padData.Buttons & PSP_CTRL_LTRIGGER) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_R] = (padData.Buttons & PSP_CTRL_RTRIGGER) ? 1.0f : 0.0f;
 
-	pGamepadState->values[Button_P2_Start] = (padData.Buttons & PSP_CTRL_START) ? 1.0f : 0.0f;
-	pGamepadState->values[Button_P2_Select] = (padData.Buttons & PSP_CTRL_SELECT) ? 1.0f : 0.0f;
-
-	pGamepadState->values[Button_P2_LThumb] = 0.0f;
-	pGamepadState->values[Button_P2_RThumb] = 0.0f;
+	pGamepadState->values[Button_PP_Start] = (padData.Buttons & PSP_CTRL_START) ? 1.0f : 0.0f;
+	pGamepadState->values[Button_PP_Select] = (padData.Buttons & PSP_CTRL_SELECT) ? 1.0f : 0.0f;
 
 	pGamepadState->values[Button_DUp] = (padData.Buttons & PSP_CTRL_UP) ? 1.0f : 0.0f;
 	pGamepadState->values[Button_DDown] = (padData.Buttons & PSP_CTRL_DOWN) ? 1.0f : 0.0f;
@@ -115,9 +104,6 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	pGamepadState->values[Axis_LY] = -((float)padData.Ly/127.5f - 1.0f);
 	pGamepadState->values[Axis_RX] = 0.0f;
 	pGamepadState->values[Axis_RY] = 0.0f;
-
-	if(fabsf(pGamepadState->values[Axis_LX]) < deadZone) pGamepadState->values[Axis_LX] = 0.0f;
-	if(fabsf(pGamepadState->values[Axis_LY]) < deadZone) pGamepadState->values[Axis_LY] = 0.0f;
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
@@ -134,7 +120,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	memset(pMouseState, 0, sizeof(MFMouseState));
 }
 
-const char* MFInput_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -142,7 +128,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 	{
 		case IDD_Gamepad:
 		{
-			pText = "Gamepad";
+			pText = "PSP Gamepad";
 			break;
 		}
 		case IDD_Mouse:
@@ -158,7 +144,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* MFInput_GetGamepadButtonName(int button, int sourceID)
+const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
 	MFDebug_Assert(sourceID < 1, "Only one gamepad available on PSP...");
 

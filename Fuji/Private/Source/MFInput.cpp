@@ -4,7 +4,7 @@
 #include "MFInput_Internal.h"
 
 // store device status for all devices
-static MFDeviceStatus	deviceStatus[IDD_Max][MFInput_MaxInputID];
+static MFInputDeviceStatus	gDeviceStatus[IDD_Max][MFInput_MaxInputID];
 
 // store states for each input device..
 static MFGamepadState	gGamepadStates[MFInput_MaxInputID];
@@ -14,20 +14,44 @@ static MFKeyState		gPrevKeyStates[MFInput_MaxInputID];
 static MFMouseState		gMouseStates[MFInput_MaxInputID];
 static MFMouseState		gPrevMouseStates[MFInput_MaxInputID];
 
-float gGamepadDeadZone = 0.3f;
-float gMouseAccelleration = 1.0f;
+static float gGamepadDeadZone = 0.3f;
+static float gMouseAccelleration = 1.0f;
 
-int gNumGamepads = 0;
-int gNumPointers = 0;
-int gNumKeyboards = 0;
+static int gNumGamepads = 0;
+static int gNumPointers = 0;
+static int gNumKeyboards = 0;
 
 // DIK to ASCII mappings with shift, caps, and shift-caps tables
-const char KEYtoASCII[256]			= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-const char KEYtoASCIISHIFT[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0, '"',0,0,'*','+','<','+','>','?',')','!','@','#','$','%','^','&','*','(',',',':','=','+',0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','{', '|','}',0,0,'~',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-const char KEYtoASCIICAPS[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-const char KEYtoASCIICAPSSHIFT[256]	= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0, '"',0,0,'*','+','<','+','>','?',')','!','@','#','$','%','^','&','*','(',',',':','=','+',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','{', '|','}',0,0,'~',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const char KEYtoASCII[256]			= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const char KEYtoASCIISHIFT[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0, '"',0,0,'*','+','<','+','>','?',')','!','@','#','$','%','^','&','*','(',',',':','=','+',0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','{', '|','}',0,0,'~',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const char KEYtoASCIICAPS[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static const char KEYtoASCIICAPSSHIFT[256]	= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0, '"',0,0,'*','+','<','+','>','?',')','!','@','#','$','%','^','&','*','(',',',':','=','+',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','{', '|','}',0,0,'~',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-const char * const gKeyNames[] =
+static const char * const gGamepadStrings[] =
+{
+	"Cross",
+	"Circle",
+	"Box",
+	"Triangle",
+	"L1",
+	"R1",
+	"L2",
+	"R2",
+	"Start",
+	"Select",
+	"L3",
+	"R3",
+	"DPad Up",
+	"DPad Down",
+	"DPad Left",
+	"DPad Right",
+	"Left Analog X-Axis",
+	"Left Analog Y-Axis",
+	"Right Analog X-Axis",
+	"Right Analog Y-Axis"
+};
+
+static const char * const gKeyNames[] =
 {
 	"None",
 	"Up",
@@ -199,12 +223,17 @@ void MFInput_DeinitModule()
 
 void MFInputInternal_ApplySphericalDeadZone(float *pX, float *pY)
 {
-	float length = MFSqrt(*pX**pX + *pY**pY);
+	float length = *pX**pX + *pY**pY;
 
-	float scale = 1.0f / length * MFClamp(0.0f, (length - gGamepadDeadZone) / (1.0f - gGamepadDeadZone), 1.0f);
+	if(length)
+	{
+		length = MFSqrt(length);
 
-	*pX *= scale;
-	*pY *= scale;
+		float scale = 1.0f / length * MFClamp(0.0f, (length - gGamepadDeadZone) / (1.0f - gGamepadDeadZone), 1.0f);
+
+		*pX *= scale;
+		*pY *= scale;
+	}
 }
 
 void MFInput_Update()
@@ -219,7 +248,7 @@ void MFInput_Update()
 	{
 		for(b=0; b<MFInput_MaxInputID; b++)
 		{
-			MFInput_GetDeviceStatusInternal(a, b, &deviceStatus[a][b]);
+			gDeviceStatus[a][b] = MFInput_GetDeviceStatusInternal(a, b);
 		}
 	}
 
@@ -227,7 +256,7 @@ void MFInput_Update()
 	int maxGamepad = -1;
 	for(a=0; a<MFInput_MaxInputID; a++)
 	{
-		if(deviceStatus[IDD_Gamepad][a].available)
+		if(MFInput_IsAvailable(IDD_Gamepad, a))
 			maxGamepad = a;
 	}
 	gNumGamepads = maxGamepad+1;
@@ -236,7 +265,7 @@ void MFInput_Update()
 	int maxKB = -1;
 	for(a=0; a<MFInput_MaxInputID; a++)
 	{
-		if(deviceStatus[IDD_Keyboard][a].available)
+		if(MFInput_IsAvailable(IDD_Keyboard, a))
 			maxKB = a;
 	}
 	gNumKeyboards = maxKB+1;
@@ -245,21 +274,34 @@ void MFInput_Update()
 	int maxMouse = -1;
 	for(a=0; a<MFInput_MaxInputID; a++)
 	{
-		if(deviceStatus[IDD_Mouse][a].available)
+		if(MFInput_IsAvailable(IDD_Mouse, a))
 			maxMouse = a;
 	}
 	gNumPointers = maxMouse+1;
 
 	// copy current states into last states
-	memcpy(gPrevGamepadStates, gGamepadStates, sizeof(MFGamepadState) * MFInput_MaxInputID);
-	memcpy(gPrevKeyStates, gKeyStates, sizeof(MFKeyState) * MFInput_MaxInputID);
-	memcpy(gPrevMouseStates, gMouseStates, sizeof(MFMouseState) * MFInput_MaxInputID);
+	memcpy(gPrevGamepadStates, gGamepadStates, sizeof(gPrevGamepadStates));
+	memcpy(gPrevKeyStates, gKeyStates, sizeof(gPrevKeyStates));
+	memcpy(gPrevMouseStates, gMouseStates, sizeof(gPrevMouseStates));
+
+	// update keyboard state
+	for(a=0; a<gNumKeyboards; a++)
+	{
+		if(MFInput_IsAvailable(IDD_Keyboard, a))
+			MFInput_GetKeyStateInternal(a, &gKeyStates[a]);
+	}
 
 	// update gamepad state
 	for(a=0; a<gNumGamepads; a++)
 	{
 		if(MFInput_IsAvailable(IDD_Gamepad, a))
 		{
+			// update gamepad state
+#if !defined(_RETAIL)
+			if(gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
+				MFInputInternal_GetGamepadStateFromKeyMap(&gGamepadStates[a], &gKeyStates[0]);
+			else
+#endif
 			MFInput_GetGamepadStateInternal(a, &gGamepadStates[a]);
 
 			// apply analog deadzone to axiis
@@ -268,12 +310,7 @@ void MFInput_Update()
 		}
 	}
 
-	for(a=0; a<gNumKeyboards; a++)
-	{
-		if(MFInput_IsAvailable(IDD_Keyboard, a))
-			MFInput_GetKeyStateInternal(a, &gKeyStates[a]);
-	}
-
+	// update mouse state
 	for(a=0; a<gNumPointers; a++)
 	{
 		if(MFInput_IsAvailable(IDD_Mouse, a))
@@ -281,32 +318,32 @@ void MFInput_Update()
 	}
 }
 
-bool MFInput_IsAvailable(int source, int sourceID)
+bool MFInput_IsAvailable(int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	bool available = deviceStatus[source][sourceID].available || gNumKeyboards;
+	bool available = gDeviceStatus[device][deviceID] != IDS_Unavailable;
 
 #if !defined(_RETAIL)
 	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
-	if(!available && source == IDD_Gamepad && sourceID == 0 && gNumKeyboards)
+	if(!available && device == IDD_Gamepad && deviceID == 0 && gNumKeyboards)
 		available = true;
 #endif
 
 	return available;
 }
 
-bool MFInput_IsConnected(int source, int sourceID)
+bool MFInput_IsConnected(int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	bool connected = deviceStatus[source][sourceID].status != IDS_Disconnected;
+	bool connected = gDeviceStatus[device][deviceID] != IDS_Disconnected && gDeviceStatus[device][deviceID] != IDS_Unavailable;
 
 #if !defined(_RETAIL)
 	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
-	if(!connected && source == IDD_Gamepad && sourceID == 0 && gNumKeyboards)
+	if(!connected && device == IDD_Gamepad && deviceID == 0 && gNumKeyboards)
 	{
 		connected = MFInput_GetKeyboardStatusState(KSS_ScrollLock, 0);
 	}
@@ -315,16 +352,16 @@ bool MFInput_IsConnected(int source, int sourceID)
 	return connected;
 }
 
-bool MFInput_IsReady(int source, int sourceID)
+bool MFInput_IsReady(int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	bool ready = deviceStatus[source][sourceID].status == IDS_Ready;
+	bool ready = gDeviceStatus[device][deviceID] == IDS_Ready;
 
 #if !defined(_RETAIL)
 	// this allow's a device with a keyboard and no gamepad's to emulate a gamepad with the keyboard
-	if(!ready && source == IDD_Gamepad && sourceID == 0 && gNumKeyboards)
+	if(!ready && device == IDD_Gamepad && deviceID == 0 && gNumKeyboards)
 	{
 		ready = MFInput_GetKeyboardStatusState(KSS_ScrollLock, 0);
 	}
@@ -333,156 +370,123 @@ bool MFInput_IsReady(int source, int sourceID)
 	return ready;
 }
 
-float MFInput_Read(int button, int source, int sourceID)
+float MFInput_Read(int button, int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= -1 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	if(sourceID == -1)
+	if(deviceID == -1)
 	{
 		float value = 0.0f;
 
 		for(int a=0; a<MFInput_MaxInputID && !value; a++)
 		{
-			value = MFInput_Read(button, source, a);
+			value = MFInput_Read(button, device, a);
 		}
 
 		return value;
 	}
 
-	switch(source)
+	switch(device)
 	{
 		case IDD_Gamepad:
 		{
-#if defined(_RETAIL)
-			return gGamepadStates[sourceID].values[button];
-#else
-			float value;
-
-			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
-				value = MFInputInternal_GetGamepadKeyMapping(button, &gKeyStates[0]);
-			else
-				value = gGamepadStates[sourceID].values[button];
-
-			return value;
-#endif
+			return gGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
-				return gMouseStates[sourceID].values[button];
+				return gMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
-				return gMouseStates[sourceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
+				return gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
 			}
 			break;
 		case IDD_Keyboard:
-			return gKeyStates[sourceID].keys[button] ? 1.0f : 0.0f;
+			return gKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
 		default:
 			break;
 	}
 	return 0.0f;
 }
 
-bool MFInput_WasPressed(int button, int source, int sourceID)
+bool MFInput_WasPressed(int button, int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	if(sourceID == -1)
+	if(deviceID == -1)
 	{
 		bool value = false;
 
 		for(int a=0; a<MFInput_MaxInputID && !value; a++)
 		{
-			value = MFInput_WasPressed(button, source, a);
+			value = MFInput_WasPressed(button, device, a);
 		}
 
 		return value;
 	}
 
-	switch(source)
+	switch(device)
 	{
 		case IDD_Gamepad:
 		{
-#if defined(_RETAIL)
-			return gGamepadStates[sourceID].values[button] && !gPrevGamepadStates[sourceID].values[button];
-#else
-			bool value;
-
-			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
-				value = MFInputInternal_GetGamepadKeyMapping(button, &gKeyStates[0]) && !MFInputInternal_GetGamepadKeyMapping(button, &gPrevKeyStates[0]);
-			else
-				value = gGamepadStates[sourceID].values[button] && !gPrevGamepadStates[sourceID].values[button];
-
-			return value;
-#endif
+			return gGamepadStates[deviceID].values[button] && !gPrevGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
-				return gMouseStates[sourceID].values[button] && !gPrevMouseStates[sourceID].values[button];
+				return gMouseStates[deviceID].values[button] && !gPrevMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
-				return gMouseStates[sourceID].buttonState[button - Mouse_MaxAxis] && !gPrevMouseStates[sourceID].buttonState[button - Mouse_MaxAxis];
+				return gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && !gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
 			}
 			break;
 		case IDD_Keyboard:
-			return gKeyStates[sourceID].keys[button] && !gPrevKeyStates[sourceID].keys[button];
+			return gKeyStates[deviceID].keys[button] && !gPrevKeyStates[deviceID].keys[button];
 		default:
 			break;
 	}
 	return false;
 }
 
-bool MFInput_WasReleased(int button, int source, int sourceID)
+bool MFInput_WasReleased(int button, int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
-	MFDebug_Assert(sourceID >= 0 && source < MFInput_MaxInputID, "Invalid DeviceID");
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
 
-	if(sourceID == -1)
+	if(deviceID == -1)
 	{
 		bool value = false;
 
 		for(int a=0; a<MFInput_MaxInputID && !value; a++)
 		{
-			value = MFInput_WasReleased(button, source, a);
+			value = MFInput_WasReleased(button, device, a);
 		}
 
 		return value;
 	}
 
-	switch(source)
+	switch(device)
 	{
 		case IDD_Gamepad:
 		{
-#if defined(_RETAIL)
-			return !gGamepadStates[sourceID].values[button] && gPrevGamepadStates[sourceID].values[button];
-#else
-			bool value;
-
-			if(sourceID == 0 && deviceStatus[IDD_Gamepad][0].status != IDS_Ready)
-				value = !MFInputInternal_GetGamepadKeyMapping(button, &gKeyStates[0]) && MFInputInternal_GetGamepadKeyMapping(button, &gPrevKeyStates[0]);
-			else
-				value = !gGamepadStates[sourceID].values[button] && gPrevGamepadStates[sourceID].values[button];
-
-			return value;
-#endif
+			return !gGamepadStates[deviceID].values[button] && gPrevGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
-				return !gMouseStates[sourceID].values[button] && gPrevMouseStates[sourceID].values[button];
+				return !gMouseStates[deviceID].values[button] && gPrevMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
-				return !gMouseStates[sourceID].buttonState[button - Mouse_MaxAxis] && gPrevMouseStates[sourceID].buttonState[button - Mouse_MaxAxis];
+				return !gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
 			}
 			break;
 		case IDD_Keyboard:
-			return !gKeyStates[sourceID].keys[button] && gPrevKeyStates[sourceID].keys[button];
+			return !gKeyStates[deviceID].keys[button] && gPrevKeyStates[deviceID].keys[button];
 		default:
 			break;
 	}
@@ -561,14 +565,32 @@ void MFInput_SetMouseAcceleration(float multiplier)
 	MFDebug_Assert(false, "SetMouseAcceleration not written");
 }
 
-const char* MFInput_EnumerateString(int button, int source, int sourceID, bool includeDevice, bool includeDeviceID)
+const char* MFInput_GetDeviceName(int device, int deviceID)
 {
-	MFDebug_Assert(source >= 0 && source < IDD_Max, "Invalid Input Device");
+#if !defined(_RETAIL)
+	if(deviceID == 0 && gDeviceStatus[device][deviceID] == IDS_Unavailable)
+		return "Keyboard Emulation";
+#endif
+	return MFInput_GetDeviceNameInternal(device, deviceID);
+}
 
-	switch(source)
+const char* MFInput_GetGamepadButtonName(int button, int deviceID)
+{
+#if !defined(_RETAIL)
+	if(deviceID == 0 && gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
+		return gGamepadStrings[button];
+#endif
+	return MFInput_GetGamepadButtonNameInternal(button, deviceID);
+}
+
+const char* MFInput_EnumerateString(int button, int device, int deviceID, bool includeDevice, bool includeDeviceID)
+{
+	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
+
+	switch(device)
 	{
 		case IDD_Gamepad:
-			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", MFInput_GetGamepadButtonName(button, sourceID));
+			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", MFInput_GetGamepadButtonName(button, deviceID));
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
@@ -576,10 +598,10 @@ const char* MFInput_EnumerateString(int button, int source, int sourceID, bool i
 			}
 			else
 			{
-				return MFStr("%s%s Button %d", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", button - Mouse_MaxAxis + 1);
+				return MFStr("%s%s Button %d", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", button - Mouse_MaxAxis + 1);
 			}
 		case IDD_Keyboard:
-			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(source, sourceID) : "", includeDeviceID ? MFStr("(%d)", sourceID) : "", gKeyNames[button]);
+			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", gKeyNames[button]);
 	}
 
 	return "";
@@ -594,6 +616,7 @@ float MFInput_GetDeadZone()
 {
 	return gGamepadDeadZone;
 }
+
 
 // gamepad mappings..
 char gamepadMappingTable[] =
@@ -620,16 +643,19 @@ char gamepadMappingTable[] =
 	Mapping_DLeft, // Button_DLeft
 	Mapping_DRight, // Button_DRight
 
-//	KEY_UP,	// Axis_LX,
-//	KEY_UP,	// Axis_LY,
-//	KEY_UP,	// Axis_RX,
-//	KEY_UP,	// Axis_RY,
+	Mapping_LX,	// Axis_LX,
+	Mapping_LY,	// Axis_LY,
+	Mapping_RX,	// Axis_RX,
+	Mapping_RY,	// Axis_RY,
 };
 
-float MFInputInternal_GetGamepadKeyMapping(int button, MFKeyState *pKeystate)
+void MFInputInternal_GetGamepadStateFromKeyMap(MFGamepadState *pGamepadState, MFKeyState *pKeyState)
 {
 	if(!MFInput_GetKeyboardStatusState(KSS_ScrollLock, 0))
-		return 0.0f;
+		return;
 
-	return pKeystate->keys[(int)gamepadMappingTable[button]] ? 1.0f : 0.0f;
+	for(int a=0; a<GamepadType_Max; a++)
+	{
+		pGamepadState->values[a] = pKeyState->keys[(int)gamepadMappingTable[a]] ? 1.0f : 0.0f;
+	}
 }

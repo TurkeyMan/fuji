@@ -864,20 +864,15 @@ void MFInput_UpdatePlatformSpecific()
 
 }
 
-void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus)
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
 	MFCALLSTACK;
-
-	pDeviceStatus->available = false;
-	pDeviceStatus->status = IDS_Disconnected;
 
 	switch(device)
 	{
 		case IDD_Gamepad:
 			if(id < gGamepadCount)
 			{
-				pDeviceStatus->available = true;
-
 				DIDEVCAPS caps;
 				memset(&caps, 0, sizeof(DIDEVCAPS));
 				caps.dwSize = sizeof(DIDEVCAPS);
@@ -885,25 +880,23 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 				gPCJoysticks[id].pDevice->GetCapabilities(&caps);
 
 				if(caps.dwFlags & DIDC_ATTACHED)
-				{
-					pDeviceStatus->status = IDS_Ready;
-				}
+					return IDS_Ready;
+				else
+					return IDS_Disconnected;
 			}
 			break;
 
 		case IDD_Mouse:
 			if(id < gMouseCount)
 			{
-				pDeviceStatus->available = true;
-				pDeviceStatus->status = IDS_Ready;
+				return IDS_Ready;
 			}
 			break;
 
 		case IDD_Keyboard:
 			if(id < gKeyboardCount)
 			{
-				pDeviceStatus->available = true;
-				pDeviceStatus->status = IDS_Ready;
+				return IDS_Ready;
 			}
 			break;
 
@@ -911,6 +904,8 @@ void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDevice
 			MFDebug_Assert(false, "Invalid Input Device");
 			break;
 	}
+
+	return IDS_Unavailable;
 }
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
@@ -1187,7 +1182,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	//....
 }
 
-const char* MFInput_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -1211,7 +1206,7 @@ const char* MFInput_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* MFInput_GetGamepadButtonName(int button, int sourceID)
+const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
 	return gPCJoysticks[sourceID].pGamepadInfo->ppButtonNameStrings[button];
 }

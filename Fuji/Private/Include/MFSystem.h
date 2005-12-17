@@ -6,8 +6,8 @@
  * @{
  */
 
-#if !defined(_SYSTEM_H)
-#define _SYSTEM_H
+#if !defined(_MFSYSTEM_H)
+#define _MFSYSTEM_H
 
 #include "Timer.h"
 
@@ -247,6 +247,6 @@ void Game_Draw();
  */
 void Game_Deinit();
 
-#endif // _SYSTEM_H
+#endif // _MFSYSTEM_H
 
 /** @} */

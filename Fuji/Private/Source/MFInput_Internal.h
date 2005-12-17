@@ -21,13 +21,16 @@ void MFInput_InitModulePlatformSpecific();
 void MFInput_DeinitModulePlatformSpecific();
 void MFInput_UpdatePlatformSpecific();
 
-void MFInput_GetDeviceStatusInternal(int device, int id, MFDeviceStatus *pDeviceStatus);
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id);
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState);
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pGamepadState);
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pGamepadState);
 
-float MFInputInternal_GetGamepadKeyMapping(int type, MFKeyState *pKeystate);
+const char* MFInput_GetDeviceNameInternal(int device, int deviceID);
+const char* MFInput_GetGamepadButtonNameInternal(int button, int deviceID);
+
+void MFInputInternal_GetGamepadStateFromKeyMap(MFGamepadState *pGamepadState, MFKeyState *pKeyState);
 
 // gamepad emulation key mapping
 enum MFKeyGamepadMapping
@@ -54,17 +57,10 @@ enum MFKeyGamepadMapping
 	Mapping_DLeft		= Key_Left,
 	Mapping_DRight		= Key_Right,
 
-//	Mapping_Cross		= Key_Up,			// Axis_LX,
-//	Mapping_Cross		= Key_Up,			// Axis_LY,
-//	Mapping_Cross		= Key_Up,			// Axis_RX,
-//	Mapping_Cross		= Key_Up,			// Axis_RY,
-};
-
-// input device state
-struct MFDeviceStatus
-{
-	bool available;
-	int status;
+	Mapping_LX			= Key_Y,
+	Mapping_LY			= Key_H,
+	Mapping_RX			= Key_U,
+	Mapping_RY			= Key_J,
 };
 
 // this may be expanded in the future

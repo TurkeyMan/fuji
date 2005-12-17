@@ -221,7 +221,7 @@ void MFSystem_Update()
 	if(MFInput_Read(Button_DLeft, IDD_Gamepad) && MFInput_Read(Button_PP_L, IDD_Gamepad) && MFInput_WasPressed(Button_PP_Start, IDD_Gamepad))
 		gDrawSystemInfo = !gDrawSystemInfo;
 #else
-	if(MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_WasPressed(Button_P2_LThumb, IDD_Gamepad))
+	if(MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_WasPressed(Button_P2_L3, IDD_Gamepad))
 		gDrawSystemInfo = !gDrawSystemInfo;
 #endif
 

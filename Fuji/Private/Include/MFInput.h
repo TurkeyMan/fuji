@@ -14,71 +14,71 @@
 /**
  * Tests is an input device is available.
  * Tests is an input device is available.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns true if the device is available.
  * @see MFInput_IsConnected()
  * @see MFInput_IsReady()
  */
-bool MFInput_IsAvailable(int source, int sourceID);
+bool MFInput_IsAvailable(int device, int deviceID);
 
 /**
  * Tests is an input device is connected.
  * Tests is an input device is connected.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns true if the device is connected.
  * @see MFInput_IsAvailable()
  * @see MFInput_IsReady()
  */
-bool MFInput_IsConnected(int source, int sourceID);
+bool MFInput_IsConnected(int device, int deviceID);
 
 /**
  * Tests is an input device is ready.
  * Tests is an input device is ready.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns true if the device is ready.
  * @see MFInput_IsAvailable()
  * @see MFInput_IsConnected()
  */
-bool MFInput_IsReady(int source, int sourceID);
+bool MFInput_IsReady(int device, int deviceID);
 
 /**
  * Read input from a device.
  * Read input from a device.
  * @param button The button on the device to read.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns a float representing the input state.
  * @see MFInput_WasPressed()
  * @see MFInput_WasReleased()
  */
-float MFInput_Read(int button, int source, int sourceID = 0);
+float MFInput_Read(int button, int device, int deviceID = 0);
 
 /**
  * Test if a button was pressed this frame.
  * Test if a button was pressed this frame.
  * @param button The button on the device to test.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns true if the button was pressed this frame.
  * @see MFInput_Read()
  * @see MFInput_WasReleased()
  */
-bool MFInput_WasPressed(int button, int source, int sourceID = 0);
+bool MFInput_WasPressed(int button, int device, int deviceID = 0);
 
 /**
  * Test if a button was released this frame.
  * Test if a button was released this frame.
  * @param button The button on the device to test.
- * @param source The source device. This should be a member of the MFInputDevice enum.
- * @param sourceID The source device index.
+ * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param deviceID The source device index.
  * @return Returns true if the button was released this frame.
  * @see MFInput_Read()
  * @see MFInput_WasPressed()
  */
-bool MFInput_WasReleased(int button, int source, int sourceID = 0);
+bool MFInput_WasReleased(int button, int device, int deviceID = 0);
 
 /**
  * Get the number of available gamepads.
@@ -152,13 +152,13 @@ void MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
  * Generate a string representing the input button/device configuration.
  * Generate a string representing the input button/device configuration.
  * @param button The button on the device.
- * @param source The device to read the name from.
- * @param sourceID The device index.
+ * @param device The device to read the name from.
+ * @param deviceID The device index.
  * @param includeDevice If true, the device name is included in the generated string.
  * @param includeDeviceID If true, the device index is included in the generated string.
  * @return Returns a string representing the button name and optionally the device name and index.
  */
-const char* MFInput_EnumerateString(int button, int source, int sourceID = 0, bool includeDevice = false, bool includeDeviceID = false);
+const char* MFInput_EnumerateString(int button, int device, int deviceID = 0, bool includeDevice = false, bool includeDeviceID = false);
 
 /**
  * Set the analog dead zone.
@@ -178,20 +178,20 @@ float MFInput_GetDeadZone();
 /**
  * Get a device name.
  * Get a device name.
- * @param source The device to fetch the name of.
- * @param sourceID The device index.
+ * @param device The device to fetch the name of.
+ * @param deviceID The device index.
  * @return Returns the name of the target device.
  */
-const char*	MFInput_GetDeviceName(int source, int sourceID);
+const char*	MFInput_GetDeviceName(int device, int deviceID);
 
 /**
  * Get the button name from a gamepad.
  * Get the button name from a gamepad.
  * @param button Gamepad button ID.
- * @param sourceID Gamepad index.
+ * @param deviceID Gamepad index.
  * @return Returns the name of the specified button of the specified device.
  */
-const char* MFInput_GetGamepadButtonName(int button, int sourceID);
+const char* MFInput_GetGamepadButtonName(int button, int deviceID);
 
 /**
  * Get the state of the keyboard status flags.
@@ -222,8 +222,9 @@ enum MFInputDevice
  */
 enum MFInputDeviceStatus
 {
-	IDS_Disconnected = 0,	/**< Device is disconnected */
+	IDS_Unavailable = 0,	/**< Device is not available */
 	IDS_Ready = 1,			/**< Device is ready for reading */
+	IDS_Disconnected,		/**< Device is disconnected */
 	IDS_Waiting,			/**< Device is waiting for initialisation */
 
 	IDS_Max,				/**< Maximum device state */
@@ -268,8 +269,8 @@ enum MFGamepadButton
 	Button_P2_Start		= 8,	/**< Start button on a Playstation or PS2 gamepad */
 	Button_P2_Select	= 9,	/**< Select button on a Playstation or PS2 gamepad */
 
-	Button_P2_LThumb	= 10,	/**< Left Thumbstick button on a Playstation or PS2 gamepad */
-	Button_P2_RThumb	= 11,	/**< Right Thumbstick button on a Playstation or PS2 gamepad */
+	Button_P2_L3		= 10,	/**< Left Thumbstick button on a Playstation or PS2 gamepad */
+	Button_P2_R3		= 11,	/**< Right Thumbstick button on a Playstation or PS2 gamepad */
 
 // PSP controller enums
 	Button_PP_Cross		= 0,	/**< Cross button on the PSP gamepad */

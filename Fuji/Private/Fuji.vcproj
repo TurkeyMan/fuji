@@ -874,6 +874,9 @@
 				RelativePath=".\Include\MFModel.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFNetwork.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFPrimitive.h">
 			</File>
 			<File
@@ -908,6 +911,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFTexture.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFThread.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFTypes.h">
@@ -1418,9 +1424,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Pc\MFInput_PC.h">
-			</File>
-			<File
 				RelativePath=".\Pc\MFMaterial_PC.cpp">
 				<FileConfiguration
 					Name="Debug_XB|Win32"
@@ -1668,6 +1671,9 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Pc\MFThread.cpp">
 			</File>
 			<Filter
 				Name="Materials"
