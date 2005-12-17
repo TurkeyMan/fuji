@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFVector.h"
-#include "MFInput.h"
 #include "MFInput_Internal.h"
+#include "MFNetwork_Internal.h"
 
 // store device status for all devices
 static MFInputDeviceStatus	gDeviceStatus[IDD_Max][MFInput_MaxInputID];
@@ -20,6 +20,10 @@ static float gMouseAccelleration = 1.0f;
 static int gNumGamepads = 0;
 static int gNumPointers = 0;
 static int gNumKeyboards = 0;
+
+static int gNetGamepadStart = MFInput_MaxInputID;
+static int gNetPointerStart = MFInput_MaxInputID;
+static int gNetKeyboardStart = MFInput_MaxInputID;
 
 // DIK to ASCII mappings with shift, caps, and shift-caps tables
 static const char KEYtoASCII[256]			= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -316,6 +320,33 @@ void MFInput_Update()
 		if(MFInput_IsAvailable(IDD_Mouse, a))
 			MFInput_GetMouseStateInternal(a, &gMouseStates[a]);
 	}
+
+	// add network devices
+	if(MFNetwork_IsRemoteInputServerRunning())
+	{
+		gNetGamepadStart = gNumGamepads;
+		gNetKeyboardStart = gNumKeyboards;
+		gNetPointerStart = gNumPointers;
+
+		MFNetwork_LockInputMutex();
+
+		// add additional gamepads
+		for(a=0; a<MFNetwork_MaxRemoteDevices(); a++)
+		{
+			MFInputDeviceStatus status = (MFInputDeviceStatus)MFNetwork_GetRemoteDeviceStatus(a);
+
+			if(status > IDS_Unavailable)
+			{
+				gDeviceStatus[IDD_Gamepad][gNetGamepadStart + a] = status;
+
+				MFNetwork_GetRemoteGamepadState(a, &gGamepadStates[gNetGamepadStart + a]);
+
+				gNumGamepads = gNetGamepadStart + a + 1;
+			}
+		}
+
+		MFNetwork_ReleaseInputMutex();
+	}
 }
 
 bool MFInput_IsAvailable(int device, int deviceID)
@@ -370,7 +401,7 @@ bool MFInput_IsReady(int device, int deviceID)
 	return ready;
 }
 
-float MFInput_Read(int button, int device, int deviceID)
+float MFInput_Read(int button, int device, int deviceID, float *pPrevState)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -391,23 +422,39 @@ float MFInput_Read(int button, int device, int deviceID)
 	{
 		case IDD_Gamepad:
 		{
+			if(pPrevState)
+				*pPrevState = gPrevGamepadStates[deviceID].values[button];
+
 			return gGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
+				if(pPrevState)
+					*pPrevState = gPrevMouseStates[deviceID].values[button];
+
 				return gMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
+				if(pPrevState)
+					*pPrevState = gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
+
 				return gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
 			}
 			break;
 		case IDD_Keyboard:
+			if(pPrevState)
+				*pPrevState = gPrevKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
+
 			return gKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
 		default:
 			break;
 	}
+
+	if(pPrevState)
+		*pPrevState = 0.0f;
+
 	return 0.0f;
 }
 
@@ -567,20 +614,34 @@ void MFInput_SetMouseAcceleration(float multiplier)
 
 const char* MFInput_GetDeviceName(int device, int deviceID)
 {
+	if(deviceID >= gNetGamepadStart && device == IDD_Gamepad)
+	{
+		return MFStr("Remote %s", MFNetwork_GetRemoteGamepadName(deviceID - gNetGamepadStart));
+	}
+	else
+	{
 #if !defined(_RETAIL)
-	if(deviceID == 0 && gDeviceStatus[device][deviceID] == IDS_Unavailable)
-		return "Keyboard Emulation";
+		if(deviceID == IDD_Gamepad && gDeviceStatus[device][deviceID] == IDS_Unavailable)
+			return "Keyboard Emulation";
 #endif
-	return MFInput_GetDeviceNameInternal(device, deviceID);
+		return MFInput_GetDeviceNameInternal(device, deviceID);
+	}
 }
 
 const char* MFInput_GetGamepadButtonName(int button, int deviceID)
 {
+	if(deviceID >= gNetGamepadStart)
+	{
+		return MFNetwork_GetRemoteGamepadButtonName(deviceID - gNetGamepadStart, button);
+	}
+	else
+	{
 #if !defined(_RETAIL)
-	if(deviceID == 0 && gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
-		return gGamepadStrings[button];
+		if(deviceID == IDD_Gamepad && gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
+			return gGamepadStrings[button];
 #endif
-	return MFInput_GetGamepadButtonNameInternal(button, deviceID);
+		return MFInput_GetGamepadButtonNameInternal(button, deviceID);
+	}
 }
 
 const char* MFInput_EnumerateString(int button, int device, int deviceID, bool includeDevice, bool includeDeviceID)

@@ -17,6 +17,7 @@
 #include "MFRenderer_Internal.h"
 #include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
+#include "MFNetwork_Internal.h"
 
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
@@ -157,6 +158,8 @@ void MFSystem_Init()
 	MFPrimitive_InitModule();
 	MFFont_InitModule();
 
+	MFNetwork_InitModule();
+
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
@@ -168,6 +171,8 @@ void MFSystem_Deinit()
 	MFCALLSTACK;
 
 	MFHeap_Release();
+
+	MFNetwork_DeinitModule();
 
 	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();
@@ -232,6 +237,8 @@ void MFSystem_Update()
 	MFMaterial_Update();
 
 	MFSound_Update();
+
+	MFNetwork_Update();
 }
 
 void MFSystem_PostUpdate()

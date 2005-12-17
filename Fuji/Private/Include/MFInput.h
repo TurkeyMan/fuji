@@ -54,7 +54,7 @@ bool MFInput_IsReady(int device, int deviceID);
  * @see MFInput_WasPressed()
  * @see MFInput_WasReleased()
  */
-float MFInput_Read(int button, int device, int deviceID = 0);
+float MFInput_Read(int button, int device, int deviceID = 0, float *pPrevState = NULL);
 
 /**
  * Test if a button was pressed this frame.
