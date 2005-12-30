@@ -2690,6 +2690,51 @@
 						RelativePath=".\Lib\pawn\amx\amxdbg.h">
 					</File>
 					<File
+						RelativePath=".\Lib\pawn\amx\amxstring.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Profile_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_XB|Xbox">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
 						RelativePath=".\Lib\pawn\amx\float.c">
 						<FileConfiguration
 							Name="Debug|Win32">
