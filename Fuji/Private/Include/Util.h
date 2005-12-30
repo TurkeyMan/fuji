@@ -24,7 +24,7 @@ inline void MFEndian_Flip(T *pData)
 	register char t[sizeof(T)];
 	const char *pBytes = (const char*)pData;
 
-	for(int a=0; a<sizeof(T); a++)
+	for(uint32 a=0; a<sizeof(T); a++)
 	{
 		t[a] = pBytes[sizeof(T)-1-a];
 	}

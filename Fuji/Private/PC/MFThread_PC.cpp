@@ -1,6 +1,5 @@
 #include "Fuji.h"
 #include "MFThread.h"
-#include "MFPtrList.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -63,7 +62,7 @@ static DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 // interface functions
 
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData)
+MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize)
 {
 	MFThreadInfoPC *pThreadInfo = MFThreadPC_GetNewThreadInfo();
 
@@ -72,33 +71,33 @@ MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint
 
 	pThreadInfo->pEntryPoint = pEntryPoint;
 	pThreadInfo->pUserData = pUserData;
-	pThreadInfo->hThread = CreateThread(NULL, 0, ThreadProc, pThreadInfo, 0, &pThreadInfo->threadID);
+	pThreadInfo->hThread = CreateThread(NULL, stackSize, ThreadProc, pThreadInfo, 0, &pThreadInfo->threadID);
 
 	return pThreadInfo;
 }
 
-void MFThread_ExitThread(uint32 exitCode)
+void MFThread_ExitThread(int exitCode)
 {
 	ExitThread((DWORD)exitCode);
 }
 
-void MFThread_TerminateThread(MFThread thread, uint32 exitCode)
+void MFThread_TerminateThread(MFThread thread)
 {
 	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
-	TerminateThread(pThreadInfo->hThread, (DWORD)exitCode);
+	TerminateThread(pThreadInfo->hThread, (DWORD)-1);
 }
 
-uint32 MFThread_GetExitCode(MFThread thread)
+int MFThread_GetExitCode(MFThread thread)
 {
 	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
 	DWORD exitCode;
 
 	GetExitCodeThread(pThreadInfo->hThread, &exitCode);
 
-	return (uint32)exitCode;
+	return (int)exitCode;
 }
 
-void MFThread_CloseThread(MFThread thread)
+void MFThread_DestroyThread(MFThread thread)
 {
 	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
 
@@ -125,22 +124,30 @@ MFMutex MFThread_CreateMutex(const char *pName)
 
 void MFThread_DestroyMutex(MFMutex mutex)
 {
-	DeleteCriticalSection((CRITICAL_SECTION*)mutex);
+	MFMutexPC *pMutex = (MFMutexPC*)mutex;
+
+	DeleteCriticalSection(&pMutex->criticalSection);
+
+	pMutex->name[0] = 0;
 }
 
 void MFThread_LockMutex(MFMutex mutex)
 {
-	EnterCriticalSection((CRITICAL_SECTION*)mutex);
+	MFMutexPC *pMutex = (MFMutexPC*)mutex;
+
+	EnterCriticalSection(&pMutex->criticalSection);
 }
 
 void MFThread_ReleaseMutex(MFMutex mutex)
 {
-	LeaveCriticalSection((CRITICAL_SECTION*)mutex);
+	MFMutexPC *pMutex = (MFMutexPC*)mutex;
+
+	LeaveCriticalSection(&pMutex->criticalSection);
 }
 
-MFSemaphore MFThread_CreateSemaphore(const char *pName, int initialCount, int maximumCount)
+MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
 {
-	return CreateSemaphore(NULL, initialCount, maximumCount, pName);
+	return CreateSemaphore(NULL, startCount, maxCount, pName);
 }
 
 void MFThread_DestroySemaphore(MFSemaphore semaphore)
@@ -154,7 +161,7 @@ uint32 MFThread_WaitSemaphore(MFSemaphore semaphore, uint32 timeout)
 	return r == WAIT_OBJECT_0 ? 0 : 1;
 }
 
-void MFThread_ReleaseSemaphore(MFSemaphore semaphore)
+void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	ReleaseSemaphore(semaphore, 1, NULL);
 }

@@ -81,7 +81,7 @@ RemoteGamepad* MFNetwork_GetNewNetworkGamepadPointer()
 	return pGamepad;
 }
 
-uint32 MFNetwork_InputServerConnectionTread(void *pUserData)
+int MFNetwork_InputServerConnectionTread(void *pUserData)
 {
 	bool connectionTerminated = false;
 	char recvBuffer[160];
@@ -120,7 +120,7 @@ uint32 MFNetwork_InputServerConnectionTread(void *pUserData)
 				continue;
 			}
 
-			if(bytes < sizeof(RemoteInputPacket) || bytes < pPacket->packetLen)
+			if(bytes < (int)sizeof(RemoteInputPacket) || bytes < pPacket->packetLen)
 			{
 				memcpy(recvBuffer, pBuffer, bytes);
 				bytes += MFSockets_Recv(connection, recvBuffer+bytes, sizeof(recvBuffer)-bytes, 0);
@@ -180,7 +180,7 @@ uint32 MFNetwork_InputServerConnectionTread(void *pUserData)
 	return 0;
 }
 
-uint32 MFNetwork_InputServerListenTread(void *pUserData)
+int MFNetwork_InputServerListenTread(void *pUserData)
 {
 	MFSocket inputServer = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 
@@ -202,7 +202,7 @@ uint32 MFNetwork_InputServerListenTread(void *pUserData)
 		if(connection)
 		{
 			MFDebug_Warn(1, MFStr("Remote gamepad connection accepted: %s", MFSockets_GetAddressString(remoteAddress)));
-			MFThread_CreateThread("Fuji Input Connection", MFNetwork_InputServerConnectionTread, connection);
+			MFThread_CreateThread("Fuji Input Connection", MFNetwork_InputServerConnectionTread, connection, MFPriority_AboveNormal, 1024);
 		}
 		else
 		{
@@ -219,7 +219,7 @@ void MFNetwork_BeginInputServer()
 		return;
 
 	inputServerMutex = MFThread_CreateMutex("Network Gamepad List");
-	inputServer	= MFThread_CreateThread("Fuji Input Server", MFNetwork_InputServerListenTread, NULL);
+	inputServer	= MFThread_CreateThread("Fuji Input Server", MFNetwork_InputServerListenTread, NULL, MFPriority_AboveNormal, 1024);
 }
 
 int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int device, int deviceID)

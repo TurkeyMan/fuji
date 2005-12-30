@@ -122,26 +122,21 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 
 const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
-	const char *pText = NULL;
-
 	switch(source)
 	{
 		case IDD_Gamepad:
 		{
-			pText = "PSP Gamepad";
-			break;
+			return "PSP Gamepad";
 		}
 		case IDD_Mouse:
-			pText = "Mouse";
-			break;
+			return "Mouse";
 		case IDD_Keyboard:
-			pText = "Keyboard";
-			break;
+			return "Keyboard";
 		default:
 			break;
 	}
 
-	return pText;
+	return NULL;
 }
 
 const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)

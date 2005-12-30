@@ -5,7 +5,6 @@
 	Name="libFuji"
 	ProjectGUID="{692AD46F-7D1C-4C2B-89B4-9DA4EEF1EF89}"
 	RootNamespace="libFuji"
-	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -2927,6 +2926,94 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFNetwork.cpp"
+				>
+				<FileConfiguration
+					Name="Debug_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_PSP|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_DC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_PS2|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_GC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_GC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Retail_GC|Win32"
+					>
+					<Tool
+						Name="GCCCompiler"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\Source\MFPrimitive.cpp"
 				>
 				<FileConfiguration
@@ -5408,6 +5495,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\MFNetwork.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\MFPrimitive.h"
 				>
 			</File>
@@ -5453,6 +5544,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFTexture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFThread.h"
 				>
 			</File>
 			<File
@@ -7757,130 +7852,6 @@
 						>
 						<Tool
 							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\PC\MFInput_PC.h"
-					>
-					<FileConfiguration
-						Name="Debug_PC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_DC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_DC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_DC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_PS2|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PS2|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PS2|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_GC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_GC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_GC|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCustomBuildTool"
 						/>
 					</FileConfiguration>
 				</File>
@@ -10596,6 +10567,127 @@
 				</File>
 				<File
 					RelativePath=".\PSP\MFTexture_PSP.cpp"
+					>
+					<FileConfiguration
+						Name="Debug_PC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_DC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_PS2|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PS2|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PS2|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_GC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_GC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_GC|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\PSP\MFThread_PSP.cpp"
 					>
 					<FileConfiguration
 						Name="Debug_PC|Win32"

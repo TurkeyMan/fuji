@@ -409,9 +409,24 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
-	unzSetOffset((unzFile)pFile->pFilesysData, (uint32)newPos);
+	unzFile f = (unzFile)pFile->pFilesysData;
+
+	unzCloseCurrentFile(f);
+	unzOpenCurrentFile(f);
+
 	pFile->offset = (uint32)newPos;
-	return newPos;
+
+	// read to the desired position.
+	char buffer[256];
+
+	while(newPos)
+	{
+		int bytes = newPos < 256 ? newPos : 256;
+		unzReadCurrentFile(f, buffer, bytes);
+		newPos -= bytes;
+	}
+
+	return (int)pFile->offset;
 }
 
 #else // !defined(_USE_ZZLIB)

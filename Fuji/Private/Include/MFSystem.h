@@ -142,21 +142,28 @@ MFPlatform MFSystem_GetCurrentPlatform();
  * Gets a platform identifier string.
  * Gets an identifier string for a specified platform.
  * @param platform Platform to get the identifier string for.
- * @return Platform identifier string.
+ * @return Returns the platform identifier string.
  * @see MFSystem_GetCurrentPlatform()
  * @see MFSystem_GetPlatformName()
  */
-const char * const MFSystem_GetPlatformString(int platform);
+const char * MFSystem_GetPlatformString(int platform);
 
 /**
  * Gets a platform name.
  * Gets the name string for a specified platform.
  * @param platform Platform identifier to get the name of.
- * @return Platform name string.
+ * @return Returns the platform name string.
  * @see MFSystem_GetCurrentPlatform()
  * @see MFSystem_GetPlatformString()
  */
-const char * const MFSystem_GetPlatformName(int platform);
+const char * MFSystem_GetPlatformName(int platform);
+
+/**
+ * Gets the name of this system.
+ * Gets a user friendly name for this system. Typically a network identification name.
+ * @return Returns the system name string.
+ */
+const char * MFSystem_GetSystemName();
 
 /**
  * Gets a platforms native endian.

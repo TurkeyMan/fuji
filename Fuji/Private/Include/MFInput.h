@@ -6,8 +6,8 @@
  * @{
  */
 
-#if !defined(_INPUT_H)
-#define _INPUT_H
+#if !defined(_MFINPUT_H)
+#define _MFINPUT_H
 
 #include "MFVector.h"
 
@@ -50,6 +50,7 @@ bool MFInput_IsReady(int device, int deviceID);
  * @param button The button on the device to read.
  * @param device The source device. This should be a member of the MFInputDevice enum.
  * @param deviceID The source device index.
+ * @param pPrevState Optional pointer to receive the previous button state. Pass NULL if the previous state is not required.
  * @return Returns a float representing the input state.
  * @see MFInput_WasPressed()
  * @see MFInput_WasReleased()

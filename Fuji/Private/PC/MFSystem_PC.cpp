@@ -65,3 +65,11 @@ uint64 MFSystem_GetRTCFrequency()
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
 	return freq;
 }
+
+const char * MFSystem_GetSystemName()
+{
+	static char buffer[128];
+	DWORD poop = sizeof(buffer);
+	GetComputerName(buffer, &poop);
+	return buffer;
+}

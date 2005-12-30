@@ -33,3 +33,8 @@ uint64 MFSystem_GetRTCFrequency()
 {
 	return CLOCKS_PER_SEC;
 }
+
+const char * MFSystem_GetSystemName()
+{
+	return "null";
+}

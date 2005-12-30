@@ -11,6 +11,7 @@
 #include <pspsdk.h>
 #include <pspdebug.h>
 #include <psppower.h>
+#include <psputility_sysparam.h>
 
 #include <time.h>
 
@@ -27,6 +28,8 @@ extern int gRestart;
 uint32 USBState = 0;
 
 MFPlatform gCurrentPlatform = FP_PSP;
+
+static char systemName[64] = "PSP";
 
 // USB Debug Menu Item...
 void USBConnectionCallback(MenuObject *pMenu, void *pData);
@@ -169,8 +172,6 @@ void DeinitUSB()
 
 int main()
 {
-	srand((uint32)clock());
-
 	SetupCallbacks();
 
 	pspDebugScreenInit();
@@ -185,6 +186,8 @@ int main()
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	sceUtilityGetSystemParamString(PSP_SYSTEMPARAM_ID_STRING_NICKNAME, systemName, 64);
+
 	DebugMenu_AddItem("Show System Info", "Fuji Options", &showSystemInfo, NULL, NULL);
 	DebugMenu_AddItem("Clock Rate", "Fuji Options", &clockRate, ClockRateCallback, NULL);
 	DebugMenu_AddItem("USB Connection", "Fuji Options", &usbMode, USBConnectionCallback, NULL);
@@ -411,4 +414,9 @@ uint64 MFSystem_ReadRTC()
 uint64 MFSystem_GetRTCFrequency()
 {
 	return CLOCKS_PER_SEC * 1000;
+}
+
+const char * MFSystem_GetSystemName()
+{
+	return systemName;
 }

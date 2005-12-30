@@ -63,12 +63,12 @@ static MFEndian gPlatformEndian[FP_Max] =
 	MFEndian_BigEndian,
 };
 
-const char * const MFSystem_GetPlatformString(int platform)
+const char * MFSystem_GetPlatformString(int platform)
 {
 	return gPlatformStrings[platform];
 }
 
-const char * const MFSystem_GetPlatformName(int platform)
+const char * MFSystem_GetPlatformName(int platform)
 {
 	return gPlatformNames[platform];
 }

@@ -60,3 +60,8 @@ uint64 MFSystem_GetRTCFrequency()
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
 	return freq;
 }
+
+const char * MFSystem_GetSystemName()
+{
+	return "xbox";
+}
