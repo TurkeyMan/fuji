@@ -85,7 +85,7 @@ void MFMaterial_InitModule()
 	MFMat_Standard_Register();
 	MFMat_Effect_Register();
 
-	if(MFMaterial_AddDefinitionsFile("Materials.ini", "Materials.ini"))
+	if(MFFileSystem_Exists("Materials.ini") && MFMaterial_AddDefinitionsFile("Materials.ini", "Materials.ini"))
 	{
 		MFDebug_Warn(3, "Failed to load Materials.ini");
 	}
