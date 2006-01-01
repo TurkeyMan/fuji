@@ -257,6 +257,12 @@
 				RelativePath=".\Source\MFModel_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFNetwork.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFNetwork_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFPrimitive.cpp">
 			</File>
 			<File
@@ -267,6 +273,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFRenderer_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFScript.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFSockets.cpp">
@@ -456,6 +465,9 @@
 				RelativePath=".\Include\MFModel.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFNetwork.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFPrimitive.h">
 			</File>
 			<File
@@ -466,6 +478,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFRenderer.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFScript.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFSockets.h">
@@ -490,6 +505,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFTexture.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFThread.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFTypes.h">
@@ -582,6 +600,9 @@
 			</File>
 			<File
 				RelativePath=".\Pc\MFTexture_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFThread_PC.cpp">
 			</File>
 			<Filter
 				Name="Materials"
@@ -819,6 +840,138 @@
 				<File
 					RelativePath=".\Lib\zzip\zzip.h">
 				</File>
+			</Filter>
+			<Filter
+				Name="pawn"
+				Filter="">
+				<Filter
+					Name="amx"
+					Filter="">
+					<File
+						RelativePath=".\Lib\pawn\amx\amx.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amx.h">
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxaux.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxaux.h">
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxcore.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxdbg.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxdbg.h">
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\amxstring.c">
+						<FileConfiguration
+							Name="Debug|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail|Win32">
+							<Tool
+								Name="VCCLCompilerTool"
+								PreprocessorDefinitions="FLOATPOINT"/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\float.c">
+					</File>
+					<File
+						RelativePath=".\Lib\pawn\amx\osdefs.h">
+					</File>
+				</Filter>
+				<Filter
+					Name="compiler"
+					Filter="">
+				</Filter>
 			</Filter>
 		</Filter>
 		<File
