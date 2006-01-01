@@ -92,7 +92,7 @@ void  MFHeap_Free(void *pMem);
  * @return Size, in bytes, of the block of memory that \a pMemory points to.
  * @see MFHeap_Alloc()
  */
-uint32 MFHeap_GetAllocSize(void *pMemory);
+uint32 MFHeap_GetAllocSize(const void *pMemory);
 
 /**
  * Get a Heap pointer.
@@ -177,7 +177,7 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap);
  * @param pMemory Pointer to a block of memory to validate.
  * @return Returns TRUE is memory is in a valid, FALSE otherwise.
  */
-bool MFHeap_ValidateMemory(void *pMemory);
+bool MFHeap_ValidateMemory(const void *pMemory);
 
 /**
  * Get an uncached pointer to a block of memory.

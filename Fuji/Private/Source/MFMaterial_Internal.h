@@ -47,7 +47,6 @@ struct MFMeshChunk
 #if defined(_WINDOWS) || defined(_FUJI_UTIL)
 struct MFMeshChunk_PC : public MFMeshChunk
 {
-//#if defined(_WINDOWS)
 	// interface pointers
 	IDirect3DVertexBuffer9 *pVertexBuffer;
 	IDirect3DIndexBuffer9 *pIndexBuffer;
@@ -66,13 +65,28 @@ struct MFMeshChunk_PC : public MFMeshChunk
 	// matrix batching data
 	int matrixBatchSize;
 	uint16 *pBatchIndices;
-//#elif defined(_XBOX)
-	// some vertex buffer type thing...
-//#endif
 
 	uint32 numVertices;
 	uint32 numIndices;
 	uint32 vertexStride;
+};
+#endif
+
+#if defined(_XBOX) || defined(_FUJI_UTIL)
+struct MFMeshChunk_XB : public MFMeshChunk
+{
+	// some vertex buffer type thing...
+
+	uint32 numVertices;
+	uint32 numIndices;
+	uint32 vertexStride;
+};
+#endif
+
+#if defined(_PSP) || defined(_FUJI_UTIL)
+struct MFMeshChunk_PSP : public MFMeshChunk
+{
+	// not done yet
 };
 #endif
 

@@ -20,7 +20,7 @@ int F3DFile::ReadF3D(char *pFilename)
 
 	if(!infile)
 	{
-		printf("Failed to open F3D file %s", pFilename);
+		printf("Failed to open F3D file '%s'\n", pFilename);
 		return 1;
 	}
 
@@ -173,7 +173,7 @@ void F3DFile::WriteF3D(char *pFilename)
 
 	if(!file)
 	{
-		printf("Count open \"%f\" for writing.", pFilename);
+		printf("Count open \"%f\" for writing.\n", pFilename);
 		return;
 	}
 
@@ -298,11 +298,11 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 
 	if(pHeader->ID != MAKEFOURCC('M','F','3','D'))
 	{
-		printf("Not an F3D file.");
+		printf("Not an F3D file.\n");
 		return 1;
 	}
 
-	printf("Reading F3D file version %d.%d", pHeader->major, pHeader->minor);
+	printf("Reading F3D file version %d.%d\n", pHeader->major, pHeader->minor);
 
 	pChunks = (F3DChunkDesc*)&pHeader[1];
 
@@ -495,7 +495,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 	if(!file)
 	{
-		printf("Count open \"%f\" for writing.", pFilename);
+		printf("Count open \"%f\" for writing.\n", pFilename);
 		return;
 	}
 
@@ -581,7 +581,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				case FP_DC:
 				case FP_GC:
 				default:
-					printf("Error! Invalid platform...");
+					printf("Invalid platform...\n");
 			}
 		}
 	}
@@ -641,7 +641,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 						case FP_DC:
 						case FP_GC:
 						default:
-							printf("Error! Invalid platform...");
+							printf("Invalid platform...\n");
 					}
 
 					(char*&)pSubobjectChunk[b].pMeshChunks -= base;

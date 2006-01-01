@@ -55,12 +55,12 @@ static MFHeap gCustomHeap =
 };
 
 #define MFHeap_MungwallBytes 8
-static char gMungwall[9] = "mungwall";
+static const char gMungwall[9] = "mungwall";
 
 /*** heap tracker ***/
 
 static int gMFHeap_TrackerLine = 0;
-static char *gpMFHeap_TrackerFile = "Unknown in RETAIL build";
+static const char *gpMFHeap_TrackerFile = "Unknown in RETAIL build";
 
 void MFHeap_SetLineAndFile(int line, char *pFile)
 {
@@ -147,7 +147,7 @@ void MFHeap_Free(void *pMem)
 }
 
 // get the size of an allocation
-uint32 MFHeap_GetAllocSize(void *pMemory)
+uint32 MFHeap_GetAllocSize(const void *pMemory)
 {
 	MFCALLSTACK;
 
@@ -232,7 +232,7 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap)
 }
 
 // validate a block of memory. returns false if memory had been corrupted.
-bool MFHeap_ValidateMemory(void *pMemory)
+bool MFHeap_ValidateMemory(const void *pMemory)
 {
 	MFCALLSTACK;
 

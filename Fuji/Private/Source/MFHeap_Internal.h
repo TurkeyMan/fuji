@@ -34,7 +34,7 @@ struct MFAllocHeader
 {
 	MFHeap *pHeap;
 	uint32 size;
-	char *pFile;
+	const char *pFile;
 	uint16 line;
 	uint16 alignment;
 };

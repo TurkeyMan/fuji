@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], MFSystem_GetPlatformName(b)))
+				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
