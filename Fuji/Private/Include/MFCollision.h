@@ -12,6 +12,31 @@
 #include "MFVector.h"
 #include "MFMatrix.h"
 
+
+struct MFCollisionField;
+struct MFCollisionItem;
+
+enum MFCollisionType
+{
+	MFCT_Unknown,
+
+	MFCT_Sphere,
+	MFCT_Box,
+	MFCT_Mesh,
+	MFCT_Field,
+
+	MFCT_Max,
+	MFCT_ForceInt = 0x7FFFFFFF
+};
+
+enum MFCollisionItemFlags
+{
+	MFCIF_Dynamic = 1,
+	MFCIF_Disabled = 2,
+
+	MFCIF_ForceInt = 0x7FFFFFFF
+};
+
 /**
  * Collision result structure.
  * Represents details about a collision betwen 2 primitives.
@@ -21,6 +46,7 @@ struct MFCollisionResult
 	MFVector intersectionPoint;	/**< Center of intersection volume. */
 	MFVector normal;			/**< Push out normal from second primitive. */
 	float depth;				/**< Depth of intersection volume. */
+	MFCollisionItem *pItem;		/**< Item that test subject collided against. */
 
 	bool bCollide;				/**< If an intersection occurred. */
 };
@@ -34,6 +60,41 @@ struct MFCollisionResult
  * @return Returns the nearest point on the ray to the specified point.
  */
 MFVector MFCollision_NearestPointOnLine(const MFVector& lineStart, const MFVector& lineEnd, const MFVector& point);
+
+/**
+ * Test a ray for intersection with an arbitrary CollisionItem.
+ * Tests a ray for intersection with an arbitrary CollisionItem.
+ * @param rayPos Ray starting position.
+ * @param rayDir Ray direction
+ * @param pRootItem Pointer to the item to test for intersection by the ray.
+ * @param pTime Optional pointer to the time of intersection along the ray.
+ * @return Returns a pointer to the nearest CollisionItem intersected by the ray. Return value is NULL if no intersection occurred.
+ */
+MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pRootItem, float *pTime);
+
+/**
+ * Test a ray for intersection with an arbitrary CollisionItem.
+ * Tests a ray for intersection with an arbitrary CollisionItem.
+ * @param spherePos World position of the sphere.
+ * @param radius Radius of the sphere
+ * @param pRootItem Pointer to the item to test for intersection by the sphere.
+ * @param pResult Optional pointer to an MFCollisionResult which will receive information about the intersection.
+ * @return Returns a pointer to the nearest CollisionItem intersected by the ray. Return value is NULL if no intersection occurred.
+ */
+MFCollisionItem* MFCollision_SphereTest(const MFVector& spherePos, float radius, MFCollisionItem *pRootItem, MFCollisionResult *pResult);
+
+
+MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize);
+
+void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags);
+
+void MFCollision_BuildField(MFCollisionItem *pField);
+
+void MFCollision_ClearField(MFCollisionItem *pField);
+
+void MFCollision_DestroyField(MFCollisionItem *pField);
+
+/*** Arbitrary primitive intersections ***/
 
 // ray intersections
 
@@ -61,6 +122,7 @@ bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, c
  * @see MFCollision_RaySphereTest()
  */
 bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pTime);
+
 
 // sphere intersections
 

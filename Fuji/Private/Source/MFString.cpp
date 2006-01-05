@@ -7,7 +7,7 @@
 static char gStringBuffer[1024*128];
 static uint32 gStringOffset;
 
-char* MFStr(const char *format, ...)
+const char * MFStr(const char *format, ...)
 {
 	va_list arglist;
 	char *pBuffer = &gStringBuffer[gStringOffset];
@@ -25,7 +25,7 @@ char* MFStr(const char *format, ...)
 	return pBuffer;
 }
 
-char* MFStrN(const char *pSource, int n)
+const char * MFStrN(const char *pSource, int n)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 

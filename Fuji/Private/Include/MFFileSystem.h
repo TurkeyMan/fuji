@@ -77,7 +77,7 @@ enum MFFileState
  * @param filename Filename to append to the path. This may be set to NULL.
  * @return Returns the path to the game data directory.
  */
-char* MFFile_SystemPath(const char *filename = NULL);
+const char* MFFile_SystemPath(const char *filename = NULL);
 
 /**
  * Gets the system home path.
@@ -86,7 +86,7 @@ char* MFFile_SystemPath(const char *filename = NULL);
  * @return Returns the path to the game home directory.
  * @remarks The home path is typically used for debugging and development purposes (writing logs, screenshots, etc). The game should not require access to the home path.
  */
-char* MFFile_HomePath(const char *filename = NULL);
+const char* MFFile_HomePath(const char *filename = NULL);
 
 
 ///////////////////////////

@@ -96,7 +96,7 @@ MFFile* MFFileSystemHTTP_Open(MFMount *pMount, const char *pFilename, uint32 ope
 
 void MFFileHTTP_GetServerAndPath(const char *pURL, char **ppServer, char **ppPath)
 {
-	char *pServer = MFStr(pURL);
+	char *pServer = (char*)MFStr(pURL);
 
 	// get the server name
 	if(!MFString_CaseCmpN(pURL, "http://", 7))
@@ -113,7 +113,7 @@ void MFFileHTTP_GetServerAndPath(const char *pURL, char **ppServer, char **ppPat
 	{
 		*pPath = 0;
 		++pPath;
-		pPath = MFStr("/%s", pPath);
+		pPath = (char*)MFStr("/%s", pPath);
 	}
 	else
 		pPath = "/";
@@ -124,7 +124,7 @@ void MFFileHTTP_GetServerAndPath(const char *pURL, char **ppServer, char **ppPat
 
 bool MFFileHTTP_RequestHeader(const char *pServer, int port, const char *pPath, char *pOutputBuffer, int maxSize)
 {
-	char *pHeaderRequest = MFStr("GET %s HTTP/1.0\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\n\n", pPath);
+	const char *pHeaderRequest = MFStr("GET %s HTTP/1.0\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\n\n", pPath);
 
 	MFAddressInfo addrInfo, *pAddrInfo;
 	memset(&addrInfo, 0, sizeof(MFAddressInfo));
@@ -196,7 +196,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 		if(!MFString_CaseCmpN(headerBuffer, "HTTP", 4))
 		{
-			char *pErrorCode = MFStrN(headerBuffer + 9, 3);
+			const char *pErrorCode = MFStrN(headerBuffer + 9, 3);
 			int errorCode = atoi(pErrorCode);
 
 			if(errorCode == 200)
@@ -207,8 +207,8 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 			else if(errorCode >= 300 && errorCode < 400)
 			{
 				// server has redirected us
-				char *pNewLocation = NULL;
-				char *pNextLine = headerBuffer;
+				const char *pNewLocation = NULL;
+				const char *pNextLine = headerBuffer;
 
 				while(!pNewLocation && pNextLine)
 				{
@@ -298,7 +298,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	{
 		if(!MFString_CaseCmpN("Content-Length:", pNextLine, 15))
 		{
-			char *pLengthString = pNextLine + 15;
+			const char *pLengthString = pNextLine + 15;
 
 			int a=0;
 			while(pLengthString[a] && !MFIsNewline(pLengthString[a]))

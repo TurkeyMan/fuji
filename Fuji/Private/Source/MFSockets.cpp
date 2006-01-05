@@ -34,7 +34,7 @@ MFInetAddress MFSockets_MakeInetAddrssFromString(const char *pIPString)
 {
 	MFInetAddress a;
 
-	const char *pToken = strtok(MFStr(pIPString), ".");
+	const char *pToken = strtok((char*)MFStr(pIPString), ".");
 	MFDebug_Assert(pToken, "Malformed IP string.");
 	a.b1 = (uint8)atoi(pToken);
 

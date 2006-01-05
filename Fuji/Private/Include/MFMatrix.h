@@ -82,7 +82,7 @@ public:
 	void SetZAxis4(const MFVector &v);
 	void SetTrans4(const MFVector &v);
 
-	char* ToString() const;
+	const char * ToString() const;
 }
 MFALIGN_END(16);
 
@@ -141,9 +141,9 @@ public:
 	MFMatrix& Multiply(const MFMatrix& mat);							/**< Multiply the matrix by another */
 	MFMatrix& Multiply(const MFMatrix& mat1, const MFMatrix& mat2);		/**< Set the matrix to the product of 2 matrices */
 	MFMatrix& Multiply4x4(const MFMatrix& mat);							/**< Multiply the matrix by another full 4x4 matrix */
-	MFMatrix& Multiply4x4(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 full 4x4 matrices matrices */
+	MFMatrix& Multiply4x4(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 full 4x4 matrices */
 	MFMatrix& Multiply3x3(const MFMatrix& mat);							/**< Multiply the 3x3 matrix by another 3x3 matrix */
-	MFMatrix& Multiply3x3(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 3x3 matrices matrices */
+	MFMatrix& Multiply3x3(const MFMatrix& mat1, const MFMatrix& mat2);	/**< Set the matrix to the product of 2 3x3 matrices */
 
 	MFVector TransformVector(const MFVector& vec) const;	/**< Transform a vector by the matrix */
 	MFVector TransformVectorH(const MFVector& vec) const;	/**< Transform a vector by the matrix assuming 1.0 in the vector's W component */
@@ -170,8 +170,23 @@ public:
 	void SetZAxis4(const MFVector &v);	/**< Set the matrices Z axis to a 4D vector */
 	void SetTrans4(const MFVector &v);	/**< Set the matrices translation to a 4D vector */
 
-	char* ToString() const;	/**< Generate a string that represents the matrix */
+	const char * ToString() const;		/**< Generate a string that represents the matrix */
 };
+
+/**
+ * Transform a vector by the matrix
+ */
+MFVector ApplyMatrix(const MFVector& vector, const MFMatrix &matrix);
+
+/**
+ * Transform a vector by the matrix
+ */
+MFVector ApplyMatrixH(const MFVector& vector, const MFMatrix &matrix);
+
+/**
+ * Transform a vector by the matrix
+ */
+MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
 
 #endif // make doxygen happy
 

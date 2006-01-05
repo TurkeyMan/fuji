@@ -50,25 +50,35 @@ inline float MFPow(float x, float y)
 	return powf(x, y);
 }
 
+inline float MFCeil(float x)
+{
+	return ceilf(x);
+}
+
+inline float MFFloor(float x)
+{
+	return floorf(x);
+}
+
 template <typename T>
 inline T MFAbs(T x)
 {
 	return (x < (T)0) ? -x : x;
 }
 
-template <class T>
+template <typename T>
 inline T MFMin(T a, T b)
 {
 	return a < b ? a : b;
 }
 
-template <class T>
+template <typename T>
 inline T MFMax(T a, T b)
 {
 	return a > b ? a : b;
 }
 
-template <class T>
+template <typename T>
 inline T MFClamp(T x, T y, T z)
 {
 	return MFMax(x, MFMin(y, z));

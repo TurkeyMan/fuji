@@ -91,9 +91,35 @@ MFScript* MFScript_LoadScript(const char *pFilename)
 {
 	int err;
 
+	const char *pScriptFilename = MFStr("%s.amx", pFilename);
+
+	if(!MFFileSystem_Exists(pScriptFilename))
+	{
+		const char *pScriptSource = MFStr("%s.p", pFilename);
+
+		if(!MFFileSystem_Exists(pScriptSource))
+		{
+			// couldnt find the script apparently
+			MFDebug_Warn(1, MFStr("Script '%s' does not exist.", pFilename));
+			return NULL;
+		}
+
+		MFDebug_Warn(4, MFStr("Script source found for script '%s'. Attempting to compile from source.", pFilename));
+
+		// we need to compile and load from source
+//		system("pawncc.exe ");
+//		MFFileSystem_Load("home:temp.amx", NULL);
+
+		if(0) // failed
+		{
+			MFDebug_Warn(1, MFStr("Failed to compile script '%s' from source. Cannot load script.", pFilename));
+			return NULL;
+		}
+	}
+
 	MFScript *pScript = (MFScript*)MFHeap_Alloc(sizeof(MFScript));
 
-	err = MFScript_LoadProgram(&pScript->amx, (char*)MFStr("%s.amx", pFilename), NULL);
+	err = MFScript_LoadProgram(&pScript->amx, (char*)pScriptFilename, NULL);
 
 	if(err != AMX_ERR_NONE)
 	{
@@ -125,7 +151,7 @@ int MFScript_Execute(MFScript *pScript, const char *pEntryPoint)
 	{
 		if(amx_FindPublic(&pScript->amx, pEntryPoint, &entryPoint) == AMX_ERR_NOTFOUND)
 		{
-			MFDebug_Error(MFStr("Public function '%s' was not found in the script. \"%s\"", pEntryPoint, aux_StrError(AMX_ERR_NOTFOUND)));
+			MFDebug_Warn(3, MFStr("Public function '%s' was not found in the script. \"%s\"", pEntryPoint, aux_StrError(AMX_ERR_NOTFOUND)));
 			return 0;
 		}
 	}

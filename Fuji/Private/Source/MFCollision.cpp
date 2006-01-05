@@ -1,8 +1,196 @@
 #include "Fuji.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
-#include "MFCollision.h"
+#include "MFCollision_Internal.h"
+#include "MFHeap.h"
 
+
+MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, float *pTime)
+{
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Sphere:
+		{
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate;
+			MFCollision_RaySphereTest(rayPos, rayDir, pItem->worldPos.GetTrans(), pSphere->radius, pTime);
+			break;
+		}
+		case MFCT_Box:
+			pItem = NULL;
+			break;
+		case MFCT_Mesh:
+			pItem = NULL;
+			break;
+		case MFCT_Field:
+		{
+			pItem = MFCollision_RayFieldTest(rayPos, rayDir, pItem, pTime);
+			break;
+		}
+	}
+
+	return pItem;
+}
+
+
+MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize)
+{
+	MFCollisionItem *pItem;
+	MFCollisionField *pField;
+
+	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionField));
+	pField = (MFCollisionField*)&pItem[1];
+	pItem->pTemplate = pField;
+
+	pField->itemList.Init("Collision Field Items", maximumItemCount);
+
+	pField->pppItems = NULL;
+
+	pField->cellSize = cellSize;
+	pField->type = MFCT_Field;
+
+	return pItem;
+}
+
+void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	pItem->flags = (uint16)itemFlags;
+	pFieldData->itemList.Create(pItem);
+}
+
+bool TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2)
+{
+	if(max1.x > min2.x && min1.x < max2.x &&
+		max1.y > min2.y && min1.y < max2.y &&
+		  max1.z > min2.z && min1.z < max2.z)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void MFCollision_BuildField(MFCollisionItem *pField)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	int numItems = pFieldData->itemList.GetLength();
+
+	if(numItems <= 0)
+	{
+		MFDebug_Warn(4, "EmptyField can not be generated.");
+		return;
+	}
+
+	// find the min and max range of the objects
+	MFVector fieldMin = MakeVector(10e+30f), fieldMax = MakeVector(-10e+30f);
+
+	MFCollisionItem **ppI = pFieldData->itemList.Begin();
+
+	while(*ppI)
+	{
+		MFCollisionItem *pI = *ppI;
+		MFCollisionTemplate *pT = pI->pTemplate;
+
+		MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
+		MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
+
+		fieldMin = MFMin(fieldMin, tMin);
+		fieldMax = MFMax(fieldMax, tMax);
+
+		ppI++;
+	}
+
+	MFVector numCells;
+	MFVector fieldRange = fieldMax - fieldMin;
+	numCells.Rcp3(pFieldData->cellSize);
+	numCells.Mul3(fieldRange, numCells);
+
+	pFieldData->width = (int)MFCeil(numCells.x);
+	pFieldData->height = (int)MFCeil(numCells.y);
+	pFieldData->depth = (int)MFCeil(numCells.z);
+
+	// this is TOTALLY broken!! .. if a big object lies in many cell's, it could easilly overflow the array.
+	int totalCells = pFieldData->width * pFieldData->height * pFieldData->depth;
+	int numPointers = totalCells * 2 + numItems * 16;
+
+	MFCollisionItem **ppItems = (MFCollisionItem**)MFHeap_Alloc(sizeof(MFCollisionItem*) * numPointers);
+	pFieldData->pppItems = (MFCollisionItem***)ppItems;
+	ppItems += totalCells;
+
+	for(int z=0; z<pFieldData->depth; z++)
+	{
+		for(int y=0; y<pFieldData->height; y++)
+		{
+			for(int x=0; x<pFieldData->width; x++)
+			{
+				pFieldData->pppItems[z*pFieldData->height*pFieldData->width + y*pFieldData->width + x] = ppItems;
+
+				MFVector thisCell = fieldMin + pFieldData->cellSize * MakeVector((float)x, (float)y, (float)z);
+				MFVector thisCellEnd = thisCell + pFieldData->cellSize;
+
+				MFCollisionItem **ppI = pFieldData->itemList.Begin();
+
+				while(*ppI)
+				{
+					MFCollisionItem *pI = *ppI;
+					MFCollisionTemplate *pT = pI->pTemplate;
+
+					// if this item fits in this cell, insert it into this cells list.
+					MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
+					MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
+
+					// test of bounding boxes overlap
+					if(TestAABB(tMin, tMax, thisCell, thisCellEnd))
+					{
+						*ppItems = pI;
+						++ppItems;
+					}
+
+					ppI++;
+				}
+
+				*ppItems = NULL;
+				++ppItems;
+			}
+		}
+	}
+
+	MFHeap_ValidateMemory(pFieldData->pppItems);
+}
+
+void MFCollision_ClearField(MFCollisionItem *pField)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	if(pFieldData->pppItems)
+	{
+		MFHeap_Free(pFieldData->pppItems);
+		pFieldData->pppItems = NULL;
+	}
+
+	pFieldData->itemList.Clear();
+}
+
+void MFCollision_DestroyField(MFCollisionItem *pField)
+{
+	MFCollision_ClearField(pField);
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	pFieldData->itemList.Deinit();
+
+	MFHeap_Free(pField);
+}
+
+
+MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, float *pTime)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	MFCollisionItem *pItem = NULL;
+
+	return pItem;
+}
 
 bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, float *pTime)
 {

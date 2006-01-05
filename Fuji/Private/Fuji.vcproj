@@ -588,6 +588,9 @@
 				RelativePath=".\Source\MFCollision.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFCollision_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFDebug.cpp">
 			</File>
 			<File

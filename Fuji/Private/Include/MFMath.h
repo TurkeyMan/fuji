@@ -107,6 +107,24 @@ float MFRSqrt(float x);
 float MFPow(float x, float y);
 
 /**
+ * Returns the next integer greater than or equal to \a x.
+ * Returns the next integer greater than or equal to \a x.
+ * @param x Value to find the ceil.
+ * @return Returns the next integer greater than or equal to \a x.
+ * @see MFFloor()
+ */
+float MFCeil(float x);
+
+/**
+ * Returns the next integer less than or equal to \a x.
+ * Returns the next integer less than or equal to \a x.
+ * @param x Value to find the floor.
+ * @return Returns the next integer less than or equal to \a x.
+ * @see MFCeil()
+ */
+float MFFloor(float x);
+
+/**
  * Calculates the absolute of a value.
  * Calculates the absolute of a value.
  * @return The absolute of \a x.
@@ -121,7 +139,7 @@ T MFAbs(T x);
  * @see MFMax()
  * @see MFClamp()
  */
-template <class T>
+template <typename T>
 T MFMin(T a, T b);
 /**
  * Returns the maximum of \a a and \a b.
@@ -129,7 +147,7 @@ T MFMin(T a, T b);
  * @see MFMin()
  * @see MFClamp()
  */
-template <class T>
+template <typename T>
 T MFMax(T a, T b);
 
 /**
@@ -138,7 +156,7 @@ T MFMax(T a, T b);
  * @see MFMax()
  * @see MFMin()
  */
-template <class T>
+template <typename T>
 T MFClamp(T x, T y, T z);
 
 /**

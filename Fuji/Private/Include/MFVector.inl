@@ -170,6 +170,81 @@ inline MFVector MFVector::operator/(const MFVector &v) const
 }
 */
 
+inline MFVector& MFVector::Add4(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x + v2.x;
+	y = v1.y + v2.y;
+	z = v1.z + v2.z;
+	w = v1.w + v2.w;
+	return *this;
+}
+
+inline MFVector& MFVector::Sub4(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x - v2.x;
+	y = v1.y - v2.y;
+	z = v1.z - v2.z;
+	w = v1.w - v2.w;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul4(const MFVector &v1, float f)
+{
+	x = v1.x * f;
+	y = v1.y * f;
+	z = v1.z * f;
+	w = v1.w * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Mul4(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x * v2.x;
+	y = v1.y * v2.y;
+	z = v1.z * v2.z;
+	w = v1.w * v2.w;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad4(const MFVector &v1, float f, const MFVector &v3)
+{
+	x = v1.x * f + v3.x;
+	y = v1.y * f + v3.y;
+	z = v1.z * f + v3.z;
+	w = v1.w * f + v3.w;
+	return *this;
+}
+
+inline MFVector& MFVector::Mad4(const MFVector &v1, const MFVector &v2, const MFVector &v3)
+{
+	x = v1.x * v2.x + v3.x;
+	y = v1.y * v2.y + v3.y;
+	z = v1.z * v2.z + v3.z;
+	w = v1.w * v2.w + v3.w;
+	return *this;
+}
+
+/*
+inline MFVector& MFVector::Div4(const MFVector &v1, float f)
+{
+	f = 1.0f / f;
+	x = v1.x * f;
+	y = v1.y * f;
+	z = v1.z * f;
+	w = v1.w * f;
+	return *this;
+}
+
+inline MFVector& MFVector::Div4(const MFVector &v1, const MFVector &v2)
+{
+	x = v1.x / v2.x;
+	y = v1.y / v2.y;
+	z = v1.z / v2.z;
+	w = v1.w / v2.w;
+	return *this;
+}
+*/
+
 inline MFVector& MFVector::Add3(const MFVector &v1, const MFVector &v2)
 {
 	x = v1.x + v2.x;
@@ -301,9 +376,9 @@ inline MFVector::operator float*()
 	return (float*)this;
 }
 
-inline MFVector::operator float*() const
+inline MFVector::operator const float*() const
 {
-	return (float*)this;
+	return (const float*)this;
 }
 
 
@@ -350,6 +425,33 @@ inline MFVector& MFVector::FromPackedColour(uint32 col)
 	return *this;
 }
 
+inline MFVector& MFVector::Rcp4(const MFVector &v)
+{
+	x = MFRcp(v.x);
+	y = MFRcp(v.y);
+	z = MFRcp(v.z);
+	w = MFRcp(v.w);
+
+	return *this;
+}
+
+inline MFVector& MFVector::Rcp3(const MFVector &v)
+{
+	x = MFRcp(v.x);
+	y = MFRcp(v.y);
+	z = MFRcp(v.z);
+
+	return *this;
+}
+
+inline MFVector& MFVector::Rcp2(const MFVector &v)
+{
+	x = MFRcp(v.x);
+	y = MFRcp(v.y);
+
+	return *this;
+}
+
 inline float MFVector::Dot4(const MFVector &vec) const
 {
 	return x*vec.x + y*vec.y + z*vec.z + w*vec.w;
@@ -376,9 +478,9 @@ inline MFVector MFVector::Cross3(const MFVector &v) const
 {
 	MFVector t;
 
-	t.x = y*v.z - v.y*z;
-	t.y = z*v.x - v.z*x;
-	t.z = x*v.y - v.x*y;
+	t.x = y*v.z - z*v.y;
+	t.y = z*v.x - x*v.z;
+	t.z = x*v.y - y*v.x;
 
 	return t;
 }
@@ -399,42 +501,6 @@ inline MFVector& MFVector::Cross3(const MFVector &v, const MFVector &v2)
 
 	return *this;
 }
-
-/*
-inline MFVector& MFVector::ApplyMatrix(const Matrix &mat)
-{
-	float _x=x, _y=y, _z=z, _w=w;
-
-	x = _x*mat.m[0][0] + _y*mat.m[1][0] + _z*mat.m[2][0] + _w*mat.m[3][0];
-	y = _x*mat.m[0][1] + _y*mat.m[1][1] + _z*mat.m[2][1] + _w*mat.m[3][1];
-	z = _x*mat.m[0][2] + _y*mat.m[1][2] + _z*mat.m[2][2] + _w*mat.m[3][2];
-	w = _x*mat.m[0][3] + _y*mat.m[1][3] + _z*mat.m[2][3] + _w*mat.m[3][3];
-
-	return *this;
-}
-
-inline MFVector& MFVector::ApplyMatrixH(const Matrix &mat)
-{
-	float _x=x, _y=y, _z=z;
-
-	x = _x*mat.m[0][0] + _y*mat.m[1][0] + _z*mat.m[2][0] + mat.m[3][0];
-	y = _x*mat.m[0][1] + _y*mat.m[1][1] + _z*mat.m[2][1] + mat.m[3][1];
-	z = _x*mat.m[0][2] + _y*mat.m[1][2] + _z*mat.m[2][2] + mat.m[3][2];
-
-	return *this;
-}
-
-inline MFVector& MFVector::ApplyMatrix3x3(const Matrix &mat)
-{
-	float _x=x, _y=y, _z=z;
-
-	x = _x*mat.m[0][0] + _y*mat.m[1][0] + _z*mat.m[2][0];
-	y = _x*mat.m[0][1] + _y*mat.m[1][1] + _z*mat.m[2][1];
-	z = _x*mat.m[0][2] + _y*mat.m[1][2] + _z*mat.m[2][2];
-
-	return *this;
-}
-*/
 
 inline float MFVector::MagSquared4() const
 {
@@ -466,24 +532,54 @@ inline float MFVector::Magnitude2() const
 	return MFSqrt(x*x + y*y);
 }
 
+inline float MFVector::InvMagnitude4() const
+{
+	return MFRSqrt(x*x + y*y + z*z + w*w);
+}
+
+inline float MFVector::InvMagnitude3() const
+{
+	return MFRSqrt(x*x + y*y + z*z);
+}
+
+inline float MFVector::InvMagnitude2() const
+{
+	return MFRSqrt(x*x + y*y);
+}
+
+inline MFVector& MFVector::Normalise4(const MFVector &vec)
+{
+	this->Mul4(vec, vec.InvMagnitude4());
+	return *this;
+}
+
+inline MFVector& MFVector::Normalise3(const MFVector &vec)
+{
+	this->Mul3(vec, vec.InvMagnitude3());
+	return *this;
+}
+
+inline MFVector& MFVector::Normalise2(const MFVector &vec)
+{
+	this->Mul2(vec, vec.InvMagnitude2());
+	return *this;
+}
+
 inline MFVector& MFVector::Normalise4()
 {
-	float l = MFSqrt(x*x + y*y + z*z + w*w);
-	*this *= 1.0f/l;
+	this->Mul4(*this, this->InvMagnitude4());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise3()
 {
-	float l = MFSqrt(x*x + y*y + z*z);
-	*this *= 1.0f/l;
+	this->Mul4(*this, this->InvMagnitude4());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise2()
 {
-	float l = MFSqrt(x*x + y*y);
-	*this *= 1.0f/l;
+	this->Mul4(*this, this->InvMagnitude4());
 	return *this;
 }
 
@@ -506,17 +602,17 @@ inline MFVector& MFVector::Lerp(const MFVector &v, float t)
 }
 
 
-inline char* MFVector::ToString4() const
+inline const char * MFVector::ToString4() const
 {
 	return MFStr("%.2f, %.2f, %.2f, %.2f", x, y, z, w);
 }
 
-inline char* MFVector::ToString3() const
+inline const char * MFVector::ToString3() const
 {
 	return MFStr("%.2f, %.2f, %.2f", x, y, z);
 }
 
-inline char* MFVector::ToString2() const
+inline const char * MFVector::ToString2() const
 {
 	return MFStr("%.2f, %.2f", x, y);
 }

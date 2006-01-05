@@ -145,7 +145,7 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 }
 
 // interface functions
-char* MFFile_SystemPath(const char *filename)
+const char* MFFile_SystemPath(const char *filename)
 {
 	MFCALLSTACK;
 
@@ -164,7 +164,7 @@ char* MFFile_SystemPath(const char *filename)
 #endif
 }
 
-char* MFFile_HomePath(const char *filename)
+const char* MFFile_HomePath(const char *filename)
 {
 	MFCALLSTACK;
 

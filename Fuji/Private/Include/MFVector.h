@@ -13,8 +13,6 @@
 #pragma warning(disable:4201)
 #endif
 
-class MFMatrix;
-
 MFALIGN_BEGIN(16)
 class MFVector
 {
@@ -28,6 +26,13 @@ public:
 	static const MFVector one;
 	static const MFVector identity;
 	static const MFVector up;
+
+	static const MFVector red;
+	static const MFVector green;
+	static const MFVector blue;
+	static const MFVector yellow;
+	static const MFVector white;
+	static const MFVector black;
 
 	// general purpose vector operators
 
@@ -52,6 +57,15 @@ public:
 //	MFVector operator/(const MFVector &v) const;
 
 	// these are some functions for the fastest possible implementations on all platforms
+	MFVector& Add4(const MFVector &v1, const MFVector &v2);
+	MFVector& Sub4(const MFVector &v1, const MFVector &v2);
+	MFVector& Mul4(const MFVector &v1, float f);
+	MFVector& Mul4(const MFVector &v1, const MFVector &v2);
+	MFVector& Mad4(const MFVector &v1, float f, const MFVector &v3);
+	MFVector& Mad4(const MFVector &v1, const MFVector &v2, const MFVector &v3);
+//	MFVector& Div4(const MFVector &v1, float f);
+//	MFVector& Div4(const MFVector &v1, const MFVector &v2);
+
 	// NOTE: These functions do NOT preserve the 'w' component!
 	MFVector& Add3(const MFVector &v1, const MFVector &v2);
 	MFVector& Sub3(const MFVector &v1, const MFVector &v2);
@@ -73,10 +87,14 @@ public:
 //	MFVector& Div2(const MFVector &v1, const MFVector &v2);
 
 	operator float*();
-	operator float*() const;
+	operator const float*() const;
 
-	uint32 ToPackedColour() const;			// WARNING: this function produces different results on all hardware
+	uint32 ToPackedColour() const;			// WARNING: this function produces different results on all hardware. Packs to the hardwares native 32bit colour format.
 	MFVector& FromPackedColour(uint32 col);
+
+	MFVector& Rcp4(const MFVector &v);
+	MFVector& Rcp3(const MFVector &v);
+	MFVector& Rcp2(const MFVector &v);
 
 	float Dot4(const MFVector &vec) const;
 	float DotH(const MFVector &vec4) const;
@@ -90,30 +108,30 @@ public:
 //	MFVector& Cross4(const MFVector &vec, const MFVector &vec2);
 	MFVector& Cross3(const MFVector &vec, const MFVector &vec2);
 
-/*
-	MFVector& ApplyMatrix(const Matrix &matrix);
-	MFVector& ApplyMatrixH(const Matrix &matrix);
-	MFVector& ApplyMatrix3x3(const Matrix &matrix);
-*/
-
 	float MagSquared4() const;
 	float MagSquared3() const;
 	float MagSquared2() const;
 	float Magnitude4() const;
 	float Magnitude3() const;
 	float Magnitude2() const;
+	float InvMagnitude4() const;
+	float InvMagnitude3() const;
+	float InvMagnitude2() const;
 	MFVector& Normalise4();
 	MFVector& Normalise3();
 	MFVector& Normalise2();
+	MFVector& Normalise4(const MFVector &vec);
+	MFVector& Normalise3(const MFVector &vec);
+	MFVector& Normalise2(const MFVector &vec);
 
 	float Distance(const MFVector &v) const;
 	float GetAngle(const MFVector &ref = up);
 
 	MFVector& Lerp(const MFVector &v, float t);
 
-	char* ToString4() const;
-	char* ToString3() const;
-	char* ToString2() const;
+	const char * ToString4() const;
+	const char * ToString3() const;
+	const char * ToString2() const;
 }
 MFALIGN_END(16);
 
@@ -161,6 +179,14 @@ public:
 	static const MFVector identity;	/**< Constant IDENTITY vector { 0, 0, 0, 1 } */
 	static const MFVector up;		/**< Constant UP vector { 0, 1, 0, 1 } */
 
+	static const MFVector red;		/**< Constant RED colour vector { 1, 0, 0, 1 } */
+	static const MFVector green;	/**< Constant GREEN colour vector { 0, 1, 0, 1 } */
+	static const MFVector blue;		/**< Constant BLUE colour vector { 0, 0, 1, 1 } */
+	static const MFVector yellow;	/**< Constant YELLOW colour vector { 1, 1, 0, 1 } */
+	static const MFVector white;	/**< Constant WHITE colour vector { 1, 1, 1, 1 } */
+	static const MFVector black;	/**< Constant BLACK colour vector { 0, 0, 0, 1 } */
+
+
 	// general purpose vector operators
 
 	MFVector operator-(); /**< Unary minus operator. */
@@ -176,8 +202,15 @@ public:
 
 	MFVector operator+(const MFVector &v) const; /**< Addition operator. */
 	MFVector operator-(const MFVector &v) const; /**< Subtraction operator. */
-	MFVector operator*(float f) const; /**< Scale operator. */
+	MFVector operator*(float f) const;			 /**< Scale operator. */
 	MFVector operator*(const MFVector &v) const; /**< Modulate operator. */
+
+	MFVector& Add4(const MFVector &v1, const MFVector &v2);						/**< Add 4D function. */
+	MFVector& Sub4(const MFVector &v1, const MFVector &v2);						/**< Subtract 4D function. */
+	MFVector& Mul4(const MFVector &v1, float f);								/**< Scale 4D function. */
+	MFVector& Mul4(const MFVector &v1, const MFVector &v2);						/**< Multiply 4D function. */
+	MFVector& Mad4(const MFVector &v1, float f, const MFVector &v3);			/**< Scale and Add 4D function. */
+	MFVector& Mad4(const MFVector &v1, const MFVector &v2, const MFVector &v3);	/**< Multiply and Add 4D function. */
 
 	MFVector& Add3(const MFVector &v1, const MFVector &v2);						/**< Add 3D function. */
 	MFVector& Sub3(const MFVector &v1, const MFVector &v2);						/**< Subtract 3D function. */
@@ -199,6 +232,10 @@ public:
 	uint32 ToPackedColour() const;			/**< Get platform-specific packed colour. */
 	MFVector& FromPackedColour(uint32 col);	/**< Build vector from platform-specific packed colour. */
 
+	MFVector& Rcp4(const MFVector &v);	/**< Find the reciprocal of all 4 components. */
+	MFVector& Rcp3(const MFVector &v);	/**< Find the reciprocal of the first 3 components. */
+	MFVector& Rcp2(const MFVector &v);	/**< Find the reciprocal of the first 2 components. */
+
 	float Dot4(const MFVector &vec) const;	/**< Dot Product 4D. */
 	float DotH(const MFVector &vec4) const;	/**< Dot Product Homogeneous (assumes this vectors w = 1). */
 	float Dot3(const MFVector &vec) const;	/**< Dot Product 3D. */
@@ -209,24 +246,30 @@ public:
 
 	MFVector& Cross3(const MFVector &vec, const MFVector &vec2);	/**< Cross Product 3D. */
 
-	float MagSquared4() const;	/**< Get the 4D Magnitude Squared. */
-	float MagSquared3() const;	/**< Get the 3D Magnitude Squared. */
-	float MagSquared2() const;	/**< Get the 2D Magnitude Squared. */
-	float Magnitude4() const;	/**< Get the 4D Magnitude. */
-	float Magnitude3() const;	/**< Get the 3D Magnitude. */
-	float Magnitude2() const;	/**< Get the 2D Magnitude. */
-	MFVector& Normalise4();		/**< Normalise vector 4D. */
-	MFVector& Normalise3();		/**< Normalise vector 3D. */
-	MFVector& Normalise2();		/**< Normalise vector 2D. */
+	float MagSquared4() const;		/**< Get the 4D Magnitude Squared. */
+	float MagSquared3() const;		/**< Get the 3D Magnitude Squared. */
+	float MagSquared2() const;		/**< Get the 2D Magnitude Squared. */
+	float Magnitude4() const;		/**< Get the 4D Magnitude. */
+	float Magnitude3() const;		/**< Get the 3D Magnitude. */
+	float Magnitude2() const;		/**< Get the 2D Magnitude. */
+	float InvMagnitude4() const;	/**< Get the inverse 4D Magnitude. */
+	float InvMagnitude3() const;	/**< Get the inverse 3D Magnitude. */
+	float InvMagnitude2() const;	/**< Get the inverse 2D Magnitude. */
+	MFVector& Normalise4();			/**< Normalise vector 4D. */
+	MFVector& Normalise3();			/**< Normalise vector 3D. */
+	MFVector& Normalise2();			/**< Normalise vector 2D. */
+	MFVector& Normalise4(const MFVector &vec);	/**< Normalise vector 4D. */
+	MFVector& Normalise3(const MFVector &vec);	/**< Normalise vector 3D. */
+	MFVector& Normalise2(const MFVector &vec);	/**< Normalise vector 2D. */
 
 	float Distance(const MFVector &v) const;	/**< Get the distance between 2 vectors. */
 	float GetAngle(const MFVector &ref = up);	/**< Get the angle between 2 vectors. */
 
 	MFVector& Lerp(const MFVector &v, float t);	/**< Lerp between 2 vectors. */
 
-	char* ToString4() const;	/**< Convert 4D vector to a string. */
-	char* ToString3() const;	/**< Convert 3D vector to a string. */
-	char* ToString2() const;	/**< Convert 2D vector to a string. */
+	const char * ToString4() const;	/**< Convert 4D vector to a string. */
+	const char * ToString3() const;	/**< Convert 3D vector to a string. */
+	const char * ToString2() const;	/**< Convert 2D vector to a string. */
 };
 
 #endif // make doxygen happy
