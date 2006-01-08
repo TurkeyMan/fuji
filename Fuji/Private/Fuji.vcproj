@@ -1235,6 +1235,9 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\XBox\MFThread_XB.cpp">
+			</File>
 			<Filter
 				Name="VertexShader"
 				Filter="">

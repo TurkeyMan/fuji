@@ -17,7 +17,7 @@ char* FixXBoxFilename(const char *pFilename)
 
 	int len = strlen(pFilename);
 
-	char *pXFilename = MFStr("%s", pFilename);
+	char *pXFilename = (char*)MFStr("%s", pFilename);
 
 	for(int a=0; a<len; a++)
 	{
