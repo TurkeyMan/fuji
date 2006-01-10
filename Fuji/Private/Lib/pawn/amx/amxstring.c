@@ -29,8 +29,11 @@
 #endif
 #include "osdefs.h"
 #include "amx.h"
-#if defined __WIN32__ || defined _WIN32 || defined WIN32 || defined _Windows
+#if (defined __WIN32__ || defined _WIN32 || defined WIN32 || defined _Windows) && !defined(_XBOX)
   #include <windows.h>
+#endif
+#if defined(_XBOX)
+  #include <xtl.h>
 #endif
 
 

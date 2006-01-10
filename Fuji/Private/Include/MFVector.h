@@ -36,7 +36,7 @@ public:
 
 	// general purpose vector operators
 
-	MFVector operator-();
+	MFVector operator-() const;
 
 	bool operator==(const MFVector &v) const;
 	bool operator!=(const MFVector &v) const;
@@ -125,7 +125,7 @@ public:
 	MFVector& Normalise2(const MFVector &vec);
 
 	float Distance(const MFVector &v) const;
-	float GetAngle(const MFVector &ref = up);
+	float GetAngle(const MFVector &ref = up) const;
 
 	MFVector& Lerp(const MFVector &v, float t);
 

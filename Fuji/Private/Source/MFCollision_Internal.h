@@ -31,7 +31,8 @@ struct MFCollisionBox : public MFCollisionTemplate
 
 struct MFCollisionField : public MFCollisionTemplate
 {
-	MFVector fieldStart;
+	MFVector fieldMin;
+	MFVector fieldMax;
 	MFVector cellSize;
 
 	int width, height, depth;

@@ -26,7 +26,7 @@
 #    define __WIN32__   1
 #  endif
 #elif defined(_MSC_VER)
-#  if defined(_WINDOWS) || defined(_WIN32)
+#  if defined(_WINDOWS) || (defined(_WIN32) && !defined(_XBOX))
 #    define _Windows    1
 #  endif
 #  ifdef _WIN32

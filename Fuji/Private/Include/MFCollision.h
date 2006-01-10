@@ -123,6 +123,8 @@ bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, c
  */
 bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pTime);
 
+bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, float *pTime);
+
 
 // sphere intersections
 

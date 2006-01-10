@@ -1,6 +1,6 @@
 #include "MFMatrix.h"
 
-inline MFVector MFVector::operator-()
+inline MFVector MFVector::operator-() const
 {
 	MFVector t;
 
@@ -588,7 +588,7 @@ inline float MFVector::Distance(const MFVector &v) const
 	return (v-*this).Magnitude3();
 }
 
-inline float MFVector::GetAngle(const MFVector &ref)
+inline float MFVector::GetAngle(const MFVector &ref) const
 {
 	float d = MFACos(Dot3(ref));
 	return (Cross2(ref) >= 0.0f) ? d : 2.0f*MFPI - d;

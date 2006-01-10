@@ -102,6 +102,9 @@ void MFCollision_BuildField(MFCollisionItem *pField)
 		ppI++;
 	}
 
+	pFieldData->fieldMin = fieldMin;
+	pFieldData->fieldMax = fieldMin;
+
 	MFVector numCells;
 	MFVector fieldRange = fieldMax - fieldMin;
 	numCells.Rcp3(pFieldData->cellSize);
@@ -189,6 +192,18 @@ MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector
 	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
 	MFCollisionItem *pItem = NULL;
 
+	MFVector crossSection = pFieldData->fieldMax - pFieldData->fieldMin;
+	MFVector radius = crossSection * 0.5f;
+	MFVector center = pFieldData->fieldMin + radius;
+
+	float t;
+
+	if(!MFCollision_RayBoxTest(rayPos, rayDir, center, radius, &t))
+		return NULL;
+
+	MFVector entryPoint;
+	entryPoint.Mad3(rayDir, t, rayPos);
+
 	return pItem;
 }
 
@@ -227,6 +242,14 @@ bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, co
 	if(pTime)
 		*pTime = t;
 	return true;
+}
+
+bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, float *pTime)
+{
+	MFVector plane[6];
+	plane[0] = MakeVector(MFVector::up, boxPos.x + boxRadius.x);
+	plane[1] = MakeVector(-MFVector::up, boxPos.x - boxRadius.x);
+	return false;
 }
 
 bool MFCollision_SpherePlaneTest(const MFVector& spherePos, float radius, const MFVector& plane, MFCollisionResult *pResult)
