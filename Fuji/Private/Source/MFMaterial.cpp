@@ -268,7 +268,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	pMatType->pTypeName = (char*)&pMatType[1];
 	strcpy(pMatType->pTypeName, pName);
 
-	MFDebug_Assert(pMatType->materialCallbacks.pBegin, "Material must supply Begin() callback.");
+	MFDebug_Assert(pCallbacks->pBegin, "Material must supply Begin() callback.");
 
 	memcpy(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
