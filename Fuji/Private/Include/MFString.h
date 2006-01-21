@@ -10,6 +10,12 @@
 #if !defined(_MFSTRING_H)
 #define _MFSTRING_H
 
+int MFString_Length(const char *pString);
+void MFString_Copy(char *pBuffer, const char *pString);
+void MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
+const char * MFString_ToLower(const char *pString);
+const char * MFString_ToUpper(const char *pString);
+
 /**
  * Compares 2 strings.
  * Compares 2 strings and returns the difference between them.

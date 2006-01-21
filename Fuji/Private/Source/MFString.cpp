@@ -7,6 +7,46 @@
 static char gStringBuffer[1024*128];
 static uint32 gStringOffset;
 
+const char * MFString_ToLower(const char *pString)
+{
+	char *pBuffer = &gStringBuffer[gStringOffset];
+	int len = MFString_Length(pString);
+
+	gStringOffset += len+1;
+
+	char *pT = pBuffer;
+	while(*pString)
+	{
+		*pT = MFToLower(*pString);
+		++pT;
+		++pString;
+	}
+
+	if(gStringOffset >= sizeof(gStringBuffer) - 1024) gStringOffset = 0;
+
+	return pBuffer;
+}
+
+const char * MFString_ToUpper(const char *pString)
+{
+	char *pBuffer = &gStringBuffer[gStringOffset];
+	int len = MFString_Length(pString);
+
+	gStringOffset += len+1;
+
+	char *pT = pBuffer;
+	while(*pString)
+	{
+		*pT = MFToUpper(*pString);
+		++pT;
+		++pString;
+	}
+
+	if(gStringOffset >= sizeof(gStringBuffer) - 1024) gStringOffset = 0;
+
+	return pBuffer;
+}
+
 const char * MFStr(const char *format, ...)
 {
 	va_list arglist;

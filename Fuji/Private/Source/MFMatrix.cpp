@@ -40,8 +40,9 @@ bool MFMatrix::operator!=(const MFMatrix& mat) const
 
 MFMatrix& MFMatrix::Rotate(const MFVector &axis, float angle)
 {
-	MFDebug_Assert(false, "Not Written...");
-	return *this;
+	MFMatrix mat;
+	mat.SetRotation(axis, angle);
+	return Multiply(mat, *this);
 }
 
 MFMatrix& MFMatrix::RotateQ(const MFVector &q)

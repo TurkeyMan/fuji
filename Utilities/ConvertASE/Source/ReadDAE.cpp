@@ -9,6 +9,8 @@
 
 extern F3DFile *pModel;
 
+TiXmlElement* pRoot;
+
 MFMatrix transformMatrix;
 bool flipWinding = false;
 
@@ -28,6 +30,45 @@ void endElement(void *userData, const char *name)
   *depthPtr -= 1;
 }
 
+bool TestID(TiXmlElement *pLib, const char *pLibName)
+{
+	const char *pName = pLib->Attribute("id");
+	if(pName && !stricmp(pName, pLibName))
+		return true;
+	return false;
+}
+
+TiXmlElement* FindObjectInLibrary(const char *pLibName)
+{
+	if(pLibName[0] == '#')
+		++pLibName;
+
+	TiXmlElement *pLib = pRoot->FirstChildElement("library");
+
+	while(pLib)
+	{
+		const char *pType = pLib->Attribute("type");
+
+		MFDebug_Assert(pType, "Library has no type. ?");
+
+		const char *pT = MFString_ToLower(pType);
+
+		TiXmlElement *pObject = pLib->FirstChildElement(pT);
+
+		while(pObject)
+		{
+			if(TestID(pObject, pLibName))
+				return pObject;
+
+			pObject = pObject->NextSiblingElement(pT);
+		}
+
+		pLib = pLib->NextSiblingElement("library");
+	}
+
+	return NULL;
+}
+
 void ParseDAEAsset(TiXmlElement *pAsset)
 {
 	TiXmlElement *pUp = pAsset->FirstChildElement("up_axis");
@@ -35,10 +76,9 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 	TiXmlElement *pAuthor = pAsset->FirstChildElement("author");
 	TiXmlElement *pCopyright = pAsset->FirstChildElement("copyright");
 	TiXmlElement *pAuthoringTool = pAsset->FirstChildElement("authoring_tool");
-/*
 	TiXmlElement *pSourceData = pAsset->FirstChildElement("source_data");
 	TiXmlElement *pLastModified = pAsset->FirstChildElement("modified");
-*/
+	TiXmlElement *pRevision = pAsset->FirstChildElement("revision");
 
 	if(pUp)
 	{
@@ -71,7 +111,7 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 		// we need to scale the model into metres..
 		const char *pMeter = pUnit->Attribute("meter");
 		float scale = (float)atof(pMeter);
-//		transformMatrix.Scale(MakeVector(scale));
+		transformMatrix.Scale(MakeVector(scale));
 	}
 
 	if(pAuthor)
@@ -90,24 +130,27 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 
 	if(pAuthoringTool)
 	{
-		// get the author (for kicks)
+		// get the authoring tool (for kicks)
 		const char *pAuthTool = pAuthoringTool->GetText();
 		strcpy(pModel->authoringTool, pAuthTool);
 	}
 }
 
-void ParseDAEMaterial(TiXmlElement *pMaterialNode)
+int ParseDAEMaterial(TiXmlElement *pMaterialNode)
 {
-	const char *pID = pMaterialNode->Attribute("id");
 	const char *pName = pMaterialNode->Attribute("name");
+
+	if(!pName)
+		pName = "Untitled collada material";
 
 	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
 
-	if(pMatChunk->GetMaterialIndexByName(pName) != -1)
-		return;
+	int matIndex = pMatChunk->materials.size();
 
 	F3DMaterial &mat = pMatChunk->materials.push();
 	strcpy(mat.name, pName);
+
+	return matIndex;
 }
 
 enum ComponentType
@@ -258,11 +301,10 @@ MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
 	return NULL;
 }
 
-void ParseDAEGeometry(TiXmlElement *pGeometryNode)
+void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransform)
 {
 	int a,b;
 
-	const char *pID = pGeometryNode->Attribute("id");
 	const char *pName = pGeometryNode->Attribute("name");
 
 	F3DMeshChunk *pMeshChunk = pModel->GetMeshChunk();
@@ -329,10 +371,33 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 
 				if(pMaterial)
 				{
-					if(*pMaterial == '#')
-						++pMaterial;
+					// find material in the library
+					TiXmlElement *pMat = FindObjectInLibrary(pMaterial);
 
-					matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(pMaterial);
+					if(pMat)
+					{
+						// get material name
+						const char *pMaterialName = pMat->Attribute("name");
+
+						if(!pMaterialName)
+							pMaterialName = pMat->Attribute("id");
+
+						// get the F3D material index
+						matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(pMaterialName);
+
+						// if the material doesnt exist in the F3D yet
+						if(matSub.materialIndex == -1)
+						{
+							// add material to F3D
+							matSub.materialIndex = ParseDAEMaterial(pMat);
+						}
+					}
+					else
+					{
+						// not found :/
+						MFDebug_Assert(false, MFStr("Material '%s' not found in library", pMaterial));
+						matSub.materialIndex = -1;
+					}
 				}
 
 				pInputs = pInputs->NextSiblingElement("input");
@@ -504,11 +569,16 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 		pMesh = pMesh->NextSiblingElement("mesh");
 	}
 
+	// apply coordinate system correction matrix
+	MFMatrix transform;
+	transform.Multiply4x4(worldTransform, transformMatrix);
+
 	for(a=0; a<subObject.positions.size(); a++)
 	{
-		subObject.positions[a] = ApplyMatrix(subObject.positions[a], transformMatrix);
+		subObject.positions[a] = ApplyMatrixH(subObject.positions[a], transform);
 	}
 
+	// flip the triangle winding if coordinate systems have changed 'handedness'
 	if(flipWinding)
 	{
 		for(a=0; a<subObject.matSubobjects.size(); a++)
@@ -538,9 +608,160 @@ void ParseDAECamera(TiXmlElement *pCameraNode)
 
 }
 
+void FindAndAddInstanceToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const MFMatrix &matrix)
+{
+	// get object name
+	const char *pObjectName = pInstanceNode->Attribute("url");
+
+	// scan library for object
+	TiXmlElement *pObject = FindObjectInLibrary(pObjectName);
+
+	if(pObject)
+	{
+		const char *pValue = pObject->Value();
+
+		if(!stricmp(pValue, "geometry"))
+		{
+			ParseDAEGeometry(pObject, matrix);
+		}
+		else
+		{
+			printf(MFStr("Object '%s' not supported in the scene yet...\n", pValue));
+		}
+	}
+	else
+	{
+		printf(MFStr("Object '%s' not found in library...\n", pObjectName));
+	}
+}
+
+void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
+{
+	TiXmlElement *pTransform;
+	MFMatrix localMat = parentMatrix;
+
+	// build the transform
+	pTransform = pSceneNode->FirstChildElement();
+
+	while(pTransform)
+	{
+		const char *pTransformValue = pTransform->Value();
+
+		if(!stricmp(pTransformValue, "matrix"))
+		{
+			// apply this node's transformation matrix to the current transform
+
+			const char *pMat = pTransform->GetText();
+			MFMatrix mat = MFMatrix::identity;
+
+			int c = 0;
+			while(*pMat && c<16)
+			{
+				mat.m[c%4][c>>2] =  (float)atof(pMat);
+				++c;
+
+				while(*pMat && !MFIsWhite(*pMat))
+					pMat++;
+				while(MFIsWhite(*pMat))
+					pMat++;
+			}
+
+			// TODO: this may need to be the other way around :)
+			localMat.Multiply(mat, localMat);
+		}
+		else if(!stricmp(pTransformValue, "translate"))
+		{
+			// just translate the current transform
+
+			const char *pTrans = pTransform->GetText();
+			MFVector translation = MFVector::identity;
+
+			int c = 0;
+			while(*pTrans && c<4)
+			{
+				translation[c] = (float)atof(pTrans);
+				++c;
+
+				while(*pTrans && !MFIsWhite(*pTrans))
+					pTrans++;
+				while(MFIsWhite(*pTrans))
+					pTrans++;
+			}
+
+			localMat.Translate(translation);
+		}
+		else if(!stricmp(pTransformValue, "scale"))
+		{
+			// scale the current transform
+
+			const char *pScale = pTransform->GetText();
+			MFVector scale = MFVector::identity;
+
+			int c = 0;
+			while(*pScale && c<4)
+			{
+				scale[c] = (float)atof(pScale);
+				++c;
+
+				while(*pScale && !MFIsWhite(*pScale))
+					pScale++;
+				while(MFIsWhite(*pScale))
+					pScale++;
+			}
+
+			localMat.Scale(scale);
+		}
+		else if(!stricmp(pTransformValue, "rotate"))
+		{
+			// rotate the current transform
+
+			const char *pRot = pTransform->GetText();
+			MFVector rot = MFVector::zero;
+
+			int c = 0;
+			while(*pRot && c<4)
+			{
+				rot[c] = (float)atof(pRot);
+				++c;
+
+				while(*pRot && !MFIsWhite(*pRot))
+					pRot++;
+				while(MFIsWhite(*pRot))
+					pRot++;
+			}
+
+			localMat.Rotate(rot, MFDEGREES(rot.w));
+		}
+
+		pTransform = pTransform->NextSiblingElement();
+	}
+
+	TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance");
+
+	if(pInstance)
+	{
+		// node is an instance node
+		// find and add instance to scene
+		FindAndAddInstanceToScene(pInstance, pSceneNode, localMat);
+	}
+
+	TiXmlElement *pNode = pSceneNode->FirstChildElement("node");
+
+	while(pNode)
+	{
+		// and recurse for child nodes
+		ParseSceneNode(pNode, localMat);
+
+		pNode = pNode->NextSiblingElement("node");
+	}
+}
+
 void ParseDAEScene(TiXmlElement *pSceneNode)
 {
-	
+	const char *pName = pSceneNode->Attribute("name");
+	strcpy(pModel->name, pName);
+
+	ParseSceneNode(pSceneNode, MFMatrix::identity);
 }
 
 void ParseDAERootElement(TiXmlElement *pRoot)
@@ -555,43 +776,19 @@ void ParseDAERootElement(TiXmlElement *pRoot)
 		{
 			ParseDAEAsset(pElement);
 		}
+		// i should probably build the library here
+/*
 		else if(!stricmp(pValue, "library"))
 		{
-//			const char *pType = pValue->Attribute("type");
-			ParseDAERootElement(pElement);
+			ParseDAELibrary(pElement);
 		}
-		else if(!stricmp(pValue, "material"))
-		{
-			ParseDAEMaterial(pElement);
-		}
-		else if(!stricmp(pValue, "geometry"))
-		{
-			ParseDAEGeometry(pElement);
-		}
-		else if(!stricmp(pValue, "animation"))
-		{
-			ParseDAEAnimation(pElement);
-		}
-		else if(!stricmp(pValue, "camera"))
-		{
-			ParseDAECamera(pElement);
-		}
-		else if(!stricmp(pValue, "image"))
-		{
-//			MFDebug_Assert(false, "Not written...");
-		}
-		else if(!stricmp(pValue, "light"))
-		{
-			ParseDAELight(pElement);
-		}
-		else if(!stricmp(pValue, "texture"))
-		{
-//			MFDebug_Assert(false, "Not written...");
-		}
+*/
+		// but for the time being i'll just parse the scene graph and refer to the library the slow way (manually)
 		else if(!stricmp(pValue, "scene"))
 		{
 			ParseDAEScene(pElement);
 		}
+
 
 		pElement = pElement->NextSiblingElement();
 	}
@@ -610,7 +807,7 @@ int F3DFile::ReadDAE(char *pFilename)
 		return -1;
 	}
 
-	TiXmlElement* pRoot = doc.FirstChildElement("COLLADA");
+	pRoot = doc.FirstChildElement("COLLADA");
 
 	if(!pRoot)
 	{
@@ -618,7 +815,7 @@ int F3DFile::ReadDAE(char *pFilename)
 		return 1;
 	}
 
-	strcpy(pModel->name, "collada file");
+	strcpy(pModel->name, "Untitled collada file");
 
 	ParseDAERootElement(pRoot);
 
