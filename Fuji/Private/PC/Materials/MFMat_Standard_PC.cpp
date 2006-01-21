@@ -5,7 +5,7 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 #include "MFRenderer_PC.h"
-#include "../../Source/Materials/Mat_Standard.h"
+#include "../../Source/Materials/MFMat_Standard.h"
 
 static MFMaterial *pSetMaterial;
 extern uint32 renderSource;
