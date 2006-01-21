@@ -66,6 +66,9 @@ enum MFEndian
 
 #if defined(_WINDOWS)
 
+	// Stop it bitching about the string functions not being secure
+	#define _CRT_SECURE_NO_DEPRECATE
+
 	#include <stdlib.h>
 	#include <memory.h>
 	#include <string.h>
@@ -82,6 +85,9 @@ enum MFEndian
 
 	// disable 'unreferenced formal parameter'
 	#pragma warning(disable:4100)
+	
+	// Disable depreciated bullshit
+	#pragma warning(disable:4996)
 
 #elif defined(_XBOX)
 
