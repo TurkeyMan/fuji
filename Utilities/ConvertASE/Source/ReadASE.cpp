@@ -34,7 +34,7 @@ char* GetInt(char *pFilePtr, int *pInt)
 		return pFilePtr;
 	}
 
-	pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
+	pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd;
 
 	*pInt = atoi(pToken);
@@ -60,7 +60,7 @@ char* GetFloat(char *pFilePtr, float *pFloat)
 	pEnd = pFilePtr;
 	while(MFIsNumeric(*pEnd) || (*pEnd == '.' && dotFound--)) pEnd++;
 
-	pToken = MFStrN(pFilePtr, (int)(pEnd-pFilePtr));
+	pToken = (char*)MFStrN(pFilePtr, (int)(pEnd-pFilePtr));
 	if(*pEnd == 'f') pEnd++;
 
 	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != NULL)
@@ -103,7 +103,7 @@ char* GetString(char *pFilePtr, char **ppString)
 		return pFilePtr;
 	}
 
-	*ppString = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
+	*ppString = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd + 1;
 
 	return pFilePtr;
@@ -125,7 +125,7 @@ char* GetLabel(char *pFilePtr, char **ppString)
 		return pFilePtr;
 	}
 
-	*ppString = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
+	*ppString = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 	pFilePtr = pEnd + 1;
 
 	return pFilePtr;
@@ -765,7 +765,7 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 
 		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
 
-		pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
+		pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
 
 		pFilePtr = BlockFunc(pFilePtr, pToken);
@@ -799,7 +799,7 @@ void ParseASEFile(char *pFilePtr)
 
 		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
 
-		pToken = MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
+		pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
 
 		if(!stricmp(pToken, "*3DSMAX_ASCIIEXPORT"))

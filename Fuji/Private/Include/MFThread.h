@@ -156,7 +156,7 @@ void MFThread_DestroySemaphore(MFSemaphore semaphore);
  * @return None.
  * @remarks MFThread_WaitSemaphore will succeed when the semaphore count is greater than zero. When a wait successfully completes, the semaphore is decremented by 1.
  */
-void MFThread_WaitSemaphore(MFSemaphore semaphore);
+uint32 MFThread_WaitSemaphore(MFSemaphore semaphore);
 
 /**
  * Signal a semaphore object.

@@ -13,6 +13,18 @@
 #pragma warning(disable:4201)
 #endif
 
+enum MFSwizzleFlags
+{
+	SW_X = 0,
+	SW_Y,
+	SW_Z,
+	SW_W,
+	SW_ComponentMask = 0x3,
+
+	SW_NEG = 4,
+	SW_ABS = 8
+};
+
 MFALIGN_BEGIN(16)
 class MFVector
 {
@@ -36,10 +48,13 @@ public:
 
 	// general purpose vector operators
 
-	MFVector operator-() const;
+	void Set(float x, float y, float z, float w);
+	void Swizzle(const MFVector &source, const uint8 x, const uint8 y, const uint8 z, const uint8 w);
 
 	bool operator==(const MFVector &v) const;
 	bool operator!=(const MFVector &v) const;
+
+	MFVector operator-() const;
 
 	MFVector& operator=(const MFVector &v);
 	MFVector& operator+=(const MFVector &v);

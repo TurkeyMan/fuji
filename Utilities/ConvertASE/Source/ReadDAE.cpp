@@ -10,6 +10,7 @@
 extern F3DFile *pModel;
 
 MFMatrix transformMatrix;
+bool flipWinding = false;
 
 void startElement(void *userData, const char *name, const char **atts)
 {
@@ -60,6 +61,8 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 			transformMatrix.SetXAxis4(x);
 			transformMatrix.SetYAxis4(z);
 			transformMatrix.SetZAxis4(y);
+
+			flipWinding = true;
 		}
 	}
 
@@ -68,7 +71,7 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 		// we need to scale the model into metres..
 		const char *pMeter = pUnit->Attribute("meter");
 		float scale = (float)atof(pMeter);
-		transformMatrix.Scale(MakeVector(1.0f / scale));
+//		transformMatrix.Scale(MakeVector(scale));
 	}
 
 	if(pAuthor)
@@ -257,6 +260,8 @@ MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
 
 void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 {
+	int a,b;
+
 	const char *pID = pGeometryNode->Attribute("id");
 	const char *pName = pGeometryNode->Attribute("name");
 
@@ -308,7 +313,6 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 			}
 			else if(!stricmp(pValue, "polygons"))
 			{
-
 				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
 
 				MFDebug_Assert(pInputs, "No inputs for polygons.\n");
@@ -349,7 +353,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 				TiXmlElement *pPolygon = pMeshElement->FirstChildElement("p");
 
 				int numIndices = (int)components.size();
-				int a,b,c,d;
+				int c,d;
 
 				// copy the data into the arrays
 				for(a=0; a<numIndices; a++)
@@ -498,6 +502,24 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode)
 		}
 
 		pMesh = pMesh->NextSiblingElement("mesh");
+	}
+
+	for(a=0; a<subObject.positions.size(); a++)
+	{
+		subObject.positions[a] = ApplyMatrix(subObject.positions[a], transformMatrix);
+	}
+
+	if(flipWinding)
+	{
+		for(a=0; a<subObject.matSubobjects.size(); a++)
+		{
+			for(b=0; b<subObject.matSubobjects[a].triangles.size(); b++)
+			{
+				int i = subObject.matSubobjects[a].triangles[b].v[1];
+				subObject.matSubobjects[a].triangles[b].v[1] = subObject.matSubobjects[a].triangles[b].v[2];
+				subObject.matSubobjects[a].triangles[b].v[2] = i;
+			}
+		}
 	}
 }
 

@@ -103,7 +103,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 
 			// get subobject name
 			char *pTokTemp = pTok - (uint32&)pT;
-			char *pSubName = MFStrN(pT, (int&)pTokTemp);
+			const char *pSubName = MFStrN(pT, (int&)pTokTemp);
 
 			++pTok;
 
@@ -113,7 +113,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 
 				// get texture name
 				pTokTemp = pT - (uint32&)pTok;
-				char *pMaterialName = MFStrN(pTok, (int&)pTokTemp);
+				char *pMaterialName = (char*)MFStrN(pTok, (int&)pTokTemp);
 
 				for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
 				pT[strlen(pT) - 4] = 0;
@@ -156,7 +156,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 
 			// get texture name
 			char *pTT = pT - (uint32&)pTok;
-			char *pMaterialName = MFStrN(pTok, (int&)pTT);
+			char *pMaterialName = (char*)MFStrN(pTok, (int&)pTT);
 
 			for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
 			pT[strlen(pT) - 4] = 0;

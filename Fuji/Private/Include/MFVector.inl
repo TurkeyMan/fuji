@@ -1,15 +1,39 @@
 #include "MFMatrix.h"
 
-inline MFVector MFVector::operator-() const
+inline void MFVector::Set(float _x, float _y, float _z, float _w)
 {
-	MFVector t;
+	x = _x;
+	y = _y;
+	z = _z;
+	w = _w;
+}
 
-	t.x=-x;
-	t.y=-y;
-	t.z=-z;
-	t.w=-w;
+inline void MFVector::Swizzle(const MFVector &source, const uint8 _x, const uint8 _y, const uint8 _z, const uint8 _w)
+{
+	if(_x&SW_NEG)
+		x = -source[_x&SW_ComponentMask];
+	else
+		x = source[_x&SW_ComponentMask];
 
-	return t;
+	if(_y&SW_NEG)
+		y = -source[_y&SW_ComponentMask];
+	else
+		y = source[_y&SW_ComponentMask];
+
+	if(_z&SW_NEG)
+		z = -source[_z&SW_ComponentMask];
+	else
+		z = source[_z&SW_ComponentMask];
+
+	if(_w&SW_NEG)
+		w = -source[_w&SW_ComponentMask];
+	else
+		w = source[_w&SW_ComponentMask];
+
+	if(_x&SW_ABS) x = MFAbs(x);
+	if(_y&SW_ABS) y = MFAbs(y);
+	if(_z&SW_ABS) z = MFAbs(z);
+	if(_w&SW_ABS) w = MFAbs(w);
 }
 
 inline bool MFVector::operator==(const MFVector &v) const
@@ -20,6 +44,18 @@ inline bool MFVector::operator==(const MFVector &v) const
 inline bool MFVector::operator!=(const MFVector &v) const
 {
 	return x!=v.x || y!=v.y || z!=v.z || w!=v.w;
+}
+
+inline MFVector MFVector::operator-() const
+{
+	MFVector t;
+
+	t.x=-x;
+	t.y=-y;
+	t.z=-z;
+	t.w=-w;
+
+	return t;
 }
 
 inline MFVector& MFVector::operator=(const MFVector &v)
@@ -573,13 +609,13 @@ inline MFVector& MFVector::Normalise4()
 
 inline MFVector& MFVector::Normalise3()
 {
-	this->Mul4(*this, this->InvMagnitude4());
+	this->Mul3(*this, this->InvMagnitude3());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise2()
 {
-	this->Mul4(*this, this->InvMagnitude4());
+	this->Mul2(*this, this->InvMagnitude2());
 	return *this;
 }
 

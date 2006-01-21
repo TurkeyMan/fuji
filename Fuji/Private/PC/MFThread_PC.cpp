@@ -155,9 +155,9 @@ void MFThread_DestroySemaphore(MFSemaphore semaphore)
 	CloseHandle(semaphore);
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore, uint32 timeout)
+uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
-	DWORD r = WaitForSingleObject(semaphore, timeout);
+	DWORD r = WaitForSingleObject(semaphore, INFINITE);
 	return r == WAIT_OBJECT_0 ? 0 : 1;
 }
 
