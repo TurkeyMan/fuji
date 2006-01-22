@@ -96,5 +96,6 @@ inline void MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
 		--maxChars;
 	}
 
-	*pBuffer = 0;
+	if(maxChars)
+		*pBuffer = 0;
 }

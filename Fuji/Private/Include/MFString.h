@@ -10,10 +10,53 @@
 #if !defined(_MFSTRING_H)
 #define _MFSTRING_H
 
+/**
+ * Get the length of a string.
+ * Get the length of a string, in characters.
+ * @param pString String to find the length of.
+ * @return Returns the length of the string, in characters, excluding the terminating NULL character.
+ * @see MFString_Copy()
+ * @see MFString_CaseCmp()
+ */
 int MFString_Length(const char *pString);
+
+/**
+ * Copy a string.
+ * Copies the source string to the target buffer.
+ * @param pBuffer Target buffer to receive a copy of the string.
+ * @param pString2 Source string.
+ * @return None.
+ * @see MFString_CopyN()
+ */
 void MFString_Copy(char *pBuffer, const char *pString);
+
+/**
+ * Copy a string with a maximum number of characters.
+ * Copies the source string or the maximum number of characters from the source string to the target buffer.
+ * @param pBuffer Target buffer to receive a copy of the string.
+ * @param pString2 Source string.
+ * @param maxChars Maximum characters to copy.
+ * @return None.
+ * @see MFString_Copy()
+ */
 void MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
+
+/**
+ * Convert a string to lower case.
+ * Generates a copy of a string converted to lower case in the MFStr buffer.
+ * @param pString String to convert.
+ * @return Returns a pointer to a string in the MFStr buffer converted to lower case.
+ * @see MFString_ToUpper()
+ */
 const char * MFString_ToLower(const char *pString);
+
+/**
+ * Convert a string to upper case.
+ * Generates a copy of a string converted to upper case in the MFStr buffer.
+ * @param pString String to convert.
+ * @return Returns a pointer to a string in the MFStr buffer converted to upper case.
+ * @see MFString_ToLower()
+ */
 const char * MFString_ToUpper(const char *pString);
 
 /**
@@ -22,13 +65,33 @@ const char * MFString_ToUpper(const char *pString);
  * @param pString1 First source string.
  * @param pString2 Second source string.
  * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @see MFString_CompareN()
+ */
+int MFString_Compare(const char *pString1, const char *pString2);
+
+/**
+ * Compares 2 strings.
+ * Compares 2 strings and returns the difference between them.
+ * @param pString1 First source string.
+ * @param pString2 Second source string.
+ * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @see MFString_Compare()
+ */
+int MFString_CompareN(const char *pString1, const char *pString2);
+
+/**
+ * Compares 2 strings with case insensitivity.
+ * Compares 2 strings with case insensitivity and returns the difference between them.
+ * @param pString1 First source string.
+ * @param pString2 Second source string.
+ * @return Returns the difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_CaseCmpN()
  */
 int MFString_CaseCmp(const char *pString1, const char *pString2);
 
 /**
- * Compares 2 strings with a maximum character limit.
- * Compares 2 strings with a maximum character limit and returns the difference between them.
+ * Compares 2 strings with case insensitivity and a maximum character limit.
+ * Compares 2 strings with case insensitivity and a maximum character limit and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
  * @param n Maximum number of characters to compare.

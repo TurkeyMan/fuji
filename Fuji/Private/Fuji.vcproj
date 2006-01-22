@@ -754,52 +754,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Synth"
-				Filter="">
-				<File
-					RelativePath=".\Source\Synth\Amplifier.cpp">
-				</File>
-				<File
-					RelativePath=".\Source\Synth\LFO.cpp">
-				</File>
-				<File
-					RelativePath=".\Source\Synth\Mixer.cpp">
-				</File>
-				<File
-					RelativePath=".\Source\Synth\OutputFilter.cpp">
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Profile_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Source\Synth\PhaseInverter.cpp">
-				</File>
-				<File
-					RelativePath=".\Source\Synth\Synth.cpp">
-				</File>
-			</Filter>
-			<Filter
 				Name="Materials"
 				Filter="">
 				<File
@@ -954,28 +908,6 @@
 			<File
 				RelativePath=".\Include\Video.h">
 			</File>
-			<Filter
-				Name="Synth"
-				Filter="">
-				<File
-					RelativePath=".\Include\Synth\Amplifier.h">
-				</File>
-				<File
-					RelativePath=".\Include\Synth\LFO.h">
-				</File>
-				<File
-					RelativePath=".\Include\Synth\Mixer.h">
-				</File>
-				<File
-					RelativePath=".\Include\Synth\OutputFilter.h">
-				</File>
-				<File
-					RelativePath=".\Include\Synth\PhaseInverter.h">
-				</File>
-				<File
-					RelativePath=".\Include\Synth\Synth.h">
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="XBox"
