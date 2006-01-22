@@ -1,57 +1,39 @@
 # Must include full path!
 sources =
 [
-	'Fuji/Source/DebugMenu.cpp',
-	'Fuji/Source/Display.cpp',
-	'Fuji/Source/Image.cpp',
-	'Fuji/Source/MFBoundingVolume.cpp',
-	'Fuji/Source/MFCallstack.cpp',
-	'Fuji/Source/MFCollision.cpp',
-	'Fuji/Source/MFDebug.cpp',
-	'Fuji/Source/MFFileSystem.cpp',
-	'Fuji/Source/MFHeap.cpp',
-	'Fuji/Source/MFIni.cpp',
-	'Fuji/Source/MFInput.cpp',
-	'Fuji/Source/MFMaterial.cpp',
-	'Fuji/Source/MFMath.cpp',
-	'Fuji/Source/MFMatrix.cpp',
-	'Fuji/Source/MFModel.cpp',
-	'Fuji/Source/MFNetwork.cpp',
-	'Fuji/Source/MFPrimitive.cpp',
-	'Fuji/Source/MFRenderer.cpp',
-	'Fuji/Source/MFScript.cpp',
-	'Fuji/Source/MFSockets.cpp',
-	'Fuji/Source/MFString.cpp',
-	'Fuji/Source/MFStringCache.cpp',
-	'Fuji/Source/MFSystem.cpp',
-	'Fuji/Source/MFTexture.cpp',
-	'Fuji/Source/MFTextureUtil.cpp',
-	'Fuji/Source/MFVector.cpp',
-	'Fuji/Source/MFView.cpp',
-	'Fuji/Source/Sprite.cpp',
-	'Fuji/Source/Timer.cpp',
-	'Fuji/Source/Util.cpp',
+]
 
-	"Fuji/#{var[:platform]}/Display_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFDebug_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFHeap_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFInput_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFMaterial_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFModel_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFPrimitive_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFSockets_#{var[:platform]}.cpp",
-#	"Fuji/#{var[:platform]}/MFSound_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFSystem_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFTexture_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/MFThread_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/FileSystem/MFFileSystemNative_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/Materials/MFMat_Effect_#{var[:platform]}.cpp",
-	"Fuji/#{var[:platform]}/Materials/MFMat_Standard_#{var[:platform]}.cpp"
+source_dirs =
+[
+]
+
+recursive_source_dirs =
+[
+	'Fuji/Source',
+	"Fuji/#{var[:platform]}",
+	'Fuji/Lib/zlib',
+	'Fuji/Lib/pawn/amx'
+]
+
+exclusions =
+[
 ]
 
 case var[:platform]
-	when 'Linux'
-	when 'Windows'
+	when 'PC'
+		sources +=
+		[
+		]
+
+	else
+		sources +=
+		[
+			"Fuji/Null/Materials/MFMat_Effect_Null.cpp",
+			"Fuji/Null/Materials/MFMat_Standard_Null.cpp"
+		]
 end
 
 var[:engine_sources] = sources
+var[:engine_source_dirs] = source_dirs
+var[:engine_recursive_source_dirs] = recursive_source_dirs
+var[:engine_exclusions] = exclusions
