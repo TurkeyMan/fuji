@@ -38,45 +38,60 @@ bool TestID(TiXmlElement *pLib, const char *pLibName)
 	return false;
 }
 
-TiXmlElement* FindObjectInLibrary(const char *pLibName)
+TiXmlElement* FindObjectInLibrary(const char *pLibName, const char *pLibrary, const char *pLibContent)
 {
 	if(pLibName[0] == '#')
 		++pLibName;
 
-	TiXmlElement *pLib = pRoot->FirstChildElement("library");
+	TiXmlElement *pLib = pRoot->FirstChildElement(pLibrary);
 
 	while(pLib)
 	{
-		const char *pType = pLib->Attribute("type");
-
-		MFDebug_Assert(pType, "Library has no type. ?");
-
-		const char *pT = MFString_ToLower(pType);
-
-		TiXmlElement *pObject = pLib->FirstChildElement(pT);
+		TiXmlElement *pObject = pLib->FirstChildElement(pLibContent);
 
 		while(pObject)
 		{
 			if(TestID(pObject, pLibName))
 				return pObject;
 
-			pObject = pObject->NextSiblingElement(pT);
+			pObject = pObject->NextSiblingElement(pLibContent);
 		}
 
-		pLib = pLib->NextSiblingElement("library");
+		pLib = pLib->NextSiblingElement(pLibrary);
 	}
 
 	return NULL;
 }
 
+TiXmlElement* GetSceneLib(const char *pLibName)
+{
+	return FindObjectInLibrary(pLibName, "library_visual_scenes", "visual_scene");
+}
+
+TiXmlElement* GetGeometryLib(const char *pLibName)
+{
+	return FindObjectInLibrary(pLibName, "library_geometries", "geometry");
+}
+
+TiXmlElement* GetMaterialLib(const char *pLibName)
+{
+	return FindObjectInLibrary(pLibName, "library_materials", "material");
+}
+
 void ParseDAEAsset(TiXmlElement *pAsset)
 {
+	TiXmlElement *pContributor = pAsset->FirstChildElement("contributor");
+
+	TiXmlElement *pContrib = pContributor ? pContributor : pAsset;
+	
+	TiXmlElement *pAuthor = pContrib->FirstChildElement("author");
+	TiXmlElement *pAuthoringTool = pContrib->FirstChildElement("authoring_tool");
+	TiXmlElement *pSourceData = pContrib->FirstChildElement("source_data");
+
 	TiXmlElement *pUp = pAsset->FirstChildElement("up_axis");
 	TiXmlElement *pUnit = pAsset->FirstChildElement("unit");
-	TiXmlElement *pAuthor = pAsset->FirstChildElement("author");
 	TiXmlElement *pCopyright = pAsset->FirstChildElement("copyright");
-	TiXmlElement *pAuthoringTool = pAsset->FirstChildElement("authoring_tool");
-	TiXmlElement *pSourceData = pAsset->FirstChildElement("source_data");
+	TiXmlElement *pCreated = pAsset->FirstChildElement("created");
 	TiXmlElement *pLastModified = pAsset->FirstChildElement("modified");
 	TiXmlElement *pRevision = pAsset->FirstChildElement("revision");
 
@@ -150,6 +165,8 @@ int ParseDAEMaterial(TiXmlElement *pMaterialNode)
 	F3DMaterial &mat = pMatChunk->materials.push();
 	strcpy(mat.name, pName);
 
+	// TODO: parse additional data from material?
+
 	return matIndex;
 }
 
@@ -216,26 +233,18 @@ SourceData* GetSourceData(const char *pSourceData)
 
 void ReadSourceData(TiXmlElement *pSource, SourceData &data)
 {
-	TiXmlElement *pTechnique = pSource->FirstChildElement("technique");
+	TiXmlElement *pTechnique = pSource->FirstChildElement("technique_common");
 
-	while(pTechnique)
+	if(pTechnique)
 	{
-		const char *pProfile = pTechnique->Attribute("profile");
+		TiXmlElement *pAccessor = pTechnique->FirstChildElement("accessor");
 
-		if(!stricmp(pProfile, "COMMON"))
-		{
-			TiXmlElement *pAccessor = pTechnique->FirstChildElement("accessor");
+		int count, stride;
+		pAccessor->Attribute("count", &count);
+		pAccessor->Attribute("stride", &stride);
 
-			int count, stride;
-			pAccessor->Attribute("count", &count);
-			pAccessor->Attribute("stride", &stride);
-
-			data.validComponents = stride;
-			data.data.resize(count);
-			break;
-		}
-
-		pTechnique = pTechnique->NextSiblingElement("technique");
+		data.validComponents = stride;
+		data.data.resize(count);
 	}
 
 	TiXmlElement *pArray;
@@ -353,7 +362,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					pInputs = pInputs->NextSiblingElement("input");
 				}
 			}
-			else if(!stricmp(pValue, "polygons"))
+			else if(!stricmp(pValue, "polylist"))
 			{
 				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
 
@@ -372,7 +381,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				if(pMaterial)
 				{
 					// find material in the library
-					TiXmlElement *pMat = FindObjectInLibrary(pMaterial);
+					TiXmlElement *pMat = GetMaterialLib(pMaterial);
 
 					if(pMat)
 					{
@@ -414,8 +423,6 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 					pInputs = pInputs->NextSiblingElement("input");
 				}
-
-				TiXmlElement *pPolygon = pMeshElement->FirstChildElement("p");
 
 				int numIndices = (int)components.size();
 				int c,d;
@@ -463,103 +470,135 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					}
 				}
 
-				// build the vertex and face lists
-				int tri=0;
+				// get num polys
+				const char *pNumPolys = pMeshElement->Attribute("count");
+				MFDebug_Assert(pNumPolys, "<polylist> has no count attribute.");
 
-				while(pPolygon)
+				int numPolys = atoi(pNumPolys);
+
+				// get vertcounts for each poly
+				MFArray<int> vertCounts;
+
+				TiXmlElement *pVCount = pMeshElement->FirstChildElement("vcount");
+				MFDebug_Assert(pVCount, "No <vcount> in <polylist>");
+
+				const char *pVCountString = pVCount->GetText();
+				pVCountString = MFSkipWhite(pVCountString);
+
+				while(*pVCountString)
 				{
-					const char *pText = pPolygon->GetText();
+					int vcount = atoi(pVCountString);
+					vertCounts.push(vcount);
 
-					int point=0;
-					int firstVert = matSub.vertices.size();
+					while(*pVCountString && !MFIsWhite(*pVCountString))
+						++pVCountString;
 
-					while(*pText)
+					pVCountString = MFSkipWhite(pVCountString);
+				}
+
+				// read polygons
+				TiXmlElement *pPolygon = pMeshElement->FirstChildElement("p");
+				MFDebug_Assert(pPolygon, "No <p> in <polylist>");
+
+				const char *pText = pPolygon->GetText();
+
+				// build the vertex and face lists
+				int tri = 0;
+				int poly = 0;
+
+				int vert = 0;
+				int firstVert = matSub.vertices.size();
+
+				while(*pText)
+				{
+					if(vert > 2)
 					{
-						if(point > 2)
-						{
-							++tri;
-							matSub.triangles[tri].v[0] = firstVert;
-							matSub.triangles[tri].v[1] = matSub.vertices.size()-1;
-							matSub.triangles[tri].v[2] = matSub.vertices.size();
-						}
-						else
-						{
-							matSub.triangles[tri].v[point] = matSub.vertices.size();
-						}
-
-						F3DVertex &v = matSub.vertices.push();
-
-						for(a=0; a<numIndices; a++)
-						{
-							int index = atoi(pText);
-
-							DataSources sources = components[a];
-
-							for(b=0; b<(int)sources.size(); b++)
-							{
-								switch(sources[b].first)
-								{
-									case CT_Position:
-										v.position = index;
-										break;
-									case CT_Normal:
-										v.normal = index;
-										break;
-									case CT_UV1:
-										v.uv1 = index;
-										break;
-									case CT_Colour:
-										v.colour = index;
-										break;
-									case CT_Weights:
-									{
-										SourceData *pData = GetSourceData(sources[b].second.c_str());
-
-										if(pData)
-										{
-											for(c=0; c<MFMin(pData->validComponents, 4); c++)
-											{
-												v.weight[c] = pData->data[index][c];
-											}
-										}
-										break;
-									}
-									case CT_Indices:
-									{
-										SourceData *pData = GetSourceData(sources[b].second.c_str());
-
-										if(pData)
-										{
-											for(c=0; c<MFMin(pData->validComponents, 4); c++)
-											{
-												v.bone[c] = (int)pData->data[index][c];
-											}
-										}
-										break;
-									}
-									case CT_Binormal:
-										v.biNormal = index;
-										break;
-									case CT_Tangent:
-										v.tangent = index;
-										break;
-									default:
-										// do nothing
-										break;
-								}
-							}
-
-							while(*pText && !MFIsWhite(*pText))
-								++pText;
-							pText = MFSkipWhite(pText);
-						}
-
-						++point;
+						++tri;
+						matSub.triangles[tri].v[0] = firstVert;
+						matSub.triangles[tri].v[1] = matSub.vertices.size()-1;
+						matSub.triangles[tri].v[2] = matSub.vertices.size();
+					}
+					else
+					{
+						matSub.triangles[tri].v[vert] = matSub.vertices.size();
 					}
 
-					++tri;
+					F3DVertex &v = matSub.vertices.push();
 
-					pPolygon = pPolygon->NextSiblingElement("p");
+					for(a=0; a<numIndices; a++)
+					{
+						int index = atoi(pText);
+
+						DataSources sources = components[a];
+
+						for(b=0; b<(int)sources.size(); b++)
+						{
+							switch(sources[b].first)
+							{
+								case CT_Position:
+									v.position = index;
+									break;
+								case CT_Normal:
+									v.normal = index;
+									break;
+								case CT_UV1:
+									v.uv1 = index;
+									break;
+								case CT_Colour:
+									v.colour = index;
+									break;
+								case CT_Weights:
+								{
+									SourceData *pData = GetSourceData(sources[b].second.c_str());
+
+									if(pData)
+									{
+										for(c=0; c<MFMin(pData->validComponents, 4); c++)
+										{
+											v.weight[c] = pData->data[index][c];
+										}
+									}
+									break;
+								}
+								case CT_Indices:
+								{
+									SourceData *pData = GetSourceData(sources[b].second.c_str());
+
+									if(pData)
+									{
+										for(c=0; c<MFMin(pData->validComponents, 4); c++)
+										{
+											v.bone[c] = (int)pData->data[index][c];
+										}
+									}
+									break;
+								}
+								case CT_Binormal:
+									v.biNormal = index;
+									break;
+								case CT_Tangent:
+									v.tangent = index;
+									break;
+								default:
+									// do nothing
+									break;
+							}
+						}
+
+						while(*pText && !MFIsWhite(*pText))
+							++pText;
+						pText = MFSkipWhite(pText);
+					}
+
+					++vert;
+
+					if(vert >= vertCounts[poly])
+					{
+						++poly;
+						++tri;
+						vert = 0;
+						firstVert = matSub.vertices.size();
+					}
 				}
 			}
 
@@ -608,26 +647,17 @@ void ParseDAECamera(TiXmlElement *pCameraNode)
 
 }
 
-void FindAndAddInstanceToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const MFMatrix &matrix)
+void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const MFMatrix &matrix)
 {
 	// get object name
 	const char *pObjectName = pInstanceNode->Attribute("url");
 
 	// scan library for object
-	TiXmlElement *pObject = FindObjectInLibrary(pObjectName);
+	TiXmlElement *pObject = GetGeometryLib(pObjectName);
 
 	if(pObject)
 	{
-		const char *pValue = pObject->Value();
-
-		if(!stricmp(pValue, "geometry"))
-		{
-			ParseDAEGeometry(pObject, matrix);
-		}
-		else
-		{
-			printf(MFStr("Object '%s' not supported in the scene yet...\n", pValue));
-		}
+		ParseDAEGeometry(pObject, matrix);
 	}
 	else
 	{
@@ -638,7 +668,7 @@ void FindAndAddInstanceToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParen
 void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 {
 	TiXmlElement *pTransform;
-	MFMatrix localMat = parentMatrix;
+	MFMatrix localMat = MFMatrix::identity;
 
 	// build the transform
 	pTransform = pSceneNode->FirstChildElement();
@@ -650,14 +680,12 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 		if(!stricmp(pTransformValue, "matrix"))
 		{
 			// apply this node's transformation matrix to the current transform
-
 			const char *pMat = pTransform->GetText();
-			MFMatrix mat = MFMatrix::identity;
 
 			int c = 0;
 			while(*pMat && c<16)
 			{
-				mat.m[c%4][c>>2] =  (float)atof(pMat);
+				localMat.m[c%4][c>>2] =  (float)atof(pMat);
 				++c;
 
 				while(*pMat && !MFIsWhite(*pMat))
@@ -665,14 +693,10 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 				while(MFIsWhite(*pMat))
 					pMat++;
 			}
-
-			// TODO: this may need to be the other way around :)
-			localMat.Multiply(mat, localMat);
 		}
 		else if(!stricmp(pTransformValue, "translate"))
 		{
 			// just translate the current transform
-
 			const char *pTrans = pTransform->GetText();
 			MFVector translation = MFVector::identity;
 
@@ -693,7 +717,6 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 		else if(!stricmp(pTransformValue, "scale"))
 		{
 			// scale the current transform
-
 			const char *pScale = pTransform->GetText();
 			MFVector scale = MFVector::identity;
 
@@ -714,7 +737,6 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 		else if(!stricmp(pTransformValue, "rotate"))
 		{
 			// rotate the current transform
-
 			const char *pRot = pTransform->GetText();
 			MFVector rot = MFVector::zero;
 
@@ -736,17 +758,23 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 		pTransform = pTransform->NextSiblingElement();
 	}
 
-	TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance");
+	// TODO: this may need to be the other way around :)
+	localMat.Multiply(localMat, parentMatrix);
 
-	if(pInstance)
+	// check for a geometry node
+	TiXmlElement *pGeometry = pSceneNode->FirstChildElement("instance_geometry");
+	if(pGeometry)
 	{
 		// node is an instance node
 		// find and add instance to scene
-		FindAndAddInstanceToScene(pInstance, pSceneNode, localMat);
+		FindAndAddGeometryToScene(pGeometry, pSceneNode, localMat);
 	}
 
-	TiXmlElement *pNode = pSceneNode->FirstChildElement("node");
+	// all the other stuff
+//	TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance_camera");
 
+	// recurse child nodes
+	TiXmlElement *pNode = pSceneNode->FirstChildElement("node");
 	while(pNode)
 	{
 		// and recurse for child nodes
@@ -758,10 +786,35 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 
 void ParseDAEScene(TiXmlElement *pSceneNode)
 {
-	const char *pName = pSceneNode->Attribute("name");
-	strcpy(pModel->name, pName);
+	TiXmlElement *pScene;
+	pScene = pSceneNode->FirstChildElement();
 
-	ParseSceneNode(pSceneNode, MFMatrix::identity);
+	while(pScene)
+	{
+		const char *pValue = pScene->Value();
+
+		if(!stricmp(pValue, "instance_visual_scene"))
+		{
+			const char *pURL = pScene->Attribute("url");
+
+			TiXmlElement *pSceneRoot = GetSceneLib(pURL);
+
+			if(pSceneRoot)
+			{
+				const char *pName = pSceneRoot->Attribute("name");
+				strcpy(pModel->name, pName);
+
+				ParseSceneNode(pSceneRoot, MFMatrix::identity);
+			}
+			else
+			{
+				// scene not found..
+				printf("Scene '%s' not found!\n", pURL);
+			}
+		}
+
+		pScene = pScene->NextSiblingElement();
+	}
 }
 
 void ParseDAERootElement(TiXmlElement *pRoot)
