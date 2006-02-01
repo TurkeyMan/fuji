@@ -146,6 +146,28 @@ void MFHeap_Free(void *pMem)
 	pAllocHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pAllocHeap->pHeapData);
 }
 
+// new/delete operators
+void* operator new(unsigned int size)
+{
+	return MFHeap_AllocInternal(size);
+}
+
+void* operator new[](unsigned int size)
+{
+	return MFHeap_AllocInternal(size);
+}
+
+void operator delete(void *pMemory)
+{
+	MFHeap_Free(pMemory);
+}
+
+void operator delete[](void *pMemory)
+{
+	MFHeap_Free(pMemory);
+}
+
+
 // get the size of an allocation
 uint32 MFHeap_GetAllocSize(const void *pMemory)
 {

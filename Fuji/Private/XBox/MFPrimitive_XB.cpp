@@ -160,14 +160,14 @@ void MFSetPosition(const MFVector &pos)
 	{
 		// if we're rendering quads, we need to insert the top-right and botom-left verts
 		// TODO: need to keep the last vert
-		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
-		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 1.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 1.0f);
 
 		// and the final vert
-		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 1.0f);
 	}
 	else
-		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 0.0f);
+		pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, pos.x, pos.y, pos.z, 1.0f);
 
 	++currentVert;
 }

@@ -85,6 +85,11 @@ void* MFHeap_Realloc(void *pMem, uint32 bytes);
  */
 void  MFHeap_Free(void *pMem);
 
+void* operator new(unsigned int size);
+void* operator new[](unsigned int size);
+void operator delete(void *pMemory);
+void operator delete[](void *pMemory);
+
 /**
  * Get the size of an allocation.
  * Get the size of a fuji allocation.

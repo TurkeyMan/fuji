@@ -193,8 +193,6 @@ enum MFEndian
 #include "MFString.h"
 #include "MFDebug.h"
 
-#include <new>
-
 #include "Util.h"
 
 

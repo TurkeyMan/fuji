@@ -141,6 +141,19 @@ MFScript* MFScript_LoadScript(const char *pFilename)
 	return pScript;
 }
 
+MFEntryPoint MFScript_FindPublicFunction(MFScript *pScript, const char *pFunctionName)
+{
+	MFEntryPoint entryPoint;
+
+	if(amx_FindPublic(&pScript->amx, pFunctionName, &entryPoint) == AMX_ERR_NOTFOUND)
+	{
+		MFDebug_Warn(4, MFStr("Public function '%s' was not found in the script. \"%s\"", pFunctionName, aux_StrError(AMX_ERR_NOTFOUND)));
+		return MFEntryPoint_Main;
+	}
+
+	return entryPoint;
+}
+
 int MFScript_Execute(MFScript *pScript, const char *pEntryPoint)
 {
 	int entryPoint = AMX_EXEC_MAIN;
@@ -167,6 +180,22 @@ int MFScript_Execute(MFScript *pScript, const char *pEntryPoint)
 	return returnValue;
 }
 
+int MFScript_Call(MFScript *pScript, MFEntryPoint entryPoint)
+{
+	cell returnValue;
+	int err;
+
+	err = amx_Exec(&pScript->amx, &returnValue, entryPoint);
+
+	if(err)
+	{
+		MFDebug_Warn(1, "Failed to execute script.");
+		return 0;
+	}
+
+	return returnValue;
+}
+
 void MFScript_DestroyScript(MFScript *pScript)
 {
 	aux_FreeProgram(&pScript->amx);
@@ -178,3 +207,32 @@ void MFScript_RegisterNativeFunctions(ScriptNativeInfo *pNativeFunctions)
 	++gNativeFunctionCount;
 }
 
+float MFScript_ctof(uint32 cell)
+{
+	return amx_ctof(cell);
+}
+
+uint32 MFScript_ftoc(float _float)
+{
+	return amx_ftoc(_float);
+}
+
+int MFScript_GetAddr(MFScript *pScript, uint32 scriptAddress, uint32 **ppPhysicalAddress)
+{
+	return amx_GetAddr(&pScript->amx, scriptAddress, (cell**)ppPhysicalAddress);
+}
+
+char* MFScript_GetCString(MFScript *pScript, uint32 scriptString)
+{
+	cell *amx_cstr_; int amx_length_;
+	amx_GetAddr(&pScript->amx, scriptString, &amx_cstr_);
+	amx_StrLen(amx_cstr_, &amx_length_);
+	if(amx_length_ > 0)
+	{
+		char *pTemp = (char*)MFStrN("", amx_length_ * sizeof(char));
+		amx_GetString(pTemp, amx_cstr_, sizeof(char)>1, amx_length_ + 1);
+		return pTemp;
+	}
+
+	return NULL;
+}

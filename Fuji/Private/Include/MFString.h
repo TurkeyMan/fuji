@@ -24,7 +24,7 @@ int MFString_Length(const char *pString);
  * Copy a string.
  * Copies the source string to the target buffer.
  * @param pBuffer Target buffer to receive a copy of the string.
- * @param pString2 Source string.
+ * @param pString Source string.
  * @return None.
  * @see MFString_CopyN()
  */
@@ -34,7 +34,7 @@ void MFString_Copy(char *pBuffer, const char *pString);
  * Copy a string with a maximum number of characters.
  * Copies the source string or the maximum number of characters from the source string to the target buffer.
  * @param pBuffer Target buffer to receive a copy of the string.
- * @param pString2 Source string.
+ * @param pString Source string.
  * @param maxChars Maximum characters to copy.
  * @return None.
  * @see MFString_Copy()

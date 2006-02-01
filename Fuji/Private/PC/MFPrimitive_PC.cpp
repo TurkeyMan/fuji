@@ -10,6 +10,8 @@
 
 #include <d3d9.h>
 
+static const int primBufferSize = 1536;
+
 static bool gRenderQuads = false;
 
 struct LitVertex
@@ -34,7 +36,7 @@ struct LitVertex
 	float u,v;
 };
 
-LitVertex primBuffer[1024];
+LitVertex primBuffer[primBufferSize];
 LitVertex current;
 
 uint32 primType;
@@ -188,6 +190,17 @@ void MFSetPosition(float x, float y, float z)
 		primBuffer[currentVert] = current;
 
 	++currentVert;
+
+	if(currentVert >= primBufferSize)
+	{
+		int newBeginCount = beginCount - currentVert;
+		beginCount = currentVert;
+
+		MFEnd();
+
+		beginCount = newBeginCount;
+		currentVert = 0;
+	}
 }
 
 void MFEnd()

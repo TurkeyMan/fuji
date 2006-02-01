@@ -48,7 +48,7 @@ public:
 
 	// general purpose vector operators
 
-	void Set(float x, float y, float z, float w);
+	void Set(float x, float y, float z = 0.0f, float w = 1.0f);
 	void Swizzle(const MFVector &source, const uint8 x, const uint8 y, const uint8 z, const uint8 w);
 
 	bool operator==(const MFVector &v) const;
