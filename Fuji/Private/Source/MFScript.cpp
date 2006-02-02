@@ -222,7 +222,7 @@ int MFScript_GetAddr(MFScript *pScript, uint32 scriptAddress, uint32 **ppPhysica
 	return amx_GetAddr(&pScript->amx, scriptAddress, (cell**)ppPhysicalAddress);
 }
 
-char* MFScript_GetCString(MFScript *pScript, uint32 scriptString)
+const char* MFScript_GetCString(MFScript *pScript, uint32 scriptString)
 {
 	cell *amx_cstr_; int amx_length_;
 	amx_GetAddr(&pScript->amx, scriptString, &amx_cstr_);

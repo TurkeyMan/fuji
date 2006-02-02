@@ -131,7 +131,7 @@ int MFScript_GetAddr(MFScript *pScript, uint32 scriptAddress, uint32 **ppPhysica
  * @param scriptString A string in the script.
  * @return Returns a pointer to a the string converted C string in the MFStr buffer.
  */
-char* MFScript_GetCString(MFScript *pScript, uint32 scriptString);
+const char* MFScript_GetCString(MFScript *pScript, uint32 scriptString);
 
 #endif
 
