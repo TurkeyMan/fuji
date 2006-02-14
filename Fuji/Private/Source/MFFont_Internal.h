@@ -8,6 +8,10 @@
 struct MFFont
 {
 	MFMaterial *pMaterial;
+
+	float height;
+	float spaceWidth;
+
 	uint8 charwidths[256];
 };
 

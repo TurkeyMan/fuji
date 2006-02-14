@@ -229,8 +229,54 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 
 uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
 {
-//	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
-	MFDebug_Assert(false, "Not Written");
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	switch(paramaterIndex)
+	{
+		case MFMatStandard_Lit:
+			return (pData->materialType & MF_Lit) ? 1 : 0;
+		case MFMatStandard_Prelit:
+			return (pData->materialType & MF_Lit) ? 0 : 1;
+		case MFMatStandard_DiffuseColour:
+			return (uint32)&pData->diffuse;
+		case MFMatStandard_AmbientColour:
+			return (uint32)&pData->ambient;
+		case MFMatStandard_SpecularColour:
+			return (uint32)&pData->specular;
+		case MFMatStandard_SpecularPower:
+			return (uint32&)pData->specularPow;
+		case MFMatStandard_EmissiveColour:
+			return (uint32)&pData->illum;
+		case MFMatStandard_Mask:
+			return (pData->materialType & MF_Mask) ? 1 : 0;
+		case MFMatStandard_DoubleSided:
+			return (pData->materialType & MF_DoubleSided) ? 1 : 0;
+		case MFMatStandard_BackfaceCull:
+			return (pData->materialType & MF_DoubleSided) ? 0 : 1;
+		case MFMatStandard_Texture:
+			return (uint32)pData->pTextures[argIndex];
+		case MFMatStandard_DifuseMap:
+			return (uint32)pData->pTextures[pData->diffuseMapIndex];
+		case MFMatStandard_DiffuseMap2:
+			return (uint32)pData->pTextures[pData->diffuseMap2Index];
+		case MFMatStandard_NormalMap:
+			return (uint32)pData->pTextures[pData->normalMapIndex];
+		case MFMatStandard_DetailMap:
+			return (uint32)pData->pTextures[pData->detailMapIndex];
+		case MFMatStandard_EnvMap:
+			return (uint32)pData->pTextures[pData->envMapIndex];
+		case MFMatStandard_LightMap:
+			return (uint32)pData->pTextures[pData->lightMapIndex];
+		case MFMatStandard_BumpMap:
+			return (uint32)pData->pTextures[pData->bumpMapIndex];
+		case MFMatStandard_ReflectionMap:
+			return (uint32)pData->pTextures[pData->reflectionMapIndex];
+		case MFMatStandard_SpecularMap:
+			return (uint32)pData->pTextures[pData->specularMapIndex];
+		default:
+			MFDebug_Assert(false, "Not written!!!");
+			break;
+	}
 
 	return 0;
 }

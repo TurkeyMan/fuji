@@ -59,7 +59,7 @@ int MFScript_LoadProgram(AMX *amx, char *filename, void *memblock)
   didalloc = 0;
   if(memblock == NULL)
   {
-    if((memblock = malloc(hdr.stp)) == NULL)
+    if((memblock = MFHeap_Alloc(hdr.stp)) == NULL)
 	{
       MFFile_Close(pFile);
       return AMX_ERR_MEMORY;
@@ -80,7 +80,7 @@ int MFScript_LoadProgram(AMX *amx, char *filename, void *memblock)
   /* free the memory block on error, if it was allocated here */
   if(result != AMX_ERR_NONE && didalloc)
   {
-    free(memblock);
+    MFHeap_Free(memblock);
     amx->base = NULL;                   /* avoid a double free */
   } /* if */
 
@@ -235,4 +235,19 @@ const char* MFScript_GetCString(MFScript *pScript, uint32 scriptString)
 	}
 
 	return NULL;
+}
+
+MFVector MFScript_GetVector(MFScript *pScript, uint32 scriptVector, int numComponents)
+{
+	MFVector t = MFVector::zero;
+
+	uint32 *pArray;
+	MFScript_GetAddr(pScript, scriptVector, &pArray);
+
+	for(int a=0; a<numComponents; a++)
+	{
+		t[a] = amx_ctof(pArray[a]);
+	}
+
+	return t;
 }

@@ -38,11 +38,11 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 
 	// find the string
 	char *pCurr = pCache->pMem;
-	int newLength = (int)strlen(pNewString)+1;
+	int newLength = MFString_Length(pNewString)+1;
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
 	{
-		int length = (int)strlen(pCurr);
-		if (!stricmp(pCurr, pNewString))
+		int length = MFString_Length(pCurr);
+		if (!MFString_CaseCmp(pCurr, pNewString))
 		{
 			// found string
 			return pCurr;
@@ -52,7 +52,7 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 
 	MFDebug_Assert(&pCurr[newLength+1] < &pCache->pMem[pCache->size], "No memory for string!");
 
-	strcpy(pCurr, pNewString);
+	MFString_Copy(pCurr, pNewString);
 	pCurr[newLength]=0;
 	pCache->used = ((uint32&)pCurr + newLength) - (uint32&)pCache->pMem + 1;
 	return pCurr;

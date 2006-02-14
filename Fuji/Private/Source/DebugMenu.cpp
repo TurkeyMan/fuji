@@ -53,7 +53,7 @@ uint32 MenuItemColour::presets[COLOUR_PRESETS] =
 void DebugMenu_InitModule()
 {
 	// create root menu
-	strcpy(rootMenu.name, "root");
+	MFString_Copy(rootMenu.name, "root");
 	rootMenu.menuDepth = 0;
 	rootMenu.numChildren = 0;
 	rootMenu.pCallback = NULL;
@@ -131,7 +131,7 @@ void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, Deb
 	MFDebug_Assert(strlen(name) < 64, "Max of 64 characters in Menu Name.");
 	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '&s'", pParent->name)); 
 
-	strcpy(pObject->name, name);
+	MFString_Copy(pObject->name, name);
 
 	pObject->pParent = pParent;
 	pObject->menuDepth = pParent->menuDepth+1;
@@ -158,7 +158,7 @@ void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, 
 //	Menu *pMenu = Heap_New(Menu);
 	Menu *pMenu = new Menu;
 
-	strcpy(pMenu->name, name);
+	MFString_Copy(pMenu->name, name);
 	pMenu->type = MenuType_Menu;
 
 	pMenu->pParent = pParent;

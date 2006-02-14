@@ -63,15 +63,9 @@ inline const char* MFSkipWhite(const char *pC)
 
 inline int MFString_Length(const char *pString)
 {
-	int l = 0;
-
-	while(*pString)
-	{
-		++l;
-		++pString;
-	}
-
-	return l;
+	const char *pT = pString;
+	while(*pT) ++pT;
+	return (uint32&)pT - (uint32&)pString;
 }
 
 inline void MFString_Copy(char *pBuffer, const char *pString)

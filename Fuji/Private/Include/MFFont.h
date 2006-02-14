@@ -42,6 +42,13 @@ MFFont* MFFont_Create(const char *pFilename);
  */
 void MFFont_Destroy(MFFont *pFont);
 
+
+float MFFont_GetFontHeight(MFFont *pFont);
+
+float MFFont_GetCharacterWidth(MFFont *pFont, int character, float scale, int fontPage = 0);
+
+float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen = -1, float *pTotalHeight = NULL);
+
 /**
  * Render a string.
  * Renders text to the screen.

@@ -91,7 +91,7 @@ const char* MFCallstack_GetCallstackString()
 	for(int a = gCallDepth-1; a >= 0; a--)
 	{
 		const char *pTemp = MFStr("  %-32s\n",pCallstack[a]);
-		int tempLen = (int)strlen(pTemp);
+		int tempLen = MFString_Length(pTemp);
 //		char *pTemp = MFStr("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? MFStr(" [%s]",pFunc->pComment) : "");
 		if(bufferUsed + tempLen < (int)sizeof(callstack) - 1)
 		{

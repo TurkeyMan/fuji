@@ -109,7 +109,7 @@ int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flat
 		unz_file_info fileInfo;
 		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
 
-		int nameLen = strlen(fileName);
+		int nameLen = MFString_Length(fileName);
 
 		bool isDirectory = fileName[nameLen-1] == '/';
 
@@ -145,7 +145,7 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 		unz_file_info fileInfo;
 		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
 
-		int fileLen = strlen(fileName);
+		int fileLen = MFString_Length(fileName);
 		bool isDirectory = fileName[fileLen-1] == '/';
 
 		if(isDirectory)
@@ -156,7 +156,7 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTO
 		{
 			int a;
 
-			strcpy(pStringCache, fileName);
+			MFString_Copy(pStringCache, fileName);
 			pToc->pFilesysData = pStringCache;
 
 			for(a=fileLen; --a;)
@@ -342,7 +342,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->length = fileInfo.uncompressed_size;
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, pZipFile->pFilename);
+	MFString_Copy(pFile->fileIdentifier, pZipFile->pFilename);
 #endif
 
 	return 0;
@@ -518,7 +518,7 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MF
 		}
 		else
 		{
-			strcpy(pStringCache, pDirEnt->d_name);
+			MFString_Copy(pStringCache, pDirEnt->d_name);
 			pToc->pFilesysData = pStringCache;
 
 			for(int a=fileLen; --a;)
@@ -694,7 +694,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->length = stat.st_size;
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, pZipFile->pFilename);
+	MFString_Copy(pFile->fileIdentifier, pZipFile->pFilename);
 #endif
 
 	return 0;

@@ -35,7 +35,7 @@ const char *MFIniLine::GetString(int index)
 
 bool MFIniLine::IsString(int index, const char *pString)
 {
-	return !stricmp(GetString(index), pString);
+	return !MFString_CaseCmp(GetString(index), pString);
 }
 
 float MFIniLine::GetFloat(int index)
@@ -122,7 +122,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	// allocate ini file
 	MFIni *pMFIni;
 	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
-	strcpy(pMFIni->name, pFilename);
+	MFString_Copy(pMFIni->name, pFilename);
 
 	// allocate temporary buffer for strings & lines
 	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
@@ -146,13 +146,13 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 {
 	MFDebug_Assert(pMemory, "Cant create ini from NULL buffer");
 
-	uint32 memSize = (uint32)strlen(pMemory);
+	uint32 memSize = (uint32)MFString_Length(pMemory);
 	const char *pMem = pMemory;
 
 	// allocate ini file
 	MFIni *pMFIni;
 	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
-	strcpy(pMFIni->name, "Memory Ini");
+	MFString_Copy(pMFIni->name, "Memory Ini");
 
 	// allocate temporary buffer for strings & lines
 	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
@@ -195,7 +195,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)) != NULL)
 	{
 		// newline
-		tokenLength = (int)strlen(tokenBuffer);
+		tokenLength = MFString_Length(tokenBuffer);
 		if (tokenLength == 1 && tokenBuffer[0] == 0xd)
 		{
 			bNewLine = true;
@@ -362,7 +362,7 @@ void MFIniLine::DumpRecursive(int depth)
 	char buffer[256];
 	while (pLine)
 	{
-		strcpy(buffer,prefix);
+		MFString_Copy(buffer,prefix);
 		for (int i=0; i<pLine->GetStringCount(); i++)
 		{
 			strcat(buffer, MFStr("'%s'",pLine->GetString(i)));

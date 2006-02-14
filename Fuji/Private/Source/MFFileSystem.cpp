@@ -332,14 +332,14 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	MFCALLSTACK;
 
 	MFMount *pMount;
-	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + strlen(pMountData->pMountpoint) + 1);
+	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
 	memset(pMount, 0, sizeof(MFMount));
 
 	pMount->mountFlags = pMountData->flags;
 	pMount->fileSystem = fileSystem;
 	pMount->priority = pMountData->priority;
 	pMount->pMountpoint = (const char*)&pMount[1];
-	strcpy((char*)&pMount[1], pMountData->pMountpoint);
+	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
 
 	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
 
@@ -386,7 +386,7 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 {
 	MFMount *pT = pMountList;
 
-	while(pT && stricmp(pMountpoint, pT->pMountpoint))
+	while(pT && MFString_CaseCmp(pMountpoint, pT->pMountpoint))
 		pT = pT->pNext;
 
 	if(pT)
@@ -417,7 +417,7 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries)
 {
 	const char *pSearchString = pFilename;
-	int nameLen = strlen(pFilename);
+	int nameLen = MFString_Length(pFilename);
 	int a;
 
 	bool isDirectory = false;
@@ -434,7 +434,7 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 
 	for(a=0; a<numEntries; a++)
 	{
-		if(!stricmp(pSearchString, pEntry[a].pName))
+		if(!MFString_CaseCmp(pSearchString, pEntry[a].pName))
 		{
 			if(isDirectory)
 			{
@@ -476,7 +476,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 	const char *pMountpoint = NULL;
 
 	// search for a mountpoint
-	int len = strlen(pFilename);
+	int len = MFString_Length(pFilename);
 	for(int a=0; a<len; a++)
 	{
 		if(pFilename[a] == ':')
@@ -499,7 +499,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 	{
 		int onlyexclusive = pMount->mountFlags & MFMF_OnlyAllowExclusiveAccess;
 
-		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !stricmp(pMountpoint, pMount->pMountpoint)))
+		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !MFString_CaseCmp(pMountpoint, pMount->pMountpoint)))
 		{
 			// open the file from a mount
 			MFFileHandle hFile = ppFileSystemList[pMount->fileSystem]->FSOpen(pMount, pFilename, openFlags);

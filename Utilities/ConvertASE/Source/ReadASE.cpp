@@ -133,43 +133,43 @@ char* GetLabel(char *pFilePtr, char **ppString)
 
 char* ReadSceneChunk(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*SCENE_FILENAME"))
+	if(!MFString_CaseCmp(pToken, "*SCENE_FILENAME"))
 	{
 		char *pName;
 
 		pFilePtr = GetString(pFilePtr, &pName);
 
-		if(strlen(pName) > 255)
+		if(MFString_Length(pName) > 255)
 		{
 			printf("Error: More than 256 characters in nodel name, \"%s\"", pName);
 			return pFilePtr;
 		}
 
-		strcpy(pModel->name, pName);
+		MFString_Copy(pModel->name, pName);
 
 		printf("Model: %s\n", pName);
 	}
-	else if(!stricmp(pToken, "*SCENE_FIRSTFRAME"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_FIRSTFRAME"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*SCENE_LASTFRAME"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_LASTFRAME"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*SCENE_FRAMESPEED"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_FRAMESPEED"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*SCENE_TICKSPERFRAME"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_TICKSPERFRAME"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*SCENE_BACKGROUND_STATIC"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_BACKGROUND_STATIC"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*SCENE_AMBIENT_STATIC"))
+	else if(!MFString_CaseCmp(pToken, "*SCENE_AMBIENT_STATIC"))
 	{
 
 	}
@@ -183,73 +183,73 @@ char* ReadSceneChunk(char *pFilePtr, char *pToken)
 
 char* ReadMaterial(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MATERIAL_NAME"))
+	if(!MFString_CaseCmp(pToken, "*MATERIAL_NAME"))
 	{
 		char *pName;
 
 		pFilePtr = GetString(pFilePtr, &pName);
 
-		if(strlen(pName) > 63)
+		if(MFString_Length(pName) > 63)
 		{
 			printf("Error: More than 64 characters in material name, \"%s\"", pName);
 			return pFilePtr;
 		}
 
-		strcpy(pMaterial->name, pName);
+		MFString_Copy(pMaterial->name, pName);
 
 		printf("Found material: \"%s\"\n", pName);
 	}
-	else if(!stricmp(pToken, "*MATERIAL_CLASS"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_CLASS"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MATERIAL_AMBIENT"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_AMBIENT"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->ambient.x);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->ambient.y);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->ambient.z);
 		pMaterial->ambient.w = 1.0f;
 	}
-	else if(!stricmp(pToken, "*MATERIAL_DIFFUSE"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_DIFFUSE"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->diffuse.x);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->diffuse.y);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->diffuse.z);
 		pMaterial->diffuse.w = 1.0f;
 	}
-	else if(!stricmp(pToken, "*MATERIAL_SPECULAR"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_SPECULAR"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->specular.x);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->specular.y);
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->specular.z);
 		pMaterial->specular.w = 1.0f;
 	}
-	else if(!stricmp(pToken, "*MATERIAL_SHINE"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_SHINE"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->glossiness);
 	}
-	else if(!stricmp(pToken, "*MATERIAL_SHINESTRENGTH"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_SHINESTRENGTH"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->specularLevel);
 	}
-	else if(!stricmp(pToken, "*MATERIAL_TRANSPARENCY"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_TRANSPARENCY"))
 	{
 		pFilePtr = GetFloat(pFilePtr, &pMaterial->diffuse.w);
 		pMaterial->diffuse.w = 1.0f - pMaterial->diffuse.w;
 	}
-	else if(!stricmp(pToken, "*MATERIAL_WIRESIZE"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_WIRESIZE"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MATERIAL_SHADING"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_SHADING"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MATERIAL_XP_FALLOFF"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_XP_FALLOFF"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MATERIAL_SELFILLUM"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_SELFILLUM"))
 	{
 		float selfIllum;
 		pFilePtr = GetFloat(pFilePtr, &selfIllum);
@@ -257,11 +257,11 @@ char* ReadMaterial(char *pFilePtr, char *pToken)
 		pMaterial->emissive = pMaterial->diffuse * selfIllum;
 		pMaterial->emissive.w = 1.0f;
 	}
-	else if(!stricmp(pToken, "*MATERIAL_FALLOFF"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_FALLOFF"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MATERIAL_XP_TYPE"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_XP_TYPE"))
 	{
 
 	}
@@ -275,7 +275,7 @@ char* ReadMaterial(char *pFilePtr, char *pToken)
 
 char* ReadMaterialChunk(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MATERIAL_COUNT"))
+	if(!MFString_CaseCmp(pToken, "*MATERIAL_COUNT"))
 	{
 		int count;
 
@@ -285,7 +285,7 @@ char* ReadMaterialChunk(char *pFilePtr, char *pToken)
 
 		printf("Found %d materials.\n", count);
 	}
-	else if(!stricmp(pToken, "*MATERIAL"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL"))
 	{
 		int matID;
 
@@ -305,33 +305,33 @@ char* ReadMaterialChunk(char *pFilePtr, char *pToken)
 
 char* ReadBone(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*NODE_NAME"))
+	if(!MFString_CaseCmp(pToken, "*NODE_NAME"))
 	{
 		char *pName;
 
 		pFilePtr = GetString(pFilePtr, &pName);
 
-		if(strlen(pName) > 63)
+		if(MFString_Length(pName) > 63)
 		{
 			printf("Error: More than 64 characters in bone name, \"%s\"", pName);
 			return pFilePtr;
 		}
 
-		strcpy(pBone->name, pName);
+		MFString_Copy(pBone->name, pName);
 	}
-	else if(!stricmp(pToken, "*INHERIT_POS"))
+	else if(!MFString_CaseCmp(pToken, "*INHERIT_POS"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*INHERIT_ROT"))
+	else if(!MFString_CaseCmp(pToken, "*INHERIT_ROT"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*INHERIT_SCL"))
+	else if(!MFString_CaseCmp(pToken, "*INHERIT_SCL"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_ROW0"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROW0"))
 	{
 		MFVector v;
 
@@ -342,7 +342,7 @@ char* ReadBone(char *pFilePtr, char *pToken)
 
 		pBone->worldMatrix.SetXAxis4(v);
 	}
-	else if(!stricmp(pToken, "*TM_ROW1"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROW1"))
 	{
 		MFVector v;
 
@@ -353,7 +353,7 @@ char* ReadBone(char *pFilePtr, char *pToken)
 
 		pBone->worldMatrix.SetYAxis4(v);
 	}
-	else if(!stricmp(pToken, "*TM_ROW2"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROW2"))
 	{
 		MFVector v;
 
@@ -364,7 +364,7 @@ char* ReadBone(char *pFilePtr, char *pToken)
 
 		pBone->worldMatrix.SetZAxis4(v);
 	}
-	else if(!stricmp(pToken, "*TM_ROW3"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROW3"))
 	{
 		MFVector v;
 
@@ -375,27 +375,27 @@ char* ReadBone(char *pFilePtr, char *pToken)
 
 		pBone->worldMatrix.SetTrans4(v);
 	}
-	else if(!stricmp(pToken, "*TM_POS"))
+	else if(!MFString_CaseCmp(pToken, "*TM_POS"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_ROTAXIS"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROTAXIS"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_ROTANGLE"))
+	else if(!MFString_CaseCmp(pToken, "*TM_ROTANGLE"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_SCALE"))
+	else if(!MFString_CaseCmp(pToken, "*TM_SCALE"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_SCALEAXIS"))
+	else if(!MFString_CaseCmp(pToken, "*TM_SCALEAXIS"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*TM_SCALEAXISANG"))
+	else if(!MFString_CaseCmp(pToken, "*TM_SCALEAXISANG"))
 	{
 
 	}
@@ -409,7 +409,7 @@ char* ReadBone(char *pFilePtr, char *pToken)
 
 char* ReadVertList(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MESH_VERTEX"))
+	if(!MFString_CaseCmp(pToken, "*MESH_VERTEX"))
 	{
 		int index;
 
@@ -429,7 +429,7 @@ char* ReadVertList(char *pFilePtr, char *pToken)
 
 char* ReadFaceList(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MESH_FACE"))
+	if(!MFString_CaseCmp(pToken, "*MESH_FACE"))
 	{
 		char *pLabel;
 		int index;
@@ -452,11 +452,11 @@ char* ReadFaceList(char *pFilePtr, char *pToken)
 
 		pSub->matSubobjects[0].triangles[index].reserved = 0;
 	}
-	if(!stricmp(pToken, "*MESH_SMOOTHING"))
+	if(!MFString_CaseCmp(pToken, "*MESH_SMOOTHING"))
 	{
 
 	}
-	if(!stricmp(pToken, "*MESH_MTLID"))
+	if(!MFString_CaseCmp(pToken, "*MESH_MTLID"))
 	{
 
 	}
@@ -470,7 +470,7 @@ char* ReadFaceList(char *pFilePtr, char *pToken)
 
 char* ReadTVertList(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MESH_TVERT"))
+	if(!MFString_CaseCmp(pToken, "*MESH_TVERT"))
 	{
 		int index;
 
@@ -492,7 +492,7 @@ char* ReadTVertList(char *pFilePtr, char *pToken)
 
 char* ReadTFaceList(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*MESH_TFACE"))
+	if(!MFString_CaseCmp(pToken, "*MESH_TFACE"))
 	{
 		int index;
 
@@ -515,7 +515,7 @@ char* ReadNormals(char *pFilePtr, char *pToken)
 	static int curFace = 0;
 	static int curNormal = 0;
 
-	if(!stricmp(pToken, "*MESH_FACENORMAL"))
+	if(!MFString_CaseCmp(pToken, "*MESH_FACENORMAL"))
 	{
 		pFilePtr = GetInt(pFilePtr, &curFace);
 
@@ -525,7 +525,7 @@ char* ReadNormals(char *pFilePtr, char *pToken)
 
 		curNormal = curFace*3;
 	}
-	if(!stricmp(pToken, "*MESH_VERTEXNORMAL"))
+	if(!MFString_CaseCmp(pToken, "*MESH_VERTEXNORMAL"))
 	{
 		int index;
 
@@ -549,11 +549,11 @@ char* ReadNormals(char *pFilePtr, char *pToken)
 
 char* ReadMesh(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*TIMEVALUE"))
+	if(!MFString_CaseCmp(pToken, "*TIMEVALUE"))
 	{
 
 	}
-	else if(!stricmp(pToken, "*MESH_NUMVERTEX"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NUMVERTEX"))
 	{
 		int count;
 
@@ -561,7 +561,7 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 		pSub->positions.resize(count);
 	}
-	else if(!stricmp(pToken, "*MESH_NUMFACES"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NUMFACES"))
 	{
 		int count;
 
@@ -571,15 +571,15 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 		pSub->matSubobjects[0].vertices.resize(count*3);
 		pSub->normals.resize(count*3);
 	}
-	else if(!stricmp(pToken, "*MESH_VERTEX_LIST"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_VERTEX_LIST"))
 	{
 		pFilePtr = ProcessBlock(pFilePtr, "*MESH_VERTEX_LIST", ReadVertList);
 	}
-	else if(!stricmp(pToken, "*MESH_FACE_LIST"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_FACE_LIST"))
 	{
 		pFilePtr = ProcessBlock(pFilePtr, "*MESH_FACE_LIST", ReadFaceList);
 	}
-	else if(!stricmp(pToken, "*MESH_NUMTVERTEX"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NUMTVERTEX"))
 	{
 		int count;
 
@@ -587,11 +587,11 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 		pSub->uvs.resize(count);
 	}
-	else if(!stricmp(pToken, "*MESH_TVERTLIST"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_TVERTLIST"))
 	{
 		pFilePtr = ProcessBlock(pFilePtr, "*MESH_TVERTLIST", ReadTVertList);
 	}
-	else if(!stricmp(pToken, "*MESH_NUMTVFACES"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NUMTVFACES"))
 	{
 		int count;
 
@@ -602,11 +602,11 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 			printf("Error: Number of faces does not match number of texture faces.");
 		}
 	}
-	else if(!stricmp(pToken, "*MESH_TFACELIST"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_TFACELIST"))
 	{
 		pFilePtr = ProcessBlock(pFilePtr, "*MESH_TFACELIST", ReadTFaceList);
 	}
-	else if(!stricmp(pToken, "*MESH_NUMCVERTEX"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NUMCVERTEX"))
 	{
 		int count;
 
@@ -614,7 +614,7 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 		pSub->colours.resize(count);
 	}
-	else if(!stricmp(pToken, "*MESH_NORMALS"))
+	else if(!MFString_CaseCmp(pToken, "*MESH_NORMALS"))
 	{
 		pFilePtr = ProcessBlock(pFilePtr, "*MESH_NORMALS", ReadNormals);
 	}
@@ -628,18 +628,18 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 char* ReadGeomChunk(char *pFilePtr, char *pToken)
 {
-	if(!stricmp(pToken, "*NODE_NAME"))
+	if(!MFString_CaseCmp(pToken, "*NODE_NAME"))
 	{
 		char *pNodeName;
 
 		pFilePtr = GetString(pFilePtr, &pNodeName);
 
-		if(!strnicmp(pNodeName, "z_", 2))
+		if(!MFString_CaseCmpN(pNodeName, "z_", 2))
 		{
 			// node is bone
 			nodeType = 2;
 		}
-		else if(!strnicmp(pNodeName, "r_", 2))
+		else if(!MFString_CaseCmpN(pNodeName, "r_", 2))
 		{
 			// node is refPoint
 			nodeType = 4;
@@ -655,12 +655,12 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 		{
 			pSub = &pModel->GetMeshChunk()->subObjects.push();
 
-			if(strlen(pNodeName) > 63)
+			if(MFString_Length(pNodeName) > 63)
 			{
 				printf("Error: More than 64 characters in mesh name, \"%s\"", pNodeName);
 			}
 			else
-				strcpy(pSub->name, pNodeName);
+				MFString_Copy(pSub->name, pNodeName);
 		}
 
 		// if exporting a bone, add a bone
@@ -674,15 +674,15 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 		{
 			pRefPoint = &pModel->GetRefPointChunk()->refPoints.push();
 
-			if(strlen(pNodeName) > 63)
+			if(MFString_Length(pNodeName) > 63)
 			{
 				printf("Error: More than 64 characters in refPoint name, \"%s\"", pNodeName);
 			}
 			else
-                strcpy(pRefPoint->name, pNodeName);
+                MFString_Copy(pRefPoint->name, pNodeName);
 		}
 	}
-	else if(!stricmp(pToken, "*NODE_PARENT"))
+	else if(!MFString_CaseCmp(pToken, "*NODE_PARENT"))
 	{
 		if(nodeType & 2)
 		{
@@ -690,30 +690,30 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 
 			pFilePtr = GetString(pFilePtr, &pParentName);
 
-			if(strlen(pParentName) > 63)
+			if(MFString_Length(pParentName) > 63)
 			{
 				printf("Error: More than 64 characters in bone parent name, \"%s\"", pParentName);
 				return pFilePtr;
 			}
 
-			strcpy(pBone->parentName, pParentName);
+			MFString_Copy(pBone->parentName, pParentName);
 		}
 	}
-	else if(!stricmp(pToken, "*NODE_TM"))
+	else if(!MFString_CaseCmp(pToken, "*NODE_TM"))
 	{
 		if(nodeType & 2)
 		{
 			pFilePtr = ProcessBlock(pFilePtr, "*NODE_TM", ReadBone);
 		}
 	}
-	else if(!stricmp(pToken, "*MESH"))
+	else if(!MFString_CaseCmp(pToken, "*MESH"))
 	{
 		if(nodeType & 1)
 		{
 			pFilePtr = ProcessBlock(pFilePtr, "*MESH", ReadMesh);
 		}
 	}
-	else if(!stricmp(pToken, "*MATERIAL_REF"))
+	else if(!MFString_CaseCmp(pToken, "*MATERIAL_REF"))
 	{
 		if(nodeType & 1)
 		{
@@ -802,7 +802,7 @@ void ParseASEFile(char *pFilePtr)
 		pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
 
-		if(!stricmp(pToken, "*3DSMAX_ASCIIEXPORT"))
+		if(!MFString_CaseCmp(pToken, "*3DSMAX_ASCIIEXPORT"))
 		{
 			int version = 0;
 
@@ -810,7 +810,7 @@ void ParseASEFile(char *pFilePtr)
 
 			printf("Recognised .ASE file version: %d\n", version);
 		}
-		else if(!stricmp(pToken, "*COMMENT"))
+		else if(!MFString_CaseCmp(pToken, "*COMMENT"))
 		{
 			char *pComment;
 
@@ -818,15 +818,15 @@ void ParseASEFile(char *pFilePtr)
 
 			printf("Comment: %s\n", pComment);
 		}
-		else if(!stricmp(pToken, "*SCENE"))
+		else if(!MFString_CaseCmp(pToken, "*SCENE"))
 		{
 			pFilePtr = ProcessBlock(pFilePtr, "*SCENE", ReadSceneChunk);
 		}
-		else if(!stricmp(pToken, "*MATERIAL_LIST"))
+		else if(!MFString_CaseCmp(pToken, "*MATERIAL_LIST"))
 		{
 			pFilePtr = ProcessBlock(pFilePtr, "*MATERIAL_LIST", ReadMaterialChunk);
 		}
-		else if(!stricmp(pToken, "*GEOMOBJECT"))
+		else if(!MFString_CaseCmp(pToken, "*GEOMOBJECT"))
 		{
 			pFilePtr = ProcessBlock(pFilePtr, "*GEOMOBJECT", ReadGeomChunk);
 		}

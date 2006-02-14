@@ -71,7 +71,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
 	char *pCurrentDir = pStringCache;
-	strcpy(pCurrentDir, pFindPattern);
+	MFString_Copy(pCurrentDir, pFindPattern);
 	pStringCache += strlen(pCurrentDir) + 1;
 
 	while(hFind != INVALID_HANDLE_VALUE)
@@ -95,7 +95,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 						if(pToc->size)
 						{
-							strcpy(pStringCache, findData.cFileName);
+							MFString_Copy(pStringCache, findData.cFileName);
 							pToc->pName = pStringCache;
 							pStringCache += strlen(pStringCache)+1;
 
@@ -116,7 +116,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			}
 			else
 			{
-				strcpy(pStringCache, findData.cFileName);
+				MFString_Copy(pStringCache, findData.cFileName);
 				pToc->pName = pStringCache;
 				pStringCache += strlen(pStringCache)+1;
 
@@ -211,7 +211,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->length = fileSize;
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, pNative->pFilename);
+	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
 #endif
 
 	return 0;

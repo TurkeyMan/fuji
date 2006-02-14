@@ -132,7 +132,7 @@ void MFView_SetOrtho(MFRect *pOrthoRect)
 	pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
 }
 
-void MFView_GetOrtho(MFRect *pOrthoRect)
+void MFView_GetOrthoRect(MFRect *pOrthoRect)
 {
 	*pOrthoRect = pCurrentView->orthoRect;
 }

@@ -158,7 +158,7 @@ bool MFFileHTTP_RequestHeader(const char *pServer, int port, const char *pPath, 
 		return true;
 	}
 
-	MFSockets_Send(socket, pHeaderRequest, strlen(pHeaderRequest) + 1, 0);
+	MFSockets_Send(socket, pHeaderRequest, MFString_Length(pHeaderRequest) + 1, 0);
 
 	int lastChar;
 	lastChar = MFSockets_Recv(socket, pOutputBuffer, maxSize-1, 0);
@@ -276,8 +276,8 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFFileHTTPData *pHTTPData = gHTTPFiles.Create();
 	pFile->pFilesysData = pHTTPData;
 
-	int serverLen = strlen(pServer) + 1;
-	int pathLen = strlen(pPath) + 1;
+	int serverLen = MFString_Length(pServer) + 1;
+	int pathLen = MFString_Length(pPath) + 1;
 
 	pHTTPData->pServer = (char*)&pHTTPData[1];
 	pHTTPData->pPath = pHTTPData->pServer + serverLen;
@@ -286,8 +286,8 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pHTTPData->cacheSize = gDefaults.filesys.maxHTTPFileCache - (serverLen + pathLen);
 	pHTTPData->cacheStart = 0;
 
-	strcpy(pHTTPData->pServer, pServer);
-	strcpy(pHTTPData->pPath, pPath);
+	MFString_Copy(pHTTPData->pServer, pServer);
+	MFString_Copy(pHTTPData->pPath, pPath);
 
 	// find file length
 	pFile->length = 0;
@@ -318,7 +318,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->offset = 0;
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, pHTTP->pURL);
+	MFString_Copy(pFile->fileIdentifier, pHTTP->pURL);
 #endif
 
 	return 0;

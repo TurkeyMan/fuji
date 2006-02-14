@@ -260,8 +260,8 @@ static const int gXBox360ButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative | AID_Clamp,	// Button_RightTrigger // use positive range of clamped z axis
 	7,   // Button_Start
 	6,   // Button_Back
-	8,  // Button_LeftThumb
-	9,  // Button_RightThumb
+	8,   // Button_LeftThumb
+	9,   // Button_RightThumb
 	-1,  // Button_DUp
 	-1,  // Button_DDown
 	-1,  // Button_DLeft
@@ -270,6 +270,30 @@ static const int gXBox360ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rx,               // Button_ThumbRX
 	AID_Ry | AID_Negative // Button_ThumbRY
+};
+
+static const int gXterminatorButtonID[GamepadType_Max] = 
+{
+	0,   // Button_A
+	1,   // Button_B
+	3,   // Button_X
+	4,   // Button_Y
+	6,   // Button_White
+	7,   // Button_Black
+	AID_Rz | AID_Negative | AID_Clamp,				// Button_LeftTrigger  // use negative range of clamped z axis
+	AID_Rz | AID_Clamp,	// Button_RightTrigger // use positive range of clamped z axis
+	9,   // Button_Start
+	8,   // Button_Back
+	5,  // Button_LeftThumb
+	2,  // Button_RightThumb
+	AID_Rx | AID_Negative | AID_Clamp,  // Button_DUp
+	AID_Rx | AID_Clamp,  // Button_DDown
+	AID_Slider1 | AID_Negative | AID_Clamp,  // Button_DLeft
+	AID_Slider1 | AID_Clamp,  // Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	-1, // Button_ThumbRX
+	-1  // Button_ThumbRY
 };
 
 // Button Names
@@ -393,6 +417,30 @@ static const char * gXBox360ButtonNames[GamepadType_Max] =
 	"Right Y-Axis"  // Button_ThumbRY
 };
 
+static const char * gXterminatorButtonNames[GamepadType_Max] =
+{
+	"1",            // Button_A
+	"2",            // Button_B
+	"4",            // Button_X
+	"5",            // Button_Y
+	"L-Grip",       // Button_White
+	"R-Grip",       // Button_Black
+	"L-Trigger",    // Button_LeftTrigger
+	"R-Trigger",    // Button_RightTrigger
+	"S",            // Button_Start
+	"Top",          // Button_Back
+	"6",            // Button_LeftThumb
+	"3",            // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
 // Gamepad Info
 static MFGamepadInfo gGamepadDescriptors[] =
 {
@@ -480,6 +528,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
 		true,
+		&gGamepadDescriptors[9]
+	},
+
+	// Xterminator Digital Gamepad
+	{
+		"Gravis Xterminator",
+		"Xterminator Digital Gamepad",
+		gXterminatorButtonID,
+		gXterminatorButtonNames,
+		false,
 		NULL
 	}
 };
@@ -1296,7 +1354,7 @@ void MFInputPC_LoadGamepadMappings()
 				pGI->bUsePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;
-				strcpy(pGI->pName, pName);
+				MFString_Copy(pGI->pName, pName);
 				pGI->pNext = pGamepadMappingRegistry;
 				pGamepadMappingRegistry = pGI;
 
@@ -1588,7 +1646,7 @@ int InitRawMouse(bool _includeRDPMouse)
 		for(j = 0; j < MAX_RAW_MOUSE_BUTTONS; j++)
 		{
 			// Create the name for this button
-			strcpy(pRawMice[i].buttonNames[j], MFStr("Button %i", j));
+			MFString_Copy(pRawMice[i].buttonNames[j], MFStr("Button %i", j));
 		}
 	}
 

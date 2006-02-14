@@ -107,7 +107,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 
 			++pTok;
 
-			if(!stricmp(pSubName, pSubobjectName))
+			if(!MFString_CaseCmp(pSubName, pSubobjectName))
 			{
 				for(pT = pTok; *pT != NULL && *pT != '\r' && *pT != '\n'; ++pT) { }
 
@@ -115,8 +115,8 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 				pTokTemp = pT - (uint32&)pTok;
 				char *pMaterialName = (char*)MFStrN(pTok, (int&)pTokTemp);
 
-				for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
-				pT[strlen(pT) - 4] = 0;
+				for(pT = pMaterialName+MFString_Length(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
+				pT[MFString_Length(pT) - 4] = 0;
 
 				return pT;
 			}
@@ -158,15 +158,15 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 			char *pTT = pT - (uint32&)pTok;
 			char *pMaterialName = (char*)MFStrN(pTok, (int&)pTT);
 
-			for(pT = pMaterialName+strlen(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
-			pT[strlen(pT) - 4] = 0;
+			for(pT = pMaterialName+MFString_Length(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
+			pT[MFString_Length(pT) - 4] = 0;
 
 			if(*pT && pModel->GetMaterialChunk()->GetMaterialIndexByName(pT) == -1)
 			{
 				F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
 
-				strcpy(mat.name, pT);
-				strcpy(mat.maps[0], pT);
+				MFString_Copy(mat.name, pT);
+				MFString_Copy(mat.maps[0], pT);
 			}
 
 			pTok = strchr(pTok, ',');
@@ -178,7 +178,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 	{
 		F3DBone &bone = pSC->bones.push();
 
-		strcpy(bone.name, pHeader->pTags[a].tagName);
+		MFString_Copy(bone.name, pHeader->pTags[a].tagName);
 
 		bone.worldMatrix.SetXAxis3(MakeVector(pHeader->pTags[a].rotationMatrix[0][0], pHeader->pTags[a].rotationMatrix[0][1], pHeader->pTags[a].rotationMatrix[0][2]));
 		bone.worldMatrix.SetYAxis3(MakeVector(pHeader->pTags[a].rotationMatrix[1][0], pHeader->pTags[a].rotationMatrix[1][1], pHeader->pTags[a].rotationMatrix[1][2]));
@@ -199,7 +199,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 		F3DMaterialSubobject &matSub = sub.matSubobjects[0];
 
 		// read subobject name
-		strcpy(sub.name, pHeader->pSurfaces->surfaceName);
+		MFString_Copy(sub.name, pHeader->pSurfaces->surfaceName);
 
 		// find material info
 		matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(GetMaterialName(pSkin, sub.name));
@@ -263,9 +263,9 @@ int F3DFile::ReadMD3(char *pFilename)
 		unz_file_info fileInfo;
 		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
 
-		int filenameLen = (int)strlen(fileName);
+		int filenameLen = MFString_Length(fileName);
 
-		if(!stricmp(".md3", &fileName[MFMax(filenameLen - 4, 0)]))
+		if(!MFString_CaseCmp(".md3", &fileName[MFMax(filenameLen - 4, 0)]))
 		{
 			// read fle from zip
 			pBuffer = (char*)malloc(fileInfo.uncompressed_size);
@@ -292,13 +292,13 @@ int F3DFile::ReadMD3(char *pFilename)
 					break;
 			}
 
-			strcpy(pModel->name, &fileName[b+1]);
+			MFString_Copy(pModel->name, &fileName[b+1]);
 			pModel->name[a-b-1] = 0;
 
 			// search for skin file
 			char skinFilename[256];
-			strcpy(skinFilename, fileName);
-			skinFilename[strlen(skinFilename) - 4] = 0;
+			MFString_Copy(skinFilename, fileName);
+			skinFilename[MFString_Length(skinFilename) - 4] = 0;
 			strcat(skinFilename, "_");
 			strcat(skinFilename, pModel->name);
 			strcat(skinFilename, ".skin");

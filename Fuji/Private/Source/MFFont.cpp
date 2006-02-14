@@ -46,7 +46,13 @@ MFFont* MFFont_Create(const char *pFilename)
 		MFFile_Close(hFile);
 
 		pFont->pMaterial = MFMaterial_Create(pFilename);
-		MFDebug_Assert(!strcmp(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
+		MFDebug_Assert(!MFString_Compare(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
+
+		MFTexture *pTexture;
+		MFMaterial_GetParamater(pFont->pMaterial, MFMatStandard_DifuseMap, 0, (uint32*)&pTexture);
+
+		pFont->height = pTexture->pTemplateData->pSurfaces[0].height / 16.0f;
+		pFont->spaceWidth = (float)pFont->charwidths[' '];
 	}
 
 	return pFont;
@@ -65,54 +71,133 @@ MFFont* MFFont_GetDebugFont()
 	return gpDebugFont;
 }
 
+float MFFont_GetFontHeight(MFFont *pFont)
+{
+	return pFont->height;
+}
+
+float MFFont_GetCharacterWidth(MFFont *pFont, int character, float scale, int fontPage)
+{
+	return (float)pFont->charwidths[character] * scale;
+}
+
+float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen, float *pTotalHeight)
+{
+	float scale = height / pFont->height;
+	float width = 0.0f;
+	float totalWidth = 0.0f;
+	float totalHeight = 0.0f;
+
+	while(*pText && maxLen)
+	{
+		switch(*pText)
+		{
+			case '\n':
+				totalWidth = MFMax(width, totalWidth);
+				width = 0.0f;
+				totalHeight += height;
+				break;
+			case ' ':
+				width += pFont->spaceWidth * scale;
+				break;
+			default:
+				width += (float)pFont->charwidths[*pText] * scale;
+				break;
+		}
+
+		++pText;
+		--maxLen;
+	}
+
+	totalWidth = MFMax(width, totalWidth);
+
+	if(pTotalHeight)
+		*pTotalHeight = totalHeight + height;
+
+	return totalWidth;
+}
+
+static int GetRenderableLength(const char *pText, int *pTotal)
+{
+	int count = 0, renderable = 0;
+
+	while(*pText)
+	{
+		if(*pText > 32)
+			++renderable;
+		++count;
+		++pText;
+	}
+
+	*pTotal = count;
+
+	return renderable;
+}
+
 int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText)
 {
 	MFCALLSTACK;
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pFont->pMaterial->pInstanceData;
 
-	int textlen = strlen(pText);
-
-	MFDebug_Assert(textlen < 2048, "Exceeded Font Vertex Buffer Limit");
+	int renderable, textlen;
+	renderable = GetRenderableLength(pText, &textlen);
 
 	float x,y,w,h, p, cwidth;
 
 	MFMaterial_SetMaterial(pFont->pMaterial);
 	MFPrimitive(PT_QuadList|PT_Prelit);
 
-	MFBegin(textlen*2);
+	MFBegin(renderable*2);
 
 	MFSetColour(colour);
 
 	float texWidth = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width;
 	float texHeight = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height;
+	float cellWidth = texWidth / 16.0f;
+	float cellHeight = texHeight / 16.0f;
+	float uScale = 1.0f / texWidth;
+	float vScale = 1.0f / texHeight;
 
 	float pos_x = pos.x;
 	float pos_y = pos.y;
 	float pos_z = pos.z;
 
+	h = cellHeight * vScale;
+
 	for(int i=0; i<textlen; i++)
 	{
-		x = (float)((uint8)pText[i] & 0x0F) * (float)(pData->pTextures[0]->pTemplateData->pSurfaces[0].width / 16);
-		y = (float)((uint8)pText[i] >> 4) * (float)(pData->pTextures[0]->pTemplateData->pSurfaces[0].height / 16);
+		uint8 c = pText[i];
 
-		w = (float)pFont->charwidths[(uint8)pText[i]];
-		h = texHeight*(1.0f/16.0f);
+		if(c <= 32)
+		{
+			switch(pText[i])
+			{
+				case '\n':
+					pos_x = pos.x;
+					pos_y += height;
+					break;
+				case ' ':
+					pos_x += height * ((pFont->spaceWidth * uScale)/h);
+					break;
+			}
+		}
+		else
+		{
+			x = (float)(c & 0x0F) * cellWidth * uScale;
+			y = (float)(c >> 4) * cellWidth * vScale;
+			w = (float)pFont->charwidths[c] * uScale;
 
-		x /= texWidth;
-		y /= texHeight;
-		w /= texWidth;
-		h /= texHeight;
+			p = w/h;
+			cwidth = height*p;
 
-		p = w/h;
-		cwidth = height*p;
+			MFSetTexCoord1(x, y);
+			MFSetPosition(pos_x, pos_y, pos_z);
+			MFSetTexCoord1(x+w, y+h);
+			MFSetPosition(pos_x + cwidth, pos_y + height, pos_z);
 
-		MFSetTexCoord1(x, y);
-		MFSetPosition(pos_x, pos_y, pos_z);
-		MFSetTexCoord1(x+w, y+h);
-		MFSetPosition(pos_x + cwidth, pos_y + height, pos_z);
-
-		pos_x += cwidth;
+			pos_x += cwidth;
+		}
 	}
 
 	MFEnd();

@@ -117,7 +117,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		pTexture->pTexture->UnlockRect(0);
 
-		strcpy(pTexture->name, pName);
+		MFString_Copy(pTexture->name, pName);
 
 		// create template data
 		uint32 levelCount = pTexture->pTexture->GetLevelCount();

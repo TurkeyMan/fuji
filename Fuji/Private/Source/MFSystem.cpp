@@ -333,6 +333,9 @@ int MFSystem_GameLoop()
 
 		Game_Init();
 
+		// init the timedelta
+		MFSystem_UpdateTimeDelta();
+
 		while(!gQuit)
 		{
 			MFSystem_HandleEventsPlatformSpecific();

@@ -133,13 +133,13 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 				InitEvent *pInitEvent = (InitEvent*)pBuffer;
 				MFDebug_Assert(pInitEvent->deviceType == IDD_Gamepad, "Only gamepads supported currently..");
 
-				strcpy(pGamepad->name, (char*)&pInitEvent[1]);
+				MFString_Copy(pGamepad->name, (char*)&pInitEvent[1]);
 			}
 			else if(pPacket->id == MFMAKEFOURCC('N','A','M','E'))
 			{
 				NameEvent *pNameEvent = (NameEvent*)pBuffer;
 
-				strcpy(pGamepad->butonNames[pNameEvent->buttonID], (char*)&pNameEvent[1]);
+				MFString_Copy(pGamepad->butonNames[pNameEvent->buttonID], (char*)&pNameEvent[1]);
 
 				// if we have received the last button name, make the gamepad active and clear the state..
 				if(pNameEvent->buttonID == GamepadType_Max-1)
@@ -265,14 +265,14 @@ int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int
 	pDevice->deviceID = deviceID;
 
 	const char *pDeviceName = MFInput_GetDeviceName(device, deviceID);
-	int len = strlen(pDeviceName);
+	int len = MFString_Length(pDeviceName);
 	MFDebug_Assert(len < 128, "Device name too long...");
 
 	InitEvent *pInit = (InitEvent*)buffer;
 	pInit->auth = 0xFEF0;
 	pInit->id = MFMAKEFOURCC('I','N','I','T');
 	pInit->deviceType = (MFInputDevice)device;
-	strcpy((char*)&pInit[1], pDeviceName);
+	MFString_Copy((char*)&pInit[1], pDeviceName);
 	pInit->packetLen = (uint16)MFALIGN(sizeof(InitEvent) + len + 1, 4);
 
 	MFSockets_Send(pDevice->socket, buffer, pInit->packetLen, 0);
@@ -280,14 +280,14 @@ int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int
 	for(int a=0; a<GamepadType_Max; a++)
 	{
 		const char *pButtonName = MFInput_GetGamepadButtonName(a, deviceID);
-		len = strlen(pButtonName);
+		len = MFString_Length(pButtonName);
 		MFDebug_Assert(len < 128, "Button name too long...");
 
 		NameEvent *pName = (NameEvent*)buffer;
 		pName->auth = 0xFEF0;
 		pName->id = MFMAKEFOURCC('N','A','M','E');
 		pName->buttonID = a;
-		strcpy((char*)&pName[1], pButtonName);
+		MFString_Copy((char*)&pName[1], pButtonName);
 		pName->packetLen = (uint16)MFALIGN(sizeof(NameEvent) + len + 1, 4);
 
 		MFSockets_Send(pDevice->socket, buffer, pName->packetLen, 0);

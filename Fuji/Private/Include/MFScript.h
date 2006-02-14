@@ -9,6 +9,8 @@
 #if !defined(_MFSCRIPT_H)
 #define _MFSCRIPT_H
 
+#include "MFVector.h"
+
 #define MFEntryPoint_Main -1
 
 /**
@@ -132,6 +134,16 @@ int MFScript_GetAddr(MFScript *pScript, uint32 scriptAddress, uint32 **ppPhysica
  * @return Returns a pointer to a the string converted C string in the MFStr buffer.
  */
 const char* MFScript_GetCString(MFScript *pScript, uint32 scriptString);
+
+/**
+ * Convert a script vector into an MFVector.
+ * Converts a script vector into an MFVector.
+ * @param pScript MFScript where the vector lives.
+ * @param scriptVector A vector in the script.
+ * @param numComponents Number of components to read into the vector.
+ * @return Returns the script vector as a MFVector.
+ */
+MFVector MFScript_GetVector(MFScript *pScript, uint32 scriptVector, int numComponents);
 
 #endif
 

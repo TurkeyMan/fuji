@@ -17,7 +17,7 @@ const char * MFString_ToLower(const char *pString)
 	char *pT = pBuffer;
 	while(*pString)
 	{
-		*pT = MFToLower(*pString);
+		*pT = (char)MFToLower(*pString);
 		++pT;
 		++pString;
 	}
@@ -37,7 +37,7 @@ const char * MFString_ToUpper(const char *pString)
 	char *pT = pBuffer;
 	while(*pString)
 	{
-		*pT = MFToUpper(*pString);
+		*pT = (char)MFToUpper(*pString);
 		++pT;
 		++pString;
 	}
@@ -69,7 +69,7 @@ const char * MFStrN(const char *pSource, int n)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
-	strncpy(pBuffer, pSource, n);
+	MFString_CopyN(pBuffer, pSource, n);
 	pBuffer[n] = 0;
 
 	gStringOffset += n+1;
@@ -79,15 +79,46 @@ const char * MFStrN(const char *pSource, int n)
 	return pBuffer;
 }
 
+int MFString_Compare(const char *pString1, const char *pString2)
+{
+	while(*pString1 == *pString2++)
+	{
+		if(*pString1++ == 0)
+			return 0;
+	}
+
+	return (*(const unsigned char *)pString1 - *(const unsigned char *)(pString2 - 1));
+}
+
+int MFString_CompareN(const char *pString1, const char *pString2, int n)
+{
+	if(n == 0)
+		return 0;
+
+	do
+	{
+		if(*pString1 != *pString2++)
+			return (*(const unsigned char *)pString1 - *(const unsigned char *)(pString2 - 1));
+
+		if(*pString1++ == 0)
+			break;
+	}
+	while(--n != 0);
+
+	return 0;
+}
+
 int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
-	while(*pSource1 != '\0' && MFToLower(*pSource1) == MFToLower(*pSource2))
+	return stricmp(pSource1, pSource2);
+
+	while(*pSource1 != '\0' && MFToLower((uint8)*pSource1) == MFToLower((uint8)*pSource2))
 	{
 		pSource1++;
 		pSource2++;
 	}
 
-	return MFToLower(*(unsigned char *)pSource1) - MFToLower(*(unsigned char *)pSource2);
+	return MFToLower((uint8)*pSource1) - MFToLower((uint8)*pSource2);
 }
 
 int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
@@ -95,33 +126,36 @@ int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 	if(n == 0)
 		return 0;
 
-	while(n-- != 0 && MFToLower(*pSource1) == MFToLower(*pSource2))
+	while(n-- != 0 && *pSource1 != '\0' && MFToLower((uint8)*pSource1) == MFToLower((uint8)*pSource2))
 	{
-		if(n == 0 || *pSource1 == '\0' || *pSource2 == '\0')
-			break;
 		pSource1++;
 		pSource2++;
 	}
 
-	return MFToLower(*(unsigned char *)pSource1) - MFToLower(*(unsigned char *)pSource2);
+	return MFToLower((uint8)*pSource1) - MFToLower((uint8)*pSource2);
+}
+
+char* MFString_Chr(const char *pString, int c)
+{
+	do
+	{
+		if(*pString == (char)c)
+			return (char*)pString;
+	}
+	while(*pString++);
+
+	return (NULL);
 }
 
 char* MFString_RChr(const char *pSource, int c)
 {
-	const char *pLast = NULL;
+	char *pLast;
 
-	if(c)
+	for(pLast = NULL; *pSource; pSource++)
 	{
-		while((pSource=strchr(pSource, c)) != NULL)
-		{
-			pLast = pSource;
-			pSource++;
-		}
-	}
-	else
-	{
-		pLast = strchr(pSource, c);
+		if(c == *pSource)
+			pLast = (char*)pSource;
 	}
 
-	return (char *)pLast;
+	return pLast;
 }

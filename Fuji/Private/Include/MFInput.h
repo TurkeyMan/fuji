@@ -285,6 +285,23 @@ enum MFGamepadButton
 	Button_PP_Start		= 8,	/**< Start button on the PSP gamepad */
 	Button_PP_Select	= 9,	/**< Select button on the PSP gamepad */
 
+// XBox 360 controller enums
+	Button_X3_A			= 0,	/**< A button on an XBox 360 gamepad */
+	Button_X3_B			= 1,	/**< B button on an XBox 360 gamepad */
+	Button_X3_X			= 2,	/**< X button on an XBox 360 gamepad */
+	Button_X3_Y			= 3,	/**< Y button on an XBox 360 gamepad */
+
+	Button_X3_LB		= 4,	/**< White button on an XBox 360 gamepad */
+	Button_X3_RB		= 5,	/**< Black button on an XBox 360 gamepad */
+	Button_X3_LT		= 6,	/**< Left trigger on an XBox 360 gamepad */
+	Button_X3_RT		= 7,	/**< Right trigger on an XBox 360 gamepad */
+
+	Button_X3_Start		= 8,	/**< Start button on an XBox 360 gamepad */
+	Button_X3_Back		= 9,	/**< Back button on an XBox 360 gamepad */
+
+	Button_X3_LThumb	= 10,	/**< Left Thumbstick button on an XBox 360 gamepad */
+	Button_X3_RThumb	= 11,	/**< Right Thumbstick button on an XBox 360 gamepad */
+
 // general controller enums
 	Button_DUp = 12,			/**< Up on the digital pad */
 	Button_DDown,				/**< Down on the digital pad */

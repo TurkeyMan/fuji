@@ -22,20 +22,20 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
+				if(!MFString_CaseCmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
 				}
 			}
 
-			if(!stricmp(&argv[a][1], "?") || !stricmp(&argv[a][1], "h") || !stricmp(&argv[a][1], "-help"))
+			if(!MFString_CaseCmp(&argv[a][1], "?") || !MFString_CaseCmp(&argv[a][1], "h") || !MFString_CaseCmp(&argv[a][1], "-help"))
 			{
 				// show help
 
 				return 0;
 			}
-			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
+			else if(!MFString_CaseCmp(&argv[a][1], "v") || !MFString_CaseCmp(&argv[a][1], "version"))
 			{
 				printf("%.2f", (float)VERSION/100.0f);
 				return VERSION;
@@ -45,11 +45,11 @@ int main(int argc, char *argv[])
 		{
 			if(!source[0])
 			{
-				strcpy(source, argv[a]);
+				MFString_Copy(source, argv[a]);
 			}
 			else if(!dest[0])
 			{
-				strcpy(dest, argv[a]);
+				MFString_Copy(dest, argv[a]);
 			}
 			else
 			{
@@ -66,46 +66,46 @@ int main(int argc, char *argv[])
 	}
 
 	// find source file extension
-	for(a=(int)strlen(source); a>0 && source[a-1] != '.'; a--);
+	for(a=MFString_Length(source); a>0 && source[a-1] != '.'; a--);
 
 	// initialise the strings
-	strcpy(pModel->name, "");
-	strcpy(pModel->author, "");
-	strcpy(pModel->authoringTool, "");
-	strcpy(pModel->copyrightString, "");
+	MFString_Copy(pModel->name, "");
+	MFString_Copy(pModel->author, "");
+	MFString_Copy(pModel->authoringTool, "");
+	MFString_Copy(pModel->copyrightString, "");
 
 	// read source file
-	if(!stricmp(&source[a], "f3d"))
+	if(!MFString_CaseCmp(&source[a], "f3d"))
 	{
 		// read .f3d file
 		a = pModel->ReadF3D(source);
 		if(a) return a;
 	}
-	else if(!stricmp(&source[a], "ase"))
+	else if(!MFString_CaseCmp(&source[a], "ase"))
 	{
 		// read .ase file
 		a = pModel->ReadASE(source);
 		if(a) return a;
 	}
-	else if(!stricmp(&source[a], "dae"))
+	else if(!MFString_CaseCmp(&source[a], "dae"))
 	{
 		// read collada file...
 		a = pModel->ReadDAE(source);
 		if(a) return a;
 	}
-	else if(!stricmp(&source[a], "md2"))
+	else if(!MFString_CaseCmp(&source[a], "md2"))
 	{
 		// read MD2 file... (Quake2)
 		a = pModel->ReadMD2(source);
 		if(a) return a;
 	}
-	else if(!stricmp(&source[a], "pk3"))
+	else if(!MFString_CaseCmp(&source[a], "pk3"))
 	{
 		// read MD3 file... (Quake3)
 		a = pModel->ReadMD3(source);
 		if(a) return a;
 	}
-	else if(!stricmp(&source[a], "me2"))
+	else if(!MFString_CaseCmp(&source[a], "me2"))
 	{
 		// read MEMD2 file... (Manu Engine)
 		a = pModel->ReadMEMD2(source);
@@ -125,21 +125,21 @@ int main(int argc, char *argv[])
 	// generate output filename
 	if(!dest[0])
 	{
-		strcpy(dest, source);
+		MFString_Copy(dest, source);
 
 		dest[a] = 0;
 		strcat(dest, "mdl");
 	}
 
 	// find output extension
-	for(a=(int)strlen(dest); a>0 && dest[a-1] != '.'; a--);
+	for(a=MFString_Length(dest); a>0 && dest[a-1] != '.'; a--);
 
 	// write output file
-	if(!stricmp(&dest[a], "f3d"))
+	if(!MFString_CaseCmp(&dest[a], "f3d"))
 	{
 		pModel->WriteF3D(dest);
 	}
-	else if(!stricmp(&dest[a], "mdl"))
+	else if(!MFString_CaseCmp(&dest[a], "mdl"))
 	{
 		if(platform == FP_Unknown)
 		{

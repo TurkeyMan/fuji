@@ -98,15 +98,15 @@ void ParseMD2File(char *pFile, uint32 length)
 	// material
 	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
 
-	strcpy(pMatChunk->materials[0].name, pModel->name);
-	strcpy(pMatChunk->materials[0].maps[0], pModel->name);
+	MFString_Copy(pMatChunk->materials[0].name, pModel->name);
+	MFString_Copy(pMatChunk->materials[0].maps[0], pModel->name);
 
 	// mesh data
 	F3DMeshChunk *pMC = pModel->GetMeshChunk();
 	F3DSubObject &sub = pMC->subObjects[0];
 
 	// copy name (TODO: remove file extension)
-	strcpy(sub.name, pModel->name);
+	MFString_Copy(sub.name, pModel->name);
 
 	// colours
 	sub.colours.resize(1);
@@ -217,7 +217,7 @@ int F3DFile::ReadMD2(char *pFilename)
 
 	int a;
 
-	for(a=(int)strlen(pFilename)-1; a>=0; a--)
+	for(a=MFString_Length(pFilename)-1; a>=0; a--)
 	{
 		if(pFilename[a] == '/' || pFilename[a] == '\\')
 		{
@@ -225,8 +225,8 @@ int F3DFile::ReadMD2(char *pFilename)
 		}
 	}
 
-	strcpy(pModel->name, &pFilename[a+1]);
-	pModel->name[strlen(pModel->name) - 4] = 0;
+	MFString_Copy(pModel->name, &pFilename[a+1]);
+	pModel->name[MFString_Length(pModel->name) - 4] = 0;
 
 	ParseMD2File(file, filesize);
 

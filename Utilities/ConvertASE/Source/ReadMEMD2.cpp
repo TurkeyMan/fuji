@@ -106,7 +106,7 @@ int ReadMesh(char** buf, int frmcount, float scale, uint32 flags)
 	mesh->UVScale.y=65525.0f/mesh->UVScale.y;
 
 	F3DSubObject &sub = pModel->GetMeshChunk()->subObjects.push();
-	strcpy(sub.name, mesh->Name);
+	MFString_Copy(sub.name, mesh->Name);
 	sub.matSubobjects[0].materialIndex = mesh->MaterialID;
 
 	// read vertex data
@@ -175,8 +175,8 @@ void ParseMEMD2File(char *pBuffer)
 
 	CalcNormTable();
 
-	strcpy(pModel->name, head->Name);
-	strcpy(pModel->author, head->Creator);
+	MFString_Copy(pModel->name, head->Name);
+	MFString_Copy(pModel->author, head->Creator);
 
 	if(head->SequenceCount)
 	{
@@ -199,16 +199,16 @@ void ParseMEMD2File(char *pBuffer)
 
 			// use texture name instead of material name
 			char *pTex = material->TextureFileName;
-			pTex += strlen(pTex);
+			pTex += MFString_Length(pTex);
 
 			while(pTex > material->TextureFileName && pTex[-1] != '/' && pTex[-1] != '\\')
 			{
 				--pTex;
 			}
 
-			pTex[strlen(pTex) - 4] = NULL;
+			pTex[MFString_Length(pTex) - 4] = NULL;
 
-			strcpy(mat.name, pTex);
+			MFString_Copy(mat.name, pTex);
 
 			// material paramaters
 			mat.specularLevel = material->matPower;

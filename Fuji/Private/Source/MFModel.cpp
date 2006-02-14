@@ -163,7 +163,7 @@ MFModel* MFModel_Create(const char *pFilename)
 				// store filename for later reference
 				pTemplate = (MFModelTemplate*)pTemplateData;
 
-				strcpy(&pTemplateData[size], pFilename);
+				MFString_Copy(&pTemplateData[size], pFilename);
 				pTemplate->pFilename = &pTemplateData[size];
 
 				gModelBank.Create(pTemplate);

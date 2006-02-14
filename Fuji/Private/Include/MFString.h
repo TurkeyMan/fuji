@@ -70,14 +70,15 @@ const char * MFString_ToUpper(const char *pString);
 int MFString_Compare(const char *pString1, const char *pString2);
 
 /**
- * Compares 2 strings.
- * Compares 2 strings and returns the difference between them.
+ * Compares 2 strings with a maximum character limit.
+ * Compares 2 strings with a maximum character limit and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
+ * @param n Maximum number of characters to compare.
  * @return Returns the difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_Compare()
  */
-int MFString_CompareN(const char *pString1, const char *pString2);
+int MFString_CompareN(const char *pString1, const char *pString2, int n);
 
 /**
  * Compares 2 strings with case insensitivity.
@@ -101,12 +102,22 @@ int MFString_CaseCmp(const char *pString1, const char *pString2);
 int MFString_CaseCmpN(const char *pString1, const char *pString2, uint32 n);
 
 /**
+ * Searches through a string for the specified character.
+ * Searches through a string for the specified character.
+ * @param pString String to search.
+ * @param c Character to search for.
+ * @return Returns a pointer to the first instance of the character \a c in \a pString.
+ * @see MFString_RChr()
+ */
+char* MFString_Chr(const char *pString, int c);
+
+/**
  * Searches backwards through a string for the specified character.
  * Searches backwards through a string for the specified character.
  * @param pString String to search.
  * @param c Character to search for.
  * @return Returns a pointer to the last instance of the character \a c in \a pString.
- * @see MFString_CaseCmp()
+ * @see MFString_Chr()
  */
 char* MFString_RChr(const char *pString, int c);
 

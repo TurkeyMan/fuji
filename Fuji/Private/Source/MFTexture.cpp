@@ -90,7 +90,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		pTexture->refCount = 0;
 		pTexture->pTemplateData = pTemplate;
-		strcpy(pTexture->name, pName);
+		MFString_Copy(pTexture->name, pName);
 
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
 	}

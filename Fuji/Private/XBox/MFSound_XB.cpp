@@ -320,7 +320,7 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 	ov_test_open(&track.vorbisFile);
 
 	// copy the filename
-	strcpy(track.name, pFilename);
+	MFString_Copy(track.name, pFilename);
 
 	// get vorbis file info
 	track.pInfo = ov_info(&track.vorbisFile, -1);

@@ -115,7 +115,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 			D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 		}
 
-		strcpy(pTexture->name, pName);
+		MFString_Copy(pTexture->name, pName);
 
 		// create template data
 		uint32 levelCount = pTexture->pTexture->GetLevelCount();
