@@ -29,6 +29,16 @@
 	int InitRawMouse(bool _includeRDPMouse);
 #endif
 
+#if defined(SUPPORT_XINPUT)
+	#include <XInput.h>
+	#include <wbemidl.h>
+	#include <stdio.h>
+
+	#pragma comment(lib, "Xinput")
+
+	HRESULT IsXInputDevice(const GUID* pGuidProductFromDirectInput);
+#endif
+
 void MFInputPC_LoadGamepadMappings();
 
 
@@ -94,12 +104,17 @@ struct MFGamepadInfo
 
 struct MFGamepadPC
 {
+	// XInput
+	int XInputID;
+
+	// DirctInput
 	IDirectInputDevice8	*pDevice;
 	IDirectInputEffect *pForceFeedback;
 
-	MFGamepadInfo *pGamepadInfo;
-
 	DIDEVCAPS caps;
+
+	// Gamepad Info
+	MFGamepadInfo *pGamepadInfo;
 
 	int  forceFeedbackState;
 	bool bUsePOV;
@@ -721,6 +736,12 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 
 	HRESULT hr;
 
+#if defined(SUPPORT_XINPUT)
+	// if device is an XInput device, we'll let XInput handle it
+	if(IsXInputDevice(&lpddi->guidProduct))
+		return DIENUM_CONTINUE;
+#endif
+
 	// attempt to create device
 	hr = pDirectInput->CreateDevice(lpddi->guidInstance, &gPCJoysticks[gGamepadCount].pDevice, NULL);
 
@@ -729,6 +750,9 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 		MFDebug_Warn(1, "Failed to create gamepad device.");
 		return DIENUM_CONTINUE;
 	}
+
+	// we found a valid gamepad
+	gPCJoysticks[gGamepadCount].XInputID = -1;
 
 	// get the device caps
 	memset(&gPCJoysticks[gGamepadCount].caps, 0, sizeof(DIDEVCAPS));
@@ -871,6 +895,31 @@ void MFInput_InitModulePlatformSpecific()
 	}
 #endif
 
+#if defined(SUPPORT_XINPUT)
+	// enumerate XInput devices
+	XINPUT_STATE state;
+	for(int a=0; a<4; a++)
+	{
+		if(XInputGetState(a, &state) == ERROR_SUCCESS)
+		{
+			// we have an xinput controller, reserve 4 gamepad slots for hotswapping
+			gPCJoysticks[0].XInputID = 0;
+			gPCJoysticks[1].XInputID = 1;
+			gPCJoysticks[2].XInputID = 2;
+			gPCJoysticks[3].XInputID = 3;
+
+			gPCJoysticks[0].pGamepadInfo = &gGamepadDescriptors[8];
+			gPCJoysticks[1].pGamepadInfo = &gGamepadDescriptors[8];
+			gPCJoysticks[2].pGamepadInfo = &gGamepadDescriptors[8];
+			gPCJoysticks[3].pGamepadInfo = &gGamepadDescriptors[8];
+
+			gGamepadCount += 4;
+
+			break;
+		}
+	}
+#endif
+
 	// enumerate gamepads
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
 }
@@ -931,16 +980,33 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 		case IDD_Gamepad:
 			if(id < gGamepadCount)
 			{
-				DIDEVCAPS caps;
-				memset(&caps, 0, sizeof(DIDEVCAPS));
-				caps.dwSize = sizeof(DIDEVCAPS);
+#if defined(SUPPORT_XINPUT)
+				if(gPCJoysticks[id].XInputID > -1)
+				{
+					XINPUT_STATE state;
+					DWORD attached = XInputGetState(gPCJoysticks[id].XInputID, &state);
 
-				gPCJoysticks[id].pDevice->GetCapabilities(&caps);
-
-				if(caps.dwFlags & DIDC_ATTACHED)
-					return IDS_Ready;
+					if(attached == ERROR_SUCCESS)
+						return IDS_Ready;
+					else if(attached == ERROR_DEVICE_NOT_CONNECTED)
+						return IDS_Disconnected;
+					else
+						MFDebug_Assert(false, "Error reading XInput device state.");
+				}
 				else
-					return IDS_Disconnected;
+#endif
+				{
+					DIDEVCAPS caps;
+					memset(&caps, 0, sizeof(DIDEVCAPS));
+					caps.dwSize = sizeof(DIDEVCAPS);
+
+					gPCJoysticks[id].pDevice->GetCapabilities(&caps);
+
+					if(caps.dwFlags & DIDC_ATTACHED)
+						return IDS_Ready;
+					else
+						return IDS_Disconnected;
+				}
 			}
 			break;
 
@@ -974,98 +1040,135 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 	memset(pGamepadState, 0, sizeof(*pGamepadState));
 
-	// poll the gamepad
-	hr = gPCJoysticks[id].pDevice->Poll(); 
-
-	if(FAILED(hr))
+#if defined(SUPPORT_XINPUT)
+	if(gPCJoysticks[id].XInputID > -1)
 	{
-		// attempt to recover the device
-		hr = gPCJoysticks[id].pDevice->Acquire();
+		XINPUT_STATE state;
+		DWORD attached = XInputGetState(gPCJoysticks[id].XInputID, &state);
 
-		if(SUCCEEDED(hr))
+		if(attached == ERROR_SUCCESS)
 		{
-			if(gPCJoysticks[id].pForceFeedback && gPCJoysticks[id].forceFeedbackState)
-			{
-				// restart the vibration effect
-				gPCJoysticks[id].pForceFeedback->Start(1, 0);
-			}
+			pGamepadState->values[Button_X3_A] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_B] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_X] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_Y] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_LB] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_RB] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_Start] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_Back] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_LThumb] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_X3_RThumb] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+
+			pGamepadState->values[Button_DUp] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_DDown] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_DLeft] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
+			pGamepadState->values[Button_DRight] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+
+			pGamepadState->values[Button_X3_LT] = (state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bLeftTrigger * (1.0f / 255.0f) : 0.0f;
+			pGamepadState->values[Button_X3_RT] = (state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bRightTrigger * (1.0f / 255.0f) : 0.0f;
+
+			pGamepadState->values[Axis_LX] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLX * (1.0f / 32767.0f), 1.0f);
+			pGamepadState->values[Axis_LY] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLY * (1.0f / 32767.0f), 1.0f);
+			pGamepadState->values[Axis_RX] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRX * (1.0f / 32767.0f), 1.0f);
+			pGamepadState->values[Axis_RY] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRY * (1.0f / 32767.0f), 1.0f);
 		}
 	}
-
-	// read gamepad
-	if(SUCCEEDED(hr))
+	else
+#endif
 	{
-		DIJOYSTATE2 joyState;
+		// poll the gamepad
+		hr = gPCJoysticks[id].pDevice->Poll(); 
 
-		// get device state
-		hr = gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
+		if(FAILED(hr))
+		{
+			// attempt to recover the device
+			hr = gPCJoysticks[id].pDevice->Acquire();
 
+			if(SUCCEEDED(hr))
+			{
+				if(gPCJoysticks[id].pForceFeedback && gPCJoysticks[id].forceFeedbackState)
+				{
+					// restart the vibration effect
+					gPCJoysticks[id].pForceFeedback->Start(1, 0);
+				}
+			}
+		}
+
+		// read gamepad
 		if(SUCCEEDED(hr))
 		{
-			const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
-			LONG *pAxii = (LONG*)&joyState;
+			DIJOYSTATE2 joyState;
 
-			// convert input to float data
-			for(int a=0; a<GamepadType_Max; a++)
+			// get device state
+			hr = gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
+
+			if(SUCCEEDED(hr))
 			{
-				if(pButtonMap[a] == -1)
-					continue;
+				const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
+				LONG *pAxii = (LONG*)&joyState;
 
-				int axisID = MFGETAXIS(pButtonMap[a]);
-				bool readAnalog = false;
-
-				// test if analog input is present
-				if(pButtonMap[a] & AID_Analog)
+				// convert input to float data
+				for(int a=0; a<GamepadType_Max; a++)
 				{
-					DIDEVICEOBJECTINSTANCE axisInfo;
-					axisInfo.dwSize = sizeof(DIDEVICEOBJECTINSTANCE);
+					if(pButtonMap[a] == -1)
+						continue;
 
-					hr = gPCJoysticks[id].pDevice->GetObjectInfo(&axisInfo, axisID<<2, DIPH_BYOFFSET);
+					int axisID = MFGETAXIS(pButtonMap[a]);
+					bool readAnalog = false;
 
-					if(SUCCEEDED(hr))
-						readAnalog = true;
+					// test if analog input is present
+					if(pButtonMap[a] & AID_Analog)
+					{
+						DIDEVICEOBJECTINSTANCE axisInfo;
+						axisInfo.dwSize = sizeof(DIDEVICEOBJECTINSTANCE);
+
+						hr = gPCJoysticks[id].pDevice->GetObjectInfo(&axisInfo, axisID<<2, DIPH_BYOFFSET);
+
+						if(SUCCEEDED(hr))
+							readAnalog = true;
+					}
+
+					// if we are not reading the analog axis
+					if(!readAnalog)
+					{
+						// read digital button
+						pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
+					}
+					else
+					{
+						// read an analog axis
+						pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
+					}
+
+					// invert any buttons with the AID_Negative flag
+					pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
+					// clamp any butons with the AID_Clamp flag to the positive range
+					pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
 				}
 
-				// if we are not reading the analog axis
-				if(!readAnalog)
+				// if device has a pov, and we want to read from it
+				if(gPCJoysticks[id].bUsePOV)
 				{
-					// read digital button
-					pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
-				}
-				else
-				{
-					// read an analog axis
-					pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
-				}
+					// read POV
+					DWORD pov = joyState.rgdwPOV[0];
+					bool POVCentered = (LOWORD(pov) == 0xFFFF);
 
-				// invert any buttons with the AID_Negative flag
-				pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
-				// clamp any butons with the AID_Clamp flag to the positive range
-				pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
-			}
-
-			// if device has a pov, and we want to read from it
-			if(gPCJoysticks[id].bUsePOV)
-			{
-				// read POV
-				DWORD pov = joyState.rgdwPOV[0];
-				bool POVCentered = (LOWORD(pov) == 0xFFFF);
-
-				if(POVCentered)
-				{
-					// POV is centered
-					pGamepadState->values[Button_DUp] = 0.0f;
-					pGamepadState->values[Button_DDown] = 0.0f;
-					pGamepadState->values[Button_DLeft] = 0.0f;
-					pGamepadState->values[Button_DRight] = 0.0f;
-				}
-				else
-				{
-					// read POV (or more appropriately titled, POS)
-					pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
-					pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
-					pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
-					pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+					if(POVCentered)
+					{
+						// POV is centered
+						pGamepadState->values[Button_DUp] = 0.0f;
+						pGamepadState->values[Button_DDown] = 0.0f;
+						pGamepadState->values[Button_DLeft] = 0.0f;
+						pGamepadState->values[Button_DRight] = 0.0f;
+					}
+					else
+					{
+						// read POV (or more appropriately titled, POS)
+						pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
+						pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
+						pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
+						pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+					}
 				}
 			}
 		}
@@ -1779,6 +1882,134 @@ int HandleRawMouseMessage(HANDLE hDevice)
 	ReadRawInput((RAWINPUT*)pBuffer);
 
 	return 0;
+}
+
+#endif
+
+#if defined(SUPPORT_XINPUT)
+//-----------------------------------------------------------------------------
+// Enum each PNP device using WMI and check each device ID to see if it contains 
+// "IG_" (ex. "VID_045E&PID_028E&IG_00").  If it does, then it's an XInput device
+// Unfortunately this information can not be found by just using DirectInput 
+//-----------------------------------------------------------------------------
+HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
+{
+    IWbemLocator*           pIWbemLocator  = NULL;
+    IEnumWbemClassObject*   pEnumDevices   = NULL;
+    IWbemClassObject*       pDevices[20]   = {0};
+    IWbemServices*          pIWbemServices = NULL;
+    BSTR                    bstrNamespace  = NULL;
+    BSTR                    bstrDeviceID   = NULL;
+    BSTR                    bstrClassName  = NULL;
+    DWORD                   uReturned      = 0;
+    bool                    bIsXinputDevice= false;
+    UINT                    iDevice        = 0;
+    VARIANT                 var;
+    HRESULT                 hr;
+
+    // CoInit if needed
+    hr = CoInitialize(NULL);
+    bool bCleanupCOM = SUCCEEDED(hr);
+
+    // Create WMI
+    hr = CoCreateInstance( __uuidof(WbemLocator),
+                           NULL,
+                           CLSCTX_INPROC_SERVER,
+                           __uuidof(IWbemLocator),
+                           (LPVOID*) &pIWbemLocator);
+    if( FAILED(hr) || pIWbemLocator == NULL )
+        goto LCleanup;
+
+    bstrNamespace = SysAllocString( L"\\\\.\\root\\cimv2" );if( bstrNamespace == NULL ) goto LCleanup;        
+    bstrClassName = SysAllocString( L"Win32_PNPEntity" );   if( bstrClassName == NULL ) goto LCleanup;        
+    bstrDeviceID  = SysAllocString( L"DeviceID" );          if( bstrDeviceID == NULL )  goto LCleanup;        
+    
+    // Connect to WMI 
+    hr = pIWbemLocator->ConnectServer( bstrNamespace, NULL, NULL, 0L, 
+                                       0L, NULL, NULL, &pIWbemServices );
+    if( FAILED(hr) || pIWbemServices == NULL )
+        goto LCleanup;
+
+    // Switch security level to IMPERSONATE. 
+    CoSetProxyBlanket( pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, 
+                       RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE );                    
+
+    hr = pIWbemServices->CreateInstanceEnum( bstrClassName, 0, NULL, &pEnumDevices ); 
+    if( FAILED(hr) || pEnumDevices == NULL )
+        goto LCleanup;
+
+    // Loop over all devices
+    for( ;; )
+    {
+        // Get 20 at a time
+        hr = pEnumDevices->Next( 10000, 20, pDevices, &uReturned );
+        if( FAILED(hr) )
+            goto LCleanup;
+        if( uReturned == 0 )
+            break;
+
+        for( iDevice=0; iDevice<uReturned; iDevice++ )
+        {
+            // For each device, get its device ID
+            hr = pDevices[iDevice]->Get( bstrDeviceID, 0L, &var, NULL, NULL );
+            if( SUCCEEDED( hr ) && var.vt == VT_BSTR && var.bstrVal != NULL )
+            {
+                // Check if the device ID contains "IG_".  If it does, then it's an XInput device
+				    // This information can not be found from DirectInput 
+                if( wcsstr( var.bstrVal, L"IG_" ) )
+                {
+                    // If it does, then get the VID/PID from var.bstrVal
+                    DWORD dwPid = 0, dwVid = 0;
+                    WCHAR* strVid = wcsstr( var.bstrVal, L"VID_" );
+                    if( strVid && swscanf( strVid, L"VID_%4X", &dwVid ) != 1 )
+                        dwVid = 0;
+                    WCHAR* strPid = wcsstr( var.bstrVal, L"PID_" );
+                    if( strPid && swscanf( strPid, L"PID_%4X", &dwPid ) != 1 )
+                        dwPid = 0;
+
+                    // Compare the VID/PID to the DInput device
+                    DWORD dwVidPid = MAKELONG( dwVid, dwPid );
+                    if( dwVidPid == pGuidProductFromDirectInput->Data1 )
+                    {
+                        bIsXinputDevice = true;
+                        goto LCleanup;
+                    }
+                }
+            }
+			if(pDevices[iDevice])
+			{
+				pDevices[iDevice]->Release();
+				pDevices[iDevice] = NULL;
+			}
+        }
+    }
+
+LCleanup:
+    if(bstrNamespace)
+        SysFreeString(bstrNamespace);
+    if(bstrDeviceID)
+        SysFreeString(bstrDeviceID);
+    if(bstrClassName)
+        SysFreeString(bstrClassName);
+    for( iDevice=0; iDevice<20; iDevice++ )
+	{
+		if(pDevices[iDevice])
+		{
+			pDevices[iDevice]->Release();
+			pDevices[iDevice] = NULL;
+		}
+	}
+	if(pEnumDevices)
+		pEnumDevices->Release();
+	if(pIWbemLocator)
+		pIWbemLocator->Release();
+	if(pIWbemServices)
+		pIWbemServices->Release();
+
+    if( bCleanupCOM )
+        CoUninitialize();
+
+    return bIsXinputDevice;
 }
 
 #endif

@@ -83,6 +83,9 @@ enum MFEndian
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
 
+	// add support for XInput (will reserve the first 4 controller slots and support hotswapping if any XInput devices are connected at startup)
+	#define SUPPORT_XINPUT
+
 	// disable 'unreferenced formal parameter'
 	#pragma warning(disable:4100)
 	

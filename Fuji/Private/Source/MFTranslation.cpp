@@ -22,7 +22,8 @@ static const char * const languageNamesEnglish[MFLang_Max] =
 	"Japanese",
 	"Korean",
 	"Chinese",
-	"Russian"
+	"Russian",
+	"Portuguese"
 };
 
 static const char * const languageNamesNative[MFLang_Max] =
@@ -39,7 +40,8 @@ static const char * const languageNamesNative[MFLang_Max] =
 	"Japanese",
 	"Korean",
 	"Chinese",
-	"Russian"
+	"Russian",
+	"Português"
 };
 
 
