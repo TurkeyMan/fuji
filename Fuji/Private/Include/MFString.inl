@@ -1,26 +1,26 @@
 
 // some useful string parsing functions
-inline bool MFIsWhite(char c)
+inline bool MFIsWhite(int c)
 {
 	return c==' ' || c=='\t';
 }
 
-inline bool MFIsAlpha(char c)
+inline bool MFIsAlpha(int c)
 {
 	return (c>='a' && c<='z') || (c>='A' && c<='Z');
 }
 
-inline bool MFIsNumeric(char c)
+inline bool MFIsNumeric(int c)
 {
 	return c>='0' && c<='9';
 }
 
-inline bool MFIsAlphaNumeric(char c)
+inline bool MFIsAlphaNumeric(int c)
 {
 	return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || (c=='_');
 }
 
-inline bool MFIsNewline(char c)
+inline bool MFIsNewline(int c)
 {
 	return c=='\n' || c=='\r';
 }

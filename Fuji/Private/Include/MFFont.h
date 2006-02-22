@@ -42,11 +42,37 @@ MFFont* MFFont_Create(const char *pFilename);
  */
 void MFFont_Destroy(MFFont *pFont);
 
-
+/**
+ * Get the height of a font.
+ * Gets the native height of a font.
+ * @param pFont Pointer to a font.
+ * @return The native height (in texels) of the specified font.
+ * @see MFFont_Create()
+ */
 float MFFont_GetFontHeight(MFFont *pFont);
 
-float MFFont_GetCharacterWidth(MFFont *pFont, int character, float scale, int fontPage = 0);
+/**
+ * Get the width of a character.
+ * Gets the native width of a character in a font.
+ * @param pFont Pointer to a font.
+ * @param character Character to get the wodth for.
+ * @param fontPage The font page where the character lies.
+ * @return The native width (in texels) of the specified character.
+ * @see MFFont_Create()
+ */
+float MFFont_GetCharacterWidth(MFFont *pFont, int character, int fontPage = 0);
 
+/**
+ * Get the physical width of a string.
+ * Gets the physical width of a string.
+ * @param pFont Pointer to a font.
+ * @param pText Text to get the width for.
+ * @param height Height of the text (hidth is relative to the height).
+ * @param maxLen Maximum number of characters to consider from the source string.
+ * @param pTotalHeight Optional pointer to a float that receives the total height of the specified string.
+ * @return The physical width of the specified string rendered by the specified font.
+ * @see MFFont_Create()
+ */
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen = -1, float *pTotalHeight = NULL);
 
 /**

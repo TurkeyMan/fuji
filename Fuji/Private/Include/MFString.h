@@ -146,27 +146,27 @@ const char* MFStrN(const char *source, int n);
 /**
  * Test if the specified character is a while space character.
  */
-bool MFIsWhite(char c);
+bool MFIsWhite(int c);
 
 /**
  * Test if the specified character is an alphabetic character.
  */
-bool MFIsAlpha(char c);
+bool MFIsAlpha(int c);
 
 /**
  * Test if the specified character is a numeric character.
  */
-bool MFIsNumeric(char c);
+bool MFIsNumeric(int c);
 
 /**
  * Test if the specified character is an alphabetic or numeric character.
  */
-bool MFIsAlphaNumeric(char c);
+bool MFIsAlphaNumeric(int c);
 
 /**
  * Test if the specified character is a newline character.
  */
-bool MFIsNewline(char c);
+bool MFIsNewline(int c);
 
 /**
  * Converts a character to lower case.

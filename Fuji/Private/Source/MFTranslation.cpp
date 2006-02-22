@@ -5,6 +5,7 @@
 
 struct MFStringTable
 {
+	uint32 magic;
 	int numStrings;
 	const char *pStrings[1];
 };
@@ -74,6 +75,12 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 	}
 
 	MFDebug_Assert(pStringTable, MFStr("String table '%s' does not exist", pFilename));
+	MFDebug_Assert(pStringTable->magic == MFMAKEFOURCC('D','L','G','1'), "File does not appear to be a Fuji String Table");
+
+	for(int a=0; a<pStringTable->numStrings; a++)
+	{
+		pStringTable->pStrings[a] += (uint32)pStringTable;
+	}
 
 	return pStringTable;
 }
