@@ -215,6 +215,30 @@ static const int gTitaniumButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative // Button_ThumbRY
 };
 
+static const int gSuperDualBoxButtonID[GamepadType_Max] =
+{
+	2,   // Button_A
+	1,   // Button_B
+	3,   // Button_X
+	0,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger
+	7,   // Button_RightTrigger
+	8,   // Button_Start
+	9,   // Button_Back
+	10,  // Button_LeftThumb
+	11,  // Button_RightThumb
+	-1,  // Button_DUp
+	-1,  // Button_DDown
+	-1,  // Button_DLeft
+	-1,  // Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Rz,               // Button_ThumbRX
+	AID_Z | AID_Negative  // Button_ThumbRY
+};
+
 static const int gXBCDButtonID[GamepadType_Max] = 
 {
 	0,   // Button_A
@@ -516,6 +540,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[6]
 	},
 
+	{
+		"PS2 Gamepad",
+		"Dual USB Force Feedback Joypad (MP-8866)",
+		gSuperDualBoxButtonID,
+		gPS2ButtonNames,
+		true,
+		&gGamepadDescriptors[7]
+	},
+
 	// xbox gamepad
 	{
 		"XBox Gamepad",
@@ -523,7 +556,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXBCDButtonID,
 		gXBoxButtonNames,
 		true,
-		&gGamepadDescriptors[7]
+		&gGamepadDescriptors[8]
 	},
 
 	// logitech dual action
@@ -533,7 +566,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
 		true,
-		&gGamepadDescriptors[8]
+		&gGamepadDescriptors[9]
 	},
 
 	// xbox 360 wired gamepad
@@ -543,7 +576,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
 		true,
-		&gGamepadDescriptors[9]
+		&gGamepadDescriptors[10]
 	},
 
 	// Xterminator Digital Gamepad
