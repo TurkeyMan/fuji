@@ -112,6 +112,7 @@ int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
 	return stricmp(pSource1, pSource2);
 
+	// TODO: FIX ME!!
 	while(*pSource1 != '\0' && MFToLower((uint8)*pSource1) == MFToLower((uint8)*pSource2))
 	{
 		pSource1++;

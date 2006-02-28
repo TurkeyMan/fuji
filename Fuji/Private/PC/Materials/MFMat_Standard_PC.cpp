@@ -76,6 +76,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 				break;
 		}
+
+		MFRendererPC_SetRenderState(D3DRS_CULLMODE, pData->materialType&MF_DoubleSided ? D3DCULL_NONE : D3DCULL_CCW);
 	}
 
 	return 0;

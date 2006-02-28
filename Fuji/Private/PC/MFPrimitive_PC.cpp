@@ -4,9 +4,11 @@
 #include "MFVector.h"
 #include "MFMatrix.h"
 #include "MFPrimitive.h"
-#include "MFTexture.h"
+#include "MFTexture_Internal.h"
 #include "MFRenderer.h"
 #include "MFMaterial.h"
+
+#include "Materials/MFMat_Standard.h"
 
 #include <d3d9.h>
 
@@ -232,4 +234,46 @@ void MFEnd()
 			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, beginCount-2, primBuffer, sizeof(LitVertex));
 			break;
 	}
+}
+
+
+int textureWidth, textureHeight;
+float uScale, vScale;
+float halfTexelU, halfTexelV;
+
+void MFPrimitive_BeginBlitter(int numBlits)
+{
+	MFView_Push();
+
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+	MFView_SetOrtho(&rect);
+
+	MFTexture *pTex;
+	MFMaterial *pMat = MFMaterial_GetCurrent();
+	MFMaterial_GetParamater(pMat, MFMatStandard_DifuseMap, 0, (uint32*)&pTex);
+	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
+	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
+
+	uScale = 1.0f / (float)textureWidth;
+	vScale = 1.0f / (float)textureHeight;
+	halfTexelU = uScale * 0.5f;
+	halfTexelV = vScale * 0.5f;
+
+	MFPrimitive(PT_QuadList);
+	MFBegin(numBlits * 2);
+}
+
+void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+{
+	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
+	MFSetPosition((float)x, (float)y, 0.0f);
+	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
+	MFSetPosition((float)(x + tw), (float)(y + th), 0.0f);
+}
+
+void MFPrimitive_EndBlitter()
+{
+	MFEnd();
+	MFView_Pop();
 }

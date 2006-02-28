@@ -32,6 +32,10 @@ inline float MFATan(float angle)
 
 inline float MFRSqrt(float x)
 {
+	// TODO: this should probably be considered
+//	float s = sqrtf(x);
+//	return s > 0.0f ? 1.0f / s : 0.0f;
+
 	return 1.0f / sqrtf(x);
 }
 
@@ -42,6 +46,9 @@ inline float MFSqrt(float x)
 
 inline float MFRcp(float x)
 {
+	// TODO: this should probably be considered
+//	return x > 0.0f ? 1.0f / x : 0.0f;
+
 	return 1.0f / x;
 }
 

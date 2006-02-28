@@ -138,6 +138,34 @@ void MFSetPosition(float x, float y, float z);
 void MFEnd();
 
 /**
+ * Begin a blitter block.
+ * Begins a blitter block.
+ * @param numBlits Number of blit's that will be performed in this block.
+ * @return None.
+ */
+void MFPrimitive_BeginBlitter(int numBlits);
+
+/**
+ * Blit an image or part of an image to the render target.
+ * Blits an image or part of an image to the render target.
+ * @param x The x coordinate, in screen space, where the image will be drawn.
+ * @param y The y coordinate, in screen space, where the image will be drawn.
+ * @param tx The x texel coordinate of the source image.
+ * @param ty The y texel coordinate of the source image.
+ * @param tw The width, in texels, if the image to be blitted.
+ * @param th The height, in texels, if the image to be blitted.
+ * @return None.
+ */
+void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th);
+
+/**
+ * End a blitter block.
+ * Ends a blitter block.
+ * @return None.
+ */
+void MFPrimitive_EndBlitter();
+
+/**
  * Draw a textured square.
  * Draws a textured square.
  * @param x X coordinate of square.

@@ -4,190 +4,28 @@
 #include "MFCollision_Internal.h"
 #include "MFHeap.h"
 
+/**** Support Functions ****/
 
-MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, float *pTime)
+void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVector& p1, const MFVector& p2, MFCollisionTriangle *pTri)
 {
-	switch(pItem->pTemplate->type)
-	{
-		case MFCT_Sphere:
-		{
-			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate;
-			MFCollision_RaySphereTest(rayPos, rayDir, pItem->worldPos.GetTrans(), pSphere->radius, pTime);
-			break;
-		}
-		case MFCT_Box:
-			pItem = NULL;
-			break;
-		case MFCT_Mesh:
-			pItem = NULL;
-			break;
-		case MFCT_Field:
-		{
-			pItem = MFCollision_RayFieldTest(rayPos, rayDir, pItem, pTime);
-			break;
-		}
-	}
+	// generate face plane
+	pTri->plane = MFCollision_MakePlaneFromPoints(p0, p1, p2);
 
-	return pItem;
+	// generate edge planes
+	pTri->edgePlanes[0] = MFCollision_MakePlaneFromPointAndNormal(p0, (p0-p1).Cross3(pTri->plane));
+	pTri->edgePlanes[1] = MFCollision_MakePlaneFromPointAndNormal(p1, (p1-p2).Cross3(pTri->plane));
+	pTri->edgePlanes[2] = MFCollision_MakePlaneFromPointAndNormal(p2, (p2-p0).Cross3(pTri->plane));
+
+	// copy verts
+	pTri->verts[0] = p0;
+	pTri->verts[1] = p1;
+	pTri->verts[2] = p2;
 }
 
 
-MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize)
-{
-	MFCollisionItem *pItem;
-	MFCollisionField *pField;
+/**** General collision tests ****/
 
-	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionField));
-	pField = (MFCollisionField*)&pItem[1];
-	pItem->pTemplate = pField;
-
-	pField->itemList.Init("Collision Field Items", maximumItemCount);
-
-	pField->pppItems = NULL;
-
-	pField->cellSize = cellSize;
-	pField->type = MFCT_Field;
-
-	return pItem;
-}
-
-void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
-{
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
-
-	pItem->flags = (uint16)itemFlags;
-	pFieldData->itemList.Create(pItem);
-}
-
-bool TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2)
-{
-	if(max1.x > min2.x && min1.x < max2.x &&
-		max1.y > min2.y && min1.y < max2.y &&
-		  max1.z > min2.z && min1.z < max2.z)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-void MFCollision_BuildField(MFCollisionItem *pField)
-{
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
-
-	int numItems = pFieldData->itemList.GetLength();
-
-	if(numItems <= 0)
-	{
-		MFDebug_Warn(4, "EmptyField can not be generated.");
-		return;
-	}
-
-	// find the min and max range of the objects
-	MFVector fieldMin = MakeVector(10e+30f), fieldMax = MakeVector(-10e+30f);
-
-	MFCollisionItem **ppI = pFieldData->itemList.Begin();
-
-	while(*ppI)
-	{
-		MFCollisionItem *pI = *ppI;
-		MFCollisionTemplate *pT = pI->pTemplate;
-
-		MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
-		MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
-
-		fieldMin = MFMin(fieldMin, tMin);
-		fieldMax = MFMax(fieldMax, tMax);
-
-		ppI++;
-	}
-
-	pFieldData->fieldMin = fieldMin;
-	pFieldData->fieldMax = fieldMin;
-
-	MFVector numCells;
-	MFVector fieldRange = fieldMax - fieldMin;
-	numCells.Rcp3(pFieldData->cellSize);
-	numCells.Mul3(fieldRange, numCells);
-
-	pFieldData->width = (int)MFCeil(numCells.x);
-	pFieldData->height = (int)MFCeil(numCells.y);
-	pFieldData->depth = (int)MFCeil(numCells.z);
-
-	// this is TOTALLY broken!! .. if a big object lies in many cell's, it could easilly overflow the array.
-	int totalCells = pFieldData->width * pFieldData->height * pFieldData->depth;
-	int numPointers = totalCells * 2 + numItems * 16;
-
-	MFCollisionItem **ppItems = (MFCollisionItem**)MFHeap_Alloc(sizeof(MFCollisionItem*) * numPointers);
-	pFieldData->pppItems = (MFCollisionItem***)ppItems;
-	ppItems += totalCells;
-
-	for(int z=0; z<pFieldData->depth; z++)
-	{
-		for(int y=0; y<pFieldData->height; y++)
-		{
-			for(int x=0; x<pFieldData->width; x++)
-			{
-				pFieldData->pppItems[z*pFieldData->height*pFieldData->width + y*pFieldData->width + x] = ppItems;
-
-				MFVector thisCell = fieldMin + pFieldData->cellSize * MakeVector((float)x, (float)y, (float)z);
-				MFVector thisCellEnd = thisCell + pFieldData->cellSize;
-
-				MFCollisionItem **ppI = pFieldData->itemList.Begin();
-
-				while(*ppI)
-				{
-					MFCollisionItem *pI = *ppI;
-					MFCollisionTemplate *pT = pI->pTemplate;
-
-					// if this item fits in this cell, insert it into this cells list.
-					MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
-					MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
-
-					// test of bounding boxes overlap
-					if(TestAABB(tMin, tMax, thisCell, thisCellEnd))
-					{
-						*ppItems = pI;
-						++ppItems;
-					}
-
-					ppI++;
-				}
-
-				*ppItems = NULL;
-				++ppItems;
-			}
-		}
-	}
-
-	MFHeap_ValidateMemory(pFieldData->pppItems);
-}
-
-void MFCollision_ClearField(MFCollisionItem *pField)
-{
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
-
-	if(pFieldData->pppItems)
-	{
-		MFHeap_Free(pFieldData->pppItems);
-		pFieldData->pppItems = NULL;
-	}
-
-	pFieldData->itemList.Clear();
-}
-
-void MFCollision_DestroyField(MFCollisionItem *pField)
-{
-	MFCollision_ClearField(pField);
-
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
-	pFieldData->itemList.Deinit();
-
-	MFHeap_Free(pField);
-}
-
-
-MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, float *pTime)
+MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, MFRayIntersectionResult *pResult)
 {
 	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
 	MFCollisionItem *pItem = NULL;
@@ -196,55 +34,214 @@ MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector
 	MFVector radius = crossSection * 0.5f;
 	MFVector center = pFieldData->fieldMin + radius;
 
-	float t;
+	MFRayIntersectionResult cr;
 
-	if(!MFCollision_RayBoxTest(rayPos, rayDir, center, radius, &t))
+	if(!MFCollision_RayBoxTest(rayPos, rayDir, center, radius, &cr))
 		return NULL;
 
 	MFVector entryPoint;
-	entryPoint.Mad3(rayDir, t, rayPos);
+	entryPoint.Mad3(rayDir, cr.time, rayPos);
 
 	return pItem;
 }
 
-bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, float *pTime)
-{
-	MFVector diff = rayPos - spherePos;
-
-	float b = diff.Dot3(rayDir);
-	float c = diff.MagSquared3() - radius;
-	float d = b*b - c;
-
-	if(d <= 0.0f)
-		return false;
-
-	float t = -b - MFSqrt(d);
-
-	if(t<0.0f) return false;
-
-	if(pTime)
-		*pTime = t;
-	return true;
-}
-
-bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float *pTime)
+bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float slabHalfWidth, MFRayIntersectionResult *pResult)
 {
 	float a = plane.Dot3(rayDir);
 
 	// if ray is parallel to plane
 	if(a > -MFALMOST_ZERO && a < MFALMOST_ZERO)
+	{
+		// TODO: this is intentionally BROKEN
+		// this is a near impossible case, and it adds a lot of junk to the function
+/*
+		if(MFAbs(rayPos.DotH(plane)) <= slabHalfWidth)
+		{
+			if(pResult)
+			{
+				pResult->time = 0.0f;
+			}
+
+			return true;
+		}
+*/
+		return false;
+	}
+
+	// otherwise we can do the conventional test
+	float inva = MFRcp(a);
+	float t = -rayPos.DotH(plane);
+	float t1 = (t + slabHalfWidth) * inva;
+	float t2 = (t - slabHalfWidth) * inva;
+
+	t = MFMin(t1, t2);
+	t2 = MFMax(t1, t2);
+
+	if(t > 1.0f || t2 < 0.0f)
 		return false;
 
-	float t = -rayPos.DotH(plane) / a;
+	if(pResult)
+	{
+		pResult->time = MFMax(t, 0.0f);
+		pResult->surfaceNormal = a > 0.0f ? -plane : plane;
+	}
 
-	if(t<0.0f) return false;
-
-	if(pTime)
-		*pTime = t;
 	return true;
 }
 
-bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, float *pTime)
+bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, MFRayIntersectionResult *pResult)
+{
+	MFVector diff = rayPos - spherePos;
+
+	// calcuate the coefficients
+	float a = rayDir.MagSquared3();
+	float b = (2.0f*rayDir).Dot3(diff);
+	float c = diff.MagSquared3() - radius*radius;
+
+	// calculate the stuff under the root sign, if it's negative no (real) solutions exist
+	float d = b*b - 4.0f*a*c;
+	if(d < 0.0f) // this means ray misses cylinder
+		return false;
+
+	float root = MFSqrt(d);
+	float rcp2a = MFRcp(2.0f*a);
+	float t1 = (-b - root)*rcp2a;
+	float t2 = (-b + root)*rcp2a;
+
+	if(t2 < 0.0f || t1 > 1.0f)
+		return false;
+
+	if(pResult)
+	{
+		pResult->time = MFMax(t1, 0.0f);
+		pResult->surfaceNormal.Mad3(rayDir, pResult->time, diff);
+		pResult->surfaceNormal.Normalise3();
+	}
+
+	return true;
+}
+
+bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& cylinderPos, const MFVector& cylinderDir, float cylinderRadius, bool capped, MFRayIntersectionResult *pResult, float *pCylinderTime)
+{
+	MFVector local = rayPos - cylinderPos;
+
+	float rayD = rayDir.Dot3(cylinderDir);
+	float T0 = local.Dot3(cylinderDir);
+
+	// bring T0 into 0.0-1.0 range
+	float invMagSq = MFRcp(cylinderDir.MagSquared3());
+	rayD *= invMagSq;
+	T0 *= invMagSq;
+
+	// calculate some intermediate vectors
+	MFVector v1 = rayDir - rayD*cylinderDir;
+	MFVector v2 = local - T0*cylinderDir;
+
+	// calculate coeff in quadratic formula
+	float a = v1.MagSquared3();
+	float b = (2.0f*v1).Dot3(v2);
+	float c = v2.MagSquared3() - cylinderRadius*cylinderRadius;
+
+	// calculate the stuff under the root sign, if it's negative no (real) solutions exist
+	float d = b*b - 4.0f*a*c;
+	if(d < 0.0f) // this means ray misses cylinder
+		return false;
+
+	float root = MFSqrt(d);
+	float rcp2a = MFRcp(2.0f*a);
+	float t1 = (-b - root)*rcp2a;
+	float t2 = (-b + root)*rcp2a;
+
+	if(t1 > 1.0f || t2 < 0.0f)
+		return false; // the cylinder is beyond the ray..
+
+	if(capped || pCylinderTime || pResult)
+	{
+		float t = MFMax(t1, 0.0f);
+
+		// get the t for the cylinders ray
+		MFVector intersectedRay;
+		intersectedRay.Mad3(rayDir, t, local);
+
+		float ct = intersectedRay.Dot3(cylinderDir) * invMagSq;
+
+		if(capped && (ct < 0.0f || ct > 1.0f))
+		{
+			// we need to test the caps
+
+			// TODO: this is REALLY slow!! can be majorly improved!!
+
+			// generate a plane for the cap
+			MFVector point, plane;
+
+			if(rayD > 0.0f)
+			{
+				// the near one
+				point = cylinderPos;
+				plane = MFCollision_MakePlaneFromPointAndNormal(point, -cylinderDir);
+			}
+			else
+			{
+				// the far one
+				point = cylinderPos + cylinderDir;
+				plane = MFCollision_MakePlaneFromPointAndNormal(point, cylinderDir);
+			}
+
+			// test the ray against the plane
+			bool collide = MFCollision_RayPlaneTest(rayPos, rayDir, plane, pResult);
+
+			if(collide)
+			{
+				// calculate the intersection point
+				intersectedRay.Mad3(rayDir, pResult->time, rayPos);
+
+				// and see if its within the cylinders radius
+				if((intersectedRay - point).MagSquared3() <= cylinderRadius * cylinderRadius)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		if(pResult)
+		{
+			pResult->time = t;
+			pResult->surfaceNormal = intersectedRay - cylinderDir*ct;
+			pResult->surfaceNormal.Normalise3();
+		}
+
+		if(pCylinderTime)
+		{
+			*pCylinderTime = ct;
+		}
+	}
+
+	return true;
+}
+
+bool MFCollision_RayCapsuleTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& capsulePos, const MFVector& capsuleDir, float capsuleRadius, MFRayIntersectionResult *pResult)
+{
+	float ct;
+
+	// get collision on the cylinder
+	bool collide = MFCollision_RayCylinderTest(rayPos, rayDir, capsulePos, capsuleDir, capsuleRadius, false, pResult, &ct);
+
+	if(!collide)
+		return false;
+
+	if(ct >= 0.0f && ct <= 1.0f)
+	{
+		// we have an intersection on the cylinders surface
+		return true;
+	}
+
+	// intersection not on cylinder, test against end sphere..
+	return MFCollision_RaySphereTest(rayPos, rayDir, (ct>0.0f) ? capsulePos + capsuleDir : capsulePos, capsuleRadius, pResult);
+}
+
+bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, MFRayIntersectionResult *pResult)
 {
 	MFVector plane[6];
 	plane[0] = MakeVector(MFVector::up, boxPos.x + boxRadius.x);
@@ -299,6 +296,80 @@ bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFV
 
 		return pResult->bCollide;
 	}
+}
+
+
+bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSphere, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFVector &sphere, float sphereRadius, MFSweepSphereResult *pResult)
+{
+	MFRayIntersectionResult r;
+	bool collide = MFCollision_RaySphereTest(sweepSphere, sweepSphereVelocity, sphere, sphereRadius + sweepSphereRadius, &r);
+
+	if(collide)
+	{
+		pResult->time = r.time;
+		pResult->surfaceNormal = r.surfaceNormal;
+		pResult->intersectionReaction = MFVector::zero;
+		return true;
+	}
+
+	return false;
+}
+
+bool MFCollision_SweepSphereTriTest(const MFVector &sphere, const MFVector &sphereVelocity, float sphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult)
+{
+	MFRayIntersectionResult result;
+
+	// test the triangle surface
+	if(!MFCollision_RaySlabTest(sphere, sphereVelocity, tri.plane, sphereRadius, &result))
+		return false;
+
+	MFVector intersection = sphere + sphereVelocity * result.time;
+
+	// test if intersection is well outside the triangle
+	float dot0, dot1, dot2;
+
+	dot0 = intersection.DotH(tri.edgePlanes[0]);
+//	if(dot0 > sphereRadius)
+//		return false;
+
+	dot1 = intersection.DotH(tri.edgePlanes[1]);
+//	if(dot1 > sphereRadius)
+//		return false;
+
+	dot2 = intersection.DotH(tri.edgePlanes[2]);
+//	if(dot2 > sphereRadius)
+//		return false;
+
+	// test if intersection is inside the triangle face
+	if(dot0 >= 0.0f && dot1 >= 0.0f && dot2 >= 0.0f)
+		goto collision;
+
+	// test the 3 edges
+	if(dot0 < 0.0f)
+	{
+		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[0], tri.verts[1]-tri.verts[0], sphereRadius, &result))
+			goto collision;
+	}
+
+	if(dot1 < 0.0f)
+	{
+		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[1], tri.verts[2]-tri.verts[1], sphereRadius, &result))
+			goto collision;
+	}
+
+	if(dot2 < 0.0f)
+	{
+		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[2], tri.verts[0]-tri.verts[2], sphereRadius, &result))
+			goto collision;
+	}
+
+	return false;
+
+collision:
+	pResult->intersectionReaction = MFVector::zero;
+	pResult->surfaceNormal = result.surfaceNormal;
+	pResult->time = result.time;
+	return true;
 }
 
 bool MFCollision_RayTriTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& p0,  const MFVector& p1, const MFVector& p2, float *pT, float *pU, float *pV)
@@ -417,10 +488,23 @@ bool MFCollision_SphereTriTest(const MFVector& sphere, const MFVector& p0,  cons
 
 bool MFCollision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const MFVector& p1, const MFVector& p2, MFVector *pIntersectionPoint)
 {
-	MFDebug_Assert(false, "Not Written!");
-	return false;
-}
+	float t0 = p0.DotH(plane);
+	float t1 = p1.DotH(plane);
+	float t2 = p2.DotH(plane);
 
+	if(t0 <= 0.0f && t1 <= 0.0f && t2 <= 0)
+		return false;
+
+	if(t0 >= 0.0f && t1 >= 0.0f && t2 >= 0)
+		return false;
+
+	if(pIntersectionPoint)
+	{
+		// TODO: calculate point
+	}
+
+	return true;
+}
 
 /* sort so that a<=b */
 #define SORT(a,b)       \
@@ -707,4 +791,188 @@ bool MFCollision_TriHull()
 {
 	MFDebug_Assert(false, "Not Written!");
 	return false;
+}
+
+
+/**** Manager ****/
+
+MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult)
+{
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Sphere:
+		{
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate;
+			MFCollision_RaySphereTest(rayPos, rayDir, pItem->worldPos.GetTrans(), pSphere->radius, pResult);
+			break;
+		}
+		case MFCT_Box:
+			pItem = NULL;
+			break;
+		case MFCT_Mesh:
+			pItem = NULL;
+			break;
+		case MFCT_Field:
+		{
+			pItem = MFCollision_RayFieldTest(rayPos, rayDir, pItem, pResult);
+			break;
+		}
+	}
+
+	return pItem;
+}
+
+
+MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize)
+{
+	MFCollisionItem *pItem;
+	MFCollisionField *pField;
+
+	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionField));
+	pField = (MFCollisionField*)&pItem[1];
+	pItem->pTemplate = pField;
+
+	pField->itemList.Init("Collision Field Items", maximumItemCount);
+
+	pField->pppItems = NULL;
+
+	pField->cellSize = cellSize;
+	pField->type = MFCT_Field;
+
+	return pItem;
+}
+
+void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	pItem->flags = (uint16)itemFlags;
+	pFieldData->itemList.Create(pItem);
+}
+
+bool TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2)
+{
+	if(max1.x > min2.x && min1.x < max2.x &&
+		max1.y > min2.y && min1.y < max2.y &&
+		  max1.z > min2.z && min1.z < max2.z)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void MFCollision_BuildField(MFCollisionItem *pField)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	int numItems = pFieldData->itemList.GetLength();
+
+	if(numItems <= 0)
+	{
+		MFDebug_Warn(4, "EmptyField can not be generated.");
+		return;
+	}
+
+	// find the min and max range of the objects
+	MFVector fieldMin = MakeVector(10e+30f), fieldMax = MakeVector(-10e+30f);
+
+	MFCollisionItem **ppI = pFieldData->itemList.Begin();
+
+	while(*ppI)
+	{
+		MFCollisionItem *pI = *ppI;
+		MFCollisionTemplate *pT = pI->pTemplate;
+
+		MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
+		MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
+
+		fieldMin = MFMin(fieldMin, tMin);
+		fieldMax = MFMax(fieldMax, tMax);
+
+		ppI++;
+	}
+
+	pFieldData->fieldMin = fieldMin;
+	pFieldData->fieldMax = fieldMin;
+
+	MFVector numCells;
+	MFVector fieldRange = fieldMax - fieldMin;
+	numCells.Rcp3(pFieldData->cellSize);
+	numCells.Mul3(fieldRange, numCells);
+
+	pFieldData->width = (int)MFCeil(numCells.x);
+	pFieldData->height = (int)MFCeil(numCells.y);
+	pFieldData->depth = (int)MFCeil(numCells.z);
+
+	// this is TOTALLY broken!! .. if a big object lies in many cell's, it could easilly overflow the array.
+	int totalCells = pFieldData->width * pFieldData->height * pFieldData->depth;
+	int numPointers = totalCells * 2 + numItems * 16;
+
+	MFCollisionItem **ppItems = (MFCollisionItem**)MFHeap_Alloc(sizeof(MFCollisionItem*) * numPointers);
+	pFieldData->pppItems = (MFCollisionItem***)ppItems;
+	ppItems += totalCells;
+
+	for(int z=0; z<pFieldData->depth; z++)
+	{
+		for(int y=0; y<pFieldData->height; y++)
+		{
+			for(int x=0; x<pFieldData->width; x++)
+			{
+				pFieldData->pppItems[z*pFieldData->height*pFieldData->width + y*pFieldData->width + x] = ppItems;
+
+				MFVector thisCell = fieldMin + pFieldData->cellSize * MakeVector((float)x, (float)y, (float)z);
+				MFVector thisCellEnd = thisCell + pFieldData->cellSize;
+
+				MFCollisionItem **ppI = pFieldData->itemList.Begin();
+
+				while(*ppI)
+				{
+					MFCollisionItem *pI = *ppI;
+					MFCollisionTemplate *pT = pI->pTemplate;
+
+					// if this item fits in this cell, insert it into this cells list.
+					MFVector tMin = ApplyMatrixH(pT->boundingVolume.min, pI->worldPos);
+					MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
+
+					// test of bounding boxes overlap
+					if(TestAABB(tMin, tMax, thisCell, thisCellEnd))
+					{
+						*ppItems = pI;
+						++ppItems;
+					}
+
+					ppI++;
+				}
+
+				*ppItems = NULL;
+				++ppItems;
+			}
+		}
+	}
+
+	MFHeap_ValidateMemory(pFieldData->pppItems);
+}
+
+void MFCollision_ClearField(MFCollisionItem *pField)
+{
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+
+	if(pFieldData->pppItems)
+	{
+		MFHeap_Free(pFieldData->pppItems);
+		pFieldData->pppItems = NULL;
+	}
+
+	pFieldData->itemList.Clear();
+}
+
+void MFCollision_DestroyField(MFCollisionItem *pField)
+{
+	MFCollision_ClearField(pField);
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	pFieldData->itemList.Deinit();
+
+	MFHeap_Free(pField);
 }

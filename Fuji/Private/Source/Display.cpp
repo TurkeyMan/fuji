@@ -31,3 +31,11 @@ void MFDisplay_DeinitModule()
 
 	MFDisplay_DestroyDisplay();
 }
+
+void MFDisplay_GetDisplayRect(MFRect *pRect)
+{
+	pRect->x = 0.0f;
+	pRect->y = 0.0f;
+	pRect->width = gDisplay.width;
+	pRect->height = gDisplay.height;
+}

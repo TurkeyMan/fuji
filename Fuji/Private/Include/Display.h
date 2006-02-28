@@ -19,5 +19,7 @@ void MFDisplay_ClearScreen(uint32 flags = CS_Colour|CS_ZBuffer);
 void MFDisplay_SetViewport(float x, float y, float width, float height);
 void MFDisplay_ResetViewport();
 
+void MFDisplay_GetDisplayRect(MFRect *pRect);
+
 #endif // _DISPLAY_H
 

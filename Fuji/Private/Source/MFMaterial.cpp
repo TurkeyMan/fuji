@@ -341,9 +341,12 @@ MFMaterial* MFMaterial_Create(const char *pName)
 			// set diffuse map parameter
 
 			int index = MFMaterial_GetParamaterIndexFromName(pMat, "diffusemap");
-
 			if(index > -1)
 				MFMaterial_SetParamater(pMat, index, 0, (uint32)pName);
+
+//			int cull = MFMaterial_GetParamaterIndexFromName(pMat, "doublesided");
+//			if(cull > -1)
+//				MFMaterial_SetParamater(pMat, cull, 0, 1);
 		}
 	}
 
@@ -640,7 +643,7 @@ int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIn
 	MFCALLSTACK;
 
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
-	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex);
+	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex, pValue);
 
 	return 0;
 }

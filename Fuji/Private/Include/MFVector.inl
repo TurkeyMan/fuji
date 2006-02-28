@@ -585,37 +585,37 @@ inline float MFVector::InvMagnitude2() const
 
 inline MFVector& MFVector::Normalise4(const MFVector &vec)
 {
-	this->Mul4(vec, vec.InvMagnitude4());
+	Mul4(vec, vec.InvMagnitude4());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise3(const MFVector &vec)
 {
-	this->Mul3(vec, vec.InvMagnitude3());
+	Mul3(vec, vec.InvMagnitude3());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise2(const MFVector &vec)
 {
-	this->Mul2(vec, vec.InvMagnitude2());
+	Mul2(vec, vec.InvMagnitude2());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise4()
 {
-	this->Mul4(*this, this->InvMagnitude4());
+	Mul4(*this, InvMagnitude4());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise3()
 {
-	this->Mul3(*this, this->InvMagnitude3());
+	Mul3(*this, InvMagnitude3());
 	return *this;
 }
 
 inline MFVector& MFVector::Normalise2()
 {
-	this->Mul2(*this, this->InvMagnitude2());
+	Mul2(*this, InvMagnitude2());
 	return *this;
 }
 
@@ -700,6 +700,18 @@ inline MFVector MakeVector(const MFVector &v, float w)
 	return t;
 }
 
+
+inline MFVector MFAbs(const MFVector &v)
+{
+	MFVector t;
+
+	t.x = MFAbs(v.x);
+	t.y = MFAbs(v.y);
+	t.z = MFAbs(v.z);
+	t.w = MFAbs(v.w);
+
+	return t;
+}
 
 inline MFVector MFMin(const MFVector &a, const MFVector &b)
 {

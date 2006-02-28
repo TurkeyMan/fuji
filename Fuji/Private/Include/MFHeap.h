@@ -73,6 +73,7 @@ void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
 #if 0
 void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
 void* MFHeap_Realloc(void *pMem, uint32 bytes);
+void* MFHeap_TAlloc(uint32 bytes);
 #endif
 
 /**
@@ -235,11 +236,13 @@ void MFHeap_PopGroupName();
 
 	// these macros wrap the debug heap trackers functionality
 	#define MFHeap_Alloc MFHeap_Debug.Tracker(__LINE__, __FILE__).Alloc
-	#define MFHeap_Realloc(pMem, bytes) (MFHeap_SetLineAndFile(__LINE__, __FILE__), MFHeap_ReallocInternal(pMem, bytes))
+	#define MFHeap_Realloc(pMem, bytes) (MFHeap_SetLineAndFile(__LINE__, __FILE__), MFHeap_ReallocInternal((pMem), (bytes)))
+	#define MFHeap_TAlloc(bytes) MFHeap_Debug.Tracker(__LINE__, __FILE__).Alloc((bytes), MFHeap_GetHeap(MFHT_ActiveTemporary))
 #else
 	// compiled out in retail
 	#define MFHeap_Alloc MFHeap_AllocInternal
 	#define MFHeap_Realloc MFHeap_ReallocInternal
+	#define MFHeap_TAlloc(bytes) MFHeap_AllocInternal((bytes), MFHeap_GetHeap(MFHT_ActiveTemporary))
 #endif
 
 #endif // _MFHEAP_H

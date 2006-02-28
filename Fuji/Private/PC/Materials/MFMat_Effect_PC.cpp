@@ -64,7 +64,7 @@ void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 }
 
-uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
+uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 	MFDebug_Assert(false, "Not Written");

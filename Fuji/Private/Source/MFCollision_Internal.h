@@ -42,6 +42,6 @@ struct MFCollisionField : public MFCollisionTemplate
 	MFCollisionItem ***pppItems;
 };
 
-MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, float *pTime);
+MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, MFRayIntersectionResult *pResult);
 
 #endif // _MFCOLLISION_INTERNAL_H

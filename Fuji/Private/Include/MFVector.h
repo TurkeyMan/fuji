@@ -156,6 +156,7 @@ MFVector MakeVector(float f);
 MFVector MakeVector(float x, float y, float z = 0.0f, float w = 1.0f);
 MFVector MakeVector(const MFVector &v, float w);
 
+MFVector MFAbs(const MFVector &v);
 MFVector MFMin(const MFVector &a, const MFVector &b);
 MFVector MFMax(const MFVector &a, const MFVector &b);
 

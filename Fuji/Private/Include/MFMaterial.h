@@ -89,7 +89,7 @@ struct MFMaterialCallbacks
 	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
 	MFMaterialParamaterInfo* (*pGetParamaterInfo)(int paramaterIndex);	/**< Pointer to the GetParamaterInfo function */
 	void      (*pSetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 parameter);	/**< Pointer to a SetParameter function */
-	uint32    (*pGetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex);	/**< Pointer to the GetParameter function */
+	uint32    (*pGetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue);	/**< Pointer to the GetParameter function */
 };
 
 
