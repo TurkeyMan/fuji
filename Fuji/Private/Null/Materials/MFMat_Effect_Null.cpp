@@ -28,7 +28,7 @@ void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int ar
 {
 }
 
-uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex)
+uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
 {
 	return 0;
 }

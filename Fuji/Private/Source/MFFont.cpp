@@ -52,7 +52,7 @@ MFFont* MFFont_Create(const char *pFilename)
 		MFMaterial_GetParamater(pFont->pMaterial, MFMatStandard_DifuseMap, 0, (uint32*)&pTexture);
 
 		pFont->height = pTexture->pTemplateData->pSurfaces[0].height / 16.0f;
-		pFont->spaceWidth = (float)pFont->charwidths[' '];
+		pFont->spaceWidth = (float)pFont->charwidths[(int)' '];
 	}
 
 	return pFont;
@@ -101,7 +101,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int 
 				width += pFont->spaceWidth * scale;
 				break;
 			default:
-				width += (float)pFont->charwidths[*pText] * scale;
+				width += (float)pFont->charwidths[(int)*pText] * scale;
 				break;
 		}
 

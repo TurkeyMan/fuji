@@ -194,9 +194,10 @@ bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir,
 			{
 				// calculate the intersection point
 				intersectedRay.Mad3(rayDir, pResult->time, rayPos);
+				intersectedRay.Sub3(intersectedRay, point);
 
 				// and see if its within the cylinders radius
-				if((intersectedRay - point).MagSquared3() <= cylinderRadius * cylinderRadius)
+				if(intersectedRay.MagSquared3() <= cylinderRadius * cylinderRadius)
 				{
 					return true;
 				}
@@ -208,7 +209,7 @@ bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir,
 		if(pResult)
 		{
 			pResult->time = t;
-			pResult->surfaceNormal = intersectedRay - cylinderDir*ct;
+			pResult->surfaceNormal.Mad3(cylinderDir, -ct, intersectedRay);
 			pResult->surfaceNormal.Normalise3();
 		}
 
