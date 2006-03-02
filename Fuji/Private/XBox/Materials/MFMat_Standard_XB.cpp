@@ -5,7 +5,7 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 #include "MFRenderer_XB.h"
-#include "../../Source/Materials/Mat_Standard.h"
+#include "../../Source/Materials/MFMat_Standard.h"
 
 static MFMaterial *pSetMaterial;
 extern uint32 renderSource;
@@ -76,6 +76,26 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 				break;
 		}
+
+		switch(pData->materialType&MF_CullMode)
+		{
+			case 0<<6:
+				MFRendererXB_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+				break;
+			case 1<<6:
+				MFRendererXB_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+				break;
+			case 2<<6:
+				MFRendererXB_SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+				break;
+			case 3<<6:
+				// 'default' ?
+				MFRendererXB_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+				break;
+		}
+
+		MFRendererXB_SetRenderState(D3DRS_ZENABLE, pData->materialType&MF_NoZRead ? FALSE : TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZWRITEENABLE, pData->materialType&MF_NoZWrite ? FALSE : TRUE);
 	}
 
 	return 0;
