@@ -76,6 +76,32 @@ float MFFont_GetCharacterWidth(MFFont *pFont, int character, int fontPage = 0);
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen = -1, float *pTotalHeight = NULL);
 
 /**
+ * Blit a string to the screen.
+ * Renders text to the screen (perfect texel to pixel mapping, no scaling).
+ * @param pFont Pointer to a font.
+ * @param x x coordinate in screen space.
+ * @param y y coordinate in screen space.
+ * @param colour Colour of the text.
+ * @param pText Pointer to a string containing the text to render.
+ * @return Returns 0 if there were no errors.
+ */
+int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText);
+
+/**
+ * Blit a formatted string to the screen.
+ * Blits formatted text to the screen (perfect texel to pixel mapping, no scaling).
+ * @param pFont Pointer to a font.
+ * @param x x coordinate in screen space.
+ * @param y y coordinate in screen space.
+ * @param colour Colour of the text.
+ * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
+ * @param ... Additional paramaters used according to the format specifier.
+ * @return Returns 0 if there were no errors.
+ * @remarks The MFFont_BlitTextf format string conforms with all the standard printf format standards.
+ */
+int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...);
+
+/**
  * Render a string.
  * Renders text to the screen.
  * @param pFont Pointer to a font.

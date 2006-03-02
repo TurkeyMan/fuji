@@ -12,8 +12,9 @@ static MFParamType specularcolour[] = { MFParamType_Vector4 };
 static MFParamType specularpower[] = { MFParamType_Float };
 static MFParamType emissivecolour[] = { MFParamType_Vector4 };
 static MFParamType mask[] = { MFParamType_Bool };
-static MFParamType doublesided[] = { MFParamType_Bool };
-static MFParamType backfacecull[] = { MFParamType_Bool };
+static MFParamType cullmode[] = { MFParamType_Int };
+static MFParamType zread[] = { MFParamType_Bool };
+static MFParamType zwrite[] = { MFParamType_Bool };
 static MFParamType additive[] = { MFParamType_Bool };
 static MFParamType subtractive[] = { MFParamType_Bool };
 static MFParamType alpha[] = { MFParamType_Bool };
@@ -42,8 +43,9 @@ MFMaterialParamaterInfo paramaterInformation[] =
 	{ "specularpower", specularpower, sizeof(specularpower)/sizeof(MFParamType) },
 	{ "emissivecolour", emissivecolour, sizeof(emissivecolour)/sizeof(MFParamType) },
 	{ "mask", mask, sizeof(mask)/sizeof(MFParamType) },
-	{ "doublesided", doublesided, sizeof(doublesided)/sizeof(MFParamType) },
-	{ "backfacecull", backfacecull, sizeof(backfacecull)/sizeof(MFParamType) },
+	{ "cullmode", cullmode, sizeof(cullmode)/sizeof(MFParamType) },
+	{ "zread", zread, sizeof(zread)/sizeof(MFParamType) },
+	{ "zwrite", zwrite, sizeof(zwrite)/sizeof(MFParamType) },
 	{ "additive", additive, sizeof(additive)/sizeof(MFParamType) },
 	{ "subtractive", subtractive, sizeof(subtractive)/sizeof(MFParamType) },
 	{ "alpha", alpha, sizeof(alpha)/sizeof(MFParamType) },
@@ -131,11 +133,14 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 		case MFMatStandard_Mask:
 			pData->materialType = (pData->materialType & ~MF_Mask) | (paramater ? MF_Mask : 0);
 			break;
-		case MFMatStandard_DoubleSided:
-			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (paramater ? MF_DoubleSided : 0);
+		case MFMatStandard_CullMode:
+			pData->materialType = (pData->materialType & ~MF_CullMode) | ((paramater & 0x3) << 6);
 			break;
-		case MFMatStandard_BackfaceCull:
-			pData->materialType = (pData->materialType & ~MF_DoubleSided) | (!paramater ? MF_DoubleSided : 0);
+		case MFMatStandard_ZRead:
+			pData->materialType = (pData->materialType & ~MF_NoZRead) | (paramater ? 0 : MF_NoZRead);
+			break;
+		case MFMatStandard_ZWrite:
+			pData->materialType = (pData->materialType & ~MF_NoZWrite) | (paramater ? 0 : MF_NoZWrite);
 			break;
 		case MFMatStandard_Additive:
 			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Additive : 0);
@@ -249,10 +254,12 @@ uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, in
 			return (uint32)&pData->illum;
 		case MFMatStandard_Mask:
 			return *pValue = (pData->materialType & MF_Mask) ? 1 : 0;
-		case MFMatStandard_DoubleSided:
-			return *pValue = (pData->materialType & MF_DoubleSided) ? 1 : 0;
-		case MFMatStandard_BackfaceCull:
-			return *pValue = (pData->materialType & MF_DoubleSided) ? 0 : 1;
+		case MFMatStandard_CullMode:
+			return *pValue = (pData->materialType & MF_CullMode) >> 6;
+		case MFMatStandard_ZRead:
+			return *pValue = (pData->materialType & MF_NoZRead) ? 0 : 1;
+		case MFMatStandard_ZWrite:
+			return *pValue = (pData->materialType & MF_NoZWrite) ? 0 : 1;
 		case MFMatStandard_Texture:
 			return (uint32)(*(MFTexture**)pValue = pData->pTextures[argIndex]);
 		case MFMatStandard_DifuseMap:

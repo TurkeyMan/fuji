@@ -13,8 +13,9 @@ enum MFMat_Standard_Paramaters
 	MFMatStandard_SpecularPower,
 	MFMatStandard_EmissiveColour,
 	MFMatStandard_Mask,
-	MFMatStandard_DoubleSided,
-	MFMatStandard_BackfaceCull,
+	MFMatStandard_CullMode,
+	MFMatStandard_ZRead,
+	MFMatStandard_ZWrite,
 	MFMatStandard_Additive,
 	MFMatStandard_Subtractive,
 	MFMatStandard_Alpha,
@@ -47,9 +48,11 @@ enum MaterialFlags
 	MF_BlendMask			= 0x00000006,
 
 	MF_Mask					= 0x00000020,	// M
-	MF_DoubleSided			= 0x00000040,	// Ds
-	MF_CullMode				= 0x000000C0,	// Ds
+	MF_CullMode				= 0x000000C0,
 	MF_Animating			= 0x00000100,
+
+	MF_NoZRead				= 0x00000200,
+	MF_NoZWrite				= 0x00000400,
 
 	// Renderer Flags
 	MF_DisplacementMap		= 0x80000000,	// D
@@ -93,10 +96,10 @@ struct MFMat_Standard_Data
 	uint16		flags	: 15;
 
 	uint32		diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
-	uint32		diffuseMap2Index		: 3;
+	uint32		diffuseMap2Index	: 3;
 	uint32		lightMapIndex		: 3;
-	uint32		specularMapIndex		: 3;
-	uint32		bumpMapIndex			: 3;
+	uint32		specularMapIndex	: 3;
+	uint32		bumpMapIndex		: 3;
 	uint32		detailMapIndex		: 3;
 	uint32		envMapIndex			: 3;
 	uint32		reflectionMapIndex	: 3;

@@ -77,7 +77,25 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		MFRendererPC_SetRenderState(D3DRS_CULLMODE, pData->materialType&MF_DoubleSided ? D3DCULL_NONE : D3DCULL_CCW);
+		switch(pData->materialType&MF_CullMode)
+		{
+			case 0<<6:
+				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+				break;
+			case 1<<6:
+				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+				break;
+			case 2<<6:
+				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+				break;
+			case 3<<6:
+				// 'default' ?
+				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+				break;
+		}
+
+		MFRendererPC_SetRenderState(D3DRS_ZENABLE, (pData->materialType&MF_NoZRead) ? D3DZB_FALSE : D3DZB_TRUE);
+		MFRendererPC_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
 	}
 
 	return 0;
@@ -95,7 +113,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->ambient = MFVector::one;
 	pData->diffuse = MFVector::one;
 
-	pData->materialType = MF_AlphaBlend;
+	pData->materialType = MF_AlphaBlend | 1<<6 /* back face culling */;
 	pData->opaque = true;
 
 	pData->textureMatrix = MFMatrix::identity;
