@@ -36,6 +36,6 @@ void MFDisplay_GetDisplayRect(MFRect *pRect)
 {
 	pRect->x = 0.0f;
 	pRect->y = 0.0f;
-	pRect->width = gDisplay.width;
-	pRect->height = gDisplay.height;
+	pRect->width = (float)gDisplay.width;
+	pRect->height = (float)gDisplay.height;
 }

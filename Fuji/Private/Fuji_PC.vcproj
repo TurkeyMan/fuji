@@ -24,7 +24,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -78,7 +78,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -132,7 +132,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -579,223 +579,111 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Lib"
+			Name="Middleware"
 			Filter="">
 			<Filter
 				Name="zlib"
 				Filter="">
 				<File
-					RelativePath=".\Lib\zlib\adler32.c">
+					RelativePath=".\Middleware\zlib\adler32.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\compress.c">
+					RelativePath=".\Middleware\zlib\compress.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.c">
+					RelativePath=".\Middleware\zlib\crc32.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.h">
+					RelativePath=".\Middleware\zlib\crc32.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\deflate.c">
+					RelativePath=".\Middleware\zlib\deflate.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\deflate.h">
+					RelativePath=".\Middleware\zlib\deflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\gzio.c">
+					RelativePath=".\Middleware\zlib\gzio.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\infback.c">
+					RelativePath=".\Middleware\zlib\infback.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.c">
+					RelativePath=".\Middleware\zlib\inffast.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.h">
+					RelativePath=".\Middleware\zlib\inffast.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffixed.h">
+					RelativePath=".\Middleware\zlib\inffixed.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inflate.c">
+					RelativePath=".\Middleware\zlib\inflate.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inflate.h">
+					RelativePath=".\Middleware\zlib\inflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inftrees.c">
+					RelativePath=".\Middleware\zlib\inftrees.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inftrees.h">
+					RelativePath=".\Middleware\zlib\inftrees.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.c">
+					RelativePath=".\Middleware\zlib\trees.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.h">
+					RelativePath=".\Middleware\zlib\trees.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\uncompr.c">
+					RelativePath=".\Middleware\zlib\uncompr.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zconf.h">
+					RelativePath=".\Middleware\zlib\zconf.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zconf.in.h">
+					RelativePath=".\Middleware\zlib\zconf.in.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zlib.h">
+					RelativePath=".\Middleware\zlib\zlib.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zutil.c">
+					RelativePath=".\Middleware\zlib\zutil.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zutil.h">
+					RelativePath=".\Middleware\zlib\zutil.h">
 				</File>
 				<Filter
 					Name="minizip"
 					Filter="">
 					<File
-						RelativePath=".\Lib\zlib\minizip\crypt.h">
+						RelativePath=".\Middleware\zlib\minizip\crypt.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.c">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.h">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.c">
+						RelativePath=".\Middleware\zlib\minizip\mztools.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.h">
+						RelativePath=".\Middleware\zlib\minizip\mztools.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.c">
+						RelativePath=".\Middleware\zlib\minizip\unzip.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.h">
+						RelativePath=".\Middleware\zlib\minizip\unzip.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.c">
+						RelativePath=".\Middleware\zlib\minizip\zip.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.h">
+						RelativePath=".\Middleware\zlib\minizip\zip.h">
 					</File>
 				</Filter>
-			</Filter>
-			<Filter
-				Name="zzip"
-				Filter="">
-				<File
-					RelativePath=".\Lib\zzip\__debug.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__dirent.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__hints.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__mmap.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_config.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_msvc.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\autoconf.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\conf.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\dir.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\err.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\format.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\lib.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stat.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stdint.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\types.h">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\write.c">
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zip.c">
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zzip.h">
-				</File>
 			</Filter>
 			<Filter
 				Name="pawn"
@@ -804,129 +692,35 @@
 					Name="amx"
 					Filter="">
 					<File
-						RelativePath=".\Lib\pawn\amx\amx.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\pawn\amx\amx.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amx.h">
+						RelativePath=".\Middleware\pawn\amx\amx.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxaux.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\pawn\amx\amxaux.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxaux.h">
+						RelativePath=".\Middleware\pawn\amx\amxaux.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxcore.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\pawn\amx\amxcore.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxdbg.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\pawn\amx\amxdbg.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxdbg.h">
+						RelativePath=".\Middleware\pawn\amx\amxdbg.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxstring.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\pawn\amx\amxstring.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\float.c">
+						RelativePath=".\Middleware\pawn\amx\float.c">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\osdefs.h">
+						RelativePath=".\Middleware\pawn\amx\osdefs.h">
 					</File>
-				</Filter>
-				<Filter
-					Name="compiler"
-					Filter="">
 				</Filter>
 			</Filter>
 		</Filter>
