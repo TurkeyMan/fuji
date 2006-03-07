@@ -29,7 +29,7 @@ typedef int MFEntryPoint;
  * Callback function type for native script functions.
  * Callback function type for native script functions.
  */
-typedef uint32 (*ScriptNativeFunction)(MFScript *pScript, uint32 *pParamaters);
+//typedef uint32 (*ScriptNativeFunction)(MFScript *pScript, uint32 *pParamaters);
 
 /**
  * Script native function description.
@@ -37,8 +37,8 @@ typedef uint32 (*ScriptNativeFunction)(MFScript *pScript, uint32 *pParamaters);
  */
 struct ScriptNativeInfo
 {
-  const char *pName;			/**< String representing the name of the function as will be known to the script */
-  ScriptNativeFunction pFunc;	/**< Pointer to the native function. */
+  const char *pName;	/**< String representing the name of the function as will be known to the script */
+  void *pFunc;			/**< Pointer to the native function. */
 };
 
 /**
@@ -72,6 +72,16 @@ MFEntryPoint MFScript_FindPublicFunction(MFScript *pScript, const char *pFunctio
 int MFScript_Execute(MFScript *pScript, const char *pEntryPoint);
 
 /**
+ * Execute an immediate instruction.
+ * Executes an immediate instruction.
+ * @param pScript Pointer to an MFScript to execute.
+ * @param pCode String containing the code to execute.
+ * @return Returns the value returned from the script entrypoint function.
+ * @see MFScript_Execute()
+ */
+int MFScript_ExecuteImmediate(MFScript *pScript, const char *pCode);
+
+/**
  * Begin execution of a pawn script at a specified entrypoint.
  * Begins execution of a pawn scriptat at a specified entrypoint.
  * @param pScript Pointer to an MFScript to execute.
@@ -99,6 +109,9 @@ void MFScript_DestroyScript(MFScript *pScript);
  * @remarks Note: MFScript_RegisterNativeFunctions does NOT take a copy of the data pointed to by pNativeFunctions. This pointer MUST point to memory that will remain available for the life of the script (usually global memory).
  */
 void MFScript_RegisterNativeFunctions(ScriptNativeInfo *pNativeFunctions);
+
+
+/**** Pawn related ****/
 
 /**
  * Cell to float.

@@ -26,7 +26,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -112,7 +112,7 @@
 				FavorSizeOrSpeed="1"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				ExceptionHandling="TRUE"
@@ -408,7 +408,7 @@
 				FavorSizeOrSpeed="1"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="FALSE"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)PC&quot;;&quot;$(ProjectDir)PC\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -667,6 +667,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFScript.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFSockets.cpp">
@@ -1890,647 +1893,490 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Lib"
+			Name="Middleware"
 			Filter="">
-			<Filter
-				Name="zzip"
-				Filter="">
-				<File
-					RelativePath=".\Lib\zzip\__debug.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__dirent.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__hints.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__mmap.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_config.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_msvc.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\autoconf.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\conf.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\dir.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\err.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\format.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\lib.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stat.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stdint.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\types.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\write.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zip.c">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zzip.h">
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_XB|Xbox"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCustomBuildTool"/>
-					</FileConfiguration>
-				</File>
-			</Filter>
 			<Filter
 				Name="zlib"
 				Filter="">
 				<File
-					RelativePath=".\Lib\zlib\adler32.c">
+					RelativePath=".\Middleware\zlib\adler32.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\compress.c">
+					RelativePath=".\Middleware\zlib\compress.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.c">
+					RelativePath=".\Middleware\zlib\crc32.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.h">
+					RelativePath=".\Middleware\zlib\crc32.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\deflate.c">
+					RelativePath=".\Middleware\zlib\deflate.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\deflate.h">
+					RelativePath=".\Middleware\zlib\deflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\gzio.c">
+					RelativePath=".\Middleware\zlib\gzio.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\infback.c">
+					RelativePath=".\Middleware\zlib\infback.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.c">
+					RelativePath=".\Middleware\zlib\inffast.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.h">
+					RelativePath=".\Middleware\zlib\inffast.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffixed.h">
+					RelativePath=".\Middleware\zlib\inffixed.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inflate.c">
+					RelativePath=".\Middleware\zlib\inflate.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inflate.h">
+					RelativePath=".\Middleware\zlib\inflate.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inftrees.c">
+					RelativePath=".\Middleware\zlib\inftrees.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inftrees.h">
+					RelativePath=".\Middleware\zlib\inftrees.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.c">
+					RelativePath=".\Middleware\zlib\trees.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.h">
+					RelativePath=".\Middleware\zlib\trees.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\uncompr.c">
+					RelativePath=".\Middleware\zlib\uncompr.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zconf.h">
+					RelativePath=".\Middleware\zlib\zconf.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zconf.in.h">
+					RelativePath=".\Middleware\zlib\zconf.in.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zlib.h">
+					RelativePath=".\Middleware\zlib\zlib.h">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zutil.c">
+					RelativePath=".\Middleware\zlib\zutil.c">
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zutil.h">
+					RelativePath=".\Middleware\zlib\zutil.h">
 				</File>
 				<Filter
 					Name="minizip"
 					Filter="">
 					<File
-						RelativePath=".\Lib\zlib\minizip\crypt.h">
+						RelativePath=".\Middleware\zlib\minizip\crypt.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.c">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.h">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.c">
+						RelativePath=".\Middleware\zlib\minizip\mztools.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.h">
+						RelativePath=".\Middleware\zlib\minizip\mztools.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.c">
+						RelativePath=".\Middleware\zlib\minizip\unzip.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.h">
+						RelativePath=".\Middleware\zlib\minizip\unzip.h">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.c">
-						<FileConfiguration
-							Name="Debug|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-						</FileConfiguration>
+						RelativePath=".\Middleware\zlib\minizip\zip.c">
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.h">
+						RelativePath=".\Middleware\zlib\minizip\zip.h">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="angelscript"
+				Filter="">
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_anyobject.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_anyobject.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_array.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_arrayobject.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_arrayobject.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_builder.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_builder.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_bytecode.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_bytecode.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_bytecodedef.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_c.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_callfunc.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_callfunc.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_callfunc_sh4.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_callfunc_x86.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_compiler.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_compiler.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_config.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_configgroup.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_configgroup.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_context.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_context.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_datatype.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_datatype.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_debug.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_gcobject.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_gcobject.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_generic.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_generic.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_map.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_module.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_module.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_objecttype.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_objecttype.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_outputbuffer.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_outputbuffer.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_parser.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_parser.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_property.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_restore.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_restore.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptcode.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptcode.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptengine.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptengine.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptfunction.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptfunction.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptnode.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptnode.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptstruct.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_scriptstruct.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_string.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_string.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_string_util.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_string_util.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_texts.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_thread.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_thread.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_tokendef.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_tokenizer.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_tokenizer.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_typeinfo.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_typeinfo.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_variablescope.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\angelscript\source\as_variablescope.h">
+					<FileConfiguration
+						Name="Debug|Win32">
+						<Tool
+							Name="VCCustomBuildTool"/>
+					</FileConfiguration>
+				</File>
+				<Filter
+					Name="add-on"
+					Filter="">
+					<File
+						RelativePath=".\Middleware\angelscript\scriptstring\scriptstring.cpp">
 					</File>
 				</Filter>
 			</Filter>
@@ -2541,286 +2387,70 @@
 					Name="amx"
 					Filter="">
 					<File
-						RelativePath=".\Lib\pawn\amx\amx.c">
+						RelativePath=".\Middleware\pawn\amx\amx.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amx.h">
+						RelativePath=".\Middleware\pawn\amx\amx.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxaux.c">
+						RelativePath=".\Middleware\pawn\amx\amxaux.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxaux.h">
+						RelativePath=".\Middleware\pawn\amx\amxaux.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxcore.c">
+						RelativePath=".\Middleware\pawn\amx\amxcore.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxdbg.c">
+						RelativePath=".\Middleware\pawn\amx\amxdbg.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxdbg.h">
+						RelativePath=".\Middleware\pawn\amx\amxdbg.h">
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\amxstring.c">
+						RelativePath=".\Middleware\pawn\amx\amxstring.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\float.c">
+						RelativePath=".\Middleware\pawn\amx\float.c">
 						<FileConfiguration
 							Name="Debug|Win32">
 							<Tool
 								Name="VCCLCompilerTool"
 								PreprocessorDefinitions="FLOATPOINT"/>
 						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Profile_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail|Win32">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_XB|Xbox">
-							<Tool
-								Name="VCCLCompilerTool"
-								PreprocessorDefinitions="FLOATPOINT"/>
-						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\pawn\amx\osdefs.h">
+						RelativePath=".\Middleware\pawn\amx\osdefs.h">
 					</File>
 				</Filter>
 				<Filter

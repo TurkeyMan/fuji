@@ -1,31 +1,43 @@
 #include "Fuji.h"
+
+#if defined(_USE_ANGEL_SCRIPT)
+
 #include "MFHeap.h"
 #include "MFScript.h"
 #include "MFFileSystem.h"
-#include "pawn/amx/amx.h"
-#include "pawn/amx/amxaux.h"
 
-extern "C" AMX_NATIVE_INFO core_Natives[];
-extern "C" AMX_NATIVE_INFO float_Natives[];
-extern "C" AMX_NATIVE_INFO string_Natives[];
+#include "FileSystem/MFFileSystemNative.h"
+
+#include "angelscript.h"
+#include "scriptstring.h"
+
+#include <stdio.h>
 
 // structure definitions
-struct MFScript
-{
-	AMX amx;
-};
 
 // globals
-static const int gMaxNativeFunctionLists = 128;
-static ScriptNativeInfo *gNativeFunctionRegistry[gMaxNativeFunctionLists];
-static int gNativeFunctionCount = 0;
+static asIScriptEngine *pEngine = NULL;
 
 
 /*** Functions ***/
 
 void MFScript_InitModule()
 {
-	
+	pEngine = asCreateScriptEngine(ANGELSCRIPT_VERSION);	
+	MFDebug_Assert(pEngine, "Failed to create script engine.");
+
+	pEngine->SetCommonMessageStream((asOUTPUTFUNC_t)MFDebug_Message, 0);
+
+	RegisterScriptString(pEngine);
+
+	MFMountDataNative native;
+	native.cbSize = sizeof(MFMountDataNative);
+	native.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
+	native.pMountpoint = "script";
+	native.priority = MFMP_AboveNormal;
+	native.pPath = MFFile_SystemPath("script/");
+
+	MFFileSystem_Mount(MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem), &native);
 }
 
 void MFScript_DeinitModule()
@@ -33,121 +45,29 @@ void MFScript_DeinitModule()
 
 }
 
-int MFScript_LoadProgram(AMX *amx, char *filename, void *memblock)
-{
-  AMX_HEADER hdr;
-  int result, didalloc;
-
-  /* open the file, read and check the header */
-  MFFile *pFile = MFFileSystem_Open(filename, MFOF_Read);
-
-  if(!pFile)
-    return AMX_ERR_NOTFOUND;
-
-  MFFile_Read(pFile, &hdr, sizeof(hdr));
-
-  amx_Align16(&hdr.magic);
-  amx_Align32((uint32_t *)&hdr.size);
-  amx_Align32((uint32_t *)&hdr.stp);
-  if(hdr.magic != AMX_MAGIC)
-  {
-    MFFile_Close(pFile);
-    return AMX_ERR_FORMAT;
-  } /* if */
-
-  /* allocate the memblock if it is NULL */
-  didalloc = 0;
-  if(memblock == NULL)
-  {
-    if((memblock = MFHeap_Alloc(hdr.stp)) == NULL)
-	{
-      MFFile_Close(pFile);
-      return AMX_ERR_MEMORY;
-    } /* if */
-    didalloc = 1;
-    /* after amx_Init(), amx->base points to the memory block */
-  } /* if */
-
-  /* read in the file */
-  MFFile_Seek(pFile, 0, MFSeek_Begin);
-  MFFile_Read(pFile, memblock, hdr.size);
-  MFFile_Close(pFile);
-
-  /* initialize the abstract machine */
-  memset(amx, 0, sizeof(*amx));
-  result = amx_Init(amx, memblock);
-
-  /* free the memory block on error, if it was allocated here */
-  if(result != AMX_ERR_NONE && didalloc)
-  {
-    MFHeap_Free(memblock);
-    amx->base = NULL;                   /* avoid a double free */
-  } /* if */
-
-  return result;
-}
-
 MFScript* MFScript_LoadScript(const char *pFilename)
 {
-	int err;
+	const char *pScript = MFFileSystem_Load(MFStr("%s.as", pFilename));
 
-	const char *pScriptFilename = MFStr("%s.amx", pFilename);
-
-	if(!MFFileSystem_Exists(pScriptFilename))
+	if(!pScript)
 	{
-		const char *pScriptSource = MFStr("%s.p", pFilename);
-
-		if(!MFFileSystem_Exists(pScriptSource))
-		{
-			// couldnt find the script apparently
-			MFDebug_Warn(1, MFStr("Script '%s' does not exist.", pFilename));
-			return NULL;
-		}
-
-		MFDebug_Warn(4, MFStr("Script source found for script '%s'. Attempting to compile from source.", pFilename));
-
-		// we need to compile and load from source
-//		system("pawncc.exe ");
-//		MFFileSystem_Load("home:temp.amx", NULL);
-
-		if(0) // failed
-		{
-			MFDebug_Warn(1, MFStr("Failed to compile script '%s' from source. Cannot load script.", pFilename));
-			return NULL;
-		}
-	}
-
-	MFScript *pScript = (MFScript*)MFHeap_Alloc(sizeof(MFScript));
-
-	err = MFScript_LoadProgram(&pScript->amx, (char*)pScriptFilename, NULL);
-
-	if(err != AMX_ERR_NONE)
-	{
-		MFHeap_Free(pScript);
-		MFDebug_Warn(1, MFStr("Failed to load script '%s'. \"%s\"", pFilename, aux_StrError(err)));
+		MFDebug_Warn(2, MFStr("Failed to load script '%s'.", pFilename));
 		return NULL;
 	}
 
-	amx_Register(&pScript->amx, core_Natives, -1);
-	amx_Register(&pScript->amx, float_Natives, -1);
-	amx_Register(&pScript->amx, string_Natives, -1);
+	pEngine->AddScriptSection(0, pFilename, pScript, MFString_Length(pScript), 0, false);
+	pEngine->Build(NULL);
 
-	// register our internal functions
-	for(int a=0; a<gNativeFunctionCount; a++)
-	{
-		amx_Register(&pScript->amx, (AMX_NATIVE_INFO*)gNativeFunctionRegistry[a], -1);
-	}
-
-	return pScript;
+	return (MFScript*)pEngine->CreateContext();
 }
 
 MFEntryPoint MFScript_FindPublicFunction(MFScript *pScript, const char *pFunctionName)
 {
-	MFEntryPoint entryPoint;
+	MFEntryPoint entryPoint = pEngine->GetFunctionIDByName(NULL, pFunctionName);
 
-	if(amx_FindPublic(&pScript->amx, pFunctionName, &entryPoint) == AMX_ERR_NOTFOUND)
+	if(entryPoint < 0)
 	{
-		MFDebug_Warn(4, MFStr("Public function '%s' was not found in the script. \"%s\"", pFunctionName, aux_StrError(AMX_ERR_NOTFOUND)));
+		MFDebug_Warn(4, MFStr("Public function '%s' was not found in the script.", pFunctionName));
 		return MFEntryPoint_Main;
 	}
 
@@ -156,98 +76,60 @@ MFEntryPoint MFScript_FindPublicFunction(MFScript *pScript, const char *pFunctio
 
 int MFScript_Execute(MFScript *pScript, const char *pEntryPoint)
 {
-	int entryPoint = AMX_EXEC_MAIN;
-	cell returnValue;
-	int err;
+	asIScriptContext *pContext = (asIScriptContext*)pScript;
 
-	if(pEntryPoint)
+	if(!pEntryPoint)
+		pEntryPoint = "main";
+
+	MFEntryPoint entryPoint = MFScript_FindPublicFunction(NULL, pEntryPoint);
+
+	if(entryPoint >= 0)
 	{
-		if(amx_FindPublic(&pScript->amx, pEntryPoint, &entryPoint) == AMX_ERR_NOTFOUND)
+		pContext->Prepare(entryPoint);
+		if(pContext->Execute() < 0)
 		{
-			MFDebug_Warn(3, MFStr("Public function '%s' was not found in the script. \"%s\"", pEntryPoint, aux_StrError(AMX_ERR_NOTFOUND)));
+			MFDebug_Warn(1, MFStr("Failed to execute script with entry point '%s'", pEntryPoint));
 			return 0;
 		}
 	}
 
-	err = amx_Exec(&pScript->amx, &returnValue, entryPoint);
+	return pContext->GetReturnDWord();
+}
 
-	if(err)
-	{
-		MFDebug_Warn(1, MFStr("Failed to execute script with entry point '%s'", pEntryPoint ? pEntryPoint : "main"));
-		return 0;
-	}
-
-	return returnValue;
+int MFScript_ExecuteImmediate(MFScript *pScript, const char *pCode)
+{
+	return pEngine->ExecuteString(NULL, pCode, NULL, 0);
 }
 
 int MFScript_Call(MFScript *pScript, MFEntryPoint entryPoint)
 {
-	cell returnValue;
-	int err;
+	asIScriptContext *pContext = (asIScriptContext*)pScript;
 
-	err = amx_Exec(&pScript->amx, &returnValue, entryPoint);
-
-	if(err)
+	pContext->Prepare(entryPoint);
+	if(pContext->Execute() < 0)
 	{
-		MFDebug_Warn(1, "Failed to execute script.");
+		MFDebug_Warn(1, MFStr("Failed to execute script."));
 		return 0;
 	}
 
-	return returnValue;
+	return pContext->GetReturnDWord();
 }
 
 void MFScript_DestroyScript(MFScript *pScript)
 {
-	aux_FreeProgram(&pScript->amx);
+	asIScriptContext *pContext = (asIScriptContext*)pScript;
+	pContext->Release();
 }
 
 void MFScript_RegisterNativeFunctions(ScriptNativeInfo *pNativeFunctions)
 {
-	gNativeFunctionRegistry[gNativeFunctionCount] = pNativeFunctions;
-	++gNativeFunctionCount;
-}
-
-float MFScript_ctof(uint32 cell)
-{
-	return amx_ctof(cell);
-}
-
-uint32 MFScript_ftoc(float _float)
-{
-	return amx_ftoc(_float);
-}
-
-int MFScript_GetAddr(MFScript *pScript, uint32 scriptAddress, uint32 **ppPhysicalAddress)
-{
-	return amx_GetAddr(&pScript->amx, scriptAddress, (cell**)ppPhysicalAddress);
-}
-
-const char* MFScript_GetCString(MFScript *pScript, uint32 scriptString)
-{
-	cell *amx_cstr_; int amx_length_;
-	amx_GetAddr(&pScript->amx, scriptString, &amx_cstr_);
-	amx_StrLen(amx_cstr_, &amx_length_);
-	if(amx_length_ > 0)
+	while(pNativeFunctions->pFunc)
 	{
-		char *pTemp = (char*)MFStrN("", amx_length_ * sizeof(char));
-		amx_GetString(pTemp, amx_cstr_, sizeof(char)>1, amx_length_ + 1);
-		return pTemp;
-	}
+		int r = pEngine->RegisterGlobalFunction(pNativeFunctions->pName, asFUNCTION(pNativeFunctions->pFunc), asCALL_CDECL);
+		MFDebug_Assert(r >= 0, MFStr("Couldnt register function with declaration '%s'", pNativeFunctions->pName));
 
-	return NULL;
+		++pNativeFunctions;
+	}
 }
 
-MFVector MFScript_GetVector(MFScript *pScript, uint32 scriptVector, int numComponents)
-{
-	MFVector t = MFVector::zero;
-
-	uint32 *pArray;
-	MFScript_GetAddr(pScript, scriptVector, &pArray);
-
-	for(int a=0; a<numComponents; a++)
-	{
-		t[a] = amx_ctof(pArray[a]);
-	}
-
-	return t;
-}
+#endif // defined(_USE_ANGEL_SCRIPT)

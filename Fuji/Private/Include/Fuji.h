@@ -61,6 +61,14 @@ enum MFEndian
 	MFEndian_ForceInt = 0x7FFFFFFF	/**< Force the enum to an int */
 };
 
+/*** Platform independant defines and includes ***/
+
+//#define _ENABLE_SCRIPTING
+
+#if defined(_ENABLE_SCRIPTING)
+//	#define _USE_PAWN_SCRIPT
+	#define _USE_ANGEL_SCRIPT
+#endif
 
 /*** Platform specific defines and includes ***/
 
