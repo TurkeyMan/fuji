@@ -138,6 +138,12 @@ void MFHeap_Free(void *pMem)
 {
 	MFCALLSTACK;
 
+	if(!pMem)
+	{
+		MFDebug_Warn(3, "Attemptd to Free 'NULL' pointer.");
+		return;
+	}
+
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
 
