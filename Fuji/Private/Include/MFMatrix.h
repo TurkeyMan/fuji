@@ -64,6 +64,8 @@ public:
 	MFMatrix& Inverse() { return Inverse(*this); }
 	MFMatrix& Inverse(const MFMatrix &matrix);
 
+	MFMatrix& Tween(const MFMatrix& start, const MFMatrix& end, float t);
+
 	MFVector CalculateQuaternion();
 
 	MFMatrix& ClearW();

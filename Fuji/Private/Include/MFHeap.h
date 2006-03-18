@@ -91,6 +91,12 @@ void* operator new(unsigned int size);
 void* operator new[](unsigned int size);
 void operator delete(void *pMemory);
 void operator delete[](void *pMemory);
+/*
+void* operator new(unsigned int size, void *pMem);
+void* operator new[](unsigned int size, void *pMem);
+void operator delete(void *pMemory, void *pMem);
+void operator delete[](void *pMemory, void *pMem);
+*/
 #endif
 
 /**

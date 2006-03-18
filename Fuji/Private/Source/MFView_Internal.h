@@ -26,6 +26,7 @@ struct MFView
 
 	bool viewDirty;
 	bool viewProjDirty;
+	bool projDirty;
 	bool isOrtho;
 };
 

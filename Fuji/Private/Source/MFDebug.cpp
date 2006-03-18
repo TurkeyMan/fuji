@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if !defined(_RETAIL)
+
 static int gWarningLevel = 4;
 
 void MFDebug_Error(const char *pErrorMessage)
@@ -20,3 +22,5 @@ void MFDebug_SetMaximumWarningLevel(int maxLevel)
 {
 	gWarningLevel = maxLevel;
 }
+
+#endif // !defined(_RETAIL)

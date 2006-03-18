@@ -143,6 +143,9 @@ int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVe
 	int renderable, textlen;
 	renderable = GetRenderableLength(pText, &textlen);
 
+	if(renderable == 0)
+		return 0;
+
 	float x,y,w,h, p, cwidth;
 
 	MFMaterial_SetMaterial(pFont->pMaterial);

@@ -77,59 +77,53 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
 	pCurrentView->fov = fieldOfView;
 	pCurrentView->nearPlane = nearPlane;
 	pCurrentView->farPlane = farPlane;
+
+	if(!pCurrentView->isOrtho)
+	{
+		pCurrentView->viewProjDirty = true;
+		pCurrentView->projDirty = true;
+	}
 }
 
 void MFView_SetAspectRatio(float aspectRatio)
 {
 	pCurrentView->aspectRatio = aspectRatio;
+
+	if(!pCurrentView->isOrtho)
+	{
+		pCurrentView->viewProjDirty = true;
+		pCurrentView->projDirty = true;
+	}
 }
 
 void MFView_SetProjection()
 {
 	MFCALLSTACK;
 
-	pCurrentView->isOrtho = false;
-	pCurrentView->viewProjDirty = true;
-
-	// construct and apply perspective projection
-	float zn = pCurrentView->nearPlane;
-	float zf = pCurrentView->farPlane;
-
-	float a = pCurrentView->fov * 0.5f;
-
-	float h = MFCos(a) / MFSin(a);
-	float w = h / pCurrentView->aspectRatio;
-
-	pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
-	pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
-	pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = zf/(zf-zn);		pCurrentView->projection.m[2][3] = 1.0f;
-	pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
+	if(pCurrentView->isOrtho)
+	{
+		pCurrentView->isOrtho = false;
+		pCurrentView->viewProjDirty = true;
+		pCurrentView->projDirty = true;
+	}
 }
 
 void MFView_SetOrtho(MFRect *pOrthoRect)
 {
 	MFCALLSTACK;
 
-	pCurrentView->viewProjDirty = true;
-	pCurrentView->isOrtho = true;
-
-	if(pOrthoRect)
+	if(!pCurrentView->isOrtho || pOrthoRect)
 	{
-		pCurrentView->orthoRect = *pOrthoRect;
+		pCurrentView->isOrtho = true;
+
+		pCurrentView->viewProjDirty = true;
+		pCurrentView->projDirty = true;
+
+		if(pOrthoRect)
+		{
+			pCurrentView->orthoRect = *pOrthoRect;
+		}
 	}
-
-	// construct and apply ortho projection
-	float l = pCurrentView->orthoRect.x;
-	float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
-	float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
-	float t = pCurrentView->orthoRect.y;
-	float zn = 0.0f;
-	float zf = 1.0f;
-
-	pCurrentView->projection.m[0][0] = 2.0f/(r-l);	pCurrentView->projection.m[0][1] = 0.0f;		pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
-	pCurrentView->projection.m[1][0] = 0.0f;		pCurrentView->projection.m[1][1] = 2.0f/(t-b);	pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
-	pCurrentView->projection.m[2][0] = 0.0f;		pCurrentView->projection.m[2][1] = 0.0f;		pCurrentView->projection.m[2][2] = 1.0f/(zf-zn);	pCurrentView->projection.m[2][3] = 0.0f;
-	pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
 }
 
 void MFView_GetOrthoRect(MFRect *pOrthoRect)
@@ -145,6 +139,7 @@ bool MFView_IsOrtho()
 void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
 {
 	pCurrentView->cameraMatrix = cameraMatrix;
+
 	pCurrentView->viewDirty = true;
 	pCurrentView->viewProjDirty = true;
 }
@@ -167,6 +162,43 @@ const MFMatrix& MFView_GetWorldToViewMatrix()
 
 const MFMatrix& MFView_GetViewToScreenMatrix()
 {
+	if(pCurrentView->projDirty)
+	{
+		if(pCurrentView->isOrtho)
+		{
+			// construct ortho projection
+			float l = pCurrentView->orthoRect.x;
+			float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
+			float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
+			float t = pCurrentView->orthoRect.y;
+			float zn = 0.0f;
+			float zf = 1.0f;
+
+			pCurrentView->projection.m[0][0] = 2.0f/(r-l);	pCurrentView->projection.m[0][1] = 0.0f;		pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
+			pCurrentView->projection.m[1][0] = 0.0f;		pCurrentView->projection.m[1][1] = 2.0f/(t-b);	pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
+			pCurrentView->projection.m[2][0] = 0.0f;		pCurrentView->projection.m[2][1] = 0.0f;		pCurrentView->projection.m[2][2] = 1.0f/(zf-zn);	pCurrentView->projection.m[2][3] = 0.0f;
+			pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
+		}
+		else
+		{
+			// construct perspective projection
+			float zn = pCurrentView->nearPlane;
+			float zf = pCurrentView->farPlane;
+
+			float a = pCurrentView->fov * 0.5f;
+
+			float h = MFCos(a) / MFSin(a);
+			float w = h / pCurrentView->aspectRatio;
+
+			pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
+			pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
+			pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = zf/(zf-zn);		pCurrentView->projection.m[2][3] = 1.0f;
+			pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
+		}
+
+		pCurrentView->projDirty = false;
+	}
+
 	return pCurrentView->projection;
 }
 
@@ -174,7 +206,7 @@ const MFMatrix& MFView_GetWorldToScreenMatrix()
 {
 	if(pCurrentView->viewProjDirty)
 	{
-		pCurrentView->viewProj.Multiply(MFView_GetWorldToViewMatrix(), pCurrentView->projection);
+		pCurrentView->viewProj.Multiply(MFView_GetWorldToViewMatrix(), MFView_GetViewToScreenMatrix());
 		pCurrentView->viewProjDirty = false;
 	}
 
@@ -183,15 +215,14 @@ const MFMatrix& MFView_GetWorldToScreenMatrix()
 
 MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, pCurrentView->view);
-	pOutput->Multiply(pCurrentView->projection);
+	pOutput->Multiply(localToWorld, MFView_GetWorldToScreenMatrix());
 
 	return pOutput;
 }
 
 MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, pCurrentView->view);
+	pOutput->Multiply(localToWorld, MFView_GetWorldToViewMatrix());
 
 	return pOutput;
 }

@@ -29,7 +29,9 @@ static MFHeap gExternalHeap =
 	NULL,
 	NULL,
 	MFHT_External,
+#if !defined(_RETAIL)
 	"External Heap"
+#endif
 };
 
 // heap pointers
@@ -51,7 +53,9 @@ static MFHeap gCustomHeap =
 	NULL,
 	NULL,
 	MFHT_Custom,
+#if !defined(_RETAIL)
 	"Custom Heap"
+#endif
 };
 
 #define MFHeap_MungwallBytes 8
@@ -155,11 +159,15 @@ void MFHeap_Free(void *pMem)
 // new/delete operators
 void* operator new(unsigned int size)
 {
+//	MFDebug_Message(MFStr("new %d bytes", size));
+
 	return MFHeap_AllocInternal(size);
 }
 
 void* operator new[](unsigned int size)
 {
+//	MFDebug_Message(MFStr("new %d bytes", size));
+
 	return MFHeap_AllocInternal(size);
 }
 
@@ -172,7 +180,25 @@ void operator delete[](void *pMemory)
 {
 	MFHeap_Free(pMemory);
 }
+/*
+void* operator new(unsigned int size, void *pMem)
+{
+	return pMem;
+}
 
+void* operator new[](unsigned int size, void *pMem)
+{
+	return pMem;
+}
+
+void operator delete(void *pMemory, void *pMem)
+{
+}
+
+void operator delete[](void *pMemory, void *pMem)
+{
+}
+*/
 
 // get the size of an allocation
 uint32 MFHeap_GetAllocSize(const void *pMemory)

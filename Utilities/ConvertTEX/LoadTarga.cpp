@@ -45,14 +45,14 @@ SourceImage* LoadTarga(const char *pFilename)
 	pPosition = pTarga;
 	pPosition += sizeof(TgaHeader);
 
-	if((pHeader->imageType != 2) && (pHeader->imageType != 10))
+	if((pHeader->imageType != 1) && (pHeader->imageType != 2) && (pHeader->imageType != 10))
 	{
 		LOGERROR("Failed loading image: %s (Unhandled TGA type (%d))\n", pFilename, pHeader->imageType);
 		free(pTarga);
 		return NULL;
 	}
 
-	if((pHeader->bpp != 24) && (pHeader->bpp != 32))
+	if((pHeader->bpp != 24) && (pHeader->bpp != 32) && (pHeader->bpp != 16))
 	{
 		LOGERROR("Failed loading image: %s (Invalid colour depth (%d))", pFilename, pHeader->bpp);
 		free(pTarga);
@@ -82,7 +82,7 @@ SourceImage* LoadTarga(const char *pFilename)
 
 	int bytesPerPixel = pHeader->bpp/8;
 
-	if(pHeader->imageType == 10) // The hard way
+	if(pHeader->imageType == 10) // RLE, ick...
 	{
 		uint32 pixelsRead = 0;
 
@@ -173,7 +173,7 @@ SourceImage* LoadTarga(const char *pFilename)
 			}
 		}
 	}
-	else // 2 - The easy way
+	else if(pHeader->imageType == 2) // raw RGB
 	{
 		if((pPosition + (bytesPerPixel * (pHeader->width * pHeader->height))) > pTarga + imageSize)
 		{
@@ -182,7 +182,34 @@ SourceImage* LoadTarga(const char *pFilename)
 			return NULL;
 		}
 
-		if(pHeader->bpp == 24)
+		if(pHeader->bpp == 16)
+		{
+			// this doesnt actually seem to be valid even tho the spec says so.
+//			uint8 hasAlpha = pHeader->flags & 0xF;
+			uint8 hasAlpha = 0;
+
+			for(int a=0; a<pHeader->width*pHeader->height; a++)
+			{
+				uint16 c = *(uint16*)pImageData;
+				uint8 r, g, b;
+
+				r = (c >> 7) & 0xF8;
+				r |= r >> 5;
+				g = (c >> 2) & 0xF8;
+				g |= g >> 5;
+				b = (c << 3) & 0xF8;
+				b |= b >> 5;
+
+				pPixel->r = (float)r * (1.0f/255.0f);
+				pPixel->g = (float)g * (1.0f/255.0f);
+				pPixel->b = (float)b * (1.0f/255.0f);
+				pPixel->a = hasAlpha ? ((c & 0x8000) ? 1.0f : 0.0f) : 1.0f;
+
+				pImageData += bytesPerPixel;
+				++pPixel;
+			}
+		}
+		else if(pHeader->bpp == 24)
 		{
 			for(int a=0; a<pHeader->width*pHeader->height; a++)
 			{
@@ -206,6 +233,10 @@ SourceImage* LoadTarga(const char *pFilename)
 				++pPixel;
 			}
 		}
+	}
+	else if(pHeader->imageType == 1) // paletted
+	{
+		MFDebug_Assert(false, "Paletted images not yet supported....");
 	}
 
 	free(pTarga);

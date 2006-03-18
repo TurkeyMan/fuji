@@ -100,6 +100,8 @@ void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
+	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
+
 	if(gRenderQuads)
 		beginCount = vertexCount * 3;
 	else

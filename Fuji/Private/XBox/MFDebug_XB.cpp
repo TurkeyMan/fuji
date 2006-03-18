@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if !defined(_RETAIL)
+
 #include "MFSystem_Internal.h"
 #include "Display_Internal.h"
 #include "MFFont.h"
@@ -89,3 +92,5 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFDisplay_EndFrame();
 	}
 }
+
+#endif // !defined(_RETAIL)

@@ -5,7 +5,6 @@
 	Name="libFuji"
 	ProjectGUID="{692AD46F-7D1C-4C2B-89B4-9DA4EEF1EF89}"
 	RootNamespace="libFuji"
-	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -367,7 +366,7 @@
 				AdditionalDependencies=""
 				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Lib\;$(ProjectDir)Lib\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
+				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
 				warninglevel="1"
 				optimization="3"
 				preprocessordefines="_PSP;_DEBUG;_LIB"
@@ -479,7 +478,7 @@
 				ExecutionBucket="6"
 				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Lib\;$(ProjectDir)Lib\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
+				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
 				preprocessordefines="_PSP;NDEBUG;_LIB;_RELEASE"
 			/>
 			<Tool
@@ -589,7 +588,7 @@
 				ExecutionBucket="6"
 				AdditionalOptions="-G0 -fno-exceptions -fno-rtti&#x0A;"
 				gccexe="psp-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Lib\;$(ProjectDir)Lib\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
+				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)PSP\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;C:\cygwin\usr\local\pspdev\psp\sdk\include"
 				preprocessordefines="_PSP;NDEBUG;_LIB;_RETAIL"
 			/>
 			<Tool
@@ -2023,6 +2022,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\MFCollision_Internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFCommandLine.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFDebug.cpp"
 				>
 				<FileConfiguration
@@ -3015,6 +3022,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Source\MFNetwork_Internal.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFPrimitive.cpp"
 				>
 				<FileConfiguration
@@ -3196,6 +3207,22 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFRenderer_Internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFScript.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Pawn.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Registration.cpp"
 				>
 			</File>
 			<File
@@ -3741,6 +3768,10 @@
 						Name="GCCCompiler"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Source\MFTranslation.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\Source\MFVector.cpp"
@@ -4844,6 +4875,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\MFCommandLine.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\MFDebug.h"
 				>
 			</File>
@@ -4912,6 +4947,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\MFScript.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\MFSockets.h"
 				>
 			</File>
@@ -4945,6 +4984,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFTranslation.h"
 				>
 			</File>
 			<File
@@ -12301,13 +12344,13 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Lib"
+			Name="Middleware"
 			>
 			<Filter
 				Name="zlib"
 				>
 				<File
-					RelativePath=".\Lib\zlib\adler32.c"
+					RelativePath=".\Middleware\zlib\adler32.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12395,7 +12438,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\compress.c"
+					RelativePath=".\Middleware\zlib\compress.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12483,7 +12526,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.c"
+					RelativePath=".\Middleware\zlib\crc32.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12571,103 +12614,11 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\crc32.h"
+					RelativePath=".\Middleware\zlib\crc32.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\deflate.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\deflate.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\gzio.c"
+					RelativePath=".\Middleware\zlib\deflate.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12755,7 +12706,11 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\infback.c"
+					RelativePath=".\Middleware\zlib\deflate.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\gzio.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12843,7 +12798,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.c"
+					RelativePath=".\Middleware\zlib\infback.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -12931,15 +12886,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inffast.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\inffixed.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\inflate.c"
+					RelativePath=".\Middleware\zlib\inffast.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -13027,103 +12974,15 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inflate.h"
+					RelativePath=".\Middleware\zlib\inffast.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\inftrees.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\inftrees.h"
+					RelativePath=".\Middleware\zlib\inffixed.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.c"
+					RelativePath=".\Middleware\zlib\inflate.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -13211,111 +13070,11 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\trees.h"
+					RelativePath=".\Middleware\zlib\inflate.h"
 					>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\uncompr.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_DC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PS2|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_GC|Win32"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\zconf.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\zconf.in.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\zlib.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zlib\zutil.c"
+					RelativePath=".\Middleware\zlib\inftrees.c"
 					>
 					<FileConfiguration
 						Name="Debug_PSP|Win32"
@@ -13403,110 +13162,302 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\Lib\zlib\zutil.h"
+					RelativePath=".\Middleware\zlib\inftrees.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\trees.c"
+					>
+					<FileConfiguration
+						Name="Debug_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\trees.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\uncompr.c"
+					>
+					<FileConfiguration
+						Name="Debug_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\zconf.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\zconf.in.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\zlib.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\zutil.c"
+					>
+					<FileConfiguration
+						Name="Debug_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PSP|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_DC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_PS2|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Retail_GC|Win32"
+						>
+						<Tool
+							Name="GCCCompiler"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Middleware\zlib\zutil.h"
 					>
 				</File>
 				<Filter
 					Name="minizip"
 					>
 					<File
-						RelativePath=".\Lib\zlib\minizip\crypt.h"
+						RelativePath=".\Middleware\zlib\minizip\crypt.h"
 						>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.c"
-						>
-						<FileConfiguration
-							Name="Debug_PSP|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_PSP|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_PSP|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_DC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_DC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_DC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_PS2|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_PS2|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_PS2|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Debug_GC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_GC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_GC|Win32"
-							>
-							<Tool
-								Name="GCCCompiler"
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\ioapi.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.c"
+						RelativePath=".\Middleware\zlib\minizip\ioapi.c"
 						>
 						<FileConfiguration
 							Name="Debug_PSP|Win32"
@@ -13594,11 +13545,11 @@
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\mztools.h"
+						RelativePath=".\Middleware\zlib\minizip\ioapi.h"
 						>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.c"
+						RelativePath=".\Middleware\zlib\minizip\mztools.c"
 						>
 						<FileConfiguration
 							Name="Debug_PSP|Win32"
@@ -13686,39 +13637,12 @@
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\unzip.h"
+						RelativePath=".\Middleware\zlib\minizip\mztools.h"
 						>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.c"
+						RelativePath=".\Middleware\zlib\minizip\unzip.c"
 						>
-						<FileConfiguration
-							Name="Debug_PC|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\$(InputName)1.obj"
-								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release_PC|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\$(InputName)1.obj"
-								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Retail_PC|Win32"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-								ObjectFile="$(IntDir)\$(InputName)1.obj"
-								XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-							/>
-						</FileConfiguration>
 						<FileConfiguration
 							Name="Debug_PSP|Win32"
 							>
@@ -13805,398 +13729,102 @@
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath=".\Lib\zlib\minizip\zip.h"
+						RelativePath=".\Middleware\zlib\minizip\unzip.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Middleware\zlib\minizip\zip.c"
+						>
+						<FileConfiguration
+							Name="Debug_PSP|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_PSP|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_PSP|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_DC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_DC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_DC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_PS2|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_PS2|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_PS2|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Debug_GC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Release_GC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="Retail_GC|Win32"
+							>
+							<Tool
+								Name="GCCCompiler"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\Middleware\zlib\minizip\zip.h"
 						>
 					</File>
 				</Filter>
-			</Filter>
-			<Filter
-				Name="zzip"
-				>
-				<File
-					RelativePath=".\Lib\zzip\__debug.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__dirent.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__hints.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\__mmap.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_config.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\_msvc.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\autoconf.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\conf.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\dir.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\err.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fetch.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\file.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\format.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\fseeko.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\info.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\lib.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\mmapped.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\plugin.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stat.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\stdint.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\types.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\write.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zip.c"
-					>
-					<FileConfiguration
-						Name="Debug_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Retail_PSP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="GCCCompiler"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\Lib\zzip\zzip.h"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<File

@@ -6,4 +6,7 @@
 void MFScript_InitModule();
 void MFScript_DeinitModule();
 
+void RegisterInternalTypes();
+void RegisterInternalFunctions();
+
 #endif

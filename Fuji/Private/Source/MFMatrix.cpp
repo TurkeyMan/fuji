@@ -542,6 +542,19 @@ MFMatrix& MFMatrix::Inverse(const MFMatrix &mat)
 	return *this = out;
 }
 
+MFMatrix& MFMatrix::Tween(const MFMatrix& start, const MFMatrix& end, float time)
+{
+	MFMatrix t = start;
+
+	((MFVector*)t.m[0])->Lerp(end.GetXAxis(), time);
+	((MFVector*)t.m[1])->Lerp(end.GetXAxis(), time);
+	((MFVector*)t.m[2])->Lerp(end.GetXAxis(), time);
+	((MFVector*)t.m[3])->Lerp(end.GetXAxis(), time);
+
+	*this = t;
+	return *this;
+}
+
 MFVector MFMatrix::CalculateQuaternion()
 {
 	MFVector t;

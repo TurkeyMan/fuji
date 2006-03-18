@@ -63,7 +63,7 @@ enum MFEndian
 
 /*** Platform independant defines and includes ***/
 
-//#define _ENABLE_SCRIPTING
+#define _ENABLE_SCRIPTING
 
 #if defined(_ENABLE_SCRIPTING)
 //	#define _USE_PAWN_SCRIPT
@@ -200,7 +200,6 @@ enum MFEndian
 
 /*** Additional includes ***/
 
-#include "MFTypes.h"
 #include "MFMath.h"
 #include "MFString.h"
 #include "MFDebug.h"

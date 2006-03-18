@@ -224,7 +224,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="_DEBUG;_XBOX;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -294,7 +294,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="NDEBUG;_XBOX;PROFILE;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -364,7 +364,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -520,7 +520,7 @@
 				Optimization="3"
 				OmitFramePointers="TRUE"
 				OptimizeForProcessor="2"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Lib&quot;;&quot;$(ProjectDir)Lib\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)XBox&quot;;&quot;$(ProjectDir)XBox\vorbis\include&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;"
 				PreprocessorDefinitions="NDEBUG;_XBOX;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -670,6 +670,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFScript_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Registration.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFSockets.cpp">
@@ -1426,6 +1429,12 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Pc\MFInputMappings_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\MFInputMappings_PC.h">
 			</File>
 			<File
 				RelativePath=".\Pc\MFMaterial_PC.cpp">
