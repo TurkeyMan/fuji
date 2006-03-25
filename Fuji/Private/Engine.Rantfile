@@ -1,13 +1,12 @@
-# Must include full path!
-sources =
+var[:engine_sources] +=
 [
 ]
 
-source_dirs =
+var[:engine_source_dirs] +=
 [
 ]
 
-recursive_source_dirs =
+var[:engine_recursive_source_dirs] +=
 [
 	'Fuji/Source',
 	"Fuji/#{var[:platform]}",
@@ -15,25 +14,18 @@ recursive_source_dirs =
 	'Fuji/Lib/pawn/amx'
 ]
 
-exclusions =
+var[:engine_exclusions] +=
 [
 ]
 
 case var[:platform]
 	when 'PC'
-		sources +=
-		[
-		]
+		var[:engine_defines]['_WINDOWS'] = nil
+		var[:engine_defines]['NTDDI_WIN2K'] = nil
+		var[:engine_defines]['WINVER'] = '0x0500'
+		var[:engine_defines]['_WIN32_WINNT'] = '0x0500'
 
-	else
-		sources +=
-		[
-			"Fuji/Null/Materials/MFMat_Effect_Null.cpp",
-			"Fuji/Null/Materials/MFMat_Standard_Null.cpp"
-		]
+	when 'Linux'
+		var[:engine_defines]['_LINUX'] = nil
 end
 
-var[:engine_sources] = sources
-var[:engine_source_dirs] = source_dirs
-var[:engine_recursive_source_dirs] = recursive_source_dirs
-var[:engine_exclusions] = exclusions
