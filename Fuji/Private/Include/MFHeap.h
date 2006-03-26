@@ -87,10 +87,14 @@ void* MFHeap_TAlloc(uint32 bytes);
 void  MFHeap_Free(void *pMem);
 
 #if !defined(_FUJI_UTIL)
+// FIXME
+#if !defined(_LINUX)
 void* operator new(unsigned int size);
 void* operator new[](unsigned int size);
 void operator delete(void *pMemory);
 void operator delete[](void *pMemory);
+#endif
+
 /*
 void* operator new(unsigned int size, void *pMem);
 void* operator new[](unsigned int size, void *pMem);

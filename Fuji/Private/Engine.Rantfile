@@ -18,6 +18,16 @@ var[:engine_exclusions] +=
 [
 ]
 
+var[:common_include_dirs] +=
+[
+	'Fuji/Include'
+]
+
+var[:engine_include_dirs] +=
+[
+	'Fuji/Source'
+]
+
 case var[:platform]
 	when 'PC'
 		var[:engine_defines]['_WINDOWS'] = nil

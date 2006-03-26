@@ -5,6 +5,10 @@
 #include <d3d9.h>
 #endif
 
+#if defined(_LINUX)
+#include <GL/gl.h>
+#endif
+
 #include "MFTexture.h"
 
 // foreward declarations
