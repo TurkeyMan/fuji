@@ -49,7 +49,7 @@ MFFont* MFFont_Create(const char *pFilename)
 		MFDebug_Assert(!MFString_Compare(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
 
 		MFTexture *pTexture;
-		MFMaterial_GetParamater(pFont->pMaterial, MFMatStandard_DifuseMap, 0, &pTexture);
+		MFMaterial_GetParameter(pFont->pMaterial, MFMatStandard_DifuseMap, 0, &pTexture);
 
 		pFont->height = pTexture->pTemplateData->pSurfaces[0].height / 16.0f;
 		pFont->spaceWidth = (float)pFont->charwidths[(int)' '];

@@ -77,7 +77,7 @@ void MFView_SetOrtho(MFRect *pOrthoRect = NULL);
 /**
  * Get the current ortho rect.
  * Get the current orthographic projection rect.
- * @param pOrthoRect Pointer to an MFRect structure that receives the current ortho rect paramaters.
+ * @param pOrthoRect Pointer to an MFRect structure that receives the current ortho rect parameters.
  * @return None.
  * @see MFView_SetOrtho()
  */
@@ -140,7 +140,7 @@ const MFMatrix& MFView_GetWorldToScreenMatrix();
  * Builds a Local to Screen matrix from the provided Local matrix.
  * @param localToWorld Local to world matrix to be used to generate the Local to Screen matrix.
  * @param pOutput Pointer to a matrix that receives the result of the operation.
- * @return The same pointer passed as pOutput, This way MFView_GetLocalToScreen() can be used as a paramater to another function.
+ * @return The same pointer passed as pOutput, This way MFView_GetLocalToScreen() can be used as a parameter to another function.
  * @see MFView_GetWorldToScreenMatrix()
  * @see MFView_GetLocalToView()
  */
@@ -151,7 +151,7 @@ MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutpu
  * Builds a Local to View matrix from the provided Local matrix.
  * @param localToWorld Local to world matrix to be used to generate the Local to Screen matrix.
  * @param pOutput Pointer to a matrix that receives the result of the operation.
- * @return The same pointer passed as pOutput, This way MFView_GetLocalToView() can be used as a paramater to another function.
+ * @return The same pointer passed as pOutput, This way MFView_GetLocalToView() can be used as a parameter to another function.
  * @see MFView_GetWorldToViewMatrix()
  * @see MFView_GetLocalToScreen()
  */

@@ -19,37 +19,37 @@ const char* MFCommandLine_GetCommandLineString();
 /**
  * Get a bool argument from the command line.
  * Gets a bool argument from the command line.
- * @param pParamater Name of the paramater to fetch from the command line.
- * @param defaultValue Default value to use if paramater does not appear on the command line.
- * @return Returns the value of the paramater on the command line as a bool. If the paramater does not exist, \a defaultValue is returned.
+ * @param pParameter Name of the parameter to fetch from the command line.
+ * @param defaultValue Default value to use if parameter does not appear on the command line.
+ * @return Returns the value of the parameter on the command line as a bool. If the parameter does not exist, \a defaultValue is returned.
  */
-bool MFCommandLine_GetBool(const char *pParamater, bool defaultValue = false);
+bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue = false);
 
 /**
  * Get an int argument from the command line.
  * Gets a int argument from the command line.
- * @param pParamater Name of the paramater to fetch from the command line.
- * @param defaultValue Default value to use if paramater does not appear on the command line.
- * @return Returns the value of the paramater on the command line as an int. If the paramater does not exist, \a defaultValue is returned.
+ * @param pParameter Name of the parameter to fetch from the command line.
+ * @param defaultValue Default value to use if parameter does not appear on the command line.
+ * @return Returns the value of the parameter on the command line as an int. If the parameter does not exist, \a defaultValue is returned.
  */
-int MFCommandLine_GetInt(const char *pParamater, int defaultValue = 0);
+int MFCommandLine_GetInt(const char *pParameter, int defaultValue = 0);
 
 /**
  * Get a float argument from the command line.
  * Gets a float argument from the command line.
- * @param pParamater Name of the paramater to fetch from the command line.
- * @param defaultValue Default value to use if paramater does not appear on the command line.
- * @return Returns the value of the paramater on the command line as a float. If the paramater does not exist, \a defaultValue is returned.
+ * @param pParameter Name of the parameter to fetch from the command line.
+ * @param defaultValue Default value to use if parameter does not appear on the command line.
+ * @return Returns the value of the parameter on the command line as a float. If the parameter does not exist, \a defaultValue is returned.
  */
-float MFCommandLine_GetFloat(const char *pParamater, float defaultValue = 0.0f);
+float MFCommandLine_GetFloat(const char *pParameter, float defaultValue = 0.0f);
 
 /**
  * Get a string argument from the command line.
  * Gets a string argument from the command line.
- * @param pParamater Name of the paramater to fetch from the command line.
- * @return Returns the value of the paramater on the command line as a string. If the paramater does not exist, NULL is returned.
+ * @param pParameter Name of the parameter to fetch from the command line.
+ * @return Returns the value of the parameter on the command line as a string. If the parameter does not exist, NULL is returned.
  */
-const char* MFCommandLine_GetString(const char *pParamater);
+const char* MFCommandLine_GetString(const char *pParameter);
 
 #endif
 

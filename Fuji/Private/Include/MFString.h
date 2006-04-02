@@ -123,7 +123,7 @@ char* MFString_RChr(const char *pString, int c);
 
 /**
  * Get a formatted a string.
- * Generates a new string from a format specifier and paramaters.
+ * Generates a new string from a format specifier and parameters.
  * @param format The format string. Supports all the standard formatting provided by the CRT like printf().
  * @param ... Variable argument list.
  * @return Pointer to the newly created string.
@@ -134,7 +134,7 @@ const char* MFStr(const char *format, ...);
 
 /**
  * Copy a specified number of characters from one string into a new string.
- * Generates a new string from a format specifier and paramaters.
+ * Generates a new string from a format specifier and parameters.
  * @param source The string from which characters will be copied.
  * @param n Number of characters to copy from the source string.
  * @return Pointer to the newly created string.

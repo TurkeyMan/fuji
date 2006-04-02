@@ -175,7 +175,7 @@ void MFHeap_Release(MFHeap *pHeap = NULL);
  * Registers a custom heap.
  * Registers a set of callbacks and some user data to access a custom heap.
  * @param pCallbacks Pointer to an MFMemoryCallbacks structure containing a set of callbacks to be used for memory management.
- * @param pUserData Pointer to a block of user data. This is passed into the memory callbacks. This paramater may be NULL.
+ * @param pUserData Pointer to a block of user data. This is passed into the memory callbacks. This parameter may be NULL.
  * @return None.
  * @see MFHeap_GetHeap()
  */

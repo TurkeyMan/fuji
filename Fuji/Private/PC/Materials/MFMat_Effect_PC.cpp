@@ -59,12 +59,12 @@ void MFMat_Effect_DestroyInstance(MFMaterial *pMaterial)
 	MFHeap_Free(pMaterial->pInstanceData);
 }
 
-void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue)
+void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 }
 
-uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue)
+uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 	MFDebug_Assert(false, "Not Written");
@@ -77,12 +77,12 @@ int MFMat_Effect_GetNumParams()
 	return 0;
 }
 
-MFMaterialParamaterInfo* MFMat_Effect_GetParamaterInfo(int paramaterIndex)
+MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex)
 {
 /*
-	MFDebug_Assert((uint32)paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), MFStr("Invalid paramater id %d.", paramaterIndex));
+	MFDebug_Assert((uint32)parameterIndex < sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo), MFStr("Invalid parameter id %d.", parameterIndex));
 
-	return &paramaterInformation[paramaterIndex];
+	return &parameterInformation[parameterIndex];
 */
 	return NULL;
 }

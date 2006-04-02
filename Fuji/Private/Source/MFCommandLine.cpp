@@ -8,9 +8,9 @@ const char * MFCommandLine_GetCommandLineString()
 	return gpCommandLineBuffer;
 }
 
-bool MFCommandLine_GetBool(const char *pParamater, bool defaultValue)
+bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue)
 {
-	const char *pValue = MFCommandLine_GetString(pParamater);
+	const char *pValue = MFCommandLine_GetString(pParameter);
 
 	if(pValue && MFIsNumeric(*pValue))
 		return atoi(pValue) ? true : false;
@@ -18,27 +18,27 @@ bool MFCommandLine_GetBool(const char *pParamater, bool defaultValue)
 	return pValue ? true : false;
 }
 
-int MFCommandLine_GetInt(const char *pParamater, int defaultValue)
+int MFCommandLine_GetInt(const char *pParameter, int defaultValue)
 {
-	const char *pValue = MFCommandLine_GetString(pParamater);
+	const char *pValue = MFCommandLine_GetString(pParameter);
 
 	return pValue ? atoi(pValue) : defaultValue;
 }
 
-float MFCommandLine_GetFloat(const char *pParamater, float defaultValue)
+float MFCommandLine_GetFloat(const char *pParameter, float defaultValue)
 {
-	const char *pValue = MFCommandLine_GetString(pParamater);
+	const char *pValue = MFCommandLine_GetString(pParameter);
 
 	return pValue ? (float)atof(pValue) : defaultValue;
 }
 
-const char* MFCommandLine_GetString(const char *pParamater)
+const char* MFCommandLine_GetString(const char *pParameter)
 {
 	if(!gpCommandLineBuffer)
 		return NULL;
 
 	const char *pT = gpCommandLineBuffer;
-	int len = MFString_Length(pParamater);
+	int len = MFString_Length(pParameter);
 
 	const char *pArgStart = NULL;
 	int argLen = 0;
@@ -57,9 +57,9 @@ const char* MFCommandLine_GetString(const char *pParamater)
 				++pT;
 
 			if(MFIsWhite(*pT))
-				MFDebug_Warn(2, "Found command line switch with no paramater name.");
+				MFDebug_Warn(2, "Found command line switch with no parameter name.");
 
-			if(!MFString_CaseCmpN(pParamater, pT, len))
+			if(!MFString_CaseCmpN(pParameter, pT, len))
 			{
 				// find arg
 				const char *pArg = pT+len;

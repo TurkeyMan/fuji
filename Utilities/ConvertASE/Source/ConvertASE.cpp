@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("Too many paramaters...");
+				printf("Too many parameters...");
 				return 1;
 			}
 		}

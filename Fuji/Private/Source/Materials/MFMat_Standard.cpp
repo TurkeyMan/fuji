@@ -33,7 +33,7 @@ static MFParamType celshading[] = { MFParamType_Unknown };
 static MFParamType phong[] = { MFParamType_Unknown };
 static MFParamType animated[] = { MFParamType_Int, MFParamType_Int, MFParamType_Float };
 
-MFMaterialParamaterInfo paramaterInformation[] =
+MFMaterialParameterInfo parameterInformation[] =
 {
 	{ "lit", lit, sizeof(lit)/sizeof(MFParamType) },
 	{ "prelit", prelit, sizeof(prelit)/sizeof(MFParamType) },
@@ -78,7 +78,7 @@ void MFMat_Standard_Register()
 	matStandardCallbacks.pSetParameter = MFMat_Standard_SetParameter;
 	matStandardCallbacks.pGetParameter = MFMat_Standard_GetParameter;
 	matStandardCallbacks.pGetNumParams = MFMat_Standard_GetNumParams;
-	matStandardCallbacks.pGetParamaterInfo = MFMat_Standard_GetParamaterInfo;
+	matStandardCallbacks.pGetParameterInfo = MFMat_Standard_GetParameterInfo;
 
 	MFMaterial_RegisterMaterialType("Standard", &matStandardCallbacks);
 }
@@ -103,11 +103,11 @@ void MFMat_Standard_Update(MFMaterial *pMaterial)
 	}
 }
 
-void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue)
+void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
-	switch(paramaterIndex)
+	switch(parameterIndex)
 	{
 		case MFMatStandard_Lit:
 			pData->materialType = (pData->materialType & ~MF_Lit) | (*(size_t*)pValue ? MF_Lit : 0);
@@ -232,11 +232,11 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 	}
 }
 
-uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue)
+uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
-	switch(paramaterIndex)
+	switch(parameterIndex)
 	{
 		case MFMatStandard_Lit:
 			return *(size_t*)pValue = (pData->materialType & MF_Lit) ? 1 : 0;
@@ -305,13 +305,13 @@ uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, in
 
 int MFMat_Standard_GetNumParams()
 {
-	return sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo);
+	return sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo);
 }
 
-MFMaterialParamaterInfo* MFMat_Standard_GetParamaterInfo(int paramaterIndex)
+MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex)
 {
-	MFDebug_Assert((uint32)paramaterIndex < sizeof(paramaterInformation)/sizeof(MFMaterialParamaterInfo), MFStr("Invalid paramater id %d.", paramaterIndex));
+	MFDebug_Assert((uint32)parameterIndex < sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo), MFStr("Invalid parameter id %d.", parameterIndex));
 
-	return &paramaterInformation[paramaterIndex];
+	return &parameterInformation[parameterIndex];
 }
 

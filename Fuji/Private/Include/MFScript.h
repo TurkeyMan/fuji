@@ -29,7 +29,7 @@ typedef int MFEntryPoint;
  * Callback function type for native script functions.
  * Callback function type for native script functions.
  */
-//typedef uint32 (*ScriptNativeFunction)(MFScript *pScript, uint32 *pParamaters);
+//typedef uint32 (*ScriptNativeFunction)(MFScript *pScript, uint32 *pParameters);
 
 /**
  * Represents any object in a script.

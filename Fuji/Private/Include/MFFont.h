@@ -95,7 +95,7 @@ int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const c
  * @param y y coordinate in screen space.
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
- * @param ... Additional paramaters used according to the format specifier.
+ * @param ... Additional parameters used according to the format specifier.
  * @return Returns 0 if there were no errors.
  * @remarks The MFFont_BlitTextf format string conforms with all the standard printf format standards.
  */
@@ -134,7 +134,7 @@ int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVecto
  * @param height Height of the text.
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
- * @param ... Additional paramaters used according to the format specifier.
+ * @param ... Additional parameters used according to the format specifier.
  * @return Returns 0 if there were no errors.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
@@ -149,7 +149,7 @@ int MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFV
  * @param height Height of the text.
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
- * @param ... Additional paramaters used according to the format specifier.
+ * @param ... Additional parameters used according to the format specifier.
  * @return Returns 0 if there were no errors.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */

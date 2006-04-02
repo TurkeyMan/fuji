@@ -304,7 +304,7 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
  * Mounts a filesystem.
  * Mounts a filesystem which provides files to Fuji.
  * @param fileSystem Handle to the filesystem which provides access to the data.
- * @param pMountData Pointer to a MFMountData structure filled with all the mount paramaters.
+ * @param pMountData Pointer to a MFMountData structure filled with all the mount parameters.
  * @return Returns 0 if filesystem was successfully mounted.
  */
 int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData);

@@ -210,7 +210,7 @@ void ParseMEMD2File(char *pBuffer)
 
 			MFString_Copy(mat.name, pTex);
 
-			// material paramaters
+			// material parameters
 			mat.specularLevel = material->matPower;
 			mat.ambient.x = material->matColours[0].r;
 			mat.ambient.y = material->matColours[0].g;

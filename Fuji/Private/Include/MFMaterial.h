@@ -39,35 +39,35 @@ enum MFStockMaterials
 };
 
 /**
- * Paramater types.
- * Various available material paramater types.
+ * Parameter types.
+ * Various available material parameter types.
  */
 enum MFParamType
 {
-	MFParamType_Unknown,	/**< Unknown paramater type */
+	MFParamType_Unknown,	/**< Unknown parameter type */
 
-	MFParamType_String,		/**< String paramater type */
-	MFParamType_Float,		/**< Floating point paramater type */
-	MFParamType_Int,		/**< Integer paramater type */
-	MFParamType_Bool,		/**< Boolean paramater type */
-	MFParamType_Vector3,	/**< 3D vector paramater type */
-	MFParamType_Vector4,	/**< 4D vector paramater type */
-	MFParamType_Matrix,		/**< Matrix paramater type */
+	MFParamType_String,		/**< String parameter type */
+	MFParamType_Float,		/**< Floating point parameter type */
+	MFParamType_Int,		/**< Integer parameter type */
+	MFParamType_Bool,		/**< Boolean parameter type */
+	MFParamType_Vector3,	/**< 3D vector parameter type */
+	MFParamType_Vector4,	/**< 4D vector parameter type */
+	MFParamType_Matrix,		/**< Matrix parameter type */
 
-	MFParamType_Max,		/**< Maximum paramater type */
+	MFParamType_Max,		/**< Maximum parameter type */
 	MFParamType_ForceInt = 0x7FFFFFFF	/**< Force ParamType to an int type */
 };
 
 /**
- * Material paramater information structure.
- * Represents various information about a material paramater. This is exposed for use when writing custom materials.
+ * Material parameter information structure.
+ * Represents various information about a material parameter. This is exposed for use when writing custom materials.
  */
-struct MFMaterialParamaterInfo
+struct MFMaterialParameterInfo
 {
-	const char *pParamaterName;	/**< Name of the paramater */
+	const char *pParameterName;	/**< Name of the parameter */
 
 	MFParamType *pArgTypes;		/**< Pointer to an array of argument types for each argument index */
-	int numArgs;				/**< Number of arguments for this paramater */
+	int numArgs;				/**< Number of arguments for this parameter */
 };
 
 /**
@@ -87,9 +87,9 @@ struct MFMaterialCallbacks
 	void      (*pUpdate)(MFMaterial *pMaterial);			/**< Pointer to the Update function */
 
 	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
-	MFMaterialParamaterInfo* (*pGetParamaterInfo)(int paramaterIndex);	/**< Pointer to the GetParamaterInfo function */
-	void      (*pSetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);	/**< Pointer to a SetParameter function */
-	uint32    (*pGetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
+	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function */
+	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);	/**< Pointer to a SetParameter function */
+	uint32    (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
 };
 
 
@@ -172,84 +172,84 @@ MFMaterial*	MFMaterial_GetCurrent();
 // material control
 
 /**
- * Get the number of paramaters the material exposes.
- * Gets the number of paramaters the material exposes.
+ * Get the number of parameters the material exposes.
+ * Gets the number of parameters the material exposes.
  * @param pMaterial Pointer to a material instance.
- * @return Returns the number of paramaters exposed by the material.
+ * @return Returns the number of parameters exposed by the material.
  */
-int MFMaterial_GetNumParamaters(MFMaterial *pMaterial);
+int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
 
 /**
- * Get the name of a paramater.
- * Gets the name of a material paramater.
+ * Get the name of a parameter.
+ * Gets the name of a material parameter.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Paramater index.
- * @return Returns a string representing the paramater name.
+ * @param parameterIndex Parameter index.
+ * @return Returns a string representing the parameter name.
  */
-const char*	MFMaterial_GetParamaterName(MFMaterial *pMaterial, int paramaterIndex);
+const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex);
 
 /**
- * Get the index of a paramater from a paramater name.
- * Gets the index of a paramater from a paramater name.
+ * Get the index of a parameter from a parameter name.
+ * Gets the index of a parameter from a parameter name.
  * @param pMaterial Pointer to a material instance.
- * @param pParameterName String representing a paramater name.
- * @return Returns the index of the paramater. -1 if the paramater does not exist.
+ * @param pParameterName String representing a parameter name.
+ * @return Returns the index of the parameter. -1 if the parameter does not exist.
  */
-int MFMaterial_GetParamaterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
+int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
 
 /**
- * Get the number of arguments for a paramater.
- * Gets the number of arguments for a paramater.
+ * Get the number of arguments for a parameter.
+ * Gets the number of arguments for a parameter.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Index of the paramater to find the arg count for.
- * @return Returns the number of arguments for a paramater.
+ * @param parameterIndex Index of the parameter to find the arg count for.
+ * @return Returns the number of arguments for a parameter.
  */
-int MFMaterial_GetNumParamaterArgs(MFMaterial *pMaterial, int paramaterIndex);
+int MFMaterial_GetNumParameterArgs(MFMaterial *pMaterial, int parameterIndex);
 
 /**
- * Get the ParamType for a paramater argument.
- * Gets the ParamType for a paramater argument.
+ * Get the ParamType for a parameter argument.
+ * Gets the ParamType for a parameter argument.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Index of the paramater.
- * @param argIndex Argument index of the paramater.
- * @return Returns the ParamType of the paramater argument.
+ * @param parameterIndex Index of the parameter.
+ * @param argIndex Argument index of the parameter.
+ * @return Returns the ParamType of the parameter argument.
  */
-MFParamType	MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterIndex, int argIndex);
+MFParamType	MFMaterial_GetParameterArgType(MFMaterial *pMaterial, int parameterIndex, int argIndex);
 
 /**
- * Set the value of a paramater.
- * Sets the value of a paramater.
+ * Set the value of a parameter.
+ * Sets the value of a parameter.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Index of the paramater
- * @param argIndex Argument index of the paramater.
- * @param pValue Pointer to the value to assign to the paramater.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pValue Pointer to the value to assign to the parameter.
  * @return None.
  */
-void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);
+void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);
 
 /**
- * Get the value of a paramater.
- * Gets the value of a paramater.
+ * Get the value of a parameter.
+ * Gets the value of a parameter.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Index of the paramater
- * @param argIndex Argument index of the paramater.
- * @param pValue Pointer to a veriable to receive the paramater data.
- * @return If MFMaterial_GetParamater, the return value is 0.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pValue Pointer to a veriable to receive the parameter data.
+ * @return If MFMaterial_GetParameter, the return value is 0.
  */
-int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);
+int MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 
 /**
- * Set the value of a paramater to an integer value.
- * Sets the value of a paramater to an integer value.
+ * Set the value of a parameter to an integer value.
+ * Sets the value of a parameter to an integer value.
  * @param pMaterial Pointer to a material instance.
- * @param paramaterIndex Index of the paramater
- * @param argIndex Argument index of the paramater.
- * @param paramater Value of the integer paramater being set.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param parameter Value of the integer parameter being set.
  * @return None.
  */
-inline void MFMaterial_SetParamaterI(MFMaterial *pMaterial, int paramaterIndex, int argIndex, size_t paramater)
+inline void MFMaterial_SetParameterI(MFMaterial *pMaterial, int parameterIndex, int argIndex, size_t parameter)
 {
-	MFMaterial_SetParamater(pMaterial, paramaterIndex, argIndex, &paramater);
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, &parameter);
 }
 
 /**

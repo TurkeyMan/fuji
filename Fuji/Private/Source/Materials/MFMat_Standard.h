@@ -1,7 +1,7 @@
 #if !defined(_MFMAT_STANDARD_H)
 #define _MFMAT_STANDARD_H
 
-enum MFMat_Standard_Paramaters
+enum MFMat_Standard_Parameters
 {
 	MFMatStandard_Unknown = -1,
 
@@ -116,9 +116,9 @@ void      MFMat_Standard_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Standard_DestroyInstance(MFMaterial *pMaterial);
 int       MFMat_Standard_Begin(MFMaterial *pMaterial);
 void      MFMat_Standard_Update(MFMaterial *pMaterial);
-void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);
-uint32    MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);
+void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);
+uint32    MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Standard_GetNumParams();
-MFMaterialParamaterInfo* MFMat_Standard_GetParamaterInfo(int paramaterIndex);
+MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex);
 
 #endif
