@@ -163,7 +163,7 @@ inline void MFPtrListDL<T>::Init(const char *pGroupName, uint32 maxElements, uin
 		*ppMark = 0;
 
 		for(uint32 i = 0; i<maxElements; ++i)
-			pBegin = (T*)(int(*(++ppMark) = pBegin) + elementSize);
+			pBegin = (T*)((char*)(*(++ppMark) = pBegin) + elementSize);
 
 		*(++ppMark) = 0;
 	}
