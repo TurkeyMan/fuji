@@ -50,20 +50,19 @@ typedef uint32 MFScriptString;
 typedef uint32 MFScriptArray;
 
 /**
- * ...
- *
+ * Calling conventions.
+ * Native function calling conventions.
  */
 enum MFScriptCallingConvention
 {
-	MFCC_CDecl = 0,
-	MFCC_StdCall,
-	MFCC_ThisCall,
-	MFCC_CDecl_ObjLast,
-	MFCC_CDecl_ObjFirst,
-	MFCC_Generic,
+	MFCC_CDecl = 0,			/**< CDECL calling convention. */
+	MFCC_StdCall,			/**< STDCALL calling convention. */
+	MFCC_ThisCall,			/**< THISCALL calling convention. */
+	MFCC_CDecl_ObjLast,		/**< CDECL calling convention, where the object pointer is passed as the last paramater. */
+	MFCC_CDecl_ObjFirst,	/**< CDECL calling convention, where the object pointer is passed as the first paramater. */
+	MFCC_Generic,			/**< Generic calling convention. */
 
-	MFCC_Max,
-	MFCC_ForceInt = 0x7FFFFFFF
+	MFCC_ForceInt = 0x7FFFFFFF /**< Force MFScriptCallingConvention to an int type. */
 };
 
 /**
@@ -79,7 +78,6 @@ int MFScript_LoadScript(const char *pFilename);
 /**
  * Find a public function.
  * Finds a public function and returns an MFEntryPoint to that function.
- * @param pScript Script to search.
  * @param pFunctionName Function name to search for in the public exports.
  * @return Returns an MFEntryPoint pointing to the function entry point. If the function was not found, the value of MFEntryPoint_Main (-1) is returned.
  * @see MFScript_Call()
