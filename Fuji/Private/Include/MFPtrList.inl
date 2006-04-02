@@ -5,7 +5,7 @@ extern void *gEmptyPtrList[2];
 extern void *gEmptyPtrListDL[2];
 
 template<class T>
-inline void MFPtrList<T>::Init(char* pGroupName, int maxElements)
+inline void MFPtrList<T>::Init(const char *pGroupName, uint32 maxElements)
 {
 	MFCALLSTACK;
 
@@ -20,7 +20,10 @@ inline void MFPtrList<T>::Init(char* pGroupName, int maxElements)
 		MFHeap_PopGroupName();
 
 		*ppMark = 0;
-		for(int i = 0; i<maxElements; ++i) *(++ppMark) = (T*)(0xdeadbeef);
+
+		for(uint32 i = 0; i<maxElements; ++i)
+			*(++ppMark) = (T*)(0xdeadbeef);
+
 		*(++ppMark) = 0;
 	}
 
@@ -36,7 +39,10 @@ inline void MFPtrList<T>::Deinit()
 	MFDebug_Assert(ppMark!=0, "not initialised");
 
 	while(*(--ppMark)!=0) {}
-	if(ppMark!=(T**)(&gEmptyPtrList[0])) MFHeap_Free(ppMark);
+
+	if(ppMark!=(T**)(&gEmptyPtrList[0]))
+		MFHeap_Free(ppMark);
+
 	ppMark = 0;
 }
 
@@ -139,7 +145,7 @@ inline bool MFPtrList<T>::IsEmpty()
 
 
 template<class T>
-inline void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementSize, void *pMem)
+inline void MFPtrListDL<T>::Init(const char *pGroupName, uint32 maxElements, uint32 elementSize, void *pMem)
 {
 	MFCALLSTACK;
 
@@ -152,9 +158,13 @@ inline void MFPtrListDL<T>::Init(char* pGroupName, int maxElements, int elementS
 	{
 		ppMark = (T**)MFHeap_Alloc(maxElements*elementSize + (maxElements + 2)*(int)sizeof(T*));
 
-		T* pBegin = (T*)(ppMark);
-		*(ppMark = (T**)(int(pBegin) + maxElements*elementSize)) = 0;
-		for(int i = 0; i<maxElements; ++i) pBegin = (T*)(int(*(++ppMark) = pBegin) + elementSize);
+		T* pBegin = (T*)ppMark;
+		ppMark = (T**)((char*)pBegin + maxElements*elementSize);
+		*ppMark = 0;
+
+		for(uint32 i = 0; i<maxElements; ++i)
+			pBegin = (T*)(int(*(++ppMark) = pBegin) + elementSize);
+
 		*(++ppMark) = 0;
 	}
 
@@ -176,16 +186,20 @@ inline void MFPtrListDL<T>::Deinit()
 	{
 		if(*iterator<mem) mem = *iterator;
 	}
+
 	if(iterator!=(T**)(&gEmptyPtrListDL[0]))
 	{
 		iterator = ppMark;
+
 		while(*iterator!=0)
 		{
 			if(*iterator<mem) mem = *iterator;
 			++iterator;
-		};
+		}
+
 		MFHeap_Free(mem);
 	}
+
 	ppMark = 0;
 }
 

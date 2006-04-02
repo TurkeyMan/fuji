@@ -24,7 +24,7 @@ public:
 	 * @param maxElements Maximum elements the list can store.
 	 * @return None.
 	 */
-	void Init(char* pGroupName, int maxElements);
+	void Init(const char *pGroupName, uint32 maxElements);
 
 	/**
 	 * Deinitialise a pointer list.
@@ -111,7 +111,7 @@ protected:
 	T** ppMark;
 
 #if !defined(_RETAIL)
-	char *pName;
+	const char *pName;
 #endif
 };
 
@@ -133,7 +133,7 @@ public:
 	 * @param pMem Pointer to an already allocated buffer. The buffer must be a minimum of (maxElements+2)*sizeof(T*) + maxElements*elementSize bytes.
 	 * @return None.
 	 */
-	void Init(char* pGroupName, int maxElements, int elementSize = sizeof(T), void *pMem = NULL);
+	void Init(const char *pGroupName, uint32 maxElements, uint32 elementSize = sizeof(T), void *pMem = NULL);
 
 	/**
 	 * Deinitialise a pointer list.
@@ -237,7 +237,7 @@ protected:
 	T** ppMark;
 
 #if !defined(_RETAIL)
-	char *pName;
+	const char *pName;
 #endif
 };
 
