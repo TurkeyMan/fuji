@@ -20,8 +20,8 @@ void      MFMat_Effect_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Effect_DestroyInstance(MFMaterial *pMaterial);
 int       MFMat_Effect_Begin(MFMaterial *pMaterial);
 void      MFMat_Effect_Update(MFMaterial *pMaterial);
-void      MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 paramater);
-uint32    MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue);
+void      MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);
+uint32    MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);
 int       MFMat_Effect_GetNumParams();
 MFMaterialParamaterInfo* MFMat_Effect_GetParamaterInfo(int paramaterIndex);
 

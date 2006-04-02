@@ -342,7 +342,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 
 			int index = MFMaterial_GetParamaterIndexFromName(pMat, "diffusemap");
 			if(index > -1)
-				MFMaterial_SetParamater(pMat, index, 0, (uint32)pName);
+				MFMaterial_SetParamater(pMat, index, 0, pName);
 
 //			int cull = MFMaterial_GetParamaterIndexFromName(pMat, "doublesided");
 //			if(cull > -1)
@@ -511,42 +511,42 @@ MFDebug_Assert(false, "Fix Me!!!");
 						case MFParamType_String:
 						{
 							const char *pString = pLine->GetString(a+1);
-							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)pString);
+							MFMaterial_SetParamater(pMat, paramIndex, a, pString);
 							break;
 						}
 
 						case MFParamType_Float:
 						{
 							float value = pLine->GetFloat(a+1);
-							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32&)value);
+							MFMaterial_SetParamater(pMat, paramIndex, a, &value);
 							break;
 						}
 
 						case MFParamType_Int:
 						{
 							int value = pLine->GetStringCount() > 1 ? pLine->GetInt(a+1) : 1;
-							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32&)value);
+							MFMaterial_SetParamaterI(pMat, paramIndex, a, value);
 							break;
 						}
 
 						case MFParamType_Bool:
 						{
 							bool value = pLine->GetStringCount() > 1 ? pLine->GetBool(a+1) : true;
-							MFMaterial_SetParamater(pMat, paramIndex, a, value ? 1 : 0);
+							MFMaterial_SetParamaterI(pMat, paramIndex, a, value ? 1 : 0);
 							break;
 						}
 
 						case MFParamType_Vector3:
 						{
 							MFVector vector = pLine->GetVector3(a+1);
-							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
+							MFMaterial_SetParamater(pMat, paramIndex, a, &vector);
 							break;
 						}
 
 						case MFParamType_Vector4:
 						{
 							MFVector vector = pLine->GetVector4(a+1);
-							MFMaterial_SetParamater(pMat, paramIndex, a, (uint32)&vector);
+							MFMaterial_SetParamater(pMat, paramIndex, a, &vector);
 							break;
 						}
 
@@ -630,22 +630,22 @@ MFParamType MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterI
 	return pInfo->pArgTypes[argIndex];
 }
 
-void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 value)
+void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue)
 {
 	MFCALLSTACK;
 
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
-	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, paramaterIndex, argIndex, value);
+	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, paramaterIndex, argIndex, pValue);
 }
 
-int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
+int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
-	*pValue = pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex, pValue);
+	void *pT = pValue ? pValue : &pT;
 
-	return 0;
+	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
+	return pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, paramaterIndex, argIndex, pT);
 }
 
 

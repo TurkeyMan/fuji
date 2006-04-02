@@ -59,12 +59,12 @@ void MFMat_Effect_DestroyInstance(MFMaterial *pMaterial)
 	MFHeap_Free(pMaterial->pInstanceData);
 }
 
-void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 paramater)
+void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 }
 
-uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
+uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 	MFDebug_Assert(false, "Not Written");

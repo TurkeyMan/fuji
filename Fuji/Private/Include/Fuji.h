@@ -65,11 +65,6 @@ enum MFEndian
 
 #define _ENABLE_SCRIPTING
 
-#if defined(_ENABLE_SCRIPTING)
-//	#define _USE_PAWN_SCRIPT
-	#define _USE_ANGEL_SCRIPT
-#endif
-
 /*** Platform specific defines and includes ***/
 
 #if defined(_WINDOWS)
@@ -113,6 +108,10 @@ enum MFEndian
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 	#include <string.h> // For strcpy
+
+	#if defined(SOME_LINUX_64BIT_FLAG)
+		#define MF64BIT
+	#endif
 
 #elif defined(_PSP)
 

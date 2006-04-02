@@ -88,8 +88,8 @@ struct MFMaterialCallbacks
 
 	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
 	MFMaterialParamaterInfo* (*pGetParamaterInfo)(int paramaterIndex);	/**< Pointer to the GetParamaterInfo function */
-	void      (*pSetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 parameter);	/**< Pointer to a SetParameter function */
-	uint32    (*pGetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue);	/**< Pointer to the GetParameter function */
+	void      (*pSetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);	/**< Pointer to a SetParameter function */
+	uint32    (*pGetParameter)(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
 };
 
 
@@ -222,10 +222,10 @@ MFParamType	MFMaterial_GetParamaterArgType(MFMaterial *pMaterial, int paramaterI
  * @param pMaterial Pointer to a material instance.
  * @param paramaterIndex Index of the paramater
  * @param argIndex Argument index of the paramater.
- * @param value Value to assign to the paramater.
+ * @param pValue Pointer to the value to assign to the paramater.
  * @return None.
  */
-void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 value);
+void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue);
 
 /**
  * Get the value of a paramater.
@@ -233,10 +233,24 @@ void MFMaterial_SetParamater(MFMaterial *pMaterial, int paramaterIndex, int argI
  * @param pMaterial Pointer to a material instance.
  * @param paramaterIndex Index of the paramater
  * @param argIndex Argument index of the paramater.
- * @param pValue Pointer to an unsigned int that will receive the paramater data.
+ * @param pValue Pointer to a veriable to receive the paramater data.
  * @return If MFMaterial_GetParamater, the return value is 0.
  */
-int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue);
+int MFMaterial_GetParamater(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue);
+
+/**
+ * Set the value of a paramater to an integer value.
+ * Sets the value of a paramater to an integer value.
+ * @param pMaterial Pointer to a material instance.
+ * @param paramaterIndex Index of the paramater
+ * @param argIndex Argument index of the paramater.
+ * @param paramater Value of the integer paramater being set.
+ * @return None.
+ */
+inline void MFMaterial_SetParamaterI(MFMaterial *pMaterial, int paramaterIndex, int argIndex, size_t paramater)
+{
+	MFMaterial_SetParamater(pMaterial, paramaterIndex, argIndex, &paramater);
+}
 
 /**
  * Register a new material type.

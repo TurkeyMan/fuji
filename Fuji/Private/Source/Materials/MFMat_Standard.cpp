@@ -103,103 +103,103 @@ void MFMat_Standard_Update(MFMaterial *pMaterial)
 	}
 }
 
-void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 paramater)
+void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, const void *pValue)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	switch(paramaterIndex)
 	{
 		case MFMatStandard_Lit:
-			pData->materialType = (pData->materialType & ~MF_Lit) | (paramater ? MF_Lit : 0);
+			pData->materialType = (pData->materialType & ~MF_Lit) | (*(size_t*)pValue ? MF_Lit : 0);
 			break;
 		case MFMatStandard_Prelit:
-			pData->materialType = (pData->materialType & ~MF_Lit) | (!paramater ? MF_Lit : 0);
+			pData->materialType = (pData->materialType & ~MF_Lit) | (!(*(size_t*)pValue) ? MF_Lit : 0);
 			break;
 		case MFMatStandard_DiffuseColour:
-			pData->diffuse = *(MFVector*)paramater;
+			pData->diffuse = *(MFVector*)pValue;
 			break;
 		case MFMatStandard_AmbientColour:
-			pData->ambient = *(MFVector*)paramater;
+			pData->ambient = *(MFVector*)pValue;
 			break;
 		case MFMatStandard_SpecularColour:
-			pData->specular = *(MFVector*)paramater;
+			pData->specular = *(MFVector*)pValue;
 			break;
 		case MFMatStandard_SpecularPower:
-			pData->specularPow = *(float*)paramater;
+			pData->specularPow = *(float*)pValue;
 			break;
 		case MFMatStandard_EmissiveColour:
-			pData->illum = *(MFVector*)paramater;
+			pData->illum = *(MFVector*)pValue;
 			break;
 		case MFMatStandard_Mask:
-			pData->materialType = (pData->materialType & ~MF_Mask) | (paramater ? MF_Mask : 0);
+			pData->materialType = (pData->materialType & ~MF_Mask) | (*(size_t*)pValue ? MF_Mask : 0);
 			break;
 		case MFMatStandard_CullMode:
-			pData->materialType = (pData->materialType & ~MF_CullMode) | ((paramater & 0x3) << 6);
+			pData->materialType = (pData->materialType & ~MF_CullMode) | ((*(size_t*)pValue & 0x3) << 6);
 			break;
 		case MFMatStandard_ZRead:
-			pData->materialType = (pData->materialType & ~MF_NoZRead) | (paramater ? 0 : MF_NoZRead);
+			pData->materialType = (pData->materialType & ~MF_NoZRead) | (*(size_t*)pValue ? 0 : MF_NoZRead);
 			break;
 		case MFMatStandard_ZWrite:
-			pData->materialType = (pData->materialType & ~MF_NoZWrite) | (paramater ? 0 : MF_NoZWrite);
+			pData->materialType = (pData->materialType & ~MF_NoZWrite) | (*(size_t*)pValue ? 0 : MF_NoZWrite);
 			break;
 		case MFMatStandard_Additive:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Additive : 0);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (*(size_t*)pValue ? MF_Additive : 0);
 			break;
 		case MFMatStandard_Subtractive:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_Subtractive : 0);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (*(size_t*)pValue ? MF_Subtractive : 0);
 			break;
 		case MFMatStandard_Alpha:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (paramater ? MF_AlphaBlend : 0);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | (*(size_t*)pValue ? MF_AlphaBlend : 0);
 			break;
 		case MFMatStandard_Blend:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)paramater << 1);
+			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)(*(size_t*)pValue) << 1);
 			break;
 		case MFMatStandard_Texture:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->textureCount++;
 			break;
 		case MFMatStandard_DifuseMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->diffuseMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_DiffuseMap2:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->diffuseMap2Index = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_NormalMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->normalMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_DetailMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->detailMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_EnvMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->envMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_LightMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->lightMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_BumpMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->bumpMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_ReflectionMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->reflectionMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
 		case MFMatStandard_SpecularMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)paramater);
+			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)pValue);
 			pData->specularMapIndex = pData->textureCount;
 			pData->textureCount++;
 			break;
@@ -216,13 +216,13 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 			switch(argIndex)
 			{
 				case 0:	// uFrames
-					pData->uFrames = (int)paramater;
+					pData->uFrames = (int)(*(size_t*)pValue);
 					break;
 				case 1:	// vFrames
-					pData->vFrames = (int)paramater;
+					pData->vFrames = (int)(*(size_t*)pValue);
 					break;
 				case 2:	// frameTime
-					pData->frameTime = (float&)paramater;
+					pData->frameTime = *(float*)pValue;
 					break;
 			}
 
@@ -232,54 +232,69 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int paramaterIndex, int 
 	}
 }
 
-uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, uint32 *pValue)
+uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int paramaterIndex, int argIndex, void *pValue)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	switch(paramaterIndex)
 	{
 		case MFMatStandard_Lit:
-			return *pValue = (pData->materialType & MF_Lit) ? 1 : 0;
+			return *(size_t*)pValue = (pData->materialType & MF_Lit) ? 1 : 0;
 		case MFMatStandard_Prelit:
-			return *pValue = (pData->materialType & MF_Lit) ? 0 : 1;
+			return *(size_t*)pValue = (pData->materialType & MF_Lit) ? 0 : 1;
 		case MFMatStandard_DiffuseColour:
-			return (uint32)&pData->diffuse;
+			*(MFVector*)pValue = pData->diffuse;
+			break;
 		case MFMatStandard_AmbientColour:
-			return (uint32)&pData->ambient;
+			*(MFVector*)pValue = pData->ambient;
+			break;
 		case MFMatStandard_SpecularColour:
-			return (uint32)&pData->specular;
+			*(MFVector*)pValue = pData->specular;
+			break;
 		case MFMatStandard_SpecularPower:
-			return (uint32&)pData->specularPow;
+			*(float*)pValue = pData->specularPow;
+			break;
 		case MFMatStandard_EmissiveColour:
-			return (uint32)&pData->illum;
+			*(MFVector*)pValue = pData->illum;
+			break;
 		case MFMatStandard_Mask:
-			return *pValue = (pData->materialType & MF_Mask) ? 1 : 0;
+			return *(size_t*)pValue = (pData->materialType & MF_Mask) ? 1 : 0;
 		case MFMatStandard_CullMode:
-			return *pValue = (pData->materialType & MF_CullMode) >> 6;
+			return *(size_t*)pValue = (pData->materialType & MF_CullMode) >> 6;
 		case MFMatStandard_ZRead:
-			return *pValue = (pData->materialType & MF_NoZRead) ? 0 : 1;
+			return *(size_t*)pValue = (pData->materialType & MF_NoZRead) ? 0 : 1;
 		case MFMatStandard_ZWrite:
-			return *pValue = (pData->materialType & MF_NoZWrite) ? 0 : 1;
+			return *(size_t*)pValue = (pData->materialType & MF_NoZWrite) ? 0 : 1;
 		case MFMatStandard_Texture:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[argIndex]);
+			*(MFTexture**)pValue = pData->pTextures[argIndex];
+			break;
 		case MFMatStandard_DifuseMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->diffuseMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->diffuseMapIndex];
+			break;
 		case MFMatStandard_DiffuseMap2:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->diffuseMap2Index]);
+			*(MFTexture**)pValue = pData->pTextures[pData->diffuseMap2Index];
+			break;
 		case MFMatStandard_NormalMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->normalMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->normalMapIndex];
+			break;
 		case MFMatStandard_DetailMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->detailMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->detailMapIndex];
+			break;
 		case MFMatStandard_EnvMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->envMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->envMapIndex];
+			break;
 		case MFMatStandard_LightMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->lightMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->lightMapIndex];
+			break;
 		case MFMatStandard_BumpMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->bumpMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->bumpMapIndex];
+			break;
 		case MFMatStandard_ReflectionMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->reflectionMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->reflectionMapIndex];
+			break;
 		case MFMatStandard_SpecularMap:
-			return (uint32)(*(MFTexture**)pValue = pData->pTextures[pData->specularMapIndex]);
+			*(MFTexture**)pValue = pData->pTextures[pData->specularMapIndex];
+			break;
 		default:
 			MFDebug_Assert(false, "Not written!!!");
 			break;

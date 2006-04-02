@@ -49,17 +49,17 @@ MFVector MakeVec4(float x, float y, float z, float w)
 
 MFStringTable* LoadStringTable(MFScriptString name, MFLanguage language, MFLanguage fallback)
 {
-	return MFTranslation_LoadStringTable(MFScript_GetCString(NULL, name), language, fallback);
+	return MFTranslation_LoadStringTable(MFScript_GetCString(name), language, fallback);
 }
 
 MFScriptString GetLanguageName(MFLanguage language, bool native)
 {
-	return MFScript_MakeScriptString(NULL, MFTranslation_GetLanguageName(language, native));
+	return MFScript_MakeScriptString(MFTranslation_GetLanguageName(language, native));
 }
 
 MFScriptString GetString(MFStringTable *pTable, int stringID)
 {
-	return MFScript_MakeScriptString(NULL, MFTranslation_GetString(pTable, stringID));
+	return MFScript_MakeScriptString(MFTranslation_GetString(pTable, stringID));
 }
 
 void RegisterInternalTypes()
