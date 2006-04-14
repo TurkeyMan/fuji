@@ -35,7 +35,11 @@
 // A class for constructing the final byte code
 //
 
+#if !defined(_PSP)
 #include <memory.h> // memcpy()
+#else
+#include <string.h>
+#endif
 #include <string.h> // some compilers declare memcpy() here
 #include <assert.h>
 #include <stdio.h> // fopen(), fprintf(), fclose()

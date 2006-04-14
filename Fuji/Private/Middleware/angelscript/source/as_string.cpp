@@ -28,7 +28,11 @@
    andreas@angelcode.com
 */
 
+#if !defined(_PSP)
 #include <memory.h>
+#else
+#include <string.h>
+#endif
 #include <stdarg.h>		// va_list, va_start(), etc
 #include <stdlib.h>     // strtod(), strtol()
 #include <assert.h>     // assert()

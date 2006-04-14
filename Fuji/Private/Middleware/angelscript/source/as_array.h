@@ -31,7 +31,11 @@
 #ifndef AS_ARRAY_H
 #define AS_ARRAY_H
 
+#if !defined(_PSP) && !defined(_GC)
 #include <memory.h>
+#else
+#include <string.h>
+#endif
 #include <assert.h>
 
 BEGIN_AS_NAMESPACE

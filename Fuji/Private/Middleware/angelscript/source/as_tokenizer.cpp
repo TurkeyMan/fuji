@@ -41,7 +41,11 @@
 #include "as_tokendef.h"
 
 #include <assert.h> // assert()
+#if !defined(_PSP)
 #include <memory.h> // memcpy()
+#else
+#include <string.h>
+#endif
 #include <string.h> // strcmp()
 
 asCTokenizer::asCTokenizer()

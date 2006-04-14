@@ -33,7 +33,11 @@
 #include <stdlib.h>     // strtod(), strtol()
 #include <assert.h>     // assert()
 #include <stdio.h>      // _vsnprintf()
+#if !defined(_PSP)
 #include <memory.h>     // memcpy()
+#else
+#include <string.h>
+#endif
 
 #include "as_config.h"
 #include "as_string_util.h"
