@@ -1,8 +1,7 @@
-#include "Common.h"
+#include "Fuji.h"
 
-#include "Vector3.h"
-#include "Input_Internal.h"
-#include "Heap.h"
+#include "MFInput_Internal.h"
+#include "MFHeap.h"
 #include "MFIni.h"
 
 /*** Structure definitions ***/
@@ -22,43 +21,42 @@ float mouseMultiplier = 1.0f;
 
 /**** Platform Specific Functions ****/
 
-void Input_InitModulePlatformSpecific()
+void MFInput_InitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Input_DeinitModulePlatformSpecific()
+void MFInput_DeinitModulePlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Input_UpdatePlatformSpecific()
+void MFInput_UpdatePlatformSpecific()
 {
 
 }
 
-void Input_GetDeviceStatusInternal(int device, int id, DeviceStatus *pDeviceStatus)
+MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
-	pDeviceStatus->available = false;
-	pDeviceStatus->status = IDS_Disconnected;
+	return IDS_Disconnected;
 }
 
-void Input_GetGamepadStateInternal(int id, GamepadState *pGamepadState)
+void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Input_GetKeyStateInternal(int id, KeyState *pKeyState)
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Input_GetMouseStateInternal(int id, MouseState *pMouseState)
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-const char* Input_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceName(int source, int sourceID)
 {
 	const char *pText = NULL;
 
@@ -82,12 +80,12 @@ const char* Input_GetDeviceName(int source, int sourceID)
 	return pText;
 }
 
-const char* Input_GetGamepadButtonName(int sourceID, int type)
+const char* MFInput_GetGamepadButtonName(int sourceID, int type)
 {
 	return "Button ?";
 }
 
-bool Input_GetKeyboardStatusState(int keyboardState, int keyboardID)
+bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	switch(keyboardState)
 	{

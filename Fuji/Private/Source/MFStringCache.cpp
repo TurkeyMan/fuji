@@ -16,6 +16,8 @@ struct MFStringCache
 
 MFStringCache* MFStringCache_Create(uint32 maxSize)
 {
+	MFCALLSTACK;
+
 	MFStringCache *pCache;
 	pCache = (MFStringCache*)MFHeap_Alloc(sizeof(MFStringCache) + maxSize);
 
@@ -29,16 +31,22 @@ MFStringCache* MFStringCache_Create(uint32 maxSize)
 
 void MFStringCache_Destroy(MFStringCache *pCache)
 {
+	MFCALLSTACK;
+
 	MFHeap_Free(pCache);
 }
 
 const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 {
+	MFCALLSTACK;
+
+	MFDebug_Assert(pCache, "NULL String cache!");
 	MFDebug_Assert(pNewString, "Cannot add NULL string");
 
 	// find the string
 	char *pCurr = pCache->pMem;
 	int newLength = MFString_Length(pNewString)+1;
+
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
 	{
 		int length = MFString_Length(pCurr);

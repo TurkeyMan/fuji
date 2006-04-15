@@ -3,6 +3,7 @@
 #if !defined(_RETAIL)
 
 static int gWarningLevel = 4;
+static int gLogLevel = 2;
 
 void MFDebug_Error(const char *pErrorMessage)
 {
@@ -18,9 +19,22 @@ void MFDebug_Warn(int level, const char *pWarningMessage)
 	}
 }
 
+void MFDebug_Log(int level, const char *pMessage)
+{
+	if(level <= gLogLevel)
+	{
+		MFDebug_Message(pMessage);
+	}
+}
+
 void MFDebug_SetMaximumWarningLevel(int maxLevel)
 {
 	gWarningLevel = maxLevel;
+}
+
+void MFDebug_SetMaximumLogLevel(int maxLevel)
+{
+	gLogLevel = maxLevel;
 }
 
 #endif // !defined(_RETAIL)

@@ -25,6 +25,8 @@
 	#define MFDebug_Breakpoint() { __asm { int 3 }; }
 #elif defined(_LINUX)
 	#define MFDebug_Breakpoint() { asm("int $3"); }
+#elif defined(_PSP) || defined(_PS2)
+	#define MFDebug_Breakpoint() { asm("break"); }
 #else
 	#define MFDebug_Breakpoint()
 #endif
@@ -91,12 +93,37 @@ void MFDebug_Error(const char *pErrorMessage);
 void MFDebug_Warn(int level, const char *pWarningMessage);
 
 /**
+ * Log a message to the debug output.
+ * Logs a message to the debug output. The log level can be controlled at runtime to restrict unwanted log messages.
+ * @param level Log level.
+ * @param pMessage Message to log to the debugger.
+ * @return None.
+ * @remarks The log level output can be controlled at runtime.
+ * 
+ * Valid Log levels:
+ * - 0 - Messages will be always be displayed.
+ * - 1 - Important message.
+ * - 2 - Not so important message.
+ * - 3 - Typically unwanted message.
+ * - 4 - Very trivial message.
+ */
+void MFDebug_Log(int level, const char *pMessage);
+
+/**
  * Sets the maximum warning level.
  * Sets the maximum warning level to be written to the debug output.
  * @param maxLevel Maximum warning level (0-4).
  * @return None.
  */
 void MFDebug_SetMaximumWarningLevel(int maxLevel);
+
+/**
+ * Sets the maximum log level.
+ * Sets the maximum log level to be written to the debug output.
+ * @param maxLevel Maximum log level (0-4).
+ * @return None.
+ */
+void MFDebug_SetMaximumLogLevel(int maxLevel);
 
 #else
 

@@ -9,7 +9,7 @@ extern int gQuit;
 
 void MFDebug_Message(const char *pMessage)
 {
-	fprintf(stderr, pMessage);
+	fprintf(stderr, "%s\n", pMessage);
 }
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
@@ -38,7 +38,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 	{
 		MFInput_Update();
 
-		if(gQuit)
+		if(gQuit || MFInput_WasPressed(Button_P2_Select, IDD_Gamepad, 0))
 			sceKernelExitGame();
 	}
 }

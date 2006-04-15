@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if defined(_ENABLE_SCRIPTING)
+
 #include "MFScript.h"
 #include "MFTranslation.h"
 
@@ -95,3 +98,5 @@ void RegisterInternalFunctions()
 	pEngine->RegisterGlobalFunction("int GetNumStrings(uint)", asFUNCTION(MFTranslation_GetNumStrings), asCALL_CDECL);
 	pEngine->RegisterGlobalFunction("string& GetStrings(uint, int)", asFUNCTION(GetString), asCALL_CDECL);
 }
+
+#endif // _ENABLE_SCRIPTING

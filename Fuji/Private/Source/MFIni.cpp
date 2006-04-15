@@ -79,6 +79,8 @@ MFVector MFIniLine::GetVector4(int index)
 // find a 2 string entry (ie. "label data")
 MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 {
+	MFCALLSTACK;
+
 	MFIniLine *pLine = this;
 	while (pLine)
 	{
@@ -97,6 +99,8 @@ MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 // Create INI file
 MFIni *MFIni::Create(const char *pFilename)
 {
+	MFCALLSTACK;
+
 	uint32 memSize;
 
 	// load text file
@@ -144,6 +148,8 @@ MFIni *MFIni::Create(const char *pFilename)
 
 MFIni *MFIni::CreateFromMemory(const char *pMemory)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(pMemory, "Cant create ini from NULL buffer");
 
 	uint32 memSize = (uint32)MFString_Length(pMemory);
@@ -174,6 +180,8 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 
 void MFIni::Destroy(MFIni *pIni)
 {
+	MFCALLSTACK;
+
 	MFHeap_Free(pIni->pLines);
 	MFHeap_Free(pIni->pStrings);
 	MFStringCache_Destroy(pIni->pCache);
@@ -183,6 +191,8 @@ void MFIni::Destroy(MFIni *pIni)
 // returns how many lines it found
 const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 {
+	MFCALLSTACK;
+
 	bool bNewLine = true;
 	int tokenLength = 0;
 	char tokenBuffer[256];
@@ -251,6 +261,8 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 void MFIni::InitLine(MFIniLine *pLine)
 {
+	MFCALLSTACK;
+
 	pLine->pIni = this;
 	pLine->pIni = this;
 	pLine->subtreeLineCount = 0;
@@ -261,6 +273,8 @@ void MFIni::InitLine(MFIniLine *pLine)
 
 const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection)
 {
+	MFCALLSTACK;
+
 	// skip white space
 	while (pSrc < pSrcEnd)
 	{
@@ -349,6 +363,8 @@ MFIniLine *MFIni::GetFirstLine()
 // Mainly for debugging purposes
 void MFIniLine::DumpRecursive(int depth)
 {
+	MFCALLSTACK;
+
 	char prefix[256];
 	int c;
 	for (c=0; c<depth*2; c++)

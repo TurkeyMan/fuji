@@ -119,6 +119,18 @@ enum MFEndian
 	#include <stdlib.h>
 	#include <string.h>
 
+	#define _USE_HOST0
+
+//	#define _USER_MODE
+//	#define _PSP_GDB
+
+	#if !defined(_USER_MODE)
+//		#define _ENABLE_USB
+	#endif
+
+	// angel script needs max portability...
+	#define MAX_PORTABILITY
+
 #elif defined(_PS2)
 
 	#include <stdarg.h>

@@ -9,6 +9,8 @@
 #if !defined(_MFSOUND_H)
 #define _MFSOUND_H
 
+#include "MFMatrix.h"
+
 /**
  * Load a sound bank.
  * Loads a sound bank.

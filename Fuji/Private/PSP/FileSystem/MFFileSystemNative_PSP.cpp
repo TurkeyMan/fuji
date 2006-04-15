@@ -211,7 +211,9 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	// find file length
 	SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
-	MFDebug_Assert(fileSize < 2147483648LL, "Fuji does not support files larger than 2,147,483,647 bytes.");
+
+	// TODO: something's very wrong with this line! :/
+//	MFDebug_Assert(fileSize < 2147483648LL, MFStr("Error opening file '%s', Fuji does not support files larger than 2,147,483,647 bytes.", pNative->pFilename));
 	pFile->length = (int)fileSize;
 
 	// return to start of file

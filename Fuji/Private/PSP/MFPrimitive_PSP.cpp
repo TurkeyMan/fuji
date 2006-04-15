@@ -14,7 +14,7 @@
 #include <pspdisplay.h>
 #include <pspgu.h>
 
-#define NUM_VERTS 4096
+#define NUM_VERTS (4096*4)
 struct ImmediateVertex
 {
 	float u, v;
@@ -42,7 +42,6 @@ void MFPrimitive_InitModule()
 	DebugMenu_AddItem("Show Primitive Stats", "Fuji Options", &showPrimitiveStats, NULL, NULL);
 
 	pPrimBuffer = (ImmediateVertex*)MFHeap_GetUncachedPointer(primBuffer);
-//	pPrimBuffer = primBuffer;
 }
 
 void MFPrimitive_DeinitModule()
@@ -97,6 +96,10 @@ void MFBegin(uint32 vertexCount)
 
 	beginCount = vertexCount;
 	startVert = currentVert;
+
+	current.colour = 0xFFFFFFFF;
+	current.u = 0.0f;
+	current.v = 0.0f;
 
 	MFDebug_Assert(startVert+vertexCount < NUM_VERTS, MFStr("Exceeded primitive vertex cache %d", NUM_VERTS));
 }

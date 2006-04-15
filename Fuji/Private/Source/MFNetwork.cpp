@@ -216,7 +216,12 @@ int MFNetwork_InputServerListenTread(void *pUserData)
 void MFNetwork_BeginInputServer()
 {
 	if(!MFSockets_IsActive())
+	{
+		MFDebug_Warn(3, "Can't start remote input server. Sockets module is not active.");
 		return;
+	}
+
+	MFDebug_Log(2, "Starting Fuji Remote Input Server...");
 
 	inputServerMutex = MFThread_CreateMutex("Network Gamepad List");
 	inputServer	= MFThread_CreateThread("Fuji Input Server", MFNetwork_InputServerListenTread, NULL, MFPriority_AboveNormal, 1024);
@@ -229,6 +234,8 @@ int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int
 		MFDebug_Assert(false, "Device is not available.");
 		return 1;
 	}
+
+	MFDebug_Log(2, MFStr("Connecting input device '%s' to remote host...", MFInput_GetDeviceName(device, deviceID)));
 
 	SharedDevice *pDevice = NULL;
 

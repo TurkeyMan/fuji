@@ -158,7 +158,11 @@ const char* MFFile_SystemPath(const char *filename)
 #elif defined(_LINUX)
 	return MFStr("Data/%s", filename);
 #elif defined(_PSP)
+#if defined(_USE_HOST0)
+	return MFStr("host0:/Data/%s", filename);
+#else
 	return MFStr("ms0:/PSP/GAME/FUJI/Data/%s", filename);
+#endif
 #else
 	return MFStr("%s", filename);
 #endif
@@ -175,7 +179,11 @@ const char* MFFile_HomePath(const char *filename)
 #elif defined(_WINDOWS)
 	return MFStr("Home/%s", filename);
 #elif defined(_PSP)
+#if defined(_USE_HOST0)
+	return MFStr("host0:/Data/Home/%s", filename);
+#else
 	return MFStr("ms0:/PSP/GAME/FUJI/Home/%s", filename);
+#endif
 #else
 	return MFStr("%s", filename);
 #endif
@@ -293,6 +301,8 @@ long MFFile_StdTell(void* fileHandle)
 // return a handle to a specific filesystem
 MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle)
 {
+	MFCALLSTACK;
+
 	switch(fileSystemHandle)
 	{
 		case MFFSH_NativeFileSystem:
@@ -384,6 +394,8 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 
 int MFFileSystem_Dismount(const char *pMountpoint)
 {
+	MFCALLSTACK;
+
 	MFMount *pT = pMountList;
 
 	while(pT && MFString_CaseCmp(pMountpoint, pT->pMountpoint))
@@ -416,6 +428,8 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 
 MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries)
 {
+	MFCALLSTACK;
+
 	const char *pSearchString = pFilename;
 	int nameLen = MFString_Length(pFilename);
 	int a;
@@ -458,6 +472,8 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 
 void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 {
+	MFCALLSTACK;
+
 	for(int a=0; a<numEntries; a++)
 	{
 		if(pEntry[a].flags & MFTF_Directory)
@@ -472,6 +488,8 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 // open a file from the mounted filesystem stack
 MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
+	MFCALLSTACK;
+
 	MFMount *pMount = pMountList;
 	const char *pMountpoint = NULL;
 
@@ -517,6 +535,8 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 // read/write a file to a filesystem
 char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 {
+	MFCALLSTACK;
+
 	char *pBuffer = NULL;
 
 	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
@@ -543,6 +563,8 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 int MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(false, "Not Written....");
 
 	return -1;
@@ -551,6 +573,8 @@ int MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
 int MFFileSystem_GetSize(const char *pFilename)
 {
+	MFCALLSTACK;
+
 	int size = 0;
 
 	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
@@ -567,6 +591,8 @@ int MFFileSystem_GetSize(const char *pFilename)
 // returns true if the file can be found within the mounted filesystem stack
 bool MFFileSystem_Exists(const char *pFilename)
 {
+	MFCALLSTACK;
+
 	bool exists = false;
 
 	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);

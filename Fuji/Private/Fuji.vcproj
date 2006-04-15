@@ -2086,6 +2086,9 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Middleware\angelscript\source\as_callfunc_mips.cpp">
+				</File>
+				<File
 					RelativePath=".\Middleware\angelscript\source\as_callfunc_sh4.cpp">
 				</File>
 				<File

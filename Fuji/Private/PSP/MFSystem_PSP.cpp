@@ -6,15 +6,16 @@
 #include "MFMaterial.h"
 
 #include <pspkernel.h>
-#include <pspusb.h>
-#include <pspusbstor.h>
 #include <pspsdk.h>
 #include <pspdebug.h>
 #include <psppower.h>
 #include <psputility_sysparam.h>
+#include <psprtc.h>
 
 #include <time.h>
 
+
+#if !defined(_USER_MODE)
 
 /* Define the module info section */
 PSP_MODULE_INFO("FUJIPSP", 0x1000, 0, 1);
@@ -22,27 +23,68 @@ PSP_MODULE_INFO("FUJIPSP", 0x1000, 0, 1);
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
+#else
+
+/* Define the module info section */
+PSP_MODULE_INFO("FUJIPSP", 0, 1, 1);
+
+/* Define the main thread's attribute value (optional) */
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
+
+#endif
+
 extern int gQuit;
 extern int gRestart;
-
-uint32 USBState = 0;
 
 MFPlatform gCurrentPlatform = FP_PSP;
 
 static char systemName[64] = "PSP";
 
-// USB Debug Menu Item...
-void USBConnectionCallback(MenuObject *pMenu, void *pData);
 void ClockRateCallback(MenuObject *pMenu, void *pData);
 
 const char *pToggleStrings[] = { "Disabled", "Enabled", NULL };
 const char *pClockRateStrings[] = { "222mhz", "266mhz", "333mhz", NULL };
 
-MenuItemIntString usbMode(pToggleStrings, gDefaults.misc.enableUSBOnStartup ? 1 : 0);
 MenuItemIntString clockRate(pClockRateStrings, 0);
 MenuItemIntString showSystemInfo(pToggleStrings, 0);
-MenuItemIntString showUSBStatus(pToggleStrings, 1);
 MenuItemIntString showPowerStatus(pToggleStrings, 1);
+
+// USB Debug Menu Item...
+#if defined(_ENABLE_USB)
+
+#include <pspusb.h>
+#include <pspusbstor.h>
+
+uint32 USBState = 0;
+
+void USBConnectionCallback(MenuObject *pMenu, void *pData);
+
+MenuItemIntString usbMode(pToggleStrings, gDefaults.misc.enableUSBOnStartup ? 1 : 0);
+MenuItemIntString showUSBStatus(pToggleStrings, 1);
+
+#endif
+
+#if !defined(_USER_MODE)
+
+void ExceptionHandler(PspDebugRegBlock *regs)
+{
+	MFDebug_Message("Hardware Exception!");
+	MFDebug_Message("Exception Details:");
+	MFDebug_Message("Callstack:");
+	MFCallstack_Log();
+
+	/* I always felt BSODs were more interesting that white on black */
+	pspDebugScreenSetBackColor(0x00000000);
+	pspDebugScreenSetTextColor(0xFF0000FF);
+	pspDebugScreenClear();
+
+	pspDebugScreenPrintf("Software Failure!\n");
+	pspDebugScreenPrintf("Guru Meditation...\n\n");
+	pspDebugScreenPrintf("Exception Details:\n");
+	pspDebugDumpException(regs);
+	pspDebugScreenPrintf("\nCallstack:\n");
+//	pspDebugScreenPrintf(MFCallstack_GetCallstackString());
+}
 
 /**
  * Function that is called from _init in kernelmode before the
@@ -54,7 +96,14 @@ void loaderInit()
     pspKernelSetKernelPC();
     pspSdkInstallNoDeviceCheckPatch();
     pspDebugInstallKprintfHandler(NULL);
+
+	pspDebugInstallErrorHandler(ExceptionHandler);
+
+#if defined(_PSP_GDB)
+	pspDebugGdbStubInit();
+#endif
 }
+#endif
 
 /* Exit callback */
 int ExitCallback(int count, int arg, void *common)
@@ -92,6 +141,7 @@ int SetupCallbacks(void)
 	return thid;
 }
 
+#if defined(_ENABLE_USB)
 //helper function to make things easier
 int LoadStartModule(char *path)
 {
@@ -153,7 +203,7 @@ void DeinitUSB()
 
 	if(USBState & PSP_USB_ACTIVATED)
 	{
-		retVal = sceUsbDeactivate();
+		retVal = sceUsbDeactivate(0x1c8);
 
 		if(retVal != 0)
 			MFDebug_Warn(1, MFStr("Error calling sceUsbDeactivate (0x%08X)\n", retVal));
@@ -169,10 +219,14 @@ void DeinitUSB()
 	if(retVal != 0)
 		MFDebug_Warn(1, MFStr("Error stopping USB BUS driver (0x%08X)\n", retVal));
 }
+#endif
 
 int main()
 {
 	SetupCallbacks();
+
+	// we want every little detail on PSP...
+	MFDebug_SetMaximumLogLevel(4);
 
 	pspDebugScreenInit();
 //	pspDebugScreenSetBackColor(0xFF400000);
@@ -190,16 +244,22 @@ void MFSystem_InitModulePlatformSpecific()
 
 	DebugMenu_AddItem("Show System Info", "Fuji Options", &showSystemInfo, NULL, NULL);
 	DebugMenu_AddItem("Clock Rate", "Fuji Options", &clockRate, ClockRateCallback, NULL);
+#if defined(_ENABLE_USB)
 	DebugMenu_AddItem("USB Connection", "Fuji Options", &usbMode, USBConnectionCallback, NULL);
 	DebugMenu_AddItem("Show USB Status", "Fuji Options", &showUSBStatus, NULL, NULL);
+#endif
 	DebugMenu_AddItem("Show Power Status", "Fuji Options", &showPowerStatus, NULL, NULL);
 
+#if defined(_ENABLE_USB)
 	InitUSB();
+#endif
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
 {
+#if defined(_ENABLE_USB)
 	DeinitUSB();
+#endif
 }
 
 void MFSystem_HandleEventsPlatformSpecific()
@@ -208,11 +268,14 @@ void MFSystem_HandleEventsPlatformSpecific()
 
 void MFSystem_UpdatePlatformSpecific()
 {
+#if defined(_ENABLE_USB)
 	USBState = sceUsbGetState();
+#endif
 }
 
 void MFSystem_DrawPlatformSpecific()
 {
+#if defined(_ENABLE_USB)
 	if(showUSBStatus)
 	{
 		if(USBState & PSP_USB_ACTIVATED)
@@ -248,6 +311,7 @@ void MFSystem_DrawPlatformSpecific()
 			MFEnd();
 		}
 	}
+#endif
 
 	if(showPowerStatus)
 	{
@@ -334,10 +398,6 @@ void MFSystem_DrawPlatformSpecific()
 		bool batteryAvailable = !!scePowerIsBatteryExist();
 		bool charging = !!scePowerIsBatteryCharging();
 
-		bool usbEnabled = !!(USBState & PSP_USB_ACTIVATED);
-		bool usbConnected = !!(USBState & PSP_USB_CABLE_CONNECTED);
-		bool usbActive = !!(USBState & PSP_USB_CONNECTION_ESTABLISHED);
-
 		MFMaterial_SetMaterial(NULL);
 
 		MFPrimitive(PT_TriStrip);
@@ -360,10 +420,17 @@ void MFSystem_DrawPlatformSpecific()
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 100.0f, 160.0f, 20.0f, MFVector::one, "Battery Temperature: %s", batteryAvailable ? MFStr("%dc", batteryTemp) : "N/A");
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 100.0f, 180.0f, 20.0f, MFVector::one, "Battery Voltage: %s", batteryAvailable ? MFStr("%.1fv", batteryVolts) : "N/A");
 
+#if defined(_ENABLE_USB)
+		bool usbEnabled = !!(USBState & PSP_USB_ACTIVATED);
+		bool usbConnected = !!(USBState & PSP_USB_CABLE_CONNECTED);
+		bool usbActive = !!(USBState & PSP_USB_CONNECTION_ESTABLISHED);
+
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 100.0f, 210.0f, 20.0f, MFVector::one, "USB: %s, %s, %s", usbEnabled ? "Enabled" : "Disabled", usbConnected ? "Connected" : "Disconnected", usbActive ? "Active" : "Inactive");
+#endif
 	}
 }
 
+#if defined(_ENABLE_USB)
 void USBConnectionCallback(MenuObject *pMenu, void *pData)
 {
 	MenuItemIntString *pMI = (MenuItemIntString*)pMenu;
@@ -376,9 +443,10 @@ void USBConnectionCallback(MenuObject *pMenu, void *pData)
 	else
 	{
 		if(USBState & PSP_USB_ACTIVATED)
-			sceUsbDeactivate();
+			sceUsbDeactivate(0x1c8);
 	}
 }
+#endif
 
 void ClockRateCallback(MenuObject *pMenu, void *pData)
 {
@@ -408,12 +476,14 @@ void ClockRateCallback(MenuObject *pMenu, void *pData)
 // RTC functions
 uint64 MFSystem_ReadRTC()
 {
-	return (uint64)clock();
+	uint64 t;
+	sceRtcGetCurrentTick(&t);
+	return t;
 }
 
 uint64 MFSystem_GetRTCFrequency()
 {
-	return CLOCKS_PER_SEC * 1000;
+	return 1000000;
 }
 
 const char * MFSystem_GetSystemName()

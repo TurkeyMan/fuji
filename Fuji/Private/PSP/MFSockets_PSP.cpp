@@ -58,10 +58,12 @@ int MFSocketsPSP_ConnectToAccessPoint()
 
 int MFSockets_InitModulePlatformSpecific()
 {
+	// lets not try and initialise the inet...
+	return 0;
+
 	int error;
 
-	return 1;
-
+	MFDebug_Log(4, "Attempting to load inet modules...");
 	error = pspSdkLoadInetModules();
 
 	if(error >= 0)
@@ -70,6 +72,7 @@ int MFSockets_InitModulePlatformSpecific()
 		return 0;
 	}
 
+	MFDebug_Log(4, "Attempting to initialise the system inet module...");
 	error = pspSdkInetInit();
 
 	if(error)

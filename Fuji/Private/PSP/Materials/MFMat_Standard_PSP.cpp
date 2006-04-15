@@ -108,6 +108,9 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
+	MFDebug_Assert(pMaterial, "NULL Material!");
+	MFDebug_Assert(pMaterial->pInstanceData, MFStr("Material '%s' already destroyed!", pMaterial->pName));
+
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	for(uint32 a=0; a<pData->textureCount; a++)
@@ -116,4 +119,5 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 	}
 
 	MFHeap_Free(pMaterial->pInstanceData);
+	pMaterial->pInstanceData = NULL;
 }

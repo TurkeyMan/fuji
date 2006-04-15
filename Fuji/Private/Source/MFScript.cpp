@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if defined(_ENABLE_SCRIPTING)
+
 #include "MFHeap.h"
 #include "MFScript_Internal.h"
 #include "MFFileSystem.h"
@@ -22,6 +24,8 @@ asIScriptEngine *pEngine = NULL;
 
 void MFScript_InitModule()
 {
+	MFCALLSTACK;
+
 	pEngine = asCreateScriptEngine(ANGELSCRIPT_VERSION);	
 	MFDebug_Assert(pEngine, "Failed to create script engine.");
 
@@ -51,6 +55,8 @@ void MFScript_DeinitModule()
 
 int MFScript_LoadScript(const char *pFilename)
 {
+	MFCALLSTACK;
+
 	MFFile *pFile = MFFileSystem_Open(MFStr("%s.as", pFilename));
 	int len = MFFile_GetSize(pFile);
 
@@ -85,6 +91,8 @@ int MFScript_LoadScript(const char *pFilename)
 
 MFEntryPoint MFScript_FindPublicFunction(const char *pFunctionName)
 {
+	MFCALLSTACK;
+
 	if(pFunctionName[0] == 0)
 		return -1;
 
@@ -101,11 +109,15 @@ MFEntryPoint MFScript_FindPublicFunction(const char *pFunctionName)
 
 MFScriptContext* MFScript_CreateContext()
 {
+	MFCALLSTACK;
+
 	return (MFScriptContext*)pEngine->CreateContext();
 }
 
 int MFScript_Execute(MFScriptContext *_pContext, const char *pEntryPoint)
 {
+	MFCALLSTACK;
+
 	asIScriptContext *pContext = (asIScriptContext*)_pContext;
 
 	if(!pEntryPoint)
@@ -128,11 +140,15 @@ int MFScript_Execute(MFScriptContext *_pContext, const char *pEntryPoint)
 
 int MFScript_ExecuteImmediate(const char *pCode, MFScriptContext *pContext)
 {
+	MFCALLSTACK;
+
 	return pEngine->ExecuteString(NULL, pCode, (asIScriptContext**)&pContext, pContext ? asEXECSTRING_USE_MY_CONTEXT : 0);
 }
 
 int MFScript_Call(MFScriptContext *_pContext, MFEntryPoint entryPoint)
 {
+	MFCALLSTACK;
+
 	asIScriptContext *pContext = (asIScriptContext*)_pContext;
 
 	pContext->Prepare(entryPoint);
@@ -147,41 +163,55 @@ int MFScript_Call(MFScriptContext *_pContext, MFEntryPoint entryPoint)
 
 void MFScript_DestroyContext(MFScriptContext *_pContext)
 {
+	MFCALLSTACK;
+
 	asIScriptContext *pContext = (asIScriptContext*)_pContext;
 	pContext->Release();
 }
 
 void MFScript_RegisterNativeFunction(const char *pDeclaration, void *pFunction, MFScriptCallingConvention callingConvention)
 {
+	MFCALLSTACK;
+
 	int r = pEngine->RegisterGlobalFunction(pDeclaration, asFUNCTION(pFunction), callingConvention);
 	MFDebug_Assert(r >= 0, MFStr("Couldnt register function with declaration '%s'", pDeclaration));
 }
 
 const char* MFScript_GetCString(MFScriptString scriptString)
 {
+	MFCALLSTACK;
+
 	asCScriptString &string = *(asCScriptString*)scriptString;
 	return string.buffer.c_str();
 }
 
 MFScriptString MFScript_MakeScriptString(const char *pString)
 {
+	MFCALLSTACK;
+
 	return (MFScriptString)new asCScriptString(pString);
 }
 
 const void* MFScript_GetArray(MFScriptArray scriptArray)
 {
+	MFCALLSTACK;
+
 	asCArrayObject &array = *(asCArrayObject*)scriptArray;
 	return array.GetElementPointer(0);
 }
 
 int MFScript_GetArraySize(MFScriptArray scriptArray)
 {
+	MFCALLSTACK;
+
 	asCArrayObject &array = *(asCArrayObject*)scriptArray;
 	return array.GetElementCount();
 }
 
 const void* MFScript_GetArrayItem(MFScriptArray scriptArray, int item)
 {
+	MFCALLSTACK;
+
 	asCArrayObject &array = *(asCArrayObject*)scriptArray;
 	MFDebug_Assert(item < (int)array.GetElementCount(), "Array index is out of bounds.");
 	return array.GetElementPointer(item);
@@ -189,12 +219,18 @@ const void* MFScript_GetArrayItem(MFScriptArray scriptArray, int item)
 
 int MFScript_AddRef(MFScriptObject *pObject)
 {
+	MFCALLSTACK;
+
 	asIScriptAny &any = *(asIScriptAny*)pObject;
 	return any.AddRef();
 }
 
 int MFScript_Release(MFScriptObject *pObject)
 {
+	MFCALLSTACK;
+
 	asIScriptAny &any = *(asIScriptAny*)pObject;
 	return any.Release();
 }
+
+#endif // _ENABLE_SCRIPTING

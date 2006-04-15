@@ -125,7 +125,7 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 	MFCALLSTACK;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
-	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
+	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
@@ -149,7 +149,7 @@ void MFHeap_Free(void *pMem)
 	}
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
-	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!/n%s(%d)", pHeader->pFile, pHeader->line));
+	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
@@ -157,14 +157,14 @@ void MFHeap_Free(void *pMem)
 }
 
 // new/delete operators
-void* operator new(unsigned int size)
+void* operator new(size_t size)
 {
 //	MFDebug_Message(MFStr("new %d bytes", size));
 
 	return MFHeap_AllocInternal(size);
 }
 
-void* operator new[](unsigned int size)
+void* operator new[](size_t size)
 {
 //	MFDebug_Message(MFStr("new %d bytes", size));
 
@@ -289,6 +289,9 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap)
 bool MFHeap_ValidateMemory(const void *pMemory)
 {
 	MFCALLSTACK;
+
+	if(!pMemory)
+		return true;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
 	return memcmp((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;

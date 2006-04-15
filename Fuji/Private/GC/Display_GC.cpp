@@ -1,42 +1,42 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
 bool isortho = false;
 float fieldOfView;
 
-extern Vector4 gClearColour;
+extern MFVector gClearColour;
 
 void Display_DestroyWindow()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 void Display_ResetDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void Display_DestroyDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void Display_BeginFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void Display_EndFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void Display_SetClearColour(float r, float g, float b, float a)
@@ -49,15 +49,15 @@ void Display_SetClearColour(float r, float g, float b, float a)
 
 void Display_ClearScreen(uint32 flags)
 {
-	CALLSTACKc;
+	MFCALLSTACK;
 }
 
 void SetViewport(float x, float y, float width, float height)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void ResetViewport()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }

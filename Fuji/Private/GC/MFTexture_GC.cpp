@@ -2,24 +2,24 @@
 
 /**** Includes ****/
 
-#include "Common.h"
-#include "Texture_Internal.h"
+#include "Fuji.h"
+#include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "PtrList.h"
+#include "MFPtrList.h"
 #include "FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 
-extern PtrListDL<Texture> gTextureBank;
-extern Texture *pNoneTexture;
+extern MFPtrListDL<MFTexture> gTextureBank;
+extern MFTexture *pNoneTexture;
 
 /**** Functions ****/
 
 // interface functions
-Texture* Texture_Create(const char *pName, bool generateMipChain)
+MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
@@ -32,9 +32,9 @@ Texture* Texture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
-	Texture *pTexture = Texture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
 	{
@@ -47,14 +47,14 @@ Texture* Texture_CreateFromRawData(const char *pName, void *pData, int width, in
 	return pTexture;
 }
 
-Texture* Texture_CreateRenderTarget(const char *pName, int width, int height)
+MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	DBGASSERT(false, "Not Written...");
+	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
 }
 
-int Texture_Destroy(Texture *pTexture)
+int MFTexture_Destroy(MFTexture *pTexture)
 {
 	pTexture->refCount--;
 

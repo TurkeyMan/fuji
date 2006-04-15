@@ -298,13 +298,16 @@ void MFSystem_Draw()
 			MFFont_DrawTextf(MFFont_GetDebugFont(), 80.0f, gDefaults.display.displayHeight-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
-		const float iconSize = 55.0f;
 
-		float yOffset = gDefaults.display.displayHeight-70.0f;
+		float yOffset = gDefaults.display.displayHeight-15.0f;
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
 		MFSetColour(1,1,1,0.5f);
+#if !defined(_PSP)
+		const float iconSize = 55.0f;
+		yOffset -= iconSize;
+
 		MFSetTexCoord1(0,0);
 		MFSetPosition(15, yOffset, 0);
 		MFSetTexCoord1(1,0);
@@ -313,6 +316,19 @@ void MFSystem_Draw()
 		MFSetPosition(15, yOffset+iconSize, 0);
 		MFSetTexCoord1(1,1);
 		MFSetPosition(15+iconSize, yOffset+iconSize, 0);
+#else
+		const float iconSize = 20.0f;
+		yOffset -= iconSize;
+
+		MFSetTexCoord1(0,0.3f);
+		MFSetPosition(15, yOffset, 0);
+		MFSetTexCoord1(1,0.3f);
+		MFSetPosition(15+iconSize*3, yOffset, 0);
+		MFSetTexCoord1(0,0.65f);
+		MFSetPosition(15, yOffset+iconSize, 0);
+		MFSetTexCoord1(1,0.65f);
+		MFSetPosition(15+iconSize*3, yOffset+iconSize, 0);
+#endif
 		MFEnd();
 
 		MFSystem_DrawPlatformSpecific();

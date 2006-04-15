@@ -1,8 +1,9 @@
-#include "Common.h"
-#include "Texture_Internal.h"
+#include "Fuji.h"
+#include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
-#include "View_Internal.h"
+#include "MFView_Internal.h"
+#include "MFHeap.h"
 
 #include "../../Source/Materials/MFMat_Standard.h"
 
@@ -12,22 +13,22 @@ extern uint32 currentRenderFlags;
 
 int Mat_Standard_RegisterMaterial(void *pPlatformData)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	return 0;
 }
 
 void Mat_Standard_UnregisterMaterial()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 }
 
 int Mat_Standard_Begin(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	if(pSetMaterial != pMaterial)
 	{
@@ -39,34 +40,34 @@ int Mat_Standard_Begin(MFMaterial *pMaterial)
 
 void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	pMaterial->pInstanceData = Heap_Alloc(sizeof(Mat_Standard_Data));
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Standard_Data));
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
-	memset(pData, 0, sizeof(Mat_Standard_Data));
+	memset(pData, 0, sizeof(MFMat_Standard_Data));
 
-	pData->ambient = Vector4::one;
-	pData->diffuse = Vector4::one;
+	pData->ambient = MFVector::one;
+	pData->diffuse = MFVector::one;
 
 	pData->materialType = MF_AlphaBlend;
 	pData->opaque = true;
 
-	pData->textureMatrix = Matrix::identity;
+	pData->textureMatrix = MFMatrix::identity;
 	pData->uFrames = 1;
 	pData->vFrames = 1;
 }
 
 void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
-		Texture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->pTextures[a]);
 	}
 
-	Heap_Free(pMaterial->pInstanceData);
+	MFHeap_Free(pMaterial->pInstanceData);
 }
