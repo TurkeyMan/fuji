@@ -27,6 +27,9 @@
 	#define MFDebug_Breakpoint() { asm("int $3"); }
 #elif defined(_PSP) || defined(_PS2)
 	#define MFDebug_Breakpoint() { asm("break"); }
+#elif defined(_GC)
+	#include <debug.h>
+	#define MFDebug_Breakpoint() { _break(); }
 #else
 	#define MFDebug_Breakpoint()
 #endif

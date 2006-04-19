@@ -88,71 +88,71 @@ asm(
 "	.set	noreorder\n"
 "	.set	nomacro\n"
 // align the stack frame to 8 bytes
-"	addiu	$t4, $a2, 7\n"
-"	li		$t5, -4\n"			// 0xfffffffffffffffc
-"	and		$t4, $t4, $t5\n"	// t4 holds the size of the argument block
+"	addiu	$12, $6, 7\n"
+"	li		$13, -4\n"			// 0xfffffffffffffffc
+"	and		$12, $12, $13\n"	// t4 holds the size of the argument block
 // and add 8 bytes for the return pointer and s0 backup
-"	addiu	$t5, $t4, 8\n"		// t5 holds the total size of the stack frame (including return pointer)
+"	addiu	$13, $12, 8\n"		// t5 holds the total size of the stack frame (including return pointer)
 // save the s0 register (so we can use it to remember where our return pointer is lives)
 "	sw		$16, -4($sp)\n"		// store the s0 register (so we can use it to remember how big our stack frame is)
 // push the stack
-"	subu	$sp, $sp, $t5\n"
+"	subu	$sp, $sp, $13\n"
 // find the return address, place in s0
-"	addu	$16, $sp, $t4\n"
+"	addu	$16, $sp, $12\n"
 // store the return pointer
-"	sw		$ra, 0($16)\n"
+"	sw		$31, 0($16)\n"
 
 // backup our function params
-"	addiu	$v0, $a3, 0\n"
-"	addiu	$v1, $a2, 0\n"
+"	addiu	$2, $7, 0\n"
+"	addiu	$3, $6, 0\n"
 
 // get global mipsArgs[] array pointer
-"	lui		$t7, %hi(mipsArgs)\n"
-"	addiu	$t7, $t7, %lo(mipsArgs)\n"
+"	lui		$15, %hi(mipsArgs)\n"
+"	addiu	$15, $15, %lo(mipsArgs)\n"
 // load register params
-"	lw		$a0, 0($t7)\n"
-"	lw		$a1, 4($t7)\n"
-"	lw		$a2, 8($t7)\n"
-"	lw		$a3, 12($t7)\n"
-"	lw		$t0, 16($t7)\n"
-"	lw		$t1, 20($t7)\n"
-"	lw		$t2, 24($t7)\n"
-"	lw		$t3, 28($t7)\n"
+"	lw		$4, 0($15)\n"
+"	lw		$5, 4($15)\n"
+"	lw		$6, 8($15)\n"
+"	lw		$7, 12($15)\n"
+"	lw		$8, 16($15)\n"
+"	lw		$9, 20($15)\n"
+"	lw		$10, 24($15)\n"
+"	lw		$11, 28($15)\n"
 
 // load float params
-"	lwc1	$f12, 32($t7)\n"
-"	lwc1	$f13, 36($t7)\n"
-"	lwc1	$f14, 40($t7)\n"
-"	lwc1	$f15, 44($t7)\n"
-"	lwc1	$f16, 48($t7)\n"
-"	lwc1	$f17, 52($t7)\n"
-"	lwc1	$f18, 56($t7)\n"
-"	lwc1	$f19, 60($t7)\n"
+"	lwc1	$f12, 32($15)\n"
+"	lwc1	$f13, 36($15)\n"
+"	lwc1	$f14, 40($15)\n"
+"	lwc1	$f15, 44($15)\n"
+"	lwc1	$f16, 48($15)\n"
+"	lwc1	$f17, 52($15)\n"
+"	lwc1	$f18, 56($15)\n"
+"	lwc1	$f19, 60($15)\n"
 
 // skip stack paramaters if there are none
-"	beq		$v1, $0, andCall\n"
+"	beq		$3, $0, andCall\n"
 // push stack paramaters
-"	addiu	$t7, $t7, 64\n"
+"	addiu	$15, $15, 64\n"
 "	addiu	$13, $sp, 0\n"
 "pushArgs:\n"
-"	addiu	$v1, -4\n"
-"	addu	$14, $t7, $v1\n"
-"	lw		$t7, 0($14)\n"
-"	sw		$t7, 0($13)\n"
-"	bne		$v1, $0, pushArgs\n"
+"	addiu	$3, -4\n"
+"	addu	$14, $15, $3\n"
+"	lw		$15, 0($14)\n"
+"	sw		$15, 0($13)\n"
+"	bne		$3, $0, pushArgs\n"
 "	addiu	$13, $13, 4\n"
 
 // and call the function
 "andCall:\n"
-"	jal		$v0\n"
+"	jal		$2\n"
 "	nop\n"
 
 // restore the return pointer
-"	lw		$ra, 0($16)\n"
+"	lw		$31, 0($16)\n"
 // pop the stack pointer (remembering the return pointer was 8 bytes below the top)
 "	addiu	$sp, $16, 8\n"
 // and return from the function
-"	j		$ra\n"
+"	j		$31\n"
 // restore the s0 register (in the branch delay slot)
 "	lw		$16, -4($sp)\n"
 "	.set	macro\n"

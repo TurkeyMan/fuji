@@ -21,5 +21,7 @@ void MFDisplay_ResetViewport();
 
 void MFDisplay_GetDisplayRect(MFRect *pRect);
 
+bool MFDisplay_IsWidescreen();
+
 #endif // _DISPLAY_H
 

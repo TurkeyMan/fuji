@@ -33,7 +33,7 @@
 #include <stdlib.h>     // strtod(), strtol()
 #include <assert.h>     // assert()
 #include <stdio.h>      // _vsnprintf()
-#if !defined(_PSP)
+#if !defined(_PSP) && !defined(_GC)
 #include <memory.h>     // memcpy()
 #else
 #include <string.h>

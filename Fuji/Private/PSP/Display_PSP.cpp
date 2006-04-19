@@ -119,3 +119,8 @@ void MFDisplay_ResetViewport()
 
 	sceGuViewport(2048, 2048, SCR_WIDTH, SCR_HEIGHT);
 }
+
+bool MFDisplay_IsWidescreen()
+{
+	return true;
+}
