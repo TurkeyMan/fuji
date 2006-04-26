@@ -1,6 +1,5 @@
 #PLATFORM = PSP
 #BUILD = Release
-#TARGET = libFuji
 TARGET_LIB = Lib/libFuji
 
 ifeq ($(PLATFORM),)
@@ -257,10 +256,6 @@ endif
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
-#LIBDIR = Lib/
-#LDFLAGS =
-#LIBS= -lpspgu -lm
-
 TARGET_LIB := $(TARGET_LIB)_$(CONFIG).a
 
 ifeq ($(PLATFORM),PSP)
@@ -287,21 +282,6 @@ CFLAGS = -G0
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) . $(PSPSDK)/include
-LIBDIR   := $(LIBDIR) . $(PSPSDK)/lib
-
-ifeq ($(BUILD_PRX),1)
-LDFLAGS  := $(addprefix -L,$(LIBDIR)) -specs=$(PSPSDK)/lib/prxspecs -Wl,-q,-T$(PSPSDK)/lib/linkfile.prx $(LDFLAGS)
-EXTRA_CLEAN += $(TARGET).elf
-# Setup default exports if needed
-ifdef PRX_EXPORTS
-EXPORT_OBJ=$(patsubst %.exp,%.o,$(PRX_EXPORTS))
-EXTRA_CLEAN += $(EXPORT_OBJ)
-else
-EXPORT_OBJ=$(PSPSDK)/lib/prxexports.o
-endif
-else
-LDFLAGS  := $(addprefix -L,$(LIBDIR)) $(LDFLAGS)
-endif
 
 # end PSP
 endif
@@ -319,7 +299,6 @@ STRIP    = powerpc-gekko-strip
 
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) . $(OGC)/include
-LIBDIR   := $(LIBDIR) . $(OGC)/lib
 
 # end GC
 endif
@@ -341,127 +320,13 @@ CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 CXXFLAGS := $(CFLAGS) $(CXXFLAGS)
 ASFLAGS  := $(CFLAGS) $(ASFLAGS)
 
-# more PSP stuff...
-ifeq ($(PLATFORM),PSP)
-# Library selection.  By default we link with Newlib's libc.  Allow the
-# user to link with PSPSDK's libc if USE_PSPSDK_LIBC is set to 1.
-
-ifeq ($(USE_KERNEL_LIBC),1)
-# Use the PSP's kernel libc
-PSPSDL_LIBC_LIB =
-CFLAGS := -I$(PSPSDK)/include/libc $(CFLAGS)
-else
-ifeq ($(USE_PSPSDK_LIBC),1)
-# Use the pspsdk libc
-PSPSDK_LIBC_LIB = -lpsplibc
-CFLAGS := -I$(PSPSDK)/include/libc $(CFLAGS)
-else
-# Use newlib (urgh)
-PSPSDK_LIBC_LIB = -lc
-endif
-endif
-
-
-# Link with following default libraries.  Other libraries should be specified in the $(LIBS) variable.
-# TODO: This library list needs to be generated at configure time.
-#
-ifeq ($(USE_KERNEL_LIBS),1)
-PSPSDK_LIBS = -lpspdebug -lpspdisplay_driver -lpspctrl_driver -lpspsdk
-LIBS     := $(LIBS) $(PSPSDK_LIBS) $(PSPSDK_LIBC_LIB) -lpspkernel
-else
-PSPSDK_LIBS = -lpspdebug -lpspdisplay -lpspge -lpspctrl -lpspsdk
-LIBS     := $(LIBS) $(PSPSDK_LIBS) $(PSPSDK_LIBC_LIB) -lpspnet \
-			-lpspnet_inet -lpspnet_apctl -lpspnet_resolver -lpsputility \
-			-lpspuser -lpspkernel
-endif
-
-# Define the overridable parameters for EBOOT.PBP
-ifndef PSP_EBOOT_TITLE
-PSP_EBOOT_TITLE = $(TARGET)
-endif
-
-ifndef PSP_EBOOT_SFO
-PSP_EBOOT_SFO = PARAM.SFO
-endif
-
-ifndef PSP_EBOOT_ICON
-PSP_EBOOT_ICON = ICON.PNG
-endif
-
-ifndef PSP_EBOOT_ICON1
-PSP_EBOOT_ICON1 = PIC0.PNG
-endif
-
-ifndef PSP_EBOOT_UNKPNG
-PSP_EBOOT_UNKPNG = NULL
-endif
-
-ifndef PSP_EBOOT_PIC1
-PSP_EBOOT_PIC1 = PIC1.PNG
-endif
-
-ifndef PSP_EBOOT_SND0
-PSP_EBOOT_SND0 = NULL
-endif
-
-ifndef PSP_EBOOT_PSAR
-PSP_EBOOT_PSAR = NULL
-endif
-
-ifndef PSP_EBOOT
-PSP_EBOOT = EBOOT.PBP
-endif
-
-# more PSP stuff
-endif
-
-ifeq ($(BUILD_PRX),1)
-ifneq ($(TARGET_LIB),)
-$(error TARGET_LIB should not be defined when building a prx)
-else
-FINAL_TARGET = $(TARGET).prx
-endif
-else
-ifneq ($(TARGET_LIB),)
 FINAL_TARGET = $(TARGET_LIB)
-else
-FINAL_TARGET = $(TARGET).elf
-endif
-endif
 
 all: $(EXTRA_TARGETS) $(FINAL_TARGET)
-
-kxploit: $(TARGET).elf $(PSP_EBOOT_SFO)
-	mkdir -p "$(TARGET)"
-	$(STRIP) $(TARGET).elf -o $(TARGET)/$(PSP_EBOOT)
-	mkdir -p "$(TARGET)%"
-	$(PACK_PBP) "$(TARGET)%/$(PSP_EBOOT)" $(PSP_EBOOT_SFO) $(PSP_EBOOT_ICON)  \
-		$(PSP_EBOOT_ICON1) $(PSP_EBOOT_UNKPNG) $(PSP_EBOOT_PIC1)  \
-		$(PSP_EBOOT_SND0) NULL $(PSP_EBOOT_PSAR)
-
-$(TARGET).elf: $(OBJS) $(EXPORT_OBJ)
-	$(LINK.c) $^ $(LIBS) -o $@
-	$(FIXUP) $@
 
 $(TARGET_LIB): $(OBJS)
 	$(AR) cru $@ $(OBJS)
 	$(RANLIB) $@
-
-$(PSP_EBOOT_SFO):
-	$(MKSFO) '$(PSP_EBOOT_TITLE)' $@
-
-$(PSP_EBOOT): $(TARGET).elf $(PSP_EBOOT_SFO)
-	$(STRIP) $(TARGET).elf -o $(TARGET)_strip.elf
-	$(PACK_PBP) EBOOT.PBP $(PSP_EBOOT_SFO) $(PSP_EBOOT_ICON)  \
-		$(PSP_EBOOT_ICON1) $(PSP_EBOOT_UNKPNG) $(PSP_EBOOT_PIC1)  \
-		$(PSP_EBOOT_SND0)  $(TARGET)_strip.elf $(PSP_EBOOT_PSAR)
-	-rm -f $(TARGET)_strip.elf
-
-%.prx: %.elf
-	psp-prxgen $< $@
-
-%.c: %.exp
-	psp-build-exports -b $< > $@
 
 clean:
 	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(OBJS) $(PSP_EBOOT_SFO) $(PSP_EBOOT) $(EXTRA_TARGETS)
