@@ -151,7 +151,7 @@ OBJS := $(OBJS) GC/Materials/Mat_Standard_GC.o
 OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
 endif
 
-ifeq ($(PLATFORM),Linux)
+ifeq ($(PLATFORM),LINUX)
 OBJS := $(OBJS) Linux/Display_Linux.o
 OBJS := $(OBJS) Linux/MFDebug_Linux.o
 OBJS := $(OBJS) Linux/MFHeap_Linux.o
@@ -324,7 +324,7 @@ LIBDIR   := $(LIBDIR) . $(OGC)/lib
 # end GC
 endif
 
-ifeq ($(PLATFORM),Linux)
+ifeq ($(PLATFORM),LINUX)
 
 CC       = gcc
 CXX      = g++
@@ -334,7 +334,7 @@ AR       = ar
 RANLIB   = ranlib
 STRIP    = strip
 
-# end Linux
+# end LINUX
 endif
 
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
