@@ -125,9 +125,7 @@ const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 	switch(source)
 	{
 		case IDD_Gamepad:
-		{
 			return "PSP Gamepad";
-		}
 		case IDD_Mouse:
 			return "Mouse";
 		case IDD_Keyboard:

@@ -41,7 +41,7 @@
 #include "as_tokendef.h"
 
 #include <assert.h> // assert()
-#if !defined(_PSP)
+#if !defined(_PSP) && !defined(_GC)
 #include <memory.h> // memcpy()
 #else
 #include <string.h>

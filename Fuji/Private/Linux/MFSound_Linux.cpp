@@ -1,87 +1,107 @@
 #include "Fuji.h"
 #include "MFVector.h"
 
-void Sound_InitModule()
+void MFSound_InitModule()
 {
 }
 
-void Sound_DeinitModule()
+void MFSound_DeinitModule()
 {
 }
 
-void Sound_Update()
+void MFSound_Update()
 {
 }
 
-void Sound_Draw()
+void MFSound_Draw()
 {
 }
 
 
-int Sound_LoadBank(const char *pFilename)
+int MFSound_LoadBank(const char *pFilename)
+{
+	MFCALLSTACK;
+
+	return -1;
+}
+
+void MFSound_UnloadBank(int bankID)
+{
+	MFCALLSTACK;
+
+
+}
+
+int MFSound_FindSound(const char *pSoundName, int searchBankID)
+{
+	MFCALLSTACK;
+
+	return -1;
+}
+
+int MFSound_Play(int soundID)
+{
+	MFCALLSTACK;
+
+	return -1;
+}
+
+int MFSound_Play3D(int soundID)
+{
+	MFCALLSTACK;
+
+	return -1;
+}
+
+void MFSound_Stop(int voice)
+{
+	MFCALLSTACK;
+
+
+}
+
+void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetVolume(int voice, float volume)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetPlaybackRate(int voice, float rate)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetMasterVolume(float volume)
+{
+	MFCALLSTACK;
+
+}
+
+int MFSound_MusicPlay(const char *pFilename, bool pause)
 {
 	return 0;
 }
 
-void Sound_UnloadBank(int bankID)
+void MFSound_MusicUnload(int track)
 {
 }
 
-int Sound_FindSound(const char *pSoundName, int searchBankID)
-{
-	return 0;
-}
-
-void Sound_Play(int soundID)
+void MFSound_MusicSeek(int track, float seconds)
 {
 }
 
-void Sound_Stop(int soundID)
+void MFSound_MusicPause(int track, bool pause)
 {
 }
 
-void Sound_Play3D(int soundID)
-{
-}
-
-void Sound_Stop3D(int soundID)
-{
-}
-
-void Sound_SetListenerPos(const MFVector& listenerPos)
-{
-}
-
-void Sound_SetVolume(int soundID, float volume)
-{
-}
-
-void Sound_SetMasterVolume(int soundID, float volume)
-{
-}
-
-void Sound_SetPlaybackRate(int soundID, float rate)
-{
-}
-
-int Sound_MusicPlay(const char *pFilename, bool pause)
-{
-	return 0;
-}
-
-void Sound_MusicUnload(int track)
-{
-}
-
-void Sound_MusicSeek(int track, float seconds)
-{
-}
-
-void Sound_MusicPause(int track, bool pause)
-{
-}
-
-void Sound_MusicSetVolume(int track, float volume)
+void MFSound_MusicSetVolume(int track, float volume)
 {
 }
 

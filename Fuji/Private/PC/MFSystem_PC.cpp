@@ -17,6 +17,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	apphInstance = hInstance;
 
 	MFSystem_GameLoop();
+
+	return 0;
 }
 
 void MFSystem_InitModulePlatformSpecific()

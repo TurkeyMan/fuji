@@ -238,24 +238,6 @@ enum MFInputDeviceStatus
  */
 enum MFGamepadButton
 {
-// xbox controller enums
-	Button_XB_A			= 0,	/**< A button on an XBox gamepad */
-	Button_XB_B			= 1,	/**< B button on an XBox gamepad */
-	Button_XB_X			= 2,	/**< X button on an XBox gamepad */
-	Button_XB_Y			= 3,	/**< Y button on an XBox gamepad */
-
-	Button_XB_White		= 4,	/**< White button on an XBox gamepad */
-	Button_XB_Black		= 5,	/**< Black button on an XBox gamepad */
-
-	Button_XB_LTrig		= 6,	/**< Left trigger on an XBox gamepad */
-	Button_XB_RTrig		= 7,	/**< Right trigger on an XBox gamepad */
-
-	Button_XB_Start		= 8,	/**< Start button on an XBox gamepad */
-	Button_XB_Back		= 9,	/**< Back button on an XBox gamepad */
-
-	Button_XB_LThumb	= 10,	/**< Left Thumbstick button on an XBox gamepad */
-	Button_XB_RThumb	= 11,	/**< Right Thumbstick button on an XBox gamepad */
-
 // PSX controller enums
 	Button_P2_Cross		= 0,	/**< Cross button on a Playstation or PS2 gamepad */
 	Button_P2_Circle	= 1,	/**< Circle button on a Playstation or PS2 gamepad */
@@ -285,6 +267,24 @@ enum MFGamepadButton
 	Button_PP_Start		= 8,	/**< Start button on the PSP gamepad */
 	Button_PP_Select	= 9,	/**< Select button on the PSP gamepad */
 
+// XBox controller enums
+	Button_XB_A			= 0,	/**< A button on an XBox gamepad */
+	Button_XB_B			= 1,	/**< B button on an XBox gamepad */
+	Button_XB_X			= 2,	/**< X button on an XBox gamepad */
+	Button_XB_Y			= 3,	/**< Y button on an XBox gamepad */
+
+	Button_XB_White		= 4,	/**< White button on an XBox gamepad */
+	Button_XB_Black		= 5,	/**< Black button on an XBox gamepad */
+
+	Button_XB_LTrig		= 6,	/**< Left trigger on an XBox gamepad */
+	Button_XB_RTrig		= 7,	/**< Right trigger on an XBox gamepad */
+
+	Button_XB_Start		= 8,	/**< Start button on an XBox gamepad */
+	Button_XB_Back		= 9,	/**< Back button on an XBox gamepad */
+
+	Button_XB_LThumb	= 10,	/**< Left Thumbstick button on an XBox gamepad */
+	Button_XB_RThumb	= 11,	/**< Right Thumbstick button on an XBox gamepad */
+
 // XBox 360 controller enums
 	Button_X3_A			= 0,	/**< A button on an XBox 360 gamepad */
 	Button_X3_B			= 1,	/**< B button on an XBox 360 gamepad */
@@ -302,7 +302,30 @@ enum MFGamepadButton
 	Button_X3_LThumb	= 10,	/**< Left Thumbstick button on an XBox 360 gamepad */
 	Button_X3_RThumb	= 11,	/**< Right Thumbstick button on an XBox 360 gamepad */
 
-// general controller enums
+// GC controller enums
+	Button_GC_A			= 0,	/**< A button on a Gamecube gamepad */
+	Button_GC_X			= 1,	/**< X button on a Gamecube gamepad */
+	Button_GC_B			= 2,	/**< B button on a Gamecube gamepad */
+	Button_GC_Y			= 3,	/**< Y button on a Gamecube gamepad */
+
+	Button_GC_Z			= 5,	/**< Z button on a Gamecube gamepad */
+	Button_GC_L			= 6,	/**< Left Trigger button on a Gamecube gamepad */
+	Button_GC_R			= 7,	/**< Right Trigger button on a Gamecube gamepad */
+
+	Button_GC_Start		= 8,	/**< Start button on a Gamecube gamepad */
+
+// Dreamcast controller enums
+	Button_DC_A			= 0,	/**< A button on a Dreamcast gamepad */
+	Button_DC_B			= 1,	/**< B button on a Dreamcast gamepad */
+	Button_DC_X			= 2,	/**< X button on a Dreamcast gamepad */
+	Button_DC_Y			= 3,	/**< Y button on a Dreamcast gamepad */
+
+	Button_DC_L			= 6,	/**< Left trigger on a Dreamcast gamepad */
+	Button_DC_R			= 7,	/**< Right trigger on a Dreamcast gamepad */
+
+	Button_DC_Start		= 8,	/**< Start button on a Dreamcast gamepad */
+
+// General controller enums
 	Button_DUp = 12,			/**< Up on the digital pad */
 	Button_DDown,				/**< Down on the digital pad */
 	Button_DLeft,				/**< Left on the digital pad */

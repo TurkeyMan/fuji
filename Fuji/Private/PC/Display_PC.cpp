@@ -529,3 +529,11 @@ void MFDisplay_ResetViewport()
 
 	pd3dDevice->SetViewport(&vp);
 }
+
+bool MFDisplay_IsWidescreen()
+{
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+
+	return rect.width / rect.height >= 0.6f;
+}

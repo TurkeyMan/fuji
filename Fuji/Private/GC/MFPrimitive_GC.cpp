@@ -6,7 +6,7 @@
 #include "MFRenderer.h"
 #include "MFMaterial.h"
 
-#include <gx.h>
+#include <ogc/gx.h>
 
 uint32 primType;
 uint32 beginCount;
@@ -62,7 +62,7 @@ void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
-	GX_LoadPosMtxImm(mat, 0);
+//	GX_LoadPosMtxImm(mat, 0);
 }
 
 void MFSetColour(const MFVector &colour)
@@ -114,5 +114,5 @@ void MFEnd()
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
-	GX_End()
+	GX_End();
 }

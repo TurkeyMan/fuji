@@ -5,6 +5,7 @@
 	Name="libFuji"
 	ProjectGUID="{692AD46F-7D1C-4C2B-89B4-9DA4EEF1EF89}"
 	RootNamespace="libFuji"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -1214,8 +1215,8 @@
 			<Tool
 				Name="GCCCompiler"
 				AdditionalDependencies=""
-				gccexe="powerpc-eabi-elf-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)GC\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;$(ProjectDir)Middleware\angelscript\include\;\usr\local\devkitcube\powerpc-eabi-elf\include"
+				gccexe="powerpc-gekko-gcc.exe"
+				includepaths="$(ProjectDir)Source;$(ProjectDir)Include;$(ProjectDir)GC;$(ProjectDir)Middleware;$(ProjectDir)Middleware/zlib;$(ProjectDir)Middleware/angelscript/include&#x0D;;/usr/local/devkitPPC/ogc/include"
 				optimization="1"
 				preprocessordefines="_GC;_DEBUG;_LIB"
 			/>
@@ -1286,7 +1287,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Creating Library..."
-				CommandLine="powerpc-eabi-elf-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-eabi-elf-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
+				CommandLine="powerpc-gekko-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-gekko-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -1306,8 +1307,8 @@
 			/>
 			<Tool
 				Name="GCCCompiler"
-				gccexe="powerpc-eabi-elf-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)GC\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;$(ProjectDir)Middleware\angelscript\include\;\usr\local\devkitcube\powerpc-eabi-elf\include"
+				gccexe="powerpc-gekko-gcc.exe"
+				includepaths="$(ProjectDir)Source;$(ProjectDir)Include;$(ProjectDir)GC;$(ProjectDir)Middleware;$(ProjectDir)Middleware/zlib;$(ProjectDir)Middleware/angelscript/include&#x0D;;/usr/local/devkitPPC/ogc/include"
 				preprocessordefines="_GC;NDEBUG;_LIB;_RELEASE"
 			/>
 			<Tool
@@ -1378,7 +1379,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Creating Library..."
-				CommandLine="powerpc-eabi-elf-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-eabi-elf-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
+				CommandLine="powerpc-gekko-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-gekko-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -1398,8 +1399,8 @@
 			/>
 			<Tool
 				Name="GCCCompiler"
-				gccexe="powerpc-eabi-elf-gcc.exe"
-				includepaths="$(ProjectDir)Source\;$(ProjectDir)Include\;$(ProjectDir)GC\;$(ProjectDir)Middleware\;$(ProjectDir)Middleware\zlib\;$(ProjectDir)Middleware\angelscript\include\;\usr\local\devkitcube\powerpc-eabi-elf\include"
+				gccexe="powerpc-gekko-gcc.exe"
+				includepaths="$(ProjectDir)Source;$(ProjectDir)Include;$(ProjectDir)GC;$(ProjectDir)Middleware;$(ProjectDir)Middleware/zlib;$(ProjectDir)Middleware/angelscript/include&#x0D;;/usr/local/devkitPPC/ogc/include"
 				preprocessordefines="_GC;NDEBUG;_LIB;_RETAIL"
 			/>
 			<Tool
@@ -1470,7 +1471,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Creating Library..."
-				CommandLine="powerpc-eabi-elf-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-eabi-elf-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
+				CommandLine="powerpc-gekko-ar r $(OutDir)/$(ProjectName)_$(ConfigurationName).a $(IntDir)/*.o&#x0D;&#x0A;powerpc-gekko-ranlib $(OutDir)/$(ProjectName)_$(ConfigurationName).a&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -14015,6 +14016,82 @@
 								Name="GCCCompiler"
 							/>
 						</FileConfiguration>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="Linux"
+				>
+				<File
+					RelativePath=".\Linux\Display_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFDebug_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFHeap_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFInput_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFMaterial_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFModel_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFPrimitive_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFSockets_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFSound_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFSystem_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFTexture_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFThread_Linux.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Linux\MFTranslation_Linux.cpp"
+					>
+				</File>
+				<Filter
+					Name="Materials"
+					>
+					<File
+						RelativePath=".\Linux\Materials\MFMat_Effect_Linux.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Linux\Materials\MFMat_Standard_Linux.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="FileSystem"
+					>
+					<File
+						RelativePath=".\Linux\FileSystem\MFFileSystemNative_Linux.cpp"
+						>
 					</File>
 				</Filter>
 			</Filter>

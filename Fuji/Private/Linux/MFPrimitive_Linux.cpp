@@ -4,15 +4,17 @@
 uint32 beginCount;
 uint32 currentVert;
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
+	MFCALLSTACK;
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
+	MFCALLSTACK;
 }
 
-void DrawMFPrimitiveStats()
+void MFPrimitive_DrawStats()
 {
 }
 

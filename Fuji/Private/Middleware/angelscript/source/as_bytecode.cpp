@@ -35,7 +35,7 @@
 // A class for constructing the final byte code
 //
 
-#if !defined(_PSP)
+#if !defined(_PSP) && !defined(_GC)
 #include <memory.h> // memcpy()
 #else
 #include <string.h>

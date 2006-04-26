@@ -4,7 +4,7 @@
 #include "MFHeap.h"
 #include "MFIni.h"
 
-#include <pad.h>
+#include <ogc/pad.h>
 
 /*** Structure definitions ***/
 
@@ -23,7 +23,35 @@ float mouseMultiplier = 1.0f;
 
 PADStatus pads[4];
 
+const char * const gGCButtonNames[] =
+{
+// Gamecube controller enums
+	"A",
+	"X",
+	"B",
+	"Y",
+	"N/A",
+	"Z",
+	"L",
+	"R",
+	"Start",
+	"N/A",
+	"N/A",
+	"N/A",
+
+// general controller enums
+	"DPad Up",
+	"DPad Down",
+	"DPad Left",
+	"DPad Right",
+	"Analog X-Axis",
+	"Analog Y-Axis",
+	"C Analog X-Axis",
+	"C Analog Y-Axis"
+};
+
 /**** Platform Specific Functions ****/
+
 
 void MFInput_InitModulePlatformSpecific()
 {
@@ -62,51 +90,31 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	MFCALLSTACK;
 }
 
-const char* MFInput_GetDeviceName(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
-	const char *pText = NULL;
-
 	switch(source)
 	{
 		case IDD_Gamepad:
-		{
-			pText = "Gamepad";
-			break;
-		}
+			return "Gamecube Gamepad";
 		case IDD_Mouse:
-			pText = "Mouse";
-			break;
+			return "Mouse";
 		case IDD_Keyboard:
-			pText = "Keyboard";
-			break;
+			return "Keyboard";
 		default:
 			break;
 	}
 
-	return pText;
+	return NULL;
 }
 
-const char* MFInput_GetGamepadButtonName(int sourceID, int type)
+const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
-	return "Button ?";
+	MFDebug_Assert(sourceID < 4, "Invalid source ID...");
+
+	return gGCButtonNames[button];
 }
 
 bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
-	switch(keyboardState)
-	{
-		case KSS_NumLock:
-			break;
-
-		case KSS_CapsLock:
-			break;
-
-		case KSS_ScrollLock:
-			break;
-
-		case KSS_Insert:
-			break;
-	}
-
-	return 0;
+	return false;
 }

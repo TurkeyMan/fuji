@@ -28,7 +28,7 @@
    andreas@angelcode.com
 */
 
-#if !defined(_PSP)
+#if !defined(_PSP) && !defined(_GC)
 #include <memory.h>
 #else
 #include <string.h>

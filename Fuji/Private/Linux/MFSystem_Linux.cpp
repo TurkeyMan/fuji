@@ -1,8 +1,18 @@
 #include "Fuji.h"
+#include "MFSystem_Internal.h"
 
 #include <time.h>
 
-MFPlatform gCurrentPlatform = FP_Unknown;
+MFPlatform gCurrentPlatform = FP_Linux;
+
+int main(int argc, char *argv[])
+{
+	MFCALLSTACK;
+
+	MFSystem_GameLoop();
+
+	return 0;
+}
 
 void MFSystem_InitModulePlatformSpecific()
 {
@@ -36,5 +46,5 @@ uint64 MFSystem_GetRTCFrequency()
 
 const char * MFSystem_GetSystemName()
 {
-	return "null";
+	return "Insert code to find system name here...";
 }

@@ -36,8 +36,7 @@
 //
 // This version is mips specific and was originally written
 // by Manu Evans in April, 2006
-// Later updated for angelscript 2.0.0 by Manu Evans in April, 2006
-
+//
 
 #include <stdio.h>
 

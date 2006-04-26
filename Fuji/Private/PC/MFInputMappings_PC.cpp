@@ -220,6 +220,30 @@ static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] =
 	-1  // Button_ThumbRY
 };
 
+static const int gPowerWaveButtonID[GamepadType_Max] = 
+{
+	0,   // Button_A
+	1,   // Button_B
+	2,   // Button_X
+	3,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+	7,   // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+	9,   // Button_Start
+	8,   // Button_Back
+	10,  // Button_LeftThumb
+	11,  // Button_RightThumb
+	-1,  // Button_DUp
+	-1,  // Button_DDown
+	-1,  // Button_DLeft
+	-1,  // Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Z,                // Button_ThumbRX
+	AID_Rz | AID_Negative // Button_ThumbRY
+};
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -389,6 +413,30 @@ static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] =
 	"Unavailable"   // Button_ThumbRY
 };
 
+static const char * gPowerWaveButtonNames[GamepadType_Max] = 
+{
+	"1",            // Button_A
+	"2",            // Button_B
+	"3",            // Button_X
+	"4",            // Button_Y
+	"L1",           // Button_White
+	"R1",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Start",        // Button_Start
+	"Select",       // Button_Back
+	"L-Thumb",      // Button_LeftThumb
+	"R-Thumb",      // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
 // Gamepad Info
 static MFGamepadInfo gGamepadDescriptors[] =
 {
@@ -514,6 +562,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"Logitech WingMan Gamepad Extreme (USB)",
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
+		false,
+		&gGamepadDescriptors[13]
+	},
+
+	// POWER))WAVE PS2 style gamepad
+	{
+		"PowerWave PS2 Style Gamepad",
+		"USB Joystick",
+		gPowerWaveButtonID,
+		gPowerWaveButtonNames,
 		false,
 		NULL
 	}
