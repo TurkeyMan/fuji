@@ -6,7 +6,12 @@
 #include "MFSystem.h"
 #include "FS.h"
 
+#if defined(_WIN32)
 #include <direct.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 #include "pcre.h"
 #include "minizip/zip.h"
@@ -140,7 +145,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		printf("Invalid output filename '%s'", output);
+		printf("Invalid output filename '%s'", output.c_str());
 		return 1;
 	}
 
@@ -156,7 +161,11 @@ int main(int argc, char **argv)
 
 		if(!IsDirectory(testPath))
 		{
+#if defined(WIN32)
 			mkdir(testPath);
+#else
+			mkdir(testPath, 0);
+#endif
 		}
 
 		pPathPart = strtok(NULL, "/\\");
@@ -561,7 +570,7 @@ void AddToZip(zipFile zip, const char *pSourceFile, const char *pSourceFileName)
 
 	if(!pFile)
 	{
-		printf("Error writing file 's' to zip, Unable to open file..", pSourceFile);
+		printf("Error writing file '%s' to zip, Unable to open file..", pSourceFile);
 		return;
 	}
 

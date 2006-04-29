@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
-#include "Input.h"
+#include "MFInput.h"
 
 #include <sys/time.h>
 #include <X11/Xlib.h>
@@ -33,7 +33,7 @@ void MFSystem_DeinitModulePlatformSpecific()
 
 void MFSystem_HandleEventsPlatformSpecific()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	XEvent event;
 	
@@ -103,8 +103,6 @@ uint64 MFSystem_ReadRTC()
 
 uint64 MFSystem_GetRTCFrequency()
 {
-	MFCALLSTACK;
-
 	return 1000000;
 }
 

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if !defined(_RETAIL)
+
 #include "MFSystem_Internal.h"
 #include "Display_Internal.h"
 #include "MFFont.h"
@@ -16,6 +19,18 @@ void MFDebug_Message(const char *pMessage)
 {
 	fprintf(stderr, MFStr("%s\n", pMessage));
 }
+
+#if defined(_FUJI_UTIL)
+
+void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+{
+	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
+	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));
+
+	MFDebug_Breakpoint();
+}
+
+#else
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
@@ -99,3 +114,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFDisplay_EndFrame();
 	}
 }
+
+#endif
+
+#endif // !defined(_RETAIL)

@@ -6,6 +6,8 @@
 #include "MFView_Internal.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
+static MFMaterial *pSetMaterial = 0;
+
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	return 0;

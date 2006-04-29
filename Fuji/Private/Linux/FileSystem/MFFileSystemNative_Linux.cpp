@@ -193,7 +193,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	if(pOpenData->openFlags & MFOF_Read)
 	{
-		if(openFlags & MFOF_Write)
+		if(pNative->openFlags & MFOF_Write)
 		{
 			flags = O_RDWR | O_CREAT;
 		}
@@ -213,7 +213,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	pFile->pFilesysData = (void*)open(pNative->pFilename, flags);
 
-	if(pFile->pFilesysData == -1)
+	if((int)pFile->pFilesysData == -1)
 	{
 		pFile->pFilesysData = 0;
 		return -1 ;

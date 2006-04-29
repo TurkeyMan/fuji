@@ -1,5 +1,13 @@
 #include "Fuji.h"
 #include "MFPrimitive.h"
+#include "MFMaterial.h"
+#include "MFView.h"
+#include "MFTexture_Internal.h"
+#include "MFRenderer.h"
+#include "Display.h"
+#include "Materials/MFMat_Standard.h"
+
+#include <GL/glx.h>
 
 uint32 beginCount;
 uint32 currentVert;

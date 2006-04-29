@@ -665,6 +665,10 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 			{
 				break;
 			}
+
+			default:
+				printf("Shouldnt be here?...\n");
+				break;
 		}
 
 		(char*&)pModelData->pDataChunks[a].pData -= base;

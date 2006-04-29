@@ -7,8 +7,10 @@
 #include "LoadTarga.h"
 #include "LoadBMP.h"
 
+#if defined(WIN32)
 #include <d3d8.h>
 #include <xgraphics.h>
+#endif
 
 void LOGERROR(const char *pFormat, ...)
 {
@@ -55,7 +57,8 @@ int main(int argc, char *argv[])
 				while(pFormatString[0] == ' ' || pFormatString[0] == '\t' || pFormatString[0] == '=')
 				 ++pFormatString;
 
-				for(int b=0; b<TexFmt_Max; b++)
+				int b = 0;
+				for(; b<TexFmt_Max; b++)
 				{
 					if(!stricmp(pFormatString, MFTexture_GetFormatString(b)))
 					{
@@ -90,7 +93,7 @@ int main(int argc, char *argv[])
 			}
 			else if(!stricmp(&argv[a][1], "a") || !stricmp(&argv[a][1], "listall"))
 			{
-				// list formats for platform
+				// list all available formats
 				for(int f=0; f<TexFmt_Max; f++)
 				{
 					printf("%s\t", MFTexture_GetFormatString(f));
@@ -106,7 +109,7 @@ int main(int argc, char *argv[])
 						}
 					}
 
-					printf("\n", MFTexture_GetFormatString(f));
+					printf("\n");
 				}
 				gets(outFile);
 				return 0;
@@ -203,7 +206,10 @@ int main(int argc, char *argv[])
 					targetFormat = TexFmt_PSP_A1B5G5R5s;
 				else
 					targetFormat = TexFmt_PSP_A4B4G4R4s;
+				break;
 
+			default:
+				targetFormat = TexFmt_A8B8G8R8;
 				break;
 		};
 	}
@@ -671,13 +677,13 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 				for(x=0; x<width; x++)
 				{
 					c = (uint32&)pSource->a;
-					*pTarget = ((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 48;
+					*pTarget = (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 48;
 					c = (uint32&)pSource->b;
-					*pTarget |= ((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 32;
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 32;
 					c = (uint32&)pSource->g;
-					*pTarget |= ((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13) << 16;
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13) << 16;
 					c = (uint32&)pSource->r;
-					*pTarget |= ((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13);
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13);
 
 					++pTarget;
 					++pSource;
@@ -723,12 +729,15 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		char *pBuffer = (char*)malloc(imageBytes);
 
+#if defined(WIN32)
 		if(targetFormat >= TexFmt_XB_A8R8G8B8s && targetFormat <= TexFmt_XB_R4G4B4A4s)
 		{
 			// swizzle for xbox
 			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
 		}
-		else if(targetFormat >= TexFmt_PSP_A8B8G8R8s && targetFormat <= TexFmt_PSP_DXT5s)
+		else
+#endif
+		if(targetFormat >= TexFmt_PSP_A8B8G8R8s && targetFormat <= TexFmt_PSP_DXT5s)
 		{
 			// swizzle for PSP
 			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);

@@ -17,8 +17,8 @@ struct Resolution
 
 // Data definition
 Resolution defaultModes[] = {{320, 240, 0.0f}, {640, 480, 0.0f}, {800, 600, 0.0f}, {1024, 768, 0.0f}, {1280, 1024, 0.0f}, {0, 0, 0.0f}};
-char modeString[24] = "";
-char *resMenuItems[] = {"-", modeString, "+", NULL};
+const char modeString[24] = "";
+const char *resMenuItems[] = {"-", modeString, "+", NULL};
 
 MenuItemIntString resSelect(resMenuItems, 1);
 MenuItemStatic applyDisplayMode;
@@ -64,16 +64,16 @@ static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);
 static void FreeModes();
 static bool FindMode(Resolution *modes, int width, int height);
-static void Display_ResetDisplay();
+static void MFDisplay_ResetDisplay();
 
 static Bool WaitForNotify(Display *d, XEvent *e, char *arg)
-{ 
+{
 	return (e->type == MapNotify) && (e->xmap.window == (Window)arg);
 }
 
 static bool GetModes(Resolution **_modes, bool fullscreen)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int numModeLines;
 
@@ -142,13 +142,13 @@ static void SetSingleMode(Resolution **modes)
 
 static void FreeModes()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	if(modes != NULL)
 	{
 		if(modes != defaultModes)
 		{
-			Heap_Free(modes);
+			MFHeap_Free(modes);
 		}
 
 		modes = NULL;
@@ -204,66 +204,66 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
 	currentMode = selectedMode;
-	display.width = modes[currentMode].width;
-	display.height = modes[currentMode].height;
+	gDisplay.width = modes[currentMode].width;
+	gDisplay.height = modes[currentMode].height;
 
-	display.fullscreenWidth = display.width;
-	display.fullscreenHeight = display.height;
+	gDisplay.fullscreenWidth = gDisplay.width;
+	gDisplay.fullscreenHeight = gDisplay.height;
 
 	MFDisplay_ResetDisplay();	
 }
 
 void MFDisplay_DestroyWindow()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	XVisualInfo *visualInfo = NULL;
 
-	display.fullscreenWidth = display.width = width;
-	display.fullscreenHeight = display.height = height;
-	display.refreshRate = 0;
-	display.colourDepth = 0; /* Use default.  Chances are, it's something sane */
-	display.windowed = true;
-	display.wide = false;
-	display.progressive = false;
+	gDisplay.fullscreenWidth = gDisplay.width = width;
+	gDisplay.fullscreenHeight = gDisplay.height = height;
+	gDisplay.refreshRate = 0;
+	gDisplay.colourDepth = 0; /* Use default.  Chances are, it's something sane */
+	gDisplay.windowed = true;
+	gDisplay.wide = false;
+	gDisplay.progressive = false;
 
 	if(!(xdisplay = XOpenDisplay(NULL)))
 	{
-		LOGD("Unable to open display");
-		Display_DestroyDisplay();
+		MFDebug_Error("Unable to open display");
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	screen = DefaultScreen(xdisplay);
 	rootWindow = RootWindow(xdisplay, screen);
 
-	GetModes(&modes, !display.windowed);
+	GetModes(&modes, !gDisplay.windowed);
 	if(!FindMode(modes, width, height))
 	{
-		if(!display.windowed)
+		if(!gDisplay.windowed)
 		{ // Try windowed mode
-			LOGD("No suitable modes for fullscreen mode, trying windowed mode");
+			MFDebug_Warn(1, "No suitable modes for fullscreen mode, trying windowed mode");
 
-			display.windowed = true;
+			gDisplay.windowed = true;
 
 			FreeModes();
 			GetModes(&modes, false);
 			if(!FindMode(modes, width, height))
 			{
-				LOGD("No suitable modes found");
-				Display_DestroyDisplay();
+				MFDebug_Error("No suitable modes found");
+				MFDisplay_DestroyDisplay();
 				return 1;
 			}
 		}
 		else
 		{
-			LOGD("No suitable modes found");
-			Display_DestroyDisplay();
+			MFDebug_Error("No suitable modes found");
+			MFDisplay_DestroyDisplay();
 			return 1;
 		}
 	}
@@ -273,16 +273,16 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	if(!glXQueryExtension(xdisplay, NULL, NULL))
 	{
-		LOGD("GLX extension not available");
-		Display_DestroyDisplay();
+		MFDebug_Error("GLX extension not available");
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	int glXMajor, glXMinor;
 	if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3))
 	{
-		LOGD(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
-		Display_DestroyDisplay();
+		MFDebug_Error(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -291,12 +291,12 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 
 	// Set full screen mode, if necessary
-	if(!display.windowed && numModes > 1)
+	if(!gDisplay.windowed && numModes > 1)
 	{
 		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]))
 		{
-			LOGD("Unable to switch screenmodes, defaulting to windowed mode");
-			Display_DestroyDisplay();
+			MFDebug_Error("Unable to switch screenmodes, defaulting to windowed mode");
+			MFDisplay_DestroyDisplay();
 			return 1;
 		}
 	}
@@ -310,34 +310,34 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
 		if(numConfigs == 0)
 		{
-			LOGD("Unable to obtain a suitable glX FBConfig");
-			Display_DestroyDisplay();
+			MFDebug_Error("Unable to obtain a suitable glX FBConfig");
+			MFDisplay_DestroyDisplay();
 			return 1;
 		}
 	}
 
 	if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL)
 	{
-		LOGD("Unable to obtain a visualInfo structure for the associated FBConfig");
+		MFDebug_Error("Unable to obtain a visualInfo structure for the associated FBConfig");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	if(visualInfo->depth < 16)
 	{
-		LOGD("Need at least a 16 bit screen!");
+		MFDebug_Error("Need at least a 16 bit screen!");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	if(!(colorMap = XCreateColormap(xdisplay, rootWindow, visualInfo->visual, AllocNone)))
 	{
-		LOGD("Unable to create colourmap");
+		MFDebug_Error("Unable to create colourmap");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -350,20 +350,20 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	if(!(window = XCreateWindow(xdisplay, rootWindow, 0, 0, width, height, 0, visualInfo->depth, InputOutput, visualInfo->visual, CWBackPixel | CWBorderPixel | CWCursor | CWColormap | CWEventMask, &windowAttrs)))
 	{
-		LOGD("Unable to create X Window");
+		MFDebug_Error("Unable to create X Window");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	// Tell the window manager not to allow our window to be resized.  But some window managers can ignore me and do it anyway.  Typical X-Windows.
 	if((sizeHints = XAllocSizeHints()) == NULL)
 	{
-		LOGD("Unable to alloc XSizeHints structure, out of memory?");
+		MFDebug_Error("Unable to alloc XSizeHints structure, out of memory?");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -379,10 +379,10 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	XWMHints *wmHints;
 	if((wmHints = XAllocWMHints()) == NULL)
 	{
-		LOGD("Unable to alloc XWMHints structure, out of memory?");
+		MFDebug_Error("Unable to alloc XWMHints structure, out of memory?");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		Display_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();		
 		return 1;
 	}
 
@@ -391,10 +391,10 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	wmHints->initial_state = NormalState;
 	if(!XSetWMHints(xdisplay, window, wmHints))
 	{
-		LOGD("Unable to set WM hints for window");
+		MFDebug_Error("Unable to set WM hints for window");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -404,18 +404,18 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	wm_delete_window = XInternAtom(xdisplay, "WM_DELETE_WINDOW", false);
 	if(!XSetWMProtocols(xdisplay, window, &wm_delete_window, 1))
 	{
-		LOGD("Unable to set Window Manager protocols");
+		MFDebug_Error("Unable to set Window Manager protocols");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();		
 		return 1;
 	}
 
 
 	if(!XMapRaised(xdisplay, window))
 	{
-		LOGD("Unable to map new window");
+		MFDebug_Error("Unable to map new window");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();		
 		return 1;
 	}
 
@@ -427,17 +427,17 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
 	{
-		LOGD("Unable to associate window with a GLXWindow");
+		MFDebug_Error("Unable to associate window with a GLXWindow");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true)))
 	{
-		LOGD("Unable to create GLXContext");
+		MFDebug_Error("Unable to create GLXContext");
 		XFree(fbConfigs);
-		Display_DestroyDisplay();
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -445,8 +445,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext))
 	{
-		LOGD("Unable to bind GLXContext");
-		Display_DestroyDisplay();
+		MFDebug_Error("Unable to bind GLXContext");
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -458,27 +458,27 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	{
 		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2)
 		{
-			LOGD("Unable to determine OpenGl version");
-			Display_DestroyDisplay();
+			MFDebug_Error("Unable to determine OpenGl version");
+			MFDisplay_DestroyDisplay();
 			return 1;
 		}
 	}
 
 	if(majorGLVersion == 1 && minorGLVersion < 4)
 	{
-		LOGD("Need at least OpenGL version 1.4");
-		Display_DestroyDisplay();
+		MFDebug_Error("Need at least OpenGL version 1.4");
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
 	// Might want to check for extensions here
 
-	if(!display.windowed && numModes > 1)
+	if(!gDisplay.windowed && numModes > 1)
 	{
 		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]))
 		{
-			LOGD("Unable to set screen mode");
-			Display_DestroyDisplay();
+			MFDebug_Error("Unable to set screen mode");
+			MFDisplay_DestroyDisplay();
 			return 1;
 		}
 
@@ -509,16 +509,16 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 void MFDisplay_ResetDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	sizeHints->flags = PSize | PMinSize | PMaxSize;
-	sizeHints->min_width = sizeHints->max_width = sizeHints->base_width = display.width;
-	sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = display.height;
+	sizeHints->min_width = sizeHints->max_width = sizeHints->base_width = gDisplay.width;
+	sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = gDisplay.height;
 
 	XSetWMNormalHints(xdisplay, window, sizeHints);
-	XResizeWindow(xdisplay, window, display.width, display.height);
+	XResizeWindow(xdisplay, window, gDisplay.width, gDisplay.height);
 
-	if(!display.windowed && numModes > 1)
+	if(!gDisplay.windowed && numModes > 1)
 	{
 		XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]);
 	
@@ -526,19 +526,19 @@ void MFDisplay_ResetDisplay()
 		XFlush(xdisplay);
 
 		// A little trick to make sure the entire window is on the screen
-		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, display.width - 1, display.height - 1);
+		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, gDisplay.width - 1, gDisplay.height - 1);
 		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, 0, 0);	
 		XFlush(xdisplay);
 	}
 
-	ResetViewport();
+	MFDisplay_ResetViewport();
 }
 
 void MFDisplay_DestroyDisplay()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	if((!display.windowed) && (originalVidMode != NULL) && xdisplay != NULL && numModes > 1)
+	if((!gDisplay.windowed) && (originalVidMode != NULL) && xdisplay != NULL && numModes > 1)
 	{
 		XF86VidModeSwitchToMode(xdisplay, screen, originalVidMode);
 	}
@@ -584,19 +584,19 @@ void MFDisplay_DestroyDisplay()
 
 void MFDisplay_BeginFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void MFDisplay_EndFrame()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	glXSwapBuffers(xdisplay, glXWindow);
 }
 
 void MFDisplay_SetClearColour(float r, float g, float b, float a)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -606,7 +606,7 @@ void MFDisplay_SetClearColour(float r, float g, float b, float a)
 
 void MFDisplay_ClearScreen(uint32 flags)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	int mask = ((flags & CS_Colour) ? GL_COLOR_BUFFER_BIT : 0) | ((flags & CS_ZBuffer) ? GL_DEPTH_BUFFER_BIT : 0);
 
@@ -616,16 +616,16 @@ void MFDisplay_ClearScreen(uint32 flags)
 
 void MFDisplay_SetViewport(float x, float y, float width, float height)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	glViewport((GLint)((x/640.0f) * (float)display.width), (GLint)((y/480.0f) * (float)display.height), (GLint)((width/640.0f) * (float)display.width), (GLint)((height/480.0f) * (float)display.height));
+	glViewport((GLint)((x/640.0f) * (float)gDisplay.width), (GLint)((y/480.0f) * (float)gDisplay.height), (GLint)((width/640.0f) * (float)gDisplay.width), (GLint)((height/480.0f) * (float)gDisplay.height));
 }
 
 void MFDisplay_ResetViewport()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	SetViewport(0, 0, display.width, display.height);
+	MFDisplay_SetViewport(0, 0, gDisplay.width, gDisplay.height);
 }
 
 bool MFDisplay_IsWidescreen()

@@ -147,10 +147,13 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath=".\Include\Array.h">
+				RelativePath=".\Include\Fuji.h">
 			</File>
 			<File
-				RelativePath=".\Include\Fuji.h">
+				RelativePath=".\Include\MFArray.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFArray.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFCallstack.h">

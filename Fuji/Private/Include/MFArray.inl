@@ -1,4 +1,3 @@
-
 #include "MFHeap.h"
 
 template<class T>

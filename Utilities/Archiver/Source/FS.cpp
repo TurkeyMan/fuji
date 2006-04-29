@@ -1,3 +1,5 @@
+#include "Fuji.h"
+#include "MFHeap.h"
 #include "FS.h"
 
 #if defined(_WIN32)
@@ -7,7 +9,7 @@
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <direent.h>
+#include <dirent.h>
 #include <unistd.h>
 #endif
 
@@ -76,7 +78,7 @@ bool IsDirectory(const char *entry)
 
 #else // *** POSIX CODE ***
 
-bool GetCurrentDirectory(char *dir, int maxlen)
+bool GetCurrentDir(char *dir, int maxlen)
 {
 	// This is valid on Windows & Linux but not on some POSIXes, best enforce it
 	if(maxlen == 0)
@@ -92,16 +94,14 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	FreeDirectoryEntries(entries);
 
-	char *tempDir = Heap_Alloc(strlen(directory) + 4);
+	char *tempDir = (char*)MFHeap_Alloc(strlen(directory) + 4);
 	strcpy(tempDir, directory);
 	strcat(tempDir, "*");
 
 	DIR *dirHandle = opendir(tempDir);
-	Heap_Free(tempDir);
+	MFHeap_Free(tempDir);
 	if(dirHandle == NULL)
 		return 0;
-
-	vectorOut.push_back(std::string(findData.cFileName));
 
 	while(readdir(dirHandle))
 	{

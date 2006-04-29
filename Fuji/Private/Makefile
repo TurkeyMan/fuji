@@ -236,7 +236,6 @@ endif
 #Null/FileSystem/MFFileSystemNative_Null.o
 #Null/Materials/MFMat_Effect_Null.o
 #Null/Materials/MFMat_Standard_Null.o
-#Util/F3D.o
 
 CONFIG = $(BUILD)_$(PLATFORM)
 
@@ -297,7 +296,7 @@ AR       = powerpc-gekko-ar
 RANLIB   = powerpc-gekko-ranlib
 STRIP    = powerpc-gekko-strip
 
-# Add in OGC includes and libraries.
+# Add in OGC includes.
 INCDIR   := $(INCDIR) . $(OGC)/include
 
 # end GC

@@ -7,7 +7,7 @@
 #include "MFRenderer_PC.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
-static MFMaterial *pSetMaterial;
+static MFMaterial *pSetMaterial = 0;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
