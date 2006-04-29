@@ -171,6 +171,9 @@
 // AS_MIPS
 // Use assembler code for the MIPS CPU family
 
+// AS_PPC
+// Use assembler code for the PowerPC CPU family
+
 
 
 //
@@ -291,11 +294,18 @@
 	#define AS_SH4
 #endif
 
-// MIPS architexture (generally PS2 and PSP consoles)
+// MIPS architexture (generally PS2 and PSP consoles, potentially supports N64 aswell)
 #if defined(_MIPS_ARCH) || defined(_PSP) || defined(_PS2) || defined(_EE_) || defined(_PSP)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_MIPS
+#endif
+
+// PPC architexture (Mac, Gamecube and hopefully PS3 + XBox360)
+#if defined(PPC) || defined(_GC)
+	#define AS_ALIGN				// align datastructures
+	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
+	#define AS_PPC
 #endif
 
 

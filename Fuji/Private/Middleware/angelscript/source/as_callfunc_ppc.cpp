@@ -30,11 +30,11 @@
 
 
 //
-// as_callfunc_mips.cpp
+// as_callfunc_ppc.cpp
 //
 // These functions handle the actual calling of system functions
 //
-// This version is MIPS specific and was originally written
+// This version is PPC specific and was originally written
 // by Manu Evans in April, 2006
 //
 
@@ -43,7 +43,7 @@
 #include "as_config.h"
 
 #ifndef MAX_PORTABILITY
-#ifdef AS_MIPS
+#ifdef AS_PPC
 
 #include "as_callfunc.h"
 #include "as_scriptengine.h"
@@ -55,32 +55,32 @@
 
 BEGIN_AS_NAMESPACE
 
-#define AS_MIPS_MAX_ARGS 32
-#define AS_NUM_REG_FLOATS 8
+#define AS_PPC_MAX_ARGS 32
+#define AS_NUM_REG_FLOATS 13
 #define AS_NUM_REG_INTS 8
 
 // The array used to send values to the correct places.
-// first 0-8 regular values to load into the a0-a3, t0-t3 registers
-// then 0-8 float values to load into the f12-f19 registers
-// then (AS_MIPS_MAX_ARGS - 16) values to load onto the stack
+// first 0-8 regular values to load into the GPR3-10 registers
+// then 0-13 float values to load into the FPR1-13 registers
+// then (AS_PPC_MAX_ARGS - 16) values to load onto the stack
 // the +1 is for when CallThis (object methods) is used
 // extra +1 when returning in memory
 extern "C" {
-static asDWORD mipsArgs[AS_MIPS_MAX_ARGS + 1 + 1];
+static asDWORD ppcArgs[AS_PPC_MAX_ARGS + 1 + 1];
 }
 
 // Loads all data into the correct places and calls the function.
 // intArgSize is the size in bytes for how much data to put in int registers
 // floatArgSize is the size in bytes for how much data to put in float registers
 // stackArgSize is the size in bytes for how much data to put on the callstack
-extern "C" asQWORD mipsFunc(int intArgSize, int floatArgSize, int stackArgSize, asDWORD func);
+extern "C" asQWORD ppcFunc(int intArgSize, int floatArgSize, int stackArgSize, asDWORD func);
 
 asm(
 "	.text\n"
 "	.align 4\n"
-"	.global mipsFunc\n"
-"	.ent	mipsFunc\n"
-"mipsFunc:\n"
+"	.global ppcFunc\n"
+"	.ent	ppcFunc\n"
+"ppcFunc:\n"
 "	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0\n"
 "	.mask	0x00000000,0\n"
 "	.fmask	0x00000000,0\n"
@@ -105,9 +105,9 @@ asm(
 "	addiu	$2, $7, 0\n"
 "	addiu	$3, $6, 0\n"
 
-// get global mipsArgs[] array pointer
-"	lui		$15, %hi(mipsArgs)\n"
-"	addiu	$15, $15, %lo(mipsArgs)\n"
+// get global ppcArgs[] array pointer
+"	lui		$15, %hi(ppcArgs)\n"
+"	addiu	$15, $15, %lo(ppcArgs)\n"
 // load register params
 "	lw		$4, 0($15)\n"
 "	lw		$5, 4($15)\n"
@@ -156,8 +156,8 @@ asm(
 "	lw		$16, -4($sp)\n"
 "	.set	macro\n"
 "	.set	reorder\n"
-"	.end	mipsFunc\n"
-"	.size	mipsFunc, .-mipsFunc\n"
+"	.end	ppcFunc\n"
+"	.size	ppcFunc, .-ppcFunc\n"
 "	.align	4\n"
 );
 
@@ -167,35 +167,35 @@ inline void splitArgs(const asDWORD *args, int argNum, int &numRegIntArgs, int &
 	int i;
 
 	int argBit = 1;
-	for (i = 0; i < argNum; i++)
+	for(i = 0; i < argNum; i++)
 	{
-		if (hostFlags & argBit)
+		if(hostFlags & argBit)
 		{
-			if (numRegFloatArgs < AS_NUM_REG_FLOATS)
+			if(numRegFloatArgs < AS_NUM_REG_FLOATS)
 			{
 				// put in float register
-				mipsArgs[AS_NUM_REG_INTS + numRegFloatArgs] = args[i];
+				ppcArgs[AS_NUM_REG_INTS + numRegFloatArgs] = args[i];
 				numRegFloatArgs++;
 			}
 			else
 			{
 				// put in stack
-				mipsArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + numRestArgs] = args[i];
+				ppcArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + numRestArgs] = args[i];
 				numRestArgs++;
 			}
 		}
 		else
 		{
-			if (numRegIntArgs < AS_NUM_REG_INTS)
+			if(numRegIntArgs < AS_NUM_REG_INTS)
 			{
 				// put in int register
-				mipsArgs[numRegIntArgs] = args[i];
+				ppcArgs[numRegIntArgs] = args[i];
 				numRegIntArgs++;
 			}
 			else
 			{
 				// put in stack
-				mipsArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + numRestArgs] = args[i];
+				ppcArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + numRestArgs] = args[i];
 				numRestArgs++;
 			}
 		}
@@ -211,12 +211,12 @@ asQWORD CallCDeclFunction(const asDWORD *args, int argSize, asDWORD func, int fl
 	int floatArgs = 0;
 	int restArgs = 0;
 
-	// put the arguments in the correct places in the mipsArgs array
+	// put the arguments in the correct places in the ppcArgs array
 	if(argNum > 0)
 		splitArgs(args, argNum, intArgs, floatArgs, restArgs, flags);
 
-//	printf("calling cdecl, %d %d %d %p.. %p.. %d...\n", intArgs, floatArgs, restArgs, func, mipsFunc, mipsArgs[0]);
-	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
+//	printf("calling cdecl, %d %d %d %p.. %p.. %d...\n", intArgs, floatArgs, restArgs, func, ppcFunc, ppcArgs[0]);
+	return ppcFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
 // This function is identical to CallCDeclFunction, with the only difference that
@@ -229,14 +229,14 @@ asQWORD CallThisCallFunction(const void *obj, const asDWORD *args, int argSize, 
 	int floatArgs = 0;
 	int restArgs = 0;
 
-	mipsArgs[0] = (asDWORD) obj;
+	ppcArgs[0] = (asDWORD) obj;
 
-	// put the arguments in the correct places in the mipsArgs array
+	// put the arguments in the correct places in the ppcArgs array
 	if (argNum > 0)
 		splitArgs(args, argNum, intArgs, floatArgs, restArgs, flags);
 
 //	printf("calling this call...\n");
-	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
+	return ppcFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
 // This function is identical to CallCDeclFunction, with the only difference that
@@ -249,23 +249,23 @@ asQWORD CallThisCallFunction_objLast(const void *obj, const asDWORD *args, int a
 	int floatArgs = 0;
 	int restArgs = 0;
 
-	// put the arguments in the correct places in the mipsArgs array
+	// put the arguments in the correct places in the ppcArgs array
 	if(argNum > 0)
 		splitArgs(args, argNum, intArgs, floatArgs, restArgs, flags);
 
 	if(intArgs < AS_NUM_REG_INTS)
 	{
-		mipsArgs[intArgs] = (asDWORD) obj;
+		ppcArgs[intArgs] = (asDWORD) obj;
 		intArgs++;
 	}
 	else
 	{
-		mipsArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + restArgs] = (asDWORD) obj;
+		ppcArgs[AS_NUM_REG_INTS + AS_NUM_REG_FLOATS + restArgs] = (asDWORD) obj;
 		restArgs++;
 	}
 
 //	printf("calling this call objlast...\n");
-	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
+	return ppcFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
 
@@ -519,7 +519,7 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 	{
 		// Allocate the memory for the object
 		retPointer = engine->CallAlloc(descr->returnType.GetObjectType());
-		mipsArgs[AS_MIPS_MAX_ARGS+1] = (asDWORD) retPointer;
+		ppcArgs[AS_PPC_MAX_ARGS+1] = (asDWORD) retPointer;
 
 		if( sysFunc->hostReturnInMemory )
 		{
@@ -559,7 +559,7 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 			//	engine->CallObjectMethod(obj, descr->objectType->beh.addref);
 		}
 	}
-	assert(descr->parameterTypes.GetLength() <= AS_MIPS_MAX_ARGS);
+	assert(descr->parameterTypes.GetLength() <= AS_PPC_MAX_ARGS);
 
 	// mark all float arguments
 	int argBit = 1;
@@ -742,5 +742,5 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 
 END_AS_NAMESPACE
 
-#endif // AS_MIPS
+#endif // AS_PPC
 #endif // AS_MAX_PORTABILITY

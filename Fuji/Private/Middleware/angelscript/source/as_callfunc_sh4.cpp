@@ -34,7 +34,7 @@
 //
 // These functions handle the actual calling of system functions
 //
-// This version is sh4 specific and was originally written
+// This version is SH4 specific and was originally written
 // by Fredrik Ehnbom in May, 2004
 // Later updated for angelscript 2.0.0 by Fredrik Ehnbom in Jan, 2005
 
