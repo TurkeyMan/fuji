@@ -191,9 +191,9 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	int flags;
 
-	if(pOpenData->openFlags & OF_Read)
+	if(pOpenData->openFlags & MFOF_Read)
 	{
-		if(openFlags & OF_Write)
+		if(openFlags & MFOF_Write)
 		{
 			flags = O_RDWR | O_CREAT;
 		}
@@ -202,16 +202,16 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 			flags = O_RDONLY;
 		}
 	}
-	else if(pOpenData->openFlags & OF_Write)
+	else if(pOpenData->openFlags & MFOF_Write)
 	{
 		flags = O_WRONLY | O_CREAT;
 	}
 	else
 	{
-		MFDebug_Assert(0, "Neither OF_Read nor OF_Write specified.");
+		MFDebug_Assert(0, "Neither MFOF_Read nor MFOF_Write specified.");
 	}
 
-	pFile->pFilesysData = open(pOpenData->pFilename, flags);
+	pFile->pFilesysData = (void*)open(pNative->pFilename, flags);
 
 	if(pFile->pFilesysData == -1)
 	{
@@ -237,7 +237,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	close(fileHandle->pFilesysData);
+	close((int)fileHandle->pFilesysData);
 	fileHandle->pFilesysData = 0;
 
 	return 0;
@@ -251,7 +251,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 	ssize_t bytesRead;
 
-	bytesRead = read(fileHandle->pFilesysData, pBuffer, bytes);
+	bytesRead = read((int)fileHandle->pFilesysData, pBuffer, bytes);
 	if(bytesRead < 0) // read() returns -1 on error
 		bytesRead = 0;
 
@@ -268,7 +268,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 	ssize_t bytesWritten;
 
-	bytesWritten = write(fileHandle->pFilesysData, pBuffer, (size_t)bytes);
+	bytesWritten = write((int)fileHandle->pFilesysData, pBuffer, (size_t)bytes);
 	if(bytesWritten < 0) // write() returns -1 on error
 		bytesWritten = 0;
 
@@ -298,7 +298,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			whence = SEEK_CUR;
 	}
 
-	newOffset = lseek(fileHandle->pFilesysData, bytes, whence);
+	newOffset = lseek((int)fileHandle->pFilesysData, bytes, whence);
 
 	if(newOffset != -1)
 	{
@@ -332,7 +332,7 @@ int MFFileNative_GetSize(MFFile* fileHandle)
 
 	struct stat fileStats;
 
-	if(fstat(fileHandle->pFilesysData, &fileStats) == -1)
+	if(fstat((int)fileHandle->pFilesysData, &fileStats) == -1)
 	{
 		return 0;
 	}
