@@ -18,10 +18,37 @@ extern MFTexture *pNoneTexture;
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
+	MFCALLSTACK;
+
+	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
+
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &(pTexture->textureID));
+	glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
+	if(generateMipChain)
+	{
+		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
+		gluBuild2DMipmaps(GL_TEXTURE_2D, pTemplate->platformFormat, pSurf->width, pSurf->height, pTemplate->platformFormat, GL_UNSIGNED_BYTE, pSurf.pImageData);
+	}
+	else
+	{
+		for(int a=0; a<mipLevels; a++)
+		{
+			MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[a];
+			glTexImage2D(GL_TEXTURE_2D, a, pTemplate->platformFormat, pSurf->width, pSurf->height, 0, pTemplate->platformFormat, GL_UNSIGNED_BYTE, pSurf.pImageData);
+		}
+	}
 }
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
+	MFCALLSTACK;
+
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
@@ -53,6 +80,8 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
@@ -60,11 +89,15 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 
 int MFTexture_Destroy(MFTexture *pTexture)
 {
+	MFCALLSTACK;
+
 	pTexture->refCount--;
 
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
 	{
+		glDeleteTextures(1, &pTexture->textureID);
+
 		MFHeap_Free(pTexture->pTemplateData);
 		gTextureBank.Destroy(pTexture);
 

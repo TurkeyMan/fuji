@@ -33,18 +33,49 @@ void MFPrimitive_DrawStats()
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
+	MFCALLSTACK;
+
 	primType = type & PT_PrimMask;
+
+	if(type & PT_Untextured)
+	{
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+	}
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadMatrixf((GLfloat *)&MFView_GetViewToScreenMatrix());
+
+	glMatrixMode(GL_MODELVIEW);
+	if(MFView_IsOrtho())
+		glLoadMatrixf((GLfloat *)&MFMatrix::identity);
+	else
+		glLoadMatrixf((GLfloat *)&MFView_GetWorldToViewMatrix());
+
+	glDepthRange(0.0f, 1.0f);
+
+	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)
 {
+	MFCALLSTACK;
+
+	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
+
 	beginCount = vertexCount;
+	currentVert = 0;
 
 	glBegin(gPrimTypes[primType]);
 }
 
 void MFSetMatrix(const MFMatrix &mat)
 {
+	MFCALLSTACK;
+
+	MFMatrix localToView;
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf((GLfloat *)MFView_GetLocalToView(mat, &localToView));
 }
 
 void MFSetColour(const MFVector &colour)
@@ -84,6 +115,8 @@ void MFSetPosition(const MFVector &pos)
 
 void MFSetPosition(float x, float y, float z)
 {
+	MFCALLSTACK;
+
 	glVertex3f(x, y, z);
 
 	if(primType == PT_QuadList && (currentVert & 1))
@@ -96,7 +129,51 @@ void MFSetPosition(float x, float y, float z)
 
 void MFEnd()
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
 	glEnd();
+}
+
+
+int textureWidth, textureHeight;
+float uScale, vScale;
+float halfTexelU, halfTexelV;
+
+void MFPrimitive_BeginBlitter(int numBlits)
+{
+	MFView_Push();
+
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+	MFView_SetOrtho(&rect);
+
+	MFTexture *pTex;
+	MFMaterial *pMat = MFMaterial_GetCurrent();
+	MFMaterial_GetParameter(pMat, MFMatStandard_DifuseMap, 0, &pTex);
+	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
+	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
+
+	uScale = 1.0f / (float)textureWidth;
+	vScale = 1.0f / (float)textureHeight;
+	halfTexelU = uScale * 0.5f;
+	halfTexelV = vScale * 0.5f;
+
+	MFPrimitive(PT_QuadList);
+	MFBegin(numBlits * 2);
+}
+
+void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+{
+	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
+	MFSetPosition((float)x, (float)y, 0.0f);
+	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
+	MFSetPosition((float)(x + tw), (float)(y + th), 0.0f);
+}
+
+void MFPrimitive_EndBlitter()
+{
+	MFEnd();
+	MFView_Pop();
 }
