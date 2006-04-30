@@ -169,6 +169,16 @@ bool MFIsAlphaNumeric(int c);
 bool MFIsNewline(int c);
 
 /**
+ * Test if a character is a lower case alphabetic character.
+ */
+bool MFIsLower(int c);
+
+/**
+ * Test if a character is an upper case alphabetic character.
+ */
+bool MFIsUpper(int c);
+
+/**
  * Converts a character to lower case.
  */
 int MFToLower(int c);

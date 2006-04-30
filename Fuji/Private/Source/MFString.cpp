@@ -110,15 +110,12 @@ int MFString_CompareN(const char *pString1, const char *pString2, int n)
 
 int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
-	return stricmp(pSource1, pSource2);
-
-	// TODO: TEST ME!!
 	register unsigned int c1, c2;
 
 	do
 	{
-		c1 = MFToLower(*pSource1++);
-		c2 = MFToLower(*pSource2++);
+		c1 = MFToUpper(*pSource1++);
+		c2 = MFToUpper(*pSource2++);
 	}
 	while(c1 && (c1 == c2));
 

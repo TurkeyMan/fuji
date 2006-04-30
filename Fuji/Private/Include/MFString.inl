@@ -25,14 +25,24 @@ inline bool MFIsNewline(int c)
 	return c=='\n' || c=='\r';
 }
 
+inline bool MFIsLower(int c)
+{
+	return c >= 'a' && c <= 'z';
+}
+
+inline bool MFIsUpper(int c)
+{
+	return c >= 'A' && c <= 'Z';
+}
+
 inline int MFToLower(int c)
 {
-	return c | 0x20;
+	return MFIsUpper(c) ? (c | 0x20) : c;
 }
 
 inline int MFToUpper(int c)
 {
-	return c & ~0x20;
+	return MFIsLower(c) ? (c & ~0x20) : c;
 }
 
 inline char* MFSeekNewline(char *pC)

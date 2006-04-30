@@ -1,6 +1,7 @@
 #include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "MFSystem.h"
+#include "MFString.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"
@@ -43,14 +44,14 @@ int main(int argc, char *argv[])
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
+				if(!MFString_CaseCmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
 				}
 			}
 
-			if(!strnicmp(&argv[a][1], "format", 6))
+			if(!MFString_CaseCmpN(&argv[a][1], "format", 6))
 			{
 				const char *pFormatString = &argv[a][7];
 
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 				int b = 0;
 				for(; b<TexFmt_Max; b++)
 				{
-					if(!stricmp(pFormatString, MFTexture_GetFormatString(b)))
+					if(!MFString_CaseCmp(pFormatString, MFTexture_GetFormatString(b)))
 					{
 						(int&)targetFormat = b;
 						break;
@@ -73,12 +74,12 @@ int main(int argc, char *argv[])
 					return 1;
 				}
 			}
-			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
+			else if(!MFString_CaseCmp(&argv[a][1], "v") || !MFString_CaseCmp(&argv[a][1], "version"))
 			{
 				// print version
 				return 0;
 			}
-			else if(!stricmp(&argv[a][1], "l") || !stricmp(&argv[a][1], "listavailable"))
+			else if(!MFString_CaseCmp(&argv[a][1], "l") || !MFString_CaseCmp(&argv[a][1], "listavailable"))
 			{
 				// list formats for platform
 				for(int f=0; f<TexFmt_Max; f++)
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
 				gets(outFile);
 				return 0;
 			}
-			else if(!stricmp(&argv[a][1], "a") || !stricmp(&argv[a][1], "listall"))
+			else if(!MFString_CaseCmp(&argv[a][1], "a") || !MFString_CaseCmp(&argv[a][1], "listall"))
 			{
 				// list all available formats
 				for(int f=0; f<TexFmt_Max; f++)
@@ -155,11 +156,11 @@ int main(int argc, char *argv[])
 	// load image
 	int fileNameLen = (int)strlen(fileName);
 
-	if(!stricmp(&fileName[fileNameLen-3], "tga"))
+	if(!MFString_CaseCmp(&fileName[fileNameLen-3], "tga"))
 	{
 		pImage = LoadTarga(fileName);
 	}
-	else if(!stricmp(&fileName[fileNameLen-3], "bmp"))
+	else if(!MFString_CaseCmp(&fileName[fileNameLen-3], "bmp"))
 	{
 		pImage = LoadBMP(fileName);
 	}
