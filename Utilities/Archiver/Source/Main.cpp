@@ -404,7 +404,7 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 
 							for(platformID = 0; platformID < FP_Max; platformID++)
 							{
-								int strLen = (int)strlen(MFSystem_GetPlatformString(platformID));
+								int strLen = MFString_Length(MFSystem_GetPlatformString(platformID));
 								if(!MFString_CaseCmpN(pString, MFSystem_GetPlatformString(platformID), strLen))
 								{
 									platformFlag = 1 << platformID;
@@ -498,7 +498,7 @@ void Traverse(const char *dir)
 			// test exclude patterns
 			for(int j=0; j<(int)reHandles.size(); j++)
 			{
-				int x = pcre_exec(reHandles[j], NULL, testEntry, (int)strlen(testEntry), 0, 0, NULL, 0);
+				int x = pcre_exec(reHandles[j], NULL, testEntry, MFString_Length(testEntry), 0, 0, NULL, 0);
 
 				if(x > -1)
 				{

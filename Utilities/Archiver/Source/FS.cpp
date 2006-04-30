@@ -103,16 +103,20 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 	if(dirHandle == NULL)
 		return 0;
 
-	while(readdir(dirHandle))
+	entry = readdir(dirHandle);
+
+	while(entry)
 	{
 		if((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0))
 		{
-			tempDir = new char[strlen(entry->d_name) + 1];
+			tempDir = new char[MFString_Length(entry->d_name) + 1];
 			strcpy(tempDir, entry->d_name);
 			entries.push_back(tempDir);
 
 			++numEntries;
 		}
+
+		entry = readdir(dirHandle);
 	}
 
 	closedir(dirHandle);

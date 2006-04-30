@@ -78,28 +78,44 @@ inline int MFString_Length(const char *pString)
 	return (uint32&)pT - (uint32&)pString;
 }
 
-inline void MFString_Copy(char *pBuffer, const char *pString)
+inline char* MFString_Copy(char *pBuffer, const char *pString)
 {
-	while(*pString)
-	{
-		*pBuffer = *pString;
-		++pBuffer;
-		++pString;
-	}
-
-	*pBuffer = 0;
+	char *s = pBuffer;
+	while(*pBuffer++ = *pString++) { }
+	return s;
 }
 
-inline void MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
+inline char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
 {
-	while(*pString && maxChars)
-	{
-		*pBuffer = *pString;
-		++pBuffer;
-		++pString;
-		--maxChars;
-	}
+	char *dscan;
+	const char *sscan;
 
-	if(maxChars)
-		*pBuffer = 0;
+	dscan = pBuffer;
+	sscan = pString;
+	while(maxChars > 0)
+	{
+		--maxChars;
+		if((*dscan++ = *sscan++) == '\0')
+			break;
+	}
+	while(maxChars-- > 0)
+		*dscan++ = '\0';
+
+	return pBuffer;
+}
+
+inline char* MFString_Cat(char *pBuffer, const char *pString)
+{
+	char *s = pBuffer;
+	while(*pBuffer) pBuffer++;
+	while(*pBuffer++ = *pString++) { }
+	return s;
+}
+
+inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pString2)
+{
+	char *s = pBuffer;
+	while(*pBuffer++ = *pString++) { }
+	while(*pBuffer++ = *pString2++) { }
+	return s;
 }

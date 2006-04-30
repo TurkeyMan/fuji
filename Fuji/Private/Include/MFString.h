@@ -25,10 +25,10 @@ int MFString_Length(const char *pString);
  * Copies the source string to the target buffer.
  * @param pBuffer Target buffer to receive a copy of the string.
  * @param pString Source string.
- * @return None.
+ * @return \a pBuffer which can be used as a paramater to other functions.
  * @see MFString_CopyN()
  */
-void MFString_Copy(char *pBuffer, const char *pString);
+char* MFString_Copy(char *pBuffer, const char *pString);
 
 /**
  * Copy a string with a maximum number of characters.
@@ -36,10 +36,31 @@ void MFString_Copy(char *pBuffer, const char *pString);
  * @param pBuffer Target buffer to receive a copy of the string.
  * @param pString Source string.
  * @param maxChars Maximum characters to copy.
- * @return None.
+ * @return \a pBuffer which can be used as a paramater to other functions.
  * @see MFString_Copy()
  */
-void MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
+char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
+
+/**
+ * Concatinate a string.
+ * Concatinate the source string with the target buffer.
+ * @param pBuffer Target buffer to receive the concatinated string.
+ * @param pString Source string.
+ * @return \a pBuffer which can be used as a paramater to other functions.
+ * @see MFString_Copy()
+ */
+char* MFString_Cat(char *pBuffer, const char *pString);
+
+/**
+ * Concatinate 2 strings into a target buffer.
+ * Concatinates the 2 strings into the target buffer.
+ * @param pBuffer Target buffer to receive a copy of the string.
+ * @param pString Source string.
+ * @param pString2 Second source string.
+ * @return \a pBuffer which can be used as a paramater to other functions.
+ * @see MFString_CopyN()
+ */
+char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pString2);
 
 /**
  * Convert a string to lower case.

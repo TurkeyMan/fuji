@@ -535,5 +535,5 @@ bool MFDisplay_IsWidescreen()
 	MFRect rect;
 	MFDisplay_GetDisplayRect(&rect);
 
-	return rect.width / rect.height >= 0.6f;
+	return rect.width / rect.height >= 1.6f;
 }

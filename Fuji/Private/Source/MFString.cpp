@@ -160,3 +160,171 @@ char* MFString_RChr(const char *pSource, int c)
 
 	return pLast;
 }
+
+#if 0
+
+char* MFString_Copy(char *pDest, const char *pSrc)
+{
+#if !defined(PREFER_SPEED_OVER_SIZE)
+	char *s = pDest;
+	while(*pDest++ = *pSrc++) { }
+	return s;
+#else
+	char *dst = dst0;
+	_CONST char *src = src0;
+	long *aligned_dst;
+	_CONST long *aligned_src;
+
+	/* If SRC or DEST is unaligned, then copy bytes.  */
+	if (!UNALIGNED (src, dst))
+	{
+		aligned_dst = (long*)dst;
+		aligned_src = (long*)src;
+
+		/* SRC and DEST are both "long int" aligned, try to do "long int"
+		sized copies.  */
+		while (!DETECTNULL(*aligned_src))
+		{
+			*aligned_dst++ = *aligned_src++;
+		}
+
+		dst = (char*)aligned_dst;
+		src = (char*)aligned_src;
+	}
+
+	while (*dst++ = *src++)
+		;
+	return dst0;
+#endif
+}
+
+char* MFString_CopyN(char *pDest, const char *pSrc, int n)
+{
+#if !defined(PREFER_SPEED_OVER_SIZE)
+	char *dscan;
+	const char *sscan;
+
+	dscan = pDest;
+	sscan = pSrc;
+	while(n > 0)
+	{
+		--n;
+		if((*dscan++ = *sscan++) == '\0')
+			break;
+	}
+	while(n-- > 0)
+		*dscan++ = '\0';
+
+	return pDest;
+#else
+	char *dst = dst0;
+	_CONST char *src = src0;
+	long *aligned_dst;
+	_CONST long *aligned_src;
+
+	/* If SRC and DEST is aligned and count large enough, then copy words.  */
+	if(!UNALIGNED (src, dst) && !TOO_SMALL (count))
+	{
+		aligned_dst = (long*)dst;
+		aligned_src = (long*)src;
+
+		/* SRC and DEST are both "long int" aligned, try to do "long int"
+		sized copies.  */
+		while(count >= sizeof (long int) && !DETECTNULL(*aligned_src))
+		{
+			count -= sizeof (long int);
+			*aligned_dst++ = *aligned_src++;
+		}
+
+		dst = (char*)aligned_dst;
+		src = (char*)aligned_src;
+	}
+
+	while(count > 0)
+	{
+		--count;
+		if((*dst++ = *src++) == '\0')
+			break;
+	}
+
+	while(count-- > 0)
+		*dst++ = '\0';
+
+	return dst0;
+#endif
+}
+
+char* MFString_Cat(char *pDest, const char *pSrc)
+{
+#if !defined(PREFER_SPEED_OVER_SIZE)
+	char *s = pDest;
+	while(*pDest) pDest++;
+	while(*pDest++ = *pSrc++) { }
+	return s;
+#else
+	char *s = s1;
+
+
+	/* Skip over the data in s1 as quickly as possible.  */
+	if (ALIGNED (s1))
+	{
+		unsigned long *aligned_s1 = (unsigned long *)s1;
+		while (!DETECTNULL (*aligned_s1))
+			aligned_s1++;
+
+		s1 = (char *)aligned_s1;
+	}
+
+	while (*s1)
+		s1++;
+
+	/* s1 now points to the its trailing null character, we can
+	just use strcpy to do the work for us now.
+
+	?!? We might want to just include strcpy here.
+	Also, this will cause many more unaligned string copies because
+	s1 is much less likely to be aligned.  I don't know if its worth
+	tweaking strcpy to handle this better.  */
+	MFString_Copy(s1, s2);
+
+	return s;
+#endif
+}
+
+char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
+{
+#if !defined(PREFER_SPEED_OVER_SIZE)
+	char *s = pDest;
+	while(*pDest++ = *pSrc++) { }
+	while(*pDest++ = *pSrc2++) { }
+	return s;
+#else
+	char *dst = dst0;
+	_CONST char *src = src0;
+	long *aligned_dst;
+	_CONST long *aligned_src;
+
+	/* If SRC or DEST is unaligned, then copy bytes.  */
+	if (!UNALIGNED (src, dst))
+	{
+		aligned_dst = (long*)dst;
+		aligned_src = (long*)src;
+
+		/* SRC and DEST are both "long int" aligned, try to do "long int"
+		sized copies.  */
+		while (!DETECTNULL(*aligned_src))
+		{
+			*aligned_dst++ = *aligned_src++;
+		}
+
+		dst = (char*)aligned_dst;
+		src = (char*)aligned_src;
+	}
+
+	while (*dst++ = *src++)
+		;
+	return dst0;
+#endif /* not PREFER_SIZE_OVER_SPEED */
+}
+
+#endif

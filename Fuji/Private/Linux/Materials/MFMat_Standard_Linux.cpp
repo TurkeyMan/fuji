@@ -41,43 +41,41 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		switch(pData->materialType&MF_BlendMask)
 		{
 			case 0:
-//				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-//				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				glDisable(GL_BLEND);
+				glBlendFunc(GL_ONE, GL_ZERO);
 				break;
 			case MF_AlphaBlend:
-//				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-//				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				break;
 			case MF_Additive:
-//				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-//				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				break;
 			case MF_Subtractive:
-//				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-//				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-//				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_DST_COLOR, GL_ZERO);
 				break;
 		}
 
 		switch(pData->materialType&MF_CullMode)
 		{
 			case 0<<6:
-//				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+//				glDisable(GL_CULL_FACE);
 				break;
 			case 1<<6:
-//				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+//				glEnable(GL_CULL_FACE);
+//				glCullFace(GL_BACK);
 				break;
 			case 2<<6:
-//				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+//				glEnable(GL_FRONT);
 				break;
 			case 3<<6:
 				// 'default' ?
-//				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+//				glEnable(GL_BACK);
 				break;
 		}
+		glDisable(GL_CULL_FACE);
 
 		// TODO: This is broken! You cant disable zwrites and still have zreads with this configuration...
 		if(pData->materialType&MF_NoZRead)
