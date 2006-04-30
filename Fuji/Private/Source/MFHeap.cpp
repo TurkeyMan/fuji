@@ -161,14 +161,14 @@ void* operator new(size_t size)
 {
 //	MFDebug_Message(MFStr("new %d bytes", size));
 
-	return MFHeap_AllocInternal(size);
+	return MFHeap_AllocInternal((uint32)size);
 }
 
 void* operator new[](size_t size)
 {
 //	MFDebug_Message(MFStr("new %d bytes", size));
 
-	return MFHeap_AllocInternal(size);
+	return MFHeap_AllocInternal((uint32)size);
 }
 
 void operator delete(void *pMemory)

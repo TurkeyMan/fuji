@@ -112,28 +112,31 @@ int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
 	return stricmp(pSource1, pSource2);
 
-	// TODO: FIX ME!!
-	while(*pSource1 != '\0' && MFToLower((uint8)*pSource1) == MFToLower((uint8)*pSource2))
-	{
-		pSource1++;
-		pSource2++;
-	}
+	// TODO: TEST ME!!
+	register unsigned int c1, c2;
 
-	return MFToLower((uint8)*pSource1) - MFToLower((uint8)*pSource2);
+	do
+	{
+		c1 = MFToLower(*pSource1++);
+		c2 = MFToLower(*pSource2++);
+	}
+	while(c1 && (c1 == c2));
+
+	return c1 - c2;
 }
 
 int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 {
-	if(n == 0)
-		return 0;
+	register int c = 0;
 
-	while(n-- != 0 && *pSource1 != '\0' && MFToLower((uint8)*pSource1) == MFToLower((uint8)*pSource2))
+	while(n)
 	{
-		pSource1++;
-		pSource2++;
+		if((c = MFToUpper(*pSource1) - MFToUpper(*pSource2++) ) != 0 || !*pSource1++)
+			break;
+		n--;
 	}
 
-	return MFToLower((uint8)*pSource1) - MFToLower((uint8)*pSource2);
+	return c;
 }
 
 char* MFString_Chr(const char *pString, int c)

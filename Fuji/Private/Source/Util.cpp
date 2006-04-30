@@ -58,7 +58,7 @@ static MFEndian gPlatformEndian[FP_Max] =
 	MFEndian_LittleEndian,
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
-	MFEndian_LittleEndian,
+	MFEndian_BigEndian,
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
 };
