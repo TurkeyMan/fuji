@@ -16,8 +16,6 @@
 extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
-/**** Functions ****/
-
 struct LinuxFormat
 {
 	GLint internalFormat;
@@ -25,13 +23,15 @@ struct LinuxFormat
 	GLenum type;
 };
 
-LinuxFormat gLinuxFormats[gMaxLinuxFormats] =
+LinuxFormat gLinuxFormats[] =
 {
 	{4, GL_BGRA_EXT, GL_UNSIGNED_BYTE},
 	{4, GL_RGBA, GL_UNSIGNED_BYTE}
 };
 
 static const int gMaxLinuxFormats = sizeof(gLinuxFormats) / sizeof(LinuxFormat);
+
+/**** Functions ****/
 
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
@@ -48,7 +48,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	MFDebug_Assert(pTemplate->platformFormat < gMaxLinuxFormats, "Platform format is undefined...");
+	MFDebug_Assert(pTemplate->platformFormat < (uint32)gMaxLinuxFormats, "Platform format is undefined...");
 
 	if(generateMipChain)
 	{

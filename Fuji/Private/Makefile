@@ -151,7 +151,6 @@ OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
 endif
 
 ifeq ($(PLATFORM),LINUX)
-OBJS := $(OBJS) Linux/Display_Linux.o
 OBJS := $(OBJS) Linux/MFDebug_Linux.o
 OBJS := $(OBJS) Linux/MFHeap_Linux.o
 OBJS := $(OBJS) Linux/MFInput_Linux.o
@@ -167,6 +166,7 @@ OBJS := $(OBJS) Linux/MFTranslation_Linux.o
 OBJS := $(OBJS) Linux/FileSystem/MFFileSystemNative_Linux.o
 OBJS := $(OBJS) Linux/Materials/MFMat_Effect_Linux.o
 OBJS := $(OBJS) Linux/Materials/MFMat_Standard_Linux.o
+OBJS := $(OBJS) Linux/Display_Linux.o
 endif
 
 ifeq ($(PLATFORM),PS2)
