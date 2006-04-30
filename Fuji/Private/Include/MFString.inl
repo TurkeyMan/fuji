@@ -81,7 +81,7 @@ inline int MFString_Length(const char *pString)
 inline char* MFString_Copy(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;
-	while(*pBuffer++ = *pString++) { }
+	while((*pBuffer++ = *pString++)) { }
 	return s;
 }
 
@@ -108,14 +108,14 @@ inline char* MFString_Cat(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;
 	while(*pBuffer) pBuffer++;
-	while(*pBuffer++ = *pString++) { }
+	while((*pBuffer++ = *pString++)) { }
 	return s;
 }
 
 inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pString2)
 {
 	char *s = pBuffer;
-	while(*pBuffer++ = *pString++) { }
-	while(*pBuffer++ = *pString2++) { }
+	while((*pBuffer++ = *pString++)) { }
+	while((*pBuffer++ = *pString2++)) { }
 	return s;
 }

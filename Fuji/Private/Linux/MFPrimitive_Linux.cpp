@@ -9,6 +9,17 @@
 
 #include <GL/glx.h>
 
+struct Vert
+{
+	float x, y, z;
+	float u, v;
+	float nx, ny, nz;
+	uint32 colour;
+};
+
+Vert prevVert;
+Vert curVert;
+
 uint32 beginCount;
 uint32 currentVert;
 
@@ -98,11 +109,17 @@ void MFSetColour(float r, float g, float b, float a)
 
 void MFSetColour(uint32 col)
 {
-	// TODO: work out raw colour byte order
+	glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
 }
 
 void MFSetTexCoord1(float u, float v)
 {
+	if(primType == PT_QuadList)
+	{
+		curVert.u = u;
+		curVert.v = v;
+	}
+
 	glTexCoord2f(u, v);
 }
 
@@ -125,11 +142,32 @@ void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
-	glVertex3f(x, y, z);
-
-	if(primType == PT_QuadList && (currentVert & 1))
+	if(primType == PT_QuadList)
 	{
-		// TODO: add top right and bottom lft verts
+		if(currentVert & 1)
+		{
+			// TODO: add top right and bottom left verts
+			glTexCoord2f(curVert.u, prevVert.v);
+			glVertex3f(x, prevVert.y, prevVert.z);
+			glTexCoord2f(curVert.u, curVert.v);
+			glVertex3f(x, y, z);
+			glTexCoord2f(prevVert.u, curVert.v);
+			glVertex3f(prevVert.x, y, z);
+		}
+		else
+		{
+			glVertex3f(x, y, z);
+
+			curVert.x = x;
+			curVert.y = y;
+			curVert.z = z;
+
+			prevVert = curVert;
+		}
+	}
+	else
+	{
+		glVertex3f(x, y, z);
 	}
 
 	++currentVert;
