@@ -4,6 +4,7 @@
 #include "MFIni.h"
 #include "MFHeap.h"
 #include "MFSystem.h"
+#include "MFString.h"
 #include "FS.h"
 
 #if defined(_WIN32)
@@ -51,14 +52,14 @@ int main(int argc, char **argv)
 		{
 			for(int b=0; b<FP_Max; b++)
 			{
-				if(!stricmp(&argv[a][1], MFSystem_GetPlatformString(b)))
+				if(!MFString_CaseCmp(&argv[a][1], MFSystem_GetPlatformString(b)))
 				{
 					platform = (MFPlatform)b;
 					break;
 				}
 			}
 
-			if(!strnicmp(&argv[a][1], "ini", 3))
+			if(!MFString_CaseCmpN(&argv[a][1], "ini", 3))
 			{
 				const char *pIniString = &argv[a][4];
 
@@ -67,13 +68,13 @@ int main(int argc, char **argv)
 
 				strcpy(iniFileName, pIniString);
 			}
-			else if(!stricmp(&argv[a][1], "?") || !stricmp(&argv[a][1], "h") || !stricmp(&argv[a][1], "-help"))
+			else if(!MFString_CaseCmp(&argv[a][1], "?") || !MFString_CaseCmp(&argv[a][1], "h") || !MFString_CaseCmp(&argv[a][1], "-help"))
 			{
 				// show help
 
 				return 0;
 			}
-			else if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
+			else if(!MFString_CaseCmp(&argv[a][1], "v") || !MFString_CaseCmp(&argv[a][1], "version"))
 			{
 				printf("%.2f", (float)VERSION/100.0f);
 				return VERSION;
@@ -118,7 +119,7 @@ int main(int argc, char **argv)
 		output.resize(output.size()-1);
 		strcpy(outPath, output.c_str());
 	}
-	else if(!stricmp(&(output.c_str()[output.size()-4]), ".zip"))
+	else if(!MFString_CaseCmp(&(output.c_str()[output.size()-4]), ".zip"))
 	{
 		// output is zip file
 /*
@@ -404,7 +405,7 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 							for(platformID = 0; platformID < FP_Max; platformID++)
 							{
 								int strLen = (int)strlen(MFSystem_GetPlatformString(platformID));
-								if(!strnicmp(pString, MFSystem_GetPlatformString(platformID), strLen))
+								if(!MFString_CaseCmpN(pString, MFSystem_GetPlatformString(platformID), strLen))
 								{
 									platformFlag = 1 << platformID;
 									pString += strLen;
@@ -414,7 +415,7 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 
 							if(!platformFlag)
 							{
-								if(!strnicmp(pString, "all", 3))
+								if(!MFString_CaseCmpN(pString, "all", 3))
 								{
 									platformFlag = 0xFFFFFFFF;
 									pString += 3;

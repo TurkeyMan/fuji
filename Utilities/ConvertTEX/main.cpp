@@ -375,6 +375,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		case TexFmt_A8B8G8R8:
 		case TexFmt_XB_A8B8G8R8s:
+		case TexFmt_PSP_A8B8G8R8s:
 		{
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
