@@ -18,6 +18,20 @@ extern MFTexture *pNoneTexture;
 
 /**** Functions ****/
 
+struct LinuxFormat
+{
+	GLint internalFormat;
+	GLenum format;
+	GLenum type;
+};
+
+LinuxFormat gLinuxFormats[gMaxLinuxFormats] =
+{
+	{4, GL_BGRA_EXT, GL_UNSIGNED_BYTE},
+	{4, GL_RGBA, GL_UNSIGNED_BYTE}
+};
+
+static const int gMaxLinuxFormats = sizeof(gLinuxFormats) / sizeof(LinuxFormat);
 
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
@@ -34,17 +48,19 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+	MFDebug_Assert(pTemplate->platformFormat < gMaxLinuxFormats, "Platform format is undefined...");
+
 	if(generateMipChain)
 	{
 		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
-		gluBuild2DMipmaps(GL_TEXTURE_2D, pTemplate->platformFormat, pSurf->width, pSurf->height, pTemplate->platformFormat, GL_UNSIGNED_BYTE, pSurf->pImageData);
+		gluBuild2DMipmaps(GL_TEXTURE_2D, gLinuxFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, gLinuxFormats[pTemplate->platformFormat].format, gLinuxFormats[pTemplate->platformFormat].type, pSurf->pImageData);
 	}
 	else
 	{
 		for(int a=0; a<pTemplate->mipLevels; a++)
 		{
 			MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[a];
-			glTexImage2D(GL_TEXTURE_2D, a, pTemplate->platformFormat, pSurf->width, pSurf->height, 0, pTemplate->platformFormat, GL_UNSIGNED_BYTE, pSurf->pImageData);
+			glTexImage2D(GL_TEXTURE_2D, a, gLinuxFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, 0, gLinuxFormats[pTemplate->platformFormat].format, gLinuxFormats[pTemplate->platformFormat].type, pSurf->pImageData);
 		}
 	}
 }

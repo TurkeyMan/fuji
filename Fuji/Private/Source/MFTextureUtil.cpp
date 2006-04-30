@@ -71,8 +71,8 @@ static const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 
 static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
-	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_A8R8G8B8
-	MFBIT(FP_PSP)|MFBIT(FP_XBox),	// TexFmt_A8B8G8R8
+	MFBIT(FP_PC)|MFBIT(FP_XBox)|MFBIT(FP_Linux),	// TexFmt_A8R8G8B8
+	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_Linux),	// TexFmt_A8B8G8R8
 	MFBIT(FP_XBox),					// TexFmt_B8G8R8A8
 	MFBIT(FP_XBox),					// TexFmt_R8G8B8A8
 
@@ -338,9 +338,11 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		0,		// TexFmt_PSP_DXT5s
 	},
 
+	// Shese are indexes into an array of platform format data to be used at runtime
+	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
 	{ // Linux
 		0,	// TexFmt_A8R8G8B8
-		0,	// TexFmt_A8B8G8R8
+		1,	// TexFmt_A8B8G8R8
 		0,	// TexFmt_B8G8R8A8
 		0,	// TexFmt_R8G8B8A8
 
