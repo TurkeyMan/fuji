@@ -3,6 +3,7 @@
 #include "F3D.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
+#include "MFString.h"
 
 #include "MFModel_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -174,7 +175,7 @@ void F3DFile::WriteF3D(char *pFilename)
 
 	if(!file)
 	{
-		printf("Count open \"%f\" for writing.\n", pFilename);
+		printf("Count open '%s' for writing.\n", pFilename);
 		return;
 	}
 
@@ -500,7 +501,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 	if(!file)
 	{
-		printf("Count open \"%f\" for writing.\n", pFilename);
+		printf("Count open '%s' for writing.\n", pFilename);
 		return;
 	}
 
@@ -720,7 +721,7 @@ int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
 {
 	for(int a=0; a<materials.size(); a++)
 	{
-		if(!stricmp(pName, materials[a].name))
+		if(!MFString_CaseCmp(pName, materials[a].name))
 			return a;
 	}
 

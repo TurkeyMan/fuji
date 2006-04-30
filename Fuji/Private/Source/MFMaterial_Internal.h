@@ -1,10 +1,6 @@
 #if !defined(_MATERIAL_INTERNAL_H)
 #define _MATERIAL_INTERNAL_H
 
-#if defined(_WINDOWS)
-#include <d3d9.h>
-#endif
-
 #include "MFMaterial.h"
 #include "MFVector.h"
 #include "MFTexture.h"
@@ -45,6 +41,9 @@ struct MFMeshChunk
 };
 
 #if defined(_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX))
+
+#include <d3d9.h>
+
 struct MFMeshChunk_PC : public MFMeshChunk
 {
 	// interface pointers
