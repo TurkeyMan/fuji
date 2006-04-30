@@ -44,7 +44,7 @@ struct MFMeshChunk
 	MFMaterial *pMaterial;
 };
 
-#if defined(_WINDOWS) || defined(_FUJI_UTIL)
+#if defined(_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX))
 struct MFMeshChunk_PC : public MFMeshChunk
 {
 	// interface pointers

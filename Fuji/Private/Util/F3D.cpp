@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <d3d9.h>
-
 #include "Fuji.h"
 #include "MFArray.h"
 #include "F3D.h"
@@ -9,6 +6,10 @@
 
 #include "MFModel_Internal.h"
 #include "MFMaterial_Internal.h"
+
+#if !defined(_LINUX)
+#include <d3d9.h>
+#endif
 
 int F3DFile::ReadF3D(char *pFilename)
 {
@@ -180,7 +181,7 @@ void F3DFile::WriteF3D(char *pFilename)
 	pFile = (char*)MFHeap_Alloc(1024*1024*10);
 	pHeader = (F3DHeader*)pFile;
 
-	pHeader->ID = MAKEFOURCC('M','F','3','D');
+	pHeader->ID = MFMAKEFOURCC('M','F','3','D');
 	pHeader->major = 1;
 	pHeader->minor = 0;
 	pHeader->chunkCount = 0;
@@ -296,7 +297,7 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 	F3DHeader *pHeader = (F3DHeader*)pMemory;
 	F3DChunkDesc *pChunks;
 
-	if(pHeader->ID != MAKEFOURCC('M','F','3','D'))
+	if(pHeader->ID != MFMAKEFOURCC('M','F','3','D'))
 	{
 		printf("Not an F3D file.\n");
 		return 1;
@@ -360,6 +361,7 @@ struct FileVertex
 
 void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache)
 {
+#if !defined(_LINUX)
 	int numMeshChunks = sub.matSubobjects.size();
 	int a, b;
 
@@ -469,10 +471,12 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			pIndices += 3;
 		}
 	}
+#endif
 }
 
 void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
 {
+#if !defined(_LINUX)
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
@@ -483,6 +487,7 @@ void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 
 		pMC[a].pIndexData -= base;
 		(char*&)pMC[a].pVertexElements -= base;
 	}
+#endif
 }
 
 void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
@@ -513,7 +518,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
-	pModelData->IDtag = MAKEFOURCC('M','D','L','2');
+	pModelData->IDtag = MFMAKEFOURCC('M','D','L','2');
 	pModelData->pName = MFStringCache_Add(pStringCache, name);
 
 	int numChunks = 0;
