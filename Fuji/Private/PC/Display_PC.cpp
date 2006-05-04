@@ -530,6 +530,14 @@ void MFDisplay_ResetViewport()
 	pd3dDevice->SetViewport(&vp);
 }
 
+float MFDisplay_GetNativeAspectRatio()
+{
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+
+	return rect.width / rect.height;
+}
+
 bool MFDisplay_IsWidescreen()
 {
 	MFRect rect;

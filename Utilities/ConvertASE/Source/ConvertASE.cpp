@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
 	// process model
 	pModel->ProcessSkeletonData();
 	pModel->Optimise();
+	pModel->ProcessCollisionData();
 	pModel->StripModel();
 
 	// generate output filename

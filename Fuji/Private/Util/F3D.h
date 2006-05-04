@@ -8,9 +8,10 @@
 enum F3DChunkType
 {
 	CT_Material,
-	CT_Skeleton,
 	CT_Mesh,
+	CT_Skeleton,
 	CT_ReferencePoint,
+	CT_Collision,
 	CT_Animation,
 	CT_Image,
 	CT_Cloth
@@ -126,6 +127,8 @@ public:
 	MFArray<MFVector> uvs;
 	MFArray<MFVector> colours;
 	MFArray<MFVector> illumination;
+
+	bool dontExportThisSubobject;
 };
 
 class F3DMeshChunk
@@ -157,6 +160,49 @@ class F3DAnimationChunk
 {
 public:
 	MFArray<MFArray<MFMatrix> > keyframes;
+};
+
+
+class F3DCollisionObject
+{
+public:
+	MFVector boundMin;
+	MFVector boundMax;
+	MFVector boundSphere;
+
+	uint32 objectType;
+
+	char name[64];
+};
+
+class F3DCollisionSphere : public F3DCollisionObject
+{
+public:
+	MFVector sphere;
+};
+
+struct F3DCollisionTri
+{
+	MFVector plane;
+	MFVector boundPlanes[3];
+	MFVector point[3];
+
+	int adjacent[3];
+	uint32 padding;
+};
+
+class F3DCollisionMesh : public F3DCollisionObject
+{
+public:
+	MFArray<F3DCollisionTri> tris;
+};
+
+class F3DCollisionChunk
+{
+public:
+	~F3DCollisionChunk();
+
+	MFArray<F3DCollisionObject*> collisionObjects;
 };
 
 class F3DMaterial
@@ -202,6 +248,17 @@ public:
 	MFArray<F3DRefPoint> refPoints;
 };
 
+
+class F3DOptions
+{
+public:
+	F3DOptions();
+
+	bool noCollision;
+	bool noAnimation;
+	bool dontDeleteCollisionSubobjects;
+};
+
 class F3DFile
 {
 public:
@@ -217,6 +274,7 @@ public:
 	void WriteMDL(char *pFilename, MFPlatform platform);
 
 	void ProcessSkeletonData();
+	void ProcessCollisionData();
 	void Optimise();
 	void StripModel();
 
@@ -225,17 +283,21 @@ public:
 	F3DMaterialChunk *GetMaterialChunk() { return &materialChunk; }
 	F3DRefPointChunk *GetRefPointChunk() { return &refPointChunk; }
 	F3DAnimationChunk *GetAnimationChunk() { return &animationChunk; }
+	F3DCollisionChunk *GetCollisionChunk() { return &collisionChunk; }
 
 	char name[256];
 	char author[256];
 	char authoringTool[256];
 	char copyrightString[256];
 
+	F3DOptions options;
+
 	F3DMeshChunk meshChunk;
 	F3DSkeletonChunk skeletonChunk;
 	F3DMaterialChunk materialChunk;
 	F3DRefPointChunk refPointChunk;
 	F3DAnimationChunk animationChunk;
+	F3DCollisionChunk collisionChunk;
 
 protected:
 	void ImportMesh(F3DMesh *pMsh, char *pBase);

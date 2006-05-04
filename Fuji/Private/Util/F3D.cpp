@@ -4,6 +4,7 @@
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFString.h"
+#include "MFCollision_Internal.h"
 
 #include "MFModel_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -525,6 +526,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	int numChunks = 0;
 	int meshChunkIndex = -1;
 	int skeletonChunkIndex = -1;
+	int collisionChunkIndex = -1;
 	int tagChunkIndex = -1;
 	int dataChunkIndex = -1;
 
@@ -532,19 +534,25 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	if(GetMeshChunk()->subObjects.size())
 	{
 		meshChunkIndex = numChunks++;
-		pDataHeaders[meshChunkIndex].chunkType = MFCT_SubObjects;
+		pDataHeaders[meshChunkIndex].chunkType = MFChunkType_SubObjects;
 	}
 
 	if(GetSkeletonChunk()->bones.size())
 	{
 		skeletonChunkIndex = numChunks++;
-		pDataHeaders[skeletonChunkIndex].chunkType = MFCT_Bones;
+		pDataHeaders[skeletonChunkIndex].chunkType = MFChunkType_Bones;
 	}
 
 	if(GetRefPointChunk()->refPoints.size())
 	{
 		tagChunkIndex = numChunks++;
-		pDataHeaders[tagChunkIndex].chunkType = MFCT_Tags;
+		pDataHeaders[tagChunkIndex].chunkType = MFChunkType_Tags;
+	}
+
+	if(GetCollisionChunk()->collisionObjects.size())
+	{
+		collisionChunkIndex = numChunks++;
+		pDataHeaders[collisionChunkIndex].chunkType = MFChunkType_Collision;
 	}
 
 	// then do something with them....
@@ -610,6 +618,53 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		}
 	}
 
+	// write out collision data
+	if(collisionChunkIndex > -1)
+	{
+		MFCollisionTemplate *pCollisionChunk = (MFCollisionTemplate*)pOffset;
+
+		pDataHeaders[collisionChunkIndex].pData = pCollisionChunk;
+		pDataHeaders[collisionChunkIndex].count = GetCollisionChunk()->collisionObjects.size();
+
+		pOffset += MFALIGN16(sizeof(MFCollisionTemplate)*pDataHeaders[collisionChunkIndex].count);
+
+		for(a=0; a<pDataHeaders[collisionChunkIndex].count; a++)
+		{
+			F3DCollisionObject *pColObj = GetCollisionChunk()->collisionObjects[a];
+			
+			pCollisionChunk[a].boundingVolume.min = pColObj->boundMin;
+			pCollisionChunk[a].boundingVolume.max = pColObj->boundMax;
+			pCollisionChunk[a].boundingVolume.boundingSphere = pColObj->boundSphere;
+			pCollisionChunk[a].type = pColObj->objectType;
+			pCollisionChunk[a].pName = MFStringCache_Add(pStringCache, pColObj->name);
+
+			pCollisionChunk[a].pCollisionTemplateData = pOffset;
+
+			switch(pCollisionChunk[a].type)
+			{
+				case MFCT_Mesh:
+				{
+					F3DCollisionMesh *pColMesh = (F3DCollisionMesh*)pColObj;
+					MFCollisionMesh *pMesh = (MFCollisionMesh*)pOffset;
+
+					pOffset += MFALIGN16(sizeof(MFCollisionMesh));
+
+					pMesh->numTris = pColMesh->tris.size();
+					pMesh->pTriangles = (MFCollisionTriangle*)pOffset;
+
+					uint32 triBlockSize = sizeof(MFCollisionTriangle) * pMesh->numTris;
+					memcpy(pMesh->pTriangles, pColMesh->tris.getpointer(), triBlockSize);
+
+					pOffset += MFALIGN16(triBlockSize);
+					break;
+				}
+
+				default:
+					MFDebug_Assert(false, "Unsupported collision object type.");
+			}
+		}
+	}
+
 	// write strings to end of file
 	memcpy(pOffset, MFStringCache_GetCache(pStringCache), MFStringCache_GetSize(pStringCache));
 
@@ -626,7 +681,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	{
 		switch(pModelData->pDataChunks[a].chunkType)
 		{
-			case MFCT_SubObjects:
+			case MFChunkType_SubObjects:
 			{
 				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pModelData->pDataChunks[a].pData;
 
@@ -655,7 +710,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				break;
 			}
 
-			case MFCT_Bones:
+			case MFChunkType_Bones:
 			{
 				BoneChunk *pBoneChunk = (BoneChunk*)pModelData->pDataChunks[a].pData;
 
@@ -667,7 +722,26 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				break;
 			}
 
-			case MFCT_Tags:
+			case MFChunkType_Collision:
+			{
+				MFCollisionTemplate *pCollisionChunk = (MFCollisionTemplate*)pModelData->pDataChunks[a].pData;
+
+				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				{
+					pCollisionChunk[b].pName -= stringBase;
+
+					if(pCollisionChunk[b].type == MFCT_Mesh)
+					{
+						MFCollisionMesh *pColMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
+						(char*&)pColMesh->pTriangles -= base;
+					}
+
+					(char*&)pCollisionChunk[b].pCollisionTemplateData -= base;
+				}
+				break;
+			}
+
+			case MFChunkType_Tags:
 			{
 				break;
 			}
@@ -717,6 +791,137 @@ void F3DFile::ProcessSkeletonData()
 	// generate localMatrix and stuff..
 }
 
+void F3DFile::ProcessCollisionData()
+{
+	// convert c_ subobjects into collision data
+
+	if(options.noCollision)
+		return;
+
+	for(int i=0; i<GetMeshChunk()->subObjects.size(); i++)
+	{
+		F3DSubObject &sub = GetMeshChunk()->subObjects[i];
+
+		if(!MFString_CaseCmpN(sub.name, "c_", 2))
+		{
+			int triCount = 0;
+			int a, b, t = 0;
+
+			// count num triangles
+			for(a=0; a<sub.matSubobjects.size(); a++)
+			{
+				triCount += sub.matSubobjects[a].triangles.size();
+			}
+
+			if(triCount == 0)
+				continue;
+
+			F3DCollisionMesh *pMesh = new F3DCollisionMesh;
+
+			MFString_Copy(pMesh->name, sub.name);
+			pMesh->objectType = MFCT_Mesh;
+
+			pMesh->boundSphere = MakeVector(sub.positions[sub.matSubobjects[0].vertices[sub.matSubobjects[0].triangles[0].v[0]].position], 0.0f);
+			pMesh->boundMin = pMesh->boundSphere;
+			pMesh->boundMax = pMesh->boundSphere;
+
+			for(a=0; a<sub.matSubobjects.size(); a++)
+			{
+				F3DMaterialSubobject &matSub = sub.matSubobjects[a];
+
+				int numTris = matSub.triangles.size();
+
+				for(b=0; b<numTris; b++)
+				{
+					F3DCollisionTri &tri = pMesh->tris[t];
+
+					for(int c=0; c<3; c++)
+					{
+						tri.point[c] = sub.positions[matSub.vertices[matSub.triangles[b].v[c]].position];
+
+						pMesh->boundMin = MFMin(pMesh->boundMin, tri.point[c]);
+						pMesh->boundMax = MFMax(pMesh->boundMax, tri.point[c]);
+
+						// if point is outside bounding sphere
+						MFVector diff = tri.point[c] - pMesh->boundSphere;
+						float mag = diff.Magnitude3();
+
+						if(mag > pMesh->boundSphere.w)
+						{
+							// fit sphere to include point
+							mag -= pMesh->boundSphere.w;
+							mag *= 0.5f;
+							diff.Normalise3();
+							pMesh->boundSphere.Mad3(diff, mag, pMesh->boundSphere);
+							pMesh->boundSphere.w += mag;
+						}
+					}
+
+					tri.plane = MFCollision_MakePlaneFromPoints(tri.point[0], tri.point[1], tri.point[2]);
+
+					tri.boundPlanes[0] = MFCollision_MakePlaneFromPoints(tri.point[0], tri.point[0] + MakeVector(0, 10, 0), tri.point[1]);
+					tri.boundPlanes[1] = MFCollision_MakePlaneFromPoints(tri.point[1], tri.point[1] + MakeVector(0, 10, 0), tri.point[2]);
+					tri.boundPlanes[2] = MFCollision_MakePlaneFromPoints(tri.point[2], tri.point[2] + MakeVector(0, 10, 0), tri.point[0]);
+
+					tri.adjacent[0] = -1;
+					tri.adjacent[1] = -1;
+					tri.adjacent[2] = -1;
+
+					++t;
+				}
+			}
+
+			// fill in all the adjacencies
+			for(a=0; a<triCount; a++)
+			{
+				for(b=0; b<3; b++)
+				{
+					// find its neighbour
+					for(int c=0; c<triCount; c++)
+					{
+						if(a == c)
+							continue;
+
+						bool foundOne = false;
+
+						int d;
+
+						for(d=0; d<3; d++)
+						{
+							if(pMesh->tris[a].point[b] == pMesh->tris[c].point[d])
+							{
+								foundOne = true;
+								break;
+							}
+						}
+
+						if(foundOne)
+						{
+							int i = (b+1)%3;
+
+							for(d=0; d<3; d++)
+							{
+								if(pMesh->tris[a].point[i] == pMesh->tris[c].point[d])
+								{
+									pMesh->tris[a].adjacent[b] = c;
+									goto cont;
+								}
+							}
+						}
+					}
+		cont:
+					continue;
+				}
+			}
+
+			GetCollisionChunk()->collisionObjects.push() = pMesh;
+
+			if(!options.dontDeleteCollisionSubobjects)
+				sub.dontExportThisSubobject = true;
+		}
+	}
+}
+
 int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
 {
 	for(int a=0; a<materials.size(); a++)
@@ -737,6 +942,8 @@ F3DSubObject::F3DSubObject()
 {
 	memset(name, 0, 64);
 //	materialIndex = 0;
+
+	dontExportThisSubobject = false;
 }
 
 F3DBone::F3DBone()
@@ -784,4 +991,19 @@ F3DRefPoint::F3DRefPoint()
 	weight[0] = 0.0f; weight[1] = 0.0f; weight[2] = 0.0f; weight[3] = 0.0f;
 	strcpy(name, "");
 	strcpy(options, "");
+}
+
+F3DCollisionChunk::~F3DCollisionChunk()
+{
+	for(int a=0; a<collisionObjects.size(); a++)
+	{
+		delete collisionObjects[a];
+	}
+}
+
+F3DOptions::F3DOptions()
+{
+	noAnimation = false;
+	noCollision = false;
+	dontDeleteCollisionSubobjects = false;
 }

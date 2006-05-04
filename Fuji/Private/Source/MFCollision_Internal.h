@@ -8,7 +8,10 @@
 struct MFCollisionTemplate
 {
 	MFBoundingVolume boundingVolume;
-	uint16 type;
+	uint32 type;
+
+	void *pCollisionTemplateData;
+	const char *pName;
 };
 
 struct MFCollisionItem
@@ -19,17 +22,23 @@ struct MFCollisionItem
 	uint16 flags;
 };
 
-struct MFCollisionSphere : public MFCollisionTemplate
+struct MFCollisionSphere
 {
 	float radius;	// this could be jammed into the w of the position
 };
 
-struct MFCollisionBox : public MFCollisionTemplate
+struct MFCollisionBox
 {
 	MFVector radius;	// this could easilly be jammed into the 4th column of the matrix
 };
 
-struct MFCollisionField : public MFCollisionTemplate
+struct MFCollisionMesh
+{
+	int numTris;
+	MFCollisionTriangle *pTriangles;
+};
+
+struct MFCollisionField
 {
 	MFVector fieldMin;
 	MFVector fieldMax;

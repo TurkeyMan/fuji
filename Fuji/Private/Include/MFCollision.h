@@ -46,6 +46,9 @@ struct MFCollisionTriangle
 	MFVector plane;			/**< The triangle face plane. Plane normal represents the front face. The front face is defined by clockwise verts. */
 	MFVector edgePlanes[3];	/**< 3 Planes that bound each edge of the triangle. Plane normals point inwards. */
 	MFVector verts[3];		/**< 3 Triangle vertices. In clockwise order. */
+
+	int adjacent[3];		/**< Adjacent triangles. */
+	uint32 padding;			/**< Pad structure to 16 bytes. */
 };
 
 /**

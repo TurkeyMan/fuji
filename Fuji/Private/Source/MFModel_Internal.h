@@ -15,16 +15,17 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load);
 
 enum MFModelDataChunkType
 {
-	MFCT_Unknown = -1,
+	MFChunkType_Unknown = -1,
 
-	MFCT_SubObjects = 0,
-	MFCT_Bones,
-	MFCT_Tags,
-	MFCT_Materials,
-	MFCT_BinaryFilesystem,
+	MFChunkType_SubObjects = 0,
+	MFChunkType_Bones,
+	MFChunkType_Collision,
+	MFChunkType_Tags,
+	MFChunkType_Materials,
+	MFChunkType_BinaryFilesystem,
 
-	MFCT_Max,
-	MFCT_ForceInt = 0x7FFFFFFF
+	MFChunkType_Max,
+	MFChunkType_ForceInt = 0x7FFFFFFF
 };
 
 struct MFModelDataChunk
