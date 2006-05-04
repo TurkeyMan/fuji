@@ -4,6 +4,7 @@
 #include "MFModel_Internal.h"
 #include "MFFileSystem.h"
 #include "MFView.h"
+#include "MFCollision_Internal.h"
 
 #include "Display_Internal.h"
 #include "MFRenderer.h"
@@ -67,7 +68,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 		switch(pTemplate->pDataChunks[a].chunkType)
 		{
-			case MFCT_SubObjects:
+			case MFChunkType_SubObjects:
 			{
 				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pTemplate->pDataChunks[a].pData;
 
@@ -97,7 +98,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 				break;
 			}
 
-			case MFCT_Bones:
+			case MFChunkType_Bones:
 			{
 				BoneChunk *pBoneChunk = (BoneChunk*)pTemplate->pDataChunks[a].pData;
 
@@ -117,7 +118,39 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 				break;
 			}
 
-			case MFCT_Tags:
+			case MFChunkType_Collision:
+			{
+				MFCollisionTemplate *pCollisionChunk = (MFCollisionTemplate*)pTemplate->pDataChunks[a].pData;
+
+				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
+				{
+					if(load)
+					{
+						pCollisionChunk[b].pName += base;
+						(char*&)pCollisionChunk[b].pCollisionTemplateData += base;
+
+						if(pCollisionChunk[b].type == MFCT_Mesh)
+						{
+							MFCollisionMesh *pMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
+							(char*&)pMesh->pTriangles += base;
+						}
+					}
+					else
+					{
+						if(pCollisionChunk[b].type == MFCT_Mesh)
+						{
+							MFCollisionMesh *pMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
+							(char*&)pMesh->pTriangles -= base;
+						}
+
+						(char*&)pCollisionChunk[b].pCollisionTemplateData -= base;
+						pCollisionChunk[b].pName -= base;
+					}
+				}
+				break;
+			}
+
+			case MFChunkType_Tags:
 			{
 				break;
 			}
@@ -170,7 +203,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 				MFModel_FixUp(pTemplate, true);
 
-				MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFCT_SubObjects);
+				MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
 
 				if(pChunk)
 				{
@@ -213,7 +246,7 @@ void MFModel_Destroy(MFModel *pModel)
 
 	if(!pModel->pTemplate->refCount)
 	{
-		MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFCT_SubObjects);
+		MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 		if(pChunk)
 		{

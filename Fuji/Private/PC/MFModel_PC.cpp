@@ -22,7 +22,7 @@ void MFModel_Draw(MFModel *pModel)
 	else
 		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
 
-	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFCT_SubObjects);
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
 	{

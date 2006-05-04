@@ -827,18 +827,21 @@ MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& ray
 MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize)
 {
 	MFCollisionItem *pItem;
+	MFCollisionTemplate *pTemplate;
 	MFCollisionField *pField;
 
-	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionField));
-	pField = (MFCollisionField*)&pItem[1];
-	pItem->pTemplate = pField;
+	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionTemplate) + sizeof(MFCollisionField));
+	pTemplate = (MFCollisionTemplate*)&pItem[1];
+	pField = (MFCollisionField*)&pTemplate[1];
+
+	pItem->pTemplate = pTemplate;
+	pTemplate->pCollisionTemplateData = pField;
+	pTemplate->pName = "";
+	pTemplate->type = MFCT_Field;
 
 	pField->itemList.Init("Collision Field Items", maximumItemCount);
-
 	pField->pppItems = NULL;
-
 	pField->cellSize = cellSize;
-	pField->type = MFCT_Field;
 
 	return pItem;
 }
