@@ -215,6 +215,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	if((int)pFile->pFilesysData == -1)
 	{
+		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
 		pFile->pFilesysData = 0;
 		return -1 ;
 	}
@@ -284,7 +285,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 
 	off_t newOffset;
 	int whence;
-	
+
 	if(!fileHandle->pFilesysData)
 		return -1;
 
@@ -292,13 +293,21 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 	{
 		case MFSeek_Begin:
 			whence = SEEK_SET;
+			break;
 		case MFSeek_End:
 			whence = SEEK_END;
+			break;
 		case MFSeek_Current:
 			whence = SEEK_CUR;
+			break;
+		default:
+			MFDebug_Assert(false, "Invalid 'whence'.");
+			break;
 	}
 
 	newOffset = lseek((int)fileHandle->pFilesysData, bytes, whence);
+//	lseek((int)fileHandle->pFilesysData, bytes, whence);
+//	newOffset = tell((int)fileHandle->pFilesysData);
 
 	if(newOffset != -1)
 	{
