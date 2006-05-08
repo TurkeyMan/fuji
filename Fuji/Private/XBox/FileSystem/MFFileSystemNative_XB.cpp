@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "FileSystem/MFFileSystemNative_Internal.h"
 
 void MFFileSystemNative_Register()
 {

@@ -5,7 +5,6 @@
 #include "MFHeap.h"
 #include "MFScript_Internal.h"
 #include "MFFileSystem.h"
-
 #include "FileSystem/MFFileSystemNative.h"
 
 #include "angelscript.h"

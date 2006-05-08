@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "FileSystem/MFFileSystemNative_Internal.h"
 
 void MFFileSystemNative_InitModule()
 {

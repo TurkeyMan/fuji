@@ -1,16 +1,7 @@
-#if !defined(_MFFILESYSTEM_NATIVE_H)
-#define _MFFILESYSTEM_NATIVE_H
+#if !defined(_MFFILESYSTEM_NATIVE_INTERNAL_H)
+#define _MFFILESYSTEM_NATIVE_INTERNAL_H
 
-struct MFOpenDataNative : public MFOpenData
-{
-	const char *pFilename;
-};
-
-// open file base data
-struct MFMountDataNative : public MFMountData
-{
-	const char *pPath;
-};
+#include "FileSystem/MFFileSystemNative.h"
 
 // internal functions
 void MFFileSystemNative_InitModule();

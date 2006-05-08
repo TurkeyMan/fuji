@@ -3,6 +3,7 @@
 #include "MFMatrix.h"
 #include "MFCollision_Internal.h"
 #include "MFHeap.h"
+#include "MFModel_Internal.h"
 
 /**** Support Functions ****/
 
@@ -22,28 +23,96 @@ void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVec
 	pTri->verts[2] = p2;
 }
 
+/**** Dynamic collision item functions ****/
 
-/**** General collision tests ****/
-
-MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, MFRayIntersectionResult *pResult)
+MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris)
 {
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
-	MFCollisionItem *pItem = NULL;
+	MFDebug_Assert(numTris > 0, "Cant create collision mesh with no triangles..");
 
-	MFVector crossSection = pFieldData->fieldMax - pFieldData->fieldMin;
-	MFVector radius = crossSection * 0.5f;
-	MFVector center = pFieldData->fieldMin + radius;
+	MFCollisionItem *pItem;
+	MFCollisionTemplate *pTemplate;
+	MFCollisionMesh *pMesh;
+	MFCollisionTriangle *pTris;
 
-	MFRayIntersectionResult cr;
+	pItem = (MFCollisionItem*)MFHeap_Alloc(MFALIGN16(sizeof(MFCollisionItem)) + MFALIGN16(sizeof(MFCollisionTemplate)) + MFALIGN16(sizeof(MFCollisionMesh)) + sizeof(MFCollisionTriangle)*numTris + MFString_Length(pItemName) + 1);
+	pTemplate = (MFCollisionTemplate*)MFALIGN16(&pItem[1]);
+	pMesh = (MFCollisionMesh*)MFALIGN16(&pTemplate[1]);
+	pTris = (MFCollisionTriangle*)MFALIGN16(&pMesh[1]);
 
-	if(!MFCollision_RayBoxTest(rayPos, rayDir, center, radius, &cr))
-		return NULL;
+	pItem->pTemplate = pTemplate;
+	pItem->flags = 0;
+	pItem->refCount = 1;
+	pItem->worldPos = MFMatrix::identity;
 
-	MFVector entryPoint;
-	entryPoint.Mad3(rayDir, cr.time, rayPos);
+	pTemplate->pCollisionTemplateData = pMesh;
+	pTemplate->type = MFCT_Mesh;
+	pTemplate->pName = (char*)&pTris[numTris];
+	MFString_Copy((char*)pTemplate->pName, pItemName);
+
+	pMesh->numTris = numTris;
+	pMesh->pTriangles = pTris;
 
 	return pItem;
 }
+
+MFCollisionTriangle* MFCollision_GetDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
+{
+	MFDebug_Assert(pDynamicCollisionMesh->pTemplate->type == MFCT_Mesh, "Collision item is not an MFCollisionMesh.");
+
+	MFCollisionMesh *pMesh = (MFCollisionMesh*)pDynamicCollisionMesh->pTemplate->pCollisionTemplateData;
+	return pMesh->pTriangles;
+}
+
+void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem)
+{
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Mesh:
+		{
+			MFCollisionMesh *pMesh = (MFCollisionMesh*)pItem->pTemplate->pCollisionTemplateData;
+			MFBoundingVolume &vol = pItem->pTemplate->boundingVolume;
+
+			vol.min = vol.max = vol.boundingSphere = MakeVector(pMesh->pTriangles[0].verts[0], 0.0f);
+
+			for(int a=0; a<pMesh->numTris; a++)
+			{
+				MFCollisionTriangle &tri = pMesh->pTriangles[a];
+
+				for(int b=0; b<3; b++)
+				{
+					vol.min = MFMin(vol.min, tri.verts[b]);
+					vol.max = MFMin(vol.max, tri.verts[b]);
+					vol.min.w = vol.max.w = 0.0f;
+
+					// if point is outside bounding sphere
+					MFVector diff = tri.verts[b] - vol.boundingSphere;
+					float mag = diff.MagSquared3();
+
+					if(mag > vol.boundingSphere.w*vol.boundingSphere.w)
+					{
+						// fit sphere to include point
+						mag = MFSqrt(mag) - vol.boundingSphere.w;
+						mag *= 0.5f;
+						diff.Normalise3();
+						vol.boundingSphere.Mad3(diff, mag, vol.boundingSphere);
+						vol.boundingSphere.w += mag;
+					}
+				}
+			}
+			break;
+		}
+
+		default:
+			MFDebug_Assert(false, "Invalid item type");
+	}
+}
+
+void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem)
+{
+	MFHeap_Free(pItem);
+}
+
+/**** General collision tests ****/
 
 bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float slabHalfWidth, MFRayIntersectionResult *pResult)
 {
@@ -316,17 +385,17 @@ bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSphere, const MFVect
 	return false;
 }
 
-bool MFCollision_SweepSphereTriTest(const MFVector &sphere, const MFVector &sphereVelocity, float sphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult)
+bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult)
 {
 	MFRayIntersectionResult result;
 
 	// test the triangle surface
-	if(!MFCollision_RaySlabTest(sphere, sphereVelocity, tri.plane, sphereRadius, &result))
+	if(!MFCollision_RaySlabTest(sweepSpherePos, sweepSphereVelocity, tri.plane, sweepSphereRadius, &result))
 		return false;
 
-	MFVector intersection = sphere + sphereVelocity * result.time;
+	MFVector intersection = sweepSpherePos + sweepSphereVelocity * result.time;
 
-	// test if intersection is well outside the triangle
+	// test if intersection is inside the triangle
 	float dot0, dot1, dot2;
 
 	dot0 = intersection.DotH(tri.edgePlanes[0]);
@@ -348,19 +417,19 @@ bool MFCollision_SweepSphereTriTest(const MFVector &sphere, const MFVector &sphe
 	// test the 3 edges
 	if(dot0 < 0.0f)
 	{
-		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[0], tri.verts[1]-tri.verts[0], sphereRadius, &result))
+		if(MFCollision_RayCapsuleTest(sweepSpherePos, sweepSphereVelocity, tri.verts[0], tri.verts[1]-tri.verts[0], sweepSphereRadius, &result))
 			goto collision;
 	}
 
 	if(dot1 < 0.0f)
 	{
-		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[1], tri.verts[2]-tri.verts[1], sphereRadius, &result))
+		if(MFCollision_RayCapsuleTest(sweepSpherePos, sweepSphereVelocity, tri.verts[1], tri.verts[2]-tri.verts[1], sweepSphereRadius, &result))
 			goto collision;
 	}
 
 	if(dot2 < 0.0f)
 	{
-		if(MFCollision_RayCapsuleTest(sphere, sphereVelocity, tri.verts[2], tri.verts[0]-tri.verts[2], sphereRadius, &result))
+		if(MFCollision_RayCapsuleTest(sweepSpherePos, sweepSphereVelocity, tri.verts[2], tri.verts[0]-tri.verts[2], sweepSphereRadius, &result))
 			goto collision;
 	}
 
@@ -799,45 +868,281 @@ bool MFCollision_TriHull()
 
 MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult)
 {
+	MFBoundingVolume rayVolume;
+
+	MFVector rayEnd = rayPos+rayDir;
+	rayVolume.min = MFMin(rayPos, rayEnd);
+	rayVolume.max = MFMax(rayPos, rayEnd);
+	rayVolume.boundingSphere = MakeVector(rayPos + rayDir*0.5f, rayDir.Magnitude3()*0.5f);
+
+	if(!MFBoundingVolume_Test(rayVolume, pItem->pTemplate->boundingVolume))
+	{
+		return NULL;
+	}
+
 	switch(pItem->pTemplate->type)
 	{
 		case MFCT_Sphere:
 		{
-			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate;
-			MFCollision_RaySphereTest(rayPos, rayDir, pItem->worldPos.GetTrans(), pSphere->radius, pResult);
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate->pCollisionTemplateData;
+			if(!MFCollision_RaySphereTest(rayPos, rayDir, pItem->worldPos.GetTrans(), pSphere->radius, pResult))
+				return NULL;
 			break;
 		}
-		case MFCT_Box:
-			pItem = NULL;
-			break;
 		case MFCT_Mesh:
-			pItem = NULL;
+		{
+			if(!MFCollision_RayMeshTest(rayPos, rayDir, pItem, pResult))
+				return NULL;
 			break;
+		}
 		case MFCT_Field:
 		{
 			pItem = MFCollision_RayFieldTest(rayPos, rayDir, pItem, pResult);
 			break;
 		}
+		default:
+			MFDebug_Assert(false, "Invalid target primitive");
 	}
 
 	return pItem;
 }
 
+MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult)
+{
+	MFBoundingVolume rayVolume;
 
-MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &cellSize)
+	MFVector radiusVector = MakeVector(radius, radius, radius, 0.0f);
+	rayVolume.min = spherePos - radiusVector;
+	rayVolume.max = spherePos + radiusVector;
+	rayVolume.boundingSphere = MakeVector(spherePos, radius);
+
+	if(!MFBoundingVolume_Test(rayVolume, pItem->pTemplate->boundingVolume))
+	{
+		return NULL;
+	}
+
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Sphere:
+		{
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate->pCollisionTemplateData;
+			if(!MFCollision_SphereSphereTest(spherePos, radius, pItem->worldPos.GetTrans(), pSphere->radius, pResult))
+				return NULL;
+			break;
+		}
+		case MFCT_Mesh:
+		{
+			if(!MFCollision_SphereMeshTest(spherePos, radius, pItem, pResult))
+				return NULL;
+			break;
+		}
+		case MFCT_Field:
+		{
+			pItem = MFCollision_SphereFieldTest(spherePos, radius, pItem, pResult);
+			break;
+		}
+		default:
+			MFDebug_Assert(false, "Invalid target primitive");
+	}
+
+	return pItem;
+}
+
+MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult)
+{
+	MFBoundingVolume rayVolume;
+
+	MFVector radiusVector = MakeVector(sweepSphereRadius, sweepSphereRadius, sweepSphereRadius, 0.0f);
+	MFVector sweepEnd = sweepSpherePos + sweepSphereVelocity;
+	rayVolume.min = MFMin(sweepSpherePos, sweepEnd) - radiusVector;
+	rayVolume.max = MFMax(sweepSpherePos, sweepEnd) + radiusVector;
+	rayVolume.boundingSphere = MakeVector(sweepSpherePos + sweepSphereVelocity*0.5f, sweepSphereVelocity.Magnitude3()*0.5f + sweepSphereRadius);
+
+	if(0)//!MFBoundingVolume_Test(rayVolume, pItem->pTemplate->boundingVolume))
+	{
+		return NULL;
+	}
+
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Sphere:
+		{
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate->pCollisionTemplateData;
+			if(!MFCollision_SweepSphereSphereTest(sweepSpherePos, sweepSphereVelocity, sweepSphereRadius, pItem->worldPos.GetTrans(), pSphere->radius, pResult))
+				return NULL;
+			break;
+		}
+		case MFCT_Mesh:
+		{
+			if(!MFCollision_SweepSphereMeshTest(sweepSpherePos, sweepSphereVelocity, sweepSphereRadius, pItem, pResult))
+				return NULL;
+			break;
+		}
+		case MFCT_Field:
+		{
+			pItem = MFCollision_SweepSphereFieldTest(sweepSpherePos, sweepSphereVelocity, sweepSphereRadius, pItem, pResult);
+			break;
+		}
+		default:
+			MFDebug_Assert(false, "Invalid target primitive");
+	}
+
+	return pItem;
+}
+
+bool MFCollision_RayMeshTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pMesh, MFRayIntersectionResult *pResult)
+{
+	MFDebug_Assert(pMesh->pTemplate->type == MFCT_Mesh, "Item is not a collision mesh");
+
+	MFDebug_Assert(false, "No dice..");
+
+	return false;
+}
+
+bool MFCollision_SphereMeshTest(const MFVector &spherePos, float radius, MFCollisionItem *pMesh, MFCollisionResult *pResult)
+{
+	MFDebug_Assert(pMesh->pTemplate->type == MFCT_Mesh, "Item is not a collision mesh");
+
+	MFDebug_Assert(false, "No dice..");
+
+	return false;
+}
+
+bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pMesh, MFSweepSphereResult *pResult)
+{
+	MFDebug_Assert(pMesh->pTemplate->type == MFCT_Mesh, "Item is not a collision mesh");
+
+	MFCollisionMesh *pMeshData = (MFCollisionMesh*)pMesh->pTemplate->pCollisionTemplateData;
+
+	MFSweepSphereResult result;
+	result.time = 1.0f;
+	bool intersected = false;
+
+	for(int a=0; a<pMeshData->numTris; a++)
+	{
+		MFSweepSphereResult r;
+		bool collide = MFCollision_SweepSphereTriTest(sweepSpherePos, sweepSphereVelocity, sweepSphereRadius, pMeshData->pTriangles[a], &r);
+
+		if(collide)
+		{
+			if(r.time <= result.time)
+			{
+				result.time = r.time;
+				result.surfaceNormal = r.surfaceNormal;
+				intersected = true;
+			}
+		}
+	}
+
+	if(intersected && pResult)
+	{
+		pResult->time = result.time;
+		pResult->surfaceNormal = result.surfaceNormal;
+		pResult->intersectionReaction = MFVector::zero;
+	}
+
+	return intersected;
+}
+
+MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, MFRayIntersectionResult *pResult)
+{
+	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
+	MFCollisionItem *pItem = NULL;
+
+	MFCollisionItem **ppIterator = pFieldData->itemList.Begin();
+
+	while(*ppIterator)
+	{
+		pItem = MFCollision_RayTest(rayPos, rayDir, *ppIterator, pResult);
+
+		ppIterator++;
+	}
+
+	return pItem;
+}
+
+MFCollisionItem* MFCollision_SphereFieldTest(const MFVector &spherePos, float radius, MFCollisionItem *pField, MFCollisionResult *pResult)
+{
+	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
+	MFCollisionItem *pItem = NULL;
+
+	MFCollisionItem **ppIterator = pFieldData->itemList.Begin();
+
+	while(*ppIterator)
+	{
+		pItem = MFCollision_SphereTest(spherePos, radius, *ppIterator, pResult);
+
+		ppIterator++;
+	}
+
+	return pItem;
+}
+
+MFCollisionItem* MFCollision_SweepSphereFieldTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pField, MFSweepSphereResult *pResult)
+{
+	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
+	MFCollisionItem *pItem = NULL;
+
+	MFCollisionItem **ppIterator = pFieldData->itemList.Begin();
+
+	MFSweepSphereResult result;
+	result.time = 1.0f;
+
+	while(*ppIterator)
+	{
+		MFSweepSphereResult r;
+		MFCollisionItem *pI = *ppIterator;
+
+		pI = MFCollision_SweepSphereTest(sweepSpherePos, sweepSphereVelocity, sweepSphereRadius, pI, &r);
+
+		if(pI)
+		{
+			if(r.time <= result.time)
+			{
+				pItem = pI;
+				result.time = r.time;
+				result.surfaceNormal = r.surfaceNormal;
+			}
+		}
+
+		ppIterator++;
+	}
+
+	if(pItem && pResult)
+	{
+		pResult->time = result.time;
+		pResult->surfaceNormal = result.surfaceNormal;
+		pResult->intersectionReaction = MFVector::zero;
+	}
+
+	return pItem;
+}
+
+MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize)
 {
 	MFCollisionItem *pItem;
 	MFCollisionTemplate *pTemplate;
 	MFCollisionField *pField;
 
-	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionTemplate) + sizeof(MFCollisionField));
+	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionTemplate) + sizeof(MFCollisionField) + MFString_Length(pFieldName) + 1);
 	pTemplate = (MFCollisionTemplate*)&pItem[1];
 	pField = (MFCollisionField*)&pTemplate[1];
 
 	pItem->pTemplate = pTemplate;
+	pItem->flags = 0;
+	pItem->refCount = 1;
+	pItem->worldPos = MFMatrix::identity;
+
 	pTemplate->pCollisionTemplateData = pField;
-	pTemplate->pName = "";
 	pTemplate->type = MFCT_Field;
+	pTemplate->pName = (char*)&pField[1];
+	MFString_Copy((char*)pTemplate->pName, pFieldName);
 
 	pField->itemList.Init("Collision Field Items", maximumItemCount);
 	pField->pppItems = NULL;
@@ -848,22 +1153,35 @@ MFCollisionItem* MFCollision_CreateField(int maximumItemCount, const MFVector &c
 
 void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
 {
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
+
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
 
 	pItem->flags = (uint16)itemFlags;
 	pFieldData->itemList.Create(pItem);
 }
 
-bool TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2)
+void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel)
 {
-	if(max1.x > min2.x && min1.x < max2.x &&
-		max1.y > min2.y && min1.y < max2.y &&
-		  max1.z > min2.z && min1.z < max2.z)
-	{
-		return true;
-	}
+	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
 
-	return false;
+	MFModelDataChunk *pCollision = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Collision);
+	MFCollisionTemplate *pTemplate = (MFCollisionTemplate*)pCollision->pData;
+
+	if(pCollision)
+	{
+		for(int a=0; a<pCollision->count; a++)
+		{
+			MFCollisionItem *pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem));
+
+			pItem->pTemplate = &pTemplate[a];
+			pItem->worldPos = pModel->worldMatrix;
+			pItem->flags = 0;
+			pItem->refCount = 1;
+
+			MFCollision_AddItemToField(pField, pItem, 0);
+		}
+	}
 }
 
 void MFCollision_BuildField(MFCollisionItem *pField)
@@ -940,7 +1258,7 @@ void MFCollision_BuildField(MFCollisionItem *pField)
 					MFVector tMax = ApplyMatrixH(pT->boundingVolume.max, pI->worldPos);
 
 					// test of bounding boxes overlap
-					if(TestAABB(tMin, tMax, thisCell, thisCellEnd))
+					if(MFCollision_TestAABB(tMin, tMax, thisCell, thisCellEnd))
 					{
 						*ppItems = pI;
 						++ppItems;

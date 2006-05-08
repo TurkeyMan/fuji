@@ -255,7 +255,8 @@ enum MFMountFlags
  */
 enum MFMountPriority
 {
-	MFMP_VeryHigh = 0,		/**< Very high priority filesystem (first in the search queue) */
+	MFMP_Highest = 0,		/**< Highest priority filesystem (first in the search queue) */
+	MFMP_VeryHigh = 1,		/**< Very high priority filesystem */
 	MFMP_AboveNormal = 5,	/**< Above normal priority filesystem */
 	MFMP_Normal = 10,		/**< Normal priority filesystem */
 	MFMP_BelowNormal = 15,	/**< Below normal priority filesystem */

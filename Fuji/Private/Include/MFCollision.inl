@@ -64,3 +64,15 @@ inline bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& ray
 
 	return true;
 }
+
+inline bool MFCollision_TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2)
+{
+	if(max1.x > min2.x && min1.x < max2.x &&
+		max1.y > min2.y && min1.y < max2.y &&
+		  max1.z > min2.z && min1.z < max2.z)
+	{
+		return true;
+	}
+
+	return false;
+}

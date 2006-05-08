@@ -201,7 +201,7 @@ enum MFEndian
 #define MFALMOST_ZERO 0.000001f
 #define MFDEGREES(a) (0.017453292519943295769236907684886f * (a))
 #define MFRADIANS(a) (57.295779513082320876798154814105f * (a))
-#define MFALIGN(x, bytes) (((x)+((bytes)-1)) & ~((bytes)-1))
+#define MFALIGN(x, bytes) ((((unsigned int)(x))+((bytes)-1)) & ~((bytes)-1))
 #define MFALIGN16(x) MFALIGN(x, 16)
 #define MFUNFLAG(x, y) ((x)&=~(y))
 #define MFFLAG(x, y) ((x)|=(y))

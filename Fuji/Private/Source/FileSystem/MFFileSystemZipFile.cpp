@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemZipFile.h"
+#include "FileSystem/MFFileSystemZipFile_Internal.h"
 
 void MFFileSystemZipFile_InitModule()
 {
@@ -270,7 +270,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 		MFOpenDataZipFile openData;
 
 		openData.cbSize = sizeof(MFOpenDataZipFile);
-		openData.openFlags = openFlags | OFZip_AlreadyMounted;
+		openData.openFlags = openFlags | MFOF_Zip_AlreadyMounted;
 		openData.zipArchiveHandle = (MFFileHandle)pMount->pFilesysData;
 		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? MFStr("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
 
@@ -292,7 +292,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
-	bool alreadyMounted = (pOpenData->openFlags&OFZip_AlreadyMounted) != 0;
+	bool alreadyMounted = (pOpenData->openFlags&MFOF_Zip_AlreadyMounted) != 0;
 
 	unzFile zipFile;
 
@@ -354,7 +354,7 @@ int MFFileZipFile_Close(MFFile* pFile)
 
 	unzCloseCurrentFile((unzFile)pFile->pFilesysData);
 
-	bool alreadyMounted = (pFile->createFlags&OFZip_AlreadyMounted) != 0;
+	bool alreadyMounted = (pFile->createFlags&MFOF_Zip_AlreadyMounted) != 0;
 
 	if(!alreadyMounted)
 	{

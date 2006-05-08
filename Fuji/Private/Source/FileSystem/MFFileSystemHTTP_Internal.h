@@ -1,16 +1,7 @@
-#if !defined(_MFFILESYSTEM_HTTP_H)
-#define _MFFILESYSTEM_HTTP_H
+#if !defined(_MFFILESYSTEM_HTTP_INTERNAL_H)
+#define _MFFILESYSTEM_HTTP_INTERNAL_H
 
-struct MFOpenDataHTTP : public MFOpenData
-{
-	const char *pURL;
-	int port;
-};
-
-// open file base data
-struct MFMountDataHTTP : public MFMountData
-{
-};
+#include "FileSystem/MFFileSystemHTTP.h"
 
 struct MFFileHTTPData
 {

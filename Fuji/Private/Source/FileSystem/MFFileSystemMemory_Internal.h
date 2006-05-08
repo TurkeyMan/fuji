@@ -1,13 +1,7 @@
-#if !defined(_MFFILESYSTEM_MEMORY_H)
-#define _MFFILESYSTEM_MEMORY_H
+#if !defined(_MFFILESYSTEM_MEMORY_INTERNAL_H)
+#define _MFFILESYSTEM_MEMORY_INTERNAL_H
 
-struct MFOpenDataMemory : public MFOpenData
-{
-	char *pMemoryPointer;
-	int fileSize;		// pass -1 for an unknown or unlimited file size (WARNING: this is dangerous)
-	uint32 allocated;	// pass 0 to specify no upper limit to the memory file (WARNING: this is dangerous!)
-	bool ownsMemory;	// this tells the filesystem to call Heap_Free() on the memory when the file is closed.
-};
+#include "FileSystem/MFFileSystemMemory.h"
 
 struct MFFileMemoryData
 {

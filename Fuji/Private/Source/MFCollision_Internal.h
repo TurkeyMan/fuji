@@ -51,6 +51,12 @@ struct MFCollisionField
 	MFCollisionItem ***pppItems;
 };
 
+bool MFCollision_RayMeshTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pMesh, MFRayIntersectionResult *pResult);
+bool MFCollision_SphereMeshTest(const MFVector &spherePos, float radius, MFCollisionItem *pMesh, MFCollisionResult *pResult);
+bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pMesh, MFSweepSphereResult *pResult);
+
 MFCollisionItem* MFCollision_RayFieldTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pField, MFRayIntersectionResult *pResult);
+MFCollisionItem* MFCollision_SphereFieldTest(const MFVector &spherePos, float radius, MFCollisionItem *pField, MFCollisionResult *pResult);
+MFCollisionItem* MFCollision_SweepSphereFieldTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pField, MFSweepSphereResult *pResult);
 
 #endif // _MFCOLLISION_INTERNAL_H

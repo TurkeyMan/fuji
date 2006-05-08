@@ -2,7 +2,7 @@
 #include "MFSystem.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemMemory.h"
+#include "FileSystem/MFFileSystemMemory_Internal.h"
 
 MFPtrListDL<MFFileMemoryData> gMemoryFiles;
 

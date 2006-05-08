@@ -1,22 +1,7 @@
-#if !defined(_MFFILESYSTEM_ZIPFILE_H)
-#define _MFFILESYSTEM_ZIPFILE_H
+#if !defined(_MFFILESYSTEM_ZIPFILE_INTERNAL_H)
+#define _MFFILESYSTEM_ZIPFILE_INTERNAL_H
 
-struct MFOpenDataZipFile : public MFOpenData
-{
-	MFFileHandle zipArchiveHandle;
-	const char *pFilename;
-};
-
-// open file base data
-struct MFMountDataZipFile : public MFMountData
-{
-	MFFileHandle zipArchiveHandle;
-};
-
-enum OpenZipFlags
-{
-	OFZip_AlreadyMounted = MFOF_User
-};
+#include "FileSystem/MFFileSystemZipFile.h"
 
 // internal functions
 void MFFileSystemZipFile_InitModule();

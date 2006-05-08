@@ -1,10 +1,10 @@
 #include "Fuji.h"
 #include "MFSystem.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemNative.h"
-#include "FileSystem/MFFileSystemMemory.h"
-#include "FileSystem/MFFileSystemZipFile.h"
-#include "FileSystem/MFFileSystemHTTP.h"
+#include "FileSystem/MFFileSystemNative_Internal.h"
+#include "FileSystem/MFFileSystemMemory_Internal.h"
+#include "FileSystem/MFFileSystemZipFile_Internal.h"
+#include "FileSystem/MFFileSystemHTTP_Internal.h"
 #include "MFPtrList.h"
 
 MFPtrListDL<MFFile> gOpenFiles;
@@ -23,6 +23,7 @@ MFFileSystemHandle hHTTPFileSystem = -1;
 MFFileSystemHandle hFTPFileSystem = -1;
 
 MFFileHandle hDataArchive = NULL;
+MFFileHandle hPatchArchive = NULL;
 
 void MFFileSystem_InitModule()
 {
@@ -70,6 +71,21 @@ void MFFileSystem_InitModule()
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
+
+	// see if we can mount the patch archive..
+	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Patch_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
+	hPatchArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+
+	if(hPatchArchive)
+	{
+		MFMountDataZipFile zipMountData;
+		zipMountData.cbSize = sizeof(MFMountDataZipFile);
+		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
+		zipMountData.priority = MFMP_VeryHigh;
+		zipMountData.pMountpoint = "patch";
+		zipMountData.zipArchiveHandle = hPatchArchive;
+		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
+	}
 
 	if(hHTTPFileSystem != -1)
 	{
@@ -384,6 +400,9 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 			pMount->pPrev = pT->pPrev;
 			pMount->pNext = pT;
 			pT->pPrev = pMount;
+
+			if(pMount->pPrev)
+				pMount->pPrev->pNext = pMount;
 		}
 		else
 		{

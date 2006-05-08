@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFSystem.h"
 #include "MFFileSystem_Internal.h"
-#include "FileSystem/MFFileSystemHTTP.h"
+#include "FileSystem/MFFileSystemHTTP_Internal.h"
 #include "MFSockets.h"
 #include "MFPtrList.h"
 
