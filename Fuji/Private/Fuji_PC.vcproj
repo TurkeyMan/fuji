@@ -341,25 +341,25 @@
 					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp">
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP_Internal.h">
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp">
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemMemory.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory_Internal.h">
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp">
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemNative.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemNative_Internal.h">
 				</File>
 				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp">
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile_Internal.h">
 				</File>
 			</Filter>
 			<Filter
@@ -523,6 +523,22 @@
 			<File
 				RelativePath=".\Include\Video.h">
 			</File>
+			<Filter
+				Name="FileSystem"
+				Filter="">
+				<File
+					RelativePath=".\Include\FileSystem\MFFileSystemHTTP.h">
+				</File>
+				<File
+					RelativePath=".\Include\FileSystem\MFFileSystemMemory.h">
+				</File>
+				<File
+					RelativePath=".\Include\FileSystem\MFFileSystemNative.h">
+				</File>
+				<File
+					RelativePath=".\Include\FileSystem\MFFileSystemZipFile.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="PC"
