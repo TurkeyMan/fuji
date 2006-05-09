@@ -19,6 +19,7 @@
 #include "MFSockets_Internal.h"
 #include "MFNetwork_Internal.h"
 #include "MFScript_Internal.h"
+#include "MFCollision_Internal.h"
 
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
@@ -159,6 +160,8 @@ void MFSystem_Init()
 	MFPrimitive_InitModule();
 	MFFont_InitModule();
 
+	MFCollision_InitModule();
+
 	MFNetwork_InitModule();
 
 #if defined(_ENABLE_SCRIPTING)
@@ -182,6 +185,8 @@ void MFSystem_Deinit()
 #endif
 
 	MFNetwork_DeinitModule();
+
+	MFCollision_DeinitModule();
 
 	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();

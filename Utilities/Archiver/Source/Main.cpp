@@ -232,7 +232,7 @@ int main(int argc, char **argv)
 		}
 
 		// search file extensions list
-		std::map<std::string, std::string>::iterator i = extensionHandlers.find(pExt);
+		std::map<std::string, std::string>::iterator i = extensionHandlers.find(MFString_ToLower(pExt));
 
 		if(i != extensionHandlers.end())
 		{
@@ -369,7 +369,7 @@ int ProcessIniFile(const char *pIniFile, MFPlatform platform)
 
 				while(pSub)
 				{
-					const char *pString = pSub->GetString(0);
+					const char *pString = MFString_ToLower(pSub->GetString(0));
 					extensionHandlers[pString] = pSub->GetString(1);
 
 					pSub = pSub->Next();

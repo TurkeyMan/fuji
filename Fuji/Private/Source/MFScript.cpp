@@ -36,15 +36,6 @@ void MFScript_InitModule()
 
 	RegisterInternalTypes();
 	RegisterInternalFunctions();
-
-	MFMountDataNative native;
-	native.cbSize = sizeof(MFMountDataNative);
-	native.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
-	native.pMountpoint = "script";
-	native.priority = MFMP_AboveNormal;
-	native.pPath = MFFile_SystemPath("script/");
-
-	MFFileSystem_Mount(MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem), &native);
 }
 
 void MFScript_DeinitModule()

@@ -188,7 +188,7 @@ struct F3DCollisionTri
 	MFVector point[3];
 
 	int adjacent[3];
-	uint32 padding;
+	uint32 flags;
 };
 
 class F3DCollisionMesh : public F3DCollisionObject

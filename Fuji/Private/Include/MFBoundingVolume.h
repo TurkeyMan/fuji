@@ -18,15 +18,22 @@
 struct MFBoundingVolume
 {
 public:
-	MFVector boundingSphere; /**< Bounding sphere (radius in the w) */
-	MFVector min;  /**< Bounding box min coords */
-	MFVector max;  /**< Bounding box max coords */
+	MFVector boundingSphere;	/**< Bounding sphere (radius in the w) */
+	MFVector min;				/**< Bounding box min coords */
+	MFVector max;				/**< Bounding box max coords */
 };
 
+/**
+ * Test 2 MFBoundingVolumes for intersection.
+ * Tests 2 MFBoundingVolumes for intersection.
+ * @param v1 The first bounding volume.
+ * @param v2 The second bounding volume.
+ * @return Returns /a true if the bounding volumes intersect.
+ */
 bool MFBoundingVolume_Test(const MFBoundingVolume &v1, const MFBoundingVolume &v2);
 
 
-// internal
+// internal (seems silly to make an MFBoundingVolume.inl file for this one function)
 
 inline bool MFBoundingVolume_Test(const MFBoundingVolume &v1, const MFBoundingVolume &v2)
 {

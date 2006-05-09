@@ -362,7 +362,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					pInputs = pInputs->NextSiblingElement("input");
 				}
 			}
-			else if(!stricmp(pValue, "polylist"))
+			else if(!stricmp(pValue, "polylist") || !stricmp(pValue, "triangles"))
 			{
 				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
 
@@ -479,21 +479,38 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				// get vertcounts for each poly
 				MFArray<int> vertCounts;
 
-				TiXmlElement *pVCount = pMeshElement->FirstChildElement("vcount");
-				MFDebug_Assert(pVCount, "No <vcount> in <polylist>");
-
-				const char *pVCountString = pVCount->GetText();
-				pVCountString = MFSkipWhite(pVCountString);
-
-				while(*pVCountString)
+				if(!stricmp(pValue, "polylist"))
 				{
-					int vcount = atoi(pVCountString);
-					vertCounts.push(vcount);
 
-					while(*pVCountString && !MFIsWhite(*pVCountString))
-						++pVCountString;
+					TiXmlElement *pVCount = pMeshElement->FirstChildElement("vcount");
+					MFDebug_Assert(pVCount, "No <vcount> in <polylist>");
 
+					const char *pVCountString = pVCount->GetText();
 					pVCountString = MFSkipWhite(pVCountString);
+
+					while(*pVCountString)
+					{
+						int vcount = atoi(pVCountString);
+						vertCounts.push(vcount);
+
+						while(*pVCountString && !MFIsWhite(*pVCountString))
+							++pVCountString;
+
+						pVCountString = MFSkipWhite(pVCountString);
+					}
+				}
+				else if(!stricmp(pValue, "triangles"))
+				{
+					vertCounts.resize(numPolys);
+
+					for(int a=0; a<numPolys; a++)
+					{
+						vertCounts[a] = 3;
+					}
+				}
+				else
+				{
+					MFDebug_Assert(false, "Unknown primitive type..");
 				}
 
 				// read polygons

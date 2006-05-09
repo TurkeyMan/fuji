@@ -4,6 +4,114 @@
 #include "MFCollision_Internal.h"
 #include "MFHeap.h"
 #include "MFModel_Internal.h"
+#include "MFPtrList.h"
+#include "MFPrimitive.h"
+
+static MFPtrList<MFCollisionItem> gItemList;
+static MenuItemBool gShowCollision;
+
+/**** Internal Functions ****/
+
+void MFCollision_InitModule()
+{
+	gItemList.Init("Collision Items", 256);
+
+	DebugMenu_AddItem("Show Collision", "Fuji Options", &gShowCollision, NULL, NULL);
+}
+
+void MFCollision_DeinitModule()
+{
+	gItemList.Deinit();
+}
+
+void MFCollision_DebugDraw()
+{
+	if(!gShowCollision)
+		return;
+
+	// draw each item..
+	MFCollisionItem **ppIterator = gItemList.Begin();
+
+	while(*ppIterator)
+	{
+		MFCollision_DrawItem(*ppIterator);
+
+		ppIterator++;
+	}
+}
+
+void MFCollision_DrawItem(MFCollisionItem *pItem)
+{
+	// maybe reject it if its not in range..
+
+	MFVector colour = (pItem->flags & MFCIF_Disabled) ? MakeVector(1,0,0,1) : ((pItem->flags & MFCIF_Dynamic) ? MakeVector(0,0,1,1) : MakeVector(0,1,0,1));
+
+	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+
+	switch(pItem->pTemplate->type)
+	{
+		case MFCT_Sphere:
+		{
+			MFCollisionSphere *pSphere = (MFCollisionSphere*)pItem->pTemplate->pCollisionTemplateData;
+
+			MFPrimitive_DrawSphere(MFVector::zero, pSphere->radius, 8, 7, colour, pItem->worldPos, true);
+			break;
+		}
+		case MFCT_Mesh:
+		{
+			MFCollisionMesh *pMesh = (MFCollisionMesh*)pItem->pTemplate->pCollisionTemplateData;
+			int a;
+
+			// draw each triangle
+			MFPrimitive(PT_TriList);
+			MFSetMatrix(pItem->worldPos);
+			MFBegin(pMesh->numTris * 3);
+			MFSetColour(1.0f, 1.0f, 1.0f, 0.5f);
+
+			for(a=0; a<pMesh->numTris; a++)
+			{
+				if(pMesh->pTriangles[a].flags)
+					MFSetColour(1.0f, 0.0f, 0.0f, 0.5f);
+
+				MFSetPosition(pMesh->pTriangles[a].verts[0]);
+				MFSetPosition(pMesh->pTriangles[a].verts[1]);
+				MFSetPosition(pMesh->pTriangles[a].verts[2]);
+
+				if(pMesh->pTriangles[a].flags)
+				{
+					MFSetColour(1.0f, 1.0f, 1.0f, 0.5f);
+					pMesh->pTriangles[a].flags = 0;
+				}
+			}
+
+			MFEnd();
+
+			// draw each triangle outline
+			MFPrimitive(PT_LineList);
+			MFSetMatrix(pItem->worldPos);
+			MFBegin(pMesh->numTris * 6);
+			MFSetColour(colour);
+
+			for(a=0; a<pMesh->numTris; a++)
+			{
+				MFSetPosition(pMesh->pTriangles[a].verts[0]);
+				MFSetPosition(pMesh->pTriangles[a].verts[1]);
+				MFSetPosition(pMesh->pTriangles[a].verts[1]);
+				MFSetPosition(pMesh->pTriangles[a].verts[2]);
+				MFSetPosition(pMesh->pTriangles[a].verts[2]);
+				MFSetPosition(pMesh->pTriangles[a].verts[0]);
+			}
+
+			MFEnd();
+			break;
+		}
+		case MFCT_Field:
+			break;
+		default:
+			break;
+	}
+}
+
 
 /**** Support Functions ****/
 
@@ -21,9 +129,29 @@ void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVec
 	pTri->verts[0] = p0;
 	pTri->verts[1] = p1;
 	pTri->verts[2] = p2;
+
+	pTri->adjacent[0] = -1;
+	pTri->adjacent[1] = -1;
+	pTri->adjacent[2] = -1;
+
+	pTri->flags = 0;
 }
 
+
 /**** Dynamic collision item functions ****/
+
+MFCollisionItem* MFCollision_CreateCollisionItem()
+{
+	MFCollisionItem *pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem));
+	gItemList.Create(pItem);
+	return pItem;
+}
+
+void MFCollision_DestroyCollisionItem(MFCollisionItem *pItem)
+{
+	gItemList.Destroy(pItem);
+	MFHeap_Free(pItem);
+}
 
 MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris)
 {
@@ -34,8 +162,8 @@ MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, i
 	MFCollisionMesh *pMesh;
 	MFCollisionTriangle *pTris;
 
-	pItem = (MFCollisionItem*)MFHeap_Alloc(MFALIGN16(sizeof(MFCollisionItem)) + MFALIGN16(sizeof(MFCollisionTemplate)) + MFALIGN16(sizeof(MFCollisionMesh)) + sizeof(MFCollisionTriangle)*numTris + MFString_Length(pItemName) + 1);
-	pTemplate = (MFCollisionTemplate*)MFALIGN16(&pItem[1]);
+	pItem = MFCollision_CreateCollisionItem();
+	pTemplate = (MFCollisionTemplate*)MFHeap_Alloc(MFALIGN16(sizeof(MFCollisionTemplate)) + MFALIGN16(sizeof(MFCollisionMesh)) + sizeof(MFCollisionTriangle)*numTris + MFString_Length(pItemName) + 1);
 	pMesh = (MFCollisionMesh*)MFALIGN16(&pTemplate[1]);
 	pTris = (MFCollisionTriangle*)MFALIGN16(&pMesh[1]);
 
@@ -109,7 +237,8 @@ void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem)
 
 void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem)
 {
-	MFHeap_Free(pItem);
+	MFHeap_Free(pItem->pTemplate);
+	MFCollision_DestroyCollisionItem(pItem);
 }
 
 /**** General collision tests ****/
@@ -1017,6 +1146,7 @@ bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVec
 	MFSweepSphereResult result;
 	result.time = 1.0f;
 	bool intersected = false;
+	int tri = -1;
 
 	for(int a=0; a<pMeshData->numTris; a++)
 	{
@@ -1030,9 +1160,12 @@ bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVec
 				result.time = r.time;
 				result.surfaceNormal = r.surfaceNormal;
 				intersected = true;
+				tri = a;
 			}
 		}
 	}
+
+	pMeshData->pTriangles[tri].flags = 1;
 
 	if(intersected && pResult)
 	{
@@ -1130,8 +1263,8 @@ MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItem
 	MFCollisionTemplate *pTemplate;
 	MFCollisionField *pField;
 
-	pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem) + sizeof(MFCollisionTemplate) + sizeof(MFCollisionField) + MFString_Length(pFieldName) + 1);
-	pTemplate = (MFCollisionTemplate*)&pItem[1];
+	pItem = MFCollision_CreateCollisionItem();
+	pTemplate = (MFCollisionTemplate*)MFHeap_Alloc(sizeof(MFCollisionTemplate) + sizeof(MFCollisionField) + MFString_Length(pFieldName) + 1);
 	pField = (MFCollisionField*)&pTemplate[1];
 
 	pItem->pTemplate = pTemplate;
@@ -1166,13 +1299,14 @@ void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel)
 	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
 
 	MFModelDataChunk *pCollision = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Collision);
-	MFCollisionTemplate *pTemplate = (MFCollisionTemplate*)pCollision->pData;
 
 	if(pCollision)
 	{
+		MFCollisionTemplate *pTemplate = (MFCollisionTemplate*)pCollision->pData;
+
 		for(int a=0; a<pCollision->count; a++)
 		{
-			MFCollisionItem *pItem = (MFCollisionItem*)MFHeap_Alloc(sizeof(MFCollisionItem));
+			MFCollisionItem *pItem = MFCollision_CreateCollisionItem();
 
 			pItem->pTemplate = &pTemplate[a];
 			pItem->worldPos = pModel->worldMatrix;
@@ -1296,5 +1430,6 @@ void MFCollision_DestroyField(MFCollisionItem *pField)
 	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
 	pFieldData->itemList.Deinit();
 
-	MFHeap_Free(pField);
+	MFHeap_Free(pField->pTemplate);
+	MFCollision_DestroyCollisionItem(pField);
 }

@@ -13,29 +13,41 @@
 #include "MFMatrix.h"
 #include "MFBoundingVolume.h"
 
-
-struct MFCollisionItem;
 struct MFModel;
 
+/**
+ * @struct MFCollisionItem
+ * Represents a Fuji collision item.
+ */
+struct MFCollisionItem;
+
+/**
+ * Collision item type.
+ * Represents the type of a collision item.
+ */
 enum MFCollisionType
 {
-	MFCT_Unknown,
+	MFCT_Unknown,	/**< Unknown collision item. */
 
-	MFCT_Sphere,
-	MFCT_Box,
-	MFCT_Mesh,
-	MFCT_Field,
+	MFCT_Sphere,	/**< Item is a sphere primitive. */
+	MFCT_Box,		/**< Item is a box primitive. */
+	MFCT_Mesh,		/**< Item is a collision mesh (polygon soup). */
+	MFCT_Field,		/**< Item is a collision field. */
 
-	MFCT_Max,
-	MFCT_ForceInt = 0x7FFFFFFF
+	MFCT_Max,		/**< Maximum collision item. */
+	MFCT_ForceInt = 0x7FFFFFFF	/**< Forces MFCollisionType to an int type. */
 };
 
+/**
+ * Collision item flags.
+ * Various flags that can be assigned to collision items.
+ */
 enum MFCollisionItemFlags
 {
-	MFCIF_Dynamic = 1,
-	MFCIF_Disabled = 2,
+	MFCIF_Dynamic = 1,	/**< Collision item is dynamic, that is, an item that can move around the field. */
+	MFCIF_Disabled = 2,	/**< Collision item is disabled. */
 
-	MFCIF_ForceInt = 0x7FFFFFFF
+	MFCIF_ForceInt = 0x7FFFFFFF	/**< Forces MFCollisionItemFlags to an int type. */
 };
 
 /**
@@ -49,7 +61,7 @@ struct MFCollisionTriangle
 	MFVector verts[3];		/**< 3 Triangle vertices. In clockwise order. */
 
 	int adjacent[3];		/**< Adjacent triangles. */
-	uint32 padding;			/**< Pad structure to 16 bytes. */
+	uint32 flags;			/**< Flags for each triangle. */
 };
 
 /**
@@ -89,6 +101,15 @@ struct MFSweepSphereResult
   MFVector intersectionReaction;	/**< Reaction to be applied in the case if an intersection. */
   float time;						/**< Time of collision along spheres velocity vector. */
 };
+
+/*** Debug ***/
+
+/**
+ * Draw the collision debugging information.
+ * This will draw the collision debugging information using the currently configured view.
+ * @return None.
+ */
+void MFCollision_DebugDraw();
 
 /*** Helper functions ***/
 
@@ -135,30 +156,49 @@ void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVec
 
 /**** General collision tests ****/
 
+/**
+ * Test 2 axis aligned bounding boxes for intersection.
+ * Tests 2 axis aligned bounding boxes for intersection.
+ * @param min1 Min position of the first box.
+ * @param max1 Max position of the first box.
+ * @param min2 Min position of the second box.
+ * @param max2 Max position of the second box.
+ * @return Returns /a true if the boxes intersect.
+ */
 bool MFCollision_TestAABB(const MFVector &min1, const MFVector &max1, const MFVector &min2, const MFVector &max2);
 
 /**
  * Test a ray for intersection with an arbitrary CollisionItem.
  * Tests a ray for intersection with an arbitrary CollisionItem.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param pItem Pointer to the item to test for intersection by the ray.
- * @param pResult Optional pointer to an MFCollisionResult structire to receive details about the intersection.
+ * @param pResult Optional pointer to an MFRayIntersectionResult structire to receive details about the intersection.
  * @return Returns a pointer to the nearest CollisionItem intersected by the ray. Return value is NULL if no intersection occurred.
  */
 MFCollisionItem* MFCollision_RayTest(const MFVector &rayPos, const MFVector &rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult);
 
 /**
- * Test a ray for intersection with an arbitrary CollisionItem.
- * Tests a ray for intersection with an arbitrary CollisionItem.
+ * Test a sphere for intersection with an arbitrary CollisionItem.
+ * Tests a sphere for intersection with an arbitrary CollisionItem.
  * @param spherePos World position of the sphere.
- * @param radius Radius of the sphere
+ * @param radius Radius of the sphere.
  * @param pItem Pointer to the item to test for intersection by the sphere.
  * @param pResult Optional pointer to an MFCollisionResult which will receive information about the intersection.
  * @return Returns a pointer to the nearest CollisionItem intersected by the sphere. Return value is NULL if no intersection occurred.
  */
 MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult);
 
+/**
+ * Test a sweeping sphere for intersection with an arbitrary CollisionItem.
+ * Tests a sweeping sphere for intersection with an arbitrary CollisionItem.
+ * @param sweepSpherePos World position of the sweeping sphere.
+ * @param sweepSphereVelocity The sweeping sphere's velocity vector.
+ * @param sweepSphereRadius Radius of the sweeping sphere.
+ * @param pItem Pointer to the item to test for intersection by the sweeping sphere.
+ * @param pResult Optional pointer to an MFSweepSphereResult which will receive information about the intersection.
+ * @return Returns a pointer to the nearest CollisionItem intersected by the sweeping sphere. Return value is NULL if no intersection occurred.
+ */
 MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult);
 
 
@@ -170,7 +210,7 @@ MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, con
  * Intersect a ray with a plane.
  * Find the point where a ray intersects a plane.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param plane Vector representing the plane to intersect.
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
  * @return Returns true if the ray intersects the plane.
@@ -181,7 +221,7 @@ bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, co
  * Intersect a ray with a slab.
  * Find the nearest point where a ray intersects a slab.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param plane Vector representing the plane to intersect.
  * @param slabHalfWidth Half the width of the slab, or rather, the distance from the plane to the surface.
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
@@ -193,7 +233,7 @@ bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, con
  * Intersect a ray with a sphere.
  * Find the nearest point where a ray intersects a sphere.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param spherePos Sphere position.
  * @param radius Sphere radius.
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
@@ -205,7 +245,7 @@ bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, c
  * Intersect a ray with a cylinder.
  * Find the nearest point where a ray intersects a cylinder.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param cylinderPos Position of the base of the cylinder.
  * @param cylinderDir Vector along which the cylinder extends.
  * @param cylinderRadius Cylinder radius.
@@ -220,7 +260,7 @@ bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir,
  * Intersect a ray with a capsule.
  * Find the nearest point where a ray intersects a capsule.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param capsulePos Position of the base of the capsule.
  * @param capsuleDir Vector along which the capsule extends.
  * @param capsuleRadius Capsule radius.
@@ -233,7 +273,7 @@ bool MFCollision_RayCapsuleTest(const MFVector& rayPos, const MFVector& rayDir, 
  * Intersect a ray with a box.
  * Find the nearest point where a ray intersects a box.
  * @param rayPos Ray starting position.
- * @param rayDir Ray direction
+ * @param rayDir Ray direction.
  * @param boxPos Position of the center of the box.
  * @param boxRadius Boxes radius along each axis.
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.

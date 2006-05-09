@@ -530,8 +530,17 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	int tagChunkIndex = -1;
 	int dataChunkIndex = -1;
 
+	int numOutputMeshChunks = 0;
+
+	// calculate how many subobjects we're actually going to write...
+	for(a=0; a<GetMeshChunk()->subObjects.size(); a++)
+	{
+		if(!GetMeshChunk()->subObjects[a].dontExportThisSubobject)
+			++numOutputMeshChunks;
+	}
+
 	// figure out number of chunks somehow.....
-	if(GetMeshChunk()->subObjects.size())
+	if(numOutputMeshChunks)
 	{
 		meshChunkIndex = numChunks++;
 		pDataHeaders[meshChunkIndex].chunkType = MFChunkType_SubObjects;
@@ -567,20 +576,23 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pOffset;
 
 		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
-		pDataHeaders[meshChunkIndex].count = GetMeshChunk()->subObjects.size();
+		pDataHeaders[meshChunkIndex].count = numOutputMeshChunks;
 
 		pOffset += MFALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
 
-		for(a=0; a<pDataHeaders[meshChunkIndex].count; a++)
+		for(a=0, b=0; a<GetMeshChunk()->subObjects.size(); a++)
 		{
 			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
-			pSubobjectChunk[a].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
-//			pSubobjectChunk[a].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
-			pSubobjectChunk[a].numMeshChunks = sub.matSubobjects.size();
+			if(sub.dontExportThisSubobject)
+				continue;
+
+			pSubobjectChunk[b].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
+//			pSubobjectChunk[b].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
+			pSubobjectChunk[b].numMeshChunks = sub.matSubobjects.size();
 
 			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
-			pSubobjectChunk[a].pMeshChunks = pMeshChunks;
+			pSubobjectChunk[b].pMeshChunks = pMeshChunks;
 
 			// build platform specific mesh chunk
 			switch(platform)
@@ -597,6 +609,8 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				default:
 					printf("Invalid platform...\n");
 			}
+
+			++b;
 		}
 	}
 
@@ -867,6 +881,8 @@ void F3DFile::ProcessCollisionData()
 					tri.adjacent[1] = -1;
 					tri.adjacent[2] = -1;
 
+					tri.flags = 0;
+
 					++t;
 				}
 			}
@@ -963,6 +979,8 @@ F3DVertex::F3DVertex()
 	uv1 = uv2 = uv3 = uv4 = uv5 = uv6 = uv7 = uv8 = -1;
 	colour = -1;
 	illum = -1;
+	biNormal = -1;
+	tangent = -1;
 	bone[0] = bone[1] = bone[2] = bone[3] = -1;
 	weight[0] = weight[1] = weight[2] = weight[3] = 0.0f;
 }

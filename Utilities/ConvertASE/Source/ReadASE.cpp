@@ -444,11 +444,11 @@ char* ReadFaceList(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetLabel(pFilePtr, &pLabel);
 		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 1].position);
-		pSub->matSubobjects[0].triangles[index].v[1] = index*3 + 1;
+		pSub->matSubobjects[0].triangles[index].v[2] = index*3 + 1;
 
 		pFilePtr = GetLabel(pFilePtr, &pLabel);
 		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 2].position);
-		pSub->matSubobjects[0].triangles[index].v[2] = index*3 + 2;
+		pSub->matSubobjects[0].triangles[index].v[1] = index*3 + 2;
 
 		pSub->matSubobjects[0].triangles[index].reserved = 0;
 	}
