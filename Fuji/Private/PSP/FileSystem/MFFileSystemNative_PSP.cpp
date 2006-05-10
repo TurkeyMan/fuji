@@ -199,7 +199,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	if(hFile < 0)
 	{
-		MFDebug_Assert(hFile >= 0, MFStr("File does not exist: '%s'", pNative->pFilename));
+		MFDebug_Warn(4, MFStr("File does not exist: '%s'", pNative->pFilename));
 		return -1;
 	}
 
