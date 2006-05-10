@@ -873,9 +873,9 @@ void F3DFile::ProcessCollisionData()
 
 					tri.plane = MFCollision_MakePlaneFromPoints(tri.point[0], tri.point[1], tri.point[2]);
 
-					tri.boundPlanes[0] = MFCollision_MakePlaneFromPoints(tri.point[0], tri.point[0] + MakeVector(0, 10, 0), tri.point[1]);
-					tri.boundPlanes[1] = MFCollision_MakePlaneFromPoints(tri.point[1], tri.point[1] + MakeVector(0, 10, 0), tri.point[2]);
-					tri.boundPlanes[2] = MFCollision_MakePlaneFromPoints(tri.point[2], tri.point[2] + MakeVector(0, 10, 0), tri.point[0]);
+					tri.boundPlanes[0] = MFCollision_MakePlaneFromPointAndNormal(tri.point[0], (tri.point[0] - tri.point[1]).Cross3(tri.plane));
+					tri.boundPlanes[1] = MFCollision_MakePlaneFromPointAndNormal(tri.point[1], (tri.point[1] - tri.point[2]).Cross3(tri.plane));
+					tri.boundPlanes[2] = MFCollision_MakePlaneFromPointAndNormal(tri.point[2], (tri.point[2] - tri.point[0]).Cross3(tri.plane));
 
 					tri.adjacent[0] = -1;
 					tri.adjacent[1] = -1;

@@ -161,7 +161,7 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 }
 
 #if defined(_PSP)
-const char * gPSPSystemPath __attribute__((weak)) = "ms0:/FUJI/Data";
+const char *gPSPSystemPath __attribute__((weak)) = "host0:";
 #endif
 
 // interface functions
@@ -178,11 +178,7 @@ const char* MFFile_SystemPath(const char *filename)
 #elif defined(_LINUX)
 	return MFStr("Data/%s", filename);
 #elif defined(_PSP)
-#if defined(_USE_HOST0)
-	return MFStr("host0:/Data/%s", filename);
-#else
-	return MFStr("%s/%s", gPSPSystemPath, filename);
-#endif
+	return MFStr("%s/Data/%s", gPSPSystemPath, filename);
 #else
 	return MFStr("%s", filename);
 #endif
@@ -199,11 +195,7 @@ const char* MFFile_HomePath(const char *filename)
 #elif defined(_WINDOWS)
 	return MFStr("Home/%s", filename);
 #elif defined(_PSP)
-#if defined(_USE_HOST0)
-	return MFStr("host0:/Data/Home/%s", filename);
-#else
-	return MFStr("%s/Home/%s", gPSPSystemPath, filename);
-#endif
+	return MFStr("%s/Data/Home/%s", gPSPSystemPath, filename);
 #else
 	return MFStr("%s", filename);
 #endif

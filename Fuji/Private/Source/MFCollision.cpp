@@ -89,7 +89,7 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 			// draw each triangle outline
 			MFPrimitive(PT_LineList);
 			MFSetMatrix(pItem->worldPos);
-			MFBegin(pMesh->numTris * 6);
+			MFBegin(pMesh->numTris * 12);
 			MFSetColour(colour);
 
 			for(a=0; a<pMesh->numTris; a++)
@@ -100,6 +100,24 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 				MFSetPosition(pMesh->pTriangles[a].verts[2]);
 				MFSetPosition(pMesh->pTriangles[a].verts[2]);
 				MFSetPosition(pMesh->pTriangles[a].verts[0]);
+
+				MFVector e1, e2, e3;
+
+				e1 = (pMesh->pTriangles[a].verts[0] + pMesh->pTriangles[a].verts[1]) * 0.5f;
+				e2 = (pMesh->pTriangles[a].verts[1] + pMesh->pTriangles[a].verts[2]) * 0.5f;
+				e3 = (pMesh->pTriangles[a].verts[2] + pMesh->pTriangles[a].verts[0]) * 0.5f;
+
+				MFSetPosition(e1);
+				MFSetPosition(e1 + pMesh->pTriangles[a].edgePlanes[0] * 2.0f);
+				MFSetPosition(e2);
+				MFSetPosition(e2 + pMesh->pTriangles[a].edgePlanes[1] * 2.0f);
+				MFSetPosition(e3);
+				MFSetPosition(e3 + pMesh->pTriangles[a].edgePlanes[2] * 2.0f);
+
+//				MFVector c = (pMesh->pTriangles[a].verts[0] + pMesh->pTriangles[a].verts[1] + pMesh->pTriangles[a].verts[2]) * (1.0f / 3.0f);
+
+//				MFSetPosition(c);
+//				MFSetPosition(c + pMesh->pTriangles[a].plane*3.0f);
 			}
 
 			MFEnd();
@@ -183,14 +201,6 @@ MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, i
 	return pItem;
 }
 
-MFCollisionTriangle* MFCollision_GetDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
-{
-	MFDebug_Assert(pDynamicCollisionMesh->pTemplate->type == MFCT_Mesh, "Collision item is not an MFCollisionMesh.");
-
-	MFCollisionMesh *pMesh = (MFCollisionMesh*)pDynamicCollisionMesh->pTemplate->pCollisionTemplateData;
-	return pMesh->pTriangles;
-}
-
 void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem)
 {
 	switch(pItem->pTemplate->type)
@@ -233,6 +243,19 @@ void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem)
 		default:
 			MFDebug_Assert(false, "Invalid item type");
 	}
+}
+
+MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
+{
+	MFDebug_Assert(pDynamicCollisionMesh->pTemplate->type == MFCT_Mesh, "Collision item is not an MFCollisionMesh.");
+
+	MFCollisionMesh *pMesh = (MFCollisionMesh*)pDynamicCollisionMesh->pTemplate->pCollisionTemplateData;
+	return pMesh->pTriangles;
+}
+
+void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
+{
+	MFCollision_CalculateDynamicBoundingVolume(pDynamicCollisionMesh);
 }
 
 void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem)

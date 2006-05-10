@@ -7,7 +7,7 @@
 #include "MFRenderer_XB.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
-static MFMaterial *pSetMaterial;
+static MFMaterial *pSetMaterial = 0;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
@@ -94,8 +94,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		MFRendererXB_SetRenderState(D3DRS_ZENABLE, pData->materialType&MF_NoZRead ? FALSE : TRUE);
-		MFRendererXB_SetRenderState(D3DRS_ZWRITEENABLE, pData->materialType&MF_NoZWrite ? FALSE : TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZENABLE, (pData->materialType & MF_NoZRead) ? D3DZB_FALSE : D3DZB_TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType & MF_NoZWrite) ? FALSE : TRUE);
 	}
 
 	return 0;

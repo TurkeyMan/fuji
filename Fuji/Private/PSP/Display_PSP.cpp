@@ -120,6 +120,11 @@ void MFDisplay_ResetViewport()
 	sceGuViewport(2048, 2048, SCR_WIDTH, SCR_HEIGHT);
 }
 
+float MFDisplay_GetNativeAspectRatio()
+{
+	return 16.0f/9.0f;
+}
+
 bool MFDisplay_IsWidescreen()
 {
 	return true;

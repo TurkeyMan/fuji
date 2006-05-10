@@ -1,207 +1,204 @@
-#PLATFORM = PSP
-#BUILD = Release
 TARGET_LIB = Lib/libFuji
 
 ifeq ($(PLATFORM),)
 #$(error $$(PLATFORM) is undefined.
-PLATFORM = PSP
+PLATFORM = LINUX
 endif
 ifeq ($(BUILD),)
 #$(error $$(BUILD) is undefined.
 BUILD = Release
 endif
 
-OBJS = Middleware/zlib/adler32.o
-OBJS := $(OBJS) Middleware/zlib/compress.o
-OBJS := $(OBJS) Middleware/zlib/crc32.o
-OBJS := $(OBJS) Middleware/zlib/deflate.o
-OBJS := $(OBJS) Middleware/zlib/gzio.o
-OBJS := $(OBJS) Middleware/zlib/infback.o
-OBJS := $(OBJS) Middleware/zlib/inffast.o
-OBJS := $(OBJS) Middleware/zlib/inflate.o
-OBJS := $(OBJS) Middleware/zlib/inftrees.o
-OBJS := $(OBJS) Middleware/zlib/trees.o
-OBJS := $(OBJS) Middleware/zlib/uncompr.o
-OBJS := $(OBJS) Middleware/zlib/zutil.o
-OBJS := $(OBJS) Middleware/zlib/minizip/ioapi.o
-OBJS := $(OBJS) Middleware/zlib/minizip/mztools.o
-OBJS := $(OBJS) Middleware/zlib/minizip/unzip.o
-OBJS := $(OBJS) Middleware/zlib/minizip/zip.o
-OBJS := $(OBJS) Middleware/angelscript/scriptstring/scriptstring.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_anyobject.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_arrayobject.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_builder.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_bytecode.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_c.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_callfunc.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_callfunc_mips.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_callfunc_sh4.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_callfunc_x86.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_compiler.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_configgroup.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_context.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_datatype.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_gcobject.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_generic.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_module.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_objecttype.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_outputbuffer.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_parser.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_restore.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_scriptcode.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_scriptengine.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_scriptfunction.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_scriptnode.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_scriptstruct.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_string.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_string_util.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_thread.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_tokenizer.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_typeinfo.o
-OBJS := $(OBJS) Middleware/angelscript/source/as_variablescope.o
-
-OBJS := $(OBJS) Source/DebugMenu.o
-OBJS := $(OBJS) Source/Display.o
-OBJS := $(OBJS) Source/Image.o
-OBJS := $(OBJS) Source/MFBoundingVolume.o
-OBJS := $(OBJS) Source/MFCallstack.o
-OBJS := $(OBJS) Source/MFCollision.o
-OBJS := $(OBJS) Source/MFCommandLine.o
-OBJS := $(OBJS) Source/MFDebug.o
-OBJS := $(OBJS) Source/MFFileSystem.o
-OBJS := $(OBJS) Source/MFFont.o
-OBJS := $(OBJS) Source/MFHeap.o
-OBJS := $(OBJS) Source/MFIni.o
-OBJS := $(OBJS) Source/MFInput.o
-OBJS := $(OBJS) Source/MFMaterial.o
-OBJS := $(OBJS) Source/MFMath.o
-OBJS := $(OBJS) Source/MFMatrix.o
-OBJS := $(OBJS) Source/MFModel.o
-OBJS := $(OBJS) Source/MFNetwork.o
-OBJS := $(OBJS) Source/MFPrimitive.o
-OBJS := $(OBJS) Source/MFRenderer.o
-OBJS := $(OBJS) Source/MFScript.o
-OBJS := $(OBJS) Source/MFScript_Pawn.o
-OBJS := $(OBJS) Source/MFScript_Registration.o
-OBJS := $(OBJS) Source/MFSockets.o
-OBJS := $(OBJS) Source/MFString.o
-OBJS := $(OBJS) Source/MFStringCache.o
-OBJS := $(OBJS) Source/MFSystem.o
-OBJS := $(OBJS) Source/MFTexture.o
-OBJS := $(OBJS) Source/MFTextureUtil.o
-OBJS := $(OBJS) Source/MFTranslation.o
-OBJS := $(OBJS) Source/MFVector.o
-OBJS := $(OBJS) Source/MFView.o
-OBJS := $(OBJS) Source/Sprite.o
-OBJS := $(OBJS) Source/Timer.o
-OBJS := $(OBJS) Source/Util.o
-OBJS := $(OBJS) Source/FileSystem/MFFileSystemHTTP.o
-OBJS := $(OBJS) Source/FileSystem/MFFileSystemMemory.o
-OBJS := $(OBJS) Source/FileSystem/MFFileSystemNative.o
-OBJS := $(OBJS) Source/FileSystem/MFFileSystemZipFile.o
-OBJS := $(OBJS) Source/Materials/MFMat_Effect.o
-OBJS := $(OBJS) Source/Materials/MFMat_Standard.o
+OBJS = Middleware/zlib/adler32.o \
+Middleware/zlib/compress.o \
+Middleware/zlib/crc32.o \
+Middleware/zlib/deflate.o \
+Middleware/zlib/gzio.o \
+Middleware/zlib/infback.o \
+Middleware/zlib/inffast.o \
+Middleware/zlib/inflate.o \
+Middleware/zlib/inftrees.o \
+Middleware/zlib/trees.o \
+Middleware/zlib/uncompr.o \
+Middleware/zlib/zutil.o \
+Middleware/zlib/minizip/ioapi.o \
+Middleware/zlib/minizip/mztools.o \
+Middleware/zlib/minizip/unzip.o \
+Middleware/zlib/minizip/zip.o \
+Middleware/angelscript/scriptstring/scriptstring.o \
+Middleware/angelscript/source/as_anyobject.o \
+Middleware/angelscript/source/as_arrayobject.o \
+Middleware/angelscript/source/as_builder.o \
+Middleware/angelscript/source/as_bytecode.o \
+Middleware/angelscript/source/as_c.o \
+Middleware/angelscript/source/as_callfunc.o \
+Middleware/angelscript/source/as_callfunc_mips.o \
+Middleware/angelscript/source/as_callfunc_sh4.o \
+Middleware/angelscript/source/as_callfunc_x86.o \
+Middleware/angelscript/source/as_compiler.o \
+Middleware/angelscript/source/as_configgroup.o \
+Middleware/angelscript/source/as_context.o \
+Middleware/angelscript/source/as_datatype.o \
+Middleware/angelscript/source/as_gcobject.o \
+Middleware/angelscript/source/as_generic.o \
+Middleware/angelscript/source/as_module.o \
+Middleware/angelscript/source/as_objecttype.o \
+Middleware/angelscript/source/as_outputbuffer.o \
+Middleware/angelscript/source/as_parser.o \
+Middleware/angelscript/source/as_restore.o \
+Middleware/angelscript/source/as_scriptcode.o \
+Middleware/angelscript/source/as_scriptengine.o \
+Middleware/angelscript/source/as_scriptfunction.o \
+Middleware/angelscript/source/as_scriptnode.o \
+Middleware/angelscript/source/as_scriptstruct.o \
+Middleware/angelscript/source/as_string.o \
+Middleware/angelscript/source/as_string_util.o \
+Middleware/angelscript/source/as_thread.o \
+Middleware/angelscript/source/as_tokenizer.o \
+Middleware/angelscript/source/as_typeinfo.o \
+Middleware/angelscript/source/as_variablescope.o \
+Source/DebugMenu.o \
+Source/Display.o \
+Source/Image.o \
+Source/MFBoundingVolume.o \
+Source/MFCallstack.o \
+Source/MFCollision.o \
+Source/MFCommandLine.o \
+Source/MFDebug.o \
+Source/MFFileSystem.o \
+Source/MFFont.o \
+Source/MFHeap.o \
+Source/MFIni.o \
+Source/MFInput.o \
+Source/MFMaterial.o \
+Source/MFMath.o \
+Source/MFMatrix.o \
+Source/MFModel.o \
+Source/MFNetwork.o \
+Source/MFPrimitive.o \
+Source/MFRenderer.o \
+Source/MFScript.o \
+Source/MFScript_Pawn.o \
+Source/MFScript_Registration.o \
+Source/MFSockets.o \
+Source/MFString.o \
+Source/MFStringCache.o \
+Source/MFSystem.o \
+Source/MFTexture.o \
+Source/MFTextureUtil.o \
+Source/MFTranslation.o \
+Source/MFVector.o \
+Source/MFView.o \
+Source/Sprite.o \
+Source/Timer.o \
+Source/Util.o \
+Source/FileSystem/MFFileSystemHTTP.o \
+Source/FileSystem/MFFileSystemMemory.o \
+Source/FileSystem/MFFileSystemNative.o \
+Source/FileSystem/MFFileSystemZipFile.o \
+Source/Materials/MFMat_Effect.o \
+Source/Materials/MFMat_Standard.o
 
 ifeq ($(PLATFORM),PSP)
-OBJS := $(OBJS) PSP/Display_PSP.o
-OBJS := $(OBJS) PSP/MFDebug_PSP.o
-OBJS := $(OBJS) PSP/MFHeap_PSP.o
-OBJS := $(OBJS) PSP/MFInput_PSP.o
-OBJS := $(OBJS) PSP/MFMaterial_PSP.o
-OBJS := $(OBJS) PSP/MFPrimitive_PSP.o
-OBJS := $(OBJS) PSP/MFRenderer_PSP.o
-OBJS := $(OBJS) PSP/MFSockets_PSP.o
-OBJS := $(OBJS) PSP/MFSound_PSP.o
-OBJS := $(OBJS) PSP/MFSystem_PSP.o
-OBJS := $(OBJS) PSP/MFTexture_PSP.o
-OBJS := $(OBJS) PSP/MFThread_PSP.o
-OBJS := $(OBJS) PSP/MFTranslation_PSP.o
-OBJS := $(OBJS) PSP/FileSystem/MFFileSystemNative_PSP.o
-OBJS := $(OBJS) PSP/Materials/MFMat_Standard_PSP.o
-OBJS := $(OBJS) Null/MFModel_Null.o
-OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
+OBJS := $(OBJS) PSP/Display_PSP.o \
+PSP/MFDebug_PSP.o \
+PSP/MFHeap_PSP.o \
+PSP/MFInput_PSP.o \
+PSP/MFMaterial_PSP.o \
+PSP/MFPrimitive_PSP.o \
+PSP/MFRenderer_PSP.o \
+PSP/MFSockets_PSP.o \
+PSP/MFSound_PSP.o \
+PSP/MFSystem_PSP.o \
+PSP/MFTexture_PSP.o \
+PSP/MFThread_PSP.o \
+PSP/MFTranslation_PSP.o \
+PSP/FileSystem/MFFileSystemNative_PSP.o \
+PSP/Materials/MFMat_Standard_PSP.o \
+Null/MFModel_Null.o \
+Null/Materials/MFMat_Effect_Null.o
 endif
 
 ifeq ($(PLATFORM),DC)
-OBJS := $(OBJS) DC/Display_DC.o
-OBJS := $(OBJS) DC/MFInput_DC.o
-OBJS := $(OBJS) DC/MFMaterial_DC.o
-OBJS := $(OBJS) DC/MFPrimitive_DC.o
-OBJS := $(OBJS) DC/MFRenderer_DC.o
-OBJS := $(OBJS) DC/MFSound_DC.o
-OBJS := $(OBJS) DC/MFSystem_DC.o
-OBJS := $(OBJS) DC/MFTexture_DC.o
-OBJS := $(OBJS) DC/FileSystem/MFFileSystemNative_DC.o
-OBJS := $(OBJS) DC/Materials/Mat_Standard_DC.o
-OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
+OBJS := $(OBJS) DC/Display_DC.o \
+DC/MFInput_DC.o \
+DC/MFMaterial_DC.o \
+DC/MFPrimitive_DC.o \
+DC/MFRenderer_DC.o \
+DC/MFSound_DC.o \
+DC/MFSystem_DC.o \
+DC/MFTexture_DC.o \
+DC/FileSystem/MFFileSystemNative_DC.o \
+DC/Materials/Mat_Standard_DC.o \
+Null/Materials/MFMat_Effect_Null.o
 endif
 
 ifeq ($(PLATFORM),GC)
-OBJS := $(OBJS) GC/Display_GC.o
-OBJS := $(OBJS) GC/MFInput_GC.o
-OBJS := $(OBJS) GC/MFMaterial_GC.o
-OBJS := $(OBJS) GC/MFPrimitive_GC.o
-OBJS := $(OBJS) GC/MFRenderer_GC.o
-OBJS := $(OBJS) GC/MFSound_GC.o
-OBJS := $(OBJS) GC/MFSystem_GC.o
-OBJS := $(OBJS) GC/MFTexture_GC.o
-OBJS := $(OBJS) GC/FileSystem/MFFileSystemNative_GC.o
-OBJS := $(OBJS) GC/Materials/Mat_Standard_GC.o
-OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
+OBJS := $(OBJS) GC/Display_GC.o \
+GC/MFInput_GC.o \
+GC/MFMaterial_GC.o \
+GC/MFPrimitive_GC.o \
+GC/MFRenderer_GC.o \
+GC/MFSound_GC.o \
+GC/MFSystem_GC.o \
+GC/MFTexture_GC.o \
+GC/FileSystem/MFFileSystemNative_GC.o \
+GC/Materials/Mat_Standard_GC.o \
+Null/Materials/MFMat_Effect_Null.o
 endif
 
 ifeq ($(PLATFORM),LINUX)
-OBJS := $(OBJS) Linux/MFDebug_Linux.o
-OBJS := $(OBJS) Linux/MFHeap_Linux.o
-OBJS := $(OBJS) Linux/MFInput_Linux.o
-OBJS := $(OBJS) Linux/MFMaterial_Linux.o
-OBJS := $(OBJS) Linux/MFModel_Linux.o
-OBJS := $(OBJS) Linux/MFPrimitive_Linux.o
-OBJS := $(OBJS) Linux/MFSockets_Linux.o
-OBJS := $(OBJS) Linux/MFSound_Linux.o
-OBJS := $(OBJS) Linux/MFSystem_Linux.o
-OBJS := $(OBJS) Linux/MFTexture_Linux.o
-OBJS := $(OBJS) Linux/MFThread_Linux.o
-OBJS := $(OBJS) Linux/MFTranslation_Linux.o
-OBJS := $(OBJS) Linux/FileSystem/MFFileSystemNative_Linux.o
-OBJS := $(OBJS) Linux/Materials/MFMat_Effect_Linux.o
-OBJS := $(OBJS) Linux/Materials/MFMat_Standard_Linux.o
-OBJS := $(OBJS) Linux/Display_Linux.o
+OBJS := $(OBJS) Linux/MFDebug_Linux.o \
+Linux/MFHeap_Linux.o \
+Linux/MFInput_Linux.o \
+Linux/MFMaterial_Linux.o \
+Linux/MFModel_Linux.o \
+Linux/MFPrimitive_Linux.o \
+Linux/MFSockets_Linux.o \
+Linux/MFSound_Linux.o \
+Linux/MFSystem_Linux.o \
+Linux/MFTexture_Linux.o \
+Linux/MFThread_Linux.o \
+Linux/MFTranslation_Linux.o \
+Linux/FileSystem/MFFileSystemNative_Linux.o \
+Linux/Materials/MFMat_Effect_Linux.o \
+Linux/Materials/MFMat_Standard_Linux.o \
+Linux/Display_Linux.o
 endif
 
 ifeq ($(PLATFORM),PS2)
-OBJS := $(OBJS) PS2/Display_PS2.o
-OBJS := $(OBJS) PS2/MFInput_PS2.o
-OBJS := $(OBJS) PS2/MFMaterial_PS2.o
-OBJS := $(OBJS) PS2/MFPrimitive_PS2.o
-OBJS := $(OBJS) PS2/MFRenderer_PS2.o
-OBJS := $(OBJS) PS2/MFSound_PS2.o
-OBJS := $(OBJS) PS2/MFSystem_PS2.o
-OBJS := $(OBJS) PS2/MFTexture_PS2.o
-OBJS := $(OBJS) PS2/FileSystem/MFFileSystemNative_PS2.o
-OBJS := $(OBJS) PS2/Materials/Mat_Standard_PS2.o
-OBJS := $(OBJS) Null/Materials/MFMat_Effect_Null.o
+OBJS := $(OBJS) PS2/Display_PS2.o \
+PS2/MFInput_PS2.o \
+PS2/MFMaterial_PS2.o \
+PS2/MFPrimitive_PS2.o \
+PS2/MFRenderer_PS2.o \
+PS2/MFSound_PS2.o \
+PS2/MFSystem_PS2.o \
+PS2/MFTexture_PS2.o \
+PS2/FileSystem/MFFileSystemNative_PS2.o \
+PS2/Materials/Mat_Standard_PS2.o \
+Null/Materials/MFMat_Effect_Null.o
 endif
 
 ifeq ($(PLATFORM),PC)
-OBJS := $(OBJS) PC/Display_PC.o
-OBJS := $(OBJS) PC/MFDebug_PC.o
-OBJS := $(OBJS) PC/MFHeap_PC.o
-OBJS := $(OBJS) PC/MFInputMappings_PC.o
-OBJS := $(OBJS) PC/MFInput_PC.o
-OBJS := $(OBJS) PC/MFMaterial_PC.o
-OBJS := $(OBJS) PC/MFModel_PC.o
-OBJS := $(OBJS) PC/MFPrimitive_PC.o
-OBJS := $(OBJS) PC/MFRenderer_PC.o
-OBJS := $(OBJS) PC/MFSockets_PC.o
-OBJS := $(OBJS) PC/MFSound_PC.o
-OBJS := $(OBJS) PC/MFSystem_PC.o
-OBJS := $(OBJS) PC/MFTexture_PC.o
-OBJS := $(OBJS) PC/MFThread_PC.o
-OBJS := $(OBJS) PC/MFTranslation_PC.o
-OBJS := $(OBJS) PC/FileSystem/MFFileSystemNative_PC.o
-OBJS := $(OBJS) PC/Materials/MFMat_Effect_PC.o
-OBJS := $(OBJS) PC/Materials/MFMat_Standard_PC.o
+OBJS := $(OBJS) PC/Display_PC.o \
+PC/MFDebug_PC.o \
+PC/MFHeap_PC.o \
+PC/MFInputMappings_PC.o \
+PC/MFInput_PC.o \
+PC/MFMaterial_PC.o \
+PC/MFModel_PC.o \
+PC/MFPrimitive_PC.o \
+PC/MFRenderer_PC.o \
+PC/MFSockets_PC.o \
+PC/MFSound_PC.o \
+PC/MFSystem_PC.o \
+PC/MFTexture_PC.o \
+PC/MFThread_PC.o \
+PC/MFTranslation_PC.o \
+PC/FileSystem/MFFileSystemNative_PC.o \
+PC/Materials/MFMat_Effect_PC.o \
+PC/Materials/MFMat_Standard_PC.o
 endif
 
 #XBox/Display_XB.o
@@ -237,34 +234,36 @@ endif
 #Null/Materials/MFMat_Effect_Null.o
 #Null/Materials/MFMat_Standard_Null.o
 
-CONFIG = $(BUILD)_$(PLATFORM)
 
-INCDIR = Include Source $(PLATFORM) Middleware Middleware/zlib Middleware/angelscript/include
+ifeq ($(PLATFORM),LINUX)
+PLATFORMINCLUDE = Linux
+else
+PLATFORMINCLUDE = $(PLATFORM)
+endif
+
+INCDIR = Include Source $(PLATFORMINCLUDE) Middleware Middleware/zlib Middleware/angelscript/include
 CFLAGS = -Wall -D_$(PLATFORM)
+CXXFLAGS = -fno-exceptions -fno-rtti
+ASFLAGS = 
 
 ifeq ($(BUILD),Debug)
-CFLAGS := $(CFLAGS)  -D_DEBUG -O0
+CFLAGS := $(CFLAGS) -D_DEBUG -O0
 endif
 ifeq ($(BUILD),Release)
-CFLAGS := $(CFLAGS)  -D_RELEASE -O1
+CFLAGS := $(CFLAGS) -D_RELEASE -O1
 endif
 ifeq ($(BUILD),Retail)
-CFLAGS := $(CFLAGS)  -D_RETAIL -O3
+CFLAGS := $(CFLAGS) -D_RETAIL -O3
 endif
 
-CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
-ASFLAGS = $(CFLAGS)
 
+CONFIG = $(BUILD)_$(PLATFORM)
 TARGET_LIB := $(TARGET_LIB)_$(CONFIG).a
+
 
 ifeq ($(PLATFORM),PSP)
 
-ifneq ($(TARGET),)
-EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = $(TARGET) $(PLATFORM)
-endif
-
-PSPSDK=C:/cygwin/usr/local/devkitPSP/psp/sdk
+PSPSDK=C:/cygwin/usr/local/pspdev/psp/sdk
 
 CC       = psp-gcc
 CXX      = psp-g++
@@ -277,13 +276,14 @@ MKSFO    = mksfo
 PACK_PBP = pack-pbp
 FIXUP    = psp-fixup-imports
 
-CFLAGS = -G0
+CFLAGS := $(CFLAGS) -G0
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) . $(PSPSDK)/include
 
 # end PSP
 endif
+
 ifeq ($(PLATFORM),GC)
 
 OGC = C:/cygwin/usr/local/devkitPPC/ogc
@@ -328,4 +328,4 @@ $(TARGET_LIB): $(OBJS)
 	$(RANLIB) $@
 
 clean:
-	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(OBJS) $(PSP_EBOOT_SFO) $(PSP_EBOOT) $(EXTRA_TARGETS)
+	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(OBJS) $(EXTRA_TARGETS)

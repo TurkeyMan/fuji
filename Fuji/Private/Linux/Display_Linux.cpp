@@ -628,7 +628,18 @@ void MFDisplay_ResetViewport()
 	MFDisplay_SetViewport(0, 0, gDisplay.width, gDisplay.height);
 }
 
+float MFDisplay_GetNativeAspectRatio()
+{
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+
+	return rect.width / rect.height;
+}
+
 bool MFDisplay_IsWidescreen()
 {
-	return false;
+	MFRect rect;
+	MFDisplay_GetDisplayRect(&rect);
+
+	return rect.width / rect.height >= 1.6f;
 }

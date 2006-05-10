@@ -33,6 +33,8 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
 
 #endif
 
+extern const char *gPSPSystemPath;
+
 extern int gQuit;
 extern int gRestart;
 
@@ -221,9 +223,30 @@ void DeinitUSB()
 }
 #endif
 
-int main()
+static char pathBuffer[128];
+
+void GetCWDFromPath(const char *pArgv)
+{
+	MFString_Copy(pathBuffer, pArgv);
+
+	int l=MFString_Length(pathBuffer);
+
+	while(l && pathBuffer[l] != '/')
+		l;
+
+	if(l)
+	{
+		pathBuffer[l] = 0;
+		gPSPSystemPath = pathBuffer;
+	}
+}
+
+int main(int argc, char *argv[])
 {
 	SetupCallbacks();
+
+	// get the cwd from argv[0]
+	GetCWDFromPath(argv[0]);
 
 	// we want every little detail on PSP...
 	MFDebug_SetMaximumLogLevel(4);

@@ -134,9 +134,11 @@ void MFDebug_SetMaximumLogLevel(int maxLevel);
 #define MFDebug_Assert(condition, pMessage)
 #define MFDebug_AssertAlignment(pPointer, alignment)
 #define MFDebug_Error(pErrorMessage)
-#define MFDebug_Warn(level, pErrorMessage)
+#define MFDebug_Warn(level, pWarningMessage)
+#define MFDebug_Log(level, pMessage)
 #define MFDebug_Message(pMessage)
 #define MFDebug_SetMaximumWarningLevel(maxLevel)
+#define MFDebug_SetMaximumLogLevel(maxLevel)
 
 #endif
 

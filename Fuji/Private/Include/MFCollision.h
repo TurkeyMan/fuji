@@ -311,8 +311,8 @@ bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFV
 // sweep sphere intersections
 
 /**
- * Intersect a sweeping sphere with a triangle.
- * Find the details about an intersection between a sweeping sphere and a triangle.
+ * Intersect a sweeping sphere with a sphere.
+ * Find the details about an intersection between a sweeping sphere and a sphere.
  * @param sweepSpherePos Spheres initial position.
  * @param sweepSphereVelocity Spheres movement velocity.
  * @param sweepSphereRadius Radius of the sphere.
@@ -332,34 +332,102 @@ bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSpherePos, const MFV
  * @param sweepSphereRadius Radius of the sphere.
  * @param tri Triangle to test for collision.
  * @param pResult Optional pointer to an MFSweepSphereResult structure to receive details about the collision.
- * @return Returns true if the spheres intersect.
+ * @return Returns true if the sweeping sphere and triangle intersect.
  */
 bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult);
 
 
 /*** Collision item functions ***/
 
+/**
+ * Create a dynamic mesh collision item.
+ * Creates a dynamic mesh collision item (polygon soup).
+ * @param pItemName Name of the collision mesh.
+ * @param numTris Number of tris in the mesh.
+ * @return Returns a pointer to the newly created dynamic collision mesh.
+ */
 MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris);
 
-MFCollisionTriangle* MFCollision_GetDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
+/**
+ * Lock a dynamic collision mesh triangle buffer.
+ * Locks and returns a pointer to a dynamic collision mesh triangle buffer.
+ * @param pDynamicCollisionMesh The dynamic mesh collision item to lock.
+ * @return Returns a pointer to an area in memory where the triangle buffer should be written.
+ */
+MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
 
-void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem);
+/**
+ * Unlock a dynamic collision mesh triangle buffer.
+ * Releases the lock on a dynamic collision mesh buffer.
+ * @param pDynamicCollisionMesh The dynamic mesh collision item to unlock.
+ * @return None.
+ * @remarks The bounding volume for the mesh will be generated at this time.
+ */
+void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
 
+/**
+ * Destroy a dynamic collision item.
+ * Destroys a dynamic collision item.
+ * @param pItem The MFCollisionItem to be destroyed.
+ * @return None.
+ */
 void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem);
 
 
 /**** Collision field ****/
 
+/**
+ * Create a collision field.
+ * Creates a collisoin field.
+ * @param pFieldName Name of the collision field.
+ * @param maximumItemCount Maximum number of items that can exist in the field.
+ * @param cellSize The size of the cells in the x, y and z axiis.
+ * @return Returns a pointer to the newly created collision field.
+ */
 MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize);
 
+/**
+ * Add an item to a field.
+ * Adds an MFCollisionItem to the specified collision field.
+ * @param pField The field to add the item to.
+ * @param pItem The item to be added to the field.
+ * @param itemFlags 0, or a combination of values from the MFCollisionItemFlags enumerated type detailing the item being added.
+ * @return None.
+ */
 void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags);
 
+/**
+ * Add a model to a field.
+ * Adds any collision items contained within an MFModel to the specified collision field.
+ * @param pField The field to add the models collision items to.
+ * @param pModel An MFModel that contains some collision items.
+ * @return None.
+ */
 void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel);
 
+/**
+ * Build a collision field.
+ * Prepares a collision field for use after adding all the collision items.
+ * @param pField The collision field to build.
+ * @return None.
+ * @remarks This must be called after all items have been added to the field. After this is called, no more items can be added to the field without first clearing the field.
+ */
 void MFCollision_BuildField(MFCollisionItem *pField);
 
+/**
+ * Clear a collision field.
+ * Clear all items from a collision field.
+ * @param pField The collision field to clear.
+ * @return None.
+ */
 void MFCollision_ClearField(MFCollisionItem *pField);
 
+/**
+ * Destroy a collision field.
+ * Destroys a collision field.
+ * @param pField The collision field to destroy.
+ * @return None.
+ */
 void MFCollision_DestroyField(MFCollisionItem *pField);
 
 
