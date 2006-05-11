@@ -665,7 +665,7 @@ const int asPREPARE_PREVIOUS = -1;
 
 // Config groups
 
-const char * const asALL_MODULES = (const char * const)-1;
+const char * const asALL_MODULES = (const char *)-1;
 
 // Type id flags
 

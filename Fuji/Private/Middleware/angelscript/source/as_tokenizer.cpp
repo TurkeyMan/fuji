@@ -35,18 +35,15 @@
 // This class identifies tokens from the script code
 //
 
-
 #include "as_config.h"
 #include "as_tokenizer.h"
 #include "as_tokendef.h"
 
-#include <assert.h> // assert()
-#if !defined(_PSP) && !defined(_GC)
-#include <memory.h> // memcpy()
-#else
-#include <string.h>
+#if !defined(AS_NO_MEMORY_H)
+#include <memory.h>
 #endif
-#include <string.h> // strcmp()
+#include <string.h> // some compilers declare memcpy() here
+#include <assert.h> // assert()
 
 asCTokenizer::asCTokenizer()
 {

@@ -29,18 +29,17 @@
 
 */
 
-#include <stdarg.h>		// va_list, va_start(), etc
-#include <stdlib.h>     // strtod(), strtol()
-#include <assert.h>     // assert()
-#include <stdio.h>      // _vsnprintf()
-#if !defined(_PSP) && !defined(_GC)
-#include <memory.h>     // memcpy()
-#else
-#include <string.h>
-#endif
-
 #include "as_config.h"
 #include "as_string_util.h"
+
+#if !defined(AS_NO_MEMORY_H)
+#include <memory.h>
+#endif
+#include <string.h> // some compilers declare memcpy() here
+#include <assert.h> // assert()
+#include <stdarg.h> // va_list, va_start(), etc
+#include <stdlib.h> // strtod(), strtol()
+#include <stdio.h>  // _vsnprintf()
 
 // Returns the number of characters written or -1 if the buffer was too small
 int asStringFormat(char *string, int maxLength, const char *format, ...)

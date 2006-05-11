@@ -28,17 +28,16 @@
    andreas@angelcode.com
 */
 
-#if !defined(_PSP) && !defined(_GC)
-#include <memory.h>
-#else
-#include <string.h>
-#endif
-#include <stdarg.h>		// va_list, va_start(), etc
-#include <stdlib.h>     // strtod(), strtol()
-#include <assert.h>     // assert()
-
 #include "as_config.h"
 #include "as_string.h"
+
+#if !defined(AS_NO_MEMORY_H)
+#include <memory.h>
+#endif
+#include <string.h> // some compilers declare memcpy() here
+#include <assert.h> // assert()
+#include <stdarg.h> // va_list, va_start(), etc
+#include <stdlib.h> // strtod(), strtol()
 
 asCString::asCString()
 {

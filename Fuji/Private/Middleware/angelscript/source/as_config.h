@@ -267,8 +267,30 @@
 	#define __int64 long long
 #endif
 
+// SN Systems ProDG (also experimental, let me know if something isn't working)
+#if defined(__SNC__) || defined(SNSYS)
+	#define GNU_STYLE_VIRTUAL_METHOD
+	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
+	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
+	#define COMPLEX_OBJS_PASSED_BY_REF
+	#define __int64 long long
+	#define ASM_AT_N_T
+	#define COMPLEX_MASK (asOBJ_CLASS_DESTRUCTOR)
+  // SN doesnt seem to like STDCALL.
+  // Maybe it can work with some fiddling, but i cant imagine linking to any STDCALL functions with a console anyway...
+	#define STDCALL
+	#ifdef __linux__
+		#define THISCALL_RETURN_SIMPLE_IN_MEMORY
+		#define CDECL_RETURN_SIMPLE_IN_MEMORY
+		#define STDCALL_RETURN_SIMPLE_IN_MEMORY
+	#endif
+	#ifdef i386
+		#define AS_X86
+	#endif
+#endif
+
 // GNU C
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__SNC__)
 	#define GNU_STYLE_VIRTUAL_METHOD
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
@@ -295,10 +317,11 @@
 #endif
 
 // MIPS architexture (generally PS2 and PSP consoles, potentially supports N64 aswell)
-#if defined(_MIPS_ARCH) || defined(_PSP) || defined(_PS2) || defined(_EE_) || defined(_PSP)
+#if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_EE_) || defined(_PSP) || defined(_PS2)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_MIPS
+  #define AS_NO_MEMORY_H
 #endif
 
 // PPC architexture (Mac, Gamecube and hopefully PS3 + XBox360)
@@ -306,6 +329,7 @@
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_PPC
+  #define AS_NO_MEMORY_H
 #endif
 
 

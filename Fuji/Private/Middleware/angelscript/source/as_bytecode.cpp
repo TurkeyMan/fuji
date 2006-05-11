@@ -35,15 +35,6 @@
 // A class for constructing the final byte code
 //
 
-#if !defined(_PSP) && !defined(_GC)
-#include <memory.h> // memcpy()
-#else
-#include <string.h>
-#endif
-#include <string.h> // some compilers declare memcpy() here
-#include <assert.h>
-#include <stdio.h> // fopen(), fprintf(), fclose()
-
 #include "as_config.h"
 #include "as_bytecode.h"
 #include "as_debug.h" // mkdir()
@@ -51,6 +42,8 @@
 #include "as_string.h"
 #include "as_module.h"
 #include "as_scriptengine.h"
+
+#include <stdio.h> // fopen(), fprintf(), fclose()
 
 BEGIN_AS_NAMESPACE
 

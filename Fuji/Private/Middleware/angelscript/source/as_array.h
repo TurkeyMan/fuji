@@ -31,11 +31,10 @@
 #ifndef AS_ARRAY_H
 #define AS_ARRAY_H
 
-#if !defined(_PSP) && !defined(_GC)
+#if !defined(AS_NO_MEMORY_H)
 #include <memory.h>
-#else
-#include <string.h>
 #endif
+#include <string.h> // some compilers declare memcpy() here
 #include <assert.h>
 
 BEGIN_AS_NAMESPACE
