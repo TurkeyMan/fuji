@@ -65,8 +65,25 @@ MFScriptString GetString(MFStringTable *pTable, int stringID)
 	return MFScript_MakeScriptString(MFTranslation_GetString(pTable, stringID));
 }
 
+char* &SetCString(char* &self, const char* &other)
+{
+	self = (char*)other;
+	return self;
+}
+
+char* &SetCStringToASString(char* &self, MFScriptString other)
+{
+	self = (char*)MFStr(MFScript_GetCString(other));
+	return self;
+}
+
 void RegisterInternalTypes()
 {
+	// used for marshalling strings between code and script
+	pEngine->RegisterObjectType("cstring", sizeof(char*), asOBJ_PRIMITIVE);
+	pEngine->RegisterObjectBehaviour("cstring",asBEHAVE_ASSIGNMENT, "cstring &f(const cstring &in)", asFUNCTION(SetCString), asCALL_CDECL_OBJFIRST);
+	pEngine->RegisterObjectBehaviour("cstring",asBEHAVE_ASSIGNMENT, "cstring &f(const string &in)", asFUNCTION(SetCStringToASString), asCALL_CDECL_OBJFIRST);
+
 	pEngine->RegisterObjectType("vector", sizeof(MFVector), asOBJ_CLASS | asOBJ_CLASS_CONSTRUCTOR | asOBJ_CLASS_ASSIGNMENT);
 	pEngine->RegisterObjectProperty("vector", "float x", offsetof(MFVector, x));
 	pEngine->RegisterObjectProperty("vector", "float y", offsetof(MFVector, y));

@@ -75,9 +75,10 @@ static asDWORD mipsArgs[AS_MIPS_MAX_ARGS + 1 + 1];
 // stackArgSize is the size in bytes for how much data to put on the callstack
 extern "C" asQWORD mipsFunc(int intArgSize, int floatArgSize, int stackArgSize, asDWORD func);
 
-// puts the arguments in the correct place in the sh4Args-array. See comments above.
+// puts the arguments in the correct place in the mipsArgs-array. See comments above.
 // This could be done better.
-inline void splitArgs(const asDWORD *args, int argNum, int &numRegIntArgs, int &numRegFloatArgs, int &numRestArgs, int hostFlags) {
+inline void splitArgs(const asDWORD *args, int argNum, int &numRegIntArgs, int &numRegFloatArgs, int &numRestArgs, int hostFlags)
+{
 	int i;
 
 	int argBit = 1;
@@ -129,7 +130,6 @@ asQWORD CallCDeclFunction(const asDWORD *args, int argSize, asDWORD func, int fl
 	if(argNum > 0)
 		splitArgs(args, argNum, intArgs, floatArgs, restArgs, flags);
 
-//	printf("calling cdecl, %d %d %d %p.. %p.. %d...\n", intArgs, floatArgs, restArgs, func, mipsFunc, mipsArgs[0]);
 	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
@@ -149,7 +149,6 @@ asQWORD CallThisCallFunction(const void *obj, const asDWORD *args, int argSize, 
 	if (argNum > 0)
 		splitArgs(args, argNum, intArgs, floatArgs, restArgs, flags);
 
-//	printf("calling this call...\n");
 	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
@@ -178,7 +177,6 @@ asQWORD CallThisCallFunction_objLast(const void *obj, const asDWORD *args, int a
 		restArgs++;
 	}
 
-//	printf("calling this call objlast...\n");
 	return mipsFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
 }
 
@@ -687,6 +685,7 @@ asm(
 // get global mipsArgs[] array pointer
 //"	lui		$15, %hi(mipsArgs)\n"
 //"	addiu	$15, $15, %lo(mipsArgs)\n"
+// we'll use the macro instead because SN Systems doesnt like %hi/%lo
 ".set macro\n"
 " la  $15, mipsArgs\n"
 ".set nomacro\n"
@@ -712,16 +711,20 @@ asm(
 
 // skip stack paramaters if there are none
 "	beq		$3, $0, andCall\n"
+
 // push stack paramaters
 "	addiu	$15, $15, 64\n"
-"	addiu	$13, $sp, 0\n"
 "pushArgs:\n"
 "	addiu	$3, -4\n"
+// load from $15 + stack bytes ($3)
 "	addu	$14, $15, $3\n"
-"	lw		$15, 0($14)\n"
-"	sw		$15, 0($13)\n"
+"	lw		$14, 0($14)\n"
+// store to $sp + stack bytes ($3)
+"	addu	$13, $sp, $3\n"
+"	sw		$14, 0($13)\n"
+// if there are more, loop...
 "	bne		$3, $0, pushArgs\n"
-"	addiu	$13, $13, 4\n"
+"	nop\n"
 
 // and call the function
 "andCall:\n"
