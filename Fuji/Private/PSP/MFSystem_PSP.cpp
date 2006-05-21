@@ -243,9 +243,23 @@ void GetCWDFromPath(const char *pArgv)
 	}
 }
 
+void DisableFloatExceptions()
+{
+	asm
+	(
+		"cfc1    $2, $31		\n"
+		"lui     $8, 0x80		\n"
+		"and     $8, $2, $8     # Mask off all bits except for 23 of FCR\n"
+		"ctc1    $8, $31		\n"
+	);
+}
+
 int main(int argc, char *argv[])
 {
 	SetupCallbacks();
+
+	// disable floating point exceptions
+	DisableFloatExceptions();
 
 	// we want every little detail on PSP...
 	MFDebug_SetMaximumLogLevel(4);

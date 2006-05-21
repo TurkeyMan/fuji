@@ -50,11 +50,6 @@ MFVector MakeVec4(float x, float y, float z, float w)
 	return t;
 }
 
-MFStringTable* LoadStringTable(MFScriptString name, MFLanguage language, MFLanguage fallback)
-{
-	return MFTranslation_LoadStringTable(MFScript_GetCString(name), language, fallback);
-}
-
 MFScriptString GetLanguageName(MFLanguage language, bool native)
 {
 	return MFScript_MakeScriptString(MFTranslation_GetLanguageName(language, native));
@@ -110,7 +105,7 @@ void RegisterInternalFunctions()
 {
 	pEngine->RegisterGlobalFunction("string& GetLanguageName(int, bool)", asFUNCTION(GetLanguageName), asCALL_CDECL);
 	pEngine->RegisterGlobalFunction("int GetDefaultLanguage()", asFUNCTION(MFTranslation_GetDefaultLanguage), asCALL_CDECL);
-	pEngine->RegisterGlobalFunction("uint LoadStringTable(const string &in, int, int)", asFUNCTION(LoadStringTable), asCALL_CDECL);
+	pEngine->RegisterGlobalFunction("uint LoadStringTable(cstring, int, int)", asFUNCTION(MFTranslation_LoadStringTable), asCALL_CDECL);
 	pEngine->RegisterGlobalFunction("void DestroyStringTable(uint)", asFUNCTION(MFTranslation_DestroyStringTable), asCALL_CDECL);
 	pEngine->RegisterGlobalFunction("int GetNumStrings(uint)", asFUNCTION(MFTranslation_GetNumStrings), asCALL_CDECL);
 	pEngine->RegisterGlobalFunction("string& GetStrings(uint, int)", asFUNCTION(GetString), asCALL_CDECL);
