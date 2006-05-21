@@ -44,9 +44,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -132,9 +132,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -426,9 +426,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib vorbisfile_static.lib ogg_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

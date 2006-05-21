@@ -5,7 +5,7 @@
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	#include "lgLcd/include/lglcd.h"
-	#pragma comment(lib, "lglcd")
+//	#pragma comment(lib, "lglcd")
 #endif
 
 #define MAX_AUX_DISPLAYS 16
