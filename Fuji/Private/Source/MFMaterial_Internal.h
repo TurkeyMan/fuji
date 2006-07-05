@@ -85,7 +85,12 @@ struct MFMeshChunk_XB : public MFMeshChunk
 #if defined(_PSP) || defined(_FUJI_UTIL)
 struct MFMeshChunk_PSP : public MFMeshChunk
 {
-	// not done yet
+	uint32 numVertices;
+	uint32 vertexFormat;
+	uint32 vertexStride;
+
+	const char *pVertexData;
+	uint32 vertexDataSize;
 };
 #endif
 

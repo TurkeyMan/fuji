@@ -13,6 +13,23 @@
 #include <d3d9.h>
 #endif
 
+void AdjustBoundingSphere(const MFVector &point, MFVector *pSphere)
+{
+	// if point is outside bounding sphere
+	MFVector diff = point - *pSphere;
+	float mag = diff.Magnitude3();
+
+	if(mag > pSphere->w)
+	{
+		// fit sphere to include point
+		mag -= pSphere->w;
+		mag *= 0.5f;
+		diff.Normalise3();
+		pSphere->Mad3(diff, mag, *pSphere);
+		pSphere->w += mag;
+	}
+}
+
 int F3DFile::ReadF3D(char *pFilename)
 {
 	FILE *infile;
@@ -372,7 +389,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
-	// fill out msh chunk, and build mesh...
+	// fill out mesh chunk, and build mesh...
 	for(a=0; a<numMeshChunks; a++)
 	{
 		struct Vert
@@ -462,20 +479,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			pVolume->min = MFMin(pVolume->min, pos);
 			pVolume->max = MFMax(pVolume->max, pos);
-
-			// if point is outside bounding sphere
-			MFVector diff = pos - pVolume->boundingSphere;
-			float mag = diff.Magnitude3();
-
-			if(mag > pVolume->boundingSphere.w)
-			{
-				// fit sphere to include point
-				mag -= pVolume->boundingSphere.w;
-				mag *= 0.5f;
-				diff.Normalise3();
-				pVolume->boundingSphere.Mad3(diff, mag, pVolume->boundingSphere);
-				pVolume->boundingSphere.w += mag;
-			}
+			AdjustBoundingSphere(pos, &pVolume->boundingSphere);
 		}
 
 		// write indices
@@ -507,6 +511,86 @@ void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 
 		(char*&)pMC[a].pVertexElements -= base;
 	}
 #endif
+}
+
+void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
+{
+	int numMeshChunks = sub.matSubobjects.size();
+	int a, b, c;
+
+	// increment size of MeshChunk_PSP structure
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_PSP)*numMeshChunks);
+
+	MFMeshChunk_PSP *pMeshChunk = (MFMeshChunk_PSP*)pMeshChunks;
+
+	struct Vert
+	{
+		float uv[2];
+		uint32 colour;
+		float normal[3];
+		float pos[3];
+	};
+
+	// fill out mesh chunk, and build mesh...
+	for(a=0; a<numMeshChunks; a++)
+	{
+		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
+
+		int numTriangles = matsub.triangles.size();
+
+		pMeshChunk[a].numVertices = numTriangles * 3;
+		pMeshChunk[a].vertexStride = sizeof(Vert);
+		pMeshChunk[a].vertexDataSize = pMeshChunk[a].numVertices * pMeshChunk[a].vertexStride;
+		pMeshChunk[a].vertexFormat = (0x03 << 0) | (0x07 << 2) | (0x03 << 5) | (0x03 << 7);
+
+		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+
+		pMeshChunk[a].pVertexData = pOffset;
+		pOffset += MFALIGN16(pMeshChunk[a].vertexDataSize);
+
+		// write triangles
+		Vert *pVert = (Vert*)pMeshChunk[a].pVertexData;
+
+		for(b=0; b<numTriangles; b++)
+		{
+			for(c=0; c<3; c++)
+			{
+				const F3DVertex &vert = matsub.vertices[matsub.triangles[b].v[c]];
+
+				const MFVector &pos = sub.positions[vert.position];
+				const MFVector &uv = sub.uvs[vert.uv1];
+				const MFVector &norm = sub.normals[vert.normal];
+				const MFVector &col = sub.colours[vert.colour];
+
+				pVert->uv[0] = uv.x;
+				pVert->uv[1] = uv.y;
+				pVert->colour = (uint32)(col.x * 255.0f) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+				pVert->normal[0] = norm.x;
+				pVert->normal[1] = norm.y;
+				pVert->normal[2] = norm.z;
+				pVert->pos[0] = pos.x;
+				pVert->pos[1] = pos.y;
+				pVert->pos[2] = pos.z;
+
+				pVolume->min = MFMin(pVolume->min, pos);
+				pVolume->max = MFMax(pVolume->max, pos);
+				AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+				++pVert;
+			}
+		}
+	}
+}
+
+void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+{
+	MFMeshChunk_PSP *pMC = (MFMeshChunk_PSP*)pMeshChunks;
+
+	for(int a=0; a<count; a++)
+	{
+		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
+		pMC[a].pVertexData -= base;
+	}
 }
 
 void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
@@ -626,6 +710,8 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				case FP_XBox:
 				case FP_Linux:
 				case FP_PSP:
+					WriteMeshChunk_PSP(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
+					break;
 				case FP_PS2:
 				case FP_DC:
 				case FP_GC:
@@ -753,6 +839,8 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 						case FP_XBox:
 						case FP_Linux:
 						case FP_PSP:
+							FixUpMeshChunk_PSP(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							break;
 						case FP_PS2:
 						case FP_DC:
 						case FP_GC:
@@ -1145,20 +1233,7 @@ void F3DFile::ProcessCollisionData()
 
 						pMesh->boundMin = MFMin(pMesh->boundMin, tri.point[c]);
 						pMesh->boundMax = MFMax(pMesh->boundMax, tri.point[c]);
-
-						// if point is outside bounding sphere
-						MFVector diff = tri.point[c] - pMesh->boundSphere;
-						float mag = diff.Magnitude3();
-
-						if(mag > pMesh->boundSphere.w)
-						{
-							// fit sphere to include point
-							mag -= pMesh->boundSphere.w;
-							mag *= 0.5f;
-							diff.Normalise3();
-							pMesh->boundSphere.Mad3(diff, mag, pMesh->boundSphere);
-							pMesh->boundSphere.w += mag;
-						}
+						AdjustBoundingSphere(tri.point[c], &pMesh->boundSphere);
 					}
 
 					tri.plane = MFCollision_MakePlaneFromPoints(tri.point[0], tri.point[1], tri.point[2]);
