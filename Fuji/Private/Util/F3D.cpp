@@ -361,7 +361,7 @@ struct FileVertex
 	float u,v;
 };
 
-void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache)
+void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
 #if !defined(_LINUX)
 	int numMeshChunks = sub.matSubobjects.size();
@@ -459,6 +459,23 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			pVert[b].colour = colour;
 			pVert[b].uv[0] = uv.x;
 			pVert[b].uv[1] = uv.y;
+
+			pVolume->min = MFMin(pVolume->min, pos);
+			pVolume->max = MFMax(pVolume->max, pos);
+
+			// if point is outside bounding sphere
+			MFVector diff = pos - pVolume->boundingSphere;
+			float mag = diff.Magnitude3();
+
+			if(mag > pVolume->boundingSphere.w)
+			{
+				// fit sphere to include point
+				mag -= pVolume->boundingSphere.w;
+				mag *= 0.5f;
+				diff.Normalise3();
+				pVolume->boundingSphere.Mad3(diff, mag, pVolume->boundingSphere);
+				pVolume->boundingSphere.w += mag;
+			}
 		}
 
 		// write indices
@@ -578,6 +595,12 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
 		pDataHeaders[meshChunkIndex].count = numOutputMeshChunks;
 
+		// prime bounding volume
+		const F3DSubObject &sub0 = GetMeshChunk()->subObjects[0];
+		pModelData->boundingVolume.boundingSphere = MakeVector(sub0.positions[sub0.matSubobjects[0].vertices[sub0.matSubobjects[0].triangles[0].v[0]].position], 0.0f);
+		pModelData->boundingVolume.min = pModelData->boundingVolume.boundingSphere;
+		pModelData->boundingVolume.max = pModelData->boundingVolume.boundingSphere;
+
 		pOffset += MFALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
 
 		for(a=0, b=0; a<GetMeshChunk()->subObjects.size(); a++)
@@ -598,7 +621,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 			switch(platform)
 			{
 				case FP_PC:
-					WriteMeshChunk_PC(this, pMeshChunks, sub, pOffset, pStringCache);
+					WriteMeshChunk_PC(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
 					break;
 				case FP_XBox:
 				case FP_Linux:
@@ -628,7 +651,8 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		{
 			pBoneChunk[a].pBoneName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].name);
 			pBoneChunk[a].pParentName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].parentName);
-			pBoneChunk[a].boneOrigin = GetSkeletonChunk()->bones[a].worldMatrix.GetTrans();
+			pBoneChunk[a].boneMatrix = GetSkeletonChunk()->bones[a].boneMatrix;
+			pBoneChunk[a].worldMatrix = GetSkeletonChunk()->bones[a].worldMatrix;
 		}
 	}
 
@@ -677,6 +701,23 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 					MFDebug_Assert(false, "Unsupported collision object type.");
 			}
 		}
+	}
+
+	// write out collision data
+	if(tagChunkIndex > -1)
+	{
+		TagChunk *pTags = (TagChunk*)pOffset;
+
+		pDataHeaders[tagChunkIndex].pData = pTags;
+		pDataHeaders[tagChunkIndex].count = GetRefPointChunk()->refPoints.size();
+
+		for(int a=0; a<pDataHeaders[tagChunkIndex].count; a++)
+		{
+			pTags[a].pTagName = MFStringCache_Add(pStringCache, GetRefPointChunk()->refPoints[a].name);
+			pTags[a].tagMatrix = GetRefPointChunk()->refPoints[a].worldMatrix;
+		}
+
+		pOffset += MFALIGN16(sizeof(TagChunk)*pDataHeaders[tagChunkIndex].count);
 	}
 
 	// write strings to end of file
@@ -757,6 +798,12 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 			case MFChunkType_Tags:
 			{
+				TagChunk *pTags = (TagChunk*)pModelData->pDataChunks[a].pData;
+
+				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				{
+					pTags[b].pTagName -= stringBase;
+				}
 				break;
 			}
 
@@ -968,7 +1015,7 @@ F3DBone::F3DBone()
 	memset(parentName, 0, 64);
 	memset(options, 0, 1024);
 
-	localMatrix = MFMatrix::identity;
+	boneMatrix = MFMatrix::identity;
 	worldMatrix = MFMatrix::identity;
 }
 

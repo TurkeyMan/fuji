@@ -142,8 +142,8 @@ class F3DBone
 public:
 	F3DBone();
 
+	MFMatrix boneMatrix;
 	MFMatrix worldMatrix;
-	MFMatrix localMatrix;
 	char name[64];
 	char parentName[64];
 
@@ -265,6 +265,7 @@ public:
 	int ReadF3D(char *pFilename);
 	int ReadF3DFromMemory(char *pMemory);
 	int ReadASE(char *pFilename);
+	int ReadOBJ(const char *pFilename);
 	int ReadDAE(char *pFilename);
 	int ReadMD2(char *pFilename);
 	int ReadMD3(char *pFilename);

@@ -152,6 +152,19 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 			case MFChunkType_Tags:
 			{
+				TagChunk *pTags = (TagChunk*)pTemplate->pDataChunks[a].pData;
+
+				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
+				{
+					if(load)
+					{
+						pTags[b].pTagName += base;
+					}
+					else
+					{
+						pTags[b].pTagName -= base;
+					}
+				}
 				break;
 			}
 
@@ -278,4 +291,70 @@ void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
 {
 	pModel->modelColour = colour;
+}
+
+MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
+{
+	return &pModel->pTemplate->boundingVolume;
+}
+
+
+int MFModel_GetNumTags(MFModel *pModel)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
+
+	if(pChunk)
+		return pChunk->count;
+
+	return 0;
+}
+
+const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
+{
+	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
+
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
+
+	if(pChunk)
+	{
+		TagChunk *pTags = (TagChunk*)pChunk->pData;
+
+		return pTags[tagIndex].pTagName;
+	}
+
+	return NULL;
+}
+
+const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
+{
+	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
+
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
+
+	if(pChunk)
+	{
+		TagChunk *pTags = (TagChunk*)pChunk->pData;
+
+		return pTags[tagIndex].tagMatrix;
+	}
+
+	return MFMatrix::identity;
+}
+
+int MFModel_GetTagIndex(MFModel *pModel, const char *pName)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
+
+	if(pChunk)
+	{
+		TagChunk *pTags = (TagChunk*)pChunk->pData;
+
+		for(int a=0; a<pChunk->count; a++)
+		{
+			if(!MFString_CaseCmp(pTags[a].pTagName, pName))
+				return a;
+		}
+	}
+
+	return -1;
 }

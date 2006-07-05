@@ -12,6 +12,7 @@ extern F3DFile *pModel;
 TiXmlElement* pRoot;
 
 MFMatrix transformMatrix;
+MFMatrix invTransformMatrix;
 bool flipWinding = false;
 
 void startElement(void *userData, const char *name, const char **atts)
@@ -149,6 +150,8 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 		const char *pAuthTool = pAuthoringTool->GetText();
 		strcpy(pModel->authoringTool, pAuthTool);
 	}
+
+	invTransformMatrix.Inverse(transformMatrix);
 }
 
 int ParseDAEMaterial(TiXmlElement *pMaterialNode)
@@ -436,9 +439,28 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					{
 						switch(sources[b].first)
 						{
+							case CT_UV1:
+							{
+								SourceData *pData = GetSourceData(sources[b].second.c_str());
+
+								if(pData)
+								{
+									MFArray<MFVector> *pDataArray = GetSemanticArray(subObject, sources[b].first);
+
+									for(c=0; c<(int)pData->data.size(); c++)
+									{
+										MFVector &v = pDataArray->push();
+
+										for(d=0; d<MFMin(pData->validComponents, 4); d++)
+										{
+											v[d] = d == 1 ? 1.0f - pData->data[c][d] : pData->data[c][d];
+										}
+									}
+								}
+								break;
+							}
 							case CT_Position:
 							case CT_Normal:
-							case CT_UV1:
 							case CT_Colour:
 							case CT_Binormal:
 							case CT_Tangent:
@@ -625,13 +647,13 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 		pMesh = pMesh->NextSiblingElement("mesh");
 	}
 
-	// apply coordinate system correction matrix
-	MFMatrix transform;
-	transform.Multiply4x4(worldTransform, transformMatrix);
-
 	for(a=0; a<subObject.positions.size(); a++)
 	{
-		subObject.positions[a] = ApplyMatrixH(subObject.positions[a], transform);
+		// apply coordinate system correction matrix
+		MFVector newPos = ApplyMatrixH(subObject.positions[a], transformMatrix);
+
+		// and transform into world space
+		subObject.positions[a] = ApplyMatrixH(newPos, worldTransform);
 	}
 
 	// flip the triangle winding if coordinate systems have changed 'handedness'
@@ -682,7 +704,7 @@ void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParen
 	}
 }
 
-void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
+void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, const char *pParentName)
 {
 	TiXmlElement *pTransform;
 	MFMatrix localMat = MFMatrix::identity;
@@ -775,27 +797,54 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix)
 		pTransform = pTransform->NextSiblingElement();
 	}
 
+	localMat.Multiply4x4(invTransformMatrix, localMat).Multiply4x4(transformMatrix);
+
 	// TODO: this may need to be the other way around :)
-	localMat.Multiply(localMat, parentMatrix);
+	MFMatrix worldMat;
+	worldMat.Multiply4x4(localMat, parentMatrix);
 
-	// check for a geometry node
-	TiXmlElement *pGeometry = pSceneNode->FirstChildElement("instance_geometry");
-	if(pGeometry)
+	// check the node name for any naming conventions (bones/ref points/etc)
+	const char *pNodeName = pSceneNode->Attribute("name");
+
+	if(!MFString_CaseCmpN(pNodeName, "r_", 2))
 	{
-		// node is an instance node
-		// find and add instance to scene
-		FindAndAddGeometryToScene(pGeometry, pSceneNode, localMat);
-	}
+		F3DRefPoint &ref = pModel->GetRefPointChunk()->refPoints.push();
 
-	// all the other stuff
-//	TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance_camera");
+		MFString_Copy(ref.name, pNodeName);
+		ref.worldMatrix = worldMat;
+		ref.localMatrix = localMat;
+		ref.bone[0] = -1;
+	}
+	else if(!MFString_CaseCmpN(pNodeName, "z_", 2))
+	{
+		F3DBone &bone = pModel->GetSkeletonChunk()->bones.push();
+
+		MFString_Copy(bone.name, pNodeName);
+		MFString_Copy(bone.parentName, pParentName);
+		bone.boneMatrix = localMat;
+		bone.worldMatrix = worldMat;
+	}
+	else
+	{
+		// check for a geometry node
+		TiXmlElement *pGeometry = pSceneNode->FirstChildElement("instance_geometry");
+		if(pGeometry)
+		{
+			// node is an instance node
+			// find and add instance to scene
+			FindAndAddGeometryToScene(pGeometry, pSceneNode, worldMat);
+		}
+
+		// all the other stuff
+//		TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance_camera");
+	}
 
 	// recurse child nodes
 	TiXmlElement *pNode = pSceneNode->FirstChildElement("node");
 	while(pNode)
 	{
 		// and recurse for child nodes
-		ParseSceneNode(pNode, localMat);
+		ParseSceneNode(pNode, worldMat, pNodeName);
 
 		pNode = pNode->NextSiblingElement("node");
 	}
@@ -821,7 +870,7 @@ void ParseDAEScene(TiXmlElement *pSceneNode)
 				const char *pName = pSceneRoot->Attribute("name");
 				strcpy(pModel->name, pName);
 
-				ParseSceneNode(pSceneRoot, MFMatrix::identity);
+				ParseSceneNode(pSceneRoot, MFMatrix::identity, "");
 			}
 			else
 			{

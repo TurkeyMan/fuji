@@ -1,6 +1,7 @@
 #if !defined(_MFMODEL_INTERNAL_H)
 #define _MFMODEL_INTERNAL_H
 
+#include "MFBoundingVolume.h"
 #include "MFModel.h"
 #include "MFMaterial_Internal.h"
 
@@ -60,8 +61,10 @@ struct MFModelTemplate
 
 	const char *pName;
 
-	int numDataChunks;
 	MFModelDataChunk *pDataChunks;
+	int numDataChunks;
+
+	MFBoundingVolume boundingVolume;
 
 	int refCount;
 };
@@ -71,13 +74,14 @@ struct SubObjectChunk
 	const char *pSubObjectName;
 //	MFMaterial *pMaterial;
 
-	int numMeshChunks;
 	MFMeshChunk *pMeshChunks;
+	int numMeshChunks;
 };
 
 struct BoneChunk
 {
-	MFVector boneOrigin;
+	MFMatrix boneMatrix;
+	MFMatrix worldMatrix;
 	const char *pBoneName;
 	const char *pParentName;
 

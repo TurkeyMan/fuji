@@ -10,11 +10,14 @@ extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_PC;
 
+extern char *gpCommandLineBuffer;
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
 	MFCALLSTACK;
 
 	apphInstance = hInstance;
+	gpCommandLineBuffer = lpCmdLine;
 
 	MFSystem_GameLoop();
 

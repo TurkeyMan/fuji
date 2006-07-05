@@ -9,6 +9,8 @@
 #if !defined(_MFMODEL_INTERNAL_H)
 #define _MFMODEL_INTERNAL_H
 
+#include "MFBoundingVolume.h"
+
 /**
  * @struct MFModel
  * Represents a Fuji model.
@@ -104,19 +106,21 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName);
  */
 const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
 
+MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
+
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 
 // bone structure
-int MFModel_GetNumBones();
-const char* MFModel_GetBoneName(int boneIndex);
-const MFVector& MFModel_GetBoneOrigin(int boneIndex);
-int MFModel_GetBoneIndex(const char *pName);
+int MFModel_GetNumBones(MFModel *pModel);
+const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
+const MFVector& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
+int MFModel_GetBoneIndex(MFModel *pModel, const char *pName);
 
 // tag's
-int MFModel_GetNumTags();
-const char* MFModel_GetTagName(int tagIndex);
-const MFVector& MFModel_GetTagMatrix(int tagIndex);
-int MFModel_GetTagIndex(const char *pName);
+int MFModel_GetNumTags(MFModel *pModel);
+const char* MFModel_GetTagName(MFModel *pModel, int tagIndex);
+const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex);
+int MFModel_GetTagIndex(MFModel *pModel, const char *pName);
 
 // ... etc
 

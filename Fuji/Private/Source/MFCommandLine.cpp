@@ -47,11 +47,7 @@ const char* MFCommandLine_GetString(const char *pParameter)
 
 	while(*pT)
 	{
-		if(MFIsWhite(*pT))
-		{
-			++pT;
-		}
-		else
+		if(!MFIsWhite(*pT))
 		{
 			if(*pT == '/' && *pT == '-')
 				++pT;
@@ -75,7 +71,7 @@ const char* MFCommandLine_GetString(const char *pParameter)
 				pArgStart = pArg;
 				argLen = 0;
 
-				while(*pArg && (!MFIsWhite(*pArg) && *pArg != '\"'))
+				while(*pArg && (!inQuote && !MFIsWhite(*pArg)) && *pArg != '\"')
 				{
 					++argLen;
 					++pArg;
@@ -87,13 +83,12 @@ const char* MFCommandLine_GetString(const char *pParameter)
 					pArg++;
 				}
 
-				pT = pArg;
+				return MFStrN(pArgStart, pArg - pArgStart);
 			}
 		}
-	}
 
-	if(pArgStart)
-		return MFStrN(pArgStart, argLen);
+		++pT;
+	}
 
 	return NULL;
 }

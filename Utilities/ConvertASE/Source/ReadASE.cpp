@@ -782,7 +782,7 @@ void ParseASEFile(char *pFilePtr)
 	int braceCount = 0;
 	bool inQuote = false;
 
-	while(*pFilePtr != NULL)
+	while(*pFilePtr != 0)
 	{
 		while(!(*pFilePtr == '*' && !braceCount && !inQuote) && *pFilePtr != NULL)
 		{

@@ -137,6 +137,9 @@
 			<File
 				RelativePath=".\Source\ReadMEMD2.h">
 			</File>
+			<File
+				RelativePath=".\Source\ReadOBJ.cpp">
+			</File>
 			<Filter
 				Name="Lib"
 				Filter="">
