@@ -43,6 +43,14 @@ class F3DVertex
 public:
 	F3DVertex();
 
+	bool operator==(const F3DVertex &v)
+	{
+		return position == v.position &&
+				uv1 == v.uv1 &&
+				normal == v.normal &&
+				colour == v.colour;
+	}
+
 	int position;
 	int normal;
 	int biNormal;

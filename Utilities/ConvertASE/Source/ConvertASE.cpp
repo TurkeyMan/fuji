@@ -124,8 +124,8 @@ int main(int argc, char *argv[])
 	}
 
 	// process model
-	pModel->ProcessSkeletonData();
 	pModel->Optimise();
+	pModel->ProcessSkeletonData();
 	pModel->ProcessCollisionData();
 	pModel->StripModel();
 

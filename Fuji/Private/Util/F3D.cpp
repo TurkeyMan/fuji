@@ -827,19 +827,262 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 
 void F3DFile::Optimise()
 {
-	// for each subobject
-		// if matstrips use the same material, merge the data
+	MFArray<int> vertexUsage;
+	MFArray<int> vertexMapping;
+	MFArray<int> posUsage;
+	MFArray<int> posMapping;
+	MFArray<int> uvUsage;
+	MFArray<int> uvMapping;
+	MFArray<int> normUsage;
+	MFArray<int> normMapping;
+	MFArray<int> colUsage;
+	MFArray<int> colMapping;
+	int a, b, c, d, x;
 
-		// for each matstrip
-			// remove vertices not referenced by triangles
+	// remove all verts not referenced by triangles
+	for(a=0; a<GetMeshChunk()->subObjects.size(); a++)
+	{
+		F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
-			// remove vertex data not referenced by vertices
+		for(b=0; b<sub.matSubobjects.size(); b++)
+		{
+			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
 
-			// remove all duplicate vertex data
+			vertexUsage.resize(matsub.vertices.size());
+			vertexMapping.resize(matsub.vertices.size());
 
-			// remove diplicate vertices
-		// end for
-	// end for
+			for(c=0; c<matsub.triangles.size(); c++)
+			{
+				F3DTriangle &tri = matsub.triangles[c];
+				++vertexUsage[tri.v[0]];
+				++vertexUsage[tri.v[1]];
+				++vertexUsage[tri.v[2]];
+			}
+
+			x=0;
+
+			for(c=0; c<matsub.vertices.size(); c++)
+			{
+				if(vertexUsage[c])
+				{
+					if(x != c)
+						matsub.vertices[x] = matsub.vertices[c];
+
+					vertexMapping[c] = x;
+					++x;
+				}
+			}
+
+			matsub.vertices.resize(x);
+
+			for(c=0; c<matsub.triangles.size(); c++)
+			{
+				F3DTriangle &tri = matsub.triangles[c];
+				tri.v[0] = vertexMapping[tri.v[0]];
+				tri.v[1] = vertexMapping[tri.v[1]];
+				tri.v[2] = vertexMapping[tri.v[2]];
+			}
+		}
+
+		int posSize = sub.positions.size();
+		int uvSize = sub.uvs.size();
+		int normSize = sub.normals.size();
+		int colSize = sub.colours.size();
+
+		posUsage.resize(posSize);
+		posMapping.resize(posSize);
+		uvUsage.resize(uvSize);
+		uvMapping.resize(uvSize);
+		normUsage.resize(normSize);
+		normMapping.resize(normSize);
+		colUsage.resize(colSize);
+		colMapping.resize(colSize);
+
+		// remove vertex data not referenced by verts
+		for(b=0; b<sub.matSubobjects.size(); b++)
+		{
+			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
+
+			for(c=0; c<matsub.vertices.size(); c++)
+			{
+				F3DVertex &vert = matsub.vertices[c];
+
+				if(vert.position != -1)
+					++posUsage[vert.position];
+				if(vert.uv1 != -1)
+					++uvUsage[vert.uv1];
+				if(vert.normal != -1)
+					++normUsage[vert.normal];
+				if(vert.colour != -1)
+					++colUsage[vert.colour];
+			}
+		}
+
+		x = 0;
+		for(b=0; b<posSize; b++)
+		{
+			if(posUsage[b])
+			{
+				if(x != b)
+					sub.positions[x] = sub.positions[b];
+
+				posMapping[b] = x;
+
+				// remove duplicate vertex data
+				for(c=b+1; c<posSize; c++)
+				{
+					if(sub.positions[x] == sub.positions[c])
+					{
+						posMapping[c] = x;
+						posUsage[c] = 0;
+					}
+				}
+
+				++x;
+			}
+		}
+		sub.positions.resize(x);
+
+		x = 0;
+		for(b=0; b<uvSize; b++)
+		{
+			if(uvUsage[b])
+			{
+				if(x != b)
+					sub.uvs[x] = sub.uvs[b];
+
+				uvMapping[b] = x;
+
+				// remove duplicate vertex data
+				for(c=b+1; c<uvSize; c++)
+				{
+					if(sub.uvs[x] == sub.uvs[c])
+					{
+						uvMapping[c] = x;
+						uvUsage[c] = 0;
+					}
+				}
+
+				++x;
+			}
+		}
+		sub.uvs.resize(x);
+
+		x = 0;
+		for(b=0; b<normSize; b++)
+		{
+			if(normUsage[b])
+			{
+				if(x != b)
+					sub.normals[x] = sub.normals[b];
+
+				normMapping[b] = x;
+
+				// remove duplicate vertex data
+				for(c=b+1; c<normSize; c++)
+				{
+					if(sub.normals[x] == sub.normals[c])
+					{
+						normMapping[c] = x;
+						normUsage[c] = 0;
+					}
+				}
+
+				++x;
+			}
+		}
+		sub.normals.resize(x);
+
+		x = 0;
+		for(b=0; b<colSize; b++)
+		{
+			if(colUsage[b])
+			{
+				if(x != b)
+					sub.colours[x] = sub.colours[b];
+
+				colMapping[b] = x;
+
+				// remove duplicate vertex data
+				for(c=b+1; c<colSize; c++)
+				{
+					if(sub.colours[x] == sub.colours[c])
+					{
+						colMapping[c] = x;
+						colUsage[c] = 0;
+					}
+				}
+
+				++x;
+			}
+		}
+		sub.colours.resize(x);
+
+		for(b=0; b<sub.matSubobjects.size(); b++)
+		{
+			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
+
+			for(c=0; c<matsub.vertices.size(); c++)
+			{
+				F3DVertex &vert = matsub.vertices[c];
+
+				if(vert.position != -1)
+					vert.position = posMapping[vert.position];
+				if(vert.uv1 != -1)
+					vert.uv1 = uvMapping[vert.uv1];
+				if(vert.normal != -1)
+					vert.normal = normMapping[vert.normal];
+				if(vert.colour != -1)
+					vert.colour = colMapping[vert.colour];
+			}
+		}
+
+		// remove duplicate verts
+		for(b=0; b<sub.matSubobjects.size(); b++)
+		{
+			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
+
+			vertexMapping.resize(matsub.vertices.size());
+
+			int vertSize = matsub.vertices.size();
+
+			for(c=0; c<vertSize; c++)
+				vertexUsage[c] = 1;
+
+			x=0;
+			for(c=0; c<vertSize; c++)
+			{
+				if(vertexUsage[c])
+				{
+					if(x != c)
+						matsub.vertices[x] = matsub.vertices[c];
+
+					vertexMapping[c] = x;
+
+					// remove duplicate vertex data
+					for(d=c+1; d<vertSize; d++)
+					{
+						if(matsub.vertices[x] == matsub.vertices[d])
+						{
+							vertexMapping[d] = x;
+							vertexUsage[d] = 0;
+						}
+					}
+
+					++x;
+				}
+			}
+			matsub.vertices.resize(x);
+
+			for(c=0; c<matsub.triangles.size(); c++)
+			{
+				F3DTriangle &tri = matsub.triangles[c];
+				tri.v[0] = vertexMapping[tri.v[0]];
+				tri.v[1] = vertexMapping[tri.v[1]];
+				tri.v[2] = vertexMapping[tri.v[2]];
+			}
+		}
+	}
 }
 
 void F3DFile::StripModel()
