@@ -30,7 +30,9 @@ int MFIniLine::GetStringCount()
 
 const char *MFIniLine::GetString(int index)
 {
-	return pIni->pStrings[firstString+index];
+	if(index < stringCount)
+		return pIni->pStrings[firstString+index];
+	return NULL;
 }
 
 bool MFIniLine::IsString(int index, const char *pString)
@@ -45,7 +47,7 @@ float MFIniLine::GetFloat(int index)
 
 int MFIniLine::GetInt(int index)
 {
-	if (index >= this->stringCount)
+	if(index >= stringCount)
 	{
 		return 0;
 	}
@@ -54,7 +56,7 @@ int MFIniLine::GetInt(int index)
 
 bool MFIniLine::GetBool(int index)
 {
-	if (index >= this->stringCount)
+	if(index >= stringCount)
 	{
 		return false;
 	}
