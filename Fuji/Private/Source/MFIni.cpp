@@ -13,31 +13,11 @@
 #endif
 
 //=============================================================================
-MFIniLine *MFIniLine::Next()
-{
-	return (terminate ? NULL : this+subtreeLineCount+1);
-}
-
-MFIniLine *MFIniLine::Sub()
-{
-	return (subtreeLineCount > 0) ? this+1 : NULL;
-}
-
-int MFIniLine::GetStringCount()
-{
-	return stringCount;
-}
-
 const char *MFIniLine::GetString(int index)
 {
 	if(index < stringCount)
 		return pIni->pStrings[firstString+index];
 	return NULL;
-}
-
-bool MFIniLine::IsString(int index, const char *pString)
-{
-	return !MFString_CaseCmp(GetString(index), pString);
 }
 
 float MFIniLine::GetFloat(int index)

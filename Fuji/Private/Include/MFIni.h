@@ -22,14 +22,14 @@ class MFIniLine
 {
 friend class MFIni;
 public:
-	MFIniLine *Next();
-	MFIniLine *Sub();
+	MFIniLine *Next() { return (terminate ? NULL : this+subtreeLineCount+1); }
+	MFIniLine *Sub() { return (subtreeLineCount > 0) ? this+1 : NULL; }
 
 	// find a 2 string entry (ie. "label data")
 	MFIniLine *FindEntry(const char *pLabel, const char *pData);
 
-	int GetStringCount();
-	bool IsString(int index, const char *pString);
+	int GetStringCount() { return stringCount; }
+	bool IsString(int index, const char *pString) { return !MFString_CaseCmp(GetString(index), pString); }
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);
