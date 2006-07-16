@@ -94,7 +94,7 @@ enum MFEndian
 
 	// disable 'unreferenced formal parameter'
 	#pragma warning(disable:4100)
-	
+
 	// Disable depreciated bullshit
 	#pragma warning(disable:4996)
 
