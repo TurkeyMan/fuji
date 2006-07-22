@@ -105,8 +105,8 @@ int MFScript_Execute(MFScriptContext *pContext, const char *pEntryPoint);
 /**
  * Execute an immediate instruction.
  * Executes an immediate instruction.
- * @param pContext Pointer to an MFScriptContext to execute within.
  * @param pCode String containing the code to execute.
+ * @param pContext Pointer to an MFScriptContext to execute within.
  * @return Returns the value returned from the script entrypoint function.
  * @see MFScript_Execute()
  */

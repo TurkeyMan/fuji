@@ -1,3 +1,6 @@
+#if !defined(_MFINI_H)
+#define _MFINI_H
+
 // Mount Fuji - INI file reader
 //
 //================================================
@@ -84,3 +87,5 @@ protected:
 	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd);
 	void InitLine(MFIniLine *pLine);
 };
+
+#endif // _MFINI_H
