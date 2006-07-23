@@ -10,7 +10,7 @@ extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_PC;
 
-char *gpCommandLineBuffer;
+char *gpCommandLineBuffer = NULL;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {

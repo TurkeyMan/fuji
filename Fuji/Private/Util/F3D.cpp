@@ -593,6 +593,112 @@ void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32
 	}
 }
 
+void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
+{
+	int numMeshChunks = sub.matSubobjects.size();
+	int a, b, c;
+
+	// increment size of MeshChunk_PSP structure
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_PSP)*numMeshChunks);
+
+	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
+
+	// fill out mesh chunk, and build mesh...
+	for(a=0; a<numMeshChunks; a++)
+	{
+		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
+
+		int numTriangles = matsub.triangles.size();
+
+		pMeshChunk[a].numVertices = matsub.vertices.size();
+		pMeshChunk[a].numIndices = numTriangles * 3;
+		pMeshChunk[a].indexDataSize = pMeshChunk[a].numIndices * sizeof(uint16);
+
+		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+
+		// write verts
+		struct V3 { float x, y, z; };
+		struct V2 { float u, v; };
+
+		pMeshChunk[a].pVertexData = pOffset;
+		pMeshChunk[a].vertexDataSize = pMeshChunk[a].numVertices * sizeof(V3);
+		pOffset += MFALIGN16(pMeshChunk[a].vertexDataSize);
+		pMeshChunk[a].pNormalData = pOffset;
+		pMeshChunk[a].normalDataSize = pMeshChunk[a].numVertices * sizeof(V3);
+		pOffset += MFALIGN16(pMeshChunk[a].normalDataSize);
+		pMeshChunk[a].pColourData = pOffset;
+		pMeshChunk[a].colourDataSize = pMeshChunk[a].numVertices * sizeof(uint32);
+		pOffset += MFALIGN16(pMeshChunk[a].colourDataSize);
+		pMeshChunk[a].pUVData = pOffset;
+		pMeshChunk[a].uvDataSize = pMeshChunk[a].numVertices * sizeof(V2);
+		pOffset += MFALIGN16(pMeshChunk[a].uvDataSize);
+
+		V3 *pVert = (V3*)pMeshChunk[a].pVertexData;
+		V3 *pNorm = (V3*)pMeshChunk[a].pNormalData;
+		uint32 *pCol = (uint32*)pMeshChunk[a].pColourData;
+		V2 *pUV = (V2*)pMeshChunk[a].pUVData;
+
+		for(b=0; b<(int)pMeshChunk[a].numVertices; b++)
+		{
+			const F3DVertex &vert = matsub.vertices[b];
+
+			const MFVector &pos = sub.positions[vert.position];
+			const MFVector &uv = sub.uvs[vert.uv1];
+			const MFVector &norm = sub.normals[vert.normal];
+			const MFVector &col = sub.colours[vert.colour];
+
+			pVert->x = pos.x;
+			pVert->y = pos.y;
+			pVert->z = pos.z;
+			pNorm->x = norm.x;
+			pNorm->y = norm.y;
+			pNorm->z = norm.z;
+			*pCol = (uint32)(col.x * 255.0f) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+			pUV->u = uv.x;
+			pUV->v = uv.y;
+
+			pVolume->min = MFMin(pVolume->min, pos);
+			pVolume->max = MFMax(pVolume->max, pos);
+			AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+			++pVert;
+			++pNorm;
+			++pCol;
+			++pUV;
+		}
+
+		// write indices
+		pMeshChunk[a].pIndexData = pOffset;
+		pOffset += MFALIGN16(pMeshChunk[a].indexDataSize);
+
+		uint16 *pIndex = (uint16*)pMeshChunk[a].pIndexData;
+
+		for(b=0; b<numTriangles; b++)
+		{
+			for(c=0; c<3; c++)
+			{
+				*pIndex = (uint16)matsub.triangles[b].v[c];
+				++pIndex;
+			}
+		}
+	}
+}
+
+void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+{
+	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunks;
+
+	for(int a=0; a<count; a++)
+	{
+		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
+		pMC[a].pVertexData -= base;
+		pMC[a].pNormalData -= base;
+		pMC[a].pColourData -= base;
+		pMC[a].pUVData -= base;
+		pMC[a].pIndexData -= base;
+	}
+}
+
 void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 {
 	int a, b;

@@ -94,6 +94,26 @@ struct MFMeshChunk_PSP : public MFMeshChunk
 };
 #endif
 
+#if defined(_LINUX) || defined(_FUJI_UTIL)
+struct MFMeshChunk_Linux : public MFMeshChunk
+{
+	uint32 numVertices;
+	uint32 numIndices;
+
+	const char *pVertexData;
+	uint32 vertexDataSize;
+	const char *pNormalData;
+	uint32 normalDataSize;
+	const char *pColourData;
+	uint32 colourDataSize;
+	const char *pUVData;
+	uint32 uvDataSize;
+
+	const char *pIndexData;
+	uint32 indexDataSize;
+};
+#endif
+
 // a debug menu material information display object
 class MaterialBrowser : public MenuObject
 {

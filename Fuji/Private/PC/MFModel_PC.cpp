@@ -49,6 +49,8 @@ void MFModel_Draw(MFModel *pModel)
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
+	MFCALLSTACK;
+
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
@@ -84,6 +86,8 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
+	MFCALLSTACK;
+
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
 
 	MFMaterial_Destroy(pMC->pMaterial);
@@ -100,6 +104,8 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 {
+	MFCALLSTACK;
+
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
 
 	if(load)

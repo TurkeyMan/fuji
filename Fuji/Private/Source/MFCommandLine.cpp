@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFCommandLine.h"
 
-extern char *gpCommandLineBuffer = NULL;
+extern char *gpCommandLineBuffer;
 
 const char * MFCommandLine_GetCommandLineString()
 {

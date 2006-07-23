@@ -105,6 +105,7 @@ PSP/MFDebug_PSP.o \
 PSP/MFHeap_PSP.o \
 PSP/MFInput_PSP.o \
 PSP/MFMaterial_PSP.o \
+PSP/MFModel_PSP.o \
 PSP/MFPrimitive_PSP.o \
 PSP/MFRenderer_PSP.o \
 PSP/MFSockets_PSP.o \
@@ -115,7 +116,6 @@ PSP/MFThread_PSP.o \
 PSP/MFTranslation_PSP.o \
 PSP/FileSystem/MFFileSystemNative_PSP.o \
 PSP/Materials/MFMat_Standard_PSP.o \
-Null/MFModel_Null.o \
 Null/Materials/MFMat_Effect_Null.o
 endif
 
