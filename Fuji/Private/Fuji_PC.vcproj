@@ -41,9 +41,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -95,9 +95,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -149,9 +149,9 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)PC\vorbis\lib\&quot;;&quot;$(ProjectDir)PC\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -207,6 +207,12 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFCollision.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFCollision_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFCommandLine.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFDebug.cpp">
@@ -279,6 +285,9 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFScript_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFScript_Pawn.cpp">
 			</File>
 			<File
 				RelativePath=".\Source\MFScript_Registration.cpp">
@@ -404,6 +413,9 @@
 				RelativePath=".\Include\MFArray.inl">
 			</File>
 			<File
+				RelativePath=".\Include\MFAuxillaryDisplay.h">
+			</File>
+			<File
 				RelativePath=".\Include\MFBoundingVolume.h">
 			</File>
 			<File
@@ -414,6 +426,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFCollision.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFCommandLine.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFDebug.h">
@@ -547,6 +562,9 @@
 				RelativePath=".\Pc\Display_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Pc\MFAuxillaryDisplay_PC.cpp">
+			</File>
+			<File
 				RelativePath=".\Pc\MFDebug_PC.cpp">
 			</File>
 			<File
@@ -596,6 +614,12 @@
 			</File>
 			<File
 				RelativePath=".\Pc\MFTranslation_PC.cpp">
+			</File>
+			<File
+				RelativePath=".\Pc\SysLogo-256.h">
+			</File>
+			<File
+				RelativePath=".\Pc\SysLogo-64.h">
 			</File>
 			<Filter
 				Name="Materials"
