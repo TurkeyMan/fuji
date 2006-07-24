@@ -5,20 +5,20 @@ Systems to Support:
 	Debugging Tools			* WORKING (Manu)
 
 	Vector Class			* DONE (Manu)
-	Matrix Class			* WORKING (Manu)
+	Matrix Class			* DONE (Manu)
 
 	View System				* DONE (Manu)
 	Camera
 
-	Material				* BASIC IMPLEMENTATION (Manu)
+	Material				* DONE (Manu)
 	Model					* BASIC IMPLEMENTATION (Manu)
 	Animation				* WORKING (Manu)
 
 	Primitive Interface		* DONE (Manu)
 
-	Controller/Input I/O	* BASIC IMPLEMENTATION (Manu)
-	FileSystem				* BASIC IMPLEMENTATION (Manu)
-	Networking				* BASIC IMPLEMENTATION (Manu)
+	Controller/Input I/O	* DONE (Manu)
+	FileSystem				* DONE (Manu)
+	Networking				* DONE (Manu)
 
 	Sound
 

@@ -6,6 +6,8 @@
 	#include <windows.h>
 	#include "lgLcd/include/lglcd.h"
 //	#pragma comment(lib, "lglcd")
+
+	extern const uint8 gDefaultImage[];
 #endif
 
 #define MAX_AUX_DISPLAYS 16
@@ -21,14 +23,12 @@ static char gSoftKeystate[MAX_AUX_DISPLAYS][MAX_SOFT_KEYS];
 
 static int gConnection;
 
-extern const uint8 gDefaultImage[];
-
 void MFAuxDisplay_Init(const char *pAppName)
 {
-#if defined(SUPPORT_G15)
 	memset(gSoftKeystate, 0, sizeof(gSoftKeystate));
 	memset(gLastKeystate, 0, sizeof(gSoftKeystate));
 
+#if defined(SUPPORT_G15)
 	DWORD r = lgLcdInit();
 
 	if(r == ERROR_SUCCESS)
@@ -110,9 +110,9 @@ void MFAuxDisplay_Deinit()
 
 void MFAuxDisplay_Update()
 {
-#if defined(SUPPORT_G15)
 	memcpy(gLastKeystate, gSoftKeystate, sizeof(gLastKeystate));
 
+#if defined(SUPPORT_G15)
 	for(int a=0; a<gNumDisplays; a++)
 	{
 		DWORD buttons;
@@ -170,6 +170,7 @@ bool MFAuxDisplay_WasReleased(int device, int button)
 	return !gSoftKeystate[device][button] && gLastKeystate[device][button];
 }
 
+#if defined(SUPPORT_G15)
 static const uint8 gDefaultImage[160*43] =
 {
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -216,3 +217,4 @@ static const uint8 gDefaultImage[160*43] =
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 };
+#endif
