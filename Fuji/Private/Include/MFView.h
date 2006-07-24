@@ -157,6 +157,11 @@ MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutpu
  */
 MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput);
 
+
+// not sure how to do these, since we dont store either matrix, and we only have one available at a time...
+void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult);
+void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult);
+
 #endif
 
 /** @} */
