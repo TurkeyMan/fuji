@@ -116,39 +116,13 @@ PSP/MFThread_PSP.o \
 PSP/MFTranslation_PSP.o \
 PSP/FileSystem/MFFileSystemNative_PSP.o \
 PSP/Materials/MFMat_Standard_PSP.o \
-Null/Materials/MFMat_Effect_Null.o
-endif
-
-ifeq ($(PLATFORM),DC)
-OBJS := $(OBJS) DC/Display_DC.o \
-DC/MFInput_DC.o \
-DC/MFMaterial_DC.o \
-DC/MFPrimitive_DC.o \
-DC/MFRenderer_DC.o \
-DC/MFSound_DC.o \
-DC/MFSystem_DC.o \
-DC/MFTexture_DC.o \
-DC/FileSystem/MFFileSystemNative_DC.o \
-DC/Materials/Mat_Standard_DC.o \
-Null/Materials/MFMat_Effect_Null.o
-endif
-
-ifeq ($(PLATFORM),GC)
-OBJS := $(OBJS) GC/Display_GC.o \
-GC/MFInput_GC.o \
-GC/MFMaterial_GC.o \
-GC/MFPrimitive_GC.o \
-GC/MFRenderer_GC.o \
-GC/MFSound_GC.o \
-GC/MFSystem_GC.o \
-GC/MFTexture_GC.o \
-GC/FileSystem/MFFileSystemNative_GC.o \
-GC/Materials/Mat_Standard_GC.o \
-Null/Materials/MFMat_Effect_Null.o
+Null/Materials/MFMat_Effect_Null.o \
+Null/MFAuxillaryDisplay_Null.o
 endif
 
 ifeq ($(PLATFORM),LINUX)
-OBJS := $(OBJS) Linux/MFDebug_Linux.o \
+OBJS := $(OBJS) Linux/Display_Linux.o \
+Linux/MFDebug_Linux.o \
 Linux/MFHeap_Linux.o \
 Linux/MFInput_Linux.o \
 Linux/MFMaterial_Linux.o \
@@ -163,29 +137,16 @@ Linux/MFTranslation_Linux.o \
 Linux/FileSystem/MFFileSystemNative_Linux.o \
 Linux/Materials/MFMat_Effect_Linux.o \
 Linux/Materials/MFMat_Standard_Linux.o \
-Linux/Display_Linux.o
-endif
-
-ifeq ($(PLATFORM),PS2)
-OBJS := $(OBJS) PS2/Display_PS2.o \
-PS2/MFInput_PS2.o \
-PS2/MFMaterial_PS2.o \
-PS2/MFPrimitive_PS2.o \
-PS2/MFRenderer_PS2.o \
-PS2/MFSound_PS2.o \
-PS2/MFSystem_PS2.o \
-PS2/MFTexture_PS2.o \
-PS2/FileSystem/MFFileSystemNative_PS2.o \
-PS2/Materials/Mat_Standard_PS2.o \
-Null/Materials/MFMat_Effect_Null.o
+Null/MFAuxillaryDisplay_Null.o
 endif
 
 ifeq ($(PLATFORM),PC)
 OBJS := $(OBJS) PC/Display_PC.o \
+PC/MFAuxillaryDisplay_PC.o \
 PC/MFDebug_PC.o \
 PC/MFHeap_PC.o \
-PC/MFInputMappings_PC.o \
 PC/MFInput_PC.o \
+PC/MFInputMappings_PC.o \
 PC/MFMaterial_PC.o \
 PC/MFModel_PC.o \
 PC/MFPrimitive_PC.o \
@@ -199,6 +160,51 @@ PC/MFTranslation_PC.o \
 PC/FileSystem/MFFileSystemNative_PC.o \
 PC/Materials/MFMat_Effect_PC.o \
 PC/Materials/MFMat_Standard_PC.o
+endif
+
+ifeq ($(PLATFORM),DC)
+OBJS := $(OBJS) DC/Display_DC.o \
+DC/MFInput_DC.o \
+DC/MFMaterial_DC.o \
+DC/MFPrimitive_DC.o \
+DC/MFRenderer_DC.o \
+DC/MFSound_DC.o \
+DC/MFSystem_DC.o \
+DC/MFTexture_DC.o \
+DC/FileSystem/MFFileSystemNative_DC.o \
+DC/Materials/Mat_Standard_DC.o \
+Null/Materials/MFMat_Effect_Null.o \
+Null/MFAuxillaryDisplay_Null.o
+endif
+
+ifeq ($(PLATFORM),GC)
+OBJS := $(OBJS) GC/Display_GC.o \
+GC/MFInput_GC.o \
+GC/MFMaterial_GC.o \
+GC/MFPrimitive_GC.o \
+GC/MFRenderer_GC.o \
+GC/MFSound_GC.o \
+GC/MFSystem_GC.o \
+GC/MFTexture_GC.o \
+GC/FileSystem/MFFileSystemNative_GC.o \
+GC/Materials/Mat_Standard_GC.o \
+Null/Materials/MFMat_Effect_Null.o \
+Null/MFAuxillaryDisplay_Null.o
+endif
+
+ifeq ($(PLATFORM),PS2)
+OBJS := $(OBJS) PS2/Display_PS2.o \
+PS2/MFInput_PS2.o \
+PS2/MFMaterial_PS2.o \
+PS2/MFPrimitive_PS2.o \
+PS2/MFRenderer_PS2.o \
+PS2/MFSound_PS2.o \
+PS2/MFSystem_PS2.o \
+PS2/MFTexture_PS2.o \
+PS2/FileSystem/MFFileSystemNative_PS2.o \
+PS2/Materials/Mat_Standard_PS2.o \
+Null/Materials/MFMat_Effect_Null.o \
+Null/MFAuxillaryDisplay_Null.o
 endif
 
 #XBox/Display_XB.o
