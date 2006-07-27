@@ -74,15 +74,16 @@ enum eScriptNode
 	snSwitch,
 	snCase,
 	snImport,
-	snStruct,
-	snInitList
+	snClass,
+	snInitList,
+	snInterface
 };
 
 struct sToken
 {
 	eTokenType type;
-	int pos;
-	int length;
+	size_t pos;
+	size_t length;
 };
 
 class asCScriptNode
@@ -95,12 +96,12 @@ public:
 	void AddChildLast(asCScriptNode *node);
 	void DisconnectParent();
 
-	void UpdateSourcePos(int pos, int length);
+	void UpdateSourcePos(size_t pos, size_t length);
 
 	eScriptNode nodeType;
 	eTokenType tokenType;
-	int tokenPos;
-	int tokenLength;
+	size_t tokenPos;
+	size_t tokenLength;
 
 	asCScriptNode *parent;
 	asCScriptNode *next;

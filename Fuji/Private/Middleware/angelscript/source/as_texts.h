@@ -48,13 +48,13 @@
 
 #define TXT_BOTH_MUST_BE_SAME             "Both expressions must have the same type"
 
-#define TXT_CANT_GUARANTEE_REF            "Cannot guarantee safety of reference. Copy the value to a local variable first"
 #define TXT_CANT_IMPLICITLY_CONVERT_s_TO_s "Can't implicitly convert from '%s' to '%s'."
 #define TXT_CANT_RETURN_VALUE             "Can't return value when return type is 'void'"
 #define TXT_CHANGE_SIGN_u_d               "Implicit conversion changed sign of value, %u -> %d."
 #define TXT_CHANGE_SIGN_d_u               "Implicit conversion changed sign of value, %d -> %u."
 #define TXT_COMPILING_s                   "Compiling %s"
 #define TXT_CONST_NOT_PRIMITIVE           "Only primitives may be declared as const"
+#define TXT_CONSTRUCTOR_NAME_ERROR        "The constructor name must be the same as the class"
 
 #define TXT_DATA_TYPE_CANT_BE_s           "Data type can't be '%s'"
 #define TXT_DEFAULT_MUST_BE_LAST          "The default case must be the last one"
@@ -67,6 +67,7 @@
 #define TXT_EXPECTED_DATA_TYPE            "Expected data type"
 #define TXT_EXPECTED_EXPRESSION_VALUE     "Expected expression value"
 #define TXT_EXPECTED_IDENTIFIER           "Expected identifier"
+#define TXT_EXPECTED_METHOD_OR_PROPERTY   "Expected method or property"
 #define TXT_EXPECTED_ONE_OF               "Expected one of: "
 #define TXT_EXPECTED_OPERATOR             "Expected operator"
 #define TXT_EXPECTED_s_OR_s               "Expected '%s' or '%s'"
@@ -75,7 +76,6 @@
 #define TXT_EXPECTED_STRING               "Expected string"
 #define TXT_EXPR_MUST_BE_BOOL             "Expression must be of boolean type"
 #define TXT_EXPR_MUST_EVAL_TO_CONSTANT    "Expression must evaluate to a constant"
-
 
 #define TXT_FUNCTION_IN_GLOBAL_EXPR       "Function calls are not allowed in global expressions"
 #define TXT_FUNCTION_ALREADY_EXIST        "A function with the same name and parameters already exist"
@@ -90,22 +90,24 @@
 #define TXT_INVALID_BREAK                 "Invalid 'break'"
 #define TXT_INVALID_CONTINUE              "Invalid 'continue'"
 #define TXT_INVALID_TYPE                  "Invalid type"
+#define TXT_INTERFACE_ALREADY_IMPLEMENTED "The interface is already implemented"
 #define TXT_ILLEGAL_MEMBER_TYPE           "Illegal member type"
 #define TXT_ILLEGAL_VARIABLE_NAME_s       "Illegal variable name '%s'."
 
-#define TXT_METHOD_IN_GLOBAL_EXPR         "Object method calls are not allowed in global expressions"
-#define TXT_MORE_THAN_ONE_MATCHING_OP     "Found more than one matching operator"
-#define TXT_MULTIPLE_MATCHING_SIGNATURES_TO_s "Multiple matching signatures to '%s'"
-#define TXT_MUST_BE_OBJECT                "Only objects have constructors"
-#define TXT_s_MUST_BE_SENT_BY_REF         "'%s' must be sent by reference"
-#define TXT_MUST_RETURN_VALUE             "Must return a value"
+#define TXT_METHOD_IN_GLOBAL_EXPR                   "Object method calls are not allowed in global expressions"
+#define TXT_MISSING_IMPLEMENTATION_OF_s             "Missing implementation of '%s'"
+#define TXT_MORE_THAN_ONE_MATCHING_OP               "Found more than one matching operator"
+#define TXT_MULTIPLE_MATCHING_SIGNATURES_TO_s       "Multiple matching signatures to '%s'"
+#define TXT_MUST_BE_OBJECT                          "Only objects have constructors"
+#define TXT_s_MUST_BE_SENT_BY_REF                   "'%s' must be sent by reference"
+#define TXT_MUST_RETURN_VALUE                       "Must return a value"
 
 #define TXT_NAME_CONFLICT_s_CONSTANT        "Name conflict. '%s' is a constant."
 #define TXT_NAME_CONFLICT_s_EXTENDED_TYPE   "Name conflict. '%s' is an extended data type."
 #define TXT_NAME_CONFLICT_s_FUNCTION        "Name conflict. '%s' is a function."
 #define TXT_NAME_CONFLICT_s_GLOBAL_VAR      "Name conflict. '%s' is a global variable."
 #define TXT_NAME_CONFLICT_s_GLOBAL_PROPERTY "Name conflict. '%s' is a global property."
-#define TXT_NAME_CONFLICT_s_STRUCT          "Name conflict. '%s' is a struct."
+#define TXT_NAME_CONFLICT_s_STRUCT          "Name conflict. '%s' is a class."
 #define TXT_NAME_CONFLICT_s_OBJ_PROPERTY    "Name conflict. '%s' is an object property."
 #define TXT_NAME_CONFLICT_s_OBJ_METHOD      "Name conflict. '%s' is an object method."
 #define TXT_NAME_CONFLICT_s_SYSTEM_FUNCTION "Name conflict. '%s' is a system function."
@@ -133,12 +135,13 @@
 #define TXT_OBJECT_DOESNT_SUPPORT_INDEX_OP "Type '%s' doesn't support the indexing operator"
 #define TXT_OBJECT_DOESNT_SUPPORT_NEGATE_OP "Object doesn't have the negate operator"
 #define TXT_OBJECT_HANDLE_NOT_SUPPORTED   "Object handle is not supported for this type"
+#define TXT_ONLY_OBJECTS_MAY_USE_REF_INOUT "Only object types that support object handles can use &inout. Use &in or &out instead"
 #define TXT_ONLY_ONE_ARGUMENT_IN_CAST     "There is only one argument in a cast"
 
 #define TXT_PARAMETER_ALREADY_DECLARED    "Parameter already declared"
 #define TXT_PARAMETER_CANT_BE_s           "Parameter type can't be '%s'"
 #define TXT_POSSIBLE_LOSS_OF_PRECISION    "Conversion from double to float, possible loss of precision"
-#define TXT_PROPERTY_CANT_BE_CONST        "Struct properties cannot be declared as const"
+#define TXT_PROPERTY_CANT_BE_CONST        "Class properties cannot be declared as const"
 
 #define TXT_REF_IS_READ_ONLY              "Reference is read-only"
 #define TXT_REF_IS_TEMP                   "Reference is temporary"
@@ -163,12 +166,7 @@
 // Engine message
 
 #define TXT_INVALID_CONFIGURATION         "Invalid configuration\n"
-
-// Message types
-
-#define TXT_INFO                          "Info   "
-#define TXT_ERROR                         "Error  "
-#define TXT_WARNING                       "Warning"
+#define TXT_MUST_BE_GLOBAL_BEHAVIOUR      "This behaviour must be registered as global behaviour\n"
 
 // Internal names
 

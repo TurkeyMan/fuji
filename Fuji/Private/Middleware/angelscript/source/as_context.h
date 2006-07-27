@@ -65,7 +65,7 @@ public:
 	asIScriptEngine *GetEngine();
 
 	int  Prepare(int functionID);
-	int  PrepareSpecial(int functionID);
+	int  PrepareSpecial(int functionID, asCModule *mod);
 
 	int  Execute();
 	int  Abort();
@@ -75,12 +75,16 @@ public:
 	int SetArgQWord(asUINT arg, asQWORD value);
 	int SetArgFloat(asUINT arg, float value);
 	int SetArgDouble(asUINT arg, double value);
+	int SetArgAddress(asUINT arg, void *addr);
 	int SetArgObject(asUINT arg, void *obj);
+
+	int SetObject(void *obj);
 
 	asDWORD GetReturnDWord();
 	asQWORD GetReturnQWord();
 	float   GetReturnFloat();
 	double  GetReturnDouble();
+	void   *GetReturnAddress();
 	void   *GetReturnObject();
 
 	int  GetState();
@@ -104,6 +108,7 @@ public:
 	int GetVarCount(int stackLevel);
 	const char *GetVarName(int varIndex, int *length, int stackLevel);
 	const char *GetVarDeclaration(int varIndex, int *length, int stackLevel);
+	int GetVarTypeId(int varIndex, int stackLevel);
 	void *GetVarPointer(int varIndex, int stackLevel);
 
 	int  SetException(const char *descr);
@@ -130,6 +135,7 @@ public:
 	void PushCallState();
 	void PopCallState();
 	void CallScriptFunction(asCModule *mod, asCScriptFunction *func);
+	void CallInterfaceMethod(asCModule *mod, asCScriptFunction *func);
 
 	void SetInternalException(const char *descr);
 
@@ -155,7 +161,7 @@ public:
 
 	asQWORD register1;
 
-	asCArray<int> callStack;
+	asCArray<size_t> callStack;
 	asCArray<asDWORD *> stackBlocks;
 	asDWORD *stackPointer;
 	int stackBlockSize;

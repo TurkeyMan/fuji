@@ -48,6 +48,7 @@
 BEGIN_AS_NAMESPACE
 
 class asCScriptEngine;
+class asCModule;
 
 struct asSScriptVariable
 {
@@ -56,10 +57,17 @@ struct asSScriptVariable
 	int stackOffset;
 };
 
+const int asFUNC_SYSTEM    = 0;
+const int asFUNC_SCRIPT    = 1;
+const int asFUNC_INTERFACE = 2;
+const int asFUNC_IMPORTED  = 3;
+
+struct asSSystemFunctionInterface;
+
 class asCScriptFunction
 {
 public:
-	asCScriptFunction() {objectType = 0; name = ""; isReadOnly = false;}
+	asCScriptFunction(asCModule *mod);
 	~asCScriptFunction();
 
 	void AddVariable(asCString &name, asCDataType &type, int stackOffset);
@@ -68,7 +76,10 @@ public:
 	int GetSpaceNeededForReturnValue();
 	asCString GetDeclaration(asCScriptEngine *engine);
 	int GetLineNumber(int programPosition);
+	void ComputeSignatureId(asCScriptEngine *engine);
 
+	int                          funcType;
+	asCModule                   *module;
 	asCString                    name;
 	asCDataType                  returnType;
 	asCArray<asCDataType>        parameterTypes;
@@ -83,6 +94,9 @@ public:
 	bool                         isReadOnly;
 	asCObjectType *              objectType;
 	asCArray<asSScriptVariable*> variables;
+	int                          signatureId;
+
+	asSSystemFunctionInterface  *sysFuncIntf;
 };
 
 END_AS_NAMESPACE

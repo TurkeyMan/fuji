@@ -55,6 +55,8 @@ struct sFunctionDescription
 	asCScriptCode *script;
 	asCScriptNode *node;
 	asCString name;
+	asCObjectType *objType;
+	int funcId;
 };
 
 struct sGlobalVariableDescription
@@ -70,7 +72,7 @@ struct sGlobalVariableDescription
 	asQWORD constantValue;
 };
 
-struct sStructDeclaration
+struct sClassDeclaration
 {
 	asCScriptCode *script;
 	asCScriptNode *node;
@@ -86,8 +88,6 @@ class asCBuilder
 public:
 	asCBuilder(asCScriptEngine *engine, asCModule *module);
 	~asCBuilder();
-
-	void SetOutputStream(asIOutputStream *out);
 
 	int VerifyProperty(asCDataType *dt, const char *decl, asCString &outName, asCDataType &outType);
 
@@ -121,11 +121,16 @@ protected:
 	void GetFunctionDescriptions(const char *name, asCArray<int> &funcs);
 	void GetObjectMethodDescriptions(const char *name, asCObjectType *objectType, asCArray<int> &methods, bool objIsConst);
 
-	int RegisterScriptFunction(int funcID, asCScriptNode *node, asCScriptCode *file);
+	int RegisterScriptFunction(int funcID, asCScriptNode *node, asCScriptCode *file, asCObjectType *object = 0, bool isInterface = false);
 	int RegisterImportedFunction(int funcID, asCScriptNode *node, asCScriptCode *file);
 	int RegisterGlobalVar(asCScriptNode *node, asCScriptCode *file);
-	int RegisterStruct(asCScriptNode *node, asCScriptCode *file);
-	void CompileStructs();
+	int RegisterClass(asCScriptNode *node, asCScriptCode *file);
+	int RegisterInterface(asCScriptNode *node, asCScriptCode *file);
+	void CompileClasses();
+
+	bool DoesMethodExist(asCObjectType *objType, int methodId);
+
+	void AddDefaultConstructor(asCObjectType *objType, asCScriptCode *file);
 
 	asCObjectType *GetObjectType(const char *type);
 
@@ -133,22 +138,28 @@ protected:
 	void CompileFunctions();
 	void CompileGlobalVariables();
 
-	asIOutputStream *out;
-	asCString preMessage;
+	struct preMessage_t
+	{
+		bool isSet;
+		asCString message;
+		int r;
+		int c;
+	} preMessage;
 
 	int numErrors;
 	int numWarnings;
 
-	asCArray<asCScriptCode *> scripts;
-	asCArray<sFunctionDescription *> functions;
+	asCArray<asCScriptCode *>              scripts;
+	asCArray<sFunctionDescription *>       functions;
 	asCArray<sGlobalVariableDescription *> globVariables;
-	asCArray<sStructDeclaration *> structDeclarations;
+	asCArray<sClassDeclaration *>          classDeclarations;
+	asCArray<sClassDeclaration *>          interfaceDeclarations;
 
 	asCScriptEngine *engine;
 	asCModule *module;
 
 	asCDataType CreateDataTypeFromNode(asCScriptNode *node, asCScriptCode *file);
-	asCDataType ModifyDataTypeFromNode(const asCDataType &type, asCScriptNode *node, int *inOutFlag, bool *autoHandle);
+	asCDataType ModifyDataTypeFromNode(const asCDataType &type, asCScriptNode *node, asCScriptCode *file, int *inOutFlag, bool *autoHandle);
 };
 
 END_AS_NAMESPACE

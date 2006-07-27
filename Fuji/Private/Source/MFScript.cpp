@@ -21,6 +21,18 @@ asIScriptEngine *pEngine = NULL;
 
 /*** Functions ***/
 
+void MessageCallback(const asSMessageInfo *msg, void *param)
+{
+	const char *type = "Error";
+
+	if(msg->type == asMSGTYPE_WARNING)
+		type = "Warn";
+	else if(msg->type == asMSGTYPE_INFORMATION)
+		type = "Info";
+
+	MFDebug_Message(MFStr("%s(%d, %d) : %s: %s\n", msg->section, msg->row, msg->col, type, msg->message));
+}
+
 void MFScript_InitModule()
 {
 	MFCALLSTACK;
@@ -29,7 +41,7 @@ void MFScript_InitModule()
 	MFDebug_Assert(pEngine, "Failed to create script engine.");
 
 #if !defined(_RETAIL)
-	pEngine->SetCommonMessageStream((asOUTPUTFUNC_t)MFDebug_Message, 0);
+	pEngine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
 #endif
 
 	RegisterScriptString(pEngine);

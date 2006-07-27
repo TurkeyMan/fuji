@@ -55,6 +55,7 @@ asCModule::asCModule(const char *name, int id, asCScriptEngine *engine)
 	contextCount = 0;
 	moduleCount = 0;
 	isGlobalVarInitialized = false;
+	initFunction = 0;
 }
 
 asCModule::~asCModule()
@@ -83,12 +84,12 @@ int asCModule::AddScriptSection(const char *name, const char *code, int codeLeng
 	if( !builder )
 		builder = new asCBuilder(engine, this);
 
-	builder->AddCode(name, code, codeLength, lineOffset, builder->scripts.GetLength(), makeCopy);
+	builder->AddCode(name, code, codeLength, lineOffset, (int)builder->scripts.GetLength(), makeCopy);
 
 	return asSUCCESS;
 }
 
-int asCModule::Build(asIOutputStream *out)
+int asCModule::Build()
 {
 	assert( contextCount == 0 );
 
@@ -97,10 +98,8 @@ int asCModule::Build(asIOutputStream *out)
 	if( !builder )
 		return asSUCCESS;
 
-	builder->SetOutputStream(out);
-
 	// Store the section names
-	for( asUINT n = 0; n < builder->scripts.GetLength(); n++ )
+	for( size_t n = 0; n < builder->scripts.GetLength(); n++ )
 	{
 		asCString *sectionName = new asCString(builder->scripts[n]->name);
 		scriptSections.PushLast(sectionName);
@@ -146,15 +145,15 @@ void asCModule::CallInit()
 
 	memset(globalMem.AddressOf(), 0, globalMem.GetLength()*sizeof(asDWORD));
 
-	if( initFunction.byteCode.GetLength() == 0 ) return;
+	if( initFunction && initFunction->byteCode.GetLength() == 0 ) return;
 
-	int id = moduleID | asFUNC_INIT;
+	int id = asFUNC_INIT;
 	asIScriptContext *ctx = 0;
 	int r = engine->CreateContext(&ctx, true);
 	if( r >= 0 && ctx )
 	{
 		// TODO: Add error handling
-		((asCContext*)ctx)->PrepareSpecial(id);
+		((asCContext*)ctx)->PrepareSpecial(id, this);
 		ctx->Execute();
 		ctx->Release();
 		ctx = 0;
@@ -167,7 +166,7 @@ void asCModule::CallExit()
 {
 	if( !isGlobalVarInitialized ) return;
 
-	for( asUINT n = 0; n < scriptGlobals.GetLength(); n++ )
+	for( size_t n = 0; n < scriptGlobals.GetLength(); n++ )
 	{
 		if( scriptGlobals[n]->type.IsObject() )
 		{
@@ -203,7 +202,6 @@ void asCModule::Reset()
 
 	CallExit();
 
-	initFunction.byteCode.SetLength(0);
 
 	// Free global variables
 	globalMem.SetLength(0);
@@ -212,9 +210,15 @@ void asCModule::Reset()
 	isBuildWithoutErrors = true;
 	isDiscarded = false;
 
-	asUINT n;
+	if( initFunction )
+	{
+		engine->DeleteScriptFunction(initFunction->id);
+		initFunction = 0;
+	}
+
+	size_t n;
 	for( n = 0; n < scriptFunctions.GetLength(); n++ )
-		delete scriptFunctions[n];
+		engine->DeleteScriptFunction(scriptFunctions[n]->id);
 	scriptFunctions.SetLength(0);
 
 	for( n = 0; n < importedFunctions.GetLength(); n++ )
@@ -227,7 +231,7 @@ void asCModule::Reset()
 		int oldFuncID = bindInformations[n].importedFunction;
 		if( oldFuncID != -1 )
 		{
-			asCModule *oldModule = engine->GetModule(oldFuncID);
+			asCModule *oldModule = engine->GetModuleFromFuncId(oldFuncID);
 			if( oldModule != 0 ) 
 			{
 				// Release reference to the module
@@ -249,13 +253,9 @@ void asCModule::Reset()
 		delete scriptSections[n];
 	scriptSections.SetLength(0);
 
-	for( n = 0; n < structTypes.GetLength(); n++ )
-		structTypes[n]->refCount--;
-	structTypes.SetLength(0);
-
-	for( n = 0; n < scriptArrayTypes.GetLength(); n++ )
-		scriptArrayTypes[n]->refCount--;
-	scriptArrayTypes.SetLength(0);
+	for( n = 0; n < classTypes.GetLength(); n++ )
+		classTypes[n]->refCount--;
+	classTypes.SetLength(0);
 
 	// Release all used object types
 	for( n = 0; n < usedTypes.GetLength(); n++ )
@@ -276,12 +276,12 @@ int asCModule::GetFunctionIDByName(const char *name)
 	// TODO: Improve linear search
 	// Find the function id
 	int id = -1;
-	for( asUINT n = 0; n < scriptFunctions.GetLength(); n++ )
+	for( size_t n = 0; n < scriptFunctions.GetLength(); n++ )
 	{
 		if( scriptFunctions[n]->name == name )
 		{
 			if( id == -1 )
-				id = n;
+				id = scriptFunctions[n]->id;
 			else
 				return asMULTIPLE_FUNCTIONS;
 		}
@@ -289,7 +289,15 @@ int asCModule::GetFunctionIDByName(const char *name)
 
 	if( id == -1 ) return asNO_FUNCTION;
 
-	return moduleID | id;
+	return id;
+}
+
+int asCModule::GetMethodIDByDecl(asCObjectType *ot, const char *decl)
+{
+	if( isBuildWithoutErrors == false )
+		return asERROR;
+
+	return engine->GetMethodIDByDecl(ot, decl, this);
 }
 
 int asCModule::GetImportedFunctionCount()
@@ -297,7 +305,7 @@ int asCModule::GetImportedFunctionCount()
 	if( isBuildWithoutErrors == false )
 		return asERROR;
 
-	return importedFunctions.GetLength();
+	return (int)importedFunctions.GetLength();
 }
 
 int asCModule::GetImportedFunctionIndexByDecl(const char *decl)
@@ -307,7 +315,7 @@ int asCModule::GetImportedFunctionIndexByDecl(const char *decl)
 
 	asCBuilder bld(engine, this);
 
-	asCScriptFunction func;
+	asCScriptFunction func(this);
 	bld.ParseFunctionDeclaration(decl, &func);
 
 	// TODO: Improve linear search
@@ -349,7 +357,7 @@ int asCModule::GetFunctionCount()
 	if( isBuildWithoutErrors == false )
 		return asERROR;
 
-	return scriptFunctions.GetLength();
+	return (int)scriptFunctions.GetLength();
 }
 
 int asCModule::GetFunctionIDByDecl(const char *decl)
@@ -359,7 +367,7 @@ int asCModule::GetFunctionIDByDecl(const char *decl)
 
 	asCBuilder bld(engine, this);
 
-	asCScriptFunction func;
+	asCScriptFunction func(this);
 	int r = bld.ParseFunctionDeclaration(decl, &func);
 	if( r < 0 )
 		return asINVALID_DECLARATION;
@@ -367,14 +375,15 @@ int asCModule::GetFunctionIDByDecl(const char *decl)
 	// TODO: Improve linear search
 	// Search script functions for matching interface
 	int id = -1;
-	for( asUINT n = 0; n < scriptFunctions.GetLength(); ++n )
+	for( size_t n = 0; n < scriptFunctions.GetLength(); ++n )
 	{
-		if( func.name == scriptFunctions[n]->name && 
+		if( scriptFunctions[n]->objectType == 0 && 
+			func.name == scriptFunctions[n]->name && 
 			func.returnType == scriptFunctions[n]->returnType &&
 			func.parameterTypes.GetLength() == scriptFunctions[n]->parameterTypes.GetLength() )
 		{
 			bool match = true;
-			for( asUINT p = 0; p < func.parameterTypes.GetLength(); ++p )
+			for( size_t p = 0; p < func.parameterTypes.GetLength(); ++p )
 			{
 				if( func.parameterTypes[p] != scriptFunctions[n]->parameterTypes[p] )
 				{
@@ -386,7 +395,7 @@ int asCModule::GetFunctionIDByDecl(const char *decl)
 			if( match )
 			{
 				if( id == -1 )
-					id = n;
+					id = scriptFunctions[n]->id;
 				else
 					return asMULTIPLE_FUNCTIONS;
 			}
@@ -395,7 +404,7 @@ int asCModule::GetFunctionIDByDecl(const char *decl)
 
 	if( id == -1 ) return asNO_FUNCTION;
 
-	return moduleID | id;
+	return id;
 }
 
 int asCModule::GetGlobalVarCount()
@@ -403,7 +412,7 @@ int asCModule::GetGlobalVarCount()
 	if( isBuildWithoutErrors == false )
 		return asERROR;
 
-	return scriptGlobals.GetLength();
+	return (int)scriptGlobals.GetLength();
 }
 
 int asCModule::GetGlobalVarIDByName(const char *name)
@@ -413,18 +422,18 @@ int asCModule::GetGlobalVarIDByName(const char *name)
 
 	// Find the global var id
 	int id = -1;
-	for( asUINT n = 0; n < scriptGlobals.GetLength(); n++ )
+	for( size_t n = 0; n < scriptGlobals.GetLength(); n++ )
 	{
 		if( scriptGlobals[n]->name == name )
 		{
-			id = n;
+			id = (int)n;
 			break;
 		}
 	}
 
 	if( id == -1 ) return asNO_GLOBAL_VAR;
 
-	return moduleID | id;
+	return id;
 }
 
 int asCModule::GetGlobalVarIDByDecl(const char *decl)
@@ -440,41 +449,41 @@ int asCModule::GetGlobalVarIDByDecl(const char *decl)
 	// TODO: Improve linear search
 	// Search script functions for matching interface
 	int id = -1;
-	for( asUINT n = 0; n < scriptGlobals.GetLength(); ++n )
+	for( size_t n = 0; n < scriptGlobals.GetLength(); ++n )
 	{
 		if( gvar.name == scriptGlobals[n]->name && 
 			gvar.type == scriptGlobals[n]->type )
 		{
-			id = n;
+			id = (int)n;
 			break;
 		}
 	}
 
 	if( id == -1 ) return asNO_GLOBAL_VAR;
 
-	return moduleID | id;
+	return id;
 }
 
-int asCModule::AddConstantString(const char *str, asUINT len)
+int asCModule::AddConstantString(const char *str, size_t len)
 {
 	//  The str may contain null chars, so we cannot use strlen, or strcmp, or strcpy
 	asCString *cstr = new asCString(str, len);
 
 	// TODO: Improve linear search
 	// Has the string been registered before?
-	for( asUINT n = 0; n < stringConstants.GetLength(); n++ )
+	for( size_t n = 0; n < stringConstants.GetLength(); n++ )
 	{
 		if( *stringConstants[n] == *cstr )
 		{
 			delete cstr;
-			return n;
+			return (int)n;
 		}
 	}
 
 	// No match was found, add the string
 	stringConstants.PushLast(cstr);
 
-	return stringConstants.GetLength() - 1;
+	return (int)stringConstants.GetLength() - 1;
 }
 
 const asCString &asCModule::GetConstantString(int id)
@@ -484,20 +493,21 @@ const asCString &asCModule::GetConstantString(int id)
 
 int asCModule::GetNextFunctionId()
 {
-	return scriptFunctions.GetLength();
+	return engine->GetNextScriptFunctionId();
 }
 
 int asCModule::GetNextImportedFunctionId()
 {
-	return FUNC_IMPORTED | importedFunctions.GetLength();
+	return FUNC_IMPORTED | (asUINT)importedFunctions.GetLength();
 }
 
-int asCModule::AddScriptFunction(int sectionIdx, int id, const char *name, const asCDataType &returnType, asCDataType *params, int *inOutFlags, int paramCount)
+int asCModule::AddScriptFunction(int sectionIdx, int id, const char *name, const asCDataType &returnType, asCDataType *params, int *inOutFlags, int paramCount, bool isInterface, asCObjectType *objType)
 {
 	assert(id >= 0);
 
 	// Store the function information
-	asCScriptFunction *func = new asCScriptFunction();
+	asCScriptFunction *func = new asCScriptFunction(this);
+	func->funcType   = isInterface ? asFUNC_INTERFACE : asFUNC_SCRIPT;
 	func->name       = name;
 	func->id         = id;
 	func->returnType = returnType;
@@ -507,9 +517,14 @@ int asCModule::AddScriptFunction(int sectionIdx, int id, const char *name, const
 		func->parameterTypes.PushLast(params[n]);
 		func->inOutFlags.PushLast(inOutFlags[n]);
 	}
-	func->objectType = 0;
+	func->objectType = objType;
 
 	scriptFunctions.PushLast(func);
+	engine->SetScriptFunction(func);
+
+	// Compute the signature id
+	if( objType )
+		func->ComputeSignatureId(engine);
 
 	return 0;
 }
@@ -519,7 +534,8 @@ int asCModule::AddImportedFunction(int id, const char *name, const asCDataType &
 	assert(id >= 0);
 
 	// Store the function information
-	asCScriptFunction *func = new asCScriptFunction();
+	asCScriptFunction *func = new asCScriptFunction(this);
+	func->funcType   = asFUNC_IMPORTED;
 	func->name       = name;
 	func->id         = id;
 	func->returnType = returnType;
@@ -542,7 +558,7 @@ int asCModule::AddImportedFunction(int id, const char *name, const asCDataType &
 
 asCScriptFunction *asCModule::GetScriptFunction(int funcID)
 {
-	return scriptFunctions[funcID & 0xFFFF];
+	return engine->scriptFunctions[funcID & 0xFFFF];
 }
 
 asCScriptFunction *asCModule::GetImportedFunction(int funcID)
@@ -557,29 +573,29 @@ asCScriptFunction *asCModule::GetSpecialFunction(int funcID)
 	else
 	{
 		if( (funcID & 0xFFFF) == asFUNC_INIT )
-			return &initFunction;
+			return initFunction;
 		else if( (funcID & 0xFFFF) == asFUNC_STRING )
 		{
 			assert(false);
 		}
 
-		return scriptFunctions[funcID & 0xFFFF];
+		return engine->scriptFunctions[funcID & 0xFFFF];
 	}
 }
 
 int asCModule::AllocGlobalMemory(int size)
 {
-	int index = globalMem.GetLength();
+	int index = (int)globalMem.GetLength();
 
-	asDWORD *start = globalMem.AddressOf();
+	size_t *start = globalMem.AddressOf();
 
 	globalMem.SetLength(index + size);
 
 	// Update the addresses in the globalVarPointers
-	for( asUINT n = 0; n < globalVarPointers.GetLength(); n++ )
+	for( size_t n = 0; n < globalVarPointers.GetLength(); n++ )
 	{
 		if( globalVarPointers[n] >= start && globalVarPointers[n] < (start+index) )
-			globalVarPointers[n] = &globalMem[0] + (int(globalVarPointers[n]) - int(start))/sizeof(void*);
+			globalVarPointers[n] = &globalMem[0] + (size_t(globalVarPointers[n]) - size_t(start))/sizeof(void*);
 	}
 
 	return index;
@@ -635,12 +651,12 @@ bool asCModule::CanDelete()
 		if( CanDeleteAllReferences(modules) )
 		{
 			// Unbind all functions. This will break any circular references
-			for( asUINT n = 0; n < bindInformations.GetLength(); n++ )
+			for( size_t n = 0; n < bindInformations.GetLength(); n++ )
 			{
 				int oldFuncID = bindInformations[n].importedFunction;
 				if( oldFuncID != -1 )
 				{
-					asCModule *oldModule = engine->GetModule(oldFuncID);
+					asCModule *oldModule = engine->GetModuleFromFuncId(oldFuncID);
 					if( oldModule != 0 ) 
 					{
 						// Release reference to the module
@@ -667,14 +683,14 @@ bool asCModule::CanDeleteAllReferences(asCArray<asCModule*> &modules)
 	modules.PushLast(this);
 
 	// Check all bound functions for referenced modules
-	for( asUINT n = 0; n < bindInformations.GetLength(); n++ )
+	for( size_t n = 0; n < bindInformations.GetLength(); n++ )
 	{
 		int funcID = bindInformations[n].importedFunction;
-		asCModule *module = engine->GetModule(funcID);
+		asCModule *module = engine->GetModuleFromFuncId(funcID);
 
 		// If the module is already in the list don't check it again
 		bool inList = false;
-		for( asUINT m = 0; m < modules.GetLength(); m++ )
+		for( size_t m = 0; m < modules.GetLength(); m++ )
 		{
 			if( modules[m] == module )
 			{
@@ -701,7 +717,7 @@ int asCModule::BindImportedFunction(int index, int sourceID)
 	int oldFuncID = bindInformations[index].importedFunction;
 	if( oldFuncID != -1 )
 	{
-		asCModule *oldModule = engine->GetModule(oldFuncID);
+		asCModule *oldModule = engine->GetModuleFromFuncId(oldFuncID);
 		if( oldModule != 0 ) 
 		{
 			// Release reference to the module
@@ -716,7 +732,7 @@ int asCModule::BindImportedFunction(int index, int sourceID)
 	}
 
 	// Must verify that the interfaces are equal
-	asCModule *srcModule = engine->GetModule(sourceID);
+	asCModule *srcModule = engine->GetModuleFromFuncId(sourceID);
 	if( srcModule == 0 ) return asNO_MODULE;
 
 	asCScriptFunction *dst = GetImportedFunction(index);
@@ -732,7 +748,7 @@ int asCModule::BindImportedFunction(int index, int sourceID)
 	if( dst->parameterTypes.GetLength() != src->parameterTypes.GetLength() )
 		return asINVALID_INTERFACE;
 
-	for( asUINT n = 0; n < dst->parameterTypes.GetLength(); ++n )
+	for( size_t n = 0; n < dst->parameterTypes.GetLength(); ++n )
 	{
 		if( dst->parameterTypes[n] != src->parameterTypes[n] )
 			return asINVALID_INTERFACE;
@@ -767,9 +783,9 @@ bool asCModule::IsUsed()
 asCObjectType *asCModule::GetObjectType(const char *type)
 {
 	// TODO: Improve linear search
-	for( asUINT n = 0; n < structTypes.GetLength(); n++ )
-		if( structTypes[n]->name == type )
-			return structTypes[n];
+	for( size_t n = 0; n < classTypes.GetLength(); n++ )
+		if( classTypes[n]->name == type )
+			return classTypes[n];
 
 	return 0;
 }
@@ -779,7 +795,7 @@ asCObjectType *asCModule::RefObjectType(asCObjectType *type)
 	if( !type ) return 0;
 
 	// Determine the index local to the module
-	for( asUINT n = 0; n < usedTypes.GetLength(); n++ )
+	for( size_t n = 0; n < usedTypes.GetLength(); n++ )
 		if( usedTypes[n] == type ) return type;
 
 	usedTypes.PushLast(type);
@@ -798,7 +814,7 @@ void asCModule::RefConfigGroupForFunction(int funcId)
 		return;
 
 	// Verify if the module is already referencing the config group
-	for( asUINT n = 0; n < configGroups.GetLength(); n++ )
+	for( size_t n = 0; n < configGroups.GetLength(); n++ )
 	{
 		if( configGroups[n] == group ) 
 			return;
@@ -817,7 +833,7 @@ void asCModule::RefConfigGroupForGlobalVar(int gvarId)
 		return;
 
 	// Verify if the module is already referencing the config group
-	for( asUINT n = 0; n < configGroups.GetLength(); n++ )
+	for( size_t n = 0; n < configGroups.GetLength(); n++ )
 	{
 		if( configGroups[n] == group ) 
 			return;
@@ -838,7 +854,7 @@ void asCModule::RefConfigGroupForObjectType(asCObjectType *type)
 		return;
 
 	// Verify if the module is already referencing the config group
-	for( asUINT n = 0; n < configGroups.GetLength(); n++ )
+	for( size_t n = 0; n < configGroups.GetLength(); n++ )
 	{
 		if( configGroups[n] == group ) 
 			return;
@@ -862,7 +878,7 @@ int asCModule::GetGlobalVarIndex(int propIdx)
 			return n;
 
 	globalVarPointers.PushLast(ptr);
-	return globalVarPointers.GetLength()-1;
+	return (int)globalVarPointers.GetLength()-1;
 }
 
 END_AS_NAMESPACE

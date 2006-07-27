@@ -60,12 +60,14 @@ public:
 	asQWORD GetArgQWord(asUINT arg);
 	float   GetArgFloat(asUINT arg);
 	double  GetArgDouble(asUINT arg);
+	void   *GetArgAddress(asUINT arg);
 	void   *GetArgObject(asUINT arg);
 
 	int     SetReturnDWord(asDWORD val);
 	int     SetReturnQWord(asQWORD val);
 	int     SetReturnFloat(float val);
 	int     SetReturnDouble(double val);
+	int     SetReturnAddress(void *addr);
 	int     SetReturnObject(void *obj);
 // interface - end
 

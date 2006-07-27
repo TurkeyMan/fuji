@@ -41,13 +41,29 @@
 #include "as_scriptfunction.h"
 #include "as_tokendef.h"
 #include "as_scriptengine.h"
+#include "as_callfunc.h"
 
 BEGIN_AS_NAMESPACE
+
+asCScriptFunction::asCScriptFunction(asCModule *mod)
+{
+	funcType    = -1;
+	module      = mod; 
+	objectType  = 0; 
+	name        = ""; 
+	isReadOnly  = false;
+	stackNeeded = 0;
+	sysFuncIntf = 0;
+	signatureId = 0;
+}
 
 asCScriptFunction::~asCScriptFunction()
 {
 	for( asUINT n = 0; n < variables.GetLength(); n++ )
 		delete variables[n];
+
+	if( sysFuncIntf )
+		delete sysFuncIntf;
 }
 
 int asCScriptFunction::GetSpaceNeededForArguments()
@@ -117,7 +133,7 @@ int asCScriptFunction::GetLineNumber(int programPosition)
 	if( lineNumbers.GetLength() == 0 ) return 0;
 
 	// Do a binary search in the buffer
-	int max = lineNumbers.GetLength()/2 - 1;
+	int max = (int)lineNumbers.GetLength()/2 - 1;
 	int min = 0;
 	int i = max/2;
 
@@ -155,6 +171,28 @@ void asCScriptFunction::AddVariable(asCString &name, asCDataType &type, int stac
 	var->type = type;
 	var->stackOffset = stackOffset;
 	variables.PushLast(var);
+}
+
+void asCScriptFunction::ComputeSignatureId(asCScriptEngine *engine)
+{
+	// This function will compute the signatureId based on the 
+	// function name, return type, and parameter types. The object 
+	// type for methods is not used, so that class methods and  
+	// interface methods match each other.
+	for( asUINT n = 0; n < engine->signatureIds.GetLength(); n++ )
+	{
+		if( name != engine->signatureIds[n]->name ) continue;
+		if( returnType != engine->signatureIds[n]->returnType ) continue;
+		if( isReadOnly != engine->signatureIds[n]->isReadOnly ) continue;
+		if( inOutFlags != engine->signatureIds[n]->inOutFlags ) continue;
+		if( parameterTypes != engine->signatureIds[n]->parameterTypes ) continue;
+
+		signatureId = engine->signatureIds[n]->signatureId;
+		return;
+	}
+
+	signatureId = id;
+	engine->signatureIds.PushLast(this);
 }
 
 END_AS_NAMESPACE

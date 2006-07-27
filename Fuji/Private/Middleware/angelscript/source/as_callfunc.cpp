@@ -38,33 +38,52 @@
 
 
 #include "as_config.h"
-
-#ifdef AS_MAX_PORTABILITY
-
 #include "as_callfunc.h"
-#include "as_scriptengine.h"
-#include "as_texts.h"
-#include "as_tokendef.h"
 
-BEGIN_AS_NAMESPACE
 
 int DetectCallingConvention(bool isMethod, const asUPtr &ptr, int callConv, asSSystemFunctionInterface *internal)
 {
 	memset(internal, 0, sizeof(asSSystemFunctionInterface));
 
-	internal->func = (asDWORD)ptr.f.func;
+	internal->func = (size_t)ptr.f.func;
 
-	int base = callConv;
+	asDWORD base = callConv;
 	if( !isMethod )
 	{
-		if( base == asCALL_GENERIC )
+		if( base == asCALL_CDECL )
+			internal->callConv = ICC_CDECL;
+		else if( base == asCALL_STDCALL )
+			internal->callConv = ICC_STDCALL;
+		else if( base == asCALL_GENERIC )
 			internal->callConv = ICC_GENERIC_FUNC;
 		else
 			return asNOT_SUPPORTED;
 	}
 	else
 	{
-		if( base == asCALL_GENERIC )
+#ifndef AS_NO_CLASS_METHODS
+		if( base == asCALL_THISCALL )
+		{
+			internal->callConv = ICC_THISCALL;
+#ifdef GNU_STYLE_VIRTUAL_METHOD
+			if( (size_t(ptr.f.func) & 1) )
+				internal->callConv = ICC_VIRTUAL_THISCALL;
+#endif
+			internal->baseOffset = MULTI_BASE_OFFSET(ptr);
+
+#ifdef HAVE_VIRTUAL_BASE_OFFSET
+			// We don't support virtual inheritance
+			if( VIRTUAL_BASE_OFFSET(ptr) != 0 )
+				return asNOT_SUPPORTED;
+#endif
+		}
+		else
+#endif
+		if( base == asCALL_CDECL_OBJLAST )
+			internal->callConv = ICC_CDECL_OBJLAST;
+		else if( base == asCALL_CDECL_OBJFIRST )
+			internal->callConv = ICC_CDECL_OBJFIRST;
+		else if( base == asCALL_GENERIC )
 			internal->callConv = ICC_GENERIC_METHOD;
 		else
 			return asNOT_SUPPORTED;
@@ -72,6 +91,15 @@ int DetectCallingConvention(bool isMethod, const asUPtr &ptr, int callConv, asSS
 
 	return 0;
 }
+
+
+#ifdef AS_MAX_PORTABILITY
+
+#include "as_scriptengine.h"
+#include "as_texts.h"
+
+BEGIN_AS_NAMESPACE
+
 
 // This function should prepare system functions so that it will be faster to call them
 int PrepareSystemFunction(asCScriptFunction *func, asSSystemFunctionInterface *internal, asCScriptEngine *engine)
@@ -183,13 +211,11 @@ int PrepareSystemFunction(asCScriptFunction *func, asSSystemFunctionInterface *i
 
 int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 {
-	id = -id - 1;
-
 	asCScriptEngine *engine = context->engine;
-	asSSystemFunctionInterface *sysFunc = engine->systemFunctionInterfaces[id];
+	asSSystemFunctionInterface *sysFunc = engine->scriptFunctions[id]->sysFuncIntf;
 	int callConv = sysFunc->callConv;
 	if( callConv == ICC_GENERIC_FUNC || callConv == ICC_GENERIC_METHOD )
-		return context->CallGeneric(-id-1, objectPointer);
+		return context->CallGeneric(id, objectPointer);
 
 	context->SetInternalException(TXT_INVALID_CALLING_CONVENTION);
 

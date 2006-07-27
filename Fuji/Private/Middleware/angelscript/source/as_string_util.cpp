@@ -29,20 +29,22 @@
 
 */
 
+#include <stdarg.h>     // va_list, va_start(), etc
+#include <stdlib.h>     // strtod(), strtol()
+#include <assert.h>     // assert()
+#include <stdio.h>      // _vsnprintf()
+#include <string.h>     // some compilers declare memcpy() here
+
 #include "as_config.h"
-#include "as_string_util.h"
 
 #if !defined(AS_NO_MEMORY_H)
 #include <memory.h>
 #endif
-#include <string.h> // some compilers declare memcpy() here
-#include <assert.h> // assert()
-#include <stdarg.h> // va_list, va_start(), etc
-#include <stdlib.h> // strtod(), strtol()
-#include <stdio.h>  // _vsnprintf()
+
+#include "as_string_util.h"
 
 // Returns the number of characters written or -1 if the buffer was too small
-int asStringFormat(char *string, int maxLength, const char *format, ...)
+int asStringFormat(char *string, size_t maxLength, const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -54,7 +56,7 @@ int asStringFormat(char *string, int maxLength, const char *format, ...)
 	return r;
 }
 
-double asStringScanDouble(const char *string, int *numScanned)
+double asStringScanDouble(const char *string, size_t *numScanned)
 {
 	char *end;
 
@@ -66,7 +68,7 @@ double asStringScanDouble(const char *string, int *numScanned)
 	return res;
 }
 
-int asStringScanInt(const char *string, int base, int *numScanned)
+int asStringScanInt(const char *string, int base, size_t *numScanned)
 {
 	assert(base > 0);
 
@@ -80,7 +82,7 @@ int asStringScanInt(const char *string, int base, int *numScanned)
 	return res;
 }
 
-acUINT asStringScanUInt(const char *string, int base, int *numScanned)
+acUINT asStringScanUInt(const char *string, int base, size_t *numScanned)
 {
 	assert(base > 0);
 
@@ -94,9 +96,9 @@ acUINT asStringScanUInt(const char *string, int base, int *numScanned)
 	return res;
 }
 
-void asStringCopy(const char *source, int srcLength, char *dest, int destLength)
+void asStringCopy(const char *source, size_t srcLength, char *dest, size_t destLength)
 {
-	int min = srcLength < destLength ? srcLength : destLength;
+	size_t min = srcLength < destLength ? srcLength : destLength;
 
 	memcpy(dest, source, min);
 	dest[min] = 0;

@@ -74,7 +74,7 @@ public:
 	void AddUnmarkedReferences(asCArray<asCGCObject*> &unmarked);
 	void ReleaseAllHandles();
 
-protected:
+//protected:
 	// Used for properties
 	void *AllocateObject(asCObjectType *objType, asCScriptEngine *engine);
 	void FreeObject(void *ptr, asCObjectType *objType, asCScriptEngine *engine);
@@ -89,6 +89,8 @@ asCScriptStruct &ScriptStruct_Assignment(asCScriptStruct *other, asCScriptStruct
 
 void ScriptStruct_Construct_Generic(asIScriptGeneric *gen);
 void ScriptStruct_Assignment_Generic(asIScriptGeneric *gen);
+
+void RegisterScriptStruct(asCScriptEngine *engine);
 
 END_AS_NAMESPACE
 

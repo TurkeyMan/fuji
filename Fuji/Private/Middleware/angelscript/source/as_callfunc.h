@@ -76,7 +76,7 @@ enum internalCallConv
 
 struct asSSystemFunctionInterface
 {
-	asDWORD              func;
+	size_t               func;
 	int                  baseOffset;
 	internalCallConv     callConv;
 	int                  scriptReturnSize;

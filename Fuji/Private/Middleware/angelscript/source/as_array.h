@@ -46,29 +46,33 @@ public:
 	asCArray(const asCArray<T> &);
 	~asCArray();
 
-	void   Allocate(asUINT numElements, bool keepData);
-	asUINT GetCapacity() const;
+	void   Allocate(size_t numElements, bool keepData);
+	size_t GetCapacity() const;
 
 	void PushLast(const T &element);
 	T    PopLast();
 
-	void   SetLength(asUINT numElements);
-	asUINT GetLength() const;
+	void   SetLength(size_t numElements);
+	size_t GetLength() const;
 
-	void Copy(const T*, asUINT count);
+	void Copy(const T*, size_t count);
 	asCArray<T> &operator =(const asCArray<T> &);
 
-	T &operator [](asUINT index) const;
+	const T &operator [](size_t index) const;
+	T &operator [](size_t index);
 	T *AddressOf();
 
 	void Concatenate(const asCArray<T> &);
 
 	T* Find(const T &element);
 
+	bool operator==(const asCArray<T> &) const;
+	bool operator!=(const asCArray<T> &) const;
+
 protected:
 	T   *array;
-	asUINT  length;
-	asUINT  maxLength;
+	size_t  length;
+	size_t  maxLength;
 };
 
 // Implementation
@@ -108,13 +112,21 @@ asCArray<T>::~asCArray(void)
 }
 
 template <class T>
-asUINT asCArray<T>::GetLength() const
+size_t asCArray<T>::GetLength() const
 {
 	return length;
 }
 
 template <class T>
-T &asCArray<T>::operator [](asUINT index) const
+const T &asCArray<T>::operator [](size_t index) const
+{
+	assert(index < length);
+
+	return array[index];
+}
+
+template <class T>
+T &asCArray<T>::operator [](size_t index)
 {
 	assert(index < length);
 
@@ -125,7 +137,7 @@ template <class T>
 void asCArray<T>::PushLast(const T &element)
 {
 	if( length == maxLength )
-		Allocate(int(maxLength*1.5f) + 1, true);
+		Allocate(maxLength + maxLength/2 + 1, true);
 
 	array[length++] = element;
 }
@@ -139,7 +151,7 @@ T asCArray<T>::PopLast()
 }
 
 template <class T>
-void asCArray<T>::Allocate(asUINT numElements, bool keepData)
+void asCArray<T>::Allocate(size_t numElements, bool keepData)
 {
 	T *tmp = new T[numElements];
 
@@ -150,7 +162,7 @@ void asCArray<T>::Allocate(asUINT numElements, bool keepData)
 			if( length > numElements )
 				length = numElements;
 
-			for( asUINT n = 0; n < length; n++ )
+			for( size_t n = 0; n < length; n++ )
 				tmp[n] = array[n];
 		}
 		else
@@ -164,13 +176,13 @@ void asCArray<T>::Allocate(asUINT numElements, bool keepData)
 }
 
 template <class T>
-asUINT asCArray<T>::GetCapacity() const
+size_t asCArray<T>::GetCapacity() const
 {
 	return maxLength;
 }
 
 template <class T>
-void asCArray<T>::SetLength(asUINT numElements)
+void asCArray<T>::SetLength(size_t numElements)
 {
 	if( numElements > maxLength )
 		Allocate(numElements, true);
@@ -179,12 +191,12 @@ void asCArray<T>::SetLength(asUINT numElements)
 }
 
 template <class T>
-void asCArray<T>::Copy(const T *data, asUINT count)
+void asCArray<T>::Copy(const T *data, size_t count)
 {
 	if( maxLength < count )
 		Allocate(count, false);
 
-	for( asUINT n = 0; n < count; n++ )
+	for( size_t n = 0; n < count; n++ )
 		array[n] = data[n];
 
 	length = count;
@@ -199,12 +211,30 @@ asCArray<T> &asCArray<T>::operator =(const asCArray<T> &copy)
 }
 
 template <class T>
+bool asCArray<T>::operator ==(const asCArray<T> &other) const
+{
+	if( length != other.length ) return false;
+
+	for( asUINT n = 0; n < length; n++ )
+		if( array[n] != other.array[n] ) 
+			return false;
+
+	return true;
+}
+
+template <class T>
+bool asCArray<T>::operator !=(const asCArray<T> &other) const
+{
+	return !(*this == other);
+}
+
+template <class T>
 void asCArray<T>::Concatenate(const asCArray<T> &other)
 {
 	if( maxLength < length + other.length )
 		Allocate(length + other.length, true);
 
-	for( asUINT n = 0; n < other.length; n++ )
+	for( size_t n = 0; n < other.length; n++ )
 		array[length+n] = other.array[n];
 
 	length += other.length;
@@ -213,7 +243,7 @@ void asCArray<T>::Concatenate(const asCArray<T> &other)
 template <class T>
 T *asCArray<T>::Find(const T &e)
 {
-	for( asUINT n = 0; n < length; n++ )
+	for( size_t n = 0; n < length; n++ )
 		if( array[n] == e ) return &array[n];
 
 	return 0;

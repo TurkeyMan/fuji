@@ -53,11 +53,11 @@ BEGIN_AS_NAMESPACE
 
 // AngelScript version
 
-#define ANGELSCRIPT_VERSION        20500
+#define ANGELSCRIPT_VERSION        20700
 #define ANGELSCRIPT_VERSION_MAJOR  2
-#define ANGELSCRIPT_VERSION_MINOR  5
+#define ANGELSCRIPT_VERSION_MINOR  7
 #define ANGELSCRIPT_VERSION_BUILD  0
-#define ANGELSCRIPT_VERSION_STRING "2.5.0c"
+#define ANGELSCRIPT_VERSION_STRING "2.7.0"
 
 // Data types
 
@@ -67,27 +67,38 @@ class asIScriptGeneric;
 class asIScriptAny;
 class asIScriptStruct;
 class asIScriptArray;
-class asIOutputStream;
 class asIBinaryStream;
-typedef unsigned long  asDWORD;
-#if defined(__GNUC__) || defined(__MWERKS__)
-typedef long long asQWORD;
-#else
-typedef __int64 asQWORD;
-#endif
-typedef unsigned short asWORD;
+
+// 
+// asBYTE  =  8 bits
+// asWORD  = 16 bits
+// asDWORD = 32 bits
+// asQWORD = 64 bits
+// asPWORD = size of pointer
+//
 typedef unsigned char  asBYTE;
+typedef unsigned short asWORD;
 typedef unsigned int   asUINT;
+#ifdef __LP64__
+    typedef unsigned int  asDWORD;
+    typedef unsigned long asQWORD;
+    typedef asQWORD asPWORD;
+#else
+    typedef unsigned long asDWORD;
+    typedef asDWORD asPWORD;
+  #if defined(__GNUC__) || defined(__MWERKS__)
+    typedef unsigned long long asQWORD;
+  #else
+    typedef unsigned __int64 asQWORD;
+  #endif
+#endif
 
 typedef void (*asFUNCTION_t)();
-
 typedef void *(*asALLOCFUNC_t)(size_t);
 typedef void (*asFREEFUNC_t)(void *);
 
 #define asFUNCTION(f) asFunctionPtr((void (*)())(f))
 #define asFUNCTIONPR(f,p,r) asFunctionPtr((void (*)())((r (*)p)(f)))
-
-#define asMODULEIDX(id) ((id >> 16) & 0x3FF)
 
 #ifndef AS_NO_CLASS_METHODS
 
@@ -108,14 +119,21 @@ union asUPtr
 
 union asUPtr
 {
-	char         dummy[20]; // largest known class method pointer
+	char         dummy[24]; // largest known class method pointer
 	asFUNCTION_t func;
 };
 
 #endif
 
+struct asSMessageInfo
+{
+	const char *section;
+	int         row;
+	int         col;
+	int         type;
+	const char *message;
+};
 
-typedef void (*asOUTPUTFUNC_t)(const char *text, void *param);
 #ifdef AS_C_INTERFACE
 typedef void (*asBINARYREADFUNC_t)(void *ptr, asUINT size, void *param);
 typedef void (*asBINARYWRITEFUNC_t)(const void *ptr, asUINT size, void *param);
@@ -147,6 +165,7 @@ extern "C"
 	// Engine
 	AS_API asIScriptEngine * asCreateScriptEngine(asDWORD version);
 	AS_API const char * asGetLibraryVersion();
+	AS_API const char * asGetLibraryOptions();
 
 	// Context
 	AS_API asIScriptContext * asGetActiveContext();
@@ -157,8 +176,9 @@ extern "C"
 #ifdef AS_C_INTERFACE
 	AS_API int               asEngine_AddRef(asIScriptEngine *e);
 	AS_API int               asEngine_Release(asIScriptEngine *e);
-	AS_API void              asEngine_SetCommonMessageStream(asIScriptEngine *e, asOUTPUTFUNC_t outFunc, void *outParam = 0);
 	AS_API int               asEngine_SetCommonObjectMemoryFunctions(asIScriptEngine *e, asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc);
+	AS_API int               asEngine_SetMessageCallback(asIScriptEngine *e, asFUNCTION_t callback, void *obj, asDWORD callConv);
+	AS_API int               asEngine_ClearMessageCallback(asIScriptEngine *e);
 	AS_API int               asEngine_RegisterObjectType(asIScriptEngine *e, const char *name, int byteSize, asDWORD flags);
 	AS_API int               asEngine_RegisterObjectProperty(asIScriptEngine *e, const char *obj, const char *declaration, int byteOffset);
 	AS_API int               asEngine_RegisterObjectMethod(asIScriptEngine *e, const char *obj, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv);
@@ -166,6 +186,8 @@ extern "C"
 	AS_API int               asEngine_RegisterGlobalProperty(asIScriptEngine *e, const char *declaration, void *pointer);
 	AS_API int               asEngine_RegisterGlobalFunction(asIScriptEngine *e, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv);
 	AS_API int               asEngine_RegisterGlobalBehaviour(asIScriptEngine *e, asDWORD behaviour, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv);
+	AS_API int               asEngine_RegisterInterface(asIScriptEngine *e, const char *name);
+	AS_API int               asEngine_RegisterInterfaceMethod(asIScriptEngine *e, const char *intf, const char *declaration);
 	AS_API int               asEngine_RegisterStringFactory(asIScriptEngine *e, const char *datatype, asFUNCTION_t factoryFunc, asDWORD callConv);
 	AS_API int               asEngine_BeginConfigGroup(asIScriptEngine *e, const char *groupName);
 	AS_API int               asEngine_EndConfigGroup(asIScriptEngine *e);
@@ -174,15 +196,22 @@ extern "C"
 	AS_API int               asEngine_AddScriptSection(asIScriptEngine *e, const char *module, const char *name, const char *code, int codeLength, int lineOffset = 0, bool makeCopy = true);
 	AS_API int               asEngine_Build(asIScriptEngine *e, const char *module);
 	AS_API int               asEngine_Discard(asIScriptEngine *e, const char *module);
+#ifdef AS_DEPRECATED
 	AS_API int               asEngine_GetModuleIndex(asIScriptEngine *e, const char *module);
 	AS_API const char *      asEngine_GetModuleNameFromIndex(asIScriptEngine *e, int index, int *length = 0);
+#endif
 	AS_API int               asEngine_GetFunctionCount(asIScriptEngine *e, const char *module);
 	AS_API int               asEngine_GetFunctionIDByIndex(asIScriptEngine *e, const char *module, int index);
 	AS_API int               asEngine_GetFunctionIDByName(asIScriptEngine *e, const char *module, const char *name);
 	AS_API int               asEngine_GetFunctionIDByDecl(asIScriptEngine *e, const char *module, const char *decl);
 	AS_API const char *      asEngine_GetFunctionDeclaration(asIScriptEngine *e, int funcID, int *length = 0);
 	AS_API const char *      asEngine_GetFunctionName(asIScriptEngine *e, int funcID, int *length = 0);
+	AS_API const char *      asEngine_GetFunctionModule(asIScriptEngine *e, int funcID, int *length = 0);
 	AS_API const char *      asEngine_GetFunctionSection(asIScriptEngine *e, int funcID, int *length = 0);
+	AS_API int               asEngine_GetMethodCount(asIScriptEngine *e, int typeId);
+	AS_API int               asEngine_GetMethodIDByIndex(asIScriptEngine *e, int typeId, int index);
+	AS_API int               asEngine_GetMethodIDByName(asIScriptEngine *e, int typeId, const char *name);
+	AS_API int               asEngine_GetMethodIDByDecl(asIScriptEngine *e, int typeId, const char *decl);
 	AS_API int               asEngine_GetGlobalVarCount(asIScriptEngine *e, const char *module);
 	AS_API int               asEngine_GetGlobalVarIDByIndex(asIScriptEngine *e, const char *module, int index);
 	AS_API int               asEngine_GetGlobalVarIDByName(asIScriptEngine *e, const char *module, const char *name);
@@ -218,11 +247,14 @@ extern "C"
 	AS_API int              asContext_SetArgQWord(asIScriptContext *c, asUINT arg, asQWORD value);
 	AS_API int              asContext_SetArgFloat(asIScriptContext *c, asUINT arg, float value);
 	AS_API int              asContext_SetArgDouble(asIScriptContext *c, asUINT arg, double value);
+	AS_API int              asContext_SetArgAddress(asIScriptContext *c, asUINT arg, void *addr);
 	AS_API int              asContext_SetArgObject(asIScriptContext *c, asUINT arg, void *obj);
+	AS_API int              asContext_SetObject(asIScriptContext *c, void *obj);
 	AS_API asDWORD          asContext_GetReturnDWord(asIScriptContext *c);
 	AS_API asQWORD          asContext_GetReturnQWord(asIScriptContext *c);
 	AS_API float            asContext_GetReturnFloat(asIScriptContext *c);
 	AS_API double           asContext_GetReturnDouble(asIScriptContext *c);
+	AS_API void *           asContext_GetReturnAddress(asIScriptContext *c);
 	AS_API void *           asContext_GetReturnObject(asIScriptContext *c);
 	AS_API int              asContext_Execute(asIScriptContext *c);
 	AS_API int              asContext_Abort(asIScriptContext *c);
@@ -243,6 +275,7 @@ extern "C"
 	AS_API int              asContext_GetVarCount(asIScriptContext *c, int stackLevel = 0);
 	AS_API const char *     asContext_GetVarName(asIScriptContext *c, int varIndex, int *length = 0, int stackLevel = 0);
 	AS_API const char *     asContext_GetVarDeclaration(asIScriptContext *c, int varIndex, int *length = 0, int stackLevel = 0);
+	AS_API int              asContext_GetVarTypeId(asIScriptContext *c, int varIndex, int stackLevel = -1);
 	AS_API void *           asContext_GetVarPointer(asIScriptContext *c, int varIndex, int stackLevel = 0);
 
 
@@ -252,11 +285,13 @@ extern "C"
 	AS_API asQWORD          asGeneric_GetArgQWord(asIScriptGeneric *g, asUINT arg);
 	AS_API float            asGeneric_GetArgFloat(asIScriptGeneric *g, asUINT arg);
 	AS_API double           asGeneric_GetArgDouble(asIScriptGeneric *g, asUINT arg);
+	AS_API void *           asGeneric_GetArgAddress(asIScriptGeneric *g, asUINT arg);
 	AS_API void *           asGeneric_GetArgObject(asIScriptGeneric *g, asUINT arg);
 	AS_API int              asGeneric_SetReturnDWord(asIScriptGeneric *g, asDWORD val);
 	AS_API int              asGeneric_SetReturnQWord(asIScriptGeneric *g, asQWORD val);
 	AS_API int              asGeneric_SetReturnFloat(asIScriptGeneric *g, float val);
 	AS_API int              asGeneric_SetReturnDouble(asIScriptGeneric *g, double val);
+	AS_API int              asGeneric_SetReturnAddress(asIScriptGeneric *g, void *addr);
 	AS_API int              asGeneric_SetReturnObject(asIScriptGeneric *g, void *obj);
 
 	AS_API int  asAny_AddRef(asIScriptAny *a);
@@ -298,8 +333,9 @@ public:
 	virtual int Release() = 0;
 
 	// Engine configuration
-	virtual void SetCommonMessageStream(asIOutputStream *out) = 0;
-	virtual void SetCommonMessageStream(asOUTPUTFUNC_t outFunc, void *outParam) = 0;
+	virtual int SetMessageCallback(const asUPtr &callback, void *obj, asDWORD callConv) = 0;
+	virtual int ClearMessageCallback() = 0;
+
 	virtual int SetCommonObjectMemoryFunctions(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc) = 0;
 
 	virtual int RegisterObjectType(const char *name, int byteSize, asDWORD flags) = 0;
@@ -311,6 +347,9 @@ public:
 	virtual int RegisterGlobalFunction(const char *declaration, const asUPtr &funcPointer, asDWORD callConv) = 0;
 	virtual int RegisterGlobalBehaviour(asDWORD behaviour, const char *declaration, const asUPtr &funcPointer, asDWORD callConv) = 0;
 
+	virtual int RegisterInterface(const char *name) = 0;
+	virtual int RegisterInterfaceMethod(const char *intf, const char *declaration) = 0;
+
 	virtual int RegisterStringFactory(const char *datatype, const asUPtr &factoryFunc, asDWORD callConv) = 0;
 
 	virtual int BeginConfigGroup(const char *groupName) = 0;
@@ -319,15 +358,14 @@ public:
 	virtual int SetConfigGroupModuleAccess(const char *groupName, const char *module, bool hasAccess) = 0;
 
 	// Script modules
-	virtual int AddScriptSection(const char *module, const char *name, const char *code, int codeLength, int lineOffset = 0, bool makeCopy = true) = 0;
-#ifdef AS_DEPRECATED
-	virtual int Build(const char *module, asIOutputStream *out) = 0;
-#endif
+	virtual int AddScriptSection(const char *module, const char *name, const char *code, size_t codeLength, int lineOffset = 0, bool makeCopy = true) = 0;
 	virtual int Build(const char *module) = 0;
     virtual int Discard(const char *module) = 0;
 	virtual int ResetModule(const char *module) = 0;
+#ifdef AS_DEPRECATED
 	virtual int GetModuleIndex(const char *module) = 0;
 	virtual const char *GetModuleNameFromIndex(int index, int *length = 0) = 0;
+#endif
 
 	// Script functions
 	virtual int GetFunctionCount(const char *module) = 0;
@@ -336,8 +374,14 @@ public:
 	virtual int GetFunctionIDByDecl(const char *module, const char *decl) = 0;
 	virtual const char *GetFunctionDeclaration(int funcID, int *length = 0) = 0;
 	virtual const char *GetFunctionName(int funcID, int *length = 0) = 0;
+	virtual const char *GetFunctionModule(int funcID, int *length = 0) = 0;
 	virtual const char *GetFunctionSection(int funcID, int *length = 0) = 0;
 
+	virtual int GetMethodCount(int typeId) = 0;
+	virtual int GetMethodIDByIndex(int typeId, int index) = 0;
+	virtual int GetMethodIDByName(int typeId, const char *name) = 0;
+	virtual int GetMethodIDByDecl(int typeId, const char *decl) = 0;
+	
 	// Script global variables
 	virtual int GetGlobalVarCount(const char *module) = 0;
 	virtual int GetGlobalVarIDByIndex(const char *module, int index) = 0;
@@ -388,7 +432,7 @@ public:
 	virtual int LoadByteCode(const char *module, asIBinaryStream *in) = 0;
 
 protected:
-	virtual ~asIScriptEngine() {};
+	virtual ~asIScriptEngine() {}
 };
 
 class asIScriptContext
@@ -410,12 +454,16 @@ public:
 	virtual int SetArgQWord(asUINT arg, asQWORD value) = 0;
 	virtual int SetArgFloat(asUINT arg, float value) = 0;
 	virtual int SetArgDouble(asUINT arg, double value) = 0;
+	virtual int SetArgAddress(asUINT arg, void *addr) = 0;
 	virtual int SetArgObject(asUINT arg, void *obj) = 0;
+
+	virtual int SetObject(void *obj) = 0;
 
 	virtual asDWORD GetReturnDWord() = 0;
 	virtual asQWORD GetReturnQWord() = 0;
 	virtual float   GetReturnFloat() = 0;
 	virtual double  GetReturnDouble() = 0;
+	virtual void   *GetReturnAddress() = 0;
 	virtual void   *GetReturnObject() = 0;
 
 	virtual int Execute() = 0;
@@ -443,10 +491,11 @@ public:
 	virtual int GetVarCount(int stackLevel = -1) = 0;
 	virtual const char *GetVarName(int varIndex, int *length = 0, int stackLevel = -1) = 0;
 	virtual const char *GetVarDeclaration(int varIndex, int *length = 0, int stackLevel = -1) = 0;
+	virtual int GetVarTypeId(int varIndex, int stackLevel = -1) = 0;
 	virtual void *GetVarPointer(int varIndex, int stackLevel = -1) = 0;
 
 protected:
-	virtual ~asIScriptContext() {};
+	virtual ~asIScriptContext() {}
 };
 
 class asIScriptGeneric
@@ -460,16 +509,18 @@ public:
 	virtual asQWORD GetArgQWord(asUINT arg) = 0;
 	virtual float   GetArgFloat(asUINT arg) = 0;
 	virtual double  GetArgDouble(asUINT arg) = 0;
+	virtual void   *GetArgAddress(asUINT arg) = 0;
 	virtual void   *GetArgObject(asUINT arg) = 0;
 
 	virtual int     SetReturnDWord(asDWORD val) = 0;
 	virtual int     SetReturnQWord(asQWORD val) = 0;
 	virtual int     SetReturnFloat(float val) = 0;
 	virtual int     SetReturnDouble(double val) = 0;
+	virtual int     SetReturnAddress(void *addr) = 0;
 	virtual int     SetReturnObject(void *obj) = 0;
 
 protected:
-	virtual ~asIScriptGeneric() {};
+	virtual ~asIScriptGeneric() {}
 };
 
 class asIScriptAny
@@ -531,17 +582,14 @@ protected:
 	virtual ~asIScriptArray() {}
 };
 
-class asIOutputStream
-{
-public:
-	virtual void Write(const char *text) = 0;
-};
-
 class asIBinaryStream
 {
 public:
 	virtual void Read(void *ptr, asUINT size) = 0;
 	virtual void Write(const void *ptr, asUINT size) = 0;
+
+public:
+	virtual ~asIBinaryStream() {}
 };
 
 // Enumerations and constants
@@ -659,13 +707,19 @@ const int asEXECUTION_ERROR         = 7;
 const asDWORD asEXECSTRING_ONLY_PREPARE	  = 1;
 const asDWORD asEXECSTRING_USE_MY_CONTEXT = 2;
 
+// Message types
+
+const int asMSGTYPE_ERROR       = 0;
+const int asMSGTYPE_WARNING     = 1;
+const int asMSGTYPE_INFORMATION = 2;
+
 // Prepare flags
 
 const int asPREPARE_PREVIOUS = -1;
 
 // Config groups
 
-const char * const asALL_MODULES = (const char *)-1;
+const char * const asALL_MODULES = (const char * const)-1;
 
 // Type id flags
 

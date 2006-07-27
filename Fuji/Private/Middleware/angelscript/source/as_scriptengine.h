@@ -59,17 +59,6 @@ class asCBuilder;
 class asCContext;
 class asCGCObject;
 
-class asCFunctionStream : public asIOutputStream
-{
-public:
-	asCFunctionStream();
-
-	void Write(const char *text); 
-
-	asOUTPUTFUNC_t func;
-	void          *param;
-};
-
 class asCScriptEngine : public asIScriptEngine
 {
 public:
@@ -81,8 +70,8 @@ public:
 	int Release();
 
 	// Script building
-	void SetCommonMessageStream(asIOutputStream *out);
-    void SetCommonMessageStream(asOUTPUTFUNC_t outFunc, void *outParam);
+	int SetMessageCallback(const asUPtr &callback, void *obj, asDWORD callConv);
+	int ClearMessageCallback();
 	int SetCommonObjectMemoryFunctions(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc);
 
 	int RegisterObjectType(const char *objname, int byteSize, asDWORD flags);
@@ -94,6 +83,9 @@ public:
 	int RegisterGlobalFunction(const char *declaration, const asUPtr &funcPointer, asDWORD callConv);
 	int RegisterGlobalBehaviour(asDWORD behaviour, const char *decl, const asUPtr &funcPointer, asDWORD callConv);
 
+	int RegisterInterface(const char *name);
+	int RegisterInterfaceMethod(const char *intf, const char *declaration);
+
 	int RegisterStringFactory(const char *datatype, const asUPtr &factoryFunc, asDWORD callConv);
 
 	int BeginConfigGroup(const char *groupName);
@@ -101,23 +93,27 @@ public:
 	int RemoveConfigGroup(const char *groupName);
 	int SetConfigGroupModuleAccess(const char *groupName, const char *module, bool haveAccess);
 
-	int AddScriptSection(const char *module, const char *name, const char *code, int codeLength, int lineOffset, bool makeCopy);
-#ifdef AS_DEPRECATED
-	int Build(const char *module, asIOutputStream *out);
-#endif
+	int AddScriptSection(const char *module, const char *name, const char *code, size_t codeLength, int lineOffset, bool makeCopy);
 	int Build(const char *module);
 	int Discard(const char *module);
 	int ResetModule(const char *module);
+#ifdef AS_DEPRECATED
 	int GetModuleIndex(const char *module);
 	const char *GetModuleNameFromIndex(int index, int *length);
-
+#endif
 	int GetFunctionCount(const char *module);
 	int GetFunctionIDByIndex(const char *module, int index);
 	int GetFunctionIDByName(const char *module, const char *name);
 	int GetFunctionIDByDecl(const char *module, const char *decl);
 	const char *GetFunctionDeclaration(int funcID, int *length);
 	const char *GetFunctionName(int funcID, int *length);
+	const char *GetFunctionModule(int funcID, int *length);
 	const char *GetFunctionSection(int funcID, int *length);
+
+	int GetMethodCount(int typeId);
+	int GetMethodIDByIndex(int typeId, int index);
+	int GetMethodIDByName(int typeId, const char *name);
+	int GetMethodIDByDecl(int typeId, const char *decl);
 
 	int GetGlobalVarCount(const char *module);
 	int GetGlobalVarIDByIndex(const char *module, int index);
@@ -192,6 +188,8 @@ public:
 	void CallObjectMethod(void *obj, void *param, asSSystemFunctionInterface *func, asCScriptFunction *desc);
 	void CallGlobalFunction(void *param1, void *param2, asSSystemFunctionInterface *func, asCScriptFunction *desc);
 
+	void CallMessageCallback(const char *section, int row, int col, int type, const char *message);
+
 	void ClearUnusedTypes();
 	void RemoveArrayType(asCObjectType *t);
 
@@ -214,6 +212,8 @@ public:
 
 	asCScriptFunction *GetScriptFunction(int funcID);
 
+	bool IsTypeUsedInParams(asCObjectType *ot);
+
 	int GCInternal();
 
 	int initialContextStackSize;
@@ -221,19 +221,17 @@ public:
 
 	// Information registered by host
 	asSTypeBehaviour globalBehaviours;
-	asCObjectType *defaultArrayObjectType;
-	asCObjectType *anyObjectType;
-	asCObjectType scriptTypeBehaviours;
+	asCObjectType   *defaultArrayObjectType;
+	asCObjectType   *anyObjectType;
+	asCObjectType    scriptTypeBehaviours;
 
 	// Store information about registered object types
-	asCArray<asCObjectType *> objectTypes;
+	asCArray<asCObjectType *>      objectTypes;
 	// Store information about registered array types
-	asCArray<asCObjectType *> arrayTypes;
-	asCArray<asCProperty *> globalProps;
-	asCArray<void *> globalPropAddresses;
-	asCArray<asCScriptFunction *> systemFunctions;
-	asCArray<asSSystemFunctionInterface *> systemFunctionInterfaces;
-	asCScriptFunction *stringFactory;
+	asCArray<asCObjectType *>      arrayTypes;
+	asCArray<asCProperty *>        globalProps;
+	asCArray<void *>               globalPropAddresses;
+	asCScriptFunction             *stringFactory;
 
 	int ConfigError(int err);
 	bool configFailed;
@@ -241,13 +239,23 @@ public:
 	// Script modules
 	asCModule *GetModule(const char *name, bool create);
 	asCModule *GetModule(int id);
+	asCModule *GetModuleFromFuncId(int funcId);
+
+	int GetMethodIDByDecl(asCObjectType *ot, const char *decl, asCModule *mod);
+
+	int GetNextScriptFunctionId();
+	void SetScriptFunction(asCScriptFunction *func);
+	void DeleteScriptFunction(int id);
+	asCArray<asCScriptFunction *> scriptFunctions;
+	asCArray<int> freeScriptFunctionIds;
+	asCArray<asCScriptFunction *> signatureIds;
 
 	// These resources must be protected for multiple accesses
 	int refCount;
 	asCArray<asCModule *> scriptModules;
 	asCModule *lastModule;
 
-	asCArray<asCObjectType *> structTypes;
+	asCArray<asCObjectType *> classTypes;
 	asCArray<asCObjectType *> scriptArrayTypes;
 
 	// Type identifiers
@@ -270,8 +278,10 @@ public:
 	asALLOCFUNC_t global_alloc;
 	asFREEFUNC_t  global_free;
 
-	asIOutputStream *outStream;
-	asCFunctionStream outStreamFunc;
+	// Message callback
+	bool msgCallback;
+	asSSystemFunctionInterface msgCallbackFunc;
+	void *msgCallbackObj;
 
 	// Critical sections for threads
 	DECLARECRITICALSECTION(engineCritical);

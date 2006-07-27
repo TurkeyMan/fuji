@@ -34,13 +34,11 @@
 
 typedef unsigned int acUINT;
 
-int    asStringFormat(char *string, int maxLength, const char *format, ...);
-double asStringScanDouble(const char *string, int *numScanned);
-int    asStringScanInt(const char *string, int base, int *numScanned);
-acUINT asStringScanUInt(const char *string, int base, int *numScanned);
-acUINT asStringHash(const char *string);
-
-void   asStringCopy(const char *source, int srcLength, char *dest, int destLength);
+int    asStringFormat(char *string, size_t maxLength, const char *format, ...);
+double asStringScanDouble(const char *string, size_t *numScanned);
+int    asStringScanInt(const char *string, int base, size_t *numScanned);
+acUINT asStringScanUInt(const char *string, int base, size_t *numScanned);
+void   asStringCopy(const char *source, size_t srcLength, char *dest, size_t destLength);
 
 #define GETSTRING(name,src,len) \
   asCString name; \

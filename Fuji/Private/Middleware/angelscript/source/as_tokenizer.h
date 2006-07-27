@@ -50,7 +50,7 @@ public:
 	asCTokenizer();
 	~asCTokenizer();
 
-	eTokenType GetToken(const char *source, int sourceLength, int *tokenLength);
+	eTokenType GetToken(const char *source, size_t sourceLength, size_t *tokenLength);
 
 protected:
 	int  ParseToken();
@@ -61,10 +61,10 @@ protected:
 	bool IsIdentifier();
 
 	const char *source;
-	int   sourceLength;
+	size_t sourceLength;
 
 	eTokenType tokenType;
-	int tokenLength;
+	size_t tokenLength;
 };
 
 #endif

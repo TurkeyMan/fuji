@@ -241,16 +241,23 @@ asCScriptNode *asCParser::ParseScript()
 
 			if( t1.type == ttImport )
 				node->AddChildLast(ParseImport());
-			else if( t1.type == ttStruct )
-				node->AddChildLast(ParseStruct());
+			else if( t1.type == ttClass )
+				node->AddChildLast(ParseClass());
+			else if( t1.type == ttInterface )
+				node->AddChildLast(ParseInterface());
 			else if( t1.type == ttConst )
 				node->AddChildLast(ParseGlobalVar());
 			else if( IsDataType(t1.type) )
 			{
-				if( IsGlobalVar() )
+				if( IsVarDecl() )
 					node->AddChildLast(ParseGlobalVar());
 				else
 					node->AddChildLast(ParseFunction());
+			}
+			else if( t1.type == ttEndStatement )
+			{
+				// Ignore a semicolon by itself
+				GetToken(&t1);
 			}
 			else if( t1.type == ttEnd )
 				return node;
@@ -293,14 +300,14 @@ asCScriptNode *asCParser::ParseScript()
 	return 0;
 }
 
-bool asCParser::IsGlobalVar()
+bool asCParser::IsVarDecl()
 {
 	// Set start point so that we can rewind
 	sToken t;
 	GetToken(&t);
 	RewindTo(&t);
 	
-	// A global variable can start with a const
+	// A variable decl can start with a const
 	sToken t1;
 	GetToken(&t1);
 	if( t1.type == ttConst )
@@ -312,20 +319,23 @@ bool asCParser::IsGlobalVar()
 		return false;
 	}
 
-	// TODO: Object handles can be interleaved with the array brackets
-
+	// Object handles can be interleaved with the array brackets
 	sToken t2;
 	GetToken(&t2);
-	while( t2.type == ttOpenBracket )
+	while( t2.type == ttHandle || t2.type == ttOpenBracket )
 	{
-		GetToken(&t2);
-		if( t2.type != ttCloseBracket )
-			return false;
+		if( t2.type == ttOpenBracket )
+		{
+			GetToken(&t2);
+			if( t2.type != ttCloseBracket )
+			{
+				RewindTo(&t);
+				return false;
+			}
+		}
+
 		GetToken(&t2);
 	}
-
-	if( t2.type == ttHandle )
-		GetToken(&t2);
 
 	if( t2.type != ttIdentifier )
 	{
@@ -365,15 +375,103 @@ bool asCParser::IsGlobalVar()
 	return false;
 }
 
-asCScriptNode *asCParser::ParseFunction()
+bool asCParser::IsFuncDecl(bool isMethod)
+{
+	// Set start point so that we can rewind
+	sToken t;
+	GetToken(&t);
+	RewindTo(&t);
+
+	// A class constructor can start with identifier followed by parenthesis
+	if( isMethod )
+	{
+		sToken t1, t2;
+		GetToken(&t1);
+		GetToken(&t2);
+		RewindTo(&t);
+		if( t1.type == ttIdentifier && t2.type == ttOpenParanthesis )
+			return true;
+	}
+
+	// A function decl can start with a const
+	sToken t1;
+	GetToken(&t1);
+	if( t1.type == ttConst )
+		GetToken(&t1);
+
+	if( !IsDataType(t1.type) )
+	{
+		RewindTo(&t);
+		return false;
+	}
+
+	// Object handles can be interleaved with the array brackets
+	sToken t2;
+	GetToken(&t2);
+	while( t2.type == ttHandle || t2.type == ttOpenBracket )
+	{
+		if( t2.type == ttOpenBracket )
+		{
+			GetToken(&t2);
+			if( t2.type != ttCloseBracket )
+			{
+				RewindTo(&t);
+				return false;
+			}
+		}
+
+		GetToken(&t2);
+	}
+
+	if( t2.type != ttIdentifier )
+	{
+		RewindTo(&t);
+		return false;
+	}
+
+	GetToken(&t2);
+	if( t2.type == ttOpenParanthesis ) 
+	{	
+		// If the closing paranthesis is not followed by a  
+		// statement block then it is not a function. 
+		while( t2.type != ttCloseParanthesis && t2.type != ttEnd )
+			GetToken(&t2);
+
+		if( t2.type == ttEnd ) 
+			return false;
+		else
+		{
+			GetToken(&t1);
+			RewindTo(&t);
+			if( t1.type == ttStartStatementBlock )
+				return true;
+		}
+
+		RewindTo(&t);
+		return false;
+	}
+
+	RewindTo(&t);
+	return false;
+}
+
+asCScriptNode *asCParser::ParseFunction(bool isMethod)
 {
 	asCScriptNode *node = new asCScriptNode(snFunction);
 
-	node->AddChildLast(ParseType(false));
-	if( isSyntaxError ) return node;
+	// If this is a class constructor then no return type will be declared
+	sToken t1,t2;
+	GetToken(&t1);
+	GetToken(&t2);
+	RewindTo(&t1);
+	if( !isMethod || t2.type != ttOpenParanthesis )
+	{
+		node->AddChildLast(ParseType(false));
+		if( isSyntaxError ) return node;
 
-	node->AddChildLast(ParseTypeMod(false));
-	if( isSyntaxError ) return node;
+		node->AddChildLast(ParseTypeMod(false));
+		if( isSyntaxError ) return node;
+	}
 
 	node->AddChildLast(ParseIdentifier());
 	if( isSyntaxError ) return node;
@@ -386,15 +484,50 @@ asCScriptNode *asCParser::ParseFunction()
 	return node;
 }
 
-asCScriptNode *asCParser::ParseStruct()
+asCScriptNode *asCParser::ParseInterfaceMethod()
 {
-	asCScriptNode *node = new asCScriptNode(snStruct);
+	asCScriptNode *node = new asCScriptNode(snFunction);
+
+	node->AddChildLast(ParseType(true));
+	if( isSyntaxError ) return node;
+
+	node->AddChildLast(ParseTypeMod(false));
+	if( isSyntaxError ) return node;
+
+	node->AddChildLast(ParseIdentifier());
+	if( isSyntaxError ) return node;
+
+	node->AddChildLast(ParseParameterList());
+	if( isSyntaxError ) return node;
+
+	// Parse an optional const after the method definition
+	sToken t1;
+	GetToken(&t1);
+	RewindTo(&t1);
+	if( t1.type == ttConst )
+		node->AddChildLast(ParseToken(ttConst));
+
+	GetToken(&t1);
+	if( t1.type != ttEndStatement )
+	{
+		Error(ExpectedToken(";").AddressOf(), &t1);
+		return node;
+	}
+
+	node->UpdateSourcePos(t1.pos, t1.length);
+
+	return node;
+}
+
+asCScriptNode *asCParser::ParseInterface()
+{
+	asCScriptNode *node = new asCScriptNode(snInterface);
 
 	sToken t;
 	GetToken(&t);
-	if( t.type != ttStruct )
+	if( t.type != ttInterface )
 	{
-		Error(ExpectedToken("struct").AddressOf(), &t);
+		Error(ExpectedToken("interface").AddressOf(), &t);
 		return node;
 	}
 
@@ -409,29 +542,15 @@ asCScriptNode *asCParser::ParseStruct()
 		return node;
 	}
 
-	// Parse properties
+	// Parse interface methods
 	GetToken(&t);
 	RewindTo(&t);
-	while( t.type != ttEndStatementBlock )
+	while( t.type != ttEndStatementBlock && t.type != ttEnd )
 	{
-		// Parse a property declaration
-		asCScriptNode *prop = new asCScriptNode(snDeclaration);
-		node->AddChildLast(prop);
-
-		prop->AddChildLast(ParseType(true));
+		// Parse the method signature
+		node->AddChildLast(ParseInterfaceMethod());
 		if( isSyntaxError ) return node;
-
-		prop->AddChildLast(ParseIdentifier());
-		if( isSyntaxError ) return node;
-
-		GetToken(&t);
-		if( t.type != ttEndStatement )
-		{
-			Error(ExpectedToken(";").AddressOf(), &t);
-			return node;
-		}
-		prop->UpdateSourcePos(t.pos, t.length);
-
+		
 		GetToken(&t);
 		RewindTo(&t);
 	}
@@ -443,13 +562,94 @@ asCScriptNode *asCParser::ParseStruct()
 		return node;
 	}
 
+	node->UpdateSourcePos(t.pos, t.length);
+
+	return node;
+}
+
+asCScriptNode *asCParser::ParseClass()
+{
+	asCScriptNode *node = new asCScriptNode(snClass);
+
+	sToken t;
 	GetToken(&t);
-	if( t.type != ttEndStatement )
+	if( t.type != ttClass )
 	{
-		Error(ExpectedToken(";").AddressOf(), &t);
+		Error(ExpectedToken("class").AddressOf(), &t);
 		return node;
 	}
 
+	node->SetToken(&t);
+
+	node->AddChildLast(ParseIdentifier());
+
+	GetToken(&t);
+
+	// Optional list of interfaces that are being implemented and classes that are being inherited
+	if( t.type == ttColon )
+	{
+		node->AddChildLast(ParseIdentifier());
+		GetToken(&t);
+		while( t.type == ttListSeparator )
+		{
+			node->AddChildLast(ParseIdentifier());
+			GetToken(&t);
+		}
+	}
+
+	if( t.type != ttStartStatementBlock )
+	{
+		Error(ExpectedToken("{").AddressOf(), &t);
+		return node;
+	}
+
+	// Parse properties
+	GetToken(&t);
+	RewindTo(&t);
+	while( t.type != ttEndStatementBlock && t.type != ttEnd )
+	{
+		// Is it a property or a method?
+		if( IsFuncDecl(true) )
+		{
+			// Parse the method
+			node->AddChildLast(ParseFunction(true));
+		}
+		else if( IsVarDecl() )
+		{
+			// Parse a property declaration
+			asCScriptNode *prop = new asCScriptNode(snDeclaration);
+			node->AddChildLast(prop);
+
+			prop->AddChildLast(ParseType(true));
+			if( isSyntaxError ) return node;
+
+			prop->AddChildLast(ParseIdentifier());
+			if( isSyntaxError ) return node;
+
+			GetToken(&t);
+			if( t.type != ttEndStatement )
+			{
+				Error(ExpectedToken(";").AddressOf(), &t);
+				return node;
+			}
+			prop->UpdateSourcePos(t.pos, t.length);
+		}
+		else
+		{
+			Error(TXT_EXPECTED_METHOD_OR_PROPERTY, &t);
+			return node;
+		}
+
+		GetToken(&t);
+		RewindTo(&t);
+	}
+
+	GetToken(&t);
+	if( t.type != ttEndStatementBlock )
+	{
+		Error(ExpectedToken("}").AddressOf(), &t);
+		return node;
+	}
 	node->UpdateSourcePos(t.pos, t.length);
 
 	return node;
@@ -532,12 +732,10 @@ asCScriptNode *asCParser::ParseTypeMod(bool isParam)
 
 		if( isParam )
 		{
-#ifdef AS_ALLOW_UNSAFE_REFERENCES
 			GetToken(&t);
 			RewindTo(&t);
 
 			if( t.type == ttIn || t.type == ttOut || t.type == ttInOut )
-#endif
 			{
 				int tokens[3] = {ttIn, ttOut, ttInOut};
 				node->AddChildLast(ParseOneOf(tokens, 3));
@@ -953,7 +1151,7 @@ asCScriptNode *asCParser::ParseStatementBlock()
 			{
 				RewindTo(&t1);
 
-				if( IsDeclaration() )
+				if( IsVarDecl() )
 					node->AddChildLast(ParseDeclaration());
 				else
 					node->AddChildLast(ParseStatement());
@@ -1101,57 +1299,6 @@ asCScriptNode *asCParser::ParseInitList()
 		}
 	}
 	return 0;
-}
-
-bool asCParser::IsDeclaration()
-{
-	sToken t1, t2;
-
-	GetToken(&t1);
-
-	if( t1.type == ttConst )
-	{
-		RewindTo(&t1);
-		return true;
-	}
-
-	if( !IsDataType(t1.type) )
-	{
-		RewindTo(&t1);
-		return false;
-	}
-
-	GetToken(&t2);
-	if( t2.type == ttIdentifier )
-	{
-		RewindTo(&t1);
-		return true;
-	}
-
-	// The data type can be followed by handle and array brackets
-	while( t2.type == ttHandle || t2.type == ttOpenBracket )
-	{
-		if( t2.type == ttOpenBracket )
-		{
-			GetToken(&t2);
-			if( t2.type != ttCloseBracket )
-			{
-				RewindTo(&t1);
-				return false;
-			}
-		}
-
-		GetToken(&t2);
-	}
-
-	if( t2.type == ttIdentifier )
-	{
-		RewindTo(&t1);
-		return true;
-	}
-
-	RewindTo(&t1);
-	return false;
 }
 
 bool asCParser::IsFunctionCall()
@@ -1506,7 +1653,7 @@ asCScriptNode *asCParser::ParseFor()
 		return node;
 	}
 
-	if( IsDeclaration() )
+	if( IsVarDecl() )
 		node->AddChildLast(ParseDeclaration());
 	else
 		node->AddChildLast(ParseExpressionStatement());
@@ -1923,7 +2070,7 @@ asCScriptNode *asCParser::ParseAssignOperator()
 
 void asCParser::GetToken(sToken *token)
 {
-	int sourceLength = script->codeLength;
+	size_t sourceLength = script->codeLength;
 
 	do
 	{
@@ -1971,6 +2118,7 @@ bool asCParser::IsRealType(int tokenType)
 		tokenType == ttInt ||
 		tokenType == ttInt8 ||
 		tokenType == ttInt16 ||
+		tokenType == ttInt64 ||
 		tokenType == ttUInt ||
 		tokenType == ttUInt8 ||
 		tokenType == ttUInt16 ||

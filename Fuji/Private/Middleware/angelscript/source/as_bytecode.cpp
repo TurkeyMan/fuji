@@ -35,6 +35,8 @@
 // A class for constructing the final byte code
 //
 
+#include <stdio.h> // fopen(), fprintf(), fclose()
+
 #include "as_config.h"
 #include "as_bytecode.h"
 #include "as_debug.h" // mkdir()
@@ -42,8 +44,6 @@
 #include "as_string.h"
 #include "as_module.h"
 #include "as_scriptengine.h"
-
-#include <stdio.h> // fopen(), fprintf(), fclose()
 
 BEGIN_AS_NAMESPACE
 
@@ -149,7 +149,7 @@ bool asCByteCode::IsVarUsed(int offset)
 				return true;
 		}
 		else if( bcTypes[curr->op] == BCTYPE_rW_ARG    ||
-                 bcTypes[curr->op] == BCTYPE_wW_ARG    ||
+				 bcTypes[curr->op] == BCTYPE_wW_ARG    ||
 				 bcTypes[curr->op] == BCTYPE_wW_W_ARG  ||
 				 bcTypes[curr->op] == BCTYPE_rW_DW_ARG ||
 				 bcTypes[curr->op] == BCTYPE_wW_DW_ARG ||
@@ -193,7 +193,7 @@ void asCByteCode::ExchangeVar(int oldOffset, int newOffset)
 				curr->wArg[2] = newOffset;
 		}
 		else if( bcTypes[curr->op] == BCTYPE_rW_ARG    ||
-                 bcTypes[curr->op] == BCTYPE_wW_ARG    ||
+				 bcTypes[curr->op] == BCTYPE_wW_ARG    ||
 				 bcTypes[curr->op] == BCTYPE_wW_W_ARG  ||
 				 bcTypes[curr->op] == BCTYPE_rW_DW_ARG ||
 				 bcTypes[curr->op] == BCTYPE_wW_DW_ARG ||
@@ -350,8 +350,6 @@ bool asCByteCode::MatchPattern(cByteInstruction *curr)
 
 cByteInstruction *asCByteCode::OptimizePattern(cByteInstruction *curr)
 {
-	asDWORD op = curr->next->next->op;
-
 	// Delete the operator instruction
 	DeleteInstruction(curr->next->next);
 
@@ -615,7 +613,7 @@ int asCByteCode::Optimize()
 		// Remove or combine instructions 
 		if( RemoveUnusedValue(curr, &instr) ) continue;
 
-		// Post pone initializations so that they may be combined in the second pass
+		// Postpone initializations so that they may be combined in the second pass
 		if( PostponeInitOfTemp(curr, &instr) ) continue;
 
 		// XXX x, YYY y, SWAP4 -> YYY y, XXX x
@@ -724,27 +722,27 @@ int asCByteCode::Optimize()
 		}
 		// YYY y, POP x -> POP x-1
 		else if( (IsCombination(curr, BC_PshV4, BC_POP) ||
-		          IsCombination(curr, BC_PshC4, BC_POP) ||
-				  IsCombination(curr, BC_VAR  , BC_POP)) && instr->wArg[0] > 0 )
+		          IsCombination(curr, BC_PshC4, BC_POP)) && instr->wArg[0] > 0 )
 		{
 			DeleteInstruction(curr);
 			instr->wArg[0]--;
 			instr = GoBack(instr);
 		}
-		// TODO: Adjust for pointer size
 		// PshRPtr, POP x -> POP x - 1
 		else if( (IsCombination(curr, BC_PshRPtr, BC_POP) ||
-			      IsCombination(curr, BC_PSF    , BC_POP)) && instr->wArg[0] > 0 )
+			      IsCombination(curr, BC_PSF    , BC_POP) ||
+				  IsCombination(curr, BC_VAR    , BC_POP)) 
+				  && instr->wArg[0] > (PTR_SIZE-1) )
 		{
 			DeleteInstruction(curr);
-			instr->wArg[0]--;
+			instr->wArg[0] -= PTR_SIZE;
 			instr = GoBack(instr);
 		}
 		// RDS8, POP 2 -> POP x-1
 		else if( IsCombination(curr, BC_RDS8, BC_POP) && instr->wArg[0] > 1 )
 		{
 			DeleteInstruction(curr);
-			instr->wArg[0]--;
+			instr->wArg[0] -= 2-PTR_SIZE; // Transform the pop to remove the address instead of the 8 byte word
 			instr = GoBack(instr);
 		}
 		// YYY y, POP x -> POP x-2
@@ -756,7 +754,7 @@ int asCByteCode::Optimize()
 		}
 		// YYY y, POP x -> POP x+1
 		else if( (IsCombination(curr, BC_ADDi, BC_POP) ||
-		         IsCombination(curr, BC_SUBi, BC_POP)) && instr->wArg[0] > 0 )
+		          IsCombination(curr, BC_SUBi, BC_POP)) && instr->wArg[0] > 0 )
 		{
 			// Delete current
 			DeleteInstruction(curr);
@@ -795,8 +793,10 @@ int asCByteCode::Optimize()
 			instr = GoBack(DeleteInstruction(curr));
 		// PSF, ChkRefS, RDS4 -> PshV4, CHKREF
 		else if( IsCombination(curr, BC_PSF, BC_ChkRefS) &&
-			     IsCombination(instr, BC_ChkRefS, BC_RDS4) )
+		         IsCombination(instr, BC_ChkRefS, BC_RDS4) )
 		{
+			assert( PTR_SIZE == 1 );
+
 			// TODO: Pointer size
 			curr->op = BC_PshV4;
 			instr->op = BC_CHKREF;
@@ -804,14 +804,25 @@ int asCByteCode::Optimize()
 			instr = GoBack(curr);
 		}
 		// PSF, ChkRefS, POP -> ChkNullV
-		// PshV4, CHKREF, POP -> ChkNullV
 		else if( (IsCombination(curr, BC_PSF, BC_ChkRefS) &&
-			     IsCombination(instr, BC_ChkRefS, BC_POP) &&
-				 instr->next->wArg > 0) ||
-				 (IsCombination(curr, BC_PshV4, BC_ChkRefS) &&
-				 IsCombination(instr, BC_CHKREF, BC_POP) &&
-				 instr->next->wArg > 0) )
+		          IsCombination(instr, BC_ChkRefS, BC_POP) &&
+		          instr->next->wArg[0] >= PTR_SIZE) )
 		{
+			curr->op = BC_ChkNullV;
+			curr->stackInc = 0;
+			// Decrease the number of DWORDs popped
+			instr->next->wArg[0] -= PTR_SIZE;
+			// Delete the ChkRefS instruction
+			DeleteInstruction(instr);
+			instr = GoBack(curr);
+		}
+		// PshV4, CHKREF, POP -> ChkNullV
+		else if( (IsCombination(curr, BC_PshV4, BC_ChkRefS) &&
+		          IsCombination(instr, BC_CHKREF, BC_POP) &&
+		          instr->next->wArg[0] > 0) )
+		{
+			assert( PTR_SIZE == 1 );
+
 			// TODO: Pointer size
 			curr->op = BC_ChkNullV;
 			curr->stackInc = 0;
@@ -850,6 +861,8 @@ int asCByteCode::SizeOfType(int type)
 	case BCTYPE_wW_QW_ARG:
 	case BCTYPE_wW_rW_DW_ARG:
 		return 3;
+	case BCTYPE_QW_DW_ARG:
+		return 4;
 	default:
 		assert(false);	
 		return 0;
@@ -1167,18 +1180,18 @@ void asCByteCode::Call(bcInstr instr, int funcID, int pop)
 	*((int*)ARG_DW(last->arg)) = funcID;
 }
 
-void asCByteCode::Alloc(bcInstr instr, int objID, int funcID, int pop)
+void asCByteCode::Alloc(bcInstr instr, void *objID, int funcID, int pop)
 {
 	if( AddInstruction() < 0 )
 		return;
 
-	assert(bcTypes[instr] == BCTYPE_DW_DW_ARG);
-
 	last->op = instr;
 	last->size = SizeOfType(bcTypes[instr]);
 	last->stackInc = -pop; // BC_ALLOC
-	*((int*)ARG_DW(last->arg)) = objID;
-	*((int*)(ARG_DW(last->arg)+1)) = funcID;
+
+	assert(bcTypes[instr] == BCTYPE_PTR_DW_ARG);
+	*ARG_PTR(last->arg) = (asPTRWORD)(size_t)objID;
+	*((int*)(ARG_DW(last->arg)+PTR_SIZE)) = funcID;
 }
 
 void asCByteCode::Ret(int pop)
@@ -1513,7 +1526,7 @@ void asCByteCode::PostProcess()
 void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngine *engine)
 {
 #ifdef AS_DEBUG
-	mkdir("AS_DEBUG");
+	_mkdir("AS_DEBUG");
 
 	asCString str = "AS_DEBUG/";
 	str += name;
@@ -1553,7 +1566,7 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 			{
 				int id = instr->wArg[0];
 				const asCString &str = module->GetConstantString(id);
-				fprintf(file, "   %-8s %d         (l:%d s:\"%.10s\")\n", bcName[instr->op].name, instr->wArg[0], str.GetLength(), str.AddressOf());
+				fprintf(file, "   %-8s %d         (l:%ld s:\"%.10s\")\n", bcName[instr->op].name, instr->wArg[0], str.GetLength(), str.AddressOf());
 			}
 			else
 				fprintf(file, "   %-8s %d\n", bcName[instr->op].name, instr->wArg[0]);
@@ -1594,17 +1607,21 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 		case BCTYPE_DW_ARG:
 			switch( instr->op )
 			{
-			case BC_PshC4:
 			case BC_OBJTYPE:
+				fprintf(file, "   %-8s 0x%x\n", bcName[instr->op].name, *ARG_DW(instr->arg));
+				break;
+
+			case BC_PshC4:
 			case BC_TYPEID:
-				fprintf(file, "   %-8s 0x%lx          (i:%d, f:%g)\n", bcName[instr->op].name, *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
+				fprintf(file, "   %-8s 0x%x          (i:%d, f:%g)\n", bcName[instr->op].name, *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
 				break;
 
 			case BC_CALL:
 			case BC_CALLSYS:
 			case BC_CALLBND:
+			case BC_CALLINTF:
 				{
-					int funcID = *(int*)ARG_DW(instr->arg) | module->moduleID;
+					int funcID = *(int*)ARG_DW(instr->arg);
 					asCString decl = engine->GetFunctionDeclaration(funcID);
 
 					fprintf(file, "   %-8s %d           (%s)\n", bcName[instr->op].name, *((int*) ARG_DW(instr->arg)), decl.AddressOf());
@@ -1634,7 +1651,11 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 
 		case BCTYPE_QW_ARG:
 #ifdef __GNUC__
+#ifdef _LP64
+			fprintf(file, "   %-8s 0x%lx           (i:%ld, f:%g)\n", bcName[instr->op].name, *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
+#else
 			fprintf(file, "   %-8s 0x%llx           (i:%lld, f:%g)\n", bcName[instr->op].name, *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
+#endif
 #else
 			fprintf(file, "   %-8s 0x%I64x          (i:%I64d, f:%g)\n", bcName[instr->op].name, *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
 #endif
@@ -1642,7 +1663,11 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 
 		case BCTYPE_wW_QW_ARG:
 #ifdef __GNUC__
+#ifdef _LP64
+			fprintf(file, "   %-8s v%d, 0x%lx           (i:%ld, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
+#else
 			fprintf(file, "   %-8s v%d, 0x%llx           (i:%lld, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
+#endif
 #else
 			fprintf(file, "   %-8s v%d, 0x%I64x          (i:%I64d, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_QW(instr->arg), *((__int64*) ARG_QW(instr->arg)), *((double*) ARG_QW(instr->arg)));
 #endif
@@ -1650,9 +1675,24 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 
 		case BCTYPE_DW_DW_ARG:
 			if( instr->op == BC_ALLOC )
-				fprintf(file, "   %-8s 0x%lx, %d\n", bcName[instr->op].name, *(int*)ARG_DW(instr->arg), *(int*)(ARG_DW(instr->arg)+1));
+				fprintf(file, "   %-8s 0x%x, %d\n", bcName[instr->op].name, *(int*)ARG_DW(instr->arg), *(int*)(ARG_DW(instr->arg)+1));
 			else
 				fprintf(file, "   %-8s %u, %d\n", bcName[instr->op].name, *(int*)ARG_DW(instr->arg), *(int*)(ARG_DW(instr->arg)+1));
+			break;
+
+		case BCTYPE_QW_DW_ARG:
+			if( instr->op == BC_ALLOC )
+#ifdef __GNUC__
+				fprintf(file, "   %-8s 0x%llx, %d\n", bcName[instr->op].name, *(__int64*)ARG_QW(instr->arg), *(int*)(ARG_DW(instr->arg)+2));
+#else
+				fprintf(file, "   %-8s 0x%I64x, %d\n", bcName[instr->op].name, *(__int64*)ARG_QW(instr->arg), *(int*)(ARG_DW(instr->arg)+2));
+#endif
+			else
+#ifdef __GNUC__
+				fprintf(file, "   %-8s %llu, %d\n", bcName[instr->op].name, *(__int64*)ARG_QW(instr->arg), *(int*)(ARG_DW(instr->arg)+2));
+#else
+				fprintf(file, "   %-8s %I64u, %d\n", bcName[instr->op].name, *(__int64*)ARG_QW(instr->arg), *(int*)(ARG_DW(instr->arg)+2));
+#endif
 			break;
 
 		case BCTYPE_INFO:
@@ -1665,7 +1705,7 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 		case BCTYPE_rW_DW_ARG:
 		case BCTYPE_wW_DW_ARG:
 			if( instr->op == BC_SetV4 )
-				fprintf(file, "   %-8s v%d, 0x%lx          (i:%d, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
+				fprintf(file, "   %-8s v%d, 0x%x          (i:%d, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
 			else if( instr->op == BC_CMPIf )
 				fprintf(file, "   %-8s v%d, %f\n", bcName[instr->op].name, instr->wArg[0], *(float*)ARG_DW(instr->arg));
 			else
@@ -1674,7 +1714,7 @@ void asCByteCode::DebugOutput(const char *name, asCModule *module, asCScriptEngi
 
 		case BCTYPE_W_DW_ARG:
 			if( instr->op == BC_SetG4 )
-				fprintf(file, "   %-8s %d, 0x%lx          (i:%d, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
+				fprintf(file, "   %-8s %d, 0x%x          (i:%d, f:%g)\n", bcName[instr->op].name, instr->wArg[0], *ARG_DW(instr->arg), *((int*) ARG_DW(instr->arg)), *((float*) ARG_DW(instr->arg)));
 			break;
 
 		case BCTYPE_wW_rW_rW_ARG:
@@ -1945,6 +1985,22 @@ int asCByteCode::InstrDWORD(bcInstr bc, asDWORD param)
 
 	last->op = bc;
 	*ARG_DW(last->arg) = param;
+	last->size     = SizeOfType(bcTypes[bc]);
+	last->stackInc = bcStackInc[bc];
+
+	return last->stackInc;
+}
+
+int asCByteCode::InstrPTR(bcInstr bc, void *param)
+{
+	assert(bcStackInc[bc] != 0xFFFF);
+
+	if( AddInstruction() < 0 )
+		return 0;
+
+	last->op = bc;
+	assert(bcTypes[bc] == BCTYPE_PTR_ARG);
+	*ARG_PTR(last->arg) = (asPTRWORD)(size_t)param;
 	last->size     = SizeOfType(bcTypes[bc]);
 	last->stackInc = bcStackInc[bc];
 

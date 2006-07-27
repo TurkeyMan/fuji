@@ -126,6 +126,9 @@
 // AS_USE_NAMESPACE
 // Adds the AngelScript namespace on the declarations.
 
+// AS_NO_MEMORY_H
+// Some compilers don't come with the memory.h header file.
+
 
 
 //
@@ -173,6 +176,9 @@
 
 // AS_PPC
 // Use assembler code for the PowerPC CPU family
+
+// AS_64BIT_PTR
+// Define this to make the engine store all pointers in 64bit words.
 
 
 
@@ -290,7 +296,7 @@
 #endif
 
 // GNU C
-#if defined(__GNUC__) && !defined(__SNC__)
+#if defined(__GNUC__) && !defined(__SNC__) && !defined(__APPLE__)
 	#define GNU_STYLE_VIRTUAL_METHOD
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
@@ -313,35 +319,77 @@
 #ifdef __SH4_SINGLE_ONLY__
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
+	#define ASM_AT_N_T
 	#define AS_SH4
-  #define ASM_AT_N_T
 #endif
 
 // MIPS architexture (generally PS2 and PSP consoles, potentially supports N64 aswell)
 #if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_EE_) || defined(_PSP) || defined(_PS2)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
+	#define ASM_AT_N_T
 	#define AS_MIPS
-  #define AS_NO_MEMORY_H
-  #define ASM_AT_N_T
+	#define AS_NO_MEMORY_H
 #endif
 
-// PPC architexture (Mac, Gamecube and hopefully PS3 + XBox360)
-#if defined(PPC) || defined(_GC) || (defined(_XBOX) && _XBOX_VER >= 200)
+// POWERPC architectures
+#if defined(__APPLE__)
+	// MACOSX (PPC and X86)
+	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
+	#define AS_NO_MEMORY_H
+	#define GNU_STYLE_VIRTUAL_METHOD
+	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
+	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
+	#define COMPLEX_OBJS_PASSED_BY_REF
+	#define __int64 long long
+	#define ASM_AT_N_T
+	#define COMPLEX_MASK (asOBJ_CLASS_DESTRUCTOR)
+	#define STDCALL
+	#ifdef __INTEL__
+		#define AS_X86
+	#else
+		#define AS_PPC
+		#define AS_USE_DOUBLE_AS_FLOAT
+	#endif
+#elif defined(PPC) || defined(_GC) || (defined(_XBOX) && _XBOX_VER >= 200)
+	// Alternative PPC architectures (Gamecube and hopefully PS3 + XBox360)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-	#define AS_PPC
-  #define AS_NO_MEMORY_H
-  #if defined(_MSC_VER)
-    #define ASM_INTEL
-  #else
-    #define ASM_AT_N_T
-  #endif
+//	#define AS_PPC					// not working yet
+	#define AS_NO_MEMORY_H
+	#if defined(_MSC_VER)
+		#define ASM_INTEL
+	#else
+		#define ASM_AT_N_T
+	#endif
 #endif
+
+
+// Is the target a 64bit system?
+#if defined(__LP64__) || defined(__amd64__)
+    #ifdef __int64
+        #undef __int64
+    #endif
+    #define __int64 long
+    #ifndef AS_64BIT_PTR
+        #define AS_64BIT_PTR
+    #endif
+#endif
+
+// If there are no current support for native calling 
+// conventions, then compile with AS_MAX_PORTABILITY
+#if (!defined(AS_X86) && !defined(AS_SH4) && !defined(AS_MIPS) && !defined(AS_PPC))
+    #ifndef AS_MAX_PORTABILITY
+        #define AS_MAX_PORTABILITY
+    #endif
+#endif
+
+
+
 
 
 // 
-// Alignment macros
+// Internal defines (do not change these)
 //----------------------------------------------------------------
 
 #ifdef AS_ALIGN
@@ -350,13 +398,22 @@
 	#define	ALIGN(b) (b)
 #endif
 
-#define	ARG_W(b) ((asWORD*)&b)
-#define	ARG_DW(b) ((asDWORD*)&b)
-#define	ARG_QW(b) ((asQWORD*)&b)	
-#define	BCARG_W(b) ((asWORD*)&(b)[1])
+#define	ARG_W(b)    ((asWORD*)&b)
+#define	ARG_DW(b)   ((asDWORD*)&b)
+#define	ARG_QW(b)   ((asQWORD*)&b)
+#define	BCARG_W(b)  ((asWORD*)&(b)[1])
 #define	BCARG_DW(b) ((asDWORD*)&(b)[1])
 #define	BCARG_QW(b) ((asQWORD*)&(b)[1])
 
+#ifdef AS_64BIT_PTR
+	#define PTR_SIZE     2
+	#define asPTRWORD    asQWORD
+#else
+	#define PTR_SIZE     1
+	#define asPTRWORD    asDWORD
+#endif
+#define ARG_PTR(b)   ((asPTRWORD*)&b)
+#define BCARG_PTR(b) ((asPTRWORD*)&(b)[1])
 
 
 #include "../include/angelscript.h"

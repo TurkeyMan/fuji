@@ -28,16 +28,18 @@
    andreas@angelcode.com
 */
 
+#include <stdarg.h>		// va_list, va_start(), etc
+#include <stdlib.h>     // strtod(), strtol()
+#include <assert.h>     // assert()
+#include <string.h> // some compilers declare memcpy() here
+
 #include "as_config.h"
-#include "as_string.h"
 
 #if !defined(AS_NO_MEMORY_H)
 #include <memory.h>
 #endif
-#include <string.h> // some compilers declare memcpy() here
-#include <assert.h> // assert()
-#include <stdarg.h> // va_list, va_start(), etc
-#include <stdlib.h> // strtod(), strtol()
+
+#include "as_string.h"
 
 asCString::asCString()
 {
@@ -58,7 +60,7 @@ asCString::asCString(const asCString &str)
 	Assign(str.buffer, str.length);
 }
 
-asCString::asCString(const char *str, asUINT len)
+asCString::asCString(const char *str, size_t len)
 {
 	length = 0;
 	bufferSize = 0;
@@ -73,7 +75,7 @@ asCString::asCString(const char *str)
 	bufferSize = 0;
 	buffer = 0;
 
-	int len = strlen(str);
+	size_t len = strlen(str);
 	Assign(str, len);
 }
 
@@ -104,7 +106,7 @@ const char *asCString::AddressOf() const
 	return buffer;
 }
 
-void asCString::SetLength(asUINT len)
+void asCString::SetLength(size_t len)
 {
 	if( len >= bufferSize )
 		Allocate(len, true);
@@ -113,7 +115,7 @@ void asCString::SetLength(asUINT len)
 	length = len;
 }
 
-void asCString::Allocate(asUINT len, bool keepData)
+void asCString::Allocate(size_t len, bool keepData)
 {
 	char *buf = new char[len+1];
 	bufferSize = len+1;
@@ -140,7 +142,7 @@ void asCString::Allocate(asUINT len, bool keepData)
 	buffer[length] = 0;
 }
 
-void asCString::Assign(const char *str, asUINT len)
+void asCString::Assign(const char *str, size_t len)
 {
 	// Allocate memory for the string
 	if( bufferSize < len + 1 )
@@ -154,7 +156,7 @@ void asCString::Assign(const char *str, asUINT len)
 
 asCString &asCString::operator =(const char *str)
 {
-	int len = str ? strlen(str) : 0;
+	size_t len = str ? strlen(str) : 0;
 	Assign(str, len);
 
 	return *this;
@@ -174,7 +176,7 @@ asCString &asCString::operator =(char ch)
 	return *this;
 }
 
-void asCString::Concatenate(const char *str, asUINT len)
+void asCString::Concatenate(const char *str, size_t len)
 {
 	// Allocate memory for the string
 	if( bufferSize < length + len + 1 )
@@ -187,7 +189,7 @@ void asCString::Concatenate(const char *str, asUINT len)
 
 asCString &asCString::operator +=(const char *str)
 {
-	int len = strlen(str);
+	size_t len = strlen(str);
 	Concatenate(str, len);
 
 	return *this;
@@ -207,13 +209,13 @@ asCString &asCString::operator +=(char ch)
 	return *this;
 }
 
-asUINT asCString::GetLength() const
+size_t asCString::GetLength() const
 {
 	return length;
 }
 
 // Returns the length
-int asCString::Format(const char *format, ...)
+size_t asCString::Format(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -227,7 +229,7 @@ int asCString::Format(const char *format, ...)
 	}
 	else
 	{
-		int n = 512;
+		size_t n = 512;
 		asCString str; // Use temporary string in case the current buffer is a parameter
 		str.Allocate(n, false);
 
@@ -245,26 +247,26 @@ int asCString::Format(const char *format, ...)
 	return length;
 }
 
-char &asCString::operator [](asUINT index) 
+char &asCString::operator [](size_t index) 
 {
 	assert(index < length);
 
 	return buffer[index];
 }
 
-const char &asCString::operator [](asUINT index) const
+const char &asCString::operator [](size_t index) const
 {
 	assert(index < length);
 
 	return buffer[index];
 }
 
-asCString asCString::SubString(asUINT start, int length) const
+asCString asCString::SubString(size_t start, size_t length) const
 {
 	if( start >= GetLength() || length == 0 )
 		return asCString("");
 
-	if( length == -1 ) length = GetLength() - start;
+	if( length == (size_t)(-1) ) length = GetLength() - start;
 
 	asCString tmp;
 	tmp.Assign(buffer + start, length);
@@ -282,7 +284,7 @@ int asCString::Compare(const asCString &str) const
 	return Compare(str.AddressOf(), str.GetLength());
 }
 
-int asCString::Compare(const char *str, asUINT len) const
+int asCString::Compare(const char *str, size_t len) const
 {
 	if( buffer == 0 ) 
 	{
@@ -313,7 +315,7 @@ int asCString::Compare(const char *str, asUINT len) const
 	return result;
 }
 
-int asCString::RecalculateLength()
+size_t asCString::RecalculateLength()
 {
 	if( buffer == 0 ) Assign("", 0);
 	length = strlen(buffer);

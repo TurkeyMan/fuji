@@ -52,7 +52,6 @@ BEGIN_AS_NAMESPACE
 const int asFUNC_INIT   = 0xFFFF;
 const int asFUNC_STRING = 0xFFFE;
 
-const int FUNC_SYSTEM   = 0x80000000;
 const int FUNC_IMPORTED = 0x40000000;
 
 class asCScriptEngine;
@@ -74,7 +73,7 @@ public:
 	~asCModule();
 
 	int  AddScriptSection(const char *name, const char *code, int codeLength, int lineOffset, bool makeCopy);
-	int  Build(asIOutputStream *out);
+	int  Build();
 	void Discard();
 
 	int  ResetGlobalVars();
@@ -82,6 +81,8 @@ public:
 	int  GetFunctionCount();
 	int  GetFunctionIDByName(const char *name);
 	int  GetFunctionIDByDecl(const char *decl);
+
+	int  GetMethodIDByDecl(asCObjectType *ot, const char *decl);
 
 	int  GetGlobalVarCount();
 	int  GetGlobalVarIDByName(const char *name);
@@ -104,13 +105,13 @@ public:
 
 	bool IsUsed();
 
-	int AddConstantString(const char *str, asUINT length);
+	int AddConstantString(const char *str, size_t length);
 	const asCString &GetConstantString(int id);
 
 	int AllocGlobalMemory(int size);
 
 	int GetNextFunctionId();
-	int AddScriptFunction(int sectionIdx, int id, const char *name, const asCDataType &returnType, asCDataType *params, int *inOutFlags, int paramCount);
+	int AddScriptFunction(int sectionIdx, int id, const char *name, const asCDataType &returnType, asCDataType *params, int *inOutFlags, int paramCount, bool isInterface, asCObjectType *objType = 0);
 	int AddImportedFunction(int id, const char *name, const asCDataType &returnType, asCDataType *params, int *inOutFlags, int paramCount, int moduleNameStringID);
 
 	bool CanDeleteAllReferences(asCArray<asCModule*> &modules);
@@ -152,7 +153,7 @@ public:
 
 	bool CanDelete();
 
-	asCScriptFunction initFunction;
+	asCScriptFunction *initFunction;
 
 	asCArray<asCString *> scriptSections;
 	asCArray<asCScriptFunction *> scriptFunctions;
@@ -160,14 +161,13 @@ public:
 	asCArray<sBindInfo> bindInformations;
 
 	asCArray<asCProperty *> scriptGlobals;
-	asCArray<asDWORD> globalMem;
+	asCArray<size_t> globalMem;
 
 	asCArray<void*> globalVarPointers;
 
 	asCArray<asCString*> stringConstants;
 
-	asCArray<asCObjectType*> structTypes;
-	asCArray<asCObjectType*> scriptArrayTypes;
+	asCArray<asCObjectType*> classTypes;
 
 	// Reference to all used types
 	asCArray<asCObjectType*> usedTypes;

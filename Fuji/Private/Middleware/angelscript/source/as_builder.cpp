@@ -52,7 +52,6 @@ asCBuilder::asCBuilder(asCScriptEngine *engine, asCModule *module)
 {
 	this->engine = engine;
 	this->module = module;
-	out = 0;
 }
 
 asCBuilder::~asCBuilder()
@@ -95,23 +94,30 @@ asCBuilder::~asCBuilder()
 		scripts[n] = 0;
 	}
 
-	// Free all struct declarations
-	for( n = 0; n < structDeclarations.GetLength(); n++ )
+	// Free all class declarations
+	for( n = 0; n < classDeclarations.GetLength(); n++ )
 	{
-		if( structDeclarations[n] )
+		if( classDeclarations[n] )
 		{
-			if( structDeclarations[n]->node )
-				delete structDeclarations[n]->node;
+			if( classDeclarations[n]->node )
+				delete classDeclarations[n]->node;
 
-			delete structDeclarations[n];
-			structDeclarations[n] = 0;
+			delete classDeclarations[n];
+			classDeclarations[n] = 0;
 		}
 	}
-}
 
-void asCBuilder::SetOutputStream(asIOutputStream *out)
-{
-	this->out = out;
+	for( n = 0; n < interfaceDeclarations.GetLength(); n++ )
+	{
+		if( interfaceDeclarations[n] )
+		{
+			if( interfaceDeclarations[n]->node )
+				delete interfaceDeclarations[n]->node;
+
+			delete interfaceDeclarations[n];
+			interfaceDeclarations[n] = 0;
+		}
+	}
 }
 
 int asCBuilder::AddCode(const char *name, const char *code, int codeLength, int lineOffset, int sectionIdx, bool makeCopy)
@@ -129,9 +135,10 @@ int asCBuilder::Build()
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	ParseScripts();
-	CompileStructs();
+	CompileClasses();
 	CompileGlobalVariables();
 	CompileFunctions();
 
@@ -145,6 +152,7 @@ int asCBuilder::BuildString(const char *string, asCContext *ctx)
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	// Add the string to the script code
 	asCScriptCode *script = new asCScriptCode;
@@ -181,10 +189,10 @@ int asCBuilder::BuildString(const char *string, asCContext *ctx)
 	{
 		// Compile the function
 		asCCompiler compiler;
-		asCScriptFunction *execfunc = new asCScriptFunction;
+		asCScriptFunction *execfunc = new asCScriptFunction(module);
 		if( compiler.CompileFunction(this, functions[0]->script, functions[0]->node, execfunc) >= 0 )
 		{
-			execfunc->id = asFUNC_STRING | module->moduleID;
+			execfunc->id = asFUNC_STRING;
 
 			// Copy byte code to the registered function
 			execfunc->byteCode.SetLength(compiler.byteCode.GetSize());
@@ -240,12 +248,66 @@ void asCBuilder::ParseScripts()
 			while( node )
 			{
 				asCScriptNode *next = node->next;
-				if( node->nodeType == snStruct )
+				if( node->nodeType == snClass )
 				{
 					node->DisconnectParent();
-					RegisterStruct(node, scripts[n]);
+					RegisterClass(node, scripts[n]);
+				}
+				else if( node->nodeType == snInterface )
+				{
+					node->DisconnectParent();
+					RegisterInterface(node, scripts[n]);
 				}
 
+				node = next;
+			}
+		}
+
+		// Register script methods found in the structures
+		for( n = 0; n < classDeclarations.GetLength(); n++ )
+		{
+			sClassDeclaration *decl = classDeclarations[n];
+
+			asCScriptNode *node = decl->node->firstChild->next;
+
+			// Skip list of classes and interfaces
+			while( node && node->nodeType == snIdentifier )
+				node = node->next;
+
+			while( node )
+			{
+				asCScriptNode *next = node->next;
+				if( node->nodeType == snFunction )
+				{
+					node->DisconnectParent();
+					RegisterScriptFunction(module->GetNextFunctionId(), node, decl->script, decl->objType);
+				}
+				
+				node = next;
+			}
+
+			// Make sure the default constructor exists for classes
+			if( decl->objType->beh.construct == engine->scriptTypeBehaviours.beh.construct )
+			{
+				AddDefaultConstructor(decl->objType, decl->script);
+			}
+		}
+
+		// Register script methods found in the interfaces
+		for( n = 0; n < interfaceDeclarations.GetLength(); n++ )
+		{
+			sClassDeclaration *decl = interfaceDeclarations[n];
+
+			asCScriptNode *node = decl->node->firstChild->next;
+			while( node )
+			{
+				asCScriptNode *next = node->next;
+				if( node->nodeType == snFunction )
+				{
+					node->DisconnectParent();
+					RegisterScriptFunction(module->GetNextFunctionId(), node, decl->script, decl->objType, true);
+				}
+				
 				node = next;
 			}
 		}
@@ -298,25 +360,28 @@ void asCBuilder::CompileFunctions()
 	// Compile each function
 	for( asUINT n = 0; n < functions.GetLength(); n++ )
 	{
+		if( functions[n] == 0 ) continue;
+
 		asCCompiler compiler;
 
 		int r, c;
 		functions[n]->script->ConvertPosToRowCol(functions[n]->node->tokenPos, &r, &c);
-		asCString str = module->scriptFunctions[n]->GetDeclaration(engine);
+		asCScriptFunction *func = engine->scriptFunctions[functions[n]->funcId];
+		asCString str = func->GetDeclaration(engine);
 		str.Format(TXT_COMPILING_s, str.AddressOf());
 		WriteInfo(functions[n]->script->name.AddressOf(), str.AddressOf(), r, c, true);
 
-		if( compiler.CompileFunction(this, functions[n]->script, functions[n]->node, module->scriptFunctions[n]) >= 0 )
+		if( compiler.CompileFunction(this, functions[n]->script, functions[n]->node, func) >= 0 )
 		{
 			// Copy byte code to the registered function
-			module->scriptFunctions[n]->byteCode.SetLength(compiler.byteCode.GetSize());
+			func->byteCode.SetLength(compiler.byteCode.GetSize());
 			// TODO: Pass the function pointer directly
-			compiler.byteCode.Output(module->scriptFunctions[n]->byteCode.AddressOf());
-			module->scriptFunctions[n]->stackNeeded = compiler.byteCode.largestStackUsed;
-			module->scriptFunctions[n]->lineNumbers = compiler.byteCode.lineNumbers;
+			compiler.byteCode.Output(func->byteCode.AddressOf());
+			func->stackNeeded = compiler.byteCode.largestStackUsed;
+			func->lineNumbers = compiler.byteCode.lineNumbers;
 
-			module->scriptFunctions[n]->objVariablePos = compiler.objVariablePos;
-			module->scriptFunctions[n]->objVariableTypes = compiler.objVariableTypes;
+			func->objVariablePos = compiler.objVariablePos;
+			func->objVariableTypes = compiler.objVariableTypes;
 
 #ifdef AS_DEBUG
 			// DEBUG: output byte code
@@ -324,7 +389,7 @@ void asCBuilder::CompileFunctions()
 #endif
 		}
 
-		preMessage = "";
+		preMessage.isSet = false;
 	}
 }
 
@@ -332,6 +397,7 @@ int asCBuilder::ParseDataType(const char *datatype, asCDataType *result)
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	asCScriptCode source;
 	source.SetCode("", datatype, true);
@@ -356,6 +422,7 @@ int asCBuilder::VerifyProperty(asCDataType *dt, const char *decl, asCString &nam
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	if( dt )
 	{
@@ -461,6 +528,7 @@ int asCBuilder::ParseFunctionDeclaration(const char *decl, asCScriptFunction *fu
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	asCScriptCode source;
 	source.SetCode(TXT_SYSTEM_FUNCTION, decl, true);
@@ -480,7 +548,7 @@ int asCBuilder::ParseFunctionDeclaration(const char *decl, asCScriptFunction *fu
 	// Initialize a script function object for registration
 	bool autoHandle;
 	func->returnType = CreateDataTypeFromNode(node->firstChild, &source);
-	func->returnType = ModifyDataTypeFromNode(func->returnType, node->firstChild->next, 0, &autoHandle);
+	func->returnType = ModifyDataTypeFromNode(func->returnType, node->firstChild->next, &source, 0, &autoHandle);
 	if( autoHandle && (!func->returnType.IsObjectHandle() || func->returnType.IsReference()) )
 			return asINVALID_DECLARATION;			
 	if( returnAutoHandle ) *returnAutoHandle = autoHandle;
@@ -490,7 +558,7 @@ int asCBuilder::ParseFunctionDeclaration(const char *decl, asCScriptFunction *fu
 	{
 		int inOutFlags;
 		asCDataType type = CreateDataTypeFromNode(n, &source);
-		type = ModifyDataTypeFromNode(type, n->next, &inOutFlags, &autoHandle);
+		type = ModifyDataTypeFromNode(type, n->next, &source, &inOutFlags, &autoHandle);
 		
 		// Store the parameter type
 		func->parameterTypes.PushLast(type);
@@ -523,6 +591,7 @@ int asCBuilder::ParseVariableDeclaration(const char *decl, asCProperty *var)
 {
 	numErrors = 0;
 	numWarnings = 0;
+	preMessage.isSet = false;
 
 	asCScriptCode source;
 	source.SetCode(TXT_VARIABLE_DECL, decl, true);
@@ -620,10 +689,10 @@ int asCBuilder::CheckNameConflict(const char *name, asCScriptNode *node, asCScri
 
 	// TODO: Property names must be checked against function names
 
-	// Check against struct types
-	for( asUINT n = 0; n < structDeclarations.GetLength(); n++ )
+	// Check against class types
+	for( asUINT n = 0; n < classDeclarations.GetLength(); n++ )
 	{
-		if( structDeclarations[n]->name == name )
+		if( classDeclarations[n]->name == name )
 		{
 			if( code )
 			{
@@ -711,7 +780,7 @@ int asCBuilder::RegisterGlobalVar(asCScriptNode *node, asCScriptCode *file)
 	return 0;
 }
 
-int asCBuilder::RegisterStruct(asCScriptNode *node, asCScriptCode *file)
+int asCBuilder::RegisterClass(asCScriptNode *node, asCScriptCode *file)
 {
 	asCScriptNode *n = node->firstChild;
 	GETSTRING(name, &file->code[n->tokenPos], n->tokenLength);
@@ -721,8 +790,8 @@ int asCBuilder::RegisterStruct(asCScriptNode *node, asCScriptCode *file)
 
 	CheckNameConflict(name.AddressOf(), n, file);
 
-	sStructDeclaration *decl = new sStructDeclaration;
-	structDeclarations.PushLast(decl);
+	sClassDeclaration *decl = new sClassDeclaration;
+	classDeclarations.PushLast(decl);
 	decl->name = name;
 	decl->script = file;
 	decl->validState = 0;
@@ -734,12 +803,12 @@ int asCBuilder::RegisterStruct(asCScriptNode *node, asCScriptCode *file)
 	st->size = sizeof(asCScriptStruct);
 	st->name = name;
 	st->tokenType = ttIdentifier;
-	module->structTypes.PushLast(st);
-	engine->structTypes.PushLast(st);
+	module->classTypes.PushLast(st);
+	engine->classTypes.PushLast(st);
 	st->refCount++;
 	decl->objType = st;
 
-	// Use the default script struct behaviours
+	// Use the default script class behaviours
 	st->beh.construct = engine->scriptTypeBehaviours.beh.construct;
 	st->beh.constructors.PushLast(st->beh.construct);
 	st->beh.addref = engine->scriptTypeBehaviours.beh.addref;
@@ -747,6 +816,44 @@ int asCBuilder::RegisterStruct(asCScriptNode *node, asCScriptCode *file)
 	st->beh.copy = engine->scriptTypeBehaviours.beh.copy;
 	st->beh.operators.PushLast(ttAssignment);
 	st->beh.operators.PushLast(st->beh.copy);
+
+	return 0;
+}
+
+int asCBuilder::RegisterInterface(asCScriptNode *node, asCScriptCode *file)
+{
+	asCScriptNode *n = node->firstChild;
+	GETSTRING(name, &file->code[n->tokenPos], n->tokenLength);
+
+	int r, c;
+	file->ConvertPosToRowCol(n->tokenPos, &r, &c);
+
+	CheckNameConflict(name.AddressOf(), n, file);
+
+	sClassDeclaration *decl = new sClassDeclaration;
+	interfaceDeclarations.PushLast(decl);
+	decl->name       = name;
+	decl->script     = file;
+	decl->validState = 0;
+	decl->node       = node;
+
+	// Register the object type for the interface
+	asCObjectType *st = new asCObjectType(engine);
+	st->arrayType = 0;
+	st->flags = asOBJ_CLASS_CDA | asOBJ_SCRIPT_STRUCT;
+	st->size = 0; // Cannot be instanciated
+	st->name = name;
+	st->tokenType = ttIdentifier;
+	module->classTypes.PushLast(st);
+	engine->classTypes.PushLast(st);
+	st->refCount++;
+	decl->objType = st;
+
+	// Use the default script class behaviours
+	st->beh.construct = 0;
+	st->beh.addref = engine->scriptTypeBehaviours.beh.addref;
+	st->beh.release = engine->scriptTypeBehaviours.beh.release;
+	st->beh.copy = 0; 
 
 	return 0;
 }
@@ -760,11 +867,17 @@ void asCBuilder::CompileGlobalVariables()
 	// Store state of compilation (errors, warning, output)
 	int currNumErrors = numErrors;
 	int currNumWarnings = numWarnings;
-	asIOutputStream *stream = out;
-	asCOutputBuffer outBuffer;
-	out = &outBuffer;
 
-	asCString finalOutput;
+	// Backup the original message stream
+	bool                       msgCallback     = engine->msgCallback;
+	asSSystemFunctionInterface msgCallbackFunc = engine->msgCallbackFunc;
+	void                      *msgCallbackObj  = engine->msgCallbackObj;
+
+	// Set the new temporary message stream
+	asCOutputBuffer outBuffer;
+	engine->SetMessageCallback(asMETHOD(asCOutputBuffer, Callback), &outBuffer, asCALL_THISCALL);	
+
+	asCOutputBuffer finalOutput;
 
 	while( compileSucceeded )
 	{
@@ -774,13 +887,13 @@ void asCBuilder::CompileGlobalVariables()
 		int accumWarnings = 0;
 
 		// Restore state of compilation
-		finalOutput = "";
+		finalOutput.Clear();
 
 		for( asUINT n = 0; n < globVariables.GetLength(); n++ )
 		{
 			numWarnings = 0;
 			numErrors = 0;
-			outBuffer.output = "";
+			outBuffer.Clear();
 			asCByteCode init;
 
 			sGlobalVariableDescription *gvar = globVariables[n];
@@ -813,7 +926,8 @@ void asCBuilder::CompileGlobalVariables()
 					if( numWarnings )
 					{
 						currNumWarnings += numWarnings;
-						stream->Write(outBuffer.output.AddressOf());
+						if( msgCallback )
+							outBuffer.SendToCallback(engine, &msgCallbackFunc, msgCallbackObj);
 					}
 
 					// Add compiled byte code to the final init and exit functions
@@ -822,12 +936,12 @@ void asCBuilder::CompileGlobalVariables()
 				else
 				{
 					// Add output to final output
-					finalOutput += outBuffer.output;
+					finalOutput.Append(outBuffer);
 					accumErrors += numErrors;
 					accumWarnings += numWarnings;
 				}
 
-				preMessage = "";
+				preMessage.isSet = false;
 			}
 		}
 
@@ -836,15 +950,18 @@ void asCBuilder::CompileGlobalVariables()
 			// Add errors and warnings to total build
 			currNumWarnings += accumWarnings;
 			currNumErrors += accumErrors;
-
-			if( stream && finalOutput != "" ) stream->Write(finalOutput.AddressOf());
+			if( msgCallback )
+				finalOutput.SendToCallback(engine, &msgCallbackFunc, msgCallbackObj);
 		}
 	}
 
 	// Restore states
-	out = stream;
+	engine->msgCallback     = msgCallback;
+	engine->msgCallbackFunc = msgCallbackFunc;
+	engine->msgCallbackObj  = msgCallbackObj;
+
 	numWarnings = currNumWarnings;
-	numErrors = currNumErrors;
+	numErrors   = currNumErrors;
 
 	// Register init code and clean up code
 	finalInit.Ret(0);
@@ -854,10 +971,17 @@ void asCBuilder::CompileGlobalVariables()
 	asCByteCode cleanInit;
 	asCByteCode cleanExit;
 
-	module->initFunction.byteCode.SetLength(finalInit.GetSize());
+	int id = engine->GetNextScriptFunctionId();
+	asCScriptFunction *init = new asCScriptFunction(module);
+
+	init->id = id;
+	module->initFunction = init;
+	engine->SetScriptFunction(init);
+
+	init->byteCode.SetLength(finalInit.GetSize());
 	// TODO: Pass the function pointer directly
-	finalInit.Output(module->initFunction.byteCode.AddressOf());
-	module->initFunction.stackNeeded = finalInit.largestStackUsed;
+	finalInit.Output(init->byteCode.AddressOf());
+	init->stackNeeded = finalInit.largestStackUsed;
 
 #ifdef AS_DEBUG
 	// DEBUG: output byte code
@@ -866,62 +990,97 @@ void asCBuilder::CompileGlobalVariables()
 
 }
 
-void asCBuilder::CompileStructs()
+void asCBuilder::CompileClasses()
 {
 	asUINT n;
-	asCArray<sStructDeclaration*> toValidate;
+	asCArray<sClassDeclaration*> toValidate;
 
-	// Go through each of the structs and register the object type descriptions
-	for( n = 0; n < structDeclarations.GetLength(); n++ )
+	// Go through each of the classes and register the object type descriptions
+	for( n = 0; n < classDeclarations.GetLength(); n++ )
 	{
-		sStructDeclaration *decl = structDeclarations[n];
+		sClassDeclaration *decl = classDeclarations[n];
 
 		// Enumerate each of the declared properties
 		asCScriptNode *node = decl->node->firstChild->next;
+
+		// Skip list of classes and interfaces
+		while( node && node->nodeType == snIdentifier )
+			node = node->next;
+
 		while( node )
 		{
-			asCScriptCode *file = decl->script;
-			asCDataType dt = CreateDataTypeFromNode(node->firstChild, file);
-			GETSTRING(name, &file->code[node->lastChild->tokenPos], node->lastChild->tokenLength);
-
-			if( dt.IsReadOnly() )
+			if( node->nodeType == snDeclaration )
 			{
-				int r, c;
-				file->ConvertPosToRowCol(node->tokenPos, &r, &c);
+				asCScriptCode *file = decl->script;
+				asCDataType dt = CreateDataTypeFromNode(node->firstChild, file);
+				GETSTRING(name, &file->code[node->lastChild->tokenPos], node->lastChild->tokenLength);
 
-				WriteError(file->name.AddressOf(), TXT_PROPERTY_CANT_BE_CONST, r, c);
+				if( dt.IsReadOnly() )
+				{
+					int r, c;
+					file->ConvertPosToRowCol(node->tokenPos, &r, &c);
+
+					WriteError(file->name.AddressOf(), TXT_PROPERTY_CANT_BE_CONST, r, c);
+				}
+
+				asCDataType st;
+				st.SetObjectType(decl->objType);
+				CheckNameConflictMember(st, name.AddressOf(), node->lastChild, file);
+
+				// Store the properties in the object type descriptor
+				asCProperty *prop = new asCProperty;
+				prop->name = name;
+				prop->type = dt;
+
+				int propSize;
+				if( dt.IsObject() )
+				{
+					propSize = dt.GetSizeOnStackDWords()*4;
+					if( !dt.IsObjectHandle() )
+					{
+						if( dt.GetSizeInMemoryBytes() == 0 )
+						{
+							int r, c;
+							file->ConvertPosToRowCol(node->tokenPos, &r, &c);
+							asCString str;
+							str.Format(TXT_DATA_TYPE_CANT_BE_s, dt.Format().AddressOf());
+							WriteError(file->name.AddressOf(), str.AddressOf(), r, c);
+						}
+						prop->type.MakeReference(true);
+					}
+				}
+				else
+				{
+					propSize = dt.GetSizeInMemoryBytes();
+					if( propSize == 0 )
+					{
+						int r, c;
+						file->ConvertPosToRowCol(node->tokenPos, &r, &c);
+						asCString str;
+						str.Format(TXT_DATA_TYPE_CANT_BE_s, dt.Format());
+						WriteError(file->name.AddressOf(), str.AddressOf(), r, c);
+					}
+				}
+
+				// Add extra bytes so that the property will be properly aligned
+				if( propSize == 2 && (decl->objType->size & 1) ) decl->objType->size += 1;
+				if( propSize > 2 && (decl->objType->size & 3) ) decl->objType->size += 3 - (decl->objType->size & 3);
+
+				prop->byteOffset = decl->objType->size;
+				decl->objType->size += propSize;
+
+				decl->objType->properties.PushLast(prop);
+
+				// Make sure the module holds a reference to the config group where the object is registered
+				module->RefConfigGroupForObjectType(dt.GetObjectType());
 			}
-
-			asCDataType st;
-			st.SetObjectType(decl->objType);
-			CheckNameConflictMember(st, name.AddressOf(), node->lastChild, file);
-
-			// Store the properties in the object type descriptor
-			asCProperty *prop = new asCProperty;
-			prop->name = name;
-			prop->type = dt;
-
-			int propSize;
-			if( dt.IsObject() )
+			else if( node->nodeType == snFunction )
 			{
-				propSize = dt.GetSizeOnStackDWords()*4;
-				if( !dt.IsObjectHandle() )
-					prop->type.MakeReference(true);
+				// TODO: Register the method and add it to the list of functions to compile later 
+
 			}
 			else
-				propSize = dt.GetSizeInMemoryBytes();
-
-			// Add extra bytes so that the property will be properly aligned
-			if( propSize == 2 && (decl->objType->size & 1) ) decl->objType->size += 1;
-			if( propSize > 2 && (decl->objType->size & 3) ) decl->objType->size += 3 - (decl->objType->size & 3);
-
-			prop->byteOffset = decl->objType->size;
-			decl->objType->size += propSize;
-
-			decl->objType->properties.PushLast(prop);
-
-			// Make sure the module holds a reference to the config group where the object is registered
-			module->RefConfigGroupForObjectType(dt.GetObjectType());
+				assert(false);
 
 			node = node->next;
 		}
@@ -933,12 +1092,12 @@ void asCBuilder::CompileStructs()
 	// doesn't contain a member of its own type directly or indirectly
 	while( toValidate.GetLength() > 0 ) 
 	{
-		asUINT numStructs = toValidate.GetLength();
+		asUINT numClasses = (asUINT)toValidate.GetLength();
 
-		asCArray<sStructDeclaration*> toValidateNext;
+		asCArray<sClassDeclaration*> toValidateNext;
 		while( toValidate.GetLength() > 0 )
 		{
-			sStructDeclaration *decl = toValidate[toValidate.GetLength()-1];
+			sClassDeclaration *decl = toValidate[toValidate.GetLength()-1];
 			int validState = 1;
 			for( asUINT n = 0; n < decl->objType->properties.GetLength(); n++ )
 			{
@@ -957,13 +1116,13 @@ void asCBuilder::CompileStructs()
 
 				if( dt.IsObject() && !dt.IsObjectHandle() )
 				{
-					// Find the struct declaration
-					sStructDeclaration *pdecl = 0;
-					for( asUINT p = 0; p < structDeclarations.GetLength(); p++ )
+					// Find the class declaration
+					sClassDeclaration *pdecl = 0;
+					for( asUINT p = 0; p < classDeclarations.GetLength(); p++ )
 					{
-						if( structDeclarations[p]->objType == dt.GetObjectType() )
+						if( classDeclarations[p]->objType == dt.GetObjectType() )
 						{
-							pdecl = structDeclarations[p];
+							pdecl = classDeclarations[p];
 							break;
 						}
 					}
@@ -1006,7 +1165,7 @@ void asCBuilder::CompileStructs()
 		toValidate = toValidateNext;
 		toValidateNext.SetLength(0);
 
-		if( numStructs == toValidate.GetLength() )
+		if( numClasses == toValidate.GetLength() )
 		{
 			int r, c;
 			toValidate[0]->script->ConvertPosToRowCol(toValidate[0]->node->tokenPos, &r, &c);
@@ -1021,9 +1180,9 @@ void asCBuilder::CompileStructs()
 	//       the graph must be flagged as potential circles
 
 	// Verify potential circular references
-	for( n = 0; n < structDeclarations.GetLength(); n++ )
+	for( n = 0; n < classDeclarations.GetLength(); n++ )
 	{
-		sStructDeclaration *decl = structDeclarations[n];
+		sClassDeclaration *decl = classDeclarations[n];
 		asCObjectType *ot = decl->objType;
 
 		// Is there some path in which this structure is involved in circular references?
@@ -1082,30 +1241,145 @@ void asCBuilder::CompileStructs()
 			}
 		}
 	}
+
+	// Verify that the class implements all the methods from the interfaces it implements
+	for( n = 0; n < classDeclarations.GetLength(); n++ )
+	{
+		sClassDeclaration *decl = classDeclarations[n];
+		asCScriptCode *file = decl->script;
+
+		// Enumerate each of the implemented interfaces
+		asCScriptNode *node = decl->node->firstChild->next;
+		while( node && node->nodeType == snIdentifier )
+		{
+			// Get the interface name from the node
+			GETSTRING(name, &file->code[node->tokenPos], node->tokenLength);
+
+			// Find the object type for the interface
+			asCObjectType *objType = GetObjectType(name.AddressOf());
+
+			if( decl->objType->Implements(objType) )
+			{
+				int r, c;
+				file->ConvertPosToRowCol(node->tokenPos, &r, &c);
+				WriteWarning(file->name.AddressOf(), TXT_INTERFACE_ALREADY_IMPLEMENTED, r, c);
+			}
+			else
+			{
+				decl->objType->interfaces.PushLast(objType);
+
+				// Make sure all the methods of the interface are implemented
+				for( asUINT i = 0; i < objType->methods.GetLength(); i++ )
+				{
+					if( !DoesMethodExist(decl->objType, objType->methods[i]) )
+					{
+						int r, c;
+						file->ConvertPosToRowCol(decl->node->tokenPos, &r, &c);
+						asCString str;
+						str.Format(TXT_MISSING_IMPLEMENTATION_OF_s, 
+							engine->GetFunctionDeclaration(objType->methods[i]).AddressOf());
+						WriteError(file->name.AddressOf(), str.AddressOf(), r, c);
+					}
+				}
+			}
+
+			node = node->next;
+		}
+	}
 }
 
-int asCBuilder::RegisterScriptFunction(int funcID, asCScriptNode *node, asCScriptCode *file)
+bool asCBuilder::DoesMethodExist(asCObjectType *objType, int methodId)
+{
+	asCScriptFunction *method = GetFunctionDescription(methodId);
+
+	for( asUINT n = 0; n < objType->methods.GetLength(); n++ )
+	{
+		asCScriptFunction *m = GetFunctionDescription(objType->methods[n]);
+
+		if( m->name           != method->name           ) continue;
+		if( m->returnType     != method->returnType     ) continue;
+		if( m->isReadOnly     != method->isReadOnly     ) continue;
+		if( m->parameterTypes != method->parameterTypes ) continue;
+		if( m->inOutFlags     != method->inOutFlags     ) continue;
+
+		return true;
+	}
+
+	return false;
+}
+
+void asCBuilder::AddDefaultConstructor(asCObjectType *objType, asCScriptCode *file)
+{
+	int funcId = module->GetNextFunctionId();
+
+	asCDataType returnType = asCDataType::CreatePrimitive(ttVoid, false);
+	asCArray<asCDataType> parameterTypes;
+	asCArray<int> inOutFlags;
+
+	// Add the script function
+	module->AddScriptFunction(file->idx, funcId, objType->name.AddressOf(), returnType, parameterTypes.AddressOf(), inOutFlags.AddressOf(), (asUINT)parameterTypes.GetLength(), false, objType);
+	
+	// Set it as default constructor
+	objType->beh.construct = funcId;
+	objType->beh.constructors[0] = funcId;
+
+	// Compile the bytecode
+	asCCompiler compiler;
+	compiler.CompileDefaultConstructor(this, file, engine->scriptFunctions[funcId]);
+
+	// Add a dummy function to the module so that it doesn't mix up the func Ids
+	functions.PushLast(0);
+}
+
+int asCBuilder::RegisterScriptFunction(int funcID, asCScriptNode *node, asCScriptCode *file, asCObjectType *objType, bool isInterface)
 {
 	// Find name 
-	asCScriptNode *n = node->firstChild->next->next;
+	bool isConstructor = false;
+	asCScriptNode *n = 0;
+	if( node->firstChild->nodeType == snDataType )
+		n = node->firstChild->next->next;
+	else
+	{
+		n = node->firstChild;
+		isConstructor = true;
+	}
 
 	// Check for name conflicts
 	GETSTRING(name, &file->code[n->tokenPos], n->tokenLength);
-	CheckNameConflict(name.AddressOf(), n, file);
+	if( !isConstructor )
+		CheckNameConflict(name.AddressOf(), n, file);
+	else
+	{
+		// Verify that the name of the function is the same as the class
+		if( name != objType->name )
+		{
+			int r, c;
+			file->ConvertPosToRowCol(n->tokenPos, &r, &c);
+			WriteError(file->name.AddressOf(), TXT_CONSTRUCTOR_NAME_ERROR, r, c);
+		}
+	}
 
-	sFunctionDescription *func = new sFunctionDescription;
-	functions.PushLast(func);
+	if( !isInterface )
+	{
+		sFunctionDescription *func = new sFunctionDescription;
+		functions.PushLast(func);
 
-	func->script = file;
-	func->node   = node;
-	func->name   = name;
+		func->script  = file;
+		func->node    = node;
+		func->name    = name;
+		func->objType = objType;
+		func->funcId  = funcID;
+	}
 
 	// Initialize a script function object for registration
-	asCDataType returnType;
-	returnType = CreateDataTypeFromNode(node->firstChild, file);
-	returnType = ModifyDataTypeFromNode(returnType, node->firstChild->next, 0, 0);
-		
-	module->RefConfigGroupForObjectType(returnType.GetObjectType());
+	asCDataType returnType = asCDataType::CreatePrimitive(ttVoid, false);
+	if( !isConstructor )
+	{
+		returnType = CreateDataTypeFromNode(node->firstChild, file);
+		returnType = ModifyDataTypeFromNode(returnType, node->firstChild->next, file, 0, 0);
+
+		module->RefConfigGroupForObjectType(returnType.GetObjectType());
+	}
 
 	asCArray<asCDataType> parameterTypes;
 	asCArray<int> inOutFlags;
@@ -1114,7 +1388,7 @@ int asCBuilder::RegisterScriptFunction(int funcID, asCScriptNode *node, asCScrip
 	{
 		int inOutFlag;
 		asCDataType type = CreateDataTypeFromNode(n, file);
-		type = ModifyDataTypeFromNode(type, n->next, &inOutFlag, 0);
+		type = ModifyDataTypeFromNode(type, n->next, file, &inOutFlag, 0);
 
 		module->RefConfigGroupForObjectType(type.GetObjectType());
 
@@ -1162,7 +1436,28 @@ int asCBuilder::RegisterScriptFunction(int funcID, asCScriptNode *node, asCScrip
 	}
 
 	// Register the function
-	module->AddScriptFunction(file->idx, funcID, func->name.AddressOf(), returnType, parameterTypes.AddressOf(), inOutFlags.AddressOf(), parameterTypes.GetLength());
+	module->AddScriptFunction(file->idx, funcID, name.AddressOf(), returnType, parameterTypes.AddressOf(), inOutFlags.AddressOf(), (asUINT)parameterTypes.GetLength(), isInterface, objType);
+
+	if( objType )
+	{
+		if( isConstructor )
+		{
+			if( parameterTypes.GetLength() == 0 )
+			{
+				// Overload the default constructor
+				objType->beh.construct = funcID;
+				objType->beh.constructors[0] = funcID;
+			}
+			else
+				objType->beh.constructors.PushLast(funcID);
+		}
+		else
+			objType->methods.PushLast(funcID);
+	}
+
+	// We need to delete the node already if this is an interface method
+	if( isInterface && node )
+		delete node;
 
 	return 0;
 }
@@ -1180,7 +1475,7 @@ int asCBuilder::RegisterImportedFunction(int importID, asCScriptNode *node, asCS
 	// Initialize a script function object for registration
 	asCDataType returnType;
 	returnType = CreateDataTypeFromNode(f->firstChild, file);
-	returnType = ModifyDataTypeFromNode(returnType, f->firstChild->next, 0, 0);
+	returnType = ModifyDataTypeFromNode(returnType, f->firstChild->next, file, 0, 0);
 		
 	asCArray<asCDataType> parameterTypes;
 	asCArray<int> inOutFlags;
@@ -1189,7 +1484,7 @@ int asCBuilder::RegisterImportedFunction(int importID, asCScriptNode *node, asCS
 	{
 		int inOutFlag;
 		asCDataType type = CreateDataTypeFromNode(n, file);
-		type = ModifyDataTypeFromNode(type, n->next, &inOutFlag, 0);
+		type = ModifyDataTypeFromNode(type, n->next, file, &inOutFlag, 0);
 
 		// Store the parameter type
 		n = n->next->next;
@@ -1244,7 +1539,7 @@ int asCBuilder::RegisterImportedFunction(int importID, asCScriptNode *node, asCS
 	delete node;
 
 	// Register the function
-	module->AddImportedFunction(importID, name.AddressOf(), returnType, parameterTypes.AddressOf(), inOutFlags.AddressOf(), parameterTypes.GetLength(), moduleNameString);
+	module->AddImportedFunction(importID, name.AddressOf(), returnType, parameterTypes.AddressOf(), inOutFlags.AddressOf(), (asUINT)parameterTypes.GetLength(), moduleNameString);
 
 	return 0;
 }
@@ -1252,13 +1547,10 @@ int asCBuilder::RegisterImportedFunction(int importID, asCScriptNode *node, asCS
 
 asCScriptFunction *asCBuilder::GetFunctionDescription(int id)
 {
-	// The top 16 bits holds the moduleID
-
+	// TODO: This should be improved
 	// Get the description from the engine
-	if( id < 0 )
-		return engine->systemFunctions[-id - 1];
-	else if( (id & 0xFFFF0000) == 0 )
-		return module->scriptFunctions[id];
+	if( (id & 0xFFFF0000) == 0 )
+		return engine->scriptFunctions[id];
 	else 
 		return module->importedFunctions[id & 0xFFFF];
 }
@@ -1269,7 +1561,8 @@ void asCBuilder::GetFunctionDescriptions(const char *name, asCArray<int> &funcs)
 	// TODO: Improve linear search
 	for( n = 0; n < module->scriptFunctions.GetLength(); n++ )
 	{
-		if( module->scriptFunctions[n]->name == name )
+		if( module->scriptFunctions[n]->name == name &&
+			module->scriptFunctions[n]->objectType == 0 )
 			funcs.PushLast(module->scriptFunctions[n]->id);
 	}
 
@@ -1281,14 +1574,17 @@ void asCBuilder::GetFunctionDescriptions(const char *name, asCArray<int> &funcs)
 	}
 
 	// TODO: Improve linear search
-	for( n = 0; n < engine->systemFunctions.GetLength(); n++ )
+	for( n = 0; n < engine->scriptFunctions.GetLength(); n++ )
 	{
-		if( engine->systemFunctions[n] && engine->systemFunctions[n]->objectType == 0 && engine->systemFunctions[n]->name == name )
+		if( engine->scriptFunctions[n] && 
+			engine->scriptFunctions[n]->funcType == asFUNC_SYSTEM && 
+			engine->scriptFunctions[n]->objectType == 0 && 
+			engine->scriptFunctions[n]->name == name )
 		{
 			// Find the config group for the global function
-			asCConfigGroup *group = engine->FindConfigGroupForFunction(engine->systemFunctions[n]->id);
+			asCConfigGroup *group = engine->FindConfigGroupForFunction(engine->scriptFunctions[n]->id);
 			if( !group || group->HasModuleAccess(module->name.AddressOf()) )
-				funcs.PushLast(engine->systemFunctions[n]->id);
+				funcs.PushLast(engine->scriptFunctions[n]->id);
 		}
 	}
 }
@@ -1301,9 +1597,9 @@ void asCBuilder::GetObjectMethodDescriptions(const char *name, asCObjectType *ob
 		// Only add const methods to the list
 		for( asUINT n = 0; n < objectType->methods.GetLength(); n++ )
 		{
-			if( engine->systemFunctions[objectType->methods[n]]->name == name &&
-				engine->systemFunctions[objectType->methods[n]]->isReadOnly )
-				methods.PushLast(engine->systemFunctions[objectType->methods[n]]->id);
+			if( engine->scriptFunctions[objectType->methods[n]]->name == name &&
+				engine->scriptFunctions[objectType->methods[n]]->isReadOnly )
+				methods.PushLast(engine->scriptFunctions[objectType->methods[n]]->id);
 		}
 	}
 	else
@@ -1311,23 +1607,26 @@ void asCBuilder::GetObjectMethodDescriptions(const char *name, asCObjectType *ob
 		// TODO: Prefer non-const over const
 		for( asUINT n = 0; n < objectType->methods.GetLength(); n++ )
 		{
-			if( engine->systemFunctions[objectType->methods[n]]->name == name )
-				methods.PushLast(engine->systemFunctions[objectType->methods[n]]->id);
+			if( engine->scriptFunctions[objectType->methods[n]]->name == name )
+				methods.PushLast(engine->scriptFunctions[objectType->methods[n]]->id);
 		}
 	}
 }
 
 void asCBuilder::WriteInfo(const char *scriptname, const char *message, int r, int c, bool pre)
 {
-	if( out )
+	// Need to store the pre message in a structure
+	if( pre )
 	{
-		asCString str;
-		str.Format("%s (%d, %d) : %s : %s\n", scriptname, r, c, TXT_INFO, message);
-
-		if( pre )
-			preMessage = str;
-		else
-			out->Write(str.AddressOf());
+		preMessage.isSet = true;
+		preMessage.c = c;
+		preMessage.r = r;
+		preMessage.message = message;
+	}
+	else
+	{
+		preMessage.isSet = false;
+		engine->CallMessageCallback(scriptname, r, c, asMSGTYPE_INFORMATION, message);
 	}
 }
 
@@ -1335,38 +1634,22 @@ void asCBuilder::WriteError(const char *scriptname, const char *message, int r, 
 {
 	numErrors++;
 
-	if( out )
-	{
-		if( preMessage != "" )
-		{
-			out->Write(preMessage.AddressOf());
-			preMessage = "";
-		}
+	// Need to pass the preMessage first
+	if( preMessage.isSet )
+		WriteInfo(scriptname, preMessage.message.AddressOf(), preMessage.r, preMessage.c, false);
 
-		asCString str;
-		str.Format("%s (%d, %d) : %s : %s\n", scriptname, r, c, TXT_ERROR, message);
-
-		out->Write(str.AddressOf());
-	}
+	engine->CallMessageCallback(scriptname, r, c, asMSGTYPE_ERROR, message);
 }
 
 void asCBuilder::WriteWarning(const char *scriptname, const char *message, int r, int c)
 {
 	numWarnings++;
 
-	if( out )
-	{
-		if( preMessage != "" )
-		{
-			out->Write(preMessage.AddressOf());
-			preMessage = "";
-		}
+	// Need to pass the preMessage first
+	if( preMessage.isSet )
+		WriteInfo(scriptname, preMessage.message.AddressOf(), preMessage.r, preMessage.c, false);
 
-		asCString str;
-		str.Format("%s (%d, %d) : %s : %s\n", scriptname, r, c, TXT_WARNING, message);
-
-		out->Write(str.AddressOf());
-	}
+	engine->CallMessageCallback(scriptname, r, c, asMSGTYPE_WARNING, message);
 }
 
 
@@ -1464,7 +1747,7 @@ asCDataType asCBuilder::CreateDataTypeFromNode(asCScriptNode *node, asCScriptCod
 	return dt;
 }
 
-asCDataType asCBuilder::ModifyDataTypeFromNode(const asCDataType &type, asCScriptNode *node, int *inOutFlags, bool *autoHandle)
+asCDataType asCBuilder::ModifyDataTypeFromNode(const asCDataType &type, asCScriptNode *node, asCScriptCode *file, int *inOutFlags, bool *autoHandle)
 {
 	asCDataType dt = type;
 
@@ -1493,11 +1776,22 @@ asCDataType asCBuilder::ModifyDataTypeFromNode(const asCDataType &type, asCScrip
 
 			n = n->next;
 		}
-#ifdef AS_ALLOW_UNSAFE_REFERENCES
 		else
 		{
 			if( inOutFlags )
 				*inOutFlags = 3; // ttInOut
+		}
+
+#ifndef AS_ALLOW_UNSAFE_REFERENCES
+		if( inOutFlags && *inOutFlags == 3 )
+		{				
+			// Verify that the base type support &inout parameter types
+			if( !dt.IsObject() || dt.IsObjectHandle() || !dt.GetObjectType()->beh.addref || !dt.GetObjectType()->beh.release )
+			{
+				int r, c;
+				file->ConvertPosToRowCol(node->firstChild->tokenPos, &r, &c);
+				WriteError(file->name.AddressOf(), TXT_ONLY_OBJECTS_MAY_USE_REF_INOUT, r, c);
+			}
 		}
 #endif
 	}

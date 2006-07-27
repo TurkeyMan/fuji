@@ -40,17 +40,6 @@
 BEGIN_AS_NAMESPACE
 #ifdef AS_C_INTERFACE
 
-class asCOutputStreamC : public asIOutputStream
-{
-public:
-	asCOutputStreamC(asOUTPUTFUNC_t func, void *param) {this->func = func; this->param = param;}
-
-	void Write(const char *text) { func(text, param); }
-
-	asOUTPUTFUNC_t func;
-	void          *param;
-};
-
 class asCBinaryStreamC : public asIBinaryStream
 {
 public:
@@ -66,8 +55,9 @@ public:
 
 int               asEngine_AddRef(asIScriptEngine *e)                                                                                                                                { return e->AddRef(); }
 int               asEngine_Release(asIScriptEngine *e)                                                                                                                               { return e->Release(); }
-void              asEngine_SetCommonMessageStream(asIScriptEngine *e, asOUTPUTFUNC_t outFunc, void *outParam)                                                                        { e->SetCommonMessageStream(outFunc, outParam); }
 int               asEngine_SetCommonObjectMemoryFunctions(asIScriptEngine *e, asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc)                                                        { return e->SetCommonObjectMemoryFunctions(allocFunc, freeFunc); }
+int               asEngine_SetMessageCallback(asIScriptEngine *e, asFUNCTION_t callback, void *obj, asDWORD callConv)                                                                { return e->SetMessageCallback(asFUNCTION(callback), obj, callConv); }
+int               asEngine_ClearMessageCallback(asIScriptEngine *e)                                                                                                                  { return e->ClearMessageCallback(); }
 int               asEngine_RegisterObjectType(asIScriptEngine *e, const char *name, int byteSize, asDWORD flags)                                                                     { return e->RegisterObjectType(name, byteSize, flags); }
 int               asEngine_RegisterObjectProperty(asIScriptEngine *e, const char *obj, const char *declaration, int byteOffset)                                                      { return e->RegisterObjectProperty(obj, declaration, byteOffset); }
 int               asEngine_RegisterObjectMethod(asIScriptEngine *e, const char *obj, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv)                            { return e->RegisterObjectMethod(obj, declaration, asFUNCTION(funcPointer), callConv); }
@@ -75,6 +65,8 @@ int               asEngine_RegisterObjectBehaviour(asIScriptEngine *e, const cha
 int               asEngine_RegisterGlobalProperty(asIScriptEngine *e, const char *declaration, void *pointer)                                                                        { return e->RegisterGlobalProperty(declaration, pointer); }
 int               asEngine_RegisterGlobalFunction(asIScriptEngine *e, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv)                                           { return e->RegisterGlobalFunction(declaration, asFUNCTION(funcPointer), callConv); }
 int               asEngine_RegisterGlobalBehaviour(asIScriptEngine *e, asDWORD behaviour, const char *declaration, asFUNCTION_t funcPointer, asDWORD callConv)                       { return e->RegisterGlobalBehaviour(behaviour, declaration, asFUNCTION(funcPointer), callConv); }
+int               asEngine_RegisterInterface(asIScriptEngine *e, const char *name)                                                                                                   { return e->RegisterInterface(name); }
+int               asEngine_RegisterInterfaceMethod(asIScriptEngine *e, const char *intf, const char *declaration)                                                                    { return e->RegisterInterfaceMethod(intf, declaration); }
 int               asEngine_RegisterStringFactory(asIScriptEngine *e, const char *datatype, asFUNCTION_t factoryFunc, asDWORD callConv)                                               { return e->RegisterStringFactory(datatype, asFUNCTION(factoryFunc), callConv); }
 int               asEngine_BeginConfigGroup(asIScriptEngine *e, const char *groupName)                                                                                               { return e->BeginConfigGroup(groupName); }
 int               asEngine_EndConfigGroup(asIScriptEngine *e)                                                                                                                        { return e->EndConfigGroup(); }
@@ -83,15 +75,22 @@ int               asEngine_SetConfigGroupModuleAccess(asIScriptEngine *e, const 
 int               asEngine_AddScriptSection(asIScriptEngine *e, const char *module, const char *name, const char *code, int codeLength, int lineOffset, bool makeCopy)               { return e->AddScriptSection(module, name, code, codeLength, lineOffset, makeCopy); }
 int               asEngine_Build(asIScriptEngine *e, const char *module)                                                                                                             { return e->Build(module); }
 int               asEngine_Discard(asIScriptEngine *e, const char *module)                                                                                                           { return e->Discard(module); }
+#ifdef AS_DEPRECATED
 int               asEngine_GetModuleIndex(asIScriptEngine *e, const char *module)                                                                                                    { return e->GetModuleIndex(module); }
 const char *      asEngine_GetModuleNameFromIndex(asIScriptEngine *e, int index, int *length)                                                                                        { return e->GetModuleNameFromIndex(index, length); }
+#endif
 int               asEngine_GetFunctionCount(asIScriptEngine *e, const char *module)                                                                                                  { return e->GetFunctionCount(module); }
 int               asEngine_GetFunctionIDByIndex(asIScriptEngine *e, const char *module, int index)                                                                                   { return e->GetFunctionIDByIndex(module, index); }
 int               asEngine_GetFunctionIDByName(asIScriptEngine *e, const char *module, const char *name)                                                                             { return e->GetFunctionIDByName(module, name); }
 int               asEngine_GetFunctionIDByDecl(asIScriptEngine *e, const char *module, const char *decl)                                                                             { return e->GetFunctionIDByDecl(module, decl); }
 const char *      asEngine_GetFunctionDeclaration(asIScriptEngine *e, int funcID, int *length)                                                                                       { return e->GetFunctionDeclaration(funcID, length); }
 const char *      asEngine_GetFunctionName(asIScriptEngine *e, int funcID, int *length)                                                                                              { return e->GetFunctionName(funcID, length); }
+const char *      asEngine_GetFunctionModule(asIScriptEngine *e, int funcID, int *length)                                                                                            { return e->GetFunctionModule(funcID, length); }
 const char *      asEngine_GetFunctionSection(asIScriptEngine *e, int funcID, int *length)                                                                                           { return e->GetFunctionSection(funcID, length); }
+int               asEngine_GetMethodCount(asIScriptEngine *e, int typeId)																				                             { return e->GetMethodCount(typeId); }
+int               asEngine_GetMethodIDByIndex(asIScriptEngine *e, int typeId, int index)															                                 { return e->GetMethodIDByIndex(typeId, index); }
+int               asEngine_GetMethodIDByName(asIScriptEngine *e, int typeId, const char *name)														                               	 { return e->GetMethodIDByName(typeId, name); }
+int               asEngine_GetMethodIDByDecl(asIScriptEngine *e, int typeId, const char *decl)															                             { return e->GetMethodIDByDecl(typeId, decl); }
 int               asEngine_GetGlobalVarCount(asIScriptEngine *e, const char *module)                                                                                                 { return e->GetGlobalVarCount(module); }
 int               asEngine_GetGlobalVarIDByIndex(asIScriptEngine *e, const char *module, int index)                                                                                  { return e->GetGlobalVarIDByIndex(module, index); }
 int               asEngine_GetGlobalVarIDByName(asIScriptEngine *e, const char *module, const char *name)                                                                            { return e->GetGlobalVarIDByName(module, name); }
@@ -127,11 +126,14 @@ int              asContext_SetArgDWord(asIScriptContext *c, asUINT arg, asDWORD 
 int              asContext_SetArgQWord(asIScriptContext *c, asUINT arg, asQWORD value)                         { return c->SetArgQWord(arg, value); }
 int              asContext_SetArgFloat(asIScriptContext *c, asUINT arg, float value)                           { return c->SetArgFloat(arg, value); }
 int              asContext_SetArgDouble(asIScriptContext *c, asUINT arg, double value)                         { return c->SetArgDouble(arg, value); }
+int              asContext_SetArgAddress(asIScriptContext *c, asUINT arg, void *addr)						   { return c->SetArgAddress(arg, addr); }
 int              asContext_SetArgObject(asIScriptContext *c, asUINT arg, void *obj)                            { return c->SetArgObject(arg, obj); }
+int              asContext_SetObject(asIScriptContext *c, void *obj)										   { return c->SetObject(obj); }
 asDWORD          asContext_GetReturnDWord(asIScriptContext *c)                                                 { return c->GetReturnDWord(); }
 asQWORD          asContext_GetReturnQWord(asIScriptContext *c)                                                 { return c->GetReturnQWord(); }
 float            asContext_GetReturnFloat(asIScriptContext *c)                                                 { return c->GetReturnFloat(); }
 double           asContext_GetReturnDouble(asIScriptContext *c)                                                { return c->GetReturnDouble(); }
+void *           asContext_GetReturnAddress(asIScriptContext *c)											   { return c->GetReturnAddress(); }
 void *           asContext_GetReturnObject(asIScriptContext *c)                                                { return c->GetReturnObject(); }
 int              asContext_Execute(asIScriptContext *c)                                                        { return c->Execute(); }
 int              asContext_Abort(asIScriptContext *c)                                                          { return c->Abort(); }
@@ -152,6 +154,7 @@ int              asContext_GetCallstackLineNumber(asIScriptContext *c, int index
 int              asContext_GetVarCount(asIScriptContext *c, int stackLevel)                                    { return c->GetVarCount(stackLevel); }
 const char *     asContext_GetVarName(asIScriptContext *c, int varIndex, int *length, int stackLevel)          { return c->GetVarName(varIndex, length, stackLevel); }
 const char *     asContext_GetVarDeclaration(asIScriptContext *c, int varIndex, int *length, int stackLevel)   { return c->GetVarDeclaration(varIndex, length, stackLevel); }
+int              asContext_GetVarTypeId(asIScriptContext *c, int varIndex, int stackLevel)                     { return c->GetVarTypeId(varIndex, stackLevel); }
 void *           asContext_GetVarPointer(asIScriptContext *c, int varIndex, int stackLevel)                    { return c->GetVarPointer(varIndex, stackLevel); }
 
 
@@ -161,11 +164,13 @@ asDWORD          asGeneric_GetArgDWord(asIScriptGeneric *g, asUINT arg)     { re
 asQWORD          asGeneric_GetArgQWord(asIScriptGeneric *g, asUINT arg)     { return g->GetArgQWord(arg); }
 float            asGeneric_GetArgFloat(asIScriptGeneric *g, asUINT arg)     { return g->GetArgFloat(arg); }
 double           asGeneric_GetArgDouble(asIScriptGeneric *g, asUINT arg)    { return g->GetArgDouble(arg); }
+void *           asGeneric_GetArgAddress(asIScriptGeneric *g, asUINT arg)   { return g->GetArgAddress(arg); }
 void *           asGeneric_GetArgObject(asIScriptGeneric *g, asUINT arg)    { return g->GetArgObject(arg); }
 int              asGeneric_SetReturnDWord(asIScriptGeneric *g, asDWORD val) { return g->SetReturnDWord(val); }
 int              asGeneric_SetReturnQWord(asIScriptGeneric *g, asQWORD val) { return g->SetReturnQWord(val); }
 int              asGeneric_SetReturnFloat(asIScriptGeneric *g, float val)   { return g->SetReturnFloat(val); }
 int              asGeneric_SetReturnDouble(asIScriptGeneric *g, double val) { return g->SetReturnDouble(val); }
+int              asGeneric_SetReturnAddress(asIScriptGeneric *g, void *addr) { return g->SetReturnAddress(addr); }
 int              asGeneric_SetReturnObject(asIScriptGeneric *g, void *obj)  { return g->SetReturnObject(obj); }
 
 int  asAny_AddRef(asIScriptAny *a)                          { return a->AddRef(); }

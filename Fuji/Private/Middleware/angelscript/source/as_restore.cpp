@@ -56,15 +56,15 @@ int asCRestore::Save()
 	unsigned long i, count;
 
 	// structTypes[]
-	count = module->structTypes.GetLength();
+	count = (asUINT)module->classTypes.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i )
 	{
-		WriteObjectTypeDeclaration(module->structTypes[i]);
+		WriteObjectTypeDeclaration(module->classTypes[i]);
 	}
 
 	// usedTypeIndices[]
-	count = module->usedTypes.GetLength();
+	count = (asUINT)module->usedTypes.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i )
 	{
@@ -72,35 +72,38 @@ int asCRestore::Save()
 	}
 
 	// scriptGlobals[]
-	count = module->scriptGlobals.GetLength();
+	count = (asUINT)module->scriptGlobals.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i ) 
 		WriteProperty(module->scriptGlobals[i]);
 
 	// globalMem size (can restore data using @init())
-	count = module->globalMem.GetLength();
+	count = (asUINT)module->globalMem.GetLength();
 	WRITE_NUM(count);
 	
 	// globalVarPointers[]
 	WriteGlobalVarPointers();
 
-	// initFunction
-	WriteFunction(&module->initFunction);
-
 	// scriptFunctions[]
-	count = module->scriptFunctions.GetLength();
+	count = (asUINT)module->scriptFunctions.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i )
 		WriteFunction(module->scriptFunctions[i]);
 
+	// initFunction
+	count = module->initFunction ? 1 : 0;
+	WRITE_NUM(count);
+	if( module->initFunction )
+		WriteFunction(module->initFunction);
+
 	// stringConstants[]
-	count = module->stringConstants.GetLength();
+	count = (asUINT)module->stringConstants.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i ) 
 		WriteString(module->stringConstants[i]);
 
 	// importedFunctions[] and bindInformations[]
-	count = module->importedFunctions.GetLength();
+	count = (asUINT)module->importedFunctions.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i )
 	{
@@ -129,13 +132,13 @@ int asCRestore::Restore()
 
 	// structTypes[]
 	READ_NUM(count);
-	module->structTypes.Allocate(count, 0);
+	module->classTypes.Allocate(count, 0);
 	for( i = 0; i < count; ++i )
 	{
 		asCObjectType *ot = new asCObjectType(engine);
 		ReadObjectTypeDeclaration(ot);
-		engine->structTypes.PushLast(ot);
-		module->structTypes.PushLast(ot);
+		engine->classTypes.PushLast(ot);
+		module->classTypes.PushLast(ot);
 		ot->refCount++;
 	}
 
@@ -166,17 +169,24 @@ int asCRestore::Restore()
 	// globalVarPointers[]
 	ReadGlobalVarPointers();
 
-	// initFunction
-	ReadFunction(&module->initFunction);
-
 	// scriptFunctions[]
 	READ_NUM(count);
 	module->scriptFunctions.Allocate(count, 0);
 	for( i = 0; i < count; ++i ) 
 	{
-		func = new asCScriptFunction;
+		func = new asCScriptFunction(module);
 		ReadFunction(func);
 		module->scriptFunctions.PushLast(func);
+		engine->SetScriptFunction(func);
+	}
+
+	// initFunction
+	READ_NUM(count);
+	if( count )
+	{
+		module->initFunction = new asCScriptFunction(module);
+		ReadFunction(module->initFunction);
+		engine->SetScriptFunction(module->initFunction);
 	}
 
 	// stringConstants[]
@@ -195,7 +205,7 @@ int asCRestore::Restore()
 	module->bindInformations.SetLength(count);
 	for(i=0;i<count;++i)
 	{
-		func = new asCScriptFunction;
+		func = new asCScriptFunction(module);
 		ReadFunction(func);
 		module->importedFunctions.PushLast(func);
 
@@ -205,6 +215,21 @@ int asCRestore::Restore()
 	
 	// usedTypeIds[]
 	ReadUsedTypeIds();
+
+	// Translate the function ids in the struct types
+	for( i = 0; i < module->classTypes.GetLength(); i++ )
+	{
+		asCObjectType *ot = module->classTypes[i];
+		asUINT n;
+		ot->beh.construct = ot->beh.construct == -1 ? 0 : module->scriptFunctions[ot->beh.construct]->id;
+		for( n = 0; n < ot->beh.constructors.GetLength(); n++ )
+			ot->beh.constructors[n] = module->scriptFunctions[ot->beh.constructors[n]]->id;
+		for( n = 0; n < ot->methods.GetLength(); n++ )
+		{
+			ot->methods[n] = module->scriptFunctions[ot->methods[n]]->id;
+			engine->scriptFunctions[ot->methods[n]]->ComputeSignatureId(engine);
+		}
+	}
 
 	// Fake building
 	module->isBuildWithoutErrors = true;
@@ -219,31 +244,34 @@ int asCRestore::Restore()
 
 void asCRestore::WriteString(asCString* str) 
 {
-	unsigned long len = str->GetLength();
+	asUINT len = (asUINT)str->GetLength();
 	WRITE_NUM(len);
-	stream->Write(str->AddressOf(), len);
+	stream->Write(str->AddressOf(), (asUINT)len);
 }
 
 void asCRestore::WriteFunction(asCScriptFunction* func) 
 {
-	int i, count;
+	asUINT i, count;
 
 	WriteString(&func->name);
 
 	WriteDataType(&func->returnType);
 
-	count = func->parameterTypes.GetLength();
+	count = (asUINT)func->parameterTypes.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i ) 
 		WriteDataType(&func->parameterTypes[i]);
 
-	WRITE_NUM(func->id);
+	int id = FindFunctionIndex(func);
+	WRITE_NUM(id);
 	
-	count = func->byteCode.GetLength();
+	WRITE_NUM(func->funcType);
+
+	count = (asUINT)func->byteCode.GetLength();
 	WRITE_NUM(count);
 	WriteByteCode(func->byteCode.AddressOf(), count);
 
-	count = func->objVariablePos.GetLength();
+	count = (asUINT)func->objVariablePos.GetLength();
 	WRITE_NUM(count);
 	for( i = 0; i < count; ++i )
 	{
@@ -255,7 +283,7 @@ void asCRestore::WriteFunction(asCScriptFunction* func)
 
 	WriteObjectType(func->objectType);
 
-	int length = func->lineNumbers.GetLength();
+	asUINT length = (asUINT)func->lineNumbers.GetLength();
 	WRITE_NUM(length);
 	for( i = 0; i < length; ++i )
 		WRITE_NUM(func->lineNumbers[i]);
@@ -359,21 +387,42 @@ void asCRestore::WriteObjectTypeDeclaration(asCObjectType *ot)
 	int size = ot->size;
 	WRITE_NUM(size);
 	// properties[]
-	size = ot->properties.GetLength();
+	size = (asUINT)ot->properties.GetLength();
 	WRITE_NUM(size);
-	for( asUINT n = 0; n < ot->properties.GetLength(); n++ )
+	asUINT n;
+	for( n = 0; n < ot->properties.GetLength(); n++ )
 	{
 		WriteProperty(ot->properties[n]);
 	}
 
-	// TODO:
-	// methods[]
 	// behaviours
+	int funcId;
+	funcId = FindFunctionIndex(engine->scriptFunctions[ot->beh.construct]);
+	WRITE_NUM(funcId);
+	size = (int)ot->beh.constructors.GetLength();
+	WRITE_NUM(size);
+	for( n = 0; n < ot->beh.constructors.GetLength(); n++ )
+	{
+		funcId = FindFunctionIndex(engine->scriptFunctions[ot->beh.constructors[n]]);
+		WRITE_NUM(funcId);
+	}
+
+	// methods[]
+	size = (int)ot->methods.GetLength();
+	WRITE_NUM(size);
+	for( n = 0; n < ot->methods.GetLength(); n++ )
+	{
+		funcId = FindFunctionIndex(engine->scriptFunctions[ot->methods[n]]);
+		WRITE_NUM(funcId);
+	}
+
+	// TODO:
+	// interfaces
 }
 
 void asCRestore::ReadString(asCString* str) 
 {
-	unsigned long len;
+	asUINT len;
 	READ_NUM(len);
 	str->SetLength(len);
 	stream->Read(str->AddressOf(), len);
@@ -397,8 +446,12 @@ void asCRestore::ReadFunction(asCScriptFunction* func)
 		func->parameterTypes.PushLast(dt);
 	}
 
-	READ_NUM(func->id);
+	int id;
+	READ_NUM(id);
+	func->id = engine->GetNextScriptFunctionId();
 	
+	READ_NUM(func->funcType);
+
 	READ_NUM(count);
 	func->byteCode.Allocate(count, 0);
 	ReadByteCode(func->byteCode.AddressOf(), count);
@@ -543,7 +596,8 @@ void asCRestore::ReadObjectTypeDeclaration(asCObjectType *ot)
 	// properties[]
 	READ_NUM(size);
 	ot->properties.Allocate(size,0);
-	for( int n = 0; n < size; n++ )
+	int n;
+	for( n = 0; n < size; n++ )
 	{
 		asCProperty *prop = new asCProperty;
 		ReadProperty(prop);
@@ -551,8 +605,6 @@ void asCRestore::ReadObjectTypeDeclaration(asCObjectType *ot)
 	}
 
 	// Use the default script struct behaviours
-	ot->beh.construct = engine->scriptTypeBehaviours.beh.construct;
-	ot->beh.constructors.PushLast(ot->beh.construct);
 	ot->beh.addref = engine->scriptTypeBehaviours.beh.addref;
 	ot->beh.release = engine->scriptTypeBehaviours.beh.release;
 	ot->beh.copy = engine->scriptTypeBehaviours.beh.copy;
@@ -564,12 +616,30 @@ void asCRestore::ReadObjectTypeDeclaration(asCObjectType *ot)
 	ot->arrayType = 0;
 	ot->flags = asOBJ_CLASS_CDA | asOBJ_SCRIPT_STRUCT;
 
+	// behaviours
+	int funcId;
+	READ_NUM(funcId);
+	ot->beh.construct = funcId;
+	READ_NUM(size);
+	for( n = 0; n < size; n++ )
+	{
+		READ_NUM(funcId);
+		ot->beh.constructors.PushLast(funcId);
+	}
+
+	// methods[]
+	READ_NUM(size);
+	for( n = 0; n < size; n++ )
+	{
+		READ_NUM(funcId);
+		ot->methods.PushLast(funcId);
+	}
+
 	// TODO: The flag asOBJ_POTENTIAL_CIRCLE must be saved
 
 	// TODO: What about the arrays? the flag must be saved as well
 
-	// TODO:
-	// methods[]
+	// TODO: Interfaces
 }
 
 void asCRestore::WriteByteCode(asDWORD *bc, int length)
@@ -579,8 +649,27 @@ void asCRestore::WriteByteCode(asDWORD *bc, int length)
 		asDWORD c = (*bc)&0xFF;
 		WRITE_NUM(*bc);
 		bc += 1;
-		if( c == BC_ALLOC || c == BC_FREE ||
-			c == BC_REFCPY || c == BC_OBJTYPE )
+		if( c == BC_ALLOC )
+		{
+			asDWORD tmp[MAX_DATA_SIZE];
+			int n;
+			for( n = 0; n < asCByteCode::SizeOfType(bcTypes[c])-1; n++ )
+				tmp[n] = *bc++;
+
+			// Translate the object type 
+			asCObjectType *ot = *(asCObjectType**)tmp;
+			*(int*)tmp = FindObjectTypeIdx(ot);
+
+			// Translate the constructor func id, if it is a script class
+			if( ot->flags & asOBJ_SCRIPT_STRUCT )
+				*(int*)&tmp[PTR_SIZE] = FindFunctionIndex(engine->scriptFunctions[*(int*)&tmp[PTR_SIZE]]);
+
+			for( n = 0; n < asCByteCode::SizeOfType(bcTypes[c])-1; n++ )
+				WRITE_NUM(tmp[n]);
+		}
+		else if( c == BC_FREE   ||
+			     c == BC_REFCPY || 
+				 c == BC_OBJTYPE )
 		{
 			// Translate object type pointers into indices
 			asDWORD tmp[MAX_DATA_SIZE];
@@ -606,6 +695,20 @@ void asCRestore::WriteByteCode(asDWORD *bc, int length)
 			for( n = 0; n < asCByteCode::SizeOfType(bcTypes[c])-1; n++ )
 				WRITE_NUM(tmp[n]);
 		}
+		else if( c == BC_CALL ||
+			     c == BC_CALLINTF )
+		{
+			// Translate the function id
+			asDWORD tmp[MAX_DATA_SIZE];
+			int n;
+			for( n = 0; n < asCByteCode::SizeOfType(bcTypes[c])-1; n++ )
+				tmp[n] = *bc++;
+
+			*(int*)tmp = FindFunctionIndex(engine->scriptFunctions[*(int*)tmp]);
+
+			for( n = 0; n < asCByteCode::SizeOfType(bcTypes[c])-1; n++ )
+				WRITE_NUM(tmp[n]);
+		}
 		else
 		{
 			// Store the bc as is
@@ -627,7 +730,7 @@ int asCRestore::FindTypeIdIdx(int typeId)
 	}
 
 	usedTypeIds.PushLast(typeId);
-	return usedTypeIds.GetLength() - 1;
+	return (int)usedTypeIds.GetLength() - 1;
 }
 
 int asCRestore::FindTypeId(int idx)
@@ -635,11 +738,19 @@ int asCRestore::FindTypeId(int idx)
 	return usedTypeIds[idx];
 }
 
+int asCRestore::FindFunctionIndex(asCScriptFunction *func)
+{
+	for( int n = 0; n < (int)module->scriptFunctions.GetLength(); n++ )
+		if( module->scriptFunctions[n] == func ) return n;
+
+	return -1;
+}
+
 void asCRestore::WriteUsedTypeIds()
 {
-	int count = usedTypeIds.GetLength();
+	asUINT count = (asUINT)usedTypeIds.GetLength();
 	WRITE_NUM(count);
-	for( int n = 0; n < count; n++ )
+	for( asUINT n = 0; n < count; n++ )
 		WriteDataType(engine->GetDataTypeFromTypeId(usedTypeIds[n]));
 }
 
@@ -657,7 +768,8 @@ void asCRestore::ReadUsedTypeIds()
 	}
 
 	// Translate all the TYPEID bytecodes
-	TranslateFunction(&module->initFunction);
+	if( module->initFunction ) 
+		TranslateFunction(module->initFunction);
 	for( n = 0; n < module->scriptFunctions.GetLength(); n++ )
 		TranslateFunction(module->scriptFunctions[n]);
 }
@@ -674,6 +786,24 @@ void asCRestore::TranslateFunction(asCScriptFunction *func)
 			int *tid = (int*)&bc[n+1];
 
 			*tid = FindTypeId(*tid);
+		}
+		else if( c == BC_CALL ||
+			     c == BC_CALLINTF )
+		{
+			// Translate the index to the func id
+			int *fid = (int*)&bc[n+1];
+
+			*fid = module->scriptFunctions[*fid]->id;
+		}
+		else if( c == BC_ALLOC )
+		{
+			// If the object type is a script class then the constructor id must be translated
+			asCObjectType *ot = *(asCObjectType**)&bc[n+1];
+			if( ot->flags & asOBJ_SCRIPT_STRUCT )
+			{
+				int *fid = (int*)&bc[n+1+PTR_SIZE];
+				*fid = module->scriptFunctions[*fid]->id;
+			}
 		}
 
 		n += asCByteCode::SizeOfType(bcTypes[c]);
@@ -734,17 +864,17 @@ void asCRestore::ReadByteCode(asDWORD *bc, int length)
 
 void asCRestore::WriteGlobalVarPointers()
 {
-	int c = module->globalVarPointers.GetLength();
+	int c = (int)module->globalVarPointers.GetLength();
 	WRITE_NUM(c);
 
 	for( int n = 0; n < c; n++ )
 	{
-		asDWORD *p = (asDWORD*)module->globalVarPointers[n];
+		size_t *p = (size_t*)module->globalVarPointers[n];
 		int idx = 0;
 		
 		// Is it a module global or engine global?
 		if( p >= module->globalMem.AddressOf() && p <= module->globalMem.AddressOf() + module->globalMem.GetLength() )
-			idx = (asDWORD(p) - asDWORD(module->globalMem.AddressOf()))/4;
+			idx = int(size_t(p) - size_t(module->globalMem.AddressOf()))/sizeof(size_t);
 		else
 		{
 			for( int i = 0; i < (signed)engine->globalPropAddresses.GetLength(); i++ )

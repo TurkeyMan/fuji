@@ -39,11 +39,12 @@
 
 /*
 
-SCRIPT        = (FUNCTION | GLOBVAR | IMPORT | STRUCT)*
+SCRIPT        = (FUNCTION | GLOBVAR | IMPORT | STRUCT | INTERFACE)*
 TYPE          = 'const'? DATATYPE
 TYPEMOD       = ('&' ('in' | 'out' | 'inout')?)?
 FUNCTION      = TYPE TYPEMOD IDENTIFIER PARAMLIST BLOCK
 IMPORT        = 'import' TYPE TYPEMOD IDENTIFIER PARAMLIST 'from' STRING ';'
+INTERFACE     = 'interface' IDENTIFIER '{' (TYPE TYPEMOD IDENTIFIER PARAMLIST ';')* '}' ';'
 GLOBVAR       = TYPE IDENTIFIER ('=' (INITLIST | ASSIGNMENT))? (',' IDENTIFIER ('=' (INITLIST | ASSIGNMENT))?)* ';'
 DATATYPE      = REALTYPE | IDENTIFIER
 REALTYPE      = 'void' | 'bool' | 'float' | 'int' | 'uint' | 'bits'
@@ -114,7 +115,7 @@ protected:
 	asCScriptNode *ParseScript();
 	asCScriptNode *ParseType(bool allowConst);
 	asCScriptNode *ParseTypeMod(bool isParam);
-	asCScriptNode *ParseFunction();
+	asCScriptNode *ParseFunction(bool isMethod = false);
 	asCScriptNode *ParseGlobalVar();
 	asCScriptNode *ParseParameterList();
 	asCScriptNode *ParseStatementBlock();
@@ -148,11 +149,13 @@ protected:
 	asCScriptNode *ParseFunctionCall();
 	asCScriptNode *ParseToken(int token);
 	asCScriptNode *ParseOneOf(int *tokens, int num);
-	asCScriptNode *ParseStruct();
+	asCScriptNode *ParseClass();
 	asCScriptNode *ParseInitList();
+	asCScriptNode *ParseInterface();
+	asCScriptNode *ParseInterfaceMethod();
 
-	bool IsGlobalVar();
-	bool IsDeclaration();
+	bool IsVarDecl();
+	bool IsFuncDecl(bool isMethod);
 	bool IsRealType(int tokenType);
 	bool IsDataType(int tokenType);
 	bool IsOperator(int tokenType);
@@ -174,7 +177,7 @@ protected:
 	asCScriptNode *scriptNode;
 
 	asCTokenizer tokenizer;
-	int          sourcePos;
+	size_t       sourcePos;
 };
 
 END_AS_NAMESPACE
