@@ -51,7 +51,6 @@
 #include "as_tokendef.h"
 
 #include <stdlib.h>
-#include <regdef.h>
 
 BEGIN_AS_NAMESPACE
 
@@ -74,6 +73,10 @@ static asDWORD ppcArgs[AS_PPC_MAX_ARGS + 1 + 1];
 // floatArgSize is the size in bytes for how much data to put in float registers
 // stackArgSize is the size in bytes for how much data to put on the callstack
 extern "C" asQWORD ppcFunc(int intArgSize, int floatArgSize, int stackArgSize, asDWORD func);
+
+#if defined(ASM_INTEL)
+
+#else // defined(ASM_AT_N_T)
 
 asm(
 "	.text\n"
@@ -160,6 +163,8 @@ asm(
 "	.size	ppcFunc, .-ppcFunc\n"
 "	.align	4\n"
 );
+
+#endif
 
 // puts the arguments in the correct place in the sh4Args-array. See comments above.
 // This could be done better.
@@ -457,7 +462,12 @@ asDWORD GetReturnedFloat()
 {
 	asDWORD f;
 
-	asm("swc1 $f0, %0\n" : "=m"(f));
+#if defined(ASM_INTEL)
+  f = 0;
+//  __asm swc1 f0, f
+#else // defined(ASM_AT_N_T)
+  asm("swc1 $f0, %0\n" : "=m"(f));
+#endif
 
 	return f;
 }
@@ -486,6 +496,7 @@ asQWORD GetReturnedDouble()
 	asQWORD d;
 
 	printf("Broken!!!");
+  d = 0;
 /*
 	asm("sw $v0, %0\n" : "=m"(d));
 */

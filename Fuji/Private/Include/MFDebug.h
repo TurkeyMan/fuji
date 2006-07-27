@@ -21,7 +21,7 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(_WINDOWS) || defined(_XBOX) || (defined(_FUJI_UTIL) && !defined(_LINUX))
+#if defined(_WINDOWS) || defined(_MFXBOX) || (defined(_FUJI_UTIL) && !defined(_LINUX))
 	#define MFDebug_Breakpoint() { __asm { int 3 }; }
 #elif defined(_LINUX) || (defined(_FUJI_UTIL) && !defined(_WINDOWS))
 	#define MFDebug_Breakpoint() { asm("int $3"); }

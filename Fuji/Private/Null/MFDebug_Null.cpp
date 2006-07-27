@@ -8,10 +8,11 @@
 #if defined(_WINDOWS)
 #include <d3d9.h>
 extern IDirect3DDevice9 *pd3dDevice;
-#endif
-#if defined(_XBOX)
+#elif defined(_MFXBOX)
 #include <stdio.h>
 extern IDirect3DDevice8 *pd3dDevice;
+#elif defined(_MFX360)
+#include <stdio.h>
 #endif
 
 void MFSystem_HandleEventsPlatformSpecific();
@@ -45,7 +46,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFView_SetOrtho();
 
 		// Set some renderstates
-#if defined(_WINDOWS) || defined(_XBOX)		
+#if defined(_WINDOWS) || defined(_MFXBOX)		
 		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);

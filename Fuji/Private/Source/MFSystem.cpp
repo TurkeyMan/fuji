@@ -225,7 +225,7 @@ void MFSystem_Update()
 
 	MFInput_Update();
 
-#if defined(_XBOX)
+#if defined(_MFXBOX)
 	if(MFInput_Read(Button_XB_Start, IDD_Gamepad) && MFInput_Read(Button_XB_White, IDD_Gamepad) && MFInput_Read(Button_XB_LTrig, IDD_Gamepad) && MFInput_Read(Button_XB_RTrig, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #elif defined(_PSP)

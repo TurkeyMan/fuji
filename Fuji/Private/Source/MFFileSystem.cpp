@@ -171,7 +171,7 @@ const char* MFFile_SystemPath(const char *filename)
 
 	filename = filename ? filename : "";
 
-#if defined(_XBOX)
+#if defined(_MFXBOX)
 	return MFStr("D:\\Data\\%s", filename);
 #elif defined(_WINDOWS)
 	return MFStr("Data/%s", filename);
@@ -190,7 +190,7 @@ const char* MFFile_HomePath(const char *filename)
 
 	filename = filename ? filename : "";
 
-#if defined(_XBOX)
+#if defined(_MFXBOX)
 	return MFStr("E:\\Home\\%s", filename);
 #elif defined(_WINDOWS)
 	return MFStr("Home/%s", filename);

@@ -421,7 +421,7 @@ inline MFVector::operator const float*() const
 // 'BGRA' in order of bytes
 inline uint32 MFVector::ToPackedColour() const
 {
-#if defined(_WINPC) || defined(_XBOX)
+#if defined(_WINPC) || defined(_MFXBOX)
 	return ((uint32)(w*255.0f)<<24) |
 		   ((uint32)(x*255.0f)<<16) |
 		   ((uint32)(y*255.0f)<<8) |
@@ -441,7 +441,7 @@ inline uint32 MFVector::ToPackedColour() const
 
 inline MFVector& MFVector::FromPackedColour(uint32 col)
 {
-#if defined(_WINPC) || defined(_XBOX)
+#if defined(_WINPC) || defined(_MFXBOX)
 	z = (float) (col&0xFF) * (1.0f/255.0f);
 	y = (float)((col&0xFF00)>>8) * (1.0f/255.0f);
 	x = (float)((col&0xFF0000)>>16) * (1.0f/255.0f);

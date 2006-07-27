@@ -71,7 +71,7 @@ struct MFMeshChunk_PC : public MFMeshChunk
 };
 #endif
 
-#if defined(_XBOX) || defined(_FUJI_UTIL)
+#if defined(_MFXBOX) || defined(_FUJI_UTIL)
 struct MFMeshChunk_XB : public MFMeshChunk
 {
 	// some vertex buffer type thing...

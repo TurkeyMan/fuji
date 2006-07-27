@@ -200,7 +200,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-#elif defined(_XBOX)
+#elif defined(_MFXBOX)
 	extern IDirect3DDevice8 *pd3dDevice;
 	pd3dDevice->SetTexture(0, pTexture->pTexture);
 	pd3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);

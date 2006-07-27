@@ -68,7 +68,7 @@ struct MFTexture
 	MFTextureTemplateData *pTemplateData;
 	int refCount;
 
-#if defined(_XBOX)
+#if defined(_MFXBOX)
 	IDirect3DTexture8 *pTexture;
 #elif defined(_WINDOWS)
 	IDirect3DTexture9 *pTexture;

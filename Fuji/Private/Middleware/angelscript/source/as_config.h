@@ -314,6 +314,7 @@
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_SH4
+  #define ASM_AT_N_T
 #endif
 
 // MIPS architexture (generally PS2 and PSP consoles, potentially supports N64 aswell)
@@ -322,14 +323,20 @@
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_MIPS
   #define AS_NO_MEMORY_H
+  #define ASM_AT_N_T
 #endif
 
 // PPC architexture (Mac, Gamecube and hopefully PS3 + XBox360)
-#if defined(PPC) || defined(_GC)
+#if defined(PPC) || defined(_GC) || (defined(_XBOX) && _XBOX_VER >= 200)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
 	#define AS_PPC
   #define AS_NO_MEMORY_H
+  #if defined(_MSC_VER)
+    #define ASM_INTEL
+  #else
+    #define ASM_AT_N_T
+  #endif
 #endif
 
 

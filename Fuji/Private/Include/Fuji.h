@@ -98,13 +98,24 @@ enum MFEndian
 	// Disable depreciated bullshit
 	#pragma warning(disable:4996)
 
-#elif defined(_XBOX)
+#elif (defined(_XBOX) && _XBOX_VER < 200)
+
+  #define _MFXBOX
 
 	#define DEBUG_KEYBOARD
 	#define DEBUG_MOUSE
 	#include <xtl.h>
 
 	char*  FixXBoxFilename(const char *pFilename);
+
+#elif (defined(_XBOX) && _XBOX_VER >= 200)
+
+  #define _MFX360
+
+//  #error Not Supported...
+	#include <xtl.h>
+
+  #define MF64BIT
 
 #elif defined(_LINUX)
 
@@ -114,6 +125,7 @@ enum MFEndian
 
 	#if defined(SOME_LINUX_64BIT_FLAG)
 		#define MF64BIT
+		#define MF64BITPOINTERS
 	#endif
 
 #elif defined(_PSP)
