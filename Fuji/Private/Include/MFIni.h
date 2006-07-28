@@ -32,7 +32,7 @@ public:
 	MFIniLine *FindEntry(const char *pLabel, const char *pData);
 
 	int GetStringCount() { return stringCount; }
-	bool IsString(int index, const char *pString) { return !MFString_CaseCmp(GetString(index), pString); }
+	bool IsString(int index, const char *pString) { const char *pToken = GetString(index); return pToken ? !MFString_CaseCmp(pToken, pString) : false; }
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);

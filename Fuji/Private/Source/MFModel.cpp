@@ -276,6 +276,7 @@ void MFModel_Destroy(MFModel *pModel)
 			}
 		}
 
+		gModelBank.Destroy(pModel->pTemplate);
 		MFHeap_Free(pModel->pTemplate);
 	}
 
