@@ -566,6 +566,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[13]
 	},
 
+	// Logitech RumblePad 2
+	{
+		"Logitech Rumble Pad 2",
+		"Logitech RumblePad 2 USB",
+		gLogitechDualActionButtonID,
+		gLogitechDualActionButtonNames,
+		true,
+		&gGamepadDescriptors[14]
+	},
+
 	// POWER))WAVE PS2 style gamepad
 	{
 		"PowerWave PS2 Style Gamepad",
