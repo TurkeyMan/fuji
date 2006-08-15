@@ -307,8 +307,16 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 	MFGamepadInfo *pInfo = pGamepadMappingRegistry;
 	for(; pInfo; pInfo = pInfo->pNext)
 	{
-		if(!strcmp(pInfo->pIdentifier, lpddi->tszProductName))
-			break;
+		if(pInfo->vendorID && pInfo->productID)
+		{
+			if((lpddi->guidProduct.Data1 & 0xFFFF) == pInfo->vendorID && (lpddi->guidProduct.Data1 >> 16) == pInfo->productID)
+				break;
+		}
+		else
+		{
+			if(!strcmp(pInfo->pIdentifier, lpddi->tszProductName))
+				break;
+		}
 	}
 
 	if(!pInfo)
@@ -316,6 +324,9 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 		// use default descriptor
 		gPCJoysticks[gGamepadCount].pGamepadInfo = pGamepadMappingRegistry;
 		MFDebug_Warn(1, MFStr("Found an unknown gamepad '%s', using default mappings.", lpddi->tszProductName));
+
+		// offer to send email detailing controller info..
+		MessageBox(NULL, "An unknown gamepad has been detected.\r\nWe strive to support every gamepad natively, please report your gamepad to Manu at turkeyman@gmail.com.\r\nI will contact you and request a few details about the gamepad so it can be added to the registry for the next release.", "Unknown gamepad detected...", MB_OK);
 	}
 	else
 	{

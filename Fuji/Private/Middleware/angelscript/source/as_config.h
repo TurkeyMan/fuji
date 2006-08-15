@@ -239,7 +239,7 @@
 #define VALUE_OF_BOOLEAN_TRUE  1
 
 // Microsoft Visual C++
-#if defined(_MSC_VER) && !defined(__MWERKS__)
+#if defined(_MSC_VER) && !defined(__MWERKS__) && !(defined(_XBOX) && _XBOX_VER >= 200)
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define HAVE_VIRTUAL_BASE_OFFSET
 	#define VIRTUAL_BASE_OFFSET(x) (*((asDWORD*)(&x)+3))
@@ -315,7 +315,7 @@
 	#endif
 #endif
 
-// Dreamcast console
+// SH4 architecture (Dreamcast console)
 #ifdef __SH4_SINGLE_ONLY__
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
@@ -323,7 +323,7 @@
 	#define AS_SH4
 #endif
 
-// MIPS architexture (generally PS2 and PSP consoles, potentially supports N64 aswell)
+// MIPS architexture (Generally PS2 and PSP consoles, potentially supports N64 aswell)
 #if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_EE_) || defined(_PSP) || defined(_PS2)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
@@ -355,7 +355,7 @@
 	// Alternative PPC architectures (Gamecube and hopefully PS3 + XBox360)
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-//	#define AS_PPC					// not working yet
+	#define AS_PPC					// not working yet
 	#define AS_NO_MEMORY_H
 	#if defined(_MSC_VER)
 		#define ASM_INTEL

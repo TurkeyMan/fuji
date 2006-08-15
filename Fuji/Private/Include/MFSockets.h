@@ -199,7 +199,7 @@ MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4);
  * @param pIPString String representing the IP address in "0.0.0.0" format.
  * @return Returns an MFInetAddress structure representing the IP address specified by the string.
  */
-MFInetAddress MFSockets_MakeInetAddrssFromString(const char *pIPString);
+MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString);
 
 /**
  * Build an MFInet6Address structure from 8 unsigned short values.
@@ -222,7 +222,7 @@ MFInet6Address MFSockets_MakeInet6Address(uint16 s1, uint16 s2, uint16 s3, uint1
  * @param pIP6String String representing the IP6 address in "0000:0000:0000:0000:0000:0000:0000:0000" format.
  * @return Returns an MFInet6Address structure representing the IP6 address specified by the string.
  */
-MFInet6Address MFSockets_MakeInet6AddrssFromString(const char *pIP6String);
+MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String);
 
 /**
  * Generate a string representing the specified network address.

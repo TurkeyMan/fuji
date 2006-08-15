@@ -30,7 +30,7 @@ MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4)
 	return address;
 }
 
-MFInetAddress MFSockets_MakeInetAddrssFromString(const char *pIPString)
+MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 {
 	MFInetAddress a;
 
@@ -69,7 +69,7 @@ MFInet6Address MFSockets_MakeInet6Address(uint16 s1, uint16 s2, uint16 s3, uint1
 	return address;
 }
 
-MFInet6Address MFSockets_MakeInet6AddrssFromString(const char *pIP6String)
+MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String)
 {
 	MFInet6Address a;
 	memset(&a, 0, sizeof(MFInet6Address));

@@ -35,7 +35,7 @@ struct MFGamepadInfo
 {
 	const char *pName;
 	const char *pIdentifier;
-
+	uint32 vendorID, productID;
 	const int *pButtonMap;
 	const char **ppButtonNameStrings;
 

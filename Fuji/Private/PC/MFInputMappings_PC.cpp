@@ -28,7 +28,7 @@ static const int gStandardButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative // Button_ThumbRY
 };
 
-static const int gPS2ButtonID[GamepadType_Max] = 
+static const int gEMSButtonID[GamepadType_Max] = 
 {
 	2,   // Button_A
 	1,   // Button_B
@@ -244,6 +244,30 @@ static const int gPowerWaveButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative // Button_ThumbRY
 };
 
+static const int gGreenAsiaButtonID[GamepadType_Max] = 
+{
+	2,   // Button_A
+	3,   // Button_B
+	0,   // Button_X
+	1,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+	7,   // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+	9,   // Button_Start
+	8,   // Button_Back
+	-1,  // Button_LeftThumb
+	-1,  // Button_RightThumb
+	AID_Y | AID_Negative | AID_Clamp,  // Button_DUp
+	AID_Y | AID_Clamp,  // Button_DDown
+	AID_X | AID_Negative | AID_Clamp,  // Button_DLeft
+	AID_X | AID_Clamp,  // Button_DRight
+	-1,	// Button_ThumbLX
+	-1,	// Button_ThumbLY
+	-1,	// Button_ThumbRX
+	-1	// Button_ThumbRY
+};
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -391,26 +415,26 @@ static const char * gXterminatorButtonNames[GamepadType_Max] =
 
 static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] = 
 {
-	"A",            // Button_A
-	"B",            // Button_B
-	"X",            // Button_X
-	"Y",            // Button_Y
+	"A",			// Button_A
+	"B",			// Button_B
+	"X",			// Button_X
+	"Y",			// Button_Y
 	"Z",			// Button_White
 	"C",			// Button_Black
 	"L",			// Button_LeftTrigger
 	"R",			// Button_RightTrigger
 	"Start",		// Button_Start
-	"Red",          // Button_Back
+	"Red",			// Button_Back
 	"Unavailable",  // Button_LeftThumb
 	"Unavailable",  // Button_RightThumb
-	"DPad Up",      // Button_DUp
-	"DPad Down",    // Button_DDown
-	"DPad Left",    // Button_DLeft
-	"DPad Right",   // Button_DRight
-	"Unavailable",  // Button_ThumbLX
-	"Unavailable",  // Button_ThumbLY
-	"Unavailable",  // Button_ThumbRX
-	"Unavailable"   // Button_ThumbRY
+	"Up",			// Button_DUp
+	"Down",			// Button_DDown
+	"Left",			// Button_DLeft
+	"Right",		// Button_DRight
+	"Unavailable",	// Button_ThumbLX
+	"Unavailable",	// Button_ThumbLY
+	"Unavailable",	// Button_ThumbRX
+	"Unavailable"	// Button_ThumbRY
 };
 
 static const char * gPowerWaveButtonNames[GamepadType_Max] = 
@@ -437,33 +461,60 @@ static const char * gPowerWaveButtonNames[GamepadType_Max] =
 	"Right Y-Axis"  // Button_ThumbRY
 };
 
+static const char * gGreenAsiaButtonNames[GamepadType_Max] = 
+{
+	"3",            // Button_A
+	"4",            // Button_B
+	"1",            // Button_X
+	"2",            // Button_Y
+	"5",			// Button_White
+	"6",			// Button_Black
+	"7",			// Button_LeftTrigger
+	"8",			// Button_RightTrigger
+	"10",			// Button_Start
+	"9",			// Button_Back
+	"Unavailable",	// Button_LeftThumb
+	"Unavailable",	// Button_RightThumb
+	"Up",			// Button_DUp
+	"Down",			// Button_DDown
+	"Left",			// Button_DLeft
+	"Right",		// Button_DRight
+	"Unavailable",	// Button_ThumbLX
+	"Unavailable",	// Button_ThumbLY
+	"Unavailable",	// Button_ThumbRX
+	"Unavailable"	// Button_ThumbRY
+};
+
 // Gamepad Info
 static MFGamepadInfo gGamepadDescriptors[] =
 {
-	// default mappings
+	// Default mappings
 	{
 		"Unknown Gamepad",
 		"",
+		0, 0,
 		gStandardButtonID,
 		gStandardButtonNames,
 		true,
 		&gGamepadDescriptors[1]
 	},
 
-	// standard PS2 adapter
+	// EMS USB2 adapter
 	{
 		"PS2 Gamepad",
-		"4 axis 16 button joystick",
-		gPS2ButtonID,
+		"EMS USB2",
+		0x0B43, 0x0003,
+		gEMSButtonID,
 		gPS2ButtonNames,
 		false,
 		&gGamepadDescriptors[2]
 	},
 
-	// different identities of the titanium adapters
+	// Different identities of the titanium adapters
 	{
 		"PS2 Gamepad",
 		"SmartJoy PLUS USB Adapter",
+		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
@@ -473,6 +524,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"PS2 Gamepad",
 		"SmartJoy PLUS Adapter",
+		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
@@ -482,6 +534,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"PS2 Gamepad",
 		"USB Force Feedback Joypad (MP-8888)",
+		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
@@ -491,6 +544,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"PS2 Gamepad",
 		"MP-8888 USB Joypad",
+		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
@@ -500,36 +554,40 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"PS2 Gamepad",
 		"Dual USB Force Feedback Joypad (MP-8866)",
+		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
 		true,
 		&gGamepadDescriptors[7]
 	},
 
-	// xbox gamepad
+	// XBox gamepad
 	{
 		"XBox Gamepad",
 		"XBCD XBox Gamepad",
+		0, 0,
 		gXBCDButtonID,
 		gXBoxButtonNames,
 		true,
 		&gGamepadDescriptors[8]
 	},
 
-	// logitech dual action
+	// Logitech dual action
 	{
 		"Logitech Dual Action",
 		"Logitech Dual Action",
+		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
 		true,
 		&gGamepadDescriptors[9]
 	},
 
-	// xbox 360 wired gamepad
+	// XBox 360 wired gamepad
 	{
 		"XBox 360 Gamepad",
 		"XBOX 360 For Windows (Controller)",
+		0, 0,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
 		true,
@@ -540,6 +598,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"Gravis Xterminator",
 		"Xterminator Digital Gamepad",
+		0, 0,
 		gXterminatorButtonID,
 		gXterminatorButtonNames,
 		false,
@@ -550,6 +609,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"WingMan Gamepad Extreme",
 		"Logitech WingMan Gamepad Extreme",
+		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
 		false,
@@ -560,6 +620,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"WingMan Gamepad Extreme",
 		"Logitech WingMan Gamepad Extreme (USB)",
+		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
 		false,
@@ -570,16 +631,29 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"Logitech Rumble Pad 2",
 		"Logitech RumblePad 2 USB",
+		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
 		true,
 		&gGamepadDescriptors[14]
 	},
 
+	// 'USB Joystick' basic PS2 style USB gamepad
+	{
+		"USB Gamepad",
+		"'GreenAsia' USB Joystick",
+		0x0E8F, 0x0002,
+		gGreenAsiaButtonID,
+		gGreenAsiaButtonNames,
+		false,
+		&gGamepadDescriptors[15]
+	},
+
 	// POWER))WAVE PS2 style gamepad
 	{
 		"PowerWave PS2 Style Gamepad",
 		"USB Joystick",
+		0, 0,
 		gPowerWaveButtonID,
 		gPowerWaveButtonNames,
 		false,
