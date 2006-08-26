@@ -15,6 +15,9 @@
 #include "MFInputMappings_PC.h"
 
 #include <dinput.h>
+#include <dbt.h>
+
+const GUID GUID_DEVINTERFACE_HID = { 0x4D1E55B2L, 0xF16F, 0x11CF, { 0x88, 0xCB, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30 } };
 
 #if defined(ALLOW_RAW_INPUT)
 	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
@@ -71,12 +74,14 @@ struct MFGamepadPC
 	IDirectInputEffect *pForceFeedback;
 
 	DIDEVCAPS caps;
+	GUID deviceInstance;
 
 	// Gamepad Info
 	MFGamepadInfo *pGamepadInfo;
 
 	int  forceFeedbackState;
 	bool bUsePOV;
+	bool wasRemoved;
 };
 
 
@@ -101,6 +106,9 @@ static bool gExclusiveMouse = false;
 static float mouseMultiplier = 1.0f;
 
 extern MFGamepadInfo *pGamepadMappingRegistry;
+
+extern HWND apphWnd;
+static HDEVNOTIFY hNotify;
 
 #if defined(ALLOW_RAW_INPUT)
 static pGetRawInputDeviceList _GRIDL;
@@ -272,6 +280,85 @@ uint8 KEYtoDIK[256] =
 
 /**** Platform Specific Functions ****/
 
+BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+
+static BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+{
+	MFCALLSTACK;
+
+#if defined(SUPPORT_XINPUT)
+	// if device is an XInput device, we'll let XInput handle it
+	if(IsXInputDevice(&lpddi->guidProduct))
+		return DIENUM_CONTINUE;
+#endif
+
+	int a;
+
+	// scan for the gamepad in the current active list...
+	for(a=0; a<gGamepadCount; a++)
+	{
+		if(gPCJoysticks[a].pDevice)
+		{
+			if(lpddi->guidInstance == gPCJoysticks[a].deviceInstance)
+			{
+				gPCJoysticks[a].wasRemoved = false;
+				break;
+			}
+		}
+	}
+
+	// gamepad was not found in the list, it must have just been connected, so we'll add it in.
+	for(a=0; a<MFInput_MaxInputID; a++)
+	{
+		if(gPCJoysticks[a].XInputID == -1 && !gPCJoysticks[a].pDevice)
+		{
+			// we'll slot it in here..
+			return EnumJoysticksCallback(lpddi, &a);
+		}
+	}
+
+	return DIENUM_CONTINUE;
+}
+
+void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect)
+{
+	MFCALLSTACK;
+
+	// TODO: Fix this...
+	return;
+
+	int a;
+
+	// mark devices as removed
+	for(a=0; a<gGamepadCount; a++)
+	{
+		if(gPCJoysticks[a].pDevice)
+		{
+			gPCJoysticks[a].wasRemoved = true;
+		}
+	}
+
+	// enumerate all devices and scan for removals..
+	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, CheckConnectedCallback, NULL, DIEDFL_ATTACHEDONLY);
+
+	// if any gamepads are still marked with wasRemoved==true, they must have been removed, so we'll clean them up.
+	for(a=0; a<MFInput_MaxInputID; a++)
+	{
+		if(gPCJoysticks[a].pDevice && gPCJoysticks[a].wasRemoved)
+		{
+			// remove gamepad...
+			if(gPCJoysticks[a].pForceFeedback)
+			{
+				gPCJoysticks[a].pForceFeedback->Release();
+				gPCJoysticks[a].pForceFeedback = NULL;
+			}
+
+			gPCJoysticks[a].pDevice->Release();
+			gPCJoysticks[a].pDevice = NULL;
+		}
+	}
+}
+
 // DirectInput Enumeration Callback
 static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
@@ -285,8 +372,13 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 		return DIENUM_CONTINUE;
 #endif
 
+	int gamepadID = gGamepadCount;
+
+	if(pvRef)
+		gamepadID = *(int*)pvRef;
+
 	// attempt to create device
-	hr = pDirectInput->CreateDevice(lpddi->guidInstance, &gPCJoysticks[gGamepadCount].pDevice, NULL);
+	hr = pDirectInput->CreateDevice(lpddi->guidInstance, &gPCJoysticks[gamepadID].pDevice, NULL);
 
 	if(FAILED(hr))
 	{
@@ -295,13 +387,16 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 	}
 
 	// we found a valid gamepad
-	gPCJoysticks[gGamepadCount].XInputID = -1;
+	gPCJoysticks[gamepadID].XInputID = -1;
+	gPCJoysticks[gamepadID].wasRemoved = false;
+
+	gPCJoysticks[gamepadID].deviceInstance = lpddi->guidInstance;
 
 	// get the device caps
-	memset(&gPCJoysticks[gGamepadCount].caps, 0, sizeof(DIDEVCAPS));
-	gPCJoysticks[gGamepadCount].caps.dwSize = sizeof(DIDEVCAPS);
+	memset(&gPCJoysticks[gamepadID].caps, 0, sizeof(DIDEVCAPS));
+	gPCJoysticks[gamepadID].caps.dwSize = sizeof(DIDEVCAPS);
 
-	gPCJoysticks[gGamepadCount].pDevice->GetCapabilities(&gPCJoysticks[gGamepadCount].caps);
+	gPCJoysticks[gamepadID].pDevice->GetCapabilities(&gPCJoysticks[gamepadID].caps);
 
 	// find matching device descriptor
 	MFGamepadInfo *pInfo = pGamepadMappingRegistry;
@@ -322,7 +417,7 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 	if(!pInfo)
 	{
 		// use default descriptor
-		gPCJoysticks[gGamepadCount].pGamepadInfo = pGamepadMappingRegistry;
+		gPCJoysticks[gamepadID].pGamepadInfo = pGamepadMappingRegistry;
 		MFDebug_Warn(1, MFStr("Found an unknown gamepad '%s', using default mappings.", lpddi->tszProductName));
 
 		// offer to send email detailing controller info..
@@ -331,26 +426,26 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 	else
 	{
 		// use applicable descriptor
-		gPCJoysticks[gGamepadCount].pGamepadInfo = pInfo;
+		gPCJoysticks[gamepadID].pGamepadInfo = pInfo;
 		MFDebug_Warn(2, MFStr("Found gamepad: %s '%s'.", pInfo->pName, pInfo->pIdentifier));
 	}
 
 	// test if device uses a POV for the digital directions
-	if(gPCJoysticks[gGamepadCount].caps.dwPOVs && gPCJoysticks[gGamepadCount].pGamepadInfo->bUsePOV)
-		gPCJoysticks[gGamepadCount].bUsePOV = true;
+	if(gPCJoysticks[gamepadID].caps.dwPOVs && gPCJoysticks[gamepadID].pGamepadInfo->bUsePOV)
+		gPCJoysticks[gamepadID].bUsePOV = true;
 	else
-		gPCJoysticks[gGamepadCount].bUsePOV = false;
+		gPCJoysticks[gamepadID].bUsePOV = false;
 
 	// initialise the device
-	hr = gPCJoysticks[gGamepadCount].pDevice->SetDataFormat(&c_dfDIJoystick2);
+	hr = gPCJoysticks[gamepadID].pDevice->SetDataFormat(&c_dfDIJoystick2);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to set gamepad data format.");
 
 	// set device cooperative level
-	hr = gPCJoysticks[gGamepadCount].pDevice->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND|DISCL_EXCLUSIVE);
+	hr = gPCJoysticks[gamepadID].pDevice->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND|DISCL_EXCLUSIVE);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to set gamepad cooperative level.");
 
 	// check for force feedback availability
-	if(gPCJoysticks[gGamepadCount].caps.dwFlags & DIDC_FORCEFEEDBACK)
+	if(gPCJoysticks[gamepadID].caps.dwFlags & DIDC_FORCEFEEDBACK)
 	{
 		// This application needs only one effect: Applying raw forces.
 		DWORD           rgdwAxes[2]     = { DIJOFS_X, DIJOFS_Y };
@@ -374,18 +469,19 @@ static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvR
 		eff.lpvTypeSpecificParams   = &cf;
 		eff.dwStartDelay            = 0;
 
-		hr = gPCJoysticks[gGamepadCount].pDevice->CreateEffect(GUID_ConstantForce, &eff, &gPCJoysticks[gGamepadCount].pForceFeedback, NULL);
+		hr = gPCJoysticks[gamepadID].pDevice->CreateEffect(GUID_ConstantForce, &eff, &gPCJoysticks[gamepadID].pForceFeedback, NULL);
 
 		if(FAILED(hr))
 		{
-			MFDebug_Warn(1, MFStr("Gamepad claims to support force feedback for device '%s', but DirectInput failed to create the effect.", gPCJoysticks[gGamepadCount].pGamepadInfo->pIdentifier));
+			MFDebug_Warn(1, MFStr("Gamepad claims to support force feedback for device '%s', but DirectInput failed to create the effect.", gPCJoysticks[gamepadID].pGamepadInfo->pIdentifier));
 		}
 	}
 
 	// attempt to acquire the device
-	gPCJoysticks[gGamepadCount].pDevice->Acquire();
+	gPCJoysticks[gamepadID].pDevice->Acquire();
 
-	gGamepadCount++;
+	if(gamepadID == gGamepadCount)
+		gGamepadCount++;
 
 	if(gGamepadCount >= MFInput_MaxInputID)
 		return DIENUM_STOP;
@@ -400,6 +496,9 @@ void MFInput_InitModulePlatformSpecific()
 	// initialise runtime data
 	ZeroMemory(gKeyState,256);
 	ZeroMemory(gPCJoysticks, sizeof(gPCJoysticks));
+
+	for(int i=0; i<MFInput_MaxInputID; i++)
+		gPCJoysticks[i].XInputID = -1;
 
 	// load additional gamepad mappings...
 	MFInputPC_LoadGamepadMappings();
@@ -476,6 +575,13 @@ void MFInput_InitModulePlatformSpecific()
 
 	// enumerate gamepads
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+
+	DEV_BROADCAST_DEVICEINTERFACE dev;
+	memset(&dev, 0, sizeof(dev));
+	dev.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+	dev.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+	dev.dbcc_classguid = GUID_DEVINTERFACE_HID;
+	hNotify = RegisterDeviceNotification(apphWnd, &dev, DEVICE_NOTIFY_WINDOW_HANDLE);
 }
 
 void MFInput_DeinitModulePlatformSpecific()
@@ -483,6 +589,8 @@ void MFInput_DeinitModulePlatformSpecific()
 	MFCALLSTACK;
 
 	int a;
+
+	UnregisterDeviceNotification(hNotify);
 
 	for(a=0; a<MFInput_MaxInputID; a++)
 	{

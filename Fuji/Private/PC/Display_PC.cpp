@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <d3d9.h>
 
+
+#include <dbt.h>
+
 void MFDisplay_ResetDisplay();
 
 void MFInputPC_Acquire(bool acquire);
@@ -184,6 +187,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_CLOSE:
 			PostQuitMessage(0);
 			return 0;
+
+		case WM_DEVICECHANGE:
+		{
+			if(wParam == DBT_DEVICEARRIVAL || wParam == DBT_DEVICEREMOVECOMPLETE)
+			{
+				void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect);
+
+				PDEV_BROADCAST_HDR pHdr = (PDEV_BROADCAST_HDR)lParam;
+				switch(pHdr->dbch_devicetype)
+				{
+					case DBT_DEVTYP_DEVICEINTERFACE:
+					{
+						PDEV_BROADCAST_DEVICEINTERFACE pDevInf = (PDEV_BROADCAST_DEVICEINTERFACE)pHdr;
+						DeviceChange(pDevInf, wParam == DBT_DEVICEARRIVAL ? true : false);
+					}
+				}
+			}
+		}
+		break;
 
 #if defined(ALLOW_RAW_INPUT)
 		case WM_INPUT:

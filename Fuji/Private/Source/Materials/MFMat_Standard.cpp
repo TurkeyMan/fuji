@@ -32,6 +32,7 @@ static MFParamType specularmap[] = { MFParamType_String };
 static MFParamType celshading[] = { MFParamType_Unknown };
 static MFParamType phong[] = { MFParamType_Unknown };
 static MFParamType animated[] = { MFParamType_Int, MFParamType_Int, MFParamType_Float };
+static MFParamType tile[] = { MFParamType_Int, MFParamType_Int, MFParamType_Int, MFParamType_Int };
 
 MFMaterialParameterInfo parameterInformation[] =
 {
@@ -62,7 +63,8 @@ MFMaterialParameterInfo parameterInformation[] =
 	{ "specularmap", specularmap, sizeof(specularmap)/sizeof(MFParamType) },
 	{ "celshading", celshading, sizeof(celshading)/sizeof(MFParamType) },
 	{ "phong", phong, sizeof(phong)/sizeof(MFParamType) },
-	{ "animated", animated, sizeof(animated)/sizeof(MFParamType) }
+	{ "animated", animated, sizeof(animated)/sizeof(MFParamType) },
+	{ "tile", tile, sizeof(tile)/sizeof(MFParamType) }
 };
 
 void MFMat_Standard_Register()
@@ -227,6 +229,27 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 			}
 
 			pData->textureMatrix.SetScale(MakeVector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
+			break;
+		}
+		case MFMatStandard_Tile:
+		{
+			switch(argIndex)
+			{
+				case 0:
+					pData->uFrames = (int)(*(size_t*)pValue);
+					break;
+				case 1:
+					pData->vFrames = (int)(*(size_t*)pValue);
+					break;
+				case 2:
+					pData->curFrame = (int)(*(size_t*)pValue);
+					break;
+				case 3:
+					pData->curFrame = (pData->curFrame % pData->uFrames) + (int)(*(size_t*)pValue) * pData->uFrames;
+					pData->textureMatrix.SetScale(MakeVector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
+					pData->textureMatrix.SetTrans3(MakeVector(1.0f/(float)pData->uFrames * (float)(pData->curFrame % pData->uFrames), 1.0f/(float)pData->vFrames * (float)(pData->curFrame / pData->vFrames), 0.0f));
+					break;
+			}
 			break;
 		}
 	}

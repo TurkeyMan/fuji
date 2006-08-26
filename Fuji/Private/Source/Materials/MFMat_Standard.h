@@ -33,6 +33,7 @@ enum MFMat_Standard_Parameters
 	MFMatStandard_CelShading,
 	MFMatStandard_Phong,
 	MFMatStandard_Animated,
+	MFMatStandard_Tile,
 
 	MFMatStandard_Max,
 	MFMatStandard_ForceInt = 0x7FFFFFFF

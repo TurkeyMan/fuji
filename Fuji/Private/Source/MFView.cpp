@@ -160,40 +160,50 @@ const MFMatrix& MFView_GetWorldToViewMatrix()
 	return pCurrentView->view;
 }
 
+void MFViewInternal_ProjectionMatrix(MFMatrix *pMat)
+{
+	// construct perspective projection
+	float zn = pCurrentView->nearPlane;
+	float zf = pCurrentView->farPlane;
+
+	float a = pCurrentView->fov * 0.5f;
+
+	float h = MFCos(a) / MFSin(a);
+	float w = h / pCurrentView->aspectRatio;
+
+	pMat->m[0][0] = w;		pMat->m[0][1] = 0.0f;	pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
+	pMat->m[1][0] = 0.0f;	pMat->m[1][1] = h;		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
+	pMat->m[2][0] = 0.0f;	pMat->m[2][1] = 0.0f;	pMat->m[2][2] = zf/(zf-zn);		pMat->m[2][3] = 1.0f;
+	pMat->m[3][0] = 0.0f;	pMat->m[3][1] = 0.0f;	pMat->m[3][2] = -zn*zf/(zf-zn);	pMat->m[3][3] = 0.0f;
+}
+
+void MFViewInternal_OrthoMatrix(MFMatrix *pMat)
+{
+	// construct ortho projection
+	float l = pCurrentView->orthoRect.x;
+	float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
+	float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
+	float t = pCurrentView->orthoRect.y;
+	float zn = 0.0f;
+	float zf = 1.0f;
+
+	pMat->m[0][0] = 2.0f/(r-l);		pMat->m[0][1] = 0.0f;			pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
+	pMat->m[1][0] = 0.0f;			pMat->m[1][1] = 2.0f/(t-b);		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
+	pMat->m[2][0] = 0.0f;			pMat->m[2][1] = 0.0f;			pMat->m[2][2] = 1.0f/(zf-zn);	pMat->m[2][3] = 0.0f;
+	pMat->m[3][0] = (l+r)/(l-r);	pMat->m[3][1] = (t+b)/(b-t);	pMat->m[3][2] = zn/(zn-zf);		pMat->m[3][3] = 1.0f;
+}
+
 const MFMatrix& MFView_GetViewToScreenMatrix()
 {
 	if(pCurrentView->projDirty)
 	{
 		if(pCurrentView->isOrtho)
 		{
-			// construct ortho projection
-			float l = pCurrentView->orthoRect.x;
-			float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
-			float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
-			float t = pCurrentView->orthoRect.y;
-			float zn = 0.0f;
-			float zf = 1.0f;
-
-			pCurrentView->projection.m[0][0] = 2.0f/(r-l);	pCurrentView->projection.m[0][1] = 0.0f;		pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
-			pCurrentView->projection.m[1][0] = 0.0f;		pCurrentView->projection.m[1][1] = 2.0f/(t-b);	pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
-			pCurrentView->projection.m[2][0] = 0.0f;		pCurrentView->projection.m[2][1] = 0.0f;		pCurrentView->projection.m[2][2] = 1.0f/(zf-zn);	pCurrentView->projection.m[2][3] = 0.0f;
-			pCurrentView->projection.m[3][0] = (l+r)/(l-r);	pCurrentView->projection.m[3][1] = (t+b)/(b-t);	pCurrentView->projection.m[3][2] = zn/(zn-zf);		pCurrentView->projection.m[3][3] = 1.0f;
+			MFViewInternal_OrthoMatrix(&pCurrentView->projection);
 		}
 		else
 		{
-			// construct perspective projection
-			float zn = pCurrentView->nearPlane;
-			float zf = pCurrentView->farPlane;
-
-			float a = pCurrentView->fov * 0.5f;
-
-			float h = MFCos(a) / MFSin(a);
-			float w = h / pCurrentView->aspectRatio;
-
-			pCurrentView->projection.m[0][0] = w;		pCurrentView->projection.m[0][1] = 0.0f;	pCurrentView->projection.m[0][2] = 0.0f;			pCurrentView->projection.m[0][3] = 0.0f;
-			pCurrentView->projection.m[1][0] = 0.0f;	pCurrentView->projection.m[1][1] = h;		pCurrentView->projection.m[1][2] = 0.0f;			pCurrentView->projection.m[1][3] = 0.0f;
-			pCurrentView->projection.m[2][0] = 0.0f;	pCurrentView->projection.m[2][1] = 0.0f;	pCurrentView->projection.m[2][2] = zf/(zf-zn);		pCurrentView->projection.m[2][3] = 1.0f;
-			pCurrentView->projection.m[3][0] = 0.0f;	pCurrentView->projection.m[3][1] = 0.0f;	pCurrentView->projection.m[3][2] = -zn*zf/(zf-zn);	pCurrentView->projection.m[3][3] = 0.0f;
+			MFViewInternal_ProjectionMatrix(&pCurrentView->projection);
 		}
 
 		pCurrentView->projDirty = false;
@@ -206,7 +216,7 @@ const MFMatrix& MFView_GetWorldToScreenMatrix()
 {
 	if(pCurrentView->viewProjDirty)
 	{
-		pCurrentView->viewProj.Multiply(MFView_GetWorldToViewMatrix(), MFView_GetViewToScreenMatrix());
+		pCurrentView->viewProj.Multiply4x4(MFView_GetWorldToViewMatrix(), MFView_GetViewToScreenMatrix());
 		pCurrentView->viewProjDirty = false;
 	}
 
@@ -225,4 +235,21 @@ MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 	pOutput->Multiply(localToWorld, MFView_GetWorldToViewMatrix());
 
 	return pOutput;
+}
+
+void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
+{
+	MFMatrix proj, viewProj;
+	MFViewInternal_ProjectionMatrix(&proj);
+
+	viewProj.Multiply4x4(MFView_GetWorldToViewMatrix(), proj);
+
+	MFVector transformed;
+	transformed = ApplyMatrix(point, viewProj);
+	transformed *= MFRcp(transformed.w);
+
+	transformed.x += 1.0f;
+	transformed.y = -transformed.y + 1.0f;
+
+	*pResult = transformed * MakeVector(pCurrentView->orthoRect.width*0.5f, pCurrentView->orthoRect.height*0.5f) + MakeVector(pCurrentView->orthoRect.x, pCurrentView->orthoRect.y);
 }
