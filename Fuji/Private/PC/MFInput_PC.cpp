@@ -110,6 +110,8 @@ extern MFGamepadInfo *pGamepadMappingRegistry;
 extern HWND apphWnd;
 static HDEVNOTIFY hNotify;
 
+static bool gUpdateDeviceList = false;
+
 #if defined(ALLOW_RAW_INPUT)
 static pGetRawInputDeviceList _GRIDL;
 static pGetRawInputData _GRID;
@@ -282,7 +284,7 @@ uint8 KEYtoDIK[256] =
 
 BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
 
-static BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
 	MFCALLSTACK;
 
@@ -302,7 +304,7 @@ static BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pv
 			if(lpddi->guidInstance == gPCJoysticks[a].deviceInstance)
 			{
 				gPCJoysticks[a].wasRemoved = false;
-				break;
+				return DIENUM_CONTINUE;
 			}
 		}
 	}
@@ -324,43 +326,11 @@ void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect)
 {
 	MFCALLSTACK;
 
-	// TODO: Fix this...
-	return;
-
-	int a;
-
-	// mark devices as removed
-	for(a=0; a<gGamepadCount; a++)
-	{
-		if(gPCJoysticks[a].pDevice)
-		{
-			gPCJoysticks[a].wasRemoved = true;
-		}
-	}
-
-	// enumerate all devices and scan for removals..
-	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, CheckConnectedCallback, NULL, DIEDFL_ATTACHEDONLY);
-
-	// if any gamepads are still marked with wasRemoved==true, they must have been removed, so we'll clean them up.
-	for(a=0; a<MFInput_MaxInputID; a++)
-	{
-		if(gPCJoysticks[a].pDevice && gPCJoysticks[a].wasRemoved)
-		{
-			// remove gamepad...
-			if(gPCJoysticks[a].pForceFeedback)
-			{
-				gPCJoysticks[a].pForceFeedback->Release();
-				gPCJoysticks[a].pForceFeedback = NULL;
-			}
-
-			gPCJoysticks[a].pDevice->Release();
-			gPCJoysticks[a].pDevice = NULL;
-		}
-	}
+	gUpdateDeviceList = true;
 }
 
 // DirectInput Enumeration Callback
-static BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
+BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
 	MFCALLSTACK;
 
@@ -630,7 +600,43 @@ void MFInput_DeinitModulePlatformSpecific()
 
 void MFInput_UpdatePlatformSpecific()
 {
+	MFCALLSTACK;
 
+	if(gUpdateDeviceList)
+	{
+		int a;
+
+		// mark devices as removed
+		for(a=0; a<gGamepadCount; a++)
+		{
+			if(gPCJoysticks[a].pDevice)
+			{
+				gPCJoysticks[a].wasRemoved = true;
+			}
+		}
+
+		// enumerate all devices and scan for removals..
+		pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, CheckConnectedCallback, NULL, DIEDFL_ATTACHEDONLY);
+
+		// if any gamepads are still marked with wasRemoved==true, they must have been removed, so we'll clean them up.
+		for(a=0; a<MFInput_MaxInputID; a++)
+		{
+			if(gPCJoysticks[a].pDevice && gPCJoysticks[a].wasRemoved)
+			{
+				// remove gamepad...
+				if(gPCJoysticks[a].pForceFeedback)
+				{
+					gPCJoysticks[a].pForceFeedback->Release();
+					gPCJoysticks[a].pForceFeedback = NULL;
+				}
+
+				gPCJoysticks[a].pDevice->Release();
+				gPCJoysticks[a].pDevice = NULL;
+			}
+		}
+
+		gUpdateDeviceList = false;
+	}
 }
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
@@ -658,14 +664,19 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 				else
 #endif
 				{
-					DIDEVCAPS caps;
-					memset(&caps, 0, sizeof(DIDEVCAPS));
-					caps.dwSize = sizeof(DIDEVCAPS);
+					if(gPCJoysticks[id].pDevice)
+					{
+						DIDEVCAPS caps;
+						memset(&caps, 0, sizeof(DIDEVCAPS));
+						caps.dwSize = sizeof(DIDEVCAPS);
 
-					gPCJoysticks[id].pDevice->GetCapabilities(&caps);
+						gPCJoysticks[id].pDevice->GetCapabilities(&caps);
 
-					if(caps.dwFlags & DIDC_ATTACHED)
-						return IDS_Ready;
+						if(caps.dwFlags & DIDC_ATTACHED)
+							return IDS_Ready;
+						else
+							return IDS_Disconnected;
+					}
 					else
 						return IDS_Disconnected;
 				}
@@ -738,98 +749,101 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	else
 #endif
 	{
-		// poll the gamepad
-		hr = gPCJoysticks[id].pDevice->Poll(); 
-
-		if(FAILED(hr))
+		if(gPCJoysticks[id].pDevice)
 		{
-			// attempt to recover the device
-			hr = gPCJoysticks[id].pDevice->Acquire();
+			// poll the gamepad
+			hr = gPCJoysticks[id].pDevice->Poll(); 
 
-			if(SUCCEEDED(hr))
+			if(FAILED(hr))
 			{
-				if(gPCJoysticks[id].pForceFeedback && gPCJoysticks[id].forceFeedbackState)
+				// attempt to recover the device
+				hr = gPCJoysticks[id].pDevice->Acquire();
+
+				if(SUCCEEDED(hr))
 				{
-					// restart the vibration effect
-					gPCJoysticks[id].pForceFeedback->Start(1, 0);
+					if(gPCJoysticks[id].pForceFeedback && gPCJoysticks[id].forceFeedbackState)
+					{
+						// restart the vibration effect
+						gPCJoysticks[id].pForceFeedback->Start(1, 0);
+					}
 				}
 			}
-		}
 
-		// read gamepad
-		if(SUCCEEDED(hr))
-		{
-			DIJOYSTATE2 joyState;
-
-			// get device state
-			hr = gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
-
+			// read gamepad
 			if(SUCCEEDED(hr))
 			{
-				const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
-				LONG *pAxii = (LONG*)&joyState;
+				DIJOYSTATE2 joyState;
 
-				// convert input to float data
-				for(int a=0; a<GamepadType_Max; a++)
+				// get device state
+				hr = gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), &joyState);
+
+				if(SUCCEEDED(hr))
 				{
-					if(pButtonMap[a] == -1)
-						continue;
+					const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
+					LONG *pAxii = (LONG*)&joyState;
 
-					int axisID = MFGETAXIS(pButtonMap[a]);
-					bool readAnalog = false;
-
-					// test if analog input is present
-					if(pButtonMap[a] & AID_Analog)
+					// convert input to float data
+					for(int a=0; a<GamepadType_Max; a++)
 					{
-						DIDEVICEOBJECTINSTANCE axisInfo;
-						axisInfo.dwSize = sizeof(DIDEVICEOBJECTINSTANCE);
+						if(pButtonMap[a] == -1)
+							continue;
 
-						hr = gPCJoysticks[id].pDevice->GetObjectInfo(&axisInfo, axisID<<2, DIPH_BYOFFSET);
+						int axisID = MFGETAXIS(pButtonMap[a]);
+						bool readAnalog = false;
 
-						if(SUCCEEDED(hr))
-							readAnalog = true;
+						// test if analog input is present
+						if(pButtonMap[a] & AID_Analog)
+						{
+							DIDEVICEOBJECTINSTANCE axisInfo;
+							axisInfo.dwSize = sizeof(DIDEVICEOBJECTINSTANCE);
+
+							hr = gPCJoysticks[id].pDevice->GetObjectInfo(&axisInfo, axisID<<2, DIPH_BYOFFSET);
+
+							if(SUCCEEDED(hr))
+								readAnalog = true;
+						}
+
+						// if we are not reading the analog axis
+						if(!readAnalog)
+						{
+							// read digital button
+							pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
+						}
+						else
+						{
+							// read an analog axis
+							pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
+						}
+
+						// invert any buttons with the AID_Negative flag
+						pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
+						// clamp any butons with the AID_Clamp flag to the positive range
+						pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
 					}
 
-					// if we are not reading the analog axis
-					if(!readAnalog)
+					// if device has a pov, and we want to read from it
+					if(gPCJoysticks[id].bUsePOV)
 					{
-						// read digital button
-						pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
-					}
-					else
-					{
-						// read an analog axis
-						pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
-					}
+						// read POV
+						DWORD pov = joyState.rgdwPOV[0];
+						bool POVCentered = (LOWORD(pov) == 0xFFFF);
 
-					// invert any buttons with the AID_Negative flag
-					pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
-					// clamp any butons with the AID_Clamp flag to the positive range
-					pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
-				}
-
-				// if device has a pov, and we want to read from it
-				if(gPCJoysticks[id].bUsePOV)
-				{
-					// read POV
-					DWORD pov = joyState.rgdwPOV[0];
-					bool POVCentered = (LOWORD(pov) == 0xFFFF);
-
-					if(POVCentered)
-					{
-						// POV is centered
-						pGamepadState->values[Button_DUp] = 0.0f;
-						pGamepadState->values[Button_DDown] = 0.0f;
-						pGamepadState->values[Button_DLeft] = 0.0f;
-						pGamepadState->values[Button_DRight] = 0.0f;
-					}
-					else
-					{
-						// read POV (or more appropriately titled, POS)
-						pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
-						pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
-						pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
-						pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+						if(POVCentered)
+						{
+							// POV is centered
+							pGamepadState->values[Button_DUp] = 0.0f;
+							pGamepadState->values[Button_DDown] = 0.0f;
+							pGamepadState->values[Button_DLeft] = 0.0f;
+							pGamepadState->values[Button_DRight] = 0.0f;
+						}
+						else
+						{
+							// read POV (or more appropriately titled, POS)
+							pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
+							pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
+							pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
+							pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+						}
 					}
 				}
 			}
@@ -1589,6 +1603,8 @@ HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
     // Connect to WMI 
     hr = pIWbemLocator->ConnectServer( bstrNamespace, NULL, NULL, 0L, 
                                        0L, NULL, NULL, &pIWbemServices );
+
+	MFDebug_Assert(SUCCEEDED(hr) && pIWbemServices, "Failed to connect to WMI server.");
     if( FAILED(hr) || pIWbemServices == NULL )
         goto LCleanup;
 
