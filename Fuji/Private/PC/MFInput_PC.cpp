@@ -97,6 +97,8 @@ static int gGamepadCount = 0;
 static int gKeyboardCount = 0;
 static int gMouseCount = 0;
 
+static bool gUseXInput = false;
+
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
 
@@ -290,7 +292,7 @@ BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 
 #if defined(SUPPORT_XINPUT)
 	// if device is an XInput device, we'll let XInput handle it
-	if(IsXInputDevice(&lpddi->guidProduct))
+	if(gUseXInput && IsXInputDevice(&lpddi->guidProduct))
 		return DIENUM_CONTINUE;
 #endif
 
@@ -338,7 +340,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 
 #if defined(SUPPORT_XINPUT)
 	// if device is an XInput device, we'll let XInput handle it
-	if(IsXInputDevice(&lpddi->guidProduct))
+	if(gUseXInput && IsXInputDevice(&lpddi->guidProduct))
 		return DIENUM_CONTINUE;
 #endif
 
@@ -537,6 +539,7 @@ void MFInput_InitModulePlatformSpecific()
 			gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[9];
 
 			gGamepadCount += 4;
+			gUseXInput = true;
 
 			break;
 		}
