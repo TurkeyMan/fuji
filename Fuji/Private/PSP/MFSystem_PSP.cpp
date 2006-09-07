@@ -238,8 +238,6 @@ void GetCWDFromPath(const char *pArgv)
 	{
 		pathBuffer[l] = 0;
 		gPSPSystemPath = pathBuffer;
-
-		MFDebug_Log(4, MFStr("CWD set to: %s", gPSPSystemPath));
 	}
 }
 
@@ -264,8 +262,22 @@ int main(int argc, char *argv[])
 	// we want every little detail on PSP...
 	MFDebug_SetMaximumLogLevel(4);
 
-	// get the cwd from argv[0]
-	GetCWDFromPath(argv[0]);
+	// check for working folder on command line
+	bool bWasSet = false;
+	for(int a=1; a<argc; a++)
+	{
+		if(!MFString_CaseCmpN(argv[a], "-w", 2))
+		{
+			gPSPSystemPath = &argv[a][2];
+			bWasSet = true;
+		}
+	}
+	if(!bWasSet)
+	{
+		// get the cwd from argv[0]
+		GetCWDFromPath(argv[0]);
+	}
+	MFDebug_Log(4, MFStr("cwd set to: %s", gPSPSystemPath));
 
 	pspDebugScreenInit();
 //	pspDebugScreenSetBackColor(0xFF400000);

@@ -63,7 +63,7 @@ void MFFileSystem_InitModule()
 	{
 		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		mountData.pMountpoint = "data";
-		mountData.pPath = MFStr("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformName(MFSystem_GetCurrentPlatform()));
+		mountData.pPath = MFStr("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform()));
 		MFFileSystem_Mount(hNativeFileSystem, &mountData);
 	}
 

@@ -51,7 +51,6 @@
 #include "as_tokendef.h"
 
 #include <stdlib.h>
-#include <regdef.h>
 
 BEGIN_AS_NAMESPACE
 
