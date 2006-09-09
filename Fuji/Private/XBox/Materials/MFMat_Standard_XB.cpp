@@ -46,7 +46,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFRendererXB_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 			MFRendererXB_SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&pData->textureMatrix);
+//			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&pData->textureMatrix);
+
+			MFMatrix texMat = pData->textureMatrix;
+			texMat.SetZAxis3(texMat.GetTrans());
+			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&texMat);
 		}
 		else
 		{

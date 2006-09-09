@@ -9,7 +9,11 @@ extern const float MFAspect_16x10;
 enum MFClearScreenFlags
 {
 	CS_Colour	= 1,
-	CS_ZBuffer	= 2
+	CS_ZBuffer	= 2,
+	CS_Stencil	= 4,
+
+	CS_All		= CS_Colour | CS_ZBuffer | CS_Stencil,
+	CS_ForceInt	= 0x7FFFFFFF
 };
 
 // interface functions

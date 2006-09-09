@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case FP_XBox:
-				targetFormat = TexFmt_A8R8G8B8;
+				targetFormat = TexFmt_XB_A8R8G8B8s;
 				break;
 
 			case FP_Linux:
@@ -735,7 +735,9 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		if(targetFormat >= TexFmt_XB_A8R8G8B8s && targetFormat <= TexFmt_XB_R4G4B4A4s)
 		{
 			// swizzle for xbox
-			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+			// TODO: Swizzle here.. But we'll swizzle at runtime for the time being....
+//			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+			memcpy(pBuffer, pOutputSurface->pImageData, width*height*bytesperpixel);
 		}
 		else
 #endif

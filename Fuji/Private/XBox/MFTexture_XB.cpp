@@ -39,11 +39,21 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// copy image data
 	D3DLOCKED_RECT rect;
 	pTexture->pTexture->LockRect(0, &rect, NULL, 0);
-	memcpy(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
+
+	if(pTemplate->imageFormat >= TexFmt_XB_A8R8G8B8s && pTemplate->imageFormat <= TexFmt_XB_R4G4B4A4s)
+	{
+		XGSwizzleRect(pTemplate->pSurfaces[0].pImageData, 0, NULL, rect.pBits, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, NULL, pTemplate->pSurfaces[0].bitsPerPixel/8);
+	}
+	else
+	{
+		memcpy(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
+	}
+
 	pTexture->pTexture->UnlockRect(0);
 
 	// filter mip levels
-	D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
+	if(generateMipChain)
+		D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 }
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)

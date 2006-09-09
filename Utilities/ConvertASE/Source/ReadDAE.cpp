@@ -319,6 +319,12 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 	const char *pName = pGeometryNode->Attribute("name");
 
+	if(!pName)
+	{
+		pName = pGeometryNode->Attribute("id");
+		MFDebug_Warn(2, MFStr("Geometry object '%s' has no name.", pName));
+	}
+
 	F3DMeshChunk *pMeshChunk = pModel->GetMeshChunk();
 	F3DSubObject &subObject = pMeshChunk->subObjects.push();
 

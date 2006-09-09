@@ -63,5 +63,5 @@ uint64 MFSystem_GetRTCFrequency()
 
 const char * MFSystem_GetSystemName()
 {
-	return "xbox";
+	return "XBox";
 }

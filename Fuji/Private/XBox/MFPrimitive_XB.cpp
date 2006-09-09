@@ -82,11 +82,7 @@ void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
-	if(primType == PT_QuadList)
-		beginCount = vertexCount * 2;
-	else
-		beginCount = vertexCount;
-
+	beginCount = vertexCount;
 	currentVert = 0;
 
 	pd3dDevice->SetVertexShader(LitVertex::FVF);
