@@ -201,6 +201,10 @@ ComponentType GetComponentType(const char *pType)
 	{
 		return CT_UV1;
 	}
+	else if(!stricmp(pType, "COLOR"))
+	{
+		return CT_Colour;
+	}
 
 	MFDebug_Assert(false, MFStr("Unknown semantic: '%s'", pType));
 	return CT_Unknown;
@@ -465,9 +469,30 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 								}
 								break;
 							}
+							case CT_Colour:
+							{
+								SourceData *pData = GetSourceData(sources[b].second.c_str());
+
+								if(pData)
+								{
+									MFArray<MFVector> *pDataArray = GetSemanticArray(subObject, sources[b].first);
+
+									for(c=0; c<(int)pData->data.size(); c++)
+									{
+										MFVector &v = pDataArray->push();
+
+										for(d=0; d<MFMin(pData->validComponents, 4); d++)
+										{
+											v[d] = pData->data[c][d];
+										}
+										if(pData->validComponents < 4)
+											v[3] = 1.0f;
+									}
+								}
+								break;
+							}
 							case CT_Position:
 							case CT_Normal:
-							case CT_Colour:
 							case CT_Binormal:
 							case CT_Tangent:
 							{
