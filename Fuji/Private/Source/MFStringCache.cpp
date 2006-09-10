@@ -50,7 +50,7 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
 	{
 		int length = MFString_Length(pCurr);
-		if (!MFString_CaseCmp(pCurr, pNewString))
+		if (!MFString_Compare(pCurr, pNewString))
 		{
 			// found string
 			return pCurr;

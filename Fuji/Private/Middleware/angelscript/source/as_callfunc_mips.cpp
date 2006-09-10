@@ -648,10 +648,10 @@ asm(
 "	lwc1	$f18, 56($15)\n"
 "	lwc1	$f19, 60($15)\n"
 
-// skip stack paramaters if there are none
+// skip stack parameters if there are none
 "	beq		$3, $0, andCall\n"
 
-// push stack paramaters
+// push stack parameters
 "	addiu	$15, $15, 64\n"
 "pushArgs:\n"
 "	addiu	$3, -4\n"

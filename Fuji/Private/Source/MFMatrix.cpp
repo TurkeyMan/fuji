@@ -546,12 +546,11 @@ MFMatrix& MFMatrix::Tween(const MFMatrix& start, const MFMatrix& end, float time
 {
 	MFMatrix t = start;
 
-	((MFVector*)t.m[0])->Lerp(end.GetXAxis(), time);
-	((MFVector*)t.m[1])->Lerp(end.GetXAxis(), time);
-	((MFVector*)t.m[2])->Lerp(end.GetXAxis(), time);
-	((MFVector*)t.m[3])->Lerp(end.GetXAxis(), time);
+	*(MFVector*)this->m[0] = ((MFVector*)t.m[0])->Lerp(*(MFVector*)end.m[0], time);
+	*(MFVector*)this->m[1] = ((MFVector*)t.m[1])->Lerp(*(MFVector*)end.m[1], time);
+	*(MFVector*)this->m[2] = ((MFVector*)t.m[2])->Lerp(*(MFVector*)end.m[2], time);
+	*(MFVector*)this->m[3] = ((MFVector*)t.m[3])->Lerp(*(MFVector*)end.m[3], time);
 
-	*this = t;
 	return *this;
 }
 
