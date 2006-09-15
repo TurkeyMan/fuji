@@ -21,9 +21,9 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(_WINDOWS) || defined(_MFXBOX) || (defined(_FUJI_UTIL) && !defined(_LINUX))
+#if defined(_WINDOWS) || defined(_MFXBOX) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
 	#define MFDebug_Breakpoint() { __asm { int 3 }; }
-#elif defined(_LINUX) || (defined(_FUJI_UTIL) && !defined(_WINDOWS))
+#elif defined(_LINUX) || (defined(_OSX) && !defined(MFBIG_ENDIAN)) || (defined(_FUJI_UTIL) && !defined(_WINDOWS))
 	#define MFDebug_Breakpoint() { asm("int $3"); }
 #elif defined(_PSP) || defined(_PS2)
 	#define MFDebug_Breakpoint() { asm("break"); }

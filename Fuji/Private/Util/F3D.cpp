@@ -952,8 +952,6 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 					WriteMeshChunk_XB(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
 					break;
 				case FP_Linux:
-					WriteMeshChunk_Linux(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
-					break;
 				case FP_OSX:
 					WriteMeshChunk_Linux(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
 					break;
@@ -1088,8 +1086,6 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
 							break;
 						case FP_Linux:
-							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
-							break;
 						case FP_OSX:
 							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
 							break;

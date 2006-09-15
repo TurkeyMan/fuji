@@ -197,9 +197,6 @@ int main(int argc, char *argv[])
 				break;
 
 			case FP_Linux:
-				targetFormat = TexFmt_A8B8G8R8;
-				break;
-
 			case FP_OSX:
 				targetFormat = TexFmt_A8B8G8R8;
 				break;

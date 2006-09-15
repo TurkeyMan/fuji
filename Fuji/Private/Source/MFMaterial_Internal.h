@@ -40,7 +40,7 @@ struct MFMeshChunk
 	MFMaterial *pMaterial;
 };
 
-#if defined(_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX))
+#if defined(_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
 
 #include <d3d9.h>
 
@@ -94,7 +94,7 @@ struct MFMeshChunk_PSP : public MFMeshChunk
 };
 #endif
 
-#if defined(_LINUX) || defined(_FUJI_UTIL)
+#if defined(_LINUX) || defined(_OSX) || defined(_FUJI_UTIL)
 struct MFMeshChunk_Linux : public MFMeshChunk
 {
 	uint32 numVertices;

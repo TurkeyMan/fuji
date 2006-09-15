@@ -16,7 +16,7 @@ void MFModel_Draw(MFModel *pModel)
 	else
 		glLoadMatrixf((GLfloat*)&MFView_GetLocalToView(pModel->worldMatrix, &localToView));
 
-	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
 	{

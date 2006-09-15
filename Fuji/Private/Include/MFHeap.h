@@ -88,7 +88,7 @@ void  MFHeap_Free(void *pMem);
 
 #if !defined(_FUJI_UTIL)
 // FIXME
-#if !defined(_LINUX) && !defined(_PSP) && !defined(_GC)
+#if !defined(_LINUX) && !defined(_OSX) && !defined(_PSP) && !defined(_GC)
 void* operator new(size_t size);
 void* operator new[](size_t size);
 void operator delete(void *pMemory);
