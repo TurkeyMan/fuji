@@ -39,6 +39,9 @@ OBJS := $(OBJS) ../../Fuji/Null/MFHeap_Null.o
 ifeq ($(PLATFORM),LINUX)
 OBJS := $(OBJS) ../../Fuji/Linux/MFDebug_Linux.o
 endif
+ifeq ($(PLATFORM),OSX)
+OBJS := $(OBJS) ../../Fuji/OSX/MFDebug_OSX.o
+endif
 ifeq ($(PLATFORM),PC)
 OBJS := $(OBJS) ../../Fuji/PC/MFDebug_PC.o
 endif

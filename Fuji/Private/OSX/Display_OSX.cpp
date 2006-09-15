@@ -198,7 +198,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	}
 
 	pRes->data = 1;
-	snprintf(modeString, 24, "%dx%d (%.02fMhz)", modes[selectedMode].width, modes[selectedMode].height, modes[selectedMode].refresh);
+	snprintf(modeString, 24, "%dx%d (%.02fhz)", modes[selectedMode].width, modes[selectedMode].height, modes[selectedMode].refresh);
 }
 
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
@@ -210,7 +210,7 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 	gDisplay.fullscreenWidth = gDisplay.width;
 	gDisplay.fullscreenHeight = gDisplay.height;
 
-	MFDisplay_ResetDisplay();	
+	MFDisplay_ResetDisplay();
 }
 
 void MFDisplay_DestroyWindow()

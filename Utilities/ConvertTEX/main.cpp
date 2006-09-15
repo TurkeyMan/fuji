@@ -200,6 +200,10 @@ int main(int argc, char *argv[])
 				targetFormat = TexFmt_A8B8G8R8;
 				break;
 
+			case FP_OSX:
+				targetFormat = TexFmt_A8B8G8R8;
+				break;
+
 			case FP_PSP:
 				if(pImage->opaque)
 					targetFormat = TexFmt_PSP_B5G6R5s;

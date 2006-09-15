@@ -9,7 +9,7 @@
 #include "MFModel_Internal.h"
 #include "MFMaterial_Internal.h"
 
-#if !defined(_LINUX)
+#if !defined(_LINUX) && !defined(_OSX)
 #include <d3d9.h>
 #endif
 
@@ -954,6 +954,9 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 				case FP_Linux:
 					WriteMeshChunk_Linux(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
 					break;
+				case FP_OSX:
+					WriteMeshChunk_Linux(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
+					break;
 				case FP_PSP:
 					WriteMeshChunk_PSP(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
 					break;
@@ -1085,6 +1088,9 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
 							break;
 						case FP_Linux:
+							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							break;
+						case FP_OSX:
 							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
 							break;
 						case FP_PSP:

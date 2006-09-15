@@ -100,7 +100,7 @@ enum MFEndian
 
 #elif (defined(_XBOX) && _XBOX_VER < 200)
 
-  #define _MFXBOX
+	#define _MFXBOX
 
 	#define DEBUG_KEYBOARD
 	#define DEBUG_MOUSE
@@ -110,12 +110,13 @@ enum MFEndian
 
 #elif (defined(_XBOX) && _XBOX_VER >= 200)
 
-  #define _MFX360
+	#define _MFX360
 
-//  #error Not Supported...
+//	#error Not Supported...
 	#include <xtl.h>
 
-  #define MF64BIT
+	#define MFBIG_ENDIAN
+	#define MF64BIT
 
 #elif defined(_LINUX)
 
