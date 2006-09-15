@@ -141,6 +141,26 @@ Linux/Materials/MFMat_Standard_Linux.o \
 Null/MFAuxillaryDisplay_Null.o
 endif
 
+ifeq ($(PLATFORM),OSX)
+OBJS := $(OBJS) OSX/Display_OSX.o \
+OSX/MFDebug_OSX.o \
+OSX/MFHeap_OSX.o \
+OSX/MFInput_OSX.o \
+OSX/MFMaterial_OSX.o \
+OSX/MFModel_OSX.o \
+OSX/MFPrimitive_OSX.o \
+OSX/MFSockets_OSX.o \
+OSX/MFSound_OSX.o \
+OSX/MFSystem_OSX.o \
+OSX/MFTexture_OSX.o \
+OSX/MFThread_OSX.o \
+OSX/MFTranslation_OSX.o \
+OSX/FileSystem/MFFileSystemNative_OSX.o \
+OSX/Materials/MFMat_Standard_OSX.o \
+Null/Materials/MFMat_Effect_Null.o \
+Null/MFAuxillaryDisplay_Null.o
+endif
+
 ifeq ($(PLATFORM),PC)
 OBJS := $(OBJS) PC/Display_PC.o \
 PC/MFAuxillaryDisplay_PC.o \
@@ -320,6 +340,19 @@ RANLIB   = ranlib
 STRIP    = strip
 
 # end LINUX
+endif
+
+ifeq ($(PLATFORM),OSX)
+
+CC       = gcc
+CXX      = g++
+AS       = as
+LD       = ld
+AR       = ar
+RANLIB   = ranlib
+STRIP    = strip
+
+# end OSX
 endif
 
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)

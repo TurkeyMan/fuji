@@ -49,13 +49,12 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
 	{
-		int length = MFString_Length(pCurr);
 		if (!MFString_Compare(pCurr, pNewString))
 		{
 			// found string
 			return pCurr;
 		}
-		pCurr += length+1;
+		pCurr += MFString_Length(pCurr)+1;
 	}
 
 	MFDebug_Assert(&pCurr[newLength+1] < &pCache->pMem[pCache->size], "No memory for string!");
