@@ -128,6 +128,12 @@ enum MFEndian
 		#define MF64BITPOINTERS
 	#endif
 
+#elif defined(_OSX)
+
+	#include <stdarg.h> // For varargs
+	#include <stdlib.h> // For realloc, malloc
+	#include <string.h> // For strcpy
+
 #elif defined(_PSP)
 
 	#include <stdarg.h>

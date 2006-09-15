@@ -12,7 +12,7 @@ extern Atom wm_delete_window;
 
 extern int gQuit;
 
-MFPlatform gCurrentPlatform = FP_Linux;
+MFPlatform gCurrentPlatform = FP_OSX;
 
 int main(int argc, char *argv[])
 {
