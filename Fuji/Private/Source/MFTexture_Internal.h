@@ -5,7 +5,7 @@
 #include <d3d9.h>
 #endif
 
-#if defined(_LINUX)
+#if defined(_LINUX) || defined(_OSX)
 #include <GL/gl.h>
 #endif
 

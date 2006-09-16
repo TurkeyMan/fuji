@@ -86,7 +86,6 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 		pMC->pColourData += base;
 		pMC->pUVData += base;
 		pMC->pIndexData += base;
-		(char*&)pMC->pVertexElements += base;
 	}
 	else
 	{
@@ -96,6 +95,5 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 		pMC->pColourData -= base;
 		pMC->pUVData -= base;
 		pMC->pIndexData -= base;
-		(char*&)pMC->pVertexElements -= base;
 	}
 }
