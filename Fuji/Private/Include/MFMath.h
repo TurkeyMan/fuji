@@ -6,8 +6,8 @@
  * @{
  */
 
-#if !defined(_FUJI_MATH)
-#define _FUJI_MATH
+#if !defined(_MFMATH_H)
+#define _MFMATH_H
 
 /**
  * Calculates the sine of an angle.

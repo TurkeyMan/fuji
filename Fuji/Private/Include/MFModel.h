@@ -6,8 +6,8 @@
  * @{
  */
 
-#if !defined(_MFMODEL_INTERNAL_H)
-#define _MFMODEL_INTERNAL_H
+#if !defined(_MFMODEL_H)
+#define _MFMODEL_H
 
 #include "MFBoundingVolume.h"
 
@@ -66,7 +66,7 @@ void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix);
  * @return None.
  * @see MFModel_Create()
  */
-void MFModel_Draw(MFModel *pModel, const MFVector &colour);
+void MFModel_SetColour(MFModel *pModel, const MFVector &colour);
 
 /**
  * Get a models name.

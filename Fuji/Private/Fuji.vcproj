@@ -654,6 +654,9 @@
 				RelativePath=".\Source\MFNetwork_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFParticleSystem_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFPrimitive.cpp">
 			</File>
 			<File
@@ -859,6 +862,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFNetwork.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFParticleSystem.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFPrimitive.h">
@@ -2735,6 +2741,9 @@
 					<Tool
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Null\MFParticleSystem_Null.cpp">
 			</File>
 			<File
 				RelativePath=".\Null\MFPrimitive_Null.cpp">
