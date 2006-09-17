@@ -33,7 +33,7 @@ enum MFEmitterBehaviour
 
 struct MFParticleEmitter
 {
-	MFVector position;		/**< Position of the emitter. */
+	MFMatrix position;		/**< Position of the emitter. */
 	MFVector startVector;	/**< Starting vector. */
 
 	float radius;			/**< Radius of volume primitives */

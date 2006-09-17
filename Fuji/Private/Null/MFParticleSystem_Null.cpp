@@ -26,13 +26,15 @@ void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem)
 	MFHeap_Free(pParticleSystem);
 }
 
-void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem)
+void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMatrix &world)
 {
 	int numParticles = pParticleSystem->particles.GetLength();
 	float fadeStart = pParticleSystem->params.life - pParticleSystem->params.fadeDelay;
 
-	MFPrimitive(PT_QuadList, 0);
-	MFBegin(numParticles * 2);
+	MFPrimitive(PT_TriList, 0);
+	MFSetMatrix(world);
+
+	MFBegin(numParticles * 6);
 
 	MFParticle **ppI = pParticleSystem->particles.Begin();
 
@@ -78,10 +80,17 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 {
 	// emit new particles
 
+	MFView_Push();
+	MFView_SetCameraMatrix(MFMatrix::identity);
+
+	const MFMatrix &view = MFView_GetWorldToViewMatrix();
+	MFMatrix world = pParticleSystem->emitter.position;
+	world.Translate(view.GetTrans());
+
 	// update and draw each particle
 	if(pParticleSystem->params.rotationRate != 0.0f)
 	{
-		MFParticleSystem_DrawRotating(pParticleSystem);
+		MFParticleSystem_DrawRotating(pParticleSystem, world);
 		return;
 	}
 
@@ -91,6 +100,8 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	MFMaterial_SetMaterial(pParticleSystem->pMaterial);
 
 	MFPrimitive(PT_QuadList, 0);
+	MFSetMatrix(world);
+
 	MFBegin(numParticles * 2);
 
 	MFParticle **ppI = pParticleSystem->particles.Begin();
@@ -122,4 +133,6 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	}
 
 	MFEnd();
+
+	MFView_Pop();
 }
