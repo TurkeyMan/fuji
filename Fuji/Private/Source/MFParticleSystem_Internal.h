@@ -27,6 +27,9 @@ struct MFParticleSystem
 	MFMaterial *pMaterial;
 
 	MFPtrListDL<MFParticle> particles;
+
+	float emitPeriod;
+	float emitTimeout;
 };
 
 #endif
