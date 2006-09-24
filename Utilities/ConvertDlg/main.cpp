@@ -97,6 +97,44 @@ const char *GetPagedString(const uint16 *pString)
 	return stringBuffer;
 }
 
+const char *GetAnsiString(const uint16 *pString)
+{
+	int len = (int)wcslen(pString);
+
+	for(int a=0; a<len; a++)
+	{
+		if(pString[a] > 255)
+			return NULL;
+		stringBuffer[a] = (uint8)pString[a];
+	}
+
+	stringBuffer[len] = 0;
+
+	return stringBuffer;
+}
+
+const uint16 *GetUnicodeString(const uint16 *pString)
+{
+	if(*pString == 0xFEFF)
+		return pString;
+
+	int len = (int)wcslen(pString);
+
+	uint16 *pT = (uint16*)stringBuffer;
+
+	*pT = 0xFEFF;
+	++pT;
+
+	for(int a=0; a<len; a++)
+	{
+		pT[a] = pString[a];
+	}
+
+	pT[len] = 0;
+
+	return &pT[-1];
+}
+
 struct MFStringTable
 {
 	uint32 magic;
@@ -163,7 +201,7 @@ int main(int argc, char *argv[])
 		size >>= 1;
 
 		++pBuffer;
-		size--;
+		--size;
 	}
 
 	pBuffer[size] = 0;
@@ -175,6 +213,7 @@ int main(int argc, char *argv[])
 	int totalLines = 0;
 
 	MFStringCache **ppCaches;
+	MFWStringCache **ppWCaches;
 
 	uint16 ***pppStringPointers = NULL;
 	uint16 **ppColumnNames;
@@ -217,6 +256,7 @@ int main(int argc, char *argv[])
 
 	// allocate some lists of stuff
 	ppCaches = (MFStringCache**)malloc(sizeof(MFStringCache*) * columnCount);
+	ppWCaches = (MFWStringCache**)malloc(sizeof(MFWStringCache*) * columnCount);
 
 	ppColumnNames = (uint16**)malloc(sizeof(uint16*) * columnCount);
 
@@ -265,15 +305,21 @@ int main(int argc, char *argv[])
 		if(ppColumnNames[a])
 		{
 			ppCaches[a] = MFStringCache_Create(size);
+			ppWCaches[a] = MFWStringCache_Create(size * 2);
 
 			for(int b=0; b<totalLines; b++)
 			{
-				pppStringPointers[a][b] = (uint16*)MFStringCache_Add(ppCaches[a], GetPagedString(pppStringPointers[a][b]));
+				const char *pAnsiString = GetAnsiString(pppStringPointers[a][b]);
+				if(pAnsiString)
+					pppStringPointers[a][b] = (uint16*)MFStringCache_Add(ppCaches[a], pAnsiString);
+				else
+					pppStringPointers[a][b] = (uint16*)MFWStringCache_Add(ppWCaches[a], GetUnicodeString(pppStringPointers[a][b]));
 			}
 		}
 		else
 		{
 			ppCaches[a] = NULL;
+			ppWCaches[a] = NULL;
 		}
 	}
 
@@ -324,34 +370,43 @@ int main(int argc, char *argv[])
 
 			fclose(pOut);
 		}
-		else
+
+		// write out language file
+		MFStringTable table;
+		table.magic = MFMAKEFOURCC('D','L','G','1');
+		table.numStrings = totalLines;
+
+		char *pCache = MFStringCache_GetCache(ppCaches[a]);
+		int cacheSize = MFStringCache_GetSize(ppCaches[a]);
+		uint16 *pWCache = MFWStringCache_GetCache(ppWCaches[a]);
+		int wcacheSize = MFWStringCache_GetSize(ppWCaches[a]);
+		uint32 base = (uint32&)pCache;
+		uint32 wbase = (uint32&)pWCache;
+		base -= sizeof(char**) * totalLines + sizeof(table) + wcacheSize;
+		wbase -= sizeof(char**) * totalLines + sizeof(table);
+
+		for(int b=0; b<totalLines; b++)
 		{
-			// write out language file
-			MFStringTable table;
-			table.magic = MFMAKEFOURCC('D','L','G','1');
-			table.numStrings = totalLines;
-
-			char *pCache = MFStringCache_GetCache(ppCaches[a]);
-			uint32 base = (uint32&)pCache;
-			base -= sizeof(char**) * totalLines + sizeof(table);
-
-			for(int b=0; b<totalLines; b++)
-			{
-				// fixup
-				(uint32&)pppStringPointers[a][b] -= base;
-			}
-
-			// write out the string cache
-			sprintf(outputFilename, "%s%s.%s", outPath, file, GetPagedString(ppColumnNames[a]));
-
-			FILE *pOut = fopen(outputFilename, "wb");
-
-			fwrite(&table, sizeof(table), 1, pOut);
-			fwrite(pppStringPointers[a], totalLines, sizeof(char **), pOut);
-			fwrite(pCache, MFStringCache_GetSize(ppCaches[a]), 1, pOut);
-
-			fclose(pOut);
+			// fixup
+			if(*pppStringPointers[a][b] == 0xFEFF)
+                (uint32&)pppStringPointers[a][b] -= wbase;
+			else
+                (uint32&)pppStringPointers[a][b] -= base;
 		}
+
+		// write out the string cache
+		sprintf(outputFilename, "%s%s.%s", outPath, file, GetPagedString(ppColumnNames[a]));
+
+		FILE *pOut = fopen(outputFilename, "wb");
+
+		fwrite(&table, sizeof(table), 1, pOut);
+		fwrite(pppStringPointers[a], totalLines, sizeof(char **), pOut);
+		fwrite(pWCache, wcacheSize, 1, pOut);
+		fwrite(pCache, cacheSize, 1, pOut);
+
+		fclose(pOut);
+
+		printf("> %s\n", outputFilename);
 	}
 
 	return 0;

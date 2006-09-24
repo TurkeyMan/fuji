@@ -328,3 +328,18 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 }
 
 #endif
+
+//
+// unicode support
+//
+
+int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
+{
+	while(*pString1 == *pString2++)
+	{
+		if(*pString1++ == 0)
+			return 0;
+	}
+
+	return (*(const uint16 *)pString1 - *(const uint16 *)(pString2 - 1));
+}

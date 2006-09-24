@@ -51,6 +51,24 @@ const char* MFTranslation_GetLanguageName(MFLanguage language, bool native)
 	return native ? languageNamesNative[language] : languageNamesEnglish[language];
 }
 
+MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
+{
+	MFStringTable *pStringTable = NULL;
+
+	const char *pFile = MFStr("%s.Enum", pFilename);
+	pStringTable = (MFStringTable*)MFFileSystem_Load(pFile);
+	MFDebug_Assert(pStringTable, "Enum table unavailable.");
+
+	MFDebug_Assert(pStringTable->magic == MFMAKEFOURCC('D','L','G','1'), "File does not appear to be a Fuji String Table");
+
+	for(int a=0; a<pStringTable->numStrings; a++)
+	{
+		pStringTable->pStrings[a] += (uint32)pStringTable;
+	}
+
+	return pStringTable;
+}
+
 MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage language, MFLanguage fallback)
 {
 	MFStringTable *pStringTable = NULL;
@@ -93,6 +111,17 @@ void MFTranslation_DestroyStringTable(MFStringTable *pTable)
 int MFTranslation_GetNumStrings(MFStringTable *pTable)
 {
 	return pTable->numStrings;
+}
+
+int MFTranslation_FindString(MFStringTable *pTable, const char *pString)
+{
+	for(int a=0; a<pTable->numStrings; a++)
+	{
+		if(!MFString_Compare(pTable->pStrings[a], pString))
+			return a;
+	}
+
+	return -1;
 }
 
 const char* MFTranslation_GetString(MFStringTable *pTable, int stringID)

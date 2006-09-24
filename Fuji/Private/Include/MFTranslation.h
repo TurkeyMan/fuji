@@ -77,6 +77,14 @@ MFLanguage MFTranslation_GetDefaultLanguage();
 MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage language, MFLanguage fallback = MFLang_English);
 
 /**
+ * Load a translation table containing enum keys.
+ * Loads a translation string table containing enum keys.
+ * @param pFilename Filename of the enum table to load.
+ * @return Return a pointer to the created MFStringTable. If the file was unavailable, NULL is returned.
+ */
+MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename);
+
+/**
  * Destroy a loaded string table.
  * Destroys a loaded string table.
  * @param pTable Pointer to the table to destroy.
@@ -91,6 +99,15 @@ void MFTranslation_DestroyStringTable(MFStringTable *pTable);
  * @return Returns the number of strings in the table.
  */
 int MFTranslation_GetNumStrings(MFStringTable *pTable);
+
+/**
+ * Find a string in the table.
+ * Finds a string in the table.
+ * @param pTable Pointer to a string table.
+ * @param pString The string to find in the table.
+ * @return Returns the id of the requested string.
+ */
+int MFTranslation_FindString(MFStringTable *pTable, const char *pString);
 
 /**
  * Get a string from the string table.

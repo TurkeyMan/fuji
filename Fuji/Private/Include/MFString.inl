@@ -119,3 +119,82 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
 }
+
+//
+// unicode support
+//
+
+inline uint16* MFSeekNewlineW(uint16 *pC)
+{
+	while(!MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline const uint16* MFSeekNewlineW(const uint16 *pC)
+{
+	while(!MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline uint16* MFSkipWhiteW(uint16 *pC)
+{
+	while(MFIsWhite(*pC)) pC++;
+	return pC;
+}
+
+inline const uint16* MFSkipWhiteW(const uint16 *pC)
+{
+	while(MFIsWhite(*pC)) pC++;
+	return pC;
+}
+
+inline int MFWString_Length(const uint16 *pString)
+{
+	const uint16 *pT = pString;
+	while(*pT) ++pT;
+	return ((uint32&)pT - (uint32&)pString) >> 1;
+}
+
+inline uint16* MFWString_Copy(uint16 *pBuffer, const uint16 *pString)
+{
+	uint16 *s = pBuffer;
+	while((*pBuffer++ = *pString++)) { }
+	return s;
+}
+
+inline uint16* MFWString_CopyN(uint16 *pBuffer, const uint16 *pString, int maxChars)
+{
+	uint16 *dscan;
+	const uint16 *sscan;
+
+	dscan = pBuffer;
+	sscan = pString;
+	while(maxChars > 0)
+	{
+		--maxChars;
+		if((*dscan++ = *sscan++) == '\0')
+			break;
+	}
+	while(maxChars-- > 0)
+		*dscan++ = '\0';
+
+	return pBuffer;
+}
+
+inline uint16* MFWString_Cat(uint16 *pBuffer, const uint16 *pString)
+{
+	uint16 *s = pBuffer;
+	while(*pBuffer) pBuffer++;
+	while((*pBuffer++ = *pString++)) { }
+	return s;
+}
+
+inline uint16* MFWString_CopyCat(uint16 *pBuffer, const uint16 *pString, const uint16 *pString2)
+{
+	uint16 *s = pBuffer;
+	while((*pBuffer++ = *pString++)) { }
+	while((*pBuffer++ = *pString2++)) { }
+	return s;
+}
