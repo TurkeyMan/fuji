@@ -418,12 +418,40 @@ void Menu::Draw()
 
 void Menu::Update()
 {
+	static gMenuHeld = 0;
+	static float gHoldTimeout = 0.3f;
+
 	// test controls and move cursor
-	if(MFInput_WasPressed(Button_DUp, IDD_Gamepad))
+	if(MFInput_WasPressed(Button_DUp, IDD_Gamepad) || (gMenuHeld == Button_DUp && gHoldTimeout<=0.0f))
+	{
 		selection = selection > 0 ? selection-1 : numChildren-1;
 
-	if(MFInput_WasPressed(Button_DDown, IDD_Gamepad))
+		if(gMenuHeld)
+			gHoldTimeout += 0.1f;
+		else
+			gMenuHeld = Button_DUp;
+	}
+
+	if(MFInput_WasPressed(Button_DDown, IDD_Gamepad) || (gMenuHeld == Button_DDown && gHoldTimeout<=0.0f))
+	{
 		selection = selection < numChildren-1 ? selection+1 : 0;
+
+		if(gMenuHeld)
+			gHoldTimeout += 0.1f;
+		else
+			gMenuHeld = Button_DDown;
+	}
+
+	if(gMenuHeld)
+	{
+		gHoldTimeout -= MFSystem_TimeDelta();
+
+		if(!MFInput_Read(gMenuHeld, IDD_Gamepad))
+		{
+			gMenuHeld = 0;
+			gHoldTimeout = 0.3f;
+		}
+	}
 
 	if(MFInput_WasPressed(Button_XB_Y, IDD_Gamepad) && pParent)
 		pCurrentMenu = pParent;

@@ -83,9 +83,10 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int 
  * @param y y coordinate in screen space.
  * @param colour Colour of the text.
  * @param pText Pointer to a string containing the text to render.
+ * @param maxChars Maximum number of chars to render from the source string.
  * @return Returns 0 if there were no errors.
  */
-int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText);
+int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars = -1);
 
 /**
  * Blit a formatted string to the screen.
@@ -109,9 +110,10 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
  * @param height Height of the text.
  * @param colour Colour of the text.
  * @param pText Pointer to a string containing the text to render.
+ * @param maxChars Maximum number of chars to render from the source string.
  * @return Returns 0 if there were no errors.
  */
-int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText);
+int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1);
 
 /**
  * Render a string.
@@ -122,9 +124,10 @@ int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVe
  * @param height Height of the text.
  * @param colour Colour of the text.
  * @param pText Pointer to a string containing the text to render.
+ * @param maxChars Maximum number of chars to render from the source string.
  * @return Returns 0 if there were no errors.
  */
-int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText);
+int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1);
 
 /**
  * Render a formatted string.
