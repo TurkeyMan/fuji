@@ -493,9 +493,9 @@ inline float MFVector::Dot4(const MFVector &vec) const
 	return x*vec.x + y*vec.y + z*vec.z + w*vec.w;
 }
 
-inline float MFVector::DotH(const MFVector &vec4) const
+inline float MFVector::DotH(const MFVector &vec) const
 {
-	return x*vec4.x + y*vec4.y + z*vec4.z + vec4.w;
+	return x*vec.x + y*vec.y + z*vec.z + vec.w;
 }
 
 inline float MFVector::Dot3(const MFVector &vec) const

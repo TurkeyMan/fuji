@@ -588,7 +588,17 @@ bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVect
 	return false;
 
 collision:
-	pResult->intersectionReaction = MFVector::zero;
+	if(result.time == 0.0f)
+	{
+
+		// this is for double sided collision.
+		float dot = sweepSpherePos.DotH(tri.plane);
+		float amountResolve = sweepSphereRadius - MFAbs(dot);
+		pResult->intersectionReaction = result.surfaceNormal * amountResolve;
+	}
+	else
+		pResult->intersectionReaction = MFVector::zero;
+
 	pResult->surfaceNormal = result.surfaceNormal;
 	pResult->time = result.time;
 	return true;
@@ -1182,6 +1192,7 @@ bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVec
 			{
 				result.time = r.time;
 				result.surfaceNormal = r.surfaceNormal;
+				result.intersectionReaction = r.intersectionReaction;
 				intersected = true;
 				tri = a;
 			}
@@ -1194,7 +1205,7 @@ bool MFCollision_SweepSphereMeshTest(const MFVector &sweepSpherePos, const MFVec
 	{
 		pResult->time = result.time;
 		pResult->surfaceNormal = result.surfaceNormal;
-		pResult->intersectionReaction = MFVector::zero;
+		pResult->intersectionReaction = result.intersectionReaction;
 	}
 
 	return intersected;
@@ -1264,6 +1275,7 @@ MFCollisionItem* MFCollision_SweepSphereFieldTest(const MFVector &sweepSpherePos
 				pItem = pI;
 				result.time = r.time;
 				result.surfaceNormal = r.surfaceNormal;
+				result.intersectionReaction = r.intersectionReaction;
 			}
 		}
 
@@ -1274,7 +1286,7 @@ MFCollisionItem* MFCollision_SweepSphereFieldTest(const MFVector &sweepSpherePos
 	{
 		pResult->time = result.time;
 		pResult->surfaceNormal = result.surfaceNormal;
-		pResult->intersectionReaction = MFVector::zero;
+		pResult->intersectionReaction = result.intersectionReaction;
 	}
 
 	return pItem;
@@ -1435,7 +1447,7 @@ void MFCollision_BuildField(MFCollisionItem *pField)
 
 void MFCollision_ClearField(MFCollisionItem *pField)
 {
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
 
 	if(pFieldData->pppItems)
 	{
@@ -1450,7 +1462,7 @@ void MFCollision_DestroyField(MFCollisionItem *pField)
 {
 	MFCollision_ClearField(pField);
 
-	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
+	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
 	pFieldData->itemList.Deinit();
 
 	MFHeap_Free(pField->pTemplate);
