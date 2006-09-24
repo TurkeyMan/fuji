@@ -34,6 +34,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	sceGuAmbientColor(0xFFFFFFFF);
+	sceGuDisable(GU_LIGHTING);
 
 	if(pSetMaterial != pMaterial)
 	{
@@ -72,13 +73,36 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case MF_Additive:
 				sceGuSetStatus(GU_BLEND, GU_TRUE);
-				sceGuBlendFunc(GU_ADD, GU_SRC_COLOR, GU_DST_COLOR, 0, 0);
+				sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
 				break;
 			case MF_Subtractive:
 				sceGuSetStatus(GU_BLEND, GU_TRUE);
-				sceGuBlendFunc(GU_SUBTRACT, GU_SRC_COLOR, GU_DST_COLOR, 0, 0);
+				sceGuBlendFunc(GU_REVERSE_SUBTRACT, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
 				break;
 		}
+
+		switch(pData->materialType&MF_CullMode)
+		{
+			case 0<<6:
+				sceGuDisable(GU_CULL_FACE);
+				break;
+			case 1<<6:
+				sceGuFrontFace(GU_CCW);
+				sceGuEnable(GU_CULL_FACE);
+				break;
+			case 2<<6:
+				sceGuFrontFace(GU_CW);
+				sceGuEnable(GU_CULL_FACE);
+				break;
+			case 3<<6:
+				// 'default' ?
+				sceGuFrontFace(GU_CCW);
+				sceGuEnable(GU_CULL_FACE);
+				break;
+		}
+
+		sceGuDepthFunc((pData->materialType&MF_NoZRead) ? GU_ALWAYS : GU_LEQUAL);
+		sceGuDepthMask((pData->materialType&MF_NoZWrite) ? GU_TRUE : GU_FALSE);
 	}
 
 	return 0;

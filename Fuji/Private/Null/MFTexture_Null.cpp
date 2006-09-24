@@ -22,6 +22,8 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
+	MFCALLSTACK;
+
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
 	if(!pTexture)
@@ -53,6 +55,8 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
+	MFCALLSTACK;
+
 	MFDebug_Assert(false, "Not Written...");
 
 	return NULL;
@@ -60,6 +64,8 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 
 int MFTexture_Destroy(MFTexture *pTexture)
 {
+	MFCALLSTACK;
+
 	pTexture->refCount--;
 
 	// if no references left, destroy texture
