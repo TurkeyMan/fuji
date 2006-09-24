@@ -118,7 +118,8 @@ PSP/MFTranslation_PSP.o \
 PSP/FileSystem/MFFileSystemNative_PSP.o \
 PSP/Materials/MFMat_Standard_PSP.o \
 Null/Materials/MFMat_Effect_Null.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),LINUX)
@@ -138,7 +139,8 @@ Linux/MFTranslation_Linux.o \
 Linux/FileSystem/MFFileSystemNative_Linux.o \
 Linux/Materials/MFMat_Effect_Linux.o \
 Linux/Materials/MFMat_Standard_Linux.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),OSX)
@@ -158,7 +160,8 @@ OSX/MFTranslation_OSX.o \
 OSX/FileSystem/MFFileSystemNative_OSX.o \
 OSX/Materials/MFMat_Standard_OSX.o \
 Null/Materials/MFMat_Effect_Null.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),PC)
@@ -180,7 +183,8 @@ PC/MFThread_PC.o \
 PC/MFTranslation_PC.o \
 PC/FileSystem/MFFileSystemNative_PC.o \
 PC/Materials/MFMat_Effect_PC.o \
-PC/Materials/MFMat_Standard_PC.o
+PC/Materials/MFMat_Standard_PC.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),DC)
@@ -195,7 +199,8 @@ DC/MFTexture_DC.o \
 DC/FileSystem/MFFileSystemNative_DC.o \
 DC/Materials/Mat_Standard_DC.o \
 Null/Materials/MFMat_Effect_Null.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),GC)
@@ -210,7 +215,8 @@ GC/MFTexture_GC.o \
 GC/FileSystem/MFFileSystemNative_GC.o \
 GC/Materials/Mat_Standard_GC.o \
 Null/Materials/MFMat_Effect_Null.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 ifeq ($(PLATFORM),PS2)
@@ -225,7 +231,8 @@ PS2/MFTexture_PS2.o \
 PS2/FileSystem/MFFileSystemNative_PS2.o \
 PS2/Materials/Mat_Standard_PS2.o \
 Null/Materials/MFMat_Effect_Null.o \
-Null/MFAuxillaryDisplay_Null.o
+Null/MFAuxillaryDisplay_Null.o \
+Null/MFParticleSystem_Null.o
 endif
 
 #XBox/Display_XB.o

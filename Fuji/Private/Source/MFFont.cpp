@@ -157,6 +157,8 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 	{
 		if(*pText > 32)
 		{
+			MFDebug_Assert(*pText < pFont->maxMapping, "Character is unavailable in this font!");
+
 			int id = pFont->pCharacterMapping[(int)*pText];
 			int p = pFont->pChars[id].page;
 			if(p == page)

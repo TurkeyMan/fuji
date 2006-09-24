@@ -418,7 +418,7 @@ void Menu::Draw()
 
 void Menu::Update()
 {
-	static gMenuHeld = 0;
+	static int gMenuHeld = 0;
 	static float gHoldTimeout = 0.3f;
 
 	// test controls and move cursor
