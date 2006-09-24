@@ -33,27 +33,30 @@ MFFont* MFFont_Create(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	MFFont *pFont = NULL;
+	// load font file
+	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fft", pFilename));
+	MFDebug_Assert(pFont, MFStr("Unable to load font '%s'", pFilename));
 
-	MFFile* hFile = MFFileSystem_Open(MFStr("%s.dat", pFilename));
-	MFDebug_Assert(hFile, MFStr("Unable to open charinfo file for font '%s'", pFilename));
+	// fixup pointers
+	(char*&)pFont->pName += (uint32&)pFont;
+	(char*&)pFont->pCharacterMapping += (uint32&)pFont;
+	(char*&)pFont->pChars += (uint32&)pFont;
+	(char*&)pFont->ppPages += (uint32&)pFont;
 
-	if(hFile)
+	for(int a=0; a<pFont->numPages; a++)
 	{
-		pFont = (MFFont*)MFHeap_Alloc(sizeof(MFFont));
-
-		MFFile_Read(hFile, pFont->charwidths, 256);
-		MFFile_Close(hFile);
-
-		pFont->pMaterial = MFMaterial_Create(pFilename);
-		MFDebug_Assert(!MFString_Compare(pFont->pMaterial->pType->pTypeName, "Standard"), "Fonts MUST be created from a 'Standard' material.");
-
-		MFTexture *pTexture;
-		MFMaterial_GetParameter(pFont->pMaterial, MFMatStandard_DifuseMap, 0, &pTexture);
-
-		pFont->height = pTexture->pTemplateData->pSurfaces[0].height / 16.0f;
-		pFont->spaceWidth = (float)pFont->charwidths[(int)' '];
+		(char*&)pFont->ppPages[a] += (uint32&)pFont;
 	}
+
+	// create materials
+	for(int a=0; a<pFont->numPages; a++)
+	{
+		pFont->ppPages[a] = MFMaterial_Create((const char *)pFont->ppPages[a]);
+	}
+
+	// set space width
+	int id = pFont->pCharacterMapping[' '];
+	pFont->spaceWidth = pFont->pChars[id].xadvance;
 
 	return pFont;
 }
@@ -62,7 +65,13 @@ void MFFont_Destroy(MFFont *pFont)
 {
 	MFCALLSTACK;
 
-	MFMaterial_Destroy(pFont->pMaterial);
+	// destroy materials
+	for(int a=0; a<pFont->numPages; a++)
+	{
+		MFMaterial_Destroy(pFont->ppPages[a]);
+	}
+
+	// destroy font
 	MFHeap_Free(pFont);
 }
 
@@ -73,12 +82,13 @@ MFFont* MFFont_GetDebugFont()
 
 float MFFont_GetFontHeight(MFFont *pFont)
 {
-	return pFont->height;
+	return (float)pFont->height;
 }
 
-float MFFont_GetCharacterWidth(MFFont *pFont, int character, float scale, int fontPage)
+float MFFont_GetCharacterWidth(MFFont *pFont, int character, float scale)
 {
-	return (float)pFont->charwidths[character] * scale;
+	int id = pFont->pCharacterMapping[character];
+	return (float)pFont->pChars[id].xadvance * scale;
 }
 
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen, float *pTotalHeight)
@@ -101,8 +111,11 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int 
 				width += pFont->spaceWidth * scale;
 				break;
 			default:
-				width += (float)pFont->charwidths[(int)*pText] * scale;
+			{
+				int id = pFont->pCharacterMapping[(int)*pText];
+				width += (float)pFont->pChars[id].xadvance * scale;
 				break;
+			}
 		}
 
 		++pText;
@@ -117,14 +130,23 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int 
 	return totalWidth;
 }
 
-static int GetRenderableLength(const char *pText, int *pTotal)
+static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, int page, int *pNextPage)
 {
+	if(page == -1)
+		return 0;
+
 	int count = 0, renderable = 0;
+
+	*pNextPage = -1;
 
 	while(*pText)
 	{
 		if(*pText > 32)
-			++renderable;
+		{
+			int id = pFont->pCharacterMapping[(int)*pText];
+			if(pFont->pChars[id].page == page)
+				++renderable;
+		}
 		++count;
 		++pText;
 	}
@@ -138,72 +160,86 @@ int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVe
 {
 	MFCALLSTACK;
 
-	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pFont->pMaterial->pInstanceData;
+	int page = 0;
+	int nextPage = -1;
 
+	// get the number of renderable chars for this page
 	int renderable, textlen;
-	renderable = GetRenderableLength(pText, &textlen);
+	renderable = GetRenderableLength(pFont, pText, &textlen, page, &nextPage);
 
-	if(renderable == 0)
-		return 0;
+	// HACK: if there was none renderable on the first page, we better find a page where there is...
+	if(renderable == 0 && nextPage != -1)
+		renderable = GetRenderableLength(pFont, pText, &textlen, nextPage, &nextPage);
 
-	float x,y,w,h, p, cwidth;
+	float &uScale = pFont->xScale;
+	float &vScale = pFont->yScale;
+	float halfU = uScale * 0.5f;
+	float halfV = vScale * 0.5f;
 
-	MFMaterial_SetMaterial(pFont->pMaterial);
-	MFPrimitive(PT_QuadList|PT_Prelit);
+	float scale = height / pFont->height;
 
-	MFBegin(renderable*2);
-
-	MFSetColour(colour);
-
-	float texWidth = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width;
-	float texHeight = (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height;
-	float cellWidth = texWidth / 16.0f;
-	float cellHeight = texHeight / 16.0f;
-	float uScale = 1.0f / texWidth;
-	float vScale = 1.0f / texHeight;
-
-	float pos_x = pos.x;
-	float pos_y = pos.y;
-	float pos_z = pos.z;
-
-	h = cellHeight * vScale;
-
-	for(int i=0; i<textlen; i++)
+	while(renderable)
 	{
-		uint8 c = pText[i];
+		float x,y,x2,y2,px,py;
 
-		if(c <= 32)
+		MFMaterial_SetMaterial(pFont->ppPages[page]);
+		MFPrimitive(PT_QuadList|PT_Prelit);
+
+		MFBegin(renderable*2);
+
+		MFSetColour(colour);
+
+		float pos_x = pos.x;
+		float pos_y = pos.y;
+		float pos_z = pos.z;
+
+		for(int i=0; i<textlen; i++)
 		{
-			switch(pText[i])
+			uint8 c = pText[i];
+
+			if(c <= 32)
 			{
-				case '\n':
-					pos_x = pos.x;
-					pos_y += height;
-					break;
-				case ' ':
-					pos_x += height * ((pFont->spaceWidth * uScale)/h);
-					break;
+				switch(pText[i])
+				{
+					case '\n':
+						pos_x = pos.x;
+						pos_y += height;
+						break;
+					case ' ':
+						pos_x += pFont->spaceWidth * scale;
+						break;
+				}
+			}
+			else
+			{
+				int id = pFont->pCharacterMapping[c];
+				MFFontChar &ch = pFont->pChars[id];
+
+				if(ch.page == page)
+				{
+					x = (float)ch.x * uScale;
+					y = (float)ch.y * vScale;
+					x2 = x + (float)(ch.width) * uScale;
+					y2 = y + (float)(ch.height) * vScale;
+
+					px = pos_x + (float)ch.xoffset*scale;
+					py = pos_y + (float)ch.yoffset*scale;
+
+					MFSetTexCoord1(x, y);
+					MFSetPosition(px, py, pos_z);
+					MFSetTexCoord1(x2, y2);
+					MFSetPosition(px + (float)ch.width*scale, py + (float)ch.height*scale, pos_z);
+				}
+
+				pos_x += (float)ch.xadvance * scale;
 			}
 		}
-		else
-		{
-			x = (float)(c & 0x0F) * cellWidth * uScale;
-			y = (float)(c >> 4) * cellWidth * vScale;
-			w = (float)pFont->charwidths[c] * uScale;
 
-			p = w/h;
-			cwidth = height*p;
+		MFEnd();
 
-			MFSetTexCoord1(x, y);
-			MFSetPosition(pos_x, pos_y, pos_z);
-			MFSetTexCoord1(x+w, y+h);
-			MFSetPosition(pos_x + cwidth, pos_y + height, pos_z);
-
-			pos_x += cwidth;
-		}
+		page = nextPage;
+		renderable = GetRenderableLength(pFont, pText, &textlen, page, &nextPage);
 	}
-
-	MFEnd();
 
 	return 0;
 }

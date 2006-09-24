@@ -112,6 +112,9 @@
 				RelativePath=".\Pc\MFDebug_PC.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFFont_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFHeap.cpp">
 			</File>
 			<File
