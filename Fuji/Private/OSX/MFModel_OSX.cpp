@@ -1,5 +1,7 @@
 #include "Fuji.h"
 #include "MFModel_Internal.h"
+#include "Source/MFView.cpp"
+#include "Source/MFRenderer.cpp"
 #include "GL/glx.h"
 
 void MFModel_Draw(MFModel *pModel)
@@ -15,7 +17,7 @@ void MFModel_Draw(MFModel *pModel)
 	if(MFView_IsOrtho())
 		glLoadMatrixf((GLfloat*)&pModel->worldMatrix);
 	else
-		glLoadMatrixf((GLfloat*)&MFView_GetLocalToView(pModel->worldMatrix, &localToView));
+		glLoadMatrixf((GLfloat*)MFView_GetLocalToView(pModel->worldMatrix, &localToView));
 
 	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -39,8 +41,8 @@ void MFModel_Draw(MFModel *pModel)
 
 				glVertexPointer(3, GL_FLOAT, 0, pMC->pVertexData);
 				glNormalPointer(GL_FLOAT, 0, pMC->pNormalData);
-				glColorPointer(4, GL_UNSIGNED_BYTE, 0, pMC->pColorData);
-				glTexCoordPointer(2, GL_FLOAT, 0, pMC->pUVData)
+				glColorPointer(4, GL_UNSIGNED_BYTE, 0, pMC->pColourData);
+				glTexCoordPointer(2, GL_FLOAT, 0, pMC->pUVData);
 
 //				glLockArraysEXT(0, numberOfVertices);
 				glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, pMC->pIndexData);
