@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "MFModel_Internal.h"
+#include "GL/glx.h"
 
 void MFModel_Draw(MFModel *pModel)
 {

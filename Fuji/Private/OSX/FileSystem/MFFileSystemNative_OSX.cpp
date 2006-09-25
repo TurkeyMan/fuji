@@ -182,6 +182,34 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 	return 0;
 }
 
+int MFFileNative_GetSize(MFFile* fileHandle)
+{
+	MFCALLSTACK;
+
+	struct stat fileStats;
+
+	if(fstat((int)fileHandle->pFilesysData, &fileStats) == -1)
+	{
+		return 0;
+	}
+
+	return fileStats.st_size;
+}
+
+uint32 MFFileNative_GetSize(const char* pFilename)
+{
+	MFCALLSTACK;
+
+	struct stat fileStats;
+
+	if(stat(pFilename, &fileStats) == -1)
+	{
+		return 0;
+	}
+
+	return fileStats.st_size;
+}
+
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
@@ -334,7 +362,7 @@ MFFileState MFFileNative_Query(MFFile* fileHandle)
 
 	return fileHandle->state;
 }
-
+/*****************************************************************************************************************
 int MFFileNative_GetSize(MFFile* fileHandle)
 {
 	MFCALLSTACK;
@@ -362,7 +390,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	return fileStats.st_size;
 }
-
+******************************************************************************************************************/
 bool MFFileNative_Exists(const char* pFilename)
 {
 	MFCALLSTACK;

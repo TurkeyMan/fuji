@@ -54,7 +54,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case MF_Subtractive:
 				glEnable(GL_BLEND);
-				glBlendFunc(GL_ZERO, ONE_MINUS_SRC_COLOR);
+				glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 				break;
 		}
 

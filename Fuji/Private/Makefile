@@ -33,7 +33,7 @@ Middleware/angelscript/source/as_bytecode.o \
 Middleware/angelscript/source/as_c.o \
 Middleware/angelscript/source/as_callfunc.o \
 Middleware/angelscript/source/as_callfunc_mips.o \
-Middleware/angelscript/source/as_callfunc_ppc.o \
+# Middleware/angelscript/source/as_callfunc_ppc.o \
 Middleware/angelscript/source/as_callfunc_sh4.o \
 Middleware/angelscript/source/as_callfunc_x86.o \
 Middleware/angelscript/source/as_compiler.o \
@@ -358,7 +358,7 @@ LD       = ld
 AR       = ar
 RANLIB   = ranlib
 STRIP    = strip
-
+INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
 # end OSX
 endif
 
