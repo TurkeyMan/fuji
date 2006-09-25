@@ -60,24 +60,25 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		switch(pData->materialType&MF_BlendMask)
 		{
 			case 0:
-				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 				break;
 			case MF_AlphaBlend:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
 			case MF_Additive:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 			case MF_Subtractive:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
-				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
+				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 		}
 
@@ -98,8 +99,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		MFRendererXB_SetRenderState(D3DRS_ZENABLE, (pData->materialType & MF_NoZRead) ? D3DZB_FALSE : D3DZB_TRUE);
-		MFRendererXB_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType & MF_NoZWrite) ? FALSE : TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
+		MFRendererXB_SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
 	}
 
 	return 0;
