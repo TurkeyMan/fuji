@@ -17,6 +17,10 @@
  */
 struct MFParticleSystem;
 
+/**
+ * Fuji emitter types.
+ * Fuji particle emitter types.
+ */
 enum MFEmitterType
 {
 	MFET_Point,					/**< Emitter will emit from a singular point. */
@@ -27,16 +31,24 @@ enum MFEmitterType
 	MFET_ForceInt = 0x7FFFFFFF	/**< Force MFEmitterType to an int type. */
 };
 
+/**
+ * Fuji emitter behaviour.
+ * Fuji particle emitter behaviour.
+ */
 enum MFEmitterBehaviour
 {
-	MFEB_Direction,				/**< \astartingVector defines an absolute direction. */
-	MFEB_TargetAttract,			/**< \astartingVector defines a point to which particles will be attracted. */
-	MFEB_TargetRepel,			/**< \astartingVector defines a point which particles will be repelled from. */
+	MFEB_Direction,				/**< \a startingVector defines an absolute direction. */
+	MFEB_TargetAttract,			/**< \a startingVector defines a point to which particles will be attracted. */
+	MFEB_TargetRepel,			/**< \a startingVector defines a point which particles will be repelled from. */
 
 	MFEB_Max,					/**< Max emitter behaviour. */
 	MFEB_ForceInt = 0x7FFFFFFF	/**< Force MFEmitterBehaviour to an int type. */
 };
 
+/**
+ * Particle emitter configuration.
+ * Particle emitter configuration structure.
+ */
 struct MFParticleEmitter
 {
 	MFMatrix position;				/**< Position of the emitter. */
@@ -55,6 +67,10 @@ struct MFParticleEmitter
 	float emitRate;					/**< Number of particles emitted per second. */
 };
 
+/**
+ * Particle system parameters.
+ * Particle system parameters structure.
+ */
 struct MFParticleParameters
 {
 	MFVector colour;				/**< Colour of particles. */

@@ -3,6 +3,10 @@
  * @brief Font rendering interface.
  * @author Manu Evans
  * @defgroup MFFont Font Rendering
+ * Provides a set of functions to perform text rendering tasks.
+ * Fuji Fonts are generated from source data produced by the excellent BMFont tool written and maintained by Andreas Jönsson.\n
+ * The tool can be downloaded here: http://www.angelcode.com/products/bmfont/\n
+ * Basic unicode support is available by submitting unicode strings beginning with the unicode character 0xFEFF to the standard ascii versions of these functions.\n
  * @{
  */
 

@@ -70,7 +70,7 @@ void MFStringCache_SetSize(MFStringCache *pCache, uint32 used);
 //
 
 /**
- * @struct MFStringCache
+ * @struct MFWStringCache
  * Represents a Fuji Unicode String Cache.
  */
 struct MFWStringCache;

@@ -248,3 +248,29 @@ enum MFEndian
 #endif // _FUJI_H
 
 /** @} */
+
+/**
+ * @mainpage Mount Fuji Engine Users Manual
+ *
+ * @section intro_sec Introduction
+ *
+ * Mount Fuji is a cross platform game engine which aims to provide a set of features and tools which can be used to radically simplify the development process of games on modern hardware.\n
+ * Mount Fuji provides a rich API which supports most flavours of PC and modern Consoles. While Mount Fuji is internally developed in C/C++ and Assembly, it is accessible by a variety of languages as a statically and dynamically linkable library.\n
+ * The Mount Fuji engine also provides a set of data and asset management tools designed to take game assets developed in a wide variety of art and asset packages in game. Assets are converted to internal platform specific data formats to maximise efficiency and performance on all available platforms.\n
+ * The Mount Fuji engine is currently only available to internal developers and beta testers, but a public release is planned when development reaches a stable state.\n
+ * For related questions or discussion, please refer to the Mount Fuji Forum.
+ *
+ * @section faq_sec FAQ
+ *
+ * @subsection step1 What platforms are currently supported by the Mount Fuji Engine?
+ *
+ * The Mount Fuji Engine has been successfully compiled and tested on the following platforms: Windows, Linux, PSP and XBox.\n
+ * Other platforms in the works at various degrees of functionality include OSX, PS2, Gamecube and Dreamcast. (I'd appreciate more people to help me test these system)
+ *
+ * @section credits_sec Special Thanks
+ *
+ * Special thanks go to all the console homebrew communities who have produced fantastic tools for many platforms and found numerous exploits to make any of it even possible!\n
+ * The zlib team, yes i use zlib :)\n
+ * Andreas Jönsson from AngelCode (http://www.angelcode.com) for providing AngelScript, an awesome cross platform scripting language and his BMFont tool which is used to generate Fuji Fonts.
+ *
+ */

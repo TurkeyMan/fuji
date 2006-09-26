@@ -1,8 +1,11 @@
 /**
  * @file MFScript.h
- * @brief Provide access to the embedded 'AngelScript' scripting system.
+ * @brief Provide access to the embedded 'AngelScript' scripting language.
  * @author Manu Evans
- * @defgroup MFScript Scripting Functions
+ * @defgroup MFScript Scripting Interface
+ * Provides access to the AngelScript scripting language integrated into the Mount Fuji engine.
+ * AngelScript is a fast, efficient and light weight cross platform scripting language written and maintained by Andreas Jönsson.\n
+ * For more details on AngelScript, visit the authors website at http://www.angelcode.com
  * @{
  */
 
