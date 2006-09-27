@@ -96,7 +96,10 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	char *tempDir = (char*)MFHeap_Alloc(strlen(directory) + 4);
 	strcpy(tempDir, directory);
-	strcat(tempDir, "*");
+
+	char *pSlash = &tempDir[MFString_Length(tempDir)-1];
+	if(*pSlash == '/' || *pSlash == '\\')
+		*pSlash = 0;
 
 	DIR *dirHandle = opendir(tempDir);
 	MFHeap_Free(tempDir);
