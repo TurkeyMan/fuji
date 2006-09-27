@@ -480,7 +480,7 @@ int MFFileSystemZipFile_GetNumEntries(ZZIP_DIR *zipFile, bool recursive, bool fl
 	// search through files in zip archive
 	while((pDirEnt = zzip_readdir(zipFile)) != NULL)
 	{
-		int nameLen = strlen(pDirEnt->d_name);
+		int nameLen = MFString_Length(pDirEnt->d_name);
 
 		bool isDirectory = pDirEnt->d_name[nameLen-1] == '/';
 
@@ -509,7 +509,7 @@ MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MF
 	// search through files in zip archive
 	while((pDirEnt = zzip_readdir(zipFile)) != NULL)
 	{
-		int fileLen = strlen(pDirEnt->d_name);
+		int fileLen = MFString_Length(pDirEnt->d_name);
 		bool isDirectory = pDirEnt->d_name[fileLen-1] == '/';
 
 		if(isDirectory)

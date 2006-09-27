@@ -236,7 +236,7 @@ void MFMaterial_RemoveDefinitions(const char *pName)
 	if(!pDef)
 		return;
 
-	if(!strcmp(pDef->pName, pName))
+	if(!MFString_Compare(pDef->pName, pName))
 	{
 		pDefinitionRegistry = pDef->pNextDefinition;
 		MFMaterial_DestroyDefinition(pDef);
@@ -245,7 +245,7 @@ void MFMaterial_RemoveDefinitions(const char *pName)
 
 	while(pDef->pNextDefinition)
 	{
-		if(!strcmp(pDef->pNextDefinition->pName, pName))
+		if(!MFString_Compare(pDef->pNextDefinition->pName, pName))
 		{
 			MaterialDefinition *pDestroy = pDef->pNextDefinition;
 			pDef->pNextDefinition = pDef->pNextDefinition->pNextDefinition;
@@ -263,7 +263,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	MFCALLSTACK;
 
 	MFMaterialType *pMatType;
-	pMatType = (MFMaterialType*)MFHeap_Alloc(sizeof(MFMaterialType) + strlen(pName) + 1);
+	pMatType = (MFMaterialType*)MFHeap_Alloc(sizeof(MFMaterialType) + MFString_Length(pName) + 1);
 
 	pMatType->pTypeName = (char*)&pMatType[1];
 	MFString_Copy(pMatType->pTypeName, pName);
@@ -311,7 +311,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 
 	if(!pMat)
 	{
-		pMat = (MFMaterial*)MFHeap_Alloc(sizeof(MFMaterial) + strlen(pName) + 1);
+		pMat = (MFMaterial*)MFHeap_Alloc(sizeof(MFMaterial) + MFString_Length(pName) + 1);
 		memset(pMat, 0, sizeof(MFMaterial));
 
 		pMat->pName = (char*)&pMat[1];
@@ -449,7 +449,7 @@ const char* MaterialInternal_GetIDString()
 		if((flags>>a)&1) strcat(id, matDesc[a]);
 	}
 
-	stringBufferOffset += strlen(id) + 1;
+	stringBufferOffset += MFString_Length(id) + 1;
 */
 	return NULL;
 }
@@ -599,7 +599,7 @@ int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pPar
 		MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 		pInfo = (MFMaterialParameterInfo*)pMaterial->pType->materialCallbacks.pGetParameterInfo(a);
 
-		if(!stricmp(pInfo->pParameterName, pParameterName))
+		if(!MFString_CaseCmp(pInfo->pParameterName, pParameterName))
 			return a;
 	}
 

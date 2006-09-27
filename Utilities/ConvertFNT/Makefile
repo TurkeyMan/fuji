@@ -57,6 +57,10 @@ LDFLAGS =
 
 LIBS := -lc -lm -lstdc++
 
+ifeq ($(PLATFORM),OSX)
+INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
+endif
+
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 LDFLAGS   := $(addprefix -L,$(LIBDIR)) $(LDFLAGS)
 CXXFLAGS := $(CFLAGS) $(CXXFLAGS)

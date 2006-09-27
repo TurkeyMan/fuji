@@ -92,6 +92,10 @@ FINAL_TARGET = $(TARGET)
 
 all: $(EXTRA_TARGETS) $(FINAL_TARGET)
 
+ifeq ($(PLATFORM),OSX)
+INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
+endif
+
 $(TARGET): $(OBJS) $(EXPORT_OBJ)
 	$(LINK.c) $^ $(LIBS) -o $@
 

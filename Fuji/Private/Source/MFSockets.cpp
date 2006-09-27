@@ -78,7 +78,7 @@ MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String)
 /*
 	int numColons = 0;
 
-	while(a=strlen(pIP6String)-1; a--;)
+	while(a=MFString_Length(pIP6String)-1; a--;)
 	{
 		if(pIP6String[a] == ':')
 			numColons++;

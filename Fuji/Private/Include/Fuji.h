@@ -129,11 +129,15 @@ enum MFEndian
 		#define MF64BITPOINTERS
 	#endif
 
+	#define _OPENGL_CLIP_SPACE
+
 #elif defined(_OSX)
 
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 	#include <string.h> // For strcpy
+
+	#define _OPENGL_CLIP_SPACE
 
 #elif defined(_PSP)
 

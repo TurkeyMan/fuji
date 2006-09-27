@@ -116,7 +116,7 @@ MFMutex MFThread_CreateMutex(const char *pName)
 		return NULL;
 
 	MFDebug_Assert(pName[0], "No name specified.");
-	MFDebug_Assert(strlen(pName) <= 31, "Name must be less than 31 characters");
+	MFDebug_Assert(MFString_Length(pName) <= 31, "Name must be less than 31 characters");
 	MFString_Copy(pMutex->name, pName);
 
 	InitializeCriticalSection(&pMutex->criticalSection);

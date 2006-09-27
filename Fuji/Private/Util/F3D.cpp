@@ -380,7 +380,7 @@ struct FileVertex
 
 void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
-#if !defined(_LINUX)
+#if !defined(_LINUX) && !defined(_OSX)
 	int numMeshChunks = sub.matSubobjects.size();
 	int a, b;
 
@@ -499,7 +499,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
 {
-#if !defined(_LINUX)
+#if !defined(_LINUX) && !defined(_OSX)
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunks;
 
 	for(int a=0; a<count; a++)

@@ -42,7 +42,6 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		{
 			case 0:
 				glDisable(GL_BLEND);
-				glBlendFunc(GL_ONE, GL_ZERO);
 				break;
 			case MF_AlphaBlend:
 				glEnable(GL_BLEND);
@@ -61,34 +60,27 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		switch(pData->materialType&MF_CullMode)
 		{
 			case 0<<6:
-//				glDisable(GL_CULL_FACE);
+				glDisable(GL_CULL_FACE);
 				break;
 			case 1<<6:
-//				glEnable(GL_CULL_FACE);
-//				glCullFace(GL_BACK);
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_BACK);
 				break;
 			case 2<<6:
-//				glEnable(GL_CULL_FACE);
-//				glCullFace(GL_FRONT);
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_FRONT);
 				break;
 			case 3<<6:
 				// 'default' ?
-//				glEnable(GL_CULL_FACE);
-//				glCullFace(GL_BACK);
+				glEnable(GL_CULL_FACE);
+				glCullFace(GL_BACK);
 				break;
 		}
-		glDisable(GL_CULL_FACE);
 
 		// TODO: This is broken! You cant disable zwrites and still have zreads with this configuration...
-		if(pData->materialType&MF_NoZRead)
-			glDepthFunc(GL_ALWAYS);
-		else
-			glDepthFunc(GL_LEQUAL);
-
-		if(pData->materialType&MF_NoZWrite)
-			glDisable(GL_DEPTH_TEST);
-		else
-			glEnable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
+		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
 	}
 
 	return 0;

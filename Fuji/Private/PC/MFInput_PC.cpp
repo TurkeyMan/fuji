@@ -381,7 +381,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 		}
 		else
 		{
-			if(!strcmp(pInfo->pIdentifier, lpddi->tszProductName))
+			if(!MFString_Compare(pInfo->pIdentifier, lpddi->tszProductName))
 				break;
 		}
 	}
@@ -1132,7 +1132,7 @@ void MFInputPC_LoadGamepadMappings()
 			if(pLine->IsString(0, "Gamepad"))
 			{
 				const char *pName = pLine->GetString(1);
-				pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + strlen(pName) + 1);
+				pGI = (MFGamepadInfo*)MFHeap_Alloc(sizeof(MFGamepadInfo) + MFString_Length(pName) + 1);
 				pGI->bUsePOV = true;
 				pGI->pName = (char*)&pGI[1];
 				pGI->ppButtonNameStrings = DefaultButtons;
@@ -1144,98 +1144,98 @@ void MFInputPC_LoadGamepadMappings()
 				while (pPadLine)
 				{
 					const char *pField = pPadLine->GetString(0);
-					if (!stricmp(pField, "Axis_LX"))
+					if (!MFString_CaseCmp(pField, "Axis_LX"))
 					{
 						pGI->axisMapping[0] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Axis_LY"))
+					else if(!MFString_CaseCmp(pField, "Axis_LY"))
 					{
 						pGI->axisMapping[1] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Axis_RX"))
+					else if(!MFString_CaseCmp(pField, "Axis_RX"))
 					{
 						pGI->axisMapping[2] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Axis_RY"))
+					else if(!MFString_CaseCmp(pField, "Axis_RY"))
 					{
 						pGI->axisMapping[3] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Cross"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Cross"))
 					{
 						pGI->buttonMapping[0] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Circle"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Circle"))
 					{
 						pGI->buttonMapping[1] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Box"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Box"))
 					{
 						pGI->buttonMapping[2] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Triangle"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Triangle"))
 					{
 						pGI->buttonMapping[3] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_R1"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_R1"))
 					{
 						pGI->buttonMapping[4] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_L1"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_L1"))
 					{
 						pGI->buttonMapping[5] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_L2"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_L2"))
 					{
 						pGI->buttonMapping[6] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_R2"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_R2"))
 					{
 						pGI->buttonMapping[7] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Start"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Start"))
 					{
 						pGI->buttonMapping[8] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_Select"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_Select"))
 					{
 						pGI->buttonMapping[9] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_LThumb"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_LThumb"))
 					{
 						pGI->buttonMapping[10] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_P2_RThumb"))
+					else if(!MFString_CaseCmp(pField, "Button_P2_RThumb"))
 					{
 						pGI->buttonMapping[11] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_DUp"))
+					else if(!MFString_CaseCmp(pField, "Button_DUp"))
 					{
 						pGI->buttonMapping[12] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_DDown"))
+					else if(!MFString_CaseCmp(pField, "Button_DDown"))
 					{
 						pGI->buttonMapping[13] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_DLeft"))
+					else if(!MFString_CaseCmp(pField, "Button_DLeft"))
 					{
 						pGI->buttonMapping[14] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "Button_DRight"))
+					else if(!MFString_CaseCmp(pField, "Button_DRight"))
 					{
 						pGI->buttonMapping[15] = pPadLine->GetInt(1);
 					}
-					else if(!stricmp(pField, "IgnorePOV"))
+					else if(!MFString_CaseCmp(pField, "IgnorePOV"))
 					{
 						pGI->usePOV = false;
 					}
-					else if(!stricmp(pField, "ButtonStrings"))
+					else if(!MFString_CaseCmp(pField, "ButtonStrings"))
 					{
 						const char *pStrings = pPadLine->GetString(1);
-						if(!stricmp(pStrings, "XBox"))
+						if(!MFString_CaseCmp(pStrings, "XBox"))
 						{
 							pGI->ppButtonNameStrings = XBoxButtons;
 						}
-						else if(!stricmp(pStrings, "Playstation"))
+						else if(!MFString_CaseCmp(pStrings, "Playstation"))
 						{
 							pGI->ppButtonNameStrings = PS2Buttons;
 						}

@@ -20,13 +20,13 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 
 	int numFiles = 0;
 
-	*pStringLengths += strlen(pFindPattern) + 1;
+	*pStringLengths += MFString_Length(pFindPattern) + 1;
 
 	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
-		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		if(MFString_Compare(findData.cFileName, ".") && MFString_Compare(findData.cFileName, "..") && MFString_Compare(findData.cFileName, ".svn"))
 		{
 			if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
@@ -38,14 +38,14 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 					}
 					else
 					{
-						*pStringLengths += strlen(findData.cFileName) + 1;
+						*pStringLengths += MFString_Length(findData.cFileName) + 1;
 						++numFiles;
 					}
 				}
 			}
 			else
 			{
-				*pStringLengths += strlen(findData.cFileName) + 1;
+				*pStringLengths += MFString_Length(findData.cFileName) + 1;
 				++numFiles;
 			}
 		}
@@ -69,11 +69,11 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 	char *pCurrentDir = pStringCache;
 	MFString_Copy(pCurrentDir, pFindPattern);
-	pStringCache += strlen(pCurrentDir) + 1;
+	pStringCache += MFString_Length(pCurrentDir) + 1;
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
-		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		if(MFString_Compare(findData.cFileName, ".") && MFString_Compare(findData.cFileName, "..") && MFString_Compare(findData.cFileName, ".svn"))
 		{
 			if(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
@@ -94,7 +94,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 						{
 							MFString_Copy(pStringCache, findData.cFileName);
 							pToc->pName = pStringCache;
-							pStringCache += strlen(pStringCache)+1;
+							pStringCache += MFString_Length(pStringCache)+1;
 
 							pToc->flags = MFTF_Directory;
 							pToc->pFilesysData = pCurrentDir;
@@ -115,7 +115,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			{
 				MFString_Copy(pStringCache, findData.cFileName);
 				pToc->pName = pStringCache;
-				pStringCache += strlen(pStringCache)+1;
+				pStringCache += MFString_Length(pStringCache)+1;
 
 				pToc->pFilesysData = pCurrentDir;
 
@@ -153,7 +153,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	const char *pFindPattern = pMountNative->pPath;
 
-	if(pFindPattern[strlen(pFindPattern)-1] != '/')
+	if(pFindPattern[MFString_Length(pFindPattern)-1] != '/')
 		pFindPattern = MFStr("%s/", pFindPattern);
 
 	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);

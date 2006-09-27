@@ -200,7 +200,7 @@ MFModel* MFModel_Create(const char *pFilename)
 				char *pTemplateData;
 
 				// allocate memory and load file
-				pTemplateData = (char*)MFHeap_Alloc(size + strlen(pFilename) + 1);
+				pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
 				MFFile_Read(hFile, pTemplateData, size);
 
 				// check ID string
