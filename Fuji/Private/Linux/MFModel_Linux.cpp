@@ -1,8 +1,9 @@
 #include "Fuji.h"
 #include "MFModel_Internal.h"
-#include "GL/gl.h"
 #include "MFView.h"
 #include "MFRenderer.h"
+
+#include "GL/gl.h"
 
 void MFModel_Draw(MFModel *pModel)
 {
@@ -19,7 +20,7 @@ void MFModel_Draw(MFModel *pModel)
 	else
 		glLoadMatrixf((GLfloat*)MFView_GetLocalToView(pModel->worldMatrix, &localToView));
 
-	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
 	{

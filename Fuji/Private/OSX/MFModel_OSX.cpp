@@ -1,8 +1,9 @@
 #include "Fuji.h"
 #include "MFModel_Internal.h"
-#include "Source/MFView.cpp"
-#include "Source/MFRenderer.cpp"
-#include "GL/glx.h"
+#include "MFView.h"
+#include "MFRenderer.h"
+
+#include "GL/gl.h"
 
 void MFModel_Draw(MFModel *pModel)
 {
