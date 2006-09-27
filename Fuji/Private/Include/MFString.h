@@ -293,7 +293,7 @@ int MFWString_Compare(const uint16 *pString1, const uint16 *pString2);
  * @return Returns the difference between the 2 unicode strings. 0 if the strings are identical.
  * @see MFWString_CaseCmpN()
  */
-int MFWString_CaseCmp(const char *pString1, const char *pString2);
+int MFWString_CaseCmp(const uint16 *pString1, const uint16 *pString2);
 
 /**
  * Returns a pointer to the start of the next line in the provided unicode string.

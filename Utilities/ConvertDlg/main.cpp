@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 	{
 		if(argv[a][0] == '-' || argv[a][0] == '/')
 		{
-			if(!stricmp(&argv[a][1], "v") || !stricmp(&argv[a][1], "version"))
+			if(!MFString_CaseCmp(&argv[a][1], "v") || !MFString_CaseCmp(&argv[a][1], "version"))
 			{
 				// print version
 				return 0;
@@ -162,9 +162,9 @@ int main(int argc, char *argv[])
 		else
 		{
 			if(!fileName[0])
-				strcpy(fileName, argv[a]);
+				MFString_Copy(fileName, argv[a]);
 			else if(!outPath[0])
-				strcpy(outPath, argv[a]);
+				MFString_Copy(outPath, argv[a]);
 		}
 	}
 
@@ -326,20 +326,20 @@ int main(int argc, char *argv[])
 	// write out data
 	char file[256];
 
-	char *pSlash = strrchr(fileName, '/');
+	char *pSlash = MFString_RChr(fileName, '/');
 	if(!pSlash)
-		pSlash = strrchr(fileName, '\\');
+		pSlash = MFString_RChr(fileName, '\\');
 	if(!pSlash)
 		pSlash = fileName;
 	else
 		++pSlash;
 
-	strcpy(file, pSlash);
-	char *pC = strrchr(file, '.');
+	MFString_Copy(file, pSlash);
+	char *pC = MFString_RChr(file, '.');
 	if(pC)
 		*pC = 0;
 
-	int l = (int)strlen(outPath);
+	int l = MFString_Length(outPath);
 	if(l && (outPath[l-1] != '/' && outPath[l-1] != '\\'))
 	{
 		outPath[l] = '/';
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 
 		char outputFilename[256];
 
-		if(!wcsicmp(ppColumnNames[a], L"Enum"))
+		if(!MFWString_CaseCmp(ppColumnNames[a], L"Enum"))
 		{
 			// write out enum include files
 			sprintf(outputFilename, "%s.h", file);
