@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 #if defined(WIN32)
 			mkdir(testPath);
 #else
-			mkdir(testPath, 777);
+			mkdir(testPath, S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 		}
 
