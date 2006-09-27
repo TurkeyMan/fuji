@@ -19,6 +19,7 @@ OBJS := $(OBJS) Lib/tinyxml/tinyxmlparser.o
 OBJS := $(OBJS) Source/ConvertASE.o
 OBJS := $(OBJS) Source/ReadASE.o
 OBJS := $(OBJS) Source/ReadDAE.o
+OBJS := $(OBJS) Source/ReadOBJ.o
 OBJS := $(OBJS) Source/ReadMD2.o
 OBJS := $(OBJS) Source/ReadMD3.o
 OBJS := $(OBJS) Source/ReadMEMD2.o
