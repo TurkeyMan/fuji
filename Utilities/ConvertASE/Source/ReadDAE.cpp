@@ -34,7 +34,7 @@ void endElement(void *userData, const char *name)
 bool TestID(TiXmlElement *pLib, const char *pLibName)
 {
 	const char *pName = pLib->Attribute("id");
-	if(pName && !stricmp(pName, pLibName))
+	if(pName && !MFString_CaseCmp(pName, pLibName))
 		return true;
 	return false;
 }
@@ -106,13 +106,13 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 		y = transformMatrix.GetYAxis();
 		z = transformMatrix.GetZAxis();
 
-		if(!stricmp(pAxis, "Y_UP"))
+		if(!MFString_CaseCmp(pAxis, "Y_UP"))
 		{
 			transformMatrix.SetXAxis4(x);
 			transformMatrix.SetYAxis4(y);
 			transformMatrix.SetZAxis4(z);
 		}
-		else if(!stricmp(pAxis, "Z_UP"))
+		else if(!MFString_CaseCmp(pAxis, "Z_UP"))
 		{
 			transformMatrix.SetXAxis4(x);
 			transformMatrix.SetYAxis4(z);
@@ -134,21 +134,21 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 	{
 		// get the author (for kicks)
 		const char *pAuth = pAuthor->GetText();
-		strcpy(pModel->author, pAuth);
+		MFString_Copy(pModel->author, pAuth);
 	}
 
 	if(pCopyright)
 	{
 		// get the author (for kicks)
 		const char *pCopyrightString = pCopyright->GetText();
-		strcpy(pModel->copyrightString, pCopyrightString);
+		MFString_Copy(pModel->copyrightString, pCopyrightString);
 	}
 
 	if(pAuthoringTool)
 	{
 		// get the authoring tool (for kicks)
 		const char *pAuthTool = pAuthoringTool->GetText();
-		strcpy(pModel->authoringTool, pAuthTool);
+		MFString_Copy(pModel->authoringTool, pAuthTool);
 	}
 
 	invTransformMatrix.Inverse(transformMatrix);
@@ -166,7 +166,7 @@ int ParseDAEMaterial(TiXmlElement *pMaterialNode)
 	int matIndex = pMatChunk->materials.size();
 
 	F3DMaterial &mat = pMatChunk->materials.push();
-	strcpy(mat.name, pName);
+	MFString_Copy(mat.name, pName);
 
 	// TODO: parse additional data from material?
 
@@ -189,19 +189,19 @@ enum ComponentType
 
 ComponentType GetComponentType(const char *pType)
 {
-	if(!stricmp(pType, "POSITION"))
+	if(!MFString_CaseCmp(pType, "POSITION"))
 	{
 		return CT_Position;
 	}
-	else if(!stricmp(pType, "NORMAL"))
+	else if(!MFString_CaseCmp(pType, "NORMAL"))
 	{
 		return CT_Normal;
 	}
-	else if(!stricmp(pType, "TEXCOORD"))
+	else if(!MFString_CaseCmp(pType, "TEXCOORD"))
 	{
 		return CT_UV1;
 	}
-	else if(!stricmp(pType, "COLOR"))
+	else if(!MFString_CaseCmp(pType, "COLOR"))
 	{
 		return CT_Colour;
 	}
@@ -229,7 +229,7 @@ SourceData* GetSourceData(const char *pSourceData)
 
 	for(int a=0; a<(int)sourceData.size(); a++)
 	{
-		if(!stricmp(pSourceData, sourceData[a].id.c_str()))
+		if(!MFString_CaseCmp(pSourceData, sourceData[a].id.c_str()))
 		{
 			return &sourceData[a];
 		}
@@ -332,7 +332,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 	F3DMeshChunk *pMeshChunk = pModel->GetMeshChunk();
 	F3DSubObject &subObject = pMeshChunk->subObjects.push();
 
-	strcpy(subObject.name, pName);
+	MFString_Copy(subObject.name, pName);
 
 	TiXmlElement *pMesh = pGeometryNode->FirstChildElement("mesh");
 
@@ -350,7 +350,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 		{
 			const char *pValue = pMeshElement->Value();
 
-			if(!stricmp(pValue, "source"))
+			if(!MFString_CaseCmp(pValue, "source"))
 			{
 				const char *pName = pMeshElement->Attribute("id");
 
@@ -361,7 +361,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 				ReadSourceData(pMeshElement, data);
 			}
-			else if(!stricmp(pValue, "vertices"))
+			else if(!MFString_CaseCmp(pValue, "vertices"))
 			{
 				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
 
@@ -375,7 +375,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					pInputs = pInputs->NextSiblingElement("input");
 				}
 			}
-			else if(!stricmp(pValue, "polylist") || !stricmp(pValue, "triangles"))
+			else if(!MFString_CaseCmp(pValue, "polylist") || !MFString_CaseCmp(pValue, "triangles"))
 			{
 				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
 
@@ -384,7 +384,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				const char *pSemantic = pInputs->Attribute("semantic");
 				const char *pSource = pInputs->Attribute("source");
 
-				MFDebug_Assert(!stricmp(pSemantic, "VERTEX"), "First input must be VERTEX.\n");
+				MFDebug_Assert(!MFString_CaseCmp(pSemantic, "VERTEX"), "First input must be VERTEX.\n");
 
 				// get mat sub structure
 				F3DMaterialSubobject &matSub = subObject.matSubobjects.push();
@@ -532,7 +532,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				// get vertcounts for each poly
 				MFArray<int> vertCounts;
 
-				if(!stricmp(pValue, "polylist"))
+				if(!MFString_CaseCmp(pValue, "polylist"))
 				{
 
 					TiXmlElement *pVCount = pMeshElement->FirstChildElement("vcount");
@@ -552,7 +552,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 						pVCountString = MFSkipWhite(pVCountString);
 					}
 				}
-				else if(!stricmp(pValue, "triangles"))
+				else if(!MFString_CaseCmp(pValue, "triangles"))
 				{
 					vertCounts.resize(numPolys);
 
@@ -747,7 +747,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 	{
 		const char *pTransformValue = pTransform->Value();
 
-		if(!stricmp(pTransformValue, "matrix"))
+		if(!MFString_CaseCmp(pTransformValue, "matrix"))
 		{
 			// apply this node's transformation matrix to the current transform
 			const char *pMat = pTransform->GetText();
@@ -764,7 +764,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 					pMat++;
 			}
 		}
-		else if(!stricmp(pTransformValue, "translate"))
+		else if(!MFString_CaseCmp(pTransformValue, "translate"))
 		{
 			// just translate the current transform
 			const char *pTrans = pTransform->GetText();
@@ -784,7 +784,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 
 			localMat.Translate(translation);
 		}
-		else if(!stricmp(pTransformValue, "scale"))
+		else if(!MFString_CaseCmp(pTransformValue, "scale"))
 		{
 			// scale the current transform
 			const char *pScale = pTransform->GetText();
@@ -804,7 +804,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 
 			localMat.Scale(scale);
 		}
-		else if(!stricmp(pTransformValue, "rotate"))
+		else if(!MFString_CaseCmp(pTransformValue, "rotate"))
 		{
 			// rotate the current transform
 			const char *pRot = pTransform->GetText();
@@ -890,7 +890,7 @@ void ParseDAEScene(TiXmlElement *pSceneNode)
 	{
 		const char *pValue = pScene->Value();
 
-		if(!stricmp(pValue, "instance_visual_scene"))
+		if(!MFString_CaseCmp(pValue, "instance_visual_scene"))
 		{
 			const char *pURL = pScene->Attribute("url");
 
@@ -899,7 +899,7 @@ void ParseDAEScene(TiXmlElement *pSceneNode)
 			if(pSceneRoot)
 			{
 				const char *pName = pSceneRoot->Attribute("name");
-				strcpy(pModel->name, pName);
+				MFString_Copy(pModel->name, pName);
 
 				ParseSceneNode(pSceneRoot, MFMatrix::identity, "");
 			}
@@ -922,19 +922,19 @@ void ParseDAERootElement(TiXmlElement *pRoot)
 	{
 		const char *pValue = pElement->Value();
 
-		if(!stricmp(pValue, "asset"))
+		if(!MFString_CaseCmp(pValue, "asset"))
 		{
 			ParseDAEAsset(pElement);
 		}
 		// i should probably build the library here
 /*
-		else if(!stricmp(pValue, "library"))
+		else if(!MFString_CaseCmp(pValue, "library"))
 		{
 			ParseDAELibrary(pElement);
 		}
 */
 		// but for the time being i'll just parse the scene graph and refer to the library the slow way (manually)
-		else if(!stricmp(pValue, "scene"))
+		else if(!MFString_CaseCmp(pValue, "scene"))
 		{
 			ParseDAEScene(pElement);
 		}
@@ -965,7 +965,7 @@ int F3DFile::ReadDAE(char *pFilename)
 		return 1;
 	}
 
-	strcpy(pModel->name, "Untitled collada file");
+	MFString_Copy(pModel->name, "Untitled collada file");
 
 	ParseDAERootElement(pRoot);
 
