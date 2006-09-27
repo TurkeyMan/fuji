@@ -699,7 +699,7 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 
 				pVert->uv[0] = uv.x;
 				pVert->uv[1] = uv.y;
-				pVert->colour = (uint32)(col.x * 255.0f) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+				pVert->colour = ((uint32)(col.x * 255.0f) << 0) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
 				pVert->normal[0] = norm.x;
 				pVert->normal[1] = norm.y;
 				pVert->normal[2] = norm.z;
@@ -734,7 +734,7 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 	int a, b, c;
 
 	// increment size of MeshChunk_PSP structure
-	pOffset += MFALIGN16(sizeof(MFMeshChunk_PSP)*numMeshChunks);
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
 
 	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
 
