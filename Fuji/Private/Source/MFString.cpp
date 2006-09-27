@@ -343,3 +343,17 @@ int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
 
 	return (*(const uint16 *)pString1 - *(const uint16 *)(pString2 - 1));
 }
+
+int MFWString_CaseCmp(const uint16 *pSource1, const uint16 *pSource2)
+{
+	register unsigned int c1, c2;
+
+	do
+	{
+		c1 = MFToUpper(*pSource1++);
+		c2 = MFToUpper(*pSource2++);
+	}
+	while(c1 && (c1 == c2));
+
+	return c1 - c2;
+}

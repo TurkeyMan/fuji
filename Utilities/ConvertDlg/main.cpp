@@ -20,11 +20,11 @@ uint16* ConvertToUnicode(char *pBuffer, int size)
 
 uint16* GetStringCopy(const uint16* pString, int len)
 {
-	int l = len < 0 ? (int)wcslen(pString) : len;
+	int l = len < 0 ? MFWString_Length(pString) : len;
 
 	uint16 *pStr = (uint16*)malloc(sizeof(uint16) * (l + 1));
 
-	wcsncpy(pStr, pString, l);
+	MFWString_CopyN(pStr, pString, l);
 	pStr[l] = 0;
 
 	if(l && *pStr == '\"' && pStr[l-1] == '\"')
@@ -85,7 +85,7 @@ uint16** GetLine(const uint16 *&pString, uint16 **ppOutput = gpArray)
 const char *GetPagedString(const uint16 *pString)
 {
 	// write string into stringBuffer[]
-	int len = (int)wcslen(pString);
+	int len = MFWString_Length(pString);
 
 	for(int a=0; a<len; a++)
 	{
@@ -99,7 +99,7 @@ const char *GetPagedString(const uint16 *pString)
 
 const char *GetAnsiString(const uint16 *pString)
 {
-	int len = (int)wcslen(pString);
+	int len = MFWString_Length(pString);
 
 	for(int a=0; a<len; a++)
 	{
@@ -118,7 +118,7 @@ const uint16 *GetUnicodeString(const uint16 *pString)
 	if(*pString == 0xFEFF)
 		return pString;
 
-	int len = (int)wcslen(pString);
+	int len = MFWString_Length(pString);
 
 	uint16 *pT = (uint16*)stringBuffer;
 

@@ -281,9 +281,19 @@ uint16* MFWString_CopyCat(uint16 *pBuffer, const uint16 *pString, const uint16 *
  * @param pString1 First source string.
  * @param pString2 Second source string.
  * @return Returns the difference between the 2 strings. 0 if the strings are identical.
- * @see MFString_CompareN()
+ * @see MFWString_CompareN()
  */
 int MFWString_Compare(const uint16 *pString1, const uint16 *pString2);
+
+/**
+ * Compares 2 unicode strings with case insensitivity.
+ * Compares 2 unicode strings with case insensitivity and returns the difference between them.
+ * @param pString1 First source string.
+ * @param pString2 Second source string.
+ * @return Returns the difference between the 2 unicode strings. 0 if the strings are identical.
+ * @see MFWString_CaseCmpN()
+ */
+int MFWString_CaseCmp(const char *pString1, const char *pString2);
 
 /**
  * Returns a pointer to the start of the next line in the provided unicode string.
