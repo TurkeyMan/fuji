@@ -72,7 +72,7 @@ struct MFTexture
 	IDirect3DTexture8 *pTexture;
 #elif defined(_WINDOWS)
 	IDirect3DTexture9 *pTexture;
-#elif defined(_LINUX)
+#elif defined(_LINUX) || defined(_OSX)
 	GLuint textureID;
 #else
 	// nothing
