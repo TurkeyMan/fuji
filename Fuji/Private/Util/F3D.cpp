@@ -1610,10 +1610,10 @@ F3DMaterial::F3DMaterial()
 	specularLevel = 0.0f;
 	glossiness = 0.0f;
 
-	strcpy(name, "");
+	MFString_Copy(name, "");
 	for(int a=0; a<8; a++)
 	{
-		strcpy(maps[a], "");
+		MFString_Copy(maps[a], "");
 	}
 }
 
@@ -1623,8 +1623,8 @@ F3DRefPoint::F3DRefPoint()
 	localMatrix = MFMatrix::identity;
 	bone[0] = -1; bone[1] = -1; bone[2] = -1; bone[3] = -1;
 	weight[0] = 0.0f; weight[1] = 0.0f; weight[2] = 0.0f; weight[3] = 0.0f;
-	strcpy(name, "");
-	strcpy(options, "");
+	MFString_Copy(name, "");
+	MFString_Copy(options, "");
 }
 
 F3DCollisionChunk::~F3DCollisionChunk()

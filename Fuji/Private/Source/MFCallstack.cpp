@@ -95,7 +95,7 @@ const char* MFCallstack_GetCallstackString()
 //		char *pTemp = MFStr("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? MFStr(" [%s]",pFunc->pComment) : "");
 		if(bufferUsed + tempLen < (int)sizeof(callstack) - 1)
 		{
-			strcat(callstack, pTemp);
+			MFString_Cat(callstack, pTemp);
 			bufferUsed += tempLen;
 		}
 	}

@@ -195,7 +195,7 @@ void ParseMEMD2File(char *pBuffer)
 			F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
 
 			// material name
-//			strcpy(mat.name, material->Name);
+//			MFString_Copy(mat.name, material->Name);
 
 			// use texture name instead of material name
 			char *pTex = material->TextureFileName;

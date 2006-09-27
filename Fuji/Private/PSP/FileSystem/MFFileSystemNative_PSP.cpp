@@ -32,7 +32,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 
 	while(findStatus > 0)
 	{
-		if(strcmp(findData.d_name, ".") && strcmp(findData.d_name, "..") && strcmp(findData.d_name, ".svn"))
+		if(MFString_Compare(findData.d_name, ".") && MFString_Compare(findData.d_name, "..") && MFString_Compare(findData.d_name, ".svn"))
 		{
 			if(FIO_SO_ISDIR(findData.d_stat.st_attr))
 			{
@@ -78,12 +78,12 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	findStatus = sceIoDread(hFind, &findData);
 
 	char *pCurrentDir = pStringCache;
-	strcpy(pCurrentDir, pFindPattern);
+	MFString_Copy(pCurrentDir, pFindPattern);
 	pStringCache += strlen(pCurrentDir) + 1;
 
 	while(findStatus > 0)
 	{
-		if(strcmp(findData.d_name, ".") && strcmp(findData.d_name, "..") && strcmp(findData.d_name, ".svn"))
+		if(MFString_Compare(findData.d_name, ".") && MFString_Compare(findData.d_name, "..") && MFString_Compare(findData.d_name, ".svn"))
 		{
 			if(FIO_SO_ISDIR(findData.d_stat.st_attr))
 			{
@@ -102,7 +102,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 						if(pToc->size)
 						{
-							strcpy(pStringCache, findData.d_name);
+							MFString_Copy(pStringCache, findData.d_name);
 							pToc->pName = pStringCache;
 							pStringCache += strlen(pStringCache)+1;
 
@@ -123,7 +123,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			}
 			else
 			{
-				strcpy(pStringCache, findData.d_name);
+				MFString_Copy(pStringCache, findData.d_name);
 				pToc->pName = pStringCache;
 				pStringCache += strlen(pStringCache)+1;
 
@@ -220,7 +220,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	sceIoLseek32(hFile, 0, SEEK_SET);
 
 #if defined(_DEBUG)
-	strcpy(pFile->fileIdentifier, pNative->pFilename);
+	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
 #endif
 
 	return 0;

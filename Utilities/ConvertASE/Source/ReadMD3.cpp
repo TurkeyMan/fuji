@@ -299,9 +299,9 @@ int F3DFile::ReadMD3(char *pFilename)
 			char skinFilename[256];
 			MFString_Copy(skinFilename, fileName);
 			skinFilename[MFString_Length(skinFilename) - 4] = 0;
-			strcat(skinFilename, "_");
-			strcat(skinFilename, pModel->name);
-			strcat(skinFilename, ".skin");
+			MFString_Cat(skinFilename, "_");
+			MFString_Cat(skinFilename, pModel->name);
+			MFString_Cat(skinFilename, ".skin");
 
 			// attempt to read skin..
 			char *pSkinFile = NULL;
@@ -336,7 +336,7 @@ int F3DFile::ReadMD3(char *pFilename)
 			pBuffer = NULL;
 		}
 /*
-		else if(!stricmp(".skin", &fileName[Max(filenameLen - 5, 0)]))
+		else if(!MFString_CaseCmp(".skin", &fileName[Max(filenameLen - 5, 0)]))
 		{
 			int a, b;
 			char skinName[256];
@@ -356,7 +356,7 @@ int F3DFile::ReadMD3(char *pFilename)
 					break;
 			}
 
-			strcpy(skinName, &fileName[b+1]);
+			MFString_Copy(skinName, &fileName[b+1]);
 			skinName[a-b-1] = 0;
 
 			pSkinName = strchr(pSkinName, '_');

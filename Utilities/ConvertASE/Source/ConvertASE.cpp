@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 		MFString_Copy(dest, source);
 
 		dest[a] = 0;
-		strcat(dest, "mdl");
+		MFString_Cat(dest, "mdl");
 	}
 
 	// find output extension

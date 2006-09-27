@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 				while(pIniString[0] == ' ' || pIniString[0] == '\t' || pIniString[0] == '=')
 				 ++pIniString;
 
-				strcpy(iniFileName, pIniString);
+				MFString_Copy(iniFileName, pIniString);
 			}
 			else if(!MFString_CaseCmp(&argv[a][1], "?") || !MFString_CaseCmp(&argv[a][1], "h") || !MFString_CaseCmp(&argv[a][1], "-help"))
 			{
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Unable to retrieve current working directory\r\n");
 	}
 
-	strcat(workingDir, "/");
+	MFString_Cat(workingDir, "/");
 
 	// read ini file
 	if(iniFileName[0])
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 	{
 		outputRawFiles = true;
 		output.resize(output.size()-1);
-		strcpy(outPath, output.c_str());
+		MFString_Copy(outPath, output.c_str());
 	}
 	else if(!MFString_CaseCmp(&(output.c_str()[output.size()-4]), ".zip"))
 	{
@@ -129,11 +129,11 @@ int main(int argc, char **argv)
 
 		if(lastSlash != std::string::npos)
 		{
-			strcpy(outPath, output.c_str());
+			MFString_Copy(outPath, output.c_str());
 			outPath[lastSlash] = 0;
 		}
 */
-		strcpy(outPath, output.c_str());
+		MFString_Copy(outPath, output.c_str());
 		outPath[output.size()-4] = 0;
 
 		zip = zipOpen(output.c_str(), 0);
@@ -157,8 +157,8 @@ int main(int argc, char **argv)
 
 	while(pPathPart)
 	{
-		strcat(testPath, pPathPart);
-		strcat(testPath, "/");
+		MFString_Cat(testPath, pPathPart);
+		MFString_Cat(testPath, "/");
 
 		if(!IsDirectory(testPath))
 		{
@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 		x = (int)fullName.rfind('/');
 		y = (int)fullName.rfind('\\');
 
-		strcpy(filePath, fullName.c_str());
+		MFString_Copy(filePath, fullName.c_str());
 
 		if(x >= 0 || y >= 0)
 		{
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 		else
 			fileName = fullName.c_str();
 
-		strcpy(filePart, fileName.c_str());
+		MFString_Copy(filePart, fileName.c_str());
 
 		x = (int)fileName.rfind('.');
 
@@ -486,14 +486,13 @@ void Traverse(const char *dir)
 	{
 		for(unsigned int i = 0; i < entries.size(); i++)
 		{
-			strcpy(testEntry, dir);
-			strcat(testEntry, entries[i].c_str());
+			MFString_CopyCat(testEntry, dir, entries[i].c_str());
 
 			bool isDir = IsDirectory(testEntry);
 			bool excluded = false;
 
 			if(isDir)
-				strcat(testEntry, "/");
+				MFString_Cat(testEntry, "/");
 
 			// test exclude patterns
 			for(int j=0; j<(int)reHandles.size(); j++)

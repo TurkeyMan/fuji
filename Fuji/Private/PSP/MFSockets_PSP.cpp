@@ -90,7 +90,7 @@ int MFSockets_InitModulePlatformSpecific()
 	if(sceNetApctlGetInfo(8, gIPAddress))
 	{
 		MFDebug_Warn(1, "Couldnt get IP address");
-		strcpy(gIPAddress, "Unknown IP address");
+		MFString_Copy(gIPAddress, "Unknown IP address");
 		return 0;
 	}
 

@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
 		else
 		{
 			if(!fileName[0])
-				strcpy(fileName, argv[a]);
+				MFString_Copy(fileName, argv[a]);
 			else if(!outFile[0])
-				strcpy(outFile, argv[a]);
+				MFString_Copy(outFile, argv[a]);
 		}
 	}
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	if(!outFile[0])
 	{
 		// generate output filename
-		strcpy(outFile, fileName);
+		MFString_Copy(outFile, fileName);
 		for(int i=(int)strlen(outFile); --i; )
 		{
 			if(outFile[i] == '.')
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		strcat(outFile, ".fft");
+		MFString_Cat(outFile, ".fft");
 	}
 
 	// load image
@@ -126,31 +126,31 @@ int main(int argc, char *argv[])
 
 		char *pT = strtok(pToken, " \t");
 
-		if(!strcmp(pT, "info"))
+		if(!MFString_Compare(pT, "info"))
 		{
 			while(pT)
 			{
-				if(!strncmp(pT, "face", 4))
+				if(!MFString_CompareN(pT, "face", 4))
 				{
 					pHeader->pName = MFStringCache_Add(pStr, strtok(NULL, "\""));
 				}
-				else if(!strncmp(pT, "size", 4))
+				else if(!MFString_CompareN(pT, "size", 4))
 				{
 					pHeader->size = atoi(&pT[5]);
 				}
-				else if(!strncmp(pT, "bold", 4))
+				else if(!MFString_CompareN(pT, "bold", 4))
 				{
 					pHeader->flags |= atoi(&pT[5]) ? MFFF_Bold : 0;
 				}
-				else if(!strncmp(pT, "italic", 6))
+				else if(!MFString_CompareN(pT, "italic", 6))
 				{
 					pHeader->flags |= atoi(&pT[7]) ? MFFF_Italic : 0;
 				}
-				else if(!strncmp(pT, "unicode", 7))
+				else if(!MFString_CompareN(pT, "unicode", 7))
 				{
 					pHeader->flags |= atoi(&pT[8]) ? MFFF_Unicode : 0;
 				}
-				else if(!strncmp(pT, "smooth", 6))
+				else if(!MFString_CompareN(pT, "smooth", 6))
 				{
 					pHeader->flags |= atoi(&pT[7]) ? MFFF_Smooth : 0;
 				}
@@ -158,32 +158,32 @@ int main(int argc, char *argv[])
 				pT = strtok(NULL, " \"\t");
 			}
 		}
-		else if(!strcmp(pT, "common"))
+		else if(!MFString_Compare(pT, "common"))
 		{
 			while(pT)
 			{
-				if(!strncmp(pT, "lineHeight", 10))
+				if(!MFString_CompareN(pT, "lineHeight", 10))
 				{
 					pHeader->height = atoi(&pT[11]);
 				}
-				else if(!strncmp(pT, "base", 4))
+				else if(!MFString_CompareN(pT, "base", 4))
 				{
 					pHeader->base = atoi(&pT[5]);
 				}
-				else if(!strncmp(pT, "scaleW", 6))
+				else if(!MFString_CompareN(pT, "scaleW", 6))
 				{
 					pHeader->xScale = 1.0f / (float)atoi(&pT[7]);
 				}
-				else if(!strncmp(pT, "scaleH", 6))
+				else if(!MFString_CompareN(pT, "scaleH", 6))
 				{
 					pHeader->yScale = 1.0f / (float)atoi(&pT[7]);
 				}
-				else if(!strncmp(pT, "pages", 5))
+				else if(!MFString_CompareN(pT, "pages", 5))
 				{
 					pHeader->numPages = atoi(&pT[6]);
 					pHeader->pCharacterMapping = (uint16*)&pHeader->ppPages[pHeader->numPages];
 				}
-				else if(!strncmp(pT, "packed", 6))
+				else if(!MFString_CompareN(pT, "packed", 6))
 				{
 //					pHeader-> = atoi(&pT[5]);
 				}
@@ -191,18 +191,18 @@ int main(int argc, char *argv[])
 				pT = strtok(NULL, " \"\t");
 			}
 		}
-		else if(!strcmp(pT, "page"))
+		else if(!MFString_Compare(pT, "page"))
 		{
 			int id = -1;
 
 			while(pT)
 			{
 
-				if(!strncmp(pT, "id", 2))
+				if(!MFString_CompareN(pT, "id", 2))
 				{
 					id = atoi(&pT[3]);
 				}
-				else if(!strncmp(pT, "file", 4))
+				else if(!MFString_CompareN(pT, "file", 4))
 				{
 					pT = strtok(NULL, "\"");
 					pT[strlen(pT)-4] = 0;
@@ -212,50 +212,50 @@ int main(int argc, char *argv[])
 				pT = strtok(NULL, " \"\t");
 			}
 		}
-		else if(!strcmp(pT, "char"))
+		else if(!MFString_Compare(pT, "char"))
 		{
 			while(pT)
 			{
-				if(!strncmp(pT, "id", 2))
+				if(!MFString_CompareN(pT, "id", 2))
 				{
 					int id = atoi(&pT[3]);
 					pHeader->pCharacterMapping[id] = pHeader->numChars;
 					pHeader->maxMapping = MFMax(pHeader->maxMapping, id);
 					pC[pHeader->numChars].id = id;
 				}
-				else if(!strncmp(pT, "x=", 2))
+				else if(!MFString_CompareN(pT, "x=", 2))
 				{
 					pC[pHeader->numChars].x = atoi(&pT[2]);
 				}
-				else if(!strncmp(pT, "y=", 2))
+				else if(!MFString_CompareN(pT, "y=", 2))
 				{
 					pC[pHeader->numChars].y = atoi(&pT[2]);
 				}
-				else if(!strncmp(pT, "width", 5))
+				else if(!MFString_CompareN(pT, "width", 5))
 				{
 					pC[pHeader->numChars].width = atoi(&pT[6]);
 				}
-				else if(!strncmp(pT, "height", 6))
+				else if(!MFString_CompareN(pT, "height", 6))
 				{
 					pC[pHeader->numChars].height = atoi(&pT[7]);
 				}
-				else if(!strncmp(pT, "xoffset", 7))
+				else if(!MFString_CompareN(pT, "xoffset", 7))
 				{
 					pC[pHeader->numChars].xoffset = atoi(&pT[8]);
 				}
-				else if(!strncmp(pT, "yoffset", 7))
+				else if(!MFString_CompareN(pT, "yoffset", 7))
 				{
 					pC[pHeader->numChars].yoffset = atoi(&pT[8]);
 				}
-				else if(!strncmp(pT, "xadvance", 8))
+				else if(!MFString_CompareN(pT, "xadvance", 8))
 				{
 					pC[pHeader->numChars].xadvance = atoi(&pT[9]);
 				}
-				else if(!strncmp(pT, "page", 4))
+				else if(!MFString_CompareN(pT, "page", 4))
 				{
 					pC[pHeader->numChars].page = atoi(&pT[5]);
 				}
-				else if(!strncmp(pT, "chnl", 4))
+				else if(!MFString_CompareN(pT, "chnl", 4))
 				{
 					pC[pHeader->numChars].channel = atoi(&pT[5]);
 				}

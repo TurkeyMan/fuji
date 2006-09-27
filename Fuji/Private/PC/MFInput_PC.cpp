@@ -1291,7 +1291,7 @@ int RegisterRawMouse(void)
 
 bool IsRDPMouse(const char *pName)
 {
-	return !strncmp(pName, "\\??\\Root#RDP_MOU#0000#", 22);
+	return !MFString_CompareN(pName, "\\??\\Root#RDP_MOU#0000#", 22);
 }
 
 int InitRawMouse(bool _includeRDPMouse)

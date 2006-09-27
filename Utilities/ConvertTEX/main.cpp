@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
 		else
 		{
 			if(!fileName[0])
-				strcpy(fileName, argv[a]);
+				MFString_Copy(fileName, argv[a]);
 			else if(!outFile[0])
-				strcpy(outFile, argv[a]);
+				MFString_Copy(outFile, argv[a]);
 		}
 	}
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	if(!outFile[0])
 	{
 		// generate output filename
-		strcpy(outFile, fileName);
+		MFString_Copy(outFile, fileName);
 		for(int i=(int)strlen(outFile); --i; )
 		{
 			if(outFile[i] == '.')
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		strcat(outFile, ".tex");
+		MFString_Cat(outFile, ".tex");
 	}
 
 	// load image

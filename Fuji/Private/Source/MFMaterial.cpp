@@ -446,7 +446,7 @@ const char* MaterialInternal_GetIDString()
 
 	for(int a=0; a<32; a++)
 	{
-		if((flags>>a)&1) strcat(id, matDesc[a]);
+		if((flags>>a)&1) MFString_Cat(id, matDesc[a]);
 	}
 
 	stringBufferOffset += MFString_Length(id) + 1;

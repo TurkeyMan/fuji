@@ -363,8 +363,8 @@ void MFIniLine::DumpRecursive(int depth)
 		MFString_Copy(buffer,prefix);
 		for (int i=0; i<pLine->GetStringCount(); i++)
 		{
-			strcat(buffer, MFStr("'%s'",pLine->GetString(i)));
-			strcat(buffer, "  ");
+			MFString_Cat(buffer, MFStr("'%s'",pLine->GetString(i)));
+			MFString_Cat(buffer, "  ");
 		}
 		MFDebug_Message(buffer);
 		if (pLine->Sub())

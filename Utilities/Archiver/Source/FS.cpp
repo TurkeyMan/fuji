@@ -37,8 +37,7 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	FreeDirectoryEntries(entries);
 
-	strcpy(tempDir, directory);
-	strcat(tempDir, "*");
+	MFString_CopyCat(tempDir, directory, "*");
 
 	WIN32_FIND_DATAA findData;
 	HANDLE dirHandle = FindFirstFile(tempDir, &findData);
@@ -50,7 +49,7 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	while(more)
 	{
-		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		if(MFString_Compare(findData.cFileName, ".") && MFString_Compare(findData.cFileName, "..") && MFString_Compare(findData.cFileName, ".svn"))
 		{
 			// check if it matches any exclude patterns...
 
@@ -95,7 +94,7 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 	FreeDirectoryEntries(entries);
 
 	char *tempDir = (char*)MFHeap_Alloc(strlen(directory) + 4);
-	strcpy(tempDir, directory);
+	MFString_Copy(tempDir, directory);
 
 	char *pSlash = &tempDir[MFString_Length(tempDir)-1];
 	if(*pSlash == '/' || *pSlash == '\\')
@@ -110,10 +109,10 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	while(entry)
 	{
-		if((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0))
+		if((MFString_Compare(entry->d_name, ".") != 0) && (MFString_Compare(entry->d_name, "..") != 0))
 		{
 			tempDir = new char[MFString_Length(entry->d_name) + 1];
-			strcpy(tempDir, entry->d_name);
+			MFString_Copy(tempDir, entry->d_name);
 			entries.push_back(tempDir);
 
 			++numEntries;

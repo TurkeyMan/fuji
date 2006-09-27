@@ -28,7 +28,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
-		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		if(MFString_Compare(findData.cFileName, ".") && MFString_Compare(findData.cFileName, "..") && MFString_Compare(findData.cFileName, ".svn"))
 		{
 			if((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 			{
@@ -76,7 +76,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
-		if(strcmp(findData.cFileName, ".") && strcmp(findData.cFileName, "..") && strcmp(findData.cFileName, ".svn"))
+		if(MFString_Compare(findData.cFileName, ".") && MFString_Compare(findData.cFileName, "..") && MFString_Compare(findData.cFileName, ".svn"))
 		{
 			if(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
