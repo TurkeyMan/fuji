@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 			uint16 *pText = ppLine[a];
 
 			if(!pText && ppColumnNames[a])
-				pText = L"Missing From Translation";
+				pText = (uint16*)L"Missing From Translation";
 
 			pppStringPointers[a][totalLines] = pText;
 		}
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
 
 		char outputFilename[256];
 
-		if(!MFWString_CaseCmp(ppColumnNames[a], L"Enum"))
+		if(!MFWString_CaseCmp(ppColumnNames[a], (uint16*)L"Enum"))
 		{
 			// write out enum include files
 			sprintf(outputFilename, "%s.h", file);
@@ -365,7 +365,7 @@ int main(int argc, char *argv[])
 
 			for(int b=0; b<totalLines; b++)
 			{
-				fprintf(pOut, "#define %s %d\n", pppStringPointers[a][b], b);
+				fprintf(pOut, "#define %s %d\n", (char*)pppStringPointers[a][b], b);
 			}
 
 			fclose(pOut);
