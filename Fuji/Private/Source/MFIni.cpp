@@ -177,7 +177,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 	bool bNewLine = true;
 	int tokenLength = 0;
-	char tokenBuffer[256];
+	char tokenBuffer[2048];
 
 	MFIniLine *pCurrLine = &pLines[lineCount];
 //	const char **pCurrString = &pStrings[stringCount];

@@ -26,6 +26,31 @@
  */
 struct MFFont;
 
+/**
+ * Font Justification.
+ * These are the available text justifications.
+ */
+enum MFFontJustify
+{
+	MFFontJustify_Top_Left,				/**< Justify top left. */
+	MFFontJustify_Top_Center,			/**< Justify top center. */
+	MFFontJustify_Top_Right,			/**< Justify top right. */
+	MFFontJustify_Top_Full,				/**< Justify top full. */
+
+	MFFontJustify_Center_Left,			/**< Justify center left. */
+	MFFontJustify_Center,				/**< Justify center. */
+	MFFontJustify_Center_Right,			/**< Justify center right. */
+	MFFontJustify_Center_Full,			/**< Justify center full. */
+
+	MFFontJustify_Bottom_Left,			/**< Justify bottom left. */
+	MFFontJustify_Bottom_Center,		/**< Justify bottom center. */
+	MFFontJustify_Bottom_Right,			/**< Justify bottom right. */
+	MFFontJustify_Bottom_Full,			/**< Justify bottom full. */
+
+	MFFontJustify_Max,					/**< Max justifications. */
+	MFFontJustify_ForceInt = 0x7FFFFFFF	/**< Force MFFontJustify to an int value. */
+};
+
 // member functions
 
 /**
@@ -59,25 +84,37 @@ float MFFont_GetFontHeight(MFFont *pFont);
  * Get the width of a character.
  * Gets the native width of a character in a font.
  * @param pFont Pointer to a font.
- * @param character Character to get the wodth for.
- * @param fontPage The font page where the character lies.
+ * @param character Character to get the width for.
  * @return The native width (in texels) of the specified character.
  * @see MFFont_Create()
  */
-float MFFont_GetCharacterWidth(MFFont *pFont, int character, int fontPage = 0);
+float MFFont_GetCharacterWidth(MFFont *pFont, int character);
+
+/**
+ * Get the character offset into a string.
+ * Gets the offset of the specified character from the string's starting position.
+ * @param pFont Pointer to a font.
+ * @param pText Text containing the target character.
+ * @param charIndex Index of the character in the string to find the position of.
+ * @param height Height of the text.
+ * @return The physical offset of the specified character in the string from the string starting position.
+ * @see MFFont_GetStringWidth()
+ */
+MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height);
 
 /**
  * Get the physical width of a string.
  * Gets the physical width of a string.
  * @param pFont Pointer to a font.
  * @param pText Text to get the width for.
- * @param height Height of the text (hidth is relative to the height).
+ * @param height Height of the text (width is relative to the height).
+ * @param lineWidth The maximum line width before the string is wrapped onto a new line.
  * @param maxLen Maximum number of characters to consider from the source string.
  * @param pTotalHeight Optional pointer to a float that receives the total height of the specified string.
  * @return The physical width of the specified string rendered by the specified font.
  * @see MFFont_Create()
  */
-float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, int maxLen = -1, float *pTotalHeight = NULL);
+float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth = 0.0f, int maxLen = -1, float *pTotalHeight = NULL);
 
 /**
  * Blit a string to the screen.
@@ -115,9 +152,10 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
  * @param colour Colour of the text.
  * @param pText Pointer to a string containing the text to render.
  * @param maxChars Maximum number of chars to render from the source string.
- * @return Returns 0 if there were no errors.
+ * @param ltw Local to world matrix used to render the string.
+ * @return Returns the height of the text rendered.
  */
-int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1);
+float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 /**
  * Render a string.
@@ -129,9 +167,10 @@ int MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVe
  * @param colour Colour of the text.
  * @param pText Pointer to a string containing the text to render.
  * @param maxChars Maximum number of chars to render from the source string.
- * @return Returns 0 if there were no errors.
+ * @param ltw Local to world matrix used to render the string.
+ * @return Returns the height of the text rendered.
  */
-int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1);
+float MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 /**
  * Render a formatted string.
@@ -142,10 +181,10 @@ int MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVecto
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
  * @param ... Additional parameters used according to the format specifier.
- * @return Returns 0 if there were no errors.
+ * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-int MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
+float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
 
 /**
  * Render a formatted string.
@@ -157,10 +196,15 @@ int MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFV
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
  * @param ... Additional parameters used according to the format specifier.
- * @return Returns 0 if there were no errors.
+ * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-int MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
+float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
+
+float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+
+float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+
 
 /**
  * Get the debug font.

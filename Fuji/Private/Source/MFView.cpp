@@ -171,7 +171,8 @@ void MFViewInternal_ProjectionMatrix(MFMatrix *pMat)
 	float h = MFCos(a) / MFSin(a);
 	float w = h / pCurrentView->aspectRatio;
 
-	float zs = zf/(zf-zn);
+	float zd = zf-zn;
+	float zs = zf/zd;
 
 #if defined(_OPENGL_CLIP_SPACE)
 	pMat->m[0][0] = w;		pMat->m[0][1] = 0.0f;	pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;

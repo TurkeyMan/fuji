@@ -77,7 +77,6 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		// TODO: This is broken! You cant disable zwrites and still have zreads with this configuration...
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
 		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
