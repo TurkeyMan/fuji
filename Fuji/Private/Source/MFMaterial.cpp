@@ -270,7 +270,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 
 	MFDebug_Assert(pCallbacks->pBegin, "Material must supply Begin() callback.");
 
-	memcpy(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
+	MFCopyMemory(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
 	gMaterialRegistry.Create(pMatType);
 }
@@ -312,7 +312,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 	if(!pMat)
 	{
 		pMat = (MFMaterial*)MFHeap_Alloc(sizeof(MFMaterial) + MFString_Length(pName) + 1);
-		memset(pMat, 0, sizeof(MFMaterial));
+		MFZeroMemory(pMat, sizeof(MFMaterial));
 
 		pMat->pName = (char*)&pMat[1];
 		MFString_Copy(pMat->pName, pName);

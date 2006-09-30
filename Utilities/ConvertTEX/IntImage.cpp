@@ -61,9 +61,9 @@ void FlipImage(SourceImage *pImage)
 		for(int b=0; b<halfHeight; b++)
 		{
 			// swap lines
-			memcpy(pBuffer, &pData[b*stride], stride);
-			memcpy(&pData[b*stride], &pData[(height-b-1)*stride], stride);
-			memcpy(&pData[(height-b-1)*stride], pBuffer, stride);
+			MFCopyMemory(pBuffer, &pData[b*stride], stride);
+			MFCopyMemory(&pData[b*stride], &pData[(height-b-1)*stride], stride);
+			MFCopyMemory(&pData[(height-b-1)*stride], pBuffer, stride);
 		}
 	}
 }

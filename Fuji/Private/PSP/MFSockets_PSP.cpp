@@ -137,7 +137,7 @@ sockaddr* MFSocketsPSP_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLe
 		pSockAddr = (sockaddr*)&ain;
 		*pAddrLen = sizeof(sockaddr_in);
 
-		memset(&ain, 0, sizeof(sockaddr_in));
+		MFZeroMemory(&ain, sizeof(sockaddr_in));
 		ain.sin_family = (short)pInet->family;
 		ain.sin_addr.s_addr = pInet->address.address;
 		ain.sin_port = (uint16)pInet->port;
@@ -215,7 +215,7 @@ MFSocket MFSockets_Accept(MFSocket socket, MFSocketAddress *pConnectingSocketAdd
 
 		if(pConnectingSocketAddress->cbSize >= pAddress->cbSize)
 		{
-			memcpy(pConnectingSocketAddress, pAddress, pAddress->cbSize);
+			MFCopyMemory(pConnectingSocketAddress, pAddress, pAddress->cbSize);
 		}
 	}
 
@@ -259,7 +259,7 @@ int MFSockets_RecvFrom(MFSocket socket, char *pBuffer, int bufferSize, uint32 fl
 
 		if(pSenderAddress->cbSize >= pAddress->cbSize)
 		{
-			memcpy(pSenderAddress, pAddress, pAddress->cbSize);
+			MFCopyMemory(pSenderAddress, pAddress, pAddress->cbSize);
 		}
 	}
 

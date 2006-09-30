@@ -387,7 +387,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
 	if(!d3d9) return 1;
 
-	memset(&presentparams, 0, sizeof(D3DPRESENT_PARAMETERS));
+	MFZeroMemory(&presentparams, sizeof(D3DPRESENT_PARAMETERS));
 	presentparams.BackBufferWidth = width;
 	presentparams.BackBufferHeight = height;
 	presentparams.BackBufferFormat = (bpp == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;

@@ -127,7 +127,7 @@ bool MFFileHTTP_RequestHeader(const char *pServer, int port, const char *pPath, 
 	const char *pHeaderRequest = MFStr("GET %s HTTP/1.0\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\n\n", pPath);
 
 	MFAddressInfo addrInfo, *pAddrInfo;
-	memset(&addrInfo, 0, sizeof(MFAddressInfo));
+	MFZeroMemory(&addrInfo, sizeof(MFAddressInfo));
 	addrInfo.family = MFAF_Inet;
 	addrInfo.type = MFSockType_Stream;
 	addrInfo.protocol = MFProtocol_TCP;

@@ -365,7 +365,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	gPCJoysticks[gamepadID].deviceInstance = lpddi->guidInstance;
 
 	// get the device caps
-	memset(&gPCJoysticks[gamepadID].caps, 0, sizeof(DIDEVCAPS));
+	MFZeroMemory(&gPCJoysticks[gamepadID].caps, sizeof(DIDEVCAPS));
 	gPCJoysticks[gamepadID].caps.dwSize = sizeof(DIDEVCAPS);
 
 	gPCJoysticks[gamepadID].pDevice->GetCapabilities(&gPCJoysticks[gamepadID].caps);
@@ -550,7 +550,7 @@ void MFInput_InitModulePlatformSpecific()
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
 
 	DEV_BROADCAST_DEVICEINTERFACE dev;
-	memset(&dev, 0, sizeof(dev));
+	MFZeroMemory(&dev, sizeof(dev));
 	dev.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
 	dev.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
 	dev.dbcc_classguid = GUID_DEVINTERFACE_HID;
@@ -670,7 +670,7 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 					if(gPCJoysticks[id].pDevice)
 					{
 						DIDEVCAPS caps;
-						memset(&caps, 0, sizeof(DIDEVCAPS));
+						MFZeroMemory(&caps, sizeof(DIDEVCAPS));
 						caps.dwSize = sizeof(DIDEVCAPS);
 
 						gPCJoysticks[id].pDevice->GetCapabilities(&caps);
@@ -714,7 +714,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 	HRESULT hr;
 
-	memset(pGamepadState, 0, sizeof(*pGamepadState));
+	MFZeroMemory(pGamepadState, sizeof(*pGamepadState));
 
 #if defined(SUPPORT_XINPUT)
 	if(gPCJoysticks[id].XInputID > -1)

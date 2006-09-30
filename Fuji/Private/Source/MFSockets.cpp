@@ -34,21 +34,51 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 {
 	MFInetAddress a;
 
-	const char *pToken = strtok((char*)MFStr(pIPString), ".");
-	MFDebug_Assert(pToken, "Malformed IP string.");
+	const char *pT = pIPString;
+
+	while(*pT && *pT != '.') ++pT;
+
+	const char *pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b1 = (uint8)atoi(pToken);
 
-	pToken = strtok(NULL, ".");
-	MFDebug_Assert(pToken, "Malformed IP string.");
+	if(*pT)
+	{
+		++pT;
+		pIPString = pT;
+	}
+
+	while(*pT && *pT != '.') ++pT;
+
+	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b2 = (uint8)atoi(pToken);
 
-	pToken = strtok(NULL, ".");
-	MFDebug_Assert(pToken, "Malformed IP string.");
+	if(*pT)
+	{
+		++pT;
+		pIPString = pT;
+	}
+
+	while(*pT && *pT != '.') ++pT;
+
+	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b3 = (uint8)atoi(pToken);
 
-	pToken = strtok(NULL, ".");
-	MFDebug_Assert(pToken, "Malformed IP string.");
+	if(*pT)
+	{
+		++pT;
+		pIPString = pT;
+	}
+
+	while(*pT && *pT != '.') ++pT;
+
+	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b4 = (uint8)atoi(pToken);
+
+	MFDebug_Assert(!*pT, "Malformed IP string.");
 
 	return a;
 }
@@ -72,7 +102,7 @@ MFInet6Address MFSockets_MakeInet6Address(uint16 s1, uint16 s2, uint16 s3, uint1
 MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String)
 {
 	MFInet6Address a;
-	memset(&a, 0, sizeof(MFInet6Address));
+	MFZeroMemory(&a, sizeof(MFInet6Address));
 
 	MFDebug_Assert(false, "Not written!");
 /*

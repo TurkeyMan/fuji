@@ -10,6 +10,11 @@
 #if !defined(_MFSTRING_H)
 #define _MFSTRING_H
 
+void MFCopyMemory(void *pDest, const void *pSrc, uint32 size);
+void MFZeroMemory(void *pDest, uint32 size);
+void MFSetMemory(void *pDest, int value, uint32 size);
+int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
+
 /**
  * Get the length of a string.
  * Get the length of a string, in characters.

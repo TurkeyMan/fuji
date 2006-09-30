@@ -364,7 +364,7 @@ int F3DFile::ReadMD3(char *pFilename)
 			++pSkinName;
 
 			// check that this is the default skin for this model
-			if(!strnicmp(pSkinName, skinName, strlen(skinName)))
+			if(!MFString_CaseCmpN(pSkinName, skinName, MFString_Length(skinName)))
 			{
 				// read material file from zip
 				pBuffer = (char*)malloc(fileInfo.uncompressed_size);

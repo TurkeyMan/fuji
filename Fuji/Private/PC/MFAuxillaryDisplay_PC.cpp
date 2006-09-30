@@ -25,8 +25,8 @@ static int gConnection;
 
 void MFAuxDisplay_Init(const char *pAppName)
 {
-	memset(gSoftKeystate, 0, sizeof(gSoftKeystate));
-	memset(gLastKeystate, 0, sizeof(gSoftKeystate));
+	MFZeroMemory(gSoftKeystate, sizeof(gSoftKeystate));
+	MFZeroMemory(gLastKeystate, sizeof(gSoftKeystate));
 
 #if defined(SUPPORT_G15)
 	DWORD r = lgLcdInit();
@@ -110,7 +110,7 @@ void MFAuxDisplay_Deinit()
 
 void MFAuxDisplay_Update()
 {
-	memcpy(gLastKeystate, gSoftKeystate, sizeof(gLastKeystate));
+	MFCopyMemory(gLastKeystate, gSoftKeystate, sizeof(gLastKeystate));
 
 #if defined(SUPPORT_G15)
 	for(int a=0; a<gNumDisplays; a++)
@@ -134,7 +134,7 @@ void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProp
 {
 	MFDebug_Assert(device < gNumDisplays, "Invalid auxillary display.");
 
-	memcpy(pProperties, &gAuxDeviceProperties[device], sizeof(*pProperties));
+	MFCopyMemory(pProperties, &gAuxDeviceProperties[device], sizeof(*pProperties));
 }
 
 void MFAuxDisplay_LockScreen(int device, bool lock)
@@ -149,7 +149,7 @@ void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priority
 #if defined(SUPPORT_G15)
 	lgLcdBitmap160x43x1 header;
 	header.hdr.Format = LGLCD_BMP_FORMAT_160x43x1;
-	memcpy(header.pixels, pImageBuffer, sizeof(header.pixels));
+	MFCopyMemory(header.pixels, pImageBuffer, sizeof(header.pixels));
 
 	lgLcdUpdateBitmap(gDeviceHandles[device], (lgLcdBitmapHeader*)&header, priority <= MFAuxPriority_High ? LGLCD_PRIORITY_ALERT : priority > MFAuxPriority_Normal ? LGLCD_PRIORITY_BACKGROUND : LGLCD_PRIORITY_NORMAL);
 #endif

@@ -70,7 +70,7 @@ RemoteGamepad* MFNetwork_GetNewNetworkGamepadPointer()
 		if(gNetworkGamepads[a].status == IDS_Unavailable)
 		{
 			pGamepad = &gNetworkGamepads[a];
-			memset(pGamepad->buttonState, 0, sizeof(pGamepad->buttonState));
+			MFZeroMemory(pGamepad->buttonState, sizeof(pGamepad->buttonState));
 			pGamepad->status = IDS_Waiting;
 			break;
 		}
@@ -122,7 +122,7 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 
 			if(bytes < (int)sizeof(RemoteInputPacket) || bytes < pPacket->packetLen)
 			{
-				memcpy(recvBuffer, pBuffer, bytes);
+				MFCopyMemory(recvBuffer, pBuffer, bytes);
 				bytes += MFSockets_Recv(connection, recvBuffer+bytes, sizeof(recvBuffer)-bytes, 0);
 				pBuffer = recvBuffer;
 				pPacket = (RemoteInputPacket*)pBuffer;
@@ -146,7 +146,7 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 				{
 					MFThread_LockMutex(inputServerMutex);
 
-					memset(pGamepad->buttonState, 0, sizeof(pGamepad->buttonState));
+					MFZeroMemory(pGamepad->buttonState, sizeof(pGamepad->buttonState));
 					pGamepad->status = IDS_Ready;
 
 					MFThread_ReleaseMutex(inputServerMutex);
@@ -404,8 +404,8 @@ void MFNetwork_BeginScriptDebugServer()
 
 void MFNetwork_InitModule()
 {
-	memset(gNetworkGamepads, 0, sizeof(gNetworkGamepads));
-	memset(gSharedDevices, 0, sizeof(gSharedDevices));
+	MFZeroMemory(gNetworkGamepads, sizeof(gNetworkGamepads));
+	MFZeroMemory(gSharedDevices, sizeof(gSharedDevices));
 }
 
 void MFNetwork_DeinitModule()

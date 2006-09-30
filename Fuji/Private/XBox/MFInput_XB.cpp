@@ -187,7 +187,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	}
 	else
 	{
-		memset(pGamepadState, 0, sizeof(*pGamepadState));
+		MFZeroMemory(pGamepadState, sizeof(*pGamepadState));
 	}
 }
 

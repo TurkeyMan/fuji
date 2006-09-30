@@ -93,7 +93,7 @@ int GetDirectoryEntries(const char *directory, std::vector<std::string> &entries
 
 	FreeDirectoryEntries(entries);
 
-	char *tempDir = (char*)MFHeap_Alloc(strlen(directory) + 4);
+	char *tempDir = (char*)MFHeap_Alloc(MFString_Length(directory) + 4);
 	MFString_Copy(tempDir, directory);
 
 	char *pSlash = &tempDir[MFString_Length(tempDir)-1];

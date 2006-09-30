@@ -95,12 +95,11 @@ void operator delete(void *pMemory);
 void operator delete[](void *pMemory);
 #endif
 
-/*
-void* operator new(unsigned int size, void *pMem);
-void* operator new[](unsigned int size, void *pMem);
+// placement new operators
+void* operator new(size_t size, void *pMem);
+void* operator new[](size_t size, void *pMem);
 void operator delete(void *pMemory, void *pMem);
 void operator delete[](void *pMemory, void *pMem);
-*/
 #endif
 
 /**

@@ -64,7 +64,7 @@ void F3DFile::ImportMesh(F3DMesh *pMesh, char *pBase)
 {
 	F3DSubObject &sub = meshChunk.subObjects.push();
 
-	memcpy(sub.name, pMesh->name, 64);
+	MFCopyMemory(sub.name, pMesh->name, 64);
 //	sub.materialIndex = pMesh->materialIndex;
 
 	F3DMatSub *pMatSubs = (F3DMatSub*)(pBase + pMesh->pMatSubOffset);
@@ -73,26 +73,26 @@ void F3DFile::ImportMesh(F3DMesh *pMesh, char *pBase)
 	for(uint32 a=0; a<pMesh->matSubCount; a++)
 	{
 		sub.matSubobjects[a].triangles.resize(pMatSubs[a].triangleCount);
-		memcpy(sub.matSubobjects[a].triangles.getpointer(), pBase + pMatSubs[a].pTriangleOffset, sizeof(sub.matSubobjects[a].triangles[0])*pMatSubs[a].triangleCount);
+		MFCopyMemory(sub.matSubobjects[a].triangles.getpointer(), pBase + pMatSubs[a].pTriangleOffset, sizeof(sub.matSubobjects[a].triangles[0])*pMatSubs[a].triangleCount);
 
 		sub.matSubobjects[a].vertices.resize(pMatSubs[a].vertexCount);
-		memcpy(sub.matSubobjects[a].vertices.getpointer(), pBase + pMatSubs[a].pVertexOffset, sizeof(sub.matSubobjects[a].vertices[0])*pMatSubs[a].vertexCount);
+		MFCopyMemory(sub.matSubobjects[a].vertices.getpointer(), pBase + pMatSubs[a].pVertexOffset, sizeof(sub.matSubobjects[a].vertices[0])*pMatSubs[a].vertexCount);
 	}
 
 	sub.positions.resize(pMesh->positionCount);
-	memcpy(sub.positions.getpointer(), pBase + pMesh->pPositionOffset, sizeof(sub.positions[0])*pMesh->positionCount);
+	MFCopyMemory(sub.positions.getpointer(), pBase + pMesh->pPositionOffset, sizeof(sub.positions[0])*pMesh->positionCount);
 
 	sub.uvs.resize(pMesh->texCount);
-	memcpy(sub.uvs.getpointer(), pBase + pMesh->pTexOffset, sizeof(sub.uvs[0])*pMesh->texCount);
+	MFCopyMemory(sub.uvs.getpointer(), pBase + pMesh->pTexOffset, sizeof(sub.uvs[0])*pMesh->texCount);
 
 	sub.normals.resize(pMesh->normalCount);
-	memcpy(sub.normals.getpointer(), pBase + pMesh->pNormalOffset, sizeof(sub.normals[0])*pMesh->normalCount);
+	MFCopyMemory(sub.normals.getpointer(), pBase + pMesh->pNormalOffset, sizeof(sub.normals[0])*pMesh->normalCount);
 
 	sub.colours.resize(pMesh->colourCount);
-	memcpy(sub.colours.getpointer(), pBase + pMesh->pColourOffset, sizeof(sub.colours[0])*pMesh->colourCount);
+	MFCopyMemory(sub.colours.getpointer(), pBase + pMesh->pColourOffset, sizeof(sub.colours[0])*pMesh->colourCount);
 
 	sub.illumination.resize(pMesh->illumCount);
-	memcpy(sub.illumination.getpointer(), pBase + pMesh->pIllumOffset, sizeof(sub.illumination[0])*pMesh->illumCount);
+	MFCopyMemory(sub.illumination.getpointer(), pBase + pMesh->pIllumOffset, sizeof(sub.illumination[0])*pMesh->illumCount);
 }
 
 void F3DFile::ExportMesh(char* &pData, char *pBase)
@@ -104,7 +104,7 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 	{
 		pMesh[a].size = sizeof(F3DMesh);
 		pData += pMesh[a].size;
-		memcpy(pMesh[a].name, meshChunk.subObjects[a].name, 64);
+		MFCopyMemory(pMesh[a].name, meshChunk.subObjects[a].name, 64);
 //		pMesh[a].materialIndex = meshChunk.subObjects[a].materialIndex;
 
 		pMesh[a].matSubCount = meshChunk.subObjects[a].matSubobjects.size();
@@ -131,38 +131,38 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 			pMatSubs[b].vertexCount = meshChunk.subObjects[a].matSubobjects[b].vertices.size();
 
 			size = pMatSubs[b].triangleCount * sizeof(meshChunk.subObjects[a].matSubobjects[b].triangles[0]);
-			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].triangles.getpointer(), size);
+			MFCopyMemory(pData, meshChunk.subObjects[a].matSubobjects[b].triangles.getpointer(), size);
 			pMatSubs[b].pTriangleOffset = (uint32)(pData - pBase);
 			pData += size;
 
 			size = pMatSubs[b].vertexCount * sizeof(meshChunk.subObjects[a].matSubobjects[b].vertices[0]);
-			memcpy(pData, meshChunk.subObjects[a].matSubobjects[b].vertices.getpointer(), size);
+			MFCopyMemory(pData, meshChunk.subObjects[a].matSubobjects[b].vertices.getpointer(), size);
 			pMatSubs[b].pVertexOffset = (uint32)(pData - pBase);
 			pData += size;
 		}
 
 		size = pMesh[a].positionCount * sizeof(meshChunk.subObjects[a].positions[0]);
-		memcpy(pData, meshChunk.subObjects[a].positions.getpointer(), size);
+		MFCopyMemory(pData, meshChunk.subObjects[a].positions.getpointer(), size);
 		pMesh[a].pPositionOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].texCount * sizeof(meshChunk.subObjects[a].uvs[0]);
-		memcpy(pData, meshChunk.subObjects[a].uvs.getpointer(), size);
+		MFCopyMemory(pData, meshChunk.subObjects[a].uvs.getpointer(), size);
 		pMesh[a].pTexOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].normalCount * sizeof(meshChunk.subObjects[a].normals[0]);
-		memcpy(pData, meshChunk.subObjects[a].normals.getpointer(), size);
+		MFCopyMemory(pData, meshChunk.subObjects[a].normals.getpointer(), size);
 		pMesh[a].pNormalOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].colourCount * sizeof(meshChunk.subObjects[a].colours[0]);
-		memcpy(pData, meshChunk.subObjects[a].colours.getpointer(), size);
+		MFCopyMemory(pData, meshChunk.subObjects[a].colours.getpointer(), size);
 		pMesh[a].pColourOffset = (uint32)(pData - pBase);
 		pData += size;
 
 		size = pMesh[a].illumCount * sizeof(meshChunk.subObjects[a].illumination[0]);
-		memcpy(pData, meshChunk.subObjects[a].illumination.getpointer(), size);
+		MFCopyMemory(pData, meshChunk.subObjects[a].illumination.getpointer(), size);
 		pMesh[a].pIllumOffset = (uint32)(pData - pBase);
 		pData += size;
 	}
@@ -171,14 +171,14 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 void F3DFile::ExportSkeleton(char* &pData, char *pBase)
 {
 	int size = sizeof(F3DBone)*skeletonChunk.bones.size();
-	memcpy(pData, skeletonChunk.bones.getpointer(), size);
+	MFCopyMemory(pData, skeletonChunk.bones.getpointer(), size);
 	pData += size;
 }
 
 void F3DFile::ExportMaterial(char* &pData, char *pBase)
 {
 	int size = sizeof(F3DMaterial)*materialChunk.materials.size();
-	memcpy(pData, materialChunk.materials.getpointer(), size);
+	MFCopyMemory(pData, materialChunk.materials.getpointer(), size);
 	pData += size;
 }
 
@@ -345,7 +345,7 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 				skeletonChunk.bones.resize(pChunks[a].elementCount);
 				for(int b=0; b<pChunks[a].elementCount; b++)
 				{
-					memcpy(&skeletonChunk.bones[b], pMemory + pChunks[a].pOffset + b*pChunks[a].elementSize, pChunks[a].elementSize);
+					MFCopyMemory(&skeletonChunk.bones[b], pMemory + pChunks[a].pOffset + b*pChunks[a].elementSize, pChunks[a].elementSize);
 				}
 			}
 			break;
@@ -355,7 +355,7 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 				materialChunk.materials.resize(pChunks[a].elementCount);
 				for(int b=0; b<pChunks[a].elementCount; b++)
 				{
-					memcpy(&materialChunk.materials[b], pMemory + pChunks[a].pOffset + b*pChunks[a].elementSize, pChunks[a].elementSize);
+					MFCopyMemory(&materialChunk.materials[b], pMemory + pChunks[a].pOffset + b*pChunks[a].elementSize, pChunks[a].elementSize);
 				}
 			}
 			break;
@@ -857,7 +857,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	const int maxFileSize = 1024*1024*4;
 
 	pFile = (char*)MFHeap_Alloc(maxFileSize); // allocating 10mb ... yeah this is REALLY weak! ;)
-	memset(pFile, 0, maxFileSize);
+	MFZeroMemory(pFile, maxFileSize);
 	pModelData = (MFModelTemplate*)pFile;
 
 	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
@@ -1023,7 +1023,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 					pMesh->pTriangles = (MFCollisionTriangle*)pOffset;
 
 					uint32 triBlockSize = sizeof(MFCollisionTriangle) * pMesh->numTris;
-					memcpy(pMesh->pTriangles, pColMesh->tris.getpointer(), triBlockSize);
+					MFCopyMemory(pMesh->pTriangles, pColMesh->tris.getpointer(), triBlockSize);
 
 					pOffset += MFALIGN16(triBlockSize);
 					break;
@@ -1053,7 +1053,7 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	}
 
 	// write strings to end of file
-	memcpy(pOffset, MFStringCache_GetCache(pStringCache), MFStringCache_GetSize(pStringCache));
+	MFCopyMemory(pOffset, MFStringCache_GetCache(pStringCache), MFStringCache_GetSize(pStringCache));
 
 	char *pCache = MFStringCache_GetCache(pStringCache);
 	uint32 stringBase = (uint32&)pCache - ((uint32&)pOffset - (uint32&)pFile);
@@ -1572,7 +1572,7 @@ F3DMaterialSubobject::F3DMaterialSubobject()
 
 F3DSubObject::F3DSubObject()
 {
-	memset(name, 0, 64);
+	MFZeroMemory(name, 64);
 //	materialIndex = 0;
 
 	dontExportThisSubobject = false;
@@ -1580,9 +1580,9 @@ F3DSubObject::F3DSubObject()
 
 F3DBone::F3DBone()
 {
-	memset(name, 0, 64);
-	memset(parentName, 0, 64);
-	memset(options, 0, 1024);
+	MFZeroMemory(name, 64);
+	MFZeroMemory(parentName, 64);
+	MFZeroMemory(options, 1024);
 
 	boneMatrix = MFMatrix::identity;
 	worldMatrix = MFMatrix::identity;

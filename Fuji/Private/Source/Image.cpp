@@ -111,9 +111,9 @@ void FujiImage::VFlip(void)
 
 	for(uint32 line=0; line < verticalRange; line++)
 	{
-		memcpy(tempPixels, top, horizSpan);
-		memcpy(top, bottom, horizSpan);
-		memcpy(bottom, tempPixels, horizSpan);
+		MFCopyMemory(tempPixels, top, horizSpan);
+		MFCopyMemory(top, bottom, horizSpan);
+		MFCopyMemory(bottom, tempPixels, horizSpan);
 
 		top += horizSpan;
 		bottom -= horizSpan;
@@ -276,7 +276,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 					return(NULL);
 				}
 
-				memcpy(&(((unsigned char *)image->pixels)[pixelsRead * image->bytesPerPixel]), position, length * image->bytesPerPixel);
+				MFCopyMemory(&(((unsigned char *)image->pixels)[pixelsRead * image->bytesPerPixel]), position, length * image->bytesPerPixel);
 				pixelsRead += length;
 				position += image->bytesPerPixel * length;
 			}
@@ -292,7 +292,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 			return(NULL);
 		}
 
-		memcpy(image->pixels, position, header->width * header->height * image->bytesPerPixel);
+		MFCopyMemory(image->pixels, position, header->width * header->height * image->bytesPerPixel);
 	}
 
 	MFHeap_Free(contents);

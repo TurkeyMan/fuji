@@ -213,9 +213,9 @@ static const char * const gKeyNames[] =
 // Functions
 void MFInput_InitModule()
 {
-	memset(gGamepadStates, 0, sizeof(gGamepadStates[0])*MFInput_MaxInputID);
-	memset(gKeyStates, 0, sizeof(gKeyStates[0])*MFInput_MaxInputID);
-	memset(gMouseStates, 0, sizeof(gMouseStates[0])*MFInput_MaxInputID);
+	MFZeroMemory(gGamepadStates, sizeof(gGamepadStates[0])*MFInput_MaxInputID);
+	MFZeroMemory(gKeyStates, sizeof(gKeyStates[0])*MFInput_MaxInputID);
+	MFZeroMemory(gMouseStates, sizeof(gMouseStates[0])*MFInput_MaxInputID);
 
 	MFInput_InitModulePlatformSpecific();
 }
@@ -284,9 +284,9 @@ void MFInput_Update()
 	gNumPointers = maxMouse+1;
 
 	// copy current states into last states
-	memcpy(gPrevGamepadStates, gGamepadStates, sizeof(gPrevGamepadStates));
-	memcpy(gPrevKeyStates, gKeyStates, sizeof(gPrevKeyStates));
-	memcpy(gPrevMouseStates, gMouseStates, sizeof(gPrevMouseStates));
+	MFCopyMemory(gPrevGamepadStates, gGamepadStates, sizeof(gPrevGamepadStates));
+	MFCopyMemory(gPrevKeyStates, gKeyStates, sizeof(gPrevKeyStates));
+	MFCopyMemory(gPrevMouseStates, gMouseStates, sizeof(gPrevMouseStates));
 
 	// update keyboard state
 	for(a=0; a<gNumKeyboards; a++)

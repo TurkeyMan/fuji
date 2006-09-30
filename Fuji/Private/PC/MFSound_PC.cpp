@@ -53,7 +53,7 @@ void MFSound_InitModule()
 	HRESULT hr;
 
 	gMusicTracks = (MFSoundMusic*)MFHeap_Alloc(sizeof(MFSoundMusic) * gDefaults.sound.maxMusicTracks);
-	memset(gMusicTracks, 0, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
+	MFZeroMemory(gMusicTracks, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
 
 	DirectSoundCreate8(NULL, &pDirectSound, NULL);
 

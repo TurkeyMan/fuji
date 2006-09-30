@@ -199,7 +199,7 @@ void MFCallstack_EndFrame()
 	// build profile stats here..
 
 	// copy profile results
-	memcpy(gProfileResults, gProfiles, sizeof(MFFunctionProfile)*gNumProfileFunctions);
+	MFCopyMemory(gProfileResults, gProfiles, sizeof(MFFunctionProfile)*gNumProfileFunctions);
 	gNumProfileResults = gNumProfileFunctions;
 
 	// build profile totals

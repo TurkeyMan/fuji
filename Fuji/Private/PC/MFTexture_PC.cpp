@@ -41,7 +41,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// copy image data
 	D3DLOCKED_RECT rect;
 	pTexture->pTexture->LockRect(0, &rect, NULL, 0);
-	memcpy(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
+	MFCopyMemory(rect.pBits, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].bufferLength);
 	pTexture->pTexture->UnlockRect(0);
 
 	// filter mip levels
@@ -99,13 +99,13 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 					for(int a=0; a<(int)height; a++)
 					{
 						(char*&)pData -= width*sizeof(uint32);
-						memcpy(rect.pBits, pData, width*sizeof(uint32));
+						MFCopyMemory(rect.pBits, pData, width*sizeof(uint32));
 						(char*&)rect.pBits += width*sizeof(uint32);
 					}
 				}
 				else
 				{
-					memcpy(rect.pBits, pData, width*height*sizeof(uint32));
+					MFCopyMemory(rect.pBits, pData, width*height*sizeof(uint32));
 				}
 				break;
 			}

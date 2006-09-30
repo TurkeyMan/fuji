@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 	{
 		// generate output filename
 		MFString_Copy(outFile, fileName);
-		for(int i=(int)strlen(outFile); --i; )
+		for(int i=MFString_Length(outFile); --i; )
 		{
 			if(outFile[i] == '.')
 			{
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	}
 
 	// load image
-	int fileNameLen = (int)strlen(fileName);
+	int fileNameLen = MFString_Length(fileName);
 
 	if(!MFString_CaseCmp(&fileName[fileNameLen-3], "tga"))
 	{
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 	char *pOutputBuffer = (char*)malloc(imageBytes);
 
 	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
-	memset(pTemplate, 0, sizeof(MFTextureTemplateData));
+	MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData));
 
 	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 
 	for(a=0; a<pImage->mipLevels; a++)
 	{
-		memset(&pSurfaceLevels[a], 0, sizeof(MFTextureSurfaceLevel));
+		MFZeroMemory(&pSurfaceLevels[a], sizeof(MFTextureSurfaceLevel));
 
 		pSurfaceLevels[a].width = pImage->pLevels[a].width;
 		pSurfaceLevels[a].height = pImage->pLevels[a].height;
@@ -738,7 +738,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			// swizzle for xbox
 			// TODO: Swizzle here.. But we'll swizzle at runtime for the time being....
 //			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
-			memcpy(pBuffer, pOutputSurface->pImageData, width*height*bytesperpixel);
+			MFCopyMemory(pBuffer, pOutputSurface->pImageData, width*height*bytesperpixel);
 		}
 		else
 #endif
@@ -748,7 +748,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);
 		}
 
-		memcpy(pOutputSurface->pImageData, pBuffer, imageBytes);
+		MFCopyMemory(pOutputSurface->pImageData, pBuffer, imageBytes);
 		free(pBuffer);
 	}
 

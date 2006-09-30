@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	int dwordCount = size + ((size%4) ? 4-(size%4) : 0);
 
 	pBuffer = (char*)malloc(dwordCount);
-	memset(&pBuffer[size], 0, dwordCount-size);
+	MFZeroMemory(&pBuffer[size], dwordCount-size);
 	dwordCount /= 4;
 
 	infile.read(pBuffer, size);

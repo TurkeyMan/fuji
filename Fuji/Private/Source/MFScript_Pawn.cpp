@@ -77,7 +77,7 @@ int MFScript_LoadProgram(AMX *amx, char *filename, void *memblock)
   MFFile_Close(pFile);
 
   /* initialize the abstract machine */
-  memset(amx, 0, sizeof(*amx));
+  MFZeroMemory(amx, sizeof(*amx));
   result = amx_Init(amx, memblock);
 
   /* free the memory block on error, if it was allocated here */

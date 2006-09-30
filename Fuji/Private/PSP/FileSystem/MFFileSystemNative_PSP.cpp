@@ -22,9 +22,9 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 	int findStatus;
 	int numFiles = 0;
 
-	memset(&findData, 0, sizeof(SceIoDirent));
+	MFZeroMemory(&findData, sizeof(SceIoDirent));
 
-	*pStringLengths += strlen(pFindPattern) + 1;
+	*pStringLengths += MFString_Length(pFindPattern) + 1;
 
 	SceUID hFind = sceIoDopen(pFindPattern);
 
@@ -44,14 +44,14 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 					}
 					else
 					{
-						*pStringLengths += strlen(findData.d_name) + 1;
+						*pStringLengths += MFString_Length(findData.d_name) + 1;
 						++numFiles;
 					}
 				}
 			}
 			else
 			{
-				*pStringLengths += strlen(findData.d_name) + 1;
+				*pStringLengths += MFString_Length(findData.d_name) + 1;
 				++numFiles;
 			}
 		}
@@ -71,7 +71,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	SceIoDirent findData;
 	int findStatus;
 
-	memset(&findData, 0, sizeof(SceIoDirent));
+	MFZeroMemory(&findData, sizeof(SceIoDirent));
 
 	SceUID hFind = sceIoDopen(pFindPattern);
 
@@ -79,7 +79,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 	char *pCurrentDir = pStringCache;
 	MFString_Copy(pCurrentDir, pFindPattern);
-	pStringCache += strlen(pCurrentDir) + 1;
+	pStringCache += MFString_Length(pCurrentDir) + 1;
 
 	while(findStatus > 0)
 	{
@@ -104,7 +104,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 						{
 							MFString_Copy(pStringCache, findData.d_name);
 							pToc->pName = pStringCache;
-							pStringCache += strlen(pStringCache)+1;
+							pStringCache += MFString_Length(pStringCache)+1;
 
 							pToc->flags = MFTF_Directory;
 							pToc->pFilesysData = pCurrentDir;
@@ -125,7 +125,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			{
 				MFString_Copy(pStringCache, findData.d_name);
 				pToc->pName = pStringCache;
-				pStringCache += strlen(pStringCache)+1;
+				pStringCache += MFString_Length(pStringCache)+1;
 
 				pToc->pFilesysData = pCurrentDir;
 
@@ -160,7 +160,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	const char *pFindPattern = pMountNative->pPath;
 
-	if(pFindPattern[strlen(pFindPattern)-1] != '/')
+	if(pFindPattern[MFString_Length(pFindPattern)-1] != '/')
 		pFindPattern = MFStr("%s/", pFindPattern);
 
 	SceUID hFind = sceIoDopen(pFindPattern);

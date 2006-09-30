@@ -4,8 +4,31 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <string.h>
+
 static char gStringBuffer[1024*128];
 static uint32 gStringOffset;
+
+
+void MFCopyMemory(void *pDest, const void *pSrc, uint32 size)
+{
+	memcpy(pDest, pSrc, size);
+}
+
+void MFSetMemory(void *pDest, int value, uint32 size)
+{
+	memset(pDest, value, size);
+}
+
+void MFZeroMemory(void *pDest, uint32 size)
+{
+	memset(pDest, 0, size);
+}
+
+int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size)
+{
+	return memcmp(pBuf1, pBuf2, size);
+}
 
 const char * MFString_ToLower(const char *pString)
 {

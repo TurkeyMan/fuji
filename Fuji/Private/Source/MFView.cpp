@@ -24,7 +24,7 @@ void MFView_InitModule()
 	MFView::defaultOrthoRect.height = gDefaults.view.orthoMaxY;
 
 	// initialise default view
-	memset(&MFView::defaultView, 0, sizeof(MFView));
+	MFZeroMemory(&MFView::defaultView, sizeof(MFView));
 	pCurrentView = &MFView::defaultView;
 
 	pCurrentView->cameraMatrix = MFMatrix::identity;

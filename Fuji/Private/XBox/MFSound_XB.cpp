@@ -53,7 +53,7 @@ void MFSound_InitModule()
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 
 	gMusicTracks = (MFSoundMusic*)MFHeap_Alloc(sizeof(MFSoundMusic) * gDefaults.sound.maxMusicTracks);
-	memset(gMusicTracks, 0, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
+	MFZeroMemory(gMusicTracks, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
 
 #if !defined(_RETAIL)
 	DebugMenu_AddMenu("Sound Options", "Fuji Options");

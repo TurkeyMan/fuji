@@ -71,7 +71,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 	hr = pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vettex buffer..");
 
-	memcpy(pData, pMC->pVertexData, pMC->vertexDataSize);
+	MFCopyMemory(pData, pMC->pVertexData, pMC->vertexDataSize);
 
 	pMC->pVertexBuffer->Unlock();
 
@@ -79,7 +79,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 	hr = pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock index buffer..");
 
-	memcpy(pData, pMC->pIndexData, pMC->indexDataSize);
+	MFCopyMemory(pData, pMC->pIndexData, pMC->indexDataSize);
 
 	pMC->pIndexBuffer->Unlock();
 }

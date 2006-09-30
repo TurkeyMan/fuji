@@ -163,7 +163,7 @@ inline void MFPtrListDL<T>::Init(const char *pGroupName, uint32 maxElements, uin
 		*ppMark = 0;
 
 		for(uint32 i = 0; i<maxElements; ++i)
-			pBegin = (T*)((char*)(*(++ppMark) = pBegin) + elementSize);
+			pBegin = (T*)((char*)(*(++ppMark) = new(pBegin) T) + elementSize);
 
 		*(++ppMark) = 0;
 	}
@@ -181,6 +181,8 @@ inline void MFPtrListDL<T>::Deinit()
 
 	T* mem = (T*)(ppMark);  // initialise with a high value
 	T** iterator = ppMark;
+
+	// need to do placement delete on all the items in the list...
 
 	while(*(--iterator)!=0)
 	{

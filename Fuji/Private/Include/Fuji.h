@@ -73,8 +73,6 @@ enum MFEndian
 	#define _CRT_SECURE_NO_DEPRECATE
 
 	#include <stdlib.h>
-	#include <memory.h>
-	#include <string.h>
 
 	// this defines weather to take mouse[0]'s coords from the windows cursor or from
 	// DirectInput's accumulated input events
@@ -122,7 +120,6 @@ enum MFEndian
 
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
-	#include <string.h> // For strcpy
 
 	#if defined(SOME_LINUX_64BIT_FLAG)
 		#define MF64BIT
@@ -135,7 +132,6 @@ enum MFEndian
 
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
-	#include <string.h> // For strcpy
 
 	#define _OPENGL_CLIP_SPACE
 
@@ -143,7 +139,6 @@ enum MFEndian
 
 	#include <stdarg.h>
 	#include <stdlib.h>
-	#include <string.h>
 
 //	#define _USER_MODE
 //	#define _PSP_GDB
@@ -152,11 +147,12 @@ enum MFEndian
 //		#define _ENABLE_USB
 	#endif
 
+//	#define _OPENGL_CLIP_SPACE
+
 #elif defined(_PS2)
 
 	#include <stdarg.h>
 	#include <stdlib.h>
-	#include <string.h>
 
 #elif defined(_DC)
 
@@ -164,14 +160,11 @@ enum MFEndian
 	#include <kos.h>
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h>
-	#include <string.h>
-	#include <math.h>
 
 #elif defined(_GC)
 
 	#include <stdarg.h>
 	#include <stdlib.h>
-	#include <string.h>
 
 	#define MFBIG_ENDIAN
 
@@ -184,7 +177,6 @@ enum MFEndian
 
 	#include <stdio.h>
 	#include <stdlib.h>
-	#include <string.h>
 	#include <new>
 
 #endif

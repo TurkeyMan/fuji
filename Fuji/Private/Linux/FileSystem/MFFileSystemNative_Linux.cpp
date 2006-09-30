@@ -22,7 +22,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 
-	*pStringLengths += strlen(pFindPattern) + 1;
+	*pStringLengths += MFString_Length(pFindPattern) + 1;
 
 	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);
 
@@ -40,14 +40,14 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 					}
 					else
 					{
-						*pStringLengths += strlen(findData.cFileName) + 1;
+						*pStringLengths += MFString_Length(findData.cFileName) + 1;
 						++numFiles;
 					}
 				}
 			}
 			else
 			{
-				*pStringLengths += strlen(findData.cFileName) + 1;
+				*pStringLengths += MFString_Length(findData.cFileName) + 1;
 				++numFiles;
 			}
 		}
@@ -72,7 +72,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 
 	char *pCurrentDir = pStringCache;
 	MFString_Copy(pCurrentDir, pFindPattern);
-	pStringCache += strlen(pCurrentDir) + 1;
+	pStringCache += MFString_Length(pCurrentDir) + 1;
 
 	while(hFind != INVALID_HANDLE_VALUE)
 	{
@@ -97,7 +97,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 						{
 							MFString_Copy(pStringCache, findData.cFileName);
 							pToc->pName = pStringCache;
-							pStringCache += strlen(pStringCache)+1;
+							pStringCache += MFString_Length(pStringCache)+1;
 
 							pToc->flags = MFTF_Directory;
 							pToc->pFilesysData = pCurrentDir;
@@ -118,7 +118,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			{
 				MFString_Copy(pStringCache, findData.cFileName);
 				pToc->pName = pStringCache;
-				pStringCache += strlen(pStringCache)+1;
+				pStringCache += MFString_Length(pStringCache)+1;
 
 				pToc->pFilesysData = pCurrentDir;
 
@@ -157,7 +157,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	const char *pFindPattern = pMountNative->pPath;
 
-	if(pFindPattern[strlen(pFindPattern)-1] != '/')
+	if(pFindPattern[MFString_Length(pFindPattern)-1] != '/')
 		pFindPattern = MFStr("%s/", pFindPattern);
 
 	hFind = FindFirstFile(MFStr("%s*", pFindPattern), &findData);

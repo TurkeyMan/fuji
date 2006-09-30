@@ -54,7 +54,7 @@ void MFInput_InitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
-	memset(gKeyState, 0, 256);
+	MFZeroMemory(gKeyState, 256);
 
 	sceCtrlSetSamplingCycle(0);
 	sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
@@ -82,7 +82,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
 	MFCALLSTACK;
 
-	memset(pGamepadState, 0, sizeof(MFGamepadState));
+	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
 
 	pGamepadState->values[Button_PP_Cross] = (padData.Buttons & PSP_CTRL_CROSS) ? 1.0f : 0.0f;
 	pGamepadState->values[Button_PP_Circle] = (padData.Buttons & PSP_CTRL_CIRCLE) ? 1.0f : 0.0f;
@@ -110,14 +110,14 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	MFCALLSTACK;
 
-	memset(pKeyState, 0, sizeof(MFKeyState));
+	MFZeroMemory(pKeyState, sizeof(MFKeyState));
 }
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
 	MFCALLSTACK;
 
-	memset(pMouseState, 0, sizeof(MFMouseState));
+	MFZeroMemory(pMouseState, sizeof(MFMouseState));
 }
 
 const char* MFInput_GetDeviceNameInternal(int source, int sourceID)

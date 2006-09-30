@@ -44,7 +44,7 @@ void Mat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pMaterial->pInstanceData = Heap_Alloc(sizeof(Mat_Standard_Data));
 	Mat_Standard_Data *pData = (Mat_Standard_Data*)pMaterial->pInstanceData;
 
-	memset(pData, 0, sizeof(Mat_Standard_Data));
+	MFZeroMemory(pData, sizeof(Mat_Standard_Data));
 
 	pData->ambient = Vector4::one;
 	pData->diffuse = Vector4::one;

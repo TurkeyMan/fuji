@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	{
 		// generate output filename
 		MFString_Copy(outFile, fileName);
-		for(int i=(int)strlen(outFile); --i; )
+		for(int i=MFString_Length(outFile); --i; )
 		{
 			if(outFile[i] == '.')
 			{
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
 	// not possible for a font to be bigger than 2mb..
 	char *pFontFile = (char*)malloc(2 * 1024 * 1024);
-	memset(pFontFile, 0, 2 * 1024 * 1024);
+	MFZeroMemory(pFontFile, 2 * 1024 * 1024);
 
 	MFFont *pHeader = (MFFont*)pFontFile;
 	pHeader->ppPages = (MFMaterial**)&pHeader[1];
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 	char *pToken = strtok(pBuffer, "\n\r");
 	while(pToken)
 	{
-		size_t len = strlen(pToken);
+		int len = MFString_Length(pToken);
 		pBuffer += len + 2;
 
 		char *pT = strtok(pToken, " \t");
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 				else if(!MFString_CompareN(pT, "file", 4))
 				{
 					pT = strtok(NULL, "\"");
-					pT[strlen(pT)-4] = 0;
+					pT[MFString_Length(pT)-4] = 0;
 					pHeader->ppPages[id] = (MFMaterial*)MFStringCache_Add(pStr, pT);
 				}
 
@@ -273,13 +273,13 @@ int main(int argc, char *argv[])
 	uint16 *pMapEnd = &pHeader->pCharacterMapping[pHeader->maxMapping];
 	uint32 offset = MFALIGN16((uint32&)pMapEnd);
 	pHeader->pChars = (MFFontChar*&)offset;
-	memcpy(pHeader->pChars, pC, sizeof(MFFontChar) * pHeader->numChars);
+	MFCopyMemory(pHeader->pChars, pC, sizeof(MFFontChar) * pHeader->numChars);
 
 	// append string cache to file...
 	char *pStrings = (char*)&pHeader->pChars[pHeader->numChars];
 	const char *pCache = MFStringCache_GetCache(pStr);
 	int stringLen = MFStringCache_GetSize(pStr);
-	memcpy(pStrings, pCache, stringLen);
+	MFCopyMemory(pStrings, pCache, stringLen);
 
 	// byte reverse
 	// TODO...

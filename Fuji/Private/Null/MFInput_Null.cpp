@@ -26,17 +26,17 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
-	memset(pGamepadState, 0, sizeof(MFGamepadState));
+	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
-	memset(pKeyState, 0, sizeof(MFKeyState));
+	MFZeroMemory(pKeyState, sizeof(MFKeyState));
 }
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
-	memset(pMouseState, 0, sizeof(MFMouseState));
+	MFZeroMemory(pMouseState, sizeof(MFMouseState));
 }
 
 const char* MFInput_GetDeviceNameInternal(int source, int sourceID)

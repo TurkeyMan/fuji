@@ -24,14 +24,14 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 	pspDebugScreenPrintf("Assertion Failure!");
 
 	pString = MFStr("%s(%d)", pFile, line);
-	pspDebugScreenSetXY(35 - (strlen(pString)>>1), 15);
+	pspDebugScreenSetXY(35 - (MFString_Length(pString)>>1), 15);
 	pspDebugScreenPrintf(pString);
 
 	pString = MFStr("Failed Condition: %s", pReason);
-	pspDebugScreenSetXY(35 - (strlen(pString)>>1), 17);
+	pspDebugScreenSetXY(35 - (MFString_Length(pString)>>1), 17);
 	pspDebugScreenPrintf(pString);
 
-	pspDebugScreenSetXY(35 - (strlen(pMessage)>>1), 18);
+	pspDebugScreenSetXY(35 - (MFString_Length(pMessage)>>1), 18);
 	pspDebugScreenPrintf(pMessage);
 
 	while(!MFInput_WasPressed(Button_P2_Start, IDD_Gamepad, 0))

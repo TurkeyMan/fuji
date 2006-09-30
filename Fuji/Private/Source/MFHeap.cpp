@@ -114,7 +114,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	pHeader->line = (uint16)gMFHeap_TrackerLine;
 
 #if !defined(_RETAIL)
-	memcpy(pMemory + bytes, gMungwall, MFHeap_MungwallBytes);
+	MFCopyMemory(pMemory + bytes, gMungwall, MFHeap_MungwallBytes);
 #endif
 
 	return (void*)pMemory;
@@ -131,7 +131,7 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 
 	void *pNew = MFHeap_AllocInternal(bytes, pAllocHeap);
 
-	memcpy(pNew, pMem, MFMin(bytes, pHeader->size));
+	MFCopyMemory(pNew, pMem, MFMin(bytes, pHeader->size));
 
 	MFHeap_Free(pMem);
 
@@ -294,7 +294,7 @@ bool MFHeap_ValidateMemory(const void *pMemory)
 		return true;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
-	return memcmp((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;
+	return MFMemCompare((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;
 }
 
 // memory allocation groups for profiling

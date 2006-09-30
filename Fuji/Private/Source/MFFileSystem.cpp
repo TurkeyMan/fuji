@@ -31,7 +31,7 @@ void MFFileSystem_InitModule()
 
 	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
 	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
-	memset(ppFileSystemList, 0, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 
 	// mount filesystems
 	MFFileSystemNative_InitModule();
@@ -138,7 +138,7 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 			MFDebug_Assert(pCallbacks->GetSize, "No GetSize function supplied.");
 
 			ppFileSystemList[a] = pFileSystemCallbacks.Create();
-			memcpy(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
+			MFCopyMemory(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
 
 			ppFileSystemList[a]->RegisterFS();
 
@@ -209,7 +209,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 
 	MFFile *pFile = gOpenFiles.Create();
 
-	memset(pFile, 0, sizeof(MFFile));
+	MFZeroMemory(pFile, sizeof(MFFile));
 	pFile->filesystem = fileSystem;
 
 	int result = ppFileSystemList[fileSystem]->Open(pFile, pOpenData);
@@ -355,7 +355,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 
 	MFMount *pMount;
 	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
-	memset(pMount, 0, sizeof(MFMount));
+	MFZeroMemory(pMount, sizeof(MFMount));
 
 	pMount->mountFlags = pMountData->flags;
 	pMount->fileSystem = fileSystem;

@@ -41,8 +41,7 @@ void MFMat_Effect_CreateInstance(MFMaterial *pMaterial)
 
 	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Effect_Data));
 	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
-	memset(pData, 0, sizeof(MFMat_Effect_Data));
-
+	MFZeroMemory(pData, sizeof(MFMat_Effect_Data));
 }
 
 void MFMat_Effect_DestroyInstance(MFMaterial *pMaterial)
