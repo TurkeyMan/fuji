@@ -4,6 +4,8 @@
 #include "MFStringCache.h"
 #include "ConvertFNT.h"
 
+#include "string.h"
+
 void LOGERROR(const char *pFormat, ...)
 {
 	va_list arglist;
