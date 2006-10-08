@@ -116,6 +116,7 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 {
 	char *s = pBuffer;
 	while((*pBuffer++ = *pString++)) { }
+	--pBuffer;
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
 }

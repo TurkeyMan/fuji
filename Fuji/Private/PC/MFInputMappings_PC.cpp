@@ -499,6 +499,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[1]
 	},
 
+	// XBox 360 wired gamepad
+	{
+		"XBox 360 Gamepad",
+		"XBOX 360 For Windows (Controller)",
+		0, 0,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		true,
+		&gGamepadDescriptors[2]
+	},
+
 	// EMS USB2 adapter
 	{
 		"PS2 Gamepad",
@@ -507,7 +518,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gEMSButtonID,
 		gPS2ButtonNames,
 		false,
-		&gGamepadDescriptors[2]
+		&gGamepadDescriptors[3]
 	},
 
 	// Different identities of the titanium adapters
@@ -518,7 +529,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
-		&gGamepadDescriptors[3]
+		&gGamepadDescriptors[4]
 	},
 
 	{
@@ -528,7 +539,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
-		&gGamepadDescriptors[4]
+		&gGamepadDescriptors[5]
 	},
 
 	{
@@ -538,7 +549,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
-		&gGamepadDescriptors[5]
+		&gGamepadDescriptors[6]
 	},
 
 	{
@@ -548,7 +559,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		true,
-		&gGamepadDescriptors[6]
+		&gGamepadDescriptors[7]
 	},
 
 	{
@@ -558,7 +569,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
 		true,
-		&gGamepadDescriptors[7]
+		&gGamepadDescriptors[8]
 	},
 
 	// XBox gamepad
@@ -569,7 +580,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXBCDButtonID,
 		gXBoxButtonNames,
 		true,
-		&gGamepadDescriptors[8]
+		&gGamepadDescriptors[9]
 	},
 
 	// Logitech dual action
@@ -580,18 +591,18 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
 		true,
-		&gGamepadDescriptors[9]
+		&gGamepadDescriptors[10]
 	},
 
-	// XBox 360 wired gamepad
+	// Logitech dual action
 	{
-		"XBox 360 Gamepad",
-		"XBOX 360 For Windows (Controller)",
+		"Logitech Dual Action",
+		"Logitech Dual Action USB",
 		0, 0,
-		gXBox360ButtonID,
-		gXBox360ButtonNames,
+		gLogitechDualActionButtonID,
+		gLogitechDualActionButtonNames,
 		true,
-		&gGamepadDescriptors[10]
+		&gGamepadDescriptors[11]
 	},
 
 	// Xterminator Digital Gamepad
@@ -602,7 +613,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXterminatorButtonID,
 		gXterminatorButtonNames,
 		false,
-		&gGamepadDescriptors[11]
+		&gGamepadDescriptors[12]
 	},
 
 	// Logitech Wingman Gamepad Extreme (Gameport)
@@ -613,7 +624,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
 		false,
-		&gGamepadDescriptors[12]
+		&gGamepadDescriptors[13]
 	},
 
 	// Logitech Wingman Gamepad Extreme (USB)
@@ -624,7 +635,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
 		false,
-		&gGamepadDescriptors[13]
+		&gGamepadDescriptors[14]
 	},
 
 	// Logitech RumblePad 2
@@ -635,7 +646,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
 		true,
-		&gGamepadDescriptors[14]
+		&gGamepadDescriptors[15]
 	},
 
 	// 'USB Joystick' basic PS2 style USB gamepad
@@ -646,7 +657,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gGreenAsiaButtonID,
 		gGreenAsiaButtonNames,
 		false,
-		&gGamepadDescriptors[15]
+		&gGamepadDescriptors[16]
 	},
 
 	// POWER))WAVE PS2 style gamepad

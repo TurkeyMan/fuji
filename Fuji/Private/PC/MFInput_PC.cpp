@@ -533,10 +533,10 @@ void MFInput_InitModulePlatformSpecific()
 			gPCJoysticks[2].XInputID = 2;
 			gPCJoysticks[3].XInputID = 3;
 
-			gPCJoysticks[0].pGamepadInfo = &pGamepadMappingRegistry[9];
-			gPCJoysticks[1].pGamepadInfo = &pGamepadMappingRegistry[9];
-			gPCJoysticks[2].pGamepadInfo = &pGamepadMappingRegistry[9];
-			gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[9];
+			gPCJoysticks[0].pGamepadInfo = &pGamepadMappingRegistry[1];
+			gPCJoysticks[1].pGamepadInfo = &pGamepadMappingRegistry[1];
+			gPCJoysticks[2].pGamepadInfo = &pGamepadMappingRegistry[1];
+			gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[1];
 
 			gGamepadCount += 4;
 			gUseXInput = true;

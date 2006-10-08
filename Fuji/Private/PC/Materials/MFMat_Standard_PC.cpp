@@ -81,6 +81,17 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
+		if(pData->materialType & MF_Mask)
+		{
+			MFRendererPC_SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			MFRendererPC_SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			MFRendererPC_SetRenderState(D3DRS_ALPHAREF, 0xFF);
+		}
+		else
+		{
+			MFRendererPC_SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+		}
+
 		switch(pData->materialType&MF_CullMode)
 		{
 			case 0<<6:
@@ -124,6 +135,8 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->textureMatrix = MFMatrix::identity;
 	pData->uFrames = 1;
 	pData->vFrames = 1;
+
+	pData->alphaRef = 1.0f;
 }
 
 void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)

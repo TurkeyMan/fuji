@@ -12,6 +12,7 @@ static MFParamType specularcolour[] = { MFParamType_Vector4 };
 static MFParamType specularpower[] = { MFParamType_Float };
 static MFParamType emissivecolour[] = { MFParamType_Vector4 };
 static MFParamType mask[] = { MFParamType_Bool };
+static MFParamType alpharef[] = { MFParamType_Float };
 static MFParamType cullmode[] = { MFParamType_Int };
 static MFParamType zread[] = { MFParamType_Bool };
 static MFParamType zwrite[] = { MFParamType_Bool };
@@ -44,6 +45,7 @@ MFMaterialParameterInfo parameterInformation[] =
 	{ "specularpower", specularpower, sizeof(specularpower)/sizeof(MFParamType) },
 	{ "emissivecolour", emissivecolour, sizeof(emissivecolour)/sizeof(MFParamType) },
 	{ "mask", mask, sizeof(mask)/sizeof(MFParamType) },
+	{ "alpharef", alpharef, sizeof(alpharef)/sizeof(MFParamType) },
 	{ "cullmode", cullmode, sizeof(cullmode)/sizeof(MFParamType) },
 	{ "zread", zread, sizeof(zread)/sizeof(MFParamType) },
 	{ "zwrite", zwrite, sizeof(zwrite)/sizeof(MFParamType) },
@@ -134,6 +136,9 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 			break;
 		case MFMatStandard_Mask:
 			pData->materialType = (pData->materialType & ~MF_Mask) | (*(size_t*)pValue ? MF_Mask : 0);
+			break;
+		case MFMatStandard_AlphaRef:
+			pData->alphaRef = *(float*)pValue;
 			break;
 		case MFMatStandard_CullMode:
 			pData->materialType = (pData->materialType & ~MF_CullMode) | ((*(size_t*)pValue & 0x3) << 6);

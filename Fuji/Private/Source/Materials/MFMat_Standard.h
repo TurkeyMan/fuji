@@ -13,6 +13,7 @@ enum MFMat_Standard_Parameters
 	MFMatStandard_SpecularPower,
 	MFMatStandard_EmissiveColour,
 	MFMatStandard_Mask,
+	MFMatStandard_AlphaRef,
 	MFMatStandard_CullMode,
 	MFMatStandard_ZRead,
 	MFMatStandard_ZWrite,
@@ -76,25 +77,24 @@ enum MaterialFlags
 struct MFMat_Standard_Data
 {
 	// Members
+	MFMatrix	textureMatrix;
+
 	MFVector	diffuse;
 	MFVector	ambient;
 	MFVector	specular;
 	MFVector	illum;
 	float		specularPow;
 
-	uint32		maskColour;
+//	uint32		maskColour;
+	float		alphaRef;
 
 	uint32		materialType;
 
 	MFTexture  *pTextures[8];
 	uint32		textureCount;
 
-	MFMatrix	textureMatrix;
 	int			uFrames, vFrames, curFrame;
 	float		frameTime, curTime;
-
-	uint16		opaque	: 1;
-	uint16		flags	: 15;
 
 	uint32		diffuseMapIndex		: 2; // diffuse required to be one of the first 4 map's
 	uint32		diffuseMap2Index	: 3;
@@ -109,6 +109,9 @@ struct MFMat_Standard_Data
 
 	uint32		cubeMapIndex			: 3; // some what if's
 	uint32		displacementMapIndex	: 3;
+
+	uint16		opaque	: 1;
+	uint16		flags	: 15;
 };
 
 int       MFMat_Standard_RegisterMaterial(void *pPlatformData);
