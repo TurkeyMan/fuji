@@ -41,25 +41,25 @@ bool MFIniLine::GetBool(int index)
 
 MFVector MFIniLine::GetVector2(int index)
 {
-	MFDebug_Assert(stringCount > index + 2, "Line does not have enough data");
+	MFDebug_Assert(stringCount >= index + 2, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1));
 }
 
 MFVector MFIniLine::GetVector3(int index)
 {
-	MFDebug_Assert(stringCount > index + 3, "Line does not have enough data");
+	MFDebug_Assert(stringCount >= index + 3, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2));
 }
 
 MFVector MFIniLine::GetVector4(int index)
 {
-	MFDebug_Assert(stringCount > index + 4, "Line does not have enough data");
+	MFDebug_Assert(stringCount >= index + 4, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
 }
 
 MFMatrix MFIniLine::GetMatrix(int index)
 {
-	MFDebug_Assert(stringCount > index + 16, "Line does not have enough data");
+	MFDebug_Assert(stringCount >= index + 16, "Line does not have enough data");
 	MFMatrix mat;
 	mat.SetXAxis4(MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3)));
 	mat.SetYAxis4(MakeVector(GetFloat(index+4), GetFloat(index+5), GetFloat(index+6), GetFloat(index+7)));
