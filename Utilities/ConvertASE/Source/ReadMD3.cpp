@@ -93,7 +93,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 {
 	if(pSkin)
 	{
-		char *pTok = strchr(pSkin, ',');
+		char *pTok = MFString_Chr(pSkin, ',');
 
 		while(pTok)
 		{
@@ -121,7 +121,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 				return pT;
 			}
 
-			pTok = strchr(pTok, ',');
+			pTok = MFString_Chr(pTok, ',');
 		}
 	}
 
@@ -147,7 +147,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 	// read materials
 	if(pSkin)
 	{
-		char *pT, *pTok = strchr(pSkin, ',');
+		char *pT, *pTok = MFString_Chr(pSkin, ',');
 
 		while(pTok)
 		{
@@ -169,7 +169,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 				MFString_Copy(mat.maps[0], pT);
 			}
 
-			pTok = strchr(pTok, ',');
+			pTok = MFString_Chr(pTok, ',');
 		}
 	}
 

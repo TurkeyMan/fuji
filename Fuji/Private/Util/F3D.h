@@ -275,6 +275,7 @@ public:
 	int ReadASE(char *pFilename);
 	int ReadOBJ(const char *pFilename);
 	int ReadDAE(char *pFilename);
+	int ReadX(char *pFilename);
 	int ReadMD2(char *pFilename);
 	int ReadMD3(char *pFilename);
 	int ReadMEMD2(char *pFilename);

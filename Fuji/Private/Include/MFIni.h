@@ -40,6 +40,7 @@ public:
 	MFVector GetVector2(int index);
 	MFVector GetVector3(int index);
 	MFVector GetVector4(int index);
+	MFMatrix GetMatrix(int index);
 
 	// Log the contents of this line, and following lines to the screen
 	// Mainly for debugging purposes

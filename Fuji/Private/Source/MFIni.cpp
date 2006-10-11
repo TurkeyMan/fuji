@@ -28,34 +28,44 @@ float MFIniLine::GetFloat(int index)
 int MFIniLine::GetInt(int index)
 {
 	if(index >= stringCount)
-	{
 		return 0;
-	}
 	return atoi(GetString(index));
 }
 
 bool MFIniLine::GetBool(int index)
 {
 	if(index >= stringCount)
-	{
 		return false;
-	}
 	return atoi(GetString(index)) != 0;
 }
 
 MFVector MFIniLine::GetVector2(int index)
 {
+	MFDebug_Assert(stringCount > index + 2, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1));
 }
 
 MFVector MFIniLine::GetVector3(int index)
 {
+	MFDebug_Assert(stringCount > index + 3, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2));
 }
 
 MFVector MFIniLine::GetVector4(int index)
 {
+	MFDebug_Assert(stringCount > index + 4, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
+}
+
+MFMatrix MFIniLine::GetMatrix(int index)
+{
+	MFDebug_Assert(stringCount > index + 16, "Line does not have enough data");
+	MFMatrix mat;
+	mat.SetXAxis4(MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3)));
+	mat.SetYAxis4(MakeVector(GetFloat(index+4), GetFloat(index+5), GetFloat(index+6), GetFloat(index+7)));
+	mat.SetZAxis4(MakeVector(GetFloat(index+8), GetFloat(index+9), GetFloat(index+10), GetFloat(index+11)));
+	mat.SetTrans4(MakeVector(GetFloat(index+12), GetFloat(index+13), GetFloat(index+14), GetFloat(index+15)));
+	return mat;
 }
 
 // find a 2 string entry (ie. "label data")

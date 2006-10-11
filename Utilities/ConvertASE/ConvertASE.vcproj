@@ -140,6 +140,9 @@
 			<File
 				RelativePath=".\Source\ReadOBJ.cpp">
 			</File>
+			<File
+				RelativePath=".\Source\ReadX.cpp">
+			</File>
 			<Filter
 				Name="Lib"
 				Filter="">

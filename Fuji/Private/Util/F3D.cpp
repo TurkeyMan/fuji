@@ -381,8 +381,15 @@ struct FileVertex
 void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
 #if !defined(_LINUX) && !defined(_OSX)
-	int numMeshChunks = sub.matSubobjects.size();
-	int a, b;
+	int numMeshChunks = 0;
+	int a, b, mc = 0;
+
+	// count valid mesh chunks
+	for(a=0; a<sub.matSubobjects.size(); a++)
+	{
+		if(sub.matSubobjects[a].triangles.size() != 0)
+			++numMeshChunks;
+	}
 
 	// increment size of MeshChunk_PC structure
 	pOffset += MFALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
@@ -390,7 +397,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<numMeshChunks; a++)
+	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
 		struct Vert
 		{
@@ -400,60 +407,63 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			float uv[2];
 		};
 
+		if(sub.matSubobjects[a].triangles.size() == 0)
+			continue;
+
 		int numVertices = sub.matSubobjects[a].vertices.size();
 		int numTriangles = sub.matSubobjects[a].triangles.size();
 		int numIndices = numTriangles*3;
 
-		pMeshChunk[a].numVertices = numVertices;
-		pMeshChunk[a].numIndices = numIndices;
-		pMeshChunk[a].vertexStride = sizeof(Vert);
-		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
-		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
+		pMeshChunk[mc].numVertices = numVertices;
+		pMeshChunk[mc].numIndices = numIndices;
+		pMeshChunk[mc].vertexStride = sizeof(Vert);
+		pMeshChunk[mc].vertexDataSize = numVertices * pMeshChunk->vertexStride;
+		pMeshChunk[mc].indexDataSize = numIndices*sizeof(uint16);
 
-		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
 
 		// setup pointers
-		pMeshChunk[a].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+		pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
 		pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
-		pMeshChunk[a].pVertexData = pOffset;
+		pMeshChunk[mc].pVertexData = pOffset;
 		pOffset += MFALIGN16(sizeof(Vert)*numVertices);
-		pMeshChunk[a].pIndexData = pOffset;
+		pMeshChunk[mc].pIndexData = pOffset;
 		pOffset += MFALIGN16(sizeof(uint16)*numIndices);
 
 		// write declaration
-		pMeshChunk[a].pVertexElements[0].Stream = 0;
-		pMeshChunk[a].pVertexElements[0].Offset = 0;
-		pMeshChunk[a].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[a].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
-		pMeshChunk[a].pVertexElements[0].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[0].Stream = 0;
+		pMeshChunk[mc].pVertexElements[0].Offset = 0;
+		pMeshChunk[mc].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[mc].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
+		pMeshChunk[mc].pVertexElements[0].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[1].Stream = 0;
-		pMeshChunk[a].pVertexElements[1].Offset = 12;
-		pMeshChunk[a].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[a].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
-		pMeshChunk[a].pVertexElements[1].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[1].Stream = 0;
+		pMeshChunk[mc].pVertexElements[1].Offset = 12;
+		pMeshChunk[mc].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[mc].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
+		pMeshChunk[mc].pVertexElements[1].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[2].Stream = 0;
-		pMeshChunk[a].pVertexElements[2].Offset = 24;
-		pMeshChunk[a].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
-		pMeshChunk[a].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
-		pMeshChunk[a].pVertexElements[2].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[2].Stream = 0;
+		pMeshChunk[mc].pVertexElements[2].Offset = 24;
+		pMeshChunk[mc].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
+		pMeshChunk[mc].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
+		pMeshChunk[mc].pVertexElements[2].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[3].Stream = 0;
-		pMeshChunk[a].pVertexElements[3].Offset = 28;
-		pMeshChunk[a].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
-		pMeshChunk[a].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
-		pMeshChunk[a].pVertexElements[3].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[3].Stream = 0;
+		pMeshChunk[mc].pVertexElements[3].Offset = 28;
+		pMeshChunk[mc].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
+		pMeshChunk[mc].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
+		pMeshChunk[mc].pVertexElements[3].UsageIndex = 0;
 
 		D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-		pMeshChunk[a].pVertexElements[4] = endMacro;
+		pMeshChunk[mc].pVertexElements[4] = endMacro;
 
 		// write vertices
-		Vert *pVert = (Vert*)pMeshChunk[a].pVertexData;
+		Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
 
 		for(b=0; b<numVertices; b++)
 		{
@@ -483,7 +493,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		}
 
 		// write indices
-		uint16 *pIndices = (uint16*)pMeshChunk[a].pIndexData;
+		uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
 
 		for(b=0; b<numTriangles; b++)
 		{
@@ -493,6 +503,8 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			pIndices += 3;
 		}
+
+		++mc;
 	}
 #endif
 }
@@ -516,8 +528,15 @@ void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 
 void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
 #if 0//!defined(_LINUX)
-	int numMeshChunks = sub.matSubobjects.size();
-	int a, b;
+	int numMeshChunks = 0;
+	int a, b, mc = 0;
+
+	// count valid mesh chunks
+	for(a=0; a<sub.matSubobjects.size(); a++)
+	{
+		if(sub.matSubobjects[a].triangles.size() != 0)
+			++numMeshChunks;
+	}
 
 	// increment size of MeshChunk_PC structure
 	pOffset += MFALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
@@ -525,7 +544,7 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 	MFMeshChunk_XB *pMeshChunk = (MFMeshChunk_XB*)pMeshChunks;
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<numMeshChunks; a++)
+	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
 		struct Vert
 		{
@@ -535,60 +554,63 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			float uv[2];
 		};
 
+		if(sub.matSubobjects[a].triangles.size() == 0)
+			continue;
+
 		int numVertices = sub.matSubobjects[a].vertices.size();
 		int numTriangles = sub.matSubobjects[a].triangles.size();
 		int numIndices = numTriangles*3;
 
-		pMeshChunk[a].numVertices = numVertices;
-		pMeshChunk[a].numIndices = numIndices;
-		pMeshChunk[a].vertexStride = sizeof(Vert);
-		pMeshChunk[a].vertexDataSize = numVertices * pMeshChunk->vertexStride;
-		pMeshChunk[a].indexDataSize = numIndices*sizeof(uint16);
+		pMeshChunk[mc].numVertices = numVertices;
+		pMeshChunk[mc].numIndices = numIndices;
+		pMeshChunk[mc].vertexStride = sizeof(Vert);
+		pMeshChunk[mc].vertexDataSize = numVertices * pMeshChunk->vertexStride;
+		pMeshChunk[mc].indexDataSize = numIndices*sizeof(uint16);
 
-		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
 
 		// setup pointers
-		pMeshChunk[a].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+		pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
 		pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
-		pMeshChunk[a].pVertexData = pOffset;
+		pMeshChunk[mc].pVertexData = pOffset;
 		pOffset += MFALIGN16(sizeof(Vert)*numVertices);
-		pMeshChunk[a].pIndexData = pOffset;
+		pMeshChunk[mc].pIndexData = pOffset;
 		pOffset += MFALIGN16(sizeof(uint16)*numIndices);
 
 		// write declaration
-		pMeshChunk[a].pVertexElements[0].Stream = 0;
-		pMeshChunk[a].pVertexElements[0].Offset = 0;
-		pMeshChunk[a].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[a].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
-		pMeshChunk[a].pVertexElements[0].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[0].Stream = 0;
+		pMeshChunk[mc].pVertexElements[0].Offset = 0;
+		pMeshChunk[mc].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[mc].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
+		pMeshChunk[mc].pVertexElements[0].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[1].Stream = 0;
-		pMeshChunk[a].pVertexElements[1].Offset = 12;
-		pMeshChunk[a].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[a].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
-		pMeshChunk[a].pVertexElements[1].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[1].Stream = 0;
+		pMeshChunk[mc].pVertexElements[1].Offset = 12;
+		pMeshChunk[mc].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
+		pMeshChunk[mc].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
+		pMeshChunk[mc].pVertexElements[1].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[2].Stream = 0;
-		pMeshChunk[a].pVertexElements[2].Offset = 24;
-		pMeshChunk[a].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
-		pMeshChunk[a].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
-		pMeshChunk[a].pVertexElements[2].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[2].Stream = 0;
+		pMeshChunk[mc].pVertexElements[2].Offset = 24;
+		pMeshChunk[mc].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
+		pMeshChunk[mc].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
+		pMeshChunk[mc].pVertexElements[2].UsageIndex = 0;
 
-		pMeshChunk[a].pVertexElements[3].Stream = 0;
-		pMeshChunk[a].pVertexElements[3].Offset = 28;
-		pMeshChunk[a].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
-		pMeshChunk[a].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[a].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
-		pMeshChunk[a].pVertexElements[3].UsageIndex = 0;
+		pMeshChunk[mc].pVertexElements[3].Stream = 0;
+		pMeshChunk[mc].pVertexElements[3].Offset = 28;
+		pMeshChunk[mc].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
+		pMeshChunk[mc].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
+		pMeshChunk[mc].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
+		pMeshChunk[mc].pVertexElements[3].UsageIndex = 0;
 
 		D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-		pMeshChunk[a].pVertexElements[4] = endMacro;
+		pMeshChunk[mc].pVertexElements[4] = endMacro;
 
 		// write vertices
-		Vert *pVert = (Vert*)pMeshChunk[a].pVertexData;
+		Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
 
 		for(b=0; b<numVertices; b++)
 		{
@@ -618,7 +640,7 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		}
 
 		// write indices
-		uint16 *pIndices = (uint16*)pMeshChunk[a].pIndexData;
+		uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
 
 		for(b=0; b<numTriangles; b++)
 		{
@@ -628,6 +650,8 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			pIndices += 3;
 		}
+
+		++mc;
 	}
 #endif
 }
@@ -650,8 +674,15 @@ void FixUpMeshChunk_XB(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 
 
 void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
-	int numMeshChunks = sub.matSubobjects.size();
-	int a, b, c;
+	int numMeshChunks = 0;
+	int a, b, c, mc = 0;
+
+	// count valid mesh chunks
+	for(a=0; a<sub.matSubobjects.size(); a++)
+	{
+		if(sub.matSubobjects[a].triangles.size() != 0)
+			++numMeshChunks;
+	}
 
 	// increment size of MeshChunk_PSP structure
 	pOffset += MFALIGN16(sizeof(MFMeshChunk_PSP)*numMeshChunks);
@@ -667,24 +698,27 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 	};
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<numMeshChunks; a++)
+	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
 		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
 
+		if(matsub.triangles.size() == 0)
+			continue;
+
 		int numTriangles = matsub.triangles.size();
 
-		pMeshChunk[a].numVertices = numTriangles * 3;
-		pMeshChunk[a].vertexStride = sizeof(Vert);
-		pMeshChunk[a].vertexDataSize = pMeshChunk[a].numVertices * pMeshChunk[a].vertexStride;
-		pMeshChunk[a].vertexFormat = (0x03 << 0) | (0x07 << 2) | (0x03 << 5) | (0x03 << 7);
+		pMeshChunk[mc].numVertices = numTriangles * 3;
+		pMeshChunk[mc].vertexStride = sizeof(Vert);
+		pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * pMeshChunk[mc].vertexStride;
+		pMeshChunk[mc].vertexFormat = (0x03 << 0) | (0x07 << 2) | (0x03 << 5) | (0x03 << 7);
 
-		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
 
-		pMeshChunk[a].pVertexData = pOffset;
-		pOffset += MFALIGN16(pMeshChunk[a].vertexDataSize);
+		pMeshChunk[mc].pVertexData = pOffset;
+		pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
 
 		// write triangles
-		Vert *pVert = (Vert*)pMeshChunk[a].pVertexData;
+		Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
 
 		for(b=0; b<numTriangles; b++)
 		{
@@ -714,6 +748,8 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 				++pVert;
 			}
 		}
+
+		++mc;
 	}
 }
 
@@ -730,8 +766,15 @@ void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32
 
 void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
-	int numMeshChunks = sub.matSubobjects.size();
-	int a, b, c;
+	int numMeshChunks = 0;
+	int a, b, c, mc = 0;
+
+	// count valid mesh chunks
+	for(a=0; a<sub.matSubobjects.size(); a++)
+	{
+		if(sub.matSubobjects[a].triangles.size() != 0)
+			++numMeshChunks;
+	}
 
 	// increment size of MeshChunk_PSP structure
 	pOffset += MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
@@ -739,41 +782,41 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<numMeshChunks; a++)
+	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
 		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
 
 		int numTriangles = matsub.triangles.size();
 
-		pMeshChunk[a].numVertices = matsub.vertices.size();
-		pMeshChunk[a].numIndices = numTriangles * 3;
-		pMeshChunk[a].indexDataSize = pMeshChunk[a].numIndices * sizeof(uint16);
+		pMeshChunk[mc].numVertices = matsub.vertices.size();
+		pMeshChunk[mc].numIndices = numTriangles * 3;
+		pMeshChunk[mc].indexDataSize = pMeshChunk[mc].numIndices * sizeof(uint16);
 
-		pMeshChunk[a].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
+		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
 
 		// write verts
 		struct V3 { float x, y, z; };
 		struct V2 { float u, v; };
 
-		pMeshChunk[a].pVertexData = pOffset;
-		pMeshChunk[a].vertexDataSize = pMeshChunk[a].numVertices * sizeof(V3);
-		pOffset += MFALIGN16(pMeshChunk[a].vertexDataSize);
-		pMeshChunk[a].pNormalData = pOffset;
-		pMeshChunk[a].normalDataSize = pMeshChunk[a].numVertices * sizeof(V3);
-		pOffset += MFALIGN16(pMeshChunk[a].normalDataSize);
-		pMeshChunk[a].pColourData = pOffset;
-		pMeshChunk[a].colourDataSize = pMeshChunk[a].numVertices * sizeof(uint32);
-		pOffset += MFALIGN16(pMeshChunk[a].colourDataSize);
-		pMeshChunk[a].pUVData = pOffset;
-		pMeshChunk[a].uvDataSize = pMeshChunk[a].numVertices * sizeof(V2);
-		pOffset += MFALIGN16(pMeshChunk[a].uvDataSize);
+		pMeshChunk[mc].pVertexData = pOffset;
+		pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
+		pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
+		pMeshChunk[mc].pNormalData = pOffset;
+		pMeshChunk[mc].normalDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
+		pOffset += MFALIGN16(pMeshChunk[mc].normalDataSize);
+		pMeshChunk[mc].pColourData = pOffset;
+		pMeshChunk[mc].colourDataSize = pMeshChunk[mc].numVertices * sizeof(uint32);
+		pOffset += MFALIGN16(pMeshChunk[mc].colourDataSize);
+		pMeshChunk[mc].pUVData = pOffset;
+		pMeshChunk[mc].uvDataSize = pMeshChunk[mc].numVertices * sizeof(V2);
+		pOffset += MFALIGN16(pMeshChunk[mc].uvDataSize);
 
-		V3 *pVert = (V3*)pMeshChunk[a].pVertexData;
-		V3 *pNorm = (V3*)pMeshChunk[a].pNormalData;
-		uint32 *pCol = (uint32*)pMeshChunk[a].pColourData;
-		V2 *pUV = (V2*)pMeshChunk[a].pUVData;
+		V3 *pVert = (V3*)pMeshChunk[mc].pVertexData;
+		V3 *pNorm = (V3*)pMeshChunk[mc].pNormalData;
+		uint32 *pCol = (uint32*)pMeshChunk[mc].pColourData;
+		V2 *pUV = (V2*)pMeshChunk[mc].pUVData;
 
-		for(b=0; b<(int)pMeshChunk[a].numVertices; b++)
+		for(b=0; b<(int)pMeshChunk[mc].numVertices; b++)
 		{
 			const F3DVertex &vert = matsub.vertices[b];
 
@@ -803,10 +846,10 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 		}
 
 		// write indices
-		pMeshChunk[a].pIndexData = pOffset;
-		pOffset += MFALIGN16(pMeshChunk[a].indexDataSize);
+		pMeshChunk[mc].pIndexData = pOffset;
+		pOffset += MFALIGN16(pMeshChunk[mc].indexDataSize);
 
-		uint16 *pIndex = (uint16*)pMeshChunk[a].pIndexData;
+		uint16 *pIndex = (uint16*)pMeshChunk[mc].pIndexData;
 
 		for(b=0; b<numTriangles; b++)
 		{
@@ -816,6 +859,8 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 				++pIndex;
 			}
 		}
+
+		++mc;
 	}
 }
 
@@ -920,24 +965,41 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
 		pDataHeaders[meshChunkIndex].count = numOutputMeshChunks;
 
+		F3DMeshChunk *pMC = GetMeshChunk();
+
+		// HACKY: gotta find the first matsub with mesh..
+		for(a=0; a<pMC->subObjects.size(); a++)
+			for(b=0; b<pMC->subObjects[a].matSubobjects.size(); b++)
+				if(pMC->subObjects[a].matSubobjects[b].triangles.size())
+					goto found;
+found:
+		MFDebug_Assert(a < pMC->subObjects.size(), "No mesh in model.");
+
 		// prime bounding volume
-		const F3DSubObject &sub0 = GetMeshChunk()->subObjects[0];
-		pModelData->boundingVolume.boundingSphere = MakeVector(sub0.positions[sub0.matSubobjects[0].vertices[sub0.matSubobjects[0].triangles[0].v[0]].position], 0.0f);
+		const F3DSubObject &sub0 = pMC->subObjects[a];
+		pModelData->boundingVolume.boundingSphere = MakeVector(sub0.positions[sub0.matSubobjects[b].vertices[sub0.matSubobjects[b].triangles[0].v[0]].position], 0.0f);
 		pModelData->boundingVolume.min = pModelData->boundingVolume.boundingSphere;
 		pModelData->boundingVolume.max = pModelData->boundingVolume.boundingSphere;
 
 		pOffset += MFALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
 
-		for(a=0, b=0; a<GetMeshChunk()->subObjects.size(); a++)
+		for(a=0, b=0; a<pMC->subObjects.size(); a++)
 		{
-			const F3DSubObject &sub = GetMeshChunk()->subObjects[a];
+			const F3DSubObject &sub = pMC->subObjects[a];
 
 			if(sub.dontExportThisSubobject)
 				continue;
 
 			pSubobjectChunk[b].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
 //			pSubobjectChunk[b].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
-			pSubobjectChunk[b].numMeshChunks = sub.matSubobjects.size();
+			pSubobjectChunk[b].numMeshChunks = 0;
+
+			// count valid mesh chunks
+			for(int c=0; c<sub.matSubobjects.size(); c++)
+			{
+				if(sub.matSubobjects[c].triangles.size() != 0)
+					++pSubobjectChunk[b].numMeshChunks;
+			}
 
 			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
 			pSubobjectChunk[b].pMeshChunks = pMeshChunks;

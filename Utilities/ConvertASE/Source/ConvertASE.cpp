@@ -99,6 +99,12 @@ int main(int argc, char *argv[])
 		a = pModel->ReadOBJ(source);
 		if(a) return a;
 	}
+	else if(!MFString_CaseCmp(&source[a], "x"))
+	{
+		// read .x file
+		a = pModel->ReadX(source);
+		if(a) return a;
+	}
 	else if(!MFString_CaseCmp(&source[a], "md2"))
 	{
 		// read MD2 file... (Quake2)
