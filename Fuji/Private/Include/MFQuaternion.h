@@ -1,6 +1,6 @@
 /**
- * @file MFVector.h
- * @brief Describes the Mount Fuji Engine vector class.
+ * @file MFQuaternion.h
+ * @brief Describes the Mount Fuji Engine quaternion class.
  * @author Manu Evans
  * @defgroup MFQuaternion Quaternion math Class
  * @{
@@ -72,7 +72,7 @@ public:
 		float w; /**< W real component */
 	};
 
-	static const MFQuaternion identity;							/**< Constant IDENTITY vector { 0, 0, 0, 1 } */
+	static const MFQuaternion identity;							/**< Constant IDENTITY quaternion { 0, 0, 0, 1 } */
 
 
 	// general purpose vector operators
@@ -82,9 +82,9 @@ public:
 
 	void SetIdentity();											/**< Set quaternion to the identity quaternion. */
 
-	void Set(float x, float y, float z = 0.0f, float w = 1.0f);	/**< Set each component of a quaternion. */
+	void Set(float x, float y, float z, float w);				/**< Set each component of a quaternion. */
 
-	MFVector& operator=(const MFVector &v);						/**< Equals operator. */
+	MFQuaternion& operator=(const MFQuaternion &v);				/**< Assignment operator. */
 	MFQuaternion operator*(const MFQuaternion &q) const;		/**< Quaternion multiply operator. */
 
 	MFQuaternion& Multiply(const MFQuaternion &q);				/**< Perform a quaternion multiply. */
@@ -96,7 +96,7 @@ public:
 	operator float*();											/**< float pointer cast operator. */
 	operator float*() const;									/**< const float pointer cast operator. */
 
-	MFVector& SLerp(const MFQuaternion &q, float t);			/**< SLerp between 2 quaternions. */
+	MFQuaternion& SLerp(const MFQuaternion &q, float t);		/**< SLerp between 2 quaternions. */
 
 	const char * ToString() const;								/**< Convert quaternion to a string. */
 };

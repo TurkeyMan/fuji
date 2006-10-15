@@ -107,12 +107,12 @@ MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
 class MFMatrix
 {
 public:
-	float m[4][4]; /**< 4x4 array of floats */
+	float m[16]; /**< 4x4 array of floats */
 
 	static const MFMatrix identity;	/**< Constant identity matrix */
 
 
-	MFMatrix& operator=(const MFMatrix& mat);	/**< Equals operator. */
+	MFMatrix& operator=(const MFMatrix& mat);	/**< Assignment operator. */
 	bool operator==(const MFMatrix& mat) const;	/**< Comparison operator. */
 	bool operator!=(const MFMatrix& mat) const;	/**< Not-equals operator. */
 

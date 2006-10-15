@@ -849,7 +849,11 @@ void LoadTextXFile(const char *pText)
 		{
 			SkipToken(pText, "{");
 
-			printf("XFile V%d.%d, 0x%X\n", GetInt(pText, &pText), GetInt(pText, &pText), GetInt(pText, &pText));
+			int maj = GetInt(pText, &pText);
+			int min = GetInt(pText, &pText);
+			int flag = GetInt(pText, &pText);
+
+//			printf("XFile V%d.%d, 0x%X\n", maj, min, flag);
 
 			pTok = GetNextToken(pText, &pText);
 			while(MFString_Compare(pTok, "}"))

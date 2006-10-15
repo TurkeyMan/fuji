@@ -115,10 +115,12 @@ const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
 MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
 
 /**
- * Get the models bounding volume.
- * Gets the models bounding volume.
+ * Get an MFModel mesh chunk.
+ * Gets a pointer to the specified MFModel mesh chunk.
  * @param pModel Model instance.
- * @return Pointer to the models bounding volume.
+ * @param subobjectIndex Subobject index.
+ * @param meshChunkIndex Mesh chunk index.
+ * @return Pointer to the specified mesh chunk.
  */
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 

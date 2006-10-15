@@ -213,7 +213,7 @@ public:
 	bool operator==(const MFVector &v) const;	/**< Comparison operator. */
 	bool operator!=(const MFVector &v) const;	/**< Not-equals operator. */
 
-	MFVector& operator=(const MFVector &v);		/**< Equals operator. */
+	MFVector& operator=(const MFVector &v);		/**< Assignment operator. */
 	MFVector& operator+=(const MFVector &v);	/**< Plus-equals operator. */
 	MFVector& operator-=(const MFVector &v);	/**< Minus-equals operator. */
 	MFVector& operator*=(float f);				/**< Scale-equals operator. */
