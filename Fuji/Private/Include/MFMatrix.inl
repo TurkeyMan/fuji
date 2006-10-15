@@ -59,7 +59,7 @@ inline MFMatrix& MFMatrix::ClearW()
 
 inline const MFVector& MFMatrix::GetXAxis() const
 {
-	return *(MFVector*)&m[1];
+	return *(MFVector*)&m[0];
 }
 
 inline const MFVector& MFMatrix::GetYAxis() const

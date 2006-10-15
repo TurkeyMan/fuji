@@ -110,7 +110,9 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 		{
 			transformMatrix.SetXAxis4(x);
 			transformMatrix.SetYAxis4(y);
-			transformMatrix.SetZAxis4(z);
+			transformMatrix.SetZAxis4(-z);
+
+			flipWinding = true;
 		}
 		else if(!MFString_CaseCmp(pAxis, "Z_UP"))
 		{

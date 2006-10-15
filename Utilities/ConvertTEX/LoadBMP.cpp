@@ -73,6 +73,29 @@ SourceImage* LoadBMP(const char *pFilename)
 					}
 				}
 			}
+			else if(pInfoHeader->bits == 32)
+			{
+				struct Pixel32
+				{
+					unsigned char b, g, r, a;
+				};
+
+				Pixel32 *p = (Pixel32*)pImageData;
+
+				for(int y=0; y<pInfoHeader->height; y++)
+				{
+					for(int x=0; x<pInfoHeader->width; x++)
+					{
+						pPixel->r = (float)p->r * (1.0f/255.0f);
+						pPixel->g = (float)p->g * (1.0f/255.0f);
+						pPixel->b = (float)p->b * (1.0f/255.0f);
+						pPixel->a = (float)p->a * (1.0f/255.0f);
+
+						++pPixel;
+						++p;
+					}
+				}
+			}
 			else
 			{
 				MFDebug_Assert(false, "Unsupported colour depth.");

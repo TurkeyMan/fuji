@@ -102,7 +102,7 @@ void MFMat_Standard_Update(MFMaterial *pMaterial)
 			pData->curFrame++;
 			pData->curFrame = pData->curFrame % (pData->uFrames*pData->vFrames);
 
-			pData->textureMatrix.SetZAxis3(MakeVector((1.0f/(float)pData->uFrames) * (float)(pData->curFrame%pData->uFrames), (1.0f/(float)pData->vFrames) * (float)(pData->curFrame/pData->vFrames), 0.0f));
+			pData->textureMatrix.SetTrans3(MakeVector(MFRcp((float)pData->uFrames) * (float)(pData->curFrame%pData->uFrames), MFRcp((float)pData->vFrames) * (float)(pData->curFrame/pData->vFrames), 0.0f));
 		}
 	}
 }
@@ -233,7 +233,7 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 					break;
 			}
 
-			pData->textureMatrix.SetScale(MakeVector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
+			pData->textureMatrix.SetScale(MakeVector(MFRcp((float)pData->uFrames), MFRcp((float)pData->vFrames), 1.0f));
 			break;
 		}
 		case MFMatStandard_Tile:
