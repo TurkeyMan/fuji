@@ -1,9 +1,27 @@
 #include "Fuji.h"
 #include "F3D.h"
 
+enum KeyType
+{
+	KT_Quat = 0,
+	KT_Scale,
+	KT_Translation,
+	KT_Matrix
+};
+
 extern F3DFile *pModel;
 
 char gTokenBuffer[2048];
+
+struct XMeshChunk
+{
+	static XMeshChunk Create(const MFMatrix &_mat, const char *_pMesh) { XMeshChunk mc; mc.mat = _mat; mc.pMesh = _pMesh; return mc; }
+	MFMatrix mat;
+	const char *pMesh;
+};
+
+MFArray<XMeshChunk> gMeshChunks;
+MFArray<const char *> gAnimSets;
 
 const char *GetNextToken(const char *pText, const char **ppTokenEnd = NULL, char *pBuffer = gTokenBuffer)
 {
@@ -195,41 +213,11 @@ void GetFloatArray(const char *pText, float *pOutput, int arrayLength, const cha
 	MFDebug_Assert(!MFString_Compare(pSemi, ";"), "Value is not terminated with a semicolon.\n");
 }
 
-const char *ParseMesh(const char *pText, const MFMatrix &mat)
+int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 {
-	F3DMeshChunk *pMesh = pModel->GetMeshChunk();
-	F3DSubObject &sub = pMesh->subObjects.push();
-
-	// read name
-	GetNextToken(pText, &pText, sub.name);
-
-	SkipToken(pText, "{");
-
-	// get num positions
-	int numPositions = GetInt(pText, &pText);
-
-	sub.positions.resize(numPositions);
-
-	// read positions
-	for(int a=0; a<numPositions; a++)
-	{
-		sub.positions[a].x = GetFloat(pText, &pText);
-		sub.positions[a].y = GetFloat(pText, &pText);
-		sub.positions[a].z = GetFloat(pText, &pText);
-
-		sub.positions[a] = ApplyMatrixH(sub.positions[a], mat);
-
-		if(a < numPositions-1)
-			SkipToken(pText, ",");
-	}
-	SkipToken(pText, ";");
-
-	// get num faces
-	int numFaces = GetInt(pText, &pText);
-
-	// see if we have a material face mapping
-	const char *pMatList = FindSectionInScope(pText, "MeshMaterialList");
 	int *pMatFaces = NULL;
+
+	const char *pMatList = FindSectionInScope(pText, "MeshMaterialList");
 
 	if(pMatList)
 	{
@@ -241,7 +229,7 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat)
 		int numMatFaces = GetInt(pMatList, &pMatList);
 		MFDebug_Assert(numMatFaces == numFaces, "Number of material faces does not match number of mesh faces");
 
-		pMatFaces = (int*)malloc(sizeof(int)*numMatFaces);
+		pMatFaces = (int*)MFHeap_Alloc(sizeof(int)*numMatFaces);
 		GetIntArray(pMatList, pMatFaces, numMatFaces, &pMatList);
 
 		// process materials...
@@ -324,6 +312,242 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat)
 		}
 	}
 
+	return pMatFaces;
+}
+
+const char *ParseNormals(const char *pText, F3DSubObject &sub, const MFMatrix &mat, int numFaces, int *pMatFaces)
+{
+	SkipToken(pText, "{");
+
+	// get num positions
+	int numNormals = GetInt(pText, &pText);
+
+	sub.normals.resize(numNormals);
+
+	// read positions
+	for(int a=0; a<numNormals; a++)
+	{
+		sub.normals[a].x = GetFloat(pText, &pText);
+		sub.normals[a].y = GetFloat(pText, &pText);
+		sub.normals[a].z = GetFloat(pText, &pText);
+
+		sub.normals[a] = ApplyMatrix3(sub.normals[a], mat);
+		sub.normals[a].Normalise3();
+
+		if(a < numNormals-1)
+			SkipToken(pText, ",");
+	}
+	SkipToken(pText, ";");
+
+	// get num faces
+	int numNormalFaces = GetInt(pText, &pText);
+	MFDebug_Assert(numNormalFaces == numFaces, "Number of normal faces does not match the number of faces in the mesh.");
+
+	// read faces
+	int face[16], numVerts[16];
+	MFZeroMemory(numVerts, sizeof(numVerts));
+	for(int a=0; a<numNormalFaces; a++)
+	{
+		int matSub = pMatFaces ? pMatFaces[a] : 0;
+
+		int numPoints = GetInt(pText, &pText);
+		GetIntArray(pText, face, numPoints, &pText);
+
+		for(int b=0; b<numPoints; b++)
+			sub.matSubobjects[matSub].vertices[numVerts[matSub]+b].normal = face[b];
+
+		numVerts[matSub] += numPoints;
+
+		if(a < numNormalFaces-1)
+			SkipToken(pText, ",");
+	}
+	SkipToken(pText, ";");
+	SkipToken(pText, "}");
+
+	return pText;
+}
+
+const char *ParseTexCoords(const char *pText, F3DSubObject &sub, int numPositions)
+{
+	SkipToken(pText, "{");
+
+	// get num positions
+	int numUV = GetInt(pText, &pText);
+	MFDebug_Assert(numUV == numPositions, "Number of UV's does not match the number of verts in the mesh.");
+
+	sub.uvs.resize(numUV);
+
+	// read positions
+	for(int a=0; a<numUV; a++)
+	{
+		sub.uvs[a].x = GetFloat(pText, &pText);
+		sub.uvs[a].y = GetFloat(pText, &pText);
+
+		if(a < numUV-1)
+			SkipToken(pText, ",");
+	}
+	SkipToken(pText, ";");
+
+	// map to faces
+	for(int m=0; m<sub.matSubobjects.size(); m++)
+	{
+		int totalVerts = sub.matSubobjects[m].vertices.size();
+		for(int a=0; a<totalVerts; a++)
+		{
+			sub.matSubobjects[m].vertices[a].uv1 = sub.matSubobjects[m].vertices[a].position;
+		}
+	}
+
+	SkipToken(pText, "}");
+
+	return pText;
+}
+
+const char *ParseColours(const char *pText, F3DSubObject &sub, int numPositions)
+{
+	SkipToken(pText, "{");
+
+	// get num positions
+	int numColours = GetInt(pText, &pText);
+	MFDebug_Assert(numColours == numPositions, "Number of colours's does not match the number of verts in the mesh.");
+
+	sub.colours.resize(numColours);
+
+	// read positions
+	for(int a=0; a<numColours; a++)
+	{
+		int colVert = GetInt(pText, &pText);
+
+		sub.colours[colVert].x = GetFloat(pText, &pText);
+		sub.colours[colVert].y = GetFloat(pText, &pText);
+		sub.colours[colVert].z = GetFloat(pText, &pText);
+		sub.colours[colVert].w = GetFloat(pText, &pText);
+		SkipToken(pText, ";");
+
+		if(a < numColours-1)
+			SkipToken(pText, ",");
+	}
+	SkipToken(pText, ";");
+
+	// map to faces
+	for(int m=0; m<sub.matSubobjects.size(); m++)
+	{
+		int totalVerts = sub.matSubobjects[m].vertices.size();
+		for(int a=0; a<totalVerts; a++)
+		{
+			sub.matSubobjects[m].vertices[a].colour = sub.matSubobjects[m].vertices[a].position;
+		}
+	}
+
+	SkipToken(pText, "}");
+
+	return pText;
+}
+
+const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositions)
+{
+	SkipToken(pText, "{");
+
+	const char *pName = GetString(pText, &pText);
+
+	// get num weights
+	int numWeights = GetInt(pText, &pText);
+	MFDebug_Assert(numWeights == numPositions, "Number of weights's does not match the number of verts in the mesh.");
+
+	int *pIndices = (int*)MFHeap_Alloc(sizeof(int) * numWeights);
+	GetIntArray(pText, pIndices, numWeights, &pText);
+
+	float *pWeights = (float*)MFHeap_Alloc(sizeof(float) * numWeights);
+	GetFloatArray(pText, pWeights, numWeights, &pText);
+
+	MFMatrix matrixOffset;
+	GetFloatArray(pText, (float*)&matrixOffset, 16, &pText);
+	SkipToken(pText, ";");
+
+	SkipToken(pText, "}");
+
+	// now we want to do something with all this data...
+	F3DSkeletonChunk *pSC = pModel->GetSkeletonChunk();
+
+	// check weights are sequential
+	for(int a=0; a<numWeights; a++)
+		MFDebug_Assert(a == pIndices[a], "Weight array is not sequential!");
+
+	// map to faces
+	for(int m=0; m<sub.matSubobjects.size(); m++)
+	{
+		int totalVerts = sub.matSubobjects[m].vertices.size();
+		for(int a=0; a<totalVerts; a++)
+		{
+			F3DVertex &v = sub.matSubobjects[m].vertices[a];
+
+			int i = v.position;
+			const int numBones = sizeof(v.bone)/sizeof(v.bone[0]);
+
+			if(pWeights[i] != 0.0f)
+			{
+				for(int b=0; b<numBones; b++)
+				{
+					if(v.bone[b] == -1)
+					{
+						v.weight[b] = pWeights[i];
+
+						int bone = pSC->FindBone(pName);
+						if(bone != -1)
+						{
+							v.bone[b] = bone;
+							pSC->bones[bone].bIsSkinned = true;
+							sub.matSubobjects[m].maxWeights = MFMax(sub.matSubobjects[m].maxWeights, b+1);
+						}
+
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return pText;
+}
+
+const char *ParseMesh(const char *pText, const MFMatrix &mat)
+{
+	F3DMeshChunk *pMesh = pModel->GetMeshChunk();
+	F3DSubObject &sub = pMesh->subObjects.push();
+
+	// read name
+	GetNextToken(pText, &pText, sub.name);
+
+	if(!MFString_Compare(sub.name, "{"))
+		MFString_Copy(sub.name, "Unnamed Subobject");
+	else
+		SkipToken(pText, "{");
+
+	// get num positions
+	int numPositions = GetInt(pText, &pText);
+
+	sub.positions.resize(numPositions);
+
+	// read positions
+	for(int a=0; a<numPositions; a++)
+	{
+		sub.positions[a].x = GetFloat(pText, &pText);
+		sub.positions[a].y = GetFloat(pText, &pText);
+		sub.positions[a].z = GetFloat(pText, &pText);
+
+		sub.positions[a] = ApplyMatrixH(sub.positions[a], mat);
+
+		if(a < numPositions-1)
+			SkipToken(pText, ",");
+	}
+	SkipToken(pText, ";");
+
+	// get num faces
+	int numFaces = GetInt(pText, &pText);
+
+	// see if we have a material face mapping
+	int *pMatFaces = ParseMaterialList(pText, sub, numFaces);
+
 	// read faces
 	int face[16], numVerts[16], numTris[16];
 	MFZeroMemory(numVerts, sizeof(numVerts));
@@ -364,84 +588,40 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat)
 		}
 		else if(!MFString_Compare(pTok, "MeshNormals"))
 		{
-			SkipToken(pText, "{");
-
-			// get num positions
-			int numNormals = GetInt(pText, &pText);
-
-			sub.normals.resize(numNormals);
-
-			// read positions
-			for(int a=0; a<numNormals; a++)
-			{
-				sub.normals[a].x = GetFloat(pText, &pText);
-				sub.normals[a].y = GetFloat(pText, &pText);
-				sub.normals[a].z = GetFloat(pText, &pText);
-
-				sub.normals[a] = ApplyMatrix3(sub.normals[a], mat);
-				sub.normals[a].Normalise3();
-
-				if(a < numNormals-1)
-					SkipToken(pText, ",");
-			}
-			SkipToken(pText, ";");
-
-			// get num faces
-			int numNormalFaces = GetInt(pText, &pText);
-			MFDebug_Assert(numNormalFaces == numFaces, "Number of normal faces does not match the number of faces in the mesh.");
-
-			// read faces
-			MFZeroMemory(numVerts, sizeof(numVerts));
-			for(int a=0; a<numNormalFaces; a++)
-			{
-				int matSub = pMatFaces ? pMatFaces[a] : 0;
-
-				int numPoints = GetInt(pText, &pText);
-				GetIntArray(pText, face, numPoints, &pText);
-
-				for(int b=0; b<numPoints; b++)
-					sub.matSubobjects[matSub].vertices[numVerts[matSub]+b].normal = face[b];
-
-				numVerts[matSub] += numPoints;
-
-				if(a < numNormalFaces-1)
-					SkipToken(pText, ",");
-			}
-			SkipToken(pText, ";");
-			SkipToken(pText, "}");
+			pText = ParseNormals(pText, sub, mat, numFaces, pMatFaces);
 		}
 		else if(!MFString_Compare(pTok, "MeshTextureCoords"))
+		{
+			pText = ParseTexCoords(pText, sub, numPositions);
+		}
+		else if(!MFString_Compare(pTok, "MeshVertexColors"))
+		{
+			pText = ParseColours(pText, sub, numPositions);
+		}
+		else if(!MFString_Compare(pTok, "XSkinMeshHeader"))
 		{
 			SkipToken(pText, "{");
 
 			// get num positions
-			int numUV = GetInt(pText, &pText);
-			MFDebug_Assert(numUV == numPositions, "Number of UV's does not match the number of verts in the mesh.");
+			int nMaxSkinWeightsPerVertex = GetInt(pText, &pText);
+			int nMaxSkinWeightsPerFace = GetInt(pText, &pText);
+			int nBones = GetInt(pText, &pText);
 
-			sub.uvs.resize(numUV);
-
-			// read positions
-			for(int a=0; a<numUV; a++)
-			{
-				sub.uvs[a].x = GetFloat(pText, &pText);
-				sub.uvs[a].y = GetFloat(pText, &pText);
-
-				if(a < numUV-1)
-					SkipToken(pText, ",");
-			}
-			SkipToken(pText, ";");
-
-			// read faces
+			// not yet sure how this helps...
 			for(int m=0; m<sub.matSubobjects.size(); m++)
 			{
-				int totalVerts = sub.matSubobjects[m].vertices.size();
-				for(int a=0; a<totalVerts; a++)
-				{
-					sub.matSubobjects[m].vertices[a].uv1 = sub.matSubobjects[m].vertices[a].position;
-				}
+				sub.matSubobjects[m].numBones = nBones;
 			}
 
 			SkipToken(pText, "}");
+		}
+		else if(!MFString_Compare(pTok, "SkinWeights"))
+		{
+			pText = ParseSkinWeights(pText, sub, numPositions);
+		}
+		else if(!MFString_Compare(pTok, "DeclData"))
+		{
+			SkipSection(pText);
 		}
 		else
 		{
@@ -452,15 +632,174 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat)
 		pTok = GetNextToken(pText, &pText);
 	}
 
+	// we should order the bone weights into the most to least weighting.
+
 	return pText;
 }
 
-const char *ParseFrame(const char *pText, const MFMatrix &mat)
+const char *ParseAnimation(const char *pText)
 {
-	MFMatrix transform = mat;
+	SkipToken(pText, "{");
 
-	char frameName[256];
-	GetNextToken(pText, &pText, frameName);
+	char bone[64];
+	int numFrames = 0;
+
+	MFVector *pQuats = NULL;
+	MFVector *pScale = NULL;
+	MFVector *pTrans = NULL;
+	MFMatrix *pMats = NULL;
+
+	const char *pTok = GetNextToken(pText, &pText);
+
+	while(MFString_Compare(pTok, "}"))
+	{
+		if(!MFString_Compare(pTok, "AnimationKey"))
+		{
+			SkipToken(pText, "{");
+
+			int type = GetInt(pText, &pText);
+			numFrames = GetInt(pText, &pText);
+
+			switch(type)
+			{
+				case KT_Quat:
+					pQuats = (MFVector*)MFHeap_Alloc(sizeof(MFVector)*numFrames);
+					break;
+				case KT_Scale:
+					pScale = (MFVector*)MFHeap_Alloc(sizeof(MFVector)*numFrames);
+					break;
+				case KT_Translation:
+					pTrans = (MFVector*)MFHeap_Alloc(sizeof(MFVector)*numFrames);
+					break;
+				case KT_Matrix:
+					pMats = (MFMatrix*)MFHeap_Alloc(sizeof(MFMatrix)*numFrames);
+					break;
+			}
+
+			// read data
+			for(int a=0; a<numFrames; a++)
+			{
+				int frame = GetInt(pText, &pText);
+				MFDebug_Assert(frame == a, "Frame sequence is not sequential.");
+
+				int numComponents = GetInt(pText, &pText);
+
+				switch(type)
+				{
+					case KT_Quat:
+						MFDebug_Assert(numComponents == 4, "Required 4 components for a quaternion.");
+						GetFloatArray(pText, (float*)&pQuats[a], numComponents, &pText);
+						break;
+					case KT_Scale:
+						MFDebug_Assert(numComponents == 3, "Required 3 components for a scale.");
+						GetFloatArray(pText, (float*)&pScale[a], numComponents, &pText);
+						break;
+					case KT_Translation:
+						MFDebug_Assert(numComponents == 3, "Required 3 components for a translation.");
+						GetFloatArray(pText, (float*)&pTrans[a], numComponents, &pText);
+						break;
+					case KT_Matrix:
+						MFDebug_Assert(numComponents == 16, "Required 16 components for a matrix.");
+						GetFloatArray(pText, (float*)&pMats[a], numComponents, &pText);
+						break;
+				}
+				SkipToken(pText, ";");
+
+				if(a < numFrames-1)
+					SkipToken(pText, ",");
+			}
+			SkipToken(pText, ";");
+
+			SkipToken(pText, "}");
+		}
+		else if(!MFString_Compare(pTok, "{"))
+		{
+			GetNextToken(pText, &pText, bone);
+			SkipToken(pText, "}");
+		}
+		else
+		{
+			printf("Unexpected token '%s'\n", pTok);
+			SkipSection(pText);
+		}
+
+		pTok = GetNextToken(pText, &pText);
+	}
+
+	// copy data to bone
+	F3DAnimation &anim = pModel->GetAnimationChunk()->anims.push();
+
+	anim.boneID = pModel->GetSkeletonChunk()->FindBone(bone);
+	if(anim.boneID == -1)
+	{
+		printf("Bone '%s' not found..\n", bone);
+		return pText;
+	}
+
+	anim.minTime = 0.0f;
+	anim.maxTime = (float)(numFrames-1);
+
+	for(int a=0; a<numFrames; a++)
+	{
+		anim.keyframes[a].time = (float)a;
+
+		if(pMats)
+		{
+			anim.keyframes[a].scale = MakeVector(pMats[a].GetXAxis().Magnitude3(), pMats[a].GetYAxis().Magnitude3(), pMats[a].GetZAxis().Magnitude3(), 1.0f);
+			anim.keyframes[a].translation = pMats[a].GetTrans();
+
+			// not sure how to do this yet...
+			anim.keyframes[a].rotation = MFVector::identity;
+		}
+		else
+		{
+			anim.keyframes[a].rotation = pQuats ? pQuats[a] : MFVector::identity;
+			anim.keyframes[a].scale = pScale ? pScale[a] : MFVector::one;
+			anim.keyframes[a].translation = pTrans ? pTrans[a] : MFVector::identity;
+		}
+	}
+
+	return pText;
+}
+
+const char *ParseAnimationSet(const char *pText)
+{
+	const char *pName = GetNextToken(pText, &pText);
+
+	if(MFString_Compare(pName, "{"))
+		SkipToken(pText, "{");
+
+	const char *pTok = GetNextToken(pText, &pText);
+
+	while(MFString_Compare(pTok, "}"))
+	{
+		if(!MFString_Compare(pTok, "Animation"))
+		{
+			pText = ParseAnimation(pText);
+		}
+		else
+		{
+			printf("Unexpected token '%s'\n", pTok);
+			SkipSection(pText);
+		}
+
+		pTok = GetNextToken(pText, &pText);
+	}
+
+	return pText;
+}
+
+const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
+{
+	int boneID = pModel->GetSkeletonChunk()->bones.size();
+	F3DBone &bone = pModel->GetSkeletonChunk()->bones[boneID];
+
+	F3DBone *pParent = parentID == -1 ? NULL : &pModel->GetSkeletonChunk()->bones[parentID];
+
+	bone.worldMatrix = mat;
+
+	GetNextToken(pText, &pText, bone.name);
+	MFString_Copy(bone.parentName, pParent ? pParent->name : "");
 
 	SkipToken(pText, "{");
 
@@ -470,23 +809,23 @@ const char *ParseFrame(const char *pText, const MFMatrix &mat)
 	{
 		if(!MFString_Compare(pTok, "Frame"))
 		{
-			pText = ParseFrame(pText, transform);
+			pText = ParseFrame(pText, bone.worldMatrix, boneID);
 		}
 		else if(!MFString_Compare(pTok, "FrameTransformMatrix"))
 		{
 			SkipToken(pText, "{");
 
-			MFMatrix tMat;
-			GetFloatArray(pText, (float*)&tMat, 16, &pText);
+			GetFloatArray(pText, (float*)&bone.boneMatrix, 16, &pText);
 
-			transform.Multiply(tMat);
+			bone.worldMatrix.Multiply(bone.boneMatrix);
 
 			SkipToken(pText, ";");
 			SkipToken(pText, "}");
 		}
 		else if(!MFString_Compare(pTok, "Mesh"))
 		{
-			pText = ParseMesh(pText, transform);
+			gMeshChunks.push(XMeshChunk::Create(bone.worldMatrix, pText));
+			SkipSection(pText);
 		}
 		else
 		{
@@ -520,11 +859,17 @@ void LoadTextXFile(const char *pText)
 		}
 		else if(!MFString_Compare(pTok, "Frame"))
 		{
-			pText = ParseFrame(pText, MFMatrix::identity);
+			pText = ParseFrame(pText, MFMatrix::identity, -1);
 		}
 		else if(!MFString_Compare(pTok, "Mesh"))
 		{
-			pText = ParseMesh(pText, MFMatrix::identity);
+			gMeshChunks.push(XMeshChunk::Create(MFMatrix::identity, pText));
+			SkipSection(pText);
+		}
+		else if(!MFString_Compare(pTok, "AnimationSet"))
+		{
+			gAnimSets.push(pText);
+			SkipSection(pText);
 		}
 		else if(!MFString_Compare(pTok, "template"))
 		{
@@ -539,6 +884,19 @@ void LoadTextXFile(const char *pText)
 
 		pTok = GetNextToken(pText, &pText);
 	}
+
+	int a;
+	for(a=0; a<gMeshChunks.size(); a++)
+	{
+		ParseMesh(gMeshChunks[a].pMesh, gMeshChunks[a].mat);
+	}
+
+	for(a=0; a<gAnimSets.size(); a++)
+	{
+		ParseAnimationSet(gAnimSets[a]);
+	}
+
+	
 }
 
 void ParseXFile(char *pFilePtr)
@@ -563,6 +921,9 @@ void ParseXFile(char *pFilePtr)
 	{
 		printf("Not a valid .x file...\n");
 	}
+
+	pModel->GetSkeletonChunk()->BuildHierarchy();
+	pModel->GetSkeletonChunk()->FlagReferenced();
 }
 
 int F3DFile::ReadX(char *pFilename)

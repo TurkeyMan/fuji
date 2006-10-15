@@ -97,6 +97,16 @@ float MFSqrt(float x);
 float MFRSqrt(float x);
 
 /**
+ * Very fast reciprocal square root estimate of a value.
+ * Very fast reciprocal square root estimate of a value.
+ * @param x Any positive value.
+ * @return The reciprocal square root estimate of \a x.
+ * @see MFSqrt()
+ * @see MFRSqrt()
+ */
+float MFRSqrtE(float x);
+
+/**
  * Raises a value to an arbitrary power.
  * Raises a value to an arbitrary power.
  * @param x The base value.

@@ -32,12 +32,12 @@ void Sprite::Draw()
 
 	world.SetIdentity();
 
-	world.m[0][0] = MFCos(angle);
-	world.m[0][1] = MFSin(angle);
-	world.m[1][0] = -MFSin(angle);
-	world.m[1][1] = MFCos(angle);
-	world.m[3][0] = position.x;
-	world.m[3][1] = position.y;
+	world.m[0] = MFCos(angle);
+	world.m[1] = MFSin(angle);
+	world.m[4] = -MFSin(angle);
+	world.m[5] = MFCos(angle);
+	world.m[12] = position.x;
+	world.m[13] = position.y;
 
 	MFMaterial_SetMaterial(pMaterial);
 

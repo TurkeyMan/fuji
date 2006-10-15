@@ -663,6 +663,9 @@
 				RelativePath=".\Source\MFPrimitive_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFQuaternion.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFRenderer.cpp">
 			</File>
 			<File
@@ -874,6 +877,12 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFPtrList.inl">
+			</File>
+			<File
+				RelativePath=".\Include\MFQuaternion.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFQuaternion.inl">
 			</File>
 			<File
 				RelativePath=".\Include\MFRenderer.h">

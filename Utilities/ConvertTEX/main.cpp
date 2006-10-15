@@ -8,6 +8,8 @@
 #include "LoadTarga.h"
 #include "LoadBMP.h"
 
+SourceImage* LoadPNG(const char *pFilename);
+
 #if defined(WIN32)
 #include <d3d8.h>
 #include <xgraphics.h>
@@ -163,6 +165,10 @@ int main(int argc, char *argv[])
 	else if(!MFString_CaseCmp(&fileName[fileNameLen-3], "bmp"))
 	{
 		pImage = LoadBMP(fileName);
+	}
+	else if(!MFString_CaseCmp(&fileName[fileNameLen-3], "png"))
+	{
+		pImage = LoadPNG(fileName);
 	}
 	else
 	{

@@ -17,13 +17,11 @@ SourceImage* LoadBMP(const char *pFilename)
 
 	unsigned char *pBMP = (unsigned char*)malloc(imageSize);
 
+	if(pBMP == NULL || imageSize < (sizeof(BMPHeader) + 1))
+		return NULL;
+
 	fread(pBMP, 1, imageSize, pFile);
 	fclose(pFile);
-
-	if(pBMP == NULL || imageSize < (sizeof(BMPHeader) + 1))
-	{
-		return NULL;
-	}
 
 	if(pBMP[0] != 'B' || pBMP[1] != 'M')
 	{

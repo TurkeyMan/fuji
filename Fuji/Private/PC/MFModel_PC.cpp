@@ -32,16 +32,16 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)&pSubobjects[a].pMeshChunks[b];
+				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[a].pMeshChunks;
 
-				MFMaterial_SetMaterial(pMC->pMaterial);
+				MFMaterial_SetMaterial(pMC[b].pMaterial);
 				MFRenderer_Begin();
 
-				pd3dDevice->SetVertexDeclaration(pMC->pVertexDeclaration);
-				pd3dDevice->SetStreamSource(0, pMC->pVertexBuffer, 0, pMC->vertexStride);
-				pd3dDevice->SetIndices(pMC->pIndexBuffer);
+				pd3dDevice->SetVertexDeclaration(pMC[b].pVertexDeclaration);
+				pd3dDevice->SetStreamSource(0, pMC[b].pVertexBuffer, 0, pMC[b].vertexStride);
+				pd3dDevice->SetIndices(pMC[b].pIndexBuffer);
 				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
-				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC->numVertices, 0, pMC->numIndices);
+				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC[b].numVertices, 0, pMC[b].numIndices);
 			}
 		}
 	}
@@ -122,4 +122,21 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 		pMC->pIndexData -= base;
 		(char*&)pMC->pVertexElements -= base;
 	}
+}
+
+MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModelTemplate, MFChunkType_SubObjects);
+
+	if(pChunk)
+	{
+		MFDebug_Assert(subobjectIndex < pChunk->count, "Subobject index out of bounds.");
+		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+
+		MFDebug_Assert(meshChunkIndex < pSubobjects->numMeshChunks, "Mesh chunk index out of bounds.");
+		MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[subobjectIndex].pMeshChunks;
+		return &pMC[meshChunkIndex];
+	}
+
+	return NULL;
 }

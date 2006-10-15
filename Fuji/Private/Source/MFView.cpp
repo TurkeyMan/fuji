@@ -175,15 +175,15 @@ void MFViewInternal_ProjectionMatrix(MFMatrix *pMat)
 	float zs = zf/zd;
 
 #if defined(_OPENGL_CLIP_SPACE)
-	pMat->m[0][0] = w;		pMat->m[0][1] = 0.0f;	pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
-	pMat->m[1][0] = 0.0f;	pMat->m[1][1] = h;		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
-	pMat->m[2][0] = 0.0f;	pMat->m[2][1] = 0.0f;	pMat->m[2][2] = 2.0f*zs;		pMat->m[2][3] = 1.0f;
-	pMat->m[3][0] = 0.0f;	pMat->m[3][1] = 0.0f;	pMat->m[3][2] = -2.0f*zn*zs-zf;	pMat->m[3][3] = 0.0f;
+	pMat->m[0] = w;		pMat->m[1] = 0.0f;	pMat->m[2] = 0.0f;				pMat->m[3] = 0.0f;
+	pMat->m[4] = 0.0f;	pMat->m[5] = h;		pMat->m[6] = 0.0f;				pMat->m[7] = 0.0f;
+	pMat->m[8] = 0.0f;	pMat->m[9] = 0.0f;	pMat->m[10] = 2.0f*zs;			pMat->m[11] = 1.0f;
+	pMat->m[12] = 0.0f;	pMat->m[13] = 0.0f;	pMat->m[14] = -2.0f*zn*zs-zf;	pMat->m[15] = 0.0f;
 #else
-	pMat->m[0][0] = w;		pMat->m[0][1] = 0.0f;	pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
-	pMat->m[1][0] = 0.0f;	pMat->m[1][1] = h;		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
-	pMat->m[2][0] = 0.0f;	pMat->m[2][1] = 0.0f;	pMat->m[2][2] = zs;				pMat->m[2][3] = 1.0f;
-	pMat->m[3][0] = 0.0f;	pMat->m[3][1] = 0.0f;	pMat->m[3][2] = -zn*zs;			pMat->m[3][3] = 0.0f;
+	pMat->m[0] = w;		pMat->m[1] = 0.0f;	pMat->m[2] = 0.0f;		pMat->m[3] = 0.0f;
+	pMat->m[4] = 0.0f;	pMat->m[5] = h;		pMat->m[6] = 0.0f;		pMat->m[7] = 0.0f;
+	pMat->m[8] = 0.0f;	pMat->m[9] = 0.0f;	pMat->m[10] = zs;		pMat->m[11] = 1.0f;
+	pMat->m[12] = 0.0f;	pMat->m[13] = 0.0f;	pMat->m[14] = -zn*zs;	pMat->m[15] = 0.0f;
 #endif
 }
 
@@ -198,15 +198,15 @@ void MFViewInternal_OrthoMatrix(MFMatrix *pMat)
 	float zf = 1.0f;
 
 #if defined(_OPENGL_CLIP_SPACE)
-	pMat->m[0][0] = 2.0f/(r-l);		pMat->m[0][1] = 0.0f;			pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
-	pMat->m[1][0] = 0.0f;			pMat->m[1][1] = 2.0f/(t-b);		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
-	pMat->m[2][0] = 0.0f;			pMat->m[2][1] = 0.0f;			pMat->m[2][2] = 1.0f/(zf-zn);	pMat->m[2][3] = 0.0f;
-	pMat->m[3][0] = (l+r)/(l-r);	pMat->m[3][1] = (t+b)/(b-t);	pMat->m[3][2] = zn/(zn-zf);		pMat->m[3][3] = 1.0f;
+	pMat->m[0] = 2.0f/(r-l);	pMat->m[1] = 0.0f;				pMat->m[2] = 0.0f;				pMat->m[3] = 0.0f;
+	pMat->m[4] = 0.0f;			pMat->m[1][1] = 2.0f/(t-b);		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
+	pMat->m[8] = 0.0f;			pMat->m[2][1] = 0.0f;			pMat->m[2][2] = 1.0f/(zf-zn);	pMat->m[2][3] = 0.0f;
+	pMat->m[12] = (l+r)/(l-r);	pMat->m[3][1] = (t+b)/(b-t);	pMat->m[3][2] = zn/(zn-zf);		pMat->m[3][3] = 1.0f;
 #else
-	pMat->m[0][0] = 2.0f/(r-l);		pMat->m[0][1] = 0.0f;			pMat->m[0][2] = 0.0f;			pMat->m[0][3] = 0.0f;
-	pMat->m[1][0] = 0.0f;			pMat->m[1][1] = 2.0f/(t-b);		pMat->m[1][2] = 0.0f;			pMat->m[1][3] = 0.0f;
-	pMat->m[2][0] = 0.0f;			pMat->m[2][1] = 0.0f;			pMat->m[2][2] = 1.0f/(zf-zn);	pMat->m[2][3] = 0.0f;
-	pMat->m[3][0] = (l+r)/(l-r);	pMat->m[3][1] = (t+b)/(b-t);	pMat->m[3][2] = zn/(zn-zf);		pMat->m[3][3] = 1.0f;
+	pMat->m[0] = 2.0f/(r-l);	pMat->m[1] = 0.0f;			pMat->m[2] = 0.0f;			pMat->m[3] = 0.0f;
+	pMat->m[4] = 0.0f;			pMat->m[5] = 2.0f/(t-b);	pMat->m[6] = 0.0f;			pMat->m[7] = 0.0f;
+	pMat->m[8] = 0.0f;			pMat->m[9] = 0.0f;			pMat->m[10] = 1.0f/(zf-zn);	pMat->m[11] = 0.0f;
+	pMat->m[12] = (l+r)/(l-r);	pMat->m[13] = (t+b)/(b-t);	pMat->m[14] = zn/(zn-zf);	pMat->m[15] = 1.0f;
 #endif
 }
 

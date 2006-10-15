@@ -43,13 +43,7 @@ class F3DVertex
 public:
 	F3DVertex();
 
-	bool operator==(const F3DVertex &v)
-	{
-		return position == v.position &&
-				uv1 == v.uv1 &&
-				normal == v.normal &&
-				colour == v.colour;
-	}
+	bool operator==(const F3DVertex &v);
 
 	int position;
 	int normal;
@@ -58,8 +52,8 @@ public:
 	int uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8;
 	int colour;
 	int illum;
-	int bone[4];
-	float weight[4];
+	int bone[8];
+	float weight[8];
 };
 
 class F3DTriangle
@@ -112,6 +106,8 @@ public:
 	F3DMaterialSubobject();
 
 	int materialIndex;
+	int numBones;
+	int maxWeights;
 
 	MFArray<F3DTriangle> triangles;
 	MFArray<F3DVertex> vertices;
@@ -156,18 +152,53 @@ public:
 	char parentName[64];
 
 	char options[1024];
+
+	int parent;
+	bool bIsSkinned;
+	bool bIsReferenced;
 };
 
 class F3DSkeletonChunk
 {
 public:
+	int FindBone(const char *pName);
+	void BuildHierarchy();
+	void FlagReferenced();
+	int GetNumReferencedBones();
+
 	MFArray<F3DBone> bones;
+};
+
+class F3DKeyFrame
+{
+public:
+	F3DKeyFrame();
+
+	float time;
+
+	MFVector rotation;
+	MFVector scale;
+	MFVector translation;
+};
+
+class F3DAnimation
+{
+public:
+	F3DAnimation();
+
+	void Optimise(float tolerance);
+
+	int boneID;
+	float minTime, maxTime;
+	MFArray<F3DKeyFrame> keyframes;
 };
 
 class F3DAnimationChunk
 {
 public:
-	MFArray<MFArray<MFMatrix> > keyframes;
+	void Optimise(float tolerance) { for(int a=0; a<anims.size(); a++) anims[a].Optimise(tolerance); }
+
+	MFArray<F3DAnimation> anims;
 };
 
 

@@ -13,6 +13,8 @@
 #include <d3d9.h>
 #endif
 
+#include <stdlib.h>
+
 void AdjustBoundingSphere(const MFVector &point, MFVector *pSphere)
 {
 	// if point is outside bounding sphere
@@ -257,7 +259,7 @@ void F3DFile::WriteF3D(char *pFilename)
 		pHeader->chunkCount++;
 	}
 
-	if(animationChunk.keyframes.size())
+	if(animationChunk.anims.size())
 	{
 		pChunks[pHeader->chunkCount].chunkType = CT_Animation;
 		pChunks[pHeader->chunkCount].elementCount = 0;
@@ -1036,18 +1038,40 @@ found:
 	{
 		BoneChunk *pBoneChunk = (BoneChunk*)pOffset;
 
+		int numBones = GetSkeletonChunk()->bones.size();
+
 		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
-		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->bones.size();
+		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->GetNumReferencedBones();
 
 		pOffset += MFALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
 
-		for(a=0; a<pDataHeaders[skeletonChunkIndex].count; a++)
+		int *pBoneRemappingTable = (int*)MFHeap_Alloc(sizeof(int) * (numBones + 1));
+		*pBoneRemappingTable = -1;
+		++pBoneRemappingTable;
+
+		int bc = 0;
+		for(a=0; a<numBones; a++)
 		{
-			pBoneChunk[a].pBoneName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].name);
-			pBoneChunk[a].pParentName = MFStringCache_Add(pStringCache, GetSkeletonChunk()->bones[a].parentName);
-			pBoneChunk[a].boneMatrix = GetSkeletonChunk()->bones[a].boneMatrix;
-			pBoneChunk[a].worldMatrix = GetSkeletonChunk()->bones[a].worldMatrix;
+			F3DBone &bone = GetSkeletonChunk()->bones[a];
+
+			if(bone.bIsReferenced)
+			{
+				pBoneRemappingTable[a] = bc;
+
+				pBoneChunk[bc].pBoneName = MFStringCache_Add(pStringCache, bone.name);
+				pBoneChunk[bc].pParentName = MFStringCache_Add(pStringCache, bone.parentName);
+				pBoneChunk[bc].boneMatrix = bone.boneMatrix;
+				pBoneChunk[bc].worldMatrix = bone.worldMatrix;
+				pBoneChunk[bc].parent = pBoneRemappingTable[bone.parent];
+				pBoneChunk[bc].reserved = 0;
+				++bc;
+			}
+			else
+				pBoneRemappingTable[a] = -1;
 		}
+
+		--pBoneRemappingTable;
+		MFHeap_Free(pBoneRemappingTable);
 	}
 
 	// write out collision data
@@ -1630,6 +1654,8 @@ int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
 F3DMaterialSubobject::F3DMaterialSubobject()
 {
 	materialIndex = 0;
+	numBones = 0;
+	maxWeights = 0;
 }
 
 F3DSubObject::F3DSubObject()
@@ -1640,6 +1666,59 @@ F3DSubObject::F3DSubObject()
 	dontExportThisSubobject = false;
 }
 
+int F3DSkeletonChunk::FindBone(const char *pName)
+{
+	if(!pName)
+		return NULL;
+
+	for(int a=0; a<bones.size(); a++)
+	{
+		if(!MFString_Compare(pName, bones[a].name))
+			return a;
+	}
+
+	return -1;
+}
+
+void F3DSkeletonChunk::BuildHierarchy()
+{
+	for(int a=0; a<bones.size(); a++)
+	{
+		bones[a].parent = FindBone(bones[a].parentName);
+	}
+}
+
+void F3DSkeletonChunk::FlagReferenced()
+{
+	for(int a=0; a<bones.size(); a++)
+	{
+		if(bones[a].bIsSkinned && !bones[a].bIsReferenced)
+		{
+			F3DBone *pBone = &bones[a];
+			pBone->bIsReferenced = true;
+
+			while(pBone->parent != -1)
+			{
+				pBone = &bones[pBone->parent];
+				pBone->bIsReferenced = true;
+			}
+		}
+	}
+}
+
+int F3DSkeletonChunk::GetNumReferencedBones()
+{
+	int numBones = 0;
+
+	for(int a=0; a<bones.size(); a++)
+	{
+		if(bones[a].bIsReferenced)
+			++numBones;
+	}
+
+	return numBones;
+}
+
 F3DBone::F3DBone()
 {
 	MFZeroMemory(name, 64);
@@ -1648,6 +1727,30 @@ F3DBone::F3DBone()
 
 	boneMatrix = MFMatrix::identity;
 	worldMatrix = MFMatrix::identity;
+
+	parent = -1;
+	bIsSkinned = false;
+	bIsReferenced = false;
+}
+
+F3DAnimation::F3DAnimation()
+{
+	boneID = -1;
+	minTime = 0.0f;
+	maxTime = 0.0f;
+}
+
+void F3DAnimation::Optimise(float tolerance)
+{
+
+}
+
+F3DKeyFrame::F3DKeyFrame()
+{
+	time = 0.0f;
+	rotation = MFVector::identity;
+	scale = MFVector::one;
+	translation = MFVector::identity;
 }
 
 F3DVertex::F3DVertex()
@@ -1659,8 +1762,13 @@ F3DVertex::F3DVertex()
 	illum = -1;
 	biNormal = -1;
 	tangent = -1;
-	bone[0] = bone[1] = bone[2] = bone[3] = -1;
-	weight[0] = weight[1] = weight[2] = weight[3] = 0.0f;
+	bone[0] = bone[1] = bone[2] = bone[3] = bone[4] = bone[5] = bone[6] = bone[7] = -1;
+	weight[0] = weight[1] = weight[2] = weight[3] = weight[4] = weight[5] = weight[6] = weight[7] = 0.0f;
+}
+
+bool F3DVertex::operator==(const F3DVertex &v)
+{
+	return !memcmp(this, &v,sizeof(*this));
 }
 
 F3DMaterial::F3DMaterial()

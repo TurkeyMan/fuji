@@ -10,12 +10,13 @@
 #define _MFMATRIX_H
 
 #include "MFVector.h"
+#include "MFQuaternion.h"
 
 MFALIGN_BEGIN(16)
 class MFMatrix
 {
 public:
-	float m[4][4];
+	float m[16];
 
 	static const MFMatrix identity;
 
@@ -27,7 +28,7 @@ public:
 
 	MFMatrix& Translate(const MFVector &trans);
 	MFMatrix& Rotate(const MFVector &axis, float angle);
-	MFMatrix& RotateQ(const MFVector &q);
+	MFMatrix& RotateQ(const MFQuaternion &q);
 	MFMatrix& RotateYPR(float yaw, float pitch, float roll);
 	MFMatrix& RotateX(float angle);
 	MFMatrix& RotateY(float angle);
@@ -36,12 +37,14 @@ public:
 
 	MFMatrix& SetTranslation(const MFVector &trans);
 	MFMatrix& SetRotation(const MFVector &axis, float angle);
-	MFMatrix& SetRotationQ(const MFVector &q);
+	MFMatrix& SetRotationQ(const MFQuaternion &q);
 	MFMatrix& SetRotationYPR(float yaw, float pitch, float roll);
 	MFMatrix& SetRotationX(float angle);
 	MFMatrix& SetRotationY(float angle);
 	MFMatrix& SetRotationZ(float angle);
 	MFMatrix& SetScale(const MFVector& scale);
+
+//	MFQuaternion GetRotationQ() const;
 
 	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);
 
@@ -66,7 +69,7 @@ public:
 
 	MFMatrix& Tween(const MFMatrix& start, const MFMatrix& end, float t);
 
-	MFVector CalculateQuaternion();
+	MFQuaternion CalculateQuaternion();
 
 	MFMatrix& ClearW();
 

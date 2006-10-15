@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware/zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware/zlib&quot;;&quot;$(ProjectDir)Middleware/lpng1212&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_FUJI_UTIL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -60,7 +60,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware/zlib&quot;;&quot;$(ProjectDir)Middleware/lpng1212&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_CONSOLE;_FUJI_UTIL"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
@@ -306,6 +306,64 @@
 						RelativePath=".\Middleware\zlib\minizip\zip.h">
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="libpng"
+				Filter="">
+				<File
+					RelativePath=".\Middleware\lpng1212\png.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\png.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngconf.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngerror.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngget.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngmem.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngpread.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngread.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrio.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrtran.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrutil.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngset.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngtrans.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngvcrd.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwio.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwrite.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwtran.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwutil.c">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

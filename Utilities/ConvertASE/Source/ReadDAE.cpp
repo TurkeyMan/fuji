@@ -752,11 +752,10 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 			// apply this node's transformation matrix to the current transform
 			const char *pMat = pTransform->GetText();
 
-			int c = 0;
-			while(*pMat && c<16)
+			int lookup[16] = { 0,4,8,12, 1,5,9,13, 2,6,10,14, 3,7,11,15 };
+			for(int c=0; *pMat && c<16; c++)
 			{
-				localMat.m[c%4][c>>2] =  (float)atof(pMat);
-				++c;
+				localMat.m[lookup[c]] = (float)atof(pMat);
 
 				while(*pMat && !MFIsWhite(*pMat))
 					pMat++;

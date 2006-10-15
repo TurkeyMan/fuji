@@ -106,14 +106,26 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName);
  */
 const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
 
+/**
+ * Get the models bounding volume.
+ * Gets the models bounding volume.
+ * @param pModel Model instance.
+ * @return Pointer to the models bounding volume.
+ */
 MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
 
+/**
+ * Get the models bounding volume.
+ * Gets the models bounding volume.
+ * @param pModel Model instance.
+ * @return Pointer to the models bounding volume.
+ */
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 
 // bone structure
 int MFModel_GetNumBones(MFModel *pModel);
 const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
-const MFVector& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
+const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
 int MFModel_GetBoneIndex(MFModel *pModel, const char *pName);
 
 // tag's

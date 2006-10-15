@@ -1,5 +1,7 @@
 #include <math.h>
 
+//#define _USE_MFSQRT
+
 inline float MFSin(float angle)
 {
 	return sinf(angle);
@@ -30,24 +32,92 @@ inline float MFATan(float angle)
 	return atanf(angle);
 }
 
+#if defined(_USE_MFSQRT)
+inline float MFFRExp(float x, int *pw2)
+{
+	union float_long { float f; long l; } fl;
+    long int i;
+
+    fl.f=x;
+    // Find the exponent (power of 2)
+    i  = (fl.l >> 23) & 0x000000ff;
+    i -= 0x7e;
+    *pw2 = i;
+    fl.l &= 0x807fffff; // strip all exponent bits
+    fl.l |= 0x3f000000; // mantissa between 0.5 and 1
+
+    return fl.f;
+}
+
+inline float MFLDExp(float x, int pw2)
+{
+    union float_long { float f; long l; } fl;
+    long e;
+
+    fl.f = x;
+
+    e=(fl.l >> 23) & 0x000000ff;
+    e+=pw2;
+    fl.l= ((e & 0xff) << 23) | (fl.l & 0x807fffff);
+
+    return fl.f;
+}
+#endif
+
+inline float MFSqrt(float x)
+{
+#if defined(_USE_MFSQRT)
+	float f, y;
+    int n;
+
+    if(x==0.0f) return x;
+    else if(x==1.0f) return 1.0f;
+    else if(x<0.0f)
+        return 0.0f;
+    f=MFFRExp(x, &n);
+    y=0.41731f+0.59016f*f; // Educated guess
+    // For a 24 bit mantisa (float), two iterations are sufficient
+    y+=f/y;
+    y=MFLDExp(y, -2) + f/y; // Faster version of 0.25 * y + f/y
+
+    if(n&1)
+    {
+        y*=0.7071067812f;
+        ++n;
+    }
+    return MFLDExp(y, n/2);
+#else
+	return sqrtf(x);
+#endif
+}
+
 inline float MFRSqrt(float x)
 {
 	// TODO: this should probably be considered
 //	float s = sqrtf(x);
 //	return s > 0.0f ? 1.0f / s : 0.0f;
 
-	return 1.0f / sqrtf(x);
+	return 1.0f / MFSqrt(x);
 }
 
-inline float MFSqrt(float x)
+inline float MFRSqrtE(float x)
 {
-	return sqrtf(x);
+	long i;
+	float y, r;
+
+	y = x * 0.5f;
+	i = *(long *)&x;
+	i = 0x5f3759df - (i>>1);
+	r = *(float *)&i;
+	r = r * (1.5f - r * r * y);
+
+	return r;
 }
 
 inline float MFRcp(float x)
 {
 	// TODO: this should probably be considered
-//	return x > 0.0f ? 1.0f / x : 0.0f;
+//	return x != 0.0f ? 1.0f / x : 0.0f;
 
 	return 1.0f / x;
 }

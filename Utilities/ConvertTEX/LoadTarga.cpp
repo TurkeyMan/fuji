@@ -17,13 +17,11 @@ SourceImage* LoadTarga(const char *pFilename)
 
 	unsigned char *pTarga = (unsigned char*)malloc(imageSize);
 
+	if(pTarga == NULL || imageSize < (sizeof(TgaHeader) + 1))
+		return NULL;
+
 	fread(pTarga, 1, imageSize, pFile);
 	fclose(pFile);
-
-	if(pTarga == NULL || imageSize < (sizeof(TgaHeader) + 1))
-	{
-		return NULL;
-	}
 
 	TgaHeader *pHeader = (TgaHeader*)pTarga;
 	unsigned char *pImageData = pTarga + sizeof(TgaHeader);

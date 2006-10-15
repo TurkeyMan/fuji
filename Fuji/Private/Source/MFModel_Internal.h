@@ -38,6 +38,7 @@ struct MFModelDataChunk
 };
 
 MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID);
+MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex);
 
 struct MFModel
 {
@@ -84,8 +85,8 @@ struct BoneChunk
 	MFMatrix worldMatrix;
 	const char *pBoneName;
 	const char *pParentName;
-
-	uint32 reserved[2];
+	int parent;
+	uint32 reserved;
 };
 
 struct TagChunk

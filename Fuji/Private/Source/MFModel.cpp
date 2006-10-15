@@ -84,7 +84,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
 					{
-						MFModel_FixUpMeshChunk(&pSubobjectChunk[b].pMeshChunks[c], base, load);
+						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), base, load);
 					}
 
 					if(!load)
@@ -228,7 +228,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 						{
-							MFModel_CreateMeshChunk(&pSubobjects[a].pMeshChunks[b]);
+							MFModel_CreateMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, a, b));
 						}
 					}
 				}
@@ -271,7 +271,7 @@ void MFModel_Destroy(MFModel *pModel)
 
 				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 				{
-					MFModel_DestroyMeshChunk(&pSubobjects[a].pMeshChunks[b]);
+					MFModel_DestroyMeshChunk(MFModel_GetMeshChunk(pModel, a, b));
 				}
 			}
 		}
@@ -294,11 +294,121 @@ void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
 	pModel->modelColour = colour;
 }
 
+const char* MFModel_GetName(MFModel *pModel)
+{
+	return pModel->pTemplate->pName;
+}
+
+int MFModel_GetNumSubObjects(MFModel *pModel)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	
+	if(pChunk)
+		return pChunk->count;
+
+	return 0;
+}
+
+int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	
+	if(pChunk)
+	{
+		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+
+		for(int a=0; a<pChunk->count; ++a)
+		{
+			if(!MFString_Compare(pSubobjects->pSubObjectName, pSubobjectName))
+				return a;
+		}
+	}
+
+	return -1;
+}
+
+const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	
+	if(pChunk)
+	{
+		MFDebug_Assert(index < pChunk->count, "Subobject index out of bounds.");
+
+		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		return pSubobjects[index].pSubObjectName;
+	}
+
+	return NULL;
+}
+
 MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
 {
 	return &pModel->pTemplate->boundingVolume;
 }
 
+MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex)
+{
+	return MFModel_GetMeshChunkInternal(pModel->pTemplate, subobjectIndex, meshChunkIndex);
+}
+
+int MFModel_GetNumBones(MFModel *pModel)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
+
+	if(pChunk)
+		return pChunk->count;
+
+	return 0;
+}
+
+const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
+
+	if(pChunk)
+	{
+		MFDebug_Assert(boneIndex < pChunk->count, "boneIndex is out of bounds.");
+
+		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+		return pBones[boneIndex].pBoneName;
+	}
+
+	return 0;
+}
+
+const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
+
+	if(pChunk)
+	{
+		MFDebug_Assert(boneIndex < pChunk->count, "boneIndex is out of bounds.");
+
+		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+		return pBones[boneIndex].worldMatrix;
+	}
+
+	return MFMatrix::identity;
+}
+
+int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
+	
+	if(pChunk)
+	{
+		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+
+		for(int a=0; a<pChunk->count; ++a)
+		{
+			if(!MFString_Compare(pBones->pBoneName, pName))
+				return a;
+		}
+	}
+
+	return -1;
+}
 
 int MFModel_GetNumTags(MFModel *pModel)
 {

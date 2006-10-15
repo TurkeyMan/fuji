@@ -205,6 +205,9 @@ public:
 
 	// general purpose vector operators
 
+	void Set(float x, float y, float z = 0.0f, float w = 1.0f);	/**< Set each component of a vector. */
+	void Swizzle(const MFVector &source, const uint8 x, const uint8 y, const uint8 z, const uint8 w);	/**< Swizzle components within a vector. */
+
 	MFVector operator-(); /**< Unary minus operator. */
 
 	bool operator==(const MFVector &v) const;	/**< Comparison operator. */
