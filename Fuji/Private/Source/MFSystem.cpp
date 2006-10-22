@@ -6,6 +6,7 @@
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
+#include "MFAnimation_Internal.h"
 #include "MFInput_Internal.h"
 #include "MFView_Internal.h"
 #include "MFFileSystem_Internal.h"
@@ -75,6 +76,11 @@ MFDefaults gDefaults =
 	// ModelDefaults
 	{
 		256				// maxModels
+	},
+
+	// AnimationDefaults
+	{
+		256				// maxAnimations
 	},
 
 	// FileSystemDefaults
@@ -156,6 +162,7 @@ void MFSystem_Init()
 	MFMaterial_InitModule();
 
 	MFModel_InitModule();
+	MFAnimation_InitModule();
 
 	MFPrimitive_InitModule();
 	MFFont_InitModule();
@@ -191,6 +198,7 @@ void MFSystem_Deinit()
 	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();
 
+	MFAnimation_DeinitModule();
 	MFModel_DeinitModule();
 
 	MFMaterial_DeinitModule();

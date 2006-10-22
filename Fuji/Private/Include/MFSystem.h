@@ -27,43 +27,49 @@ struct MFDefaults
 	/** Display Defaults. */
 	struct DisplayDefaults
 	{
-		uint32 displayWidth;	/**< Display width */
-		uint32 displayHeight;	/**< Display height */
+		uint32 displayWidth;			/**< Display width */
+		uint32 displayHeight;			/**< Display height */
 	} display;
 
 	/** View Defaults. */
 	struct ViewDefaults
 	{
-		int maxViewsOnStack;	/**< Maximum view stack height */
-		float defaultFOV;		/**< Default field of view */
-		float defaultAspect;	/**< Default aspect ratio */
-		float defaultNearPlane;	/**< Default near plane */
-		float defaultFarPlane;	/**< Default far plane */
-		float orthoMinX;		/**< Ortho min X */
-		float orthoMinY;		/**< Ortho min Y */
-		float orthoMaxX;		/**< Ortho max X */
-		float orthoMaxY;		/**< Ortho max Y */
+		int maxViewsOnStack;			/**< Maximum view stack height */
+		float defaultFOV;				/**< Default field of view */
+		float defaultAspect;			/**< Default aspect ratio */
+		float defaultNearPlane;			/**< Default near plane */
+		float defaultFarPlane;			/**< Default far plane */
+		float orthoMinX;				/**< Ortho min X */
+		float orthoMinY;				/**< Ortho min Y */
+		float orthoMaxX;				/**< Ortho max X */
+		float orthoMaxY;				/**< Ortho max Y */
 	} view;
 
 	/** Texture Defaults. */
 	struct TextureDefaults
 	{
-		uint32 maxTextures;		/**< Maximum loaded textures */
+		uint32 maxTextures;				/**< Maximum loaded textures */
 	} texture;
 
 	/** Material Defaults. */
 	struct MaterialDefaults
 	{
-		uint32 maxMaterialTypes;	/**< Maximum material types */
-		uint32 maxMaterialDefs;		/**< Maximum material definitions */
-		uint32 maxMaterials;		/**< Maximum materials */
+		uint32 maxMaterialTypes;		/**< Maximum material types */
+		uint32 maxMaterialDefs;			/**< Maximum material definitions */
+		uint32 maxMaterials;			/**< Maximum materials */
 	} material;
 
 	/** Model Defaults. */
 	struct ModelDefaults
 	{
-		uint32 maxModels;			/**< Maximum models */
+		uint32 maxModels;				/**< Maximum models */
 	} model;
+
+	/** Animation Defaults. */
+	struct AnimationDefaults
+	{
+		uint32 maxAnimations;			/**< Maximum animations */
+	} animation;
 
 	/** FileSystem Defaults. */
 	struct FileSystemDefaults
@@ -78,7 +84,7 @@ struct MFDefaults
 	/** Sound Defaults. */
 	struct SoundDefaults
 	{
-		int maxMusicTracks;	/**< Maximum music tracks */
+		int maxMusicTracks;				/**< Maximum music tracks */
 	} sound;
 
 	/** Input Defaults. */
@@ -92,7 +98,7 @@ struct MFDefaults
 	/** Miscellaneous Defaults. */
 	struct MiscellaneousDefaults
 	{
-		bool enableUSBOnStartup;	/**< Unable USB on startup (for PSP) */
+		bool enableUSBOnStartup;		/**< Unable USB on startup (for PSP) */
 	} misc;
 };
 

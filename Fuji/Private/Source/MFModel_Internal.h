@@ -4,6 +4,7 @@
 #include "MFBoundingVolume.h"
 #include "MFModel.h"
 #include "MFMaterial_Internal.h"
+#include "MFAnimation.h"
 
 struct MFModelTemplate;
 
@@ -45,11 +46,12 @@ struct MFModel
 	MFMatrix worldMatrix;
 	MFVector modelColour;
 
+	MFModelTemplate *pTemplate;
+	MFAnimation *pAnimation;
+
 	// subobject flags
 	// * enabled flags
 	// * subobject colours
-
-	MFModelTemplate *pTemplate;
 };
 
 struct MFModelTemplate
@@ -83,6 +85,7 @@ struct BoneChunk
 {
 	MFMatrix boneMatrix;
 	MFMatrix worldMatrix;
+	MFMatrix invWorldMatrix;
 	const char *pBoneName;
 	const char *pParentName;
 	int parent;

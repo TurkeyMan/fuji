@@ -18,6 +18,7 @@
 struct MFModel;
 
 struct MFMeshChunk;
+struct MFAnimation;
 
 /**
  * Creates a model from the filesystem.
@@ -28,6 +29,17 @@ struct MFMeshChunk;
  * @see MFModel_Draw()
  */
 MFModel* MFModel_Create(const char *pFilename);
+
+/**
+ * Creates a model from the filesystem.
+ * Creates a model from the filesystem.
+ * @param pFilename Filename of model to load.
+ * @param pAnimationFilename Filename of an animation to load and bind to the model instance.
+ * @return Returns a new instance of the specified model with animation already loaded and bound.
+ * @see MFModel_Create()
+ * @see MFModel_BindAnimation()
+ */
+MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename);
 
 /**
  * Dstroy a model.
@@ -125,6 +137,8 @@ MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 
 // bone structure
+MFAnimation *MFModel_GetAnimation(MFModel *pModel);
+
 int MFModel_GetNumBones(MFModel *pModel);
 const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
 const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);

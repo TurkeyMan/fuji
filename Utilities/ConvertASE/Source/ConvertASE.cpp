@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
 	char dest[1024] = "";
 	int a;
 
+	bool writeAnimation = true;
+
 	pModel = new F3DFile;
 
 	// process command line
@@ -142,6 +144,8 @@ int main(int argc, char *argv[])
 
 		dest[a] = 0;
 		MFString_Cat(dest, "mdl");
+
+		writeAnimation = true;
 	}
 
 	// find output extension
@@ -161,6 +165,17 @@ int main(int argc, char *argv[])
 		}
 
 		pModel->WriteMDL(dest, platform);
+
+		if(writeAnimation && pModel->GetAnimationChunk()->anims.size())
+		{
+			// print the model
+			printf("> %s\n", dest);
+
+			// write animation file
+			dest[a] = 0;
+			MFString_Cat(dest, "anm");
+			pModel->WriteANM(dest, platform);
+		}
 	}
 	else
 	{

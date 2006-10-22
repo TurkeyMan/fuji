@@ -108,20 +108,10 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
 
-	if(load)
-	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial + base);
-		pMC->pVertexData += base;
-		pMC->pIndexData += base;
-		(char*&)pMC->pVertexElements += base;
-	}
-	else
-	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial - base);
-		pMC->pVertexData -= base;
-		pMC->pIndexData -= base;
-		(char*&)pMC->pVertexElements -= base;
-	}
+	MFFixUp(pMC->pMaterial, (void*)base, load);
+	MFFixUp(pMC->pVertexData, (void*)base, load);
+	MFFixUp(pMC->pIndexData, (void*)base, load);
+	MFFixUp(pMC->pVertexElements, (void*)base, load);
 }
 
 MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)

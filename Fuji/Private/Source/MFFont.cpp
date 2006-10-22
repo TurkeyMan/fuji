@@ -128,14 +128,14 @@ MFFont* MFFont_Create(const char *pFilename)
 	MFDebug_Assert(pFont, MFStr("Unable to load font '%s'", pFilename));
 
 	// fixup pointers
-	(char*&)pFont->pName += (uint32&)pFont;
-	(char*&)pFont->pCharacterMapping += (uint32&)pFont;
-	(char*&)pFont->pChars += (uint32&)pFont;
-	(char*&)pFont->ppPages += (uint32&)pFont;
+	MFFixUp(pFont->pName, pFont, 1);
+	MFFixUp(pFont->pCharacterMapping, pFont, 1);
+	MFFixUp(pFont->pChars, pFont, 1);
+	MFFixUp(pFont->ppPages, pFont, 1);
 
 	for(int a=0; a<pFont->numPages; a++)
 	{
-		(char*&)pFont->ppPages[a] += (uint32&)pFont;
+		MFFixUp(pFont->ppPages[a], pFont, 1);
 	}
 
 	// create materials

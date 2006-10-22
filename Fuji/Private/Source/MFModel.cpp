@@ -5,6 +5,7 @@
 #include "MFFileSystem.h"
 #include "MFView.h"
 #include "MFCollision_Internal.h"
+#include "MFAnimation.h"
 
 #include "Display_Internal.h"
 #include "MFRenderer.h"
@@ -53,18 +54,17 @@ MFModelTemplate* MFModel_FindTemplate(const char *pName)
 void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 {
 	int a, b, c;
-	uint32 base = (uint32)pTemplate;
 
 	if(load)
 	{
-		(char*&)pTemplate->pDataChunks += base;
-		pTemplate->pName += base;
+		MFFixUp(pTemplate->pDataChunks, pTemplate, 1);
+		MFFixUp(pTemplate->pName, pTemplate, 1);
 	}
 
 	for(a=0; a<pTemplate->numDataChunks; a++)
 	{
 		if(load)
-			(char*&)pTemplate->pDataChunks[a].pData += base;
+			MFFixUp(pTemplate->pDataChunks[a].pData, pTemplate, 1);
 
 		switch(pTemplate->pDataChunks[a].chunkType)
 		{
@@ -76,23 +76,23 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 				{
 					if(load)
 					{
-						(char*&)pSubobjectChunk[b].pMeshChunks += base;
+						MFFixUp(pSubobjectChunk[b].pMeshChunks, pTemplate, 1);
 
-						pSubobjectChunk[b].pSubObjectName += base;
-//						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial + base);
+						MFFixUp(pSubobjectChunk[b].pSubObjectName, pTemplate, 1);
+//						MFFixUp(pSubobjectChunk[b].pMaterial, pTemplate, 1);
 					}
 
 					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
 					{
-						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), base, load);
+						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), (uint32&)pTemplate, load);
 					}
 
 					if(!load)
 					{
-						pSubobjectChunk[b].pSubObjectName -= base;
-//						pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - base);
+						MFFixUp(pSubobjectChunk[b].pSubObjectName, pTemplate, 0);
+//						MFFixUp(pSubobjectChunk[b].pMaterial, pTemplate, 0);
 
-						(char*&)pSubobjectChunk[b].pMeshChunks -= base;
+						MFFixUp(pSubobjectChunk[b].pMeshChunks, pTemplate, 0);
 					}
 				}
 				break;
@@ -104,16 +104,8 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
-					if(load)
-					{
-						pBoneChunk[b].pBoneName += base;
-						pBoneChunk[b].pParentName += base;
-					}
-					else
-					{
-						pBoneChunk[b].pBoneName -= base;
-						pBoneChunk[b].pParentName -= base;
-					}
+					MFFixUp(pBoneChunk[b].pBoneName, pTemplate, load);
+					MFFixUp(pBoneChunk[b].pParentName, pTemplate, load);
 				}
 				break;
 			}
@@ -124,28 +116,19 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
+					MFFixUp(pCollisionChunk[b].pName, pTemplate, load);
+
 					if(load)
-					{
-						pCollisionChunk[b].pName += base;
-						(char*&)pCollisionChunk[b].pCollisionTemplateData += base;
+						MFFixUp(pCollisionChunk[b].pCollisionTemplateData, pTemplate, 1);
 
-						if(pCollisionChunk[b].type == MFCT_Mesh)
-						{
-							MFCollisionMesh *pMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
-							(char*&)pMesh->pTriangles += base;
-						}
-					}
-					else
+					if(pCollisionChunk[b].type == MFCT_Mesh)
 					{
-						if(pCollisionChunk[b].type == MFCT_Mesh)
-						{
-							MFCollisionMesh *pMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
-							(char*&)pMesh->pTriangles -= base;
-						}
-
-						(char*&)pCollisionChunk[b].pCollisionTemplateData -= base;
-						pCollisionChunk[b].pName -= base;
+						MFCollisionMesh *pMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
+						MFFixUp(pMesh->pTriangles, pTemplate, load);
 					}
+
+					if(!load)
+						MFFixUp(pCollisionChunk[b].pCollisionTemplateData, pTemplate, 0);
 				}
 				break;
 			}
@@ -156,14 +139,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
-					if(load)
-					{
-						pTags[b].pTagName += base;
-					}
-					else
-					{
-						pTags[b].pTagName -= base;
-					}
+					MFFixUp(pTags[b].pTagName, pTemplate, load);
 				}
 				break;
 			}
@@ -173,13 +149,13 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 		}
 
 		if(!load)
-			(char*&)pTemplate->pDataChunks[a].pData -= base;
+			MFFixUp(pTemplate->pDataChunks[a].pData, pTemplate, 0);
 	}
 
 	if(!load)
 	{
-		(char*&)pTemplate->pDataChunks -= base;
-		pTemplate->pName -= base;
+		MFFixUp(pTemplate->pDataChunks, pTemplate, 0);
+		MFFixUp(pTemplate->pName, pTemplate, 0);
 	}
 }
 
@@ -247,14 +223,30 @@ MFModel* MFModel_Create(const char *pFilename)
 	pModel->worldMatrix = MFMatrix::identity;
 	pModel->modelColour = MFVector::one;
 	pModel->pTemplate = pTemplate;
+	pModel->pAnimation = NULL;
 
 	++pTemplate->refCount;
 
 	return pModel;
 }
 
+MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename)
+{
+	MFModel *pModel = MFModel_Create(pFilename);
+
+	if(pAnimationFilename)
+		MFAnimation_Create(pAnimationFilename, pModel);
+
+	return pModel;
+}
+
 void MFModel_Destroy(MFModel *pModel)
 {
+	// free instance data
+	if(pModel->pAnimation)
+		MFAnimation_Destroy(pModel->pAnimation);
+
+	// decrement and possibly free template
 	--pModel->pTemplate->refCount;
 
 	if(!pModel->pTemplate->refCount)
@@ -280,6 +272,7 @@ void MFModel_Destroy(MFModel *pModel)
 		MFHeap_Free(pModel->pTemplate);
 	}
 
+	//free instance
 	MFHeap_Free(pModel);
 }
 
@@ -350,6 +343,11 @@ MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex)
 {
 	return MFModel_GetMeshChunkInternal(pModel->pTemplate, subobjectIndex, meshChunkIndex);
+}
+
+MFAnimation *MFModel_GetAnimation(MFModel *pModel)
+{
+	return pModel->pAnimation;
 }
 
 int MFModel_GetNumBones(MFModel *pModel)

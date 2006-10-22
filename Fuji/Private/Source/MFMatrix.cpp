@@ -127,25 +127,25 @@ MFMatrix& MFMatrix::SetRotation(const MFVector &axis, float angle)
 
 MFMatrix& MFMatrix::SetRotationQ(const MFQuaternion &q)
 {
-    float xx = q.x*q.x;
-    float xy = q.x*q.y;
-    float xz = q.x*q.z;
-    float xw = q.x*q.w;
-    float yy = q.y*q.y;
-    float yz = q.y*q.z;
-    float yw = q.y*q.w;
-    float zz = q.z*q.z;
-    float zw = q.z*q.w;
+	float xx = q.x*q.x;
+	float xy = q.x*q.y;
+	float xz = q.x*q.z;
+	float xw = q.x*q.w;
+	float yy = q.y*q.y;
+	float yz = q.y*q.z;
+	float yw = q.y*q.w;
+	float zz = q.z*q.z;
+	float zw = q.z*q.w;
 
-    m[0] = 1.0f - 2.0f*(yy+zz);
-    m[1] = 2.0f*(xy-zw);
-    m[2] = 2.0f*(xz+yw);
-    m[4] = 2.0f*(xy+zw);
-    m[5] = 1.0f - 2.0f*(xx+zz);
-    m[6] = 2.0f*(yz-xw);
-    m[8] = 2.0f*(xz-yw);
-    m[9] = 2.0f*(yz+xw);
-    m[10] = 1.0f - 2.0f*(xx+yy);
+	m[0] = 1.0f - 2.0f*(yy+zz);
+	m[1] = 2.0f*(xy-zw);
+	m[2] = 2.0f*(xz+yw);
+	m[4] = 2.0f*(xy+zw);
+	m[5] = 1.0f - 2.0f*(xx+zz);
+	m[6] = 2.0f*(yz-xw);
+	m[8] = 2.0f*(xz-yw);
+	m[9] = 2.0f*(yz+xw);
+	m[10] = 1.0f - 2.0f*(xx+yy);
 
 	m[12] = m[13] = m[14] = m[3]= m[7] = m[11] = 0.0f;
 	m[15] = 1.0f;
@@ -153,72 +153,52 @@ MFMatrix& MFMatrix::SetRotationQ(const MFQuaternion &q)
 	return *this;
 }
 
-/*
 MFQuaternion MFMatrix::GetRotationQ() const
 {
+	MFQuaternion q;
+	float trace = m[0] + m[5] + m[10] + 1.0f;
 
-	Calculate the trace of the matrix T from the equation:
+	if(trace > 0.0f)
+	{
+		float s = MFRSqrt(trace) * 0.5f;
+		q.w = 0.25f / s;
+		q.x = (m[9] - m[6]) * s;
+		q.y = (m[2] - m[8]) * s;
+		q.z = (m[4] - m[1]) * s;
+	}
+	else
+	{
+		if(m[0] > m[5] && m[0] > m[10])
+		{
+			float s = 2.0f * MFSqrt(1.0f + m[0] - m[5] - m[10]);
+			float invS = 1.0f / s;
+			q.x = 0.25f * s;
+			q.y = (m[1] + m[4]) * invS;
+			q.z = (m[2] + m[8]) * invS;
+			q.w = (m[6] - m[9]) * invS;
+		}
+		else if(m[5] > m[10])
+		{
+			float s = 2.0f * MFSqrt(1.0f + m[5] - m[0] - m[10]);
+			float invS = 1.0f / s;
+			q.x = (m[1] + m[4]) * invS;
+			q.y = 0.25f * s;
+			q.z = (m[6] + m[9]) * invS;
+			q.w = (m[2] - m[8]) * invS;
+		}
+		else
+		{
+			float s = 2.0f * MFSqrt(1.0f + m[10] - m[0] - m[5]);
+			float invS = 1.0f / s;
+			q.x = (m[2] + m[8] ) * invS;
+			q.y = (m[6] + m[9] ) * invS;
+			q.z = 0.25f * s;
+			q.w = (m[1] - m[4] ) * invS;
+		}
+	}
 
-                2     2     2
-      T = 4 - 4x  - 4y  - 4z
-
-                 2    2    2
-        = 4( 1 -x  - y  - z )
-
-        = mat[0] + mat[5] + mat[10] + 1
-
-
-    If the trace of the matrix is greater than zero, then
-    perform an "instant" calculation.
-
-      S = 0.5 / sqrt(T)
-
-      W = 0.25 / S
-
-      X = ( mat[9] - mat[6] ) * S
-
-      Y = ( mat[2] - mat[8] ) * S
-
-      Z = ( mat[4] - mat[1] ) * S
-
-
-    If the trace of the matrix is less than or equal to zero
-    then identify which major diagonal element has the greatest
-    value.
-
-    Depending on this value, calculate the following:
-
-      Column 0:
-        S  = sqrt( 1.0 + mr[0] - mr[5] - mr[10] ) * 2;
-
-        Qx = 0.5 / S;
-        Qy = (mr[1] + mr[4] ) / S;
-        Qz = (mr[2] + mr[8] ) / S;
-        Qw = (mr[6] + mr[9] ) / S;
-
-      Column 1:
-        S  = sqrt( 1.0 + mr[5] - mr[0] - mr[10] ) * 2;
-
-        Qx = (mr[1] + mr[4] ) / S;
-        Qy = 0.5 / S;
-        Qz = (mr[6] + mr[9] ) / S;
-        Qw = (mr[2] + mr[8] ) / S;
-
-      Column 2:
-        S  = sqrt( 1.0 + mr[10] - mr[0] - mr[5] ) * 2;
-
-        Qx = (mr[2] + mr[8] ) / S;
-        Qy = (mr[6] + mr[9] ) / S;
-        Qz = 0.5 / S;
-        Qw = (mr[1] + mr[4] ) / S;
-
-     The quaternion is then defined as:
-
-       Q = | Qx Qy Qz Qw |
-
-	return MFVector::identity;
+	return q;
 }
-*/
 
 MFMatrix& MFMatrix::SetRotationYPR(float yaw, float pitch, float roll)
 {
@@ -574,7 +554,7 @@ MFMatrix& MFMatrix::Inverse(const MFMatrix &mat)
 	float pos, neg, temp;
 
 	//	* Calculate the determinant of submatrix A and determine if the
-	//	* the matrix is singular as limited by the double precision
+	//	* the matrix is singular as limited by the single precision
 	//	* floating-point data representation.
 	pos = neg = 0.0;
 	temp =  mat.m[0] * mat.m[5] * mat.m[10];
@@ -601,15 +581,15 @@ MFMatrix& MFMatrix::Inverse(const MFMatrix &mat)
 
 	// Calculate inverse(A) = adj(A) / det(A)
 	det_1 = 1.0f / det_1;
-	out.m[0] =  (mat.m[5]*mat.m[10] - mat.m[6]*mat.m[9]) * det_1;
-	out.m[4] = -(mat.m[4]*mat.m[10] - mat.m[6]*mat.m[8]) * det_1;
-	out.m[8] =  (mat.m[4]*mat.m[9] - mat.m[5]*mat.m[8]) * det_1;
-	out.m[1] = -(mat.m[1]*mat.m[10] - mat.m[2]*mat.m[9]) * det_1;
-	out.m[5] =  (mat.m[0]*mat.m[10] - mat.m[2]*mat.m[8]) * det_1;
-	out.m[9] = -(mat.m[0]*mat.m[9] - mat.m[1]*mat.m[8]) * det_1;
-	out.m[2] =  (mat.m[1]*mat.m[6] - mat.m[2]*mat.m[5]) * det_1;
-	out.m[6] = -(mat.m[0]*mat.m[6] - mat.m[2]*mat.m[4]) * det_1;
-	out.m[10] =  (mat.m[0]*mat.m[5] - mat.m[1]*mat.m[4]) * det_1;
+	out.m[0]  =  (mat.m[5]*mat.m[10] - mat.m[6]*mat.m[9]) * det_1;
+	out.m[4]  = -(mat.m[4]*mat.m[10] - mat.m[6]*mat.m[8]) * det_1;
+	out.m[8]  =  (mat.m[4]*mat.m[9]  - mat.m[5]*mat.m[8]) * det_1;
+	out.m[1]  = -(mat.m[1]*mat.m[10] - mat.m[2]*mat.m[9]) * det_1;
+	out.m[5]  =  (mat.m[0]*mat.m[10] - mat.m[2]*mat.m[8]) * det_1;
+	out.m[9]  = -(mat.m[0]*mat.m[9]  - mat.m[1]*mat.m[8]) * det_1;
+	out.m[2]  =  (mat.m[1]*mat.m[6]  - mat.m[2]*mat.m[5]) * det_1;
+	out.m[6]  = -(mat.m[0]*mat.m[6]  - mat.m[2]*mat.m[4]) * det_1;
+	out.m[10] =  (mat.m[0]*mat.m[5]  - mat.m[1]*mat.m[4]) * det_1;
 
 	// Calculate -C * inverse(A)
 	out.m[12] = -(mat.m[12]*out.m[0] + mat.m[13]*out.m[4] + mat.m[14]*out.m[8]);
@@ -617,7 +597,7 @@ MFMatrix& MFMatrix::Inverse(const MFMatrix &mat)
 	out.m[14] = -(mat.m[12]*out.m[2] + mat.m[13]*out.m[6] + mat.m[14]*out.m[10]);
 
 	// Fill in last column
-	out.m[3] = out.m[7] = out.m[11] = 0.0f;
+	out.m[3]  = out.m[7] = out.m[11] = 0.0f;
 	out.m[15] = 1.0f;
 
 	return *this = out;
@@ -635,113 +615,31 @@ MFMatrix& MFMatrix::Tween(const MFMatrix& start, const MFMatrix& end, float time
 	return *this;
 }
 
-MFQuaternion MFMatrix::CalculateQuaternion()
+MFMatrix& MFMatrix::PreciseTween(const MFMatrix& start, const MFMatrix& end, float time)
 {
-	MFQuaternion t;
-	float T = m[0] + m[5] + m[10];
-	if(T>0.0f)
-	{
-//		If the trace of the matrix is greater than zero, then
-//		perform an "instant" calculation.
-		float S=0.5f/MFSqrt(T+1);
-		t.w = 0.25f/S;
-		t.x = (m[9] - m[6])*S;
-		t.y = (m[2] - m[8])*S;
-		t.z = (m[4] - m[1])*S;
-	}
-	else
-	{
-//		If the trace of the matrix is less than or equal to zero
-//		then identify which major diagonal element has the greatest
-//		value.
-//		Depending on this value, calculate the following:
-		if ((m[0] > m[5]) && (m[0] > m[10]))
-		{
-			float S = MFSqrt(1.0f + m[0] - m[5] - m[10]) * 2.0f;
-			t.x = 0.25f * S;
-			t.y = (m[1] + m[4] ) / S;
-			t.z = (m[2] + m[8] ) / S;
-			t.w = (m[6] - m[9] ) / S;
-		}
-		else if (m[5] > m[10])
-		{
-			float S = MFSqrt(1.0f + m[5] - m[0] - m[10]) * 2.0f;
-			t.x = (m[1] + m[4]) / S;
-			t.y = 0.25f * S;
-			t.z = (m[6] + m[9]) / S;
-			t.w = (m[2] - m[8]) / S;
-		}
-		else
-		{ 
-			float S = MFSqrt(1.0f + m[10] - m[0] - m[5] ) * 2.0f;
-			t.x = (m[2] + m[8]) / S;
-			t.y = (m[6] + m[9]) / S;
-			t.z = 0.25f * S;
-			t.w = (m[1] - m[4]) / S;
-		}
-	}
+	MFQuaternion q1, q2;
+	MFVector scale1, scale2;
+	MFVector trans;
 
-	return t;
+	q1 = start.GetRotationQ();
+	q2 = end.GetRotationQ();
+
+	scale1.x = start.GetXAxis().Magnitude3();
+	scale1.y = start.GetYAxis().Magnitude3();
+	scale1.z = start.GetZAxis().Magnitude3();
+	scale2.x = end.GetXAxis().Magnitude3();
+	scale2.y = end.GetYAxis().Magnitude3();
+	scale2.z = end.GetZAxis().Magnitude3();
+
+	trans = start.GetTrans();
+
+	q1.Slerp(q2, time);
+	trans.Lerp(end.GetTrans(), time);
+	scale1.Lerp(scale2, time);
+
+	SetRotationQ(q1);
+	Scale(scale1);
+	SetTrans3(trans);
+
+	return *this;
 }
-
-/*
-	Calculate the trace of the matrix T from the equation:
-
-                2     2     2
-      T = 4 - 4x  - 4y  - 4z
-
-                 2    2    2
-        = 4( 1 -x  - y  - z )
-
-        = mat[0] + mat[5] + mat[10] + 1
-
-
-    If the trace of the matrix is greater than zero, then
-    perform an "instant" calculation.
-
-      S = 0.5 / sqrt(T)
-
-      W = 0.25 / S
-
-      X = ( mat[9] - mat[6] ) * S
-
-      Y = ( mat[2] - mat[8] ) * S
-
-      Z = ( mat[4] - mat[1] ) * S
-
-
-    If the trace of the matrix is less than or equal to zero
-    then identify which major diagonal element has the greatest
-    value.
-
-    Depending on this value, calculate the following:
-
-      Column 0:
-        S  = sqrt( 1.0 + mr[0] - mr[5] - mr[10] ) * 2;
-
-        Qx = 0.5 / S;
-        Qy = (mr[1] + mr[4] ) / S;
-        Qz = (mr[2] + mr[8] ) / S;
-        Qw = (mr[6] + mr[9] ) / S;
-
-      Column 1:
-        S  = sqrt( 1.0 + mr[5] - mr[0] - mr[10] ) * 2;
-
-        Qx = (mr[1] + mr[4] ) / S;
-        Qy = 0.5 / S;
-        Qz = (mr[6] + mr[9] ) / S;
-        Qw = (mr[2] + mr[8] ) / S;
-
-      Column 2:
-        S  = sqrt( 1.0 + mr[10] - mr[0] - mr[5] ) * 2;
-
-        Qx = (mr[2] + mr[8] ) / S;
-        Qy = (mr[6] + mr[9] ) / S;
-        Qz = 0.5 / S;
-        Qw = (mr[1] + mr[4] ) / S;
-
-     The quaternion is then defined as:
-
-       Q = | Qx Qy Qz Qw |
-	   */
-

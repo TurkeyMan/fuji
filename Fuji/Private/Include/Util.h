@@ -33,7 +33,7 @@ inline void MFEndian_Flip(T *pData)
 }
 
 template<typename T>
-inline void FixUp(T* &pPointer, void *pBase, int fix)
+inline void MFFixUp(T* &pPointer, void *pBase, int fix)
 {
 	if(pPointer)
 	{

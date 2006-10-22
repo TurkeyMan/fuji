@@ -4,9 +4,9 @@
 enum KeyType
 {
 	KT_Quat = 0,
-	KT_Scale,
-	KT_Translation,
-	KT_Matrix
+	KT_Scale = 1,
+	KT_Translation = 2,
+	KT_Matrix = 4
 };
 
 extern F3DFile *pModel;
@@ -15,9 +15,10 @@ char gTokenBuffer[2048];
 
 struct XMeshChunk
 {
-	static XMeshChunk Create(const MFMatrix &_mat, const char *_pMesh) { XMeshChunk mc; mc.mat = _mat; mc.pMesh = _pMesh; return mc; }
+	static XMeshChunk Create(const MFMatrix &_mat, const char *_pMesh, const char *pFrameName) { XMeshChunk mc; mc.mat = _mat; mc.pMesh = _pMesh; MFString_Copy(mc.frameName, pFrameName); return mc; }
 	MFMatrix mat;
 	const char *pMesh;
+	char frameName[64];
 };
 
 MFArray<XMeshChunk> gMeshChunks;
@@ -510,18 +511,28 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 	return pText;
 }
 
-const char *ParseMesh(const char *pText, const MFMatrix &mat)
+const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrameName)
 {
+	// read name
+	char meshName[64];
+	const char *pMeshName = GetNextToken(pText, &pText, meshName);
+
+	if(!MFString_Compare(pMeshName, "{"))
+		pMeshName = pFrameName;
+	else
+		SkipToken(pText, "{");
+
+	if(MFString_CaseCmpN(pMeshName, "m_", 2))
+	{
+		// not a mesh!
+		SkipSection(pText);
+		return pText;
+	}
+
 	F3DMeshChunk *pMesh = pModel->GetMeshChunk();
 	F3DSubObject &sub = pMesh->subObjects.push();
 
-	// read name
-	GetNextToken(pText, &pText, sub.name);
-
-	if(!MFString_Compare(sub.name, "{"))
-		MFString_Copy(sub.name, "Unnamed Subobject");
-	else
-		SkipToken(pText, "{");
+	MFString_Copy(sub.name, pMeshName);
 
 	// get num positions
 	int numPositions = GetInt(pText, &pText);
@@ -639,12 +650,16 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat)
 
 const char *ParseAnimation(const char *pText)
 {
-	SkipToken(pText, "{");
+	const char *pAnimName = GetNextToken(pText, &pText);
+
+	if(MFString_Compare(pAnimName, "{"))
+		SkipToken(pText, "{");
 
 	char bone[64];
 	int numFrames = 0;
 
-	MFVector *pQuats = NULL;
+	float *pFrameTimes = NULL;
+	MFQuaternion *pQuats = NULL;
 	MFVector *pScale = NULL;
 	MFVector *pTrans = NULL;
 	MFMatrix *pMats = NULL;
@@ -660,10 +675,12 @@ const char *ParseAnimation(const char *pText)
 			int type = GetInt(pText, &pText);
 			numFrames = GetInt(pText, &pText);
 
+			pFrameTimes = (float*)MFHeap_Alloc(sizeof(float)*numFrames);
+
 			switch(type)
 			{
 				case KT_Quat:
-					pQuats = (MFVector*)MFHeap_Alloc(sizeof(MFVector)*numFrames);
+					pQuats = (MFQuaternion*)MFHeap_Alloc(sizeof(MFQuaternion)*numFrames);
 					break;
 				case KT_Scale:
 					pScale = (MFVector*)MFHeap_Alloc(sizeof(MFVector)*numFrames);
@@ -680,7 +697,7 @@ const char *ParseAnimation(const char *pText)
 			for(int a=0; a<numFrames; a++)
 			{
 				int frame = GetInt(pText, &pText);
-				MFDebug_Assert(frame == a, "Frame sequence is not sequential.");
+				pFrameTimes[a] = (float)frame;
 
 				int numComponents = GetInt(pText, &pText);
 
@@ -726,36 +743,46 @@ const char *ParseAnimation(const char *pText)
 		pTok = GetNextToken(pText, &pText);
 	}
 
-	// copy data to bone
-	F3DAnimation &anim = pModel->GetAnimationChunk()->anims.push();
-
-	anim.boneID = pModel->GetSkeletonChunk()->FindBone(bone);
-	if(anim.boneID == -1)
+	if(!MFString_CaseCmpN(bone, "bn_", 3) || !MFString_CaseCmpN(bone, "z_", 2))
 	{
-		printf("Bone '%s' not found..\n", bone);
-		return pText;
-	}
+		// copy data to bone
+		F3DAnimation &anim = pModel->GetAnimationChunk()->anims.push();
 
-	anim.minTime = 0.0f;
-	anim.maxTime = (float)(numFrames-1);
-
-	for(int a=0; a<numFrames; a++)
-	{
-		anim.keyframes[a].time = (float)a;
-
-		if(pMats)
+		anim.boneID = pModel->GetSkeletonChunk()->FindBone(bone);
+		if(anim.boneID == -1)
 		{
-			anim.keyframes[a].scale = MakeVector(pMats[a].GetXAxis().Magnitude3(), pMats[a].GetYAxis().Magnitude3(), pMats[a].GetZAxis().Magnitude3(), 1.0f);
-			anim.keyframes[a].translation = pMats[a].GetTrans();
-
-			// not sure how to do this yet...
-			anim.keyframes[a].rotation = MFVector::identity;
+			printf("Bone '%s' not found..\n", bone);
+			return pText;
 		}
-		else
+
+		anim.minTime = pFrameTimes[0];
+		anim.maxTime = pFrameTimes[numFrames-1];
+
+		for(int a=0; a<numFrames; a++)
 		{
-			anim.keyframes[a].rotation = pQuats ? pQuats[a] : MFVector::identity;
-			anim.keyframes[a].scale = pScale ? pScale[a] : MFVector::one;
-			anim.keyframes[a].translation = pTrans ? pTrans[a] : MFVector::identity;
+			anim.keyframes[a].time = pFrameTimes[a];
+
+			if(pMats)
+			{
+				anim.keyframes[a].key = pMats[a];
+
+//				anim.keyframes[a].scale = MakeVector(pMats[a].GetXAxis().Magnitude3(), pMats[a].GetYAxis().Magnitude3(), pMats[a].GetZAxis().Magnitude3(), 1.0f);
+//				anim.keyframes[a].translation = pMats[a].GetTrans();
+
+				// not sure how to do this yet...
+//				anim.keyframes[a].rotation = pMats[a].GetRotationQ();
+			}
+			else
+			{
+				anim.keyframes[a].key.SetRotationQ(pQuats ? pQuats[a] : MFQuaternion::identity);
+				if(pScale)
+					anim.keyframes[a].key.Scale(pScale[a]);
+				anim.keyframes[a].key.SetTrans3(pTrans ? pTrans[a] : MFVector::identity);
+
+//				anim.keyframes[a].rotation = pQuats ? pQuats[a] : MFQuaternion::identity;
+//				anim.keyframes[a].scale = pScale ? pScale[a] : MFVector::one;
+//				anim.keyframes[a].translation = pTrans ? pTrans[a] : MFVector::identity;
+			}
 		}
 	}
 
@@ -791,17 +818,29 @@ const char *ParseAnimationSet(const char *pText)
 
 const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
 {
-	int boneID = pModel->GetSkeletonChunk()->bones.size();
-	F3DBone &bone = pModel->GetSkeletonChunk()->bones[boneID];
+	char frameName[64];
+	const char *pName = GetNextToken(pText, &pText, frameName);
 
-	F3DBone *pParent = parentID == -1 ? NULL : &pModel->GetSkeletonChunk()->bones[parentID];
+	MFMatrix worldMatrix = mat;
 
-	bone.worldMatrix = mat;
+	F3DBone *pBone = NULL;
 
-	GetNextToken(pText, &pText, bone.name);
-	MFString_Copy(bone.parentName, pParent ? pParent->name : "");
+	if(!MFString_CaseCmpN(pName, "bn_", 3) || !MFString_CaseCmpN(pName, "z_", 2))
+	{
+		int boneID = pModel->GetSkeletonChunk()->bones.size();
+		pBone = &pModel->GetSkeletonChunk()->bones[boneID];
 
-	SkipToken(pText, "{");
+		F3DBone *pParent = parentID == -1 ? NULL : &pModel->GetSkeletonChunk()->bones[parentID];
+		parentID = boneID;
+
+		MFString_Copy(pBone->name, pName);
+		MFString_Copy(pBone->parentName, pParent ? pParent->name : "");
+
+		pBone->worldMatrix = mat;
+	}
+
+	if(MFString_Compare(pName, "{"))
+		SkipToken(pText, "{");
 
 	const char *pTok = GetNextToken(pText, &pText);
 
@@ -809,22 +848,29 @@ const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
 	{
 		if(!MFString_Compare(pTok, "Frame"))
 		{
-			pText = ParseFrame(pText, bone.worldMatrix, boneID);
+			pText = ParseFrame(pText, worldMatrix, parentID);
 		}
 		else if(!MFString_Compare(pTok, "FrameTransformMatrix"))
 		{
 			SkipToken(pText, "{");
 
-			GetFloatArray(pText, (float*)&bone.boneMatrix, 16, &pText);
+			MFMatrix localMatrix;
+			GetFloatArray(pText, (float*)&localMatrix, 16, &pText);
 
-			bone.worldMatrix.Multiply(bone.boneMatrix);
+			worldMatrix.Multiply(localMatrix, worldMatrix);
+
+			if(pBone)
+			{
+				pBone->boneMatrix = localMatrix;
+				pBone->worldMatrix = worldMatrix;
+			}
 
 			SkipToken(pText, ";");
 			SkipToken(pText, "}");
 		}
 		else if(!MFString_Compare(pTok, "Mesh"))
 		{
-			gMeshChunks.push(XMeshChunk::Create(bone.worldMatrix, pText));
+			gMeshChunks.push(XMeshChunk::Create(worldMatrix, pText, pName));
 			SkipSection(pText);
 		}
 		else
@@ -867,7 +913,7 @@ void LoadTextXFile(const char *pText)
 		}
 		else if(!MFString_Compare(pTok, "Mesh"))
 		{
-			gMeshChunks.push(XMeshChunk::Create(MFMatrix::identity, pText));
+			gMeshChunks.push(XMeshChunk::Create(MFMatrix::identity, pText, ""));
 			SkipSection(pText);
 		}
 		else if(!MFString_Compare(pTok, "AnimationSet"))
@@ -892,15 +938,13 @@ void LoadTextXFile(const char *pText)
 	int a;
 	for(a=0; a<gMeshChunks.size(); a++)
 	{
-		ParseMesh(gMeshChunks[a].pMesh, gMeshChunks[a].mat);
+		ParseMesh(gMeshChunks[a].pMesh, gMeshChunks[a].mat, gMeshChunks[a].frameName);
 	}
 
 	for(a=0; a<gAnimSets.size(); a++)
 	{
 		ParseAnimationSet(gAnimSets[a]);
 	}
-
-	
 }
 
 void ParseXFile(char *pFilePtr)
@@ -927,7 +971,7 @@ void ParseXFile(char *pFilePtr)
 	}
 
 	pModel->GetSkeletonChunk()->BuildHierarchy();
-	pModel->GetSkeletonChunk()->FlagReferenced();
+	pModel->GetSkeletonChunk()->FlagReferenced(true);
 }
 
 int F3DFile::ReadX(char *pFilename)

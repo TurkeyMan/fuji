@@ -127,6 +127,9 @@
 				RelativePath=".\Source\MFMatrix.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFQuaternion.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFString.cpp">
 			</File>
 			<File
@@ -175,6 +178,9 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFMatrix.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFQuaternion.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFString.h">

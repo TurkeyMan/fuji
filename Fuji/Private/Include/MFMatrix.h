@@ -44,7 +44,7 @@ public:
 	MFMatrix& SetRotationZ(float angle);
 	MFMatrix& SetScale(const MFVector& scale);
 
-//	MFQuaternion GetRotationQ() const;
+	MFQuaternion GetRotationQ() const;
 
 	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);
 
@@ -68,8 +68,7 @@ public:
 	MFMatrix& Inverse(const MFMatrix &matrix);
 
 	MFMatrix& Tween(const MFMatrix& start, const MFMatrix& end, float t);
-
-	MFQuaternion CalculateQuaternion();
+	MFMatrix& PreciseTween(const MFMatrix& start, const MFMatrix& end, float t);
 
 	MFMatrix& ClearW();
 
@@ -129,12 +128,14 @@ public:
 
 	MFMatrix& SetTranslation(const MFVector &trans);				/**< Set the matrix translation */
 	MFMatrix& SetRotation(const MFVector &axis, float angle);		/**< Set the matrix rotation */
-	MFMatrix& SetRotationQ(const MFVector &q);						/**< Set the matrix rotation to a quaternion */
+	MFMatrix& SetRotationQ(const MFQuaternion &q);						/**< Set the matrix rotation to a quaternion */
 	MFMatrix& SetRotationYPR(float yaw, float pitch, float roll);	/**< Set the matrix rotation to a specified pitch yaw and roll */
 	MFMatrix& SetRotationX(float angle);		/**< Sets the rotation to rotate about the X axis */
 	MFMatrix& SetRotationY(float angle);		/**< Sets the rotation to rotate about the Y axis */
 	MFMatrix& SetRotationZ(float angle);		/**< Sets the rotation to rotate about the Z axis */
 	MFMatrix& SetScale(const MFVector& scale);	/**< Sets the scale of the matrix */
+
+	MFQuaternion GetRotationQ() const;				/**< Calculate a quaternion from the matrix */
 
 	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);	/**< Build a matrix that looks from one point to another */
 
@@ -157,7 +158,8 @@ public:
 	MFMatrix& Inverse() { return Inverse(*this); }	/**< Inverse the matrix */
 	MFMatrix& Inverse(const MFMatrix &matrix);		/**< Set this matrix to the inverse of another matrix */
 
-	MFVector CalculateQuaternion();	/**< Calculate a quaternion from the matrix */
+	MFMatrix& Tween(const MFMatrix& start, const MFMatrix& end, float t);			/**< Tween one matrix towards another by a factor \a t */
+	MFMatrix& PreciseTween(const MFMatrix& start, const MFMatrix& end, float t);	/**< Tween one matrix towards another by a factor \a t using a quaternion to interpolate rotation */
 
 	MFMatrix& ClearW();	/**< Clear the matrix W column */
 

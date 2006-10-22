@@ -163,7 +163,7 @@ class F3DSkeletonChunk
 public:
 	int FindBone(const char *pName);
 	void BuildHierarchy();
-	void FlagReferenced();
+	void FlagReferenced(bool bAll = false);
 	int GetNumReferencedBones();
 
 	MFArray<F3DBone> bones;
@@ -176,7 +176,8 @@ public:
 
 	float time;
 
-	MFVector rotation;
+	MFMatrix key;
+	MFQuaternion rotation;
 	MFVector scale;
 	MFVector translation;
 };
@@ -313,10 +314,12 @@ public:
 
 	void WriteF3D(char *pFilename);
 	void WriteMDL(char *pFilename, MFPlatform platform);
+	void WriteANM(char *pFilename, MFPlatform platform);
 
 	void ProcessSkeletonData();
 	void ProcessCollisionData();
 	void Optimise();
+	void BuildBatches();
 	void StripModel();
 
 	F3DMeshChunk *GetMeshChunk() { return &meshChunk; }

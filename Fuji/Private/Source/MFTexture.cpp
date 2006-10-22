@@ -78,12 +78,12 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			return MFTexture_Create("_None");
 		}
 
-		FixUp(pTemplate->pSurfaces, pTemplate, 1);
+		MFFixUp(pTemplate->pSurfaces, pTemplate, 1);
 
 		for(int a=0; a<pTemplate->mipLevels; a++)
 		{
-			FixUp(pTemplate->pSurfaces[a].pImageData, pTemplate, 1);
-			FixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
+			MFFixUp(pTemplate->pSurfaces[a].pImageData, pTemplate, 1);
+			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
 		pTexture = gTextureBank.Create();
