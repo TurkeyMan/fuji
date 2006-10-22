@@ -706,6 +706,11 @@ const char *ParseAnimation(const char *pText)
 					case KT_Quat:
 						MFDebug_Assert(numComponents == 4, "Required 4 components for a quaternion.");
 						GetFloatArray(pText, (float*)&pQuats[a], numComponents, &pText);
+						{
+							MFVector v;
+							v.Swizzle((MFVector&)pQuats[a], SW_Y|SW_NEG, SW_Z|SW_NEG, SW_W|SW_NEG, SW_X|SW_NEG);
+							pQuats[a] = (MFQuaternion&)v;
+						}
 						break;
 					case KT_Scale:
 						MFDebug_Assert(numComponents == 3, "Required 3 components for a scale.");

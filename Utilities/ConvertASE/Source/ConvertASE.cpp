@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
 	if(!MFString_CaseCmp(&dest[a], "f3d"))
 	{
 		pModel->WriteF3D(dest);
+		printf("> %s\n", dest);
 	}
 	else if(!MFString_CaseCmp(&dest[a], "mdl"))
 	{
@@ -164,17 +165,23 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 
-		pModel->WriteMDL(dest, platform);
+		if(pModel->GetMeshChunk()->subObjects.size() ||
+			pModel->GetCollisionChunk()->collisionObjects.size() ||
+			pModel->GetRefPointChunk()->refPoints.size())
+		{
+			pModel->WriteMDL(dest, platform);
+			printf("> %s\n", dest);
+		}
 
 		if(writeAnimation && pModel->GetAnimationChunk()->anims.size())
 		{
-			// print the model
-			printf("> %s\n", dest);
-
 			// write animation file
 			dest[a] = 0;
 			MFString_Cat(dest, "anm");
 			pModel->WriteANM(dest, platform);
+
+			// print the model
+			printf("> %s\n", dest);
 		}
 	}
 	else
@@ -182,8 +189,6 @@ int main(int argc, char *argv[])
 		printf("Unrecognised output file format.\n");
 		return 1;
 	}
-
-	printf("> %s\n", dest);
 
 	delete pModel;
 
