@@ -7,6 +7,8 @@
 #include "MFRenderer_Internal.h"
 #include "MFRenderer_PC.h"
 
+#include "Shaders/Registers.h"
+
 #include <d3d9.h>
 
 extern IDirect3DDevice9 *pd3dDevice;
@@ -30,6 +32,41 @@ void MFRendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuf
 void MFRendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
 {
 	pd3dDevice->SetIndices(pIndexBuffer);
+}
+
+void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
+{
+	MFMatrix mat = animationMatrix;
+	mat.Transpose();
+	pd3dDevice->SetVertexShaderConstantF(r_animMats + boneID*3, (float*)&mat, 3);
+}
+
+void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
+{
+	MFMatrix mat = worldToScreen;
+	mat.Transpose();
+	pd3dDevice->SetVertexShaderConstantF(r_wvp, (float*)&mat, 4);
+}
+
+void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix)
+{
+	MFMatrix mat = textureMatrix;
+	mat.Transpose();
+	pd3dDevice->SetVertexShaderConstantF(r_tex, (float*)&mat, 2);
+}
+
+void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
+{
+	float mask[4] = { colourModulate, colourAdd, alphaModulate, alphaAdd };
+	pd3dDevice->SetVertexShaderConstantF(r_colourMask, mask, 1);
+}
+
+void MFRendererPC_SetNumWeights(int numWeights)
+{
+//	int i[4] = { numWeights, numWeights, numWeights, numWeights };
+//	pd3dDevice->SetVertexShaderConstantI(r_numWeights, i, 1);
+	pd3dDevice->SetVertexShaderConstantF(r_animating, numWeights ? MFVector::identity : MFVector::one, 1);
+	pd3dDevice->SetVertexShaderConstantF(r_animating + 1, numWeights ? MFVector::one : MFVector::identity, 1);
 }
 
 void MFRendererPC_ApplyGPUStates()

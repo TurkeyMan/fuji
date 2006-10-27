@@ -315,6 +315,24 @@ MFMatrix& MFMatrix::LookAt(const MFVector& pos, const MFVector& at, const MFVect
 	return *this;
 }
 
+MFMatrix& MFMatrix::Normalise()
+{
+	((MFVector*)&m[0])->Normalise3();
+	((MFVector*)&m[4])->Normalise3();
+	((MFVector*)&m[8])->Normalise3();
+	return *this;
+}
+
+MFMatrix& MFMatrix::OrthoNormalise()
+{
+	// we must first assert that the axiis are orthogonal.
+
+	((MFVector*)&m[0])->Normalise3();
+	((MFVector*)&m[4])->Normalise3();
+	((MFVector*)&m[8])->Normalise3();
+	return *this;
+}
+
 MFMatrix& MFMatrix::Transpose()
 {
 	register float t;
@@ -405,10 +423,10 @@ MFMatrix& MFMatrix::Multiply(const MFMatrix &mat)
 	t.m[13] = m[12]*mat.m[1] + m[13]*mat.m[5] + m[14]*mat.m[9] + mat.m[13];
 	t.m[14] = m[12]*mat.m[2] + m[13]*mat.m[6] + m[14]*mat.m[10] + mat.m[14];
 
-	m[0] = t.m[0]; m[1] = t.m[1]; m[2] = t.m[2];
-	m[4] = t.m[4]; m[5] = t.m[5]; m[6] = t.m[6];
-	m[8] = t.m[8]; m[9] = t.m[9]; m[10] = t.m[10];
-	m[12] = t.m[12]; m[13] = t.m[13]; m[14] = t.m[14];
+	m[0] = t.m[0]; m[1] = t.m[1]; m[2] = t.m[2]; m[3] = 0.0f;
+	m[4] = t.m[4]; m[5] = t.m[5]; m[6] = t.m[6]; m[7] = 0.0f;
+	m[8] = t.m[8]; m[9] = t.m[9]; m[10] = t.m[10]; m[11] = 0.0f;
+	m[12] = t.m[12]; m[13] = t.m[13]; m[14] = t.m[14]; m[15] = 1.0f;
 
 	return *this;
 }
@@ -430,10 +448,10 @@ MFMatrix& MFMatrix::Multiply(const MFMatrix &mat1, const MFMatrix &mat2)
 	t.m[13] = mat1.m[12]*mat2.m[1] + mat1.m[13]*mat2.m[5] + mat1.m[14]*mat2.m[9] + mat2.m[13];
 	t.m[14] = mat1.m[12]*mat2.m[2] + mat1.m[13]*mat2.m[6] + mat1.m[14]*mat2.m[10] + mat2.m[14];
 
-	m[0] = t.m[0]; m[1] = t.m[1]; m[2] = t.m[2];
-	m[4] = t.m[4]; m[5] = t.m[5]; m[6] = t.m[6];
-	m[8] = t.m[8]; m[9] = t.m[9]; m[10] = t.m[10];
-	m[12] = t.m[12]; m[13] = t.m[13]; m[14] = t.m[14];
+	m[0] = t.m[0]; m[1] = t.m[1]; m[2] = t.m[2]; m[3] = 0.0f;
+	m[4] = t.m[4]; m[5] = t.m[5]; m[6] = t.m[6]; m[7] = 0.0f;
+	m[8] = t.m[8]; m[9] = t.m[9]; m[10] = t.m[10]; m[11] = 0.0f;
+	m[12] = t.m[12]; m[13] = t.m[13]; m[14] = t.m[14]; m[15] = 1.0f;
 
 	return *this;
 }

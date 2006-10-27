@@ -45,7 +45,8 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	pTexture->pTexture->UnlockRect(0);
 
 	// filter mip levels
-	D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
+	if(generateMipChain)
+		D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
 }
 
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
@@ -115,9 +116,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		// generate mipmaps
 		if(generateMipChain)
-		{
 			D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
-		}
 
 		MFString_Copy(pTexture->name, pName);
 

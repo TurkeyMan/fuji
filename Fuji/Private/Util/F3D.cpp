@@ -385,13 +385,13 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 {
 #if !defined(_LINUX) && !defined(_OSX)
 	int numMeshChunks = 0;
-	int a, b, mc = 0;
+	int a, b, c, mc = 0;
 
 	// count valid mesh chunks
 	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
 		if(sub.matSubobjects[a].triangles.size() != 0)
-			++numMeshChunks;
+			numMeshChunks += sub.matSubobjects[a].triangleBatches.size();
 	}
 
 	// increment size of MeshChunk_PC structure
@@ -399,9 +399,18 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
+	MFArray<int> vertexList;
+	MFArray<int> vertexRemapping;
+	MFArray<int> boneBatch;
+	MFArray<int> boneRemapping;
+
+	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
+
 	// fill out mesh chunk, and build mesh...
 	for(a=0; a<sub.matSubobjects.size(); a++)
 	{
+		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
+
 		struct Vert
 		{
 			float pos[3];
@@ -410,104 +419,254 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			float uv[2];
 		};
 
-		if(sub.matSubobjects[a].triangles.size() == 0)
+		struct AnimVert
+		{
+			uint8 i[4];
+			uint8 w[4];
+		};
+
+		if(matsub.triangles.size() == 0)
 			continue;
 
-		int numVertices = sub.matSubobjects[a].vertices.size();
-		int numTriangles = sub.matSubobjects[a].triangles.size();
-		int numIndices = numTriangles*3;
+		bool bAnimating = (matsub.numBones && !subobjectAnimation);
 
-		pMeshChunk[mc].numVertices = numVertices;
-		pMeshChunk[mc].numIndices = numIndices;
-		pMeshChunk[mc].vertexStride = sizeof(Vert);
-		pMeshChunk[mc].vertexDataSize = numVertices * pMeshChunk->vertexStride;
-		pMeshChunk[mc].indexDataSize = numIndices*sizeof(uint16);
-
-		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[sub.matSubobjects[a].materialIndex].name);
-
-		// setup pointers
-		pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
-		pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*5);
-		pMeshChunk[mc].pVertexData = pOffset;
-		pOffset += MFALIGN16(sizeof(Vert)*numVertices);
-		pMeshChunk[mc].pIndexData = pOffset;
-		pOffset += MFALIGN16(sizeof(uint16)*numIndices);
-
-		// write declaration
-		pMeshChunk[mc].pVertexElements[0].Stream = 0;
-		pMeshChunk[mc].pVertexElements[0].Offset = 0;
-		pMeshChunk[mc].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[mc].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[mc].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
-		pMeshChunk[mc].pVertexElements[0].UsageIndex = 0;
-
-		pMeshChunk[mc].pVertexElements[1].Stream = 0;
-		pMeshChunk[mc].pVertexElements[1].Offset = 12;
-		pMeshChunk[mc].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
-		pMeshChunk[mc].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[mc].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
-		pMeshChunk[mc].pVertexElements[1].UsageIndex = 0;
-
-		pMeshChunk[mc].pVertexElements[2].Stream = 0;
-		pMeshChunk[mc].pVertexElements[2].Offset = 24;
-		pMeshChunk[mc].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
-		pMeshChunk[mc].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[mc].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
-		pMeshChunk[mc].pVertexElements[2].UsageIndex = 0;
-
-		pMeshChunk[mc].pVertexElements[3].Stream = 0;
-		pMeshChunk[mc].pVertexElements[3].Offset = 28;
-		pMeshChunk[mc].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
-		pMeshChunk[mc].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
-		pMeshChunk[mc].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
-		pMeshChunk[mc].pVertexElements[3].UsageIndex = 0;
-
-		D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-		pMeshChunk[mc].pVertexElements[4] = endMacro;
-
-		// write vertices
-		Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
-
-		for(b=0; b<numVertices; b++)
+		for(b=0; b<matsub.triangleBatches.size(); b++)
 		{
-			int posIndex = sub.matSubobjects[a].vertices[b].position;
-			int normalIndex = sub.matSubobjects[a].vertices[b].normal;
-			int uvIndex = sub.matSubobjects[a].vertices[b].uv1;
-			int colourIndex = sub.matSubobjects[a].vertices[b].colour;
+			const F3DBatch &batch = matsub.triangleBatches[b];
 
-			const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
-			const MFVector &normal = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
-			const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
-			uint32 colour = colourIndex > -1 ? sub.colours[colourIndex].ToPackedColour() : 0xFFFFFFFF;
+			// build batch vertex list and remapping table
+			// this will also order the vertices in the order they are consumed which optimises vertex data cache usage
+			vertexList.clear();
 
-			pVert[b].pos[0] = pos.x;
-			pVert[b].pos[1] = pos.y;
-			pVert[b].pos[2] = pos.z;
-			pVert[b].normal[0] = normal.x;
-			pVert[b].normal[1] = normal.y;
-			pVert[b].normal[2] = normal.z;
-			pVert[b].colour = colour;
-			pVert[b].uv[0] = uv.x;
-			pVert[b].uv[1] = uv.y;
+			int numVertices = matsub.vertices.size();
 
-			pVolume->min = MFMin(pVolume->min, pos);
-			pVolume->max = MFMax(pVolume->max, pos);
-			AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+			vertexRemapping.resize(numVertices);
+			MFSetMemory(vertexRemapping.getpointer(), -1, sizeof(int)*numVertices);
+
+			for(c=0; c<batch.tris.size(); c++)
+			{
+				F3DTriangle tri = matsub.triangles[batch.tris[c]];
+				if(vertexRemapping[tri.v[0]] == -1)
+				{
+					vertexRemapping[tri.v[0]] = vertexList.size();
+					vertexList.push(tri.v[0]);
+				}
+				if(vertexRemapping[tri.v[1]] == -1)
+				{
+					vertexRemapping[tri.v[1]] = vertexList.size();
+					vertexList.push(tri.v[1]);
+				}
+				if(vertexRemapping[tri.v[2]] == -1)
+				{
+					vertexRemapping[tri.v[2]] = vertexList.size();
+					vertexList.push(tri.v[2]);
+				}
+			}
+
+			if(bAnimating)
+			{
+				// bone batch and mapping
+				int numBones = pModel->GetSkeletonChunk()->bones.size();
+
+				boneBatch.clear();
+
+				boneRemapping.resize(numBones + 1);
+				MFSetMemory(boneRemapping.getpointer(), -1, sizeof(int)*(numBones+1));
+				boneRemapping[0] = 0;
+
+				for(c=0; c<batch.bones.size(); c++)
+				{
+					if(boneRemapping[batch.bones[c]+1] == -1)
+					{
+						boneRemapping[batch.bones[c]+1] = boneBatch.size();
+						boneBatch.push(batch.bones[c]);
+					}
+				}
+			}
+
+			int numTriangles = batch.tris.size();
+			int numIndices = numTriangles*3;
+			numVertices = vertexList.size();
+
+			pMeshChunk[mc].numVertices = numVertices;
+			pMeshChunk[mc].numIndices = numIndices;
+			pMeshChunk[mc].vertexStride = sizeof(Vert);
+			pMeshChunk[mc].animVertexStride = bAnimating ? sizeof(AnimVert) : 0;
+			pMeshChunk[mc].vertexDataSize = numVertices * pMeshChunk[mc].vertexStride;
+			pMeshChunk[mc].animDataSize = numVertices * pMeshChunk[mc].animVertexStride;
+			pMeshChunk[mc].indexDataSize = numIndices * sizeof(uint16);
+			pMeshChunk[mc].maxWeights = bAnimating ? matsub.maxWeights : 0;
+			pMeshChunk[mc].matrixBatchSize = batch.bones.size();
+
+			pMeshChunk[mc].pVertexBuffer = NULL;
+			pMeshChunk[mc].pAnimBuffer = NULL;
+			pMeshChunk[mc].pIndexBuffer = NULL;
+			pMeshChunk[mc].pVertexDeclaration = NULL;
+
+			pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
+
+			// setup pointers
+			pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
+			pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*(bAnimating ? 7 : 7));
+			pMeshChunk[mc].pVertexData = pOffset;
+			pOffset += MFALIGN16(sizeof(Vert)*numVertices);
+			pMeshChunk[mc].pAnimData = bAnimating ? pOffset : NULL;
+			pOffset += bAnimating ? MFALIGN16(sizeof(AnimVert)*numVertices) : 0;
+			pMeshChunk[mc].pIndexData = pOffset;
+			pOffset += MFALIGN16(sizeof(uint16)*numIndices);
+			pMeshChunk[mc].pBatchIndices = bAnimating ? (uint16*)pOffset : 0;
+			pOffset += bAnimating ? MFALIGN16(sizeof(uint16)*pMeshChunk[mc].matrixBatchSize) : 0;
+
+			// write declaration
+			pMeshChunk[mc].pVertexElements[0].Stream = 0;
+			pMeshChunk[mc].pVertexElements[0].Offset = 0;
+			pMeshChunk[mc].pVertexElements[0].Type = D3DDECLTYPE_FLOAT3;
+			pMeshChunk[mc].pVertexElements[0].Method = D3DDECLMETHOD_DEFAULT;
+			pMeshChunk[mc].pVertexElements[0].Usage = D3DDECLUSAGE_POSITION;
+			pMeshChunk[mc].pVertexElements[0].UsageIndex = 0;
+
+			pMeshChunk[mc].pVertexElements[1].Stream = 0;
+			pMeshChunk[mc].pVertexElements[1].Offset = 12;
+			pMeshChunk[mc].pVertexElements[1].Type = D3DDECLTYPE_FLOAT3;
+			pMeshChunk[mc].pVertexElements[1].Method = D3DDECLMETHOD_DEFAULT;
+			pMeshChunk[mc].pVertexElements[1].Usage = D3DDECLUSAGE_NORMAL;
+			pMeshChunk[mc].pVertexElements[1].UsageIndex = 0;
+
+			pMeshChunk[mc].pVertexElements[2].Stream = 0;
+			pMeshChunk[mc].pVertexElements[2].Offset = 24;
+			pMeshChunk[mc].pVertexElements[2].Type = D3DDECLTYPE_D3DCOLOR;
+			pMeshChunk[mc].pVertexElements[2].Method = D3DDECLMETHOD_DEFAULT;
+			pMeshChunk[mc].pVertexElements[2].Usage = D3DDECLUSAGE_COLOR;
+			pMeshChunk[mc].pVertexElements[2].UsageIndex = 0;
+
+			pMeshChunk[mc].pVertexElements[3].Stream = 0;
+			pMeshChunk[mc].pVertexElements[3].Offset = 28;
+			pMeshChunk[mc].pVertexElements[3].Type = D3DDECLTYPE_FLOAT2;
+			pMeshChunk[mc].pVertexElements[3].Method = D3DDECLMETHOD_DEFAULT;
+			pMeshChunk[mc].pVertexElements[3].Usage = D3DDECLUSAGE_TEXCOORD;
+			pMeshChunk[mc].pVertexElements[3].UsageIndex = 0;
+
+			if(bAnimating)
+			{
+				pMeshChunk[mc].pVertexElements[4].Stream = 1;
+				pMeshChunk[mc].pVertexElements[4].Offset = 0;
+				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_UBYTE4;
+				pMeshChunk[mc].pVertexElements[4].Method = D3DDECLMETHOD_DEFAULT;
+				pMeshChunk[mc].pVertexElements[4].Usage = D3DDECLUSAGE_BLENDINDICES;
+				pMeshChunk[mc].pVertexElements[4].UsageIndex = 0;
+
+				pMeshChunk[mc].pVertexElements[5].Stream = 1;
+				pMeshChunk[mc].pVertexElements[5].Offset = 4;
+				pMeshChunk[mc].pVertexElements[5].Type = D3DDECLTYPE_UBYTE4N;
+				pMeshChunk[mc].pVertexElements[5].Method = D3DDECLMETHOD_DEFAULT;
+				pMeshChunk[mc].pVertexElements[5].Usage = D3DDECLUSAGE_BLENDWEIGHT;
+				pMeshChunk[mc].pVertexElements[5].UsageIndex = 0;
+
+				D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+				pMeshChunk[mc].pVertexElements[6] = endMacro;
+			}
+			else
+			{
+				pMeshChunk[mc].pVertexElements[4].Stream = 0;
+				pMeshChunk[mc].pVertexElements[4].Offset = 0;
+				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_D3DCOLOR;
+				pMeshChunk[mc].pVertexElements[4].Method = D3DDECLMETHOD_DEFAULT;
+				pMeshChunk[mc].pVertexElements[4].Usage = D3DDECLUSAGE_BLENDINDICES;
+				pMeshChunk[mc].pVertexElements[4].UsageIndex = 0;
+
+				pMeshChunk[mc].pVertexElements[5].Stream = 0;
+				pMeshChunk[mc].pVertexElements[5].Offset = 0;
+				pMeshChunk[mc].pVertexElements[5].Type = D3DDECLTYPE_D3DCOLOR;
+				pMeshChunk[mc].pVertexElements[5].Method = D3DDECLMETHOD_DEFAULT;
+				pMeshChunk[mc].pVertexElements[5].Usage = D3DDECLUSAGE_BLENDWEIGHT;
+				pMeshChunk[mc].pVertexElements[5].UsageIndex = 0;
+
+				D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+				pMeshChunk[mc].pVertexElements[6] = endMacro;
+			}
+
+			// write vertices
+			Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
+			AnimVert *pAnimVert = (AnimVert*)pMeshChunk[mc].pAnimData;
+
+			for(c=0; c<numVertices; c++)
+			{
+				int p = vertexList[c];
+
+				const F3DVertex &vert = matsub.vertices[p];
+
+				int posIndex = vert.position;
+				int normalIndex = vert.normal;
+				int uvIndex = vert.uv1;
+				int colourIndex = vert.colour;
+
+				const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
+				const MFVector &normal = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
+				const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
+				uint32 colour = colourIndex > -1 ? sub.colours[colourIndex].ToPackedColour() : 0xFFFFFFFF;
+
+				pVert[c].pos[0] = pos.x;
+				pVert[c].pos[1] = pos.y;
+				pVert[c].pos[2] = pos.z;
+				pVert[c].normal[0] = normal.x;
+				pVert[c].normal[1] = normal.y;
+				pVert[c].normal[2] = normal.z;
+				pVert[c].colour = colour;
+				pVert[c].uv[0] = uv.x;
+				pVert[c].uv[1] = uv.y;
+
+				pVolume->min = MFMin(pVolume->min, pos);
+				pVolume->max = MFMax(pVolume->max, pos);
+				AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+				if(bAnimating)
+				{
+					pAnimVert[c].i[0] = boneRemapping[vert.bone[0]+1] * 3;
+					pAnimVert[c].i[1] = boneRemapping[vert.bone[1]+1] * 3;
+					pAnimVert[c].i[2] = boneRemapping[vert.bone[2]+1] * 3;
+					pAnimVert[c].i[3] = boneRemapping[vert.bone[3]+1] * 3;
+					pAnimVert[c].w[0] = (uint8)(vert.weight[0] * 255.0f);
+					pAnimVert[c].w[1] = (uint8)(vert.weight[1] * 255.0f);
+					pAnimVert[c].w[2] = (uint8)(vert.weight[2] * 255.0f);
+					pAnimVert[c].w[3] = (uint8)(vert.weight[3] * 255.0f);
+
+					// we need to make sure the weights sum to 255
+					int leftOver = 255 - pAnimVert[c].w[0] - pAnimVert[c].w[1] - pAnimVert[c].w[2] - pAnimVert[c].w[3];
+
+					int d, biggest = 0, weight = pAnimVert[c].w[0];
+					for(d=1; d<4; d++)
+					{
+						biggest = pAnimVert[c].w[d] > weight ? d : biggest;
+						weight = MFMax(weight, (int)pAnimVert[c].w[d]);
+					}
+
+					pAnimVert[c].w[biggest] += leftOver;
+				}
+			}
+
+			// write indices
+			uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
+
+			for(c=0; c<numTriangles; c++)
+			{
+				int t = batch.tris[c];
+
+				pIndices[0] = matsub.triangles[t].v[0];
+				pIndices[1] = matsub.triangles[t].v[1];
+				pIndices[2] = matsub.triangles[t].v[2];
+
+				pIndices += 3;
+			}
+
+			// write out batch
+			if(bAnimating)
+			{
+				for(int c=0; c<pMeshChunk[mc].matrixBatchSize; c++)
+					pMeshChunk[mc].pBatchIndices[c] = (uint16)batch.bones[c];
+			}
+
+			++mc;
 		}
-
-		// write indices
-		uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
-
-		for(b=0; b<numTriangles; b++)
-		{
-			pIndices[0] = sub.matSubobjects[a].triangles[b].v[0];
-			pIndices[1] = sub.matSubobjects[a].triangles[b].v[1];
-			pIndices[2] = sub.matSubobjects[a].triangles[b].v[2];
-
-			pIndices += 3;
-		}
-
-		++mc;
 	}
 #endif
 }
@@ -522,8 +681,12 @@ void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 
 		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
 
 		pMC[a].pVertexData -= base;
+		if(pMC[a].pAnimData)
+			pMC[a].pAnimData -= base;
 		pMC[a].pIndexData -= base;
 		(char*&)pMC[a].pVertexElements -= base;
+		if(pMC[a].pBatchIndices)
+			(char*&)pMC[a].pBatchIndices -= base;
 	}
 #endif
 }
@@ -963,9 +1126,9 @@ void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
 	// write out mesh data
 	if(meshChunkIndex > -1)
 	{
-		SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pOffset;
+		MFModelSubObject *pSubobject = (MFModelSubObject*)pOffset;
 
-		pDataHeaders[meshChunkIndex].pData = pSubobjectChunk;
+		pDataHeaders[meshChunkIndex].pData = pSubobject;
 		pDataHeaders[meshChunkIndex].count = numOutputMeshChunks;
 
 		F3DMeshChunk *pMC = GetMeshChunk();
@@ -984,7 +1147,7 @@ found:
 		pModelData->boundingVolume.min = pModelData->boundingVolume.boundingSphere;
 		pModelData->boundingVolume.max = pModelData->boundingVolume.boundingSphere;
 
-		pOffset += MFALIGN16(sizeof(SubObjectChunk)*pDataHeaders[meshChunkIndex].count);
+		pOffset += MFALIGN16(sizeof(MFModelSubObject)*pDataHeaders[meshChunkIndex].count);
 
 		for(a=0, b=0; a<pMC->subObjects.size(); a++)
 		{
@@ -993,19 +1156,20 @@ found:
 			if(sub.dontExportThisSubobject)
 				continue;
 
-			pSubobjectChunk[b].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
-//			pSubobjectChunk[b].pMaterial = (MFMaterial*)pStringCache->Add(GetMaterialChunk()->materials[sub.materialIndex].name);
-			pSubobjectChunk[b].numMeshChunks = 0;
+			pSubobject[b].pSubObjectName = MFStringCache_Add(pStringCache, sub.name);
+//			pSubobject[b].pMaterial = (MFMaterial*)pStringCache->Add(materialChunk.materials[sub.materialIndex].name);
+			pSubobject[b].numMeshChunks = 0;
+			pSubobject[b].subobjectAnimMatrix = sub.IsSubobjectAnimation();
 
 			// count valid mesh chunks
 			for(int c=0; c<sub.matSubobjects.size(); c++)
 			{
 				if(sub.matSubobjects[c].triangles.size() != 0)
-					++pSubobjectChunk[b].numMeshChunks;
+					++pSubobject[b].numMeshChunks;
 			}
 
 			MFMeshChunk *pMeshChunks = (MFMeshChunk*)pOffset;
-			pSubobjectChunk[b].pMeshChunks = pMeshChunks;
+			pSubobject[b].pMeshChunks = pMeshChunks;
 
 			// build platform specific mesh chunk
 			switch(platform)
@@ -1037,14 +1201,14 @@ found:
 	// write out skeleton data
 	if(skeletonChunkIndex > -1)
 	{
-		BoneChunk *pBoneChunk = (BoneChunk*)pOffset;
+		MFModelBone *pBoneChunk = (MFModelBone*)pOffset;
 
 		int numBones = GetSkeletonChunk()->bones.size();
 
 		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
 		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->GetNumReferencedBones();
 
-		pOffset += MFALIGN16(sizeof(BoneChunk)*pDataHeaders[skeletonChunkIndex].count);
+		pOffset += sizeof(MFModelBone)*pDataHeaders[skeletonChunkIndex].count;
 
 		int *pBoneRemappingTable = (int*)MFHeap_Alloc(sizeof(int) * (numBones + 1));
 		*pBoneRemappingTable = -1;
@@ -1064,13 +1228,23 @@ found:
 				pBoneChunk[bc].boneMatrix = bone.boneMatrix;
 				pBoneChunk[bc].worldMatrix = bone.worldMatrix;
 				pBoneChunk[bc].invWorldMatrix.Inverse(bone.worldMatrix);
-				pBoneChunk[bc].parent = pBoneRemappingTable[bone.parent];
-				pBoneChunk[bc].reserved = 0;
+				pBoneChunk[bc].parent = (int16)pBoneRemappingTable[bone.parent];
+
+				pBoneChunk[bc].numChildren = (int16)bone.children.size();
+				pBoneChunk[bc].pChildren = (int16*)pOffset;
+
+				for(int b=0; b<pBoneChunk[bc].numChildren; b++)
+					pBoneChunk[bc].pChildren[b] = bone.children[b];
+
+				pOffset += sizeof(int16)*pBoneChunk[bc].numChildren;
+
 				++bc;
 			}
 			else
 				pBoneRemappingTable[a] = -1;
 		}
+
+		pOffset = (char*)MFALIGN16(pOffset);
 
 		--pBoneRemappingTable;
 		MFHeap_Free(pBoneRemappingTable);
@@ -1126,7 +1300,7 @@ found:
 	// write out tag data
 	if(tagChunkIndex > -1)
 	{
-		TagChunk *pTags = (TagChunk*)pOffset;
+		MFModelTag *pTags = (MFModelTag*)pOffset;
 
 		pDataHeaders[tagChunkIndex].pData = pTags;
 		pDataHeaders[tagChunkIndex].count = GetRefPointChunk()->refPoints.size();
@@ -1137,20 +1311,18 @@ found:
 			pTags[a].tagMatrix = GetRefPointChunk()->refPoints[a].worldMatrix;
 		}
 
-		pOffset += MFALIGN16(sizeof(TagChunk)*pDataHeaders[tagChunkIndex].count);
+		pOffset += MFALIGN16(sizeof(MFModelTag)*pDataHeaders[tagChunkIndex].count);
 	}
 
 	// write strings to end of file
 	char *pCache = MFStringCache_GetCache(pStringCache);
 	MFCopyMemory(pOffset, pCache, MFStringCache_GetSize(pStringCache));
 
-	uint32 stringBase = (uint32&)pCache - ((uint32&)pOffset - (uint32&)pFile);
+	char *pStringBase = pCache - (pOffset-pFile);
 	pOffset += MFStringCache_GetSize(pStringCache); // pOffset now equals the file size..
 
 	// un-fix-up all the pointers...
-	uint32 base = (uint32&)pModelData;
-
-	pModelData->pName -= stringBase;
+	MFFixUp(pModelData->pName, pStringBase, 0);
 
 	for(a=0; a<pModelData->numDataChunks; a++)
 	{
@@ -1158,27 +1330,27 @@ found:
 		{
 			case MFChunkType_SubObjects:
 			{
-				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pModelData->pDataChunks[a].pData;
+				MFModelSubObject *pSubobjectChunk = (MFModelSubObject*)pModelData->pDataChunks[a].pData;
 
 				for(b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
-					pSubobjectChunk[b].pSubObjectName -= stringBase;
-//					pSubobjectChunk[b].pMaterial = (MFMaterial*)((char*)pSubobjectChunk[b].pMaterial - stringBase);
+					MFFixUp(pSubobjectChunk[b].pSubObjectName, pStringBase, 0);
+//					MFFixUp(pSubobjectChunk[b].pMaterial, pStringBase, 0);
 
 					switch(platform)
 					{
 						case FP_PC:
-							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
 							break;
 						case FP_XBox:
-							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
 							break;
 						case FP_Linux:
 						case FP_OSX:
-							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
 							break;
 						case FP_PSP:
-							FixUpMeshChunk_PSP(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, base, stringBase);
+							FixUpMeshChunk_PSP(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
 							break;
 						case FP_PS2:
 						case FP_DC:
@@ -1187,19 +1359,20 @@ found:
 							printf("Invalid platform...\n");
 					}
 
-					(char*&)pSubobjectChunk[b].pMeshChunks -= base;
+					MFFixUp(pSubobjectChunk[b].pMeshChunks, pModelData, 0);
 				}
 				break;
 			}
 
 			case MFChunkType_Bones:
 			{
-				BoneChunk *pBoneChunk = (BoneChunk*)pModelData->pDataChunks[a].pData;
+				MFModelBone *pBoneChunk = (MFModelBone*)pModelData->pDataChunks[a].pData;
 
 				for(b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
-					pBoneChunk[b].pBoneName -= stringBase;
-					pBoneChunk[b].pParentName -= stringBase;
+					MFFixUp(pBoneChunk[b].pBoneName, pStringBase, 0);
+					MFFixUp(pBoneChunk[b].pParentName, pStringBase, 0);
+					MFFixUp(pBoneChunk[b].pChildren, pModelData, 0);
 				}
 				break;
 			}
@@ -1210,26 +1383,26 @@ found:
 
 				for(b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
-					pCollisionChunk[b].pName -= stringBase;
+					MFFixUp(pCollisionChunk[b].pName, pStringBase, 0);
 
 					if(pCollisionChunk[b].type == MFCT_Mesh)
 					{
 						MFCollisionMesh *pColMesh = (MFCollisionMesh*)pCollisionChunk[b].pCollisionTemplateData;
-						(char*&)pColMesh->pTriangles -= base;
+						MFFixUp(pColMesh->pTriangles, pModelData, 0);
 					}
 
-					(char*&)pCollisionChunk[b].pCollisionTemplateData -= base;
+					MFFixUp(pCollisionChunk[b].pCollisionTemplateData, pModelData, 0);
 				}
 				break;
 			}
 
 			case MFChunkType_Tags:
 			{
-				TagChunk *pTags = (TagChunk*)pModelData->pDataChunks[a].pData;
+				MFModelTag *pTags = (MFModelTag*)pModelData->pDataChunks[a].pData;
 
 				for(b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
-					pTags[b].pTagName -= stringBase;
+					MFFixUp(pTags[b].pTagName, pStringBase, 0);
 				}
 				break;
 			}
@@ -1239,12 +1412,12 @@ found:
 				break;
 		}
 
-		(char*&)pModelData->pDataChunks[a].pData -= base;
+		MFFixUp(pModelData->pDataChunks[a].pData, pModelData, 0);
 	}
-	(char*&)pModelData->pDataChunks -= base;
+	MFFixUp(pModelData->pDataChunks, pModelData, 0);
 
 	// write to disk..
-	uint32 fileSize = (uint32&)pOffset - base;
+	size_t fileSize = pOffset - pFile;
 	fwrite(pFile, fileSize, 1, file);
 	fclose(file);
 
@@ -1615,9 +1788,141 @@ void F3DFile::Optimise()
 	}
 }
 
-void F3DFile::BuildBatches()
+bool IsBoneInBatch(const MFArray<int> &batch, int bone)
+{
+	if(bone == -1) return true;
+
+	for(int a=0; a<batch.size(); a++)
+	{
+		if(batch[a] == bone)
+			return true;
+	}
+
+	return false;
+}
+
+int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri)
+{
+	int numNotInBatch = 0;
+
+	MFArray<int> bones;
+
+	for(int a=0; a<matSub.maxWeights; a++)
+	{
+		int b0 = matSub.vertices[tri.v[0]].bone[a];
+		int b1 = matSub.vertices[tri.v[1]].bone[a];
+		int b2 = matSub.vertices[tri.v[2]].bone[a];
+
+		if(!IsBoneInBatch(batch.bones, b0))
+		{
+			if(!IsBoneInBatch(bones, b0))
+			{
+				bones.push(b0);
+				++numNotInBatch;
+			}
+		}
+		if(!IsBoneInBatch(batch.bones, b1))
+		{
+			if(!IsBoneInBatch(bones, b1))
+			{
+				bones.push(b0);
+				++numNotInBatch;
+			}
+		}
+		if(!IsBoneInBatch(batch.bones, b2))
+		{
+			if(!IsBoneInBatch(bones, b2))
+			{
+				bones.push(b0);
+				++numNotInBatch;
+			}
+		}
+	}
+
+	return numNotInBatch;
+}
+
+void AddTriToBatch(F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri)
+{
+	for(int a=0; a<matSub.maxWeights; a++)
+	{
+		int b0 = matSub.vertices[tri.v[0]].bone[a];
+		int b1 = matSub.vertices[tri.v[1]].bone[a];
+		int b2 = matSub.vertices[tri.v[2]].bone[a];
+
+		if(!IsBoneInBatch(batch.bones, b0))
+			batch.bones.push(b0);
+		if(!IsBoneInBatch(batch.bones, b1))
+			batch.bones.push(b1);
+		if(!IsBoneInBatch(batch.bones, b2))
+			batch.bones.push(b2);
+	}
+}
+
+void F3DFile::BuildBatches(MFPlatform platform)
 {
 	// build bone batches
+	int maxBones = 0;
+
+	switch(platform)
+	{
+		case FP_PC:		maxBones = 50;	break;
+		case FP_XBox:	maxBones = 20;	break;
+		case FP_PSP:	maxBones = 8;	break;
+		case FP_Linux:	maxBones = 50;	break;
+		case FP_OSX:	maxBones = 50;	break;
+		default:		maxBones = 256;	break;
+	}
+
+	MFArray<int> trisAdded;
+	int numAdded;
+
+	for(int a=0; a<meshChunk.subObjects.size(); a++)
+	{
+		for(int b=0; b<meshChunk.subObjects[a].matSubobjects.size(); b++)
+		{
+			F3DMaterialSubobject &matSub = meshChunk.subObjects[a].matSubobjects[b];
+/*
+			if(matSub.numBones < maxBones)
+			{
+				// do this the fast way :P
+				F3DBatch &batch = matSub.triangleBatches.push();
+
+				// ..... harder than i thought ....
+			}
+			else
+*/
+			{
+				int numTris = matSub.triangles.size();
+
+				trisAdded.resize(numTris);
+				MFZeroMemory(trisAdded.getpointer(), sizeof(int)*numTris);
+				numAdded = 0;
+
+				while(numAdded < numTris)
+				{
+					F3DBatch &batch = matSub.triangleBatches.push();
+
+					for(int c=0; c<numTris; c++)
+					{
+						if(trisAdded[c])
+							continue;
+
+						F3DTriangle &tri = matSub.triangles[c];
+						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri);
+						if(numNotInBatch + batch.bones.size() > maxBones)
+							continue;
+
+						if(numNotInBatch)
+							AddTriToBatch(batch, matSub, tri);
+						batch.tris.push(c);
+						trisAdded[c] = 1;
+						++numAdded;
+					}
+				}
+			}
+		}
+	}
 }
 
 void F3DFile::StripModel()
@@ -1627,7 +1932,9 @@ void F3DFile::StripModel()
 
 void F3DFile::ProcessSkeletonData()
 {
-	// generate localMatrix and stuff..
+	// build hierarchy and stuff
+	skeletonChunk.BuildHierarchy();
+	skeletonChunk.FlagReferenced(true);
 }
 
 void F3DFile::ProcessCollisionData()
@@ -1776,7 +2083,32 @@ F3DSubObject::F3DSubObject()
 	dontExportThisSubobject = false;
 }
 
-int F3DSkeletonChunk::FindBone(const char *pName)
+int F3DSubObject::IsSubobjectAnimation() const
+{
+	int subobject = -1;
+
+	for(int a=0; a<matSubobjects.size(); a++)
+	{
+		if(matSubobjects[a].numBones != 1)
+			return -1;
+
+		MFDebug_Assert(matSubobjects[a].triangleBatches.size() == 1 && matSubobjects[a].triangleBatches[0].bones.size() == 1, "Internal error!!");
+
+		if(subobject != -1)
+		{
+			if(subobject != matSubobjects[a].triangleBatches[0].bones[0])
+				return -1;
+		}
+		else
+		{
+			subobject = matSubobjects[a].triangleBatches[0].bones[0];
+		}
+	}
+
+	return subobject;
+}
+
+int F3DSkeletonChunk::FindBone(const char *pName) const
 {
 	if(!pName)
 		return NULL;
@@ -1795,6 +2127,11 @@ void F3DSkeletonChunk::BuildHierarchy()
 	for(int a=0; a<bones.size(); a++)
 	{
 		bones[a].parent = FindBone(bones[a].parentName);
+
+		if(bones[a].parent > -1)
+		{
+			bones[bones[a].parent].children.push(a);
+		}
 	}
 }
 
@@ -1816,7 +2153,7 @@ void F3DSkeletonChunk::FlagReferenced(bool bAll)
 	}
 }
 
-int F3DSkeletonChunk::GetNumReferencedBones()
+int F3DSkeletonChunk::GetNumReferencedBones() const
 {
 	int numBones = 0;
 
@@ -1877,7 +2214,7 @@ F3DVertex::F3DVertex()
 	weight[0] = weight[1] = weight[2] = weight[3] = weight[4] = weight[5] = weight[6] = weight[7] = 0.0f;
 }
 
-bool F3DVertex::operator==(const F3DVertex &v)
+bool F3DVertex::operator==(const F3DVertex &v) const
 {
 	return !memcmp(this, &v,sizeof(*this));
 }

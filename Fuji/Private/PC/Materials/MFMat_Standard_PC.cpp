@@ -7,15 +7,27 @@
 #include "MFRenderer_PC.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
+#include "../Shaders/MatStandard.h"
+
 static MFMaterial *pSetMaterial = 0;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
 extern IDirect3DDevice9 *pd3dDevice;
+IDirect3DVertexShader9 *pVS = NULL;
+
+extern const MFMatrix *pAnimMats;
+extern int gNumAnimMats;
+
+extern const uint16 *pCurrentBatch;
+extern int gNumBonesInBatch;
+
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	MFCALLSTACK;
+
+	pd3dDevice->CreateVertexShader(g_vs20_main, &pVS);
 
 	return 0;
 }
@@ -24,6 +36,7 @@ void MFMat_Standard_UnregisterMaterial()
 {
 	MFCALLSTACK;
 
+	pVS->Release();
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial)
@@ -45,11 +58,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
-			MFRendererPC_SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-
-			MFMatrix texMat = pData->textureMatrix;
-			texMat.SetZAxis3(texMat.GetTrans());
-			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&texMat);
+			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 		}
 		else
 		{
@@ -113,6 +122,17 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		MFRendererPC_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
 		MFRendererPC_SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
 	}
+
+	MFRendererPC_SetColourMask(1, 0, 1, 0);
+
+	// set animation matrices...
+	if(pAnimMats && pCurrentBatch)
+	{
+		for(int b=0; b<gNumBonesInBatch; b++)
+			MFRendererPC_SetAnimationMatrix(b, pAnimMats[pCurrentBatch[b]]);
+	}
+
+	MFRendererPC_SetVertexShader(pVS);
 
 	return 0;
 }

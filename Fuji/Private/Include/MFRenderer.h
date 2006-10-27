@@ -123,7 +123,16 @@ void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix);
  * @param numMatrices The number of matrices that \a pMatrices points to.
  * @return None.
  */
-void MFRenderer_SetMatrices(MFMatrix *pMatrices, int numMatrices);
+void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
+
+/**
+ * Set the current animation bone batch.
+ * Sets the current animation bone batch.
+ * @param pBatch Pointer to the matrix batch.
+ * @param numBonesInBatch The number of bones in the batch.
+ * @return None.
+ */
+void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch);
 
 /**
  * Flush the renderer settings to the hardware.

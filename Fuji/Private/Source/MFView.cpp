@@ -103,6 +103,7 @@ void MFView_SetProjection()
 	if(pCurrentView->isOrtho)
 	{
 		pCurrentView->isOrtho = false;
+		pCurrentView->viewDirty = true;
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
 	}
@@ -115,7 +116,7 @@ void MFView_SetOrtho(MFRect *pOrthoRect)
 	if(!pCurrentView->isOrtho || pOrthoRect)
 	{
 		pCurrentView->isOrtho = true;
-
+		pCurrentView->viewDirty = true;
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
 
@@ -153,7 +154,10 @@ const MFMatrix& MFView_GetWorldToViewMatrix()
 {
 	if(pCurrentView->viewDirty)
 	{
-		pCurrentView->view.Inverse(pCurrentView->cameraMatrix);
+		if(pCurrentView->isOrtho)
+			pCurrentView->view.SetIdentity();
+		else
+			pCurrentView->view.Inverse(pCurrentView->cameraMatrix);
 		pCurrentView->viewDirty = false;
 	}
 
@@ -242,14 +246,14 @@ const MFMatrix& MFView_GetWorldToScreenMatrix()
 
 MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, MFView_GetWorldToScreenMatrix());
+	pOutput->Multiply4x4(localToWorld, MFView_GetWorldToScreenMatrix());
 
 	return pOutput;
 }
 
 MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
-	pOutput->Multiply(localToWorld, MFView_GetWorldToViewMatrix());
+	pOutput->Multiply4x4(localToWorld, MFView_GetWorldToViewMatrix());
 
 	return pOutput;
 }

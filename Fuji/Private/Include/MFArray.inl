@@ -81,7 +81,7 @@ inline T& MFArray<T>::push()
 }
 
 template<class T>
-inline T& MFArray<T>::push(T &x)
+inline T& MFArray<T>::push(const T &x)
 {
 	return operator[](size()) = x;
 }
@@ -119,7 +119,7 @@ inline const T& MFArray<T>::back() const
 }
 
 template<class T>
-inline T* MFArray<T>::getpointer()
+inline T* MFArray<T>::getpointer() const
 {
 	return pData;
 }

@@ -51,4 +51,10 @@ void MFRendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 
 void MFRendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type);
 void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type);
 
+void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen);
+void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix);
+void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix);
+void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd);
+void MFRendererPC_SetNumWeights(int numWeights);
+
 #endif // _MFRENDERER_PC_H

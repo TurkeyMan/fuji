@@ -6,6 +6,7 @@
 #include "MFPrimitive.h"
 #include "MFTexture_Internal.h"
 #include "MFRenderer.h"
+#include "MFRenderer_PC.h"
 #include "MFMaterial.h"
 
 #include "Materials/MFMat_Standard.h"
@@ -18,11 +19,6 @@ static bool gRenderQuads = false;
 
 struct LitVertex
 {
-	enum
-	{
-		FVF = D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1
-	};
-
 	struct LitPos
 	{
 		float x, y, z;
@@ -46,6 +42,7 @@ uint32 beginCount;
 uint32 currentVert;
 
 extern IDirect3DDevice9 *pd3dDevice;
+static IDirect3DVertexDeclaration9 *pDecl;
 
 /*** functions ***/
 
@@ -53,12 +50,63 @@ void MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
 
+	D3DVERTEXELEMENT9 decl[7];
+
+	// write declaration
+	decl[0].Stream = 0;
+	decl[0].Offset = 0;
+	decl[0].Type = D3DDECLTYPE_FLOAT3;
+	decl[0].Method = D3DDECLMETHOD_DEFAULT;
+	decl[0].Usage = D3DDECLUSAGE_POSITION;
+	decl[0].UsageIndex = 0;
+
+	decl[1].Stream = 0;
+	decl[1].Offset = 12;
+	decl[1].Type = D3DDECLTYPE_FLOAT3;
+	decl[1].Method = D3DDECLMETHOD_DEFAULT;
+	decl[1].Usage = D3DDECLUSAGE_NORMAL;
+	decl[1].UsageIndex = 0;
+
+	decl[2].Stream = 0;
+	decl[2].Offset = 24;
+	decl[2].Type = D3DDECLTYPE_D3DCOLOR;
+	decl[2].Method = D3DDECLMETHOD_DEFAULT;
+	decl[2].Usage = D3DDECLUSAGE_COLOR;
+	decl[2].UsageIndex = 0;
+
+	decl[3].Stream = 0;
+	decl[3].Offset = 28;
+	decl[3].Type = D3DDECLTYPE_FLOAT2;
+	decl[3].Method = D3DDECLMETHOD_DEFAULT;
+	decl[3].Usage = D3DDECLUSAGE_TEXCOORD;
+	decl[3].UsageIndex = 0;
+
+	decl[4].Stream = 0;
+	decl[4].Offset = 0;
+	decl[4].Type = D3DDECLTYPE_D3DCOLOR;
+	decl[4].Method = D3DDECLMETHOD_DEFAULT;
+	decl[4].Usage = D3DDECLUSAGE_BLENDINDICES;
+	decl[4].UsageIndex = 0;
+
+	decl[5].Stream = 0;
+	decl[5].Offset = 0;
+	decl[5].Type = D3DDECLTYPE_D3DCOLOR;
+	decl[5].Method = D3DDECLMETHOD_DEFAULT;
+	decl[5].Usage = D3DDECLUSAGE_BLENDWEIGHT;
+	decl[5].UsageIndex = 0;
+
+	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+	decl[6] = endMacro;
+
+	HRESULT hr = pd3dDevice->CreateVertexDeclaration(decl, &pDecl);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
 }
 
 void MFPrimitive_DeinitModule()
 {
 	MFCALLSTACK;
 
+	pDecl->Release();
 }
 
 void MFPrimitive_DrawStats()
@@ -85,13 +133,11 @@ void MFPrimitive(uint32 type, uint32 hint)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 	}
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&MFMatrix::identity);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&MFView_GetViewToScreenMatrix());
+	MFRenderer_SetMatrices(NULL, 0);
+	MFRendererPC_SetNumWeights(0);
+	MFRendererPC_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
 
-	if(MFView_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFMatrix::identity);
-	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
+	pd3dDevice->SetVertexDeclaration(pDecl);
 
 	MFRenderer_Begin();
 }
@@ -119,7 +165,9 @@ void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
+	MFMatrix temp;
+	MFView_GetLocalToScreen(mat, &temp);
+	MFRendererPC_SetWorldToScreenMatrix(temp);
 }
 
 void MFSetColour(const MFVector &colour)
@@ -212,8 +260,6 @@ void MFEnd()
 	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
-
-	pd3dDevice->SetFVF(LitVertex::FVF);
 
 	switch(primType)
 	{

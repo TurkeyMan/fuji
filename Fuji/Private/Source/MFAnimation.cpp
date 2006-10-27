@@ -7,6 +7,9 @@
 
 MFPtrList<MFAnimationTemplate> gAnimationBank;
 
+// 128 temp matrices for intermediate calculation data
+MFMatrix gWorkingMats[128];
+
 void MFAnimation_InitModule()
 {
 	gAnimationBank.Init("Animation Bank", gDefaults.animation.maxAnimations);
@@ -106,19 +109,25 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 	// create and init instance
 	MFAnimation *pAnimation;
-	pAnimation = (MFAnimation*)MFHeap_Alloc(MFALIGN16(sizeof(MFAnimation)) + MFALIGN16(sizeof(MFMatrix) * pBoneChunk->count) + sizeof(int)*pBoneChunk->count);
+	pAnimation = (MFAnimation*)MFHeap_Alloc(MFALIGN16(sizeof(MFAnimation)) + MFALIGN16(sizeof(MFMatrix) * pBoneChunk->count) + sizeof(int)*pBoneChunk->count + sizeof(MFAnimationCurrentFrame)*pBoneChunk->count);
 	pAnimation->pModel = pModel;
 	pAnimation->pTemplate = pTemplate;
 
 	// add animation to model animation list
 	pModel->pAnimation = pAnimation;
 
+	// get bones pointer from model (for convenience)
+	pAnimation->pBones = (MFModelBone*)pBoneChunk->pData;
+	pAnimation->numBones = pBoneChunk->count;
+
+	// set matrices to identity
 	pAnimation->pMatrices = (MFMatrix*)MFALIGN16(&pAnimation[1]);
 	for(int a=0; a<pBoneChunk->count; a++)
 	{
 		pAnimation->pMatrices[a] = MFMatrix::identity;
 	}
 
+	// build bone to animation stream mapping
 	pAnimation->pBoneMap = (int*)MFALIGN16(&pAnimation->pMatrices[pBoneChunk->count]);
 	for(int a=0; a<pBoneChunk->count; a++)
 	{
@@ -139,9 +148,10 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	}
 
 	pAnimation->pCustomMatrices = NULL;
-	pAnimation->curFrame = 0.0f;
-	pAnimation->targetFrame = 0.0f;
-	pAnimation->tween = 0.0f;
+	pAnimation->blendLayer.frameTime = pAnimation->pTemplate->startTime;
+
+	pAnimation->blendLayer.pCurFrames = (MFAnimationCurrentFrame*)&pAnimation->pBoneMap[pBoneChunk->count];
+	MFZeroMemory(pAnimation->blendLayer.pCurFrames, sizeof(MFAnimationCurrentFrame)*pBoneChunk->count);
 
 	return pAnimation;
 }
@@ -159,54 +169,102 @@ void MFAnimation_Destroy(MFAnimation *pAnimation)
 	MFHeap_Free(pAnimation);
 }
 
-int gFrame = 0;
-
-MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation)
+MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)
 {
-	MFMatrix *pMats = pAnimation->pMatrices;
-	MFModel *pModel = pAnimation->pModel;
 	MFAnimationBone *pAnims = pAnimation->pTemplate->pBones;
+	MFModelBone *pBones = pAnimation->pBones;
+	MFMatrix *pMats = pAnimation->pMatrices;
 
-	// get the model bone chunk
-	MFModelDataChunk *pBoneChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
-	BoneChunk *pBones = (BoneChunk*)pBoneChunk->pData;
+	float t = pAnimation->blendLayer.frameTime;
+	MFDebug_Assert(t >= pAnimation->pTemplate->startTime && t <= pAnimation->pTemplate->endTime, "Frame time outside animation range...");
 
-	int numBones = pBoneChunk->count;
+	// find the frame number for each bone
+	for(int a=0; a<pAnimation->numBones; a++)
+	{
+		int map = pAnimation->pBoneMap[a];
 
-	for(int a=0; a<numBones; a++)
+		if(map != -1)
+		{
+			float *pTimes = pAnims[map].pTime;
+			int lastFrames = pAnims[map].numFrames-1;
+
+			if(t == pTimes[lastFrames])
+			{
+				pAnimation->blendLayer.pCurFrames[a].tweenStart = lastFrames;
+				pAnimation->blendLayer.pCurFrames[a].tweenEnd = lastFrames;
+				pAnimation->blendLayer.pCurFrames[a].tween = 0;
+			}
+			else
+			{
+				// TODO: change this to a binary search...
+				for(int b=0; b<lastFrames; b++)
+				{
+					float t1 = pTimes[b];
+					float t2 = pTimes[b+1];
+
+					if(t >= pTimes[b] && t < pTimes[b+1])
+					{
+						pAnimation->blendLayer.pCurFrames[a].tweenStart = b;
+						pAnimation->blendLayer.pCurFrames[a].tweenEnd = b+1;
+						pAnimation->blendLayer.pCurFrames[a].tween = (t-t1) / (t2-t1);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// calculate the matrix for each bone
+	for(int a=0; a<pAnimation->numBones; a++)
+	{
+		int map = pAnimation->pBoneMap[a];
+
+		if(map != -1)
+		{
+			MFMatrix &m1 = pAnims[map].pFrames[pAnimation->blendLayer.pCurFrames[a].tweenStart].key;
+			MFMatrix &m2 = pAnims[map].pFrames[pAnimation->blendLayer.pCurFrames[a].tweenEnd].key;
+
+			gWorkingMats[a].Tween(m1, m2, pAnimation->blendLayer.pCurFrames[a].tween);
+		}
+		else
+		{
+			gWorkingMats[a] = pBones[a].boneMatrix;
+		}
+	}
+
+	// build the animation matrix for each bone...
+	// TODO: this could be much faster
+	for(int a=0; a<pAnimation->numBones; a++)
 	{
 		MFMatrix boneMat = MFMatrix::identity;
 
 		int b = a;
 		do
 		{
-			int map = pAnimation->pBoneMap[b];
-
-			MFMatrix *pMat;
-
-			if(map != -1)
-				pMat = &pAnims[map].pFrames[gFrame].key;
-			else
-				pMat = &pBones[b].boneMatrix;
-
-			boneMat.Multiply(*pMat);
-
+			boneMat.Multiply(gWorkingMats[b]);
 			b = pBones[b].parent;
 		}
 		while(b != -1);
 
+//		pMats[a].Multiply(boneMat, pBones[a].invWorldMatrix);
 		pMats[a].Multiply(pBones[a].invWorldMatrix, boneMat);
+
+		if(pLocalToWorld)
+			pMats[a].Multiply(*pLocalToWorld);
 	}
 
 	return pAnimation->pMatrices;
 }
 
-int MFAnimation_GetNumFrames(MFAnimation *pAnimation)
+void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime)
 {
-	return pAnimation->pTemplate->pBones[0].numFrames;
+	if(pStartTime)
+		*pStartTime = pAnimation->pTemplate->startTime;
+	if(pEndTime)
+		*pEndTime = pAnimation->pTemplate->endTime;
 }
 
-void MFAnimation_SetFrame(MFAnimation *, int frame)
+void MFAnimation_SetFrame(MFAnimation *pAnimation, float frameTime)
 {
-	gFrame = frame;
+	pAnimation->blendLayer.frameTime = frameTime;
 }

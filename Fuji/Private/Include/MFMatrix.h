@@ -48,6 +48,9 @@ public:
 
 	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);
 
+	MFMatrix& Normalise();
+	MFMatrix& OrthoNormalise();
+
 	MFMatrix& Transpose();
 	MFMatrix& Transpose(const MFMatrix &matrix);
 	MFMatrix& Transpose3x3();

@@ -2,11 +2,13 @@
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFModel_Internal.h"
+#include "MFAnimation_Internal.h"
 #include "MFFileSystem.h"
 #include "MFView.h"
 
 #include "Display_Internal.h"
 #include "MFRenderer.h"
+#include "MFRenderer_PC.h"
 
 extern IDirect3DDevice9 *pd3dDevice;
 
@@ -14,19 +16,28 @@ void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
 
-	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&pModel->worldMatrix);
-	pd3dDevice->SetTransform(D3DTS_PROJECTION, (D3DMATRIX*)&MFView_GetViewToScreenMatrix());
+	MFMatrix *pAnimMats = NULL;
 
-	if(MFView_IsOrtho())
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFMatrix::identity);
+	MFMatrix wts;
+
+	if(pModel->pAnimation)
+	{
+		pAnimMats = MFAnimation_CalculateMatrices(pModel->pAnimation, &pModel->worldMatrix);
+		wts = MFView_GetWorldToScreenMatrix();
+	}
 	else
-		pd3dDevice->SetTransform(D3DTS_VIEW, (D3DMATRIX*)&MFView_GetWorldToViewMatrix());
+	{
+		MFView_GetLocalToScreen(pModel->worldMatrix, &wts);
+	}
+
+	MFRenderer_SetMatrices(pAnimMats, pAnimMats ? pModel->pAnimation->numBones : 0);
+	MFRendererPC_SetWorldToScreenMatrix(wts);
 
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
 	{
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 		for(int a=0; a<pChunk->count; a++)
 		{
@@ -35,13 +46,24 @@ void MFModel_Draw(MFModel *pModel)
 				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[a].pMeshChunks;
 
 				MFMaterial_SetMaterial(pMC[b].pMaterial);
+
+				if(pModel->pAnimation)
+				{
+					MFRendererPC_SetNumWeights(pMC[b].maxWeights);
+					MFRenderer_SetBatch(pMC[b].pBatchIndices, pMC[b].matrixBatchSize);
+				}
+				else
+					MFRendererPC_SetNumWeights(0);
+
 				MFRenderer_Begin();
 
 				pd3dDevice->SetVertexDeclaration(pMC[b].pVertexDeclaration);
 				pd3dDevice->SetStreamSource(0, pMC[b].pVertexBuffer, 0, pMC[b].vertexStride);
+				if(pMC[b].pAnimBuffer)
+					pd3dDevice->SetStreamSource(1, pMC[b].pAnimBuffer, 0, pMC[b].animVertexStride);
 				pd3dDevice->SetIndices(pMC[b].pIndexBuffer);
-				pd3dDevice->SetFVF(D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1);
-				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC[b].numVertices, 0, pMC[b].numIndices);
+
+				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC[b].numVertices, 0, pMC[b].numIndices/3);
 			}
 		}
 	}
@@ -60,8 +82,13 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 	// create D3D interfaces
 	hr = pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
-	hr = pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, D3DFVF_XYZ|D3DFVF_NORMAL|D3DFVF_DIFFUSE|D3DFVF_TEX1, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
+	hr = pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, 0, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex buffer..");
+	if(pMC->pAnimData)
+	{
+		hr = pd3dDevice->CreateVertexBuffer(pMC->animDataSize, 0, 0, D3DPOOL_MANAGED, &pMC->pAnimBuffer, NULL);
+		MFDebug_Assert(SUCCEEDED(hr), "Failed to create animation buffer..");
+	}
 	hr = pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create index buffer..");
 
@@ -69,11 +96,22 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 	// fill vertex buffer
 	hr = pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vettex buffer..");
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vertex buffer..");
 
 	MFCopyMemory(pData, pMC->pVertexData, pMC->vertexDataSize);
 
 	pMC->pVertexBuffer->Unlock();
+
+	// fill animation buffer
+	if(pMC->pAnimData)
+	{
+		hr = pMC->pAnimBuffer->Lock(0, 0, &pData, 0);
+		MFDebug_Assert(SUCCEEDED(hr), "Failed to lock animation buffer..");
+
+		MFCopyMemory(pData, pMC->pAnimData, pMC->animDataSize);
+
+		pMC->pAnimBuffer->Unlock();
+	}
 
 	// fill index buffer
 	hr = pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
@@ -98,6 +136,12 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 	pMC->pVertexBuffer->Release();
 	pMC->pVertexBuffer = NULL;
 
+	if(pMC->pAnimBuffer)
+	{
+		pMC->pAnimBuffer->Release();
+		pMC->pAnimBuffer = NULL;
+	}
+
 	pMC->pVertexDeclaration->Release();
 	pMC->pVertexDeclaration = NULL;
 }
@@ -110,8 +154,12 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 
 	MFFixUp(pMC->pMaterial, (void*)base, load);
 	MFFixUp(pMC->pVertexData, (void*)base, load);
+	if(pMC->pAnimData)
+		MFFixUp(pMC->pAnimData, (void*)base, load);
 	MFFixUp(pMC->pIndexData, (void*)base, load);
 	MFFixUp(pMC->pVertexElements, (void*)base, load);
+	if(pMC->pBatchIndices)
+		MFFixUp(pMC->pBatchIndices, (void*)base, load);
 }
 
 MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)
@@ -121,7 +169,7 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 	if(pChunk)
 	{
 		MFDebug_Assert(subobjectIndex < pChunk->count, "Subobject index out of bounds.");
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 		MFDebug_Assert(meshChunkIndex < pSubobjects->numMeshChunks, "Mesh chunk index out of bounds.");
 		MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[subobjectIndex].pMeshChunks;

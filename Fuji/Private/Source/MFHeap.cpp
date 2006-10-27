@@ -101,7 +101,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(bytes + pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes, pAllocHeap->pHeapData);
 
-	int alignment = MFALIGN((uint32&)pMemory + sizeof(MFAllocHeader), heapAlignment) - (uint32&)pMemory;
+	int alignment = (int)((uint32)MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uint32&)pMemory);
 
 	pMemory += alignment;
 

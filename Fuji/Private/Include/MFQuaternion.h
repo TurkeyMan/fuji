@@ -101,7 +101,18 @@ public:
 	void Set(float x, float y, float z, float w);				/**< Set each component of a quaternion. */
 
 	MFQuaternion& operator=(const MFQuaternion &v);				/**< Assignment operator. */
+
+	MFQuaternion operator+(const MFQuaternion &q) const;		/**< Addition operator. */
+	MFQuaternion operator-(const MFQuaternion &q) const;		/**< Subtraction operator. */
+	MFQuaternion operator*(float f) const;						/**< Scale operator. */
 	MFQuaternion operator*(const MFQuaternion &q) const;		/**< Quaternion multiply operator. */
+
+	MFQuaternion& operator+=(const MFQuaternion &q);			/**< Plus-equals operator. */
+	MFQuaternion& operator-=(const MFQuaternion &q);			/**< Minus-equals operator. */
+	MFQuaternion& operator*=(float f);							/**< Scale-equals operator. */
+	MFQuaternion& operator*=(const MFQuaternion &q);			/**< Quaternion multiply-equals operator. */
+
+	float Dot(const MFQuaternion &q) const;						/**< Quaternion dot product. */
 
 	MFQuaternion& Multiply(const MFQuaternion &q);				/**< Perform a quaternion multiply. */
 	MFQuaternion& Multiply(const MFQuaternion &q1, const MFQuaternion &q2);	/**< Perform a quaternion multiply. */
@@ -109,10 +120,13 @@ public:
 	MFQuaternion& Conjugate(const MFQuaternion &q);				/**< Find the conjugate of a quaternion. */
 	MFQuaternion& Conjugate();									/**< Calculate the quaternion conjugate. */
 
+	MFVector Apply(const MFVector &v) const;					/**< Apply the quaternion to a vector. */
+
 	operator float*();											/**< float pointer cast operator. */
 	operator float*() const;									/**< const float pointer cast operator. */
 
-	MFQuaternion& SLerp(const MFQuaternion &q, float t);		/**< SLerp between 2 quaternions. */
+	MFQuaternion& Slerp(const MFQuaternion &q1, const MFQuaternion &q2, float t);	/**< Slerp between 2 quaternions. */
+	MFQuaternion& Slerp(const MFQuaternion &q, float t);		/**< Slerp between this and another quaternion. */
 
 	const char * ToString() const;								/**< Convert quaternion to a string. */
 };

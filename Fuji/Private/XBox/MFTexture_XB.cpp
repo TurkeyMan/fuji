@@ -127,6 +127,10 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		pTexture->pTexture->UnlockRect(0);
 
+		// filter mip levels
+		if(generateMipChain)
+			D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
+
 		MFString_Copy(pTexture->name, pName);
 
 		// create template data

@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
 	pModel->Optimise();
 	pModel->ProcessSkeletonData();
 	pModel->ProcessCollisionData();
+	pModel->BuildBatches(platform);
 	pModel->StripModel();
 
 	// generate output filename

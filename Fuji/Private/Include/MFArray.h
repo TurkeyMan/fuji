@@ -22,7 +22,7 @@ public:
 	void clear();
 
 	T& push();
-	T& push(T &x);
+	T& push(const T &x);
 	T& pop();
 
 	T& front();
@@ -31,7 +31,7 @@ public:
 	T& back();
 	const T& back() const;
 
-	T* getpointer();
+	T* getpointer() const;
 
 protected:
 	int count;

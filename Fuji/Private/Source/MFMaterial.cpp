@@ -273,6 +273,8 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	MFCopyMemory(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
 	gMaterialRegistry.Create(pMatType);
+
+	pCallbacks->pRegisterMaterial(NULL);
 }
 
 void Materual_UnregisterMaterialType(const char *pName)
@@ -284,7 +286,11 @@ void Materual_UnregisterMaterialType(const char *pName)
 	MFDebug_Assert(pMatType, MFStr("Material type '%s' doesn't exist!", pName));
 
 	if(pMatType)
+	{
+		pMatType->materialCallbacks.pUnregisterMaterial();
 		gMaterialRegistry.Destroy(pMatType);
+		MFHeap_Free(pMatType);
+	}
 }
 
 MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName)

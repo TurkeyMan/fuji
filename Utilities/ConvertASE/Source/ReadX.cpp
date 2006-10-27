@@ -470,9 +470,18 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 	// now we want to do something with all this data...
 	F3DSkeletonChunk *pSC = pModel->GetSkeletonChunk();
 
+	int boneID = pSC->FindBone(pName);
+
+	// if boneID == -1 we dont want to process this data
+	if(boneID == -1)
+		return pText;
+
 	// check weights are sequential
 	for(int a=0; a<numWeights; a++)
 		MFDebug_Assert(a == pIndices[a], "Weight array is not sequential!");
+
+	for(int a=0; a<sub.matSubobjects.size(); a++)
+		++sub.matSubobjects[a].numBones;
 
 	// map to faces
 	for(int m=0; m<sub.matSubobjects.size(); m++)
@@ -492,15 +501,9 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 					if(v.bone[b] == -1)
 					{
 						v.weight[b] = pWeights[i];
-
-						int bone = pSC->FindBone(pName);
-						if(bone != -1)
-						{
-							v.bone[b] = bone;
-							pSC->bones[bone].bIsSkinned = true;
-							sub.matSubobjects[m].maxWeights = MFMax(sub.matSubobjects[m].maxWeights, b+1);
-						}
-
+						v.bone[b] = boneID;
+						pSC->bones[boneID].bIsSkinned = true;
+						sub.matSubobjects[m].maxWeights = MFMax(sub.matSubobjects[m].maxWeights, b+1);
 						break;
 					}
 				}
@@ -619,10 +622,12 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 			int nBones = GetInt(pText, &pText);
 
 			// not yet sure how this helps...
+/*
 			for(int m=0; m<sub.matSubobjects.size(); m++)
 			{
 				sub.matSubobjects[m].numBones = nBones;
 			}
+*/
 
 			SkipToken(pText, "}");
 		}
@@ -663,6 +668,7 @@ const char *ParseAnimation(const char *pText)
 	MFVector *pScale = NULL;
 	MFVector *pTrans = NULL;
 	MFMatrix *pMats = NULL;
+	MFVector tQuat;
 
 	const char *pTok = GetNextToken(pText, &pText);
 
@@ -705,12 +711,8 @@ const char *ParseAnimation(const char *pText)
 				{
 					case KT_Quat:
 						MFDebug_Assert(numComponents == 4, "Required 4 components for a quaternion.");
-						GetFloatArray(pText, (float*)&pQuats[a], numComponents, &pText);
-						{
-							MFVector v;
-							v.Swizzle((MFVector&)pQuats[a], SW_Y|SW_NEG, SW_Z|SW_NEG, SW_W|SW_NEG, SW_X|SW_NEG);
-							pQuats[a] = (MFQuaternion&)v;
-						}
+						GetFloatArray(pText, tQuat, numComponents, &pText);
+						((MFVector&)pQuats[a]).Swizzle(tQuat, SW_Y|SW_NEG, SW_Z|SW_NEG, SW_W|SW_NEG, SW_X|SW_NEG);
 						break;
 					case KT_Scale:
 						MFDebug_Assert(numComponents == 3, "Required 3 components for a scale.");
@@ -772,10 +774,9 @@ const char *ParseAnimation(const char *pText)
 				anim.keyframes[a].key = pMats[a];
 
 //				anim.keyframes[a].scale = MakeVector(pMats[a].GetXAxis().Magnitude3(), pMats[a].GetYAxis().Magnitude3(), pMats[a].GetZAxis().Magnitude3(), 1.0f);
-//				anim.keyframes[a].translation = pMats[a].GetTrans();
-
-				// not sure how to do this yet...
+//				pMats[a].Normalise();
 //				anim.keyframes[a].rotation = pMats[a].GetRotationQ();
+//				anim.keyframes[a].translation = pMats[a].GetTrans();
 			}
 			else
 			{
@@ -974,9 +975,6 @@ void ParseXFile(char *pFilePtr)
 	{
 		printf("Not a valid .x file...\n");
 	}
-
-	pModel->GetSkeletonChunk()->BuildHierarchy();
-	pModel->GetSkeletonChunk()->FlagReferenced(true);
 }
 
 int F3DFile::ReadX(char *pFilename)

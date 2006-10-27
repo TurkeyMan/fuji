@@ -1,6 +1,7 @@
 #if !defined(_MFANIMATION_INTERNAL_H)
 #define _MFANIMATION_INTERNAL_H
 
+#include "MFModel_Internal.h"
 #include "MFAnimation.h"
 
 struct MFAnimationTemplate;
@@ -8,19 +9,35 @@ struct MFAnimationTemplate;
 void MFAnimation_InitModule();
 void MFAnimation_DeinitModule();
 
+struct MFAnimationCurrentFrame
+{
+	float frameTime;
+
+	int tweenStart, tweenEnd;
+	float tween;
+};
+
+struct MFAnimationBlendLayer
+{
+	float frameTime;
+
+	MFAnimationCurrentFrame *pCurFrames;
+};
+
 struct MFAnimation
 {
 	MFAnimationTemplate *pTemplate;
+
 	MFModel *pModel;
+	MFModelBone *pBones;
+	int numBones;
 
 	int *pBoneMap;
 
 	MFMatrix *pMatrices;
 	MFMatrix *pCustomMatrices;
 
-	float curFrame;
-	float targetFrame;
-	float tween;
+	MFAnimationBlendLayer blendLayer;
 };
 
 struct MFAnimationFrame

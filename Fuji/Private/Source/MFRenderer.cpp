@@ -10,6 +10,12 @@ extern MFMaterial *pCurrentMaterial;
 
 MFMatrix gTransformationMatrices[MFMT_Max];
 
+const MFMatrix *pAnimMats = NULL;
+int gNumAnimMats = 0;
+
+const uint16 *pCurrentBatch = NULL;
+int gNumBonesInBatch = 0;
+
 void MFRenderer_InitModule()
 {
 	MFCALLSTACK;
@@ -48,6 +54,18 @@ void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix)
 	MFCALLSTACK;
 
 	gTransformationMatrices[type] = matrix;
+}
+
+void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices)
+{
+	pAnimMats = pMatrices;
+	gNumAnimMats = numMatrices;
+}
+
+void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
+{
+	pCurrentBatch = pBatch;
+	gNumBonesInBatch = numBonesInBatch;
 }
 
 uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value)

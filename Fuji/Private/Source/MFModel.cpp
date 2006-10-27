@@ -70,29 +70,29 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 		{
 			case MFChunkType_SubObjects:
 			{
-				SubObjectChunk *pSubobjectChunk = (SubObjectChunk*)pTemplate->pDataChunks[a].pData;
+				MFModelSubObject *pSubobjects = (MFModelSubObject*)pTemplate->pDataChunks[a].pData;
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
 					if(load)
 					{
-						MFFixUp(pSubobjectChunk[b].pMeshChunks, pTemplate, 1);
+						MFFixUp(pSubobjects[b].pMeshChunks, pTemplate, 1);
 
-						MFFixUp(pSubobjectChunk[b].pSubObjectName, pTemplate, 1);
-//						MFFixUp(pSubobjectChunk[b].pMaterial, pTemplate, 1);
+						MFFixUp(pSubobjects[b].pSubObjectName, pTemplate, 1);
+//						MFFixUp(pSubobjects[b].pMaterial, pTemplate, 1);
 					}
 
-					for(c=0; c<pSubobjectChunk[b].numMeshChunks; c++)
+					for(c=0; c<pSubobjects[b].numMeshChunks; c++)
 					{
 						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), (uint32&)pTemplate, load);
 					}
 
 					if(!load)
 					{
-						MFFixUp(pSubobjectChunk[b].pSubObjectName, pTemplate, 0);
-//						MFFixUp(pSubobjectChunk[b].pMaterial, pTemplate, 0);
+						MFFixUp(pSubobjects[b].pSubObjectName, pTemplate, 0);
+//						MFFixUp(pSubobjects[b].pMaterial, pTemplate, 0);
 
-						MFFixUp(pSubobjectChunk[b].pMeshChunks, pTemplate, 0);
+						MFFixUp(pSubobjects[b].pMeshChunks, pTemplate, 0);
 					}
 				}
 				break;
@@ -100,12 +100,13 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 			case MFChunkType_Bones:
 			{
-				BoneChunk *pBoneChunk = (BoneChunk*)pTemplate->pDataChunks[a].pData;
+				MFModelBone *pBones = (MFModelBone*)pTemplate->pDataChunks[a].pData;
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
-					MFFixUp(pBoneChunk[b].pBoneName, pTemplate, load);
-					MFFixUp(pBoneChunk[b].pParentName, pTemplate, load);
+					MFFixUp(pBones[b].pBoneName, pTemplate, load);
+					MFFixUp(pBones[b].pParentName, pTemplate, load);
+					MFFixUp(pBones[b].pChildren, pTemplate, load);
 				}
 				break;
 			}
@@ -135,7 +136,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 			case MFChunkType_Tags:
 			{
-				TagChunk *pTags = (TagChunk*)pTemplate->pDataChunks[a].pData;
+				MFModelTag *pTags = (MFModelTag*)pTemplate->pDataChunks[a].pData;
 
 				for(b=0; b<pTemplate->pDataChunks[a].count; b++)
 				{
@@ -196,7 +197,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 				if(pChunk)
 				{
-					SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+					MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 					for(int a=0; a<pChunk->count; a++)
 					{
@@ -255,7 +256,7 @@ void MFModel_Destroy(MFModel *pModel)
 
 		if(pChunk)
 		{
-			SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+			MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 			for(int a=0; a<pChunk->count; a++)
 			{
@@ -308,7 +309,7 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
 	
 	if(pChunk)
 	{
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 		for(int a=0; a<pChunk->count; ++a)
 		{
@@ -328,7 +329,7 @@ const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
 	{
 		MFDebug_Assert(index < pChunk->count, "Subobject index out of bounds.");
 
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 		return pSubobjects[index].pSubObjectName;
 	}
 
@@ -368,7 +369,7 @@ const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
 	{
 		MFDebug_Assert(boneIndex < pChunk->count, "boneIndex is out of bounds.");
 
-		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+		MFModelBone *pBones = (MFModelBone*)pChunk->pData;
 		return pBones[boneIndex].pBoneName;
 	}
 
@@ -383,7 +384,7 @@ const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
 	{
 		MFDebug_Assert(boneIndex < pChunk->count, "boneIndex is out of bounds.");
 
-		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+		MFModelBone *pBones = (MFModelBone*)pChunk->pData;
 		return pBones[boneIndex].worldMatrix;
 	}
 
@@ -396,7 +397,7 @@ int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
 	
 	if(pChunk)
 	{
-		BoneChunk *pBones = (BoneChunk*)pChunk->pData;
+		MFModelBone *pBones = (MFModelBone*)pChunk->pData;
 
 		for(int a=0; a<pChunk->count; ++a)
 		{
@@ -426,7 +427,7 @@ const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
 
 	if(pChunk)
 	{
-		TagChunk *pTags = (TagChunk*)pChunk->pData;
+		MFModelTag *pTags = (MFModelTag*)pChunk->pData;
 
 		return pTags[tagIndex].pTagName;
 	}
@@ -442,7 +443,7 @@ const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
 
 	if(pChunk)
 	{
-		TagChunk *pTags = (TagChunk*)pChunk->pData;
+		MFModelTag *pTags = (MFModelTag*)pChunk->pData;
 
 		return pTags[tagIndex].tagMatrix;
 	}
@@ -456,7 +457,7 @@ int MFModel_GetTagIndex(MFModel *pModel, const char *pName)
 
 	if(pChunk)
 	{
-		TagChunk *pTags = (TagChunk*)pChunk->pData;
+		MFModelTag *pTags = (MFModelTag*)pChunk->pData;
 
 		for(int a=0; a<pChunk->count; a++)
 		{

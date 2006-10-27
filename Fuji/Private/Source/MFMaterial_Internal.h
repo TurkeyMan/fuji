@@ -48,12 +48,16 @@ struct MFMeshChunk_PC : public MFMeshChunk
 {
 	// interface pointers
 	IDirect3DVertexBuffer9 *pVertexBuffer;
+	IDirect3DVertexBuffer9 *pAnimBuffer;
 	IDirect3DIndexBuffer9 *pIndexBuffer;
 	IDirect3DVertexDeclaration9 *pVertexDeclaration;
 
 	// model data
 	const char *pVertexData;
 	uint32 vertexDataSize;
+
+	const char *pAnimData;
+	uint32 animDataSize;
 
 	const char *pIndexData;
 	uint32 indexDataSize;
@@ -68,6 +72,8 @@ struct MFMeshChunk_PC : public MFMeshChunk
 	uint32 numVertices;
 	uint32 numIndices;
 	uint32 vertexStride;
+	uint32 animVertexStride;
+	uint32 maxWeights;
 };
 #endif
 

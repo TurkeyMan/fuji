@@ -72,27 +72,30 @@ struct MFModelTemplate
 	int refCount;
 };
 
-struct SubObjectChunk
+struct MFModelSubObject
 {
 	const char *pSubObjectName;
 //	MFMaterial *pMaterial;
 
 	MFMeshChunk *pMeshChunks;
 	int numMeshChunks;
+
+	int subobjectAnimMatrix;
 };
 
-struct BoneChunk
+struct MFModelBone
 {
 	MFMatrix boneMatrix;
 	MFMatrix worldMatrix;
 	MFMatrix invWorldMatrix;
 	const char *pBoneName;
 	const char *pParentName;
-	int parent;
-	uint32 reserved;
+	int16 *pChildren;
+	int16 numChildren;
+	int16 parent;
 };
 
-struct TagChunk
+struct MFModelTag
 {
 	MFMatrix tagMatrix;
 	const char *pTagName;

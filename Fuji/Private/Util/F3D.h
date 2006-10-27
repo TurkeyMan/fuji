@@ -43,7 +43,7 @@ class F3DVertex
 public:
 	F3DVertex();
 
-	bool operator==(const F3DVertex &v);
+	bool operator==(const F3DVertex &v) const;
 
 	int position;
 	int normal;
@@ -100,6 +100,13 @@ struct F3DMesh
 	uint32 pIllumOffset;
 };
 
+class F3DBatch
+{
+public:
+	MFArray<int> bones;
+	MFArray<int> tris;
+};
+
 class F3DMaterialSubobject
 {
 public:
@@ -111,12 +118,16 @@ public:
 
 	MFArray<F3DTriangle> triangles;
 	MFArray<F3DVertex> vertices;
+
+	MFArray<F3DBatch> triangleBatches;
 };
 
 class F3DSubObject
 {
 public:
 	F3DSubObject();
+
+	int IsSubobjectAnimation() const;
 
 	char name[64];
 
@@ -156,15 +167,17 @@ public:
 	int parent;
 	bool bIsSkinned;
 	bool bIsReferenced;
+
+	MFArray<int> children;
 };
 
 class F3DSkeletonChunk
 {
 public:
-	int FindBone(const char *pName);
+	int FindBone(const char *pName) const;
 	void BuildHierarchy();
 	void FlagReferenced(bool bAll = false);
-	int GetNumReferencedBones();
+	int GetNumReferencedBones() const;
 
 	MFArray<F3DBone> bones;
 };
@@ -319,7 +332,7 @@ public:
 	void ProcessSkeletonData();
 	void ProcessCollisionData();
 	void Optimise();
-	void BuildBatches();
+	void BuildBatches(MFPlatform platform);
 	void StripModel();
 
 	F3DMeshChunk *GetMeshChunk() { return &meshChunk; }
