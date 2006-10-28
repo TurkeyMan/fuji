@@ -616,22 +616,22 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 #endif
 }
 
-void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
 #if !defined(_LINUX) && !defined(_OSX)
 	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
-		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
+		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
 
-		pMC[a].pVertexData -= base;
+		MFFixUp(pMC[a].pVertexData, pBase, 0);
 		if(pMC[a].pAnimData)
-			pMC[a].pAnimData -= base;
-		pMC[a].pIndexData -= base;
-		(char*&)pMC[a].pVertexElements -= base;
+			MFFixUp(pMC[a].pAnimData, pBase, 0);
+		MFFixUp(pMC[a].pIndexData, pBase, 0);
+		MFFixUp(pMC[a].pVertexElements, pBase, 0);
 		if(pMC[a].pBatchIndices)
-			(char*&)pMC[a].pBatchIndices -= base;
+			MFFixUp(pMC[a].pBatchIndices, pBase, 0);
 	}
 #endif
 }
@@ -767,18 +767,18 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 #endif
 }
 
-void FixUpMeshChunk_XB(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+void FixUpMeshChunk_XB(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
 #if 0//!defined(_LINUX)
 	MFMeshChunk_XB *pMC = (MFMeshChunk_XB*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
-		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
+		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
 
-		pMC[a].pVertexData -= base;
-		pMC[a].pIndexData -= base;
-		(char*&)pMC[a].pVertexElements -= base;
+		MFFixUp(pMC[a].pVertexData, pBase, 0);
+		MFFixUp(pMC[a].pIndexData, pBase, 0);
+		MFFixUp(pMC[a].pVertexElements, pBase, 0);
 	}
 #endif
 }
@@ -864,14 +864,14 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 	}
 }
 
-void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
 	MFMeshChunk_PSP *pMC = (MFMeshChunk_PSP*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
-		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
-		pMC[a].pVertexData -= base;
+		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
+		MFFixUp(pMC[a].pVertexData, pBase, 0);
 	}
 }
 
@@ -975,18 +975,18 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 	}
 }
 
-void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, uint32 base, uint32 stringBase)
+void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
 	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
-		pMC[a].pMaterial = (MFMaterial*)((char*)pMC[a].pMaterial - stringBase);
-		pMC[a].pVertexData -= base;
-		pMC[a].pNormalData -= base;
-		pMC[a].pColourData -= base;
-		pMC[a].pUVData -= base;
-		pMC[a].pIndexData -= base;
+		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
+		MFFixUp(pMC[a].pVertexData, pBase, 0);
+		MFFixUp(pMC[a].pNormalData, pBase, 0);
+		MFFixUp(pMC[a].pColourData, pBase, 0);
+		MFFixUp(pMC[a].pUVData, pBase, 0);
+		MFFixUp(pMC[a].pIndexData, pBase, 0);
 	}
 }
 
@@ -1285,17 +1285,17 @@ found:
 					switch(platform)
 					{
 						case FP_PC:
-							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
+							FixUpMeshChunk_PC(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, pModelData, pStringBase);
 							break;
 						case FP_XBox:
-							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
+							FixUpMeshChunk_XB(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, pModelData, pStringBase);
 							break;
 						case FP_Linux:
 						case FP_OSX:
-							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
+							FixUpMeshChunk_Linux(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, pModelData, pStringBase);
 							break;
 						case FP_PSP:
-							FixUpMeshChunk_PSP(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, (uint32&)pModelData, (uint32&)pStringBase);
+							FixUpMeshChunk_PSP(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, pModelData, pStringBase);
 							break;
 						case FP_PS2:
 						case FP_DC:

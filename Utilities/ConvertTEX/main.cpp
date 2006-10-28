@@ -13,6 +13,9 @@ SourceImage* LoadPNG(const char *pFilename);
 #if defined(WIN32)
 #include <d3d8.h>
 #include <xgraphics.h>
+
+#include "Lib/ATI_Compress.h"
+#pragma comment(lib, "Lib/ATI_Compress.lib")
 #endif
 
 void LOGERROR(const char *pFormat, ...)
@@ -26,6 +29,25 @@ void LOGERROR(const char *pFormat, ...)
 
 int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat);
 void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format);
+void ATICompress(Pixel *pSourceBuffer, int width, int height, MFTextureFormat targetFormat, void *pOutputBuffer);
+void PremultiplyAlpha(SourceImage *pImage);
+
+bool IsPowerOf2(int x)
+{
+	while(x)
+	{
+		if(x&1)
+		{
+			x>>=1;
+			if(x)
+				return false;
+		}
+		else
+			x>>=1;
+	}
+
+	return true;
+}
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +60,7 @@ int main(int argc, char *argv[])
 	SourceImage *pImage = NULL;
 
 	int a;
+	bool premultipliedAlpha = true;
 
 	// process command line
 	for(a=1; a<argc; a++)
@@ -117,6 +140,10 @@ int main(int argc, char *argv[])
 				gets(outFile);
 				return 0;
 			}
+			else if(!MFString_CaseCmp(&argv[a][1], "ra") || !MFString_CaseCmp(&argv[a][1], "rawalpha"))
+			{
+				bool premultipliedAlpha = false;
+			}
 		}
 		else
 		{
@@ -195,7 +222,11 @@ int main(int argc, char *argv[])
 		switch(platform)
 		{
 			case FP_PC:
-				targetFormat = TexFmt_A8R8G8B8;
+				if(pImage->opaque || (pImage->oneBitAlpha && premultipliedAlpha))
+					targetFormat = TexFmt_DXT1;
+				else
+					targetFormat = TexFmt_DXT5;
+//				targetFormat = TexFmt_A8R8G8B8;
 				break;
 
 			case FP_XBox:
@@ -223,21 +254,25 @@ int main(int argc, char *argv[])
 	}
 
 	// check minimum pitch
-	if((pImage->pLevels[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 < 64)
+	if((pImage->pLevels[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 < 16)
 	{
-		LOGERROR("Textures should have a minimum pitch of 64 bytes.\n");
+		LOGERROR("Textures should have a minimum pitch of 16 bytes.\n");
 		return 1;
 	}
 
 	// check power of 2 dimensions
-	if(0)
+	if(!IsPowerOf2(pImage->pLevels[0].width) || !IsPowerOf2(pImage->pLevels[0].height))
 	{
 		LOGERROR("Texture dimensions are not a power of 2.\n");
+		return 1;
 	}
 
 	//
 	// begin processing...
 	//
+
+	if(premultipliedAlpha)
+		PremultiplyAlpha(pImage);
 
 	// calculate texture data size..
 	uint32 imageBytes = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pImage->mipLevels;
@@ -277,6 +312,9 @@ int main(int argc, char *argv[])
 		pTemplate->alpha = 3;
 	else
 		pTemplate->alpha = 1;
+
+	if(premultipliedAlpha)
+		pTemplate->premultipliedAlpha = 1;
 
 	pTemplate->mipLevels = pImage->mipLevels;
 	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
@@ -325,10 +363,10 @@ int main(int argc, char *argv[])
 	// fix up pointers
 	for(a=0; a<pTemplate->mipLevels; a++)
 	{
-		FixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
-		FixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
+		MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
+		MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
 	}
-	FixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
+	MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
 
 	// write out texture..
 	FILE *pFile = fopen(outFile, "wb");
@@ -723,6 +761,28 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			break;
 		}
 
+		case TexFmt_DXT1:
+		case TexFmt_DXT2:
+		case TexFmt_DXT3:
+		case TexFmt_DXT4:
+		case TexFmt_DXT5:
+		case TexFmt_PSP_DXT1:
+		case TexFmt_PSP_DXT3:
+		case TexFmt_PSP_DXT5:
+		case TexFmt_PSP_DXT1s:
+		case TexFmt_PSP_DXT3s:
+		case TexFmt_PSP_DXT5s:
+		{
+			ATICompress(pSource, width, height, targetFormat, pOutputSurface->pImageData);
+
+			if(targetFormat == TexFmt_PSP_DXT1 || targetFormat == TexFmt_PSP_DXT3 ||  targetFormat == TexFmt_PSP_DXT5 ||
+				targetFormat == TexFmt_PSP_DXT1s || targetFormat == TexFmt_PSP_DXT3s ||  targetFormat == TexFmt_PSP_DXT5s)
+			{
+				// we need to swizzle the PSP buffer about a bit...
+			}
+			break;
+		}
+
 		default:
 		{
 			LOGERROR("Conversion for target type '%s' not yet support...\n", MFTexture_GetFormatString(targetFormat));
@@ -795,5 +855,84 @@ void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextu
 			xsrc += 16;
 		}
 		ysrc += src_row;
+	}
+}
+
+void ATICompress(Pixel *pSourceBuffer, int width, int height, MFTextureFormat targetFormat, void *pOutputBuffer)
+{
+#if defined(WIN32)
+	ATI_TC_FORMAT atiFormat;
+	switch(targetFormat)
+	{
+		case TexFmt_DXT1:
+		case TexFmt_PSP_DXT1:
+		case TexFmt_PSP_DXT1s:
+			atiFormat = ATI_TC_FORMAT_DXT1;
+			break;
+		case TexFmt_DXT2:
+		case TexFmt_DXT3:
+		case TexFmt_PSP_DXT3:
+		case TexFmt_PSP_DXT3s:
+			atiFormat = ATI_TC_FORMAT_DXT3;
+			break;
+		case TexFmt_DXT4:
+		case TexFmt_DXT5:
+		case TexFmt_PSP_DXT5:
+		case TexFmt_PSP_DXT5s:
+			atiFormat = ATI_TC_FORMAT_DXT5;
+			break;
+	}
+
+	// Init source texture
+	ATI_TC_Texture srcTexture;
+	srcTexture.dwSize = sizeof(srcTexture);
+	srcTexture.dwWidth = width;
+	srcTexture.dwHeight = height;
+	srcTexture.dwPitch = width*sizeof(float);
+	srcTexture.format = ATI_TC_FORMAT_ARGB_32F;
+	srcTexture.dwDataSize = ATI_TC_CalculateBufferSize(&srcTexture);
+	srcTexture.pData = (ATI_TC_BYTE*)pSourceBuffer;
+
+	// Init dest texture
+	ATI_TC_Texture destTexture;
+	destTexture.dwSize = sizeof(destTexture);
+	destTexture.dwWidth = width;
+	destTexture.dwHeight = height;
+	destTexture.dwPitch = 0;
+	destTexture.format = atiFormat;
+	destTexture.dwDataSize = ATI_TC_CalculateBufferSize(&destTexture);
+	destTexture.pData = (ATI_TC_BYTE*)pOutputBuffer;
+
+	ATI_TC_CompressOptions options;
+	options.dwSize = sizeof(options);
+	options.bUseChannelWeighting = FALSE;
+	options.fWeightingRed = 1.0;			/* Weighting of the Red or X Channel */
+	options.fWeightingGreen = 1.0;		/* Weighting of the Green or Y Channel */
+	options.fWeightingBlue = 1.0;			/* Weighting of the Blue or Z Channel */
+	options.bUseAdaptiveWeighting = TRUE;	/* Adapt weighting on a per-block basis */
+	options.bDXT1UseAlpha = TRUE;
+	options.nAlphaThreshold = 128;
+
+	// Compress
+	ATI_TC_ConvertTexture(&srcTexture, &destTexture, &options, NULL, NULL, NULL);
+#else
+	// not supported
+	MKDebug_Assert(false, "S3TC not supports on non-windows platforms..");
+#endif
+}
+
+void PremultiplyAlpha(SourceImage *pImage)
+{
+	Pixel *pPx = pImage->pLevels[0].pData;
+
+	for(int a=0; a<pImage->pLevels[0].width; a++)
+	{
+		for(int a=0; a<pImage->pLevels[0].height; a++)
+		{
+			pPx->r *= pPx->a;
+			pPx->g *= pPx->a;
+			pPx->b *= pPx->a;
+			++pPx;
+		}
 	}
 }

@@ -47,6 +47,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 	if(pSetMaterial != pMaterial)
 	{
+		bool premultipliedAlpha = false;
+
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
@@ -59,6 +61,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
+
+			premultipliedAlpha = pData->pTextures[pData->diffuseMapIndex]->pTemplateData->premultipliedAlpha;
 		}
 		else
 		{
@@ -73,19 +77,19 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			case MF_AlphaBlend:
 				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
 			case MF_Additive:
 				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 			case MF_Subtractive:
 				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 		}

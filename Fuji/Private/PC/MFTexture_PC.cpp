@@ -132,6 +132,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		pTexture->pTexture->GetLevelDesc(0, &imageDesc);
 		pTexture->pTemplateData->imageFormat = format;
 		pTexture->pTemplateData->platformFormat = imageDesc.Format;
+		pTexture->pTemplateData->premultipliedAlpha = 0;
 
 		pTexture->pTemplateData->mipLevels = levelCount;
 

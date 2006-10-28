@@ -32,9 +32,10 @@ struct MFTextureTemplateData
 	int mipLevels;
 
 	// flags
-	uint32 alpha	: 1; // 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha
-	uint32 swizzled	: 1; // 0 = Linear, 1 = Swizzled
-	uint32 flags	: 29;
+	uint32 alpha				: 1; // 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha
+	uint32 swizzled				: 1; // 0 = Linear, 1 = Swizzled
+	uint32 premultipliedAlpha	: 1; // 0 = raw alpha, 1 = premultiplied alpha
+	uint32 flags				: 28;
 
 	// padding
 	uint32 res[2];
