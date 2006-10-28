@@ -221,9 +221,9 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		0,	//						// TexFmt_R6G5B5
 		0,	//						// TexFmt_B5G6R5
 
-		0,	// D3DFMT_A1R5G5B5		// TexFmt_A1R5G5B5
+		25,	// D3DFMT_A1R5G5B5		// TexFmt_A1R5G5B5
 		0,	//						// TexFmt_R5G5B5A1
-		25,	//						// TexFmt_A1B5G5R5
+		0,	//						// TexFmt_A1B5G5R5
 
 		26,	// D3DFMT_A4R4G4B4		// TexFmt_A4R4G4B4
 		0,	//						// TexFmt_A4B4G4R4

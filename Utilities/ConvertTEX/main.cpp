@@ -222,10 +222,18 @@ int main(int argc, char *argv[])
 		switch(platform)
 		{
 			case FP_PC:
+/*
 				if(pImage->opaque || (pImage->oneBitAlpha && premultipliedAlpha))
 					targetFormat = TexFmt_DXT1;
 				else
 					targetFormat = TexFmt_DXT5;
+*/
+				if(pImage->opaque)
+					targetFormat = TexFmt_R5G6B5;
+				else if(pImage->oneBitAlpha)
+					targetFormat = TexFmt_A1R5G5B5;
+				else
+					targetFormat = TexFmt_A4R4G4B4;
 //				targetFormat = TexFmt_A8R8G8B8;
 				break;
 
