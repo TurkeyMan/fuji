@@ -136,18 +136,82 @@ MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
  */
 MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex);
 
-// bone structure
+/**
+ * Get a pointer to an MFAnimation associated with the model.
+ * Gets a pointer to an MFAnimation associated with the model.
+ * @param pModel Model instance.
+ * @return Pointer to the MFAnimation associated with this model. If no animation is loaded, MFModel_GetAnimation returns NULL.
+ */
 MFAnimation *MFModel_GetAnimation(MFModel *pModel);
 
+/**
+ * Get the number of bones in the model.
+ * Gets the number of bones in the model.
+ * @param pModel Model instance.
+ * @return The number of bones in the model.
+ */
 int MFModel_GetNumBones(MFModel *pModel);
+
+/**
+ * Get the name of a bone.
+ * Gets the name of the specified bone.
+ * @param pModel Model instance.
+ * @param boneIndex Target bone index.
+ * @return The name of the specified bone.
+ */
 const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
+
+/**
+ * Get a bones origin matrix.
+ * Gets the specified bones origin or 'bind' matrix.
+ * @param pModel Model instance.
+ * @param boneIndex Target bone index.
+ * @return The bones origin matrix.
+ */
 const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
+
+/**
+ * Get the index of a bone by name.
+ * Gets the index of a bone by name.
+ * @param pModel Model instance.
+ * @param pName The target bones name.
+ * @return The index of the named bone, or -1 if the bone does not exist.
+ */
 int MFModel_GetBoneIndex(MFModel *pModel, const char *pName);
 
-// tag's
+/**
+ * Get the number of tags in the model.
+ * Gets the number of tags in the model.
+ * @param pModel Model instance.
+ * @return The number of tags in the model.
+ */
 int MFModel_GetNumTags(MFModel *pModel);
+
+/**
+ * Get the name of a tag.
+ * Gets the name of the specified tag.
+ * @param pModel Model instance.
+ * @param tagIndex Target tag index.
+ * @return The name of the specified tag.
+ */
 const char* MFModel_GetTagName(MFModel *pModel, int tagIndex);
+
+/**
+ * Get a tag matrix.
+ * Gets the specified tag matrix.
+ * @param pModel Model instance.
+ * @param tagIndex Target tag index.
+ * @return The tag matrix in the models local space.
+ */
 const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex);
+
+/**
+ * Get the index of a tag by name.
+ * Gets the index of a tag by name.
+ * @param pModel Model instance.
+ * @param pName The target tags name.
+ * @return The index of the named tag, or -1 if the tag does not exist.
+ */
 int MFModel_GetTagIndex(MFModel *pModel, const char *pName);
 
 // ... etc
