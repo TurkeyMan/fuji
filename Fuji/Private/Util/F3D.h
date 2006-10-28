@@ -103,7 +103,11 @@ struct F3DMesh
 class F3DBatch
 {
 public:
+	MFArray<int> vertices;
+	MFArray<int> vertexMapping;
 	MFArray<int> bones;
+	MFArray<int> boneMapping;
+
 	MFArray<int> tris;
 };
 

@@ -26,6 +26,8 @@ inline MFArray<T>::~MFArray()
 template<class T>
 inline T& MFArray<T>::operator[](int x)
 {
+	MFDebug_Assert(x >= 0, "Index out of bounds.");
+
 	if(x >= allocated)
 	{
 		int oldAlloc = allocated;
@@ -43,7 +45,7 @@ inline T& MFArray<T>::operator[](int x)
 template<class T>
 inline const T& MFArray<T>::operator[](int x) const
 {
-	MFDebug_Assert(x < count, "Index out of bounds.");
+	MFDebug_Assert(x >= 0 && x < count, "Index out of bounds.");
 	return pData[x];
 }
 

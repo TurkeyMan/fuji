@@ -260,10 +260,11 @@ MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 
 void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
 {
-	MFMatrix proj, viewProj;
+	MFMatrix proj, viewProj, view;
 	MFViewInternal_ProjectionMatrix(&proj);
+	view.Inverse(MFView_GetCameraMatrix());
 
-	viewProj.Multiply4x4(MFView_GetWorldToViewMatrix(), proj);
+	viewProj.Multiply4x4(view, proj);
 
 	MFVector transformed;
 	transformed = ApplyMatrix(point, viewProj);

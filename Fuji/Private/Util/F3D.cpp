@@ -399,11 +399,6 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
 
-	MFArray<int> vertexList;
-	MFArray<int> vertexRemapping;
-	MFArray<int> boneBatch;
-	MFArray<int> boneRemapping;
-
 	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
 
 	// fill out mesh chunk, and build mesh...
@@ -434,59 +429,9 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 		{
 			const F3DBatch &batch = matsub.triangleBatches[b];
 
-			// build batch vertex list and remapping table
-			// this will also order the vertices in the order they are consumed which optimises vertex data cache usage
-			vertexList.clear();
-
-			int numVertices = matsub.vertices.size();
-
-			vertexRemapping.resize(numVertices);
-			MFSetMemory(vertexRemapping.getpointer(), -1, sizeof(int)*numVertices);
-
-			for(c=0; c<batch.tris.size(); c++)
-			{
-				F3DTriangle tri = matsub.triangles[batch.tris[c]];
-				if(vertexRemapping[tri.v[0]] == -1)
-				{
-					vertexRemapping[tri.v[0]] = vertexList.size();
-					vertexList.push(tri.v[0]);
-				}
-				if(vertexRemapping[tri.v[1]] == -1)
-				{
-					vertexRemapping[tri.v[1]] = vertexList.size();
-					vertexList.push(tri.v[1]);
-				}
-				if(vertexRemapping[tri.v[2]] == -1)
-				{
-					vertexRemapping[tri.v[2]] = vertexList.size();
-					vertexList.push(tri.v[2]);
-				}
-			}
-
-			if(bAnimating)
-			{
-				// bone batch and mapping
-				int numBones = pModel->GetSkeletonChunk()->bones.size();
-
-				boneBatch.clear();
-
-				boneRemapping.resize(numBones + 1);
-				MFSetMemory(boneRemapping.getpointer(), -1, sizeof(int)*(numBones+1));
-				boneRemapping[0] = 0;
-
-				for(c=0; c<batch.bones.size(); c++)
-				{
-					if(boneRemapping[batch.bones[c]+1] == -1)
-					{
-						boneRemapping[batch.bones[c]+1] = boneBatch.size();
-						boneBatch.push(batch.bones[c]);
-					}
-				}
-			}
-
 			int numTriangles = batch.tris.size();
 			int numIndices = numTriangles*3;
-			numVertices = vertexList.size();
+			int numVertices = batch.vertices.size();
 
 			pMeshChunk[mc].numVertices = numVertices;
 			pMeshChunk[mc].numIndices = numIndices;
@@ -591,7 +536,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			for(c=0; c<numVertices; c++)
 			{
-				int p = vertexList[c];
+				int p = batch.vertices[c];
 
 				const F3DVertex &vert = matsub.vertices[p];
 
@@ -621,10 +566,10 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 				if(bAnimating)
 				{
-					pAnimVert[c].i[0] = boneRemapping[vert.bone[0]+1] * 3;
-					pAnimVert[c].i[1] = boneRemapping[vert.bone[1]+1] * 3;
-					pAnimVert[c].i[2] = boneRemapping[vert.bone[2]+1] * 3;
-					pAnimVert[c].i[3] = boneRemapping[vert.bone[3]+1] * 3;
+					pAnimVert[c].i[0] = vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0;
+					pAnimVert[c].i[1] = vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0;
+					pAnimVert[c].i[2] = vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0;
+					pAnimVert[c].i[3] = vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0;
 					pAnimVert[c].w[0] = (uint8)(vert.weight[0] * 255.0f);
 					pAnimVert[c].w[1] = (uint8)(vert.weight[1] * 255.0f);
 					pAnimVert[c].w[2] = (uint8)(vert.weight[2] * 255.0f);
@@ -651,9 +596,9 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			{
 				int t = batch.tris[c];
 
-				pIndices[0] = matsub.triangles[t].v[0];
-				pIndices[1] = matsub.triangles[t].v[1];
-				pIndices[2] = matsub.triangles[t].v[2];
+				pIndices[0] = batch.vertexMapping[matsub.triangles[t].v[0]];
+				pIndices[1] = batch.vertexMapping[matsub.triangles[t].v[1]];
+				pIndices[2] = batch.vertexMapping[matsub.triangles[t].v[2]];
 
 				pIndices += 3;
 			}
@@ -1801,11 +1746,13 @@ bool IsBoneInBatch(const MFArray<int> &batch, int bone)
 	return false;
 }
 
-int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri)
+static MFArray<int> gAdded;
+
+int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri, int numBones)
 {
 	int numNotInBatch = 0;
 
-	MFArray<int> bones;
+	MFZeroMemory(gAdded.getpointer(), sizeof(int)*numBones);
 
 	for(int a=0; a<matSub.maxWeights; a++)
 	{
@@ -1813,49 +1760,76 @@ int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &mat
 		int b1 = matSub.vertices[tri.v[1]].bone[a];
 		int b2 = matSub.vertices[tri.v[2]].bone[a];
 
-		if(!IsBoneInBatch(batch.bones, b0))
+		if(b0 > -1 && batch.boneMapping[b0] == -1 && !gAdded[b0])
 		{
-			if(!IsBoneInBatch(bones, b0))
-			{
-				bones.push(b0);
-				++numNotInBatch;
-			}
+			gAdded[b0] = 1;
+			++numNotInBatch;
 		}
-		if(!IsBoneInBatch(batch.bones, b1))
+		if(b1 > -1 && batch.boneMapping[b1] == -1 && !gAdded[b1])
 		{
-			if(!IsBoneInBatch(bones, b1))
-			{
-				bones.push(b0);
-				++numNotInBatch;
-			}
+			gAdded[b1] = 1;
+			++numNotInBatch;
 		}
-		if(!IsBoneInBatch(batch.bones, b2))
+		if(b2 > -1 && batch.boneMapping[b2] == -1 && !gAdded[b2])
 		{
-			if(!IsBoneInBatch(bones, b2))
-			{
-				bones.push(b0);
-				++numNotInBatch;
-			}
+			gAdded[b2] = 1;
+			++numNotInBatch;
 		}
 	}
 
 	return numNotInBatch;
 }
 
+void AddVertsToBatch(F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri)
+{
+	int v0 = tri.v[0];
+	int v1 = tri.v[1];
+	int v2 = tri.v[2];
+
+	if(batch.vertexMapping[v0] == -1)
+	{
+		batch.vertexMapping[v0] = batch.vertices.size();
+		batch.vertices.push(v0);
+	}
+	if(batch.vertexMapping[v1] == -1)
+	{
+		batch.vertexMapping[v1] = batch.vertices.size();
+		batch.vertices.push(v1);
+	}
+	if(batch.vertexMapping[v2] == -1)
+	{
+		batch.vertexMapping[v2] = batch.vertices.size();
+		batch.vertices.push(v2);
+	}
+}
+
 void AddTriToBatch(F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri)
 {
+	int v0 = tri.v[0];
+	int v1 = tri.v[1];
+	int v2 = tri.v[2];
+
 	for(int a=0; a<matSub.maxWeights; a++)
 	{
-		int b0 = matSub.vertices[tri.v[0]].bone[a];
-		int b1 = matSub.vertices[tri.v[1]].bone[a];
-		int b2 = matSub.vertices[tri.v[2]].bone[a];
+		int b0 = matSub.vertices[v0].bone[a];
+		int b1 = matSub.vertices[v1].bone[a];
+		int b2 = matSub.vertices[v2].bone[a];
 
-		if(!IsBoneInBatch(batch.bones, b0))
+		if(batch.boneMapping[b0] == -1)
+		{
+			batch.boneMapping[b0] = batch.bones.size();
 			batch.bones.push(b0);
-		if(!IsBoneInBatch(batch.bones, b1))
+		}
+		if(batch.boneMapping[b1] == -1)
+		{
+			batch.boneMapping[b1] = batch.bones.size();
 			batch.bones.push(b1);
-		if(!IsBoneInBatch(batch.bones, b2))
+		}
+		if(batch.boneMapping[b2] == -1)
+		{
+			batch.boneMapping[b2] = batch.bones.size();
 			batch.bones.push(b2);
+		}
 	}
 }
 
@@ -1903,16 +1877,26 @@ void F3DFile::BuildBatches(MFPlatform platform)
 				{
 					F3DBatch &batch = matSub.triangleBatches.push();
 
+					int numVerts = matSub.vertices.size();
+					int numBones = skeletonChunk.bones.size();
+					batch.vertexMapping.resize(numVerts);
+					batch.boneMapping.resize(numBones);
+					MFSetMemory(batch.vertexMapping.getpointer(), -1, sizeof(int)*numVerts);
+					MFSetMemory(batch.boneMapping.getpointer(), -1, sizeof(int)*numBones);
+
+					gAdded.resize(numBones);
+
 					for(int c=0; c<numTris; c++)
 					{
 						if(trisAdded[c])
 							continue;
 
 						F3DTriangle &tri = matSub.triangles[c];
-						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri);
+						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri, numBones);
 						if(numNotInBatch + batch.bones.size() > maxBones)
 							continue;
 
+						AddVertsToBatch(batch, matSub, tri);
 						if(numNotInBatch)
 							AddTriToBatch(batch, matSub, tri);
 						batch.tris.push(c);
