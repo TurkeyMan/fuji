@@ -111,3 +111,30 @@ void MFAnimScript_Destroy(MFAnimScript *pAnimScript)
 
 	MFHeap_Free(pAnimScript);
 }
+
+int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript)
+{
+	return pAnimScript->pTemplate->numSequences;
+}
+
+void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime)
+{
+	pAnimScript->currentSequence = sequence;
+	pAnimScript->currentFrame = pAnimScript->pTemplate->pSequences[sequence].startFrame;
+}
+
+const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence)
+{
+	return pAnimScript->pTemplate->pSequences[sequence].pName;
+}
+
+int MFAnimScript_FindSequence(MFAnimScript *pAnimScript, const char *pSequenceName)
+{
+	for(int a=0; a<pAnimScript->pTemplate->numSequences; a++)
+	{
+		if(!MFString_CaseCmp(pSequenceName, pAnimScript->pTemplate->pSequences[a].pName))
+			return a;
+	}
+
+	return -1;
+}
