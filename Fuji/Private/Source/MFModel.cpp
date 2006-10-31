@@ -336,6 +336,16 @@ const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
 	return NULL;
 }
 
+void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable)
+{
+	MFDebug_Assert(false, "Not written...");
+}
+
+bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index)
+{
+	return true;
+}
+
 MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
 {
 	return &pModel->pTemplate->boundingVolume;

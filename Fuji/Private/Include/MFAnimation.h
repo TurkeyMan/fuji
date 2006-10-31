@@ -2,7 +2,7 @@
  * @file MFAnimation.h
  * @brief A set of functions for managing mesh animation.
  * @author Manu Evans
- * @defgroup MFAnimation Animation Management
+ * @defgroup MFAnimation Animation System
  * @{
  */
 

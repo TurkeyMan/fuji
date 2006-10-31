@@ -21,6 +21,7 @@
 #include "MFNetwork_Internal.h"
 #include "MFScript_Internal.h"
 #include "MFCollision_Internal.h"
+#include "MFAnimScript_Internal.h"
 
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
@@ -163,6 +164,7 @@ void MFSystem_Init()
 
 	MFModel_InitModule();
 	MFAnimation_InitModule();
+	MFAnimScript_InitModule();
 
 	MFPrimitive_InitModule();
 	MFFont_InitModule();
@@ -198,6 +200,7 @@ void MFSystem_Deinit()
 	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();
 
+	MFAnimScript_DeinitModule();
 	MFAnimation_DeinitModule();
 	MFModel_DeinitModule();
 

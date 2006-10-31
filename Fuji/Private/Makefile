@@ -318,6 +318,26 @@ INCDIR   := $(INCDIR) . $(PSPSDK)/include
 # end PSP
 endif
 
+ifeq ($(PLATFORM),PS2)
+
+PS2SDK=C:/cygwin/usr/local/ps2dev/ps2sdk
+
+CC       = ee-gcc
+CXX      = ee-g++
+AS       = ee-as
+LD       = ee-ld
+AR       = ee-ar
+RANLIB   = ee-ranlib
+STRIP    = ee-strip
+
+CFLAGS := $(CFLAGS) -G0
+
+# Add in PSPSDK includes and libraries.
+INCDIR   := $(INCDIR) . $(PSPSDK)/include
+
+# end PS2
+endif
+
 ifeq ($(PLATFORM),GC)
 
 OGC = C:/cygwin/usr/local/devkitPPC/ogc

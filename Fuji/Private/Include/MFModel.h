@@ -119,6 +119,29 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName);
 const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
 
 /**
+ * Enabe or disable a subobject.
+ * Enabe or disable the specified subobject.
+ * @param pModel Model instance.
+ * @param index Subobject index.
+ * @param enable Bool to enable or disable the subobject.
+ * @return None.
+ * @see MFModel_GetNumSubObjects()
+ * @see MFModel_IsSubobjectEnabed()
+ */
+void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable);
+
+/**
+ * Find if a subobject is enabled.
+ * Finds if a specified subobject is enabled or disabled.
+ * @param pModel Model instance.
+ * @param index Subobject index.
+ * @return Returns true if the subobject is enabled.
+ * @see MFModel_GetNumSubObjects()
+ * @see MFModel_EnableSubobject()
+ */
+bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index);
+
+/**
  * Get the models bounding volume.
  * Gets the models bounding volume.
  * @param pModel Model instance.
@@ -213,8 +236,6 @@ const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex);
  * @return The index of the named tag, or -1 if the tag does not exist.
  */
 int MFModel_GetTagIndex(MFModel *pModel, const char *pName);
-
-// ... etc
 
 #endif
 
