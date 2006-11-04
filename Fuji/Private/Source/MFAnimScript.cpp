@@ -80,6 +80,8 @@ MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel)
 				if(pAnim)
 				{
 					// load animation settings...
+
+					pAnim = pAnim->Next();
 				}
 
 				++pSequence;
