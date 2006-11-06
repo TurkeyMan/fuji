@@ -141,7 +141,9 @@ MFFont* MFFont_Create(const char *pFilename)
 	// create materials
 	for(int a=0; a<pFont->numPages; a++)
 	{
+//		MFTexture *pTex = MFTexture_Create((const char *)pFont->ppPages[a], false);
 		pFont->ppPages[a] = MFMaterial_Create((const char *)pFont->ppPages[a]);
+//		if(pTex) MFTexture_Destroy(pTex);
 	}
 
 	// set space width

@@ -855,6 +855,12 @@
 				RelativePath=".\Include\MFFont.h">
 			</File>
 			<File
+				RelativePath=".\Include\MFHashList.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFHashList.inl">
+			</File>
+			<File
 				RelativePath=".\Include\MFHeap.h">
 			</File>
 			<File

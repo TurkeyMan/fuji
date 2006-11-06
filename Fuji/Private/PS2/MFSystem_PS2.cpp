@@ -1,30 +1,48 @@
-#include "Common.h"
-#include "System.h"
+#include "Fuji.h"
+#include "MFSystem_Internal.h"
+
+#include <time.h>
+
+MFPlatform gCurrentPlatform = FP_PS2;
 
 int main()
 {
-//	kos_init_all(ALL_ENABLE, ROMDISK_NONE);
-	kos_init_all(THD_ENABLE | IRQ_ENABLE | TA_ENABLE, romdisk);
-
-	System_GameLoop();
-
-//	kos_shutdown_all();
+	MFSystem_GameLoop();
 
 	return 0;
 }
 
-void _start()
+void MFSystem_InitModulePlatformSpecific()
 {
-
 }
 
-uint64 RDTSC()
+void MFSystem_DeinitModulePlatformSpecific()
 {
-	return timer_ms_gettime64();
 }
 
-uint64 GetTSCFrequency()
+void MFSystem_HandleEventsPlatformSpecific()
+{
+}
+
+void MFSystem_UpdatePlatformSpecific()
+{
+}
+
+void MFSystem_DrawPlatformSpecific()
+{
+}
+
+uint64 MFSystem_ReadRTC()
+{
+	return (uint64)clock();
+}
+
+uint64 MFSystem_GetRTCFrequency()
 {
 	return 1000;
 }
 
+const char * MFSystem_GetSystemName()
+{
+	return "Playstation2";
+}

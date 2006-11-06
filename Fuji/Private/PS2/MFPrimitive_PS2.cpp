@@ -1,56 +1,55 @@
-#include "Common.h"
+#include "Fuji.h"
 #include "Display_Internal.h"
-#include "View.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix.h"
-#include "Primitive.h"
-#include "Texture.h"
-#include "Renderer.h"
+#include "MFView.h"
+#include "MFVector.h"
+#include "MFMatrix.h"
+#include "MFPrimitive.h"
+#include "MFTexture.h"
+#include "MFRenderer.h"
 #include "MFMaterial.h"
 
 uint32 primType;
 uint32 beginCount;
 uint32 currentVert;
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	primType = type & PT_PrimMask;
 
 	if(type & PT_Untextured)
 	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(Mat_White));
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 	}
 
-	Renderer_Begin();
+	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	beginCount = vertexCount;
 	currentVert = 0;
 }
 
-void MFSetMatrix(const Matrix &mat)
+void MFSetMatrix(const MFMatrix &mat)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 }
 
-void MFSetColour(const Vector4 &colour)
+void MFSetColour(const MFVector &colour)
 {
 	MFSetColour(colour.x, colour.y, colour.z, colour.w);
 }
@@ -67,7 +66,7 @@ void MFSetTexCoord1(float u, float v)
 {
 }
 
-void MFSetNormal(const Vector3 &normal)
+void MFSetNormal(const MFVector &normal)
 {
 	MFSetNormal(normal.x, normal.y, normal.z);
 }
@@ -76,21 +75,21 @@ void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetPosition(const Vector3 &pos)
+void MFSetPosition(const MFVector &pos)
 {
 	MFSetPosition(pos.x, pos.y, pos.z);
 }
 
 void MFSetPosition(float x, float y, float z)
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
 	++currentVert;
 }
 
 void MFEnd()
 {
-	CALLSTACK;
+	MFCALLSTACK;
 
-	DBGASSERT(currentVert == beginCount, "Incorrect number of vertices.");
+	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 }

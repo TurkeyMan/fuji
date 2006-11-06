@@ -92,9 +92,9 @@ char *ModuleName(char *pSourceFileName)
 }
 
 // CRC functions
-uint32 crc32_table[256];
+static uint32 gCrc32Table[256];
 #define CRC32_POLY 0x04c11db7
-void CrcInit()
+void MFUtil_CrcInit()
 {
 	int i, j;
 	uint32 c;
@@ -105,19 +105,42 @@ void CrcInit()
 		{
 			c = c & 0x80000000 ? (c << 1) ^ CRC32_POLY : (c << 1);
 		}
-		crc32_table[i] = c;
+		gCrc32Table[i] = c;
 	}
 }
 
-// generate a unique Crc number for this buffer
-uint32 Crc(char *buffer, int length)
+// generate a unique Crc value for this buffer
+uint32 MFUtil_Crc(char *pBuffer, int length)
 {
-	char *p;
-	uint32 crc;
+	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
-	crc = 0xffffffff;       /* preload shift register, per CRC-32 spec */
-	for (p = buffer; length > 0; ++p, --length)
-		crc = (crc << 8) ^ crc32_table[(crc >> 24) ^ *p];
-	return ~crc;            /* transmit complement, per CRC-32 spec */
+	for(; length > 0; ++pBuffer, --length)
+		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ *pBuffer];
+
+	return ~crc;			// transmit complement, per CRC-32 spec
 }
 
+// generate a unique Crc value for this string, strings are treated case INSENSITIVE
+uint32 MFUtil_CrcString(char *pString)
+{
+	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
+
+	for(; *pString; ++pString)
+		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ (*pString | 0x20)];
+
+	return ~crc;			// transmit complement, per CRC-32 spec
+}
+
+// generate a fast hash value for this string, strings are treated case INSENSITIVE
+uint32 MFUtil_HashString(char *pString)
+{
+	uint32 hash = 0;
+
+	while(*pString)
+	{
+		hash += hash*17 + (*pString | 0x20);
+		++pString;
+	}
+
+	return hash;
+}

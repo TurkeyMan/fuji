@@ -2,8 +2,10 @@
 #define _UTIL_H
 
 // CRC functions
-void CrcInit(); // generates some crc tables - system should call this once
-uint32 Crc(char *buffer, int length); // generate a unique Crc number for this buffer
+void MFUtil_CrcInit(); // generates some crc tables - system should call this once
+uint32 MFUtil_Crc(char *buffer, int length); // generate a unique Crc number for this buffer
+uint32 MFUtil_CrcString(char *pString);	// generate a unique Crc number for this string
+uint32 MFUtil_HashString(char *pString); // generate a very fast hash value from a string
 
 // endian flipping
 #if defined(MFBIG_ENDIAN)

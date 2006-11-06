@@ -135,7 +135,7 @@ void MFSystem_Init()
 {
 	MFCALLSTACK;
 
-	CrcInit();
+	MFUtil_CrcInit();
 
 	MFHeap_InitModule();
 

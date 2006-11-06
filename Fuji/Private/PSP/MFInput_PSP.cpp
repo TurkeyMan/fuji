@@ -21,7 +21,7 @@ float deadZone = 0.2f;
 
 SceCtrlData padData;
 
-const char * const PSPButtons[] =
+static const char * const gPSPButtons[] =
 {
 // PSP controller enums
 	"X",
@@ -141,7 +141,7 @@ const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
 	MFDebug_Assert(sourceID < 1, "Only one gamepad available on PSP...");
 
-	return PSPButtons[button];
+	return gPSPButtons[button];
 }
 
 bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)

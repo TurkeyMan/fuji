@@ -213,7 +213,7 @@ GC/MFSound_GC.o \
 GC/MFSystem_GC.o \
 GC/MFTexture_GC.o \
 GC/FileSystem/MFFileSystemNative_GC.o \
-GC/Materials/Mat_Standard_GC.o \
+GC/Materials/MFMat_Standard_GC.o \
 Null/Materials/MFMat_Effect_Null.o \
 Null/MFAuxillaryDisplay_Null.o \
 Null/MFParticleSystem_Null.o
@@ -221,15 +221,21 @@ endif
 
 ifeq ($(PLATFORM),PS2)
 OBJS := $(OBJS) PS2/Display_PS2.o \
+PS2/MFDebug_PS2.o \
+PS2/MFHeap_PS2.o \
 PS2/MFInput_PS2.o \
 PS2/MFMaterial_PS2.o \
+PS2/MFModel_PS2.o \
 PS2/MFPrimitive_PS2.o \
 PS2/MFRenderer_PS2.o \
+PS2/MFSockets_PS2.o \
 PS2/MFSound_PS2.o \
 PS2/MFSystem_PS2.o \
 PS2/MFTexture_PS2.o \
+PS2/MFThread_PS2.o \
+PS2/MFTranslation_PS2.o \
 PS2/FileSystem/MFFileSystemNative_PS2.o \
-PS2/Materials/Mat_Standard_PS2.o \
+PS2/Materials/MFMat_Standard_PS2.o \
 Null/Materials/MFMat_Effect_Null.o \
 Null/MFAuxillaryDisplay_Null.o \
 Null/MFParticleSystem_Null.o
@@ -320,8 +326,6 @@ endif
 
 ifeq ($(PLATFORM),PS2)
 
-PS2SDK=C:/cygwin/usr/local/ps2dev/ps2sdk
-
 CC       = ee-gcc
 CXX      = ee-g++
 AS       = ee-as
@@ -333,7 +337,7 @@ STRIP    = ee-strip
 CFLAGS := $(CFLAGS) -G0
 
 # Add in PSPSDK includes and libraries.
-INCDIR   := $(INCDIR) . $(PSPSDK)/include
+INCDIR   := $(INCDIR) . $(PS2SDK)/ee/include $(PS2SDK)/common/include
 
 # end PS2
 endif
