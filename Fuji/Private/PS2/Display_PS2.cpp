@@ -7,39 +7,39 @@ float fieldOfView;
 
 extern MFVector gClearColour;
 
-void Display_DestroyWindow()
+void MFDisplay_DestroyWindow()
 {
 	MFCALLSTACK;
 }
 
-int Display_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
+int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
 	MFCALLSTACK;
 
 	return 0;
 }
 
-void Display_ResetDisplay()
+void MFDisplay_ResetDisplay()
 {
 	MFCALLSTACK;
 }
 
-void Display_DestroyDisplay()
+void MFDisplay_DestroyDisplay()
 {
 	MFCALLSTACK;
 }
 
-void Display_BeginFrame()
+void MFDisplay_BeginFrame()
 {
 	MFCALLSTACK;
 }
 
-void Display_EndFrame()
+void MFDisplay_EndFrame()
 {
 	MFCALLSTACK;
 }
 
-void Display_SetClearColour(float r, float g, float b, float a)
+void MFDisplay_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -47,17 +47,27 @@ void Display_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void Display_ClearScreen(uint32 flags)
+void MFDisplay_ClearScreen(uint32 flags)
 {
 	MFCALLSTACK;
 }
 
-void SetViewport(float x, float y, float width, float height)
+void MFDisplay_SetViewport(float x, float y, float width, float height)
 {
 	MFCALLSTACK;
 }
 
-void ResetViewport()
+void MFDisplay_ResetViewport()
 {
 	MFCALLSTACK;
+}
+
+float MFDisplay_GetNativeAspectRatio()
+{
+	return 4.0f/3.0f;
+}
+
+bool MFDisplay_IsWidescreen()
+{
+	return false;
 }

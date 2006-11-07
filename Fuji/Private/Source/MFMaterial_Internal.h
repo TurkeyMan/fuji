@@ -100,6 +100,16 @@ struct MFMeshChunk_PSP : public MFMeshChunk
 };
 #endif
 
+#if defined(_PS2) || defined(_FUJI_UTIL)
+struct MFMeshChunk_PS2 : public MFMeshChunk
+{
+	uint32 numVertices;
+
+	const char *pDMAList;
+	uint32 listSize;
+};
+#endif
+
 #if defined(_LINUX) || defined(_OSX) || defined(_FUJI_UTIL)
 struct MFMeshChunk_Linux : public MFMeshChunk
 {

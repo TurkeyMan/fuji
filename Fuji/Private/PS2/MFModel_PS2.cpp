@@ -11,38 +11,44 @@ void MFModel_Draw(MFModel *pModel)
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
-/*
+
 	MFMeshChunk_PS2 *pMC = (MFMeshChunk_PS2*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
-*/
 }
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
-/*
+
 	MFMeshChunk_PS2 *pMC = (MFMeshChunk_PS2*)pMeshChunk;
 
 	MFMaterial_Destroy(pMC->pMaterial);
-*/
 }
 
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
 {
 	MFCALLSTACK;
-/*
+
 	MFMeshChunk_PS2 *pMC = (MFMeshChunk_PS2*)pMeshChunk;
 
-	if(load)
+	MFFixUp(pMC->pMaterial, (void*)base, load);
+	MFFixUp(pMC->pDMAList, (void*)base, load);
+}
+
+MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModelTemplate, MFChunkType_SubObjects);
+
+	if(pChunk)
 	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial + base);
-		pMC->pVertexData += base;
+		MFDebug_Assert(subobjectIndex < pChunk->count, "Subobject index out of bounds.");
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+
+		MFDebug_Assert(meshChunkIndex < pSubobjects->numMeshChunks, "Mesh chunk index out of bounds.");
+		MFMeshChunk_PS2 *pMC = (MFMeshChunk_PS2*)pSubobjects[subobjectIndex].pMeshChunks;
+		return &pMC[meshChunkIndex];
 	}
-	else
-	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial - base);
-		pMC->pVertexData -= base;
-	}
-*/
+
+	return NULL;
 }

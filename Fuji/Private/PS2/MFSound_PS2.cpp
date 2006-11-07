@@ -1,86 +1,86 @@
 #include "Fuji.h"
 #include "MFVector.h"
 
-void Sound_InitModule()
+void MFSound_InitModule()
 {
 }
 
-void Sound_DeinitModule()
+void MFSound_DeinitModule()
 {
 }
 
-void Sound_Update()
+void MFSound_Update()
 {
 }
 
-void Sound_Draw()
+void MFSound_Draw()
 {
 }
 
 
-int Sound_LoadBank(const char *pFilename)
-{
-	return 0;
-}
-
-void Sound_UnloadBank(int bankID)
-{
-}
-
-int Sound_FindSound(const char *pSoundName, int searchBankID)
+int MFSound_LoadBank(const char *pFilename)
 {
 	return 0;
 }
 
-void Sound_Play(int soundID)
+void MFSound_UnloadBank(int bankID)
 {
 }
 
-void Sound_Stop(int soundID)
-{
-}
-
-void Sound_Play3D(int soundID)
-{
-}
-
-void Sound_Stop3D(int soundID)
-{
-}
-
-void Sound_SetListenerPos(const MFVector& listenerPos)
-{
-}
-
-void Sound_SetVolume(int soundID, float volume)
-{
-}
-
-void Sound_SetMasterVolume(int soundID, float volume)
-{
-}
-
-void Sound_SetPlaybackRate(int soundID, float rate)
-{
-}
-
-int Sound_MusicPlay(const char *pFilename, bool pause)
+int MFSound_FindSound(const char *pSoundName, int searchBankID)
 {
 	return 0;
 }
 
-void Sound_MusicUnload(int track)
+void MFSound_Play(int soundID)
 {
 }
 
-void Sound_MusicSeek(int track, float seconds)
+void MFSound_Stop(int soundID)
 {
 }
 
-void Sound_MusicPause(int track, bool pause)
+void MFSound_Play3D(int soundID)
 {
 }
 
-void Sound_MusicSetVolume(int track, float volume)
+void MFSound_Stop3D(int soundID)
+{
+}
+
+void MFSound_SetListenerPos(const MFVector& listenerPos)
+{
+}
+
+void MFSound_SetVolume(int soundID, float volume)
+{
+}
+
+void MFSound_SetMasterVolume(int soundID, float volume)
+{
+}
+
+void MFSound_SetPlaybackRate(int soundID, float rate)
+{
+}
+
+int MFSound_MusicPlay(const char *pFilename, bool pause)
+{
+	return 0;
+}
+
+void MFSound_MusicUnload(int track)
+{
+}
+
+void MFSound_MusicSeek(int track, float seconds)
+{
+}
+
+void MFSound_MusicPause(int track, bool pause)
+{
+}
+
+void MFSound_MusicSetVolume(int track, float volume)
 {
 }

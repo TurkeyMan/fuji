@@ -61,6 +61,8 @@ Middleware/angelscript/source/as_variablescope.o \
 Source/DebugMenu.o \
 Source/Display.o \
 Source/Image.o \
+Source/MFAnimation.o \
+Source/MFAnimScript.o \
 Source/MFBoundingVolume.o \
 Source/MFCallstack.o \
 Source/MFCollision.o \
