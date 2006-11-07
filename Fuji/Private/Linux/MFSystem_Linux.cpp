@@ -36,15 +36,16 @@ void MFSystem_HandleEventsPlatformSpecific()
 	MFCALLSTACK;
 
 	XEvent event;
-	
+
 	while(XPending(xdisplay))
 	{
 		XNextEvent(xdisplay, &event);
 		switch(event.type)
 		{
 			case ClientMessage:
+			{
 				Atom atom;
-				
+
 				if(event.xclient.format == 8)
 				{
 					atom = event.xclient.data.b[0];
@@ -57,11 +58,14 @@ void MFSystem_HandleEventsPlatformSpecific()
 				{
 					atom = event.xclient.data.l[0];
 				}
-				
+
 				if(atom == wm_delete_window)
 				{
 					gQuit = 1;
 				}
+				break;
+			}
+			default:
 				break;
 		}
 	}

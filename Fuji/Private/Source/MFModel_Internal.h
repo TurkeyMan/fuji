@@ -13,7 +13,7 @@ void MFModel_DeinitModule();
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk);
-void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load);
+void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load);
 
 enum MFModelDataChunkType
 {

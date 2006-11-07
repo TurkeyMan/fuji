@@ -13,11 +13,6 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 }
 
-void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
+void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
-}
-
-MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)
-{
-	return NULL;
 }

@@ -130,6 +130,19 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 };
 #endif
 
+// define MFMeshChunk_Current
+#if defined(_WINDOWS)
+typedef MFMeshChunk_PC MFMeshChunk_Current;
+#elif defined(_MFXBOX)
+typedef MFMeshChunk_XB MFMeshChunk_Current;
+#elif defined(_PSP)
+typedef MFMeshChunk_PSP MFMeshChunk_Current;
+#elif defined(_PS2)
+typedef MFMeshChunk_PS2 MFMeshChunk_Current;
+#elif defined(_LINUX)
+typedef MFMeshChunk_Linux MFMeshChunk_Current;
+#endif
+
 // a debug menu material information display object
 class MaterialBrowser : public MenuObject
 {

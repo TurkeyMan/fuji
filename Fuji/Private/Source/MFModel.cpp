@@ -84,7 +84,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 
 					for(c=0; c<pSubobjects[b].numMeshChunks; c++)
 					{
-						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), (uint32&)pTemplate, load);
+						MFModel_FixUpMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, b, c), pTemplate, load);
 					}
 
 					if(!load)
@@ -158,6 +158,23 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 		MFFixUp(pTemplate->pDataChunks, pTemplate, 0);
 		MFFixUp(pTemplate->pName, pTemplate, 0);
 	}
+}
+
+MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex)
+{
+	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModelTemplate, MFChunkType_SubObjects);
+
+	if(pChunk)
+	{
+		MFDebug_Assert(subobjectIndex < pChunk->count, "Subobject index out of bounds.");
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+
+		MFDebug_Assert(meshChunkIndex < pSubobjects->numMeshChunks, "Mesh chunk index out of bounds.");
+		MFMeshChunk_Current *pMC = (MFMeshChunk_Current*)pSubobjects[subobjectIndex].pMeshChunks;
+		return &pMC[meshChunkIndex];
+	}
+
+	return NULL;
 }
 
 MFModel* MFModel_Create(const char *pFilename)

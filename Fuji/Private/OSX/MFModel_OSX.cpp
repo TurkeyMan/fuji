@@ -76,28 +76,16 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 	MFMaterial_Destroy(pMC->pMaterial);
 }
 
-void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, uint32 base, bool load)
+void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
 	MFCALLSTACK;
 
 	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunk;
 
-	if(load)
-	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial + base);
-		pMC->pVertexData += base;
-		pMC->pNormalData += base;
-		pMC->pColourData += base;
-		pMC->pUVData += base;
-		pMC->pIndexData += base;
-	}
-	else
-	{
-		pMC->pMaterial = (MFMaterial*)((char*)pMC->pMaterial - base);
-		pMC->pVertexData -= base;
-		pMC->pNormalData -= base;
-		pMC->pColourData -= base;
-		pMC->pUVData -= base;
-		pMC->pIndexData -= base;
-	}
+	MFFixUp(pMC->pMaterial, pBase, load);
+	MFFixUp(pMC->pVertexData, pBase, load);
+	MFFixUp(pMC->pNormalData, pBase, load);
+	MFFixUp(pMC->pColourData, pBase, load);
+	MFFixUp(pMC->pUVData, pBase, load);
+	MFFixUp(pMC->pIndexData, pBase, load);
 }
