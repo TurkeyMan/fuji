@@ -4,6 +4,8 @@
 
 MFPlatform gCurrentPlatform = FP_XBox;
 
+char *gpCommandLineBuffer = NULL;
+
 void main()
 {
 	MFCALLSTACK;

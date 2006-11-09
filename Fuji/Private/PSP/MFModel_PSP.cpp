@@ -21,7 +21,7 @@ void MFModel_Draw(MFModel *pModel)
 
 	if(pChunk)
 	{
-		SubObjectChunk *pSubobjects = (SubObjectChunk*)pChunk->pData;
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
 		for(int a=0; a<pChunk->count; a++)
 		{
