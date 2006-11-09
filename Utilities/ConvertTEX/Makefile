@@ -14,6 +14,7 @@ endif
 OBJS = main.o
 OBJS := $(OBJS) LoadTarga.o
 OBJS := $(OBJS) LoadBMP.o
+OBJS := $(OBJS) LoadPNG.o
 OBJS := $(OBJS) IntImage.o
 
 OBJS := $(OBJS) ../../Fuji/Source/MFCallstack.o
@@ -77,7 +78,7 @@ ASFLAGS = $(CFLAGS)
 LDFLAGS =
 #LIBS = -lFuji_$(CONFIG)
 
-LIBS := -lc -lm -lstdc++
+LIBS := -lc -lm -lstdc++ -lpng
 
 ifeq ($(PLATFORM),OSX)
 INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
