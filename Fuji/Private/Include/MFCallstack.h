@@ -51,12 +51,21 @@ public:
 #endif
 };
 
+#if defined(__GNUC__)
+#define MFCALLSTACK MFCall _call(__PRETTY_FUNCTION__, 0);
+#define MFCALLSTACKc MFCall _call(__PRETTY_FUNCTION__, 1);
+#define MFCALLSTACKg MFCall _call(__PRETTY_FUNCTION__, 3);
+#define MFCALLSTACKs(s) MFCall _call(__PRETTY_FUNCTION__, 0);
+#define MFCALLSTACKcs(s) MFCall _call(__PRETTY_FUNCTION__, 1);
+#define MFCALLSTACKgs(s) MFCall _call(__PRETTY_FUNCTION__, 3);
+#else
 #define MFCALLSTACK MFCall _call(__FUNCTION__, 0);
 #define MFCALLSTACKc MFCall _call(__FUNCTION__, 1);
 #define MFCALLSTACKg MFCall _call(__FUNCTION__, 3);
 #define MFCALLSTACKs(s) MFCall _call(__FUNCTION__, 0);
 #define MFCALLSTACKcs(s) MFCall _call(__FUNCTION__, 1);
 #define MFCALLSTACKgs(s) MFCall _call(__FUNCTION__, 3);
+#endif
 
 #else // defined(_MFCALLSTACK)
 

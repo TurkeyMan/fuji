@@ -454,11 +454,11 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
 			pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*(bAnimating ? 7 : 7));
 			pMeshChunk[mc].pVertexData = pOffset;
-			pOffset += MFALIGN16(sizeof(Vert)*numVertices);
+			pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
 			pMeshChunk[mc].pAnimData = bAnimating ? pOffset : NULL;
-			pOffset += bAnimating ? MFALIGN16(sizeof(AnimVert)*numVertices) : 0;
+			pOffset += bAnimating ? MFALIGN16(pMeshChunk[mc].animDataSize) : 0;
 			pMeshChunk[mc].pIndexData = pOffset;
-			pOffset += MFALIGN16(sizeof(uint16)*numIndices);
+			pOffset += MFALIGN16(pMeshChunk[mc].indexDataSize);
 			pMeshChunk[mc].pBatchIndices = bAnimating ? (uint16*)pOffset : 0;
 			pOffset += bAnimating ? MFALIGN16(sizeof(uint16)*pMeshChunk[mc].matrixBatchSize) : 0;
 
@@ -800,8 +800,19 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 
 	MFMeshChunk_PSP *pMeshChunk = (MFMeshChunk_PSP*)pMeshChunks;
 
+	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
+
 	struct Vert
 	{
+		float uv[2];
+		uint32 colour;
+		float normal[3];
+		float pos[3];
+	};
+
+	struct AnimVert
+	{
+		uint8 weights[8];
 		float uv[2];
 		uint32 colour;
 		float normal[3];
@@ -816,51 +827,139 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 		if(matsub.triangles.size() == 0)
 			continue;
 
-		int numTriangles = matsub.triangles.size();
+		bool bAnimating = (matsub.numBones && !subobjectAnimation);
 
-		pMeshChunk[mc].numVertices = numTriangles * 3;
-		pMeshChunk[mc].vertexStride = sizeof(Vert);
-		pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * pMeshChunk[mc].vertexStride;
-		pMeshChunk[mc].vertexFormat = (0x03 << 0) | (0x07 << 2) | (0x03 << 5) | (0x03 << 7);
-
-		pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
-
-		pMeshChunk[mc].pVertexData = pOffset;
-		pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
-
-		// write triangles
-		Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
-
-		for(b=0; b<numTriangles; b++)
+		for(b=0; b<matsub.triangleBatches.size(); b++)
 		{
-			for(c=0; c<3; c++)
+			const F3DBatch &batch = matsub.triangleBatches[b];
+
+			int numTriangles = batch.tris.size();
+			int numVertices = numTriangles * 3;
+
+			pMeshChunk[mc].numVertices = numVertices;
+			pMeshChunk[mc].vertexStride = bAnimating ? sizeof(AnimVert) : sizeof(Vert);
+			pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * pMeshChunk[mc].vertexStride;
+			pMeshChunk[mc].vertexFormat = (0x03 << 0) | (0x07 << 2) | (0x03 << 5) | (0x03 << 7) | (bAnimating ? ((0x01 << 9) | (0x07 << 14)) : 0);
+			pMeshChunk[mc].maxWeights = bAnimating ? matsub.maxWeights : 0;
+			pMeshChunk[mc].matrixBatchSize = batch.bones.size();
+
+			pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
+
+			pMeshChunk[mc].pVertexData = pOffset;
+			pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
+			pMeshChunk[mc].pBatchIndices = bAnimating ? (uint16*)pOffset : 0;
+			pOffset += bAnimating ? MFALIGN16(sizeof(uint16)*pMeshChunk[mc].matrixBatchSize) : 0;
+
+			if(!bAnimating)
 			{
-				const F3DVertex &vert = matsub.vertices[matsub.triangles[b].v[c]];
+				// write triangles
+				Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
 
-				const MFVector &pos = sub.positions[vert.position];
-				const MFVector &uv = sub.uvs[vert.uv1];
-				const MFVector &norm = sub.normals[vert.normal];
-				const MFVector &col = sub.colours[vert.colour];
+				for(b=0; b<numTriangles; b++)
+				{
+					for(c=0; c<3; c++)
+					{
+						int t = batch.tris[b];
+						int v = matsub.triangles[t].v[c];
 
-				pVert->uv[0] = uv.x;
-				pVert->uv[1] = uv.y;
-				pVert->colour = ((uint32)(col.x * 255.0f) << 0) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
-				pVert->normal[0] = norm.x;
-				pVert->normal[1] = norm.y;
-				pVert->normal[2] = norm.z;
-				pVert->pos[0] = pos.x;
-				pVert->pos[1] = pos.y;
-				pVert->pos[2] = pos.z;
+						const F3DVertex &vert = matsub.vertices[v];
 
-				pVolume->min = MFMin(pVolume->min, pos);
-				pVolume->max = MFMax(pVolume->max, pos);
-				AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+						int posIndex = vert.position;
+						int normalIndex = vert.normal;
+						int uvIndex = vert.uv1;
+						int colourIndex = vert.colour;
 
-				++pVert;
+						const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
+						const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
+						const MFVector &norm = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
+						const MFVector &col = colourIndex > -1 ? sub.colours[colourIndex] : MFVector::one;
+
+						pVert->uv[0] = uv.x;
+						pVert->uv[1] = uv.y;
+						pVert->colour = ((uint32)(col.x * 255.0f) << 0) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+						pVert->normal[0] = norm.x;
+						pVert->normal[1] = norm.y;
+						pVert->normal[2] = norm.z;
+						pVert->pos[0] = pos.x;
+						pVert->pos[1] = pos.y;
+						pVert->pos[2] = pos.z;
+
+						pVolume->min = MFMin(pVolume->min, pos);
+						pVolume->max = MFMax(pVolume->max, pos);
+						AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+						++pVert;
+					}
+				}
 			}
-		}
+			else
+			{
+				// write animated triangles
+				AnimVert *pVert = (AnimVert*)pMeshChunk[mc].pVertexData;
 
-		++mc;
+				for(b=0; b<numTriangles; b++)
+				{
+					for(c=0; c<3; c++)
+					{
+						int t = batch.tris[b];
+						int v = matsub.triangles[t].v[c];
+
+						const F3DVertex &vert = matsub.vertices[v];
+
+						int posIndex = vert.position;
+						int normalIndex = vert.normal;
+						int uvIndex = vert.uv1;
+						int colourIndex = vert.colour;
+
+						const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
+						const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
+						const MFVector &norm = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
+						const MFVector &col = colourIndex > -1 ? sub.colours[colourIndex] : MFVector::one;
+
+						pVert->uv[0] = uv.x;
+						pVert->uv[1] = uv.y;
+						pVert->colour = ((uint32)(col.x * 255.0f) << 0) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+						pVert->normal[0] = norm.x;
+						pVert->normal[1] = norm.y;
+						pVert->normal[2] = norm.z;
+						pVert->pos[0] = pos.x;
+						pVert->pos[1] = pos.y;
+						pVert->pos[2] = pos.z;
+
+						for(int a=0; a<8; ++a)
+						{
+							int bid = vert.bone[a] != -1 ? batch.boneMapping[vert.bone[a]] : -1;
+							if(bid > -1)
+								pVert->weights[bid] = (uint8)(vert.weight[a] * 255.0f);
+						}
+
+						// we need to make sure the weights sum to 255
+						int leftOver = 255 - pVert->weights[0] - pVert->weights[1] - pVert->weights[2] - pVert->weights[3] - pVert->weights[4] - pVert->weights[5] - pVert->weights[6] - pVert->weights[7];
+
+						int d, biggest = 0, weight = pVert->weights[0];
+						for(d=1; d<8; d++)
+						{
+							biggest = pVert->weights[d] > weight ? d : biggest;
+							weight = MFMax(weight, (int)pVert->weights[d]);
+						}
+
+						pVert->weights[biggest] += leftOver;
+
+						pVolume->min = MFMin(pVolume->min, pos);
+						pVolume->max = MFMax(pVolume->max, pos);
+						AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+						++pVert;
+					}
+				}
+
+				// write out batch
+				for(int c=0; c<pMeshChunk[mc].matrixBatchSize; c++)
+					pMeshChunk[mc].pBatchIndices[c] = (uint16)batch.bones[c];
+			}
+
+			++mc;
+		}
 	}
 }
 

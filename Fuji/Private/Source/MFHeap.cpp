@@ -180,13 +180,14 @@ void operator delete[](void *pMemory)
 {
 	MFHeap_Free(pMemory);
 }
-/*
-void* operator new(unsigned int size, void *pMem)
+
+#if !defined(_WINDOWS)
+void* operator new(size_t size, void *pMem)
 {
 	return pMem;
 }
 
-void* operator new[](unsigned int size, void *pMem)
+void* operator new[](size_t size, void *pMem)
 {
 	return pMem;
 }
@@ -198,7 +199,7 @@ void operator delete(void *pMemory, void *pMem)
 void operator delete[](void *pMemory, void *pMem)
 {
 }
-*/
+#endif
 
 // get the size of an allocation
 uint32 MFHeap_GetAllocSize(const void *pMemory)
