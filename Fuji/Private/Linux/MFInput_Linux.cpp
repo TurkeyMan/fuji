@@ -61,7 +61,19 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
+	MFCALLSTACK;
+
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
+//         switch(device)
+// 	{
+//             case IDD_Gamepad: break;
+//             case IDD_Mouse: break;
+//             case IDD_Keyboard:
+// break;
+//             default:
+// 		MFDebug_Assert(false, "Invalid Input Device");
+// 		break;
+//         }
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)

@@ -925,7 +925,7 @@ void ATICompress(Pixel *pSourceBuffer, int width, int height, MFTextureFormat ta
 	ATI_TC_ConvertTexture(&srcTexture, &destTexture, &options, NULL, NULL, NULL);
 #else
 	// not supported
-	MKDebug_Assert(false, "S3TC not supports on non-windows platforms..");
+	MFDebug_Assert(false, "S3TC not supports on non-windows platforms..");
 #endif
 }
 

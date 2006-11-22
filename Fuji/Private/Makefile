@@ -371,6 +371,7 @@ LD       = ld
 AR       = ar
 RANLIB   = ranlib
 STRIP    = strip
+INCDIR	:= $(INCDIR) . ./Linux
 
 # end LINUX
 endif

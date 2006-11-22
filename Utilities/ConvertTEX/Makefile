@@ -26,6 +26,7 @@ OBJS := $(OBJS) ../../Fuji/Source/MFString.o
 OBJS := $(OBJS) ../../Fuji/Source/MFStringCache.o
 OBJS := $(OBJS) ../../Fuji/Source/MFTextureUtil.o
 OBJS := $(OBJS) ../../Fuji/Source/MFVector.o
+OBJS := $(OBJS) ../../Fuji/Source/MFQuaternion.o 
 OBJS := $(OBJS) ../../Fuji/Source/Util.o
 OBJS := $(OBJS) ../../Fuji/Util/F3D.o
 OBJS := $(OBJS) ../../Fuji/Null/MFHeap_Null.o

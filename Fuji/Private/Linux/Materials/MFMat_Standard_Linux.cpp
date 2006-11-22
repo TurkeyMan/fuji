@@ -5,6 +5,7 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 #include "../../Source/Materials/MFMat_Standard.h"
+#include "GL/gl.h"
 
 static MFMaterial *pSetMaterial = 0;
 
@@ -53,7 +54,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case MF_Subtractive:
 				glEnable(GL_BLEND);
-				glBlendFunc(GL_ZERO, ONE_MINUS_SRC_COLOR);
+				glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
 				break;
 		}
 
@@ -77,9 +78,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
+		// TODO: This is broken! You cant disable zwrites and still have zreads with this configuration...
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
 		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
+
 	}
 
 	return 0;

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#define  stricmp strcasecmp
 
 #include <string.h>
 

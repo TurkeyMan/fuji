@@ -181,7 +181,7 @@ void operator delete[](void *pMemory)
 	MFHeap_Free(pMemory);
 }
 
-#if !defined(_WINDOWS)
+#if !defined(_WINDOWS) && !defined(_FUJI_UTIL) 
 void* operator new(size_t size, void *pMem)
 {
 	return pMem;

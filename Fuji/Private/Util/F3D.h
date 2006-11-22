@@ -5,6 +5,10 @@
 #include "MFVector.h"
 #include "MFMatrix.h"
 
+#if defined(_LINUX) 
+#include <string.h> 
+#endif 
+
 enum F3DChunkType
 {
 	CT_Material,

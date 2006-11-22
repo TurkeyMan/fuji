@@ -3,10 +3,10 @@
 #include "MFView.h"
 #include "DebugMenu.h"
 #include "MFHeap.h"
-
+#include "X11_linux.h"
+#include <stdio.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
-#include <X11/extensions/xf86vmode.h>
 
 // Typedefs
 struct Resolution
@@ -17,7 +17,7 @@ struct Resolution
 
 // Data definition
 Resolution defaultModes[] = {{320, 240, 0.0f}, {640, 480, 0.0f}, {800, 600, 0.0f}, {1024, 768, 0.0f}, {1280, 1024, 0.0f}, {0, 0, 0.0f}};
-const char modeString[24] = "";
+char modeString[24] = "";
 const char *resMenuItems[] = {"-", modeString, "+", NULL};
 
 MenuItemIntString resSelect(resMenuItems, 1);
