@@ -21,37 +21,37 @@ int joy_fd;
 
 void MFInput_InitModulePlatformSpecific()
 {
-  joy_fd = open("/dev/input/js0", O_RDONLY); // This is horrible - need to something more robust - will work for testing
-  ioctl (joy_fd, JSIOCGAXES, &num_of_axis);
-  ioctl (joy_fd, JSIOCGBUTTONS, &num_of_buttons);
-  ioctl (joy_fd, JSIOCGNAME(80), &name_of_joystick );
+	joy_fd = open("/dev/input/js0", O_RDONLY); // This is horrible - need to something more robust - will work for testing
+	ioctl (joy_fd, JSIOCGAXES, &num_of_axis);
+	ioctl (joy_fd, JSIOCGBUTTONS, &num_of_buttons);
+	ioctl (joy_fd, JSIOCGNAME(80), &name_of_joystick );
 
-  axis = (int *) calloc (num_of_axis, sizeof(int));
-  button = (char *) calloc (num_of_buttons, sizeof(char));
+	axis = (int *) calloc (num_of_axis, sizeof(int));
+	button = (char *) calloc (num_of_buttons, sizeof(char));
 
-  MFCALLSTACK;
+	MFCALLSTACK;
 }
 
 void MFInput_DeinitModulePlatformSpecific()
 {
-  free(axis);
-  free(button);
-  close (joy_fd);
-  MFCALLSTACK;
+	free(axis);
+	free(button);
+	close (joy_fd);
+	MFCALLSTACK;
 }
 
 void MFInput_UpdatePlatformSpecific()
 {
-  read (joy_fd, &js, sizeof(struct js_event));
-    switch (js.type & ~JS_EVENT_INIT)
-    {
-       case JS_EVENT_AXIS:
-         axis [js.number] = js.value;
-         break;
-       case JS_EVENT_BUTTON:
-         button [js.number] = js.value;
-         break;
-    }
+	read (joy_fd, &js, sizeof(struct js_event));
+	switch (js.type & ~JS_EVENT_INIT)
+	{
+		case JS_EVENT_AXIS:
+			axis [js.number] = js.value;
+			break;
+		case JS_EVENT_BUTTON:
+			button [js.number] = js.value;
+			break;
+	}
 }
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
@@ -64,16 +64,16 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	MFCALLSTACK;
 
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
-//         switch(device)
-// 	{
-//             case IDD_Gamepad: break;
-//             case IDD_Mouse: break;
-//             case IDD_Keyboard:
-// break;
-//             default:
-// 		MFDebug_Assert(false, "Invalid Input Device");
-// 		break;
-//         }
+//	switch(device)
+//	{
+//		case IDD_Gamepad: break;
+//		case IDD_Mouse: break;
+//		case IDD_Keyboard:
+//			break;
+//		default:
+//			MFDebug_Assert(false, "Invalid Input Device");
+//			break;
+//	}
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)

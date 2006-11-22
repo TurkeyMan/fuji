@@ -69,15 +69,15 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case MF_AlphaBlend:
 				sceGuSetStatus(GU_BLEND, GU_TRUE);
-				sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+				sceGuBlendFunc(GU_ADD, premultipliedAlpha ? GU_FIX : GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0xFFFFFFFF, 0);
 				break;
 			case MF_Additive:
 				sceGuSetStatus(GU_BLEND, GU_TRUE);
-				sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
+				sceGuBlendFunc(GU_ADD, premultipliedAlpha ? GU_FIX : GU_SRC_ALPHA, GU_FIX, 0xFFFFFFFF, 0xFFFFFFFF);
 				break;
 			case MF_Subtractive:
 				sceGuSetStatus(GU_BLEND, GU_TRUE);
-				sceGuBlendFunc(GU_REVERSE_SUBTRACT, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
+				sceGuBlendFunc(GU_REVERSE_SUBTRACT, premultipliedAlpha ? GU_FIX : GU_SRC_ALPHA, GU_FIX, 0xFFFFFFFF, 0xFFFFFFFF);
 				break;
 		}
 

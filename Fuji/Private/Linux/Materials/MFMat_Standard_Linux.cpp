@@ -46,11 +46,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case MF_AlphaBlend:
 				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendFunc(premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				break;
 			case MF_Additive:
 				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+				glBlendFunc(premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
 				break;
 			case MF_Subtractive:
 				glEnable(GL_BLEND);
@@ -78,11 +78,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		// TODO: This is broken! You cant disable zwrites and still have zreads with this configuration...
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
 		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
-
 	}
 
 	return 0;
