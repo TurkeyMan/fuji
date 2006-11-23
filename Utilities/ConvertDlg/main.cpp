@@ -4,15 +4,10 @@
 uint16 *gpArray[128];
 char stringBuffer[2048];
 
-uint16* ConvertToUnicode(char *pBuffer, int size)
+uint16* ConvertToUnicode(char *pBuffer, int &size)
 {
 	uint16 *pNewBuffer = (uint16*)malloc(size*2 + 2);
-
-	for(int a = 0; a < size; a++)
-	{
-		pNewBuffer[a] = pBuffer[a];
-	}
-
+	size = MFString_UFT8ToWChar(pNewBuffer, pBuffer);
 	free(pBuffer);
 
 	return pNewBuffer;
@@ -82,33 +77,29 @@ uint16** GetLine(const uint16 *&pString, uint16 **ppOutput = gpArray)
 	return ppOutput;
 }
 
-const char *GetPagedString(const uint16 *pString)
+const char *GetAnsiString(const uint16 *pString)
 {
-	// write string into stringBuffer[]
-	int len = MFWString_Length(pString);
+	uint8 *pC = (uint8*)stringBuffer;
 
-	for(int a=0; a<len; a++)
+	while(*pString)
 	{
-		stringBuffer[a] = (uint8)pString[a];
+		if(*pString > 255)
+			return NULL;
+
+		*pC = (uint8)*pString;
+
+		++pC;
+		++pString;
 	}
 
-	stringBuffer[len] = 0;
+	*pC = 0;
 
 	return stringBuffer;
 }
 
-const char *GetAnsiString(const uint16 *pString)
+const char *GetUTF8String(const uint16 *pString)
 {
-	int len = MFWString_Length(pString);
-
-	for(int a=0; a<len; a++)
-	{
-		if(pString[a] > 255)
-			return NULL;
-		stringBuffer[a] = (uint8)pString[a];
-	}
-
-	stringBuffer[len] = 0;
+	MFWString_ToUFT8(stringBuffer, pString);
 
 	return stringBuffer;
 }
@@ -191,20 +182,42 @@ int main(int argc, char *argv[])
 	uint16 *pBuffer = (uint16*)malloc(size+2);
 	fread(pBuffer, size, 1, pFile);
 
-	if(*pBuffer != 0xFEFF)
+	if(*pBuffer != 0xFEFF && *pBuffer != 0xFFFE)
 	{
+		char *pCharBuffer = (char*)pBuffer;
+		pCharBuffer[size] = 0;
+
+		// skip the UTF8 signature if present.
+		if(pCharBuffer[0] == 0xEF && pCharBuffer[1] == 0xBB && pCharBuffer[2] == 0xBF)
+		{
+			pCharBuffer += 3;
+			size -= 3;
+		}
+
 		// convert ascii to unicode
-		pBuffer = ConvertToUnicode((char*)pBuffer, size);
+		pBuffer = ConvertToUnicode(pCharBuffer, size);
 	}
 	else
 	{
 		size >>= 1;
+		pBuffer[size] = 0;
+
+		// the source file is big endian (or little endian on a big endian machine)
+		// we will convert the file to the machines native format
+		if(*pBuffer == 0xFFFE)
+		{
+			for(int a=0; a<size; ++a)
+			{
+				char *pC = (char*)&pBuffer[a];
+				char c = pC[0];
+				pC[0] = pC[1];
+				pC[1] = c;
+			}
+		}
 
 		++pBuffer;
 		--size;
 	}
-
-	pBuffer[size] = 0;
 
 	// parse csv file
 	int columnCount = 1;
@@ -213,7 +226,6 @@ int main(int argc, char *argv[])
 	int totalLines = 0;
 
 	MFStringCache **ppCaches;
-	MFWStringCache **ppWCaches;
 
 	uint16 ***pppStringPointers = NULL;
 	uint16 **ppColumnNames;
@@ -256,8 +268,6 @@ int main(int argc, char *argv[])
 
 	// allocate some lists of stuff
 	ppCaches = (MFStringCache**)malloc(sizeof(MFStringCache*) * columnCount);
-	ppWCaches = (MFWStringCache**)malloc(sizeof(MFWStringCache*) * columnCount);
-
 	ppColumnNames = (uint16**)malloc(sizeof(uint16*) * columnCount);
 
 	pppStringPointers = (uint16***)malloc(sizeof(uint16**) * columnCount);
@@ -304,22 +314,17 @@ int main(int argc, char *argv[])
 	{
 		if(ppColumnNames[a])
 		{
-			ppCaches[a] = MFStringCache_Create(size);
-			ppWCaches[a] = MFWStringCache_Create(size * 2);
+			ppCaches[a] = MFStringCache_Create(size*3);
 
 			for(int b=0; b<totalLines; b++)
 			{
-				const char *pAnsiString = GetAnsiString(pppStringPointers[a][b]);
-				if(pAnsiString)
-					pppStringPointers[a][b] = (uint16*)MFStringCache_Add(ppCaches[a], pAnsiString);
-				else
-					pppStringPointers[a][b] = (uint16*)MFWStringCache_Add(ppWCaches[a], GetUnicodeString(pppStringPointers[a][b]));
+				const char *pUTF8String = GetUTF8String(pppStringPointers[a][b]);
+				pppStringPointers[a][b] = (uint16*)MFStringCache_Add(ppCaches[a], pUTF8String);
 			}
 		}
 		else
 		{
 			ppCaches[a] = NULL;
-			ppWCaches[a] = NULL;
 		}
 	}
 
@@ -378,30 +383,22 @@ int main(int argc, char *argv[])
 
 		char *pCache = MFStringCache_GetCache(ppCaches[a]);
 		int cacheSize = MFStringCache_GetSize(ppCaches[a]);
-		uint16 *pWCache = MFWStringCache_GetCache(ppWCaches[a]);
-		int wcacheSize = MFWStringCache_GetSize(ppWCaches[a]);
-		uint32 base = (uint32&)pCache;
-		uint32 wbase = (uint32&)pWCache;
-		base -= sizeof(char**) * totalLines + sizeof(table) + wcacheSize;
-		wbase -= sizeof(char**) * totalLines + sizeof(table);
+		char *pBase = pCache;
+		pBase -= sizeof(char**) * totalLines + sizeof(table);
 
 		for(int b=0; b<totalLines; b++)
 		{
 			// fixup
-			if(*pppStringPointers[a][b] == 0xFEFF)
-                (uint32&)pppStringPointers[a][b] -= wbase;
-			else
-                (uint32&)pppStringPointers[a][b] -= base;
+			MFFixUp(pppStringPointers[a][b], pBase, 0);
 		}
 
 		// write out the string cache
-		sprintf(outputFilename, "%s%s.%s", outPath, file, GetPagedString(ppColumnNames[a]));
+		sprintf(outputFilename, "%s%s.%s", outPath, file, GetAnsiString(ppColumnNames[a]));
 
 		FILE *pOut = fopen(outputFilename, "wb");
 
 		fwrite(&table, sizeof(table), 1, pOut);
 		fwrite(pppStringPointers[a], totalLines, sizeof(char **), pOut);
-		fwrite(pWCache, wcacheSize, 1, pOut);
 		fwrite(pCache, cacheSize, 1, pOut);
 
 		fclose(pOut);
