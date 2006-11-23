@@ -7,7 +7,10 @@
 
 #include <string.h>
 
-static char gStringBuffer[1024*128];
+MFALIGN_BEGIN(16)
+static char gStringBuffer[1024*128]
+MFALIGN_END(16);
+
 static uint32 gStringOffset;
 
 
@@ -353,9 +356,130 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 
 #endif
 
+
+//
+// UTF8 support
+//
+
+int MFString_UFT8ToWChar(uint16 *pBuffer, const char *pUTF8String)
+{
+	uint16 *pStart = pBuffer;
+
+	// copy the string
+	int bytes = MFString_MBToWChar(pUTF8String, pBuffer);
+
+	while(*pUTF8String)
+	{
+		if(bytes > 0)
+		{
+			pUTF8String += bytes;
+			++pBuffer;
+
+			bytes = MFString_MBToWChar(pUTF8String, pBuffer);
+		}
+		else
+		{
+			*pBuffer = *pUTF8String;
+			++pUTF8String;
+			++pBuffer;
+		}
+	}
+
+	// add terminating NULL
+	*pBuffer = 0;
+
+	return pBuffer - pStart;
+}
+
+uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
+{
+	// count number of actual characters in the string
+	int numChars = MFString_GetNumChars(pUTF8String);
+
+	// get some space in the MFStr buffer
+	if(gStringOffset & 1)
+		++gStringOffset;
+
+	uint16 *pBuffer = (uint16*)&gStringBuffer[gStringOffset];
+	gStringOffset += numChars*2 + 2;
+
+	// if we wrapped the string buffer
+	if(gStringOffset >= sizeof(gStringBuffer) - 1024)
+	{
+		gStringOffset = 0;
+		pBuffer = (uint16*)gStringBuffer;
+	}
+
+	// copy the string
+	int bytes = MFString_MBToWChar(pUTF8String, pBuffer);
+
+	while(*pUTF8String)
+	{
+		if(bytes > 0)
+		{
+			pUTF8String += bytes;
+			++pBuffer;
+
+			bytes = MFString_MBToWChar(pUTF8String, pBuffer);
+		}
+		else
+		{
+			*pBuffer = *pUTF8String;
+			++pUTF8String;
+			++pBuffer;
+		}
+	}
+
+	// add terminating NULL
+	*pBuffer = 0;
+
+	if(pNumChars)
+		*pNumChars = numChars;
+
+	return pBuffer;
+}
+
+int MFString_ToUFT8(char *pBuffer, const char *pString)
+{
+	if(*(const uint16*)pString == 0xFEFF)
+		return MFWString_ToUFT8(pBuffer, (const uint16*)pString);
+
+	const char *pStart = pString;
+
+	// copy string
+	while(*pString)
+	{
+		pBuffer += MFString_WCharToMB(*pString, pBuffer);
+		++pString;
+	}
+
+	// add terminating NULL
+	*pBuffer = 0;
+
+	return pString - pStart;
+}
+
+
 //
 // unicode support
 //
+
+int MFWString_ToUFT8(char *pBuffer, const uint16 *pUnicodeString)
+{
+	const uint16 *pStart = pUnicodeString;
+
+	// copy string
+	while(*pUnicodeString)
+	{
+		pBuffer += MFString_WCharToMB(*pUnicodeString, pBuffer);
+		++pUnicodeString;
+	}
+
+	// add terminating NULL
+	*pBuffer = 0;
+
+	return pUnicodeString - pStart;
+}
 
 int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
 {

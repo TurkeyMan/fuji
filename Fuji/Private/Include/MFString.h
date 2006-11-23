@@ -17,9 +17,9 @@ int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
 
 /**
  * Get the length of a string.
- * Get the length of a string, in characters.
+ * Get the length of a string, in bytes.
  * @param pString String to find the length of.
- * @return Returns the length of the string, in characters, excluding the terminating NULL character.
+ * @return Returns the length of the string, in bytes, excluding the terminating NULL character.
  * @see MFString_Copy()
  * @see MFString_CaseCmp()
  */
@@ -225,14 +225,60 @@ char* MFSeekNewline(char *pC);
 char* MFSkipWhite(char *pC);
 
 //
+// UTF8 support
+//
+
+/**
+ * Get the number of actual characters in a string.
+ * Gets the number of actual characters in a string, with consideration to UTF8 multibyte encoding.
+ * @param pString String to find the number of characters.
+ * @return Returns the number of actual characters in the string, excluding the terminating NULL character.
+ * @remarks Takes into account UTF8 multibyte encoding when calculating the number of characters.
+ * @see MFString_GetCharacterOffset()
+ */
+int MFString_GetNumChars(const char *pString);
+
+/**
+ * Get the character offset from the start of a string.
+ * Gets the character offset in bytes from the start of a string, with consideration to UTF8 multibyte encoding.
+ * @param pString String to find the character offset.
+ * @param character Character index to find the offset of.
+ * @return Returns the character offset in bytes of the specified character index.
+ * @remarks Takes into account UTF8 multibyte encoding when calculating the character offset.
+ * @see MFString_GetNumChars()
+ */
+int MFString_GetCharacterOffset(const char *pString, int character);
+
+int MFString_GetNumBytesInMBChar(const char *pMBChar);
+
+int MFString_MBToWChar(const char *pMBChar, uint16 *pWC);
+int MFString_WCharToMB(int wc, char *pMBChar);
+
+int MFString_UFT8ToWChar(uint16 *pBuffer, const char *pUTF8String);
+int MFString_ToUFT8(char *pBuffer, const char *pString);
+
+uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
+
+//
 // unicode support
 //
 
 /**
+ * Convert a unicode string to a UTF8 string.
+ * Converts a unicode string to a UTF8 string placing the result in the target buffer.
+ * @param pBuffer Target buffer to output the resulting string.
+ * @param pUnicodeString Unicode string to convert.
+ * @return Returns the number of characters copied, NOT the length of the result string in bytes.
+ * @see MFString_UFT8ToWChar()
+ * @see MFString_UFT8AsWChar()
+ */
+int MFWString_ToUFT8(char *pBuffer, const uint16 *pUnicodeString);
+
+/**
  * Get the length of a unicode string.
- * Get the length of a unicode string, in characters.
+ * Get the length of a unicode string, in wide chars.
  * @param pString String to find the length of.
- * @return Returns the length of the unicode string, in characters, excluding the terminating NULL character.
+ * @return Returns the length of the unicode string, in wide chars, excluding the terminating NULL character.
  * @see MFWString_Copy()
  * @see MFWString_CaseCmp()
  */

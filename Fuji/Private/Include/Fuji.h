@@ -261,7 +261,32 @@ enum MFEndian
  * @subsection step1 What platforms are currently supported by the Mount Fuji Engine?
  *
  * The Mount Fuji Engine has been successfully compiled and tested on the following platforms: Windows, Linux, PSP and XBox.\n
- * Other platforms in the works at various degrees of functionality include OSX, PS2, Gamecube and Dreamcast. (I'd appreciate more people to help me test these system)
+ * Other platforms in the works at various degrees of functionality include OSX, PS2, Gamecube and Dreamcast. (I'd appreciate more people to help me test these system)\n
+ * System planned for support include PS3 (when it releases in australia using the OpenPlatform technology) and Wii (also via gamecube support).
+ *
+ * @subsection step1 What support is offered for internationalisation?
+ *
+ * The Mount Fuji Engine provides extensive support for internationalisation. The font functions are UTF8 and Unicode aware, and the engine has internal support for Unicode string, or more conveniently UTF8 encoding when using the standard string functions.\n
+ * Tools are provided for managing translations and string tables.
+ *
+ * @subsection step1 What asset formats are supported?
+ *
+ * Asset files in typical formats are not directly loaded by the engine.\n
+ * The engine is designed to load raw optimised platform specific asset formats. This is for efficiency and performance.\n
+ * Tools are provided to convert many common asset formats into 'data archives' for consumption by the engine.\n
+ * Supported formats include:\n
+ * DAE (Collada), X, ASE, OBJ, MD2, MD3. Note: Animation is currently only supported through the DAE and X formats.\n
+ * PNG, TGA, BMP.\n
+ * WAV, OGG.
+ *
+ * @subsection step1 Are sample applications provided?
+ *
+ * Yes, samples are provided for some typical tasks.\n
+ * Further questions/support can be brought to me directly.
+ *
+ * @subsection step1 Is this gonna be able to make pron games on PSP?
+ *
+ * Sure, if thats what does it for you ;)
  *
  * @section credits_sec Special Thanks
  *

@@ -115,11 +115,121 @@ inline char* MFString_Cat(char *pBuffer, const char *pString)
 inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pString2)
 {
 	char *s = pBuffer;
-	while((*pBuffer++ = *pString++)) { }
-	--pBuffer;
+	while((*pBuffer = *pString++)) { ++pBuffer; }
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
 }
+
+
+//
+// UTF8 support
+//
+
+#define RET_ILSEQ -2
+#define RET_ILUNI -1
+
+inline int MFString_GetNumBytesInMBChar(const char *pMBChar)
+{
+	const unsigned char *pMB = (const unsigned char*)pMBChar;
+	unsigned char c = pMB[0];
+
+	if(c < 0x80)
+		return 1;
+	else if(c < 0xc2)
+		return RET_ILSEQ;
+	else if(c < 0xe0)
+	{
+		if(!((pMB[1] ^ 0x80) < 0x40))
+			return RET_ILSEQ;
+		return 2;
+	}
+	else if(c < 0xf0)
+	{
+		if(!((pMB[1] ^ 0x80) < 0x40 && (pMB[2] ^ 0x80) < 0x40 && (c >= 0xe1 || pMB[1] >= 0xa0)))
+			return RET_ILSEQ;
+		return 3;
+	}
+	else
+		return RET_ILSEQ;
+}
+
+inline int MFString_MBToWChar(const char *pMBChar, uint16 *pWC)
+{
+	const unsigned char *pMB = (const unsigned char*)pMBChar;
+	unsigned char c = pMB[0];
+
+	if(c < 0x80)
+	{
+		*pWC = c;
+		return 1;
+	}
+	else if(c < 0xc2)
+	{
+		return RET_ILSEQ;
+	}
+	else if(c < 0xe0)
+	{
+		if(!((pMB[1] ^ 0x80) < 0x40))
+			return RET_ILSEQ;
+		*pWC = (uint16)(((uint32) (c & 0x1f) << 6) | (uint32) (pMB[1] ^ 0x80));
+		return 2;
+	}
+	else if(c < 0xf0)
+	{
+		if(!((pMB[1] ^ 0x80) < 0x40 && (pMB[2] ^ 0x80) < 0x40 && (c >= 0xe1 || pMB[1] >= 0xa0)))
+			return RET_ILSEQ;
+		*pWC = (uint16)(((uint32) (c & 0x0f) << 12) | ((uint32) (pMB[1] ^ 0x80) << 6) | (uint32) (pMB[2] ^ 0x80));
+		return 3;
+	}
+	else
+		return RET_ILSEQ;
+}
+
+inline int MFString_WCharToMB(int wc, char *pMBChar)
+{
+	unsigned char *pMB = (unsigned char*)pMBChar;
+	int count;
+
+	if(wc < 0x80)
+		count = 1;
+	else if(wc < 0x800)
+		count = 2;
+	else if(wc < 0x10000)
+		count = 3;
+	else
+		return RET_ILUNI;
+
+	switch(count)
+	{
+		case 3: pMB[2] = (unsigned char)(0x80 | (wc & 0x3f)); wc = wc >> 6; wc |= 0x800;
+		case 2: pMB[1] = (unsigned char)(0x80 | (wc & 0x3f)); wc = wc >> 6; wc |= 0xc0;
+		case 1: pMB[0] = (unsigned char)wc;
+	}
+
+	return count;
+}
+
+inline int MFString_GetNumChars(const char *pString)
+{
+	int bytes = MFString_GetNumBytesInMBChar(pString);
+	int numChars = 0;
+
+	while(*pString)
+	{
+		if(bytes > 0)
+		{
+			pString += bytes;
+			bytes = MFString_GetNumBytesInMBChar(pString);
+		}
+		else
+			++pString;
+
+		++numChars;
+	}
+
+	return numChars;
+}
+
 
 //
 // unicode support

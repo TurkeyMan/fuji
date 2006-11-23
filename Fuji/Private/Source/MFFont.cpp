@@ -228,8 +228,8 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
-	if(*(uint16*)pText == 0xFEFF)
-		return MFFont_GetStringWidthW(pFont, (uint16*)pText, height, lineWidth, maxLen, pTotalHeight);
+	if(*(const uint16*)pText == 0xFEFF)
+		return MFFont_GetStringWidthW(pFont, (const uint16*)pText, height, lineWidth, maxLen, pTotalHeight);
 
 	if(pFont == NULL) pFont = gpDebugFont;
 
@@ -370,8 +370,8 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 {
 	MFCALLSTACK;
 
-	if(*(uint16*)pText == 0xFEFF)
-		return MFFont_DrawTextW(pFont, pos, height, colour, (uint16*)pText, maxChars, ltw);
+	if(*(const uint16*)pText == 0xFEFF)
+		return MFFont_DrawTextW(pFont, pos, height, colour, (const uint16*)pText, maxChars, ltw);
 
 	if(pFont == NULL) pFont = gpDebugFont;
 
