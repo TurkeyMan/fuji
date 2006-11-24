@@ -9,9 +9,10 @@
 
 EE_BIN = Hello_sample.elf
 EE_OBJS = main.o 
-EE_CXXFLAGS = -D_EE -I ports/include/stlport  -fno-exceptions -fno-rtti
-EE_LIBS =    -lFuji_Release_PS2 -lstdc++ -ldraw -lgraph -lmath3d -lmf -lpacket -ldma   -lm -lg -lmc -lm 
-EE_LDFLAGS = -L $(PS2SDK)/ports/lib -L../../Lib
+EE_CXXFLAGS = -D_EE -D_PS2 -D_RELEASE -Iports/include/stlport -I../../Include -fno-exceptions -fno-rtti 
+EE_LIBS = -lFuji_Release_PS2 -lstdc++ -ldraw -lgraph -lmath3d -lmf -lpacket -ldma   -lm -lg -lmc -lm 
+EE_LDFLAGS = -L$(PS2SDK)/ports/lib -L../../Lib
+
 all: $(EE_BIN)
 	#ee-strip --strip-all $(EE_BIN)
 

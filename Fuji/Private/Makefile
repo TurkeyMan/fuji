@@ -305,8 +305,6 @@ TARGET_LIB := $(TARGET_LIB)_$(CONFIG).a
 
 ifeq ($(PLATFORM),PSP)
 
-PSPSDK=C:/cygwin/usr/local/pspdev/psp/sdk
-
 CC       = psp-gcc
 CXX      = psp-g++
 AS       = psp-gcc

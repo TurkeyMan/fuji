@@ -235,9 +235,8 @@ enum MFEndian
 
 
 /*** Callstack profiling ***/
-#if !defined(_FUJI_UTIL)
-	#define _ENABLE_CALLSTACK_PROFILING
-#endif
+
+#define _ENABLE_CALLSTACK_PROFILING
 
 #include "MFCallstack.h"
 

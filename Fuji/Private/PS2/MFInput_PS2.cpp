@@ -27,24 +27,24 @@ static const char * const gPS2Buttons[] =
 	"Circle",
 	"Box",
 	"Triangle",
-	"N/A",
-	"N/A",
-	"Left Trigger",
-	"Right Trigger",
+	"L1",
+	"R1",
+	"L2",
+	"R2",
 	"Start",
 	"Select",
-	"N/A",
-	"N/A",
+	"L3",
+	"R3",
 
 // general controller enums
 	"DPad Up",
 	"DPad Down",
 	"DPad Left",
 	"DPad Right",
-	"Left Analog X-Axis",
-	"Left Analog Y-Axis",
-	"N/A",
-	"N/A"
+	"Left X-Axis",
+	"Left Y-Axis",
+	"Right X-Axis",
+	"Right Y-Axis"
 };
 
 /**** Platform Specific Functions ****/
@@ -100,7 +100,7 @@ const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 	switch(source)
 	{
 		case IDD_Gamepad:
-			return "Gamepad";
+			return "DualShock 2";
 		case IDD_Mouse:
 			return "Mouse";
 		case IDD_Keyboard:
@@ -114,7 +114,7 @@ const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 
 const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
-	MFDebug_Assert(sourceID < 2, "Only two gamepads available on PS2...");
+	MFDebug_Assert(sourceID < 2, "Only two gamepads available on PS2..."); // multitap??
 
 	return gPS2Buttons[button];
 }

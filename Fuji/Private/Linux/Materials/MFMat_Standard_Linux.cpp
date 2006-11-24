@@ -80,7 +80,6 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				glCullFace(GL_BACK);
 				break;
 		}
-		glDisable(GL_CULL_FACE);
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
