@@ -126,7 +126,7 @@ enum MFEndian
 		#define MF64BITPOINTERS
 	#endif
 
-	#define _OPENGL_CLIP_SPACE
+//	#define _OPENGL_CLIP_SPACE
 
 #elif defined(_OSX)
 
@@ -235,8 +235,9 @@ enum MFEndian
 
 
 /*** Callstack profiling ***/
-
-#define _ENABLE_CALLSTACK_PROFILING
+#if !defined(_FUJI_UTIL)
+	#define _ENABLE_CALLSTACK_PROFILING
+#endif
 
 #include "MFCallstack.h"
 

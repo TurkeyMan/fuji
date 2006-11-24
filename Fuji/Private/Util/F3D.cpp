@@ -15,6 +15,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 void AdjustBoundingSphere(const MFVector &point, MFVector *pSphere)
 {

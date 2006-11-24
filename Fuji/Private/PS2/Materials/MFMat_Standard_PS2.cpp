@@ -58,7 +58,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->vFrames = 1;
 }
 
-void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 

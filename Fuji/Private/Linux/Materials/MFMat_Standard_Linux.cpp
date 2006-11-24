@@ -26,12 +26,15 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 	if(pSetMaterial != pMaterial)
 	{
+	    bool premultipliedAlpha = false;
+
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
 			glBindTexture(GL_TEXTURE_2D, pData->pTextures[pData->diffuseMapIndex]->textureID);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //			glActiveTexture(0);
+			premultipliedAlpha = pData->pTextures[pData->diffuseMapIndex]->pTemplateData->premultipliedAlpha;
 		}
 		else
 		{
@@ -77,6 +80,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				glCullFace(GL_BACK);
 				break;
 		}
+		glDisable(GL_CULL_FACE);
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);

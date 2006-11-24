@@ -71,6 +71,13 @@ void MFSetNormal(const MFVector &normal)
 	MFSetNormal(normal.x, normal.y, normal.z);
 }
 
+void MFPrimitive_DrawStats()
+{
+	MFCALLSTACK;
+
+}
+
+
 void MFSetNormal(float x, float y, float z)
 {
 }

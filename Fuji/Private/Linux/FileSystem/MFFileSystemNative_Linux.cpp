@@ -189,7 +189,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
 
-	int flags;
+	int flags = 0;
 
 	if(pOpenData->openFlags & MFOF_Read)
 	{
@@ -284,7 +284,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 	MFCALLSTACK;
 
 	off_t newOffset;
-	int whence;
+	int whence = 0;
 
 	if(!fileHandle->pFilesysData)
 		return -1;
