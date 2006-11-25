@@ -191,7 +191,6 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
-	const uint8 *pC = (uint8*)pText;
 	MFVector currentPos = MFVector::zero;
 	float scale;
 
@@ -200,9 +199,18 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	while(*pC && charIndex)
+	uint16 c;
+	int bytes = MFString_MBToWChar(pText, &c);
+
+	while(*pText && charIndex)
 	{
-		switch(*pC)
+		if(bytes <= 0)
+		{
+			c = *(uint8*)pText;
+			++pText;
+		}
+
+		switch(c)
 		{
 			case '\n':
 				currentPos.x = 0.0f;
@@ -213,13 +221,18 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 				break;
 			default:
 			{
-				int id = pFont->pCharacterMapping[(int)*pC];
+				int id = pFont->pCharacterMapping[c];
 				currentPos.x += (float)pFont->pChars[id].xadvance * scale;
 				break;
 			}
 		}
 
-		++pC;
+		if(bytes > 0)
+		{
+			pText += bytes;
+			bytes = MFString_MBToWChar(pText, &c);
+		}
+
 		--charIndex;
 	}
 
@@ -233,8 +246,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 	if(pFont == NULL) pFont = gpDebugFont;
 
-	const uint8 *pC = (uint8*)pText;
-	const uint8 *pLineStart = (uint8*)pText;
+	const char *pLineStart = pText;
 	float width = 0.0f;
 	float maxWidth = 0.0f;
 	float totalHeight = 0.0f;
@@ -245,9 +257,15 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	while(*pC && maxLen)
+	uint16 c;
+	int bytes = MFString_MBToWChar(pText, &c);
+
+	while(*pText && maxLen)
 	{
-		switch(*pC)
+		if(bytes <= 0)
+			c = *(uint8*)pText;
+
+		switch(c)
 		{
 			case '\n':
 				maxWidth = MFMax(width, maxWidth);
@@ -259,7 +277,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 				break;
 			default:
 			{
-				int id = pFont->pCharacterMapping[(int)*pC];
+				int id = pFont->pCharacterMapping[c];
 				width += (float)pFont->pChars[id].xadvance * scale;
 				break;
 			}
@@ -272,32 +290,59 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 			// here we need to recurse backward to find a valid wrap point and submit to DrawString
 			float wrapWidth = width;
-			const uint8 *pT = pC;
+			const char *pT = pText;
 			while(pT > pLineStart)
 			{
-				int id = pFont->pCharacterMapping[(int)*pT];
+				int id = pFont->pCharacterMapping[c];
 				wrapWidth -= (float)pFont->pChars[id].xadvance * scale;
 
-				if(MFFontInternal_IsValidWrapPoint(*pT) && (pT > pLineStart ? !MFFontInternal_IsValidWrapPoint(pT[-1]) : true))
+				bool prevInvalid = true;
+				if(pT > pLineStart)
+				{
+					uint16 cc;
+					MFString_MBToWChar(MFString_PrevChar(pT), &cc);
+					prevInvalid = !MFFontInternal_IsValidWrapPoint(cc);
+				}
+
+				if(MFFontInternal_IsValidWrapPoint(c) && prevInvalid)
 				{
 					// this is a valid wrap point.. how convenient..
-					pC = pT;
-					while(MFFontInternal_IsValidWrapPoint(*pC))
+					pText = pT;
+					while(MFFontInternal_IsValidWrapPoint(c))
 					{
-						++pC;
+						if(bytes <= 0)
+						{
+							++pText;
+							c = *(uint8*)pText;
+						}
+						else
+						{
+							pText += bytes;
+							bytes = MFString_MBToWChar(pText, &c);
+						}
 						--maxLen;
 					}
 					break;
 				}
 
-				--pT;
+				pT = MFString_PrevChar(pT);
+				if(bytes > 0)
+					bytes = MFString_MBToWChar(pT, &c);
+				if(bytes <= 0)
+					c = *pT;
+
 				++maxLen;
 			}
 
 			if(pT == pLineStart)
 			{
 				// no valid wrap point was found so force wrap at current character
-				int id = pFont->pCharacterMapping[(int)*pC];
+				if(bytes <= 0)
+					c = *(uint8*)pText;
+				else
+					bytes = MFString_MBToWChar(pText, &c);
+
+				int id = pFont->pCharacterMapping[c];
 				wrapWidth = width - (float)pFont->pChars[id].xadvance * scale;
 			}
 
@@ -309,11 +354,18 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 			totalHeight += height;
 
 			// update character positions
-			pLineStart = pC;
+			pLineStart = pText;
 		}
 		else
 		{
-			++pC;
+			if(bytes <= 0)
+				++pText;
+			else
+			{
+				pText += bytes;
+				bytes = MFString_MBToWChar(pText, &c);
+			}
+
 			--maxLen;
 		}
 	}
@@ -342,7 +394,7 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 	{
 		if(bytes <= 0)
 		{
-			c = *pText;
+			c = *(uint8*)pText;
 			++pText;
 		}
 
@@ -442,7 +494,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 		{
 			if(bytes <= 0)
 			{
-				c = *pRenderString;
+				c = *(uint8*)pRenderString;
 				++pRenderString;
 			}
 

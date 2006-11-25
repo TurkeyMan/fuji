@@ -251,6 +251,9 @@ int MFString_GetCharacterOffset(const char *pString, int character);
 
 int MFString_GetNumBytesInMBChar(const char *pMBChar);
 
+char *MFString_NextChar(const char *pString);
+char *MFString_PrevChar(const char *pString);
+
 int MFString_MBToWChar(const char *pMBChar, uint16 *pWC);
 int MFString_WCharToMB(int wc, char *pMBChar);
 

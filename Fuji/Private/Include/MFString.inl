@@ -153,6 +153,56 @@ inline int MFString_GetNumBytesInMBChar(const char *pMBChar)
 		return RET_ILSEQ;
 }
 
+inline char *MFString_NextChar(const char *pString)
+{
+	int bytes = MFString_GetNumBytesInMBChar(pString);
+	return (char*)pString + (bytes > 0 ? bytes : 1);
+}
+
+inline char *MFString_PrevChar(const char *pString)
+{
+	// theres GOTTA be a better way of doing this...
+	int c = *((uint8*)pString - 1);
+
+	if(c < 128)
+		return (char*)pString-1;
+	else
+	{
+		if((c & 0xC0) != 0x80)
+			return (char*)pString-1;
+		else
+		{
+			// 2 bytes
+			int d = *((uint8*)pString - 2);
+
+			if((d & 0xE0) == 0xC0)
+			{
+				return (char*)pString - 2;
+			}
+			else if((d & 0xC0) == 0x80)
+			{
+				// 3 bytes
+				int e = *((uint8*)pString - 3);
+
+				if((e & 0xF0) == 0xE0)
+				{
+					return (char*)pString - 3;
+				}
+				else
+				{
+					// illegal sequence
+					return (char*)pString - 1;
+				}
+			}
+			else
+			{
+				// illegal sequence
+				return (char*)pString - 1;
+			}
+		}
+	}
+}
+
 inline int MFString_MBToWChar(const char *pMBChar, uint16 *pWC)
 {
 	const unsigned char *pMB = (const unsigned char*)pMBChar;
