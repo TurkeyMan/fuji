@@ -322,7 +322,7 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 {
 #if !defined(PREFER_SPEED_OVER_SIZE)
 	char *s = pDest;
-	while(*pDest++ = *pSrc++) { }
+	while(*pDest = *pSrc++) { ++pDest; }
 	while(*pDest++ = *pSrc2++) { }
 	return s;
 #else

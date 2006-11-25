@@ -61,9 +61,11 @@ enum MFEndian
 	MFEndian_ForceInt = 0x7FFFFFFF	/**< Force the enum to an int */
 };
 
+
 /*** Platform independant defines and includes ***/
 
 #define _ENABLE_SCRIPTING
+
 
 /*** Platform specific defines and includes ***/
 
@@ -133,7 +135,7 @@ enum MFEndian
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 
-	#define _OPENGL_CLIP_SPACE
+//	#define _OPENGL_CLIP_SPACE
 
 #elif defined(_PSP)
 
@@ -180,6 +182,19 @@ enum MFEndian
 	#include <new>
 
 #endif
+
+/*** Locale Options ***/
+
+// these defines alter the rhobustness vs speed trade off of the string functions.
+#if !defined(MFLOCALE_ENGLISH_ONLY) && !defined(MFLOCALE_BASIC_LATIN) && !defined(MFLOCALE_BASIC_LATIN_CRYLLIC)
+	// choose one below
+//	#define MFLOCALE_ENGLISH_ONLY
+//	#define MFLOCALE_BASIC_LATIN
+	#define MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC
+#endif
+
+#define MFLOCALE_UTF8_SUPPORT
+#define MFLOCALE_UNICODE_SUPPORT
 
 
 /*** Compiler compatibility macros ***/

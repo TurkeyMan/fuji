@@ -53,6 +53,16 @@ static uint8 gFontJustify[MFFontJustify_Max] =
 
 static MFFont *gpDebugFont;
 
+struct CharHistory
+{
+	float width;
+	uint16 c;
+	uint16 offset;
+};
+
+// this is used to quickly calculate word wraping and stuff.
+static CharHistory gCharHistory[256];
+
 
 // foreward declarations
 
@@ -246,6 +256,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 	if(pFont == NULL) pFont = gpDebugFont;
 
+	CharHistory *pH = gCharHistory;
 	const char *pLineStart = pText;
 	float width = 0.0f;
 	float maxWidth = 0.0f;
@@ -265,22 +276,33 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 		if(bytes <= 0)
 			c = *(uint8*)pText;
 
-		switch(c)
+		if(c == '\n')
 		{
-			case '\n':
-				maxWidth = MFMax(width, maxWidth);
-				width = 0.0f;
-				totalHeight += height;
-				break;
-			case ' ':
-				width += spaceWidth;
-				break;
-			default:
+			maxWidth = MFMax(width, maxWidth);
+			width = 0.0f;
+			totalHeight += height;
+			pLineStart = pText + (bytes > 0 ? bytes : 1);
+			pH = gCharHistory - 1;
+		}
+		else
+		{
+			switch(c)
 			{
-				int id = pFont->pCharacterMapping[c];
-				width += (float)pFont->pChars[id].xadvance * scale;
-				break;
+				case ' ':
+					pH->width = spaceWidth;
+					width += spaceWidth;
+					break;
+				default:
+				{
+					int id = pFont->pCharacterMapping[c];
+					pH->width = (float)pFont->pChars[id].xadvance * scale;
+					width += pH->width;
+					break;
+				}
 			}
+
+			pH->c = c;
+			pH->offset = (uint16)(pText - pLineStart);
 		}
 
 		// check for and handle word wrapping
@@ -290,60 +312,32 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 			// here we need to recurse backward to find a valid wrap point and submit to DrawString
 			float wrapWidth = width;
-			const char *pT = pText;
-			while(pT > pLineStart)
+			CharHistory *pT = pH;
+			while(pT > gCharHistory)
 			{
-				int id = pFont->pCharacterMapping[c];
-				wrapWidth -= (float)pFont->pChars[id].xadvance * scale;
+				wrapWidth -= pT->width;
 
-				bool prevInvalid = true;
-				if(pT > pLineStart)
+				if(MFFontInternal_IsValidWrapPoint(pT->c) && !MFFontInternal_IsValidWrapPoint(pT[-1].c))
 				{
-					uint16 cc;
-					MFString_MBToWChar(MFString_PrevChar(pT), &cc);
-					prevInvalid = !MFFontInternal_IsValidWrapPoint(cc);
-				}
+					pText = pLineStart + pT->offset;
 
-				if(MFFontInternal_IsValidWrapPoint(c) && prevInvalid)
-				{
 					// this is a valid wrap point.. how convenient..
-					pText = pT;
-					while(MFFontInternal_IsValidWrapPoint(c))
+					while(MFFontInternal_IsValidWrapPoint(*pText))
 					{
-						if(bytes <= 0)
-						{
-							++pText;
-							c = *(uint8*)pText;
-						}
-						else
-						{
-							pText += bytes;
-							bytes = MFString_MBToWChar(pText, &c);
-						}
+						++pText;
 						--maxLen;
 					}
 					break;
 				}
 
-				pT = MFString_PrevChar(pT);
-				if(bytes > 0)
-					bytes = MFString_MBToWChar(pT, &c);
-				if(bytes <= 0)
-					c = *pT;
-
+				--pT;
 				++maxLen;
 			}
 
-			if(pT == pLineStart)
+			if(pT == gCharHistory)
 			{
 				// no valid wrap point was found so force wrap at current character
-				if(bytes <= 0)
-					c = *(uint8*)pText;
-				else
-					bytes = MFString_MBToWChar(pText, &c);
-
-				int id = pFont->pCharacterMapping[c];
-				wrapWidth = width - (float)pFont->pChars[id].xadvance * scale;
+				wrapWidth = width - pH->width;
 			}
 
 			// get the maximum width
@@ -355,6 +349,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 			// update character positions
 			pLineStart = pText;
+			pH = gCharHistory;
 		}
 		else
 		{
@@ -366,6 +361,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 				bytes = MFString_MBToWChar(pText, &c);
 			}
 
+			++pH;
 			--maxLen;
 		}
 	}
@@ -590,31 +586,49 @@ float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVe
 
 int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, float height, int *pLastSignificantCharacter)
 {
-	const uint8 *pC = (uint8*)pText;
-
+	CharHistory *pH = gCharHistory;
+	const char *pC = pText;
+	const char *pLineStart = pText;
 	float currentPos = 0.0f;
 	float scale;
+	int numChars = 0;
 
 	// calculate height and scale
 	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
+	uint16 c;
+	int bytes = MFString_MBToWChar(pC, &c);
+
 	while(*pC)
 	{
-		if(*pC == ' ')
+		if(bytes <= 0)
+			c = *(uint8*)pC;
+
+		if(c == '\n')
 		{
-			currentPos += spaceWidth;
-		}
-		else if(*pC == '\n')
-		{
-			++pC;
+			currentPos = 0.0f;
+			pLineStart = pLineStart = pC + (bytes > 0 ? bytes : 1);
+			pH = gCharHistory - 1;
 			break;
 		}
 		else
 		{
-			int id = pFont->pCharacterMapping[(int)*pC];
-			currentPos += (float)pFont->pChars[id].xadvance * scale;
+			if(c == ' ')
+			{
+				currentPos += spaceWidth;
+				pH->width = spaceWidth;
+			}
+			else
+			{
+				int id = pFont->pCharacterMapping[c];
+				pH->width = (float)pFont->pChars[id].xadvance * scale;
+				currentPos += pH->width;
+			}
+
+			pH->c = c;
+			pH->offset = (uint16)(pC - pLineStart);
 		}
 
 		if(lineWidth > 0.0f && currentPos > lineWidth)
@@ -622,13 +636,13 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			// we have exceeded a line width
 
 			// here we need to recurse backward to find a valid wrap point and submit to DrawString
-			const uint8 *pT = pC;
-			while(pT > (uint8*)pText)
+			CharHistory *pT = pH;
+			while(pT > gCharHistory)
 			{
-				if(MFFontInternal_IsValidWrapPoint(*pT))
+				if(MFFontInternal_IsValidWrapPoint(pT->c))
 				{
 					// this is a valid wrap point.. how convenient..
-					pC = pT+1;
+					pC = pLineStart + pT->offset;
 					break;
 				}
 
@@ -636,23 +650,31 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			}
 
 			while(MFFontInternal_IsValidWrapPoint(*pC))
-				++pC;
+				pC = MFString_NextChar(pC);
 
-			uint32 numChars = (uint32)MFMax((uint32)pC - (uint32)pText, 1U);
+			int offset = MFMax(pC - pText, MFString_GetNumBytesInMBChar(pText));
 
-			if(pT == (uint8*)pText)
+			if(pT == gCharHistory)
 			{
 				// no valid wrap point was found so force wrap at current character
-				pC = (uint8*)pText + numChars;
+				pC = pText + offset;
 			}
 
 			break;
 		}
 
-		++pC;
+		if(bytes > 0)
+		{
+			pC += bytes;
+			bytes = MFString_MBToWChar(pC, &c);
+		}
+		else
+			++pC;
+
+		++pH;
 	}
 
-	int charOffset = pC - (uint8*)pText;
+	int charOffset = pC - pText;
 
 	if(pLastSignificantCharacter)
 	{

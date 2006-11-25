@@ -7,7 +7,13 @@ inline bool MFIsWhite(int c)
 
 inline bool MFIsAlpha(int c)
 {
+#if defined(MFLOCALE_ENGLISH_ONLY)
 	return (c>='a' && c<='z') || (c>='A' && c<='Z');
+#elif defined(MFLOCALE_BASIC_LATIN)
+	return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c >= 'à' && c <= 'þ') || (c >= 'À' && c <= 'Þ');
+#elif defined(MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC)
+	return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c >= 'à' && c <= 'þ') || (c >= 'À' && c <= 'Þ') || (c >= 0x0391 && c <= 0x03AB) || (c >= 0x03B1 && c <= 0x03CB) || (c >= 0x0410 && c <= 0x044F);
+#endif
 }
 
 inline bool MFIsNumeric(int c)
@@ -17,7 +23,13 @@ inline bool MFIsNumeric(int c)
 
 inline bool MFIsAlphaNumeric(int c)
 {
+#if defined(MFLOCALE_ENGLISH_ONLY)
 	return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || (c=='_');
+#elif defined(MFLOCALE_BASIC_LATIN)
+	return (c>='a' && c<='z') || (c >= 'à' && c <= 'þ') || (c>='A' && c<='Z') || (c >= 'À' && c <= 'Þ') || (c>='0' && c<='9') || (c=='_');
+#elif defined(MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC)
+	return (c>='a' && c<='z') || (c >= 'à' && c <= 'þ') || (c>='A' && c<='Z') || (c >= 'À' && c <= 'Þ') || (c >= 0x0391 && c <= 0x03AB) || (c >= 0x03B1 && c <= 0x03CB) || (c >= 0x0410 && c <= 0x044F) || (c>='0' && c<='9') || (c=='_');
+#endif
 }
 
 inline bool MFIsNewline(int c)
@@ -27,12 +39,24 @@ inline bool MFIsNewline(int c)
 
 inline bool MFIsLower(int c)
 {
-	return c >= 'a' && c <= 'z';
+#if defined(MFLOCALE_ENGLISH_ONLY)
+	return (c >= 'a' && c <= 'z');
+#elif defined(MFLOCALE_BASIC_LATIN)
+	return (c >= 'a' && c <= 'z') || (c >= 'à' && c <= 'þ');
+#elif defined(MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC)
+	return (c >= 'a' && c <= 'z') || (c >= 'à' && c <= 'þ') || (c >= 0x03B1 && c <= 0x03CB) || (c >= 0x0430 && c <= 0x044F);
+#endif
 }
 
 inline bool MFIsUpper(int c)
 {
-	return c >= 'A' && c <= 'Z';
+#if defined(MFLOCALE_ENGLISH_ONLY)
+	return (c >= 'A' && c <= 'Z');
+#elif defined(MFLOCALE_BASIC_LATIN)
+	return (c >= 'A' && c <= 'Z') || (c >= 'À' && c <= 'Þ');
+#elif defined(MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC)
+	return (c >= 'A' && c <= 'Z') || (c >= 'À' && c <= 'Þ') || (c >= 0x0391 && c <= 0x03AB) || (c >= 0x0410 && c <= 0x042F);
+#endif
 }
 
 inline int MFToLower(int c)
@@ -130,6 +154,7 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 
 inline int MFString_GetNumBytesInMBChar(const char *pMBChar)
 {
+#if defined(MFLOCALE_UTF8_SUPPORT)
 	const unsigned char *pMB = (const unsigned char*)pMBChar;
 	unsigned char c = pMB[0];
 
@@ -151,16 +176,24 @@ inline int MFString_GetNumBytesInMBChar(const char *pMBChar)
 	}
 	else
 		return RET_ILSEQ;
+#else
+	return 1;
+#endif
 }
 
 inline char *MFString_NextChar(const char *pString)
 {
+#if defined(MFLOCALE_UTF8_SUPPORT)
 	int bytes = MFString_GetNumBytesInMBChar(pString);
 	return (char*)pString + (bytes > 0 ? bytes : 1);
+#else
+	return pString + 1;
+#endif
 }
 
 inline char *MFString_PrevChar(const char *pString)
 {
+#if defined(MFLOCALE_UTF8_SUPPORT)
 	// theres GOTTA be a better way of doing this...
 	int c = *((uint8*)pString - 1);
 
@@ -201,16 +234,20 @@ inline char *MFString_PrevChar(const char *pString)
 			}
 		}
 	}
+#else
+	return pString - 1;
+#endif
 }
 
 inline int MFString_MBToWChar(const char *pMBChar, uint16 *pWC)
 {
-	const unsigned char *pMB = (const unsigned char*)pMBChar;
-	unsigned char c = pMB[0];
+#if defined(MFLOCALE_UTF8_SUPPORT)
+	const uint8 *pMB = (const uint8*)pMBChar;
+	int c = pMB[0];
 
 	if(c < 0x80)
 	{
-		*pWC = c;
+		*pWC = (uint16)c;
 		return 1;
 	}
 	else if(c < 0xc2)
@@ -233,6 +270,10 @@ inline int MFString_MBToWChar(const char *pMBChar, uint16 *pWC)
 	}
 	else
 		return RET_ILSEQ;
+#else
+	*pWC = *(uint8*)pMBChar;
+	return 1;
+#endif
 }
 
 inline int MFString_WCharToMB(int wc, char *pMBChar)
@@ -261,6 +302,7 @@ inline int MFString_WCharToMB(int wc, char *pMBChar)
 
 inline int MFString_GetNumChars(const char *pString)
 {
+#if defined(MFLOCALE_UTF8_SUPPORT)
 	int bytes = MFString_GetNumBytesInMBChar(pString);
 	int numChars = 0;
 
@@ -278,6 +320,9 @@ inline int MFString_GetNumChars(const char *pString)
 	}
 
 	return numChars;
+#else
+	return MFString_Length(pString);
+#endif
 }
 
 
