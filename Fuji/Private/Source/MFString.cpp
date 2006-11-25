@@ -388,7 +388,7 @@ int MFString_UFT8ToWChar(uint16 *pBuffer, const char *pUTF8String)
 	// add terminating NULL
 	*pBuffer = 0;
 
-	return pBuffer - pStart;
+	return (int)(pBuffer - pStart);
 }
 
 uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
@@ -456,7 +456,7 @@ int MFString_ToUFT8(char *pBuffer, const char *pString)
 	// add terminating NULL
 	*pBuffer = 0;
 
-	return pString - pStart;
+	return (int)(pString - pStart);
 }
 
 
@@ -478,7 +478,7 @@ int MFWString_ToUFT8(char *pBuffer, const uint16 *pUnicodeString)
 	// add terminating NULL
 	*pBuffer = 0;
 
-	return pUnicodeString - pStart;
+	return (int)(pUnicodeString - pStart);
 }
 
 int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)

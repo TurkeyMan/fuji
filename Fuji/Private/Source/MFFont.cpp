@@ -335,9 +335,16 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 
 	*pNextPage = 99999;
 
+	uint16 c;
+	int bytes = MFString_MBToWChar(pText, &c);
+
 	while(*pText && maxLen)
 	{
-		uint8 c = *(uint8*)pText;
+		if(bytes <= 0)
+		{
+			c = *pText;
+			++pText;
+		}
 
 		if(c > 32)
 		{
@@ -353,8 +360,14 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 					*pNextPage = MFMin(*pNextPage, p);
 			}
 		}
+
+		if(bytes > 0)
+		{
+			pText += bytes;
+			bytes = MFString_MBToWChar(pText, &c);
+		}
+
 		++count;
-		++pText;
 		--maxLen;
 	}
 
@@ -420,13 +433,22 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 
 		textlen = maxChars < 0 ? textlen : MFMin(textlen, maxChars);
 
+		const char *pRenderString = pText;
+
+		uint16 c;
+		int bytes = MFString_MBToWChar(pRenderString, &c);
+
 		for(int i=0; i<textlen; i++)
 		{
-			uint8 c = pText[i];
+			if(bytes <= 0)
+			{
+				c = *pRenderString;
+				++pRenderString;
+			}
 
 			if(c <= 32)
 			{
-				switch(pText[i])
+				switch(c)
 				{
 					case '\n':
 						pos_x = pos.x;
@@ -459,6 +481,12 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 				}
 
 				pos_x += (float)ch.xadvance * scale;
+			}
+
+			if(bytes > 0)
+			{
+				pRenderString += bytes;
+				bytes = MFString_MBToWChar(pRenderString, &c);
 			}
 		}
 

@@ -43,6 +43,7 @@ enum MFLanguage
 
 	MFLang_Russian,			/**< Russian */
 	MFLang_Portuguese,		/**< Portuguese */
+	MFLang_Greek,			/**< Greek */
 
 	MFLang_Max,				/**< Max language */
 	MFLang_ForceInt = 0x7FFFFFFF	/**< Force enumeration to an int type */
