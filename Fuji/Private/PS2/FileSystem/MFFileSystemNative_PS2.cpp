@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "MFFileSystem_Internal.h"
+#include "MFHeap.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 
 #include <stdio.h>
@@ -181,6 +182,7 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
+    printf("O");
 	MFCALLSTACK;
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
@@ -189,7 +191,11 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	const char *pAccess = (pOpenData->openFlags&MFOF_Write) ? "wb" : ((pOpenData->openFlags&MFOF_Read) ? "rb" : NULL);
 	MFDebug_Assert(pAccess, "Neither MFOF_Read nor MFOF_Write specified.");
 
-	pFile->pFilesysData = fopen(pNative->pFilename, pAccess);
+	char * pRealName = (char*)MFHeap_Alloc( MFString_Length(pNative->pFilename) + MFString_Length("host:") + 1);
+	sprintf(pRealName, "host:%s", pNative->pFilename);
+
+	pFile->pFilesysData = fopen(pRealName, pAccess);
+	MFHeap_Free(pRealName);
 
 	if(!pFile->pFilesysData)
 	{
@@ -216,6 +222,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileNative_Close(MFFile* fileHandle)
 {
+    printf("c");
 	MFCALLSTACK;
 
 	fclose((FILE*)fileHandle->pFilesysData);
@@ -225,9 +232,11 @@ int MFFileNative_Close(MFFile* fileHandle)
 
 int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
+    printf("r");
 	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
+		
 
 	uint32 bytesRead;
 	bytesRead = fread(pBuffer, 1, bytes, (FILE*)fileHandle->pFilesysData);
@@ -238,6 +247,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
+    printf("w");
 	MFCALLSTACK;
 
 	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
@@ -252,6 +262,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
+    printf("s");
 	MFCALLSTACK;
 
 	int method = 0;
@@ -316,6 +327,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 bool MFFileNative_Exists(const char* pFilename)
 {
+    printf("e");
 	MFCALLSTACK;
 
 	bool exists = false;

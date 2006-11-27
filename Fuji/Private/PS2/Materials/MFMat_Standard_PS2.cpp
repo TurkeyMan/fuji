@@ -56,6 +56,8 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->textureMatrix = MFMatrix::identity;
 	pData->uFrames = 1;
 	pData->vFrames = 1;
+
+	pData->alphaRef = 1.0f;
 }
 
 void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)

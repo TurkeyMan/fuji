@@ -2,8 +2,11 @@
 #include "Display.h"
 #include "MFView.h"
 #include "MFFont.h"
+#include <stdio.h>
+#include "Timer.h"
 
 /**** Globals ****/
+
 
 /**** Functions ****/
 
@@ -19,6 +22,8 @@ void Game_Init()
 
 void Game_Update()
 {
+    printf("Time is %f \t %f FPS\n", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS());
+   
 	MFCALLSTACK;
 }
 
