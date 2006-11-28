@@ -48,10 +48,170 @@ static const char * const gPS2Buttons[] =
 };
 
 /**** Platform Specific Functions ****/
+#include <stdio.h>
+#include <kernel.h>
+#include <sifrpc.h>
+#include <loadfile.h>
+#include "libpad.h"
+
+static char padBuf[256] __attribute__((aligned(64)));
+static char actAlign[6];
+static int actuators;
+static int pad_valid;
+
+struct padButtonStatus buttons;
+u32 paddata;
+u32 old_pad = 0;
+u32 new_pad;
+
+
+
+#define ROM_PADMAN
+static int
+loadModules(void)
+{
+    int ret;
+
+#ifdef ROM_PADMAN
+    ret = SifLoadModule("rom0:SIO2MAN", 0, NULL);
+#else
+    ret = SifLoadModule("rom0:XSIO2MAN", 0, NULL);
+#endif
+    if (ret < 0) {
+	printf("sifLoadModule sio failed: %d\n", ret);
+	return -1;
+    }
+
+#ifdef ROM_PADMAN
+    ret = SifLoadModule("rom0:PADMAN", 0, NULL);
+#else
+    ret = SifLoadModule("rom0:XPADMAN", 0, NULL);
+#endif
+    if (ret < 0) {
+	printf("sifLoadModule pad failed: %d\n", ret);
+	return -1;
+    }
+    return 0;
+}
+
+int waitPadReady(int port, int slot)
+{
+    int state;
+    int lastState;
+    char stateString[16];
+
+    state = padGetState(port, slot);
+    lastState = -1;
+    while((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
+	lastState = state;
+	state=padGetState(port, slot);
+    }
+    return 0;
+}
+
+int
+initializePad(int port, int slot)
+{
+
+    int ret;
+    int modes;
+    int i;
+
+    waitPadReady(port, slot);
+
+    // How many different modes can this device operate in?
+    // i.e. get # entrys in the modetable
+    modes = padInfoMode(port, slot, PAD_MODETABLE, -1);
+
+
+    // If modes == 0, this is not a Dual shock controller 
+    // (it has no actuator engines)
+    if (modes == 0) {
+//	printf("This is a digital controller?\n");
+	return 1;
+    }
+
+    // Verify that the controller has a DUAL SHOCK mode
+    i = 0;
+    do {
+	if (padInfoMode(port, slot, PAD_MODETABLE, i) == PAD_TYPE_DUALSHOCK)
+	    break;
+	i++;
+    } while (i < modes);
+    if (i >= modes) {
+//	printf("This is no Dual Shock controller\n");
+	return 1;
+    }
+
+    // If ExId != 0x0 => This controller has actuator engines
+    // This check should always pass if the Dual Shock test above passed
+    ret = padInfoMode(port, slot, PAD_MODECUREXID, 0);
+    if (ret == 0) {
+//	printf("This is no Dual Shock controller??\n");
+	return 1;
+    }
+
+
+    // When using MMODE_LOCK, user cant change mode with Select button
+    padSetMainMode(port, slot, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
+
+
+
+    waitPadReady(port, slot);
+    actuators = padInfoAct(port, slot, -1, 0);
+
+    if (actuators != 0) {
+	actAlign[0] = 0;   // Enable small engine
+	actAlign[1] = 1;   // Enable big engine
+	actAlign[2] = 0xff;
+	actAlign[3] = 0xff;
+	actAlign[4] = 0xff;
+	actAlign[5] = 0xff;
+
+	waitPadReady(port, slot);
+    }
+    else {
+//	printf("Did not find any actuators.\n");
+    }
+
+    waitPadReady(port, slot);
+
+    return 1;
+}
+
 
 void MFInput_InitModulePlatformSpecific()
 {
+	int port, slot;
+	int ret;
+    
 	MFCALLSTACK;
+	SifInitRpc(0);
+	if(loadModules()){
+	    printf("UNABLE to load modules\n");
+	    return;
+	}
+	if(padInit(0)){
+	    printf("UNABLE to init pad\n");
+	    return;
+	}
+
+	port = 0; // 0 -> Connector 1, 1 -> Connector 2
+	slot = 0; // Always zero if not using multitap
+
+//	printf("PortMax: %d\n", padGetPortMax());
+//	printf("SlotMax: %d\n", padGetSlotMax(port));
+
+	if((ret = padPortOpen(port, slot, padBuf)) == 0) {
+	    printf("padOpenPort failed: %d\n", ret);
+	    return;
+	}
+
+	if(!initializePad(port, slot)) {
+	    printf("pad initalization failed!\n");
+	    return ;
+	}
+	
 }
 
 void MFInput_DeinitModulePlatformSpecific()
@@ -61,7 +221,36 @@ void MFInput_DeinitModulePlatformSpecific()
 
 void MFInput_UpdatePlatformSpecific()
 {
-	MFCALLSTACK;
+    int ret;
+    int port =0, slot = 0;
+    pad_valid = 0;
+
+    MFCALLSTACK;
+    ret=padGetState(port, slot);
+    while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) {
+	if(ret==PAD_STATE_DISCONN) {
+	    printf("Pad(%d, %d) is disconnected\n", port, slot);
+	    printf("What now?\n");
+	    while(1)
+		;
+	}
+	ret=padGetState(port, slot);
+    }
+
+	pad_valid = 1;
+    ret = padRead(port, slot, &buttons);
+                    
+    if (ret != 0) {
+	paddata = 0xffff ^ buttons.btns;
+
+	new_pad = paddata & ~old_pad;
+	old_pad = paddata;
+	pad_valid = 1;
+	return;
+    }
+
+
+    
 }
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
@@ -77,8 +266,38 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	MFCALLSTACK;
 
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
+	if(!pad_valid) return;
 
-	// ... read gamepad
+	// comment this out if we want button presses to be edge-triggered
+	// if not commented, we will have level triggered buttons.
+        new_pad = paddata;
+	
+	pGamepadState->values[Button_P2_Cross]    = (new_pad & PAD_CROSS )?1.0f:0.0f;
+	pGamepadState->values[Button_P2_Circle]   = (new_pad & PAD_CIRCLE)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_Box]      = (new_pad & PAD_SQUARE)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_Triangle] = (new_pad & PAD_TRIANGLE)?1.0f:0.0f;
+	
+	pGamepadState->values[Button_P2_L1] = (new_pad & PAD_L1)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_R1] = (new_pad & PAD_R1)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_L2] = (new_pad & PAD_L2)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_R2] = (new_pad & PAD_R2)?1.0f:0.0f;
+	
+	pGamepadState->values[Button_P2_Start]  = (new_pad & PAD_START)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_Select] = (new_pad & PAD_SELECT)?1.0f:0.0f;
+
+	pGamepadState->values[Button_P2_L3] = (new_pad & PAD_L3)?1.0f:0.0f;
+	pGamepadState->values[Button_P2_R3] = (new_pad & PAD_R3)?1.0f:0.0f;
+
+	pGamepadState->values[Button_DUp]    = (new_pad & PAD_UP)?1.0f:0.0f;
+	pGamepadState->values[Button_DDown]  = (new_pad & PAD_DOWN)?1.0f:0.0f;
+	pGamepadState->values[Button_DLeft]  = (new_pad & PAD_LEFT)?1.0f:0.0f;
+	pGamepadState->values[Button_DRight] = (new_pad & PAD_RIGHT)?1.0f:0.0f;
+
+	pGamepadState->values[Axis_LX] = (float)buttons.ljoy_h /127.5f - 1.0f;
+	pGamepadState->values[Axis_LY] = -((float)buttons.ljoy_v/127.5f - 1.0f);
+	pGamepadState->values[Axis_RX] = (float)buttons.rjoy_h /127.5f - 1.0f;
+	pGamepadState->values[Axis_RY] = -((float)buttons.rjoy_v/127.5f - 1.0f);
+
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
