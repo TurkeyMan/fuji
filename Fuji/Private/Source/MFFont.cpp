@@ -17,7 +17,8 @@
 
 // globals
 
-#define MAX_TEXT_LINES          30           // maximum number of lines we can handle in one draw text
+#define MAX_TEXT_LINES 30					// maximum number of lines we can handle in one draw text
+#define _WRAP_EXCLUDES_TRAILING_WHITESPACE	// weather text justification considers trailing whitespace after the final wrap char when considering justification.
 
 struct TextLine
 {
@@ -324,7 +325,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 					// this is a valid wrap point.. how convenient..
 					while(MFFontInternal_IsValidWrapPoint(*pText))
 					{
-						++pText;
+						pText = MFString_NextChar(pText);
 						--maxLen;
 					}
 					break;
@@ -584,14 +585,13 @@ float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVe
 //////////////////////////////
 // word wrapping functions...
 
-int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, float height, int *pLastSignificantCharacter)
+int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, float height, int *pLastSignificantCharacter = NULL)
 {
 	CharHistory *pH = gCharHistory;
 	const char *pC = pText;
 	const char *pLineStart = pText;
 	float currentPos = 0.0f;
 	float scale;
-	int numChars = 0;
 
 	// calculate height and scale
 	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
@@ -609,7 +609,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 		if(c == '\n')
 		{
 			currentPos = 0.0f;
-			pLineStart = pLineStart = pC + (bytes > 0 ? bytes : 1);
+			pLineStart = pC + (bytes > 0 ? bytes : 1);
 			pH = gCharHistory - 1;
 			break;
 		}
@@ -652,12 +652,10 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			while(MFFontInternal_IsValidWrapPoint(*pC))
 				pC = MFString_NextChar(pC);
 
-			int offset = MFMax(pC - pText, MFString_GetNumBytesInMBChar(pText));
-
 			if(pT == gCharHistory)
 			{
 				// no valid wrap point was found so force wrap at current character
-				pC = pText + offset;
+				pC = pLineStart + MFString_GetNumBytesInMBChar(pLineStart);
 			}
 
 			break;
@@ -678,18 +676,16 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 	if(pLastSignificantCharacter)
 	{
-		*pLastSignificantCharacter = charOffset;
-
-		while(MFIsWhite(pText[*pLastSignificantCharacter-1]) && *pLastSignificantCharacter > 0)
+		while(MFFontInternal_IsValidWrapPoint(pH->c) && pH > gCharHistory)
 		{
-			--*pLastSignificantCharacter;
+			--pH;
 		}
+
+		*pLastSignificantCharacter = (pH - gCharHistory) + 1;
 	}
 
 	return charOffset;
 }
-
-#define _WRAP_EXCLUDES_TRAILING_WHITESPACE
 
 MFVector MFFont_GetCharPosJustified(MFFont *pFont, const char *pText, float textHeight, int charIndex, float boxWidth, float boxHeight, MFFontJustify justification)
 {
@@ -802,7 +798,7 @@ float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector 
     // calculate total height
     while(*pCurrentLine)
     {
-      lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+      lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight);
 
       totalHeight += height;
       pCurrentLine += lineEnd;
@@ -828,6 +824,7 @@ float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector 
   {
     // get next line
     lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+	int endChar = MFString_GetNumChars(MFStrN(pCurrentLine, lineEnd));
 
     // if we are not left justified, we need to calculate the x offset
     if(justification != MFFontJustify_Top_Left && justification != MFFontJustify_Center_Left && justification != MFFontJustify_Bottom_Left)
@@ -835,7 +832,7 @@ float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector 
 #if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
       float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lastSignificantChar);
 #else
-      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lineEnd);
+      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, endChar);
 #endif
 
       if(justification != MFFontJustify_Top_Center && justification != MFFontJustify_Center && justification != MFFontJustify_Bottom_Center)
@@ -856,9 +853,9 @@ float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector 
     currentPos.y += height;
 
 	// if we exceeded the number of characters to render
-	if((uint32)numChars < (uint32)lineEnd)
+	if((uint32)numChars < (uint32)endChar)
 		break;
-	numChars -= lineEnd;
+	numChars -= endChar;
 
     // and increment string
     pCurrentLine += lineEnd;
