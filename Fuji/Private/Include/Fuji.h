@@ -106,8 +106,6 @@ enum MFEndian
 	#define DEBUG_MOUSE
 	#include <xtl.h>
 
-	char*  FixXBoxFilename(const char *pFilename);
-
 #elif (defined(_XBOX) && _XBOX_VER >= 200)
 
 	#define _MFX360

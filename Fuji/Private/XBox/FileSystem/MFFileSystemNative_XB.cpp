@@ -3,6 +3,10 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 
+
+char *FixXBoxFilename(const char *pFilename);
+
+
 void MFFileSystemNative_Register()
 {
 
