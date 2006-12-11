@@ -160,44 +160,28 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 	ppFileSystemList[filesystemHandle] = NULL;
 }
 
-#if defined(_PSP)
-const char *gPSPSystemPath __attribute__((weak)) = "host0:";
-#endif
-
 // interface functions
-const char* MFFile_SystemPath(const char *filename)
+const char* MFFile_SystemPath(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	filename = filename ? filename : "";
+	pFilename = pFilename ? pFilename : "";
 
-#if defined(_MFXBOX)
-	return MFStr("D:\\Data\\%s", filename);
-#elif defined(_WINDOWS)
-	return MFStr("Data/%s", filename);
-#elif defined(_LINUX)
-	return MFStr("Data/%s", filename);
-#elif defined(_PSP)
-	return MFStr("%s/Data/%s", gPSPSystemPath, filename);
-#else
-	return MFStr("%s", filename);
-#endif
+	return MFStr("Data/%s", pFilename);
 }
 
-const char* MFFile_HomePath(const char *filename)
+const char* MFFile_HomePath(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	filename = filename ? filename : "";
+	pFilename = pFilename ? pFilename : "";
 
 #if defined(_MFXBOX)
-	return MFStr("E:\\Home\\%s", filename);
-#elif defined(_WINDOWS)
-	return MFStr("Home/%s", filename);
-#elif defined(_PSP)
-	return MFStr("%s/Data/Home/%s", gPSPSystemPath, filename);
+	return MFStr("E:\\Home\\%s", pFilename);
+#elif defined(_LINUX)
+	return MFStr("~/%s", pFilename);
 #else
-	return MFStr("%s", filename);
+	return MFStr("Home/%s", pFilename);
 #endif
 }
 

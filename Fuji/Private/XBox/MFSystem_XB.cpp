@@ -17,9 +17,17 @@ char* FixXBoxFilename(const char *pFilename)
 {
 	if(!pFilename) return NULL;
 
+	char *pXFilename;
+
 	int len = MFString_Length(pFilename);
 
-	char *pXFilename = (char*)MFStr("%s", pFilename);
+	if(len > 1 && pFilename[1] != ':')
+	{
+		pXFilename = (char*)MFStr("D:\\%s", pFilename);
+		len += 3;
+	}
+	else
+		pXFilename = (char*)MFStr("%s", pFilename);
 
 	for(int a=0; a<len; a++)
 	{

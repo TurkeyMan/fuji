@@ -155,7 +155,6 @@ enum MFEndian
 
 	#include <stdarg.h>
 	#include <stdlib.h>
-	#undef _ENABLE_SCRIPTING
 
 #elif defined(_DC)
 

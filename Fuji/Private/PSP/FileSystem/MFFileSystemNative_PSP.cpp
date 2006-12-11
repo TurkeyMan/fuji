@@ -6,6 +6,8 @@
 #include <pspkernel.h>
 #include <stdio.h>
 
+const char *gPSPSystemPath __attribute__((weak)) = "host0:";
+
 void MFFileSystemNative_Register()
 {
 
@@ -195,11 +197,12 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	int access = ((pOpenData->openFlags&MFOF_Read) ? PSP_O_RDONLY : NULL) | ((pOpenData->openFlags&MFOF_Write) ? PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC : NULL);
 	MFDebug_Assert(access, "Neither MFOF_Read nor MFOF_Write specified.");
 
-	SceUID hFile = sceIoOpen(pNative->pFilename, access, 0777);
+	const char *pFilename = MFStr("%s/%s", gPSPSystemPath, pNative->pFilename);
+	SceUID hFile = sceIoOpen(pFilename, access, 0777);
 
 	if(hFile < 0)
 	{
-		MFDebug_Warn(4, MFStr("File does not exist: '%s'", pNative->pFilename));
+		MFDebug_Warn(4, MFStr("File does not exist: '%s'", pFilename));
 		return -1;
 	}
 
@@ -213,14 +216,14 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	SceOff fileSize = sceIoLseek(hFile, 0, SEEK_END);
 
 	// TODO: something's very wrong with this line! :/
-//	MFDebug_Assert(fileSize < 2147483648LL, MFStr("Error opening file '%s', Fuji does not support files larger than 2,147,483,647 bytes.", pNative->pFilename));
+//	MFDebug_Assert(fileSize < 2147483648LL, MFStr("Error opening file '%s', Fuji does not support files larger than 2,147,483,647 bytes.", pFilename));
 	pFile->length = (int)fileSize;
 
 	// return to start of file
 	sceIoLseek32(hFile, 0, SEEK_SET);
 
 #if defined(_DEBUG)
-	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
+	MFString_Copy(pFile->fileIdentifier, pFilename);
 #endif
 
 	return 0;
@@ -309,6 +312,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	uint32 fileSize = 0;
 
+	pFilename = MFStr("%s/%s", gPSPSystemPath, pNative->pFilename);
 	SceUID hFile = sceIoOpen(pFilename, PSP_O_RDONLY, 0777);
 
 	if(hFile > 0)
@@ -329,6 +333,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 	bool exists = false;
 
+	pFilename = MFStr("%s/%s", gPSPSystemPath, pNative->pFilename);
 	SceUID hFile = sceIoOpen(pFilename, PSP_O_RDONLY, 0777);
 
 	if(hFile > 0)

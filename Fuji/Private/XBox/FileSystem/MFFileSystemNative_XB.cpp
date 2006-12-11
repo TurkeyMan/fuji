@@ -302,7 +302,8 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	DWORD fileSize = 0;
 
-	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	char *pXFilename = FixXBoxFilename(pFilename);
+	HANDLE hFile = CreateFile(pXFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
@@ -322,6 +323,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 	bool exists = false;
 
+	char *pXFilename = FixXBoxFilename(pFilename);
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
 	if(hFile != INVALID_HANDLE_VALUE)
