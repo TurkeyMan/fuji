@@ -197,6 +197,18 @@
 				RelativePath=".\Source\Image.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFAnimation.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFAnimation_Internal.h">
+			</File>
+			<File
+				RelativePath=".\Source\MFAnimScript.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFAnimScript_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFBoundingVolume.cpp">
 			</File>
 			<File
@@ -405,6 +417,12 @@
 			</File>
 			<File
 				RelativePath=".\Include\IniFile.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFAnimation.h">
+			</File>
+			<File
+				RelativePath=".\Include\MFAnimScript.h">
 			</File>
 			<File
 				RelativePath=".\Include\MFArray.h">
