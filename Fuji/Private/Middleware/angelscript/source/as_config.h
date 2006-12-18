@@ -2,23 +2,23 @@
    AngelCode Scripting Library
    Copyright (c) 2003-2006 Andreas Jönsson
 
-   This software is provided 'as-is', without any express or implied 
-   warranty. In no event will the authors be held liable for any 
+   This software is provided 'as-is', without any express or implied
+   warranty. In no event will the authors be held liable for any
    damages arising from the use of this software.
 
-   Permission is granted to anyone to use this software for any 
-   purpose, including commercial applications, and to alter it and 
+   Permission is granted to anyone to use this software for any
+   purpose, including commercial applications, and to alter it and
    redistribute it freely, subject to the following restrictions:
 
-   1. The origin of this software must not be misrepresented; you 
+   1. The origin of this software must not be misrepresented; you
       must not claim that you wrote the original software. If you use
-      this software in a product, an acknowledgment in the product 
+      this software in a product, an acknowledgment in the product
       documentation would be appreciated but is not required.
 
-   2. Altered source versions must be plainly marked as such, and 
+   2. Altered source versions must be plainly marked as such, and
       must not be misrepresented as being the original software.
 
-   3. This notice may not be removed or altered from any source 
+   3. This notice may not be removed or altered from any source
       distribution.
 
    The original version of this library can be located at:
@@ -45,12 +45,12 @@
 //-----------------------------------------
 
 // USE_THREADS
-// Adds basic support for multithreading. 
+// Adds basic support for multithreading.
 // This is currently only supported on Win32 platforms.
 
 // BUILD_WITHOUT_LINE_CUES
 // This flag makes the script compiler remove some extra bytecodes that is used
-// to allow the VM to call the line callback after each statement. The performance 
+// to allow the VM to call the line callback after each statement. The performance
 // is improved slightly but the scripts are only guaranteed to allow one suspension
 // per loop iteration, not one per statement.
 
@@ -59,7 +59,7 @@
 // compiling and executing scripts.
 
 // AS_DEPRECATED
-// If this flag is defined then some backwards compatibility is maintained. 
+// If this flag is defined then some backwards compatibility is maintained.
 // There is no guarantee for how well deprecated functionality will work though
 // so it is best to exchange it for the new functionality as soon as possible.
 
@@ -67,17 +67,17 @@
 // Make the C interface available.
 
 // AS_NO_CLASS_METHODS
-// Disables the possibility to add class methods. Can increase the  
+// Disables the possibility to add class methods. Can increase the
 // portability of the library.
 
 // AS_MAX_PORTABILITY
-// Disables all platform specific code. Only the asCALL_GENERIC calling 
+// Disables all platform specific code. Only the asCALL_GENERIC calling
 // convention will be available in with this flag set.
 
 // AS_ALLOW_UNSAFE_REFERENCES
-// When this flag is defined it is not required to define the in, out, or 
-// inout keywords for parameter references. The compiler will generate code 
-// that passes the true reference to functions. It is however possible to 
+// When this flag is defined it is not required to define the in, out, or
+// inout keywords for parameter references. The compiler will generate code
+// that passes the true reference to functions. It is however possible to
 // write scripts that could crash the application due to invalid references.
 
 
@@ -91,7 +91,7 @@
 // This flag should be defined when compiling the library as a lib or dll.
 
 // ANGELSCRIPT_DLL_LIBRARY_IMPORT
-// This flag should be defined when using AngelScript as a dll with automatic 
+// This flag should be defined when using AngelScript as a dll with automatic
 // library import.
 
 // ANGELSCRIPT_DLL_MANUAL_IMPORT
@@ -101,13 +101,13 @@
 
 
 
-// 
+//
 // Compiler differences
 //-----------------------------------------
 
-// vsnprintf() 
+// vsnprintf()
 // Some compilers use different names for this function. If your compiler
-// doesn't use the name vsnprintf() then you need to write a macro to translate 
+// doesn't use the name vsnprintf() then you need to write a macro to translate
 // the function into its real name.
 
 // ASM_AT_N_T or ASM_INTEL
@@ -119,6 +119,9 @@
 
 // VALUE_OF_BOOLEAN_TRUE
 // This flag allows to customize the exact value of boolean true.
+
+// AS_SIZEOF_BOOL
+// On some target platforms the sizeof(bool) is 4, but on most it is 1.
 
 // STDCALL
 // This is used to declare a function to use the stdcall calling convention.
@@ -154,10 +157,10 @@
 
 // AS_ALIGN
 // Some CPUs require that data words are aligned in some way. This macro
-// should be defined if the words should be aligned to boundaries of the same 
-// size as the word, i.e. 
-//  1 byte  on 1 byte boundaries 
-//  2 bytes on 2 byte boundaries 
+// should be defined if the words should be aligned to boundaries of the same
+// size as the word, i.e.
+//  1 byte  on 1 byte boundaries
+//  2 bytes on 2 byte boundaries
 //  4 bytes on 4 byte boundaries
 //  8 bytes on 4 byte boundaries (no it's not a typo)
 
@@ -180,6 +183,8 @@
 // AS_64BIT_PTR
 // Define this to make the engine store all pointers in 64bit words.
 
+// AS_BIG_ENDIAN
+// Define this for CPUs that use big endian memory layout, e.g. PPC
 
 
 //
@@ -187,8 +192,8 @@
 //-----------------------------------------
 
 // GNU_STYLE_VIRTUAL_METHOD
-// This constant should be defined if method pointers store index for virtual 
-// functions in the same location as the function pointer. In such cases the method 
+// This constant should be defined if method pointers store index for virtual
+// functions in the same location as the function pointer. In such cases the method
 // is identified as virtual if the least significant bit is set.
 
 // MULTI_BASE_OFFSET(x)
@@ -203,21 +208,21 @@
 
 // VIRTUAL_BASE_OFFSET(x)
 // This macro is used to retrieve the offset added to the object pointer in order to
-// find the virtual base object. x is the method pointer received by the register 
+// find the virtual base object. x is the method pointer received by the register
 // function;
 
 // COMPLEX_MASK
-// This constant shows what attributes determines if an object is returned in memory 
+// This constant shows what attributes determines if an object is returned in memory
 // or in the registers as normal structures
 
 // THISCALL_RETURN_SIMPLE_IN_MEMORY
 // CDECL_RETURN_SIMPLE_IN_MEMORY
 // STDCALL_RETURN_SIMPLE_IN_MEMORY
-// When these constants are defined then the corresponding calling convention always 
+// When these constants are defined then the corresponding calling convention always
 // return classes/structs in memory regardless of size or complexity.
 
 // CALLEE_POPS_HIDDEN_RETURN_POINTER
-// This constant should be defined if the callee pops the hidden return pointer, 
+// This constant should be defined if the callee pops the hidden return pointer,
 // used when returning an object in memory.
 
 // THISCALL_PASS_OBJECT_POINTER_ON_THE_STACK
@@ -227,31 +232,40 @@
 // If the callee pops arguments for class methods then define this constant
 
 // COMPLEX_OBJS_PASSED_BY_REF
-// Some compilers always pass certain objects by reference. GNUC for example does 
+// Some compilers always pass certain objects by reference. GNUC for example does
 // this if the the class has a defined destructor.
 
 
 
-// 
-// Configurations 
+//
+// Detect compiler
 //------------------------------------------------
 
 #define VALUE_OF_BOOLEAN_TRUE  1
 
 // Microsoft Visual C++
-#if defined(_MSC_VER) && !defined(__MWERKS__) && !(defined(_XBOX) && _XBOX_VER >= 200)
+#if defined(_MSC_VER) && !defined(__MWERKS__)
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define HAVE_VIRTUAL_BASE_OFFSET
 	#define VIRTUAL_BASE_OFFSET(x) (*((asDWORD*)(&x)+3))
 	#define THISCALL_RETURN_SIMPLE_IN_MEMORY
 	#define THISCALL_PASS_OBJECT_POINTER_IN_ECX
-	#define ASM_INTEL
 	#define vsnprintf(a, b, c, d) _vsnprintf(a, b, c, d)
 	#define THISCALL_CALLEE_POPS_ARGUMENTS
 	#define COMPLEX_MASK (asOBJ_CLASS_CONSTRUCTOR | asOBJ_CLASS_DESTRUCTOR | asOBJ_CLASS_ASSIGNMENT)
 	#define STDCALL __stdcall
-	#ifdef _M_IX86
+	#define AS_SIZEOF_BOOL 1
+
+	// Support native calling conventions on x86, but not 64bit yet
+	#if defined(_M_IX86) && !defined(__LP64__)
 		#define AS_X86
+		#define ASM_INTEL  // Intel style for inline assembly
+	#endif
+
+	#if _MSC_VER <= 1200 // MSVC++ 6
+		#define I64(x) x##l
+	#else
+		#define I64(x) x##ll
 	#endif
 #endif
 
@@ -262,15 +276,28 @@
 	#define VIRTUAL_BASE_OFFSET(x) (*((asDWORD*)(&x)+3))
 	#define THISCALL_RETURN_SIMPLE_IN_MEMORY
 	#define THISCALL_PASS_OBJECT_POINTER_IN_ECX
-	#define ASM_INTEL
 	#define vsnprintf(a, b, c, d) _vsnprintf(a, b, c, d)
 	#define THISCALL_CALLEE_POPS_ARGUMENTS
 	#define COMPLEX_MASK (asOBJ_CLASS_CONSTRUCTOR | asOBJ_CLASS_DESTRUCTOR | asOBJ_CLASS_ASSIGNMENT)
+	#define AS_SIZEOF_BOOL 1
 	#define STDCALL __stdcall
-	#ifdef _M_IX86
-		#define AS_X86
+	#ifndef __LP64__
+		#define __int64 long long
+	#else
+		#define __int64 long
 	#endif
-	#define __int64 long long
+
+	// Support native calling conventions on x86, but not 64bit yet
+	#if defined(_M_IX86) && !defined(__LP64__)
+		#define AS_X86
+		#define ASM_INTEL  // Intel style for inline assembly
+	#endif
+
+	#if _MSC_VER <= 1200 // MSVC++ 6
+		#define I64(x) x##l
+	#else
+		#define I64(x) x##ll
+	#endif
 #endif
 
 // SN Systems ProDG (also experimental, let me know if something isn't working)
@@ -279,104 +306,126 @@
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
 	#define COMPLEX_OBJS_PASSED_BY_REF
-	#define __int64 long long
-	#define ASM_AT_N_T
+	#ifndef __LP64__
+		#define __int64 long long
+	#else
+		#define __int64 long
+	#endif
+	#define ASM_AT_N_T  // AT&T style inline assembly
 	#define COMPLEX_MASK (asOBJ_CLASS_DESTRUCTOR)
-  // SN doesnt seem to like STDCALL.
-  // Maybe it can work with some fiddling, but i cant imagine linking to any STDCALL functions with a console anyway...
+	#define AS_SIZEOF_BOOL 1
+
+	// SN doesnt seem to like STDCALL.
+	// Maybe it can work with some fiddling, but i cant imagine linking to any STDCALL functions with a console anyway...
 	#define STDCALL
+
+	// Linux specific
 	#ifdef __linux__
 		#define THISCALL_RETURN_SIMPLE_IN_MEMORY
 		#define CDECL_RETURN_SIMPLE_IN_MEMORY
 		#define STDCALL_RETURN_SIMPLE_IN_MEMORY
 	#endif
-	#ifdef i386
+
+	// Support native calling conventions on x86, but not 64bit yet
+	#if defined(i386) && !defined(__LP64__)
 		#define AS_X86
 	#endif
+
+	#define I64(x) x##ll
 #endif
 
 // GNU C
-#if defined(__GNUC__) && !defined(__SNC__) && !defined(__APPLE__)
+#if defined(__GNUC__) && !defined(__SNC__)
 	#define GNU_STYLE_VIRTUAL_METHOD
 	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
 	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
 	#define COMPLEX_OBJS_PASSED_BY_REF
-	#define __int64 long long
-	#define ASM_AT_N_T
+	#ifndef __LP64__
+		#define __int64 long long
+	#else
+		#define __int64 long
+	#endif
 	#define COMPLEX_MASK (asOBJ_CLASS_DESTRUCTOR)
-	#define STDCALL __attribute__((stdcall))
-	#ifdef __linux__
+	#define AS_NO_MEMORY_H
+	#define AS_SIZEOF_BOOL 1
+
+	// MacOSX
+	#ifdef __APPLE__
+		// The sizeof bool is different depending on the target CPU
+		#undef AS_SIZEOF_BOOL
+		#if defined(__ppc__)
+			#define AS_SIZEOF_BOOL 4
+		#else
+			#define AS_SIZEOF_BOOL 1
+		#endif
+		#define STDCALL
+	#endif
+
+	// Windows and Linux
+	#if defined(WIN32) || defined(__linux__)
+		#define STDCALL __attribute__((stdcall))
 		#define THISCALL_RETURN_SIMPLE_IN_MEMORY
 		#define CDECL_RETURN_SIMPLE_IN_MEMORY
 		#define STDCALL_RETURN_SIMPLE_IN_MEMORY
 	#endif
-	#ifdef i386
-		#define AS_X86
+
+	// Support native calling conventions on x86, MIPS, and SH4, but not 64bit
+	#ifndef __LP64__
+		#define ASM_AT_N_T
+		#if defined(i386) && !defined(__LP64__)
+			#define AS_X86
+		#endif
+		#if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_EE_) || defined(_PSP) || defined(_PS2)
+			#define AS_MIPS
+		#endif
+		#ifdef __SH4_SINGLE_ONLY__
+			#define AS_SH4
+		#endif
+	#endif
+
+	#define I64(x) x##ll
+#endif
+
+
+//
+// Detect target hardware
+//------------------------------------------------
+
+// X86, Intel, AMD, etc, i.e. most PCs
+#if defined(__i386__) || defined(_M_IX86)
+	// Nothing special here
+#endif
+
+// MIPS architecture (generally PS2 and PSP consoles, potentially supports N64 as well)
+#if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_EE_) || defined(_PSP) || defined(_PS2)
+	#define AS_ALIGN				// align datastructures
+	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
+#endif
+
+// PowerPC, e.g. Mac, GameCube, maybe even PS3 and XBox 360
+#if defined(__PPC__) || defined(__ppc__)
+	#define AS_BIG_ENDIAN
+	// Gamecube
+	#if defined(_GC)
+		#define AS_ALIGN
+		#define AS_USE_DOUBLE_AS_FLOAT
 	#endif
 #endif
 
-// SH4 architecture (Dreamcast console)
+// Dreamcast console
 #ifdef __SH4_SINGLE_ONLY__
 	#define AS_ALIGN				// align datastructures
 	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-	#define ASM_AT_N_T
-	#define AS_SH4
 #endif
-
-// MIPS architexture (Generally PS2 and PSP consoles, potentially supports N64 aswell)
-#if defined(_MIPS_ARCH) || defined(_mips) || defined(__MIPSEL__) || defined(__PSP__) || defined(__psp__) || defined(_PSP)
-	#define AS_ALIGN				// align datastructures
-	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-	#define ASM_AT_N_T
-	#define AS_MIPS
-	#define AS_NO_MEMORY_H
-#endif
-
-// POWERPC architectures
-#if defined(__APPLE__)
-	// MACOSX (PPC and X86)
-	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-	#define AS_NO_MEMORY_H
-	#define GNU_STYLE_VIRTUAL_METHOD
-	#define MULTI_BASE_OFFSET(x) (*((asDWORD*)(&x)+1))
-	#define CALLEE_POPS_HIDDEN_RETURN_POINTER
-	#define COMPLEX_OBJS_PASSED_BY_REF
-	#define __int64 long long
-	#define ASM_AT_N_T
-	#define COMPLEX_MASK (asOBJ_CLASS_DESTRUCTOR)
-	#define STDCALL
-	#ifdef __INTEL__
-		#define AS_X86
-	#else
-		#define AS_PPC
-		#define AS_USE_DOUBLE_AS_FLOAT
-	#endif
-#elif defined(PPC) || defined(_GC) || (defined(_XBOX) && _XBOX_VER >= 200)
-	// Alternative PPC architectures (Gamecube and hopefully PS3 + XBox360)
-	#define AS_ALIGN				// align datastructures
-	#define AS_USE_DOUBLE_AS_FLOAT	// use 32bit floats instead of doubles
-	#define AS_PPC					// not working yet
-	#define AS_NO_MEMORY_H
-	#if defined(_MSC_VER)
-		#define ASM_INTEL
-	#else
-		#define ASM_AT_N_T
-	#endif
-#endif
-
 
 // Is the target a 64bit system?
 #if defined(__LP64__) || defined(__amd64__)
-    #ifdef __int64
-        #undef __int64
-    #endif
-    #define __int64 long
     #ifndef AS_64BIT_PTR
         #define AS_64BIT_PTR
     #endif
 #endif
 
-// If there are no current support for native calling 
+// If there are no current support for native calling
 // conventions, then compile with AS_MAX_PORTABILITY
 #if (!defined(AS_X86) && !defined(AS_SH4) && !defined(AS_MIPS) && !defined(AS_PPC))
     #ifndef AS_MAX_PORTABILITY
@@ -388,7 +437,7 @@
 
 
 
-// 
+//
 // Internal defines (do not change these)
 //----------------------------------------------------------------
 

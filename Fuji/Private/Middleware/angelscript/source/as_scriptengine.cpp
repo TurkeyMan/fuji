@@ -112,6 +112,19 @@ AS_API asIScriptEngine *asCreateScriptEngine(asDWORD version)
 	assert( sizeof(asQWORD) == 8 );
 	assert( sizeof(asPWORD) == sizeof(void*) );
 
+	// Verify the boolean type
+	assert( sizeof(bool) == AS_SIZEOF_BOOL );
+	assert( true == VALUE_OF_BOOLEAN_TRUE );
+
+	// Verify endianess
+#ifdef AS_BIG_ENDIAN
+	assert( *(asDWORD*)"\x00\x01\x02\x03" == 0x00010203 );
+	assert( *(asQWORD*)"\x00\x01\x02\x03\x04\x05\x06\x07" == I64(0x0001020304050607) );
+#else
+	assert( *(asDWORD*)"\x00\x01\x02\x03" == 0x03020100 );
+	assert( *(asQWORD*)"\x00\x01\x02\x03\x04\x05\x06\x07" == I64(0x0706050403020100) );
+#endif
+
 	return new asCScriptEngine();
 }
 
@@ -876,7 +889,7 @@ int asCScriptEngine::RegisterSpecialObjectType(const char *name, int byteSize, a
 		defaultArrayObjectType = type;
 		type->refCount++;
 	}
-	else if( strcmp(name, "any") == 0 )
+	else if( strcmp(name, ANY_TOKEN) == 0 )
 	{
 		type = new asCObjectType(this);
 		anyObjectType = type;
@@ -1714,6 +1727,14 @@ int asCScriptEngine::RegisterGlobalProperty(const char *declaration, void *point
 		{
 			int idx = -globalProps[n]->index - 1;
 			void **pp = &globalPropAddresses[idx-1];
+
+			// Update the chached pointers in the modules
+			for( asUINT m = 0; m < scriptModules.GetLength(); m++ )
+			{
+				if( scriptModules[m] )
+					scriptModules[m]->UpdateGlobalVarPointer(globalPropAddresses[idx], (void*)pp);
+			}
+
 			globalPropAddresses[idx] = (void*)pp;
 		}
 	}
@@ -2965,6 +2986,14 @@ const asCDataType *asCScriptEngine::GetDataTypeFromTypeId(int typeId)
 {
 	if( mapTypeIdToDataType.MoveTo(typeId) )
 		return mapTypeIdToDataType.GetValue();
+
+	return 0;
+}
+
+const asCObjectType *asCScriptEngine::GetObjectTypeFromTypeId(int typeId)
+{
+	if( mapTypeIdToDataType.MoveTo(typeId) )
+		return mapTypeIdToDataType.GetValue()->GetObjectType();
 
 	return 0;
 }

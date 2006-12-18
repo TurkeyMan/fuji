@@ -262,6 +262,11 @@ void asCRestore::WriteFunction(asCScriptFunction* func)
 	for( i = 0; i < count; ++i ) 
 		WriteDataType(&func->parameterTypes[i]);
 
+	count = (asUINT)func->inOutFlags.GetLength();
+	WRITE_NUM(count);
+	for( i = 0; i < count; ++i )
+		WRITE_NUM(func->inOutFlags[i]);
+
 	int id = FindFunctionIndex(func);
 	WRITE_NUM(id);
 	
@@ -444,6 +449,14 @@ void asCRestore::ReadFunction(asCScriptFunction* func)
 	{
 		ReadDataType(&dt);
 		func->parameterTypes.PushLast(dt);
+	}
+
+	READ_NUM(count);
+	func->inOutFlags.Allocate(count, 0);
+	for( i = 0; i < count; ++i )
+	{
+		READ_NUM(num);
+		func->inOutFlags.PushLast(num);
 	}
 
 	int id;
@@ -646,7 +659,7 @@ void asCRestore::WriteByteCode(asDWORD *bc, int length)
 {
 	while( length )
 	{
-		asDWORD c = (*bc)&0xFF;
+		asDWORD c = *(asBYTE*)bc;
 		WRITE_NUM(*bc);
 		bc += 1;
 		if( c == BC_ALLOC )
@@ -779,7 +792,7 @@ void asCRestore::TranslateFunction(asCScriptFunction *func)
 	asDWORD *bc = func->byteCode.AddressOf();
 	for( asUINT n = 0; n < func->byteCode.GetLength(); )
 	{
-		int c = bc[n]&0xFF;
+		int c = *(asBYTE*)&bc[n];
 		if( c == BC_TYPEID )
 		{
 			// Translate the index to the type id
@@ -834,9 +847,9 @@ void asCRestore::ReadByteCode(asDWORD *bc, int length)
 	{
 		asDWORD c;
 		READ_NUM(c);
-		*bc = asDWORD(c);
+		*bc = c;
 		bc += 1;
-		c &= 0xFF;
+		c = *(asBYTE*)&c;
 		if( c == BC_ALLOC || c == BC_FREE ||
 			c == BC_REFCPY || c == BC_OBJTYPE )
 		{

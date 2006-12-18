@@ -1101,12 +1101,12 @@ void asCContext::ExecuteNext()
 	{
 
 #ifdef AS_DEBUG
-	++stats.instrCount[(*l_bc)&0xFF];
+	++stats.instrCount[*(asBYTE*)l_bc];
 
-	++instrCount[(*l_bc)&0xFF];
+	++instrCount[*(asBYTE*)l_bc];
 
-	++instrCount2[lastBC][(*l_bc)&0xFF];
-	lastBC = (*l_bc)&0xFF;
+	++instrCount2[lastBC][*(asBYTE*)l_bc];
+	lastBC = *(asBYTE*)l_bc;
 
 	// Used to verify that the size of the instructions are correct
 	asDWORD *old = l_bc;
@@ -1160,7 +1160,18 @@ void asCContext::ExecuteNext()
 		break;
 
 	case BC_NOT:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(asBYTE*)(l_fp - SWORDARG0(l_bc)) == 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+			// Make sure the rest of the byte is 0
+			*(l_fp - SWORDARG0(l_bc)) = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)(l_fp - SWORDARG0(l_bc)) = b;
+		}
+#else
 		*(l_fp - SWORDARG0(l_bc)) = (*(l_fp - SWORDARG0(l_bc)) == 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+#endif
 		l_bc++;
 		break;
 
@@ -1172,7 +1183,7 @@ void asCContext::ExecuteNext()
 
 	case BC_LdGRdR4:
 		*(void**)&register1 = module->globalVarPointers[WORDARG1(l_bc)];
-		*(l_fp - SWORDARG0(l_bc)) = *(asDWORD*)(size_t)register1;
+		*(l_fp - SWORDARG0(l_bc)) = **(asDWORD**)&register1;
 		l_bc += 2;
 		break;
 
@@ -1279,27 +1290,93 @@ void asCContext::ExecuteNext()
 //--------------------
 // test instructions
 	case BC_TZ:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 == 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 == 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+#endif
 		l_bc++;
 		break;
 	case BC_TNZ:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 == 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 == 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+#endif
 		l_bc++;
 		break;
 	case BC_TS:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 < 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 < 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+#endif
 		l_bc++;
 		break;
 	case BC_TNS:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 < 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 < 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+#endif
 		l_bc++;
 		break;
 	case BC_TP:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 > 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 > 0 ? VALUE_OF_BOOLEAN_TRUE : 0);
+#endif		
 		l_bc++;
 		break;
 	case BC_TNP:
+#if AS_SIZEOF_BOOL == 1
+		{
+			// Read only the lower byte
+			asBYTE b = (*(int*)&register1 > 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+			// Make sure the rest of the byte is 0
+			register1 = 0;
+			// The value is stored in the lower byte
+			*(asBYTE*)&register1 = b;
+		}
+#else
 		*(int*)&register1 = (*(int*)&register1 > 0 ? 0 : VALUE_OF_BOOLEAN_TRUE);
+#endif		
 		l_bc++;
 		break;
 
@@ -1321,50 +1398,51 @@ void asCContext::ExecuteNext()
 //-------------------------
 // Increment value pointed to by address in register
 	case BC_INCi16:
-		(*(short*)(size_t)register1)++;
+		(**(short**)&register1)++;
 		l_bc++;
 		break;
 
 	case BC_INCi8:
-		(*(char*)(size_t)register1)++;
+		(**(char**)&register1)++;
 		l_bc++;
 		break;
 
 	case BC_DECi16:
-		(*(short*)(size_t)register1)--;
+		(**(short**)&register1)--;
 		l_bc++;
 		break;
 
 	case BC_DECi8:
-		(*(char*)(size_t)register1)--;
+		(**(char**)&register1)--;
 		l_bc++;
 		break;
+
 	case BC_INCi:
-		++(*(int*)(size_t)register1);
+		++(**(int**)&register1);
 		l_bc++;
 		break;
 
 	case BC_DECi:
-		--(*(int*)(size_t)register1);
+		--(**(int**)&register1);
 		l_bc++;
 		break;
 
 	case BC_INCf:
-		++(*(float*)(size_t)register1);
+		++(**(float**)&register1);
 		l_bc++;
 		break;
 
 	case BC_DECf:
-		--(*(float*)(size_t)register1);
+		--(**(float**)&register1);
 		l_bc++;
 		break;
 	case BC_INCd:
-		++(*(double*)(size_t)register1);
+		++(**(double**)&register1);
 		l_bc++;
 		break;
 
 	case BC_DECd:
-		--(*(double*)(size_t)register1);
+		--(**(double**)&register1);
 		l_bc++;
 		break;
 
@@ -1549,7 +1627,7 @@ void asCContext::ExecuteNext()
 
 	case BC_PshRPtr:
 		l_sp -= PTR_SIZE;
-		*(asPTRWORD*)l_sp = (asPTRWORD)*(size_t*)&register1;
+		*(asPTRWORD*)l_sp = *(asPTRWORD*)&register1;
 		l_bc++;
 		break;
 
@@ -1834,6 +1912,7 @@ void asCContext::ExecuteNext()
 		break;
 	case BC_CHKREF:
 		{
+			// Verify if the pointer on the stack is null
 			size_t a = *(size_t*)l_sp;
 			if( a == 0 )
 			{
@@ -1940,36 +2019,40 @@ void asCContext::ExecuteNext()
 		break;
 
 	case BC_WRTV1:
-		*(asBYTE*)(size_t)register1 = *(asBYTE*)(l_fp - SWORDARG0(l_bc));
+		// The pointer in the register points to a byte, and *(l_fp - offset) too
+		**(asBYTE**)&register1 = *(asBYTE*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 	case BC_WRTV2:
-		*(asWORD*)(size_t)register1 = *(asWORD*)(l_fp - SWORDARG0(l_bc));
+		// The pointer in the register points to a word, and *(l_fp - offset) too
+		**(asWORD**)&register1 = *(asWORD*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 	case BC_WRTV4:
-		*(asDWORD*)(size_t)register1 = *(asDWORD*)(l_fp - SWORDARG0(l_bc));
+		**(asDWORD**)&register1 = *(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 	case BC_WRTV8:
-		*(asQWORD*)(size_t)register1 = *(asQWORD*)(l_fp - SWORDARG0(l_bc));
+		**(asQWORD**)&register1 = *(asQWORD*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 
 	case BC_RDR1:
-		*(asDWORD*)(l_fp - SWORDARG0(l_bc)) = *(asBYTE*)(size_t)register1;
+		// The pointer in the register points to a byte, and *(l_fp - offset) will also point to a byte
+		*(asBYTE*)(l_fp - SWORDARG0(l_bc)) = **(asBYTE**)&register1;
 		l_bc++;
 		break;
 	case BC_RDR2:
-		*(asDWORD*)(l_fp - SWORDARG0(l_bc)) = *(asWORD*)(size_t)register1;
+		// The pointer in the register points to a word, and *(l_fp - offset) will also point to a word
+		*(asWORD*)(l_fp - SWORDARG0(l_bc)) = **(asWORD**)&register1;
 		l_bc++;
 		break;
 	case BC_RDR4:
-		*(asDWORD*)(l_fp - SWORDARG0(l_bc)) = *(asDWORD*)(size_t)register1;
+		*(asDWORD*)(l_fp - SWORDARG0(l_bc)) = **(asDWORD**)&register1;
 		l_bc++;
 		break;
 	case BC_RDR8:
-		*(asQWORD*)(l_fp - SWORDARG0(l_bc)) = *(asQWORD*)(size_t)register1;
+		*(asQWORD*)(l_fp - SWORDARG0(l_bc)) = **(asQWORD**)&register1;
 		l_bc++;
 		break;
 
@@ -1978,7 +2061,7 @@ void asCContext::ExecuteNext()
 		l_bc++;
 		break;
 	case BC_LDV:
-		register1 = size_t(l_fp - SWORDARG0(l_bc));
+		*(asDWORD**)&register1 = (l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 	case BC_PGA:
@@ -2027,21 +2110,25 @@ void asCContext::ExecuteNext()
 		break;
 		
 	case BC_sbTOi:
-		*(l_fp - SWORDARG0(l_bc)) = *(char*)(l_fp - SWORDARG0(l_bc));
+		// *(l_fp - offset) points to a char, and will point to an int afterwards 
+		*(l_fp - SWORDARG0(l_bc)) = *(signed char*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 
 	case BC_swTOi:
+		// *(l_fp - offset) points to a short, and will point to an int afterwards 
 		*(l_fp - SWORDARG0(l_bc)) = *(short*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 
 	case BC_ubTOi:
+		// (l_fp - offset) points to a byte, and will point to an int afterwards 
 		*(l_fp - SWORDARG0(l_bc)) = *(asBYTE*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
 
 	case BC_uwTOi:
+		// *(l_fp - offset) points to a word, and will point to an int afterwards 
 		*(l_fp - SWORDARG0(l_bc)) = *(asWORD*)(l_fp - SWORDARG0(l_bc));
 		l_bc++;
 		break;
@@ -2334,13 +2421,52 @@ void asCContext::ExecuteNext()
 		}
 		break;
 
+	case BC_iTOb:
+		// *(l_fp - offset) points to an int, and will point to a byte afterwards
+		*(asBYTE*)(l_fp - SWORDARG0(l_bc)) = (asBYTE)*(l_fp - SWORDARG0(l_bc));
+		l_bc++;
+		break;
+
+	case BC_iTOw:
+		// *(l_fp - offset) points to an int, and will point to word afterwards
+		*(asWORD*)(l_fp - SWORDARG0(l_bc)) = (asWORD)*(l_fp - SWORDARG0(l_bc));
+		l_bc++;
+		break;
+
+	case BC_SetV1:
+		// The byte is already stored correctly in the argument
+		*(l_fp - SWORDARG0(l_bc)) = DWORDARG(l_bc);
+		l_bc += 2;
+		break;
+
+	case BC_SetV2:
+		// The word is already stored correctly in the argument
+		*(l_fp - SWORDARG0(l_bc)) = DWORDARG(l_bc);
+		l_bc += 2;
+		break;
+
+	case BC_Cast:
+		// Cast the handle at the top of the stack to the type in the argument
+		{	
+			asDWORD **a = (asDWORD**)*(size_t*)l_sp;
+			if( a && *a )
+			{
+				asDWORD typeId = DWORDARG(l_bc);
+
+				asCScriptStruct *obj = (asCScriptStruct *)* a;
+				asCObjectType *objType = obj->gc.objType;
+				if( !objType->Implements(engine->GetObjectTypeFromTypeId(typeId)) )
+				{
+					// The cast is not possible, set the reference on the stack to null
+					*(size_t*)l_sp = 0;
+				}
+			}
+		}
+		l_bc += 2;
+		break;
+
 	// Don't let the optimizer optimize for size, 
 	// since it requires extra conditions and jumps
-	case 140: l_bc = (asDWORD*)140; break;
-	case 141: l_bc = (asDWORD*)141; break;
-	case 142: l_bc = (asDWORD*)142; break;
-	case 143: l_bc = (asDWORD*)143; break;
-	case 144: l_bc = (asDWORD*)144; break;
 	case 145: l_bc = (asDWORD*)145; break;
 	case 146: l_bc = (asDWORD*)146; break;
 	case 147: l_bc = (asDWORD*)147; break;
@@ -2467,7 +2593,7 @@ void asCContext::ExecuteNext()
 */	}
 
 #ifdef AS_DEBUG
-		asDWORD instr = (*old)&0xFF;
+		asDWORD instr = *(asBYTE*)old;
 		if( instr != BC_JMP && instr != BC_JMPP && (instr < BC_JZ || instr > BC_JNP) &&
 			instr != BC_CALL && instr != BC_CALLBND && instr != BC_CALLINTF && instr != BC_RET && instr != BC_ALLOC )
 		{

@@ -159,7 +159,8 @@ enum eTokenType
 	ttOut,                 // out
 	ttInOut,               // inout
 	ttNull,                // null
-    ttClass                // class
+    ttClass,               // class
+	ttCast                 // cast
 };
 
 struct sTokenWord
@@ -225,6 +226,7 @@ sTokenWord const tokenWords[] =
 	{"bits32"    , ttBits},
 	{"bool"      , ttBool},
 	{"break"     , ttBreak},
+	{"cast"      , ttCast},
 	{"const"     , ttConst},
 	{"continue"  , ttContinue},
 	{"do"        , ttDo},
@@ -269,8 +271,13 @@ sTokenWord const tokenWords[] =
 	{"xor"       , ttXor},
 };
 
-asUINT const numTokenWords = sizeof(tokenWords)/sizeof(sTokenWord);
+const asUINT numTokenWords = sizeof(tokenWords)/sizeof(sTokenWord);
 
-char * const whiteSpace = " \t\r\n";
+const char * const whiteSpace = " \t\r\n";
+
+// Some keywords that are not considered tokens by the parser
+const char * const THIS_TOKEN = "this";
+const char * const ANY_TOKEN  = "any";
+const char * const FROM_TOKEN = "from";
 
 #endif

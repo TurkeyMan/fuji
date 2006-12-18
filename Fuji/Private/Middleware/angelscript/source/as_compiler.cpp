@@ -485,7 +485,7 @@ int asCCompiler::CompileGlobalVariable(asCBuilder *builder, asCScriptCode *scrip
 					funcs.SetLength(0);
 
 					// Build a readable string of the function with parameter types
-					asCString str = "any";
+					asCString str = ANY_TOKEN;
 					str += "(";
 					if( args.GetLength() )
 						str += args[0]->type.dataType.Format();
@@ -773,7 +773,7 @@ void asCCompiler::PrepareArgument(asCDataType *paramType, asSExprContext *ctx, a
 					asCArray<int> vars;
 					ctx->bc.GetVarsUsed(vars);
 					if( reservedVars ) vars.Concatenate(*reservedVars);
-					offset = AllocateVariableNotIn(dt, true, vars);
+					offset = AllocateVariableNotIn(dt, true, &vars);
 
 					// Allocate and construct the temporary object
 					asCByteCode tmpBC;
@@ -820,7 +820,7 @@ void asCCompiler::PrepareArgument(asCDataType *paramType, asSExprContext *ctx, a
 			asCArray<int> vars;
 			ctx->bc.GetVarsUsed(vars);
 			if( reservedVars ) vars.Concatenate(*reservedVars);
-			offset = AllocateVariableNotIn(dt, true, vars);
+			offset = AllocateVariableNotIn(dt, true, &vars);
 
 			if( dt.IsPrimitive() )
 			{
@@ -874,7 +874,7 @@ void asCCompiler::PrepareArgument(asCDataType *paramType, asSExprContext *ctx, a
 				asCArray<int> vars;
 				ctx->bc.GetVarsUsed(vars);
 				if( reservedVars ) vars.Concatenate(*reservedVars);
-				offset = AllocateVariableNotIn(dt, true, vars);
+				offset = AllocateVariableNotIn(dt, true, &vars);
 
 				// Copy the handle
 				ctx->bc.InstrWORD(BC_PSF, offset);
@@ -1692,6 +1692,14 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *, asCByteCo
 		return;
 	}
 
+	// Convert the expression to a 32bit variable
+	asCDataType to;
+	if( expr.type.dataType.IsIntegerType() )
+		to.SetTokenType(ttInt);
+	else if( expr.type.dataType.IsUnsignedType() )
+		to.SetTokenType(ttUInt);
+	ImplicitConversion(&expr, to, snode->firstChild, false, true);
+
 	ConvertToVariable(&expr);
 	int offset = expr.type.stackOffset;
 
@@ -1727,7 +1735,15 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *, asCByteCo
 				Error(TXT_SWITCH_MUST_BE_INTEGRAL, cnode->firstChild);
 
 			// Store constant for later use
-			caseValues.PushLast(c.type.intValue);
+			int val;
+			if( c.type.dataType.GetSizeInMemoryBytes() == 1 )
+				val = (signed char)c.type.byteValue;
+			else if( c.type.dataType.GetSizeInMemoryBytes() == 2 )
+				val = (short)c.type.wordValue;
+			else
+				val = c.type.intValue;
+
+			caseValues.PushLast(val);
 
 			// Reserve label for this case
 			caseLabels.PushLast(nextLabel++);
@@ -1746,6 +1762,13 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *, asCByteCo
 		}
 
 		cnode = cnode->next;
+	}
+
+    // check for empty switch
+	if (caseValues.GetLength() == 0)
+	{
+		Error(TXT_EMPTY_SWITCH, snode);
+		return;
 	}
 
 	if( defaultLabel == 0 )
@@ -2510,7 +2533,7 @@ int asCCompiler::AllocateVariable(const asCDataType &type, bool isTemporary)
 	return offset;
 }
 
-int asCCompiler::AllocateVariableNotIn(const asCDataType &type, bool isTemporary, asCArray<int> &vars)
+int asCCompiler::AllocateVariableNotIn(const asCDataType &type, bool isTemporary, asCArray<int> *vars)
 {
 	asCDataType t(type);
 
@@ -2531,12 +2554,15 @@ int asCCompiler::AllocateVariableNotIn(const asCDataType &type, bool isTemporary
 
 			// Verify that it is not in the list of used variables
 			bool isUsed = false;
-			for( asUINT m = 0; m < vars.GetLength(); m++ )
+			if( vars )
 			{
-				if( offset == vars[m] )
+				for( asUINT m = 0; m < vars->GetLength(); m++ )
 				{
-					isUsed = true;
-					break;
+					if( offset == (*vars)[m] )
+					{
+						isUsed = true;
+						break;
+					}
 				}
 			}
 
@@ -2670,7 +2696,11 @@ void asCCompiler::Dereference(asSExprContext *ctx, bool generateCode)
 		if( ctx->type.dataType.IsObject() )
 		{
 			ctx->type.dataType.MakeReference(false);
-			if( generateCode ) ctx->bc.Instr(BC_RDSPTR);
+			if( generateCode ) 
+			{
+				ctx->bc.Instr(BC_CHKREF);
+				ctx->bc.Instr(BC_RDSPTR);
+			}
 		}
 		else
 		{
@@ -2891,125 +2921,153 @@ void asCCompiler::ImplicitConversion(asSExprContext *ctx, const asCDataType &to,
 		// No conversion from objects to primitives yet
 		if( !ctx->type.dataType.IsPrimitive() ) return;
 
-		// This function don't deal with references
-		assert( !ctx->type.dataType.IsReference() );
-
-		// Only a primitive can be converted to a primitive
-		if( !ctx->type.dataType.IsPrimitive() )
-			return;
-
 		// Start by implicitly converting constant values
 		if( ctx->type.isConstant )
 			ImplicitConversionConstant(ctx, to, node, isExplicit);
 
-		// After the constant value has been converted we have the following possibilities
+		if( to == ctx->type.dataType )
+			return;
 
-		// int8 -> int16 -> int32
-		// uint8 -> uint16 -> uint32
-		// bits8 -> bits16 -> bits32
-		int s = to.GetSizeInMemoryBytes();
-		if( s != ctx->type.dataType.GetSizeInMemoryBytes() )
-		{
-			if( ctx->type.dataType.IsIntegerType() )
-			{
-				if( s == 1 )
-					ctx->type.dataType.SetTokenType(ttInt8);
-				else if( s == 2 )
-					ctx->type.dataType.SetTokenType(ttInt16);
-				else if( s == 4 )
-					ctx->type.dataType.SetTokenType(ttInt);
-			}
-			else if( ctx->type.dataType.IsUnsignedType() )
-			{
-				if( s == 1 )
-					ctx->type.dataType.SetTokenType(ttUInt8);
-				else if( s == 2 )
-					ctx->type.dataType.SetTokenType(ttUInt16);
-				else if( s == 4 )
-					ctx->type.dataType.SetTokenType(ttUInt);
-			}
-			else if( ctx->type.dataType.IsBitVectorType() )
-			{
-				if( s == 1 )
-					ctx->type.dataType.SetTokenType(ttBits8);
-				else if( s == 2 )
-					ctx->type.dataType.SetTokenType(ttBits16);
-				else if( s == 4 )
-					ctx->type.dataType.SetTokenType(ttBits);
-			}
-		}
+		// After the constant value has been converted we have the following possibilities
 
 		// Allow implicit conversion between numbers
 		if( generateCode )
 		{
+			// Convert smaller types to 32bit first
+			int s = ctx->type.dataType.GetSizeInMemoryBytes();
+			if( s < 4 )
+			{
+				ConvertToTempVariableNotIn(ctx, reservedVars);
+				if( ctx->type.dataType.IsIntegerType() )
+				{
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_sbTOi, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_swTOi, ctx->type.stackOffset);
+					ctx->type.dataType.SetTokenType(ttInt);
+				}
+				else if( ctx->type.dataType.IsUnsignedType() )
+				{
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_ubTOi, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_uwTOi, ctx->type.stackOffset);
+					ctx->type.dataType.SetTokenType(ttUInt);
+				}
+				else if( ctx->type.dataType.IsBitVectorType() )
+				{
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_ubTOi, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_uwTOi, ctx->type.stackOffset);
+					ctx->type.dataType.SetTokenType(ttBits);
+				}
+			}
+
 			if( to.IsIntegerType() )
 			{
-				if( ctx->type.dataType.IsUnsignedType() )
+				if( ctx->type.dataType.IsIntegerType() || 
+					ctx->type.dataType.IsUnsignedType() || 
+					ctx->type.dataType.IsBitVectorType() )
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				else if( ctx->type.dataType.IsFloatType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ctx->bc.InstrSHORT(BC_fTOi, ctx->type.stackOffset);
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				}
 				else if( ctx->type.dataType.IsDoubleType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_dTOi, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
-				else if( ctx->type.dataType.IsBitVectorType() )
-					ctx->type.dataType.SetTokenType(to.GetTokenType());
+
+				// Convert to smaller integer if necessary
+				int s = to.GetSizeInMemoryBytes();
+				if( s < 4 )
+				{
+					ConvertToTempVariableNotIn(ctx, reservedVars);
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_iTOb, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_iTOw, ctx->type.stackOffset);
+				}
 			}
 			else if( to.IsUnsignedType() )
 			{
-				if( ctx->type.dataType.IsIntegerType() )
+				if( ctx->type.dataType.IsIntegerType() || 
+					ctx->type.dataType.IsUnsignedType() || 
+					ctx->type.dataType.IsBitVectorType() )
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				else if( ctx->type.dataType.IsFloatType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ctx->bc.InstrSHORT(BC_fTOu, ctx->type.stackOffset);
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				}
 				else if( ctx->type.dataType.IsDoubleType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_dTOu, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
-				else if( ctx->type.dataType.IsBitVectorType() )
-					ctx->type.dataType.SetTokenType(to.GetTokenType());
+
+				// Convert to smaller integer if necessary
+				int s = to.GetSizeInMemoryBytes();
+				if( s < 4 )
+				{
+					ConvertToTempVariableNotIn(ctx, reservedVars);
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_iTOb, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_iTOw, ctx->type.stackOffset);
+				}
 			}
 			else if( to.IsBitVectorType() )
 			{
-				if( ctx->type.dataType.IsIntegerType() )
+				// Don't permit implicit conversion from float or double  
+				// to bits due to it cause possible ambiguities
+
+				if( ctx->type.dataType.IsIntegerType() || 
+					ctx->type.dataType.IsUnsignedType() || 
+					ctx->type.dataType.IsBitVectorType() )
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
-				else if( ctx->type.dataType.IsUnsignedType() )
-					ctx->type.dataType.SetTokenType(to.GetTokenType());
+
+				// Convert to smaller integer if necessary
+				int s = to.GetSizeInMemoryBytes();
+				if( s < 4 )
+				{
+					ConvertToTempVariableNotIn(ctx, reservedVars);
+					if( s == 1 )
+						ctx->bc.InstrSHORT(BC_iTOb, ctx->type.stackOffset);
+					else if( s == 2 )
+						ctx->bc.InstrSHORT(BC_iTOw, ctx->type.stackOffset);
+				}
 			}
 			else if( to.IsFloatType() )
 			{
 				if( ctx->type.dataType.IsIntegerType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ctx->bc.InstrSHORT(BC_iTOf, ctx->type.stackOffset);
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				}
 				else if( ctx->type.dataType.IsUnsignedType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ctx->bc.InstrSHORT(BC_uTOf, ctx->type.stackOffset);
 					ctx->type.dataType.SetTokenType(to.GetTokenType());
 				}
 				else if( ctx->type.dataType.IsDoubleType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_dTOf, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
@@ -3018,25 +3076,25 @@ void asCCompiler::ImplicitConversion(asSExprContext *ctx, const asCDataType &to,
 			{
 				if( ctx->type.dataType.IsIntegerType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = reservedVars ? AllocateVariableNotIn(to, true, *reservedVars) : AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_iTOd, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
 				else if( ctx->type.dataType.IsUnsignedType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = reservedVars ? AllocateVariableNotIn(to, true, *reservedVars) : AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_uTOd, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
 				else if( ctx->type.dataType.IsFloatType() )
 				{
-					ConvertToTempVariable(ctx);
+					ConvertToTempVariableNotIn(ctx, reservedVars);
 					ReleaseTemporaryVariable(ctx->type, &ctx->bc);
-					int offset = reservedVars ? AllocateVariableNotIn(to, true, *reservedVars) : AllocateVariable(to, true);
+					int offset = AllocateVariableNotIn(to, true, reservedVars);
 					ctx->bc.InstrW_W(BC_fTOd, offset, ctx->type.stackOffset);
 					ctx->type.SetVariable(to, offset, true);
 				}
@@ -3064,10 +3122,7 @@ void asCCompiler::ImplicitConversion(asSExprContext *ctx, const asCDataType &to,
 		if( to.IsObjectHandle() )
 		{
 			// An object type can be directly converted to a handle of the same type
-			if( !ctx->type.dataType.IsObjectHandle() &&
-				ctx->type.dataType.IsObject() &&
-				ctx->type.dataType.GetObjectType()->beh.addref &&
-				ctx->type.dataType.GetObjectType()->beh.release )
+			if( ctx->type.dataType.SupportHandles() )
 			{
 				ctx->type.dataType.MakeHandle(true);
 			}
@@ -3156,7 +3211,7 @@ void asCCompiler::ImplicitConversion(asSExprContext *ctx, const asCDataType &to,
 						assert(!ctx->type.isTemporary);
 
 						// Allocate a temporary variable
-						int offset = reservedVars ? AllocateVariableNotIn(ctx->type.dataType, true, *reservedVars) : AllocateVariable(ctx->type.dataType, true);
+						int offset = AllocateVariableNotIn(ctx->type.dataType, true, reservedVars);
 						ctx->type.isTemporary = true;
 						ctx->type.stackOffset = (short)offset;
 
@@ -3180,7 +3235,7 @@ void asCCompiler::ImplicitConversion(asSExprContext *ctx, const asCDataType &to,
 					type.Set(ctx->type.dataType);
 
 					// Allocate a temporary variable
-					int offset = reservedVars ? AllocateVariableNotIn(type.dataType, true, *reservedVars) : AllocateVariable(type.dataType, true);
+					int offset = AllocateVariableNotIn(type.dataType, true, reservedVars);
 					type.isTemporary = true;
 					type.stackOffset = (short)offset;
 					if( type.dataType.IsObjectHandle() )
@@ -3282,6 +3337,12 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 				if( !isExplicit && node ) Warning(str.AddressOf(), node);
 			}
 
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.intValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.intValue = from->type.wordValue;
+
 			from->type.dataType = asCDataType::CreatePrimitive(ttInt, true);
 
 			// Try once more, in case of a smaller type
@@ -3289,13 +3350,31 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsBitVectorType() )
 		{
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.intValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.intValue = from->type.wordValue;
+
 			from->type.dataType = asCDataType::CreatePrimitive(ttInt, true);
 
 			// Try once more, in case of a smaller type
 			ImplicitConversionConstant(from, to, node, isExplicit);
 		}
-		else if( from->type.dataType.IsIntegerType() && from->type.dataType.GetSizeInMemoryBytes() < to.GetSizeInMemoryBytes() )
-			from->type.dataType = to;
+		else if( from->type.dataType.IsIntegerType() && 
+		         from->type.dataType.GetSizeInMemoryBytes() < 4 )
+		{
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.intValue = (signed char)from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.intValue = (short)from->type.wordValue;
+
+			from->type.dataType = asCDataType::CreatePrimitive(ttInt, true);
+
+			// Try once more, in case of a smaller type
+			ImplicitConversionConstant(from, to, node, isExplicit);
+		}
 		else if( from->type.dataType.IsIntegerType() &&
 		         from->type.dataType.GetSizeInMemoryBytes() > to.GetSizeInMemoryBytes() )
 		{
@@ -3305,14 +3384,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 				if( char(from->type.intValue) != from->type.intValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.intValue = char(from->type.intValue);
+				from->type.byteValue = char(from->type.intValue);
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
 				if( short(from->type.intValue) != from->type.intValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.intValue = short(from->type.intValue);
+				from->type.wordValue = short(from->type.intValue);
 			}
 
 			from->type.dataType.SetTokenType(to.GetTokenType());
@@ -3338,7 +3417,7 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 			// Try once more, in case of a smaller type
 			ImplicitConversionConstant(from, to, node, isExplicit);
 		}
-		else if( from->type.dataType == asCDataType::CreatePrimitive(ttDouble, true) )
+		else if( from->type.dataType.IsDoubleType() )
 		{
 			double fc = from->type.doubleValue;
 			unsigned int uic = (unsigned int)(fc);
@@ -3366,6 +3445,12 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 				if( !isExplicit && node ) Warning(str.AddressOf(), node);
 			}
 
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.intValue = (signed char)from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.intValue = (short)from->type.wordValue;
+
 			from->type.dataType = asCDataType::CreatePrimitive(ttUInt, true);
 
 			// Try once more, in case of a smaller type
@@ -3373,13 +3458,31 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsBitVectorType() )
 		{
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.dwordValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.dwordValue = from->type.wordValue;
+
 			from->type.dataType = asCDataType::CreatePrimitive(ttUInt, true);
 
 			// Try once more, in case of a smaller type
 			ImplicitConversionConstant(from, to, node, isExplicit);
 		}
-		else if( from->type.dataType.IsUnsignedType() && from->type.dataType.GetSizeInMemoryBytes() < to.GetSizeInMemoryBytes() )
-			from->type.dataType = to;
+		else if( from->type.dataType.IsUnsignedType() && 
+		         from->type.dataType.GetSizeInMemoryBytes() < 4 )
+		{
+			// Convert to 32bit
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.dwordValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.dwordValue = from->type.wordValue;
+
+			from->type.dataType = asCDataType::CreatePrimitive(ttUInt, true);
+
+			// Try once more, in case of a smaller type
+			ImplicitConversionConstant(from, to, node, isExplicit);
+		}
 		else if( from->type.dataType.IsUnsignedType() &&
 		         from->type.dataType.GetSizeInMemoryBytes() > to.GetSizeInMemoryBytes() )
 		{
@@ -3389,14 +3492,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 				if( asBYTE(from->type.dwordValue) != from->type.dwordValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.dwordValue = asBYTE(from->type.dwordValue);
+				from->type.byteValue = asBYTE(from->type.dwordValue);
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
 				if( asWORD(from->type.dwordValue) != from->type.dwordValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.dwordValue = asWORD(from->type.dwordValue);
+				from->type.wordValue = asWORD(from->type.dwordValue);
 			}
 
 			from->type.dataType.SetTokenType(to.GetTokenType());
@@ -3421,7 +3524,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsIntegerType() )
 		{
-			int ic = from->type.intValue;
+			// Must properly convert value in case the from value is smaller
+			int ic;
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				ic = (signed char)from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				ic = (short)from->type.wordValue;
+			else
+				ic = from->type.intValue;
 			float fc = float(ic);
 
 			if( int(fc) != ic )
@@ -3436,7 +3546,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsUnsignedType() )
 		{
-			unsigned int uic = from->type.dwordValue;
+			// Must properly convert value in case the from value is smaller
+			unsigned int uic;
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				uic = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				uic = from->type.wordValue;
+			else
+				uic = from->type.dwordValue;
 			float fc = float(uic);
 
 			if( (unsigned int)(fc) != uic )
@@ -3470,7 +3587,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsIntegerType() )
 		{
-			int ic = from->type.intValue;
+			// Must properly convert value in case the from value is smaller
+			int ic;
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				ic = (signed char)from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				ic = (short)from->type.wordValue;
+			else
+				ic = from->type.intValue;
 			double fc = double(ic);
 
 			if( int(fc) != ic )
@@ -3485,7 +3609,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		}
 		else if( from->type.dataType.IsUnsignedType() )
 		{
-			unsigned int uic = from->type.dwordValue;
+			// Must properly convert value in case the from value is smaller
+			unsigned int uic;
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				uic = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				uic = from->type.wordValue;
+			else
+				uic = from->type.dwordValue;
 			double fc = double(uic);
 
 			if( (unsigned int)(fc) != uic )
@@ -3506,13 +3637,31 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 		if( from->type.dataType.IsIntegerType() ||
 			from->type.dataType.IsUnsignedType() )
 		{
+			// Must properly convert value in case the from value is smaller
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.dwordValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.dwordValue = from->type.wordValue;
+
 			from->type.dataType = asCDataType::CreatePrimitive(ttBits, true);
 
 			// Try once more, in case of a smaller type
 			ImplicitConversionConstant(from, to, node, isExplicit);
 		}
-		else if( from->type.dataType.IsBitVectorType() && from->type.dataType.GetSizeInMemoryBytes() < to.GetSizeInMemoryBytes() )
-			from->type.dataType = to;
+		else if( from->type.dataType.IsBitVectorType() && 
+		         from->type.dataType.GetSizeInMemoryBytes() < 4 )
+		{
+			// Must properly convert value in case the from value is smaller
+			if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				from->type.dwordValue = from->type.byteValue;
+			else if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
+				from->type.dwordValue = from->type.wordValue;
+
+			from->type.dataType = asCDataType::CreatePrimitive(ttBits, true);
+
+			// Try once more, in case of a smaller type
+			ImplicitConversionConstant(from, to, node, isExplicit);
+		}
 		else if( from->type.dataType.IsBitVectorType() &&
 		         from->type.dataType.GetSizeInMemoryBytes() > to.GetSizeInMemoryBytes() )
 		{
@@ -3522,14 +3671,14 @@ void asCCompiler::ImplicitConversionConstant(asSExprContext *from, const asCData
 				if( asBYTE(from->type.dwordValue) != from->type.dwordValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.dwordValue = asBYTE(from->type.dwordValue);
+				from->type.byteValue = asBYTE(from->type.dwordValue);
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
 				if( asWORD(from->type.dwordValue) != from->type.dwordValue )
 					if( !isExplicit && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.dwordValue = asWORD(from->type.dwordValue);
+				from->type.wordValue = asWORD(from->type.dwordValue);
 			}
 
 			from->type.dataType.SetTokenType(to.GetTokenType());
@@ -3677,7 +3826,7 @@ void asCCompiler::DoAssignment(asSExprContext *ctx, asSExprContext *lctx, asSExp
 
 				asCDataType dt = rctx->type.dataType;
 				dt.MakeReference(false);
-				int newOffset = AllocateVariableNotIn(dt, true, usedVars);
+				int newOffset = AllocateVariableNotIn(dt, true, &usedVars);
 
 				rctx->bc.ExchangeVar(rctx->type.stackOffset, newOffset);
 				rctx->type.stackOffset = (short)newOffset;
@@ -3826,7 +3975,7 @@ void asCCompiler::CompileCondition(asCScriptNode *expr, asSExprContext *ctx)
 		// Make sure the variable isn't used in the initial expression
 		asCArray<int> vars;
 		e.bc.GetVarsUsed(vars);
-		int offset = AllocateVariableNotIn(temp.dataType, true, vars);
+		int offset = AllocateVariableNotIn(temp.dataType, true, &vars);
 		temp.SetVariable(temp.dataType, offset, true);
 
 		CompileConstructor(temp.dataType, offset, &ctx->bc);
@@ -4029,7 +4178,7 @@ void asCCompiler::CompileExpressionValue(asCScriptNode *node, asSExprContext *ct
 		sVariable *v = variables->GetVariable(name.AddressOf());
 		if( v == 0 )
 		{
-			if( outFunc && outFunc->objectType && name == "this" )
+			if( outFunc && outFunc->objectType && name == THIS_TOKEN )
 			{
 				asCDataType dt = asCDataType::CreateObject(outFunc->objectType, false);
 
@@ -4178,7 +4327,11 @@ void asCCompiler::CompileExpressionValue(asCScriptNode *node, asSExprContext *ct
 		else if( vnode->tokenType == ttTrue ||
 			     vnode->tokenType == ttFalse )
 		{
+#if AS_SIZEOF_BOOL == 1 
+			ctx->type.SetConstantB(asCDataType::CreatePrimitive(ttBool, true), vnode->tokenType == ttTrue ? VALUE_OF_BOOLEAN_TRUE : 0);
+#else
 			ctx->type.SetConstantDW(asCDataType::CreatePrimitive(ttBool, true), vnode->tokenType == ttTrue ? VALUE_OF_BOOLEAN_TRUE : 0);
+#endif
 		}
 		else if( vnode->tokenType == ttStringConstant || vnode->tokenType == ttHeredocStringConstant )
 		{
@@ -4244,6 +4397,11 @@ void asCCompiler::CompileExpressionValue(asCScriptNode *node, asSExprContext *ct
 		CompileAssignment(vnode, &e);
 		MergeExprContexts(ctx, &e);
 		ctx->type = e.type;
+	}
+	else if( vnode->nodeType == snCast )
+	{
+		// Implement the cast operator
+		CompileConversion(vnode, ctx);
 	}
 	else
 		assert(false);
@@ -4372,23 +4530,43 @@ void asCCompiler::ProcessHeredocStringConstant(asCString &str)
 
 void asCCompiler::CompileConversion(asCScriptNode *node, asSExprContext *ctx)
 {
-	// Verify that there is only one argument
-	if( node->lastChild->firstChild != node->lastChild->lastChild )
-	{
-		Error(TXT_ONLY_ONE_ARGUMENT_IN_CAST, node->lastChild);
-	}
-
-	// Compile the expression
 	asSExprContext expr;
-	CompileAssignment(node->lastChild->firstChild, &expr);
+	asCDataType to;
+	if( node->nodeType == snFunctionCall )
+	{
+		// Verify that there is only one argument
+		if( node->lastChild->firstChild != node->lastChild->lastChild )
+		{
+			Error(TXT_ONLY_ONE_ARGUMENT_IN_CAST, node->lastChild);
+		}
+
+		// Compile the expression
+		CompileAssignment(node->lastChild->firstChild, &expr);
+
+		// Determine the requested type
+		to = builder->CreateDataTypeFromNode(node->firstChild, script);
+		to.MakeReadOnly(true); // Default to const
+		assert(to.IsPrimitive());
+	}
+	else
+	{
+		// Compile the expression
+		CompileAssignment(node->lastChild, &expr);
+
+		// Determine the requested type
+		to = builder->CreateDataTypeFromNode(node->firstChild, script);
+		to = builder->ModifyDataTypeFromNode(to, node->firstChild->next, script, 0, 0);
+
+		// If the type support object handles, then use it
+		if( to.SupportHandles() )
+		{
+			to.MakeHandle(true);
+			to.MakeReference(true);
+		}
+	}
 
 	// Convert any reference to a variable
 	if( expr.type.dataType.IsReference() ) ConvertToVariable(&expr);
-
-	// Try an implicit conversion first
-	asCDataType to = builder->CreateDataTypeFromNode(node->firstChild, script);
-	to.MakeReadOnly(true); // Default to const
-	assert(to.IsPrimitive());
 
 	ImplicitConversion(&expr, to, node, true);
 
@@ -4411,227 +4589,87 @@ void asCCompiler::CompileConversion(asCScriptNode *node, asSExprContext *ctx)
 		return;
 	}
 
+	// The implicit conversion already does most of the conversions permitted,
+	// here we'll only treat those conversions that require an explicit cast.
+
 	bool conversionOK = false;
 	if( !expr.type.isConstant )
 	{
-		ConvertToTempVariable(&expr);
+		if( !expr.type.dataType.IsObject() )
+			ConvertToTempVariable(&expr);
 		MergeExprContexts(ctx, &expr);
 
 		int offset = expr.type.stackOffset;
 
-		if( to.IsIntegerType() )
+		if( to.IsFloatType() )
 		{
-			if( expr.type.dataType.IsFloatType() )
+			if( expr.type.dataType.IsBitVectorType() )
 			{
-				conversionOK = true;
-				ctx->bc.InstrSHORT(BC_fTOi, expr.type.stackOffset);
-			}
-			else if( expr.type.dataType.IsDoubleType() )
-			{
-				conversionOK = true;
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_dTOi, offset, expr.type.stackOffset);
-			}
-			else if( expr.type.dataType.IsBitVectorType() ||
-					 expr.type.dataType.IsIntegerType() ||
-					 expr.type.dataType.IsUnsignedType() )
-				conversionOK = true;
+				// Convert the bitvector to 32bit
+				if( expr.type.dataType.GetSizeInMemoryBytes() == 1 )
+					ctx->bc.InstrSHORT(BC_ubTOi, expr.type.stackOffset);
+				else if( expr.type.dataType.GetSizeInMemoryBytes() == 2 )
+					ctx->bc.InstrSHORT(BC_uwTOi, expr.type.stackOffset);
 
-			if( to.GetSizeInMemoryBytes() == 1 )
-				ctx->bc.InstrSHORT(BC_sbTOi, expr.type.stackOffset);
-			else if( to.GetSizeInMemoryBytes() == 2 )
-				ctx->bc.InstrSHORT(BC_swTOi, expr.type.stackOffset);
-		}
-		else if( to.IsUnsignedType() )
-		{
-			if( expr.type.dataType.IsFloatType() )
-			{
 				conversionOK = true;
-				ctx->bc.InstrSHORT(BC_fTOu, expr.type.stackOffset);
 			}
-			else if( expr.type.dataType.IsDoubleType() )
-			{
-				conversionOK = true;
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_dTOu, offset, expr.type.stackOffset);
-			}
-			else if( expr.type.dataType.IsBitVectorType() ||
-					 expr.type.dataType.IsIntegerType() ||
-					 expr.type.dataType.IsUnsignedType() )
-				conversionOK = true;
 
-			if( to.GetSizeInMemoryBytes() == 1 )
-				ctx->bc.InstrSHORT(BC_ubTOi, expr.type.stackOffset);
-			else if( to.GetSizeInMemoryBytes() == 2 )
-				ctx->bc.InstrSHORT(BC_uwTOi, expr.type.stackOffset);
+			ctx->type.SetVariable(to, offset, true);
 		}
-		else if( to.IsFloatType() )
-		{
-			if( expr.type.dataType.IsDoubleType() )
-			{
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_dTOf, offset, expr.type.stackOffset);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsIntegerType() )
-			{
-				ctx->bc.InstrSHORT(BC_iTOf, expr.type.stackOffset);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsUnsignedType() )
-			{
-				ctx->bc.InstrSHORT(BC_uTOf, expr.type.stackOffset);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsBitVectorType() )
-				conversionOK = true;
-		}
-		else if( to == asCDataType::CreatePrimitive(ttDouble, true) )
-		{
-			if( expr.type.dataType.IsFloatType() )
-			{
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_fTOd, offset, expr.type.stackOffset);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsIntegerType() )
-			{
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_iTOd, offset, expr.type.stackOffset);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsUnsignedType() )
-			{
-				ReleaseTemporaryVariable(expr.type, &ctx->bc);
-				offset = AllocateVariable(to, true);
-				ctx->bc.InstrW_W(BC_uTOd, offset, expr.type.stackOffset);
-				conversionOK = true;
-			}
-		}
+		// TODO: We need to allow conversion from bits64
+		// else if( to.IsDoubleType() )
+		// {
+		// }
 		else if( to.IsBitVectorType() )
 		{
-			if( expr.type.dataType.IsIntegerType()  ||
-				expr.type.dataType.IsUnsignedType() ||
-				expr.type.dataType.IsFloatType()    ||
-				expr.type.dataType.IsBitVectorType() )
+			if( expr.type.dataType.IsFloatType() )
 			{
 				conversionOK = true;
 
 				if( to.GetSizeInMemoryBytes() == 1 )
-					ctx->bc.InstrSHORT(BC_ubTOi, expr.type.stackOffset);
+					ctx->bc.InstrSHORT(BC_iTOb, expr.type.stackOffset);
 				else if( to.GetSizeInMemoryBytes() == 2 )
-					ctx->bc.InstrSHORT(BC_uwTOi, expr.type.stackOffset);
+					ctx->bc.InstrSHORT(BC_iTOw, expr.type.stackOffset);
 			}
-		}
 
-		ctx->type.SetVariable(to, offset, true);
+			ctx->type.SetVariable(to, offset, true);
+		}
+		else if( to.IsObjectHandle() &&
+			     expr.type.dataType.IsObjectHandle() &&
+				 (expr.type.dataType.GetObjectType()->flags & asOBJ_SCRIPT_STRUCT) &&
+				 !(!to.IsHandleToConst() && expr.type.dataType.IsHandleToConst()) )
+		{
+			// Allow dynamic cast between object handles (only for script objects).
+			// At run time this may result in a null handle,   
+			// which when used will throw an exception
+			conversionOK = true;
+			ctx->bc.InstrDWORD(BC_Cast, engine->GetTypeIdFromDataType(to));
+
+			ctx->type = expr.type;
+			ctx->type.dataType = to;
+		}
 	}
 	else
 	{
-		if( to.IsIntegerType() )
+		if( to.IsFloatType() )
 		{
-			if( expr.type.dataType.IsFloatType() )
+			if( expr.type.dataType.IsBitVectorType() )
 			{
-				ctx->type.intValue = int(expr.type.floatValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsDoubleType() )
-			{
-				ctx->type.intValue = int(expr.type.doubleValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsBitVectorType() ||
-					 expr.type.dataType.IsIntegerType() ||
-					 expr.type.dataType.IsUnsignedType() )
-			{
+				// First convert the bitvector to 32bit
+				if( expr.type.dataType.GetSizeInMemoryBytes() == 1 )
+					expr.type.dwordValue = (asDWORD)(asBYTE)expr.type.dwordValue;
+				else if( expr.type.dataType.GetSizeInMemoryBytes() == 2 )
+					expr.type.dwordValue = (asDWORD)(asWORD)expr.type.dwordValue;
 				ctx->type.dwordValue = expr.type.dwordValue;
-				conversionOK = true;
-			}
-
-			if( to.GetSizeInMemoryBytes() == 1 )
-				ctx->type.intValue = char(ctx->type.intValue);
-			else if( to.GetSizeInMemoryBytes() == 2 )
-				ctx->type.intValue = short(ctx->type.intValue);
-		}
-		else if( to.IsUnsignedType() )
-		{
-			if( expr.type.dataType.IsFloatType() )
-			{
-				ctx->type.dwordValue = asDWORD(expr.type.floatValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsDoubleType() )
-			{
-				ctx->type.dwordValue = asDWORD(expr.type.doubleValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsBitVectorType() ||
-					 expr.type.dataType.IsIntegerType() ||
-					 expr.type.dataType.IsUnsignedType() )
-			{
-				ctx->type.dwordValue = expr.type.dwordValue;
-				conversionOK = true;
-			}
-
-			if( to.GetSizeInMemoryBytes() == 1 )
-				ctx->type.dwordValue = asBYTE(ctx->type.dwordValue);
-			else if( to.GetSizeInMemoryBytes() == 2 )
-				ctx->type.dwordValue = asWORD(ctx->type.dwordValue);
-		}
-		else if( to.IsFloatType() )
-		{
-			if( expr.type.dataType.IsDoubleType() )
-			{
-				ctx->type.floatValue = float(expr.type.doubleValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsIntegerType() )
-			{
-				ctx->type.floatValue = float(expr.type.intValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsUnsignedType() )
-			{
-				ctx->type.floatValue = float(expr.type.dwordValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsBitVectorType() )
-			{
-				ctx->type.dwordValue = expr.type.dwordValue;
-				conversionOK = true;
-			}
-		}
-		else if( to == asCDataType::CreatePrimitive(ttDouble, true) )
-		{
-			if( expr.type.dataType.IsFloatType() )
-			{
-				ctx->type.doubleValue = double(expr.type.floatValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsIntegerType() )
-			{
-				ctx->type.doubleValue = double(expr.type.intValue);
-				conversionOK = true;
-			}
-			else if( expr.type.dataType.IsUnsignedType() )
-			{
-				ctx->type.doubleValue = double(expr.type.dwordValue);
 				conversionOK = true;
 			}
 		}
 		else if( to.IsBitVectorType() )
 		{
-			if( expr.type.dataType.IsIntegerType() ||
-				expr.type.dataType.IsUnsignedType() ||
-				expr.type.dataType.IsFloatType() ||
-				expr.type.dataType.IsBitVectorType() )
+			if( expr.type.dataType.IsFloatType() )
 			{
 				ctx->type.dwordValue = expr.type.dwordValue;
+				conversionOK = true;
 
 				if( to.GetSizeInMemoryBytes() == 1 )
 					ctx->type.dwordValue = asBYTE(ctx->type.dwordValue);
@@ -4647,10 +4685,11 @@ void asCCompiler::CompileConversion(asCScriptNode *node, asSExprContext *ctx)
 		return;
 
 	// Conversion not available
+	ctx->type.SetDummy();
 
 	asCString strTo, strFrom;
 
-	strTo = ctx->type.dataType.Format();
+	strTo = to.Format();
 	strFrom = expr.type.dataType.Format();
 
 	asCString msg;
@@ -4864,7 +4903,7 @@ void asCCompiler::CompileMethodCallOnAny(asCScriptNode *node, asSExprContext *ct
 
 				asCDataType dt = args[n]->type.dataType;
 				dt.MakeReference(false);
-				int newOffset = AllocateVariableNotIn(dt, true, usedVars);
+				int newOffset = AllocateVariableNotIn(dt, true, &usedVars);
 
 				ctx->bc.ExchangeVar(args[n]->type.stackOffset, newOffset);
 				args[n]->type.stackOffset = (short)newOffset;
@@ -5086,7 +5125,7 @@ void asCCompiler::CompileFunctionCall(asCScriptNode *node, asSExprContext *ctx, 
 
 					asCDataType dt = args[n]->type.dataType;
 					dt.MakeReference(false);
-					int newOffset = AllocateVariableNotIn(dt, true, usedVars);
+					int newOffset = AllocateVariableNotIn(dt, true, &usedVars);
 
 					ctx->bc.ExchangeVar(args[n]->type.stackOffset, newOffset);
 					args[n]->type.stackOffset = (short)newOffset;
@@ -5565,6 +5604,15 @@ void asCCompiler::CompileExpressionPostOp(asCScriptNode *node, asSExprContext *c
 		Dereference(ctx, true);
 		bool isConst = ctx->type.dataType.IsReadOnly();
 
+		if( ctx->type.dataType.IsObjectHandle() )
+		{
+			// Convert the handle to a normal object
+			asCDataType dt = ctx->type.dataType;
+			dt.MakeHandle(false);
+
+			ImplicitConversion(ctx, dt, node, false);
+		}
+
 		// Check if the variable is initialized (if it indeed is a variable)
 		IsVariableInitialized(&ctx->type, node);
 
@@ -6032,6 +6080,56 @@ void asCCompiler::CompileOperator(asCScriptNode *node, asSExprContext *lctx, asS
 	assert(false);
 }
 
+void asCCompiler::ConvertToTempVariableNotIn(asSExprContext *ctx, asCArray<int> *reservedVars)
+{
+	ConvertToVariableNotIn(ctx, reservedVars);
+	if( !ctx->type.isTemporary )
+	{
+		if( ctx->type.dataType.IsPrimitive() )
+		{
+			int offset = AllocateVariableNotIn(ctx->type.dataType, true, reservedVars);
+			if( ctx->type.dataType.GetSizeInMemoryDWords() == 1 )
+				ctx->bc.InstrW_W(BC_CpyVtoV4, offset, ctx->type.stackOffset);
+			else
+				ctx->bc.InstrW_W(BC_CpyVtoV8, offset, ctx->type.stackOffset);
+			ctx->type.SetVariable(ctx->type.dataType, offset, true);
+		}
+		else if( ctx->type.dataType.IsObjectHandle() )
+		{
+			assert(false);
+		}
+		else // ctx->type.dataType.IsObject()
+		{
+			// Make sure the variable is not used in the expression
+			asCArray<int> vars;
+			ctx->bc.GetVarsUsed(vars);
+			int offset = AllocateVariableNotIn(ctx->type.dataType, true, &vars);
+
+			// Allocate and construct the temporary object
+			asCByteCode tmpBC;
+			CompileConstructor(ctx->type.dataType, offset, &tmpBC);
+
+			// Insert the code before the expression code
+			tmpBC.AddCode(&ctx->bc);
+			ctx->bc.AddCode(&tmpBC);
+
+			// Assign the evaluated expression to the temporary variable
+			PrepareForAssignment(&ctx->type.dataType, ctx, 0);
+
+			asCTypeInfo type;
+			type.SetVariable(ctx->type.dataType, offset, true);
+
+			ctx->bc.InstrSHORT(BC_PSF, offset);
+
+			PerformAssignment(&type, &ctx->type, &ctx->bc, 0);
+
+			ReleaseTemporaryVariable(ctx->type, &ctx->bc);
+
+			ctx->type = type;
+		}
+	}
+}
+
 void asCCompiler::ConvertToTempVariable(asSExprContext *ctx)
 {
 	ConvertToVariable(ctx);
@@ -6055,7 +6153,7 @@ void asCCompiler::ConvertToTempVariable(asSExprContext *ctx)
 			// Make sure the variable is not used in the expression
 			asCArray<int> vars;
 			ctx->bc.GetVarsUsed(vars);
-			int offset = AllocateVariableNotIn(ctx->type.dataType, true, vars);
+			int offset = AllocateVariableNotIn(ctx->type.dataType, true, &vars);
 
 			// Allocate and construct the temporary object
 			asCByteCode tmpBC;
@@ -6084,19 +6182,19 @@ void asCCompiler::ConvertToTempVariable(asSExprContext *ctx)
 
 void asCCompiler::ConvertToVariable(asSExprContext *ctx)
 {
-	ConvertToVariableNotIn(ctx, 0);
+	ConvertToVariableNotIn(ctx, (asCArray<int>*)0);
 }
 
-void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asSExprContext *exclude)
+void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asCArray<int> *reservedVars)
 {
 	if( !ctx->type.isVariable )
 	{
 		asCArray<int> excludeVars;
-		if( exclude ) exclude->bc.GetVarsUsed(excludeVars);
+		if( reservedVars ) excludeVars.Concatenate(*reservedVars);
 		int offset;
 		if( ctx->type.dataType.IsObjectHandle() )
 		{
-			offset = AllocateVariableNotIn(ctx->type.dataType, true, excludeVars);
+			offset = AllocateVariableNotIn(ctx->type.dataType, true, &excludeVars);
 			if( ctx->type.IsNullConstant() )
 			{
 				// TODO: Adapt pointer size
@@ -6117,8 +6215,12 @@ void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asSExprContext *ex
 		{
 			if( ctx->type.isConstant )
 			{
-				offset = AllocateVariableNotIn(ctx->type.dataType, true, excludeVars);
-				if( ctx->type.dataType.GetSizeInMemoryDWords() == 1 )
+				offset = AllocateVariableNotIn(ctx->type.dataType, true, &excludeVars);
+				if( ctx->type.dataType.GetSizeInMemoryBytes() == 1 )
+					ctx->bc.InstrSHORT_B(BC_SetV1, offset, ctx->type.byteValue);
+				else if( ctx->type.dataType.GetSizeInMemoryBytes() == 2 )
+					ctx->bc.InstrSHORT_W(BC_SetV2, offset, ctx->type.wordValue);
+				else if( ctx->type.dataType.GetSizeInMemoryBytes() == 4 )
 					ctx->bc.InstrSHORT_DW(BC_SetV4, offset, ctx->type.dwordValue);
 				else
 					ctx->bc.InstrSHORT_QW(BC_SetV8, offset, ctx->type.qwordValue);
@@ -6132,25 +6234,13 @@ void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asSExprContext *ex
 				assert(ctx->type.dataType.IsReference());
 
 				ctx->type.dataType.MakeReference(false);
-				offset = AllocateVariableNotIn(ctx->type.dataType, true, excludeVars);
+				offset = AllocateVariableNotIn(ctx->type.dataType, true, &excludeVars);
 
 				// Read the value from the address in the register directly into the variable
 				if( ctx->type.dataType.GetSizeInMemoryBytes() == 1 )
-				{
 					ctx->bc.InstrSHORT(BC_RDR1, offset);
-					if( ctx->type.dataType.IsIntegerType() )
-						ctx->bc.InstrSHORT(BC_sbTOi, offset);
-					else
-						ctx->bc.InstrSHORT(BC_ubTOi, offset);
-				}
 				else if( ctx->type.dataType.GetSizeInMemoryBytes() == 2 )
-				{
 					ctx->bc.InstrSHORT(BC_RDR2, offset);
-					if( ctx->type.dataType.IsIntegerType() )
-						ctx->bc.InstrSHORT(BC_swTOi, offset);
-					else
-						ctx->bc.InstrSHORT(BC_uwTOi, offset);
-				}
 				else if( ctx->type.dataType.GetSizeInMemoryDWords() == 1 )
 					ctx->bc.InstrSHORT(BC_RDR4, offset);
 				else
@@ -6161,6 +6251,13 @@ void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asSExprContext *ex
 			ctx->type.SetVariable(ctx->type.dataType, offset, true);
 		}
 	}
+}
+
+void asCCompiler::ConvertToVariableNotIn(asSExprContext *ctx, asSExprContext *exclude)
+{
+	asCArray<int> excludeVars;
+	if( exclude ) exclude->bc.GetVarsUsed(excludeVars);
+	ConvertToVariableNotIn(ctx, &excludeVars);
 }
 
 
@@ -6185,7 +6282,9 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asSExprContext *lctx,
 		to.SetTokenType(ttFloat);
 
 	// Do the actual conversion
-	ImplicitConversion(lctx, to, node, false);
+	asCArray<int> reservedVars;
+	rctx->bc.GetVarsUsed(reservedVars);
+	ImplicitConversion(lctx, to, node, false, true, &reservedVars);
 	ImplicitConversion(rctx, to, node, false);
 
 	// Verify that the conversion was successful
@@ -6197,6 +6296,9 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asSExprContext *lctx,
 		asCString str;
 		str.Format(TXT_NO_CONVERSION_s_TO_MATH_TYPE, lctx->type.dataType.Format().AddressOf());
 		Error(str.AddressOf(), node);
+
+		ctx->type.SetDummy();
+		return;
 	}
 
 	if( !rctx->type.dataType.IsIntegerType() &&
@@ -6207,6 +6309,9 @@ void asCCompiler::CompileMathOperator(asCScriptNode *node, asSExprContext *lctx,
 		asCString str;
 		str.Format(TXT_NO_CONVERSION_s_TO_MATH_TYPE, rctx->type.dataType.Format().AddressOf());
 		Error(str.AddressOf(), node);
+
+		ctx->type.SetDummy();
+		return;
 	}
 
 	bool isConstant = lctx->type.isConstant && rctx->type.isConstant;
@@ -6399,7 +6504,9 @@ void asCCompiler::CompileBitwiseOperator(asCScriptNode *node, asSExprContext *lc
 		to.SetTokenType(ttBits);
 
 		// Do the actual conversion
-		ImplicitConversion(lctx, to, node, false);
+		asCArray<int> reservedVars;
+		rctx->bc.GetVarsUsed(reservedVars);
+		ImplicitConversion(lctx, to, node, false, true, &reservedVars);
 		ImplicitConversion(rctx, to, node, false);
 
 		// Verify that the conversion was successful
@@ -6599,7 +6706,9 @@ void asCCompiler::CompileComparisonOperator(asCScriptNode *node, asSExprContext 
 		Warning(TXT_SIGNED_UNSIGNED_MISMATCH, node);
 
 	// Do the actual conversion
-	ImplicitConversion(lctx, to, node, false);
+	asCArray<int> reservedVars;
+	rctx->bc.GetVarsUsed(reservedVars);
+	ImplicitConversion(lctx, to, node, false, true, &reservedVars);
 	ImplicitConversion(rctx, to, node, false);
 
 	// Verify that the conversion was successful
@@ -6812,7 +6921,9 @@ void asCCompiler::CompileBooleanOperator(asCScriptNode *node, asSExprContext *lc
 	to.SetTokenType(ttBool);
 
 	// Do the actual conversion
-	ImplicitConversion(lctx, to, node, false);
+	asCArray<int> reservedVars;
+	rctx->bc.GetVarsUsed(reservedVars);
+	ImplicitConversion(lctx, to, node, false, true, &reservedVars);
 	ImplicitConversion(rctx, to, node, false);
 
 	// Verify that the conversion was successful
@@ -6863,6 +6974,17 @@ void asCCompiler::CompileBooleanOperator(asCScriptNode *node, asSExprContext *lc
 		else
 		{
 			// Make sure they are equal if not false
+#if AS_SIZEOF_BOOL == 1
+			if( lctx->type.byteValue != 0 ) lctx->type.byteValue = VALUE_OF_BOOLEAN_TRUE;
+			if( rctx->type.byteValue != 0 ) rctx->type.byteValue = VALUE_OF_BOOLEAN_TRUE;
+
+			asBYTE v = 0;
+			v = lctx->type.byteValue - rctx->type.byteValue;
+			if( v != 0 ) v = VALUE_OF_BOOLEAN_TRUE; else v = 0;
+
+			ctx->type.isConstant = true;
+			ctx->type.byteValue = v;
+#else
 			if( lctx->type.dwordValue != 0 ) lctx->type.dwordValue = VALUE_OF_BOOLEAN_TRUE;
 			if( rctx->type.dwordValue != 0 ) rctx->type.dwordValue = VALUE_OF_BOOLEAN_TRUE;
 
@@ -6870,10 +6992,9 @@ void asCCompiler::CompileBooleanOperator(asCScriptNode *node, asSExprContext *lc
 			v = lctx->type.intValue - rctx->type.intValue;
 			if( v != 0 ) v = VALUE_OF_BOOLEAN_TRUE; else v = 0;
 
-			ctx->bc.InstrDWORD(BC_PshC4, v);
-
 			ctx->type.isConstant = true;
-			ctx->type.intValue = v;
+			ctx->type.dwordValue = v;
+#endif
 		}
 	}
 	else if( op == ttAnd ||
@@ -6902,7 +7023,11 @@ void asCCompiler::CompileBooleanOperator(asCScriptNode *node, asSExprContext *lc
 			{
 				ctx->bc.InstrSHORT(BC_CpyVtoR4, lctx->type.stackOffset);
 				ctx->bc.InstrDWORD(BC_JZ, label1);
-				ctx->bc.InstrW_DW(BC_SetV4, offset, VALUE_OF_BOOLEAN_TRUE);
+#if AS_SIZEOF_BOOL == 1
+				ctx->bc.InstrSHORT_B(BC_SetV1, offset, VALUE_OF_BOOLEAN_TRUE);
+#else
+				ctx->bc.InstrSHORT_DW(BC_SetV4, offset, VALUE_OF_BOOLEAN_TRUE);
+#endif
 				ctx->bc.InstrINT(BC_JMP, label2);
 			}
 
@@ -6917,17 +7042,27 @@ void asCCompiler::CompileBooleanOperator(asCScriptNode *node, asSExprContext *lc
 		}
 		else
 		{
+#if AS_SIZEOF_BOOL == 1
+			asBYTE v = 0;
+			if( op == ttAnd )
+				v = lctx->type.byteValue && rctx->type.byteValue;
+			else if( op == ttOr )
+				v = lctx->type.byteValue || rctx->type.byteValue;
+
+			// Remember the result
+			ctx->type.isConstant = true;
+			ctx->type.byteValue = v;
+#else
 			asDWORD v = 0;
 			if( op == ttAnd )
 				v = lctx->type.dwordValue && rctx->type.dwordValue;
 			else if( op == ttOr )
 				v = lctx->type.dwordValue || rctx->type.dwordValue;
 
-			ctx->bc.InstrDWORD(BC_PshC4, v);
-
 			// Remember the result
 			ctx->type.isConstant = true;
 			ctx->type.dwordValue = v;
+#endif
 		}
 	}
 }
@@ -7105,25 +7240,10 @@ void asCCompiler::PerformFunctionCall(int funcID, asSExprContext *ctx, bool isCo
 		if( descr->returnType.GetSizeInMemoryBytes() )
 		{
 			int offset = AllocateVariable(descr->returnType, true);
+
+			// Move the value from the return register to the variable
 			if( descr->returnType.GetSizeOnStackDWords() == 1 )
-			{
-				// Move the value from the return register to the variable
 				ctx->bc.InstrSHORT(BC_CpyRtoV4, offset);
-				if( descr->returnType.GetSizeInMemoryBytes() == 1 )
-				{
-					if( descr->returnType.IsIntegerType() )
-						ctx->bc.InstrSHORT(BC_sbTOi, offset);
-					else
-						ctx->bc.InstrSHORT(BC_ubTOi, offset);
-				}
-				else if( descr->returnType.GetSizeInMemoryBytes() == 2 )
-				{
-					if( descr->returnType.IsIntegerType() )
-						ctx->bc.InstrSHORT(BC_swTOi, offset);
-					else
-						ctx->bc.InstrSHORT(BC_uwTOi, offset);
-				}
-			}
 			else if( descr->returnType.GetSizeOnStackDWords() == 2 )
 				ctx->bc.InstrSHORT(BC_CpyRtoV8, offset);
 

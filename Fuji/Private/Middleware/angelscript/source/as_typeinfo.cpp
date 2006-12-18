@@ -68,7 +68,7 @@ void asCTypeInfo::SetVariable(const asCDataType &dt, int stackOffset, bool isTem
 
 	this->isVariable  = true;
 	this->isTemporary = isTemporary;
-	this->stackOffset = (short)stackOffset;
+	this->stackOffset = stackOffset;
 }
 
 void asCTypeInfo::SetConstantQW(const asCDataType &dt, asQWORD value)
@@ -85,6 +85,14 @@ void asCTypeInfo::SetConstantDW(const asCDataType &dt, asDWORD value)
 
 	isConstant = true;
 	dwordValue = value;
+}
+
+void asCTypeInfo::SetConstantB(const asCDataType &dt, asBYTE value)
+{
+	Set(dt);
+
+	isConstant = true;
+	byteValue = value;
 }
 
 void asCTypeInfo::SetConstantF(const asCDataType &dt, float value)
