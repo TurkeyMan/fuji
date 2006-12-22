@@ -779,7 +779,7 @@ void *asCScriptEngine::GetGlobalVarPointer(int gvarID)
 	else
 		return (void*)(mod->globalMem.AddressOf() + mod->scriptGlobals[id]->index);
 
-	return 0;
+	UNREACHABLE_RETURN;
 }
 
 #ifdef AS_DEPRECATED
@@ -2924,7 +2924,7 @@ int asCScriptEngine::GCInternal()
 	}
 
 	// Shouldn't reach this point
-	return -1;
+	UNREACHABLE_RETURN;
 }
 
 int asCScriptEngine::GetTypeIdFromDataType(const asCDataType &dt)

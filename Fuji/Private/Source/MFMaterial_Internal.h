@@ -135,6 +135,13 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 };
 #endif
 
+#if defined(_GC) || defined(_FUJI_UTIL)
+struct MFMeshChunk_GC : public MFMeshChunk
+{
+	// GC can use indexed streams..
+};
+#endif
+
 // define MFMeshChunk_Current
 #if defined(_WINDOWS)
 typedef MFMeshChunk_PC MFMeshChunk_Current;
@@ -146,6 +153,10 @@ typedef MFMeshChunk_PSP MFMeshChunk_Current;
 typedef MFMeshChunk_PS2 MFMeshChunk_Current;
 #elif defined(_LINUX)
 typedef MFMeshChunk_Linux MFMeshChunk_Current;
+#elif defined(_GC)
+typedef MFMeshChunk_GC MFMeshChunk_Current;
+#else
+#error Platform not yet supported...
 #endif
 
 // a debug menu material information display object

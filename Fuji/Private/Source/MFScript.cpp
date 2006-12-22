@@ -21,6 +21,19 @@ asIScriptEngine *pEngine = NULL;
 
 /*** Functions ***/
 
+void* MFScript_Alloc(size_t bytes)
+{
+	void *pMem = MFHeap_Alloc(bytes);
+	MFDebug_Log(1, MFStr("Allocating %d bytes: 0x%08d", bytes, pMem));
+	return pMem;
+}
+
+void MFScript_Free(void *pMem)
+{
+	MFDebug_Log(1, MFStr("Freeing 0x%08d", pMem));
+	MFHeap_Free(pMem);
+}
+
 void MessageCallback(const asSMessageInfo *msg, void *param)
 {
 	const char *type = "Error";
@@ -39,6 +52,8 @@ void MFScript_InitModule()
 
 	pEngine = asCreateScriptEngine(ANGELSCRIPT_VERSION);	
 	MFDebug_Assert(pEngine, "Failed to create script engine.");
+
+	pEngine->SetCommonObjectMemoryFunctions(MFScript_Alloc, MFScript_Free);
 
 #if !defined(_RETAIL)
 	pEngine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);

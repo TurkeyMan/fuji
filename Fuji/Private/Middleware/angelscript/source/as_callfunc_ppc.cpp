@@ -37,7 +37,7 @@
 // This version is PPC specific
 // Modified from as_callfunc_sh4.cpp by Pecan Heber June 2006
 // Tweaked for compiling (only!) in 2.7.0 wip by kunitoki July 2006
-//
+// Rewritten to be fast and support more platforms my Manu Evans Dec 2006
 
 #include <stdio.h>
 
@@ -59,9 +59,15 @@ BEGIN_AS_NAMESPACE
 #define AS_MAX_REG_FLOATS 13
 #define AS_MAX_REG_INTS 8
 
-#define eq ==
+#define AS_INT_REGS         AS_PPC_MAX_ARGS+2
+#define AS_FLOAT_REGS       AS_INT_REGS+AS_MAX_REG_INTS
+#define AS_ARG_ARRAY_SIZE   AS_FLOAT_REGS+AS_MAX_REG_FLOATS
+
+// these are absolute values because the 360's assembler is stupid ;)
+#define INT_OFFSET 132    // (AS_INT_REGS-1)*4
+#define FLOAT_OFFSET 164  // (AS_FLOAT_REGS-1)*4
+
 //these register defines are logical/reference only, not used by asm()
-#define sp r1
 #define rFloatUsedCount r22
 #define rGPRusedCount r23
 #define rArgDataType r24
@@ -82,10 +88,215 @@ BEGIN_AS_NAMESPACE
 extern "C" {
 	enum argTypes { ppcENDARG, ppcINTARG, ppcFLOATARG, ppcDOUBLEARG };
 	static asBYTE ppcArgsType[AS_PPC_MAX_ARGS + 1 + 1 + 1];
-	static asDWORD ppcArgs[AS_PPC_MAX_ARGS + 1 + 1];
+	static asDWORD ppcArgs[AS_ARG_ARRAY_SIZE];
 }
 
 // Loads all data into the correct places and calls the function.
+#if defined(ASM_INTEL)
+
+// Intel assembly version
+__declspec(naked) asQWORD ppcFunc(const asDWORD* /*argsPtr*/, int /*StackArgSize*/, asDWORD /*func*/)
+{
+	__asm
+	{
+		// store the link register
+		mflr r12
+		stw r12, -8(sp)
+
+		// store the backchain register and push the stack
+		slwi r12, r4, 1
+		addi r12, r12, 39
+		li r11, -16
+		and r12, r12, r11
+		neg r12, r12
+		stwux sp, sp, r12
+
+		// set function pointer since we'll be overwriting r5
+		mtctr r5
+
+		// write excess parameters to the stack.. (from parameter 8 and onwards)
+
+		// load the float parameter registers
+		// TODO: do this in reverse, and jump past the ones we dont need.
+		addi r11, r3, FLOAT_OFFSET
+		lfsu fp1, 4(r11)
+		lfsu fp2, 4(r11)
+		lfsu fp3, 4(r11)
+		lfsu fp4, 4(r11)
+		lfsu fp5, 4(r11)
+		lfsu fp6, 4(r11)
+		lfsu fp7, 4(r11)
+		lfsu fp8, 4(r11)
+		lfsu fp9, 4(r11)
+		lfsu fp10, 4(r11)
+		lfsu fp11, 4(r11)
+		lfsu fp12, 4(r11)
+		lfsu fp13, 4(r11)
+
+		// load the int parameter registers
+		// TODO: do this in reverse, and jump past the ones we dont need.
+		addi r11, r3, INT_OFFSET
+		lwzu r3, 4(r11)
+		lwzu r4, 4(r11)
+		lwzu r5, 4(r11)
+		lwzu r6, 4(r11)
+		lwzu r7, 4(r11)
+		lwzu r8, 4(r11)
+		lwzu r9, 4(r11)
+		lwzu r10, 4(r11)
+
+		// call the function
+		bctrl
+
+		// pop the stack and restore the link register
+		lwz sp, 0(sp) // restore callers stack
+		lwz r12, -8(sp) // fetch return link to caller
+		mtlr r12
+		blr // return to caller
+	}
+}
+
+#elif defined(ASM_AT_N_T)
+
+// AT&T assembly version
+
+// use this macro to stringify a #define
+#define STF(x) #x
+
+// different assemblers for different systems use different register names
+#if defined(__APPLE__)
+	// the apple assembler seems to use r0, r1, f0, etc
+	#define MKR(x) r##x
+	#define MKFP(x) f##x
+#else
+	// GC and PS3 both just use the register number with no annotation.
+	#define MKR(x) x
+	#define MKFP(x) x
+#endif
+
+// defines for identifying the registers
+#define R0 MKR(0)
+#define R1 MKR(1)
+#define R2 MKR(2)
+#define R3 MKR(3)
+#define R4 MKR(4)
+#define R5 MKR(5)
+#define R6 MKR(6)
+#define R7 MKR(7)
+#define R8 MKR(8)
+#define R9 MKR(9)
+#define R10 MKR(10)
+#define R11 MKR(11)
+#define R12 MKR(12)
+#define R31 MKR(31)
+
+#define FP0 MKFP(0)
+#define FP1 MKFP(1)
+#define FP2 MKFP(2)
+#define FP3 MKFP(3)
+#define FP4 MKFP(4)
+#define FP5 MKFP(5)
+#define FP6 MKFP(6)
+#define FP7 MKFP(7)
+#define FP8 MKFP(8)
+#define FP9 MKFP(9)
+#define FP10 MKFP(10)
+#define FP11 MKFP(11)
+#define FP12 MKFP(12)
+#define FP13 MKFP(13)
+
+// define some meaningful registers
+#define SP R1
+
+#define A0 R3
+#define A1 R4
+#define A2 R5
+#define A3 R6
+#define A4 R7
+#define A5 R8
+#define A6 R9
+#define A7 R10
+
+// macros to build the PPC ops we use in our code..
+#define MFLR(dest) "	mflr " STF(dest) "\n"
+#define MTLR(reg) "	mtlr " STF(reg) "\n"
+#define MTCTR(reg) "	mtctr " STF(reg) "\n"
+#define LI(dest, imm) "	li " STF(dest) ", " STF(imm) "\n"
+#define LWZ(dest, offset, base) "	lwz " STF(dest) ", " STF(offset) "(" STF(base) ")\n"
+#define LWZU(dest, offset, base) "	lwzu " STF(dest) ", " STF(offset) "(" STF(base) ")\n"
+#define LFSU(dest, offset, base) "	lfsu " STF(dest) ", " STF(offset) "(" STF(base) ")\n"
+#define STW(reg, offset, base) "	stw " STF(reg) ", " STF(offset) "(" STF(base) ")\n"
+#define STWUX(reg, base, offset) "	stwux " STF(reg) ", " STF(base) ", " STF(offset) "\n"
+#define ADDI(dest, src, imm) "	addi " STF(dest) ", " STF(src) ", " STF(imm) "\n"
+#define AND(dest, arg1, arg2) "	and " STF(dest) ", " STF(arg1) ", " STF(arg2) "\n"
+#define NEG(dest, src) "	neg " STF(dest) ", " STF(src) "\n"
+#define SLWI(dest, src, shift) "	slwi " STF(dest) ", " STF(src) ", " STF(shift) "\n"
+#define BCTRL() "	bctrl\n"
+#define BLR() "	blr\n"
+
+// ppcArgsType is an array containing a byte type (enum argTypes) for each argument.
+// stackArgSize is the size in bytes for how much data to put on the stack frame
+// -------------------------------------------------------------------
+extern "C" asQWORD ppcFunc(const asDWORD* argsPtr, int StackArgSize, asDWORD func);
+// -------------------------------------------------------------------
+asm(
+	"	.text\n"
+	"	.align 2\n"
+	"	.p2align 4,,15\n"
+	"	.globl _ppcFunc\n"
+	"_ppcFunc:\n"
+	// store the link register
+	MFLR(R12)
+	STW(R12, -8, SP)
+	// store the backchain register and push the stack
+	SLWI(R12, A1, 1)
+	ADDI(R12, R12, 39)
+	LI(R11, -16)
+	AND(R12, R12, R11)
+	NEG(R12, R12)
+	STWUX(SP, SP, R12)
+	// set function pointer since we'll be overwriting r5
+	MTCTR(A2)
+	// write excess parameters to the stack.. (from parameter 8 and onwards)
+
+	// load the float parameter registers
+	// TODO: do this in reverse, and jump past the ones we dont need.
+	ADDI(R11, A0, FLOAT_OFFSET)
+	LFSU(FP1, 4, R11)
+	LFSU(FP2, 4, R11)
+	LFSU(FP3, 4, R11)
+	LFSU(FP4, 4, R11)
+	LFSU(FP5, 4, R11)
+	LFSU(FP6, 4, R11)
+	LFSU(FP7, 4, R11)
+	LFSU(FP8, 4, R11)
+	LFSU(FP9, 4, R11)
+	LFSU(FP10, 4, R11)
+	LFSU(FP11, 4, R11)
+	LFSU(FP12, 4, R11)
+	LFSU(FP13, 4, R11)
+	// load the int parameter registers
+	// TODO: do this in reverse, and jump past the ones we dont need.
+	ADDI(R11, A0, INT_OFFSET)
+	LWZU(A0, 4, R11)
+	LWZU(A1, 4, R11)
+	LWZU(A2, 4, R11)
+	LWZU(A3, 4, R11)
+	LWZU(A4, 4, R11)
+	LWZU(A5, 4, R11)
+	LWZU(A6, 4, R11)
+	LWZU(A7, 4, R11)
+	// call the function
+	BCTRL()
+	// pop the stack and restore the link register
+	LWZ(SP, 0, SP) // restore callers stack
+	LWZ(R12, -8, SP) // fetch return link to caller
+	MTLR(R12)
+	BLR()
+	"	.align 4\n"
+);
+
+/*
 // ppcArgsType is an array containing a byte type (enum argTypes) for each argument.
 // stackArgSize is the size in bytes for how much data to put on the stack frame
 // -------------------------------------------------------------------
@@ -347,41 +558,46 @@ asm(""
 	"ppcArgsType:\n"
 	" .long _ppcArgsType\n"
 );
+*/
+
+#endif
 
 // puts the arguments in the correct place in the stack array. See comments above.
 // ------------------------------------------------------------------
 void stackArgs(const asDWORD *args, int& numIntArgs, int& numFloatArgs, int& numDoubleArgs)
 // ------------------------------------------------------------------
 {
-	// asm("trap");
 	int i;
 
 	int argWordPos = numIntArgs + numFloatArgs + (numDoubleArgs*2) ;
 
 	for(i = 0; i < AS_PPC_MAX_ARGS; i++)
 	{
-		if ( ppcArgsType[i] eq ppcENDARG )
+		if( ppcArgsType[i] == ppcENDARG )
 			break;
 
-		if( ppcArgsType[i] eq ppcFLOATARG )
+		if( ppcArgsType[i] == ppcFLOATARG )
 		{
 			// stow float
-			((float*)ppcArgs)[argWordPos] = (float)(args[i]);
+			((float*)ppcArgs)[argWordPos] = *(float*)&args[i];
+			if(numFloatArgs < AS_MAX_REG_FLOATS)
+				((float*)ppcArgs)[AS_FLOAT_REGS + numFloatArgs] = *(float*)&args[i];
 			numFloatArgs++;
 			argWordPos++; //add one word
 		}
-		if ( ppcArgsType[i] eq ppcDOUBLEARG )
+		if( ppcArgsType[i] == ppcDOUBLEARG )
 		{
 			// stow double
-			((double*)ppcArgs)[argWordPos] = (double)(args[i]);
+			((double*)ppcArgs)[argWordPos] = (double&)args[i];
 			numDoubleArgs++;
 			argWordPos+=2; //add two words
 		}
-
-		if( ppcArgsType[i] eq ppcINTARG )
+		if( ppcArgsType[i] == ppcINTARG )
 		{
 			// stow register
-			((int*)ppcArgs)[argWordPos] = (int)(args[i]);
+			((int*)ppcArgs)[argWordPos] = (int)args[i];
+			if(i < AS_MAX_REG_INTS)
+				((int*)ppcArgs)[AS_INT_REGS + i] = (int)args[i];
 			numIntArgs++;
 			argWordPos++;
 		}
@@ -398,13 +614,13 @@ asQWORD CallCDeclFunction(const asDWORD* pArgs, int argSize, asDWORD func)
 
 	// put the arguments in the correct places in the ppcArgs array
 	if(argSize > 0)
-		stackArgs( pArgs, intArgs, floatArgs, doubleArgs );
+		stackArgs(pArgs, intArgs, floatArgs, doubleArgs);
 
 	// asm(" trap\n nop\n");
 	// printf("calling ppcFunc, %d %d %d %p.. %p.. %d...\n", intArgs, floatArgs, doubleArgs, (void*)func, ppcFunc, (int)ppcArgs[0]);
 
 	//-return ppcFunc(intArgs << 2, floatArgs << 2, restArgs << 2, func);
-	return ppcFunc( ppcArgs, argSize, func);
+	return ppcFunc(ppcArgs, argSize << 2, func);
 }
 
 // This function is identical to CallCDeclFunction, with the only difference that
@@ -418,15 +634,16 @@ asQWORD CallThisCallFunction(const void *obj, const asDWORD* pArgs, int argSize,
 	int doubleArgs = 0;
 
 	ppcArgs[0] = (asDWORD) obj;
+	ppcArgs[AS_INT_REGS] = (asDWORD) obj;
 	ppcArgsType[0] = ppcINTARG;
 
 	// put the arguments in the correct places in the ppcArgs array
-	if (argSize > 0)
-		stackArgs( pArgs, intArgs, floatArgs, doubleArgs );
+	if(argSize > 0)
+		stackArgs(pArgs, intArgs, floatArgs, doubleArgs);
 
 	// asm(" trap\n nop\n");
 	// printf("calling from CallThisCall...\n");
-	return ppcFunc( pArgs, argSize + sizeof(obj), func);
+	return ppcFunc(pArgs, (argSize+sizeof(obj)) << 2, func);
 }
 
 // This function is identical to CallCDeclFunction, with the only difference that
@@ -439,19 +656,21 @@ asQWORD CallThisCallFunction_objLast(const void *obj, const asDWORD* pArgs, int 
 	int floatArgs = 0;
 	int doubleArgs = 0;
 
-	stackArgs( pArgs, intArgs, floatArgs, doubleArgs );
+	stackArgs(pArgs, intArgs, floatArgs, doubleArgs);
 
-	int numArgs = intArgs + floatArgs + doubleArgs ;
-	if( numArgs < AS_PPC_MAX_ARGS )
+	int numArgs = intArgs + floatArgs + doubleArgs;
+	if(numArgs < AS_PPC_MAX_ARGS)
 	{
 		int argPos = intArgs + floatArgs + (doubleArgs*2/*words*/);
 		ppcArgs[argPos] = (asDWORD) obj;
+		if(argPos < AS_MAX_REG_INTS)
+			ppcArgs[AS_INT_REGS + argPos] = (asDWORD) obj;
 		ppcArgsType[numArgs] = ppcINTARG;
 	}
 
 	// asm(" trap\n nop\n");
 	// printf("calling from CallThisCallFunction_objlast...\n");
-	return ppcFunc( pArgs, argSize+sizeof(obj), func );
+	return ppcFunc(pArgs, (argSize+sizeof(obj)) << 2, func);
 }
 
 // This function should prepare system functions so that it will be faster to call them
@@ -459,7 +678,6 @@ asQWORD CallThisCallFunction_objLast(const void *obj, const asDWORD* pArgs, int 
 int PrepareSystemFunction(asCScriptFunction *func, asSSystemFunctionInterface *internal, asCScriptEngine *engine)
 // -------------------------------------------------------------------
 {
-	// asm("trap");
 	// UNUSED(engine); //pecan 2006.6.8
 
 	// References are always returned as primitive data
@@ -592,14 +810,21 @@ int PrepareSystemFunction(asCScriptFunction *func, asSSystemFunctionInterface *i
 	return 0;
 }
 
+#define STFS(reg, output) "stfs " STF(reg) ", " STF(output) "\n"
+#define STFD(reg, output) "stfd " STF(reg) ", " STF(output) "\n"
+
 // -------------------------------------------------------------------
 asDWORD GetReturnedFloat()
 // -------------------------------------------------------------------
 {
 	asDWORD f;
 
-	//asm("swc1 $f0, %0\n" : "=m"(f));
-	asm(" stfs f0, %0\n" : "=m"(f));
+#if defined(ASM_INTEL)
+	// note: XBox 360 returns floats in FP1, not FP0 like other compilers..
+	__asm stfs fp1, f
+#elif defined(ASM_AT_N_T)
+	asm(STFS(FP0, %0) : "=m"(f));
+#endif
 
 	return f;
 }
@@ -611,19 +836,19 @@ asQWORD GetReturnedDouble()
 {
 	asQWORD f;
 
-	//asm("swc1 $f0, %0\n" : "=m"(f));
-	asm(" stfd f0, %0\n" : "=m"(f));
+#if defined(ASM_INTEL)
+	// note: XBox 360 returns floats in FP1, not FP0 like other compilers..
+	__asm stfd fp1, f
+#elif defined(ASM_AT_N_T)
+	asm(STFD(FP0, %0) : "=m"(f));
+#endif
 
 	return f;
 }
 
-// -------------------------------------------------------------------
 int CallSystemFunction(int id, asCContext *context, void *objectPointer)
-// -------------------------------------------------------------------
 {
-//	asm("trap");
 	memset( ppcArgsType, 0, sizeof(ppcArgsType));
-	id = -id - 1;
 
 	asCScriptEngine *engine = context->engine;
 	asCScriptFunction *descr = engine->scriptFunctions[id];
@@ -631,7 +856,7 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 
 	int callConv = sysFunc->callConv;
 	if( callConv == ICC_GENERIC_FUNC || callConv == ICC_GENERIC_METHOD )
-		return context->CallGeneric(-id-1, objectPointer);
+		return context->CallGeneric(id, objectPointer);
 
 	asQWORD retQW = 0;
 
@@ -640,7 +865,6 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 	asDWORD *args = context->stackPointer;
 	void *retPointer = 0;
 	void *obj = 0;
-	asDWORD *vftable;
 	int popSize = paramSize;
 
 	context->objectType = descr->returnType.GetObjectType();
@@ -750,25 +974,25 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 	case ICC_CDECL_RETURNINMEM:
 	case ICC_STDCALL:
 	case ICC_STDCALL_RETURNINMEM:
-		retQW = CallCDeclFunction( args, paramSize, (asDWORD)func );
-		break;
-	case ICC_THISCALL:
-	case ICC_THISCALL_RETURNINMEM:
-		retQW = CallThisCallFunction(obj, args, paramSize, (asDWORD)func );
-		break;
-	case ICC_VIRTUAL_THISCALL:
-	case ICC_VIRTUAL_THISCALL_RETURNINMEM:
-		// Get virtual function table from the object pointer
-		vftable = *(asDWORD**)obj;
-		retQW = CallThisCallFunction( obj, args, paramSize, vftable[asDWORD(func)>>2] );
-		break;
-	case ICC_CDECL_OBJLAST:
-	case ICC_CDECL_OBJLAST_RETURNINMEM:
-		retQW = CallThisCallFunction_objLast( obj, args, paramSize, (asDWORD)func );
+		retQW = CallCDeclFunction(args, paramSize, (asDWORD)func);
 		break;
 	case ICC_CDECL_OBJFIRST:
 	case ICC_CDECL_OBJFIRST_RETURNINMEM:
-		retQW = CallThisCallFunction( obj, args, paramSize, (asDWORD)func );
+	case ICC_THISCALL:
+	case ICC_THISCALL_RETURNINMEM:
+		retQW = CallThisCallFunction(obj, args, paramSize, (asDWORD)func);
+		break;
+	case ICC_VIRTUAL_THISCALL:
+	case ICC_VIRTUAL_THISCALL_RETURNINMEM:
+	{
+		// Get virtual function table from the object pointer
+		asDWORD *vftable = *(asDWORD**)obj;
+		retQW = CallThisCallFunction(obj, args, paramSize, vftable[asDWORD(func)>>2]);
+		break;
+	}
+	case ICC_CDECL_OBJLAST:
+	case ICC_CDECL_OBJLAST_RETURNINMEM:
+		retQW = CallThisCallFunction_objLast(obj, args, paramSize, (asDWORD)func);
 		break;
 	default:
 		context->SetInternalException(TXT_INVALID_CALLING_CONVENTION);
@@ -781,7 +1005,7 @@ int CallSystemFunction(int id, asCContext *context, void *objectPointer)
 		// Need to free the complex objects passed by value
 		args = context->stackPointer;
 		if( callConv >= ICC_THISCALL && !objectPointer )
-		    args++;
+			args++;
 
 		int spos = 0;
 		for( int n = 0; n < (int)descr->parameterTypes.GetLength(); n++ )
@@ -876,4 +1100,3 @@ END_AS_NAMESPACE
 #endif // AS_MAX_PORTABILITY
 
 //------------------------------------------------------------------
-
