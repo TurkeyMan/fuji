@@ -21,6 +21,4 @@ struct TgaHeader
 };
 #pragma pack ()
 
-SourceImage* LoadTarga(const char *pFilename);
-
 #endif

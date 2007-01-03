@@ -5,9 +5,9 @@
 
 #include "ConvertTex.h"
 #include "IntImage.h"
-#include "LoadTarga.h"
-#include "LoadBMP.h"
 
+SourceImage* LoadTarga(const char *pFilename);
+SourceImage* LoadBMP(const char *pFilename);
 SourceImage* LoadPNG(const char *pFilename);
 
 #if defined(WIN32)
@@ -31,6 +31,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format);
 void ATICompress(Pixel *pSourceBuffer, int width, int height, MFTextureFormat targetFormat, void *pOutputBuffer);
 void PremultiplyAlpha(SourceImage *pImage);
+void WriteHeader(const char *pName, MFTextureTemplateData *pTemplate, FILE *pFile);
 
 bool IsPowerOf2(int x)
 {
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
 
 	int a;
 	bool premultipliedAlpha = true;
+	bool outputHeader = false;
 
 	// process command line
 	for(a=1; a<argc; a++)
@@ -180,6 +182,13 @@ int main(int argc, char *argv[])
 		}
 
 		MFString_Cat(outFile, ".tex");
+	}
+	else
+	{
+		if(!MFString_CaseCmp(&outFile[MFString_Length(outFile) - 2], ".h"))
+		{
+			outputHeader = true;
+		}
 	}
 
 	// load image
@@ -312,17 +321,18 @@ int main(int argc, char *argv[])
 	pTemplate->platformFormat = gMFTexturePlatformFormat[(int)platform][(int)targetFormat];
 
 	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
-		pTemplate->swizzled = 1;
+		pTemplate->flags |= TEX_Swizzled;
 
-	if(pImage->opaque = true)
-		pTemplate->alpha = 0;
-	else if(pImage->oneBitAlpha)
-		pTemplate->alpha = 3;
-	else
-		pTemplate->alpha = 1;
+	if(!pImage->opaque)
+	{
+		if(pImage->oneBitAlpha)
+			pTemplate->flags |= 3;
+		else
+			pTemplate->flags |= 1;
+	}
 
 	if(premultipliedAlpha)
-		pTemplate->premultipliedAlpha = 1;
+		pTemplate->flags |= TEX_PreMultipliedAlpha;
 
 	pTemplate->mipLevels = pImage->mipLevels;
 	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
@@ -368,15 +378,7 @@ int main(int argc, char *argv[])
 	// destroy source
 	DestroyImage(pImage);
 
-	// fix up pointers
-	for(a=0; a<pTemplate->mipLevels; a++)
-	{
-		MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
-		MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
-	}
-	MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
-
-	// write out texture..
+	// open output file..
 	FILE *pFile = fopen(outFile, "wb");
 
 	if(!pFile)
@@ -385,13 +387,38 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	fwrite(pOutputBuffer, 1, imageBytes, pFile);
+	// write out image
+	if(outputHeader)
+	{
+		char name[256];
+
+		char *pOffset = MFString_RChr(outFile, '\\') + 1;
+		if(pOffset == (char*)0x1) pOffset = MFString_RChr(outFile, '/') + 1;
+		if(pOffset == (char*)0x1) pOffset = outFile;
+
+		MFString_Copy(name, pOffset);
+
+		name[MFString_Length(name) - 2] = 0;
+		WriteHeader(name, pTemplate, pFile);
+	}
+	else
+	{
+		// fix up pointers
+		for(a=0; a<pTemplate->mipLevels; a++)
+		{
+			MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
+			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
+		}
+		MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
+
+		fwrite(pOutputBuffer, 1, imageBytes, pFile);
+	}
+
 	fclose(pFile);
 
 	free(pOutputBuffer);
 
 	printf(MFStr("> %s\n", outFile));
-	// done! :)
 
 	return 0;
 }
@@ -943,4 +970,40 @@ void PremultiplyAlpha(SourceImage *pImage)
 			++pPx;
 		}
 	}
+}
+
+void WriteHeader(const char *pName, MFTextureTemplateData *pTemplate, FILE *pFile)
+{
+	fprintf(pFile, "// %s.h\n", pName);
+	fprintf(pFile, "// Generated using ConvertTEX for the Mount Fuji Engine by Manu Evans\n\n");
+
+	fprintf(pFile, "const int %s_width  = %d;\n", pName, pTemplate->pSurfaces[0].width);
+	fprintf(pFile, "const int %s_height = %d;\n", pName, pTemplate->pSurfaces[0].height);
+	fprintf(pFile, "const int %s_format = %d;\n", pName, pTemplate->imageFormat);
+	fprintf(pFile, "const int %s_bpp    = %d;\n", pName, pTemplate->pSurfaces[0].bitsPerPixel);
+	fprintf(pFile, "const int %s_flags  = 0x%08X;\n\n", pName, pTemplate->flags);
+
+	fprintf(pFile, "unsigned char %s_data[%d] =\n", pName, pTemplate->pSurfaces[0].bufferLength);
+	fprintf(pFile, "{\n");
+
+	int y = pTemplate->pSurfaces[0].height;
+	int xbytes = (pTemplate->pSurfaces[0].width * pTemplate->pSurfaces[0].bitsPerPixel) / 8;
+
+	unsigned char *pBuffer = (unsigned char *)pTemplate->pSurfaces[0].pImageData;
+
+	for(int a=0; a<pTemplate->pSurfaces[0].height; ++a)
+	{
+		fprintf(pFile, "\t");
+
+		for(int b=xbytes-1; b; --b)
+		{
+			fprintf(pFile, "%d,", *pBuffer);
+			++pBuffer;
+		}
+
+		fprintf(pFile, a == y-1 ? "%d\n" : "%d,\n", *pBuffer);
+		++pBuffer;
+	}
+
+	fprintf(pFile, "};\n");
 }

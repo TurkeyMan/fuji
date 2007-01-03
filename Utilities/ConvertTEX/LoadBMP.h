@@ -40,6 +40,4 @@ struct BMPPaletteEntry /**** Colormap entry structure ****/
 	unsigned char  rgbReserved;      /* Reserved */
 };
 
-SourceImage* LoadBMP(const char *pFilename);
-
 #endif
