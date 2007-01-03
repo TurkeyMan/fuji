@@ -57,16 +57,14 @@ static const char * const gPS2Buttons[] =
 static char padBuf[256] __attribute__((aligned(64)));
 static char actAlign[6];
 static int actuators;
-static int pad_valid;
 
 struct padButtonStatus buttons;
-u32 paddata;
-u32 old_pad = 0;
 u32 new_pad;
 
 
-
+// Using the X* variety of modules doesnt work for me, so I stick to the vanilla versions
 #define ROM_PADMAN
+
 static int
 loadModules(void)
 {
@@ -97,13 +95,9 @@ loadModules(void)
 int waitPadReady(int port, int slot)
 {
     int state;
-    int lastState;
-    char stateString[16];
 
     state = padGetState(port, slot);
-    lastState = -1;
     while((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
-	lastState = state;
 	state=padGetState(port, slot);
     }
     return 0;
@@ -154,8 +148,6 @@ initializePad(int port, int slot)
 
     // When using MMODE_LOCK, user cant change mode with Select button
     padSetMainMode(port, slot, PAD_MMODE_DUALSHOCK, PAD_MMODE_LOCK);
-
-
 
     waitPadReady(port, slot);
     actuators = padInfoAct(port, slot, -1, 0);
@@ -223,7 +215,6 @@ void MFInput_UpdatePlatformSpecific()
 {
     int ret;
     int port =0, slot = 0;
-    pad_valid = 0;
 
     MFCALLSTACK;
     ret=padGetState(port, slot);
@@ -237,19 +228,12 @@ void MFInput_UpdatePlatformSpecific()
 	ret=padGetState(port, slot);
     }
 
-	pad_valid = 1;
     ret = padRead(port, slot, &buttons);
                     
     if (ret != 0) {
-	paddata = 0xffff ^ buttons.btns;
-
-	new_pad = paddata & ~old_pad;
-	old_pad = paddata;
-	pad_valid = 1;
+	new_pad = 0xffff ^ buttons.btns;
 	return;
     }
-
-
     
 }
 
@@ -266,11 +250,6 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	MFCALLSTACK;
 
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
-	if(!pad_valid) return;
-
-	// comment this out if we want button presses to be edge-triggered
-	// if not commented, we will have level triggered buttons.
-        new_pad = paddata;
 	
 	pGamepadState->values[Button_P2_Cross]    = (new_pad & PAD_CROSS )?1.0f:0.0f;
 	pGamepadState->values[Button_P2_Circle]   = (new_pad & PAD_CIRCLE)?1.0f:0.0f;

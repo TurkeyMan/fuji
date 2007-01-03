@@ -72,7 +72,7 @@ static const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
 	MFBIT(FP_PC)|MFBIT(FP_XBox)|MFBIT(FP_Linux),	// TexFmt_A8R8G8B8
-	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_Linux),	// TexFmt_A8B8G8R8
+	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_Linux)|MFBIT(FP_PS2),	// TexFmt_A8B8G8R8
 	MFBIT(FP_XBox),					// TexFmt_B8G8R8A8
 	MFBIT(FP_XBox),					// TexFmt_R8G8B8A8
 
@@ -87,7 +87,7 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_A1R5G5B5
 	MFBIT(FP_XBox),					// TexFmt_R5G5B5A1
-	MFBIT(FP_PSP),					// TexFmt_A1B5G5R5
+	MFBIT(FP_PSP)|MFBIT(FP_PS2),			// TexFmt_A1B5G5R5
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_A4R4G4B4
 	MFBIT(FP_PSP),					// TexFmt_A4B4G4R4
@@ -96,8 +96,8 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 	MFBIT(FP_PC),					// TexFmt_ABGR_F16
 	MFBIT(FP_PC),					// TexFmt_ABGR_F32
 
-	MFBIT(FP_PSP)|MFBIT(FP_XBox),	// TexFmt_I8
-	MFBIT(FP_PSP),					// TexFmt_I4
+	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_PS2),	// TexFmt_I8
+	MFBIT(FP_PSP)|MFBIT(FP_PS2),					// TexFmt_I4
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_DXT1
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_DXT2
@@ -482,7 +482,6 @@ uint32 MFTexture_GetPlatformAvailability(int format)
 {
 	return gMFTexturePlatformAvailability[format];
 }
-
 bool MFTexture_IsAvailableOnPlatform(int format, int platform)
 {
 	return (gMFTexturePlatformAvailability[format] & MFBIT(platform)) != 0;

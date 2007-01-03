@@ -23,7 +23,7 @@ void Game_Init()
 
 
 #define CHK_BUTTON(x) \
-     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  MFDebug_Message(#x" ");
+     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  printf(#x"\n");
 
 void Game_Update()
 {
@@ -31,7 +31,7 @@ void Game_Update()
 
 	MFDebug_Message(MFStr("Time is %f- %f FPS\t", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS()));
 	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_LX, IDD_Gamepad), MFInput_Read(Axis_LY, IDD_Gamepad)));
-	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_RX, IDD_Gamepad), MFInput_Read(Axis_RY, IDD_Gamepad)));
+	MFDebug_Message(MFStr("Right (%1.4f, %1.4f) ", MFInput_Read(Axis_RX, IDD_Gamepad), MFInput_Read(Axis_RY, IDD_Gamepad)));
 
 	CHK_BUTTON(Button_P2_Cross);
 	CHK_BUTTON(Button_P2_Circle);

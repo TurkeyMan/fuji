@@ -129,7 +129,7 @@ uint64 MFSystem_GetRTCFrequency()
 	// This implies that the accuracy of this timer is:
 	//   1 / 576,000 = 0.0000017361 seconds (~1.74 usec!)
 
-	return  576000;
+	return 1000000;
 }
 
 const char * MFSystem_GetSystemName()

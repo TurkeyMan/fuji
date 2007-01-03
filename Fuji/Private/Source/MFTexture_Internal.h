@@ -71,6 +71,8 @@ struct MFTexture
 	IDirect3DTexture9 *pTexture;
 #elif defined(_LINUX) || defined(_OSX)
 	GLuint textureID;
+#elif defined(_PS2)
+	unsigned int vramAddr;
 #else
 	// nothing
 #endif
