@@ -1356,6 +1356,9 @@
 			</Filter>
 		</Filter>
 		<File
+			RelativePath=".\Releasenotes.txt">
+		</File>
+		<File
 			RelativePath=".\Todo.txt">
 		</File>
 	</Files>

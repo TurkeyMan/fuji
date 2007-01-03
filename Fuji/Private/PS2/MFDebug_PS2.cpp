@@ -5,7 +5,7 @@
 
 void MFDebug_Message(const char *pMessage)
 {
-	fprintf(stderr, "%s\n", pMessage);
+	printf("%s\n", pMessage);
 }
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)

@@ -65,59 +65,6 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	}
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
-{
-	MFCALLSTACK;
-
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
-
-	if(!pTexture)
-	{
-		pTexture = gTextureBank.Create();
-		pTexture->refCount = 0;
-
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &(pTexture->textureID));
-		glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		int internalFormat = gMFTexturePlatformFormat[FP_Linux][format];
-
-		if(generateMipChain)
-		{
-			gluBuild2DMipmaps(GL_TEXTURE_2D, gLinuxFormats[internalFormat].internalFormat, width, height, gLinuxFormats[internalFormat].format, gLinuxFormats[internalFormat].type, pData);
-		}
-		else
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, gLinuxFormats[internalFormat].internalFormat, width, height, 0, gLinuxFormats[internalFormat].format, gLinuxFormats[internalFormat].type, pData);
-		}
-
-		MFString_Copy(pTexture->name, pName);
-
-		// create template data
-		char *pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-		pTexture->pTemplateData->imageFormat = format;
-		pTexture->pTemplateData->platformFormat = internalFormat;
-
-		pTexture->pTemplateData->mipLevels = 1;
-
-		pTexture->pTemplateData->pSurfaces->width = width;
-		pTexture->pTemplateData->pSurfaces->height = height;
-		pTexture->pTemplateData->pSurfaces->pImageData = (char*)pData;
-	}
-
-	pTexture->refCount++;
-
-	return pTexture;
-}
-
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	MFCALLSTACK;

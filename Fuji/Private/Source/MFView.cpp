@@ -261,17 +261,78 @@ MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
 {
 	MFMatrix proj, viewProj, view;
+
+	// get the perspective projection matrix
 	MFViewInternal_ProjectionMatrix(&proj);
-	view.Inverse(MFView_GetCameraMatrix());
+
+	// in this special case, we'll make the projection matrix produce a 0-1 value in z across all platforms (some platforms project into different 'z' spaces)
+	float zn = pCurrentView->nearPlane;
+	float zf = pCurrentView->farPlane;
+	float zd = zf-zn;
+	float zs = zf/zd;
+	proj.m[10] = zs;
+	proj.m[14] = -zn*zs;
+
+	// get the view matrix (which we will need to calculate if we are in ortho mode)
+	if(!MFView_IsOrtho())
+		view = MFView_GetWorldToViewMatrix();
+	else
+		view.Inverse(MFView_GetCameraMatrix());
 
 	viewProj.Multiply4x4(view, proj);
 
+	// apply the projection and perform the perspective divide
 	MFVector transformed;
 	transformed = ApplyMatrix(point, viewProj);
 	transformed *= MFRcp(transformed.w);
 
+	// and shift the result into the ortho rect
 	transformed.x += 1.0f;
 	transformed.y = -transformed.y + 1.0f;
 
 	*pResult = transformed * MakeVector(pCurrentView->orthoRect.width*0.5f, pCurrentView->orthoRect.height*0.5f) + MakeVector(pCurrentView->orthoRect.x, pCurrentView->orthoRect.y);
+}
+
+void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult, MFVector *pResultRayDir)
+{
+	MFMatrix proj, viewProj, view;
+
+	// get the perspective projection matrix
+	MFViewInternal_ProjectionMatrix(&proj);
+
+	// in this special case, we'll make the projection matrix produce a 0-1 value in z across all platforms (some platforms project into different 'z' spaces)
+	float zn = pCurrentView->nearPlane;
+	float zf = pCurrentView->farPlane;
+	float zd = zf-zn;
+	float zs = zf/zd;
+	proj.m[10] = zs;
+	proj.m[14] = -zn*zs;
+
+	// get the view matrix (which we will need to calculate if we are in ortho mode)
+	if(!MFView_IsOrtho())
+		view = MFView_GetWorldToViewMatrix();
+	else
+		view.Inverse(MFView_GetCameraMatrix());
+
+	viewProj.Multiply4x4(view, proj);
+
+	// inverse projection
+	viewProj.Inverse();
+
+	// which the point from ortho space back into homogeneous space
+	*pResult = point;
+	*pResult -= MakeVector(pCurrentView->orthoRect.x, pCurrentView->orthoRect.y);
+	*pResult *= MakeVector(MFRcp(pCurrentView->orthoRect.width*0.5f), MFRcp(pCurrentView->orthoRect.height*0.5f));
+	pResult->x -= 1.0f;
+	pResult->y = -pResult->y + 1.0f;
+
+	// and un-project
+	// TODO: undo the perspective divide (fuck)
+	*pResult = ApplyMatrix(*pResult, viewProj);
+
+	if(pResultRayDir)
+	{
+		// calculate the pixels rays direction..
+
+	}
 }

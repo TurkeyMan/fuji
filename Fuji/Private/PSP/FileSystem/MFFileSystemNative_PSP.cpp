@@ -312,7 +312,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	uint32 fileSize = 0;
 
-	pFilename = MFStr("%s/%s", gPSPSystemPath, pNative->pFilename);
+	pFilename = MFStr("%s/%s", gPSPSystemPath, pFilename);
 	SceUID hFile = sceIoOpen(pFilename, PSP_O_RDONLY, 0777);
 
 	if(hFile > 0)
@@ -333,7 +333,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 	bool exists = false;
 
-	pFilename = MFStr("%s/%s", gPSPSystemPath, pNative->pFilename);
+	pFilename = MFStr("%s/%s", gPSPSystemPath, pFilename);
 	SceUID hFile = sceIoOpen(pFilename, PSP_O_RDONLY, 0777);
 
 	if(hFile > 0)

@@ -62,7 +62,25 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 
-			premultipliedAlpha = pData->pTextures[pData->diffuseMapIndex]->pTemplateData->premultipliedAlpha;
+			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
+
+			if(premultipliedAlpha)
+			{
+				// we need to scale the colour intensity by the vertex alpha since it wont happen during the blend.
+				MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
+				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+				MFRendererPC_SetTextureStageState(1, D3DTSS_CONSTANT, 0);
+
+				MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+				MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CONSTANT);
+				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			}
+			else
+			{
+				MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			}
 		}
 		else
 		{

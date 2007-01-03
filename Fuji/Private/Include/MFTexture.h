@@ -95,12 +95,18 @@ enum MFTextureFormat
 };
 
 /**
- * Create texture flags.
- * Flags that can be passed to CreateTexture.
+ * Texture flags.
+ * Flags to control the way textures are created.
  */
-enum CreateTextureFlags
+enum TextureFlags
 {
-	TEX_VerticalMirror = 1 /**< Mirrors the texture vertically */
+	// Internal Flags
+	TEX_AlphaMask = 0x3,				/**< Alpha mask. 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha */
+	TEX_PreMultipliedAlpha = MFBIT(2),	/**< Pre-multiplied alpha */
+	TEX_Swizzled = MFBIT(3),			/**< Texture data is swizzled for the platform */
+
+	// User Flags
+	TEX_CopyMemory = MFBIT(8)			/**< Takes a copy of the image buffer when calling MFTexture_CreateFromRawData() */
 };
 
 
@@ -126,13 +132,16 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
  * @param pData Pointer to a buffer containing the image data
  * @param width Image width.
  * @param height Image height.
- * @param format Format of the image data being read.
- * @param flags Flags to control aspects of the creation process.
+ * @param format Format of the image data being read. Only formats supported by the platform and TexFmt_A8R8G8B8 can be used.
+ * @param flags Texture creation flags.
  * @param generateMipChain If true, a mip-chain will be generated for the texture.
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
  * @return Pointer to an MFTexture structure representing the newly created texture.
+ * @remarks If TexFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFTexture_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
  * @see MFTexture_Create()
  * @see MFTexture_Destroy()
+ * @see MFTexture_GetPlatformAvailability()
+ * @see MFTexture_IsAvailableOnPlatform()
  */
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
 

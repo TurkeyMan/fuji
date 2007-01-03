@@ -38,6 +38,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 	if(pSetMaterial != pMaterial)
 	{
+		bool premultipliedAlpha = false;
+
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
@@ -49,13 +51,15 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			int height = pTexture->pTemplateData->pSurfaces[0].height;
 			char *pImageData = pTexture->pTemplateData->pSurfaces[0].pImageData;
 
-			sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, pTexture->pTemplateData->swizzled);
+			sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, (pTexture->pTemplateData->flags & TEX_Swizzled) ? 1 : 0);
 			sceGuTexImage(0, width, height, width, pImageData);
 			sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 			sceGuTexFilter(GU_LINEAR, GU_LINEAR);
 			sceGuTexScale(pData->textureMatrix.GetXAxis().Magnitude3(), pData->textureMatrix.GetYAxis().Magnitude3());
 			sceGuTexOffset(pData->textureMatrix.GetTrans().x, pData->textureMatrix.GetTrans().y);
 //			sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&pData->textureMatrix);
+
+			premultipliedAlpha = !!(pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
 		}
 		else
 		{

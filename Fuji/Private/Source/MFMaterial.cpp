@@ -15,8 +15,8 @@
 #include "MFFont.h"
 #include "MFInput.h"
 
-#include "SysLogo-256.h"
-#include "SysLogo-64.h"
+#include "SysLogo256.h"
+#include "SysLogo64.h"
 #if defined(_PSP)
 #include "connected.h"
 #include "disconnected.h"
@@ -91,8 +91,8 @@ void MFMaterial_InitModule()
 	}
 
 	// create the logo textures from raw data
-	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
-	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFTextureFormat)SysLogo256_format, SysLogo256_flags);
+	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFTextureFormat)SysLogo64_format, SysLogo64_flags);
 
 	// create standard materials
 	pNoneMaterial = MFMaterial_Create("_None");
@@ -106,11 +106,11 @@ void MFMaterial_InitModule()
 
 #if defined(_PSP)
 	// create PSP specific stock materials
-	MFTexture *pConnectedTexture = MFTexture_CreateFromRawData("connected", connected_data, connected_width, connected_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
-	MFTexture *pDisconnectedTexture = MFTexture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
-	MFTexture *pPowerTexture = MFTexture_CreateFromRawData("power", power_data, power_width, power_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
-	MFTexture *pChargingTexture = MFTexture_CreateFromRawData("charging", charging_data, charging_width, charging_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
-	MFTexture *pUSBTexture = MFTexture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, TexFmt_A8R8G8B8, TEX_VerticalMirror);
+	MFTexture *pConnectedTexture = MFTexture_CreateFromRawData("connected", connected_data, connected_width, connected_height, (MFTextureFormat)connected_format, connected_flags);
+	MFTexture *pDisconnectedTexture = MFTexture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, (MFTextureFormat)disconnected_format, disconnected_flags);
+	MFTexture *pPowerTexture = MFTexture_CreateFromRawData("power", power_data, power_width, power_height, (MFTextureFormat)power_format, power_flags);
+	MFTexture *pChargingTexture = MFTexture_CreateFromRawData("charging", charging_data, charging_width, charging_height, (MFTextureFormat)charging_format, charging_flags);
+	MFTexture *pUSBTexture = MFTexture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, (MFTextureFormat)usb_icon_format, usb_icon_flags);
 
 	pConnected = MFMaterial_Create("connected");
 	pDisconnected = MFMaterial_Create("disconnected");

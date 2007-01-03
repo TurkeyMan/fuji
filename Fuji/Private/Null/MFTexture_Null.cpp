@@ -20,39 +20,6 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 {
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
-{
-	MFCALLSTACK;
-
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
-
-	if(!pTexture)
-	{
-		pTexture = gTextureBank.Create();
-		pTexture->refCount = 0;
-
-		MFString_Copy(pTexture->name, pName);
-
-		// create template data
-		char *pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-		pTexture->pTemplateData->imageFormat = format;
-		pTexture->pTemplateData->platformFormat = 0;
-
-		pTexture->pTemplateData->mipLevels = 1;
-
-		pTexture->pTemplateData->pSurfaces->width = width;
-		pTexture->pTemplateData->pSurfaces->height = height;
-	}
-
-	pTexture->refCount++;
-
-	return pTexture;
-}
-
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	MFCALLSTACK;

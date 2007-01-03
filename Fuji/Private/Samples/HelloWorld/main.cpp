@@ -23,40 +23,36 @@ void Game_Init()
 
 
 #define CHK_BUTTON(x) \
-     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  printf(#x" ");
+     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  MFDebug_Message(#x" ");
 
 void Game_Update()
 {
-   
-     printf("Time is %f- %f FPS\t", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS());
-     printf("Left (%1.4f, %1.4f) ", 
-	     MFInput_Read(Axis_LX, IDD_Gamepad), MFInput_Read(Axis_LY, IDD_Gamepad));
-     printf("Left (%1.4f, %1.4f) ", 
-	     MFInput_Read(Axis_RX, IDD_Gamepad), MFInput_Read(Axis_RY, IDD_Gamepad));
-     
-     CHK_BUTTON(Button_P2_Cross);
-     CHK_BUTTON(Button_P2_Circle);
-     CHK_BUTTON(Button_P2_Box);
-     CHK_BUTTON(Button_P2_Triangle);
-     
-     CHK_BUTTON(Button_P2_L1);
-     CHK_BUTTON(Button_P2_R1);
-     CHK_BUTTON(Button_P2_L2);
-     CHK_BUTTON(Button_P2_R2);
-     
-     CHK_BUTTON(Button_P2_Start);
-     CHK_BUTTON(Button_P2_Select);
-     
-     CHK_BUTTON(Button_P2_L3);
-     CHK_BUTTON(Button_P2_R3);
-     
-     CHK_BUTTON(Button_DUp);
-     CHK_BUTTON(Button_DDown);
-     CHK_BUTTON(Button_DLeft);
-     CHK_BUTTON(Button_DRight);
-     printf("\n");
-
 	MFCALLSTACK;
+
+	MFDebug_Message(MFStr("Time is %f- %f FPS\t", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS()));
+	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_LX, IDD_Gamepad), MFInput_Read(Axis_LY, IDD_Gamepad)));
+	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_RX, IDD_Gamepad), MFInput_Read(Axis_RY, IDD_Gamepad)));
+
+	CHK_BUTTON(Button_P2_Cross);
+	CHK_BUTTON(Button_P2_Circle);
+	CHK_BUTTON(Button_P2_Box);
+	CHK_BUTTON(Button_P2_Triangle);
+
+	CHK_BUTTON(Button_P2_L1);
+	CHK_BUTTON(Button_P2_R1);
+	CHK_BUTTON(Button_P2_L2);
+	CHK_BUTTON(Button_P2_R2);
+
+	CHK_BUTTON(Button_P2_Start);
+	CHK_BUTTON(Button_P2_Select);
+
+	CHK_BUTTON(Button_P2_L3);
+	CHK_BUTTON(Button_P2_R3);
+
+	CHK_BUTTON(Button_DUp);
+	CHK_BUTTON(Button_DDown);
+	CHK_BUTTON(Button_DLeft);
+	CHK_BUTTON(Button_DRight);
 }
 
 void Game_Draw()

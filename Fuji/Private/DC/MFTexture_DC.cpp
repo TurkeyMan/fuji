@@ -32,21 +32,6 @@ Texture* MFTexture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-Texture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, int format, uint32 flags, bool generateMipChain, uint32 *pPalette)
-{
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
-
-	if(!pTexture)
-	{
-		pTexture = gTextureBank.Create();
-		pTexture->refCount = 0;
-	}
-
-	pTexture->refCount++;
-
-	return pTexture;
-}
-
 Texture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	MFDebug_Assert(false, "Not Written...");

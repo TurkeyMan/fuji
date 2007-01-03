@@ -338,7 +338,7 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		0,		// TexFmt_PSP_DXT5s
 	},
 
-	// Shese are indexes into an array of platform format data to be used at runtime
+	// These are indexes into an array of platform format data to be used at runtime
 	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
 	{ // Linux
 		0,	// TexFmt_A8R8G8B8

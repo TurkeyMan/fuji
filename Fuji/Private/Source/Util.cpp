@@ -30,7 +30,8 @@ static const char * const gPlatformStrings[FP_Max] =
 	"OSX",
 	"AMI",
 	"X360",
-	"PS3"
+	"PS3",
+	"WII"
 };
 
 static const char * const gPlatformNames[FP_Max] =
@@ -45,22 +46,24 @@ static const char * const gPlatformNames[FP_Max] =
 	"Mac OSX",
 	"Amiga",
 	"XBox 360",
-	"Platstation 3"
+	"Platstation 3",
+	"Nintendo Wii"
 };
 
 static MFEndian gPlatformEndian[FP_Max] =
 {
 	MFEndian_LittleEndian,
 	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,	// on big endian linux we will do runtime endian flipping
 	MFEndian_LittleEndian,
 	MFEndian_LittleEndian,
 	MFEndian_LittleEndian,
-	MFEndian_LittleEndian,
+	MFEndian_BigEndian,
+	MFEndian_LittleEndian,	// on big endian mac's we will do runtime endian flipping
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
-	MFEndian_BigEndian,
-	MFEndian_BigEndian,
+	MFEndian_BigEndian
 };
 
 const char * MFSystem_GetPlatformString(int platform)

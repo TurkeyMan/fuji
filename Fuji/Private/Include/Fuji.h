@@ -42,6 +42,7 @@ enum MFPlatform
 	FP_Amiga,	/**< Amiga */
 	FP_XBox360,	/**< XBox360 */
 	FP_PS3,		/**< Playstation 3 */
+	FP_Wii,		/**< Nintendo Wii */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
