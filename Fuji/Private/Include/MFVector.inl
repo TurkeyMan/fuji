@@ -517,6 +517,7 @@ inline MFVector MFVector::Cross3(const MFVector &v) const
 	t.x = y*v.z - z*v.y;
 	t.y = z*v.x - x*v.z;
 	t.z = x*v.y - y*v.x;
+	t.w = 0.f;
 
 	return t;
 }

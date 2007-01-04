@@ -71,7 +71,7 @@ static const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 
 static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
-	MFBIT(FP_PC)|MFBIT(FP_XBox)|MFBIT(FP_Linux),	// TexFmt_A8R8G8B8
+	MFBIT(FP_PC)|MFBIT(FP_XBox)|MFBIT(FP_Linux),				// TexFmt_A8R8G8B8
 	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_Linux)|MFBIT(FP_PS2),	// TexFmt_A8B8G8R8
 	MFBIT(FP_XBox),					// TexFmt_B8G8R8A8
 	MFBIT(FP_XBox),					// TexFmt_R8G8B8A8
@@ -87,7 +87,7 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_A1R5G5B5
 	MFBIT(FP_XBox),					// TexFmt_R5G5B5A1
-	MFBIT(FP_PSP)|MFBIT(FP_PS2),			// TexFmt_A1B5G5R5
+	MFBIT(FP_PSP)|MFBIT(FP_PS2),	// TexFmt_A1B5G5R5
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_A4R4G4B4
 	MFBIT(FP_PSP),					// TexFmt_A4B4G4R4
@@ -96,8 +96,8 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 	MFBIT(FP_PC),					// TexFmt_ABGR_F16
 	MFBIT(FP_PC),					// TexFmt_ABGR_F32
 
-	MFBIT(FP_PSP)|MFBIT(FP_XBox)|MFBIT(FP_PS2),	// TexFmt_I8
-	MFBIT(FP_PSP)|MFBIT(FP_PS2),					// TexFmt_I4
+	MFBIT(FP_PSP)|MFBIT(FP_PS2)|MFBIT(FP_XBox),	// TexFmt_I8
+	MFBIT(FP_PSP)|MFBIT(FP_PS2),				// TexFmt_I4
 
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_DXT1
 	MFBIT(FP_PC)|MFBIT(FP_XBox),	// TexFmt_DXT2
@@ -470,6 +470,72 @@ uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max] =
 		8,	// SCEGU_PFDXT1, //	TexFmt_PSP_DXT1s
 		9,	// SCEGU_PFDXT3, //	TexFmt_PSP_DXT3s
 		10,	// SCEGU_PFDXT5, //	TexFmt_PSP_DXT5s
+	},
+
+	{ // PS2
+		0,	//				 // TexFmt_A8R8G8B8
+		99,	// ????????????, //	TexFmt_A8B8G8R8
+		0,	//				 // TexFmt_B8G8R8A8
+		0,	//				 // TexFmt_R8G8B8A8
+
+		0,	//				 // TexFmt_A2R10G10B10
+		0,	//				 // TexFmt_A2B10G10R10
+
+		0,	//				 // TexFmt_A16B16G16R16
+
+		0,	//				 //	TexFmt_R5G6B5
+		0,	//				 // TexFmt_R6G5B5
+		0,	//				 // TexFmt_B5G6R5
+
+		0,	//				 //	TexFmt_A1R5G5B5
+		0,	//				 // TexFmt_R5G5B5A1
+		99,	// ????????????, //	TexFmt_A1B5G5R5
+
+		0,	//				 // TexFmt_A4R4G4B4
+		0,	//				 //	TexFmt_A4B4G4R4
+		0,	//				 // TexFmt_R4G4B4A4
+
+		0,	//				 // TexFmt_ABGR_F16
+		0,	//				 // TexFmt_ABGR_F32
+
+		99,	// ????????????, //	TexFmt_I8
+		99,	// ????????????, //	TexFmt_I4
+
+		0,	//				 // TexFmt_DXT1
+		0,	//				 // TexFmt_DXT2
+		0,	//				 // TexFmt_DXT3
+		0,	//				 // TexFmt_DXT4
+		0,	//				 // TexFmt_DXT5
+
+		0,	//				 //	TexFmt_PSP_DXT1
+		0,	//				 //	TexFmt_PSP_DXT3
+		0,	//				 //	TexFmt_PSP_DXT5
+
+		0,	//				 // TexFmt_XB_A8R8G8B8
+		0,	//				 // TexFmt_XB_A8B8G8R8
+		0,	//				 // TexFmt_XB_B8G8R8A8
+		0,	//				 // TexFmt_XB_R8G8B8A8
+
+		0,	//				 // TexFmt_XB_R5G6B5
+		0,	//				 // TexFmt_XB_R6G5B5
+
+		0,	//				 // TexFmt_XB_A1R5G5B5
+		0,	//				 // TexFmt_XB_R5G5B5A1
+
+		0,	//				 // TexFmt_XB_A4R4G4B4
+		0,	//				 // TexFmt_XB_R4G4B4A4
+
+		0,	//				 //	TexFmt_PSP_A8B8G8R8s
+		0,	//				 // TexFmt_PSP_B5G6R5s
+		0,	//				 //	TexFmt_PSP_A1B5G5R5s
+		0,	//				 //	TexFmt_PSP_A4B4G4R4s
+
+		0,	//				 //	TexFmt_PSP_I8s
+		0,	//				 //	TexFmt_PSP_I4s
+
+		0,	//				 //	TexFmt_PSP_DXT1s
+		0,	//				 //	TexFmt_PSP_DXT3s
+		0,	//				 //	TexFmt_PSP_DXT5s
 	}
 };
 
@@ -482,6 +548,7 @@ uint32 MFTexture_GetPlatformAvailability(int format)
 {
 	return gMFTexturePlatformAvailability[format];
 }
+
 bool MFTexture_IsAvailableOnPlatform(int format, int platform)
 {
 	return (gMFTexturePlatformAvailability[format] & MFBIT(platform)) != 0;

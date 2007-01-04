@@ -27,7 +27,7 @@ void LOGERROR(const char *pFormat, ...)
 	getc(stdin);
 }
 
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat);
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat, MFPlatform platform);
 void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format);
 void ATICompress(Pixel *pSourceBuffer, int width, int height, MFTextureFormat targetFormat, void *pOutputBuffer);
 void PremultiplyAlpha(SourceImage *pImage);
@@ -264,6 +264,13 @@ int main(int argc, char *argv[])
 					targetFormat = TexFmt_PSP_A4B4G4R4s;
 				break;
 
+			case FP_PS2:
+				if(pImage->opaque || pImage->oneBitAlpha)
+					targetFormat = TexFmt_A1B5G5R5;
+				else
+					targetFormat = TexFmt_A8B8G8R8;
+				break;
+
 			default:
 				targetFormat = TexFmt_A8B8G8R8;
 				break;
@@ -372,7 +379,7 @@ int main(int argc, char *argv[])
 		}
 
 		// convert surface
-		ConvertSurface(&pImage->pLevels[a], &pSurfaceLevels[a], targetFormat);
+		ConvertSurface(&pImage->pLevels[a], &pSurfaceLevels[a], targetFormat, platform);
 	}
 
 	// destroy source
@@ -423,7 +430,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat)
+int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat, MFPlatform platform)
 {
 	// convert image...
 	int width = pSourceSurface->width;
@@ -431,6 +438,8 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 	int x, y;
 	Pixel *pSource = pSourceSurface->pData;
+
+	float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
 
 	switch(targetFormat)
 	{
@@ -464,7 +473,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 			{
 				for(x=0; x<width; x++)
 				{
-					*pTarget = ((uint32)(pSource->a*255.0f) & 0xFF) << 24 |
+					*pTarget = ((uint32)(pSource->a*alphaScale) & 0xFF) << 24 |
 								((uint32)(pSource->b*255.0f) & 0xFF) << 16 |
 								((uint32)(pSource->g*255.0f) & 0xFF) << 8 |
 								((uint32)(pSource->r*255.0f) & 0xFF);
@@ -820,7 +829,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 
 		default:
 		{
-			LOGERROR("Conversion for target type '%s' not yet support...\n", MFTexture_GetFormatString(targetFormat));
+			LOGERROR("Conversion for target format '%s' not yet supported...\n", MFTexture_GetFormatString(targetFormat));
 			return 1;
 		}
 	}

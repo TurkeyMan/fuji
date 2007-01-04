@@ -169,7 +169,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pData;
 		}
 
-		// convert to another format is the platform requires it...
+		// convert to another format if the platform requires it...
 		if(convertARGB)
 		{
 			int numPixels = width*height;

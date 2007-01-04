@@ -1,9 +1,51 @@
 v0.6b
+-----
 
+3-1-07:
+
+- Added MFAnimation system which manages runtime animation
+- Updated .x loader to fully support animation
+- MFMatrix fixes
+- Switched PC renderer to use shaders
+- Added DX shader tools
+- Fixed some bugs in MFView
+- Improved animation matching code
+- Added ATI's S3 compressor
+- Changed textures to support pre-multiplied alpha
+- Fixed ConvertASE's fixup code
+- Turned the S3 compressor off, (it looks shit!)
+- Used 16 bit textures on PC to shrink the archives
+- Added MFAnimScript which manages high level animation sequences and scripted animation events
+- Fixed the ortho matrix on linux
+- PS2 now compiling!
+- HelloWorld for PS2 compiles and runs (nothing interesting happening yet)
+- PS2 RTC implemented. (seconds seem a little fast for now - scaling factor is off?)
+- Added a basic hash list class
+- Changed MFModel code layout a bit
+- Updated PSP model format
+- Fixed PSP model rendering
+- Material fixes
+- Added UTF8 infrastructure (MFFont and MFString)
+- Added an FAQ to the docs
+- Fixed up font width calculation (support UTF8)
+- Added pad support for PS2, all buttons in digital mode and both Analog sticks.
+  * Presure sensitive buttons is a TODO, as is more robust handling of anything that isn't a DualShock2
+- Fixed the filesystem a little
+- Got Caelestis booting on PS2
+- Angelscript update to 2.7.1b
+- Angelscript calling convention updates
+- Gamecube Compiling!
+- Texture format changes
+- SysLogo .h files have been remodelled and are now in platform specific formats
+- ConvertTEX can now produce .h files aswell as .tex files
+- Renamed the SysLogos
+- Made MFTexture_CreateFromRawData platform independant (it was an annoying function to maintain)
 
 
 Earlier releases:
+
 v0.1b - v0.5b
+-------------
 
 16-10-06:
 
