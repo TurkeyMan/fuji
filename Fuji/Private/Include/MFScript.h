@@ -154,6 +154,15 @@ void MFScript_RegisterNativeFunction(const char *pDeclaration, void *pFunction, 
 const char* MFScript_GetCString(MFScriptString scriptString);
 
 /**
+ * Set an MFScriptString to a c string.
+ * Sets an MFScriptString to a c string.
+ * @param scriptString A string in the script.
+ * @param pCString A c string to set as the value of the script string.
+ * @return None.
+ */
+void MFScript_SetString(MFScriptString scriptString, const char *pCString);
+
+/**
  * Convert a C string to a script string.
  * Converts a C string into a script string.
  * @param pString C string to be converted.

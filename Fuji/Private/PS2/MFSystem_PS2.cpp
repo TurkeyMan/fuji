@@ -1,7 +1,6 @@
 #include "Fuji.h"
 #include "MFSystem_Internal.h"
 
-#include <stdio.h>
 #include <kernel.h>
 
 // Timer Registers
@@ -36,6 +35,7 @@ enum
 	kINTC_TIMER1
 };
 
+MFPlatform gCurrentPlatform = FP_PS2;
 
 // Timer statics
 static int s_tnInterruptID = -1;
@@ -50,8 +50,6 @@ int tnTimeInterrupt(int ca)
 	*T1_MODE |= (1 << 11);
 	return -1;
 }
-
-MFPlatform gCurrentPlatform = FP_PS2;
 
 int main()
 {

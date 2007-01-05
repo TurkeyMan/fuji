@@ -74,7 +74,7 @@ uint64 MFSystem_GetRTCFrequency()
 const char * MFSystem_GetSystemName()
 {
 	static char buffer[128];
-	DWORD poop = sizeof(buffer);
-	GetComputerName(buffer, &poop);
+	DWORD bufferSize = sizeof(buffer);
+	GetComputerName(buffer, &bufferSize);
 	return buffer;
 }

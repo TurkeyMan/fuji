@@ -17,15 +17,15 @@ void MFDisplay_DestroyWindow()
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
-    MFCALLSTACK;
+	MFCALLSTACK;
 
-    graph_initialize();
-    graph_set_mode(GRAPH_MODE_PAL, GRAPH_PSM_32, GRAPH_PSM_32);
-    graph_set_displaybuffer(0);
-    graph_set_drawbuffer(0);
-    graph_set_zbuffer(graph_get_size());
-   
-    return 0;
+	graph_initialize();
+	graph_set_mode(GRAPH_MODE_PAL, GRAPH_PSM_32, GRAPH_PSM_32);
+	graph_set_displaybuffer(0);
+	graph_set_drawbuffer(0);
+	graph_set_zbuffer(graph_get_size());
+
+	return 0;
 }
 
 void MFDisplay_ResetDisplay()
@@ -51,7 +51,6 @@ void MFDisplay_EndFrame()
 #define CSR ((volatile u64 *)(0x12001000))
 	*CSR = *CSR & 8;
 	while(!(*CSR & 8));
-
 }
 
 void MFDisplay_SetClearColour(float r, float g, float b, float a)

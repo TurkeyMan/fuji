@@ -27,15 +27,15 @@ extern MFMaterial *pSetMaterial;
 
 int  r, g, b, a;
 
-#define NUM_VERTS (4096*4)
-#define GIF_AD          0x0E
-#include <stdio.h>
+#define NUM_VERTS	(4096*4)
+#define GIF_AD		0x0E
 
 void MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
-	if (packet_allocate(&packet, 1024) < 0) {
-	    while(1) printf("NO PACKET\n");
+	if(packet_allocate(&packet, 1024) < 0)
+	{
+		while(1) MFDebug_Message("NO PACKET");
 	}
 }
 
@@ -70,11 +70,11 @@ int width, height;
 void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
-	
+
 	packet_reset(&packet);
 	beginCount = vertexCount;
 	currentVert = 0;
-	
+
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pSetMaterial->pInstanceData;
 	MFTexture *pTexture = pData->pTextures[pData->diffuseMapIndex];
 	width = pTexture->pTemplateData->pSurfaces[0].width;
@@ -84,7 +84,7 @@ void MFBegin(uint32 vertexCount)
 	int th = mylog2(height);
 
 	int num = vertexCount*2 + 9;
-	
+
 	packet_append_64(&packet, DMA_SET_TAG(num, 0, DMA_TAG_END, 0, 0, 0));
 	packet_append_64(&packet, 0);
 
@@ -116,7 +116,6 @@ void MFBegin(uint32 vertexCount)
 	packet_append_64(&packet, GIF_REG_PRIM);
 }
 
-#include <stdio.h>
 void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
@@ -141,13 +140,11 @@ void MFSetColour(uint32 col)
 
 void MFSetTexCoord1(float u, float v)
 {
+	unsigned int iu = (unsigned int)(u * width);
+	unsigned int iv = (unsigned int)(v * height);
 
-    unsigned int iu = (unsigned int)(u * width);
-    unsigned int iv = (unsigned int)(v * height);
-
-    packet_append_64(&packet, GIF_SET_UV (iu<<4,iv<<4));
-    packet_append_64(&packet, GIF_REG_UV);
-	    
+	packet_append_64(&packet, GIF_SET_UV (iu<<4,iv<<4));
+	packet_append_64(&packet, GIF_REG_UV);
 }
 
 void MFSetNormal(const MFVector &normal)
@@ -158,7 +155,6 @@ void MFSetNormal(const MFVector &normal)
 void MFPrimitive_DrawStats()
 {
 	MFCALLSTACK;
-
 }
 
 void MFSetNormal(float x, float y, float z)
@@ -177,7 +173,7 @@ void MFSetPosition(float x, float y, float z)
 	int ix, iy;
 	ix = (int) x;
 	iy = (int) y;
-	
+
 	packet_append_64(&packet, GIF_SET_XYZ((2048-320+ix)<<4,(2078-256+iy)<<4,0));
 	packet_append_64(&packet, GIF_REG_XYZ2);
 
@@ -190,11 +186,12 @@ void MFEnd()
 	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
-		
+
 	// Send the DMA chain we have built
-	if (packet_send(&packet, DMA_CHANNEL_GIF, DMA_FLAG_CHAIN) < 0){
-	    printf("CANT SEND PACKET\n");
-	    while(1) ;
+	if(packet_send(&packet, DMA_CHANNEL_GIF, DMA_FLAG_CHAIN) < 0)
+	{
+		MFDebug_Message("CANT SEND PACKET");
+		while(1);
 	}
 
 }

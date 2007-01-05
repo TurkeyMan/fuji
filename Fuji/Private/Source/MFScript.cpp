@@ -24,26 +24,28 @@ asIScriptEngine *pEngine = NULL;
 void* MFScript_Alloc(size_t bytes)
 {
 	void *pMem = MFHeap_Alloc(bytes);
-	MFDebug_Log(1, MFStr("Allocating %d bytes: 0x%08d", bytes, pMem));
+//	MFDebug_Log(1, MFStr("Allocating %d bytes: 0x%08d", bytes, pMem));
 	return pMem;
 }
 
 void MFScript_Free(void *pMem)
 {
-	MFDebug_Log(1, MFStr("Freeing 0x%08d", pMem));
+//	MFDebug_Log(1, MFStr("Freeing 0x%08d", pMem));
 	MFHeap_Free(pMem);
 }
 
 void MessageCallback(const asSMessageInfo *msg, void *param)
 {
-	const char *type = "Error";
+	const char *type = "";
 
 	if(msg->type == asMSGTYPE_WARNING)
-		type = "Warn";
+		type = "Warn: ";
 	else if(msg->type == asMSGTYPE_INFORMATION)
-		type = "Info";
+		type = "Info: ";
+	else if(msg->type == asMSGTYPE_ERROR)
+		type = "Error: ";
 
-	MFDebug_Message(MFStr("%s(%d, %d) : %s: %s\n", msg->section, msg->row, msg->col, type, msg->message));
+	MFDebug_Message(MFStr("%s.as(%d, %d) : %s%s\n", msg->section, msg->row, msg->col, type, msg->message));
 }
 
 void MFScript_InitModule()
@@ -200,6 +202,14 @@ const char* MFScript_GetCString(MFScriptString scriptString)
 
 	asCScriptString &string = *(asCScriptString*)scriptString;
 	return string.buffer.c_str();
+}
+
+void MFScript_SetString(MFScriptString scriptString, const char *pCString)
+{
+	MFCALLSTACK;
+
+	asCScriptString &string = *(asCScriptString*)scriptString;
+	string.buffer = pCString;
 }
 
 MFScriptString MFScript_MakeScriptString(const char *pString)

@@ -3,7 +3,6 @@
 #include "MFView.h"
 #include "MFFont.h"
 #include "MFInput.h"
-#include <stdio.h>
 #include "Timer.h"
 
 /**** Globals ****/
@@ -23,7 +22,7 @@ void Game_Init()
 
 
 #define CHK_BUTTON(x) \
-     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  printf(#x"\n");
+     if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  MFDebug_Message(#x);
 
 void Game_Update()
 {
