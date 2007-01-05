@@ -19,6 +19,11 @@ typedef void (*funcPTR)();
 
 // wrapper functions
 
+static void ConstructString(asCScriptString *self, const char *pCString)
+{
+	new(self) asCScriptString(pCString);
+}
+
 static void ConstructMFVector(MFVector *pVector)
 {
 	*pVector = MFVector::zero;
@@ -72,7 +77,13 @@ static void ScriptAssert(asIScriptGeneric *gen)
 {
 	if(!gen->GetArgDWord(0))
 	{
-		MFDebug_DebugAssert("Script Assert", MFScript_GetCString((MFScriptString)gen->GetArgObject(1)), "Script", 0);
+		const char *pFunc;
+
+		asIScriptContext *c = asGetActiveContext();
+		int f = c->GetCurrentFunction();
+		pFunc = gen->GetEngine()->GetFunctionName(f);
+
+		MFDebug_DebugAssert("Script Assert", MFScript_GetCString((MFScriptString)gen->GetArgObject(1)), pFunc, c->GetCurrentLineNumber());
 		MFDebug_Breakpoint();
 	}
 }
@@ -121,7 +132,7 @@ void RegisterInternalTypes()
 //	r = pEngine->RegisterObjectBehaviour("cstring",asBEHAVE_ASSIGNMENT, "cstring &f(cstring)", asFUNCTION(SetCString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectBehaviour("cstring", asBEHAVE_CONSTRUCT, "void f(const string &in)", asFUNCTION(SetCStringToASString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectBehaviour("cstring",asBEHAVE_ASSIGNMENT, "cstring &f(const string &in)", asFUNCTION(SetCStringToASString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
-	r = pEngine->RegisterObjectBehaviour("string",asBEHAVE_CONSTRUCT, "void f(cstring)", asFUNCTION(SetASStringToCString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
+	r = pEngine->RegisterObjectBehaviour("string",asBEHAVE_CONSTRUCT, "void f(cstring)", asFUNCTION(ConstructString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectBehaviour("string",asBEHAVE_ASSIGNMENT, "string &f(cstring)", asFUNCTION(SetASStringToCString), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 
 	r = pEngine->RegisterObjectType("vector", sizeof(MFVector), asOBJ_CLASS | asOBJ_CLASS_CONSTRUCTOR | asOBJ_CLASS_ASSIGNMENT); MFDebug_Assert(r >= 0, "Failed!");
