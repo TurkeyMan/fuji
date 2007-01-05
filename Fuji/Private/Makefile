@@ -302,8 +302,14 @@ endif
 CONFIG = $(BUILD)_$(PLATFORM)
 TARGET_LIB := $(TARGET_LIB)_$(CONFIG).a
 
+INTDIR = Build/$(CONFIG)
 
 ifeq ($(PLATFORM),PSP)
+
+# because my environment variables never seem to work! :(
+ifndef ($(PSPSDK))
+PSPSDK = /usr/local/pspdev/psp/sdk
+endif
 
 CC       = psp-gcc
 CXX      = psp-g++
@@ -344,7 +350,10 @@ endif
 
 ifeq ($(PLATFORM),GC)
 
-OGC = C:/cygwin/usr/local/devkitPPC/ogc
+# because my environment variables never seem to work! :(
+ifndef ($(PSPSDK))
+OGC = /usr/local/devkitPPC/ogc
+endif
 
 CC       = powerpc-gekko-gcc
 CXX      = powerpc-gekko-g++
@@ -392,12 +401,26 @@ CXXFLAGS := $(CFLAGS) $(CXXFLAGS)
 ASFLAGS  := $(CFLAGS) $(ASFLAGS)
 
 FINAL_TARGET = $(TARGET_LIB)
+OBJLIST = $(patsubst %,$(INTDIR)/%,$(OBJS))
 
-all: $(EXTRA_TARGETS) $(FINAL_TARGET)
+all: MAKEDIRS $(EXTRA_TARGETS) $(FINAL_TARGET)
 
-$(TARGET_LIB): $(OBJS)
-	$(AR) cru $@ $(OBJS)
+$(INTDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(INTDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(TARGET_LIB): $(OBJLIST)
+	$(AR) cru $@ $(OBJLIST)
 	$(RANLIB) $@
 
+MAKEDIRS:
+	@mkdir -p Lib
+	@mkdir -p $(INTDIR)
+
 clean:
-	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(OBJS) $(EXTRA_TARGETS)
+	rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(EXTRA_TARGETS)
+	rm -f -r $(INTDIR)
