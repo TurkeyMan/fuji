@@ -1,6 +1,4 @@
-#BUILD = Release
-#PLATFORM = LINUX
-TARGET = Archiver
+TARGET = ../../Fuji/Bin/Archiver
 
 ifeq ($(PLATFORM),)
 #$(error $$(PLATFORM) is undefined.
@@ -11,56 +9,24 @@ ifeq ($(BUILD),)
 BUILD = Release
 endif
 
-OBJS = Source/Main.o
-OBJS := $(OBJS) Source/Chomp.o
-OBJS := $(OBJS) Source/FS.o
 
-OBJS := $(OBJS) PCRE/Source/chartables.o
-OBJS := $(OBJS) PCRE/Source/get.o
-OBJS := $(OBJS) PCRE/Source/pcre.o
-OBJS := $(OBJS) PCRE/Source/study.o
+OBJS = Source/Main.o \
+Source/Chomp.o \
+Source/FS.o \
+PCRE/Source/chartables.o \
+PCRE/Source/get.o \
+PCRE/Source/pcre.o \
+PCRE/Source/study.o
 
-OBJS := $(OBJS) ../../Fuji/Source/MFCallstack.o
-OBJS := $(OBJS) ../../Fuji/Source/MFDebug.o
-OBJS := $(OBJS) ../../Fuji/Source/MFHeap.o
-OBJS := $(OBJS) ../../Fuji/Source/MFIni.o
-OBJS := $(OBJS) ../../Fuji/Source/MFMatrix.o
-OBJS := $(OBJS) ../../Fuji/Source/MFString.o
-OBJS := $(OBJS) ../../Fuji/Source/MFStringCache.o
-OBJS := $(OBJS) ../../Fuji/Source/MFTextureUtil.o
-OBJS := $(OBJS) ../../Fuji/Source/MFVector.o
-OBJS := $(OBJS) ../../Fuji/Source/MFQuaternion.o
-OBJS := $(OBJS) ../../Fuji/Source/Util.o
-OBJS := $(OBJS) ../../Fuji/Util/F3D.o
-OBJS := $(OBJS) ../../Fuji/Null/MFHeap_Null.o
 
-ifeq ($(PLATFORM),LINUX)
-OBJS := $(OBJS) ../../Fuji/Linux/MFDebug_Linux.o
-endif
-ifeq ($(PLATFORM),OSX)
-OBJS := $(OBJS) ../../Fuji/OSX/MFDebug_OSX.o
-endif
-ifeq ($(PLATFORM),PC)
-OBJS := $(OBJS) ../../Fuji/PC/MFDebug_PC.o
+ifeq ($(FUJIPATH),)
+FUJIPATH = ../../Fuji
 endif
 
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/adler32.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/compress.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/crc32.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/deflate.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/gzio.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/infback.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/inffast.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/inflate.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/inftrees.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/trees.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/uncompr.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/zutil.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/minizip/ioapi.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/minizip/mztools.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/minizip/unzip.o
-OBJS := $(OBJS) ../../Fuji/Middleware/zlib/minizip/zip.o
+CONFIG = $(BUILD)_$(PLATFORM)
+INTDIR = Build/$(CONFIG)
 
+FUJILIB = $(FUJIPATH)/Lib/libFujiUtil_$(CONFIG).a
 
 INCDIR = PCRE/Include Include Source ../../Fuji/Include ../../Fuji/Source ../../Fuji/Util ../../Fuji/Middleware ../../Fuji/Middleware/zlib
 CFLAGS = -Wall -D_FUJI_UTIL -D_$(PLATFORM)
@@ -84,21 +50,44 @@ LDFLAGS =
 
 LIBS := -lc -lm -lstdc++
 
+
+ifeq ($(PLATFORM),OSX)
+INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
+endif
+
+
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 LDFLAGS   := $(addprefix -L,$(LIBDIR)) $(LDFLAGS)
 CXXFLAGS := $(CFLAGS) $(CXXFLAGS)
 ASFLAGS  := $(CFLAGS) $(ASFLAGS)
 
 FINAL_TARGET = $(TARGET)
+OBJLIST = $(patsubst %,$(INTDIR)/%,$(OBJS))
 
-all: $(EXTRA_TARGETS) $(FINAL_TARGET)
+all: makedirs $(EXTRA_TARGETS) $(FINAL_TARGET)
 
-ifeq ($(PLATFORM),OSX)
-INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
-endif
+$(INTDIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(TARGET): $(OBJS) $(EXPORT_OBJ)
-	$(LINK.c) $^ $(LIBS) -o $@
+$(INTDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(TARGET): $(FUJILIB) $(OBJLIST) $(EXPORT_OBJ)
+	$(LINK.c) -Wl,--start-group $^ $(LIBS) -Wl,--end-group -o $@
+
+makedirs:
+	@mkdir -p $(INTDIR)
 
 clean:
-	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(OBJS) $(EXTRA_TARGETS)
+	-rm -f $(FINAL_TARGET) $(EXTRA_CLEAN) $(EXTRA_TARGETS)
+	-rm -f -r $(INTDIR)
+
+$(FUJILIB):
+	make -C $(FUJIPATH) PLATFORM=$(PLATFORM) BUILD=$(BUILD) util
+
+deletelib:
+	-rm -f $(FUJILIB)
+
+rebuild: deletelib all
