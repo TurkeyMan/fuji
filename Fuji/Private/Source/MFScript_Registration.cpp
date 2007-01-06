@@ -75,6 +75,7 @@ static MFScriptString SetASStringToCString(MFScriptString self, char* other)
 
 static void ScriptAssert(asIScriptGeneric *gen)
 {
+#if !defined(_RETAIL)
 	if(!gen->GetArgDWord(0))
 	{
 		const char *pFunc;
@@ -86,6 +87,7 @@ static void ScriptAssert(asIScriptGeneric *gen)
 		MFDebug_DebugAssert("Script Assert", MFScript_GetCString((MFScriptString)gen->GetArgObject(1)), pFunc, c->GetCurrentLineNumber());
 		MFDebug_Breakpoint();
 	}
+#endif
 }
 static void ScriptMessage(MFScriptString message)
 {
