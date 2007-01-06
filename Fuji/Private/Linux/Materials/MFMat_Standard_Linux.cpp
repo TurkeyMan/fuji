@@ -34,7 +34,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			glBindTexture(GL_TEXTURE_2D, pData->pTextures[pData->diffuseMapIndex]->textureID);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //			glActiveTexture(0);
-			premultipliedAlpha = pData->pTextures[pData->diffuseMapIndex]->pTemplateData->premultipliedAlpha;
+			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
 		}
 		else
 		{
