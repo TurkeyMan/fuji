@@ -68,16 +68,16 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 			case 1<<6:
 				glEnable(GL_CULL_FACE);
-				glCullFace(GL_BACK);
+				glCullFace(GL_FRONT);
 				break;
 			case 2<<6:
 				glEnable(GL_CULL_FACE);
-				glCullFace(GL_FRONT);
+				glCullFace(GL_BACK);
 				break;
 			case 3<<6:
 				// 'default' ?
 				glEnable(GL_CULL_FACE);
-				glCullFace(GL_BACK);
+				glCullFace(GL_FRONT);
 				break;
 		}
 
