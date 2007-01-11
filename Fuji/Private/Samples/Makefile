@@ -11,3 +11,4 @@ all:
 	make -C 3DBox/ PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 	make -C InputTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)
 	make -C HelloWorld/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)
+	make -C ModelTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)

@@ -37,6 +37,7 @@ void Game_Draw()
 
 	// Set identity camera (no camera)
 	MFView_Push();
+	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
 	MFView_SetProjection();
 
 	MFMaterial_SetMaterial(pMat);
@@ -154,4 +155,6 @@ void Game_Draw()
 void Game_Deinit()
 {
 	MFCALLSTACK;
+
+	MFMaterial_Destroy(pMat);
 }
