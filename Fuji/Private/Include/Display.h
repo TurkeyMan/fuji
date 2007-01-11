@@ -18,7 +18,7 @@ enum MFClearScreenFlags
 
 // interface functions
 void MFDisplay_SetClearColour(float r, float g, float b, float a);
-void MFDisplay_ClearScreen(uint32 flags = CS_Colour|CS_ZBuffer);
+void MFDisplay_ClearScreen(uint32 flags = CS_Colour|CS_ZBuffer|CS_Stencil);
 
 void MFDisplay_SetViewport(float x, float y, float width, float height);
 void MFDisplay_ResetViewport();

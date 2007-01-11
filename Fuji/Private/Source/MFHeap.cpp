@@ -156,6 +156,7 @@ void MFHeap_Free(void *pMem)
 	pAllocHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pAllocHeap->pHeapData);
 }
 
+#if !(defined(_FUJI_UTIL) && defined(_LINUX))
 // new/delete operators
 void* operator new(size_t size)
 {
@@ -180,6 +181,7 @@ void operator delete[](void *pMemory)
 {
 	MFHeap_Free(pMemory);
 }
+#endif
 
 #if !defined(_WINDOWS) && !defined(_FUJI_UTIL) 
 void* operator new(size_t size, void *pMem)

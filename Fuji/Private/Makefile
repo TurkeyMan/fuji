@@ -507,12 +507,22 @@ makedirs:
 	@mkdir -p Lib
 	@mkdir -p $(INTDIR)
 
-tools:
+archiver: Bin/Archiver
 	make -C ../Utilities/Archiver PLATFORM=$(PLATFORM) BUILD=$(BUILD)
-	make -C ../Utilities/ConvertFNT PLATFORM=$(PLATFORM) BUILD=$(BUILD)
-	make -C ../Utilities/ConvertDlg PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
+convertase: Bin/ConvertASE
 	make -C ../Utilities/ConvertASE PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
+converttex: Bin/ConvertTEX
 	make -C ../Utilities/ConvertTEX PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
+convertfnt: Bin/ConvertFNT
+	make -C ../Utilities/ConvertFNT PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
+convertdlg: Bin/ConvertDlg
+	make -C ../Utilities/ConvertDlg PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
+tools: archiver convertase converttex convertfnt convertdlg
 
 clean:
 	-rm -f $(TARGET_LIB) $(EXTRA_CLEAN) $(EXTRA_TARGETS)
