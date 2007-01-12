@@ -7,55 +7,131 @@
 #include <sys/ioctl.h>
 #include <linux/joystick.h>
 
+
 /*** Structure definitions ***/
 
+#define MAX_LINUX_GAMEPADS 16
+
+struct LinuxGamepad
+{
+	char name[128];
+	char identifier[128];
+	char deviceName[64];
+
+	int axis[32];
+	char button[128];
+	int numButtons;
+	int numAxiis;
+
+	int joyFD;
+
+	void *pMapping;
+};
+
+
 /*** Globals ***/
-int num_of_axis=0, num_of_buttons=0;
-char name_of_joystick[80];
-int *axis = NULL;
-char *button = NULL;
-struct js_event js;
-int joy_fd;
+
+LinuxGamepad gGamepads[MAX_LINUX_GAMEPADS];
+int gMaxGamepad = 0;
+
+const char * const gDeviceNames[] =
+{
+	"/dev/input/js%d",
+	"/dev/input/djs%d",
+	"/dev/js%d",
+	"/dev/djs%d",
+	NULL
+}
 
 /**** Platform Specific Functions ****/
 
+void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
+{
+	MFCALLSTACK;
+
+	pGamepad->joyFD = fd;
+
+	ioctl(fd, JSIOCGNAME(80), pGamepad->identifier);
+	ioctl(fd, JSIOCGAXES, &pGamepad->numAxiis);
+	ioctl(fd, JSIOCGBUTTONS, &pGamepad->numButtons);
+}
+
 void MFInput_InitModulePlatformSpecific()
 {
-	joy_fd = open("/dev/input/js0", O_RDONLY); // This is horrible - need to something more robust - will work for testing
-	ioctl (joy_fd, JSIOCGAXES, &num_of_axis);
-	ioctl (joy_fd, JSIOCGBUTTONS, &num_of_buttons);
-	ioctl (joy_fd, JSIOCGNAME(80), &name_of_joystick );
-
-	axis = (int *) calloc (num_of_axis, sizeof(int));
-	button = (char *) calloc (num_of_buttons, sizeof(char));
-
 	MFCALLSTACK;
+
+	MFZeroMemory(gGamepads, sizeof(gGamepads));
+
+	int fd;
+
+	const char **ppDevNames = gDeviceNames;
+
+	// search for joystick devices....
+	while(*ppDevNames)
+	{
+		for(int a=0; a<16; a++)
+		{
+			const char *pDevice = MFStr(*ppDevNames, a);
+			fd = open(pDevice, O_RDONLY|O_NONBLOCK);
+
+			if(fd > 0)
+			{
+				MFInputLinux_InitGamepad(fd, gGamepads[gMaxGamepad]);
+				MFString_Copy(gGamepads[gMaxGamepad].deviceName, pDevice);
+				++gMaxGamepad
+			}
+		}
+
+		++ppDevNames;
+	}
 }
 
 void MFInput_DeinitModulePlatformSpecific()
 {
-	free(axis);
-	free(button);
-	close (joy_fd);
 	MFCALLSTACK;
+
+	for(int a=0; a<gMaxGamepad; a++)
+	{
+		if(gGamepads[a].joyFD)
+			close(gGamepads[a].joyFD);
+	}
 }
 
 void MFInput_UpdatePlatformSpecific()
 {
-	read (joy_fd, &js, sizeof(struct js_event));
-	switch (js.type & ~JS_EVENT_INIT)
+	struct js_event js;
+	int error;
+
+	for(int a=0; a<gMaxGamepad; a++)
 	{
-		case JS_EVENT_AXIS:
-			axis [js.number] = js.value;
-			break;
-		case JS_EVENT_BUTTON:
-			button [js.number] = js.value;
-			break;
+		if(gGamepads[a].joyFD)
+		{
+			while((error = read(gGamepads[a].joyFD, &js, sizeof(struct js_event)) > 0)
+			{
+				switch (js.type & ~JS_EVENT_INIT)
+				{
+					case JS_EVENT_AXIS:
+						gGamepads[a].axis[js.number] = js.value;
+						break;
+					case JS_EVENT_BUTTON:
+						gGamepads[a]button[js.number] = js.value;
+						break;
+				}
+			}
+
+			if(error == -1 && errno != EAGAIN)
+			{
+				// some error occurred....
+			}
+		}
 	}
 }
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
+	if(device == IDD_Gamepad && id < gMaxGamepad)
+		return gGamepads[id].joyFD ? IDS_Ready : IDS_Disconnected;
+
 	return IDS_Unavailable;
 }
 
@@ -64,16 +140,33 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	MFCALLSTACK;
 
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
-//	switch(device)
-//	{
-//		case IDD_Gamepad: break;
-//		case IDD_Mouse: break;
-//		case IDD_Keyboard:
-//			break;
-//		default:
-//			MFDebug_Assert(false, "Invalid Input Device");
-//			break;
-//	}
+
+	if(gGamepads[id].joyFD)
+	{
+		pGamepadState->values[Button_X3_A] = gGamepads[id].buttons[0] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_B] = gGamepads[id].buttons[1] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_X] = gGamepads[id].buttons[2] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_Y] = gGamepads[id].buttons[3] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_LB] = gGamepads[id].buttons[6] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_RB] = gGamepads[id].buttons[7] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_Start] = gGamepads[id].buttons[8] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_Back] = gGamepads[id].buttons[9] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_LThumb] = gGamepads[id].buttons[10] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_RThumb] = gGamepads[id].buttons[11] ? 1.0f : 0.0f;
+
+		pGamepadState->values[Button_DUp] = MFMax(-((float)gGamepads[id].axis[5] * (1.0f / 32767.0f)), 0.0f);
+		pGamepadState->values[Button_DDown] = MFMax((float)gGamepads[id].axis[5] * (1.0f / 32767.0f), 0.0f);
+		pGamepadState->values[Button_DLeft] = MFMax(-((float)gGamepads[id].axis[4] * (1.0f / 32767.0f)), 0.0f);
+		pGamepadState->values[Button_DRight] = MFMax((float)gGamepads[id].axis[4] * (1.0f / 32767.0f), 0.0f);
+
+		pGamepadState->values[Button_X3_LT] = gGamepads[id].buttons[4] ? 1.0f : 0.0f;
+		pGamepadState->values[Button_X3_RT] = gGamepads[id].buttons[5] ? 1.0f : 0.0f;
+
+		pGamepadState->values[Axis_LX] = (float)gGamepads[id].axis[0] * (1.0f / 32767.0f);
+		pGamepadState->values[Axis_LY] = -((float)gGamepads[id].axis[1] * (1.0f / 32767.0f));
+		pGamepadState->values[Axis_RX] = (float)gGamepads[id].axis[2] * (1.0f / 32767.0f);
+		pGamepadState->values[Axis_RY] = -((float)gGamepads[id].axis[3] * (1.0f / 32767.0f));
+	}
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
@@ -88,7 +181,16 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 
 const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
 {
-	return "Null Input Device";
+	switch(device)
+	{
+		case IDD_Gamepad:
+	        return gGamepads[sourceID].identifier;
+		case IDD_Mouse:
+		    return "Mouse";
+		case IDD_Keyboard:
+	        return "Keyboard";
+	}
+	return NULL;
 }
 
 const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
