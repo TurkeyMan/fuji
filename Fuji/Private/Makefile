@@ -362,7 +362,7 @@ endif
 INCDIR = Include Source $(PLATFORMINCLUDE) Middleware Middleware/zlib Middleware/angelscript/include
 CFLAGS = -Wall -D_$(PLATFORM)
 CXXFLAGS = -fno-exceptions -fno-rtti
-ASFLAGS = 
+ASFLAGS =
 
 
 ifeq ($(BUILD),Debug)
@@ -507,19 +507,19 @@ makedirs:
 	@mkdir -p Lib
 	@mkdir -p $(INTDIR)
 
-archiver: Bin/Archiver
+archiver:
 	make -C ../Utilities/Archiver PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
-convertase: Bin/ConvertASE
+convertase:
 	make -C ../Utilities/ConvertASE PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
-converttex: Bin/ConvertTEX
+converttex:
 	make -C ../Utilities/ConvertTEX PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
-convertfnt: Bin/ConvertFNT
+convertfnt:
 	make -C ../Utilities/ConvertFNT PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
-convertdlg: Bin/ConvertDlg
+convertdlg:
 	make -C ../Utilities/ConvertDlg PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
 tools: archiver convertase converttex convertfnt convertdlg

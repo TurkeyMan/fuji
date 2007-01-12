@@ -1,4 +1,3 @@
-// kate: tab-width 4; space-indent off
 #include "Fuji.h"
 #include "MFInput_Internal.h"
 #include "X11_linux.h"
@@ -45,6 +44,7 @@ const char * gDeviceNames[] =
 	NULL
 };
 
+
 /**** Platform Specific Functions ****/
 
 void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
@@ -53,7 +53,7 @@ void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
 
 	pGamepad->joyFD = fd;
 
-	ioctl(fd, JSIOCGNAME(80), pGamepad->identifier); 
+	ioctl(fd, JSIOCGNAME(80), pGamepad->identifier);
 	ioctl(fd, JSIOCGAXES, &pGamepad->numAxiis);
 	ioctl(fd, JSIOCGBUTTONS, &pGamepad->numButtons);
 }
@@ -61,7 +61,6 @@ void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
 void MFInput_InitModulePlatformSpecific()
 {
 	MFCALLSTACK;
-
 
 	MFZeroMemory(gGamepads, sizeof(gGamepads));
 
@@ -144,7 +143,6 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 	MFZeroMemory(pGamepadState, sizeof(MFGamepadState));
 
-
 	if(gGamepads[id].joyFD)
 	{
 		pGamepadState->values[Button_X3_A] = gGamepads[id].button[0] ? 1.0f : 0.0f;
@@ -171,7 +169,6 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 		pGamepadState->values[Axis_RX] = (float)gGamepads[id].axis[2] * (1.0f / 32767.0f);
 		pGamepadState->values[Axis_RY] = -((float)gGamepads[id].axis[3] * (1.0f / 32767.0f));
 	}
-
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
@@ -184,17 +181,17 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	MFZeroMemory(pMouseState, sizeof(MFMouseState));
 }
 
-const char* MFInput_GetDeviceNameInternal(int source, int sourceID)
+const char* MFInput_GetDeviceNameInternal(int device, int deviceID)
 {
-// 	switch(device)
-// 	{
-// 		case IDD_Gamepad:
-// 	        return gGamepads[sourceID].identifier;
-// 		case IDD_Mouse:
-// 		    return "Mouse";
-// 		case IDD_Keyboard:
-// 	        return "Keyboard";
-// 	}
+	switch(device)
+	{
+		case IDD_Gamepad:
+			return gGamepads[deviceID].identifier;
+		case IDD_Mouse:
+			return "Mouse";
+		case IDD_Keyboard:
+			return "Keyboard";
+	}
 	return NULL;
 }
 
