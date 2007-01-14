@@ -14,6 +14,8 @@
 
 void MFSystem_HandleEventsPlatformSpecific();
 
+extern int gQuit;
+
 // Output a string to the debugger.
 void MFDebug_Message(const char *pMessage)
 {
@@ -40,7 +42,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 	MFCallstack_Log();
 #endif
 
-	while(1)
+	while(!gQuit)
 	{
 		MFSystem_HandleEventsPlatformSpecific();
 
@@ -54,10 +56,10 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFView_SetDefault();
 		MFView_SetOrtho();
 
-		
+
 		// FIXME: Need Linux code for resetting the render states
 		// Set some renderstates
-#if defined(_WINDOWS) || defined(_XBOX)		
+#if defined(_WINDOWS) || defined(_XBOX)
 		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);

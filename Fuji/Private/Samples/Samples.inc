@@ -145,7 +145,7 @@ RANLIB   = ranlib
 STRIP    = strip
 
 LIBDIR   := $(LIBDIR) /usr/X11R6/lib
-LIBS := -lc -lm -lstdc++ -lGL -lGLU -lXxf86vm 
+LIBS := -lc -lm -lstdc++ -lGL -lGLU -lXxf86vm
 
 # end LINUX
 endif
@@ -318,9 +318,7 @@ fujitools:
 	make -C $(FUJIPATH) PLATFORM=$(PLATFORM) tools
 
 data: fujitools
-	cd Data
-	./Build_Archive.sh $(PLATFORM)
-	cd ..
+	cd Data;./Build_Archive.sh $(PLATFORM)
 
 # PSP specific rules...
 #----------------------------------------------------------------------------------------------
