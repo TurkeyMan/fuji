@@ -5,6 +5,7 @@
 
 #include <sys/time.h>
 #include <X11/Xlib.h>
+#include <sys/utsname.h>
 
 extern Display *xdisplay;
 extern Window window;
@@ -107,10 +108,12 @@ uint64 MFSystem_ReadRTC()
 
 uint64 MFSystem_GetRTCFrequency()
 {
-	return 1000000;
+	return 1000000; // microseconds
 }
 
 const char * MFSystem_GetSystemName()
 {
-	return "Insert code to find system name here...";
+	static utsname name;
+	uname(&name);
+	return name.nodename;
 }

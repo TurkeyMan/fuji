@@ -2,11 +2,13 @@
 
 #if !defined(_RETAIL)
 
+#include "MFCallstack_Internal.h"
 #include "MFSystem_Internal.h"
 #include "Display_Internal.h"
 #include "MFFont.h"
 #include "MFView.h"
 #include "MFPrimitive.h"
+#include "MFMaterial.h"
 
 #include <stdio.h>
 
@@ -50,12 +52,15 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		gFrameCount++;
 
 		MFSystem_Update();
+		MFSystem_PostUpdate();
 
 		MFDisplay_BeginFrame();
 
+		MFDisplay_SetClearColour(0,0,0,0);
+		MFDisplay_ClearScreen();
+
 		MFView_SetDefault();
 		MFView_SetOrtho();
-
 
 		// FIXME: Need Linux code for resetting the render states
 		// Set some renderstates
@@ -69,36 +74,23 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		pd3dDevice->SetTexture(0, NULL);
 #endif
 
-		MFPrimitive(PT_TriStrip);
-
-		MFBegin(4);
-		MFSetColour(0xFF000000);
-		MFSetPosition(0, 0, 0);
-		MFSetPosition(640, 0, 0);
-		MFSetPosition(0, 480, 0);
-		MFSetPosition(640, 480, 0);
-		MFEnd();
-
 		if(!(((uint32)gSystemTimer.GetSecondsF()) % 2))
 		{
-			MFBegin(4);
-			MFSetColour(0xFFFF0000);
-			MFSetPosition(50, 50, 0);
-			MFSetPosition(590, 50, 0);
-			MFSetPosition(50, 110, 0);
-			MFSetPosition(590, 110, 0);
-			MFEnd();
+			MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+			MFPrimitive(PT_QuadList);
 
 			MFBegin(4);
-			MFSetColour(0xFF000000);
+			MFSetColour(1,0,0,1);
+			MFSetPosition(50, 50, 0);
+			MFSetPosition(590, 110, 0);
+
+			MFSetColour(0,0,0,1);
 			MFSetPosition(55, 55, 0);
-			MFSetPosition(585, 55, 0);
-			MFSetPosition(55, 105, 0);
 			MFSetPosition(585, 105, 0);
 			MFEnd();
 		}
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue");
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue.");
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
 
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
@@ -113,6 +105,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in _RETAIL builds");
 #endif
 
+//		MFSystem_Draw();
 		MFDisplay_EndFrame();
 	}
 }

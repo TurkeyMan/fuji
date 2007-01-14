@@ -99,38 +99,37 @@ void MFSetMatrix(const MFMatrix &mat)
 
 void MFSetColour(const MFVector &colour)
 {
-	glColor4f(colour.x, colour.y, colour.z, colour.w);
+	curVert.colour = ((uint32)(colour.x*255.0f) << 0) | ((uint32)(colour.y*255.0f) << 8) | ((uint32)(colour.z*255.0f) << 16) | ((uint32)(colour.w*255.0f) << 24);
 }
 
 void MFSetColour(float r, float g, float b, float a)
 {
-	glColor4f(r, g, b, a);
+	curVert.colour = ((uint32)(r*255.0f) << 0) | ((uint32)(g*255.0f) << 8) | ((uint32)(b*255.0f) << 16) | ((uint32)(a*255.0f) << 24);
 }
 
 void MFSetColour(uint32 col)
 {
-	glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
+	curVert.colour = col;
 }
 
 void MFSetTexCoord1(float u, float v)
 {
-	if(primType == PT_QuadList)
-	{
-		curVert.u = u;
-		curVert.v = v;
-	}
-
-	glTexCoord2f(u, v);
+	curVert.u = u;
+	curVert.v = v;
 }
 
 void MFSetNormal(const MFVector &normal)
 {
-	glNormal3f(normal.x, normal.y, normal.z);
+	curVert.nx = normal.x;
+	curVert.ny = normal.y;
+	curVert.nz = normal.z;
 }
 
 void MFSetNormal(float x, float y, float z)
 {
-	glNormal3f(x, y, z);
+	curVert.nx = x;
+	curVert.ny = y;
+	curVert.nz = z;
 }
 
 void MFSetPosition(const MFVector &pos)
@@ -147,15 +146,27 @@ void MFSetPosition(float x, float y, float z)
 		if(currentVert & 1)
 		{
 			// TODO: add top right and bottom left verts
+			uint32 col = prevVert.colour;
+
+			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
 			glTexCoord2f(curVert.u, prevVert.v);
 			glVertex3f(x, prevVert.y, prevVert.z);
+
+			col = curVert.colour;
+
+			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
 			glTexCoord2f(curVert.u, curVert.v);
 			glVertex3f(x, y, z);
+
+			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
 			glTexCoord2f(prevVert.u, curVert.v);
 			glVertex3f(prevVert.x, y, z);
 		}
 		else
 		{
+			uint32 col = curVert.colour;
+			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
+			glTexCoord2f(curVert.u, curVert.v);
 			glVertex3f(x, y, z);
 
 			curVert.x = x;
@@ -167,6 +178,9 @@ void MFSetPosition(float x, float y, float z)
 	}
 	else
 	{
+		uint32 col = curVert.colour;
+		glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
+		glTexCoord2f(curVert.u, curVert.v);
 		glVertex3f(x, y, z);
 	}
 

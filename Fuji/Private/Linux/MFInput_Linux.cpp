@@ -197,7 +197,7 @@ const char* MFInput_GetDeviceNameInternal(int device, int deviceID)
 
 const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 {
-	return "Null Input Device";
+	return "Unknown";
 }
 
 bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
