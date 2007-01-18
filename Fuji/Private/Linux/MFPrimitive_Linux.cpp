@@ -84,6 +84,10 @@ void MFBegin(uint32 vertexCount)
 	beginCount = vertexCount;
 	currentVert = 0;
 
+	MFZeroMemory(&curVert, sizeof(curVert));
+	curVert.colour = 0xFFFFFFFF;
+	curVert.ny = 1.0f;
+
 	glBegin(gPrimTypes[primType]);
 }
 
