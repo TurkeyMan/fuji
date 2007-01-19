@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 			}
 			else if(!MFString_CaseCmp(&argv[a][1], "ra") || !MFString_CaseCmp(&argv[a][1], "rawalpha"))
 			{
-				bool premultipliedAlpha = false;
+				premultipliedAlpha = false;
 			}
 		}
 		else
@@ -439,8 +439,6 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	int x, y;
 	Pixel *pSource = pSourceSurface->pData;
 
-	float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
-
 	switch(targetFormat)
 	{
 		case TexFmt_A8R8G8B8:
@@ -467,6 +465,8 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		case TexFmt_XB_A8B8G8R8s:
 		case TexFmt_PSP_A8B8G8R8s:
 		{
+			float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
+
 			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
 
 			for(y=0; y<height; y++)
@@ -838,7 +838,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
 	{
 		uint32 imageBytes = (width * height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
-		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
+//		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
 
 		char *pBuffer = (char*)malloc(imageBytes);
 
