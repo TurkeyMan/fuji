@@ -7,6 +7,7 @@
 #include "MFFont.h"
 #include "MFView.h"
 #include "MFPrimitive.h"
+#include "MFMaterial.h"
 
 extern IDirect3DDevice8 *pd3dDevice;
 
@@ -14,6 +15,7 @@ extern IDirect3DDevice8 *pd3dDevice;
 void MFDebug_Message(const char *pMessage)
 {
 	OutputDebugString((LPCTSTR)pMessage);
+	OutputDebugString("\n");
 }
 
 void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
@@ -30,8 +32,12 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		gFrameCount++;
 
 		MFSystem_Update();
+		MFSystem_PostUpdate();
 
 		MFDisplay_BeginFrame();
+
+		MFDisplay_SetClearColour(0,0,0,0);
+		MFDisplay_ClearScreen();
 
 		MFView_SetDefault();
 		MFView_SetOrtho();
@@ -42,34 +48,20 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 		pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-
 		pd3dDevice->SetTexture(0, NULL);
-
-		MFPrimitive(PT_TriStrip);
-
-		MFBegin(4);
-		MFSetColour(0xFF000000);
-		MFSetPosition(0, 0, 0);
-		MFSetPosition(640, 0, 0);
-		MFSetPosition(0, 480, 0);
-		MFSetPosition(640, 480, 0);
-		MFEnd();
 
 		if(!(((uint32)gSystemTimer.GetSecondsF()) % 2))
 		{
-			MFBegin(4);
-			MFSetColour(0xFFFF0000);
-			MFSetPosition(50, 50, 0);
-			MFSetPosition(590, 50, 0);
-			MFSetPosition(50, 110, 0);
-			MFSetPosition(590, 110, 0);
-			MFEnd();
+			MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+			MFPrimitive(PT_QuadList);
 
 			MFBegin(4);
-			MFSetColour(0xFF000000);
+			MFSetColour(1,0,0,1);
+			MFSetPosition(50, 50, 0);
+			MFSetPosition(590, 110, 0);
+
+			MFSetColour(0,0,0,1);
 			MFSetPosition(55, 55, 0);
-			MFSetPosition(585, 55, 0);
-			MFSetPosition(55, 105, 0);
 			MFSetPosition(585, 105, 0);
 			MFEnd();
 		}

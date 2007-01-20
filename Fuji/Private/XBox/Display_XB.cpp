@@ -14,6 +14,79 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 {
 	MFCALLSTACK;
 
+	DWORD avPack = XGetAVPack();
+	DWORD vidMode = XGetVideoStandard();
+	DWORD vidFlags = XGetVideoFlags();
+
+	switch(avPack)
+	{
+		case XC_AV_PACK_SCART:		MFDebug_Log(2, "MFDisplay: Video output using Scart AV Pack"); break;
+		case XC_AV_PACK_HDTV:		MFDebug_Log(2, "MFDisplay: Video output using HighDef Pack"); break;
+		case XC_AV_PACK_RFU:		MFDebug_Log(2, "MFDisplay: Video output using RF Unit"); break;
+		case XC_AV_PACK_SVIDEO:		MFDebug_Log(2, "MFDisplay: Video output using Advanced AV Pack"); break;
+		case XC_AV_PACK_STANDARD:	MFDebug_Log(2, "MFDisplay: Video output using Standard AV Pack"); break;
+		default:					MFDebug_Log(2, "MFDisplay: Video output using Unknown AV Pack"); break;
+	}
+
+	wide = !!(vidFlags & (XC_VIDEO_FLAGS_WIDESCREEN));
+
+	if(vidMode == XC_VIDEO_STANDARD_PAL_I)
+	{
+		if(vidFlags & XC_VIDEO_FLAGS_PAL_60Hz)
+		{
+			width = 720;
+			height = 480;
+			rate = 60;
+			progressive = false;
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL60%s", wide ? " (Widescreen)" : ""));
+		}
+		else
+		{
+			width = 720;
+			height = 576;
+			rate = 50;
+			progressive = false;
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL (576i)", wide ? " (Widescreen)" : ""));
+		}
+	}
+	else
+	{
+		if(vidFlags & XC_VIDEO_FLAGS_HDTV_1080i)
+		{
+			width = 1920;
+			height = 1080;
+			rate = 60;
+			progressive = false;
+			MFDebug_Log(2, "MFDisplay: Video Mode set to 1080i");
+		}
+		else if(vidFlags & XC_VIDEO_FLAGS_HDTV_720p)
+		{
+			width = 1280;
+			height = 720;
+			rate = 60;
+			progressive = true;
+			MFDebug_Log(2, "MFDisplay: Video Mode set to 720p");
+		}
+		else if(vidFlags & XC_VIDEO_FLAGS_HDTV_480p)
+		{
+			width = 720;
+			height = 480;
+			rate = 60;
+			progressive = true;
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to 480p", wide ? " (Widescreen)" : ""));
+		}
+		else
+		{
+			width = 720;
+			height = 480;
+			rate = 60;
+			progressive = false;
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to NTSC (480i)", wide ? " (Widescreen)" : ""));
+		}
+	}
+
+	// XC_VIDEO_FLAGS_LETTERBOX
+
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
 
@@ -24,7 +97,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	gDisplay.wide = wide;
 
 	d3d8 = Direct3DCreate8(D3D_SDK_VERSION);
-	if(!d3d8) return 1;
+	if(!d3d8)
+		return 1;
 
 	MFZeroMemory(&presentparams, sizeof(D3DPRESENT_PARAMETERS));
 	presentparams.BackBufferWidth = width;
@@ -40,7 +114,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	presentparams.Flags = (wide ? D3DPRESENTFLAG_WIDESCREEN : NULL) | (progressive ? D3DPRESENTFLAG_PROGRESSIVE : NULL);
 
 	hr = d3d8->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentparams, &pd3dDevice);
-	if(hr != D3D_OK) return 2;
+	if(hr != D3D_OK)
+		return 2;
 
 	return 0;
 }
@@ -86,7 +161,7 @@ void MFDisplay_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
 void MFDisplay_SetViewport(float x, float y, float width, float height)

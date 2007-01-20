@@ -108,7 +108,7 @@ void MFDebug_Warn(int level, const char *pWarningMessage);
  * - 1 - Important message.
  * - 2 - Not so important message.
  * - 3 - Typically unwanted message.
- * - 4 - Very trivial message.
+ * - 4 - Very trivial and probably frequent spammy message.
  */
 void MFDebug_Log(int level, const char *pMessage);
 

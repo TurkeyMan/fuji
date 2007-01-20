@@ -204,6 +204,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		pTexture->pTemplateData->pSurfaces[0].bufferLength = imageSize;
 		pTexture->pTemplateData->pSurfaces[0].width = width;
 		pTexture->pTemplateData->pSurfaces[0].height = height;
+		pTexture->pTemplateData->pSurfaces[0].bitsPerPixel = MFTexture_GetBitsPerPixel(format);
 
 		// and call the platform specific create.
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
@@ -227,7 +228,7 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 		pPixels[a] = colour.ToPackedColour();
 	}
 
-	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0);
+	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0, false);
 }
 
 // texture browser

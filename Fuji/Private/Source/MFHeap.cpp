@@ -183,7 +183,7 @@ void operator delete[](void *pMemory)
 }
 #endif
 
-#if !defined(_WINDOWS) && !defined(_FUJI_UTIL) 
+#if !(defined(_WINDOWS) || defined(_MFXBOX)) && !defined(_FUJI_UTIL) 
 void* operator new(size_t size, void *pMem)
 {
 	return pMem;
