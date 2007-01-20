@@ -48,4 +48,6 @@ void MFRendererXB_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type,
 void MFRendererXB_ConvertFloatToXBVF(const float *pFloat, char *pData, XBVF_Type type);
 void MFRendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type type);
 
+void MFRendererXB_SetTextureMatrix(const MFMatrix &textureMatrix);
+
 #endif

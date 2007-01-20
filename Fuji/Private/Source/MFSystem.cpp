@@ -315,7 +315,7 @@ void MFSystem_Draw()
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 
-		float yOffset = gDefaults.display.displayHeight-15.0f;
+		float yOffset = gDefaults.display.displayHeight-25.0f;
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
@@ -325,13 +325,13 @@ void MFSystem_Draw()
 		yOffset -= iconSize;
 
 		MFSetTexCoord1(0,0);
-		MFSetPosition(15, yOffset, 0);
+		MFSetPosition(25, yOffset, 0);
 		MFSetTexCoord1(1,0);
-		MFSetPosition(15+iconSize, yOffset, 0);
+		MFSetPosition(25+iconSize, yOffset, 0);
 		MFSetTexCoord1(0,1);
-		MFSetPosition(15, yOffset+iconSize, 0);
+		MFSetPosition(25, yOffset+iconSize, 0);
 		MFSetTexCoord1(1,1);
-		MFSetPosition(15+iconSize, yOffset+iconSize, 0);
+		MFSetPosition(25+iconSize, yOffset+iconSize, 0);
 #else
 		const float iconSize = 20.0f;
 		yOffset -= iconSize;

@@ -30,6 +30,13 @@ void MFRendererXB_SetIndices(IDirect3DIndexBuffer8 *pIndexBuffer, int baseIndex)
 	pd3dDevice->SetIndices(pIndexBuffer, baseIndex);
 }
 
+void MFRendererXB_SetTextureMatrix(const MFMatrix &textureMatrix)
+{
+	MFMatrix texMat = textureMatrix;
+	texMat.SetZAxis3(texMat.GetTrans());
+	pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&texMat);
+}
+
 void MFRendererXB_ApplyGPUStates()
 {
 

@@ -242,12 +242,18 @@ int main(int argc, char *argv[])
 				else if(pImage->oneBitAlpha)
 					targetFormat = TexFmt_A1R5G5B5;
 				else
-					targetFormat = TexFmt_A4R4G4B4;
+					targetFormat = TexFmt_A8R8G8B8;
 //				targetFormat = TexFmt_A8R8G8B8;
 				break;
 
 			case FP_XBox:
-				targetFormat = TexFmt_XB_A8R8G8B8s;
+				if(pImage->opaque)
+					targetFormat = TexFmt_XB_R5G6B5s;
+				else if(pImage->oneBitAlpha)
+					targetFormat = TexFmt_XB_A1R5G5B5s;
+				else
+					targetFormat = TexFmt_XB_A8R8G8B8s;
+//				targetFormat = TexFmt_XB_A8R8G8B8s;
 				break;
 
 			case FP_Linux:
@@ -838,11 +844,12 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
 	{
 		uint32 imageBytes = (width * height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
-//		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
 
 		char *pBuffer = (char*)malloc(imageBytes);
 
 #if defined(WIN32)
+		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
+
 		if(targetFormat >= TexFmt_XB_A8R8G8B8s && targetFormat <= TexFmt_XB_R4G4B4A4s)
 		{
 			// swizzle for xbox

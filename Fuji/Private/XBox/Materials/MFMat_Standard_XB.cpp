@@ -34,23 +34,42 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 	if(pSetMaterial != pMaterial)
 	{
+		bool premultipliedAlpha = false;
+
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
 			MFRendererXB_SetTexture(0, pData->pTextures[pData->diffuseMapIndex]->pTexture);
 			MFRendererXB_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-			MFRendererXB_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-			MFRendererXB_SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+			MFRendererXB_SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+			MFRendererXB_SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
 
 			MFRendererXB_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			MFRendererXB_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 
 			MFRendererXB_SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-//			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&pData->textureMatrix);
+			MFRendererXB_SetTextureMatrix(pData->textureMatrix);
+/*
+			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
 
-			MFMatrix texMat = pData->textureMatrix;
-			texMat.SetZAxis3(texMat.GetTrans());
-			pd3dDevice->SetTransform(D3DTS_TEXTURE0, (D3DMATRIX*)&texMat);
+			if(premultipliedAlpha)
+			{
+				// we need to scale the colour intensity by the vertex alpha since it wont happen during the blend.
+				MFRendererXB_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
+				MFRendererXB_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+				MFRendererXB_SetTextureStageState(1, D3DTSS_CONSTANT, 0);
+
+				MFRendererXB_SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+				MFRendererXB_SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CONSTANT);
+				MFRendererXB_SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			}
+			else
+			{
+				MFRendererXB_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+				MFRendererXB_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			}
+*/
 		}
 		else
 		{
@@ -65,21 +84,32 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			case MF_AlphaBlend:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
 			case MF_Additive:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 			case MF_Subtractive:
 				MFRendererXB_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 				MFRendererXB_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
-				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				MFRendererXB_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
 				MFRendererXB_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
+		}
+
+		if(pData->materialType & MF_Mask)
+		{
+			MFRendererXB_SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			MFRendererXB_SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			MFRendererXB_SetRenderState(D3DRS_ALPHAREF, 0xFF);
+		}
+		else
+		{
+			MFRendererXB_SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 		}
 
 		switch(pData->materialType&MF_CullMode)
