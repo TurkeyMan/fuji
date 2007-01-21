@@ -79,6 +79,9 @@ enum MFEndian
 
 	#include <stdlib.h>
 
+	// This forces ConvertASE and the shaders to use vertex data formats supported by D3D8
+	#define SUPPORT_D3D8
+
 	// this defines weather to take mouse[0]'s coords from the windows cursor or from
 	// DirectInput's accumulated input events
 	#define USE_WINDOWS_MOUSE_COORDS

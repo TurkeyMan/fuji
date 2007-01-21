@@ -14,70 +14,64 @@
 /**
  * Tests is an input device is available.
  * Tests is an input device is available.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @return Returns true if the device is available.
- * @see MFInput_IsConnected()
- * @see MFInput_IsReady()
+ * @see MFInput_IsConnected(), MFInput_IsReady()
  */
 bool MFInput_IsAvailable(int device, int deviceID);
 
 /**
  * Tests is an input device is connected.
  * Tests is an input device is connected.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @return Returns true if the device is connected.
- * @see MFInput_IsAvailable()
- * @see MFInput_IsReady()
+ * @see MFInput_IsAvailable(), MFInput_IsReady()
  */
 bool MFInput_IsConnected(int device, int deviceID);
 
 /**
  * Tests is an input device is ready.
  * Tests is an input device is ready.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @return Returns true if the device is ready.
- * @see MFInput_IsAvailable()
- * @see MFInput_IsConnected()
+ * @see MFInput_IsAvailable(), MFInput_IsConnected()
  */
 bool MFInput_IsReady(int device, int deviceID);
 
 /**
  * Read input from a device.
  * Read input from a device.
- * @param button The button on the device to read.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param button The button or control on the device to read. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @param pPrevState Optional pointer to receive the previous button state. Pass NULL if the previous state is not required.
  * @return Returns a float representing the input state.
- * @see MFInput_WasPressed()
- * @see MFInput_WasReleased()
+ * @see MFInput_WasPressed(), MFInput_WasReleased()
  */
 float MFInput_Read(int button, int device, int deviceID = 0, float *pPrevState = NULL);
 
 /**
  * Test if a button was pressed this frame.
  * Test if a button was pressed this frame.
- * @param button The button on the device to test.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param button The button or control on the device to test. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @return Returns true if the button was pressed this frame.
- * @see MFInput_Read()
- * @see MFInput_WasReleased()
+ * @see MFInput_Read(), MFInput_WasReleased()
  */
 bool MFInput_WasPressed(int button, int device, int deviceID = 0);
 
 /**
  * Test if a button was released this frame.
  * Test if a button was released this frame.
- * @param button The button on the device to test.
- * @param device The source device. This should be a member of the MFInputDevice enum.
+ * @param button The button or control on the device to test. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @return Returns true if the button was released this frame.
- * @see MFInput_Read()
- * @see MFInput_WasPressed()
+ * @see MFInput_Read(), MFInput_WasPressed()
  */
 bool MFInput_WasReleased(int button, int device, int deviceID = 0);
 
@@ -85,8 +79,7 @@ bool MFInput_WasReleased(int button, int device, int deviceID = 0);
  * Get the number of available gamepads.
  * Get the number of available gamepads.
  * @return Returns the number of gamepads available to the system.
- * @see MFInput_GetNumKeyboards()
- * @see MFInput_GetNumPointers()
+ * @see MFInput_GetNumKeyboards(), MFInput_GetNumPointers()
  */
 int MFInput_GetNumGamepads();
 
@@ -94,8 +87,7 @@ int MFInput_GetNumGamepads();
  * Get the number of available keyboards.
  * Get the number of available keyboards.
  * @return Returns the number of keyboards available to the system.
- * @see MFInput_GetNumGamepads()
- * @see MFInput_GetNumPointers()
+ * @see MFInput_GetNumGamepads(), MFInput_GetNumPointers()
  */
 int MFInput_GetNumKeyboards();
 
@@ -103,8 +95,7 @@ int MFInput_GetNumKeyboards();
  * Get the number of available pointers.
  * Get the number of available pointers.
  * @return Returns the number of pointers available to the system.
- * @see MFInput_GetNumGamepads()
- * @see MFInput_GetNumKeyboards()
+ * @see MFInput_GetNumGamepads(), MFInput_GetNumKeyboards()
  */
 int MFInput_GetNumPointers();
 
@@ -152,8 +143,8 @@ void MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
 /**
  * Generate a string representing the input button/device configuration.
  * Generate a string representing the input button/device configuration.
- * @param button The button on the device.
- * @param device The device to read the name from.
+ * @param button The button or control on the device. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
+ * @param device The device to read the name from. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The device index.
  * @param includeDevice If true, the device name is included in the generated string.
  * @param includeDeviceID If true, the device index is included in the generated string.
@@ -179,7 +170,7 @@ float MFInput_GetDeadZone();
 /**
  * Get a device name.
  * Get a device name.
- * @param device The device to fetch the name of.
+ * @param device The device to fetch the name of. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The device index.
  * @return Returns the name of the target device.
  */
@@ -188,7 +179,7 @@ const char*	MFInput_GetDeviceName(int device, int deviceID);
 /**
  * Get the button name from a gamepad.
  * Get the button name from a gamepad.
- * @param button Gamepad button ID.
+ * @param button Gamepad button ID. Must be a member of the #MFGamepadButton enumerated type.
  * @param deviceID Gamepad index.
  * @return Returns the name of the specified button of the specified device.
  */
@@ -197,7 +188,7 @@ const char* MFInput_GetGamepadButtonName(int button, int deviceID);
 /**
  * Get the state of the keyboard status flags.
  * Get the state of the keyboard status flags.
- * @param keyboardState Value from the MFKeyboardStatusState enumerated type.
+ * @param keyboardState Value from the #MFKeyboardStatusState enumerated type.
  * @param keyboardID Keyboard index.
  * @return Returns the state of the keyboards status bit.
  */
