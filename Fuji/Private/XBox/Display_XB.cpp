@@ -33,6 +33,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	wide = !!(vidFlags & (XC_VIDEO_FLAGS_WIDESCREEN));
 	gbWidescreen = wide;
 
+	gbLetterBox = !!(vidFlags & (XC_VIDEO_FLAGS_LETTERBOX));
+
 	if(vidMode == XC_VIDEO_STANDARD_PAL_I)
 	{
 		if(vidFlags & XC_VIDEO_FLAGS_PAL_60Hz)
@@ -41,7 +43,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			height = 480;
 			rate = 60;
 			progressive = false;
-			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL60%s", wide ? " (Widescreen)" : ""));
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL60%s", wide ? " (Widescreen)" : (gbLetterBox ? " (Letterbox)" : "")));
 		}
 		else
 		{
@@ -49,7 +51,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			height = 576;
 			rate = 50;
 			progressive = false;
-			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL (576i)", wide ? " (Widescreen)" : ""));
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to PAL (576i)%s", wide ? " (Widescreen)" : (gbLetterBox ? " (Letterbox)" : "")));
 		}
 	}
 	else
@@ -76,7 +78,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			height = 480;
 			rate = 60;
 			progressive = true;
-			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to 480p", wide ? " (Widescreen)" : ""));
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to 480p%s", wide ? " (Widescreen)" : (gbLetterBox ? " (Letterbox)" : "")));
 		}
 		else
 		{
@@ -84,11 +86,9 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			height = 480;
 			rate = 60;
 			progressive = false;
-			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to NTSC (480i)", wide ? " (Widescreen)" : ""));
+			MFDebug_Log(2, MFStr("MFDisplay: Video Mode set to NTSC (480i)%s", wide ? " (Widescreen)" : (gbLetterBox ? " (Letterbox)" : "")));
 		}
 	}
-
-	gbLetterBox = !!(vidFlags & (XC_VIDEO_FLAGS_LETTERBOX));
 
 	D3DPRESENT_PARAMETERS presentparams;
 	HRESULT hr;
@@ -119,6 +119,25 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	hr = d3d8->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentparams, &pd3dDevice);
 	if(hr != D3D_OK)
 		return 2;
+
+	// clear both buffers to black
+	MFDisplay_SetClearColour(0,0,0,0);
+
+	MFDisplay_BeginFrame();
+	MFDisplay_ClearScreen(CS_All);
+	MFDisplay_EndFrame();
+	MFDisplay_BeginFrame();
+	MFDisplay_ClearScreen(CS_All);
+	MFDisplay_EndFrame();
+	if(triplebuffer)
+	{
+		MFDisplay_BeginFrame();
+		MFDisplay_ClearScreen(CS_All);
+		MFDisplay_EndFrame();
+	}
+
+	// setup the initial viewport (letterbox)
+	MFDisplay_ResetViewport();
 
 	return 0;
 }
@@ -199,10 +218,10 @@ void MFDisplay_ResetViewport()
 
 float MFDisplay_GetNativeAspectRatio()
 {
-	return gbWidescreen ? MFAspect_16x9 : MFAspect_4x3;
+	return (gbWidescreen || gbLetterBox) ? MFAspect_16x9 : MFAspect_4x3;
 }
 
 bool MFDisplay_IsWidescreen()
 {
-	return gbWidescreen;
+	return gbWidescreen || gbLetterBox;
 }

@@ -281,11 +281,14 @@ void MFSystem_Draw()
 	MFView_SetDefault();
 
 	MFRect rect;
+	MFRect display;
+
+	MFDisplay_GetDisplayRect(&display);
 
 	rect.x = 0.0f;
 	rect.y = 0.0f;
-	rect.width = (float)gDefaults.display.displayWidth;
-	rect.height = (float)gDefaults.display.displayHeight;
+	rect.height = display.height;
+	rect.width = rect.height * MFDisplay_GetNativeAspectRatio();
 
 	MFView_SetOrtho(&rect);
 
@@ -300,40 +303,24 @@ void MFSystem_Draw()
 	{
 		//FPS Display
 #if defined(_PSP)
-		float x = gDefaults.display.displayWidth-100.0f;
+		float x = display.width-100.0f;
 		float y = 10.0f;
-#else
-		float x = gDefaults.display.displayWidth-140.0f;
-		float y = 30.0f;
-#endif
 
 		MFFont_DrawTextf(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 80.0f, gDefaults.display.displayHeight-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+			MFFont_DrawTextf(MFFont_GetDebugFont(), 80.0f, display.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
-
-		float yOffset = gDefaults.display.displayHeight-25.0f;
 
 		MFPrimitive(PT_TriStrip);
 		MFBegin(4);
 		MFSetColour(1,1,1,0.5f);
-#if !defined(_PSP)
-		const float iconSize = 55.0f;
-		yOffset -= iconSize;
 
-		MFSetTexCoord1(0,0);
-		MFSetPosition(25, yOffset, 0);
-		MFSetTexCoord1(1,0);
-		MFSetPosition(25+iconSize, yOffset, 0);
-		MFSetTexCoord1(0,1);
-		MFSetPosition(25, yOffset+iconSize, 0);
-		MFSetTexCoord1(1,1);
-		MFSetPosition(25+iconSize, yOffset+iconSize, 0);
-#else
 		const float iconSize = 20.0f;
+
+		float yOffset = rect.height-25.0f;
 		yOffset -= iconSize;
 
 		MFSetTexCoord1(0,0.3f);
@@ -344,11 +331,48 @@ void MFSystem_Draw()
 		MFSetPosition(15, yOffset+iconSize, 0);
 		MFSetTexCoord1(1,0.65f);
 		MFSetPosition(15+iconSize*3, yOffset+iconSize, 0);
-#endif
+
 		MFEnd();
+#else
+		float x = rect.width-140.0f;
+		float y = 30.0f;
+
+		float xaspect = 25 * MFDisplay_GetNativeAspectRatio();
+
+		MFFont_DrawTextf(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
+
+		float rate = (float)gSystemTimer.GetRate();
+		if(rate != 1.0f)
+			MFFont_DrawTextf(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
+
+		MFPrimitive(PT_TriStrip);
+		MFBegin(4);
+		MFSetColour(1,1,1,0.5f);
+
+		const float iconSize = 55.0f;
+		float yOffset = rect.height-30.0f;
+		yOffset -= iconSize;
+
+		MFSetTexCoord1(0,0);
+		MFSetPosition(xaspect, yOffset, 0);
+		MFSetTexCoord1(1,0);
+		MFSetPosition(xaspect+iconSize, yOffset, 0);
+		MFSetTexCoord1(0,1);
+		MFSetPosition(xaspect, yOffset+iconSize, 0);
+		MFSetTexCoord1(1,1);
+		MFSetPosition(xaspect+iconSize, yOffset+iconSize, 0);
+
+		MFEnd();
+#endif
 
 		MFSystem_DrawPlatformSpecific();
 	}
+
+	rect.height = 480;
+	rect.width = rect.height * MFDisplay_GetNativeAspectRatio();
+	MFView_SetOrtho(&rect);
 
 	DebugMenu_Draw();
 
