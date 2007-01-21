@@ -117,7 +117,11 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		uint32 levelCount = 1;
 
 		int imageSize = (width * height * MFTexture_GetBitsPerPixel(format)) / 8;
+#if defined(XB_XGTEXTURES)
+		bool ownCopy = true;
+#else
 		bool ownCopy = !!(flags & TEX_CopyMemory);
+#endif
 		bool convertARGB = false;
 
 		const MFPlatform currentPlatform = MFSystem_GetCurrentPlatform();
@@ -149,7 +153,10 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		// create template data
 		char *pTemplate;
-		pTemplate = (char*)MFHeap_Alloc(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount + (ownCopy ? imageSize : 0));
+		uint32 size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
+		if(ownCopy)
+			size = MFALIGN(size, 0x100) + imageSize;
+		pTemplate = (char*)MFHeap_Alloc(size);
 		MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
@@ -164,7 +171,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		// we need to take a copy of this memory if flagged to do so...
 		if(ownCopy)
 		{
-			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pTexture->pTemplateData->pSurfaces + sizeof(MFTextureSurfaceLevel)*levelCount;
+			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)MFALIGN((char*)pTexture->pTemplateData->pSurfaces + sizeof(MFTextureSurfaceLevel)*levelCount, 0x100);
 			MFCopyMemory(pTexture->pTemplateData->pSurfaces[0].pImageData, pData, imageSize);
 		}
 		else

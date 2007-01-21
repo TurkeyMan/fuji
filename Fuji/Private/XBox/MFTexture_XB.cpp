@@ -23,10 +23,20 @@ extern IDirect3DDevice8 *pd3dDevice;
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
-	HRESULT hr;
 	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 
 	// create texture
+#if defined(XB_XGTEXTURES)
+	pTexture->pTexture = &pTexture->texture;
+	XGSetTextureHeader(pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, 1, 0, (D3DFORMAT)pTemplate->platformFormat, 0, pTexture->pTexture, 0, 0);
+	pTexture->pTexture->Register(pTemplate->pSurfaces[0].pImageData);
+
+	if(pTemplate->imageFormat >= TexFmt_XB_A8R8G8B8s && pTemplate->imageFormat <= TexFmt_XB_R4G4B4A4s)
+	{
+		XGSwizzleRect(pTemplate->pSurfaces[0].pImageData, 0, NULL, pTemplate->pSurfaces[0].pImageData, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, NULL, pTemplate->pSurfaces[0].bitsPerPixel/8);
+	}
+#else
+	HRESULT hr;
 	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, (D3DFORMAT)pTemplate->platformFormat, 0, &pTexture->pTexture);
 
 	MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
@@ -54,6 +64,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// filter mip levels
 	if(generateMipChain)
 		D3DXFilterTexture(pTexture->pTexture, NULL, 0, D3DX_DEFAULT);
+#endif
 }
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)

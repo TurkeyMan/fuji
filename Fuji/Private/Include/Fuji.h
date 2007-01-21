@@ -112,6 +112,9 @@ enum MFEndian
 	#define DEBUG_MOUSE
 	#include <xtl.h>
 
+	// Use XG interface to create textures in place
+//	#define XB_XGTEXTURES
+
 #elif (defined(_XBOX) && _XBOX_VER >= 200)
 
 	#define _MFX360

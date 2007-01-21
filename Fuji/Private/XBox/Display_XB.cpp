@@ -20,6 +20,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	DWORD vidMode = XGetVideoStandard();
 	DWORD vidFlags = XGetVideoFlags();
 
+	// log the AV pack (just an FYI)
 	switch(avPack)
 	{
 		case XC_AV_PACK_SCART:		MFDebug_Log(2, "MFDisplay: Video output using Scart AV Pack"); break;
@@ -30,13 +31,14 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		default:					MFDebug_Log(2, "MFDisplay: Video output using Unknown AV Pack"); break;
 	}
 
-	wide = !!(vidFlags & (XC_VIDEO_FLAGS_WIDESCREEN));
-	gbWidescreen = wide;
-
+	// calculate the frame buffer size and display mode from the dashboard info
+	gbWidescreen = !!(vidFlags & (XC_VIDEO_FLAGS_WIDESCREEN));
 	gbLetterBox = !!(vidFlags & (XC_VIDEO_FLAGS_LETTERBOX));
+	wide = gbWidescreen;
 
 	if(vidMode == XC_VIDEO_STANDARD_PAL_I)
 	{
+		// PAL modes (poor PAL users dont get high def) :(
 		if(vidFlags & XC_VIDEO_FLAGS_PAL_60Hz)
 		{
 			width = 720;
@@ -56,6 +58,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	}
 	else
 	{
+		// NTSC modes
 		if(vidFlags & XC_VIDEO_FLAGS_HDTV_1080i)
 		{
 			width = 1920;
@@ -90,18 +93,21 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		}
 	}
 
-	D3DPRESENT_PARAMETERS presentparams;
-	HRESULT hr;
-
+	// update display parameters
 	gDisplay.width = width;
 	gDisplay.height = height;
 	gDisplay.progressive = progressive;
 	gDisplay.refreshRate = rate;
 	gDisplay.wide = wide;
 
+	// create D3D interface
 	d3d8 = Direct3DCreate8(D3D_SDK_VERSION);
 	if(!d3d8)
 		return 1;
+
+	// create the D3D device
+	D3DPRESENT_PARAMETERS presentparams;
+	HRESULT hr;
 
 	MFZeroMemory(&presentparams, sizeof(D3DPRESENT_PARAMETERS));
 	presentparams.BackBufferWidth = width;
@@ -120,7 +126,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	if(hr != D3D_OK)
 		return 2;
 
-	// clear both buffers to black
+	// clear frame buffers to black
+	MFVector oldColour = gClearColour;
 	MFDisplay_SetClearColour(0,0,0,0);
 
 	MFDisplay_BeginFrame();
@@ -135,6 +142,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		MFDisplay_ClearScreen(CS_All);
 		MFDisplay_EndFrame();
 	}
+
+	MFDisplay_SetClearColour(oldColour.x, oldColour.y, oldColour.z, oldColour.w);
 
 	// setup the initial viewport (letterbox)
 	MFDisplay_ResetViewport();

@@ -62,10 +62,10 @@ struct MFTexture
 	// data members
 	char name[64];
 
-	MFTextureTemplateData *pTemplateData;
-	int refCount;
-
 #if defined(_MFXBOX)
+#if defined(XB_XGTEXTURES)
+	IDirect3DTexture8 texture;
+#endif
 	IDirect3DTexture8 *pTexture;
 #elif defined(_WINDOWS)
 	IDirect3DTexture9 *pTexture;
@@ -76,6 +76,9 @@ struct MFTexture
 #else
 	// nothing
 #endif
+
+	MFTextureTemplateData *pTemplateData;
+	int refCount;
 };
 
 #if !defined(_FUJI_UTIL)

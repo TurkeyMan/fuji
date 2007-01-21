@@ -5,6 +5,9 @@
 
 void MFHeap_InitModulePlatformSpecific()
 {
+#if defined(XB_XGTEXTURES)
+	MFHeap_SetAllocAlignment(4096);
+#endif
 }
 
 void MFHeap_DeinitModulePlatformSpecific()
@@ -16,21 +19,33 @@ void* MFHeap_SystemMalloc(uint32 bytes)
 {
 	MFCALLSTACK;
 
+#if defined(XB_XGTEXTURES)
+	return XPhysicalAlloc(bytes, MAXULONG_PTR, 16, PAGE_READWRITE);
+#else
 	return malloc(bytes);
+#endif
 }
 
 void* MFHeap_SystemRealloc(void *buffer, uint32 bytes)
 {
 	MFCALLSTACK;
 
+#if defined(XB_XGTEXTURES)
+	return NULL;
+#else
 	return realloc(buffer, bytes);
+#endif
 }
 
 void MFHeap_SystemFree(void *buffer)
 {
 	MFCALLSTACK;
 
-	return free(buffer);
+#if defined(XB_XGTEXTURES)
+	XPhysicalFree(buffer);
+#else
+	free(buffer);
+#endif
 }
 
 

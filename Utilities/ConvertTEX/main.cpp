@@ -2,6 +2,7 @@
 #include "MFTexture_Internal.h"
 #include "MFSystem.h"
 #include "MFString.h"
+#include "MFHeap.h"
 
 #include "ConvertTex.h"
 #include "IntImage.h"
@@ -305,7 +306,7 @@ int main(int argc, char *argv[])
 		PremultiplyAlpha(pImage);
 
 	// calculate texture data size..
-	uint32 imageBytes = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pImage->mipLevels;
+	uint32 imageBytes = (uint32)MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pImage->mipLevels, 0x100);
 
 	for(a=0; a<pImage->mipLevels; a++)
 	{
@@ -323,7 +324,8 @@ int main(int argc, char *argv[])
 	}
 
 	// allocate buffer
-	char *pOutputBuffer = (char*)malloc(imageBytes);
+	MFHeap_SetAllocAlignment(4096);
+	char *pOutputBuffer = (char*)MFHeap_Alloc(imageBytes);
 
 	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
 	MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData));
@@ -352,7 +354,7 @@ int main(int argc, char *argv[])
 
 	MFTextureSurfaceLevel *pSurfaceLevels = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
 
-	char *pDataPointer = pOutputBuffer + sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pImage->mipLevels;
+	char *pDataPointer = pOutputBuffer + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pImage->mipLevels, 0x100);
 
 	for(a=0; a<pImage->mipLevels; a++)
 	{
@@ -429,7 +431,7 @@ int main(int argc, char *argv[])
 
 	fclose(pFile);
 
-	free(pOutputBuffer);
+	MFHeap_Free(pOutputBuffer);
 
 	printf(MFStr("> %s\n", outFile));
 
@@ -845,7 +847,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 	{
 		uint32 imageBytes = (width * height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
 
-		char *pBuffer = (char*)malloc(imageBytes);
+		char *pBuffer = (char*)MFHeap_Alloc(imageBytes);
 
 #if defined(WIN32)
 		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
@@ -866,7 +868,7 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		}
 
 		MFCopyMemory(pOutputSurface->pImageData, pBuffer, imageBytes);
-		free(pBuffer);
+		MFHeap_Free(pBuffer);
 	}
 
 	return 0;
