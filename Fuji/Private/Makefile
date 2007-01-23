@@ -169,6 +169,7 @@ OBJS := $(OBJS) Linux/Display_Linux.o \
 	Linux/MFDebug_Linux.o \
 	Linux/MFHeap_Linux.o \
 	Linux/MFInput_Linux.o \
+	PC/MFInputMappings_PC.o \
 	Linux/MFMaterial_Linux.o \
 	Linux/MFModel_Linux.o \
 	Linux/MFPrimitive_Linux.o \

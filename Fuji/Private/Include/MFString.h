@@ -190,6 +190,11 @@ bool MFIsNumeric(int c);
 bool MFIsAlphaNumeric(int c);
 
 /**
+ * Test if the specified character is a hexadecimal character.
+ */
+bool MFIsHex(int c);
+
+/**
  * Test if the specified character is a newline character.
  */
 bool MFIsNewline(int c);

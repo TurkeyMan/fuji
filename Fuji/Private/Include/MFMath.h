@@ -10,12 +10,19 @@
 #define _MFMATH_H
 
 /**
+ * Convert a string containing a hexadecimal number to an int.
+ * Converts a string containing a hexadecimal number to an int.
+ * @param pString String containing a hexadecimal number.
+ * @return The value of the hexadecimal number in the string.
+ */
+int MFHexToInt(const char *pString);
+
+/**
  * Calculates the sine of an angle.
  * Calculates the sine of an angle.
  * @param angle An angle in radians.
  * @return The sine of \a angle.
- * @see MFCos()
- * @see MFTan()
+ * @see MFCos(), MFTan()
  */
 float MFSin(float angle);
 
@@ -24,8 +31,7 @@ float MFSin(float angle);
  * Calculates the cosine of an angle.
  * @param angle An angle in radians.
  * @return The cosine of \a angle.
- * @see MFSin()
- * @see MFTan()
+ * @see MFSin(), MFTan()
  */
 float MFCos(float angle);
 
@@ -34,8 +40,7 @@ float MFCos(float angle);
  * Calculates the tangent of an angle.
  * @param angle An angle in radians.
  * @return The tangent of \a angle.
- * @see MFSin()
- * @see MFCos()
+ * @see MFSin(), MFCos()
  */
 float MFTan(float angle);
 
@@ -44,8 +49,7 @@ float MFTan(float angle);
  * Calculates the arc-sine of an angle.
  * @param angle An angle in radians.
  * @return The arc-sine of \a angle.
- * @see MFACos()
- * @see MFATan()
+ * @see MFACos(), MFATan()
  */
 float MFASin(float angle);
 
@@ -54,8 +58,7 @@ float MFASin(float angle);
  * Calculates the arc-cosine of an angle.
  * @param angle An angle in radians.
  * @return The arc-cosine of \a angle.
- * @see MFASin()
- * @see MFATan()
+ * @see MFASin(), MFATan()
  */
 float MFACos(float angle);
 
@@ -64,8 +67,7 @@ float MFACos(float angle);
  * Calculates the arc-tangent of an angle.
  * @param angle An angle in radians.
  * @return The arc-tangent of \a angle.
- * @see MFASin()
- * @see MFACos()
+ * @see MFASin(), MFACos()
  */
 float MFATan(float angle);
 
@@ -101,8 +103,7 @@ float MFRSqrt(float x);
  * Very fast reciprocal square root estimate of a value.
  * @param x Any positive value.
  * @return The reciprocal square root estimate of \a x.
- * @see MFSqrt()
- * @see MFRSqrt()
+ * @see MFSqrt(), MFRSqrt()
  */
 float MFRSqrtE(float x);
 
@@ -146,16 +147,14 @@ T MFAbs(T x);
 /**
  * Returns the minimum of \a a and \a b.
  * Returns the minimum of \a a and \a b.
- * @see MFMax()
- * @see MFClamp()
+ * @see MFMax(), MFClamp()
  */
 template <typename T>
 T MFMin(T a, T b);
 /**
  * Returns the maximum of \a a and \a b.
  * Returns the maximum of \a a and \a b.
- * @see MFMin()
- * @see MFClamp()
+ * @see MFMin(), MFClamp()
  */
 template <typename T>
 T MFMax(T a, T b);
@@ -163,8 +162,7 @@ T MFMax(T a, T b);
 /**
  * Clamps values such that: \a x <= \a y <= \a z.
  * Clamps values such that: \a x <= \a y <= \a z.
- * @see MFMax()
- * @see MFMin()
+ * @see MFMax(), MFMin()
  */
 template <typename T>
 T MFClamp(T x, T y, T z);
@@ -173,8 +171,7 @@ T MFClamp(T x, T y, T z);
  * Seed the random number generator.
  * Seeds the random number generator.
  * @return None.
- * @see MFRand()
- * @see MFRand_Unit()
+ * @see MFRand(), MFRand_Unit()
  */
 void MFRand_Seed(uint32 seed);
 
@@ -182,8 +179,7 @@ void MFRand_Seed(uint32 seed);
  * Get a pseudo-random number.
  * Get a pseudo-random number.
  * @return Returns a pseudo random number in the range of 0 to 2^32-1 (4294967295).
- * @see MFRand_Unit()
- * @see MFRand_Range()
+ * @see MFRand_Unit(), MFRand_Range()
  */
 uint32 MFRand();
 
@@ -191,8 +187,7 @@ uint32 MFRand();
  * Get a pseudo-random number between 0.0f and 1.0f.
  * Get a pseudo-random number between 0.0f and 1.0f.
  * @return Returns a pseudo-random number betwen 0.0f and 1.0f.
- * @see MFRand()
- * @see MFRand_Range()
+ * @see MFRand(), MFRand_Range()
  */
 float MFRand_Unit();
 
@@ -200,8 +195,7 @@ float MFRand_Unit();
  * Get a pseudo-random double precision number between 0.0f and 1.0f.
  * Get a pseudo-random double precision number between 0.0f and 1.0f.
  * @return Returns a double precision pseudo-random number betwen 0.0f and 1.0f.
- * @see MFRand()
- * @see MFRand_Unit()
+ * @see MFRand(), MFRand_Unit()
  */
 double MFRand_Double();
 
@@ -211,8 +205,7 @@ double MFRand_Double();
  * @param min Minimum value.
  * @param max Maximum value.
  * @return Returns a pseudo-random number between \a min and \a max.
- * @see MFRand()
- * @see MFRand_Unit()
+ * @see MFRand(), MFRand_Unit()
  */
 float MFRand_Range(float min, float max);
 

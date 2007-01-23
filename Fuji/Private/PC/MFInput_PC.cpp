@@ -3,7 +3,7 @@
 
 #define SAMPLE_BUFFER_SIZE 128//50000
 
-#define MFWHEEL_DELTA 120 
+#define MFWHEEL_DELTA 120
 
 #include "Fuji.h"
 #include "MFVector.h"
@@ -399,7 +399,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	{
 		// use applicable descriptor
 		gPCJoysticks[gamepadID].pGamepadInfo = pInfo;
-		MFDebug_Warn(2, MFStr("Found gamepad: %s '%s'.", pInfo->pName, pInfo->pIdentifier));
+		MFDebug_Log(2, MFStr("Found gamepad: %s '%s'.", pInfo->pName, pInfo->pIdentifier));
 	}
 
 	// test if device uses a POV for the digital directions
@@ -755,7 +755,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 		if(gPCJoysticks[id].pDevice)
 		{
 			// poll the gamepad
-			hr = gPCJoysticks[id].pDevice->Poll(); 
+			hr = gPCJoysticks[id].pDevice->Poll();
 
 			if(FAILED(hr))
 			{
@@ -879,7 +879,7 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 	}
 	else
 	{
-		for(DWORD a=0; a<elements; a++) 
+		for(DWORD a=0; a<elements; a++)
 		{
 			gKeyState[inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
 		}
@@ -937,7 +937,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 		}
 		else
 		{
-			for(DWORD a=0; a<elements; a++) 
+			for(DWORD a=0; a<elements; a++)
 			{
 				switch(inputBuffer[a].dwOfs)
 				{
@@ -1285,7 +1285,7 @@ void MFInputPC_LoadGamepadMappings()
 int RegisterRawMouse(void)
 {
 	// This function registers to receive the WM_INPUT messages
-	RAWINPUTDEVICE rid[1]; // Register only for mouse messages from wm_input.  
+	RAWINPUTDEVICE rid[1]; // Register only for mouse messages from wm_input.
 
 	//register to get wm_input messages
 	rid[0].usUsagePage = 0x01;
@@ -1388,7 +1388,7 @@ int InitRawMouse(bool _includeRDPMouse)
 			{
 				MFDebug_Assert(false, "Error: Unable to get raw input device name.");
 				return 1;
-			} 
+			}
 
 			// Count this mouse for allocation if it's not an RDP mouse or if we want to include the rdp mouse
 			if(includeRDPMouse || !IsRDPMouse(pName))
@@ -1426,7 +1426,7 @@ int InitRawMouse(bool _includeRDPMouse)
 			{
 				MFDebug_Assert(false, "Error: Unable to get raw input device name.");
 				return 1;
-			} 
+			}
 
 			// Add this mouse to the array if it's not an RDPMouse or if we wish to include the RDP mouse
 			if(includeRDPMouse || !IsRDPMouse(pName))
@@ -1452,7 +1452,7 @@ int InitRawMouse(bool _includeRDPMouse)
 	// finally, register to recieve raw input WM_INPUT messages
 	MFDebug_Assert(RegisterRawMouse() == 0, "Error: Unable to register raw input.");
 
-	return 0;  
+	return 0;
 }
 
 int ReadRawInput(RAWINPUT *pRaw)
@@ -1584,9 +1584,9 @@ int HandleRawMouseMessage(HANDLE hDevice)
 
 #if defined(SUPPORT_XINPUT)
 //-----------------------------------------------------------------------------
-// Enum each PNP device using WMI and check each device ID to see if it contains 
+// Enum each PNP device using WMI and check each device ID to see if it contains
 // "IG_" (ex. "VID_045E&PID_028E&IG_00").  If it does, then it's an XInput device
-// Unfortunately this information can not be found by just using DirectInput 
+// Unfortunately this information can not be found by just using DirectInput
 //-----------------------------------------------------------------------------
 HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
 {
@@ -1616,23 +1616,23 @@ HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
     if( FAILED(hr) || pIWbemLocator == NULL )
         goto LCleanup;
 
-    bstrNamespace = SysAllocString( L"\\\\.\\root\\cimv2" );if( bstrNamespace == NULL ) goto LCleanup;        
-    bstrClassName = SysAllocString( L"Win32_PNPEntity" );   if( bstrClassName == NULL ) goto LCleanup;        
-    bstrDeviceID  = SysAllocString( L"DeviceID" );          if( bstrDeviceID == NULL )  goto LCleanup;        
-    
-    // Connect to WMI 
-    hr = pIWbemLocator->ConnectServer( bstrNamespace, NULL, NULL, 0L, 
+    bstrNamespace = SysAllocString( L"\\\\.\\root\\cimv2" );if( bstrNamespace == NULL ) goto LCleanup;
+    bstrClassName = SysAllocString( L"Win32_PNPEntity" );   if( bstrClassName == NULL ) goto LCleanup;
+    bstrDeviceID  = SysAllocString( L"DeviceID" );          if( bstrDeviceID == NULL )  goto LCleanup;
+
+    // Connect to WMI
+    hr = pIWbemLocator->ConnectServer( bstrNamespace, NULL, NULL, 0L,
                                        0L, NULL, NULL, &pIWbemServices );
 
 	MFDebug_Assert(SUCCEEDED(hr) && pIWbemServices, "Failed to connect to WMI server.");
     if( FAILED(hr) || pIWbemServices == NULL )
         goto LCleanup;
 
-    // Switch security level to IMPERSONATE. 
-    CoSetProxyBlanket( pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL, 
-                       RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE );                    
+    // Switch security level to IMPERSONATE.
+    CoSetProxyBlanket( pIWbemServices, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
+                       RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, NULL, EOAC_NONE );
 
-    hr = pIWbemServices->CreateInstanceEnum( bstrClassName, 0, NULL, &pEnumDevices ); 
+    hr = pIWbemServices->CreateInstanceEnum( bstrClassName, 0, NULL, &pEnumDevices );
     if( FAILED(hr) || pEnumDevices == NULL )
         goto LCleanup;
 
@@ -1653,7 +1653,7 @@ HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
             if( SUCCEEDED( hr ) && var.vt == VT_BSTR && var.bstrVal != NULL )
             {
                 // Check if the device ID contains "IG_".  If it does, then it's an XInput device
-				    // This information can not be found from DirectInput 
+				    // This information can not be found from DirectInput
                 if( wcsstr( var.bstrVal, L"IG_" ) )
                 {
                     // If it does, then get the VID/PID from var.bstrVal

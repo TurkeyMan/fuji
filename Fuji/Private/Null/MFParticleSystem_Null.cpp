@@ -174,7 +174,6 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	}
 
 	int numParticles = pParticleSystem->particles.GetLength();
-	MFDebug_Assert(numParticles >= 0, "Weird error!");
 	if(numParticles == 0)
 		return;
 

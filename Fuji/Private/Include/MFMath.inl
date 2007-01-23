@@ -2,6 +2,27 @@
 
 //#define _USE_MFSQRT
 
+inline int MFHexToInt(const char *pString)
+{
+	int val = 0;
+
+	while(MFIsHex(*pString))
+	{
+		int c = *pString++;
+
+		val <<= 4;
+
+		if(c <= '9')
+			val |= c - '0';
+		else if(c <= 'F')
+			val |= c - 'A' + 10;
+		else
+			val |= c - 'a' + 10;
+	}
+
+	return val;
+}
+
 inline float MFSin(float angle)
 {
 	return sinf(angle);
@@ -163,14 +184,14 @@ inline T MFClamp(T x, T y, T z)
 
 inline float MFRand_Unit()
 {
-	return (float)MFRand()*(float)(1.0/4294967295.0); 
+	return (float)MFRand()*(float)(1.0/4294967295.0);
 }
 
-inline double MFRand_Double() 
-{ 
-	uint32 a=MFRand()>>5, b=MFRand()>>6; 
-	return (a*67108864.0+b)*(1.0/9007199254740992.0); 
-} 
+inline double MFRand_Double()
+{
+	uint32 a=MFRand()>>5, b=MFRand()>>6;
+	return (a*67108864.0+b)*(1.0/9007199254740992.0);
+}
 
 inline float MFRand_Range(float min, float max)
 {

@@ -32,6 +32,11 @@ inline bool MFIsAlphaNumeric(int c)
 #endif
 }
 
+inline bool MFIsHex(int c)
+{
+	return (c>='0' && c<='9') || (c>='a' && c<='f') || (c>='A' && c<='F');
+}
+
 inline bool MFIsNewline(int c)
 {
 	return c=='\n' || c=='\r';

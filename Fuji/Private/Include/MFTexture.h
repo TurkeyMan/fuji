@@ -119,9 +119,7 @@ enum TextureFlags
  * @param generateMipChain If true, a mip-chain will be generated for the texture.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
- * @see MFTexture_CreateFromRawData()
- * @see MFTexture_CreateRenderTarget()
- * @see MFTexture_Destroy()
+ * @see MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
  */
 MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
 
@@ -138,10 +136,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If TexFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFTexture_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
- * @see MFTexture_Create()
- * @see MFTexture_Destroy()
- * @see MFTexture_GetPlatformAvailability()
- * @see MFTexture_IsAvailableOnPlatform()
+ * @see MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFTexture_IsAvailableOnPlatform()
  */
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
 
@@ -152,8 +147,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
  * @param width Width of render target.
  * @param height Height of render target.
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
- * @see MFTexture_Create()
- * @see MFTexture_Destroy()
+ * @see MFTexture_Create(), MFTexture_Destroy()
  */
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height);
 
@@ -192,8 +186,7 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
  * Gets a human readable string representing the texture format.
  * @param format Texture format to get the name of.
  * @return Pointer to a string representing the texture format.
- * @see MFTexture_GetPlatformAvailability()
- * @see MFTexture_GetBitsPerPixel()
+ * @see MFTexture_GetPlatformAvailability(), MFTexture_GetBitsPerPixel()
  */
 const char * const MFTexture_GetFormatString(int format);
 
@@ -202,8 +195,7 @@ const char * const MFTexture_GetFormatString(int format);
  * Gets a variable representing which platforms support the specified texture format in hardware.
  * @param format Format to test for hardware support.
  * @return Result is a bitfield where each bit represents hardware support for a specific platform. Platform support can be tested, for example, using: ( result & MFBIT(FP_PC) ) != 0.
- * @see MFTexture_GetFormatString()
- * @see MFTexture_GetBitsPerPixel()
+ * @see MFTexture_GetFormatString(), MFTexture_GetBitsPerPixel()
  */
 uint32 MFTexture_GetPlatformAvailability(int format);
 
@@ -222,8 +214,7 @@ bool MFTexture_IsAvailableOnPlatform(int format, int platform);
  * Get the average number of bits per pixel for the specified format.
  * @param format Name for the texture being created.
  * @return Returns the number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
- * @see MFTexture_GetPlatformAvailability()
- * @see MFTexture_GetFormatString()
+ * @see MFTexture_GetPlatformAvailability(), MFTexture_GetFormatString()
  */
 int MFTexture_GetBitsPerPixel(int format);
 

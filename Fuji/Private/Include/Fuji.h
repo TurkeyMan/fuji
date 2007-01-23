@@ -93,7 +93,7 @@ enum MFEndian
 	#define ALLOW_RAW_INPUT
 
 	// add support for XInput (will reserve the first 4 controller slots and support hotswapping if any XInput devices are connected at startup)
-//	#define SUPPORT_XINPUT
+	#define SUPPORT_XINPUT
 
 	// add support for the G15 LCD screen
 	#define SUPPORT_G15
@@ -249,8 +249,8 @@ enum MFEndian
 
 /*** Additional includes ***/
 
-#include "MFMath.h"
 #include "MFString.h"
+#include "MFMath.h"
 #include "MFDebug.h"
 
 #include "Util.h"
@@ -314,6 +314,6 @@ enum MFEndian
  *
  * Special thanks go to all the console homebrew communities who have produced fantastic tools for many platforms and found numerous exploits to make any of it even possible!\n
  * The zlib and libPNG teams, yes i use zlib :)\n
- * Andreas Jönsson from AngelCode (http://www.angelcode.com) for providing AngelScript, an awesome cross platform scripting language and his BMFont tool which is used to generate Fuji Fonts.
+ * Andreas Jï¿½sson from AngelCode (http://www.angelcode.com) for providing AngelScript, an awesome cross platform scripting language and his BMFont tool which is used to generate Fuji Fonts.
  *
  */

@@ -129,8 +129,9 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		// we guarantee ARGB on all platforms, but it is not supported natively
 		if(format == TexFmt_A8R8G8B8)
 		{
-			if(currentPlatform == FP_XBox)
-				format = TexFmt_XB_A8R8G8B8s;
+#if defined(_MFXBOX)
+			format = TexFmt_XB_A8R8G8B8s;
+#endif
 
 			if(!MFTexture_IsAvailableOnPlatform(format, currentPlatform))
 			{
