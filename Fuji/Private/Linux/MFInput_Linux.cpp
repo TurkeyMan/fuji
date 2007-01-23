@@ -85,7 +85,6 @@ MFGamepadInfo gEMS2Info =
 	0x0B43, 0x0003,
 	gEMS2ButtonID,
 	NULL,
-	false,
 	NULL
 };
 
