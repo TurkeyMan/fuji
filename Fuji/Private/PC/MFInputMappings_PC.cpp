@@ -4,7 +4,7 @@
 #include "MFInputMappings_PC.h"
 
 // Button Mappings
-static const int gStandardButtonID[GamepadType_Max] = 
+static const int gStandardButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -28,7 +28,7 @@ static const int gStandardButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative // Button_ThumbRY
 };
 
-static const int gEMSButtonID[GamepadType_Max] = 
+static const int gEMSButtonID[GamepadType_Max] =
 {
 	2,   // Button_A
 	1,   // Button_B
@@ -52,7 +52,7 @@ static const int gEMSButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative  // Button_ThumbRY
 };
 
-static const int gTitaniumButtonID[GamepadType_Max] = 
+static const int gTitaniumButtonID[GamepadType_Max] =
 {
 	2,   // Button_A
 	1,   // Button_B
@@ -100,7 +100,7 @@ static const int gSuperDualBoxButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative  // Button_ThumbRY
 };
 
-static const int gXBCDButtonID[GamepadType_Max] = 
+static const int gXBCDButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -124,7 +124,7 @@ static const int gXBCDButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative // Button_ThumbRY
 };
 
-static const int gLogitechDualActionButtonID[GamepadType_Max] = 
+static const int gLogitechDualActionButtonID[GamepadType_Max] =
 {
 	1,   // Button_A
 	2,   // Button_B
@@ -148,7 +148,7 @@ static const int gLogitechDualActionButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative // Button_ThumbRY
 };
 
-static const int gXBox360ButtonID[GamepadType_Max] = 
+static const int gXBox360ButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -172,7 +172,7 @@ static const int gXBox360ButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative // Button_ThumbRY
 };
 
-static const int gXterminatorButtonID[GamepadType_Max] = 
+static const int gXterminatorButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -196,7 +196,7 @@ static const int gXterminatorButtonID[GamepadType_Max] =
 	-1  // Button_ThumbRY
 };
 
-static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] = 
+static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -220,7 +220,7 @@ static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] =
 	-1  // Button_ThumbRY
 };
 
-static const int gPowerWaveButtonID[GamepadType_Max] = 
+static const int gPowerWaveButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
 	1,   // Button_B
@@ -244,7 +244,7 @@ static const int gPowerWaveButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative // Button_ThumbRY
 };
 
-static const int gGreenAsiaButtonID[GamepadType_Max] = 
+static const int gGreenAsiaButtonID[GamepadType_Max] =
 {
 	2,   // Button_A
 	3,   // Button_B
@@ -438,7 +438,7 @@ static const char * gXterminatorButtonNames[GamepadType_Max] =
 	"Right Y-Axis"  // Button_ThumbRY
 };
 
-static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] = 
+static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] =
 {
 	"A",			// Button_A
 	"B",			// Button_B
@@ -462,7 +462,7 @@ static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] =
 	"Unavailable"	// Button_ThumbRY
 };
 
-static const char * gPowerWaveButtonNames[GamepadType_Max] = 
+static const char * gPowerWaveButtonNames[GamepadType_Max] =
 {
 	"1",            // Button_A
 	"2",            // Button_B
@@ -486,7 +486,7 @@ static const char * gPowerWaveButtonNames[GamepadType_Max] =
 	"Right Y-Axis"  // Button_ThumbRY
 };
 
-static const char * gGreenAsiaButtonNames[GamepadType_Max] = 
+static const char * gGreenAsiaButtonNames[GamepadType_Max] =
 {
 	"3",            // Button_A
 	"4",            // Button_B
@@ -669,7 +669,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[16]
 	},
 
-	// Radioshack 'USB Dual Vibration Joystick' another PS2 gamepad adapter, 
+	// Radioshack 'USB Dual Vibration Joystick' another PS2 gamepad adapter,
 	{
 		"PS2 Gamepad",
 		"USB Dual Vibration Joystick",
