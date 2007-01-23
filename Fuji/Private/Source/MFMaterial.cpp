@@ -93,6 +93,8 @@ void MFMaterial_InitModule()
 	// create the logo textures from raw data
 	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFTextureFormat)SysLogo256_format, SysLogo256_flags);
 	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFTextureFormat)SysLogo64_format, SysLogo64_flags);
+	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo_256_data, SysLogo_256_width, SysLogo_256_height, TexFmt_A8R8G8B8, TEX_VerticalMirror, false);
+	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo_64_data, SysLogo_64_width, SysLogo_64_height, TexFmt_A8R8G8B8, TEX_VerticalMirror, false);
 
 	// create standard materials
 	pNoneMaterial = MFMaterial_Create("_None");

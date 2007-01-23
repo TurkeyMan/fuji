@@ -17,7 +17,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 	else
 		pSystem->pMaterial = MFMaterial_Create(pParticleParams->pMaterial);
 
-	pSystem->emitPeriod = 1.0f / pSystem->emitter.emitRate;
+	pSystem->emitPeriod = pSystem->emitter.emitRate == 0.0f ? 0.0f : 1.0f / pSystem->emitter.emitRate;
 	pSystem->emitTimeout = 0.0f;
 
 	pSystem->particles.Init("ParticleSystem", pSystem->params.maxActiveParticles);
@@ -174,6 +174,7 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	}
 
 	int numParticles = pParticleSystem->particles.GetLength();
+	MFDebug_Assert(numParticles >= 0, "Weird error!");
 	if(numParticles == 0)
 		return;
 

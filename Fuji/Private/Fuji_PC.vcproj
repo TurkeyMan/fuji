@@ -281,6 +281,9 @@
 				RelativePath=".\Source\MFNetwork_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFParticleSystem_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFPrimitive.cpp">
 			</File>
 			<File

@@ -93,7 +93,7 @@ enum MFEndian
 	#define ALLOW_RAW_INPUT
 
 	// add support for XInput (will reserve the first 4 controller slots and support hotswapping if any XInput devices are connected at startup)
-	#define SUPPORT_XINPUT
+//	#define SUPPORT_XINPUT
 
 	// add support for the G15 LCD screen
 	#define SUPPORT_G15
