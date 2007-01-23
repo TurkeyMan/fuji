@@ -195,6 +195,11 @@ const char* MFInput_GetGamepadButtonName(int button, int deviceID);
 bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);
 
 /**
+ *
+ */
+char MFInput_KeyToAscii(int key, bool shift, bool caps);
+
+/**
  * Input devices.
  * These are available input devices.
  */

@@ -80,7 +80,7 @@ struct MFGamepadPC
 	MFGamepadInfo *pGamepadInfo;
 
 	int  forceFeedbackState;
-	bool bUsePOV;
+	bool bHasPOV;
 	bool wasRemoved;
 };
 
@@ -393,7 +393,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 		MFDebug_Warn(1, MFStr("Found an unknown gamepad '%s', using default mappings.", lpddi->tszProductName));
 
 		// offer to send email detailing controller info..
-		MessageBox(NULL, "An unknown gamepad has been detected.\r\nWe strive to support every gamepad natively, please report your gamepad to Manu at turkeyman@gmail.com.\r\nI will contact you and request a few details about the gamepad so it can be added to the registry for the next release.", "Unknown gamepad detected...", MB_OK);
+//		MessageBox(NULL, "An unknown gamepad has been detected.\r\nWe strive to support every gamepad natively, please report your gamepad to Manu at turkeyman@gmail.com.\r\nI will contact you and request a few details about the gamepad so it can be added to the registry for the next release.", "Unknown gamepad detected...", MB_OK);
 	}
 	else
 	{
@@ -403,10 +403,10 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	}
 
 	// test if device uses a POV for the digital directions
-	if(gPCJoysticks[gamepadID].caps.dwPOVs && gPCJoysticks[gamepadID].pGamepadInfo->bUsePOV)
-		gPCJoysticks[gamepadID].bUsePOV = true;
+	if(gPCJoysticks[gamepadID].caps.dwPOVs)
+		gPCJoysticks[gamepadID].bHasPOV = true;
 	else
-		gPCJoysticks[gamepadID].bUsePOV = false;
+		gPCJoysticks[gamepadID].bHasPOV = false;
 
 	// initialise the device
 	hr = gPCJoysticks[gamepadID].pDevice->SetDataFormat(&c_dfDIJoystick2);
@@ -785,6 +785,10 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 					const int *pButtonMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
 					LONG *pAxii = (LONG*)&joyState;
 
+					// read pov
+					DWORD pov = gPCJoysticks[id].bHasPOV ? joyState.rgdwPOV[0] : 0xFFFF;
+					bool POVCentered = LOWORD(pov) == 0xFFFF;
+
 					// convert input to float data
 					for(int a=0; a<GamepadType_Max; a++)
 					{
@@ -809,44 +813,47 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 						// if we are not reading the analog axis
 						if(!readAnalog)
 						{
-							// read digital button
-							pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
+							if(axisID >= 60 && gPCJoysticks[id].bHasPOV)
+							{
+								if(POVCentered)
+								{
+									// POV is centered
+									pGamepadState->values[a] = 0.0f;
+								}
+								else
+								{
+									// read POV (or more appropriately titled, POS)
+									if(axisID == 60)
+										pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
+									else if(axisID == 61)
+										pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
+									else if(axisID == 62)
+										pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
+									else if(axisID == 63)
+										pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
+								}
+							}
+							else
+							{
+								// read digital button
+								pGamepadState->values[a] = (joyState.rgbButtons[pButtonMap[a] & AID_ButtonMask] & 0x80) ? 1.0f : 0.0f;
+							}
 						}
 						else
 						{
 							// read an analog axis
-							pGamepadState->values[a] = MFMin(pAxii[MFGETAXIS(pButtonMap[a])] * (1.0f/32767.0f) - 1.0f, 1.0f);
+							pGamepadState->values[a] = MFMin(pAxii[axisID] * (1.0f/32767.0f) - 1.0f, 1.0f);
 						}
 
 						// invert any buttons with the AID_Negative flag
-						pGamepadState->values[a] = (pButtonMap[a] & AID_Negative) ? -pGamepadState->values[a] : pGamepadState->values[a];
+						if(pButtonMap[a] & AID_Negative)
+							pGamepadState->values[a] = -pGamepadState->values[a];
 						// clamp any butons with the AID_Clamp flag to the positive range
-						pGamepadState->values[a] = (pButtonMap[a] & AID_Clamp) ? MFMax(0.0f, pGamepadState->values[a]) : pGamepadState->values[a];
-					}
-
-					// if device has a pov, and we want to read from it
-					if(gPCJoysticks[id].bUsePOV)
-					{
-						// read POV
-						DWORD pov = joyState.rgdwPOV[0];
-						bool POVCentered = (LOWORD(pov) == 0xFFFF);
-
-						if(POVCentered)
-						{
-							// POV is centered
-							pGamepadState->values[Button_DUp] = 0.0f;
-							pGamepadState->values[Button_DDown] = 0.0f;
-							pGamepadState->values[Button_DLeft] = 0.0f;
-							pGamepadState->values[Button_DRight] = 0.0f;
-						}
-						else
-						{
-							// read POV (or more appropriately titled, POS)
-							pGamepadState->values[Button_DUp] = ((pov >= 31500 && pov <= 36000) || (pov >= 0 && pov <= 4500)) ? 1.0f : 0.0f;
-							pGamepadState->values[Button_DDown] = (pov >= 13500 && pov <= 22500) ? 1.0f : 0.0f;
-							pGamepadState->values[Button_DLeft] = (pov >= 22500 && pov <= 31500) ? 1.0f : 0.0f;
-							pGamepadState->values[Button_DRight] = (pov >= 4500 && pov <= 13500) ? 1.0f : 0.0f;
-						}
+						if(pButtonMap[a] & AID_Clamp)
+							pGamepadState->values[a] = MFMax(0.0f, pGamepadState->values[a]);
+						// use the full range for any buttons with the AID_Full flag
+						if(pButtonMap[a] & AID_Full)
+							pGamepadState->values[a] = (pGamepadState->values[a] + 1.0f) * 0.5f;
 					}
 				}
 			}
@@ -1078,6 +1085,16 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 }
 
 // internal functions
+void MFInputPC_GetDIJoyStateInternal(int id, DIJOYSTATE2 *pJoyState)
+{
+	gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), pJoyState);
+}
+
+IDirectInputDevice8 *MFInputPC_GetDIGamepadDevice(int id)
+{
+	return gPCJoysticks[id].pDevice;
+}
+
 void MFInputPC_Acquire(bool acquire)
 {
 	MFCALLSTACK;

@@ -18,10 +18,10 @@ static const int gStandardButtonID[GamepadType_Max] =
 	9,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	12,  // Button_DUp
-	13,  // Button_DDown
-	14,  // Button_DLeft
-	15,  // Button_DRight
+	12 | POV_Up,	// Button_DUp
+	13 | POV_Down,	// Button_DDown
+	14 | POV_Left,	// Button_DLeft
+	15 | POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rx,               // Button_ThumbRX
@@ -66,10 +66,10 @@ static const int gTitaniumButtonID[GamepadType_Max] =
 	9,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	-1,  // Button_DUp
-	-1,  // Button_DDown
-	-1,  // Button_DLeft
-	-1,  // Button_DRight
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Z,                // Button_ThumbRX
@@ -90,10 +90,10 @@ static const int gSuperDualBoxButtonID[GamepadType_Max] =
 	9,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	-1,  // Button_DUp
-	-1,  // Button_DDown
-	-1,  // Button_DLeft
-	-1,  // Button_DRight
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
@@ -114,10 +114,10 @@ static const int gXBCDButtonID[GamepadType_Max] =
 	7,   // Button_Back
 	8,   // Button_LeftThumb
 	9,   // Button_RightThumb
-	12,  // Button_DUp
-	14,  // Button_DDown
-	15,  // Button_DLeft
-	13,  // Button_DRight
+	12 | POV_Up,	// Button_DUp
+	14 | POV_Down,	// Button_DDown
+	15 | POV_Left,	// Button_DLeft
+	13 | POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rx,               // Button_ThumbRX
@@ -138,10 +138,10 @@ static const int gLogitechDualActionButtonID[GamepadType_Max] =
 	8,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	-1,  // Button_DUp
-	-1,  // Button_DDown
-	-1,  // Button_DLeft
-	-1,  // Button_DRight
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Z,                // Button_ThumbRX
@@ -162,10 +162,10 @@ static const int gXBox360ButtonID[GamepadType_Max] =
 	6,   // Button_Back
 	8,   // Button_LeftThumb
 	9,   // Button_RightThumb
-	-1,  // Button_DUp
-	-1,  // Button_DDown
-	-1,  // Button_DLeft
-	-1,  // Button_DRight
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rx,               // Button_ThumbRX
@@ -234,10 +234,10 @@ static const int gPowerWaveButtonID[GamepadType_Max] =
 	8,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	-1,  // Button_DUp
-	-1,  // Button_DDown
-	-1,  // Button_DLeft
-	-1,  // Button_DRight
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Z,                // Button_ThumbRX
@@ -267,6 +267,31 @@ static const int gGreenAsiaButtonID[GamepadType_Max] =
 	-1,	// Button_ThumbRX
 	-1	// Button_ThumbRY
 };
+
+static const int gRadioshackButtonID[GamepadType_Max] =
+{
+	2,   // Button_A
+	1,   // Button_B
+	3,   // Button_X
+	0,   // Button_Y
+	6,   // Button_White
+	7,   // Button_Black
+	4,   // Button_LeftTrigger
+	5,   // Button_RightTrigger
+	9,   // Button_Start
+	8,   // Button_Back
+	10,  // Button_LeftThumb
+	11,  // Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Rz,               // Button_ThumbRX
+	AID_Z | AID_Negative  // Button_ThumbRY
+};
+
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -495,7 +520,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gStandardButtonID,
 		gStandardButtonNames,
-		true,
 		&gGamepadDescriptors[1]
 	},
 
@@ -506,7 +530,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		true,
 		&gGamepadDescriptors[2]
 	},
 
@@ -517,7 +540,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0B43, 0x0003,
 		gEMSButtonID,
 		gPS2ButtonNames,
-		false,
 		&gGamepadDescriptors[3]
 	},
 
@@ -528,7 +550,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		true,
 		&gGamepadDescriptors[4]
 	},
 
@@ -538,7 +559,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		true,
 		&gGamepadDescriptors[5]
 	},
 
@@ -548,7 +568,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		true,
 		&gGamepadDescriptors[6]
 	},
 
@@ -558,7 +577,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		true,
 		&gGamepadDescriptors[7]
 	},
 
@@ -568,7 +586,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
-		true,
 		&gGamepadDescriptors[8]
 	},
 
@@ -579,7 +596,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXBCDButtonID,
 		gXBoxButtonNames,
-		true,
 		&gGamepadDescriptors[9]
 	},
 
@@ -590,7 +606,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		true,
 		&gGamepadDescriptors[10]
 	},
 
@@ -601,7 +616,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		true,
 		&gGamepadDescriptors[11]
 	},
 
@@ -612,7 +626,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXterminatorButtonID,
 		gXterminatorButtonNames,
-		false,
 		&gGamepadDescriptors[12]
 	},
 
@@ -623,7 +636,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		false,
 		&gGamepadDescriptors[13]
 	},
 
@@ -634,18 +646,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		false,
 		&gGamepadDescriptors[14]
 	},
 
 	// Logitech RumblePad 2
 	{
-		"Logitech Rumble Pad 2",
+		"Logitech RumblePad 2",
 		"Logitech RumblePad 2 USB",
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		true,
 		&gGamepadDescriptors[15]
 	},
 
@@ -656,8 +666,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0002,
 		gGreenAsiaButtonID,
 		gGreenAsiaButtonNames,
-		false,
 		&gGamepadDescriptors[16]
+	},
+
+	// Radioshack 'USB Dual Vibration Joystick' another PS2 gamepad adapter, 
+	{
+		"PS2 Gamepad",
+		"USB Dual Vibration Joystick",
+		0x0E8F, 0x0003,
+		gRadioshackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[17]
 	},
 
 	// POWER))WAVE PS2 style gamepad
@@ -667,7 +686,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gPowerWaveButtonID,
 		gPowerWaveButtonNames,
-		false,
 		NULL
 	}
 };
