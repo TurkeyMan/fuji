@@ -145,47 +145,39 @@ void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
-	if(primType == PT_QuadList)
+	bool bIsQuads = primType == PT_QuadList;
+	bool bInsertVerts = bIsQuads && (currentVert & 1);
+	uint32 col;
+
+	if(bInsertVerts)
 	{
-		if(currentVert & 1)
-		{
-			// TODO: add top right and bottom left verts
-			uint32 col = prevVert.colour;
+		// add top right vertex
+		col = prevVert.colour;
 
-			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-			glTexCoord2f(curVert.u, prevVert.v);
-			glVertex3f(x, prevVert.y, prevVert.z);
-
-			col = curVert.colour;
-
-			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-			glTexCoord2f(curVert.u, curVert.v);
-			glVertex3f(x, y, z);
-
-			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-			glTexCoord2f(prevVert.u, curVert.v);
-			glVertex3f(prevVert.x, y, z);
-		}
-		else
-		{
-			uint32 col = curVert.colour;
-			glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-			glTexCoord2f(curVert.u, curVert.v);
-			glVertex3f(x, y, z);
-
-			curVert.x = x;
-			curVert.y = y;
-			curVert.z = z;
-
-			prevVert = curVert;
-		}
-	}
-	else
-	{
-		uint32 col = curVert.colour;
 		glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-		glTexCoord2f(curVert.u, curVert.v);
-		glVertex3f(x, y, z);
+		glTexCoord2f(curVert.u, prevVert.v);
+		glVertex3f(x, prevVert.y, prevVert.z);
+	}
+
+	col = curVert.colour;
+
+	glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
+	glTexCoord2f(curVert.u, curVert.v);
+	glVertex3f(x, y, z);
+
+	if(bInsertVerts)
+	{
+		// add the bottom left vertex
+		glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
+		glTexCoord2f(prevVert.u, curVert.v);
+		glVertex3f(prevVert.x, y, z);
+	}
+	else if(bIsQuads)
+	{
+		curVert.x = x;
+		curVert.y = y;
+		curVert.z = z;
+		prevVert = curVert;
 	}
 
 	++currentVert;

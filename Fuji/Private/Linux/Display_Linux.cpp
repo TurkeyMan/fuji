@@ -210,7 +210,7 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 	gDisplay.fullscreenWidth = gDisplay.width;
 	gDisplay.fullscreenHeight = gDisplay.height;
 
-	MFDisplay_ResetDisplay();	
+	MFDisplay_ResetDisplay();
 }
 
 void MFDisplay_DestroyWindow()
@@ -369,8 +369,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	sizeHints->flags = PSize | PMinSize | PMaxSize;
     sizeHints->min_width = sizeHints->max_width = sizeHints->base_width = width;
-    sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = height;	
-	
+    sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = height;
+
 	XSetWMNormalHints(xdisplay, window, sizeHints);
 
 	// Window title
@@ -382,7 +382,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		MFDebug_Error("Unable to alloc XWMHints structure, out of memory?");
 		XFree(fbConfigs);
 		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -398,7 +398,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		return 1;
 	}
 
-	XFree(wmHints);	
+	XFree(wmHints);
 
 	// Tell the window manager that I want to be notified if the window's closed
 	wm_delete_window = XInternAtom(xdisplay, "WM_DELETE_WINDOW", false);
@@ -406,16 +406,17 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	{
 		MFDebug_Error("Unable to set Window Manager protocols");
 		XFree(fbConfigs);
-		MFDisplay_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
+	XSelectInput(xdisplay, window, KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask | ExposureMask);
 
 	if(!XMapRaised(xdisplay, window))
 	{
 		MFDebug_Error("Unable to map new window");
 		XFree(fbConfigs);
-		MFDisplay_DestroyDisplay();		
+		MFDisplay_DestroyDisplay();
 		return 1;
 	}
 
@@ -521,13 +522,13 @@ void MFDisplay_ResetDisplay()
 	if(!gDisplay.windowed && numModes > 1)
 	{
 		XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]);
-	
+
 		XGrabPointer(xdisplay, window, True, ButtonPressMask, GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
 		XFlush(xdisplay);
 
 		// A little trick to make sure the entire window is on the screen
 		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, gDisplay.width - 1, gDisplay.height - 1);
-		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, 0, 0);	
+		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, 0, 0);
 		XFlush(xdisplay);
 	}
 

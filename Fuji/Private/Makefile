@@ -476,6 +476,7 @@ AR       = ar
 RANLIB   = ranlib
 STRIP    = strip
 INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
+
 # end OSX
 endif
 

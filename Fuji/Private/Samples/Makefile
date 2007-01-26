@@ -24,3 +24,9 @@ clean:
 	make -C InputTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD) clean
 	make -C HelloWorld/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD) clean
 	make -C ModelTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD) clean
+
+rebuild:
+	make -C 3DBox/ PLATFORM=$(PLATFORM) BUILD=$(BUILD) rebuild
+	make -C InputTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)
+	make -C HelloWorld/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)
+	make -C ModelTest/ PLATFORM=$(PLATFORM)  BUILD=$(BUILD)

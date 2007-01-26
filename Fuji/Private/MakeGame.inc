@@ -1,4 +1,6 @@
+ifeq ($(TARGET),)
 TARGET = $(TARGETNAME)
+endif
 
 ifeq ($(PLATFORM),)
 #$(error $$(PLATFORM) is undefined.
@@ -7,10 +9,6 @@ endif
 ifeq ($(BUILD),)
 #$(error $$(BUILD) is undefined.
 BUILD = Release
-endif
-
-ifeq ($(FUJIPATH),)
-FUJIPATH = ../../
 endif
 
 ifeq ($(BUILD),Debug)
@@ -217,11 +215,11 @@ PSP_EBOOT_SFO = PARAM.SFO
 endif
 
 ifndef PSP_EBOOT_ICON
-PSP_EBOOT_ICON = NULL
+PSP_EBOOT_ICON = ICON.PNG
 endif
 
 ifndef PSP_EBOOT_ICON1
-PSP_EBOOT_ICON1 = NULL
+PSP_EBOOT_ICON1 = PIC0.PNG
 endif
 
 ifndef PSP_EBOOT_UNKPNG
@@ -229,7 +227,7 @@ PSP_EBOOT_UNKPNG = NULL
 endif
 
 ifndef PSP_EBOOT_PIC1
-PSP_EBOOT_PIC1 = NULL
+PSP_EBOOT_PIC1 = PIC1.PNG
 endif
 
 ifndef PSP_EBOOT_SND0
@@ -294,6 +292,7 @@ $(TARGET).elf: $(FUJILIB) $(OBJLIST) $(EXPORT_OBJ)
 	$(FIXUP) $@
 
 makedirs:
+	@mkdir -p bin
 	@mkdir -p $(INTDIR)
 
 clean:

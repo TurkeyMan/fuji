@@ -1,4 +1,8 @@
 TARGETNAME = InputTest
 OBJS = main.o
 
-include ../Samples.inc
+ifeq ($(FUJIPATH),)
+FUJIPATH = ../../
+endif
+
+include $(FUJIPATH)/MakeGame.inc

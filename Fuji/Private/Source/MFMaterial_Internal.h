@@ -120,7 +120,9 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 {
 	uint32 numVertices;
 	uint32 numIndices;
+	uint32 maxWeights;
 
+ 	// vertex data
 	const char *pVertexData;
 	uint32 vertexDataSize;
 	const char *pNormalData;
@@ -132,6 +134,10 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 
 	const char *pIndexData;
 	uint32 indexDataSize;
+
+	// matrix batching data
+	uint16 *pBatchIndices;
+	int matrixBatchSize;
 };
 #endif
 
@@ -151,7 +157,7 @@ typedef MFMeshChunk_XB MFMeshChunk_Current;
 typedef MFMeshChunk_PSP MFMeshChunk_Current;
 #elif defined(_PS2)
 typedef MFMeshChunk_PS2 MFMeshChunk_Current;
-#elif defined(_LINUX)
+#elif defined(_LINUX) || defined(_OSX)
 typedef MFMeshChunk_Linux MFMeshChunk_Current;
 #elif defined(_GC)
 typedef MFMeshChunk_GC MFMeshChunk_Current;

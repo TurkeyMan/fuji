@@ -7,10 +7,13 @@
 #include <X11/Xlib.h>
 #include <sys/utsname.h>
 
+#include <stdio.h>
+
 extern Display *xdisplay;
 extern Window window;
 extern Atom wm_delete_window;
 
+uint8 gXKeys[256];
 extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_Linux;
@@ -26,6 +29,7 @@ int main(int argc, char *argv[])
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	MFZeroMemory(gXKeys, sizeof(gXKeys));
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
@@ -64,6 +68,30 @@ void MFSystem_HandleEventsPlatformSpecific()
 				{
 					gQuit = 1;
 				}
+				break;
+			}
+			case KeyPress:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				gXKeys[pEv->keycode] = 1;
+				break;
+			}
+			case KeyRelease:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				gXKeys[pEv->keycode] = 0;
+				break;
+			}
+			case ButtonPressMask:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				printf("Button down %d %d\n", pEv->state, pEv->button);
+				break;
+			}
+			case ButtonReleaseMask:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				printf("Button up %d %d\n", pEv->state, pEv->button);
 				break;
 			}
 			default:
