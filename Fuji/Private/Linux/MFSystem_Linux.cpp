@@ -5,6 +5,7 @@
 
 #include <sys/time.h>
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
 #include <sys/utsname.h>
 
 #include <stdio.h>
@@ -15,7 +16,7 @@ extern Display *xdisplay;
 extern Window window;
 extern Atom wm_delete_window;
 
-uint8 gXKeys[256];
+uint8 gXKeys[65535];
 extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_Linux;
@@ -75,13 +76,17 @@ void MFSystem_HandleEventsPlatformSpecific()
 			case KeyPress:
 			{
 				XKeyEvent *pEv = (XKeyEvent*)&event;
-				gXKeys[pEv->keycode] = 1;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 1;
 				break;
 			}
 			case KeyRelease:
 			{
 				XKeyEvent *pEv = (XKeyEvent*)&event;
-				gXKeys[pEv->keycode] = 0;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 0;
 				break;
 			}
 			case ButtonPressMask:

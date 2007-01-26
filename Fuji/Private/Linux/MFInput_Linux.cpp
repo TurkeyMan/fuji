@@ -52,6 +52,10 @@ const char * gDeviceNames[] =
 
 extern MFGamepadInfo *pGamepadMappingRegistry;
 
+extern Display *xdisplay;
+
+extern uint16 MKKeyToXK[256];
+extern uint8 gXKeys[65535];
 
 // HACK: mapping for the second EMS2 gamepad
 static const int gEMS2ButtonID[GamepadType_Max] =
@@ -278,6 +282,10 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 
 		return gGamepads[id].joyFD ? IDS_Ready : IDS_Disconnected;
 	}
+	else if(device == IDD_Mouse && id == 0)
+		return IDS_Ready;
+	else if(device == IDD_Keyboard && id == 0)
+		return IDS_Ready;
 
 	return IDS_Unavailable;
 }
@@ -359,6 +367,9 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	MFZeroMemory(pKeyState, sizeof(MFKeyState));
+
+	for(int a=0; a<Key_Max; a++)
+		pKeyState->keys[a] = gXKeys[MKKeyToXK[a]];
 }
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
@@ -389,3 +400,158 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	return false;
 }
+
+uint16 MKKeyToXK[256] =
+{
+	0,
+	XK_Up,
+	XK_Down,
+	XK_Left,
+	XK_Right,
+	XK_Menu,
+	XK_Super_L,
+	XK_Super_R,
+	XK_BackSpace,
+	XK_Tab,
+	XK_Print,
+	XK_Scroll_Lock,
+	XK_Pause,
+	XK_Return,
+	XK_F1,
+	XK_F2,
+	XK_F3,
+	XK_F4,
+	XK_F5,
+	XK_F6,
+	XK_F7,
+	XK_F8,
+	XK_F9,
+	XK_F10,
+	XK_F11,
+	XK_F12,
+	0,//Key_OEM_102,		// on german keyboard
+	XK_Escape,
+	0,//Key_MyComputer,		// on multimedia keyboards
+	0,//Key_Mail,			// on multimedia keyboards
+	0,//Key_Calculator,		// on multimedia keyboards
+	0,//Key_Stop,			// japanese keyboard
+	XK_space,
+	XK_Insert,
+	XK_Delete,
+	XK_Home,
+	XK_End,
+	XK_Page_Up,
+	XK_Page_Down,
+	XK_apostrophe,
+	0,//Key_ABNT_C1,		// on brazilian keyboard
+	0,//Key_ABNT_C2,		// on brazilian keyboard
+	XK_KP_Multiply,
+	XK_KP_Add,
+	XK_comma,
+	XK_minus,
+	XK_period,
+	XK_slash,
+	XK_0,
+	XK_1,
+	XK_2,
+	XK_3,
+	XK_4,
+	XK_5,
+	XK_6,
+	XK_7,
+	XK_8,
+	XK_9,
+	XK_KP_Separator,	// japanese keyboard
+	XK_semicolon,
+	XK_KP_Equal,	// japanese keyboard
+	XK_equal,
+	0,			// on windows keyboards
+	0,			// on windows keyboards
+	0,			// on windows keyboards
+	XK_a,
+	XK_b,
+	XK_c,
+	XK_d,
+	XK_e,
+	XK_f,
+	XK_g,
+	XK_h,
+	XK_i,
+	XK_j,
+	XK_k,
+	XK_l,
+	XK_m,
+	XK_n,
+	XK_o,
+	XK_p,
+	XK_q,
+	XK_r,
+	XK_s,
+	XK_t,
+	XK_u,
+	XK_v,
+	XK_w,
+	XK_x,
+	XK_y,
+	XK_z,
+	XK_underscore,		// japanese keyboard
+	XK_bracketleft,
+	XK_backslash,
+	XK_bracketright,
+	XK_F13,			// japanese keyboard
+	XK_F14,			// japanese keyboard
+	XK_grave,
+	XK_F15,			// japanese keyboard
+	0,//Key_Unlabeled,		// japanese keyboard
+	XK_Control_L,
+	XK_Alt_L,
+	XK_Shift_L,
+	XK_Control_R,
+	XK_Alt_R,
+	XK_Shift_R,
+	XK_Caps_Lock,
+
+	XK_Num_Lock,
+	XK_KP_Divide,
+	XK_KP_Subtract,
+	XK_KP_Delete,
+
+	XK_KP_Insert,
+	XK_KP_End,
+	XK_KP_Down,
+	XK_KP_Page_Down,
+	XK_KP_Left,
+	XK_KP_Begin,
+	XK_KP_Right,
+	XK_KP_Home,
+	XK_KP_Up,
+	XK_KP_Page_Up,
+	XK_KP_Enter,
+
+	0,//Key_PlayPause,		// on multimedia keyboards
+	0,//Key_MediaStop,		// on multimedia keyboards
+	0,//Key_MediaSelect,	// on multimedia keyboards
+	0,//Key_NextTrack,		// on multimedia keyboards
+	0,//Key_PrevTrack,		// on multimedia keyboards
+
+	0,//Key_VolumeDown,		// on multimedia keyboards
+	0,//Key_VolumeUp,		// on multimedia keyboards
+	0,//Key_Mute,			// on multimedia keyboards
+
+	0,//Key_WebBack,		// on multimedia keyboards
+	0,//Key_WebFavorites,	// on multimedia keyboards
+	0,//Key_WebForeward,	// on multimedia keyboards
+	0,//Key_WebHome,		// on multimedia keyboards
+	0,//Key_WebRefresh,		// on multimedia keyboards
+	0,//Key_WebSearch,		// on multimedia keyboards
+	0,//Key_WebStop,		// on multimedia keyboards
+
+	0,//Key_AT,				// japanese keyboard
+	0,//Key_AX,				// japanese keyboard
+	0,//Key_Colon,			// japanese keyboard
+	0,//Key_Convert,		// japanese keyboard
+	0,//Key_Kana,			// japanese keyboard
+	0,//Key_Kanji,			// japanese keyboard
+	0,//Key_NoConvert,		// japanese keyboard
+	0,//Key_Yen,			// japanese keyboard
+};
