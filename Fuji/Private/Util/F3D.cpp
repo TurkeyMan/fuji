@@ -1125,6 +1125,8 @@ void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, void *pBase, void
 		MFFixUp(pMC[a].pColourData, pBase, 0);
 		MFFixUp(pMC[a].pUVData, pBase, 0);
 		MFFixUp(pMC[a].pIndexData, pBase, 0);
+		if(pMC[a].pBatchIndices)
+			MFFixUp(pMC[a].pBatchIndices, pBase, 0);
 	}
 }
 
