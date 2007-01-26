@@ -143,7 +143,7 @@ RANLIB   = ranlib
 STRIP    = strip
 
 LIBDIR   := $(LIBDIR) /usr/X11R6/lib
-LIBS := -lc -lm -lstdc++ -lGL -lGLU -lXxf86vm
+LIBS := -lc -lm -lstdc++ -lpthread -lGL -lGLU -lXxf86vm
 
 # end LINUX
 endif

@@ -9,6 +9,8 @@
 
 #include <stdio.h>
 
+char *gpCommandLineBuffer = NULL;
+
 extern Display *xdisplay;
 extern Window window;
 extern Atom wm_delete_window;
