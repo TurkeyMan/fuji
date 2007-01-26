@@ -20,5 +20,6 @@ esac
 
 if test -n "$VALID_PLATFORM"
 then
+  export PATH=../../Fuji/Bin:$PATH
   Archiver -$PLATFORM -ini=rkv.ini
 fi
