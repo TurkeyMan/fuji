@@ -348,6 +348,9 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	sceGuTexScale(1.0f, 1.0f);
 	sceGuTexOffset(0.0f, 0.0f);
 	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
+#elif defined(_LINUX) || defined(_OSX)
+	glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 #else
 	MFDebug_Assert(false, "Not supported on this platform...");
 #endif
