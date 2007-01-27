@@ -174,9 +174,7 @@ void MFModel_Draw(MFModel *pModel)
 					glTexCoordPointer(2, GL_FLOAT, 0, pMC->pUVData);
 				}
 
-//				glLockArraysEXT(0, numberOfVertices);
 				glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, pMC->pIndexData);
-//				glUnlockArraysEXT();
 
 				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 				glDisableClientState(GL_NORMAL_ARRAY);

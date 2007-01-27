@@ -54,7 +54,7 @@ extern MFGamepadInfo *pGamepadMappingRegistry;
 
 extern Display *xdisplay;
 
-extern uint16 MKKeyToXK[256];
+extern uint16 MFKeyToXK[256];
 extern uint8 gXKeys[65535];
 
 // HACK: mapping for the second EMS2 gamepad
@@ -366,10 +366,12 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
+	MFDebug_Assert(id == 0, "Only one keyboard supported currently.");
+
 	MFZeroMemory(pKeyState, sizeof(MFKeyState));
 
 	for(int a=0; a<Key_Max; a++)
-		pKeyState->keys[a] = gXKeys[MKKeyToXK[a]];
+		pKeyState->keys[a] = gXKeys[MFKeyToXK[a]];
 }
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
@@ -401,7 +403,7 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 	return false;
 }
 
-uint16 MKKeyToXK[256] =
+uint16 MFKeyToXK[256] =
 {
 	0,
 	XK_Up,
