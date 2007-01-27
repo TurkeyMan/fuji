@@ -15,10 +15,14 @@ MFPtrList<MFModelTemplate> gModelBank;
 void MFModel_InitModule()
 {
 	gModelBank.Init("Model Bank", gDefaults.model.maxModels);
+
+	MFModel_InitModulePlatformSpecific();
 }
 
 void MFModel_DeinitModule()
 {
+	MFModel_DeinitModulePlatformSpecific();
+
 	gModelBank.Deinit();
 }
 
@@ -313,7 +317,7 @@ const char* MFModel_GetName(MFModel *pModel)
 int MFModel_GetNumSubObjects(MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
-	
+
 	if(pChunk)
 		return pChunk->count;
 
@@ -323,7 +327,7 @@ int MFModel_GetNumSubObjects(MFModel *pModel)
 int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
-	
+
 	if(pChunk)
 	{
 		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
@@ -341,7 +345,7 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
 const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
-	
+
 	if(pChunk)
 	{
 		MFDebug_Assert(index < pChunk->count, "Subobject index out of bounds.");
@@ -421,7 +425,7 @@ const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
 int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
-	
+
 	if(pChunk)
 	{
 		MFModelBone *pBones = (MFModelBone*)pChunk->pData;

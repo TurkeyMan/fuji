@@ -987,10 +987,11 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 			++numMeshChunks;
 	}
 
-	// increment size of MeshChunk_PSP structure
-	pOffset += MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
-
+	// increment size of MeshChunk_Linux structure
 	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
+	uint32 meshChunkSize = MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
+	MFZeroMemory(pMeshChunk, meshChunkSize);
+	pOffset += meshChunkSize;
 
 	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
 

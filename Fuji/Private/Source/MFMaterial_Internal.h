@@ -122,6 +122,11 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 	uint32 numIndices;
 	uint32 maxWeights;
 
+	uint32 vertBuffer;
+	uint32 normalBuffer;
+	uint32 colourBuffer;
+	uint32 uvBuffer;
+
  	// vertex data
 	const char *pVertexData;
 	uint32 vertexDataSize;
