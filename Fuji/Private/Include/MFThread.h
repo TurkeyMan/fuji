@@ -59,10 +59,7 @@ typedef int (*MFThreadEntryPoint)(void *);
  * @param priority The threads execution priority.
  * @param stackSize Size of the new threads stack.
  * @return Returns a handle to the new thread.
- * @see MFThread_TerminateThread()
- * @see MFThread_ExitThread()
- * @see MFThread_GetExitCode()
- * @see MFThread_DestroyThread()
+ * @see MFThread_TerminateThread(), MFThread_ExitThread(), MFThread_GetExitCode(), MFThread_DestroyThread()
  */
 MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize);
 

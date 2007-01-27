@@ -362,7 +362,7 @@ enum MFMouseButton
 	Mouse_YDelta,	/**< The mouses movement delta on the Y-Axis */
 
 	Mouse_Wheel,	/**< The mouses wheel delta */
-	Mouse_Wheel2,	/**< The mouses second wheel delta (rare on mouses) */ 
+	Mouse_Wheel2,	/**< The mouses second wheel delta (rare on mouses) */
 
 	Mouse_MaxAxis,	/**< Max axis enum */
 
@@ -524,7 +524,7 @@ enum MFKeyboardButton
 	Key_NumPad6,
 	Key_NumPad7,
 	Key_NumPad8,
-	Key_NumPad9,
+	Key_NumPad9,Unknown key
 	Key_NumPadEnter,
 
 	Key_PlayPause,		// on multimedia keyboards
@@ -554,8 +554,8 @@ enum MFKeyboardButton
 	Key_NoConvert,		// japanese keyboard
 	Key_Yen,			// japanese keyboard
 
-	Key_Max,
-	Key_ForceInt	= 0x7FFFFFFF
+	Key_Max,			/**< Max MFKeyboardButton enumeration */
+	Key_ForceInt	= 0x7FFFFFFF	/**< Force MFKeyboardButton to an int type */
 };
 
 #endif
