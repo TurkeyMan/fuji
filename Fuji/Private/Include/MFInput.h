@@ -524,7 +524,7 @@ enum MFKeyboardButton
 	Key_NumPad6,
 	Key_NumPad7,
 	Key_NumPad8,
-	Key_NumPad9,Unknown key
+	Key_NumPad9,
 	Key_NumPadEnter,
 
 	Key_PlayPause,		// on multimedia keyboards
