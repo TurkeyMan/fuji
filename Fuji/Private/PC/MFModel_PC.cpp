@@ -33,6 +33,11 @@ void MFModel_Draw(MFModel *pModel)
 	MFRenderer_SetMatrices(pAnimMats, pAnimMats ? pModel->pAnimation->numBones : 0);
 	MFRendererPC_SetWorldToScreenMatrix(wts);
 
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
@@ -45,7 +50,8 @@ void MFModel_Draw(MFModel *pModel)
 			{
 				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[a].pMeshChunks;
 
-				MFMaterial_SetMaterial(pMC[b].pMaterial);
+				if(!pMatOverride)
+					MFMaterial_SetMaterial(pMC[b].pMaterial);
 
 				if(pModel->pAnimation)
 				{
@@ -154,10 +160,8 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 
 	MFFixUp(pMC->pMaterial, pBase, load);
 	MFFixUp(pMC->pVertexData, pBase, load);
-	if(pMC->pAnimData)
-		MFFixUp(pMC->pAnimData, pBase, load);
+	MFFixUp(pMC->pAnimData, pBase, load);
 	MFFixUp(pMC->pIndexData, pBase, load);
 	MFFixUp(pMC->pVertexElements, pBase, load);
-	if(pMC->pBatchIndices)
-		MFFixUp(pMC->pBatchIndices, pBase, load);
+	MFFixUp(pMC->pBatchIndices, pBase, load);
 }

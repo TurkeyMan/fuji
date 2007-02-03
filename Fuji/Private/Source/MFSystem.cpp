@@ -111,6 +111,16 @@ MFDefaults gDefaults =
 	}
 };
 
+MFSystemCallbackFunction pFilesystemInit = NULL;
+MFSystemCallbackFunction pInit = NULL;
+MFSystemCallbackFunction pDeinit = NULL;
+MFSystemCallbackFunction pUpdate = NULL;
+MFSystemCallbackFunction pDraw = NULL;
+MFSystemCallbackFunction pHandleSysMessages = NULL;
+MFSystemCallbackFunction pDisplayLost = NULL;
+MFSystemCallbackFunction pDisplayReset = NULL;
+MFSystemCallbackFunction pVerticalBlank = NULL;
+
 bool gDrawSystemInfo = true;
 int gQuit = 0;
 int gRestart = 1;
@@ -396,6 +406,7 @@ int MFSystem_GameLoop()
 		gRestart = 0;
 		gQuit = 0;
 
+		if(pInit) pInit();
 		Game_Init();
 
 		// init the timedelta
@@ -411,11 +422,15 @@ int MFSystem_GameLoop()
 
 			MFSystem_Update();
 			if(!DebugMenu_IsEnabled())
+			{
+				if(pUpdate) pUpdate();
 				Game_Update();
+			}
 			MFSystem_PostUpdate();
 
 			MFDisplay_BeginFrame();
 
+			if(pDraw) pDraw();
 			Game_Draw();
 			MFSystem_Draw();
 
@@ -423,12 +438,91 @@ int MFSystem_GameLoop()
 			MFDisplay_EndFrame();
 		}
 
+		if(pDeinit) pDeinit();
 		Game_Deinit();
 	}
 
 	MFSystem_Deinit();
 
 	return gQuit;
+}
+
+MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction)
+{
+	MFSystemCallbackFunction pOldCallback = NULL;
+
+	switch(callback)
+	{
+		case MFCB_FileSystemInit:
+			pOldCallback = pFilesystemInit;
+			pFilesystemInit = pCallbackFunction;
+			break;
+		case MFCB_PostInit:
+			pOldCallback = pInit;
+			pInit = pCallbackFunction;
+			break;
+		case MFCB_Deinit:
+			pOldCallback = pDeinit;
+			pDeinit = pCallbackFunction;
+			break;
+		case MFCB_Update:
+			pOldCallback = pUpdate;
+			pUpdate = pCallbackFunction;
+			break;
+		case MFCB_Draw:
+			pOldCallback = pDraw;
+			pDraw = pCallbackFunction;
+			break;
+		case MFCB_HandleSystemMessages:
+			pOldCallback = pHandleSysMessages;
+			pHandleSysMessages = pCallbackFunction;
+			break;
+		case MFCB_DisplayLost:
+			pOldCallback = pDisplayLost;
+			pDisplayLost = pCallbackFunction;
+			break;
+		case MFCB_DisplayReset:
+			pOldCallback = pDisplayReset;
+			pDisplayReset = pCallbackFunction;
+			break;
+		case MFCB_VerticalBlank:
+			pOldCallback = pVerticalBlank;
+			pVerticalBlank = pCallbackFunction;
+			break;
+		default:
+			MFDebug_Assert(false, "Unknown system callback.");
+	}
+
+	return pOldCallback;
+}
+
+MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
+{
+	switch(callback)
+	{
+		case MFCB_FileSystemInit:
+			return pFilesystemInit;
+		case MFCB_PostInit:
+			return pInit;
+		case MFCB_Deinit:
+			return pDeinit;
+		case MFCB_Update:
+			return pUpdate;
+		case MFCB_Draw:
+			return pDraw;
+		case MFCB_HandleSystemMessages:
+			return pHandleSysMessages;
+		case MFCB_DisplayLost:
+			return pDisplayLost;
+		case MFCB_DisplayReset:
+			return pDisplayReset;
+		case MFCB_VerticalBlank:
+			return pVerticalBlank;
+		default:
+			MFDebug_Assert(false, "Unknown system callback.");
+	}
+
+	return NULL;
 }
 
 void MFSystem_UpdateTimeDelta()

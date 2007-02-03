@@ -112,28 +112,36 @@ extern MFDefaults gDefaults;
  * System callbacks.
  * System callback function idenifiers.
  */
-enum MFCallbacks
+enum MFCallback
 {
-	MFCB_Unknown = -1,			/**< Unknown callback */
+	MFCB_Unknown = -1,			/**< Unknown callback. */
 
-	MFCB_Update = 0,			/**< Update callback */
-	MFCB_Draw,					/**< Draw callback */
-	MFCB_Init,					/**< Init callback */
-	MFCB_Deinit,				/**< Deinit callback */
+	MFCB_FileSystemInit = 0,	/**< File system init callback. This is called after the filesystem initialises, before fuji attempts to load any debug resources. */
+	MFCB_PostInit,				/**< Post engine init callback. Called after Fuji had completed initialisation. */
+	MFCB_Deinit,				/**< Deinit callback. */
 
-	MFCB_HandleSystemMessages,	/**< System Message Handler callback */
+	MFCB_Update,				/**< Update callback. */
+	MFCB_Draw,					/**< Draw callback. */
 
-	MFCB_DisplayLost,			/**< Display Lost callback */
-	MFCB_DisplayReset,			/**< Reset Display callback */
+	MFCB_HandleSystemMessages,	/**< System Message Handler callback. */
 
-	MFCB_VerticalBlank,			/**< Vertical Blank callback */
+	MFCB_DisplayLost,			/**< Display Lost callback. */
+	MFCB_DisplayReset,			/**< Reset Display callback. */
 
-	MFCB_Max,					/**< Max callback */
-	MFCB_ForceInt = 0x7FFFFFFF	/**< Force enum to int type */
+	MFCB_VerticalBlank,			/**< Vertical Blank callback. */
+
+	MFCB_Max,					/**< Max callback. */
+	MFCB_ForceInt = 0x7FFFFFFF	/**< Force enum to int type. */
 };
 
 
 // Fuji system functions
+
+typedef void (*MFSystemCallbackFunction)(void);
+
+MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
+
+MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
 /**
  * Gets the current platform.

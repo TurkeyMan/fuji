@@ -18,7 +18,7 @@ struct VS_INPUT
 	float4 uv		: TEXCOORD; 
 	float4 colour	: COLOR0;
 	float4 weights	: BLENDWEIGHT;
-	int4   indices	: BLENDINDICES;
+	float4 indices	: BLENDINDICES;
 };
 
 struct VS_OUTPUT
@@ -49,8 +49,12 @@ VS_OUTPUT main(in VS_INPUT input)
 		pos += t*w;
 	}
 */
-	int i = input.indices.x;
+
+	int i;
 	float3 t0, t1, t2, t3;
+	input.indices = input.indices * 255 + float4(0.5, 0.5, 0.5, 0.5);
+
+	i = input.indices.x;
 	t0.x = dot(input.pos, mAnimMats[i]);
 	t0.y = dot(input.pos, mAnimMats[i+1]);
 	t0.z = dot(input.pos, mAnimMats[i+2]);

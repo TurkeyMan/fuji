@@ -260,8 +260,8 @@ MFSocket MFSockets_CreateSocket(MFAddressFamily addressFamily, MFSocketType type
 int MFSockets_CloseSocket(MFSocket socket);
 
 /**
- * Close a socket.
- * Closes an existing socket.
+ * Associate a local address with a socket.
+ * Associates a local address with a socket.
  * @param socket Descriptor identifying an unbound socket.
  * @param address Address to assign to the socket.
  * @return If no error occurs, 0 is returnd.

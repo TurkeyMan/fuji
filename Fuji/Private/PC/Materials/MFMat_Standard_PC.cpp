@@ -27,7 +27,7 @@ int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	MFCALLSTACK;
 
-	pd3dDevice->CreateVertexShader(g_vs20_main, &pVS);
+	pd3dDevice->CreateVertexShader(g_vs11_main, &pVS);
 
 	return 0;
 }

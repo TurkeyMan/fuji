@@ -116,7 +116,7 @@ int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 
 	uint32 bytesToCopy = fileHandle->length > -1 ? MFMin(bytes, (uint32)fileHandle->length - fileHandle->offset) : bytes;
 
-	MFCopyMemory(pBuffer, &pMem->pMemoryPointer[fileHandle->offset], bytesToCopy);
+	MFCopyMemory(pBuffer, &((char*)pMem->pMemoryPointer)[fileHandle->offset], bytesToCopy);
 	fileHandle->offset += bytesToCopy;
 
 	return bytesToCopy;
@@ -132,7 +132,7 @@ int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bo
 
 	uint32 bytesToCopy = pMem->allocated ? MFMin(bytes, pMem->allocated - fileHandle->offset) : bytes;
 
-	MFCopyMemory(&pMem->pMemoryPointer[fileHandle->offset], pBuffer, bytesToCopy);
+	MFCopyMemory(&((char*)pMem->pMemoryPointer)[fileHandle->offset], pBuffer, bytesToCopy);
 
 	fileHandle->offset += bytesToCopy;
 	fileHandle->length = MFMax((int)fileHandle->offset, fileHandle->length);

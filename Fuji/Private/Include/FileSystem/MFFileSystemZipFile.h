@@ -6,6 +6,8 @@
 #if !defined(_MFFILESYSTEM_ZIPFILE_H)
 #define _MFFILESYSTEM_ZIPFILE_H
 
+#include "MFFileSystem.h"
+
 /**
  * Open a zip archive file structure.
  * Information required to open a file within a zip archive.

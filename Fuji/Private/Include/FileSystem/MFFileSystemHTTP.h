@@ -6,6 +6,8 @@
 #if !defined(_MFFILESYSTEM_HTTP_H)
 #define _MFFILESYSTEM_HTTP_H
 
+#include "MFFileSystem.h"
+
 /**
  * Open HTTP file structure.
  * Information required to open a HTTP file.

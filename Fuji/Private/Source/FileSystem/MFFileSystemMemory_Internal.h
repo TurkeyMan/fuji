@@ -5,7 +5,7 @@
 
 struct MFFileMemoryData
 {
-	char *pMemoryPointer;
+	void *pMemoryPointer;
 	uint32 allocated;
 	bool ownsMemory;	// this calls Heap_Free() on the memory pointer when the file is closed.
 };

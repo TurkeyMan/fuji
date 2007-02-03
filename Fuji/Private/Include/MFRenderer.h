@@ -201,6 +201,23 @@ void MFRenderer_EndVertices();
  */
 void MFRenderer_EndImmediate();
 
+
+enum MFRenderState
+{
+	MFRS_MaterialOverride,
+	MFRS_NoZRead,
+	MFRS_NoZWrite,
+	MFRS_Untextured,
+	MFRS_PreLit,
+	MFRS_PrimType,
+
+	MFRS_ShowZBuffer,
+	MFRS_ShowOverDraw,
+
+	MFRS_Max,
+	MFRS_ForceInt = 0x7FFFFFFF
+};
+
 /**
  * Set a global render state override.
  * Sets a global render state override.
@@ -208,7 +225,7 @@ void MFRenderer_EndImmediate();
  * @param value Value to set.
  * @return Returns the old value.
  */
-uint32 MFRenderer_SetRenderstateOverride(uint32 renderState, uint32 value);
+uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value);
 
 /**
  * Get the value of a global renderstate override state.
@@ -216,7 +233,7 @@ uint32 MFRenderer_SetRenderstateOverride(uint32 renderState, uint32 value);
  * @param renderState The global renderstate to get.
  * @return Returns the current value of the global renderstate.
  */
-uint32 MFRenderer_GetRenderstateOverride(uint32 renderState);
+uint32 MFRenderer_GetRenderStateOverride(uint32 renderState);
 
 #endif // _MFRENDERER_H
 

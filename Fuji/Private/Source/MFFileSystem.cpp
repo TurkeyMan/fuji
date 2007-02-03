@@ -39,6 +39,13 @@ void MFFileSystem_InitModule()
 	MFFileSystemZipFile_InitModule();
 	MFFileSystemHTTP_InitModule();
 
+	// call the filesystem init callback
+	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
+	if(pFilesystemInitCallback)
+		pFilesystemInitCallback();
+
+	// try and mount the 'standard' archives...
+	// TODO: ponder removing this code and forcing the use of a filesystem init callback? :/
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;

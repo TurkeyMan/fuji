@@ -6,6 +6,8 @@
 #if !defined(_MFFILESYSTEM_NATIVE_H)
 #define _MFFILESYSTEM_NATIVE_H
 
+#include "MFFileSystem.h"
+
 /**
  * Open native file structure.
  * Information required to open a native file.

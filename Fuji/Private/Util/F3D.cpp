@@ -415,10 +415,25 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			float uv[2];
 		};
 
+		struct W4
+		{
+#if defined(SUPPORT_D3D8)
+			uint8 w3;
+			uint8 w2;
+			uint8 w1;
+			uint8 w4;
+#else
+			uint8 w1;
+			uint8 w2;
+			uint8 w3;
+			uint8 w4;
+#endif
+		};
+
 		struct AnimVert
 		{
-			uint8 i[4];
-			uint8 w[4];
+			W4 i;
+			W4 w;
 		};
 
 		if(matsub.triangles.size() == 0)
@@ -494,16 +509,22 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			if(bAnimating)
 			{
+#if defined(SUPPORT_D3D8)
+				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_D3DCOLOR;
+				pMeshChunk[mc].pVertexElements[5].Type = D3DDECLTYPE_D3DCOLOR;
+#else
+				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_UBYTE4;
+				pMeshChunk[mc].pVertexElements[5].Type = D3DDECLTYPE_UBYTE4N;
+#endif
+
 				pMeshChunk[mc].pVertexElements[4].Stream = 1;
 				pMeshChunk[mc].pVertexElements[4].Offset = 0;
-				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_UBYTE4;
 				pMeshChunk[mc].pVertexElements[4].Method = D3DDECLMETHOD_DEFAULT;
 				pMeshChunk[mc].pVertexElements[4].Usage = D3DDECLUSAGE_BLENDINDICES;
 				pMeshChunk[mc].pVertexElements[4].UsageIndex = 0;
 
 				pMeshChunk[mc].pVertexElements[5].Stream = 1;
 				pMeshChunk[mc].pVertexElements[5].Offset = 4;
-				pMeshChunk[mc].pVertexElements[5].Type = D3DDECLTYPE_UBYTE4N;
 				pMeshChunk[mc].pVertexElements[5].Method = D3DDECLMETHOD_DEFAULT;
 				pMeshChunk[mc].pVertexElements[5].Usage = D3DDECLUSAGE_BLENDWEIGHT;
 				pMeshChunk[mc].pVertexElements[5].UsageIndex = 0;
@@ -567,26 +588,27 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 				if(bAnimating)
 				{
-					pAnimVert[c].i[0] = vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0;
-					pAnimVert[c].i[1] = vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0;
-					pAnimVert[c].i[2] = vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0;
-					pAnimVert[c].i[3] = vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0;
-					pAnimVert[c].w[0] = (uint8)(vert.weight[0] * 255.0f);
-					pAnimVert[c].w[1] = (uint8)(vert.weight[1] * 255.0f);
-					pAnimVert[c].w[2] = (uint8)(vert.weight[2] * 255.0f);
-					pAnimVert[c].w[3] = (uint8)(vert.weight[3] * 255.0f);
+					pAnimVert[c].i.w1 = vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0;
+					pAnimVert[c].i.w2 = vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0;
+					pAnimVert[c].i.w3 = vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0;
+					pAnimVert[c].i.w4 = vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0;
+					pAnimVert[c].w.w1 = (uint8)(vert.weight[0] * 255.0f);
+					pAnimVert[c].w.w2 = (uint8)(vert.weight[1] * 255.0f);
+					pAnimVert[c].w.w3 = (uint8)(vert.weight[2] * 255.0f);
+					pAnimVert[c].w.w4 = (uint8)(vert.weight[3] * 255.0f);
 
 					// we need to make sure the weights sum to 255
-					int leftOver = 255 - pAnimVert[c].w[0] - pAnimVert[c].w[1] - pAnimVert[c].w[2] - pAnimVert[c].w[3];
+					int leftOver = 255 - pAnimVert[c].w.w1 - pAnimVert[c].w.w2 - pAnimVert[c].w.w3 - pAnimVert[c].w.w4;
 
-					int d, biggest = 0, weight = pAnimVert[c].w[0];
+					uint8 *pW = (uint8*)&pAnimVert[c].w;
+					int d, biggest = 0, weight = pW[0];
 					for(d=1; d<4; d++)
 					{
-						biggest = pAnimVert[c].w[d] > weight ? d : biggest;
-						weight = MFMax(weight, (int)pAnimVert[c].w[d]);
+						biggest = pW[d] > weight ? d : biggest;
+						weight = MFMax(weight, (int)pW[d]);
 					}
 
-					pAnimVert[c].w[biggest] += leftOver;
+					pW[biggest] += leftOver;
 				}
 			}
 
@@ -625,14 +647,11 @@ void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, void *pBase, void *p
 	for(int a=0; a<count; a++)
 	{
 		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
-
 		MFFixUp(pMC[a].pVertexData, pBase, 0);
-		if(pMC[a].pAnimData)
-			MFFixUp(pMC[a].pAnimData, pBase, 0);
+		MFFixUp(pMC[a].pAnimData, pBase, 0);
 		MFFixUp(pMC[a].pIndexData, pBase, 0);
 		MFFixUp(pMC[a].pVertexElements, pBase, 0);
-		if(pMC[a].pBatchIndices)
-			MFFixUp(pMC[a].pBatchIndices, pBase, 0);
+		MFFixUp(pMC[a].pBatchIndices, pBase, 0);
 	}
 #endif
 }
@@ -776,7 +795,6 @@ void FixUpMeshChunk_XB(MFMeshChunk *pMeshChunks, int count, void *pBase, void *p
 	for(int a=0; a<count; a++)
 	{
 		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
-
 		MFFixUp(pMC[a].pVertexData, pBase, 0);
 		MFFixUp(pMC[a].pIndexData, pBase, 0);
 		MFFixUp(pMC[a].pVertexElements, pBase, 0);
@@ -989,7 +1007,7 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 
 	// increment size of MeshChunk_Linux structure
 	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
-	uint32 meshChunkSize = MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
+	uint32 meshChunkSize = (uint32)MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
 	MFZeroMemory(pMeshChunk, meshChunkSize);
 	pOffset += meshChunkSize;
 
@@ -997,6 +1015,7 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 
 	struct V3 { float x, y, z; };
 	struct V2 { float u, v; };
+	struct W4 { uint8 w[4]; };
 
 	// fill out mesh chunk, and build mesh...
 	for(a=0; a<sub.matSubobjects.size(); a++)
@@ -1024,89 +1043,126 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 			pMeshChunk[mc].pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
 
 			// write verts
-			if(1)//!bAnimating)
+
+			// setup pointers
+			pMeshChunk[mc].pVertexData = pOffset;
+			pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
+			pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
+			pMeshChunk[mc].pNormalData = pOffset;
+			pMeshChunk[mc].normalDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
+			pOffset += MFALIGN16(pMeshChunk[mc].normalDataSize);
+			pMeshChunk[mc].pColourData = pOffset;
+			pMeshChunk[mc].colourDataSize = pMeshChunk[mc].numVertices * sizeof(uint32);
+			pOffset += MFALIGN16(pMeshChunk[mc].colourDataSize);
+			pMeshChunk[mc].pUVData = pOffset;
+			pMeshChunk[mc].uvDataSize = pMeshChunk[mc].numVertices * sizeof(V2);
+			pOffset += MFALIGN16(pMeshChunk[mc].uvDataSize);
+			pMeshChunk[mc].pIndexData = pOffset;
+			pMeshChunk[mc].indexDataSize = numIndices * sizeof(uint16);
+			pOffset += MFALIGN16(pMeshChunk[mc].indexDataSize);
+
+			if(bAnimating)
 			{
-				// setup pointers
-				pMeshChunk[mc].pVertexData = pOffset;
-				pMeshChunk[mc].vertexDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
-				pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
-				pMeshChunk[mc].pNormalData = pOffset;
-				pMeshChunk[mc].normalDataSize = pMeshChunk[mc].numVertices * sizeof(V3);
-				pOffset += MFALIGN16(pMeshChunk[mc].normalDataSize);
-				pMeshChunk[mc].pColourData = pOffset;
-				pMeshChunk[mc].colourDataSize = pMeshChunk[mc].numVertices * sizeof(uint32);
-				pOffset += MFALIGN16(pMeshChunk[mc].colourDataSize);
-				pMeshChunk[mc].pUVData = pOffset;
-				pMeshChunk[mc].uvDataSize = pMeshChunk[mc].numVertices * sizeof(V2);
-				pOffset += MFALIGN16(pMeshChunk[mc].uvDataSize);
-				pMeshChunk[mc].pIndexData = pOffset;
-				pMeshChunk[mc].indexDataSize = numIndices * sizeof(uint16);
-				pOffset += MFALIGN16(pMeshChunk[mc].indexDataSize);
+				pMeshChunk[mc].pIndicesData = pOffset;
+				pMeshChunk[mc].indicesDataSize = pMeshChunk[mc].numVertices * sizeof(W4);
+				pOffset += MFALIGN16(pMeshChunk[mc].indicesDataSize);
+				pMeshChunk[mc].pWeightData = pOffset;
+				pMeshChunk[mc].weightDataSize = pMeshChunk[mc].numVertices * sizeof(W4);
+				pOffset += MFALIGN16(pMeshChunk[mc].weightDataSize);
 
-				pMeshChunk[mc].pBatchIndices = bAnimating ? (uint16*)pOffset : 0;
-				pOffset += bAnimating ? MFALIGN16(sizeof(uint16)*pMeshChunk[mc].matrixBatchSize) : 0;
+				pMeshChunk[mc].pBatchIndices = (uint16*)pOffset;
+				pOffset += MFALIGN16(sizeof(uint16)*pMeshChunk[mc].matrixBatchSize);
+			}
 
-				V3 *pVert = (V3*)pMeshChunk[mc].pVertexData;
-				V3 *pNorm = (V3*)pMeshChunk[mc].pNormalData;
-				uint32 *pCol = (uint32*)pMeshChunk[mc].pColourData;
-				V2 *pUV = (V2*)pMeshChunk[mc].pUVData;
+			V3 *pVert = (V3*)pMeshChunk[mc].pVertexData;
+			V3 *pNorm = (V3*)pMeshChunk[mc].pNormalData;
+			uint32 *pCol = (uint32*)pMeshChunk[mc].pColourData;
+			V2 *pUV = (V2*)pMeshChunk[mc].pUVData;
+			W4 *pInd = (W4*)pMeshChunk[mc].pIndicesData;
+			W4 *pWgt = (W4*)pMeshChunk[mc].pWeightData;
 
-				for(b=0; b<numVertices; b++)
-				{
-					int p = batch.vertices[b];
+			for(b=0; b<numVertices; b++)
+			{
+				int p = batch.vertices[b];
 
-					const F3DVertex &vert = matsub.vertices[p];
+				const F3DVertex &vert = matsub.vertices[p];
 
-					int posIndex = vert.position;
-					int normalIndex = vert.normal;
-					int uvIndex = vert.uv1;
-					int colourIndex = vert.colour;
+				int posIndex = vert.position;
+				int normalIndex = vert.normal;
+				int uvIndex = vert.uv1;
+				int colourIndex = vert.colour;
 
-					const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
-					const MFVector &norm = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
-					const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
-					const MFVector &col = colourIndex > -1 ? sub.colours[colourIndex] : MFVector::one;
+				const MFVector &pos = posIndex > -1 ? sub.positions[posIndex] : MFVector::zero;
+				const MFVector &norm = normalIndex > -1 ? sub.normals[normalIndex] : MFVector::up;
+				const MFVector &uv = uvIndex > -1 ? sub.uvs[uvIndex] : MFVector::zero;
+				const MFVector &col = colourIndex > -1 ? sub.colours[colourIndex] : MFVector::one;
 
-					pVert->x = pos.x;
-					pVert->y = pos.y;
-					pVert->z = pos.z;
-					pNorm->x = norm.x;
-					pNorm->y = norm.y;
-					pNorm->z = norm.z;
-					*pCol = (uint32)(col.x * 255.0f) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
-					pUV->u = uv.x;
-					pUV->v = uv.y;
+				pVert->x = pos.x;
+				pVert->y = pos.y;
+				pVert->z = pos.z;
+				pNorm->x = norm.x;
+				pNorm->y = norm.y;
+				pNorm->z = norm.z;
+				*pCol = (uint32)(col.x * 255.0f) | ((uint32)(col.y * 255.0f) << 8) | ((uint32)(col.z * 255.0f) << 16) | ((uint32)(col.w * 255.0f) << 24);
+				pUV->u = uv.x;
+				pUV->v = uv.y;
 
-					pVolume->min = MFMin(pVolume->min, pos);
-					pVolume->max = MFMax(pVolume->max, pos);
-					AdjustBoundingSphere(pos, &pVolume->boundingSphere);
-
-					++pVert;
-					++pNorm;
-					++pCol;
-					++pUV;
-				}
-
-				// write indices
-				uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
-
-				for(c=0; c<numTriangles; c++)
-				{
-					int t = batch.tris[c];
-
-					pIndices[0] = batch.vertexMapping[matsub.triangles[t].v[0]];
-					pIndices[1] = batch.vertexMapping[matsub.triangles[t].v[1]];
-					pIndices[2] = batch.vertexMapping[matsub.triangles[t].v[2]];
-
-					pIndices += 3;
-				}
-
-				// write out batch
 				if(bAnimating)
 				{
-					for(int c=0; c<pMeshChunk[mc].matrixBatchSize; c++)
-						pMeshChunk[mc].pBatchIndices[c] = (uint16)batch.bones[c];
+					pInd->w[0] = vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0;
+					pInd->w[1] = vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0;
+					pInd->w[2] = vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0;
+					pInd->w[3] = vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0;
+					pWgt->w[0] = (uint8)(vert.weight[0] * 255.0f);
+					pWgt->w[1] = (uint8)(vert.weight[1] * 255.0f);
+					pWgt->w[2] = (uint8)(vert.weight[2] * 255.0f);
+					pWgt->w[3] = (uint8)(vert.weight[3] * 255.0f);
+
+					// we need to make sure the weights sum to 255
+					int leftOver = 255 - pWgt->w[0] - pWgt->w[1] - pWgt->w[2] - pWgt->w[3];
+
+					int d, biggest = 0, weight = pWgt->w[0];
+					for(d=1; d<4; d++)
+					{
+						biggest = pWgt->w[d] > weight ? d : biggest;
+						weight = MFMax(weight, (int)pWgt->w[d]);
+					}
+
+					pWgt->w[biggest] += leftOver;
+
+					++pInd;
+					++pWgt;
 				}
+
+				pVolume->min = MFMin(pVolume->min, pos);
+				pVolume->max = MFMax(pVolume->max, pos);
+				AdjustBoundingSphere(pos, &pVolume->boundingSphere);
+
+				++pVert;
+				++pNorm;
+				++pCol;
+				++pUV;
+			}
+
+			// write indices
+			uint16 *pIndices = (uint16*)pMeshChunk[mc].pIndexData;
+
+			for(c=0; c<numTriangles; c++)
+			{
+				int t = batch.tris[c];
+
+				pIndices[0] = batch.vertexMapping[matsub.triangles[t].v[0]];
+				pIndices[1] = batch.vertexMapping[matsub.triangles[t].v[1]];
+				pIndices[2] = batch.vertexMapping[matsub.triangles[t].v[2]];
+
+				pIndices += 3;
+			}
+
+			// write out batch
+			if(bAnimating)
+			{
+				for(int c=0; c<pMeshChunk[mc].matrixBatchSize; c++)
+					pMeshChunk[mc].pBatchIndices[c] = (uint16)batch.bones[c];
 			}
 
 			++mc;
@@ -1125,9 +1181,10 @@ void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, void *pBase, void
 		MFFixUp(pMC[a].pNormalData, pBase, 0);
 		MFFixUp(pMC[a].pColourData, pBase, 0);
 		MFFixUp(pMC[a].pUVData, pBase, 0);
+		MFFixUp(pMC[a].pIndicesData, pBase, 0);
+		MFFixUp(pMC[a].pWeightData, pBase, 0);
 		MFFixUp(pMC[a].pIndexData, pBase, 0);
-		if(pMC[a].pBatchIndices)
-			MFFixUp(pMC[a].pBatchIndices, pBase, 0);
+		MFFixUp(pMC[a].pBatchIndices, pBase, 0);
 	}
 }
 

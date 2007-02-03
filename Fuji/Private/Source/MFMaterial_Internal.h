@@ -136,6 +136,10 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 	uint32 colourDataSize;
 	const char *pUVData;
 	uint32 uvDataSize;
+	const char *pIndicesData;
+	uint32 indicesDataSize;
+	const char *pWeightData;
+	uint32 weightDataSize;
 
 	const char *pIndexData;
 	uint32 indexDataSize;
