@@ -136,6 +136,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFRenderer_SetMatrices(NULL, 0);
 	MFRendererPC_SetNumWeights(0);
 	MFRendererPC_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
+	MFRendererPC_SetModelColour(MFVector::white);
 
 	pd3dDevice->SetVertexDeclaration(pDecl);
 

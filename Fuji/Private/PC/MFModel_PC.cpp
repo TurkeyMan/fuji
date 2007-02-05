@@ -32,6 +32,7 @@ void MFModel_Draw(MFModel *pModel)
 
 	MFRenderer_SetMatrices(pAnimMats, pAnimMats ? pModel->pAnimation->numBones : 0);
 	MFRendererPC_SetWorldToScreenMatrix(wts);
+	MFRendererPC_SetModelColour(pModel->modelColour);
 
 	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
 

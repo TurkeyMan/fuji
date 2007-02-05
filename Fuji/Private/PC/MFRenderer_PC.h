@@ -54,6 +54,7 @@ void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type
 void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen);
 void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix);
 void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix);
+void MFRendererPC_SetModelColour(const MFVector &colour);
 void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd);
 void MFRendererPC_SetNumWeights(int numWeights);
 

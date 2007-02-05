@@ -55,6 +55,11 @@ void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix)
 	pd3dDevice->SetVertexShaderConstantF(r_tex, (float*)&mat, 2);
 }
 
+void MFRendererPC_SetModelColour(const MFVector &colour)
+{
+	pd3dDevice->SetVertexShaderConstantF(r_modelColour, colour, 1);
+}
+
 void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
 {
 	float mask[4] = { colourModulate, colourAdd, alphaModulate, alphaAdd };

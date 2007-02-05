@@ -13,6 +13,8 @@
 #include <dsound.h>
 #include <vorbis/vorbisfile.h>
 
+void MFSound_FillBufferPC(int trackID, int bytes);
+
 extern HWND apphWnd;
 
 struct MFSoundMusic
@@ -368,6 +370,7 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 	wfx.cbSize = 0;
 
 	track.bufferSize = wfx.nAvgBytesPerSec;
+	track.playBackOffset = 0;
 
 	desc.dwSize = sizeof(DSBUFFERDESC);
 	desc.dwFlags = DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPAN;
@@ -379,32 +382,8 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 	// create the DSBuffer
 	pDirectSound->CreateSoundBuffer(&desc, &track.pDSMusicBuffer, NULL);
 
-	track.playBackOffset = 0;
-
-	void *pData1, *pData2;
-	DWORD bytes1, bytes2;
-	int currentBitstream;
-	uint32 bufferFed = 0;
-
-	// fill buffer
-	track.pDSMusicBuffer->Lock(0, track.bufferSize, &pData1, &bytes1, &pData2, &bytes2, DSBLOCK_ENTIREBUFFER);
-
-	char *pData = (char*)pData1;
-
-	while(bufferFed < track.bufferSize)
-	{
-		int r = ov_read(&track.vorbisFile, pData, track.bufferSize-bufferFed, 0, 2, 1, &currentBitstream);
-
-		if(!r)
-		{
-			ov_time_seek(&track.vorbisFile, 0.0);
-		}
-
-		pData += r;
-		bufferFed += r;
-	}
-
-	track.pDSMusicBuffer->Unlock(pData1, bytes1, pData2, bytes2);
+	// fill the buffer
+	MFSound_FillBufferPC(t, track.bufferSize);
 
 	// dont begin playback is we start paused
 	if(pause)
@@ -426,19 +405,13 @@ void MFSound_ServiceMusicBuffer(int trackID)
 
 	MFSoundMusic& track = gMusicTracks[trackID];
 
-	void *pData1, *pData2;
-	DWORD bytes1, bytes2;
-	int currentBitstream;
-	uint32 bufferFed = 0;
-
 	DWORD playCursor;
+	int lockSize;
 
 	// get cursor pos
 	track.pDSMusicBuffer->GetCurrentPosition(&playCursor, NULL);
 
 	// calculate lock size
-	int lockSize;
-
 	if(playCursor < track.playBackOffset)
 	{
 		lockSize = playCursor + (track.bufferSize - track.playBackOffset);
@@ -448,8 +421,84 @@ void MFSound_ServiceMusicBuffer(int trackID)
 		lockSize = playCursor - track.playBackOffset;
 	}
 
+	// update the buffer
+	MFSound_FillBufferPC(trackID, lockSize);
+}
+
+void MFSound_MusicUnload(int track)
+{
+	MFCALLSTACK;
+
+	// bad tracks, just ignore
+	if (track == -1) return;
+
+	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
+
+	gMusicTracks[track].pInfo = NULL;
+	ov_clear(&gMusicTracks[track].vorbisFile);
+
+	gMusicTracks[track].pDSMusicBuffer->Release();
+	gMusicTracks[track].pDSMusicBuffer = NULL;
+}
+
+void MFSound_MusicSeek(int trackID, float seconds)
+{
+	MFCALLSTACK;
+
+	MFSoundMusic& track = gMusicTracks[trackID];
+
+	ov_time_seek(&track.vorbisFile, seconds);
+
+	if(track.playing)
+		track.pDSMusicBuffer->Stop();
+
+	track.pDSMusicBuffer->SetCurrentPosition(0);
+	track.playBackOffset = 0;
+	MFSound_FillBufferPC(trackID, track.bufferSize);
+
+	if(track.playing)
+		track.pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
+}
+
+void MFSound_MusicPause(int track, bool pause)
+{
+	MFCALLSTACK;
+
+	if(pause)
+	{
+		if(gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Stop();
+	}
+	else
+	{
+		if(!gMusicTracks[track].playing)
+			gMusicTracks[track].pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
+	}
+
+	gMusicTracks[track].playing = !pause;
+}
+
+void MFSound_MusicSetVolume(int track, float volume)
+{
+	MFCALLSTACK;
+
+//	gMusicTracks[track].pDSMusicBuffer->SetVolume();
+}
+
+
+void MFSound_FillBufferPC(int trackID, int bytes)
+{
+	MFCALLSTACK;
+
+	MFSoundMusic& track = gMusicTracks[trackID];
+
+	void *pData1, *pData2;
+	DWORD bytes1, bytes2;
+	int currentBitstream;
+	uint32 bufferFed = 0;
+
 	// fill buffer
-	track.pDSMusicBuffer->Lock(track.playBackOffset, lockSize, &pData1, &bytes1, &pData2, &bytes2, NULL);
+	track.pDSMusicBuffer->Lock(track.playBackOffset, bytes, &pData1, &bytes1, &pData2, &bytes2, NULL);
 
 	char *pData = (char*)pData1;
 	uint32 bytesToWrite = bytes1;
@@ -472,7 +521,7 @@ void MFSound_ServiceMusicBuffer(int trackID)
 			bufferFed = 0;
 			bytesToWrite = bytes2;
 			pData = (char*)pData2;
-			wrapped = true;			
+			wrapped = true;
 		}
 	}
 
@@ -480,55 +529,8 @@ void MFSound_ServiceMusicBuffer(int trackID)
 	track.pDSMusicBuffer->Unlock(pData1, bytes1, pData2, bytes2);
 
 	// increment playback cursor
-	track.playBackOffset = playCursor;
+	track.playBackOffset = (track.playBackOffset + bytes) % track.bufferSize;
 
 	// update playback time
 	track.currentTime = (float)ov_time_tell(&track.vorbisFile);
 }
-
-void MFSound_MusicUnload(int track)
-{
-	MFCALLSTACK;
-
-	// bad tracks, just ignore
-	if (track == -1) return;
-
-	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
-
-	gMusicTracks[track].pInfo = NULL;
-	ov_clear(&gMusicTracks[track].vorbisFile);
-
-	gMusicTracks[track].pDSMusicBuffer->Release();
-	gMusicTracks[track].pDSMusicBuffer = NULL;
-}
-
-void MFSound_MusicSeek(int track, float seconds)
-{
-	MFCALLSTACK;
-
-	ov_time_seek(&gMusicTracks[track].vorbisFile, seconds);
-}
-
-void MFSound_MusicPause(int track, bool pause)
-{
-	MFCALLSTACK;
-
-	if(pause)
-	{
-		if(gMusicTracks[track].playing)
-			gMusicTracks[track].pDSMusicBuffer->Stop();
-	}
-	else
-	{
-		if(!gMusicTracks[track].playing)
-			gMusicTracks[track].pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
-	}
-}
-
-void MFSound_MusicSetVolume(int track, float volume)
-{
-	MFCALLSTACK;
-
-//	gMusicTracks[track].pDSMusicBuffer->SetVolume();
-}
-

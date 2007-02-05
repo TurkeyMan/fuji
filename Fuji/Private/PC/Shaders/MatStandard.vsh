@@ -5,6 +5,7 @@ float4x4 mLocalToWorld : register(c_ltw);
 float4 mAnimMats[70*3] : register(c_animMats);
 float4 mTexMatrix[2] : register(c_tex);
 
+float4 gModelColour : register(c_modelColour);
 float4 gColourMask : register(c_colourMask);
 float4 bAnimation[2] : register(c_animating);
 
@@ -82,8 +83,8 @@ VS_OUTPUT main(in VS_INPUT input)
 	output.uv.yzw = dot(input.uv, mTexMatrix[1]);
 
 	// output colour and apply colour mask
-	output.colour.xyz = input.colour.xyz*gColourMask.x + gColourMask.yyy;
-	output.colour.w = input.colour.w*gColourMask.z + gColourMask.w;
+	output.colour.xyz = input.colour.xyz*gModelColour.xyz*gColourMask.x + gColourMask.yyy;
+	output.colour.w = input.colour.w*gModelColour.w*gColourMask.z + gColourMask.w;
 
     return output;
 }
