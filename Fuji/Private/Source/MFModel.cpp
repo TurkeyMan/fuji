@@ -262,7 +262,7 @@ MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimati
 	return pModel;
 }
 
-void MFModel_Destroy(MFModel *pModel)
+int MFModel_Destroy(MFModel *pModel)
 {
 	// free instance data
 	if(pModel->pAnimation)
@@ -270,6 +270,7 @@ void MFModel_Destroy(MFModel *pModel)
 
 	// decrement and possibly free template
 	--pModel->pTemplate->refCount;
+	int refCount = pModel->pTemplate->refCount;
 
 	if(!pModel->pTemplate->refCount)
 	{
@@ -296,6 +297,8 @@ void MFModel_Destroy(MFModel *pModel)
 
 	//free instance
 	MFHeap_Free(pModel);
+
+	return refCount;
 }
 
 

@@ -41,8 +41,7 @@ void MFAnimScript_Destroy(MFAnimScript *pAnimScript);
  * Gets the number of animation sequences in the anim script.
  * @param pAnimScript Anim script instance.
  * @return The number of sequences in the anim script.
- * @see MFAnimScript_Create()
- * @see MFAnimScript_SetSequence()
+ * @see MFAnimScript_Create(), MFAnimScript_SetSequence()
  */
 int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript);
 
@@ -53,9 +52,7 @@ int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript);
  * @param sequence Sequence ID to begin playing.
  * @param tweenTime The amout of time to tween into the new sequence.
  * @return None.
- * @see MFAnimScript_Create()
- * @see MFAnimScript_GetNumSequences()
- * @see MFAnimScript_FindSequence()
+ * @see MFAnimScript_Create(), MFAnimScript_GetNumSequences(), MFAnimScript_FindSequence()
  */
 void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime = 0.0f);
 

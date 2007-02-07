@@ -423,9 +423,6 @@
 				RelativePath=".\Include\Image.h">
 			</File>
 			<File
-				RelativePath=".\Include\IniFile.h">
-			</File>
-			<File
 				RelativePath=".\Include\MFAnimation.h">
 			</File>
 			<File

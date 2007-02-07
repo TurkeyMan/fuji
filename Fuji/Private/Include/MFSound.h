@@ -12,53 +12,81 @@
 #include "MFMatrix.h"
 
 /**
- * Load a sound bank.
- * Loads a sound bank.
- * @param pFilename Filename of the osund bank to load.
- * @return Returns the sound bank ID.
+ * @struct MFSound
+ * Represents a Fuji sound.
  */
-int MFSound_LoadBank(const char *pFilename);
+struct MFSound;
 
 /**
- * Load a sound bank.
- * Loads a sound bank.
- * @param bankID ID of the bank to unload.
- * @return None.
+ * @struct MFVoice
+ * Represents a playing sound.
  */
-void MFSound_UnloadBank(int bankID);
+struct MFVoice;
+
+/**
+ * @struct MFAudioStream
+ * Represents a Fuji audio/music stream.
+ */
+struct MFAudioStream;
+
+/**
+ * Sound flags.
+ * Various flags related to a sound.
+ */
+enum MFSoundFlags
+{
+	MFSF_Looping = MFBIT(0),	/**< Specifies that the sound is a looping sound. */
+	MFSF_3D = MFBIT(1),			/**< Specifies that the sound should be played in 3d space. */
+
+	MFSF_ForceInt = 0x7FFFFFFF	/**< Force MFSoundFlags to an int type. */
+};
+
+/**
+ * Load a sound.
+ * Loads a sound.
+ * @param pName Name of the sound to load.
+ * @return Returns s pointer to the newly created sound, or NULL on failure.
+ * @see MFSound_Destroy(), MFSound_Play()
+ */
+MFSound *MFSound_Create(const char *pName);
+
+/**
+ * Destroy a sound.
+ * Destroys a sound.
+ * @param pSound Sound to destroy.
+ * @return Returns the new reference count of the sound. If the returned reference count is 0, the sound is destroyed.
+ * @see MFSound_Create()
+ */
+int MFSound_Destroy(MFSound *pSound);
 
 /**
  * Find a sound.
  * Finds a specified sound.
- * @param pSoundName Name of sound to locate.
- * @param searchBankID Optional bank ID. If 0, all loaded sounds will be searched.
- * @return Returns the ID of the sound. -1 if the sound was not found.
+ * @param pName Name of sound to locate.
+ * @return Returns a pointer to the sound or NULL if the sound was not found.
+ * @remarks MFSound_FindSound() does NOT increment the internal reference count of the object.
  */
-int MFSound_FindSound(const char *pSoundName, int searchBankID = 0);
+MFSound *MFSound_FindSound(const char *pName);
 
 /**
  * Play a sound.
  * Begin playback of a sound.
- * @param soundID ID of the sound.
+ * @param pSound Pointer to the sound to play.
+ * @param playFlags Flags to control the way the sound is played.
  * @return Returns the voice ID.
+ * @see MFSound_Stop(), MFSound_Create()
  */
-int MFSound_Play(int soundID);
-
-/**
- * Play a sound in the 3D environment.
- * Begin playback of a sound in the 3D environment.
- * @param soundID ID of the sound.
- * @return Returns the voice ID.
- */
-int MFSound_Play3D(int soundID);
+MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags = 0);
 
 /**
  * Stop a sound.
  * Stops playback of a sound.
- * @param voice Voice ID of the playing sound.
+ * @param pVoice Pointer to a playing voice.
  * @return None.
+ * @remarks The void ID is obtained when calling MFSound_Play()
+ * @see MFSound_Play(), MFSound_Create()
  */
-void MFSound_Stop(int voice);
+void MFSound_Stop(MFVoice *pVoice);
 
 /**
  * Set the sound listener position.
@@ -71,20 +99,20 @@ void MFSound_SetListenerPos(const MFMatrix& listenerPos);
 /**
  * Set the volume of a voice.
  * Set the volume of a voice.
- * @param voice Voice ID of the playing sound.
+ * @param pVoice Pointer to a playing voice.
  * @param volume Volume of the voice. The volume can range from 0.0f to 1.0f.
  * @return None.
  */
-void MFSound_SetVolume(int voice, float volume);
+void MFSound_SetVolume(MFVoice *pVoice, float volume);
 
 /**
  * Set the playback rate for a voice.
  * Sets the playback rate for a voice.
- * @param voice Voice ID of the playing sound.
+ * @param pVoice Pointer to a playing voice.
  * @param rate Playback rate for the sound. Default is 1.0f.
  * @return None.
  */
-void MFSound_SetPlaybackRate(int voice, float rate);
+void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
 
 /**
  * Set the master volume.
@@ -103,44 +131,44 @@ void MFSound_SetMasterVolume(float volume);
  * Begin playback of a music stream.
  * @param pFilename Filename of music track.
  * @param pause Initial pause state.
- * @return Returns an ID for the music track.
+ * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
-int MFSound_MusicPlay(const char *pFilename, bool pause = false);
+MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause = false);
 
 /**
- * Unload a music track.
- * Unloads a music track.
- * @param track Track ID of the music stream.
+ * Destroy a music track.
+ * Destroys a music track.
+ * @param pStream Pointer to an MFAudioStream.
  * @return None.
  */
-void MFSound_MusicUnload(int track);
+void MFSound_DestroyStream(MFAudioStream *pStream);
 
 /**
  * Seek the music track.
  * Seeks the music track.
- * @param track Track ID of the music stream.
- * @param seconds Seek offset in seconds from the start of the track.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param seconds Seek offset in seconds from the start of the stream.
  * @return None.
  */
-void MFSound_MusicSeek(int track, float seconds);
+void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
 
 /**
  * Pause music playback.
  * Pauses music playback.
- * @param track Track ID of the music stream.
- * @param pause true to pause the track, false to resume playback.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param pause true to pause the stream, false to resume playback.
  * @return None.
  */
-void MFSound_MusicPause(int track, bool pause);
+void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
 
 /**
  * Set the music track volume.
  * Sets the music track volume.
- * @param track Track ID of the music stream.
- * @param volume Volume of the track. The volume can range from 0.0f to 1.0f.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param volume Volume of the stream. The volume can range from 0.0f to 1.0f.
  * @return None.
  */
-void Sound_MusicSetVolume(int track, float volume);
+void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume);
 
 #endif // _MFSOUND_H
 

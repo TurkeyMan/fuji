@@ -95,6 +95,8 @@ MFDefaults gDefaults =
 
 	// SoundDefaults
 	{
+		256,			// maxSounds
+		32,				// maxVoices
 		4				// maxMusicTracks
 	},
 

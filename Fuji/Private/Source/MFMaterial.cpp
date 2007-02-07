@@ -365,7 +365,7 @@ int MFMaterial_Destroy(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
-	pMaterial->refCount--;
+	--pMaterial->refCount;
 
 	if(!pMaterial->refCount)
 	{

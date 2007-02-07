@@ -25,8 +25,7 @@ struct MFAnimation;
  * Creates a model from the filesystem.
  * @param pFilename Filename of model to load.
  * @return Returns a new instance of the specified model.
- * @see MFModel_Destroy()
- * @see MFModel_Draw()
+ * @see MFModel_Destroy(), MFModel_Draw()
  */
 MFModel* MFModel_Create(const char *pFilename);
 
@@ -36,8 +35,7 @@ MFModel* MFModel_Create(const char *pFilename);
  * @param pFilename Filename of model to load.
  * @param pAnimationFilename Filename of an animation to load and bind to the model instance.
  * @return Returns a new instance of the specified model with animation already loaded and bound.
- * @see MFModel_Create()
- * @see MFModel_BindAnimation()
+ * @see MFModel_Create(), MFModel_BindAnimation()
  */
 MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename);
 
@@ -45,11 +43,10 @@ MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimati
  * Dstroy a model.
  * Destroys a model instance.
  * @param pModel Model instance to be destroyed.
- * @return None.
- * @see MFModel_Create()
- * @see MFModel_Draw()
+ * @return Returns the new reference count of the model. If the returned reference count is 0, the model is destroyed.
+ * @see MFModel_Create(), MFModel_Draw()
  */
-void MFModel_Destroy(MFModel *pModel);
+int MFModel_Destroy(MFModel *pModel);
 
 /**
  * Draw a model.
@@ -125,8 +122,7 @@ const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
  * @param index Subobject index.
  * @param enable Bool to enable or disable the subobject.
  * @return None.
- * @see MFModel_GetNumSubObjects()
- * @see MFModel_IsSubobjectEnabed()
+ * @see MFModel_GetNumSubObjects(), MFModel_IsSubobjectEnabed()
  */
 void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable);
 
@@ -136,8 +132,7 @@ void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable);
  * @param pModel Model instance.
  * @param index Subobject index.
  * @return Returns true if the subobject is enabled.
- * @see MFModel_GetNumSubObjects()
- * @see MFModel_EnableSubobject()
+ * @see MFModel_GetNumSubObjects(), MFModel_EnableSubobject()
  */
 bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index);
 

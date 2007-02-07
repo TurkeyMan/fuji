@@ -84,6 +84,8 @@ struct MFDefaults
 	/** Sound Defaults. */
 	struct SoundDefaults
 	{
+		int maxSounds;					/**< Maximum sounds */
+		int maxVoices;					/**< Maximum voices */
 		int maxMusicTracks;				/**< Maximum music tracks */
 	} sound;
 

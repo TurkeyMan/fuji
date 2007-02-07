@@ -156,9 +156,10 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	return pAnimation;
 }
 
-void MFAnimation_Destroy(MFAnimation *pAnimation)
+int MFAnimation_Destroy(MFAnimation *pAnimation)
 {
 	--pAnimation->pTemplate->refCount;
+	int refCount = pAnimation->pTemplate->refCount;
 
 	if(!pAnimation->pTemplate->refCount)
 	{
@@ -167,6 +168,8 @@ void MFAnimation_Destroy(MFAnimation *pAnimation)
 	}
 
 	MFHeap_Free(pAnimation);
+
+	return refCount;
 }
 
 MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)

@@ -133,7 +133,7 @@ MFMaterial*	MFMaterial_Create(const char *pName);
  * Destroy a material instance.
  * Destroys a material instance.
  * @param pMaterial Material instance to destroy.
- * @return Returns the new number of references to the material. If 0 is returned, there are no more instance and the material will be destroyed.
+ * @return Returns the new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
  */
 int MFMaterial_Destroy(MFMaterial *pMaterial);
 

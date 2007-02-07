@@ -24,8 +24,7 @@ struct MFAnimation;
  * @param pFilename Filename of the animation to load.
  * @param pModel MFModel instance the animation will be bound to.
  * @return Returns a new instance of the specified animation.
- * @see MFAnimation_Destroy()
- * @see MFAnimation_CalculateMatrices()
+ * @see MFAnimation_Destroy(), MFAnimation_CalculateMatrices()
  */
 MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
 
@@ -33,10 +32,10 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
  * Destroy an animation.
  * Destroys an animation instance.
  * @param pAnimation Animation instance to be destroyed.
- * @return None.
+ * @return Returns the new reference count of the animation. If the returned reference count is 0, the animation is model.
  * @see MFAnimation_Create()
  */
-void MFAnimation_Destroy(MFAnimation *pAnimation);
+int MFAnimation_Destroy(MFAnimation *pAnimation);
 
 /**
  * Calculate the animation matrices.

@@ -43,6 +43,13 @@ void MFTexture_DeinitModule()
 	MFTexture_Destroy(pNoneTexture);
 	MFTexture_Destroy(pWhiteTexture);
 
+	MFTexture **ppI = gTextureBank.Begin();
+	while(*ppI)
+	{
+		MFTexture_Destroy(*ppI);
+		ppI++;
+	}
+
 	gTextureBank.Deinit();
 }
 
@@ -52,7 +59,8 @@ MFTexture* MFTexture_FindTexture(const char *pName)
 
 	while(*ppIterator)
 	{
-		if(!MFString_CaseCmp(pName, (*ppIterator)->name)) return *ppIterator;
+		if(!MFString_CaseCmp(pName, (*ppIterator)->name))
+			return *ppIterator;
 
 		ppIterator++;
 	}

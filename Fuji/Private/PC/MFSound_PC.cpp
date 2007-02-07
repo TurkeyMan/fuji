@@ -13,11 +13,29 @@
 #include <dsound.h>
 #include <vorbis/vorbisfile.h>
 
-void MFSound_FillBufferPC(int trackID, int bytes);
+struct MFSound
+{
+	char name[64];
 
-extern HWND apphWnd;
+	MFSoundTemplate *pTemplate;
+	int refCount;
 
-struct MFSoundMusic
+	IDirectSoundBuffer *pBuffer;
+	IDirectSoundBuffer *p3DBuffer;
+};
+
+struct MFVoice
+{
+	MFSoundTemplate *pTemplate;
+
+	IDirectSoundBuffer *pBuffer;
+	IDirectSoundBuffer8 *pBuffer8;
+	IDirectSound3DBuffer8 *p3DBuffer8;
+
+	uint32 flags;
+};
+
+struct MFAudioStream
 {
 	char name[256];
 
@@ -36,17 +54,25 @@ struct MFSoundMusic
 	bool playing;
 };
 
-void MFSound_ServiceMusicBuffer(int track);
 
+void MFSound_FillBufferPC(MFAudioStream *pStream, int bytes);
+void MFSound_ServiceStreamBuffer(MFAudioStream *pStream);
+
+
+MFPtrListDL<MFSound> gSoundBank;
+MFPtrListDL<MFVoice> gVoices;
+
+extern HWND apphWnd;
 
 IDirectSound8 *pDirectSound;
 static IDirectSoundBuffer *pDSPrimaryBuffer;
 
-static MFSoundMusic *gMusicTracks;
+static MFAudioStream *gMusicTracks;
 
 #if !defined(_RETAIL)
 MenuItemBool showSoundStats;
 #endif
+
 
 void MFSound_InitModule()
 {
@@ -54,8 +80,11 @@ void MFSound_InitModule()
 
 	HRESULT hr;
 
-	gMusicTracks = (MFSoundMusic*)MFHeap_Alloc(sizeof(MFSoundMusic) * gDefaults.sound.maxMusicTracks);
-	MFZeroMemory(gMusicTracks, sizeof(MFSoundMusic)*gDefaults.sound.maxMusicTracks);
+	gSoundBank.Init("Sound Bank", gDefaults.sound.maxSounds);
+	gVoices.Init("Voice Bank", gDefaults.sound.maxVoices);
+
+	gMusicTracks = (MFAudioStream*)MFHeap_Alloc(sizeof(MFAudioStream) * gDefaults.sound.maxMusicTracks);
+	MFZeroMemory(gMusicTracks, sizeof(MFAudioStream)*gDefaults.sound.maxMusicTracks);
 
 	DirectSoundCreate8(NULL, &pDirectSound, NULL);
 
@@ -91,25 +120,225 @@ void MFSound_DeinitModule()
 	{
 		if(gMusicTracks[a].pDSMusicBuffer)
 		{
-			MFSound_MusicUnload(a);
+			MFSound_DestroyStream(&gMusicTracks[a]);
 		}
 	}
 
 	pDSPrimaryBuffer->Release();
 	pDirectSound->Release();
+
+	gVoices.Deinit();
+	gSoundBank.Deinit();
 }
 
 void MFSound_Update()
 {
 	MFCALLSTACK;
 
+	MFVoice **ppI = gVoices.Begin();
+
+	while(*ppI)
+	{
+		MFVoice *pV = *ppI;
+		DWORD stat;
+
+		pV->pBuffer8->GetStatus(&stat);
+
+		if(stat != DSBSTATUS_PLAYING)
+		{
+			// destroy voice
+			if(pV->p3DBuffer8)
+				pV->p3DBuffer8->Release();
+			pV->pBuffer8->Release();
+			pV->pBuffer->Release();
+
+			gVoices.Destroy(ppI);
+		}
+
+		ppI++;
+	}
+
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
 		if(gMusicTracks[a].pDSMusicBuffer && gMusicTracks[a].playing)
 		{
-			MFSound_ServiceMusicBuffer(a);
+			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
 		}
 	}
+}
+
+MFSound *MFSound_Create(const char *pName)
+{
+	MFCALLSTACK;
+
+	MFSound *pSound = MFSound_FindSound(pName);
+
+	if(!pSound)
+	{
+		uint32 fileSize;
+
+		const char *pFileName = MFStr("%s.snd", pName);
+
+		MFSoundTemplate *pTemplate = (MFSoundTemplate*)MFFileSystem_Load(pFileName, &fileSize);
+
+		if(!pTemplate)
+		{
+			MFDebug_Error(MFStr("Sound '%s' does not exist.\n", pFileName));
+			return NULL;
+		}
+
+		MFDebug_Assert(pTemplate->magic == MFMAKEFOURCC('S', 'N', 'D', '1'), MFStr("File '%s' is not a valid sound file.", pFileName));
+
+		MFFixUp(pTemplate->ppStreams, pTemplate, true);
+		for(int a=0; a<pTemplate->numStreams; a++)
+			MFFixUp(pTemplate->ppStreams[a], pTemplate, true);
+
+		pSound = gSoundBank.Create();
+		pSound->pTemplate = pTemplate;
+		pSound->refCount = 0;
+		MFString_Copy(pSound->name, pName);
+
+		int bytesPerSample = pTemplate->numChannels * (pTemplate->bitsPerSample>>3);
+
+		DSBUFFERDESC desc;
+		WAVEFORMATEX wfx;
+
+		desc.dwSize = sizeof(DSBUFFERDESC);
+		desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+		desc.dwBufferBytes = pTemplate->numSamples * bytesPerSample;
+		desc.dwReserved = 0;
+		desc.guid3DAlgorithm = DS3DALG_DEFAULT;
+		desc.lpwfxFormat = &wfx;
+		
+		wfx.wFormatTag = WAVE_FORMAT_PCM;
+		wfx.nChannels = pTemplate->numChannels;
+		wfx.nSamplesPerSec = pTemplate->sampleRate;
+		wfx.nAvgBytesPerSec = pTemplate->sampleRate * bytesPerSample;
+		wfx.nBlockAlign = bytesPerSample;
+		wfx.wBitsPerSample = pTemplate->bitsPerSample;
+		wfx.cbSize = 0;
+
+		// create the 2d buffer
+		pDirectSound->CreateSoundBuffer(&desc, &pSound->pBuffer, NULL);
+
+		// and create the 3d buffer
+		desc.dwFlags |= DSBCAPS_CTRL3D;
+		pDirectSound->CreateSoundBuffer(&desc, &pSound->p3DBuffer, NULL);
+
+		// lock the buffers and copy in the data
+		VOID *pBuffer, *pB2;
+		DWORD bufferLen, l2;
+
+		pSound->pBuffer->Lock(0, 0, &pBuffer, &bufferLen, &pB2, &l2, DSBLOCK_ENTIREBUFFER);
+		MFDebug_Assert(desc.dwBufferBytes == bufferLen, "Error locking sound buffer.");
+		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], bufferLen);
+		pSound->pBuffer->Unlock(pBuffer, bufferLen, pB2, l2);
+
+		pSound->p3DBuffer->Lock(0, 0, &pBuffer, &bufferLen, &pB2, &l2, DSBLOCK_ENTIREBUFFER);
+		MFDebug_Assert(desc.dwBufferBytes == bufferLen, "Error locking sound buffer.");
+		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], bufferLen);
+		pSound->p3DBuffer->Unlock(pBuffer, bufferLen, pB2, l2);
+	}
+
+	++pSound->refCount;
+
+	return pSound;
+}
+
+int MFSound_Destroy(MFSound *pSound)
+{
+	MFCALLSTACK;
+
+	--pSound->refCount;
+	int refCount = pSound->refCount;
+
+	if(!pSound->refCount)
+	{
+		pSound->pBuffer->Release();
+		pSound->p3DBuffer->Release();
+
+		MFHeap_Free(pSound->pTemplate);
+
+		gSoundBank.Destroy(pSound);
+	}
+
+	return refCount;
+}
+
+MFSound *MFSound_FindSound(const char *pSoundName)
+{
+	MFCALLSTACK;
+
+	MFSound **ppIterator = gSoundBank.Begin();
+
+	while(*ppIterator)
+	{
+		if(!MFString_CaseCmp(pSoundName, (*ppIterator)->name))
+			return *ppIterator;
+
+		ppIterator++;
+	}
+
+	return NULL;
+}
+
+MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
+{
+	MFCALLSTACK;
+
+	MFVoice *pVoice = gVoices.Create();
+	pVoice->flags = playFlags;
+
+	DWORD playbackFlags = (playFlags & MFSF_Looping) ? DSBPLAY_LOOPING : 0;
+
+	if(playFlags & MFSF_3D)
+	{
+		pDirectSound->DuplicateSoundBuffer(pSound->p3DBuffer, &pVoice->pBuffer);
+		pVoice->pBuffer->QueryInterface(IID_IDirectSound3DBuffer8, (VOID**)&pVoice->p3DBuffer8);
+
+	}
+	else
+	{
+		pDirectSound->DuplicateSoundBuffer(pSound->pBuffer, &pVoice->pBuffer);
+		pVoice->p3DBuffer8 = NULL;
+	}
+
+	pVoice->pBuffer->QueryInterface(IID_IDirectSoundBuffer8, (VOID**)&pVoice->pBuffer8);
+	pVoice->pBuffer8->Play(0, 0, playbackFlags);
+
+	return pVoice;
+}
+
+void MFSound_Stop(MFVoice *pVoice)
+{
+	MFCALLSTACK;
+
+	pVoice->pBuffer8->Stop();
+}
+
+void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetVolume(MFVoice *pVoice, float volume)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
+{
+	MFCALLSTACK;
+
+}
+
+void MFSound_SetMasterVolume(float volume)
+{
+	MFCALLSTACK;
+
+//	pDSPrimaryBuffer->SetVolume();
 }
 
 void MFSound_Draw()
@@ -239,83 +468,19 @@ void MFSound_Draw()
 }
 
 
-int MFSound_LoadBank(const char *pFilename)
-{
-	MFCALLSTACK;
 
-	return -1;
-}
-
-void MFSound_UnloadBank(int bankID)
-{
-	MFCALLSTACK;
-
-
-}
-
-int MFSound_FindSound(const char *pSoundName, int searchBankID)
-{
-	MFCALLSTACK;
-
-	return -1;
-}
-
-int MFSound_Play(int soundID)
-{
-	MFCALLSTACK;
-
-	return -1;
-}
-
-int MFSound_Play3D(int soundID)
-{
-	MFCALLSTACK;
-
-	return -1;
-}
-
-void MFSound_Stop(int voice)
-{
-	MFCALLSTACK;
-
-
-}
-
-void MFSound_SetListenerPos(const MFMatrix& listenerPos)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetVolume(int voice, float volume)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetPlaybackRate(int voice, float rate)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetMasterVolume(float volume)
-{
-	MFCALLSTACK;
-
-//	pDSPrimaryBuffer->SetVolume();
-}
-
-
+//
+// Vorbis Music Functions
+//
 int MFSoundPC_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
 	return MFFile_StdSeek(datasource, (long)offset, whence);
 }
 
 //
-// Vorbis Music Functions
+// MFAudioStream related functions
 //
-int MFSound_MusicPlay(const char *pFilename, bool pause)
+MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 {
 	MFCALLSTACK;
 
@@ -323,14 +488,14 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 
 	// find free music track
 	while(gMusicTracks[t].pDSMusicBuffer && t < gDefaults.sound.maxMusicTracks) t++;
-	if(t == gDefaults.sound.maxMusicTracks) return -1;
+	if(t == gDefaults.sound.maxMusicTracks) return NULL;
 
-	MFSoundMusic& track = gMusicTracks[t];
+	MFAudioStream *pStream = &gMusicTracks[t];
 
 	// open vorbis file
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
-		return -1;
+		return NULL;
 
 	// setup vorbis read callbacks
 	ov_callbacks callbacks;
@@ -340,157 +505,146 @@ int MFSound_MusicPlay(const char *pFilename, bool pause)
 	callbacks.tell_func = MFFile_StdTell;
 
 	// open vorbis file
-	if(ov_test_callbacks(hFile, &track.vorbisFile, NULL, 0, callbacks))
+	if(ov_test_callbacks(hFile, &pStream->vorbisFile, NULL, 0, callbacks))
 	{
 		MFDebug_Assert(false, "Not a vorbis file.");
-		return -1;
+		return NULL;
 	}
 
-	ov_test_open(&track.vorbisFile);
+	ov_test_open(&pStream->vorbisFile);
 
 	// copy the filename
-	MFString_Copy(track.name, pFilename);
+	MFString_Copy(pStream->name, pFilename);
 
 	// get vorbis file info
-	track.pInfo = ov_info(&track.vorbisFile, -1);
+	pStream->pInfo = ov_info(&pStream->vorbisFile, -1);
 
-	track.trackLength = (float)ov_time_total(&track.vorbisFile, -1);
-	track.currentTime = 0.0f;
+	pStream->trackLength = (float)ov_time_total(&pStream->vorbisFile, -1);
+	pStream->currentTime = 0.0f;
 
 	// fill out DSBuffer creation data
 	DSBUFFERDESC desc;
 	WAVEFORMATEX wfx;
 
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
-	wfx.nChannels = (WORD)track.pInfo->channels;
-	wfx.nSamplesPerSec = track.pInfo->rate;
+	wfx.nChannels = (WORD)pStream->pInfo->channels;
+	wfx.nSamplesPerSec = pStream->pInfo->rate;
 	wfx.wBitsPerSample = 16;
 	wfx.nBlockAlign = wfx.nChannels * (wfx.wBitsPerSample/8);
 	wfx.nAvgBytesPerSec = wfx.nBlockAlign * wfx.nSamplesPerSec;
 	wfx.cbSize = 0;
 
-	track.bufferSize = wfx.nAvgBytesPerSec;
-	track.playBackOffset = 0;
+	pStream->bufferSize = wfx.nAvgBytesPerSec;
+	pStream->playBackOffset = 0;
 
 	desc.dwSize = sizeof(DSBUFFERDESC);
 	desc.dwFlags = DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPAN;
-	desc.dwBufferBytes = track.bufferSize;
+	desc.dwBufferBytes = pStream->bufferSize;
 	desc.lpwfxFormat = &wfx;
 	desc.dwReserved = 0; 
 	desc.guid3DAlgorithm = DS3DALG_DEFAULT; 
 
 	// create the DSBuffer
-	pDirectSound->CreateSoundBuffer(&desc, &track.pDSMusicBuffer, NULL);
+	pDirectSound->CreateSoundBuffer(&desc, &pStream->pDSMusicBuffer, NULL);
 
 	// fill the buffer
-	MFSound_FillBufferPC(t, track.bufferSize);
+	MFSound_FillBufferPC(pStream, pStream->bufferSize);
 
 	// dont begin playback is we start paused
-	if(pause)
+	pStream->playing = !pause;
+
+	if(!pause)
 	{
-		track.playing = false;
-		return t;
+		// play buffer
+		pStream->pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
 	}
 
-	// play buffer
-	track.pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
-	track.playing = true;
-
-	return t;
+	return pStream;
 }
 
-void MFSound_ServiceMusicBuffer(int trackID)
+void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
-
-	MFSoundMusic& track = gMusicTracks[trackID];
 
 	DWORD playCursor;
 	int lockSize;
 
 	// get cursor pos
-	track.pDSMusicBuffer->GetCurrentPosition(&playCursor, NULL);
+	pStream->pDSMusicBuffer->GetCurrentPosition(&playCursor, NULL);
 
 	// calculate lock size
-	if(playCursor < track.playBackOffset)
+	if(playCursor < pStream->playBackOffset)
 	{
-		lockSize = playCursor + (track.bufferSize - track.playBackOffset);
+		lockSize = playCursor + (pStream->bufferSize - pStream->playBackOffset);
 	}
 	else
 	{
-		lockSize = playCursor - track.playBackOffset;
+		lockSize = playCursor - pStream->playBackOffset;
 	}
 
 	// update the buffer
-	MFSound_FillBufferPC(trackID, lockSize);
+	MFSound_FillBufferPC(pStream, lockSize);
 }
 
-void MFSound_MusicUnload(int track)
+void MFSound_DestroyStream(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
 
-	// bad tracks, just ignore
-	if (track == -1) return;
+	if(pStream->playing) pStream->pDSMusicBuffer->Stop();
 
-	if(gMusicTracks[track].playing) gMusicTracks[track].pDSMusicBuffer->Stop();
+	pStream->pInfo = NULL;
+	ov_clear(&pStream->vorbisFile);
 
-	gMusicTracks[track].pInfo = NULL;
-	ov_clear(&gMusicTracks[track].vorbisFile);
-
-	gMusicTracks[track].pDSMusicBuffer->Release();
-	gMusicTracks[track].pDSMusicBuffer = NULL;
+	pStream->pDSMusicBuffer->Release();
+	pStream->pDSMusicBuffer = NULL;
 }
 
-void MFSound_MusicSeek(int trackID, float seconds)
+void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
-	MFSoundMusic& track = gMusicTracks[trackID];
+	ov_time_seek(&pStream->vorbisFile, seconds);
 
-	ov_time_seek(&track.vorbisFile, seconds);
+	if(pStream->playing)
+		pStream->pDSMusicBuffer->Stop();
 
-	if(track.playing)
-		track.pDSMusicBuffer->Stop();
+	pStream->pDSMusicBuffer->SetCurrentPosition(0);
+	pStream->playBackOffset = 0;
+	MFSound_FillBufferPC(pStream, pStream->bufferSize);
 
-	track.pDSMusicBuffer->SetCurrentPosition(0);
-	track.playBackOffset = 0;
-	MFSound_FillBufferPC(trackID, track.bufferSize);
-
-	if(track.playing)
-		track.pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
+	if(pStream->playing)
+		pStream->pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
 }
 
-void MFSound_MusicPause(int track, bool pause)
+void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 {
 	MFCALLSTACK;
 
 	if(pause)
 	{
-		if(gMusicTracks[track].playing)
-			gMusicTracks[track].pDSMusicBuffer->Stop();
+		if(pStream->playing)
+			pStream->pDSMusicBuffer->Stop();
 	}
 	else
 	{
-		if(!gMusicTracks[track].playing)
-			gMusicTracks[track].pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
+		if(!pStream->playing)
+			pStream->pDSMusicBuffer->Play(0, 0, DSBPLAY_LOOPING);
 	}
 
-	gMusicTracks[track].playing = !pause;
+	pStream->playing = !pause;
 }
 
-void MFSound_MusicSetVolume(int track, float volume)
+void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume)
 {
 	MFCALLSTACK;
 
-//	gMusicTracks[track].pDSMusicBuffer->SetVolume();
+//	pStream->pDSMusicBuffer->SetVolume();
 }
 
 
-void MFSound_FillBufferPC(int trackID, int bytes)
+void MFSound_FillBufferPC(MFAudioStream *pStream, int bytes)
 {
 	MFCALLSTACK;
-
-	MFSoundMusic& track = gMusicTracks[trackID];
 
 	void *pData1, *pData2;
 	DWORD bytes1, bytes2;
@@ -498,7 +652,7 @@ void MFSound_FillBufferPC(int trackID, int bytes)
 	uint32 bufferFed = 0;
 
 	// fill buffer
-	track.pDSMusicBuffer->Lock(track.playBackOffset, bytes, &pData1, &bytes1, &pData2, &bytes2, NULL);
+	pStream->pDSMusicBuffer->Lock(pStream->playBackOffset, bytes, &pData1, &bytes1, &pData2, &bytes2, NULL);
 
 	char *pData = (char*)pData1;
 	uint32 bytesToWrite = bytes1;
@@ -506,11 +660,11 @@ void MFSound_FillBufferPC(int trackID, int bytes)
 
 	while(bufferFed < bytesToWrite)
 	{
-		int r = ov_read(&track.vorbisFile, pData, bytesToWrite-bufferFed, 0, 2, 1, &currentBitstream);
+		int r = ov_read(&pStream->vorbisFile, pData, bytesToWrite-bufferFed, 0, 2, 1, &currentBitstream);
 
 		if(!r)
 		{
-			ov_time_seek(&track.vorbisFile, 0.0);
+			ov_time_seek(&pStream->vorbisFile, 0.0);
 		}
 
 		pData += r;
@@ -526,11 +680,11 @@ void MFSound_FillBufferPC(int trackID, int bytes)
 	}
 
 	// unlock buffer;
-	track.pDSMusicBuffer->Unlock(pData1, bytes1, pData2, bytes2);
+	pStream->pDSMusicBuffer->Unlock(pData1, bytes1, pData2, bytes2);
 
 	// increment playback cursor
-	track.playBackOffset = (track.playBackOffset + bytes) % track.bufferSize;
+	pStream->playBackOffset = (pStream->playBackOffset + bytes) % pStream->bufferSize;
 
 	// update playback time
-	track.currentTime = (float)ov_time_tell(&track.vorbisFile);
+	pStream->currentTime = (float)ov_time_tell(&pStream->vorbisFile);
 }

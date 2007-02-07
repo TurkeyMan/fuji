@@ -518,13 +518,16 @@ convertase:
 converttex:
 	make -C ../Utilities/ConvertTEX PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
+convertsnd:
+	make -C ../Utilities/ConvertSND PLATFORM=$(PLATFORM) BUILD=$(BUILD)
+
 convertfnt:
 	make -C ../Utilities/ConvertFNT PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
 convertdlg:
 	make -C ../Utilities/ConvertDlg PLATFORM=$(PLATFORM) BUILD=$(BUILD)
 
-tools: archiver convertase converttex convertfnt convertdlg
+tools: archiver convertase converttex convertsnd convertfnt convertdlg
 
 clean:
 	-rm -f $(TARGET_LIB) $(EXTRA_CLEAN) $(EXTRA_TARGETS)

@@ -34,6 +34,7 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	MFCALLSTACK;
 
 	pTexture->refCount--;
+	int refCount = pTexture->refCount;
 
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
@@ -44,5 +45,5 @@ int MFTexture_Destroy(MFTexture *pTexture)
 		return 0;
 	}
 
-	return pTexture->refCount;
+	return refCount;
 }
