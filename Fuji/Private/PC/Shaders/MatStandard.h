@@ -39,15 +39,6 @@
 #line 56 "d:\Projects\Fuji\Pc\Shaders\MatStandard.vsh"
     mad r0, v4, c4.x, c4.y  // input<19,20,21,22>
 
-#line 70
-    frc r3.xy, r0.zwzw
-    mov r1.zw, r3.xyxy
-    frc r1.xy, r0
-    add r2, r0, -r1
-    slt r1, -r1, r1
-    slt r0, r0, -r0
-    mad r0, r0, r1, r2  // i<0,0,0,0>
-
 #line 63
     mov a0.x, r0.y
     dp4 r1.x, v0, c20[a0.x]  // t1<0>

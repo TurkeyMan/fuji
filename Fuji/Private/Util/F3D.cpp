@@ -468,7 +468,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 			// setup pointers
 			pMeshChunk[mc].pVertexElements = (D3DVERTEXELEMENT9*)pOffset;
-			pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*(bAnimating ? 7 : 7));
+			pOffset += MFALIGN16(sizeof(D3DVERTEXELEMENT9)*(bAnimating ? 7 : 5));
 			pMeshChunk[mc].pVertexData = pOffset;
 			pOffset += MFALIGN16(pMeshChunk[mc].vertexDataSize);
 			pMeshChunk[mc].pAnimData = bAnimating ? pOffset : NULL;
@@ -534,6 +534,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 			}
 			else
 			{
+/*
 				pMeshChunk[mc].pVertexElements[4].Stream = 0;
 				pMeshChunk[mc].pVertexElements[4].Offset = 0;
 				pMeshChunk[mc].pVertexElements[4].Type = D3DDECLTYPE_D3DCOLOR;
@@ -550,6 +551,9 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 
 				D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
 				pMeshChunk[mc].pVertexElements[6] = endMacro;
+*/
+				D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+				pMeshChunk[mc].pVertexElements[4] = endMacro;
 			}
 
 			// write vertices

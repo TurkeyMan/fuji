@@ -11,7 +11,7 @@
 
 /**** Functions ****/
 
-void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	MFCALLSTACK;
 
@@ -27,13 +27,13 @@ void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& 
 	MFSetPosition(x, y, 0);
 
 	MFSetTexCoord1(du, sv);
-	MFSetPosition(x2, y, 0);
+	MFSetPosition(x+w, y, 0);
 
 	MFSetTexCoord1(su, dv);
-	MFSetPosition(x, y2, 0);
+	MFSetPosition(x, y+h, 0);
 
 	MFSetTexCoord1(du, dv);
-	MFSetPosition(x2, y2, 0);
+	MFSetPosition(x+w, y+h, 0);
 
 	MFEnd();
 
@@ -41,7 +41,7 @@ void MFPrimitive_DrawQuad(float x, float y, float x2, float y2, const MFVector& 
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	MFCALLSTACK;
 
@@ -54,16 +54,16 @@ void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector&
 	MFSetColour(colour);
 
 	MFSetTexCoord1(su, sv);
-	MFSetPosition(pos.x, pos.y, pos.z);
+	MFSetPosition(min.x, min.y, min.z);
 
 	MFSetTexCoord1(du, sv);
-	MFSetPosition(pos.x+w, pos.y, pos.z);
+	MFSetPosition(max.x, min.y, min.z);
 
 	MFSetTexCoord1(su, dv);
-	MFSetPosition(pos.x, pos.y+h, pos.z);
+	MFSetPosition(min.x, max.y, min.z);
 
 	MFSetTexCoord1(du, dv);
-	MFSetPosition(pos.x+w, pos.y+h, pos.z);
+	MFSetPosition(max.x, max.y, min.z);
 
 	MFEnd();
 
@@ -71,7 +71,7 @@ void MFPrimitive_DrawQuad(const MFVector& pos, float w, float h, const MFVector&
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector& colour)
 {
 	MFCALLSTACK;
 
@@ -83,9 +83,9 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const 
 
 	MFSetColour(colour);
 	MFSetPosition(x, y, 0);
-	MFSetPosition(x2, y, 0);
-	MFSetPosition(x, y2, 0);
-	MFSetPosition(x2, y2, 0);
+	MFSetPosition(x+w, y, 0);
+	MFSetPosition(x, y+h, 0);
+	MFSetPosition(x+w, y+h, 0);
 
 	MFEnd();
 
@@ -93,7 +93,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float x2, float y2, const 
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(const MFVector& pos, float w, float h, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector& colour)
 {
 	MFCALLSTACK;
 
@@ -104,10 +104,10 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector& pos, float w, float h, const
 	MFBegin(4);
 
 	MFSetColour(colour);
-	MFSetPosition(pos.x, pos.y, pos.z);
-	MFSetPosition(pos.x+w, pos.y, pos.z);
-	MFSetPosition(pos.x, pos.y+h, pos.z);
-	MFSetPosition(pos.x+w, pos.y+h, pos.z);
+	MFSetPosition(min.x, min.y, min.z);
+	MFSetPosition(max.x, min.y, min.z);
+	MFSetPosition(min.x, max.y, min.z);
+	MFSetPosition(max.x, max.y, min.z);
 
 	MFEnd();
 

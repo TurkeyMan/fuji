@@ -2,6 +2,7 @@
 #include "Display_Internal.h"
 #include "DebugMenu.h"
 #include "MFView.h"
+#include "MFSystem.h"
 
 MFDisplaySettings gDisplay;
 
@@ -21,7 +22,7 @@ void MFDisplay_InitModule()
 	DebugMenu_AddMenu("Display Options", "Fuji Options");
 
 	// create the display
-	error = MFDisplay_CreateDisplay(640, 480, 32, 60, true, false, false, false);
+	error = MFDisplay_CreateDisplay(gDefaults.display.displayWidth, gDefaults.display.displayHeight, 32, 60, true, false, false, false);
 	if(error) return;
 }
 

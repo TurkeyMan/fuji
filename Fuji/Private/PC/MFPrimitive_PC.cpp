@@ -81,22 +81,8 @@ void MFPrimitive_InitModule()
 	decl[3].Usage = D3DDECLUSAGE_TEXCOORD;
 	decl[3].UsageIndex = 0;
 
-	decl[4].Stream = 0;
-	decl[4].Offset = 0;
-	decl[4].Type = D3DDECLTYPE_D3DCOLOR;
-	decl[4].Method = D3DDECLMETHOD_DEFAULT;
-	decl[4].Usage = D3DDECLUSAGE_BLENDINDICES;
-	decl[4].UsageIndex = 0;
-
-	decl[5].Stream = 0;
-	decl[5].Offset = 0;
-	decl[5].Type = D3DDECLTYPE_D3DCOLOR;
-	decl[5].Method = D3DDECLMETHOD_DEFAULT;
-	decl[5].Usage = D3DDECLUSAGE_BLENDWEIGHT;
-	decl[5].UsageIndex = 0;
-
 	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-	decl[6] = endMacro;
+	decl[4] = endMacro;
 
 	HRESULT hr = pd3dDevice->CreateVertexDeclaration(decl, &pDecl);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");

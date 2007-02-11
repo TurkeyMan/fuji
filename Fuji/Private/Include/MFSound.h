@@ -35,10 +35,13 @@ struct MFAudioStream;
  */
 enum MFSoundFlags
 {
-	MFSF_Looping = MFBIT(0),	/**< Specifies that the sound is a looping sound. */
-	MFSF_3D = MFBIT(1),			/**< Specifies that the sound should be played in 3d space. */
+	MFSF_Looping = MFBIT(0),		/**< Specifies that the sound is a looping sound. */
+	MFSF_3D = MFBIT(1),				/**< Specifies that the sound should be played in 3d space. */
+	MFSF_BeginPaused = MFBIT(2),	/**< Specifies that the voice will be created paused. */
 
-	MFSF_ForceInt = 0x7FFFFFFF	/**< Force MFSoundFlags to an int type. */
+	MFSF_Reserved = 0x7 << 28,		/**< Bit mask is reserved for internal use. */
+
+	MFSF_ForceInt = 0x7FFFFFFF		/**< Force MFSoundFlags to an int type. */
 };
 
 /**
@@ -79,12 +82,22 @@ MFSound *MFSound_FindSound(const char *pName);
 MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags = 0);
 
 /**
+ * Pause a sound.
+ * Pause or resume playback of a sound.
+ * @param pVoice The voice to pause/resume.
+ * @param pause Specifies weather to pause or resume playback. If \a pause is \c true, the sound will be paused, otherwise it will be resumed.
+ * @return Returns None.
+ * @see MFSound_Play()
+ */
+void MFSound_Pause(MFVoice *pVoice, bool pause = true);
+
+/**
  * Stop a sound.
  * Stops playback of a sound.
  * @param pVoice Pointer to a playing voice.
  * @return None.
  * @remarks The void ID is obtained when calling MFSound_Play()
- * @see MFSound_Play(), MFSound_Create()
+ * @see MFSound_Play()
  */
 void MFSound_Stop(MFVoice *pVoice);
 

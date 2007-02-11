@@ -26,7 +26,7 @@ struct MFSound
 
 struct MFVoice
 {
-	MFSoundTemplate *pTemplate;
+	MFSound *pSound;
 
 	IDirectSoundBuffer *pBuffer;
 	IDirectSoundBuffer8 *pBuffer8;
@@ -288,8 +288,7 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 
 	MFVoice *pVoice = gVoices.Create();
 	pVoice->flags = playFlags;
-
-	DWORD playbackFlags = (playFlags & MFSF_Looping) ? DSBPLAY_LOOPING : 0;
+	pVoice->pSound = pSound;
 
 	if(playFlags & MFSF_3D)
 	{
@@ -304,9 +303,33 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	}
 
 	pVoice->pBuffer->QueryInterface(IID_IDirectSoundBuffer8, (VOID**)&pVoice->pBuffer8);
-	pVoice->pBuffer8->Play(0, 0, playbackFlags);
+
+	if(!(playFlags & MFSF_BeginPaused))
+	{
+		DWORD playbackFlags = (playFlags & MFSF_Looping) ? DSBPLAY_LOOPING : 0;
+		pVoice->pBuffer8->Play(0, 0, playbackFlags);
+	}
+	else
+		pVoice->flags |= MFBIT(28);
 
 	return pVoice;
+}
+
+void MFSound_Pause(MFVoice *pVoice, bool pause)
+{
+	MFCALLSTACK;
+
+	if(pause && !(pVoice->flags & MFBIT(28)))
+	{
+		pVoice->pBuffer8->Stop();
+		pVoice->flags |= MFBIT(28);
+	}
+	else if(!pause && (pVoice->flags & MFBIT(28)))
+	{
+		DWORD playbackFlags = (pVoice->flags & MFSF_Looping) ? DSBPLAY_LOOPING : 0;
+		pVoice->pBuffer8->Play(0, 0, playbackFlags);
+		pVoice->flags &= ~MFBIT(28);
+	}
 }
 
 void MFSound_Stop(MFVoice *pVoice)
@@ -326,12 +349,15 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume)
 {
 	MFCALLSTACK;
 
+	float vol = (float)(DSBVOLUME_MAX - DSBVOLUME_MIN) * volume;
+	pVoice->pBuffer8->SetVolume((LONG)vol + DSBVOLUME_MIN);
 }
 
 void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 {
 	MFCALLSTACK;
 
+	pVoice->pBuffer8->SetFrequency((DWORD)((float)pVoice->pSound->pTemplate->sampleRate * rate));
 }
 
 void MFSound_SetMasterVolume(float volume)
