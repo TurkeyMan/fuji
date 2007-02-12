@@ -673,18 +673,15 @@
 				Name="Shaders"
 				Filter="">
 				<File
-					RelativePath=".\Pc\Shaders\MatStandard.h">
-				</File>
-				<File
 					RelativePath=".\Pc\Shaders\MatStandard.vsh">
 					<FileConfiguration
 						Name="Debug|Win32">
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Building Shader"
-							CommandLine="$(ProjectDir)Bin\fxc.exe /Fh$(InputDir)$(InputName).h $(InputPath) /Tvs_1_1 /Zi /nologo"
+							CommandLine="$(InputDir)BuildShaders.bat"
 							AdditionalDependencies="$(InputDir)Registers.h"
-							Outputs="$(InputDir)$(InputName).h"/>
+							Outputs="$(InputDir)$(InputName)_s.h;$(InputDir)$(InputName)_a.h"/>
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32">
@@ -704,6 +701,12 @@
 							AdditionalDependencies="$(InputDir)Registers.h"
 							Outputs="$(InputDir)$(InputName).h"/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\Pc\Shaders\MatStandard_a.h">
+				</File>
+				<File
+					RelativePath=".\Pc\Shaders\MatStandard_s.h">
 				</File>
 				<File
 					RelativePath=".\Pc\Shaders\Registers.h">

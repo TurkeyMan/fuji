@@ -13,6 +13,13 @@
 
 extern IDirect3DDevice9 *pd3dDevice;
 
+bool gbAnimating = false;
+
+bool MFRenderPC_IsAnimatin()
+{
+	return gbAnimating;
+}
+
 // direct3d management fucntions
 void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
 {
@@ -68,6 +75,8 @@ void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alp
 
 void MFRendererPC_SetNumWeights(int numWeights)
 {
+	gbAnimating = numWeights != 0;
+
 //	int i[4] = { numWeights, numWeights, numWeights, numWeights };
 //	pd3dDevice->SetVertexShaderConstantI(r_numWeights, i, 1);
 	pd3dDevice->SetVertexShaderConstantF(r_animating, numWeights ? MFVector::identity : MFVector::one, 1);

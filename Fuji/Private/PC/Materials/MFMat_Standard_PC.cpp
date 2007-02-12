@@ -7,14 +7,16 @@
 #include "MFRenderer_PC.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
-#include "../Shaders/MatStandard.h"
+#include "../Shaders/MatStandard_s.h"
+#include "../Shaders/MatStandard_a.h"
 
 static MFMaterial *pSetMaterial = 0;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
 extern IDirect3DDevice9 *pd3dDevice;
-IDirect3DVertexShader9 *pVS = NULL;
+IDirect3DVertexShader9 *pVS_s = NULL;
+IDirect3DVertexShader9 *pVS_a = NULL;
 
 extern const MFMatrix *pAnimMats;
 extern int gNumAnimMats;
@@ -27,7 +29,8 @@ int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	MFCALLSTACK;
 
-	pd3dDevice->CreateVertexShader(g_vs11_main, &pVS);
+	pd3dDevice->CreateVertexShader(g_vs11_main_s, &pVS_s);
+	pd3dDevice->CreateVertexShader(g_vs11_main_a, &pVS_a);
 
 	return 0;
 }
@@ -36,7 +39,8 @@ void MFMat_Standard_UnregisterMaterial()
 {
 	MFCALLSTACK;
 
-	pVS->Release();
+	pVS_s->Release();
+	pVS_a->Release();
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial)
@@ -154,7 +158,12 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFRendererPC_SetAnimationMatrix(b, pAnimMats[pCurrentBatch[b]]);
 	}
 
-	MFRendererPC_SetVertexShader(pVS);
+	bool MFRenderPC_IsAnimatin();
+
+	if(MFRenderPC_IsAnimatin())
+		MFRendererPC_SetVertexShader(pVS_a);
+	else
+		MFRendererPC_SetVertexShader(pVS_s);
 
 	return 0;
 }

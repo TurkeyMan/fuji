@@ -18,8 +18,10 @@ struct VS_INPUT
 	float3 norm		: NORMAL;
 	float4 uv		: TEXCOORD; 
 	float4 colour	: COLOR0;
+#if defined(_ANIMATION)
 	float4 weights	: BLENDWEIGHT;
 	float4 indices	: BLENDINDICES;
+#endif
 };
 
 struct VS_OUTPUT
@@ -34,6 +36,7 @@ VS_OUTPUT main(in VS_INPUT input)
 {
     VS_OUTPUT output;
 
+#if defined(_ANIMATION)
 	float4 pos = input.pos * bAnimation[0];
 /*
 	// animate
@@ -73,6 +76,10 @@ VS_OUTPUT main(in VS_INPUT input)
 	t3.z = dot(input.pos, mAnimMats[i+2]);
 
 	pos.xyz += (t0*input.weights.x + t1*input.weights.y + t2*input.weights.z + t3*input.weights.w) * bAnimation[1];
+#else
+	float4 pos = input.pos;
+#endif
+
 	// do lighting
 
 	// transform pos
