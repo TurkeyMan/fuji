@@ -25,25 +25,11 @@ MFFileSystemHandle hFTPFileSystem = -1;
 MFFileHandle hDataArchive = NULL;
 MFFileHandle hPatchArchive = NULL;
 
-void MFFileSystem_InitModule()
+
+/**** Functions ****/
+
+void MFFileSystem_RegisterDefaultArchives()
 {
-	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
-
-	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
-	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
-	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
-
-	// mount filesystems
-	MFFileSystemNative_InitModule();
-	MFFileSystemMemory_InitModule();
-	MFFileSystemZipFile_InitModule();
-	MFFileSystemHTTP_InitModule();
-
-	// call the filesystem init callback
-	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
-	if(pFilesystemInitCallback)
-		pFilesystemInitCallback();
-
 	// try and mount the 'standard' archives...
 	// TODO: ponder removing this code and forcing the use of a filesystem init callback? :/
 	MFOpenDataNative dataArchive;
@@ -51,6 +37,11 @@ void MFFileSystem_InitModule()
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
 	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
 	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+	if(!hDataArchive)
+	{
+		dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data/Data_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
+		hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+	}
 
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -82,6 +73,11 @@ void MFFileSystem_InitModule()
 	// see if we can mount the patch archive..
 	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Patch_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
 	hPatchArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+	if(!hPatchArchive)
+	{
+		dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data/Patch_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
+		hPatchArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+	}
 
 	if(hPatchArchive)
 	{
@@ -104,6 +100,26 @@ void MFFileSystem_InitModule()
 		mountDataHTTP.flags = MFMF_OnlyAllowExclusiveAccess;
 		MFFileSystem_Mount(hHTTPFileSystem, &mountDataHTTP);
 	}
+}
+
+void MFFileSystem_InitModule()
+{
+	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
+
+	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
+	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+
+	// mount filesystems
+	MFFileSystemNative_InitModule();
+	MFFileSystemMemory_InitModule();
+	MFFileSystemZipFile_InitModule();
+	MFFileSystemHTTP_InitModule();
+
+	// call the filesystem init callback
+	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
+	if(pFilesystemInitCallback)
+		pFilesystemInitCallback();
 }
 
 void MFFileSystem_DeinitModule()
@@ -174,7 +190,7 @@ const char* MFFile_SystemPath(const char *pFilename)
 
 	pFilename = pFilename ? pFilename : "";
 
-	return MFStr("Data/%s", pFilename);
+	return MFStr("./%s", pFilename);
 }
 
 const char* MFFile_HomePath(const char *pFilename)

@@ -383,26 +383,6 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-/*
-	d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
-	if(!d3d9) return 1;
-
-	MFZeroMemory(&presentparams, sizeof(D3DPRESENT_PARAMETERS));
-	presentparams.BackBufferWidth = width;
-	presentparams.BackBufferHeight = height;
-	presentparams.BackBufferFormat = (bpp == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-	presentparams.BackBufferCount = triplebuffer ? 2 : 1;
-	presentparams.MultiSampleType = D3DMULTISAMPLE_NONE;
-	presentparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	presentparams.EnableAutoDepthStencil = TRUE;
-	presentparams.AutoDepthStencilFormat = D3DFMT_D24S8;
-	presentparams.FullScreen_RefreshRateInHz = rate; 
-	presentparams.FullScreen_PresentationInterval = vsync ? D3DPRESENT_INTERVAL_ONE_OR_IMMEDIATE : D3DPRESENT_INTERVAL_IMMEDIATE;
-	presentparams.Flags = (wide ? D3DPRESENTFLAG_WIDESCREEN : NULL) | (progressive ? D3DPRESENTFLAG_PROGRESSIVE : NULL);
-
-	hr = d3d8->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, NULL, D3DCREATE_HARDWARE_VERTEXPROCESSING, &presentparams, &pd3dDevice);
-	if(hr != D3D_OK) return 2;
-*/
 	initialised = true;
 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);

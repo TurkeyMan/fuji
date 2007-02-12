@@ -327,6 +327,22 @@ enum MFGamepadButton
 	Button_DLeft,				/**< Left on the digital pad */
 	Button_DRight,				/**< Right on the digital pad */
 
+// Guitar hero controller enums
+	Button_GH_Green		= Button_P2_R2,			/**< Green key on Guitar Hero controller */
+	Button_GH_Red		= Button_P2_Circle,		/**< Red key on Guitar Hero controller */
+	Button_GH_Yellow	= Button_P2_Triangle,	/**< Yellow key on Guitar Hero controller */
+	Button_GH_Blue		= Button_P2_Cross,		/**< Blue key on Guitar Hero controller */
+	Button_GH_Orange	= Button_P2_Box,		/**< Orange key on Guitar Hero controller */
+
+	Button_GH_Tilt		= Button_P2_L2,			/**< Vertical tilt sensor on Guitar Hero controller */
+
+	Button_GH_Start		= Button_P2_Start,		/**< Start button on Guitar Hero controller */
+	Button_GH_Select	= Button_P2_Select,		/**< Select button on Guitar Hero controller */
+
+	Button_GH_StrumDown	= Button_DDown,			/**< Strum down on Guitar Hero controller */
+	Button_GH_StrumUp	= Button_DUp,			/**< Strum up on Guitar Hero controller */
+
+// Analog Axiis
 	Axis_LX = 16,				/**< X-Axis on the Left analog stick */
 	Axis_LY,					/**< Y-Axis on the Left analog stick */
 	Axis_RX,					/**< X-Axis on the Right analog stick */

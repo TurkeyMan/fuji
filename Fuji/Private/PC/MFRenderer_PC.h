@@ -57,5 +57,6 @@ void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix);
 void MFRendererPC_SetModelColour(const MFVector &colour);
 void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd);
 void MFRendererPC_SetNumWeights(int numWeights);
+int MFRendererPC_GetNumWeights();
 
 #endif // _MFRENDERER_PC_H

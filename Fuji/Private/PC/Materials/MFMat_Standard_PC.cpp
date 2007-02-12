@@ -158,9 +158,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFRendererPC_SetAnimationMatrix(b, pAnimMats[pCurrentBatch[b]]);
 	}
 
-	bool MFRenderPC_IsAnimatin();
-
-	if(MFRenderPC_IsAnimatin())
+	if(MFRendererPC_GetNumWeights() > 0)
 		MFRendererPC_SetVertexShader(pVS_a);
 	else
 		MFRendererPC_SetVertexShader(pVS_s);
