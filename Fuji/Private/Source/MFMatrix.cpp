@@ -70,14 +70,14 @@ MFMatrix& MFMatrix::RotateY(float angle)
 {
 	MFMatrix rot;
 	rot.SetRotationY(angle);
-	return 	Multiply3x3(rot);
+	return Multiply3x3(rot);
 }
 
 MFMatrix& MFMatrix::RotateZ(float angle)
 {
 	MFMatrix rot;
 	rot.SetRotationZ(angle);
-	return 	Multiply3x3(rot);
+	return Multiply3x3(rot);
 }
 
 MFMatrix& MFMatrix::Scale(const MFVector& scale)

@@ -194,15 +194,15 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 	InitLine(pCurrLine);
 	bool bIsSection;
-	while (pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)) != NULL)
+	while(pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)) != NULL)
 	{
 		// newline
 		tokenLength = MFString_Length(tokenBuffer);
-		if (tokenLength == 1 && tokenBuffer[0] == 0xd)
+		if(tokenLength == 1 && MFIsNewline(tokenBuffer[0]))
 		{
 			bNewLine = true;
 		}
-		else if (tokenLength == 1 && tokenBuffer[0] == '{')
+		else if(tokenLength == 1 && tokenBuffer[0] == '{')
 		{
 			MFDebug_Assert(bNewLine, "open bracket must be at start of line!");
 
@@ -212,11 +212,11 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			pCurrLine->subtreeLineCount = lineCount - oldLineCount;
 			lineCount--;
 		}
-		else if (tokenLength == 1 && tokenBuffer[0] == '}')
+		else if(tokenLength == 1 && tokenBuffer[0] == '}')
 		{
 			MFDebug_Assert(bNewLine, "close bracket must be at start of line!");
 
-			if (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
+			if(pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 			{
 				pCurrLine->terminate = 1;
 				lineCount++;
@@ -225,7 +225,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		}
 		else // must be a string token
 		{
-			if (bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
+			if(bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
 			{
 				lineCount++;
 				pCurrLine = &pLines[lineCount];
@@ -233,7 +233,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			}
 			bNewLine = false;
 
-			if (bIsSection)
+			if(bIsSection)
 			{
 				pStrings[stringCount++] = MFStringCache_Add(pCache, "section");
 				pCurrLine->stringCount++;
@@ -243,7 +243,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		}
 	}
 
-	if (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
+	if(pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 	{
 		pCurrLine->terminate = 1;
 		lineCount++;
@@ -268,21 +268,21 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	MFCALLSTACK;
 
 	// skip white space
-	while (pSrc < pSrcEnd)
+	while(pSrc < pSrcEnd)
 	{
 		// skip comment lines
-		if ((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (pSrc[0] == '#'))
+		if((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (pSrc[0] == '#'))
 		{
 			while (pSrc < pSrcEnd && pSrc[0] != 0xd)
 			{
 				pSrc++;
 			}
-			if (pSrc == pSrcEnd)
+			if(pSrc == pSrcEnd)
 				return NULL;
 		}
 
 		// check if we have found some non-whitespace
-		if (pSrc[0] != ' ' && pSrc[0] != '\t' && pSrc[0] != 0xa && (stringCount!=1 || pSrc[0] != '='))
+		if(!MFIsWhite(pSrc[0]) && (stringCount!=1 || pSrc[0] != '='))
 //		if (pSrc[0] != ' ' && pSrc[0] != '\t' && pSrc[0] != 0xd && pSrc[0] != 0xa && (stringCount!=1 || pSrc[0] != '='))
 			break;
 
@@ -290,14 +290,14 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	}
 
 	// end of file?
-	if (pSrc == pSrcEnd)
+	if(pSrc == pSrcEnd)
 		return NULL;
 
 	// start of token
 	char *pDst = pTokenBuffer;
 
 	// handle special tokens (brackets and EOL)
-	if (*pSrc == '{' || *pSrc == '}' || *pSrc == 0xd)
+	if(*pSrc == '{' || *pSrc == '}' || MFIsNewline(*pSrc))
 	{
 		*pDst++ = *pSrc;
 		*pDst++ = 0;
@@ -308,23 +308,22 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	bool bInQuotes = false;
 	int sectionDepth = 0;
 	*pbIsSection = false;
-	while (pSrc < pSrcEnd && *pSrc != 0xd
-		    && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && *pSrc != ' ' && *pSrc != '\t' && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
+	while(pSrc < pSrcEnd && !MFIsNewline(*pSrc) && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && !MFIsWhite(*pSrc) && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
 	{
-		if (!bInQuotes && *pSrc == '[')
+		if(!bInQuotes && *pSrc == '[')
 		{
 			sectionDepth++;
 			*pbIsSection = true;
 			pSrc++;
 		}
-		else if (!bInQuotes && *pSrc == ']')
+		else if(!bInQuotes && *pSrc == ']')
 		{
 			sectionDepth--;
 			if (sectionDepth < 0)
 				MFDebug_Warn(1, "Malformed ini file, Missing '['");
 			pSrc++;
 		}
-		else if (*pSrc == '"')
+		else if(*pSrc == '"')
 		{
 			bInQuotes = !bInQuotes;
 			pSrc++;
@@ -335,10 +334,10 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 	}
 
-	if (pDst != pTokenBuffer)
+	if(pDst != pTokenBuffer)
 	{
 		*pDst++ = 0;
-		if (*pSrc == ',')
+		if(*pSrc == ',')
 			pSrc++;
 		return pSrc;
 	}
@@ -359,7 +358,7 @@ void MFIniLine::DumpRecursive(int depth)
 
 	char prefix[256];
 	int c;
-	for (c=0; c<depth*2; c++)
+	for(c=0; c<depth*2; c++)
 	{
 		prefix[c] = ' ';
 	}
@@ -368,16 +367,16 @@ void MFIniLine::DumpRecursive(int depth)
 	MFIniLine *pLine = this;
 
 	char buffer[256];
-	while (pLine)
+	while(pLine)
 	{
 		MFString_Copy(buffer,prefix);
-		for (int i=0; i<pLine->GetStringCount(); i++)
+		for(int i=0; i<pLine->GetStringCount(); i++)
 		{
 			MFString_Cat(buffer, MFStr("'%s'",pLine->GetString(i)));
 			MFString_Cat(buffer, "  ");
 		}
 		MFDebug_Message(buffer);
-		if (pLine->Sub())
+		if(pLine->Sub())
 		{
 			MFDebug_Message(MFStr("%s{",prefix));
 			pLine->Sub()->DumpRecursive(depth+1);
