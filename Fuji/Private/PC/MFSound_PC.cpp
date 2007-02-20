@@ -18,10 +18,16 @@ struct MFSound
 	char name[64];
 
 	MFSoundTemplate *pTemplate;
+	int flags;
 	int refCount;
 
 	IDirectSoundBuffer *pBuffer;
 	IDirectSoundBuffer *p3DBuffer;
+
+	// for locking dynamic buffers
+	int lockOffset, lockBytes;
+	void *pLock1, *pLock2;
+	uint32 lockSize1, lockSize2;
 };
 
 struct MFVoice
@@ -167,6 +173,43 @@ void MFSound_Update()
 	}
 }
 
+MFSound *MFSoundPC_CreateInternal(MFSoundTemplate *pTemplate, const char *pName)
+{
+	MFSound *pSound = gSoundBank.Create();
+	MFZeroMemory(pSound, sizeof(MFSound));
+	pSound->pTemplate = pTemplate;
+	MFString_Copy(pSound->name, pName);
+
+	int bytesPerSample = pTemplate->numChannels * (pTemplate->bitsPerSample>>3);
+
+	DSBUFFERDESC desc;
+	WAVEFORMATEX wfx;
+
+	desc.dwSize = sizeof(DSBUFFERDESC);
+	desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+	desc.dwBufferBytes = pTemplate->numSamples * bytesPerSample;
+	desc.dwReserved = 0;
+	desc.guid3DAlgorithm = DS3DALG_DEFAULT;
+	desc.lpwfxFormat = &wfx;
+	
+	wfx.wFormatTag = WAVE_FORMAT_PCM;
+	wfx.nChannels = pTemplate->numChannels;
+	wfx.nSamplesPerSec = pTemplate->sampleRate;
+	wfx.nAvgBytesPerSec = pTemplate->sampleRate * bytesPerSample;
+	wfx.nBlockAlign = bytesPerSample;
+	wfx.wBitsPerSample = pTemplate->bitsPerSample;
+	wfx.cbSize = 0;
+
+	// create the 2d buffer
+	pDirectSound->CreateSoundBuffer(&desc, &pSound->pBuffer, NULL);
+
+	// and create the 3d buffer
+	desc.dwFlags |= DSBCAPS_CTRL3D;
+	pDirectSound->CreateSoundBuffer(&desc, &pSound->p3DBuffer, NULL);
+
+	return pSound;
+}
+
 MFSound *MFSound_Create(const char *pName)
 {
 	MFCALLSTACK;
@@ -177,6 +220,7 @@ MFSound *MFSound_Create(const char *pName)
 	{
 		uint32 fileSize;
 
+		// load the template
 		const char *pFileName = MFStr("%s.snd", pName);
 
 		MFSoundTemplate *pTemplate = (MFSoundTemplate*)MFFileSystem_Load(pFileName, &fileSize);
@@ -193,51 +237,52 @@ MFSound *MFSound_Create(const char *pName)
 		for(int a=0; a<pTemplate->numStreams; a++)
 			MFFixUp(pTemplate->ppStreams[a], pTemplate, true);
 
-		pSound = gSoundBank.Create();
-		pSound->pTemplate = pTemplate;
-		pSound->refCount = 0;
-		MFString_Copy(pSound->name, pName);
-
-		int bytesPerSample = pTemplate->numChannels * (pTemplate->bitsPerSample>>3);
-
-		DSBUFFERDESC desc;
-		WAVEFORMATEX wfx;
-
-		desc.dwSize = sizeof(DSBUFFERDESC);
-		desc.dwFlags = DSBCAPS_STATIC | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
-		desc.dwBufferBytes = pTemplate->numSamples * bytesPerSample;
-		desc.dwReserved = 0;
-		desc.guid3DAlgorithm = DS3DALG_DEFAULT;
-		desc.lpwfxFormat = &wfx;
-		
-		wfx.wFormatTag = WAVE_FORMAT_PCM;
-		wfx.nChannels = pTemplate->numChannels;
-		wfx.nSamplesPerSec = pTemplate->sampleRate;
-		wfx.nAvgBytesPerSec = pTemplate->sampleRate * bytesPerSample;
-		wfx.nBlockAlign = bytesPerSample;
-		wfx.wBitsPerSample = pTemplate->bitsPerSample;
-		wfx.cbSize = 0;
-
-		// create the 2d buffer
-		pDirectSound->CreateSoundBuffer(&desc, &pSound->pBuffer, NULL);
-
-		// and create the 3d buffer
-		desc.dwFlags |= DSBCAPS_CTRL3D;
-		pDirectSound->CreateSoundBuffer(&desc, &pSound->p3DBuffer, NULL);
+		// create the sound
+		pSound = MFSoundPC_CreateInternal(pTemplate, pName);
 
 		// lock the buffers and copy in the data
-		VOID *pBuffer, *pB2;
-		DWORD bufferLen, l2;
+		void *pBuffer;
+		uint32 len;
 
-		pSound->pBuffer->Lock(0, 0, &pBuffer, &bufferLen, &pB2, &l2, DSBLOCK_ENTIREBUFFER);
-		MFDebug_Assert(desc.dwBufferBytes == bufferLen, "Error locking sound buffer.");
-		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], bufferLen);
-		pSound->pBuffer->Unlock(pBuffer, bufferLen, pB2, l2);
+		MFSound_LockDynamic(pSound, 0, 0, &pBuffer, &len);
+		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], len);
+		MFSound_UnlockDynamic(pSound);
+	}
 
-		pSound->p3DBuffer->Lock(0, 0, &pBuffer, &bufferLen, &pB2, &l2, DSBLOCK_ENTIREBUFFER);
-		MFDebug_Assert(desc.dwBufferBytes == bufferLen, "Error locking sound buffer.");
-		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], bufferLen);
-		pSound->p3DBuffer->Unlock(pBuffer, bufferLen, pB2, l2);
+	++pSound->refCount;
+
+	return pSound;
+}
+
+MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate)
+{
+	MFCALLSTACK;
+
+	MFSound *pSound = MFSound_FindSound(pName);
+
+	if(!pSound)
+	{
+		// create a template
+		MFSoundTemplate *pTemplate = (MFSoundTemplate*)MFHeap_Alloc(sizeof(MFSoundTemplate));
+
+		MFZeroMemory(pTemplate, sizeof(MFSoundTemplate));
+		pTemplate->magic = MFMAKEFOURCC('S', 'N', 'D', '1');
+		pTemplate->sampleRate = samplerate;
+		pTemplate->numSamples = numSamples;
+		pTemplate->numChannels = numChannels;
+		pTemplate->bitsPerSample = bitsPerSample;
+		pTemplate->format = MFWF_PCM_s16;
+
+		// create the sound
+		pSound = MFSoundPC_CreateInternal(pTemplate, pName);
+
+		// clear buffer
+		void *pBuffer;
+		uint32 len;
+
+		MFSound_LockDynamic(pSound, 0, 0, &pBuffer, &len);
+		MFZeroMemory(pBuffer, len);
+		MFSound_UnlockDynamic(pSound);
 	}
 
 	++pSound->refCount;
@@ -282,6 +327,50 @@ MFSound *MFSound_FindSound(const char *pSoundName)
 	return NULL;
 }
 
+int MFSound_LockDynamic(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+{
+	MFDebug_Assert(!(pSound->flags & MFSF_Locked), MFStr("Dynamic sound '%s' is already locked.", pSound->name));
+
+	pSound->pBuffer->Lock(offset, bytes, &pSound->pLock1, (DWORD*)&pSound->lockSize1, &pSound->pLock2, (DWORD*)&pSound->lockSize2, bytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
+
+	pSound->flags |= MFSF_Locked;
+	pSound->lockOffset = offset;
+	pSound->lockBytes = bytes;
+
+	*ppData = pSound->pLock1;
+	*pSize = pSound->lockSize1;
+	if(ppData2)
+	{
+		*ppData2 = pSound->pLock2;
+		*pSize2 = pSound->lockSize2;
+	}
+
+	return 0;
+}
+
+void MFSound_UnlockDynamic(MFSound *pSound)
+{
+	MFDebug_Assert(pSound->flags & MFSF_Locked, MFStr("Dynamic sound '%s' is not locked.", pSound->name));
+
+	if(pSound->p3DBuffer)
+	{
+		// copy new data into 3d buffer...
+		VOID *pBuffer, *pB2;
+		DWORD bufferLen, l2;
+
+		pSound->p3DBuffer->Lock(pSound->lockOffset, pSound->lockBytes, &pBuffer, &bufferLen, &pB2, &l2, pSound->lockBytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
+		MFCopyMemory(pBuffer, pSound->pLock1, pSound->lockSize1);
+		if(pB2)
+			MFCopyMemory(pB2, pSound->pLock2, pSound->lockSize2);
+		pSound->p3DBuffer->Unlock(pBuffer, bufferLen, pB2, l2);
+	}
+
+	// and unlock the main buffer
+	pSound->pBuffer->Unlock(pSound->pLock1, pSound->lockSize1, pSound->pLock2, pSound->lockSize2);
+
+	pSound->flags = pSound->flags & ~MFSF_Locked;
+}
+
 MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 {
 	MFCALLSTACK;
@@ -310,7 +399,7 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 		pVoice->pBuffer8->Play(0, 0, playbackFlags);
 	}
 	else
-		pVoice->flags |= MFBIT(28);
+		pVoice->flags |= MFSF_Paused;
 
 	return pVoice;
 }
@@ -319,16 +408,16 @@ void MFSound_Pause(MFVoice *pVoice, bool pause)
 {
 	MFCALLSTACK;
 
-	if(pause && !(pVoice->flags & MFBIT(28)))
+	if(pause && !(pVoice->flags & MFSF_Paused))
 	{
 		pVoice->pBuffer8->Stop();
-		pVoice->flags |= MFBIT(28);
+		pVoice->flags |= MFSF_Paused;
 	}
-	else if(!pause && (pVoice->flags & MFBIT(28)))
+	else if(!pause && (pVoice->flags & MFSF_Paused))
 	{
 		DWORD playbackFlags = (pVoice->flags & MFSF_Looping) ? DSBPLAY_LOOPING : 0;
 		pVoice->pBuffer8->Play(0, 0, playbackFlags);
-		pVoice->flags &= ~MFBIT(28);
+		pVoice->flags &= ~MFSF_Paused;
 	}
 }
 
@@ -358,6 +447,16 @@ void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 	MFCALLSTACK;
 
 	pVoice->pBuffer8->SetFrequency((DWORD)((float)pVoice->pSound->pTemplate->sampleRate * rate));
+}
+
+void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+{
+	MFCALLSTACK;
+
+	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
+
+	DWORD offset = (DWORD)((float)((pT->sampleRate * pT->numChannels * pT->bitsPerSample) >> 3) * seconds);
+	pVoice->pBuffer8->SetCurrentPosition(offset);
 }
 
 void MFSound_SetMasterVolume(float volume)

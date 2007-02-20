@@ -35,4 +35,10 @@ struct MFSoundTemplate
 	char **ppStreams;
 };
 
+enum MFSoundFlagsInternal
+{
+	MFSF_Paused = MFBIT(28),
+	MFSF_Locked = MFBIT(29)
+};
+
 #endif

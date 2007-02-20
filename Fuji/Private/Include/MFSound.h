@@ -53,6 +53,23 @@ enum MFSoundFlags
  */
 MFSound *MFSound_Create(const char *pName);
 
+//MFSound *MFSound_CreateFromMemory(const char *pName, const char *pData);
+
+//MFSound *MFSound_CreateFromFile(const char *pName, MFFileHandle hFile);
+
+/**
+ * Create a dynamic sound buffer.
+ * Creates a dynamic sound buffer.
+ * @param pName Name of the sound to create.
+ * @param numSamples Number of samples in the buffer.
+ * @param numChannels Number of channels in the sound buffer.
+ * @param bitsPerSample Bits per sample.
+ * @param samplerate Playback rate in samples per second.
+ * @return Returns s pointer to the newly created sound buffer, or NULL on failure.
+ * @see MFSound_Destroy(), MFSound_Play(), MFSound_LockDynamic(), MFSound_UnlockDynamic()
+ */
+MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate);
+
 /**
  * Destroy a sound.
  * Destroys a sound.
@@ -70,6 +87,29 @@ int MFSound_Destroy(MFSound *pSound);
  * @remarks MFSound_FindSound() does NOT increment the internal reference count of the object.
  */
 MFSound *MFSound_FindSound(const char *pName);
+
+/**
+ * Lock a dynamic sound buffer.
+ * Locks a dynamic sound buffer for writing.
+ * @param pSound Pointer to the sound to lock.
+ * @param offset Offset into the sound buffer, in bytes.
+ * @param bytes Number of bytes to lock.
+ * @param ppData Pointer to a pointer that receives the address of the locked buffer portion.
+ * @param pSize Pointer to an int the receives the size of the locked buffer portion.
+ * @param ppData2 Pointer to a pointer that receives the second locked portion, or NULL. This is only used when locking a circular buffer and the lock length exceeds the buffers length. This parameter may be NULL.
+ * @param pSize2 Pointer to an int the receives the size of the locked buffer portion. This parameter may be NULL.
+ * @return Returns 0 on success.
+ * @see MFSound_UnlockDynamic(), MFSound_CreateDynamic()
+ */
+int MFSound_LockDynamic(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
+
+/**
+ * Unlock a dynamic buffer.
+ * Unlocks a previously locked dynamic buffer.
+ * @return None.
+ * @see MFSound_LockDynamic()
+ */
+void MFSound_UnlockDynamic(MFSound *pSound);
 
 /**
  * Play a sound.
@@ -126,6 +166,15 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume);
  * @return None.
  */
 void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
+
+/**
+ * Set playback offset.
+ * Sets the playback offset.
+ * @param pVoice Pointer to a playing voice.
+ * @param offset Playback offset, in seconds.
+ * @return None.
+ */
+void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
 
 /**
  * Set the master volume.
