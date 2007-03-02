@@ -292,6 +292,30 @@ static const int gRadioshackButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative  // Button_ThumbRY
 };
 
+static const int gGenericPS2ButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	11,	// Button_Start
+	8,	// Button_Back
+	9,	// Button_LeftThumb
+	10,	// Button_RightThumb
+	12,	// Button_DUp
+	14,	// Button_DDown
+	15,	// Button_DLeft
+	13,	// Button_DRight
+	AID_X,					// Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Z,					// Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -686,6 +710,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gPowerWaveButtonID,
 		gPowerWaveButtonNames,
+		&gGamepadDescriptors[18]
+	},
+
+	// POWER))WAVE PS2 style gamepad
+	{
+		"PS2 Gamepad",
+		"4 axis 16 button joystick",
+		0x6666, 0x0667,
+		gGenericPS2ButtonID,
+		gPS2ButtonNames,
 		NULL
 	}
 };
