@@ -66,10 +66,10 @@ static const int gTitaniumButtonID[GamepadType_Max] =
 	9,   // Button_Back
 	10,  // Button_LeftThumb
 	11,  // Button_RightThumb
-	POV_Up,		// Button_DUp
-	POV_Down,	// Button_DDown
-	POV_Left,	// Button_DLeft
-	POV_Right,	// Button_DRight
+	12 | POV_Up,	// Button_DUp
+	14 | POV_Down,	// Button_DDown
+	15 | POV_Left,	// Button_DLeft
+	13 | POV_Right,	// Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Z,                // Button_ThumbRX
@@ -315,7 +315,6 @@ static const int gGenericPS2ButtonID[GamepadType_Max] =
 	AID_Z,					// Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
 };
-
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -733,12 +732,30 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[20]
 	},
 
-	// Generic PS2 adapter
+	// Some more PS2 adapters
 	{
 		"PS2 Gamepad",
 		"4 axis 16 button joystick",
 		0x6666, 0x0667,
 		gGenericPS2ButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[21]
+	},
+
+	{
+		"PS2 Gamepad",
+		"GIC USB Joystick",
+		0x3427, 0x1190,
+		gGenericPS2ButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[22]
+	},
+
+	{
+		"PS2 Gamepad",
+		"SmartJoy Dual PLUS Adapter",
+		0x6677, 0x8802,
+		gTitaniumButtonID,
 		gPS2ButtonNames,
 		NULL
 	}
