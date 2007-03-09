@@ -232,6 +232,15 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
  */
 void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume);
 
+/**
+ * Set the playback rate for an audio stream.
+ * Sets the playback rate for an audio stream.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param rate Playback rate for the stream. Default is 1.0f.
+ * @return None.
+ */
+void MFSound_SetStreamPlaybackRate(MFAudioStream *pStream, float rate);
+
 #endif // _MFSOUND_H
 
 /** @} */

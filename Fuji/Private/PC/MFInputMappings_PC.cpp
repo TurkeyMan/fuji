@@ -551,10 +551,30 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"XBox 360 Gamepad",
 		"XBOX 360 For Windows (Controller)",
-		0, 0,
+		0x045E, 0x028E,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
 		&gGamepadDescriptors[2]
+	},
+
+	// XBox 360 wireless gamepad
+	{
+		"XBox 360 Gamepad",
+		"Controller (Xbox 360 Wireless Receiver for Windows)",
+		0x045E, 0x0719,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		&gGamepadDescriptors[3]
+	},
+
+	// XBox 360 DOA Arcade Stick
+	{
+		"DOA Arcade Stick",
+		"Arcade Stick (Dead or Alive4Stick)",
+		0x0F0D, 0x000A,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		&gGamepadDescriptors[4]
 	},
 
 	// EMS USB2 adapter
@@ -564,7 +584,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0B43, 0x0003,
 		gEMSButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[3]
+		&gGamepadDescriptors[5]
 	},
 
 	// Different identities of the titanium adapters
@@ -574,7 +594,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[4]
+		&gGamepadDescriptors[6]
 	},
 
 	{
@@ -583,7 +603,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[5]
+		&gGamepadDescriptors[7]
 	},
 
 	{
@@ -592,7 +612,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[6]
+		&gGamepadDescriptors[8]
 	},
 
 	{
@@ -601,7 +621,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[7]
+		&gGamepadDescriptors[9]
 	},
 
 	{
@@ -610,7 +630,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[8]
+		&gGamepadDescriptors[10]
 	},
 
 	// XBox gamepad
@@ -620,7 +640,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXBCDButtonID,
 		gXBoxButtonNames,
-		&gGamepadDescriptors[9]
+		&gGamepadDescriptors[11]
 	},
 
 	// Logitech dual action
@@ -630,7 +650,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		&gGamepadDescriptors[10]
+		&gGamepadDescriptors[12]
 	},
 
 	// Logitech dual action
@@ -640,7 +660,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		&gGamepadDescriptors[11]
+		&gGamepadDescriptors[13]
 	},
 
 	// Xterminator Digital Gamepad
@@ -650,7 +670,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXterminatorButtonID,
 		gXterminatorButtonNames,
-		&gGamepadDescriptors[12]
+		&gGamepadDescriptors[14]
 	},
 
 	// Logitech Wingman Gamepad Extreme (Gameport)
@@ -660,7 +680,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		&gGamepadDescriptors[13]
+		&gGamepadDescriptors[15]
 	},
 
 	// Logitech Wingman Gamepad Extreme (USB)
@@ -670,7 +690,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		&gGamepadDescriptors[14]
+		&gGamepadDescriptors[16]
 	},
 
 	// Logitech RumblePad 2
@@ -680,7 +700,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		&gGamepadDescriptors[15]
+		&gGamepadDescriptors[17]
 	},
 
 	// 'USB Joystick' basic PS2 style USB gamepad
@@ -690,7 +710,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0002,
 		gGreenAsiaButtonID,
 		gGreenAsiaButtonNames,
-		&gGamepadDescriptors[16]
+		&gGamepadDescriptors[18]
 	},
 
 	// Radioshack 'USB Dual Vibration Joystick' another PS2 gamepad adapter,
@@ -700,7 +720,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[17]
+		&gGamepadDescriptors[19]
 	},
 
 	// POWER))WAVE PS2 style gamepad
@@ -710,10 +730,10 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gPowerWaveButtonID,
 		gPowerWaveButtonNames,
-		&gGamepadDescriptors[18]
+		&gGamepadDescriptors[20]
 	},
 
-	// POWER))WAVE PS2 style gamepad
+	// Generic PS2 adapter
 	{
 		"PS2 Gamepad",
 		"4 axis 16 button joystick",

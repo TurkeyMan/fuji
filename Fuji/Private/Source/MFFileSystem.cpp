@@ -28,6 +28,24 @@ MFFileHandle hPatchArchive = NULL;
 
 /**** Functions ****/
 
+static const char * gArchiveNames[] =
+{
+	"Data_%s.zip",
+	"Data_%s.dat",
+	"Data/Data_%s.zip",
+	"Data/Data_%s.dat",
+	NULL
+};
+
+static const char * gPatchArchiveNames[] =
+{
+	"Patch_%s.zip",
+	"Patch_%s.dat",
+	"Data/Patch_%s.zip",
+	"Data/Patch_%s.dat",
+	NULL
+};
+
 void MFFileSystem_RegisterDefaultArchives()
 {
 	// try and mount the 'standard' archives...
@@ -35,12 +53,13 @@ void MFFileSystem_RegisterDefaultArchives()
 	MFOpenDataNative dataArchive;
 	dataArchive.cbSize = sizeof(MFOpenDataNative);
 	dataArchive.openFlags = MFOF_Read|MFOF_Binary;
-	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
-	hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
-	if(!hDataArchive)
+	hDataArchive = 0;
+	const char **pArc = gArchiveNames;
+	while(!hDataArchive && *pArc)
 	{
-		dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data/Data_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
+		dataArchive.pFilename =  MFFile_SystemPath(MFStr(*pArc, MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
 		hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+		++pArc;
 	}
 
 	MFMountDataNative mountData;
@@ -71,12 +90,13 @@ void MFFileSystem_RegisterDefaultArchives()
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
 
 	// see if we can mount the patch archive..
-	dataArchive.pFilename =  MFFile_SystemPath(MFStr("Patch_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
-	hPatchArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
-	if(!hPatchArchive)
+	hPatchArchive = 0;
+	pArc = gPatchArchiveNames;
+	while(!hPatchArchive && *pArc)
 	{
-		dataArchive.pFilename =  MFFile_SystemPath(MFStr("Data/Patch_%s.zip", MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
-		hPatchArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+		dataArchive.pFilename =  MFFile_SystemPath(MFStr(*pArc, MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
+		hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+		++pArc;
 	}
 
 	if(hPatchArchive)

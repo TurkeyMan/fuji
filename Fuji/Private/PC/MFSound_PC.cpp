@@ -663,7 +663,7 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	pStream->playBackOffset = 0;
 
 	desc.dwSize = sizeof(DSBUFFERDESC);
-	desc.dwFlags = DSBCAPS_CTRLVOLUME|DSBCAPS_CTRLPAN;
+	desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
 	desc.dwBufferBytes = pStream->bufferSize;
 	desc.lpwfxFormat = &wfx;
 	desc.dwReserved = 0; 
@@ -766,6 +766,10 @@ void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume)
 //	pStream->pDSMusicBuffer->SetVolume();
 }
 
+void MFSound_SetStreamPlaybackRate(MFAudioStream *pStream, float rate)
+{
+	pStream->pDSMusicBuffer->SetFrequency((DWORD)((float)pStream->pInfo->rate * rate));
+}
 
 void MFSound_FillBufferPC(MFAudioStream *pStream, int bytes)
 {
