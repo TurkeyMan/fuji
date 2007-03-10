@@ -757,6 +757,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6677, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
+		&gGamepadDescriptors[23]
+	},
+
+	// Logitech Cordless RumblePad 2
+	{
+		"RumblePad 2",
+		"Logitech Cordless RumblePad 2",
+		0x046d, 0xc219,
+		gLogitechDualActionButtonID,
+		gLogitechDualActionButtonNames,
 		NULL
 	}
 };
