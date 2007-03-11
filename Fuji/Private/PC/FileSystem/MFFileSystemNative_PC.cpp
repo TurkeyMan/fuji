@@ -191,7 +191,9 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	DWORD access = ((pOpenData->openFlags&MFOF_Read) ? GENERIC_READ : NULL) | ((pOpenData->openFlags&MFOF_Write) ? GENERIC_WRITE : NULL);
 	MFDebug_Assert(access, "Neither MFOF_Read nor MFOF_Write specified.");
 
-	pFile->pFilesysData = CreateFile(pNative->pFilename, access, FILE_SHARE_READ, NULL, (pOpenData->openFlags&MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING, NULL, NULL);
+	DWORD create = (pOpenData->openFlags&MFOF_Read) ? ((pOpenData->openFlags&MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
+
+	pFile->pFilesysData = CreateFile(pNative->pFilename, access, FILE_SHARE_READ, NULL, create, NULL, NULL);
 
 	if(pFile->pFilesysData == INVALID_HANDLE_VALUE)
 	{
