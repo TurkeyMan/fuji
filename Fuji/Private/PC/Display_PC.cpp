@@ -300,44 +300,38 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	if(!gDisplay.windowed)
 	{
-		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
-		present.Windowed						= FALSE;
-		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth					= gDisplay.width;
-		present.BackBufferHeight				= gDisplay.height;
-		present.BackBufferCount					= 2;
-		present.EnableAutoDepthStencil			= TRUE;
-		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
-//		present.AutoDepthStencilFormat			= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
-		present.PresentationInterval			= D3DPRESENT_INTERVAL_ONE;
-//		present.PresentationInterval			= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow					= apphWnd;
-
-		PixelFormat = present.BackBufferFormat;
+		present.SwapEffect					= D3DSWAPEFFECT_FLIP;
+		present.Windowed					= FALSE;
+		present.BackBufferFormat			= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth				= gDisplay.width;
+		present.BackBufferHeight			= gDisplay.height;
+		present.BackBufferCount				= 2;
+		present.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;
 	}
 	else
 	{
 		D3DDISPLAYMODE d3ddm;
 		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
 
-		present.SwapEffect              = D3DSWAPEFFECT_COPY;
-		present.Windowed                = TRUE;
-		present.BackBufferFormat        = d3ddm.Format;
-		present.EnableAutoDepthStencil	= TRUE;
-		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
-		present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-//		present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-//		present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow			= apphWnd;
-
-		PixelFormat = d3ddm.Format;
+		present.SwapEffect			= D3DSWAPEFFECT_COPY;
+		present.Windowed			= TRUE;
+		present.BackBufferFormat	= d3ddm.Format;
 	}
+
+	PixelFormat = present.BackBufferFormat;
+	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, D3DFMT_D24S8) != D3D_OK;
+
+	present.EnableAutoDepthStencil	= TRUE;
+//	present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+	present.AutoDepthStencilFormat	= z16 ? D3DFMT_D16 : D3DFMT_D24S8;
+//	present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
+	present.hDeviceWindow			= apphWnd;
 
 	int b=0;
 	DWORD processing = D3DCREATE_MULTITHREADED;
 
-	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
+	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((deviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
 	{
 		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	}
@@ -349,7 +343,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	for(int a=0; a<2&&!b; a++)
 	{
-		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, true)==D3D_OK)
+		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, gDisplay.windowed)==D3D_OK)
 		{
 			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
 			{
@@ -470,7 +464,7 @@ void MFDisplay_BeginFrame()
 {
 	MFCALLSTACK;
 
-	pd3dDevice->BeginScene();
+	HRESULT hr = pd3dDevice->BeginScene();
 
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

@@ -316,6 +316,7 @@ static const int gGenericPS2ButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative,	// Button_ThumbRY
 };
 
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -758,6 +759,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gTitaniumButtonID,
 		gPS2ButtonNames,
 		&gGamepadDescriptors[23]
+	},
+
+	{
+		"PS2 Gamepad",
+		"TWIN PS TO PC CONVERTER",
+		0x0810, 0x0001,
+		gRadioshackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[24]
 	},
 
 	// Logitech Cordless RumblePad 2
