@@ -84,8 +84,8 @@ MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 }
 
 
-#define MAX_LINES (32000)
-#define MAX_STRINGS (64000)
+#define MAX_LINES (64000)
+#define MAX_STRINGS (256000)
 #define MAX_STRINGCACHE (128000)
 //=============================================================================
 // Create INI file
@@ -228,6 +228,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			if(bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
 			{
 				lineCount++;
+				MFDebug_Assert(lineCount < MAX_LINES, MFStr("MFIni: Exceeded maximum number of lines %d.", MAX_LINES));
 				pCurrLine = &pLines[lineCount];
 				InitLine(pCurrLine);
 			}
@@ -235,6 +236,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 
 			if(bIsSection)
 			{
+				MFDebug_Assert(stringCount < MAX_STRINGS, MFStr("MFIni: Exceeded maximum ini strings %d.", MAX_STRINGS));
 				pStrings[stringCount++] = MFStringCache_Add(pCache, "section");
 				pCurrLine->stringCount++;
 			}
