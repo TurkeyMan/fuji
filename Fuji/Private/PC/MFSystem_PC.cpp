@@ -19,6 +19,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	apphInstance = hInstance;
 	gpCommandLineBuffer = lpCmdLine;
 
+	// HACK: this is to force dual-core or multi-processor systems to use the first cpu for timing.
+//	DWORD proc, system;
+//	GetProcessAffinityMask(GetCurrentProcess(), &proc, &system);
+	SetProcessAffinityMask(GetCurrentProcess(), 1);
+
 	MFSystem_GameLoop();
 
 	return 0;

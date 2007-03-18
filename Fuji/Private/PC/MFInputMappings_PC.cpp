@@ -770,6 +770,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[24]
 	},
 
+	{
+		"PS2 Gamepad",
+		"Unknown PS2 gamepad adapter",
+		0x0F30, 0x010A,
+		gRadioshackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[25]
+	},
+
 	// Logitech Cordless RumblePad 2
 	{
 		"RumblePad 2",
