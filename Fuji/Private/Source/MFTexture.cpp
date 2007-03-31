@@ -43,10 +43,23 @@ void MFTexture_DeinitModule()
 	MFTexture_Destroy(pNoneTexture);
 	MFTexture_Destroy(pWhiteTexture);
 
+	// list all non-freed textures...
 	MFTexture **ppI = gTextureBank.Begin();
+	bool bShowHeader = true;
+
 	while(*ppI)
 	{
+		if(bShowHeader)
+		{
+			bShowHeader = false;
+			MFDebug_Message("Un-freed textures:\n----------------------------------------------------------");
+		}
+
+		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->name, (*ppI)->refCount));
+
+		(*ppI)->refCount = 1;
 		MFTexture_Destroy(*ppI);
+
 		ppI++;
 	}
 

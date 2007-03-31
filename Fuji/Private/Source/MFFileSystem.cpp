@@ -132,7 +132,7 @@ void MFFileSystem_InitModule()
 	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 
-	gFinds.Init("File System Find Instances", 10);//gDefaults.filesys.maxFinds);
+	gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
 
 	// mount filesystems
 	MFFileSystemNative_InitModule();

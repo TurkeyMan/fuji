@@ -75,6 +75,7 @@ struct MFDefaults
 	struct FileSystemDefaults
 	{
 		uint32 maxOpenFiles;			/**< Maximum open files */
+		uint32 maxFinds;				/**< Maximum finds */
 		uint32 maxFileSystems;			/**< Maximum file systems */
 		uint32 maxFileSystemStackSize;	/**< Maximum file system stack size */
 		uint32 maxHTTPFiles;			/**< Maximum number of concurrent HTTP files */

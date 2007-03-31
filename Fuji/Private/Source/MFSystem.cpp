@@ -87,6 +87,7 @@ MFDefaults gDefaults =
 	// FileSystemDefaults
 	{
 		128,			// maxOpenFiles
+		16,				// maxFinds
 		16,				// maxFileSystems
 		16,				// maxFileSystemStackSize
 		8,				// maxHTTPFiles

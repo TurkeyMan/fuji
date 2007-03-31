@@ -458,6 +458,9 @@ void MFDisplay_DestroyDisplay()
 
 	pd3dDevice->Release();
 	d3d9->Release();
+
+	DestroyWindow(apphWnd);
+	UnregisterClass("FujiWin", apphInstance);
 }
 
 void MFDisplay_BeginFrame()

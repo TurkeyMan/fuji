@@ -21,6 +21,25 @@ void MFModel_InitModule()
 
 void MFModel_DeinitModule()
 {
+	// list all non-freed textures...
+	MFModelTemplate **ppI = gModelBank.Begin();
+	bool bShowHeader = true;
+
+	while(*ppI)
+	{
+		if(bShowHeader)
+		{
+			bShowHeader = false;
+			MFDebug_Message("\nUn-freed models:\n----------------------------------------------------------");
+		}
+
+		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->pName, (*ppI)->refCount));
+
+		// Destroy template...
+
+		ppI++;
+	}
+
 	MFModel_DeinitModulePlatformSpecific();
 
 	gModelBank.Deinit();

@@ -130,11 +130,31 @@ void MFSound_DeinitModule()
 		}
 	}
 
-	pDSPrimaryBuffer->Release();
-	pDirectSound->Release();
+	// list all non-freed textures...
+	MFSound **ppI = gSoundBank.Begin();
+	bool bShowHeader = true;
+
+	while(*ppI)
+	{
+		if(bShowHeader)
+		{
+			bShowHeader = false;
+			MFDebug_Message("\nUn-freed sounds:\n----------------------------------------------------------");
+		}
+
+		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->name, (*ppI)->refCount));
+
+		(*ppI)->refCount = 1;
+		MFSound_Destroy(*ppI);
+
+		ppI++;
+	}
 
 	gVoices.Deinit();
 	gSoundBank.Deinit();
+
+	pDSPrimaryBuffer->Release();
+	pDirectSound->Release();
 }
 
 void MFSound_Update()
@@ -203,9 +223,12 @@ MFSound *MFSoundPC_CreateInternal(MFSoundTemplate *pTemplate, const char *pName)
 	// create the 2d buffer
 	pDirectSound->CreateSoundBuffer(&desc, &pSound->pBuffer, NULL);
 
-	// and create the 3d buffer
-	desc.dwFlags |= DSBCAPS_CTRL3D;
-	pDirectSound->CreateSoundBuffer(&desc, &pSound->p3DBuffer, NULL);
+	if(wfx.nChannels == 1)
+	{
+		// and create the 3d buffer (but only for 1 channel sounds)
+		desc.dwFlags |= DSBCAPS_CTRL3D;
+		pDirectSound->CreateSoundBuffer(&desc, &pSound->p3DBuffer, NULL);
+	}
 
 	return pSound;
 }
@@ -300,7 +323,8 @@ int MFSound_Destroy(MFSound *pSound)
 	if(!pSound->refCount)
 	{
 		pSound->pBuffer->Release();
-		pSound->p3DBuffer->Release();
+		if(pSound->p3DBuffer)
+			pSound->p3DBuffer->Release();
 
 		MFHeap_Free(pSound->pTemplate);
 
@@ -368,6 +392,11 @@ void MFSound_UnlockDynamic(MFSound *pSound)
 	// and unlock the main buffer
 	pSound->pBuffer->Unlock(pSound->pLock1, pSound->lockSize1, pSound->pLock2, pSound->lockSize2);
 
+	pSound->pLock1 = NULL;
+	pSound->lockSize1 = 0;
+	pSound->pLock2 = NULL;
+	pSound->lockSize2 = 0;
+
 	pSound->flags = pSound->flags & ~MFSF_Locked;
 }
 
@@ -379,11 +408,10 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	pVoice->flags = playFlags;
 	pVoice->pSound = pSound;
 
-	if(playFlags & MFSF_3D)
+	if(playFlags & MFSF_3D && pSound->p3DBuffer)
 	{
 		pDirectSound->DuplicateSoundBuffer(pSound->p3DBuffer, &pVoice->pBuffer);
 		pVoice->pBuffer->QueryInterface(IID_IDirectSound3DBuffer8, (VOID**)&pVoice->p3DBuffer8);
-
 	}
 	else
 	{

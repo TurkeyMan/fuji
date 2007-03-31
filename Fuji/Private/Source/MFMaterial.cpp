@@ -154,6 +154,29 @@ void MFMaterial_DeinitModule()
 		pDef = pNext;
 	}
 
+	// list all non-freed materials...
+	MFMaterial **ppI = gMaterialList.Begin();
+	bool bShowHeader = true;
+
+	while(*ppI)
+	{
+		if(bShowHeader)
+		{
+			bShowHeader = false;
+			MFDebug_Message("\nUn-freed materials:\n----------------------------------------------------------");
+		}
+
+		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->pName, (*ppI)->refCount));
+
+		(*ppI)->refCount = 1;
+		MFMaterial_Destroy(*ppI);
+
+		ppI++;
+	}
+
+	MFMaterial_UnregisterMaterialType("Standard");
+	MFMaterial_UnregisterMaterialType("Effect");
+
 	gMaterialList.Deinit();
 	gMaterialDefList.Deinit();
 	gMaterialRegistry.Deinit();
@@ -277,7 +300,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	pCallbacks->pRegisterMaterial(NULL);
 }
 
-void Materual_UnregisterMaterialType(const char *pName)
+void MFMaterial_UnregisterMaterialType(const char *pName)
 {
 	MFCALLSTACK;
 

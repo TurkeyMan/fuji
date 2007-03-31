@@ -267,7 +267,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
  * @param pName The name of the material type to de-register.
  * @return None.
  */
-void MFMaterual_UnregisterMaterialType(const char *pName);
+void MFMaterial_UnregisterMaterialType(const char *pName);
 
 #endif // _MFMATERIAL_H
 
