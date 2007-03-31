@@ -13,8 +13,8 @@ void MFFileSystemHTTP_InitModule()
 	{
 		MFFileSystemCallbacks fsCallbacks;
 
-		fsCallbacks.RegisterFS = MFFileSystemHTTP_Register;
-		fsCallbacks.UnregisterFS = MFFileSystemHTTP_Unregister;
+		fsCallbacks.RegisterFS = NULL;
+		fsCallbacks.UnregisterFS = NULL;
 		fsCallbacks.FSMount = MFFileSystemHTTP_Mount;
 		fsCallbacks.FSDismount = MFFileSystemHTTP_Dismount;
 		fsCallbacks.FSOpen = MFFileSystemHTTP_Open;
@@ -26,6 +26,9 @@ void MFFileSystemHTTP_InitModule()
 		fsCallbacks.Tell = MFFileHTTP_Tell;
 		fsCallbacks.Query = MFFileHTTP_Query;
 		fsCallbacks.GetSize = MFFileHTTP_GetSize;
+		fsCallbacks.FindFirst = NULL;
+		fsCallbacks.FindNext = NULL;
+		fsCallbacks.FindClose = NULL;
 
 		hHTTPFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
 
@@ -44,25 +47,15 @@ void MFFileSystemHTTP_DeinitModule()
 		MFFileSystem_UnregisterFileSystem(hHTTPFileSystem);
 }
 // filesystem callbacks
-void MFFileSystemHTTP_Register()
-{
-
-}
-
-void MFFileSystemHTTP_Unregister()
-{
-
-}
-
 int MFFileSystemHTTP_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataHTTP), "Incorrect size for MFMountDataHTTP structure. Invalid pMountData.");
-	MFDebug_Assert(pMount->mountFlags & MFMF_OnlyAllowExclusiveAccess, "HTTP Filesystem can not generate a directory list. The MFMF_OnlyAllowExclusiveAccess flag MUST be specified for HTTP mounts.");
+	MFDebug_Assert(pMount->volumeInfo.flags & MFMF_OnlyAllowExclusiveAccess, "HTTP Filesystem can not generate a directory list. The MFMF_OnlyAllowExclusiveAccess flag MUST be specified for HTTP mounts.");
 
 //	MFMountDataHTTP *pMountHTTP = (MFMountDataHTTP*)pMountData;
 
-	pMount->numFiles = 0;
-	pMount->pEntries = NULL;
+	// HTTP has no way to evaluate the directory structire.
+	pMount->volumeInfo.flags |= MFMF_DontCacheTOC;
 
 	return 0;
 }
@@ -74,7 +67,7 @@ int MFFileSystemHTTP_Dismount(MFMount *pMount)
 
 MFFile* MFFileSystemHTTP_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
-	MFFileHandle hFile = NULL;
+	MFFile *hFile = NULL;
 
 	MFOpenDataHTTP openData;
 

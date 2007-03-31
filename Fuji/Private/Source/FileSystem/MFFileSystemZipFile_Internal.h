@@ -8,9 +8,6 @@ void MFFileSystemZipFile_InitModule();
 void MFFileSystemZipFile_DeinitModule();
 
 // filesystem callbacks
-void MFFileSystemZipFile_Register();
-void MFFileSystemZipFile_Unregister();
-
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData);
 int MFFileSystemZipFile_Dismount(MFMount *pMount);
 
@@ -22,6 +19,9 @@ int MFFileZipFile_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asy
 int MFFileZipFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async);
 int MFFileZipFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileZipFile_Tell(MFFile* fileHandle);
+bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData);
+bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData);
+void MFFileZipFile_FindClose(MFFind *pFind);
 
 MFFileState MFFileZipFile_Query(MFFile* fileHandle);
 int MFFileZipFile_GetSize(MFFile* fileHandle);

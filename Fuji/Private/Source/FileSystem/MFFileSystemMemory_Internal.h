@@ -15,9 +15,6 @@ void MFFileSystemMemory_InitModule();
 void MFFileSystemMemory_DeinitModule();
 
 // filesystem callbacks
-void MFFileSystemMemory_Register();
-void MFFileSystemMemory_Unregister();
-
 int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData);
 int MFFileSystemMemory_Dismount(MFMount *pMount);
 

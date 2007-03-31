@@ -46,6 +46,8 @@ struct MFFile
 enum MFTOCFlags
 {
 	MFTF_Directory = 1,
+	MFTF_SymbolicLink = 2,
+	MFTF_Hidden = 4
 };
 
 struct MFTOCEntry
@@ -62,10 +64,7 @@ struct MFTOCEntry
 
 struct MFMount
 {
-	MFFileSystemHandle fileSystem;
-	uint32 mountFlags;
-	const char *pMountpoint;
-	int priority;
+	MFVolumeInfo volumeInfo;
 
 	MFMount *pPrev;
 	MFMount *pNext;
@@ -76,6 +75,11 @@ struct MFMount
 	void *pFilesysData;
 };
 
+struct MFFind
+{
+	MFMount *pMount;
+	void *pFilesystemData;
+};
 
 /////////////////////////////////////
 // implementing a custom filesystem
@@ -96,6 +100,10 @@ struct MFFileSystemCallbacks
 	int (*Write)(MFFile*, const void*, uint32, bool);
 	int (*Seek)(MFFile*, int, MFFileSeek);
 	int (*Tell)(MFFile*);
+
+	bool (*FindFirst)(MFFind*, const char*, MFFindData*);
+	bool (*FindNext)(MFFind*, MFFindData*);
+	void (*FindClose)(MFFind*);
 
 	MFFileState (*Query)(MFFile*);
 	int (*GetSize)(MFFile*);

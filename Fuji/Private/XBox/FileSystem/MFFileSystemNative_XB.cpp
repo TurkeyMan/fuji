@@ -328,7 +328,7 @@ bool MFFileNative_Exists(const char* pFilename)
 	bool exists = false;
 
 	char *pXFilename = FixXBoxFilename(pFilename);
-	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE hFile = CreateFile(pXFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
@@ -337,4 +337,51 @@ bool MFFileNative_Exists(const char* pFilename)
 	}
 
 	return exists;
+}
+
+
+bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
+{
+	WIN32_FIND_DATA fd;
+
+	HANDLE hFind = FindFirstFile(MFStr("%s%s", (char*)pFind->pMount->pFilesysData, pSearchPattern), &fd);
+
+	if(hFind == INVALID_HANDLE_VALUE)
+		return false;
+
+	pFindData->isDirectory = !!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
+	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
+
+	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	if(pLast)
+		pLast[1] = 0;
+	else
+		pFindData->pSystemPath[0] = NULL;
+
+	pFind->pFilesystemData = (void*)hFind;
+
+	return true;
+}
+
+bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
+{
+	WIN32_FIND_DATA fd;
+
+	BOOL more = FindNextFile((HANDLE)pFind->pFilesystemData, &fd);
+
+	if(!more)
+		return false;
+
+	pFindData->isDirectory = !!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
+	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
+
+	return true;
+}
+
+void MFFileNative_FindClose(MFFind *pFind)
+{
+	FindClose((HANDLE)pFind->pFilesystemData);
 }

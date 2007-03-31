@@ -66,7 +66,7 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 	if(!pTemplate)
 	{
-		MFFileHandle hFile = MFFileSystem_Open(MFStr("%s.anm", pFilename), MFOF_Read|MFOF_Binary);
+		MFFile *hFile = MFFileSystem_Open(MFStr("%s.anm", pFilename), MFOF_Read|MFOF_Binary);
 
 		if(hFile)
 		{

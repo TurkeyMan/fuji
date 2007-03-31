@@ -15,6 +15,8 @@ MFMount *pMountListEnd = NULL;
 MFPtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
 MFFileSystemCallbacks **ppFileSystemList;
 
+MFPtrListDL<MFFind> gFinds;
+
 // internal filesystems
 MFFileSystemHandle hNativeFileSystem = -1;
 MFFileSystemHandle hMemoryFileSystem = -1;
@@ -22,8 +24,8 @@ MFFileSystemHandle hZipFileSystem = -1;
 MFFileSystemHandle hHTTPFileSystem = -1;
 MFFileSystemHandle hFTPFileSystem = -1;
 
-MFFileHandle hDataArchive = NULL;
-MFFileHandle hPatchArchive = NULL;
+MFFile *hDataArchive = NULL;
+MFFile *hPatchArchive = NULL;
 
 
 /**** Functions ****/
@@ -73,7 +75,7 @@ void MFFileSystem_RegisterDefaultArchives()
 		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		zipMountData.priority = MFMP_Normal;
 		zipMountData.pMountpoint = "data";
-		zipMountData.zipArchiveHandle = hDataArchive;
+		zipMountData.pZipArchive = hDataArchive;
 		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
 	}
 	else
@@ -106,7 +108,7 @@ void MFFileSystem_RegisterDefaultArchives()
 		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
 		zipMountData.priority = MFMP_VeryHigh;
 		zipMountData.pMountpoint = "patch";
-		zipMountData.zipArchiveHandle = hPatchArchive;
+		zipMountData.pZipArchive = hPatchArchive;
 		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
 	}
 
@@ -129,6 +131,8 @@ void MFFileSystem_InitModule()
 	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
 	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
 	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+
+	gFinds.Init("File System Find Instances", 10);//gDefaults.filesys.maxFinds);
 
 	// mount filesystems
 	MFFileSystemNative_InitModule();
@@ -158,6 +162,7 @@ void MFFileSystem_DeinitModule()
 
 	pFileSystemCallbacks.Deinit();
 	gOpenFiles.Deinit();
+	gFinds.Deinit();
 }
 
 MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks)
@@ -166,8 +171,6 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 	{
 		if(ppFileSystemList[a] == NULL)
 		{
-			MFDebug_Assert(pCallbacks->RegisterFS, "No RegisterFS function supplied.");
-			MFDebug_Assert(pCallbacks->UnregisterFS, "No UnregisterFS function supplied.");
 			MFDebug_Assert(pCallbacks->FSMount, "No FSMount function supplied.");
 			MFDebug_Assert(pCallbacks->FSDismount, "No FSDismount function supplied.");
 			MFDebug_Assert(pCallbacks->FSOpen, "No FSOpen function supplied.");
@@ -183,7 +186,8 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 			ppFileSystemList[a] = pFileSystemCallbacks.Create();
 			MFCopyMemory(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
 
-			ppFileSystemList[a]->RegisterFS();
+			if(ppFileSystemList[a]->RegisterFS)
+				ppFileSystemList[a]->RegisterFS();
 
 			return a;
 		}
@@ -196,10 +200,15 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 
 void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 {
-	MFDebug_Assert(ppFileSystemList[filesystemHandle], "Filesystem not mounted");
+	MFDebug_Assert((uint32)filesystemHandle < gDefaults.filesys.maxFileSystems, "Invalid filesystem");
 
-	ppFileSystemList[filesystemHandle]->UnregisterFS();
-	pFileSystemCallbacks.Destroy(ppFileSystemList[filesystemHandle]);
+	MFFileSystemCallbacks *pFS = ppFileSystemList[filesystemHandle];
+	MFDebug_Assert(pFS, "Filesystem not mounted");
+
+	if(pFS->UnregisterFS)
+		pFS->UnregisterFS();
+
+	pFileSystemCallbacks.Destroy(pFS);
 	ppFileSystemList[filesystemHandle] = NULL;
 }
 
@@ -254,9 +263,7 @@ int MFFile_Close(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	int fileID = fileHandle->filesystem;
-
-	ppFileSystemList[fileID]->Close(fileHandle);
+	ppFileSystemList[fileHandle->filesystem]->Close(fileHandle);
 	gOpenFiles.Destroy(fileHandle);
 
 	return 0;
@@ -309,29 +316,29 @@ int MFFile_GetSize(MFFile* fileHandle)
 }
 
 // stdio signiture functions (these can be used as a callback to many libs and API's)
-uint32 MFFile_StdRead(void *pBuffer, uint32 size, uint32 count, void* fileHandle)
+size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (uint32)MFFile_Read((MFFileHandle)fileHandle, pBuffer, size*count, false);
+	return (uint32)MFFile_Read((MFFile*)fileHandle, pBuffer, size*count, false);
 }
 
-uint32 MFFile_StdWrite(void *pBuffer, uint32 size, uint32 count, void* fileHandle)
+size_t MFFile_StdWrite(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (uint32)MFFile_Write((MFFileHandle)fileHandle, pBuffer, size*count, false);
+	return (uint32)MFFile_Write((MFFile*)fileHandle, pBuffer, size*count, false);
 }
 int MFFile_StdClose(void* fileHandle)
 {
-	return MFFile_Close((MFFileHandle)fileHandle);
+	return MFFile_Close((MFFile*)fileHandle);
 }
 
-int MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
+long MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
 {
-	int seek = MFFile_Seek((MFFileHandle)fileHandle, (int)bytes, (MFFileSeek)relativity);
+	long seek = (long)MFFile_Seek((MFFile*)fileHandle, (int)bytes, (MFFileSeek)relativity);
 	return seek < 0 ? seek : 0;
 }
 
 long MFFile_StdTell(void* fileHandle)
 {
-	return (long)MFFile_Tell((MFFileHandle)fileHandle);
+	return (long)MFFile_Tell((MFFile*)fileHandle);
 }
 
 //////////////////////////////
@@ -375,6 +382,142 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 	}
 }
 
+
+int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
+{
+	MFFindData findData;
+	MFFind *hFind;
+
+	int numFiles = 0;
+
+	hFind = MFFileSystem_FindFirst(MFStr("%s*", pFindPattern), &findData);
+
+	if(hFind)
+	{
+		*pStringLengths += MFString_Length(pFindPattern) + 1;
+	}
+
+	while(hFind)
+	{
+		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
+		{
+			if(findData.isDirectory)
+			{
+				if(recursive)
+				{
+					if(flatten)
+					{
+						numFiles += MFFileSystemNative_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.pFilename), recursive, flatten, pStringLengths);
+					}
+					else
+					{
+						*pStringLengths += MFString_Length(findData.pFilename) + 1;
+						++numFiles;
+					}
+				}
+			}
+			else
+			{
+				*pStringLengths += MFString_Length(findData.pFilename) + 1;
+				++numFiles;
+			}
+		}
+
+		if(!MFFileSystem_FindNext(hFind, &findData))
+		{
+			MFFileSystem_FindClose(hFind);
+			hFind = NULL;
+		}
+	}
+
+	return numFiles;
+}
+
+MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
+{
+	MFFindData findData;
+	MFFind *hFind;
+
+	hFind = MFFileSystem_FindFirst(MFStr("%s*", pFindPattern), &findData);
+
+	char *pCurrentDir = pStringCache;
+
+	if(hFind)
+	{
+		MFString_Copy(pCurrentDir, findData.pSystemPath);
+		pStringCache += MFString_Length(pCurrentDir) + 1;
+	}
+
+	while(hFind)
+	{
+		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
+		{
+			if(findData.isDirectory)
+			{
+				if(recursive)
+				{
+					if(flatten)
+					{
+						pToc = MFFileSystemNative_BuildToc(MFStr("%s%s/", pFindPattern, findData.pFilename), pToc, pParent, pStringCache, recursive, flatten);
+					}
+					else
+					{
+						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.pFilename);
+
+						int stringCacheSize = 0;
+						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
+
+						if(pToc->size)
+						{
+							MFString_Copy(pStringCache, findData.pFilename);
+							pToc->pName = pStringCache;
+							pStringCache += MFString_Length(pStringCache)+1;
+
+							pToc->flags = MFTF_Directory;
+							pToc->pFilesysData = pCurrentDir;
+							pToc->pParent = pParent;
+							pToc->size = 0;
+
+							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
+							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
+
+							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
+							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
+
+							++pToc;
+						}
+					}
+				}
+			}
+			else
+			{
+				MFString_Copy(pStringCache, findData.pFilename);
+				pToc->pName = pStringCache;
+				pStringCache += MFString_Length(pStringCache)+1;
+
+				pToc->pFilesysData = pCurrentDir;
+
+				pToc->pParent = pParent;
+				pToc->pChild = NULL;
+
+				MFDebug_Assert(findData.fileSize < 0x100000000, "Files larger than 4gb not yet supported...");
+				pToc->size = (uint32)findData.fileSize;
+				pToc->flags = 0;
+
+				++pToc;
+			}
+		}
+
+		if(!MFFileSystem_FindNext(hFind, &findData))
+		{
+			MFFileSystem_FindClose(hFind);
+			hFind = NULL;
+		}
+	}
+
+	return pToc;
+}
+
 // mount a filesystem
 int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 {
@@ -384,12 +527,13 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
 	MFZeroMemory(pMount, sizeof(MFMount));
 
-	pMount->mountFlags = pMountData->flags;
-	pMount->fileSystem = fileSystem;
-	pMount->priority = pMountData->priority;
-	pMount->pMountpoint = (const char*)&pMount[1];
+	pMount->volumeInfo.flags = pMountData->flags;
+	pMount->volumeInfo.fileSystem = fileSystem;
+	pMount->volumeInfo.priority = pMountData->priority;
+	pMount->volumeInfo.pVolumeName = (const char*)&pMount[1];
 	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
 
+	// call the mount callback
 	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
 
 	if(result < 0)
@@ -408,7 +552,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	{
 		MFMount *pT = pMountList;
 
-		while(pT && pT->priority < pMount->priority)
+		while(pT && pT->volumeInfo.priority < pMount->volumeInfo.priority)
 			pT = pT->pNext;
 
 		if(pT)
@@ -431,6 +575,44 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 		}
 	}
 
+	// build toc
+	if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
+	{
+		MFDebug_Assert(ppFileSystemList[fileSystem]->FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
+
+		MFFindData findData;
+		MFFind *hFind;
+
+		bool flatten = (pMount->volumeInfo.flags & MFMF_FlattenDirectoryStructure) != 0;
+		bool recursive = (pMount->volumeInfo.flags & MFMF_Recursive) != 0;
+
+		const char *pFindPath = MFStr("%s:", pMount->volumeInfo.pVolumeName);
+
+		// this is a crude way to check if the directory exists..
+		// TODO: improve this!!
+		hFind = MFFileSystem_FindFirst(MFStr("%s*", pFindPath), &findData);
+
+		if(!hFind)
+		{
+			MFDebug_Warn(1, "FileSystem: Couldnt Mount Native FileSystem.");
+			return -1;
+		}
+
+		MFFileSystem_FindClose(hFind);
+
+		// build the TOC
+		int stringCacheSize = 0;
+		pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPath, recursive, flatten, &stringCacheSize);
+
+		int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
+		MFTOCEntry *pTOC = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
+
+		char *pStringCache = (char*)pTOC + sizeOfToc;
+		MFFileSystemNative_BuildToc(pFindPath, pTOC, NULL, pStringCache, recursive, flatten);
+
+		pMount->pEntries = pTOC;
+	}
+
 	return 0;
 }
 
@@ -440,13 +622,13 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 
 	MFMount *pT = pMountList;
 
-	while(pT && MFString_CaseCmp(pMountpoint, pT->pMountpoint))
+	while(pT && MFString_CaseCmp(pMountpoint, pT->volumeInfo.pVolumeName))
 		pT = pT->pNext;
 
 	if(pT)
 	{
 		// dismount
-		ppFileSystemList[pT->fileSystem]->FSDismount(pT);
+		ppFileSystemList[pT->volumeInfo.fileSystem]->FSDismount(pT);
 
 		// remove mount
 		if(pMountList == pT)
@@ -549,7 +731,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		if(pFilename[a] == '.')
 		{
 			// if we have found a dot, this cant be a mountpoint
-			// (mountpoints may only be alphanumeric)			
+			// (mountpoints may only be alphanumeric)
 			break;
 		}
 	}
@@ -557,12 +739,12 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 	// search for file through the mount list...
 	while(pMount)
 	{
-		int onlyexclusive = pMount->mountFlags & MFMF_OnlyAllowExclusiveAccess;
+		int onlyexclusive = pMount->volumeInfo.flags & MFMF_OnlyAllowExclusiveAccess;
 
-		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !MFString_CaseCmp(pMountpoint, pMount->pMountpoint)))
+		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName)))
 		{
 			// open the file from a mount
-			MFFileHandle hFile = ppFileSystemList[pMount->fileSystem]->FSOpen(pMount, pFilename, openFlags);
+			MFFile *hFile = ppFileSystemList[pMount->volumeInfo.fileSystem]->FSOpen(pMount, pFilename, openFlags);
 
 			if(hFile)
 				return hFile;
@@ -581,7 +763,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 	char *pBuffer = NULL;
 
-	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
 
 	if(hFile)
 	{
@@ -619,7 +801,7 @@ int MFFileSystem_GetSize(const char *pFilename)
 
 	int size = 0;
 
-	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
 
 	if(hFile)
 	{
@@ -637,7 +819,7 @@ bool MFFileSystem_Exists(const char *pFilename)
 
 	bool exists = false;
 
-	MFFileHandle hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
 
 	if(hFile)
 	{
@@ -646,4 +828,98 @@ bool MFFileSystem_Exists(const char *pFilename)
 	}
 
 	return exists;
+}
+
+int MFFileSystem_GetNumVolumes()
+{
+	int numVolumes = 0;
+
+	MFMount *pMount = pMountList;
+
+	while(pMount)
+	{
+		++numVolumes;
+		pMount = pMount->pNext;
+	}
+
+	return numVolumes;
+}
+
+void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
+{
+	MFMount *pMount = pMountList;
+
+	while(pMount && volumeID)
+	{
+		--volumeID;
+		pMount = pMount->pNext;
+	}
+
+	MFDebug_Assert(pMount, "Invalid volume ID");
+
+	*pVolumeInfo = pMount->volumeInfo;
+}
+
+MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData)
+{
+	MFMount *pMount = pMountList;
+	const char *pMountpoint = NULL;
+
+	// search for a mountpoint
+	int len = MFString_Length(pSearchPattern);
+	for(int a=0; a<len; a++)
+	{
+		if(pSearchPattern[a] == ':')
+		{
+			pMountpoint = MFStrN(pSearchPattern, a);
+			pSearchPattern += a+1;
+			break;
+		}
+
+		if(pSearchPattern[a] == '.')
+		{
+			// if we have found a dot, this cant be a mountpoint
+			// (mountpoints may only be alphanumeric)
+			break;
+		}
+	}
+
+	MFDebug_Assert(pMountpoint, "A volume name must be specified in the search pattern.");
+
+	// search for file through the mount list...
+	while(pMount)
+	{
+		if(!MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName))
+		{
+			MFFind *pFind = gFinds.Create();
+
+			pFind->pMount = pMount;
+			pFind->pFilesystemData = NULL;
+
+			if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->FindFirst(pFind, pSearchPattern, pFindData))
+			{
+				gFinds.Destroy(pFind);
+				return NULL;
+			}
+			else
+				return pFind;
+		}
+
+		pMount = pMount->pNext;
+	}
+
+	MFDebug_Warn(2, MFStr("MFFileSystem_FindFirst: Volume '%s' in not mounted.", pMountpoint));
+
+	return NULL;
+}
+
+bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
+{
+	return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindNext(pFind, pFindData);
+}
+
+void MFFileSystem_FindClose(MFFind *pFind)
+{
+	ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindClose(pFind);
+	gFinds.Destroy(pFind);
 }

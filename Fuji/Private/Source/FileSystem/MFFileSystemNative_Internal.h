@@ -22,6 +22,9 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool asyn
 int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async);
 int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
 int MFFileNative_Tell(MFFile* fileHandle);
+bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData);
+bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData);
+void MFFileNative_FindClose(MFFind *pFind);
 
 MFFileState MFFileNative_Query(MFFile* fileHandle);
 int MFFileNative_GetSize(MFFile* fileHandle);

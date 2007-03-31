@@ -14,8 +14,8 @@
  */
 struct MFOpenDataZipFile : public MFOpenData
 {
-	MFFileHandle zipArchiveHandle;	/**< The MFFile handle to an open zip file. This handle can exist in any other filesystem that supports seeking. */
-	const char *pFilename;			/**< Filename of the file within the zip file to open. */
+	MFFile *pZipArchive;	/**< The MFFile handle to an open zip file. This handle can exist in any other filesystem that supports seeking. */
+	const char *pFilename;		/**< Filename of the file within the zip file to open. */
 };
 
 /**
@@ -24,7 +24,7 @@ struct MFOpenDataZipFile : public MFOpenData
  */
 struct MFMountDataZipFile : public MFMountData
 {
-	MFFileHandle zipArchiveHandle;	/**< The MFFile handle to an open zip file. This handle can exist in any other filesystem that supports seeking. */
+	MFFile *pZipArchive;	/**< The MFFile handle to an open zip file. This handle can exist in any other filesystem that supports seeking. */
 };
 
 /**

@@ -12,8 +12,8 @@ void MFFileSystemMemory_InitModule()
 
 	MFFileSystemCallbacks fsCallbacks;
 
-	fsCallbacks.RegisterFS = MFFileSystemMemory_Register;
-	fsCallbacks.UnregisterFS = MFFileSystemMemory_Unregister;
+	fsCallbacks.RegisterFS = NULL;
+	fsCallbacks.UnregisterFS = NULL;
 	fsCallbacks.FSMount = MFFileSystemMemory_Mount;
 	fsCallbacks.FSDismount = MFFileSystemMemory_Dismount;
 	fsCallbacks.FSOpen = MFFileSystemMemory_Open;
@@ -25,6 +25,9 @@ void MFFileSystemMemory_InitModule()
 	fsCallbacks.Tell = MFFileMemory_Tell;
 	fsCallbacks.Query = MFFileMemory_Query;
 	fsCallbacks.GetSize = MFFileMemory_GetSize;
+	fsCallbacks.FindFirst = NULL;
+	fsCallbacks.FindNext = NULL;
+	fsCallbacks.FindClose = NULL;
 
 	hMemoryFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
 }
@@ -37,16 +40,6 @@ void MFFileSystemMemory_DeinitModule()
 }
 
 // filesystem callbacks
-void MFFileSystemMemory_Register()
-{
-
-}
-
-void MFFileSystemMemory_Unregister()
-{
-
-}
-
 int MFFileSystemMemory_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 	// cant mount a memory filesystem

@@ -10,14 +10,13 @@
 #if !defined(_MFFILESYSTEM_H)
 #define _MFFILESYSTEM_H
 
-struct MFFile;
 struct MFMount;
 
 /**
- * Represents a Fuji File handle.
- * Represents a Fuji File handle.
+ * @struct MFFile
+ * Represents a Fuji file.
  */
-typedef MFFile* MFFileHandle;
+struct MFFile;
 
 /**
  * Represents a Fuji FileSystem.
@@ -107,9 +106,9 @@ struct MFOpenData
  * Opens a file.
  * @param fileSystem Filesystem which provides the file.
  * @param pOpenData Pointer to an MFOpenData structure describing the file to open.
- * @return Returns an MFFileHandle to the newly opened file, returns NULL if the file open failed.
+ * @return Returns a pointer to the newly opened file, returns NULL if the file open failed.
  */
-MFFileHandle MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
+MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
 
 /**
  * Close a file.
@@ -117,7 +116,7 @@ MFFileHandle MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
  * @param fileHandle Handle to an open file.
  * @return Returns 0 if the file was successfully closed.
  */
-int MFFile_Close(MFFileHandle fileHandle);
+int MFFile_Close(MFFile *pFile);
 
 /**
  * Read data from a file.
@@ -128,7 +127,7 @@ int MFFile_Close(MFFileHandle fileHandle);
  * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes read.
  */
-int MFFile_Read(MFFileHandle fileHandle, void *pBuffer, uint32 bytes, bool async = false);
+int MFFile_Read(MFFile *pFile, void *pBuffer, uint32 bytes, bool async = false);
 
 /**
  * Write to a file.
@@ -139,7 +138,7 @@ int MFFile_Read(MFFileHandle fileHandle, void *pBuffer, uint32 bytes, bool async
  * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes written.
  */
-int MFFile_Write(MFFileHandle fileHandle, const void *pBuffer, uint32 bytes, bool async = false);
+int MFFile_Write(MFFile *pFile, const void *pBuffer, uint32 bytes, bool async = false);
 
 /**
  * Seek the file.
@@ -149,7 +148,7 @@ int MFFile_Write(MFFileHandle fileHandle, const void *pBuffer, uint32 bytes, boo
  * @param relativity Member of the MFFileSeek enumerated type where to begin the seek.
  * @return Returns the new file offset in bytes.
  */
-int MFFile_Seek(MFFileHandle fileHandle, int bytes, MFFileSeek relativity);
+int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 
 /**
  * Tell the file position.
@@ -157,7 +156,7 @@ int MFFile_Seek(MFFileHandle fileHandle, int bytes, MFFileSeek relativity);
  * @param fileHandle Handle to an open file.
  * @return Returns the file pointer offset in bytes.
  */
-int MFFile_Tell(MFFileHandle fileHandle);
+int MFFile_Tell(MFFile *pFile);
 
 /**
  * Get the state of a file.
@@ -165,7 +164,7 @@ int MFFile_Tell(MFFileHandle fileHandle);
  * @param fileHandle Handle to an open file.
  * @return Returns the current file activity state.
  */
-MFFileState MFFile_Query(MFFileHandle fileHandle);
+MFFileState MFFile_Query(MFFile *pFile);
 
 /**
  * Get the size of a file.
@@ -173,7 +172,7 @@ MFFileState MFFile_Query(MFFileHandle fileHandle);
  * @param fileHandle Handle to an open file.
  * @return Returns the size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
  */
-int MFFile_GetSize(MFFileHandle fileHandle);
+int MFFile_GetSize(MFFile *pFile);
 
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
@@ -197,7 +196,7 @@ int MFFile_StdClose(void* stream);
  * @return Returns the number of bytes read.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-uint32 MFFile_StdRead(void *buffer, uint32 size, uint32 count, void* stream);
+size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* stream);
 
 /**
  * Write to a file.
@@ -209,7 +208,7 @@ uint32 MFFile_StdRead(void *buffer, uint32 size, uint32 count, void* stream);
  * @return Returns the number of bytes written.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-uint32 MFFile_StdWrite(void *buffer, uint32 size, uint32 count, void* stream);
+size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count, void* stream);
 
 /**
  * Seek the file.
@@ -220,7 +219,7 @@ uint32 MFFile_StdWrite(void *buffer, uint32 size, uint32 count, void* stream);
  * @return Returns the new file offset in bytes.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-int MFFile_StdSeek(void* stream, long offset, int whence);
+long MFFile_StdSeek(void* stream, long offset, int whence);
 
 /**
  * Tell the file position.
@@ -234,6 +233,12 @@ long MFFile_StdTell(void* stream);
 
 //////////////////////////////
 // mounted filesystem access
+
+/**
+ * @struct MFFind
+ * Represents a Fuji find handle.
+ */
+struct MFFind;
 
 /**
  * Mount flags.
@@ -294,6 +299,30 @@ enum MFFileSystemHandles
 };
 
 /**
+ * FileSystem find data.
+ * Structure used to return information about a file in the filesystem.
+ */
+struct MFFindData
+{
+	char pFilename[256];	/**< The files filename */
+	char pSystemPath[256];	/**< The system path to the file */
+	uint64 fileSize;		/**< The files size */
+	bool isDirectory;		/**< Is the file a directory */
+};
+
+/**
+ * FileSystem volume info.
+ * MFFileSystem volume information.
+ */
+struct MFVolumeInfo
+{
+	const char *pVolumeName;		/**< The name of the volume */
+	MFFileSystemHandle fileSystem;	/**< The filesystem handle the volume is mounted on */
+	uint32 flags;					/**< Volume flags */
+	int priority;					/**< Mount priority */
+};
+
+/**
  * Get a handle to a specific filesystem.
  * Gets a handle to a specific filesystem.
  * @param fileSystemHandle Enum of the filesystem to retrieve.
@@ -323,9 +352,9 @@ int MFFileSystem_Dismount(const char *pMountpoint);
  * Open a file from the mounted filesystem stack.
  * @param pFilename The name of the file to open.
  * @param openFlags Open file flags.
- * @return Returns a handle to the opened file. Returns NULL if open failed.
+ * @return Returns a pointer to the opened file. Returns NULL if open failed.
  */
-MFFileHandle MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
+MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
 
 /**
  * Load a file from the filesystem.
@@ -361,6 +390,52 @@ int MFFileSystem_GetSize(const char *pFilename);
  * @return Returns true if the file can be found within the mounted filesystem stack.
  */
 bool MFFileSystem_Exists(const char *pFilename);
+
+/**
+ * Get number of available volumes.
+ * Gets the number of available volumes.
+ * @return The number of mounted volumes.
+ */
+int MFFileSystem_GetNumVolumes();
+
+/**
+ * Get volume mount details.
+ * Gets the details of a mounted volume.
+ * @param volumeID Target volume ID.
+ * @param pVolumeInfo Pointer to an MFVolumeInfo structre that receives the volumes mount details.
+ * @return None.
+ */
+void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
+
+/**
+ * Begin a find for files.
+ * Finds the first file matching a specified search pattern.
+ * @param pSearchPattern The search pattern. The search pattern MUST be a full justified fuji path begining with a volume, and ending with a filename pattern to match.
+ * @param pFindData Pointer to an MFFindData structure which receives details about the file.
+ * @return An MFFind handle that is passed to subsequent calls to MFFileSystem_FindNext and MFFileSystem_FindClose.
+ * @remarks Currently the only valid filename pattern is '*'. For example: "data:subdir/*" is a valid search pattern.
+ * @see MFFileSystem_FindNext(), MFFileSystem_FindClose()
+ */
+MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData);
+
+/**
+ * Find the next file.
+ * Finds the next file in the directory matching the search pattern specified in MFFileSystem_FindFirst().
+ * @param pFind MFFind handle returned from a previous call to MFFileSystem_FindFirst().
+ * @param pFindData Pointer to an MFFindData structure which receives details about the file.
+ * @return Returns true on success or false if there are no more files in the directory.
+ * @see MFFileSystem_FindFirst(), MFFileSystem_FindClose()
+ */
+bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);
+
+/**
+ * Close an open find.
+ * Closes an open find file process.
+ * @param pFind MFFind handle returned from a previous call to MFFileSystem_FindFirst().
+ * @return None.
+ * @see MFFileSystem_FindFirst()
+ */
+void MFFileSystem_FindClose(MFFind *pFind);
 
 
 /////////////////////////////////////

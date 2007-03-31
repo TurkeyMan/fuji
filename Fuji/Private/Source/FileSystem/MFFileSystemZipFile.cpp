@@ -3,14 +3,19 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemZipFile_Internal.h"
 
+#include <zlib/zlib.h>
+#include <zlib/minizip/zip.h>
+#include <zlib/minizip/unzip.h>
+#include <zlib/minizip/ioapi.h>
+
 void MFFileSystemZipFile_InitModule()
 {
 	MFCALLSTACK;
 
 	MFFileSystemCallbacks fsCallbacks;
 
-	fsCallbacks.RegisterFS = MFFileSystemZipFile_Register;
-	fsCallbacks.UnregisterFS = MFFileSystemZipFile_Unregister;
+	fsCallbacks.RegisterFS = NULL;
+	fsCallbacks.UnregisterFS = NULL;
 	fsCallbacks.FSMount = MFFileSystemZipFile_Mount;
 	fsCallbacks.FSDismount = MFFileSystemZipFile_Dismount;
 	fsCallbacks.FSOpen = MFFileSystemZipFile_Open;
@@ -22,6 +27,9 @@ void MFFileSystemZipFile_InitModule()
 	fsCallbacks.Tell = MFFileZipFile_Tell;
 	fsCallbacks.Query = MFFileZipFile_Query;
 	fsCallbacks.GetSize = MFFileZipFile_GetSize;
+	fsCallbacks.FindFirst = MFFileZipFile_FindFirst;
+	fsCallbacks.FindNext = MFFileZipFile_FindNext;
+	fsCallbacks.FindClose = MFFileZipFile_FindClose;
 
 	hZipFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
 }
@@ -34,26 +42,6 @@ void MFFileSystemZipFile_DeinitModule()
 }
 
 // filesystem callbacks
-void MFFileSystemZipFile_Register()
-{
-
-}
-
-void MFFileSystemZipFile_Unregister()
-{
-
-}
-
-//#define _USE_ZZLIB
-
-#if !defined(_USE_ZZLIB)
-
-#include <zlib/zlib.h>
-#include <zlib/minizip/zip.h>
-#include <zlib/minizip/unzip.h>
-#include <zlib/minizip/ioapi.h>
-
-// zlib callbacks
 voidpf zopen_file_func(voidpf opaque, const char* filename, int mode)
 {
 	return opaque; 
@@ -61,22 +49,22 @@ voidpf zopen_file_func(voidpf opaque, const char* filename, int mode)
 
 uLong zread_file_func(voidpf opaque, voidpf stream, void* buf, uLong size)
 {
-	return MFFile_Read((MFFileHandle)stream, buf, size, false);
+	return MFFile_Read((MFFile*)stream, buf, size, false);
 }
 
 uLong zwrite_file_func(voidpf opaque, voidpf stream, const void* buf, uLong size)
 {
-	return MFFile_Write((MFFileHandle)stream, buf, size, false);
+	return MFFile_Write((MFFile*)stream, buf, size, false);
 }
 
 long ztell_file_func(voidpf opaque, voidpf stream)
 {
-	return MFFile_Tell((MFFileHandle)stream);
+	return MFFile_Tell((MFFile*)stream);
 }
 
 long zseek_file_func(voidpf opaque, voidpf stream, uLong offset, int origin)
 {
-	return MFFile_StdSeek((MFFileHandle)stream, offset, (MFFileSeek)origin);
+	return MFFile_StdSeek((MFFile*)stream, offset, (MFFileSeek)origin);
 }
 
 int zclose_file_func(voidpf opaque, voidpf stream)
@@ -89,110 +77,6 @@ int ztesterror_file_func(voidpf opaque, voidpf stream)
 	return 0;
 }
 
-
-int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flatten, int *pStringLengths)
-{
-	MFCALLSTACK;
-
-	// count files and calculate string cache length
-	int numFiles = 0;
-
-	int zipFileIndex = unzGoToFirstFile(zipFile);
-
-	// search through files in zip archive
-	while(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
-	{
-		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
-
-		char fileName[256];
-
-		unz_file_info fileInfo;
-		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
-
-		int nameLen = MFString_Length(fileName);
-
-		bool isDirectory = fileName[nameLen-1] == '/';
-
-		if(isDirectory)
-		{
-			// register directory for individual files to reference
-		}
-		else
-		{
-			*pStringLengths += nameLen + 1;
-			++numFiles;
-		}
-
-		zipFileIndex = unzGoToNextFile(zipFile);
-	}
-
-	return numFiles;
-}
-
-MFTOCEntry* MFFileSystemZipFile_BuildToc(unzFile zipFile, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
-{
-	MFCALLSTACK;
-
-	int zipFileIndex = unzGoToFirstFile(zipFile);
-
-	// search through files in zip archive
-	while(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
-	{
-		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
-
-		char fileName[256];
-
-		unz_file_info fileInfo;
-		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
-
-		int fileLen = MFString_Length(fileName);
-		bool isDirectory = fileName[fileLen-1] == '/';
-
-		if(isDirectory)
-		{
-			// register directory for individual files to reference
-		}
-		else
-		{
-			int a;
-
-			MFString_Copy(pStringCache, fileName);
-			pToc->pFilesysData = pStringCache;
-
-			for(a=fileLen; --a;)
-			{
-				if(pStringCache[a] == '/')
-					break;
-			}
-
-			if(a == 0)
-			{
-				pToc->pName = pStringCache;
-				pToc->pFilesysData = NULL;
-			}
-			else
-			{
-				pStringCache[a] = 0;
-				pToc->pName = &pStringCache[a+1];
-			}
-
-			pStringCache += fileLen+1;
-
-			pToc->pParent = NULL;
-			pToc->pChild = NULL;
-
-			pToc->flags = 0;
-			pToc->size = fileInfo.uncompressed_size;
-
-			++pToc;
-		}
-
-		zipFileIndex = unzGoToNextFile(zipFile);
-	}
-
-	return pToc;
-}
-
 int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 {
 	MFCALLSTACK;
@@ -201,15 +85,13 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
 
-	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
-	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
+	bool flatten = (pMount->volumeInfo.flags & MFMF_FlattenDirectoryStructure) != 0;
+	bool recursive = (pMount->volumeInfo.flags & MFMF_Recursive) != 0;
 
 	MFDebug_Assert(flatten, ".zip file currently only supports a flattened directory structure.");
 
 	if(!recursive)
-	{
-		MFDebug_Warn(3, "Zip filesystem mounted WITHOUT 'Recursive' flag. Zip file will be mounted recursive anyway.");
-	}
+		MFDebug_Warn(3, "Mounting Zip filesystems without the 'Recursive' flag is invalid. Zip file will be mounted recursive anyway.");
 
 	// attempt to open zipfile..
 	zlib_filefunc_def zipIOFunctions;
@@ -221,7 +103,7 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
     zipIOFunctions.zseek_file = zseek_file_func;
     zipIOFunctions.zclose_file = zclose_file_func;
     zipIOFunctions.zerror_file = ztesterror_file_func;
-    zipIOFunctions.opaque = pMountZipFile->zipArchiveHandle;
+    zipIOFunctions.opaque = pMountZipFile->pZipArchive;
 
 	unzFile zipFile = unzOpen2(NULL, &zipIOFunctions);
 
@@ -233,14 +115,12 @@ int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	pMount->pFilesysData = zipFile;
 
-	int stringCacheSize = 0;
-	pMount->numFiles = MFFileSystemZipFile_GetNumEntries(zipFile, recursive, flatten, &stringCacheSize);
-
-	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
-
-	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
-	MFFileSystemZipFile_BuildToc(zipFile, pMount->pEntries, NULL, pStringCache, recursive, flatten);
+	// make sure the toc is being cached...
+	if(pMount->volumeInfo.flags & MFMF_DontCacheTOC)
+	{
+		MFDebug_Warn(2, "Zip files MUST cache the toc");
+		pMount->volumeInfo.flags &= ~MFMF_DontCacheTOC;
+	}
 
 	return 0;
 }
@@ -260,7 +140,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 {
 	MFCALLSTACK;
 
-	MFFileHandle hFile = NULL;
+	MFFile *hFile = NULL;
 
 	// recurse toc
 	MFTOCEntry *pTOCEntry = MFFileSystem_GetTocEntry(pFilename, pMount->pEntries, pMount->numFiles);
@@ -271,8 +151,8 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 
 		openData.cbSize = sizeof(MFOpenDataZipFile);
 		openData.openFlags = openFlags | MFOF_Zip_AlreadyMounted;
-		openData.zipArchiveHandle = (MFFileHandle)pMount->pFilesysData;
-		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? MFStr("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
+		openData.pZipArchive = (MFFile*)pMount->pFilesysData;
+		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? (char*)pTOCEntry->pFilesysData : "", pTOCEntry->pName);
 
 		hFile = MFFile_Open(hZipFileSystem, &openData);
 	}
@@ -307,13 +187,13 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 		zipIOFunctions.zseek_file = zseek_file_func;
 		zipIOFunctions.zclose_file = zclose_file_func;
 		zipIOFunctions.zerror_file = ztesterror_file_func;
-		zipIOFunctions.opaque = pZipFile->zipArchiveHandle;
+		zipIOFunctions.opaque = pZipFile->pZipArchive;
 
 		zipFile = unzOpen2(NULL, &zipIOFunctions);
 	}
 	else
 	{
-		zipFile = (unzFile)pZipFile->zipArchiveHandle;
+		zipFile = (unzFile)pZipFile->pZipArchive;
 	}
 
 	if(!zipFile)
@@ -429,348 +309,6 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 	return (int)pFile->offset;
 }
 
-#else // !defined(_USE_ZZLIB)
-
-#include "zzip/zzip.h"
-#include "zzip/plugin.h"
-#include "zzip/file.h"
-
-// zlib callbacks
-int zopen_file_func(const char *pathname, int flags, ...)
-{
-	return (int&)pathname;
-}
-
-int zclose_file_func(int fd)
-{
-	return 0;
-}
-
-zzip_ssize_t zread_file_func(int fd, void* buf, zzip_size_t len)
-{
-	return MFFile_Read((MFFileHandle)fd, buf, (uint32)len, false);
-}
-
-zzip_ssize_t zwrite_file_func(int fd, _zzip_const void* buf, zzip_size_t len)
-{
-	return MFFile_Write((MFFileHandle)fd, buf, (uint32)len, false);
-}
-
-zzip_off_t zseek_file_func(int fd, zzip_off_t offset, int whence)
-{
-	return MFFile_StdSeek((MFFileHandle)fd, (long)offset, (MFFileSeek)whence);
-}
-
-zzip_off_t zsize_file_func(int fd)
-{
-	return MFFile_GetSize((MFFileHandle)fd);
-}
-
-
-//int MFFileSystemZipFile_GetNumEntries(unzFile zipFile, bool recursive, bool flatten, int *pStringLengths)
-int MFFileSystemZipFile_GetNumEntries(ZZIP_DIR *zipFile, bool recursive, bool flatten, int *pStringLengths)
-{
-	MFCALLSTACK;
-
-	// count files and calculate string cache length
-	int numFiles = 0;
-
-	ZZIP_DIRENT *pDirEnt;
-
-	// search through files in zip archive
-	while((pDirEnt = zzip_readdir(zipFile)) != NULL)
-	{
-		int nameLen = MFString_Length(pDirEnt->d_name);
-
-		bool isDirectory = pDirEnt->d_name[nameLen-1] == '/';
-
-		if(isDirectory)
-		{
-			// register directory for individual files to reference
-		}
-		else
-		{
-			*pStringLengths += nameLen + 1;
-			++numFiles;
-		}
-	}
-
-	zzip_rewinddir(zipFile);
-
-	return numFiles;
-}
-
-MFTOCEntry* MFFileSystemZipFile_BuildToc(ZZIP_DIR *zipFile, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
-{
-	MFCALLSTACK;
-
-	ZZIP_DIRENT *pDirEnt;
-
-	// search through files in zip archive
-	while((pDirEnt = zzip_readdir(zipFile)) != NULL)
-	{
-		int fileLen = MFString_Length(pDirEnt->d_name);
-		bool isDirectory = pDirEnt->d_name[fileLen-1] == '/';
-
-		if(isDirectory)
-		{
-			// register directory for individual files to reference
-		}
-		else
-		{
-			MFString_Copy(pStringCache, pDirEnt->d_name);
-			pToc->pFilesysData = pStringCache;
-
-			for(int a=fileLen; --a;)
-			{
-				if(pStringCache[a] == '/')
-					break;
-			}
-
-			if(a == 0)
-			{
-				pToc->pName = pStringCache;
-				pToc->pFilesysData = NULL;
-			}
-			else
-			{
-				pStringCache[a] = 0;
-				pToc->pName = &pStringCache[a+1];
-			}
-
-			pStringCache += fileLen+1;
-
-			pToc->pParent = NULL;
-			pToc->pChild = NULL;
-
-			pToc->flags = 0;
-			pToc->size = pDirEnt->st_size;
-
-			++pToc;
-		}
-	}
-
-	zzip_rewinddir(zipFile);
-
-	return pToc;
-}
-
-int MFFileSystemZipFile_Mount(MFMount *pMount, MFMountData *pMountData)
-{
-	MFCALLSTACK;
-
-	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataZipFile), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
-
-	MFMountDataZipFile *pMountZipFile = (MFMountDataZipFile*)pMountData;
-
-	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
-	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
-
-	MFDebug_Assert(flatten, ".zip file currently only supports a flattened directory structure.");
-
-	if(!recursive)
-	{
-		LOGD("Warning: Zip filesystem mounted WITHOUT 'Recursive' flag. Zip file will be mounted recursive anyway.");
-	}
-
-	// attempt to open zipfile..
-	static zzip_plugin_io zipFilesystem =
-	{
-		zopen_file_func,
-		zclose_file_func,
-		zread_file_func,
-		zseek_file_func,
-		zsize_file_func,
-		1,1,
-		zwrite_file_func
-	};
-
-	ZZIP_DIR* pDir = zzip_opendir_ext_io((zzip_char_t*)pMountZipFile->zipArchiveHandle, ZZIP_ONLYZIP|ZZIP_CASELESS|ZZIP_NOPATHS, 0, (zzip_plugin_io_t)&zipFilesystem);
-
-	if(!pDir)
-	{
-		LOGD("FileSystem: Supplied file handle is not a valid .zip file.");
-		return -1;
-	}
-
-	pMount->pFilesysData = pDir;
-
-	int stringCacheSize = 0;
-	pMount->numFiles = MFFileSystemZipFile_GetNumEntries(pDir, recursive, flatten, &stringCacheSize);
-
-	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
-
-	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
-	MFFileSystemZipFile_BuildToc(pDir, pMount->pEntries, NULL, pStringCache, recursive, flatten);
-
-	return 0;
-}
-
-int MFFileSystemZipFile_Dismount(MFMount *pMount)
-{
-	MFCALLSTACK;
-
-	MFFileSystem_ReleaseToc(pMount->pEntries, pMount->numFiles);
-
-	zzip_closedir((ZZIP_DIR*)pMount->pFilesysData);
-
-	return 0;
-}
-
-MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
-{
-	MFCALLSTACK;
-
-	MFFileHandle hFile = NULL;
-
-	// recurse toc
-	MFTOCEntry *pTOCEntry = MFFileSystem_GetTocEntry(pFilename, pMount->pEntries, pMount->numFiles);
-
-	if(pTOCEntry)
-	{
-		MFOpenDataZipFile openData;
-
-		openData.cbSize = sizeof(MFOpenDataZipFile);
-		openData.openFlags = openFlags | OFZip_AlreadyMounted;
-		openData.zipArchiveHandle = (MFFileHandle)pMount->pFilesysData;
-		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? MFStr("%s/", (char*)pTOCEntry->pFilesysData) : "", pTOCEntry->pName);
-
-		hFile = MFFile_Open(hZipFileSystem, &openData);
-	}
-
-	return hFile;
-}
-
-int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
-{
-	MFCALLSTACK;
-
-	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
-	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
-
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
-	pFile->createFlags = pOpenData->openFlags;
-	pFile->offset = 0;
-
-	bool alreadyMounted = (pOpenData->openFlags&OFZip_AlreadyMounted) != 0;
-
-	ZZIP_DIR *pDir;
-
-	if(!alreadyMounted)
-	{
-		static const zzip_plugin_io zipFilesystem =
-		{
-			zopen_file_func,
-			zclose_file_func,
-			zread_file_func,
-			zseek_file_func,
-			zsize_file_func,
-			1,1,
-			zwrite_file_func
-		};
-
-		pDir = zzip_opendir_ext_io((zzip_char_t*)pZipFile->zipArchiveHandle, 0, 0, (zzip_plugin_io_t)&zipFilesystem);
-	}
-	else
-	{
-		pDir = (ZZIP_DIR*)pZipFile->zipArchiveHandle;
-	}
-
-	if(!pDir)
-	{
-		LOGD("FileSystem: Supplied file handle is not a valid .zip file.");
-		return -1;
-	}
-
-	ZZIP_FILE *pOpenZipFile = zzip_file_open(pDir, pZipFile->pFilename, ZZIP_ONLYZIP|ZZIP_CASELESS|ZZIP_NOPATHS);
-	pFile->pFilesysData = pOpenZipFile;
-
-	// get length of deflated file..
-	ZZIP_STAT stat;
-	zzip_file_stat(pOpenZipFile, &stat);
-
-	pFile->length = stat.st_size;
-
-#if defined(_DEBUG)
-	MFString_Copy(pFile->fileIdentifier, pZipFile->pFilename);
-#endif
-
-	return 0;
-}
-
-int MFFileZipFile_Close(MFFile* pFile)
-{
-	MFCALLSTACK;
-
-	ZZIP_DIR *pDir = ((ZZIP_FILE*)pFile->pFilesysData)->dir;
-
-	zzip_fclose((ZZIP_FILE*)pFile->pFilesysData);
-
-	bool alreadyMounted = (pFile->createFlags&OFZip_AlreadyMounted) != 0;
-
-	if(!alreadyMounted)
-	{
-		// TODO: Close the zip file when its finished!!
-		zzip_closedir(pDir);
-	}
-
-	return 0;//unzClose((unzFile)pFile->pFilesysData);
-}
-
-int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
-{
-	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
-	uint32 bytesRead;
-	bytesRead = zzip_fread(pBuffer, 1, bytes, (ZZIP_FILE*)pFile->pFilesysData);
-	pFile->offset += bytesRead;
-
-	return bytesRead;
-}
-
-int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool async)
-{
-	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
-	// write
-
-	return 0;
-}
-
-int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
-{
-	MFCALLSTACK;
-
-	int newPos = 0;
-
-	switch(relativity)
-	{
-		case MFSeek_Begin:
-			newPos = Min(bytes, pFile->length);
-			break;
-		case MFSeek_End:
-			newPos = Max(0, pFile->length - bytes);
-			break;
-		case MFSeek_Current:
-			newPos = Clamp(0, (int)pFile->offset + bytes, pFile->length);
-			break;
-		default:
-			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
-	}
-
-	zzip_seek((ZZIP_FILE*)pFile->pFilesysData, newPos, SEEK_SET);
-	pFile->offset = (uint32)newPos;
-	return newPos;
-}
-
-#endif
-
 int MFFileZipFile_Tell(MFFile* pFile)
 {
 	MFCALLSTACK;
@@ -787,4 +325,43 @@ int MFFileZipFile_GetSize(MFFile* pFile)
 {
 	MFCALLSTACK;
 	return pFile->length;
+}
+
+bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
+{
+	unzFile zipFile = (unzFile)pFind->pMount->pFilesysData;
+
+	int err = unzGoToFirstFile(zipFile);
+
+	if(err != UNZ_OK)
+		return false;
+
+	unz_file_info fileInfo;
+	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
+	pFindData->isDirectory = false;
+	pFindData->fileSize = fileInfo.uncompressed_size;
+	pFindData->pSystemPath[0] = 0;
+
+	return true;
+}
+
+bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData)
+{
+	unzFile zipFile = (unzFile)pFind->pMount->pFilesysData;
+
+	int err = unzGoToNextFile(zipFile);
+
+	if(err != UNZ_OK)
+		return false;
+
+	unz_file_info fileInfo;
+	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
+	pFindData->isDirectory = false;
+	pFindData->fileSize = fileInfo.uncompressed_size;
+
+	return true;
+}
+
+void MFFileZipFile_FindClose(MFFind *pFind)
+{
 }

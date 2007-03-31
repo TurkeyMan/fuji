@@ -187,7 +187,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 	if(!pTemplate)
 	{
-		MFFileHandle hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
+		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 
 		if(hFile)
 		{

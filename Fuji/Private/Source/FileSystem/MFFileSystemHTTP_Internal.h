@@ -19,9 +19,6 @@ void MFFileSystemHTTP_InitModule();
 void MFFileSystemHTTP_DeinitModule();
 
 // filesystem callbacks
-void MFFileSystemHTTP_Register();
-void MFFileSystemHTTP_Unregister();
-
 int MFFileSystemHTTP_Mount(MFMount *pMount, MFMountData *pMountData);
 int MFFileSystemHTTP_Dismount(MFMount *pMount);
 
