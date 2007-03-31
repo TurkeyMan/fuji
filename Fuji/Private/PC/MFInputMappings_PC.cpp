@@ -779,6 +779,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[25]
 	},
 
+	{
+		"PS2 Gamepad",
+		"MP-8866 Dual USB Joypad",
+		0x0925, 0x8866,
+		gTitaniumButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[26]
+	},
+
 	// Logitech Cordless RumblePad 2
 	{
 		"RumblePad 2",
