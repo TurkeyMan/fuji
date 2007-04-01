@@ -35,6 +35,9 @@ void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem)
 void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMatrix &ltv)
 {
 	int numParticles = pParticleSystem->particles.GetLength();
+	if(!numParticles)
+		return;
+
 	float fadeStart = pParticleSystem->params.life - pParticleSystem->params.fadeDelay;
 
 	MFMaterial_SetMaterial(pParticleSystem->pMaterial);

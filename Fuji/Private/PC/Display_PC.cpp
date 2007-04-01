@@ -29,7 +29,7 @@ extern MFVector gClearColour;
 
 extern HINSTANCE apphInstance;
 HWND apphWnd;
-int wndX = 0, wndY = 0;
+int wndX = 24, wndY = 64;
 
 bool initialised = false;
 
