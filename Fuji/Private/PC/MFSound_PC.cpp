@@ -79,6 +79,11 @@ static MFAudioStream *gMusicTracks;
 MenuItemBool showSoundStats;
 #endif
 
+float MFSoundInternal_MakeLinear(float level)
+{
+	return MFPow(level, 0.15f);
+//	return 20*log10(level);
+}
 
 void MFSound_InitModule()
 {
@@ -466,7 +471,7 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume)
 {
 	MFCALLSTACK;
 
-	float vol = (float)(DSBVOLUME_MAX - DSBVOLUME_MIN) * volume;
+	float vol = (float)(DSBVOLUME_MAX - DSBVOLUME_MIN) * MFSoundInternal_MakeLinear(volume);
 	pVoice->pBuffer8->SetVolume((LONG)vol + DSBVOLUME_MIN);
 }
 
@@ -491,7 +496,8 @@ void MFSound_SetMasterVolume(float volume)
 {
 	MFCALLSTACK;
 
-//	pDSPrimaryBuffer->SetVolume();
+	float vol = (float)(DSBVOLUME_MAX - DSBVOLUME_MIN) * MFSoundInternal_MakeLinear(volume);
+	pDSPrimaryBuffer->SetVolume((LONG)vol + DSBVOLUME_MIN);
 }
 
 void MFSound_Draw()
@@ -691,7 +697,7 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	pStream->playBackOffset = 0;
 
 	desc.dwSize = sizeof(DSBUFFERDESC);
-	desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLPAN | DSBCAPS_CTRLFREQUENCY;
+	desc.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY | (wfx.nChannels == 2 ? DSBCAPS_CTRLPAN : 0);
 	desc.dwBufferBytes = pStream->bufferSize;
 	desc.lpwfxFormat = &wfx;
 	desc.dwReserved = 0; 
@@ -791,12 +797,30 @@ void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume)
 {
 	MFCALLSTACK;
 
-//	pStream->pDSMusicBuffer->SetVolume();
+	float vol = (float)(DSBVOLUME_MAX - DSBVOLUME_MIN) * MFSoundInternal_MakeLinear(volume);
+	pStream->pDSMusicBuffer->SetVolume((LONG)vol + DSBVOLUME_MIN);
 }
 
 void MFSound_SetStreamPlaybackRate(MFAudioStream *pStream, float rate)
 {
 	pStream->pDSMusicBuffer->SetFrequency((DWORD)((float)pStream->pInfo->rate * rate));
+}
+
+void MFSound_SetStreamPan(MFAudioStream *pStream, float pan)
+{
+	if(pStream->pInfo->channels == 2)
+	{
+		if(pan >= 0)
+		{
+			float level = 1-pan;
+			pStream->pDSMusicBuffer->SetPan((DWORD)(MFSoundInternal_MakeLinear(level) * DSBPAN_LEFT + DSBPAN_RIGHT));
+		}
+		else
+		{
+			float level = 1+pan;
+			pStream->pDSMusicBuffer->SetPan((DWORD)(MFSoundInternal_MakeLinear(level) * DSBPAN_RIGHT + DSBPAN_LEFT));
+		}
+	}
 }
 
 void MFSound_FillBufferPC(MFAudioStream *pStream, int bytes)

@@ -189,8 +189,8 @@ void MFSound_SetMasterVolume(float volume);
 /*** Music playback ***/
 
 /**
- * Begin music playback.
- * Begin playback of a music stream.
+ * Begin stream playback.
+ * Begin playback of an audio stream.
  * @param pFilename Filename of music track.
  * @param pause Initial pause state.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
@@ -206,8 +206,8 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause = false);
 void MFSound_DestroyStream(MFAudioStream *pStream);
 
 /**
- * Seek the music track.
- * Seeks the music track.
+ * Seek the stream.
+ * Seeks the stream.
  * @param pStream Pointer to an MFAudioStream.
  * @param seconds Seek offset in seconds from the start of the stream.
  * @return None.
@@ -215,8 +215,8 @@ void MFSound_DestroyStream(MFAudioStream *pStream);
 void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
 
 /**
- * Pause music playback.
- * Pauses music playback.
+ * Pause stream playback.
+ * Pauses stream playback.
  * @param pStream Pointer to an MFAudioStream.
  * @param pause true to pause the stream, false to resume playback.
  * @return None.
@@ -224,13 +224,22 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
 void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
 
 /**
- * Set the music track volume.
- * Sets the music track volume.
+ * Set the stream volume.
+ * Sets the stream volume.
  * @param pStream Pointer to an MFAudioStream.
  * @param volume Volume of the stream. The volume can range from 0.0f to 1.0f.
  * @return None.
  */
 void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume);
+
+/**
+ * Set the stream pan.
+ * Sets the stream pan.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param pam Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
+ * @return None.
+ */
+void MFSound_SetStreamPan(MFAudioStream *pStream, float pan);
 
 /**
  * Set the playback rate for an audio stream.

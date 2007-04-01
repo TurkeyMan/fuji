@@ -15,13 +15,15 @@
 //=============================================================================
 const char *MFIniLine::GetString(int index)
 {
-	if(index < stringCount)
-		return pIni->pStrings[firstString+index];
-	return NULL;
+	if(index >= stringCount)
+		return NULL; // maybe should we return an empty string here?
+	return pIni->pStrings[firstString+index];
 }
 
 float MFIniLine::GetFloat(int index)
 {
+	if(index >= stringCount)
+		return 0.0f;
 	return (float)atof(GetString(index));
 }
 
