@@ -88,6 +88,7 @@ struct MFDefaults
 		int maxSounds;					/**< Maximum sounds */
 		int maxVoices;					/**< Maximum voices */
 		int maxMusicTracks;				/**< Maximum music tracks */
+		bool useGlobalFocus;			/**< Use global focus on PC */
 	} sound;
 
 	/** Input Defaults. */

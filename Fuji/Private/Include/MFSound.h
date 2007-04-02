@@ -31,17 +31,29 @@ struct MFAudioStream;
 
 /**
  * Sound flags.
- * Various flags related to a sound.
+ * Various flags related to the behaviour of MFSound buffers.
  */
-enum MFSoundFlags
+enum MFSoundFlagsInternal
 {
-	MFSF_Looping = MFBIT(0),		/**< Specifies that the sound is a looping sound. */
-	MFSF_3D = MFBIT(1),				/**< Specifies that the sound should be played in 3d space. */
-	MFSF_BeginPaused = MFBIT(2),	/**< Specifies that the voice will be created paused. */
-
-	MFSF_Reserved = 0x7 << 28,		/**< Bit mask is reserved for internal use. */
+	MFSF_Dynamic = MFBIT(0),		/**< Specifies that the sound will be a dynamic sound buffer. */
+	MFSF_Circular = MFBIT(1),		/**< Specifies that the sound buffer is a circular buffer to be used for streaming. */
 
 	MFSF_ForceInt = 0x7FFFFFFF		/**< Force MFSoundFlags to an int type. */
+};
+
+/**
+ * Sound play flags.
+ * Various flags related to playback of a sound.
+ */
+enum MFPlayFlags
+{
+	MFPF_Looping = MFBIT(0),		/**< Specifies that the sound is a looping sound. */
+	MFPF_3D = MFBIT(1),				/**< Specifies that the sound should be played in 3d space. */
+	MFPF_BeginPaused = MFBIT(2),	/**< Specifies that the voice will be created paused. */
+
+	MFPF_Reserved = 0x7 << 28,		/**< Bit mask is reserved for internal use. */
+
+	MFPF_ForceInt = 0x7FFFFFFF		/**< Force MFPlayFlags to an int type. */
 };
 
 /**
@@ -65,10 +77,11 @@ MFSound *MFSound_Create(const char *pName);
  * @param numChannels Number of channels in the sound buffer.
  * @param bitsPerSample Bits per sample.
  * @param samplerate Playback rate in samples per second.
+ * @param flags A combination of zero or more flags from the MFSoundFlags enum to control the behaviour of the sound buffer.
  * @return Returns s pointer to the newly created sound buffer, or NULL on failure.
  * @see MFSound_Destroy(), MFSound_Play(), MFSound_LockDynamic(), MFSound_UnlockDynamic()
  */
-MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate);
+MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint32 flags);
 
 /**
  * Destroy a sound.
@@ -89,33 +102,33 @@ int MFSound_Destroy(MFSound *pSound);
 MFSound *MFSound_FindSound(const char *pName);
 
 /**
- * Lock a dynamic sound buffer.
- * Locks a dynamic sound buffer for writing.
+ * Lock a sound buffer.
+ * Locks a sound buffer for writing.
  * @param pSound Pointer to the sound to lock.
  * @param offset Offset into the sound buffer, in bytes.
- * @param bytes Number of bytes to lock.
+ * @param bytes Number of bytes to lock. If bytes is 0, the entire buffer is locked.
  * @param ppData Pointer to a pointer that receives the address of the locked buffer portion.
  * @param pSize Pointer to an int the receives the size of the locked buffer portion.
  * @param ppData2 Pointer to a pointer that receives the second locked portion, or NULL. This is only used when locking a circular buffer and the lock length exceeds the buffers length. This parameter may be NULL.
  * @param pSize2 Pointer to an int the receives the size of the locked buffer portion. This parameter may be NULL.
  * @return Returns 0 on success.
- * @see MFSound_UnlockDynamic(), MFSound_CreateDynamic()
+ * @see MFSound_Unlock(), MFSound_CreateDynamic()
  */
-int MFSound_LockDynamic(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
+int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
 
 /**
- * Unlock a dynamic buffer.
- * Unlocks a previously locked dynamic buffer.
+ * Unlock a sound buffer.
+ * Unlocks a previously locked sound buffer.
  * @return None.
- * @see MFSound_LockDynamic()
+ * @see MFSound_Lock()
  */
-void MFSound_UnlockDynamic(MFSound *pSound);
+void MFSound_Unlock(MFSound *pSound);
 
 /**
  * Play a sound.
  * Begin playback of a sound.
  * @param pSound Pointer to the sound to play.
- * @param playFlags Flags to control the way the sound is played.
+ * @param playFlags A combination of zero or moew flags from the MFPlayFlags to control the way the sound is played.
  * @return Returns the voice ID.
  * @see MFSound_Stop(), MFSound_Create()
  */
@@ -166,6 +179,15 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume);
  * @return None.
  */
 void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
+
+/**
+ * Set the voices pan.
+ * Sets the voices pan.
+ * @param pVoice Pointer to a playing voice.
+ * @param pam Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
+ * @return None.
+ */
+void MFSound_SetPan(MFVoice *pVoice, float pan);
 
 /**
  * Set playback offset.
@@ -224,31 +246,12 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
 void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
 
 /**
- * Set the stream volume.
- * Sets the stream volume.
+ * Get the voice associated with an MFAudioStream.
+ * Gets the voice associated with an MFAudioStream.
  * @param pStream Pointer to an MFAudioStream.
- * @param volume Volume of the stream. The volume can range from 0.0f to 1.0f.
- * @return None.
+ * @return Returns a pointer to the MFVoice associated with the stream.
  */
-void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume);
-
-/**
- * Set the stream pan.
- * Sets the stream pan.
- * @param pStream Pointer to an MFAudioStream.
- * @param pam Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
- * @return None.
- */
-void MFSound_SetStreamPan(MFAudioStream *pStream, float pan);
-
-/**
- * Set the playback rate for an audio stream.
- * Sets the playback rate for an audio stream.
- * @param pStream Pointer to an MFAudioStream.
- * @param rate Playback rate for the stream. Default is 1.0f.
- * @return None.
- */
-void MFSound_SetStreamPlaybackRate(MFAudioStream *pStream, float rate);
+MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
 
 #endif // _MFSOUND_H
 

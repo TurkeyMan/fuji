@@ -699,6 +699,9 @@
 				RelativePath=".\Source\MFSockets_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFSound.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFSound_Internal.h">
 			</File>
 			<File

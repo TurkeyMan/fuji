@@ -98,7 +98,8 @@ MFDefaults gDefaults =
 	{
 		256,			// maxSounds
 		32,				// maxVoices
-		4				// maxMusicTracks
+		4,				// maxMusicTracks
+		true			// useGlobalFocus
 	},
 
 	// InputDefaults
