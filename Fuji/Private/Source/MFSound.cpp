@@ -7,7 +7,13 @@
 #include "MFPrimitive.h"
 #include "DebugMenu.h"
 
-#include <vorbis/vorbisfile.h>
+#if defined(_WINDOWS)
+	#define VORBIS_STREAM
+#endif
+
+#if defined(VORBIS_STREAM)
+	#include <vorbis/vorbisfile.h>
+#endif
 
 /**** Foreward Declarations ****/
 
@@ -21,9 +27,10 @@ struct MFAudioStream
 {
 	char name[256];
 
+#if defined(VORBIS_STREAM)
 	OggVorbis_File vorbisFile;
-
 	vorbis_info *pInfo;
+#endif
 
 	MFSound *pStreamBuffer;
 	MFVoice *pStreamVoice;
@@ -282,6 +289,7 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 }
 
 
+#if defined(VORBIS_STREAM)
 //
 // Vorbis Music Functions
 //
@@ -289,6 +297,7 @@ int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
 	return MFFile_StdSeek(datasource, (long)offset, whence);
 }
+#endif
 
 //
 // MFAudioStream related functions
@@ -305,6 +314,7 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 
 	MFAudioStream *pStream = &gMusicTracks[t];
 
+#if defined(VORBIS_STREAM)
 	// open vorbis file
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
@@ -338,6 +348,9 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	pStream->bufferSize = pStream->pInfo->rate * pStream->pInfo->channels * 2;
 
 	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pStream->pInfo->rate, pStream->pInfo->channels, 16, pStream->pInfo->rate, MFSF_Dynamic | MFSF_Circular);
+#else
+	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, 44100, 2, 16, 44100, MFSF_Dynamic | MFSF_Circular);
+#endif
 
 	// fill the buffer
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
@@ -380,8 +393,10 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 	if(pStream->playing)
 		MFSound_Stop(pStream->pStreamVoice);
 
+#if defined(VORBIS_STREAM)
 	pStream->pInfo = NULL;
 	ov_clear(&pStream->vorbisFile);
+#endif
 
 	MFSound_Destroy(pStream->pStreamBuffer);
 	pStream->pStreamBuffer = NULL;
@@ -391,7 +406,9 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
+#if defined(VORBIS_STREAM)
 	ov_time_seek(&pStream->vorbisFile, seconds);
+#endif
 
 	if(pStream->playing)
 		MFSound_Pause(pStream->pStreamVoice, true);
@@ -444,6 +461,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	uint32 bytesToWrite = bytes1;
 	bool wrapped = false;
 
+#if defined(VORBIS_STREAM)
 	while(bufferFed < bytesToWrite)
 	{
 		int r = ov_read(&pStream->vorbisFile, pData, bytesToWrite-bufferFed, 0, 2, 1, &currentBitstream);
@@ -464,6 +482,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 			wrapped = true;
 		}
 	}
+#endif
 
 	// unlock buffer
 	MFSound_Unlock(pStream->pStreamBuffer);
@@ -472,7 +491,11 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	pStream->playBackOffset = (pStream->playBackOffset + bytes) % pStream->bufferSize;
 
 	// update playback time
+#if defined(VORBIS_STREAM)
 	pStream->currentTime = (float)ov_time_tell(&pStream->vorbisFile);
+#else
+	pStream->currentTime = 0.0f;
+#endif
 }
 
 
@@ -480,6 +503,7 @@ void MFSound_Draw()
 {
 	MFCALLSTACK;
 
+#if defined(VORBIS_STREAM)
 #if !defined(_RETAIL)
 	if(!showSoundStats) return;
 
@@ -599,5 +623,6 @@ void MFSound_Draw()
 			y += 35.0f;
 		}
 	}
+#endif
 #endif
 }

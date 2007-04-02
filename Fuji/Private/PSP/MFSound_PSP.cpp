@@ -1,125 +1,137 @@
 #include "Fuji.h"
-#include "MFFileSystem.h"
-#include "MFPtrList.h"
-#include "MFFont.h"
-#include "MFPrimitive.h"
-#include "DebugMenu.h"
 #include "MFSound_Internal.h"
 
-void MFSound_InitModule()
+#include <pspkernel.h>
+#include <pspaudiolib.h>
+
+
+/**** Structures ****/
+
+struct MFSoundDataInternal
 {
-	MFCALLSTACK;
+};
+
+struct MFVoiceDataInternal
+{
+};
+
+
+/**** Globals ****/
+
+
+/**** Functions ****/
+
+void audioOutCallback(int channel, uint16 *buf, unsigned int reqn)
+{
+	// mix and write samples...
+/*
+	ChannelState_t* state = &channelStates[channel];
+	unsigned int i;
+	for (i = 0; i < reqn; i++) {
+		float time = ((float) state->currentTime) / ((float) SAMPLE_RATE);
+		if (state->currentTime++ == state->currentNote.duration) nextNote(channel);
+		float value;
+		if (state->currentsampleIncrement == 0.0) {
+			value = 0.0;
+		} else {
+			value = sample[(int)state->currentsampleIndex] * adsr(time, ((float) state->currentNote.duration) / ((float) SAMPLE_RATE));
+			value *= (float) 0x7000;
+			state->currentsampleIndex += state->currentsampleIncrement;
+			if (state->currentsampleIndex >= SAMPLE_COUNT) state->currentsampleIndex -= (float) SAMPLE_COUNT;
+		}
+		buf[0] = value;
+		buf[1] = value;
+		buf += 2;
+	}
+*/
 }
 
-void MFSound_DeinitModule()
+void audioOutCallback0(void *buf, unsigned int reqn, void *userdata) { audioOutCallback(0, (uint16*)buf, reqn); }
+void audioOutCallback1(void *buf, unsigned int reqn, void *userdata) { audioOutCallback(1, (uint16*)buf, reqn); }
+
+void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize)
 {
 	MFCALLSTACK;
+
+	pspAudioInit();
+//	pspAudioSetVolume(0, 0x4000, 0x4000);
+//	pspAudioSetVolume(1, 0x4000, 0x4000);
+//	pspAudioSetChannelCallback(0, audioOutCallback0, NULL);
+//	pspAudioSetChannelCallback(1, audioOutCallback1, NULL);
+
+	// we need to return the size of the internal structures so the platform independant
+	// code can make the correct allocations..
+	*pSoundDataSize = sizeof(MFSoundDataInternal);
+	*pVoiceDataSize = sizeof(MFVoiceDataInternal);
 }
 
-void MFSound_Update()
+void MFSound_DeinitModulePlatformSpecific()
 {
 	MFCALLSTACK;
+
+	// cleanup?
 }
 
-void MFSound_Draw()
+bool MFSound_UpdateInternal(MFVoice *pVoice)
 {
-	MFCALLSTACK;
+	// check if the voice has finished playing and destroy it if it has..
+	return true;
 }
 
-
-int MFSound_LoadBank(const char *pFilename)
+void MFSound_CreateInternal(MFSound *pSound)
 {
-	MFCALLSTACK;
-
-	return -1;
 }
 
-void MFSound_UnloadBank(int bankID)
+void MFSound_DestroyInternal(MFSound *pSound)
 {
-	MFCALLSTACK;
 }
 
-int MFSound_FindSound(const char *pSoundName, int searchBankID)
+int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
-	MFCALLSTACK;
-
-	return -1;
-}
-
-int MFSound_Play(int soundID)
-{
-	MFCALLSTACK;
-
 	return 0;
 }
 
-int MFSound_Play3D(int soundID)
+void MFSound_Unlock(MFSound *pSound)
 {
-	MFCALLSTACK;
+}
 
+void MFSound_PlayInternal(MFVoice *pVoice)
+{
+}
+
+void MFSound_Pause(MFVoice *pVoice, bool pause)
+{
+}
+
+void MFSound_Stop(MFVoice *pVoice)
+{
+}
+
+void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+{
+}
+
+void MFSound_SetVolume(MFVoice *pVoice, float volume)
+{
+}
+
+void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
+{
+}
+
+void MFSound_SetPan(MFVoice *pVoice, float pan)
+{
+}
+
+void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+{
+}
+
+void MFSound_SetMasterVolume(float volume)
+{
+}
+
+uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+{
 	return 0;
 }
-
-void MFSound_Stop(int soundID)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_SetListenerPos(const MFVector& listenerPos)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_SetVolume(int soundID, float volume)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_SetMasterVolume(int soundID, float volume)
-{
-	MFCALLSTACK;
-
-//	pDSPrimaryBuffer->SetVolume();
-}
-
-void MFSound_SetPlaybackRate(int soundID, float rate)
-{
-	MFCALLSTACK;
-}
-
-
-//
-// Music Functions
-//
-int MFSound_MusicPlay(const char *pFilename, bool pause)
-{
-	MFCALLSTACK;
-
-	return 0;
-}
-
-void MFSound_ServiceMusicBuffer(int trackID)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_MusicUnload(int track)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_MusicSeek(int track, float seconds)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_MusicPause(int track, bool pause)
-{
-	MFCALLSTACK;
-}
-
-void MFSound_MusicSetVolume(int track, float volume)
-{
-	MFCALLSTACK;
-}
-

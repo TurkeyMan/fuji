@@ -184,7 +184,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	if(hFind == INVALID_HANDLE_VALUE)
 		return false;
 
-	pFindData->isDirectory = !!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+	pFindData->attributes = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0;
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
 	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
 
@@ -209,7 +209,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	if(!more)
 		return false;
 
-	pFindData->isDirectory = !!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+	pFindData->attributes = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0;
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
 	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
 

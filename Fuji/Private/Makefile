@@ -124,6 +124,7 @@ OBJS := $(ZLIB) \
 	Source/MFScript_Pawn.o \
 	Source/MFScript_Registration.o \
 	Source/MFSockets.o \
+	Source/MFSound.o \
 	Source/MFString.o \
 	Source/MFStringCache.o \
 	Source/MFSystem.o \

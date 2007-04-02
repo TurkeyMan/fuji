@@ -338,7 +338,7 @@ bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDa
 
 	unz_file_info fileInfo;
 	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
-	pFindData->isDirectory = false;
+	pFindData->attributes = 0;
 	pFindData->fileSize = fileInfo.uncompressed_size;
 	pFindData->pSystemPath[0] = 0;
 
@@ -356,7 +356,7 @@ bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	unz_file_info fileInfo;
 	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
-	pFindData->isDirectory = false;
+	pFindData->attributes = 0;
 	pFindData->fileSize = fileInfo.uncompressed_size;
 
 	return true;

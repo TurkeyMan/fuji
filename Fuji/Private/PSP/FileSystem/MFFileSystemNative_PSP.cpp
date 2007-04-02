@@ -18,175 +18,6 @@ void MFFileSystemNative_Unregister()
 
 }
 
-int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
-{
-	SceIoDirent findData;
-	int findStatus;
-	int numFiles = 0;
-
-	MFZeroMemory(&findData, sizeof(SceIoDirent));
-
-	*pStringLengths += MFString_Length(pFindPattern) + 1;
-
-	SceUID hFind = sceIoDopen(pFindPattern);
-
-	findStatus = sceIoDread(hFind, &findData);
-
-	while(findStatus > 0)
-	{
-		if(MFString_Compare(findData.d_name, ".") && MFString_Compare(findData.d_name, "..") && MFString_Compare(findData.d_name, ".svn"))
-		{
-			if(FIO_SO_ISDIR(findData.d_stat.st_attr))
-			{
-				if(recursive)
-				{
-					if(flatten)
-					{
-						numFiles += MFFileSystemNative_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.d_name), recursive, flatten, pStringLengths);
-					}
-					else
-					{
-						*pStringLengths += MFString_Length(findData.d_name) + 1;
-						++numFiles;
-					}
-				}
-			}
-			else
-			{
-				*pStringLengths += MFString_Length(findData.d_name) + 1;
-				++numFiles;
-			}
-		}
-
-		findStatus = sceIoDread(hFind, &findData);
-	}
-
-	MFDebug_Assert(findStatus == 0, "Error scanning directory...");
-
-	sceIoDclose(hFind);
-
-	return numFiles;
-}
-
-MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
-{
-	SceIoDirent findData;
-	int findStatus;
-
-	MFZeroMemory(&findData, sizeof(SceIoDirent));
-
-	SceUID hFind = sceIoDopen(pFindPattern);
-
-	findStatus = sceIoDread(hFind, &findData);
-
-	char *pCurrentDir = pStringCache;
-	MFString_Copy(pCurrentDir, pFindPattern);
-	pStringCache += MFString_Length(pCurrentDir) + 1;
-
-	while(findStatus > 0)
-	{
-		if(MFString_Compare(findData.d_name, ".") && MFString_Compare(findData.d_name, "..") && MFString_Compare(findData.d_name, ".svn"))
-		{
-			if(FIO_SO_ISDIR(findData.d_stat.st_attr))
-			{
-				if(recursive)
-				{
-					if(flatten)
-					{
-						pToc = MFFileSystemNative_BuildToc(MFStr("%s%s/", pFindPattern, findData.d_name), pToc, pParent, pStringCache, recursive, flatten);
-					}
-					else
-					{
-						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.d_name);
-
-						int stringCacheSize = 0;
-						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
-
-						if(pToc->size)
-						{
-							MFString_Copy(pStringCache, findData.d_name);
-							pToc->pName = pStringCache;
-							pStringCache += MFString_Length(pStringCache)+1;
-
-							pToc->flags = MFTF_Directory;
-							pToc->pFilesysData = pCurrentDir;
-							pToc->pParent = pParent;
-
-							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
-							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
-
-							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
-							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
-
-							++pToc;
-						}
-					}
-				}
-			}
-			else
-			{
-				MFString_Copy(pStringCache, findData.d_name);
-				pToc->pName = pStringCache;
-				pStringCache += MFString_Length(pStringCache)+1;
-
-				pToc->pFilesysData = pCurrentDir;
-
-				pToc->pParent = pParent;
-				pToc->pChild = NULL;
-
-				pToc->flags = 0;
-				pToc->size = 0;
-
-				++pToc;
-			}
-		}
-
-		findStatus = sceIoDread(hFind, &findData);
-	}
-
-	MFDebug_Assert(findStatus == 0, "Error scanning directory...");
-
-	sceIoDclose(hFind);
-
-	return pToc;
-}
-
-int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
-{
-	MFDebug_Assert(pMountData->cbSize == sizeof(MFMountDataNative), "Incorrect size for MFMountDataNative structure. Invalid pMountData.");
-
-	MFMountDataNative *pMountNative = (MFMountDataNative*)pMountData;
-
-	bool flatten = (pMountData->flags & MFMF_FlattenDirectoryStructure) != 0;
-	bool recursive = (pMountData->flags & MFMF_Recursive) != 0;
-
-	const char *pFindPattern = pMountNative->pPath;
-
-	if(pFindPattern[MFString_Length(pFindPattern)-1] != '/')
-		pFindPattern = MFStr("%s/", pFindPattern);
-
-	SceUID hFind = sceIoDopen(pFindPattern);
-
-	if(hFind < 0)
-	{
-		MFDebug_Warn(1, MFStr("FileSystem: Couldnt Mount Native FileSystem '%s'.", pMountNative->pPath));
-		return -1;
-	}
-
-	sceIoDclose(hFind);
-
-	int stringCacheSize = 0;
-	pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPattern, recursive, flatten, &stringCacheSize);
-
-	int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
-	pMount->pEntries = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
-
-	char *pStringCache = ((char*)pMount->pEntries)+sizeOfToc;
-	MFFileSystemNative_BuildToc(pFindPattern, pMount->pEntries, NULL, pStringCache, recursive, flatten);
-
-	return 0;
-}
-
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
@@ -343,4 +174,63 @@ bool MFFileNative_Exists(const char* pFilename)
 	}
 
 	return exists;
+}
+
+bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
+{
+	SceIoDirent findData;
+	int findStatus;
+
+	SceUID hFind = sceIoDopen(pSearchPattern);
+
+	if(hFind < 0)
+		return false;
+
+	findStatus = sceIoDread(hFind, &findData);
+
+	MFDebug_Assert(findStatus >= 0, "Error reading directory.");
+
+	if(findStatus == 0)
+		return false;
+
+	pFindData->attributes = (FIO_SO_ISDIR(findData.d_stat.st_attr) ? MFFA_Directory : 0) |
+							(FIO_SO_ISLNK(findData.d_stat.st_attr) ? MFFA_SymLink : 0);
+	pFindData->fileSize = (uint64)findData.d_stat.st_size;
+	MFString_Copy((char*)pFindData->pFilename, findData.d_name);
+
+	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	if(pLast)
+		pLast[1] = 0;
+	else
+		pFindData->pSystemPath[0] = 0;
+
+	pFind->pFilesystemData = (void*)hFind;
+
+	return true;
+}
+
+bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
+{
+	SceIoDirent findData;
+	int findStatus;
+
+	findStatus = sceIoDread((SceUID)pFind->pFilesystemData, &findData);
+
+	MFDebug_Assert(findStatus >= 0, "Error reading directory.");
+
+	if(findStatus == 0)
+		return false;
+
+	pFindData->attributes = (FIO_SO_ISDIR(findData.d_stat.st_attr) ? MFFA_Directory : 0) |
+							(FIO_SO_ISLNK(findData.d_stat.st_attr) ? MFFA_SymLink : 0);
+	pFindData->fileSize = (uint64)findData.d_stat.st_size;
+	MFString_Copy((char*)pFindData->pFilename, findData.d_name);
+
+	return true;
+}
+
+void MFFileNative_FindClose(MFFind *pFind)
+{
+	sceIoDclose((SceUID)pFind->pFilesystemData);
 }

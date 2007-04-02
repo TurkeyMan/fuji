@@ -1,40 +1,65 @@
 #include "Fuji.h"
-#include "MFVector.h"
 
-void MFSound_InitModule()
+/**** Structures ****/
+
+struct MFSoundDataInternal
+{
+};
+
+struct MFVoiceDataInternal
+{
+};
+
+
+/**** Globals ****/
+
+
+/**** Functions ****/
+
+void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize)
+{
+	MFCALLSTACK;
+
+	// we need to return the size of the internal structures so the platform independant
+	// code can make the correct allocations..
+	*pSoundDataSize = sizeof(MFSoundDataInternal);
+	*pVoiceDataSize = sizeof(MFVoiceDataInternal);
+}
+
+void MFSound_DeinitModulePlatformSpecific()
+{
+	MFCALLSTACK;
+}
+
+bool MFSound_UpdateInternal(MFVoice *pVoice)
+{
+	// check if the voice has finished playing and destroy it if it has..
+	return true;
+}
+
+void MFSound_CreateInternal(MFSound *pSound)
 {
 }
 
-void MFSound_DeinitModule()
+void MFSound_DestroyInternal(MFSound *pSound)
 {
 }
 
-void MFSound_Update()
+int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+{
+	return 0;
+}
+
+void MFSound_Unlock(MFSound *pSound)
 {
 }
 
-void MFSound_Draw()
+void MFSound_PlayInternal(MFVoice *pVoice)
 {
 }
 
-
-MFSound *MFSound_Create(const char *pName)
+void MFSound_Pause(MFVoice *pVoice, bool pause)
 {
-	return NULL;
-}
-
-void MFSound_Destroy(MFSound *pSound)
-{
-}
-
-MFSound *MFSound_FindSound(const char *pName)
-{
-	return NULL;
-}
-
-MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
-{
-	return NULL;
 }
 
 void MFSound_Stop(MFVoice *pVoice)
@@ -53,28 +78,19 @@ void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 {
 }
 
+void MFSound_SetPan(MFVoice *pVoice, float pan)
+{
+}
+
+void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+{
+}
+
 void MFSound_SetMasterVolume(float volume)
 {
 }
 
-MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
+uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
-	return NULL;
+	return 0;
 }
-
-void MFSound_DestroyStream(MFAudioStream *pStream)
-{
-}
-
-void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
-{
-}
-
-void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
-{
-}
-
-void MFSound_SetStreamVolume(MFAudioStream *pStream, float volume)
-{
-}
-

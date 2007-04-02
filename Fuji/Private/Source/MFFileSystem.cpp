@@ -401,7 +401,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 	{
 		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
 		{
-			if(findData.isDirectory)
+			if(findData.attributes & MFFA_Directory)
 			{
 				if(recursive)
 				{
@@ -452,7 +452,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	{
 		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
 		{
-			if(findData.isDirectory)
+			if(findData.attributes & MFFA_Directory)
 			{
 				if(recursive)
 				{
@@ -500,7 +500,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 				pToc->pParent = pParent;
 				pToc->pChild = NULL;
 
-				MFDebug_Assert(findData.fileSize < 0x100000000, "Files larger than 4gb not yet supported...");
+				MFDebug_Assert(findData.fileSize < 0x100000000LL, "Files larger than 4gb not yet supported...");
 				pToc->size = (uint32)findData.fileSize;
 				pToc->flags = 0;
 

@@ -251,7 +251,7 @@ enum MFMountFlags
 	MFMF_DontCacheTOC = 4,				/**< Doesn't take a local memory copy of the TOC (useful for filesystems read from memory) */
 	MFMF_OnlyAllowExclusiveAccess = 8,	/**< This will exclude this mount from any non-specific filesystem operations (filenames explicitly directed to this mount using 'device:') */
 
-	MFMF_ForceUInt = 0xFFFFFFFF			/**< Force MountFlags to an int type */
+	MFMF_ForceUInt = 0xFFFFFFFF			/**< Force MFMountFlags to a uint type */
 };
 
 /**
@@ -260,12 +260,27 @@ enum MFMountFlags
  */
 enum MFMountPriority
 {
-	MFMP_Highest = 0,		/**< Highest priority filesystem (first in the search queue) */
-	MFMP_VeryHigh = 1,		/**< Very high priority filesystem */
-	MFMP_AboveNormal = 5,	/**< Above normal priority filesystem */
-	MFMP_Normal = 10,		/**< Normal priority filesystem */
-	MFMP_BelowNormal = 15,	/**< Below normal priority filesystem */
-	MFMP_VeryLow = 20		/**< Very low priority filesystem (last in the search queue) */
+	MFMP_Highest = 0,			/**< Highest priority filesystem (first in the search queue) */
+	MFMP_VeryHigh = 1,			/**< Very high priority filesystem */
+	MFMP_AboveNormal = 5,		/**< Above normal priority filesystem */
+	MFMP_Normal = 10,			/**< Normal priority filesystem */
+	MFMP_BelowNormal = 15,		/**< Below normal priority filesystem */
+	MFMP_VeryLow = 20,			/**< Very low priority filesystem (last in the search queue) */
+
+	MFMP_ForceInt = 0x7FFFFFFF	/**< Force MFMountPriority to an int type */
+};
+
+/**
+ * File attributes.
+ * These are a set of file attributes.
+ */
+enum MFFileAttributes
+{
+	MFFA_Directory = MFBIT(0),	/**< File is a directory */
+	MFFA_SymLink = MFBIT(1),	/**< File is a symbolic link */
+	MFFA_Hidden = MFBIT(2),		/**< File is hidden */
+
+	MFFA_ForceInt = 0x7FFFFFFF	/**< Force MFFileAttributes to an int type */
 };
 
 /**
@@ -307,7 +322,7 @@ struct MFFindData
 	char pFilename[256];	/**< The files filename */
 	char pSystemPath[256];	/**< The system path to the file */
 	uint64 fileSize;		/**< The files size */
-	bool isDirectory;		/**< Is the file a directory */
+	uint32 attributes;		/**< The files attributes */
 };
 
 /**
@@ -413,7 +428,7 @@ void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
  * @param pSearchPattern The search pattern. The search pattern MUST be a full justified fuji path begining with a volume, and ending with a filename pattern to match.
  * @param pFindData Pointer to an MFFindData structure which receives details about the file.
  * @return An MFFind handle that is passed to subsequent calls to MFFileSystem_FindNext and MFFileSystem_FindClose.
- * @remarks Currently the only valid filename pattern is '*'. For example: "data:subdir/*" is a valid search pattern.
+ * @remarks Currently the only valid filename pattern is '*'. For example: "data:subdir/ *" is a valid search pattern.
  * @see MFFileSystem_FindNext(), MFFileSystem_FindClose()
  */
 MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData);
