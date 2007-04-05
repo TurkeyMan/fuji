@@ -669,7 +669,7 @@ const char* MFInput_EnumerateString(int button, int device, int deviceID, bool i
 	switch(device)
 	{
 		case IDD_Gamepad:
-			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", MFInput_GetGamepadButtonName(button, deviceID));
+			return MFStr("%s%s%s%s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", (includeDevice||includeDeviceID) ? " " : "", MFInput_GetGamepadButtonName(button, deviceID));
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
@@ -677,10 +677,10 @@ const char* MFInput_EnumerateString(int button, int device, int deviceID, bool i
 			}
 			else
 			{
-				return MFStr("%s%s Button %d", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", button - Mouse_MaxAxis + 1);
+				return MFStr("%s%s%sButton %d", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", (includeDevice||includeDeviceID) ? " " : "", button - Mouse_MaxAxis + 1);
 			}
 		case IDD_Keyboard:
-			return MFStr("%s%s %s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", gKeyNames[button]);
+			return MFStr("%s%s%s%s", includeDevice ? MFInput_GetDeviceName(device, deviceID) : "", includeDeviceID ? MFStr("(%d)", deviceID) : "", (includeDevice||includeDeviceID) ? " " : "", gKeyNames[button]);
 	}
 
 	return "";
