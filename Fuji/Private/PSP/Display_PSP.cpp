@@ -25,6 +25,10 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 {
 	MFCALLSTACK;
 
+	gDisplay.width = 480;
+	gDisplay.height = 272;
+	gDisplay.wide = true;
+
 	sceGuInit();
 
 	sceGuStart(GU_DIRECT, displayList);

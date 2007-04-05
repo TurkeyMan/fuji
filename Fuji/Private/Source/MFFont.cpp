@@ -210,7 +210,7 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c;
+	uint16 c = 0;
 	int bytes = MFString_MBToWChar(pText, &c);
 
 	while(*pText && charIndex)
@@ -252,10 +252,11 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
-	if(*(const uint16*)pText == 0xFEFF)
+	if(((uint8*)pText)[0] == 0xFF && ((uint8*)pText)[1] == 0xFE)
 		return MFFont_GetStringWidthW(pFont, (const uint16*)pText, height, lineWidth, maxLen, pTotalHeight);
 
-	if(pFont == NULL) pFont = gpDebugFont;
+	if(pFont == NULL)
+		pFont = gpDebugFont;
 
 	CharHistory *pH = gCharHistory;
 	const char *pLineStart = pText;
@@ -269,7 +270,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c;
+	uint16 c = 0;
 	int bytes = MFString_MBToWChar(pText, &c);
 
 	while(*pText && maxLen)
@@ -384,7 +385,7 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 
 	*pNextPage = 99999;
 
-	uint16 c;
+	uint16 c = 0;
 	int bytes = MFString_MBToWChar(pText, &c);
 
 	while(*pText && maxLen)
@@ -432,7 +433,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 {
 	MFCALLSTACK;
 
-	if(*(const uint16*)pText == 0xFEFF)
+	if(((uint8*)pText)[0] == 0xFF && ((uint8*)pText)[1] == 0xFE)
 		return MFFont_DrawTextW(pFont, pos, height, colour, (const uint16*)pText, maxChars, ltw);
 
 	if(pFont == NULL) pFont = gpDebugFont;
@@ -484,7 +485,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 
 		const char *pRenderString = pText;
 
-		uint16 c;
+		uint16 c = 0;
 		int bytes = MFString_MBToWChar(pRenderString, &c);
 
 		for(int i=0; i<textlen; i++)
@@ -598,7 +599,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c;
+	uint16 c = 0;
 	int bytes = MFString_MBToWChar(pC, &c);
 
 	while(*pC)

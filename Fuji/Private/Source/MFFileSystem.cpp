@@ -3,6 +3,7 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 #include "FileSystem/MFFileSystemMemory_Internal.h"
+#include "FileSystem/MFFileSystemCachedFile_Internal.h"
 #include "FileSystem/MFFileSystemZipFile_Internal.h"
 #include "FileSystem/MFFileSystemHTTP_Internal.h"
 #include "MFPtrList.h"
@@ -20,6 +21,7 @@ MFPtrListDL<MFFind> gFinds;
 // internal filesystems
 MFFileSystemHandle hNativeFileSystem = -1;
 MFFileSystemHandle hMemoryFileSystem = -1;
+MFFileSystemHandle hCachedFileSystem = -1;
 MFFileSystemHandle hZipFileSystem = -1;
 MFFileSystemHandle hHTTPFileSystem = -1;
 MFFileSystemHandle hFTPFileSystem = -1;
@@ -70,6 +72,18 @@ void MFFileSystem_RegisterDefaultArchives()
 
 	if(hDataArchive)
 	{
+		// attempt to cache the zip archive
+		MFOpenDataCachedFile cachedOpen;
+		cachedOpen.cbSize = sizeof(MFOpenDataCachedFile);
+		cachedOpen.openFlags = MFOF_Read | MFOF_Binary | MFOF_Cached_CleanupBaseFile;
+		cachedOpen.maxCacheSize = 1*1024*1024; // 1mb cache for zip archives should be heaps!!
+		cachedOpen.pBaseFile = hDataArchive;
+
+		MFFile *pCachedFile = MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_CachedFileSystem), &cachedOpen);
+		if(pCachedFile)
+			hDataArchive = pCachedFile;
+
+		// mount the zip archive.
 		MFMountDataZipFile zipMountData;
 		zipMountData.cbSize = sizeof(MFMountDataZipFile);
 		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
@@ -103,6 +117,18 @@ void MFFileSystem_RegisterDefaultArchives()
 
 	if(hPatchArchive)
 	{
+		// attempt to cache the zip archive
+		MFOpenDataCachedFile cachedOpen;
+		cachedOpen.cbSize = sizeof(MFOpenDataCachedFile);
+		cachedOpen.openFlags = MFOF_Read | MFOF_Binary | MFOF_Cached_CleanupBaseFile;
+		cachedOpen.maxCacheSize = 1*1024*1024; // 1mb cache for zip archives should be heaps!!
+		cachedOpen.pBaseFile = hPatchArchive;
+
+		MFFile *pCachedFile = MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_CachedFileSystem), &cachedOpen);
+		if(pCachedFile)
+			hPatchArchive = pCachedFile;
+
+		// mount the zip archive.
 		MFMountDataZipFile zipMountData;
 		zipMountData.cbSize = sizeof(MFMountDataZipFile);
 		zipMountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
@@ -137,6 +163,7 @@ void MFFileSystem_InitModule()
 	// mount filesystems
 	MFFileSystemNative_InitModule();
 	MFFileSystemMemory_InitModule();
+	MFFileSystemCachedFile_InitModule();
 	MFFileSystemZipFile_InitModule();
 	MFFileSystemHTTP_InitModule();
 
@@ -155,6 +182,7 @@ void MFFileSystem_DeinitModule()
 
 	MFFileSystemHTTP_DeinitModule();
 	MFFileSystemZipFile_DeinitModule();
+	MFFileSystemCachedFile_DeinitModule();
 	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
 
@@ -171,9 +199,6 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 	{
 		if(ppFileSystemList[a] == NULL)
 		{
-			MFDebug_Assert(pCallbacks->FSMount, "No FSMount function supplied.");
-			MFDebug_Assert(pCallbacks->FSDismount, "No FSDismount function supplied.");
-			MFDebug_Assert(pCallbacks->FSOpen, "No FSOpen function supplied.");
 			MFDebug_Assert(pCallbacks->Open, "No Open function supplied.");
 			MFDebug_Assert(pCallbacks->Close, "No Close function supplied.");
 			MFDebug_Assert(pCallbacks->Read, "No Read function supplied.");
@@ -361,6 +386,11 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 			if(hMemoryFileSystem < 0)
 				MFDebug_Error("Memory file filesystem is not available...");
 			return hMemoryFileSystem;
+		case MFFSH_CachedFileSystem:
+			MFDebug_Assert(hCachedFileSystem > -1, "Memory file filesystem is not available...");
+			if(hCachedFileSystem < 0)
+				MFDebug_Error("Cached file filesystem is not available...");
+			return hCachedFileSystem;
 		case MFFSH_ZipFileSystem:
 			MFDebug_Assert(hZipFileSystem > -1, "Zip file filesystem is not available...");
 			if(hZipFileSystem < 0)

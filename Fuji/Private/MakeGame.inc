@@ -63,7 +63,7 @@ FIXUP    = psp-fixup-imports
 
 CFLAGS := $(CFLAGS) -G0
 
-LIBS := $(LIBS) -lpspusb -lpspusbstor -lpsprtc -lpspgu -lm -lpspdebug -lpspdisplay -lpspge -lpspctrl -lpspsdk -lstdc++ -lc -lpsppower -lpspwlan -lpspnet -lpspnet_inet -lpspnet_apctl -lpspnet_resolver -lpsputility -lpspuser -lpspkernel
+LIBS := $(LIBS) -lpspusb -lpspusbstor -lpsprtc -lpspgu -lm -lpspdebug -lpspdisplay -lpspge -lpspctrl -lpspsdk -lstdc++ -lc -lpsppower -lpspaudio -lpspaudiolib -lpspwlan -lpspnet -lpspnet_inet -lpspnet_apctl -lpspnet_resolver -lpsputility -lpspuser -lpspkernel
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) $(PSPSDK)/include

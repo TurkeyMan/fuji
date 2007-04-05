@@ -369,6 +369,12 @@
 				Name="FileSystem"
 				Filter="">
 				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile_Internal.h">
+				</File>
+				<File
 					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp">
 				</File>
 				<File
@@ -575,6 +581,9 @@
 			<Filter
 				Name="FileSystem"
 				Filter="">
+				<File
+					RelativePath=".\Include\FileSystem\MFFileSystemCachedFile.h">
+				</File>
 				<File
 					RelativePath=".\Include\FileSystem\MFFileSystemHTTP.h">
 				</File>

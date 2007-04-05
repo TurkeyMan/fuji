@@ -136,10 +136,11 @@ OBJS := $(ZLIB) \
 	Source/Sprite.o \
 	Source/Timer.o \
 	Source/Util.o \
-	Source/FileSystem/MFFileSystemHTTP.o \
-	Source/FileSystem/MFFileSystemMemory.o \
 	Source/FileSystem/MFFileSystemNative.o \
+	Source/FileSystem/MFFileSystemMemory.o \
+	Source/FileSystem/MFFileSystemCachedFile.o \
 	Source/FileSystem/MFFileSystemZipFile.o \
+	Source/FileSystem/MFFileSystemHTTP.o \
 	Source/Materials/MFMat_Effect.o \
 	Source/Materials/MFMat_Standard.o
 

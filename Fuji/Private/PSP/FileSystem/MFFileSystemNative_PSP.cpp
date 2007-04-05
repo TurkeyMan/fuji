@@ -181,10 +181,30 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	SceIoDirent findData;
 	int findStatus;
 
-	SceUID hFind = sceIoDopen(pSearchPattern);
+	// separate path and search pattern..
+	char *pPath = (char*)MFStr("%s%s", (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	const char *pPattern = pPath;
+
+	char *pLast = MFString_RChr(pPath, '/');
+	if(pLast)
+	{
+		*pLast = 0;
+		pPattern = pLast + 1;
+	}
+	else
+	{
+		// find pattern refers to current directory..
+		pPath = ".";
+	}
+
+	// open the directory
+	SceUID hFind = sceIoDopen(pPath);
 
 	if(hFind < 0)
+	{
+		MFDebug_Warn(2, MFStr("Couldnt open directory '%s' with search pattern '%s'", pPath, pPattern));
 		return false;
+	}
 
 	findStatus = sceIoDread(hFind, &findData);
 
@@ -199,7 +219,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	MFString_Copy((char*)pFindData->pFilename, findData.d_name);
 
 	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
-	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	pLast = MFString_RChr(pFindData->pSystemPath, '/');
 	if(pLast)
 		pLast[1] = 0;
 	else

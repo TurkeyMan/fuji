@@ -17,6 +17,11 @@ void MFModel_Draw(MFModel *pModel)
 	else
 		sceGuSetMatrix(GU_VIEW, (ScePspFMatrix4*)&MFView_GetWorldToViewMatrix());
 
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
@@ -29,7 +34,9 @@ void MFModel_Draw(MFModel *pModel)
 			{
 				MFMeshChunk_PSP *pMC = (MFMeshChunk_PSP*)&pSubobjects[a].pMeshChunks[b];
 
-				MFMaterial_SetMaterial(pMC->pMaterial);
+				if(!pMatOverride)
+					MFMaterial_SetMaterial(pMC->pMaterial);
+
 				MFRenderer_Begin();
 
 				sceGuDrawArray(GU_TRIANGLES, GU_TEXTURE_32BITF|GU_COLOR_8888|GU_NORMAL_32BITF|GU_VERTEX_32BITF|GU_TRANSFORM_3D, pMC->numVertices, 0, pMC->pVertexData);

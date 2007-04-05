@@ -305,6 +305,7 @@ enum MFFileSystemHandles
 
 	MFFSH_NativeFileSystem = 0,	/**< The native operating system FileSystem */
 	MFFSH_MemoryFileSystem,		/**< Memory file FileSystem */
+	MFFSH_CachedFileSystem,		/**< Cached file FileSystem */
 	MFFSH_ZipFileSystem,		/**< Zip file FileSystem */
 	MFFSH_HTTPFileSystem,		/**< HTTP file FileSystem */
 	MFFSH_FTPFileSystem,		/**< FTP file FileSystem */
