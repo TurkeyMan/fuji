@@ -316,6 +316,30 @@ static const int gGenericPS2ButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative,	// Button_ThumbRY
 };
 
+static const int gXPlorerButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	4,	// Button_X
+	3,	// Button_Y
+	-1,	// Button_White
+	-1,	// Button_Black
+	AID_Ry | AID_Clamp,	// Button_LeftTrigger
+	0,	// Button_RightTrigger
+	7,	// Button_Start
+	6,	// Button_Back
+	-1,	// Button_LeftThumb
+	-1,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Rx | AID_Full | AID_Negative,					// Button_ThumbLX
+	-1,	// Button_ThumbLY
+	AID_Rz,	// Button_ThumbRX
+	AID_Ry,	// Button_ThumbRY
+};
+
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -532,6 +556,30 @@ static const char * gGreenAsiaButtonNames[GamepadType_Max] =
 	"Unavailable",	// Button_ThumbLY
 	"Unavailable",	// Button_ThumbRX
 	"Unavailable"	// Button_ThumbRY
+};
+
+static const char * gXPlorerButtonNames[GamepadType_Max] =
+{
+	"Blue",			// Button_A
+	"Red",			// Button_B
+	"Orange",		// Button_X
+	"Yellow",		// Button_Y
+	"Unavailable",	// Button_White
+	"Unavailable",	// Button_Black
+	"Rock Out",		// Button_LeftTrigger
+	"Green",		// Button_RightTrigger
+	"Start",		// Button_Start
+	"Back",			// Button_Back
+	"Unavailable",	// Button_LeftThumb
+	"Unavailable",	// Button_RightThumb
+	"Up",			// Button_DUp
+	"Down",			// Button_DDown
+	"Left",			// Button_DLeft
+	"Right",		// Button_DRight
+	"Whammy",		// Button_ThumbLX
+	"Unavailable",	// Button_ThumbLY
+	"Motion",		// Button_ThumbRX
+	"Tilt"			// Button_ThumbRY
 };
 
 // Gamepad Info
@@ -788,6 +836,8 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[26]
 	},
 
+	// "MP-8868 Dual USB Joypad" 0409:005A
+
 	// Logitech Cordless RumblePad 2
 	{
 		"RumblePad 2",
@@ -795,6 +845,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046d, 0xc219,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
+		NULL
+	},
+
+	// Guitar Hero X-Plorer
+	{
+		"X-Plorer",
+		"Controller (Guitar Hero X-plorer  )",
+		0x1430, 0x4748,
+		gXPlorerButtonID,
+		gXPlorerButtonNames,
 		NULL
 	}
 };
