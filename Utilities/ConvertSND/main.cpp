@@ -195,6 +195,7 @@ int main(int argc, char *argv[])
 	}
 
 	pTemplate->magic = MFMAKEFOURCC('S', 'N', 'D', '1');
+	pTemplate->flags = 0;
 	pTemplate->format = targetFormat;
 	pTemplate->numSamples = numSamples;
 	pTemplate->numStreams = numStreams;

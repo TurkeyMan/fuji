@@ -203,18 +203,11 @@ bool MFFileNative_Exists(const char* pFilename)
 	MFCALLSTACK;
 
 	struct stat fileStats;
-	int rv;
 
-	rv = stat(pFilename, &fileStats);
-
-	if(rv == -1)
-	{
+	if(stat(pFilename, &fileStats) < 0)
 		return false;
-	}
-	else
-	{
-		return true;
-	}
+
+	return true;
 }
 
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
@@ -249,8 +242,8 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	if(!pFD)
 		return false;
 
-	stat statbuf;
-	if(stat(pFD, &statbuf) < 0)
+	struct stat statbuf;
+	if(stat(pFD->d_name, &statbuf) < 0)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
@@ -277,8 +270,8 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	if(!pFD)
 		return false;
 
-	stat statbuf;
-	if(stat(pFD, &statbuf) < 0)
+	struct stat statbuf;
+	if(stat(pFD->d_name, &statbuf) < 0)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
