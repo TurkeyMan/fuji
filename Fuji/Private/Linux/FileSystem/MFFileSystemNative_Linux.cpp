@@ -244,19 +244,19 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 		return false;
 	}
 
-	dirent *pFindData = readdir(hFind);
+	dirent *pFD = readdir(hFind);
 
-	if(!pFindData)
+	if(!pFD)
 		return false;
 
 	stat statbuf;
-	if(stat(pFindData, &statbuf) < 0)
+	if(stat(pFD, &statbuf) < 0)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
 							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0);
 	pFindData->fileSize = (uint64)statbuf.st_size;
-	MFString_Copy((char*)pFindData->pFilename, pFindData->d_name);
+	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
 
 	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
 	pLast = MFString_RChr(pFindData->pSystemPath, '/');
@@ -272,19 +272,19 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
-	dirent *pFindData = readdir((DIR*)pFind->pFilesystemData);
+	dirent *pFD = readdir((DIR*)pFind->pFilesystemData);
 
-	if(pFindData)
+	if(!pFD)
 		return false;
 
 	stat statbuf;
-	if(stat(pFindData, &statbuf) < 0)
+	if(stat(pFD, &statbuf) < 0)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
 							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0);
 	pFindData->fileSize = (uint64)statbuf.st_size;
-	MFString_Copy((char*)pFindData->pFilename, pFindData->d_name);
+	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
 
 	return true;
 }
