@@ -66,6 +66,10 @@ void MFSystem_HandleEventsPlatformSpecific()
 				{
 					atom = event.xclient.data.l[0];
 				}
+				else
+				{
+					atom = 0;
+				}
 
 				if(atom == wm_delete_window)
 				{

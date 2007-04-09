@@ -4,10 +4,12 @@
 
 struct MFSoundDataInternal
 {
+	uint32 reserved;
 };
 
 struct MFVoiceDataInternal
 {
+	uint32 reserved;
 };
 
 
