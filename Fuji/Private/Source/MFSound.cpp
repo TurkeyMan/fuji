@@ -5,6 +5,7 @@
 #include "MFFileSystem.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
+#include "MFThread.h"
 #include "DebugMenu.h"
 
 #if defined(_WINDOWS)
@@ -50,6 +51,8 @@ struct MFAudioStream
 MFPtrListDL<MFSound> gSoundBank;
 MFPtrListDL<MFVoice> gVoices;
 
+MFMutex gSoundMutex;
+
 int internalSoundDataSize = 0;
 int internalVoiceDataSize = 0;
 
@@ -65,6 +68,8 @@ MenuItemBool showSoundStats;
 void MFSound_InitModule()
 {
 	MFCALLSTACK;
+
+	gSoundMutex = MFThread_CreateMutex("Sound Mutex");
 
 	MFSound_InitModulePlatformSpecific(&internalSoundDataSize, &internalVoiceDataSize);
 
@@ -116,6 +121,8 @@ void MFSound_DeinitModule()
 
 	gVoices.Deinit();
 	gSoundBank.Deinit();
+
+	MFThread_DestroyMutex(gSoundMutex);
 }
 
 void MFSound_Update()
@@ -131,7 +138,11 @@ void MFSound_Update()
 		bool bFinished = MFSound_UpdateInternal(pV);
 
 		if(bFinished)
+		{
+			MFThread_LockMutex(gSoundMutex);
 			gVoices.Destroy(ppI);
+			MFThread_ReleaseMutex(gSoundMutex);
+		}
 
 		ppI++;
 	}
@@ -180,14 +191,6 @@ MFSound *MFSound_Create(const char *pName)
 		MFString_Copy(pSound->name, pName);
 
 		MFSound_CreateInternal(pSound);
-
-		// lock the buffers and copy in the data
-		void *pBuffer;
-		uint32 len;
-
-		MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
-		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], len);
-		MFSound_Unlock(pSound);
 	}
 
 	++pSound->refCount;
@@ -277,6 +280,11 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 {
 	MFCALLSTACK;
 
+	if(!pSound)
+		return NULL;
+
+	MFThread_LockMutex(gSoundMutex);
+
 	MFVoice *pVoice = gVoices.Create();
 	MFZeroMemory(pVoice, sizeof(MFVoice) + internalVoiceDataSize);
 	pVoice->flags = playFlags;
@@ -284,6 +292,8 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	pVoice->pInternal = (MFVoiceDataInternal*)((char*)pVoice + sizeof(MFVoice));
 
 	MFSound_PlayInternal(pVoice);
+
+	MFThread_ReleaseMutex(gSoundMutex);
 
 	return pVoice;
 }

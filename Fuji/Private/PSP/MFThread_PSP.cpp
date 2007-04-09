@@ -89,22 +89,22 @@ void MFThread_DestroyThread(MFThread thread)
 
 MFMutex MFThread_CreateMutex(const char *pName)
 {
-	return (MFMutex)MFThread_CreateSemaphore(pName, 1, 1);
+	return (MFMutex)sceKernelCreateSema(pName, 0, 1, 1, NULL);
 }
 
 void MFThread_DestroyMutex(MFMutex mutex)
 {
-	MFThread_DestroySemaphore((MFSemaphore)mutex);
+	sceKernelDeleteSema((SceUID)mutex);
 }
 
 void MFThread_LockMutex(MFMutex mutex)
 {
-	MFThread_WaitSemaphore((MFSemaphore)mutex);
+	sceKernelWaitSema((SceUID)mutex, 1, NULL);
 }
 
 void MFThread_ReleaseMutex(MFMutex mutex)
 {
-	MFThread_SignalSemaphore((MFSemaphore)mutex);
+	sceKernelSignalSema((SceUID)mutex, 1);
 }
 
 MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)

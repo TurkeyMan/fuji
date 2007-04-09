@@ -145,6 +145,14 @@ void MFSound_CreateInternal(MFSound *pSound)
 		desc.dwFlags |= DSBCAPS_CTRL3D;
 		pDirectSound->CreateSoundBuffer(&desc, &pSound->pInternal->p3DBuffer, NULL);
 	}
+
+	// lock the buffers and copy in the data
+	void *pBuffer;
+	uint32 len;
+
+	MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
+	MFCopyMemory(pBuffer, pTemplate->ppStreams[0], len);
+	MFSound_Unlock(pSound);
 }
 
 void MFSound_DestroyInternal(MFSound *pSound)

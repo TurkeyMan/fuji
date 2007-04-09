@@ -124,6 +124,8 @@ static MFRawMouse *pRawMice = NULL;
 static int rawMouseCount;
 
 static BOOL includeRDPMouse;
+
+bool gbAllowRawMouse = true;
 #endif
 
 // KEY to DIK mapping table
@@ -498,7 +500,14 @@ void MFInput_InitModulePlatformSpecific()
 
 	// create mouse device/s
 #if defined(ALLOW_RAW_INPUT)
-	if(gDefaults.input.allowMultipleMice)
+	// check we're running Windows XP
+
+	OSVERSIONINFO ver;
+	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	BOOL r = GetVersionEx(&ver);
+	gbAllowRawMouse = ver.dwMajorVersion >= 5 && ver.dwMinorVersion >= 1;
+
+	if(gbAllowRawMouse && gDefaults.input.allowMultipleMice)
 	{
 		InitRawMouse(false);
 
@@ -986,7 +995,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 #endif
 	{
 #if defined(ALLOW_RAW_INPUT)
-		if(gDefaults.input.allowMultipleMice)
+		if(gbAllowRawMouse && gDefaults.input.allowMultipleMice)
 		{
 			// read from the raw mouse
 			for(int a=0; a<MAX_RAW_MOUSE_BUTTONS; a++)
