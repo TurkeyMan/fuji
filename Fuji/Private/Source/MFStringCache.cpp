@@ -23,8 +23,8 @@ MFStringCache* MFStringCache_Create(uint32 maxSize)
 
 	pCache->size = maxSize;
 	pCache->pMem = (char*)&pCache[1];
-	pCache->pMem[0] = 0;
-	pCache->used = 1;
+	pCache->pMem[0] = pCache->pMem[1] = 0;
+	pCache->used = 2;
 
 	return pCache;
 }
@@ -43,8 +43,11 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 	MFDebug_Assert(pCache, "NULL String cache!");
 	MFDebug_Assert(pNewString, "Cannot add NULL string");
 
+	if(!*pNewString)
+		return pCache->pMem;
+
 	// find the string
-	char *pCurr = pCache->pMem;
+	char *pCurr = pCache->pMem + 1;
 	int newLength = MFString_Length(pNewString)+1;
 
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])

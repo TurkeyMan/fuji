@@ -34,6 +34,23 @@ int MFIniLine::GetInt(int index)
 	return atoi(GetString(index));
 }
 
+int MFIniLine::GetIntString(int index, const char **ppStrings, int numStrings)
+{
+	int i = 0;
+	const char *pString = GetString(index);
+
+	while(numStrings && ppStrings[i])
+	{
+		if(!MFString_CaseCmp(ppStrings[i], pString))
+			return i;
+
+		++i;
+		--numStrings;
+	}
+
+	return -1;
+}
+
 bool MFIniLine::GetBool(int index)
 {
 	if(index >= stringCount)
@@ -329,8 +346,19 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 		else if(*pSrc == '"')
 		{
-			bInQuotes = !bInQuotes;
-			pSrc++;
+			if(!bInQuotes)
+			{
+				bInQuotes = true;
+				++pSrc;
+			}
+			else
+			{
+				*pDst++ = 0;
+				pSrc++;
+				if(*pSrc == ',')
+					pSrc++;
+				return pSrc;
+			}
 		}
 		else
 		{

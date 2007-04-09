@@ -495,6 +495,8 @@ void MFInput_InitModulePlatformSpecific()
 		pKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE);
 		pKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
 		pKeyboard->Acquire();
+
+		MFDebug_Log(2, "Using DirectInput Keyboard.");
 	}
 	gKeyboardCount = 1;
 
@@ -524,6 +526,8 @@ void MFInput_InitModulePlatformSpecific()
 			pMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE));
 			pMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
 			pMouse->Acquire();
+
+			MFDebug_Log(2, "Using DirectInput Mouse.");
 		}
 		gMouseCount = 1;
 	}
@@ -536,6 +540,8 @@ void MFInput_InitModulePlatformSpecific()
 	{
 		if(XInputGetState(a, &state) == ERROR_SUCCESS)
 		{
+			MFDebug_Log(2, "Found XInput Gamepad.");
+
 			// we have an xinput controller, reserve 4 gamepad slots for hotswapping
 			gPCJoysticks[0].XInputID = 0;
 			gPCJoysticks[1].XInputID = 1;
@@ -1661,8 +1667,8 @@ HRESULT IsXInputDevice( const GUID* pGuidProductFromDirectInput )
             hr = pDevices[iDevice]->Get( bstrDeviceID, 0L, &var, NULL, NULL );
             if( SUCCEEDED( hr ) && var.vt == VT_BSTR && var.bstrVal != NULL )
             {
-                // Check if the device ID contains "IG_".  If it does, then it's an XInput device
-				    // This information can not be found from DirectInput
+				// Check if the device ID contains "IG_".  If it does, then it's an XInput device
+				// This information can not be found from DirectInput
                 if( wcsstr( var.bstrVal, L"IG_" ) )
                 {
                     // If it does, then get the VID/PID from var.bstrVal

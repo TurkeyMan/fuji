@@ -37,6 +37,7 @@ public:
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);
+	int GetIntString(int index, const char **ppStrings, int numStrings = -1);
 	bool GetBool(int index);
 	MFVector GetVector2(int index);
 	MFVector GetVector3(int index);

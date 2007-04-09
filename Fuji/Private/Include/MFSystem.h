@@ -147,6 +147,8 @@ MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MF
 
 MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
+const char * MFSystem_GetSettingString(int tabDepth);
+
 /**
  * Gets the current platform.
  * Gets the current running platform.

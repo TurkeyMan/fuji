@@ -465,6 +465,15 @@ MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
 	return pSystemCallbacks[callback];
 }
 
+const char * MFSystem_GetSettingString(int tabDepth)
+{
+	const char *pSettings = "";
+
+//	pSettings = MFStr("\ttest 0\r\n", tabDepth, "");
+
+	return pSettings;
+}
+
 void MFSystem_UpdateTimeDelta()
 {
 	MFCALLSTACK;
