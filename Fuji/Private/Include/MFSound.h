@@ -211,6 +211,29 @@ void MFSound_SetMasterVolume(float volume);
 /*** Music playback ***/
 
 /**
+ * Stream callbacks.
+ * Callbacks used to access the audio stream.
+ */
+struct MFStreamCallbacks
+{
+	void (*pCreateStream)(MFAudioStream*, const char *);	/**< Create stream callback. */
+	int (*pGetSamples)(MFAudioStream*, void *, uint32);		/**< Callback to get samples from the stream. */
+	void (*pDestroyStream)(MFAudioStream*);					/**< Destroy stream callback. */
+	void (*pSeekStream)(MFAudioStream*, float);				/**< Seek stream callbacks. */
+	float (*pGetTime)(MFAudioStream*);						/**< Get the current stream time. */
+};
+
+/**
+ * Register audio stream handler.
+ * Registers an audio stream handler.
+ * @param pStreamType A name for the type of stream.
+ * @param pStreamExtension The file extension found on this stream format.
+ * @param pCallbacks Pointer to an MFStreamCallbacks structure which defines the stream access callbacks.
+ * @return None.
+ */
+void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks);
+
+/**
  * Begin stream playback.
  * Begin playback of an audio stream.
  * @param pFilename Filename of music track.

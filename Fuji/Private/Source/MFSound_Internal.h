@@ -3,6 +3,10 @@
 
 #include "MFSound.h"
 
+struct MFSoundDataInternal;
+struct MFVoiceDataInternal;
+struct MFStreamCallbacks;
+
 void MFSound_InitModule();
 void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize);
 void MFSound_DeinitModule();
@@ -33,9 +37,6 @@ enum MFWaveFormat
 	MFWF_Max,
 	MFWF_ForceInt = 0x7FFFFFFF
 };
-
-struct MFSoundDataInternal;
-struct MFVoiceDataInternal;
 
 struct MFSoundTemplate
 {
@@ -79,6 +80,35 @@ enum MFPlayFlagsInternal
 {
 	MFPF_Paused = MFBIT(28),
 	MFPF_Locked = MFBIT(29)
+};
+
+
+// stream structures
+
+struct MFStreamHandler
+{
+	char streamType[64];
+	char streamExtension[8];
+	MFStreamCallbacks callbacks;
+};
+
+struct MFAudioStream
+{
+	char name[256];
+
+	MFStreamHandler *pStreamHandler;
+	void *pStreamData;
+
+	MFSound *pStreamBuffer;
+	MFVoice *pStreamVoice;
+
+	uint32 bufferSize;
+	uint32 playBackOffset;
+
+	float trackLength;
+	float currentTime;
+
+	bool playing;
 };
 
 #endif

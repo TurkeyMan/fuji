@@ -14,7 +14,10 @@
 
 #if defined(VORBIS_STREAM)
 	#include <vorbis/vorbisfile.h>
+
+	void MFSound_RegisterVorbis();
 #endif
+
 
 /**** Foreward Declarations ****/
 
@@ -24,32 +27,12 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream);
 
 /**** Structures ****/
 
-struct MFAudioStream
-{
-	char name[256];
-
-#if defined(VORBIS_STREAM)
-	OggVorbis_File vorbisFile;
-	vorbis_info *pInfo;
-#endif
-
-	MFSound *pStreamBuffer;
-	MFVoice *pStreamVoice;
-
-	uint32 bufferSize;
-	uint32 playBackOffset;
-
-	float trackLength;
-	float currentTime;
-
-	bool playing;
-};
-
 
 /**** Globals ****/
 
 MFPtrListDL<MFSound> gSoundBank;
 MFPtrListDL<MFVoice> gVoices;
+MFPtrList<MFStreamHandler> gStreamHandlers;
 
 int internalSoundDataSize = 0;
 int internalVoiceDataSize = 0;
@@ -71,9 +54,14 @@ void MFSound_InitModule()
 
 	gSoundBank.Init("Sound Bank", gDefaults.sound.maxSounds, sizeof(MFSound) + internalSoundDataSize);
 	gVoices.Init("Voice Bank", gDefaults.sound.maxVoices, sizeof(MFVoice) + internalVoiceDataSize);
+	gStreamHandlers.Init("Stream handlers", 16);
 
 	gMusicTracks = (MFAudioStream*)MFHeap_Alloc(sizeof(MFAudioStream) * gDefaults.sound.maxMusicTracks);
 	MFZeroMemory(gMusicTracks, sizeof(MFAudioStream)*gDefaults.sound.maxMusicTracks);
+
+#if defined(VORBIS_STREAM)
+	MFSound_RegisterVorbis();
+#endif
 
 #if !defined(_RETAIL)
 	DebugMenu_AddMenu("Sound Options", "Fuji Options");
@@ -115,6 +103,11 @@ void MFSound_DeinitModule()
 
 	MFSound_DeinitModulePlatformSpecific();
 
+	MFStreamHandler **ppSI = gStreamHandlers.Begin();
+	while(*ppSI)
+		MFHeap_Free(*ppSI);
+
+	gStreamHandlers.Deinit();
 	gVoices.Deinit();
 	gSoundBank.Deinit();
 }
@@ -183,6 +176,14 @@ MFSound *MFSound_Create(const char *pName)
 		MFString_Copy(pSound->name, pName);
 
 		MFSound_CreateInternal(pSound);
+
+		// lock the buffers and copy in the data
+		void *pBuffer;
+		uint32 len;
+
+		MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
+		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], len);
+		MFSound_Unlock(pSound);
 	}
 
 	++pSound->refCount;
@@ -219,7 +220,7 @@ MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannel
 
 		MFSound_CreateInternal(pSound);
 
-		// clear buffer
+		// clear the buffer
 		void *pBuffer;
 		uint32 len;
 
@@ -287,19 +288,21 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 }
 
 
-#if defined(VORBIS_STREAM)
-//
-// Vorbis Music Functions
-//
-int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
-{
-	return MFFile_StdSeek(datasource, (long)offset, whence);
-}
-#endif
-
 //
 // MFAudioStream related functions
 //
+
+void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks)
+{
+	MFStreamHandler *pHandler = (MFStreamHandler*)MFHeap_Alloc(sizeof(MFStreamHandler));
+
+	MFString_Copy(pHandler->streamType, pStreamType);
+	MFString_Copy(pHandler->streamExtension, pStreamExtension);
+	pHandler->callbacks = *pCallbacks;
+
+	gStreamHandlers.Create(pHandler);
+}
+
 MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 {
 	MFCALLSTACK;
@@ -312,43 +315,34 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 
 	MFAudioStream *pStream = &gMusicTracks[t];
 
-#if defined(VORBIS_STREAM)
-	// open vorbis file
-	MFFile* hFile = MFFileSystem_Open(pFilename);
-	if(!hFile)
-		return NULL;
+	// find matching extension
+	MFStreamHandler **ppI = gStreamHandlers.Begin();
 
-	// setup vorbis read callbacks
-	ov_callbacks callbacks;
-	callbacks.read_func = MFFile_StdRead;
-	callbacks.seek_func = MFSound_VorbisSeek;
-	callbacks.close_func = MFFile_StdClose;
-	callbacks.tell_func = MFFile_StdTell;
-
-	// open vorbis file
-	if(ov_test_callbacks(hFile, &pStream->vorbisFile, NULL, 0, callbacks))
+	while(*ppI)
 	{
-		MFDebug_Assert(false, "Not a vorbis file.");
-		return NULL;
+		int extLen = MFString_Length((*ppI)->streamExtension);
+		int fileLen = MFString_Length(pFilename);
+
+		if(extLen < fileLen && !MFString_CaseCmp((*ppI)->streamExtension, pFilename + (fileLen - extLen)))
+		{
+			pStream->pStreamHandler = *ppI;
+			break;
+		}
 	}
 
-	ov_test_open(&pStream->vorbisFile);
+	if(!pStream->pStreamHandler)
+		return NULL;
 
-	// copy the filename
+	// attempt to create the stream...
+	pStream->pStreamHandler->callbacks.pCreateStream(pStream, pFilename);
+
+	if(!pStream->pStreamBuffer)
+		return NULL;
+
+	// init the stream
 	MFString_Copy(pStream->name, pFilename);
-
-	// get vorbis file info
-	pStream->pInfo = ov_info(&pStream->vorbisFile, -1);
-
-	pStream->trackLength = (float)ov_time_total(&pStream->vorbisFile, -1);
 	pStream->currentTime = 0.0f;
 	pStream->playBackOffset = 0;
-	pStream->bufferSize = pStream->pInfo->rate * pStream->pInfo->channels * 2;
-
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pStream->pInfo->rate, pStream->pInfo->channels, 16, pStream->pInfo->rate, MFSF_Dynamic | MFSF_Circular);
-#else
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, 44100, 2, 16, 44100, MFSF_Dynamic | MFSF_Circular);
-#endif
 
 	// fill the buffer
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
@@ -391,10 +385,8 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 	if(pStream->playing)
 		MFSound_Stop(pStream->pStreamVoice);
 
-#if defined(VORBIS_STREAM)
-	pStream->pInfo = NULL;
-	ov_clear(&pStream->vorbisFile);
-#endif
+	// call stream handler destroy
+	pStream->pStreamHandler->callbacks.pDestroyStream(pStream);
 
 	MFSound_Destroy(pStream->pStreamBuffer);
 	pStream->pStreamBuffer = NULL;
@@ -404,9 +396,7 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
-#if defined(VORBIS_STREAM)
-	ov_time_seek(&pStream->vorbisFile, seconds);
-#endif
+	pStream->pStreamHandler->callbacks.pSeekStream(pStream, seconds);
 
 	if(pStream->playing)
 		MFSound_Pause(pStream->pStreamVoice, true);
@@ -449,7 +439,6 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 
 	void *pData1, *pData2;
 	uint32 bytes1, bytes2;
-	int currentBitstream;
 	uint32 bufferFed = 0;
 
 	// fill buffer
@@ -459,15 +448,12 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	uint32 bytesToWrite = bytes1;
 	bool wrapped = false;
 
-#if defined(VORBIS_STREAM)
 	while(bufferFed < bytesToWrite)
 	{
-		int r = ov_read(&pStream->vorbisFile, pData, bytesToWrite-bufferFed, 0, 2, 1, &currentBitstream);
+		int r = pStream->pStreamHandler->callbacks.pGetSamples(pStream, pData, bytesToWrite-bufferFed);
 
 		if(!r)
-		{
-			ov_time_seek(&pStream->vorbisFile, 0.0);
-		}
+			pStream->pStreamHandler->callbacks.pSeekStream(pStream, 0.0f);
 
 		pData += r;
 		bufferFed += r;
@@ -480,7 +466,6 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 			wrapped = true;
 		}
 	}
-#endif
 
 	// unlock buffer
 	MFSound_Unlock(pStream->pStreamBuffer);
@@ -489,138 +474,246 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	pStream->playBackOffset = (pStream->playBackOffset + bytes) % pStream->bufferSize;
 
 	// update playback time
-#if defined(VORBIS_STREAM)
-	pStream->currentTime = (float)ov_time_tell(&pStream->vorbisFile);
-#else
-	pStream->currentTime = 0.0f;
-#endif
+	pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
 }
 
+
+// vorbis stream handler
+
+#if defined(VORBIS_STREAM)
+void DestroyVorbisStream(MFAudioStream *pStream);
+
+struct MFVorbisStream
+{
+	OggVorbis_File vorbisFile;
+	vorbis_info *pInfo;
+};
+
+int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
+{
+	return MFFile_StdSeek(datasource, (long)offset, whence);
+}
+
+void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
+{
+	MFCALLSTACK;
+
+	MFVorbisStream *pVS = (MFVorbisStream*)MFHeap_Alloc(sizeof(MFVorbisStream));
+	pStream->pStreamData = pVS;
+
+	// open vorbis file
+	MFFile* hFile = MFFileSystem_Open(pFilename);
+	if(!hFile)
+		return;
+
+	// setup vorbis read callbacks
+	ov_callbacks callbacks;
+	callbacks.read_func = MFFile_StdRead;
+	callbacks.seek_func = MFSound_VorbisSeek;
+	callbacks.close_func = MFFile_StdClose;
+	callbacks.tell_func = MFFile_StdTell;
+
+	// open vorbis file
+	if(ov_test_callbacks(hFile, &pVS->vorbisFile, NULL, 0, callbacks))
+	{
+		MFDebug_Assert(false, "Not a vorbis file.");
+		MFHeap_Free(pVS);
+		return;
+	}
+
+	ov_test_open(&pVS->vorbisFile);
+
+	// get vorbis file info
+	pVS->pInfo = ov_info(&pVS->vorbisFile, -1);
+
+	pStream->trackLength = (float)ov_time_total(&pVS->vorbisFile, -1);
+	pStream->bufferSize = pVS->pInfo->rate * pVS->pInfo->channels * 2;
+
+	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pVS->pInfo->rate, pVS->pInfo->channels, 16, pVS->pInfo->rate, MFSF_Dynamic | MFSF_Circular);
+
+	if(!pStream->pStreamBuffer)
+		DestroyVorbisStream(pStream);
+}
+
+void DestroyVorbisStream(MFAudioStream *pStream)
+{
+	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+
+	pVS->pInfo = NULL;
+	ov_clear(&pVS->vorbisFile);
+
+	MFHeap_Free(pVS);
+}
+
+int GetVorbisSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
+{
+	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+
+	int currentBitstream;
+	return ov_read(&pVS->vorbisFile, (char*)pBuffer, bytes, 0, 2, 1, &currentBitstream);
+}
+
+void SeekVorbisStream(MFAudioStream *pStream, float seconds)
+{
+	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+	ov_time_seek(&pVS->vorbisFile, seconds);
+}
+
+float GetVorbisTime(MFAudioStream *pStream)
+{
+	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+	return (float)ov_time_tell(&pVS->vorbisFile);
+}
+
+void MFSound_RegisterVorbis()
+{
+	MFStreamCallbacks callbacks;
+	callbacks.pCreateStream = CreateVorbisStream;
+	callbacks.pDestroyStream = DestroyVorbisStream;
+	callbacks.pGetSamples = GetVorbisSamples;
+	callbacks.pGetTime = GetVorbisTime;
+	callbacks.pSeekStream = SeekVorbisStream;
+
+	MFSound_RegisterStreamHandler("Vorbis Audio", ".ogg", &callbacks);
+}
+#endif
+
+
+// MFSound debug draw
 
 void MFSound_Draw()
 {
 	MFCALLSTACK;
 
-#if defined(VORBIS_STREAM)
 #if !defined(_RETAIL)
 	if(!showSoundStats) return;
 
 	float y = 20.0f;
 
-	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
+	MFVoice **ppI = gVoices.Begin();
+
+	while(*ppI)
 	{
-		if(gMusicTracks[a].playing)
-		{
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Track %d: %s", a, gMusicTracks[a].name);
-			y += 20.0f;
+		MFVoice *pV = *ppI;
+		MFSoundTemplate *pT = pV->pSound->pTemplate;
 
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", gMusicTracks[a].pInfo->channels, gMusicTracks[a].pInfo->rate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
-			y += 20.0f;
+		uint32 bufferSize = (pT->numSamples * pT->numChannels * pT->bitsPerSample) >> 3;
 
-			static float bitrate = 0.0f;
-			long br = ov_bitrate_instant(&gMusicTracks[a].vorbisFile);
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Voice: '%s'", pV->pSound->name);
+		y += 20.0f;
 
-			if(br)
-				bitrate = (float)br*0.02f + bitrate * 0.98f;
+//		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", pV->pSound->pTemplate->numChannels, pV->pSound->pTemplate->sampleRate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d", pT->numChannels, pT->sampleRate);
+		y += 20.0f;
+/*
+#if defined(VORBIS_STREAM)
+		// render bitrate
+		static float bitrate = 0.0f;
+		long br = ov_bitrate_instant(&gMusicTracks[a].vorbisFile);
 
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
-			y += 20.0f;
+		if(br)
+			bitrate = (float)br*0.02f + bitrate * 0.98f;
 
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
-			y += 25.0f;
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "CurrentBitrate: %dkbps", ((int)bitrate)/1000);
+		y += 20.0f;
 
-			MFPrimitive(PT_TriStrip|PT_Untextured);
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
+		y += 25.0f;
 
-			MFBegin(16);
-			MFSetColour(0xFFFFFFFF);
-			MFSetPosition(23.0f, y-2.0f, 0.0f);
-			MFSetPosition(617.0f, y-2.0f, 0.0f);
-			MFSetPosition(23.0f, y+22.0f, 0.0f);
-			MFSetPosition(617.0f, y+22.0f, 0.0f);
+		MFPrimitive(PT_TriStrip|PT_Untextured);
 
-			MFSetPosition(617.0f, y+22.0f, 0.0f);
-			MFSetPosition(25.0f, y, 0.0f);
+		MFBegin(16);
+		MFSetColour(0xFFFFFFFF);
+		MFSetPosition(23.0f, y-2.0f, 0.0f);
+		MFSetPosition(617.0f, y-2.0f, 0.0f);
+		MFSetPosition(23.0f, y+22.0f, 0.0f);
+		MFSetPosition(617.0f, y+22.0f, 0.0f);
 
-			MFSetColour(0xFF404040);
-			MFSetPosition(25.0f, y, 0.0f);
-			MFSetPosition(615.0f, y, 0.0f);
-			MFSetPosition(25.0f, y+20.0f, 0.0f);
-			MFSetPosition(615.0f, y+20.0f, 0.0f);
+		MFSetPosition(617.0f, y+22.0f, 0.0f);
+		MFSetPosition(25.0f, y, 0.0f);
 
-			float xPlayback = 25.0f + (615.0f-25.0f) * (gMusicTracks[a].currentTime/gMusicTracks[a].trackLength);
+		MFSetColour(0xFF404040);
+		MFSetPosition(25.0f, y, 0.0f);
+		MFSetPosition(615.0f, y, 0.0f);
+		MFSetPosition(25.0f, y+20.0f, 0.0f);
+		MFSetPosition(615.0f, y+20.0f, 0.0f);
 
-			MFSetPosition(615.0f, y+20.0f, 0.0f);
-			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
+		float xPlayback = 25.0f + (615.0f-25.0f) * (gMusicTracks[a].currentTime/gMusicTracks[a].trackLength);
 
-			MFSetColour(MakeVector(0.5f, 0.5f, 1, 1));
-			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xPlayback+1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xPlayback-1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xPlayback+1.0f, y+21.0f, 0.0f);
-			MFEnd();
+		MFSetPosition(615.0f, y+20.0f, 0.0f);
+		MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
 
-			y += 30.0f;
+		MFSetColour(MakeVector(0.5f, 0.5f, 1, 1));
+		MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xPlayback+1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xPlayback-1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xPlayback+1.0f, y+21.0f, 0.0f);
+		MFEnd();
 
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
-
-			MFPrimitive(PT_TriStrip|PT_Untextured);
-
-			MFBegin(28);
-			MFSetColour(0xFFFFFFFF);
-			MFSetPosition(98.0f, y-2.0f, 0.0f);
-			MFSetPosition(502.0f, y-2.0f, 0.0f);
-			MFSetPosition(98.0f, y+22.0f, 0.0f);
-			MFSetPosition(502.0f, y+22.0f, 0.0f);
-
-			MFSetPosition(502.0f, y+22.0f, 0.0f);
-			MFSetPosition(100.0f, y, 0.0f);
-
-			MFSetColour(0xFF404040);
-			MFSetPosition(100.0f, y, 0.0f);
-			MFSetPosition(500.0f, y, 0.0f);
-			MFSetPosition(100.0f, y+20.0f, 0.0f);
-			MFSetPosition(500.0f, y+20.0f, 0.0f);
-
-			uint32 playCursor, writeCursor;
-			playCursor = MFSound_GetPlayCursor(gMusicTracks[a].pStreamVoice, &writeCursor);
-
-			float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)gMusicTracks[a].bufferSize);
-
-			MFSetPosition(500.0f, y+20.0f, 0.0f);
-			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
-
-			MFSetColour(0xFFFFFF00);
-			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
-
-			float xWriteCursor = 100.0f + (500.0f-100.0f) * ((float)writeCursor / (float)gMusicTracks[a].bufferSize);
-
-			MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
-
-			MFSetColour(0xFF0000FF);
-			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
-
-			float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].playBackOffset / (float)gMusicTracks[a].bufferSize);
-
-			MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
-
-			MFSetColour(0xFFFF8000);
-			MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xBufferFilled+1.0f, y-1.0f, 0.0f);
-			MFSetPosition(xBufferFilled-1.0f, y+21.0f, 0.0f);
-			MFSetPosition(xBufferFilled+1.0f, y+21.0f, 0.0f);
-			MFEnd();
-
-			y += 35.0f;
-		}
-	}
+		y += 30.0f;
 #endif
+*/
+
+		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
+
+		MFPrimitive(PT_TriStrip|PT_Untextured);
+
+		MFBegin(28);
+		MFSetColour(0xFFFFFFFF);
+		MFSetPosition(98.0f, y-2.0f, 0.0f);
+		MFSetPosition(502.0f, y-2.0f, 0.0f);
+		MFSetPosition(98.0f, y+22.0f, 0.0f);
+		MFSetPosition(502.0f, y+22.0f, 0.0f);
+
+		MFSetPosition(502.0f, y+22.0f, 0.0f);
+		MFSetPosition(100.0f, y, 0.0f);
+
+		MFSetColour(0xFF404040);
+		MFSetPosition(100.0f, y, 0.0f);
+		MFSetPosition(500.0f, y, 0.0f);
+		MFSetPosition(100.0f, y+20.0f, 0.0f);
+		MFSetPosition(500.0f, y+20.0f, 0.0f);
+
+		uint32 playCursor, writeCursor;
+		playCursor = MFSound_GetPlayCursor(pV, &writeCursor);
+
+		float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)bufferSize);
+
+		MFSetPosition(500.0f, y+20.0f, 0.0f);
+		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
+
+		MFSetColour(0xFFFFFF00);
+		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
+
+		float xWriteCursor = 100.0f + (500.0f-100.0f) * ((float)writeCursor / (float)bufferSize);
+
+		MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
+
+		MFSetColour(0xFF0000FF);
+		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
+/*
+		float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].playBackOffset / (float)bufferSize);
+
+		MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
+
+		MFSetColour(0xFFFF8000);
+		MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xBufferFilled+1.0f, y-1.0f, 0.0f);
+		MFSetPosition(xBufferFilled-1.0f, y+21.0f, 0.0f);
+		MFSetPosition(xBufferFilled+1.0f, y+21.0f, 0.0f);
+		MFEnd();
+*/
+		y += 35.0f;
+
+		ppI++;
+	}
 #endif
 }
