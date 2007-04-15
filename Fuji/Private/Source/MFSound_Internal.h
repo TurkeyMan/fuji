@@ -9,7 +9,8 @@ void MFSound_DeinitModule();
 void MFSound_DeinitModulePlatformSpecific();
 
 void MFSound_Update();
-bool MFSound_UpdateInternal(MFVoice *pVoice);
+void MFSound_UpdateInternal();
+bool MFSound_UpdateVoiceInternal(MFVoice *pVoice);
 
 void MFSound_Draw();
 

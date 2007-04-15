@@ -19,6 +19,8 @@ void MFInputPC_Acquire(bool acquire);
 int HandleRawMouseMessage(HANDLE hDevice);
 #endif
 
+uint8 gWindowsKeys[256];
+
 IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
 
@@ -121,6 +123,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					MFDisplay_ResetDisplay();
 				}
+
+				// scan key states...
+
+				// using GetKeyState() for windows keystates
+
+				// or read the state from directinput
 			}
 			else
 			{
@@ -215,6 +223,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				return 0;
 			}
 #endif
+
+		case WM_KEYDOWN:
+			gWindowsKeys[wParam] = 1;
+			break;
+
+		case WM_KEYUP:
+			gWindowsKeys[wParam] = 0;
+			break;
 	}
 
     return DefWindowProc(hWnd, message, wParam, lParam);
@@ -382,6 +398,8 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 	DebugMenu_AddItem("Apply", "Display Options", &applyDisplayMode, ApplyDisplayModeCallback);
 	sprintf(pCurrentRes, "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+
+	MFZeroMemory(gWindowsKeys, sizeof(gWindowsKeys));
 
 	return 0;
 }

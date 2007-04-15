@@ -51,8 +51,6 @@ struct MFAudioStream
 MFPtrListDL<MFSound> gSoundBank;
 MFPtrListDL<MFVoice> gVoices;
 
-MFMutex gSoundMutex;
-
 int internalSoundDataSize = 0;
 int internalVoiceDataSize = 0;
 
@@ -68,8 +66,6 @@ MenuItemBool showSoundStats;
 void MFSound_InitModule()
 {
 	MFCALLSTACK;
-
-	gSoundMutex = MFThread_CreateMutex("Sound Mutex");
 
 	MFSound_InitModulePlatformSpecific(&internalSoundDataSize, &internalVoiceDataSize);
 
@@ -121,8 +117,6 @@ void MFSound_DeinitModule()
 
 	gVoices.Deinit();
 	gSoundBank.Deinit();
-
-	MFThread_DestroyMutex(gSoundMutex);
 }
 
 void MFSound_Update()
@@ -135,14 +129,10 @@ void MFSound_Update()
 	{
 		MFVoice *pV = *ppI;
 
-		bool bFinished = MFSound_UpdateInternal(pV);
+		bool bFinished = MFSound_UpdateVoiceInternal(pV);
 
 		if(bFinished)
-		{
-			MFThread_LockMutex(gSoundMutex);
 			gVoices.Destroy(ppI);
-			MFThread_ReleaseMutex(gSoundMutex);
-		}
 
 		ppI++;
 	}
@@ -154,6 +144,8 @@ void MFSound_Update()
 			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
 		}
 	}
+
+	MFSound_UpdateInternal();
 }
 
 MFSound *MFSound_Create(const char *pName)
@@ -283,8 +275,6 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	if(!pSound)
 		return NULL;
 
-	MFThread_LockMutex(gSoundMutex);
-
 	MFVoice *pVoice = gVoices.Create();
 	MFZeroMemory(pVoice, sizeof(MFVoice) + internalVoiceDataSize);
 	pVoice->flags = playFlags;
@@ -292,8 +282,6 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	pVoice->pInternal = (MFVoiceDataInternal*)((char*)pVoice + sizeof(MFVoice));
 
 	MFSound_PlayInternal(pVoice);
-
-	MFThread_ReleaseMutex(gSoundMutex);
 
 	return pVoice;
 }

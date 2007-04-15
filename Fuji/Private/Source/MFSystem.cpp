@@ -106,7 +106,8 @@ MFDefaults gDefaults =
 	{
 		true,			// allowMultipleMice
 		true,			// mouseZeroIsSystemMouse
-		true			// systemMouseUseWindowsCursor
+		true,			// systemMouseUseWindowsCursor
+		true			// useDirectInputKeyboard
 	},
 
 	// MiscellaneousDefaults

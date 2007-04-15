@@ -128,161 +128,10 @@ static BOOL includeRDPMouse;
 bool gbAllowRawMouse = true;
 #endif
 
-// KEY to DIK mapping table
-uint8 KEYtoDIK[256] =
-{
-	0, // KEY_NONE = 0,
-	DIK_UP, // KEY_UP,
-	DIK_DOWN, // KEY_DOWN,
-	DIK_LEFT, // KEY_LEFT,
-	DIK_RIGHT, // KEY_RIGHT,
-	DIK_APPS, // KEY_APPS,			// on windows keyboards
-	DIK_LWIN, // KEY_LWIN,			// on windows keyboards
-	DIK_RWIN, // KEY_RWIN,			// on windows keyboards
-	DIK_BACK, // KEY_BACKSPACE,
-	DIK_TAB, // KEY_TAB,
-	DIK_SYSRQ, // KEY_PRINTSCREEN,
-	DIK_SCROLL, // KEY_SCROLLLOCK,
-	DIK_PAUSE, // KEY_BREAK,
-	DIK_RETURN, // KEY_RETURN,
-	DIK_F1, // KEY_F1,
-	DIK_F2, // KEY_F2,
-	DIK_F3, // KEY_F3,
-	DIK_F4, // KEY_F4,
-	DIK_F5, // KEY_F5,
-	DIK_F6, // KEY_F6,
-	DIK_F7, // KEY_F7,
-	DIK_F8, // KEY_F8,
-	DIK_F9, // KEY_F9,
-	DIK_F10, // KEY_F10,
-	DIK_F11, // KEY_F11,
-	DIK_F12, // KEY_F12,
-	DIK_OEM_102, // KEY_OEM_102,		// on german keyboard
-	DIK_ESCAPE, // KEY_ESCAPE,
-	DIK_MYCOMPUTER, // KEY_MYCOMPUTER,		// on multimedia keyboards
-	DIK_MAIL, // KEY_MAIL,			// on multimedia keyboards
-	DIK_CALCULATOR, // KEY_CALCULATOR,		// on multimedia keyboards
-	DIK_STOP, // KEY_STOP,			// japanese keyboard
-	DIK_SPACE, // KEY_SPACE,
-	DIK_INSERT, // KEY_INSERT,
-	DIK_DELETE, // KEY_DELETE,
-	DIK_HOME, // KEY_HOME,
-	DIK_END, // KEY_END,
-	DIK_PRIOR, // KEY_PAGEUP,
-	DIK_NEXT, // KEY_PAGEDOWN,
-	DIK_APOSTROPHE, // KEY_APOSTROPHE,
-	DIK_ABNT_C1, // KEY_ABNT_C1,		// on brazilian keyboard
-	DIK_ABNT_C2, // KEY_ABNT_C2,		// on brazilian keyboard
-	DIK_MULTIPLY, // KEY_ASTERISK,
-	DIK_ADD, // KEY_PLUS,
-	DIK_COMMA, // KEY_COMMA,
-	DIK_MINUS, // KEY_HYPHEN,
-	DIK_PERIOD, // KEY_PERIOD,
-	DIK_SLASH, // KEY_SLASH,
-	DIK_0, // KEY_0,
-	DIK_1, // KEY_1,
-	DIK_2, // KEY_2,
-	DIK_3, // KEY_3,
-	DIK_4, // KEY_4,
-	DIK_5, // KEY_5,
-	DIK_6, // KEY_6,
-	DIK_7, // KEY_7,
-	DIK_8, // KEY_8,
-	DIK_9, // KEY_9,
-	DIK_NUMPADCOMMA, // KEY_NUMPADCOMMA,	// japanese keyboard
-	DIK_SEMICOLON, // KEY_SEMICOLON,
-	DIK_NUMPADEQUALS, // KEY_NUMPADEQUALS,	// japanese keyboard
-	DIK_EQUALS, // KEY_EQUALS,
-	DIK_SLEEP, // KEY_SLEEP,			// on windows keyboards
-	DIK_WAKE, // KEY_WAKE,			// on windows keyboards
-	DIK_POWER, // KEY_POWER,			// on windows keyboards
-	DIK_A, // KEY_A,
-	DIK_B, // KEY_B,
-	DIK_C, // KEY_C,
-	DIK_D, // KEY_D,
-	DIK_E, // KEY_E,
-	DIK_F, // KEY_F,
-	DIK_G, // KEY_G,
-	DIK_H, // KEY_H,
-	DIK_I, // KEY_I,
-	DIK_J, // KEY_J,
-	DIK_K, // KEY_K,
-	DIK_L, // KEY_L,
-	DIK_M, // KEY_M,
-	DIK_N, // KEY_N,
-	DIK_O, // KEY_O,
-	DIK_P, // KEY_P,
-	DIK_Q, // KEY_Q,
-	DIK_R, // KEY_R,
-	DIK_S, // KEY_S,
-	DIK_T, // KEY_T,
-	DIK_U, // KEY_U,
-	DIK_V, // KEY_V,
-	DIK_W, // KEY_W,
-	DIK_X, // KEY_X,
-	DIK_Y, // KEY_Y,
-	DIK_Z, // KEY_Z,
-	DIK_UNDERLINE, // KEY_UNDERLINE,		// japanese keyboard
-	DIK_LBRACKET, // KEY_LBRACKET,
-	DIK_BACKSLASH, // KEY_BACKSLASH,
-	DIK_RBRACKET, // KEY_RBRACKET,
-	DIK_F13, // KEY_F13,			// japanese keyboard
-	DIK_F14, // KEY_F14,			// japanese keyboard
-	DIK_GRAVE, // KEY_GRAVE,
-	DIK_F15, // KEY_F15,			// japanese keyboard
-	DIK_UNLABELED, // KEY_UNLABELED,		// japanese keyboard
-	DIK_LCONTROL, // KEY_LCONTROL,
-	DIK_LMENU, // KEY_LALT,
-	DIK_LSHIFT, // KEY_LSHIFT,
-	DIK_RCONTROL, // KEY_RCONTROL,
-	DIK_RMENU, // KEY_RALT,
-	DIK_RSHIFT, // KEY_RSHIFT,
-	DIK_CAPITAL, // KEY_CAPITAL,
+extern uint8 gWindowsKeys[256];
 
-	DIK_NUMLOCK, // KEY_NUMLOCK,
-	DIK_DIVIDE, // KEY_DIVIDE,
-	DIK_SUBTRACT, // KEY_SUBTRACT,
-	DIK_DECIMAL, // KEY_DECIMAL
-	DIK_NUMPAD0, // KEY_NUMPAD0,
-	DIK_NUMPAD1, // KEY_NUMPAD1,
-	DIK_NUMPAD2, // KEY_NUMPAD2,
-	DIK_NUMPAD3, // KEY_NUMPAD3,
-	DIK_NUMPAD4, // KEY_NUMPAD4,
-	DIK_NUMPAD5, // KEY_NUMPAD5,
-	DIK_NUMPAD6, // KEY_NUMPAD6,
-	DIK_NUMPAD7, // KEY_NUMPAD7,
-	DIK_NUMPAD8, // KEY_NUMPAD8,
-	DIK_NUMPAD9, // KEY_NUMPAD9,
-	DIK_NUMPADENTER, // KEY_NUMPADENTER,
-
-	DIK_PLAYPAUSE, // KEY_PLAYPAUSE,		// on multimedia keyboards
-	DIK_MEDIASTOP, // KEY_MEDIASTOP,		// on multimedia keyboards
-	DIK_MEDIASELECT, // KEY_MEDIASELECT,	// on multimedia keyboards
-	DIK_NEXTTRACK, // KEY_NEXTTRACK,		// on multimedia keyboards
-	DIK_PREVTRACK, // KEY_PREVTRACK,		// on multimedia keyboards
-
-	DIK_VOLUMEDOWN, // KEY_VOLUMEDOWN,		// on multimedia keyboards
-	DIK_VOLUMEUP, // KEY_VOLUMEUP,		// on multimedia keyboards
-	DIK_MUTE, // KEY_MUTE,			// on multimedia keyboards
-
-	DIK_WEBBACK, // KEY_WEBBACK,		// on multimedia keyboards
-	DIK_WEBFAVORITES, // KEY_WEBFAVORITES,	// on multimedia keyboards
-	DIK_WEBFORWARD, // KEY_WEBFORWARD,		// on multimedia keyboards
-	DIK_WEBHOME, // KEY_WEBHOME,		// on multimedia keyboards
-	DIK_WEBREFRESH, // KEY_WEBREFRESH,		// on multimedia keyboards
-	DIK_WEBSEARCH, // KEY_WEBSEARCH,		// on multimedia keyboards
-	DIK_WEBSTOP, // KEY_WEBSTOP,		// on multimedia keyboards
-
-	DIK_AT, // KEY_AT,				// japanese keyboard
-	DIK_AX, // KEY_AX,				// japanese keyboard
-	DIK_COLON, // KEY_COLON,			// japanese keyboard
-	DIK_CONVERT, // KEY_CONVERT,		// japanese keyboard
-	DIK_KANA, // KEY_KANA,			// japanese keyboard
-	DIK_KANJI, // KEY_KANJI,			// japanese keyboard
-	DIK_NOCONVERT, // KEY_NOCONVERT,		// japanese keyboard
-	DIK_YEN  // KEY_YEN,			// japanese keyboard
-};
-
+extern uint8 KEYtoDIK[256];
+extern uint8 KEYtoVK[256];
 
 /**** Platform Specific Functions ****/
 
@@ -480,24 +329,29 @@ void MFInput_InitModulePlatformSpecific()
 	// create the direct inpur device
 	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
 
-	// for setting the sample buffer
-	DIPROPDWORD dipdw;
-	dipdw.diph.dwSize       = sizeof(DIPROPDWORD);
-	dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-	dipdw.diph.dwObj        = 0;
-	dipdw.diph.dwHow        = DIPH_DEVICE;
-	dipdw.dwData            = SAMPLE_BUFFER_SIZE;
-
-	// create keyboard device
-	if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pKeyboard, NULL)))
+	if(gDefaults.input.useDirectInputKeyboard)
 	{
-		pKeyboard->SetDataFormat(&c_dfDIKeyboard);
-		pKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE);
-		pKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
-		pKeyboard->Acquire();
+		// create keyboard device
+		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysKeyboard, &pKeyboard, NULL)))
+		{
+			// for setting the sample buffer
+			DIPROPDWORD dipdw;
+			dipdw.diph.dwSize       = sizeof(DIPROPDWORD);
+			dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+			dipdw.diph.dwObj        = 0;
+			dipdw.diph.dwHow        = DIPH_DEVICE;
+			dipdw.dwData            = SAMPLE_BUFFER_SIZE;
 
-		MFDebug_Log(2, "Using DirectInput Keyboard.");
+			// setup the keyboard
+			pKeyboard->SetDataFormat(&c_dfDIKeyboard);
+			pKeyboard->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | DISCL_NOWINKEY | DISCL_NONEXCLUSIVE);
+			pKeyboard->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
+			pKeyboard->Acquire();
+
+			MFDebug_Log(2, "Using DirectInput Keyboard.");
+		}
 	}
+
 	gKeyboardCount = 1;
 
 	// create mouse device/s
@@ -522,6 +376,15 @@ void MFInput_InitModulePlatformSpecific()
 	{
 		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pMouse, NULL)))
 		{
+			// for setting the sample buffer
+			DIPROPDWORD dipdw;
+			dipdw.diph.dwSize       = sizeof(DIPROPDWORD);
+			dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+			dipdw.diph.dwObj        = 0;
+			dipdw.diph.dwHow        = DIPH_DEVICE;
+			dipdw.dwData            = SAMPLE_BUFFER_SIZE;
+
+			// setup the mouse
 			pMouse->SetDataFormat(&c_dfDIMouse2);
 			pMouse->SetCooperativeLevel(apphWnd, DISCL_FOREGROUND | (gExclusiveMouse ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE));
 			pMouse->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
@@ -880,32 +743,41 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	MFCALLSTACK;
 
-	DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
-	DWORD elements = SAMPLE_BUFFER_SIZE;
+	uint8 *pKeys = pKeyState->keys;
 
-	HRESULT hr;
-
-	hr = pKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
-
-	if(hr != DI_OK)
+	if(gDefaults.input.useDirectInputKeyboard)
 	{
-		pKeyboard->Acquire();
-		return;
+		DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
+		DWORD elements = SAMPLE_BUFFER_SIZE;
+
+		HRESULT hr;
+
+		hr = pKeyboard->GetDeviceData(sizeof(DIDEVICEOBJECTDATA), inputBuffer, &elements, 0 );
+
+		if(hr != DI_OK)
+		{
+			pKeyboard->Acquire();
+			return;
+		}
+		else
+		{
+			for(DWORD a=0; a<elements; a++)
+			{
+				gKeyState[inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
+			}
+		}
+
+		for(int a=0; a<256; a++)
+		{
+			pKeys[a] = gKeyState[KEYtoDIK[a]] ? -1 : 0;
+		}
 	}
 	else
 	{
-		for(DWORD a=0; a<elements; a++)
+		for(int a=0; a<256; a++)
 		{
-			gKeyState[inputBuffer[a].dwOfs]=(char)inputBuffer[a].dwData;
+			pKeys[a] = gWindowsKeys[KEYtoVK[a]] ? -1 : 0;
 		}
-	}
-
-	uint8 *pKeys = pKeyState->keys;
-
-#pragma message("This part is redundant, needs to DIK->KEY table")
-	for(int a=0; a<256; a++)
-	{
-		pKeys[a] = gKeyState[KEYtoDIK[a]] ? -1 : 0;
 	}
 }
 
@@ -1140,6 +1012,14 @@ void MFInputPC_Acquire(bool acquire)
 				}
 			}
 			else gPCJoysticks[a].pDevice->Unacquire();
+		}
+	}
+
+	if(acquire)
+	{
+		for(int a=0; a<256; a++)
+		{
+			gWindowsKeys[a] = (GetKeyState(a) & 0x80) ? 1 : 0;
 		}
 	}
 }
@@ -1726,3 +1606,316 @@ LCleanup:
 }
 
 #endif
+
+
+// key mapping tables..
+
+// KEY to DIK mapping table
+uint8 KEYtoDIK[256] =
+{
+	0, // KEY_NONE = 0,
+	DIK_UP, // KEY_UP,
+	DIK_DOWN, // KEY_DOWN,
+	DIK_LEFT, // KEY_LEFT,
+	DIK_RIGHT, // KEY_RIGHT,
+	DIK_APPS, // KEY_APPS,			// on windows keyboards
+	DIK_LWIN, // KEY_LWIN,			// on windows keyboards
+	DIK_RWIN, // KEY_RWIN,			// on windows keyboards
+	DIK_BACK, // KEY_BACKSPACE,
+	DIK_TAB, // KEY_TAB,
+	DIK_SYSRQ, // KEY_PRINTSCREEN,
+	DIK_SCROLL, // KEY_SCROLLLOCK,
+	DIK_PAUSE, // KEY_BREAK,
+	DIK_RETURN, // KEY_RETURN,
+	DIK_F1, // KEY_F1,
+	DIK_F2, // KEY_F2,
+	DIK_F3, // KEY_F3,
+	DIK_F4, // KEY_F4,
+	DIK_F5, // KEY_F5,
+	DIK_F6, // KEY_F6,
+	DIK_F7, // KEY_F7,
+	DIK_F8, // KEY_F8,
+	DIK_F9, // KEY_F9,
+	DIK_F10, // KEY_F10,
+	DIK_F11, // KEY_F11,
+	DIK_F12, // KEY_F12,
+	DIK_OEM_102, // KEY_OEM_102,		// on german keyboard
+	DIK_ESCAPE, // KEY_ESCAPE,
+	DIK_MYCOMPUTER, // KEY_MYCOMPUTER,		// on multimedia keyboards
+	DIK_MAIL, // KEY_MAIL,			// on multimedia keyboards
+	DIK_CALCULATOR, // KEY_CALCULATOR,		// on multimedia keyboards
+	DIK_STOP, // KEY_STOP,			// japanese keyboard
+	DIK_SPACE, // KEY_SPACE,
+	DIK_INSERT, // KEY_INSERT,
+	DIK_DELETE, // KEY_DELETE,
+	DIK_HOME, // KEY_HOME,
+	DIK_END, // KEY_END,
+	DIK_PRIOR, // KEY_PAGEUP,
+	DIK_NEXT, // KEY_PAGEDOWN,
+	DIK_APOSTROPHE, // KEY_APOSTROPHE,
+	DIK_ABNT_C1, // KEY_ABNT_C1,		// on brazilian keyboard
+	DIK_ABNT_C2, // KEY_ABNT_C2,		// on brazilian keyboard
+	DIK_MULTIPLY, // KEY_ASTERISK,
+	DIK_ADD, // KEY_PLUS,
+	DIK_COMMA, // KEY_COMMA,
+	DIK_MINUS, // KEY_HYPHEN,
+	DIK_PERIOD, // KEY_PERIOD,
+	DIK_SLASH, // KEY_SLASH,
+	DIK_0, // KEY_0,
+	DIK_1, // KEY_1,
+	DIK_2, // KEY_2,
+	DIK_3, // KEY_3,
+	DIK_4, // KEY_4,
+	DIK_5, // KEY_5,
+	DIK_6, // KEY_6,
+	DIK_7, // KEY_7,
+	DIK_8, // KEY_8,
+	DIK_9, // KEY_9,
+	DIK_NUMPADCOMMA, // KEY_NUMPADCOMMA,	// japanese keyboard
+	DIK_SEMICOLON, // KEY_SEMICOLON,
+	DIK_NUMPADEQUALS, // KEY_NUMPADEQUALS,	// japanese keyboard
+	DIK_EQUALS, // KEY_EQUALS,
+	DIK_SLEEP, // KEY_SLEEP,			// on windows keyboards
+	DIK_WAKE, // KEY_WAKE,			// on windows keyboards
+	DIK_POWER, // KEY_POWER,			// on windows keyboards
+	DIK_A, // KEY_A,
+	DIK_B, // KEY_B,
+	DIK_C, // KEY_C,
+	DIK_D, // KEY_D,
+	DIK_E, // KEY_E,
+	DIK_F, // KEY_F,
+	DIK_G, // KEY_G,
+	DIK_H, // KEY_H,
+	DIK_I, // KEY_I,
+	DIK_J, // KEY_J,
+	DIK_K, // KEY_K,
+	DIK_L, // KEY_L,
+	DIK_M, // KEY_M,
+	DIK_N, // KEY_N,
+	DIK_O, // KEY_O,
+	DIK_P, // KEY_P,
+	DIK_Q, // KEY_Q,
+	DIK_R, // KEY_R,
+	DIK_S, // KEY_S,
+	DIK_T, // KEY_T,
+	DIK_U, // KEY_U,
+	DIK_V, // KEY_V,
+	DIK_W, // KEY_W,
+	DIK_X, // KEY_X,
+	DIK_Y, // KEY_Y,
+	DIK_Z, // KEY_Z,
+	DIK_UNDERLINE, // KEY_UNDERLINE,		// japanese keyboard
+	DIK_LBRACKET, // KEY_LBRACKET,
+	DIK_BACKSLASH, // KEY_BACKSLASH,
+	DIK_RBRACKET, // KEY_RBRACKET,
+	DIK_F13, // KEY_F13,			// japanese keyboard
+	DIK_F14, // KEY_F14,			// japanese keyboard
+	DIK_GRAVE, // KEY_GRAVE,
+	DIK_F15, // KEY_F15,			// japanese keyboard
+	DIK_UNLABELED, // KEY_UNLABELED,		// japanese keyboard
+	DIK_LCONTROL, // KEY_LCONTROL,
+	DIK_LMENU, // KEY_LALT,
+	DIK_LSHIFT, // KEY_LSHIFT,
+	DIK_RCONTROL, // KEY_RCONTROL,
+	DIK_RMENU, // KEY_RALT,
+	DIK_RSHIFT, // KEY_RSHIFT,
+	DIK_CAPITAL, // KEY_CAPITAL,
+
+	DIK_NUMLOCK, // KEY_NUMLOCK,
+	DIK_DIVIDE, // KEY_DIVIDE,
+	DIK_SUBTRACT, // KEY_SUBTRACT,
+	DIK_DECIMAL, // KEY_DECIMAL
+	DIK_NUMPAD0, // KEY_NUMPAD0,
+	DIK_NUMPAD1, // KEY_NUMPAD1,
+	DIK_NUMPAD2, // KEY_NUMPAD2,
+	DIK_NUMPAD3, // KEY_NUMPAD3,
+	DIK_NUMPAD4, // KEY_NUMPAD4,
+	DIK_NUMPAD5, // KEY_NUMPAD5,
+	DIK_NUMPAD6, // KEY_NUMPAD6,
+	DIK_NUMPAD7, // KEY_NUMPAD7,
+	DIK_NUMPAD8, // KEY_NUMPAD8,
+	DIK_NUMPAD9, // KEY_NUMPAD9,
+	DIK_NUMPADENTER, // KEY_NUMPADENTER,
+
+	DIK_PLAYPAUSE, // KEY_PLAYPAUSE,		// on multimedia keyboards
+	DIK_MEDIASTOP, // KEY_MEDIASTOP,		// on multimedia keyboards
+	DIK_MEDIASELECT, // KEY_MEDIASELECT,	// on multimedia keyboards
+	DIK_NEXTTRACK, // KEY_NEXTTRACK,		// on multimedia keyboards
+	DIK_PREVTRACK, // KEY_PREVTRACK,		// on multimedia keyboards
+
+	DIK_VOLUMEDOWN, // KEY_VOLUMEDOWN,		// on multimedia keyboards
+	DIK_VOLUMEUP, // KEY_VOLUMEUP,		// on multimedia keyboards
+	DIK_MUTE, // KEY_MUTE,			// on multimedia keyboards
+
+	DIK_WEBBACK, // KEY_WEBBACK,		// on multimedia keyboards
+	DIK_WEBFAVORITES, // KEY_WEBFAVORITES,	// on multimedia keyboards
+	DIK_WEBFORWARD, // KEY_WEBFORWARD,		// on multimedia keyboards
+	DIK_WEBHOME, // KEY_WEBHOME,		// on multimedia keyboards
+	DIK_WEBREFRESH, // KEY_WEBREFRESH,		// on multimedia keyboards
+	DIK_WEBSEARCH, // KEY_WEBSEARCH,		// on multimedia keyboards
+	DIK_WEBSTOP, // KEY_WEBSTOP,		// on multimedia keyboards
+
+	DIK_AT, // KEY_AT,				// japanese keyboard
+	DIK_AX, // KEY_AX,				// japanese keyboard
+	DIK_COLON, // KEY_COLON,			// japanese keyboard
+	DIK_CONVERT, // KEY_CONVERT,		// japanese keyboard
+	DIK_KANA, // KEY_KANA,			// japanese keyboard
+	DIK_KANJI, // KEY_KANJI,			// japanese keyboard
+	DIK_NOCONVERT, // KEY_NOCONVERT,		// japanese keyboard
+	DIK_YEN  // KEY_YEN,			// japanese keyboard
+};
+
+// KEY to windows VK mapping table
+uint8 KEYtoVK[256] =
+{
+	0,
+	VK_UP, // KEY_UP,
+	VK_DOWN, // KEY_DOWN,
+	VK_LEFT, // KEY_LEFT,
+	VK_RIGHT, // KEY_RIGHT,
+	VK_APPS, // KEY_APPS,			// on windows keyboards
+	VK_LWIN, // KEY_LWIN,			// on windows keyboards
+	VK_RWIN, // KEY_RWIN,			// on windows keyboards
+	VK_BACK, // KEY_BACKSPACE,
+	VK_TAB, // KEY_TAB,
+	VK_SNAPSHOT, // KEY_PRINTSCREEN,
+	VK_SCROLL, // KEY_SCROLLLOCK,
+	VK_PAUSE, // KEY_BREAK,
+	VK_RETURN, // KEY_RETURN,
+	VK_F1, // KEY_F1,
+	VK_F2, // KEY_F2,
+	VK_F3, // KEY_F3,
+	VK_F4, // KEY_F4,
+	VK_F5, // KEY_F5,
+	VK_F6, // KEY_F6,
+	VK_F7, // KEY_F7,
+	VK_F8, // KEY_F8,
+	VK_F9, // KEY_F9,
+	VK_F10, // KEY_F10,
+	VK_F11, // KEY_F11,
+	VK_F12, // KEY_F12,
+	VK_OEM_102, // KEY_OEM_102,		// on german keyboard
+	VK_ESCAPE, // KEY_ESCAPE,
+	0, // KEY_MYCOMPUTER,		// on multimedia keyboards
+	VK_LAUNCH_MAIL, // KEY_MAIL,			// on multimedia keyboards
+	0, // KEY_CALCULATOR,		// on multimedia keyboards
+	0, // KEY_STOP,			// japanese keyboard
+	VK_SPACE, // KEY_SPACE,
+	VK_INSERT, // KEY_INSERT,
+	VK_DELETE, // KEY_DELETE,
+	VK_HOME, // KEY_HOME,
+	VK_END, // KEY_END,
+	VK_PRIOR, // KEY_PAGEUP,
+	VK_NEXT, // KEY_PAGEDOWN,
+	VK_OEM_7, // KEY_APOSTROPHE,
+	0, // KEY_ABNT_C1,		// on brazilian keyboard
+	0, // KEY_ABNT_C2,		// on brazilian keyboard
+	VK_MULTIPLY, // KEY_ASTERISK,
+	VK_ADD, // KEY_PLUS,
+	VK_OEM_COMMA, // KEY_COMMA,
+	VK_OEM_MINUS, // KEY_HYPHEN,
+	VK_OEM_PERIOD, // KEY_PERIOD,
+	VK_OEM_2, // KEY_SLASH,
+	'0', // KEY_0,
+	'1', // KEY_1,
+	'2', // KEY_2,
+	'3', // KEY_3,
+	'4', // KEY_4,
+	'5', // KEY_5,
+	'6', // KEY_6,
+	'7', // KEY_7,
+	'8', // KEY_8,
+	'9', // KEY_9,
+	0, // KEY_NUMPADCOMMA,	// japanese keyboard
+	VK_OEM_1, // KEY_SEMICOLON,
+	0, // KEY_NUMPADEQUALS,	// japanese keyboard
+	VK_OEM_PLUS, // KEY_EQUALS,
+	VK_SLEEP, // KEY_SLEEP,			// on windows keyboards
+	0, // KEY_WAKE,			// on windows keyboards
+	0, // KEY_POWER,			// on windows keyboards
+	'A', // KEY_A,
+	'B', // KEY_B,
+	'C', // KEY_C,
+	'D', // KEY_D,
+	'E', // KEY_E,
+	'F', // KEY_F,
+	'G', // KEY_G,
+	'H', // KEY_H,
+	'I', // KEY_I,
+	'J', // KEY_J,
+	'K', // KEY_K,
+	'L', // KEY_L,
+	'M', // KEY_M,
+	'N', // KEY_N,
+	'O', // KEY_O,
+	'P', // KEY_P,
+	'Q', // KEY_Q,
+	'R', // KEY_R,
+	'S', // KEY_S,
+	'T', // KEY_T,
+	'U', // KEY_U,
+	'V', // KEY_V,
+	'W', // KEY_W,
+	'X', // KEY_X,
+	'Y', // KEY_Y,
+	'Z', // KEY_Z,
+	0, // KEY_UNDERLINE,		// japanese keyboard
+	VK_OEM_4, // KEY_LBRACKET,
+	VK_OEM_5, // KEY_BACKSLASH,
+	VK_OEM_6, // KEY_RBRACKET,
+	VK_F13, // KEY_F13,			// japanese keyboard
+	VK_F14, // KEY_F14,			// japanese keyboard
+	VK_OEM_3, // KEY_GRAVE,
+	VK_F15, // KEY_F15,			// japanese keyboard
+	0, // KEY_UNLABELED,		// japanese keyboard
+	VK_LCONTROL, // KEY_LCONTROL,
+	VK_LMENU, // KEY_LALT,
+	VK_LSHIFT, // KEY_LSHIFT,
+	VK_RCONTROL, // KEY_RCONTROL,
+	VK_RMENU, // KEY_RALT,
+	VK_RSHIFT, // KEY_RSHIFT,
+	VK_CAPITAL, // KEY_CAPITAL,
+
+	VK_NUMLOCK, // KEY_NUMLOCK,
+	VK_DIVIDE, // KEY_DIVIDE,
+	VK_SUBTRACT, // KEY_SUBTRACT,
+	VK_DECIMAL, // KEY_DECIMAL
+	VK_NUMPAD0, // KEY_NUMPAD0,
+	VK_NUMPAD1, // KEY_NUMPAD1,
+	VK_NUMPAD2, // KEY_NUMPAD2,
+	VK_NUMPAD3, // KEY_NUMPAD3,
+	VK_NUMPAD4, // KEY_NUMPAD4,
+	VK_NUMPAD5, // KEY_NUMPAD5,
+	VK_NUMPAD6, // KEY_NUMPAD6,
+	VK_NUMPAD7, // KEY_NUMPAD7,
+	VK_NUMPAD8, // KEY_NUMPAD8,
+	VK_NUMPAD9, // KEY_NUMPAD9,
+	0, // KEY_NUMPADENTER,
+
+	VK_MEDIA_PLAY_PAUSE, // KEY_PLAYPAUSE,		// on multimedia keyboards
+	VK_MEDIA_STOP, // KEY_MEDIASTOP,		// on multimedia keyboards
+	0, // KEY_MEDIASELECT,	// on multimedia keyboards
+	VK_MEDIA_NEXT_TRACK, // KEY_NEXTTRACK,		// on multimedia keyboards
+	VK_MEDIA_PREV_TRACK, // KEY_PREVTRACK,		// on multimedia keyboards
+
+	VK_VOLUME_DOWN, // KEY_VOLUMEDOWN,		// on multimedia keyboards
+	VK_VOLUME_UP, // KEY_VOLUMEUP,		// on multimedia keyboards
+	VK_VOLUME_MUTE, // KEY_MUTE,			// on multimedia keyboards
+
+	VK_BROWSER_BACK, // KEY_WEBBACK,		// on multimedia keyboards
+	VK_BROWSER_FAVORITES, // KEY_WEBFAVORITES,	// on multimedia keyboards
+	VK_BROWSER_FORWARD, // KEY_WEBFORWARD,		// on multimedia keyboards
+	VK_BROWSER_HOME, // KEY_WEBHOME,		// on multimedia keyboards
+	VK_BROWSER_REFRESH, // KEY_WEBREFRESH,		// on multimedia keyboards
+	VK_BROWSER_SEARCH, // KEY_WEBSEARCH,		// on multimedia keyboards
+	VK_BROWSER_STOP, // KEY_WEBSTOP,		// on multimedia keyboards
+
+	0, // KEY_AT,				// japanese keyboard
+	0, // KEY_AX,				// japanese keyboard
+	0, // KEY_COLON,			// japanese keyboard
+	VK_CONVERT, // KEY_CONVERT,		// japanese keyboard
+	VK_KANA, // KEY_KANA,			// japanese keyboard
+	VK_KANJI, // KEY_KANJI,			// japanese keyboard
+	VK_NONCONVERT, // KEY_NOCONVERT,		// japanese keyboard
+	0  // KEY_YEN,			// japanese keyboard
+};

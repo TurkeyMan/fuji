@@ -97,6 +97,7 @@ struct MFDefaults
 		bool allowMultipleMice;				/**< Allow multiple mice? */
 		bool mouseZeroIsSystemMouse;		/**< Mouse 0 is System mouse? */
 		bool systemMouseUseWindowsCursor;	/**< System mouse uses windows cursor? */
+		bool useDirectInputKeyboard;		/**< Use DirectInput to read the keyboard */
 	} input;
 
 	/** Miscellaneous Defaults. */

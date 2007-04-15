@@ -80,7 +80,11 @@ void MFSound_DeinitModulePlatformSpecific()
 	pDirectSound->Release();
 }
 
-bool MFSound_UpdateInternal(MFVoice *pVoice)
+void MFSound_UpdateInternal()
+{
+}
+
+bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
 {
 	if(pVoice->flags & MFPF_Paused)
 		return false;
