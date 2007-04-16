@@ -178,6 +178,18 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 	pInt->offset = offset;
 }
 
+void PrimeBuffer(MFVoice *pVoice)
+{
+	// HACK: we'll mix in the first bit of the sample to reduce trigger lag...
+	uint32 offset = gMasterOffset + 1024;
+	if(offset > MASTER_BUFFER_SAMPLES)
+		offset -= MASTER_BUFFER_SAMPLES;
+
+	uint32 numSamples = offset < gMixOffset ? gMixOffset - offset : (MASTER_BUFFER_SAMPLES - offset) + gMixOffset;
+
+	MixVoice(pVoice, offset, numSamples);
+}
+
 void MFSound_UpdateInternal()
 {
 	MFCALLSTACKc;
@@ -211,10 +223,8 @@ void MFSound_UpdateInternal()
 		MFVoice *pVoice = (*ppI);
 		MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 
-		if(pVoice->flags & MFPF_Paused || pInt->bFinished)
-			continue;
-
-		MixVoice(pVoice, gMixOffset, numSamples);
+		if(!(pVoice->flags & MFPF_Paused || pInt->bFinished))
+			MixVoice(pVoice, gMixOffset, numSamples);
 
 		++ppI;
 	}
@@ -239,7 +249,8 @@ void MFSound_CreateInternal(MFSound *pSound)
 	if(pSound->pTemplate->flags & MFSF_Dynamic)
 	{
 		long bufferSize = ((pSound->pTemplate->numChannels * pSound->pTemplate->bitsPerSample) >> 3) * pSound->pTemplate->numSamples;
-		pSound->pTemplate->ppStreams[0] = (char*)MFHeap_Alloc(bufferSize);
+		pSound->pTemplate->ppStreams = (char**)MFHeap_Alloc(sizeof(char*) + bufferSize);
+		pSound->pTemplate->ppStreams[0] = (char*)&pSound->pTemplate->ppStreams[1];
 	}
 }
 
@@ -250,7 +261,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	// if dynamic, free buffer
 	if(pSound->pTemplate->flags & MFSF_Dynamic)
 	{
-		MFHeap_Free(pSound->pTemplate->ppStreams[0]);
+		MFHeap_Free(pSound->pTemplate->ppStreams);
 	}
 }
 
@@ -333,14 +344,10 @@ void MFSound_PlayInternal(MFVoice *pVoice)
 
 	MFDebug_Assert(pT->bitsPerSample != 8, "8bit samples not yet supported..");
 
-	// HACK: we'll mix in the first bit of the sample to reduce trigger lag...
-	uint32 offset = gMasterOffset + 1024;
-	if(offset > MASTER_BUFFER_SAMPLES)
-		offset -= MASTER_BUFFER_SAMPLES;
-
-	uint32 numSamples = offset < gMixOffset ? gMixOffset - offset : (MASTER_BUFFER_SAMPLES - offset) + gMixOffset;
-
-	MixVoice(pVoice, offset, numSamples);
+	if(pVoice->flags & MFPF_BeginPaused)
+		pVoice->flags |= MFPF_Paused;
+	else
+		PrimeBuffer(pVoice);
 }
 
 void MFSound_Pause(MFVoice *pVoice, bool pause)
@@ -350,7 +357,10 @@ void MFSound_Pause(MFVoice *pVoice, bool pause)
 	if(pause)
 		pVoice->flags |= MFPF_Paused;
 	else if(!pause)
+	{
+		PrimeBuffer(pVoice);
 		pVoice->flags &= ~MFPF_Paused;
+	}
 }
 
 void MFSound_Stop(MFVoice *pVoice)
@@ -409,9 +419,12 @@ void MFSound_SetMasterVolume(float volume)
 uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
+	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
+
+	int bytesPerSample = (pT->numChannels * pT->bitsPerSample) >> 3;
 
 	if(pWriteCursor)
-		*pWriteCursor = pInt->offset >> 10;
+		*pWriteCursor = (pInt->offset >> 10) * bytesPerSample;
 
-	return pInt->offset >> 10;
+	return (pInt->offset >> 10) * bytesPerSample;
 }

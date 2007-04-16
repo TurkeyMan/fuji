@@ -3,6 +3,7 @@
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFFileSystem.h"
+#include "FileSystem/MFFileSystemCachedFile_Internal.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
 #include "MFThread.h"
@@ -12,8 +13,17 @@
 	#define VORBIS_STREAM
 #endif
 
+#if defined(_PSP)
+	#define VORBIS_STREAM
+//	#define VORBIS_TREMOR
+#endif
+
 #if defined(VORBIS_STREAM)
-	#include <vorbis/vorbisfile.h>
+	#if defined(VORBIS_TREMOR)
+		#include <tremor/ivorbisfile.h>
+	#else
+		#include <vorbis/vorbisfile.h>
+	#endif
 
 	void MFSound_RegisterVorbis();
 #endif
@@ -364,6 +374,9 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 	// get cursor pos
 	playCursor = MFSound_GetPlayCursor(pStream->pStreamVoice);
 
+	if(pStream->playBackOffset == playCursor)
+		return;
+
 	// calculate lock size
 	if(playCursor < pStream->playBackOffset)
 	{
@@ -435,7 +448,7 @@ MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream)
 
 void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 {
-	MFCALLSTACK;
+	MFCALLSTACKc;
 
 	void *pData1, *pData2;
 	uint32 bytes1, bytes2;
@@ -491,7 +504,7 @@ struct MFVorbisStream
 
 int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
-	return MFFile_StdSeek(datasource, (long)offset, whence);
+	return MFFile_Seek((MFFile*)datasource, (int)offset, (MFFileSeek)whence);
 }
 
 void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
@@ -505,6 +518,17 @@ void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
 		return;
+
+	// attempt to cache the vorbis stream
+	MFOpenDataCachedFile cachedOpen;
+	cachedOpen.cbSize = sizeof(MFOpenDataCachedFile);
+	cachedOpen.openFlags = MFOF_Read | MFOF_Binary | MFOF_Cached_CleanupBaseFile;
+	cachedOpen.maxCacheSize = 256*1024; // 256k cache for vorbis stream should be heaps!!
+	cachedOpen.pBaseFile = hFile;
+
+	MFFile *pCachedFile = MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_CachedFileSystem), &cachedOpen);
+	if(pCachedFile)
+		hFile = pCachedFile;
 
 	// setup vorbis read callbacks
 	ov_callbacks callbacks;
@@ -526,7 +550,12 @@ void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
 	// get vorbis file info
 	pVS->pInfo = ov_info(&pVS->vorbisFile, -1);
 
+#if defined(VORBIS_TREMOR)
+//	pStream->trackLength = (float)ov_pcm_total(&pVS->vorbisFile, -1) / (float)pVS->pInfo->rate;
+	pStream->trackLength = 1000.0f;
+#else
 	pStream->trackLength = (float)ov_time_total(&pVS->vorbisFile, -1);
+#endif
 	pStream->bufferSize = pVS->pInfo->rate * pVS->pInfo->channels * 2;
 
 	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pVS->pInfo->rate, pVS->pInfo->channels, 16, pVS->pInfo->rate, MFSF_Dynamic | MFSF_Circular);
@@ -550,19 +579,31 @@ int GetVorbisSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
 
 	int currentBitstream;
+#if defined(VORBIS_TREMOR)
+	return ov_read(&pVS->vorbisFile, (char*)pBuffer, bytes, &currentBitstream);
+#else
 	return ov_read(&pVS->vorbisFile, (char*)pBuffer, bytes, 0, 2, 1, &currentBitstream);
+#endif
 }
 
 void SeekVorbisStream(MFAudioStream *pStream, float seconds)
 {
 	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+#if defined(VORBIS_TREMOR)
+	ov_pcm_seek(&pVS->vorbisFile, (ogg_int64_t)(seconds*(float)pVS->pInfo->rate));
+#else
 	ov_time_seek(&pVS->vorbisFile, seconds);
+#endif
 }
 
 float GetVorbisTime(MFAudioStream *pStream)
 {
 	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
+#if defined(VORBIS_TREMOR)
+	return (float)ov_pcm_tell(&pVS->vorbisFile) / (float)pVS->pInfo->rate;
+#else
 	return (float)ov_time_tell(&pVS->vorbisFile);
+#endif
 }
 
 void MFSound_RegisterVorbis()

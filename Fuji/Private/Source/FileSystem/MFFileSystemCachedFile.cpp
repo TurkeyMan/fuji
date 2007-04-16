@@ -11,7 +11,7 @@ void MFFileSystemCachedFile_InitModule()
 {
 	MFCALLSTACK;
 
-	gCachedFiles.Init("Memory Files", gDefaults.filesys.maxOpenFiles);
+	gCachedFiles.Init("Cached Files", gDefaults.filesys.maxOpenFiles);
 
 	MFFileSystemCallbacks fsCallbacks;
 
@@ -119,7 +119,7 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async
 
     int bytesRead = 0;
 
-	while(bytes)
+	while(bytes && (int)pFile->offset < pFile->length)
 	{
 		// find bucket
 		MFFileCachedBucket *pBucket = NULL;
