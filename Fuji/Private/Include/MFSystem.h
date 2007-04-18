@@ -29,6 +29,7 @@ struct MFDefaults
 	{
 		uint32 displayWidth;			/**< Display width */
 		uint32 displayHeight;			/**< Display height */
+		const char *pWindowTitle;		/**< Game window title */
 	} display;
 
 	/** View Defaults. */

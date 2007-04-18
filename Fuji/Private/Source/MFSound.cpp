@@ -115,7 +115,10 @@ void MFSound_DeinitModule()
 
 	MFStreamHandler **ppSI = gStreamHandlers.Begin();
 	while(*ppSI)
+	{
 		MFHeap_Free(*ppSI);
+		++ppSI;
+	}
 
 	gStreamHandlers.Deinit();
 	gVoices.Deinit();

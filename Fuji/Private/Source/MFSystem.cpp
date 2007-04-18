@@ -42,11 +42,12 @@ MFDefaults gDefaults =
 	{
 #if !defined(_PSP)
 		640,			// displayWidth
-		480				// displayHeight
+		480,			// displayHeight
 #else
 		480,			// displayWidth
-		272				// displayHeight
+		272,			// displayHeight
 #endif
+		"Fuji Window"	// pWindowTitle
 	},
 
 	// ViewDefaults

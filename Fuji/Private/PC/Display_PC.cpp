@@ -296,7 +296,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	int xframe = GetSystemMetrics(SM_CXFRAME)*2;
 	int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
 
-	apphWnd = CreateWindowEx(NULL, "FujiWin", "Fuji Window", WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, NULL, NULL, apphInstance, NULL);
+	apphWnd = CreateWindowEx(NULL, "FujiWin", gDefaults.display.pWindowTitle, WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, NULL, NULL, apphInstance, NULL);
     if(!apphWnd)
 	{
 		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
