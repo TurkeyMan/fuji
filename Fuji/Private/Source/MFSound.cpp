@@ -341,6 +341,8 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 			pStream->pStreamHandler = *ppI;
 			break;
 		}
+
+		++ppI;
 	}
 
 	if(!pStream->pStreamHandler)

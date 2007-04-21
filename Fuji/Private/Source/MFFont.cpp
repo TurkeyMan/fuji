@@ -75,7 +75,7 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 
 inline bool MFFontInternal_IsValidWrapPoint(int c)
 {
-  return MFIsWhite(c);
+  return MFIsWhite(c) || MFIsNewline(c);
 }
 
 inline int GetHorizontalJustification(MFFontJustify justification)
@@ -609,9 +609,8 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 		if(c == '\n')
 		{
-			currentPos = 0.0f;
-			pLineStart = pC + (bytes > 0 ? bytes : 1);
-			pH = gCharHistory - 1;
+			++pC;
+			pH->c = c;
 			break;
 		}
 		else
@@ -915,11 +914,13 @@ float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &
     // get next line
     lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, lineWidth, textHeight, &lastSignificantChar);
 
+	int charsToDraw = (int)MFMin((uint32)lastSignificantChar, (uint32)numChars);
+
     // if we are not left justified, we need to calculate the x offset
     if(GetHorizontalJustification(justification) > 0)
     {
 //#if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
-      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, lastSignificantChar);
+      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, charsToDraw);
 //#else
 //      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, lineEnd);
 //#endif
@@ -936,7 +937,7 @@ float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &
       }
     }
 
-    MFFont_DrawText(pFont, currentPos+pos, textHeight, color, pCurrentLine, (int)MFMin((uint32)lastSignificantChar, (uint32)numChars), ltw);
+    MFFont_DrawText(pFont, currentPos+pos, textHeight, color, pCurrentLine, charsToDraw, ltw);
 
     // increment height
     currentPos.y += height;
