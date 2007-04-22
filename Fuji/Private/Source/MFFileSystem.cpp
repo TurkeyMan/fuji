@@ -616,6 +616,8 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 		bool flatten = (pMount->volumeInfo.flags & MFMF_FlattenDirectoryStructure) != 0;
 		bool recursive = (pMount->volumeInfo.flags & MFMF_Recursive) != 0;
 
+		pMount->volumeInfo.flags |= MFMF_DontCacheTOC;
+
 		const char *pFindPath = MFStr("%s:", pMount->volumeInfo.pVolumeName);
 
 		// this is a crude way to check if the directory exists..
@@ -641,6 +643,8 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 		MFFileSystemNative_BuildToc(pFindPath, pTOC, NULL, pStringCache, recursive, flatten);
 
 		pMount->pEntries = pTOC;
+
+		pMount->volumeInfo.flags &= ~MFMF_DontCacheTOC;
 	}
 
 	return 0;
@@ -921,18 +925,43 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 	{
 		if(!MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName))
 		{
-			MFFind *pFind = gFinds.Create();
-
-			pFind->pMount = pMount;
-			pFind->pFilesystemData = NULL;
-
-			if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->FindFirst(pFind, pSearchPattern, pFindData))
+			if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 			{
-				gFinds.Destroy(pFind);
-				return NULL;
+				if(pMount->numFiles)
+				{
+					MFFind *pFind = gFinds.Create();
+
+					pFind->pMount = pMount;
+					pFind->pFilesystemData = (void*)0;
+
+					MFString_Copy(pFindData->pFilename, pMount->pEntries[0].pName);
+					MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[0].pFilesysData);
+
+					pFindData->attributes = ((pMount->pEntries[0].flags & MFTF_Directory) ? MFFA_Directory : 0) |
+											((pMount->pEntries[0].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
+											((pMount->pEntries[0].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
+					pFindData->fileSize = pMount->pEntries[0].size;
+
+					return pFind;
+				}
+				else
+					return NULL;
 			}
 			else
-				return pFind;
+			{
+				MFFind *pFind = gFinds.Create();
+
+				pFind->pMount = pMount;
+				pFind->pFilesystemData = NULL;
+
+				if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->FindFirst(pFind, pSearchPattern, pFindData))
+				{
+					gFinds.Destroy(pFind);
+					return NULL;
+				}
+				else
+					return pFind;
+			}
 		}
 
 		pMount = pMount->pNext;
@@ -945,11 +974,35 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 
 bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
-	return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindNext(pFind, pFindData);
+	if(!(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC))
+	{
+		size_t id = (size_t)pFind->pFilesystemData + 1;
+
+		if(id < pFind->pMount->numFiles)
+		{
+			MFString_Copy(pFindData->pFilename, pFind->pMount->pEntries[id].pName);
+			MFString_Copy(pFindData->pSystemPath, (char*)pFind->pMount->pEntries[id].pFilesysData);
+
+			pFindData->fileSize = ((pFind->pMount->pEntries[id].flags & MFTF_Directory) ? MFFA_Directory : 0) |
+									((pFind->pMount->pEntries[id].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
+									((pFind->pMount->pEntries[id].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
+			pFindData->attributes = pFind->pMount->pEntries[id].size;
+
+			pFind->pFilesystemData = (void*)id;
+		}
+		else
+			return false;
+	}
+	else
+		return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindNext(pFind, pFindData);
+
+	return true;
 }
 
 void MFFileSystem_FindClose(MFFind *pFind)
 {
-	ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindClose(pFind);
+	if(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC)
+		ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindClose(pFind);
+
 	gFinds.Destroy(pFind);
 }
