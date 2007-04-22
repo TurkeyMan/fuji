@@ -656,8 +656,10 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			{
 				// no valid wrap point was found so force wrap at current character
 				pC = pLineStart + MFString_GetNumBytesInMBChar(pLineStart);
+				pT = gCharHistory + 1;
 			}
 
+			pH = pT;
 			break;
 		}
 
