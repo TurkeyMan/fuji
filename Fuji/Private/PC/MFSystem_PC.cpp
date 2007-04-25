@@ -1,6 +1,7 @@
 #include "Fuji.h"
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
+#include "MFThread.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -31,6 +32,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	if(gDefaults.system.threadPriority != MFPriority_Normal)
+	{
+		int priority = THREAD_PRIORITY_NORMAL;
+
+		switch(gDefaults.system.threadPriority)
+		{
+			case MFPriority_Normal:			priority = THREAD_PRIORITY_NORMAL;			break;
+			case MFPriority_AboveNormal:	priority = THREAD_PRIORITY_ABOVE_NORMAL;	break;
+			case MFPriority_BelowNormal:	priority = THREAD_PRIORITY_BELOW_NORMAL;	break;
+			case MFPriority_Maximum:		priority = THREAD_PRIORITY_HIGHEST;			break;
+			case MFPriority_Low:			priority = THREAD_PRIORITY_LOWEST;			break;
+			case MFPriority_Idle:			priority = THREAD_PRIORITY_IDLE;			break;
+			default:
+				break;
+		}
+
+		SetThreadPriority(GetCurrentThread(), priority);
+	}
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

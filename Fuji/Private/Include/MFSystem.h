@@ -101,6 +101,12 @@ struct MFDefaults
 		bool useDirectInputKeyboard;		/**< Use DirectInput to read the keyboard */
 	} input;
 
+	/** System Defaults. */
+	struct SystemDefaults
+	{
+		int threadPriority;					/**< Main thread priority */
+	} system;
+
 	/** Miscellaneous Defaults. */
 	struct MiscellaneousDefaults
 	{

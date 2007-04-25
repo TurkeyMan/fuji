@@ -22,6 +22,7 @@
 #include "MFScript_Internal.h"
 #include "MFCollision_Internal.h"
 #include "MFAnimScript_Internal.h"
+#include "MFThread.h"
 
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
@@ -109,6 +110,11 @@ MFDefaults gDefaults =
 		true,			// mouseZeroIsSystemMouse
 		true,			// systemMouseUseWindowsCursor
 		true			// useDirectInputKeyboard
+	},
+
+	// SystemDefaults
+	{
+		MFPriority_Normal	// threadPriority
 	},
 
 	// MiscellaneousDefaults
@@ -479,6 +485,19 @@ const char * MFSystem_GetSettingString(int tabDepth)
 void MFSystem_UpdateTimeDelta()
 {
 	MFCALLSTACK;
+
+#if defined(_WINDOWS)
+	static uint64 clock = MFSystem_ReadRTC();
+	static uint64 freq = MFSystem_GetRTCFrequency();
+	uint64 curClock = MFSystem_ReadRTC();
+
+	while(curClock - clock < freq/85)
+	{
+		Sleep(1);
+		curClock = MFSystem_ReadRTC();
+	}
+	clock = curClock;
+#endif
 
 	gSystemTimer.Update();
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
