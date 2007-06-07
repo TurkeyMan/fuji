@@ -324,7 +324,7 @@ static const int gXPlorerButtonID[GamepadType_Max] =
 	3,	// Button_Y
 	-1,	// Button_White
 	-1,	// Button_Black
-	AID_Ry | AID_Clamp,	// Button_LeftTrigger
+	AID_Ry | AID_Clamp | AID_Negative,	// Button_LeftTrigger
 	0,	// Button_RightTrigger
 	7,	// Button_Start
 	6,	// Button_Back
@@ -334,12 +334,11 @@ static const int gXPlorerButtonID[GamepadType_Max] =
 	POV_Down,	// Button_DDown
 	POV_Left,	// Button_DLeft
 	POV_Right,	// Button_DRight
-	AID_Rx | AID_Full | AID_Negative,					// Button_ThumbLX
+	AID_Rx | AID_Full,					// Button_ThumbLX
 	-1,	// Button_ThumbLY
-	AID_Rz,	// Button_ThumbRX
-	AID_Ry,	// Button_ThumbRY
+	-1, // AID_Z,	// Button_ThumbRX // the spherical deadzone plays havoc with this value
+	AID_Ry | AID_Negative,	// Button_ThumbRY
 };
-
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -845,7 +844,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046d, 0xc219,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		NULL
+		&gGamepadDescriptors[27]
 	},
 
 	// Guitar Hero X-Plorer

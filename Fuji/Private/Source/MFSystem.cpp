@@ -48,7 +48,8 @@ MFDefaults gDefaults =
 		480,			// displayWidth
 		272,			// displayHeight
 #endif
-		"Fuji Window"	// pWindowTitle
+		"Fuji Window",	// pWindowTitle
+		NULL			// pIcon
 	},
 
 	// ViewDefaults

@@ -30,6 +30,7 @@ struct MFDefaults
 		uint32 displayWidth;			/**< Display width */
 		uint32 displayHeight;			/**< Display height */
 		const char *pWindowTitle;		/**< Game window title */
+		const char *pIcon;				/**< Resource name of the window icon */
 	} display;
 
 	/** View Defaults. */

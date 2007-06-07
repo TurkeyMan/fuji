@@ -281,7 +281,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = apphInstance;
-	wc.hIcon = NULL;
+	wc.hIcon = gDefaults.display.pIcon ? LoadIcon(apphInstance, gDefaults.display.pIcon) : NULL;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = NULL;
 	wc.lpszMenuName = NULL;
