@@ -100,6 +100,7 @@ struct MFDefaults
 		bool mouseZeroIsSystemMouse;		/**< Mouse 0 is System mouse? */
 		bool systemMouseUseWindowsCursor;	/**< System mouse uses windows cursor? */
 		bool useDirectInputKeyboard;		/**< Use DirectInput to read the keyboard */
+		bool useXInput;						/**< Use XInput when available on PC */
 	} input;
 
 	/** System Defaults. */

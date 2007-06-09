@@ -397,29 +397,32 @@ void MFInput_InitModulePlatformSpecific()
 #endif
 
 #if defined(SUPPORT_XINPUT)
-	// enumerate XInput devices
-	XINPUT_STATE state;
-	for(int a=0; a<4; a++)
+	if(gDefaults.input.useXInput)
 	{
-		if(XInputGetState(a, &state) == ERROR_SUCCESS)
+		// enumerate XInput devices
+		XINPUT_STATE state;
+		for(int a=0; a<4; a++)
 		{
-			MFDebug_Log(2, "Found XInput Gamepad.");
+			if(XInputGetState(a, &state) == ERROR_SUCCESS)
+			{
+				MFDebug_Log(2, "Found XInput Gamepad.");
 
-			// we have an xinput controller, reserve 4 gamepad slots for hotswapping
-			gPCJoysticks[0].XInputID = 0;
-			gPCJoysticks[1].XInputID = 1;
-			gPCJoysticks[2].XInputID = 2;
-			gPCJoysticks[3].XInputID = 3;
+				// we have an xinput controller, reserve 4 gamepad slots for hotswapping
+				gPCJoysticks[0].XInputID = 0;
+				gPCJoysticks[1].XInputID = 1;
+				gPCJoysticks[2].XInputID = 2;
+				gPCJoysticks[3].XInputID = 3;
 
-			gPCJoysticks[0].pGamepadInfo = &pGamepadMappingRegistry[1];
-			gPCJoysticks[1].pGamepadInfo = &pGamepadMappingRegistry[1];
-			gPCJoysticks[2].pGamepadInfo = &pGamepadMappingRegistry[1];
-			gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[1];
+				gPCJoysticks[0].pGamepadInfo = &pGamepadMappingRegistry[1];
+				gPCJoysticks[1].pGamepadInfo = &pGamepadMappingRegistry[1];
+				gPCJoysticks[2].pGamepadInfo = &pGamepadMappingRegistry[1];
+				gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[1];
 
-			gGamepadCount += 4;
-			gUseXInput = true;
+				gGamepadCount += 4;
+				gUseXInput = true;
 
-			break;
+				break;
+			}
 		}
 	}
 #endif

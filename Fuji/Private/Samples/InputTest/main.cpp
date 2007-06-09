@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFSystem.h"
 #include "Display.h"
 #include "MFView.h"
 #include "MFFont.h"
@@ -11,6 +12,8 @@
 void Game_InitSystem()
 {
 	MFCALLSTACK;
+
+	gDefaults.input.useXInput = false;
 }
 
 void Game_Init()
