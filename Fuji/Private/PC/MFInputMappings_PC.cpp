@@ -854,6 +854,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x4748,
 		gXPlorerButtonID,
 		gXPlorerButtonNames,
+		&gGamepadDescriptors[28]
+	},
+
+	// PS TO PC CONVERTOR
+	{
+		"PS2 Gamepad",
+		"PS TO PC CONVERTOR",
+		0x19FA, 0x8D01,
+		gTitaniumButtonID,
+		gPS2ButtonNames,
 		NULL
 	}
 };
