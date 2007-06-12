@@ -100,6 +100,30 @@ static const int gSuperDualBoxButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative  // Button_ThumbRY
 };
 
+static const int gGGE909ButtonID[GamepadType_Max] =
+{
+	2,   // Button_A
+	1,   // Button_B
+	3,   // Button_X
+	0,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger
+	7,   // Button_RightTrigger
+	9,   // Button_Start
+	8,   // Button_Back
+	10,  // Button_LeftThumb
+	11,  // Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Rz,               // Button_ThumbRX
+	AID_Z | AID_Negative  // Button_ThumbRY
+};
+
 static const int gXBCDButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
@@ -108,8 +132,8 @@ static const int gXBCDButtonID[GamepadType_Max] =
 	3,   // Button_Y
 	5,   // Button_White
 	4,   // Button_Black
-	10 | AID_Z,  // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
-	11 | AID_Rz, // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+	10,// | AID_Z,  // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+	11,// | AID_Rz, // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
 	6,   // Button_Start
 	7,   // Button_Back
 	8,   // Button_LeftThumb
@@ -314,6 +338,54 @@ static const int gGenericPS2ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Z,					// Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gJoyBox3ButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	8,	// Button_Start
+	9,	// Button_Back
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X,					// Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Z,					// Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gSixaxisButtonID[GamepadType_Max] =
+{
+	14,	// Button_A
+	13,	// Button_B
+	15,	// Button_X
+	12,	// Button_Y
+	10,	// Button_White
+	11,	// Button_Black
+	8,	// Button_LeftTrigger
+	9,	// Button_RightTrigger
+	3,	// Button_Start
+	0,	// Button_Back
+	1,	// Button_LeftThumb
+	2,	// Button_RightThumb
+	4,	// Button_DUp
+	6,	// Button_DDown
+	7,	// Button_DLeft
+	5,	// Button_DRight
+	AID_X,					// Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	-1, // AID_Z,					// Button_ThumbRX // sixaxis driver doesnt seem to like the right stick...
+	-1, // AID_Rz | AID_Negative,	// Button_ThumbRY // sixaxis driver doesnt seem to like the right stick...
 };
 
 static const int gXPlorerButtonID[GamepadType_Max] =
@@ -557,6 +629,30 @@ static const char * gGreenAsiaButtonNames[GamepadType_Max] =
 	"Unavailable"	// Button_ThumbRY
 };
 
+static const char * gGGE909ButtonNames[GamepadType_Max] =
+{
+	"3",			// Button_A
+	"2",			// Button_B
+	"4",			// Button_X
+	"1",			// Button_Y
+	"L1",           // Button_White
+	"R1",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Start",        // Button_Start
+	"Select",       // Button_Back
+	"L3",           // Button_LeftThumb
+	"R3",           // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
 static const char * gXPlorerButtonNames[GamepadType_Max] =
 {
 	"Blue",			// Button_A
@@ -684,7 +780,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 	{
 		"XBox Gamepad",
 		"XBCD XBox Gamepad",
-		0, 0,
+		0, 0, // 0x0738, 0x4516, // i think the S-Pad and 3rd party pads are different..
 		gXBCDButtonID,
 		gXBoxButtonNames,
 		&gGamepadDescriptors[11]
@@ -835,8 +931,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[26]
 	},
 
-	// "MP-8868 Dual USB Joypad" 0409:005A
-
 	// Logitech Cordless RumblePad 2
 	{
 		"RumblePad 2",
@@ -849,7 +943,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 
 	// Guitar Hero X-Plorer
 	{
-		"X-Plorer",
+		"X-Plorer Guitar",
 		"Controller (Guitar Hero X-plorer  )",
 		0x1430, 0x4748,
 		gXPlorerButtonID,
@@ -864,8 +958,41 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D01,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
+		&gGamepadDescriptors[29]
+	},
+
+	// GGE909 PC Recoil Pad
+	{
+		"GGE909 Recoil Pad",
+		"GGE909 PC Recoil Pad",
+		0x0F30, 0x010B,
+		gGGE909ButtonID,
+		gGGE909ButtonNames,
+		&gGamepadDescriptors[30]
+	},
+
+	// Super Joy Box 3 Pro
+	{
+		"PS2 Gamepad",
+		"Super Joy Box 3 Pro",
+		0x6666, 0x8801,
+		gJoyBox3ButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[31]
+	},
+
+	// PS3 SIXAXIS Controller
+	{
+		"PS3 Controller",
+		"PLAYSTATION(R)3 Controller",
+		0x054C, 0x0268,
+		gSixaxisButtonID,
+		gPS2ButtonNames,
 		NULL
 	}
+
+	// "MP-8868 Dual USB Joypad" 0409:005A
+
 };
 
 MFGamepadInfo *pGamepadMappingRegistry = gGamepadDescriptors;
