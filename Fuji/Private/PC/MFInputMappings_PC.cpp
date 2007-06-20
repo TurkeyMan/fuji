@@ -981,6 +981,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[31]
 	},
 
+	// PSX/USB Pad
+	{
+		"PS2 Gamepad",
+		"PSX/USB Pad",
+		0x8631, 0x1128,
+		gRadioshackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[32]
+	},
+
 	// PS3 SIXAXIS Controller
 	{
 		"PS3 Controller",
