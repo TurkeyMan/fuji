@@ -1,107 +1,99 @@
 #include "Fuji.h"
-#include "MFVector.h"
+#include "MFSound_Internal.h"
 
-void MFSound_InitModule()
+/**** Structures ****/
+
+struct MFSoundDataInternal
 {
-}
+	uint32 reserved;
+};
 
-void MFSound_DeinitModule()
+struct MFVoiceDataInternal
 {
-}
-
-void MFSound_Update()
-{
-}
-
-void MFSound_Draw()
-{
-}
+	uint32 reserved;
+};
 
 
-int MFSound_LoadBank(const char *pFilename)
-{
-	MFCALLSTACK;
+/**** Globals ****/
 
-	return -1;
-}
 
-void MFSound_UnloadBank(int bankID)
+/**** Functions ****/
+
+void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize)
 {
 	MFCALLSTACK;
 
-
+	// we need to return the size of the internal structures so the platform independant
+	// code can make the correct allocations..
+	*pSoundDataSize = sizeof(MFSoundDataInternal);
+	*pVoiceDataSize = sizeof(MFVoiceDataInternal);
 }
 
-int MFSound_FindSound(const char *pSoundName, int searchBankID)
+void MFSound_DeinitModulePlatformSpecific()
 {
 	MFCALLSTACK;
-
-	return -1;
 }
 
-int MFSound_Play(int soundID)
+bool MFSound_UpdateInternal(MFVoice *pVoice)
 {
-	MFCALLSTACK;
-
-	return -1;
+	// check if the voice has finished playing and destroy it if it has..
+	return true;
 }
 
-int MFSound_Play3D(int soundID)
+void MFSound_CreateInternal(MFSound *pSound)
 {
-	MFCALLSTACK;
-
-	return -1;
 }
 
-void MFSound_Stop(int voice)
+void MFSound_DestroyInternal(MFSound *pSound)
 {
-	MFCALLSTACK;
-
-
 }
 
-void MFSound_SetListenerPos(const MFMatrix& listenerPos)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetVolume(int voice, float volume)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetPlaybackRate(int voice, float rate)
-{
-	MFCALLSTACK;
-
-}
-
-void MFSound_SetMasterVolume(float volume)
-{
-	MFCALLSTACK;
-
-}
-
-int MFSound_MusicPlay(const char *pFilename, bool pause)
+int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	return 0;
 }
 
-void MFSound_MusicUnload(int track)
+void MFSound_Unlock(MFSound *pSound)
 {
 }
 
-void MFSound_MusicSeek(int track, float seconds)
+void MFSound_PlayInternal(MFVoice *pVoice)
 {
 }
 
-void MFSound_MusicPause(int track, bool pause)
+void MFSound_Pause(MFVoice *pVoice, bool pause)
 {
 }
 
-void MFSound_MusicSetVolume(int track, float volume)
+void MFSound_Stop(MFVoice *pVoice)
 {
 }
 
+void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+{
+}
+
+void MFSound_SetVolume(MFVoice *pVoice, float volume)
+{
+}
+
+void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
+{
+}
+
+void MFSound_SetPan(MFVoice *pVoice, float pan)
+{
+}
+
+void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+{
+}
+
+void MFSound_SetMasterVolume(float volume)
+{
+}
+
+uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+{
+	return 0;
+}

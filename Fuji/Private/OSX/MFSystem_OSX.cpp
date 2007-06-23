@@ -5,11 +5,18 @@
 
 #include <sys/time.h>
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <sys/utsname.h>
+
+#include <stdio.h>
+
+char *gpCommandLineBuffer = NULL;
 
 extern Display *xdisplay;
 extern Window window;
 extern Atom wm_delete_window;
 
+uint8 gXKeys[65535];
 extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_OSX;
@@ -25,6 +32,7 @@ int main(int argc, char *argv[])
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	MFZeroMemory(gXKeys, sizeof(gXKeys));
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
@@ -36,15 +44,16 @@ void MFSystem_HandleEventsPlatformSpecific()
 	MFCALLSTACK;
 
 	XEvent event;
-	
+
 	while(XPending(xdisplay))
 	{
 		XNextEvent(xdisplay, &event);
 		switch(event.type)
 		{
 			case ClientMessage:
+			{
 				Atom atom;
-				
+
 				if(event.xclient.format == 8)
 				{
 					atom = event.xclient.data.b[0];
@@ -57,11 +66,46 @@ void MFSystem_HandleEventsPlatformSpecific()
 				{
 					atom = event.xclient.data.l[0];
 				}
-				
+				else
+				{
+					atom = 0;
+				}
+
 				if(atom == wm_delete_window)
 				{
 					gQuit = 1;
 				}
+				break;
+			}
+			case KeyPress:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 1;
+				break;
+			}
+			case KeyRelease:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 0;
+				break;
+			}
+			case ButtonPressMask:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				printf("Button down %d %d\n", pEv->state, pEv->button);
+				break;
+			}
+			case ButtonReleaseMask:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				printf("Button up %d %d\n", pEv->state, pEv->button);
+				break;
+			}
+			default:
 				break;
 		}
 	}
@@ -103,10 +147,12 @@ uint64 MFSystem_ReadRTC()
 
 uint64 MFSystem_GetRTCFrequency()
 {
-	return 1000000;
+	return 1000000; // microseconds
 }
 
 const char * MFSystem_GetSystemName()
 {
-	return "Insert code to find system name here...";
+	static utsname name;
+	uname(&name);
+	return name.nodename;
 }
