@@ -1003,6 +1003,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 
 	// "MP-8868 Dual USB Joypad" 0409:005A
 
+	// "Microsoft SideWinder game pad" 045E:0003
 };
 
 MFGamepadInfo *pGamepadMappingRegistry = gGamepadDescriptors;

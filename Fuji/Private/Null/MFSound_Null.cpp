@@ -33,7 +33,11 @@ void MFSound_DeinitModulePlatformSpecific()
 	MFCALLSTACK;
 }
 
-bool MFSound_UpdateInternal(MFVoice *pVoice)
+void MFSound_UpdateInternal()
+{
+}
+
+bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
 {
 	// check if the voice has finished playing and destroy it if it has..
 	return true;
