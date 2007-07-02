@@ -1,3 +1,7 @@
+#include "Fuji.h"
+
+#if MF_INPUT == PC
+
 #define DIRECTINPUT_VERSION 0x0800
 #define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
 
@@ -5,7 +9,6 @@
 
 #define MFWHEEL_DELTA 120
 
-#include "Fuji.h"
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
@@ -1922,3 +1925,5 @@ uint8 KEYtoVK[256] =
 	VK_NONCONVERT, // KEY_NOCONVERT,		// japanese keyboard
 	0  // KEY_YEN,			// japanese keyboard
 };
+
+#endif // MF_INPUT

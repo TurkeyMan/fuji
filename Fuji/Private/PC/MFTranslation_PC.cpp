@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_TRANSLATION == PC
+
 #include "MFTranslation.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -73,3 +76,5 @@ MFLanguage MFTranslation_GetDefaultLanguage()
 
 	return language;
 }
+
+#endif // MF_TRANSLATION

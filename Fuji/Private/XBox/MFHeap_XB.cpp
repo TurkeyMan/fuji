@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_HEAP == XBOX
+
 #include "MFHeap.h"
 
 #include <stdlib.h>
@@ -57,3 +60,5 @@ void* MFHeap_GetUncachedPointer(void *pPointer)
 void MFHeap_FlushDCache()
 {
 }
+
+#endif // MF_HEAP

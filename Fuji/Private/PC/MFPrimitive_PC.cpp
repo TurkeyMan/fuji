@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 #include "Display_Internal.h"
 #include "MFView.h"
 #include "MFVector.h"
@@ -312,3 +315,5 @@ void MFPrimitive_EndBlitter()
 	MFEnd();
 	MFView_Pop();
 }
+
+#endif // MF_RENDERER

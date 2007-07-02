@@ -1,11 +1,28 @@
-#pragma warning(disable: 4706)
-#pragma warning(disable: 4127)
-
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
 #include "Fuji.h"
+
+#if MF_SOCKETS == WINSOCK
+
 #include "MFSockets.h"
+
+#if defined(MF_WINDOWS)
+
+	#pragma warning(disable: 4706)
+	#pragma warning(disable: 4127)
+
+	#include <winsock2.h>
+	#include <ws2tcpip.h>
+
+	#define WS_MAJOR 2
+	#define WS_MINOR 0
+
+#elif defined(MF_XBOX)
+
+	#include <xtl.h>
+
+	#define WS_MAJOR 2
+	#define WS_MINOR 2
+
+#endif
 
 static WSADATA wsData;
 static bool wsActive = false;
@@ -14,7 +31,18 @@ int MFSockets_InitModulePlatformSpecific()
 {
 	int error;
 
-	error = WSAStartup(MAKEWORD(2, 0), &wsData);
+#if defined(MF_XBOX)
+	// we cant start the network on xbox if we are debugging... :(
+	DWORD launchDataType;
+	LAUNCH_DATA launchData;
+	XGetLaunchInfo(&launchDataType, &launchData);
+
+	if(launchDataType == LDT_FROM_DEBUGGER_CMDLINE)
+		return 0;
+#endif
+
+	// startup the network...
+	error = WSAStartup(MAKEWORD(WS_MAJOR, WS_MINOR), &wsData);
 
 	if(error != 0)
 	{
@@ -23,7 +51,7 @@ int MFSockets_InitModulePlatformSpecific()
 	}
 
 	// check for correct version
-	if(LOBYTE(wsData.wVersion) != 2 || HIBYTE(wsData.wVersion) != 0)
+	if(LOBYTE(wsData.wVersion) != WS_MAJOR || HIBYTE(wsData.wVersion) != WS_MINOR)
 	{
 		// incorrect WinSock version
 		WSACleanup();
@@ -207,6 +235,11 @@ int MFSockets_RecvFrom(MFSocket socket, char *pBuffer, int bufferSize, uint32 fl
 
 int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, const MFAddressInfo *pHint, MFAddressInfo **ppAddressInfo)
 {
+	int result = 0;
+
+#if defined(MF_XBOX)
+	// XBox doesn't support getaddrinfo() ... We'll need to do something else :/
+#else
 	const int maxNumAddresses = 20;
 	static MFAddressInfo addressInfo[maxNumAddresses];
 	int numAddresses = 0;
@@ -233,7 +266,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 		hint.ai_next = NULL;
 	}
 
-	int result = getaddrinfo(pAddress, pServiceName, pHint ? &hint : NULL, &pSockAddr);
+	result = getaddrinfo(pAddress, pServiceName, pHint ? &hint : NULL, &pSockAddr);
 
 	if(result)
 	{
@@ -270,6 +303,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 
 		*ppAddressInfo = addressInfo;
 	}
+#endif
 
 	return result;
 }
@@ -288,3 +322,5 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 		return setsockopt((SOCKET)socket, SOL_SOCKET, option, (const char *)optval, optlen);
 	}
 }
+
+#endif // MF_SOCKETS

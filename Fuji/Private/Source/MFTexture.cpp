@@ -150,7 +150,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		// we guarantee ARGB on all platforms, but it is not supported natively
 		if(format == TexFmt_A8R8G8B8)
 		{
-#if defined(_MFXBOX)
+#if defined(MF_XBOX)
 			format = TexFmt_XB_A8R8G8B8s;
 #endif
 
@@ -345,13 +345,13 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 		xaspect = ((float)pTexture->pTemplateData->pSurfaces[0].width/(float)pTexture->pTemplateData->pSurfaces[0].height) * 0.5f;
 	}
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 	extern IDirect3DDevice9 *pd3dDevice;
 	pd3dDevice->SetTexture(0, pTexture->pTexture);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-#elif defined(_MFXBOX)
+#elif defined(MF_XBOX)
 	extern IDirect3DDevice8 *pd3dDevice;
 	pd3dDevice->SetTexture(0, pTexture->pTexture);
 	pd3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);

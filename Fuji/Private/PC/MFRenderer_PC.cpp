@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
@@ -300,3 +303,5 @@ void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type
 	if(pNumComponentsWritten)
 		*pNumComponentsWritten = numComponents;
 }
+
+#endif // MF_RENDERER

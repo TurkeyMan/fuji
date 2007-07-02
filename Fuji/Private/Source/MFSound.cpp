@@ -9,7 +9,7 @@
 #include "MFThread.h"
 #include "DebugMenu.h"
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 	#define VORBIS_STREAM
 #endif
 
@@ -220,7 +220,7 @@ MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannel
 		pTemplate->flags = flags;
 		pTemplate->sampleRate = samplerate;
 		pTemplate->numSamples = numSamples;
-		pTemplate->numChannels = numChannels;
+		pTemplate->numChannels = (uint16)numChannels;
 		pTemplate->bitsPerSample = bitsPerSample;
 		pTemplate->format = MFWF_PCM_s16;
 

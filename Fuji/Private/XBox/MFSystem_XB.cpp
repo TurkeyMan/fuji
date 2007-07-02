@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == XBOX
+
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 
@@ -75,3 +78,5 @@ const char * MFSystem_GetSystemName()
 {
 	return "XBox";
 }
+
+#endif // MF_SYSTEM

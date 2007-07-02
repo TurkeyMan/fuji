@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == PC
+
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFThread.h"
@@ -102,3 +105,5 @@ const char * MFSystem_GetSystemName()
 	GetComputerName(buffer, &bufferSize);
 	return buffer;
 }
+
+#endif // MF_SYSTEM

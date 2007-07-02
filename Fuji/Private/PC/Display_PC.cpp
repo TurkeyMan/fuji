@@ -1,7 +1,10 @@
+#include "Fuji.h"
+
+#if MF_DISPLAY == WIN32
+
 #define _WIN32_WINNT 0x501
 #define WM_INPUT 0x00FF
 
-#include "Fuji.h"
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "MFSystem.h"
@@ -562,3 +565,5 @@ bool MFDisplay_IsWidescreen()
 
 	return rect.width / rect.height >= 1.6f;
 }
+
+#endif // MF_DISPLAY

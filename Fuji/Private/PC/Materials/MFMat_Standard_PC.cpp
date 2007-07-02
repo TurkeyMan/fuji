@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -201,3 +204,5 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	MFHeap_Free(pMaterial->pInstanceData);
 }
+
+#endif // MF_RENDERER

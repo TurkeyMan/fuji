@@ -21,16 +21,23 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(_WINDOWS) || defined(_MFXBOX) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
-	#define MFDebug_Breakpoint() { __asm { int 3 }; }
-#elif defined(_LINUX) || (defined(_OSX) && !defined(MFBIG_ENDIAN)) || (defined(_FUJI_UTIL) && !defined(_WINDOWS))
-	#define MFDebug_Breakpoint() { asm("int $3"); }
-#elif defined(_PSP) || defined(_PS2)
-	#define MFDebug_Breakpoint() { asm("break"); }
-//#elif defined(_GC)
-//	#include <debug.h>
-//	#define MFDebug_Breakpoint() { _break(); }
-#else
+#if defined(MF_ARCH_X86)
+	#if defined(MF_ASM_INTEL)
+		#define MFDebug_Breakpoint() { __asm { int 3 }; }
+	#elif defined(MF_ASM_ATNT)
+		#define MFDebug_Breakpoint() { asm("int $3"); }
+	#endif
+#elif defined(MF_ARCH_MIPS)
+	#if defined(MF_ASM_INTEL)
+		#define MFDebug_Breakpoint() { __asm { break }; }
+	#elif defined(MF_ASM_ATNT)
+		#define MFDebug_Breakpoint() { asm("break"); }
+	#endif
+#elif defined(MF_ARCH_PPC)
+	// whats the PPC breakpoint?
+#endif
+
+#if !defined(MFDebug_Breakpoint)
 	#define MFDebug_Breakpoint()
 #endif
 

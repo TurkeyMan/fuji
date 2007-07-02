@@ -5,13 +5,13 @@
 #include "MFView.h"
 #include "MFPrimitive.h"
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <d3d9.h>
 extern IDirect3DDevice9 *pd3dDevice;
-#elif defined(_MFXBOX)
+#elif defined(MF_XBOX)
 #include <stdio.h>
 extern IDirect3DDevice8 *pd3dDevice;
-#elif defined(_MFX360)
+#elif defined(MF_X360)
 #include <stdio.h>
 #endif
 
@@ -46,7 +46,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFView_SetOrtho();
 
 		// Set some renderstates
-#if defined(_WINDOWS) || defined(_MFXBOX)		
+#if defined(MF_WINDOWS) || defined(MF_XBOX)		
 		pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 		pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);

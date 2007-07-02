@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFModel_Internal.h"
@@ -166,3 +169,5 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 	MFFixUp(pMC->pVertexElements, pBase, load);
 	MFFixUp(pMC->pBatchIndices, pBase, load);
 }
+
+#endif // MF_RENDERER

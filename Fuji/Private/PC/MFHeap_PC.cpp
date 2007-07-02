@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_HEAP == WIN32
+
 #include "MFHeap.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -53,3 +56,5 @@ void* MFHeap_GetUncachedPointer(void *pPointer)
 void MFHeap_FlushDCache()
 {
 }
+
+#endif // MF_HEAP

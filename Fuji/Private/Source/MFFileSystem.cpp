@@ -253,7 +253,7 @@ const char* MFFile_HomePath(const char *pFilename)
 
 	pFilename = pFilename ? pFilename : "";
 
-#if defined(_MFXBOX)
+#if defined(MF_XBOX)
 	return MFStr("E:\\Home\\%s", pFilename);
 #elif defined(_LINUX)
 	return MFStr("~/%s", pFilename);

@@ -8,11 +8,11 @@
 #include "MFPrimitive.h"
 #include "MFSystem.h"
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <d3d9.h>
 extern IDirect3DDevice9 *pd3dDevice;
 #endif
-#if defined(_MFXBOX)
+#if defined(MF_XBOX)
 extern IDirect3DDevice8 *pd3dDevice;
 #endif
 
@@ -357,7 +357,7 @@ void Menu::Draw()
 	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2, menuPosition.y + logoMargin + iconSize, 0);
 	MFEnd();
 
-#if defined(_WINDOWS) || defined(_MFXBOX)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
 	pd3dDevice->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR);
@@ -375,7 +375,7 @@ void Menu::Draw()
 	MFSetPosition(menuPosition.x+menuDimensions.x-15, menuPosition.y+menuDimensions.y-15, 0);
 	MFEnd();
 
-#if defined(_WINDOWS) || defined(_MFXBOX)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_LESS);
 	pd3dDevice->SetRenderState(D3DRS_STENCILREF, 0);
 #endif
@@ -411,7 +411,7 @@ void Menu::Draw()
 		currentPos.y += pChildren[a]->ListDraw(selection==a, currentPos, requestedWidth);
 	}
 
-#if defined(_WINDOWS) || defined(_MFXBOX)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 	pd3dDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
 #endif
 }

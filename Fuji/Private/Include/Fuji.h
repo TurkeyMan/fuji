@@ -11,15 +11,207 @@
 #if !defined(_FUJI_H)
 #define _FUJI_H
 
-/*** Compiler definitions ***/
+/*
+	We'll define a few #define's to tell us about the target architecture:
 
-#if defined(__GNUC__)
-#define __cdecl __attribute__((__cdecl__))
-#define _cdecl __attribute__((__cdecl__))
+	Compilers:
+		MF_COMPILER_VISUALC
+		MF_COMPILER_GCC
+		MF_COMPILER_SN
+		MF_COMPILER_CODEWARRIOR
+
+	Assembler Syntax:
+		MF_ASM_INTEL
+		MF_ASM_ATNT
+
+	Architectures:
+		MF_ARCH_PPC
+		MF_ARCH_X86
+		MF_ARCH_MIPS
+		MF_ARCH_SH4
+
+	Endian:
+		MF_ENDIAN_LITTLE
+		MF_ENDIAN_BIG
+
+	Data word:
+		MF_32BIT
+		MF_64BIT
+
+	Platform:
+		MF_WINDOWS
+		MF_LINUX
+		MF_OSX
+		MF_XBOX
+		MF_X360
+		MF_PSP
+		MF_PS2
+		MF_PS3
+		MF_GCN
+		MF_WII
+		MF_DC
+		MF_AMIGA
+
+
+	We'll also define some #define's to tell us which drivers to use.
+	At any time, these drivers may also be equal to the 
+	Where any of these drivers is left undefined by a platform, NULL will be selected.
+
+	MF_DISPLAY:
+		NULL
+		WIN32
+		X11
+		COCOA
+		MF_PLATFORM
+
+	MF_RENDERER:
+		NULL
+		D3D9
+		D3D10
+		OPENGL
+		SDL
+		SOFTWARE
+		MF_PLATFORM
+
+	MF_SOUND:
+		NULL
+		DSOUND
+		FMOD
+		ALSA
+		MF_PLATFORM
+
+	MF_HEAP:
+		NULL
+		WIN32
+		CRT
+		MF_PLATFORM
+
+	MF_FILESYSTEM:
+		NULL
+		WIN32
+		CRT
+		MF_PLATFORM
+
+	MF_THREAD:
+		NULL
+		WIN32
+		CRT
+		MF_PLATFORM
+
+	MF_SOCKETS:
+		NULL
+		WINSOCK
+		CRT
+		MF_PLATFORM
+
+	MF_INPUT:
+	MF_AUXILLARYDISPLAY:
+	MF_SYSTEM:
+	MF_TRANSLATION:
+		NULL
+		MF_PLATFORM
+*/
+
+// detect compiler
+#if defined(_MSC_VER)
+	#define MF_COMPILER_VISUALC
+	#define MF_ASM_INTEL
+#elif defined(__GNUC__)
+	#define MF_COMPILER_GCC
+	#define MF_ASM_ATNT
+#else
+	#error Unrecognised compiler. Contact Fuji dev team or add an entry here...
 #endif
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4201)
+// detect architecture/platform
+#if defined(MF_COMPILER_VISUALC)
+	// if we're using an MS compiler, we must be building windows or xbox
+	#if defined(_XBOX)
+		// detect xbox version
+		#if _XBOX_VER < 200
+			#define MF_XBOX
+			#define MF_PLATFORM XBOX
+			#define MF_ARCH_X86
+			#define MF_32BIT
+		#elif _XBOX_VER >= 200
+			#define MF_X360
+			#define MF_PLATFORM X360
+			#define MF_ARCH_PPC
+			#define MF_64BIT
+		#else
+			#error XBox version undefined...
+		#endif
+	#else
+		#define MF_WINDOWS
+		#define MF_PLATFORM WINDOWS
+		#define MF_ARCH_X86
+	#endif
+#elif defined(PSP) || defined(__psp__) || defined(__PSP__) || defined(_PSP)
+	#define MF_PSP
+	#define MF_PLATFORM PSP
+	#define MF_ARCH_MIPS
+	#define MF_32BIT
+#elif defined(_EE_)
+	#define MF_PS2
+	#define MF_PLATFORM PS2
+	#define MF_ARCH_MIPS
+	#define MF_32BIT
+#elif defined(__PPU__)
+	#define MF_PS3
+	#define MF_PLATFORM PS3
+	#define MF_ARCH_PPC
+	#define MF_64BIT
+#elif defined(__SH4_SINGLE_ONLY__)
+	#define MF_ARCH_SH4
+#elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips__) || defined(__MIPSEL__)
+	#define MF_ARCH_MIPS
+#elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__)
+	#define MF_ARCH_PPC
+#elif defined(__i386__) || defined(_M_IX86)
+	#define MF_ARCH_X86
+#else
+	// assume x86 if we couldnt identify an architecture, since its the most likely
+	#define MF_ARCH_X86
+#endif
+
+// if the architecture or platform didn't specify a data word size, try and detect one
+#if !defined(MF_32BIT) && !defined(MF_64BIT)
+	// detect 64bit
+	#define MF_32BIT
+#endif
+
+// if the architecture didn't specify a platform, try and detect one
+#if !defined(MF_PLATFORM)
+	// check OSX, assume linux for now
+	#define MF_LINUX
+	#define MF_PLATFORM LINUX
+#endif
+
+// select architecture endian
+#if defined(MF_ARCH_PPC)
+	#define MF_ENDIAN_BIG
+#else
+	#define MF_ENDIAN_LITTLE
+#endif
+
+/*** Compiler definitions ***/
+
+#if defined(MF_COMPILER_GCC)
+	#define __cdecl __attribute__((__cdecl__))
+	#define _cdecl __attribute__((__cdecl__))
+#endif
+
+#if defined(MF_COMPILER_VISUALC)
+	#pragma warning(disable: 4201)
+
+	// Stop it bitching about the string functions not being secure
+	#define _CRT_SECURE_NO_DEPRECATE
+
+	// disable 'unreferenced formal parameter'
+	#pragma warning(disable:4100)
+
+	// Disable depreciated bullshit
+	#pragma warning(disable:4996)
 #endif
 
 
@@ -70,12 +262,9 @@ enum MFEndian
 #endif
 
 
-/*** Platform specific defines and includes ***/
+/*** Platform specific defines, includes and driver selection ***/
 
-#if defined(_WINDOWS)
-
-	// Stop it bitching about the string functions not being secure
-	#define _CRT_SECURE_NO_DEPRECATE
+#if defined(MF_WINDOWS)
 
 	#include <stdlib.h>
 
@@ -98,15 +287,20 @@ enum MFEndian
 	// add support for the G15 LCD screen
 	#define SUPPORT_G15
 
-	// disable 'unreferenced formal parameter'
-	#pragma warning(disable:4100)
+	// specify drivers
+	#define MF_DISPLAY WIN32
+	#define MF_RENDERER D3D9
+	#define MF_SOUND DSOUND
+	#define MF_HEAP WIN32
+	#define MF_FILESYSTEM WIN32
+	#define MF_THREAD WIN32
+	#define MF_SOCKETS WINSOCK
+	#define MF_INPUT PC
+	#define MF_AUXILLARYDISPLAY PC
+	#define MF_SYSTEM PC
+	#define MF_TRANSLATION PC
 
-	// Disable depreciated bullshit
-	#pragma warning(disable:4996)
-
-#elif (defined(_XBOX) && _XBOX_VER < 200)
-
-	#define _MFXBOX
+#elif defined(MF_XBOX)
 
 	#define DEBUG_KEYBOARD
 	#define DEBUG_MOUSE
@@ -115,9 +309,19 @@ enum MFEndian
 	// Use XG interface to create textures in place
 //	#define XB_XGTEXTURES
 
-#elif (defined(_XBOX) && _XBOX_VER >= 200)
+	// specify drivers
+	#define MF_DISPLAY XBOX
+	#define MF_RENDERER XBOX
+	#define MF_SOUND XBOX
+	#define MF_HEAP XBOX
+	#define MF_FILESYSTEM WIN32
+	#define MF_THREAD WIN32
+	#define MF_SOCKETS WINSOCK
+	#define MF_INPUT XBOX
+	#define MF_SYSTEM XBOX
+	#define MF_TRANSLATION XBOX
 
-	#define _MFX360
+#elif defined(MF_X360)
 
 //	#error Not Supported...
 	#include <xtl.h>
@@ -125,26 +329,46 @@ enum MFEndian
 	#define MFBIG_ENDIAN
 	#define MF64BIT
 
-#elif defined(_LINUX)
+	// specify drivers
+	#define MF_DISPLAY X360
+	#define MF_RENDERER X360
+	#define MF_SOUND X360
+	#define MF_HEAP WIN32
+	#define MF_FILESYSTEM WIN32
+	#define MF_THREAD WIN32
+	#define MF_SOCKETS WINSOCK
+	#define MF_INPUT X360
+	#define MF_SYSTEM X360
+	#define MF_TRANSLATION X360
+
+#elif defined(MF_LINUX)
 
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 
-	#if defined(SOME_LINUX_64BIT_FLAG)
-		#define MF64BIT
-		#define MF64BITPOINTERS
-	#endif
-
 //	#define _OPENGL_CLIP_SPACE
 
-#elif defined(_OSX)
+	// specify drivers
+	#define MF_DISPLAY X11
+	#define MF_RENDERER OPENGL
+	#define MF_INPUT LINUX
+	#define MF_SYSTEM LINUX
+	#define MF_TRANSLATION LINUX
+
+#elif defined(MF_OSX)
 
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h> // For realloc, malloc
 
 //	#define _OPENGL_CLIP_SPACE
 
-#elif defined(_PSP)
+	// specify drivers
+	#define MF_DISPLAY X11
+	#define MF_RENDERER OPENGL
+	#define MF_SYSTEM LINUX
+	#define MF_TRANSLATION LINUX
+
+#elif defined(MF_PSP)
 
 	#include <stdarg.h>
 	#include <stdlib.h>
@@ -158,27 +382,55 @@ enum MFEndian
 
 //	#define _OPENGL_CLIP_SPACE
 
-#elif defined(_PS2)
+	// specify drivers
+	#define MF_DISPLAY PSP
+	#define MF_RENDERER PSP
+	#define MF_SOUND PSP
+	#define MF_HEAP PSP
+	#define MF_FILESYSTEM PSP
+	#define MF_THREAD PSP
+	#define MF_SOCKETS PSP
+	#define MF_INPUT PSP
+	#define MF_SYSTEM PSP
+	#define MF_TRANSLATION PSP
+
+#elif defined(MF_PS2)
 
 	#include <stdarg.h>
 	#include <stdlib.h>
 
-#elif defined(_DC)
+	// specify drivers
+	#define MF_DISPLAY PS2
+	#define MF_RENDERER PS2
+	#define MF_INPUT PS2
+	#define MF_SYSTEM PS2
+
+#elif defined(MF_DC)
 
 	#define _arch_dreamcast
 	#include <kos.h>
 	#include <stdarg.h> // For varargs
 	#include <stdlib.h>
 
-#elif defined(_GC)
+	// specify drivers
+	#define MF_DISPLAY DC
+	#define MF_RENDERER DC
+	#define MF_INPUT DC
+	#define MF_SYSTEM DC
+
+#elif defined(MF_GC)
 
 	#include <stdarg.h>
 	#include <stdlib.h>
 
-	#define MFBIG_ENDIAN
-
 	// angel script needs max portability...
 	#define MAX_PORTABILITY
+
+	// specify drivers
+	#define MF_DISPLAY GC
+	#define MF_RENDERER GC
+	#define MF_INPUT GC
+	#define MF_SYSTEM GC
 
 #endif
 
@@ -189,6 +441,44 @@ enum MFEndian
 	#include <new>
 
 #endif
+
+// use NULL devices where specific devices aren't specified for a particular platform...
+#if !defined(MF_DISPLAY)
+	#define MF_DISPLAY NULL
+#endif
+#if !defined(MF_RENDERER)
+	#define MF_RENDERER NULL
+#endif
+#if !defined(MF_SOUND)
+	#define MF_SOUND NULL
+#endif
+#if !defined(MF_HEAP)
+	#define MF_HEAP NULL
+#endif
+#if !defined(MF_FILESYSTEM)
+	#define MF_FILESYSTEM NULL
+#endif
+#if !defined(MF_THREAD)
+	#define MF_THREAD NULL
+#endif
+#if !defined(MF_SOCKETS)
+	#define MF_SOCKETS NULL
+#endif
+#if !defined(MF_INPUT)
+	#define MF_INPUT NULL
+#endif
+#if !defined(MF_AUXILLARYDISPLAY)
+	#define MF_AUXILLARYDISPLAY NULL
+#endif
+#if !defined(MF_SYSTEM)
+	#define MF_SYSTEM NULL
+#endif
+#if !defined(MF_TRANSLATION)
+	#define MF_TRANSLATION NULL
+#endif
+
+// enable this define to allow the NULL drivers to operate using the standard CRT where appropriate
+#define _USE_CRT_FOR_NULL_DRIVERS
 
 /*** Locale Options ***/
 
@@ -206,10 +496,10 @@ enum MFEndian
 
 /*** Compiler compatibility macros ***/
 
-#if defined(_MSC_VER)
+#if defined(MF_COMPILER_VISUALC)
 	#define MFALIGN_BEGIN(n) __declspec(align(n))
 	#define MFALIGN_END(n)
-#elif defined(__GNUC__)
+#elif defined(MF_COMPILER_GCC)
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n) __attribute__((aligned(n)))
 #else
@@ -217,7 +507,7 @@ enum MFEndian
 	#define MFALIGN_END(n)
 #endif
 
-#if defined(__GNUC__)
+#if defined(MF_COMPILER_GCC)
 	#define MFPACKED __attribute__((packed))
 #else
 	#define MFPACKED

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DISPLAY == XBOX
+
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
@@ -234,3 +237,5 @@ bool MFDisplay_IsWidescreen()
 {
 	return gbWidescreen || gbLetterBox;
 }
+
+#endif // MF_DISPLAY

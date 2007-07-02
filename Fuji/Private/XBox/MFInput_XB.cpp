@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_INPUT == XBOX
+
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 
@@ -423,3 +426,5 @@ void CheckKeyboard()
 }
 
 
+
+#endif // MF_INPUT

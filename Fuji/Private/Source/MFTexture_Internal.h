@@ -1,7 +1,7 @@
 #if !defined(_TEXTURE_INTERNAL_H)
 #define _TEXTURE_INTERNAL_H
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <d3d9.h>
 #endif
 
@@ -62,12 +62,12 @@ struct MFTexture
 	// data members
 	char name[64];
 
-#if defined(_MFXBOX)
+#if defined(MF_XBOX)
 #if defined(XB_XGTEXTURES)
 	IDirect3DTexture8 texture;
 #endif
 	IDirect3DTexture8 *pTexture;
-#elif defined(_WINDOWS)
+#elif defined(MF_WINDOWS)
 	IDirect3DTexture9 *pTexture;
 #elif defined(_LINUX) || defined(_OSX)
 	GLuint textureID;

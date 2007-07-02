@@ -20,7 +20,7 @@ void MFSystem_DeinitModulePlatformSpecific();
 void MFSystem_UpdatePlatformSpecific();
 void MFSystem_DrawPlatformSpecific();
 
-#if defined(_WINDOWS) || defined(_DC)
+#if defined(MF_WINDOWS) || defined(_DC)
 	void DoMessageLoop();
 #elif defined(_LINUX)
 	void CheckEvents();

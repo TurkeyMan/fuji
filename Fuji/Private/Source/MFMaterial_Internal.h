@@ -40,7 +40,7 @@ struct MFMeshChunk
 	MFMaterial *pMaterial;
 };
 
-#if defined(_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
+#if defined(MF_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
 
 #include <d3d9.h>
 
@@ -77,7 +77,7 @@ struct MFMeshChunk_PC : public MFMeshChunk
 };
 #endif
 
-#if defined(_MFXBOX) || defined(_FUJI_UTIL)
+#if defined(MF_XBOX) || defined(_FUJI_UTIL)
 struct MFMeshChunk_XB : public MFMeshChunk
 {
 	// some vertex buffer type thing...
@@ -158,17 +158,17 @@ struct MFMeshChunk_GC : public MFMeshChunk
 #endif
 
 // define MFMeshChunk_Current
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 typedef MFMeshChunk_PC MFMeshChunk_Current;
-#elif defined(_MFXBOX)
+#elif defined(MF_XBOX)
 typedef MFMeshChunk_XB MFMeshChunk_Current;
-#elif defined(_PSP)
+#elif defined(MF_PSP)
 typedef MFMeshChunk_PSP MFMeshChunk_Current;
-#elif defined(_PS2)
+#elif defined(MF_PS2)
 typedef MFMeshChunk_PS2 MFMeshChunk_Current;
-#elif defined(_LINUX) || defined(_OSX)
+#elif defined(MF_LINUX) || defined(MF_OSX)
 typedef MFMeshChunk_Linux MFMeshChunk_Current;
-#elif defined(_GC)
+#elif defined(MF_GC)
 typedef MFMeshChunk_GC MFMeshChunk_Current;
 #else
 #error Platform not yet supported...

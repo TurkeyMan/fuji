@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -85,3 +88,5 @@ MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex)
 */
 	return NULL;
 }
+
+#endif // MF_RENDERER

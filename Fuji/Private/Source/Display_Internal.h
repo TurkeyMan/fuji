@@ -39,7 +39,7 @@ public:
 /*
 // vertex formats.. to be removed later
 #if !defined(_FUJI_UTIL)
-#if defined(_MFXBOX) || defined(_WINDOWS)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 
 class Vec3
 {

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOUND == DSOUND
+
 #include "MFSystem.h"
 #include "MFSound_Internal.h"
 
@@ -136,8 +139,8 @@ void MFSound_CreateInternal(MFSound *pSound)
 	wfx.nChannels = pTemplate->numChannels;
 	wfx.nSamplesPerSec = pTemplate->sampleRate;
 	wfx.nAvgBytesPerSec = pTemplate->sampleRate * bytesPerSample;
-	wfx.nBlockAlign = bytesPerSample;
-	wfx.wBitsPerSample = pTemplate->bitsPerSample;
+	wfx.nBlockAlign = (WORD)bytesPerSample;
+	wfx.wBitsPerSample = (WORD)pTemplate->bitsPerSample;
 	wfx.cbSize = 0;
 
 	// create the 2d buffer
@@ -328,3 +331,5 @@ uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 
 	return play;
 }
+
+#endif // MF_SOUND

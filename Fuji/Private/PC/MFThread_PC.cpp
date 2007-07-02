@@ -1,8 +1,15 @@
 #include "Fuji.h"
+
+#if MF_THREAD == WIN32
+
 #include "MFThread.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#if defined(MF_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#elif defined(MF_XBOX)
+	#include <xtl.h>
+#endif
 
 // globals
 
@@ -84,7 +91,13 @@ void MFThread_ExitThread(int exitCode)
 void MFThread_TerminateThread(MFThread thread)
 {
 	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
+
+#if defined(MF_XBOX)
+	#pragma message("TODO: This needs to be fixed")
+	MFDebug_Assert(false, "Cant terminate a thread on xbox.");
+#else
 	TerminateThread(pThreadInfo->hThread, (DWORD)-1);
+#endif
 }
 
 int MFThread_GetExitCode(MFThread thread)
@@ -165,3 +178,5 @@ void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	ReleaseSemaphore(semaphore, 1, NULL);
 }
+
+#endif // MF_THREAD

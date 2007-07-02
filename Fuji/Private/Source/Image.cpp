@@ -3,7 +3,7 @@
 #include "Image.h"
 #include "MFFileSystem.h"
 
-#if defined(_WINDOWS) || defined(_MFXBOX)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 #pragma pack(1)
 #endif
 struct TgaHeader
@@ -24,7 +24,7 @@ struct TgaHeader
 	uint8 flags;
 } _PACKED;
 
-#if defined(_WINDOWS) || defined(_MFXBOX)
+#if defined(MF_WINDOWS) || defined(MF_XBOX)
 #pragma pack ()
 #endif
 

@@ -1,7 +1,14 @@
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include "Fuji.h"
+
+#if MF_FILESYSTEM == WIN32
+
+#if defined(MF_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#elif defined(MF_XBOX)
+	#include <xtl.h>
+#endif
+
 #include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
@@ -220,3 +227,5 @@ void MFFileNative_FindClose(MFFind *pFind)
 {
 	FindClose((HANDLE)pFind->pFilesystemData);
 }
+
+#endif // MF_FILESYSTEM

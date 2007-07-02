@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_TRANSLATION == XBOX
+
 #include "MFTranslation.h"
 
 #include <xtl.h>
@@ -46,3 +49,5 @@ MFLanguage MFTranslation_GetDefaultLanguage()
 
 	return language;
 }
+
+#endif // MF_TRANSLATION

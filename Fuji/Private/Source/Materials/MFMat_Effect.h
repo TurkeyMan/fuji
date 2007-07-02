@@ -1,13 +1,13 @@
 #if !defined(_MFMAT_EFFECT_H)
 #define _MFMAT_EFFECT_H
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <d3dx9.h>
 #endif
 
 struct MFMat_Effect_Data
 {
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 	ID3DXEffect *pEffect;
 #else
 	void *pEffect;

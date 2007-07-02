@@ -254,13 +254,13 @@ void MFSystem_Update()
 
 	MFInput_Update();
 
-#if defined(_MFXBOX)
+#if defined(MF_XBOX)
 	if(MFInput_Read(Button_XB_Start, IDD_Gamepad) && MFInput_Read(Button_XB_White, IDD_Gamepad) && MFInput_Read(Button_XB_LTrig, IDD_Gamepad) && MFInput_Read(Button_XB_RTrig, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #elif defined(_PSP)
 	if(MFInput_Read(Button_DLeft, IDD_Gamepad) && MFInput_Read(Button_PP_Circle, IDD_Gamepad) && MFInput_Read(Button_PP_L, IDD_Gamepad) && MFInput_Read(Button_PP_R, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
-#else//if defined(_WINDOWS)
+#else//if defined(MF_WINDOWS)
 	if(MFInput_Read(Button_P2_Start, IDD_Gamepad) && MFInput_Read(Button_P2_Select, IDD_Gamepad) && MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_R1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_Read(Button_P2_R2, IDD_Gamepad))
 		RestartCallback(NULL, NULL);
 #endif
@@ -488,7 +488,7 @@ void MFSystem_UpdateTimeDelta()
 {
 	MFCALLSTACK;
 
-#if defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 	static uint64 clock = MFSystem_ReadRTC();
 	static uint64 freq = MFSystem_GetRTCFrequency();
 	uint64 curClock = MFSystem_ReadRTC();

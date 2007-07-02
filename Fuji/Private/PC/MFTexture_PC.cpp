@@ -1,8 +1,11 @@
+#include "Fuji.h"
+
+#if MF_RENDERER == D3D9
+
 /**** Defines ****/
 
 /**** Includes ****/
 
-#include "Fuji.h"
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
@@ -77,3 +80,5 @@ int MFTexture_Destroy(MFTexture *pTexture)
 
 	return pTexture->refCount;
 }
+
+#endif // MF_RENDERER
