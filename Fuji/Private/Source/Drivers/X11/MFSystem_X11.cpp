@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == X11
+
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFInput.h"
@@ -156,3 +159,5 @@ const char * MFSystem_GetSystemName()
 	uname(&name);
 	return name.nodename;
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DISPLAY == X11
+
 #include "Display_Internal.h"
 #include "MFView.h"
 #include "DebugMenu.h"
@@ -644,3 +647,5 @@ bool MFDisplay_IsWidescreen()
 
 	return rect.width / rect.height >= 1.6f;
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_FILESYSTEM == PSP
+
 #include "MFHeap.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
@@ -254,3 +257,5 @@ void MFFileNative_FindClose(MFFind *pFind)
 {
 	sceIoDclose((SceUID)pFind->pFilesystemData);
 }
+
+#endif

@@ -110,6 +110,7 @@
 	MF_SYSTEM:
 	MF_TRANSLATION:
 	MF_DEBUG:
+	MF_PARTICLESYSTEM:
 		NULL
 		MF_PLATFORM
 */
@@ -366,6 +367,7 @@ enum MFEndian
 	#define MF_INPUT LINUX
 	#define MF_SYSTEM X11
 	#define MF_TRANSLATION LINUX
+	#define MF_THREAD LINUX
 
 #elif defined(MF_OSX)
 
@@ -379,6 +381,7 @@ enum MFEndian
 	#define MF_RENDERER OPENGL
 	#define MF_SYSTEM X11
 	#define MF_TRANSLATION LINUX
+	#define MF_THREAD LINUX
 
 #elif defined(MF_PSP)
 
@@ -405,6 +408,7 @@ enum MFEndian
 	#define MF_INPUT PSP
 	#define MF_SYSTEM PSP
 	#define MF_TRANSLATION PSP
+	#define MF_DEBUG PSP
 
 #elif defined(MF_PS2)
 
@@ -490,6 +494,9 @@ enum MFEndian
 #endif
 #if !defined(MF_DEBUG)
 	#define MF_DEBUG NULL
+#endif
+#if !defined(MF_PARTICLESYSTEM)
+	#define MF_PARTICLESYSTEM NULL
 #endif
 
 // enable this define to allow the NULL drivers to operate using the standard CRT where appropriate

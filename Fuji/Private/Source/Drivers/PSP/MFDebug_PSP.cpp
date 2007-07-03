@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DEBUG == PSP
+
 #include "MFInput_Internal.h"
 
 #include <pspkernel.h>
@@ -42,3 +45,5 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 			sceKernelExitGame();
 	}
 }
+
+#endif

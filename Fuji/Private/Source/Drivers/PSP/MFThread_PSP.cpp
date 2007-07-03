@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_THREAD == PSP
+
 #include "MFThread.h"
 
 #include <pspthreadman.h>
@@ -126,3 +129,5 @@ void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	sceKernelSignalSema((SceUID)semaphore, 1);
 }
+
+#endif

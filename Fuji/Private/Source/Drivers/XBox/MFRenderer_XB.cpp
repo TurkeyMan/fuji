@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == XBOX
+
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
@@ -241,3 +244,5 @@ void MFRendererXB_ConvertXBVFToFloat(const char *pData, float *pFloat, XBVF_Type
 	if(pNumComponentsWritten)
 		*pNumComponentsWritten = numComponents;
 }
+
+#endif

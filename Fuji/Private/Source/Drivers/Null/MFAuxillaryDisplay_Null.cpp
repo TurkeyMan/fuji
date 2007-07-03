@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_AUXILLARYDISPLAY == NULL
+
 #include "MFAuxillaryDisplay.h"
 
 void MFAuxDisplay_Init(const char *pAppName)
@@ -45,3 +48,5 @@ bool MFAuxDisplay_WasReleased(int device, int button)
 {
 	return false;
 }
+
+#endif

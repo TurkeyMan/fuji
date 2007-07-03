@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == PSP
+
 #include "MFHeap.h"
 #include "Display_Internal.h"
 #include "MFView.h"
@@ -199,3 +202,5 @@ void MFEnd()
 //	Heap_FlushDCache();
 	sceGuDrawArray(pt, GU_TEXTURE_32BITF|GU_COLOR_8888|GU_VERTEX_32BITF|GU_TRANSFORM_3D, beginCount, 0, &pPrimBuffer[startVert]);
 }
+
+#endif

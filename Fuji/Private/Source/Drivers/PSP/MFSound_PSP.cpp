@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOUND == PSP
+
 #include "MFSound_Internal.h"
 #include "MFHeap.h"
 #include "MFThread.h"
@@ -428,3 +431,5 @@ uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 
 	return (pInt->offset >> 10) * bytesPerSample;
 }
+
+#endif

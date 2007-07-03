@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_INPUT == NULL
+
 #include "MFInput_Internal.h"
 
 /*** Structure definitions ***/
@@ -53,3 +56,5 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	return false;
 }
+
+#endif

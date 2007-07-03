@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == XBOX
+
 #include "Display_Internal.h"
 #include "MFView.h"
 #include "MFVector.h"
@@ -175,3 +178,5 @@ void MFEnd()
 
 	pd3dDevice->End();
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_INPUT == PC || MF_INPUT == LINUX
+
 #include "MFInput.h"
 
 #include "MFInputMappings_PC.h"
@@ -1007,3 +1010,5 @@ static MFGamepadInfo gGamepadDescriptors[] =
 };
 
 MFGamepadInfo *pGamepadMappingRegistry = gGamepadDescriptors;
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOCKETS == PSP
+
 #include "MFSockets.h"
 
 #include <pspkernel.h>
@@ -354,3 +357,5 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 		return sceNetInetSetsockopt((int)socket, SOL_SOCKET, option, (const char *)optval, optlen);
 	}
 }
+
+#endif

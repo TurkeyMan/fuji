@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_PARTICLESYSTEM == NULL
+
 #include "MFSystem.h"
 #include "MFParticleSystem_Internal.h"
 #include "MFPrimitive.h"
@@ -235,3 +238,5 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 
 	MFView_Pop();
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DISPLAY == PSP
+
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
@@ -133,3 +136,5 @@ bool MFDisplay_IsWidescreen()
 {
 	return true;
 }
+
+#endif

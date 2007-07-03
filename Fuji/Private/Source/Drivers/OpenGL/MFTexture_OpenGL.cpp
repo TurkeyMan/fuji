@@ -1,8 +1,11 @@
+#include "Fuji.h"
+
+#if MF_RENDERER == OPENGL
+
 /**** Defines ****/
 
 /**** Includes ****/
 
-#include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "Display_Internal.h"
 #include "MFFileSystem_Internal.h"
@@ -93,3 +96,5 @@ int MFTexture_Destroy(MFTexture *pTexture)
 
 	return pTexture->refCount;
 }
+
+#endif

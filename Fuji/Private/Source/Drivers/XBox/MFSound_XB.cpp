@@ -1,6 +1,9 @@
+#include "Fuji.h"
+
+#if MF_SOUND == XBOX
+
 //#define _USE_LIBVORBIS
 
-#include "Fuji.h"
 #include "MFFileSystem.h"
 #include "MFPtrList.h"
 #include "MFFont.h"
@@ -511,3 +514,5 @@ void MFSound_MusicSetVolume(int track, float volume)
 //	gMusicTracks[track].pDSMusicBuffer->SetVolume();
 }
 
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DISPLAY == NULL
+
 #include "Display_Internal.h"
 
 void MFDisplay_DestroyWindow()
@@ -46,3 +49,5 @@ bool MFDisplay_IsWidescreen()
 {
 	return false;
 }
+
+#endif

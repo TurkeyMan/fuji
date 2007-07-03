@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_THREAD == NULL
+
 #include "MFThread.h"
 
 
@@ -61,3 +64,5 @@ uint32 MFThread_WaitSemaphore(MFSemaphore semaphore, uint32 timeout)
 void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 }
+
+#endif

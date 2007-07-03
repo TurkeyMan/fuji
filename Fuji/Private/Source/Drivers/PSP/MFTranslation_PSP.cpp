@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_TRANSLATION == PSP
+
 #include "MFTranslation.h"
 
 #include <psputility_sysparam.h>
@@ -51,3 +54,5 @@ MFLanguage MFTranslation_GetDefaultLanguage()
 
 	return language;
 }
+
+#endif

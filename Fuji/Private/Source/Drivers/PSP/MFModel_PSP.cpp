@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == PSP
+
 #include "MFModel_Internal.h"
 #include "MFView.h"
 #include "MFRenderer.h"
@@ -73,3 +76,5 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 	MFFixUp(pMC->pVertexData, pBase, load);
 }
 
+
+#endif

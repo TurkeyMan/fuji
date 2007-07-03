@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_TRANSLATION == LINUX
+
 #include "MFTranslation.h"
 
 MFLanguage MFTranslation_GetDefaultLanguage()
@@ -45,3 +48,5 @@ MFLanguage MFTranslation_GetDefaultLanguage()
 
 	return lang;
 }
+
+#endif

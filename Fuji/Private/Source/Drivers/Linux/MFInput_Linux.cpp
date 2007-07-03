@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_INPUT == LINUX
+
 #include "MFInput_Internal.h"
 #include "MFMath.h"
 #include "../PC/MFInputMappings_PC.h"
@@ -557,3 +560,5 @@ uint16 MFKeyToXK[256] =
 	0,//Key_NoConvert,		// japanese keyboard
 	0,//Key_Yen,			// japanese keyboard
 };
+
+#endif

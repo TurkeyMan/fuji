@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == OPENGL
+
 #include "MFPrimitive.h"
 #include "MFMaterial.h"
 #include "MFView.h"
@@ -233,3 +236,5 @@ void MFPrimitive_EndBlitter()
 	MFEnd();
 	MFView_Pop();
 }
+
+#endif

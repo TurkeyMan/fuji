@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if MF_SYSTEM == NULL
+
 #include <time.h>
 
 MFPlatform gCurrentPlatform = FP_Unknown;
@@ -38,3 +40,5 @@ const char * MFSystem_GetSystemName()
 {
 	return "null";
 }
+
+#endif

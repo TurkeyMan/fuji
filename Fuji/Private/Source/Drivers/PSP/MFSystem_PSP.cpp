@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == PSP
+
 #include "MFSystem_Internal.h"
 #include "DebugMenu.h"
 #include "MFFont.h"
@@ -530,3 +533,5 @@ const char * MFSystem_GetSystemName()
 {
 	return systemName;
 }
+
+#endif

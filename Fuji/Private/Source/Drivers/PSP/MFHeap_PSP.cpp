@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_HEAP == PSP
+
 #include "MFHeap.h"
 
 #include <stdlib.h>
@@ -38,3 +41,5 @@ void MFHeap_FlushDCache()
 {
 	sceKernelDcacheWritebackAll();
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == OPENGL
+
 #include "MFModel_Internal.h"
 #include "MFView.h"
 #include "MFRenderer.h"
@@ -245,3 +248,5 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 	if(pMC->pBatchIndices)
 		MFFixUp(pMC->pBatchIndices, pBase, load);
 }
+
+#endif

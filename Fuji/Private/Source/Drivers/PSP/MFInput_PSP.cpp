@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if MF_INPUT == PSP
+
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
@@ -163,3 +165,5 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 
 	return 0;
 }
+
+#endif

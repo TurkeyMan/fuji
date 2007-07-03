@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if MF_DEBUG == PC
+
 #if !defined(_RETAIL)
 
 #define WIN32_LEAN_AND_MEAN
@@ -62,3 +64,5 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 #endif
 
 #endif // !defined(_RETAIL)
+
+#endif

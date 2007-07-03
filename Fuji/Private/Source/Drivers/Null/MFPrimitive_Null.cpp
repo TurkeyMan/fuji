@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == NULL
+
 #include "MFPrimitive.h"
 
 uint32 beginCount;
@@ -67,3 +70,5 @@ void MFEnd()
 {
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 }
+
+#endif
