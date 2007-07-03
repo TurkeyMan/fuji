@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_FILESYSTEM == NULL
+#if MF_FILESYSTEM == MF_DRIVER_NULL
 
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"

@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_HEAP == PSP
+#if MF_HEAP == MF_DRIVER_PSP
 
 #include "MFHeap.h"
 

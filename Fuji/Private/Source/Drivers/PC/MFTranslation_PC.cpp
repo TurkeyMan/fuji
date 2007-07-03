@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_TRANSLATION == PC
+#if MF_TRANSLATION == MF_DRIVER_PC
 
 #include "MFTranslation.h"
 

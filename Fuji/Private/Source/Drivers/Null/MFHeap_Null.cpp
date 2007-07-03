@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_HEAP == NULL
+#if MF_HEAP == MF_DRIVER_NULL
 
 #include "MFHeap.h"
 

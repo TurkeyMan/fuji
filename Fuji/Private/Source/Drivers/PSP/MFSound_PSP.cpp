@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOUND == PSP
+#if MF_SOUND == MF_DRIVER_PSP
 
 #include "MFSound_Internal.h"
 #include "MFHeap.h"

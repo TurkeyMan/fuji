@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SYSTEM == XBOX
+#if MF_SYSTEM == MF_DRIVER_XBOX
 
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"

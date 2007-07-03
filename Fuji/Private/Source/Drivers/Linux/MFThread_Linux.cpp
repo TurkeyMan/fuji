@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_THREAD == LINUX
+#if MF_THREAD == MF_DRIVER_LINUX
 
 #include "MFThread.h"
 #include "MFHeap.h"

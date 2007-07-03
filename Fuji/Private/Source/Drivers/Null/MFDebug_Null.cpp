@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_DEBUG == NULL
+#if MF_DEBUG == MF_DRIVER_NULL
 
 #if !defined(_RETAIL)
 

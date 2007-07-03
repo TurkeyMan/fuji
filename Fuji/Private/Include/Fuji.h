@@ -48,7 +48,7 @@
 		MF_PSP
 		MF_PS2
 		MF_PS3
-		MF_GCN
+		MF_GC
 		MF_WII
 		MF_DC
 		MF_AMIGA
@@ -206,6 +206,37 @@
 	#define MF_ASM_ATNT
 #endif
 
+
+/*** Driver list ***/
+
+#define MF_DRIVER_NULL		0
+#define MF_DRIVER_WIN32		1
+#define MF_DRIVER_X11		2
+#define MF_DRIVER_COCOA		3
+#define MF_DRIVER_D3D9		4
+#define MF_DRIVER_D3D10		5
+#define MF_DRIVER_OPENGL	6
+#define MF_DRIVER_SDL		7
+#define MF_DRIVER_SOFTWARE	8
+#define MF_DRIVER_DSOUND	9
+#define MF_DRIVER_FMOD		10
+#define MF_DRIVER_ALSA		11
+#define MF_DRIVER_CRT		12
+#define MF_DRIVER_WINSOCK	13
+#define MF_DRIVER_PC		14
+#define MF_DRIVER_LINUX		15
+#define MF_DRIVER_OSX		16
+#define MF_DRIVER_XBOX		17
+#define MF_DRIVER_X360		18
+#define MF_DRIVER_PSP		19
+#define MF_DRIVER_PS2		20
+#define MF_DRIVER_PS3		21
+#define MF_DRIVER_GC		22
+#define MF_DRIVER_DC		23
+#define MF_DRIVER_AMIGA		24
+#define MF_DRIVER_WII		25
+
+
 /*** Compiler definitions ***/
 
 #if defined(MF_COMPILER_GCC)
@@ -300,18 +331,18 @@ enum MFEndian
 	#define SUPPORT_G15
 
 	// specify drivers
-	#define MF_DISPLAY WIN32
-	#define MF_RENDERER D3D9
-	#define MF_SOUND DSOUND
-	#define MF_HEAP WIN32
-	#define MF_FILESYSTEM WIN32
-	#define MF_THREAD WIN32
-	#define MF_SOCKETS WINSOCK
-	#define MF_INPUT PC
-	#define MF_AUXILLARYDISPLAY PC
-	#define MF_SYSTEM PC
-	#define MF_TRANSLATION PC
-	#define MF_DEBUG PC
+	#define MF_DISPLAY			MF_DRIVER_WIN32
+	#define MF_RENDERER			MF_DRIVER_D3D9
+	#define MF_SOUND			MF_DRIVER_DSOUND
+	#define MF_HEAP				MF_DRIVER_WIN32
+	#define MF_FILESYSTEM		MF_DRIVER_WIN32
+	#define MF_THREAD			MF_DRIVER_WIN32
+	#define MF_SOCKETS			MF_DRIVER_WINSOCK
+	#define MF_INPUT			MF_DRIVER_PC
+	#define MF_AUXILLARYDISPLAY	MF_DRIVER_PC
+	#define MF_SYSTEM			MF_DRIVER_PC
+	#define MF_TRANSLATION		MF_DRIVER_PC
+	#define MF_DEBUG			MF_DRIVER_PC
 
 #elif defined(MF_XBOX)
 
@@ -323,16 +354,16 @@ enum MFEndian
 //	#define XB_XGTEXTURES
 
 	// specify drivers
-	#define MF_DISPLAY XBOX
-	#define MF_RENDERER XBOX
-	#define MF_SOUND XBOX
-	#define MF_HEAP XBOX
-	#define MF_FILESYSTEM WIN32
-	#define MF_THREAD WIN32
-	#define MF_SOCKETS WINSOCK
-	#define MF_INPUT XBOX
-	#define MF_SYSTEM XBOX
-	#define MF_TRANSLATION XBOX
+	#define MF_DISPLAY		MF_DRIVER_XBOX
+	#define MF_RENDERER		MF_DRIVER_XBOX
+	#define MF_SOUND		MF_DRIVER_NULL //MF_DRIVER_DSOUND
+	#define MF_HEAP			MF_DRIVER_XBOX
+	#define MF_FILESYSTEM	MF_DRIVER_WIN32
+	#define MF_THREAD		MF_DRIVER_WIN32
+	#define MF_SOCKETS		MF_DRIVER_WINSOCK
+	#define MF_INPUT		MF_DRIVER_XBOX
+	#define MF_SYSTEM		MF_DRIVER_XBOX
+	#define MF_TRANSLATION	MF_DRIVER_XBOX
 
 #elif defined(MF_X360)
 
@@ -343,16 +374,16 @@ enum MFEndian
 	#define MF64BIT
 
 	// specify drivers
-	#define MF_DISPLAY X360
-	#define MF_RENDERER X360
-	#define MF_SOUND X360
-	#define MF_HEAP WIN32
-	#define MF_FILESYSTEM WIN32
-	#define MF_THREAD WIN32
-	#define MF_SOCKETS WINSOCK
-	#define MF_INPUT X360
-	#define MF_SYSTEM X360
-	#define MF_TRANSLATION X360
+	#define MF_DISPLAY		MF_DRIVER_X360
+	#define MF_RENDERER		MF_DRIVER_X360
+	#define MF_SOUND		MF_DRIVER_X360
+	#define MF_HEAP			MF_DRIVER_WIN32
+	#define MF_FILESYSTEM	MF_DRIVER_WIN32
+	#define MF_THREAD		MF_DRIVER_WIN32
+	#define MF_SOCKETS		MF_DRIVER_WINSOCK
+	#define MF_INPUT		MF_DRIVER_X360
+	#define MF_SYSTEM		MF_DRIVER_X360
+	#define MF_TRANSLATION	MF_DRIVER_X360
 
 #elif defined(MF_LINUX)
 
@@ -362,12 +393,12 @@ enum MFEndian
 //	#define _OPENGL_CLIP_SPACE
 
 	// specify drivers
-	#define MF_DISPLAY X11
-	#define MF_RENDERER OPENGL
-	#define MF_INPUT LINUX
-	#define MF_SYSTEM X11
-	#define MF_TRANSLATION LINUX
-	#define MF_THREAD LINUX
+	#define MF_DISPLAY		MF_DRIVER_X11
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_INPUT		MF_DRIVER_LINUX
+	#define MF_SYSTEM		MF_DRIVER_X11
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
 
 #elif defined(MF_OSX)
 
@@ -377,11 +408,11 @@ enum MFEndian
 //	#define _OPENGL_CLIP_SPACE
 
 	// specify drivers
-	#define MF_DISPLAY X11
-	#define MF_RENDERER OPENGL
-	#define MF_SYSTEM X11
-	#define MF_TRANSLATION LINUX
-	#define MF_THREAD LINUX
+	#define MF_DISPLAY		MF_DRIVER_X11
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_SYSTEM		MF_DRIVER_X11
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
 
 #elif defined(MF_PSP)
 
@@ -398,17 +429,17 @@ enum MFEndian
 //	#define _OPENGL_CLIP_SPACE
 
 	// specify drivers
-	#define MF_DISPLAY PSP
-	#define MF_RENDERER PSP
-	#define MF_SOUND PSP
-	#define MF_HEAP PSP
-	#define MF_FILESYSTEM PSP
-	#define MF_THREAD PSP
-	#define MF_SOCKETS PSP
-	#define MF_INPUT PSP
-	#define MF_SYSTEM PSP
-	#define MF_TRANSLATION PSP
-	#define MF_DEBUG PSP
+	#define MF_DISPLAY		MF_DRIVER_PSP
+	#define MF_RENDERER		MF_DRIVER_PSP
+	#define MF_SOUND		MF_DRIVER_PSP
+	#define MF_HEAP			MF_DRIVER_PSP
+	#define MF_FILESYSTEM	MF_DRIVER_PSP
+	#define MF_THREAD		MF_DRIVER_PSP
+	#define MF_SOCKETS		MF_DRIVER_PSP
+	#define MF_INPUT		MF_DRIVER_PSP
+	#define MF_SYSTEM		MF_DRIVER_PSP
+	#define MF_TRANSLATION	MF_DRIVER_PSP
+	#define MF_DEBUG		MF_DRIVER_PSP
 
 #elif defined(MF_PS2)
 
@@ -416,10 +447,10 @@ enum MFEndian
 	#include <stdlib.h>
 
 	// specify drivers
-	#define MF_DISPLAY PS2
-	#define MF_RENDERER PS2
-	#define MF_INPUT PS2
-	#define MF_SYSTEM PS2
+	#define MF_DISPLAY		MF_DRIVER_PS2
+	#define MF_RENDERER		MF_DRIVER_PS2
+	#define MF_INPUT		MF_DRIVER_PS2
+	#define MF_SYSTEM		MF_DRIVER_PS2
 
 #elif defined(MF_DC)
 
@@ -429,10 +460,10 @@ enum MFEndian
 	#include <stdlib.h>
 
 	// specify drivers
-	#define MF_DISPLAY DC
-	#define MF_RENDERER DC
-	#define MF_INPUT DC
-	#define MF_SYSTEM DC
+	#define MF_DISPLAY		MF_DRIVER_DC
+	#define MF_RENDERER		MF_DRIVER_DC
+	#define MF_INPUT		MF_DRIVER_DC
+	#define MF_SYSTEM		MF_DRIVER_DC
 
 #elif defined(MF_GC)
 
@@ -443,10 +474,10 @@ enum MFEndian
 	#define MAX_PORTABILITY
 
 	// specify drivers
-	#define MF_DISPLAY GC
-	#define MF_RENDERER GC
-	#define MF_INPUT GC
-	#define MF_SYSTEM GC
+	#define MF_DISPLAY		MF_DRIVER_GC
+	#define MF_RENDERER		MF_DRIVER_GC
+	#define MF_INPUT		MF_DRIVER_GC
+	#define MF_SYSTEM		MF_DRIVER_GC
 
 #endif
 

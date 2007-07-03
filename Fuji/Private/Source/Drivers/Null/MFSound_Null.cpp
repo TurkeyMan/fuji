@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOUND == NULL
+#if MF_SOUND == MF_DRIVER_NULL
 
 #include "MFSound_Internal.h"
 

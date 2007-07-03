@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_DISPLAY == XBOX
+#if MF_DISPLAY == MF_DRIVER_XBOX
 
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"

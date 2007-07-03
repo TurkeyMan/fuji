@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOCKETS == NULL
+#if MF_SOCKETS == MF_DRIVER_NULL
 
 #include "MFSockets.h"
 

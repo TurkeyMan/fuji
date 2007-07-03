@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOCKETS == PSP
+#if MF_SOCKETS == MF_DRIVER_PSP
 
 #include "MFSockets.h"
 

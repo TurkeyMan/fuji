@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_INPUT == XBOX
+#if MF_INPUT == MF_DRIVER_XBOX
 
 #include "MFVector.h"
 #include "MFInput_Internal.h"

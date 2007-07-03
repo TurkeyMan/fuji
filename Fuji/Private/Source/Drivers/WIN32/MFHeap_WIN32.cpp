@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_HEAP == WIN32
+#if MF_HEAP == MF_DRIVER_WIN32
 
 #include "MFHeap.h"
 

@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOCKETS == WINSOCK
+#if MF_SOCKETS == MF_DRIVER_WINSOCK
 
 #include "MFSockets.h"
 

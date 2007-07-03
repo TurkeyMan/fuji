@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL
 
 #include "MFPrimitive.h"
 #include "MFMaterial.h"

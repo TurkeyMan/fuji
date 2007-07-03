@@ -1,6 +1,7 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == NULL
+//#if MF_RENDERER == MF_DRIVER_NULL
+#if MF_RENDERER != MF_DRIVER_PC
 
 #include "MFMaterial_Internal.h"
 

@@ -1,15 +1,18 @@
 #include "Fuji.h"
 
-#if MF_SOUND == DSOUND
+#if MF_SOUND == MF_DRIVER_DSOUND
 
 #include "MFSystem.h"
 #include "MFSound_Internal.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <Mmreg.h>
-#include <dsound.h>
-
+#if defined(MF_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+	#include <Mmreg.h>
+	#include <dsound.h>
+#elif defined(MF_XBOX)
+	#include <xtl.h>
+#endif
 
 /**** Structures ****/
 
@@ -23,7 +26,9 @@ struct MFVoiceDataInternal
 {
 	IDirectSoundBuffer *pBuffer;
 	IDirectSoundBuffer8 *pBuffer8;
+#if !defined(MF_XBOX)
 	IDirectSound3DBuffer8 *p3DBuffer8;
+#endif
 };
 
 
@@ -47,9 +52,10 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 {
 	MFCALLSTACK;
 
-	HRESULT hr;
-
-	DirectSoundCreate8(NULL, &pDirectSound, NULL);
+#if defined(MF_XBOX)
+	DirectSoundCreate(NULL, &pDirectSound, NULL);
+#else
+	HRESULT hr = DirectSoundCreate8(NULL, &pDirectSound, NULL);
 
 	// create the primary sound buffer
 	// fill out DSBuffer creation data
@@ -68,6 +74,7 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 
 	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_PRIORITY);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to set the DirectSound cooperative level");
+#endif
 
 	// we need to return the size of the internal structures so the platform independant
 	// code can make the correct allocations..
@@ -99,8 +106,10 @@ bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
 		return false;
 
 	// destroy voice
+#if !defined(MF_XBOX)
 	if(pVoice->pInternal->p3DBuffer8)
 		pVoice->pInternal->p3DBuffer8->Release();
+#endif
 	pVoice->pInternal->pBuffer8->Release();
 	pVoice->pInternal->pBuffer->Release();
 
@@ -118,10 +127,11 @@ void MFSound_CreateInternal(MFSound *pSound)
 
 	desc.dwSize = sizeof(DSBUFFERDESC);
 	desc.dwBufferBytes = pTemplate->numSamples * bytesPerSample;
+	desc.lpwfxFormat = &wfx;
+#if !defined(MF_XBOX)
+	desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
 	desc.dwReserved = 0;
 	desc.guid3DAlgorithm = DS3DALG_DEFAULT;
-	desc.lpwfxFormat = &wfx;
-	desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
 
 	// if we're not creating a dynamic duffer we should probably make it static..
 	if(!(pTemplate->flags & MFSF_Dynamic))
@@ -134,6 +144,11 @@ void MFSound_CreateInternal(MFSound *pSound)
 	// if we want global focus..
 	if(gDefaults.sound.useGlobalFocus)
 		desc.dwFlags |= DSBCAPS_GLOBALFOCUS;
+#else
+	desc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_LOCDEFER | DSBCAPS_MUTE3DATMAXDISTANCE;
+    desc.lpMixBins = NULL;
+    desc.dwInputMixBin = 0;
+#endif
 
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
 	wfx.nChannels = pTemplate->numChannels;
@@ -146,12 +161,14 @@ void MFSound_CreateInternal(MFSound *pSound)
 	// create the 2d buffer
 	pDirectSound->CreateSoundBuffer(&desc, &pSound->pInternal->pBuffer, NULL);
 
+#if !defined(MF_XBOX)
 	if(wfx.nChannels == 1)
 	{
 		// and create the 3d buffer (but only for 1 channel sounds)
 		desc.dwFlags |= DSBCAPS_CTRL3D;
 		pDirectSound->CreateSoundBuffer(&desc, &pSound->pInternal->p3DBuffer, NULL);
 	}
+#endif
 }
 
 void MFSound_DestroyInternal(MFSound *pSound)
@@ -218,12 +235,14 @@ void MFSound_PlayInternal(MFVoice *pVoice)
 
 	MFSound *pSound = pVoice->pSound;
 
+#if !defined(MF_XBOX)
 	if(pVoice->flags & MFPF_3D && pSound->pInternal->p3DBuffer)
 	{
 		pDirectSound->DuplicateSoundBuffer(pSound->pInternal->p3DBuffer, &pVoice->pInternal->pBuffer);
 		pVoice->pInternal->pBuffer->QueryInterface(IID_IDirectSound3DBuffer8, (VOID**)&pVoice->pInternal->p3DBuffer8);
 	}
 	else
+#endif
 	{
 		pDirectSound->DuplicateSoundBuffer(pSound->pInternal->pBuffer, &pVoice->pInternal->pBuffer);
 		pVoice->pInternal->p3DBuffer8 = NULL;

@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9
 
 /**** Defines ****/
 

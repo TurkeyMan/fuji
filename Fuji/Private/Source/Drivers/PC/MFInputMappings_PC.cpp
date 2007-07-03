@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_INPUT == PC || MF_INPUT == LINUX
+#if MF_INPUT == MF_DRIVER_PC || MF_INPUT == MF_DRIVER_LINUX
 
 #include "MFInput.h"
 

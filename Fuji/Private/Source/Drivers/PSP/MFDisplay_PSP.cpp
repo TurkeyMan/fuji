@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_DISPLAY == PSP
+#if MF_DISPLAY == MF_DRIVER_PSP
 
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"

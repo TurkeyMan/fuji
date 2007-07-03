@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_THREAD == NULL
+#if MF_THREAD == MF_DRIVER_NULL
 
 #include "MFThread.h"
 

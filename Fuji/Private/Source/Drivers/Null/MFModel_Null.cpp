@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == NULL
+#if MF_RENDERER == MF_DRIVER_NULL
 
 #include "MFModel_Internal.h"
 

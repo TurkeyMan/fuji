@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_DISPLAY == WIN32
+#if MF_DISPLAY == MF_DRIVER_WIN32
 
 #define _WIN32_WINNT 0x501
 #define WM_INPUT 0x00FF

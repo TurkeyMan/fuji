@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_FILESYSTEM == WIN32
+#if MF_FILESYSTEM == MF_DRIVER_WIN32
 
 #if defined(MF_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN

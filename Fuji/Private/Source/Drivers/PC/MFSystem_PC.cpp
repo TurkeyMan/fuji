@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SYSTEM == PC
+#if MF_SYSTEM == MF_DRIVER_PC
 
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"

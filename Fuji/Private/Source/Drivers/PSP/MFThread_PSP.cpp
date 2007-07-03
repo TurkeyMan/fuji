@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_THREAD == PSP
+#if MF_THREAD == MF_DRIVER_PSP
 
 #include "MFThread.h"
 

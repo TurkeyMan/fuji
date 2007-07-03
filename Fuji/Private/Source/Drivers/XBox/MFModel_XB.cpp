@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == XBOX
+#if MF_RENDERER == MF_DRIVER_XBOX
 
 #include "MFModel_Internal.h"
 

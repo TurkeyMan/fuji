@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == PSP
+#if MF_RENDERER == MF_DRIVER_PSP
 
 #include "MFHeap.h"
 #include "Display_Internal.h"

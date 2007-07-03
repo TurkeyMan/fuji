@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_INPUT == PSP
+#if MF_INPUT == MF_DRIVER_PSP
 
 #include "MFVector.h"
 #include "MFInput_Internal.h"

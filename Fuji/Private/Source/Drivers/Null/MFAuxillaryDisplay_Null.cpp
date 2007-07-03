@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_AUXILLARYDISPLAY == NULL
+#if MF_AUXILLARYDISPLAY == MF_DRIVER_NULL
 
 #include "MFAuxillaryDisplay.h"
 

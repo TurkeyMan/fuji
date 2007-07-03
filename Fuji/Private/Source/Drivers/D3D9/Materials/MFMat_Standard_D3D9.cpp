@@ -1,14 +1,14 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9
 
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
-#include "MFRenderer_PC.h"
-#include "../../Source/Materials/MFMat_Standard.h"
+#include "../MFRenderer_D3D9.h"
+#include "Materials/MFMat_Standard.h"
 
 #include "../Shaders/MatStandard_s.h"
 #include "../Shaders/MatStandard_a.h"

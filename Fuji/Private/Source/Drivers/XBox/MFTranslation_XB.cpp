@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_TRANSLATION == XBOX
+#if MF_TRANSLATION == MF_DRIVER_XBOX
 
 #include "MFTranslation.h"
 

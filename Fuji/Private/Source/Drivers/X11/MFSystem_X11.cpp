@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SYSTEM == X11
+#if MF_SYSTEM == MF_DRIVER_X11
 
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"

@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_PARTICLESYSTEM == NULL
+#if MF_PARTICLESYSTEM == MF_DRIVER_NULL
 
 #include "MFSystem.h"
 #include "MFParticleSystem_Internal.h"

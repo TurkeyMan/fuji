@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_TRANSLATION == PSP
+#if MF_TRANSLATION == MF_DRIVER_PSP
 
 #include "MFTranslation.h"
 

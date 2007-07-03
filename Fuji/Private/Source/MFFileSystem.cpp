@@ -8,6 +8,10 @@
 #include "FileSystem/MFFileSystemHTTP_Internal.h"
 #include "MFPtrList.h"
 
+#if defined(FindClose)
+	#undef FindClose
+#endif
+
 MFPtrListDL<MFFile> gOpenFiles;
 
 MFMount *pMountList = NULL;

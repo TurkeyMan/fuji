@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SYSTEM == NULL
+#if MF_SYSTEM == MF_DRIVER_NULL
 
 #include <time.h>
 

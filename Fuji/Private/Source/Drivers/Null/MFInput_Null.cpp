@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_INPUT == NULL
+#if MF_INPUT == MF_DRIVER_NULL
 
 #include "MFInput_Internal.h"
 

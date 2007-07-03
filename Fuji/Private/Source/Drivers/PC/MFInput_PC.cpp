@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_INPUT == PC
+#if MF_INPUT == MF_DRIVER_PC
 
 #define DIRECTINPUT_VERSION 0x0800
 #define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll

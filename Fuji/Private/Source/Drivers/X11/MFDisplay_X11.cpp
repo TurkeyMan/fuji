@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_DISPLAY == X11
+#if MF_DISPLAY == MF_DRIVER_X11
 
 #include "Display_Internal.h"
 #include "MFView.h"

@@ -1,14 +1,14 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == XBOX
+#if MF_RENDERER == MF_DRIVER_XBOX
 
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
-#include "MFRenderer_XB.h"
-#include "../../Source/Materials/MFMat_Standard.h"
+#include "../MFRenderer_XB.h"
+#include "Materials/MFMat_Standard.h"
 
 static MFMaterial *pSetMaterial = 0;
 extern uint32 renderSource;
