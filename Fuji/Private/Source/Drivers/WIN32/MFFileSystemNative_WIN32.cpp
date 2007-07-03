@@ -7,6 +7,8 @@
 	#include <windows.h>
 #elif defined(MF_XBOX)
 	#include <xtl.h>
+
+	char *FixXBoxFilename(const char *pFilename);
 #endif
 
 #include "MFHeap.h"
@@ -33,9 +35,16 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	DWORD access = ((pOpenData->openFlags&MFOF_Read) ? GENERIC_READ : NULL) | ((pOpenData->openFlags&MFOF_Write) ? GENERIC_WRITE : NULL);
 	MFDebug_Assert(access, "Neither MFOF_Read nor MFOF_Write specified.");
 
+	const char *pFilename;
+#if defined(MF_WINDOWS)
+	pFilename = pNative->pFilename;
+#else
+	pFilename = FixXBoxFilename(pNative->pFilename);
+#endif
+
 	DWORD create = (pOpenData->openFlags&MFOF_Read) ? ((pOpenData->openFlags&MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
 
-	pFile->pFilesysData = CreateFile(pNative->pFilename, access, FILE_SHARE_READ, NULL, create, NULL, NULL);
+	pFile->pFilesysData = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, create, NULL, NULL);
 
 	if(pFile->pFilesysData == INVALID_HANDLE_VALUE)
 	{
@@ -151,6 +160,10 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	DWORD fileSize = 0;
 
+#if defined(MF_XBOX)
+	pFilename = FixXBoxFilename(pFilename);
+#endif
+
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
 	if(hFile != INVALID_HANDLE_VALUE)
@@ -170,6 +183,10 @@ bool MFFileNative_Exists(const char* pFilename)
 	MFCALLSTACK;
 
 	bool exists = false;
+
+#if defined(_MF_XBOX)
+	pFilename = FixXBoxFilename(pFilename);
+#endif
 
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 

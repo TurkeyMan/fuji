@@ -25,10 +25,11 @@
 		MF_ASM_ATNT
 
 	Architectures:
-		MF_ARCH_PPC
 		MF_ARCH_X86
+		MF_ARCH_PPC
 		MF_ARCH_MIPS
 		MF_ARCH_SH4
+		MF_ARCH_SPU
 
 	Endian:
 		MF_ENDIAN_LITTLE
@@ -108,6 +109,7 @@
 	MF_AUXILLARYDISPLAY:
 	MF_SYSTEM:
 	MF_TRANSLATION:
+	MF_DEBUG:
 		NULL
 		MF_PLATFORM
 */
@@ -115,10 +117,8 @@
 // detect compiler
 #if defined(_MSC_VER)
 	#define MF_COMPILER_VISUALC
-	#define MF_ASM_INTEL
 #elif defined(__GNUC__)
 	#define MF_COMPILER_GCC
-	#define MF_ASM_ATNT
 #else
 	#error Unrecognised compiler. Contact Fuji dev team or add an entry here...
 #endif
@@ -151,7 +151,7 @@
 	#define MF_PLATFORM PSP
 	#define MF_ARCH_MIPS
 	#define MF_32BIT
-#elif defined(_EE_)
+#elif defined(_EE_) || defined(_EE) || defined(_R5900) || defined(__R5900)
 	#define MF_PS2
 	#define MF_PLATFORM PS2
 	#define MF_ARCH_MIPS
@@ -161,9 +161,13 @@
 	#define MF_PLATFORM PS3
 	#define MF_ARCH_PPC
 	#define MF_64BIT
-#elif defined(__SH4_SINGLE_ONLY__)
+#elif defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
 	#define MF_ARCH_SH4
-#elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips__) || defined(__MIPSEL__)
+	// shall we assume DC here? yeah, why not... i've never heard of an SH4 in anything else..
+	#define MF_DC
+	#define MF_PLATFORM DC
+	#define MF_32BIT
+#elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips) || defined(__mips__) || defined(__MIPSEL__) || defined(_MIPSEL) || defined(__MIPSEL)
 	#define MF_ARCH_MIPS
 #elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__)
 	#define MF_ARCH_PPC
@@ -192,6 +196,13 @@
 	#define MF_ENDIAN_BIG
 #else
 	#define MF_ENDIAN_LITTLE
+#endif
+
+// select asm format
+#if defined(MF_COMPILER_VISUALC)
+	#define MF_ASM_INTEL
+#else
+	#define MF_ASM_ATNT
 #endif
 
 /*** Compiler definitions ***/
@@ -299,6 +310,7 @@ enum MFEndian
 	#define MF_AUXILLARYDISPLAY PC
 	#define MF_SYSTEM PC
 	#define MF_TRANSLATION PC
+	#define MF_DEBUG PC
 
 #elif defined(MF_XBOX)
 
@@ -475,6 +487,9 @@ enum MFEndian
 #endif
 #if !defined(MF_TRANSLATION)
 	#define MF_TRANSLATION NULL
+#endif
+#if !defined(MF_DEBUG)
+	#define MF_DEBUG NULL
 #endif
 
 // enable this define to allow the NULL drivers to operate using the standard CRT where appropriate
