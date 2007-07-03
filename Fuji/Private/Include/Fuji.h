@@ -364,7 +364,7 @@ enum MFEndian
 	#define MF_DISPLAY X11
 	#define MF_RENDERER OPENGL
 	#define MF_INPUT LINUX
-	#define MF_SYSTEM LINUX
+	#define MF_SYSTEM X11
 	#define MF_TRANSLATION LINUX
 
 #elif defined(MF_OSX)
@@ -377,7 +377,7 @@ enum MFEndian
 	// specify drivers
 	#define MF_DISPLAY X11
 	#define MF_RENDERER OPENGL
-	#define MF_SYSTEM LINUX
+	#define MF_SYSTEM X11
 	#define MF_TRANSLATION LINUX
 
 #elif defined(MF_PSP)

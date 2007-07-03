@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_THREAD == LINUX
+
 #include "MFThread.h"
 #include "MFHeap.h"
 
@@ -87,3 +90,5 @@ void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	MFDebug_Assert(false, "Not written...");
 }
+
+#endif

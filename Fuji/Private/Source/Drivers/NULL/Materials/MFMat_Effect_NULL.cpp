@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == NULL
+
 #include "MFMaterial_Internal.h"
 
 int MFMat_Effect_RegisterMaterial(void *pPlatformData)
@@ -42,3 +45,5 @@ MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex)
 {
 	return NULL;
 }
+
+#endif

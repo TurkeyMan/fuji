@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == NULL
+
 #include "MFMaterial_Internal.h"
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
@@ -23,3 +26,5 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
 }
+
+#endif

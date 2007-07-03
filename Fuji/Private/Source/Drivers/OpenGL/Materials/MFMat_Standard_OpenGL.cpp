@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == OPENGL
+
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -127,3 +130,5 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	MFHeap_Free(pMaterial->pInstanceData);
 }
+
+#endif

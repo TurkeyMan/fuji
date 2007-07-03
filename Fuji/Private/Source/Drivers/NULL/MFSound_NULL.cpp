@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOUND == NULL
+
 #include "MFSound_Internal.h"
 
 /**** Structures ****/
@@ -101,3 +104,5 @@ uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	return 0;
 }
+
+#endif

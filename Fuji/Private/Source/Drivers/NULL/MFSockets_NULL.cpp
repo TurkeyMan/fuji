@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOCKETS == NULL
+
 #include "MFSockets.h"
 
 int MFSockets_InitModulePlatformSpecific()
@@ -79,3 +82,5 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 {
 	return 0;
 }
+
+#endif
