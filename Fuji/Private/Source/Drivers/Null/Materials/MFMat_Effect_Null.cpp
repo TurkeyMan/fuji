@@ -1,7 +1,7 @@
 #include "Fuji.h"
 
 //#if MF_RENDERER == MF_DRIVER_NULL
-#if MF_RENDERER != MF_DRIVER_PC
+#if MF_RENDERER != MF_DRIVER_D3D9
 
 #include "MFMaterial_Internal.h"
 

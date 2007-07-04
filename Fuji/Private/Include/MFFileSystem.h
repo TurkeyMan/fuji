@@ -279,6 +279,7 @@ enum MFFileAttributes
 	MFFA_Directory = MFBIT(0),	/**< File is a directory */
 	MFFA_SymLink = MFBIT(1),	/**< File is a symbolic link */
 	MFFA_Hidden = MFBIT(2),		/**< File is hidden */
+	MFFA_ReadOnly = MFBIT(3),	/**< File is read only */
 
 	MFFA_ForceInt = 0x7FFFFFFF	/**< Force MFFileAttributes to an int type */
 };
