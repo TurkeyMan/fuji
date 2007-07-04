@@ -142,182 +142,81 @@ OBJS := $(ZLIB) \
 	Source/FileSystem/MFFileSystemZipFile.o \
 	Source/FileSystem/MFFileSystemHTTP.o \
 	Source/Materials/MFMat_Effect.o \
-	Source/Materials/MFMat_Standard.o
-
-ifeq ($(PLATFORM),PSP)
-OBJS := $(OBJS) PSP/Display_PSP.o \
-	PSP/MFDebug_PSP.o \
-	PSP/MFHeap_PSP.o \
-	PSP/MFInput_PSP.o \
-	PSP/MFMaterial_PSP.o \
-	PSP/MFModel_PSP.o \
-	PSP/MFPrimitive_PSP.o \
-	PSP/MFRenderer_PSP.o \
-	PSP/MFSockets_PSP.o \
-	PSP/MFSound_PSP.o \
-	PSP/MFSystem_PSP.o \
-	PSP/MFTexture_PSP.o \
-	PSP/MFThread_PSP.o \
-	PSP/MFTranslation_PSP.o \
-	PSP/FileSystem/MFFileSystemNative_PSP.o \
-	PSP/Materials/MFMat_Standard_PSP.o \
-	Null/Materials/MFMat_Effect_Null.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),LINUX)
-OBJS := $(OBJS) Linux/Display_Linux.o \
-	Linux/MFDebug_Linux.o \
-	Linux/MFHeap_Linux.o \
-	Linux/MFInput_Linux.o \
-	PC/MFInputMappings_PC.o \
-	Linux/MFMaterial_Linux.o \
-	Linux/MFModel_Linux.o \
-	Linux/MFPrimitive_Linux.o \
-	Linux/MFSockets_Linux.o \
-	Linux/MFSound_Linux.o \
-	Linux/MFSystem_Linux.o \
-	Linux/MFTexture_Linux.o \
-	Linux/MFThread_Linux.o \
-	Linux/MFTranslation_Linux.o \
-	Linux/FileSystem/MFFileSystemNative_Linux.o \
-	Linux/Materials/MFMat_Effect_Linux.o \
-	Linux/Materials/MFMat_Standard_Linux.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),OSX)
-OBJS := $(OBJS) OSX/Display_OSX.o \
-	OSX/MFDebug_OSX.o \
-	OSX/MFHeap_OSX.o \
-	OSX/MFInput_OSX.o \
-	OSX/MFMaterial_OSX.o \
-	OSX/MFModel_OSX.o \
-	OSX/MFPrimitive_OSX.o \
-	OSX/MFSockets_OSX.o \
-	OSX/MFSound_OSX.o \
-	OSX/MFSystem_OSX.o \
-	OSX/MFTexture_OSX.o \
-	OSX/MFThread_OSX.o \
-	OSX/MFTranslation_OSX.o \
-	OSX/FileSystem/MFFileSystemNative_OSX.o \
-	OSX/Materials/MFMat_Standard_OSX.o \
-	Null/Materials/MFMat_Effect_Null.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),PC)
-OBJS := $(OBJS) PC/Display_PC.o \
-	PC/MFAuxillaryDisplay_PC.o \
-	PC/MFDebug_PC.o \
-	PC/MFHeap_PC.o \
-	PC/MFInput_PC.o \
-	PC/MFInputMappings_PC.o \
-	PC/MFMaterial_PC.o \
-	PC/MFModel_PC.o \
-	PC/MFPrimitive_PC.o \
-	PC/MFRenderer_PC.o \
-	PC/MFSockets_PC.o \
-	PC/MFSound_PC.o \
-	PC/MFSystem_PC.o \
-	PC/MFTexture_PC.o \
-	PC/MFThread_PC.o \
-	PC/MFTranslation_PC.o \
-	PC/FileSystem/MFFileSystemNative_PC.o \
-	PC/Materials/MFMat_Effect_PC.o \
-	PC/Materials/MFMat_Standard_PC.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),DC)
-OBJS := $(OBJS) DC/Display_DC.o \
-	DC/MFInput_DC.o \
-	DC/MFMaterial_DC.o \
-	DC/MFPrimitive_DC.o \
-	DC/MFRenderer_DC.o \
-	DC/MFSound_DC.o \
-	DC/MFSystem_DC.o \
-	DC/MFTexture_DC.o \
-	DC/FileSystem/MFFileSystemNative_DC.o \
-	DC/Materials/Mat_Standard_DC.o \
-	Null/Materials/MFMat_Effect_Null.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),GC)
-OBJS := $(OBJS) GC/Display_GC.o \
-	GC/MFInput_GC.o \
-	GC/MFMaterial_GC.o \
-	GC/MFPrimitive_GC.o \
-	GC/MFRenderer_GC.o \
-	GC/MFSound_GC.o \
-	GC/MFSystem_GC.o \
-	GC/MFTexture_GC.o \
-	GC/FileSystem/MFFileSystemNative_GC.o \
-	GC/Materials/MFMat_Standard_GC.o \
-	Null/Materials/MFMat_Effect_Null.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-ifeq ($(PLATFORM),PS2)
-OBJS := $(OBJS) PS2/Display_PS2.o \
-	PS2/MFDebug_PS2.o \
-	PS2/MFHeap_PS2.o \
-	PS2/MFInput_PS2.o \
-	PS2/MFMaterial_PS2.o \
-	PS2/MFModel_PS2.o \
-	PS2/MFPrimitive_PS2.o \
-	PS2/MFRenderer_PS2.o \
-	PS2/MFSockets_PS2.o \
-	PS2/MFSound_PS2.o \
-	PS2/MFSystem_PS2.o \
-	PS2/MFTexture_PS2.o \
-	PS2/MFThread_PS2.o \
-	PS2/MFTranslation_PS2.o \
-	PS2/FileSystem/MFFileSystemNative_PS2.o \
-	PS2/Materials/MFMat_Standard_PS2.o \
-	Null/Materials/MFMat_Effect_Null.o \
-	Null/MFAuxillaryDisplay_Null.o \
-	Null/MFParticleSystem_Null.o
-endif
-
-#XBox/Display_XB.o
-#XBox/MFDebug_XB.o
-#XBox/MFHeap_XB.o
-#XBox/MFInput_XB.o
-#XBox/MFMaterial_XB.o
-#XBox/MFModel_XB.o
-#XBox/MFPrimitive_XB.o
-#XBox/MFRenderer_XB.o
-#XBox/MFSockets_XB.o
-#XBox/MFSound_XB.o
-#XBox/MFSystem_XB.o
-#XBox/MFTexture_XB.o
-#XBox/MFThread_XB.o
-#XBox/MFTranslation_XB.o
-#XBox/FileSystem/MFFileSystemNative_XB.o
-#XBox/Materials/MFMat_Standard_XB.o
-#Null/Display_Null.o
-#Null/MFDebug_Null.o
-#Null/MFHeap_Null.o
-#Null/MFInput_Null.o
-#Null/MFMaterial_Null.o
-#Null/MFModel_Null.o
-#Null/MFPrimitive_Null.o
-#Null/MFSockets_Null.o
-#Null/MFSound_Null.o
-#Null/MFSystem_Null.o
-#Null/MFTexture_Null.o
-#Null/MFThread_Null.o
-#Null/MFTranslation_Null.o
-#Null/FileSystem/MFFileSystemNative_Null.o
-#Null/Materials/MFMat_Effect_Null.o
-#Null/Materials/MFMat_Standard_Null.o
+	Source/Materials/MFMat_Standard.o \
+	Source/Drivers/D3D9/MFMaterial_D3D9.o \
+	Source/Drivers/D3D9/MFModel_D3D9.o \
+	Source/Drivers/D3D9/MFPrimitive_D3D9.o \
+	Source/Drivers/D3D9/MFRenderer_D3D9.o \
+	Source/Drivers/D3D9/MFTexture_D3D9.o \
+	Source/Drivers/D3D9/Materials/MFMat_Effect_D3D9.o \
+	Source/Drivers/D3D9/Materials/MFMat_Standard_D3D9.o \
+	Source/Drivers/Linux/MFInput_Linux.o \
+	Source/Drivers/Linux/MFThread_Linux.o \
+	Source/Drivers/Linux/MFTranslation_Linux.o \
+	Source/Drivers/Null/MFAuxillaryDisplay_Null.o \
+	Source/Drivers/Null/MFDebug_Null.o \
+	Source/Drivers/Null/MFDisplay_Null.o \
+	Source/Drivers/Null/MFFileSystemNative_Null.o \
+	Source/Drivers/Null/MFHeap_Null.o \
+	Source/Drivers/Null/MFInput_Null.o \
+	Source/Drivers/Null/MFMaterial_Null.o \
+	Source/Drivers/Null/MFModel_Null.o \
+	Source/Drivers/Null/MFParticleSystem_Null.o \
+	Source/Drivers/Null/MFPrimitive_Null.o \
+	Source/Drivers/Null/MFSockets_Null.o \
+	Source/Drivers/Null/MFSound_Null.o \
+	Source/Drivers/Null/MFSystem_Null.o \
+	Source/Drivers/Null/MFTexture_Null.o \
+	Source/Drivers/Null/MFThread_Null.o \
+	Source/Drivers/Null/MFTranslation_Null.o \
+	Source/Drivers/Null/Materials/MFMat_Effect_Null.o \
+	Source/Drivers/Null/Materials/MFMat_Standard_Null.o \
+	Source/Drivers/OpenGL/MFMaterial_OpenGL.o \
+	Source/Drivers/OpenGL/MFModel_OpenGL.o \
+	Source/Drivers/OpenGL/MFPrimitive_OpenGL.o \
+	Source/Drivers/OpenGL/MFTexture_OpenGL.o \
+	Source/Drivers/OpenGL/Materials/MFMat_Standard_OpenGL.o \
+	Source/Drivers/PC/MFAuxillaryDisplay_PC.o \
+	Source/Drivers/PC/MFDebug_PC.o \
+	Source/Drivers/PC/MFDisplay_PC.o \
+	Source/Drivers/PC/MFInputMappings_PC.o \
+	Source/Drivers/PC/MFInput_PC.o \
+	Source/Drivers/PC/MFSound_PC.o \
+	Source/Drivers/PC/MFSystem_PC.o \
+	Source/Drivers/PC/MFTranslation_PC.o \
+	Source/Drivers/PSP/MFDebug_PSP.o \
+	Source/Drivers/PSP/MFDisplay_PSP.o \
+	Source/Drivers/PSP/MFFileSystemNative_PSP.o \
+	Source/Drivers/PSP/MFHeap_PSP.o \
+	Source/Drivers/PSP/MFInput_PSP.o \
+	Source/Drivers/PSP/MFMaterial_PSP.o \
+	Source/Drivers/PSP/MFModel_PSP.o \
+	Source/Drivers/PSP/MFPrimitive_PSP.o \
+	Source/Drivers/PSP/MFRenderer_PSP.o \
+	Source/Drivers/PSP/MFSockets_PSP.o \
+	Source/Drivers/PSP/MFSound_PSP.o \
+	Source/Drivers/PSP/MFSystem_PSP.o \
+	Source/Drivers/PSP/MFTexture_PSP.o \
+	Source/Drivers/PSP/MFThread_PSP.o \
+	Source/Drivers/PSP/MFTranslation_PSP.o \
+	Source/Drivers/PSP/Materials/MFMat_Standard_PSP.o \
+	Source/Drivers/WIN32/MFFileSystemNative_WIN32.o \
+	Source/Drivers/WIN32/MFHeap_WIN32.o \
+	Source/Drivers/WIN32/MFSockets_WINSOCK.o \
+	Source/Drivers/WIN32/MFThread_WIN32.o \
+	Source/Drivers/X11/MFDisplay_X11.o \
+	Source/Drivers/X11/MFSystem_X11.o \
+	Source/Drivers/XBox/MFDisplay_XB.o \
+	Source/Drivers/XBox/MFHeap_XB.o \
+	Source/Drivers/XBox/MFInput_XB.o \
+	Source/Drivers/XBox/MFMaterial_XB.o \
+	Source/Drivers/XBox/MFModel_XB.o \
+	Source/Drivers/XBox/MFPrimitive_XB.o \
+	Source/Drivers/XBox/MFRenderer_XB.o \
+	Source/Drivers/XBox/MFSystem_XB.o \
+	Source/Drivers/XBox/MFTexture_XB.o \
+	Source/Drivers/XBox/MFTranslation_XB.o \
+	Source/Drivers/XBox/Materials/MFMat_Standard_XB.o
 
 #-------------------------------------------------------------------
 
@@ -337,17 +236,10 @@ UTIL_OBJS := $(ZLIB) \
 	Source/MFQuaternion.o \
 	Source/Util.o \
 	Util/F3D.o \
-	Null/MFHeap_Null.o \
-
-ifeq ($(PLATFORM),LINUX)
-UTIL_OBJS := $(UTIL_OBJS) Linux/MFDebug_Linux.o
-endif
-ifeq ($(PLATFORM),OSX)
-UTIL_OBJS := $(UTIL_OBJS) OSX/MFDebug_OSX.o
-endif
-ifeq ($(PLATFORM),PC)
-UTIL_OBJS := $(UTIL_OBJS) PC/MFDebug_PC.o
-endif
+	Source/Drivers/Null/MFHeap_Null.o \
+	Source/Drivers/Null/MFDebug_Null.o \
+	Source/Drivers/Linux/MFDebug_Linux.o \
+	Source/Drivers/PC/MFDebug_PC.o
 
 #-------------------------------------------------------------------
 # End Objects
@@ -356,13 +248,7 @@ endif
 TARGET_LIB = Lib/libFuji
 
 
-ifeq ($(PLATFORM),LINUX)
-PLATFORMINCLUDE = Linux
-else
-PLATFORMINCLUDE = $(PLATFORM)
-endif
-
-INCDIR = Include Source $(PLATFORMINCLUDE) Middleware Middleware/zlib Middleware/angelscript/include
+INCDIR = Include Source Source/Images/$(PLATFORM) Middleware Middleware/zlib Middleware/angelscript/include
 CFLAGS = -Wall -D_$(PLATFORM)
 CXXFLAGS = -fno-exceptions -fno-rtti
 ASFLAGS =
