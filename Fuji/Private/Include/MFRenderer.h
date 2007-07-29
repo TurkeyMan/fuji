@@ -91,6 +91,23 @@ enum MFVertexComponent
 	MFVC_ForceInt = 0x7FFFFFFF	/**< Force VertexComponent to an int type */
 };
 
+// new from display...
+enum MFClearScreenFlags
+{
+	CS_Colour	= 1,
+	CS_ZBuffer	= 2,
+	CS_Stencil	= 4,
+
+	CS_All		= CS_Colour | CS_ZBuffer | CS_Stencil,
+	CS_ForceInt	= 0x7FFFFFFF
+};
+
+void MFRenderer_SetClearColour(float r, float g, float b, float a);
+void MFRenderer_ClearScreen(uint32 flags = CS_All);
+
+void MFRenderer_SetViewport(float x, float y, float width, float height);
+void MFRenderer_ResetViewport();
+
 /**
  * Begin a render block.
  * Configures the renderer to render geometry with the current settings.

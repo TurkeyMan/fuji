@@ -415,6 +415,30 @@ static const int gXPlorerButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative,	// Button_ThumbRY
 };
 
+static const int gUSBGamepadButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	9,	// Button_Start
+	8,	// Button_Back
+	-1,	// Button_LeftThumb
+	-1,	// Button_RightThumb
+	12,	// Button_DUp
+	14,	// Button_DDown
+	15,	// Button_DLeft
+	13,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+};
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -1000,6 +1024,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"PLAYSTATION(R)3 Controller",
 		0x054C, 0x0268,
 		gSixaxisButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[33]
+	},
+
+	// Random PC Gamepad (this one needs fleshing out... and i dont know the button names)
+	{
+		"USB Gamepad",
+		"USB GamePad",
+		0x0E8F, 0x3013,
+		gUSBGamepadButtonID,
 		gPS2ButtonNames,
 		NULL
 	}

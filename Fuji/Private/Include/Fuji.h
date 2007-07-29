@@ -399,6 +399,7 @@ enum MFEndian
 	#define MF_SYSTEM		MF_DRIVER_X11
 	#define MF_TRANSLATION	MF_DRIVER_LINUX
 	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_LINUX
 
 #elif defined(MF_OSX)
 
@@ -413,6 +414,7 @@ enum MFEndian
 	#define MF_SYSTEM		MF_DRIVER_X11
 	#define MF_TRANSLATION	MF_DRIVER_LINUX
 	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_LINUX
 
 #elif defined(MF_PSP)
 

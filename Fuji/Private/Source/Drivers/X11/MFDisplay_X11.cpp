@@ -9,7 +9,6 @@
 #include "X11_linux.h"
 #include <stdio.h>
 #include <X11/Xlib.h>
-#include <GL/glx.h>
 
 // Typedefs
 struct Resolution
@@ -26,23 +25,6 @@ const char *resMenuItems[] = {"-", modeString, "+", NULL};
 MenuItemIntString resSelect(resMenuItems, 1);
 MenuItemStatic applyDisplayMode;
 
-const int glAttrsSingle[] =
-{
-	GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, /* Don't need to draw to anything else */
-	GLX_DEPTH_SIZE, 16,
-	GLX_STENCIL_SIZE, 8,
-	GLX_DOUBLEBUFFER, true,
-	None
-};
-
-const int glAttrsDouble[] =
-{
-	GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
-	GLX_DEPTH_SIZE, 16,
-	GLX_STENCIL_SIZE, 8,
-	None
-};
-
 // Variables
 Resolution *modes = NULL;
 MenuItemIntString *modesMenu;
@@ -55,8 +37,6 @@ Window window = 0;
 Window rootWindow;
 XF86VidModeModeInfo *originalVidMode = NULL;
 XF86VidModeModeInfo **vidModes = NULL;
-GLXWindow glXWindow;
-GLXContext glXContext = NULL;
 XSizeHints *sizeHints = NULL;
 Colormap colorMap = 0;
 Atom wm_delete_window;
@@ -495,18 +475,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		XFlush(xdisplay);
 	}
 
-	glEnable(GL_LINE_SMOOTH);
-
-//	glFrontFace(GL_CW);
-//	glCullFace(GL_BACK);
-
-	glDisable(GL_LIGHTING);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glEnable(GL_TEXTURE_2D);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	MFRenderer_CreateDisplay();
 
 	return 0;
 }
@@ -584,52 +553,6 @@ void MFDisplay_DestroyDisplay()
 	}
 
 	FreeModes();
-}
-
-void MFDisplay_BeginFrame()
-{
-	MFCALLSTACK;
-}
-
-void MFDisplay_EndFrame()
-{
-	MFCALLSTACK;
-
-	glXSwapBuffers(xdisplay, glXWindow);
-}
-
-void MFDisplay_SetClearColour(float r, float g, float b, float a)
-{
-	MFCALLSTACK;
-
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-void MFDisplay_ClearScreen(uint32 flags)
-{
-	MFCALLSTACK;
-
-	int mask = ((flags & CS_Colour) ? GL_COLOR_BUFFER_BIT : 0) | ((flags & CS_ZBuffer) ? GL_DEPTH_BUFFER_BIT : 0);
-
-	glClearColor(gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w);
-	glClear(mask);
-}
-
-void MFDisplay_SetViewport(float x, float y, float width, float height)
-{
-	MFCALLSTACK;
-
-	glViewport((GLint)((x/640.0f) * (float)gDisplay.width), (GLint)((y/480.0f) * (float)gDisplay.height), (GLint)((width/640.0f) * (float)gDisplay.width), (GLint)((height/480.0f) * (float)gDisplay.height));
-}
-
-void MFDisplay_ResetViewport()
-{
-	MFCALLSTACK;
-
-	MFDisplay_SetViewport(0, 0, gDisplay.width, gDisplay.height);
 }
 
 float MFDisplay_GetNativeAspectRatio()

@@ -8,7 +8,8 @@
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	#include "lgLcd/include/lglcd.h"
-//	#pragma comment(lib, "lglcd")
+
+	#pragma comment(lib, "lglcd")
 
 	extern const uint8 gDefaultImage[];
 #endif

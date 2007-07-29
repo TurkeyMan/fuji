@@ -11,13 +11,8 @@ struct MFModelTemplate;
 void MFModel_InitModule();
 void MFModel_DeinitModule();
 
-#if !defined(_LINUX) && !defined(_OSX)
-inline void MFModel_InitModulePlatformSpecific() {}
-inline void MFModel_DeinitModulePlatformSpecific() {}
-#else
 void MFModel_InitModulePlatformSpecific();
 void MFModel_DeinitModulePlatformSpecific();
-#endif
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk);

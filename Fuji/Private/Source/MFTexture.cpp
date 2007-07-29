@@ -345,19 +345,19 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 		xaspect = ((float)pTexture->pTemplateData->pSurfaces[0].width/(float)pTexture->pTemplateData->pSurfaces[0].height) * 0.5f;
 	}
 
-#if defined(MF_WINDOWS)
+#if MF_RENDERER == MF_DRIVER_D3D9
 	extern IDirect3DDevice9 *pd3dDevice;
 	pd3dDevice->SetTexture(0, pTexture->pTexture);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
-#elif defined(MF_XBOX)
+#elif MF_RENDERER == MF_DRIVER_XBOX
 	extern IDirect3DDevice8 *pd3dDevice;
 	pd3dDevice->SetTexture(0, pTexture->pTexture);
 	pd3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
 	pd3dDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
-#elif defined(_PSP)
+#elif MF_RENDERER == MF_DRIVER_PSP
 	int width = pTexture->pTemplateData->pSurfaces[0].width;
 	int height = pTexture->pTemplateData->pSurfaces[0].height;
 	char *pImageData = pTexture->pTemplateData->pSurfaces[0].pImageData;
@@ -369,11 +369,11 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	sceGuTexScale(1.0f, 1.0f);
 	sceGuTexOffset(0.0f, 0.0f);
 	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
-#elif defined(_LINUX) || defined(_OSX)
+#elif MF_RENDERER == MF_DRIVER_OPENGL
 	glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 #else
-	MFDebug_Assert(false, "Not supported on this platform...");
+//	MFDebug_Assert(false, "Not supported on this platform...");
 #endif
 
 	MFBegin(4);

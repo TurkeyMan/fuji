@@ -10,7 +10,14 @@
 #include "Display.h"
 #include "Materials/MFMat_Standard.h"
 
-#include <GL/glx.h>
+#if defined(MF_LINUX) || defined(MF_OSX)
+	#include <GL/glx.h>
+#endif
+
+#if defined(MF_WINDOWS)
+	#pragma comment(lib, "Opengl32")
+	#pragma comment(lib, "Glu32")
+#endif
 
 struct Vert
 {

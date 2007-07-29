@@ -6,13 +6,13 @@
 #define WM_INPUT 0x00FF
 
 #include "Display_Internal.h"
+#include "MFRenderer_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "MFSystem.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <stdio.h>
-#include <d3d9.h>
-
-
 #include <dbt.h>
 
 void MFDisplay_ResetDisplay();
@@ -24,13 +24,8 @@ int HandleRawMouseMessage(HANDLE hDevice);
 
 uint8 gWindowsKeys[256];
 
-IDirect3D9 *d3d9;
-IDirect3DDevice9 *pd3dDevice;
-
 bool isortho = false;
 float fieldOfView;
-
-extern MFVector gClearColour;
 
 extern HINSTANCE apphInstance;
 HWND apphWnd;
@@ -243,11 +238,7 @@ void MFDisplay_DestroyWindow()
 {
 	MFCALLSTACK;
 
-	if(pd3dDevice)
-	{
-		pd3dDevice->Release();
-		pd3dDevice=NULL;
-	}
+	MFRenderer_DestroyDisplay();
 
 	if(apphWnd && !DestroyWindow(apphWnd))
 	{
@@ -271,14 +262,6 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	WNDCLASS wc;
 
-	d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
-
-	if(!d3d9)
-	{
-		MessageBox(NULL,"Unable to Create the D3D Device.","Error!",MB_OK|MB_ICONERROR);
-		return 1;
-	}
-
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = (WNDPROC)WndProc;
 	wc.cbClsExtra = 0;
@@ -296,105 +279,71 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		return 2;
 	}
 
-	int xframe = GetSystemMetrics(SM_CXFRAME)*2;
-	int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
+	RECT rect;
+	rect.left=(long)0;
+	rect.right=(long)width;
+	rect.top=(long)0;
+	rect.bottom=(long)height;
 
-	apphWnd = CreateWindowEx(NULL, "FujiWin", gDefaults.display.pWindowTitle, WS_POPUP|WS_OVERLAPPEDWINDOW, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, NULL, NULL, apphInstance, NULL);
+	DWORD dwStyle = WS_POPUP|WS_OVERLAPPEDWINDOW;
+	DWORD dwExStyle = 0;
+
+#if MF_RENDERER != MF_DRIVER_D3D9
+	if(!gDisplay.windowed)
+	{
+		dwExStyle = WS_EX_APPWINDOW;
+		dwStyle = WS_POPUP;
+	}
+	else
+	{
+		dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+		dwStyle = WS_OVERLAPPEDWINDOW;
+	}
+#endif
+
+	AdjustWindowRectEx(&rect, dwStyle, FALSE, dwExStyle);
+
+	apphWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, wndX, wndY, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, apphInstance, NULL);
     if(!apphWnd)
 	{
 		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
 		return 3;
 	}
 
-	ShowWindow(apphWnd, SW_SHOW);
-	SetFocus(apphWnd);
-
-	D3DCAPS9 deviceCaps;
-	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &deviceCaps);
-
-	D3DFORMAT PixelFormat;
-
-	D3DPRESENT_PARAMETERS present;
-	ZeroMemory(&present, sizeof(present));
-
+#if MF_RENDERER != MF_DRIVER_D3D9
+	// if we're not using D3D, we'll have to manage the display mode ourselves...
 	if(!gDisplay.windowed)
 	{
-		present.SwapEffect					= D3DSWAPEFFECT_FLIP;
-		present.Windowed					= FALSE;
-		present.BackBufferFormat			= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth				= gDisplay.width;
-		present.BackBufferHeight			= gDisplay.height;
-		present.BackBufferCount				= 2;
-		present.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;
-	}
-	else
-	{
-		D3DDISPLAYMODE d3ddm;
-		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+		ShowCursor(FALSE);
 
-		present.SwapEffect			= D3DSWAPEFFECT_COPY;
-		present.Windowed			= TRUE;
-		present.BackBufferFormat	= d3ddm.Format;
-	}
+		DEVMODE dmScreenSettings;
+		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth = gDisplay.fullscreenWidth;
+		dmScreenSettings.dmPelsHeight = gDisplay.fullscreenHeight;
+		dmScreenSettings.dmBitsPerPel = 32;
+		dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
-	PixelFormat = present.BackBufferFormat;
-	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, D3DFMT_D24S8) != D3D_OK;
-
-	present.EnableAutoDepthStencil	= TRUE;
-//	present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-	present.AutoDepthStencilFormat	= z16 ? D3DFMT_D16 : D3DFMT_D24S8;
-//	present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-	present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-	present.hDeviceWindow			= apphWnd;
-
-	int b=0;
-	DWORD processing = D3DCREATE_MULTITHREADED;
-
-	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((deviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
-	{
-		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
-	}
-	else
-	{
-		MFDebug_Warn(2, "Hardware does not support HardwareVertexProcessing, Attempting to use SoftwareVertexProcessing instead..");
-		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
-	}
-
-	for(int a=0; a<2&&!b; a++)
-	{
-		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, gDisplay.windowed)==D3D_OK)
+		if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
 		{
-			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
+			if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			{
-				MFDebug_Error("Failed to create Direct3D device. Cant create game window.");
-				MFDisplay_DestroyWindow();
-				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
-				return 4;
-			}
-			else b=1;
-		}
-		else
-		{
-			if(a == 0)
-			{
-				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
+				gDisplay.windowed = true;
 			}
 			else
 			{
-				MessageBox(NULL,"No suitable hardware supported Display Mode could be found.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
-				MFDisplay_DestroyWindow();
-				return 5;
+				MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
+				return FALSE;
 			}
 		}
 	}
+#endif
 
-	pd3dDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	ShowWindow(apphWnd, SW_SHOW);
+	SetForegroundWindow(apphWnd);
+	SetFocus(apphWnd);
 
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	MFRenderer_CreateDisplay();
 
 	initialised = true;
 
@@ -411,143 +360,17 @@ void MFDisplay_ResetDisplay()
 {
 	MFCALLSTACK;
 
-	D3DFORMAT PixelFormat;
-
-	D3DPRESENT_PARAMETERS present;
-	ZeroMemory(&present, sizeof(present));
-
-	if(!gDisplay.windowed)
-	{
-		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
-		present.Windowed						= FALSE;
-		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth					= gDisplay.fullscreenWidth;
-		present.BackBufferHeight				= gDisplay.fullscreenHeight;
-		present.BackBufferCount					= 1;
-		present.EnableAutoDepthStencil			= TRUE;
-		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
-//		present.AutoDepthStencilFormat			= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
-		present.PresentationInterval			= D3DPRESENT_INTERVAL_ONE;
-//		present.PresentationInterval			= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow					= apphWnd;
-
-		PixelFormat = present.BackBufferFormat;
-	}
-	else
-	{
-		D3DDISPLAYMODE d3ddm;
-		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
-
-		present.SwapEffect              = D3DSWAPEFFECT_COPY;
-		present.Windowed                = TRUE;
-		present.BackBufferFormat        = d3ddm.Format;
-		present.BackBufferWidth			= gDisplay.width;
-		present.BackBufferHeight		= gDisplay.height;
-		present.BackBufferCount			= 1;
-		present.EnableAutoDepthStencil	= TRUE;
-		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
-		present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-//		present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-//		present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow			= apphWnd;
-
-		PixelFormat = d3ddm.Format;
-	}
-
-	HRESULT hr;
-
-	hr = pd3dDevice->Reset(&present);
-
-	switch(hr)
-	{
-		case D3DERR_DEVICELOST:
-			MessageBox(0, "Reset: D3DERR_DEVICELOST", "Error!", MB_OK|MB_ICONERROR);
-			break;
-		case D3DERR_DRIVERINTERNALERROR:
-			MessageBox(0, "Reset: D3DERR_DRIVERINTERNALERROR", "Error!", MB_OK|MB_ICONERROR);
-			break;
-		case D3DERR_INVALIDCALL:
-			MessageBox(0, "Reset: D3DERR_INVALIDCALL", "Error!", MB_OK|MB_ICONERROR);
-			break;
-	}
+	MFRenderer_ResetDisplay();
 }
 
 void MFDisplay_DestroyDisplay()
 {
 	MFCALLSTACK;
 
-	pd3dDevice->Release();
-	d3d9->Release();
+	MFRenderer_DestroyDisplay();
 
 	DestroyWindow(apphWnd);
 	UnregisterClass("FujiWin", apphInstance);
-}
-
-void MFDisplay_BeginFrame()
-{
-	MFCALLSTACK;
-
-	HRESULT hr = pd3dDevice->BeginScene();
-
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-}
-
-void MFDisplay_EndFrame()
-{
-	MFCALLSTACK;
-
-	pd3dDevice->EndScene();
-	pd3dDevice->Present(NULL, NULL, NULL, NULL);
-}
-
-void MFDisplay_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-void MFDisplay_ClearScreen(uint32 flags)
-{
-	MFCALLSTACKc;
-
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
-}
-
-void MFDisplay_SetViewport(float x, float y, float width, float height)
-{
-	MFCALLSTACK;
-
-	D3DVIEWPORT9 vp;
-	vp.X = (DWORD)((x / 640.0f) * (float)gDisplay.width);
-	vp.Y = (DWORD)((y / 480.0f) * (float)gDisplay.height);
-	vp.Width = (DWORD)((width / 640.0f) * (float)gDisplay.width);
-	vp.Height = (DWORD)((height / 480.0f) * (float)gDisplay.height);
-	vp.MinZ = 0.0f;
-	vp.MaxZ = 1.0f;
-
-	pd3dDevice->SetViewport(&vp);
-}
-
-void MFDisplay_ResetViewport()
-{
-	MFCALLSTACK;
-
-	D3DVIEWPORT9 vp;
-	vp.X = 0;
-	vp.Y = 0;
-	vp.Width = gDisplay.width;
-	vp.Height = gDisplay.height;
-	vp.MinZ = 0.0f;
-	vp.MaxZ = 1.0f;
-
-	pd3dDevice->SetViewport(&vp);
 }
 
 float MFDisplay_GetNativeAspectRatio()

@@ -42,7 +42,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -96,7 +96,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -150,7 +150,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib Ws2_32.lib lgLcd.lib"
+				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="TRUE"/>
@@ -552,6 +552,9 @@
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\OpenGL\MFPrimitive_OpenGL.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\OpenGL\MFRenderer_OpenGL.cpp">
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\OpenGL\MFTexture_OpenGL.cpp">

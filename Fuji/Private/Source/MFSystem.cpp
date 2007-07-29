@@ -171,12 +171,12 @@ void MFSystem_Init()
 	MFFileSystem_InitModule();
 
 	MFView_InitModule();
+	MFRenderer_InitModule();
 	MFDisplay_InitModule();
 	MFInput_InitModule();
 
 	MFSound_InitModule();
 
-	MFRenderer_InitModule();
 	MFTexture_InitModule();
 	MFMaterial_InitModule();
 
@@ -224,12 +224,12 @@ void MFSystem_Deinit()
 
 	MFMaterial_DeinitModule();
 	MFTexture_DeinitModule();
-	MFRenderer_DeinitModule();
 
 	MFSound_DeinitModule();
 
 	MFInput_DeinitModule();
 	MFDisplay_DeinitModule();
+	MFRenderer_DeinitModule();
 	MFView_DeinitModule();
 
 	MFFileSystem_DeinitModule();
@@ -438,7 +438,7 @@ int MFSystem_GameLoop()
 			}
 			MFSystem_PostUpdate();
 
-			MFDisplay_BeginFrame();
+			MFRenderer_BeginFrame();
 
 			if(pSystemCallbacks[MFCB_Draw])
 				pSystemCallbacks[MFCB_Draw]();
@@ -446,7 +446,7 @@ int MFSystem_GameLoop()
 			MFSystem_Draw();
 
 			MFCallstack_EndFrame();
-			MFDisplay_EndFrame();
+			MFRenderer_EndFrame();
 		}
 
 		if(pSystemCallbacks[MFCB_Deinit])

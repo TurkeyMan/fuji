@@ -1,15 +1,30 @@
 #if !defined(_TEXTURE_INTERNAL_H)
 #define _TEXTURE_INTERNAL_H
 
-#if defined(MF_WINDOWS)
-#include <d3d9.h>
-#endif
-
-#if defined(_LINUX) || defined(_OSX)
-#include <GL/gl.h>
+#if MF_RENDERER == MF_DRIVER_D3D9
+	#include <d3d9.h>
+#elif MF_RENDERER == MF_DRIVER_OPENGL
+	#if defined(MF_WINDOWS)
+		#define WIN32_LEAN_AND_MEAN
+		#include <windows.h>
+	#endif
+	#include <GL/gl.h>
 #endif
 
 #include "MFTexture.h"
+
+// we need a list of all available display drivers
+enum MFDisplayDrivers
+{
+	MFDD_D3D9,
+	MFDD_XBox,
+	MFDD_OpenGL,
+	MFDD_PSP,
+	MFDD_PS2,
+
+	MFDD_Max,
+	MFDD_ForceInt = 0x7FFFFFFF
+};
 
 // foreward declarations
 struct MFTexture;
@@ -62,16 +77,16 @@ struct MFTexture
 	// data members
 	char name[64];
 
-#if defined(MF_XBOX)
+#if MF_RENDERER == MF_DRIVER_XBOX
 #if defined(XB_XGTEXTURES)
 	IDirect3DTexture8 texture;
 #endif
 	IDirect3DTexture8 *pTexture;
-#elif defined(MF_WINDOWS)
+#elif MF_RENDERER == MF_DRIVER_D3D9
 	IDirect3DTexture9 *pTexture;
-#elif defined(_LINUX) || defined(_OSX)
+#elif MF_RENDERER == MF_DRIVER_OPENGL
 	GLuint textureID;
-#elif defined(_PS2)
+#elif MF_RENDERER == MF_DRIVER_PS2
 	unsigned int vramAddr;
 #else
 	// nothing
@@ -101,6 +116,6 @@ public:
 };
 #endif
 
-extern uint32 gMFTexturePlatformFormat[FP_Max][TexFmt_Max];
+extern uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max];
 
 #endif

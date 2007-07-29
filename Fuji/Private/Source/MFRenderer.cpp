@@ -27,12 +27,15 @@ void MFRenderer_InitModule()
 	{
 		gTransformationMatrices[a] = MFMatrix::identity;
 	}
+
+	MFRenderer_InitModulePlatformSpecific();
 }
 
 void MFRenderer_DeinitModule()
 {
 	MFCALLSTACK;
 
+	MFRenderer_DeinitModulePlatformSpecific();
 }
 
 int MFRenderer_Begin()

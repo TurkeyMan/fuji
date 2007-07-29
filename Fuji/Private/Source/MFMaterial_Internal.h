@@ -40,11 +40,11 @@ struct MFMeshChunk
 	MFMaterial *pMaterial;
 };
 
-#if defined(MF_WINDOWS) || (defined(_FUJI_UTIL) && !defined(_LINUX) && !defined(_OSX))
+#if MF_RENDERER == MF_DRIVER_D3D9 || (defined(_FUJI_UTIL) && !defined(MF_LINUX) && !defined(MF_OSX))
 
 #include <d3d9.h>
 
-struct MFMeshChunk_PC : public MFMeshChunk
+struct MFMeshChunk_D3D9 : public MFMeshChunk
 {
 	// interface pointers
 	IDirect3DVertexBuffer9 *pVertexBuffer;
@@ -77,7 +77,7 @@ struct MFMeshChunk_PC : public MFMeshChunk
 };
 #endif
 
-#if defined(MF_XBOX) || defined(_FUJI_UTIL)
+#if MF_RENDERER == MF_DRIVER_XBOX || defined(_FUJI_UTIL)
 struct MFMeshChunk_XB : public MFMeshChunk
 {
 	// some vertex buffer type thing...
@@ -88,7 +88,7 @@ struct MFMeshChunk_XB : public MFMeshChunk
 };
 #endif
 
-#if defined(_PSP) || defined(_FUJI_UTIL)
+#if MF_RENDERER == MF_DRIVER_PSP || defined(_FUJI_UTIL)
 struct MFMeshChunk_PSP : public MFMeshChunk
 {
 	const char *pVertexData;
@@ -105,7 +105,7 @@ struct MFMeshChunk_PSP : public MFMeshChunk
 };
 #endif
 
-#if defined(_PS2) || defined(_FUJI_UTIL)
+#if MF_RENDERER == MF_DRIVER_PS2 || defined(_FUJI_UTIL)
 struct MFMeshChunk_PS2 : public MFMeshChunk
 {
 	uint32 numVertices;
@@ -115,8 +115,8 @@ struct MFMeshChunk_PS2 : public MFMeshChunk
 };
 #endif
 
-#if defined(_LINUX) || defined(_OSX) || defined(_FUJI_UTIL)
-struct MFMeshChunk_Linux : public MFMeshChunk
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(_FUJI_UTIL)
+struct MFMeshChunk_OpenGL : public MFMeshChunk
 {
 	uint32 numVertices;
 	uint32 numIndices;
@@ -150,7 +150,7 @@ struct MFMeshChunk_Linux : public MFMeshChunk
 };
 #endif
 
-#if defined(_GC) || defined(_FUJI_UTIL)
+#if MF_RENDERER == MF_DRIVER_GC || defined(_FUJI_UTIL)
 struct MFMeshChunk_GC : public MFMeshChunk
 {
 	// GC can use indexed streams..
@@ -158,17 +158,17 @@ struct MFMeshChunk_GC : public MFMeshChunk
 #endif
 
 // define MFMeshChunk_Current
-#if defined(MF_WINDOWS)
-typedef MFMeshChunk_PC MFMeshChunk_Current;
-#elif defined(MF_XBOX)
+#if MF_RENDERER == MF_DRIVER_D3D9
+typedef MFMeshChunk_D3D9 MFMeshChunk_Current;
+#elif MF_RENDERER == MF_DRIVER_XBOX
 typedef MFMeshChunk_XB MFMeshChunk_Current;
-#elif defined(MF_PSP)
+#elif MF_RENDERER == MF_DRIVER_PSP
 typedef MFMeshChunk_PSP MFMeshChunk_Current;
-#elif defined(MF_PS2)
+#elif MF_RENDERER == MF_DRIVER_PS2
 typedef MFMeshChunk_PS2 MFMeshChunk_Current;
-#elif defined(MF_LINUX) || defined(MF_OSX)
-typedef MFMeshChunk_Linux MFMeshChunk_Current;
-#elif defined(MF_GC)
+#elif MF_RENDERER == MF_DRIVER_OPENGL
+typedef MFMeshChunk_OpenGL MFMeshChunk_Current;
+#elif MF_RENDERER == MF_DRIVER_GC
 typedef MFMeshChunk_GC MFMeshChunk_Current;
 #else
 #error Platform not yet supported...

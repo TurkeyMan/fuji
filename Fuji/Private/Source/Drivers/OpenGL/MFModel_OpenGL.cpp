@@ -6,11 +6,15 @@
 #include "MFView.h"
 #include "MFRenderer.h"
 
+#if defined(MF_LINUX) || defined(MF_OSX)
+	#include <GL/glx.h>
+	#include <GL/glxext.h>
+#elif defined(MF_WINDOWS)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#endif
 #include <GL/gl.h>
-#include <GL/glx.h>
-#include <GL/glxext.h>
 #include <string.h>
-
 
 /*** Globals ****/
 
@@ -22,7 +26,12 @@ typedef void (APIENTRY * PFNGLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *bu
 typedef void (APIENTRY * PFNGLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
 typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC) (GLenum target, int size, const GLvoid *data, GLenum usage);
 
-extern "C" void (*glXGetProcAddressARB(const char *))();
+#if defined(MF_WINDOWS)
+	#define GETPROCADDRESS wglGetProcAddress
+#elif defined(MF_LINUX) || defined(MF_OSX)
+	extern "C" void (*glXGetProcAddressARB(const char *))();
+	#define GETPROCADDRESS glXGetProcAddressARB
+#endif
 
 // VBO Extension Function Pointers
 PFNGLGENBUFFERSARBPROC glGenBuffers = NULL;			// VBO Name Generation Procedure
@@ -86,23 +95,23 @@ void MFModel_InitModulePlatformSpecific()
 		// Load the function pointers
 		if(glVersion15)
 		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glXGetProcAddressARB("glBindBuffer");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glXGetProcAddressARB("glBufferData");
-//			glBufferSubData = glXGetProcAddressARB("glBufferSubData");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glXGetProcAddressARB("glDeleteBuffers");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glXGetProcAddressARB("glGenBuffers");
-//			glMapBuffer = glXGetProcAddressARB("glMapBuffer");
-//			glUnmapBuffer = glXGetProcAddressARB("glUnmapBuffer");
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)GETPROCADDRESS("glBindBuffer");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)GETPROCADDRESS("glBufferData");
+//			glBufferSubData = GETPROCADDRESS("glBufferSubData");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)GETPROCADDRESS("glDeleteBuffers");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)GETPROCADDRESS("glGenBuffers");
+//			glMapBuffer = GETPROCADDRESS("glMapBuffer");
+//			glUnmapBuffer = GETPROCADDRESS("glUnmapBuffer");
 		}
 		else
 		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glXGetProcAddressARB("glBindBufferARB");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glXGetProcAddressARB("glBufferDataARB");
-//			glBufferSubData = glXGetProcAddressARB("glBufferSubDataARB");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glXGetProcAddressARB("glDeleteBuffersARB");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glXGetProcAddressARB("glGenBuffersARB");
-//			glMapBuffer = glXGetProcAddressARB("glMapBufferARB");
-//			glUnmapBuffer = glXGetProcAddressARB("glUnmapBufferARB");
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)GETPROCADDRESS("glBindBufferARB");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)GETPROCADDRESS("glBufferDataARB");
+//			glBufferSubData = GETPROCADDRESS("glBufferSubDataARB");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)GETPROCADDRESS("glDeleteBuffersARB");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)GETPROCADDRESS("glGenBuffersARB");
+//			glMapBuffer = GETPROCADDRESS("glMapBufferARB");
+//			glUnmapBuffer = GETPROCADDRESS("glUnmapBufferARB");
 		}
 
 		if(glBindBuffer && glBufferData && glDeleteBuffers && glGenBuffers)
@@ -146,7 +155,7 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)&pSubobjects[a].pMeshChunks[b];
+				MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)&pSubobjects[a].pMeshChunks[b];
 
 				MFMaterial_SetMaterial(pMC->pMaterial);
 				MFRenderer_Begin();
@@ -192,7 +201,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunk;
+	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
 
@@ -220,7 +229,7 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunk;
+	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
 
 	if(gbUseVBOs)
 	{
@@ -237,7 +246,7 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunk;
+	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
 
 	MFFixUp(pMC->pMaterial, pBase, load);
 	MFFixUp(pMC->pVertexData, pBase, load);

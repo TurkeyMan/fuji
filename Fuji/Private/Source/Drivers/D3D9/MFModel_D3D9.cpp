@@ -15,6 +15,14 @@
 
 extern IDirect3DDevice9 *pd3dDevice;
 
+void MFModel_InitModulePlatformSpecific()
+{
+}
+
+void MFModel_DeinitModulePlatformSpecific()
+{
+}
+
 void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
@@ -52,7 +60,7 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pSubobjects[a].pMeshChunks;
+				MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pSubobjects[a].pMeshChunks;
 
 				if(!pMatOverride)
 					MFMaterial_SetMaterial(pMC[b].pMaterial);
@@ -83,7 +91,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
+	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
 
@@ -136,7 +144,7 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
+	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
 
 	MFMaterial_Destroy(pMC->pMaterial);
 
@@ -160,7 +168,7 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunk;
+	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
 
 	MFFixUp(pMC->pMaterial, pBase, load);
 	MFFixUp(pMC->pVertexData, pBase, load);

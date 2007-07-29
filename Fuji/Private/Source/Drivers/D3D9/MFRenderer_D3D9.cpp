@@ -14,9 +14,267 @@
 
 #include <d3d9.h>
 
-extern IDirect3DDevice9 *pd3dDevice;
+IDirect3D9 *d3d9;
+IDirect3DDevice9 *pd3dDevice;
+
+static D3DCAPS9 deviceCaps;
+
+extern HWND apphWnd;
+
+MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 int gNumWeights = 0;
+
+
+void MFRenderer_InitModulePlatformSpecific()
+{
+	d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
+
+	if(!d3d9)
+	{
+		MessageBox(NULL,"Unable to Create the D3D Device.","Error!",MB_OK|MB_ICONERROR);
+		return;
+	}
+
+	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &deviceCaps);
+}
+
+void MFRenderer_DeinitModulePlatformSpecific()
+{
+	if(d3d9)
+	{
+		d3d9->Release();
+	}
+}
+
+int MFRenderer_CreateDisplay()
+{
+	D3DFORMAT PixelFormat;
+
+	D3DPRESENT_PARAMETERS present;
+	ZeroMemory(&present, sizeof(present));
+
+	if(!gDisplay.windowed)
+	{
+		present.SwapEffect					= D3DSWAPEFFECT_FLIP;
+		present.Windowed					= FALSE;
+		present.BackBufferFormat			= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth				= gDisplay.width;
+		present.BackBufferHeight			= gDisplay.height;
+		present.BackBufferCount				= 2;
+		present.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;
+	}
+	else
+	{
+		D3DDISPLAYMODE d3ddm;
+		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+		present.SwapEffect			= D3DSWAPEFFECT_COPY;
+		present.Windowed			= TRUE;
+		present.BackBufferFormat	= d3ddm.Format;
+	}
+
+	PixelFormat = present.BackBufferFormat;
+	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, D3DFMT_D24S8) != D3D_OK;
+
+	present.EnableAutoDepthStencil	= TRUE;
+//	present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+	present.AutoDepthStencilFormat	= z16 ? D3DFMT_D16 : D3DFMT_D24S8;
+//	present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
+	present.hDeviceWindow			= apphWnd;
+
+	int b=0;
+	DWORD processing = D3DCREATE_MULTITHREADED;
+
+	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((deviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
+	{
+		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	}
+	else
+	{
+		MFDebug_Warn(2, "Hardware does not support HardwareVertexProcessing, Attempting to use SoftwareVertexProcessing instead..");
+		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+	}
+
+	for(int a=0; a<2&&!b; a++)
+	{
+		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, gDisplay.windowed)==D3D_OK)
+		{
+			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
+			{
+				MFDebug_Error("Failed to create Direct3D device. Cant create game window.");
+				MFRenderer_DestroyDisplay();
+				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
+				return 4;
+			}
+			else b=1;
+		}
+		else
+		{
+			if(a == 0)
+			{
+				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
+			}
+			else
+			{
+				MessageBox(NULL,"No suitable hardware supported Display Mode could be found.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
+				MFRenderer_DestroyDisplay();
+				return 5;
+			}
+		}
+	}
+
+	pd3dDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	return 0;
+}
+
+void MFRenderer_DestroyDisplay()
+{
+	if(pd3dDevice)
+	{
+		pd3dDevice->Release();
+		pd3dDevice=NULL;
+	}
+}
+
+void MFRenderer_ResetDisplay()
+{
+	D3DFORMAT PixelFormat;
+
+	D3DPRESENT_PARAMETERS present;
+	ZeroMemory(&present, sizeof(present));
+
+	if(!gDisplay.windowed)
+	{
+		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
+		present.Windowed						= FALSE;
+		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
+		present.BackBufferWidth					= gDisplay.fullscreenWidth;
+		present.BackBufferHeight				= gDisplay.fullscreenHeight;
+		present.BackBufferCount					= 1;
+		present.EnableAutoDepthStencil			= TRUE;
+		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
+//		present.AutoDepthStencilFormat			= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
+		present.PresentationInterval			= D3DPRESENT_INTERVAL_ONE;
+//		present.PresentationInterval			= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+		present.hDeviceWindow					= apphWnd;
+
+		PixelFormat = present.BackBufferFormat;
+	}
+	else
+	{
+		D3DDISPLAYMODE d3ddm;
+		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+
+		present.SwapEffect              = D3DSWAPEFFECT_COPY;
+		present.Windowed                = TRUE;
+		present.BackBufferFormat        = d3ddm.Format;
+		present.BackBufferWidth			= gDisplay.width;
+		present.BackBufferHeight		= gDisplay.height;
+		present.BackBufferCount			= 1;
+		present.EnableAutoDepthStencil	= TRUE;
+		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
+		present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
+//		present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+//		present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+		present.hDeviceWindow			= apphWnd;
+
+		PixelFormat = d3ddm.Format;
+	}
+
+	HRESULT hr;
+
+	hr = pd3dDevice->Reset(&present);
+
+	switch(hr)
+	{
+		case D3DERR_DEVICELOST:
+			MessageBox(0, "Reset: D3DERR_DEVICELOST", "Error!", MB_OK|MB_ICONERROR);
+			break;
+		case D3DERR_DRIVERINTERNALERROR:
+			MessageBox(0, "Reset: D3DERR_DRIVERINTERNALERROR", "Error!", MB_OK|MB_ICONERROR);
+			break;
+		case D3DERR_INVALIDCALL:
+			MessageBox(0, "Reset: D3DERR_INVALIDCALL", "Error!", MB_OK|MB_ICONERROR);
+			break;
+	}
+}
+
+void MFRenderer_BeginFrame()
+{
+	MFCALLSTACK;
+
+	HRESULT hr = pd3dDevice->BeginScene();
+
+	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
+	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+}
+
+void MFRenderer_EndFrame()
+{
+	MFCALLSTACK;
+
+	pd3dDevice->EndScene();
+	pd3dDevice->Present(NULL, NULL, NULL, NULL);
+}
+
+void MFRenderer_SetClearColour(float r, float g, float b, float a)
+{
+	gClearColour.x = r;
+	gClearColour.y = g;
+	gClearColour.z = b;
+	gClearColour.w = a;
+}
+
+void MFRenderer_ClearScreen(uint32 flags)
+{
+	MFCALLSTACKc;
+
+	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
+}
+
+void MFRenderer_SetViewport(float x, float y, float width, float height)
+{
+	MFCALLSTACK;
+
+	D3DVIEWPORT9 vp;
+	vp.X = (DWORD)((x / 640.0f) * (float)gDisplay.width);
+	vp.Y = (DWORD)((y / 480.0f) * (float)gDisplay.height);
+	vp.Width = (DWORD)((width / 640.0f) * (float)gDisplay.width);
+	vp.Height = (DWORD)((height / 480.0f) * (float)gDisplay.height);
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
+}
+
+void MFRenderer_ResetViewport()
+{
+	MFCALLSTACK;
+
+	D3DVIEWPORT9 vp;
+	vp.X = 0;
+	vp.Y = 0;
+	vp.Width = gDisplay.width;
+	vp.Height = gDisplay.height;
+	vp.MinZ = 0.0f;
+	vp.MaxZ = 1.0f;
+
+	pd3dDevice->SetViewport(&vp);
+}
+
 
 // direct3d management fucntions
 void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)

@@ -11,7 +11,9 @@
 #include "MFFileSystem_Internal.h"
 #include "MFPtrList.h"
 
-#include <GL/glx.h>
+#if defined(MF_LINUX) || defined(MF_OSX)
+	#include <GL/glx.h>
+#endif
 #include <GL/glu.h>
 
 /**** Globals ****/
@@ -19,20 +21,20 @@
 extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
-struct LinuxFormat
+struct GLFormat
 {
 	GLint internalFormat;
 	GLenum format;
 	GLenum type;
 };
 
-LinuxFormat gLinuxFormats[] =
+GLFormat gGLFormats[] =
 {
 	{4, GL_BGRA_EXT, GL_UNSIGNED_BYTE},
 	{4, GL_RGBA, GL_UNSIGNED_BYTE}
 };
 
-static const int gMaxLinuxFormats = sizeof(gLinuxFormats) / sizeof(LinuxFormat);
+static const int gMaxGLFormats = sizeof(gGLFormats) / sizeof(GLFormat);
 
 /**** Functions ****/
 
@@ -51,19 +53,19 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-	MFDebug_Assert(pTemplate->platformFormat < (uint32)gMaxLinuxFormats, "Platform format is undefined...");
+	MFDebug_Assert(pTemplate->platformFormat < (uint32)gMaxGLFormats, "Platform format is undefined...");
 
 	if(generateMipChain)
 	{
 		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
-		gluBuild2DMipmaps(GL_TEXTURE_2D, gLinuxFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, gLinuxFormats[pTemplate->platformFormat].format, gLinuxFormats[pTemplate->platformFormat].type, pSurf->pImageData);
+		gluBuild2DMipmaps(GL_TEXTURE_2D, gGLFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, gGLFormats[pTemplate->platformFormat].format, gGLFormats[pTemplate->platformFormat].type, pSurf->pImageData);
 	}
 	else
 	{
 		for(int a=0; a<pTemplate->mipLevels; a++)
 		{
 			MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[a];
-			glTexImage2D(GL_TEXTURE_2D, a, gLinuxFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, 0, gLinuxFormats[pTemplate->platformFormat].format, gLinuxFormats[pTemplate->platformFormat].type, pSurf->pImageData);
+			glTexImage2D(GL_TEXTURE_2D, a, gGLFormats[pTemplate->platformFormat].internalFormat, pSurf->width, pSurf->height, 0, gGLFormats[pTemplate->platformFormat].format, gGLFormats[pTemplate->platformFormat].type, pSurf->pImageData);
 		}
 	}
 }

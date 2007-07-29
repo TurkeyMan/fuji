@@ -15,6 +15,8 @@
 	#define WS_MAJOR 2
 	#define WS_MINOR 0
 
+	#pragma comment(lib, "Ws2_32")
+
 #elif defined(MF_XBOX)
 
 	#include <xtl.h>
