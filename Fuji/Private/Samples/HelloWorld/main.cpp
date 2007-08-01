@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "Display.h"
+#include "MFRenderer.h"
 #include "MFView.h"
 #include "MFFont.h"
 #include "MFInput.h"
@@ -59,8 +60,8 @@ void Game_Draw()
 	MFCALLSTACK;
 
 	// set clear colour and clear the screen
-	MFDisplay_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFDisplay_ClearScreen();
+	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
+	MFRenderer_ClearScreen();
 
 	// push current view onto the stack
 	MFView_Push();
