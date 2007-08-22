@@ -117,6 +117,9 @@ MFIni *MFIni::Create(const char *pFilename)
 	// load text file
 #if !defined(_FUJI_UTIL)
 	char *pMem = MFFileSystem_Load(MFStr("%s.ini", pFilename), &memSize);
+
+	if(!pMem)
+		return NULL;
 #else
 	FILE *pFile = fopen(pFilename, "rb");
 
@@ -131,8 +134,6 @@ MFIni *MFIni::Create(const char *pFilename)
 	fread(pMem, 1, memSize, pFile);
 	fclose(pFile);
 #endif
-
-	MFDebug_Assert(pMem != NULL, "Couldnt load .ini file!");
 
 	// allocate ini file
 	MFIni *pMFIni;

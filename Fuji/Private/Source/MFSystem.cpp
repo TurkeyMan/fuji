@@ -484,6 +484,11 @@ const char * MFSystem_GetSettingString(int tabDepth)
 	return pSettings;
 }
 
+void MFSystem_InitFromSettings(const MFIniLine *pSettings)
+{
+	
+}
+
 void MFSystem_UpdateTimeDelta()
 {
 	MFCALLSTACK;

@@ -439,6 +439,78 @@ static const int gUSBGamepadButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative,	// Button_ThumbRY
 };
 
+static const int gTwinShockButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	11,	// Button_Start
+	8,	// Button_Back
+	9,	// Button_LeftThumb
+	10,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Z, // Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gUNIVERSALRumbleWheelButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	9,	// Button_Start
+	8,	// Button_Back
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Slider1, // Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gSaitekButtonID[GamepadType_Max] =
+{
+	1,	// Button_A
+	2,	// Button_B
+	0,	// Button_X
+	3,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	6,	// Button_LeftTrigger
+	7,	// Button_RightTrigger
+	9,	// Button_Start
+	8,	// Button_Back
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+};
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -668,6 +740,54 @@ static const char * gGGE909ButtonNames[GamepadType_Max] =
 	"R2",           // Button_RightTrigger
 	"Start",        // Button_Start
 	"Select",       // Button_Back
+	"L3",           // Button_LeftThumb
+	"R3",           // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gTwinShockButtonNames[GamepadType_Max] =
+{
+	"3",			// Button_A
+	"2",			// Button_B
+	"4",			// Button_X
+	"1",			// Button_Y
+	"7",            // Button_White
+	"8",            // Button_Black
+	"5",            // Button_LeftTrigger
+	"6",            // Button_RightTrigger
+	"12",           // Button_Start
+	"9",            // Button_Back
+	"10",           // Button_LeftThumb
+	"11",           // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gSaitekButtonNames[GamepadType_Max] =
+{
+	"2",			// Button_A
+	"3",			// Button_B
+	"1",			// Button_X
+	"4",			// Button_Y
+	"L1",           // Button_White
+	"R1",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Grey",         // Button_Start
+	"Black",        // Button_Back
 	"L3",           // Button_LeftThumb
 	"R3",           // Button_RightThumb
 	"DPad Up",      // Button_DUp
@@ -1034,6 +1154,56 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"USB GamePad",
 		0x0E8F, 0x3013,
 		gUSBGamepadButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[34]
+	},
+
+	// Twin Shock
+	{
+		"Twin Shock Gamepad",
+		"Twin Shock",
+		0x1241, 0x5004,
+		gTwinShockButtonID,
+		gTwinShockButtonNames,
+		&gGamepadDescriptors[35]
+	},
+
+	// UNIVERSAL Rumble Wheel
+	{
+		"PS2 Gamepad",
+		"UNIVERSAL Rumble Wheel",
+		0x0E8F, 0x103F,
+		gUNIVERSALRumbleWheelButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[36]
+	},
+
+	// Mad Catz Gamepad
+	{
+		"Mad Catz Gamepad",
+		"Controller (MadCatz GamePad)",
+		0x0738, 0x4716,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		&gGamepadDescriptors[37]
+	},
+
+	// Mad Catz Gamepad
+	{
+		"Saitek P990 Gamepad",
+		"Saitek P990 Dual Analog Pad",
+		0x06A3, 0x040B,
+		gSaitekButtonID,
+		gSaitekButtonNames,
+		&gGamepadDescriptors[38]
+	},
+
+	// Mad Catz Gamepad
+	{
+		"PS2 Gamepad",
+		"TigerGame PS/PS2 Game Controller Adapter",
+		0x6666, 0x8804,
+		gTitaniumButtonID,
 		gPS2ButtonNames,
 		NULL
 	}

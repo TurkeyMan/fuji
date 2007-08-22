@@ -11,6 +11,8 @@
 
 #include "Timer.h"
 
+class MFIniLine;
+
 /**
  * Fuji Defaults structure.
  * Stores default values for most aspects of the engine.
@@ -158,6 +160,8 @@ MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MF
 MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
 const char * MFSystem_GetSettingString(int tabDepth);
+
+void MFSystem_InitFromSettings(const MFIniLine *pSettings);
 
 /**
  * Gets the current platform.
