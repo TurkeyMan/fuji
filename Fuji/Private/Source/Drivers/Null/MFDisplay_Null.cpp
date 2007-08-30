@@ -4,13 +4,28 @@
 
 #include "Display_Internal.h"
 
-void MFDisplay_DestroyWindow()
+MFRect gCurrentViewport;
+
+void MFRenderer_InitModulePlatformSpecific()
+{
+}
+
+void MFRenderer_DeinitModulePlatformSpecific()
 {
 }
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)gDisplay.width;
+	gCurrentViewport.height = (float)gDisplay.height;
+
 	return 0;
+}
+
+void MFRenderer_DestroyDisplay()
+{
 }
 
 void MFDisplay_ResetDisplay()
@@ -37,12 +52,22 @@ void MFDisplay_ClearScreen(uint32 flags)
 {
 }
 
-void MFDisplay_SetViewport(float x, float y, float width, float height)
+void MFDisplay_GetViewport(MFRect *pRect)
 {
+	*pRect = gCurrentViewport;
+}
+
+void MFDisplay_SetViewport(MFRect *pRect)
+{
+	gCurrentViewport = *pRect;
 }
 
 void MFDisplay_ResetViewport()
 {
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)gDisplay.width;
+	gCurrentViewport.height = (float)gDisplay.height;
 }
 
 bool MFDisplay_IsWidescreen()

@@ -23,14 +23,11 @@ void MFFileSystemHTTP_InitModule()
 		fsCallbacks.Read = MFFileHTTP_Read;
 		fsCallbacks.Write = MFFileHTTP_Write;
 		fsCallbacks.Seek = MFFileHTTP_Seek;
-		fsCallbacks.Tell = MFFileHTTP_Tell;
-		fsCallbacks.Query = MFFileHTTP_Query;
-		fsCallbacks.GetSize = MFFileHTTP_GetSize;
 		fsCallbacks.FindFirst = NULL;
 		fsCallbacks.FindNext = NULL;
 		fsCallbacks.FindClose = NULL;
 
-		hHTTPFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
+		hHTTPFileSystem = MFFileSystem_RegisterFileSystem("HTTP Filesystem", &fsCallbacks);
 
 		// make a bunch of file buffers
 		int gHTTPFileSize = sizeof(MFFileHTTPData)+gDefaults.filesys.maxHTTPFileCache;
@@ -305,8 +302,6 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 		pNextLine = MFSeekNewline(pNextLine);
 	}
 
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
@@ -326,25 +321,25 @@ int MFFileHTTP_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
 	return 0;
 }
 
-int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
+int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
 	return 0;
 }
 
-int MFFileHTTP_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+int MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int newPos = 0;
+	int64 newPos = 0;
 
 	switch(relativity)
 	{
@@ -352,33 +347,15 @@ int MFFileHTTP_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			newPos = MFMin(bytes, fileHandle->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax(0, fileHandle->length - bytes);
+			newPos = MFMax((int64)0, fileHandle->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp(0, (int)fileHandle->offset + bytes, fileHandle->length);
+			newPos = MFClamp((int64)0, fileHandle->offset + bytes, fileHandle->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
-	fileHandle->offset = (uint32)newPos;
-	return newPos;
-}
-
-int MFFileHTTP_Tell(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return (int)fileHandle->offset;
-}
-
-MFFileState MFFileHTTP_Query(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->state;
-}
-
-int MFFileHTTP_GetSize(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->length;
+	fileHandle->offset = newPos;
+	return (int)newPos;
 }

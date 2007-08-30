@@ -25,14 +25,11 @@ void MFFileSystemCachedFile_InitModule()
 	fsCallbacks.Read = MFFileCachedFile_Read;
 	fsCallbacks.Write = MFFileCachedFile_Write;
 	fsCallbacks.Seek = MFFileCachedFile_Seek;
-	fsCallbacks.Tell = MFFileCachedFile_Tell;
-	fsCallbacks.Query = MFFileCachedFile_Query;
-	fsCallbacks.GetSize = MFFileCachedFile_GetSize;
 	fsCallbacks.FindFirst = NULL;
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
 
-	hCachedFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
+	hCachedFileSystem = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
 }
 
 void MFFileSystemCachedFile_DeinitModule()
@@ -51,8 +48,6 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataCachedFile), "Incorrect size for MFOpenDataCachedFile structure. Invalid pOpenData.");
 	MFOpenDataCachedFile *pCachedFile = (MFOpenDataCachedFile*)pOpenData;
 
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 	pFile->length = pCachedFile->pBaseFile->length;
@@ -61,12 +56,12 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
 	MFZeroMemory(pCacheData, sizeof(MFFileCachedData));
 
-	int baseFileSize = pFile->length;
+	int64 baseFileSize = pFile->length;
 
 	if(pCachedFile->maxCacheSize > 0)
-		pCacheData->cacheSize = MFMin(baseFileSize, pCachedFile->maxCacheSize);
+		pCacheData->cacheSize = (int)MFMin(baseFileSize, (int64)pCachedFile->maxCacheSize);
 	else
-		pCacheData->cacheSize = baseFileSize;
+		pCacheData->cacheSize = (int)baseFileSize;
 
 	pCacheData->pCache = (char*)MFHeap_Alloc(pCacheData->cacheSize);
 	pCacheData->pBaseFile = pCachedFile->pBaseFile;
@@ -75,8 +70,8 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	if(baseFileSize == pCacheData->cacheSize)
 	{
 		pCacheData->buckets[0].pData = pCacheData->pCache;
-		pCacheData->buckets[0].size = baseFileSize;
-		pCacheData->buckets[0].fileOffset = 0xFFFFFFFF;
+		pCacheData->buckets[0].size = (int)baseFileSize;
+		pCacheData->buckets[0].fileOffset = 0x7FFFFFFFFFFFFFFF;
 	}
 	else
 	{
@@ -86,7 +81,7 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 		{
 			pCacheData->buckets[a].pData = pCacheData->pCache + a*bucketSize;
 			pCacheData->buckets[a].size = bucketSize;
-			pCacheData->buckets[a].fileOffset = 0xFFFFFFFF;
+			pCacheData->buckets[a].fileOffset = 0x7FFFFFFFFFFFFFFF;
 		}
 	}
 
@@ -109,15 +104,13 @@ int MFFileCachedFile_Close(MFFile* pFile)
 	return 0;
 }
 
-int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
+int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
 	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
 
-    int bytesRead = 0;
+    int64 bytesRead = 0;
 
 	while(bytes && (int)pFile->offset < pFile->length)
 	{
@@ -151,23 +144,23 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async
 						pBucket = &pCacheData->buckets[a];
 				}
 
-				pBucket->fileOffset = MFMin(pFile->offset, (uint32)(pFile->length - pBucket->size));
+				pBucket->fileOffset = MFMin(pFile->offset, pFile->length - pBucket->size);
 			}
 
-			MFFile_Seek(pCacheData->pBaseFile, pBucket->fileOffset, MFSeek_Begin);
+			MFFile_Seek(pCacheData->pBaseFile, (int)pBucket->fileOffset, MFSeek_Begin);
 			uint32 read = MFFile_Read(pCacheData->pBaseFile, pBucket->pData, pBucket->size);
 
 			// if there are less bytes left in the file than we are trying to read, then we need to update the read count...
-			bytes = MFMin(bytes, read);
+			bytes = MFMin(bytes, (int64)read);
 		}
 
 		pBucket->lastTouched = (uint32)MFSystem_ReadRTC();
 
-		uint32 bucketOffset = pFile->offset - pBucket->fileOffset;
-		uint32 bytesRemaining = pBucket->size - bucketOffset;
-		int bytesToCopy = MFMin(bytes, bytesRemaining);
+		int64 bucketOffset = pFile->offset - pBucket->fileOffset;
+		int64 bytesRemaining = pBucket->size - bucketOffset;
+		int64 bytesToCopy = MFMin(bytes, bytesRemaining);
 
-		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, bytesToCopy);
+		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, (uint32)bytesToCopy);
 
 		bytes -= bytesToCopy;
 		(char*&)pBuffer += bytesToCopy;
@@ -176,25 +169,23 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async
 		bytesRead += bytesToCopy;
 	}
 
-	return bytesRead;
+	return (int)bytesRead;
 }
 
-int MFFileCachedFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool async)
+int MFFileCachedFile_Write(MFFile* pFile, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	// write
 
 	return 0;
 }
 
-int MFFileCachedFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
+int MFFileCachedFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int newPos = 0;
+	int64 newPos = 0;
 
 	switch(relativity)
 	{
@@ -202,34 +193,16 @@ int MFFileCachedFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 			newPos = MFMin(bytes, pFile->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax(0, pFile->length - bytes);
+			newPos = MFMax((int64)0, pFile->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp(0, (int)pFile->offset + bytes, pFile->length);
+			newPos = MFClamp((int64)0, pFile->offset + bytes, pFile->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
-	pFile->offset = (uint32)newPos;
+	pFile->offset = newPos;
 
 	return (int)pFile->offset;
-}
-
-int MFFileCachedFile_Tell(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return (int)pFile->offset;
-}
-
-MFFileState MFFileCachedFile_Query(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return pFile->state;
-}
-
-int MFFileCachedFile_GetSize(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return pFile->length;
 }

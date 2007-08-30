@@ -22,14 +22,11 @@ void MFFileSystemMemory_InitModule()
 	fsCallbacks.Read = MFFileMemory_Read;
 	fsCallbacks.Write = MFFileMemory_Write;
 	fsCallbacks.Seek = MFFileMemory_Seek;
-	fsCallbacks.Tell = MFFileMemory_Tell;
-	fsCallbacks.Query = MFFileMemory_Query;
-	fsCallbacks.GetSize = MFFileMemory_GetSize;
 	fsCallbacks.FindFirst = NULL;
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
 
-	hMemoryFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
+	hMemoryFileSystem = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
 }
 
 void MFFileSystemMemory_DeinitModule()
@@ -68,8 +65,6 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->pFilesysData = gMemoryFiles.Create();
 	MFFileMemoryData *pMem = (MFFileMemoryData*)pFile->pFilesysData;
 
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 	pFile->length = pMemory->fileSize;
@@ -99,45 +94,41 @@ int MFFileMemory_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
-	uint32 bytesToCopy = fileHandle->length > -1 ? MFMin(bytes, (uint32)fileHandle->length - fileHandle->offset) : bytes;
+	int64 bytesToCopy = fileHandle->length > -1 ? MFMin(bytes, fileHandle->length - fileHandle->offset) : bytes;
 
-	MFCopyMemory(pBuffer, (char*)pMem->pMemoryPointer + fileHandle->offset, bytesToCopy);
+	MFCopyMemory(pBuffer, (char*)pMem->pMemoryPointer + fileHandle->offset, (uint32)bytesToCopy);
 	fileHandle->offset += bytesToCopy;
 
-	return bytesToCopy;
+	return (int)bytesToCopy;
 }
 
-int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
+int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
-	uint32 bytesToCopy = pMem->allocated ? MFMin(bytes, pMem->allocated - fileHandle->offset) : bytes;
+	int64 bytesToCopy = pMem->allocated ? MFMin(bytes, (int64)pMem->allocated - fileHandle->offset) : bytes;
 
-	MFCopyMemory((char*)pMem->pMemoryPointer + fileHandle->offset, pBuffer, bytesToCopy);
+	MFCopyMemory((char*)pMem->pMemoryPointer + fileHandle->offset, pBuffer, (uint32)bytesToCopy);
 
 	fileHandle->offset += bytesToCopy;
-	fileHandle->length = MFMax((int)fileHandle->offset, fileHandle->length);
+	fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
 
-	return bytesToCopy;
+	return (int)bytesToCopy;
 }
 
-int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+int MFFileMemory_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int newPos = 0;
+	int64 newPos = 0;
 
 	switch(relativity)
 	{
@@ -145,33 +136,15 @@ int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			newPos = MFMin(bytes, fileHandle->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax(0, fileHandle->length - bytes);
+			newPos = MFMax((int64)0, fileHandle->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp(0, (int)fileHandle->offset + bytes, fileHandle->length);
+			newPos = MFClamp((int64)0, fileHandle->offset + bytes, fileHandle->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
-	fileHandle->offset = (uint32)newPos;
-	return newPos;
-}
-
-int MFFileMemory_Tell(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return (int)fileHandle->offset;
-}
-
-MFFileState MFFileMemory_Query(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->state;
-}
-
-int MFFileMemory_GetSize(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->length;
+	fileHandle->offset = newPos;
+	return (int)newPos;
 }

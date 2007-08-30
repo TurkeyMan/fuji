@@ -61,7 +61,7 @@ typedef int (*MFThreadEntryPoint)(void *);
  * @return Returns a handle to the new thread.
  * @see MFThread_TerminateThread(), MFThread_ExitThread(), MFThread_GetExitCode(), MFThread_DestroyThread()
  */
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize);
+MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 stackSize = 0);
 
 /**
  * Exit from the current thread.

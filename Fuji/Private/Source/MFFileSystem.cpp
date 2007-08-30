@@ -12,13 +12,15 @@
 	#undef FindClose
 #endif
 
+#define MAX_JOBS 16
+
 MFPtrListDL<MFFile> gOpenFiles;
 
 MFMount *pMountList = NULL;
 MFMount *pMountListEnd = NULL;
 
-MFPtrListDL<MFFileSystemCallbacks> pFileSystemCallbacks;
-MFFileSystemCallbacks **ppFileSystemList;
+MFPtrListDL<MFFileSystem> gFileSystems;
+MFFileSystem **ppFileSystemList;
 
 MFPtrListDL<MFFind> gFinds;
 
@@ -53,6 +55,92 @@ static const char * gPatchArchiveNames[] =
 	"Data/Patch_%s.dat",
 	NULL
 };
+
+MFJob *NewJob(MFFileSystem *pFS)
+{
+	MFJob *pJob = pFS->jobs.Create();
+	MFZeroMemory(pJob, sizeof(MFJob));
+	return pJob;
+}
+
+void PostJob(MFFileSystem *pFS, MFJob *pJob)
+{
+	int nextJob = (pFS->writeJob+1) % pFS->numJobs;
+	while(nextJob == pFS->readJob)
+	{
+		// yield...
+	}
+
+	pFS->ppJobQueue[pFS->writeJob] = pJob;
+	MFThread_SignalSemaphore(pFS->semaphore);
+	pFS->writeJob = nextJob;
+}
+
+int MKFileJobThread(void *pData)
+{
+	MFFileSystem *pFS = (MFFileSystem*)pData;
+
+	while(1)
+	{
+		// wait for a job
+		MFThread_WaitSemaphore(pFS->semaphore);
+
+		MFJob *pJob = pFS->ppJobQueue[pFS->readJob];
+		MFFile *pFile = pJob->pFile;
+		pJob->status = MFJS_Busy;
+		pJob->result = 0;
+
+		switch(pJob->job)
+		{
+			case MFFJ_Exit:
+				pJob->status = MFJS_Finished;
+				goto exit;
+			case MFFJ_Open:
+				pJob->result = pFS->callbacks.Open(pJob->pFile, &pJob->open.openData);
+				break;
+			case MFFJ_Close:
+				pJob->result = pFS->callbacks.Close(pJob->pFile);
+				break;
+			case MFFJ_Read:
+				pJob->result = pFS->callbacks.Read(pFile, pJob->read.pBuffer, pJob->read.bytes);
+//				pFile->offset += pJob->result;
+				break;
+			case MFFJ_Write:
+				pJob->result = pFS->callbacks.Write(pFile, pJob->write.pBuffer, pJob->write.bytes);
+//				pFile->offset += pJob->result;
+//				pFile->length = MFMax(pFile->length, pFile->offset);
+				break;
+			case MFFJ_Seek:
+				pJob->result = pFS->callbacks.Seek(pJob->pFile, pJob->seek.bytes, pJob->seek.whence);
+//				if(pJob->result > -1)
+//					pFile->offset = pJob->result;
+				break;
+			case MFFJ_Stat:
+				MFDebug_Assert(false, "Not done..");
+				break;
+			case MFFJ_Tell:
+				pJob->result = pFile->offset;
+				break;
+			case MFFJ_GetSize:
+				pJob->result = pFile->length;
+				break;
+			case MFFJ_Load:
+			{
+//				MFFile *pFile = MFFile_Open(
+				break;
+			}
+			case MFFJ_Save:
+				break;
+		}
+
+		pJob->status = MFJS_Finished;
+		++pFS->readJob;
+	}
+
+exit:
+	MFThread_ExitThread(0);
+	return 0;
+}
 
 void MFFileSystem_RegisterDefaultArchives()
 {
@@ -158,9 +246,9 @@ void MFFileSystem_InitModule()
 {
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
 
-	pFileSystemCallbacks.Init("File System Callbacls", gDefaults.filesys.maxFileSystems);
-	ppFileSystemList = (MFFileSystemCallbacks**)MFHeap_Alloc(sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
-	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystemCallbacks*) * gDefaults.filesys.maxFileSystems);
+	gFileSystems.Init("File Systems", gDefaults.filesys.maxFileSystems);
+	ppFileSystemList = (MFFileSystem**)MFHeap_Alloc(sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
+	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
 
 	gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
 
@@ -192,12 +280,12 @@ void MFFileSystem_DeinitModule()
 
 	MFHeap_Free(ppFileSystemList);
 
-	pFileSystemCallbacks.Deinit();
+	gFileSystems.Deinit();
 	gOpenFiles.Deinit();
 	gFinds.Deinit();
 }
 
-MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks)
+MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, MFFileSystemCallbacks *pCallbacks)
 {
 	for(uint32 a=0; a<gDefaults.filesys.maxFileSystems; a++)
 	{
@@ -208,15 +296,25 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallb
 			MFDebug_Assert(pCallbacks->Read, "No Read function supplied.");
 			MFDebug_Assert(pCallbacks->Write, "No Write function supplied.");
 			MFDebug_Assert(pCallbacks->Seek, "No Seek function supplied.");
-			MFDebug_Assert(pCallbacks->Tell, "No Tell function supplied.");
-			MFDebug_Assert(pCallbacks->Query, "No Query function supplied.");
-			MFDebug_Assert(pCallbacks->GetSize, "No GetSize function supplied.");
 
-			ppFileSystemList[a] = pFileSystemCallbacks.Create();
-			MFCopyMemory(ppFileSystemList[a], pCallbacks, sizeof(MFFileSystemCallbacks));
+			MFFileSystem *pFS = gFileSystems.Create();
+			MFZeroMemory(pFS, sizeof(MFFileSystem));
+			MFString_Copy(pFS->name, pFilesystemName);
+			MFCopyMemory(&pFS->callbacks, pCallbacks, sizeof(MFFileSystemCallbacks));
+			ppFileSystemList[a] = pFS;
 
-			if(ppFileSystemList[a]->RegisterFS)
-				ppFileSystemList[a]->RegisterFS();
+#if defined(USE_JOB_THREAD)
+			pFS->ppJobQueue = (MFJob**)MFHeap_Alloc(sizeof(MFJob*)*MAX_JOBS);
+			pFS->jobs.Init(MFStr("%s Job List", pFilesystemName), MAX_JOBS+2);
+			pFS->readJob = 0;
+			pFS->writeJob = 0;
+			pFS->numJobs = MAX_JOBS;
+			pFS->semaphore = MFThread_CreateSemaphore("Filesystem Semaphore", MAX_JOBS, 0);
+			pFS->thread = MFThread_CreateThread(MFStr("%s Thread", pFilesystemName), MKFileJobThread, pFS, MFPriority_AboveNormal);
+#endif
+
+			if(pFS->callbacks.RegisterFS)
+				pFS->callbacks.RegisterFS();
 
 			return a;
 		}
@@ -231,13 +329,28 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 {
 	MFDebug_Assert((uint32)filesystemHandle < gDefaults.filesys.maxFileSystems, "Invalid filesystem");
 
-	MFFileSystemCallbacks *pFS = ppFileSystemList[filesystemHandle];
+	MFFileSystem *pFS = ppFileSystemList[filesystemHandle];
 	MFDebug_Assert(pFS, "Filesystem not mounted");
 
-	if(pFS->UnregisterFS)
-		pFS->UnregisterFS();
+	if(pFS->callbacks.UnregisterFS)
+		pFS->callbacks.UnregisterFS();
 
-	pFileSystemCallbacks.Destroy(pFS);
+	if(pFS->thread)
+	{
+		// terminate job thread
+		MFJob *pJob = NewJob(pFS);
+		PostJob(pFS, pJob);
+		while(pJob->status != MFJS_Finished)
+		{
+			// yield
+		}
+
+		MFThread_DestroySemaphore(pFS->semaphore);
+		pFS->jobs.Deinit();
+		MFHeap_Free(pFS->ppJobQueue);
+	}
+
+	gFileSystems.Destroy(pFS);
 	ppFileSystemList[filesystemHandle] = NULL;
 }
 
@@ -277,7 +390,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 	MFZeroMemory(pFile, sizeof(MFFile));
 	pFile->filesystem = fileSystem;
 
-	int result = ppFileSystemList[fileSystem]->Open(pFile, pOpenData);
+	int result = ppFileSystemList[fileSystem]->callbacks.Open(pFile, pOpenData);
 
 	if(result < 0)
 	{
@@ -292,7 +405,7 @@ int MFFile_Close(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	ppFileSystemList[fileHandle->filesystem]->Close(fileHandle);
+	ppFileSystemList[fileHandle->filesystem]->callbacks.Close(fileHandle);
 	gOpenFiles.Destroy(fileHandle);
 
 	return 0;
@@ -303,14 +416,14 @@ int MFFile_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
 {
 	MFCALLSTACK;
 
-	return ppFileSystemList[fileHandle->filesystem]->Read(fileHandle, pBuffer, bytes, async);
+	return ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
 }
 
 int MFFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
 {
 	MFCALLSTACK;
 
-	return ppFileSystemList[fileHandle->filesystem]->Write(fileHandle, pBuffer, bytes, async);
+	return ppFileSystemList[fileHandle->filesystem]->callbacks.Write(fileHandle, pBuffer, bytes);
 }
 
 // offset management (these are stdio function signature compliant)
@@ -318,22 +431,14 @@ int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	return ppFileSystemList[fileHandle->filesystem]->Seek(fileHandle, bytes, relativity);
+	return ppFileSystemList[fileHandle->filesystem]->callbacks.Seek(fileHandle, bytes, relativity);
 }
 
 int MFFile_Tell(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	return ppFileSystemList[fileHandle->filesystem]->Tell(fileHandle);
-}
-
-// return the state of a file
-MFFileState MFFile_Query(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-
-	return ppFileSystemList[fileHandle->filesystem]->Query(fileHandle);
+	return (int)fileHandle->offset;
 }
 
 // get file stream length (retuurs -1 for an undefined stream length)
@@ -341,7 +446,7 @@ int MFFile_GetSize(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	return ppFileSystemList[fileHandle->filesystem]->GetSize(fileHandle);
+	return (int)fileHandle->length;
 }
 
 // stdio signiture functions (these can be used as a callback to many libs and API's)
@@ -568,7 +673,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
 
 	// call the mount callback
-	int result = ppFileSystemList[fileSystem]->FSMount(pMount, pMountData);
+	int result = ppFileSystemList[fileSystem]->callbacks.FSMount(pMount, pMountData);
 
 	if(result < 0)
 	{
@@ -612,7 +717,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	// build toc
 	if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
-		MFDebug_Assert(ppFileSystemList[fileSystem]->FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
+		MFDebug_Assert(ppFileSystemList[fileSystem]->callbacks.FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
 
 		MFFindData findData;
 		MFFind *hFind;
@@ -666,7 +771,7 @@ int MFFileSystem_Dismount(const char *pMountpoint)
 	if(pT)
 	{
 		// dismount
-		ppFileSystemList[pT->volumeInfo.fileSystem]->FSDismount(pT);
+		ppFileSystemList[pT->volumeInfo.fileSystem]->callbacks.FSDismount(pT);
 
 		// remove mount
 		if(pMountList == pT)
@@ -782,7 +887,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName)))
 		{
 			// open the file from a mount
-			MFFile *hFile = ppFileSystemList[pMount->volumeInfo.fileSystem]->FSOpen(pMount, pFilename, openFlags);
+			MFFile *hFile = ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FSOpen(pMount, pFilename, openFlags);
 
 			if(hFile)
 				return hFile;
@@ -958,7 +1063,7 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 				pFind->pMount = pMount;
 				pFind->pFilesystemData = NULL;
 
-				if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->FindFirst(pFind, pSearchPattern, pFindData))
+				if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
 				{
 					gFinds.Destroy(pFind);
 					return NULL;
@@ -998,7 +1103,7 @@ bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 			return false;
 	}
 	else
-		return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindNext(pFind, pFindData);
+		return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindNext(pFind, pFindData);
 
 	return true;
 }
@@ -1006,7 +1111,7 @@ bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 void MFFileSystem_FindClose(MFFind *pFind)
 {
 	if(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC)
-		ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->FindClose(pFind);
+		ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindClose(pFind);
 
 	gFinds.Destroy(pFind);
 }

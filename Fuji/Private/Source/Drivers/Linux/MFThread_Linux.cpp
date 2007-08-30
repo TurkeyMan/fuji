@@ -80,7 +80,7 @@ void MFThread_DestroySemaphore(MFSemaphore semaphore)
 	MFDebug_Assert(false, "Not written...");
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore, uint32 timeout)
+uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
 	MFDebug_Assert(false, "Not written...");
 	return 0;

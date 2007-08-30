@@ -52,8 +52,6 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 		return -1;
 	}
 
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
@@ -80,34 +78,30 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
 	uint32 bytesRead;
-	ReadFile(fileHandle->pFilesysData, pBuffer, bytes, (DWORD*)&bytesRead, NULL);
+	ReadFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (DWORD*)&bytesRead, NULL);
 	fileHandle->offset += bytesRead;
 
 	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
 	uint32 bytesWritten;
-	WriteFile(fileHandle->pFilesysData, pBuffer, bytes, (LPDWORD)&bytesWritten, NULL);
+	WriteFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (LPDWORD)&bytesWritten, NULL);
 	fileHandle->offset += bytesWritten;
-	fileHandle->length = MFMax(fileHandle->offset, (uint32)fileHandle->length);
+	fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
 
 	return bytesWritten;
 }
 
-int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
@@ -128,30 +122,13 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
-	uint32 newPos = SetFilePointer(fileHandle->pFilesysData, bytes, NULL, method);
+	DWORD newPos = SetFilePointer(fileHandle->pFilesysData, (LONG)bytes, (LONG*)&bytes + 1, method);
 	if(newPos == INVALID_SET_FILE_POINTER)
 		return -1;
 
-	fileHandle->offset = newPos;
-	return newPos;
-}
-
-int MFFileNative_Tell(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->offset;
-}
-
-MFFileState MFFileNative_Query(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->state;
-}
-
-int MFFileNative_GetSize(MFFile* fileHandle)
-{
-	MFCALLSTACK;
-	return fileHandle->length;
+	bytes = (bytes & 0xFFFFFFFF00000000) | newPos;
+	fileHandle->offset = bytes;
+	return (int)bytes;
 }
 
 uint32 MFFileNative_GetSize(const char* pFilename)

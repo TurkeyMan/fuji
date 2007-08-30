@@ -22,13 +22,9 @@ MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 o
 
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileMemory_Close(MFFile* fileHandle);
-int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async);
-int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async);
-int MFFileMemory_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity);
-int MFFileMemory_Tell(MFFile* fileHandle);
-
-MFFileState MFFileMemory_Query(MFFile* fileHandle);
-int MFFileMemory_GetSize(MFFile* fileHandle);
+int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, int64 bytes);
+int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes);
+int MFFileMemory_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
 // handle to the Memory filesystem
 extern MFFileSystemHandle hMemoryFileSystem;

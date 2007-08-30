@@ -24,7 +24,7 @@ extern HWND apphWnd;
 MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 int gNumWeights = 0;
-
+MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -132,6 +132,13 @@ int MFRenderer_CreateDisplay()
 	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	D3DVIEWPORT9 vp;
+	pd3dDevice->GetViewport(&vp);
+	gCurrentViewport.x = (float)vp.X;
+	gCurrentViewport.y = (float)vp.Y;
+	gCurrentViewport.width = (float)vp.Width;
+	gCurrentViewport.height = (float)vp.Height;
 
 	return 0;
 }
@@ -245,15 +252,22 @@ void MFRenderer_ClearScreen(uint32 flags)
 	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
-void MFRenderer_SetViewport(float x, float y, float width, float height)
+void MFRenderer_GetViewport(MFRect *pRect)
+{
+	*pRect = gCurrentViewport;
+}
+
+void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;
 
+	gCurrentViewport = *pRect;
+
 	D3DVIEWPORT9 vp;
-	vp.X = (DWORD)((x / 640.0f) * (float)gDisplay.width);
-	vp.Y = (DWORD)((y / 480.0f) * (float)gDisplay.height);
-	vp.Width = (DWORD)((width / 640.0f) * (float)gDisplay.width);
-	vp.Height = (DWORD)((height / 480.0f) * (float)gDisplay.height);
+	vp.X = (DWORD)pRect->x;
+	vp.Y = (DWORD)pRect->y;
+	vp.Width = (DWORD)pRect->width;
+	vp.Height = (DWORD)pRect->height;
 	vp.MinZ = 0.0f;
 	vp.MaxZ = 1.0f;
 
@@ -263,6 +277,11 @@ void MFRenderer_SetViewport(float x, float y, float width, float height)
 void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
+
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)gDisplay.width;
+	gCurrentViewport.height = (float)gDisplay.height;
 
 	D3DVIEWPORT9 vp;
 	vp.X = 0;

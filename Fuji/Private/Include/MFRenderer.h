@@ -105,7 +105,8 @@ enum MFClearScreenFlags
 void MFRenderer_SetClearColour(float r, float g, float b, float a);
 void MFRenderer_ClearScreen(uint32 flags = CS_All);
 
-void MFRenderer_SetViewport(float x, float y, float width, float height);
+void MFRenderer_GetViewport(MFRect *pRect);
+void MFRenderer_SetViewport(MFRect *pRect);
 void MFRenderer_ResetViewport();
 
 /**

@@ -17,14 +17,11 @@ void MFFileSystemNative_InitModule()
 	fsCallbacks.Read = MFFileNative_Read;
 	fsCallbacks.Write = MFFileNative_Write;
 	fsCallbacks.Seek = MFFileNative_Seek;
-	fsCallbacks.Tell = MFFileNative_Tell;
-	fsCallbacks.Query = MFFileNative_Query;
-	fsCallbacks.GetSize = MFFileNative_GetSize;
 	fsCallbacks.FindFirst = MFFileNative_FindFirst;
 	fsCallbacks.FindNext = MFFileNative_FindNext;
 	fsCallbacks.FindClose = MFFileNative_FindClose;
 
-	hNativeFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
+	hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
 }
 
 void MFFileSystemNative_DeinitModule()
@@ -76,7 +73,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 			hFile = MFFile_Open(hNativeFileSystem, &openData);
 		}
 	}
-	else 
+	else
 	{
 		MFOpenDataNative openData;
 

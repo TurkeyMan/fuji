@@ -24,14 +24,11 @@ void MFFileSystemZipFile_InitModule()
 	fsCallbacks.Read = MFFileZipFile_Read;
 	fsCallbacks.Write = MFFileZipFile_Write;
 	fsCallbacks.Seek = MFFileZipFile_Seek;
-	fsCallbacks.Tell = MFFileZipFile_Tell;
-	fsCallbacks.Query = MFFileZipFile_Query;
-	fsCallbacks.GetSize = MFFileZipFile_GetSize;
 	fsCallbacks.FindFirst = MFFileZipFile_FindFirst;
 	fsCallbacks.FindNext = MFFileZipFile_FindNext;
 	fsCallbacks.FindClose = MFFileZipFile_FindClose;
 
-	hZipFileSystem = MFFileSystem_RegisterFileSystem(&fsCallbacks);
+	hZipFileSystem = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
 }
 
 void MFFileSystemZipFile_DeinitModule()
@@ -167,8 +164,6 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataZipFile), "Incorrect size for MFOpenDataZipFile structure. Invalid pOpenData.");
 	MFOpenDataZipFile *pZipFile = (MFOpenDataZipFile*)pOpenData;
 
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
@@ -244,35 +239,31 @@ int MFFileZipFile_Close(MFFile* pFile)
 	return 0;//unzClose((unzFile)pFile->pFilesysData);
 }
 
-int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, uint32 bytes, bool async)
+int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
 	uint32 bytesRead;
-	bytesRead = unzReadCurrentFile((unzFile)pFile->pFilesysData, pBuffer, bytes);
+	bytesRead = unzReadCurrentFile((unzFile)pFile->pFilesysData, pBuffer, (uint32)bytes);
 	pFile->offset += bytesRead;
 
 	return bytesRead;
 }
 
-int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, uint32 bytes, bool async)
+int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
-
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
 
 	// write
 
 	return 0;
 }
 
-int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
+int MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int newPos = 0;
+	int64 newPos = 0;
 
 	switch(relativity)
 	{
@@ -280,10 +271,10 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 			newPos = MFMin(bytes, pFile->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax(0, pFile->length - bytes);
+			newPos = MFMax((int64)0, pFile->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp(0, (int)pFile->offset + bytes, pFile->length);
+			newPos = MFClamp((int64)0, pFile->offset + bytes, pFile->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
@@ -294,37 +285,19 @@ int MFFileZipFile_Seek(MFFile* pFile, int bytes, MFFileSeek relativity)
 	unzCloseCurrentFile(f);
 	unzOpenCurrentFile(f);
 
-	pFile->offset = (uint32)newPos;
+	pFile->offset = newPos;
 
 	// read to the desired position.
 	char buffer[256];
 
 	while(newPos)
 	{
-		int bytes = newPos < 256 ? newPos : 256;
-		unzReadCurrentFile(f, buffer, bytes);
+		int64 bytes = newPos < 256 ? newPos : 256;
+		unzReadCurrentFile(f, buffer, (uint32)bytes);
 		newPos -= bytes;
 	}
 
 	return (int)pFile->offset;
-}
-
-int MFFileZipFile_Tell(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return (int)pFile->offset;
-}
-
-MFFileState MFFileZipFile_Query(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return pFile->state;
-}
-
-int MFFileZipFile_GetSize(MFFile* pFile)
-{
-	MFCALLSTACK;
-	return pFile->length;
 }
 
 bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)

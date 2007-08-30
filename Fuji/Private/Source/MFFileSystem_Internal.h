@@ -2,16 +2,10 @@
 #define _MFFILESYSTEM_INTERNAL_H
 
 #include "MFFileSystem.h"
+#include "MFThread.h"
+#include "MFPtrList.h"
 
 struct MFTOCEntry;
-
-// asynchronous file operations
-enum MFFileOp
-{
-	MFFO_None,
-	MFFO_Read,
-	MFFO_Write
-};
 
 // internal functions
 void MFFileSystem_InitModule();
@@ -23,22 +17,83 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries);
 // open file structure
 struct MFFile
 {
-	uint32 offset;
-	int length;						// yes we are limiting our files to only 2gb here, but we can define if its an endless stream
-
-	MFFileOp operation;				// current operation
-	MFFileState state;				// current activity state
+	int64 offset;
+	int64 length;
 
 	uint32 createFlags;				// creat flags
 
 	MFFileSystemHandle filesystem;	// filesystem that created the file
 	void *pFilesysData;				// extra data related to the file
 
-	MFAsyncOperationCompletedCallback pAsyncCallback;
-
 #if !defined(_RETAIL)
 	char fileIdentifier[256];
 #endif
+};
+
+enum MFFileOp
+{
+	MFFJ_Exit = 0,
+	MFFJ_Open,
+	MFFJ_Close,
+	MFFJ_Read,
+	MFFJ_Write,
+	MFFJ_Seek,
+	MFFJ_Stat,
+	MFFJ_Tell,
+	MFFJ_GetSize,
+	MFFJ_Load,
+	MFFJ_Save,
+	MFFJ_Max,
+	MFFJ_ForceInt = 0x7FFFFFFF
+};
+
+struct MFJob
+{
+	MFFileOp job;
+	MFFile *pFile;
+	int64 result;
+	union
+	{
+		struct Open
+		{
+			union
+			{
+				MFOpenData openData;
+				char buffer[64];
+			};
+		} open;
+		struct Read
+		{
+			void *pBuffer;
+			uint32 bytes;
+		} read;
+		struct Write
+		{
+			int64 bytes;
+			const void *pBuffer;
+		} write;
+		struct Seek
+		{
+			int64 bytes;
+			MFFileSeek whence;
+		} seek;
+		struct Stat
+		{
+		} stat;
+		struct Load
+		{
+			const char *pFilename;
+			void *pBuffer;
+		} load;
+		struct Save
+		{
+			const char *pFilename;
+			void *pBuffer;
+			int64 size;
+		} save;
+	};
+	volatile MFJobState status;
+	int completion;
 };
 
 // mounted filesystem management
@@ -96,20 +151,29 @@ struct MFFileSystemCallbacks
 
 	int (*Open)(MFFile*, MFOpenData*);
 	int (*Close)(MFFile*);
-	int (*Read)(MFFile*, void*, uint32, bool);
-	int (*Write)(MFFile*, const void*, uint32, bool);
-	int (*Seek)(MFFile*, int, MFFileSeek);
-	int (*Tell)(MFFile*);
+	int (*Read)(MFFile*, void*, int64);
+	int (*Write)(MFFile*, const void*, int64);
+	int (*Seek)(MFFile*, int64, MFFileSeek);
 
 	bool (*FindFirst)(MFFind*, const char*, MFFindData*);
 	bool (*FindNext)(MFFind*, MFFindData*);
 	void (*FindClose)(MFFind*);
-
-	MFFileState (*Query)(MFFile*);
-	int (*GetSize)(MFFile*);
 };
 
-MFFileSystemHandle MFFileSystem_RegisterFileSystem(MFFileSystemCallbacks *pCallbacks);
+struct MFFileSystem
+{
+	char name[64];
+	MFFileSystemCallbacks callbacks;
+	MFThread thread;
+	MFSemaphore semaphore;
+	MFJob ** ppJobQueue;
+	volatile int readJob;
+	volatile int writeJob;
+	int numJobs;
+	MFPtrListDL<MFJob> jobs;
+};
+
+MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, MFFileSystemCallbacks *pCallbacks);
 void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle);
 
 #endif

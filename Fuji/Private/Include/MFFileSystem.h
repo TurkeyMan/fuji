@@ -25,12 +25,6 @@ struct MFFile;
 typedef int MFFileSystemHandle;
 
 /**
- * Callback function type for file op completion notification.
- * Callback function type for file op completion notification.
- */
-typedef void (*MFAsyncOperationCompletedCallback)(MFFile *);
-
-/**
  * File open flags.
  * Flags to use when opening a file.
  */
@@ -40,7 +34,6 @@ enum MFOpenFlags
 	MFOF_Write	= 2,	/**< File has write access */
 	MFOF_Text	= 4,	/**< Open file in text mode */
 	MFOF_Binary	= 8,	/**< Open file in binary mode */
-	MFOF_Async	= 16,	/**< Open file in asyncrenous mode */
 
 	MFOF_User	= 256,	/**< User flags begin here (for use by other file systems) */
 
@@ -62,12 +55,12 @@ enum MFFileSeek
  * Represents asyncrenous file operation state.
  * Represents asyncrenous file operation state.
  */
-enum MFFileState
+enum MFJobState
 {
-	MFFS_Unavailable = -1,	/**< File is unavailable */
-	MFFS_Ready = 0,			/**< File is ready */
-	MFFS_Busy,				/**< File is busy */
-	MFFS_Waiting			/**< File is waiting */
+	MFJS_Ready = 0,		/**< Job is ready */
+	MFJS_Waiting,		/**< Job is waiting */
+	MFJS_Busy,			/**< Job is busy */
+	MFJS_Finished,		/**< Job is busy */
 };
 
 /**
@@ -157,14 +150,6 @@ int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
  * @return Returns the file pointer offset in bytes.
  */
 int MFFile_Tell(MFFile *pFile);
-
-/**
- * Get the state of a file.
- * Get the activity state of a file.
- * @param fileHandle Handle to an open file.
- * @return Returns the current file activity state.
- */
-MFFileState MFFile_Query(MFFile *pFile);
 
 /**
  * Get the size of a file.
