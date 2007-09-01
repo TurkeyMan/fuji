@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "MFSystem.h"
+#include "MFSockets.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 #include "FileSystem/MFFileSystemMemory_Internal.h"
@@ -436,17 +437,18 @@ int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 
 int MFFile_Tell(MFFile* fileHandle)
 {
-	MFCALLSTACK;
-
 	return (int)fileHandle->offset;
 }
 
 // get file stream length (retuurs -1 for an undefined stream length)
 int MFFile_GetSize(MFFile* fileHandle)
 {
-	MFCALLSTACK;
-
 	return (int)fileHandle->length;
+}
+
+bool MFFile_IsEOF(MFFile* fileHandle)
+{
+	return fileHandle->offset == fileHandle->length;
 }
 
 // stdio signiture functions (these can be used as a callback to many libs and API's)

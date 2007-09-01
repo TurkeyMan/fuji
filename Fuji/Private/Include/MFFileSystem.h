@@ -159,6 +159,13 @@ int MFFile_Tell(MFFile *pFile);
  */
 int MFFile_GetSize(MFFile *pFile);
 
+/**
+ * Check for end of file.
+ * Check to see if the file has reached its end.
+ * @param fileHandle Handle to an open file.
+ * @return Returns true if the file pointer has reached the end of the file, otherwise false.
+ */
+bool MFFile_IsEOF(MFFile* fileHandle);
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
 

@@ -25,7 +25,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -79,7 +79,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -133,7 +133,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -1362,6 +1362,116 @@
 						RelativePath=".\Middleware\angelscript\include\scriptstring.h">
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="libpng"
+				Filter="">
+				<File
+					RelativePath=".\Middleware\lpng1212\Announce">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\configure">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\Install">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\Knownbug">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\License">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\png.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\png.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngconf.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngerror.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pnggccrd.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngget.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngmem.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngpread.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngread.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrio.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrtran.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngrutil.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngset.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngtest.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngtrans.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngvcrd.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwio.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwrite.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwtran.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\pngwutil.c">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\Readme">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\Todo">
+				</File>
+				<File
+					RelativePath=".\Middleware\lpng1212\Y2kinfo">
+				</File>
+			</Filter>
+			<Filter
+				Name="tinyxml"
+				Filter="">
+				<File
+					RelativePath=".\Middleware\tinyxml\tinystr.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\tinyxml\tinystr.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\tinyxml\tinyxml.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\tinyxml\tinyxml.h">
+				</File>
+				<File
+					RelativePath=".\Middleware\tinyxml\tinyxmlerror.cpp">
+				</File>
+				<File
+					RelativePath=".\Middleware\tinyxml\tinyxmlparser.cpp">
+				</File>
 			</Filter>
 		</Filter>
 		<File

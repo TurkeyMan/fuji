@@ -111,7 +111,9 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		pTexture->refCount = 0;
 		pTexture->pTemplateData = pTemplate;
-		MFString_Copy(pTexture->name, pName);
+		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
+		pTexture->name[sizeof(pTexture->name) - 1] = 0;
+
 
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
 	}
@@ -132,7 +134,8 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		pTexture = gTextureBank.Create();
 		pTexture->refCount = 0;
 
-		MFString_Copy(pTexture->name, pName);
+		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
+		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
 		// set this to 1 for the moment until we deal with mipmaping..
 		uint32 levelCount = 1;

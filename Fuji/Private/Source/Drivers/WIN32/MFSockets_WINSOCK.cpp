@@ -244,6 +244,7 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 #else
 	const int maxNumAddresses = 20;
 	static MFAddressInfo addressInfo[maxNumAddresses];
+	static MFSocketAddressInet6 addressInfoAddress[maxNumAddresses];
 	int numAddresses = 0;
 
 	static addrinfo *pSockAddr = NULL;
@@ -294,7 +295,8 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 			addressInfo[numAddresses].type = (MFSocketType)pAI->ai_socktype;
 			addressInfo[numAddresses].protocol = (MFSocketProtocol)pAI->ai_protocol;
 			addressInfo[numAddresses].pCanonName = pAI->ai_canonname;
-			addressInfo[numAddresses].pAddress = MFSocketsPC_GetSocketAddress(pAI->ai_addr);
+			MFCopyMemory(&addressInfoAddress[numAddresses], MFSocketsPC_GetSocketAddress(pAI->ai_addr), pAI->ai_family == MFAF_Inet ? sizeof(MFSocketAddressInet) : sizeof(MFSocketAddressInet6));
+			addressInfo[numAddresses].pAddress = (MFSocketAddressInet*)&addressInfoAddress[numAddresses];
 			addressInfo[numAddresses].pNext = pAI->ai_next ? &addressInfo[numAddresses+1] : 0;
 
 			++numAddresses;

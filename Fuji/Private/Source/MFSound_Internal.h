@@ -55,7 +55,7 @@ struct MFSoundTemplate
 
 struct MFSound
 {
-	char name[64];
+	char name[128];
 
 	MFSoundTemplate *pTemplate;
 	int flags;

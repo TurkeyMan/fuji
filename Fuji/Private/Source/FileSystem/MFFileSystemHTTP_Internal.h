@@ -5,6 +5,7 @@
 
 struct MFFileHTTPData
 {
+	MFSocketAddressInet address;
 	char *pServer;
 	char *pPath;
 	int port;

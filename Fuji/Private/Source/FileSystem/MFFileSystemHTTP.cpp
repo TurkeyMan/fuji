@@ -1,9 +1,11 @@
 #include "Fuji.h"
 #include "MFSystem.h"
+#include "MFSockets.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemHTTP_Internal.h"
-#include "MFSockets.h"
 #include "MFPtrList.h"
+
+#include <stdio.h>
 
 static MFPtrListDL<MFFileHTTPData> gHTTPFiles;
  
@@ -112,41 +114,16 @@ void MFFileHTTP_GetServerAndPath(const char *pURL, char **ppServer, char **ppPat
 	*ppPath = pPath;
 }
 
-bool MFFileHTTP_RequestHeader(const char *pServer, int port, const char *pPath, char *pOutputBuffer, int maxSize)
+bool MFFileHTTP_RequestHeader(const MFSocketAddress *pAddr, const char *pHost, int port, const char *pPath, char *pOutputBuffer, int maxSize)
 {
-	const char *pHeaderRequest = MFStr("GET %s HTTP/1.0\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\n\n", pPath);
-
-	MFAddressInfo addrInfo, *pAddrInfo;
-	MFZeroMemory(&addrInfo, sizeof(MFAddressInfo));
-	addrInfo.family = MFAF_Inet;
-	addrInfo.type = MFSockType_Stream;
-	addrInfo.protocol = MFProtocol_TCP;
-
-	MFSockets_GetAddressInfo(pServer, MFStr("%d", port), &addrInfo, &pAddrInfo);
-
-	if(!pAddrInfo)
-	{
-		MFDebug_Warn(2, MFStr("Couldnt find host: '%s' on port %d", pServer, port));
-		return true;
-	}
+	const char *pHeaderRequest = MFStr("HEAD %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\n\n", pPath, pHost, port);
 
 	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 
-	MFDebug_Warn(4, MFStr("Connecting to: '%s'", MFSockets_GetAddressString(*pAddrInfo->pAddress)));
+	MFDebug_Warn(4, MFStr("Connecting to: '%s'", MFSockets_GetAddressString(*pAddr)));
 
-	int connected = MFSockets_Connect(socket, *pAddrInfo->pAddress);
-
-	while(connected && pAddrInfo->pNext)
-	{
-		pAddrInfo = pAddrInfo->pNext;
-		connected = MFSockets_Connect(socket, *pAddrInfo->pAddress);
-	}
-
-	if(connected)
-	{
-		MFDebug_Warn(2, MFStr("Couldnt create a connection to '%s' on port %d", pServer, port));
+	if(MFSockets_Connect(socket, *pAddr))
 		return true;
-	}
 
 	MFSockets_Send(socket, pHeaderRequest, MFString_Length(pHeaderRequest) + 1, 0);
 
@@ -173,16 +150,21 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	MFFileHTTP_GetServerAndPath(pHTTP->pURL, &pServer, &pPath);
 
+	// resolve this address..
+	MFAddressInfo addrInfo, *pAddrInfo;
+	MFZeroMemory(&addrInfo, sizeof(MFAddressInfo));
+	addrInfo.family = MFAF_Inet;
+	addrInfo.type = MFSockType_Stream;
+	addrInfo.protocol = MFProtocol_TCP;
+
+	MFSockets_GetAddressInfo(pServer, MFStr("%d", pHTTP->port), &addrInfo, &pAddrInfo);
+
 	char headerBuffer[2048];
 	bool foundServer = false;
-
-	while(!foundServer)
+	for(; pAddrInfo; pAddrInfo = pAddrInfo->pNext)
 	{
-		if(MFFileHTTP_RequestHeader(pServer, pHTTP->port, pPath, headerBuffer, 2048))
-		{
-			// there was an error
-			return 1;
-		}
+		if(MFFileHTTP_RequestHeader(pAddrInfo->pAddress, pServer, pHTTP->port, pPath, headerBuffer, 2048))
+			continue;
 
 		if(!MFString_CaseCmpN(headerBuffer, "HTTP", 4))
 		{
@@ -193,6 +175,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 			{
 				// success..
 				foundServer = true;
+				break;
 			}
 			else if(errorCode >= 300 && errorCode < 400)
 			{
@@ -222,25 +205,13 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 				}
 			}
 			else if(errorCode == 404)
-			{
 				MFDebug_Warn(2, MFStr("HTTP response code 404: Not Found", errorCode));
-				return 2;
-			}
 			else if(errorCode == 400)
-			{
 				MFDebug_Warn(2, MFStr("HTTP response code 400: Bad Request", errorCode));
-				return 3;
-			}
 			else if(errorCode == 401)
-			{
 				MFDebug_Warn(2, MFStr("HTTP response code 401: Unauthorized", errorCode));
-				return 4;
-			}
 			else if(errorCode == 403)
-			{
 				MFDebug_Warn(2, MFStr("HTTP response code 403: Forbidden", errorCode));
-				return 5;
-			}
 			else if(errorCode >= 100 && errorCode < 200)
 			{
 				// continue request
@@ -251,16 +222,16 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 				// success or something
 			}
 			else
-			{
 				MFDebug_Warn(2, MFStr("HTTP server has returned an unknown response code %d", errorCode));
-				return 6;
-			}
 		}
 		else
-		{
 			MFDebug_Warn(2, "Invalid HTTP response, server is likely NOT a HTTP server...");
-			// not a HTTP server
-		}
+	}
+
+	if(!foundServer)
+	{
+		MFDebug_Warn(2, MFStr("Couldnt locate host: '%s' on port %d", pServer, pHTTP->port));
+		return 1;
 	}
 
 	MFFileHTTPData *pHTTPData = gHTTPFiles.Create();
@@ -269,6 +240,7 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	int serverLen = MFString_Length(pServer) + 1;
 	int pathLen = MFString_Length(pPath) + 1;
 
+	MFCopyMemory(&pHTTPData->address, pAddrInfo->pAddress, sizeof(MFSocketAddressInet));
 	pHTTPData->pServer = (char*)&pHTTPData[1];
 	pHTTPData->pPath = pHTTPData->pServer + serverLen;
 	pHTTPData->port = pHTTP->port;
@@ -325,7 +297,106 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	return 0;
+	MFFileHTTPData *pHTTPData = (MFFileHTTPData*)fileHandle->pFilesysData;
+
+	const char *pHeaderRequest = MFStr("GET %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\nRange: bytes=%d-%d\nRequest-Range: bytes=%d-%d\n\n", pHTTPData->pPath, pHTTPData->pServer, pHTTPData->port, (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1));
+
+	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
+	if(MFSockets_Connect(socket, pHTTPData->address))
+		return 0;
+
+	MFSockets_Send(socket, pHeaderRequest, MFString_Length(pHeaderRequest) + 1, 0);
+
+	const int bufferLen = 256;
+	char temp[bufferLen+1];
+	int read = MFSockets_Recv(socket, temp, bufferLen, 0);
+	temp[bufferLen] = 0;
+
+	// validate HTTP response
+	if(MFString_CompareN("HTTP/", temp, 5))
+		return -1;
+
+	// get response code
+	const char *pResponse = MFString_Chr(temp, ' ');
+	if(!pResponse) return -1;
+	++pResponse;
+	const char *pT = MFString_Chr(pResponse, ' ');
+	if(!pT) return -1;
+
+	int response = atoi(MFStrN(pResponse, pT-pResponse));
+	int dataStart = 0;
+	int dataEnd = (int)fileHandle->length;
+	int dataLength = dataEnd;
+	int contentLength = 0;
+
+	const char *pLineStart = MFSeekNewline(++pT);
+	int numNewlines = 0;
+	do
+	{
+		pT = MFSeekNewline(pLineStart);
+
+		if(!*pT)
+		{
+			int numBytes = pT - pLineStart;
+			for(int i=0; i<numBytes; ++i)
+				temp[i] = pLineStart[i];
+			read = MFSockets_Recv(socket, temp + numBytes, bufferLen - numBytes, 0);
+			pLineStart = temp;
+			pT = MFSeekNewline(pLineStart);
+		}
+
+		const char *pLastChar = pT-1;
+		while(MFIsNewline(*pLastChar))
+			--pLastChar;
+		const char *pHeaderLine = MFStrN(pLineStart, (++pLastChar) - pLineStart);
+
+		// read header... migth be interesting...
+		if(!MFString_CompareN("Content-Range: bytes ", pHeaderLine, 21))
+		{
+			sscanf(pHeaderLine + 21, "%d-%d/%d", &dataStart, &dataEnd, &dataLength);
+		}
+		else if(!MFString_CompareN("Content-Length: ", pHeaderLine, 16))
+		{
+			contentLength = atoi(pHeaderLine + 16);
+		}
+
+		// count \n's between line end and line start
+
+		numNewlines = 0;
+		while(pLastChar < pT)
+		{
+			if(*pLastChar == '\n')
+				++numNewlines;
+			++pLastChar;
+		}
+		pLineStart = pT;
+	}
+	while(numNewlines == 1);
+
+	MFDebug_Assert(dataStart == fileHandle->offset, "Offset is wrong..");
+	MFDebug_Assert(contentLength == bytes, "Length is wrong..");
+
+	int numBytes = MFMin(bufferLen - (pT - temp), (int)bytes);
+	if(numBytes)
+	{
+		MFCopyMemory(pBuffer, pT, numBytes);
+		(char*&)pBuffer += numBytes;
+		bytes -= numBytes;
+	}
+
+	while(bytes)
+	{
+		int read = MFSockets_Recv(socket, (char*)pBuffer, (int)bytes, 0);
+		if(!read)
+			break;
+		(char*&)pBuffer += read;
+		bytes -= read;
+		numBytes += read;
+	}
+
+	MFSockets_CloseSocket(socket);
+
+	return numBytes;
 }
 
 int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
