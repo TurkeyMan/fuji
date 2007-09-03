@@ -83,14 +83,14 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 		MFDebug_Warn(3, MFStr("String table '%s' does not exist, attempting to use fallback language", pFile));
 
 		pFile = MFStr("%s.%s", pFilename, MFTranslation_GetLanguageName(fallback, false));
-		pStringTable = (MFStringTable*)MFFileSystem_GetSize(pFile);
+		pStringTable = (MFStringTable*)MFFileSystem_Load(pFile);
 
 		if(!pStringTable && fallback != MFLang_English)
 		{
 			MFDebug_Warn(3, MFStr("String table '%s' does not exist, attempting to use 'English'", pFile));
 
 			pFile = MFStr("%s.%s", pFilename, MFTranslation_GetLanguageName(MFLang_English, false));
-			pStringTable = (MFStringTable*)MFFileSystem_GetSize(pFile);
+			pStringTable = (MFStringTable*)MFFileSystem_Load(pFile);
 		}
 	}
 

@@ -994,7 +994,7 @@ void SeekMADStream(MFAudioStream *pStream, float seconds)
 	// initialise timer to our song position
 	pDecoder->timer.seconds = 0;
 	pDecoder->timer.fraction = MAD_TIMER_RESOLUTION / pDecoder->firstHeader.samplerate;
-	mad_timer_multiply(&pDecoder->timer, pDecoder->currentFrame*1152 + sampleInFrame);
+	mad_timer_multiply(&pDecoder->timer, pDecoder->currentFrame*1152);
 
 	// skip samples to where we want to be..
 	int skipFrames = frame - pDecoder->currentFrame;
