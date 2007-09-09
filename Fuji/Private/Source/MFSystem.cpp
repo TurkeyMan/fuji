@@ -414,8 +414,8 @@ int MFSystem_GameLoop()
 		gRestart = 0;
 		gQuit = 0;
 
-		if(pSystemCallbacks[MFCB_PostInit])
-			pSystemCallbacks[MFCB_PostInit]();
+		if(pSystemCallbacks[MFCB_InitDone])
+			pSystemCallbacks[MFCB_InitDone]();
 		Game_Init();
 
 		// init the timedelta
