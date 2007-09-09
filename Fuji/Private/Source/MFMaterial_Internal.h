@@ -77,7 +77,6 @@ struct MFMeshChunk_D3D9 : public MFMeshChunk
 };
 #endif
 
-#if MF_RENDERER == MF_DRIVER_XBOX || defined(_FUJI_UTIL)
 struct MFMeshChunk_XB : public MFMeshChunk
 {
 	// some vertex buffer type thing...
@@ -86,9 +85,7 @@ struct MFMeshChunk_XB : public MFMeshChunk
 	uint32 numIndices;
 	uint32 vertexStride;
 };
-#endif
 
-#if MF_RENDERER == MF_DRIVER_PSP || defined(_FUJI_UTIL)
 struct MFMeshChunk_PSP : public MFMeshChunk
 {
 	const char *pVertexData;
@@ -103,9 +100,7 @@ struct MFMeshChunk_PSP : public MFMeshChunk
 	uint32 vertexStride;
 	uint32 maxWeights;
 };
-#endif
 
-#if MF_RENDERER == MF_DRIVER_PS2 || defined(_FUJI_UTIL)
 struct MFMeshChunk_PS2 : public MFMeshChunk
 {
 	uint32 numVertices;
@@ -113,9 +108,7 @@ struct MFMeshChunk_PS2 : public MFMeshChunk
 	const char *pDMAList;
 	uint32 listSize;
 };
-#endif
 
-#if MF_RENDERER == MF_DRIVER_OPENGL || defined(_FUJI_UTIL)
 struct MFMeshChunk_OpenGL : public MFMeshChunk
 {
 	uint32 numVertices;
@@ -148,14 +141,11 @@ struct MFMeshChunk_OpenGL : public MFMeshChunk
 	uint16 *pBatchIndices;
 	int matrixBatchSize;
 };
-#endif
 
-#if MF_RENDERER == MF_DRIVER_GC || defined(_FUJI_UTIL)
 struct MFMeshChunk_GC : public MFMeshChunk
 {
 	// GC can use indexed streams..
 };
-#endif
 
 // define MFMeshChunk_Current
 #if MF_RENDERER == MF_DRIVER_D3D9

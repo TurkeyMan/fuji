@@ -93,10 +93,21 @@ LIBPNG = Middleware/lpng1212/png.o \
 
 #-------------------------------------------------------------------
 
+
+# tinyxml
+
+TINYXML = Middleware/tinyxml/tinystr.o \
+	Middleware/tinyxml/tinyxml.o \
+	Middleware/tinyxml/tinyxmlerror.o \
+	Middleware/tinyxml/tinyxmlparser.o
+
+#-------------------------------------------------------------------
+
 # Regular build
 
 OBJS := $(ZLIB) \
 	$(ANGELSCRIPT) \
+	$(TINYXML) \
 	Source/DebugMenu.o \
 	Source/Display.o \
 	Source/Image.o \
@@ -224,6 +235,7 @@ OBJS := $(ZLIB) \
 
 UTIL_OBJS := $(ZLIB) \
 	$(LIBPNG) \
+	$(TINYXML) \
 	Source/MFCallstack.o \
 	Source/MFDebug.o \
 	Source/MFHeap.o \

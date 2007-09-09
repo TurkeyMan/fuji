@@ -6,7 +6,7 @@
 
 #include "MFCallstack_Internal.h"
 #include "MFSystem_Internal.h"
-#include "Display_Internal.h"
+#include "MFRenderer_Internal.h"
 #include "MFFont.h"
 #include "MFView.h"
 #include "MFPrimitive.h"
@@ -61,10 +61,10 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFSystem_Update();
 		MFSystem_PostUpdate();
 
-		MFDisplay_BeginFrame();
+		MFRenderer_BeginFrame();
 
-		MFDisplay_SetClearColour(0,0,0,0);
-		MFDisplay_ClearScreen();
+		MFRenderer_SetClearColour(0,0,0,0);
+		MFRenderer_ClearScreen();
 
 		MFView_SetDefault();
 		MFView_SetOrtho();
@@ -101,7 +101,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 #endif
 
 //		MFSystem_Draw();
-		MFDisplay_EndFrame();
+		MFRenderer_EndFrame();
 	}
 }
 

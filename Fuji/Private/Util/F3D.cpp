@@ -10,6 +10,8 @@
 #include "MFAnimation_Internal.h"
 #include "MFMaterial_Internal.h"
 
+#include "MFFileSystem.h"
+
 #if !defined(_LINUX) && !defined(_OSX)
 #include <d3d9.h>
 #endif
@@ -36,30 +38,15 @@ void AdjustBoundingSphere(const MFVector &point, MFVector *pSphere)
 
 int F3DFile::ReadF3D(char *pFilename)
 {
-	FILE *infile;
-	char *file = NULL;
-	uint32 filesize = 0;
-
-	infile = fopen(pFilename, "r");
-
-	if(!infile)
+	char *pFile = MFFileSystem_Load(pFilename);
+	if(!pFile)
 	{
-		printf("Failed to open F3D file '%s'\n", pFilename);
+		MFDebug_Warn(2, MFStr("Failed to open F3D file %s", pFilename));
 		return 1;
 	}
 
-	fseek(infile, 0, SEEK_END);
-	filesize = ftell(infile);
-	fseek(infile, 0, SEEK_SET);
-
-	file = (char*)MFHeap_Alloc(filesize);
-	fread(file, 1, filesize, infile);
-
-	fclose(infile);
-
-	ReadF3DFromMemory(file);
-
-	MFHeap_Free(file);
+	ReadF3DFromMemory(pFile);
+	MFHeap_Free(pFile);
 
 	return 0;
 }
@@ -193,11 +180,11 @@ void F3DFile::WriteF3D(char *pFilename)
 	F3DHeader *pHeader;
 	F3DChunkDesc *pChunks;
 
-	FILE *file = fopen(pFilename, "wb");
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Write);
 
-	if(!file)
+	if(!hFile)
 	{
-		printf("Count open '%s' for writing.\n", pFilename);
+		MFDebug_Warn(1, MFStr("Count open '%s' for writing.\n", pFilename));
 		return;
 	}
 
@@ -308,9 +295,9 @@ void F3DFile::WriteF3D(char *pFilename)
 		}
 	}
 
-	fwrite(pFile, 1, pOffset - pFile, file);
+	MFFile_Write(hFile, pFile, pOffset - pFile);
 
-	fclose(file);
+	MFFile_Close(hFile);
 
 	MFHeap_Free(pFile);
 }
@@ -322,11 +309,11 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 
 	if(pHeader->ID != MFMAKEFOURCC('M','F','3','D'))
 	{
-		printf("Not an F3D file.\n");
+		MFDebug_Warn(1, "Not an F3D file.\n");
 		return 1;
 	}
 
-	printf("Reading F3D file version %d.%d\n", pHeader->major, pHeader->minor);
+	MFDebug_Log(4, MFStr("Reading F3D file version %d.%d\n", pHeader->major, pHeader->minor));
 
 	pChunks = (F3DChunkDesc*)&pHeader[1];
 
@@ -396,9 +383,9 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 	}
 
 	// increment size of MeshChunk_PC structure
-	pOffset += MFALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_D3D9)*numMeshChunks);
 
-	MFMeshChunk_PC *pMeshChunk = (MFMeshChunk_PC*)pMeshChunks;
+	MFMeshChunk_D3D9 *pMeshChunk = (MFMeshChunk_D3D9*)pMeshChunks;
 
 	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
 
@@ -646,7 +633,7 @@ void WriteMeshChunk_PC(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 void FixUpMeshChunk_PC(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
 #if !defined(_LINUX) && !defined(_OSX)
-	MFMeshChunk_PC *pMC = (MFMeshChunk_PC*)pMeshChunks;
+	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
@@ -674,7 +661,7 @@ void WriteMeshChunk_XB(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubOb
 	}
 
 	// increment size of MeshChunk_PC structure
-	pOffset += MFALIGN16(sizeof(MFMeshChunk_PC)*numMeshChunks);
+	pOffset += MFALIGN16(sizeof(MFMeshChunk_D3D9)*numMeshChunks);
 
 	MFMeshChunk_XB *pMeshChunk = (MFMeshChunk_XB*)pMeshChunks;
 
@@ -1010,8 +997,8 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 	}
 
 	// increment size of MeshChunk_Linux structure
-	MFMeshChunk_Linux *pMeshChunk = (MFMeshChunk_Linux*)pMeshChunks;
-	uint32 meshChunkSize = (uint32)MFALIGN16(sizeof(MFMeshChunk_Linux)*numMeshChunks);
+	MFMeshChunk_OpenGL *pMeshChunk = (MFMeshChunk_OpenGL*)pMeshChunks;
+	uint32 meshChunkSize = (uint32)MFALIGN16(sizeof(MFMeshChunk_OpenGL)*numMeshChunks);
 	MFZeroMemory(pMeshChunk, meshChunkSize);
 	pOffset += meshChunkSize;
 
@@ -1176,7 +1163,7 @@ void WriteMeshChunk_Linux(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSu
 
 void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, void *pBase, void *pStringBase)
 {
-	MFMeshChunk_Linux *pMC = (MFMeshChunk_Linux*)pMeshChunks;
+	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunks;
 
 	for(int a=0; a<count; a++)
 	{
@@ -1192,19 +1179,11 @@ void FixUpMeshChunk_Linux(MFMeshChunk *pMeshChunks, int count, void *pBase, void
 	}
 }
 
-void F3DFile::WriteMDL(char *pFilename, MFPlatform platform)
+void *F3DFile::CreateMDL(uint32 *pSize, MFPlatform platform)
 {
 	int a, b = 0;
 
 	MFModelTemplate *pModelData;
-
-	FILE *file = fopen(pFilename, "wb");
-
-	if(!file)
-	{
-		printf("Count open '%s' for writing.\n", pFilename);
-		return;
-	}
 
 	MFStringCache *pStringCache;
 	pStringCache = MFStringCache_Create(1024*1024);
@@ -1338,7 +1317,7 @@ found:
 				case FP_DC:
 				case FP_GC:
 				default:
-					printf("Invalid platform...\n");
+					MFDebug_Warn(1, "Invalid platform...");
 			}
 
 			++b;
@@ -1503,7 +1482,7 @@ found:
 						case FP_DC:
 						case FP_GC:
 						default:
-							printf("Invalid platform...\n");
+							MFDebug_Warn(1, "Invalid platform...");
 					}
 
 					MFFixUp(pSubobjectChunk[b].pMeshChunks, pModelData, 0);
@@ -1555,7 +1534,7 @@ found:
 			}
 
 			default:
-				printf("Shouldnt be here?...\n");
+				MFDebug_Assert(false, "Shouldnt be here?...");
 				break;
 		}
 
@@ -1563,33 +1542,28 @@ found:
 	}
 	MFFixUp(pModelData->pDataChunks, pModelData, 0);
 
-	// write to disk..
 	size_t fileSize = pOffset - pFile;
-	fwrite(pFile, fileSize, 1, file);
-	fclose(file);
+	void *pMDL = MFHeap_Alloc(fileSize);
+	MFCopyMemory(pMDL, pFile, fileSize);
 
 	// we're done!!!! clean up..
 	MFHeap_Free(pFile);
+
+	if(pSize)
+		*pSize = fileSize;
+	return pMDL;
 }
 
-void F3DFile::WriteANM(char *pFilename, MFPlatform platform)
+void *F3DFile::CreateANM(uint32 *pSize, MFPlatform platform)
 {
 	if(!animationChunk.anims.size())
 	{
 		// no animation
-		return;
+		return NULL;
 	}
 
 	MFAnimationTemplate *pAnimData;
 	int a, b;
-
-	FILE *file = fopen(pFilename, "wb");
-
-	if(!file)
-	{
-		printf("Count open '%s' for writing.\n", pFilename);
-		return;
-	}
 
 	MFStringCache *pStringCache;
 	pStringCache = MFStringCache_Create(1024*1024);
@@ -1666,13 +1640,16 @@ void F3DFile::WriteANM(char *pFilename, MFPlatform platform)
 	MFFixUp(pAnimData->pName, (void*)stringBase, 0);
 	MFFixUp(pAnimData->pBones, pAnimData, 0);
 
-	// write to disk..
 	uint32 fileSize = (uint32&)pOffset - (uint32&)pAnimData;
-	fwrite(pFile, fileSize, 1, file);
-	fclose(file);
+	void *pANM = MFHeap_Alloc(fileSize);
+	MFCopyMemory(pANM, pFile, fileSize);
 
 	// we're done!!!! clean up..
 	MFHeap_Free(pFile);
+
+	if(pSize)
+		*pSize = fileSize;
+	return pANM;
 }
 
 void F3DFile::Optimise()

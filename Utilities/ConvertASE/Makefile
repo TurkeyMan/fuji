@@ -10,11 +10,7 @@ BUILD = Release
 endif
 
 
-OBJS = Lib/tinyxml/tinystr.o \
-Lib/tinyxml/tinyxml.o \
-Lib/tinyxml/tinyxmlerror.o \
-Lib/tinyxml/tinyxmlparser.o \
-Source/ConvertASE.o \
+OBJS = Source/ConvertASE.o \
 Source/ReadASE.o \
 Source/ReadDAE.o \
 Source/ReadX.o  \

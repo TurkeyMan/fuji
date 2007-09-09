@@ -858,6 +858,40 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="Util"
+				Filter="">
+				<File
+					RelativePath=".\Util\F3D.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\F3D.h">
+				</File>
+				<File
+					RelativePath=".\Util\ReadASE.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadDAE.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadMD2.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadMD3.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadMEMD2.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadMEMD2.h">
+				</File>
+				<File
+					RelativePath=".\Util\ReadOBJ.cpp">
+				</File>
+				<File
+					RelativePath=".\Util\ReadX.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

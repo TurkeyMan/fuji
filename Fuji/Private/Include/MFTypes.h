@@ -51,7 +51,9 @@ typedef __int64				int64;
 #endif
 
 typedef unsigned int		uint32;
+#if !defined(MF_PSP)
 typedef int					int32;
+#endif
 typedef unsigned short		uint16;
 typedef short				int16;
 typedef unsigned char		uint8;

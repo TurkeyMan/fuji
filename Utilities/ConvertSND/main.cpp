@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 
 	// we only output 1 stream for now..
 	int numStreams = 1;
-	int numSamples = (pData->size*8) / ((pFormat->wBitsPerSample + 7) & ~7) / pFormat->nChannels;
+	int numSamples = ((pData->size*8) / ((pFormat->wBitsPerSample + 7) & ~7)) / pFormat->nChannels;
 
 	int fileSize = sizeof(MFSoundTemplate) + sizeof(char*)*numStreams + bytesPerSample[targetFormat]*pFormat->nChannels*numSamples*numStreams;
 	char *pSndFile = (char*)MFHeap_Alloc(fileSize);

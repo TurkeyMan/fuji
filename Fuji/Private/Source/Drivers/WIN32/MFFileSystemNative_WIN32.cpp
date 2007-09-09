@@ -135,7 +135,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 {
 	MFCALLSTACK;
 
-	DWORD fileSize = 0;
+	int64 fileSize = 0;
 
 #if defined(MF_XBOX)
 	pFilename = FixXBoxFilename(pFilename);
@@ -148,11 +148,12 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 		DWORD excess;
 		fileSize = GetFileSize(hFile, &excess);
 		CloseHandle(hFile);
+		fileSize |= (int64)excess << 32;
 
 		MFDebug_Assert(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
 	}
 
-	return fileSize;
+	return (uint32)fileSize;
 }
 
 bool MFFileNative_Exists(const char* pFilename)

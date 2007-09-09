@@ -4,6 +4,14 @@
 
 #include "MFModel_Internal.h"
 
+void MFModel_InitModulePlatformSpecific()
+{
+}
+
+void MFModel_DeinitModulePlatformSpecific()
+{
+}
+
 void MFModel_Draw(MFModel *pModel)
 {
 }
