@@ -54,7 +54,7 @@ void MFView_Push()
 {
 	MFDebug_Assert(pCurrentView - gpViewStack < (int)gDefaults.view.maxViewsOnStack, "Error: Exceeded maximum views on the stack. Increase 'gDefaults.view.maxViewsOnStack'.");
 
-	// push view pointer foreward
+	// push view pointer forward
 	pCurrentView++;
 	*pCurrentView = pCurrentView[-1];
 }

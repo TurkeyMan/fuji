@@ -94,7 +94,7 @@ void MFSound_DeinitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
-	// cleanup?
+	pspAudioEnd();
 }
 
 void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)

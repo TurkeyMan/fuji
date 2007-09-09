@@ -41,8 +41,6 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	}
 
 	pFile->pFilesysData = (void*)hFile;
-	pFile->state = MFFS_Ready;
-	pFile->operation = MFFO_None;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
@@ -51,7 +49,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	// TODO: something's very wrong with this line! :/
 //	MFDebug_Assert(fileSize < 2147483648LL, MFStr("Error opening file '%s', Fuji does not support files larger than 2,147,483,647 bytes.", pFilename));
-	pFile->length = (int)fileSize;
+	pFile->length = (int64)fileSize;
 
 	// return to start of file
 	sceIoLseek32(hFile, 0, SEEK_SET);
@@ -72,34 +70,30 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
-	int bytesRead;
+	int64 bytesRead;
 	bytesRead = sceIoRead((SceUID)fileHandle->pFilesysData, pBuffer, bytes);
-	fileHandle->offset += (uint32)bytesRead;
+	fileHandle->offset += bytesRead;
 
 	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(async == false, "Asynchronous Filesystem not yet supported...");
-
-	int bytesWritten;
+	int64 bytesWritten;
 	bytesWritten = sceIoWrite((SceUID)fileHandle->pFilesysData, pBuffer, bytes);
-	fileHandle->offset += (uint32)bytesWritten;
-	fileHandle->length = MFMax(fileHandle->offset, (uint32)fileHandle->length);
+	fileHandle->offset += bytesWritten;
+	fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
 
 	return bytesWritten;
 }
 
-int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
@@ -121,23 +115,8 @@ int MFFileNative_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 	}
 
 	SceOff newPos = sceIoLseek((SceUID)fileHandle->pFilesysData, bytes, method);
-	fileHandle->offset = (uint32)newPos;
+	fileHandle->offset = (int64)newPos;
 	return newPos;
-}
-
-int MFFileNative_Tell(MFFile* fileHandle)
-{
-	return fileHandle->offset;
-}
-
-MFFileState MFFileNative_Query(MFFile* fileHandle)
-{
-	return fileHandle->state;
-}
-
-int MFFileNative_GetSize(MFFile* fileHandle)
-{
-	return fileHandle->length;
 }
 
 uint32 MFFileNative_GetSize(const char* pFilename)

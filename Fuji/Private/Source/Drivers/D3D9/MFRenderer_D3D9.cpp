@@ -213,6 +213,8 @@ void MFRenderer_ResetDisplay()
 		case D3DERR_INVALIDCALL:
 			MessageBox(0, "Reset: D3DERR_INVALIDCALL", "Error!", MB_OK|MB_ICONERROR);
 			break;
+		case D3D_OK:
+			MFRenderer_ResetViewport();
 	}
 }
 

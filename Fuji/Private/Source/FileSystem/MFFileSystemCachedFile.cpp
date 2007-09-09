@@ -71,7 +71,7 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	{
 		pCacheData->buckets[0].pData = pCacheData->pCache;
 		pCacheData->buckets[0].size = (int)baseFileSize;
-		pCacheData->buckets[0].fileOffset = 0x7FFFFFFFFFFFFFFF;
+		pCacheData->buckets[0].fileOffset = 0x7FFFFFFFFFFFFFFFLL;
 	}
 	else
 	{
@@ -81,7 +81,7 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 		{
 			pCacheData->buckets[a].pData = pCacheData->pCache + a*bucketSize;
 			pCacheData->buckets[a].size = bucketSize;
-			pCacheData->buckets[a].fileOffset = 0x7FFFFFFFFFFFFFFF;
+			pCacheData->buckets[a].fileOffset = 0x7FFFFFFFFFFFFFFFLL;
 		}
 	}
 

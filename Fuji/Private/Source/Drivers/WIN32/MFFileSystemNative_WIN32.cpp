@@ -126,7 +126,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 	if(newPos == INVALID_SET_FILE_POINTER)
 		return -1;
 
-	bytes = (bytes & 0xFFFFFFFF00000000) | newPos;
+	bytes = (bytes & 0xFFFFFFFF00000000LL) | (int64)newPos;
 	fileHandle->offset = bytes;
 	return (int)bytes;
 }

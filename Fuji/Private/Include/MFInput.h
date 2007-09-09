@@ -386,7 +386,7 @@ enum MFMouseButton
 	Mouse_RightButton,	/**< Right mouse button */
 	Mouse_MiddleButton,	/**< Middle mouse button */
 	Mouse_Extra1,		/**< Extra mouse button 1 (often maps to 'back') */
-	Mouse_Extra2,		/**< Extra mouse button 2 (often maps to 'foreward') */
+	Mouse_Extra2,		/**< Extra mouse button 2 (often maps to 'forward') */
 	Mouse_Extra3,		/**< Extra mouse button 3 */
 	Mouse_Extra4,		/**< Extra mouse button 4 */
 	Mouse_Extra5,		/**< Extra mouse button 5 */
@@ -555,7 +555,7 @@ enum MFKeyboardButton
 
 	Key_WebBack,		// on multimedia keyboards
 	Key_WebFavorites,	// on multimedia keyboards
-	Key_WebForeward,	// on multimedia keyboards
+	Key_WebForward,		// on multimedia keyboards
 	Key_WebHome,		// on multimedia keyboards
 	Key_WebRefresh,		// on multimedia keyboards
 	Key_WebSearch,		// on multimedia keyboards

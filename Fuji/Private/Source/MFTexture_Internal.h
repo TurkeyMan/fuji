@@ -26,7 +26,7 @@ enum MFDisplayDrivers
 	MFDD_ForceInt = 0x7FFFFFFF
 };
 
-// foreward declarations
+// forward declarations
 struct MFTexture;
 struct MFTextureSurfaceLevel;
 

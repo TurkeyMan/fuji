@@ -36,7 +36,7 @@
 #endif
 
 
-/**** Foreward Declarations ****/
+/**** Forward Declarations ****/
 
 void MFSound_FillBuffer(MFAudioStream *pStream, int bytes);
 void MFSound_ServiceStreamBuffer(MFAudioStream *pStream);

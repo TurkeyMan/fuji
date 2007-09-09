@@ -56,11 +56,8 @@ struct MFJob
 	{
 		struct Open
 		{
-			union
-			{
-				MFOpenData openData;
-				char buffer[64];
-			};
+			MFOpenData openData;
+			char buffer[64 - sizeof(MFOpenData)];
 		} open;
 		struct Read
 		{
@@ -91,7 +88,7 @@ struct MFJob
 			void *pBuffer;
 			int64 size;
 		} save;
-	};
+	} data;
 	volatile MFJobState status;
 	int completion;
 };

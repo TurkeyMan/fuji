@@ -5,7 +5,7 @@
 
 #define MFInput_MaxInputID	16
 
-// foreward declarations
+// forward declarations
 struct MFDeviceStatus;
 
 struct MFGamepadState;

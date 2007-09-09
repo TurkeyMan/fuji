@@ -545,7 +545,7 @@ uint16 MFKeyToXK[256] =
 
 	0,//Key_WebBack,		// on multimedia keyboards
 	0,//Key_WebFavorites,	// on multimedia keyboards
-	0,//Key_WebForeward,	// on multimedia keyboards
+	0,//Key_WebForward,	// on multimedia keyboards
 	0,//Key_WebHome,		// on multimedia keyboards
 	0,//Key_WebRefresh,		// on multimedia keyboards
 	0,//Key_WebSearch,		// on multimedia keyboards

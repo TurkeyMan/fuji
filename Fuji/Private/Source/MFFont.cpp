@@ -65,7 +65,7 @@ struct CharHistory
 static CharHistory gCharHistory[256];
 
 
-// foreward declarations
+// forward declarations
 
 float MFFont_GetStringWidthW(MFFont *pFont, const uint16 *pText, float height, float lineWidth, int maxLen, float *pTotalHeight);
 float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const uint16 *pText, int maxChars, const MFMatrix &ltw);

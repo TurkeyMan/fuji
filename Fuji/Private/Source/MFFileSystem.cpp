@@ -97,22 +97,22 @@ int MKFileJobThread(void *pData)
 				pJob->status = MFJS_Finished;
 				goto exit;
 			case MFFJ_Open:
-				pJob->result = pFS->callbacks.Open(pJob->pFile, &pJob->open.openData);
+				pJob->result = pFS->callbacks.Open(pJob->pFile, &pJob->data.open.openData);
 				break;
 			case MFFJ_Close:
 				pJob->result = pFS->callbacks.Close(pJob->pFile);
 				break;
 			case MFFJ_Read:
-				pJob->result = pFS->callbacks.Read(pFile, pJob->read.pBuffer, pJob->read.bytes);
+				pJob->result = pFS->callbacks.Read(pFile, pJob->data.read.pBuffer, pJob->data.read.bytes);
 //				pFile->offset += pJob->result;
 				break;
 			case MFFJ_Write:
-				pJob->result = pFS->callbacks.Write(pFile, pJob->write.pBuffer, pJob->write.bytes);
+				pJob->result = pFS->callbacks.Write(pFile, pJob->data.write.pBuffer, pJob->data.write.bytes);
 //				pFile->offset += pJob->result;
 //				pFile->length = MFMax(pFile->length, pFile->offset);
 				break;
 			case MFFJ_Seek:
-				pJob->result = pFS->callbacks.Seek(pJob->pFile, pJob->seek.bytes, pJob->seek.whence);
+				pJob->result = pFS->callbacks.Seek(pJob->pFile, pJob->data.seek.bytes, pJob->data.seek.whence);
 //				if(pJob->result > -1)
 //					pFile->offset = pJob->result;
 				break;
@@ -131,6 +131,8 @@ int MKFileJobThread(void *pData)
 				break;
 			}
 			case MFFJ_Save:
+				break;
+			default:
 				break;
 		}
 

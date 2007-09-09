@@ -298,7 +298,7 @@ MFMatrix& MFMatrix::LookAt(const MFVector& pos, const MFVector& at, const MFVect
 	MFVector &zAxis = *(MFVector*)&m[8];
 	MFVector &trans = *(MFVector*)&m[12];
 
-	// calculate forewards
+	// calculate forwards
 	zAxis.Normalise3(at-pos);
 
 	// calculate right

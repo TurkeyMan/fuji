@@ -48,7 +48,7 @@ Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = DebugMenu_Ge
 class MenuObject
 {
 public:
-	virtual ~MenuObject() {}
+	virtual ~MenuObject() { }
 
 	// when selected as current menu
 	virtual void Draw();

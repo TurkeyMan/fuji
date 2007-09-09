@@ -212,7 +212,7 @@ static const char * const gKeyNames[] =
 
 	"WebBack",		// on multimedia keyboards
 	"WebFavorites",	// on multimedia keyboards
-	"WebForeward",	// on multimedia keyboards
+	"WebForward",	// on multimedia keyboards
 	"WebHome",		// on multimedia keyboards
 	"WebRefresh",	// on multimedia keyboards
 	"WebSearch",	// on multimedia keyboards
