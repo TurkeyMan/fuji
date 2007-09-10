@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 #include "ReadMEMD2.h"
 
 #include "MFFileSystem.h"
@@ -30,7 +30,7 @@ void CalcNormTable()
 	}
 }
 
-int F3DFile::ReadMEMD2(char *pFilename)
+int F3DFile::ReadMEMD2(const char *pFilename)
 {
 	pModel = this;
 

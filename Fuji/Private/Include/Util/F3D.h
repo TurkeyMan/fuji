@@ -323,17 +323,17 @@ public:
 class F3DFile
 {
 public:
-	int ReadF3D(char *pFilename);
-	int ReadF3DFromMemory(char *pMemory);
-	int ReadASE(char *pFilename);
+	int ReadF3D(const char *pFilename);
+	int ReadF3DFromMemory(const char *pMemory);
+	int ReadASE(const char *pFilename);
 	int ReadOBJ(const char *pFilename);
-	int ReadDAE(char *pFilename);
-	int ReadX(char *pFilename);
-	int ReadMD2(char *pFilename);
-	int ReadMD3(char *pFilename);
-	int ReadMEMD2(char *pFilename);
+	int ReadDAE(const char *pFilename);
+	int ReadX(const char *pFilename);
+	int ReadMD2(const char *pFilename);
+	int ReadMD3(const char *pFilename);
+	int ReadMEMD2(const char *pFilename);
 
-	void WriteF3D(char *pFilename);
+	void WriteF3D(const char *pFilename);
 	void *CreateMDL(uint32 *pSize, MFPlatform platform);
 	void *CreateANM(uint32 *pSize, MFPlatform platform);
 

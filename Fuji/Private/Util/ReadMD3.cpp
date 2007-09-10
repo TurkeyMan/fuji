@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 #include "zlib.h"
 #include "zlib.h"
@@ -244,7 +244,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 	}
 }
 
-int F3DFile::ReadMD3(char *pFilename)
+int F3DFile::ReadMD3(const char *pFilename)
 {
 	pModel = this;
 

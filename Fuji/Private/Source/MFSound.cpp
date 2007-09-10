@@ -15,9 +15,14 @@
 #endif
 
 #if defined(_PSP)
+	#define PSPAUDIOCODEC_MP3_STREAM
+	#define PSPAUDIOCODEC_AAC_STREAM
+	#define PSPAUDIOCODEC_AT3_STREAM
+	#define PSPAUDIOCODEC_AA3_STREAM
 	#define VORBIS_STREAM
 //	#define VORBIS_TREMOR
 #endif
+
 
 #if defined(VORBIS_STREAM)
 	#if defined(VORBIS_TREMOR)
@@ -35,6 +40,13 @@
 	void MFSound_RegisterMAD();
 #endif
 
+#if defined(PSPAUDIOCODEC_MP3_STREAM) || defined(PSPAUDIOCODEC_AAC_STREAM) || \
+	defined(PSPAUDIOCODEC_AT3_STREAM) || defined(PSPAUDIOCODEC_AA3_STREAM)
+	#include <pspsdk.h>
+	#include <pspaudiocodec.h>
+	#include <pspaudio.h>
+	#include <pspmpeg.h>
+#endif
 
 /**** Forward Declarations ****/
 
@@ -81,6 +93,16 @@ void MFSound_InitModule()
 #endif
 #if defined(MAD_STREAM)
 	MFSound_RegisterMAD();
+#endif
+
+#if defined(PSPAUDIOCODEC_MP3_STREAM) || defined(PSPAUDIOCODEC_AAC_STREAM)
+   int result = pspSdkLoadStartModule("flash0:/kd/me_for_vsh.prx", PSP_MEMORY_PARTITION_KERNEL);
+   result = pspSdkLoadStartModule("flash0:/kd/videocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+   result = pspSdkLoadStartModule("flash0:/kd/audiocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+   result = pspSdkLoadStartModule("flash0:/kd/mpegbase.prx", PSP_MEMORY_PARTITION_KERNEL);
+   result = pspSdkLoadStartModule("flash0:/kd/mpeg_vsh.prx", PSP_MEMORY_PARTITION_USER);
+   pspSdkFixupImports(result);
+   sceMpegInit();
 #endif
 
 #if !defined(_RETAIL)
@@ -1019,6 +1041,661 @@ void MFSound_RegisterMAD()
 	callbacks.pSeekStream = SeekMADStream;
 
 	MFSound_RegisterStreamHandler("MP3 Audio (MAD)", ".mp3", &callbacks);
+}
+#endif
+
+
+
+#if defined(PSPAUDIOCODEC_MP3_STREAM)
+
+///////////////////////////////////
+
+// If you're targeting 3.xx firmware, you should be able to use sceUtilityLoadAvModule() to get at the audio/video decoders from user mode.
+// I personally avoid ATRAC3, but here's how I set up for AVC decoding to work on both 1.50 (psplink) and 3.40 OE-A:
+
+Code:
+int loadav_ok = 0;
+int32_t firmware_version = sceKernelDevkitVersion();
+if (firmware_version >= 0x02070000) {
+    loadav_ok = 1;
+    res = sceUtilityLoadAvModule(0);
+    if (res < 0) {
+        loadav_ok = 0;
+    }
+    if (loadav_ok) {
+        res = sceUtilityLoadAvModule(3);
+        if (res < 0) {
+            sceUtilityUnloadAvModule(0);
+            loadav_ok = 0;
+        }
+    }
+}
+if (!loadav_ok) {
+    res = load_start_module("flash0:/kd/audiocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+    if (res < 0 && res != SCE_KERNEL_ERROR_EXCLUSIVE_LOAD) {
+        return NULL;
+    }
+    res = load_start_module("flash0:/kd/videocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+    if (res < 0 && res != SCE_KERNEL_ERROR_EXCLUSIVE_LOAD) {
+        return NULL;
+    }
+    res = load_start_module("flash0:/kd/mpegbase.prx", PSP_MEMORY_PARTITION_KERNEL);
+    if (res < 0 && res != SCE_KERNEL_ERROR_EXCLUSIVE_LOAD) {
+        return NULL;
+    }
+    res = load_start_module("flash0:/kd/mpeg_vsh.prx", PSP_MEMORY_PARTITION_USER);
+    if (res < 0 && res != SCE_KERNEL_ERROR_EXCLUSIVE_LOAD) {
+        return NULL;
+    }
+}
+
+
+// (Note--load_start_module() is an internal routine of mine that loads and starts the given module; it's essentially a streamlined version of pspSdkLoadStartModule(), but the latter should work just as well.)
+
+
+ //////////////////////////////////////////////////
+
+
+
+
+
+SceCtrlData input;
+
+static int bitrates[] = {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
+
+unsigned long mp3_codec_buffer[65] __attribute__((aligned(64)));
+short mp3_mix_buffer[1152 * 2] __attribute__((aligned(64)));
+
+SceUID mp3_handle;
+u8* mp3_data_buffer;
+u16 mp3_data_align;
+u32 mp3_sample_per_frame;
+u16 mp3_channel_mode;
+u32 mp3_data_start;
+u32 mp3_data_size;
+u8 mp3_getEDRAM;
+u32 mp3_channels;
+u32 mp3_samplerate;
+
+int main(void)
+{
+   mp3_handle = sceIoOpen("ms0:/Test.MP3", PSP_O_RDONLY, 0777);
+   if (  ! mp3_handle )
+      goto wait;
+   
+   mp3_channels = 2;
+   mp3_samplerate = 44100; //this is mp3 file's samplerate, also can be 48000,....
+   mp3_sample_per_frame = 1152;
+   
+   mp3_data_start = sceIoLseek32(mp3_handle, 0, PSP_SEEK_CUR);
+   
+   memset(mp3_codec_buffer, 0, sizeof(mp3_codec_buffer));
+   
+   if ( sceAudiocodecCheckNeedMem(mp3_codec_buffer, 0x1002) < 0 )
+      goto wait;
+   if ( sceAudiocodecGetEDRAM(mp3_codec_buffer, 0x1002) < 0 )
+         goto wait;
+   mp3_getEDRAM = 1;
+   
+   if ( sceAudiocodecInit(mp3_codec_buffer, 0x1002) < 0 )
+      goto wait;
+   
+   int eof = 0;   
+   while( !eof )
+   {
+      int samplesdecoded;
+      memset(mp3_mix_buffer, 0, mp3_sample_per_frame*2*2);
+      unsigned char mp3_header_buf[4];
+      if ( sceIoRead( mp3_handle, mp3_header_buf, 4 ) != 4 ) {
+         eof = 1;
+         continue;
+      }
+      int mp3_header = mp3_header_buf[0];
+      mp3_header = (mp3_header<<8) | mp3_header_buf[1];
+      mp3_header = (mp3_header<<8) | mp3_header_buf[2];
+      mp3_header = (mp3_header<<8) | mp3_header_buf[3];
+      
+      int bitrate = (mp3_header & 0xf000) >> 12;
+      int padding = (mp3_header & 0x200) >> 9;
+      
+      int frame_size = 144000*bitrates[bitrate]/mp3_samplerate + padding;
+      
+      if ( mp3_data_buffer )
+         free(mp3_data_buffer);
+      mp3_data_buffer = (u8*)memalign(64, frame_size);
+      
+      sceIoLseek32(mp3_handle, mp3_data_start, PSP_SEEK_SET); //seek back
+      
+      if ( sceIoRead( mp3_handle, mp3_data_buffer, frame_size ) != frame_size )
+	  {
+         eof = 1;
+         continue;
+      }
+      
+      mp3_data_start += frame_size;
+      
+      mp3_codec_buffer[6] = (unsigned long)mp3_data_buffer;
+      mp3_codec_buffer[8] = (unsigned long)mp3_mix_buffer;
+      
+      mp3_codec_buffer[7] = mp3_codec_buffer[10] = frame_size;
+      mp3_codec_buffer[9] = mp3_sample_per_frame * 4;
+   
+      int res = sceAudiocodecDecode(mp3_codec_buffer, 0x1002);
+      if ( res < 0 )
+	  {
+         eof = 1;
+         continue;
+      }
+      samplesdecoded = mp3_sample_per_frame;
+   }
+
+wait:
+   
+   if ( mp3_handle )
+      sceIoClose(mp3_handle);
+   if ( mp3_data_buffer)
+      free(mp3_data_buffer);
+   if ( mp3_getEDRAM )
+      sceAudiocodecReleaseEDRAM(mp3_codec_buffer);
+   
+   sceCtrlReadBufferPositive(&input, 1);
+   while(!(input.Buttons & PSP_CTRL_TRIANGLE))
+   {
+      sceKernelDelayThread(10000);   // wait 10 milliseconds
+      sceCtrlReadBufferPositive(&input, 1);
+   }
+   
+   sceKernelExitGame();
+   return 0;
+}
+#endif
+
+#if defined(PSPAUDIOCODEC_AAC_STREAM)
+SceCtrlData input;
+
+static int bitrates[] = {0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
+
+unsigned long aac_codec_buffer[65] __attribute__((aligned(64)));
+short aac_mix_buffer[1024 * 2] __attribute__((aligned(64)));
+
+SceUID aac_handle;
+u8* aac_data_buffer;
+u16 aac_data_align;
+u32 aac_sample_per_frame;
+u16 aac_channel_mode;
+u32 aac_data_start;
+u32 aac_data_size;
+u8 aac_getEDRAM;
+u32 aac_channels;
+u32 aac_samplerate;
+
+int main(void)
+{
+   aac_handle = sceIoOpen("ms0:/Test.AAC", PSP_O_RDONLY, 0777);
+   if (  ! aac_handle )
+      goto wait;
+   
+   aac_channels = 2;
+   aac_samplerate = 44100; //this is aac file's samplerate, also can be 48000,....
+   aac_sample_per_frame = 1024;
+   
+   aac_data_start = sceIoLseek32(aac_handle, 0, PSP_SEEK_CUR);
+   
+   memset(aac_codec_buffer, 0, sizeof(aac_codec_buffer));
+   
+   if ( sceAudiocodecCheckNeedMem(aac_codec_buffer, 0x1003) < 0 )
+      goto wait;
+   if ( sceAudiocodecGetEDRAM(aac_codec_buffer, 0x1003) < 0 )
+         goto wait;
+   aac_getEDRAM = 1;
+   
+   aac_codec_buffer[10] = aac_samplerate;
+   if ( sceAudiocodecInit(aac_codec_buffer, 0x1003) < 0 )
+      goto wait;
+   
+   int eof = 0;   
+   while( !eof )
+   {
+      int samplesdecoded;
+      memset(aac_mix_buffer, 0, aac_sample_per_frame*2*2);
+      unsigned char aac_header_buf[7];
+      if ( sceIoRead( aac_handle, aac_header_buf, 7 ) != 7 )
+	  {
+         eof = 1;
+         continue;
+      }
+      int aac_header = aac_header_buf[3];
+      aac_header = (aac_header<<8) | aac_header_buf[4];
+      aac_header = (aac_header<<8) | aac_header_buf[5];
+      aac_header = (aac_header<<8) | aac_header_buf[6];
+      
+      int frame_size = aac_header & 67100672;
+      frame_size = frame_size >> 13;
+      frame_size = frame_size - 7;
+      
+      if ( aac_data_buffer )
+         free(aac_data_buffer);
+      aac_data_buffer = (u8*)memalign(64, frame_size);
+      
+      if ( sceIoRead( aac_handle, aac_data_buffer, frame_size ) != frame_size )
+	  {
+         eof = 1;
+         continue;
+      }
+      
+      aac_data_start += (frame_size+7);
+      
+      aac_codec_buffer[6] = (unsigned long)aac_data_buffer;
+      aac_codec_buffer[8] = (unsigned long)aac_mix_buffer;
+      
+      aac_codec_buffer[7] = frame_size;
+      aac_codec_buffer[9] = aac_sample_per_frame * 4;
+      
+   
+      int res = sceAudiocodecDecode(aac_codec_buffer, 0x1003);
+      if ( res < 0 )
+	  {
+         eof = 1;
+         continue;
+      }
+      samplesdecoded = aac_sample_per_frame;
+   }
+
+wait:
+   
+   if ( aac_handle )
+      sceIoClose(aac_handle);
+   if ( aac_data_buffer)
+      free(aac_data_buffer);
+   if ( aac_getEDRAM )
+      sceAudiocodecReleaseEDRAM(aac_codec_buffer);
+   
+   sceCtrlReadBufferPositive(&input, 1);
+   while(!(input.Buttons & PSP_CTRL_TRIANGLE))
+   {
+      sceKernelDelayThread(10000);   // wait 10 milliseconds
+      sceCtrlReadBufferPositive(&input, 1);
+   }
+   
+   sceKernelExitGame();
+   return 0;
+}
+#endif
+
+#if 0
+
+AT3 file decode:
+Code:
+
+SceCtrlData input;
+
+#define TYPE_ATRAC3 0x270
+#define TYPE_ATRAC3PLUS 0xFFFE
+
+unsigned long at3_codec_buffer[65] __attribute__((aligned(64)));
+short at3_mix_buffer[2048 * 2] __attribute__((aligned(64)));
+
+
+SceUID at3_handle;
+u16 at3_type;
+u8* at3_data_buffer;
+u16 at3_data_align;
+u32 at3_sample_per_frame;
+u16 at3_channel_mode;
+u8 at3_at3plus_flagdata[2];
+u32 at3_data_start;
+u32 at3_data_size;
+u8 at3_getEDRAM;
+u32 at3_channels;
+u32 at3_samplerate;
+
+
+int main(void)
+{
+   SetupCallbacks();
+   
+   int result = pspSdkLoadStartModule("flash0:/kd/audiocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+   pspSdkFixupImports(result);
+   
+   SceUID at3_handle = sceIoOpen("ms0:/Test.AT3", PSP_O_RDONLY, 0777);
+   if (  ! at3_handle )
+      goto wait;
+   
+   u32 riff_header[2];
+   if ( sceIoRead( at3_handle, riff_header, 8 ) != 8 )
+      goto wait;
+   if ( riff_header[0] != 0x46464952 )
+      goto wait;
+   u32 wavefmt_header[3];
+   if ( sceIoRead( at3_handle, wavefmt_header, 12 ) != 12 )
+      goto wait;
+   if ( wavefmt_header[0] != 0x45564157 || wavefmt_header[1] != 0x20746D66 )
+      goto wait;
+   u8* wavefmt_data = (u8*)malloc(wavefmt_header[2]);
+   if ( wavefmt_data == NULL )
+      goto wait;
+   if ( sceIoRead( at3_handle, wavefmt_data, wavefmt_header[2] ) != wavefmt_header[2] ) {
+      free(wavefmt_data);
+      goto wait;
+   }
+   at3_type = *((u16*)wavefmt_data);
+   at3_channels = *((u16*)(wavefmt_data+2));
+   at3_samplerate = *((u32*)(wavefmt_data+4));
+   at3_data_align = *((u16*)(wavefmt_data+12));
+   
+   if ( at3_type == TYPE_ATRAC3PLUS) {
+      at3_at3plus_flagdata[0] = wavefmt_data[42];
+      at3_at3plus_flagdata[1] = wavefmt_data[43];
+   }
+   
+   free(wavefmt_data);
+   
+   u32 data_header[2];
+   if ( sceIoRead( at3_handle, data_header, 8 ) != 8 )
+      goto wait;
+   while(data_header[0] != 0x61746164 ) {
+      sceIoLseek32(at3_handle, data_header[1], PSP_SEEK_CUR);
+      if ( sceIoRead( at3_handle, data_header, 8 ) != 8 )
+         goto wait;
+   }
+   
+   at3_data_start = sceIoLseek32(at3_handle, 0, PSP_SEEK_CUR);
+   at3_data_size = data_header[1];
+   
+   if ( at3_data_size % at3_data_align != 0 )
+      goto wait;
+   
+   memset(at3_codec_buffer, 0, sizeof(at3_codec_buffer));
+   
+   if ( at3_type == TYPE_ATRAC3 ) {
+      at3_channel_mode = 0x0;
+      if ( at3_data_align == 0xC0 ) // atract3 have 3 bitrate, 132k,105k,66k, 132k align=0x180, 105k align = 0x130, 66k align = 0xc0
+         at3_channel_mode = 0x1;
+      at3_sample_per_frame = 1024;
+      at3_data_buffer = (u8*)memalign(64, 0x180);
+      if ( at3_data_buffer == NULL)
+         goto wait;
+      at3_codec_buffer[26] = 0x20;
+      if ( sceAudiocodecCheckNeedMem(at3_codec_buffer, 0x1001) < 0 )
+         goto wait;
+      if ( sceAudiocodecGetEDRAM(at3_codec_buffer, 0x1001) < 0 )
+         goto wait;
+      at3_getEDRAM = 1;
+      at3_codec_buffer[10] = 4;
+      at3_codec_buffer[44] = 2;
+      if ( at3_data_align == 0x130 )
+         at3_codec_buffer[10] = 6;
+      if ( sceAudiocodecInit(at3_codec_buffer, 0x1001) < 0 ) {
+         goto wait;
+      }
+   }
+   else if ( at3_type == TYPE_ATRAC3PLUS ) {
+      at3_sample_per_frame = 2048;
+      int temp_size = at3_data_align+8;
+      int mod_64 = temp_size & 0x3f;
+      if (mod_64 != 0) temp_size += 64 - mod_64;
+      at3_data_buffer = (u8*)memalign(64, temp_size);
+      if ( at3_data_buffer == NULL)
+         goto wait;
+      at3_codec_buffer[5] = 0x1;
+      at3_codec_buffer[10] = at3_at3plus_flagdata[1];
+      at3_codec_buffer[10] = (at3_codec_buffer[10] << 8 ) | at3_at3plus_flagdata[0];
+      at3_codec_buffer[12] = 0x1;
+      at3_codec_buffer[14] = 0x1;
+      if ( sceAudiocodecCheckNeedMem(at3_codec_buffer, 0x1000) < 0 )
+         goto wait;
+      if ( sceAudiocodecGetEDRAM(at3_codec_buffer, 0x1000) < 0 )
+         goto wait;
+      at3_getEDRAM = 1;
+      if ( sceAudiocodecInit(at3_codec_buffer, 0x1000) < 0 ) {
+         goto wait;
+      }
+   }
+   else
+      goto wait;
+   
+   int eof = 0;   
+   while( !eof ) {
+      int samplesdecoded;
+      memset(at3_mix_buffer, 0, 2048*2*2);
+      unsigned long decode_type = 0x1001;
+      if ( at3_type == TYPE_ATRAC3 ) {
+         memset( at3_data_buffer, 0, 0x180);
+         if (sceIoRead( at3_handle, at3_data_buffer, at3_data_align ) != at3_data_align) {
+            eof = 1;
+            continue;
+         }
+         if ( at3_channel_mode ) {
+            memcpy(at3_data_buffer+at3_data_align, at3_data_buffer, at3_data_align);
+         }
+         decode_type = 0x1001;
+      }
+      else {
+         memset( at3_data_buffer, 0, at3_data_align+8);
+         at3_data_buffer[0] = 0x0F;
+         at3_data_buffer[1] = 0xD0;
+         at3_data_buffer[2] = at3_at3plus_flagdata[0];
+         at3_data_buffer[3] = at3_at3plus_flagdata[1];
+         if (sceIoRead( at3_handle, at3_data_buffer+8, at3_data_align ) != at3_data_align) {
+            eof = 1;
+            continue;
+         }
+         decode_type = 0x1000;
+      }
+   
+      at3_codec_buffer[6] = (unsigned long)at3_data_buffer;
+      at3_codec_buffer[8] = (unsigned long)at3_mix_buffer;
+   
+      int res = sceAudiocodecDecode(at3_codec_buffer, decode_type);
+      if ( res < 0 ) {
+         eof = 1;
+         continue;
+      }
+      samplesdecoded = at3_sample_per_frame;
+   }
+
+wait:
+   
+   if ( at3_handle ) {
+      sceIoClose(at3_handle);
+   }
+   if ( at3_data_buffer) {
+      free(at3_data_buffer);
+   }
+   if ( at3_getEDRAM ) {
+      sceAudiocodecReleaseEDRAM(at3_codec_buffer);
+   }
+   
+   sceCtrlReadBufferPositive(&input, 1);
+   while(!(input.Buttons & PSP_CTRL_TRIANGLE))
+   {
+      sceKernelDelayThread(10000);   // wait 10 milliseconds
+      sceCtrlReadBufferPositive(&input, 1);
+   }
+   
+   sceKernelExitGame();
+   return 0;
+}
+
+
+AA3 file decode:
+Code:
+
+SceCtrlData input;
+
+#define TYPE_ATRAC3 0x270
+#define TYPE_ATRAC3PLUS 0xFFFE
+
+unsigned long aa3_codec_buffer[65] __attribute__((aligned(64)));
+short aa3_mix_buffer[2048 * 2] __attribute__((aligned(64)));
+
+
+SceUID aa3_handle;
+u16 aa3_type;
+u8* aa3_data_buffer;
+u16 aa3_data_align;
+u32 aa3_sample_per_frame;
+u16 aa3_channel_mode;
+u8 aa3_at3plus_flagdata[2];
+u32 aa3_data_start;
+u32 aa3_data_size;
+u8 aa3_getEDRAM;
+u32 aa3_channels;
+u32 aa3_samplerate;
+
+
+int main(void)
+{
+   SetupCallbacks();
+   
+   int result = pspSdkLoadStartModule("flash0:/kd/audiocodec.prx", PSP_MEMORY_PARTITION_KERNEL);
+   pspSdkFixupImports(result);
+   
+   SceUID aa3_handle = sceIoOpen("ms0:/Test.AA3", PSP_O_RDONLY, 0777); // or ms0:/Test.OMA
+   if (  ! aa3_handle )
+      goto wait;
+   
+   sceIoLseek32(aa3_handle, 0x0C00, PSP_SEEK_SET);
+   
+   u8 ea3_header[0x60];
+   if ( sceIoRead( aa3_handle, ea3_header, 0x60 ) != 0x60 )
+      goto wait;
+   if ( ea3_header[0] != 0x45 || ea3_header[1] != 0x41 || ea3_header[2] != 0x33 || ea3_header[3] != 0x01 )
+      goto wait;
+   
+   aa3_at3plus_flagdata[0] = ea3_header[0x22];
+   aa3_at3plus_flagdata[1] = ea3_header[0x23];
+   
+   aa3_type = (ea3_header[0x22] == 0x20) ? TYPE_ATRAC3 : ((ea3_header[0x22] == 0x28) ? TYPE_ATRAC3PLUS : 0x0);
+   
+   if ( aa3_type != TYPE_ATRAC3 && aa3_type != TYPE_ATRAC3PLUS )
+      goto wait;
+   
+   aa3_channels = 2;
+   aa3_samplerate = 44100;
+   if ( aa3_type == TYPE_ATRAC3 )
+      aa3_data_align = ea3_header[0x23]*8;
+   else
+      aa3_data_align = (ea3_header[0x23]+1)*8;
+   
+   aa3_data_start = 0x0C60;
+   aa3_data_size = sceIoLseek32(aa3_handle, 0, PSP_SEEK_END) - aa3_data_start;
+   
+   if ( aa3_data_size % aa3_data_align != 0 )
+      goto wait;
+   
+   sceIoLseek32(aa3_handle, aa3_data_start, PSP_SEEK_SET);
+   
+   memset(aa3_codec_buffer, 0, sizeof(aa3_codec_buffer));
+   
+   if ( aa3_type == TYPE_ATRAC3 ) {
+      aa3_channel_mode = 0x0;
+      if ( aa3_data_align == 0xC0 ) // atract3 have 3 bitrate, 132k,105k,66k, 132k align=0x180, 105k align = 0x130, 66k align = 0xc0
+         aa3_channel_mode = 0x1;
+      aa3_sample_per_frame = 1024;
+      aa3_data_buffer = (u8*)memalign(64, 0x180);
+      if ( aa3_data_buffer == NULL)
+         goto wait;
+      aa3_codec_buffer[26] = 0x20;
+      if ( sceAudiocodecCheckNeedMem(aa3_codec_buffer, 0x1001) < 0 )
+         goto wait;
+      if ( sceAudiocodecGetEDRAM(aa3_codec_buffer, 0x1001) < 0 )
+         goto wait;
+      aa3_getEDRAM = 1;
+      aa3_codec_buffer[10] = 4;
+      aa3_codec_buffer[44] = 2;
+      if ( aa3_data_align == 0x130 )
+         aa3_codec_buffer[10] = 6;
+      if ( sceAudiocodecInit(aa3_codec_buffer, 0x1001) < 0 ) {
+         goto wait;
+      }
+   }
+   else if ( aa3_type == TYPE_ATRAC3PLUS ) {
+      aa3_sample_per_frame = 2048;
+      int temp_size = aa3_data_align+8;
+      int mod_64 = temp_size & 0x3f;
+      if (mod_64 != 0) temp_size += 64 - mod_64;
+      aa3_data_buffer = (u8*)memalign(64, temp_size);
+      if ( aa3_data_buffer == NULL)
+         goto wait;
+      aa3_codec_buffer[5] = 0x1;
+      aa3_codec_buffer[10] = aa3_at3plus_flagdata[1];
+      aa3_codec_buffer[10] = (aa3_codec_buffer[10] << 8 ) | aa3_at3plus_flagdata[0];
+      aa3_codec_buffer[12] = 0x1;
+      aa3_codec_buffer[14] = 0x1;
+      if ( sceAudiocodecCheckNeedMem(aa3_codec_buffer, 0x1000) < 0 )
+         goto wait;
+      if ( sceAudiocodecGetEDRAM(aa3_codec_buffer, 0x1000) < 0 )
+         goto wait;
+      aa3_getEDRAM = 1;
+      if ( sceAudiocodecInit(aa3_codec_buffer, 0x1000) < 0 ) {
+         goto wait;
+      }
+   }
+   else
+      goto wait;
+   
+   int eof = 0;   
+   while( !eof ) {
+      int samplesdecoded;
+      memset(aa3_mix_buffer, 0, 2048*2*2);
+      unsigned long decode_type = 0x1001;
+      if ( aa3_type == TYPE_ATRAC3 ) {
+         memset( aa3_data_buffer, 0, 0x180);
+         if (sceIoRead( aa3_handle, aa3_data_buffer, aa3_data_align ) != aa3_data_align) {
+            eof = 1;
+            continue;
+         }
+         if ( aa3_channel_mode ) {
+            memcpy(aa3_data_buffer+aa3_data_align, aa3_data_buffer, aa3_data_align);
+         }
+         decode_type = 0x1001;
+      }
+      else {
+         memset( aa3_data_buffer, 0, aa3_data_align+8);
+         aa3_data_buffer[0] = 0x0F;
+         aa3_data_buffer[1] = 0xD0;
+         aa3_data_buffer[2] = aa3_at3plus_flagdata[0];
+         aa3_data_buffer[3] = aa3_at3plus_flagdata[1];
+         if (sceIoRead( aa3_handle, aa3_data_buffer+8, aa3_data_align ) != aa3_data_align) {
+            eof = 1;
+            continue;
+         }
+         decode_type = 0x1000;
+      }
+   
+      aa3_codec_buffer[6] = (unsigned long)aa3_data_buffer;
+      aa3_codec_buffer[8] = (unsigned long)aa3_mix_buffer;
+   
+      int res = sceAudiocodecDecode(aa3_codec_buffer, decode_type);
+      if ( res < 0 ) {
+         eof = 1;
+         continue;
+      }
+      samplesdecoded = aa3_sample_per_frame;
+   }
+
+wait:
+   
+   if ( aa3_handle ) {
+      sceIoClose(aa3_handle);
+   }
+   if ( aa3_data_buffer) {
+      free(aa3_data_buffer);
+   }
+   if ( aa3_getEDRAM ) {
+      sceAudiocodecReleaseEDRAM(aa3_codec_buffer);
+   }
+   
+   sceCtrlReadBufferPositive(&input, 1);
+   while(!(input.Buttons & PSP_CTRL_TRIANGLE))
+   {
+      sceKernelDelayThread(10000);   // wait 10 milliseconds
+      sceCtrlReadBufferPositive(&input, 1);
+   }
+   
+   sceKernelExitGame();
+   return 0;
 }
 #endif
 

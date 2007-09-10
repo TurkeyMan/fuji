@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 #include "MFFileSystem.h"
 
@@ -839,7 +839,7 @@ void ParseASEFile(char *pFilePtr)
 	}
 }
 
-int F3DFile::ReadASE(char *pFilename)
+int F3DFile::ReadASE(const char *pFilename)
 {
 	pModel = this;
 

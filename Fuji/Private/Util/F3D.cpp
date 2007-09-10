@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFArray.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFString.h"
@@ -36,7 +36,7 @@ void AdjustBoundingSphere(const MFVector &point, MFVector *pSphere)
 	}
 }
 
-int F3DFile::ReadF3D(char *pFilename)
+int F3DFile::ReadF3D(const char *pFilename)
 {
 	char *pFile = MFFileSystem_Load(pFilename);
 	if(!pFile)
@@ -173,7 +173,7 @@ void F3DFile::ExportMaterial(char* &pData, char *pBase)
 	pData += size;
 }
 
-void F3DFile::WriteF3D(char *pFilename)
+void F3DFile::WriteF3D(const char *pFilename)
 {
 	char *pFile;
 	char *pOffset;
@@ -302,7 +302,7 @@ void F3DFile::WriteF3D(char *pFilename)
 	MFHeap_Free(pFile);
 }
 
-int F3DFile::ReadF3DFromMemory(char *pMemory)
+int F3DFile::ReadF3DFromMemory(const char *pMemory)
 {
 	F3DHeader *pHeader = (F3DHeader*)pMemory;
 	F3DChunkDesc *pChunks;
@@ -326,7 +326,7 @@ int F3DFile::ReadF3DFromMemory(char *pMemory)
 				for(int b=0; b<pChunks[a].elementCount; b++)
 				{
 					F3DMesh *pMesh = (F3DMesh*)(pMemory + pChunks[a].pOffset + b*pChunks[a].elementSize);
-					ImportMesh(pMesh, pMemory);
+					ImportMesh(pMesh, (char*)pMemory);
 				}
 			}
 			break;

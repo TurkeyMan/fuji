@@ -865,9 +865,6 @@
 					RelativePath=".\Util\F3D.cpp">
 				</File>
 				<File
-					RelativePath=".\Util\F3D.h">
-				</File>
-				<File
 					RelativePath=".\Util\ReadASE.cpp">
 				</File>
 				<File
@@ -1072,6 +1069,13 @@
 				</File>
 				<File
 					RelativePath=".\Include\FileSystem\MFFileSystemZipFile.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="Util"
+				Filter="">
+				<File
+					RelativePath=".\Include\Util\F3D.h">
 				</File>
 			</Filter>
 		</Filter>

@@ -100,6 +100,8 @@ void loaderInit()
 {
     pspKernelSetKernelPC();
     pspSdkInstallNoDeviceCheckPatch();
+	pspSdkInstallNoPlainModuleCheckPatch();
+	pspSdkInstallKernelLoadModulePatch();
     pspDebugInstallKprintfHandler(NULL);
 
 	pspDebugInstallErrorHandler(ExceptionHandler);

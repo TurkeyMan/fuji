@@ -22,6 +22,9 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
+#include "Fuji.h"
+#include "MFFileSystem.h"
+
 #include <ctype.h>
 #include "tinyxml.h"
 
@@ -972,20 +975,17 @@ bool TiXmlDocument::LoadFile( const char* filename, TiXmlEncoding encoding )
 	value = filename;
 
 	// reading in binary mode so that tinyxml can normalize the EOL
-	FILE* file = fopen( value.c_str (), "rb" );	
+	MFFile* file = MFFileSystem_Open( value.c_str(), MFOF_Read );	
 
 	if ( file )
 	{
 		// Get the file size, so we can pre-allocate the string. HUGE speed impact.
-		long length = 0;
-		fseek( file, 0, SEEK_END );
-		length = ftell( file );
-		fseek( file, 0, SEEK_SET );
+		long length = MFFile_GetSize(file);
 
 		// Strange case, but good to handle up front.
 		if ( length == 0 )
 		{
-			fclose( file );
+			MFFile_Close( file );
 			return false;
 		}
 
@@ -1018,13 +1018,12 @@ bool TiXmlDocument::LoadFile( const char* filename, TiXmlEncoding encoding )
 		char* buf = new char[ length+1 ];
 		buf[0] = 0;
 
-		if ( fread( buf, length, 1, file ) != 1 ) {
-		//if ( fread( buf, 1, length, file ) != (size_t)length ) {
+		if ( MFFile_Read( file, buf, length ) != length ) {
 			SetError( TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN );
-			fclose( file );
+			MFFile_Close( file );
 			return false;
 		}
-		fclose( file );
+		MFFile_Close( file );
 
 		const char* lastPos = buf;
 		const char* p = buf;
