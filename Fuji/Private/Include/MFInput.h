@@ -327,6 +327,15 @@ enum MFGamepadButton
 	Button_DLeft,				/**< Left on the digital pad */
 	Button_DRight,				/**< Right on the digital pad */
 
+// Analog Axiis
+	Axis_LX = 16,				/**< X-Axis on the Left analog stick */
+	Axis_LY,					/**< Y-Axis on the Left analog stick */
+	Axis_RX,					/**< X-Axis on the Right analog stick */
+	Axis_RY,					/**< Y-Axis on the Right analog stick */
+
+	GamepadType_Max,			/**< Maximum gamepad button id */
+	GamepadType_ForceInt	= 0x7FFFFFFF,	/**< Force button ID to an int type */
+
 // Guitar hero controller enums
 	Button_GH_Green		= Button_P2_R2,			/**< Green key on Guitar Hero controller */
 	Button_GH_Red		= Button_P2_Circle,		/**< Red key on Guitar Hero controller */
@@ -342,14 +351,7 @@ enum MFGamepadButton
 	Button_GH_StrumDown	= Button_DDown,			/**< Strum down on Guitar Hero controller */
 	Button_GH_StrumUp	= Button_DUp,			/**< Strum up on Guitar Hero controller */
 
-// Analog Axiis
-	Axis_LX = 16,				/**< X-Axis on the Left analog stick */
-	Axis_LY,					/**< Y-Axis on the Left analog stick */
-	Axis_RX,					/**< X-Axis on the Right analog stick */
-	Axis_RY,					/**< Y-Axis on the Right analog stick */
-
-	GamepadType_Max,			/**< Maximum gamepad button id */
-	GamepadType_ForceInt	= 0x7FFFFFFF	/**< Force button ID to an int type */
+	Button_GH_Whammy	= Axis_LX				/**< Whammy bar depression on Guitar Hero controller */
 };
 
 /**
