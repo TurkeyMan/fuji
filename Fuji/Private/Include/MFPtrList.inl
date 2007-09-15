@@ -22,7 +22,7 @@ inline void MFPtrList<T>::Init(const char *pGroupName, uint32 maxElements)
 		*ppMark = 0;
 
 		for(uint32 i = 0; i<maxElements; ++i)
-			*(++ppMark) = (T*)(0xdeadbeef);
+			*(++ppMark) = (T*)((size_t)0xdeadbeef);
 
 		*(++ppMark) = 0;
 	}

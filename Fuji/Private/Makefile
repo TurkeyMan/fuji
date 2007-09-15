@@ -136,6 +136,9 @@ OBJS := $(ZLIB) \
 	Source/MFScript_Registration.o \
 	Source/MFSockets.o \
 	Source/MFSound.o \
+	Source/MFSound_Vorbis.o \
+	Source/MFSound_MAD.o \
+	Source/MFSound_PSPAudioCodec.o \
 	Source/MFString.o \
 	Source/MFStringCache.o \
 	Source/MFSystem.o \

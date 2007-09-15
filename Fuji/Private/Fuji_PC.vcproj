@@ -324,6 +324,15 @@
 				RelativePath=".\Source\MFSound_Internal.h">
 			</File>
 			<File
+				RelativePath=".\Source\MFSound_MAD.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSound_PSPAudioCodec.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSound_Vorbis.cpp">
+			</File>
+			<File
 				RelativePath=".\Source\MFString.cpp">
 			</File>
 			<File

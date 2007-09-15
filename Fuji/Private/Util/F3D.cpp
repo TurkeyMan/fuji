@@ -2408,6 +2408,15 @@ F3DRefPoint::F3DRefPoint()
 	MFString_Copy(options, "");
 }
 
+F3DRefMesh::F3DRefMesh()
+{
+	worldMatrix = MFMatrix::identity;
+	localMatrix = MFMatrix::identity;
+	name[0] = 0;
+	target[0] = 0;
+	options[0] = 0;
+}
+
 F3DCollisionChunk::~F3DCollisionChunk()
 {
 	for(int a=0; a<collisionObjects.size(); a++)

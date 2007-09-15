@@ -60,11 +60,8 @@ void audioOutCallback(int channel, int16 *pBuf, unsigned int reqn)
 		gSampleCount += numSamples;
 		reqn -= numSamples;
 
-		if(reqn)
-		{
-			pBuf += numSamples * 2;
-			MFCopyMemory(pBuf, gMasterBuffer, sizeof(int16)*2*reqn);
-		}
+		pBuf += numSamples * 2;
+		MFCopyMemory(pBuf, gMasterBuffer, sizeof(int16)*2*reqn);
 	}
 
 	gMasterOffset += reqn;
@@ -107,6 +104,8 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 	int rVolume = pInt->lVolume;
 	uint32 rate = (uint32)((float)0x400 * ((float)pT->sampleRate / 44100.0f) * pInt->rate);
 
+	MFDebug_Log(4, MFStr("MasterOffset: %d NumSamples: %d", startSample, numSamples));
+
 	int16 *pData = &gMasterBuffer[startSample*2];
 
 	while(numSamples)
@@ -125,8 +124,9 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 						break;
 
 					// mix in this voice..
-					int l = (int)pData[0] + (((int)pSamples[sample] * lVolume) >> 15);
-					int r = (int)pData[1] + (((int)pSamples[sample] * lVolume) >> 15);
+					int attemuatedSample = ((int)pSamples[sample] * lVolume) >> 15;
+					int l = (int)pData[0] + attemuatedSample;
+					int r = (int)pData[1] + attemuatedSample;
 					pData[0] = (int16)MFClamp(-32768, l, 32767);
 					pData[1] = (int16)MFClamp(-32768, r, 32767);
 
@@ -412,7 +412,7 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 {
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 
-	pInt->offset = MFMin((uint32)((float)pVoice->pSound->pTemplate->sampleRate * seconds) << 10, (uint32)pVoice->pSound->pTemplate->numSamples);
+	pInt->offset = MFMin((uint32)((float)pVoice->pSound->pTemplate->sampleRate * seconds), (uint32)pVoice->pSound->pTemplate->numSamples) << 10;
 }
 
 void MFSound_SetMasterVolume(float volume)

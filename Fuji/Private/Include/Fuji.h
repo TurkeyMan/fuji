@@ -344,6 +344,9 @@ enum MFEndian
 	#define MF_TRANSLATION		MF_DRIVER_PC
 	#define MF_DEBUG			MF_DRIVER_PC
 
+	#define	VORBIS_STREAM
+	#define	MAD_STREAM
+
 #elif defined(MF_XBOX)
 
 	#define DEBUG_KEYBOARD
@@ -401,6 +404,8 @@ enum MFEndian
 	#define MF_THREAD		MF_DRIVER_LINUX
 	#define MF_FILESYSTEM	MF_DRIVER_LINUX
 
+	#define VORBIS_STREAM
+
 #elif defined(MF_OSX)
 
 	#include <stdarg.h> // For varargs
@@ -415,6 +420,8 @@ enum MFEndian
 	#define MF_TRANSLATION	MF_DRIVER_LINUX
 	#define MF_THREAD		MF_DRIVER_LINUX
 	#define MF_FILESYSTEM	MF_DRIVER_LINUX
+
+	#define VORBIS_STREAM
 
 #elif defined(MF_PSP)
 
@@ -442,6 +449,10 @@ enum MFEndian
 	#define MF_SYSTEM		MF_DRIVER_PSP
 	#define MF_TRANSLATION	MF_DRIVER_PSP
 	#define MF_DEBUG		MF_DRIVER_PSP
+
+	#define PSPAUDIOCODEC_STREAM
+	#define VORBIS_STREAM
+//	#define VORBIS_TREMOR
 
 #elif defined(MF_PS2)
 

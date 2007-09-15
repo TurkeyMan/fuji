@@ -153,7 +153,7 @@ int SetupCallbacks(void)
 int LoadStartModule(char *path)
 {
 	uint32 loadResult;
-	uint32 startResult;
+	uint32 startResult = 0;;
 	int status;
 
 	loadResult = sceKernelLoadModule(path, 0, NULL);

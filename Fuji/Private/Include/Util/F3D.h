@@ -309,6 +309,24 @@ public:
 	MFArray<F3DRefPoint> refPoints;
 };
 
+class F3DRefMesh
+{
+public:
+	F3DRefMesh();
+
+	MFMatrix worldMatrix;
+	MFMatrix localMatrix;
+	char name[64];
+	char target[64];
+	char options[1024];
+};
+
+class F3DRefMeshChunk
+{
+public:
+	MFArray<F3DRefMesh> refMeshes;
+};
+
 
 class F3DOptions
 {
@@ -347,6 +365,7 @@ public:
 	F3DSkeletonChunk *GetSkeletonChunk() { return &skeletonChunk; }
 	F3DMaterialChunk *GetMaterialChunk() { return &materialChunk; }
 	F3DRefPointChunk *GetRefPointChunk() { return &refPointChunk; }
+	F3DRefMeshChunk *GetRefMeshChunk() { return &refMeshChunk; }
 	F3DAnimationChunk *GetAnimationChunk() { return &animationChunk; }
 	F3DCollisionChunk *GetCollisionChunk() { return &collisionChunk; }
 
@@ -361,6 +380,7 @@ public:
 	F3DSkeletonChunk skeletonChunk;
 	F3DMaterialChunk materialChunk;
 	F3DRefPointChunk refPointChunk;
+	F3DRefMeshChunk refMeshChunk;
 	F3DAnimationChunk animationChunk;
 	F3DCollisionChunk collisionChunk;
 

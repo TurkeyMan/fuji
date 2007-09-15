@@ -719,11 +719,8 @@ void ParseDAECamera(TiXmlElement *pCameraNode)
 
 }
 
-void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const MFMatrix &matrix)
+void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const char *pObjectName, const MFMatrix &matrix)
 {
-	// get object name
-	const char *pObjectName = pInstanceNode->Attribute("url");
-
 	// scan library for object
 	TiXmlElement *pObject = GetGeometryLib(pObjectName);
 
@@ -862,9 +859,28 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		TiXmlElement *pGeometry = pSceneNode->FirstChildElement("instance_geometry");
 		if(pGeometry)
 		{
-			// node is an instance node
-			// find and add instance to scene
-			FindAndAddGeometryToScene(pGeometry, pSceneNode, worldMat);
+			// get object name
+			const char *pObjectName = pGeometry->Attribute("url");
+
+			if(pObjectName[0] != '#')
+			{
+				const char *pHash = MFString_Chr(pObjectName, '#');
+				const char *pFilename = MFStr_GetFileNameWithoutExtension(pHash ? MFStrN(pObjectName, pHash - pObjectName) : pObjectName);
+
+				// this is instancing an external mesh..
+				F3DRefMesh &ref = pModel->GetRefMeshChunk()->refMeshes.push();
+
+				MFString_Copy(ref.name, pNodeName);
+				MFString_Copy(ref.target, pFilename);
+				ref.worldMatrix = worldMat;
+				ref.localMatrix = localMat;
+			}
+			else
+			{
+				// node is an instance node
+				// find and add instance to scene
+				FindAndAddGeometryToScene(pGeometry, pSceneNode, pObjectName, worldMat);
+			}
 		}
 
 		// all the other stuff

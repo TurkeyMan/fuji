@@ -63,7 +63,7 @@ FIXUP    = psp-fixup-imports
 
 CFLAGS := $(CFLAGS) -G0
 
-LIBS := $(LIBS) -lpspusb -lpspusbstor -lpsprtc -lpspgu -lm -lpspdebug -lpspdisplay -lpspge -lpspctrl -lpspsdk -lstdc++ -lc -lpsppower -lpspaudio -lpspaudiolib -lpspwlan -lpspnet -lpspnet_inet -lpspnet_apctl -lpspnet_resolver -lpsputility -lpspuser -lpspkernel -logg -lvorbisfile -lvorbis
+LIBS := $(LIBS) -lpspusb -lpspusbstor -lpsprtc -lpspgu -lm -lpspdebug -lpspdisplay -lpspge -lpspctrl -lpspsdk -lstdc++ -lc -lpsppower -lpspaudio -lpspaudiolib -lpspwlan -lpspnet -lpspnet_inet -lpspnet_apctl -lpspnet_resolver -lpsputility -lpspuser -lpspkernel -lpspaudiocodec -lpspmpeg -logg -lvorbisfile -lvorbis
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) $(PSPSDK)/include
@@ -311,7 +311,7 @@ deletedata:
 deletebin:
 	-rm -f $(FINAL_TARGET)
 
-rebuild: deletelib deletedata deletebin all
+rebuild: deletelib deletebin all
 
 fujitools:
 	make -C $(FUJIPATH) PLATFORM=$(PLATFORM) tools

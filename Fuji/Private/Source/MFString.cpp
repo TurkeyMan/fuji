@@ -92,7 +92,7 @@ const char * MFStr(const char *format, ...)
 	return pBuffer;
 }
 
-const char * MFStrN(const char *pSource, int n)
+const char * MFStrN(const char *pSource, size_t n)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
