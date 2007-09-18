@@ -323,7 +323,7 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	}
 
 	MFAudioStream *pStream = &gMusicTracks[t];
-	pStream->pStreamHandler = NULL;
+	MFZeroMemory(pStream, sizeof(*pStream));
 
 	MFDebug_Log(4, MFStr("Attempting to create audio stream '%s'.", pFilename));
 
@@ -362,8 +362,6 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	// init the stream
 	MFString_CopyN(pStream->name, pFilename, sizeof(pStream->name) - 1);
 	pStream->name[sizeof(pStream->name) - 1] = 0;
-	pStream->currentTime = 0.0f;
-	pStream->playBackOffset = 0;
 
 	// fill the buffer
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
@@ -385,19 +383,17 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 	// get cursor pos
 	playCursor = MFSound_GetPlayCursor(pStream->pStreamVoice);
 
-	MFDebug_Log(4, MFStr("PC: %d Offset: %d", playCursor, pStream->playBackOffset));
-
-	if(pStream->playBackOffset == playCursor)
+	if(pStream->writePointer == playCursor)
 		return;
 
 	// calculate lock size
-	if(playCursor < pStream->playBackOffset)
+	if(playCursor < pStream->writePointer)
 	{
-		lockSize = playCursor + (pStream->bufferSize - pStream->playBackOffset);
+		lockSize = playCursor + (pStream->bufferSize - pStream->writePointer);
 	}
 	else
 	{
-		lockSize = playCursor - pStream->playBackOffset;
+		lockSize = playCursor - pStream->writePointer;
 	}
 
 	// update the buffer
@@ -422,13 +418,13 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
-	pStream->pStreamHandler->callbacks.pSeekStream(pStream, seconds);
-
 	if(pStream->playing)
 		MFSound_Pause(pStream->pStreamVoice, true);
 
+	pStream->pStreamHandler->callbacks.pSeekStream(pStream, seconds);
+
 	MFSound_SetPlaybackOffset(pStream->pStreamVoice, 0.0f);
-	pStream->playBackOffset = 0;
+	pStream->writePointer = 0;
 
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
 
@@ -468,9 +464,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	uint32 bufferFed = 0;
 
 	// fill buffer
-	MFSound_Lock(pStream->pStreamBuffer, pStream->playBackOffset, bytes, &pData1, &bytes1, &pData2, &bytes2);
-
-	MFDebug_Log(2, MFStr("Writing %d bytes to stream", bytes));
+	MFSound_Lock(pStream->pStreamBuffer, pStream->writePointer, bytes, &pData1, &bytes1, &pData2, &bytes2);
 
 	char *pData = (char*)pData1;
 	uint32 bytesToWrite = bytes1;
@@ -498,7 +492,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	MFSound_Unlock(pStream->pStreamBuffer);
 
 	// increment playback cursor
-	pStream->playBackOffset = (pStream->playBackOffset + bytes) % pStream->bufferSize;
+	pStream->writePointer = (pStream->writePointer + bytes) % pStream->bufferSize;
 
 	// update playback time
 	pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
@@ -600,7 +594,7 @@ void MFSound_Draw()
 			MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
 			MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 
-			float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].playBackOffset/(float)gMusicTracks[a].bufferSize);
+			float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].writePointer/(float)gMusicTracks[a].bufferSize);
 
 			MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 			MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
@@ -732,7 +726,7 @@ void MFSound_Draw()
 		MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
 		MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 /*
-		float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].playBackOffset / (float)bufferSize);
+		float xBufferFilled = 100.0f + (500.0f-100.0f) * ((float)gMusicTracks[a].writePointer / (float)bufferSize);
 
 		MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 		MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);

@@ -164,7 +164,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	int findStatus;
 
 	// separate path and search pattern..
-	char *pPath = (char*)MFStr("%s%s", (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	char *pPath = (char*)MFStr("%s/%s%s", gPSPSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
 	const char *pPattern = pPath;
 
 	char *pLast = MFString_RChr(pPath, '/');

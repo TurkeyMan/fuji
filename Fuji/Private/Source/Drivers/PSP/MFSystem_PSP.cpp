@@ -12,6 +12,7 @@
 #include <pspsdk.h>
 #include <pspdebug.h>
 #include <psppower.h>
+#include <pspsysmem.h>
 #include <psputility_sysparam.h>
 #include <psprtc.h>
 
@@ -50,7 +51,7 @@ void ClockRateCallback(MenuObject *pMenu, void *pData);
 const char *pToggleStrings[] = { "Disabled", "Enabled", NULL };
 const char *pClockRateStrings[] = { "222mhz", "266mhz", "333mhz", NULL };
 
-MenuItemIntString clockRate(pClockRateStrings, 0);
+MenuItemIntString clockRate(pClockRateStrings, 2);
 MenuItemIntString showSystemInfo(pToggleStrings, 0);
 MenuItemIntString showPowerStatus(pToggleStrings, 1);
 
@@ -60,6 +61,7 @@ MenuItemIntString showPowerStatus(pToggleStrings, 1);
 #include <pspusb.h>
 #include <pspusbstor.h>
 
+static bool bIsUSBLoaded = false;
 uint32 USBState = 0;
 
 void USBConnectionCallback(MenuObject *pMenu, void *pData);
@@ -202,10 +204,15 @@ void InitUSB()
 		sceUsbActivate(0x1c8);
 
 	USBState = sceUsbGetState();
+
+	bIsUSBLoaded = true;
 }
 
 void DeinitUSB()
 {
+	if(!bIsUSBLoaded)
+		return;
+
 	uint32 retVal;
 
 	if(USBState & PSP_USB_ACTIVATED)
@@ -253,6 +260,9 @@ int main(int argc, char *argv[])
 	// disable floating point exceptions
 	pspSdkDisableFPUExceptions();
 
+	// set clock rate to fast...
+	scePowerSetClockFrequency(333, 333, 166);
+
 	// we want every little detail on PSP...
 	MFDebug_SetMaximumLogLevel(4);
 
@@ -285,18 +295,31 @@ int main(int argc, char *argv[])
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	bool bCanLoadUSB = true;
+
+	int firmwareVersion = sceKernelDevkitVersion();
+	if(firmwareVersion >= 0x02070000)
+	{
+		// cant load the usb module in user mode..
+		bCanLoadUSB = false;
+	}
+
 	sceUtilityGetSystemParamString(PSP_SYSTEMPARAM_ID_STRING_NICKNAME, systemName, 64);
 
 	DebugMenu_AddItem("Show System Info", "Fuji Options", &showSystemInfo, NULL, NULL);
 	DebugMenu_AddItem("Clock Rate", "Fuji Options", &clockRate, ClockRateCallback, NULL);
 #if defined(_ENABLE_USB)
-	DebugMenu_AddItem("USB Connection", "Fuji Options", &usbMode, USBConnectionCallback, NULL);
-	DebugMenu_AddItem("Show USB Status", "Fuji Options", &showUSBStatus, NULL, NULL);
+	if(bCanLoadUSB)
+	{
+		DebugMenu_AddItem("USB Connection", "Fuji Options", &usbMode, USBConnectionCallback, NULL);
+		DebugMenu_AddItem("Show USB Status", "Fuji Options", &showUSBStatus, NULL, NULL);
+	}
 #endif
 	DebugMenu_AddItem("Show Power Status", "Fuji Options", &showPowerStatus, NULL, NULL);
 
 #if defined(_ENABLE_USB)
-	InitUSB();
+	if(bCanLoadUSB)
+		InitUSB();
 #endif
 }
 

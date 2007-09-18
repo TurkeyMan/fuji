@@ -104,8 +104,6 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 	int rVolume = pInt->lVolume;
 	uint32 rate = (uint32)((float)0x400 * ((float)pT->sampleRate / 44100.0f) * pInt->rate);
 
-	MFDebug_Log(4, MFStr("MasterOffset: %d NumSamples: %d", startSample, numSamples));
-
 	int16 *pData = &gMasterBuffer[startSample*2];
 
 	while(numSamples)
@@ -160,7 +158,7 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 		}
 		else if(pT->bitsPerSample == 8)
 		{
-//				uint8 *pSamples = (uint8*)pT->ppStreams[0];
+//			uint8 *pSamples = (uint8*)pT->ppStreams[0];
 		}
 
 		if((offset >> 10) >= (uint32)pT->numSamples)
@@ -184,9 +182,7 @@ void MixVoice(MFVoice *pVoice, uint32 startSample, uint32 numSamples)
 void PrimeBuffer(MFVoice *pVoice)
 {
 	// HACK: we'll mix in the first bit of the sample to reduce trigger lag...
-	uint32 offset = gMasterOffset + 1024;
-	if(offset > MASTER_BUFFER_SAMPLES)
-		offset -= MASTER_BUFFER_SAMPLES;
+	uint32 offset = (gMasterOffset + 1024) % MASTER_BUFFER_SAMPLES;
 
 	uint32 numSamples = offset < gMixOffset ? gMixOffset - offset : (MASTER_BUFFER_SAMPLES - offset) + gMixOffset;
 
@@ -276,7 +272,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
 
 	long bufferSize = ((pSound->pTemplate->numChannels * pSound->pTemplate->bitsPerSample) >> 3) * pSound->pTemplate->numSamples;
 
-	MFDebug_Assert(offset < bufferSize, MFStr("MFSound_Lock: Invalid buffer offset.", pSound->name));
+	MFDebug_Assert(offset < bufferSize, "MFSound_Lock: Invalid buffer offset.");
 
 	pSound->pLock1 = pSound->pTemplate->ppStreams[0] + offset;
 
@@ -284,7 +280,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
 	{
 		pSound->lockSize1 = bufferSize - offset;
 		pSound->pLock2 = pSound->pTemplate->ppStreams[0];
-		pSound->lockSize2 = bytes - *pSize;
+		pSound->lockSize2 = bytes - pSound->lockSize1;
 	}
 	else
 	{
@@ -378,6 +374,10 @@ void MFSound_SetListenerPos(const MFMatrix& listenerPos)
 {
 }
 
+void MFSound_SetMasterVolume(float volume)
+{
+}
+
 void MFSound_SetVolume(MFVoice *pVoice, float volume)
 {
 	MFCALLSTACK;
@@ -413,10 +413,6 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 
 	pInt->offset = MFMin((uint32)((float)pVoice->pSound->pTemplate->sampleRate * seconds), (uint32)pVoice->pSound->pTemplate->numSamples) << 10;
-}
-
-void MFSound_SetMasterVolume(float volume)
-{
 }
 
 uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)

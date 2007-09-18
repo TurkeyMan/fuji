@@ -18,14 +18,48 @@ uint16* GetStringCopy(const uint16* pString, int len)
 	int l = len < 0 ? MFWString_Length(pString) : len;
 
 	uint16 *pStr = (uint16*)malloc(sizeof(uint16) * (l + 1));
+	MFZeroMemory(pStr, sizeof(uint16) * (l+1));
 
-	MFWString_CopyN(pStr, pString, l);
-	pStr[l] = 0;
-
-	if(l && *pStr == '\"' && pStr[l-1] == '\"')
+	if(*pString == '\"' && pString[l-1] == '\"')
 	{
-		pStr[l-1] = 0;
-		++pStr;
+		++pString;
+		l -= 2;
+	}
+
+	uint16 *pS = pStr;
+	while(l)
+	{
+		if(*pString == '\\')
+		{
+			bool bInc = true;
+			if(pString[1] == 'n')
+				*pS = '\n';
+			else if(pString[1] == 'r')
+				*pS = '\r';
+			else if(pString[1] == 't')
+				*pS = '\t';
+			else if(pString[1] == '\\')
+				*pS = '\\';
+			else
+			{
+				*pS = '\\';
+				bInc = false;
+			}
+
+			if(bInc)
+			{
+				--l;
+				++pString;
+			}
+		}
+		else
+		{
+			*pS = *pString;
+		}
+
+		++pS;
+		++pString;
+		--l;
 	}
 
 	return pStr;

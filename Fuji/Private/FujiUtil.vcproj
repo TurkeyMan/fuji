@@ -109,9 +109,6 @@
 				RelativePath=".\Source\MFDebug.cpp">
 			</File>
 			<File
-				RelativePath=".\Pc\MFDebug_PC.cpp">
-			</File>
-			<File
 				RelativePath=".\Source\MFFont_Internal.h">
 			</File>
 			<File
@@ -147,6 +144,31 @@
 			<File
 				RelativePath="Source\Util.cpp">
 			</File>
+			<Filter
+				Name="Drivers"
+				Filter="">
+				<Filter
+					Name="PC"
+					Filter="">
+					<File
+						RelativePath=".\Source\Drivers\Pc\MFDebug_PC.cpp">
+					</File>
+				</Filter>
+				<Filter
+					Name="Null"
+					Filter="">
+					<File
+						RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp">
+					</File>
+				</Filter>
+				<Filter
+					Name="WIN32"
+					Filter="">
+					<File
+						RelativePath=".\Source\Drivers\Win32\MFHeap_WIN32.cpp">
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -380,13 +402,6 @@
 			</File>
 			<File
 				RelativePath=".\Util\F3D.h">
-			</File>
-		</Filter>
-		<Filter
-			Name="Null"
-			Filter="">
-			<File
-				RelativePath=".\Null\MFHeap_Null.cpp">
 			</File>
 		</Filter>
 	</Files>

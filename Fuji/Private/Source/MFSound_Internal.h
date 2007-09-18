@@ -103,7 +103,7 @@ struct MFAudioStream
 	MFVoice *pStreamVoice;
 
 	uint32 bufferSize;
-	uint32 playBackOffset;
+	uint32 writePointer;
 
 	float trackLength;
 	float currentTime;

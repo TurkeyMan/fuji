@@ -13,14 +13,13 @@
 #include <pspaudiocodec.h>
 #include <pspaudio.h>
 #include <pspmpeg.h>
+#include <pspsysmem.h>
+#include <psputility_avmodules.h>
 
 #define SAMPLES_PER_MP3_FRAME 1152
 
-static int bitrates[] = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
 
-static unsigned long mp3_codec_buffer[65] __attribute__((aligned(64)));
-static short mp3_data_buffer[2048] __attribute__((aligned(64)));
-static short mp3_mix_buffer[SAMPLES_PER_MP3_FRAME * 2] __attribute__((aligned(64)));
+/**** Local Structures ****/
 
 struct MFID3
 {
@@ -50,14 +49,17 @@ struct MP3Header
 
 struct MFMP3Decoder
 {
-	unsigned char inputBuffer[8 * 1024];
-	unsigned char overflow[SAMPLES_PER_MP3_FRAME * 4];
+	unsigned char inputBuffer[4 * 1024];
 	MP3Header firstHeader;
 	MFFile *pFile;
 	MFID3 *pID3;
+	char *pDecodeBuffer;
 
 	int inputBufferOffset;
 	int inputBufferDataLen;
+
+	uint32 pcmBufferOffset;
+	uint32 pcmBufferBytes;
 
 	uint32 *pFrameOffsets;
 	uint32 numFrameOffsetsAllocated;
@@ -65,12 +67,54 @@ struct MFMP3Decoder
 
 	uint32 currentFrame;
 	uint32 frameCount;
-	uint32 overflowOffset;
-	uint32 overflowBytes;
 	uint32 playbackTime;	// in samples
 
 	bool hasEDRAM;
 };
+
+
+/**** Globals ****/
+
+static int bitrates[] = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
+
+static unsigned long mp3_codec_buffer[65] __attribute__((aligned(64)));
+static char mp3_data_buffer[2048] __attribute__((aligned(64)));
+
+static bool gInitCodec = false;
+
+
+/**** Functions ****/
+
+int InitPSPAudioCodec()
+{
+	if(!gInitCodec)
+	{
+		// init the mp3 decoder (should be moved globally and initialised on first mp3 playback)
+		MFZeroMemory(mp3_codec_buffer, sizeof(mp3_codec_buffer));
+
+		if(sceAudiocodecCheckNeedMem(mp3_codec_buffer, 0x1002) < 0)
+		{
+			MFDebug_Warn(1, "Not enough memory for MP3 decoder.");
+			return 1;
+		}
+		if(sceAudiocodecGetEDRAM(mp3_codec_buffer, 0x1002) < 0)
+		{
+			MFDebug_Warn(1, "sceAudiocodecGetEDRAM() failed.");
+			return 2;
+		}
+		if(sceAudiocodecInit(mp3_codec_buffer, 0x1002) < 0)
+		{
+			MFDebug_Warn(1, "sceAudiocodecInit() failed.");
+			sceAudiocodecReleaseEDRAM(mp3_codec_buffer);
+			return 3;
+		}
+
+		gInitCodec = true;
+	}
+
+	return 0;
+}
+
 
 int GetSynchSafeInt(unsigned char *pStream)
 {
@@ -109,127 +153,115 @@ void ReadMP3Header(MP3Header *pHeader, const unsigned char *pHeaderBuffer)
 	pHeader->frameSize = 144000*pHeader->bitrate/pHeader->samplerate + pHeader->padding;
 }
 
+int ReadNextFrame(MFMP3Decoder *pDecoder, bool bDecodeFrame)
+{
+	// check theres enough data in the file
+	if(pDecoder->inputBufferOffset >= pDecoder->inputBufferDataLen - 4)
+		RefillInputBuffer(pDecoder);
+	if(pDecoder->inputBufferDataLen < 4)
+		return 1; // eof
+
+	// decode header
+	MP3Header header;
+	ReadMP3Header(&header, pDecoder->inputBuffer + pDecoder->inputBufferOffset);
+
+	// we'll keep a copy of the first frames header (it has some useful information)...
+	if(pDecoder->frameCount == 0)
+		pDecoder->firstHeader = header;
+
+	// check theres enough data in the file
+	if(pDecoder->inputBufferOffset >= pDecoder->inputBufferDataLen - (header.frameSize + 4))
+		RefillInputBuffer(pDecoder);
+	if(pDecoder->inputBufferDataLen < header.frameSize)
+		return 1; // eof
+
+	// if we're seeking we dont need to decode... (make the seek a little faster)
+	if(bDecodeFrame)
+	{
+		// copy samples into the decode buffer
+		MFCopyMemory(mp3_data_buffer, pDecoder->inputBuffer + pDecoder->inputBufferOffset, header.frameSize);
+
+		// decode samples...
+		MFZeroMemory(pDecoder->pDecodeBuffer, SAMPLES_PER_MP3_FRAME*4);
+
+		mp3_codec_buffer[6] = (unsigned long)mp3_data_buffer;
+		mp3_codec_buffer[8] = (unsigned long)pDecoder->pDecodeBuffer;
+
+		mp3_codec_buffer[7] = mp3_codec_buffer[10] = header.frameSize;
+		mp3_codec_buffer[9] = SAMPLES_PER_MP3_FRAME * 4;
+
+		int r = sceAudiocodecDecode(mp3_codec_buffer, 0x1002);
+		if(r < 0)
+			MFDebug_Warn(1, "sceAudiocodecDecode() failed.");
+	}
+
+	// push the input buffer forward
+	pDecoder->inputBufferOffset += header.frameSize;
+
+	pDecoder->pcmBufferBytes = SAMPLES_PER_MP3_FRAME * 4;
+	pDecoder->pcmBufferOffset = 0;
+
+	// we need to keep a backlog of frame offsets for seeking...
+	if(pDecoder->currentFrame == pDecoder->frameCount)
+	{
+		// we'll only take a frame offset once every 10 frames (otherwise we waste loads of memory!)
+		// we need to push the counter along from time to time
+		if(pDecoder->frameCount % 10 == 0)
+		{
+			++pDecoder->frameOffsetCount;
+
+			// if we have overflowed the frame history, we need to realloc...
+			if(pDecoder->frameOffsetCount == pDecoder->numFrameOffsetsAllocated)
+			{
+				pDecoder->numFrameOffsetsAllocated *= 2;
+				pDecoder->pFrameOffsets = (uint32*)MFHeap_Realloc(pDecoder->pFrameOffsets, sizeof(uint32)*pDecoder->numFrameOffsetsAllocated);
+			}
+
+			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount] = pDecoder->pFrameOffsets[pDecoder->frameOffsetCount - 1];
+		}
+
+		// add current frames size to frame offset counter
+		pDecoder->pFrameOffsets[pDecoder->frameOffsetCount] += header.frameSize;
+
+		// increase counters
+		++pDecoder->frameCount;
+	}
+
+	// increment the current frame counter
+	++pDecoder->currentFrame;
+
+	return 0;
+}
+
 int GetMP3Samples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 {
 	MFMP3Decoder *pDecoder = (MFMP3Decoder*)pStream->pStreamData;
 
 	int written = 0;
 
-	if(pDecoder->overflowBytes)
-	{
-		// grab from the overflow until we run out...
-		uint32 numBytes = MFMin(pDecoder->overflowBytes - pDecoder->overflowOffset, bytes);
-		MFCopyMemory(pBuffer, pDecoder->overflow + pDecoder->overflowOffset, numBytes);
-		pDecoder->overflowOffset += numBytes;
-		if(pDecoder->overflowOffset == pDecoder->overflowBytes)
-			pDecoder->overflowBytes = 0;
-
-		// increment timer
-		pDecoder->playbackTime += numBytes >> 2;
-
-		if(bytes == numBytes)
-			return numBytes;
-
-		bytes -= numBytes;
-		(char*&)pBuffer += numBytes;
-		written = (int)numBytes;
-	}
-
 	do
 	{
-		// check theres enough data in the file
-		if(pDecoder->inputBufferOffset >= pDecoder->inputBufferDataLen - 4)
-			RefillInputBuffer(pDecoder);
-		if(pDecoder->inputBufferDataLen < 4)
-			return written; // eof
-
-		// decode header
-		MP3Header header;
-		ReadMP3Header(&header, pDecoder->inputBuffer + pDecoder->inputBufferOffset);
-		int frame_size = header.frameSize;
-
-		// we'll keep a copy of the first frames header (it has some useful information)...
-		if(pDecoder->frameCount == 0)
-			pDecoder->firstHeader = header;
-
-		// check theres enough data in the file
-		if(pDecoder->inputBufferOffset >= pDecoder->inputBufferDataLen - (frame_size + 4))
-			RefillInputBuffer(pDecoder);
-		if(pDecoder->inputBufferDataLen < frame_size)
-			return written; // eof
-
-		// if we're seeking we dont need to decode... (make the seek a little faster)
-		if(pBuffer || bytes < SAMPLES_PER_MP3_FRAME*4)
+		// if we are out of PCM data, we need to read the next frame...
+		if(pDecoder->pcmBufferOffset == pDecoder->pcmBufferBytes)
 		{
-			// copy samples into the decode buffer (this is unnecessarily allocating every single frame?)
-			MFCopyMemory(mp3_data_buffer, pDecoder->inputBuffer + pDecoder->inputBufferOffset, frame_size);
-
-			// decode samples...
-			MFZeroMemory(mp3_mix_buffer, sizeof(mp3_mix_buffer));
-
-			mp3_codec_buffer[6] = (unsigned long)mp3_data_buffer;
-			mp3_codec_buffer[8] = (unsigned long)mp3_mix_buffer;
-
-			mp3_codec_buffer[7] = mp3_codec_buffer[10] = frame_size;
-			mp3_codec_buffer[9] = SAMPLES_PER_MP3_FRAME * 4;
-
-			int r = sceAudiocodecDecode(mp3_codec_buffer, 0x1002);
-			if(r < 0)
-				MFDebug_Warn(1, "sceAudiocodecDecode() failed.");
+			int r = ReadNextFrame(pDecoder, pBuffer || bytes < SAMPLES_PER_MP3_FRAME*4);
+			if(r)
+				return written; // end of stream...
 		}
 
-		// push the input buffer forward
-		pDecoder->inputBufferOffset += frame_size;
+		// copy data into the output buffer
+		uint32 bytesToCopy = MFMin(pDecoder->pcmBufferBytes - pDecoder->pcmBufferOffset, bytes);
 
-		// we need to keep a backlog of frame offsets for seeking...
-		if(pDecoder->currentFrame == pDecoder->frameCount)
+		if(pBuffer && bytesToCopy)
 		{
-			// we'll only take a frame offset once every 10 frames (otherwise we waste loads of memory!)
-			// we need to push the counter along from time to time
-			if(pDecoder->frameCount % 10 == 0)
-			{
-				++pDecoder->frameOffsetCount;
-
-				// if we have overflowed the frame history, we need to realloc...
-				if(pDecoder->frameOffsetCount == pDecoder->numFrameOffsetsAllocated)
-				{
-					pDecoder->numFrameOffsetsAllocated *= 2;
-					pDecoder->pFrameOffsets = (uint32*)MFHeap_Realloc(pDecoder->pFrameOffsets, sizeof(uint32)*pDecoder->numFrameOffsetsAllocated);
-				}
-
-				pDecoder->pFrameOffsets[pDecoder->frameOffsetCount] = pDecoder->pFrameOffsets[pDecoder->frameOffsetCount - 1];
-			}
-
-			// add current frames size to frame offset counter
-			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount] += frame_size;
-
-			// increase counters
-			++pDecoder->frameCount;
-		}
-		++pDecoder->currentFrame;
-
-		// copy samples into the output buffer...
-		int samplesToCopy = MFMin(SAMPLES_PER_MP3_FRAME, (int)bytes >> 2);
-		int bytesToCopy = samplesToCopy*4;
-
-//		bool bStereo = header.channelMode != 3;
-		if(pBuffer)
-		{
-			MFCopyMemory(pBuffer, mp3_mix_buffer, bytesToCopy);
+			MFCopyMemory((char*)pBuffer + written, pDecoder->pDecodeBuffer + pDecoder->pcmBufferOffset, bytesToCopy);
 			written += bytesToCopy;
 		}
+		pDecoder->pcmBufferOffset += bytesToCopy;
 		bytes -= bytesToCopy;
 
 		// increment timer
-		pDecoder->playbackTime += samplesToCopy;
-
-		// copy left over samples into the overflow
-		if(samplesToCopy < SAMPLES_PER_MP3_FRAME)
-		{
-			pDecoder->overflowBytes = (SAMPLES_PER_MP3_FRAME - samplesToCopy)*4;
-			pDecoder->overflowOffset = 0;
-			MFCopyMemory(pDecoder->overflow, mp3_mix_buffer + samplesToCopy*2, pDecoder->overflowBytes);
-		}
+		pDecoder->playbackTime += bytesToCopy >> 2;
 	}
 	while(bytes);
 
@@ -242,9 +274,6 @@ void DestroyMP3Stream(MFAudioStream *pStream)
 
 	MFFile_Close(pDecoder->pFile);
 
-	if(pDecoder->hasEDRAM)
-		sceAudiocodecReleaseEDRAM(mp3_codec_buffer);
-
 	if(pDecoder->pID3)
 		MFHeap_Free(pDecoder->pID3);
 	if(pDecoder->pFrameOffsets)
@@ -256,10 +285,20 @@ void CreateMP3Stream(MFAudioStream *pStream, const char *pFilename)
 {
 	MFCALLSTACK;
 
+	// make sure we've initialised the psp audio codec
+	if(InitPSPAudioCodec())
+	{
+		MFDebug_Warn(1, "Failed to initialise PSP Audio Codec.");
+		return;
+	}
+
 	// open mp3 file
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
+	{
+		MFDebug_Warn(1, MFStr("Couldn't open audio stream '%s'.", pFilename));
 		return;
+	}
 
 	// attempt to cache the mp3 stream
 	MFOpenDataCachedFile cachedOpen;
@@ -273,41 +312,22 @@ void CreateMP3Stream(MFAudioStream *pStream, const char *pFilename)
 		hFile = pCachedFile;
 
 	// init the decoder
-	MFMP3Decoder *pDecoder = (MFMP3Decoder*)MFHeap_Alloc(sizeof(MFMP3Decoder));
-	MFZeroMemory(pDecoder, sizeof(MFMP3Decoder));
-	pStream->pStreamData = pDecoder;
+	int bufferSize = sizeof(MFMP3Decoder) + SAMPLES_PER_MP3_FRAME*4 + 64;
+	MFMP3Decoder *pDecoder = (MFMP3Decoder*)MFHeap_Alloc(bufferSize);
+	MFZeroMemory(pDecoder, bufferSize);
+	pDecoder->pDecodeBuffer = (char*)MFALIGN(&pDecoder[1], 64);
+	pDecoder->pcmBufferBytes = 0;
+	pDecoder->pcmBufferOffset = 0;
 	pDecoder->pID3 = NULL;
 	pDecoder->pFile = hFile;
-
-	MFZeroMemory(mp3_codec_buffer, sizeof(mp3_codec_buffer));
-
-	if(sceAudiocodecCheckNeedMem(mp3_codec_buffer, 0x1002) < 0)
-	{
-		MFDebug_Warn(1, "Not enough memory for MP3 decoder.");
-		DestroyMP3Stream(pStream);
-		return;
-	}
-	if(sceAudiocodecGetEDRAM(mp3_codec_buffer, 0x1002) < 0)
-	{
-		MFDebug_Warn(1, "sceAudiocodecGetEDRAM() failed.");
-		DestroyMP3Stream(pStream);
-		return;
-	}
-	pDecoder->hasEDRAM = true;
-	if(sceAudiocodecInit(mp3_codec_buffer, 0x1002) < 0)
-	{
-		MFDebug_Warn(1, "sceAudiocodecInit() failed.");
-		DestroyMP3Stream(pStream);
-		return;
-	}
-
 	pDecoder->currentFrame = 0;
 	pDecoder->frameCount = 0;
-	pDecoder->overflowOffset = 0;
-	pDecoder->overflowBytes = 0;
 	pDecoder->pFrameOffsets = (uint32*)MFHeap_Alloc(sizeof(uint32)*2048);
 	pDecoder->numFrameOffsetsAllocated = 2048;
 	pDecoder->frameOffsetCount = 0;
+	pStream->pStreamData = pDecoder;
+
+	MFDebug_Assert(((size_t)pDecoder->pDecodeBuffer & 63) == 0, "Audio decode buffer not aligned!");
 
 	// read the ID3 tag, if present...
 	unsigned char buffer[10];
@@ -384,19 +404,17 @@ void SeekMP3Stream(MFAudioStream *pStream, float seconds)
 	int bytes = MFFile_Read(pDecoder->pFile, pDecoder->inputBuffer, sizeof(pDecoder->inputBuffer), false);
 	pDecoder->inputBufferDataLen = bytes;
 	pDecoder->inputBufferOffset = 0;
-	pDecoder->overflowBytes = 0;
+	pDecoder->pcmBufferOffset = pDecoder->pcmBufferBytes = 0;
 
 	// initialise timer to our song position
 	pDecoder->playbackTime = pDecoder->currentFrame*SAMPLES_PER_MP3_FRAME;
-	MFDebug_Log(4, MFStr("Request: %.2f Start: %.2f", seconds, GetMP3Time(pStream)));
 
 	// skip samples to where we want to be..
 	int skipFrames = frame - pDecoder->currentFrame;
 	int skipSamples = skipFrames*SAMPLES_PER_MP3_FRAME + sampleInFrame;
 	int skipBytes = skipSamples * 4;
-	GetMP3Samples(pStream, NULL, skipBytes);
 
-	MFDebug_Log(4, MFStr("Resolve: %.2f", GetMP3Time(pStream)));
+	GetMP3Samples(pStream, NULL, skipBytes);
 }
 
 void MFSound_RegisterPSPAudioCodec()
@@ -404,7 +422,7 @@ void MFSound_RegisterPSPAudioCodec()
 	MFDebug_Log(2, "Attempting to load AV modules");
 	int result = 0;
 	bool loaded = false;
-/*
+
 	// this tries to load the AV modules in user mode for 3.03+ users
 	int firmwareVersion = sceKernelDevkitVersion();
 	if(firmwareVersion >= 0x02070000)
@@ -425,7 +443,6 @@ void MFSound_RegisterPSPAudioCodec()
 			}
 		}
 	}
-*/
 	if(!loaded)
 	{
 		loaded = true;
