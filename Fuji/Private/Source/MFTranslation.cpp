@@ -14,37 +14,40 @@ static const char * const languageNamesEnglish[MFLang_Max] =
 {
 	"English",
 	"French",
-	"Spanish",
 	"German",
+	"Dutch",
 	"Italian",
+	"Spanish",
+	"Portuguese",
 	"Swedish",
 	"Norwegian",
+	"Finnish",
 	"Danish",
+	"Russian",
+	"Greek",
 	"Japanese",
 	"Korean",
-	"Chinese",
-	"Russian",
-	"Portuguese",
-	"Greek"
+	"Chinese"
 };
 
 static const char * const languageNamesNative[MFLang_Max] =
 {
 	"English",
-	"Fran�ais",
-	"Espa�ol",
+	"Français",
 	"Deutsch",
+	"Nederlands",
 	"Italiano",
+	"Español",
+	"Português",
 	"Svenska",
 	"Norsk",
+	"Suomi",
 	"Dansk",
-	// these are a little tricky because they require unicode... :/
-	"Japanese",
-	"Korean",
-	"Chinese",
-	"Russian",
-	"Portugu�s",
-	"Greek"
+	"Русский",	// Russkiy
+	"Ελληνικά",	// Εlliniká
+	"日本語",	// Nihongo
+	"한국어",	// Hangugeo
+	"中文"		// Zhōngwén
 };
 
 

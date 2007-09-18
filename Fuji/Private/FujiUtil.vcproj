@@ -404,6 +404,17 @@
 				RelativePath=".\Util\F3D.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="Drivers"
+			Filter="">
+			<Filter
+				Name="Null"
+				Filter="">
+				<File
+					RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp">
+				</File>
+			</Filter>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

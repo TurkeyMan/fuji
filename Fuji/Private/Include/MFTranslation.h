@@ -27,23 +27,26 @@ enum MFLanguage
 	// European Languages
 	MFLang_English = 0,		/**< English (Default) */
 	MFLang_French,			/**< French */
-	MFLang_Spanish,			/**< Spanish */
 	MFLang_German,			/**< German */
+	MFLang_Dutch,			/**< Dutch */
 	MFLang_Italian,			/**< Italian */
+	MFLang_Spanish,			/**< Spanish */
+	MFLang_Portuguese,		/**< Portuguese */
 
 	// Scandinavian Languages
 	MFLang_Swedish,			/**< Swedish */
 	MFLang_Norwegian,		/**< Norwegian */
+	MFLang_Finnish,			/**< Finnish */
 	MFLang_Danish,			/**< Danish */
+
+	// Eastern European
+	MFLang_Russian,			/**< Russian */
+	MFLang_Greek,			/**< Greek */
 
 	// Asian Languages
 	MFLang_Japanese,		/**< Japanese */
 	MFLang_Korean,			/**< Korean */
 	MFLang_Chinese,			/**< Chinese */
-
-	MFLang_Russian,			/**< Russian */
-	MFLang_Portuguese,		/**< Portuguese */
-	MFLang_Greek,			/**< Greek */
 
 	MFLang_Max,				/**< Max language */
 	MFLang_ForceInt = 0x7FFFFFFF	/**< Force enumeration to an int type */
