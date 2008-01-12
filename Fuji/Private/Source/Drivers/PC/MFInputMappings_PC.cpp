@@ -127,6 +127,30 @@ static const int gGGE909ButtonID[GamepadType_Max] =
 	AID_Z | AID_Negative  // Button_ThumbRY
 };
 
+static const int gGGE909VariantButtonID[GamepadType_Max] =
+{
+	2,   // Button_A
+	1,   // Button_B
+	3,   // Button_X
+	0,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger
+	7,   // Button_RightTrigger
+	9,   // Button_Start
+	8,   // Button_Back
+	10,  // Button_LeftThumb
+	11,  // Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Z,               // Button_ThumbRX
+	AID_Rz | AID_Negative  // Button_ThumbRY
+};
+
 static const int gXBCDButtonID[GamepadType_Max] =
 {
 	0,   // Button_A
@@ -415,6 +439,30 @@ static const int gXPlorerButtonID[GamepadType_Max] =
 	AID_Ry | AID_Negative,	// Button_ThumbRY
 };
 
+static const int gXGuitarButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	4,	// Button_X
+	3,	// Button_Y
+	-1,	// Button_White
+	-1,	// Button_Black
+	AID_Ry | AID_Clamp | AID_Negative,	// Button_LeftTrigger
+	0,	// Button_RightTrigger
+	7,	// Button_Start
+	6,	// Button_Back
+	-1,	// Button_LeftThumb
+	-1,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Rx | AID_Full,					// Button_ThumbLX
+	-1,	// Button_ThumbLY
+	-1, // AID_Z,	// Button_ThumbRX // the spherical deadzone plays havoc with this value
+	AID_Ry | AID_Negative,	// Button_ThumbRY
+};
+
 static const int gUSBGamepadButtonID[GamepadType_Max] =
 {
 	2,	// Button_A
@@ -487,7 +535,7 @@ static const int gUNIVERSALRumbleWheelButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative,	// Button_ThumbRY
 };
 
-static const int gSaitekButtonID[GamepadType_Max] =
+static const int gSaitek990ButtonID[GamepadType_Max] =
 {
 	1,	// Button_A
 	2,	// Button_B
@@ -510,6 +558,79 @@ static const int gSaitekButtonID[GamepadType_Max] =
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
 };
+
+static const int gSaitek880ButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	3,	// Button_B
+	0,	// Button_X
+	1,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	6,	// Button_LeftTrigger
+	7,	// Button_RightTrigger
+	9,	// Button_Start
+	8,	// Button_Back
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gUnusualPS2AdapterButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	3,	// Button_B
+	1,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	4,	// Button_Black
+	7,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	8,	// Button_Start
+	9,	// Button_Back
+	11,	// Button_LeftThumb
+	10,	// Button_RightThumb
+	AID_Ry | AID_Negative | AID_Clamp,	// Button_DUp
+	AID_Ry | AID_Clamp,	// Button_DDown
+	AID_Rx | AID_Negative | AID_Clamp,	// Button_DLeft
+	AID_Rx | AID_Clamp,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Z, // Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+};
+
+static const int gGamePadProButtonID[GamepadType_Max] =
+{
+	1,   // Button_A
+	2,   // Button_B
+	0,   // Button_X
+	3,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+	7,   // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+	9,   // Button_Start
+	8,   // Button_Back
+	-1,  // Button_LeftThumb
+	-1,  // Button_RightThumb
+	AID_Y | AID_Negative | AID_Clamp,  // Button_DUp
+	AID_Y | AID_Clamp,  // Button_DDown
+	AID_X | AID_Negative | AID_Clamp,  // Button_DLeft
+	AID_X | AID_Clamp,  // Button_DRight
+	-1,	// Button_ThumbLX
+	-1,	// Button_ThumbLY
+	-1,	// Button_ThumbRX
+	-1	// Button_ThumbRY
+};
+
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -762,10 +883,10 @@ static const char * gTwinShockButtonNames[GamepadType_Max] =
 	"8",            // Button_Black
 	"5",            // Button_LeftTrigger
 	"6",            // Button_RightTrigger
-	"12",           // Button_Start
+	"10",           // Button_Start
 	"9",            // Button_Back
-	"10",           // Button_LeftThumb
-	"11",           // Button_RightThumb
+	"L-Thumb",      // Button_LeftThumb
+	"R-Thumb",      // Button_RightThumb
 	"DPad Up",      // Button_DUp
 	"DPad Down",    // Button_DDown
 	"DPad Left",    // Button_DLeft
@@ -776,7 +897,31 @@ static const char * gTwinShockButtonNames[GamepadType_Max] =
 	"Right Y-Axis"  // Button_ThumbRY
 };
 
-static const char * gSaitekButtonNames[GamepadType_Max] =
+static const char * gPS2LookAlikeButtonNames[GamepadType_Max] =
+{
+	"3",			// Button_A
+	"2",			// Button_B
+	"4",			// Button_X
+	"1",			// Button_Y
+	"5",            // Button_White
+	"6",            // Button_Black
+	"7",            // Button_LeftTrigger
+	"8",            // Button_RightTrigger
+	"10",           // Button_Start
+	"9",            // Button_Back
+	"L-Thumb",      // Button_LeftThumb
+	"R-Thumb",      // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gSaitek990ButtonNames[GamepadType_Max] =
 {
 	"2",			// Button_A
 	"3",			// Button_B
@@ -788,6 +933,30 @@ static const char * gSaitekButtonNames[GamepadType_Max] =
 	"R2",           // Button_RightTrigger
 	"Grey",         // Button_Start
 	"Black",        // Button_Back
+	"L3",           // Button_LeftThumb
+	"R3",           // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
+};
+
+static const char * gSaitek880ButtonNames[GamepadType_Max] =
+{
+	"3",			// Button_A
+	"4",			// Button_B
+	"1",			// Button_X
+	"2",			// Button_Y
+	"5",            // Button_White
+	"6",            // Button_Black
+	"L",            // Button_LeftTrigger
+	"R",            // Button_RightTrigger
+	"10",           // Button_Start
+	"9",            // Button_Back
 	"L3",           // Button_LeftThumb
 	"R3",           // Button_RightThumb
 	"DPad Up",      // Button_DUp
@@ -822,6 +991,30 @@ static const char * gXPlorerButtonNames[GamepadType_Max] =
 	"Unavailable",	// Button_ThumbLY
 	"Motion",		// Button_ThumbRX
 	"Tilt"			// Button_ThumbRY
+};
+
+static const char * gGamePadProButtonNames[GamepadType_Max] =
+{
+	"Yellow",		// Button_A
+	"Green",		// Button_B
+	"Red",			// Button_X
+	"Blue",			// Button_Y
+	"L1",           // Button_White
+	"R1",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Start",        // Button_Start
+	"Select",       // Button_Back
+	"Unavailable",  // Button_LeftThumb
+	"Unavailable",  // Button_RightThumb
+	"Up",      // Button_DUp
+	"Down",    // Button_DDown
+	"Left",    // Button_DLeft
+	"Right",   // Button_DRight
+	"Unavailable",  // Button_ThumbLX
+	"Unavailable",  // Button_ThumbLY
+	"Unavailable",  // Button_ThumbRX
+	"Unavailable"   // Button_ThumbRY
 };
 
 // Gamepad Info
@@ -1108,14 +1301,23 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[29]
 	},
 
-	// GGE909 PC Recoil Pad
+	// GGE90x PC Recoil Pad
+	{
+		"GGE908 Recoil Pad",
+		"GGE908 PC Recoil Pad",
+		0x0F30, 0x0107,
+		gGGE909ButtonID,
+		gGGE909ButtonNames,
+		&gGamepadDescriptors[30]
+	},
+
 	{
 		"GGE909 Recoil Pad",
 		"GGE909 PC Recoil Pad",
 		0x0F30, 0x010B,
 		gGGE909ButtonID,
 		gGGE909ButtonNames,
-		&gGamepadDescriptors[30]
+		&gGamepadDescriptors[31]
 	},
 
 	// Super Joy Box 3 Pro
@@ -1125,7 +1327,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8801,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[31]
+		&gGamepadDescriptors[32]
 	},
 
 	// PSX/USB Pad
@@ -1135,7 +1337,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x8631, 0x1128,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[32]
+		&gGamepadDescriptors[33]
 	},
 
 	// PS3 SIXAXIS Controller
@@ -1145,7 +1347,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x054C, 0x0268,
 		gSixaxisButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[33]
+		&gGamepadDescriptors[34]
 	},
 
 	// Random PC Gamepad (this one needs fleshing out... and i dont know the button names)
@@ -1155,7 +1357,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x3013,
 		gUSBGamepadButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[34]
+		&gGamepadDescriptors[35]
 	},
 
 	// Twin Shock
@@ -1165,7 +1367,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1241, 0x5004,
 		gTwinShockButtonID,
 		gTwinShockButtonNames,
-		&gGamepadDescriptors[35]
+		&gGamepadDescriptors[36]
 	},
 
 	// UNIVERSAL Rumble Wheel
@@ -1175,7 +1377,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x103F,
 		gUNIVERSALRumbleWheelButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[36]
+		&gGamepadDescriptors[37]
 	},
 
 	// Mad Catz Gamepad
@@ -1185,26 +1387,110 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0738, 0x4716,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		&gGamepadDescriptors[37]
+		&gGamepadDescriptors[38]
 	},
 
-	// Mad Catz Gamepad
+	// Saitek Gamepads
 	{
 		"Saitek P990 Gamepad",
 		"Saitek P990 Dual Analog Pad",
 		0x06A3, 0x040B,
-		gSaitekButtonID,
-		gSaitekButtonNames,
-		&gGamepadDescriptors[38]
+		gSaitek990ButtonID,
+		gSaitek990ButtonNames,
+		&gGamepadDescriptors[39]
 	},
 
-	// Mad Catz Gamepad
+	{
+		"Saitek P880 Gamepad",
+		"p880",
+		0x07B5, 0x0312,
+		gSaitek880ButtonID,
+		gSaitek880ButtonNames,
+		&gGamepadDescriptors[40]
+	},
+
+	// TigerGame PS2 Gamepad Adapters
+	{
+		"PS2 Gamepad",
+		"TigerGame PS/PS2 Game Controller Adapter",
+		0x6666, 0x8802,
+		gTitaniumButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[41]
+	},
+
 	{
 		"PS2 Gamepad",
 		"TigerGame PS/PS2 Game Controller Adapter",
 		0x6666, 0x8804,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
+		&gGamepadDescriptors[42]
+	},
+
+	// PS2 Adapter
+	{
+		"PS2 Gamepad",
+		"Psx Gamepad 1",
+		0x045E, 0x1100,
+		gUnusualPS2AdapterButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[43]
+	},
+
+	{
+		"PS2 Gamepad",
+		"Generic   USB  Joystick",
+		0x0079, 0x0006,
+		gGGE909VariantButtonID,
+		gPS2LookAlikeButtonNames,
+		&gGamepadDescriptors[44]
+	},
+
+	{
+		"PS2 Gamepad",
+		"PS2->USB Gamepad Adapter",
+		0x19FA, 0x8D91,
+		gJoyBox3ButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[45]
+	},
+
+	{
+		"PS2 Gamepad",
+		"USB  Joystick",
+		0x1345, 0x0003,
+		gRadioshackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[46]
+	},
+
+	{
+		"PS2 Gamepad",
+		"USB Game Device",
+		0x04B4, 0xC681,
+		gGGE909ButtonID,	// BEST GUESS: this should possibly use the gGGE909VariantButtonID instead (can't check)
+		gPS2ButtonNames,
+		&gGamepadDescriptors[47]
+	},
+
+	// Gravis GamePad Pro USB
+	{
+		"GamePad Pro",
+		"GamePad Pro USB",
+		0x0428, 0x4001,
+		gGamePadProButtonID,
+		gGamePadProButtonNames,
+		&gGamepadDescriptors[48]
+	},
+
+	// Guitar Hero X-Plorer
+	{
+		"Guitar Controller",
+		"Guitar Hero Controller",
+		0, 0,
+		gXGuitarButtonID,
+		gXPlorerButtonNames,
 		NULL
 	}
 

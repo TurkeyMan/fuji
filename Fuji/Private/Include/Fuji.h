@@ -600,8 +600,11 @@ enum MFEndian
 #define MFUNFLAG(x, y) ((x)&=~(y))
 #define MFFLAG(x, y) ((x)|=(y))
 #define MFBIT(x) (1<<(x))
+#if defined(MF_ENDIAN_BIG)
+#define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch3) | ((uint32)(uint8)(ch2) << 8) | ((uint32)(uint8)(ch1) << 16) | ((uint32)(uint8)(ch0) << 24 ))
+#else
 #define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
-
+#endif
 
 /*** Additional includes ***/
 
