@@ -255,8 +255,8 @@ UTIL_OBJS := $(ZLIB) \
 	Util/F3D.o \
 	Source/Drivers/Null/MFHeap_Null.o \
 	Source/Drivers/Null/MFDebug_Null.o \
-	Source/Drivers/Linux/MFDebug_Linux.o \
-	Source/Drivers/PC/MFDebug_PC.o
+	Source/Drivers/PC/MFDebug_PC.o \
+	Source/Drivers/PSP/MFDebug_PSP.o
 
 #-------------------------------------------------------------------
 # End Objects
