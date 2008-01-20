@@ -88,7 +88,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint64 bytes)
+int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
@@ -103,7 +103,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint64 bytes)
 	return (int)bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint64 bytes)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
@@ -216,7 +216,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
 							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0);
-	pFindData->fileSize = (uint64)statbuf.st_size;
+	pFindData->fileSize = statbuf.st_size;
 	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
 
 	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
@@ -244,7 +244,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
 							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0);
-	pFindData->fileSize = (uint64)statbuf.st_size;
+	pFindData->fileSize = statbuf.st_size;
 	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
 
 	return true;

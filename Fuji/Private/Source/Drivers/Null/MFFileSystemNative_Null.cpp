@@ -87,7 +87,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint64 bytes)
+int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
@@ -101,7 +101,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, uint64 bytes)
 	return (int)bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, uint64 bytes)
+int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 {
 	MFCALLSTACK;
 
