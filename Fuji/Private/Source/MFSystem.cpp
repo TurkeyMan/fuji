@@ -135,6 +135,7 @@ int gRestart = 1;
 uint32 gFrameCount = 0;
 float gSystemTimeDelta;
 
+#if !defined(_FUJI_UTIL)
 MenuItemStatic quitOption;
 MenuItemStatic restartOption;
 
@@ -459,6 +460,33 @@ int MFSystem_GameLoop()
 	return gQuit;
 }
 
+void MFSystem_UpdateTimeDelta()
+{
+	MFCALLSTACK;
+
+#if defined(MF_WINDOWS)
+	static uint64 clock = MFSystem_ReadRTC();
+	static uint64 freq = MFSystem_GetRTCFrequency();
+	uint64 curClock = MFSystem_ReadRTC();
+
+	while(curClock - clock < freq/85)
+	{
+		Sleep(1);
+		curClock = MFSystem_ReadRTC();
+	}
+	clock = curClock;
+#endif
+
+	gSystemTimer.Update();
+	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
+}
+
+float MFSystem_GetFPS()
+{
+	return gSystemTimer.GetFPS();
+}
+#endif // !defined(_FUJI_UTIL)
+
 MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
@@ -487,32 +515,6 @@ const char * MFSystem_GetSettingString(int tabDepth)
 void MFSystem_InitFromSettings(const MFIniLine *pSettings)
 {
 	
-}
-
-void MFSystem_UpdateTimeDelta()
-{
-	MFCALLSTACK;
-
-#if defined(MF_WINDOWS)
-	static uint64 clock = MFSystem_ReadRTC();
-	static uint64 freq = MFSystem_GetRTCFrequency();
-	uint64 curClock = MFSystem_ReadRTC();
-
-	while(curClock - clock < freq/85)
-	{
-		Sleep(1);
-		curClock = MFSystem_ReadRTC();
-	}
-	clock = curClock;
-#endif
-
-	gSystemTimer.Update();
-	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
-}
-
-float MFSystem_GetFPS()
-{
-	return gSystemTimer.GetFPS();
 }
 
 MFPlatform MFSystem_GetCurrentPlatform()

@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 enum KeyType
 {
@@ -977,7 +977,7 @@ void ParseXFile(char *pFilePtr)
 	}
 }
 
-int F3DFile::ReadX(char *pFilename)
+int F3DFile::ReadX(const char *pFilename)
 {
 	FILE *infile;
 	char *file = NULL;

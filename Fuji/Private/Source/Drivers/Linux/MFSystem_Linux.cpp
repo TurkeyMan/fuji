@@ -1,15 +1,17 @@
 #include "Fuji.h"
 
-#if MF_SYSTEM == MF_DRIVER_X11
+#if MF_SYSTEM == MF_DRIVER_LINUX
 
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFInput.h"
 
 #include <sys/time.h>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
 #include <sys/utsname.h>
+#if MF_DISPLAY == MF_DRIVER_X11
+	#include <X11/Xlib.h>
+	#include <X11/keysym.h>
+#endif
 
 #include <stdio.h>
 
@@ -24,6 +26,7 @@ extern int gQuit;
 
 MFPlatform gCurrentPlatform = FP_Linux;
 
+#if !defined(_FUJI_UTIL)
 int main(int argc, char *argv[])
 {
 	MFCALLSTACK;
@@ -46,6 +49,7 @@ void MFSystem_HandleEventsPlatformSpecific()
 {
 	MFCALLSTACK;
 
+#if MF_DISPLAY == MF_DRIVER_X11
 	XEvent event;
 
 	while(XPending(xdisplay))
@@ -112,6 +116,7 @@ void MFSystem_HandleEventsPlatformSpecific()
 				break;
 		}
 	}
+#endif
 }
 
 void MFSystem_UpdatePlatformSpecific()
@@ -121,6 +126,7 @@ void MFSystem_UpdatePlatformSpecific()
 void MFSystem_DrawPlatformSpecific()
 {
 }
+#endif // !defined(_FUJI_UTIL)
 
 uint64 MFSystem_ReadRTC()
 {

@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 extern F3DFile *pModel;
 
@@ -191,7 +191,7 @@ void ParseMD2File(char *pFile, uint32 length)
 	}
 }
 
-int F3DFile::ReadMD2(char *pFilename)
+int F3DFile::ReadMD2(const char *pFilename)
 {
 	FILE *infile;
 	char *file = NULL;

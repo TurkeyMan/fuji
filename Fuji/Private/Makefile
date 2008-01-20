@@ -166,6 +166,7 @@ OBJS := $(ZLIB) \
 	Source/Drivers/D3D9/Materials/MFMat_Standard_D3D9.o \
 	Source/Drivers/Linux/MFFileSystemNative_Linux.o \
 	Source/Drivers/Linux/MFInput_Linux.o \
+	Source/Drivers/Linux/MFSystem_Linux.o \
 	Source/Drivers/Linux/MFThread_Linux.o \
 	Source/Drivers/Linux/MFTranslation_Linux.o \
 	Source/Drivers/Null/MFAuxillaryDisplay_Null.o \
@@ -221,7 +222,6 @@ OBJS := $(ZLIB) \
 	Source/Drivers/WIN32/MFSockets_WINSOCK.o \
 	Source/Drivers/WIN32/MFThread_WIN32.o \
 	Source/Drivers/X11/MFDisplay_X11.o \
-	Source/Drivers/X11/MFSystem_X11.o \
 	Source/Drivers/XBox/MFDisplay_XB.o \
 	Source/Drivers/XBox/MFHeap_XB.o \
 	Source/Drivers/XBox/MFInput_XB.o \
@@ -243,20 +243,40 @@ UTIL_OBJS := $(ZLIB) \
 	$(TINYXML) \
 	Source/MFCallstack.o \
 	Source/MFDebug.o \
+	Source/MFFileSystem.o \
 	Source/MFHeap.o \
 	Source/MFIni.o \
 	Source/MFMatrix.o \
+	Source/MFSockets.o \
 	Source/MFString.o \
 	Source/MFStringCache.o \
+	Source/MFSystem.o \
 	Source/MFTextureUtil.o \
 	Source/MFVector.o \
 	Source/MFQuaternion.o \
 	Source/Util.o \
 	Util/F3D.o \
-	Source/Drivers/Null/MFHeap_Null.o \
+	Source/FileSystem/MFFileSystemCachedFile.o \
+	Source/FileSystem/MFFileSystemHTTP.o \
+	Source/FileSystem/MFFileSystemMemory.o \
+	Source/FileSystem/MFFileSystemNative.o \
+	Source/FileSystem/MFFileSystemZipFile.o \
+	Source/Drivers/Linux/MFFileSystemNative_Linux.o \
+	Source/Drivers/Linux/MFSystem_Linux.o \
+	Source/Drivers/Linux/MFThread_Linux.o \
 	Source/Drivers/Null/MFDebug_Null.o \
+	Source/Drivers/Null/MFFileSystemNative_Null.o \
+	Source/Drivers/Null/MFHeap_Null.o \
+	Source/Drivers/Null/MFSockets_Null.o \
+	Source/Drivers/Null/MFSystem_Null.o \
+	Source/Drivers/Null/MFThread_Null.o \
 	Source/Drivers/PC/MFDebug_PC.o \
-	Source/Drivers/PSP/MFDebug_PSP.o
+	Source/Drivers/PC/MFSystem_PC.o \
+	Source/Drivers/PSP/MFDebug_PSP.o \
+	Source/Drivers/WIN32/MFFileSystemNative_WIN32.o \
+	Source/Drivers/WIN32/MFHeap_WIN32.o \
+	Source/Drivers/WIN32/MFSockets_WINSOCK.o \
+	Source/Drivers/WIN32/MFThread_WIN32.o
 
 #-------------------------------------------------------------------
 # End Objects

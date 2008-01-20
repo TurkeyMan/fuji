@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*));
 
@@ -837,7 +837,7 @@ void ParseASEFile(char *pFilePtr)
 	}
 }
 
-int F3DFile::ReadASE(char *pFilename)
+int F3DFile::ReadASE(const char *pFilename)
 {
 	FILE *infile;
 	char *file = NULL;

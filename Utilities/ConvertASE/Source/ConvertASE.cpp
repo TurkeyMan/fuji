@@ -1,8 +1,11 @@
 #define VERSION 100
 
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 #include "MFSystem.h"
+#include "MFFileSystem.h"
+
+void WriteScene(F3DFile *pModel, const char *pFilename);
 
 F3DFile *pModel;
 
@@ -170,7 +173,9 @@ int main(int argc, char *argv[])
 			pModel->GetCollisionChunk()->collisionObjects.size() ||
 			pModel->GetRefPointChunk()->refPoints.size())
 		{
-			pModel->WriteMDL(dest, platform);
+			uint32 size;
+			void *pMdl = pModel->CreateMDL(&size, platform);
+//			dest
 			printf("> %s\n", dest);
 		}
 
@@ -179,11 +184,16 @@ int main(int argc, char *argv[])
 			// write animation file
 			dest[a] = 0;
 			MFString_Cat(dest, "anm");
-			pModel->WriteANM(dest, platform);
-
+			uint32 size;
+			void *pAnm = pModel->CreateANM(&size, platform);
+//			dest
 			// print the model
 			printf("> %s\n", dest);
 		}
+	}
+	else if(!MFString_CaseCmp(&dest[a], "scn"))
+	{
+		WriteScene(pModel, dest);
 	}
 	else
 	{
@@ -194,4 +204,9 @@ int main(int argc, char *argv[])
 	delete pModel;
 
 	return 0;
+}
+
+void WriteScene(F3DFile *pModel, const char *pFilename)
+{
+	
 }

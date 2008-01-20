@@ -456,12 +456,12 @@ bool MFFile_IsEOF(MFFile* fileHandle)
 // stdio signiture functions (these can be used as a callback to many libs and API's)
 size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (uint32)MFFile_Read((MFFile*)fileHandle, pBuffer, size*count, false);
+	return (size_t)MFFile_Read((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
 }
 
 size_t MFFile_StdWrite(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (uint32)MFFile_Write((MFFile*)fileHandle, pBuffer, size*count, false);
+	return (size_t)MFFile_Write((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
 }
 int MFFile_StdClose(void* fileHandle)
 {

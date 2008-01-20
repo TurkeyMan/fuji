@@ -26,7 +26,7 @@ INTDIR = Build/$(CONFIG)
 
 FUJILIB = $(FUJIPATH)/Lib/libFujiUtil_$(CONFIG).a
 
-INCDIR = ../../Fuji/Include ../../Fuji/Source ../../Fuji/Util ../../Fuji/Middleware ../../Fuji/Middleware/zlib ../../Fuji/Middleware/lpng1212
+INCDIR = $(FUJIPATH)/Include $(FUJIPATH)/Include/Util $(FUJIPATH)/Source $(FUJIPATH)/Util $(FUJIPATH)/Middleware $(FUJIPATH)/Middleware/zlib $(FUJIPATH)/Middleware/lpng1212
 CFLAGS = -Wall -D_FUJI_UTIL -D_$(PLATFORM)
 
 ifeq ($(BUILD),Debug)

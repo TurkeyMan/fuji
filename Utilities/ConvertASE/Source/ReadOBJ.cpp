@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 
 extern F3DFile *pModel;
 

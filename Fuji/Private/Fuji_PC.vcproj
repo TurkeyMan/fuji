@@ -481,6 +481,9 @@
 						RelativePath=".\Source\Drivers\Linux\MFInput_Linux.cpp">
 					</File>
 					<File
+						RelativePath=".\Source\Drivers\Linux\MFSystem_Linux.cpp">
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Linux\MFThread_Linux.cpp">
 					</File>
 					<File
@@ -699,9 +702,6 @@
 					Filter="">
 					<File
 						RelativePath=".\Source\Drivers\X11\MFDisplay_X11.cpp">
-					</File>
-					<File
-						RelativePath=".\Source\Drivers\X11\MFSystem_X11.cpp">
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\X11\X11_linux.h">

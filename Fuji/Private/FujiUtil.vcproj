@@ -109,6 +109,12 @@
 				RelativePath=".\Source\MFDebug.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFFileSystem.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFFileSystem_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFFont_Internal.h">
 			</File>
 			<File
@@ -127,10 +133,22 @@
 				RelativePath=".\Source\MFQuaternion.cpp">
 			</File>
 			<File
+				RelativePath=".\Source\MFSockets.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSockets_Internal.h">
+			</File>
+			<File
 				RelativePath=".\Source\MFString.cpp">
 			</File>
 			<File
 				RelativePath="Source\MFStringCache.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSystem.cpp">
+			</File>
+			<File
+				RelativePath=".\Source\MFSystem_Internal.h">
 			</File>
 			<File
 				RelativePath=".\Source\MFTexture_Internal.h">
@@ -153,21 +171,95 @@
 					<File
 						RelativePath=".\Source\Drivers\Pc\MFDebug_PC.cpp">
 					</File>
+					<File
+						RelativePath=".\Source\Drivers\Pc\MFSystem_PC.cpp">
+					</File>
 				</Filter>
 				<Filter
 					Name="Null"
 					Filter="">
 					<File
+						RelativePath=".\Source\Drivers\Null\MFDebug_Null.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Null\MFFileSystemNative_Null.cpp">
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Null\MFSockets_Null.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Null\MFSystem_Null.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Null\MFThread_Null.cpp">
 					</File>
 				</Filter>
 				<Filter
 					Name="WIN32"
 					Filter="">
 					<File
+						RelativePath=".\Source\Drivers\Win32\MFFileSystemNative_WIN32.cpp">
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Win32\MFHeap_WIN32.cpp">
 					</File>
+					<File
+						RelativePath=".\Source\Drivers\Win32\MFSockets_WINSOCK.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Win32\MFThread_WIN32.cpp">
+					</File>
 				</Filter>
+				<Filter
+					Name="Linux"
+					Filter="">
+					<File
+						RelativePath=".\Source\Drivers\Linux\MFFileSystemNative_Linux.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Linux\MFSystem_Linux.cpp">
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Linux\MFThread_Linux.cpp">
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="FileSystem"
+				Filter="">
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile_Internal.h">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP_Internal.h">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory_Internal.h">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemNative_Internal.h">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp">
+				</File>
+				<File
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile_Internal.h">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -403,17 +495,6 @@
 			<File
 				RelativePath=".\Util\F3D.h">
 			</File>
-		</Filter>
-		<Filter
-			Name="Drivers"
-			Filter="">
-			<Filter
-				Name="Null"
-				Filter="">
-				<File
-					RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp">
-				</File>
-			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

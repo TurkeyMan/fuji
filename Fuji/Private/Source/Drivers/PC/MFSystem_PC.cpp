@@ -16,6 +16,7 @@ MFPlatform gCurrentPlatform = FP_PC;
 
 char *gpCommandLineBuffer = NULL;
 
+#if !defined(_FUJI_UTIL)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
 	MFCALLSTACK;
@@ -83,6 +84,7 @@ void MFSystem_UpdatePlatformSpecific()
 void MFSystem_DrawPlatformSpecific()
 {
 }
+#endif
 
 uint64 MFSystem_ReadRTC()
 {

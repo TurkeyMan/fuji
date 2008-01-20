@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "F3D.h"
+#include "Util/F3D.h"
 #include "MFMatrix.h"
 
 #include "tinyxml/tinyxml.h"
@@ -945,7 +945,7 @@ void ParseDAERootElement(TiXmlElement *pRoot)
 	}
 }
 
-int F3DFile::ReadDAE(char *pFilename)
+int F3DFile::ReadDAE(const char *pFilename)
 {
 	transformMatrix = MFMatrix::identity;
 
