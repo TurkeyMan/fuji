@@ -46,7 +46,7 @@ ASFLAGS = $(CFLAGS)
 LDFLAGS =
 #LIBS = -lFuji_$(CONFIG)
 
-LIBS := -lc -lm -lstdc++
+LIBS := -lc -lm -lstdc++ -lpthread
 
 ifeq ($(PLATFORM),OSX)
 INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
