@@ -9,6 +9,16 @@ void WriteScene(F3DFile *pModel, const char *pFilename);
 
 F3DFile *pModel;
 
+void SaveFile(const char *pFilename, void *pBuffer, uint32 size)
+{
+	FILE *pFile = fopen(pFilename, "wb");
+	if(pFile)
+	{
+		fwrite(pBuffer, 1, size, pFile);
+		fclose(pFile);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	MFPlatform platform = FP_Unknown;
@@ -175,7 +185,7 @@ int main(int argc, char *argv[])
 		{
 			uint32 size;
 			void *pMdl = pModel->CreateMDL(&size, platform);
-//			dest
+			SaveFile(dest, pMdl, size);
 			printf("> %s\n", dest);
 		}
 
@@ -186,7 +196,7 @@ int main(int argc, char *argv[])
 			MFString_Cat(dest, "anm");
 			uint32 size;
 			void *pAnm = pModel->CreateANM(&size, platform);
-//			dest
+			SaveFile(dest, pAnm, size);
 			// print the model
 			printf("> %s\n", dest);
 		}
