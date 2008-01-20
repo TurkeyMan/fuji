@@ -405,6 +405,22 @@ INCDIR   :=$(INCDIR) . /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/include/
 # end OSX
 endif
 
+ifeq ($(PLATFORM),SYMBIAN)
+
+SYMBIANDEV = C:\Symbian\9.3\S60_3rd_FP2_Beta\epoc32
+
+CC       = arm-none-symbianelf-gcc
+CXX      = arm-none-symbianelf-g++
+AS       = arm-none-symbianelf-as
+LD       = arm-none-symbianelf-ld
+AR       = arm-none-symbianelf-ar
+RANLIB   = arm-none-symbianelf-ranlib
+STRIP    = arm-none-symbianelf-strip
+INCDIR   :=$(INCDIR) . $(SYMBIANDEV)/include $(SYMBIANDEV)/include/stdapis
+
+# end SYMBIAN
+endif
+
 
 OBJLIST = $(patsubst %,$(INTDIR)/%,$(OBJS))
 

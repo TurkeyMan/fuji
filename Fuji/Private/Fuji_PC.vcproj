@@ -1525,6 +1525,12 @@
 			</Filter>
 		</Filter>
 		<File
+			RelativePath=".\Makefile">
+		</File>
+		<File
+			RelativePath=".\MakeGame.inc">
+		</File>
+		<File
 			RelativePath=".\Releasenotes.txt">
 		</File>
 		<File

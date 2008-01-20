@@ -30,6 +30,7 @@
 		MF_ARCH_MIPS
 		MF_ARCH_SH4
 		MF_ARCH_SPU
+		MF_ARCH_ARM
 
 	Endian:
 		MF_ENDIAN_LITTLE
@@ -52,6 +53,7 @@
 		MF_WII
 		MF_DC
 		MF_AMIGA
+		MF_SYMBIAN
 
 
 	We'll also define some #define's to tell us which drivers to use.
@@ -174,6 +176,12 @@
 	#define MF_ARCH_PPC
 #elif defined(__i386__) || defined(_M_IX86)
 	#define MF_ARCH_X86
+#elif defined(_SYMBIAN)
+	#define MF_SYMBIAN
+	#define MF_PLATFORM SYMBIAN
+	#define MF_ARCH_ARM
+	#define MF_ENDIAN_LITTLE
+	#define MF_32BIT
 #else
 	// assume x86 if we couldnt identify an architecture, since its the most likely
 	#define MF_ARCH_X86
@@ -193,10 +201,12 @@
 #endif
 
 // select architecture endian
-#if defined(MF_ARCH_PPC)
-	#define MF_ENDIAN_BIG
-#else
-	#define MF_ENDIAN_LITTLE
+#if !defined(MF_ENDIAN_BIG) && !defined(MF_ENDIAN_LITTLE)
+	#if defined(MF_ARCH_PPC) || defined(MF_ARCH_SPU)
+		#define MF_ENDIAN_BIG
+	#else
+		#define MF_ENDIAN_LITTLE
+	#endif
 #endif
 
 // select asm format
@@ -235,6 +245,7 @@
 #define MF_DRIVER_DC		23
 #define MF_DRIVER_AMIGA		24
 #define MF_DRIVER_WII		25
+#define MF_DRIVER_SYMBIAN	26
 
 
 /*** Compiler definitions ***/
@@ -278,6 +289,7 @@ enum MFPlatform
 	FP_XBox360,	/**< XBox360 */
 	FP_PS3,		/**< Playstation 3 */
 	FP_Wii,		/**< Nintendo Wii */
+	FP_Symbian,	/**< Symbian OS */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
@@ -492,6 +504,12 @@ enum MFEndian
 	#define MF_INPUT		MF_DRIVER_GC
 	#define MF_SYSTEM		MF_DRIVER_GC
 
+#elif defined(MF_SYMBIAN)
+
+	#define MF_NO_CRT
+
+	// specify drivers
+
 #endif
 
 #if defined(_FUJI_UTIL)
@@ -544,7 +562,9 @@ enum MFEndian
 #endif
 
 // enable this define to allow the NULL drivers to operate using the standard CRT where appropriate
-#define _USE_CRT_FOR_NULL_DRIVERS
+#if !defined(MF_NO_CRT)
+	#define _USE_CRT_FOR_NULL_DRIVERS
+#endif
 
 /*** Locale Options ***/
 
