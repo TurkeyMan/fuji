@@ -11,6 +11,8 @@
 
 #if MF_DISPLAY == MF_DRIVER_X11
 	#include <GL/glx.h>
+	#include "../X11/X11_linux.h"
+	#include <stdio.h>
 
 	const int glAttrsSingle[] =
 	{
@@ -31,11 +33,61 @@
 
 	GLXWindow glXWindow;
 	GLXContext glXContext = NULL;
+	GLXFBConfig *fbConfigs = NULL;
 
+	XVisualInfo *MFRenderer_GetVisualInfo()
+	{
+		XVisualInfo *visualInfo = NULL;
+
+		if(!glXQueryExtension(xdisplay, NULL, NULL))
+		{
+			MFDebug_Error("GLX extension not available");
+			MFDisplay_DestroyDisplay();
+			return NULL;
+		}
+
+		int glXMajor, glXMinor;
+		if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3))
+		{
+			MFDebug_Error(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
+			MFDisplay_DestroyDisplay();
+			return NULL;
+		}
+
+		// Try and obtain a suitable FBconfig, try for double buffering first
+		int numConfigs;
+		fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
+		if(numConfigs == 0)
+		{
+			fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
+			if(numConfigs == 0)
+			{
+				MFDebug_Error("Unable to obtain a suitable glX FBConfig");
+				MFDisplay_DestroyDisplay();
+				return NULL;
+			}
+		}
+
+		if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL)
+		{
+			MFDebug_Error("Unable to obtain a visualInfo structure for the associated FBConfig");
+			MFDisplay_DestroyDisplay();
+			return NULL;
+		}
+
+		if(visualInfo->depth < 16)
+		{
+			MFDebug_Error("Need at least a 16 bit screen!");
+			MFDisplay_DestroyDisplay();
+			return NULL;
+		}
+
+		return visualInfo;
+	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>
-	#include <gl\gl.h>
+	#include <gl/gl.h>
 
 	extern HINSTANCE apphInstance;
 	extern HWND apphWnd;
@@ -57,7 +109,53 @@ void MFRenderer_DeinitModulePlatformSpecific()
 int MFRenderer_CreateDisplay()
 {
 #if MF_DISPLAY == MF_DRIVER_X11
+	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
+	{
+		MFDebug_Error("Unable to associate window with a GLXWindow");
+		MFDisplay_DestroyDisplay();
+		return 1;
+	}
 
+	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true)))
+	{
+		MFDebug_Error("Unable to create GLXContext");
+		MFDisplay_DestroyDisplay();
+		return 1;
+	}
+
+	XFree(fbConfigs);
+	fbConfigs = NULL;
+
+	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext))
+	{
+		MFDebug_Error("Unable to bind GLXContext");
+		MFDisplay_DestroyDisplay();
+		return 1;
+	}
+
+	// Check OpenGL version
+	const char *glVersionStr = (const char *)glGetString(GL_VERSION);
+	int32 majorGLVersion, minorGLVersion;
+
+	if(sscanf(glVersionStr, "%d.%d.%*d", &majorGLVersion, &minorGLVersion) != 2)
+	{
+		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2)
+		{
+			MFDebug_Error("Unable to determine OpenGl version");
+			MFDisplay_DestroyDisplay();
+			return 1;
+		}
+	}
+
+	if(majorGLVersion == 1 && minorGLVersion < 4)
+	{
+		MFDebug_Error("Need at least OpenGL version 1.4");
+		MFDisplay_DestroyDisplay();
+		return 1;
+	}
+
+	// Might want to check for extensions here
+	//...
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	GLuint pixelFormat;
 
@@ -118,7 +216,6 @@ int MFRenderer_CreateDisplay()
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
-
 #endif
 
 	glShadeModel(GL_SMOOTH);
@@ -145,10 +242,30 @@ int MFRenderer_CreateDisplay()
 
 void MFRenderer_DestroyDisplay()
 {
+#if MF_DISPLAY == MF_DRIVER_X11
+	if(fbConfigs != NULL)
+	{
+		XFree(fbConfigs);
+		fbConfigs = NULL;
+	}
+
+	if(glXContext != NULL)
+	{
+		glXDestroyContext(xdisplay, glXContext);
+		glXContext = NULL;
+	}
+
+	if(glXWindow != 0)
+	{
+		glXDestroyWindow(xdisplay, glXWindow);
+		glXWindow = 0;
+	}
+#endif
 }
 
 void MFRenderer_ResetDisplay()
 {
+	MFRenderer_ResetViewport();
 }
 
 void MFRenderer_BeginFrame()

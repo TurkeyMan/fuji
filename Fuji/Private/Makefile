@@ -188,6 +188,7 @@ OBJS := $(ZLIB) \
 	Source/Drivers/OpenGL/MFMaterial_OpenGL.o \
 	Source/Drivers/OpenGL/MFModel_OpenGL.o \
 	Source/Drivers/OpenGL/MFPrimitive_OpenGL.o \
+	Source/Drivers/OpenGL/MFRenderer_OpenGL.o \
 	Source/Drivers/OpenGL/MFTexture_OpenGL.o \
 	Source/Drivers/OpenGL/Materials/MFMat_Standard_OpenGL.o \
 	Source/Drivers/PC/MFAuxillaryDisplay_PC.o \

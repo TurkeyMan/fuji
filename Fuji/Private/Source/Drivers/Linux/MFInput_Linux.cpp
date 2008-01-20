@@ -6,15 +6,18 @@
 #include "MFMath.h"
 #include "../PC/MFInputMappings_PC.h"
 
-#include "X11_linux.h"
+#include "../X11/X11_linux.h"
 
+#include <X11/keysym.h>
 #include <X11/extensions/XInput.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <linux/joystick.h>
 #include <errno.h>
+#if !defined(__CYGWIN__)
+#include <linux/joystick.h>
+#endif
 
 /*** Structure definitions ***/
 
@@ -100,6 +103,7 @@ MFGamepadInfo gEMS2Info =
 
 void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
 {
+#if !defined(__CYGWIN__)
 	MFCALLSTACK;
 
 	pGamepad->joyFD = fd;
@@ -193,6 +197,7 @@ void MFInputLinux_InitGamepad(int fd, LinuxGamepad *pGamepad)
 		}
 	}
 */
+#endif
 }
 
 void MFInput_InitModulePlatformSpecific()
@@ -247,6 +252,7 @@ void MFInput_DeinitModulePlatformSpecific()
 
 void MFInput_UpdatePlatformSpecific()
 {
+#if !defined(__CYGWIN__)
 	struct js_event js;
 	int error;
 
@@ -274,6 +280,7 @@ void MFInput_UpdatePlatformSpecific()
 			}
 		}
 	}
+#endif
 }
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
