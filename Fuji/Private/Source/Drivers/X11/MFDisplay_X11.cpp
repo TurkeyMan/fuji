@@ -19,7 +19,23 @@ struct Resolution
 };
 
 // Data definition
-Resolution defaultModes[] = {{320, 240, 0.0f}, {640, 480, 0.0f}, {800, 600, 0.0f}, {1024, 768, 0.0f}, {1280, 1024, 0.0f}, {0, 0, 0.0f}};
+static Resolution defaultModes[] =
+{
+	{320, 240, 0.0f},
+	{480, 272, 0.0f},
+	{640, 480, 0.0f},
+	{800, 600, 0.0f},
+	{1024, 576, 0.0f},
+	{1024, 768, 0.0f},
+	{1280, 720, 0.0f},
+	{1280, 960, 0.0f},
+	{1280, 1024, 0.0f},
+	{1920, 1080, 0.0f},
+	{1920, 1200, 0.0f},
+	{0, 0, 0.0f},
+	{0, 0, 0.0f}
+};
+
 char modeString[24] = "";
 const char *resMenuItems[] = {"-", modeString, "+", NULL};
 
@@ -224,29 +240,29 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	screen = DefaultScreen(xdisplay);
 	rootWindow = RootWindow(xdisplay, screen);
 
+	// build our internal list of available video modes
 	GetModes(&modes, !gDisplay.windowed);
-	if(!FindMode(modes, width, height))
+	while(!FindMode(modes, width, height))
 	{
 		if(!gDisplay.windowed)
-		{ // Try windowed mode
+		{
+			// no fullscreen mode, try windowed mode instead
 			MFDebug_Warn(1, "No suitable modes for fullscreen mode, trying windowed mode");
 
 			gDisplay.windowed = true;
 
 			FreeModes();
 			GetModes(&modes, false);
-			if(!FindMode(modes, width, height))
-			{
-				MFDebug_Error("No suitable modes found");
-				MFDisplay_DestroyDisplay();
-				return 1;
-			}
 		}
 		else
 		{
-			MFDebug_Error("No suitable modes found");
-			MFDisplay_DestroyDisplay();
-			return 1;
+			// default is some sort of custom mode that doesn't appear in the windowed mode list
+			// HACK: we'll add it to the end..
+			modes[numModes].width = width;
+			modes[numModes].height = height;
+			currentMode = numModes;
+			++numModes;
+			break;
 		}
 	}
 
