@@ -96,6 +96,7 @@
 #endif
 
 MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
+MFRect gCurrentViewport;
 
 
 void MFRenderer_InitModulePlatformSpecific()
@@ -300,18 +301,29 @@ void MFRenderer_ClearScreen(uint32 flags)
 	glClear(mask);
 }
 
-void MFRenderer_SetViewport(float x, float y, float width, float height)
+void MFRenderer_GetViewport(MFRect *pRect)
+{
+	*pRect = gCurrentViewport;
+}
+
+void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;
 
-	glViewport((GLint)((x/640.0f) * (float)gDisplay.width), (GLint)((y/480.0f) * (float)gDisplay.height), (GLint)((width/640.0f) * (float)gDisplay.width), (GLint)((height/480.0f) * (float)gDisplay.height));
+	gCurrentViewport = *pRect;
+	glViewport((GLint)pRect->x, (GLint)pRect->y, (GLint)pRect->width, (GLint)pRect->height);
 }
 
 void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
-	MFRenderer_SetViewport(0.f, 0.f, (float)gDisplay.width, (float)gDisplay.height);
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)gDisplay.width;
+	gCurrentViewport.height = (float)gDisplay.height;
+
+	glViewport(0, 0, gDisplay.width, gDisplay.height);
 }
 
 #endif

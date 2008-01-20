@@ -475,6 +475,9 @@
 					Name="Linux"
 					Filter="">
 					<File
+						RelativePath=".\Source\Drivers\Linux\MFFileSystemNative_Linux.cpp">
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Linux\MFInput_Linux.cpp">
 					</File>
 					<File

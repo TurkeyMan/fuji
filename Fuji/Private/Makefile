@@ -164,6 +164,7 @@ OBJS := $(ZLIB) \
 	Source/Drivers/D3D9/MFTexture_D3D9.o \
 	Source/Drivers/D3D9/Materials/MFMat_Effect_D3D9.o \
 	Source/Drivers/D3D9/Materials/MFMat_Standard_D3D9.o \
+	Source/Drivers/Linux/MFFileSystemNative_Linux.o \
 	Source/Drivers/Linux/MFInput_Linux.o \
 	Source/Drivers/Linux/MFThread_Linux.o \
 	Source/Drivers/Linux/MFTranslation_Linux.o \
