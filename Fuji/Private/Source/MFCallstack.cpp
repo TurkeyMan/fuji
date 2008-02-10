@@ -6,6 +6,7 @@
 #include "MFSystem.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
+#include "MFView.h"
 #include "Display_Internal.h"
 
 #if defined(_MFCALLSTACK)
@@ -20,18 +21,15 @@
 	#if defined(_MFCALLSTACK_PROFILING)
 
 		// maximum number of functions that can be profiled in a frame..
-		static const int gMaxProfileFunctions = 64;
+		static const int gMaxProfileFunctions = 128;
 
-		// used to gather profiling information
-		MFFunctionProfile gProfiles[gMaxProfileFunctions];
+		// an array of pointers to functions added for profiling this frame.
+		MFCallstack_Function *gpProfiles[gMaxProfileFunctions];
 		static int gNumProfileFunctions = 0;
 
-		// stores results of the frames profiling
-		MFFunctionProfile gProfileResults[gMaxProfileFunctions];
-		static int gNumProfileResults = 0;
-
-		MFFunctionProfileTotals gProfileTotals[gMaxProfileFunctions];
-		static int gNumProfileTotals = 0;
+		// used to gather profiling information
+		MFCallstack_FunctionCall gCalls[gMaxProfileFunctions];
+		static int gNumFunctionCalls = 0;
 
 		// frame begin/end times
 		static uint64 gLastBeginTime = 0;
@@ -39,7 +37,7 @@
 		static uint64 gEndTime = 0;
 
 		// profile colours
-		MFVector gProfileColours[] =
+		static MFVector gProfileColours[] =
 		{
 			MakeVector( 1,		0,		0,		1 ),
 			MakeVector( 0,		1,		0,		1 ),
@@ -55,6 +53,13 @@
 		};
 
 		static const int gProfileColourCount = sizeof(gProfileColours) / sizeof(gProfileColours[0]);
+		static int gColourCounter = -1;
+
+		int MFCallstack_GetNextColour()
+		{
+			return gColourCounter = (gColourCounter+1)%gProfileColourCount;
+		}
+
 
 		// debug menu items
 		MenuItemBool drawCallstack(false);
@@ -111,37 +116,57 @@ const char* MFCallstack_GetCallstackString()
 
 #if defined(_MFCALLSTACK)
 
-MFCall::MFCall(const char *pFunction, bool _profile)
+MFCall::MFCall(const char *pFunctionName, MFCallstack_Function *_pFunction)
 {
-	pCallstack[gCallDepth] = pFunction;
+	pCallstack[gCallDepth] = pFunctionName;
 	++gCallDepth;
 
 #if defined(_MFCALLSTACK_PROFILING)
-	if(_profile && gNumProfileFunctions < gMaxProfileFunctions)
+	if(_pFunction && gNumProfileFunctions < gMaxProfileFunctions)
 	{
-		pProfile = &gProfiles[gNumProfileFunctions];
-		++gNumProfileFunctions;
+		pFunction = _pFunction;
 
-		pProfile->pFunction = pFunction;
-		pProfile->startTime = MFSystem_ReadRTC();
+		if(!_pFunction->bAdded)
+		{
+			gpProfiles[gNumProfileFunctions] = _pFunction;
+			++gNumProfileFunctions;
+		}
+
+		++_pFunction->numCalls;
+		++_pFunction->bAdded;
+
+		startTime = MFSystem_ReadRTC();
+
+		if(0)//gNumFunctionCalls < gMaxProfileFunctions)
+		{
+			pCall = &gCalls[gNumFunctionCalls];
+			++gNumFunctionCalls;
+
+			pCall->pFunction = _pFunction;
+			pCall->startTime = startTime;
+		}
+		else
+			pCall = NULL;
 	}
 	else
-	{
-		pProfile = NULL;
-	}
+		pFunction = NULL;
 #endif
 }
 
 MFCall::~MFCall()
 {
-	--gCallDepth;
-
 #if defined(_MFCALLSTACK_PROFILING)
-	if(pProfile)
+	if(pFunction)
 	{
-		pProfile->endTime = MFSystem_ReadRTC();
+		uint64 endTime = MFSystem_ReadRTC();
+		pFunction->totalTime += endTime - startTime;
+
+		if(pCall)
+			pCall->endTime = endTime;
 	}
 #endif
+
+	--gCallDepth;
 }
 
 #endif // defined(_MFCALLSTACK)
@@ -151,39 +176,22 @@ MFCall::~MFCall()
 
 #if defined(_MFCALLSTACK_PROFILING)
 
-MFFunctionProfileTotals* MFCallstackInternal_GetProfileTotals(const char *pFunction)
-{
-	MFCALLSTACK;
-
-	int a;
-	for(a=0; a<gNumProfileTotals; a++)
-	{
-		if(gProfileTotals[a].pFunctionName == pFunction)
-		{
-			return &gProfileTotals[a];
-		}
-	}
-
-	if(a == gNumProfileTotals && gNumProfileTotals < gMaxProfileFunctions)
-	{
-		++gNumProfileTotals;
-
-		gProfileTotals[a].pFunctionName = pFunction;
-		gProfileTotals[a].numCalls = 0;
-		gProfileTotals[a].totalFunctionTime = 0;
-
-		return &gProfileTotals[a];
-	}
-
-	return NULL;
-}
-
 void MFCallstack_BeginFrame()
 {
 	MFCALLSTACK;
 
 	gLastBeginTime = gBeginTime;
 	gBeginTime = MFSystem_ReadRTC();
+}
+
+int MFCallstack_SortPred(const void *pF1, const void *pF2)
+{
+	MFCallstack_Function *pFunc1 = *(MFCallstack_Function**)pF1;
+	MFCallstack_Function *pFunc2 = *(MFCallstack_Function**)pF2;
+
+	return MFString_CaseCmp(pFunc1->pFunctionName, pFunc2->pFunctionName);
+//	return pFunc1->totalTime < pFunc2->totalTime;
+//	return pFunc1->numCalls < pFunc2->numCalls;
 }
 
 void MFCallstack_EndFrame()
@@ -193,28 +201,15 @@ void MFCallstack_EndFrame()
 	// mark the end of the frame
 	gEndTime = MFSystem_ReadRTC();
 
-	// reset the profile totals (totals from this frame will exist until this time next frame)
-	gNumProfileTotals = 0;
-
-	// build profile stats here..
-
-	// copy profile results
-	MFCopyMemory(gProfileResults, gProfiles, sizeof(MFFunctionProfile)*gNumProfileFunctions);
-	gNumProfileResults = gNumProfileFunctions;
-
-	// build profile totals
-	for(int a=0; a<gNumProfileFunctions; a++)
+	// take a copy and reset everything
+	for(int a=0; a<gNumProfileFunctions; ++a)
 	{
-		MFFunctionProfileTotals *pTotals = MFCallstackInternal_GetProfileTotals(gProfiles[a].pFunction);
-
-		if(pTotals)
-		{
-			++pTotals->numCalls;
-			pTotals->totalFunctionTime += gProfiles[a].endTime - gProfiles[a].startTime;
-		}
+		// reset the function
+		gpProfiles[a]->totalTime = 0;
+		gpProfiles[a]->numCalls = 0;
+		gpProfiles[a]->bAdded = false;
 	}
 
-	// reset everything
 	gNumProfileFunctions = 0;
 }
 
@@ -236,18 +231,6 @@ void MFCallstackInternal_DrawMeterLabel(const MFVector &listPos, const MFVector 
 	}
 }
 
-int MFCallstackInternal_GetTotalIndex(int profileIndex)
-{
-	for(int a=0; a<gNumProfileTotals; a++)
-	{
-		if(gProfileResults[profileIndex].pFunction == gProfileTotals[a].pFunctionName)
-			return a;
-	}
-
-	MFDebug_Assert(false, "Profile does not have a total?!!");
-	return -1;
-}
-
 void MFCallstack_Draw()
 {
 	MFCALLSTACK;
@@ -259,28 +242,39 @@ void MFCallstack_Draw()
 		float xoffset = width / 10.0f;
 		float yoffset = height / 6.0f;
 
-		float rtcFreq = (float)MFSystem_GetRTCFrequency();
+		MFView_Push();
 
-		uint32 frameTime = uint32(gBeginTime - gLastBeginTime);
+		MFRect rect = { 0.f, 0.f, width, height };
+		MFView_SetOrtho(&rect);
+
+		float rtcFreq = 1000000.f / (float)MFSystem_GetRTCFrequency();
+
+		uint32 frameDuration = uint32(gBeginTime - gLastBeginTime);
+		float frameTime = (float)frameDuration * rtcFreq;
 
 		MFVector callstackPos = MakeVector(xoffset, yoffset, 0.f, 0.f);
 
-		if(!drawCallstackMeter)
+		// sort the calls
+		qsort(gpProfiles, gNumProfileFunctions, sizeof(gpProfiles[0]), MFCallstack_SortPred);
+
+//		if(!drawCallstackMeter)
 		{
 			// just draw the callstack profiling information..
+			MFPrimitive_DrawUntexturedQuad(callstackPos.x - 10.f, callstackPos.y - 10.f, (width - callstackPos.x) + 10, callstackPos.y + (float)gNumProfileFunctions*16.0f + 10, MakeVector(0, 0, 0, 0.8f));
 
-			MFPrimitive_DrawUntexturedQuad(callstackPos.x - 10.f, callstackPos.y - 10.f, (width - callstackPos.x) + 10, callstackPos.y + (float)gNumProfileTotals*16.0f + 10, MakeVector(0, 0, 0, 0.8f));
-
-			for(int a=0; a<gNumProfileTotals; a++)
+			for(int a=0; a<gNumProfileFunctions; a++)
 			{
-				uint32 microseconds = uint32((float)gProfileTotals[a].totalFunctionTime / (rtcFreq / 1000000.0f));
-				uint32 percent = uint32(((float)microseconds / (float)frameTime) * 100.0f);
+				uint32 microseconds = uint32((float)gpProfiles[a]->totalTime * rtcFreq);
+				uint32 percent = uint32((float)microseconds / 166.66666f);
 
-				MFFont_DrawTextf(MFFont_GetDebugFont(), callstackPos, 16.0f, MFVector::one, "%s", gProfileTotals[a].pFunctionName);
-				MFFont_DrawTextf(MFFont_GetDebugFont(), callstackPos + MakeVector((width - xoffset) - 250.0f, 0, 0), 16.0f, MFVector::one, "- %dus (%d%%) %d calls", microseconds, percent, gProfileTotals[a].numCalls);
+//				MFVector colour = gProfileColours[gpProfiles[a]->functionColour];
+				MFVector colour = MFVector::one;
+				MFFont_DrawTextf(MFFont_GetDebugFont(), callstackPos, 16.0f, colour, "%s", gpProfiles[a]->pFunctionName);
+				MFFont_DrawTextf(MFFont_GetDebugFont(), callstackPos + MakeVector((width - xoffset) - 250.0f, 0, 0), 16.0f, colour, "- %dus (%d%%) %d calls", microseconds, percent, gpProfiles[a]->numCalls);
 				callstackPos.y += 16.0f;
 			}
 		}
+/*
 		else
 		{
 			// draw a meter up the top of the screen representing the frame..
@@ -302,8 +296,8 @@ void MFCallstack_Draw()
 			// draw all the totals
 			for(int a=0; a<gNumProfileTotals; a++)
 			{
-				uint32 microseconds = uint32((float)gProfileTotals[a].totalFunctionTime / (rtcFreq / 1000000.0f));
-				uint32 percent = uint32(((float)microseconds / (float)frameTime) * 100.0f);
+				uint32 microseconds = uint32((float)gpProfiles[a]->totalTime * rtcFreq);
+				uint32 percent = uint32((float)microseconds / 166.66666f);
 
 				MFCallstackInternal_DrawMeterLabel(callstackPos, gProfileColours[a % gProfileColourCount], gProfileTotals[a].pFunctionName, MFStr("- %dus (%d%%) %d calls", microseconds, percent, gProfileTotals[a].numCalls));
 				callstackPos.y += 16.0f;
@@ -317,6 +311,9 @@ void MFCallstack_Draw()
 				MFCallstackInternal_DrawMeterBlock(meterPos, meterDimensions, (float)(gProfileResults[a].startTime - gLastBeginTime) / totalTime, (float)(gProfileResults[a].endTime - gLastBeginTime) / totalTime, gProfileColours[colour % gProfileColourCount]);
 			}
 		}
+*/
+
+		MFView_Pop();
 	}
 }
 
