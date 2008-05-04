@@ -511,6 +511,30 @@ static const int gTwinShockButtonID[GamepadType_Max] =
 	AID_Rz | AID_Negative,	// Button_ThumbRY
 };
 
+static const int gPSVibrationFeedbackButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	6,	// Button_White
+	7,	// Button_Black
+	4,	// Button_LeftTrigger
+	5,	// Button_RightTrigger
+	11,	// Button_Start
+	8,	// Button_Back
+	9,	// Button_LeftThumb
+	10,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+};
+
 static const int gUNIVERSALRumbleWheelButtonID[GamepadType_Max] =
 {
 	2,	// Button_A
@@ -1594,14 +1618,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[52]
 	},
 
-	{
-		"PS2 Gamepad",
-		"  USB  Joystick",
-		0x0E8F, 0x0012,
-		gGGE909ButtonID,
-		gPS2ButtonNames,
-		&gGamepadDescriptors[53]
-	},
 
 	{
 		"XBox 360 Gamepad",
@@ -1609,7 +1625,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046D, 0xC242,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		&gGamepadDescriptors[54]
+		&gGamepadDescriptors[53]
 	},
 
 	{
@@ -1618,7 +1634,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BD, 0xC001,
 		gRandomAdapterButtonID,
 		gPS2ButtonNames,
-		&gGamepadDescriptors[55]
+		&gGamepadDescriptors[54]
 	},
 
 	{
@@ -1627,6 +1643,36 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046D, 0xCAD2,
 		gLogitechDualActionButtonID,
 		gPS2ButtonNames,
+		&gGamepadDescriptors[55]
+	},
+
+	// PS Vibration Feedback Converter
+	{
+		"PS2 Gamepad",
+		"PS Vibration Feedback Converter",
+		0x0C12, 0x0005,
+		gPSVibrationFeedbackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[56]
+	},
+
+	// PS to USB (2P) Convert Cable
+	{
+		"PS2 Gamepad",
+		"PS to USB (2P) Convert Cable",
+		0x0E8F, 0x1006,
+		gPSVibrationFeedbackButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[57]
+	},
+
+	// Speed-Link SL-6535 USB Pad
+	{
+		"SpeedLink SL6535 Gamepad",
+		"Speed-Link SL-6535 USB Pad",
+		0x0E8F, 0x0012,
+		gGGE909VariantButtonID,
+		gGGE909ButtonNames,
 		NULL
 	},
 
