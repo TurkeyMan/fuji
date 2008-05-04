@@ -631,6 +631,54 @@ static const int gGamePadProButtonID[GamepadType_Max] =
 	-1	// Button_ThumbRY
 };
 
+static const int gAirFloButtonID[GamepadType_Max] =
+{
+	0,   // Button_A
+	1,   // Button_B
+	2,   // Button_X
+	3,   // Button_Y
+	4,   // Button_White
+	5,   // Button_Black
+	6,   // Button_LeftTrigger  // if Z axis is present, the L-Trigger is in analog mode, if not, use button 10
+	7,   // Button_RightTrigger // if Rz axis is present the R-Trigger is in analog mode, if not, use button 11
+	9,   // Button_Start
+	8,   // Button_Back
+	11,  // Button_LeftThumb
+	12,  // Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X,                // Button_ThumbLX
+	AID_Y | AID_Negative, // Button_ThumbLY
+	AID_Rz,               // Button_ThumbRX
+	AID_Z | AID_Negative  // Button_ThumbRY
+};
+
+static const int gRandomAdapterButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	1,	// Button_B
+	3,	// Button_X
+	0,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	6,	// Button_LeftTrigger
+	7,	// Button_RightTrigger
+	11,	// Button_Start
+	8,	// Button_Back
+	9,	// Button_LeftThumb
+	10,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+};
+
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -1015,6 +1063,30 @@ static const char * gGamePadProButtonNames[GamepadType_Max] =
 	"Unavailable",  // Button_ThumbLY
 	"Unavailable",  // Button_ThumbRX
 	"Unavailable"   // Button_ThumbRY
+};
+
+static const char * gAirFlo[GamepadType_Max] =
+{
+	"1",            // Button_A
+	"2",            // Button_B
+	"3",            // Button_X
+	"4",            // Button_Y
+	"5",            // Button_White
+	"6",            // Button_Black
+	"7",            // Button_LeftTrigger
+	"8",            // Button_RightTrigger
+	"10",           // Button_Start
+	"9",            // Button_Back
+	"L-Thumb",      // Button_LeftThumb
+	"R-Thumb",      // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis"  // Button_ThumbRY
 };
 
 // Gamepad Info
@@ -1440,10 +1512,10 @@ static MFGamepadInfo gGamepadDescriptors[] =
 
 	{
 		"PS2 Gamepad",
-		"Generic   USB  Joystick",
+		"Macro Vibration Joystick",
 		0x0079, 0x0006,
-		gGGE909VariantButtonID,
-		gPS2LookAlikeButtonNames,
+		gGGE909ButtonID,
+		gPS2ButtonNames,
 		&gGamepadDescriptors[44]
 	},
 
@@ -1491,9 +1563,111 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXGuitarButtonID,
 		gXPlorerButtonNames,
-		NULL
-	}
+		&gGamepadDescriptors[49]
+	},
 
+	// PS3/USB Corded Gamepad
+	{
+		"PS3 Gamepad",
+		"PS3/USB Corded Gamepad",
+		0x046D, 0xCAD1,
+		gLogitechDualActionButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[50]
+	},
+
+	{
+		"PS3 Gamepad",
+		"NYKO AirFlo Controller",
+		0x124B, 0x4D01,
+		gAirFloButtonID,
+		gAirFlo,
+		&gGamepadDescriptors[51]
+	},
+
+	{
+		"PS2 Gamepad",
+		"axe 4 bouton 13 Manette de jeu avec commande de pouce",
+		0x146B, 0x0306,
+		gPowerWaveButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[52]
+	},
+
+	{
+		"PS2 Gamepad",
+		"  USB  Joystick",
+		0x0E8F, 0x0012,
+		gGGE909ButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[53]
+	},
+
+	{
+		"XBox 360 Gamepad",
+		"XUSB Gamepad (Controller)",
+		0x046D, 0xC242,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		&gGamepadDescriptors[54]
+	},
+
+	{
+		"PS2 Gamepad",
+		"USB Joystick",
+		0x12BD, 0xC001,
+		gRandomAdapterButtonID,
+		gPS2ButtonNames,
+		&gGamepadDescriptors[55]
+	},
+
+	{
+		"PS3 Gamepad",
+		"PS3/USB Cordless Gamepad",
+		0x046D, 0xCAD2,
+		gLogitechDualActionButtonID,
+		gPS2ButtonNames,
+		NULL
+	},
+
+	// "Harmonix Guitar for Xbox 360 (Controller)" 1BAD:0002
+	// "Controller (Harmonix Guitar for Xbox 360)" 1BAD:0002
+	// "Harmonix Guitar for PlayStation®3" 12BA:0200
+	// "Guitar Hero3 for PlayStation (R) 3" 12BA:0100
+	// "Controller (Harmonix Drum Kit for Xbox 360)" 1BAD:0003
+	// "Harmonix Drum Kit for PlayStation(R)3" 12BA:0210
+
+/*
+	RB PS3:
+		GREEN FRET - 1
+		RED FRET - 2
+		YELLOW FRET - 3
+		BLUE FRET - 0
+		ORANGE FRET - 4
+		START - 9
+		SELECT - 8
+		FX TRIGGER - AID_Clamp | AID_Rz
+
+	GH3 PS3:
+		Green - 1
+		Red - 2
+		Yellow - 0
+		Blue - 3
+		Orange - 4
+		Start - 9
+		Select - 8
+
+	RB 360:
+		Green - 0
+		Red - 1
+		Yellow - 3
+		Blue - 2
+		Orange - 4
+		Start - 7
+		Back - 6
+		Whammy - AID_Full | AID_Rx
+
+*/
 	// "MP-8868 Dual USB Joypad" 0409:005A
 
 	// "Microsoft SideWinder game pad" 045E:0003

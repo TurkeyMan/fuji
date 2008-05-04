@@ -424,9 +424,9 @@ int MFSystem_GameLoop()
 
 		while(!gQuit)
 		{
+			MFCallstack_BeginFrame();
 			MFSystem_HandleEventsPlatformSpecific();
 
-			MFCallstack_BeginFrame();
 			MFSystem_UpdateTimeDelta();
 			gFrameCount++;
 
@@ -446,8 +446,8 @@ int MFSystem_GameLoop()
 			Game_Draw();
 			MFSystem_Draw();
 
-			MFCallstack_EndFrame();
 			MFRenderer_EndFrame();
+			MFCallstack_EndFrame();
 		}
 
 		if(pSystemCallbacks[MFCB_Deinit])
