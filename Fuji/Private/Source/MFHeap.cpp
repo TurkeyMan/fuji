@@ -100,6 +100,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 		pad += heapAlignment;
 
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(bytes + pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes, pAllocHeap->pHeapData);
+	MFDebug_Assert(pMemory, "Failed to allocate memory!");
 
 	int alignment = (int)((uint32)MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uint32&)pMemory);
 

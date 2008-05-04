@@ -102,10 +102,6 @@ MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 	return NULL;
 }
 
-
-#define MAX_LINES (64000)
-#define MAX_STRINGS (256000)
-#define MAX_STRINGCACHE (128000)
 //=============================================================================
 // Create INI file
 MFIni *MFIni::Create(const char *pFilename)
@@ -141,9 +137,12 @@ MFIni *MFIni::Create(const char *pFilename)
 	MFString_Copy(pMFIni->name, pFilename);
 
 	// allocate temporary buffer for strings & lines
-	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
-	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
-	pMFIni->pCache = MFStringCache_Create(MAX_STRINGCACHE);
+	pMFIni->linesAllocated = 1024;
+	pMFIni->stringsAllocated = 1024;
+	pMFIni->stringCacheSize = memSize+2+(7*4); // 7*4 = memory for a couple of "section" strings..
+	pMFIni->pLines = (MFIniLine*)MFHeap_Alloc(sizeof(MFIniLine)*pMFIni->linesAllocated);
+	pMFIni->pStrings = (const char**)MFHeap_Alloc(sizeof(const char*)*pMFIni->stringsAllocated);
+	pMFIni->pCache = MFStringCache_Create(pMFIni->stringCacheSize);
 
 	// scan though the file
 	pMFIni->lineCount = 0;
@@ -173,9 +172,12 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 	MFString_Copy(pMFIni->name, "Memory Ini");
 
 	// allocate temporary buffer for strings & lines
-	pMFIni->pLines = (MFIniLine *)MFHeap_Alloc(sizeof(MFIniLine)*MAX_LINES);
-	pMFIni->pStrings = (const char **)MFHeap_Alloc(4*MAX_STRINGS);
-	pMFIni->pCache = MFStringCache_Create(MAX_STRINGCACHE);
+	pMFIni->linesAllocated = 1024;
+	pMFIni->stringsAllocated = 1024;
+	pMFIni->stringCacheSize = memSize+2+(7*4); // 7*4 = memory for a couple of "section" strings..
+	pMFIni->pLines = (MFIniLine*)MFHeap_Alloc(sizeof(MFIniLine)*pMFIni->linesAllocated);
+	pMFIni->pStrings = (const char**)MFHeap_Alloc(sizeof(const char*)*pMFIni->stringsAllocated);
+	pMFIni->pCache = MFStringCache_Create(pMFIni->stringCacheSize);
 
 	// scan though the file
 	pMFIni->lineCount = 0;
@@ -209,7 +211,8 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	int tokenLength = 0;
 	char tokenBuffer[2048];
 
-	MFIniLine *pCurrLine = &pLines[lineCount];
+	int currLine = lineCount;
+	MFIniLine *pCurrLine = &pLines[currLine];
 //	const char **pCurrString = &pStrings[stringCount];
 
 	InitLine(pCurrLine);
@@ -229,6 +232,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			// new sub section
 			int oldLineCount = ++lineCount;
 			pSrc = ScanRecursive(pSrc, pSrcEnd);
+			pCurrLine = &pLines[currLine];
 			pCurrLine->subtreeLineCount = lineCount - oldLineCount;
 			lineCount--;
 		}
@@ -247,18 +251,31 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		{
 			if(bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
 			{
-				lineCount++;
-				MFDebug_Assert(lineCount < MAX_LINES, MFStr("MFIni: Exceeded maximum number of lines %d.", MAX_LINES));
-				pCurrLine = &pLines[lineCount];
+				++lineCount;
+				if(lineCount >= linesAllocated)
+				{
+					linesAllocated *= 4;
+					pLines = (MFIniLine*)MFHeap_Realloc(pLines, sizeof(MFIniLine)*linesAllocated);
+				}
+				pCurrLine = &pLines[currLine = lineCount];
 				InitLine(pCurrLine);
 			}
 			bNewLine = false;
 
 			if(bIsSection)
 			{
-				MFDebug_Assert(stringCount < MAX_STRINGS, MFStr("MFIni: Exceeded maximum ini strings %d.", MAX_STRINGS));
+				if(stringCount >= stringsAllocated)
+				{
+					stringsAllocated *= 4;
+					pStrings = (const char **)MFHeap_Realloc(pStrings, sizeof(const char *)*stringsAllocated);
+				}
 				pStrings[stringCount++] = MFStringCache_Add(pCache, "section");
 				pCurrLine->stringCount++;
+			}
+			if(stringCount >= stringsAllocated)
+			{
+				stringsAllocated *= 4;
+				pStrings = (const char **)MFHeap_Realloc(pStrings, sizeof(const char *)*stringsAllocated);
 			}
 			pStrings[stringCount++] = MFStringCache_Add(pCache, tokenBuffer);
 			pCurrLine->stringCount++;

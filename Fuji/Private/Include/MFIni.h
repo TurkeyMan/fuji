@@ -49,7 +49,7 @@ public:
 	void DumpRecursive(int depth);
 
 protected:
-	class MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
+	MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
 	int subtreeLineCount;		// total number of sublines before next line at this level
 	uint32 firstString;         // first index of MFIni::pStrings for line string data
 	int16 stringCount;			// how many data strings on this line
@@ -73,11 +73,14 @@ protected:
 
 	MFIniLine *pLines;          // array of lines that index the ini file
 	int lineCount;
+	int linesAllocated;
 
 	const char **pStrings;      // array of string pointers (tokens) into the ini file
 	int stringCount;
+	int stringsAllocated;
 
 	MFStringCache *pCache;      // string cache
+	int stringCacheSize;
 
 	// scans text at "pSrc" for a single token
 	// pTokenStart will point to first Char in the token
