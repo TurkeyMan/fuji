@@ -32,7 +32,7 @@ void MFRenderer_InitModulePlatformSpecific()
 
 	if(!d3d9)
 	{
-		MessageBox(NULL,"Unable to Create the D3D Device.","Error!",MB_OK|MB_ICONERROR);
+		MessageBox(NULL,"Unable to Create the D3D Device. You probably need to update DirectX.","Error!",MB_OK|MB_ICONERROR);
 		return;
 	}
 
@@ -49,8 +49,6 @@ void MFRenderer_DeinitModulePlatformSpecific()
 
 int MFRenderer_CreateDisplay()
 {
-	D3DFORMAT PixelFormat;
-
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
 
@@ -69,12 +67,20 @@ int MFRenderer_CreateDisplay()
 		D3DDISPLAYMODE d3ddm;
 		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
 
+		// check if this format is supported as a back buffer
+		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
+		{
+			d3ddm.Format = D3DFMT_X8R8G8B8;
+			if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
+				d3ddm.Format = D3DFMT_R5G6B5;
+		}
+
 		present.SwapEffect			= D3DSWAPEFFECT_COPY;
 		present.Windowed			= TRUE;
 		present.BackBufferFormat	= d3ddm.Format;
 	}
 
-	PixelFormat = present.BackBufferFormat;
+	D3DFORMAT PixelFormat = present.BackBufferFormat;
 	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, D3DFMT_D24S8) != D3D_OK;
 
 	present.EnableAutoDepthStencil	= TRUE;
@@ -115,6 +121,9 @@ int MFRenderer_CreateDisplay()
 			if(a == 0)
 			{
 				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
+				PixelFormat = D3DFMT_X8R8G8B8;
+				present.BackBufferFormat = D3DFMT_X8R8G8B8;
+				present.AutoDepthStencilFormat = D3DFMT_D24S8;
 			}
 			else
 			{
@@ -154,8 +163,6 @@ void MFRenderer_DestroyDisplay()
 
 void MFRenderer_ResetDisplay()
 {
-	D3DFORMAT PixelFormat;
-
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
 
@@ -166,37 +173,37 @@ void MFRenderer_ResetDisplay()
 		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
 		present.BackBufferWidth					= gDisplay.fullscreenWidth;
 		present.BackBufferHeight				= gDisplay.fullscreenHeight;
-		present.BackBufferCount					= 1;
-		present.EnableAutoDepthStencil			= TRUE;
-		present.AutoDepthStencilFormat			= D3DFMT_D24S8;
-//		present.AutoDepthStencilFormat			= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
 		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
-		present.PresentationInterval			= D3DPRESENT_INTERVAL_ONE;
-//		present.PresentationInterval			= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow					= apphWnd;
-
-		PixelFormat = present.BackBufferFormat;
 	}
 	else
 	{
 		D3DDISPLAYMODE d3ddm;
 		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
 
+		// check if this format is supported as a back buffer
+		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
+		{
+			d3ddm.Format = D3DFMT_X8R8G8B8;
+			if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
+				d3ddm.Format = D3DFMT_R5G6B5;
+		}
+
 		present.SwapEffect              = D3DSWAPEFFECT_COPY;
 		present.Windowed                = TRUE;
 		present.BackBufferFormat        = d3ddm.Format;
 		present.BackBufferWidth			= gDisplay.width;
 		present.BackBufferHeight		= gDisplay.height;
-		present.BackBufferCount			= 1;
-		present.EnableAutoDepthStencil	= TRUE;
-		present.AutoDepthStencilFormat	= D3DFMT_D24S8;
-		present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-//		present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-//		present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-		present.hDeviceWindow			= apphWnd;
-
-		PixelFormat = d3ddm.Format;
 	}
+
+	// set the zbuffer format
+	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, present.BackBufferFormat, present.BackBufferFormat, D3DFMT_D24S8) != D3D_OK;
+	present.EnableAutoDepthStencil = TRUE;
+//	present.AutoDepthStencilFormat = (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
+	present.AutoDepthStencilFormat = z16 ? D3DFMT_D16 : D3DFMT_D24S8;
+	present.BackBufferCount        = 1;
+	present.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;
+//	present.PresentationInterval   = display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	present.hDeviceWindow          = apphWnd;
 
 	HRESULT hr;
 
