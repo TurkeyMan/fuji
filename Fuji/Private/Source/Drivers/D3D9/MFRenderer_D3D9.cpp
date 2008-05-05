@@ -103,16 +103,48 @@ int MFRenderer_CreateDisplay()
 		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 	}
 
-	for(int a=0; a<2&&!b; a++)
+	for(int a=0; a<3&&!b; a++)
 	{
 		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, gDisplay.windowed)==D3D_OK)
 		{
-			if(FAILED(d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice)))
+			HRESULT hr = d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice);
+			if(FAILED(hr))
 			{
-				MFDebug_Error("Failed to create Direct3D device. Cant create game window.");
-				MFRenderer_DestroyDisplay();
-				MessageBox(NULL,"Failed to create Direct3D device.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
-				return 4;
+				if(a == 0)
+				{
+					MessageBox(NULL,"Failed to create Direct3D device.\nAttempting default display settings.","Error!",MB_OK|MB_ICONERROR);
+					present.BackBufferFormat = PixelFormat = D3DFMT_X8R8G8B8;
+					present.AutoDepthStencilFormat = D3DFMT_D24S8;
+				}
+				if(a == 1)
+				{
+					present.BackBufferFormat = PixelFormat = D3DFMT_R5G6B5;
+					present.AutoDepthStencilFormat = D3DFMT_D16;
+				}
+				else
+				{
+					const char *pMessage = "UNKNOWN ERROR";
+					switch(hr)
+					{
+						case D3DERR_DEVICELOST:
+							pMessage = "D3DERR_DEVICELOST";
+							break;
+						case D3DERR_INVALIDCALL:
+							pMessage = "D3DERR_INVALIDCALL";
+							break;
+						case D3DERR_NOTAVAILABLE:
+							pMessage = "D3DERR_NOTAVAILABLE";
+							break;
+						case D3DERR_OUTOFVIDEOMEMORY:
+							pMessage = "D3DERR_OUTOFVIDEOMEMORY";
+							break;
+					}
+					pMessage = MFStr("Failed to create Direct3D device with error: %s.\nCant create game window.", pMessage);
+					MFDebug_Error(pMessage);
+					MFRenderer_DestroyDisplay();
+					MessageBox(NULL, pMessage, "Error!", MB_OK|MB_ICONERROR);
+					return 4;
+				}
 			}
 			else b=1;
 		}
@@ -121,9 +153,13 @@ int MFRenderer_CreateDisplay()
 			if(a == 0)
 			{
 				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
-				PixelFormat = D3DFMT_X8R8G8B8;
-				present.BackBufferFormat = D3DFMT_X8R8G8B8;
+				present.BackBufferFormat = PixelFormat = D3DFMT_X8R8G8B8;
 				present.AutoDepthStencilFormat = D3DFMT_D24S8;
+			}
+			if(a == 1)
+			{
+				present.BackBufferFormat = PixelFormat = D3DFMT_R5G6B5;
+				present.AutoDepthStencilFormat = D3DFMT_D16;
 			}
 			else
 			{
