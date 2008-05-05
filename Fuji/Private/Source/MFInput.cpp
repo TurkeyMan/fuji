@@ -327,8 +327,12 @@ void MFInput_Update()
 			MFInput_GetGamepadStateInternal(a, &gGamepadStates[a]);
 
 			// apply analog deadzone to axiis
-			MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_LX], &gGamepadStates[a].values[Axis_LY]);
-			MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_RX], &gGamepadStates[a].values[Axis_RY]);
+			uint32 deviceFlags = MFInput_GetDeviceFlags(IDD_Gamepad, a);
+			if(!(deviceFlags & MFGF_DontUseSphericalDeadzone))
+			{
+				MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_LX], &gGamepadStates[a].values[Axis_LY]);
+				MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_RX], &gGamepadStates[a].values[Axis_RY]);
+			}
 		}
 	}
 

@@ -44,6 +44,7 @@ struct MFGamepadInfo
 	uint32 vendorID, productID;
 	const int *pButtonMap;
 	const char **ppButtonNameStrings;
+	uint32 flags;
 
 	MFGamepadInfo *pNext;
 };

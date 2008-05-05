@@ -76,6 +76,15 @@ bool MFInput_WasPressed(int button, int device, int deviceID = 0);
 bool MFInput_WasReleased(int button, int device, int deviceID = 0);
 
 /**
+ * Get input device flags.
+ * Gets the device flags from an input device.
+ * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
+ * @param deviceID The source device index.
+ * @return Returns a bitfield containing the input device flags.
+ */
+uint32 MFInput_GetDeviceFlags(int device, int deviceID = 0);
+
+/**
  * Get the number of available gamepads.
  * Get the number of available gamepads.
  * @return Returns the number of gamepads available to the system.
@@ -229,6 +238,20 @@ enum MFInputDeviceStatus
 };
 
 /**
+ * Gamepad Flags.
+ * Various flags available to certain types of gamepads.
+ */
+enum MFGamepadFlags
+{
+	MFGF_UserFlags					= 0xFFFF,
+	MFGF_IsGuitar					= 0x1,
+	MFGF_IsDrums					= 0x2,
+
+	MFGF_SystemFlags				= 0xFFFF0000,
+	MFGF_DontUseSphericalDeadzone	= 0x10000,
+};
+
+/**
  * Enums to access gamepad buttons.
  * These represent the buttons on a gamepad.
  */
@@ -336,22 +359,44 @@ enum MFGamepadButton
 	GamepadType_Max,			/**< Maximum gamepad button id */
 	GamepadType_ForceInt	= 0x7FFFFFFF,	/**< Force button ID to an int type */
 
-// Guitar hero controller enums
-	Button_GH_Green		= Button_P2_R2,			/**< Green key on Guitar Hero controller */
-	Button_GH_Red		= Button_P2_Circle,		/**< Red key on Guitar Hero controller */
-	Button_GH_Yellow	= Button_P2_Triangle,	/**< Yellow key on Guitar Hero controller */
-	Button_GH_Blue		= Button_P2_Cross,		/**< Blue key on Guitar Hero controller */
-	Button_GH_Orange	= Button_P2_Box,		/**< Orange key on Guitar Hero controller */
+// Guitar controller enums
+	Button_GH_Green			= Button_P2_R2,			/**< Green key on Guitar controller */
+	Button_GH_Red			= Button_P2_Circle,		/**< Red key on Guitar controller */
+	Button_GH_Yellow		= Button_P2_Triangle,	/**< Yellow key on Guitar controller */
+	Button_GH_Blue			= Button_P2_Cross,		/**< Blue key on Guitar controller */
+	Button_GH_Orange		= Button_P2_Box,		/**< Orange key on Guitar controller */
 
-	Button_GH_Tilt		= Button_P2_L2,			/**< Vertical tilt sensor on Guitar Hero controller */
+	Button_GH_Start			= Button_P2_Start,		/**< Start button on Guitar controller */
+	Button_GH_Select		= Button_P2_Select,		/**< Select button on Guitar controller */
 
-	Button_GH_Start		= Button_P2_Start,		/**< Start button on Guitar Hero controller */
-	Button_GH_Select	= Button_P2_Select,		/**< Select button on Guitar Hero controller */
+	Button_GH_Solo			= Button_P2_L1,			/**< Solo buttons on Guitar controller */
+	Button_GH_TiltTrigger	= Button_P2_L2,			/**< Vertical tilt trigger on Guitar controller */
 
-	Button_GH_StrumDown	= Button_DDown,			/**< Strum down on Guitar Hero controller */
-	Button_GH_StrumUp	= Button_DUp,			/**< Strum up on Guitar Hero controller */
+	Button_GH_StrumDown		= Button_DDown,			/**< Strum down on Guitar controller */
+	Button_GH_StrumUp		= Button_DUp,			/**< Strum up on Guitar controller */
 
-	Button_GH_Whammy	= Axis_LX				/**< Whammy bar depression on Guitar Hero controller */
+	Button_GH_Whammy		= Axis_LX,				/**< Whammy bar depression on Guitar controller */
+	Button_GH_Tilt			= Axis_RY,				/**< Analog vertical tilt sensor on Guitar controller */
+
+	Button_GH_Roll			= Axis_LY,				/**< Jump/Roll sensor on Guitar controller */
+	Button_GH_PickupSwitch	= Axis_RX,				/**< Pickup Switch on Guitar controller */
+
+// Rock Band Drums enums
+	Button_Drum_Red		= Button_P2_Circle,		/**< Red drum on Drum controller */
+	Button_Drum_Yellow	= Button_P2_Triangle,	/**< Red key on Drum controller */
+	Button_Drum_Blue	= Button_P2_Box,		/**< Yellow key on Drum controller */
+	Button_Drum_Green	= Button_P2_Cross,		/**< Blue key on Drum controller */
+	Button_Drum_Kick	= Button_P2_L1,			/**< Orange key on Drum controller */
+
+	Button_DM_Hat		= Button_Drum_Yellow,	/**< Red drum on Drum controller */
+	Button_DM_Snare		= Button_Drum_Red,		/**< Red key on Drum controller */
+	Button_DM_Tom1		= Button_Drum_Blue,		/**< Yellow key on Drum controller */
+	Button_DM_Tom2		= Button_P2_R1,			/**< Blue key on Drum controller */
+	Button_DM_Cymbal	= Button_Drum_Green,	/**< Blue key on Drum controller */
+	Button_DM_Kick		= Button_Drum_Kick,		/**< Blue key on Drum controller */
+
+	Button_Drum_Start	= Button_P2_Start,		/**< Start button on Drum controller */
+	Button_Drum_Select	= Button_P2_Select		/**< Select button on Drum controller */
 };
 
 /**

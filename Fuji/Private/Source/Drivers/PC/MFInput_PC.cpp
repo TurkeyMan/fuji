@@ -410,16 +410,33 @@ void MFInput_InitModulePlatformSpecific()
 			{
 				MFDebug_Log(2, "Found XInput Gamepad.");
 
-				// we have an xinput controller, reserve 4 gamepad slots for hotswapping
-				gPCJoysticks[0].XInputID = 0;
-				gPCJoysticks[1].XInputID = 1;
-				gPCJoysticks[2].XInputID = 2;
-				gPCJoysticks[3].XInputID = 3;
+				for(int b=0; b<4; ++b)
+				{
+					// we have an xinput controller, reserve gamepad slot for hotswapping
+					gPCJoysticks[b].XInputID = b;
 
-				gPCJoysticks[0].pGamepadInfo = &pGamepadMappingRegistry[1];
-				gPCJoysticks[1].pGamepadInfo = &pGamepadMappingRegistry[1];
-				gPCJoysticks[2].pGamepadInfo = &pGamepadMappingRegistry[1];
-				gPCJoysticks[3].pGamepadInfo = &pGamepadMappingRegistry[1];
+					// hack to recognise guitar controllers
+					XINPUT_CAPABILITIES caps;
+					MFZeroMemory(&caps, sizeof(caps));
+					XInputGetCapabilities(b, 0, &caps);
+					switch(caps.SubType)
+					{
+						case XINPUT_DEVSUBTYPE_GUITAR:
+						case 7:
+							gPCJoysticks[b].pGamepadInfo = &pGamepadMappingRegistry[48];
+							break;
+						case XINPUT_DEVSUBTYPE_DRUM_KIT:
+							gPCJoysticks[b].pGamepadInfo = &pGamepadMappingRegistry[60];
+							break;
+						case XINPUT_DEVSUBTYPE_ARCADE_STICK:
+							gPCJoysticks[b].pGamepadInfo = &pGamepadMappingRegistry[62];
+							break;
+						case XINPUT_DEVSUBTYPE_GAMEPAD:
+						default:
+							gPCJoysticks[b].pGamepadInfo = &pGamepadMappingRegistry[61];
+							break;
+					}
+				}
 
 				gGamepadCount += 4;
 				gUseXInput = true;
@@ -608,29 +625,52 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 
 		if(attached == ERROR_SUCCESS)
 		{
-			pGamepadState->values[Button_X3_A] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_B] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_X] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_Y] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_LB] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_RB] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_Start] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_Back] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_LThumb] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_X3_RThumb] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) ? 1.0f : 0.0f;
+			const int *pMap = gPCJoysticks[id].pGamepadInfo->pButtonMap;
 
-			pGamepadState->values[Button_DUp] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_DDown] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_DLeft] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) ? 1.0f : 0.0f;
-			pGamepadState->values[Button_DRight] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) ? 1.0f : 0.0f;
+			for(int a=0; a<GamepadType_Max; ++a)
+			{
+				if(pMap[a] == -1)
+					continue;
 
-			pGamepadState->values[Button_X3_LT] = (state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bLeftTrigger * (1.0f / 255.0f) : 0.0f;
-			pGamepadState->values[Button_X3_RT] = (state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bRightTrigger * (1.0f / 255.0f) : 0.0f;
+				if(pMap[a] & AID_Analog)
+				{
+					switch(pMap[a] & (AID_AxisMask | AID_Analog))
+					{
+						case AID_X:
+							pGamepadState->values[a] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLX * (1.0f / 32767.0f), 1.0f);
+							break;
+						case AID_Y:
+							pGamepadState->values[a] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLY * (1.0f / 32767.0f), 1.0f);
+							break;
+						case AID_Rx:
+							pGamepadState->values[a] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRX * (1.0f / 32767.0f), 1.0f);
+							break;
+						case AID_Ry:
+							pGamepadState->values[a] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRY * (1.0f / 32767.0f), 1.0f);
+							break;
+						case AID_Z:
+							pGamepadState->values[a] = (state.Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bLeftTrigger * (1.0f / 255.0f) : 0.0f;
+							break;
+						case AID_Rz:
+							pGamepadState->values[a] = (state.Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? (float)state.Gamepad.bRightTrigger * (1.0f / 255.0f) : 0.0f;
+							break;
+					}
 
-			pGamepadState->values[Axis_LX] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLX * (1.0f / 32767.0f), 1.0f);
-			pGamepadState->values[Axis_LY] = MFClamp(-1.0f, (float)state.Gamepad.sThumbLY * (1.0f / 32767.0f), 1.0f);
-			pGamepadState->values[Axis_RX] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRX * (1.0f / 32767.0f), 1.0f);
-			pGamepadState->values[Axis_RY] = MFClamp(-1.0f, (float)state.Gamepad.sThumbRY * (1.0f / 32767.0f), 1.0f);
+					// invert any buttons with the AID_Negative flag
+					if(pMap[a] & AID_Negative)
+						pGamepadState->values[a] = -pGamepadState->values[a];
+					// clamp any butons with the AID_Clamp flag to the positive range
+					if(pMap[a] & AID_Clamp)
+						pGamepadState->values[a] = MFMax(0.0f, pGamepadState->values[a]);
+					// use the full range for any buttons with the AID_Full flag
+					if(pMap[a] & AID_Full)
+						pGamepadState->values[a] = (pGamepadState->values[a] + 1.0f) * 0.5f;
+				}
+				else
+				{
+					pGamepadState->values[a] = (state.Gamepad.wButtons & (1 << pMap[a])) ? 1.0f : 0.0f;
+				}
+			}
 		}
 	}
 	else
@@ -743,6 +783,13 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 			}
 		}
 	}
+}
+
+uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+{
+	if(device != IDD_Gamepad || deviceID >= gGamepadCount)
+		return 0;
+	return gPCJoysticks[deviceID].pGamepadInfo->flags;
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
