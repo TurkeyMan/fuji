@@ -70,6 +70,8 @@ void MFNetwork_BeginFileServer();
 void MFNetwork_BeginScriptDebugServer();
 void MFNetwork_BeginScriptRPCServer();
 
+int MFNetwork_SendEmail(const char *pEmailText, const char *pSender = "someones@computer.com", const char *pEmailHandlerURL = "www.dotblip.com", int port = 80);
+
 #endif // _MFNETWORK_H
 
 /** @} */

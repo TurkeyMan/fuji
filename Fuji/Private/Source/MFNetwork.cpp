@@ -3,6 +3,7 @@
 #include "MFThread.h"
 #include "MFNetwork_Internal.h"
 
+#include <stdio.h>
 
 /**************************************************************************
 ** Remote gamepad support
@@ -435,4 +436,23 @@ void MFNetwork_Update()
 	MFThread_ReleaseMutex(inputServerMutex);
 }
 
+int MFNetwork_SendEmail(const char *pEmailText, const char *pSender, const char *pEmailHandlerURL, int port)
+{
+	if(!MFSockets_IsActive())
+		return 1;
 
+	MFAddressInfo *pAddrInfo;
+	if(MFSockets_GetAddressInfo(pEmailHandlerURL, MFStr("%d", port), NULL, &pAddrInfo) == 0)
+	{
+		char buffer[2048];
+		sprintf(buffer, "POST /fuji/reportgamepad.php HTTP/1.1\nHost: %s:%d\nFrom: %s\nUser-Agent: HTTPTool/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: %d\n\n%s", pEmailHandlerURL, port, pSender, MFString_Length(pEmailText), pEmailText);
+
+		MFSocket s = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
+		MFSockets_Connect(s, *pAddrInfo->pAddress);
+		MFSockets_Send(s, buffer, MFString_Length(buffer), 0);
+		MFSockets_Recv(s, buffer, sizeof(buffer), 0);
+		MFSockets_CloseSocket(s);
+	}
+
+	return 0;
+}
