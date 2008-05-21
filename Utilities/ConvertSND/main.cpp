@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 	WAVFormatChunk *pFormat = NULL;
 	WAVDataChunk *pData = NULL;
 
-	while((char*)pChunk - pBuffer < bytes)
+	while((char*)pChunk - pBuffer < bytes && bytes - ((char*)pChunk - pBuffer) >= sizeof(WAVChunk))
 	{
 		if(pChunk->id == MFMAKEFOURCC('f', 'm', 't', ' '))
 		{
