@@ -1,95 +1,145 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="FujiUtil"
 	ProjectGUID="{D971AB30-160A-4871-92F7-D2220504B869}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(ProjectDir)Lib"
 			IntermediateDirectory="Build/$(ConfigurationName)_Util"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware/zlib&quot;;&quot;$(ProjectDir)Middleware/lpng1212&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_WINDOWS;_FUJI_UTIL"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"/>
+				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectDir)Lib"
 			IntermediateDirectory="Build/$(ConfigurationName)_Util"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware/zlib&quot;;&quot;$(ProjectDir)Middleware/lpng1212&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_RELEASE;_CONSOLE;_WINDOWS;_FUJI_UTIL"
-				RuntimeLibrary="4"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"/>
+				OutputFile="$(OutDir)\lib$(ProjectName)_$(ConfigurationName).lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -98,402 +148,519 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath=".\Source\MFCallstack.cpp">
+				RelativePath=".\Source\MFCallstack.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFCallstack_Internal.h">
+				RelativePath=".\Source\MFCallstack_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFDebug.cpp">
+				RelativePath=".\Source\MFDebug.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFFileSystem.cpp">
+				RelativePath=".\Source\MFFileSystem.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFFileSystem_Internal.h">
+				RelativePath=".\Source\MFFileSystem_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFFont_Internal.h">
+				RelativePath=".\Source\MFFont_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFHeap.cpp">
+				RelativePath=".\Source\MFHeap.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFHeap_Internal.h">
+				RelativePath=".\Source\MFHeap_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath="Source\MFIni.cpp">
+				RelativePath="Source\MFIni.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFMatrix.cpp">
+				RelativePath=".\Source\MFMatrix.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFQuaternion.cpp">
+				RelativePath=".\Source\MFQuaternion.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFSockets.cpp">
+				RelativePath=".\Source\MFSockets.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFSockets_Internal.h">
+				RelativePath=".\Source\MFSockets_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFString.cpp">
+				RelativePath=".\Source\MFString.cpp"
+				>
 			</File>
 			<File
-				RelativePath="Source\MFStringCache.cpp">
+				RelativePath="Source\MFStringCache.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFSystem.cpp">
+				RelativePath=".\Source\MFSystem.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFSystem_Internal.h">
+				RelativePath=".\Source\MFSystem_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFTexture_Internal.h">
+				RelativePath=".\Source\MFTexture_Internal.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFTextureUtil.cpp">
+				RelativePath=".\Source\MFTextureUtil.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Source\MFVector.cpp">
+				RelativePath=".\Source\MFVector.cpp"
+				>
 			</File>
 			<File
-				RelativePath="Source\Util.cpp">
+				RelativePath="Source\Util.cpp"
+				>
 			</File>
 			<Filter
 				Name="Drivers"
-				Filter="">
+				>
 				<Filter
 					Name="PC"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Source\Drivers\Pc\MFDebug_PC.cpp">
+						RelativePath=".\Source\Drivers\Pc\MFDebug_PC.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Pc\MFSystem_PC.cpp">
+						RelativePath=".\Source\Drivers\Pc\MFSystem_PC.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="Null"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFDebug_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFDebug_Null.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFFileSystemNative_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFFileSystemNative_Null.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFHeap_Null.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFSockets_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFSockets_Null.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFSystem_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFSystem_Null.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Null\MFThread_Null.cpp">
+						RelativePath=".\Source\Drivers\Null\MFThread_Null.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="WIN32"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Source\Drivers\Win32\MFFileSystemNative_WIN32.cpp">
+						RelativePath=".\Source\Drivers\Win32\MFFileSystemNative_WIN32.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Win32\MFHeap_WIN32.cpp">
+						RelativePath=".\Source\Drivers\Win32\MFHeap_WIN32.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Win32\MFSockets_WINSOCK.cpp">
+						RelativePath=".\Source\Drivers\Win32\MFSockets_WINSOCK.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Win32\MFThread_WIN32.cpp">
+						RelativePath=".\Source\Drivers\Win32\MFThread_WIN32.cpp"
+						>
 					</File>
 				</Filter>
 				<Filter
 					Name="Linux"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Source\Drivers\Linux\MFFileSystemNative_Linux.cpp">
+						RelativePath=".\Source\Drivers\Linux\MFFileSystemNative_Linux.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Linux\MFSystem_Linux.cpp">
+						RelativePath=".\Source\Drivers\Linux\MFSystem_Linux.cpp"
+						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\Linux\MFThread_Linux.cpp">
+						RelativePath=".\Source\Drivers\Linux\MFThread_Linux.cpp"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="FileSystem"
-				Filter="">
+				>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile.cpp">
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile_Internal.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemCachedFile_Internal.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp">
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemHTTP_Internal.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemHTTP_Internal.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp">
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemMemory_Internal.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemMemory_Internal.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp">
+					RelativePath=".\Source\FileSystem\MFFileSystemNative.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemNative_Internal.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemNative_Internal.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp">
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile.cpp"
+					>
 				</File>
 				<File
-					RelativePath=".\Source\FileSystem\MFFileSystemZipFile_Internal.h">
+					RelativePath=".\Source\FileSystem\MFFileSystemZipFile_Internal.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath=".\Include\Fuji.h">
+				RelativePath=".\Include\Fuji.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFArray.h">
+				RelativePath=".\Include\MFArray.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFArray.inl">
+				RelativePath=".\Include\MFArray.inl"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFCallstack.h">
+				RelativePath=".\Include\MFCallstack.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFHeap.h">
+				RelativePath=".\Include\MFHeap.h"
+				>
 			</File>
 			<File
-				RelativePath="Include\MFIni.h">
+				RelativePath="Include\MFIni.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFMath.h">
+				RelativePath=".\Include\MFMath.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFMath.inl">
+				RelativePath=".\Include\MFMath.inl"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFMatrix.h">
+				RelativePath=".\Include\MFMatrix.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFQuaternion.h">
+				RelativePath=".\Include\MFQuaternion.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFString.h">
+				RelativePath=".\Include\MFString.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFString.inl">
+				RelativePath=".\Include\MFString.inl"
+				>
 			</File>
 			<File
-				RelativePath="Include\MFStringCache.h">
+				RelativePath="Include\MFStringCache.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFTexture.h">
+				RelativePath=".\Include\MFTexture.h"
+				>
 			</File>
 			<File
-				RelativePath=".\Include\MFVector.h">
+				RelativePath=".\Include\MFVector.h"
+				>
 			</File>
 			<File
-				RelativePath="Include\Util.h">
+				RelativePath="Include\Util.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 		</Filter>
 		<Filter
 			Name="Middleware"
-			Filter="">
+			>
 			<Filter
 				Name="zlib"
-				Filter="">
+				>
 				<File
-					RelativePath=".\Middleware\zlib\adler32.c">
+					RelativePath=".\Middleware\zlib\adler32.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\compress.c">
+					RelativePath=".\Middleware\zlib\compress.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\crc32.c">
+					RelativePath=".\Middleware\zlib\crc32.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\crc32.h">
+					RelativePath=".\Middleware\zlib\crc32.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\deflate.c">
+					RelativePath=".\Middleware\zlib\deflate.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\deflate.h">
+					RelativePath=".\Middleware\zlib\deflate.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\gzio.c">
+					RelativePath=".\Middleware\zlib\gzio.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\infback.c">
+					RelativePath=".\Middleware\zlib\infback.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inffast.c">
+					RelativePath=".\Middleware\zlib\inffast.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inffast.h">
+					RelativePath=".\Middleware\zlib\inffast.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inffixed.h">
+					RelativePath=".\Middleware\zlib\inffixed.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inflate.c">
+					RelativePath=".\Middleware\zlib\inflate.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inflate.h">
+					RelativePath=".\Middleware\zlib\inflate.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inftrees.c">
+					RelativePath=".\Middleware\zlib\inftrees.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\inftrees.h">
+					RelativePath=".\Middleware\zlib\inftrees.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\trees.c">
+					RelativePath=".\Middleware\zlib\trees.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\trees.h">
+					RelativePath=".\Middleware\zlib\trees.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\uncompr.c">
+					RelativePath=".\Middleware\zlib\uncompr.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\zconf.h">
+					RelativePath=".\Middleware\zlib\zconf.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\zconf.in.h">
+					RelativePath=".\Middleware\zlib\zconf.in.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\zlib.h">
+					RelativePath=".\Middleware\zlib\zlib.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\zutil.c">
+					RelativePath=".\Middleware\zlib\zutil.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\zlib\zutil.h">
+					RelativePath=".\Middleware\zlib\zutil.h"
+					>
 				</File>
 				<Filter
 					Name="minizip"
-					Filter="">
+					>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\crypt.h">
+						RelativePath=".\Middleware\zlib\minizip\crypt.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\ioapi.c">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.c"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\ioapi.h">
+						RelativePath=".\Middleware\zlib\minizip\ioapi.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\mztools.c">
+						RelativePath=".\Middleware\zlib\minizip\mztools.c"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\mztools.h">
+						RelativePath=".\Middleware\zlib\minizip\mztools.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\unzip.c">
+						RelativePath=".\Middleware\zlib\minizip\unzip.c"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\unzip.h">
+						RelativePath=".\Middleware\zlib\minizip\unzip.h"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\zip.c">
+						RelativePath=".\Middleware\zlib\minizip\zip.c"
+						>
 					</File>
 					<File
-						RelativePath=".\Middleware\zlib\minizip\zip.h">
+						RelativePath=".\Middleware\zlib\minizip\zip.h"
+						>
 					</File>
 				</Filter>
 			</Filter>
 			<Filter
 				Name="libpng"
-				Filter="">
+				>
 				<File
-					RelativePath=".\Middleware\lpng1212\png.c">
+					RelativePath=".\Middleware\lpng1212\png.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\png.h">
+					RelativePath=".\Middleware\lpng1212\png.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngconf.h">
+					RelativePath=".\Middleware\lpng1212\pngconf.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngerror.c">
+					RelativePath=".\Middleware\lpng1212\pngerror.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngget.c">
+					RelativePath=".\Middleware\lpng1212\pngget.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngmem.c">
+					RelativePath=".\Middleware\lpng1212\pngmem.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngpread.c">
+					RelativePath=".\Middleware\lpng1212\pngpread.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngread.c">
+					RelativePath=".\Middleware\lpng1212\pngread.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngrio.c">
+					RelativePath=".\Middleware\lpng1212\pngrio.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngrtran.c">
+					RelativePath=".\Middleware\lpng1212\pngrtran.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngrutil.c">
+					RelativePath=".\Middleware\lpng1212\pngrutil.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngset.c">
+					RelativePath=".\Middleware\lpng1212\pngset.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngtrans.c">
+					RelativePath=".\Middleware\lpng1212\pngtrans.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngvcrd.c">
+					RelativePath=".\Middleware\lpng1212\pngvcrd.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngwio.c">
+					RelativePath=".\Middleware\lpng1212\pngwio.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngwrite.c">
+					RelativePath=".\Middleware\lpng1212\pngwrite.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngwtran.c">
+					RelativePath=".\Middleware\lpng1212\pngwtran.c"
+					>
 				</File>
 				<File
-					RelativePath=".\Middleware\lpng1212\pngwutil.c">
+					RelativePath=".\Middleware\lpng1212\pngwutil.c"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Util"
-			Filter="">
+			>
 			<File
-				RelativePath=".\Util\F3D.cpp">
+				RelativePath=".\Util\F3D.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Util\F3D.h">
+				RelativePath=".\Util\F3D.h"
+				>
 			</File>
 		</Filter>
 	</Files>

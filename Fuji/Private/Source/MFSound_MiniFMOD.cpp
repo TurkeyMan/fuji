@@ -28,6 +28,7 @@ int GetMiniFMODSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 void DestroyMiniFMODStream(MFAudioStream *pStream)
 {
 	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)pStream->pStreamData;
+	FMUSIC_StopSong(pModStream->pMod);
 	FMUSIC_FreeSong(pModStream->pMod);
 	MFHeap_Free(pModStream);
 }
