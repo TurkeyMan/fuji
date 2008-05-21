@@ -63,6 +63,10 @@ void MFSound_InitModule()
 	void MFSound_RegisterMAD();
 	MFSound_RegisterMAD();
 #endif
+#if defined(MINIFMOD_STREAM)
+	void MFSound_RegisterMiniFMOD();
+	MFSound_RegisterMiniFMOD();
+#endif
 #if defined(PSPAUDIOCODEC_STREAM)
 	void MFSound_RegisterPSPAudioCodec();
 	MFSound_RegisterPSPAudioCodec();

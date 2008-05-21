@@ -22,6 +22,8 @@
 // all the macros and fun stuff
 #if defined(_MFCALLSTACK)
 
+struct MFCallstack_Function;
+
 #if defined(_MFCALLSTACK_PROFILING)
 
 int MFCallstack_GetNextColour();

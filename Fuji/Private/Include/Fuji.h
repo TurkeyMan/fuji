@@ -358,6 +358,7 @@ enum MFEndian
 
 	#define	VORBIS_STREAM
 	#define	MAD_STREAM
+	#define MINIFMOD_STREAM
 
 #elif defined(MF_XBOX)
 
