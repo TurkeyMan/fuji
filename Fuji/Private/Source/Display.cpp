@@ -6,11 +6,6 @@
 
 MFDisplaySettings gDisplay;
 
-const float MFAspect_1x1 = 1.0f/1.0f;
-const float MFAspect_4x3 = 4.0f/3.0f;
-const float MFAspect_16x9 = 16.0f/9.0f;
-const float MFAspect_16x10 = 16.0f/10.0f;
-
 void MFDisplay_InitModule()
 {
 	MFCALLSTACK;

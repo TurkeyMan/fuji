@@ -45,12 +45,16 @@ void MFDisplay_BlitToScreen(MFDisplay *pDisplay);
 #else
 /////////////////////////////////////////////////////////////////////////////////
 
-extern const float MFAspect_1x1;
-extern const float MFAspect_4x3;
-extern const float MFAspect_16x9;
-extern const float MFAspect_16x10;
+const float MFAspect_1x1 = 1.f;
+const float MFAspect_4x3 = 4.f/3.f;
+const float MFAspect_16x9 = 16.f/9.f;
+const float MFAspect_16x10 = 16.f/10.f;
 
 // interface functions
+bool MFDisplay_SupportsFullscreen();
+void MFDisplay_GetNumDisplayModes(bool window = false, float aspectConstraint = 0.f);
+void MFDisplay_GetDisplayMode(int index, bool window = false, float aspectConstraint = 0.f);
+
 void MFDisplay_GetDisplayRect(MFRect *pRect);
 
 float MFDisplay_GetNativeAspectRatio();
