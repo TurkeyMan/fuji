@@ -264,6 +264,9 @@ typedef struct FMUSIC_MODULE
 	SAMPLELOADCALLBACK	samplecallback;
 
 	FMUSIC_TIMMEINFO	timeInfo;
+
+	FMUSIC_CHANNEL		*FMUSIC_Channel;	// channel array for this song
+	FSOUND_CHANNEL		FSOUND_Channel[64];	// channel pool (we need twice as manu channels as the maximum number of xm channels)
 } FMUSIC_MODULE;
 
 
@@ -276,7 +279,6 @@ extern "C"
 extern FSOUND_SAMPLE			FMUSIC_DummySample;
 extern FSOUND_CHANNEL			FMUSIC_DummyChannel;
 extern FMUSIC_INSTRUMENT		FMUSIC_DummyInstrument;
-extern FMUSIC_CHANNEL			FMUSIC_Channel[];		// channel array for this song
 
 #ifdef __cplusplus
 }

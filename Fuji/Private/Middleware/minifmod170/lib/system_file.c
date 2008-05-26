@@ -17,15 +17,12 @@
 #include "minifmod.h"
 #include "system_file.h"
 #include "system_memory.h"
-#include "sound.h"
-
 
 unsigned int	(*FSOUND_File_OpenCallback)(char *name) = NULL;
 void			(*FSOUND_File_CloseCallback)(unsigned int handle) = NULL;
 int				(*FSOUND_File_ReadCallback)(void *buffer, int size, unsigned int handle) = NULL;
 void			(*FSOUND_File_SeekCallback)(unsigned int handle, int pos, signed char mode) = NULL;
 int				(*FSOUND_File_TellCallback)(unsigned int handle) = NULL;
-
 
 /*
 [API]
@@ -123,20 +120,6 @@ void FSOUND_File_SetCallbacks(unsigned int (*OpenCallback)(char *name), void	(*C
 	}
 }
 
-
-/*
-[
-	[DESCRIPTION]
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-
-	[SEE_ALSO]
-]
-*/
 FSOUND_FILE_HANDLE *FSOUND_File_Open(void *data, signed char type, int length)
 {
 	FSOUND_FILE_HANDLE *handle;
@@ -155,20 +138,6 @@ FSOUND_FILE_HANDLE *FSOUND_File_Open(void *data, signed char type, int length)
 	return handle;
 }
 
-
-/*
-[
-	[DESCRIPTION]
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-
-	[SEE_ALSO]
-]
-*/
 void FSOUND_File_Close(FSOUND_FILE_HANDLE *handle)
 {
 	if (!handle) 
@@ -180,20 +149,6 @@ void FSOUND_File_Close(FSOUND_FILE_HANDLE *handle)
 	FSOUND_Memory_Free(handle);
 }
 
-
-/*
-[
-	[DESCRIPTION]
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-
-	[SEE_ALSO]
-]
-*/
 int FSOUND_File_Read(void *buffer, int size, FSOUND_FILE_HANDLE *handle)
 {
 	if (!handle) 
@@ -204,21 +159,6 @@ int FSOUND_File_Read(void *buffer, int size, FSOUND_FILE_HANDLE *handle)
 	return FSOUND_File_ReadCallback(buffer, size, handle->userhandle);
 }
 
-
-
-/*
-[
-	[DESCRIPTION]
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-
-	[SEE_ALSO]
-]
-*/
 void FSOUND_File_Seek(FSOUND_FILE_HANDLE *handle, int pos, signed char mode)
 {
 	if (!handle) 
@@ -229,20 +169,6 @@ void FSOUND_File_Seek(FSOUND_FILE_HANDLE *handle, int pos, signed char mode)
 	FSOUND_File_SeekCallback(handle->userhandle, pos, mode);
 }
 
-
-/*
-[
-	[DESCRIPTION]
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-
-	[SEE_ALSO]
-]
-*/
 int FSOUND_File_Tell(FSOUND_FILE_HANDLE *handle)
 {
 	if (!handle)

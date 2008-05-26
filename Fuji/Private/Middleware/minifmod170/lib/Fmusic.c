@@ -11,20 +11,19 @@
 /******************************************************************************/
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "minifmod.h"
-
-#include "mixer_fpu_ramp.h"
-#include "music.h"
 #include "music_formatxm.h"
-#include "sound.h"
-#include "system_file.h"
-#include "system_memory.h"
+#include "mixer_fpu_ramp.h"
+#include "mixer_clipcopy.h"
+#include "music.h"
 
-FMUSIC_CHANNEL		FMUSIC_Channel[32];		// channel array for this song
 FSOUND_SAMPLE		FMUSIC_DummySample;
 FSOUND_CHANNEL		FMUSIC_DummyChannel;
 FMUSIC_INSTRUMENT	FMUSIC_DummyInstrument;
+
+char				mixTemp[35280];
 
 //= PRIVATE FUNCTIONS ==============================================================================
 
@@ -35,7 +34,7 @@ void FMUSIC_SetBPM(FMUSIC_MODULE *module, int bpm)
 	module->bpm = bpm;
 
 	hz = (float)bpm * 2.0f / 5.0f;
-	
+
 	// number of samples
 	module->mixer_samplespertick = (int)((float)FSOUND_MixRate * (1000.0f / hz) / 1000.0f);	
 }
@@ -55,7 +54,7 @@ void FMUSIC_SetBPM(FMUSIC_MODULE *module, int bpm)
 
 	[PARAMETERS]
 	'name'		Filename of module to load.
- 
+
 	[RETURN_VALUE]
 	On success, a pointer to a FMUSIC_MODULE handle is returned.
 	On failure, NULL is returned.
@@ -97,26 +96,10 @@ FMUSIC_MODULE * FMUSIC_LoadSong(signed char *name, SAMPLELOADCALLBACK sampleload
     }
 
 	// ========================================================================================================
-	// INITIALIZE SOFTWARE MIXER 
+	// INITIALIZE
 	// ========================================================================================================
-	FSOUND_OOMixRate    = 1.0f / (float)FSOUND_MixRate;
-
 	mix_volumerampsteps      = FSOUND_MixRate * FSOUND_VOLUMERAMP_STEPS / 44100;
 	mix_1overvolumerampsteps = 1.0f / mix_volumerampsteps;
-
-	//=======================================================================================
-	// ALLOC GLOBAL CHANNEL POOL
-	//=======================================================================================
-	memset(FSOUND_Channel, 0, sizeof(FSOUND_CHANNEL) * 256);
-
-	// ========================================================================================================
-	// SET UP CHANNELS
-	// ========================================================================================================
-	for (count=0; count < 256; count++)
-	{
-		FSOUND_Channel[count].index = count;
-		FSOUND_Channel[count].speedhi = 1;
-	}
 
 	mod->globalvolume       = mod->defaultglobalvolume;
  	mod->speed              = (int)mod->defaultspeed;
@@ -131,12 +114,23 @@ FMUSIC_MODULE * FMUSIC_LoadSong(signed char *name, SAMPLELOADCALLBACK sampleload
 
 	FMUSIC_SetBPM(mod, mod->defaultbpm);
 
-	memset(FMUSIC_Channel, 0, mod->numchannels * sizeof(FMUSIC_CHANNEL));
+	//=======================================================================================
+	// ALLOC CHANNELS
+	//=======================================================================================
+	mod->FMUSIC_Channel = (FMUSIC_CHANNEL*)FSOUND_Memory_Calloc(sizeof(FMUSIC_CHANNEL) * mod->numchannels);
+	memset(mod->FSOUND_Channel, 0, sizeof(FSOUND_CHANNEL) * 64);
+	memset(mod->FMUSIC_Channel, 0, sizeof(FMUSIC_CHANNEL) * mod->numchannels);
 
-	for (count=0; count < mod->numchannels; count++)
+	// ========================================================================================================
+	// SET UP CHANNELS
+	// ========================================================================================================
+	for (count=0; count < 64; count++)
 	{
-		FMUSIC_CHANNEL *cptr = &FMUSIC_Channel[count];
-		cptr->cptr = &FSOUND_Channel[count];
+		FSOUND_CHANNEL *pChannel = &mod->FSOUND_Channel[count];
+		pChannel->index = count;
+		pChannel->speedhi = 1;
+		if(count < mod->numchannels)
+			mod->FMUSIC_Channel[count].cptr = pChannel;
 	}
 
     return mod;
@@ -167,6 +161,10 @@ signed char FMUSIC_FreeSong(FMUSIC_MODULE *mod)
 
 	if (!mod) 
 		return FALSE;
+
+	// free channels
+	if (mod->FMUSIC_Channel)
+		FSOUND_Memory_Free(mod->FMUSIC_Channel);
 
 	// free samples
 	if (mod->instrument)
@@ -215,6 +213,80 @@ signed char FMUSIC_FreeSong(FMUSIC_MODULE *mod)
 	FSOUND_Memory_Free(mod);
 
 	return TRUE;
+}
+
+/*
+	[DESCRIPTION]
+
+	[PARAMETERS]
+ 
+	[RETURN_VALUE]
+
+	[REMARKS]
+
+	[SEE_ALSO]
+*/
+void FMUSIC_GetSamples(FMUSIC_MODULE *pMod, char *pBuffer, int bytes)
+{
+	while(bytes)
+	{
+		int numSamples = min(bytes >> 2, sizeof(mixTemp)>>3);
+		bytes -= numSamples << 2;
+
+		//==============================================================================
+		// MIXBUFFER CLEAR
+		//==============================================================================
+		memset(mixTemp, 0, numSamples << 3);
+
+		//==============================================================================
+		// UPDATE MUSIC
+		//==============================================================================
+		{
+			int MixedSoFar = 0;
+			int MixedLeft = pMod->mixer_samplesleft;
+			int SamplesToMix;
+			signed char *MixPtr = mixTemp;
+
+			while (MixedSoFar < numSamples)
+			{
+				if (!MixedLeft)
+				{
+					pMod->Update(pMod);		// update new mod tick
+					SamplesToMix = pMod->mixer_samplespertick;
+					MixedLeft = SamplesToMix;
+				}
+				else 
+				{
+					SamplesToMix = MixedLeft;
+				}
+
+				if (MixedSoFar + SamplesToMix > numSamples) 
+				{
+					SamplesToMix = numSamples - MixedSoFar;
+				}
+
+				FSOUND_Mixer_FPU_Ramp(MixPtr, SamplesToMix, FALSE, pMod->FSOUND_Channel); 
+
+				MixedSoFar	+= SamplesToMix;
+				MixPtr		+= (SamplesToMix << 3);
+				MixedLeft	-= SamplesToMix;
+
+				pMod->time_ms += (int)(((float)SamplesToMix * FSOUND_OOMixRate) * 1000);
+			}
+
+			pMod->timeInfo.ms    = pMod->time_ms;
+			pMod->timeInfo.row   = pMod->row;
+			pMod->timeInfo.order = pMod->order;
+
+			pMod->mixer_samplesleft = MixedLeft;
+		}
+
+		// ====================================================================================
+		// CLIP AND COPY BLOCK TO OUTPUT BUFFER
+		// ====================================================================================
+		FSOUND_MixerClipCopy_Float32(pBuffer, mixTemp, numSamples);
+		pBuffer += numSamples << 2;
+	}
 }
 
 //= INFORMATION FUNCTIONS ======================================================================

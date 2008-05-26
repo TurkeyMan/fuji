@@ -13,13 +13,13 @@
 #ifndef _SYSTEM_MEMORY_H_
 #define _SYSTEM_MEMORY_H_
 
-// include your system's header here
-#include <stdlib.h>
+void	FSOUND_Memory_SetCallbacks(void *(*AllocCallback)(unsigned int bytes), void (*FreeCallback)(void *pointer));
 
-// redefine here
-#define FSOUND_Memory_Free(_ptr)			free(_ptr)
-#define FSOUND_Memory_Alloc(_len)			calloc(_len, 1)
-#define FSOUND_Memory_Calloc(_len)			calloc(_len, 1)
-#define FSOUND_Memory_Realloc(_ptr, _len)	realloc(_ptr, _len)
+void *	FSOUND_Memory_Alloc(unsigned int bytes);
+void *	FSOUND_Memory_Calloc(unsigned int bytes);
+void	FSOUND_Memory_Free(void *pointer);
+
+extern void *(*FSOUND_Memory_AllocCallback)(unsigned int bytes);
+extern void (*FSOUND_Memory_FreeCallback)(void *pointer);
 
 #endif

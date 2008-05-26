@@ -15,7 +15,9 @@
 
 #define FSOUND_VOLUMERAMP_STEPS	128		// at 44.1khz
 
-void FSOUND_Mixer_FPU_Ramp(void *mixptr, int len, signed char returnaddress);
+struct FSOUND_CHANNEL;
+
+void FSOUND_Mixer_FPU_Ramp(void *mixptr, int len, signed char returnaddress, FSOUND_CHANNEL *channels);
 
 extern unsigned int mix_volumerampsteps;
 extern float		mix_1overvolumerampsteps;

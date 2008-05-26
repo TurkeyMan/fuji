@@ -29,7 +29,8 @@
 
 #define FSOUND_LATENCY	20
 
-#define BLOCK_ON_SOFTWAREUPDATE() while(FSOUND_Software_UpdateMutex);
+#define FSOUND_MixRate 44100
+#define FSOUND_OOMixRate (1.0f / 44100.f) 
 
 /*
 [DEFINE_START] 
@@ -152,16 +153,6 @@ typedef struct
 extern "C" 
 {
 #endif
-
-FSOUND_CHANNEL			FSOUND_Channel[];
-extern int				FSOUND_MixRate;
-
-// mixing info
-signed char *			FSOUND_MixBufferMem;		// mix buffer memory block
-signed char	*			FSOUND_MixBuffer;			// mix output buffer (16bit or 32bit)
-unsigned int			FSOUND_MixerAddress;		// actual address of the function
-int						FSOUND_HWMixOffset;			// the offset in the output buffer to mix into in bytes
-float					FSOUND_OOMixRate;			// mixing rate in hz.
 
 #ifdef __cplusplus
 }

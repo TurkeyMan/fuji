@@ -39,14 +39,15 @@ extern "C" {
 typedef void (*SAMPLELOADCALLBACK)(void *buff, int lenbytes, int numbits, int instno, int sampno);
 typedef void (*FMUSIC_CALLBACK)(FMUSIC_MODULE *mod, unsigned char param);
 
-// this must be called before FSOUND_Init!
+// these must be called before FSOUND_Init!
 void FSOUND_File_SetCallbacks(unsigned int	(*OpenCallback)(char *name),
                               void			(*CloseCallback)(unsigned int handle),
                               int			(*ReadCallback)(void *buffer, int size, unsigned int handle),
                               void			(*SeekCallback)(unsigned int handle, int pos, signed char mode),
                               int			(*TellCallback)(unsigned int handle));
 
-void FSOUND_Software_Fill(FMUSIC_MODULE *pMod, char *pBuffer, int bytes);
+void FSOUND_Memory_SetCallbacks(void *(*AllocCallback)(unsigned int bytes),
+								void (*FreeCallback)(void *pointer));
 
 // =============================================================================================
 // FMUSIC API
@@ -57,6 +58,8 @@ void FSOUND_Software_Fill(FMUSIC_MODULE *pMod, char *pBuffer, int bytes);
 
 FMUSIC_MODULE * FMUSIC_LoadSong(char *data, SAMPLELOADCALLBACK sampleloadcallback);
 signed char		FMUSIC_FreeSong(FMUSIC_MODULE *mod);
+
+void			FMUSIC_GetSamples(FMUSIC_MODULE *pMod, char *pBuffer, int bytes);
 
 // Runtime song information.
 // =========================

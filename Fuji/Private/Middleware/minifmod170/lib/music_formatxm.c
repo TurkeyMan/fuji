@@ -528,7 +528,7 @@ void FMUSIC_XM_UpdateFlags(FMUSIC_CHANNEL *cptr, FSOUND_SAMPLE *sptr, FMUSIC_MOD
 		//==========================================================================================
 		// ALLOCATE A CHANNEL
 		//==========================================================================================
-		ccptr = &FSOUND_Channel[channel];
+		ccptr = &mod->FSOUND_Channel[channel];
 
         // this swaps between channels to avoid sounds cutting each other off and causing a click
         if (ccptr->sptr != NULL)
@@ -538,20 +538,20 @@ void FMUSIC_XM_UpdateFlags(FMUSIC_CHANNEL *cptr, FSOUND_SAMPLE *sptr, FMUSIC_MOD
             else
                 channel -= 32;
 
-            memcpy(&FSOUND_Channel[channel], ccptr, sizeof(FSOUND_CHANNEL));
-            FSOUND_Channel[channel].index = channel; // oops dont want its index
+            memcpy(&mod->FSOUND_Channel[channel], ccptr, sizeof(FSOUND_CHANNEL));
+            mod->FSOUND_Channel[channel].index = channel; // oops dont want its index
 
             // this should cause the old channel to ramp out nicely.
 		    ccptr->volume = ccptr->actualvolume = 0;
 		    ccptr->leftvolume  = 0;
 		    ccptr->rightvolume = 0;
 
-            ccptr = &FSOUND_Channel[channel];
+            ccptr = &mod->FSOUND_Channel[channel];
             cptr->cptr = ccptr;
         }
 
 		ccptr->sptr = sptr;
-			
+
 		//==========================================================================================
 		// START THE SOUND!
 		//==========================================================================================
@@ -580,7 +580,7 @@ void FMUSIC_XM_UpdateFlags(FMUSIC_CHANNEL *cptr, FSOUND_SAMPLE *sptr, FMUSIC_MOD
 		finalvol *= mod->globalvolume;				//  6 bits (   64)
 														// ==============
 														// 42 bits
-	
+
 		// Any half arsed compiler will convert this into 1 constant at compile time.
 		finalvol *= (255.0f / (64.0f * 64.0f * 65536.0f * 64.0f)) * 0.5f;
 		volume = (int)finalvol;
@@ -745,7 +745,7 @@ void FMUSIC_UpdateXMNote(FMUSIC_MODULE *mod)
 		paramx = current->eparam >> 4;			// get effect param x
 		paramy = current->eparam & 0xF;			// get effect param y
 
-		cptr = &FMUSIC_Channel[count];
+		cptr = &mod->FMUSIC_Channel[count];
 
 
 //			**** FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
@@ -1397,7 +1397,7 @@ void FMUSIC_UpdateXMEffects(FMUSIC_MODULE *mod)
 		FSOUND_SAMPLE			*sptr  = NULL;
 		unsigned char			effect, paramx, paramy;
 		
-		cptr = &FMUSIC_Channel[count];
+		cptr = &mod->FMUSIC_Channel[count];
 
 //			**** FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 //		cptr = LinkedListNextNode(&cptr->vchannelhead);

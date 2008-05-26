@@ -12,55 +12,76 @@
 
 #include "sound.h"
 
-static unsigned long mix_temp1		= 0;
-static const float	 mix_3times2pow51 = 3.0f * (float)(1L<<25) * (float)(1L<<26);
-
 // this is smaller but slower.
 #define USER_SMALLER_CLIPCOPY
+#define USE_ASM_FOR_CLIPCOPY
 
-/*
-[API]
-[
-	[DESCRIPTION]
-	Size optimized version of the commented out clipper below
-
-	[PARAMETERS]
- 
-	[RETURN_VALUE]
-
-	[REMARKS]
-	This uses an fadd trick and does 2 float to ints in about 8 cycles.. which is what just 1 
-	fistp would take normally.. note this is meant for p5 machines, as ppro has a 1cycle 
-	fistp which is faster.
-
-	[SEE_ALSO]
-]
-*/
 #ifdef USER_SMALLER_CLIPCOPY
+
 void FSOUND_MixerClipCopy_Float32(void *dest, void *src, long len)
 {
-	int count;
-	short *destptr = (short *)dest;
-	float *srcptr = (float *)src;
+  int temp;
 
-	if (len <=0 || !dest || !src) 
-		return;
+  if (len <=0 || !dest || !src)
+    return;
 
-	for (count=0; count<len<<1; count++)
-	{
-		int val;
-		__asm
-		{
-			mov eax, srcptr
-			fld [eax]
-			add srcptr, 4
-			fistp val
-		}
-		*destptr++ = (val < -32768 ? -32768 : val > 32767 ? 32767 : val);
-	}
-}
+#ifndef USE_ASM_FOR_CLIPCOPY
+  for (temp = 0; temp < (len<<1); temp++)
+  {
+    int val = *((float *)src)++;
+    *((short *)dest)++ = (val < -32768 ? -32768 : val > 32767 ? 32767 : val);
+  }
 #else
+#ifdef __GNUC__
+  asm(
+    ".DoLoop:                 \n"
+    "flds (%1)                \n"
+    "fistpl %3                \n"
+    "addl $4, %1              \n"
+    "movl %3, %%eax           \n"
+    "cmpl $32767, %%eax       \n"
+    "jle .MaxOk               \n"
+    "movl $32727, %%eax       \n"
+    ".MaxOk:                  \n"
+    "cmpl $-32768, %%eax      \n"
+    "jge .MinOk               \n"
+    "movl $-32728, %%eax      \n"
+    ".MinOk:                  \n"
+    "movw %%ax, (%2)          \n"
+    "addl $2, %2              \n"
+    "decl %0                  \n"
+    "jnz .DoLoop              \n"
+    :
+    :"c" (len<<1), "S"(src), "D"(dest), "m"(temp)
+    :"eax");
+#endif
+#ifdef _MSC_VER
+  for (temp = 0; temp < (len<<1); temp++)
+  {
+    int val;
+    __asm
+    {
+      mov eax, src
+      fld [eax]
+      add src, 4
+      fistp val
+    }
+    *((short *)dest)++ = (val < -32768 ? -32768 : val > 32767 ? 32767 : val);
+  }
+#endif
+#endif
+}
 
+#else // USER_SMALLER_CLIPCOPY
+
+static unsigned long mix_temp1        = 0;
+static const float   mix_3times2pow51 = 3.0f * (float)(1L<<25) * (float)(1L<<26);
+
+#ifdef __GNUC__
+#error only USER_SMALLER_CLIPCOPY is now supported (for now) by GNU C compilation mode
+#endif
+
+#ifdef _MSC_VER
 void FSOUND_MixerClipCopy_Float32(void *dest, void *src, long len)
 {
 	__int64 lefti,righti;
@@ -208,3 +229,4 @@ void FSOUND_MixerClipCopy_Float32(void *dest, void *src, long len)
 }
 #endif
 
+#endif // USER_SMALLER_CLIPCOPY
