@@ -1993,10 +1993,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Middleware\minifmod170\lib\Fsound.c"
-					>
-				</File>
-				<File
 					RelativePath=".\Middleware\minifmod170\lib\minifmod.h"
 					>
 				</File>
@@ -2042,6 +2038,10 @@
 				</File>
 				<File
 					RelativePath=".\Middleware\minifmod170\lib\system_file.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Middleware\minifmod170\lib\system_memory.c"
 					>
 				</File>
 				<File

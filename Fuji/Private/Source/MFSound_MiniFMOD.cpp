@@ -14,7 +14,7 @@ int GetMiniFMODSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 {
 	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
 
-	FSOUND_Software_Fill(pMod, (char*)pBuffer, bytes);
+	FMUSIC_GetSamples(pMod, (char*)pBuffer, bytes);
 	return bytes;
 }
 
@@ -67,18 +67,18 @@ unsigned int MiniFMOD_OpenCallback(char *pFilename)
 	MFFile* hFile = MFFileSystem_Open(pFilename);
 	if(!hFile)
 		return 0;
-/*
-	// attempt to cache the mod file stream
+
+	// attempt to cache the mod file stream (music_formatxm.cpp does a lot of random file access, not good from a .zip)
 	MFOpenDataCachedFile cachedOpen;
 	cachedOpen.cbSize = sizeof(MFOpenDataCachedFile);
 	cachedOpen.openFlags = MFOF_Read | MFOF_Binary | MFOF_Cached_CleanupBaseFile;
-	cachedOpen.maxCacheSize = 8*1024; // 8k cache for a mod should be plenty...
+	cachedOpen.maxCacheSize = 128*1024; // 128k cache will make a big .xm load fast..
 	cachedOpen.pBaseFile = hFile;
 
 	MFFile *pCachedFile = MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_CachedFileSystem), &cachedOpen);
 	if(pCachedFile)
 		hFile = pCachedFile;
-*/
+
 	return (unsigned int)hFile;
 }
 
@@ -102,10 +102,21 @@ int MiniFMOD_TellCallback(unsigned int handle)
 	return MFFile_Tell((MFFile*)handle);
 }
 
+void* MiniFMOD_Alloc(unsigned int bytes)
+{
+	return MFHeap_Alloc(bytes);
+}
+
+void MiniFMOD_Free(void *pMem)
+{
+	MFHeap_Free(pMem);
+}
+
 void MFSound_RegisterMiniFMOD()
 {
 	// register FSOUND callbacks
 	FSOUND_File_SetCallbacks(MiniFMOD_OpenCallback, MiniFMOD_CloseCallback, MiniFMOD_ReadCallback, MiniFMOD_SeekCallback, MiniFMOD_TellCallback);
+	FSOUND_Memory_SetCallbacks(MiniFMOD_Alloc, MiniFMOD_Free);
 
 	MFStreamCallbacks callbacks;
 	callbacks.pCreateStream = CreateMiniFMODStream;
