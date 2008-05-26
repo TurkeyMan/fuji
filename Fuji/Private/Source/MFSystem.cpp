@@ -193,7 +193,7 @@ void MFSystem_Init()
 	MFNetwork_InitModule();
 
 #if defined(_ENABLE_SCRIPTING)
-//	MFScript_InitModule();
+	MFScript_InitModule();
 #endif
 
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
