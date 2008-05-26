@@ -221,7 +221,7 @@ typedef struct FMUSIC_CHANNEL
 
 // Song type - contains info on song
 typedef struct FMUSIC_MODULE 
-{							
+{
 	FMUSIC_PATTERN	*pattern;			// patterns array for this song
 	FMUSIC_INSTRUMENT *instrument;		// instrument array for this song (not used in MOD/S3M)
 	int				mixer_samplesleft;
@@ -263,6 +263,7 @@ typedef struct FMUSIC_MODULE
 	void			(*Update)(struct FMUSIC_MODULE *mod);	// playback routine callback... for different formats
 	SAMPLELOADCALLBACK	samplecallback;
 
+	FMUSIC_TIMMEINFO	timeInfo;
 } FMUSIC_MODULE;
 
 
@@ -272,12 +273,10 @@ extern "C"
 {
 #endif
 
-extern FMUSIC_MODULE *			FMUSIC_PlayingSong;
 extern FSOUND_SAMPLE			FMUSIC_DummySample;
 extern FSOUND_CHANNEL			FMUSIC_DummyChannel;
 extern FMUSIC_INSTRUMENT		FMUSIC_DummyInstrument;
 extern FMUSIC_CHANNEL			FMUSIC_Channel[];		// channel array for this song
-extern FMUSIC_TIMMEINFO *		FMUSIC_TimeInfo;
 
 #ifdef __cplusplus
 }

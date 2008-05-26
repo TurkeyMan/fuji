@@ -58,7 +58,6 @@ void FSOUND_MixerClipCopy_Float32(void *dest, void *src, long len)
 		}
 		*destptr++ = (val < -32768 ? -32768 : val > 32767 ? 32767 : val);
 	}
-		
 }
 #else
 

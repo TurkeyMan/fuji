@@ -10,27 +10,18 @@
 #include "minifmod170/lib/minifmod.h"
 #include "minifmod170/lib/system_file.h"
 
-#pragma comment(lib, "winmm.lib")
-
-struct MFMiniFMODStream
-{
-	FMUSIC_MODULE *pMod;
-};
-
 int GetMiniFMODSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 {
-	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)pStream->pStreamData;
+	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
 
-	int written = 0;
-	return written;
+	FSOUND_Software_Fill(pMod, (char*)pBuffer, bytes);
+	return bytes;
 }
 
 void DestroyMiniFMODStream(MFAudioStream *pStream)
 {
-	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)pStream->pStreamData;
-	FMUSIC_StopSong(pModStream->pMod);
-	FMUSIC_FreeSong(pModStream->pMod);
-	MFHeap_Free(pModStream);
+	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
+	FMUSIC_FreeSong(pMod);
 }
 
 void CreateMiniFMODStream(MFAudioStream *pStream, const char *pFilename)
@@ -38,22 +29,35 @@ void CreateMiniFMODStream(MFAudioStream *pStream, const char *pFilename)
 	MFCALLSTACK;
 
 	// init the decoder
-	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)MFHeap_Alloc(sizeof(MFMiniFMODStream));
-	pStream->pStreamData = pModStream;
-	pModStream->pMod = FMUSIC_LoadSong((char*)pFilename, NULL);
-	FMUSIC_PlaySong(pModStream->pMod);
+	FMUSIC_MODULE *pMod = FMUSIC_LoadSong((char*)pFilename, NULL);
+	if(!pMod)
+		return;
+
+	pStream->pStreamData = pMod;
+
+	int sampleRate = 44100;
+	int numSamples = sampleRate;
+	int channels = 2;
+
+	pStream->trackLength = 1000.f;
+	pStream->bufferSize = numSamples * channels * 2;
+	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, numSamples, channels, 16, sampleRate, MFSF_Dynamic | MFSF_Circular);
+
+	if(!pStream->pStreamBuffer)
+		DestroyMiniFMODStream(pStream);
 }
 
 void SeekMiniFMODStream(MFAudioStream *pStream, float seconds)
 {
-	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)pStream->pStreamData;
-
+	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
+	// this is not so easy :/
+	// we'll just have to speed-play the mod and not fix the samples...
 }
 
 float GetMiniFMODTime(MFAudioStream *pStream)
 {
-	MFMiniFMODStream *pModStream = (MFMiniFMODStream*)pStream->pStreamData;
-	return 0.0f;
+	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
+	return (float)FMUSIC_GetTime(pMod) * 0.001f;
 }
 
 // fmod filesystem callbacks

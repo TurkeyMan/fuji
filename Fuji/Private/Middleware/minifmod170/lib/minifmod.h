@@ -46,6 +46,8 @@ void FSOUND_File_SetCallbacks(unsigned int	(*OpenCallback)(char *name),
                               void			(*SeekCallback)(unsigned int handle, int pos, signed char mode),
                               int			(*TellCallback)(unsigned int handle));
 
+void FSOUND_Software_Fill(FMUSIC_MODULE *pMod, char *pBuffer, int bytes);
+
 // =============================================================================================
 // FMUSIC API
 // =============================================================================================
@@ -55,8 +57,6 @@ void FSOUND_File_SetCallbacks(unsigned int	(*OpenCallback)(char *name),
 
 FMUSIC_MODULE * FMUSIC_LoadSong(char *data, SAMPLELOADCALLBACK sampleloadcallback);
 signed char		FMUSIC_FreeSong(FMUSIC_MODULE *mod);
-signed char		FMUSIC_PlaySong(FMUSIC_MODULE *mod);
-signed char		FMUSIC_StopSong(FMUSIC_MODULE *mod);
 
 // Runtime song information.
 // =========================

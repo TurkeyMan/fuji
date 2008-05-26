@@ -13,9 +13,6 @@
 #ifndef _SOUND_H_
 #define _SOUND_H_
 
-#include <windows.h>
-#include <mmsystem.h>
-
 #include "system_memory.h"
 
 //= DEFINITIONS ===============================================================================
@@ -150,13 +147,6 @@ typedef struct
 
 //= FUNCTIONS =================================================================================
 
-typedef struct 
-{
-	WAVEHDR		wavehdr;
-	signed char	*data;
-} FSOUND_SoundBlock;
-
-
 //= VARIABLE EXTERNS ==========================================================================
 #ifdef __cplusplus
 extern "C" 
@@ -164,11 +154,7 @@ extern "C"
 #endif
 
 FSOUND_CHANNEL			FSOUND_Channel[];
-int						FSOUND_MixRate;
-int						FSOUND_BufferSize;			// software buffersize
-int						FSOUND_BufferSizeMs;
-HWAVEOUT				FSOUND_WaveOutHandle;
-FSOUND_SoundBlock		FSOUND_MixBlock;
+extern int				FSOUND_MixRate;
 
 // mixing info
 signed char *			FSOUND_MixBufferMem;		// mix buffer memory block
@@ -176,18 +162,6 @@ signed char	*			FSOUND_MixBuffer;			// mix output buffer (16bit or 32bit)
 unsigned int			FSOUND_MixerAddress;		// actual address of the function
 int						FSOUND_HWMixOffset;			// the offset in the output buffer to mix into in bytes
 float					FSOUND_OOMixRate;			// mixing rate in hz.
-int						FSOUND_BufferSize;			// size of 1 'latency' ms buffer in bytes
-int						FSOUND_BlockSize;			// LATENCY ms worth of samples
-
-volatile signed char	FSOUND_Software_Exit;		// mixing thread termination flag
-volatile signed char	FSOUND_Software_UpdateMutex;
-volatile signed char	FSOUND_Software_ThreadFinished;
-volatile HANDLE			FSOUND_Software_hThread;
-volatile int			FSOUND_Software_FillBlock;
-volatile int			FSOUND_Software_RealBlock;
-
-DWORD					FSOUND_Software_DoubleBufferThread(LPDWORD lpdwParam);
-void					FSOUND_Software_Fill();
 
 #ifdef __cplusplus
 }
