@@ -313,7 +313,7 @@ enum MFEndian
 /*** Platform independant defines and includes ***/
 
 #if !defined(_PS2)
-	#define _ENABLE_SCRIPTING
+//	#define _ENABLE_SCRIPTING
 #endif
 
 

@@ -49,7 +49,8 @@ MFDefaults gDefaults =
 		272,			// displayHeight
 #endif
 		"Fuji Window",	// pWindowTitle
-		NULL			// pIcon
+		NULL,			// pIcon
+		false			// hideMouseCursor
 	},
 
 	// ViewDefaults

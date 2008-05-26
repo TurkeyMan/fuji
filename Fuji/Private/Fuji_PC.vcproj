@@ -1834,6 +1834,14 @@
 					<File
 						RelativePath=".\Middleware\angelscript\scriptstring\scriptstring.cpp"
 						>
+						<FileConfiguration
+							Name="Retail|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\Middleware\angelscript\include\scriptstring.h"

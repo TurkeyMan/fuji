@@ -33,6 +33,7 @@ struct MFDefaults
 		uint32 displayHeight;			/**< Display height */
 		const char *pWindowTitle;		/**< Game window title */
 		const char *pIcon;				/**< Resource name of the window icon */
+		bool hideMouseCursor;			/**< Hide the mouse cursor when it hovers over the application window */
 	} display;
 
 	/** View Defaults. */
