@@ -129,10 +129,11 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 		if(!pBucket)
 		{
 			// no bucket was found
-			if(pCacheData->pBaseFile->length <= pCacheData->cacheSize)
+			if(pFile->length <= pCacheData->cacheSize)
 			{
 				pBucket = &pCacheData->buckets[0];
 				pBucket->fileOffset = 0;
+				pBucket->size = (int)pFile->length;
 			}
 			else
 			{
@@ -149,9 +150,7 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 
 			MFFile_Seek(pCacheData->pBaseFile, (int)pBucket->fileOffset, MFSeek_Begin);
 			uint32 read = MFFile_Read(pCacheData->pBaseFile, pBucket->pData, pBucket->size);
-
-			// if there are less bytes left in the file than we are trying to read, then we need to update the read count...
-			bytes = MFMin(bytes, (int64)read);
+			MFDebug_Assert(read == pBucket->size, "Error reading base file...");
 		}
 
 		pBucket->lastTouched = (uint32)MFSystem_ReadRTC();
