@@ -342,7 +342,7 @@ enum MFEndian
 
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32
-	#define MF_RENDERER			MF_DRIVER_OPENGL
+	#define MF_RENDERER			MF_DRIVER_D3D9
 	#define MF_SOUND			MF_DRIVER_DSOUND
 	#define MF_HEAP				MF_DRIVER_WIN32
 	#define MF_FILESYSTEM		MF_DRIVER_WIN32
