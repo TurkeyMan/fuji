@@ -106,6 +106,7 @@ TINYXML = Middleware/tinyxml/tinystr.o \
 # Regular build
 
 OBJS := $(ZLIB) \
+	$(LIBPNG) \
 	$(ANGELSCRIPT) \
 	$(TINYXML) \
 	Source/DebugMenu.o \

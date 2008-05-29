@@ -1119,3 +1119,16 @@ void MFFileSystem_FindClose(MFFind *pFind)
 
 	gFinds.Destroy(pFind);
 }
+
+MFFile* MFFile_CreateMemoryFile(const void *pMemory, uint32 size, bool writable, bool ownMemory)
+{
+	MFOpenDataMemory memory;
+	memory.cbSize = sizeof(MFOpenDataMemory);
+	memory.openFlags = MFOF_Read|MFOF_Binary|(writable ? MFOF_Write : 0);
+	memory.pMemoryPointer = (void*)pMemory;
+	memory.fileSize = size;
+	memory.allocated = size;
+	memory.ownsMemory = false;
+
+	return MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_MemoryFileSystem), &memory);
+}

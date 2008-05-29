@@ -545,7 +545,7 @@ void MFInput_UpdatePlatformSpecific()
 
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
-	MFCALLSTACK;
+	MFCALLSTACKc;
 
 	switch(device)
 	{
@@ -611,7 +611,7 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 {
-	MFCALLSTACK;
+	MFCALLSTACKc;
 
 	HRESULT hr;
 

@@ -343,41 +343,41 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 	{ // Linux
 		0,	// TexFmt_A8R8G8B8
 		1,	// TexFmt_A8B8G8R8
-		0,	// TexFmt_B8G8R8A8
-		0,	// TexFmt_R8G8B8A8
+		2,	// TexFmt_B8G8R8A8
+		3,	// TexFmt_R8G8B8A8
 
-		0,	// TexFmt_A2R10G10B10
-		0,	// TexFmt_A2B10G10R10
+		4,	// TexFmt_A2R10G10B10
+		5,	// TexFmt_A2B10G10R10
 
-		0,	// TexFmt_A16B16G16R16
+		6,	// TexFmt_A16B16G16R16
 
-		0,	// TexFmt_R5G6B5
+		7,	// TexFmt_R5G6B5
 		0,	// TexFmt_R6G5B5
-		0,	// TexFmt_B5G6R5
+		8,	// TexFmt_B5G6R5
 
-		0,	// TexFmt_A1R5G5B5
-		0,	// TexFmt_R5G5B5A1
-		0,	// TexFmt_A1B5G5R5
+		9,	// TexFmt_A1R5G5B5
+		10,	// TexFmt_R5G5B5A1
+		11,	// TexFmt_A1B5G5R5
 
-		0,	// TexFmt_A4R4G4B4
-		0,	// TexFmt_A4B4G4R4
-		0,	// TexFmt_R4G4B4A4
+		12,	// TexFmt_A4R4G4B4
+		13,	// TexFmt_A4B4G4R4
+		14,	// TexFmt_R4G4B4A4
 
-		0,	// TexFmt_ABGR_F16
-		0,	// TexFmt_ABGR_F32
+		15,	// TexFmt_ABGR_F16
+		16,	// TexFmt_ABGR_F32
 
-		0,	// TexFmt_I8
+		17,	// TexFmt_I8
 		0,	// TexFmt_I4
 
-		0,	// TexFmt_DXT1
+		18,	// TexFmt_DXT1
 		0,	// TexFmt_DXT2
-		0,	// TexFmt_DXT3
+		19,	// TexFmt_DXT3
 		0,	// TexFmt_DXT4
-		0,	// TexFmt_DXT5
+		20,	// TexFmt_DXT5
 
-		0,	// TexFmt_DXT1
-		0,	// TexFmt_DXT3
-		0,	// TexFmt_DXT5
+		0,	// TexFmt_PSP_DXT1
+		0,	// TexFmt_PSP_DXT3
+		0,	// TexFmt_PSP_DXT5
 
 		0,	// TexFmt_XB_A8R8G8B8
 		0,	// TexFmt_XB_A8B8G8R8

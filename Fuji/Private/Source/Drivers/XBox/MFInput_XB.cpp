@@ -194,6 +194,11 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	}
 }
 
+uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+{
+	return 0;
+}
+
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 {
 	MFCALLSTACK;

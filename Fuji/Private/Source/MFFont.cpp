@@ -371,7 +371,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 	maxWidth = MFMax(width, maxWidth);
 
 	if(pTotalHeight)
-		*pTotalHeight = totalHeight + height;
+		*pTotalHeight = MFAbs(totalHeight + height);
 
 	return maxWidth;
 }

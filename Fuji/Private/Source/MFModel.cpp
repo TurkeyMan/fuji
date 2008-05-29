@@ -7,6 +7,7 @@
 #include "MFCollision_Internal.h"
 #include "MFAnimation.h"
 
+#include "MFMesh_Internal.h"
 #include "Display_Internal.h"
 #include "MFRenderer.h"
 

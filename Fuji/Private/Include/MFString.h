@@ -12,7 +12,7 @@
 
 void MFCopyMemory(void *pDest, const void *pSrc, uint32 size);
 void MFZeroMemory(void *pDest, uint32 size);
-void MFSetMemory(void *pDest, int value, uint32 size);
+void MFMemSet(void *pDest, int value, uint32 size);
 int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
 
 /**
@@ -146,6 +146,8 @@ char* MFString_Chr(const char *pString, int c);
  * @see MFString_Chr()
  */
 char* MFString_RChr(const char *pString, int c);
+
+char* MFString_GetFileExtension(const char *pFilename);
 
 const char* MFStr_GetFileName(const char *pFilename);
 const char* MFStr_GetFileNameWithoutExtension(const char *pFilename);

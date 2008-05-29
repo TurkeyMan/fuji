@@ -2,6 +2,7 @@
 
 #if MF_RENDERER == MF_DRIVER_OPENGL
 
+#include "MFMesh_Internal.h"
 #include "MFModel_Internal.h"
 #include "MFView.h"
 #include "MFRenderer.h"
@@ -17,6 +18,8 @@
 #include <string.h>
 
 /*** Globals ****/
+
+#define NO_VBOS
 
 // VBO Extension Definitions, From glext.h
 #define GL_ARRAY_BUFFER_ARB 0x8892
@@ -74,8 +77,8 @@ bool IsExtensionSupported(const char *extension)
 
 void MFModel_InitModulePlatformSpecific()
 {
+#if !defined(NO_VBOS)
 	// check if VBO extension is present
-#ifndef NO_VBOS
 	const GLubyte *version;
 	GLboolean glVersion15 = GL_FALSE;
 
@@ -145,6 +148,11 @@ void MFModel_Draw(MFModel *pModel)
 	else
 		glLoadMatrixf((GLfloat*)MFView_GetLocalToView(pModel->worldMatrix, &localToView));
 
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+
 	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
@@ -155,16 +163,14 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)&pSubobjects[a].pMeshChunks[b];
+				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)&pSubobjects[a].pMeshChunks[b];
 
-				MFMaterial_SetMaterial(pMC->pMaterial);
+				if(!pMatOverride)
+					MFMaterial_SetMaterial(pMC->pMaterial);
+
 				MFRenderer_Begin();
 
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glEnableClientState(GL_NORMAL_ARRAY);
-				glEnableClientState(GL_COLOR_ARRAY);
-				glEnableClientState(GL_VERTEX_ARRAY);
-
+#if !defined(NO_VBOS)
 				if(gbUseVBOs)
 				{
 					// user video memory buffers
@@ -178,12 +184,36 @@ void MFModel_Draw(MFModel *pModel)
 					glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 				}
 				else
+#endif
 				{
 					// just use conventional vertex arrays
-					glVertexPointer(3, GL_FLOAT, 0, pMC->pVertexData);
-					glNormalPointer(GL_FLOAT, 0, pMC->pNormalData);
-					glColorPointer(4, GL_UNSIGNED_BYTE, 0, pMC->pColourData);
-					glTexCoordPointer(2, GL_FLOAT, 0, pMC->pUVData);
+					for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
+					{
+						MFVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
+
+						for(int b=0; b<pStream->numVertexElements; ++b)
+						{
+							switch(pStream->pElements[b].usage)
+							{
+								case MFVET_Position:
+									glVertexPointer(3, GL_FLOAT, pStream->streamStride, (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset);
+									glEnableClientState(GL_VERTEX_ARRAY);
+									break;
+								case MFVET_Normal:
+									glNormalPointer(GL_FLOAT, pStream->streamStride, (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset);
+									glEnableClientState(GL_NORMAL_ARRAY);
+									break;
+								case MFVET_Colour:
+									glColorPointer(4, GL_UNSIGNED_BYTE, pStream->streamStride, (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset);
+									glEnableClientState(GL_COLOR_ARRAY);
+									break;
+								case MFVET_TexCoord:
+									glTexCoordPointer(2, GL_FLOAT, pStream->streamStride, (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset);
+									glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+									break;
+							}
+						}
+					}
 				}
 
 				glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, pMC->pIndexData);
@@ -201,10 +231,11 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
+	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
 
+#if !defined(NO_VBOS)
 	if(gbUseVBOs)
 	{
 		glGenBuffers(1, &pMC->vertBuffer);
@@ -223,14 +254,16 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 		glBindBuffer(GL_ARRAY_BUFFER_ARB, pMC->uvBuffer);
 		glBufferData(GL_ARRAY_BUFFER_ARB, pMC->uvDataSize, pMC->pUVData, GL_STATIC_DRAW_ARB);
 	}
+#endif
 }
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
+	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
 
+#if !defined(NO_VBOS)
 	if(gbUseVBOs)
 	{
 		glDeleteBuffers(1, &pMC->vertBuffer);
@@ -238,24 +271,14 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 		glDeleteBuffers(1, &pMC->colourBuffer);
 		glDeleteBuffers(1, &pMC->uvBuffer);
 	}
+#endif
 
 	MFMaterial_Destroy(pMC->pMaterial);
 }
 
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
-	MFCALLSTACK;
-
-	MFMeshChunk_OpenGL *pMC = (MFMeshChunk_OpenGL*)pMeshChunk;
-
-	MFFixUp(pMC->pMaterial, pBase, load);
-	MFFixUp(pMC->pVertexData, pBase, load);
-	MFFixUp(pMC->pNormalData, pBase, load);
-	MFFixUp(pMC->pColourData, pBase, load);
-	MFFixUp(pMC->pUVData, pBase, load);
-	MFFixUp(pMC->pIndexData, pBase, load);
-	if(pMC->pBatchIndices)
-		MFFixUp(pMC->pBatchIndices, pBase, load);
+	MFMesh_FixUpMeshChunkGeneric(pMeshChunk, pBase, load);
 }
 
 #endif

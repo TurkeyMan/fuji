@@ -1,6 +1,8 @@
 #if !defined(_MFRENDERER_PC_H)
 #define _MFRENDERER_PC_H
 
+#include <d3d9.h>
+
 enum PCVF_Type
 {
 	PCVF_Float4,

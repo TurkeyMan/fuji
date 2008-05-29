@@ -19,7 +19,7 @@ void MFCopyMemory(void *pDest, const void *pSrc, uint32 size)
 	memcpy(pDest, pSrc, size);
 }
 
-void MFSetMemory(void *pDest, int value, uint32 size)
+void MFMemSet(void *pDest, int value, uint32 size)
 {
 	memset(pDest, value, size);
 }

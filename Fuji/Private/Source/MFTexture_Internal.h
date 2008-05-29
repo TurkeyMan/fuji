@@ -40,12 +40,9 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 struct MFTextureTemplateData
 {
 	uint32 magicNumber;
-
 	MFTextureFormat imageFormat;
-	uint32 platformFormat;
-
+	uint32 reserved;
 	int mipLevels;
-
 	uint32 flags;
 
 	// padding
@@ -117,5 +114,10 @@ public:
 #endif
 
 extern uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max];
+
+inline uint32 MFTexture_GetPlatformFormatID(MFTextureFormat format, MFDisplayDrivers displayDriver)
+{
+	return gMFTexturePlatformFormat[displayDriver][format];
+}
 
 #endif

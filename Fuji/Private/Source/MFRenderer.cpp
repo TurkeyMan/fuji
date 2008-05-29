@@ -21,7 +21,7 @@ void MFRenderer_InitModule()
 	MFCALLSTACK;
 
 	MFZeroMemory(gRenderStates, sizeof(gRenderStates));
-	MFSetMemory(gCurrentRenderStates, -1, sizeof(gCurrentRenderStates));
+	MFMemSet(gCurrentRenderStates, -1, sizeof(gCurrentRenderStates));
 
 	for(int a=0; a<MFMT_Max; a++)
 	{

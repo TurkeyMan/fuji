@@ -448,6 +448,12 @@ void MFFileSystem_FindClose(MFFind *pFind);
 
 
 /////////////////////////////////////
+// helper functions, to make life easier
+
+MFFile* MFFile_CreateMemoryFile(const void *pMemory, uint32 size, bool writable = false, bool ownMemory = false);
+
+
+/////////////////////////////////////
 // implementing a custom filesystem
 
 // this can be exposed to the game later on when the design is more settled

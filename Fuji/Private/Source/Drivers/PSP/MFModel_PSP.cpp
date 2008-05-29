@@ -2,6 +2,7 @@
 
 #if MF_RENDERER == MF_DRIVER_PSP
 
+#include "MFMesh_Internal.h"
 #include "MFModel_Internal.h"
 #include "MFView.h"
 #include "MFRenderer.h"

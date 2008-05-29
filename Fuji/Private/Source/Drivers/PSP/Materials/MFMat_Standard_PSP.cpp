@@ -54,7 +54,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			int height = pTexture->pTemplateData->pSurfaces[0].height;
 			char *pImageData = pTexture->pTemplateData->pSurfaces[0].pImageData;
 
-			sceGuTexMode(pTexture->pTemplateData->platformFormat, 0, 0, (pTexture->pTemplateData->flags & TEX_Swizzled) ? 1 : 0);
+			uint32 platformFormat = MFTexture_GetPlatformFormatID(pTexture->pTemplateData->imageFormat, MFDD_PSP);
+			sceGuTexMode(platformFormat, 0, 0, (pTexture->pTemplateData->flags & TEX_Swizzled) ? 1 : 0);
 			sceGuTexImage(0, width, height, width, pImageData);
 			sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
 			sceGuTexFilter(GU_LINEAR, GU_LINEAR);

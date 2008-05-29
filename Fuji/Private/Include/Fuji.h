@@ -31,6 +31,7 @@
 		MF_ARCH_SH4
 		MF_ARCH_SPU
 		MF_ARCH_ARM
+		MF_ARCH_68K
 
 	Endian:
 		MF_ENDIAN_LITTLE
@@ -202,7 +203,7 @@
 
 // select architecture endian
 #if !defined(MF_ENDIAN_BIG) && !defined(MF_ENDIAN_LITTLE)
-	#if defined(MF_ARCH_PPC) || defined(MF_ARCH_SPU)
+	#if defined(MF_ARCH_PPC) || defined(MF_ARCH_SPU) || defined(MF_ARCH_68K)
 		#define MF_ENDIAN_BIG
 	#else
 		#define MF_ENDIAN_LITTLE
@@ -323,9 +324,6 @@ enum MFEndian
 
 	#include <stdlib.h>
 
-	// This forces ConvertASE and the shaders to use vertex data formats supported by D3D8
-	#define SUPPORT_D3D8
-
 	// this defines weather to take mouse[0]'s coords from the windows cursor or from
 	// DirectInput's accumulated input events
 	#define USE_WINDOWS_MOUSE_COORDS
@@ -344,7 +342,7 @@ enum MFEndian
 
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32
-	#define MF_RENDERER			MF_DRIVER_D3D9
+	#define MF_RENDERER			MF_DRIVER_OPENGL
 	#define MF_SOUND			MF_DRIVER_DSOUND
 	#define MF_HEAP				MF_DRIVER_WIN32
 	#define MF_FILESYSTEM		MF_DRIVER_WIN32
@@ -465,7 +463,7 @@ enum MFEndian
 	#define MF_DEBUG		MF_DRIVER_PSP
 
 	#define PSPAUDIOCODEC_STREAM
-	#define VORBIS_STREAM
+//	#define VORBIS_STREAM
 //	#define VORBIS_TREMOR
 
 #elif defined(MF_PS2)

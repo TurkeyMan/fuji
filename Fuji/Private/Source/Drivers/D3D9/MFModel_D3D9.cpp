@@ -9,11 +9,45 @@
 #include "MFFileSystem.h"
 #include "MFView.h"
 
+#include "MFMesh_Internal.h"
 #include "Display_Internal.h"
 #include "MFRenderer.h"
 #include "MFRenderer_D3D9.h"
 
 extern IDirect3DDevice9 *pd3dDevice;
+
+static BYTE gUsageTable[] =
+{
+	D3DDECLUSAGE_POSITION,
+	D3DDECLUSAGE_NORMAL,
+	D3DDECLUSAGE_COLOR,
+	D3DDECLUSAGE_TEXCOORD,
+	D3DDECLUSAGE_BINORMAL,
+	D3DDECLUSAGE_TANGENT,
+	D3DDECLUSAGE_BLENDINDICES,
+	D3DDECLUSAGE_BLENDWEIGHT
+};
+
+static BYTE gTypeTable[] =
+{
+	D3DDECLTYPE_FLOAT1,
+	D3DDECLTYPE_FLOAT2,
+	D3DDECLTYPE_FLOAT3,
+	D3DDECLTYPE_FLOAT4,
+	D3DDECLTYPE_D3DCOLOR,
+	D3DDECLTYPE_UBYTE4,
+	D3DDECLTYPE_UBYTE4N,
+	D3DDECLTYPE_SHORT2,
+	D3DDECLTYPE_SHORT4,
+	D3DDECLTYPE_SHORT2N,
+	D3DDECLTYPE_SHORT4N,
+	D3DDECLTYPE_USHORT2N,
+	D3DDECLTYPE_USHORT4N,
+	D3DDECLTYPE_UDEC3,
+	D3DDECLTYPE_DEC3N,
+	D3DDECLTYPE_FLOAT16_2,
+	D3DDECLTYPE_FLOAT16_4
+};
 
 void MFModel_InitModulePlatformSpecific()
 {
@@ -60,14 +94,14 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pSubobjects[a].pMeshChunks;
+				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pSubobjects[a].pMeshChunks;
 
 				if(!pMatOverride)
 					MFMaterial_SetMaterial(pMC[b].pMaterial);
 
 				if(pModel->pAnimation)
 				{
-					MFRendererPC_SetNumWeights(pMC[b].maxWeights);
+					MFRendererPC_SetNumWeights(pMC[b].maxBlendWeights);
 					MFRenderer_SetBatch(pMC[b].pBatchIndices, pMC[b].matrixBatchSize);
 				}
 				else
@@ -75,11 +109,11 @@ void MFModel_Draw(MFModel *pModel)
 
 				MFRenderer_Begin();
 
-				pd3dDevice->SetVertexDeclaration(pMC[b].pVertexDeclaration);
-				pd3dDevice->SetStreamSource(0, pMC[b].pVertexBuffer, 0, pMC[b].vertexStride);
-				if(pMC[b].pAnimBuffer)
-					pd3dDevice->SetStreamSource(1, pMC[b].pAnimBuffer, 0, pMC[b].animVertexStride);
-				pd3dDevice->SetIndices(pMC[b].pIndexBuffer);
+				pd3dDevice->SetVertexDeclaration((IDirect3DVertexDeclaration9*)pMC[b].userData[3]);
+				pd3dDevice->SetStreamSource(0, (IDirect3DVertexBuffer9*)pMC[b].userData[0], 0, pMC[b].pVertexFormat->pStreams[0].streamStride);
+				if(pMC[b].userData[1])
+					pd3dDevice->SetStreamSource(1, (IDirect3DVertexBuffer9*)pMC[b].userData[1], 0, pMC[b].pVertexFormat->pStreams[1].streamStride);
+				pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pMC[b].userData[2]);
 
 				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC[b].numVertices, 0, pMC[b].numIndices/3);
 			}
@@ -87,95 +121,121 @@ void MFModel_Draw(MFModel *pModel)
 	}
 }
 
+HRESULT MFModelD3D9_CreateVertexDeclaration(MFVertexFormat *pVF, IDirect3DVertexDeclaration9** ppDecl)
+{
+	D3DVERTEXELEMENT9 elements[16];
+	int element = 0;
+
+	for(int a=0; a<pVF->numVertexStreams; ++a)
+	{
+		for(int b=0; b<pVF->pStreams[a].numVertexElements; ++b)
+		{
+			elements[element].Stream = a;
+			elements[element].Offset = pVF->pStreams[a].pElements[b].offset;
+			elements[element].Type = gTypeTable[pVF->pStreams[a].pElements[b].type];
+			elements[element].Method = D3DDECLMETHOD_DEFAULT;
+			elements[element].Usage = gUsageTable[pVF->pStreams[a].pElements[b].usage];
+			elements[element].UsageIndex = pVF->pStreams[a].pElements[b].usageIndex;
+			++element;
+		}
+	}
+	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
+	elements[element] = endMacro;
+
+	return pd3dDevice->CreateVertexDeclaration(elements, ppDecl);
+}
+
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
+	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
 
 	HRESULT hr;
 
+	IDirect3DVertexBuffer9* &vb = (IDirect3DVertexBuffer9*&)pMC->userData[0];
+	IDirect3DVertexBuffer9* &ab = (IDirect3DVertexBuffer9*&)pMC->userData[1];
+	IDirect3DIndexBuffer9* &ib = (IDirect3DIndexBuffer9*&)pMC->userData[2];
+	IDirect3DVertexDeclaration9* &vd = (IDirect3DVertexDeclaration9*&)pMC->userData[3];
+
 	// create D3D interfaces
-	hr = pd3dDevice->CreateVertexDeclaration(pMC->pVertexElements, &pMC->pVertexDeclaration);
+	hr = MFModelD3D9_CreateVertexDeclaration(pMC->pVertexFormat, &vd);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
-	hr = pd3dDevice->CreateVertexBuffer(pMC->vertexDataSize, 0, 0, D3DPOOL_MANAGED, &pMC->pVertexBuffer, NULL);
+
+	hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[0].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &vb, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex buffer..");
-	if(pMC->pAnimData)
+	if(pMC->pVertexFormat->numVertexStreams > 1)
 	{
-		hr = pd3dDevice->CreateVertexBuffer(pMC->animDataSize, 0, 0, D3DPOOL_MANAGED, &pMC->pAnimBuffer, NULL);
+		hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[1].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &ab, NULL);
 		MFDebug_Assert(SUCCEEDED(hr), "Failed to create animation buffer..");
 	}
-	hr = pd3dDevice->CreateIndexBuffer(pMC->indexDataSize, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pMC->pIndexBuffer, NULL);
+	hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*pMC->numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &ib, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create index buffer..");
 
 	void *pData;
 
 	// fill vertex buffer
-	hr = pMC->pVertexBuffer->Lock(0, 0, &pData, 0);
+	hr = vb->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vertex buffer..");
 
-	MFCopyMemory(pData, pMC->pVertexData, pMC->vertexDataSize);
+	MFCopyMemory(pData, pMC->ppVertexStreams[0], pMC->pVertexFormat->pStreams[0].streamStride*pMC->numVertices);
 
-	pMC->pVertexBuffer->Unlock();
+	vb->Unlock();
 
 	// fill animation buffer
-	if(pMC->pAnimData)
+	if(pMC->pVertexFormat->numVertexStreams > 1)
 	{
-		hr = pMC->pAnimBuffer->Lock(0, 0, &pData, 0);
+		hr = ab->Lock(0, 0, &pData, 0);
 		MFDebug_Assert(SUCCEEDED(hr), "Failed to lock animation buffer..");
 
-		MFCopyMemory(pData, pMC->pAnimData, pMC->animDataSize);
+		MFCopyMemory(pData, pMC->ppVertexStreams[1], pMC->pVertexFormat->pStreams[1].streamStride*pMC->numVertices);
 
-		pMC->pAnimBuffer->Unlock();
+		ab->Unlock();
 	}
 
 	// fill index buffer
-	hr = pMC->pIndexBuffer->Lock(0, 0, &pData, 0);
+	hr = ib->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock index buffer..");
 
-	MFCopyMemory(pData, pMC->pIndexData, pMC->indexDataSize);
+	MFCopyMemory(pData, pMC->pIndexData, sizeof(uint16)*pMC->numIndices);
 
-	pMC->pIndexBuffer->Unlock();
+	ib->Unlock();
 }
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;
 
-	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
+	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
 
 	MFMaterial_Destroy(pMC->pMaterial);
 
-	pMC->pIndexBuffer->Release();
-	pMC->pIndexBuffer = NULL;
+	IDirect3DVertexBuffer9* &vb = (IDirect3DVertexBuffer9*&)pMC->userData[0];
+	IDirect3DVertexBuffer9* &ab = (IDirect3DVertexBuffer9*&)pMC->userData[1];
+	IDirect3DIndexBuffer9* &ib = (IDirect3DIndexBuffer9*&)pMC->userData[2];
+	IDirect3DVertexDeclaration9* &vd = (IDirect3DVertexDeclaration9*&)pMC->userData[3];
 
-	pMC->pVertexBuffer->Release();
-	pMC->pVertexBuffer = NULL;
+	ib->Release();
+	ib = NULL;
 
-	if(pMC->pAnimBuffer)
+	vb->Release();
+	vb = NULL;
+
+	if(ab)
 	{
-		pMC->pAnimBuffer->Release();
-		pMC->pAnimBuffer = NULL;
+		ab->Release();
+		ab = NULL;
 	}
 
-	pMC->pVertexDeclaration->Release();
-	pMC->pVertexDeclaration = NULL;
+	vd->Release();
+	vd = NULL;
 }
 
-void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
+void MFModel_FixUpMeshChunk(MFMeshChunk *pMC, void *pBase, bool load)
 {
-	MFCALLSTACK;
-
-	MFMeshChunk_D3D9 *pMC = (MFMeshChunk_D3D9*)pMeshChunk;
-
-	MFFixUp(pMC->pMaterial, pBase, load);
-	MFFixUp(pMC->pVertexData, pBase, load);
-	MFFixUp(pMC->pAnimData, pBase, load);
-	MFFixUp(pMC->pIndexData, pBase, load);
-	MFFixUp(pMC->pVertexElements, pBase, load);
-	MFFixUp(pMC->pBatchIndices, pBase, load);
+	MFMesh_FixUpMeshChunkGeneric(pMC, pBase, load);
 }
 
 #endif // MF_RENDERER

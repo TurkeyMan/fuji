@@ -261,6 +261,21 @@ void MFRenderer_DestroyDisplay()
 		glXDestroyWindow(xdisplay, glXWindow);
 		glXWindow = 0;
 	}
+#elif MF_DISPLAY == MF_DRIVER_WIN32
+	if(hRC)
+	{
+		if(wglMakeCurrent(NULL, NULL))
+		{
+			wglDeleteContext(hRC);
+		}
+		hRC = NULL;
+	}
+
+	if(hDC)
+	{
+		ReleaseDC(apphWnd, hDC);
+		hDC = NULL;
+	}
 #endif
 }
 
@@ -280,6 +295,7 @@ void MFRenderer_EndFrame()
 #if MF_DISPLAY == MF_DRIVER_X11
 	glXSwapBuffers(xdisplay, glXWindow);
 #elif MF_DISPLAY == MF_DRIVER_WIN32
+	SwapBuffers(hDC);
 #endif
 }
 

@@ -149,6 +149,11 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 	return s;
 }
 
+inline char* MFString_GetFileExtension(const char *pFilename)
+{
+	return MFString_RChr(pFilename, '.');
+}
+
 inline const char* MFStr_GetFileName(const char *pFilename)
 {
 	const char *pSlash = MFString_RChr(pFilename, '/');

@@ -22,6 +22,8 @@
 
 struct MFStringCache;
 
+class MFIni;
+
 class MFIniLine
 {
 friend class MFIni;

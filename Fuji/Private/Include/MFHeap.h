@@ -50,6 +50,7 @@ struct MFMemoryCallbacks
  * @param bytes Number of bytes to allocate for the new buffer.
  * @param pHeap Optional pointer to an MFHeap where the memory will be allocated. If pHeap is set to NULL, the current 'Active' heap will be used.
  * @return A pointer to a new area in memory ready for use.
+ * @see MFHeap_AllocAndZero()
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
@@ -71,6 +72,18 @@ void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
 
 // these are here to satisfy doxygen
 #if 0
+/**
+ * @fn void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap)
+ * Allocates a block of memory and zero's the contents.
+ * Allocates a new memory block of the specified size and zero's the contents.
+ * @param bytes Number of bytes to allocate for the new buffer.
+ * @param pHeap Optional pointer to an MFHeap where the memory will be allocated. If pHeap is set to NULL, the current 'Active' heap will be used.
+ * @return A pointer to a new area in memory ready for use.
+ * @see MFHeap_Alloc()
+ * @see MFHeap_Realloc()
+ * @see MFHeap_Free()
+ */
+void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL);
 void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
 void* MFHeap_Realloc(void *pMem, uint32 bytes);
 void* MFHeap_TAlloc(uint32 bytes);
@@ -241,10 +254,12 @@ void MFHeap_PopGroupName();
 		public:
 		inline MFHeapDebug& Tracker(int line, char *pFile) { MFHeap_SetLineAndFile(line, pFile); return *this; }
 		inline static void *Alloc(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocInternal(bytes, pHeap); }
+		inline static void *AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL) { void *pMem = MFHeap_AllocInternal(bytes, pHeap); MFZeroMemory(pMem, bytes); return pMem; }
 	} MFHeap_Debug;
 
 	// these macros wrap the debug heap trackers functionality
 	#define MFHeap_Alloc MFHeap_Debug.Tracker(__LINE__, __FILE__).Alloc
+	#define MFHeap_AllocAndZero MFHeap_Debug.Tracker(__LINE__, __FILE__).AllocAndZero
 	#define MFHeap_Realloc(pMem, bytes) (MFHeap_SetLineAndFile(__LINE__, __FILE__), MFHeap_ReallocInternal((pMem), (bytes)))
 	#define MFHeap_TAlloc(bytes) MFHeap_Debug.Tracker(__LINE__, __FILE__).Alloc((bytes), MFHeap_GetHeap(MFHT_ActiveTemporary))
 #else

@@ -232,6 +232,8 @@ int main(int argc, char *argv[])
 		switch(platform)
 		{
 			case FP_PC:
+			case FP_Linux:
+			case FP_OSX:
 /*
 				if(pImage->opaque || (pImage->oneBitAlpha && premultipliedAlpha))
 					targetFormat = TexFmt_DXT1;
@@ -255,11 +257,6 @@ int main(int argc, char *argv[])
 				else
 					targetFormat = TexFmt_XB_A8R8G8B8s;
 //				targetFormat = TexFmt_XB_A8R8G8B8s;
-				break;
-
-			case FP_Linux:
-			case FP_OSX:
-				targetFormat = TexFmt_A8B8G8R8;
 				break;
 
 			case FP_PSP:
@@ -333,7 +330,6 @@ int main(int argc, char *argv[])
 	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
 
 	pTemplate->imageFormat = targetFormat;
-	pTemplate->platformFormat = gMFTexturePlatformFormat[(int)platform][(int)targetFormat];
 
 	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
 		pTemplate->flags |= TEX_Swizzled;
@@ -452,16 +448,16 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		case TexFmt_A8R8G8B8:
 		case TexFmt_XB_A8R8G8B8s:
 		{
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+			struct PixelBGRA { uint8 b, g, r, a; } *pTarget = (PixelBGRA*)pOutputSurface->pImageData;
 
 			for(y=0; y<height; y++)
 			{
 				for(x=0; x<width; x++)
 				{
-					*pTarget = ((uint32)(pSource->a*255.0f) & 0xFF) << 24 |
-								((uint32)(pSource->r*255.0f) & 0xFF) << 16 |
-								((uint32)(pSource->g*255.0f) & 0xFF) << 8 |
-								((uint32)(pSource->b*255.0f) & 0xFF);
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
@@ -475,16 +471,16 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		{
 			float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
 
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+			struct PixelRGBA { uint8 r, g, b, a; } *pTarget = (PixelRGBA*)pOutputSurface->pImageData;
 
 			for(y=0; y<height; y++)
 			{
 				for(x=0; x<width; x++)
 				{
-					*pTarget = ((uint32)(pSource->a*alphaScale) & 0xFF) << 24 |
-								((uint32)(pSource->b*255.0f) & 0xFF) << 16 |
-								((uint32)(pSource->g*255.0f) & 0xFF) << 8 |
-								((uint32)(pSource->r*255.0f) & 0xFF);
+					pTarget->a = (uint8)((int)(pSource->a*alphaScale) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*alphaScale) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*alphaScale) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*alphaScale) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
@@ -495,16 +491,16 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		case TexFmt_B8G8R8A8:
 		case TexFmt_XB_B8G8R8A8s:
 		{
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+			struct PixelARGB { uint8 a, r, g, b; } *pTarget = (PixelARGB*)pOutputSurface->pImageData;
 
 			for(y=0; y<height; y++)
 			{
 				for(x=0; x<width; x++)
 				{
-					*pTarget = ((uint32)(pSource->b*255.0f) & 0xFF) << 24 |
-								((uint32)(pSource->g*255.0f) & 0xFF) << 16 |
-								((uint32)(pSource->r*255.0f) & 0xFF) << 8 |
-								((uint32)(pSource->a*255.0f) & 0xFF);
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
@@ -515,16 +511,16 @@ int ConvertSurface(SourceImageLevel *pSourceSurface, MFTextureSurfaceLevel *pOut
 		case TexFmt_R8G8B8A8:
 		case TexFmt_XB_R8G8B8A8s:
 		{
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+			struct PixelABGR { uint8 a, b, g, r; } *pTarget = (PixelABGR*)pOutputSurface->pImageData;
 
 			for(y=0; y<height; y++)
 			{
 				for(x=0; x<width; x++)
 				{
-					*pTarget = ((uint32)(pSource->r*255.0f) & 0xFF) << 24 |
-								((uint32)(pSource->g*255.0f) & 0xFF) << 16 |
-								((uint32)(pSource->b*255.0f) & 0xFF) << 8 |
-								((uint32)(pSource->a*255.0f) & 0xFF);
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
