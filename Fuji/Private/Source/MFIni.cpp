@@ -310,9 +310,9 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	while(pSrc < pSrcEnd)
 	{
 		// skip comment lines
-		if((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (pSrc[0] == '#'))
+		if((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (stringCount == 0 && pSrc[0] == '#'))
 		{
-			while (pSrc < pSrcEnd && pSrc[0] != 0xd)
+			while (pSrc < pSrcEnd && !MFIsNewline(pSrc[0]))
 			{
 				pSrc++;
 			}
@@ -322,7 +322,6 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 
 		// check if we have found some non-whitespace
 		if(!MFIsWhite(pSrc[0]) && (stringCount!=1 || pSrc[0] != '='))
-//		if (pSrc[0] != ' ' && pSrc[0] != '\t' && pSrc[0] != 0xd && pSrc[0] != 0xa && (stringCount!=1 || pSrc[0] != '='))
 			break;
 
 		pSrc++;

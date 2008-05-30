@@ -57,6 +57,19 @@ struct MFMemoryCallbacks
 void* MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap = NULL);
 
 /**
+ * @fn void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap)
+ * Allocates a block of memory and zero's the contents.
+ * Allocates a new memory block of the specified size and zero's the contents.
+ * @param bytes Number of bytes to allocate for the new buffer.
+ * @param pHeap Optional pointer to an MFHeap where the memory will be allocated. If pHeap is set to NULL, the current 'Active' heap will be used.
+ * @return A pointer to a new area in memory ready for use.
+ * @see MFHeap_Alloc()
+ * @see MFHeap_Realloc()
+ * @see MFHeap_Free()
+ */
+void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap = NULL);
+
+/**
  * @fn void* MFHeap_Realloc(void *pMem, uint32 bytes)
  * Re-allocates an allocated block of memory.
  * Allocates a new memory block of the specified size and copies the contents of the previous buffer.
@@ -72,17 +85,6 @@ void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
 
 // these are here to satisfy doxygen
 #if 0
-/**
- * @fn void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap)
- * Allocates a block of memory and zero's the contents.
- * Allocates a new memory block of the specified size and zero's the contents.
- * @param bytes Number of bytes to allocate for the new buffer.
- * @param pHeap Optional pointer to an MFHeap where the memory will be allocated. If pHeap is set to NULL, the current 'Active' heap will be used.
- * @return A pointer to a new area in memory ready for use.
- * @see MFHeap_Alloc()
- * @see MFHeap_Realloc()
- * @see MFHeap_Free()
- */
 void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL);
 void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
 void* MFHeap_Realloc(void *pMem, uint32 bytes);
@@ -254,7 +256,7 @@ void MFHeap_PopGroupName();
 		public:
 		inline MFHeapDebug& Tracker(int line, char *pFile) { MFHeap_SetLineAndFile(line, pFile); return *this; }
 		inline static void *Alloc(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocInternal(bytes, pHeap); }
-		inline static void *AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL) { void *pMem = MFHeap_AllocInternal(bytes, pHeap); MFZeroMemory(pMem, bytes); return pMem; }
+		inline static void *AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocAndZeroInternal(bytes, pHeap); }
 	} MFHeap_Debug;
 
 	// these macros wrap the debug heap trackers functionality
@@ -265,6 +267,7 @@ void MFHeap_PopGroupName();
 #else
 	// compiled out in retail
 	#define MFHeap_Alloc MFHeap_AllocInternal
+	#define MFHeap_AllocAndZero MFHeap_AllocAndZeroInternal
 	#define MFHeap_Realloc MFHeap_ReallocInternal
 	#define MFHeap_TAlloc(bytes) MFHeap_AllocInternal((bytes), MFHeap_GetHeap(MFHT_ActiveTemporary))
 #endif

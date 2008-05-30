@@ -121,6 +121,14 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	return (void*)pMemory;
 }
 
+void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap)
+{
+	void *pMem = MFHeap_Alloc(bytes, pHeap);
+	if(pMem)
+		MFZeroMemory(pMem, bytes);
+	return pMem;
+}
+
 void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 {
 	MFCALLSTACK;
