@@ -283,6 +283,11 @@ void MFInput_UpdatePlatformSpecific()
 #endif
 }
 
+uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+{
+	return 0;
+}
+
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
 	if(device == IDD_Gamepad && id < gMaxGamepad)
@@ -372,11 +377,6 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 				pGamepadState->values[a] = (pGamepadState->values[a] + 1.0f) * 0.5f;
 		}
 	}
-}
-
-uint32 MFInput_GetDeviceFlags(int device, int deviceID)
-{
-	return 0;
 }
 
 void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)

@@ -32,7 +32,7 @@ enum MFWaveFormat
 
 	MFWF_PCM_u8,
 	MFWF_PCM_s16,
-	MFWF_PCM_32f,
+	MFWF_PCM_f32,
 
 	MFWF_Max,
 	MFWF_ForceInt = 0x7FFFFFFF

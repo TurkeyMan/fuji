@@ -127,6 +127,7 @@ OBJS := $(ZLIB) \
 	Source/MFMaterial.o \
 	Source/MFMath.o \
 	Source/MFMatrix.o \
+	Source/MFMesh.o \
 	Source/MFModel.o \
 	Source/MFNetwork.o \
 	Source/MFPrimitive.o \

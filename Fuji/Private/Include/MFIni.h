@@ -21,7 +21,6 @@
 #include "MFMatrix.h"
 
 struct MFStringCache;
-
 class MFIni;
 
 class MFIniLine

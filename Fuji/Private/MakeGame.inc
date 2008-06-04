@@ -143,7 +143,7 @@ RANLIB   = ranlib
 STRIP    = strip
 
 LIBDIR   := $(LIBDIR) /usr/X11R6/lib
-LIBS := -lc -lm -lstdc++ -lpthread -lGL -lGLU -lXxf86vm
+LIBS := -lc -lm -lstdc++ -lpthread -lGL -lGLU -lXxf86vm -logg -lvorbis -lvorbisfile -lasound
 
 # end LINUX
 endif
@@ -159,7 +159,7 @@ RANLIB   = ranlib
 STRIP    = strip
 
 LIBDIR   := $(LIBDIR) /Developer/SDKs/MacOSX10.4u.sdk/usr/X11R6/lib
-LIBS := -lc -lm -lstdc++ -lGL -lGLU -lXxf86vm -lX11 -lXext
+LIBS := -lc -lm -lstdc++ -lGL -lGLU -lXxf86vm -lX11 -lXext -logg -lvorbis -lvorbisfile
 
 # end OSX
 endif

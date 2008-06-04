@@ -216,6 +216,7 @@ MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannel
 		pTemplate->sampleRate = samplerate;
 		pTemplate->numSamples = numSamples;
 		pTemplate->numChannels = (uint16)numChannels;
+		pTemplate->numStreams = 1;
 		pTemplate->bitsPerSample = bitsPerSample;
 		pTemplate->format = MFWF_PCM_s16;
 
