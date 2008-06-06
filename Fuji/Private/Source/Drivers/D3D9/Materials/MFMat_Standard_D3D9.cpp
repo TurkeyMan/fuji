@@ -147,9 +147,16 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 				break;
 		}
 
-		MFRendererPC_SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-		MFRendererPC_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
-		MFRendererPC_SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
+		if(!(pData->materialType&MF_NoZRead) || !(pData->materialType&MF_NoZWrite))
+		{
+			MFRendererPC_SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+			MFRendererPC_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
+			MFRendererPC_SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
+		}
+		else
+		{
+			MFRendererPC_SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+		}
 	}
 
 	MFRendererPC_SetColourMask(1, 0, 1, 0);
