@@ -129,6 +129,7 @@ struct MFMount
 
 struct MFFind
 {
+	char searchPattern[256];
 	MFMount *pMount;
 	void *pFilesystemData;
 };

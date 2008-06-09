@@ -1045,15 +1045,30 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 					MFFind *pFind = gFinds.Create();
 
 					pFind->pMount = pMount;
-					pFind->pFilesystemData = (void*)0;
+					MFString_Copy(pFind->searchPattern, pSearchPattern);
 
-					MFString_Copy(pFindData->pFilename, pMount->pEntries[0].pName);
-					MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[0].pFilesysData);
+					size_t file = 0;
+					for(; file < pFind->pMount->numFiles; ++file)
+					{
+						if(MFString_PatternMatch(pSearchPattern, pMount->pEntries[file].pName))
+							break;
+					}
 
-					pFindData->attributes = ((pMount->pEntries[0].flags & MFTF_Directory) ? MFFA_Directory : 0) |
-											((pMount->pEntries[0].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
-											((pMount->pEntries[0].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
-					pFindData->fileSize = pMount->pEntries[0].size;
+					if(file == pFind->pMount->numFiles)
+					{
+						gFinds.Destroy(pFind);
+						return NULL;
+					}
+
+					pFind->pFilesystemData = (void*)file;
+
+					MFString_Copy(pFindData->pFilename, pMount->pEntries[file].pName);
+					MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[file].pFilesysData);
+
+					pFindData->attributes = ((pMount->pEntries[file].flags & MFTF_Directory) ? MFFA_Directory : 0) |
+											((pMount->pEntries[file].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
+											((pMount->pEntries[file].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
+					pFindData->fileSize = pMount->pEntries[file].size;
 
 					return pFind;
 				}
@@ -1066,6 +1081,7 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 
 				pFind->pMount = pMount;
 				pFind->pFilesystemData = NULL;
+				MFString_Copy(pFind->searchPattern, pSearchPattern);
 
 				if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
 				{
@@ -1090,6 +1106,12 @@ bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 	if(!(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
 		size_t id = (size_t)pFind->pFilesystemData + 1;
+
+		for(; id < pFind->pMount->numFiles; ++id)
+		{
+			if(MFString_PatternMatch(pFind->searchPattern, pFind->pMount->pEntries[id].pName))
+				break;
+		}
 
 		if(id < pFind->pMount->numFiles)
 		{

@@ -188,6 +188,52 @@ char* MFString_RChr(const char *pSource, int c)
 	return pLast;
 }
 
+bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory)
+{
+	if(!pPattern || !pFilename)
+		return false;
+
+	while(*pPattern && *pFilename)
+	{
+		if(*pPattern == '?')
+		{
+			if(*pFilename == '/' || *pFilename == '\\')
+				break;
+		}
+		else if(*pPattern == '*')
+		{
+			++pPattern;
+
+			bool match = false;
+			while(!(match = MFString_PatternMatch(pPattern, pFilename, ppMatchDirectory)) && *pFilename)
+			{
+				if(*pFilename == '/' || *pFilename == '\\')
+					break;
+
+				++pFilename;
+			}
+
+			return match;
+		}
+		else if(*pPattern != *pFilename)
+			break;
+
+		++pPattern;
+		++pFilename;
+	}
+
+	if(*pPattern == 0)
+	{
+		if((*pFilename == '/' || *pFilename == '\\') && ppMatchDirectory)
+			*ppMatchDirectory = pFilename + 1;
+
+		if((ppMatchDirectory && *ppMatchDirectory) || *pFilename == 0)
+			return true;
+	}
+
+	return false;
+}
+
 #if 0
 
 char* MFString_Copy(char *pDest, const char *pSrc)

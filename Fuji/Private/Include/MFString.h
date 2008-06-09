@@ -154,6 +154,8 @@ const char* MFStr_GetFileNameWithoutExtension(const char *pFilename);
 const char* MFStr_GetFilePath(const char *pFilename);
 const char* MFStr_TruncateExtension(const char *pFilename);
 
+bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL);
+
 /**
  * Get a formatted a string.
  * Generates a new string from a format specifier and parameters.
