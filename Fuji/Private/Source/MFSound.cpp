@@ -71,6 +71,10 @@ void MFSound_InitModule()
 	void MFSound_RegisterPSPAudioCodec();
 	MFSound_RegisterPSPAudioCodec();
 #endif
+#if defined(WAV_STREAM)
+	void MFSound_RegisterWAV();
+	MFSound_RegisterWAV();
+#endif
 }
 
 void MFSound_DeinitModule()

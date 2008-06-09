@@ -512,6 +512,10 @@ enum MFEndian
 
 #endif
 
+// define avalable audio stream codecs
+#define WAV_STREAM
+
+
 #if defined(_FUJI_UTIL)
 
 	#include <stdio.h>

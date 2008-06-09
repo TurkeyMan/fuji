@@ -465,6 +465,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFSound_WAV.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFString.cpp"
 				>
 			</File>
