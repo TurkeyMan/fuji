@@ -93,13 +93,115 @@ LIBPNG = Middleware/lpng1212/png.o \
 
 #-------------------------------------------------------------------
 
-
 # tinyxml
 
 TINYXML = Middleware/tinyxml/tinystr.o \
 	Middleware/tinyxml/tinyxml.o \
 	Middleware/tinyxml/tinyxmlerror.o \
 	Middleware/tinyxml/tinyxmlparser.o
+
+#-------------------------------------------------------------------
+
+# minifmod
+
+MINIFMOD = Middleware/minifmod170/lib/Fmusic.o \
+	Middleware/minifmod170/lib/mixer_clipcopy.o \
+	Middleware/minifmod170/lib/mixer_fpu_ramp.o \
+	Middleware/minifmod170/lib/mixer_fpu_ramp_asm.o \
+	Middleware/minifmod170/lib/music_formatxm.o \
+	Middleware/minifmod170/lib/system_file.o \
+	Middleware/minifmod170/lib/system_memory.o
+
+#-------------------------------------------------------------------
+
+# pcre
+
+PCRE = Middleware/pcre/source/chartables.o \
+	Middleware/pcre/source/get.o \
+	Middleware/pcre/source/pcre.o \
+	Middleware/pcre/source/study.o
+
+#-------------------------------------------------------------------
+
+# libtxc_dxtn
+
+LIBTXC_DXTN = Middleware/libtxc_dxtn060508/txc_compress_dxtn.o \
+	Middleware/libtxc_dxtn060508/txc_fetch_dxtn.o
+
+#-------------------------------------------------------------------
+
+# squish-1.10
+
+SQUISH = Middleware/squish-1.10/alpha.o \
+	Middleware/squish-1.10/clusterfit.o \
+	Middleware/squish-1.10/colourblock.o \
+	Middleware/squish-1.10/colourfit.o \
+	Middleware/squish-1.10/colourset.o \
+	Middleware/squish-1.10/maths.o \
+	Middleware/squish-1.10/rangefit.o \
+	Middleware/squish-1.10/singlecolourfit.o \
+	Middleware/squish-1.10/squish.o
+
+#-------------------------------------------------------------------
+
+# liblzf
+
+LIBLZF = Middleware/liblzf/lzf.o \
+	Middleware/liblzf/lzf_c.o \
+	Middleware/liblzf/lzf_d.o
+
+#-------------------------------------------------------------------
+
+# libmad
+
+LIBMAD = Middleware/libmad/bit.o \
+	Middleware/libmad/decoder.o \
+	Middleware/libmad/fixed.o \
+	Middleware/libmad/frame.o \
+	Middleware/libmad/huffman.o \
+	Middleware/libmad/layer3.o \
+	Middleware/libmad/layer12.o \
+	Middleware/libmad/stream.o \
+	Middleware/libmad/synth.o \
+	Middleware/libmad/timer.o \
+	Middleware/libmad/version.o
+
+#-------------------------------------------------------------------
+
+# libogg
+
+LIBOGG = Middleware/libogg-1.1.3/src/bitwise.o \
+	Middleware/libogg-1.1.3/src/framing.o
+
+#-------------------------------------------------------------------
+
+# libvorbis
+
+LIBVORBIS = Middleware/libvorbis-1.2.0/lib/analysis.o \
+	Middleware/libvorbis-1.2.0/lib/barkmel.o \
+	Middleware/libvorbis-1.2.0/lib/bitrate.o \
+	Middleware/libvorbis-1.2.0/lib/block.o \
+	Middleware/libvorbis-1.2.0/lib/codebook.o \
+	Middleware/libvorbis-1.2.0/lib/envelope.o \
+	Middleware/libvorbis-1.2.0/lib/floor0.o \
+	Middleware/libvorbis-1.2.0/lib/floor1.o \
+	Middleware/libvorbis-1.2.0/lib/info.o \
+	Middleware/libvorbis-1.2.0/lib/lookup.o \
+	Middleware/libvorbis-1.2.0/lib/lpc.o \
+	Middleware/libvorbis-1.2.0/lib/lsp.o \
+	Middleware/libvorbis-1.2.0/lib/mapping0.o \
+	Middleware/libvorbis-1.2.0/lib/mdct.o \
+	Middleware/libvorbis-1.2.0/lib/psy.o \
+	Middleware/libvorbis-1.2.0/lib/psytune.o \
+	Middleware/libvorbis-1.2.0/lib/registry.o \
+	Middleware/libvorbis-1.2.0/lib/res0.o \
+	Middleware/libvorbis-1.2.0/lib/sharedbook.o \
+	Middleware/libvorbis-1.2.0/lib/smallft.o \
+	Middleware/libvorbis-1.2.0/lib/synthesis.o \
+	Middleware/libvorbis-1.2.0/lib/tone.o \
+	Middleware/libvorbis-1.2.0/lib/vorbisenc.o \
+	Middleware/libvorbis-1.2.0/lib/vorbisfile.o \
+	Middleware/libvorbis-1.2.0/lib/window.o
 
 #-------------------------------------------------------------------
 
@@ -138,8 +240,10 @@ OBJS := $(ZLIB) \
 	Source/MFScript_Registration.o \
 	Source/MFSockets.o \
 	Source/MFSound.o \
-	Source/MFSound_Vorbis.o \
+	Source/MFSound_WAV.o \
 	Source/MFSound_MAD.o \
+	Source/MFSound_Vorbis.o \
+	Source/MFSound_MiniFMOD.o \
 	Source/MFSound_PSPAudioCodec.o \
 	Source/MFString.o \
 	Source/MFStringCache.o \
@@ -363,7 +467,28 @@ ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = /usr/local/devkitPPC/ogc
+OGC = D:\Programming\Tools\devkitPro\libogc
+endif
+
+CC       = powerpc-gekko-gcc
+CXX      = powerpc-gekko-g++
+AS       = powerpc-gekko-gcc
+LD       = powerpc-gekko-gcc
+AR       = powerpc-gekko-ar
+RANLIB   = powerpc-gekko-ranlib
+STRIP    = powerpc-gekko-strip
+
+# Add in OGC includes.
+INCDIR   := $(INCDIR) . $(OGC)/include
+
+# end GC
+endif
+
+ifeq ($(PLATFORM),WII)
+
+# because my environment variables never seem to work! :(
+ifndef ($(PSPSDK))
+OGC = D:\Programming\Tools\devkitPro\libogc
 endif
 
 CC       = powerpc-gekko-gcc

@@ -6,9 +6,15 @@
 #include "FileSystem/MFFileSystemNative_Internal.h"
 #include "MFHeap.h"
 
+#if !defined(MF_WII) && !defined(MF_GC)
+	#define CRT_SUPPORTS_FIND
+#endif
+
 #if defined(_USE_CRT_FOR_NULL_DRIVERS)
 	#include <stdio.h>
-	#include <io.h>
+	#if defined(CRT_SUPPORTS_FIND)
+		#include <io.h>
+	#endif
 #endif
 
 void MFFileSystemNative_Register()
@@ -192,7 +198,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
-#if defined(_USE_CRT_FOR_NULL_DRIVERS)
+#if defined(_USE_CRT_FOR_NULL_DRIVERS) && defined(CRT_SUPPORTS_FIND)
 	// open the directory
 	_finddata_t fd;
 
@@ -225,7 +231,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
-#if defined(_USE_CRT_FOR_NULL_DRIVERS)
+#if defined(_USE_CRT_FOR_NULL_DRIVERS) && defined(CRT_SUPPORTS_FIND)
 	_finddata_t fd;
 
 	int more = _findnext((intptr_t)pFind->pFilesystemData, &fd);
@@ -249,7 +255,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 void MFFileNative_FindClose(MFFind *pFind)
 {
-#if defined(_USE_CRT_FOR_NULL_DRIVERS)
+#if defined(_USE_CRT_FOR_NULL_DRIVERS) && defined(CRT_SUPPORTS_FIND)
 	_findclose((intptr_t)pFind->pFilesystemData);
 #endif
 }

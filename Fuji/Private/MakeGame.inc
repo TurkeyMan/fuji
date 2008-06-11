@@ -85,6 +85,7 @@ endif
 
 # end PSP
 endif
+
 ifeq ($(PLATFORM),PS2)
 
 CC       = ee-gcc
@@ -108,11 +109,12 @@ LIBDIR   := $(LIBDIR) $(PS2SDK)/ee/lib
 
 # end PS2
 endif
+
 ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = /usr/local/devkitPPC/ogc
+OGC = D:\Programming\Tools\devkitPro\libogc
 endif
 
 CC       = powerpc-gekko-gcc
@@ -127,7 +129,31 @@ LIBS := $(LIBS)
 
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) $(OGC)/include
-LIBDIR   := $(LIBDIR) $(OGC)/lib
+LIBDIR   := $(LIBDIR) $(OGC)/lib/cube
+
+# endGC
+endif
+
+ifeq ($(PLATFORM),WII)
+
+# because my environment variables never seem to work! :(
+ifndef ($(PSPSDK))
+OGC = D:\Programming\Tools\devkitPro\libogc
+endif
+
+CC       = powerpc-gekko-gcc
+CXX      = powerpc-gekko-g++
+AS       = powerpc-gekko-gcc
+LD       = powerpc-gekko-gcc
+AR       = powerpc-gekko-ar
+RANLIB   = powerpc-gekko-ranlib
+STRIP    = powerpc-gekko-strip
+
+LIBS := $(LIBS)
+
+# Add in OGC includes and libraries.
+INCDIR   := $(INCDIR) $(OGC)/include
+LIBDIR   := $(LIBDIR) $(OGC)/lib/wii
 
 # endGC
 endif

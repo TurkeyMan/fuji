@@ -160,11 +160,29 @@
 	#define MF_PLATFORM PS2
 	#define MF_ARCH_MIPS
 	#define MF_32BIT
+#elif defined(_GC)
+	#define MF_GC
+	#define MF_PLATFORM GC
+	#define MF_ARCH_PPC
+#elif defined(__wii__) || defined(_WII)
+	#define MF_WII
+	#define MF_PLATFORM WII
+	#define MF_ARCH_PPC
+#elif defined(_DC)
+	#define MF_DC
+	#define MF_PLATFORM DC
+	#define MF_ARCH_SH4
 #elif defined(__PPU__)
 	#define MF_PS3
 	#define MF_PLATFORM PS3
 	#define MF_ARCH_PPC
 	#define MF_64BIT
+#elif defined(_SYMBIAN)
+	#define MF_SYMBIAN
+	#define MF_PLATFORM SYMBIAN
+	#define MF_ARCH_ARM
+	#define MF_ENDIAN_LITTLE
+	#define MF_32BIT
 #elif defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
 	#define MF_ARCH_SH4
 	// shall we assume DC here? yeah, why not... i've never heard of an SH4 in anything else..
@@ -177,12 +195,6 @@
 	#define MF_ARCH_PPC
 #elif defined(__i386__) || defined(_M_IX86)
 	#define MF_ARCH_X86
-#elif defined(_SYMBIAN)
-	#define MF_SYMBIAN
-	#define MF_PLATFORM SYMBIAN
-	#define MF_ARCH_ARM
-	#define MF_ENDIAN_LITTLE
-	#define MF_32BIT
 #else
 	// assume x86 if we couldnt identify an architecture, since its the most likely
 	#define MF_ARCH_X86
@@ -490,7 +502,7 @@ enum MFEndian
 	#define MF_INPUT		MF_DRIVER_DC
 	#define MF_SYSTEM		MF_DRIVER_DC
 
-#elif defined(MF_GC)
+#elif defined(MF_GC) || defined(MF_WII)
 
 	#include <stdarg.h>
 	#include <stdlib.h>

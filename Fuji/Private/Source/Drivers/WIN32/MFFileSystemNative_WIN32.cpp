@@ -35,11 +35,9 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	DWORD access = ((pOpenData->openFlags&MFOF_Read) ? GENERIC_READ : NULL) | ((pOpenData->openFlags&MFOF_Write) ? GENERIC_WRITE : NULL);
 	MFDebug_Assert(access, "Neither MFOF_Read nor MFOF_Write specified.");
 
-	const char *pFilename;
-#if defined(MF_WINDOWS)
-	pFilename = pNative->pFilename;
-#else
-	pFilename = FixXBoxFilename(pNative->pFilename);
+	const char *pFilename = pNative->pFilename;
+#if defined(MF_XBOX) || defined(MF_X360)
+	pFilename = FixXBoxFilename(pFilename);
 #endif
 
 	DWORD create = (pOpenData->openFlags&MFOF_Read) ? ((pOpenData->openFlags&MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
@@ -137,7 +135,7 @@ uint32 MFFileNative_GetSize(const char* pFilename)
 
 	int64 fileSize = 0;
 
-#if defined(MF_XBOX)
+#if defined(MF_XBOX) || defined(MF_X360)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
@@ -162,7 +160,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 	bool exists = false;
 
-#if defined(_MF_XBOX)
+#if defined(MF_XBOX) || defined(MF_X360)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
