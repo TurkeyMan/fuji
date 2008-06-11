@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DEBUG == MF_DRIVER_PS2
+
 #include "MFInput_Internal.h"
 
 #include <stdio.h>
@@ -21,3 +24,5 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 		MFInput_Update();
 	}
 }
+
+#endif

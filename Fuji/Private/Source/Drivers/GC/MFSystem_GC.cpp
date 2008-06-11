@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == MF_DRIVER_GC
+
 #include "MFSystem.h"
 
 MFPlatform gCurrentPlatform = FP_GC;
@@ -43,3 +46,5 @@ const char * MFSystem_GetSystemName()
 {
 	return "Gamecube";
 }
+
+#endif

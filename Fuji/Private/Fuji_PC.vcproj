@@ -638,10 +638,98 @@
 				<Filter
 					Name="DC"
 					>
+					<File
+						RelativePath=".\Source\Drivers\DC\Display_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFFileSystemNative_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFInput_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFMaterial_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFPrimitive_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFRenderer_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFSound_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFSystem_DC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\DC\MFTexture_DC.cpp"
+						>
+					</File>
+					<Filter
+						Name="Materials"
+						>
+						<File
+							RelativePath=".\Source\Drivers\DC\Materials\Mat_Standard_DC.cpp"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="GC"
 					>
+					<File
+						RelativePath=".\Source\Drivers\GC\Display_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFFileSystemNative_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFInput_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFMaterial_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFPrimitive_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFRenderer_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFSound_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFSystem_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFTexture_GC.cpp"
+						>
+					</File>
+					<Filter
+						Name="Materials"
+						>
+						<File
+							RelativePath=".\Source\Drivers\GC\Materials\MFMat_Standard_GC.cpp"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="Linux"
@@ -830,6 +918,74 @@
 				<Filter
 					Name="PS2"
 					>
+					<File
+						RelativePath=".\Source\Drivers\PS2\Display_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFDebug_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFFileSystemNative_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFHeap_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFInput_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFMaterial_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFModel_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFPrimitive_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFRenderer_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFSockets_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFSound_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFSystem_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFTexture_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFThread_PS2.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\PS2\MFTranslation_PS2.cpp"
+						>
+					</File>
+					<Filter
+						Name="Materials"
+						>
+						<File
+							RelativePath=".\Source\Drivers\PS2\Materials\MFMat_Standard_PS2.cpp"
+							>
+						</File>
+					</Filter>
 				</Filter>
 				<Filter
 					Name="PSP"
@@ -1018,6 +1174,14 @@
 							>
 						</File>
 					</Filter>
+				</Filter>
+				<Filter
+					Name="Wii"
+					>
+					<File
+						RelativePath=".\Source\Drivers\Wii\MFInput_Wii.cpp"
+						>
+					</File>
 				</Filter>
 			</Filter>
 			<Filter

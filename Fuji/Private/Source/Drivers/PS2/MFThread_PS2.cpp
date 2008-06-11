@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_THREAD == MF_DRIVER_PS2
+
 #include "MFThread.h"
 
 // globals
@@ -61,3 +64,5 @@ uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == MF_DRIVER_PS2
+
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
@@ -86,3 +89,5 @@ bool MFDisplay_IsWidescreen()
 {
 	return false;
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == MF_DRIVER_GC
+
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
@@ -71,3 +74,5 @@ void Mat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	MFHeap_Free(pMaterial->pInstanceData);
 }
+
+#endif

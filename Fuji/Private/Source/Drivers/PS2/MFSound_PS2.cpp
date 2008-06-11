@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOUND == MF_DRIVER_PS2
+
 #include "MFVector.h"
 
 void MFSound_InitModule()
@@ -84,3 +87,5 @@ void MFSound_MusicPause(int track, bool pause)
 void MFSound_MusicSetVolume(int track, float volume)
 {
 }
+
+#endif

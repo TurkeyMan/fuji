@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == MF_DRIVER_PS2
+
 #include "MFSystem_Internal.h"
 
 #include <kernel.h>
@@ -134,3 +137,5 @@ const char * MFSystem_GetSystemName()
 {
 	return "Playstation2";
 }
+
+#endif

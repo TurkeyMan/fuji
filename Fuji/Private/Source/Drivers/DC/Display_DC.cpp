@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_DISPLAY == MF_DRIVER_DC
+
 #include "Display_Internal.h"
 #include "DebugMenu_Internal.h"
 
@@ -61,3 +64,5 @@ void ResetViewport()
 {
 	CALLSTACK;
 }
+
+#endif

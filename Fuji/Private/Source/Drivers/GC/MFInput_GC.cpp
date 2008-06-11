@@ -1,5 +1,7 @@
 #include "Fuji.h"
 
+#if MF_INPUT == MF_DRIVER_GC
+
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
 #include "MFIni.h"
@@ -118,3 +120,5 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	return false;
 }
+
+#endif

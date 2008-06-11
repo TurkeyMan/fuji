@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SYSTEM == MF_DRIVER_DC
+
 #include "System_Internal.h"
 
 MFPlatform gCurrentPlatform = FP_DC;
@@ -49,3 +52,5 @@ const char * MFSystem_GetSystemName()
 {
 	return "Dreamcast";
 }
+
+#endif

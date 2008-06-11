@@ -1,8 +1,7 @@
-/**** Defines ****/
-
-/**** Includes ****/
-
 #include "Fuji.h"
+
+#if MF_RENDERER == MF_DRIVER_PS2
+
 #include "Display_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFFileSystem_Internal.h"
@@ -45,3 +44,5 @@ int MFTexture_Destroy(MFTexture *pTexture)
 
 	return pTexture->refCount;
 }
+
+#endif

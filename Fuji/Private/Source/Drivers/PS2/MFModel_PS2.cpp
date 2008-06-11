@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == MF_DRIVER_PS2
+
 #include "MFModel_Internal.h"
 #include "MFView.h"
 #include "MFRenderer.h"
@@ -35,3 +38,5 @@ void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 	MFFixUp(pMC->pMaterial, pBase, load);
 	MFFixUp(pMC->pDMAList, pBase, load);
 }
+
+#endif

@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_RENDERER == MF_DRIVER_PS2
+
 #include "Display_Internal.h"
 #include "MFView.h"
 #include "MFVector.h"
@@ -195,3 +198,5 @@ void MFEnd()
 	}
 
 }
+
+#endif

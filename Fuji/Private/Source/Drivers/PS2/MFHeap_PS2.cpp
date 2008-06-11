@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_HEAP == MF_DRIVER_PS2
+
 #include "MFHeap.h"
 
 #include <stdlib.h>
@@ -38,3 +41,5 @@ void* MFHeap_GetUncachedPointer(void *pPointer)
 void MFHeap_FlushDCache()
 {
 }
+
+#endif

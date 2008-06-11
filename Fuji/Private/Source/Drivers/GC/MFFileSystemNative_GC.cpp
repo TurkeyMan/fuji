@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_FILESYSTEM == MF_DRIVER_GC
+
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 
@@ -108,3 +111,5 @@ bool MFFileNative_Exists(const char* pFilename)
 
 	return false;
 }
+
+#endif

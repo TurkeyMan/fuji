@@ -1,4 +1,7 @@
 #include "Fuji.h"
+
+#if MF_SOUND == MF_DRIVER_GC
+
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 #include "MFSound.h"
@@ -141,3 +144,4 @@ void MFSound_MusicSetVolume(int track, float volume)
 	MFCALLSTACK;
 }
 
+#endif
