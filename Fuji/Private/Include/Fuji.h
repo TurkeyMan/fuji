@@ -475,7 +475,7 @@ enum MFEndian
 	#define MF_DEBUG		MF_DRIVER_PSP
 
 	#define PSPAUDIOCODEC_STREAM
-//	#define VORBIS_STREAM
+	#define VORBIS_STREAM
 //	#define VORBIS_TREMOR
 
 #elif defined(MF_PS2)

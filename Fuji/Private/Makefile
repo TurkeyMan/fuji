@@ -178,7 +178,6 @@ LIBOGG = Middleware/libogg-1.1.3/src/bitwise.o \
 # libvorbis
 
 LIBVORBIS = Middleware/libvorbis-1.2.0/lib/analysis.o \
-	Middleware/libvorbis-1.2.0/lib/barkmel.o \
 	Middleware/libvorbis-1.2.0/lib/bitrate.o \
 	Middleware/libvorbis-1.2.0/lib/block.o \
 	Middleware/libvorbis-1.2.0/lib/codebook.o \
@@ -192,14 +191,11 @@ LIBVORBIS = Middleware/libvorbis-1.2.0/lib/analysis.o \
 	Middleware/libvorbis-1.2.0/lib/mapping0.o \
 	Middleware/libvorbis-1.2.0/lib/mdct.o \
 	Middleware/libvorbis-1.2.0/lib/psy.o \
-	Middleware/libvorbis-1.2.0/lib/psytune.o \
 	Middleware/libvorbis-1.2.0/lib/registry.o \
 	Middleware/libvorbis-1.2.0/lib/res0.o \
 	Middleware/libvorbis-1.2.0/lib/sharedbook.o \
 	Middleware/libvorbis-1.2.0/lib/smallft.o \
 	Middleware/libvorbis-1.2.0/lib/synthesis.o \
-	Middleware/libvorbis-1.2.0/lib/tone.o \
-	Middleware/libvorbis-1.2.0/lib/vorbisenc.o \
 	Middleware/libvorbis-1.2.0/lib/vorbisfile.o \
 	Middleware/libvorbis-1.2.0/lib/window.o
 
@@ -476,6 +472,9 @@ PACK_PBP = pack-pbp
 FIXUP    = psp-fixup-imports
 
 CFLAGS := $(CFLAGS) -G0
+
+# Add in the vorbis libs (since tremor doesn't seem to want to work for us)
+OBJS := $(LIBOGG) $(LIBVORBIS) $(OBJS)
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) . $(PSPSDK)/include

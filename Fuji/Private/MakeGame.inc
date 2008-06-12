@@ -67,7 +67,7 @@ LIBS := $(LIBS)  -lm -lstdc++ -lc -lpspusb -lpspusbstor -lpsprtc -lpspgu -lpspde
 
 # Add in PSPSDK includes and libraries.
 INCDIR   := $(INCDIR) $(PSPSDK)/include
-LIBDIR   := $(LIBDIR) $(PSPSDK)/lib
+LIBDIR   := $(LIBDIR) $(PSPSDK)/lib $(FUJIPATH)/Middleware/vorbis/lib/psp
 
 ifeq ($(BUILD_PRX),1)
 LDFLAGS  := $(addprefix -L,$(LIBDIR)) -specs=$(PSPSDK)/lib/prxspecs -Wl,-q,-T$(PSPSDK)/lib/linkfile.prx $(LDFLAGS)
@@ -310,11 +310,11 @@ $(INTDIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(TARGET): $(FUJILIB) $(OBJLIST) $(EXPORT_OBJ)
-	$(LINK.c) -Wl,--start-group $^ $(LIBS) -Wl,--end-group -o $@
+$(TARGET): $(OBJLIST) $(FUJILIB) $(EXPORT_OBJ)
+	$(LINK.c) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
-$(TARGET).elf: $(FUJILIB) $(OBJLIST) $(EXPORT_OBJ)
-	$(LINK.c) -Wl,--start-group $^ $(LIBS) -Wl,--end-group -o $@
+$(TARGET).elf: $(OBJLIST) $(FUJILIB) $(EXPORT_OBJ)
+	$(LINK.c) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 	$(FIXUP) $@
 
 makedirs:
