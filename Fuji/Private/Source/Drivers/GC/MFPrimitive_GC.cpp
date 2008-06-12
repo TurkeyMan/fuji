@@ -26,35 +26,25 @@ static uint8 gPTLookup[7] =
 	GX_QUADS
 };
 
-
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
-	MFCALLSTACK;
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
-	MFCALLSTACK;
+}
+
+void MFPrimitive_DrawStats()
+{
+
 }
 
 void MFPrimitive(uint32 type, uint32 hint)
 {
-	MFCALLSTACK;
-
-	primType = type & PT_PrimMask;
-
-	if(type & PT_Untextured)
-	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
-	}
-
-	MFRenderer_Begin();
 }
 
 void MFBegin(uint32 vertexCount)
 {
-	MFCALLSTACK;
-
 	beginCount = vertexCount;
 	currentVert = 0;
 

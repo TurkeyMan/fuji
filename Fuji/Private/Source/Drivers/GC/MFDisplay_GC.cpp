@@ -1,11 +1,11 @@
 #include "Fuji.h"
 
-#if MF_DISPLAY == MF_DRIVER_NULL
+#if MF_DISPLAY == MF_DRIVER_GC
 
 #include "Display_Internal.h"
 #include "MFRenderer_Internal.h"
 
-MFRect gCurrentViewport;
+extern MFRect gCurrentViewport;
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
@@ -31,10 +31,7 @@ void MFDisplay_DestroyDisplay()
 
 float MFDisplay_GetNativeAspectRatio()
 {
-	MFRect rect;
-	MFDisplay_GetDisplayRect(&rect);
-
-	return rect.width / rect.height;
+	return 4.f / 3.f;
 }
 
 bool MFDisplay_IsWidescreen()

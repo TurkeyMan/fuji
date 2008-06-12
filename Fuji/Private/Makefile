@@ -324,6 +324,44 @@ OBJS := $(ZLIB) \
 	Source/Drivers/PSP/MFThread_PSP.o \
 	Source/Drivers/PSP/MFTranslation_PSP.o \
 	Source/Drivers/PSP/Materials/MFMat_Standard_PSP.o \
+	Source/Drivers/PS2/MFDebug_PS2.o \
+	Source/Drivers/PS2/MFDisplay_PS2.o \
+	Source/Drivers/PS2/MFFileSystemNative_PS2.o \
+	Source/Drivers/PS2/MFHeap_PS2.o \
+	Source/Drivers/PS2/MFInput_PS2.o \
+	Source/Drivers/PS2/MFMaterial_PS2.o \
+	Source/Drivers/PS2/MFModel_PS2.o \
+	Source/Drivers/PS2/MFPrimitive_PS2.o \
+	Source/Drivers/PS2/MFRenderer_PS2.o \
+	Source/Drivers/PS2/MFSockets_PS2.o \
+	Source/Drivers/PS2/MFSound_PS2.o \
+	Source/Drivers/PS2/MFSystem_PS2.o \
+	Source/Drivers/PS2/MFTexture_PS2.o \
+	Source/Drivers/PS2/MFThread_PS2.o \
+	Source/Drivers/PS2/MFTranslation_PS2.o \
+	Source/Drivers/PS2/Materials/MFMat_Standard_PS2.o \
+	Source/Drivers/GC/MFDisplay_GC.o \
+	Source/Drivers/GC/MFFileSystemNative_GC.o \
+	Source/Drivers/GC/MFInput_GC.o \
+	Source/Drivers/GC/MFMaterial_GC.o \
+	Source/Drivers/GC/MFModel_GC.o \
+	Source/Drivers/GC/MFPrimitive_GC.o \
+	Source/Drivers/GC/MFRenderer_GC.o \
+	Source/Drivers/GC/MFSound_GC.o \
+	Source/Drivers/GC/MFSystem_GC.o \
+	Source/Drivers/GC/MFTexture_GC.o \
+	Source/Drivers/GC/Materials/MFMat_Standard_GC.o \
+	Source/Drivers/Wii/MFInput_Wii.o \
+	Source/Drivers/DC/MFDisplay_DC.o \
+	Source/Drivers/DC/MFFileSystemNative_DC.o \
+	Source/Drivers/DC/MFInput_DC.o \
+	Source/Drivers/DC/MFMaterial_DC.o \
+	Source/Drivers/DC/MFPrimitive_DC.o \
+	Source/Drivers/DC/MFRenderer_DC.o \
+	Source/Drivers/DC/MFSound_DC.o \
+	Source/Drivers/DC/MFSystem_DC.o \
+	Source/Drivers/DC/MFTexture_DC.o \
+	Source/Drivers/DC/Materials/MFMat_Standard_DC.o \
 	Source/Drivers/WIN32/MFFileSystemNative_WIN32.o \
 	Source/Drivers/WIN32/MFHeap_WIN32.o \
 	Source/Drivers/WIN32/MFSockets_WINSOCK.o \
@@ -467,7 +505,7 @@ ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = D:\Programming\Tools\devkitPro\libogc
+OGC = ../../Programming/Tools/devkitPro/libogc
 endif
 
 CC       = powerpc-gekko-gcc
@@ -488,7 +526,8 @@ ifeq ($(PLATFORM),WII)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = D:\Programming\Tools\devkitPro\libogc
+OGC = ../../Programming/Tools/devkitPro/libogc
+
 endif
 
 CC       = powerpc-gekko-gcc
@@ -502,7 +541,7 @@ STRIP    = powerpc-gekko-strip
 # Add in OGC includes.
 INCDIR   := $(INCDIR) . $(OGC)/include
 
-# end GC
+# end WII
 endif
 
 ifeq ($(PLATFORM),LINUX)

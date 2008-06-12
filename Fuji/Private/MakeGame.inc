@@ -114,7 +114,7 @@ ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = D:\Programming\Tools\devkitPro\libogc
+OGC = ../../Programming/Tools/devkitPro/libogc
 endif
 
 CC       = powerpc-gekko-gcc
@@ -125,7 +125,7 @@ AR       = powerpc-gekko-ar
 RANLIB   = powerpc-gekko-ranlib
 STRIP    = powerpc-gekko-strip
 
-LIBS := $(LIBS)
+LIBS := $(LIBS) -lm -lstdc++ -lc -logc
 
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) $(OGC)/include
@@ -138,7 +138,7 @@ ifeq ($(PLATFORM),WII)
 
 # because my environment variables never seem to work! :(
 ifndef ($(PSPSDK))
-OGC = D:\Programming\Tools\devkitPro\libogc
+OGC = ../../Programming/Tools/devkitPro/libogc
 endif
 
 CC       = powerpc-gekko-gcc
@@ -149,13 +149,13 @@ AR       = powerpc-gekko-ar
 RANLIB   = powerpc-gekko-ranlib
 STRIP    = powerpc-gekko-strip
 
-LIBS := $(LIBS)
+LIBS := $(LIBS) -lm -lstdc++ -lc -logc -lwiiuse
 
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) $(OGC)/include
 LIBDIR   := $(LIBDIR) $(OGC)/lib/wii
 
-# endGC
+# endWII
 endif
 
 ifeq ($(PLATFORM),LINUX)

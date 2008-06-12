@@ -639,7 +639,7 @@
 					Name="DC"
 					>
 					<File
-						RelativePath=".\Source\Drivers\DC\Display_DC.cpp"
+						RelativePath=".\Source\Drivers\DC\MFDisplay_DC.cpp"
 						>
 					</File>
 					<File
@@ -678,7 +678,7 @@
 						Name="Materials"
 						>
 						<File
-							RelativePath=".\Source\Drivers\DC\Materials\Mat_Standard_DC.cpp"
+							RelativePath=".\Source\Drivers\DC\Materials\MFMat_Standard_DC.cpp"
 							>
 						</File>
 					</Filter>
@@ -687,7 +687,7 @@
 					Name="GC"
 					>
 					<File
-						RelativePath=".\Source\Drivers\GC\Display_GC.cpp"
+						RelativePath=".\Source\Drivers\GC\MFDisplay_GC.cpp"
 						>
 					</File>
 					<File
@@ -700,6 +700,10 @@
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\GC\MFMaterial_GC.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\GC\MFModel_GC.cpp"
 						>
 					</File>
 					<File
@@ -740,6 +744,10 @@
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\Linux\MFInput_Linux.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Linux\MFSound_ALSA.cpp"
 						>
 					</File>
 					<File
@@ -919,11 +927,11 @@
 					Name="PS2"
 					>
 					<File
-						RelativePath=".\Source\Drivers\PS2\Display_PS2.cpp"
+						RelativePath=".\Source\Drivers\PS2\MFDebug_PS2.cpp"
 						>
 					</File>
 					<File
-						RelativePath=".\Source\Drivers\PS2\MFDebug_PS2.cpp"
+						RelativePath=".\Source\Drivers\PS2\MFDisplay_PS2.cpp"
 						>
 					</File>
 					<File

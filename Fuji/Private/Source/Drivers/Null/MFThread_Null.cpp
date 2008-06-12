@@ -56,7 +56,7 @@ void MFThread_DestroySemaphore(MFSemaphore semaphore)
 {
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore, uint32 timeout)
+uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
 	return 0;
 }

@@ -6,7 +6,6 @@
 #include "MFMaterial_Internal.h"
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
-
 #include "MFRenderer_Internal.h"
 
 #if MF_DISPLAY == MF_DRIVER_X11

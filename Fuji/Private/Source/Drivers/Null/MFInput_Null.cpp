@@ -22,6 +22,11 @@ void MFInput_UpdatePlatformSpecific()
 {
 }
 
+uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+{
+	return 0;
+}
+
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
 	return IDS_Unavailable;

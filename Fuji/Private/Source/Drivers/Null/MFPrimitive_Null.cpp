@@ -7,16 +7,17 @@
 uint32 beginCount;
 uint32 currentVert;
 
-void Primitive_InitModule()
+void MFPrimitive_InitModule()
 {
 }
 
-void Primitive_DeinitModule()
+void MFPrimitive_DeinitModule()
 {
 }
 
-void DrawMFPrimitiveStats()
+void MFPrimitive_DrawStats()
 {
+
 }
 
 void MFPrimitive(uint32 type, uint32 hint)

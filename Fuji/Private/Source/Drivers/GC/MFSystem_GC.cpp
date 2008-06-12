@@ -44,7 +44,11 @@ uint64 MFSystem_GetRTCFrequency()
 
 const char * MFSystem_GetSystemName()
 {
-	return "Gamecube";
+#if defined(MF_GC)
+	return "Nintendo Gamecube";
+#elif defined(MF_WII)
+	return "Nintendo Wii";
+#endif
 }
 
 #endif

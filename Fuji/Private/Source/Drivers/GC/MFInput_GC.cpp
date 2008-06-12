@@ -72,6 +72,11 @@ void MFInput_UpdatePlatformSpecific()
 	PAD_Read(pads);
 }
 
+uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+{
+	return 0;
+}
+
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 {
 	return IDS_Disconnected;
