@@ -113,9 +113,7 @@ endif
 ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
-ifndef ($(PSPSDK))
 OGC = ../../Programming/Tools/devkitPro/libogc
-endif
 
 CC       = powerpc-gekko-gcc
 CXX      = powerpc-gekko-g++
@@ -125,11 +123,15 @@ AR       = powerpc-gekko-ar
 RANLIB   = powerpc-gekko-ranlib
 STRIP    = powerpc-gekko-strip
 
-LIBS := $(LIBS) -lm -lstdc++ -lc -logc
-
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) $(OGC)/include
 LIBDIR   := $(LIBDIR) $(OGC)/lib/cube
+
+LIBS := $(LIBS) -lc -lm -lstdc++ -logc
+
+MACHDEP = -DGEKKO -mogc -mcpu=750 -meabi -mhard-float
+LDFLAGS	= -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
+CFLAGS := $(CFLAGS) -MMD -MP -MF $(DEPSDIR)/$*.d $(MACHDEP)
 
 # endGC
 endif
@@ -137,9 +139,7 @@ endif
 ifeq ($(PLATFORM),WII)
 
 # because my environment variables never seem to work! :(
-ifndef ($(PSPSDK))
 OGC = ../../Programming/Tools/devkitPro/libogc
-endif
 
 CC       = powerpc-gekko-gcc
 CXX      = powerpc-gekko-g++
@@ -149,11 +149,15 @@ AR       = powerpc-gekko-ar
 RANLIB   = powerpc-gekko-ranlib
 STRIP    = powerpc-gekko-strip
 
-LIBS := $(LIBS) -lm -lstdc++ -lc -logc -lwiiuse
-
 # Add in OGC includes and libraries.
 INCDIR   := $(INCDIR) $(OGC)/include
 LIBDIR   := $(LIBDIR) $(OGC)/lib/wii
+
+LIBS := $(LIBS) -lm -lstdc++ -lc -logc -lwiiuse
+
+MACHDEP = -DGEKKO -mogc -mcpu=750 -meabi -mhard-float
+LDFLAGS	= -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
+CFLAGS := $(CFLAGS) -MMD -MP -MF $(DEPSDIR)/$*.d $(MACHDEP)
 
 # endWII
 endif

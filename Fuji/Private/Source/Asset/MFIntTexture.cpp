@@ -7,7 +7,7 @@
 
 #define MF_ENABLE_PNG
 #if defined(MF_WINDOWS)
-	#define MF_ENABLE_ATI_COMPRESSOR
+//	#define MF_ENABLE_ATI_COMPRESSOR
 #endif
 #if defined(MF_WINDOWS) || defined(MF_XBOX)
 	#define MF_ENABLE_MS_COMPRESSOR

@@ -503,9 +503,7 @@ endif
 ifeq ($(PLATFORM),GC)
 
 # because my environment variables never seem to work! :(
-ifndef ($(PSPSDK))
 OGC = ../../Programming/Tools/devkitPro/libogc
-endif
 
 CC       = powerpc-gekko-gcc
 CXX      = powerpc-gekko-g++
@@ -518,16 +516,16 @@ STRIP    = powerpc-gekko-strip
 # Add in OGC includes.
 INCDIR   := $(INCDIR) . $(OGC)/include
 
+MACHDEP = -DGEKKO -mogc -mcpu=750 -meabi -mhard-float
+CFLAGS := $(CFLAGS) -MMD -MP -MF $(DEPSDIR)/$*.d $(MACHDEP)
+
 # end GC
 endif
 
 ifeq ($(PLATFORM),WII)
 
 # because my environment variables never seem to work! :(
-ifndef ($(PSPSDK))
 OGC = ../../Programming/Tools/devkitPro/libogc
-
-endif
 
 CC       = powerpc-gekko-gcc
 CXX      = powerpc-gekko-g++

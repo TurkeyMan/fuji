@@ -7,6 +7,7 @@
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "MFSystem.h"
+#include "Asset/MFIntTexture.h"
 
 #if defined(_PSP)
 	#include <pspdisplay.h>
@@ -95,8 +96,26 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		if(!pTemplate)
 		{
-			MFDebug_Warn(2, MFStr("Texture '%s' does not exist. Using '_None'.\n", pFileName));
-			return MFTexture_Create("_None");
+#if 0
+			// try to load from source data
+			const char * const pExt[] = { ".tga", ".png", ".bmp", NULL };
+			const char * const *ppExt = pExt;
+			MFIntTexture *pIT = NULL;
+			while(!pIT && *ppExt)
+			{
+				pIT = MFIntTexture_CreateFromFile(MFStr("%s%s", pName, *ppExt));
+				++ppExt;
+			}
+
+			if(pIT)
+				MFIntTexture_CreateRuntimeData(pIT, (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform());
+#endif
+
+			if(!pTemplate)
+			{
+				MFDebug_Warn(2, MFStr("Texture '%s' does not exist. Using '_None'.\n", pFileName));
+				return MFTexture_Create("_None");
+			}
 		}
 
 		MFFixUp(pTemplate->pSurfaces, pTemplate, 1);

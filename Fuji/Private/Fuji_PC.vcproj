@@ -1609,6 +1609,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Asset"
+				>
+				<File
+					RelativePath=".\Include\Asset\MFIntModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Include\Asset\MFIntTexture.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Middleware"
