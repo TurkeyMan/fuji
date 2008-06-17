@@ -3,6 +3,7 @@
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFString.h"
+#include "MFTexture_Internal.h"
 #include "Asset/MFIntTexture.h"
 
 #define MF_ENABLE_PNG
@@ -103,16 +104,19 @@ void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 
 MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 {
-	MFFile *pFile = MFFile_CreateMemoryFile(pMemory, size);
-
-	if(!pFile)
-		return NULL;
-
 	if(png_sig_cmp((uint8*)pMemory, 0, 8))
 	{
 		printf("Not a PNG file..");
 		return NULL;
 	}
+
+	MFFile *pFile = MFFile_CreateMemoryFile(pMemory, size);
+
+	if(!pFile)
+		return NULL;
+
+	// skip past the sig
+	MFFile_Seek(pFile, 8, MFSeek_Begin);
 
 	int width, height;
 	png_byte color_type;
@@ -155,7 +159,7 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 	// allocate internal image structures
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
-	pImage->mipLevels = 1;
+	pImage->numSurfaces = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*width*height);
@@ -347,7 +351,7 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
-	pImage->mipLevels = 1;
+	pImage->numSurfaces = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*pHeader->width*pHeader->height);
@@ -365,21 +369,18 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 	if((pHeader->imageType != 1) && (pHeader->imageType != 2) && (pHeader->imageType != 10))
 	{
 		MFDebug_Message(MFStr("Failed loading image (Unhandled TGA type (%d))\n", pHeader->imageType));
-		MFHeap_Free(pTarga);
 		return NULL;
 	}
 
 	if((pHeader->bpp != 24) && (pHeader->bpp != 32) && (pHeader->bpp != 16))
 	{
 		MFDebug_Message(MFStr("Failed loading image (Invalid colour depth (%d))", pHeader->bpp));
-		MFHeap_Free(pTarga);
 		return NULL;
 	}
 
 	if((pHeader->flags & 0xC0))
 	{
 		MFDebug_Message("Failed loading image (Interleaved images not supported)");
-		MFHeap_Free(pTarga);
 		return NULL;
 	}
 
@@ -391,7 +392,6 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 	if((pPosition + pHeader->idLength + (pHeader->colourMapLength * pHeader->colourMapBits * pHeader->colourMapType)) >= pTarga + imageSize)
 	{
 		MFDebug_Message("Failed loading image (Unexpected end of file)");
-		MFHeap_Free(pTarga);
 		return NULL;
 	}
 
@@ -408,7 +408,6 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 			if(pPosition >= pTarga + imageSize)
 			{
 				MFDebug_Message("Failed loading image (Unexpected end of file)");
-				MFHeap_Free(pTarga);
 				return NULL;
 			}
 
@@ -421,14 +420,12 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 				if((pPosition + bytesPerPixel) > pTarga + imageSize)
 				{
 					MFDebug_Message("Failed loading image (Unexpected end of file)");
-					MFHeap_Free(pTarga);
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
 					MFDebug_Message("Failed loading image (Unexpected end of file)");
-					MFHeap_Free(pTarga);
 					return NULL;
 				}
 
@@ -460,14 +457,12 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 				if((pPosition + (bytesPerPixel * length)) > pTarga + imageSize)
 				{
 					MFDebug_Message("Failed loading image (Unexpected end of file)");
-					MFHeap_Free(pTarga);
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
 					MFDebug_Message("Failed loading image (Unexpected end of file)");
-					MFHeap_Free(pTarga);
 					return NULL;
 				}
 
@@ -495,7 +490,6 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 		if((pPosition + (bytesPerPixel * (pHeader->width * pHeader->height))) > pTarga + imageSize)
 		{
 			MFDebug_Message("Failed loading image (Unexpected end of file)");
-			MFHeap_Free(pTarga);
 			return NULL;
 		}
 
@@ -556,8 +550,6 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 		MFDebug_Assert(false, "Paletted images not yet supported....");
 	}
 
-	MFHeap_Free(pTarga);
-
 	if(isSavedFlipped)
 	{
 		MFIntTexture_FlipImage(pImage);
@@ -576,7 +568,6 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 	if(pBMP[0] != 'B' || pBMP[1] != 'M')
 	{
 		MFDebug_Message("Not a bitmap image.");
-		MFHeap_Free(pBMP);
 		return NULL;
 	}
 
@@ -587,7 +578,7 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
-	pImage->mipLevels = 1;
+	pImage->numSurfaces = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*pInfoHeader->width*pInfoHeader->height);
@@ -650,7 +641,6 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 			else
 			{
 				MFDebug_Message("Unsupported colour depth.");
-				MFHeap_Free(pBMP);
 				return NULL;
 			}
 			break;
@@ -661,12 +651,9 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 		default:
 		{
 			MFDebug_Message("Compressed bitmaps not supported.");
-			MFHeap_Free(pBMP);
 			return NULL;
 		}
 	}
-
-	MFHeap_Free(pBMP);
 
 	if(isSavedFlipped)
 	{
@@ -674,6 +661,579 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 	}
 
 	return pImage;
+}
+
+
+bool IsPowerOf2(int x)
+{
+	while(x)
+	{
+		if(x&1)
+		{
+			x>>=1;
+			if(x)
+				return false;
+		}
+		else
+			x>>=1;
+	}
+
+	return true;
+}
+
+void ATICompress(MFIntTexturePixel *pSourceBuffer, int width, int height, MFTextureFormat targetFormat, void *pOutputBuffer)
+{
+#if defined(MF_ENABLE_ATI_COMPRESSOR)
+	ATI_TC_FORMAT atiFormat;
+	switch(targetFormat)
+	{
+		case TexFmt_DXT1:
+		case TexFmt_PSP_DXT1:
+		case TexFmt_PSP_DXT1s:
+			atiFormat = ATI_TC_FORMAT_DXT1;
+			break;
+		case TexFmt_DXT2:
+		case TexFmt_DXT3:
+		case TexFmt_PSP_DXT3:
+		case TexFmt_PSP_DXT3s:
+			atiFormat = ATI_TC_FORMAT_DXT3;
+			break;
+		case TexFmt_DXT4:
+		case TexFmt_DXT5:
+		case TexFmt_PSP_DXT5:
+		case TexFmt_PSP_DXT5s:
+			atiFormat = ATI_TC_FORMAT_DXT5;
+			break;
+	}
+
+	// Init source texture
+	ATI_TC_Texture srcTexture;
+	srcTexture.dwSize = sizeof(srcTexture);
+	srcTexture.dwWidth = width;
+	srcTexture.dwHeight = height;
+	srcTexture.dwPitch = width*sizeof(float);
+	srcTexture.format = ATI_TC_FORMAT_ARGB_32F;
+	srcTexture.dwDataSize = ATI_TC_CalculateBufferSize(&srcTexture);
+	srcTexture.pData = (ATI_TC_BYTE*)pSourceBuffer;
+
+	// Init dest texture
+	ATI_TC_Texture destTexture;
+	destTexture.dwSize = sizeof(destTexture);
+	destTexture.dwWidth = width;
+	destTexture.dwHeight = height;
+	destTexture.dwPitch = 0;
+	destTexture.format = atiFormat;
+	destTexture.dwDataSize = ATI_TC_CalculateBufferSize(&destTexture);
+	destTexture.pData = (ATI_TC_BYTE*)pOutputBuffer;
+
+	ATI_TC_CompressOptions options;
+	options.dwSize = sizeof(options);
+	options.bUseChannelWeighting = FALSE;
+	options.fWeightingRed = 1.0;			/* Weighting of the Red or X Channel */
+	options.fWeightingGreen = 1.0;		/* Weighting of the Green or Y Channel */
+	options.fWeightingBlue = 1.0;			/* Weighting of the Blue or Z Channel */
+	options.bUseAdaptiveWeighting = TRUE;	/* Adapt weighting on a per-block basis */
+	options.bDXT1UseAlpha = TRUE;
+	options.nAlphaThreshold = 128;
+
+	// Compress
+	ATI_TC_ConvertTexture(&srcTexture, &destTexture, &options, NULL, NULL, NULL);
+#else
+	// not supported
+	MFDebug_Assert(false, "ATI's S3 Texture Compressor not available in this build..");
+#endif
+}
+
+void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFTextureFormat format)
+{
+	uint32 blockx, blocky;
+	uint32 j;
+
+	// calculate width in bytes
+	width = (width * MFTexture_GetBitsPerPixel(format)) / 8;
+
+	uint32 width_blocks = (width / 16);
+	uint32 height_blocks = (height / 8);
+
+	uint32 src_pitch = (width-16)/4;
+	uint32 src_row = width * 8;
+
+	const char* ysrc = in;
+	uint32* dst = (uint32*)out;
+
+	for(blocky = 0; blocky < height_blocks; ++blocky)
+	{
+		const char* xsrc = ysrc;
+		for(blockx = 0; blockx < width_blocks; ++blockx)
+		{
+			const uint32* src = (uint32*)xsrc;
+			for(j = 0; j < 8; ++j)
+			{
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				*(dst++) = *(src++);
+				src += src_pitch;
+			}
+			xsrc += 16;
+		}
+		ysrc += src_row;
+	}
+}
+
+int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFTextureFormat targetFormat, MFPlatform platform)
+{
+	// convert image...
+	int width = pSourceSurface->width;
+	int height = pSourceSurface->height;
+
+	int x, y;
+	MFIntTexturePixel *pSource = pSourceSurface->pData;
+
+	switch(targetFormat)
+	{
+		case TexFmt_A8R8G8B8:
+		case TexFmt_XB_A8R8G8B8s:
+		{
+			struct PixelBGRA { uint8 b, g, r, a; } *pTarget = (PixelBGRA*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A8B8G8R8:
+		case TexFmt_XB_A8B8G8R8s:
+		case TexFmt_PSP_A8B8G8R8s:
+		{
+			float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
+
+			struct PixelRGBA { uint8 r, g, b, a; } *pTarget = (PixelRGBA*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->a = (uint8)((int)(pSource->a*alphaScale) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*alphaScale) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*alphaScale) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*alphaScale) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_B8G8R8A8:
+		case TexFmt_XB_B8G8R8A8s:
+		{
+			struct PixelARGB { uint8 a, r, g, b; } *pTarget = (PixelARGB*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R8G8B8A8:
+		case TexFmt_XB_R8G8B8A8s:
+		{
+			struct PixelABGR { uint8 a, b, g, r; } *pTarget = (PixelABGR*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A2R10G10B10:
+		{
+			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint32)(pSource->a*3.0f) & 0x3) << 30 |
+								((uint32)(pSource->r*1023.0f) & 0x3FF) << 20 |
+								((uint32)(pSource->g*1023.0f) & 0x3FF) << 10 |
+								((uint32)(pSource->b*1023.0f) & 0x3FF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A2B10G10R10:
+		{
+			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint32)(pSource->a*3.0f) & 0x3) << 30 |
+								((uint32)(pSource->b*1023.0f) & 0x3FF) << 20 |
+								((uint32)(pSource->g*1023.0f) & 0x3FF) << 10 |
+								((uint32)(pSource->r*1023.0f) & 0x3FF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A16B16G16R16:
+		{
+			uint64 *pTarget = (uint64*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint64)(pSource->a*65535.0f) & 0xFFFF) << 48 |
+								((uint64)(pSource->b*65535.0f) & 0xFFFF) << 32 |
+								((uint64)(pSource->g*65535.0f) & 0xFFFF) << 16 |
+								((uint64)(pSource->r*65535.0f) & 0xFFFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R5G6B5:
+		case TexFmt_XB_R5G6B5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->r*31.0f) & 0x1F) << 11 |
+								((uint16)(pSource->g*63.0f) & 0x3F) << 5 |
+								((uint16)(pSource->b*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R6G5B5:
+		case TexFmt_XB_R6G5B5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->r*63.0f) & 0x3F) << 10 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
+								((uint16)(pSource->b*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_B5G6R5:
+		case TexFmt_PSP_B5G6R5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->b*31.0f) & 0x1F) << 11 |
+								((uint16)(pSource->g*63.0f) & 0x3F) << 5 |
+								((uint16)(pSource->r*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A1R5G5B5:
+		case TexFmt_XB_A1R5G5B5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) << 15 |
+								((uint16)(pSource->r*31.0f) & 0x1F) << 10 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
+								((uint16)(pSource->b*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R5G5B5A1:
+		case TexFmt_XB_R5G5B5A1s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) |
+								((uint16)(pSource->r*31.0f) & 0x1F) << 11 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 6 |
+								((uint16)(pSource->b*31.0f) & 0x1F) << 1;
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A1B5G5R5:
+		case TexFmt_PSP_A1B5G5R5s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) << 15 |
+								((uint16)(pSource->b*31.0f) & 0x1F) << 10 |
+								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
+								((uint16)(pSource->r*31.0f) & 0x1F);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A4R4G4B4:
+		case TexFmt_XB_A4R4G4B4s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*15.0f) & 0xF) << 12 |
+								((uint16)(pSource->r*15.0f) & 0xF) << 8 |
+								((uint16)(pSource->g*15.0f) & 0xF) << 4 |
+								((uint16)(pSource->b*15.0f) & 0xF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_A4B4G4R4:
+		case TexFmt_PSP_A4B4G4R4s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->a*15.0f) & 0xF) << 12 |
+								((uint16)(pSource->b*15.0f) & 0xF) << 8 |
+								((uint16)(pSource->g*15.0f) & 0xF) << 4 |
+								((uint16)(pSource->r*15.0f) & 0xF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R4G4B4A4:
+		case TexFmt_XB_R4G4B4A4s:
+		{
+			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = ((uint16)(pSource->r*15.0f) & 0xF) << 12 |
+								((uint16)(pSource->g*15.0f) & 0xF) << 8 |
+								((uint16)(pSource->b*15.0f) & 0xF) << 4 |
+								((uint16)(pSource->a*15.0f) & 0xF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_ABGR_F16:
+		{
+			uint64 *pTarget = (uint64*)pOutputSurface->pImageData;
+			uint32 c;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					c = (uint32&)pSource->a;
+					*pTarget = (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 48;
+					c = (uint32&)pSource->b;
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 32;
+					c = (uint32&)pSource->g;
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13) << 16;
+					c = (uint32&)pSource->r;
+					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13);
+
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_ABGR_F32:
+		{
+			float *pTarget = (float*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					*pTarget = pSource->r;
+					++pTarget;
+					*pTarget = pSource->g;
+					++pTarget;
+					*pTarget = pSource->b;
+					++pTarget;
+					*pTarget = pSource->a;
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_DXT1:
+		case TexFmt_DXT2:
+		case TexFmt_DXT3:
+		case TexFmt_DXT4:
+		case TexFmt_DXT5:
+		case TexFmt_PSP_DXT1:
+		case TexFmt_PSP_DXT3:
+		case TexFmt_PSP_DXT5:
+		case TexFmt_PSP_DXT1s:
+		case TexFmt_PSP_DXT3s:
+		case TexFmt_PSP_DXT5s:
+		{
+			ATICompress(pSource, width, height, targetFormat, pOutputSurface->pImageData);
+
+			if(targetFormat == TexFmt_PSP_DXT1 || targetFormat == TexFmt_PSP_DXT3 ||  targetFormat == TexFmt_PSP_DXT5 ||
+				targetFormat == TexFmt_PSP_DXT1s || targetFormat == TexFmt_PSP_DXT3s ||  targetFormat == TexFmt_PSP_DXT5s)
+			{
+				// we need to swizzle the PSP buffer about a bit...
+			}
+			break;
+		}
+
+		default:
+		{
+			MFDebug_Assert(false, MFStr("Conversion for target format '%s' not yet supported...\n", MFTexture_GetFormatString(targetFormat)));
+			return 1;
+		}
+	}
+
+	// test for swizzled format..
+	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
+	{
+		uint32 imageBytes = (width * height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
+
+		char *pBuffer = (char*)MFHeap_Alloc(imageBytes);
+
+#if 0
+		uint32 bytesperpixel = MFTexture_GetBitsPerPixel(targetFormat) / 8;
+
+		if(targetFormat >= TexFmt_XB_A8R8G8B8s && targetFormat <= TexFmt_XB_R4G4B4A4s)
+		{
+			// swizzle for xbox
+			// TODO: Swizzle here.. But we'll swizzle at runtime for the time being....
+//			XGSwizzleRect(pOutputSurface->pImageData, 0, NULL, pBuffer, width, height, NULL, bytesperpixel);
+			MFCopyMemory(pBuffer, pOutputSurface->pImageData, width*height*bytesperpixel);
+		}
+		else
+#endif
+		if(targetFormat >= TexFmt_PSP_A8B8G8R8s && targetFormat <= TexFmt_PSP_DXT5s)
+		{
+			// swizzle for PSP
+			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);
+		}
+
+		MFCopyMemory(pOutputSurface->pImageData, pBuffer, imageBytes);
+		MFHeap_Free(pBuffer);
+	}
+
+	return 0;
+}
+
+void PremultiplyAlpha(MFIntTexture *pImage)
+{
+	MFIntTexturePixel *pPx = pImage->pSurfaces[0].pData;
+
+	for(int s=0; s<pImage->numSurfaces; ++s)
+	{
+		for(int a=0; a<pImage->pSurfaces[s].width; a++)
+		{
+			for(int a=0; a<pImage->pSurfaces[s].height; a++)
+			{
+				pPx->r *= pPx->a;
+				pPx->g *= pPx->a;
+				pPx->b *= pPx->a;
+				++pPx;
+			}
+		}
+	}
 }
 
 MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
@@ -742,7 +1302,7 @@ MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, uint32 si
 
 void MFIntTexture_Destroy(MFIntTexture *pTexture)
 {
-	for(int a=0; a<pTexture->mipLevels; a++)
+	for(int a=0; a<pTexture->numSurfaces; a++)
 	{
 		if(pTexture->pSurfaces[a].pData)
 			MFHeap_Free(pTexture->pSurfaces[a].pData);
@@ -755,9 +1315,177 @@ void MFIntTexture_Destroy(MFIntTexture *pTexture)
 		MFHeap_Free(pTexture);
 }
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, void **ppOutput, uint32 *pSize, MFPlatform platform)
+MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 {
+	MFTextureFormat targetFormat = TexFmt_A8B8G8R8;
 
+	// choose target format..
+	switch(platform)
+	{
+		case FP_PC:
+		case FP_Linux:
+		case FP_OSX:
+/*
+			if(pImage->opaque || (pImage->oneBitAlpha && premultipliedAlpha))
+				targetFormat = TexFmt_DXT1;
+			else
+				targetFormat = TexFmt_DXT5;
+*/
+			if(pTexture->opaque)
+				targetFormat = TexFmt_R5G6B5;
+			else if(pTexture->oneBitAlpha)
+				targetFormat = TexFmt_A1R5G5B5;
+			else
+				targetFormat = TexFmt_A8R8G8B8;
+			break;
+
+		case FP_XBox:
+			if(pTexture->opaque)
+				targetFormat = TexFmt_XB_R5G6B5s;
+			else if(pTexture->oneBitAlpha)
+				targetFormat = TexFmt_XB_A1R5G5B5s;
+			else
+				targetFormat = TexFmt_XB_A8R8G8B8s;
+			break;
+
+		case FP_PSP:
+			if(pTexture->opaque)
+				targetFormat = TexFmt_PSP_B5G6R5s;
+			else if(pTexture->oneBitAlpha)
+				targetFormat = TexFmt_PSP_A1B5G5R5s;
+			else
+				targetFormat = TexFmt_PSP_A4B4G4R4s;
+			break;
+
+		case FP_PS2:
+			if(pTexture->opaque || pTexture->oneBitAlpha)
+				targetFormat = TexFmt_A1B5G5R5;
+			else
+				targetFormat = TexFmt_A8B8G8R8;
+			break;
+
+		default:
+			break;
+	}
+
+	return targetFormat;
+}
+
+void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, uint32 *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
+{
+	*ppTemplateData = NULL;
+	if(pSize)
+		*pSize = 0;
+
+	// choose target image format
+	if(targetFormat == TexFmt_Unknown)
+		targetFormat = ChooseBestFormat(pTexture, platform);
+
+	// check minimum pitch
+	MFDebug_Assert((pTexture->pSurfaces[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 >= 16, "Textures should have a minimum pitch of 16 bytes.");
+
+	// check power of 2 dimensions
+	MFDebug_Assert(IsPowerOf2(pTexture->pSurfaces[0].width) && IsPowerOf2(pTexture->pSurfaces[0].height), "Texture dimensions are not a power of 2.");
+
+	// begin processing...
+	if(flags & MFITF_PreMultipliedAlpha)
+		PremultiplyAlpha(pTexture);
+
+	// calculate texture data size..
+	uint32 imageBytes = (uint32)MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
+
+	for(int a=0; a<pTexture->numSurfaces; a++)
+	{
+		imageBytes += (pTexture->pSurfaces[a].width * pTexture->pSurfaces[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
+
+		// add palette
+		uint32 paletteBytes = 0;
+
+		if(targetFormat == TexFmt_I8)
+			paletteBytes = 4*256;
+		if(targetFormat == TexFmt_I4)
+			paletteBytes = 4*16;
+
+		imageBytes += paletteBytes;
+	}
+
+	// allocate buffer
+//	MFHeap_SetAllocAlignment(4096);
+	char *pOutputBuffer = (char*)MFHeap_Alloc(imageBytes);
+
+	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
+	MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData));
+
+	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
+
+	pTemplate->imageFormat = targetFormat;
+
+	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
+		pTemplate->flags |= TEX_Swizzled;
+
+	if(!pTexture->opaque)
+	{
+		if(pTexture->oneBitAlpha)
+			pTemplate->flags |= 3;
+		else
+			pTemplate->flags |= 1;
+	}
+
+	if(flags & MFITF_PreMultipliedAlpha)
+		pTemplate->flags |= TEX_PreMultipliedAlpha;
+
+	pTemplate->mipLevels = pTexture->numSurfaces;
+	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
+
+	MFTextureSurfaceLevel *pSurfaceLevels = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
+
+	char *pDataPointer = pOutputBuffer + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
+
+	for(int a=0; a<pTexture->numSurfaces; a++)
+	{
+		MFZeroMemory(&pSurfaceLevels[a], sizeof(MFTextureSurfaceLevel));
+
+		pSurfaceLevels[a].width = pTexture->pSurfaces[a].width;
+		pSurfaceLevels[a].height = pTexture->pSurfaces[a].height;
+		pSurfaceLevels[a].bitsPerPixel = MFTexture_GetBitsPerPixel(targetFormat);
+
+		pSurfaceLevels[a].xBlocks = -1;
+		pSurfaceLevels[a].yBlocks = -1;
+		pSurfaceLevels[a].bitsPerBlock = -1;
+
+		pSurfaceLevels[a].pImageData = pDataPointer;
+		pSurfaceLevels[a].bufferLength = (pTexture->pSurfaces[a].width*pTexture->pSurfaces[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
+		pDataPointer += pSurfaceLevels[a].bufferLength;
+
+		uint32 paletteBytes = 0;
+
+		if(targetFormat == TexFmt_I8)
+			paletteBytes = 4*256;
+		if(targetFormat == TexFmt_I4)
+			paletteBytes = 4*16;
+
+		if(paletteBytes)
+		{
+			pSurfaceLevels[a].pImageData = pDataPointer;
+			pSurfaceLevels[a].paletteBufferLength = paletteBytes;
+			pDataPointer += paletteBytes;
+		}
+
+		// convert surface
+		ConvertSurface(&pTexture->pSurfaces[a], &pSurfaceLevels[a], targetFormat, platform);
+	}
+
+	// fix up pointers
+	for(int a=0; a<pTemplate->mipLevels; a++)
+	{
+		MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
+		MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
+	}
+	MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
+
+	*ppTemplateData = (MFTextureTemplateData*)pOutputBuffer;
+	if(pSize)
+		*pSize = imageBytes;
 }
 
 void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename)
@@ -775,7 +1503,7 @@ void MFIntTexture_ScanImage(MFIntTexture *pTexture)
 	pTexture->opaque = true;
 	pTexture->oneBitAlpha = true;
 
-	for(int a=0; a<pTexture->mipLevels; a++)
+	for(int a=0; a<pTexture->numSurfaces; a++)
 	{
 		for(int b=0; b<pTexture->pSurfaces[a].width; b++)
 		{
@@ -797,7 +1525,7 @@ void MFIntTexture_ScanImage(MFIntTexture *pTexture)
 
 void MFIntTexture_FlipImage(MFIntTexture *pTexture)
 {
-	for(int a=0; a<pTexture->mipLevels; a++)
+	for(int a=0; a<pTexture->numSurfaces; a++)
 	{
 		int halfHeight = pTexture->pSurfaces[a].height / 2;
 		int stride = pTexture->pSurfaces[a].width * sizeof(MFIntTexturePixel);

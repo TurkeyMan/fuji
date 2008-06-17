@@ -14,6 +14,8 @@
 	#include <pspgu.h>
 #endif
 
+#define ALLOW_LOAD_FROM_SOURCE_DATA
+
 // globals
 MFPtrListDL<MFTexture> gTextureBank;
 TextureBrowser texBrowser;
@@ -96,7 +98,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		if(!pTemplate)
 		{
-#if 0
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			// try to load from source data
 			const char * const pExt[] = { ".tga", ".png", ".bmp", NULL };
 			const char * const *ppExt = pExt;
@@ -104,11 +106,16 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			while(!pIT && *ppExt)
 			{
 				pIT = MFIntTexture_CreateFromFile(MFStr("%s%s", pName, *ppExt));
+				if(pIT)
+					break;
 				++ppExt;
 			}
 
 			if(pIT)
-				MFIntTexture_CreateRuntimeData(pIT, (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform());
+			{
+				MFIntTexture_CreateRuntimeData(pIT, &pTemplate, NULL, MFSystem_GetCurrentPlatform());
+				MFIntTexture_Destroy(pIT);
+			}
 #endif
 
 			if(!pTemplate)
