@@ -23,7 +23,7 @@ void MFSound_DestroyInternal(MFSound *pSound);
 
 void MFSound_PlayInternal(MFVoice *pVoice);
 
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
+uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
 
 
 enum MFWaveFormat
@@ -92,9 +92,18 @@ struct MFStreamHandler
 	MFStreamCallbacks callbacks;
 };
 
+struct MFAudioStreamInfo
+{
+	char songName[256];
+	char albumName[256];
+	char artistName[256];
+	char genre[256];
+};
+
 struct MFAudioStream
 {
 	char name[256];
+	MFAudioStreamInfo streamInfo;
 
 	MFStreamHandler *pStreamHandler;
 	void *pStreamData;
@@ -108,7 +117,7 @@ struct MFAudioStream
 	float trackLength;
 	float currentTime;
 
-	bool playing;
+	uint32 playFlags;
 };
 
 #endif

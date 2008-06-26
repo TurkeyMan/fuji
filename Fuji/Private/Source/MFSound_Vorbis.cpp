@@ -19,6 +19,7 @@ struct MFVorbisStream
 {
 	OggVorbis_File vorbisFile;
 	vorbis_info *pInfo;
+	vorbis_comment *pComment;
 };
 
 int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
@@ -91,6 +92,25 @@ void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
 
 	if(!pStream->pStreamBuffer)
 		DestroyVorbisStream(pStream);
+
+	// read the vorbis comment data
+	pVS->pComment = ov_comment(&pVS->vorbisFile, -1);
+	if(pVS->pComment)
+	{
+		const char *pTitle = vorbis_comment_query(pVS->pComment, "TITLE", 0);
+		const char *pArtist = vorbis_comment_query(pVS->pComment, "ALBUM", 0);
+		const char *pAlbum = vorbis_comment_query(pVS->pComment, "ARTIST", 0);
+		const char *pGenre = vorbis_comment_query(pVS->pComment, "GENRE", 0);
+
+		if(pTitle)
+			MFString_CopyN(pStream->streamInfo.songName, pTitle, sizeof(pStream->streamInfo.songName)-1);
+		if(pArtist)
+			MFString_CopyN(pStream->streamInfo.artistName, pArtist, sizeof(pStream->streamInfo.artistName)-1);
+		if(pAlbum)
+			MFString_CopyN(pStream->streamInfo.albumName, pAlbum, sizeof(pStream->streamInfo.albumName)-1);
+		if(pGenre)
+			MFString_CopyN(pStream->streamInfo.genre, pGenre, sizeof(pStream->streamInfo.genre)-1);
+	}
 }
 
 int GetVorbisSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)

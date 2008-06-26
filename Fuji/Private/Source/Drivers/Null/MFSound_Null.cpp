@@ -100,7 +100,7 @@ void MFSound_SetMasterVolume(float volume)
 {
 }
 
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	return 0;
 }

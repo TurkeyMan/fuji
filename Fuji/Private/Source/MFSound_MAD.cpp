@@ -25,6 +25,13 @@ struct MFID3
 	uint8 reserved;
 };
 
+struct ID3Chunk
+{
+	uint32 id;
+	uint32 size;
+	uint16 flags;
+};
+
 struct MFMADDecoder
 {
 	unsigned char inputBuffer[INPUT_BUFFER_SIZE+MAD_BUFFER_GUARD];
@@ -64,6 +71,53 @@ static inline signed short MadFixedToSshort(mad_fixed_t fixed)
 	// conversion
 	fixed = fixed >> (MAD_F_FRACBITS - 15);
 	return (signed short)fixed;
+}
+
+void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
+{
+	unsigned char *pData = pID3->pID3Data;
+
+	while(pData - pID3->pID3Data <= dataSize)
+	{
+		if(pID3->major == 2)
+		{
+			// for the moment, to be safe...
+			return;
+
+			int size = (int)pData[5] | ((int)pData[4] << 7) | ((int)pData[3] << 14);
+			pData += 6 + size;
+		}
+		if(pID3->major > 2)
+		{
+			ID3Chunk *pChunkHeader = (ID3Chunk*)pData;
+			uint32 size = GetSynchSafeInt(pData + 4);
+
+			if(*pData = 'T')
+			{
+				uint8 encoding = pData[10];
+				const char *pString = (const char*)pData + 11;
+
+				switch(pChunkHeader->id)
+				{
+					case MFMAKEFOURCC('T', 'I', 'T', '2'):
+						MFString_CopyN(pStream->streamInfo.songName, pString, MFMin(size-1, sizeof(pStream->streamInfo.songName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'A', 'L', 'B'):
+						MFString_CopyN(pStream->streamInfo.albumName, pString, MFMin(size-1, sizeof(pStream->streamInfo.albumName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'P', 'E', '1'):
+					case MFMAKEFOURCC('T', 'P', 'E', '2'):
+						MFString_CopyN(pStream->streamInfo.artistName, pString, MFMin(size-1, sizeof(pStream->streamInfo.artistName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'C', 'O', 'N'):
+						MFString_CopyN(pStream->streamInfo.genre, pString, MFMin(size-1, sizeof(pStream->streamInfo.genre)-1));
+						break;
+				}
+			}
+
+			pData += 10 + size;
+		}
+	}
 }
 
 int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
@@ -309,6 +363,7 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 		pDecoder->pID3->minor = buffer[4];
 		pDecoder->pID3->flags = buffer[5];
 		MFFile_Read(hFile, pDecoder->pID3->pID3Data, size, false);
+		ParseID3(pStream, pDecoder->pID3, size);
 		pDecoder->pFrameOffsets[0] = read + size;
 		read = 0;
 	}

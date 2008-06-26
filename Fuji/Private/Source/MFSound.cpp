@@ -143,7 +143,8 @@ void MFSound_Update()
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
-		if(gMusicTracks[a].pStreamBuffer && gMusicTracks[a].playing)
+		bool playing = !(gMusicTracks[a].playFlags & MFASF_BeginPaused);
+		if(gMusicTracks[a].pStreamBuffer && playing)
 		{
 			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
 		}
@@ -301,6 +302,32 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	return pVoice;
 }
 
+uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+{
+	uint32 play = MFSound_GetPlayCursorInternal(pVoice, pWriteCursor);
+
+	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
+	int bytesPerSample = (pT->bitsPerSample * pT->numChannels) >> 3;
+
+	if(pWriteCursor)
+		*pWriteCursor /= bytesPerSample;
+
+	return play / bytesPerSample;
+}
+
+MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice)
+{
+	return pVoice->pSound;
+}
+
+void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo)
+{
+	pInfo->sampleRate = pSound->pTemplate->sampleRate;
+	pInfo->numSamples = pSound->pTemplate->numSamples;
+	pInfo->numChannels = pSound->pTemplate->numChannels;
+	pInfo->bitsPerSample = pSound->pTemplate->bitsPerSample;
+}
+
 
 //
 // MFAudioStream related functions
@@ -317,7 +344,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
 	gStreamHandlers.Create(pHandler);
 }
 
-MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
+MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 {
 	MFCALLSTACK;
 
@@ -376,8 +403,8 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause)
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
 
 	// play buffer
-	pStream->pStreamVoice = MFSound_Play(pStream->pStreamBuffer, MFPF_Looping | (pause ? MFPF_BeginPaused : 0));
-	pStream->playing = !pause;
+	pStream->pStreamVoice = MFSound_Play(pStream->pStreamBuffer, MFPF_Looping | ((playFlags & MFASF_BeginPaused) ? MFPF_BeginPaused : 0));
+	pStream->playFlags = playFlags;
 
 	return pStream;
 }
@@ -390,20 +417,16 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 	int lockSize;
 
 	// get cursor pos
-	playCursor = MFSound_GetPlayCursor(pStream->pStreamVoice);
+	playCursor = MFSound_GetPlayCursorInternal(pStream->pStreamVoice);
 
 	if(pStream->writePointer == playCursor)
 		return;
 
 	// calculate lock size
 	if(playCursor < pStream->writePointer)
-	{
 		lockSize = playCursor + (pStream->bufferSize - pStream->writePointer);
-	}
 	else
-	{
 		lockSize = playCursor - pStream->writePointer;
-	}
 
 	// update the buffer
 	MFSound_FillBuffer(pStream, lockSize);
@@ -413,7 +436,8 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
 
-	if(pStream->playing)
+	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
+	if(playing)
 		MFSound_Stop(pStream->pStreamVoice);
 
 	// call stream handler destroy
@@ -427,7 +451,8 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
-	if(pStream->playing)
+	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
+	if(playing)
 		MFSound_Pause(pStream->pStreamVoice, true);
 
 	pStream->pStreamHandler->callbacks.pSeekStream(pStream, seconds);
@@ -437,7 +462,7 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
 
-	if(pStream->playing)
+	if(playing)
 		MFSound_Pause(pStream->pStreamVoice, false);
 }
 
@@ -445,23 +470,49 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 {
 	MFCALLSTACK;
 
+	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
 	if(pause)
 	{
-		if(pStream->playing)
+		if(playing)
 			MFSound_Pause(pStream->pStreamVoice, true);
 	}
 	else
 	{
-		if(!pStream->playing)
+		if(!playing)
 			MFSound_Pause(pStream->pStreamVoice, false);
 	}
 
-	pStream->playing = !pause;
+	pStream->playFlags = (pStream->playFlags & ~MFASF_BeginPaused) | (pause ? MFASF_BeginPaused : 0);
 }
 
 MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream)
 {
 	return pStream->pStreamVoice;
+}
+
+const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType)
+{
+	switch(infoType)
+	{
+		case MFSIT_TrackName:
+			if(pStream->streamInfo.songName[0])
+				return pStream->streamInfo.songName;
+			break;
+		case MFSIT_AlbumName:
+			if(pStream->streamInfo.albumName[0])
+				return pStream->streamInfo.albumName;
+			break;
+		case MFSIT_ArtistName:
+			if(pStream->streamInfo.artistName[0])
+				return pStream->streamInfo.artistName;
+			break;
+		case MFSIT_Genre:
+			if(pStream->streamInfo.genre[0])
+				return pStream->streamInfo.genre;
+			break;
+	}
+
+	return NULL;
 }
 
 void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
@@ -579,7 +630,7 @@ void MFSound_Draw()
 			MFSetPosition(500.0f, y+20.0f, 0.0f);
 
 			uint32 playCursor, writeCursor;
-			playCursor = MFSound_GetPlayCursor(gMusicTracks[a].pStreamVoice, &writeCursor);
+			playCursor = MFSound_GetPlayCursorInternal(gMusicTracks[a].pStreamVoice, &writeCursor);
 
 			float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)bufferSize);
 
@@ -711,7 +762,7 @@ void MFSound_Draw()
 		MFSetPosition(500.0f, y+20.0f, 0.0f);
 
 		uint32 playCursor, writeCursor;
-		playCursor = MFSound_GetPlayCursor(pV, &writeCursor);
+		playCursor = MFSound_GetPlayCursorInternal(pV, &writeCursor);
 
 		float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)bufferSize);
 

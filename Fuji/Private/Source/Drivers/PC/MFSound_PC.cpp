@@ -337,12 +337,11 @@ void MFSound_SetMasterVolume(float volume)
 	pDSPrimaryBuffer->SetVolume(MFSoundInternal_GetDecibels(volume));
 }
 
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFCALLSTACK;
 
 	DWORD play, write;
-
 	pVoice->pInternal->pBuffer8->GetCurrentPosition(&play, &write);
 
 	if(pWriteCursor)

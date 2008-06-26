@@ -30,6 +30,17 @@ struct MFVoice;
 struct MFAudioStream;
 
 /**
+ * Describes an MFSound buffer.
+ */
+struct MFSoundInfo
+{
+	int sampleRate;			/**< Sample playback rate. */
+	int numSamples;			/**< Number of samples in the buffer. */
+	int16 bitsPerSample;	/**< Number of bits per sample. */
+	int16 numChannels;		/**< Number of channels. */
+};
+
+/**
  * Sound flags.
  * Various flags related to the behaviour of MFSound buffers.
  */
@@ -207,8 +218,60 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
  */
 void MFSound_SetMasterVolume(float volume);
 
+/**
+ * Get the current play cursor, in samples.
+ * Gets the current play cursor and write cursor, in samples.
+ * @param pVoice Pointer to a playing voice.
+ * @param pWriteCursor Optional pointer to a uint32 that received the position of the write cursor.
+ * @return Returns the play cursor's position, in samples.
+ */
+uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
+
+/**
+ * Get the sound buffer from a voice.
+ * Gets the sound buffer from a playing voice.
+ * @param pVoice Pointer to a playing voice.
+ * @return Returns the voices associated sound buffer.
+ */
+MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice);
+
+/**
+ * Get info about a sound.
+ * Gets info about an MFSound.
+ * @param pSound Pointer to an MFSound.
+ * @param pInfo Pointer to an MFSoundInfo struct that receives information about the MFSound.
+ * @return None.
+ */
+void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
 
 /*** Music playback ***/
+
+/**
+ * Stream create flags.
+ * Flags used to specify various properties of an audio stream when created.
+ */
+enum MFAudioStreamFlags
+{
+	MFASF_BeginPaused = MFBIT(0),	/**< Stream playback begins in paused state. */
+	MFASF_QueryLength = MFBIT(1),	/**< Allows the user to query the stream length. */
+	MFASF_AllowSeeking = MFBIT(2),	/**< Allows seeking within the stream. */
+	MFASF_AllowBuffering = MFBIT(3)	/**< Allows buffering of the compressed data if the driver chooses. (May use a lot of memory) */
+};
+
+/**
+ * Stream info type.
+ * Enums representing various information that can be fetched from audio streams.
+ */
+enum MFStreamInfoType
+{
+	MFSIT_TrackName,				/**< Track name. */
+	MFSIT_AlbumName,				/**< Album name. */
+	MFSIT_ArtistName,				/**< Artists name. */
+	MFSIT_Genre,					/**< Track genre. */
+
+	MFSIT_Max,						/**< Max info type. */
+	MFSIT_ForceInt = 0x7FFFFFFF,	/**< Force MFStreamInfoType to an int type. */
+};
 
 /**
  * Stream callbacks.
@@ -240,7 +303,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
  * @param pause Initial pause state.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
-MFAudioStream *MFSound_PlayStream(const char *pFilename, bool pause = false);
+MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags = 0);
 
 /**
  * Destroy a music track.
@@ -275,6 +338,15 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
  * @return Returns a pointer to the MFVoice associated with the stream.
  */
 MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
+
+/**
+ * Get information associated with an audio stream.
+ * Gets various information that maybe associated with an audio stream.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param infoType The type of information to fetch.
+ * @return Returns a string containing the requested infomation.
+ */
+const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType);
 
 #endif // _MFSOUND_H
 

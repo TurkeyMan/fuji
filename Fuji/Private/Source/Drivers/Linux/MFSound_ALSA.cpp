@@ -418,7 +418,7 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 	pInt->offset = MFMin((uint32)((float)pVoice->pSound->pTemplate->sampleRate * seconds), (uint32)pVoice->pSound->pTemplate->numSamples) << 10;
 }
 
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
