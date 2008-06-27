@@ -511,6 +511,58 @@ static const int gRB360GuitarButtonID[GamepadType_Max] =
 	-1,					// Button_GH_Tilt
 };
 
+static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
+{
+	3,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	0,	// Button_GH_Yellow
+	-1,	// Button_GH_Solo
+	-1,	// Unused
+	-1,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z | AID_Full | AID_Negative,		// Button_GH_Whammy
+	-1,					// Jump/Roll sensor
+	-1,         // Button_GH_PickupSwitch
+	-1,	        // Button_GH_Tilt
+
+  // PS Button = 12
+};
+
+static const int gRBPS3GuitarButtonID[GamepadType_Max] =
+{
+	0,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	3,	// Button_GH_Yellow
+	6,	// Button_GH_Solo
+	-1,	// Unused
+	5,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z | AID_Negative,	// Button_GH_Whammy
+	-1,       // Jump/Roll sensor
+	-1,       // Button_GH_PickupSwitch
+	-1,       // Button_GH_Tilt
+
+  // PS Button = 12
+};
+
 static const int gUSBGamepadButtonID[GamepadType_Max] =
 {
 	2,	// Button_A
