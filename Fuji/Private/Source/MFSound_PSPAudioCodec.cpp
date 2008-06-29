@@ -30,6 +30,13 @@ struct MFID3
 	uint8 reserved;
 };
 
+struct ID3Chunk
+{
+	uint32 id;
+	uint32 size;
+	uint16 flags;
+};
+
 struct MP3Header
 {
 	int audioVersion;
@@ -121,6 +128,54 @@ int GetSynchSafeInt(unsigned char *pStream)
 	return (uint32)pStream[3] | ((uint32)pStream[2] << 7) | ((uint32)pStream[1] << 14) | ((uint32)pStream[0] << 21);
 }
 
+void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
+{
+	unsigned char *pData = pID3->pID3Data;
+
+	while(pData - pID3->pID3Data <= dataSize)
+	{
+		if(pID3->major == 2)
+		{
+			// for the moment, to be safe...
+			MFDebug_Assert(false, "Make this work!!");
+			return;
+
+			int size = (int)pData[5] | ((int)pData[4] << 7) | ((int)pData[3] << 14);
+			pData += 6 + size;
+		}
+		if(pID3->major > 2)
+		{
+			ID3Chunk *pChunkHeader = (ID3Chunk*)pData;
+			uint32 size = GetSynchSafeInt(pData + 4);
+
+			if(*pData = 'T')
+			{
+				uint8 encoding = pData[10];
+				const char *pString = (const char*)pData + 11;
+
+				switch(pChunkHeader->id)
+				{
+					case MFMAKEFOURCC('T', 'I', 'T', '2'):
+						MFString_CopyN(pStream->streamInfo.songName, pString, MFMin(size-1, sizeof(pStream->streamInfo.songName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'A', 'L', 'B'):
+						MFString_CopyN(pStream->streamInfo.albumName, pString, MFMin(size-1, sizeof(pStream->streamInfo.albumName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'P', 'E', '1'):
+					case MFMAKEFOURCC('T', 'P', 'E', '2'):
+						MFString_CopyN(pStream->streamInfo.artistName, pString, MFMin(size-1, sizeof(pStream->streamInfo.artistName)-1));
+						break;
+					case MFMAKEFOURCC('T', 'C', 'O', 'N'):
+						MFString_CopyN(pStream->streamInfo.genre, pString, MFMin(size-1, sizeof(pStream->streamInfo.genre)-1));
+						break;
+				}
+			}
+
+			pData += 10 + size;
+		}
+	}
+}
+
 void RefillInputBuffer(MFMP3Decoder *pDecoder)
 {
 	pDecoder->inputBufferDataLen -= pDecoder->inputBufferOffset;
@@ -139,7 +194,7 @@ void ReadMP3Header(MP3Header *pHeader, const unsigned char *pHeaderBuffer)
 	header = (header<<8) | pHeaderBuffer[3];
 
 	// assert we are looking at a frame header
-	MFDebug_Assert(header & 0xFFE00000, MFStr("Not an MP3 frame header: 0x%08X", header));
+	MFDebug_Assert((header & 0xFFE00000) == 0xFFE00000, MFStr("Not an MP3 frame header: 0x%08X", header));
 
 	// extract details from frame header
 	int bitrate = (header & 0xf000) >> 12;
@@ -342,6 +397,7 @@ void CreateMP3Stream(MFAudioStream *pStream, const char *pFilename)
 		pDecoder->pID3->minor = buffer[4];
 		pDecoder->pID3->flags = buffer[5];
 		MFFile_Read(hFile, pDecoder->pID3->pID3Data, size, false);
+		ParseID3(pStream, pDecoder->pID3, size);
 		pDecoder->pFrameOffsets[0] = read + size;
 		read = 0;
 	}

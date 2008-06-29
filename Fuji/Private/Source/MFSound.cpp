@@ -9,6 +9,12 @@
 #include "MFThread.h"
 #include "DebugMenu.h"
 
+//#define USE_THREADED_AUDIO
+
+#if defined(USE_THREADED_AUDIO)
+	#include <windows.h>
+#endif
+
 /**** Forward Declarations ****/
 
 void MFSound_FillBuffer(MFAudioStream *pStream, int bytes);
@@ -35,6 +41,68 @@ MenuItemBool showSoundStats;
 
 
 /**** Functions ****/
+
+volatile static bool gbShutdownAudioThread = false;
+volatile static bool gbAudioThreadFinished = false;
+static MFMutex gSoundMutex;
+static MFThread gAudioThread = NULL;
+
+void MFSound_LockMutex(bool lock)
+{
+#if defined(USE_THREADED_AUDIO)
+	if(lock)
+		MFThread_LockMutex(gSoundMutex);
+	else
+		MFThread_ReleaseMutex(gSoundMutex);
+#endif
+}
+
+void MFSound_UpdateSound()
+{
+	MFVoice **ppI = gVoices.Begin();
+
+	while(*ppI)
+	{
+		MFVoice *pV = *ppI;
+
+		bool bFinished = MFSound_UpdateVoiceInternal(pV);
+
+		if(bFinished)
+			gVoices.Destroy(ppI);
+
+		ppI++;
+	}
+
+	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
+	{
+		bool playing = !(gMusicTracks[a].playFlags & MFASF_BeginPaused);
+		if(gMusicTracks[a].pStreamBuffer && playing)
+		{
+			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
+		}
+	}
+
+	MFSound_UpdateInternal();
+}
+
+#if defined(USE_THREADED_AUDIO)
+int MFSound_UpdateThread(void *pUserData)
+{
+	while(!gbShutdownAudioThread)
+	{
+		MFSound_LockMutex(true);
+		MFSound_UpdateSound();
+		MFSound_LockMutex(false);
+
+		Sleep(10);
+	}
+
+	gbAudioThreadFinished = true;
+
+	MFThread_ExitThread(0);
+	return 0;
+}
+#endif
 
 void MFSound_InitModule()
 {
@@ -75,11 +143,25 @@ void MFSound_InitModule()
 	void MFSound_RegisterWAV();
 	MFSound_RegisterWAV();
 #endif
+
+#if defined(USE_THREADED_AUDIO)
+	gSoundMutex = MFThread_CreateMutex("MFSound Mutex");
+	gAudioThread = MFThread_CreateThread("MFSound Thread", MFSound_UpdateThread, NULL, MFPriority_AboveNormal);
+#endif
 }
 
 void MFSound_DeinitModule()
 {
 	MFCALLSTACK;
+
+#if defined(USE_THREADED_AUDIO)
+	if(gAudioThread)
+	{
+		gbShutdownAudioThread = true;
+		while(!gbAudioThreadFinished)
+			Sleep(1);
+	}
+#endif
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
@@ -127,30 +209,14 @@ void MFSound_Update()
 {
 	MFCALLSTACK;
 
-	MFVoice **ppI = gVoices.Begin();
-
-	while(*ppI)
+	if(gAudioThread)
 	{
-		MFVoice *pV = *ppI;
-
-		bool bFinished = MFSound_UpdateVoiceInternal(pV);
-
-		if(bFinished)
-			gVoices.Destroy(ppI);
-
-		ppI++;
+		// what we should do, is pool all voice related requests, and then commit them all at once so we only lock the mutex once per frame..
 	}
-
-	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
+	else
 	{
-		bool playing = !(gMusicTracks[a].playFlags & MFASF_BeginPaused);
-		if(gMusicTracks[a].pStreamBuffer && playing)
-		{
-			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
-		}
+		MFSound_UpdateSound();
 	}
-
-	MFSound_UpdateInternal();
 }
 
 MFSound *MFSound_Create(const char *pName)
@@ -291,6 +357,8 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	if(!pSound)
 		return NULL;
 
+	MFSound_LockMutex(true);
+
 	MFVoice *pVoice = gVoices.Create();
 	MFZeroMemory(pVoice, sizeof(MFVoice) + internalVoiceDataSize);
 	pVoice->flags = playFlags;
@@ -299,15 +367,21 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 
 	MFSound_PlayInternal(pVoice);
 
+	MFSound_LockMutex(false);
+
 	return pVoice;
 }
 
 uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
+	MFSound_LockMutex(true);
+
 	uint32 play = MFSound_GetPlayCursorInternal(pVoice, pWriteCursor);
 
 	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
 	int bytesPerSample = (pT->bitsPerSample * pT->numChannels) >> 3;
+
+	MFSound_LockMutex(false);
 
 	if(pWriteCursor)
 		*pWriteCursor /= bytesPerSample;
@@ -348,9 +422,10 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 {
 	MFCALLSTACK;
 
-	int t = 0;
+	MFSound_LockMutex(true);
 
 	// find free music track
+	int t = 0;
 	while(gMusicTracks[t].pStreamBuffer && t < gDefaults.sound.maxMusicTracks) t++;
 	if(t == gDefaults.sound.maxMusicTracks)
 	{
@@ -360,6 +435,7 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 
 	MFAudioStream *pStream = &gMusicTracks[t];
 	MFZeroMemory(pStream, sizeof(*pStream));
+	pStream->playFlags = playFlags;
 
 	MFDebug_Log(4, MFStr("Attempting to create audio stream '%s'.", pFilename));
 
@@ -404,7 +480,8 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 
 	// play buffer
 	pStream->pStreamVoice = MFSound_Play(pStream->pStreamBuffer, MFPF_Looping | ((playFlags & MFASF_BeginPaused) ? MFPF_BeginPaused : 0));
-	pStream->playFlags = playFlags;
+
+	MFSound_LockMutex(false);
 
 	return pStream;
 }
@@ -436,6 +513,8 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
 
+	MFSound_LockMutex(true);
+
 	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
 	if(playing)
 		MFSound_Stop(pStream->pStreamVoice);
@@ -445,11 +524,15 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 
 	MFSound_Destroy(pStream->pStreamBuffer);
 	pStream->pStreamBuffer = NULL;
+
+	MFSound_LockMutex(false);
 }
 
 void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
+
+	MFSound_LockMutex(true);
 
 	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
 	if(playing)
@@ -464,11 +547,15 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 
 	if(playing)
 		MFSound_Pause(pStream->pStreamVoice, false);
+
+	MFSound_LockMutex(false);
 }
 
 void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 {
 	MFCALLSTACK;
+
+	MFSound_LockMutex(true);
 
 	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
 	if(pause)
@@ -483,6 +570,8 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 	}
 
 	pStream->playFlags = (pStream->playFlags & ~MFASF_BeginPaused) | (pause ? MFASF_BeginPaused : 0);
+
+	MFSound_LockMutex(false);
 }
 
 MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream)
