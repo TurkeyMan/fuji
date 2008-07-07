@@ -306,6 +306,9 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 {
 	MFCALLSTACK;
 
+	uint16 ch;
+	int bytes;
+
 	// skip white space
 	while(pSrc < pSrcEnd)
 	{
@@ -321,10 +324,11 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 
 		// check if we have found some non-whitespace
-		if(!MFIsWhite(pSrc[0]) && (stringCount!=1 || pSrc[0] != '='))
+		bytes = MFString_MBToWChar(pSrc, &ch);
+		if(!MFIsWhite(ch) && (stringCount!=1 || ch != '='))
 			break;
 
-		pSrc++;
+		pSrc += bytes;
 	}
 
 	// end of file?
@@ -346,15 +350,16 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	bool bInQuotes = false;
 	int sectionDepth = 0;
 	*pbIsSection = false;
-	while(pSrc < pSrcEnd && !MFIsNewline(*pSrc) && (bInQuotes || ((stringCount!=0 || *pSrc != '=') && !MFIsWhite(*pSrc) && *pSrc != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
+	bytes = MFString_MBToWChar(pSrc, &ch);
+	while(pSrc < pSrcEnd && !MFIsNewline(ch) && (bInQuotes || sectionDepth!=0 || ((stringCount!=0 || ch != '=') && !MFIsWhite(ch) && ch != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
 	{
-		if(!bInQuotes && *pSrc == '[')
+		if(!bInQuotes && ch == '[')
 		{
 			sectionDepth++;
 			*pbIsSection = true;
 			pSrc++;
 		}
-		else if(!bInQuotes && *pSrc == ']')
+		else if(!bInQuotes && ch == ']')
 		{
 			sectionDepth--;
 			if (sectionDepth < 0)
@@ -379,9 +384,14 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 		else
 		{
-			*pDst++ = *pSrc++;
+			while(bytes--)
+				*pDst++ = *pSrc++;
 		}
+		bytes = MFString_MBToWChar(pSrc, &ch);
 	}
+
+	if(sectionDepth > 0)
+		MFDebug_Warn(1, "Malformed ini file, Missing ']'");
 
 	if(pDst != pTokenBuffer)
 	{

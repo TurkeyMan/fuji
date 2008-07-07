@@ -2,7 +2,7 @@
 // some useful string parsing functions
 inline bool MFIsWhite(int c)
 {
-	return c==' ' || c=='\t';
+	return c==' ' || c=='\t' || c==0x3000;
 }
 
 inline bool MFIsAlpha(int c)
