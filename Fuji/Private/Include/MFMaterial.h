@@ -169,6 +169,13 @@ void MFMaterial_SetMaterial(MFMaterial *pMaterial);
  */
 MFMaterial*	MFMaterial_GetCurrent();
 
+/**
+ * Get a materials name.
+ * Gets a materials name.
+ * @return The name of the specified material.
+ */
+const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial);
+
 // material control
 
 /**

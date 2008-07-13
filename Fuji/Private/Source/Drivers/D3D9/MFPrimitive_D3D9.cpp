@@ -11,6 +11,7 @@
 #include "MFRenderer.h"
 #include "MFRenderer_D3D9.h"
 #include "MFMaterial.h"
+#include "MFVertex.h"
 
 #include "Materials/MFMat_Standard.h"
 
@@ -45,7 +46,7 @@ uint32 beginCount;
 uint32 currentVert;
 
 extern IDirect3DDevice9 *pd3dDevice;
-static IDirect3DVertexDeclaration9 *pDecl;
+static MFVertexDeclaration *pDecl;
 
 /*** functions ***/
 
@@ -53,49 +54,38 @@ void MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
 
-	D3DVERTEXELEMENT9 decl[7];
+	MFVertexElement elements[4];
 
 	// write declaration
-	decl[0].Stream = 0;
-	decl[0].Offset = 0;
-	decl[0].Type = D3DDECLTYPE_FLOAT3;
-	decl[0].Method = D3DDECLMETHOD_DEFAULT;
-	decl[0].Usage = D3DDECLUSAGE_POSITION;
-	decl[0].UsageIndex = 0;
+	elements[0].stream = 0;
+	elements[0].elementType = MFVE_Position;
+	elements[0].elementIndex = 0;
+	elements[0].componentCount = 3;
 
-	decl[1].Stream = 0;
-	decl[1].Offset = 12;
-	decl[1].Type = D3DDECLTYPE_FLOAT3;
-	decl[1].Method = D3DDECLMETHOD_DEFAULT;
-	decl[1].Usage = D3DDECLUSAGE_NORMAL;
-	decl[1].UsageIndex = 0;
+	elements[1].stream = 0;
+	elements[1].elementType = MFVE_Normal;
+	elements[1].elementIndex = 0;
+	elements[1].componentCount = 3;
 
-	decl[2].Stream = 0;
-	decl[2].Offset = 24;
-	decl[2].Type = D3DDECLTYPE_D3DCOLOR;
-	decl[2].Method = D3DDECLMETHOD_DEFAULT;
-	decl[2].Usage = D3DDECLUSAGE_COLOR;
-	decl[2].UsageIndex = 0;
+	elements[2].stream = 0;
+	elements[2].elementType = MFVE_Colour;
+	elements[2].elementIndex = 0;
+	elements[2].componentCount = 4;
 
-	decl[3].Stream = 0;
-	decl[3].Offset = 28;
-	decl[3].Type = D3DDECLTYPE_FLOAT2;
-	decl[3].Method = D3DDECLMETHOD_DEFAULT;
-	decl[3].Usage = D3DDECLUSAGE_TEXCOORD;
-	decl[3].UsageIndex = 0;
+	elements[3].stream = 0;
+	elements[3].elementType = MFVE_TexCoord;
+	elements[3].elementIndex = 0;
+	elements[3].componentCount = 2;
 
-	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-	decl[4] = endMacro;
-
-	HRESULT hr = pd3dDevice->CreateVertexDeclaration(decl, &pDecl);
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
+	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
+	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
 }
 
 void MFPrimitive_DeinitModule()
 {
 	MFCALLSTACK;
 
-	pDecl->Release();
+	MFVertex_DestroyVertexDeclaration(pDecl);
 }
 
 void MFPrimitive_DrawStats()
@@ -117,17 +107,18 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else
 		gRenderQuads = false;
 
-	if(type & PT_Untextured)
-	{
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+	else if(type & PT_Untextured)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
-	}
 
 	MFRenderer_SetMatrices(NULL, 0);
 	MFRendererPC_SetNumWeights(0);
 	MFRendererPC_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
 	MFRendererPC_SetModelColour(MFVector::white);
 
-	pd3dDevice->SetVertexDeclaration(pDecl);
+	MFVertex_SetVertexDeclaration(pDecl);
 
 	MFRenderer_Begin();
 }

@@ -130,6 +130,9 @@ MFDefaults gDefaults =
 void MFFileSystem_RegisterDefaultArchives();
 MFSystemCallbackFunction pSystemCallbacks[MFCB_Max] = { MFFileSystem_RegisterDefaultArchives, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
+MFInitParams gInitParams;
+
+bool gFujiInitialised = false;
 bool gDrawSystemInfo = true;
 int gQuit = 0;
 int gRestart = 1;
@@ -149,6 +152,11 @@ void RestartCallback(MenuObject *pMenu, void *pData)
 {
 	gQuit = 1;
 	gRestart = 1;
+}
+
+void MFSystem_Quit()
+{
+	gQuit = 1;
 }
 
 void MFSystem_Init()
@@ -406,10 +414,13 @@ int MFSystem_GameLoop()
 
 	// allow's game to set defaults and what not
 	// before the system begins initialisation
-	Game_InitSystem();
+	MFZeroMemory(&gInitParams, sizeof(gInitParams));
+	Game_InitSystem(&gInitParams);
 
 	// initialise the system and create displays etc..
 	MFSystem_Init();
+
+	gFujiInitialised = true;
 
 	while(gRestart)
 	{
@@ -418,7 +429,6 @@ int MFSystem_GameLoop()
 
 		if(pSystemCallbacks[MFCB_InitDone])
 			pSystemCallbacks[MFCB_InitDone]();
-		Game_Init();
 
 		// init the timedelta
 		MFSystem_UpdateTimeDelta();
@@ -426,7 +436,10 @@ int MFSystem_GameLoop()
 		while(!gQuit)
 		{
 			MFCallstack_BeginFrame();
-			MFSystem_HandleEventsPlatformSpecific();
+			if(pSystemCallbacks[MFCB_HandleSystemMessages])
+				pSystemCallbacks[MFCB_HandleSystemMessages]();
+			else
+				MFSystem_HandleEventsPlatformSpecific();
 
 			MFSystem_UpdateTimeDelta();
 			gFrameCount++;
@@ -436,7 +449,6 @@ int MFSystem_GameLoop()
 			{
 				if(pSystemCallbacks[MFCB_Update])
 					pSystemCallbacks[MFCB_Update]();
-				Game_Update();
 			}
 			MFSystem_PostUpdate();
 
@@ -444,7 +456,6 @@ int MFSystem_GameLoop()
 
 			if(pSystemCallbacks[MFCB_Draw])
 				pSystemCallbacks[MFCB_Draw]();
-			Game_Draw();
 			MFSystem_Draw();
 
 			MFRenderer_EndFrame();
@@ -453,7 +464,6 @@ int MFSystem_GameLoop()
 
 		if(pSystemCallbacks[MFCB_Deinit])
 			pSystemCallbacks[MFCB_Deinit]();
-		Game_Deinit();
 	}
 
 	MFSystem_Deinit();

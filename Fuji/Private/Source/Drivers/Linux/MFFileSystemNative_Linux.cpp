@@ -52,7 +52,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	int file = open(pNative->pFilename, flags);
 	if(file == -1)
 	{
-		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
+//		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
 		pFile->pFilesysData = 0;
 		return -1;
 	}

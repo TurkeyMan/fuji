@@ -44,10 +44,10 @@ struct TgaHeader
 
 enum BMPCompressionType
 {
-	RGB = 0,			/* No compression - straight BGR data */
-	RLE8 = 1,		/* 8-bit run-length compression */
-	RLE4 = 2,		/* 4-bit run-length compression */
-	BITFIELDS = 3	/* RGB bitmap with RGB masks */
+	BMCT_RGB = 0,			/* No compression - straight BGR data */
+	BMCT_RLE8 = 1,		/* 8-bit run-length compression */
+	BMCT_RLE4 = 2,		/* 4-bit run-length compression */
+	BMCT_BITFIELDS = 3	/* RGB bitmap with RGB masks */
 };
 
 #pragma pack(1)
@@ -106,7 +106,7 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 {
 	if(png_sig_cmp((uint8*)pMemory, 0, 8))
 	{
-		printf("Not a PNG file..");
+		MFDebug_Warn(2, "Not a PNG file..");
 		return NULL;
 	}
 
@@ -368,19 +368,19 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 
 	if((pHeader->imageType != 1) && (pHeader->imageType != 2) && (pHeader->imageType != 10))
 	{
-		MFDebug_Message(MFStr("Failed loading image (Unhandled TGA type (%d))\n", pHeader->imageType));
+		MFDebug_Warn(2, MFStr("Failed loading image (Unhandled TGA type (%d))\n", pHeader->imageType));
 		return NULL;
 	}
 
 	if((pHeader->bpp != 24) && (pHeader->bpp != 32) && (pHeader->bpp != 16))
 	{
-		MFDebug_Message(MFStr("Failed loading image (Invalid colour depth (%d))", pHeader->bpp));
+		MFDebug_Warn(2, MFStr("Failed loading image (Invalid colour depth (%d))", pHeader->bpp));
 		return NULL;
 	}
 
 	if((pHeader->flags & 0xC0))
 	{
-		MFDebug_Message("Failed loading image (Interleaved images not supported)");
+		MFDebug_Warn(2, "Failed loading image (Interleaved images not supported)");
 		return NULL;
 	}
 
@@ -391,7 +391,7 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 
 	if((pPosition + pHeader->idLength + (pHeader->colourMapLength * pHeader->colourMapBits * pHeader->colourMapType)) >= pTarga + imageSize)
 	{
-		MFDebug_Message("Failed loading image (Unexpected end of file)");
+		MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 		return NULL;
 	}
 
@@ -407,7 +407,7 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 		{
 			if(pPosition >= pTarga + imageSize)
 			{
-				MFDebug_Message("Failed loading image (Unexpected end of file)");
+				MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 				return NULL;
 			}
 
@@ -419,13 +419,13 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 
 				if((pPosition + bytesPerPixel) > pTarga + imageSize)
 				{
-					MFDebug_Message("Failed loading image (Unexpected end of file)");
+					MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
-					MFDebug_Message("Failed loading image (Unexpected end of file)");
+					MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 					return NULL;
 				}
 
@@ -456,13 +456,13 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 
 				if((pPosition + (bytesPerPixel * length)) > pTarga + imageSize)
 				{
-					MFDebug_Message("Failed loading image (Unexpected end of file)");
+					MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 					return NULL;
 				}
 
 				if((pixelsRead + length) > (uint32)(pHeader->width * pHeader->height))
 				{
-					MFDebug_Message("Failed loading image (Unexpected end of file)");
+					MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 					return NULL;
 				}
 
@@ -489,7 +489,7 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 	{
 		if((pPosition + (bytesPerPixel * (pHeader->width * pHeader->height))) > pTarga + imageSize)
 		{
-			MFDebug_Message("Failed loading image (Unexpected end of file)");
+			MFDebug_Warn(2, "Failed loading image (Unexpected end of file)");
 			return NULL;
 		}
 
@@ -567,7 +567,7 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 
 	if(pBMP[0] != 'B' || pBMP[1] != 'M')
 	{
-		MFDebug_Message("Not a bitmap image.");
+		MFDebug_Warn(2, "Not a bitmap image.");
 		return NULL;
 	}
 
@@ -591,7 +591,7 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 
 	switch(pInfoHeader->compression)
 	{
-		case RGB:
+		case BMCT_RGB:
 			if(pInfoHeader->bits == 24)
 			{
 				struct Pixel24
@@ -638,19 +638,62 @@ MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
 					}
 				}
 			}
+			else if(pInfoHeader->bits == 8)
+			{
+				struct Pixel32
+				{
+					unsigned char b, g, r, a;
+				};
+
+				Pixel32 *pPalette = (Pixel32*)((char*)pInfoHeader + pInfoHeader->size);
+				uint8 *p = (uint8*)pImageData;
+
+				float alpha = 0.f;
+
+				for(int y=0; y<pInfoHeader->height; y++)
+				{
+					for(int x=0; x<pInfoHeader->width; x++)
+					{
+						Pixel32 *pColour = pPalette + *p;
+
+						pPixel->r = (float)pColour->r * (1.0f/255.0f);
+						pPixel->g = (float)pColour->g * (1.0f/255.0f);
+						pPixel->b = (float)pColour->b * (1.0f/255.0f);
+						pPixel->a = alpha = (float)pColour->a * (1.0f/255.0f);
+
+						++pPixel;
+						++p;
+					}
+				}
+
+				// if there was no alpha present in the image... set it all to white
+				if(alpha == 0.f)
+				{
+					pPixel = pImage->pSurfaces[0].pData;
+
+					for(int y=0; y<pInfoHeader->height; y++)
+					{
+						for(int x=0; x<pInfoHeader->width; x++)
+						{
+							pPixel->a = 1.0f;
+							++pPixel;
+						}
+					}
+				}
+			}
 			else
 			{
-				MFDebug_Message("Unsupported colour depth.");
+				MFDebug_Warn(2, "Unsupported colour depth.");
 				return NULL;
 			}
 			break;
 
-		case RLE8:
-		case RLE4:
-		case BITFIELDS:
+		case BMCT_RLE8:
+		case BMCT_RLE4:
+		case BMCT_BITFIELDS:
 		default:
 		{
-			MFDebug_Message("Compressed bitmaps not supported.");
+			MFDebug_Warn(2, "Compressed bitmaps not supported.");
 			return NULL;
 		}
 	}

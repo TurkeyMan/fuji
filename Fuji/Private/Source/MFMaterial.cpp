@@ -100,6 +100,13 @@ void MFMaterial_InitModule()
 	pSysLogoLarge = MFMaterial_Create("SysLogoLarge");
 	pSysLogoSmall = MFMaterial_Create("SysLogoSmall");
 
+	// disable backface cullign on the default materials
+	size_t zero = 0;
+	int cull = MFMaterial_GetParameterIndexFromName(pNoneMaterial, "cullmode");
+	if(cull > -1) MFMaterial_SetParameter(pNoneMaterial, cull, 0, &zero);
+	cull = MFMaterial_GetParameterIndexFromName(pWhiteMaterial, "cullmode");
+	if(cull > -1) MFMaterial_SetParameter(pWhiteMaterial, cull, 0, &zero);
+
 	// release a reference to the logo textures
 	MFTexture_Destroy(pSysLogoLargeTexture);
 	MFTexture_Destroy(pSysLogoSmallTexture);
@@ -368,14 +375,9 @@ MFMaterial* MFMaterial_Create(const char *pName)
 			pMat->pType->materialCallbacks.pCreateInstance(pMat);
 
 			// set diffuse map parameter
-
 			int index = MFMaterial_GetParameterIndexFromName(pMat, "diffusemap");
 			if(index > -1)
 				MFMaterial_SetParameter(pMat, index, 0, pName);
-
-//			int cull = MFMaterial_GetParameterIndexFromName(pMat, "doublesided");
-//			if(cull > -1)
-//				MFMaterial_SetParameter(pMat, cull, 0, 1);
 		}
 	}
 
@@ -421,6 +423,11 @@ MFMaterial* MFMaterial_Find(const char *pName)
 MFMaterial* MFMaterial_GetCurrent()
 {
 	return pCurrentMaterial;
+}
+
+const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
+{
+	return pMaterial->pName;
 }
 
 void MFMaterial_SetMaterial(MFMaterial *pMaterial)

@@ -505,6 +505,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFVertex.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFVertex_Internal.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFView.cpp"
 				>
 			</File>
@@ -616,6 +624,10 @@
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\D3d9\MFTexture_D3D9.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D9\MFVertex_D3D9.cpp"
 						>
 					</File>
 					<Filter
@@ -868,6 +880,10 @@
 					</File>
 					<File
 						RelativePath=".\Source\Drivers\OpenGL\MFTexture_OpenGL.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\OpenGL\MFVertex_OpenGL.cpp"
 						>
 					</File>
 					<Filter
@@ -1555,6 +1571,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFVector.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFVertex.h"
 				>
 			</File>
 			<File

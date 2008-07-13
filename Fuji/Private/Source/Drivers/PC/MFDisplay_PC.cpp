@@ -27,6 +27,9 @@ uint8 gWindowsKeys[256];
 bool isortho = false;
 float fieldOfView;
 
+extern MFInitParams gInitParams;
+extern bool gFujiInitialised;
+
 extern HINSTANCE apphInstance;
 HWND apphWnd;
 int wndX = 24, wndY = 64;
@@ -105,10 +108,10 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	pRes->data = 1;
 }
 
-// windows WndProc
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	MFCALLSTACK;
+	if(!gFujiInitialised)
+		return 1;
 
 	switch(message)
 	{
@@ -231,6 +234,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 	}
 
+	return 1;
+}
+
+// windows WndProc
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	MFCALLSTACK;
+
+	if(!MFDisplayPC_HandleWindowMessages(hWnd, message, wParam, lParam))
+		return 0;
+
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -260,88 +274,95 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	gDisplay.wide = false;
 	gDisplay.progressive = true;
 
-	WNDCLASS wc;
-
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = (WNDPROC)WndProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = apphInstance;
-	wc.hIcon = gDefaults.display.pIcon ? LoadIcon(apphInstance, gDefaults.display.pIcon) : NULL;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "FujiWin";
-
-	if(!RegisterClass(&wc))
+	if(gInitParams.phWnd)
 	{
-		MessageBox(NULL,"Failed To Register The Window Class.","Error!",MB_OK|MB_ICONERROR);
-		return 2;
-	}
-
-	RECT rect;
-	rect.left=(long)0;
-	rect.right=(long)width;
-	rect.top=(long)0;
-	rect.bottom=(long)height;
-
-	DWORD dwStyle = WS_POPUP|WS_OVERLAPPEDWINDOW;
-	DWORD dwExStyle = 0;
-
-#if MF_RENDERER != MF_DRIVER_D3D9
-	if(!gDisplay.windowed)
-	{
-		dwExStyle = WS_EX_APPWINDOW;
-		dwStyle = WS_POPUP;
+		apphWnd = (HWND)gInitParams.phWnd;
 	}
 	else
 	{
-		dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-		dwStyle = WS_OVERLAPPEDWINDOW;
-	}
-#endif
+		WNDCLASS wc;
 
-	AdjustWindowRectEx(&rect, dwStyle, FALSE, dwExStyle);
+		wc.style = CS_HREDRAW | CS_VREDRAW;
+		wc.lpfnWndProc = (WNDPROC)WndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = apphInstance;
+		wc.hIcon = gDefaults.display.pIcon ? LoadIcon(apphInstance, gDefaults.display.pIcon) : NULL;
+		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wc.hbrBackground = NULL;
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = "FujiWin";
 
-	apphWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, wndX, wndY, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, apphInstance, NULL);
-    if(!apphWnd)
-	{
-		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
-		return 3;
-	}
+		if(!RegisterClass(&wc))
+		{
+			MessageBox(NULL,"Failed To Register The Window Class.","Error!",MB_OK|MB_ICONERROR);
+			return 2;
+		}
+
+		RECT rect;
+		rect.left=(long)0;
+		rect.right=(long)width;
+		rect.top=(long)0;
+		rect.bottom=(long)height;
+
+		DWORD dwStyle = WS_POPUP|WS_OVERLAPPEDWINDOW;
+		DWORD dwExStyle = 0;
 
 #if MF_RENDERER != MF_DRIVER_D3D9
-	// if we're not using D3D, we'll have to manage the display mode ourselves...
-	if(!gDisplay.windowed)
-	{
-		ShowCursor(FALSE);
-
-		DEVMODE dmScreenSettings;
-		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = gDisplay.fullscreenWidth;
-		dmScreenSettings.dmPelsHeight = gDisplay.fullscreenHeight;
-		dmScreenSettings.dmBitsPerPel = 32;
-		dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
-
-		if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+		if(!gDisplay.windowed)
 		{
-			if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-			{
-				gDisplay.windowed = true;
-			}
-			else
-			{
-				MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
-				return FALSE;
-			}
+			dwExStyle = WS_EX_APPWINDOW;
+			dwStyle = WS_POPUP;
 		}
-	}
+		else
+		{
+			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+			dwStyle = WS_OVERLAPPEDWINDOW;
+		}
 #endif
 
-	ShowWindow(apphWnd, SW_SHOW);
-	SetForegroundWindow(apphWnd);
-	SetFocus(apphWnd);
+		AdjustWindowRectEx(&rect, dwStyle, FALSE, dwExStyle);
+
+		apphWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, wndX, wndY, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, apphInstance, NULL);
+		if(!apphWnd)
+		{
+			MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
+			return 3;
+		}
+
+#if MF_RENDERER != MF_DRIVER_D3D9
+		// if we're not using D3D, we'll have to manage the display mode ourselves...
+		if(!gDisplay.windowed)
+		{
+			ShowCursor(FALSE);
+
+			DEVMODE dmScreenSettings;
+			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+			dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+			dmScreenSettings.dmPelsWidth = gDisplay.fullscreenWidth;
+			dmScreenSettings.dmPelsHeight = gDisplay.fullscreenHeight;
+			dmScreenSettings.dmBitsPerPel = 32;
+			dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+			if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+			{
+				if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+				{
+					gDisplay.windowed = true;
+				}
+				else
+				{
+					MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
+					return FALSE;
+				}
+			}
+		}
+#endif
+
+		ShowWindow(apphWnd, SW_SHOW);
+		SetForegroundWindow(apphWnd);
+		SetFocus(apphWnd);
+	}
 
 	MFRenderer_CreateDisplay();
 

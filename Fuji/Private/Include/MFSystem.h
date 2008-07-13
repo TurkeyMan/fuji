@@ -156,6 +156,8 @@ enum MFCallback
 
 typedef void (*MFSystemCallbackFunction)(void);
 
+void MFSystem_Quit();
+
 MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
 
 MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
@@ -254,40 +256,17 @@ uint32 MFSystem_GetFrameCounter();
 
 // these MUST be implemented by the game
 
+struct MFInitParams
+{
+	void *phWnd;
+};
+
 /**
  * The games pre-engine init hook.
  * The games pre-engine init hook. The game can use this function to modify engine defaults before the engine initialises.
  * @return None.
  */
-void Game_InitSystem();
-
-/**
- * The games initialisation function.
- * This function is called after engine initialisation to initialise the game before begining the main loop.
- * @return None.
- */
-void Game_Init();
-
-/**
- * The games update function.
- * This is called by the engine to update the game.
- * @return None.
- */
-void Game_Update();
-
-/**
- * The games draw function.
- * This is called by the engine to draw the game.
- * @return None.
- */
-void Game_Draw();
-
-/**
- * The games deinitialisation function.
- * This function is called before the engine deinitialisation to clean up the game before app termination.
- * @return None.
- */
-void Game_Deinit();
+void Game_InitSystem(MFInitParams *pInitPrams);
 
 #endif // _MFSYSTEM_H
 

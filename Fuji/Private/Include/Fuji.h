@@ -272,7 +272,9 @@
 	#pragma warning(disable: 4201)
 
 	// Stop it bitching about the string functions not being secure
-	#define _CRT_SECURE_NO_DEPRECATE
+	#if !defined(_CRT_SECURE_NO_DEPRECATE)
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
 
 	// disable 'unreferenced formal parameter'
 	#pragma warning(disable:4100)
