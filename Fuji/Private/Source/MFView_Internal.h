@@ -28,6 +28,7 @@ struct MFView
 	bool viewProjDirty;
 	bool projDirty;
 	bool isOrtho;
+	bool customProjection;
 };
 
 #endif

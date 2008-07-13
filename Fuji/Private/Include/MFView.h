@@ -49,6 +49,16 @@ void MFView_SetDefault();
 void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPlane);
 
 /**
+ * Set a custom projection matrix.
+ * Configure the projection to use a custom projection matrix.
+ * @param projectionMatrix Matrix to be used as the custom projection matrix.
+ * @return None.
+ * @see MFView_SetProjection()
+ * @see MFView_SetOrtho()
+ */
+void MFView_SetCustomProjection(MFMatrix &projectionMatrix);
+
+/**
  * Set the aspect ratio.
  * Set the screen aspect ratio of the current view.
  * @param aspectRatio Value to set as the screen aspect ratio.

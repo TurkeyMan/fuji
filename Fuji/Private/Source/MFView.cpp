@@ -85,6 +85,16 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
 	}
 }
 
+void MFView_SetCustomProjection(MFMatrix &projectionMatrix)
+{
+	pCurrentView->projection = projectionMatrix;
+
+	pCurrentView->isOrtho = false;
+	pCurrentView->customProjection = true;
+	pCurrentView->projDirty = false;
+	pCurrentView->viewProjDirty = true;
+}
+
 void MFView_SetAspectRatio(float aspectRatio)
 {
 	pCurrentView->aspectRatio = aspectRatio;
