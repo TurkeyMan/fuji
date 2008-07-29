@@ -241,10 +241,12 @@ void MFRenderer_ResetDisplay()
 //	present.PresentationInterval   = display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
 	present.hDeviceWindow          = apphWnd;
 
+	if (!pd3dDevice)
+		return;
+
 	HRESULT hr;
-
 	hr = pd3dDevice->Reset(&present);
-
+	
 	switch(hr)
 	{
 		case D3DERR_DEVICELOST:

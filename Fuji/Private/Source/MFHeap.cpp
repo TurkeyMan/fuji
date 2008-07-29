@@ -165,32 +165,32 @@ void MFHeap_Free(void *pMem)
 	pAllocHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pAllocHeap->pHeapData);
 }
 
-#if !(defined(_FUJI_UTIL) && defined(_LINUX)) && !defined(MF_GC)
-// new/delete operators
-void* operator new(size_t size)
-{
-//	MFDebug_Message(MFStr("new %d bytes", size));
-
-	return MFHeap_AllocInternal((uint32)size);
-}
-
-void* operator new[](size_t size)
-{
-//	MFDebug_Message(MFStr("new %d bytes", size));
-
-	return MFHeap_AllocInternal((uint32)size);
-}
-
-void operator delete(void *pMemory)
-{
-	MFHeap_Free(pMemory);
-}
-
-void operator delete[](void *pMemory)
-{
-	MFHeap_Free(pMemory);
-}
-#endif
+// #if !(defined(_FUJI_UTIL) && defined(_LINUX)) && !defined(MF_GC)
+// // new/delete operators
+// void* operator new(size_t size)
+// {
+// //	MFDebug_Message(MFStr("new %d bytes", size));
+// 
+// 	return MFHeap_AllocInternal((uint32)size);
+// }
+// 
+// void* operator new[](size_t size)
+// {
+// //	MFDebug_Message(MFStr("new %d bytes", size));
+// 
+// 	return MFHeap_AllocInternal((uint32)size);
+// }
+// 
+// void operator delete(void *pMemory)
+// {
+// 	MFHeap_Free(pMemory);
+// }
+// 
+// void operator delete[](void *pMemory)
+// {
+// 	MFHeap_Free(pMemory);
+// }
+// #endif
 
 #if !(defined(MF_WINDOWS) || defined(MF_XBOX)) && !defined(_FUJI_UTIL) 
 void* operator new(size_t size, void *pMem)

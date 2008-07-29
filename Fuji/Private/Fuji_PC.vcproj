@@ -935,6 +935,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Include\MFSystem_PC.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Pc\MFTranslation_PC.cpp"
 						>
 					</File>

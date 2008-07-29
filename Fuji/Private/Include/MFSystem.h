@@ -254,7 +254,6 @@ uint32 MFSystem_GetFrameCounter();
 #include "MFSystem.inl"
 
 
-// these MUST be implemented by the game
 
 struct MFInitParams
 {
