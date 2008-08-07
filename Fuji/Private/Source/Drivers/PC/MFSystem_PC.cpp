@@ -17,7 +17,7 @@ MFPlatform gCurrentPlatform = FP_PC;
 char *gpCommandLineBuffer = NULL;
 
 #if !defined(_FUJI_UTIL)
-int WINAPI InitFuji(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
+int WINAPI MFMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
 {
 	MFCALLSTACK;
 
