@@ -133,8 +133,8 @@ enum MFCallback
 {
 	MFCB_Unknown = -1,			/**< Unknown callback. */
 
-	MFCB_FileSystemInit = 0,	/**< File system init callback. This is called after the filesystem initialises, before fuji attempts to load any debug resources. */
-	MFCB_InitDone,				/**< Post engine init callback. Called after Fuji had completed initialisation. */
+	MFCB_FileSystemInit = 0,	/**< File system init callback. This is called after the filesystem initialises, before Fuji attempts to load any debug resources. */
+	MFCB_InitDone,				/**< Post engine init callback. Called after Fuji has completed initialisation. */
 	MFCB_Deinit,				/**< Deinit callback. */
 
 	MFCB_Update,				/**< Update callback. */
@@ -174,7 +174,7 @@ struct MFInitParams
 
 /**
  * Begin the fuji main loop.
- * Beginitialisation of Fuji, and continue with the Fuji main loop.
+ * Begin initialisation of Fuji, and continue with the Fuji main loop.
  * @return An error code that can be returned to the OS.
  */
 int MFMain(MFInitParams *pInitPrams);

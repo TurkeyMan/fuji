@@ -106,7 +106,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
 /**
  * Close a file.
  * Closes an open file.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @return Returns 0 if the file was successfully closed.
  */
 int MFFile_Close(MFFile *pFile);
@@ -114,7 +114,7 @@ int MFFile_Close(MFFile *pFile);
 /**
  * Read data from a file.
  * Reads data from a file.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @param pBuffer Pointer to a buffer where the read data will be stored.
  * @param bytes Number of bytes to read.
  * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
@@ -125,7 +125,7 @@ int MFFile_Read(MFFile *pFile, void *pBuffer, uint32 bytes, bool async = false);
 /**
  * Write to a file.
  * Writes data to a file.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @param pBuffer Pointer to the data to be written.
  * @param bytes Number of bytes to write.
  * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
@@ -136,7 +136,7 @@ int MFFile_Write(MFFile *pFile, const void *pBuffer, uint32 bytes, bool async = 
 /**
  * Seek the file.
  * Seek to a soecified file offset.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @param bytes Number of bytes to seek.
  * @param relativity Member of the MFFileSeek enumerated type where to begin the seek.
  * @return Returns the new file offset in bytes.
@@ -146,7 +146,7 @@ int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 /**
  * Tell the file position.
  * Tells the current file position.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @return Returns the file pointer offset in bytes.
  */
 int MFFile_Tell(MFFile *pFile);
@@ -154,7 +154,7 @@ int MFFile_Tell(MFFile *pFile);
 /**
  * Get the size of a file.
  * Gets the size of a file.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @return Returns the size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
  */
 int MFFile_GetSize(MFFile *pFile);
@@ -162,10 +162,10 @@ int MFFile_GetSize(MFFile *pFile);
 /**
  * Check for end of file.
  * Check to see if the file has reached its end.
- * @param fileHandle Handle to an open file.
+ * @param pFile Pointer to an open file.
  * @return Returns true if the file pointer has reached the end of the file, otherwise false.
  */
-bool MFFile_IsEOF(MFFile* fileHandle);
+bool MFFile_IsEOF(MFFile *pFile);
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
 

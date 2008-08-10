@@ -10,9 +10,43 @@
 #if !defined(_MFSTRING_H)
 #define _MFSTRING_H
 
+/**
+ * Copy memory.
+ * Copy memory from one location to another.
+ * @param pDest Pointer to the destination buffer.
+ * @param pSrc Pointer to the source buffer.
+ * @param size Size of data to copy in bytes.
+ * @return None.
+ */
 void MFCopyMemory(void *pDest, const void *pSrc, uint32 size);
+
+/**
+ * Zero memory.
+ * Initialise a region of memory to zero.
+ * @param pDest Pointer to the target buffer.
+ * @param size Size of data to initialise in bytes.
+ * @return None.
+ */
 void MFZeroMemory(void *pDest, uint32 size);
+
+/**
+ * Initialise memory.
+ * Initialise a region of memory to a specified value.
+ * @param pDest Pointer to the target buffer.
+ * @param value Value written to each byte in the memory region.
+ * @param size Number of bytes to initialise.
+ * @return None.
+ */
 void MFMemSet(void *pDest, int value, uint32 size);
+
+/**
+ * Compare memory.
+ * Compare bytes returning the difference.
+ * @param pBuf1 Pointer to the first buffer.
+ * @param pBuf2 Pointer to the second buffer.
+ * @param size Number of bytes to compate.
+ * @return Return the difference of the first encountered differing byte. Returns 0 if buffers are identical.
+ */
 int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
 
 /**
@@ -147,13 +181,59 @@ char* MFString_Chr(const char *pString, int c);
  */
 char* MFString_RChr(const char *pString, int c);
 
+/**
+ * Get file extension from filename.
+ * Get the file extension part from a filename.
+ * @param pFilename String containing the filename.
+ * @return Returns a pointer to the file extension (the part after the final '.' in the filename).
+ * @remarks The pointer returned points into the source string. It is only valid while the source string remains unchanged.
+ */
 char* MFString_GetFileExtension(const char *pFilename);
 
+/**
+ * Get the filename from a path.
+ * Gets the filename part from a path.
+ * @param pFilename String containing a file path.
+ * @return Returns a string containing just the filename taken from the path.
+ * @remarks The pointer returned points into the source string. It is only valid while the source string remains unchanged.
+ */
 const char* MFStr_GetFileName(const char *pFilename);
+
+/**
+ * Get the filename without its extension from a path.
+ * Gets the filename without its extension from a path.
+ * @param pFilename String containing a file path.
+ * @return Returns a string containing just the filename taken from the path with the file extension removed.
+ * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
+ */
 const char* MFStr_GetFileNameWithoutExtension(const char *pFilename);
+
+/**
+ * Get the file path from a path string.
+ * Gets the file path with the filename removed from a path string.
+ * @param pFilename String containing a file path.
+ * @return Returns a string containing just the file path (everything preceeding the final '/').
+ * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
+ */
 const char* MFStr_GetFilePath(const char *pFilename);
+
+/**
+ * Truncate the file extension.
+ * Truncates the file extension from a filename.
+ * @param pFilename String containing a filename.
+ * @return Returns a string containing the filename with the final file extension truncated.
+ * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
+ */
 const char* MFStr_TruncateExtension(const char *pFilename);
 
+/**
+ * String pattern match.
+ * Performs a string pattern match.
+ * @param pPattern String containing the filename pattern to test. May contain wild cards, etc.
+ * @param pFilename String containing the filename to compare against.
+ * @param ppMatchDirectory Cant remember what this is used for. Dont use it...
+ * @return bool Returns true if the pattern matches the filename.
+ */
 bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL);
 
 /**
@@ -263,6 +343,12 @@ int MFString_GetNumChars(const char *pString);
  */
 int MFString_GetCharacterOffset(const char *pString, int character);
 
+/**
+ * Get the number of bytes in a multibyte character.
+ * Gets the number of bytes in a multibyte encoded character.
+ * @param pMBChar Pointer to a multibyte character sequence.
+ * @return Returns the number of bytes in the multibyte character sequence8
+ */
 int MFString_GetNumBytesInMBChar(const char *pMBChar);
 
 char *MFString_NextChar(const char *pString);

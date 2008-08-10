@@ -195,7 +195,7 @@ void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
  * Set the voices pan.
  * Sets the voices pan.
  * @param pVoice Pointer to a playing voice.
- * @param pam Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
+ * @param pan Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
  * @return None.
  */
 void MFSound_SetPan(MFVoice *pVoice, float pan);
@@ -204,7 +204,7 @@ void MFSound_SetPan(MFVoice *pVoice, float pan);
  * Set playback offset.
  * Sets the playback offset.
  * @param pVoice Pointer to a playing voice.
- * @param offset Playback offset, in seconds.
+ * @param seconds Playback offset, in seconds.
  * @return None.
  */
 void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
@@ -300,7 +300,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
  * Begin stream playback.
  * Begin playback of an audio stream.
  * @param pFilename Filename of music track.
- * @param pause Initial pause state.
+ * @param playFlags Optional combination of flags from the MFAudioStreamFlags enum defining stream features and initial play state.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
 MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags = 0);
