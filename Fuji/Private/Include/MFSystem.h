@@ -151,19 +151,72 @@ enum MFCallback
 	MFCB_ForceInt = 0x7FFFFFFF	/**< Force enum to int type. */
 };
 
-
-// Fuji system functions
-
+/**
+ * Fuji system callback function prototype.
+ */
 typedef void (*MFSystemCallbackFunction)(void);
 
+/**
+ * Parameters supplied when initialising Fuji.
+ */
+struct MFInitParams
+{
+	const char *pAppTitle;		//*< A title used to represent the application */
+
+	void *hInstance;			//*< The WIN32 hInstance paramater supplied to WinMain() */
+	void *hWnd;					//*< An optional hWnd to a WIN32 window that will contain the viewport */
+
+	const char *pCommandLine;	//*< Pointer to the command line string */
+
+	int argc;					//*< The argc parameter supplied to main() */
+	const char **argv;			//*< The argv paramater supplied to main() */
+};
+
+/**
+ * Begin the fuji main loop.
+ * Beginitialisation of Fuji, and continue with the Fuji main loop.
+ * @return An error code that can be returned to the OS.
+ */
+int MFMain(MFInitParams *pInitPrams);
+
+/**
+ * Quit the Fuji application.
+ * Quits the Fuji application.
+ * @return None.
+ */
 void MFSystem_Quit();
 
+/**
+ * Set a Fuji system callback.
+ * Sets a Fuji system callback function.
+ * @param callback The callback to set from the MFCallback enum.
+ * @param pCallbackFunction Pointer to the callback function.
+ * @return Returns a pointer to the old callback function which MUST be called in the new registered callback.
+ */
 MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
 
+/**
+ * Get a Fuji system callback function.
+ * Gets a registered Fuji system callback function pointer.
+ * @param callback The callback to get from the MFCallback enum.
+ * @return Returns the currently registered callback function for the requested callback.
+ */
 MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
+/**
+ * Generate engine initialisation data.
+ * Generates a string containing the current engine initialisation options.
+ * @param tabDepth Initial tab depth for ini generation.
+ * @return Returns a string containing initialisation parameters for the engine in MFIni '.ini' format.
+ */
 const char * MFSystem_GetSettingString(int tabDepth);
 
+/**
+ * Initialise Fuji from saved settings.
+ * Initialise Fuji from settings data stored in an MFIni File.
+ * @param pSettings Pointer to the first MFiniLine in an options group containing engine initialisation options.
+ * @return None.
+ */
 void MFSystem_InitFromSettings(const MFIniLine *pSettings);
 
 /**
@@ -252,25 +305,6 @@ float MFSystem_GetFPS();
 uint32 MFSystem_GetFrameCounter();
 
 #include "MFSystem.inl"
-
-
-
-struct MFInitParams
-{
-	void *hInstance;
-	void *hWnd;
-	const char *pCommandLine;
-
-	int argc;
-	const char **argv;
-};
-
-/**
- * Begin the fuji main loop.
- * Beginitialisation of Fuji, and continue with the Fuji main loop.
- * @return An error code that can be returned to the OS.
- */
-int MFMain(MFInitParams *pInitPrams);
 
 #endif // _MFSYSTEM_H
 

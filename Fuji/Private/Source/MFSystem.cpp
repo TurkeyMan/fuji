@@ -412,6 +412,10 @@ int MFMain(MFInitParams *pInitParams)
 
 	gInitParams = *pInitParams;
 
+	// assign the app title to the window title it it was set
+	if(gInitParams.pAppTitle)
+		gDefaults.display.pWindowTitle = pInitParams->pAppTitle;
+
 	// process command line
 	//...
 
