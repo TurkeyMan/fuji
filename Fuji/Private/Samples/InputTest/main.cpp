@@ -10,13 +10,6 @@
 
 /**** Functions ****/
 
-void Game_InitSystem()
-{
-	MFCALLSTACK;
-
-	gDefaults.input.useXInput = false;
-}
-
 void Game_Init()
 {
 	MFCALLSTACK;
@@ -53,7 +46,10 @@ void Game_Draw()
 				y = 30.0f;
 				for(b=0; b<GamepadType_Max; b++)
 				{
-					MFFont_DrawText(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g", MFInput_EnumerateString(b, IDD_Gamepad, a), MFInput_Read(b, IDD_Gamepad, a)));
+					float value = MFInput_Read(b, IDD_Gamepad, a);
+//					int ival = (int)(value * 255.f);
+//					MFFont_DrawText(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g - %d (0x%02X)", MFInput_EnumerateString(b, IDD_Gamepad, a), value, ival, ival));
+					MFFont_DrawText(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g", MFInput_EnumerateString(b, IDD_Gamepad, a), value));
 					y += 15.0f;
 				}
 			}
@@ -104,3 +100,61 @@ void Game_Deinit()
 {
 	MFCALLSTACK;
 }
+
+
+int GameMain(MFInitParams *pInitParams)
+{
+	MFRand_Seed((uint32)MFSystem_ReadRTC());
+
+//	gDefaults.input.useXInput = false;
+
+	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
+	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
+	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
+	MFSystem_RegisterSystemCallback(MFCB_Deinit, Game_Deinit);
+
+	return MFMain(pInitParams);
+}
+
+#if defined(MF_WINDOWS) || defined(_WINDOWS)
+#include <windows.h>
+
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.hInstance = hInstance;
+	initParams.pCommandLine = lpCmdLine;
+
+	return GameMain(&initParams);
+}
+
+#elif defined(MF_PSP) || defined(_PSP)
+#include <pspkernel.h>
+
+int main(int argc, char *argv[])
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.argc = argc;
+	initParams.argv = argv;
+
+	int r = GameMain(&initParams);
+
+	sceKernelExitGame();
+	return r;
+}
+
+#else
+
+int main(int argc, char *argv[])
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.argc = argc;
+	initParams.argv = argv;
+
+	return GameMain(&initParams);
+}
+
+#endif

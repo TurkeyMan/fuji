@@ -54,13 +54,6 @@ int tnTimeInterrupt(int ca)
 	return -1;
 }
 
-int main()
-{
-	MFSystem_GameLoop();
-
-	return 0;
-}
-
 void MFSystem_InitModulePlatformSpecific()
 {
 	// Init the timer and register the interrupt handler

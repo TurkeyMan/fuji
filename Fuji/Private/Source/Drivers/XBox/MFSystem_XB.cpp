@@ -9,13 +9,6 @@ MFPlatform gCurrentPlatform = FP_XBox;
 
 char *gpCommandLineBuffer = NULL;
 
-void main()
-{
-	MFCALLSTACK;
-
-	MFSystem_GameLoop();
-}
-
 char* FixXBoxFilename(const char *pFilename)
 {
 	if(!pFilename) return NULL;

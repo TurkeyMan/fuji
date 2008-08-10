@@ -257,15 +257,20 @@ uint32 MFSystem_GetFrameCounter();
 
 struct MFInitParams
 {
-	void *phWnd;
+	void *hInstance;
+	void *hWnd;
+	const char *pCommandLine;
+
+	int argc;
+	const char **argv;
 };
 
 /**
- * The games pre-engine init hook.
- * The games pre-engine init hook. The game can use this function to modify engine defaults before the engine initialises.
- * @return None.
+ * Begin the fuji main loop.
+ * Beginitialisation of Fuji, and continue with the Fuji main loop.
+ * @return An error code that can be returned to the OS.
  */
-void Game_InitSystem(MFInitParams *pInitPrams);
+int MFMain(MFInitParams *pInitPrams);
 
 #endif // _MFSYSTEM_H
 

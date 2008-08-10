@@ -6,24 +6,15 @@
 
 MFPlatform gCurrentPlatform = FP_DC;
 
-int main()
+void MFSystem_InitModulePlatformSpecific()
 {
 	kos_init_all(ALL_ENABLE, ROMDISK_NONE);
 //	kos_init_all(THD_ENABLE | IRQ_ENABLE | TA_ENABLE, ROMDISK_NONE);
-
-	System_GameLoop();
-
-	kos_shutdown_all();
-
-	return 0;
-}
-
-void MFSystem_InitModulePlatformSpecific()
-{
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
 {
+	kos_shutdown_all();
 }
 
 void MFSystem_HandleEventsPlatformSpecific()

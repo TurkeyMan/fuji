@@ -6,12 +6,6 @@
 
 MFPlatform gCurrentPlatform = FP_GC;
 
-int main()
-{
-
-	return 0;
-}
-
 void MFSystem_InitModulePlatformSpecific()
 {
 }

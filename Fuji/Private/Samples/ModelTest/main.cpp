@@ -11,11 +11,6 @@ MFModel *pModel;
 
 /**** Functions ****/
 
-void Game_InitSystem()
-{
-	MFCALLSTACK;
-}
-
 void Game_Init()
 {
 	MFCALLSTACK;
@@ -66,3 +61,59 @@ void Game_Deinit()
 
 	MFModel_Destroy(pModel);
 }
+
+
+int GameMain(MFInitParams *pInitParams)
+{
+	MFRand_Seed((uint32)MFSystem_ReadRTC());
+
+	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
+	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
+	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
+	MFSystem_RegisterSystemCallback(MFCB_Deinit, Game_Deinit);
+
+	return MFMain(pInitParams);
+}
+
+#if defined(MF_WINDOWS) || defined(_WINDOWS)
+#include <windows.h>
+
+int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.hInstance = hInstance;
+	initParams.pCommandLine = lpCmdLine;
+
+	return GameMain(&initParams);
+}
+
+#elif defined(MF_PSP) || defined(_PSP)
+#include <pspkernel.h>
+
+int main(int argc, char *argv[])
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.argc = argc;
+	initParams.argv = argv;
+
+	int r = GameMain(&initParams);
+
+	sceKernelExitGame();
+	return r;
+}
+
+#else
+
+int main(int argc, char *argv[])
+{
+	MFInitParams initParams;
+	MFZeroMemory(&initParams, sizeof(MFInitParams));
+	initParams.argc = argc;
+	initParams.argv = argv;
+
+	return GameMain(&initParams);
+}
+
+#endif

@@ -274,9 +274,9 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	gDisplay.wide = false;
 	gDisplay.progressive = true;
 
-	if(gInitParams.phWnd)
+	if(gInitParams.hWnd)
 	{
-		apphWnd = (HWND)gInitParams.phWnd;
+		apphWnd = (HWND)gInitParams.hWnd;
 	}
 	else
 	{

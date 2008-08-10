@@ -161,8 +161,6 @@ void MFSystem_Quit()
 
 void MFSystem_Init()
 {
-	MFCALLSTACK;
-
 	MFUtil_CrcInit();
 
 	MFHeap_InitModule();
@@ -408,14 +406,23 @@ void MFSystem_Draw()
 #endif
 }
 
-int MFSystem_GameLoop()
+int MFMain(MFInitParams *pInitParams)
 {
 	MFCALLSTACK;
 
-	// allow's game to set defaults and what not
-	// before the system begins initialisation
-	MFZeroMemory(&gInitParams, sizeof(gInitParams));
-	Game_InitSystem(&gInitParams);
+	gInitParams = *pInitParams;
+
+	// process command line
+	//...
+
+	MFSystem_GameLoop();
+
+	return 0;
+}
+
+int MFSystem_GameLoop()
+{
+	MFCALLSTACK;
 
 	// initialise the system and create displays etc..
 	MFSystem_Init();

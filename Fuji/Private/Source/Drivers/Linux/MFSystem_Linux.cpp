@@ -27,15 +27,6 @@ extern int gQuit;
 MFPlatform gCurrentPlatform = FP_Linux;
 
 #if !defined(_FUJI_UTIL)
-int main(int argc, char *argv[])
-{
-	MFCALLSTACK;
-
-	MFSystem_GameLoop();
-
-	return 0;
-}
-
 void MFSystem_InitModulePlatformSpecific()
 {
 	MFZeroMemory(gXKeys, sizeof(gXKeys));

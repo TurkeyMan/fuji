@@ -253,7 +253,7 @@ void GetCWDFromPath(const char *pArgv)
 	}
 }
 
-int main(int argc, char *argv[])
+void MFSystem_InitModulePlatformSpecific()
 {
 	SetupCallbacks();
 
@@ -287,14 +287,7 @@ int main(int argc, char *argv[])
 //	pspDebugScreenSetBackColor(0xFF400000);
 //	pspDebugScreenClear();
 
-	MFSystem_GameLoop();
-
-	sceKernelExitGame();
-	return 0;
-}
-
-void MFSystem_InitModulePlatformSpecific()
-{
+	// old init system stuff
 	bool bCanLoadUSB = true;
 
 	int firmwareVersion = sceKernelDevkitVersion();

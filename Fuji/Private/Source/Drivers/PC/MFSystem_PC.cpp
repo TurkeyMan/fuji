@@ -9,6 +9,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+extern MFInitParams gInitParams;
+
 HINSTANCE apphInstance;
 extern int gQuit;
 
@@ -17,25 +19,16 @@ MFPlatform gCurrentPlatform = FP_PC;
 char *gpCommandLineBuffer = NULL;
 
 #if !defined(_FUJI_UTIL)
-int WINAPI MFMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmsShow)
+void MFSystem_InitModulePlatformSpecific()
 {
-	MFCALLSTACK;
-
-	apphInstance = hInstance;
-	gpCommandLineBuffer = lpCmdLine;
+	apphInstance = (HINSTANCE)gInitParams.hInstance;
+	gpCommandLineBuffer = (char*)gInitParams.pCommandLine;
 
 	// HACK: this is to force dual-core or multi-processor systems to use the first cpu for timing.
 //	DWORD proc, system;
 //	GetProcessAffinityMask(GetCurrentProcess(), &proc, &system);
 	SetProcessAffinityMask(GetCurrentProcess(), 1);
 
-	MFSystem_GameLoop();
-
-	return 0;
-}
-
-void MFSystem_InitModulePlatformSpecific()
-{
 	if(gDefaults.system.threadPriority != MFPriority_Normal)
 	{
 		int priority = THREAD_PRIORITY_NORMAL;
