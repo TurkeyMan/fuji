@@ -21,7 +21,7 @@ static D3DCAPS9 deviceCaps;
 
 extern HWND apphWnd;
 
-MFVector gClearColour = MakeVector(0.f,0.f,0.0f,1.f);
+MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 int gNumWeights = 0;
 MFRect gCurrentViewport;

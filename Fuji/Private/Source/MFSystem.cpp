@@ -366,31 +366,31 @@ void MFSystem_Draw()
 		float xaspect = 25 * MFDisplay_GetNativeAspectRatio();
 
 		MFFont_DrawTextf(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
-//Dont display the icon for now
-// 		float rate = (float)gSystemTimer.GetRate();
-// 		if(rate != 1.0f)
-// 			MFFont_DrawTextf(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
-// 
-// 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
-// 
-// 		MFPrimitive(PT_TriStrip);
-// 		MFBegin(4);
-// 		MFSetColour(1,1,1,0.5f);
-// 
-// 		const float iconSize = 55.0f;
-// 		float yOffset = rect.height-30.0f;
-// 		yOffset -= iconSize;
-// 
-// 		MFSetTexCoord1(0,0);
-// 		MFSetPosition(xaspect, yOffset, 0);
-// 		MFSetTexCoord1(1,0);
-// 		MFSetPosition(xaspect+iconSize, yOffset, 0);
-// 		MFSetTexCoord1(0,1);
-// 		MFSetPosition(xaspect, yOffset+iconSize, 0);
-// 		MFSetTexCoord1(1,1);
-// 		MFSetPosition(xaspect+iconSize, yOffset+iconSize, 0);
-// 
-// 		MFEnd();
+
+		float rate = (float)gSystemTimer.GetRate();
+		if(rate != 1.0f)
+			MFFont_DrawTextf(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
+
+		MFPrimitive(PT_TriStrip);
+		MFBegin(4);
+		MFSetColour(1,1,1,0.5f);
+
+		const float iconSize = 55.0f;
+		float yOffset = rect.height-30.0f;
+		yOffset -= iconSize;
+
+		MFSetTexCoord1(0,0);
+		MFSetPosition(xaspect, yOffset, 0);
+		MFSetTexCoord1(1,0);
+		MFSetPosition(xaspect+iconSize, yOffset, 0);
+		MFSetTexCoord1(0,1);
+		MFSetPosition(xaspect, yOffset+iconSize, 0);
+		MFSetTexCoord1(1,1);
+		MFSetPosition(xaspect+iconSize, yOffset+iconSize, 0);
+
+		MFEnd();
 #endif
 
 		MFSystem_DrawPlatformSpecific();
