@@ -411,6 +411,7 @@ int MFMain(MFInitParams *pInitParams)
 	MFCALLSTACK;
 
 	gInitParams = *pInitParams;
+	gDrawSystemInfo = pInitParams->drawSystemInfo;
 
 	// assign the app title to the window title it it was set
 	if(gInitParams.pAppTitle)
