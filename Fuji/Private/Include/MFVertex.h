@@ -27,6 +27,8 @@ struct MFVertexBuffer;
  */
 struct MFIndexBuffer;
 
+class MFVector;
+
 enum MFVertexDataFormat
 {
 	MFVDF_Unknown = -1,

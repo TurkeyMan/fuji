@@ -42,7 +42,7 @@ int MFRenderer_Begin()
 {
 	MFCALLSTACK;
 
-	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial);
+	return pCurrentMaterial ? pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial) : 0;
 }
 
 const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type)
