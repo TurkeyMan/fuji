@@ -18,7 +18,6 @@
 		GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT, /* Don't need to draw to anything else */
 		GLX_DEPTH_SIZE, 16,
 		GLX_STENCIL_SIZE, 8,
-		GLX_DOUBLEBUFFER, true,
 		None
 	};
 
@@ -27,6 +26,7 @@
 		GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
 		GLX_DEPTH_SIZE, 16,
 		GLX_STENCIL_SIZE, 8,
+		GLX_DOUBLEBUFFER, true,
 		None
 	};
 
@@ -58,7 +58,7 @@
 		fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
 		if(numConfigs == 0)
 		{
-			fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsDouble, &numConfigs);
+			fbConfigs = glXChooseFBConfig(xdisplay, screen, glAttrsSingle, &numConfigs);
 			if(numConfigs == 0)
 			{
 				MFDebug_Error("Unable to obtain a suitable glX FBConfig");

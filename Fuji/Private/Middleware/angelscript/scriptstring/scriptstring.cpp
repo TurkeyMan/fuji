@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <sstream>
+#include <string.h>
 #include "scriptstring.h"
 using namespace std;
 

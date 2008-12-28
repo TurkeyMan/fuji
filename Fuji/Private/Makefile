@@ -236,6 +236,7 @@ OBJS := $(ZLIB) \
 	Source/MFScript_Registration.o \
 	Source/MFSockets.o \
 	Source/MFSound.o \
+	Source/MFSound_Mixer.o \
 	Source/MFSound_WAV.o \
 	Source/MFSound_MAD.o \
 	Source/MFSound_Vorbis.o \
@@ -252,6 +253,7 @@ OBJS := $(ZLIB) \
 	Source/Sprite.o \
 	Source/Timer.o \
 	Source/Util.o \
+	Source/Asset/MFIntTexture.o \
 	Source/FileSystem/MFFileSystemNative.o \
 	Source/FileSystem/MFFileSystemMemory.o \
 	Source/FileSystem/MFFileSystemCachedFile.o \
@@ -269,6 +271,9 @@ OBJS := $(ZLIB) \
 	Source/Drivers/Linux/MFFileSystemNative_Linux.o \
 	Source/Drivers/Linux/MFInput_Linux.o \
 	Source/Drivers/Linux/MFSound_ALSA.o \
+	Source/Drivers/Linux/MFSound_Port.o \
+	Source/Drivers/Linux/MFSound_JACK.o \
+	Source/Drivers/Linux/MFSound_RTAI.o \
 	Source/Drivers/Linux/MFSystem_Linux.o \
 	Source/Drivers/Linux/MFThread_Linux.o \
 	Source/Drivers/Linux/MFTranslation_Linux.o \

@@ -31,7 +31,8 @@ static const char * const gPlatformStrings[FP_Max] =
 	"AMI",
 	"X360",
 	"PS3",
-	"WII"
+	"WII",
+	"SYM"
 };
 
 static const char * const gPlatformNames[FP_Max] =

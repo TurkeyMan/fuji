@@ -94,13 +94,13 @@ void MFSystem_HandleEventsPlatformSpecific()
 			case ButtonPressMask:
 			{
 				XButtonEvent *pEv = (XButtonEvent*)&event;
-				printf("Button down %d %d\n", pEv->state, pEv->button);
+//				printf("Button down %d %d\n", pEv->state, pEv->button);
 				break;
 			}
 			case ButtonReleaseMask:
 			{
 				XButtonEvent *pEv = (XButtonEvent*)&event;
-				printf("Button up %d %d\n", pEv->state, pEv->button);
+//				printf("Button up %d %d\n", pEv->state, pEv->button);
 				break;
 			}
 			default:

@@ -173,7 +173,7 @@ RANLIB   = ranlib
 STRIP    = strip
 
 LIBDIR   := $(LIBDIR) /usr/X11R6/lib
-LIBS := -lc -lm -lstdc++ -lpthread -lGL -lGLU -lXxf86vm -logg -lvorbis -lvorbisfile -lasound
+LIBS := -lc -lm -lstdc++ -lpthread -lGL -lGLU -lXxf86vm -logg -lvorbis -lvorbisfile -lasound -lportaudio
 
 # end LINUX
 endif

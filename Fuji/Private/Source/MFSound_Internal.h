@@ -25,6 +25,26 @@ void MFSound_PlayInternal(MFVoice *pVoice);
 
 uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
 
+#if defined(USE_MFMIXER)
+void MFSoundMixer_Init(int *pVoiceDataSize);
+void MFSoundMixer_Deinit();
+
+void MFSoundMixer_MixVoice_Stereo16(MFVoice *pVoice, int16 *pOutput, uint32 numSamples);
+void MFSoundMixer_MixVoices(int16 *pBuffer, int numSamples);
+
+bool MFSoundMixer_UpdateVoice(MFVoice *pVoice);
+
+void MFSoundMixer_PlayVoice(MFVoice *pVoice);
+void MFSoundMixer_PauseVoice(MFVoice *pVoice, bool pause);
+void MFSoundMixer_StopVoice(MFVoice *pVoice);
+
+void MFSoundMixer_SetVolume(MFVoice *pVoice, float volume);
+void MFSoundMixer_SetPlaybackRate(MFVoice *pVoice, float rate);
+void MFSoundMixer_SetPan(MFVoice *pVoice, float pan);
+void MFSoundMixer_SetPlaybackOffset(MFVoice *pVoice, float seconds);
+
+uint32 MFSoundMixer_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor);
+#endif
 
 enum MFWaveFormat
 {

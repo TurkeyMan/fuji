@@ -171,7 +171,7 @@ struct MFInitParams
 	int argc;					//*< The argc parameter supplied to main() */
 	const char **argv;			//*< The argv paramater supplied to main() */
 
-	bool drawSystemInfo;		//*< Draw the frame rate and system logo() */
+	bool hideSystemInfo;		//*< Hide the frame rate and system logo() */
 };
 
 /**

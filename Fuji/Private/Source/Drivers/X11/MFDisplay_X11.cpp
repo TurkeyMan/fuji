@@ -5,6 +5,7 @@
 #include "Display_Internal.h"
 #include "MFRenderer_Internal.h"
 #include "MFView.h"
+#include "MFSystem.h"
 #include "DebugMenu.h"
 #include "MFHeap.h"
 #include "X11_linux.h"
@@ -228,7 +229,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	gDisplay.colourDepth = 0; /* Use default.  Chances are, it's something sane */
 	gDisplay.windowed = true;
 	gDisplay.wide = false;
-	gDisplay.progressive = false;
+	gDisplay.progressive = true;
 
 	if(!(xdisplay = XOpenDisplay(NULL)))
 	{
@@ -324,7 +325,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	XSetWMNormalHints(xdisplay, window, sizeHints);
 
 	// Window title
-	XStoreName(xdisplay, window, "Fuji Window");
+	XStoreName(xdisplay, window, gDefaults.display.pWindowTitle);
 
 	XWMHints *wmHints;
 	if((wmHints = XAllocWMHints()) == NULL)

@@ -108,10 +108,15 @@ void MFSound_InitModule()
 {
 	MFCALLSTACK;
 
-	MFSound_InitModulePlatformSpecific(&internalSoundDataSize, &internalVoiceDataSize);
-
-	gSoundBank.Init("Sound Bank", gDefaults.sound.maxSounds, sizeof(MFSound) + internalSoundDataSize);
+#if defined(USE_MFMIXER)
+	MFSoundMixer_Init(&internalVoiceDataSize);
 	gVoices.Init("Voice Bank", gDefaults.sound.maxVoices, sizeof(MFVoice) + internalVoiceDataSize);
+	MFSound_InitModulePlatformSpecific(&internalSoundDataSize, &internalVoiceDataSize);
+#else
+	MFSound_InitModulePlatformSpecific(&internalSoundDataSize, &internalVoiceDataSize);
+	gVoices.Init("Voice Bank", gDefaults.sound.maxVoices, sizeof(MFVoice) + internalVoiceDataSize);
+#endif
+	gSoundBank.Init("Sound Bank", gDefaults.sound.maxSounds, sizeof(MFSound) + internalSoundDataSize);
 	gStreamHandlers.Init("Stream handlers", 16);
 
 	gMusicTracks = (MFAudioStream*)MFHeap_Alloc(sizeof(MFAudioStream) * gDefaults.sound.maxMusicTracks);
@@ -192,6 +197,9 @@ void MFSound_DeinitModule()
 	}
 
 	MFSound_DeinitModulePlatformSpecific();
+#if defined(USE_MFMIXER)
+	void MFSoundMixer_Deinit();
+#endif
 
 	MFStreamHandler **ppSI = gStreamHandlers.Begin();
 	while(*ppSI)
@@ -402,6 +410,89 @@ void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo)
 	pInfo->bitsPerSample = pSound->pTemplate->bitsPerSample;
 }
 
+//
+// Fuji default sound buffer implementation.
+//
+
+#if defined(USE_MFSOUNDBUFFER)
+void MFSound_CreateInternal(MFSound *pSound)
+{
+	MFCALLSTACK;
+
+	// if dynamic, allocate buffer
+	if(pSound->pTemplate->flags & MFSF_Dynamic)
+	{
+		long bufferSize = ((pSound->pTemplate->numChannels * pSound->pTemplate->bitsPerSample) >> 3) * pSound->pTemplate->numSamples;
+		pSound->pTemplate->ppStreams = (char**)MFHeap_Alloc(sizeof(char*) + bufferSize);
+		pSound->pTemplate->ppStreams[0] = (char*)&pSound->pTemplate->ppStreams[1];
+	}
+}
+
+void MFSound_DestroyInternal(MFSound *pSound)
+{
+	MFCALLSTACK;
+
+	// if dynamic, free buffer
+	if(pSound->pTemplate->flags & MFSF_Dynamic)
+	{
+		MFHeap_Free(pSound->pTemplate->ppStreams);
+	}
+}
+
+int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+{
+	MFCALLSTACK;
+
+	MFDebug_Assert(!(pSound->flags & MFPF_Locked), MFStr("Dynamic sound '%s' is already locked.", pSound->name));
+
+	long bufferSize = ((pSound->pTemplate->numChannels * pSound->pTemplate->bitsPerSample) >> 3) * pSound->pTemplate->numSamples;
+
+	MFDebug_Assert(offset < bufferSize, "MFSound_Lock: Invalid buffer offset.");
+
+	pSound->pLock1 = pSound->pTemplate->ppStreams[0] + offset;
+
+	if(offset + bytes > bufferSize)
+	{
+		pSound->lockSize1 = bufferSize - offset;
+		pSound->pLock2 = pSound->pTemplate->ppStreams[0];
+		pSound->lockSize2 = bytes - pSound->lockSize1;
+	}
+	else
+	{
+		pSound->lockSize1 = bytes;
+		pSound->pLock2 = NULL;
+		pSound->lockSize2 = 0;
+	}
+
+	pSound->flags |= MFPF_Locked;
+	pSound->lockOffset = offset;
+	pSound->lockBytes = bytes;
+
+	*ppData = pSound->pLock1;
+	*pSize = pSound->lockSize1;
+	if(ppData2)
+	{
+		*ppData2 = pSound->pLock2;
+		*pSize2 = pSound->lockSize2;
+	}
+
+	return 0;
+}
+
+void MFSound_Unlock(MFSound *pSound)
+{
+	MFCALLSTACK;
+
+	MFDebug_Assert(pSound->flags & MFPF_Locked, MFStr("Dynamic sound '%s' is not locked.", pSound->name));
+
+	pSound->pLock1 = NULL;
+	pSound->lockSize1 = 0;
+	pSound->pLock2 = NULL;
+	pSound->lockSize2 = 0;
+
+	pSound->flags = pSound->flags & ~MFPF_Locked;
+}
+#endif
 
 //
 // MFAudioStream related functions
