@@ -10,6 +10,7 @@
 #if defined(_WIN32)
 #include <direct.h>
 #else
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
