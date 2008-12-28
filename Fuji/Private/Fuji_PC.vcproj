@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -120,7 +120,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -197,7 +197,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -1211,6 +1211,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Plugin"
+					>
+					<File
+						RelativePath=".\Source\Drivers\Plugin\MFRenderer_Plug.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Plugin\MFSound_Plug.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Images"
@@ -1376,6 +1388,10 @@
 				Name="Asset"
 				>
 				<File
+					RelativePath=".\Source\Asset\MFIntModel.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Asset\MFIntTexture.cpp"
 					>
 				</File>
@@ -1443,6 +1459,14 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFDebug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFDriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFDriver_Plugin.h"
 				>
 			</File>
 			<File

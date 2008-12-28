@@ -207,57 +207,79 @@ MFModel* MFModel_Create(const char *pFilename)
 
 	if(!pTemplate)
 	{
-		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
+		char *pTemplateData = NULL;
+		const char *pFilename = NULL;
 
+		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 		if(hFile)
 		{
 			int size = MFFile_GetSize(hFile);
 
 			if(size > 0)
 			{
-				char *pTemplateData;
-
 				// allocate memory and load file
 				pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
 				MFFile_Read(hFile, pTemplateData, size);
-
-				// check ID string
-				MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
-
-				// store filename for later reference
-				pTemplate = (MFModelTemplate*)pTemplateData;
+				MFFile_Close(hFile);
 
 				MFString_Copy(&pTemplateData[size], pFilename);
-				pTemplate->pFilename = &pTemplateData[size];
-
-				gModelBank.Create(pTemplate);
-
-				MFModel_FixUp(pTemplate, true);
-
-				MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
-
-				if(pChunk)
-				{
-					MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
-
-					for(int a=0; a<pChunk->count; a++)
-					{
-//						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
-
-						for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
-						{
-							MFModel_CreateMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, a, b));
-						}
-					}
-				}
+				pFilename = &pTemplateData[size];
+			}
+		}
+		else
+		{
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+			// try to load from source data
+			const char * const pExt[] = { ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".me2", NULL };
+			const char * const *ppExt = pExt;
+			MFIntModel *pIM = NULL;
+			while(!pIM && *ppExt)
+			{
+				pIM = MFIntModel_CreateFromFile(MFStr("%s%s", pFilename, *ppExt));
+				if(pIM)
+					break;
+				++ppExt;
 			}
 
-			MFFile_Close(hFile);
+			if(pIM)
+			{
+				MFIntModel_CreateRuntimeData(pIM, &pTemplateData, NULL, MFSystem_GetCurrentPlatform());
+				MFIntModel_Destroy(pIM);
+			}
+#endif
+		}
+
+		if(!pTemplateData)
+			return NULL;
+
+		// check ID string
+		MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
+
+		// store filename for later reference
+		pTemplate = (MFModelTemplate*)pTemplateData;
+		pTemplate->pFilename = pFilename;
+
+		gModelBank.Create(pTemplate);
+
+		MFModel_FixUp(pTemplate, true);
+
+		MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
+
+		if(pChunk)
+		{
+			MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+
+			for(int a=0; a<pChunk->count; a++)
+			{
+//						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
+
+				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
+				{
+					MFModel_CreateMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, a, b));
+				}
+			}
 		}
 	}
-
-	if(!pTemplate)
-		return NULL;
 
 	MFModel *pModel;
 	pModel = (MFModel*)MFHeap_Alloc(sizeof(MFModel));

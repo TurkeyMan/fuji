@@ -623,7 +623,12 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 		int r = pStream->pStreamHandler->callbacks.pGetSamples(pStream, pData, bytesToWrite-bufferFed);
 
 		if(!r)
-			pStream->pStreamHandler->callbacks.pSeekStream(pStream, 0.0f);
+		{
+			if(pStream->pStreamHandler->callbacks.pSeekStream)
+				pStream->pStreamHandler->callbacks.pSeekStream(pStream, 0.0f);
+			else
+				break; // TODO: end of the track.. write silence, or stop playback??
+		}
 
 		pData += r;
 		bufferFed += r;
@@ -644,7 +649,8 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	pStream->writePointer = (pStream->writePointer + bytes) % pStream->bufferSize;
 
 	// update playback time
-	pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
+	if(pStream->pStreamHandler->callbacks.pGetTime)
+		pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
 }
 
 // MFSound debug draw

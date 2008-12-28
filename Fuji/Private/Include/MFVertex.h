@@ -27,8 +27,6 @@ struct MFVertexBuffer;
  */
 struct MFIndexBuffer;
 
-class MFVector;
-
 enum MFVertexDataFormat
 {
 	MFVDF_Unknown = -1,
@@ -108,7 +106,7 @@ MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, 
 void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer);
 void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer);
 void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
-void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector &data);
+void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
 void MFVertex_ReadVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector *pData);
 void MFVertex_SetVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 data);
 void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 *pData);

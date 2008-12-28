@@ -161,8 +161,6 @@ typedef void (*MFSystemCallbackFunction)(void);
  */
 struct MFInitParams
 {
-	MFInitParams() : drawSystemInfo(false) {}
-
 	const char *pAppTitle;		//*< A title used to represent the application */
 
 	void *hInstance;			//*< The WIN32 hInstance paramater supplied to WinMain() */
@@ -172,6 +170,7 @@ struct MFInitParams
 
 	int argc;					//*< The argc parameter supplied to main() */
 	const char **argv;			//*< The argv paramater supplied to main() */
+
 	bool drawSystemInfo;		//*< Draw the frame rate and system logo() */
 };
 

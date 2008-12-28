@@ -133,18 +133,20 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 {
 	MFCALLSTACK;
 
-	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
-	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
+	if(pMem)
+	{
+		MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
+		MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
 
-	MFHeap *pAllocHeap = pHeader->pHeap;
-
-	void *pNew = MFHeap_AllocInternal(bytes, pAllocHeap);
-
-	MFCopyMemory(pNew, pMem, MFMin(bytes, pHeader->size));
-
-	MFHeap_Free(pMem);
-
-	return pNew;
+		void *pNew = MFHeap_AllocInternal(bytes, pHeader->pHeap);
+		MFCopyMemory(pNew, pMem, MFMin(bytes, pHeader->size));
+		MFHeap_Free(pMem);
+		return pNew;
+	}
+	else
+	{
+		return MFHeap_AllocInternal(bytes, NULL);
+	}
 }
 
 void MFHeap_Free(void *pMem)

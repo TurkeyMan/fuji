@@ -94,7 +94,7 @@ void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType 
 	}
 }
 
-void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector &data)
+void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data)
 {
 	
 }

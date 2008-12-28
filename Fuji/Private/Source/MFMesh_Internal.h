@@ -138,7 +138,7 @@ struct MFMeshChunk_GC : public MFMeshChunk
 };
 
 // define MFMeshChunk_Current
-#if MF_RENDERER == MF_DRIVER_D3D9 || MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_D3D9 || MF_RENDERER == MF_DRIVER_OPENGL || MF_RENDERER == MF_DRIVER_PLUGIN
 typedef MFMeshChunk_Generic MFMeshChunk_Current;
 #elif MF_RENDERER == MF_DRIVER_XBOX
 typedef MFMeshChunk_XB MFMeshChunk_Current;

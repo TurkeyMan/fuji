@@ -1,6 +1,21 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
+
+#if defined(MF_RENDERPLUGIN_D3D9)
+	#define MFRenderer_InitModulePlatformSpecific MFRenderer_InitModulePlatformSpecific_D3D9
+	#define MFRenderer_DeinitModulePlatformSpecific MFRenderer_DeinitModulePlatformSpecific_D3D9
+	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_D3D9
+	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D9
+	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D9
+	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D9
+	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D9
+	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D9
+	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D9
+	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D9
+	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D9
+	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D9
+#endif
 
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"

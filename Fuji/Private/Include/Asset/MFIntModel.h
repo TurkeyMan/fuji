@@ -18,12 +18,17 @@ enum MFIntModelFormat
 	MFIMF_ForceInt = 0x7FFFFFFF
 };
 
-void MFIntModel_CreateFromFile(const char *pFilename, MFIntModel **ppModel);
-void MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModel **ppModel, MFIntModelFormat format);
+struct MFIntModel
+{
+	int x;
+};
+
+MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format);
 
 void MFIntModel_Optimise(MFIntModel *pModel);
 
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform = MFP_Current);
+void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform);
 
 void MFIntModel_Destroy(MFIntModel *pModel);
 

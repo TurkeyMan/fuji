@@ -24,6 +24,11 @@
 #include "MFAnimScript_Internal.h"
 #include "MFThread.h"
 
+#if defined(MF_WINDOWS)
+	// NOTE: REMOVE ME!!!
+	#include <windows.h>
+#endif
+
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
 

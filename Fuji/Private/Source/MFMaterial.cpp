@@ -379,11 +379,6 @@ MFMaterial* MFMaterial_Create(const char *pName)
 			if(index > -1)
 				MFMaterial_SetParameter(pMat, index, 0, pName);
 		}
-
-		size_t zero = 0;
-		int cull = MFMaterial_GetParameterIndexFromName(pMat, "cullmode");
-		if(cull > -1) 
-			MFMaterial_SetParameter(pMat, cull, 0, &zero);
 	}
 
 	pMat->refCount++;
