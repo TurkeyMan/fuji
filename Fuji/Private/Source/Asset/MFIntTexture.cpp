@@ -1285,12 +1285,12 @@ MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 	const char *pExt = MFString_GetFileExtension(pFilename);
 
 	int format;
-	for(format=0; format<MFIMF_Max; ++format)
+	for(format=0; format<MFITF_Max; ++format)
 	{
 		if(!MFString_Compare(pExt, gFileExtensions[format]))
 			break;
 	}
-	if(format == MFIMF_Max)
+	if(format == MFITF_Max)
 		return NULL;
 
 	// load file
@@ -1314,13 +1314,13 @@ MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, uint32 si
 
 	switch(format)
 	{
-		case MFIMF_TGA:
+		case MFITF_TGA:
 			pImage = LoadTGA(pMemory, size);
 			break;
-		case MFIMF_BMP:
+		case MFITF_BMP:
 			pImage = LoadBMP(pMemory, size);
 			break;
-		case MFIMF_PNG:
+		case MFITF_PNG:
 #if defined(MF_ENABLE_PNG)
 			pImage = LoadPNG(pMemory, size);
 #else

@@ -3,14 +3,14 @@
 
 enum MFIntTextureFormat
 {
-	MFIMF_Unknown = -1,
+	MFITF_Unknown = -1,
 
-	MFIMF_TGA = 0,
-	MFIMF_BMP,
-	MFIMF_PNG,
+	MFITF_TGA = 0,
+	MFITF_BMP,
+	MFITF_PNG,
 
-	MFIMF_Max,
-	MFIMF_ForceInt = 0x7FFFFFFF
+	MFITF_Max,
+	MFITF_ForceInt = 0x7FFFFFFF
 };
 
 enum MFIntTextureFlags
