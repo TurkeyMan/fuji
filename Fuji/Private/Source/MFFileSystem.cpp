@@ -525,8 +525,18 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 	}
 }
 
+MFMount* MFFileSystem_FindVolume(const char *pVolumeName)
+{
+	for(MFMount *pT = pMountList; pT; pT = pT->pNext)
+	{
+		if(!MFString_CaseCmp(pT->volumeInfo.pVolumeName, pVolumeName))
+			return pT;
+	}
 
-int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
+	return NULL;
+}
+
+int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
 {
 	MFFindData findData;
 	MFFind *hFind;
@@ -537,7 +547,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 
 	if(hFind)
 	{
-		*pStringLengths += MFString_Length(pFindPattern) + 1;
+		*pStringLengths += MFString_Length(findData.pSystemPath) + 1;
 	}
 
 	while(hFind)
@@ -550,7 +560,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 				{
 					if(flatten)
 					{
-						numFiles += MFFileSystemNative_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.pFilename), recursive, flatten, pStringLengths);
+						numFiles += MFFileSystem_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.pFilename), recursive, flatten, pStringLengths);
 					}
 					else
 					{
@@ -576,7 +586,7 @@ int MFFileSystemNative_GetNumEntries(const char *pFindPattern, bool recursive, b
 	return numFiles;
 }
 
-MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
+MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MFTOCEntry *pParent, char* &pStringCache, bool recursive, bool flatten)
 {
 	MFFindData findData;
 	MFFind *hFind;
@@ -588,7 +598,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	if(hFind)
 	{
 		MFString_Copy(pCurrentDir, findData.pSystemPath);
-		pStringCache += MFString_Length(pCurrentDir) + 1;
+		pStringCache += MFString_Length(findData.pSystemPath) + 1;
 	}
 
 	while(hFind)
@@ -601,20 +611,20 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 				{
 					if(flatten)
 					{
-						pToc = MFFileSystemNative_BuildToc(MFStr("%s%s/", pFindPattern, findData.pFilename), pToc, pParent, pStringCache, recursive, flatten);
+						pToc = MFFileSystem_BuildToc(MFStr("%s%s/", pFindPattern, findData.pFilename), pToc, pParent, pStringCache, recursive, flatten);
 					}
 					else
 					{
 						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.pFilename);
 
 						int stringCacheSize = 0;
-						pToc->size = MFFileSystemNative_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
+						pToc->size = MFFileSystem_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
 
 						if(pToc->size)
 						{
 							MFString_Copy(pStringCache, findData.pFilename);
 							pToc->pName = pStringCache;
-							pStringCache += MFString_Length(pStringCache)+1;
+							pStringCache += MFString_Length(findData.pFilename)+1;
 
 							pToc->flags = MFTF_Directory;
 							pToc->pFilesysData = pCurrentDir;
@@ -625,7 +635,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
 
 							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
-							MFFileSystemNative_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
+							MFFileSystem_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
 
 							++pToc;
 						}
@@ -636,7 +646,7 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 			{
 				MFString_Copy(pStringCache, findData.pFilename);
 				pToc->pName = pStringCache;
-				pStringCache += MFString_Length(pStringCache)+1;
+				pStringCache += MFString_Length(findData.pFilename)+1;
 
 				pToc->pFilesysData = pCurrentDir;
 
@@ -661,30 +671,8 @@ MFTOCEntry* MFFileSystemNative_BuildToc(const char *pFindPattern, MFTOCEntry *pT
 	return pToc;
 }
 
-// mount a filesystem
-int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
+int MFFileSystem_AddVolume(MFMount *pMount)
 {
-	MFCALLSTACK;
-
-	MFMount *pMount;
-	pMount = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
-	MFZeroMemory(pMount, sizeof(MFMount));
-
-	pMount->volumeInfo.flags = pMountData->flags;
-	pMount->volumeInfo.fileSystem = fileSystem;
-	pMount->volumeInfo.priority = pMountData->priority;
-	pMount->volumeInfo.pVolumeName = (const char*)&pMount[1];
-	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
-
-	// call the mount callback
-	int result = ppFileSystemList[fileSystem]->callbacks.FSMount(pMount, pMountData);
-
-	if(result < 0)
-	{
-		MFHeap_Free(pMount);
-		return -1;
-	}
-
 	// hook it up..
 	if(!pMountList)
 	{
@@ -721,7 +709,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	// build toc
 	if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
-		MFDebug_Assert(ppFileSystemList[fileSystem]->callbacks.FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
+		MFDebug_Assert(ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
 
 		MFFindData findData;
 		MFFind *hFind;
@@ -739,7 +727,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 
 		if(!hFind)
 		{
-			MFDebug_Warn(1, "FileSystem: Couldnt Mount Native FileSystem.");
+			MFDebug_Warn(1, "FileSystem: Couldnt Mount FileSystem.");
 			return -1;
 		}
 
@@ -747,13 +735,13 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 
 		// build the TOC
 		int stringCacheSize = 0;
-		pMount->numFiles = MFFileSystemNative_GetNumEntries(pFindPath, recursive, flatten, &stringCacheSize);
+		pMount->numFiles = MFFileSystem_GetNumEntries(pFindPath, recursive, flatten, &stringCacheSize);
 
 		int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
 		MFTOCEntry *pTOC = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
 		char *pStringCache = (char*)pTOC + sizeOfToc;
-		MFFileSystemNative_BuildToc(pFindPath, pTOC, NULL, pStringCache, recursive, flatten);
+		MFFileSystem_BuildToc(pFindPath, pTOC, NULL, pStringCache, recursive, flatten);
 
 		pMount->pEntries = pTOC;
 
@@ -763,14 +751,64 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	return 0;
 }
 
+// mount a filesystem
+int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
+{
+	MFCALLSTACK;
+
+	MFMount *pMount;
+	pMount = (MFMount*)MFHeap_AllocAndZero(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
+
+	pMount->volumeInfo.flags = pMountData->flags;
+	pMount->volumeInfo.fileSystem = fileSystem;
+	pMount->volumeInfo.priority = pMountData->priority;
+	pMount->volumeInfo.pVolumeName = (const char*)&pMount[1];
+	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
+
+	// call the mount callback
+	int result = ppFileSystemList[fileSystem]->callbacks.FSMount(pMount, pMountData);
+
+	if(result < 0)
+	{
+		MFHeap_Free(pMount);
+		return -1;
+	}
+
+	return MFFileSystem_AddVolume(pMount);
+}
+
+int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority, uint32 flags)
+{
+	const char *pColon = MFString_Chr(pFujiPath, ':');
+	if(!pColon)
+		return -1; // not a fuji path. needs a volume name!
+
+	MFMount *pMount = MFFileSystem_FindVolume(MFStrN(pFujiPath, pColon-pFujiPath));
+
+	if(!pMount)
+		return -2; // volume not mounted
+
+	// get the path
+//	++pColon;
+//	const char *pNewPath = MFStr("%s%s", pColon, MFString_EndsWith(pColon, "/") ? "" : "/");
+
+	MFMount *pNew = (MFMount*)MFHeap_Alloc(sizeof(MFMount) + MFString_Length(pMountpoint) + 1);
+	MFCopyMemory(pNew, pMount, sizeof(MFMount));
+
+	pNew->volumeInfo.pVolumeName = (const char*)&pNew[1];
+	MFString_Copy((char*)pNew->volumeInfo.pVolumeName, pMountpoint);
+
+	pNew->volumeInfo.priority = priority;
+	pNew->volumeInfo.flags = (pNew->volumeInfo.flags & ~MFMF_DontCacheTOC) | flags;
+
+	return MFFileSystem_AddVolume(pNew);
+}
+
 int MFFileSystem_Dismount(const char *pMountpoint)
 {
 	MFCALLSTACK;
 
-	MFMount *pT = pMountList;
-
-	while(pT && MFString_CaseCmp(pMountpoint, pT->volumeInfo.pVolumeName))
-		pT = pT->pNext;
+	MFMount *pT = MFFileSystem_FindVolume(pMountpoint);
 
 	if(pT)
 	{
@@ -904,7 +942,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 }
 
 // read/write a file to a filesystem
-char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
+char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead, bool bAppendNullByte)
 {
 	MFCALLSTACK;
 
@@ -918,9 +956,12 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead)
 
 		if(size > 0)
 		{
-			pBuffer = (char*)MFHeap_Alloc(size);
+			pBuffer = (char*)MFHeap_Alloc(size + (bAppendNullByte ? 1 : 0));
 
 			int bytesRead = MFFile_Read(hFile, pBuffer, size);
+
+			if(bAppendNullByte)
+				pBuffer[size] = 0;
 
 			if(pBytesRead)
 				*pBytesRead = bytesRead;
@@ -1009,96 +1050,79 @@ void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
 
 MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData)
 {
-	MFMount *pMount = pMountList;
 	const char *pMountpoint = NULL;
+	MFFind *pFind = NULL;
 
 	// search for a mountpoint
-	int len = MFString_Length(pSearchPattern);
-	for(int a=0; a<len; a++)
+	const char *pColon = MFString_Chr(pSearchPattern, ':');
+	if(pColon)
 	{
-		if(pSearchPattern[a] == ':')
-		{
-			pMountpoint = MFStrN(pSearchPattern, a);
-			pSearchPattern += a+1;
-			break;
-		}
-
-		if(pSearchPattern[a] == '.')
-		{
-			// if we have found a dot, this cant be a mountpoint
-			// (mountpoints may only be alphanumeric)
-			break;
-		}
+		pMountpoint = MFStrN(pSearchPattern, pColon - pSearchPattern);
+		pSearchPattern = pColon + 1;
 	}
 
 	MFDebug_Assert(pMountpoint, "A volume name must be specified in the search pattern.");
 
-	// search for file through the mount list...
-	while(pMount)
+	// find the volume
+	MFMount *pMount = MFFileSystem_FindVolume(pMountpoint);
+	if(!pMount)
 	{
-		if(!MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName))
+		MFDebug_Warn(2, MFStr("MFFileSystem_FindFirst: Volume '%s' in not mounted.", pMountpoint));
+		return NULL;
+	}
+
+	// search for file through the mount list...
+	if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
+	{
+		if(pMount->numFiles)
 		{
-			if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
+			pFind = gFinds.Create();
+
+			pFind->pMount = pMount;
+			MFString_Copy(pFind->searchPattern, pSearchPattern);
+
+			size_t file = 0;
+			for(; file < pFind->pMount->numFiles; ++file)
 			{
-				if(pMount->numFiles)
-				{
-					MFFind *pFind = gFinds.Create();
+				if(MFString_PatternMatch(pSearchPattern, pMount->pEntries[file].pName))
+					break;
+			}
 
-					pFind->pMount = pMount;
-					MFString_Copy(pFind->searchPattern, pSearchPattern);
-
-					size_t file = 0;
-					for(; file < pFind->pMount->numFiles; ++file)
-					{
-						if(MFString_PatternMatch(pSearchPattern, pMount->pEntries[file].pName))
-							break;
-					}
-
-					if(file == pFind->pMount->numFiles)
-					{
-						gFinds.Destroy(pFind);
-						return NULL;
-					}
-
-					pFind->pFilesystemData = (void*)file;
-
-					MFString_Copy(pFindData->pFilename, pMount->pEntries[file].pName);
-					MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[file].pFilesysData);
-
-					pFindData->attributes = ((pMount->pEntries[file].flags & MFTF_Directory) ? MFFA_Directory : 0) |
-											((pMount->pEntries[file].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
-											((pMount->pEntries[file].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
-					pFindData->fileSize = pMount->pEntries[file].size;
-
-					return pFind;
-				}
-				else
-					return NULL;
+			if(file == pFind->pMount->numFiles)
+			{
+				gFinds.Destroy(pFind);
+				pFind = NULL;
 			}
 			else
 			{
-				MFFind *pFind = gFinds.Create();
+				pFind->pFilesystemData = (void*)file;
 
-				pFind->pMount = pMount;
-				pFind->pFilesystemData = NULL;
-				MFString_Copy(pFind->searchPattern, pSearchPattern);
+				MFString_Copy(pFindData->pFilename, pMount->pEntries[file].pName);
+				MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[file].pFilesysData);
 
-				if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
-				{
-					gFinds.Destroy(pFind);
-					return NULL;
-				}
-				else
-					return pFind;
+				pFindData->attributes = ((pMount->pEntries[file].flags & MFTF_Directory) ? MFFA_Directory : 0) |
+										((pMount->pEntries[file].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
+										((pMount->pEntries[file].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
+				pFindData->fileSize = pMount->pEntries[file].size;
 			}
 		}
+	}
+	else
+	{
+		pFind = gFinds.Create();
 
-		pMount = pMount->pNext;
+		pFind->pMount = pMount;
+		pFind->pFilesystemData = NULL;
+		MFString_Copy(pFind->searchPattern, pSearchPattern);
+
+		if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
+		{
+			gFinds.Destroy(pFind);
+			pFind = NULL;
+		}
 	}
 
-	MFDebug_Warn(2, MFStr("MFFileSystem_FindFirst: Volume '%s' in not mounted.", pMountpoint));
-
-	return NULL;
+	return pFind;
 }
 
 bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)

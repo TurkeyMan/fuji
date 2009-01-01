@@ -5,7 +5,7 @@
 #include "MFString.h"
 #include "MFModel_Internal.h"
 #include "Asset/MFIntModel.h"
-
+#include "Util/F3D.h"
 
 /**** Structures ****/
 
@@ -14,6 +14,7 @@
 
 static char *gFileExtensions[] =
 {
+	".f3d",
 	".dae",
 	".x",
 	".ase",
@@ -26,35 +27,7 @@ static char *gFileExtensions[] =
 
 /**** Functions ****/
 
-MFIntModel *MFIntModel_CreateFromFile(const char *pFilename, MFIntModel **ppModel)
-{
-
-  return NULL;
-}
-
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format)
-{
-
-  return NULL;
-}
-
-void MFIntModel_Optimise(MFIntModel *pModel)
-{
-
-}
-
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform)
-{
-
-}
-
-void MFIntModel_Destroy(MFIntModel *pModel)
-{
-
-}
-
-/*
-MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
+MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 {
 	// find format
 	const char *pExt = MFString_GetFileExtension(pFilename);
@@ -66,187 +39,90 @@ MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 			break;
 	}
 	if(format == MFIMF_Max)
-		return NULL;
+		return NULL; // unsupported model format
+
+	// some text formats need a null character appended for processing
+	bool bAppendNull = false;
+	if(format == MFIMF_X || format == MFIMF_ASE || format == MFIMF_OBJ)
+		bAppendNull = true;
 
 	// load file
 	uint32 size;
-	char *pData = MFFileSystem_Load(pFilename, &size);
+	char *pData = MFFileSystem_Load(pFilename, &size, bAppendNull);
 	if(!pData)
 		return NULL;
 
 	// load the image
-	MFIntTexture *pImage = MFIntTexture_CreateFromFileInMemory(pData, size, (MFIntTextureFormat)format);
+	MFIntModel *pModel = MFIntModel_CreateFromFileInMemory(pData, size, (MFIntModelFormat)format);
 
 	// free file
 	MFHeap_Free(pData);
 
-	return pImage;
+	return pModel;
 }
 
-MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntTextureFormat format)
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format)
 {
-	MFIntTexture *pImage = NULL;
+	F3DFile *pF3D = new F3DFile;
 
 	switch(format)
 	{
-		case MFIMF_TGA:
-			pImage = LoadTGA(pMemory, size);
-			break;
-		case MFIMF_BMP:
-			pImage = LoadBMP(pMemory, size);
-			break;
-		case MFIMF_PNG:
-#if defined(MF_ENABLE_PNG)
-			pImage = LoadPNG(pMemory, size);
-#else
-			MFDebug_Assert(false, "PNG support is not enabled in this build.");
-#endif
+		case MFIMF_ASE:
+			void ParseASEFile(char *, F3DFile *);
+			ParseASEFile((char*)pMemory, pF3D);
 			break;
 		default:
-			MFDebug_Assert(false, "Unsupported image format.");
+			MFDebug_Assert(false, "Unsupported model format.");
 	}
 
-	if(pImage)
-	{
-		// scan for alpha information
-		MFIntTexture_ScanImage(pImage);
-
-		// build the mip chain
-		MFIntTexture_FilterMipMaps(pImage, 0, 0);
-	}
-
-	return pImage;
+	return (MFIntModel*)pF3D;
 }
 
-void MFIntTexture_Destroy(MFIntTexture *pTexture)
+void MFIntModel_Optimise(MFIntModel *pModel)
 {
-	for(int a=0; a<pTexture->numSurfaces; a++)
-	{
-		if(pTexture->pSurfaces[a].pData)
-			MFHeap_Free(pTexture->pSurfaces[a].pData);
-	}
+	F3DFile *pF3D = (F3DFile*)pModel;
 
-	if(pTexture->pSurfaces)
-		MFHeap_Free(pTexture->pSurfaces);
-
-	if(pTexture)
-		MFHeap_Free(pTexture);
+	pF3D->Optimise();
 }
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, uint32 *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
+void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform)
 {
-	*ppTemplateData = NULL;
+	F3DFile *pF3D = (F3DFile*)pModel;
+
+	*ppOutput = NULL;
 	if(pSize)
 		*pSize = 0;
 
-	// choose target image format
-	if(targetFormat == TexFmt_Unknown)
-		targetFormat = ChooseBestFormat(pTexture, platform);
+	pF3D->ProcessSkeletonData();
+	pF3D->ProcessCollisionData();
+	pF3D->BuildBatches(platform);
+	pF3D->StripModel();
 
-	// check minimum pitch
-	MFDebug_Assert((pTexture->pSurfaces[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 >= 16, "Textures should have a minimum pitch of 16 bytes.");
-
-	// check power of 2 dimensions
-	MFDebug_Assert(IsPowerOf2(pTexture->pSurfaces[0].width) && IsPowerOf2(pTexture->pSurfaces[0].height), "Texture dimensions are not a power of 2.");
-
-	// begin processing...
-	if(flags & MFITF_PreMultipliedAlpha)
-		PremultiplyAlpha(pTexture);
-
-	// calculate texture data size..
-	uint32 imageBytes = (uint32)MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
-
-	for(int a=0; a<pTexture->numSurfaces; a++)
+	if(pF3D->GetMeshChunk()->subObjects.size() ||
+		pF3D->GetCollisionChunk()->collisionObjects.size() ||
+		pF3D->GetRefPointChunk()->refPoints.size())
 	{
-		imageBytes += (pTexture->pSurfaces[a].width * pTexture->pSurfaces[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
-
-		// add palette
-		uint32 paletteBytes = 0;
-
-		if(targetFormat == TexFmt_I8)
-			paletteBytes = 4*256;
-		if(targetFormat == TexFmt_I4)
-			paletteBytes = 4*16;
-
-		imageBytes += paletteBytes;
+		*ppOutput = pF3D->CreateMDL(pSize, platform);
 	}
-
-	// allocate buffer
-//	MFHeap_SetAllocAlignment(4096);
-	char *pOutputBuffer = (char*)MFHeap_Alloc(imageBytes);
-
-	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
-	MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData));
-
-	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
-
-	pTemplate->imageFormat = targetFormat;
-
-	if(targetFormat >= TexFmt_XB_A8R8G8B8s)
-		pTemplate->flags |= TEX_Swizzled;
-
-	if(!pTexture->opaque)
-	{
-		if(pTexture->oneBitAlpha)
-			pTemplate->flags |= 3;
-		else
-			pTemplate->flags |= 1;
-	}
-
-	if(flags & MFITF_PreMultipliedAlpha)
-		pTemplate->flags |= TEX_PreMultipliedAlpha;
-
-	pTemplate->mipLevels = pTexture->numSurfaces;
-	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
-
-	MFTextureSurfaceLevel *pSurfaceLevels = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
-
-	char *pDataPointer = pOutputBuffer + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
-
-	for(int a=0; a<pTexture->numSurfaces; a++)
-	{
-		MFZeroMemory(&pSurfaceLevels[a], sizeof(MFTextureSurfaceLevel));
-
-		pSurfaceLevels[a].width = pTexture->pSurfaces[a].width;
-		pSurfaceLevels[a].height = pTexture->pSurfaces[a].height;
-		pSurfaceLevels[a].bitsPerPixel = MFTexture_GetBitsPerPixel(targetFormat);
-
-		pSurfaceLevels[a].xBlocks = -1;
-		pSurfaceLevels[a].yBlocks = -1;
-		pSurfaceLevels[a].bitsPerBlock = -1;
-
-		pSurfaceLevels[a].pImageData = pDataPointer;
-		pSurfaceLevels[a].bufferLength = (pTexture->pSurfaces[a].width*pTexture->pSurfaces[a].height * MFTexture_GetBitsPerPixel(targetFormat)) / 8;
-		pDataPointer += pSurfaceLevels[a].bufferLength;
-
-		uint32 paletteBytes = 0;
-
-		if(targetFormat == TexFmt_I8)
-			paletteBytes = 4*256;
-		if(targetFormat == TexFmt_I4)
-			paletteBytes = 4*16;
-
-		if(paletteBytes)
-		{
-			pSurfaceLevels[a].pImageData = pDataPointer;
-			pSurfaceLevels[a].paletteBufferLength = paletteBytes;
-			pDataPointer += paletteBytes;
-		}
-
-		// convert surface
-		ConvertSurface(&pTexture->pSurfaces[a], &pSurfaceLevels[a], targetFormat, platform);
-	}
-
-	// fix up pointers
-	for(int a=0; a<pTemplate->mipLevels; a++)
-	{
-		MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
-		MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
-	}
-	MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
-
-	*ppTemplateData = (MFTextureTemplateData*)pOutputBuffer;
-	if(pSize)
-		*pSize = imageBytes;
 }
-*/
+
+void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform)
+{
+	F3DFile *pF3D = (F3DFile*)pModel;
+
+	*ppOutput = NULL;
+	*pSize = 0;
+
+	// we'll assume the user wrote out the model first (so it does the processing and stripping/etc)
+
+	if(pF3D->GetAnimationChunk()->anims.size())
+	{
+		*ppOutput = pF3D->CreateANM(pSize, platform);
+	}
+}
+
+void MFIntModel_Destroy(MFIntModel *pModel)
+{
+	F3DFile *pF3D = (F3DFile*)pModel;
+	delete pF3D;
+}

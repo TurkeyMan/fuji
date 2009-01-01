@@ -34,17 +34,13 @@ void CreateMiniFMODStream(MFAudioStream *pStream, const char *pFilename)
 		return;
 
 	pStream->pStreamData = pMod;
-
-	int sampleRate = 44100;
-	int numSamples = sampleRate;
-	int channels = 2;
-
 	pStream->trackLength = 1000.f;
-	pStream->bufferSize = numSamples * channels * 2;
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, numSamples, channels, 16, sampleRate, MFSF_Dynamic | MFSF_Circular);
 
-	if(!pStream->pStreamBuffer)
-		DestroyMiniFMODStream(pStream);
+	// fill out the stream info
+	pStream->streamInfo.sampleRate = 44100;
+	pStream->streamInfo.channels = 2;
+	pStream->streamInfo.bitsPerSample = 16;
+	pStream->streamInfo.bufferLength = pStream->streamInfo.sampleRate;
 }
 
 void SeekMiniFMODStream(MFAudioStream *pStream, float seconds)

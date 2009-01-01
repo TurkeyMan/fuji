@@ -252,10 +252,10 @@ void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
  */
 enum MFAudioStreamFlags
 {
-	MFASF_BeginPaused = MFBIT(0),	/**< Stream playback begins in paused state. */
-	MFASF_QueryLength = MFBIT(1),	/**< Allows the user to query the stream length. */
-	MFASF_AllowSeeking = MFBIT(2),	/**< Allows seeking within the stream. */
-	MFASF_AllowBuffering = MFBIT(3)	/**< Allows buffering of the compressed data if the driver chooses. (May use a lot of memory) */
+	MFASF_QueryLength = MFBIT(0),		/**< Allows the user to query the stream length. */
+	MFASF_AllowSeeking = MFBIT(1),		/**< Allows seeking within the stream. */
+	MFASF_AllowBuffering = MFBIT(2),	/**< Allows buffering of the compressed data if the driver chooses. (May use a lot of memory) */
+	MFASF_DecodeOnly = MFBIT(3)			/**< The stream is created for decode only. Streams created with the MFASF_DecodeOnly flag may not be played. */
 };
 
 /**
@@ -297,13 +297,22 @@ struct MFStreamCallbacks
 void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks);
 
 /**
- * Begin stream playback.
- * Begin playback of an audio stream.
+ * Create audio stream.
+ * Create an audio stream.
  * @param pFilename Filename of music track.
- * @param playFlags Optional combination of flags from the MFAudioStreamFlags enum defining stream features and initial play state.
+ * @param flags Optional combination of flags from the MFAudioStreamFlags enum defining various stream options.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
-MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags = 0);
+MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags = 0);
+
+/**
+ * Begin stream playback.
+ * Begin playback of an audio stream.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param playFlags Optional combination of flags from the MFPlayFlags enum defining playback state.
+ * @return Returns a pointer to the created MFAudioStream or NULL on failure.
+ */
+void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags = 0);
 
 /**
  * Destroy a music track.
@@ -347,6 +356,16 @@ MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
  * @return Returns a string containing the requested infomation.
  */
 const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType);
+
+/**
+ * Read sample data from an audio stream.
+ * Reads raw samples from an audio stream.
+ * @param pStream Pointer to an MFAudioStream.
+ * @param pBuffer Pointer to a buffer that will receive the sample data.
+ * @param bytes number of bytes to read from the stream.
+ * @return Returns the number of bytes read.
+ */
+int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes);
 
 #endif // _MFSOUND_H
 

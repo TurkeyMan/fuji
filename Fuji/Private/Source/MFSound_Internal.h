@@ -118,6 +118,11 @@ struct MFAudioStreamInfo
 	char albumName[256];
 	char artistName[256];
 	char genre[256];
+
+	int sampleRate;
+	int bitsPerSample;
+	int channels;
+	int bufferLength; // in samples
 };
 
 struct MFAudioStream
@@ -137,6 +142,7 @@ struct MFAudioStream
 	float trackLength;
 	float currentTime;
 
+	uint32 createFlags;
 	uint32 playFlags;
 };
 

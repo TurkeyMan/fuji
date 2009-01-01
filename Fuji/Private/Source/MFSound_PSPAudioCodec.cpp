@@ -416,20 +416,13 @@ void CreateMP3Stream(MFAudioStream *pStream, const char *pFilename)
 	// decode the first frame so we can get the frame header
 	GetMP3Samples(pStream, NULL, 0);
 
-	int sampleRate = pDecoder->firstHeader.samplerate;
-	if(!sampleRate)
-	{
-		DestroyMP3Stream(pStream);
-		return;
-	}
-
 	pStream->trackLength = 1000.0f;				// mp3 sucks! we have no idea without skipping through the whole thing... :/
-	pStream->bufferSize = sampleRate * 2 * 2;	// 1 second, 2 channels, 16bits per sample
 
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, sampleRate, 2, 16, sampleRate, MFSF_Dynamic | MFSF_Circular);
-
-	if(!pStream->pStreamBuffer)
-		DestroyMP3Stream(pStream);
+	// fill out the stream info
+	pStream->streamInfo.sampleRate = pDecoder->firstHeader.samplerate;
+	pStream->streamInfo.channels = 2;
+	pStream->streamInfo.bitsPerSample = 16;
+	pStream->streamInfo.bufferLength = pDecoder->firstHeader.samplerate;
 }
 
 float GetMP3Time(MFAudioStream *pStream)

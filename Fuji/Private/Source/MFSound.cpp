@@ -8,12 +8,15 @@
 #include "MFPrimitive.h"
 #include "MFThread.h"
 #include "DebugMenu.h"
+#include "Asset/MFIntSound.h"
 
 //#define USE_THREADED_AUDIO
 
 #if defined(USE_THREADED_AUDIO)
 	#include <windows.h>
 #endif
+
+#define ALLOW_LOAD_FROM_SOURCE_DATA
 
 /**** Forward Declarations ****/
 
@@ -75,7 +78,7 @@ void MFSound_UpdateSound()
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
-		bool playing = !(gMusicTracks[a].playFlags & MFASF_BeginPaused);
+		bool playing = !(gMusicTracks[a].playFlags & MFPF_Paused);
 		if(gMusicTracks[a].pStreamBuffer && playing)
 		{
 			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
@@ -244,8 +247,29 @@ MFSound *MFSound_Create(const char *pName)
 
 		if(!pTemplate)
 		{
-			MFDebug_Error(MFStr("Sound '%s' does not exist.\n", pFileName));
-			return NULL;
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+			// try to load from source data
+			MFIntSound *pIS = NULL;
+
+			MFStreamHandler **ppI = gStreamHandlers.Begin();
+			while(!pIS && *ppI)
+			{
+				pIS = MFIntSound_CreateFromFile(MFStr("%s%s", pName, (*ppI)->streamExtension));
+				++ppI;
+			}
+
+			if(pIS)
+			{
+				MFIntSound_CreateRuntimeData(pIS, (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform());
+				MFIntSound_Destroy(pIS);
+			}
+#endif
+
+			if(!pTemplate)
+			{
+				MFDebug_Error(MFStr("Sound '%s' does not exist.\n", pFileName));
+				return NULL;
+			}
 		}
 
 		MFDebug_Assert(pTemplate->magic == MFMAKEFOURCC('S', 'N', 'D', '1'), MFStr("File '%s' is not a valid sound file.", pFileName));
@@ -509,7 +533,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
 	gStreamHandlers.Create(pHandler);
 }
 
-MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
+MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 {
 	MFCALLSTACK;
 
@@ -526,12 +550,12 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 
 	MFAudioStream *pStream = &gMusicTracks[t];
 	MFZeroMemory(pStream, sizeof(*pStream));
-	pStream->playFlags = playFlags;
+	pStream->createFlags = flags;
 
 	MFDebug_Log(4, MFStr("Attempting to create audio stream '%s'.", pFilename));
 
 	// find matching extension
-	const char *pExt = MFString_RChr(pFilename, '.');
+	const char *pExt = MFString_GetFileExtension(pFilename);
 	if(!pExt)
 	{
 		MFDebug_Warn(2, MFStr("Audio stream '%s' has no file extension. Can't select stream handler.", pFilename));
@@ -559,22 +583,44 @@ MFAudioStream *MFSound_PlayStream(const char *pFilename, uint32 playFlags)
 	// attempt to create the stream...
 	pStream->pStreamHandler->callbacks.pCreateStream(pStream, pFilename);
 
-	if(!pStream->pStreamBuffer)
-		return NULL;
+	// create the playback sound buffer
+	if(!(pStream->createFlags & MFASF_DecodeOnly))
+	{
+		pStream->bufferSize = (pStream->streamInfo.bufferLength*pStream->streamInfo.bitsPerSample*pStream->streamInfo.channels) >> 3;
+
+		if(pStream->bufferSize)
+			pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pStream->streamInfo.bufferLength, pStream->streamInfo.channels, pStream->streamInfo.bitsPerSample, pStream->streamInfo.sampleRate, MFSF_Dynamic | MFSF_Circular);
+
+		if(!pStream->pStreamBuffer)
+		{
+			pStream->pStreamHandler->callbacks.pDestroyStream(pStream);
+			return NULL;
+		}
+	}
 
 	// init the stream
 	MFString_CopyN(pStream->name, pFilename, sizeof(pStream->name) - 1);
 	pStream->name[sizeof(pStream->name) - 1] = 0;
 
+	MFSound_LockMutex(false);
+
+	return pStream;
+}
+
+void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags)
+{
+	MFCALLSTACK;
+
+	// copy flags
+	pStream->playFlags = playFlags;
+	if(playFlags & MFPF_BeginPaused)
+		pStream->playFlags |= MFPF_Paused;
+
 	// fill the buffer
 	MFSound_FillBuffer(pStream, pStream->bufferSize);
 
 	// play buffer
-	pStream->pStreamVoice = MFSound_Play(pStream->pStreamBuffer, MFPF_Looping | ((playFlags & MFASF_BeginPaused) ? MFPF_BeginPaused : 0));
-
-	MFSound_LockMutex(false);
-
-	return pStream;
+	pStream->pStreamVoice = MFSound_Play(pStream->pStreamBuffer, MFPF_Looping | (playFlags & MFPF_BeginPaused));
 }
 
 void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
@@ -606,15 +652,21 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 
 	MFSound_LockMutex(true);
 
-	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
-	if(playing)
-		MFSound_Stop(pStream->pStreamVoice);
+	if(pStream->pStreamVoice)
+	{
+		bool playing = !(pStream->playFlags & MFPF_Paused);
+		if(playing)
+			MFSound_Stop(pStream->pStreamVoice);
+	}
 
 	// call stream handler destroy
 	pStream->pStreamHandler->callbacks.pDestroyStream(pStream);
 
-	MFSound_Destroy(pStream->pStreamBuffer);
-	pStream->pStreamBuffer = NULL;
+	if(pStream->pStreamBuffer)
+	{
+		MFSound_Destroy(pStream->pStreamBuffer);
+		pStream->pStreamBuffer = NULL;
+	}
 
 	MFSound_LockMutex(false);
 }
@@ -625,7 +677,7 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 
 	MFSound_LockMutex(true);
 
-	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
+	bool playing = !(pStream->playFlags & MFPF_Paused);
 	if(playing)
 		MFSound_Pause(pStream->pStreamVoice, true);
 
@@ -648,7 +700,7 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 
 	MFSound_LockMutex(true);
 
-	bool playing = !(pStream->playFlags & MFASF_BeginPaused);
+	bool playing = !(pStream->playFlags & MFPF_Paused);
 	if(pause)
 	{
 		if(playing)
@@ -660,7 +712,7 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 			MFSound_Pause(pStream->pStreamVoice, false);
 	}
 
-	pStream->playFlags = (pStream->playFlags & ~MFASF_BeginPaused) | (pause ? MFASF_BeginPaused : 0);
+	pStream->playFlags = (pStream->playFlags & ~MFPF_Paused) | (pause ? MFPF_Paused : 0);
 
 	MFSound_LockMutex(false);
 }
@@ -715,10 +767,16 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 
 		if(!r)
 		{
-			if(pStream->pStreamHandler->callbacks.pSeekStream)
+			if((pStream->playFlags & MFPF_Looping) && pStream->pStreamHandler->callbacks.pSeekStream)
 				pStream->pStreamHandler->callbacks.pSeekStream(pStream, 0.0f);
 			else
-				break; // TODO: end of the track.. write silence, or stop playback??
+			{
+				// TODO: end of the track.. should we stop playback somehow?
+
+				// write silence for the time being...
+				r = bytesToWrite-bufferFed;
+				MFZeroMemory(pData, r);
+			}
 		}
 
 		pData += r;
@@ -742,6 +800,11 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 	// update playback time
 	if(pStream->pStreamHandler->callbacks.pGetTime)
 		pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
+}
+
+int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes)
+{
+	return pStream->pStreamHandler->callbacks.pGetSamples(pStream, pBuffer, bytes);
 }
 
 // MFSound debug draw

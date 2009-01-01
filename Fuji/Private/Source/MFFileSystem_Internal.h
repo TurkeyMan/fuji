@@ -6,10 +6,13 @@
 #include "MFPtrList.h"
 
 struct MFTOCEntry;
+struct MFMount;
 
 // internal functions
 void MFFileSystem_InitModule();
 void MFFileSystem_DeinitModule();
+
+MFMount *MFFileSystem_FindVolume(const char *pVolumeName);
 
 MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, int numEntries);
 void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries);

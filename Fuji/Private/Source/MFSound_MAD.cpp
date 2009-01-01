@@ -465,7 +465,7 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 
 	// if we were granted permission to buffer the whole thing, let's try and do that (speed up the rest of the steps)
 	bool cacheFile = true;
-	if(pStream->playFlags & MFASF_AllowBuffering)
+	if(pStream->createFlags & MFASF_AllowBuffering)
 	{
 		uint32 fileSize = MFFile_GetSize(hFile);
 		void *pMP3File = MFHeap_Alloc(fileSize);
@@ -543,7 +543,7 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 	}
 
 	// depending on the play flags, we might do a pre-scan of the audio stream to build seek tables and stuff
-	if((pStream->playFlags & MFASF_QueryLength) || (pStream->playFlags & MFASF_AllowSeeking))
+	if((pStream->createFlags & MFASF_QueryLength) || (pStream->createFlags & MFASF_AllowSeeking))
 	{
 		// get the offset to the start of the mp3 data
 		int sampleRate = PreCacheFrameOffsets(pDecoder);
@@ -564,19 +564,11 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 	// decode the first frame so we can get the frame header
 	GetMADSamples(pStream, NULL, 0);
 
-	int sampleRate = pDecoder->firstHeader.samplerate;
-	if(!sampleRate)
-	{
-		DestroyMADStream(pStream);
-		return;
-	}
-
-	pStream->bufferSize = sampleRate * 2 * 2;	// 1 second, 2 channels, 16bits per sample
-
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, sampleRate, 2, 16, sampleRate, MFSF_Dynamic | MFSF_Circular);
-
-	if(!pStream->pStreamBuffer)
-		DestroyMADStream(pStream);
+	// fill out the stream info
+	pStream->streamInfo.sampleRate = pDecoder->firstHeader.samplerate;
+	pStream->streamInfo.channels = 2;
+	pStream->streamInfo.bitsPerSample = 16;
+	pStream->streamInfo.bufferLength = pDecoder->firstHeader.samplerate;
 }
 
 void SeekMADStream(MFAudioStream *pStream, float seconds)

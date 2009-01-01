@@ -151,7 +151,40 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 
 inline char* MFString_GetFileExtension(const char *pFilename)
 {
-	return MFString_RChr(pFilename, '.');
+	char *pExt = NULL;
+	for(; *pFilename; pFilename++)
+	{
+		int c = *pFilename;
+		if(c == '.')
+			pExt = (char*)pFilename;
+		else if(c == '/' || c == '\\')
+			pExt = NULL;
+	}
+	return pExt;
+}
+
+inline bool MFString_EndsWith(const char *pString, const char *pEnd)
+{
+	int stringLen = MFString_Length(pString);
+	int endLen = MFString_Length(pEnd);
+
+	if(endLen > stringLen)
+		return false;
+
+	return !MFString_Compare(pString + (stringLen - endLen), pEnd);
+}
+
+inline bool MFString_BeginsWith(const char *pString, const char *pBegin)
+{
+	while(*pBegin)
+	{
+		if(*pString != *pBegin)
+			return false;
+		++pBegin;
+		++pString;
+	}
+
+	return true;
 }
 
 inline const char* MFStr_GetFileName(const char *pFilename)
@@ -182,7 +215,6 @@ inline const char* MFStr_TruncateExtension(const char *pFilename)
 	const char *pDot = MFString_RChr(pFilename, '.');
 	return pDot ? MFStrN(pFilename, pDot - pFilename) : pFilename;
 }
-
 
 //
 // UTF8 support

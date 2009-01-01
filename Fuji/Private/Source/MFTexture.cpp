@@ -106,8 +106,6 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			while(!pIT && *ppExt)
 			{
 				pIT = MFIntTexture_CreateFromFile(MFStr("%s%s", pName, *ppExt));
-				if(pIT)
-					break;
 				++ppExt;
 			}
 

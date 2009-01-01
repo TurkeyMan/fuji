@@ -77,7 +77,7 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 		return;	// not a .wav file...
 
 	// if everything's good, and it appears to be a valid wav file
-	MFWAVStream *pWS = (MFWAVStream*)MFHeap_Alloc(sizeof(MFWAVStream));
+	MFWAVStream *pWS = (MFWAVStream*)MFHeap_AllocAndZero(sizeof(MFWAVStream));
 	pStream->pStreamData = pWS;
 	pWS->pStream = hFile;
 
@@ -106,15 +106,18 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 	}
 	while(read);
 
-	// setup this shit...
+	// return to the start of the audio data
+	MFFile_Seek(pWS->pStream, pWS->dataOffset, MFSeek_Begin);
+
+	// calculate the track length
 	pWS->sampleSize = (pWS->format.nChannels * pWS->format.wBitsPerSample) >> 3;
 	pStream->trackLength = (float)(pWS->dataSize / pWS->sampleSize) / (float)pWS->format.nSamplesPerSec;
-	pStream->bufferSize = pWS->format.nSamplesPerSec * pWS->sampleSize;
 
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pWS->format.nSamplesPerSec, pWS->format.nChannels, pWS->format.wBitsPerSample, pWS->format.nSamplesPerSec, MFSF_Dynamic | MFSF_Circular);
-
-	if(!pStream->pStreamBuffer)
-		DestroyWAVStream(pStream);
+	// fill out the stream info
+	pStream->streamInfo.sampleRate = pWS->format.nSamplesPerSec;
+	pStream->streamInfo.channels = pWS->format.nChannels;
+	pStream->streamInfo.bitsPerSample = pWS->format.wBitsPerSample;
+	pStream->streamInfo.bufferLength = pWS->format.nSamplesPerSec;
 }
 
 int GetWAVSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)

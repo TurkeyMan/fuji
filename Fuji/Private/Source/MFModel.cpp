@@ -6,10 +6,12 @@
 #include "MFView.h"
 #include "MFCollision_Internal.h"
 #include "MFAnimation.h"
-
 #include "MFMesh_Internal.h"
 #include "Display_Internal.h"
 #include "MFRenderer.h"
+#include "Asset/MFIntModel.h"
+
+#define ALLOW_LOAD_FROM_SOURCE_DATA
 
 MFPtrList<MFModelTemplate> gModelBank;
 
@@ -208,7 +210,6 @@ MFModel* MFModel_Create(const char *pFilename)
 	if(!pTemplate)
 	{
 		char *pTemplateData = NULL;
-		const char *pFilename = NULL;
 
 		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 		if(hFile)
@@ -230,20 +231,25 @@ MFModel* MFModel_Create(const char *pFilename)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			// try to load from source data
-			const char * const pExt[] = { ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".me2", NULL };
+			const char * const pExt[] = { ".f3d", ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".me2", NULL };
 			const char * const *ppExt = pExt;
 			MFIntModel *pIM = NULL;
 			while(!pIM && *ppExt)
 			{
-				pIM = MFIntModel_CreateFromFile(MFStr("%s%s", pFilename, *ppExt));
+				const char *pTempFilename = MFStr("%s%s", pFilename, *ppExt);
+				pIM = MFIntModel_CreateFromFile(pTempFilename);
 				if(pIM)
+				{
+					pFilename = MFString_Copy((char*)MFHeap_Alloc(MFString_Length(pTempFilename)+1), pTempFilename);
 					break;
+				}
 				++ppExt;
 			}
 
 			if(pIM)
 			{
-				MFIntModel_CreateRuntimeData(pIM, &pTemplateData, NULL, MFSystem_GetCurrentPlatform());
+				MFIntModel_Optimise(pIM);
+				MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplateData, NULL, MFSystem_GetCurrentPlatform());
 				MFIntModel_Destroy(pIM);
 			}
 #endif

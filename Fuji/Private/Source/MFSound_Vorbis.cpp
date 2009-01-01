@@ -86,12 +86,12 @@ void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
 #else
 	pStream->trackLength = (float)ov_time_total(&pVS->vorbisFile, -1);
 #endif
-	pStream->bufferSize = pVS->pInfo->rate * pVS->pInfo->channels * 2;
 
-	pStream->pStreamBuffer = MFSound_CreateDynamic(pFilename, pVS->pInfo->rate, pVS->pInfo->channels, 16, pVS->pInfo->rate, MFSF_Dynamic | MFSF_Circular);
-
-	if(!pStream->pStreamBuffer)
-		DestroyVorbisStream(pStream);
+	// fill out the stream info
+	pStream->streamInfo.sampleRate = pVS->pInfo->rate;
+	pStream->streamInfo.channels = pVS->pInfo->channels;
+	pStream->streamInfo.bitsPerSample = 16;
+	pStream->streamInfo.bufferLength = pVS->pInfo->rate;
 
 	// read the vorbis comment data
 	pVS->pComment = ov_comment(&pVS->vorbisFile, -1);

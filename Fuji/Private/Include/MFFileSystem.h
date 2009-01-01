@@ -10,8 +10,6 @@
 #if !defined(_MFFILESYSTEM_H)
 #define _MFFILESYSTEM_H
 
-struct MFMount;
-
 /**
  * @struct MFFile
  * Represents a Fuji file.
@@ -349,6 +347,17 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
 int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData);
 
 /**
+ * Mounts a filesystem from a fuji path.
+ * Mounts a filesystem which provides files to Fuji from a fully justified Fuji path.
+ * @param pMountpoint The volume name.
+ * @param pFujiPath Fully justified Fuji path to the volume root.
+ * @param priority Filsystem priority when searching for files.
+ * @param flags Mount flags, this can be any combination of values from the MFMountFlags enum.
+ * @return Returns 0 if filesystem was successfully mounted.
+ */
+int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority = MFMP_Normal, uint32 flags = 0);
+
+/**
  * Dismount a filesystem.
  * Dismounts a mounted filesystem.
  * @param pMountpoint The name of the mountpoint for the filesystem to dismount.
@@ -370,9 +379,10 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MF
  * Load a file from the filesystem.
  * @param pFilename The name of the file to load.
  * @param pBytesRead Optional pointer to a uint32 that will receive the size of the file loaded.
+ * @param bAppendNullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
  * @return Returns a pointer to a new buffer containing the file that was loaded.
  */
-char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL);
+char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL, bool bAppendNullByte = false);
 
 /**
  * Write a file to a filesystem.

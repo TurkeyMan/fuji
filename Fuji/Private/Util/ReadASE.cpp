@@ -776,8 +776,10 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 	return pFilePtr;
 }
 
-void ParseASEFile(char *pFilePtr)
+void ParseASEFile(char *pFilePtr, F3DFile *_pModel)
 {
+	pModel = _pModel;
+
 	char *pEnd;
 	char *pToken;
 
@@ -841,25 +843,9 @@ void ParseASEFile(char *pFilePtr)
 
 int F3DFile::ReadASE(const char *pFilename)
 {
-	pModel = this;
+	char *pMem = MFFileSystem_Load(pFilename, NULL, true);
 
-	MFFile *pFile = MFFileSystem_Open(pFilename, MFOF_Read);
-	if(!pFile)
-	{
-		MFDebug_Warn(2, MFStr("Failed to open ASE file %s", pFilename));
-		return 1;
-	}
-
-	int size = MFFile_Seek(pFile, 0, MFSeek_End);
-	MFFile_Seek(pFile, 0, MFSeek_Begin);
-
-	char *pMem = (char*)MFHeap_Alloc(size+1);
-	MFFile_Read(pFile, pMem, size);
-	pMem[size] = 0;
-
-	MFFile_Close(pFile);
-
-	ParseASEFile(pMem);
+	ParseASEFile(pMem, this);
 	MFHeap_Free(pMem);
 
 	return 0;

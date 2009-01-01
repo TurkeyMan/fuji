@@ -6,10 +6,10 @@ enum MFIntModelFormat
 	MFIMF_Unknown = -1,
 
 	MFIMF_F3D = 0,
-	MFIMF_ASE,
-	MFIMF_OBJ,
 	MFIMF_DAE,
 	MFIMF_X,
+	MFIMF_ASE,
+	MFIMF_OBJ,
 	MFIMF_MD2,
 	MFIMF_MD3,
 	MFIMF_MEMD2,
@@ -18,10 +18,7 @@ enum MFIntModelFormat
 	MFIMF_ForceInt = 0x7FFFFFFF
 };
 
-struct MFIntModel
-{
-	int x;
-};
+struct MFIntModel;
 
 MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
 MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format);
