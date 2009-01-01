@@ -280,9 +280,9 @@ MFSound *MFSound_Create(const char *pName)
 
 		// create the sound
 		pSound = gSoundBank.Create();
-		MFZeroMemory(pSound, sizeof(MFSound));
+		MFZeroMemory(pSound, sizeof(MFSound) + internalSoundDataSize);
 		pSound->pTemplate = pTemplate;
-		pSound->pInternal = (MFSoundDataInternal*)((char*)pSound + internalSoundDataSize);
+		pSound->pInternal = (MFSoundDataInternal*)((char*)pSound + sizeof(MFSound));
 		MFString_CopyN(pSound->name, pName, sizeof(pSound->name) - 1);
 		pSound->name[sizeof(pSound->name) - 1] = 0;
 
@@ -541,7 +541,7 @@ MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 
 	// find free music track
 	int t = 0;
-	while(gMusicTracks[t].pStreamBuffer && t < gDefaults.sound.maxMusicTracks) t++;
+	while(gMusicTracks[t].pStreamHandler && t < gDefaults.sound.maxMusicTracks) t++;
 	if(t == gDefaults.sound.maxMusicTracks)
 	{
 		MFDebug_Warn(2, "Maximum number of streams reached, unable to create audio stream.");
@@ -583,6 +583,13 @@ MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 	// attempt to create the stream...
 	pStream->pStreamHandler->callbacks.pCreateStream(pStream, pFilename);
 
+	// check if the stream was created
+	if(!pStream->streamInfo.bitsPerSample || !pStream->streamInfo.channels)
+	{
+		pStream->pStreamHandler = NULL;
+		return NULL;
+	}
+
 	// create the playback sound buffer
 	if(!(pStream->createFlags & MFASF_DecodeOnly))
 	{
@@ -594,6 +601,7 @@ MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 		if(!pStream->pStreamBuffer)
 		{
 			pStream->pStreamHandler->callbacks.pDestroyStream(pStream);
+			pStream->pStreamHandler = NULL;
 			return NULL;
 		}
 	}
@@ -652,6 +660,7 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 
 	MFSound_LockMutex(true);
 
+	// destroy the playback voice
 	if(pStream->pStreamVoice)
 	{
 		bool playing = !(pStream->playFlags & MFPF_Paused);
@@ -661,7 +670,9 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 
 	// call stream handler destroy
 	pStream->pStreamHandler->callbacks.pDestroyStream(pStream);
+	pStream->pStreamHandler = NULL;
 
+	// destroy the sound buffer
 	if(pStream->pStreamBuffer)
 	{
 		MFSound_Destroy(pStream->pStreamBuffer);
