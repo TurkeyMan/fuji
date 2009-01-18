@@ -75,7 +75,7 @@ MFLanguage MFTranslation_GetDefaultLanguage();
  * Loads a translation string table. If the specified language is not available, the fallback language is used instead. If the fallback language is not available, 'English' is used instead.
  * @param pFilename Filename of the string table to load.
  * @param language Language to load.
- * @param fallback Fallback language in the cawse \a language is unavailable.
+ * @param fallback Fallback language in the case \a language is unavailable.
  * @return Return a pointer to the created MFStringTable. If the file was unavailable, NULL is returned.
  */
 MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage language, MFLanguage fallback = MFLang_English);

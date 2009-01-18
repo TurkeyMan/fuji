@@ -36,10 +36,10 @@ static D3DCAPS9 deviceCaps;
 
 extern HWND apphWnd;
 
-MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
+static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
-int gNumWeights = 0;
-MFRect gCurrentViewport;
+static int gNumWeights = 0;
+static MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
 {

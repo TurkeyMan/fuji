@@ -1,6 +1,21 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
+
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFRenderer_InitModulePlatformSpecific MFRenderer_InitModulePlatformSpecific_OpenGL
+	#define MFRenderer_DeinitModulePlatformSpecific MFRenderer_DeinitModulePlatformSpecific_OpenGL
+	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_OpenGL
+	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_OpenGL
+	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_OpenGL
+	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_OpenGL
+	#define MFRenderer_EndFrame MFRenderer_EndFrame_OpenGL
+	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_OpenGL
+	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_OpenGL
+	#define MFRenderer_GetViewport MFRenderer_GetViewport_OpenGL
+	#define MFRenderer_SetViewport MFRenderer_SetViewport_OpenGL
+	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_OpenGL
+#endif
 
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -88,14 +103,17 @@
 	#include <Windows.h>
 	#include <gl/gl.h>
 
+	#pragma comment(lib, "Opengl32")
+	#pragma comment(lib, "Glu32")
+
 	extern HINSTANCE apphInstance;
 	extern HWND apphWnd;
 	HGLRC hRC = NULL; // Permanent Rendering Context
 	HDC hDC = NULL; // Private GDI Device Context
 #endif
 
-MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
-MFRect gCurrentViewport;
+static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
+static MFRect gCurrentViewport;
 
 
 void MFRenderer_InitModulePlatformSpecific()

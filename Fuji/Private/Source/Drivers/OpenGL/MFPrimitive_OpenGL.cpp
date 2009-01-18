@@ -1,6 +1,24 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
+
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFPrimitive_InitModule MFPrimitive_InitModule_OpenGL
+	#define MFPrimitive_DeinitModule MFPrimitive_DeinitModule_OpenGL
+	#define MFPrimitive_DrawStats MFPrimitive_DrawStats_OpenGL
+	#define MFPrimitive MFPrimitive_OpenGL
+	#define MFBegin MFBegin_OpenGL
+	#define MFSetMatrix MFSetMatrix_OpenGL
+	#define MFSetColour MFSetColour_OpenGL
+	#define MFSetTexCoord1 MFSetTexCoord1_OpenGL
+	#define MFSetNormal MFSetNormal_OpenGL
+	#define MFSetPosition MFSetPosition_OpenGL
+	#define MFEnd MFEnd_OpenGL
+	#define MFPrimitive_BeginBlitter MFPrimitive_BeginBlitter_OpenGL
+	#define MFPrimitive_Blit MFPrimitive_Blit_OpenGL
+	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_OpenGL
+#endif
+
 
 #include "MFPrimitive.h"
 #include "MFMaterial.h"
@@ -15,8 +33,8 @@
 #endif
 
 #if defined(MF_WINDOWS)
-	#pragma comment(lib, "Opengl32")
-	#pragma comment(lib, "Glu32")
+	#include <windows.h>
+	#include <gl/gl.h>
 #endif
 
 struct Vert
@@ -27,13 +45,13 @@ struct Vert
 	uint32 colour;
 };
 
-Vert prevVert;
-Vert curVert;
+static Vert prevVert;
+static Vert curVert;
 
-uint32 beginCount;
-uint32 currentVert;
+static uint32 beginCount;
+static uint32 currentVert;
 
-uint32 primType;
+static uint32 primType;
 
 static int gPrimTypes[7] =
 {
@@ -111,19 +129,9 @@ void MFSetMatrix(const MFMatrix &mat)
 	glLoadMatrixf((GLfloat *)MFView_GetLocalToView(mat, &localToView));
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	curVert.colour = ((uint32)(colour.x*255.0f) << 0) | ((uint32)(colour.y*255.0f) << 8) | ((uint32)(colour.z*255.0f) << 16) | ((uint32)(colour.w*255.0f) << 24);
-}
-
 void MFSetColour(float r, float g, float b, float a)
 {
 	curVert.colour = ((uint32)(r*255.0f) << 0) | ((uint32)(g*255.0f) << 8) | ((uint32)(b*255.0f) << 16) | ((uint32)(a*255.0f) << 24);
-}
-
-void MFSetColour(uint32 col)
-{
-	curVert.colour = col;
 }
 
 void MFSetTexCoord1(float u, float v)
@@ -132,23 +140,11 @@ void MFSetTexCoord1(float u, float v)
 	curVert.v = v;
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	curVert.nx = normal.x;
-	curVert.ny = normal.y;
-	curVert.nz = normal.z;
-}
-
 void MFSetNormal(float x, float y, float z)
 {
 	curVert.nx = x;
 	curVert.ny = y;
 	curVert.nz = z;
-}
-
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
 }
 
 void MFSetPosition(float x, float y, float z)
@@ -203,9 +199,9 @@ void MFEnd()
 }
 
 
-int textureWidth, textureHeight;
-float uScale, vScale;
-float halfTexelU, halfTexelV;
+static int textureWidth, textureHeight;
+static float uScale, vScale;
+static float halfTexelU, halfTexelV;
 
 void MFPrimitive_BeginBlitter(int numBlits)
 {

@@ -1,6 +1,25 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
+
+#if defined(MF_RENDERPLUGIN_D3D9)
+	#define MFVertex_InitModulePlatformSpecific MFVertex_InitModulePlatformSpecific_D3D9
+	#define MFVertex_DeinitModulePlatformSpecific MFVertex_DeinitModulePlatformSpecific_D3D9
+	#define MFVertex_CreateVertexDeclaration MFVertex_CreateVertexDeclaration_D3D9
+	#define MFVertex_DestroyVertexDeclaration MFVertex_DestroyVertexDeclaration_D3D9
+	#define MFVertex_CreateVertexBuffer MFVertex_CreateVertexBuffer_D3D9
+	#define MFVertex_DestroyVertexBuffer MFVertex_DestroyVertexBuffer_D3D9
+	#define MFVertex_LockVertexBuffer MFVertex_LockVertexBuffer_D3D9
+	#define MFVertex_UnlockVertexBuffer MFVertex_UnlockVertexBuffer_D3D9
+	#define MFVertex_CreateIndexBuffer MFVertex_CreateIndexBuffer_D3D9
+	#define MFVertex_DestroyIndexBuffer MFVertex_DestroyIndexBuffer_D3D9
+	#define MFVertex_LockIndexBuffer MFVertex_LockIndexBuffer_D3D9
+	#define MFVertex_UnlockIndexBuffer MFVertex_UnlockIndexBuffer_D3D9
+	#define MFVertex_SetVertexDeclaration MFVertex_SetVertexDeclaration_D3D9
+	#define MFVertex_SetVertexStreamSource MFVertex_SetVertexStreamSource_D3D9
+	#define MFVertex_RenderVertices MFVertex_RenderVertices_D3D9
+	#define MFVertex_RenderIndexedVertices MFVertex_RenderIndexedVertices_D3D9
+#endif
 
 #include "MFVector.h"
 #include "MFHeap.h"
@@ -73,6 +92,14 @@ MFVertexDataFormat MFVertexD3D9_ChoooseDataType(MFVertexElementType elementType,
 	}
 	// everything else is a float for now...
 	return floatComponents[components];
+}
+
+void MFVertex_InitModulePlatformSpecific()
+{
+}
+
+void MFVertex_DeinitModulePlatformSpecific()
+{
 }
 
 MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)

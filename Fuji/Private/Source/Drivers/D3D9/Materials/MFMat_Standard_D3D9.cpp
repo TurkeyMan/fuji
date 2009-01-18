@@ -1,6 +1,14 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
+
+#if defined(MF_RENDERPLUGIN_D3D9)
+	#define MFMat_Standard_RegisterMaterial MFMat_Standard_RegisterMaterial_D3D9
+	#define MFMat_Standard_UnregisterMaterial MFMat_Standard_UnregisterMaterial_D3D9
+	#define MFMat_Standard_Begin MFMat_Standard_Begin_D3D9
+	#define MFMat_Standard_CreateInstance MFMat_Standard_CreateInstance_D3D9
+	#define MFMat_Standard_DestroyInstance MFMat_Standard_DestroyInstance_D3D9
+#endif
 
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
@@ -59,7 +67,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
-			MFRendererPC_SetTexture(0, pData->pTextures[pData->diffuseMapIndex]->pTexture);
+			IDirect3DTexture9 *pTexture = (IDirect3DTexture9*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			MFRendererPC_SetTexture(0, pTexture);
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);

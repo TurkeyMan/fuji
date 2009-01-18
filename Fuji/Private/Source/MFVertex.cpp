@@ -23,6 +23,16 @@ int gVertexDataStride[MFVDF_Max] =
 	4	// MFVDF_Float16_2
 };
 
+void MFVertex_InitModule()
+{
+	MFVertex_InitModulePlatformSpecific();
+}
+
+void MFVertex_DeinitModule()
+{
+	MFVertex_DeinitModulePlatformSpecific();
+}
+
 MFVertexElement *MFVertex_FindVertexElement(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, MFVertexElementData **ppElementData)
 {
 	MFVertexDeclaration *pDecl = pVertexBuffer->pVertexDeclatation;

@@ -34,6 +34,9 @@ struct MFTextureSurfaceLevel;
 void MFTexture_InitModule();
 void MFTexture_DeinitModule();
 
+void MFTexture_InitModulePlatformSpecific();
+void MFTexture_DeinitModulePlatformSpecific();
+
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
 
 // texture TemplateData
@@ -79,14 +82,10 @@ struct MFTexture
 	IDirect3DTexture8 texture;
 #endif
 	IDirect3DTexture8 *pTexture;
-#elif MF_RENDERER == MF_DRIVER_D3D9
-	IDirect3DTexture9 *pTexture;
-#elif MF_RENDERER == MF_DRIVER_OPENGL
-	GLuint textureID;
 #elif MF_RENDERER == MF_DRIVER_PS2
 	unsigned int vramAddr;
 #else
-	// nothing
+	void *pInternalData;
 #endif
 
 	MFTextureTemplateData *pTemplateData;

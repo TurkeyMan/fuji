@@ -392,6 +392,9 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	MFSound_LockMutex(true);
 
 	MFVoice *pVoice = gVoices.Create();
+	if(!pVoice)
+		return NULL;
+
 	MFZeroMemory(pVoice, sizeof(MFVoice) + internalVoiceDataSize);
 	pVoice->flags = playFlags;
 	pVoice->pSound = pSound;
@@ -844,7 +847,7 @@ void MFSound_Draw()
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 
 			MFBegin(46);
-			MFSetColour(0xFFFFFFFF);
+			MFSetColour(MFVector::white);
 			MFSetPosition(23.0f, y-2.0f, 0.0f);
 			MFSetPosition(617.0f, y-2.0f, 0.0f);
 			MFSetPosition(23.0f, y+22.0f, 0.0f);
@@ -853,7 +856,7 @@ void MFSound_Draw()
 			MFSetPosition(617.0f, y+22.0f, 0.0f);
 			MFSetPosition(25.0f, y, 0.0f);
 
-			MFSetColour(0xFF404040);
+			MFSetColour(.25f, .25f, .25f, 1.f);
 			MFSetPosition(25.0f, y, 0.0f);
 			MFSetPosition(615.0f, y, 0.0f);
 			MFSetPosition(25.0f, y+20.0f, 0.0f);
@@ -874,7 +877,7 @@ void MFSound_Draw()
 			y += 30.0f;
 			MFSetPosition(98.0f, y-2.0f, 0.0f);
 
-			MFSetColour(0xFFFFFFFF);
+			MFSetColour(MFVector::white);
 			MFSetPosition(98.0f, y-2.0f, 0.0f);
 			MFSetPosition(502.0f, y-2.0f, 0.0f);
 			MFSetPosition(98.0f, y+22.0f, 0.0f);
@@ -883,7 +886,7 @@ void MFSound_Draw()
 			MFSetPosition(502.0f, y+22.0f, 0.0f);
 			MFSetPosition(100.0f, y, 0.0f);
 
-			MFSetColour(0xFF404040);
+			MFSetColour(.25f, .25f, .25f, 1.f);
 			MFSetPosition(100.0f, y, 0.0f);
 			MFSetPosition(500.0f, y, 0.0f);
 			MFSetPosition(100.0f, y+20.0f, 0.0f);
@@ -897,7 +900,7 @@ void MFSound_Draw()
 			MFSetPosition(500.0f, y+20.0f, 0.0f);
 			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(1,1,0,1);
+			MFSetColour(MFVector::yellow);
 			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
@@ -908,7 +911,7 @@ void MFSound_Draw()
 			MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
 			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(1,0,0,1);
+			MFSetColour(MFVector::red);
 			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
@@ -919,7 +922,7 @@ void MFSound_Draw()
 			MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 			MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(0xFFFF8000);
+			MFSetColour(1.f, .5f, 0.f, 1.f);
 			MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xBufferFilled+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xBufferFilled-1.0f, y+21.0f, 0.0f);
@@ -1006,7 +1009,7 @@ void MFSound_Draw()
 		MFPrimitive(PT_TriStrip|PT_Untextured);
 
 		MFBegin(22);
-		MFSetColour(0xFFFFFFFF);
+		MFSetColour(MFVector::white);
 		MFSetPosition(98.0f, y-2.0f, 0.0f);
 		MFSetPosition(502.0f, y-2.0f, 0.0f);
 		MFSetPosition(98.0f, y+22.0f, 0.0f);
@@ -1015,7 +1018,7 @@ void MFSound_Draw()
 		MFSetPosition(502.0f, y+22.0f, 0.0f);
 		MFSetPosition(100.0f, y, 0.0f);
 
-		MFSetColour(0xFF404040);
+		MFSetColour(.25f, .25f, .25f, 1.f);
 		MFSetPosition(100.0f, y, 0.0f);
 		MFSetPosition(500.0f, y, 0.0f);
 		MFSetPosition(100.0f, y+20.0f, 0.0f);
@@ -1029,7 +1032,7 @@ void MFSound_Draw()
 		MFSetPosition(500.0f, y+20.0f, 0.0f);
 		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 
-		MFSetColour(1,1,0,1);
+		MFSetColour(MFVector::yellow);
 		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
@@ -1040,7 +1043,7 @@ void MFSound_Draw()
 		MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
 		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 
-		MFSetColour(1,0,0,1);
+		MFSetColour(MFVector::red);
 		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
@@ -1051,7 +1054,7 @@ void MFSound_Draw()
 		MFSetPosition(xWriteCursor+1.0f, y+21.0f, 0.0f);
 		MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
 
-		MFSetColour(0xFFFF8000);
+		MFSetColour(1.f, .5f, 0.f, 1.f);
 		MFSetPosition(xBufferFilled-1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xBufferFilled+1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xBufferFilled-1.0f, y+21.0f, 0.0f);

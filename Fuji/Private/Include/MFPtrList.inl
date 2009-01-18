@@ -208,7 +208,11 @@ inline void MFPtrListDL<T>::Deinit()
 template<class T>
 inline T* MFPtrListDL<T>::Create()
 {
-	MFDebug_Assert(!IsFull(), MFStr("list %s full",pName));
+	if(IsFull())
+	{
+		MFDebug_Log(2, MFStr("list %s full",pName));
+		return NULL;
+	}
 	return *(--ppMark);
 };
 

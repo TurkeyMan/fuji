@@ -1,6 +1,15 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
+
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFModel_InitModulePlatformSpecific MFModel_InitModulePlatformSpecific_OpenGL
+	#define MFModel_DeinitModulePlatformSpecific MFModel_DeinitModulePlatformSpecific_OpenGL
+	#define MFModel_Draw MFModel_Draw_OpenGL
+	#define MFModel_CreateMeshChunk MFModel_CreateMeshChunk_OpenGL
+	#define MFModel_DestroyMeshChunk MFModel_DestroyMeshChunk_OpenGL
+	#define MFModel_FixUpMeshChunk MFModel_FixUpMeshChunk_OpenGL
+#endif
 
 #include "MFMesh_Internal.h"
 #include "MFModel_Internal.h"

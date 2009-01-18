@@ -163,17 +163,17 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 
 		// draw the axii's
 		MFBegin(2);
-		MFSetColour(0xFF00FF00);
+		MFSetColour(MFVector::green);
 		MFSetPosition(center.x, center.y + 10.0f, center.z);
 		MFSetPosition(center.x, center.y, center.z);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(0xFFFF0000);
+		MFSetColour(MFVector::red);
 		MFSetPosition(center.x, center.y, center.z);
 		MFSetPosition(center.x + 10.0f, center.y, center.z);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(0xFF0000FF);
+		MFSetColour(MFVector::blue);
 		MFSetPosition(center.x, center.y, center.z);
 		MFSetPosition(center.x, center.y, center.z + 10.0f);
 		MFEnd();
@@ -313,17 +313,17 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
 
 	// draw the axii's
 	MFBegin(2);
-	MFSetColour(0xFF00FF00);
+	MFSetColour(MFVector::green);
 	MFSetPosition(position.x, position.y + radius * 0.5f, position.z);
 	MFSetPosition(position.x, position.y, position.z);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(0xFFFF0000);
+	MFSetColour(MFVector::red);
 	MFSetPosition(position.x, position.y, position.z);
 	MFSetPosition(position.x + radius * 0.5f, position.y, position.z);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(0xFF0000FF);
+	MFSetColour(MFVector::blue);
 	MFSetPosition(position.x, position.y, position.z);
 	MFSetPosition(position.x, position.y, position.z + radius * 0.5f);
 	MFEnd();
@@ -463,17 +463,17 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 
 	// draw the axii's
 	MFBegin(2);
-	MFSetColour(0xFF00FF00);
+	MFSetColour(MFVector::green);
 	MFSetPosition(0.0f, radius * 0.5f, 0.0f);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(0xFFFF0000);
+	MFSetColour(MFVector::red);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(radius * 0.5f, 0.0f, 0.0f);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(0xFF0000FF);
+	MFSetColour(MFVector::blue);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(0.0f, 0.0f, radius * 0.5f);
 	MFEnd();
@@ -564,17 +564,17 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 
 		// draw the axii's
 		MFBegin(2);
-		MFSetColour(0xFF00FF00);
+		MFSetColour(MFVector::green);
 		MFSetPosition(0.0f, radius * 0.5f, 0.0f);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(0xFFFF0000);
+		MFSetColour(MFVector::red);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFSetPosition(radius * 0.5f, 0.0f, 0.0f);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(0xFF0000FF);
+		MFSetColour(MFVector::blue);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFSetPosition(0.0f, 0.0f, radius * 0.5f);
 		MFEnd();
@@ -821,15 +821,15 @@ void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 		MFSetMatrix(_mat);
 		MFBegin(6);
 
-		MFSetColour(0xFFFF0000);
+		MFSetColour(MFVector::red);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(scale*0.8f,0.0f,0.0f);
 
-		MFSetColour(0xFF00FF00);
+		MFSetColour(MFVector::green);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(0.0f,scale*0.8f,0.0f);
 
-		MFSetColour(0xFF0000FF);
+		MFSetColour(MFVector::blue);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(0.0f,0.0f,scale*0.8f);
 		MFEnd();
@@ -840,8 +840,8 @@ void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 	}
 	else
 	{
-		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(1.0f,0.0f,0.0f), scale, scale * 0.02f, MakeVector(1,0,0,1), _mat);
-		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,1.0f,0.0f), scale, scale * 0.02f, MakeVector(0,1,0,1), _mat);
-		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,0.0f,1.0f), scale, scale * 0.02f, MakeVector(0,0,1,1), _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(1.0f,0.0f,0.0f), scale, scale * 0.02f, MFVector::red, _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,1.0f,0.0f), scale, scale * 0.02f, MFVector::green, _mat);
+		MFPrimitive_DrawArrow(MFVector::zero, MakeVector(0.0f,0.0f,1.0f), scale, scale * 0.02f, MFVector::blue, _mat);
 	}
 }

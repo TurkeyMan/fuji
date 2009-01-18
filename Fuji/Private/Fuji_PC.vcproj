@@ -1215,6 +1215,14 @@
 					Name="Plugin"
 					>
 					<File
+						RelativePath=".\Source\Drivers\Plugin\MFModel_Plug.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Plugin\MFPrimitive_Plug.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Plugin\MFRenderer_Plug.cpp"
 						>
 					</File>
@@ -1222,6 +1230,22 @@
 						RelativePath=".\Source\Drivers\Plugin\MFSound_Plug.cpp"
 						>
 					</File>
+					<File
+						RelativePath=".\Source\Drivers\Plugin\MFTexture_Plug.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\Plugin\MFVertex_Plug.cpp"
+						>
+					</File>
+					<Filter
+						Name="Materials"
+						>
+						<File
+							RelativePath=".\Source\Drivers\Plugin\Materials\MFMat_Standard_Plug.cpp"
+							>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 			<Filter

@@ -81,7 +81,12 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 	const char *pFile = MFStr("%s.%s", pFilename, MFTranslation_GetLanguageName(language, false));
 	pStringTable = (MFStringTable*)MFFileSystem_Load(pFile);
 
-	if(!pStringTable && language != fallback)
+	if(!pStringTable && fallback == MFLang_Unknown)
+	{
+		// we have requested to fail if the language could not be loaded
+		return NULL;
+	}
+	else if(!pStringTable && language != fallback)
 	{
 		MFDebug_Warn(3, MFStr("String table '%s' does not exist, attempting to use fallback language", pFile));
 

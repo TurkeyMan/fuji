@@ -274,7 +274,6 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 	if(result)
 	{
 		// some error
-
 		switch(result)
 		{
 			case WSAHOST_NOT_FOUND:

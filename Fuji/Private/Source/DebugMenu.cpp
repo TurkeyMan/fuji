@@ -345,7 +345,7 @@ void Menu::Draw()
 
 	MFPrimitive(PT_TriStrip);
 	MFBegin(4);
-	MFSetColour(1,1,1,1);
+	MFSetColour(MFVector::white);
 	MFSetTexCoord1(0,0);
 	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2 - iconSize, menuPosition.y + logoMargin, 0);
 	MFSetTexCoord1(1,0);
@@ -364,13 +364,10 @@ void Menu::Draw()
 
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 	MFBegin(4);
-	MFSetColour(0xA0000000);
+	MFSetColour(0.f, 0.f, 0.f, 0.65f);
 	MFSetPosition(menuPosition.x+15, menuPosition.y+45, 0);
-	MFSetColour(0xA0000000);
 	MFSetPosition(menuPosition.x+menuDimensions.x-15, menuPosition.y+45, 0);
-	MFSetColour(0xA0000000);
 	MFSetPosition(menuPosition.x+15, menuPosition.y+menuDimensions.y-15, 0);
-	MFSetColour(0xA0000000);
 	MFSetPosition(menuPosition.x+menuDimensions.x-15, menuPosition.y+menuDimensions.y-15, 0);
 	MFEnd();
 
@@ -396,13 +393,13 @@ void Menu::Draw()
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 
 			MFBegin(4);
-			MFSetColour(0xC0000080);
+			MFSetColour(0.f, 0.f, .5f, .75f);
 			MFSetPosition(menuPosition.x+15, currentPos.y, 0);
-			MFSetColour(0xC00000D0);
+			MFSetColour(0.f, 0.f, .8f, .75f);
 			MFSetPosition(menuPosition.x+menuDimensions.x-15, currentPos.y, 0);
-			MFSetColour(0xC0000090);
+			MFSetColour(0.f, 0.f, .56f, .75f);
 			MFSetPosition(menuPosition.x+15, currentPos.y + height, 0);
-			MFSetColour(0xC00000FF);
+			MFSetColour(0.f, 0.f, .1f, .75f);
 			MFSetPosition(menuPosition.x+menuDimensions.x-15, currentPos.y + height, 0);
 			MFEnd();
 		}
@@ -662,7 +659,7 @@ float MenuItemColour::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(0xFFFFFFFF);
+	MFSetColour(MFVector::white);
 	MFSetPosition(pos);
 	MFSetPosition(pos + MakeVector(45.0f, 0.0f, 0.0f));
 	MFSetPosition(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));

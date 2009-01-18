@@ -188,7 +188,7 @@ char* MFString_RChr(const char *pSource, int c)
 	return pLast;
 }
 
-bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory)
+bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory, bool bCaseSensitive)
 {
 	if(!pPattern || !pFilename)
 		return false;
@@ -215,7 +215,7 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
 
 			return match;
 		}
-		else if(*pPattern != *pFilename)
+		else if((bCaseSensitive && *pPattern != *pFilename) || (!bCaseSensitive && MFToLower(*pPattern) != MFToLower(*pFilename)))
 			break;
 
 		++pPattern;

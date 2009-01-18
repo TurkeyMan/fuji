@@ -219,10 +219,8 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 #if defined(ALLOW_RAW_INPUT)
 		case WM_INPUT:
 			if(gDefaults.input.allowMultipleMice)
-			{
 				HandleRawMouseMessage((HRAWINPUT)lParam);
-				return 0;
-			}
+			break;
 #endif
 
 		case WM_KEYDOWN:

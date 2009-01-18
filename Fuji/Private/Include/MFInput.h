@@ -244,8 +244,18 @@ enum MFInputDeviceStatus
 enum MFGamepadFlags
 {
 	MFGF_UserFlags					= 0xFFFF,
-	MFGF_IsGuitar					= 0x1,
-	MFGF_IsDrums					= 0x2,
+	MFGF_IsPS2Adapter				= 0x1,
+	MFGF_IsGuitar					= 0x2,
+	MFGF_IsDrums					= 0x4,
+
+	// Guitar specific flags
+	MFGF_Guitar_HasTilt				= 0x100,
+	MFGF_Guitar_HasSolo				= 0x200,
+	MFGF_Guitar_HasPickupSwitch		= 0x400,
+	MFGF_Guitar_HasSlider			= 0x800,
+
+	// Drum specific flags
+	MFGF_Drums_Has5Drums			= 0x100,
 
 	MFGF_SystemFlags				= 0xFFFF0000,
 	MFGF_DontUseSphericalDeadzone	= 0x10000,
@@ -356,6 +366,9 @@ enum MFGamepadButton
 	Axis_RX,					/**< X-Axis on the Right analog stick */
 	Axis_RY,					/**< Y-Axis on the Right analog stick */
 
+// Extra buttons
+	Button_Home = 20,
+
 	GamepadType_Max,			/**< Maximum gamepad button id */
 	GamepadType_ForceInt	= 0x7FFFFFFF,	/**< Force button ID to an int type */
 
@@ -380,20 +393,21 @@ enum MFGamepadButton
 
 	Button_GH_Roll			= Axis_LY,				/**< Jump/Roll sensor on Guitar controller */
 	Button_GH_PickupSwitch	= Axis_RX,				/**< Pickup Switch on Guitar controller */
+	Button_GH_Slider		= Axis_RX,				/**< Slider on Guitar controller */
 
 // Rock Band Drums enums
 	Button_Drum_Red		= Button_P2_Circle,		/**< Red drum on Drum controller */
-	Button_Drum_Yellow	= Button_P2_Triangle,	/**< Red key on Drum controller */
-	Button_Drum_Blue	= Button_P2_Box,		/**< Yellow key on Drum controller */
-	Button_Drum_Green	= Button_P2_Cross,		/**< Blue key on Drum controller */
-	Button_Drum_Kick	= Button_P2_L1,			/**< Orange key on Drum controller */
+	Button_Drum_Yellow	= Button_P2_Triangle,	/**< Red drum on Drum controller */
+	Button_Drum_Blue	= Button_P2_Box,		/**< Yellow drum on Drum controller */
+	Button_Drum_Green	= Button_P2_Cross,		/**< Blue drum on Drum controller */
+	Button_Drum_Kick	= Button_P2_L1,			/**< Kick pedal on Drum controller */
 
-	Button_DM_Hat		= Button_Drum_Yellow,	/**< Red drum on Drum controller */
-	Button_DM_Snare		= Button_Drum_Red,		/**< Red key on Drum controller */
-	Button_DM_Tom1		= Button_Drum_Blue,		/**< Yellow key on Drum controller */
-	Button_DM_Tom2		= Button_P2_R1,			/**< Blue key on Drum controller */
-	Button_DM_Cymbal	= Button_Drum_Green,	/**< Blue key on Drum controller */
-	Button_DM_Kick		= Button_Drum_Kick,		/**< Blue key on Drum controller */
+// Guitar Hero: World Tour enums
+	Button_Drum_Hat		= Button_Drum_Yellow,	/**< Hi-Hat drum on Drum controller */
+	Button_Drum_Snare	= Button_Drum_Red,		/**< Snare on Drum controller */
+	Button_Drum_Tom1	= Button_Drum_Blue,		/**< Tom-1 on Drum controller */
+	Button_Drum_Tom2	= Button_Drum_Green,	/**< Tom-2 on Drum controller */
+	Button_Drum_Cymbal	= Button_P2_R1,			/**< Cymbal on Drum controller */
 
 	Button_Drum_Start	= Button_P2_Start,		/**< Start button on Drum controller */
 	Button_Drum_Select	= Button_P2_Select		/**< Select button on Drum controller */

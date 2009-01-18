@@ -3,6 +3,12 @@
 
 #include "MFVertex.h"
 
+void MFVertex_InitModule();
+void MFVertex_DeinitModule();
+
+void MFVertex_InitModulePlatformSpecific();
+void MFVertex_DeinitModulePlatformSpecific();
+
 struct MFVertexElementData
 {
 	void *pData;

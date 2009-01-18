@@ -1,6 +1,16 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
+
+#if defined(MF_RENDERPLUGIN_D3D9)
+	#define MFModel_InitModulePlatformSpecific MFModel_InitModulePlatformSpecific_D3D9
+	#define MFModel_DeinitModulePlatformSpecific MFModel_DeinitModulePlatformSpecific_D3D9
+	#define MFModel_Draw MFModel_Draw_D3D9
+	#define MFModel_CreateMeshChunk MFModel_CreateMeshChunk_D3D9
+	#define MFModel_DestroyMeshChunk MFModel_DestroyMeshChunk_D3D9
+	#define MFModel_FixUpMeshChunk MFModel_FixUpMeshChunk_D3D9
+#endif
+
 
 #include "MFPtrList.h"
 #include "MFSystem.h"

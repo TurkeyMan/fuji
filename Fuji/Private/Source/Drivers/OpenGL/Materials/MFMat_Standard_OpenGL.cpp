@@ -1,6 +1,14 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
+
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFMat_Standard_RegisterMaterial MFMat_Standard_RegisterMaterial_OpenGL
+	#define MFMat_Standard_UnregisterMaterial MFMat_Standard_UnregisterMaterial_OpenGL
+	#define MFMat_Standard_Begin MFMat_Standard_Begin_OpenGL
+	#define MFMat_Standard_CreateInstance MFMat_Standard_CreateInstance_OpenGL
+	#define MFMat_Standard_DestroyInstance MFMat_Standard_DestroyInstance_OpenGL
+#endif
 
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
@@ -8,7 +16,11 @@
 #include "Display_Internal.h"
 #include "MFView_Internal.h"
 #include "../../Source/Materials/MFMat_Standard.h"
-#include "GL/gl.h"
+
+#if defined(MF_WINDOWS)
+	#include <windows.h>
+	#include <gl/gl.h>
+#endif
 
 static MFMaterial *pSetMaterial = 0;
 
@@ -34,7 +46,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		// set some render states
 		if(pData->pTextures[pData->diffuseMapIndex])
 		{
-			glBindTexture(GL_TEXTURE_2D, pData->pTextures[pData->diffuseMapIndex]->textureID);
+			GLuint textureID = *(GLuint*)&pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			glBindTexture(GL_TEXTURE_2D, textureID);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 //			glActiveTexture(0);
 			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);

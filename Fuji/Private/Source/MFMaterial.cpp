@@ -724,7 +724,7 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(0xFFFFFFFF);
+	MFSetColour(MFVector::white);
 	MFSetPosition(pos);
 	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
 	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
@@ -745,7 +745,7 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 			y = pos.y + (float)a*h;
 
 			MFBegin(4);
-			MFSetColour(((a+b)&1) ? 0xFFC0C0C0 : 0xFF303030);
+			MFSetColour(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
 			MFSetPosition(x,y,0);
 			MFSetPosition(x+w,y,0);
 			MFSetPosition(x,y+h,0);
@@ -759,7 +759,7 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 	MFPrimitive(PT_TriStrip);
 
 	MFBegin(4);
-	MFSetColour(0xFFFFFFFF);
+	MFSetColour(MFVector::white);
 	MFSetTexCoord1(0.0f,0.0f);
 	MFSetPosition(pos);
 	MFSetTexCoord1(1.0f,0.0f);

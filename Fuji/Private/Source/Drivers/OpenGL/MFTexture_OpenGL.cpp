@@ -1,6 +1,14 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_OPENGL
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
+
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFTexture_InitModulePlatformSpecific MFTexture_InitModulePlatformSpecific_OpenGL
+	#define MFTexture_DeinitModulePlatformSpecific MFTexture_DeinitModulePlatformSpecific_OpenGL
+	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_OpenGL
+	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_OpenGL
+	#define MFTexture_Destroy MFTexture_Destroy_OpenGL
+#endif
 
 /**** Includes ****/
 
@@ -10,6 +18,9 @@
 #include "MFFileSystem_Internal.h"
 #include "MFPtrList.h"
 
+#if defined(MF_WINDOWS)
+	#include <windows.h>
+#endif
 #if defined(MF_LINUX) || defined(MF_OSX)
 	#include <GL/glx.h>
 #endif
@@ -85,6 +96,14 @@ static const int gMaxGLFormats = sizeof(gGLFormats) / sizeof(GLFormat);
 
 /**** Functions ****/
 
+void MFTexture_InitModulePlatformSpecific()
+{
+}
+
+void MFTexture_DeinitModulePlatformSpecific()
+{
+}
+
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
@@ -92,12 +111,14 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 
+	GLuint textureID;
 	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &(pTexture->textureID));
-	glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	pTexture->pInternalData = (void*)textureID;
 
 	uint32 platformFormat = MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_OpenGL);
 	MFDebug_Assert(platformFormat < (uint32)gMaxGLFormats, "Platform format is undefined...");
@@ -150,7 +171,8 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	// if no references left, destroy texture
 	if(!pTexture->refCount)
 	{
-		glDeleteTextures(1, &pTexture->textureID);
+		GLuint *pTextures = (GLuint*)&pTexture->pInternalData;
+		glDeleteTextures(1, pTextures);
 
 		MFHeap_Free(pTexture->pTemplateData);
 		gTextureBank.Destroy(pTexture);

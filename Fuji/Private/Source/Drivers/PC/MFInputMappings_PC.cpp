@@ -25,10 +25,11 @@ static const int gStandardButtonID[GamepadType_Max] =
 	13 | POV_Down,	// Button_DDown
 	14 | POV_Left,	// Button_DLeft
 	15 | POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Rx,               // Button_ThumbRX
-	AID_Ry | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Rx,                // Button_ThumbRX
+	AID_Ry | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gEMSButtonID[GamepadType_Max] =
@@ -52,7 +53,8 @@ static const int gEMSButtonID[GamepadType_Max] =
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
-	AID_Z | AID_Negative  // Button_ThumbRY
+	AID_Z | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gTitaniumButtonID[GamepadType_Max] =
@@ -73,10 +75,11 @@ static const int gTitaniumButtonID[GamepadType_Max] =
 	14 | POV_Down,	// Button_DDown
 	15 | POV_Left,	// Button_DLeft
 	13 | POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Z,                // Button_ThumbRX
-	AID_Rz | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Z,                 // Button_ThumbRX
+	AID_Rz | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gSuperDualBoxButtonID[GamepadType_Max] =
@@ -100,7 +103,8 @@ static const int gSuperDualBoxButtonID[GamepadType_Max] =
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
-	AID_Z | AID_Negative  // Button_ThumbRY
+	AID_Z | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gGGE909ButtonID[GamepadType_Max] =
@@ -124,7 +128,8 @@ static const int gGGE909ButtonID[GamepadType_Max] =
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
-	AID_Z | AID_Negative  // Button_ThumbRY
+	AID_Z | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gGGE909VariantButtonID[GamepadType_Max] =
@@ -145,10 +150,11 @@ static const int gGGE909VariantButtonID[GamepadType_Max] =
 	POV_Down,	// Button_DDown
 	POV_Left,	// Button_DLeft
 	POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Z,               // Button_ThumbRX
-	AID_Rz | AID_Negative  // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Z,                 // Button_ThumbRX
+	AID_Rz | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gXBCDButtonID[GamepadType_Max] =
@@ -169,10 +175,11 @@ static const int gXBCDButtonID[GamepadType_Max] =
 	14 | POV_Down,	// Button_DDown
 	15 | POV_Left,	// Button_DLeft
 	13 | POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Rx,               // Button_ThumbRX
-	AID_Ry | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Rx,                // Button_ThumbRX
+	AID_Ry | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gLogitechDualActionButtonID[GamepadType_Max] =
@@ -193,10 +200,11 @@ static const int gLogitechDualActionButtonID[GamepadType_Max] =
 	POV_Down,	// Button_DDown
 	POV_Left,	// Button_DLeft
 	POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Z,                // Button_ThumbRX
-	AID_Rz | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Z,                 // Button_ThumbRX
+	AID_Rz | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gXBox360ButtonID[GamepadType_Max] =
@@ -217,10 +225,11 @@ static const int gXBox360ButtonID[GamepadType_Max] =
 	POV_Down,	// Button_DDown
 	POV_Left,	// Button_DLeft
 	POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Rx,               // Button_ThumbRX
-	AID_Ry | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Rx,                // Button_ThumbRX
+	AID_Ry | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gXGamepadButtonID[GamepadType_Max] =
@@ -244,7 +253,8 @@ static const int gXGamepadButtonID[GamepadType_Max] =
 	AID_X,	// Button_ThumbLX
 	AID_Y,	// Button_ThumbLY
 	AID_Rx,	// Button_ThumbRX
-	AID_Ry  // Button_ThumbRY
+	AID_Ry, // Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gXterminatorButtonID[GamepadType_Max] =
@@ -259,16 +269,17 @@ static const int gXterminatorButtonID[GamepadType_Max] =
 	AID_Rz | AID_Clamp,	// Button_RightTrigger // use positive range of clamped z axis
 	9,   // Button_Start
 	8,   // Button_Back
-	5,  // Button_LeftThumb
-	2,  // Button_RightThumb
+	5,   // Button_LeftThumb
+	2,   // Button_RightThumb
 	AID_Rx | AID_Negative | AID_Clamp,  // Button_DUp
 	AID_Rx | AID_Clamp,  // Button_DDown
 	AID_Slider1 | AID_Negative | AID_Clamp,  // Button_DLeft
 	AID_Slider1 | AID_Clamp,  // Button_DRight
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
-	-1, // Button_ThumbRX
-	-1  // Button_ThumbRY
+	-1,   // Button_ThumbRX
+	-1,   // Button_ThumbRY
+	-1    // Button_Home
 };
 
 static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] =
@@ -292,7 +303,8 @@ static const int gLogitechWingmanGamepadExtremeID[GamepadType_Max] =
 	-1, // Button_ThumbLX
 	-1, // Button_ThumbLY
 	-1, // Button_ThumbRX
-	-1  // Button_ThumbRY
+	-1, // Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gPowerWaveButtonID[GamepadType_Max] =
@@ -313,10 +325,11 @@ static const int gPowerWaveButtonID[GamepadType_Max] =
 	POV_Down,	// Button_DDown
 	POV_Left,	// Button_DLeft
 	POV_Right,	// Button_DRight
-	AID_X,                // Button_ThumbLX
-	AID_Y | AID_Negative, // Button_ThumbLY
-	AID_Z,                // Button_ThumbRX
-	AID_Rz | AID_Negative // Button_ThumbRY
+	AID_X,                 // Button_ThumbLX
+	AID_Y | AID_Negative,  // Button_ThumbLY
+	AID_Z,                 // Button_ThumbRX
+	AID_Rz | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gGreenAsiaButtonID[GamepadType_Max] =
@@ -340,7 +353,8 @@ static const int gGreenAsiaButtonID[GamepadType_Max] =
 	-1,	// Button_ThumbLX
 	-1,	// Button_ThumbLY
 	-1,	// Button_ThumbRX
-	-1	// Button_ThumbRY
+	-1,	// Button_ThumbRY
+	-1	// Button_Home
 };
 
 static const int gRadioshackButtonID[GamepadType_Max] =
@@ -364,7 +378,8 @@ static const int gRadioshackButtonID[GamepadType_Max] =
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
-	AID_Z | AID_Negative  // Button_ThumbRY
+	AID_Z | AID_Negative, // Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gGenericPS2ButtonID[GamepadType_Max] =
@@ -389,6 +404,7 @@ static const int gGenericPS2ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Z,					// Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gJoyBox3ButtonID[GamepadType_Max] =
@@ -413,6 +429,7 @@ static const int gJoyBox3ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Z,					// Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+	-1   // Button_Home
 };
 
 static const int gSixaxisButtonID[GamepadType_Max] =
@@ -437,6 +454,7 @@ static const int gSixaxisButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	-1, // AID_Z,					// Button_ThumbRX // sixaxis driver doesnt seem to like the right stick...
 	-1, // AID_Rz | AID_Negative,	// Button_ThumbRY // sixaxis driver doesnt seem to like the right stick...
+	-1  // Button_Home
 };
 
 static const int gXPlorerButtonID[GamepadType_Max] =
@@ -461,6 +479,7 @@ static const int gXPlorerButtonID[GamepadType_Max] =
 	AID_Z,					// Jump/Roll sensor
 	-1,						// Button_GH_PickupSwitch
 	AID_Ry | AID_Negative,	// Button_GH_Tilt
+	-1  // Button_Home
 };
 
 static const int gXGuitarButtonID[GamepadType_Max] =
@@ -485,6 +504,7 @@ static const int gXGuitarButtonID[GamepadType_Max] =
 	AID_Z,	// Jump/Roll sensor
 	AID_Rz,	// Button_GH_PickupSwitch
 	AID_Ry,	// Button_GH_Tilt
+	-1		// Button_Home
 };
 
 static const int gRB360GuitarButtonID[GamepadType_Max] =
@@ -509,6 +529,7 @@ static const int gRB360GuitarButtonID[GamepadType_Max] =
 	-1,					// Jump/Roll sensor
 	AID_Z,				// Button_GH_PickupSwitch
 	-1,					// Button_GH_Tilt
+	-1  // Button_Home
 };
 
 static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
@@ -533,8 +554,7 @@ static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
 	-1,					// Jump/Roll sensor
 	-1,         // Button_GH_PickupSwitch
 	-1,	        // Button_GH_Tilt
-
-  // PS Button = 12
+	12  // Button_Home
 };
 
 static const int gRBPS3GuitarButtonID[GamepadType_Max] =
@@ -559,8 +579,32 @@ static const int gRBPS3GuitarButtonID[GamepadType_Max] =
 	-1,       // Jump/Roll sensor
 	-1,       // Button_GH_PickupSwitch
 	-1,       // Button_GH_Tilt
+	12  // Button_Home
+};
 
-  // PS Button = 12
+static const int gGH4PS3GuitarButtonID[GamepadType_Max] =
+{
+	3,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	0,	// Button_GH_Yellow
+	6,	// Button_GH_Solo
+	-1,	// Unused
+	5,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z,	// Button_GH_Whammy
+	-1,       // Jump/Roll sensor
+	AID_Rz | AID_Full, // Button_GH_Slider
+	-1,       // Button_GH_Tilt
+	12  // Button_Home
 };
 
 static const int gUSBGamepadButtonID[GamepadType_Max] =
@@ -585,6 +629,7 @@ static const int gUSBGamepadButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gTwinShockButtonID[GamepadType_Max] =
@@ -609,6 +654,7 @@ static const int gTwinShockButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Z, // Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gPSVibrationFeedbackButtonID[GamepadType_Max] =
@@ -633,6 +679,7 @@ static const int gPSVibrationFeedbackButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gUNIVERSALRumbleWheelButtonID[GamepadType_Max] =
@@ -657,6 +704,7 @@ static const int gUNIVERSALRumbleWheelButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Slider1, // Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gSaitek990ButtonID[GamepadType_Max] =
@@ -681,6 +729,7 @@ static const int gSaitek990ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gSaitek880ButtonID[GamepadType_Max] =
@@ -705,6 +754,7 @@ static const int gSaitek880ButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gUnusualPS2AdapterButtonID[GamepadType_Max] =
@@ -729,6 +779,7 @@ static const int gUnusualPS2AdapterButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Z, // Button_ThumbRX
 	AID_Rz | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gGamePadProButtonID[GamepadType_Max] =
@@ -752,7 +803,8 @@ static const int gGamePadProButtonID[GamepadType_Max] =
 	-1,	// Button_ThumbLX
 	-1,	// Button_ThumbLY
 	-1,	// Button_ThumbRX
-	-1	// Button_ThumbRY
+	-1,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gAirFloButtonID[GamepadType_Max] =
@@ -776,7 +828,8 @@ static const int gAirFloButtonID[GamepadType_Max] =
 	AID_X,                // Button_ThumbLX
 	AID_Y | AID_Negative, // Button_ThumbLY
 	AID_Rz,               // Button_ThumbRX
-	AID_Z | AID_Negative  // Button_ThumbRY
+	AID_Z | AID_Negative, // Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gRandomAdapterButtonID[GamepadType_Max] =
@@ -801,6 +854,7 @@ static const int gRandomAdapterButtonID[GamepadType_Max] =
 	AID_Y | AID_Negative,	// Button_ThumbLY
 	AID_Rz, // Button_ThumbRX
 	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
 };
 
 static const int gRB360DrumsButtonID[GamepadType_Max] =
@@ -825,6 +879,32 @@ static const int gRB360DrumsButtonID[GamepadType_Max] =
 	-1,	// Unused
 	-1, // Unused
 	-1,	// Unused
+	-1  // Button_Home
+};
+
+static const int gGH4PS3DrumsButtonID[GamepadType_Max] =
+{
+	1,	// Button_Drum_Tom2
+	2,	// Button_Drum_Snare
+	0,	// Button_Drum_Tom1
+	3,	// Button_Drum_Hat
+	4,	// Button_Drum_Kick
+	5,	// Button_Drum_Cymbal
+	-1,	// Unused
+	-1,	// Unused
+	9,	// Button_Start
+	8,	// Button_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	-1, // Unused
+	-1,	// Unused
+	-1, // Unused
+	-1,	// Unused
+	12  // Button_Home
 };
 
 static const int gXDrumsButtonID[GamepadType_Max] =
@@ -849,6 +929,7 @@ static const int gXDrumsButtonID[GamepadType_Max] =
 	AID_Y,	// Unused
 	AID_Rx,	// Unused
 	AID_Ry,	// Unused
+	-1		// Button_Home
 };
 
 
@@ -874,7 +955,8 @@ static const char * gStandardButtonNames[GamepadType_Max] =
 	"Analog X-Axis",  // Button_ThumbLX
 	"Analog Y-Axis",  // Button_ThumbLY
 	"Analog RX-Axis", // Button_ThumbRX
-	"Analog RY-Axis"  // Button_ThumbRY
+	"Analog RY-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gPS2ButtonNames[GamepadType_Max] =
@@ -898,7 +980,8 @@ static const char * gPS2ButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gXBoxButtonNames[GamepadType_Max] =
@@ -922,7 +1005,8 @@ static const char * gXBoxButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gLogitechDualActionButtonNames[GamepadType_Max] =
@@ -946,7 +1030,8 @@ static const char * gLogitechDualActionButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gXBox360ButtonNames[GamepadType_Max] =
@@ -970,7 +1055,8 @@ static const char * gXBox360ButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gXterminatorButtonNames[GamepadType_Max] =
@@ -994,7 +1080,8 @@ static const char * gXterminatorButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] =
@@ -1018,7 +1105,8 @@ static const char * gLogitechWingmanGamepadExtremeNames[GamepadType_Max] =
 	"Unavailable",	// Button_ThumbLX
 	"Unavailable",	// Button_ThumbLY
 	"Unavailable",	// Button_ThumbRX
-	"Unavailable"	// Button_ThumbRY
+	"Unavailable",	// Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gPowerWaveButtonNames[GamepadType_Max] =
@@ -1042,7 +1130,8 @@ static const char * gPowerWaveButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gGreenAsiaButtonNames[GamepadType_Max] =
@@ -1066,7 +1155,8 @@ static const char * gGreenAsiaButtonNames[GamepadType_Max] =
 	"Unavailable",	// Button_ThumbLX
 	"Unavailable",	// Button_ThumbLY
 	"Unavailable",	// Button_ThumbRX
-	"Unavailable"	// Button_ThumbRY
+	"Unavailable",	// Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gGGE909ButtonNames[GamepadType_Max] =
@@ -1090,7 +1180,8 @@ static const char * gGGE909ButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gTwinShockButtonNames[GamepadType_Max] =
@@ -1114,7 +1205,8 @@ static const char * gTwinShockButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gPS2LookAlikeButtonNames[GamepadType_Max] =
@@ -1138,7 +1230,8 @@ static const char * gPS2LookAlikeButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gSaitek990ButtonNames[GamepadType_Max] =
@@ -1162,7 +1255,8 @@ static const char * gSaitek990ButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gSaitek880ButtonNames[GamepadType_Max] =
@@ -1186,7 +1280,8 @@ static const char * gSaitek880ButtonNames[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gXPlorerButtonNames[GamepadType_Max] =
@@ -1210,7 +1305,8 @@ static const char * gXPlorerButtonNames[GamepadType_Max] =
 	"Whammy",		// Button_ThumbLX
 	"Motion",		// Button_ThumbLY
 	"Unavailable",	// Button_ThumbRX
-	"Tilt"			// Button_ThumbRY
+	"Tilt",			// Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gPS3RBGuitarButtonNames[GamepadType_Max] =
@@ -1234,7 +1330,33 @@ static const char * gPS3RBGuitarButtonNames[GamepadType_Max] =
 	"Whammy",		// Button_ThumbLX
 	"Unavailable",	// Button_ThumbLY
 	"Pickup Switch",// Button_ThumbRX
-	"Unavailable"	// Button_ThumbRY
+	"Unavailable",	// Button_ThumbRY
+	"Unavailable"	// Button_Home
+};
+
+static const char * gPS3GH4GuitarButtonNames[GamepadType_Max] =
+{
+	"Blue",			// Button_A
+	"Red",			// Button_B
+	"Orange",		// Button_X
+	"Yellow",		// Button_Y
+	"Unavailable",	// Button_White
+	"Unavailable",	// Button_Black
+	"Unavailable",	// Button_LeftTrigger
+	"Green",		// Button_RightTrigger
+	"Start",		// Button_Start
+	"Select",		// Button_Back
+	"Unavailable",	// Button_LeftThumb
+	"Unavailable",	// Button_RightThumb
+	"Up Strum",		// Button_DUp
+	"Down Strum",	// Button_DDown
+	"Left",			// Button_DLeft
+	"Right",		// Button_DRight
+	"Whammy",		// Button_ThumbLX
+	"Unavailable",	// Button_ThumbLY
+	"Slider",		// Button_ThumbRX
+	"Unavailable",	// Button_ThumbRY
+	"PS Home"		// Button_Home
 };
 
 static const char * g360RBGuitarButtonNames[GamepadType_Max] =
@@ -1258,7 +1380,8 @@ static const char * g360RBGuitarButtonNames[GamepadType_Max] =
 	"Whammy",		// Button_ThumbLX
 	"Unavailable",	// Button_ThumbLY
 	"Pickup Switch",// Button_ThumbRX
-	"Unavailable"	// Button_ThumbRY
+	"Unavailable",	// Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gXGuitarButtonNames[GamepadType_Max] =
@@ -1282,7 +1405,8 @@ static const char * gXGuitarButtonNames[GamepadType_Max] =
 	"Whammy",		// Button_ThumbLX
 	"Motion",		// Button_ThumbLY
 	"Pickup Switch",// Button_ThumbRX
-	"Tilt"			// Button_ThumbRY
+	"Tilt",			// Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gGamePadProButtonNames[GamepadType_Max] =
@@ -1306,7 +1430,8 @@ static const char * gGamePadProButtonNames[GamepadType_Max] =
 	"Unavailable",  // Button_ThumbLX
 	"Unavailable",  // Button_ThumbLY
 	"Unavailable",  // Button_ThumbRX
-	"Unavailable"   // Button_ThumbRY
+	"Unavailable",  // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gAirFlo[GamepadType_Max] =
@@ -1330,7 +1455,8 @@ static const char * gAirFlo[GamepadType_Max] =
 	"Left X-Axis",  // Button_ThumbLX
 	"Left Y-Axis",  // Button_ThumbLY
 	"Right X-Axis", // Button_ThumbRX
-	"Right Y-Axis"  // Button_ThumbRY
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
 };
 
 static const char * gPS3DrumsButtonNames[GamepadType_Max] =
@@ -1354,7 +1480,33 @@ static const char * gPS3DrumsButtonNames[GamepadType_Max] =
 	"Unavailable",  // Unused
 	"Unavailable",  // Unused
 	"Unavailable",  // Unused
-	"Unavailable"   // Unused
+	"Unavailable",  // Unused
+	"Unavailable"	// Button_Home
+};
+
+static const char * gPS3GH4DrumsButtonNames[GamepadType_Max] =
+{
+	"Green",        // Button_Drum_Green / Button_Drum_Tom2
+	"Red",          // Button_Drum_Red / Button_Drum_Snare
+	"Blue",         // Button_Drum_Blue / Button_Drum_Tom1
+	"Yellow",       // Button_Drum_Yellow / Button_Drum_Hat
+	"Kick",         // Button_Drum_Kick
+	"Orange",		// Button_Drum_Cymbal
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Start",        // Button_Drum_Start
+	"Select",       // Button_Drum_Select
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"PS Home"	// Button_Home
 };
 
 static const char * g360DrumsButtonNames[GamepadType_Max] =
@@ -1378,7 +1530,8 @@ static const char * g360DrumsButtonNames[GamepadType_Max] =
 	"Unavailable",  // Unused
 	"Unavailable",  // Unused
 	"Unavailable",  // Unused
-	"Unavailable"   // Unused
+	"Unavailable",  // Unused
+	"Unavailable"	// Button_Home
 };
 
 // Gamepad Info
@@ -1435,7 +1588,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0B43, 0x0003,
 		gEMSButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[5]
 	},
 
@@ -1446,7 +1599,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[6]
 	},
 
@@ -1456,7 +1609,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[7]
 	},
 
@@ -1466,7 +1619,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[8]
 	},
 
@@ -1476,7 +1629,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[9]
 	},
 
@@ -1486,7 +1639,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[10]
 	},
 
@@ -1585,7 +1738,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[19]
 	},
 
@@ -1607,7 +1760,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x0667,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[21]
 	},
 
@@ -1617,7 +1770,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x3427, 0x1190,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[22]
 	},
 
@@ -1627,7 +1780,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6677, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[23]
 	},
 
@@ -1637,7 +1790,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0810, 0x0001,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[24]
 	},
 
@@ -1647,7 +1800,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F30, 0x010A,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[25]
 	},
 
@@ -1657,7 +1810,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0925, 0x8866,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[26]
 	},
 
@@ -1679,7 +1832,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x4748,
 		gXPlorerButtonID,
 		gXPlorerButtonNames,
-		MFGF_IsGuitar | MFGF_DontUseSphericalDeadzone,
+		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[28]
 	},
 
@@ -1690,7 +1843,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D01,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[29]
 	},
 
@@ -1722,7 +1875,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8801,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[32]
 	},
 
@@ -1733,7 +1886,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x8631, 0x1128,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[33]
 	},
 
@@ -1777,7 +1930,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x103F,
 		gUNIVERSALRumbleWheelButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[37]
 	},
 
@@ -1820,7 +1973,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[41]
 	},
 
@@ -1830,7 +1983,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8804,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[42]
 	},
 
@@ -1841,7 +1994,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x045E, 0x1100,
 		gUnusualPS2AdapterButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[43]
 	},
 
@@ -1851,7 +2004,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0079, 0x0006,
 		gGGE909ButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[44]
 	},
 
@@ -1861,7 +2014,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D91,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[45]
 	},
 
@@ -1871,7 +2024,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1345, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[46]
 	},
 
@@ -1881,7 +2034,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x04B4, 0xC681,
 		gGGE909ButtonID,	// BEST GUESS: this should possibly use the gGGE909VariantButtonID instead (can't check)
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[47]
 	},
 
@@ -1896,14 +2049,14 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		&gGamepadDescriptors[48]
 	},
 
-	// Guitar Hero X-Plorer
+	// XInput Guitar
 	{
 		"Guitar Controller",
 		"Guitar Controller",
 		0, 0,
 		gXGuitarButtonID,
 		gXGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_DontUseSphericalDeadzone,
+		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[49]
 	},
 
@@ -1934,7 +2087,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x146B, 0x0306,
 		gPowerWaveButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[52]
 	},
 
@@ -1955,7 +2108,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BD, 0xC001,
 		gRandomAdapterButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[54]
 	},
 
@@ -1976,7 +2129,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0C12, 0x0005,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[56]
 	},
 
@@ -1987,7 +2140,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x1006,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		0,
+		MFGF_IsPS2Adapter,
 		&gGamepadDescriptors[57]
 	},
 
@@ -2009,7 +2162,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1BAD, 0x0002,
 		gRB360GuitarButtonID,
 		g360RBGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_DontUseSphericalDeadzone,
+		MFGF_IsGuitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[59]
 	},
 
@@ -2054,6 +2207,28 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXGamepadButtonID,
 		gXBox360ButtonNames,
 		0,
+		&gGamepadDescriptors[63]
+	},
+
+	// GH:WT PS3 Guitar
+	{
+		"GH4 Guitar",
+		"Guitar Hero4 for PlayStation (R) 3",
+		0x12BA, 0x0100,
+		gGH4PS3GuitarButtonID,
+		gPS3GH4GuitarButtonNames,
+		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone,
+		&gGamepadDescriptors[64]
+	},
+
+	// GH:WT PS3 Drums
+	{
+		"GH4 Drums",
+		"GuitarHero for Playstation (R) 3",
+		0x12BA, 0x0120,
+		gGH4PS3DrumsButtonID,
+		gPS3GH4DrumsButtonNames,
+		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
 		NULL
 	}
 

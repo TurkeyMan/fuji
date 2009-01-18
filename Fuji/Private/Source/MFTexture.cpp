@@ -32,6 +32,8 @@ void MFTexture_InitModule()
 
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
+	MFTexture_InitModulePlatformSpecific();
+
 	// create white texture (used by white material)
 	if(MFFileSystem_Exists("_None.tex"))
 		pNoneTexture = MFTexture_Create("_None", true);
@@ -67,6 +69,8 @@ void MFTexture_DeinitModule()
 	}
 
 	gTextureBank.Deinit();
+
+	MFTexture_DeinitModulePlatformSpecific();
 }
 
 MFTexture* MFTexture_FindTexture(const char *pName)
@@ -328,7 +332,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(0xFFFFFFFF);
+	MFSetColour(MFVector::white);
 	MFSetPosition(pos);
 	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
 	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
@@ -349,7 +353,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 			y = pos.y + (float)a*h;
 
 			MFBegin(4);
-			MFSetColour(((a+b)&1) ? 0xFFC0C0C0 : 0xFF303030);
+			MFSetColour(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
 			MFSetPosition(x,y,0);
 			MFSetPosition(x+w,y,0);
 			MFSetPosition(x,y+h,0);
@@ -404,7 +408,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 #endif
 
 	MFBegin(4);
-	MFSetColour(0xFFFFFFFF);
+	MFSetColour(MFVector::white);
 	MFSetTexCoord1(0.0f,0.0f);
 	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(1.0f,0.0f);

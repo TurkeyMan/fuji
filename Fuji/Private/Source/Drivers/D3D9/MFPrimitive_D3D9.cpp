@@ -1,6 +1,23 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D9
+#if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
+
+#if defined(MF_RENDERPLUGIN_D3D9)
+	#define MFPrimitive_InitModule MFPrimitive_InitModule_D3D9
+	#define MFPrimitive_DeinitModule MFPrimitive_DeinitModule_D3D9
+	#define MFPrimitive_DrawStats MFPrimitive_DrawStats_D3D9
+	#define MFPrimitive MFPrimitive_D3D9
+	#define MFBegin MFBegin_D3D9
+	#define MFSetMatrix MFSetMatrix_D3D9
+	#define MFSetColour MFSetColour_D3D9
+	#define MFSetTexCoord1 MFSetTexCoord1_D3D9
+	#define MFSetNormal MFSetNormal_D3D9
+	#define MFSetPosition MFSetPosition_D3D9
+	#define MFEnd MFEnd_D3D9
+	#define MFPrimitive_BeginBlitter MFPrimitive_BeginBlitter_D3D9
+	#define MFPrimitive_Blit MFPrimitive_Blit_D3D9
+	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_D3D9
+#endif
 
 #include "Display_Internal.h"
 #include "MFView.h"
@@ -38,12 +55,12 @@ struct LitVertex
 	float u,v;
 };
 
-LitVertex primBuffer[primBufferSize];
-LitVertex current;
+static LitVertex primBuffer[primBufferSize];
+static LitVertex current;
 
-uint32 primType;
-uint32 beginCount;
-uint32 currentVert;
+static uint32 primType;
+static uint32 beginCount;
+static uint32 currentVert;
 
 extern IDirect3DDevice9 *pd3dDevice;
 static MFVertexDeclaration *pDecl;
@@ -151,19 +168,9 @@ void MFSetMatrix(const MFMatrix &mat)
 	MFRendererPC_SetWorldToScreenMatrix(temp);
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
-}
-
 void MFSetColour(float r, float g, float b, float a)
 {
 	current.colour = ((uint32)(r*255.0f))<<16 | ((uint32)(g*255.0f))<<8 | (uint32)(b*255.0f) | ((uint32)(a*255.0f))<<24;
-}
-
-void MFSetColour(uint32 col)
-{
-	current.colour = col;
 }
 
 void MFSetTexCoord1(float u, float v)
@@ -172,21 +179,11 @@ void MFSetTexCoord1(float u, float v)
 	current.v = v;
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	MFSetNormal(normal.x, normal.y, normal.z);
-}
-
 void MFSetNormal(float x, float y, float z)
 {
 	current.normal.x = x;
 	current.normal.y = y;
 	current.normal.z = z;
-}
-
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
 }
 
 void MFSetPosition(float x, float y, float z)
@@ -266,9 +263,9 @@ void MFEnd()
 }
 
 
-int textureWidth, textureHeight;
-float uScale, vScale;
-float halfTexelU, halfTexelV;
+static int textureWidth, textureHeight;
+static float uScale, vScale;
+static float halfTexelU, halfTexelV;
 
 void MFPrimitive_BeginBlitter(int numBlits)
 {

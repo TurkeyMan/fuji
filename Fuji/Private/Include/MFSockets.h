@@ -171,7 +171,7 @@ struct MFSocketAddressInet6 : public MFSocketAddress
 struct MFAddressInfo
 {
 	uint32 flags;				/**< Flags that indicate options used in the getaddrinfo function. See AI_PASSIVE, AI_CANONNAME, and AI_NUMERICHOST. */
-	MFAddressFamily family;		/**< Protocol family, such as PF_INET. */
+	MFAddressFamily family;		/**< Protocol family, such as MFAF_Inet. */
 	MFSocketType type;			/**< Socket type, such as MFSockType_Raw, MFSockType_Stream, or MFSockType_Datagram. */
 	MFSocketProtocol protocol;	/**< Protocol, such as MFProtocol_TCP or MFProtocol_UDP. For protocols other than IPv4 and IPv6, set ai_protocol to zero. */
 	const char *pCanonName;		/**< Canonical name for the host. */

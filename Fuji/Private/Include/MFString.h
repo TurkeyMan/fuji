@@ -232,9 +232,10 @@ const char* MFStr_TruncateExtension(const char *pFilename);
  * @param pPattern String containing the filename pattern to test. May contain wild cards, etc.
  * @param pFilename String containing the filename to compare against.
  * @param ppMatchDirectory Cant remember what this is used for. Dont use it...
+ * @param bCaseSensitive Perform the pattern match with case sensitivity.
  * @return bool Returns true if the pattern matches the filename.
  */
-bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL);
+bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL, bool bCaseSensitive = false);
 
 /**
  * Get a formatted a string.

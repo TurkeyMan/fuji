@@ -22,6 +22,7 @@
 #include "MFScript_Internal.h"
 #include "MFCollision_Internal.h"
 #include "MFAnimScript_Internal.h"
+#include "MFVertex_Internal.h"
 #include "MFThread.h"
 
 #if defined(MF_WINDOWS)
@@ -193,6 +194,7 @@ void MFSystem_Init()
 	MFTexture_InitModule();
 	MFMaterial_InitModule();
 
+	MFVertex_InitModule();
 	MFModel_InitModule();
 	MFAnimation_InitModule();
 	MFAnimScript_InitModule();
@@ -234,6 +236,7 @@ void MFSystem_Deinit()
 	MFAnimScript_DeinitModule();
 	MFAnimation_DeinitModule();
 	MFModel_DeinitModule();
+	MFVertex_DeinitModule();
 
 	MFMaterial_DeinitModule();
 	MFTexture_DeinitModule();

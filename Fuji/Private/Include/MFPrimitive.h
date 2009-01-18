@@ -59,14 +59,6 @@ void MFSetMatrix(const MFMatrix &mat);
 /**
  * Set the current vertex colour.
  * Sets the current vertex colour.
- * @param colour The colour to set for all proceeding vertices.
- * @return None.
- */
-void MFSetColour(const MFVector &colour);
-
-/**
- * Set the current vertex colour.
- * Sets the current vertex colour.
  * @param r The red component to set for all proceeding vertices.
  * @param g The red component to set for all proceeding vertices.
  * @param b The red component to set for all proceeding vertices.
@@ -78,10 +70,13 @@ void MFSetColour(float r, float g, float b, float a = 1.0f);
 /**
  * Set the current vertex colour.
  * Sets the current vertex colour.
- * @param col The colour to set for all proceeding vertices as a platform specific 32bit packed format.
+ * @param colour The colour to set for all proceeding vertices.
  * @return None.
  */
-void MFSetColour(uint32 col);
+inline void MFSetColour(const MFVector &colour)
+{
+	MFSetColour(colour.x, colour.y, colour.z, colour.w);
+}
 
 /**
  * Set the current texture coordinate.
@@ -95,14 +90,6 @@ void MFSetTexCoord1(float u, float v);
 /**
  * Set the current vertex normal.
  * Sets the current vertex normal.
- * @param normal The vertex normal to use for all proceeding vertices.
- * @return None.
- */
-void MFSetNormal(const MFVector &normal);
-
-/**
- * Set the current vertex normal.
- * Sets the current vertex normal.
  * @param x The vertex normal x component.
  * @param y The vertex normal y component.
  * @param z The vertex normal z component.
@@ -111,13 +98,15 @@ void MFSetNormal(const MFVector &normal);
 void MFSetNormal(float x, float y, float z);
 
 /**
- * Set the current vertex position.
- * Sets the current vertex position.
- * @param pos The position of the next vertex.
+ * Set the current vertex normal.
+ * Sets the current vertex normal.
+ * @param normal The vertex normal to use for all proceeding vertices.
  * @return None.
- * @remarks Setting the vertex position applies all current values to the current vertex and moves to the next vertex.
  */
-void MFSetPosition(const MFVector &pos);
+inline void MFSetNormal(const MFVector &normal)
+{
+	MFSetNormal(normal.x, normal.y, normal.z);
+}
 
 /**
  * Set the current vertex position.
@@ -129,6 +118,18 @@ void MFSetPosition(const MFVector &pos);
  * @remarks Setting the vertex position applies all current values to the current vertex and moves to the next vertex.
  */
 void MFSetPosition(float x, float y, float z);
+
+/**
+ * Set the current vertex position.
+ * Sets the current vertex position.
+ * @param pos The position of the next vertex.
+ * @return None.
+ * @remarks Setting the vertex position applies all current values to the current vertex and moves to the next vertex.
+ */
+inline void MFSetPosition(const MFVector &pos)
+{
+	MFSetPosition(pos.x, pos.y, pos.z);
+}
 
 /**
  * End the vertex submition block.
