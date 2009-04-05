@@ -114,7 +114,7 @@ void MFUtil_CrcInit()
 }
 
 // generate a unique Crc value for this buffer
-uint32 MFUtil_Crc(char *pBuffer, int length)
+uint32 MFUtil_Crc(const char *pBuffer, int length)
 {
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
@@ -125,7 +125,7 @@ uint32 MFUtil_Crc(char *pBuffer, int length)
 }
 
 // generate a unique Crc value for this string, strings are treated case INSENSITIVE
-uint32 MFUtil_CrcString(char *pString)
+uint32 MFUtil_CrcString(const char *pString)
 {
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
@@ -136,7 +136,7 @@ uint32 MFUtil_CrcString(char *pString)
 }
 
 // generate a fast hash value for this string, strings are treated case INSENSITIVE
-uint32 MFUtil_HashString(char *pString)
+uint32 MFUtil_HashString(const char *pString)
 {
 	uint32 hash = 0;
 

@@ -210,8 +210,8 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c = 0;
-	int bytes = MFString_MBToWChar(pText, &c);
+	int c = 0;
+	int bytes = MFString_DecodeUTF8(pText, &c);
 
 	while(*pText && charIndex)
 	{
@@ -241,7 +241,7 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 		if(bytes > 0)
 		{
 			pText += bytes;
-			bytes = MFString_MBToWChar(pText, &c);
+			bytes = MFString_DecodeUTF8(pText, &c);
 		}
 
 		--charIndex;
@@ -270,8 +270,8 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c = 0;
-	int bytes = MFString_MBToWChar(pText, &c);
+	int c = 0;
+	int bytes = MFString_DecodeUTF8(pText, &c);
 
 	while(*pText && maxLen)
 	{
@@ -360,7 +360,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 			else
 			{
 				pText += bytes;
-				bytes = MFString_MBToWChar(pText, &c);
+				bytes = MFString_DecodeUTF8(pText, &c);
 			}
 
 			++pH;
@@ -385,8 +385,8 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 
 	*pNextPage = 99999;
 
-	uint16 c = 0;
-	int bytes = MFString_MBToWChar(pText, &c);
+	int c = 0;
+	int bytes = MFString_DecodeUTF8(pText, &c);
 
 	while(*pText && maxLen)
 	{
@@ -414,7 +414,7 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 		if(bytes > 0)
 		{
 			pText += bytes;
-			bytes = MFString_MBToWChar(pText, &c);
+			bytes = MFString_DecodeUTF8(pText, &c);
 		}
 
 		++count;
@@ -485,8 +485,8 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 
 		const char *pRenderString = pText;
 
-		uint16 c = 0;
-		int bytes = MFString_MBToWChar(pRenderString, &c);
+		int c = 0;
+		int bytes = MFString_DecodeUTF8(pRenderString, &c);
 
 		for(int i=0; i<textlen; i++)
 		{
@@ -536,7 +536,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 			if(bytes > 0)
 			{
 				pRenderString += bytes;
-				bytes = MFString_MBToWChar(pRenderString, &c);
+				bytes = MFString_DecodeUTF8(pRenderString, &c);
 			}
 		}
 
@@ -599,8 +599,8 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
-	uint16 c = 0;
-	int bytes = MFString_MBToWChar(pC, &c);
+	int c = 0;
+	int bytes = MFString_DecodeUTF8(pC, &c);
 
 	while(*pC)
 	{
@@ -655,7 +655,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			if(pT == gCharHistory)
 			{
 				// no valid wrap point was found so force wrap at current character
-				pC = pLineStart + MFString_GetNumBytesInMBChar(pLineStart);
+				pC = pLineStart + MFString_DecodeUTF8(pLineStart, NULL);
 				pT = gCharHistory + 1;
 			}
 
@@ -666,7 +666,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 		if(bytes > 0)
 		{
 			pC += bytes;
-			bytes = MFString_MBToWChar(pC, &c);
+			bytes = MFString_DecodeUTF8(pC, &c);
 		}
 		else
 			++pC;

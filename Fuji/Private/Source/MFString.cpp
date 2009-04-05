@@ -1,5 +1,7 @@
 #include "Fuji.h"
 #include "MFString.h"
+#include "MFHeap.h"
+#include "MFObjectPool.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -13,6 +15,28 @@ MFALIGN_END(16);
 
 static uint32 gStringOffset;
 
+static MFObjectPool stringPool;
+static MFObjectPoolGroup stringHeap;
+
+void MFString_InitModule()
+{
+	MFObjectPoolGroupConfig groups[] =
+	{
+		{ 5, 256, 128 },
+		{ 16, 128, 64 },
+		{ 128, 32, 16 },
+		{ 1024, 4, 2}
+	};
+
+	stringHeap.Init(groups, sizeof(groups) / sizeof(groups[0]));
+	stringPool.Init(sizeof(MFStringData), 512, 128);
+}
+
+void MFString_DeinitModule()
+{
+	stringPool.Deinit();
+	stringHeap.Deinit();
+}
 
 void MFCopyMemory(void *pDest, const void *pSrc, uint32 size)
 {
@@ -234,6 +258,44 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
 	return false;
 }
 
+bool MFString_IsNumber(const char *pString, bool bAllowHex)
+{
+	int numDigits = 0;
+
+	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
+	{
+		// hex number
+		pString += 2;
+		while(*pString)
+		{
+			if(!MFIsHex(*pString++))
+				return false;
+			++numDigits;
+		}
+	}
+	else
+	{
+		// decimal number
+		if(*pString == '-' || *pString == '+')
+			++pString;
+
+		bool bHasDot = false;
+		while(*pString)
+		{
+			if(!MFIsNumeric(*pString) && (bHasDot || *pString != '.'))
+				return false;
+			if(*pString++ == '.')
+			{
+				bHasDot = true;
+				numDigits = 0;
+			}
+			else
+				++numDigits;
+		}
+	}
+	return numDigits > 0 ? true : false;
+}
+
 #if 0
 
 char* MFString_Copy(char *pDest, const char *pSrc)
@@ -407,34 +469,30 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 // UTF8 support
 //
 
-int MFString_UFT8ToWChar(uint16 *pBuffer, const char *pUTF8String)
+int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString)
 {
-	uint16 *pStart = pBuffer;
+	const char *pStart = pString;
+	int bytes;
 
-	// copy the string
-	int bytes = MFString_MBToWChar(pUTF8String, pBuffer);
-
-	while(*pUTF8String)
+	while(*pString)
 	{
-		if(bytes > 0)
-		{
-			pUTF8String += bytes;
-			++pBuffer;
-
-			bytes = MFString_MBToWChar(pUTF8String, pBuffer);
-		}
-		else
-		{
-			*pBuffer = *pUTF8String;
-			++pUTF8String;
-			++pBuffer;
-		}
+		*pBuffer++ = MFString_DecodeUTF8(pString, &bytes);
+		pString += bytes;
 	}
-
-	// add terminating NULL
 	*pBuffer = 0;
 
-	return (int)(pBuffer - pStart);
+	return (int)(pString - pStart);
+}
+
+int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString)
+{
+	const uint16 *pStart = pString;
+
+	while(*pString)
+		pBuffer += MFString_EncodeUTF8(*pString++, pBuffer);
+	*pBuffer = 0;
+
+	return (int)(pString - pStart);
 }
 
 uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
@@ -457,27 +515,7 @@ uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 	}
 
 	// copy the string
-	int bytes = MFString_MBToWChar(pUTF8String, pBuffer);
-
-	while(*pUTF8String)
-	{
-		if(bytes > 0)
-		{
-			pUTF8String += bytes;
-			++pBuffer;
-
-			bytes = MFString_MBToWChar(pUTF8String, pBuffer);
-		}
-		else
-		{
-			*pBuffer = *pUTF8String;
-			++pUTF8String;
-			++pBuffer;
-		}
-	}
-
-	// add terminating NULL
-	*pBuffer = 0;
+	MFString_CopyUTF8ToUTF16(pBuffer, pUTF8String);
 
 	if(pNumChars)
 		*pNumChars = numChars;
@@ -485,47 +523,10 @@ uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 	return pBuffer;
 }
 
-int MFString_ToUFT8(char *pBuffer, const char *pString)
-{
-	if(*(const uint16*)pString == 0xFEFF)
-		return MFWString_ToUFT8(pBuffer, (const uint16*)pString);
-
-	const char *pStart = pString;
-
-	// copy string
-	while(*pString)
-	{
-		pBuffer += MFString_WCharToMB(*pString, pBuffer);
-		++pString;
-	}
-
-	// add terminating NULL
-	*pBuffer = 0;
-
-	return (int)(pString - pStart);
-}
-
 
 //
 // unicode support
 //
-
-int MFWString_ToUFT8(char *pBuffer, const uint16 *pUnicodeString)
-{
-	const uint16 *pStart = pUnicodeString;
-
-	// copy string
-	while(*pUnicodeString)
-	{
-		pBuffer += MFString_WCharToMB(*pUnicodeString, pBuffer);
-		++pUnicodeString;
-	}
-
-	// add terminating NULL
-	*pBuffer = 0;
-
-	return (int)(pUnicodeString - pStart);
-}
 
 int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
 {
@@ -550,4 +551,164 @@ int MFWString_CaseCmp(const uint16 *pSource1, const uint16 *pSource2)
 	while(c1 && (c1 == c2));
 
 	return c1 - c2;
+}
+
+
+/**** MFString Functions ****/
+
+MFStringData *MFStringData::Alloc()
+{
+	MFStringData *pData = (MFStringData*)stringPool.Alloc();
+	pData->refCount = 1;
+	pData->pMemory = NULL;
+	pData->allocated = pData->bytes = 0;
+	return pData;
+}
+
+void MFStringData::Destroy()
+{
+	if(allocated)
+		stringHeap.Free(pMemory);
+	stringPool.Free(this);
+}
+
+MFString::MFString(const char *pString, bool bHoldStaticPointer)
+{
+	if(!pString)
+	{
+		pData = NULL;
+	}
+	else
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = MFString_Length(pString);
+		if(bHoldStaticPointer)
+		{
+			pData->pMemory = (char*)pString;
+		}
+		else
+		{
+			pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+			MFString_Copy(pData->pMemory, pString);
+		}
+	}
+}
+
+MFString& MFString::operator=(const char *pString)
+{
+	if(pData)
+	{
+		pData->Release();
+		pData = NULL;
+	}
+
+	if(pString)
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = MFString_Length(pString);
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		MFString_Copy(pData->pMemory, pString);
+	}
+
+	return *this;
+}
+
+MFString& MFString::operator=(const MFString &string)
+{
+	if(pData)
+		pData->Release();
+
+	pData = string.pData;
+	if(pData)
+		pData->AddRef();
+
+	return *this;
+}
+
+MFString& MFString::operator+=(const char *pString)
+{
+	return *this;
+}
+
+MFString& MFString::operator+=(const MFString &string)
+{
+	return *this;
+}
+
+MFString MFString::operator+(const char *pString) const
+{
+	MFString t(*this);
+	return t += pString;
+}
+
+MFString MFString::operator+(const MFString &string) const
+{
+	MFString t(*this);
+	return t += string;
+}
+
+MFString operator+(const char *pString, const MFString &string)
+{
+	MFString t(pString, true);
+	return t += string;
+}
+
+MFString& MFString::SetStaticString(const char *pStaticString)
+{
+	if(pData)
+	{
+		pData->Release();
+		pData = NULL;
+	}
+
+	if(pStaticString)
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = MFString_Length(pStaticString);
+		pData->pMemory = (char*)pStaticString;
+	}
+
+	return *this;
+}
+
+MFString& MFString::FromUTF16(const wchar_t *pString)
+{
+	if(pData)
+	{
+		pData->Release();
+		pData = NULL;
+	}
+
+	if(pString)
+	{
+		pData = MFStringData::Alloc();
+
+		int len = 0;
+		const wchar_t *pS = pString;
+		while(*pS)
+			len += MFString_EncodeUTF8(*pS++, NULL);
+		pData->bytes = len;
+
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		MFString_CopyUTF16ToUTF8(pData->pMemory, (const uint16*)pString);
+	}
+
+	return *this;
+}
+
+MFString MFString::Upper() const
+{
+	MFString t(*this);
+	return t;
+}
+
+MFString MFString::Lower() const
+{
+	MFString t(*this);
+	return t;
+}
+
+MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
+{
+	return *this;
 }

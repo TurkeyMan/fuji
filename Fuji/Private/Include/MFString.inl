@@ -216,180 +216,105 @@ inline const char* MFStr_TruncateExtension(const char *pFilename)
 	return pDot ? MFStrN(pFilename, pDot - pFilename) : pFilename;
 }
 
+
 //
 // UTF8 support
 //
 
-#define RET_ILSEQ -2
-#define RET_ILUNI -1
-
-inline int MFString_GetNumBytesInMBChar(const char *pMBChar)
+inline int MFString_EncodeUTF8(int c, char *pMBChar)
 {
-#if defined(MFLOCALE_UTF8_SUPPORT)
-	const unsigned char *pMB = (const unsigned char*)pMBChar;
-	unsigned char c = pMB[0];
-
-	if(c < 0x80)
-		return 1;
-	else if(c < 0xc2)
-		return RET_ILSEQ;
-	else if(c < 0xe0)
-	{
-		if(!((pMB[1] ^ 0x80) < 0x40))
-			return RET_ILSEQ;
-		return 2;
-	}
-	else if(c < 0xf0)
-	{
-		if(!((pMB[1] ^ 0x80) < 0x40 && (pMB[2] ^ 0x80) < 0x40 && (c >= 0xe1 || pMB[1] >= 0xa0)))
-			return RET_ILSEQ;
-		return 3;
-	}
-	else
-		return RET_ILSEQ;
-#else
-	return 1;
-#endif
-}
-
-inline char *MFString_NextChar(const char *pString)
-{
-#if defined(MFLOCALE_UTF8_SUPPORT)
-	int bytes = MFString_GetNumBytesInMBChar(pString);
-	return (char*)pString + (bytes > 0 ? bytes : 1);
-#else
-	return pString + 1;
-#endif
-}
-
-inline char *MFString_PrevChar(const char *pString)
-{
-#if defined(MFLOCALE_UTF8_SUPPORT)
-	// theres GOTTA be a better way of doing this...
-	int c = *((uint8*)pString - 1);
-
-	if(c < 128)
-		return (char*)pString-1;
-	else
-	{
-		if((c & 0xC0) != 0x80)
-			return (char*)pString-1;
-		else
-		{
-			// 2 bytes
-			int d = *((uint8*)pString - 2);
-
-			if((d & 0xE0) == 0xC0)
-			{
-				return (char*)pString - 2;
-			}
-			else if((d & 0xC0) == 0x80)
-			{
-				// 3 bytes
-				int e = *((uint8*)pString - 3);
-
-				if((e & 0xF0) == 0xE0)
-				{
-					return (char*)pString - 3;
-				}
-				else
-				{
-					// illegal sequence
-					return (char*)pString - 1;
-				}
-			}
-			else
-			{
-				// illegal sequence
-				return (char*)pString - 1;
-			}
-		}
-	}
-#else
-	return pString - 1;
-#endif
-}
-
-inline int MFString_MBToWChar(const char *pMBChar, uint16 *pWC)
-{
-#if defined(MFLOCALE_UTF8_SUPPORT)
-	const uint8 *pMB = (const uint8*)pMBChar;
-	int c = pMB[0];
-
-	if(c < 0x80)
-	{
-		*pWC = (uint16)c;
-		return 1;
-	}
-	else if(c < 0xc2)
-	{
-		return RET_ILSEQ;
-	}
-	else if(c < 0xe0)
-	{
-		if(!((pMB[1] ^ 0x80) < 0x40))
-			return RET_ILSEQ;
-		*pWC = (uint16)(((uint32) (c & 0x1f) << 6) | (uint32) (pMB[1] ^ 0x80));
-		return 2;
-	}
-	else if(c < 0xf0)
-	{
-		if(!((pMB[1] ^ 0x80) < 0x40 && (pMB[2] ^ 0x80) < 0x40 && (c >= 0xe1 || pMB[1] >= 0xa0)))
-			return RET_ILSEQ;
-		*pWC = (uint16)(((uint32) (c & 0x0f) << 12) | ((uint32) (pMB[1] ^ 0x80) << 6) | (uint32) (pMB[2] ^ 0x80));
-		return 3;
-	}
-	else
-		return RET_ILSEQ;
-#else
-	*pWC = *(uint8*)pMBChar;
-	return 1;
-#endif
-}
-
-inline int MFString_WCharToMB(int wc, char *pMBChar)
-{
-	unsigned char *pMB = (unsigned char*)pMBChar;
 	int count;
 
-	if(wc < 0x80)
+	if(c < 0x80)
 		count = 1;
-	else if(wc < 0x800)
+	else if(c < 0x800)
 		count = 2;
-	else if(wc < 0x10000)
+	else if(c < 0x10000)
 		count = 3;
-	else
-		return RET_ILUNI;
 
+	if(!pMBChar)
+		return count;
+
+	uint8 *pMB = (uint8*)pMBChar;
 	switch(count)
 	{
-		case 3: pMB[2] = (unsigned char)(0x80 | (wc & 0x3f)); wc = wc >> 6; wc |= 0x800;
-		case 2: pMB[1] = (unsigned char)(0x80 | (wc & 0x3f)); wc = wc >> 6; wc |= 0xc0;
-		case 1: pMB[0] = (unsigned char)wc;
+		case 3: pMB[2] = (uint8)(0x80 | (c & 0x3f)); c >>= 6; c |= 0x800;
+		case 2: pMB[1] = (uint8)(0x80 | (c & 0x3f)); c >>= 6; c |= 0xc0;
+		case 1: pMB[0] = (uint8)c;
 	}
 
 	return count;
 }
 
+inline int MFString_DecodeUTF8(const char *pMBChar, int *pC)
+{
+	const uint8 *pMB = (const uint8*)pMBChar;
+	int t = *pMB;
+
+	if(t >= 128)
+	{    
+		if((t&0xE0) == 0xC0)
+		{
+			if(pC)
+				*pC = ((int)(t&0x1F) << 6) | (pMB[1]&0x3F);
+			return 2;
+		}
+		else if((t&0xF0) == 0xE0)
+		{
+			if(pC)
+				*pC = ((int)(t&0x0F) << 12) | ((int)(pMB[1]&0x3F) << 6) | (pMB[2]&0x3F);
+			return 3;
+		}
+	}
+
+	if(pC)
+		*pC = t;
+	return 1;
+}
+
+inline char *MFString_NextChar(const char *pChar)
+{
+#if defined(MFLOCALE_UTF8_SUPPORT)
+	int t = *(uint8*)pChar;
+	if(t >= 128)
+	{
+		if((t&0xE0) == 0xC0)
+			return (char*)pChar+2;
+		else if((t&0xF0) == 0xE0)
+			return (char*)pChar+3;
+	}
+	return (char*)pChar+1;
+#else
+	return pChar+1;
+#endif
+}
+
+inline char *MFString_PrevChar(const char *pChar)
+{
+#if defined(MFLOCALE_UTF8_SUPPORT)
+	int t = ((uint8*)pChar)[-1];
+	if(t >= 128)
+	{
+		if((t&0xC0) == 0x80 && (pChar[-2]&0xE0) == 0xC0)
+			return (char*)pChar-2;
+		else if((t&0xC0) == 0x80 && (pChar[-2]&0xC0) == 0x80 && (pChar[-3]&0xF0) == 0xE0)
+			return (char*)pChar-3;
+	}
+	return (char*)pChar-1;
+#else
+	return pChar-1;
+#endif
+}
+
 inline int MFString_GetNumChars(const char *pString)
 {
 #if defined(MFLOCALE_UTF8_SUPPORT)
-	int bytes = MFString_GetNumBytesInMBChar(pString);
 	int numChars = 0;
-
 	while(*pString)
 	{
-		if(bytes > 0)
-		{
-			pString += bytes;
-			bytes = MFString_GetNumBytesInMBChar(pString);
-		}
-		else
-			++pString;
-
 		++numChars;
+		pString = MFString_NextChar(pString);
 	}
-
 	return numChars;
 #else
 	return MFString_Length(pString);
@@ -474,4 +399,71 @@ inline uint16* MFWString_CopyCat(uint16 *pBuffer, const uint16 *pString, const u
 	while((*pBuffer++ = *pString++)) { }
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
+}
+
+
+///// MFString Functions /////
+
+struct MFStringData
+{
+	friend class MFString;
+private:
+	char *pMemory;
+	int bytes;
+	int allocated;
+	int refCount;
+
+	static MFStringData *Alloc();
+	void Destroy();
+
+	int AddRef() { ++refCount;  return refCount; }
+	int Release() { if(--refCount == 0) Destroy(); return refCount; }
+};
+
+inline MFString::MFString()
+{
+	pData = NULL;
+}
+
+inline MFString::MFString(const MFString &string)
+{
+	pData = string.pData;
+	if(pData)
+		pData->AddRef();
+}
+
+inline MFString::~MFString()
+{
+	if(pData)
+		pData->Release();
+}
+
+inline bool MFString::operator!() const
+{
+	return !pData;
+}
+
+inline const char *MFString::CStr() const
+{
+	return pData ? pData->pMemory : NULL;
+}
+
+inline int MFString::NumBytes() const
+{
+	return pData ? pData->bytes : 0;
+}
+
+inline int MFString::NumChars() const
+{
+	return pData ? MFString_GetNumChars(pData->pMemory) : 0;
+}
+
+inline bool MFString::IsNull() const
+{
+	return !!pData;
+}
+
+inline bool MFString::IsNumeric() const
+{
+	return pData ? MFString_IsNumber(pData->pMemory) : false;
 }

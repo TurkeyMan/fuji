@@ -33,6 +33,9 @@
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
 
+void MFString_InitModule();
+void MFString_DeinitModule();
+
 // extern to platform
 extern MFPlatform gCurrentPlatform;
 
@@ -170,6 +173,7 @@ void MFSystem_Init()
 	MFUtil_CrcInit();
 
 	MFHeap_InitModule();
+	MFString_InitModule();
 
 	DebugMenu_InitModule();
 	MFCallstack_InitModule();
@@ -259,6 +263,7 @@ void MFSystem_Deinit()
 	MFCallstack_DeinitModule();
 	DebugMenu_DeinitModule();
 
+	MFString_DeinitModule();
 	MFHeap_DeinitModule();
 }
 

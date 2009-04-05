@@ -277,7 +277,7 @@ MFModel* MFModel_Create(const char *pFilename)
 
 			for(int a=0; a<pChunk->count; a++)
 			{
-//						pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
+//				pSubobjects[a].pMaterial = MFMaterial_Create((char*)pSubobjects[a].pMaterial);
 
 				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 				{

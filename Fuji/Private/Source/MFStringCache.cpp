@@ -60,7 +60,8 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 		pCurr += MFString_Length(pCurr)+1;
 	}
 
-	MFDebug_Assert(&pCurr[newLength+1] < &pCache->pMem[pCache->size], "No memory for string!");
+	if(pCurr+newLength+1 > pCache->pMem+pCache->size)
+		return NULL;
 
 	MFString_Copy(pCurr, pNewString);
 	pCurr[newLength]=0;

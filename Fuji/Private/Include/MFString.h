@@ -260,6 +260,15 @@ const char* MFStr(const char *format, ...);
 const char* MFStrN(const char *source, size_t n);
 
 /**
+ * Test if a string is a number.
+ * Tests to see if a given string contains a decimal or hexadecimal number (using '0x' hex notation).
+ * @param pString String to test.
+ * @param bAllowHex Test also if the string is a hexadecimal number.
+ * @return Returns true if the string was a valid number.
+ */
+bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
+
+/**
  * Test if the specified character is a while space character.
  */
 bool MFIsWhite(int c);
@@ -344,22 +353,14 @@ int MFString_GetNumChars(const char *pString);
  */
 int MFString_GetCharacterOffset(const char *pString, int character);
 
-/**
- * Get the number of bytes in a multibyte character.
- * Gets the number of bytes in a multibyte encoded character.
- * @param pMBChar Pointer to a multibyte character sequence.
- * @return Returns the number of bytes in the multibyte character sequence8
- */
-int MFString_GetNumBytesInMBChar(const char *pMBChar);
+int MFString_EncodeUTF8(int c, char *pMBChar);
+int MFString_DecodeUTF8(const char *pMBChar, int *pNumBytes);
 
-char *MFString_NextChar(const char *pString);
-char *MFString_PrevChar(const char *pString);
+char *MFString_NextChar(const char *pChar);
+char *MFString_PrevChar(const char *pChar);
 
-int MFString_MBToWChar(const char *pMBChar, uint16 *pWC);
-int MFString_WCharToMB(int wc, char *pMBChar);
-
-int MFString_UFT8ToWChar(uint16 *pBuffer, const char *pUTF8String);
-int MFString_ToUFT8(char *pBuffer, const char *pString);
+int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString);
+int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString);
 
 uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
 
@@ -459,6 +460,47 @@ uint16* MFSeekNewlineW(uint16 *pC);
  * Returns a pointer to the next non-white space character in the provided unicode string.
  */
 uint16* MFSkipWhiteW(uint16 *pC);
+
+////// String Class //////
+
+struct MFStringData;
+
+class MFString
+{
+public:
+	MFString();
+	MFString(const MFString &string);
+	MFString(const char *pString, bool bHoldStaticPointer = false);
+	~MFString();
+
+	bool operator!() const;
+
+	MFString& operator=(const char *pString);
+	MFString& operator=(const MFString &string);
+	MFString& operator+=(const char *pString);
+	MFString& operator+=(const MFString &string);
+	MFString operator+(const char *pString) const;
+	MFString operator+(const MFString &string) const;
+
+	MFString& SetStaticString(const char *pStaticString);
+	MFString& FromUTF16(const wchar_t *pString);
+
+	const char *CStr() const;
+
+	int NumBytes() const;
+	int NumChars() const;
+	bool IsNull() const;
+	bool IsNumeric() const;
+
+	MFString Upper() const;
+	MFString Lower() const;
+	MFString& Trim(bool bFront = true, bool bEnd = true, const char *pCharacters = " \t\r\n");
+
+private:
+	MFStringData *pData;
+};
+
+MFString operator+(const char *pString, const MFString &string);
 
 #include "MFString.inl"
 

@@ -393,6 +393,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFObjectPool.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFParticleSystem_Internal.h"
 				>
 			</File>
@@ -1543,6 +1547,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFNetwork.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFObjectPool.h"
 				>
 			</File>
 			<File

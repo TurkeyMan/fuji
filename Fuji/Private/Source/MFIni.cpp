@@ -306,7 +306,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 {
 	MFCALLSTACK;
 
-	uint16 ch;
+	int ch;
 	int bytes;
 
 	// skip white space
@@ -324,7 +324,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		}
 
 		// check if we have found some non-whitespace
-		bytes = MFString_MBToWChar(pSrc, &ch);
+		bytes = MFString_DecodeUTF8(pSrc, &ch);
 		if(!MFIsWhite(ch) && (stringCount!=1 || ch != '='))
 			break;
 
@@ -350,7 +350,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 	bool bInQuotes = false;
 	int sectionDepth = 0;
 	*pbIsSection = false;
-	bytes = MFString_MBToWChar(pSrc, &ch);
+	bytes = MFString_DecodeUTF8(pSrc, &ch);
 	while(pSrc < pSrcEnd && !MFIsNewline(ch) && (bInQuotes || sectionDepth!=0 || ((stringCount!=0 || ch != '=') && !MFIsWhite(ch) && ch != ',' && (pSrc[0] != '/' || pSrc[1] != '/' ))))
 	{
 		if(!bInQuotes && ch == '[')
@@ -387,7 +387,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 			while(bytes--)
 				*pDst++ = *pSrc++;
 		}
-		bytes = MFString_MBToWChar(pSrc, &ch);
+		bytes = MFString_DecodeUTF8(pSrc, &ch);
 	}
 
 	if(sectionDepth > 0)
