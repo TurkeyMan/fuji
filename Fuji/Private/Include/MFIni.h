@@ -35,6 +35,7 @@ public:
 
 	int GetStringCount() { return stringCount; }
 	bool IsString(int index, const char *pString) { const char *pToken = GetString(index); return pToken ? !MFString_CaseCmp(pToken, pString) : false; }
+	bool IsSection(const char *pSectionName) { return IsString(0, "section") && IsString(1, pSectionName); }
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index);
