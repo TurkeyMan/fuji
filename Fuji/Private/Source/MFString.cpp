@@ -293,7 +293,102 @@ bool MFString_IsNumber(const char *pString, bool bAllowHex)
 				++numDigits;
 		}
 	}
+
 	return numDigits > 0 ? true : false;
+}
+
+int MFString_AsciiToInteger(const char *pString, bool bAllowHex)
+{
+	int number = 0;
+
+	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
+	{
+		// hex number
+		pString += 2;
+		while(*pString)
+		{
+			int digit = *pString;
+			if(!MFIsHex(digit))
+				return number;
+			number <<= 4;
+			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a';
+		}
+	}
+	else
+	{
+		// decimal number
+		bool neg = false;
+		if(*pString == '-' || *pString == '+')
+		{
+			neg = *pString == '-';
+			++pString;
+		}
+
+		while(*pString)
+		{
+			if(!MFIsNumeric(*pString))
+				return neg ? -number : number;
+			number *= 10;
+			number += (*pString++) - '0';
+		}
+
+		if(neg)
+			number = -number;
+	}
+
+	return number;
+}
+
+float MFString_AsciiToFloat(const char *pString, bool bAllowHex)
+{
+	int64 number = 0;
+	float frac = 1;
+
+	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
+	{
+		// hex number
+		pString += 2;
+		while(*pString)
+		{
+			int digit = *pString++;
+			if(!MFIsHex(digit))
+				return (float)number;
+			number <<= 4;
+			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a';
+		}
+	}
+	else
+	{
+		// decimal number
+		bool neg = false;
+		if(*pString == '-' || *pString == '+')
+		{
+			neg = *pString == '-';
+			++pString;
+		}
+
+		bool bHasDot = false;
+		while(*pString)
+		{
+			int digit = *pString++;
+			if(!MFIsNumeric(digit) && (bHasDot || digit != '.'))
+				return (float)(neg ? -number : number) * frac;
+			if(digit == '.')
+				bHasDot = true;
+			else
+			{
+				number *= 10;
+				number += digit - '0';
+				if(bHasDot)
+					frac *= 0.1f;
+			}
+		}
+
+		if(neg)
+			number = -number;
+	}
+
+	return (float)number * frac;
 }
 
 #if 0
@@ -594,6 +689,14 @@ MFString::MFString(const char *pString, bool bHoldStaticPointer)
 	}
 }
 
+MFString::MFString(int preallocatedBytes)
+{
+	pData = MFStringData::Alloc();
+	pData->bytes = 0;
+	pData->pMemory = (char*)stringHeap.Alloc(preallocatedBytes, &pData->allocated);
+	pData->pMemory[0] = 0;
+}
+
 MFString& MFString::operator=(const char *pString)
 {
 	if(pData)
@@ -627,11 +730,45 @@ MFString& MFString::operator=(const MFString &string)
 
 MFString& MFString::operator+=(const char *pString)
 {
-	return *this;
+	MFString t(pString);
+	return *this += t;
 }
 
 MFString& MFString::operator+=(const MFString &string)
 {
+	if(!string)
+		return *this;
+
+	if(!pData)
+	{
+		string.pData->AddRef();
+		pData = string.pData;
+	}
+	else
+	{
+		// make sure nothing else references this string since we are going to modify it
+		Detach();
+
+		int sumBytes = pData->bytes + string.pData->bytes;
+		int bytesNeeded = sumBytes + 1;
+		if(pData->allocated >= bytesNeeded)
+		{
+			MFString_Copy(pData->pMemory + pData->bytes, string.pData->pMemory);
+		}
+		else
+		{
+			// overflowed the string buffer, need to realloc...
+			char *pNew = (char*)stringHeap.Alloc(bytesNeeded, &pData->allocated);
+			MFString_CopyCat(pNew, pData->pMemory, string.pData->pMemory);
+
+			if(pData->allocated)
+				stringHeap.Free(pData->pMemory);
+
+			pData->pMemory = pNew;
+		}
+		pData->bytes = sumBytes;
+	}
+
 	return *this;
 }
 
@@ -696,19 +833,137 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 	return *this;
 }
 
+MFString& MFString::Detach()
+{
+	if(pData && pData->refCount > 1)
+	{
+		MFStringData *pNew = MFStringData::Alloc();
+		pNew->bytes = pData->bytes;
+		pNew->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		MFString_Copy(pNew->pMemory, pData->pMemory);
+
+		--pData->refCount;
+		pData = pNew;
+	}
+
+	return *this;
+}
+
+MFString& MFString::Sprintf(const char *pFormat, ...)
+{
+	if(pData)
+	{
+		pData->Release();
+		pData = NULL;
+	}
+
+	va_list arglist;
+	va_start(arglist, pFormat);
+
+	int nRes = vsprintf(NULL, pFormat, arglist);
+	if(nRes >= 0)
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = nRes;
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		vsprintf(pData->pMemory, pFormat, arglist);
+	}
+
+	va_end(arglist);
+
+	return *this;
+}
+
+MFString& MFString::FromInt(int number)
+{
+	Sprintf("%d", number);
+	return *this;
+}
+
+MFString& MFString::FromFloat(float number)
+{
+	Sprintf("%g", number);
+	return *this;
+}
+
 MFString MFString::Upper() const
 {
-	MFString t(*this);
+	if(!pData)
+		return *this;
+
+	// allocate a new string
+	MFString t(pData->bytes + 1);
+	t.pData->bytes = pData->bytes;
+
+	// copy upper case
+	for(int a=0; a<pData->bytes + 1; ++a)
+		t.pData->pMemory[a] = MFToUpper(pData->pMemory[a]);
+
 	return t;
 }
 
 MFString MFString::Lower() const
 {
-	MFString t(*this);
+	if(!pData)
+		return *this;
+
+	// allocate a new string
+	MFString t(pData->bytes + 1);
+	t.pData->bytes = pData->bytes;
+
+	// copy lower case string
+	for(int a=0; a<pData->bytes + 1; ++a)
+		t.pData->pMemory[a] = MFToLower(pData->pMemory[a]);
+
 	return t;
 }
 
 MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
 {
+	if(pData)
+	{
+		const char *pSrc = pData->pMemory;
+		int offset = 0;
+
+		// trim start
+		if(bFront)
+		{
+			while(pSrc[offset] && MFString_Chr(pCharacters, pSrc[offset]))
+				++offset;
+		}
+
+		int count = pData->bytes - offset;
+
+		// trim end
+		if(bEnd)
+		{
+			const char *pEnd = pSrc + offset + count - 1;
+			while(count && MFString_Chr(pCharacters, *pEnd))
+			{
+				--count;
+				--pEnd;
+			}
+		}
+
+		*this = SubStr(offset, count);
+	}
+
 	return *this;
+}
+
+MFString MFString::SubStr(int offset, int count) const
+{
+	if(!pData)
+		return *this;
+
+	// allocate a new string
+	MFString t(count+1);
+	t.pData->bytes = count;
+
+	// copy sub string
+	for(int a=0; a<count; ++a)
+		t.pData->pMemory[a] = pData->pMemory[offset + a];
+	t.pData->pMemory[count] = 0;
+
+	return t;
 }

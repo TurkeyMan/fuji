@@ -12,16 +12,18 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 	MFParticleSystem *pSystem = (MFParticleSystem*)MFHeap_Alloc(sizeof(MFParticleSystem));
 
 	pSystem->params = *pParticleParams;
-	pSystem->emitter = *pParticleParams->pEmitter;
-	pSystem->params.pEmitter = &pSystem->emitter;
 
 	if(!pParticleParams->pMaterial)
 		pSystem->pMaterial = MFMaterial_Create("_None");
 	else
+	{
 		pSystem->pMaterial = MFMaterial_Create(pParticleParams->pMaterial);
 
-	pSystem->emitPeriod = pSystem->emitter.emitRate == 0.0f ? 0.0f : 1.0f / pSystem->emitter.emitRate;
-	pSystem->emitTimeout = 0.0f;
+//		int additive = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "additive");
+		int zwrite = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "zwrite");
+		int on = 1, off = 0;
+		MFMaterial_SetParameter(pSystem->pMaterial, zwrite, 0, &off);
+	}
 
 	pSystem->particles.Init("ParticleSystem", pSystem->params.maxActiveParticles);
 
@@ -95,15 +97,94 @@ void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMa
 
 void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 {
-	MFParticleEmitter *pE = &pParticleSystem->emitter;
-	MFParticleParameters *pP = &pParticleSystem->params;
+	int numParticles = pParticleSystem->particles.GetLength();
+	if(numParticles == 0)
+		return;
 
-	// emit new particles
-	pParticleSystem->emitTimeout += MFSystem_TimeDelta();
+	// render particles
+	MFView_Push();
 
-	while(pParticleSystem->emitTimeout > pParticleSystem->emitPeriod && pParticleSystem->particles.GetLength() < pParticleSystem->params.maxActiveParticles)
+	MFMatrix ltv = MFView_GetWorldToViewMatrix();
+	MFView_SetCameraMatrix(MFMatrix::identity);
+
+	// update and draw each particle
+	if(pParticleSystem->params.rotationRate != 0.0f)
 	{
-		MFParticle *pNew = pParticleSystem->particles.Create();
+		MFParticleSystem_DrawRotating(pParticleSystem, ltv);
+		MFView_Pop();
+		return;
+	}
+
+	float fadeStart = pParticleSystem->params.life - pParticleSystem->params.fadeDelay;
+
+	MFMaterial_SetMaterial(pParticleSystem->pMaterial);
+
+	MFPrimitive(PT_QuadList, 0);
+	MFBegin(numParticles * 2);
+
+	MFParticle **ppI = pParticleSystem->particles.Begin();
+
+	while(*ppI)
+	{
+		MFParticle *pParticle = *ppI;
+
+		float dt = MFSystem_TimeDelta();
+
+		pParticle->size += pParticleSystem->params.scaleRate * dt;
+		pParticle->velocity += pParticleSystem->params.force * dt;
+		pParticle->pos += pParticle->velocity * dt;
+
+		float halfSize = pParticle->size * 0.5f;
+		float alpha = MFMin(pParticle->life / fadeStart, 1.0f);
+
+		MFVector pos = ApplyMatrixH(pParticle->pos, ltv);
+
+		MFSetColour(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
+		MFSetTexCoord1(0, 0);
+		MFSetPosition(pos.x - halfSize, pos.y + halfSize, pos.z);
+		MFSetTexCoord1(1, 1);
+		MFSetPosition(pos.x + halfSize, pos.y - halfSize, pos.z);
+
+		pParticle->life -= dt;
+		if(pParticle->life < 0.0f)
+			pParticleSystem->particles.Destroy(ppI);
+
+		ppI++;
+	}
+
+	MFEnd();
+
+	MFView_Pop();
+}
+
+MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams)
+{
+	MFParticleEmitter *pEmitter = (MFParticleEmitter*)MFHeap_Alloc(sizeof(MFParticleEmitter));
+
+	pEmitter->params = *pEmitterParams;
+	pEmitter->emitPeriod = pEmitter->params.emitRate == 0.0f ? 0.0f : 1.0f / pEmitter->params.emitRate;
+	pEmitter->emitTimeout = 0.0f;
+
+	return pEmitter;
+}
+
+void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pParticleEmitter)
+{
+	MFHeap_Free(pParticleEmitter);
+}
+
+void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
+{
+	MFParticleEmitterParameters *pE = &pEmitter->params;
+	MFParticleSystem *pParticleSystem = pE->pParticleSystem;
+
+	MFParticle *pNew = NULL;
+	if(pParticleSystem->particles.GetLength() < pParticleSystem->params.maxActiveParticles)
+		pNew = pParticleSystem->particles.Create();
+
+	if(pNew)
+	{
+		MFParticleParameters *pP = &pParticleSystem->params;
 
 		pNew->colour = pP->colour;
 		pNew->life = pP->life;
@@ -175,68 +256,33 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 
 			pNew->velocity = ApplyMatrixH(pNew->velocity, scatterMat);
 		}
-
-		pParticleSystem->emitTimeout -= pParticleSystem->emitPeriod;
 	}
+}
 
-	int numParticles = pParticleSystem->particles.GetLength();
-	if(numParticles == 0)
-		return;
+void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter)
+{
+	// emit new particles
+	pEmitter->emitTimeout += MFSystem_TimeDelta();
 
-	// render particles
-	MFView_Push();
-
-	MFMatrix ltv = MFView_GetWorldToViewMatrix();
-	MFView_SetCameraMatrix(MFMatrix::identity);
-
-	// update and draw each particle
-	if(pParticleSystem->params.rotationRate != 0.0f)
+	while(pEmitter->emitTimeout > pEmitter->emitPeriod)
 	{
-		MFParticleSystem_DrawRotating(pParticleSystem, ltv);
-		MFView_Pop();
-		return;
+		MFParticleSystem_AddParticle(pEmitter);
+
+		pEmitter->emitTimeout -= pEmitter->emitPeriod;
 	}
+}
 
-	float fadeStart = pParticleSystem->params.life - pParticleSystem->params.fadeDelay;
-
-	MFMaterial_SetMaterial(pParticleSystem->pMaterial);
-
-	MFPrimitive(PT_QuadList, 0);
-	MFBegin(numParticles * 2);
-
-	MFParticle **ppI = pParticleSystem->particles.Begin();
-
-	while(*ppI)
+void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles)
+{
+	for(int a=0; a<numParticles; ++a)
 	{
-		MFParticle *pParticle = *ppI;
-
-		float dt = MFSystem_TimeDelta();
-
-		pParticle->size += pParticleSystem->params.scaleRate * dt;
-		pParticle->velocity += pParticleSystem->params.force * dt;
-		pParticle->pos += pParticle->velocity * dt;
-
-		float halfSize = pParticle->size * 0.5f;
-		float alpha = MFMin(pParticle->life / fadeStart, 1.0f);
-
-		MFVector pos = ApplyMatrixH(pParticle->pos, ltv);
-
-		MFSetColour(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
-		MFSetTexCoord1(0, 0);
-		MFSetPosition(pos.x - halfSize, pos.y + halfSize, pos.z);
-		MFSetTexCoord1(1, 1);
-		MFSetPosition(pos.x + halfSize, pos.y - halfSize, pos.z);
-
-		pParticle->life -= dt;
-		if(pParticle->life < 0.0f)
-			pParticleSystem->particles.Destroy(ppI);
-
-		ppI++;
+		MFParticleSystem_AddParticle(pEmitter);
 	}
+}
 
-	MFEnd();
-
-	MFView_Pop();
+void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix)
+{
+	pEmitter->params.position = worldMatrix;
 }
 
 #endif

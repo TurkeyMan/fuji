@@ -21,12 +21,16 @@ struct MFParticle
 
 struct MFParticleSystem
 {
-	MFParticleEmitter emitter;
 	MFParticleParameters params;
 
 	MFMaterial *pMaterial;
 
 	MFPtrListDL<MFParticle> particles;
+};
+
+struct MFParticleEmitter
+{
+	MFParticleEmitterParameters params;
 
 	float emitPeriod;
 	float emitTimeout;

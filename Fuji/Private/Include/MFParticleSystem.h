@@ -17,6 +17,8 @@
  */
 struct MFParticleSystem;
 
+struct MFParticleEmitter;
+
 /**
  * Fuji emitter types.
  * Fuji particle emitter types.
@@ -46,13 +48,36 @@ enum MFEmitterBehaviour
 };
 
 /**
+ * Particle system parameters.
+ * Particle system parameters structure.
+ */
+struct MFParticleParameters
+{
+	MFVector colour;				/**< Colour of particles. */
+	MFVector force;					/**< An arbitrary force vector which may be applied over time. */
+
+	float life;						/**< Life of a single particle. */
+	float size;						/**< Particles size. */
+
+	float fadeDelay;				/**< Delay before particle begins to fade. */
+	float rotationRate;				/**< Rate of rotation in radians/second. */
+	float scaleRate;				/**< Rate of scale in units/second. */
+
+	int maxActiveParticles;			/**< Maximum number of active particles. */
+
+	const char *pMaterial;			/**< Name of material to apply to particles. */
+};
+
+/**
  * Particle emitter configuration.
  * Particle emitter configuration structure.
  */
-struct MFParticleEmitter
+struct MFParticleEmitterParameters
 {
 	MFMatrix position;				/**< Position of the emitter. */
 	MFVector startVector;			/**< Starting vector. */
+
+	MFParticleSystem *pParticleSystem;
 
 	MFEmitterType type;				/**< Emitter type. */
 	MFEmitterBehaviour behaviour;	/**< Motion behaviour. */
@@ -65,29 +90,6 @@ struct MFParticleEmitter
 	float directionScatter;			/**< Directional scatter from initial direction in radians. */
 
 	float emitRate;					/**< Number of particles emitted per second. */
-};
-
-/**
- * Particle system parameters.
- * Particle system parameters structure.
- */
-struct MFParticleParameters
-{
-	MFVector colour;				/**< Colour of particles. */
-	MFVector force;					/**< An arbitrary force vector which may be applied over time. */
-
-	MFParticleEmitter *pEmitter;	/**< Emitter used to emit particles. */
-
-	float life;						/**< Life of a single particle. */
-	float size;						/**< Particles size. */
-
-	float fadeDelay;				/**< Delay before particle begins to fade. */
-	float rotationRate;				/**< Rate of rotation in radians/second. */
-	float scaleRate;				/**< Rate of scale in units/second. */
-
-	int maxActiveParticles;			/**< Maximum number of active particles. */
-
-	const char *pMaterial;			/**< Name of material to apply to particles. */
 };
 
 /**
@@ -119,15 +121,25 @@ void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem);
  */
 void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem);
 
+
+
+MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams);
+
+void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pEmitter);
+
+void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter);
+
+void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles);
+
 /**
- * Set the particle system world matrix.
- * Sets the particle systems local to world matrix.
- * @param pParticleSystem Particle system.
- * @param worldMatrix World matrix to assign to the particle system.
+ * Set the particle emitter world matrix.
+ * Sets the particle emitters local to world matrix.
+ * @param pEmitter Particle emitter.
+ * @param worldMatrix World matrix to assign to the particle emitter.
  * @return None.
  * @see MFParticleSystem_Draw()
  */
-void MFParticleSystem_SetWorldMatrix(MFParticleSystem *pParticleSystem, const MFMatrix &worldMatrix);
+void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix);
 
 #endif
 

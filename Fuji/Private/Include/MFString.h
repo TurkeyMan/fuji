@@ -268,6 +268,10 @@ const char* MFStrN(const char *source, size_t n);
  */
 bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
 
+int MFString_AsciiToInteger(const char *pString, bool bAllowHex = true);
+
+float MFString_AsciiToFloat(const char *pString, bool bAllowHex = true);
+
 /**
  * Test if the specified character is a while space character.
  */
@@ -471,6 +475,7 @@ public:
 	MFString();
 	MFString(const MFString &string);
 	MFString(const char *pString, bool bHoldStaticPointer = false);
+	MFString(int preallocatedBytes);
 	~MFString();
 
 	bool operator!() const;
@@ -484,8 +489,16 @@ public:
 
 	MFString& SetStaticString(const char *pStaticString);
 	MFString& FromUTF16(const wchar_t *pString);
+	MFString& FromInt(int number);
+	MFString& FromFloat(float number);
+
+	MFString& Detach();
+
+	MFString& Sprintf(const char *pFormat, ...);
 
 	const char *CStr() const;
+	int ToInt() const;
+	float ToFloat() const;
 
 	int NumBytes() const;
 	int NumChars() const;
@@ -495,6 +508,8 @@ public:
 	MFString Upper() const;
 	MFString Lower() const;
 	MFString& Trim(bool bFront = true, bool bEnd = true, const char *pCharacters = " \t\r\n");
+
+	MFString SubStr(int offset, int count) const;
 
 private:
 	MFStringData *pData;

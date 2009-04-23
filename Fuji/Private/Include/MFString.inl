@@ -443,6 +443,16 @@ inline bool MFString::operator!() const
 	return !pData;
 }
 
+inline int MFString::ToInt() const
+{
+	return pData ? MFString_AsciiToInteger(pData->pMemory) : 0;
+}
+
+inline float MFString::ToFloat() const
+{
+	return pData ? MFString_AsciiToFloat(pData->pMemory) : 0.f;
+}
+
 inline const char *MFString::CStr() const
 {
 	return pData ? pData->pMemory : NULL;

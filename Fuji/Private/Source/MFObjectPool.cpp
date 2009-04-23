@@ -7,6 +7,7 @@ void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects)
 	objectSize = _objectSize;
 	maxItems = numObjects;
 	grow = growObjects;
+	allocated = 0;
 
 	bytes = _objectSize * numObjects;
 	pMemory = (char*)MFHeap_Alloc(bytes + sizeof(void**)*numObjects);
@@ -82,14 +83,15 @@ int MFObjectPool::Free(void *pItem)
 	return 0;
 }
 
-void MFObjectPoolGroup::Init(MFObjectPoolGroupConfig *_pPools, int numPools)
+void MFObjectPoolGroup::Init(MFObjectPoolGroupConfig *_pPools, int _numPools)
 {
-	pConfig = (MFObjectPoolGroupConfig*)MFHeap_Alloc(sizeof(MFObjectPoolGroupConfig)*numPools + sizeof(MFObjectPool)*numPools);
-	pPools = (MFObjectPool*)&pConfig[numPools];
+	pConfig = (MFObjectPoolGroupConfig*)MFHeap_Alloc(sizeof(MFObjectPoolGroupConfig)*_numPools + sizeof(MFObjectPool)*_numPools);
+	pPools = (MFObjectPool*)&pConfig[_numPools];
+	numPools = _numPools;
 
-	MFCopyMemory(pConfig, _pPools, sizeof(MFObjectPoolGroupConfig)*numPools);
+	MFCopyMemory(pConfig, _pPools, sizeof(MFObjectPoolGroupConfig)*_numPools);
 
-	for(int a=0; a<numPools; ++a)
+	for(int a=0; a<_numPools; ++a)
 	{
 		pPools[a].Init(pConfig[a].objectSize, pConfig[a].numObjects, pConfig[a].growObjects);
 	}
