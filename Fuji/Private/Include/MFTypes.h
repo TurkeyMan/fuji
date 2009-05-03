@@ -70,6 +70,16 @@ struct MFRect
 	float height; /**< Height of rectangle */
 };
 
+inline bool MFTypes_PointInRect(float x, float y, MFRect *pRect)
+{
+	return x >= pRect->x && x <= pRect->x + pRect->width &&
+			y >= pRect->y && y <= pRect->y + pRect->height;
+}
+
+inline bool MFTypes_RectOverlap(MFRect *pRect1, MFRect *pRect2)
+{
+}
+
 #endif // _MFTYPES_H
 
 /** @} */
