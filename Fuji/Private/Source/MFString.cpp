@@ -307,11 +307,11 @@ int MFString_AsciiToInteger(const char *pString, bool bAllowHex)
 		pString += 2;
 		while(*pString)
 		{
-			int digit = *pString;
+			int digit = *pString++;
 			if(!MFIsHex(digit))
 				return number;
 			number <<= 4;
-			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a';
+			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a' + 10;
 		}
 	}
 	else
