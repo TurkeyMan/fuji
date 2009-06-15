@@ -297,14 +297,16 @@ bool MFString_IsNumber(const char *pString, bool bAllowHex)
 	return numDigits > 0 ? true : false;
 }
 
-int MFString_AsciiToInteger(const char *pString, bool bAllowHex)
+int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 {
 	int number = 0;
 
-	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
+	if(base == 16 || (bDetectBase && pString[0] == '0' && pString[1] == 'x'))
 	{
 		// hex number
-		pString += 2;
+		if(pString[0] == '0' && pString[1] == 'x')
+			pString += 2;
+
 		while(*pString)
 		{
 			int digit = *pString++;
@@ -314,7 +316,18 @@ int MFString_AsciiToInteger(const char *pString, bool bAllowHex)
 			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a' + 10;
 		}
 	}
-	else
+	else if(base == 2 || (bDetectBase && pString[0] == 'b'))
+	{
+		if(pString[0] == 'b')
+			++pString;
+
+		while(*pString == '0' || *pString == '1')
+		{
+			number <<= 1;
+			number |= *pString - '0';
+		}
+	}
+	else if(base == 10)
 	{
 		// decimal number
 		bool neg = false;
@@ -339,54 +352,38 @@ int MFString_AsciiToInteger(const char *pString, bool bAllowHex)
 	return number;
 }
 
-float MFString_AsciiToFloat(const char *pString, bool bAllowHex)
+float MFString_AsciiToFloat(const char *pString)
 {
 	int64 number = 0;
 	float frac = 1;
 
-	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
+	// floating poiont number
+	bool neg = false;
+	if(*pString == '-' || *pString == '+')
 	{
-		// hex number
-		pString += 2;
-		while(*pString)
+		neg = *pString == '-';
+		++pString;
+	}
+
+	bool bHasDot = false;
+	while(*pString)
+	{
+		int digit = *pString++;
+		if(!MFIsNumeric(digit) && (bHasDot || digit != '.'))
+			return (float)(neg ? -number : number) * frac;
+		if(digit == '.')
+			bHasDot = true;
+		else
 		{
-			int digit = *pString++;
-			if(!MFIsHex(digit))
-				return (float)number;
-			number <<= 4;
-			number += MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a';
+			number *= 10;
+			number += digit - '0';
+			if(bHasDot)
+				frac *= 0.1f;
 		}
 	}
-	else
-	{
-		// decimal number
-		bool neg = false;
-		if(*pString == '-' || *pString == '+')
-		{
-			neg = *pString == '-';
-			++pString;
-		}
 
-		bool bHasDot = false;
-		while(*pString)
-		{
-			int digit = *pString++;
-			if(!MFIsNumeric(digit) && (bHasDot || digit != '.'))
-				return (float)(neg ? -number : number) * frac;
-			if(digit == '.')
-				bHasDot = true;
-			else
-			{
-				number *= 10;
-				number += digit - '0';
-				if(bHasDot)
-					frac *= 0.1f;
-			}
-		}
-
-		if(neg)
-			number = -number;
-	}
+	if(neg)
+		number = -number;
 
 	return (float)number * frac;
 }

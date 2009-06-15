@@ -268,9 +268,9 @@ const char* MFStrN(const char *source, size_t n);
  */
 bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
 
-int MFString_AsciiToInteger(const char *pString, bool bAllowHex = true);
+int MFString_AsciiToInteger(const char *pString, bool bDetectBase = true, int base = 10);
 
-float MFString_AsciiToFloat(const char *pString, bool bAllowHex = true);
+float MFString_AsciiToFloat(const char *pString);
 
 /**
  * Test if the specified character is a while space character.
