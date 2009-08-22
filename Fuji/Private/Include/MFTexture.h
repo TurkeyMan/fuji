@@ -113,18 +113,32 @@ enum TextureFlags
 // interface functions
 
 /**
- * Creates a texture.
+ * Create a texture.
  * Creates a texture from the filesystem.
  * @param pName Name of texture to read from the filesystem.
  * @param generateMipChain If true, a mip-chain will be generated for the texture.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
- * @see MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
+ * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
  */
 MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
 
 /**
- * Creates a texture from raw data.
+ * Create a dynamic texture.
+ * Creates a dynamic texture.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param height Image height.
+ * @param format Format of the image data. Only formats supported by the platform and TexFmt_A8R8G8B8 can be used.
+ * @param flags Texture creation flags.
+ * @return Pointer to an MFTexture structure representing the newly created texture.
+ * @remarks If the specified texture has already been created, MFTexture_CreateDynamic will fail.
+ * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
+ */
+MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags = 0);
+
+/**
+ * Create a texture from raw data.
  * Creates a texture from a raw data buffer.
  * @param pName Name of the texture being created.
  * @param pData Pointer to a buffer containing the image data
@@ -217,6 +231,8 @@ bool MFTexture_IsAvailableOnPlatform(int format, int platform);
  * @see MFTexture_GetPlatformAvailability(), MFTexture_GetFormatString()
  */
 int MFTexture_GetBitsPerPixel(int format);
+
+void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight);
 
 #endif // _TEXTURE_H
 

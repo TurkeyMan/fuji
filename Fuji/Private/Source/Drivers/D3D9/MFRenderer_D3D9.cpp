@@ -15,6 +15,8 @@
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D9
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D9
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D9
+	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D9
+	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_D3D9
 #endif
 
 #include "MFTexture_Internal.h"
@@ -29,8 +31,11 @@
 
 #include <d3d9.h>
 
-IDirect3D9 *d3d9;
+static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
+
+static IDirect3DSurface9 *pRenderTarget = NULL;
+static IDirect3DSurface9 *pZTarget = NULL;
 
 static D3DCAPS9 deviceCaps;
 
@@ -185,6 +190,9 @@ int MFRenderer_CreateDisplay()
 		}
 	}
 
+	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
+	pd3dDevice->GetDepthStencilSurface(&pZTarget);
+
 	pd3dDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -205,6 +213,18 @@ int MFRenderer_CreateDisplay()
 
 void MFRenderer_DestroyDisplay()
 {
+	if(pRenderTarget)
+	{
+		pRenderTarget->Release();
+		pRenderTarget = NULL;
+	}
+
+	if(pZTarget)
+	{
+		pZTarget->Release();
+		pZTarget = NULL;
+	}
+
 	if(pd3dDevice)
 	{
 		pd3dDevice->Release();
@@ -356,6 +376,39 @@ void MFRenderer_ResetViewport()
 	pd3dDevice->SetViewport(&vp);
 }
 
+void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+{
+	if(pRenderTarget)
+	{
+		IDirect3DTexture9 *pRT = (IDirect3DTexture9*)pRenderTarget->pInternalData;
+
+		IDirect3DSurface9 *pSurface;
+		pRT->GetSurfaceLevel(0, &pSurface);
+		pd3dDevice->SetRenderTarget(0, pSurface);
+		pSurface->Release();
+	}
+
+	if(pZTarget)
+	{
+		IDirect3DTexture9 *pRT = (IDirect3DTexture9*)pRenderTarget->pInternalData;
+
+		IDirect3DSurface9 *pSurface;
+		pRT->GetSurfaceLevel(0, &pSurface);
+		pd3dDevice->SetDepthStencilSurface(pSurface);
+		pSurface->Release();
+	}
+	else
+	{
+		pd3dDevice->SetDepthStencilSurface(NULL);
+	}
+
+}
+
+void MFRenderer_SetDeviceRenderTarget()
+{
+	pd3dDevice->SetRenderTarget(0, pRenderTarget);
+	pd3dDevice->SetDepthStencilSurface(pZTarget);
+}
 
 // direct3d management fucntions
 void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)

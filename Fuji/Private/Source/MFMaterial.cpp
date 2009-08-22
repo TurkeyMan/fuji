@@ -358,7 +358,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 		MaterialDefinition *pDef = pDefinitionRegistry;
 		while(pDef)
 		{
-			MFIniLine *pLine = pDef->pIni->GetFirstLine()->FindEntry("Material",pName);
+			MFIniLine *pLine = pDef->pIni->GetFirstLine()->FindEntry("section",pName);
 			if (pLine)
 			{
 				MaterialInternal_InitialiseFromDefinition(pDef->pIni, pMat, pName);
@@ -494,7 +494,7 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat,
 {
 	MFCALLSTACK;
 
-	MFIniLine *pLine = pDefIni->GetFirstLine()->FindEntry("material", pDefinition);
+	MFIniLine *pLine = pDefIni->GetFirstLine()->FindEntry("section", pDefinition);
 
 	if(pLine)
 	{

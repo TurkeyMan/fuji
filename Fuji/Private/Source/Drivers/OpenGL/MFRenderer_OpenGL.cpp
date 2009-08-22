@@ -15,6 +15,8 @@
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_OpenGL
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_OpenGL
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_OpenGL
+	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_OpenGL
+	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_OpenGL
 #endif
 
 #include "MFTexture_Internal.h"
@@ -357,6 +359,16 @@ void MFRenderer_ResetViewport()
 	gCurrentViewport.height = (float)gDisplay.height;
 
 	glViewport(0, 0, gDisplay.width, gDisplay.height);
+}
+
+void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+{
+	MFDebug_Assert(false, "!");
+}
+
+void MFRenderer_SetDeviceRenderTarget()
+{
+	MFDebug_Assert(false, "!");
 }
 
 #endif

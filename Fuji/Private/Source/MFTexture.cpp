@@ -151,6 +151,13 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
+MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags)
+{
+	MFDebug_Assert(false, "Not written!");
+
+	return NULL;
+}
+
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
 	MFCALLSTACK;
@@ -291,6 +298,14 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 	}
 
 	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0, false);
+}
+
+void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
+{
+	if(pWidth)
+		*pWidth = pTexture->pTemplateData->pSurfaces[0].width;
+	if(pHeight)
+		*pHeight = pTexture->pTemplateData->pSurfaces[0].height;
 }
 
 // texture browser

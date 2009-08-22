@@ -1,4 +1,5 @@
 #include "Fuji.h"
+#include "MFTexture.h"
 
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
@@ -15,7 +16,9 @@
 	void MFRenderer_ClearScreen_##driver(uint32 flags); \
 	void MFRenderer_GetViewport_##driver(MFRect *pRect); \
 	void MFRenderer_SetViewport_##driver(MFRect *pRect); \
-	void MFRenderer_ResetViewport_##driver();
+	void MFRenderer_ResetViewport_##driver(); \
+	void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
+	void MFRenderer_SetDeviceRenderTarget_##driver();
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -31,7 +34,9 @@
 		MFRenderer_ClearScreen_##driver, \
 		MFRenderer_GetViewport_##driver, \
 		MFRenderer_SetViewport_##driver, \
-		MFRenderer_ResetViewport_##driver \
+		MFRenderer_ResetViewport_##driver, \
+		MFRenderer_SetRenderTarget_##driver, \
+		MFRenderer_SetDeviceRenderTarget_##driver \
 	},
 
 // declare the available plugins
@@ -58,6 +63,8 @@ struct MFRenderPluginCallbacks
 	void (*pGetViewport)(MFRect *pRect);
 	void (*pSetViewport)(MFRect *pRect);
 	void (*pResetViewport)();
+	void (*pSetRenderTarget)(MFTexture *pRenderTarget, MFTexture *pZTarget);
+	void (*pSetDeviceRenderTarget)();
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -139,6 +146,16 @@ void MFRenderer_SetViewport(MFRect *pRect)
 void MFRenderer_ResetViewport()
 {
 	gpCurrentRenderPlugin->pResetViewport();
+}
+
+void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+{
+	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget, pZTarget);
+}
+
+void MFRenderer_SetDeviceRenderTarget()
+{
+	gpCurrentRenderPlugin->pSetDeviceRenderTarget();
 }
 
 #endif // MF_RENDERER

@@ -73,11 +73,40 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	MFCALLSTACK;
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
-	MFDebug_Assert(false, "Not Written...");
+	if(!pTexture)
+	{
+		pTexture = gTextureBank.Create();
 
-	return NULL;
+		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
+		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
+		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
+		pTexture->pTemplateData->imageFormat = TexFmt_A8R8G8B8;
+		pTexture->pTemplateData->mipLevels = 1;
+		pTexture->pTemplateData->flags = 0;
+
+		pTexture->pTemplateData->pSurfaces->width = width;
+		pTexture->pTemplateData->pSurfaces->height = height;
+		pTexture->pTemplateData->pSurfaces->bitsPerPixel = MFTexture_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
+		pTexture->pTemplateData->pSurfaces->xBlocks = width;
+		pTexture->pTemplateData->pSurfaces->yBlocks = height;
+		pTexture->pTemplateData->pSurfaces->bitsPerBlock = pTexture->pTemplateData->pSurfaces->bitsPerPixel;
+		pTexture->pTemplateData->pSurfaces->pImageData = NULL;
+		pTexture->pTemplateData->pSurfaces->bufferLength = 0;
+		pTexture->pTemplateData->pSurfaces->pPaletteEntries = NULL;
+		pTexture->pTemplateData->pSurfaces->paletteBufferLength = 0;
+
+		pTexture->refCount = 0;
+		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
+		pTexture->name[sizeof(pTexture->name) - 1] = 0;
+
+		pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
+	}
+
+	pTexture->refCount++;
+
+	return pTexture;
 }
 
 int MFTexture_Destroy(MFTexture *pTexture)

@@ -11,6 +11,8 @@
 
 #include "MFMatrix.h"
 
+struct MFTexture;
+
 /**
  * @struct MFMeshChunk
  * Represents a mesh chunk.
@@ -108,6 +110,9 @@ void MFRenderer_ClearScreen(uint32 flags = CS_All);
 void MFRenderer_GetViewport(MFRect *pRect);
 void MFRenderer_SetViewport(MFRect *pRect);
 void MFRenderer_ResetViewport();
+
+void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
+void MFRenderer_SetDeviceRenderTarget();
 
 /**
  * Begin a render block.

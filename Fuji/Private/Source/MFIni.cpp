@@ -137,8 +137,8 @@ MFIni *MFIni::Create(const char *pFilename)
 	MFString_Copy(pMFIni->name, pFilename);
 
 	// allocate temporary buffer for strings & lines
-	pMFIni->linesAllocated = 1024;
-	pMFIni->stringsAllocated = 1024;
+	pMFIni->linesAllocated = 2048;
+	pMFIni->stringsAllocated = 2048;
 	pMFIni->stringCacheSize = memSize+2+(7*4); // 7*4 = memory for a couple of "section" strings..
 	pMFIni->pLines = (MFIniLine*)MFHeap_Alloc(sizeof(MFIniLine)*pMFIni->linesAllocated);
 	pMFIni->pStrings = (const char**)MFHeap_Alloc(sizeof(const char*)*pMFIni->stringsAllocated);
