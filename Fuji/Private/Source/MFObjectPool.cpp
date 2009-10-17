@@ -25,10 +25,14 @@ void MFObjectPool::Deinit()
 	{
 		pNext->Deinit();
 		MFHeap_Free(pNext);
+    pNext = NULL;
 	}
 
 	if(pMemory)
+  {
 		MFHeap_Free(pMemory);
+    pMemory = NULL;
+  }
 }
 
 void *MFObjectPool::Alloc()
