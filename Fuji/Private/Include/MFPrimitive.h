@@ -160,6 +160,43 @@ void MFPrimitive_BeginBlitter(int numBlits);
 void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th);
 
 /**
+ * Blit an image or part of an image to the render target with scaling.
+ * Blits an image or part of an image to the render target with scaling.
+ * @param x The x coordinate, in screen space, where the image will be drawn.
+ * @param y The y coordinate, in screen space, where the image will be drawn.
+ * @param uvs An MFRect containing and segment of the image to blit.
+ * @return None.
+ */
+void MFPrimitive_BlitRect(int x, int y, MFRect uvs);
+
+/**
+ * Blit an image or part of an image to the render target with scaling.
+ * Blits an image or part of an image to the render target with scaling.
+ * @param x The x coordinate, in screen space, where the image will be drawn.
+ * @param y The y coordinate, in screen space, where the image will be drawn.
+ * @param w The width, in pixels, of the image to be drawn.
+ * @param h The width, in pixels, of the image to be drawn.
+ * @param tx The x texel coordinate of the source image.
+ * @param ty The y texel coordinate of the source image.
+ * @param tw The width, in texels, if the image to be blitted.
+ * @param th The height, in texels, if the image to be blitted.
+ * @return None.
+ */
+void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th);
+
+/**
+ * Blit an image or part of an image to the render target with scaling.
+ * Blits an image or part of an image to the render target with scaling.
+ * @param x The x coordinate, in screen space, where the image will be drawn.
+ * @param y The y coordinate, in screen space, where the image will be drawn.
+ * @param w The width, in pixels, of the image to be drawn.
+ * @param h The width, in pixels, of the image to be drawn.
+ * @param uvs An MFRect containing and segment of the image to blit.
+ * @return None.
+ */
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs);
+
+/**
  * End a blitter block.
  * Ends a blitter block.
  * @return None.

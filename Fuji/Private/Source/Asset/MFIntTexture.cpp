@@ -1428,7 +1428,10 @@ void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateDat
 	MFDebug_Assert((pTexture->pSurfaces[0].width*MFTexture_GetBitsPerPixel(targetFormat)) / 8 >= 16, "Textures should have a minimum pitch of 16 bytes.");
 
 	// check power of 2 dimensions
-	MFDebug_Assert(IsPowerOf2(pTexture->pSurfaces[0].width) && IsPowerOf2(pTexture->pSurfaces[0].height), "Texture dimensions are not a power of 2.");
+//	MFDebug_Assert(IsPowerOf2(pTexture->pSurfaces[0].width) && IsPowerOf2(pTexture->pSurfaces[0].height), "Texture dimensions are not a power of 2.");
+
+	// check dimensions are a multiple of 4
+	MFDebug_Assert((pTexture->pSurfaces[0].width & 0x3) == 0 && (pTexture->pSurfaces[0].height & 3) == 0, "Texture dimensions are not multiples of 4.");
 
 	// begin processing...
 	if(flags & MFITF_PreMultipliedAlpha)

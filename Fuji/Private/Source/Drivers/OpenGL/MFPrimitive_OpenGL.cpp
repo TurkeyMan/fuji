@@ -226,12 +226,12 @@ void MFPrimitive_BeginBlitter(int numBlits)
 	MFBegin(numBlits * 2);
 }
 
-void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+void MFPrimitive_Blit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
 	MFSetPosition((float)x, (float)y, 0.0f);
 	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
-	MFSetPosition((float)(x + tw), (float)(y + th), 0.0f);
+	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
 }
 
 void MFPrimitive_EndBlitter()

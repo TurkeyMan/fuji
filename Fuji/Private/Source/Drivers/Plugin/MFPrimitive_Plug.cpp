@@ -16,7 +16,7 @@
 	void MFSetPosition_##driver(float x, float y, float z); \
 	void MFEnd_##driver(); \
 	void MFPrimitive_BeginBlitter_##driver(int numBlits); \
-	void MFPrimitive_Blit_##driver(int x, int y, int tx, int ty, int tw, int th); \
+	void MFPrimitive_Blit_##driver(int x, int y, int w, int h, int tx, int ty, int tw, int th); \
 	void MFPrimitive_EndBlitter_##driver();
 
 #define DEFINE_PLUGIN(driver) \
@@ -62,7 +62,7 @@ struct MFPrimitivePluginCallbacks
 	void (*pMFSetPosition)(float x, float y, float z);
 	void (*pMFEnd)();
 	void (*pBeginBlitter)(int numBlits);
-	void (*pBlit)(int x, int y, int tx, int ty, int tw, int th);
+	void (*pBlit)(int x, int y, int w, int h, int tx, int ty, int tw, int th);
 	void (*pEndBlitter)();
 };
 
@@ -149,7 +149,22 @@ void MFPrimitive_BeginBlitter(int numBlits)
 
 void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
-	gpCurrentPrimitivePlugin->pBlit(x, y, tx, ty, tw, th);
+	gpCurrentPrimitivePlugin->pBlit(x, y, tw, th, tx, ty, tw, th);
+}
+
+void MFPrimitive_BlitRect(int x, int y, MFRect uvs)
+{
+	gpCurrentPrimitivePlugin->pBlit(x, y, (int)uvs.width, (int)uvs.height, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
+}
+
+void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
+{
+	gpCurrentPrimitivePlugin->pBlit(x, y, w, h, tx, ty, tw, th);
+}
+
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs)
+{
+	gpCurrentPrimitivePlugin->pBlit(x, y, w, h, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
 }
 
 void MFPrimitive_EndBlitter()
