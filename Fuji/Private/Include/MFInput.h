@@ -444,16 +444,17 @@ enum MFMouseButton
 	Mouse_MaxAxis,	/**< Max axis enum */
 
 	Mouse_LeftButton = Mouse_MaxAxis,	/**< Left mouse button */
-	Mouse_RightButton,	/**< Right mouse button */
-	Mouse_MiddleButton,	/**< Middle mouse button */
-	Mouse_Extra1,		/**< Extra mouse button 1 (often maps to 'back') */
-	Mouse_Extra2,		/**< Extra mouse button 2 (often maps to 'forward') */
-	Mouse_Extra3,		/**< Extra mouse button 3 */
-	Mouse_Extra4,		/**< Extra mouse button 4 */
-	Mouse_Extra5,		/**< Extra mouse button 5 */
+	Mouse_RightButton,					/**< Right mouse button */
+	Mouse_MiddleButton,					/**< Middle mouse button */
+	Mouse_Extra1,						/**< Extra mouse button 1 (often maps to 'back') */
+	Mouse_Extra2,						/**< Extra mouse button 2 (often maps to 'forward') */
+	Mouse_Extra3,						/**< Extra mouse button 3 */
+	Mouse_Extra4,						/**< Extra mouse button 4 */
+	Mouse_Extra5,						/**< Extra mouse button 5 */
 
-	Mouse_Max,			/**< Maximum mouse button */
-	Mouse_ForceInt	= 0x7FFFFFFF	/**< Force mouse button to an int type */
+	Mouse_Max,											/**< Maximum mouse input */
+	Mouse_MaxButtons = Mouse_Max - Mouse_LeftButton,	/**< Number of mouse buttons */
+	Mouse_ForceInt	= 0x7FFFFFFF						/**< Force mouse button to an int type */
 };
 
 /**
