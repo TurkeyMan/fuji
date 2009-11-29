@@ -8,6 +8,7 @@
 #include "MFPrimitive.h"
 #include "MFFileSystem.h"
 #include "MFView.h"
+#include "MFStringCache.h"
 
 #include "Materials/MFMat_Standard.h"
 
@@ -16,6 +17,8 @@
 #include <stdarg.h>
 
 // globals
+
+MFFont *MFFont_CreateFromSourceData(const char *pFilename);
 
 #define MAX_TEXT_LINES 30					// maximum number of lines we can handle in one draw text
 #define _WRAP_EXCLUDES_TRAILING_WHITESPACE	// weather text justification considers trailing whitespace after the final wrap char when considering justification.
@@ -136,6 +139,12 @@ MFFont* MFFont_Create(const char *pFilename)
 
 	// load font file
 	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fft", pFilename));
+	if(!pFont)
+	{
+		// try and load from source data
+		pFont = MFFont_CreateFromSourceData(MFStr("%s.fnt", pFilename));
+	}
+
 	MFDebug_Assert(pFont, MFStr("Unable to load font '%s'", pFilename));
 
 	// fixup pointers
@@ -150,10 +159,13 @@ MFFont* MFFont_Create(const char *pFilename)
 	}
 
 	// create materials
+	char path[256];
+	MFString_Copy(path, MFStr_GetFilePath(pFilename));
+
 	for(int a=0; a<pFont->numPages; a++)
 	{
 //		MFTexture *pTex = MFTexture_Create((const char *)pFont->ppPages[a], false);
-		pFont->ppPages[a] = MFMaterial_Create((const char *)pFont->ppPages[a]);
+		pFont->ppPages[a] = MFMaterial_Create(MFStr("%s%s", path, (const char *)pFont->ppPages[a]));
 //		if(pTex) MFTexture_Destroy(pTex);
 	}
 
@@ -427,6 +439,23 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 	*pTotal = count;
 
 	return renderable;
+}
+
+int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars)
+{
+	return (int)MFFont_DrawText(pFont, MakeVector((float)x - .5f, (float)y - .5f), (float)pFont->height, colour, pText, maxChars);
+}
+
+int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...)
+{
+	char buffer[1024];
+
+	va_list args;
+	va_start(args, pFormat);
+
+	vsprintf(buffer, pFormat, args);
+
+	return (int)MFFont_DrawText(pFont, MakeVector((float)x - .5f, (float)y - .5f), (float)pFont->height, colour, buffer);
 }
 
 float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
@@ -1200,4 +1229,215 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 	}
 
 	return (pos_y-pos.y) + height;
+}
+
+MFFont *MFFont_CreateFromSourceData(const char *pFilename)
+{
+	uint32 bytes = 0;
+	char *pBuffer = MFFileSystem_Load(pFilename, &bytes, true);
+
+	if(!pBuffer)
+		return NULL;
+
+	// parse the font file...
+
+	// not possible for a font to be bigger than 2mb..
+	char *pFontFile = (char*)MFHeap_AllocAndZero(2 * 1024 * 1024);
+
+	MFFont *pHeader = (MFFont*)pFontFile;
+	pHeader->ppPages = (MFMaterial**)&pHeader[1];
+
+	MFStringCache *pStr = MFStringCache_Create(1024*1024);
+
+	MFFontChar *pC = (MFFontChar*)MFHeap_Alloc(sizeof(MFFontChar) * 65535);
+
+	char *pToken = strtok(pBuffer, "\n\r");
+	while(pToken)
+	{
+		int len = MFString_Length(pToken);
+		pBuffer += len + 2;
+
+		char *pT = strtok(pToken, " \t");
+
+		if(!MFString_Compare(pT, "info"))
+		{
+			while(pT)
+			{
+				if(!MFString_CompareN(pT, "face", 4))
+				{
+					pHeader->pName = MFStringCache_Add(pStr, strtok(NULL, "\""));
+				}
+				else if(!MFString_CompareN(pT, "size", 4))
+				{
+					pHeader->size = atoi(&pT[5]);
+				}
+				else if(!MFString_CompareN(pT, "bold", 4))
+				{
+					pHeader->flags |= atoi(&pT[5]) ? MFFF_Bold : 0;
+				}
+				else if(!MFString_CompareN(pT, "italic", 6))
+				{
+					pHeader->flags |= atoi(&pT[7]) ? MFFF_Italic : 0;
+				}
+				else if(!MFString_CompareN(pT, "unicode", 7))
+				{
+					pHeader->flags |= atoi(&pT[8]) ? MFFF_Unicode : 0;
+				}
+				else if(!MFString_CompareN(pT, "smooth", 6))
+				{
+					pHeader->flags |= atoi(&pT[7]) ? MFFF_Smooth : 0;
+				}
+
+				pT = strtok(NULL, " \"\t");
+			}
+		}
+		else if(!MFString_Compare(pT, "common"))
+		{
+			while(pT)
+			{
+				if(!MFString_CompareN(pT, "lineHeight", 10))
+				{
+					pHeader->height = atoi(&pT[11]);
+				}
+				else if(!MFString_CompareN(pT, "base", 4))
+				{
+					pHeader->base = atoi(&pT[5]);
+				}
+				else if(!MFString_CompareN(pT, "scaleW", 6))
+				{
+					pHeader->xScale = 1.0f / (float)atoi(&pT[7]);
+				}
+				else if(!MFString_CompareN(pT, "scaleH", 6))
+				{
+					pHeader->yScale = 1.0f / (float)atoi(&pT[7]);
+				}
+				else if(!MFString_CompareN(pT, "pages", 5))
+				{
+					pHeader->numPages = atoi(&pT[6]);
+					pHeader->pCharacterMapping = (uint16*)&pHeader->ppPages[pHeader->numPages];
+				}
+				else if(!MFString_CompareN(pT, "packed", 6))
+				{
+//					pHeader-> = atoi(&pT[5]);
+				}
+
+				pT = strtok(NULL, " \"\t");
+			}
+		}
+		else if(!MFString_Compare(pT, "page"))
+		{
+			int id = -1;
+
+			while(pT)
+			{
+
+				if(!MFString_CompareN(pT, "id", 2))
+				{
+					id = atoi(&pT[3]);
+				}
+				else if(!MFString_CompareN(pT, "file", 4))
+				{
+					pT = strtok(NULL, "\"");
+					pT[MFString_Length(pT)-4] = 0;
+					pHeader->ppPages[id] = (MFMaterial*)MFStringCache_Add(pStr, pT);
+				}
+
+				pT = strtok(NULL, " \"\t");
+			}
+		}
+		else if(!MFString_Compare(pT, "char"))
+		{
+			while(pT)
+			{
+				if(!MFString_CompareN(pT, "id", 2))
+				{
+					int id = atoi(&pT[3]);
+					pHeader->pCharacterMapping[id] = pHeader->numChars;
+					pHeader->maxMapping = MFMax(pHeader->maxMapping, id);
+					pC[pHeader->numChars].id = id;
+				}
+				else if(!MFString_CompareN(pT, "x=", 2))
+				{
+					pC[pHeader->numChars].x = atoi(&pT[2]);
+				}
+				else if(!MFString_CompareN(pT, "y=", 2))
+				{
+					pC[pHeader->numChars].y = atoi(&pT[2]);
+				}
+				else if(!MFString_CompareN(pT, "width", 5))
+				{
+					pC[pHeader->numChars].width = atoi(&pT[6]);
+				}
+				else if(!MFString_CompareN(pT, "height", 6))
+				{
+					pC[pHeader->numChars].height = atoi(&pT[7]);
+				}
+				else if(!MFString_CompareN(pT, "xoffset", 7))
+				{
+					pC[pHeader->numChars].xoffset = atoi(&pT[8]);
+				}
+				else if(!MFString_CompareN(pT, "yoffset", 7))
+				{
+					pC[pHeader->numChars].yoffset = atoi(&pT[8]);
+				}
+				else if(!MFString_CompareN(pT, "xadvance", 8))
+				{
+					pC[pHeader->numChars].xadvance = atoi(&pT[9]);
+				}
+				else if(!MFString_CompareN(pT, "page", 4))
+				{
+					pC[pHeader->numChars].page = atoi(&pT[5]);
+				}
+				else if(!MFString_CompareN(pT, "chnl", 4))
+				{
+					pC[pHeader->numChars].channel = atoi(&pT[5]);
+				}
+
+				pT = strtok(NULL, " \"\t");
+			}
+
+			++pHeader->numChars;
+		}
+
+		pToken = strtok(pBuffer, "\n\r");
+	}
+
+	// append characters to file
+	uint16 *pMapEnd = &pHeader->pCharacterMapping[pHeader->maxMapping+1];
+	uint32 offset = MFALIGN16((uint32&)pMapEnd);
+	pHeader->pChars = (MFFontChar*&)offset;
+	MFCopyMemory(pHeader->pChars, pC, sizeof(MFFontChar) * pHeader->numChars);
+
+	// append string cache to file...
+	char *pStrings = (char*)&pHeader->pChars[pHeader->numChars];
+	const char *pCache = MFStringCache_GetCache(pStr);
+	int stringLen = MFStringCache_GetSize(pStr);
+	MFCopyMemory(pStrings, pCache, stringLen);
+
+	// byte reverse
+	// TODO...
+
+	// fix up pointers
+	uint32 base = (uint32&)pFontFile;
+	uint32 stringBase = (uint32&)pCache - ((uint32&)pStrings - (uint32&)pFontFile);
+
+	for(int a=0; a<pHeader->numPages; a++)
+		(char*&)pHeader->ppPages[a] -= stringBase;
+
+	(char*&)pHeader->ppPages -= base;
+	(char*&)pHeader->pChars -= base;
+	(char*&)pHeader->pCharacterMapping -= base;
+	(char*&)pHeader->pName -= stringBase;
+
+	// write to disk
+	int fileSize = ((uint32&)pStrings+stringLen) - (uint32&)pFontFile;
+	MFFont *pFont = (MFFont*)MFHeap_Alloc(fileSize);
+	MFCopyMemory(pFont, pFontFile, fileSize);
+
+	// clean up
+	MFStringCache_Destroy(pStr);
+	MFHeap_Free(pC);
+	MFHeap_Free(pFontFile);
+
+	return pFont;
 }
