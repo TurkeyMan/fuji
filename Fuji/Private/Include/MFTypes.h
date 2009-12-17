@@ -78,6 +78,7 @@ inline bool MFTypes_PointInRect(float x, float y, MFRect *pRect)
 
 inline bool MFTypes_RectOverlap(MFRect *pRect1, MFRect *pRect2)
 {
+	return false;
 }
 
 #endif // _MFTYPES_H

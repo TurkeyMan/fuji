@@ -26,7 +26,19 @@
 #endif
 #include <GL/glu.h>
 
-/**** Defines ****/
+/**** Globals ****/
+
+extern MFPtrListDL<MFTexture> gTextureBank;
+extern MFTexture *pNoneTexture;
+
+struct GLFormat
+{
+	GLint internalFormat;
+	GLenum format;
+	GLenum type;
+};
+
+#if !defined(MF_OPENGL_ES)
 
 // missing constants... :/
 #define GL_TEXTURE_MAX_LEVEL				0x813D
@@ -48,18 +60,6 @@
 #define GL_UNSIGNED_SHORT_5_6_5_REV			0x8364
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV		0x8366
 #define GL_UNSIGNED_SHORT_4_4_4_4_REV		0x8365
-
-/**** Globals ****/
-
-extern MFPtrListDL<MFTexture> gTextureBank;
-extern MFTexture *pNoneTexture;
-
-struct GLFormat
-{
-	GLint internalFormat;
-	GLenum format;
-	GLenum type;
-};
 
 // opengl format table.. man, opengl's texture format management is a complete shambles!!!!
 // i havent verified that all of these formats are correct, some might be wrong...
@@ -91,6 +91,38 @@ GLFormat gGLFormats[] =
 																				// TexFmt_DXT4
 	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// TexFmt_DXT5
 };
+#else
+// opengl format table.. man, opengl's texture format management is a complete shambles!!!!
+// i havent verified that all of these formats are correct, some might be wrong...
+GLFormat gGLFormats[] =
+{
+	{ 0, 0, 0 },						// TexFmt_A8R8G8B8
+	{ 0, GL_RGBA, 0 },							// TexFmt_A8B8G8R8
+	{ 0, 0, 0 },							// TexFmt_B8G8R8A8
+	{ 0, GL_RGBA, 0 },								// TexFmt_R8G8B8A8
+	{ 0, 0, 0 },				// TexFmt_A2R10G10B10
+	{ 0, GL_RGBA, 0 },					// TexFmt_A2B10G10R10
+	{ 0, GL_RGBA, GL_UNSIGNED_SHORT },									// TexFmt_A16B16G16R16
+																				// TexFmt_R6G5B5
+	{ GL_RGB565, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// TexFmt_R5G6B5
+	{ GL_RGB565, 0, 0 },						// TexFmt_B5G6R5
+	{ GL_RGB5_A1, 0, 0 },					// TexFmt_A1R5G5B5
+	{ GL_RGB5_A1, 0, GL_UNSIGNED_SHORT_5_5_5_1 },						// TexFmt_R5G5B5A1
+	{ GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// TexFmt_A1B5G5R5
+	{ GL_RGBA4, 0, GL_UNSIGNED_SHORT_4_4_4_4_REV },					// TexFmt_A4R4G4B4
+	{ GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// TexFmt_A4B4G4R4
+	{ GL_RGBA4, 0, GL_UNSIGNED_SHORT_4_4_4_4 },						// TexFmt_R4G4B4A4
+	{ 0, GL_RGBA, 0 },								// TexFmt_ABGR_F16
+	{ 0, GL_RGBA, GL_FLOAT },										// TexFmt_ABGR_F32
+	{ 0, 0, GL_UNSIGNED_BYTE },					// TexFmt_I8
+																				// TexFmt_I4
+	{ 0, 0, 0 },	// TexFmt_DXT1
+																				// TexFmt_DXT2
+	{ 0, 0, 0 },	// TexFmt_DXT3
+																				// TexFmt_DXT4
+	{ 0, 0, 0 }	// TexFmt_DXT5
+};
+#endif
 
 static const int gMaxGLFormats = sizeof(gGLFormats) / sizeof(GLFormat);
 

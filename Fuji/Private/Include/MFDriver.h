@@ -277,6 +277,28 @@
 	#define MF_INPUT		MF_DRIVER_GC
 	#define MF_SYSTEM		MF_DRIVER_GC
 
+#elif defined(MF_IPHONE)
+
+	#include <stdarg.h> // For varargs
+	#include <stdlib.h> // For realloc, malloc
+
+//	#define _OPENGL_CLIP_SPACE
+
+	// specify drivers
+	#define MF_DISPLAY		MF_DRIVER_IPHONE
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_INPUT		MF_DRIVER_IPHONE
+	#define MF_SYSTEM		MF_DRIVER_IPHONE
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_LINUX
+	#define MF_SOUND		MF_DRIVER_IPHONE
+
+	#define USE_MFSOUNDBUFFER
+	#define USE_MFMIXER
+
+	#define MF_OPENGL_ES
+
 #elif defined(MF_SYMBIAN)
 
 	#define MF_NO_CRT

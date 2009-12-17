@@ -1,0 +1,8 @@
+//
+// Prefix header for all source files of the 'Fuji' target in the 'Fuji' project
+//
+
+#ifdef __OBJC__
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#endif

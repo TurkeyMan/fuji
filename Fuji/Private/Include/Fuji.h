@@ -55,6 +55,7 @@
 		MF_DC
 		MF_AMIGA
 		MF_SYMBIAN
+		MF_IPHONE
 */
 
 // detect compiler
@@ -116,6 +117,19 @@
 	#define MF_PLATFORM PS3
 	#define MF_ARCH_PPC
 	#define MF_64BIT
+#elif defined(TARGET_OS_IPHONE)
+	#include <TargetConditionals.h>
+	#define MF_IPHONE
+	#define MF_PLATFORM IPHONE
+	#if defined(TARGET_IPHONE_SIMULATOR)
+		#define MF_ARCH_X86
+		#define MF_ENDIAN_LITTLE
+		#define MF_32BIT
+	#else
+		#define MF_ARCH_ARM
+		#define MF_ENDIAN_LITTLE
+		#define MF_32BIT
+	#endif
 #elif defined(_SYMBIAN)
 	#define MF_SYMBIAN
 	#define MF_PLATFORM SYMBIAN
@@ -212,6 +226,7 @@ enum MFPlatform
 	FP_PS3,		/**< Playstation 3 */
 	FP_Wii,		/**< Nintendo Wii */
 	FP_Symbian,	/**< Symbian OS */
+	FP_IPhone,	/**< IPhone OS */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
