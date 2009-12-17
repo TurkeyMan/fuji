@@ -1,0 +1,334 @@
+// !$*UTF8*$!
+{
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeSDKPreference = iphonesimulator3.0;
+		activeTarget = 326BB39C10D9130500E014B5 /* Fuji */;
+		addToTargets = (
+			326BB39C10D9130500E014B5 /* Fuji */,
+		);
+		codeSenseManager = 3236BE6A10D8EDFD00D2BCE3 /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXBookmarksDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBookmarksDataSource_NameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					200,
+					200,
+					293,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBookmarksDataSource_LocationID,
+					PBXBookmarksDataSource_NameID,
+					PBXBookmarksDataSource_CommentsID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXExecutablesDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXExecutablesDataSource_NameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					22,
+					300,
+					363,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXExecutablesDataSource_ActiveFlagID,
+					PBXExecutablesDataSource_NameID,
+					PBXExecutablesDataSource_CommentsID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = 1;
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					483,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					443,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 282747975;
+			PBXWorkspaceStateSaveDate = 282747975;
+		};
+		perUserProjectItems = {
+			32033B9610DA6C0300C6DC61 /* PBXTextBookmark */ = 32033B9610DA6C0300C6DC61 /* PBXTextBookmark */;
+			3236BE7110D8F35900D2BCE3 /* PBXTextBookmark */ = 3236BE7110D8F35900D2BCE3 /* PBXTextBookmark */;
+			3236BE7F10D8F35900D2BCE3 /* PBXTextBookmark */ = 3236BE7F10D8F35900D2BCE3 /* PBXTextBookmark */;
+			32BB061910DA54BC004A5ACE /* PBXTextBookmark */ = 32BB061910DA54BC004A5ACE /* PBXTextBookmark */;
+		};
+		sourceControlManager = 3236BE6910D8EDFD00D2BCE3 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	32033B9610DA6C0300C6DC61 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 326BB3CE10D9133D00E014B5 /* MFDriver.h */;
+		name = "MFDriver.h: 281";
+		rLen = 0;
+		rLoc = 6509;
+		rType = 0;
+		vrLen = 798;
+		vrLoc = 6162;
+	};
+	3236BE6910D8EDFD00D2BCE3 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	3236BE6A10D8EDFD00D2BCE3 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	3236BE7110D8F35900D2BCE3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 32CA4F630368D1EE00C91783 /* Fuji_Prefix.pch */;
+		name = "Fuji_Prefix.pch: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 169;
+		vrLoc = 0;
+	};
+	3236BE7F10D8F35900D2BCE3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 32CA4F630368D1EE00C91783 /* Fuji_Prefix.pch */;
+		name = "Fuji_Prefix.pch: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 169;
+		vrLoc = 0;
+	};
+	326BB39C10D9130500E014B5 /* Fuji */ = {
+		activeExec = 0;
+	};
+	326BB3C110D9133D00E014B5 /* Fuji.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1152, 5698}}";
+			sepNavSelRange = "{5821, 0}";
+			sepNavVisRange = "{5528, 864}";
+			sepNavWindowFrame = "{{102, 117}, {750, 558}}";
+		};
+	};
+	326BB3CE10D9133D00E014B5 /* MFDriver.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 5558}}";
+			sepNavSelRange = "{6509, 0}";
+			sepNavVisRange = "{6162, 798}";
+			sepNavWindowFrame = "{{446, 67}, {750, 558}}";
+		};
+	};
+	326BB3D410D9133D00E014B5 /* MFHeap.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1590, 3906}}";
+			sepNavSelRange = "{9362, 0}";
+			sepNavVisRange = "{9185, 1351}";
+			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
+		};
+	};
+	326BB3F110D9133D00E014B5 /* MFTypes.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 1218}}";
+			sepNavSelRange = "{1900, 2}";
+			sepNavVisRange = "{1292, 645}";
+			sepNavWindowFrame = "{{173, 127}, {750, 558}}";
+		};
+	};
+	326BB63810D9133E00E014B5 /* MFIntModel.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 2000}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 541}";
+			sepNavWindowFrame = "{{139, 104}, {750, 558}}";
+		};
+	};
+	326BB64A10D9133E00E014B5 /* MFVertex_D3D9.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 4592}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 1488}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	326BB66310D9133E00E014B5 /* MFSystem_DC.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 630}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 513}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	326BB67A10D9133E00E014B5 /* MFTranslation_Linux.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 742}}";
+			sepNavSelRange = "{212, 0}";
+			sepNavVisRange = "{0, 863}";
+			sepNavWindowFrame = "{{153, 89}, {750, 558}}";
+		};
+	};
+	326BB69510D9133E00E014B5 /* MFPrimitive_OpenGL.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 3402}}";
+			sepNavSelRange = "{1097, 0}";
+			sepNavVisRange = "{822, 522}";
+			sepNavWindowFrame = "{{130, 110}, {750, 558}}";
+		};
+	};
+	326BB69710D9133E00E014B5 /* MFTexture_OpenGL.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {882, 3122}}";
+			sepNavSelRange = "{1468, 0}";
+			sepNavVisRange = "{3986, 1464}";
+			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
+	};
+	326BB69810D9133E00E014B5 /* MFVertex_OpenGL.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {882, 1162}}";
+			sepNavSelRange = "{449, 0}";
+			sepNavVisRange = "{0, 1519}";
+			sepNavWindowFrame = "{{107, 131}, {750, 558}}";
+		};
+	};
+	326BB6B710D9133E00E014B5 /* MFPrimitive_PS2.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 2996}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 593}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	326BB6E310D9133E00E014B5 /* MFHeap_XB.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 854}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 500}";
+			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
+	};
+	326BB6F610D9133E00E014B5 /* MFFileSystemHTTP.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {2286, 5978}}";
+			sepNavSelRange = "{9310, 8}";
+			sepNavVisRange = "{9330, 883}";
+			sepNavWindowFrame = "{{130, 110}, {750, 558}}";
+		};
+	};
+	326BB6F810D9133E00E014B5 /* MFFileSystemMemory.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {822, 2114}}";
+			sepNavSelRange = "{155, 0}";
+			sepNavVisRange = "{0, 973}";
+			sepNavWindowFrame = "{{74, 137}, {750, 558}}";
+		};
+	};
+	326BB72D10D9133E00E014B5 /* MFFileSystem.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {978, 16954}}";
+			sepNavSelRange = "{22783, 0}";
+			sepNavVisRange = "{25825, 634}";
+			sepNavWindowFrame = "{{15, 215}, {750, 558}}";
+		};
+	};
+	326BB74D10D9133E00E014B5 /* MFSound.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {858, 15750}}";
+			sepNavSelRange = "{142, 0}";
+			sepNavVisRange = "{0, 656}";
+			sepNavWindowFrame = "{{401, 88}, {750, 558}}";
+		};
+	};
+	326BB75910D9133E00E014B5 /* MFTexture.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {792, 6426}}";
+			sepNavSelRange = "{13210, 0}";
+			sepNavVisRange = "{12369, 1094}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	326BB75A10D9133E00E014B5 /* MFTexture_Internal.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {691, 1876}}";
+			sepNavSelRange = "{297, 0}";
+			sepNavVisRange = "{1226, 520}";
+			sepNavWindowFrame = "{{137, 142}, {750, 558}}";
+		};
+	};
+	326BB76810D9133E00E014B5 /* ReadASE.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {696, 12586}}";
+			sepNavSelRange = "{18628, 0}";
+			sepNavVisRange = "{275, 592}";
+			sepNavWindowFrame = "{{38, 194}, {750, 558}}";
+		};
+	};
+	326BB76910D9133E00E014B5 /* ReadDAE.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {876, 14042}}";
+			sepNavSelRange = "{97, 0}";
+			sepNavVisRange = "{0, 598}";
+			sepNavWindowFrame = "{{84, 152}, {750, 558}}";
+		};
+	};
+	326BB76B10D9133E00E014B5 /* ReadMD3.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1038, 5858}}";
+			sepNavSelRange = "{82, 26}";
+			sepNavVisRange = "{7040, 760}";
+			sepNavWindowFrame = "{{61, 173}, {750, 558}}";
+		};
+	};
+	32BB061910DA54BC004A5ACE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 326BB3CE10D9133D00E014B5 /* MFDriver.h */;
+		name = "MFDriver.h: 291";
+		rLen = 0;
+		rLoc = 6509;
+		rType = 0;
+		vrLen = 697;
+		vrLoc = 6204;
+	};
+	32CA4F630368D1EE00C91783 /* Fuji_Prefix.pch */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {678, 342}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 169}";
+		};
+	};
+}

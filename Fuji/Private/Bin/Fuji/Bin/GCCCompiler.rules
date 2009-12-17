@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="GCC Tools"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="GCCCompiler"
+			DisplayName="GCC Compiler"
+			CommandLine="[gccexe] [includepaths] [preprocessordefines] [optimization] [compilemode] [warninglevel] [march] [mcpu] [language] [outputfile] $(InputPath)"
+			Outputs="$(InputName).o"
+			FileExtensions="*.g;*.gpp"
+			ExecutionDescription="$(InputFileName)"
+			ShowOnlyRuleProperties="false"
+			>
+			<Properties>
+				<StringProperty
+					Name="gccexe"
+					DisplayName="GCC Executable File"
+					Description="Allows you to change the GCC executable filename (support cross compilers)"
+					Switch="[value]"
+					DefaultValue="gcc.exe"
+					PropertyPageName="General"
+				/>
+				<StringProperty
+					Name="includepaths"
+					DisplayName="Additional Include Directories"
+					Description="Specifies one or more directories to add to the include path; use semi-colon delimited list if more than one."
+					Switch="-I[value]"
+					Delimited="true"
+					Inheritable="true"
+					PropertyPageName="General"
+				/>
+				<EnumProperty
+					Name="language"
+					DisplayName="Language"
+					PropertyPageName="Compiler"
+					Description="Language the compiler will recognise"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							DisplayName="Default"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="-xc++"
+							DisplayName="C++"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="-xc"
+							DisplayName="C"
+						/>
+						<EnumValue
+							Value="3"
+							Switch="-xassembler"
+							DisplayName="Assembler"
+						/>
+						<EnumValue
+							Value="4"
+							Switch="-xnone"
+							DisplayName="None"
+						/>
+					</Values>
+				</EnumProperty>
+				<EnumProperty
+					Name="compilemode"
+					DisplayName="Compile Mode"
+					Description="Compiler output mode"
+					PropertyPageName="Compiler"
+					DefaultValue="1"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							Switch=""
+							DisplayName="Default (Compile and Link)"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="-c"
+							DisplayName="Compile"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="-S"
+							DisplayName="Output Assembly"
+						/>
+						<EnumValue
+							Value="3"
+							Switch="-E"
+							DisplayName="Output Preprocessed"
+						/>
+					</Values>
+				</EnumProperty>
+				<EnumProperty
+					Name="warninglevel"
+					DisplayName="Warning Level"
+					Description="Level of warnings to show"
+					PropertyPageName="Compiler"
+					DefaultValue="1"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							Switch=""
+							DisplayName="Default (Disabled)"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="-Wall"
+							DisplayName="All"
+						/>
+					</Values>
+				</EnumProperty>
+				<StringProperty
+					Name="march"
+					DisplayName="Target Architecture"
+					Description="Specify a target architecture"
+					Switch="-march[value]"
+					PropertyPageName="Compiler"
+				/>
+				<StringProperty
+					Name="mcpu"
+					DisplayName="Target CPU"
+					Description="Optimizes for the target CPU"
+					Switch="-mcpu=[value]"
+					PropertyPageName="Compiler"
+				/>
+				<EnumProperty
+					Name="optimization"
+					DisplayName="Optimization"
+					PropertyPageName="Optimization"
+					Description="Set compiler optimization mode"
+					DefaultValue="5"
+					>
+					<Values>
+						<EnumValue
+							Value="0"
+							DisplayName="Default"
+						/>
+						<EnumValue
+							Value="1"
+							Switch="-O0"
+							DisplayName="No Optimization"
+						/>
+						<EnumValue
+							Value="2"
+							Switch="-O"
+							DisplayName="Simple Optimization"
+						/>
+						<EnumValue
+							Value="3"
+							Switch="-O2"
+							DisplayName="Optimize for Speed"
+						/>
+						<EnumValue
+							Value="4"
+							Switch="-Os"
+							DisplayName="Optimize for Size"
+						/>
+						<EnumValue
+							Value="5"
+							Switch="-O3"
+							DisplayName="Maximum Optimization"
+						/>
+					</Values>
+				</EnumProperty>
+				<StringProperty
+					Name="preprocessordefines"
+					DisplayName="Preprocessor Definitions"
+					PropertyPageName="Preprocessor"
+					Description="Specifies one or more preprocessor defines"
+					Switch="-D[value]"
+					Delimited="true"
+					Inheritable="true"
+				/>
+				<StringProperty
+					Name="outputfile"
+					DisplayName="Output File Name"
+					PropertyPageName="Output Files"
+					Description="Specifies a name to override the default object filename."
+					Switch="-o[value]"
+					DefaultValue="$(IntDir)/$(InputName).o"
+				/>
+			</Properties>
+		</CustomBuildRule>
+		<CustomBuildRule
+			Name="GCCLinker"
+			DisplayName="GCC Librarian"
+			CommandLine="[gccexe] $(IntDir)/*.o -o[outputfile]"
+			Outputs="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).a"
+			FileExtensions="*.gcproj"
+			ExecutionDescription="Linking..."
+			ShowOnlyRuleProperties="false"
+			>
+			<Properties>
+				<StringProperty
+					Name="gccexe"
+					DisplayName="GCC Executable File"
+					Description="Allows you to change the GCC executable filename (support cross compilers)"
+					Switch="[value]"
+					DefaultValue="gcc.exe"
+					PropertyPageName="General"
+				/>
+				<StringProperty
+					Name="outputfile"
+					DisplayName="Output File Name"
+					PropertyPageName="Output Files"
+					Description="Specifies a name to override the default library filename."
+					Switch="-o[value]"
+					DefaultValue="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).a"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

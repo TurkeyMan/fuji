@@ -1,0 +1,358 @@
+v0.6b
+-----
+
+3-1-07:
+
+- Added MFAnimation system which manages runtime animation
+- Updated .x loader to fully support animation
+- MFMatrix fixes
+- Switched PC renderer to use shaders
+- Added DX shader tools
+- Fixed some bugs in MFView
+- Improved animation matching code
+- Added ATI's S3 compressor
+- Changed textures to support pre-multiplied alpha
+- Fixed ConvertASE's fixup code
+- Turned the S3 compressor off, (it looks shit!)
+- Used 16 bit textures on PC to shrink the archives
+- Added MFAnimScript which manages high level animation sequences and scripted animation events
+- Fixed the ortho matrix on linux
+- PS2 now compiling!
+- HelloWorld for PS2 compiles and runs (nothing interesting happening yet)
+- PS2 RTC implemented. (seconds seem a little fast for now - scaling factor is off?)
+- Added a basic hash list class
+- Changed MFModel code layout a bit
+- Updated PSP model format
+- Fixed PSP model rendering
+- Material fixes
+- Added UTF8 infrastructure (MFFont and MFString)
+- Added an FAQ to the docs
+- Fixed up font width calculation (support UTF8)
+- Added pad support for PS2, all buttons in digital mode and both Analog sticks.
+  * Presure sensitive buttons is a TODO, as is more robust handling of anything that isn't a DualShock2
+- Fixed the filesystem a little
+- Got Caelestis booting on PS2
+- Angelscript update to 2.7.1b
+- Angelscript calling convention updates
+- Gamecube Compiling!
+- Texture format changes
+- SysLogo .h files have been remodelled and are now in platform specific formats
+- ConvertTEX can now produce .h files aswell as .tex files
+- Renamed the SysLogos
+- Made MFTexture_CreateFromRawData platform independant (it was an annoying function to maintain)
+
+
+Earlier releases:
+
+v0.1b - v0.5b
+-------------
+
+16-10-06:
+
+- PSP now detects the current working directory.
+- Fixed a bug generating collision mesh.
+- Fixed Retail Build.
+- Gamecube compiles, just a few link issues.
+- Fixed the angelscript MIPS calling code.
+- Added .obj support to ConvertASE
+- Added .x model support to ConvertASE
+- Added Tag/ReferencePoint support to Fuji models
+- Flipped UV's along the v axis when importing collada models (this might be wrong)
+- Added geometry optimisation to ConvertASE (models generally half the size or less)
+- Added PSP MFModel support.
+- Linux MFModel support.
+- Updated to Angelscript 2.7.0 (this has added support for 64bit cpu's)
+- Fixed lots of GCC warnings.
+- Fixed a typo in the sockets.
+- Added MKView_TransformPoint3DTo2D().
+- Added preliminary USB connect/disconnect detection.
+- Added USB hotswapping (Finally!)
+- Fixed an XInput bug.
+- Fixed XBox texture swizzling
+- Fixed an XBox texture bug
+- Fixed an XBox texture matrix bug
+- Fixed an XBox MFPrimitive bug
+- Added vertex colour support to ConvertASE
+- Fixed all spelling of the word 'parameter'
+- Fixed a bug in the string cache where it was incorrectly doing a case insensitive compare
+- Added OSX support!
+- Preliminary particle system in MFParticleSystem
+- Finished new font system, MFFont can now render unicode strings
+- Added auto scroll to debug menu
+- Sweep sphere test now returns the correct intersection resolve vector
+- Fixed a silly PSP crash when releasing textures
+- Fixed blend modes on PC and PSP
+- Added culling and ztest stuff to PSP
+- ConvertDLG changed to use the Fuji string library
+- Changed ConvertASE to use the Fuji string functions
+- Fixed the PSP SysLogo
+- Fixed ConvertASE for linux/osx
+- Shifted everything to MFString
+- Added new font functions for rendering justified and anchored strings.
+- Added MFCopyMemory, MFZeroMemory, MFSetMemory and MFMemCompare.
+- Replaced CRT functions with the fuji versions.
+- Fixed masking on PC
+- Added 'alpharef' material parameter
+- Fixed MFString_CopyCat()
+- Added PNG image support to ConvertTEX
+- Added code to read animation from .x files in ConvertASE
+- Added MFQuaternion a preliminary Quaternion class
+- Implemented some more MFModel functions
+- Added carmack's super fast reciprocal square root estimate as MFRSqrtE()
+- Changed MFMatrix to use a 1D array instead of the previous 2D 4x4 array
+- 32bit BMP support
+- Updated the gamepad registry
+- Added 'Logitech Dual Action USB'
+- Added 'Logitech RumblePad 2' to gamepad registry.
+- Added a random 'GreenAsia' gamepad.
+- Doco updates and fixes
+- Fixed lots and lots of bugs
+
+* Preliminary MFModel animation *
+- ConvertASE can now export bone hierarchies
+- Started MFAnimation system 
+
+
+10-05-06:
+
+- Added Logitech G15 keyboard LCD screen support to a new MFAuxillaryDisplay module.
+- Added ConvertDlg, an app which converts a game translation spreadsheet into language specific ingame dialog files.
+- Added Super Dual Box (PS2 gamepad adapter) support (Mostly)
+- Added a screen space blitter.
+- Added a command line parser.
+- Added a cullmode paramater to standard material.
+- Added zread & zwrite paramaters to standard material.
+- Allowed MFHeap_Free() to gracefully free a NULL pointer.
+- Added an MFMatrix 'Tween' function.
+- Shifted MFScript to use a language called AngelScript.
+- Added MIPS native calling convention code to AngelScript!
+- Added preliminary PPC calling convention support to AngelScript.
+- Added 16 bit targa support to ConvertTEX.
+- Cleaned up the pointer list a little.
+- Some updates to prepare for 64bit.
+- Fixed spelling of Paramater to Parameter engine wide.
+- Added loads of MFString functions. The CRT shouldnt be needed at all anymore for most basic string stuff.
+- Added loads of primitive tests to MFCollision.
+- Added a dynamic polygon soup to MFCollision.
+- Added collision fields to MFCollision.
+- ConvertASE can now generate collision template data from specifically designed models which can be used by MFCollision.
+- Added MFCollision debug visualisation code.
+- Made the structures to mount filesystems public.
+- Fixed ASE file conversion (it was inside out).
+- Fixed Collada collision mesh conversion. (it was just broken)
+- Added support for triangle meshes in collada files.
+- Fixed the Archivers extension handling code (which couldn't deal with mismatching case extensions).
+- PSP now detects the current working directory.
+- Added makefiles that can be used to build all platforms.
+- Linux builds and runs! (Yes, Fuji now has linux support!)
+- Gamecube now compiles! (Haven't got it running yet tho)
+- Got PSP working with all recent changes.
+- Got Linux working with all recent changes.
+- Got XBox working with all recent changes.
+- Updated all the doco with all the new additions.
+- And lots of miscelaneous things i've forgotten. 
+
+
+15-02-06:
+
+* Added MFScript scripting interface. This is being used in the Caelestis Project
+* Added a translation/localisation module
+* PSP now builds with recent changes
+* Cleaned up the Input code
+* Native support for more gamepads on PC (including Xbox360)
+* Fixed deadzone handling on all platforms
+* Added QuadList support to the immediate renderer
+* Added a new threading interface (MFThread)
+* Added some more MFMath functions
+* Added some new MFVector functions
+* Added some new MFString functions
+* Added some more collision foundation functions
+* Added the new XInput support, so the XBox 360 gamepad is handled properly now and supports full hotswapping.
+
+* Added a MFNetwork module which exposes some common network functionality
+* Added remote gamepad support. Now the PSP, for example, can be used as a wireless gamepad over the WLAN.
+
+An RPC service is planned based on the scripting module which would allow for the PSP to be controlled
+by an external system while it is being used as a remote gamepad (like the GBA->Cube connection)
+
+
+11-12-05:
+
+* DAE working nicely now. (Still no animation tho...)
+* .me2 support added for loading old Manu Enging MEMD2 models.
+* BMP image support.
+* XBox updated with all the recent changes, builds again now.
+* New callstack and debugging modules.
+* Interface redesign mostly complete.
+* Updated MFMath functions, added a new MFRand using the mersenne twister algorithm.
+* Doco update. 
+
+
+13-11-05:
+
+* Fixed up project files. All paths are relative now so fuji and projects can build from anywhere.
+* Updated PC MFSockets. Working good now, tested a small HTTP client connecting to google.
+* Updated ConvertASE to properly support multiple platform mesh chunks, and prepare for collada support.
+* Added DAE, MD2 and MD3 source model support!
+* Added a Null platform device, so new platforms, or platforms that dont support specific features can build with the Null device.
+* Massive code clean up! This is in preparation for a doco system.
+* Interface changes across the board. Much tighter and simpler in general.
+* Cleaned up global headers. Sped up compile times heaps!
+* Added MFHeap. Much cleaner than the old one :P
+* Came up with a reasonable doco system (using dyxygen).
+* Added Doco for some of the more 'complete' modules
+* Added Fuji.chm (incomplete but this is an example of what to expect) 
+
+
+18-08-05:
+
+* Archiver finished up.. Works real nice
+* New archiver scripts added to projects
+* Texture tool working nicely now with many many target formats supported
+* Archiver can produce raw processed data, or a .zip file archive for convenience and space efficiency
+* ZipFile filesystem added. Mounts a compressed .zip archive as a filesystem at runtime
+* Vector3 and Vector4 removed in favour of new MFVector which has methods for both 2, 3 and 4d vectors. Less code, more managable, should allow for more optimisation and simplicity.
+* Matrix replaced by MFMatrix, and all code changed over.
+* PSP Texture swizzling added. Doubles PSP framerate!!
+* Starting ethernet support. Writing a sockets layer currently. 
+
+
+25-07-05:
+
+* PSP is now supported by Fuji!
+* VS 2005 Tool Files for the GCC compilers. These support the GCC cross compilers.
+* Project for DevC++, an alternative GCC build environment. 
+
+
+3-06-05:
+
+* Complete rewrite of Renderer and Material systems and interface
+* Custom material types can be created easilly, or even loaded from DLL's
+* Added a new 'Standard' material which mimics the behaviour of the previous material system
+* Added a new MFModel system
+* New ConvertASE for new model format
+* Rewrote View module with a nice new interface
+* All new totally awesome filesystem!
+* Mounting filesystems now works
+* Flattening filesystems now works
+* Mounted filesystems now have volume names for direct addressing
+* Added an AppTemplate to the Sandpit app
+* Added a StringCache
+* Rewrote the Ini file reader to be far more powerful
+* Added some CRC functions 
+
+
+04-05-05:
+
+* PC now supports multiple individual mouses
+* InputTest updated to display stats for multiple mouses
+
+Multiple mouses are implented using RawInput which reads the USB directly. This is not thoroughly tested so may behave differently than DirectInput.
+If only one mouse is detected (avoid potential instability), or RawInput is not available (Requires WindowsXP), the system falls back to DirectInput instead.
+Mouse 0 can choose to remain the collective system mouse if multiple mouses are available.
+If multiple USB mouses are detected, and RawInput is enabled, any other mouses (Serial/PS2) will not be available due to RawInput and DirectInput conflicting, and generally not getting along...
+
+
+24-03-05:
+
+* Rewrote the input system. Much simpler interface and far less platform specific code.
+* Fixed some clean up problems.
+* Added a Texture::CreateFromRawData function.
+* Added GamepadMapping.ini to PC builds. This is for automatically configuring controls so many gamepad adapters can map correctly in the PC build.
+* Rewrote Texture interface
+* Rewrote Material Interface
+* Added Material reference counting.
+* Changed the way textures are created procedurally or from raw data.. Much simpler management now.
+* Fixed Texture management and reference counting
+* More changes to PC Input. PC now recognises the button names of known gamepad types.
+* Input system can enumerate input device and bytton names
+* Keyboard->Gamepad input mapping now works when Scroll Lock is turned on
+
+
+1-6th - 10 - 04:
+
+* Added music playback debugging features
+* Added new Renderer module that manages render state settings
+* Added PC Keyboard->Gamepad input mapping (While ScrollLock is turned on)
+* Moved Sprites over to use Materials instead of directly managing Textures
+* Did some work on the F3D format and got the exporter building again
+* Added a few common collision tests to the collision manager
+
+
+23-30th - 9 - 04:
+
+* Added animated texture support
+* Added Ogg Vorbis support
+* Made .Bix (Falling Bricks game) :)
+* Fixed Ogg Vorbis on PC
+* More bug fixes
+
+
+24-07-04:
+
+* Many VS.NET/GCC bugs and incompatabilities fixed (thanks Lewis)
+* Started writing a Scene Graph which will maintain the world
+* Stripped out the left over platform specific code that was lying around
+* Many many miscelaneous changes I made in my dead time that i cant remember
+
+
+04-05-04:
+
+* Exporter is now working!
+* Model class can now load models and render them in 3D
+* ASE->F3D->MDL file converter works sweet 
+
+
+April-04:
+
+* Started writing a custom Heap manager
+* Started writing a platform independant FileSystem module, intention to support compressed data archives
+* Added the beginings of a Model/Animation exporter for 3DSMax, Unfortunately i cant finish this till i have a copy of .NET 2002 (Anybody?) cus the MAXSDK just sucks :)
+* Added a dynamic array class (Array.h)
+* Investigated the recent bad performance, found it was the Callstack Profiler. Fixed it up a great deal.
+* Fixed a bug in the Vector3 CrossProduct function where it was returning invalid results.
+* Finished FileSystem module for now (One day it will have compressed data archive support added)
+* Added a .ini file parsing system (Will come in handy for material definition/config/etc)
+* Finished off IniFile reader. Works well in all my tests.
+* Started writing a Material manager. Reads 'Materials.ini' for a list of material definitions that can be instanced at runtime.
+* Finished off Material manager. Will move systems that directly referenced Texture's over to Materials some time soon
+* Started a Renderer interface (Manages Vertex/Pixel shaders etc..)
+* Started writing some basic vertex shaders
+* Major rework of PC window control. It now correctly resizes the framebuffer (not just a bilinear scale of the frame buffer to fit the window Wink), and supports fullscreen (Alt-Enter). Can change resolution at any time on the fly.
+* Added View class which manages Projection and View matrices, render targets and Orthographic mode.
+* Started writing model class. Not must use yet tho as the exporter wont work
+* Designed intermediate model format (.F3D). Used as a robust intermediate format that is exported from Max that is later converted to a series of optimised platform specific model and animation files
+* Fuji now supports 3D!
+* Added a set of 3D geometrical primitives that can be useful for debugging (Shape.cpp/h)
+* Bulked out the Matrix class. The majority of it is implemented and working now
+* Some small changes to the View class
+* Primitive renderer now read's the current view for camera/pojection matrices. previously the sprites (and anything else) were leaving the view in an unknown state
+* Properly supported Widescreen on PC
+
+
+March-04:
+
+* Added a primitive renderig system (Primitive.cpp/h)
+* Added Debug Menu system. Pretty extensible, flexable and easy to use (DebugMenu.cpp/h)
+* Fixed a font crash caused by a memory allocation eventually fragmenting the xbox memory till it crashed (over a few hours).. Now font just does a single static allocate and shares it for all text render calls
+* Added debug assert's and log util functions, also a dynamic string cache (Util.cpp/h)
+* Added vector and matrix classes. Bulked them out with a few useful functions. (Vector3, Vector4, Matrix cpp/h)
+* Fixed some bugs in the Primitive renderer
+* Fixed a bug in the sprite renderer that had the same effect as the previous one i fixed in the font system
+* Added an intelligent texture management system
+* Added a cool texture browser feature in the debug menu. Displays image, filename, dimensions and reference count
+* More debug menu improvements
+* Fixed a bug in Player::Update() that caused player ships to dissapear after the controller was disconnected and reconnected.
+* Added an Asteroid class
+* Added a callstack manager
+* Added a callstack profiler which can record performance information down to individual function's
+* Added a timing management system. Gives access to a timer class, also allows for global timing management such as pausing game playback or slowing/speeding playback rate without affecting relative game timing charactistics
+* Added debug menu options for new features
+* Supported all current systems (except Input) on PC which now builds and runs
+* Added a set of functions for generating random numbers in various ways (Util.h/cpp)
+* Prefixed Primitive functions with 'MF' (Mount Fuji). Will Probably continue this tradition in future with second revisions of each system (there is always a second revision, after the flaw's are found and considered from the first revision through general usage)
+* Fixed more debug menu bugs
+* Font now uses platform independant MFPrimitive to render instead of dx8 vertex buffers
+* Final touches to the debug menu. Scrolls nicely now and clips content within its frame..
+* Added PC Input. Only reads joysticks currently, there is no interface for reading anything else in the engine yet (as it was primarily a console engine). Buttons are mapped to a typical PSX->USB adapter in a Playstation layout
+* Added options to the debug menu to control the look and feel of the debug menu ;)

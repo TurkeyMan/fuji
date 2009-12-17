@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InputTest", "InputTest.vcproj", "{78FB8ECA-F741-4D5F-99B4-062004C68952}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE} = {E91A06AB-9465-4300-9C3E-15A5275E22FE}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fuji", "..\..\Fuji_PC.vcproj", "{E91A06AB-9465-4300-9C3E-15A5275E22FE}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+		Retail = Retail
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Debug.ActiveCfg = Debug|Win32
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Debug.Build.0 = Debug|Win32
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Release.ActiveCfg = Release|Win32
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Release.Build.0 = Release|Win32
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Retail.ActiveCfg = Release|Win32
+		{78FB8ECA-F741-4D5F-99B4-062004C68952}.Retail.Build.0 = Release|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Debug.ActiveCfg = Debug|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Debug.Build.0 = Debug|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Release.ActiveCfg = Release|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Release.Build.0 = Release|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Retail.ActiveCfg = Retail|Win32
+		{E91A06AB-9465-4300-9C3E-15A5275E22FE}.Retail.Build.0 = Retail|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
