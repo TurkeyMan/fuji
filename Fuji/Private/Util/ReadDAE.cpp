@@ -1,11 +1,11 @@
+#include <string>
+#include <vector>
+
 #include "Fuji.h"
 #include "Util/F3D.h"
 #include "MFMatrix.h"
 
 #include "tinyxml/tinyxml.h"
-
-#include <string>
-#include <vector>
 
 static F3DFile *pModel;
 

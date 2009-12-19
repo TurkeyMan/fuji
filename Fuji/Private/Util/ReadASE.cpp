@@ -3,7 +3,7 @@
 
 #include "MFFileSystem.h"
 
-char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*));
+char *ProcessBlock(char *pFilePtr, const char *pBlockName, char* (*BlockFunc)(char*, char*));
 
 static F3DFile *pModel;
 F3DMaterial *pMaterial = NULL;
@@ -29,7 +29,7 @@ char* GetInt(char *pFilePtr, int *pInt)
 	pEnd = pFilePtr;
 	while(MFIsNumeric(*pEnd)) pEnd++;
 
-	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != NULL)
+	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != 0)
 	{
 		MFDebug_Warn(3, "Error: GetInt() found non numeric character.");
 		*pInt = 0;
@@ -65,7 +65,7 @@ char* GetFloat(char *pFilePtr, float *pFloat)
 	pToken = (char*)MFStrN(pFilePtr, (int)(pEnd-pFilePtr));
 	if(*pEnd == 'f') pEnd++;
 
-	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != NULL)
+	if(!MFIsWhite(*pEnd) && !MFIsNewline(*pEnd) && *pEnd != 0)
 	{
 		MFDebug_Warn(3, "Error: GetFloat() found non numeric character.");
 		*pFloat = 0.0f;
@@ -96,7 +96,7 @@ char* GetString(char *pFilePtr, char **ppString)
 	pFilePtr++;
 
 	pEnd = pFilePtr;
-	while(*pEnd != '\"' && *pEnd != NULL && !MFIsNewline(*pEnd)) pEnd++;
+	while(*pEnd != '\"' && *pEnd != 0 && !MFIsNewline(*pEnd)) pEnd++;
 
 	if(*pEnd != '\"')
 	{
@@ -118,7 +118,7 @@ char* GetLabel(char *pFilePtr, char **ppString)
 	pFilePtr = MFSkipWhite(pFilePtr);
 
 	pEnd = pFilePtr;
-	while(*pEnd != ':' && *pEnd != NULL && !MFIsNewline(*pEnd)) pEnd++;
+	while(*pEnd != ':' && *pEnd != 0 && !MFIsNewline(*pEnd)) pEnd++;
 
 	if(*pEnd != ':')
 	{
@@ -730,7 +730,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 	return pFilePtr;
 }
 
-char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, char*))
+char *ProcessBlock(char *pFilePtr, const char *pBlockName, char* (*BlockFunc)(char*, char*))
 {
 	char *pEnd;
 	char *pToken;
@@ -748,9 +748,9 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 
 	pFilePtr++;
 
-	while(*pFilePtr != NULL)
+	while(*pFilePtr != 0)
 	{
-		while(!(*pFilePtr == '*' && !braceCount && !inQuote) && *pFilePtr != NULL)
+		while(!(*pFilePtr == '*' && !braceCount && !inQuote) && *pFilePtr != 0)
 		{
 			if(*pFilePtr == '\"') inQuote = !inQuote;
 			if(!inQuote)
@@ -765,7 +765,7 @@ char *ProcessBlock(char *pFilePtr, char *pBlockName, char* (*BlockFunc)(char*, c
 
 		pEnd = pFilePtr;
 
-		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
+		while(!MFIsWhite(*pEnd) && *pEnd != 0) pEnd++;
 
 		pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;
@@ -788,7 +788,7 @@ void ParseASEFile(char *pFilePtr, F3DFile *_pModel)
 
 	while(*pFilePtr != 0)
 	{
-		while(!(*pFilePtr == '*' && !braceCount && !inQuote) && *pFilePtr != NULL)
+		while(!(*pFilePtr == '*' && !braceCount && !inQuote) && *pFilePtr != 0)
 		{
 			if(*pFilePtr == '\"') inQuote = !inQuote;
 			if(!inQuote)
@@ -801,7 +801,7 @@ void ParseASEFile(char *pFilePtr, F3DFile *_pModel)
 
 		pEnd = pFilePtr;
 
-		while(!MFIsWhite(*pEnd) && *pEnd != NULL) pEnd++;
+		while(!MFIsWhite(*pEnd) && *pEnd != 0) pEnd++;
 
 		pToken = (char*)MFStrN(pFilePtr, (int)(pEnd - pFilePtr));
 		pFilePtr = pEnd;

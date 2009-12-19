@@ -121,7 +121,7 @@
 	#include <TargetConditionals.h>
 	#define MF_IPHONE
 	#define MF_PLATFORM IPHONE
-	#if defined(TARGET_IPHONE_SIMULATOR)
+	#if TARGET_IPHONE_SIMULATOR == 1
 		#define MF_ARCH_X86
 		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
@@ -142,10 +142,18 @@
 	#define MF_DC
 	#define MF_PLATFORM DC
 	#define MF_32BIT
+#elif defined(__arm__)
+	#define MF_ARCH_ARM
 #elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips) || defined(__mips__) || defined(__MIPSEL__) || defined(_MIPSEL) || defined(__MIPSEL)
 	#define MF_ARCH_MIPS
+#elif defined(__ppc64__)
+	#define MF_ARCH_PPC
+	#define MF_64BIT
 #elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__)
 	#define MF_ARCH_PPC
+#elif defined(__x86_64__)
+	#define MF_ARCH_X86
+	#define MF_64BIT
 #elif defined(__i386__) || defined(_M_IX86)
 	#define MF_ARCH_X86
 #else

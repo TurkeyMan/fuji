@@ -139,6 +139,8 @@ void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
 
+	MFMatrix localToView;
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf((GLfloat*)&MFView_GetViewToScreenMatrix());
 

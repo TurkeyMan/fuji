@@ -54,7 +54,11 @@ static int gPrimTypes[7] =
 	GL_TRIANGLES,
 	GL_TRIANGLE_STRIP,
 	GL_TRIANGLE_FAN,
+#if !defined(MF_OPENGL_ES)
 	GL_QUADS
+#else
+	GL_TRIANGLES // OpenGLES does't support quad rendering, so we'll have to simulate with triangles
+#endif
 };
 
 void MFPrimitive_InitModule()

@@ -26,6 +26,7 @@
 #include "MFRenderer_Internal.h"
 
 #include "MFOpenGL.h"
+
 #if MF_DISPLAY == MF_DRIVER_X11
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>

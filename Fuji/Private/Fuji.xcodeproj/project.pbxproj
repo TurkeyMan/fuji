@@ -239,6 +239,7 @@
 		326BBBE310D9374F00E014B5 /* MFThread_Linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67910D9133E00E014B5 /* MFThread_Linux.cpp */; };
 		326BBBEC10D9378C00E014B5 /* MFAuxillaryDisplay_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68010D9133E00E014B5 /* MFAuxillaryDisplay_Null.cpp */; };
 		326BBBED10D9378F00E014B5 /* MFSound_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68B10D9133E00E014B5 /* MFSound_Null.cpp */; };
+		AE0AC1D410DC92F600FAB6CB /* MFOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = AE0AC1D310DC92F600FAB6CB /* MFOpenGL.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -658,6 +659,7 @@
 		326BBAED10D92E7800E014B5 /* TODO */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO; sourceTree = "<group>"; };
 		326BBAEE10D92E7800E014B5 /* Y2KINFO */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Y2KINFO; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* Fuji_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fuji_Prefix.pch; sourceTree = "<group>"; };
+		AE0AC1D310DC92F600FAB6CB /* MFOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFOpenGL.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1103,6 +1105,7 @@
 		326BB69010D9133E00E014B5 /* OpenGL */ = {
 			isa = PBXGroup;
 			children = (
+				AE0AC1D310DC92F600FAB6CB /* MFOpenGL.h */,
 				326BB69110D9133E00E014B5 /* Materials */,
 				326BB69310D9133E00E014B5 /* MFMaterial_OpenGL.cpp */,
 				326BB69410D9133E00E014B5 /* MFModel_OpenGL.cpp */,
@@ -1700,6 +1703,7 @@
 				326BBACE10D92A5300E014B5 /* tinyxml.h in Headers */,
 				326BBAF010D92E7800E014B5 /* png.h in Headers */,
 				326BBAF110D92E7800E014B5 /* pngconf.h in Headers */,
+				AE0AC1D410DC92F600FAB6CB /* MFOpenGL.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1728,12 +1732,15 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = "Manu Stuff Inc.";
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Fuji" */;
 			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
-			projectRoot = "";
+			projectRoot = /Volumes/STORAGE/Projects/Fuji;
 			targets = (
 				326BB39C10D9130500E014B5 /* Fuji */,
 			);

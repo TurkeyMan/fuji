@@ -80,4 +80,9 @@
 	#define GL_UNSIGNED_SHORT_4_4_4_4_REV		0x8365
 #endif
 
+#if defined(MF_OPENGL_ES)
+	#define glClearDepth glClearDepthf
+	#define glDepthRange glDepthRangef
+#endif
+
 #endif
