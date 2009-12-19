@@ -25,8 +25,8 @@
 #include "MFView_Internal.h"
 #include "MFRenderer_Internal.h"
 
+#include "MFOpenGL.h"
 #if MF_DISPLAY == MF_DRIVER_X11
-	#include <GL/glx.h>
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>
 
@@ -101,12 +101,8 @@
 		return visualInfo;
 	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
-	#define WIN32_LEAN_AND_MEAN
-	#include <Windows.h>
-	#include <gl/gl.h>
-
 	#pragma comment(lib, "Opengl32")
-	#pragma comment(lib, "Glu32")
+//	#pragma comment(lib, "Glu32")
 
 	extern HINSTANCE apphInstance;
 	extern HWND apphWnd;

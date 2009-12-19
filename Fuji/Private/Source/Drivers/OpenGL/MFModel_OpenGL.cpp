@@ -16,14 +16,7 @@
 #include "MFView.h"
 #include "MFRenderer.h"
 
-#if defined(MF_LINUX) || defined(MF_OSX)
-	#include <GL/glx.h>
-	#include <GL/glxext.h>
-#elif defined(MF_WINDOWS)
-	#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-#endif
-#include <GL/gl.h>
+#include "MFOpenGL.h"
 #include <string.h>
 
 /*** Globals ****/

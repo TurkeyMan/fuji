@@ -4,16 +4,7 @@
 #if MF_RENDERER == MF_DRIVER_D3D9
 	#include <d3d9.h>
 #elif MF_RENDERER == MF_DRIVER_OPENGL
-	#if defined(MF_WINDOWS)
-		#define WIN32_LEAN_AND_MEAN
-		#include <windows.h>
-	#endif
-	#if defined(MF_OPENGL_ES)
-		#include <OpenGLES/ES2/gl.h>
-		#include <OpenGLES/ES2/glext.h>
-	#else
-		#include <GL/gl.h>
-	#endif
+	#include "MFOpenGL.h"
 #endif
 
 #include "MFTexture.h"

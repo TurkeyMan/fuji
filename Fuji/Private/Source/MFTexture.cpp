@@ -416,8 +416,10 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	sceGuTexOffset(0.0f, 0.0f);
 	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
 #elif MF_RENDERER == MF_DRIVER_OPENGL
-	glBindTexture(GL_TEXTURE_2D, pTexture->textureID);
+#if !defined(MF_OPENGL_ES)
+	glBindTexture(GL_TEXTURE_2D, (uint32)pTexture->pInternalData);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+#endif
 #else
 //	MFDebug_Assert(false, "Not supported on this platform...");
 #endif

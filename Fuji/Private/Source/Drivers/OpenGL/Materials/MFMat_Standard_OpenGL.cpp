@@ -17,10 +17,7 @@
 #include "MFView_Internal.h"
 #include "../../Source/Materials/MFMat_Standard.h"
 
-#if defined(MF_WINDOWS)
-	#include <windows.h>
-	#include <gl/gl.h>
-#endif
+#include "../MFOpenGL.h"
 
 static MFMaterial *pSetMaterial = 0;
 

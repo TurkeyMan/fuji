@@ -875,6 +875,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Drivers\OpenGL\MFOpenGL.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\OpenGL\MFPrimitive_OpenGL.cpp"
 						>
 					</File>

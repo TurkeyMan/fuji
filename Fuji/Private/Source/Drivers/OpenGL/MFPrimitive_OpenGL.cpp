@@ -28,14 +28,7 @@
 #include "Display.h"
 #include "Materials/MFMat_Standard.h"
 
-#if defined(MF_LINUX) || defined(MF_OSX)
-	#include <GL/glx.h>
-#endif
-
-#if defined(MF_WINDOWS)
-	#include <windows.h>
-	#include <gl/gl.h>
-#endif
+#include "MFOpenGL.h"
 
 struct Vert
 {
