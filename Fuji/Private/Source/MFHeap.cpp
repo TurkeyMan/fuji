@@ -66,7 +66,7 @@ static const char gMungwall[9] = "mungwall";
 static int gMFHeap_TrackerLine = 0;
 static const char *gpMFHeap_TrackerFile = "Unknown in RETAIL build";
 
-void MFHeap_SetLineAndFile(int line, char *pFile)
+void MFHeap_SetLineAndFile(int line, const char *pFile)
 {
 	gMFHeap_TrackerLine = line;
 	gpMFHeap_TrackerFile = pFile;

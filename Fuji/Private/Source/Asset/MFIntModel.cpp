@@ -12,7 +12,7 @@
 
 /**** Globals ****/
 
-static char *gFileExtensions[] =
+static const char *gFileExtensions[] =
 {
 	".f3d",
 	".dae",

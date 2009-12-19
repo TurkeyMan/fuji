@@ -84,7 +84,7 @@ struct BMPPaletteEntry /**** Colormap entry structure ****/
 
 /**** Globals ****/
 
-static char *gFileExtensions[] =
+static const char *gFileExtensions[] =
 {
 	".tga",
 	".bmp",

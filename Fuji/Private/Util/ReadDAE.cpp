@@ -87,14 +87,14 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 	
 	TiXmlElement *pAuthor = pContrib->FirstChildElement("author");
 	TiXmlElement *pAuthoringTool = pContrib->FirstChildElement("authoring_tool");
-	TiXmlElement *pSourceData = pContrib->FirstChildElement("source_data");
+//	TiXmlElement *pSourceData = pContrib->FirstChildElement("source_data");
 
 	TiXmlElement *pUp = pAsset->FirstChildElement("up_axis");
 	TiXmlElement *pUnit = pAsset->FirstChildElement("unit");
 	TiXmlElement *pCopyright = pAsset->FirstChildElement("copyright");
-	TiXmlElement *pCreated = pAsset->FirstChildElement("created");
-	TiXmlElement *pLastModified = pAsset->FirstChildElement("modified");
-	TiXmlElement *pRevision = pAsset->FirstChildElement("revision");
+//	TiXmlElement *pCreated = pAsset->FirstChildElement("created");
+//	TiXmlElement *pLastModified = pAsset->FirstChildElement("modified");
+//	TiXmlElement *pRevision = pAsset->FirstChildElement("revision");
 
 	if(pUp)
 	{
@@ -384,7 +384,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				MFDebug_Assert(pInputs, "No inputs for polygons.\n");
 
 				const char *pSemantic = pInputs->Attribute("semantic");
-				const char *pSource = pInputs->Attribute("source");
+//				const char *pSource = pInputs->Attribute("source");
 
 				MFDebug_Assert(!MFString_CaseCmp(pSemantic, "VERTEX"), "First input must be VERTEX.\n");
 
@@ -730,7 +730,7 @@ void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParen
 	}
 	else
 	{
-		printf(MFStr("Object '%s' not found in library...\n", pObjectName));
+		printf("Object '%s' not found in library...\n", pObjectName);
 	}
 }
 

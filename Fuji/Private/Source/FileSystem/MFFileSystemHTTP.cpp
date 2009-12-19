@@ -108,7 +108,7 @@ void MFFileHTTP_GetServerAndPath(const char *pURL, char **ppServer, char **ppPat
 		pPath = (char*)MFStr("/%s", pPath);
 	}
 	else
-		pPath = "/";
+		pPath = (char*)"/";
 
 	*ppServer = pServer;
 	*ppPath = pPath;
@@ -323,7 +323,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 	const char *pT = MFString_Chr(pResponse, ' ');
 	if(!pT) return -1;
 
-	int response = atoi(MFStrN(pResponse, pT-pResponse));
+//	int response = atoi(MFStrN(pResponse, pT-pResponse));
 	int dataStart = 0;
 	int dataEnd = (int)fileHandle->length;
 	int dataLength = dataEnd;

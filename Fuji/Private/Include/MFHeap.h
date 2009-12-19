@@ -248,13 +248,13 @@ void MFHeap_PopGroupName();
 // user alloc macros
 #if !defined(_RETAIL)
 	// to trace memory allocations
-	void MFHeap_SetLineAndFile(int line, char *pFile);
+	void MFHeap_SetLineAndFile(int line, const char *pFile);
 
 	/** @internal */
 	static class MFHeapDebug
 	{
 		public:
-		inline MFHeapDebug& Tracker(int line, char *pFile) { MFHeap_SetLineAndFile(line, pFile); return *this; }
+		inline MFHeapDebug& Tracker(int line, const char *pFile) { MFHeap_SetLineAndFile(line, pFile); return *this; }
 		inline static void *Alloc(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocInternal(bytes, pHeap); }
 		inline static void *AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocAndZeroInternal(bytes, pHeap); }
 	} MFHeap_Debug;
