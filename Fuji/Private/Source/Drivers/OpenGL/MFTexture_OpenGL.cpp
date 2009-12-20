@@ -131,15 +131,19 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 	if(generateMipChain && pTemplate->mipLevels == 1)
 	{
-		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
-		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurf->width, pSurf->height, 0, format.format, format.type, pSurf->pImageData);
-
 		int numMips = 0;
-		// build mips from the top surface..
+		// build mips from the top surface
+		//...
 
 		// set this to however many mips we just constructed
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMips);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, numMips ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+
+		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
+		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurf->width, pSurf->height, 0, format.format, format.type, pSurf->pImageData);
+
+		// set the mips
+		//...
 	}
 	else
 	{

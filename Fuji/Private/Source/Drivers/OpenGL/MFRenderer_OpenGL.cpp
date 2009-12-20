@@ -27,6 +27,8 @@
 
 #include "MFOpenGL.h"
 
+int gOpenGLVersion = 0;
+
 #if MF_DISPLAY == MF_DRIVER_X11
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>
@@ -111,9 +113,43 @@
 	HDC hDC = NULL; // Private GDI Device Context
 #endif
 
+#if defined(LOAD_EXTENSIONS)
+	PFNGLGENBUFFERSARBPROC glGenBuffers = NULL;
+	PFNGLBINDBUFFERARBPROC glBindBuffer = NULL;
+	PFNGLBUFFERDATAARBPROC glBufferData = NULL;
+	PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = NULL;
+#endif
+
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 static MFRect gCurrentViewport;
 
+bool IsExtensionSupported(const char *extension)
+{
+	const GLubyte *extensions = NULL;
+	const GLubyte *start;
+	GLubyte *where, *terminator;
+
+	// Extension names should not have spaces.
+	where = (GLubyte *) strchr(extension, ' ');
+	if(where || *extension == '\0')
+		return false;
+	extensions = glGetString(GL_EXTENSIONS);
+
+    // It takes a bit of care to be fool-proof about parsing the OpenGL extensions string. Don't be fooled by sub-strings, etc.
+	start = extensions;
+	for(;;)
+	{
+		where = (GLubyte *)strstr((const char *)start, extension);
+		if(!where)
+			break;
+		terminator = where + strlen(extension);
+		if(where == start || *(where - 1) == ' ')
+			if(*terminator == ' ' || *terminator == '\0')
+				return true;
+		start = terminator;
+	}
+	return false;
+}
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -232,6 +268,44 @@ int MFRenderer_CreateDisplay()
 		MFDisplay_DestroyDisplay();
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
+	}
+#endif
+
+    // get the opengl version
+	const char *pVersion = (const char *)glGetString(GL_VERSION);
+	float ver = MFString_AsciiToFloat(pVersion);
+	gOpenGLVersion = (int)(ver * 100);
+
+#if defined(LOAD_EXTENSIONS)
+	// try and load some extensions
+	// try and load the buffer object extensions
+	if(gOpenGLVersion < 150 && !IsExtensionSupported("GL_ARB_vertex_buffer_object"))
+	{
+		MFDebug_Warn(1, "Neither OpenGL 1.5 nor GL_ARB_vertex_buffer_object extension is available!");
+	}
+	else
+	{
+		// Load the function pointers
+		if(gOpenGLVersion >= 150)
+		{
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress("glBindBuffer");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress("glBufferData");
+//			glBufferSubData = glGetProcAddress("glBufferSubData");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress("glDeleteBuffers");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress("glGenBuffers");
+//			glMapBuffer = glGetProcAddress("glMapBuffer");
+//			glUnmapBuffer = glGetProcAddress("glUnmapBuffer");
+		}
+		else
+		{
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress("glBindBufferARB");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress("glBufferDataARB");
+//			glBufferSubData = glGetProcAddress("glBufferSubDataARB");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress("glDeleteBuffersARB");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress("glGenBuffersARB");
+//			glMapBuffer = glGetProcAddress("glMapBufferARB");
+//			glUnmapBuffer = glGetProcAddress("glUnmapBufferARB");
+		}
 	}
 #endif
 
