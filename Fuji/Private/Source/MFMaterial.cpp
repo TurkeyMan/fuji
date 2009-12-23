@@ -430,14 +430,14 @@ const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
 	return pMaterial->pName;
 }
 
-void MFMaterial_SetMaterial(MFMaterial *pMaterial)
+void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
 	if(!pMaterial)
 		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
 
-	pCurrentMaterial = pMaterial;
+	pCurrentMaterial = (MFMaterial*)pMaterial;
 }
 
 MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)

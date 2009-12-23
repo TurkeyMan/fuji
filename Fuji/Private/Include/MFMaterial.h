@@ -160,7 +160,7 @@ MFMaterial*	MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier);
  * @param pMaterial Pointer to a material to set as the active material.
  * @return None.
  */
-void MFMaterial_SetMaterial(MFMaterial *pMaterial);
+void MFMaterial_SetMaterial(const MFMaterial *pMaterial);
 
 /**
  * Get the current active material.

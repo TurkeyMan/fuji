@@ -65,16 +65,52 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		bool premultipliedAlpha = false;
 
 		// set some render states
-		if(pData->pTextures[pData->diffuseMapIndex])
+		if(pData->detailMapIndex)
+		{
+			// HACK: for compound multitexturing
+			IDirect3DTexture9 *pDiffuse = (IDirect3DTexture9*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			IDirect3DTexture9 *pDetail = (IDirect3DTexture9*)pData->pTextures[pData->detailMapIndex]->pInternalData;
+
+			MFRendererPC_SetTexture(0, pDetail);
+			MFRendererPC_SetTexture(1, pDiffuse);
+
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+			MFRendererPC_SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+			MFRendererPC_SetSamplerState(1, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+
+			MFRendererPC_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+			MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_ADD);
+			MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
+		}
+		else if(pData->pTextures[pData->diffuseMapIndex])
 		{
 			IDirect3DTexture9 *pTexture = (IDirect3DTexture9*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+
 			MFRendererPC_SetTexture(0, pTexture);
+			MFRendererPC_SetTexture(1, NULL);
+
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
 
 			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
 			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
 
 			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 
