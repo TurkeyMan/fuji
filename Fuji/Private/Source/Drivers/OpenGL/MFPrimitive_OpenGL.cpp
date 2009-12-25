@@ -30,6 +30,12 @@
 
 #include "MFOpenGL.h"
 
+static const int primBufferSize = 1536;
+
+#if defined(MF_OPENGL_ES)
+static bool gImmitateQuads = false;
+#endif
+
 struct Vert
 {
 	float x, y, z;
@@ -38,8 +44,8 @@ struct Vert
 	uint32 colour;
 };
 
-static Vert prevVert;
-static Vert curVert;
+static Vert primBuffer[primBufferSize];
+static Vert current;
 
 static uint32 beginCount;
 static uint32 currentVert;
@@ -55,9 +61,7 @@ static int gPrimTypes[7] =
 	GL_TRIANGLE_STRIP,
 	GL_TRIANGLE_FAN,
 #if !defined(MF_OPENGL_ES)
-	GL_QUADS
-#else
-	GL_TRIANGLES // OpenGLES does't support quad rendering, so we'll have to simulate with triangles
+	GL_QUADS // OpenGLES does't support quad rendering, so we'll have to simulate with triangles
 #endif
 };
 
@@ -81,10 +85,21 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 	primType = type & PT_PrimMask;
 
-	if(type & PT_Untextured)
+#if defined(MF_OPENGL_ES)
+	if(primType == PT_QuadList)
 	{
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+		primType = PT_TriList;
+		gImmitateQuads = true;
 	}
+	else
+		gImmitateQuads = false;
+#endif
+
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+	else if(type & PT_Untextured)
+		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf((GLfloat *)&MFView_GetViewToScreenMatrix());
@@ -106,14 +121,19 @@ void MFBegin(uint32 vertexCount)
 
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
+#if defined(MF_OPENGL_ES)
+	if(gImmitateQuads)
+		beginCount = vertexCount * 3;
+	else
+#endif
 	beginCount = vertexCount;
+
 	currentVert = 0;
 
-	MFZeroMemory(&curVert, sizeof(curVert));
-	curVert.colour = 0xFFFFFFFF;
-	curVert.ny = 1.0f;
-
-	glBegin(gPrimTypes[primType]);
+	current.u = current.v = 0.0f;
+	current.colour = 0xFFFFFFFF;
+	current.nx = current.nz = 0.0f;
+	current.ny = 1.0f;
 }
 
 void MFSetMatrix(const MFMatrix &mat)
@@ -128,62 +148,86 @@ void MFSetMatrix(const MFMatrix &mat)
 
 void MFSetColour(float r, float g, float b, float a)
 {
-	curVert.colour = ((uint32)(r*255.0f) << 0) | ((uint32)(g*255.0f) << 8) | ((uint32)(b*255.0f) << 16) | ((uint32)(a*255.0f) << 24);
+	current.colour = ((uint32)(r*255.0f) << 0) | ((uint32)(g*255.0f) << 8) | ((uint32)(b*255.0f) << 16) | ((uint32)(a*255.0f) << 24);
 }
 
 void MFSetTexCoord1(float u, float v)
 {
-	curVert.u = u;
-	curVert.v = v;
+	current.u = u;
+	current.v = v;
 }
 
 void MFSetNormal(float x, float y, float z)
 {
-	curVert.nx = x;
-	curVert.ny = y;
-	curVert.nz = z;
+	current.nx = x;
+	current.ny = y;
+	current.nz = z;
 }
 
 void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
-	bool bIsQuads = primType == PT_QuadList;
-	bool bInsertVerts = bIsQuads && (currentVert & 1);
-	uint32 col;
+	current.x = x;
+	current.y = y;
+	current.z = z;
 
-	if(bInsertVerts)
+#if defined(MF_OPENGL_ES)
+	if(gImmitateQuads && (currentVert & 1))
 	{
-		// add top right vertex
-		col = prevVert.colour;
+		Vert &prev = primBuffer[currentVert - 1];
 
-		glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-		glTexCoord2f(curVert.u, prevVert.v);
-		glVertex3f(x, prevVert.y, prevVert.z);
+		primBuffer[currentVert + 0] = prev;
+		primBuffer[currentVert + 1] = prev;
+		primBuffer[currentVert + 2] = current;
+		primBuffer[currentVert + 3] = current;
+		primBuffer[currentVert + 4] = current;
+
+		primBuffer[currentVert + 0].pos.x = current.pos.x;
+		primBuffer[currentVert + 1].pos.y = current.pos.y;
+		primBuffer[currentVert + 2].pos.x = prev.pos.x;
+		primBuffer[currentVert + 3].pos.y = prev.pos.y;
+
+		primBuffer[currentVert + 0].u = current.u;
+		primBuffer[currentVert + 1].v = current.v;
+		primBuffer[currentVert + 2].u = prev.u;
+		primBuffer[currentVert + 3].v = prev.v;
+
+		currentVert += 4;
 	}
-
-	col = curVert.colour;
-
-	glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-	glTexCoord2f(curVert.u, curVert.v);
-	glVertex3f(x, y, z);
-
-	if(bInsertVerts)
+#else
+	if(primType == PT_QuadList && (currentVert & 1))
 	{
-		// add the bottom left vertex
-		glColor4ub((uint8)(col & 0xFF), (uint8)((col >> 8) & 0xFF), (uint8)((col >> 16) & 0xFF), (uint8)((col >> 24) & 0xFF));
-		glTexCoord2f(prevVert.u, curVert.v);
-		glVertex3f(prevVert.x, y, z);
+		Vert &prev = primBuffer[currentVert - 1];
+
+		primBuffer[currentVert + 0] = prev;
+		primBuffer[currentVert + 1] = current;
+		primBuffer[currentVert + 2] = current;
+
+		primBuffer[currentVert + 0].x = current.x;
+		primBuffer[currentVert + 2].x = prev.x;
+
+		primBuffer[currentVert + 0].u = current.u;
+		primBuffer[currentVert + 2].u = prev.u;
+
+		currentVert += 2;
 	}
-	else if(bIsQuads)
-	{
-		curVert.x = x;
-		curVert.y = y;
-		curVert.z = z;
-		prevVert = curVert;
-	}
+#endif
+	else
+		primBuffer[currentVert] = current;
 
 	++currentVert;
+
+	if(currentVert >= primBufferSize)
+	{
+		int newBeginCount = beginCount - currentVert;
+		beginCount = currentVert;
+
+		MFEnd();
+
+		beginCount = newBeginCount;
+		currentVert = 0;
+	}
 }
 
 void MFEnd()
@@ -192,7 +236,38 @@ void MFEnd()
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
-	glEnd();
+	int numVerts = 0;
+	switch(primType)
+	{
+		case PT_PointList:	numVerts = beginCount;		break;
+		case PT_LineList:	numVerts = beginCount/2;	break;
+		case PT_LineStrip:	numVerts = beginCount-1;	break;
+		case PT_TriList:	numVerts = beginCount/3;	break;
+		case PT_TriStrip:	numVerts = beginCount-2;	break;
+		case PT_TriFan:		numVerts = beginCount-2;	break;
+	}
+
+	if(numVerts)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
+		glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glDrawArrays(GL_TRIANGLES, 0, numVerts);
+
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
 }
 
 
