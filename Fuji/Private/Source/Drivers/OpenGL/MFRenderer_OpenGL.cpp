@@ -27,6 +27,9 @@
 
 #include "MFOpenGL.h"
 
+// TODO: REMOVE ME!! MFString needs MFString_SubStr()
+#include <string.h>
+
 int gOpenGLVersion = 0;
 
 #if MF_DISPLAY == MF_DRIVER_X11
@@ -130,7 +133,7 @@ bool IsExtensionSupported(const char *extension)
 	GLubyte *where, *terminator;
 
 	// Extension names should not have spaces.
-	where = (GLubyte *) strchr(extension, ' ');
+	where = (GLubyte *) MFString_Chr(extension, ' ');
 	if(where || *extension == '\0')
 		return false;
 	extensions = glGetString(GL_EXTENSIONS);
@@ -142,7 +145,7 @@ bool IsExtensionSupported(const char *extension)
 		where = (GLubyte *)strstr((const char *)start, extension);
 		if(!where)
 			break;
-		terminator = where + strlen(extension);
+		terminator = where + MFString_Length(extension);
 		if(where == start || *(where - 1) == ' ')
 			if(*terminator == ' ' || *terminator == '\0')
 				return true;

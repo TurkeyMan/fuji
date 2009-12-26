@@ -89,7 +89,7 @@ char* GetString(char *pFilePtr, char **ppString)
 	if(*pFilePtr != '\"')
 	{
 		MFDebug_Warn(3, "Error: GetString() expected a string.");
-		*ppString = "";
+		*ppString = (char*)"";
 		return pFilePtr;
 	}
 
@@ -101,7 +101,7 @@ char* GetString(char *pFilePtr, char **ppString)
 	if(*pEnd != '\"')
 	{
 		MFDebug_Warn(3, "Error: GetString() encountered an unterminated String.");
-		*ppString = "";
+		*ppString = (char*)"";
 		return pFilePtr;
 	}
 
@@ -123,7 +123,7 @@ char* GetLabel(char *pFilePtr, char **ppString)
 	if(*pEnd != ':')
 	{
 		MFDebug_Warn(3, "Error: GetLabel() encountered an unterminated label.");
-		*ppString = "";
+		*ppString = (char*)"";
 		return pFilePtr;
 	}
 

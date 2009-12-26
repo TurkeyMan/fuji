@@ -221,20 +221,21 @@ enum MFPlatform
 {
 	FP_Unknown = -1, /**< Unknown platform */
 
-	FP_PC = 0,	/**< PC */
-	FP_XBox,	/**< XBox */
-	FP_Linux,	/**< Linux */
-	FP_PSP,		/**< Playstation Portable */
-	FP_PS2,		/**< Playstation 2 */
-	FP_DC,		/**< Dreamcast */
-	FP_GC,		/**< Gamecube */
-	FP_OSX,		/**< MacOSX */
-	FP_Amiga,	/**< Amiga */
-	FP_XBox360,	/**< XBox360 */
-	FP_PS3,		/**< Playstation 3 */
-	FP_Wii,		/**< Nintendo Wii */
-	FP_Symbian,	/**< Symbian OS */
-	FP_IPhone,	/**< IPhone OS */
+	FP_PC = 0,			/**< PC */
+	FP_XBox,			/**< XBox */
+	FP_Linux,			/**< Linux */
+	FP_PSP,				/**< Playstation Portable */
+	FP_PS2,				/**< Playstation 2 */
+	FP_DC,				/**< Dreamcast */
+	FP_GC,				/**< Gamecube */
+	FP_OSX,				/**< MacOSX */
+	FP_Amiga,			/**< Amiga */
+	FP_XBox360,			/**< XBox360 */
+	FP_PS3,				/**< Playstation 3 */
+	FP_Wii,				/**< Nintendo Wii */
+	FP_Symbian,			/**< Symbian OS */
+	FP_IPhone,			/**< IPhone OS */
+	FP_WindowsMobile,	/**< Windows Mobile */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */

@@ -109,7 +109,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 
 			if(!MFString_CaseCmp(pSubName, pSubobjectName))
 			{
-				for(pT = pTok; *pT != NULL && *pT != '\r' && *pT != '\n'; ++pT) { }
+				for(pT = pTok; *pT != 0 && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 				// get texture name
 				pTokTemp = pT - (uint32&)pTok;
@@ -152,7 +152,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 		while(pTok)
 		{
 			++pTok;
-			for(pT = pTok; *pT != NULL && *pT != '\r' && *pT != '\n'; ++pT) { }
+			for(pT = pTok; *pT != 0 && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 			// get texture name
 			char *pTT = pT - (uint32&)pTok;

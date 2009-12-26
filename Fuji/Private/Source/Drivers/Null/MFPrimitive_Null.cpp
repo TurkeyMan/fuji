@@ -72,4 +72,28 @@ void MFEnd()
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 }
 
+void MFPrimitive_BeginBlitter(int numBlits)
+{
+}
+
+void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+{
+}
+
+void MFPrimitive_BlitRect(int x, int y, MFRect uvs)
+{
+}
+
+void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
+{
+}
+
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs)
+{
+}
+
+void MFPrimitive_EndBlitter()
+{
+}
+
 #endif

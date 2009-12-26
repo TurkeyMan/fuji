@@ -27,7 +27,7 @@ void MFDebug_Message(const char *pMessage)
 	OutputDebugString((LPCTSTR)pMessage);
 	OutputDebugString("\n");
 #else
-	fprintf(stderr, MFStr("%s\n", pMessage));
+	fprintf(stderr, "%s\n", pMessage);
 #endif
 }
 

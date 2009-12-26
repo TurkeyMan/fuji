@@ -50,12 +50,15 @@ MFDefaults gDefaults =
 
 	// DisplayDefaults
 	{
-#if !defined(_PSP)
-		640,			// displayWidth
-		480,			// displayHeight
-#else
+#if defined(MF_PSP)
 		480,			// displayWidth
 		272,			// displayHeight
+#elif defined(MF_IPHONE)
+		320,			// displayWidth
+		480,			// displayHeight
+#else
+		640,			// displayWidth
+		480,			// displayHeight
 #endif
 		"Fuji Window",	// pWindowTitle
 		NULL,			// pIcon

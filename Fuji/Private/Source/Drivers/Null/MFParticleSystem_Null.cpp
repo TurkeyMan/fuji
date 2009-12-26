@@ -21,7 +21,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 
 //		int additive = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "additive");
 		int zwrite = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "zwrite");
-		int on = 1, off = 0;
+		int off = 0;
 		MFMaterial_SetParameter(pSystem->pMaterial, zwrite, 0, &off);
 	}
 

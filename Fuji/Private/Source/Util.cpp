@@ -32,7 +32,9 @@ static const char * const gPlatformStrings[FP_Max] =
 	"X360",
 	"PS3",
 	"WII",
-	"SYM"
+	"SYM",
+	"IPH",
+	"WM"
 };
 
 static const char * const gPlatformNames[FP_Max] =
@@ -48,7 +50,10 @@ static const char * const gPlatformNames[FP_Max] =
 	"Amiga",
 	"XBox 360",
 	"Platstation 3",
-	"Nintendo Wii"
+	"Nintendo Wii",
+	"Symbian",
+	"iPhone",
+	"Windows Mobile"
 };
 
 static MFEndian gPlatformEndian[FP_Max] =
@@ -64,7 +69,10 @@ static MFEndian gPlatformEndian[FP_Max] =
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
 	MFEndian_BigEndian,
-	MFEndian_BigEndian
+	MFEndian_BigEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian,
+	MFEndian_LittleEndian
 };
 
 const char * MFSystem_GetPlatformString(int platform)

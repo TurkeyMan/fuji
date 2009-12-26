@@ -193,7 +193,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	else
 	{
 		// find pattern refers to current directory..
-		pPath = ".";
+		pPath = (char*)".";
 	}
 
 	// open the directory

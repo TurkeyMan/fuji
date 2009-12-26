@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOUND == MF_DRIVER_NULL
+#if MF_SOUND == MF_DRIVER_IPHONE
 
 #include "MFSound_Internal.h"
 
@@ -47,7 +47,7 @@ bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
 	return true;
 }
 
-#if !defined(USE_MFSOUNDBUFFER)
+#if 0
 void MFSound_CreateInternal(MFSound *pSound)
 {
 }

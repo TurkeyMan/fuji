@@ -96,6 +96,8 @@
 #define MF_DRIVER_OPENAL		29
 #define MF_DRIVER_PULSEAUDIO	30
 #define MF_DRIVER_PLUGIN		31
+#define MF_DRIVER_IPHONE		32
+#define MF_DRIVER_WINDOWSMOBILE	33
 
 /*** Platform specific defines, includes and driver selection ***/
 
