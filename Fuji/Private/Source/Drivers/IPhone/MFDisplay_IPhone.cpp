@@ -9,6 +9,14 @@ MFRect gCurrentViewport;
 
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
 {
+	gDisplay.fullscreenWidth = gDisplay.width = 320;
+	gDisplay.fullscreenHeight = gDisplay.height = 480;
+	gDisplay.refreshRate = 0;
+	gDisplay.colourDepth = 0;
+	gDisplay.windowed = false;
+	gDisplay.wide = false;
+	gDisplay.progressive = true;
+
 	gCurrentViewport.x = 0.0f;
 	gCurrentViewport.y = 0.0f;
 	gCurrentViewport.width = (float)width;

@@ -25,7 +25,6 @@
 #include "usb_icon.h"
 #endif
 
-
 /**** internal functions ****/
 
 void		MaterialInternal_Update(MFMaterial *pMaterial);

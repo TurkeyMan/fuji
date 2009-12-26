@@ -290,12 +290,11 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 {
 	uint32 *pPixels = (uint32*)blankBuffer;
 
+	uint32 packed = colour.ToPackedColour();
 	for(int a=0; a<8*8; a++)
-	{
-		pPixels[a] = colour.ToPackedColour();
-	}
+		pPixels[a] = packed;
 
-	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0, false);
+	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0, TEX_CopyMemory);
 }
 
 void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)

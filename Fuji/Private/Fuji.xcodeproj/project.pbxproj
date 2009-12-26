@@ -240,6 +240,133 @@
 		326BBBEC10D9378C00E014B5 /* MFAuxillaryDisplay_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68010D9133E00E014B5 /* MFAuxillaryDisplay_Null.cpp */; };
 		326BBBED10D9378F00E014B5 /* MFSound_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68B10D9133E00E014B5 /* MFSound_Null.cpp */; };
 		AE0AC1D410DC92F600FAB6CB /* MFOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = AE0AC1D310DC92F600FAB6CB /* MFOpenGL.h */; };
+		AE7ACC2510E4E609002AFB79 /* MFDebug_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68110D9133E00E014B5 /* MFDebug_Null.cpp */; };
+		AE7ACC2610E4E613002AFB79 /* MFDisplay_X11.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6DC10D9133E00E014B5 /* MFDisplay_X11.cpp */; };
+		AE7ACC2710E4E614002AFB79 /* MFDisplay_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68210D9133E00E014B5 /* MFDisplay_Null.cpp */; };
+		AE7ACC2810E4E615002AFB79 /* MFDisplay_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB69D10D9133E00E014B5 /* MFDisplay_PC.cpp */; };
+		AE7ACC2910E4E616002AFB79 /* MFDisplay_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C410D9133E00E014B5 /* MFDisplay_PSP.cpp */; };
+		AE7ACC2A10E4E616002AFB79 /* MFDisplay_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B110D9133E00E014B5 /* MFDisplay_PS2.cpp */; };
+		AE7ACC2B10E4E617002AFB79 /* MFDisplay_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E210D9133E00E014B5 /* MFDisplay_XB.cpp */; };
+		AE7ACC2C10E4E618002AFB79 /* MFDisplay_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66810D9133E00E014B5 /* MFDisplay_GC.cpp */; };
+		AE7ACC2D10E4E619002AFB79 /* MFDisplay_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB65C10D9133E00E014B5 /* MFDisplay_DC.cpp */; };
+		AE7ACC2E10E4E61A002AFB79 /* MFDebug_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C310D9133E00E014B5 /* MFDebug_PSP.cpp */; };
+		AE7ACC2F10E4E61A002AFB79 /* MFDebug_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B010D9133E00E014B5 /* MFDebug_PS2.cpp */; };
+		AE7ACC3010E4E61A002AFB79 /* MFDebug_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB69C10D9133E00E014B5 /* MFDebug_PC.cpp */; };
+		AE7ACC3110E4E61E002AFB79 /* MFAuxillaryDisplay_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB69B10D9133E00E014B5 /* MFAuxillaryDisplay_PC.cpp */; };
+		AE7ACC3210E4E620002AFB79 /* MFFileSystemNative_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB65D10D9133E00E014B5 /* MFFileSystemNative_DC.cpp */; };
+		AE7ACC3310E4E620002AFB79 /* MFFileSystemNative_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66910D9133E00E014B5 /* MFFileSystemNative_GC.cpp */; };
+		AE7ACC3410E4E621002AFB79 /* MFFileSystemNative_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68310D9133E00E014B5 /* MFFileSystemNative_Null.cpp */; };
+		AE7ACC3510E4E622002AFB79 /* MFFileSystemNative_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B210D9133E00E014B5 /* MFFileSystemNative_PS2.cpp */; };
+		AE7ACC3610E4E622002AFB79 /* MFFileSystemNative_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C510D9133E00E014B5 /* MFFileSystemNative_PSP.cpp */; };
+		AE7ACC3710E4E623002AFB79 /* MFFileSystemNative_WIN32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D710D9133E00E014B5 /* MFFileSystemNative_WIN32.cpp */; };
+		AE7ACC3810E4E624002AFB79 /* MFHeap_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68410D9133E00E014B5 /* MFHeap_Null.cpp */; };
+		AE7ACC3910E4E625002AFB79 /* MFHeap_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B310D9133E00E014B5 /* MFHeap_PS2.cpp */; };
+		AE7ACC3A10E4E625002AFB79 /* MFHeap_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C610D9133E00E014B5 /* MFHeap_PSP.cpp */; };
+		AE7ACC3B10E4E626002AFB79 /* MFHeap_WIN32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D810D9133E00E014B5 /* MFHeap_WIN32.cpp */; };
+		AE7ACC3C10E4E626002AFB79 /* MFHeap_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E310D9133E00E014B5 /* MFHeap_XB.cpp */; };
+		AE7ACC3D10E4E628002AFB79 /* MFInput_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB65E10D9133E00E014B5 /* MFInput_DC.cpp */; };
+		AE7ACC3E10E4E628002AFB79 /* MFInput_Linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67410D9133E00E014B5 /* MFInput_Linux.cpp */; };
+		AE7ACC3F10E4E628002AFB79 /* MFInput_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66A10D9133E00E014B5 /* MFInput_GC.cpp */; };
+		AE7ACC4010E4E629002AFB79 /* MFInput_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68510D9133E00E014B5 /* MFInput_Null.cpp */; };
+		AE7ACC4110E4E62A002AFB79 /* MFInput_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB69E10D9133E00E014B5 /* MFInput_PC.cpp */; };
+		AE7ACC4210E4E62A002AFB79 /* MFInput_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B410D9133E00E014B5 /* MFInput_PS2.cpp */; };
+		AE7ACC4310E4E62C002AFB79 /* MFInput_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C710D9133E00E014B5 /* MFInput_PSP.cpp */; };
+		AE7ACC4410E4E62D002AFB79 /* MFInput_Wii.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D510D9133E00E014B5 /* MFInput_Wii.cpp */; };
+		AE7ACC4510E4E62D002AFB79 /* MFInput_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E410D9133E00E014B5 /* MFInput_XB.cpp */; };
+		AE7ACC4610E4E62D002AFB79 /* MFInputMappings_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB69F10D9133E00E014B5 /* MFInputMappings_PC.cpp */; };
+		AE7ACC4710E4E62F002AFB79 /* MFInputMappings_PC.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB6A010D9133E00E014B5 /* MFInputMappings_PC.h */; };
+		AE7ACC4810E4E630002AFB79 /* MFMat_Effect_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64210D9133E00E014B5 /* MFMat_Effect_D3D9.cpp */; };
+		AE7ACC4910E4E631002AFB79 /* MFMat_Effect_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67E10D9133E00E014B5 /* MFMat_Effect_Null.cpp */; };
+		AE7ACC4A10E4E632002AFB79 /* MFMat_Standard_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64310D9133E00E014B5 /* MFMat_Standard_D3D9.cpp */; };
+		AE7ACC4B10E4E632002AFB79 /* MFMat_Standard_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB65B10D9133E00E014B5 /* MFMat_Standard_DC.cpp */; };
+		AE7ACC4C10E4E634002AFB79 /* MFMat_Standard_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66710D9133E00E014B5 /* MFMat_Standard_GC.cpp */; };
+		AE7ACC4D10E4E634002AFB79 /* MFMat_Standard_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67F10D9133E00E014B5 /* MFMat_Standard_Null.cpp */; };
+		AE7ACC4E10E4E637002AFB79 /* MFMat_Standard_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A610D9133E00E014B5 /* MFMat_Standard_Plug.cpp */; };
+		AE7ACC4F10E4E637002AFB79 /* MFMat_Standard_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6AF10D9133E00E014B5 /* MFMat_Standard_PS2.cpp */; };
+		AE7ACC5010E4E637002AFB79 /* MFMat_Standard_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E110D9133E00E014B5 /* MFMat_Standard_XB.cpp */; };
+		AE7ACC5110E4E638002AFB79 /* MFMat_Standard_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C210D9133E00E014B5 /* MFMat_Standard_PSP.cpp */; };
+		AE7ACC5210E4E638002AFB79 /* MFMaterial_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64410D9133E00E014B5 /* MFMaterial_D3D9.cpp */; };
+		AE7ACC5310E4E639002AFB79 /* MFMaterial_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB65F10D9133E00E014B5 /* MFMaterial_DC.cpp */; };
+		AE7ACC5410E4E63B002AFB79 /* MFMaterial_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66B10D9133E00E014B5 /* MFMaterial_GC.cpp */; };
+		AE7ACC5510E4E63C002AFB79 /* MFMaterial_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68610D9133E00E014B5 /* MFMaterial_Null.cpp */; };
+		AE7ACC5610E4E63D002AFB79 /* MFMaterial_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B510D9133E00E014B5 /* MFMaterial_PS2.cpp */; };
+		AE7ACC5710E4E63D002AFB79 /* MFMaterial_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E510D9133E00E014B5 /* MFMaterial_XB.cpp */; };
+		AE7ACC5810E4E63E002AFB79 /* MFMaterial_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C810D9133E00E014B5 /* MFMaterial_PSP.cpp */; };
+		AE7ACC5910E4E63E002AFB79 /* MFModel_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64510D9133E00E014B5 /* MFModel_D3D9.cpp */; };
+		AE7ACC5A10E4E640002AFB79 /* MFModel_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66C10D9133E00E014B5 /* MFModel_GC.cpp */; };
+		AE7ACC5B10E4E641002AFB79 /* MFModel_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68710D9133E00E014B5 /* MFModel_Null.cpp */; };
+		AE7ACC5C10E4E642002AFB79 /* MFModel_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A710D9133E00E014B5 /* MFModel_Plug.cpp */; };
+		AE7ACC5D10E4E643002AFB79 /* MFModel_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B610D9133E00E014B5 /* MFModel_PS2.cpp */; };
+		AE7ACC5E10E4E643002AFB79 /* MFModel_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6C910D9133E00E014B5 /* MFModel_PSP.cpp */; };
+		AE7ACC5F10E4E643002AFB79 /* MFModel_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E610D9133E00E014B5 /* MFModel_XB.cpp */; };
+		AE7ACC6010E4E647002AFB79 /* MFParticleSystem_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68810D9133E00E014B5 /* MFParticleSystem_Null.cpp */; };
+		AE7ACC6110E4E648002AFB79 /* MFPrimitive_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64610D9133E00E014B5 /* MFPrimitive_D3D9.cpp */; };
+		AE7ACC6210E4E649002AFB79 /* MFPrimitive_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66010D9133E00E014B5 /* MFPrimitive_DC.cpp */; };
+		AE7ACC6310E4E649002AFB79 /* MFPrimitive_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66D10D9133E00E014B5 /* MFPrimitive_GC.cpp */; };
+		AE7ACC6410E4E64A002AFB79 /* MFPrimitive_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68910D9133E00E014B5 /* MFPrimitive_Null.cpp */; };
+		AE7ACC6510E4E64B002AFB79 /* MFPrimitive_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A810D9133E00E014B5 /* MFPrimitive_Plug.cpp */; };
+		AE7ACC6610E4E64D002AFB79 /* MFPrimitive_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B710D9133E00E014B5 /* MFPrimitive_PS2.cpp */; };
+		AE7ACC6710E4E64D002AFB79 /* MFPrimitive_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E710D9133E00E014B5 /* MFPrimitive_XB.cpp */; };
+		AE7ACC6810E4E64D002AFB79 /* MFPrimitive_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CA10D9133E00E014B5 /* MFPrimitive_PSP.cpp */; };
+		AE7ACC6910E4E64E002AFB79 /* MFRenderer_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64710D9133E00E014B5 /* MFRenderer_D3D9.cpp */; };
+		AE7ACC6A10E4E64E002AFB79 /* MFRenderer_D3D9.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB64810D9133E00E014B5 /* MFRenderer_D3D9.h */; };
+		AE7ACC6B10E4E64E002AFB79 /* MFRenderer_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66110D9133E00E014B5 /* MFRenderer_DC.cpp */; };
+		AE7ACC6C10E4E64F002AFB79 /* MFRenderer_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66E10D9133E00E014B5 /* MFRenderer_GC.cpp */; };
+		AE7ACC6D10E4E652002AFB79 /* MFRenderer_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A910D9133E00E014B5 /* MFRenderer_Plug.cpp */; };
+		AE7ACC6E10E4E652002AFB79 /* MFRenderer_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B810D9133E00E014B5 /* MFRenderer_PS2.cpp */; };
+		AE7ACC6F10E4E653002AFB79 /* MFRenderer_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CB10D9133E00E014B5 /* MFRenderer_PSP.cpp */; };
+		AE7ACC7010E4E655002AFB79 /* MFRenderer_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6E810D9133E00E014B5 /* MFRenderer_XB.cpp */; };
+		AE7ACC7110E4E655002AFB79 /* MFRenderer_XB.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB6E910D9133E00E014B5 /* MFRenderer_XB.h */; };
+		AE7ACC7210E4E656002AFB79 /* MFSockets_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68A10D9133E00E014B5 /* MFSockets_Null.cpp */; };
+		AE7ACC7310E4E656002AFB79 /* MFSockets_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6B910D9133E00E014B5 /* MFSockets_PS2.cpp */; };
+		AE7ACC7410E4E657002AFB79 /* MFSockets_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CC10D9133E00E014B5 /* MFSockets_PSP.cpp */; };
+		AE7ACC7510E4E65A002AFB79 /* MFSockets_WINSOCK.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D910D9133E00E014B5 /* MFSockets_WINSOCK.cpp */; };
+		AE7ACC7610E4E65A002AFB79 /* MFSound_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66210D9133E00E014B5 /* MFSound_DC.cpp */; };
+		AE7ACC7710E4E65A002AFB79 /* MFSound_ALSA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67510D9133E00E014B5 /* MFSound_ALSA.cpp */; };
+		AE7ACC7810E4E65B002AFB79 /* MFSound_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66F10D9133E00E014B5 /* MFSound_GC.cpp */; };
+		AE7ACC7910E4E65C002AFB79 /* MFSound_JACK.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67610D9133E00E014B5 /* MFSound_JACK.cpp */; };
+		AE7ACC7A10E4E65D002AFB79 /* MFSound_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A110D9133E00E014B5 /* MFSound_PC.cpp */; };
+		AE7ACC7B10E4E65D002AFB79 /* MFSound_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6AA10D9133E00E014B5 /* MFSound_Plug.cpp */; };
+		AE7ACC7C10E4E65E002AFB79 /* MFSound_Port.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67710D9133E00E014B5 /* MFSound_Port.cpp */; };
+		AE7ACC7D10E4E65E002AFB79 /* MFSound_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6BA10D9133E00E014B5 /* MFSound_PS2.cpp */; };
+		AE7ACC7E10E4E65F002AFB79 /* MFSound_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CD10D9133E00E014B5 /* MFSound_PSP.cpp */; };
+		AE7ACC7F10E4E65F002AFB79 /* MFSystem_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67010D9133E00E014B5 /* MFSystem_GC.cpp */; };
+		AE7ACC8010E4E660002AFB79 /* MFSystem_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66310D9133E00E014B5 /* MFSystem_DC.cpp */; };
+		AE7ACC8110E4E663002AFB79 /* MFSystem_Linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67810D9133E00E014B5 /* MFSystem_Linux.cpp */; };
+		AE7ACC8210E4E663002AFB79 /* MFSystem_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68C10D9133E00E014B5 /* MFSystem_Null.cpp */; };
+		AE7ACC8310E4E663002AFB79 /* MFSystem_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A210D9133E00E014B5 /* MFSystem_PC.cpp */; };
+		AE7ACC8410E4E664002AFB79 /* MFSystem_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6BB10D9133E00E014B5 /* MFSystem_PS2.cpp */; };
+		AE7ACC8510E4E665002AFB79 /* MFSystem_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6EA10D9133E00E014B5 /* MFSystem_XB.cpp */; };
+		AE7ACC8610E4E665002AFB79 /* MFSystem_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CE10D9133E00E014B5 /* MFSystem_PSP.cpp */; };
+		AE7ACC8710E4E666002AFB79 /* MFTexture_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64910D9133E00E014B5 /* MFTexture_D3D9.cpp */; };
+		AE7ACC8810E4E668002AFB79 /* MFTexture_DC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB66410D9133E00E014B5 /* MFTexture_DC.cpp */; };
+		AE7ACC8910E4E668002AFB79 /* MFTexture_GC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB67110D9133E00E014B5 /* MFTexture_GC.cpp */; };
+		AE7ACC8A10E4E669002AFB79 /* MFTexture_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68D10D9133E00E014B5 /* MFTexture_Null.cpp */; };
+		AE7ACC8B10E4E66B002AFB79 /* MFTexture_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6AB10D9133E00E014B5 /* MFTexture_Plug.cpp */; };
+		AE7ACC8C10E4E66C002AFB79 /* MFTexture_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6BC10D9133E00E014B5 /* MFTexture_PS2.cpp */; };
+		AE7ACC8D10E4E66C002AFB79 /* MFTexture_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6CF10D9133E00E014B5 /* MFTexture_PSP.cpp */; };
+		AE7ACC8E10E4E66D002AFB79 /* MFTexture_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6EB10D9133E00E014B5 /* MFTexture_XB.cpp */; };
+		AE7ACC8F10E4E66E002AFB79 /* MFThread_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68E10D9133E00E014B5 /* MFThread_Null.cpp */; };
+		AE7ACC9010E4E66E002AFB79 /* MFThread_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6BD10D9133E00E014B5 /* MFThread_PS2.cpp */; };
+		AE7ACC9110E4E66F002AFB79 /* MFThread_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D010D9133E00E014B5 /* MFThread_PSP.cpp */; };
+		AE7ACC9210E4E66F002AFB79 /* MFThread_WIN32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6DA10D9133E00E014B5 /* MFThread_WIN32.cpp */; };
+		AE7ACC9310E4E671002AFB79 /* MFTranslation_Null.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB68F10D9133E00E014B5 /* MFTranslation_Null.cpp */; };
+		AE7ACC9410E4E671002AFB79 /* MFTranslation_PC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6A310D9133E00E014B5 /* MFTranslation_PC.cpp */; };
+		AE7ACC9510E4E672002AFB79 /* MFTranslation_PSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6D110D9133E00E014B5 /* MFTranslation_PSP.cpp */; };
+		AE7ACC9610E4E673002AFB79 /* MFTranslation_PS2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6BE10D9133E00E014B5 /* MFTranslation_PS2.cpp */; };
+		AE7ACC9710E4E673002AFB79 /* MFTranslation_XB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6EC10D9133E00E014B5 /* MFTranslation_XB.cpp */; };
+		AE7ACC9810E4E674002AFB79 /* MFVertex_D3D9.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB64A10D9133E00E014B5 /* MFVertex_D3D9.cpp */; };
+		AE7ACC9910E4E676002AFB79 /* MFVertex_Plug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6AC10D9133E00E014B5 /* MFVertex_Plug.cpp */; };
+		AE7ACCCC10E4E80E002AFB79 /* MFInput_IPhone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE7ACCC810E4E80E002AFB79 /* MFInput_IPhone.cpp */; };
+		AE7ACCCD10E4E80E002AFB79 /* MFDisplay_IPhone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE7ACCC910E4E80E002AFB79 /* MFDisplay_IPhone.cpp */; };
+		AE7ACCCE10E4E80E002AFB79 /* MFSound_IPhone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE7ACCCA10E4E80E002AFB79 /* MFSound_IPhone.cpp */; };
+		AE82AD8E10E5AAC0004C6181 /* MFSystem_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD8D10E5AAC0004C6181 /* MFSystem_IPhone.mm */; };
+		AE82AD9810E5AADB004C6181 /* FujiAppDelegate_IPhone.h in Headers */ = {isa = PBXBuildFile; fileRef = AE82AD9210E5AADB004C6181 /* FujiAppDelegate_IPhone.h */; };
+		AE82AD9910E5AADB004C6181 /* FujiAppDelegate_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD9310E5AADB004C6181 /* FujiAppDelegate_IPhone.mm */; };
+		AE82AD9A10E5AADB004C6181 /* FujiView_IPhone.h in Headers */ = {isa = PBXBuildFile; fileRef = AE82AD9410E5AADB004C6181 /* FujiView_IPhone.h */; };
+		AE82AD9B10E5AADB004C6181 /* FujiView_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD9510E5AADB004C6181 /* FujiView_IPhone.mm */; };
+		AE82AD9C10E5AADB004C6181 /* MFFileSystemNative_IPhone.h in Headers */ = {isa = PBXBuildFile; fileRef = AE82AD9610E5AADB004C6181 /* MFFileSystemNative_IPhone.h */; };
+		AE82AD9D10E5AADB004C6181 /* MFFileSystemNative_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD9710E5AADB004C6181 /* MFFileSystemNative_IPhone.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -660,6 +787,16 @@
 		326BBAEE10D92E7800E014B5 /* Y2KINFO */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Y2KINFO; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* Fuji_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fuji_Prefix.pch; sourceTree = "<group>"; };
 		AE0AC1D310DC92F600FAB6CB /* MFOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFOpenGL.h; sourceTree = "<group>"; };
+		AE7ACCC810E4E80E002AFB79 /* MFInput_IPhone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFInput_IPhone.cpp; sourceTree = "<group>"; };
+		AE7ACCC910E4E80E002AFB79 /* MFDisplay_IPhone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFDisplay_IPhone.cpp; sourceTree = "<group>"; };
+		AE7ACCCA10E4E80E002AFB79 /* MFSound_IPhone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFSound_IPhone.cpp; sourceTree = "<group>"; };
+		AE82AD8D10E5AAC0004C6181 /* MFSystem_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MFSystem_IPhone.mm; sourceTree = "<group>"; };
+		AE82AD9210E5AADB004C6181 /* FujiAppDelegate_IPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FujiAppDelegate_IPhone.h; sourceTree = "<group>"; };
+		AE82AD9310E5AADB004C6181 /* FujiAppDelegate_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FujiAppDelegate_IPhone.mm; sourceTree = "<group>"; };
+		AE82AD9410E5AADB004C6181 /* FujiView_IPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FujiView_IPhone.h; sourceTree = "<group>"; };
+		AE82AD9510E5AADB004C6181 /* FujiView_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FujiView_IPhone.mm; sourceTree = "<group>"; };
+		AE82AD9610E5AADB004C6181 /* MFFileSystemNative_IPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFFileSystemNative_IPhone.h; sourceTree = "<group>"; };
+		AE82AD9710E5AADB004C6181 /* MFFileSystemNative_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MFFileSystemNative_IPhone.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -909,6 +1046,7 @@
 				326BB64010D9133E00E014B5 /* D3D9 */,
 				326BB65410D9133E00E014B5 /* DC */,
 				326BB66510D9133E00E014B5 /* GC */,
+				AE7ACCC710E4E80E002AFB79 /* IPhone */,
 				326BB67210D9133E00E014B5 /* Linux */,
 				326BB67B10D9133E00E014B5 /* Misc */,
 				326BB67C10D9133E00E014B5 /* Null */,
@@ -1584,6 +1722,23 @@
 			path = Middleware/lpng1212;
 			sourceTree = "<group>";
 		};
+		AE7ACCC710E4E80E002AFB79 /* IPhone */ = {
+			isa = PBXGroup;
+			children = (
+				AE82AD9210E5AADB004C6181 /* FujiAppDelegate_IPhone.h */,
+				AE82AD9310E5AADB004C6181 /* FujiAppDelegate_IPhone.mm */,
+				AE82AD9410E5AADB004C6181 /* FujiView_IPhone.h */,
+				AE82AD9510E5AADB004C6181 /* FujiView_IPhone.mm */,
+				AE7ACCC910E4E80E002AFB79 /* MFDisplay_IPhone.cpp */,
+				AE82AD9610E5AADB004C6181 /* MFFileSystemNative_IPhone.h */,
+				AE82AD9710E5AADB004C6181 /* MFFileSystemNative_IPhone.mm */,
+				AE7ACCC810E4E80E002AFB79 /* MFInput_IPhone.cpp */,
+				AE7ACCCA10E4E80E002AFB79 /* MFSound_IPhone.cpp */,
+				AE82AD8D10E5AAC0004C6181 /* MFSystem_IPhone.mm */,
+			);
+			path = IPhone;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1704,6 +1859,12 @@
 				326BBAF010D92E7800E014B5 /* png.h in Headers */,
 				326BBAF110D92E7800E014B5 /* pngconf.h in Headers */,
 				AE0AC1D410DC92F600FAB6CB /* MFOpenGL.h in Headers */,
+				AE7ACC4710E4E62F002AFB79 /* MFInputMappings_PC.h in Headers */,
+				AE7ACC6A10E4E64E002AFB79 /* MFRenderer_D3D9.h in Headers */,
+				AE7ACC7110E4E655002AFB79 /* MFRenderer_XB.h in Headers */,
+				AE82AD9810E5AADB004C6181 /* FujiAppDelegate_IPhone.h in Headers */,
+				AE82AD9A10E5AADB004C6181 /* FujiView_IPhone.h in Headers */,
+				AE82AD9C10E5AADB004C6181 /* MFFileSystemNative_IPhone.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1868,6 +2029,127 @@
 				326BBBE310D9374F00E014B5 /* MFThread_Linux.cpp in Sources */,
 				326BBBEC10D9378C00E014B5 /* MFAuxillaryDisplay_Null.cpp in Sources */,
 				326BBBED10D9378F00E014B5 /* MFSound_Null.cpp in Sources */,
+				AE7ACC2510E4E609002AFB79 /* MFDebug_Null.cpp in Sources */,
+				AE7ACC2610E4E613002AFB79 /* MFDisplay_X11.cpp in Sources */,
+				AE7ACC2710E4E614002AFB79 /* MFDisplay_Null.cpp in Sources */,
+				AE7ACC2810E4E615002AFB79 /* MFDisplay_PC.cpp in Sources */,
+				AE7ACC2910E4E616002AFB79 /* MFDisplay_PSP.cpp in Sources */,
+				AE7ACC2A10E4E616002AFB79 /* MFDisplay_PS2.cpp in Sources */,
+				AE7ACC2B10E4E617002AFB79 /* MFDisplay_XB.cpp in Sources */,
+				AE7ACC2C10E4E618002AFB79 /* MFDisplay_GC.cpp in Sources */,
+				AE7ACC2D10E4E619002AFB79 /* MFDisplay_DC.cpp in Sources */,
+				AE7ACC2E10E4E61A002AFB79 /* MFDebug_PSP.cpp in Sources */,
+				AE7ACC2F10E4E61A002AFB79 /* MFDebug_PS2.cpp in Sources */,
+				AE7ACC3010E4E61A002AFB79 /* MFDebug_PC.cpp in Sources */,
+				AE7ACC3110E4E61E002AFB79 /* MFAuxillaryDisplay_PC.cpp in Sources */,
+				AE7ACC3210E4E620002AFB79 /* MFFileSystemNative_DC.cpp in Sources */,
+				AE7ACC3310E4E620002AFB79 /* MFFileSystemNative_GC.cpp in Sources */,
+				AE7ACC3410E4E621002AFB79 /* MFFileSystemNative_Null.cpp in Sources */,
+				AE7ACC3510E4E622002AFB79 /* MFFileSystemNative_PS2.cpp in Sources */,
+				AE7ACC3610E4E622002AFB79 /* MFFileSystemNative_PSP.cpp in Sources */,
+				AE7ACC3710E4E623002AFB79 /* MFFileSystemNative_WIN32.cpp in Sources */,
+				AE7ACC3810E4E624002AFB79 /* MFHeap_Null.cpp in Sources */,
+				AE7ACC3910E4E625002AFB79 /* MFHeap_PS2.cpp in Sources */,
+				AE7ACC3A10E4E625002AFB79 /* MFHeap_PSP.cpp in Sources */,
+				AE7ACC3B10E4E626002AFB79 /* MFHeap_WIN32.cpp in Sources */,
+				AE7ACC3C10E4E626002AFB79 /* MFHeap_XB.cpp in Sources */,
+				AE7ACC3D10E4E628002AFB79 /* MFInput_DC.cpp in Sources */,
+				AE7ACC3E10E4E628002AFB79 /* MFInput_Linux.cpp in Sources */,
+				AE7ACC3F10E4E628002AFB79 /* MFInput_GC.cpp in Sources */,
+				AE7ACC4010E4E629002AFB79 /* MFInput_Null.cpp in Sources */,
+				AE7ACC4110E4E62A002AFB79 /* MFInput_PC.cpp in Sources */,
+				AE7ACC4210E4E62A002AFB79 /* MFInput_PS2.cpp in Sources */,
+				AE7ACC4310E4E62C002AFB79 /* MFInput_PSP.cpp in Sources */,
+				AE7ACC4410E4E62D002AFB79 /* MFInput_Wii.cpp in Sources */,
+				AE7ACC4510E4E62D002AFB79 /* MFInput_XB.cpp in Sources */,
+				AE7ACC4610E4E62D002AFB79 /* MFInputMappings_PC.cpp in Sources */,
+				AE7ACC4810E4E630002AFB79 /* MFMat_Effect_D3D9.cpp in Sources */,
+				AE7ACC4910E4E631002AFB79 /* MFMat_Effect_Null.cpp in Sources */,
+				AE7ACC4A10E4E632002AFB79 /* MFMat_Standard_D3D9.cpp in Sources */,
+				AE7ACC4B10E4E632002AFB79 /* MFMat_Standard_DC.cpp in Sources */,
+				AE7ACC4C10E4E634002AFB79 /* MFMat_Standard_GC.cpp in Sources */,
+				AE7ACC4D10E4E634002AFB79 /* MFMat_Standard_Null.cpp in Sources */,
+				AE7ACC4E10E4E637002AFB79 /* MFMat_Standard_Plug.cpp in Sources */,
+				AE7ACC4F10E4E637002AFB79 /* MFMat_Standard_PS2.cpp in Sources */,
+				AE7ACC5010E4E637002AFB79 /* MFMat_Standard_XB.cpp in Sources */,
+				AE7ACC5110E4E638002AFB79 /* MFMat_Standard_PSP.cpp in Sources */,
+				AE7ACC5210E4E638002AFB79 /* MFMaterial_D3D9.cpp in Sources */,
+				AE7ACC5310E4E639002AFB79 /* MFMaterial_DC.cpp in Sources */,
+				AE7ACC5410E4E63B002AFB79 /* MFMaterial_GC.cpp in Sources */,
+				AE7ACC5510E4E63C002AFB79 /* MFMaterial_Null.cpp in Sources */,
+				AE7ACC5610E4E63D002AFB79 /* MFMaterial_PS2.cpp in Sources */,
+				AE7ACC5710E4E63D002AFB79 /* MFMaterial_XB.cpp in Sources */,
+				AE7ACC5810E4E63E002AFB79 /* MFMaterial_PSP.cpp in Sources */,
+				AE7ACC5910E4E63E002AFB79 /* MFModel_D3D9.cpp in Sources */,
+				AE7ACC5A10E4E640002AFB79 /* MFModel_GC.cpp in Sources */,
+				AE7ACC5B10E4E641002AFB79 /* MFModel_Null.cpp in Sources */,
+				AE7ACC5C10E4E642002AFB79 /* MFModel_Plug.cpp in Sources */,
+				AE7ACC5D10E4E643002AFB79 /* MFModel_PS2.cpp in Sources */,
+				AE7ACC5E10E4E643002AFB79 /* MFModel_PSP.cpp in Sources */,
+				AE7ACC5F10E4E643002AFB79 /* MFModel_XB.cpp in Sources */,
+				AE7ACC6010E4E647002AFB79 /* MFParticleSystem_Null.cpp in Sources */,
+				AE7ACC6110E4E648002AFB79 /* MFPrimitive_D3D9.cpp in Sources */,
+				AE7ACC6210E4E649002AFB79 /* MFPrimitive_DC.cpp in Sources */,
+				AE7ACC6310E4E649002AFB79 /* MFPrimitive_GC.cpp in Sources */,
+				AE7ACC6410E4E64A002AFB79 /* MFPrimitive_Null.cpp in Sources */,
+				AE7ACC6510E4E64B002AFB79 /* MFPrimitive_Plug.cpp in Sources */,
+				AE7ACC6610E4E64D002AFB79 /* MFPrimitive_PS2.cpp in Sources */,
+				AE7ACC6710E4E64D002AFB79 /* MFPrimitive_XB.cpp in Sources */,
+				AE7ACC6810E4E64D002AFB79 /* MFPrimitive_PSP.cpp in Sources */,
+				AE7ACC6910E4E64E002AFB79 /* MFRenderer_D3D9.cpp in Sources */,
+				AE7ACC6B10E4E64E002AFB79 /* MFRenderer_DC.cpp in Sources */,
+				AE7ACC6C10E4E64F002AFB79 /* MFRenderer_GC.cpp in Sources */,
+				AE7ACC6D10E4E652002AFB79 /* MFRenderer_Plug.cpp in Sources */,
+				AE7ACC6E10E4E652002AFB79 /* MFRenderer_PS2.cpp in Sources */,
+				AE7ACC6F10E4E653002AFB79 /* MFRenderer_PSP.cpp in Sources */,
+				AE7ACC7010E4E655002AFB79 /* MFRenderer_XB.cpp in Sources */,
+				AE7ACC7210E4E656002AFB79 /* MFSockets_Null.cpp in Sources */,
+				AE7ACC7310E4E656002AFB79 /* MFSockets_PS2.cpp in Sources */,
+				AE7ACC7410E4E657002AFB79 /* MFSockets_PSP.cpp in Sources */,
+				AE7ACC7510E4E65A002AFB79 /* MFSockets_WINSOCK.cpp in Sources */,
+				AE7ACC7610E4E65A002AFB79 /* MFSound_DC.cpp in Sources */,
+				AE7ACC7710E4E65A002AFB79 /* MFSound_ALSA.cpp in Sources */,
+				AE7ACC7810E4E65B002AFB79 /* MFSound_GC.cpp in Sources */,
+				AE7ACC7910E4E65C002AFB79 /* MFSound_JACK.cpp in Sources */,
+				AE7ACC7A10E4E65D002AFB79 /* MFSound_PC.cpp in Sources */,
+				AE7ACC7B10E4E65D002AFB79 /* MFSound_Plug.cpp in Sources */,
+				AE7ACC7C10E4E65E002AFB79 /* MFSound_Port.cpp in Sources */,
+				AE7ACC7D10E4E65E002AFB79 /* MFSound_PS2.cpp in Sources */,
+				AE7ACC7E10E4E65F002AFB79 /* MFSound_PSP.cpp in Sources */,
+				AE7ACC7F10E4E65F002AFB79 /* MFSystem_GC.cpp in Sources */,
+				AE7ACC8010E4E660002AFB79 /* MFSystem_DC.cpp in Sources */,
+				AE7ACC8110E4E663002AFB79 /* MFSystem_Linux.cpp in Sources */,
+				AE7ACC8210E4E663002AFB79 /* MFSystem_Null.cpp in Sources */,
+				AE7ACC8310E4E663002AFB79 /* MFSystem_PC.cpp in Sources */,
+				AE7ACC8410E4E664002AFB79 /* MFSystem_PS2.cpp in Sources */,
+				AE7ACC8510E4E665002AFB79 /* MFSystem_XB.cpp in Sources */,
+				AE7ACC8610E4E665002AFB79 /* MFSystem_PSP.cpp in Sources */,
+				AE7ACC8710E4E666002AFB79 /* MFTexture_D3D9.cpp in Sources */,
+				AE7ACC8810E4E668002AFB79 /* MFTexture_DC.cpp in Sources */,
+				AE7ACC8910E4E668002AFB79 /* MFTexture_GC.cpp in Sources */,
+				AE7ACC8A10E4E669002AFB79 /* MFTexture_Null.cpp in Sources */,
+				AE7ACC8B10E4E66B002AFB79 /* MFTexture_Plug.cpp in Sources */,
+				AE7ACC8C10E4E66C002AFB79 /* MFTexture_PS2.cpp in Sources */,
+				AE7ACC8D10E4E66C002AFB79 /* MFTexture_PSP.cpp in Sources */,
+				AE7ACC8E10E4E66D002AFB79 /* MFTexture_XB.cpp in Sources */,
+				AE7ACC8F10E4E66E002AFB79 /* MFThread_Null.cpp in Sources */,
+				AE7ACC9010E4E66E002AFB79 /* MFThread_PS2.cpp in Sources */,
+				AE7ACC9110E4E66F002AFB79 /* MFThread_PSP.cpp in Sources */,
+				AE7ACC9210E4E66F002AFB79 /* MFThread_WIN32.cpp in Sources */,
+				AE7ACC9310E4E671002AFB79 /* MFTranslation_Null.cpp in Sources */,
+				AE7ACC9410E4E671002AFB79 /* MFTranslation_PC.cpp in Sources */,
+				AE7ACC9510E4E672002AFB79 /* MFTranslation_PSP.cpp in Sources */,
+				AE7ACC9610E4E673002AFB79 /* MFTranslation_PS2.cpp in Sources */,
+				AE7ACC9710E4E673002AFB79 /* MFTranslation_XB.cpp in Sources */,
+				AE7ACC9810E4E674002AFB79 /* MFVertex_D3D9.cpp in Sources */,
+				AE7ACC9910E4E676002AFB79 /* MFVertex_Plug.cpp in Sources */,
+				AE7ACCCC10E4E80E002AFB79 /* MFInput_IPhone.cpp in Sources */,
+				AE7ACCCD10E4E80E002AFB79 /* MFDisplay_IPhone.cpp in Sources */,
+				AE7ACCCE10E4E80E002AFB79 /* MFSound_IPhone.cpp in Sources */,
+				AE82AD8E10E5AAC0004C6181 /* MFSystem_IPhone.mm in Sources */,
+				AE82AD9910E5AADB004C6181 /* FujiAppDelegate_IPhone.mm in Sources */,
+				AE82AD9B10E5AADB004C6181 /* FujiView_IPhone.mm in Sources */,
+				AE82AD9D10E5AADB004C6181 /* MFFileSystemNative_IPhone.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1933,9 +2215,15 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TARGET_OS_IPHONE,
+					_DEBUG,
+				);
+				GCC_THUMB_SUPPORT = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					Source/Images/IPHONE/,
 					Include/,
 					Source/,
 					Middleware/,
@@ -1943,13 +2231,12 @@
 					Middleware/tinyxml/,
 					Middleware/lpng1212/,
 				);
-				OTHER_CFLAGS = (
-					"-DTARGET_OS_IPHONE",
-					"-D_DEBUG",
-				);
+				OBJROOT = "$(PROJECT_DIR)/build";
+				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = iphoneos3.0;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = dynamic;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Debug;
 		};
@@ -1959,9 +2246,15 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TARGET_OS_IPHONE,
+					_DEBUG,
+				);
+				GCC_THUMB_SUPPORT = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					Source/Images/IPHONE/,
 					Include/,
 					Source/,
 					Middleware/,
@@ -1969,13 +2262,12 @@
 					Middleware/tinyxml/,
 					Middleware/lpng1212/,
 				);
-				OTHER_CFLAGS = (
-					"-DTARGET_OS_IPHONE",
-					"-D_RELEASE",
-				);
+				OBJROOT = "$(PROJECT_DIR)/build";
+				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = iphoneos3.0;
 				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = dynamic;
+				SYMROOT = "$(PROJECT_DIR)/build";
 			};
 			name = Release;
 		};

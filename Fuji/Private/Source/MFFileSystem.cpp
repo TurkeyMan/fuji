@@ -195,7 +195,7 @@ void MFFileSystem_RegisterDefaultArchives()
 		MFFileSystem_Mount(hNativeFileSystem, &mountData);
 	}
 
-	mountData.flags = MFMF_Recursive;
+	mountData.flags = MFMF_DontCacheTOC;
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();
 	MFFileSystem_Mount(hNativeFileSystem, &mountData);
@@ -364,7 +364,12 @@ const char* MFFile_SystemPath(const char *pFilename)
 
 	pFilename = pFilename ? pFilename : "";
 
+#if defined(MF_IPHONE)
+	const char *GetAppHome();
+	return MFStr("%s/%s", GetAppHome(), pFilename);
+#else
 	return MFStr("./%s", pFilename);
+#endif
 }
 
 const char* MFFile_HomePath(const char *pFilename)
@@ -377,6 +382,9 @@ const char* MFFile_HomePath(const char *pFilename)
 	return MFStr("E:\\Home\\%s", pFilename);
 #elif defined(_LINUX)
 	return MFStr("~/%s", pFilename);
+#elif defined(MF_IPHONE)
+	const char *GetUserHome();
+	return MFStr("%s/%s", GetUserHome(), pFilename);
 #else
 	return MFStr("Home/%s", pFilename);
 #endif

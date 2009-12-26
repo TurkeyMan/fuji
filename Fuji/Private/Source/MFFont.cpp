@@ -146,6 +146,8 @@ MFFont* MFFont_Create(const char *pFilename)
 	}
 
 	MFDebug_Assert(pFont, MFStr("Unable to load font '%s'", pFilename));
+	if(!pFont)
+		return NULL;
 
 	// fixup pointers
 	MFFixUp(pFont->pName, pFont, 1);
