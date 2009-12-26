@@ -15,10 +15,10 @@
 	#define MFSetPosition MFSetPosition_OpenGL
 	#define MFEnd MFEnd_OpenGL
 	#define MFPrimitive_BeginBlitter MFPrimitive_BeginBlitter_OpenGL
+	#define MFPrimitive_Blit MFPrimitive_Blit_OpenGL
 	#define MFPrimitive_StretchBlit MFPrimitive_StretchBlit_OpenGL
 	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_OpenGL
 #endif
-
 
 #include "MFPrimitive.h"
 #include "MFMaterial.h"
@@ -303,22 +303,12 @@ void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 	MFPrimitive_StretchBlit(x, y, tw, th, tx, ty, tw, th);
 }
 
-void MFPrimitive_BlitRect(int x, int y, MFRect uvs)
-{
-	MFPrimitive_StretchBlit(x, y, (int)uvs.width, (int)uvs.height, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
-}
-
 void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
 	MFSetPosition((float)x, (float)y, 0.0f);
 	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
 	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
-}
-
-void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs)
-{
-	MFPrimitive_StretchBlit(x, y, w, h, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
 }
 
 void MFPrimitive_EndBlitter()

@@ -11,6 +11,16 @@
 
 /**** Functions ****/
 
+void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
+{
+	MFPrimitive_Blit(x, y, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
+}
+
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
+{
+	MFPrimitive_StretchBlit(x, y, w, h, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
+}
+
 void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
 {
 	MFCALLSTACK;
