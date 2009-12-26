@@ -73,37 +73,37 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_A8R8G8B8
 	MFBIT(MFDD_PSP)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PS2),	// TexFmt_A8B8G8R8
-	MFBIT(MFDD_XBox),					// TexFmt_B8G8R8A8
-	MFBIT(MFDD_XBox),					// TexFmt_R8G8B8A8
+	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_B8G8R8A8
+	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_R8G8B8A8
 
-	MFBIT(MFDD_D3D9),					// TexFmt_A2R10G10B10
-	MFBIT(MFDD_D3D9),					// TexFmt_A2B10G10R10
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_A2R10G10B10
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_A2B10G10R10
 
-	MFBIT(MFDD_D3D9),					// TexFmt_A16B16G16R16
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_A16B16G16R16
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_R5G6B5
-	MFBIT(MFDD_XBox),					// TexFmt_R6G5B5
-	MFBIT(MFDD_PSP),					// TexFmt_B5G6R5
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_R5G6B5
+	MFBIT(MFDD_XBox),										// TexFmt_R6G5B5
+	MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PSP),						// TexFmt_B5G6R5
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_A1R5G5B5
-	MFBIT(MFDD_XBox),					// TexFmt_R5G5B5A1
-	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2),	// TexFmt_A1B5G5R5
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_A1R5G5B5
+	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_R5G5B5A1
+	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2)|MFBIT(MFDD_OpenGL),		// TexFmt_A1B5G5R5
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_A4R4G4B4
-	MFBIT(MFDD_PSP),					// TexFmt_A4B4G4R4
-	MFBIT(MFDD_XBox),					// TexFmt_R4G4B4A4
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_A4R4G4B4
+	MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PSP),						// TexFmt_A4B4G4R4
+	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_R4G4B4A4
 
-	MFBIT(MFDD_D3D9),					// TexFmt_ABGR_F16
-	MFBIT(MFDD_D3D9),					// TexFmt_ABGR_F32
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_ABGR_F16
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_ABGR_F32
 
-	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2)|MFBIT(MFDD_XBox),	// TexFmt_I8
-	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2),					// TexFmt_I4
+	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2),	// TexFmt_I8
+	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2),						// TexFmt_I4
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_DXT1
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_DXT2
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_DXT3
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_DXT4
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),	// TexFmt_DXT5
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_DXT1
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),						// TexFmt_DXT2
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_DXT3
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),						// TexFmt_DXT4
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),	// TexFmt_DXT5
 
 	MFBIT(MFDD_PSP),	// TexFmt_PSP_DXT1
 	MFBIT(MFDD_PSP),	// TexFmt_PSP_DXT3
@@ -340,7 +340,7 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 
 	// These are indexes into an array of platform format data to be used at runtime
 	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
-	{ // Linux
+	{ // OpenGL
 		0,	// TexFmt_A8R8G8B8
 		1,	// TexFmt_A8B8G8R8
 		2,	// TexFmt_B8G8R8A8
@@ -538,6 +538,42 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		0,	//				 //	TexFmt_PSP_DXT5s
 	}
 };
+
+#if !defined(_FUJI_UTIL)
+MFDisplayDrivers MFTexture_GetCurrentDisplayDriver()
+{
+#if MF_RENDERER == MF_DRIVER_PLUGIN
+	// runtime check...
+	int MFRenderer_GetCurrentRendererPlugin();
+	int current = MFRenderer_GetCurrentRendererPlugin();
+	if(current == MF_DRIVER_D3D9)
+		return MFDD_D3D9;
+	else if(current == MF_DRIVER_OPENGL)
+		return MFDD_OpenGL;
+	return MFDD_Unknown;
+#elif MF_RENDERER == MF_DRIVER_D3D9
+	return MFDD_D3D9;
+#elif MF_RENDERER == MF_DRIVER_XBOX
+	return MFDD_XBox;
+#elif MF_RENDERER == MF_DRIVER_OPENGL
+	return MFDD_OpenGL;
+#elif MF_RENDERER == MF_DRIVER_PSP
+	return MFDD_PSP;
+#elif MF_RENDERER == MF_DRIVER_PS2
+	return MFDD_PS2;
+#else
+	return MFDD_Unknown;
+#endif
+}
+
+bool MFTexture_IsAvailable(int format)
+{
+	MFDisplayDrivers driver = MFTexture_GetCurrentDisplayDriver();
+	if(driver == MFDD_Unknown)
+		return format == TexFmt_A8R8G8B8;
+	return (gMFTexturePlatformAvailability[format] & MFBIT(driver)) != 0;
+}
+#endif
 
 const char * const MFTexture_GetFormatString(int format)
 {

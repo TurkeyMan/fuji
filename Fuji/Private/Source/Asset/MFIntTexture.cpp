@@ -44,7 +44,7 @@ struct TgaHeader
 
 enum BMPCompressionType
 {
-	BMCT_RGB = 0,			/* No compression - straight BGR data */
+	BMCT_RGB = 0,		/* No compression - straight BGR data */
 	BMCT_RLE8 = 1,		/* 8-bit run-length compression */
 	BMCT_RLE4 = 2,		/* 4-bit run-length compression */
 	BMCT_BITFIELDS = 3	/* RGB bitmap with RGB masks */
@@ -1380,6 +1380,15 @@ MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 				targetFormat = TexFmt_A1R5G5B5;
 			else
 				targetFormat = TexFmt_A8R8G8B8;
+			break;
+
+		case FP_IPhone:
+			if(pTexture->opaque)
+				targetFormat = TexFmt_R5G6B5;
+			else if(pTexture->oneBitAlpha)
+				targetFormat = TexFmt_A1R5G5B5;
+			else
+				targetFormat = TexFmt_A4R4G4B4;
 			break;
 
 		case FP_XBox:

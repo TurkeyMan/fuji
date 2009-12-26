@@ -12,7 +12,9 @@
 // we need a list of all available display drivers
 enum MFDisplayDrivers
 {
-	MFDD_D3D9,
+	MFDD_Unknown = -1,
+
+	MFDD_D3D9 = 0,
 	MFDD_XBox,
 	MFDD_OpenGL,
 	MFDD_PSP,

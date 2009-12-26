@@ -214,6 +214,15 @@ const char * const MFTexture_GetFormatString(int format);
 uint32 MFTexture_GetPlatformAvailability(int format);
 
 /**
+ * Tests to see if a texture format is available on the current platform.
+ * Tests if a texture format is supported in hardware on the current platform.
+ * @param format Texture format to be tested.
+ * @return Returns true if specified format is supported in hardware.
+ * @see MFTexture_GetPlatformAvailability()
+ */
+bool MFTexture_IsAvailable(int format);
+
+/**
  * Tests to see if a texture format is available on a specified platform.
  * Tests if a texture format is supported in hardware on a specified platform.
  * @param format Texture format to be tested.

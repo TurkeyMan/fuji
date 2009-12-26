@@ -183,8 +183,6 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 #endif
 		bool convertARGB = false;
 
-		const MFPlatform currentPlatform = MFSystem_GetCurrentPlatform();
-
 		// we guarantee ARGB on all platforms, but it is not supported natively
 		if(format == TexFmt_A8R8G8B8)
 		{
@@ -192,24 +190,24 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 			format = TexFmt_XB_A8R8G8B8s;
 #endif
 
-			if(!MFTexture_IsAvailableOnPlatform(format, currentPlatform))
+			if(!MFTexture_IsAvailable(format))
 			{
 				// we need to take a copy and convert the image to a native 32bit format
 				ownCopy = true;
 				convertARGB = true;
 
-				if(MFTexture_IsAvailableOnPlatform(TexFmt_A8B8G8R8, currentPlatform))
+				if(MFTexture_IsAvailable(TexFmt_A8B8G8R8))
 					format = TexFmt_A8B8G8R8;
-				else if(MFTexture_IsAvailableOnPlatform(TexFmt_B8G8R8A8, currentPlatform))
+				else if(MFTexture_IsAvailable(TexFmt_B8G8R8A8))
 					format = TexFmt_B8G8R8A8;
-				else if(MFTexture_IsAvailableOnPlatform(TexFmt_R8G8B8A8, currentPlatform))
+				else if(MFTexture_IsAvailable(TexFmt_R8G8B8A8))
 					format = TexFmt_R8G8B8A8;
 				else
 					MFDebug_Assert(false, "No 32bit texture format seems to be available on the current platform.");
 			}
 		}
 
-		MFDebug_Assert(MFTexture_IsAvailableOnPlatform(format, currentPlatform), MFStr("Texture format %s not supported on %s", MFTexture_GetFormatString(format), MFSystem_GetPlatformName(currentPlatform)));
+		MFDebug_Assert(MFTexture_IsAvailable(format), MFStr("Texture format %s not supported", MFTexture_GetFormatString(format)));
 
 		// create template data
 		char *pTemplate;

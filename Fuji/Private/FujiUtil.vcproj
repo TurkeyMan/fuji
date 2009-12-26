@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFObjectPool.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFQuaternion.cpp"
 				>
 			</File>
