@@ -5,6 +5,7 @@
 
 // system functions
 int MFSystem_GameLoop();
+void MFSystem_RunFrame();
 
 void MFSystem_UpdateTimeDelta();
 

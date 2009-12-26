@@ -2,6 +2,10 @@
 
 #if MF_SYSTEM == MF_DRIVER_IPHONE
 
+#import <UIKit/UIKit.h>
+
+#include "MFSystem.h"
+
 #include <time.h>
 
 MFPlatform gCurrentPlatform = FP_IPhone;

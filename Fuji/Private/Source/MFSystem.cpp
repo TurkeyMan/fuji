@@ -221,6 +221,8 @@ void MFSystem_Init()
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
 	MFHeap_Mark();
+
+	gFujiInitialised = true;
 }
 
 void MFSystem_Deinit()
@@ -436,9 +438,14 @@ int MFMain(MFInitParams *pInitParams)
 	// process command line
 	//...
 
+#if defined(MF_IPHONE)
+	int StartIPhone(MFInitParams *);
+	return StartIPhone(pInitParams);
+#else
 	MFSystem_GameLoop();
 
 	return 0;
+#endif
 }
 
 int MFSystem_GameLoop()
@@ -447,8 +454,6 @@ int MFSystem_GameLoop()
 
 	// initialise the system and create displays etc..
 	MFSystem_Init();
-
-	gFujiInitialised = true;
 
 	while(gRestart)
 	{
@@ -463,31 +468,7 @@ int MFSystem_GameLoop()
 
 		while(!gQuit)
 		{
-			MFCallstack_BeginFrame();
-			if(pSystemCallbacks[MFCB_HandleSystemMessages])
-				pSystemCallbacks[MFCB_HandleSystemMessages]();
-			else
-				MFSystem_HandleEventsPlatformSpecific();
-
-			MFSystem_UpdateTimeDelta();
-			gFrameCount++;
-
-			MFSystem_Update();
-			if(!DebugMenu_IsEnabled())
-			{
-				if(pSystemCallbacks[MFCB_Update])
-					pSystemCallbacks[MFCB_Update]();
-			}
-			MFSystem_PostUpdate();
-
-			MFRenderer_BeginFrame();
-
-			if(pSystemCallbacks[MFCB_Draw])
-				pSystemCallbacks[MFCB_Draw]();
-			MFSystem_Draw();
-
-			MFRenderer_EndFrame();
-			MFCallstack_EndFrame();
+			MFSystem_RunFrame();
 		}
 
 		if(pSystemCallbacks[MFCB_Deinit])
@@ -497,6 +478,36 @@ int MFSystem_GameLoop()
 	MFSystem_Deinit();
 
 	return gQuit;
+}
+
+void MFSystem_RunFrame()
+{
+	MFCallstack_BeginFrame();
+
+	if(pSystemCallbacks[MFCB_HandleSystemMessages])
+		pSystemCallbacks[MFCB_HandleSystemMessages]();
+	else
+		MFSystem_HandleEventsPlatformSpecific();
+	
+	MFSystem_UpdateTimeDelta();
+	gFrameCount++;
+	
+	MFSystem_Update();
+	if(!DebugMenu_IsEnabled())
+	{
+		if(pSystemCallbacks[MFCB_Update])
+			pSystemCallbacks[MFCB_Update]();
+	}
+	MFSystem_PostUpdate();
+	
+	MFRenderer_BeginFrame();
+	
+	if(pSystemCallbacks[MFCB_Draw])
+		pSystemCallbacks[MFCB_Draw]();
+	MFSystem_Draw();
+	
+	MFRenderer_EndFrame();
+	MFCallstack_EndFrame();
 }
 
 void MFSystem_UpdateTimeDelta()

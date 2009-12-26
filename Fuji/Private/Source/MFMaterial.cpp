@@ -195,7 +195,7 @@ void MFMaterial_Update()
 
 	MFMaterial **ppMatIterator = gMaterialList.Begin();
 
-	while(*ppMatIterator)
+	while(ppMatIterator && *ppMatIterator)
 	{
 		if((*ppMatIterator)->pType->materialCallbacks.pUpdate)
 			(*ppMatIterator)->pType->materialCallbacks.pUpdate(*ppMatIterator);

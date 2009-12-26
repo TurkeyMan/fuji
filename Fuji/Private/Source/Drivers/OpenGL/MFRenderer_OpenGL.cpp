@@ -114,6 +114,9 @@ int gOpenGLVersion = 0;
 	extern HWND apphWnd;
 	HGLRC hRC = NULL; // Permanent Rendering Context
 	HDC hDC = NULL; // Private GDI Device Context
+#elif MF_DISPLAY == MF_DRIVER_IPHONE
+	extern "C" int MFRendererIPhone_MakeCurrent();
+	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
 #if defined(LOAD_EXTENSIONS)
@@ -272,10 +275,14 @@ int MFRenderer_CreateDisplay()
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
+#elif MF_DISPLAY == MF_DRIVER_IPHONE
+	MFRendererIPhone_MakeCurrent();
 #endif
 
     // get the opengl version
 	const char *pVersion = (const char *)glGetString(GL_VERSION);
+	while(pVersion && *pVersion && !MFIsNumeric(*pVersion))
+		++pVersion;
 	float ver = MFString_AsciiToFloat(pVersion);
 	gOpenGLVersion = (int)(ver * 100);
 
@@ -389,6 +396,8 @@ void MFRenderer_EndFrame()
 	glXSwapBuffers(xdisplay, glXWindow);
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	SwapBuffers(hDC);
+#elif MF_DISPLAY == MF_DRIVER_IPHONE
+	MFRendererIPhone_SwapBuffers();
 #endif
 }
 
