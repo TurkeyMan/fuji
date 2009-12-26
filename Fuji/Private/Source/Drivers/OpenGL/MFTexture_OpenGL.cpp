@@ -160,11 +160,71 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
-	MFCALLSTACK;
+	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
-	MFDebug_Assert(false, "Not Written...");
+	if(!pTexture)
+	{
+		pTexture = gTextureBank.Create();
 
-	return NULL;
+		MFTextureFormat frameBufferFormat = TexFmt_A8R8G8B8;
+
+		// allocate an MFTexture template
+		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
+		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
+		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
+		pTexture->pTemplateData->imageFormat = frameBufferFormat;
+		pTexture->pTemplateData->mipLevels = 1;
+		pTexture->pTemplateData->flags = TEX_RenderTarget;
+
+		int bitsPerPixel = MFTexture_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
+		int imageSize = (width * height * bitsPerPixel) >> 3;
+		MFTextureSurfaceLevel *pSurface = &pTexture->pTemplateData->pSurfaces[0];
+		pSurface->width = width;
+		pSurface->height = height;
+		pSurface->bitsPerPixel = bitsPerPixel;
+		pSurface->xBlocks = width;
+		pSurface->yBlocks = height;
+		pSurface->bitsPerBlock = bitsPerPixel;
+		pSurface->pImageData = NULL;//MFHeap_Alloc(imageSize);
+		pSurface->bufferLength = 0;
+		pSurface->pPaletteEntries = NULL;
+		pSurface->paletteBufferLength = 0;
+
+		pTexture->refCount = 0;
+		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
+		pTexture->name[sizeof(pTexture->name) - 1] = 0;
+
+		// create the OpenGL texture
+		glEnable(GL_TEXTURE_2D);
+
+		GLuint textureID, frameBufferID;
+		glGenTextures(1, &textureID);
+		pTexture->pInternalData = (void*)textureID;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// create the frame buffer
+		uint32 platformFormat = MFTexture_GetPlatformFormatID(frameBufferFormat, MFDD_OpenGL);
+		GLFormat &format = gGLFormats[platformFormat];
+		glTexImage2D(GL_PROXY_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
+
+		glGenFramebuffers(1, &frameBufferID);
+		pSurface->pImageData = (char*)frameBufferID;
+
+		// and bind it to our texture
+		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	pTexture->refCount++;
+
+	return pTexture;
 }
 
 int MFTexture_Destroy(MFTexture *pTexture)

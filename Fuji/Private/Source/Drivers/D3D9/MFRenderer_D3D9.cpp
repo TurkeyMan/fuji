@@ -378,6 +378,8 @@ void MFRenderer_ResetViewport()
 
 void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
+	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+
 	if(pRenderTarget)
 	{
 		IDirect3DTexture9 *pRT = (IDirect3DTexture9*)pRenderTarget->pInternalData;
@@ -401,7 +403,6 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 	{
 		pd3dDevice->SetDepthStencilSurface(NULL);
 	}
-
 }
 
 void MFRenderer_SetDeviceRenderTarget()

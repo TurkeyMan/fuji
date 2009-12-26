@@ -104,6 +104,7 @@ enum TextureFlags
 	TEX_AlphaMask = 0x3,				/**< Alpha mask. 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha */
 	TEX_PreMultipliedAlpha = MFBIT(2),	/**< Pre-multiplied alpha */
 	TEX_Swizzled = MFBIT(3),			/**< Texture data is swizzled for the platform */
+	TEX_RenderTarget = MFBIT(4),		/**< Texture is a render target */
 
 	// User Flags
 	TEX_CopyMemory = MFBIT(8)			/**< Takes a copy of the image buffer when calling MFTexture_CreateFromRawData() */

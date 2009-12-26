@@ -84,7 +84,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
 		pTexture->pTemplateData->imageFormat = TexFmt_A8R8G8B8;
 		pTexture->pTemplateData->mipLevels = 1;
-		pTexture->pTemplateData->flags = 0;
+		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
 		pTexture->pTemplateData->pSurfaces->width = width;
 		pTexture->pTemplateData->pSurfaces->height = height;

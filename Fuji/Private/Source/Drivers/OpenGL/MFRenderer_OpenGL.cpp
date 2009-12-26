@@ -124,6 +124,17 @@ int gOpenGLVersion = 0;
 	PFNGLBINDBUFFERARBPROC glBindBuffer = NULL;
 	PFNGLBUFFERDATAARBPROC glBufferData = NULL;
 	PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = NULL;
+
+	PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffers = NULL;
+	PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffers = NULL;
+	PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbuffer = NULL;
+	PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorage = NULL;
+
+	PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffers = NULL;
+	PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffers = NULL;
+	PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebuffer = NULL;
+	PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D = NULL;
+	PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer = NULL;
 #endif
 
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
@@ -295,7 +306,7 @@ int MFRenderer_CreateDisplay()
 	}
 	else
 	{
-		// Load the function pointers
+		// link the VBO extension
 		if(gOpenGLVersion >= 150)
 		{
 			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress("glBindBuffer");
@@ -316,6 +327,18 @@ int MFRenderer_CreateDisplay()
 //			glMapBuffer = glGetProcAddress("glMapBufferARB");
 //			glUnmapBuffer = glGetProcAddress("glUnmapBufferARB");
 		}
+
+		// link the FBO extension
+		glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffersEXT");
+		glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffersEXT");
+		glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbufferEXT");
+		glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorageEXT");
+
+		glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffersEXT");
+		glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffersEXT");
+		glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebufferEXT");
+		glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2DEXT");
+		glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbufferEXT");
 	}
 #endif
 
@@ -446,12 +469,21 @@ void MFRenderer_ResetViewport()
 
 void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
-	MFDebug_Assert(false, "!");
+	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
+
+	if(pZTarget)
+	{
+		MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+	}
+	else
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 }
 
 void MFRenderer_SetDeviceRenderTarget()
 {
-	MFDebug_Assert(false, "!");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 #endif

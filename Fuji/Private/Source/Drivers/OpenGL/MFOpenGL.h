@@ -83,6 +83,18 @@
 #if !defined(GL_UNSIGNED_SHORT_4_4_4_4_REV)
 	#define GL_UNSIGNED_SHORT_4_4_4_4_REV		0x8365
 #endif
+#if !defined(GL_FRAMEBUFFER)
+	#define GL_FRAMEBUFFER						0x8D40
+#endif
+#if !defined(GL_RENDERBUFFER)
+	#define GL_RENDERBUFFER						0x8D41
+#endif
+#if !defined(GL_COLOR_ATTACHMENT0)
+	#define GL_COLOR_ATTACHMENT0				0x8CE0
+#endif
+#if !defined(GL_DEPTH_ATTACHMENT)
+	#define GL_DEPTH_ATTACHMENT					0x8D00
+#endif
 
 // defines for working with buffer objects
 #if !defined(GL_ARRAY_BUFFER)
@@ -111,6 +123,13 @@
 #if defined(MF_OPENGL_ES)
 	#define glClearDepth glClearDepthf
 	#define glDepthRange glDepthRangef
+
+	#define glGenFramebuffers glGenFramebuffersOES
+	#define glBindFramebuffer glBindFramebufferOES
+	#define glFramebufferTexture2D glFramebufferTexture2DOES
+
+	#define GL_FRAMEBUFFER GL_FRAMEBUFFER_OES
+	#define GL_COLOR_ATTACHMENT0 GL_COLOR_ATTACHMENT0_OES
 #endif
 
 // APIENTRY seems to be missing on some platforms
@@ -125,16 +144,39 @@
 
 #if defined(LOAD_EXTENSIONS)
 	// function pointers for opengl extensions
-	typedef void (APIENTRY * PFNGLBINDBUFFERARBPROC) (GLenum target, GLuint buffer);
-	typedef void (APIENTRY * PFNGLDELETEBUFFERSARBPROC) (GLsizei n, const GLuint *buffers);
-	typedef void (APIENTRY * PFNGLGENBUFFERSARBPROC) (GLsizei n, GLuint *buffers);
-	typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC) (GLenum target, int size, const GLvoid *data, GLenum usage);
+	typedef void (APIENTRY * PFNGLBINDBUFFERARBPROC)(GLenum target, GLuint buffer);
+	typedef void (APIENTRY * PFNGLDELETEBUFFERSARBPROC)(GLsizei n, const GLuint *buffers);
+	typedef void (APIENTRY * PFNGLGENBUFFERSARBPROC)(GLsizei n, GLuint *buffers);
+	typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
 
-	// VBO Extension Function Pointers
+	typedef void (APIENTRY * PFNGLGENRENDERBUFFERSEXTPROC)(GLsizei n, GLuint* ids);
+	typedef void (APIENTRY * PFNGLDELETERENDERBUFFERSEXTPROC)(GLsizei n, const GLuint* ids);
+	typedef void (APIENTRY * PFNGLBINDRENDERBUFFEREXTPROC)(GLenum target, GLuint id);
+	typedef void (APIENTRY * PFNGLRENDERBUFFERSTORAGEEXTPROC)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+
+	typedef void (APIENTRY * PFNGLGENFRAMEBUFFERSEXTPROC)(GLsizei n, GLuint* ids);
+	typedef void (APIENTRY * PFNGLDELETEFRAMEBUFFERSEXTPROC)(GLsizei n, const GLuint* ids);
+	typedef void (APIENTRY * PFNGLBINDFRAMEBUFFEREXTPROC)(GLenum target, GLuint id);
+	typedef void (APIENTRY * PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)(GLenum target, GLenum attachmentPoint, GLenum textureTarget, GLuint textureId, GLint  level);
+	typedef void (APIENTRY * PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+	// VBO extension function pointers
 	extern PFNGLGENBUFFERSARBPROC glGenBuffers;
 	extern PFNGLBINDBUFFERARBPROC glBindBuffer;
 	extern PFNGLBUFFERDATAARBPROC glBufferData;
 	extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
+
+	// FBO extension function pointers
+	extern PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffers;
+	extern PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffers;
+	extern PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbuffer;
+	extern PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorage;
+
+	extern PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffers;
+	extern PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffers;
+	extern PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebuffer;
+	extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D;
+	extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer;
 #endif
 
 #endif
