@@ -64,7 +64,7 @@ void MFSound_UpdateSound()
 {
 	MFVoice **ppI = gVoices.Begin();
 
-	while(*ppI)
+	while(ppI && *ppI)
 	{
 		MFVoice *pV = *ppI;
 

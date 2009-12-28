@@ -95,6 +95,9 @@
 #if !defined(GL_DEPTH_ATTACHMENT)
 	#define GL_DEPTH_ATTACHMENT					0x8D00
 #endif
+#if !defined(GL_PROXY_TEXTURE_2D)
+	#define GL_PROXY_TEXTURE_2D					0x8064
+#endif
 
 // defines for working with buffer objects
 #if !defined(GL_ARRAY_BUFFER)
@@ -124,12 +127,18 @@
 	#define glClearDepth glClearDepthf
 	#define glDepthRange glDepthRangef
 
-	#define glGenFramebuffers glGenFramebuffersOES
-	#define glBindFramebuffer glBindFramebufferOES
-	#define glFramebufferTexture2D glFramebufferTexture2DOES
+	#if MF_OPENGL_ES_VER == 1
+		#define glGenRenderbuffers glGenRenderbuffersOES
+		#define glDeleterenderbuffers glDeleteRenderbuffersOES
+		#define glBindRenderbuffer glBindRenderbufferOES
+		#define glRenderbufferStorage glRenderbufferStorageOES
 
-	#define GL_FRAMEBUFFER GL_FRAMEBUFFER_OES
-	#define GL_COLOR_ATTACHMENT0 GL_COLOR_ATTACHMENT0_OES
+		#define glGenFramebuffers glGenFramebuffersOES
+		#define glDeleteFramebuffers glDeleteFramebuffersOES
+		#define glBindFramebuffer glBindFramebufferOES
+		#define glFramebufferTexture2D glFramebufferTexture2DOES
+		#define glFramebufferRenderbuffer glFramebufferRenderbufferOES
+	#endif
 #endif
 
 // APIENTRY seems to be missing on some platforms
@@ -178,5 +187,7 @@
 	extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D;
 	extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer;
 #endif
+
+bool MFCheckForOpenGLError();
 
 #endif

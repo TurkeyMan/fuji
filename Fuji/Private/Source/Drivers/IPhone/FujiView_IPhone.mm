@@ -13,26 +13,25 @@ static int g_frame;
   return [CAEAGLLayer class];
 }
 
-- (id) initWithFrame:(CGRect)frame
-{
-   self = [super initWithFrame:frame];
-   if ( self != nil )
-   {
-	   CAEAGLLayer* gllayer = (CAEAGLLayer*) [self layer];
-	   gllayer.opaque = YES;
-	   gllayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-									   [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+- (id) initWithCoder:(NSCoder*)coder
+{    
+    if ((self = [super initWithCoder:coder]))
+	{
+		CAEAGLLayer* gllayer = (CAEAGLLayer*) [self layer];
+		gllayer.opaque = YES;
+		gllayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+									  [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
 
-	   // new EAGLContext instance
-	   context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1];
-	   [EAGLContext setCurrentContext:context];
-	   g_context = context;
+		// new EAGLContext instance
+		context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1];
+		[EAGLContext setCurrentContext:context];
+		g_context = context;
 
-	   [self createFramebuffer];
-	   [context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable: gllayer];
-   }
+		[self createFramebuffer];
+		[context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable: gllayer];
+	}
 
-   return self;
+	return self;
 }
 
 -(void) layoutSubviews
@@ -40,7 +39,7 @@ static int g_frame;
 	[EAGLContext setCurrentContext:context];
 	[self destroyFramebuffer];
 	[self createFramebuffer];
-    CGRect bounds = [self bounds];
+	CGRect bounds = [self bounds];
 //	resize(bounds.size.width, bounds.size.height);
 }
 
@@ -61,7 +60,7 @@ static int g_frame;
 	glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
 	glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
 
-	if (USE_DEPTH_BUFFER)
+	if(1)
 	{
 		glGenRenderbuffersOES(1, &depthRenderbuffer);
 		glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
@@ -97,8 +96,15 @@ int MFRendererIPhone_MakeCurrent()
    return NO == [EAGLContext setCurrentContext:g_context];
 }
 
+void MFRendererIPhone_SetBackBuffer()
+{
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, g_frame);
+	glBindRenderbufferOES(GL_RENDERBUFFER_OES, g_buffer);
+}
+
 int MFRendererIPhone_SwapBuffers()
 {
+	glBindFramebufferOES(GL_FRAMEBUFFER_OES, g_frame);
 	glBindRenderbufferOES(GL_RENDERBUFFER_OES, g_buffer);
 	return NO == [g_context presentRenderbuffer:GL_RENDERBUFFER_OES];
 }

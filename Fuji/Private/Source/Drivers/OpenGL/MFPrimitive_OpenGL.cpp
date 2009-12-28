@@ -236,18 +236,7 @@ void MFEnd()
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
-	int numVerts = 0;
-	switch(primType)
-	{
-		case PT_PointList:	numVerts = beginCount;		break;
-		case PT_LineList:	numVerts = beginCount/2;	break;
-		case PT_LineStrip:	numVerts = beginCount-1;	break;
-		case PT_TriList:	numVerts = beginCount/3;	break;
-		case PT_TriStrip:	numVerts = beginCount-2;	break;
-		case PT_TriFan:		numVerts = beginCount-2;	break;
-	}
-
-	if(numVerts)
+	if(beginCount)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -261,7 +250,7 @@ void MFEnd()
 		glEnableClientState(GL_COLOR_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-		glDrawArrays(gPrimTypes[primType], 0, numVerts);
+		glDrawArrays(gPrimTypes[primType], 0, beginCount);
 
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);

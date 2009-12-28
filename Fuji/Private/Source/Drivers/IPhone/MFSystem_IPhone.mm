@@ -6,12 +6,18 @@
 
 #include "MFSystem.h"
 
-#include <time.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
 
 MFPlatform gCurrentPlatform = FP_IPhone;
 
+static mach_timebase_info_data_t timebase;
+static uint32 frequency;
+
 void MFSystem_InitModulePlatformSpecific()
 {
+	mach_timebase_info(&timebase);
+	frequency = 1000000000 * timebase.numer / timebase.denom;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
@@ -32,12 +38,12 @@ void MFSystem_DrawPlatformSpecific()
 
 uint64 MFSystem_ReadRTC()
 {
-	return (uint64)clock();
+	return (uint64)mach_absolute_time();
 }
 
 uint64 MFSystem_GetRTCFrequency()
 {
-	return CLOCKS_PER_SEC;
+	return frequency;
 }
 
 const char * MFSystem_GetSystemName()

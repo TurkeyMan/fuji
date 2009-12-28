@@ -116,6 +116,7 @@ int gOpenGLVersion = 0;
 	HDC hDC = NULL; // Private GDI Device Context
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
 	extern "C" int MFRendererIPhone_MakeCurrent();
+	extern "C" void MFRendererIPhone_SetBackBuffer();
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
@@ -409,6 +410,14 @@ void MFRenderer_ResetDisplay()
 
 void MFRenderer_BeginFrame()
 {
+	MFCheckForOpenGLError();
+#if defined(MF_IPHONE)
+	MFRendererIPhone_MakeCurrent();
+#endif
+	MFRenderer_SetDeviceRenderTarget();
+	MFRenderer_ResetViewport();
+	MFCheckForOpenGLError();
+
 }
 
 void MFRenderer_EndFrame()
@@ -422,6 +431,14 @@ void MFRenderer_EndFrame()
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
 	MFRendererIPhone_SwapBuffers();
 #endif
+
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR)
+	{
+		MFDebug_Log(0, MFStr("OpenGL Error: %d", err));
+		MFDebug_Breakpoint();
+	}
+//	MFDebug_Assert(err == GL_NO_ERROR, "OpenGL error!");
 }
 
 void MFRenderer_SetClearColour(float r, float g, float b, float a)
@@ -440,6 +457,7 @@ void MFRenderer_ClearScreen(uint32 flags)
 
 	glClearColor(gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w);
 	glClear(mask);
+	MFCheckForOpenGLError();
 }
 
 void MFRenderer_GetViewport(MFRect *pRect)
@@ -453,6 +471,7 @@ void MFRenderer_SetViewport(MFRect *pRect)
 
 	gCurrentViewport = *pRect;
 	glViewport((GLint)pRect->x, (GLint)pRect->y, (GLint)pRect->width, (GLint)pRect->height);
+	MFCheckForOpenGLError();
 }
 
 void MFRenderer_ResetViewport()
@@ -465,10 +484,12 @@ void MFRenderer_ResetViewport()
 	gCurrentViewport.height = (float)gDisplay.height;
 
 	glViewport(0, 0, gDisplay.width, gDisplay.height);
+	MFCheckForOpenGLError();
 }
 
 void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
+	MFCheckForOpenGLError();
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
 	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
 
@@ -476,14 +497,45 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 	{
 		MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+
+		glEnable(GL_DEPTH_TEST);
 	}
 	else
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+	{
+		glDisable(GL_DEPTH_TEST);
+		
+//		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+	}
+	MFCheckForOpenGLError();
+
+	MFRect viewport = { 0.f, 0.f, (float)pRenderTarget->pTemplateData->pSurfaces[0].width, (float)pRenderTarget->pTemplateData->pSurfaces[0].height };
+	MFRenderer_SetViewport(&viewport);
 }
 
 void MFRenderer_SetDeviceRenderTarget()
 {
+#if defined(MF_IPHONE)
+	MFRendererIPhone_SetBackBuffer();
+#else
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
+
+	MFRect viewport = { 0.f, 0.f, (float)gDisplay.width, (float)gDisplay.height };
+	MFRenderer_SetViewport(&viewport);
+
+	glEnable(GL_DEPTH_TEST);
+}
+
+bool MFCheckForOpenGLError()
+{
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR)
+	{
+		MFDebug_Log(0, MFStr("OpenGL Error: %d", err));
+//		MFDebug_Breakpoint();
+		return true;
+	}
+	return false;
 }
 
 #endif

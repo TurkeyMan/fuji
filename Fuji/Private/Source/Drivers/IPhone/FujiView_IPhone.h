@@ -32,5 +32,6 @@
 extern "C"
 {
 	int MFRendererIPhone_MakeCurrent();
+	void MFRendererIPhone_SetBackBuffer();
 	int MFRendererIPhone_SwapBuffers();
 }

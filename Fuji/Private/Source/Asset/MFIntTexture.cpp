@@ -1386,9 +1386,9 @@ MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 			if(pTexture->opaque)
 				targetFormat = TexFmt_R5G6B5;
 			else if(pTexture->oneBitAlpha)
-				targetFormat = TexFmt_A1R5G5B5;
+				targetFormat = TexFmt_R5G5B5A1;
 			else
-				targetFormat = TexFmt_A4R4G4B4;
+				targetFormat = TexFmt_R4G4B4A4;
 			break;
 
 		case FP_XBox:
