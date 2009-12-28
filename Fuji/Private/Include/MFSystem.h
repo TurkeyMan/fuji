@@ -117,6 +117,14 @@ struct MFDefaults
 	{
 		bool enableUSBOnStartup;		/**< Unable USB on startup (for PSP) */
 	} misc;
+
+	/** Plugin Selection Defaults. */
+	struct PluginDefaults
+	{
+		int renderPlugin;
+		int soundPlugin;
+		int inputPlugin;
+	} plugin;
 };
 
 /**

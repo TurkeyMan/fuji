@@ -29,6 +29,12 @@
 #if !defined(GL_TEXTURE_MAX_LEVEL)
 	#define GL_TEXTURE_MAX_LEVEL				0x813D
 #endif
+#if !defined(GL_TEXTURE0)
+	#define GL_TEXTURE0							0x84C0
+#endif
+#if !defined(GL_TEXTURE1)
+	#define GL_TEXTURE1							0x84C1
+#endif
 #if !defined(GL_BGRA)
 	#define GL_BGRA								0x80E1
 #endif
@@ -89,37 +95,23 @@
 #if !defined(GL_RENDERBUFFER)
 	#define GL_RENDERBUFFER						0x8D41
 #endif
+#if !defined(GL_FRAMEBUFFER_COMPLETE)
+	#define GL_FRAMEBUFFER_COMPLETE				0x8CD5 
+#endif
 #if !defined(GL_COLOR_ATTACHMENT0)
 	#define GL_COLOR_ATTACHMENT0				0x8CE0
 #endif
 #if !defined(GL_DEPTH_ATTACHMENT)
 	#define GL_DEPTH_ATTACHMENT					0x8D00
 #endif
-#if !defined(GL_PROXY_TEXTURE_2D)
-	#define GL_PROXY_TEXTURE_2D					0x8064
-#endif
-
-// defines for working with buffer objects
 #if !defined(GL_ARRAY_BUFFER)
-	#if defined(GL_ARRAY_BUFFER_ARB)
-		#define GL_ARRAY_BUFFER GL_ARRAY_BUFFER_ARB
-	#else
-		#define GL_ARRAY_BUFFER 0x8892
-	#endif
+	#define GL_ARRAY_BUFFER						0x8892
 #endif
 #if !defined(GL_ELEMENT_ARRAY_BUFFER)
-	#if defined(GL_ELEMENT_ARRAY_BUFFER_ARB)
-		#define GL_ELEMENT_ARRAY_BUFFER GL_ELEMENT_ARRAY_BUFFER_ARB
-	#else
-		#define GL_ELEMENT_ARRAY_BUFFER 0x8893
-	#endif
+	#define GL_ELEMENT_ARRAY_BUFFER				0x8893
 #endif
 #if !defined(GL_STATIC_DRAW)
-	#if defined(GL_STATIC_DRAW_ARB)
-		#define GL_STATIC_DRAW GL_STATIC_DRAW_ARB
-	#else
-		#define GL_STATIC_DRAW 0x88E4
-	#endif
+	#define GL_STATIC_DRAW						0x88E4
 #endif
 
 //  OpenGL ES seems to have renamed a couple of functions
@@ -138,6 +130,8 @@
 		#define glBindFramebuffer glBindFramebufferOES
 		#define glFramebufferTexture2D glFramebufferTexture2DOES
 		#define glFramebufferRenderbuffer glFramebufferRenderbufferOES
+
+		#define glCheckFramebufferStatus glCheckFramebufferStatusOES
 	#endif
 #endif
 
@@ -169,6 +163,11 @@
 	typedef void (APIENTRY * PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)(GLenum target, GLenum attachmentPoint, GLenum textureTarget, GLuint textureId, GLint  level);
 	typedef void (APIENTRY * PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
+	typedef GLenum (APIENTRY * PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)(GLenum target);
+
+	typedef void (APIENTRY * PFNGLACTIVETEXTUREARBPROC)(GLenum texture);
+	typedef void (APIENTRY * PFNGLCLIENTACTIVETEXTUREARBPROC)(GLenum texture);
+
 	// VBO extension function pointers
 	extern PFNGLGENBUFFERSARBPROC glGenBuffers;
 	extern PFNGLBINDBUFFERARBPROC glBindBuffer;
@@ -186,6 +185,12 @@
 	extern PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebuffer;
 	extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D;
 	extern PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer;
+
+	extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatus;
+
+	// multitexturing extension
+	extern PFNGLACTIVETEXTUREARBPROC glActiveTexture;
+	extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
 #endif
 
 bool MFCheckForOpenGLError();

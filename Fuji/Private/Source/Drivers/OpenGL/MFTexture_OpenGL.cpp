@@ -232,12 +232,8 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		// and it to the framebuffer
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
-		uint32 status = glCheckFramebufferStatusOES(GL_FRAMEBUFFER);
-		if (status != GL_FRAMEBUFFER_COMPLETE_OES)
-		{
-			MFDebug_Log(0, "Broken!");
-			__asm__ int 3;
-		}
+		uint32 status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		MFDebug_Assert(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
 		
 //		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		MFRenderer_SetDeviceRenderTarget();

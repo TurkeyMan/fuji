@@ -17,6 +17,7 @@
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D9
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D9
 	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_D3D9
+	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D9
 #endif
 
 #include "MFTexture_Internal.h"
@@ -409,6 +410,11 @@ void MFRenderer_SetDeviceRenderTarget()
 {
 	pd3dDevice->SetRenderTarget(0, pRenderTarget);
 	pd3dDevice->SetDepthStencilSurface(pZTarget);
+}
+
+float MFRenderer_GetTexelCenterOffset()
+{
+	return 0.5f;
 }
 
 // direct3d management fucntions

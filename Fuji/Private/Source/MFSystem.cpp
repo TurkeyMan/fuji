@@ -135,6 +135,13 @@ MFDefaults gDefaults =
 	// MiscellaneousDefaults
 	{
 		true			// enableUSBOnStartup
+	},
+
+	// PluginSelectionDefaults
+	{
+		0,	// renderPlugin
+		0,	// soundPlugin
+		0	// inputPlugin
 	}
 };
 

@@ -3,6 +3,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFModel.h"
+#include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -64,7 +65,7 @@ MFModelPluginCallbacks *gpCurrentModelPlugin = NULL;
 void MFModel_InitModulePlatformSpecific()
 {
 	// choose the plugin from init settings
-	gpCurrentModelPlugin = &gModelPlugins[0];
+	gpCurrentModelPlugin = &gModelPlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentModelPlugin->pInitModulePlatformSpecific();

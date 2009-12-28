@@ -17,6 +17,7 @@
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_OpenGL
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_OpenGL
 	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_OpenGL
+	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_OpenGL
 #endif
 
 #include "MFTexture_Internal.h"
@@ -136,6 +137,11 @@ int gOpenGLVersion = 0;
 	PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebuffer = NULL;
 	PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D = NULL;
 	PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer = NULL;
+
+	PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatus = NULL;
+
+	PFNGLACTIVETEXTUREARBPROC glActiveTexture = NULL;
+	PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture = NULL;
 #endif
 
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
@@ -328,18 +334,63 @@ int MFRenderer_CreateDisplay()
 //			glMapBuffer = glGetProcAddress("glMapBufferARB");
 //			glUnmapBuffer = glGetProcAddress("glUnmapBufferARB");
 		}
+	}
 
+	if(gOpenGLVersion < 300 && !IsExtensionSupported("GL_EXT_framebuffer_object"))
+	{
+		MFDebug_Warn(1, "Neither OpenGL 1.5 nor GL_ARB_vertex_buffer_object extension is available!");
+	}
+	else
+	{
 		// link the FBO extension
-		glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffersEXT");
-		glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffersEXT");
-		glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbufferEXT");
-		glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorageEXT");
+		if(gOpenGLVersion >= 300)
+		{
+			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffers");
+			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffers");
+			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbuffer");
+			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorage");
 
-		glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffersEXT");
-		glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffersEXT");
-		glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebufferEXT");
-		glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2DEXT");
-		glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbufferEXT");
+			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffers");
+			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffers");
+			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebuffer");
+			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2D");
+			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbuffer");
+
+			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress("glCheckFramebufferStatus");
+		}
+		else
+		{
+			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffersEXT");
+			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffersEXT");
+			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbufferEXT");
+			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorageEXT");
+
+			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffersEXT");
+			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffersEXT");
+			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebufferEXT");
+			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2DEXT");
+			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbufferEXT");
+
+			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress("glCheckFramebufferStatusEXT");
+		}
+	}
+
+	if(gOpenGLVersion < 130 && !IsExtensionSupported("GL_ARB_multitexture"))
+	{
+		MFDebug_Warn(1, "Neither OpenGL 1.3 nor ARB_multitexture extension is available!");
+	}
+	else
+	{
+		if(gOpenGLVersion >= 130)
+		{
+			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress("glActiveTexture");
+			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress("glClientActiveTexture");
+		}
+		else
+		{
+			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress("glActiveTextureARB");
+			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress("glClientActiveTextureARB");
+		}
 	}
 #endif
 
@@ -524,6 +575,11 @@ void MFRenderer_SetDeviceRenderTarget()
 	MFRenderer_SetViewport(&viewport);
 
 	glEnable(GL_DEPTH_TEST);
+}
+
+float MFRenderer_GetTexelCenterOffset()
+{
+	return 0.f;
 }
 
 bool MFCheckForOpenGLError()

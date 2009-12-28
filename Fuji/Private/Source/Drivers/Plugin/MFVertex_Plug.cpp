@@ -3,6 +3,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFVertex.h"
+#include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -94,7 +95,7 @@ MFVertexPluginCallbacks *gpCurrentVertexPlugin = NULL;
 void MFVertex_InitModulePlatformSpecific()
 {
 	// choose the plugin from init settings
-	gpCurrentVertexPlugin = &gVertexPlugins[0];
+	gpCurrentVertexPlugin = &gVertexPlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentVertexPlugin->pInitModulePlatformSpecific();

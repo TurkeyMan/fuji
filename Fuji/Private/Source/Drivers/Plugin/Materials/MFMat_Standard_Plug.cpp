@@ -3,6 +3,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFMaterial.h"
+#include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -61,7 +62,7 @@ MFMat_StandardPluginCallbacks *gpCurrentMatStandardPlugin = NULL;
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	// choose the plugin from init settings
-	gpCurrentMatStandardPlugin = &gMatStandardPlugins[0];
+	gpCurrentMatStandardPlugin = &gMatStandardPlugins[gDefaults.plugin.renderPlugin];
 
 	return gpCurrentMatStandardPlugin->pRegisterMaterial(pPlatformData);
 }

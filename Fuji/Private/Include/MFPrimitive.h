@@ -167,7 +167,7 @@ void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th);
  * @param uvs An MFRect containing and segment of the image to blit.
  * @return None.
  */
-void MFPrimitive_BlitRect(int x, int y, MFRect uvs);
+void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs);
 
 /**
  * Blit an image or part of an image to the render target with scaling.
@@ -194,7 +194,7 @@ void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw,
  * @param uvs An MFRect containing and segment of the image to blit.
  * @return None.
  */
-void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs);
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs);
 
 /**
  * End a blitter block.

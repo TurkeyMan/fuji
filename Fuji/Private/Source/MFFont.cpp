@@ -6,6 +6,7 @@
 #include "MFMaterial_Internal.h"
 #include "MFFont_Internal.h"
 #include "MFPrimitive.h"
+#include "MFRenderer.h"
 #include "MFFileSystem.h"
 #include "MFView.h"
 #include "MFStringCache.h"
@@ -445,7 +446,8 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 
 int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars)
 {
-	return (int)MFFont_DrawText(pFont, MakeVector((float)x - .5f, (float)y - .5f), (float)pFont->height, colour, pText, maxChars);
+	float texelCenter = MFRenderer_GetTexelCenterOffset();
+	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, pText, maxChars);
 }
 
 int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...)
@@ -457,7 +459,8 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
 
 	vsprintf(buffer, pFormat, args);
 
-	return (int)MFFont_DrawText(pFont, MakeVector((float)x - .5f, (float)y - .5f), (float)pFont->height, colour, buffer);
+	float texelCenter = MFRenderer_GetTexelCenterOffset();
+	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, buffer);
 }
 
 float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)

@@ -3,6 +3,8 @@
 
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
+#include "MFSystem_Internal.h"
+
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFRenderer_InitModulePlatformSpecific_##driver(); \
@@ -18,7 +20,8 @@
 	void MFRenderer_SetViewport_##driver(MFRect *pRect); \
 	void MFRenderer_ResetViewport_##driver(); \
 	void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
-	void MFRenderer_SetDeviceRenderTarget_##driver();
+	void MFRenderer_SetDeviceRenderTarget_##driver(); \
+	float MFRenderer_GetTexelCenterOffset_##driver();
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -36,7 +39,8 @@
 		MFRenderer_SetViewport_##driver, \
 		MFRenderer_ResetViewport_##driver, \
 		MFRenderer_SetRenderTarget_##driver, \
-		MFRenderer_SetDeviceRenderTarget_##driver \
+		MFRenderer_SetDeviceRenderTarget_##driver, \
+		MFRenderer_GetTexelCenterOffset_##driver \
 	},
 
 // declare the available plugins
@@ -65,6 +69,7 @@ struct MFRenderPluginCallbacks
 	void (*pResetViewport)();
 	void (*pSetRenderTarget)(MFTexture *pRenderTarget, MFTexture *pZTarget);
 	void (*pSetDeviceRenderTarget)();
+	float (*pGetTexelCenterOffset)();
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -96,7 +101,7 @@ int MFRenderer_GetCurrentRendererPlugin()
 void MFRenderer_InitModulePlatformSpecific()
 {
 	// choose the plugin from init settings
-	gpCurrentRenderPlugin = &gRenderPlugins[0];
+	gpCurrentRenderPlugin = &gRenderPlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentRenderPlugin->pInitModulePlatformSpecific();
@@ -165,6 +170,11 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 void MFRenderer_SetDeviceRenderTarget()
 {
 	gpCurrentRenderPlugin->pSetDeviceRenderTarget();
+}
+
+float MFRenderer_GetTexelCenterOffset()
+{
+	return gpCurrentRenderPlugin->pGetTexelCenterOffset();
 }
 
 #endif // MF_RENDERER

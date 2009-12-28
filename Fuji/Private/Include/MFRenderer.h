@@ -114,6 +114,8 @@ void MFRenderer_ResetViewport();
 void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
 void MFRenderer_SetDeviceRenderTarget();
 
+float MFRenderer_GetTexelCenterOffset();
+
 /**
  * Begin a render block.
  * Configures the renderer to render geometry with the current settings.

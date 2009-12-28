@@ -2,6 +2,8 @@
 
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
+#include "MFSystem_Internal.h"
+
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFPrimitive_InitModule_##driver(); \
@@ -89,7 +91,7 @@ MFPrimitivePluginCallbacks *gpCurrentPrimitivePlugin = NULL;
 void MFPrimitive_InitModule()
 {
 	// choose the plugin from init settings
-	gpCurrentPrimitivePlugin = &gPrimitivePlugins[0];
+	gpCurrentPrimitivePlugin = &gPrimitivePlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentPrimitivePlugin->pInitModule();

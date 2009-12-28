@@ -126,7 +126,7 @@ void MFBegin(uint32 vertexCount)
 		beginCount = vertexCount * 3;
 	else
 #endif
-	beginCount = vertexCount;
+	beginCount = (primType == PT_QuadList) ? vertexCount*2 : vertexCount;
 
 	currentVert = 0;
 
@@ -241,28 +241,38 @@ void MFEnd()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
-		glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
-		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
-
 		glEnableClientState(GL_VERTEX_ARRAY);
+
+		glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
 		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
 		glEnableClientState(GL_COLOR_ARRAY);
+
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+		glClientActiveTexture(GL_TEXTURE1);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		glDrawArrays(gPrimTypes[primType], 0, beginCount);
 
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_VERTEX_ARRAY);
+
+		glClientActiveTexture(GL_TEXTURE0);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glClientActiveTexture(GL_TEXTURE1);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 }
 
 
 static int textureWidth, textureHeight;
 static float uScale, vScale;
-static float halfTexelU, halfTexelV;
 
 void MFPrimitive_BeginBlitter(int numBlits)
 {
@@ -272,16 +282,18 @@ void MFPrimitive_BeginBlitter(int numBlits)
 	MFDisplay_GetDisplayRect(&rect);
 	MFView_SetOrtho(&rect);
 
-	MFTexture *pTex;
 	MFMaterial *pMat = MFMaterial_GetCurrent();
+
+	MFTexture *pTex;
 	MFMaterial_GetParameter(pMat, MFMatStandard_DifuseMap, 0, &pTex);
 	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
 	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
 
-	uScale = 1.0f / (float)textureWidth;
-	vScale = 1.0f / (float)textureHeight;
-	halfTexelU = uScale * 0.5f;
-	halfTexelV = vScale * 0.5f;
+	MFMatrix matrix;
+	MFMaterial_GetParameter(pMat, MFMatStandard_TextureMatrix, 0, &matrix);
+
+	uScale = 1.0f / (float)textureWidth / matrix.GetXAxis().Magnitude3();
+	vScale = 1.0f / (float)textureHeight / matrix.GetYAxis().Magnitude3();
 
 	MFPrimitive(PT_QuadList);
 	MFBegin(numBlits * 2);
@@ -294,9 +306,9 @@ void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 
 void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
-	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
+	MFSetTexCoord1((float)tx * uScale, (float)ty * vScale);
 	MFSetPosition((float)x, (float)y, 0.0f);
-	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
+	MFSetTexCoord1((float)(tx + tw) * uScale, (float)(ty + th) * vScale);
 	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
 }
 

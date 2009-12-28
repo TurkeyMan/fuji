@@ -3,6 +3,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFTexture.h"
+#include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -61,7 +62,7 @@ MFTexturePluginCallbacks *gpCurrentTexturePlugin = NULL;
 void MFTexture_InitModulePlatformSpecific()
 {
 	// choose the plugin from init settings
-	gpCurrentTexturePlugin = &gTexturePlugins[0];
+	gpCurrentTexturePlugin = &gTexturePlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentTexturePlugin->pInitModulePlatformSpecific();

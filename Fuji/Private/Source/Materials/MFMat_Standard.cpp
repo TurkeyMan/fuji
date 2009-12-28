@@ -323,6 +323,9 @@ uint32 MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, in
 		case MFMatStandard_SpecularMap:
 			*(MFTexture**)pValue = pData->pTextures[pData->specularMapIndex];
 			break;
+		case MFMatStandard_TextureMatrix:
+			*(MFMatrix*)pValue = pData->textureMatrix;
+			break;
 		default:
 			MFDebug_Assert(false, "Not written!!!");
 			break;

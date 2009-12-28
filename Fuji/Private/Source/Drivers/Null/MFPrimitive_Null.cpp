@@ -80,7 +80,7 @@ void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
 }
 
-void MFPrimitive_BlitRect(int x, int y, MFRect uvs)
+void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
 {
 }
 
@@ -88,7 +88,7 @@ void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw,
 {
 }
 
-void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, MFRect uvs)
+void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
 {
 }
 

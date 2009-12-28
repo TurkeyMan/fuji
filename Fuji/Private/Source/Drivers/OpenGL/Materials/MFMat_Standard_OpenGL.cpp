@@ -41,21 +41,48 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	    bool premultipliedAlpha = false;
 
 		// set some render states
-		if(pData->pTextures[pData->diffuseMapIndex])
+		if(pData->detailMapIndex)
 		{
-			GLuint textureID = *(GLuint*)&pData->pTextures[pData->diffuseMapIndex]->pInternalData;
-			glBindTexture(GL_TEXTURE_2D, textureID);
-			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-//			glActiveTexture(0);
-			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
+			// HACK: for compound multitexturing
+			GLuint diffuse = (GLuint)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			GLuint detail = (GLuint)pData->pTextures[pData->detailMapIndex]->pInternalData;
+
+			glActiveTexture(GL_TEXTURE0);
+		    glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, detail);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			glActiveTexture(GL_TEXTURE1);
+		    glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, diffuse);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 
 			glMatrixMode(GL_TEXTURE);
 			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
 		}
+		else if(pData->pTextures[pData->diffuseMapIndex])
+		{
+			glActiveTexture(GL_TEXTURE0);
+		    glEnable(GL_TEXTURE_2D);
+
+			GLuint textureID = *(GLuint*)&pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			glBindTexture(GL_TEXTURE_2D, textureID);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
+
+			glMatrixMode(GL_TEXTURE);
+			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
+
+			glActiveTexture(GL_TEXTURE1);
+		    glDisable(GL_TEXTURE_2D);
+		}
 		else
 		{
-//			glActiveTexture(texUnit);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE0);
+		    glDisable(GL_TEXTURE_2D);
+			glActiveTexture(GL_TEXTURE1);
+		    glDisable(GL_TEXTURE_2D);
 		}
 
 		switch(pData->materialType&MF_BlendMask)
