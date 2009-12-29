@@ -294,7 +294,7 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 	for(int a=0; a<8*8; a++)
 		pPixels[a] = packed;
 
-	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, 0, TEX_CopyMemory);
+	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, TEX_CopyMemory, false);
 }
 
 void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)

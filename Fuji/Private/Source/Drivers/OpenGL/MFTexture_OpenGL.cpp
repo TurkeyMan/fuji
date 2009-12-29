@@ -167,7 +167,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFCheckForOpenGLError();
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
+MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -175,13 +175,37 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	{
 		pTexture = gTextureBank.Create();
 
-		MFTextureFormat frameBufferFormat = TexFmt_A8B8G8R8;
+		if(targetFormat & TexFmt_SelectNicest)
+		{
+#if defined(MF_IPHONE)
+			switch(targetFormat)
+			{
+				case TexFmt_SelectNicest:
+					targetFormat = TexFmt_A8R8G8B8;
+					break;
+				case TexFmt_SelectNicest_NoAlpha:
+					targetFormat = TexFmt_R8G8B8;
+					break;
+				case TexFmt_SelectFastest:
+					targetFormat = TexFmt_R4G4B4A4;
+					break;
+				case TexFmt_SelectFastest_Masked:
+					targetFormat = TexFmt_R5G5B5A1;
+					break;
+				case TexFmt_SelectFastest_NoAlpha:
+					targetFormat = TexFmt_R5G6B5;
+					break;
+			}
+#else
+			targetFormat = TexFmt_A8R8G8B8;
+#endif
+		}
 
 		// allocate an MFTexture template
 		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
 		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
-		pTexture->pTemplateData->imageFormat = frameBufferFormat;
+		pTexture->pTemplateData->imageFormat = targetFormat;
 		pTexture->pTemplateData->mipLevels = 1;
 		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
@@ -194,7 +218,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		pSurface->xBlocks = width;
 		pSurface->yBlocks = height;
 		pSurface->bitsPerBlock = bitsPerPixel;
-		pSurface->pImageData = NULL;//MFHeap_Alloc(imageSize);
+		pSurface->pImageData = NULL;
 		pSurface->bufferLength = 0;
 		pSurface->pPaletteEntries = NULL;
 		pSurface->paletteBufferLength = 0;
@@ -220,7 +244,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 #endif
 
-		uint32 platformFormat = MFTexture_GetPlatformFormatID(frameBufferFormat, MFDD_OpenGL);
+		uint32 platformFormat = MFTexture_GetPlatformFormatID(targetFormat, MFDD_OpenGL);
 		GLFormat &format = gGLFormats[platformFormat];
 		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
 
@@ -234,8 +258,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 
 		uint32 status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		MFDebug_Assert(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
-		
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		MFRenderer_SetDeviceRenderTarget();
 
 		if(!MFCheckForOpenGLError())

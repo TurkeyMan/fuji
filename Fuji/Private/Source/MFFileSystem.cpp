@@ -187,13 +187,6 @@ void MFFileSystem_RegisterDefaultArchives()
 		zipMountData.pZipArchive = hDataArchive;
 		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
 	}
-	else
-	{
-		mountData.flags = MFMF_Recursive|MFMF_FlattenDirectoryStructure;
-		mountData.pMountpoint = "data";
-		mountData.pPath = MFStr("%sData_%s/", MFFile_SystemPath(), MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform()));
-		MFFileSystem_Mount(hNativeFileSystem, &mountData);
-	}
 
 	mountData.flags = MFMF_DontCacheTOC;
 	mountData.pMountpoint = "home";

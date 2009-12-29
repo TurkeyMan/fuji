@@ -3,7 +3,7 @@
 
 const int disconnected_width  = 16;
 const int disconnected_height = 16;
-const int disconnected_format = 40;
+const int disconnected_format = TexFmt_PSP_A1B5G5R5s;
 const int disconnected_bpp    = 16;
 const int disconnected_flags  = 0x0000000F;
 

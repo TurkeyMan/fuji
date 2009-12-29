@@ -866,9 +866,9 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 				for(x=0; x<width; x++)
 				{
 					pTarget->a = (uint8)((int)(pSource->a*alphaScale) & 0xFF);
-					pTarget->r = (uint8)((int)(pSource->r*alphaScale) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*alphaScale) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*alphaScale) & 0xFF);
+					pTarget->r = (uint8)((int)(pSource->r*255.0f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.0f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.0f) & 0xFF);
 					++pTarget;
 					++pSource;
 				}
@@ -909,6 +909,42 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
 					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
 					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_R8G8B8:
+		{
+			struct PixelBGR { uint8 b, g, r; } *pTarget = (PixelBGR*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
+					++pTarget;
+					++pSource;
+				}
+			}
+			break;
+		}
+
+		case TexFmt_B8G8R8:
+		{
+			struct PixelRGB { uint8 r, g, b; } *pTarget = (PixelRGB*)pOutputSurface->pImageData;
+
+			for(y=0; y<height; y++)
+			{
+				for(x=0; x<width; x++)
+				{
+					pTarget->r = (uint8)((int)(pSource->r) & 0xFF);
+					pTarget->g = (uint8)((int)(pSource->g) & 0xFF);
+					pTarget->b = (uint8)((int)(pSource->b) & 0xFF);
 					++pTarget;
 					++pSource;
 				}

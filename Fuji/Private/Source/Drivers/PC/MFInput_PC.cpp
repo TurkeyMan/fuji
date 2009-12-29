@@ -589,16 +589,16 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 
 		case IDD_Mouse:
 			if(id < gMouseCount)
-			{
 				return IDS_Ready;
-			}
 			break;
 
 		case IDD_Keyboard:
 			if(id < gKeyboardCount)
-			{
 				return IDS_Ready;
-			}
+			break;
+
+		case IDD_Accelerometer:
+		case IDD_TouchPanel:
 			break;
 
 		default:
@@ -967,6 +967,16 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 
 	// clamp absolute mouse coords to mouse rect
 	//....
+}
+
+void MFInput_GetAccelerometerStateInternal(int id, MFAccelerometerState *pAccelerometerState)
+{
+	MFZeroMemory(pAccelerometerState, sizeof(MFAccelerometerState));
+}
+
+void MFInput_GetTouchPanelStateInternal(int id, MFTouchPanelState *pTouchPanelState)
+{
+	MFZeroMemory(pTouchPanelState, sizeof(MFTouchPanelState));
 }
 
 const char* MFInput_GetDeviceNameInternal(int source, int sourceID)

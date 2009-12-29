@@ -3,7 +3,7 @@
 
 const int usb_icon_width  = 32;
 const int usb_icon_height = 16;
-const int usb_icon_format = 41;
+const int usb_icon_format = TexFmt_PSP_A4B4G4R4s;
 const int usb_icon_bpp    = 16;
 const int usb_icon_flags  = 0x0000000D;
 

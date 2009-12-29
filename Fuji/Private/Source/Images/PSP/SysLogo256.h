@@ -3,7 +3,7 @@
 
 const int SysLogo256_width  = 256;
 const int SysLogo256_height = 256;
-const int SysLogo256_format = 41;
+const int SysLogo256_format = TexFmt_PSP_A4B4G4R4s;
 const int SysLogo256_bpp    = 16;
 const int SysLogo256_flags  = 0x0000000D;
 

@@ -3,7 +3,7 @@
 
 const int SysLogo64_width  = 64;
 const int SysLogo64_height = 64;
-const int SysLogo64_format = 1;
+const int SysLogo64_format = TexFmt_A8B8G8R8;
 const int SysLogo64_bpp    = 32;
 const int SysLogo64_flags  = 0x00000005;
 

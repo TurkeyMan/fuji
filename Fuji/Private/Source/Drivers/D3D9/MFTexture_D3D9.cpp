@@ -71,7 +71,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		D3DXFilterTexture(pTex, NULL, 0, D3DX_DEFAULT);
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
+MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -79,10 +79,15 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	{
 		pTexture = gTextureBank.Create();
 
+		if(targetFormat & TexFmt_SelectNicest)
+		{
+			targetFormat = TexFmt_A8R8G8B8;
+		}
+
 		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
 		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
-		pTexture->pTemplateData->imageFormat = TexFmt_A8R8G8B8;
+		pTexture->pTemplateData->imageFormat = targetFormat;
 		pTexture->pTemplateData->mipLevels = 1;
 		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
@@ -101,7 +106,8 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
-		pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
+		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFDD_D3D9);
+		pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
 	}
 
 	pTexture->refCount++;

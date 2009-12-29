@@ -3,7 +3,7 @@
 
 const int power_width  = 16;
 const int power_height = 16;
-const int power_format = 40;
+const int power_format = TexFmt_PSP_A1B5G5R5s;
 const int power_bpp    = 16;
 const int power_flags  = 0x0000000F;
 

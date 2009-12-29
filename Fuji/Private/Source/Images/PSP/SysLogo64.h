@@ -3,7 +3,7 @@
 
 const int SysLogo64_width  = 64;
 const int SysLogo64_height = 64;
-const int SysLogo64_format = 41;
+const int SysLogo64_format = TexFmt_PSP_A4B4G4R4s;
 const int SysLogo64_bpp    = 16;
 const int SysLogo64_flags  = 0x0000000D;
 

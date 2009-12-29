@@ -3,7 +3,7 @@
 
 const int charging_width  = 16;
 const int charging_height = 16;
-const int charging_format = 40;
+const int charging_format = TexFmt_PSP_A1B5G5R5s;
 const int charging_bpp    = 16;
 const int charging_flags  = 0x0000000F;
 

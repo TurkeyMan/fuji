@@ -3,7 +3,7 @@
 
 const int connected_width  = 16;
 const int connected_height = 16;
-const int connected_format = 40;
+const int connected_format = TexFmt_PSP_A1B5G5R5s;
 const int connected_bpp    = 16;
 const int connected_flags  = 0x0000000F;
 

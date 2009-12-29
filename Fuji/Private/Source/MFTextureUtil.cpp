@@ -8,6 +8,9 @@ static const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 	"B8G8R8A8",
 	"R8G8B8A8",
 
+	"R8G8B8",
+	"B8G8R8",
+
 	"A2R10G10B10",
 	"A2B10G10R10",
 
@@ -75,6 +78,9 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 	MFBIT(MFDD_PSP)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PS2),	// TexFmt_A8B8G8R8
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_B8G8R8A8
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),					// TexFmt_R8G8B8A8
+
+	MFBIT(MFDD_D3D9),										// TexFmt_R8G8B8
+	0,														// TexFmt_B8G8R8
 
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_A2R10G10B10
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),					// TexFmt_A2B10G10R10
@@ -144,6 +150,9 @@ static uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
 	32,	// TexFmt_B8G8R8A8
 	32,	// TexFmt_R8G8B8A8
 
+	24,	// TexFmt_R8G8B8
+	24,	// TexFmt_B8G8R8
+
 	32,	// TexFmt_A2R10G10B10
 	32,	// TexFmt_A2B10G10R10
 
@@ -212,6 +221,9 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		0,	//						// TexFmt_B8G8R8A8
 		0,	//						// TexFmt_R8G8B8A8
 
+		20,	// D3DFMT_R8G8B8		// TexFmt_R8G8B8
+		0,	//						// TexFmt_B8G8R8
+
 		35,	// D3DFMT_A2R10G10B10	// TexFmt_A2R10G10B10
 		31,	// D3DFMT_A2B10G10R10	// TexFmt_A2B10G10R10
 
@@ -277,6 +289,9 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		0x3F,	// TexFmt_A8B8G8R8
 		0x40,	// TexFmt_B8G8R8A8
 		0x41,	// TexFmt_R8G8B8A8
+
+		0,		// TexFmt_R8G8B8
+		0,		// TexFmt_B8G8R8
 
 		0,		// TexFmt_A2R10G10B10
 		0,		// TexFmt_A2B10G10R10
@@ -346,6 +361,9 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		2,	// TexFmt_B8G8R8A8
 		3,	// TexFmt_R8G8B8A8
 
+		0,	// TexFmt_R8G8B8
+		0,	// TexFmt_B8G8R8
+
 		4,	// TexFmt_A2R10G10B10
 		5,	// TexFmt_A2B10G10R10
 
@@ -412,6 +430,9 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		0,	//				 // TexFmt_B8G8R8A8
 		0,	//				 // TexFmt_R8G8B8A8
 
+		0,	//				 //	TexFmt_R8G8B8
+		0,	//				 // TexFmt_B8G8R8
+
 		0,	//				 // TexFmt_A2R10G10B10
 		0,	//				 // TexFmt_A2B10G10R10
 
@@ -477,6 +498,9 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		99,	// ????????????, //	TexFmt_A8B8G8R8
 		0,	//				 // TexFmt_B8G8R8A8
 		0,	//				 // TexFmt_R8G8B8A8
+
+		0,	//				 // TexFmt_R8G8B8
+		0,	//				 // TexFmt_B8G8R8
 
 		0,	//				 // TexFmt_A2R10G10B10
 		0,	//				 // TexFmt_A2B10G10R10

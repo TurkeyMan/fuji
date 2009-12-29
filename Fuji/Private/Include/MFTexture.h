@@ -30,6 +30,9 @@ enum MFTextureFormat
 	TexFmt_B8G8R8A8,	/**< 32bit ARGB format */
 	TexFmt_R8G8B8A8,	/**< 32bit ABGR format */
 
+	TexFmt_R8G8B8,	/**< 24bit BGR format */
+	TexFmt_B8G8R8,	/**< 24bit RGB format */
+
 	TexFmt_A2R10G10B10,	/**< 32bit BGRA format with 10 bits per colour channel */
 	TexFmt_A2B10G10R10,	/**< 32bit RGBA format with 10 bits per colour channel */
 
@@ -91,7 +94,14 @@ enum MFTextureFormat
 	TexFmt_PSP_DXT5s,		/**< DXT5, swizzled for PSP */
 
 	TexFmt_Max,				/**< Max texture format */
-	TexFmt_ForceInt = 0x7FFFFFFF /**< Force texture format to int type */
+
+	TexFmt_SelectNicest = 0x1000,			/**< Select the nicest format. */
+	TexFmt_SelectNicest_NoAlpha = 0x1001,	/**< Select the nicest format with no alpha channel. */
+	TexFmt_SelectFastest = 0x1002,			/**< Select the fastest format. */
+	TexFmt_SelectFastest_Masked = 0x1003,	/**< Select the fastest format requiring only a single bit of alpha. */
+	TexFmt_SelectFastest_NoAlpha = 0x1004,	/**< Select the fastest format with no alpha channel. */
+
+	TexFmt_ForceInt = 0x7FFFFFFF			/**< Force texture format to int type */
 };
 
 /**
@@ -164,7 +174,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
  * @see MFTexture_Create(), MFTexture_Destroy()
  */
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height);
+MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat = TexFmt_SelectNicest);
 
 /**
  * Destroys a Texture.
