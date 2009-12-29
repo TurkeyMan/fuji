@@ -17,7 +17,7 @@ static uint32 frequency;
 void MFSystem_InitModulePlatformSpecific()
 {
 	mach_timebase_info(&timebase);
-	frequency = 1000000000 * timebase.numer / timebase.denom;
+	frequency = 1000000000LL * (uint64)timebase.denom / timebase.numer;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

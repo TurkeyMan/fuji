@@ -109,6 +109,16 @@ int MFInput_GetNumKeyboards();
 int MFInput_GetNumPointers();
 
 /**
+ *
+ */
+int MFInput_GetNumAccelerometers();
+
+/**
+ *
+ */
+int MFInput_GetNumTouchPanels();
+
+/**
  * Read the absolute position of the mouse pointer.
  * Read the absolute position of the mouse pointer.
  * @param mouseID Index of the mouse to read.
@@ -208,15 +218,39 @@ bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);
  */
 char MFInput_KeyToAscii(int key, bool shift, bool caps);
 
+/*** HACK ***/
+struct MFTouchPanelState
+{
+	struct Contact
+	{
+		int x, y;
+		int tapCount;
+		int phase;
+		int flags;		
+	};
+	
+	Contact contacts[20];
+	int numContacts;
+	
+	bool bDidShake;
+};
+
+/**
+ *
+ */
+MFTouchPanelState *MFInput_GetContactInfo(int touchPanel);
+
 /**
  * Input devices.
  * These are available input devices.
  */
 enum MFInputDevice
 {
-	IDD_Gamepad,	/**< Gamepad device */
-	IDD_Mouse,		/**< Mouse or pointer device */
-	IDD_Keyboard,	/**< Keyboard device */
+	IDD_Gamepad,		/**< Gamepad device */
+	IDD_Mouse,			/**< Mouse or pointer device */
+	IDD_Keyboard,		/**< Keyboard device */
+	IDD_Accelerometer,	/**< Accelerometer device */
+	IDD_TouchPanel,		/**< Touch panel device */
 
 	IDD_Max,		/**< Maximum device */
 	IDD_ForceInt = 0x7FFFFFFF	/**< Force device to an int type */
@@ -634,6 +668,67 @@ enum MFKeyboardButton
 
 	Key_Max,			/**< Max MFKeyboardButton enumeration */
 	Key_ForceInt	= 0x7FFFFFFF	/**< Force MFKeyboardButton to an int type */
+};
+
+/**
+ * Accelerometer input.
+ * These represent available accelerometer readings.
+ */
+enum MFAccelerometerInput
+{
+	Acc_XAxis,
+	Acc_YAxis,
+	Acc_ZAxis,
+	Acc_Acceleration,
+
+	Acc_XDelta,
+	Acc_YDelta,
+	Acc_ZDelta,
+	Acc_AccelerationDelta,
+
+	Acc_Max,
+	Acc_ForceInt = 0x7FFFFFFF
+};
+
+/**
+ * Touch panel input.
+ * These represent available touch panel input readings.
+ */
+enum MFTouchPanelInput
+{
+#define Touch_XPos(contact) ((MFTouchPanelInput)(Touch_Contact0_XPos + (Touch_Contact1_XPos - Touch_Contact0_XPos)*(contact)))
+#define Touch_YPos(contact) ((MFTouchPanelInput)(Touch_Contact0_YPos + (Touch_Contact1_YPos - Touch_Contact0_YPos)*(contact)))
+#define Touch_XDelta(contact) ((MFTouchPanelInput)(Touch_Contact0_XDelta + (Touch_Contact1_XDelta - Touch_Contact0_XDelta)*(contact)))
+#define Touch_YDelta(contact) ((MFTouchPanelInput)(Touch_Contact0_YDelta + (Touch_Contact1_YDelta - Touch_Contact0_YDelta)*(contact)))
+
+	Touch_Contact0_XPos,
+	Touch_Contact0_YPos,
+	Touch_Contact0_XDelta,
+	Touch_Contact0_YDelta,
+	Touch_Contact1_XPos,
+	Touch_Contact1_YPos,
+	Touch_Contact1_XDelta,
+	Touch_Contact1_YDelta,
+	Touch_Contact2_XPos,
+	Touch_Contact2_YPos,
+	Touch_Contact2_XDelta,
+	Touch_Contact2_YDelta,
+	Touch_Contact3_XPos,
+	Touch_Contact3_YPos,
+	Touch_Contact3_XDelta,
+	Touch_Contact3_YDelta,
+	Touch_Contact4_XPos,
+	Touch_Contact4_YPos,
+	Touch_Contact4_XDelta,
+	Touch_Contact4_YDelta,
+	Touch_Contact5_XPos,
+	Touch_Contact5_YPos,
+	Touch_Contact5_XDelta,
+	Touch_Contact5_YDelta,
+	Touch_Shake,
+
+	Touch_Max,
+	Touch_ForceInt = 0x7FFFFFFF
 };
 
 #endif

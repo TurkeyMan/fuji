@@ -2,6 +2,10 @@
 
 #include "OpenGLES/ES1/glext.h"
 
+#include "MFInput_IPhone.h"
+
+#define USE_DEPTH_BUFFER YES 
+
 static id g_context;
 static int g_buffer;
 static int g_frame;
@@ -17,6 +21,8 @@ static int g_frame;
 {    
     if ((self = [super initWithCoder:coder]))
 	{
+		self.multipleTouchEnabled = YES;
+		
 		CAEAGLLayer* gllayer = (CAEAGLLayer*) [self layer];
 		gllayer.opaque = YES;
 		gllayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -43,9 +49,51 @@ static int g_frame;
 //	resize(bounds.size.width, bounds.size.height);
 }
 
-#define USE_DEPTH_BUFFER YES 
+-(void)updateTouches:(NSSet *)touches
+{
+	int numTouches = [touches count];
 
-- (BOOL)createFramebuffer {
+	Contact contacts[20];
+	for(int a=0; a<numTouches; ++a)
+	{
+		UITouch *touch = [[touches allObjects] objectAtIndex:a];
+
+		CGPoint p = [touch locationInView:self];
+		contacts[a].x = p.x;
+		contacts[a].y = p.y;
+		contacts[a].tapCount = touch.tapCount;
+		contacts[a].phase = touch.phase;
+	}
+
+	MFInputIPhone_SetContacts(numTouches, contacts);	
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	NSSet *allTouches = [event allTouches];
+	[self updateTouches:allTouches];
+}
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	NSSet *allTouches = [event allTouches];
+	[self updateTouches:allTouches];
+}
+
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	NSSet *allTouches = [event allTouches];
+	[self updateTouches:allTouches];
+}
+
+-(void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	NSSet *allTouches = [event allTouches];
+	[self updateTouches:allTouches];
+}
+
+- (BOOL)createFramebuffer
+{
 	glGenFramebuffersOES(1, &viewFramebuffer);
 	glGenRenderbuffersOES(1, &viewRenderbuffer);
 

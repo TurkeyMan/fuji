@@ -27,6 +27,8 @@
 - (BOOL)createFramebuffer;
 - (void)destroyFramebuffer;
 
+- (void)updateTouchScreen:(NSSet *)touches;
+
 @end
 
 extern "C"

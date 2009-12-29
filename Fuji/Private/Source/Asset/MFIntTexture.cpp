@@ -148,9 +148,9 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 	// read file
 	setjmp(png_jmpbuf(png_ptr));
 
-	row_pointers = (png_bytep*)MFHeap_Alloc(sizeof(png_bytep) * height);
+	row_pointers = (png_bytep*)MFHeap_Alloc((sizeof(png_bytep) + info_ptr->rowbytes)*height);
 	for(int y=0; y<height; y++)
-		row_pointers[y] = (png_byte*)MFHeap_Alloc(info_ptr->rowbytes);
+		row_pointers[y] = (png_byte*)(row_pointers + height) + info_ptr->rowbytes*y;
 
 	png_read_image(png_ptr, row_pointers);
 
@@ -331,8 +331,6 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 	}
 
 	// free image
-	for(int y=0; y<height; y++)
-		MFHeap_Free(row_pointers[y]);
 	MFHeap_Free(row_pointers);
 
 	return pImage;

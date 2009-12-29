@@ -11,6 +11,8 @@ struct MFDeviceStatus;
 struct MFGamepadState;
 struct MFKeyState;
 struct MFMouseState;
+struct MFAccelerometerState;
+struct MFTouchPanelState;
 
 // internal functions
 void MFInput_InitModule();
@@ -24,8 +26,10 @@ void MFInput_UpdatePlatformSpecific();
 MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id);
 
 void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState);
-void MFInput_GetKeyStateInternal(int id, MFKeyState *pGamepadState);
-void MFInput_GetMouseStateInternal(int id, MFMouseState *pGamepadState);
+void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState);
+void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState);
+void MFInput_GetAccelerometerStateInternal(int id, MFAccelerometerState *pAccelerometerState);
+void MFInput_GetTouchPanelStateInternal(int id, MFTouchPanelState *pTouchPanelState);
 
 const char* MFInput_GetDeviceNameInternal(int device, int deviceID);
 const char* MFInput_GetGamepadButtonNameInternal(int button, int deviceID);
@@ -81,5 +85,30 @@ struct MFMouseState
 	float values[Mouse_MaxAxis];
 	uint8 buttonState[8];
 };
+
+// state of an accelerometer
+struct MFAccelerometerState
+{
+	float values[Acc_XDelta];
+};
+
+// state of a touch panel
+/*
+struct MFTouchPanelState
+{
+	struct Contact
+	{
+		int x, y;
+		int tapCount;
+		int phase;
+		int flags;		
+	};
+
+	Contact contacts[20];
+	int numContacts;
+
+	bool bDidShake;
+};
+*/
 
 #endif

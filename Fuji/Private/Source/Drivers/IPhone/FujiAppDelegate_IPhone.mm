@@ -3,6 +3,7 @@
 
 #include "Fuji.h"
 #include "MFSystem_Internal.h"
+#include "MFInput_IPhone.h"
 
 int StartIPhone(MFInitParams *pInitParams)
 {
@@ -70,7 +71,7 @@ int StartIPhone(MFInitParams *pInitParams)
 }
 
 - (void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration {
-//	getApp()->accelerating(acceleration.x, acceleration.y, acceleration.z);	            
+	MFInputIPhone_SetAcceleration(acceleration.x, acceleration.y, acceleration.z);
 }
 
 - (void) onTimer:(NSTimer*)timer {
