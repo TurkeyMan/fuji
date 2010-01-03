@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFView.h"
 #include "DebugMenu_Internal.h"
 #include "MFMaterial.h"

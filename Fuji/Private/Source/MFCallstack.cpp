@@ -7,7 +7,7 @@
 #include "MFFont.h"
 #include "MFPrimitive.h"
 #include "MFView.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 
 #if defined(_MFCALLSTACK)
 

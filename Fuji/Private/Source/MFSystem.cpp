@@ -2,7 +2,7 @@
 #include "MFCallstack_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
@@ -139,7 +139,7 @@ MFDefaults gDefaults =
 
 	// PluginSelectionDefaults
 	{
-		0,	// renderPlugin
+		1,	// renderPlugin
 		0,	// soundPlugin
 		0	// inputPlugin
 	}

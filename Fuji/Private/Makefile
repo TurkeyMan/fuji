@@ -208,7 +208,6 @@ OBJS := $(ZLIB) \
 	$(ANGELSCRIPT) \
 	$(TINYXML) \
 	Source/DebugMenu.o \
-	Source/Display.o \
 	Source/Image.o \
 	Source/MFAnimation.o \
 	Source/MFAnimScript.o \
@@ -217,6 +216,7 @@ OBJS := $(ZLIB) \
 	Source/MFCollision.o \
 	Source/MFCommandLine.o \
 	Source/MFDebug.o \
+	Source/MFDisplay.o \
 	Source/MFFileSystem.o \
 	Source/MFFont.o \
 	Source/MFHeap.o \

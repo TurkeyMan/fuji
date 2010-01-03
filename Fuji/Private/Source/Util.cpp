@@ -8,7 +8,7 @@
 #include "MFPtrList.h"
 
 #if !defined(_FUJI_UTIL)
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFPrimitive.h"
 #include "MFFont.h"
 #include "MFView.h"

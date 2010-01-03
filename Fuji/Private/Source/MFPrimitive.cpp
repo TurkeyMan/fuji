@@ -3,7 +3,7 @@
 /**** Includes ****/
 
 #include "Fuji.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "MFView.h"
 #include "MFPrimitive.h"
 

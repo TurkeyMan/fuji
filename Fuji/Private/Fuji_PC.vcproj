@@ -261,14 +261,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\Display.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Display_Internal.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Source\Image.cpp"
 				>
 			</File>
@@ -314,6 +306,14 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFDebug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFDisplay.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFDisplay_Internal.h"
 				>
 			</File>
 			<File
@@ -1442,10 +1442,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Include\Display.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Include\Fuji.h"
 				>
 			</File>
@@ -1495,6 +1491,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFDebug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFDisplay.h"
 				>
 			</File>
 			<File

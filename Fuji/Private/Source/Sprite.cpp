@@ -1,7 +1,7 @@
 #include "Fuji.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "MFView.h"
 #include "Sprite.h"
 #include "MFPrimitive.h"

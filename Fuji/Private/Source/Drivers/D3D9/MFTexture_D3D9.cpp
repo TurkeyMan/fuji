@@ -16,7 +16,7 @@
 
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "MFPtrList.h"
 

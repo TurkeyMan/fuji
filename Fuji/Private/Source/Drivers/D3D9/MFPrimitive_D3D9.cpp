@@ -20,7 +20,7 @@
 	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_D3D9
 #endif
 
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFView.h"
 #include "MFVector.h"
 #include "MFMatrix.h"

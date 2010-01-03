@@ -13,7 +13,7 @@
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "../MFRenderer_D3D9.h"
 #include "Materials/MFMat_Standard.h"

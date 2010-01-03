@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFHeap.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "MFSystem.h"
 
@@ -85,11 +85,11 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
 	}
 }
 
-void MFView_SetCustomProjection(MFMatrix &projectionMatrix)
+void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
 {
 	pCurrentView->projection = projectionMatrix;
 
-	pCurrentView->isOrtho = false;
+	pCurrentView->isOrtho = !bYIsUp;
 	pCurrentView->customProjection = true;
 	pCurrentView->projDirty = false;
 	pCurrentView->viewProjDirty = true;
@@ -110,12 +110,13 @@ void MFView_SetProjection()
 {
 	MFCALLSTACK;
 
-	if(pCurrentView->isOrtho)
+	if(pCurrentView->customProjection || pCurrentView->isOrtho)
 	{
 		pCurrentView->isOrtho = false;
 		pCurrentView->viewDirty = true;
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
+		pCurrentView->customProjection = false;
 	}
 }
 
@@ -123,12 +124,13 @@ void MFView_SetOrtho(MFRect *pOrthoRect)
 {
 	MFCALLSTACK;
 
-	if(!pCurrentView->isOrtho || pOrthoRect)
+	if(pCurrentView->customProjection || !pCurrentView->isOrtho || pOrthoRect)
 	{
 		pCurrentView->isOrtho = true;
 		pCurrentView->viewDirty = true;
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
+		pCurrentView->customProjection = false;
 
 		if(pOrthoRect)
 		{

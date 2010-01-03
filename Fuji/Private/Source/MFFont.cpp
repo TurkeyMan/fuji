@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFHeap.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "MFFileSystem.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"

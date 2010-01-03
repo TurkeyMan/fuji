@@ -25,7 +25,7 @@
 #include "MFView.h"
 #include "MFTexture_Internal.h"
 #include "MFRenderer.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "Materials/MFMat_Standard.h"
 
 #include "MFOpenGL.h"

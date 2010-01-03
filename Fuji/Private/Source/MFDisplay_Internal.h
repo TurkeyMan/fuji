@@ -1,7 +1,7 @@
 #if !defined(_DISPLAY_INTERNAL_H)
 #define _DISPLAY_INTERNAL_H
 
-#include "Display.h"
+#include "MFDisplay.h"
 
 // internal functions
 void MFDisplay_InitModule();

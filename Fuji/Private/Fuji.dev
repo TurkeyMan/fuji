@@ -50,16 +50,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit3]
-FileName=Include\Display.h
-CompileCpp=1
-Folder=Include
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit4]
 FileName=Include\Fuji.h
 CompileCpp=1
 Folder=Include
@@ -69,7 +59,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit5]
+[Unit4]
 FileName=Include\Image.h
 CompileCpp=1
 Folder=Include
@@ -79,7 +69,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit6]
+[Unit5]
 FileName=Include\IniFile.h
 CompileCpp=1
 Folder=Include
@@ -89,7 +79,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit7]
+[Unit6]
 FileName=Include\MFArray.h
 CompileCpp=1
 Folder=Include
@@ -99,7 +89,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit8]
+[Unit7]
 FileName=Include\MFBoundingVolume.h
 CompileCpp=1
 Folder=Include
@@ -109,7 +99,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit9]
+[Unit8]
 FileName=Include\MFCallstack.h
 CompileCpp=1
 Folder=Include
@@ -119,7 +109,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit10]
+[Unit9]
 FileName=Include\MFCollision.h
 CompileCpp=1
 Folder=Include
@@ -129,7 +119,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit11]
+[Unit10]
 FileName=Include\MFCommandLine.h
 CompileCpp=1
 Folder=Include
@@ -139,8 +129,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit12]
+[Unit11]
 FileName=Include\MFDebug.h
+CompileCpp=1
+Folder=Include
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit12]
+FileName=Include\MFDisplay.h
 CompileCpp=1
 Folder=Include
 Compile=1
@@ -532,26 +532,6 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit52]
-FileName=Source\Display.cpp
-CompileCpp=1
-Folder=Source
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit53]
-FileName=Source\Display_Internal.h
-CompileCpp=1
-Folder=Source
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit54]
 FileName=Source\Image.cpp
 CompileCpp=1
 Folder=Source
@@ -561,7 +541,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit55]
+[Unit53]
 FileName=Source\MFBoundingVolume.cpp
 CompileCpp=1
 Folder=Source
@@ -571,7 +551,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit56]
+[Unit54]
 FileName=Source\MFCallstack.cpp
 CompileCpp=1
 Folder=Source
@@ -581,7 +561,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit57]
+[Unit55]
 FileName=Source\MFCallstack_Internal.h
 CompileCpp=1
 Folder=Source
@@ -591,7 +571,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit58]
+[Unit56]
 FileName=Source\MFCollision.cpp
 CompileCpp=1
 Folder=Source
@@ -601,7 +581,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit59]
+[Unit57]
 FileName=Source\MFCollision_Internal.h
 CompileCpp=1
 Folder=Source
@@ -611,7 +591,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit60]
+[Unit58]
 FileName=Source\MFCommandLine.cpp
 CompileCpp=1
 Folder=Source
@@ -621,8 +601,28 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit61]
+[Unit59]
 FileName=Source\MFDebug.cpp
+CompileCpp=1
+Folder=Source
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit60]
+FileName=Source\MFDisplay.cpp
+CompileCpp=1
+Folder=Source
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit61]
+FileName=Source\MFDisplay_Internal.h
 CompileCpp=1
 Folder=Source
 Compile=1

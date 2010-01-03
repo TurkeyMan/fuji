@@ -20,7 +20,7 @@
 #include "MFView.h"
 
 #include "MFMesh_Internal.h"
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFRenderer.h"
 #include "MFRenderer_D3D9.h"
 

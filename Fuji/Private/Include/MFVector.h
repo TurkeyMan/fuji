@@ -38,6 +38,8 @@ public:
 	static const MFVector one;
 	static const MFVector identity;
 	static const MFVector up;
+	static const MFVector right;
+	static const MFVector forward;
 
 	static const MFVector red;
 	static const MFVector green;

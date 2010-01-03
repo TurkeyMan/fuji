@@ -5,7 +5,7 @@
 #define _WIN32_WINNT 0x501
 #define WM_INPUT 0x00FF
 
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFRenderer_Internal.h"
 #include "DebugMenu_Internal.h"
 #include "MFSystem.h"

@@ -52,11 +52,12 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
  * Set a custom projection matrix.
  * Configure the projection to use a custom projection matrix.
  * @param projectionMatrix Matrix to be used as the custom projection matrix.
+ * @param bYIsUp Set to true is the Y axis extends in the 'upward' direction. (ie. towards the top of the screen)
  * @return None.
  * @see MFView_SetProjection()
  * @see MFView_SetOrtho()
  */
-void MFView_SetCustomProjection(MFMatrix &projectionMatrix);
+void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp);
 
 /**
  * Set the aspect ratio.
