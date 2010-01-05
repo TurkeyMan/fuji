@@ -228,7 +228,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 		// we need to take a copy of this memory if flagged to do so...
 		if(ownCopy)
 		{
-			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)MFALIGN((char*)pTexture->pTemplateData->pSurfaces + sizeof(MFTextureSurfaceLevel)*levelCount, 0x100);
+			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pTexture->pTemplateData + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount, 0x100);
 			MFCopyMemory(pTexture->pTemplateData->pSurfaces[0].pImageData, pData, imageSize);
 		}
 		else
