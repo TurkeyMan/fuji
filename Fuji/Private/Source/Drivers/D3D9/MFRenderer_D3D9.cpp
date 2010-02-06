@@ -235,6 +235,14 @@ void MFRenderer_DestroyDisplay()
 
 void MFRenderer_ResetDisplay()
 {
+	// free resources
+	void MFTexture_Release();
+	MFTexture_Release();
+
+	pRenderTarget->Release();
+	pZTarget->Release();
+
+	// setup present params
 	D3DPRESENT_PARAMETERS present;
 	ZeroMemory(&present, sizeof(present));
 
@@ -280,9 +288,10 @@ void MFRenderer_ResetDisplay()
 	if (!pd3dDevice)
 		return;
 
+	// reset the device
 	HRESULT hr;
 	hr = pd3dDevice->Reset(&present);
-	
+
 	switch(hr)
 	{
 		case D3DERR_DEVICELOST:
@@ -296,6 +305,16 @@ void MFRenderer_ResetDisplay()
 			break;
 		case D3D_OK:
 			MFRenderer_ResetViewport();
+	}
+
+	// recreate resources
+	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
+	pd3dDevice->GetDepthStencilSurface(&pZTarget);
+
+	if(SUCCEEDED(hr))
+	{
+		void MFTexture_Recreate();
+		MFTexture_Recreate();
 	}
 }
 

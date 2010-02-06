@@ -39,6 +39,47 @@ void MFTexture_DeinitModulePlatformSpecific()
 {
 }
 
+void MFTexture_Release()
+{
+	MFTexture **ppTI = gTextureBank.Begin();
+	while(*ppTI)
+	{
+		MFTexture *pTex = *ppTI;
+		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
+
+		if(pTemplate->flags & TEX_RenderTarget)
+		{
+			IDirect3DTexture9 *pD3DTex = (IDirect3DTexture9*)pTex->pInternalData;
+
+			// release the old render target
+			pD3DTex->Release();
+
+			pTex->pInternalData = NULL;
+		}
+
+		++ppTI;
+	}
+}
+
+void MFTexture_Recreate()
+{
+	MFTexture **ppTI = gTextureBank.Begin();
+	while(*ppTI)
+	{
+		MFTexture *pTex = *ppTI;
+		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
+
+		if(pTemplate->flags & TEX_RenderTarget)
+		{
+			// recreate a new one
+			D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D9);
+			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
+		}
+
+		++ppTI;
+	}
+}
+
 // interface functions
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
 {
