@@ -55,7 +55,12 @@ bool MFIniLine::GetBool(int index)
 {
 	if(index >= stringCount)
 		return false;
-	return atoi(GetString(index)) != 0;
+	const char *pString = GetString(index);
+	if(!MFString_CaseCmp(pString, "true") | !MFString_CaseCmp(pString, "yes") | !MFString_CaseCmp(pString, "on") | !MFString_CaseCmp(pString, "enabled"))
+		return true;
+	else if(!MFString_CaseCmp(pString, "false") | !MFString_CaseCmp(pString, "no") | !MFString_CaseCmp(pString, "off") | !MFString_CaseCmp(pString, "disabled"))
+		return false;
+	return atoi(pString) != 0;
 }
 
 MFVector MFIniLine::GetVector2(int index)
