@@ -233,9 +233,19 @@ const char* MFStr_TruncateExtension(const char *pFilename);
  * @param pFilename String containing the filename to compare against.
  * @param ppMatchDirectory Cant remember what this is used for. Dont use it...
  * @param bCaseSensitive Perform the pattern match with case sensitivity.
- * @return bool Returns true if the pattern matches the filename.
+ * @return Returns true if the pattern matches the filename.
  */
 bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL, bool bCaseSensitive = false);
+
+/**
+ * URL encode a string.
+ * Encodes a string for URL use in a URL or HTTP 'POST' content.
+ * @param pString String to encode.
+ * @param pExcludeChars A string containing characters to be excluded from URL encoding.
+ * @return Returns the URL encoded string.
+ * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
+ */
+const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars = NULL);
 
 /**
  * Get a formatted a string.

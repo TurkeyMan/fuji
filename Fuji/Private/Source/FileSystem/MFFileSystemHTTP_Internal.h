@@ -10,6 +10,8 @@ struct MFFileHTTPData
 	char *pPath;
 	int port;
 
+	char *pArgString;
+
 	char *pCache;
 	uint32 cacheSize;
 	uint32 cacheStart;

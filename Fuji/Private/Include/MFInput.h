@@ -228,10 +228,10 @@ struct MFTouchPanelState
 		int phase;
 		int flags;		
 	};
-	
+
 	Contact contacts[20];
 	int numContacts;
-	
+
 	bool bDidShake;
 };
 

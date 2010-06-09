@@ -239,13 +239,47 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	int serverLen = MFString_Length(pServer) + 1;
 	int pathLen = MFString_Length(pPath) + 1;
+	int argLen = 0;
 
 	MFCopyMemory(&pHTTPData->address, pAddrInfo->pAddress, sizeof(MFSocketAddressInet));
 	pHTTPData->pServer = (char*)&pHTTPData[1];
 	pHTTPData->pPath = pHTTPData->pServer + serverLen;
 	pHTTPData->port = pHTTP->port;
-	pHTTPData->pCache = pHTTPData->pPath + pathLen;
-	pHTTPData->cacheSize = gDefaults.filesys.maxHTTPFileCache - (serverLen + pathLen);
+
+	// calculate args
+	pHTTPData->pArgString = NULL;
+
+	if(pHTTP->pPostArgs)
+	{
+		pHTTPData->pArgString = pHTTPData->pPath + pathLen;
+
+		// build the string from the supplied args
+		for(int a=0; a<pHTTP->numPostArgs; ++a)
+		{
+			switch(pHTTP->pPostArgs[a].type)
+			{
+				case MFFileHTTPRequestArg::AT_Int:
+					argLen += sprintf(pHTTPData->pArgString + argLen, "%s%s=%d", argLen ? "&" : "", pHTTP->pPostArgs[a].pArg, pHTTP->pPostArgs[a].iValue);
+					break;
+				case MFFileHTTPRequestArg::AT_Float:
+					argLen += sprintf(pHTTPData->pArgString + argLen, "%s%s=%g", argLen ? "&" : "", pHTTP->pPostArgs[a].pArg, pHTTP->pPostArgs[a].fValue);
+					break;
+				case MFFileHTTPRequestArg::AT_String:
+					argLen += sprintf(pHTTPData->pArgString + argLen, "%s%s=%s", argLen ? "&" : "", pHTTP->pPostArgs[a].pArg, pHTTP->pPostArgs[a].pValue);
+					break;
+			}
+		}
+
+		// URL encode the arg string
+		const char *pEncoded = MFStr_URLEncodeString(pHTTPData->pArgString);
+
+		// and copy the encoded version into the buffer
+		MFString_Copy(pHTTPData->pArgString, pEncoded);
+		argLen = MFString_Length(pHTTPData->pArgString);
+	}
+
+	pHTTPData->pCache = pHTTPData->pPath + pathLen + argLen;
+	pHTTPData->cacheSize = gDefaults.filesys.maxHTTPFileCache - (serverLen + pathLen + argLen);
 	pHTTPData->cacheStart = 0;
 
 	MFString_Copy(pHTTPData->pServer, pServer);
@@ -299,7 +333,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 	MFFileHTTPData *pHTTPData = (MFFileHTTPData*)fileHandle->pFilesysData;
 
-	const char *pHeaderRequest = MFStr("GET %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\nRange: bytes=%d-%d\nRequest-Range: bytes=%d-%d\n\n", pHTTPData->pPath, pHTTPData->pServer, pHTTPData->port, (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1));
+	const char *pHeaderRequest = MFStr("$s %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\nRange: bytes=%d-%d\nRequest-Range: bytes=%d-%d\n\n%s", pHTTPData->pArgString ? "POST" : "GET", pHTTPData->pPath, pHTTPData->pServer, pHTTPData->port, (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), pHTTPData->pArgString ? pHTTPData->pArgString : "");
 
 	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 	if(MFSockets_Connect(socket, pHTTPData->address))

@@ -10,6 +10,8 @@
 #if !defined(_MFSOCKETS_H)
 #define _MFSOCKETS_H
 
+#define MFSOCKET_ERROR -1
+
 /**
  * Represents a Fuji socket.
  * Represents a Fuji socket.

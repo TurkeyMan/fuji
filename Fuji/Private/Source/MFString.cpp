@@ -258,6 +258,33 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
 	return false;
 }
 
+const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars)
+{
+	char *pBuffer = &gStringBuffer[gStringOffset];
+
+	int sourceLen = MFString_Length(pString);
+	int destLen = 0;
+
+	for(int a=0; a<sourceLen; ++a)
+	{
+		int c = (uint8)pString[a];
+		if(MFIsAlphaNumeric(c) || MFString_Chr("-_.!~*'()", c) || MFString_Chr(pExcludeChars, c))
+			pBuffer[destLen++] = (char)c;
+		else if(c == ' ')
+			pBuffer[destLen++] = '+';
+		else
+			destLen += sprintf(pBuffer + destLen, "%%%02X", c);
+	}
+
+	pBuffer[destLen] = 0;
+
+	gStringOffset += destLen+1;
+	if(gStringOffset >= sizeof(gStringBuffer) - 1024)
+		gStringOffset = 0;
+
+	return pBuffer;
+}
+
 bool MFString_IsNumber(const char *pString, bool bAllowHex)
 {
 	int numDigits = 0;
