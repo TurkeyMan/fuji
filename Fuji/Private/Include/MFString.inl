@@ -133,6 +133,15 @@ inline char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
 	return pBuffer;
 }
 
+inline char* MFString_CopyUntil(char *pBuffer, const char *pString, int terminator)
+{
+	char *s = pBuffer;
+	while(*pString && *pString != terminator)
+		*pBuffer++ = *pString++;
+	*pBuffer = 0;
+	return s;
+}
+
 inline char* MFString_Cat(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;

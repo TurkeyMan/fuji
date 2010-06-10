@@ -81,6 +81,17 @@ char* MFString_Copy(char *pBuffer, const char *pString);
 char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
 
 /**
+ * Copy a string with custom terminator.
+ * Copies characters from the source string to the target buffer until reaching the specified terminating character.
+ * @param pBuffer Target buffer to receive a copy of the string.
+ * @param pString Source string.
+ * @param terminator Terminating character.
+ * @return \a pBuffer which can be used as a paramater to other functions.
+ * @see MFString_Copy()
+ */
+char* MFString_CopyUntil(char *pBuffer, const char *pString, int terminator);
+
+/**
  * Concatinate a string.
  * Concatinate the source string with the target buffer.
  * @param pBuffer Target buffer to receive the concatinated string.
