@@ -120,6 +120,47 @@ enum TextureFlags
 	TEX_CopyMemory = MFBIT(8)			/**< Takes a copy of the image buffer when calling MFTexture_CreateFromRawData() */
 };
 
+/**
+ * Scaling algorithm.
+ * Supported scaling algorithms.
+ */
+enum MFScalingAlgorithm
+{
+	SA_Unknown = -1,
+	SA_None = 0,	// no scaling
+	SA_Nearest,		// nearest filtering: any size
+	SA_Bilinear,	// bilinear filtering: any size
+	SA_Box,			// box filtering: 1/2x (common for mip generation)
+	SA_HQX,			// 'High Quality nX' algorithm: 2x, 3x, 4x
+	SA_AdvMAME,		// 'Advance MAME' algorithm: 2x, 3x, 4x
+	SA_Eagle,		// 'Eagle' algorithm: 2x
+	SA_SuperEagle,	// 'Super Eagle' algorithm: 2x
+	SA_2xSaI,		// '2x Scale and Interpolate' algorithm: 2x
+	SA_Super2xSaI,	// 'Super 2x Scale and Interpolate' algorithm: 2x
+
+	SA_Max,
+	SA_ForceInt = 0x7FFFFFFF
+};
+
+/**
+ * Image scaling data.
+ * Image scaling data.
+ */
+struct MFScaleImage
+{
+	void *pSourceImage;
+	int sourceWidth;
+	int sourceHeight;
+	int sourceStride;
+
+	void *pTargetBuffer;
+	int targetWidth;
+	int targetHeight;
+	int targetStride;
+
+	MFTextureFormat sourceFormat;
+	MFScalingAlgorithm algorithm;
+};
 
 // interface functions
 
@@ -164,6 +205,27 @@ MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFT
  * @see MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFTexture_IsAvailableOnPlatform()
  */
 MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
+
+void MFTexture_ScaleImage(MFScaleImage *pScaleData);
+
+/**
+ * Create a scaled texture from raw data.
+ * Creates a texture from a raw data buffer that us scaled using a given algorithm.
+ * @param pName Name of the texture being created.
+ * @param pData Pointer to a buffer containing the image data
+ * @param sourceWidth Source image width.
+ * @param sourceHeight Source image height.
+ * @param texWidth Texture width.
+ * @param texHeight Texture height.
+ * @param format Format of the image data being read. Only formats supported by the platform and TexFmt_A8R8G8B8 can be used.
+ * @param algorithm Scaling algorithm to be used.
+ * @param flags Texture creation flags.
+ * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
+ * @return Pointer to an MFTexture structure representing the newly created texture.
+ * @remarks If TexFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFTexture_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
+ * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFTexture_IsAvailableOnPlatform()
+ */
+MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFTextureFormat format, MFScalingAlgorithm algorithm, uint32 flags = 0, uint32 *pPalette = 0);
 
 /**
  * Creates a render target texture.
