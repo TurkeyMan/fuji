@@ -2,7 +2,7 @@
 
 #if MF_DISPLAY == MF_DRIVER_IPHONE
 
-#include "Display_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "MFRenderer_Internal.h"
 
 MFRect gCurrentViewport;

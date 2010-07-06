@@ -12,7 +12,6 @@
 		326BB77110D9133E00E014B5 /* MFIntSound.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3B710D9133D00E014B5 /* MFIntSound.h */; };
 		326BB77210D9133E00E014B5 /* MFIntTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3B810D9133D00E014B5 /* MFIntTexture.h */; };
 		326BB77310D9133E00E014B5 /* DebugMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3B910D9133D00E014B5 /* DebugMenu.h */; };
-		326BB77410D9133E00E014B5 /* Display.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3BA10D9133D00E014B5 /* Display.h */; };
 		326BB77510D9133E00E014B5 /* MFFileSystemCachedFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3BC10D9133D00E014B5 /* MFFileSystemCachedFile.h */; };
 		326BB77610D9133E00E014B5 /* MFFileSystemHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3BD10D9133D00E014B5 /* MFFileSystemHTTP.h */; };
 		326BB77710D9133E00E014B5 /* MFFileSystemMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB3BE10D9133D00E014B5 /* MFFileSystemMemory.h */; };
@@ -71,8 +70,6 @@
 		326BB8E010D9133F00E014B5 /* MFIntTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB63A10D9133E00E014B5 /* MFIntTexture.cpp */; };
 		326BB8E110D9133F00E014B5 /* DebugMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB63B10D9133E00E014B5 /* DebugMenu.cpp */; };
 		326BB8E210D9133F00E014B5 /* DebugMenu_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB63C10D9133E00E014B5 /* DebugMenu_Internal.h */; };
-		326BB8E310D9133F00E014B5 /* Display.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB63D10D9133E00E014B5 /* Display.cpp */; };
-		326BB8E410D9133F00E014B5 /* Display_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB63E10D9133E00E014B5 /* Display_Internal.h */; };
 		326BB96F10D9133F00E014B5 /* MFFileSystemCachedFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6F410D9133E00E014B5 /* MFFileSystemCachedFile.cpp */; };
 		326BB97010D9133F00E014B5 /* MFFileSystemCachedFile_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 326BB6F510D9133E00E014B5 /* MFFileSystemCachedFile_Internal.h */; };
 		326BB97110D9133F00E014B5 /* MFFileSystemHTTP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 326BB6F610D9133E00E014B5 /* MFFileSystemHTTP.cpp */; };
@@ -347,6 +344,9 @@
 		AE82AD9B10E5AADB004C6181 /* FujiView_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD9510E5AADB004C6181 /* FujiView_IPhone.mm */; };
 		AE82AD9C10E5AADB004C6181 /* MFFileSystemNative_IPhone.h in Headers */ = {isa = PBXBuildFile; fileRef = AE82AD9610E5AADB004C6181 /* MFFileSystemNative_IPhone.h */; };
 		AE82AD9D10E5AADB004C6181 /* MFFileSystemNative_IPhone.mm in Sources */ = {isa = PBXBuildFile; fileRef = AE82AD9710E5AADB004C6181 /* MFFileSystemNative_IPhone.mm */; };
+		AE9887D010F20D370032BBD5 /* MFDisplay_Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = AE9887CE10F20D370032BBD5 /* MFDisplay_Internal.h */; };
+		AE9887D110F20D370032BBD5 /* MFDisplay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE9887CF10F20D370032BBD5 /* MFDisplay.cpp */; };
+		AE9887D310F20D660032BBD5 /* MFDisplay.h in Headers */ = {isa = PBXBuildFile; fileRef = AE9887D210F20D660032BBD5 /* MFDisplay.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -359,7 +359,6 @@
 		326BB3B710D9133D00E014B5 /* MFIntSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFIntSound.h; sourceTree = "<group>"; };
 		326BB3B810D9133D00E014B5 /* MFIntTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFIntTexture.h; sourceTree = "<group>"; };
 		326BB3B910D9133D00E014B5 /* DebugMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugMenu.h; sourceTree = "<group>"; };
-		326BB3BA10D9133D00E014B5 /* Display.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Display.h; sourceTree = "<group>"; };
 		326BB3BC10D9133D00E014B5 /* MFFileSystemCachedFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFFileSystemCachedFile.h; sourceTree = "<group>"; };
 		326BB3BD10D9133D00E014B5 /* MFFileSystemHTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFFileSystemHTTP.h; sourceTree = "<group>"; };
 		326BB3BE10D9133D00E014B5 /* MFFileSystemMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFFileSystemMemory.h; sourceTree = "<group>"; };
@@ -428,8 +427,6 @@
 		326BB63A10D9133E00E014B5 /* MFIntTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFIntTexture.cpp; sourceTree = "<group>"; };
 		326BB63B10D9133E00E014B5 /* DebugMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DebugMenu.cpp; sourceTree = "<group>"; };
 		326BB63C10D9133E00E014B5 /* DebugMenu_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DebugMenu_Internal.h; sourceTree = "<group>"; };
-		326BB63D10D9133E00E014B5 /* Display.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Display.cpp; sourceTree = "<group>"; };
-		326BB63E10D9133E00E014B5 /* Display_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Display_Internal.h; sourceTree = "<group>"; };
 		326BB64210D9133E00E014B5 /* MFMat_Effect_D3D9.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFMat_Effect_D3D9.cpp; sourceTree = "<group>"; };
 		326BB64310D9133E00E014B5 /* MFMat_Standard_D3D9.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFMat_Standard_D3D9.cpp; sourceTree = "<group>"; };
 		326BB64410D9133E00E014B5 /* MFMaterial_D3D9.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFMaterial_D3D9.cpp; sourceTree = "<group>"; };
@@ -727,6 +724,9 @@
 		AE82AD9510E5AADB004C6181 /* FujiView_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FujiView_IPhone.mm; sourceTree = "<group>"; };
 		AE82AD9610E5AADB004C6181 /* MFFileSystemNative_IPhone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFFileSystemNative_IPhone.h; sourceTree = "<group>"; };
 		AE82AD9710E5AADB004C6181 /* MFFileSystemNative_IPhone.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MFFileSystemNative_IPhone.mm; sourceTree = "<group>"; };
+		AE9887CE10F20D370032BBD5 /* MFDisplay_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFDisplay_Internal.h; sourceTree = "<group>"; };
+		AE9887CF10F20D370032BBD5 /* MFDisplay.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MFDisplay.cpp; sourceTree = "<group>"; };
+		AE9887D210F20D660032BBD5 /* MFDisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MFDisplay.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -782,7 +782,6 @@
 			children = (
 				326BB3B510D9133D00E014B5 /* Asset */,
 				326BB3B910D9133D00E014B5 /* DebugMenu.h */,
-				326BB3BA10D9133D00E014B5 /* Display.h */,
 				326BB3BB10D9133D00E014B5 /* FileSystem */,
 				326BB3C110D9133D00E014B5 /* Fuji.h */,
 				326BB3C210D9133D00E014B5 /* Image.h */,
@@ -797,6 +796,7 @@
 				326BB3CB10D9133D00E014B5 /* MFCollision.inl */,
 				326BB3CC10D9133D00E014B5 /* MFCommandLine.h */,
 				326BB3CD10D9133D00E014B5 /* MFDebug.h */,
+				AE9887D210F20D660032BBD5 /* MFDisplay.h */,
 				326BB3CE10D9133D00E014B5 /* MFDriver.h */,
 				326BB3CF10D9133D00E014B5 /* MFDriver_Plugin.h */,
 				326BB3D010D9133D00E014B5 /* MFFileSystem.h */,
@@ -882,8 +882,6 @@
 				326BB63710D9133E00E014B5 /* Asset */,
 				326BB63B10D9133E00E014B5 /* DebugMenu.cpp */,
 				326BB63C10D9133E00E014B5 /* DebugMenu_Internal.h */,
-				326BB63D10D9133E00E014B5 /* Display.cpp */,
-				326BB63E10D9133E00E014B5 /* Display_Internal.h */,
 				326BB63F10D9133E00E014B5 /* Drivers */,
 				326BB6F310D9133E00E014B5 /* FileSystem */,
 				326BB6FE10D9133E00E014B5 /* Image.cpp */,
@@ -900,6 +898,8 @@
 				326BB72A10D9133E00E014B5 /* MFCollision_Internal.h */,
 				326BB72B10D9133E00E014B5 /* MFCommandLine.cpp */,
 				326BB72C10D9133E00E014B5 /* MFDebug.cpp */,
+				AE9887CE10F20D370032BBD5 /* MFDisplay_Internal.h */,
+				AE9887CF10F20D370032BBD5 /* MFDisplay.cpp */,
 				326BB72D10D9133E00E014B5 /* MFFileSystem.cpp */,
 				326BB72E10D9133E00E014B5 /* MFFileSystem_Internal.h */,
 				326BB72F10D9133E00E014B5 /* MFFont.cpp */,
@@ -1567,7 +1567,6 @@
 				326BB77110D9133E00E014B5 /* MFIntSound.h in Headers */,
 				326BB77210D9133E00E014B5 /* MFIntTexture.h in Headers */,
 				326BB77310D9133E00E014B5 /* DebugMenu.h in Headers */,
-				326BB77410D9133E00E014B5 /* Display.h in Headers */,
 				326BB77510D9133E00E014B5 /* MFFileSystemCachedFile.h in Headers */,
 				326BB77610D9133E00E014B5 /* MFFileSystemHTTP.h in Headers */,
 				326BB77710D9133E00E014B5 /* MFFileSystemMemory.h in Headers */,
@@ -1622,7 +1621,6 @@
 				326BB7A810D9133E00E014B5 /* Util.h in Headers */,
 				326BB7A910D9133E00E014B5 /* Video.h in Headers */,
 				326BB8E210D9133F00E014B5 /* DebugMenu_Internal.h in Headers */,
-				326BB8E410D9133F00E014B5 /* Display_Internal.h in Headers */,
 				326BB97010D9133F00E014B5 /* MFFileSystemCachedFile_Internal.h in Headers */,
 				326BB97210D9133F00E014B5 /* MFFileSystemHTTP_Internal.h in Headers */,
 				326BB97410D9133F00E014B5 /* MFFileSystemMemory_Internal.h in Headers */,
@@ -1673,6 +1671,8 @@
 				AE6EDFA510E8E32500E3CE09 /* SysLogo64.h in Headers */,
 				AE6EDFA610E8E32500E3CE09 /* SysLogo256.h in Headers */,
 				AE6EDFB510E8E97B00E3CE09 /* MFInput_IPhone.h in Headers */,
+				AE9887D010F20D370032BBD5 /* MFDisplay_Internal.h in Headers */,
+				AE9887D310F20D660032BBD5 /* MFDisplay.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1725,7 +1725,6 @@
 				326BB8DF10D9133F00E014B5 /* MFIntSound.cpp in Sources */,
 				326BB8E010D9133F00E014B5 /* MFIntTexture.cpp in Sources */,
 				326BB8E110D9133F00E014B5 /* DebugMenu.cpp in Sources */,
-				326BB8E310D9133F00E014B5 /* Display.cpp in Sources */,
 				326BB96F10D9133F00E014B5 /* MFFileSystemCachedFile.cpp in Sources */,
 				326BB97110D9133F00E014B5 /* MFFileSystemHTTP.cpp in Sources */,
 				326BB97310D9133F00E014B5 /* MFFileSystemMemory.cpp in Sources */,
@@ -1946,6 +1945,7 @@
 				AE6EDEE910E89E1200E3CE09 /* ioapi.c in Sources */,
 				AE6EDEEB10E89E1C00E3CE09 /* unzip.c in Sources */,
 				AE6EDEEE10E89E2300E3CE09 /* zip.c in Sources */,
+				AE9887D110F20D370032BBD5 /* MFDisplay.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

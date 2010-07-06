@@ -162,8 +162,9 @@ struct MFSocketAddressInet : public MFSocketAddress
 struct MFSocketAddressInet6 : public MFSocketAddress
 {
 	int port;				/**< Transport-level port number */
-	int flowInfo;			/**< Ipv6 flow information */
+	uint32 flowInfo;		/**< Ipv6 flow information */
 	MFInet6Address address;	/**< IPv6 address */
+	uint32 scopeId;			/**< IPv6 scope ID */
 };
 
 /**

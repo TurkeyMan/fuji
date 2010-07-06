@@ -89,28 +89,58 @@ sockaddr* MFSocketsPC_GetSockaddr(const MFSocketAddress *pAddress, int *pAddrLen
 
 	sockaddr *pSockAddr = NULL;
 
-	if(pAddress->family == MFAF_Inet)
+	switch(pAddress->family)
 	{
-		MFDebug_Assert(pAddress->cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
+		case MFAF_Inet:
+		{
+			MFDebug_Assert(pAddress->cbSize == sizeof(MFSocketAddressInet), "address size does not match MFSocketAddressInet.");
 
-		MFSocketAddressInet *pInet = (MFSocketAddressInet*)pAddress;
+			MFSocketAddressInet *pInet = (MFSocketAddressInet*)pAddress;
 
-		static sockaddr_in ain;
-		pSockAddr = (sockaddr*)&ain;
-		*pAddrLen = sizeof(sockaddr_in);
+			static sockaddr_in ain;
+			pSockAddr = (sockaddr*)&ain;
+			*pAddrLen = sizeof(sockaddr_in);
 
-		MFZeroMemory(&ain, sizeof(sockaddr_in));
-		ain.sin_family = (short)pInet->family;
-		ain.sin_addr.S_un.S_un_b.s_b1 = pInet->address.b1;
-		ain.sin_addr.S_un.S_un_b.s_b2 = pInet->address.b2;
-		ain.sin_addr.S_un.S_un_b.s_b3 = pInet->address.b3;
-		ain.sin_addr.S_un.S_un_b.s_b4 = pInet->address.b4;
-		ain.sin_port = (uint16)pInet->port;
-		MFEndian_HostToBig(&ain.sin_port);
-	}
-	else
-	{
-		MFDebug_Assert(false, "Unsupported socket family.");
+			MFZeroMemory(&ain, sizeof(sockaddr_in));
+			ain.sin_family = (short)pInet->family;
+			ain.sin_addr.S_un.S_un_b.s_b1 = pInet->address.b1;
+			ain.sin_addr.S_un.S_un_b.s_b2 = pInet->address.b2;
+			ain.sin_addr.S_un.S_un_b.s_b3 = pInet->address.b3;
+			ain.sin_addr.S_un.S_un_b.s_b4 = pInet->address.b4;
+			ain.sin_port = (uint16)pInet->port;
+			MFEndian_HostToBig(&ain.sin_port);
+			break;
+		}
+		case MFAF_Inet6:
+		{
+			MFDebug_Assert(pAddress->cbSize == sizeof(MFSocketAddressInet6), "address size does not match MFSocketAddressInet6.");
+
+			MFSocketAddressInet6 *pInet6 = (MFSocketAddressInet6*)pAddress;
+
+			static sockaddr_in6 ain6;
+			pSockAddr = (sockaddr*)&ain6;
+			*pAddrLen = sizeof(sockaddr_in6);
+
+			MFZeroMemory(&ain6, sizeof(sockaddr_in6));
+			ain6.sin6_family = (short)pInet6->family;
+			ain6.sin6_port = (uint16)pInet6->port;
+			MFEndian_HostToBig(&ain6.sin6_port);
+			ain6.sin6_flowinfo = pInet6->flowInfo;
+			MFEndian_HostToBig(&ain6.sin6_flowinfo);
+			ain6.sin6_scope_id = pInet6->scopeId;
+			MFEndian_HostToBig(&ain6.sin6_scope_id);
+			for(int a=0; a<8; ++a)
+			{
+				ain6.sin6_addr.u.Word[a] = pInet6->address.s[a];
+				MFEndian_HostToBig(&ain6.sin6_addr.u.Word[a]);
+			}
+			break;
+		}
+		default:
+		{
+			MFDebug_Assert(false, "Unsupported socket family.");
+			break;
+		}
 	}
 
 	return pSockAddr;
@@ -120,29 +150,62 @@ MFSocketAddress* MFSocketsPC_GetSocketAddress(const sockaddr *pSockAddress)
 {
 	MFSocketAddress *pSockAddr = NULL;
 
-	if(pSockAddress->sa_family == (int)MFAF_Inet)
+	switch(pSockAddress->sa_family)
 	{
-		static MFSocketAddressInet inet;
-		pSockAddr = &inet;
+		case MFAF_Inet:
+		{
+			static MFSocketAddressInet inet;
+			pSockAddr = &inet;
 
-		sockaddr_in *ain = (sockaddr_in*)pSockAddress;
+			sockaddr_in *ain = (sockaddr_in*)pSockAddress;
 
-		inet.cbSize = sizeof(MFSocketAddressInet);
+			inet.cbSize = sizeof(MFSocketAddressInet);
 
-		inet.family = MFAF_Inet;
+			inet.family = MFAF_Inet;
 
-		uint16 t = ain->sin_port;
-		MFEndian_BigToHost(&t);
-		inet.port = (int)t;
+			uint16 t = ain->sin_port;
+			MFEndian_BigToHost(&t);
+			inet.port = (int)t;
 
-		inet.address.b1 = ain->sin_addr.S_un.S_un_b.s_b1;
-		inet.address.b2 = ain->sin_addr.S_un.S_un_b.s_b2;
-		inet.address.b3 = ain->sin_addr.S_un.S_un_b.s_b3;
-		inet.address.b4 = ain->sin_addr.S_un.S_un_b.s_b4;
-	}
-	else
-	{
-		MFDebug_Assert(false, "Unsupported socket family.");
+			inet.address.b1 = ain->sin_addr.S_un.S_un_b.s_b1;
+			inet.address.b2 = ain->sin_addr.S_un.S_un_b.s_b2;
+			inet.address.b3 = ain->sin_addr.S_un.S_un_b.s_b3;
+			inet.address.b4 = ain->sin_addr.S_un.S_un_b.s_b4;
+			break;
+		}
+		case MFAF_Inet6:
+		{
+			static MFSocketAddressInet6 inet;
+			pSockAddr = &inet;
+
+			sockaddr_in6 *ain = (sockaddr_in6*)pSockAddress;
+
+			inet.cbSize = sizeof(MFSocketAddressInet6);
+
+			inet.family = MFAF_Inet6;
+
+			uint16 port = ain->sin6_port;
+			MFEndian_BigToHost(&port);
+			inet.port = (int)port;
+
+			inet.flowInfo = ain->sin6_flowinfo;
+			MFEndian_BigToHost(&inet.flowInfo);
+
+			inet.scopeId = ain->sin6_scope_id;
+			MFEndian_BigToHost(&inet.scopeId);
+
+			for(int a=0; a<8; ++a)
+			{
+				inet.address.s[a] = ain->sin6_addr.u.Word[a];
+				MFEndian_BigToHost(&inet.address.s[a]);
+			}
+			break;
+		}
+		default:
+		{
+			MFDebug_Assert(false, "Unsupported socket family.");
+			break;
+		}
 	}
 
 	return pSockAddr;
@@ -289,16 +352,22 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
 
 		while(pAI && numAddresses < maxNumAddresses)
 		{
-			addressInfo[numAddresses].family = (MFAddressFamily)pAI->ai_family;
-			addressInfo[numAddresses].flags = pAI->ai_flags;
-			addressInfo[numAddresses].type = (MFSocketType)pAI->ai_socktype;
-			addressInfo[numAddresses].protocol = (MFSocketProtocol)pAI->ai_protocol;
-			addressInfo[numAddresses].pCanonName = pAI->ai_canonname;
-			MFCopyMemory(&addressInfoAddress[numAddresses], MFSocketsPC_GetSocketAddress(pAI->ai_addr), pAI->ai_family == MFAF_Inet ? sizeof(MFSocketAddressInet) : sizeof(MFSocketAddressInet6));
-			addressInfo[numAddresses].pAddress = (MFSocketAddressInet*)&addressInfoAddress[numAddresses];
-			addressInfo[numAddresses].pNext = pAI->ai_next ? &addressInfo[numAddresses+1] : 0;
+			if(pAI->ai_family == MFAF_Inet || pAI->ai_family == MFAF_Inet6)
+			{
+				if(numAddresses > 0)
+					addressInfo[numAddresses-1].pNext = &addressInfo[numAddresses];
 
-			++numAddresses;
+				addressInfo[numAddresses].family = (MFAddressFamily)pAI->ai_family;
+				addressInfo[numAddresses].flags = pAI->ai_flags;
+				addressInfo[numAddresses].type = (MFSocketType)pAI->ai_socktype;
+				addressInfo[numAddresses].protocol = (MFSocketProtocol)pAI->ai_protocol;
+				addressInfo[numAddresses].pCanonName = pAI->ai_canonname;
+				MFCopyMemory(&addressInfoAddress[numAddresses], MFSocketsPC_GetSocketAddress(pAI->ai_addr), pAI->ai_family == MFAF_Inet ? sizeof(MFSocketAddressInet) : sizeof(MFSocketAddressInet6));
+				addressInfo[numAddresses].pAddress = (MFSocketAddressInet*)&addressInfoAddress[numAddresses];
+				addressInfo[numAddresses].pNext = NULL;
+				++numAddresses;
+			}
+
 			pAI = pAI->ai_next;
 		}
 
