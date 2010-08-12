@@ -33,8 +33,8 @@ MFPtrListDL<MFSound> gSoundBank;
 MFPtrListDL<MFVoice> gVoices;
 MFPtrList<MFStreamHandler> gStreamHandlers;
 
-int internalSoundDataSize = 0;
-int internalVoiceDataSize = 0;
+static int internalSoundDataSize = 0;
+static int internalVoiceDataSize = 0;
 
 static MFAudioStream *gMusicTracks;
 

@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;;&quot;$(ProjectDir)Middleware\hqx&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -119,7 +119,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;;&quot;$(ProjectDir)Middleware\hqx&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RELEASE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -196,7 +196,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)Source&quot;;&quot;$(ProjectDir)Include&quot;;&quot;$(ProjectDir)Source\Images\WINDOWS&quot;;&quot;$(ProjectDir)Middleware&quot;;&quot;$(ProjectDir)Middleware\zlib&quot;;&quot;$(ProjectDir)Middleware\angelscript\include&quot;;&quot;$(ProjectDir)Middleware\vorbis\include&quot;;&quot;$(ProjectDir)Middleware\libmad&quot;;&quot;$(ProjectDir)Middleware\lpng1212&quot;;&quot;$(ProjectDir)Middleware\hqx&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;_LIB;_RETAIL"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -398,6 +398,10 @@
 			</File>
 			<File
 				RelativePath=".\Source\MFParticleSystem_Internal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\MFPoolHeap.cpp"
 				>
 			</File>
 			<File
@@ -1559,6 +1563,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFParticleSystem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFPoolHeap.h"
 				>
 			</File>
 			<File

@@ -56,6 +56,9 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 #else
 	HRESULT hr = DirectSoundCreate8(NULL, &pDirectSound, NULL);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to create DirectSound instance.");
+	if(FAILED(hr))
+		return;
 
 	// create the primary sound buffer
 	// fill out DSBuffer creation data

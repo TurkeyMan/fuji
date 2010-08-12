@@ -121,9 +121,8 @@ inline char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
 
 	dscan = pBuffer;
 	sscan = pString;
-	while(maxChars > 0)
+	while(maxChars-- > 0)
 	{
-		--maxChars;
 		if((*dscan++ = *sscan++) == '\0')
 			break;
 	}
