@@ -207,6 +207,17 @@ void MFIni::Destroy(MFIni *pIni)
 	MFHeap_Free(pIni);
 }
 
+int MFIni::IncLineCount()
+{
+	if(++lineCount >= linesAllocated)
+	{
+		linesAllocated *= 4;
+		pLines = (MFIniLine*)MFHeap_Realloc(pLines, sizeof(MFIniLine)*linesAllocated);
+	}
+
+	return lineCount;
+}
+
 // returns how many lines it found
 const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 {
@@ -235,7 +246,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			MFDebug_Assert(bNewLine, "open bracket must be at start of line!");
 
 			// new sub section
-			int oldLineCount = ++lineCount;
+			int oldLineCount = IncLineCount();
 			pSrc = ScanRecursive(pSrc, pSrcEnd);
 			pCurrLine = &pLines[currLine];
 			pCurrLine->subtreeLineCount = lineCount - oldLineCount;
@@ -248,7 +259,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 			if(pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 			{
 				pCurrLine->terminate = 1;
-				lineCount++;
+				IncLineCount();
 			}
 			return pSrc;
 		}
@@ -256,12 +267,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 		{
 			if(bNewLine && (pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0))
 			{
-				++lineCount;
-				if(lineCount >= linesAllocated)
-				{
-					linesAllocated *= 4;
-					pLines = (MFIniLine*)MFHeap_Realloc(pLines, sizeof(MFIniLine)*linesAllocated);
-				}
+				IncLineCount();
 				pCurrLine = &pLines[currLine = lineCount];
 				InitLine(pCurrLine);
 			}
@@ -290,7 +296,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 	if(pCurrLine->stringCount != 0 || pCurrLine->subtreeLineCount != 0)
 	{
 		pCurrLine->terminate = 1;
-		lineCount++;
+		IncLineCount();
 	}
 	return pSrc;
 }

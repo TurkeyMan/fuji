@@ -94,6 +94,8 @@ protected:
 	// use recursion to scan in the lines & strings
 	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd);
 	void InitLine(MFIniLine *pLine);
+
+	int IncLineCount();
 };
 
 #endif // _MFINI_H
