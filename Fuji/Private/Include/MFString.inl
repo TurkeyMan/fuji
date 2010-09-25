@@ -77,14 +77,34 @@ inline int MFToUpper(int c)
 inline char* MFSeekNewline(char *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;
-	while(MFIsNewline(*pC)) pC++;
+	if(pC[0] == '\r' && pC[1] == '\n')
+		pC += 2;
+	else if(MFIsNewline(*pC))
+		++pC;
 	return pC;
 }
 
 inline const char* MFSeekNewline(const char *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;
-	while(MFIsNewline(*pC)) pC++;
+	if(pC[0] == '\r' && pC[1] == '\n')
+		pC += 2;
+	else if(MFIsNewline(*pC))
+		++pC;
+	return pC;
+}
+
+inline char* MFSeekNextWord(char *pC)
+{
+	while(!MFIsWhite(*pC) && !MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsWhite(*pC) || MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline const char* MFSeekNextWord(const char *pC)
+{
+	while(!MFIsWhite(*pC) && !MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsWhite(*pC) || MFIsNewline(*pC)) pC++;
 	return pC;
 }
 
@@ -98,6 +118,24 @@ inline const char* MFSkipWhite(const char *pC)
 {
 	while(MFIsWhite(*pC)) pC++;
 	return pC;
+}
+
+inline char* MFTokeniseLine(char *pString, char **ppNext)
+{
+	char *pC = pString;
+	while(!MFIsNewline(*pC) && *pC != 0) pC++;
+	if(pC[0] == '\r' && pC[1] == '\n')
+	{
+		pC[0] = 0;
+		pC += 2;
+	}
+	else if(MFIsNewline(*pC))
+	{
+		*pC++ = 0;
+	}
+	if(ppNext)
+		*ppNext = pC;
+	return pString;
 }
 
 inline int MFString_Length(const char *pString)

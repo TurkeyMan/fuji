@@ -105,7 +105,7 @@ void *MFPoolHeap::Alloc()
 		if(peakNumUsed < numUsed)
 			peakNumUsed++;
 	} 
-#endif 
+#endif
 
 	return pItem;
 }
@@ -114,12 +114,16 @@ void MFPoolHeap::Delete(void *pItem)
 {
 	if(pItem)
 	{
+#if defined(_DEBUG)
+		MFMemSet(pItem, 0xfe, itemSize);
+#endif
+
 		*(void**)pItem = pFreeList;
 		pFreeList = pItem;
 
 #if !defined(MF_RETAIL)
 		numUsed--;
-#endif 
+#endif
 	}
 }
 
