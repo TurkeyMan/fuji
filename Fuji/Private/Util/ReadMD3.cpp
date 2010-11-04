@@ -3,8 +3,8 @@
 
 #include "zlib.h"
 #include "zlib.h"
-#include "minizip/zip.h"
-#include "minizip/unzip.h"
+#include "zlib/minizip/zip.h"
+#include "zlib/minizip/unzip.h"
 
 static F3DFile *pModel;
 

@@ -82,7 +82,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
-	close((int)fileHandle->pFilesysData);
+	close((size_t)fileHandle->pFilesysData);
 	fileHandle->pFilesysData = 0;
 
 	return 0;
@@ -94,7 +94,7 @@ int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 	int bytesRead = 0;
 
-	bytesRead = read((int)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
+	bytesRead = read((size_t)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
 	if(bytesRead < 0) // read() returns -1 on error
 		bytesRead = 0;
 
@@ -109,7 +109,7 @@ int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
 
 	int bytesWritten = 0;
 
-	bytesWritten = write((int)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
+	bytesWritten = write((size_t)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
 	if(bytesWritten < 0) // write() returns -1 on error
 		bytesWritten = 0;
 
@@ -143,7 +143,7 @@ int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 			break;
 	}
 
-	off_t newOffset = lseek((int)fileHandle->pFilesysData, (long)bytes, whence);
+	off_t newOffset = lseek((size_t)fileHandle->pFilesysData, (long)bytes, whence);
 //	lseek((int)fileHandle->pFilesysData, bytes, whence);
 //	newOffset = tell((int)fileHandle->pFilesysData);
 

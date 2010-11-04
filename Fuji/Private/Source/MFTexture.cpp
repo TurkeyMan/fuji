@@ -916,7 +916,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	sceGuSetMatrix(GU_TEXTURE, (ScePspFMatrix4*)&MFMatrix::identity);
 #elif MF_RENDERER == MF_DRIVER_OPENGL
 #if !defined(MF_OPENGL_ES)
-	glBindTexture(GL_TEXTURE_2D, (uint32)pTexture->pInternalData);
+	glBindTexture(GL_TEXTURE_2D, (size_t)pTexture->pInternalData);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 #endif
 #else

@@ -86,6 +86,7 @@ LIBPNG = Middleware/lpng1212/png.o \
 	Middleware/lpng1212/pngset.o \
 	Middleware/lpng1212/pngtrans.o \
 	Middleware/lpng1212/pngvcrd.o \
+	Middleware/lpng1212/pnggccrd.o \
 	Middleware/lpng1212/pngwio.o \
 	Middleware/lpng1212/pngwrite.o \
 	Middleware/lpng1212/pngwtran.o \
@@ -228,6 +229,8 @@ OBJS := $(ZLIB) \
 	Source/MFMesh.o \
 	Source/MFModel.o \
 	Source/MFNetwork.o \
+	Source/MFObjectPool.o \
+	Source/MFPoolHeap.o \
 	Source/MFPrimitive.o \
 	Source/MFQuaternion.o \
 	Source/MFRenderer.o \
@@ -249,10 +252,13 @@ OBJS := $(ZLIB) \
 	Source/MFTextureUtil.o \
 	Source/MFTranslation.o \
 	Source/MFVector.o \
+	Source/MFVertex.o \
 	Source/MFView.o \
 	Source/Sprite.o \
 	Source/Timer.o \
 	Source/Util.o \
+	Source/Asset/MFIntModel.o \
+	Source/Asset/MFIntSound.o \
 	Source/Asset/MFIntTexture.o \
 	Source/FileSystem/MFFileSystemNative.o \
 	Source/FileSystem/MFFileSystemMemory.o \
@@ -266,6 +272,7 @@ OBJS := $(ZLIB) \
 	Source/Drivers/D3D9/MFPrimitive_D3D9.o \
 	Source/Drivers/D3D9/MFRenderer_D3D9.o \
 	Source/Drivers/D3D9/MFTexture_D3D9.o \
+	Source/Drivers/D3D9/MFVertex_D3D9.o \
 	Source/Drivers/D3D9/Materials/MFMat_Effect_D3D9.o \
 	Source/Drivers/D3D9/Materials/MFMat_Standard_D3D9.o \
 	Source/Drivers/Linux/MFFileSystemNative_Linux.o \
@@ -273,7 +280,6 @@ OBJS := $(ZLIB) \
 	Source/Drivers/Linux/MFSound_ALSA.o \
 	Source/Drivers/Linux/MFSound_Port.o \
 	Source/Drivers/Linux/MFSound_JACK.o \
-	Source/Drivers/Linux/MFSound_RTAI.o \
 	Source/Drivers/Linux/MFSystem_Linux.o \
 	Source/Drivers/Linux/MFThread_Linux.o \
 	Source/Drivers/Linux/MFTranslation_Linux.o \
@@ -300,6 +306,7 @@ OBJS := $(ZLIB) \
 	Source/Drivers/OpenGL/MFPrimitive_OpenGL.o \
 	Source/Drivers/OpenGL/MFRenderer_OpenGL.o \
 	Source/Drivers/OpenGL/MFTexture_OpenGL.o \
+	Source/Drivers/OpenGL/MFVertex_OpenGL.o \
 	Source/Drivers/OpenGL/Materials/MFMat_Standard_OpenGL.o \
 	Source/Drivers/PC/MFAuxillaryDisplay_PC.o \
 	Source/Drivers/PC/MFDebug_PC.o \
@@ -378,7 +385,15 @@ OBJS := $(ZLIB) \
 	Source/Drivers/XBox/MFSystem_XB.o \
 	Source/Drivers/XBox/MFTexture_XB.o \
 	Source/Drivers/XBox/MFTranslation_XB.o \
-	Source/Drivers/XBox/Materials/MFMat_Standard_XB.o
+	Source/Drivers/XBox/Materials/MFMat_Standard_XB.o \
+	Util/F3D.o \
+	Util/ReadASE.o \
+	Util/ReadDAE.o \
+	Util/ReadMD2.o \
+	Util/ReadMD3.o \
+	Util/ReadMEMD2.o \
+	Util/ReadOBJ.o \
+	Util/ReadX.o
 
 #-------------------------------------------------------------------
 
@@ -402,6 +417,13 @@ UTIL_OBJS := $(ZLIB) \
 	Source/MFQuaternion.o \
 	Source/Util.o \
 	Util/F3D.o \
+	Util/ReadASE.o \
+	Util/ReadDAE.o \
+	Util/ReadMD2.o \
+	Util/ReadMD3.o \
+	Util/ReadMEMD2.o \
+	Util/ReadOBJ.o \
+	Util/ReadX.o \
 	Source/FileSystem/MFFileSystemCachedFile.o \
 	Source/FileSystem/MFFileSystemHTTP.o \
 	Source/FileSystem/MFFileSystemMemory.o \

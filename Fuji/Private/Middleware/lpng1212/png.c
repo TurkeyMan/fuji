@@ -153,13 +153,13 @@ voidpf /* private */
 png_zalloc(voidpf png_ptr, uInt items, uInt size)
 {
    png_voidp ptr;
-   png_structp p=png_ptr;
+   png_structp p=(png_structp)png_ptr;
    png_uint_32 save_flags=p->flags;
    png_uint_32 num_bytes;
 
    if (items > PNG_UINT_32_MAX/size)
    {
-     png_warning (png_ptr, "Potential overflow in png_zalloc()");
+     png_warning ((png_structp)png_ptr, "Potential overflow in png_zalloc()");
      return (NULL);
    }
    num_bytes = (png_uint_32)items * size;

@@ -394,6 +394,16 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 	MFZeroMemory(pMouseState, sizeof(MFMouseState));
 }
 
+void MFInput_GetAccelerometerStateInternal(int id, MFAccelerometerState *pAccelerometerState)
+{
+	MFZeroMemory(pAccelerometerState, sizeof(MFAccelerometerState));
+}
+
+void MFInput_GetTouchPanelStateInternal(int id, MFTouchPanelState *pTouchPanelState)
+{
+	MFZeroMemory(pTouchPanelState, sizeof(MFTouchPanelState));
+}
+
 const char* MFInput_GetDeviceNameInternal(int device, int deviceID)
 {
 	switch(device)

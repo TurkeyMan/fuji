@@ -44,8 +44,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		if(pData->detailMapIndex)
 		{
 			// HACK: for compound multitexturing
-			GLuint diffuse = (GLuint)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
-			GLuint detail = (GLuint)pData->pTextures[pData->detailMapIndex]->pInternalData;
+			GLuint diffuse = (GLuint)(size_t)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			GLuint detail = (GLuint)(size_t)pData->pTextures[pData->detailMapIndex]->pInternalData;
 
 			glActiveTexture(GL_TEXTURE0);
 		    glEnable(GL_TEXTURE_2D);

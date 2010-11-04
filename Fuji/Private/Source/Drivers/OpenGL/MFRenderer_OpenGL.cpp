@@ -316,23 +316,23 @@ int MFRenderer_CreateDisplay()
 		// link the VBO extension
 		if(gOpenGLVersion >= 150)
 		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress("glBindBuffer");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress("glBufferData");
-//			glBufferSubData = glGetProcAddress("glBufferSubData");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress("glDeleteBuffers");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress("glGenBuffers");
-//			glMapBuffer = glGetProcAddress("glMapBuffer");
-//			glUnmapBuffer = glGetProcAddress("glUnmapBuffer");
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress((GLstring)"glBindBuffer");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress((GLstring)"glBufferData");
+//			glBufferSubData = glGetProcAddress((GLstring)"glBufferSubData");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress((GLstring)"glDeleteBuffers");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress((GLstring)"glGenBuffers");
+//			glMapBuffer = glGetProcAddress((GLstring)"glMapBuffer");
+//			glUnmapBuffer = glGetProcAddress((GLstring)"glUnmapBuffer");
 		}
 		else
 		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress("glBindBufferARB");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress("glBufferDataARB");
-//			glBufferSubData = glGetProcAddress("glBufferSubDataARB");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress("glDeleteBuffersARB");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress("glGenBuffersARB");
-//			glMapBuffer = glGetProcAddress("glMapBufferARB");
-//			glUnmapBuffer = glGetProcAddress("glUnmapBufferARB");
+			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress((GLstring)"glBindBufferARB");
+			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress((GLstring)"glBufferDataARB");
+//			glBufferSubData = glGetProcAddress((GLstring)"glBufferSubDataARB");
+			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress((GLstring)"glDeleteBuffersARB");
+			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress((GLstring)"glGenBuffersARB");
+//			glMapBuffer = glGetProcAddress((GLstring)"glMapBufferARB");
+//			glUnmapBuffer = glGetProcAddress((GLstring)"glUnmapBufferARB");
 		}
 	}
 
@@ -345,33 +345,33 @@ int MFRenderer_CreateDisplay()
 		// link the FBO extension
 		if(gOpenGLVersion >= 300)
 		{
-			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffers");
-			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffers");
-			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbuffer");
-			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorage");
+			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenRenderbuffers");
+			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteRenderbuffers");
+			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindRenderbuffer");
+			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress((GLstring)"glRenderbufferStorage");
 
-			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffers");
-			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffers");
-			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebuffer");
-			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2D");
-			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbuffer");
+			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenFramebuffers");
+			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteFramebuffers");
+			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindFramebuffer");
+			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress((GLstring)"glFramebufferTexture2D");
+			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glFramebufferRenderbuffer");
 
-			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress("glCheckFramebufferStatus");
+			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress((GLstring)"glCheckFramebufferStatus");
 		}
 		else
 		{
-			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress("glGenRenderbuffersEXT");
-			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress("glDeleteRenderbuffersEXT");
-			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress("glBindRenderbufferEXT");
-			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress("glRenderbufferStorageEXT");
+			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenRenderbuffersEXT");
+			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteRenderbuffersEXT");
+			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindRenderbufferEXT");
+			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress((GLstring)"glRenderbufferStorageEXT");
 
-			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress("glGenFramebuffersEXT");
-			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress("glDeleteFramebuffersEXT");
-			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress("glBindFramebufferEXT");
-			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress("glFramebufferTexture2DEXT");
-			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress("glFramebufferRenderbufferEXT");
+			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenFramebuffersEXT");
+			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteFramebuffersEXT");
+			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindFramebufferEXT");
+			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress((GLstring)"glFramebufferTexture2DEXT");
+			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glFramebufferRenderbufferEXT");
 
-			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress("glCheckFramebufferStatusEXT");
+			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress((GLstring)"glCheckFramebufferStatusEXT");
 		}
 	}
 
@@ -383,13 +383,13 @@ int MFRenderer_CreateDisplay()
 	{
 		if(gOpenGLVersion >= 130)
 		{
-			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress("glActiveTexture");
-			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress("glClientActiveTexture");
+			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glActiveTexture");
+			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glClientActiveTexture");
 		}
 		else
 		{
-			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress("glActiveTextureARB");
-			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress("glClientActiveTextureARB");
+			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glActiveTextureARB");
+			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glClientActiveTextureARB");
 		}
 	}
 #endif
@@ -542,12 +542,12 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFCheckForOpenGLError();
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
+	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(size_t)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
 
 	if(pZTarget)
 	{
 		MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(size_t)pZTarget->pTemplateData->pSurfaces[0].pImageData);
 
 		glEnable(GL_DEPTH_TEST);
 	}

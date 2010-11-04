@@ -7,7 +7,7 @@ public:
 	void Init(int num, int size, void *pMem = NULL, int memsize = 0);
 	void Destroy();
 
-	uint32 Size() const;
+	size_t Size() const;
 	void *Alloc();
 	void Delete(void *pItem);
 	void DeleteAll();

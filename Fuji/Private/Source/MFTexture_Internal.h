@@ -4,7 +4,7 @@
 #if MF_RENDERER == MF_DRIVER_D3D9
 	#include <d3d9.h>
 #elif MF_RENDERER == MF_DRIVER_OPENGL
-	#include "MFOpenGL.h"
+	#include "../Source/Drivers/OpenGL/MFOpenGL.h"
 #endif
 
 #include "MFTexture.h"

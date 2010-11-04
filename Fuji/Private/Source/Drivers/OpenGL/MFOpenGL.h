@@ -5,6 +5,8 @@
 	#include <windows.h>
 	#include <GL/gl.h>
 
+	typedef LPCSTR GLstring;
+
 	#define glGetProcAddress wglGetProcAddress
 #elif defined(MF_OPENGL_ES)
 	#if MF_OPENGL_ES_VER == 1
@@ -21,7 +23,9 @@
 	#endif
 	#include <GL/gl.h>
 
-	extern "C" void (*glXGetProcAddressARB(const char *))();
+	typedef GLubyte* GLstring;
+
+	extern "C" void (*glXGetProcAddressARB(const GLubyte *))();
 	#define glGetProcAddress glXGetProcAddressARB
 #endif
 

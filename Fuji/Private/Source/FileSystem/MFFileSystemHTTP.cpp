@@ -410,7 +410,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 	MFDebug_Assert(dataStart == fileHandle->offset, "Offset is wrong..");
 	MFDebug_Assert(contentLength == bytes, "Length is wrong..");
 
-	int numBytes = MFMin(bufferLen - (pT - temp), (int)bytes);
+	int numBytes = MFMin(bufferLen - (int)(size_t)(pT - temp), (int)bytes);
 	if(numBytes)
 	{
 		MFCopyMemory(pBuffer, pT, numBytes);

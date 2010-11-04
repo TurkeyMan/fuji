@@ -68,7 +68,7 @@ MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
 
 	for(int a=0; a<pStringTable->numStrings; a++)
 	{
-		pStringTable->pStrings[a] += (uint32)pStringTable;
+		pStringTable->pStrings[a] += (size_t)pStringTable;
 	}
 
 	return pStringTable;
@@ -107,7 +107,7 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 
 	for(int a=0; a<pStringTable->numStrings; a++)
 	{
-		pStringTable->pStrings[a] += (uint32)pStringTable;
+		pStringTable->pStrings[a] += (size_t)pStringTable;
 	}
 
 	return pStringTable;

@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{347A065C-D736-4613-B593-8A7F277C34A8}</ProjectGuid>
+    <Target>Bin</Target>
+    <Language>CPP</Language>
+    <Compiler>
+      <Compiler ctype="GppCompiler" />
+    </Compiler>
+    <Packages>
+      <Packages>
+        <Package file="/usr/lib/pkgconfig/gl.pc" name="gl" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/libpng.pc" name="libpng" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/mad.pc" name="mad" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/ogg.pc" name="ogg" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/zlib.pc" name="zlib" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/vorbis.pc" name="vorbis" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/portaudio-2.0.pc" name="PortAudio" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/glu.pc" name="glu" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/xxf86vm.pc" name="Xxf86vm" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/vorbisfile.pc" name="vorbisfile" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/alsa.pc" name="alsa" IsProject="false" />
+        <Package file="/usr/lib/pkgconfig/tinyxml.pc" name="TinyXml" IsProject="false" />
+      </Packages>
+    </Packages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>Build\Debug-Linux</OutputPath>
+    <DefineSymbols>DEBUG MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+    <OutputName>libFuji</OutputName>
+    <CompileTarget>StaticLibrary</CompileTarget>
+    <Includes>
+      <Includes>
+        <Include>/media/Data/Projects/Fuji/Include</Include>
+        <Include>/media/Data/Projects/Fuji/Source</Include>
+        <Include>/media/Data/Projects/Fuji/Source/Images/LINUX</Include>
+        <Include>/media/Data/Projects/Fuji/Middleware</Include>
+      </Includes>
+    </Includes>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="cp -f ${ProjectDir}/Build/Debug-Linux/libFuji.a ${ProjectDir}/Lib/libFuji.a" />
+      </CustomCommands>
+    </CustomCommands>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>Build\Release-Linux</OutputPath>
+    <DefineSymbols>MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+    <OptimizationLevel>3</OptimizationLevel>
+    <OutputName>libFuji</OutputName>
+    <CompileTarget>StaticLibrary</CompileTarget>
+    <Includes>
+      <Includes>
+        <Include>/media/Data/Projects/Fuji/Include</Include>
+        <Include>/media/Data/Projects/Fuji/Source</Include>
+        <Include>/media/Data/Projects/Fuji/Source/Images/LINUX</Include>
+        <Include>/media/Data/Projects/Fuji/Middleware</Include>
+      </Includes>
+    </Includes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Source\" />
+    <Folder Include="Include\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Include\DebugMenu.h" />
+    <None Include="Include\Fuji.h" />
+    <None Include="Include\Image.h" />
+    <None Include="Include\MFAnimation.h" />
+    <None Include="Include\MFAnimScript.h" />
+    <None Include="Include\MFArray.h" />
+    <None Include="Include\MFArray.inl" />
+    <None Include="Include\MFAuxillaryDisplay.h" />
+    <None Include="Include\MFBoundingVolume.h" />
+    <None Include="Include\MFCallstack.h" />
+    <None Include="Include\MFCollision.h" />
+    <None Include="Include\MFCollision.inl" />
+    <None Include="Include\MFCommandLine.h" />
+    <None Include="Include\MFDebug.h" />
+    <None Include="Include\MFDisplay.h" />
+    <None Include="Include\MFDriver.h" />
+    <None Include="Include\MFDriver_Plugin.h" />
+    <None Include="Include\MFFileSystem.h" />
+    <None Include="Include\MFFont.h" />
+    <None Include="Include\MFHashList.h" />
+    <None Include="Include\MFHashList.inl" />
+    <None Include="Include\MFHeap.h" />
+    <None Include="Include\MFIni.h" />
+    <None Include="Include\MFInput.h" />
+    <None Include="Include\MFMaterial.h" />
+    <None Include="Include\MFMath.h" />
+    <None Include="Include\MFMath.inl" />
+    <None Include="Include\MFMatrix.h" />
+    <None Include="Include\MFMatrix.inl" />
+    <None Include="Include\MFModel.h" />
+    <None Include="Include\MFNetwork.h" />
+    <None Include="Include\MFObjectPool.h" />
+    <None Include="Include\MFParticleSystem.h" />
+    <None Include="Include\MFPoolHeap.h" />
+    <None Include="Include\MFPrimitive.h" />
+    <None Include="Include\MFPtrList.h" />
+    <None Include="Include\MFPtrList.inl" />
+    <None Include="Include\MFQuaternion.h" />
+    <None Include="Include\MFQuaternion.inl" />
+    <None Include="Include\MFRenderer.h" />
+    <None Include="Include\MFScript.h" />
+    <None Include="Include\MFSockets.h" />
+    <None Include="Include\MFSound.h" />
+    <None Include="Include\MFString.h" />
+    <None Include="Include\MFString.inl" />
+    <None Include="Include\MFStringCache.h" />
+    <None Include="Include\MFSystem.h" />
+    <None Include="Include\MFSystem.inl" />
+    <None Include="Include\MFTexture.h" />
+    <None Include="Include\MFThread.h" />
+    <None Include="Include\MFTranslation.h" />
+    <None Include="Include\MFTypes.h" />
+    <None Include="Include\MFVector.h" />
+    <None Include="Include\MFVector.inl" />
+    <None Include="Include\MFVertex.h" />
+    <None Include="Include\MFView.h" />
+    <None Include="Include\Sprite.h" />
+    <None Include="Include\Timer.h" />
+    <None Include="Include\Util.h" />
+    <None Include="Include\Video.h" />
+    <None Include="Source\DebugMenu_Internal.h" />
+    <None Include="Source\MFAnimation_Internal.h" />
+    <None Include="Source\MFAnimScript_Internal.h" />
+    <None Include="Source\MFCallstack_Internal.h" />
+    <None Include="Source\MFCollision_Internal.h" />
+    <None Include="Source\MFDisplay_Internal.h" />
+    <None Include="Source\MFFileSystem_Internal.h" />
+    <None Include="Source\MFFont_Internal.h" />
+    <None Include="Source\MFHeap_Internal.h" />
+    <None Include="Source\MFInput_Internal.h" />
+    <None Include="Source\MFMaterial_Internal.h" />
+    <None Include="Source\MFMesh_Internal.h" />
+    <None Include="Source\MFModel_Internal.h" />
+    <None Include="Source\MFNetwork_Internal.h" />
+    <None Include="Source\MFParticleSystem_Internal.h" />
+    <None Include="Source\MFPrimitive_Internal.h" />
+    <None Include="Source\MFRenderer_Internal.h" />
+    <None Include="Source\MFScript_Internal.h" />
+    <None Include="Source\MFSockets_Internal.h" />
+    <None Include="Source\MFSound_Internal.h" />
+    <None Include="Source\MFSystem_Internal.h" />
+    <None Include="Source\MFTexture_Internal.h" />
+    <None Include="Source\MFVertex_Internal.h" />
+    <None Include="Source\MFView_Internal.h" />
+    <None Include="Include\Util\F3D.h" />
+    <None Include="Include\FileSystem\MFFileSystemCachedFile.h" />
+    <None Include="Include\FileSystem\MFFileSystemHTTP.h" />
+    <None Include="Include\FileSystem\MFFileSystemMemory.h" />
+    <None Include="Include\FileSystem\MFFileSystemNative.h" />
+    <None Include="Include\FileSystem\MFFileSystemZipFile.h" />
+    <None Include="Include\Asset\MFIntModel.h" />
+    <None Include="Include\Asset\MFIntSound.h" />
+    <None Include="Include\Asset\MFIntTexture.h" />
+    <None Include="Source\FileSystem\MFFileSystemCachedFile_Internal.h" />
+    <None Include="Source\FileSystem\MFFileSystemHTTP_Internal.h" />
+    <None Include="Source\FileSystem\MFFileSystemMemory_Internal.h" />
+    <None Include="Source\FileSystem\MFFileSystemNative_Internal.h" />
+    <None Include="Source\FileSystem\MFFileSystemZipFile_Internal.h" />
+    <None Include="Source\Materials\MFMat_Effect.h" />
+    <None Include="Source\Materials\MFMat_Standard.h" />
+    <None Include="Source\Images\LINUX\SysLogo64.h" />
+    <None Include="Source\Images\LINUX\SysLogo256.h" />
+    <None Include="Source\Images\DC\SysLogo64.h" />
+    <None Include="Source\Images\DC\SysLogo256.h" />
+    <None Include="Source\Images\GC\SysLogo64.h" />
+    <None Include="Source\Images\GC\SysLogo256.h" />
+    <None Include="Source\Images\IPHONE\SysLogo64.h" />
+    <None Include="Source\Images\IPHONE\SysLogo256.h" />
+    <None Include="Source\Images\OSX\SysLogo64.h" />
+    <None Include="Source\Images\OSX\SysLogo256.h" />
+    <None Include="Source\Images\PS2\SysLogo64.h" />
+    <None Include="Source\Images\PS2\SysLogo256.h" />
+    <None Include="Source\Images\PSP\charging.h" />
+    <None Include="Source\Images\PSP\connected.h" />
+    <None Include="Source\Images\PSP\disconnected.h" />
+    <None Include="Source\Images\PSP\power.h" />
+    <None Include="Source\Images\PSP\SysLogo64.h" />
+    <None Include="Source\Images\PSP\SysLogo256.h" />
+    <None Include="Source\Images\PSP\usb_icon.h" />
+    <None Include="Source\Images\WINDOWS\SysLogo64.h" />
+    <None Include="Source\Images\WINDOWS\SysLogo256.h" />
+    <None Include="Source\Images\XBOX\SysLogo64.h" />
+    <None Include="Source\Images\XBOX\SysLogo256.h" />
+    <None Include="Source\Drivers\D3D9\MFRenderer_D3D9.h" />
+    <None Include="Source\Drivers\D3D9\Renderers\Model_LS.fx" />
+    <None Include="Source\Drivers\D3D9\Renderers\Model_S.fx" />
+    <None Include="Source\Drivers\D3D9\Shaders\BuildShaders.bat" />
+    <None Include="Source\Drivers\D3D9\Shaders\MatStandard.vsh" />
+    <None Include="Source\Drivers\D3D9\Shaders\MatStandard_a.h" />
+    <None Include="Source\Drivers\D3D9\Shaders\MatStandard_s.h" />
+    <None Include="Source\Drivers\D3D9\Shaders\Registers.h" />
+    <None Include="Source\Drivers\IPhone\FujiAppDelegate_IPhone.h" />
+    <None Include="Source\Drivers\IPhone\FujiAppDelegate_IPhone.mm" />
+    <None Include="Source\Drivers\IPhone\FujiView_IPhone.h" />
+    <None Include="Source\Drivers\IPhone\FujiView_IPhone.mm" />
+    <None Include="Source\Drivers\IPhone\MFFileSystemNative_IPhone.h" />
+    <None Include="Source\Drivers\IPhone\MFFileSystemNative_IPhone.mm" />
+    <None Include="Source\Drivers\IPhone\MFInput_IPhone.h" />
+    <None Include="Source\Drivers\IPhone\MFSystem_IPhone.mm" />
+    <None Include="Source\Drivers\OpenGL\MFOpenGL.h" />
+    <None Include="Source\Drivers\PC\MFInputMappings_PC.h" />
+    <None Include="Source\Drivers\X11\X11_linux.h" />
+    <None Include="Source\Drivers\XBox\MFRenderer_XB.h" />
+    <None Include="Source\Drivers\XBox\VertexShaders\MatStandard.vsh" />
+    <None Include="Source\Drivers\XBox\VertexShaders\Model_LS.vsh" />
+    <None Include="Source\Drivers\XBox\VertexShaders\ModelRenderer.h" />
+    <None Include="Source\Drivers\XBox\VertexShaders\Model_S.vsh" />
+    <None Include="Source\Drivers\XBox\VertexShaders\Registers.h" />
+    <None Include="Util\MD2Normals.h" />
+    <None Include="Util\ReadMEMD2.h" />
+    <None Include="Middleware\lpng1212\png.h" />
+    <None Include="Middleware\lpng1212\pngconf.h" />
+    <None Include="Middleware\zlib\minizip\crypt.h" />
+    <None Include="Middleware\zlib\minizip\ioapi.h" />
+    <None Include="Middleware\zlib\minizip\mztools.h" />
+    <None Include="Middleware\zlib\minizip\unzip.h" />
+    <None Include="Middleware\zlib\minizip\zip.h" />
+    <None Include="Middleware\zlib\crc32.h" />
+    <None Include="Middleware\zlib\deflate.h" />
+    <None Include="Middleware\zlib\inffast.h" />
+    <None Include="Middleware\zlib\inffixed.h" />
+    <None Include="Middleware\zlib\inflate.h" />
+    <None Include="Middleware\zlib\inftrees.h" />
+    <None Include="Middleware\zlib\trees.h" />
+    <None Include="Middleware\zlib\zconf.h" />
+    <None Include="Middleware\zlib\zconf.in.h" />
+    <None Include="Middleware\zlib\zlib.h" />
+    <None Include="Middleware\zlib\zutil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Source\DebugMenu.cpp" />
+    <Compile Include="Source\Image.cpp" />
+    <Compile Include="Source\MFAnimation.cpp" />
+    <Compile Include="Source\MFAnimScript.cpp" />
+    <Compile Include="Source\MFBoundingVolume.cpp" />
+    <Compile Include="Source\MFCallstack.cpp" />
+    <Compile Include="Source\MFCollision.cpp" />
+    <Compile Include="Source\MFCommandLine.cpp" />
+    <Compile Include="Source\MFDebug.cpp" />
+    <Compile Include="Source\MFDisplay.cpp" />
+    <Compile Include="Source\MFFileSystem.cpp" />
+    <Compile Include="Source\MFFont.cpp" />
+    <Compile Include="Source\MFHeap.cpp" />
+    <Compile Include="Source\MFIni.cpp" />
+    <Compile Include="Source\MFInput.cpp" />
+    <Compile Include="Source\MFMaterial.cpp" />
+    <Compile Include="Source\MFMath.cpp" />
+    <Compile Include="Source\MFMatrix.cpp" />
+    <Compile Include="Source\MFMesh.cpp" />
+    <Compile Include="Source\MFModel.cpp" />
+    <Compile Include="Source\MFNetwork.cpp" />
+    <Compile Include="Source\MFObjectPool.cpp" />
+    <Compile Include="Source\MFPoolHeap.cpp" />
+    <Compile Include="Source\MFPrimitive.cpp" />
+    <Compile Include="Source\MFQuaternion.cpp" />
+    <Compile Include="Source\MFRenderer.cpp" />
+    <Compile Include="Source\MFScript.cpp" />
+    <Compile Include="Source\MFScript_Pawn.cpp" />
+    <Compile Include="Source\MFScript_Registration.cpp" />
+    <Compile Include="Source\MFSockets.cpp" />
+    <Compile Include="Source\MFSound.cpp" />
+    <Compile Include="Source\MFSound_MAD.cpp" />
+    <Compile Include="Source\MFSound_MiniFMOD.cpp" />
+    <Compile Include="Source\MFSound_Mixer.cpp" />
+    <Compile Include="Source\MFSound_PSPAudioCodec.cpp" />
+    <Compile Include="Source\MFSound_Vorbis.cpp" />
+    <Compile Include="Source\MFSound_WAV.cpp" />
+    <Compile Include="Source\MFString.cpp" />
+    <Compile Include="Source\MFStringCache.cpp" />
+    <Compile Include="Source\MFSystem.cpp" />
+    <Compile Include="Source\MFTexture.cpp" />
+    <Compile Include="Source\MFTextureUtil.cpp" />
+    <Compile Include="Source\MFTranslation.cpp" />
+    <Compile Include="Source\MFVector.cpp" />
+    <Compile Include="Source\MFVertex.cpp" />
+    <Compile Include="Source\MFView.cpp" />
+    <Compile Include="Source\Sprite.cpp" />
+    <Compile Include="Source\Timer.cpp" />
+    <Compile Include="Source\Util.cpp" />
+    <Compile Include="Source\Asset\MFIntModel.cpp" />
+    <Compile Include="Source\Asset\MFIntSound.cpp" />
+    <Compile Include="Source\Asset\MFIntTexture.cpp" />
+    <Compile Include="Source\FileSystem\MFFileSystemCachedFile.cpp" />
+    <Compile Include="Source\FileSystem\MFFileSystemHTTP.cpp" />
+    <Compile Include="Source\FileSystem\MFFileSystemMemory.cpp" />
+    <Compile Include="Source\FileSystem\MFFileSystemNative.cpp" />
+    <Compile Include="Source\FileSystem\MFFileSystemZipFile.cpp" />
+    <Compile Include="Source\Materials\MFMat_Effect.cpp" />
+    <Compile Include="Source\Materials\MFMat_Standard.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFFileSystemNative_Linux.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFInput_Linux.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFSound_ALSA.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFSound_JACK.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFSound_Port.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFSystem_Linux.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFThread_Linux.cpp" />
+    <Compile Include="Source\Drivers\Linux\MFTranslation_Linux.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFMaterial_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFModel_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFPrimitive_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFRenderer_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFTexture_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\MFVertex_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\Materials\MFMat_Effect_D3D9.cpp" />
+    <Compile Include="Source\Drivers\D3D9\Materials\MFMat_Standard_D3D9.cpp" />
+    <Compile Include="Source\Drivers\DC\MFDisplay_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFFileSystemNative_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFInput_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFMaterial_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFPrimitive_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFRenderer_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFSound_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFSystem_DC.cpp" />
+    <Compile Include="Source\Drivers\DC\MFTexture_DC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFDisplay_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFFileSystemNative_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFInput_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFMaterial_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFModel_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFPrimitive_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFRenderer_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFSound_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFSystem_GC.cpp" />
+    <Compile Include="Source\Drivers\GC\MFTexture_GC.cpp" />
+    <Compile Include="Source\Drivers\IPhone\MFDisplay_IPhone.cpp" />
+    <Compile Include="Source\Drivers\IPhone\MFInput_IPhone.cpp" />
+    <Compile Include="Source\Drivers\IPhone\MFSound_IPhone.cpp" />
+    <Compile Include="Source\Drivers\Null\MFAuxillaryDisplay_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFDebug_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFDisplay_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFFileSystemNative_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFHeap_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFInput_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFMaterial_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFModel_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFParticleSystem_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFPrimitive_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFSockets_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFSound_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFSystem_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFTexture_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFThread_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\MFTranslation_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\Materials\MFMat_Effect_Null.cpp" />
+    <Compile Include="Source\Drivers\Null\Materials\MFMat_Standard_Null.cpp" />
+    <Compile Include="Source\Drivers\GC\Materials\MFMat_Standard_GC.cpp" />
+    <Compile Include="Source\Drivers\DC\Materials\MFMat_Standard_DC.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFMaterial_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFModel_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFPrimitive_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFRenderer_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFTexture_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\MFVertex_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\OpenGL\Materials\MFMat_Standard_OpenGL.cpp" />
+    <Compile Include="Source\Drivers\PC\MFAuxillaryDisplay_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFDebug_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFDisplay_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFInputMappings_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFInput_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFSound_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFSystem_PC.cpp" />
+    <Compile Include="Source\Drivers\PC\MFTranslation_PC.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFModel_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFPrimitive_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFRenderer_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFSound_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFTexture_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\MFVertex_Plug.cpp" />
+    <Compile Include="Source\Drivers\Plugin\Materials\MFMat_Standard_Plug.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFDebug_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFDisplay_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFFileSystemNative_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFHeap_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFInput_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFMaterial_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFModel_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFPrimitive_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFRenderer_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFSockets_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFSound_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFSystem_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFTexture_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFThread_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\MFTranslation_PS2.cpp" />
+    <Compile Include="Source\Drivers\PS2\Materials\MFMat_Standard_PS2.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFDebug_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFDisplay_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFFileSystemNative_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFHeap_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFInput_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFMaterial_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFModel_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFPrimitive_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFRenderer_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFSockets_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFSound_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFSystem_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFTexture_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFThread_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\MFTranslation_PSP.cpp" />
+    <Compile Include="Source\Drivers\PSP\Materials\MFMat_Standard_PSP.cpp" />
+    <Compile Include="Source\Drivers\Wii\MFInput_Wii.cpp" />
+    <Compile Include="Source\Drivers\WIN32\MFFileSystemNative_WIN32.cpp" />
+    <Compile Include="Source\Drivers\WIN32\MFHeap_WIN32.cpp" />
+    <Compile Include="Source\Drivers\WIN32\MFSockets_WINSOCK.cpp" />
+    <Compile Include="Source\Drivers\WIN32\MFThread_WIN32.cpp" />
+    <Compile Include="Source\Drivers\X11\MFDisplay_X11.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFDisplay_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFHeap_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFInput_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFMaterial_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFModel_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFPrimitive_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFRenderer_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFSystem_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFTexture_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\MFTranslation_XB.cpp" />
+    <Compile Include="Source\Drivers\XBox\Materials\MFMat_Standard_XB.cpp" />
+    <Compile Include="Util\F3D.cpp" />
+    <Compile Include="Util\ReadASE.cpp" />
+    <Compile Include="Util\ReadDAE.cpp" />
+    <Compile Include="Util\ReadMD2.cpp" />
+    <Compile Include="Util\ReadMD3.cpp" />
+    <Compile Include="Util\ReadMEMD2.cpp" />
+    <Compile Include="Util\ReadOBJ.cpp" />
+    <Compile Include="Util\ReadX.cpp" />
+    <Compile Include="Middleware\lpng1212\png.c" />
+    <Compile Include="Middleware\lpng1212\pngerror.c" />
+    <Compile Include="Middleware\lpng1212\pnggccrd.c" />
+    <Compile Include="Middleware\lpng1212\pngget.c" />
+    <Compile Include="Middleware\lpng1212\pngmem.c" />
+    <Compile Include="Middleware\lpng1212\pngpread.c" />
+    <Compile Include="Middleware\lpng1212\pngread.c" />
+    <Compile Include="Middleware\lpng1212\pngrio.c" />
+    <Compile Include="Middleware\lpng1212\pngrtran.c" />
+    <Compile Include="Middleware\lpng1212\pngrutil.c" />
+    <Compile Include="Middleware\lpng1212\pngset.c" />
+    <Compile Include="Middleware\lpng1212\pngtrans.c" />
+    <Compile Include="Middleware\lpng1212\pngvcrd.c" />
+    <Compile Include="Middleware\lpng1212\pngwio.c" />
+    <Compile Include="Middleware\lpng1212\pngwrite.c" />
+    <Compile Include="Middleware\lpng1212\pngwtran.c" />
+    <Compile Include="Middleware\lpng1212\pngwutil.c" />
+    <Compile Include="Middleware\zlib\minizip\ioapi.c" />
+    <Compile Include="Middleware\zlib\minizip\mztools.c" />
+    <Compile Include="Middleware\zlib\minizip\unzip.c" />
+    <Compile Include="Middleware\zlib\minizip\zip.c" />
+    <Compile Include="Middleware\zlib\adler32.c" />
+    <Compile Include="Middleware\zlib\compress.c" />
+    <Compile Include="Middleware\zlib\crc32.c" />
+    <Compile Include="Middleware\zlib\deflate.c" />
+    <Compile Include="Middleware\zlib\gzio.c" />
+    <Compile Include="Middleware\zlib\infback.c" />
+    <Compile Include="Middleware\zlib\inffast.c" />
+    <Compile Include="Middleware\zlib\inflate.c" />
+    <Compile Include="Middleware\zlib\inftrees.c" />
+    <Compile Include="Middleware\zlib\trees.c" />
+    <Compile Include="Middleware\zlib\uncompr.c" />
+    <Compile Include="Middleware\zlib\zutil.c" />
+  </ItemGroup>
+</Project>
