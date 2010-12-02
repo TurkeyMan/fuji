@@ -1252,7 +1252,7 @@ int RegisterRawMouse(void)
 	rid[0].dwFlags = 0;// RIDEV_NOLEGACY;   // adds HID mouse and also ignores legacy mouse messages
 
 #if 1
-	rid[0].dwFlags |= RIDEV_INPUTSINK;
+//	rid[0].dwFlags |= RIDEV_INPUTSINK; // this allows the mouse to respond in the background
 	rid[0].hwndTarget = apphWnd;
 #else
 	rid[0].hwndTarget = NULL;

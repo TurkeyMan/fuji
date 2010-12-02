@@ -25,7 +25,7 @@ void MFString_InitModule()
 		{ 5, 256, 128 },
 		{ 16, 128, 64 },
 		{ 128, 32, 16 },
-		{ 1024, 4, 2}
+		{ 1024, 4, 2 }
 	};
 
 	stringHeap.Init(groups, sizeof(groups) / sizeof(groups[0]));

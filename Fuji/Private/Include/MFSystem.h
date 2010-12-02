@@ -150,6 +150,9 @@ enum MFCallback
 
 	MFCB_HandleSystemMessages,	/**< System Message Handler callback. */
 
+	MFCB_GainedFocus,			/**< Focus Gained callback. */
+	MFCB_LostFocus,				/**< Focus Lost callback. */
+
 	MFCB_DisplayLost,			/**< Display Lost callback. */
 	MFCB_DisplayReset,			/**< Reset Display callback. */
 
