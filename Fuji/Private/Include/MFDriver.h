@@ -392,6 +392,8 @@
 //	#define _ENABLE_SCRIPTING
 #endif
 
+#define USE_LIBJSON
+
 // old rubbish that should disappear
 #if defined(_FUJI_UTIL)
 	#include <stdio.h>
