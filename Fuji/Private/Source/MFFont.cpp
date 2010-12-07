@@ -459,6 +459,8 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
 
 	vsprintf(buffer, pFormat, args);
 
+	va_end(args);
+
 	float texelCenter = MFRenderer_GetTexelCenterOffset();
 	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, buffer);
 }
@@ -599,6 +601,8 @@ float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const M
 
 	vsprintf(buffer, pFormat, args);
 
+	va_end(args);
+
 	return MFFont_DrawText(pFont, pos, height, colour, buffer, -1);
 }
 
@@ -612,6 +616,8 @@ float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVe
 	va_start(args, pFormat);
 
 	vsprintf(buffer, pFormat, args);
+
+	va_end(args);
 
 	return MFFont_DrawText(pFont, MakeVector(x, y, 0.0f), height, colour, buffer, -1);
 }
