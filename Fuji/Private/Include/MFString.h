@@ -250,13 +250,24 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
 
 /**
  * URL encode a string.
- * Encodes a string for URL use in a URL or HTTP 'POST' content.
+ * Encodes a string for use in a URL or HTTP 'POST' content.
  * @param pString String to encode.
  * @param pExcludeChars A string containing characters to be excluded from URL encoding.
  * @return Returns the URL encoded string.
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
 const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars = NULL);
+
+/**
+ * URL encode a string.
+ * Encodes a string for use in a URL or HTTP 'POST' content.
+ * @param pDest Output buffer, may be NULL.
+ * @param pString String to encode.
+ * @param pExcludeChars A string containing characters to be excluded from URL encoding.
+ * @return Return the length of the output string, excluding the terminating NULL.
+ * @remarks If pDest is NULL, the output length will be calculated but no output will be written.
+ */
+int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars = NULL);
 
 /**
  * Get a formatted a string.

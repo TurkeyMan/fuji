@@ -285,6 +285,41 @@ const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars
 	return pBuffer;
 }
 
+int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars)
+{
+	int sourceLen = MFString_Length(pString);
+	int destLen = 0;
+
+	for(int a=0; a<sourceLen; ++a)
+	{
+		int c = (uint8)pString[a];
+		if(MFIsAlphaNumeric(c) || MFString_Chr("-_.!~*'()", c) || (pExcludeChars && MFString_Chr(pExcludeChars, c)))
+		{
+			if(pDest)
+				pDest[destLen] = (char)c;
+			destLen++;
+		}
+		else if(c == ' ')
+		{
+			if(pDest)
+				pDest[destLen] = '+';
+			destLen++;
+		}
+		else
+		{
+			if(pDest)
+				destLen += sprintf(pDest + destLen, "%%%02X", c);
+			else
+				destLen += 3; // *** surely this can't write more than 3 chars? '%xx'
+		}
+	}
+
+	if(pDest)
+		pDest[destLen] = 0;
+
+	return destLen;
+}
+
 bool MFString_IsNumber(const char *pString, bool bAllowHex)
 {
 	int numDigits = 0;
