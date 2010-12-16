@@ -38,7 +38,7 @@ public:
 	bool IsSection(const char *pSectionName) { return IsString(0, "section") && IsString(1, pSectionName); }
 	const char *GetString(int index);
 	float GetFloat(int index);
-	int GetInt(int index);
+	int GetInt(int index, int base = 10);
 	int GetIntString(int index, const char **ppStrings, int numStrings = -1);
 	bool GetBool(int index);
 	MFVector GetVector2(int index);

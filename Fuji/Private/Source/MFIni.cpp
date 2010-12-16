@@ -27,11 +27,11 @@ float MFIniLine::GetFloat(int index)
 	return (float)atof(GetString(index));
 }
 
-int MFIniLine::GetInt(int index)
+int MFIniLine::GetInt(int index, int base)
 {
 	if(index >= stringCount)
 		return 0;
-	return atoi(GetString(index));
+	return MFString_AsciiToInteger(GetString(index), false, base);
 }
 
 int MFIniLine::GetIntString(int index, const char **ppStrings, int numStrings)
