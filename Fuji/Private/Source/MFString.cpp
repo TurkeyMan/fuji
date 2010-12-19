@@ -933,6 +933,27 @@ MFString& MFString::Sprintf(const char *pFormat, ...)
 	return *this;
 }
 
+MFString MFString::Format(const char *pFormat, ...)
+{
+	MFString t;
+
+	va_list arglist;
+	va_start(arglist, pFormat);
+
+	int nRes = vsnprintf(NULL, 0, pFormat, arglist);
+	if(nRes >= 0)
+	{
+		t.pData = MFStringData::Alloc();
+		t.pData->bytes = nRes;
+		t.pData->pMemory = (char*)stringHeap.Alloc(t.pData->bytes + 1, &t.pData->allocated);
+		vsprintf(t.pData->pMemory, pFormat, arglist);
+	}
+
+	va_end(arglist);
+
+	return t;
+}
+
 MFString& MFString::FromInt(int number)
 {
 	Sprintf("%d", number);

@@ -484,14 +484,104 @@ inline MFString::~MFString()
 		pData->Release();
 }
 
+inline MFString MFString::Static(const char *pStatic)
+{
+	MFString t(pStatic, true);
+	return t;
+}
+
 inline bool MFString::operator!() const
 {
 	return !pData;
 }
 
-inline int MFString::ToInt() const
+inline bool MFString::operator==(const char *pString)
 {
-	return pData ? MFString_AsciiToInteger(pData->pMemory) : 0;
+	if(!pData || !pString)
+		return (const char *)pData == pString;
+	return MFString_Compare(pData->pMemory, pString) == 0;
+}
+
+inline bool MFString::operator==(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData == string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) == 0;
+}
+
+inline bool MFString::operator!=(const char *pString)
+{
+	if(!pData || !pString)
+		return (const char *)pData != pString;
+	return MFString_Compare(pData->pMemory, pString) != 0;
+}
+
+inline bool MFString::operator!=(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData != string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) != 0;
+}
+
+inline bool MFString::operator<=(const char *pString)
+{
+	if(!pData || !pString)
+		return (const char *)pData <= pString;
+	return MFString_Compare(pData->pMemory, pString) <= 0;
+}
+
+inline bool MFString::operator<=(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData <= string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) <= 0;
+}
+
+inline bool MFString::operator>=(const char *pString)
+{
+	if(!pData || !pString)
+		return (const char *)pData >= pString;
+	return MFString_Compare(pData->pMemory, pString) >= 0;
+}
+
+inline bool MFString::operator>=(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData >= string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) >= 0;
+}
+
+inline bool MFString::operator<(const char *pString)
+{
+	if(!pData || !pString)
+		return (const char *)pData < pString;
+	return MFString_Compare(pData->pMemory, pString) < 0;
+}
+
+inline bool MFString::operator<(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData < string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) < 0;
+}
+
+inline bool MFString::operator>(const char *pString)
+{
+	if(!pData || !pString)
+		return (const char *)pData > pString;
+	return MFString_Compare(pData->pMemory, pString) > 0;
+}
+
+inline bool MFString::operator>(const MFString &string)
+{
+	if(!pData || !string.pData)
+		return pData > string.pData;
+	return MFString_Compare(pData->pMemory, string.pData->pMemory) > 0;
+}
+
+inline int MFString::ToInt(int base) const
+{
+	return pData ? MFString_AsciiToInteger(pData->pMemory, true, base) : 0;
 }
 
 inline float MFString::ToFloat() const
@@ -522,4 +612,10 @@ inline bool MFString::IsNull() const
 inline bool MFString::IsNumeric() const
 {
 	return pData ? MFString_IsNumber(pData->pMemory) : false;
+}
+
+inline uint32 MFString::GetHash()
+{
+	uint32 MFUtil_HashString(const char *pString);
+	return pData ? MFUtil_HashString(pData->pMemory) : 0;
 }

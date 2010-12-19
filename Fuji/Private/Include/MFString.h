@@ -504,6 +504,9 @@ struct MFStringData;
 class MFString
 {
 public:
+	static MFString Format(const char *pFormat, ...);
+	static MFString Static(const char *pString);
+
 	MFString();
 	MFString(const MFString &string);
 	MFString(const char *pString, bool bHoldStaticPointer = false);
@@ -519,6 +522,19 @@ public:
 	MFString operator+(const char *pString) const;
 	MFString operator+(const MFString &string) const;
 
+	bool operator==(const char *pString);
+	bool operator==(const MFString &string);
+	bool operator!=(const char *pString);
+	bool operator!=(const MFString &string);
+	bool operator>=(const char *pString);
+	bool operator>=(const MFString &string);
+	bool operator<=(const char *pString);
+	bool operator<=(const MFString &string);
+	bool operator>(const char *pString);
+	bool operator>(const MFString &string);
+	bool operator<(const char *pString);
+	bool operator<(const MFString &string);
+
 	MFString& SetStaticString(const char *pStaticString);
 	MFString& FromUTF16(const wchar_t *pString);
 	MFString& FromInt(int number);
@@ -529,13 +545,15 @@ public:
 	MFString& Sprintf(const char *pFormat, ...);
 
 	const char *CStr() const;
-	int ToInt() const;
+	int ToInt(int base = 10) const;
 	float ToFloat() const;
 
 	int NumBytes() const;
 	int NumChars() const;
 	bool IsNull() const;
 	bool IsNumeric() const;
+
+	uint32 GetHash();
 
 	MFString Upper() const;
 	MFString Lower() const;
