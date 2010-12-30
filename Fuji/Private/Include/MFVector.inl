@@ -641,17 +641,17 @@ inline MFVector& MFVector::Lerp(const MFVector &v, float t)
 
 inline const char * MFVector::ToString4() const
 {
-	return MFStr("%.2f, %.2f, %.2f, %.2f", x, y, z, w);
+	return MFStr("%g, %g, %g, %g", x, y, z, w);
 }
 
 inline const char * MFVector::ToString3() const
 {
-	return MFStr("%.2f, %.2f, %.2f", x, y, z);
+	return MFStr("%g, %g, %g", x, y, z);
 }
 
 inline const char * MFVector::ToString2() const
 {
-	return MFStr("%.2f, %.2f", x, y);
+	return MFStr("%g, %g", x, y);
 }
 
 inline MFVector operator*(float f, const MFVector &v)

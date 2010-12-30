@@ -46,16 +46,24 @@ public:
 	MFVector GetVector4(int index);
 	MFMatrix GetMatrix(int index);
 
+	int GetLineNumber() { return lineNumber; }
+	MFString GetLine();
+	MFString GetLineData();
+
 	// Log the contents of this line, and following lines to the screen
 	// Mainly for debugging purposes
 	void DumpRecursive(int depth);
 
 protected:
-	MFIni *pIni;			// what INI do we belong to? Allows usage of Lines as an iterator
+	MFIni *pIni;				// what INI do we belong to? Allows usage of Lines as an iterator
 	int subtreeLineCount;		// total number of sublines before next line at this level
 	uint32 firstString;         // first index of MFIni::pStrings for line string data
 	int16 stringCount;			// how many data strings on this line
 	int16 terminate;			// is this the last subline at this level?
+
+	int lineNumber;
+	int lineStart, dataOffset;
+	int lineLength;
 };
 
 class MFIni
@@ -89,10 +97,10 @@ protected:
 	// pTokenEnd will point to the last Char in the token
 	// return TRUE if a token was found
 	// '{', '}' and '/n' are also treated as tokens
-	static const char *ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection);
+	static const char *ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection, const char **ppTokenStart);
 
 	// use recursion to scan in the lines & strings
-	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd);
+	const char *ScanRecursive(const char *pSrc, const char *pSrcEnd, int &lineNumber);
 	void InitLine(MFIniLine *pLine);
 
 	int IncLineCount();

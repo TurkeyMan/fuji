@@ -145,6 +145,13 @@ inline int MFString_Length(const char *pString)
 	return (uint32&)pT - (uint32&)pString;
 }
 
+inline int MFString_LengthN(const char *pString, int maxChars)
+{
+	const char *pT = pString;
+	while(*pT && maxChars--) ++pT;
+	return (uint32&)pT - (uint32&)pString;
+}
+
 inline char* MFString_Copy(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;
@@ -463,7 +470,7 @@ private:
 	void Destroy();
 
 	int AddRef() { ++refCount;  return refCount; }
-	int Release() { if(--refCount == 0) Destroy(); return refCount; }
+	int Release() { if(--refCount == 0) { Destroy(); return 0; } return refCount; }
 };
 
 inline MFString::MFString()

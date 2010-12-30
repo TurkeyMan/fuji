@@ -748,6 +748,24 @@ MFString::MFString(const char *pString, bool bHoldStaticPointer)
 	}
 }
 
+MFString::MFString(const char *pString, int maxChars)
+{
+	if(!pString)
+	{
+		pData = NULL;
+	}
+	else
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = MFString_LengthN(pString, maxChars);
+
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+
+		MFString_CopyN(pData->pMemory, pString, pData->bytes);
+		pData->pMemory[pData->bytes] = 0;
+	}
+}
+
 MFString::MFString(int preallocatedBytes)
 {
 	pData = MFStringData::Alloc();
@@ -758,18 +776,26 @@ MFString::MFString(int preallocatedBytes)
 
 MFString& MFString::operator=(const char *pString)
 {
-	if(pData)
+	if(pString)
+	{
+		int bytes = MFString_Length(pString);
+
+		if(!pData || pData->refCount > 1 || pData->allocated < bytes + 1)
+		{
+			if(pData)
+				pData->Release();
+
+			pData = MFStringData::Alloc();
+			pData->bytes = bytes;
+			pData->pMemory = (char*)stringHeap.Alloc(bytes + 1, &pData->allocated);
+		}
+
+		MFString_Copy(pData->pMemory, pString);
+	}
+	else if(pData)
 	{
 		pData->Release();
 		pData = NULL;
-	}
-
-	if(pString)
-	{
-		pData = MFStringData::Alloc();
-		pData->bytes = MFString_Length(pString);
-		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
-		MFString_Copy(pData->pMemory, pString);
 	}
 
 	return *this;
@@ -817,10 +843,12 @@ MFString& MFString::operator+=(const MFString &string)
 		else
 		{
 			// overflowed the string buffer, need to realloc...
+			bool bNeedFree = pData->allocated != 0;
+
 			char *pNew = (char*)stringHeap.Alloc(bytesNeeded, &pData->allocated);
 			MFString_CopyCat(pNew, pData->pMemory, string.pData->pMemory);
 
-			if(pData->allocated)
+			if(bNeedFree)
 				stringHeap.Free(pData->pMemory);
 
 			pData->pMemory = pNew;

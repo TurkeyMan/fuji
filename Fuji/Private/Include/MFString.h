@@ -60,6 +60,16 @@ int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
 int MFString_Length(const char *pString);
 
 /**
+ * Get the length of a string clamping to a given maximum.
+ * Count the number of bytes in a string, clamping to a given maximum.
+ * @param pString String to find the length of.
+ * @param maxChars Maximum number of chars to count.
+ * @return Returns the length of the string, in bytes, excluding the terminating NULL character.
+ * @see MFString_Length()
+ */
+int MFString_LengthN(const char *pString, int maxChars);
+
+/**
  * Copy a string.
  * Copies the source string to the target buffer.
  * @param pBuffer Target buffer to receive a copy of the string.
@@ -510,6 +520,7 @@ public:
 	MFString();
 	MFString(const MFString &string);
 	MFString(const char *pString, bool bHoldStaticPointer = false);
+	MFString(const char *pString, int numChars);
 	MFString(int preallocatedBytes);
 	~MFString();
 

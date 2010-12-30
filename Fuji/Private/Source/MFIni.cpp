@@ -92,6 +92,18 @@ MFMatrix MFIniLine::GetMatrix(int index)
 	return mat;
 }
 
+MFString MFIniLine::GetLine()
+{
+	MFString t(pIni->pMem + lineStart, lineLength);
+	return t;
+}
+
+MFString MFIniLine::GetLineData()
+{
+	MFString t(pIni->pMem + lineStart + dataOffset, lineLength - dataOffset);
+	return t;
+}
+
 // find a 2 string entry (ie. "label data")
 MFIniLine *MFIniLine::FindEntry(const char *pLabel, const char *pData)
 {
@@ -140,6 +152,7 @@ MFIni *MFIni::Create(const char *pFilename)
 	MFIni *pMFIni;
 	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
 	MFString_Copy(pMFIni->name, pFilename);
+	pMFIni->pMem = pMem;
 
 	// allocate temporary buffer for strings & lines
 	pMFIni->linesAllocated = 2048;
@@ -152,10 +165,10 @@ MFIni *MFIni::Create(const char *pFilename)
 	// scan though the file
 	pMFIni->lineCount = 0;
 	pMFIni->stringCount = 0;
-//	char *pIn = pMem;
 
 	// scan text file
-	pMFIni->ScanRecursive(pMem, pMem+memSize);
+	int lineNumber = 0;
+	pMFIni->ScanRecursive(pMem, pMem+memSize, lineNumber);
 
 	// TODO: copy lines, strings & cache to save on memory
 
@@ -169,12 +182,12 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 	MFDebug_Assert(pMemory, "Cant create ini from NULL buffer");
 
 	uint32 memSize = (uint32)MFString_Length(pMemory);
-	const char *pMem = pMemory;
 
 	// allocate ini file
 	MFIni *pMFIni;
 	pMFIni = (MFIni *)MFHeap_Alloc(sizeof(MFIni));
 	MFString_Copy(pMFIni->name, "Memory Ini");
+	pMFIni->pMem = (char*)pMemory;
 
 	// allocate temporary buffer for strings & lines
 	pMFIni->linesAllocated = 1024;
@@ -187,10 +200,10 @@ MFIni *MFIni::CreateFromMemory(const char *pMemory)
 	// scan though the file
 	pMFIni->lineCount = 0;
 	pMFIni->stringCount = 0;
-//	const char *pIn = pMem;
 
 	// scan text file
-	pMFIni->ScanRecursive(pMem, pMem+memSize);
+	int lineNumber = 0;
+	pMFIni->ScanRecursive(pMFIni->pMem, pMFIni->pMem+memSize, lineNumber);
 
 	// TODO: copy lines, strings & cache to save on memory
 
@@ -204,6 +217,7 @@ void MFIni::Destroy(MFIni *pIni)
 	MFHeap_Free(pIni->pLines);
 	MFHeap_Free(pIni->pStrings);
 	MFStringCache_Destroy(pIni->pCache);
+	MFHeap_Free(pIni->pMem);
 	MFHeap_Free(pIni);
 }
 
@@ -219,7 +233,7 @@ int MFIni::IncLineCount()
 }
 
 // returns how many lines it found
-const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
+const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd, int &lineNumber)
 {
 	MFCALLSTACK;
 
@@ -232,27 +246,39 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 //	const char **pCurrString = &pStrings[stringCount];
 
 	InitLine(pCurrLine);
-	bool bIsSection;
-	while(pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection)) != NULL)
+	bool bIsSection, bNeedLineLength = false;
+	const char *pTokenStart;
+	while(pSrc && (pSrc = ScanToken(pSrc, pSrcEnd, tokenBuffer, pCurrLine->stringCount, &bIsSection, &pTokenStart)) != NULL)
 	{
 		// newline
 		tokenLength = MFString_Length(tokenBuffer);
 		if(tokenLength == 1 && MFIsNewline(tokenBuffer[0]))
 		{
 			bNewLine = true;
+
+			if(bNeedLineLength)
+			{
+				while(pTokenStart > pMem && (MFIsWhite(pTokenStart[-1]) || MFIsNewline(pTokenStart[-1])))
+					--pTokenStart;
+
+				pCurrLine->lineLength = (int)(pTokenStart - pMem) - pCurrLine->lineStart;
+				bNeedLineLength = false;
+			}
+
+			++lineNumber;
 		}
-		else if(tokenLength == 1 && tokenBuffer[0] == '{')
+		else if(tokenLength == 1 && tokenBuffer[0] == '{' && bNewLine)
 		{
 			MFDebug_Assert(bNewLine, "open bracket must be at start of line!");
 
 			// new sub section
 			int oldLineCount = IncLineCount();
-			pSrc = ScanRecursive(pSrc, pSrcEnd);
+			pSrc = ScanRecursive(pSrc, pSrcEnd, lineNumber);
 			pCurrLine = &pLines[currLine];
 			pCurrLine->subtreeLineCount = lineCount - oldLineCount;
 			lineCount--;
 		}
-		else if(tokenLength == 1 && tokenBuffer[0] == '}')
+		else if(tokenLength == 1 && tokenBuffer[0] == '}' && bNewLine)
 		{
 			MFDebug_Assert(bNewLine, "close bracket must be at start of line!");
 
@@ -272,6 +298,18 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd)
 				InitLine(pCurrLine);
 			}
 			bNewLine = false;
+
+			if(pTokenStart > pMem && pTokenStart[-1] == '"')
+				--pTokenStart;
+
+			if(pCurrLine->stringCount == 0)
+			{
+				pCurrLine->lineNumber = lineNumber;
+				pCurrLine->lineStart = (int)(pTokenStart - pMem);
+				bNeedLineLength = true;
+			}
+			else if(pCurrLine->stringCount == 1)
+				pCurrLine->dataOffset = (int)(pTokenStart - pMem) - pCurrLine->lineStart;
 
 			if(bIsSection)
 			{
@@ -306,14 +344,18 @@ void MFIni::InitLine(MFIniLine *pLine)
 	MFCALLSTACK;
 
 	pLine->pIni = this;
-	pLine->pIni = this;
 	pLine->subtreeLineCount = 0;
 	pLine->firstString = stringCount;
 	pLine->stringCount = 0;
 	pLine->terminate = 0;
+
+	pLine->lineNumber = 0;
+	pLine->lineStart = 0;
+	pLine->lineLength = 0;
+	pLine->dataOffset = 0;
 }
 
-const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection)
+const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pTokenBuffer, int stringCount, bool *pbIsSection, const char **ppTokenStart)
 {
 	MFCALLSTACK;
 
@@ -326,7 +368,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 		// skip comment lines
 		if((pSrc[0] == '/' && pSrc[1] == '/') || (pSrc[0] == ';') || (stringCount == 0 && pSrc[0] == '#'))
 		{
-			while (pSrc < pSrcEnd && !MFIsNewline(pSrc[0]))
+			while (pSrc < pSrcEnd && pSrc[0] != '\n')
 			{
 				pSrc++;
 			}
@@ -336,7 +378,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 
 		// check if we have found some non-whitespace
 		bytes = MFString_DecodeUTF8(pSrc, &ch);
-		if(!MFIsWhite(ch) && (stringCount!=1 || ch != '='))
+		if(!(MFIsWhite(ch) || ch == '\r') && (stringCount!=1 || ch != '='))
 			break;
 
 		pSrc += bytes;
@@ -348,6 +390,7 @@ const char *MFIni::ScanToken(const char *pSrc, const char *pSrcEnd, char *pToken
 
 	// start of token
 	char *pDst = pTokenBuffer;
+	*ppTokenStart = pSrc;
 
 	// handle special tokens (brackets and EOL)
 	if(*pSrc == '{' || *pSrc == '}' || MFIsNewline(*pSrc))

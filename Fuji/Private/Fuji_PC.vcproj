@@ -1530,6 +1530,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\MFList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFList.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\MFMaterial.h"
 				>
 			</File>
