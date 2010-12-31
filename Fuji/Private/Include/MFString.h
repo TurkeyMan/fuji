@@ -525,6 +525,7 @@ public:
 	~MFString();
 
 	bool operator!() const;
+	operator bool() const;
 
 	MFString& operator=(const char *pString);
 	MFString& operator=(const MFString &string);
@@ -546,6 +547,11 @@ public:
 	bool operator<(const char *pString);
 	bool operator<(const MFString &string);
 
+	bool Compare(const char *pString);
+	bool Compare(const MFString &string);
+	bool CompareInsensitive(const char *pString);
+	bool CompareInsensitive(const MFString &string);
+
 	MFString& SetStaticString(const char *pStaticString);
 	MFString& FromUTF16(const wchar_t *pString);
 	MFString& FromInt(int number);
@@ -564,13 +570,16 @@ public:
 	bool IsNull() const;
 	bool IsNumeric() const;
 
-	uint32 GetHash();
+	uint32 GetHash() const;
 
 	MFString Upper() const;
 	MFString Lower() const;
 	MFString& Trim(bool bFront = true, bool bEnd = true, const char *pCharacters = " \t\r\n");
 
-	MFString SubStr(int offset, int count) const;
+	MFString SubStr(int offset, int count = -1) const;
+	MFString& Truncate(int length);
+
+	int FindChar(int c) const;
 
 private:
 	MFStringData *pData;

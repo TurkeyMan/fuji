@@ -922,14 +922,14 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 
 MFString& MFString::Detach()
 {
-	if(pData && pData->refCount > 1)
+	if(pData && (pData->refCount > 1 || pData->allocated == 0))
 	{
 		MFStringData *pNew = MFStringData::Alloc();
 		pNew->bytes = pData->bytes;
-		pNew->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		pNew->pMemory = (char*)stringHeap.Alloc(pNew->bytes + 1, &pNew->allocated);
 		MFString_Copy(pNew->pMemory, pData->pMemory);
 
-		--pData->refCount;
+		pData->Release();
 		pData = pNew;
 	}
 
@@ -1064,14 +1064,57 @@ MFString MFString::SubStr(int offset, int count) const
 	if(!pData)
 		return *this;
 
+	// limit within the strings range
+	int maxChars = pData->bytes - offset;
+	if(count < 0 || count > maxChars)
+		count = maxChars;
+
+	// bail if we don't need to do anything
+	if(count == pData->bytes)
+		return *this;
+
 	// allocate a new string
 	MFString t(count+1);
 	t.pData->bytes = count;
 
 	// copy sub string
-	for(int a=0; a<count; ++a)
-		t.pData->pMemory[a] = pData->pMemory[offset + a];
+	MFString_CopyN(t.pData->pMemory, pData->pMemory + offset, count);
 	t.pData->pMemory[count] = 0;
 
 	return t;
+}
+
+MFString& MFString::Truncate(int length)
+{
+	if(pData && length < pData->bytes)
+	{
+		Detach();
+		pData->bytes = length;
+		pData->pMemory[length] = 0;
+	}
+
+	return *this;
+}
+
+int MFString::FindChar(int c) const
+{
+	if(pData)
+	{
+		const char *pT = pData->pMemory;
+		while(*pT)
+		{
+			// decode utf8
+			int t;
+			int bytes = MFString_DecodeUTF8(pT, &t);
+
+			// check if the characters match
+			if(t == c)
+				return (int)(pT - pData->pMemory);
+
+			// progress to next char
+			pT += bytes;
+		}
+	}
+
+	return -1;
 }
