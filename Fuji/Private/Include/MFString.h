@@ -564,7 +564,7 @@ public:
 	MFString& FromFloat(float number);
 
 	MFString& Detach();
-	MFString& Reserve(int bytes);
+	MFString& Reserve(int bytes, bool bClearString = false);
 	MFString Duplicate() const;
 
 	MFString& Sprintf(const char *pFormat, ...);

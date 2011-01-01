@@ -833,17 +833,10 @@ MFString& MFString::operator=(const char *pString)
 	{
 		int bytes = MFString_Length(pString);
 
-		if(!pData || pData->refCount > 1 || pData->allocated < bytes + 1)
-		{
-			if(pData)
-				pData->Release();
+		Reserve(bytes + 1, true);
 
-			pData = MFStringData::Alloc();
-			pData->pMemory = (char*)stringHeap.Alloc(bytes + 1, &pData->allocated);
-		}
-
-		pData->bytes = bytes;
 		MFString_Copy(pData->pMemory, pString);
+		pData->bytes = bytes;
 	}
 	else if(pData)
 	{
@@ -982,7 +975,7 @@ MFString& MFString::Detach()
 	return *this;
 }
 
-MFString& MFString::Reserve(int bytes)
+MFString& MFString::Reserve(int bytes, bool bClearString)
 {
 	// detach instance
 	if(pData && pData->refCount > 1)
@@ -999,16 +992,27 @@ MFString& MFString::Reserve(int bytes)
 		pData->pMemory[0] = 0;
 		pData->bytes = 0;
 	}
-	else if(bytes > pData->allocated)
+	else
 	{
-		bool bNeedFree = pData->allocated != 0;
+		if(bytes > pData->allocated)
+		{
+			bool bNeedFree = pData->allocated != 0;
 
-		char *pNew = (char*)stringHeap.Alloc(bytes, &pData->allocated);
-		MFString_Copy(pNew, pData->pMemory);
+			char *pNew = (char*)stringHeap.Alloc(bytes, &pData->allocated);
 
-		if(bNeedFree)
-			stringHeap.Free(pData->pMemory);
-		pData->pMemory = pNew;
+			if(!bClearString)
+				MFString_Copy(pNew, pData->pMemory);
+
+			if(bNeedFree)
+				stringHeap.Free(pData->pMemory);
+			pData->pMemory = pNew;
+		}
+
+		if(bClearString)
+		{
+			pData->bytes = 0;
+			pData->pMemory[0] = 0;
+		}
 	}
 
 	return *this;
