@@ -511,6 +511,10 @@ uint16* MFSkipWhiteW(uint16 *pC);
 
 struct MFStringData;
 
+/**
+ * Fuji String class.
+ * String management class via the Fuji string heap.
+ */
 class MFString
 {
 public:
@@ -524,33 +528,35 @@ public:
 	MFString(int preallocatedBytes);
 	~MFString();
 
-	bool operator!() const;
-	operator bool() const;
+	bool operator!() const;									/**< Boolean 'not' operator. */
+	operator bool() const;									/**< bool typecast operator. */
 
-	MFString& operator=(const char *pString);
-	MFString& operator=(const MFString &string);
-	MFString& operator+=(const char *pString);
-	MFString& operator+=(const MFString &string);
-	MFString operator+(const char *pString) const;
-	MFString operator+(const MFString &string) const;
+	char operator[](int index);
 
-	bool operator==(const char *pString);
-	bool operator==(const MFString &string);
-	bool operator!=(const char *pString);
-	bool operator!=(const MFString &string);
-	bool operator>=(const char *pString);
-	bool operator>=(const MFString &string);
-	bool operator<=(const char *pString);
-	bool operator<=(const MFString &string);
-	bool operator>(const char *pString);
-	bool operator>(const MFString &string);
-	bool operator<(const char *pString);
-	bool operator<(const MFString &string);
+	MFString& operator=(const char *pString);				/**< Assignment operator. */
+	MFString& operator=(const MFString &string);			/**< Assignment operator. */
+	MFString& operator+=(const char *pString);				/**< Concatinate operator. */
+	MFString& operator+=(const MFString &string);			/**< Concatinate operator. */
+	MFString operator+(const char *pString) const;			/**< Concatinate operator. */
+	MFString operator+(const MFString &string) const;		/**< Concatinate operator. */
 
-	bool Compare(const char *pString);
-	bool Compare(const MFString &string);
-	bool CompareInsensitive(const char *pString);
-	bool CompareInsensitive(const MFString &string);
+	bool operator==(const char *pString) const;				/**< Case-sensitive compare 'equal' operator. */
+	bool operator==(const MFString &string) const;			/**< Case-sensitive compare 'equal' operator. */
+	bool operator!=(const char *pString) const;				/**< Case-sensitive compare 'not-equal' operator. */
+	bool operator!=(const MFString &string) const;			/**< Case-sensitive compare 'not-equal' operator. */
+	bool operator>=(const char *pString) const;				/**< Case-sensitive compare 'greater or equal' operator. */
+	bool operator>=(const MFString &string) const;			/**< Case-sensitive compare 'greater or equal' operator. */
+	bool operator<=(const char *pString) const;				/**< Case-sensitive compare 'less or equal' operator. */
+	bool operator<=(const MFString &string) const;			/**< Case-sensitive compare 'less or equal' operator. */
+	bool operator>(const char *pString) const;				/**< Case-sensitive compare 'greater' operator. */
+	bool operator>(const MFString &string) const;			/**< Case-sensitive compare 'greater' operator. */
+	bool operator<(const char *pString) const;				/**< Case-sensitive compare 'less' operator. */
+	bool operator<(const MFString &string) const;			/**< Case-sensitive compare 'less' operator. */
+
+	bool Compare(const char *pString) const;				/**< Case-sensitive 'equal' comparison. */
+	bool Compare(const MFString &string) const;				/**< Case-sensitive 'equal' comparison. */
+	bool CompareInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
+	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
 
 	MFString& SetStaticString(const char *pStaticString);
 	MFString& FromUTF16(const wchar_t *pString);
@@ -558,6 +564,8 @@ public:
 	MFString& FromFloat(float number);
 
 	MFString& Detach();
+	MFString& Reserve(int bytes);
+	MFString Duplicate() const;
 
 	MFString& Sprintf(const char *pFormat, ...);
 
@@ -578,6 +586,10 @@ public:
 
 	MFString SubStr(int offset, int count = -1) const;
 	MFString& Truncate(int length);
+	MFString& ClearRange(int offset, int length);
+
+	MFString& Insert(int offset, MFString string);
+	MFString& Replace(int offset, int range, MFString string);
 
 	int FindChar(int c) const;
 
@@ -585,9 +597,28 @@ private:
 	MFStringData *pData;
 };
 
+/**
+ * Concatinate operator.
+ */
 MFString operator+(const char *pString, const MFString &string);
 
 #include "MFString.inl"
+
+/**
+ * Generate a string describing the state of the string heap.
+ * Generates a string describing the current state of the string heap.
+ * @return String describing the state of the string heap.
+ * @see MFString_Dump()
+ */
+MFString MFString_GetStats();
+
+/**
+ * Dump the state of the string heap.
+ * Dumps the current state of the string heap.
+ * @return None.
+ * @see MFString_GetStats()
+ */
+void MFString_Dump();
 
 #endif // _MFSTRING_H
 

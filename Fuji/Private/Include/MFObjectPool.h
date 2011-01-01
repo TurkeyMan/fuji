@@ -23,6 +23,17 @@ public:
 	void *AllocAndZero();
 	int Free(void *pItem);
 
+	uint32 GetObjectSize() { return objectSize; }
+
+	uint32 GetTotalMemory();
+	uint32 GetAllocatedMemory();
+	uint32 GetOverheadMemory();
+
+	int GetNumReserved();
+	int GetNumAllocated();
+
+	void *GetItem(int index);
+
 private:
 	int objectSize;
 	int maxItems;
@@ -47,12 +58,22 @@ struct MFObjectPoolGroupConfig
 class MFObjectPoolGroup
 {
 public:
-	void Init(MFObjectPoolGroupConfig *pPools, int numPools);
+	void Init(const MFObjectPoolGroupConfig *pPools, int numPools);
 	void Deinit();
 
 	void *Alloc(int bytes, int *pAllocated);
 	void *AllocAndZero(int bytes, int *pAllocated);
 	void Free(void *pItem);
+
+	uint32 GetTotalMemory();
+	uint32 GetAllocatedMemory();
+	uint32 GetOverheadMemory();
+
+	int GetNumReserved();
+	int GetNumAllocated();
+
+	int GetNumPools() { return numPools; }
+	MFObjectPool *GetPool(int pool) { return pPools + pool; }
 
 private:
 	MFObjectPoolGroupConfig *pConfig;

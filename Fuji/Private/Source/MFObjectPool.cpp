@@ -25,14 +25,14 @@ void MFObjectPool::Deinit()
 	{
 		pNext->Deinit();
 		MFHeap_Free(pNext);
-    pNext = NULL;
+		pNext = NULL;
 	}
 
 	if(pMemory)
-  {
+	{
 		MFHeap_Free(pMemory);
-    pMemory = NULL;
-  }
+		pMemory = NULL;
+	}
 }
 
 void *MFObjectPool::Alloc()
@@ -87,7 +87,43 @@ int MFObjectPool::Free(void *pItem)
 	return 0;
 }
 
-void MFObjectPoolGroup::Init(MFObjectPoolGroupConfig *_pPools, int _numPools)
+uint32 MFObjectPool::GetTotalMemory()
+{
+	return objectSize * GetNumReserved();
+}
+
+uint32 MFObjectPool::GetAllocatedMemory()
+{
+	return objectSize * GetNumAllocated();
+}
+
+uint32 MFObjectPool::GetOverheadMemory()
+{
+	return sizeof(void**) * GetNumReserved() + sizeof(*this);
+}
+
+int MFObjectPool::GetNumReserved()
+{
+	return maxItems + (pNext ? pNext->GetNumReserved() : 0);
+}
+
+int MFObjectPool::GetNumAllocated()
+{
+	return allocated + (pNext ? pNext->GetNumAllocated() : 0);
+}
+
+void *MFObjectPool::GetItem(int index)
+{
+	if(index < maxItems)
+		return ppItems[index];
+
+	if(pNext)
+		return pNext->GetItem(index - maxItems);
+
+	return NULL;
+}
+
+void MFObjectPoolGroup::Init(const MFObjectPoolGroupConfig *_pPools, int _numPools)
 {
 	pConfig = (MFObjectPoolGroupConfig*)MFHeap_Alloc(sizeof(MFObjectPoolGroupConfig)*_numPools + sizeof(MFObjectPool)*_numPools);
 	pPools = (MFObjectPool*)&pConfig[_numPools];
@@ -145,4 +181,44 @@ void MFObjectPoolGroup::Free(void *pItem)
 	}
 
 	MFHeap_Free(pItem);
+}
+
+uint32 MFObjectPoolGroup::GetTotalMemory()
+{
+	int total = 0;
+	for(int a=0; a<numPools; ++a)
+		total += pPools[a].GetTotalMemory();
+	return total;
+}
+
+uint32 MFObjectPoolGroup::GetAllocatedMemory()
+{
+	int allocated = 0;
+	for(int a=0; a<numPools; ++a)
+		allocated += pPools[a].GetAllocatedMemory();
+	return allocated;
+}
+
+uint32 MFObjectPoolGroup::GetOverheadMemory()
+{
+	int overhead = 0;
+	for(int a=0; a<numPools; ++a)
+		overhead += pPools[a].GetOverheadMemory();
+	return overhead;
+}
+
+int MFObjectPoolGroup::GetNumReserved()
+{
+	int reserved = 0;
+	for(int a=0; a<numPools; ++a)
+		reserved += pPools[a].GetNumReserved();
+	return reserved;
+}
+
+int MFObjectPoolGroup::GetNumAllocated()
+{
+	int allocated = 0;
+	for(int a=0; a<numPools; ++a)
+		allocated += pPools[a].GetNumReserved();
+	return allocated;
 }

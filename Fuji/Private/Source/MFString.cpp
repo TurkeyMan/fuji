@@ -18,24 +18,77 @@ static uint32 gStringOffset;
 static MFObjectPool stringPool;
 static MFObjectPoolGroup stringHeap;
 
+static const MFObjectPoolGroupConfig gStringGroups[] =
+{
+	{ 5, 256, 128 },
+	{ 16, 512, 128 },
+	{ 128, 32, 16 },
+	{ 1024, 4, 4 }
+};
+
 void MFString_InitModule()
 {
-	MFObjectPoolGroupConfig groups[] =
-	{
-		{ 5, 256, 128 },
-		{ 16, 128, 64 },
-		{ 128, 32, 16 },
-		{ 1024, 4, 2 }
-	};
-
-	stringHeap.Init(groups, sizeof(groups) / sizeof(groups[0]));
-	stringPool.Init(sizeof(MFStringData), 512, 128);
+	stringHeap.Init(gStringGroups, sizeof(gStringGroups) / sizeof(gStringGroups[0]));
+	stringPool.Init(sizeof(MFStringData), 128, 128);
 }
 
 void MFString_DeinitModule()
 {
 	stringPool.Deinit();
 	stringHeap.Deinit();
+}
+
+MFString MFString_GetStats()
+{
+	uint32 overhead = stringPool.GetTotalMemory() + stringPool.GetOverheadMemory() + stringHeap.GetOverheadMemory();
+	uint32 waste = 0, averageSize = 0;
+
+	// calculate waste
+	int numStrings = stringPool.GetNumAllocated();
+	for(int a=0; a<numStrings; ++a)
+	{
+		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
+		int allocated = pString->GetAllocated();
+		if(allocated)
+		{
+			int bytes = pString->GetBytes();
+			averageSize += bytes;
+			waste += allocated - bytes;
+		}
+	}
+
+	if(numStrings)
+		averageSize /= numStrings;
+
+	MFString desc(1024);
+	desc = MFStr("String heap memory: %d allocated/%d reserved + %d overhead  Waste: %d  Average length: %d\n\tPool: %d/%d", stringHeap.GetAllocatedMemory(), stringHeap.GetTotalMemory(), overhead, waste, averageSize, stringPool.GetNumAllocated(), stringPool.GetNumReserved());
+
+	int numGroups = stringHeap.GetNumPools();
+	for(int a=0; a<numGroups; ++a)
+	{
+		MFObjectPool *pPool = stringHeap.GetPool(a);
+		desc += MFStr("\n\t\t%d byte: %d/%d", pPool->GetObjectSize(), pPool->GetNumAllocated(), pPool->GetNumReserved());
+	}
+
+	return desc;
+}
+
+void MFString_Dump()
+{
+	MFString temp = MFString_GetStats();
+
+	MFDebug_Log(1, "\n-------------------------------------------------------------------------------------------------------");
+	MFDebug_Log(1, temp.CStr());
+
+	// dump all strings...
+	MFDebug_Log(1, "");
+
+	int numStrings = stringPool.GetNumAllocated();
+	for(int a=0; a<numStrings; ++a)
+	{
+		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
+		MFDebug_Log(1, MFStr("%d refs, %db: \"%s\"", pString->GetRefCount(), pString->GetAllocated(), pString->GetMemory()));
+	}
 }
 
 void MFCopyMemory(void *pDest, const void *pSrc, uint32 size)
@@ -786,10 +839,10 @@ MFString& MFString::operator=(const char *pString)
 				pData->Release();
 
 			pData = MFStringData::Alloc();
-			pData->bytes = bytes;
 			pData->pMemory = (char*)stringHeap.Alloc(bytes + 1, &pData->allocated);
 		}
 
+		pData->bytes = bytes;
 		MFString_Copy(pData->pMemory, pString);
 	}
 	else if(pData)
@@ -815,8 +868,7 @@ MFString& MFString::operator=(const MFString &string)
 
 MFString& MFString::operator+=(const char *pString)
 {
-	MFString t(pString);
-	return *this += t;
+	return *this += MFString::Static(pString);
 }
 
 MFString& MFString::operator+=(const MFString &string)
@@ -831,50 +883,44 @@ MFString& MFString::operator+=(const MFString &string)
 	}
 	else
 	{
-		// make sure nothing else references this string since we are going to modify it
-		Detach();
-
 		int sumBytes = pData->bytes + string.pData->bytes;
 		int bytesNeeded = sumBytes + 1;
-		if(pData->allocated >= bytesNeeded)
-		{
-			MFString_Copy(pData->pMemory + pData->bytes, string.pData->pMemory);
-		}
-		else
-		{
-			// overflowed the string buffer, need to realloc...
-			bool bNeedFree = pData->allocated != 0;
 
-			char *pNew = (char*)stringHeap.Alloc(bytesNeeded, &pData->allocated);
-			MFString_CopyCat(pNew, pData->pMemory, string.pData->pMemory);
+		Reserve(bytesNeeded);
 
-			if(bNeedFree)
-				stringHeap.Free(pData->pMemory);
-
-			pData->pMemory = pNew;
-		}
+		MFString_Copy(pData->pMemory + pData->bytes, string.pData->pMemory);
 		pData->bytes = sumBytes;
 	}
 
 	return *this;
 }
 
-MFString MFString::operator+(const char *pString) const
-{
-	MFString t(*this);
-	return t += pString;
-}
-
 MFString MFString::operator+(const MFString &string) const
 {
-	MFString t(*this);
-	return t += string;
+	if(!string)
+		return *this;
+
+	if(!pData)
+		return string;
+
+	int bytes = pData->bytes + string.pData->bytes;
+
+	MFString t(bytes + 1);
+	t.pData->bytes = bytes;
+
+	MFString_CopyCat(t.pData->pMemory, pData->pMemory, string.pData->pMemory);
+
+	return t;
+}
+
+MFString MFString::operator+(const char *pString) const
+{
+	return this->operator+(MFString::Static(pString));
 }
 
 MFString operator+(const char *pString, const MFString &string)
 {
-	MFString t(pString, true);
-	return t += string;
+	return MFString::Static(pString) + string;
 }
 
 MFString& MFString::SetStaticString(const char *pStaticString)
@@ -931,6 +977,38 @@ MFString& MFString::Detach()
 
 		pData->Release();
 		pData = pNew;
+	}
+
+	return *this;
+}
+
+MFString& MFString::Reserve(int bytes)
+{
+	// detach instance
+	if(pData && pData->refCount > 1)
+	{
+		pData->Release();
+		pData = NULL;
+	}
+
+	// allocate memory
+	if(!pData)
+	{
+		pData = MFStringData::Alloc();
+		pData->pMemory = (char*)stringHeap.Alloc(bytes, &pData->allocated);
+		pData->pMemory[0] = 0;
+		pData->bytes = 0;
+	}
+	else if(bytes > pData->allocated)
+	{
+		bool bNeedFree = pData->allocated != 0;
+
+		char *pNew = (char*)stringHeap.Alloc(bytes, &pData->allocated);
+		MFString_Copy(pNew, pData->pMemory);
+
+		if(bNeedFree)
+			stringHeap.Free(pData->pMemory);
+		pData->pMemory = pNew;
 	}
 
 	return *this;
@@ -1092,6 +1170,95 @@ MFString& MFString::Truncate(int length)
 		pData->bytes = length;
 		pData->pMemory[length] = 0;
 	}
+
+	return *this;
+}
+
+MFString& MFString::ClearRange(int offset, int length)
+{
+	if(!pData)
+		return *this;
+
+	// limit within the strings range
+	int maxChars = pData->bytes - offset;
+	if(length > maxChars)
+		length = maxChars;
+
+	// bail if we don't need to do anything
+	if(length <= 0)
+		return *this;
+
+	// clear the range
+	Detach();
+
+	int postBytes = pData->bytes - (offset + length);
+	pData->bytes -= length;
+
+	char *pReplace = pData->pMemory + offset;
+	const char *pTail = pReplace + length;
+
+	for(int a=0; a <= postBytes; ++a)
+		pReplace[a] = pTail[a];
+
+	return *this;
+}
+
+MFString& MFString::Replace(int offset, int range, MFString string)
+{
+	if(!pData)
+	{
+		pData = string.pData;
+		if(pData)
+			pData->AddRef();
+		return *this;
+	}
+
+	// limit within the strings range
+	offset = MFMin(offset, pData->bytes);
+	int maxChars = pData->bytes - offset;
+	if(range > maxChars)
+		range = maxChars;
+
+	// bail if we don't need to do anything
+	int strLen = string.NumBytes();
+	if(range == 0 && strLen == 0)
+		return *this;
+
+	int reposition = strLen - range;
+	int newSize = pData->bytes + reposition;
+
+	// reserve memory for the new string
+	Reserve(newSize);
+
+	// move tail into place
+	if(reposition)
+	{
+		int tailOffset = offset + range;
+		char *pSrc = pData->pMemory + tailOffset;
+		char *pDest = pSrc + reposition;
+
+		if(pDest < pSrc)
+		{
+			while(*pSrc)
+				*pDest++ = *pSrc++;
+			*pDest = 0;
+		}
+		else
+		{
+			int len = pData->bytes - tailOffset;
+			while(len >= 0)
+			{
+				pDest[len] = pSrc[len];
+				--len;
+			}
+		}
+	}
+
+	// insert string
+	if(strLen)
+		MFString_CopyN(pData->pMemory + offset, string.pData->pMemory, strLen);
+
+	pData->bytes = newSize;
 
 	return *this;
 }

@@ -460,17 +460,24 @@ inline uint16* MFWString_CopyCat(uint16 *pBuffer, const uint16 *pString, const u
 struct MFStringData
 {
 	friend class MFString;
-private:
-	char *pMemory;
-	int bytes;
-	int allocated;
-	int refCount;
+public:
+	int GetRefCount() const { return refCount; }
+	int GetBytes() const { return bytes + 1; }
+	int GetAllocated() const { return allocated; }
+	const char *GetMemory() const { return pMemory; }
 
+private:
 	static MFStringData *Alloc();
 	void Destroy();
 
 	int AddRef() { ++refCount;  return refCount; }
 	int Release() { if(--refCount == 0) { Destroy(); return 0; } return refCount; }
+
+	// members
+	char *pMemory;
+	int bytes;
+	int allocated;
+	int refCount;
 };
 
 inline MFString::MFString()
@@ -507,116 +514,129 @@ inline MFString::operator bool() const
 	return pData != NULL;
 }
 
-inline bool MFString::operator==(const char *pString)
+inline char MFString::operator[](int index)
+{
+	if(!pData)
+		return 0;
+	return pData->pMemory[index];
+}
+
+inline bool MFString::operator==(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData == pString;
 	return MFString_Compare(pData->pMemory, pString) == 0;
 }
 
-inline bool MFString::operator==(const MFString &string)
+inline bool MFString::operator==(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData == string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) == 0;
 }
 
-inline bool MFString::operator!=(const char *pString)
+inline bool MFString::operator!=(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData != pString;
 	return MFString_Compare(pData->pMemory, pString) != 0;
 }
 
-inline bool MFString::operator!=(const MFString &string)
+inline bool MFString::operator!=(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData != string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) != 0;
 }
 
-inline bool MFString::operator<=(const char *pString)
+inline bool MFString::operator<=(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData <= pString;
 	return MFString_Compare(pData->pMemory, pString) <= 0;
 }
 
-inline bool MFString::operator<=(const MFString &string)
+inline bool MFString::operator<=(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData <= string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) <= 0;
 }
 
-inline bool MFString::operator>=(const char *pString)
+inline bool MFString::operator>=(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData >= pString;
 	return MFString_Compare(pData->pMemory, pString) >= 0;
 }
 
-inline bool MFString::operator>=(const MFString &string)
+inline bool MFString::operator>=(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData >= string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) >= 0;
 }
 
-inline bool MFString::operator<(const char *pString)
+inline bool MFString::operator<(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData < pString;
 	return MFString_Compare(pData->pMemory, pString) < 0;
 }
 
-inline bool MFString::operator<(const MFString &string)
+inline bool MFString::operator<(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData < string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) < 0;
 }
 
-inline bool MFString::operator>(const char *pString)
+inline bool MFString::operator>(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData > pString;
 	return MFString_Compare(pData->pMemory, pString) > 0;
 }
 
-inline bool MFString::operator>(const MFString &string)
+inline bool MFString::operator>(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData > string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) > 0;
 }
 
-inline bool MFString::Compare(const char *pString)
+inline bool MFString::Compare(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData == pString;
 	return MFString_Compare(pData->pMemory, pString) == 0;
 }
 
-inline bool MFString::Compare(const MFString &string)
+inline bool MFString::Compare(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData == string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) == 0;
 }
 
-inline bool MFString::CompareInsensitive(const char *pString)
+inline bool MFString::CompareInsensitive(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData == pString;
 	return MFString_CaseCmp(pData->pMemory, pString) == 0;
 }
 
-inline bool MFString::CompareInsensitive(const MFString &string)
+inline bool MFString::CompareInsensitive(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData == string.pData;
 	return MFString_CaseCmp(pData->pMemory, string.pData->pMemory) == 0;
+}
+
+inline MFString MFString::Duplicate() const
+{
+	MFString t(*this);
+	return t;
 }
 
 inline int MFString::ToInt(int base) const
@@ -658,4 +678,9 @@ inline uint32 MFString::GetHash() const
 {
 	uint32 MFUtil_HashString(const char *pString);
 	return pData ? MFUtil_HashString(pData->pMemory) : 0;
+}
+
+inline MFString& MFString::Insert(int offset, MFString string)
+{
+	return Replace(offset, 0, string);
 }
