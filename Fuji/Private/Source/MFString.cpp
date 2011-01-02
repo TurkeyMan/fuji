@@ -1141,6 +1141,61 @@ MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
 	return *this;
 }
 
+MFString& MFString::PadLeft(int minLength, const char *pPadding)
+{
+	// check if the string is already long enough
+	int len = NumBytes();
+	if(len >= minLength)
+		return *this;
+
+	// reserve enough memory
+	Reserve(minLength + 1);
+	pData->bytes = minLength;
+
+	// move string
+	int preBytes = minLength - len;
+	for(int a=len; a>=0; --a)
+		pData->pMemory[a + preBytes] = pData->pMemory[a];
+
+	// pre-pad the string
+	int padLen = MFString_Length(pPadding);
+	for(int a=0, b=0; a<preBytes; ++a, ++b)
+	{
+		if(b >= padLen)
+			b = 0;
+
+		pData->pMemory[a] = pPadding[b];
+	}
+
+	return *this;
+}
+
+MFString& MFString::PadRight(int minLength, const char *pPadding, bool bAlignPadding)
+{
+	// check if the string is already long enough
+	int len = NumBytes();
+	if(len >= minLength)
+		return *this;
+
+	// reserve enough memory
+	Reserve(minLength + 1);
+	pData->bytes = minLength;
+	pData->pMemory[minLength] = 0;
+
+	// pad the string
+	int padLen = MFString_Length(pPadding);
+	int b = bAlignPadding ? len%padLen : 0;
+	for(int a=len; a<minLength; ++a, ++b)
+	{
+		if(b >= padLen)
+			b = 0;
+
+		pData->pMemory[a] = pPadding[b];
+	}
+
+	return *this;
+}
+
 MFString MFString::SubStr(int offset, int count) const
 {
 	if(!pData)

@@ -143,19 +143,110 @@ uint32 MFUtil_CrcString(const char *pString)
 	return ~crc;			// transmit complement, per CRC-32 spec
 }
 
+#define USE_FNV
+//#define USE_SUPERFASTHASH
+
 // generate a fast hash value for this string, strings are treated case INSENSITIVE
+#if defined(USE_FNV)
+
+// using the FNV-1a hash algorithm
 uint32 MFUtil_HashString(const char *pString)
 {
-	uint32 hash = 0;
+	uint32 hash = 2166136261;
 
 	while(*pString)
-	{
-		hash += hash*17 + (*pString | 0x20);
-		++pString;
-	}
+		hash = (hash ^ (uint32)*pString++) * 16777619;
 
 	return hash;
 }
+
+#elif defined(USE_SUPERFASTHASH)
+
+// using the SuperFastHash algorithm
+#if defined(MF_ARCH_X86) // any little endian system that can perform unaligned loads
+//	#define get16bits(d) (*(uint16*)(d))
+	#define get32bits(d) (*(uint32*)(d))
+#else
+//	#define get16bits(d) ((((uint8*)(d))[1] << 8) | ((uint8*)(d))[0])
+	#define get32bits(d) ((((uint8*)(d))[3] << 24) | ((((uint8*)(d))[2] << 16) | ((((uint8*)(d))[1] << 8) | ((uint8*)(d))[0])
+#endif
+
+uint32 MFUtil_HashString(const char *data)
+{
+//	uint32 hash = len, tmp;
+	uint32 hash = (uint8)*data, tmp;
+
+	// Main loop
+	uint32 d, hasZero;
+	while(1)
+	{
+		d = get32bits(data);
+		data += 4;
+
+		hasZero = (d - 0x01010101UL) & ~d & 0x80808080UL;
+		if(hasZero)
+			break;
+
+		hash  += (d & 0xFFFF);
+		tmp    = ((d >> 16) << 11) ^ hash;
+		hash   = (hash << 16) ^ tmp;
+		hash  += hash >> 11;
+	}
+
+	// Handle end cases
+	if((hasZero & 0x808080) == 0)
+	{
+		hash += (d & 0xFFFF);
+		hash ^= hash << 16;
+		hash ^= (d >> 16) << 18;
+		hash += hash >> 11;
+	}
+	else if((hasZero & 0x8080) == 0)
+	{
+		hash += (d & 0xFFFF);
+		hash ^= hash << 11;
+		hash += hash >> 17;
+	}
+	else if(hasZero & 0x80 == 0)
+	{
+		hash += (d & 0xFF);
+		hash ^= hash << 10;
+		hash += hash >> 1;
+	}
+
+	// Force "avalanching" of final 127 bits
+	hash ^= hash << 3;
+	hash += hash >> 5;
+	hash ^= hash << 4;
+	hash += hash >> 17;
+	hash ^= hash << 25;
+	hash += hash >> 6;
+
+	return hash;
+}
+
+#else
+
+// using the one-at-a-time algorithm
+uint32 MFUtil_HashString(const char *s)
+{
+    uint32 hash = 0;
+
+    while(*s)
+    {
+        hash += *s++;
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return hash;
+}
+
+#endif
 
 int MFUtil_NextPowerOf2(int x)
 {

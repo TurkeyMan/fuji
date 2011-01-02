@@ -553,19 +553,14 @@ public:
 	bool operator<(const char *pString) const;				/**< Case-sensitive compare 'less' operator. */
 	bool operator<(const MFString &string) const;			/**< Case-sensitive compare 'less' operator. */
 
-	bool Compare(const char *pString) const;				/**< Case-sensitive 'equal' comparison. */
-	bool Compare(const MFString &string) const;				/**< Case-sensitive 'equal' comparison. */
-	bool CompareInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
-	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
+	MFString& Detach();
+	MFString& Reserve(int bytes, bool bClearString = false);
+	MFString Duplicate() const;
 
 	MFString& SetStaticString(const char *pStaticString);
 	MFString& FromUTF16(const wchar_t *pString);
 	MFString& FromInt(int number);
 	MFString& FromFloat(float number);
-
-	MFString& Detach();
-	MFString& Reserve(int bytes, bool bClearString = false);
-	MFString Duplicate() const;
 
 	MFString& Sprintf(const char *pFormat, ...);
 
@@ -578,11 +573,20 @@ public:
 	bool IsNull() const;
 	bool IsNumeric() const;
 
-	uint32 GetHash() const;
+	uint32 GetHash() const;									/**< Generate a fast hash for this string. */
+
+	bool Compare(const char *pString) const;				/**< Case-sensitive 'equal' comparison. */
+	bool Compare(const MFString &string) const;				/**< Case-sensitive 'equal' comparison. */
+	bool CompareInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
+	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
+
+	int FindChar(int c) const;
 
 	MFString Upper() const;
 	MFString Lower() const;
 	MFString& Trim(bool bFront = true, bool bEnd = true, const char *pCharacters = " \t\r\n");
+	MFString& PadLeft(int minLength, const char *pPadding = " ");
+	MFString& PadRight(int minLength, const char *pPadding = " ", bool bAlignPadding = false);
 
 	MFString SubStr(int offset, int count = -1) const;
 	MFString& Truncate(int length);
@@ -590,8 +594,6 @@ public:
 
 	MFString& Insert(int offset, MFString string);
 	MFString& Replace(int offset, int range, MFString string);
-
-	int FindChar(int c) const;
 
 private:
 	MFStringData *pData;
