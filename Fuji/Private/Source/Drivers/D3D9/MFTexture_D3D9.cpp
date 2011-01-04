@@ -143,15 +143,24 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		pTexture->pTemplateData->pSurfaces->pPaletteEntries = NULL;
 		pTexture->pTemplateData->pSurfaces->paletteBufferLength = 0;
 
-		pTexture->refCount = 0;
+		pTexture->refCount = 1;
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
 		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFDD_D3D9);
-		pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
-	}
+		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
 
-	pTexture->refCount++;
+		if(hr != D3D_OK)
+		{
+			MFHeap_Free(pTexture->pTemplateData);
+			gTextureBank.Destroy(pTexture);
+			pTexture = NULL;
+		}
+	}
+	else
+	{
+		pTexture->refCount++;
+	}
 
 	return pTexture;
 }
