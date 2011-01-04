@@ -47,6 +47,9 @@ public:
 	static const MFVector yellow;
 	static const MFVector white;
 	static const MFVector black;
+	static const MFVector grey;
+	static const MFVector lightgrey;
+	static const MFVector darkgrey;
 
 	// general purpose vector operators
 

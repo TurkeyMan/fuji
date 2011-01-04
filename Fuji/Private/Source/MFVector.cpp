@@ -15,3 +15,6 @@ const MFVector MFVector::blue = MakeVector(0.0f, 0.0f, 1.0f, 1.0f);
 const MFVector MFVector::yellow = MakeVector(1.0f, 1.0f, 0.0f, 1.0f);
 const MFVector MFVector::white = MakeVector(1.0f, 1.0f, 1.0f, 1.0f);
 const MFVector MFVector::black = MakeVector(0.0f, 0.0f, 0.0f, 1.0f);
+const MFVector MFVector::grey = MakeVector(0.5f, 0.5f, 0.5f, 1.0f);
+const MFVector MFVector::lightgrey = MakeVector(0.8f, 0.8f, 0.8f, 1.0f);
+const MFVector MFVector::darkgrey = MakeVector(0.3f, 0.3f, 0.3f, 1.0f);

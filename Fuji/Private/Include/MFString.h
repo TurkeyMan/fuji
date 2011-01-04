@@ -571,6 +571,7 @@ public:
 	int NumBytes() const;
 	int NumChars() const;
 	bool IsNull() const;
+	bool IsEmpty() const;
 	bool IsNumeric() const;
 
 	uint32 GetHash() const;									/**< Generate a fast hash for this string. */

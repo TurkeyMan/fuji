@@ -666,7 +666,12 @@ inline int MFString::NumChars() const
 
 inline bool MFString::IsNull() const
 {
-	return !!pData;
+	return pData == NULL;
+}
+
+inline bool MFString::IsEmpty() const
+{
+	return !pData || pData->bytes == 0;
 }
 
 inline bool MFString::IsNumeric() const
