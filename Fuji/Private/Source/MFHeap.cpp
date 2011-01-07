@@ -6,6 +6,10 @@
 
 static int heapAlignment = 32;
 
+static uint32 totalAllocated = 0;
+static uint32 totalWaste = 0;
+static uint32 allocCount = 0;
+
 // external heap
 static void* ExternalMalloc(uint32 bytes, void *pUserData)
 {
@@ -58,8 +62,12 @@ static MFHeap gCustomHeap =
 #endif
 };
 
-#define MFHeap_MungwallBytes 8
-static const char gMungwall[9] = "mungwall";
+#if !defined(_RETAIL)
+	#define MFHeap_MungwallBytes 8
+	static const char gMungwall[9] = "mungwall";
+#else
+	#define MFHeap_MungwallBytes 0
+#endif
 
 /*** heap tracker ***/
 
@@ -99,10 +107,15 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	while(pad < (int)sizeof(MFAllocHeader))
 		pad += heapAlignment;
 
-	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(bytes + pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes, pAllocHeap->pHeapData);
-	MFDebug_Assert(pMemory, "Failed to allocate memory!");
+	uint32 allocExtra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
+	uint32 allocBytes = bytes + allocExtra;
 
-	int alignment = (int)((uint32)MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uint32&)pMemory);
+	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(allocBytes, pAllocHeap->pHeapData);
+	MFDebug_Assert(pMemory, "Failed to allocate memory!");
+	if(!pMemory)
+		return NULL;
+
+	int alignment = (int)((uint32)MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uintp)pMemory);
 
 	pMemory += alignment;
 
@@ -116,6 +129,12 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 
 #if !defined(_RETAIL)
 	MFCopyMemory(pMemory + bytes, gMungwall, MFHeap_MungwallBytes);
+
+	totalAllocated += allocBytes;
+	totalWaste += allocExtra;
+	++allocCount;
+
+	MFDebug_Log(2, MFStr("Alloc: %d bytes - %s:(%d)", bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
 #endif
 
 	return (void*)pMemory;
@@ -139,6 +158,10 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 		MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
 
 		void *pNew = MFHeap_AllocInternal(bytes, pHeader->pHeap);
+		MFDebug_Assert(pNew, "Failed to allocate memory!");
+		if(!pNew)
+			return NULL;
+
 		MFCopyMemory(pNew, pMem, MFMin(bytes, pHeader->size));
 		MFHeap_Free(pMem);
 		return pNew;
@@ -161,6 +184,19 @@ void MFHeap_Free(void *pMem)
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
+
+#if !defined(_RETAIL)
+	int pad = 0;
+	while(pad < (int)sizeof(MFAllocHeader))
+		pad += heapAlignment;
+	uint32 extra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
+
+	totalAllocated -= pHeader->size + extra;
+	totalWaste -= extra;
+	--allocCount;
+
+	MFDebug_Log(2, MFStr("Free: %d bytes - %s:(%d)", pHeader->size, pHeader->pFile, (int)pHeader->line));
+#endif
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
@@ -213,6 +249,21 @@ void operator delete[](void *pMemory, void *pMem)
 {
 }
 #endif
+
+uint32 MFHeap_GetTotalAllocated()
+{
+	return totalAllocated;
+}
+
+uint32 MFHeap_GetTotalWaste()
+{
+	return totalWaste;
+}
+
+uint32 MFHeap_GetNumAllocations()
+{
+	return allocCount;
+}
 
 // get the size of an allocation
 uint32 MFHeap_GetAllocSize(const void *pMemory)

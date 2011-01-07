@@ -117,6 +117,12 @@ void operator delete(void *pMemory, void *pMem);
 void operator delete[](void *pMemory, void *pMem);
 #endif
 
+
+// *** document me!! ***
+uint32 MFHeap_GetTotalAllocated();
+uint32 MFHeap_GetTotalWaste();
+uint32 MFHeap_GetNumAllocations();
+
 /**
  * Get the size of an allocation.
  * Get the size of a fuji allocation.

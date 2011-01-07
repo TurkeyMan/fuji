@@ -65,7 +65,7 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 
 	MFString_Copy(pCurr, pNewString);
 	pCurr[newLength]=0;
-	pCache->used = ((uint32&)pCurr + newLength) - (uint32&)pCache->pMem + 1;
+	pCache->used = ((uintp)pCurr + newLength) - (uintp)pCache->pMem + 1;
 	return pCurr;
 }
 
@@ -147,7 +147,7 @@ const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewStrin
 
 	MFWString_Copy(pCurr, pNewString);
 	pCurr[newLength]=0;
-	pCache->used = (((uint32&)pCurr + newLength) - (uint32&)pCache->pMem + 1) * 2;
+	pCache->used = (((uintp)pCurr + newLength) - (uintp)pCache->pMem + 1) * 2;
 	return pCurr;
 }
 

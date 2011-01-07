@@ -1409,7 +1409,7 @@ void *F3DFile::CreateANM(uint32 *pSize, MFPlatform platform)
 	char *pCache = MFStringCache_GetCache(pStringCache);
 	MFCopyMemory(pOffset, pCache, MFStringCache_GetSize(pStringCache));
 
-	size_t stringBase = (uint32&)pCache - ((uint32&)pOffset - (uint32&)pFile);
+	uintp stringBase = (uintp)pCache - ((uintp)pOffset - (uintp)pFile);
 	pOffset += MFStringCache_GetSize(pStringCache); // pOffset now equals the file size..
 
 	// un-fix-up all the pointers...
@@ -1423,7 +1423,7 @@ void *F3DFile::CreateANM(uint32 *pSize, MFPlatform platform)
 	MFFixUp(pAnimData->pName, (void*)stringBase, 0);
 	MFFixUp(pAnimData->pBones, pAnimData, 0);
 
-	uint32 fileSize = (uint32&)pOffset - (uint32&)pAnimData;
+	uintp fileSize = (uintp)pOffset - (uintp)pAnimData;
 	void *pANM = MFHeap_Alloc(fileSize);
 	MFCopyMemory(pANM, pFile, fileSize);
 

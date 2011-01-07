@@ -31,7 +31,7 @@ const char *GetNextToken(const char *&pString)
 	while(*pEnd && !MFIsWhite(*pEnd) && !MFIsNewline(*pEnd))
 		++pEnd;
 
-	const char *pToken = MFStrN(pString, (int)((uint32&)pEnd-(uint32&)pString));
+	const char *pToken = MFStrN(pString, (int)((uintp)pEnd-(uintp)pString));
 	pString = pEnd;
 
 	return pToken;
@@ -47,7 +47,7 @@ const char *GetNextIndex(const char *&pString)
 	while(*pEnd && *pEnd != '/')
 		++pEnd;
 
-	const char *pToken = MFStrN(pString, (int)((uint32&)pEnd-(uint32&)pString));
+	const char *pToken = MFStrN(pString, (int)((uintp)pEnd-(uintp)pString));
 	pString = pEnd;
 
 	return pToken;
@@ -62,7 +62,7 @@ const char *GetRestOfLine(const char *&pString)
 	while(*pEnd && !MFIsNewline(*pEnd))
 		++pEnd;
 
-	const char *pRestOfLine = MFStrN(pString, (int)((uint32&)pEnd - (uint32&)pString));
+	const char *pRestOfLine = MFStrN(pString, (int)((uintp)pEnd - (uintp)pString));
 	pString = pEnd;
 
 	return pRestOfLine;

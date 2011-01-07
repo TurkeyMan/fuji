@@ -38,7 +38,7 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 
 	while(*pT && *pT != '.') ++pT;
 
-	const char *pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	const char *pToken = MFStrN(pIPString, (uintp)pT - (uintp)pIPString);
 	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b1 = (uint8)atoi(pToken);
 
@@ -50,7 +50,7 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 
 	while(*pT && *pT != '.') ++pT;
 
-	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	pToken = MFStrN(pIPString, (uintp)pT - (uintp)pIPString);
 	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b2 = (uint8)atoi(pToken);
 
@@ -62,7 +62,7 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 
 	while(*pT && *pT != '.') ++pT;
 
-	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	pToken = MFStrN(pIPString, (uintp)pT - (uintp)pIPString);
 	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b3 = (uint8)atoi(pToken);
 
@@ -74,7 +74,7 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString)
 
 	while(*pT && *pT != '.') ++pT;
 
-	pToken = MFStrN(pIPString, (uint32&)pT - (uint32&)pIPString);
+	pToken = MFStrN(pIPString, (uintp)pT - (uintp)pIPString);
 	MFDebug_Assert(MFString_Length(pToken), "Malformed IP string.");
 	a.b4 = (uint8)atoi(pToken);
 

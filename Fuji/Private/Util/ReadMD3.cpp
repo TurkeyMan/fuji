@@ -102,7 +102,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 			for(; pT > pSkin && pT[-1] != '\n'; --pT) { }
 
 			// get subobject name
-			char *pTokTemp = pTok - (uint32&)pT;
+			char *pTokTemp = pTok - (uintp)pT;
 			const char *pSubName = MFStrN(pT, (int&)pTokTemp);
 
 			++pTok;
@@ -112,7 +112,7 @@ const char* GetMaterialName(const char *pSkin, const char *pSubobjectName)
 				for(pT = pTok; *pT != 0 && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 				// get texture name
-				pTokTemp = pT - (uint32&)pTok;
+				pTokTemp = pT - (uintp)pTok;
 				char *pMaterialName = (char*)MFStrN(pTok, (int&)pTokTemp);
 
 				for(pT = pMaterialName+MFString_Length(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
@@ -141,8 +141,8 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 //	DBGASSERT(pHeader->version == 15, "Invalid MD3 version.");
 //	DBGASSERT(pHeader->offsetEnd == bufferSize, "Incorrect MD3 Size.");
 
-	(char*&)pHeader->pTags += (uint32&)pBuffer;
-	(char*&)pHeader->pSurfaces += (uint32&)pBuffer;
+	(char*&)pHeader->pTags += (uintp)pBuffer;
+	(char*&)pHeader->pSurfaces += (uintp)pBuffer;
 
 	// read materials
 	if(pSkin)
@@ -155,7 +155,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 			for(pT = pTok; *pT != 0 && *pT != '\r' && *pT != '\n'; ++pT) { }
 
 			// get texture name
-			char *pTT = pT - (uint32&)pTok;
+			char *pTT = pT - (uintp)pTok;
 			char *pMaterialName = (char*)MFStrN(pTok, (int&)pTT);
 
 			for(pT = pMaterialName+MFString_Length(pMaterialName); pT > pMaterialName && pT[-1] != '/' && pT[-1] != '\\' && pT[-1] != '\n' && pT[-1] != '\r'; --pT) { }
@@ -191,9 +191,9 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 	{
 //		DBGASSERT(pHeader->pSurfaces->identity == (('3'<<24) | ('P'<<16) | ('D'<<8) | 'I'), "Invalid MD3 surface header.");
 
-		(char*&)pHeader->pSurfaces->pTextureCoords += (uint32&)pHeader->pSurfaces;
-		(char*&)pHeader->pSurfaces->pTriangles += (uint32&)pHeader->pSurfaces;
-		(char*&)pHeader->pSurfaces->pVertices += (uint32&)pHeader->pSurfaces;
+		(char*&)pHeader->pSurfaces->pTextureCoords += (uintp)pHeader->pSurfaces;
+		(char*&)pHeader->pSurfaces->pTriangles += (uintp)pHeader->pSurfaces;
+		(char*&)pHeader->pSurfaces->pVertices += (uintp)pHeader->pSurfaces;
 
 		F3DSubObject &sub = pMC->subObjects.push();
 		F3DMaterialSubobject &matSub = sub.matSubobjects[0];
@@ -240,7 +240,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 		}
 
 		// skip to next surface
-		(char*&)pHeader->pSurfaces += (uint32&)pHeader->pSurfaces->surfaceSize;
+		(char*&)pHeader->pSurfaces += pHeader->pSurfaces->surfaceSize;
 	}
 }
 

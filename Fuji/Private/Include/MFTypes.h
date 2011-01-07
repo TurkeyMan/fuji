@@ -57,6 +57,14 @@ typedef short				int16;
 typedef unsigned char		uint8;
 typedef char				int8;
 
+// pointer sized ints
+typedef size_t				uintp;
+#if defined(WIN32)
+//typedef LONG_PTR			intp; // *** FIND SOMETHING!!!
+#else
+typedef ssize_t				intp;
+#endif
+
 #endif
 
 /**

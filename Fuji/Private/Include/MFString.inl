@@ -142,14 +142,14 @@ inline int MFString_Length(const char *pString)
 {
 	const char *pT = pString;
 	while(*pT) ++pT;
-	return (uint32&)pT - (uint32&)pString;
+	return (uintp)pT - (uintp)pString;
 }
 
 inline int MFString_LengthN(const char *pString, int maxChars)
 {
 	const char *pT = pString;
 	while(*pT && maxChars--) ++pT;
-	return (uint32&)pT - (uint32&)pString;
+	return (uintp)pT - (uintp)pString;
 }
 
 inline char* MFString_Copy(char *pBuffer, const char *pString)
@@ -409,7 +409,7 @@ inline int MFWString_Length(const uint16 *pString)
 {
 	const uint16 *pT = pString;
 	while(*pT) ++pT;
-	return ((uint32&)pT - (uint32&)pString) >> 1;
+	return ((uintp)pT - (uintp)pString) >> 1;
 }
 
 inline uint16* MFWString_Copy(uint16 *pBuffer, const uint16 *pString)

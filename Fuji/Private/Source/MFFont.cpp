@@ -1415,7 +1415,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 
 	// append characters to file
 	uint16 *pMapEnd = &pHeader->pCharacterMapping[pHeader->maxMapping+1];
-	uint32 offset = MFALIGN16((uint32&)pMapEnd);
+	uintp offset = MFALIGN16(pMapEnd);
 	pHeader->pChars = (MFFontChar*&)offset;
 	MFCopyMemory(pHeader->pChars, pC, sizeof(MFFontChar) * pHeader->numChars);
 
@@ -1429,8 +1429,8 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	// TODO...
 
 	// fix up pointers
-	uint32 base = (uint32&)pFontFile;
-	uint32 stringBase = (uint32&)pCache - ((uint32&)pStrings - (uint32&)pFontFile);
+	uintp base = (uintp)pFontFile;
+	uintp stringBase = (uintp)pCache - ((uintp)pStrings - (uintp)pFontFile);
 
 	for(int a=0; a<pHeader->numPages; a++)
 		(char*&)pHeader->ppPages[a] -= stringBase;
@@ -1441,7 +1441,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	(char*&)pHeader->pName -= stringBase;
 
 	// write to disk
-	int fileSize = ((uint32&)pStrings+stringLen) - (uint32&)pFontFile;
+	int fileSize = ((uintp)pStrings+stringLen) - (uintp)pFontFile;
 	MFFont *pFont = (MFFont*)MFHeap_Alloc(fileSize);
 	MFCopyMemory(pFont, pFontFile, fileSize);
 
