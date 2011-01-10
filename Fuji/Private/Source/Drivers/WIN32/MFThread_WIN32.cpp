@@ -3,6 +3,7 @@
 #if MF_THREAD == MF_DRIVER_WIN32
 
 #include "MFThread.h"
+#include "MFHeap.h"
 
 #if defined(MF_WINDOWS)
 	#define WIN32_LEAN_AND_MEAN
@@ -14,7 +15,6 @@
 // globals
 
 static const int gMaxThreads = 16;
-static const int gMaxMutexes = 16;
 
 struct MFThreadInfoPC
 {
@@ -32,7 +32,6 @@ struct MFMutexPC
 };
 
 static MFThreadInfoPC gThreads[gMaxThreads];
-static MFMutexPC gMutexes[gMaxMutexes];
 
 
 // functions
@@ -47,18 +46,6 @@ static MFThreadInfoPC* MFThreadPC_GetNewThreadInfo()
 
 	return NULL;
 }
-
-static MFMutexPC* MFThreadPC_GetNewMutex()
-{
-	for(int a=0; a<gMaxMutexes; a++)
-	{
-		if(!gMutexes[a].name[0])
-			return &gMutexes[a];
-	}
-
-	return NULL;
-}
-
 
 static DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
@@ -121,7 +108,7 @@ void MFThread_DestroyThread(MFThread thread)
 
 MFMutex MFThread_CreateMutex(const char *pName)
 {
-	MFMutexPC *pMutex = MFThreadPC_GetNewMutex();
+	MFMutexPC *pMutex = (MFMutexPC*)MFHeap_Alloc(sizeof(MFMutexPC));
 
 	if(!pMutex)
 		return NULL;
@@ -141,7 +128,7 @@ void MFThread_DestroyMutex(MFMutex mutex)
 
 	DeleteCriticalSection(&pMutex->criticalSection);
 
-	pMutex->name[0] = 0;
+	MFHeap_Free(pMutex);
 }
 
 void MFThread_LockMutex(MFMutex mutex)
