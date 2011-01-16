@@ -409,7 +409,7 @@ inline int MFWString_Length(const uint16 *pString)
 {
 	const uint16 *pT = pString;
 	while(*pT) ++pT;
-	return (int)((uintp)pT - (uintp)pString) >> 1;
+	return (int)(((uintp)pT - (uintp)pString) >> 1);
 }
 
 inline uint16* MFWString_Copy(uint16 *pBuffer, const uint16 *pString)

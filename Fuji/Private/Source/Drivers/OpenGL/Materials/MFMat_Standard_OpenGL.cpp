@@ -15,7 +15,7 @@
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
-#include "../../Source/Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard.h"
 
 #include "../MFOpenGL.h"
 

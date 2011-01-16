@@ -109,7 +109,8 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 	// create and init instance
 	MFAnimation *pAnimation;
-	pAnimation = (MFAnimation*)MFHeap_Alloc(MFALIGN16(sizeof(MFAnimation)) + MFALIGN16(sizeof(MFMatrix) * pBoneChunk->count) + sizeof(int)*pBoneChunk->count + sizeof(MFAnimationCurrentFrame)*pBoneChunk->count);
+	size_t bytes = MFALIGN16(sizeof(MFAnimation)) + MFALIGN16(sizeof(MFMatrix) * pBoneChunk->count) + sizeof(int)*pBoneChunk->count + sizeof(MFAnimationCurrentFrame)*pBoneChunk->count;
+	pAnimation = (MFAnimation*)MFHeap_Alloc((uint32)bytes);
 	pAnimation->pModel = pModel;
 	pAnimation->pTemplate = pTemplate;
 

@@ -120,7 +120,7 @@ inline int MFPtrList<T>::GetLength()
 {
 	T** iterator = ppMark;
 	while(*iterator!=0) ++iterator;
-	return iterator - ppMark;
+	return (int)(iterator - ppMark);
 }
 
 template<class T>

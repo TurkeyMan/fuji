@@ -582,6 +582,7 @@ public:
 	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
 
 	int FindChar(int c) const;
+	int FindCharReverse(int c) const;
 
 	MFString Upper() const;
 	MFString Lower() const;
@@ -591,6 +592,7 @@ public:
 
 	MFString SubStr(int offset, int count = -1) const;
 	MFString& Truncate(int length);
+	MFString& TruncateExtension();
 	MFString& ClearRange(int offset, int length);
 
 	MFString& Insert(int offset, MFString string);

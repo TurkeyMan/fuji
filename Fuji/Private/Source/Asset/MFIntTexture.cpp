@@ -99,7 +99,7 @@ static const char *gFileExtensions[] =
 
 void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 {
-	MFFile_Read((MFFile*)png->io_ptr, pBuffer, bytes, false);
+	MFFile_Read((MFFile*)png->io_ptr, pBuffer, (uint32)bytes, false);
 }
 
 MFIntTexture* LoadPNG(const void *pMemory, uint32 size)

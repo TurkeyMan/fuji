@@ -353,6 +353,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\MFMain.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\MFMaterial.cpp"
 				>
 			</File>

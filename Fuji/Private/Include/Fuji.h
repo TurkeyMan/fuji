@@ -26,6 +26,8 @@
 
 	Architectures:
 		MF_ARCH_X86
+		MF_ARCH_X64
+		MF_ARCH_ITANIUM
 		MF_ARCH_PPC
 		MF_ARCH_MIPS
 		MF_ARCH_SH4
@@ -56,6 +58,7 @@
 		MF_AMIGA
 		MF_SYMBIAN
 		MF_IPHONE
+		MF_ANDROID
 */
 
 // detect compiler
@@ -88,7 +91,19 @@
 	#else
 		#define MF_WINDOWS
 		#define MF_PLATFORM WINDOWS
-		#define MF_ARCH_X86
+
+		// detect the architecture
+		#if defined(_WIN64)
+			#define MF_64BIT
+			#if defined(_M_IX86)
+				#define MF_ARCH_ITANIUM
+			#else
+				#define MF_ARCH_X64
+			#endif
+		#else
+			#define MF_32BIT
+			#define MF_ARCH_X86
+		#endif
 	#endif
 #elif defined(PSP) || defined(__psp__) || defined(__PSP__) || defined(_PSP)
 	#define MF_PSP

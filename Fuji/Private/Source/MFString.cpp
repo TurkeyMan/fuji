@@ -1233,6 +1233,18 @@ MFString& MFString::Truncate(int length)
 	return *this;
 }
 
+MFString& MFString::TruncateExtension()
+{
+	int dot = FindCharReverse('.');
+	if(dot >= 0)
+	{
+		pData->pMemory[dot] = 0;
+		pData->bytes = dot;
+	}
+
+	return *this;
+}
+
 MFString& MFString::ClearRange(int offset, int length)
 {
 	if(!pData)
@@ -1339,6 +1351,29 @@ int MFString::FindChar(int c) const
 
 			// progress to next char
 			pT += bytes;
+		}
+	}
+
+	return -1;
+}
+
+int MFString::FindCharReverse(int c) const
+{
+	if(pData)
+	{
+		const char *pT = pData->pMemory + pData->bytes;
+		while(pT >= pData->pMemory)
+		{
+			// decode utf8
+			int t;
+			MFString_DecodeUTF8(pT, &t);
+
+			// check if the characters match
+			if(t == c)
+				return (int)(pT - pData->pMemory);
+
+			// progress to prev char
+			pT = MFString_PrevChar(pT);
 		}
 	}
 

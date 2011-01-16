@@ -371,7 +371,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 		if(!*pT)
 		{
-			int numBytes = pT - pLineStart;
+			int numBytes = (int)(pT - pLineStart);
 			for(int i=0; i<numBytes; ++i)
 				temp[i] = pLineStart[i];
 			read = MFSockets_Recv(socket, temp + numBytes, bufferLen - numBytes, 0);
