@@ -22,7 +22,7 @@ project "Fuji"
 	-- add source for some middleware that we'll link directly on unix systems --
 	configuration { "not linux", "not macosx" }
 	files { "../Middleware/zlib/**.h", "../Middleware/zlib/**.c" }
-	files { "../Middleware/lpng1212/**.h", "../Middleware/lpng1212/**.c" }
+	files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 	files { "../Middleware/libjson/**.h", "../Middleware/libjson/**.cpp" }
 	configuration { }
 
