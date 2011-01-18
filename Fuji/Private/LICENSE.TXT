@@ -5,9 +5,9 @@ The Mount Fuji Engine is copyright © 2002-2011 Manu Evans. All Rights Reserved.
 The Mount Fuji Engine is offered under a dual license for commercial or non-commercial use.
 
 For use in non-commercial projects that do not aim to profit directly,
-or indirectly by useof the Mount Fuji Engine, the Mount Fuji Engine is
-offered under version 3 of the the GNU General Public License (GPLv3),
-detailed below.
+or indirectly by use of the Mount Fuji Engine or any part thereof, the
+Mount Fuji Engine is offered under version 3 of the the GNU General
+Public License (GPLv3), detailed below.
 
 Permission for use in commercial projects may be granted only by
 specific request of the author Manu Evans, where details relating to
@@ -15,7 +15,7 @@ compensation may be negotiated.
 
 ----------------------------------------------------------------------------------------------------------------------
 
- GNU GENERAL PUBLIC LICENSE
+                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
