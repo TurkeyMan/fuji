@@ -28,7 +28,7 @@ project "Fuji"
 
 	-- setup paths --
 	includedirs { "../Source/" }
-	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/lpng1212/", "../Middleware/hqx/" }
+	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/libpng-1.5.0/", "../Middleware/hqx/" }
 	objdir "../Build/"
 	targetdir "../Lib/"
 
