@@ -96,6 +96,8 @@ static const char *gFileExtensions[] =
 
 #if defined(MF_ENABLE_PNG)
 #include "png.h"
+#include "pngstruct.h"
+#include "pnginfo.h"
 
 void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 {
