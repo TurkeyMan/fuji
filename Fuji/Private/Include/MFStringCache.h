@@ -21,7 +21,7 @@ struct MFStringCache;
  * @param maxSize First byte.
  * @return Returns a handle to the newly created string cache.
  */
-MFStringCache* MFStringCache_Create(uint32 maxSize);
+MFStringCache* MFStringCache_Create(size_t maxSize);
 
 /**
  * Destroy a string cache.
@@ -54,7 +54,7 @@ char* MFStringCache_GetCache(MFStringCache *pCache);
  * @param pCache Target string cache.
  * @return Returns the number of bytes currently used.
  */
-uint32 MFStringCache_GetSize(MFStringCache *pCache);
+size_t MFStringCache_GetSize(MFStringCache *pCache);
 
 /**
  * Set the number of bytes used in a string cache.
@@ -63,7 +63,7 @@ uint32 MFStringCache_GetSize(MFStringCache *pCache);
  * @param used New number of bytes used.
  * @return None.
  */
-void MFStringCache_SetSize(MFStringCache *pCache, uint32 used);
+void MFStringCache_SetSize(MFStringCache *pCache, size_t used);
 
 //
 // unicode support
@@ -81,7 +81,7 @@ struct MFWStringCache;
  * @param maxSize First byte.
  * @return Returns a handle to the newly created unicode string cache.
  */
-MFWStringCache* MFWStringCache_Create(uint32 maxSize);
+MFWStringCache* MFWStringCache_Create(size_t maxSize);
 
 /**
  * Destroy a unicode string cache.
@@ -114,7 +114,7 @@ uint16* MFWStringCache_GetCache(MFWStringCache *pCache);
  * @param pCache Target unicode string cache.
  * @return Returns the number of bytes currently used.
  */
-uint32 MFWStringCache_GetSize(MFWStringCache *pCache);
+size_t MFWStringCache_GetSize(MFWStringCache *pCache);
 
 /**
  * Set the number of bytes used in a unicode string cache.
@@ -123,7 +123,7 @@ uint32 MFWStringCache_GetSize(MFWStringCache *pCache);
  * @param used New number of bytes used.
  * @return None.
  */
-void MFWStringCache_SetSize(MFWStringCache *pCache, uint32 used);
+void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used);
 
 #endif
 

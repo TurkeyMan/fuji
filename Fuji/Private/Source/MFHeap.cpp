@@ -6,12 +6,12 @@
 
 static int heapAlignment = 32;
 
-static uint32 totalAllocated = 0;
-static uint32 totalWaste = 0;
-static uint32 allocCount = 0;
+static size_t totalAllocated = 0;
+static size_t totalWaste = 0;
+static int allocCount = 0;
 
 // external heap
-static void* ExternalMalloc(uint32 bytes, void *pUserData)
+static void* ExternalMalloc(size_t bytes, void *pUserData)
 {
 	return MFHeap_SystemMalloc(bytes);
 }
@@ -97,7 +97,7 @@ void MFHeap_DeinitModule()
 	MFHeap_DeinitModulePlatformSpecific();
 }
 
-void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
+void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 {
 	MFCALLSTACK;
 
@@ -107,15 +107,15 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	while(pad < (int)sizeof(MFAllocHeader))
 		pad += heapAlignment;
 
-	uint32 allocExtra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
-	uint32 allocBytes = bytes + allocExtra;
+	size_t allocExtra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
+	size_t allocBytes = bytes + allocExtra;
 
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(allocBytes, pAllocHeap->pHeapData);
 	MFDebug_Assert(pMemory, "Failed to allocate memory!");
 	if(!pMemory)
 		return NULL;
 
-	int alignment = (int)((uint32)MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uintp)pMemory);
+	int alignment = (int)(MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uintp)pMemory);
 
 	pMemory += alignment;
 
@@ -123,7 +123,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 
 	pHeader->alignment = (uint16)alignment;
 	pHeader->pHeap = pAllocHeap;
-	pHeader->size = bytes;
+	pHeader->size = (uint32)bytes;
 	pHeader->pFile = gpMFHeap_TrackerFile;
 	pHeader->line = (uint16)gMFHeap_TrackerLine;
 
@@ -140,7 +140,7 @@ void *MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap)
 	return (void*)pMemory;
 }
 
-void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap)
+void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap)
 {
 	void *pMem = MFHeap_Alloc(bytes, pHeap);
 	if(pMem)
@@ -148,7 +148,7 @@ void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap)
 	return pMem;
 }
 
-void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
+void *MFHeap_ReallocInternal(void *pMem, size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -162,7 +162,7 @@ void *MFHeap_ReallocInternal(void *pMem, uint32 bytes)
 		if(!pNew)
 			return NULL;
 
-		MFCopyMemory(pNew, pMem, MFMin(bytes, pHeader->size));
+		MFCopyMemory(pNew, pMem, MFMin(bytes, (size_t)pHeader->size));
 		MFHeap_Free(pMem);
 		return pNew;
 	}
@@ -189,7 +189,7 @@ void MFHeap_Free(void *pMem)
 	int pad = 0;
 	while(pad < (int)sizeof(MFAllocHeader))
 		pad += heapAlignment;
-	uint32 extra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
+	size_t extra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
 
 	totalAllocated -= pHeader->size + extra;
 	totalWaste -= extra;
@@ -209,14 +209,14 @@ void MFHeap_Free(void *pMem)
 // {
 // //	MFDebug_Message(MFStr("new %d bytes", size));
 // 
-// 	return MFHeap_AllocInternal((uint32)size);
+// 	return MFHeap_AllocInternal(size);
 // }
 // 
 // void* operator new[](size_t size)
 // {
 // //	MFDebug_Message(MFStr("new %d bytes", size));
 // 
-// 	return MFHeap_AllocInternal((uint32)size);
+// 	return MFHeap_AllocInternal(size);
 // }
 // 
 // void operator delete(void *pMemory)
@@ -250,17 +250,17 @@ void operator delete[](void *pMemory, void *pMem)
 }
 #endif
 
-uint32 MFHeap_GetTotalAllocated()
+size_t MFHeap_GetTotalAllocated()
 {
 	return totalAllocated;
 }
 
-uint32 MFHeap_GetTotalWaste()
+size_t MFHeap_GetTotalWaste()
 {
 	return totalWaste;
 }
 
-uint32 MFHeap_GetNumAllocations()
+int MFHeap_GetNumAllocations()
 {
 	return allocCount;
 }

@@ -19,6 +19,11 @@
 #include "MFOpenGL.h"
 #include <string.h>
 
+struct MeshChunkOpenGLRuntimeData
+{
+	GLuint streams[8];
+};
+
 /*** Globals ****/
 
 #define USE_VBOS
@@ -78,6 +83,8 @@ void MFModel_Draw(MFModel *pModel)
 
 				MFRenderer_Begin();
 
+				MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
+
 				// just use conventional vertex arrays
 				for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
 				{
@@ -85,13 +92,13 @@ void MFModel_Draw(MFModel *pModel)
 
 #if defined(USE_VBOS)
 					if(gbUseVBOs)
-						glBindBuffer(GL_ARRAY_BUFFER, pMC->userData[a]);
+						glBindBuffer(GL_ARRAY_BUFFER, runtimeData.streams[a]);
 #endif
 
 					for(int b=0; b<pStream->numVertexElements; ++b)
 					{
 						// if we're using vertex buffer objects, the the pointer is just an offset into the buffer
-						char *pDataPointer = gbUseVBOs ? (char*)pStream->pElements[b].offset : (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset;
+						char *pDataPointer = gbUseVBOs ? (char*)(uintp)pStream->pElements[b].offset : (char*)pMC->ppVertexStreams[a] + pStream->pElements[b].offset;
 
 						switch(pStream->pElements[b].usage)
 						{
@@ -117,7 +124,7 @@ void MFModel_Draw(MFModel *pModel)
 
 				if(gbUseVBOs)
 				{
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMC->userData[7]);
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, runtimeData.streams[7]);
 					glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, NULL);
 				}
 				else
@@ -143,11 +150,14 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 #if defined(USE_VBOS)
 	if(gbUseVBOs)
 	{
+		MFDebug_Assert(sizeof(MeshChunkOpenGLRuntimeData) < sizeof(pMC->runtimeData), "MeshChunkOpenGLRuntimeData is larger than runtimeData!");
+		MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
+
 		MFDebug_Assert(pMC->pVertexFormat->numVertexStreams <= 7, "OpenGL rendering currently supports a maximum of 7 vertex data streams.");
 
 		// bind the index buffer
-		glGenBuffers(1, &pMC->userData[7]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pMC->userData[7]);
+		glGenBuffers(1, &runtimeData.streams[7]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, runtimeData.streams[7]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pMC->numVertices, pMC->pIndexData, GL_STATIC_DRAW);
 
 		// bind the vertex buffers
@@ -155,8 +165,8 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 		{
 			MFVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
 
-			glGenBuffers(1, &pMC->userData[a]);
-			glBindBuffer(GL_ARRAY_BUFFER, pMC->userData[a]);
+			glGenBuffers(1, &runtimeData.streams[a]);
+			glBindBuffer(GL_ARRAY_BUFFER, runtimeData.streams[a]);
 			glBufferData(GL_ARRAY_BUFFER, pStream->streamStride*pMC->numVertices, pMC->ppVertexStreams[a], GL_STATIC_DRAW);
 		}
 	}
@@ -172,12 +182,14 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 #if defined(USE_VBOS)
 	if(gbUseVBOs)
 	{
+		MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
+
 		// destroy the vertex buffers
 		for(int a=0; a<pMC->pVertexFormat->numVertexStreams && a < 7; ++a)
-			glDeleteBuffers(1, &pMC->userData[a]);
+			glDeleteBuffers(1, &runtimeData.streams[a]);
 
 		// destroy the index buffer
-		glDeleteBuffers(1, &pMC->userData[7]);
+		glDeleteBuffers(1, &runtimeData.streams[7]);
 	}
 #endif
 

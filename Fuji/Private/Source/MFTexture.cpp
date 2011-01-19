@@ -217,7 +217,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 		// create template data
 		char *pTemplate;
-		uint32 size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
+		size_t size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
 		if(ownCopy)
 			size = MFALIGN(size, 0x100) + imageSize;
 		pTemplate = (char*)MFHeap_Alloc(size);
@@ -709,7 +709,7 @@ MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int source
 
 		// create template data
 		char *pTemplate;
-		uint32 size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
+		size_t size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
 		size = MFALIGN(size, 0x100) + imageSize;
 		pTemplate = (char*)MFHeap_Alloc(size);
 		MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);

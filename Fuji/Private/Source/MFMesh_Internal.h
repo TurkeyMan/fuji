@@ -97,7 +97,8 @@ struct MFMeshChunk_Generic : public MFMeshChunk
 	// number of blend weights present in the mesh
 	int maxBlendWeights;
 
-	uint32 userData[8];	// this can be used to store pointers or handles to platform specific things at runtime...
+	// this 32 bytes can be used to store pointers or handles to platform specific things at runtime...
+	char runtimeData[32];
 };
 
 struct MFMeshChunk_XB : public MFMeshChunk

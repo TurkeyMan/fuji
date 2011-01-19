@@ -542,12 +542,12 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFCheckForOpenGLError();
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(size_t)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
+	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(uintp)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
 
 	if(pZTarget)
 	{
 		MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(size_t)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
 
 		glEnable(GL_DEPTH_TEST);
 	}

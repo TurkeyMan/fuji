@@ -329,7 +329,7 @@ int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 				readSize += MAD_BUFFER_GUARD;
 			}
 
-			mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, readSize + remaining);
+			mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, (unsigned long)(readSize + remaining));
 			pDecoder->stream.error = MAD_ERROR_NONE;
 		}
 
@@ -377,7 +377,7 @@ int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 			}
 
 			// add current frames size to frame offset counter
-			int frameSize = pDecoder->stream.next_frame - pDecoder->stream.this_frame;
+			int frameSize = (int)(pDecoder->stream.next_frame - pDecoder->stream.this_frame);
 			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount] += frameSize;
 
 			// increase counters

@@ -121,8 +121,8 @@ void      MFMat_Standard_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Standard_DestroyInstance(MFMaterial *pMaterial);
 int       MFMat_Standard_Begin(MFMaterial *pMaterial);
 void      MFMat_Standard_Update(MFMaterial *pMaterial);
-void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);
-uint32    MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
+void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
+uintp     MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Standard_GetNumParams();
 MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex);
 

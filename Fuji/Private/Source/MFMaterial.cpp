@@ -100,11 +100,10 @@ void MFMaterial_InitModule()
 	pSysLogoSmall = MFMaterial_Create("SysLogoSmall");
 
 	// disable backface cullign on the default materials
-	size_t zero = 0;
 	int cull = MFMaterial_GetParameterIndexFromName(pNoneMaterial, "cullmode");
-	if(cull > -1) MFMaterial_SetParameter(pNoneMaterial, cull, 0, &zero);
+	if(cull > -1) MFMaterial_SetParameterI(pNoneMaterial, cull, 0, 0);
 	cull = MFMaterial_GetParameterIndexFromName(pWhiteMaterial, "cullmode");
-	if(cull > -1) MFMaterial_SetParameter(pWhiteMaterial, cull, 0, &zero);
+	if(cull > -1) MFMaterial_SetParameterI(pWhiteMaterial, cull, 0, 0);
 
 	// release a reference to the logo textures
 	MFTexture_Destroy(pSysLogoLargeTexture);
@@ -376,7 +375,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 			// set diffuse map parameter
 			int index = MFMaterial_GetParameterIndexFromName(pMat, "diffusemap");
 			if(index > -1)
-				MFMaterial_SetParameter(pMat, index, 0, pName);
+				MFMaterial_SetParameterS(pMat, index, 0, pName);
 		}
 	}
 
@@ -546,14 +545,14 @@ MFDebug_Assert(false, "Fix Me!!!");
 						case MFParamType_String:
 						{
 							const char *pString = pLine->GetString(a+1);
-							MFMaterial_SetParameter(pMat, paramIndex, a, pString);
+							MFMaterial_SetParameterS(pMat, paramIndex, a, pString);
 							break;
 						}
 
 						case MFParamType_Float:
 						{
 							float value = pLine->GetFloat(a+1);
-							MFMaterial_SetParameter(pMat, paramIndex, a, &value);
+							MFMaterial_SetParameterF(pMat, paramIndex, a, value);
 							break;
 						}
 
@@ -574,14 +573,14 @@ MFDebug_Assert(false, "Fix Me!!!");
 						case MFParamType_Vector3:
 						{
 							MFVector vector = pLine->GetVector3(a+1);
-							MFMaterial_SetParameter(pMat, paramIndex, a, &vector);
+							MFMaterial_SetParameterV(pMat, paramIndex, a, vector);
 							break;
 						}
 
 						case MFParamType_Vector4:
 						{
 							MFVector vector = pLine->GetVector4(a+1);
-							MFMaterial_SetParameter(pMat, paramIndex, a, &vector);
+							MFMaterial_SetParameterV(pMat, paramIndex, a, vector);
 							break;
 						}
 
@@ -665,22 +664,20 @@ MFParamType MFMaterial_GetParameterArgType(MFMaterial *pMaterial, int parameterI
 	return pInfo->pArgTypes[argIndex];
 }
 
-void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue)
+void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value)
 {
 	MFCALLSTACK;
 
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
-	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, parameterIndex, argIndex, pValue);
+	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, parameterIndex, argIndex, value);
 }
 
-int MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	MFCALLSTACK;
 
-	void *pT = pValue ? pValue : &pT;
-
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
-	return pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, parameterIndex, argIndex, pT);
+	return pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, parameterIndex, argIndex, pValue);
 }
 
 

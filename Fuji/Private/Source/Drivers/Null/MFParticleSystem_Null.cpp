@@ -21,8 +21,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 
 //		int additive = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "additive");
 		int zwrite = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "zwrite");
-		int off = 0;
-		MFMaterial_SetParameter(pSystem->pMaterial, zwrite, 0, &off);
+		MFMaterial_SetParameterI(pSystem->pMaterial, zwrite, 0, 0);
 	}
 
 	pSystem->particles.Init("ParticleSystem", pSystem->params.maxActiveParticles);

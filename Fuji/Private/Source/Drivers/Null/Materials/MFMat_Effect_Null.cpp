@@ -28,11 +28,11 @@ void MFMat_Effect_DestroyInstance(MFMaterial *pMaterial)
 {
 }
 
-void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue)
+void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, size_t value)
 {
 }
 
-uint32 MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+uintp MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	return 0;
 }

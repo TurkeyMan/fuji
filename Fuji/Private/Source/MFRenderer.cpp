@@ -3,8 +3,8 @@
 #include "MFMaterial_Internal.h"
 #include "MFView.h"
 
-uint32 gRenderStates[MFRS_Max];
-uint32 gCurrentRenderStates[MFRS_Max];
+uintp gRenderStates[MFRS_Max];
+uintp gCurrentRenderStates[MFRS_Max];
 
 extern MFMaterial *pCurrentMaterial;
 
@@ -72,17 +72,17 @@ void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
 	gNumBonesInBatch = numBonesInBatch;
 }
 
-uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value)
+uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value)
 {
 	MFCALLSTACK;
 
-	uint32 t = gRenderStates[renderState];
+	uintp t = gRenderStates[renderState];
 	gRenderStates[renderState] = value;
 
 	return t;
 }
 
-uint32 MFRenderer_GetRenderStateOverride(uint32 renderState)
+uintp MFRenderer_GetRenderStateOverride(uint32 renderState)
 {
 	MFCALLSTACK;
 

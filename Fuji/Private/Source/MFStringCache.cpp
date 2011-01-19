@@ -8,13 +8,13 @@
 
 struct MFStringCache
 {
-	uint32 size;
-	uint32 used;
+	size_t size;
+	size_t used;
 	char *pMem;
 };
 
 
-MFStringCache* MFStringCache_Create(uint32 maxSize)
+MFStringCache* MFStringCache_Create(size_t maxSize)
 {
 	MFCALLSTACK;
 
@@ -76,13 +76,13 @@ char* MFStringCache_GetCache(MFStringCache *pCache)
 }
 
 // get the actual used size of the cache
-uint32 MFStringCache_GetSize(MFStringCache *pCache)
+size_t MFStringCache_GetSize(MFStringCache *pCache)
 {
 	return pCache->used;
 }
 
 // use this if you have filled the cache yourself
-void MFStringCache_SetSize(MFStringCache *pCache, uint32 used)
+void MFStringCache_SetSize(MFStringCache *pCache, size_t used)
 {
 	pCache->used = used;
 }
@@ -94,13 +94,13 @@ void MFStringCache_SetSize(MFStringCache *pCache, uint32 used)
 
 struct MFWStringCache
 {
-	uint32 size;
-	uint32 used;
+	size_t size;
+	size_t used;
 	uint16 *pMem;
 };
 
 
-MFWStringCache* MFWStringCache_Create(uint32 maxSize)
+MFWStringCache* MFWStringCache_Create(size_t maxSize)
 {
 	MFCALLSTACK;
 
@@ -158,13 +158,13 @@ uint16* MFWStringCache_GetCache(MFWStringCache *pCache)
 }
 
 // get the actual used size of the cache
-uint32 MFWStringCache_GetSize(MFWStringCache *pCache)
+size_t MFWStringCache_GetSize(MFWStringCache *pCache)
 {
 	return pCache->used;
 }
 
 // use this if you have filled the cache yourself
-void MFWStringCache_SetSize(MFWStringCache *pCache, uint32 used)
+void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used)
 {
 	pCache->used = used;
 }

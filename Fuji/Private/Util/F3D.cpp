@@ -295,7 +295,7 @@ void F3DFile::WriteF3D(const char *pFilename)
 		}
 	}
 
-	MFFile_Write(hFile, pFile, pOffset - pFile);
+	MFFile_Write(hFile, pFile, (uint32)(pOffset - pFile));
 
 	MFFile_Close(hFile);
 
@@ -1333,7 +1333,7 @@ found:
 	MFHeap_Free(pFile);
 
 	if(pSize)
-		*pSize = fileSize;
+		*pSize = (uint32)fileSize;
 	return pMDL;
 }
 
@@ -1431,7 +1431,7 @@ void *F3DFile::CreateANM(uint32 *pSize, MFPlatform platform)
 	MFHeap_Free(pFile);
 
 	if(pSize)
-		*pSize = fileSize;
+		*pSize = (uint32)fileSize;
 	return pANM;
 }
 
@@ -1708,13 +1708,11 @@ bool IsBoneInBatch(const MFArray<int> &batch, int bone)
 	return false;
 }
 
-static MFArray<int> gAdded;
-
-int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri, int numBones)
+int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3DTriangle &tri, int numBones, int *pAdded)
 {
 	int numNotInBatch = 0;
 
-	MFZeroMemory(gAdded.getpointer(), sizeof(int)*numBones);
+	MFZeroMemory(pAdded, sizeof(int)*numBones);
 
 	for(int a=0; a<matSub.maxWeights; a++)
 	{
@@ -1722,19 +1720,19 @@ int GetNumBonesNotInBatch(const F3DBatch &batch, const F3DMaterialSubobject &mat
 		int b1 = matSub.vertices[tri.v[1]].bone[a];
 		int b2 = matSub.vertices[tri.v[2]].bone[a];
 
-		if(b0 > -1 && batch.boneMapping[b0] == -1 && !gAdded[b0])
+		if(b0 > -1 && batch.boneMapping[b0] == -1 && !pAdded[b0])
 		{
-			gAdded[b0] = 1;
+			pAdded[b0] = 1;
 			++numNotInBatch;
 		}
-		if(b1 > -1 && batch.boneMapping[b1] == -1 && !gAdded[b1])
+		if(b1 > -1 && batch.boneMapping[b1] == -1 && !pAdded[b1])
 		{
-			gAdded[b1] = 1;
+			pAdded[b1] = 1;
 			++numNotInBatch;
 		}
-		if(b2 > -1 && batch.boneMapping[b2] == -1 && !gAdded[b2])
+		if(b2 > -1 && batch.boneMapping[b2] == -1 && !pAdded[b2])
 		{
-			gAdded[b2] = 1;
+			pAdded[b2] = 1;
 			++numNotInBatch;
 		}
 	}
@@ -1846,7 +1844,8 @@ void F3DFile::BuildBatches(MFPlatform platform)
 					MFMemSet(batch.vertexMapping.getpointer(), -1, sizeof(int)*numVerts);
 					MFMemSet(batch.boneMapping.getpointer(), -1, sizeof(int)*numBones);
 
-					gAdded.resize(numBones);
+					MFArray<int> gAdded(numBones);
+					int *pAdded = gAdded.getpointer();
 
 					for(int c=0; c<numTris; c++)
 					{
@@ -1854,7 +1853,7 @@ void F3DFile::BuildBatches(MFPlatform platform)
 							continue;
 
 						F3DTriangle &tri = matSub.triangles[c];
-						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri, numBones);
+						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri, numBones, pAdded);
 						if(numNotInBatch + batch.bones.size() > maxBones)
 							continue;
 

@@ -91,22 +91,22 @@ void MFString_Dump()
 	}
 }
 
-void MFCopyMemory(void *pDest, const void *pSrc, uint32 size)
+void MFCopyMemory(void *pDest, const void *pSrc, size_t size)
 {
 	memcpy(pDest, pSrc, size);
 }
 
-void MFMemSet(void *pDest, int value, uint32 size)
+void MFMemSet(void *pDest, int value, size_t size)
 {
 	memset(pDest, value, size);
 }
 
-void MFZeroMemory(void *pDest, uint32 size)
+void MFZeroMemory(void *pDest, size_t size)
 {
 	memset(pDest, 0, size);
 }
 
-int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size)
+int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)
 {
 	return memcmp(pBuf1, pBuf2, size);
 }
@@ -173,10 +173,10 @@ const char * MFStrN(const char *pSource, size_t n)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
-	MFString_CopyN(pBuffer, pSource, n);
+	MFString_CopyN(pBuffer, pSource, (int)n);
 	pBuffer[n] = 0;
 
-	gStringOffset += n+1;
+	gStringOffset += (uint32)n+1;
 
 	if(gStringOffset >= sizeof(gStringBuffer) - 1024) gStringOffset = 0;
 

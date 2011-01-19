@@ -2,7 +2,7 @@
 #include "MFPoolHeap.h"
 #include "MFHeap.h"
 
-void MFPoolHeap::Init(int num, int size, void * pMem, int memsize)
+void MFPoolHeap::Init(int num, size_t size, void *pMem, size_t memsize)
 {
 	MFDebug_Assert(num > 0 && size >= 4 && (size & 3) == 0, "Bad args");
 
@@ -159,7 +159,7 @@ void MFPoolHeap::SetNextHeap(MFPoolHeap *pHeap)
 	pNext = pHeap;
 }
 
-void MFPoolHeapCollection::Init(int _numHeaps, const int *pNum, const int *pSizes, void *pMem, int memsize)
+void MFPoolHeapCollection::Init(int _numHeaps, const int *pNum, const size_t *pSizes, void *pMem, size_t memsize)
 {
 	MFDebug_Assert(_numHeaps > 0 && pNum && pSizes, "Bad parameters");
 
@@ -170,7 +170,7 @@ void MFPoolHeapCollection::Init(int _numHeaps, const int *pNum, const int *pSize
 
 	if(pMem)
 	{
-		int size = (sizeof(MFPoolHeap*)+sizeof(MFPoolHeap))*numHeaps;
+		size_t size = (sizeof(MFPoolHeap*)+sizeof(MFPoolHeap))*numHeaps;
 		for(int i=0; i<numHeaps; ++i)
 			size += pNum[i]*pSizes[i];
 
@@ -183,10 +183,10 @@ void MFPoolHeapCollection::Init(int _numHeaps, const int *pNum, const int *pSize
 		pHeaps = (MFPoolHeap**)MFHeap_Alloc(sizeof(MFPoolHeap*)*numHeaps);
 	}
 
-	int lastSize = 0;
+	size_t lastSize = 0;
 	for(int i = 0; i < numHeaps; ++i)
 	{
-		const int size = pSizes[i];
+		const size_t size = pSizes[i];
 		const int num = pNum[i];
 
 		MFDebug_Assert(size > lastSize && num > 0, "Bad heap params");
@@ -197,7 +197,7 @@ void MFPoolHeapCollection::Init(int _numHeaps, const int *pNum, const int *pSize
 			pHeaps[i] = (MFPoolHeap*)pMem;
 			pMem = ((MFPoolHeap*)pMem) + 1;
 
-			const int memorySize = size*num;
+			const size_t memorySize = size*num;
 			pHeaps[i]->Init(num, size, pMem, memorySize);
 
 			pMem = ((char *)pMem) + memorySize;
@@ -223,13 +223,13 @@ void MFPoolHeapCollection::Destroy()
 	MFHeap_Free(pHeaps);
 }
 
-void * MFPoolHeapCollection::Alloc(uint32 size)
+void * MFPoolHeapCollection::Alloc(size_t size)
 {
 	for(int i = 0; i < numHeaps; ++i)
 	{
 		MFPoolHeap *pHeap = pHeaps[i];
 
-		const uint32 heapSize = pHeap->Size();
+		const size_t heapSize = pHeap->Size();
 		if(size <= heapSize)
 		{
 			void *pMem = pHeap->Alloc();
@@ -246,7 +246,7 @@ void * MFPoolHeapCollection::Alloc(uint32 size)
 	return MFHeap_Alloc(size);
 }
 
-void *MFPoolHeapCollection::Realloc(void *pItem, uint32 size)
+void *MFPoolHeapCollection::Realloc(void *pItem, size_t size)
 {
 	if(!pItem)
 		return Alloc(size);
@@ -257,7 +257,7 @@ void *MFPoolHeapCollection::Realloc(void *pItem, uint32 size)
 
 		if(pHeap->IsFromThisHeap(pItem))
 		{
-			uint32 heapSize = pHeap->Size();
+			size_t heapSize = pHeap->Size();
 			if(size <= heapSize)
 				return pItem;
 
@@ -293,7 +293,7 @@ int MFPoolHeapCollection::NumHeaps() const
 	return numHeaps;
 }
 
-int MFPoolHeapCollection::SizeOfHeapItem(int heapIndex) const
+size_t MFPoolHeapCollection::SizeOfHeapItem(int heapIndex) const
 {
 	MFDebug_Assert(heapIndex >= 0 && heapIndex < numHeaps, "Invalid heap index");
 	return pHeaps[heapIndex]->Size();

@@ -284,13 +284,12 @@ void MFPrimitive_BeginBlitter(int numBlits)
 
 	MFMaterial *pMat = MFMaterial_GetCurrent();
 
-	MFTexture *pTex;
-	MFMaterial_GetParameter(pMat, MFMatStandard_DifuseMap, 0, &pTex);
+	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_DifuseMap, 0);
 	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
 	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
 
 	MFMatrix matrix;
-	MFMaterial_GetParameter(pMat, MFMatStandard_TextureMatrix, 0, &matrix);
+	MFMaterial_GetParameterM(pMat, MFMatStandard_TextureMatrix, 0, &matrix);
 
 	uScale = 1.0f / (float)textureWidth / matrix.GetXAxis().Magnitude3();
 	vScale = 1.0f / (float)textureHeight / matrix.GetYAxis().Magnitude3();

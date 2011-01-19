@@ -11,8 +11,8 @@ void MFHeap_InitModulePlatformSpecific();
 void MFHeap_DeinitModulePlatformSpecific();
 
 // system allocation/deallocation
-void* MFHeap_SystemMalloc(uint32 bytes);
-void* MFHeap_SystemRealloc(void *pBuffer, uint32 bytes);
+void* MFHeap_SystemMalloc(size_t bytes);
+void* MFHeap_SystemRealloc(void *pBuffer, size_t bytes);
 void MFHeap_SystemFree(void *pBuffer);
 
 // heap structure

@@ -26,6 +26,14 @@
 
 extern IDirect3DDevice9 *pd3dDevice;
 
+struct MeshChunkD3DRuntimeData
+{
+	IDirect3DVertexBuffer9 *vertexBuffer;
+	IDirect3DVertexBuffer9 *animBuffer;
+	IDirect3DIndexBuffer9 *indexBuffer;
+	IDirect3DVertexDeclaration9 *vertexDecl;
+};
+
 static BYTE gUsageTable[] =
 {
 	D3DDECLUSAGE_POSITION,
@@ -119,11 +127,13 @@ void MFModel_Draw(MFModel *pModel)
 
 				MFRenderer_Begin();
 
-				pd3dDevice->SetVertexDeclaration((IDirect3DVertexDeclaration9*)pMC[b].userData[3]);
-				pd3dDevice->SetStreamSource(0, (IDirect3DVertexBuffer9*)pMC[b].userData[0], 0, pMC[b].pVertexFormat->pStreams[0].streamStride);
-				if(pMC[b].userData[1])
-					pd3dDevice->SetStreamSource(1, (IDirect3DVertexBuffer9*)pMC[b].userData[1], 0, pMC[b].pVertexFormat->pStreams[1].streamStride);
-				pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pMC[b].userData[2]);
+				MeshChunkD3DRuntimeData &runtimeData = (MeshChunkD3DRuntimeData&)pMC[b].runtimeData;
+
+				pd3dDevice->SetVertexDeclaration(runtimeData.vertexDecl);
+				pd3dDevice->SetStreamSource(0, runtimeData.vertexBuffer, 0, pMC[b].pVertexFormat->pStreams[0].streamStride);
+				if(runtimeData.animBuffer)
+					pd3dDevice->SetStreamSource(1, runtimeData.animBuffer, 0, pMC[b].pVertexFormat->pStreams[1].streamStride);
+				pd3dDevice->SetIndices(runtimeData.indexBuffer);
 
 				pd3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, pMC[b].numVertices, 0, pMC[b].numIndices/3);
 			}
@@ -165,53 +175,51 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 
 	HRESULT hr;
 
-	IDirect3DVertexBuffer9* &vb = (IDirect3DVertexBuffer9*&)pMC->userData[0];
-	IDirect3DVertexBuffer9* &ab = (IDirect3DVertexBuffer9*&)pMC->userData[1];
-	IDirect3DIndexBuffer9* &ib = (IDirect3DIndexBuffer9*&)pMC->userData[2];
-	IDirect3DVertexDeclaration9* &vd = (IDirect3DVertexDeclaration9*&)pMC->userData[3];
+	MFDebug_Assert(sizeof(MeshChunkD3DRuntimeData) <= sizeof(pMC->runtimeData), "MeshChunkD3DRuntimeData is larger than runtimeData!");
+	MeshChunkD3DRuntimeData &runtimeData = (MeshChunkD3DRuntimeData&)pMC->runtimeData;
 
 	// create D3D interfaces
-	hr = MFModelD3D9_CreateVertexDeclaration(pMC->pVertexFormat, &vd);
+	hr = MFModelD3D9_CreateVertexDeclaration(pMC->pVertexFormat, &runtimeData.vertexDecl);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex declaration..");
 
-	hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[0].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &vb, NULL);
+	hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[0].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &runtimeData.vertexBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex buffer..");
 	if(pMC->pVertexFormat->numVertexStreams > 1)
 	{
-		hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[1].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &ab, NULL);
+		hr = pd3dDevice->CreateVertexBuffer(pMC->pVertexFormat->pStreams[1].streamStride*pMC->numVertices, 0, 0, D3DPOOL_MANAGED, &runtimeData.animBuffer, NULL);
 		MFDebug_Assert(SUCCEEDED(hr), "Failed to create animation buffer..");
 	}
-	hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*pMC->numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &ib, NULL);
+	hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*pMC->numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &runtimeData.indexBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create index buffer..");
 
 	void *pData;
 
 	// fill vertex buffer
-	hr = vb->Lock(0, 0, &pData, 0);
+	hr = runtimeData.vertexBuffer->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vertex buffer..");
 
 	MFCopyMemory(pData, pMC->ppVertexStreams[0], pMC->pVertexFormat->pStreams[0].streamStride*pMC->numVertices);
 
-	vb->Unlock();
+	runtimeData.vertexBuffer->Unlock();
 
 	// fill animation buffer
 	if(pMC->pVertexFormat->numVertexStreams > 1)
 	{
-		hr = ab->Lock(0, 0, &pData, 0);
+		hr = runtimeData.animBuffer->Lock(0, 0, &pData, 0);
 		MFDebug_Assert(SUCCEEDED(hr), "Failed to lock animation buffer..");
 
 		MFCopyMemory(pData, pMC->ppVertexStreams[1], pMC->pVertexFormat->pStreams[1].streamStride*pMC->numVertices);
 
-		ab->Unlock();
+		runtimeData.animBuffer->Unlock();
 	}
 
 	// fill index buffer
-	hr = ib->Lock(0, 0, &pData, 0);
+	hr = runtimeData.indexBuffer->Lock(0, 0, &pData, 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock index buffer..");
 
 	MFCopyMemory(pData, pMC->pIndexData, sizeof(uint16)*pMC->numIndices);
 
-	ib->Unlock();
+	runtimeData.indexBuffer->Unlock();
 }
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
@@ -222,25 +230,22 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 
 	MFMaterial_Destroy(pMC->pMaterial);
 
-	IDirect3DVertexBuffer9* &vb = (IDirect3DVertexBuffer9*&)pMC->userData[0];
-	IDirect3DVertexBuffer9* &ab = (IDirect3DVertexBuffer9*&)pMC->userData[1];
-	IDirect3DIndexBuffer9* &ib = (IDirect3DIndexBuffer9*&)pMC->userData[2];
-	IDirect3DVertexDeclaration9* &vd = (IDirect3DVertexDeclaration9*&)pMC->userData[3];
+	MeshChunkD3DRuntimeData &runtimeData = (MeshChunkD3DRuntimeData&)pMC->runtimeData;
 
-	ib->Release();
-	ib = NULL;
+	runtimeData.indexBuffer->Release();
+	runtimeData.indexBuffer = NULL;
 
-	vb->Release();
-	vb = NULL;
+	runtimeData.vertexBuffer->Release();
+	runtimeData.vertexBuffer = NULL;
 
-	if(ab)
+	if(runtimeData.animBuffer)
 	{
-		ab->Release();
-		ab = NULL;
+		runtimeData.animBuffer->Release();
+		runtimeData.animBuffer = NULL;
 	}
 
-	vd->Release();
-	vd = NULL;
+	runtimeData.vertexDecl->Release();
+	runtimeData.vertexDecl = NULL;
 }
 
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMC, void *pBase, bool load)

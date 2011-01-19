@@ -18,7 +18,7 @@ void MFHeap_DeinitModulePlatformSpecific()
 }
 
 // use CRT memory functions
-void* MFHeap_SystemMalloc(uint32 bytes)
+void* MFHeap_SystemMalloc(size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -29,7 +29,7 @@ void* MFHeap_SystemMalloc(uint32 bytes)
 #endif
 }
 
-void* MFHeap_SystemRealloc(void *buffer, uint32 bytes)
+void* MFHeap_SystemRealloc(void *buffer, size_t bytes)
 {
 	MFCALLSTACK;
 

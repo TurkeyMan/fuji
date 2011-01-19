@@ -39,12 +39,12 @@ enum MFHeapType
  */
 struct MFMemoryCallbacks
 {
-	void* (*pMalloc)(uint32 bytes, void *pUserData);	/**< Pointer to function used to allocate memory. */
+	void* (*pMalloc)(size_t bytes, void *pUserData);	/**< Pointer to function used to allocate memory. */
 	void  (*pFree)(void *pMemory, void *pUserData);		/**< Pointer to function used to free memory. */
 };
 
 /**
- * @fn void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap)
+ * @fn void* MFHeap_Alloc(size_t bytes, MFHeap *pHeap)
  * Allocates a block of memory.
  * Allocates a new memory block of the specified size.
  * @param bytes Number of bytes to allocate for the new buffer.
@@ -54,10 +54,10 @@ struct MFMemoryCallbacks
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap = NULL);
+void* MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap = NULL);
 
 /**
- * @fn void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap)
+ * @fn void* MFHeap_AllocAndZero(size_t bytes, MFHeap *pHeap)
  * Allocates a block of memory and zero's the contents.
  * Allocates a new memory block of the specified size and zero's the contents.
  * @param bytes Number of bytes to allocate for the new buffer.
@@ -67,10 +67,10 @@ void* MFHeap_AllocInternal(uint32 bytes, MFHeap *pHeap = NULL);
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap = NULL);
+void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap = NULL);
 
 /**
- * @fn void* MFHeap_Realloc(void *pMem, uint32 bytes)
+ * @fn void* MFHeap_Realloc(void *pMem, size_t bytes)
  * Re-allocates an allocated block of memory.
  * Allocates a new memory block of the specified size and copies the contents of the previous buffer.
  * The old buffer is safely released.
@@ -81,14 +81,14 @@ void* MFHeap_AllocAndZeroInternal(uint32 bytes, MFHeap *pHeap = NULL);
  * @see MFHeap_Alloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_ReallocInternal(void *pMem, uint32 bytes);
+void* MFHeap_ReallocInternal(void *pMem, size_t bytes);
 
 // these are here to satisfy doxygen
 #if 0
-void* MFHeap_AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL);
-void* MFHeap_Alloc(uint32 bytes, MFHeap *pHeap = NULL);
-void* MFHeap_Realloc(void *pMem, uint32 bytes);
-void* MFHeap_TAlloc(uint32 bytes);
+void* MFHeap_AllocAndZero(size_t bytes, MFHeap *pHeap = NULL);
+void* MFHeap_Alloc(size_t bytes, MFHeap *pHeap = NULL);
+void* MFHeap_Realloc(void *pMem, size_t bytes);
+void* MFHeap_TAlloc(size_t bytes);
 #endif
 
 /**
@@ -119,9 +119,9 @@ void operator delete[](void *pMemory, void *pMem);
 
 
 // *** document me!! ***
-uint32 MFHeap_GetTotalAllocated();
-uint32 MFHeap_GetTotalWaste();
-uint32 MFHeap_GetNumAllocations();
+size_t MFHeap_GetTotalAllocated();
+size_t MFHeap_GetTotalWaste();
+int MFHeap_GetNumAllocations();
 
 /**
  * Get the size of an allocation.
@@ -261,8 +261,8 @@ void MFHeap_PopGroupName();
 	{
 		public:
 		inline MFHeapDebug& Tracker(int line, const char *pFile) { MFHeap_SetLineAndFile(line, pFile); return *this; }
-		inline static void *Alloc(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocInternal(bytes, pHeap); }
-		inline static void *AllocAndZero(uint32 bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocAndZeroInternal(bytes, pHeap); }
+		inline static void *Alloc(size_t bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocInternal(bytes, pHeap); }
+		inline static void *AllocAndZero(size_t bytes, MFHeap *pHeap = NULL) { return MFHeap_AllocAndZeroInternal(bytes, pHeap); }
 	} MFHeap_Debug;
 
 	// these macros wrap the debug heap trackers functionality

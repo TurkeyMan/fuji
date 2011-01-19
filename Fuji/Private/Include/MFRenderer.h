@@ -250,7 +250,7 @@ enum MFRenderState
  * @param value Value to set.
  * @return Returns the old value.
  */
-uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value);
+uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value);
 
 /**
  * Get the value of a global renderstate override state.
@@ -258,7 +258,7 @@ uint32 MFRenderer_SetRenderStateOverride(uint32 renderState, uint32 value);
  * @param renderState The global renderstate to get.
  * @return Returns the current value of the global renderstate.
  */
-uint32 MFRenderer_GetRenderStateOverride(uint32 renderState);
+uintp MFRenderer_GetRenderStateOverride(uint32 renderState);
 
 #endif // _MFRENDERER_H
 

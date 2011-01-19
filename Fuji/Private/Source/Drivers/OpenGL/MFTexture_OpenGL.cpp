@@ -123,7 +123,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	pTexture->pInternalData = (void*)textureID;
+	pTexture->pInternalData = (void*)(uintp)textureID;
 
 	uint32 platformFormat = MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_OpenGL);
 	MFDebug_Assert(platformFormat < (uint32)gMaxGLFormats, "Platform format is undefined...");
@@ -233,7 +233,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		// create the texture
 		glEnable(GL_TEXTURE_2D);
 		glGenTextures(1, &textureID);
-		pTexture->pInternalData = (void*)textureID;
+		pTexture->pInternalData = (void*)(uintp)textureID;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -251,7 +251,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		// create the frame buffer
 		glGenFramebuffers(1, &frameBufferID);
 		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-		pSurface->pImageData = (char*)frameBufferID;
+		pSurface->pImageData = (char*)(uintp)frameBufferID;
 
 		// and it to the framebuffer
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);

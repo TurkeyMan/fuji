@@ -714,7 +714,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 		++pH;
 	}
 
-	int charOffset = pC - pText;
+	int charOffset = (int)(pC - pText);
 
 	if(pLastSignificantCharacter)
 	{
@@ -723,7 +723,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			--pH;
 		}
 
-		*pLastSignificantCharacter = (pH - gCharHistory) + 1;
+		*pLastSignificantCharacter = (int)((pH - gCharHistory) + 1);
 	}
 
 	return charOffset;
@@ -1422,7 +1422,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	// append string cache to file...
 	char *pStrings = (char*)&pHeader->pChars[pHeader->numChars];
 	const char *pCache = MFStringCache_GetCache(pStr);
-	int stringLen = MFStringCache_GetSize(pStr);
+	size_t stringLen = MFStringCache_GetSize(pStr);
 	MFCopyMemory(pStrings, pCache, stringLen);
 
 	// byte reverse
@@ -1441,7 +1441,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	(char*&)pHeader->pName -= stringBase;
 
 	// write to disk
-	int fileSize = ((uintp)pStrings+stringLen) - (uintp)pFontFile;
+	int fileSize = (int)(((uintp)pStrings + stringLen) - (uintp)pFontFile);
 	MFFont *pFont = (MFFont*)MFHeap_Alloc(fileSize);
 	MFCopyMemory(pFont, pFontFile, fileSize);
 

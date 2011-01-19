@@ -18,7 +18,7 @@
  * @param size Size of data to copy in bytes.
  * @return None.
  */
-void MFCopyMemory(void *pDest, const void *pSrc, uint32 size);
+void MFCopyMemory(void *pDest, const void *pSrc, size_t size);
 
 /**
  * Zero memory.
@@ -27,7 +27,7 @@ void MFCopyMemory(void *pDest, const void *pSrc, uint32 size);
  * @param size Size of data to initialise in bytes.
  * @return None.
  */
-void MFZeroMemory(void *pDest, uint32 size);
+void MFZeroMemory(void *pDest, size_t size);
 
 /**
  * Initialise memory.
@@ -37,7 +37,7 @@ void MFZeroMemory(void *pDest, uint32 size);
  * @param size Number of bytes to initialise.
  * @return None.
  */
-void MFMemSet(void *pDest, int value, uint32 size);
+void MFMemSet(void *pDest, int value, size_t size);
 
 /**
  * Compare memory.
@@ -47,7 +47,7 @@ void MFMemSet(void *pDest, int value, uint32 size);
  * @param size Number of bytes to compate.
  * @return Return the difference of the first encountered differing byte. Returns 0 if buffers are identical.
  */
-int MFMemCompare(const void *pBuf1, const void *pBuf2, uint32 size);
+int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size);
 
 /**
  * Get the length of a string.

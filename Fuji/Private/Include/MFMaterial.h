@@ -10,6 +10,7 @@
 #define _MFMATERIAL_H
 
 class MFIni;
+struct MFTexture;
 
 /**
  * @struct MFMaterial
@@ -88,8 +89,8 @@ struct MFMaterialCallbacks
 
 	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
 	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function */
-	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);	/**< Pointer to a SetParameter function */
-	uint32    (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
+	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);	/**< Pointer to a SetParameter function */
+	uintp     (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
 };
 
 
@@ -224,39 +225,178 @@ int MFMaterial_GetNumParameterArgs(MFMaterial *pMaterial, int parameterIndex);
 MFParamType	MFMaterial_GetParameterArgType(MFMaterial *pMaterial, int parameterIndex, int argIndex);
 
 /**
- * Set the value of a parameter.
- * Sets the value of a parameter.
- * @param pMaterial Pointer to a material instance.
- * @param parameterIndex Index of the parameter
- * @param argIndex Argument index of the parameter.
- * @param pValue Pointer to the value to assign to the parameter.
- * @return None.
- */
-void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, const void *pValue);
-
-/**
  * Get the value of a parameter.
  * Gets the value of a parameter.
  * @param pMaterial Pointer to a material instance.
  * @param parameterIndex Index of the parameter
  * @param argIndex Argument index of the parameter.
- * @param pValue Pointer to a veriable to receive the parameter data.
- * @return If MFMaterial_GetParameter, the return value is 0.
+ * @param pValue Pointer to a buffer to receive non-integer parameter data.
+ * @return Returns the value of integer or poitner parameters, otherwise returns 0 on success.
  */
-int MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
+uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue = NULL);
 
 /**
- * Set the value of a parameter to an integer value.
- * Sets the value of a parameter to an integer value.
+ * Get the value of an integer parameter.
+ * Gets the value of an integer parameter.
  * @param pMaterial Pointer to a material instance.
  * @param parameterIndex Index of the parameter
  * @param argIndex Argument index of the parameter.
- * @param parameter Value of the integer parameter being set.
+ * @return Returns the value contained in the integer parameter.
+ */
+inline uintp MFMaterial_GetParameterI(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+{
+	return MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex);
+}
+
+/**
+ * Get the value of a float parameter.
+ * Gets the value of a float parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @return Returns the value contained in the float parameter.
+ */
+inline float MFMaterial_GetParameterF(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+{
+	float value;
+	MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, &value);
+	return value;
+}
+
+/**
+ * Get the value of a vector parameter.
+ * Gets the value of a vector parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pValue Pointer to a vector to receive the parameter data.
+ * @return Returns 0 on success.
+ */
+inline int MFMaterial_GetParameterV(MFMaterial *pMaterial, int parameterIndex, int argIndex, MFVector *pVector)
+{
+	return (int)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, pVector);
+}
+
+/**
+ * Get the value of a matrix parameter.
+ * Gets the value of a matrix parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pMatrix Pointer to a matrix to receive the parameter data.
+ * @return Returns 0 on success.
+ */
+inline int MFMaterial_GetParameterM(MFMaterial *pMaterial, int parameterIndex, int argIndex, MFMatrix *pMatrix)
+{
+	return (int)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, pMatrix);
+}
+
+/**
+ * Get the value of a texture parameter.
+ * Gets the value of a texture parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @return Returns the MFTexture set to the parameter requested.
+ */
+inline MFTexture *MFMaterial_GetParameterT(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+{
+	return (MFTexture*)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex);
+}
+
+/**
+ * Set the value of a parameter.
+ * Sets the value of a parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param value The value to assign to the parameter.
  * @return None.
  */
-inline void MFMaterial_SetParameterI(MFMaterial *pMaterial, int parameterIndex, int argIndex, size_t parameter)
+void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
+
+/**
+ * Set the value of an integer parameter.
+ * Sets the value of an integer parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param value Value of the integer parameter being set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterI(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value)
 {
-	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, &parameter);
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, value);
+}
+
+/**
+ * Set the value of a float parameter.
+ * Sets the value of a float parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param value Value of the float parameter being set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterF(MFMaterial *pMaterial, int parameterIndex, int argIndex, float value)
+{
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, (uintp)&value);
+}
+
+/**
+ * Set the value of a vector parameter.
+ * Sets the value of a vector parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param vector Value of the vector parameter being set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterV(MFMaterial *pMaterial, int parameterIndex, int argIndex, const MFVector &vector)
+{
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, (uintp)&vector);
+}
+
+/**
+ * Set the value of a matrix parameter.
+ * Sets the value of a matrix parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param matrix Value of the matrix parameter being set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterM(MFMaterial *pMaterial, int parameterIndex, int argIndex, const MFMatrix &matrix)
+{
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, (uintp)&matrix);
+}
+
+/**
+ * Set the value of a texture parameter.
+ * Sets the value of a texture parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pTexture Texture to be set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterT(MFMaterial *pMaterial, int parameterIndex, int argIndex, const MFTexture *pTexture)
+{
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, (uintp)pTexture);
+}
+
+/**
+ * Set the value of a string parameter.
+ * Sets the value of a string parameter.
+ * @param pMaterial Pointer to a material instance.
+ * @param parameterIndex Index of the parameter
+ * @param argIndex Argument index of the parameter.
+ * @param pString String to be set.
+ * @return None.
+ */
+inline void MFMaterial_SetParameterS(MFMaterial *pMaterial, int parameterIndex, int argIndex, const char *pString)
+{
+	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, (uintp)pString);
 }
 
 /**

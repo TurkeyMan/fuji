@@ -4,7 +4,7 @@
 class MFPoolHeap
 {
 public:
-	void Init(int num, int size, void *pMem = NULL, int memsize = 0);
+	void Init(int num, size_t size, void *pMem = NULL, size_t memsize = 0);
 	void Destroy();
 
 	size_t Size() const;
@@ -25,7 +25,7 @@ public:
 
 private:
 	void *pFreeList;
-	uint32 itemSize;
+	size_t itemSize;
 	int numItems;
 	void *pStorage;
 	bool bOwnStorage;
@@ -39,16 +39,16 @@ private:
 class MFPoolHeapCollection
 {
 public:
-	void Init(int numHeaps, const int *pNum, const int *pSizes, void *pMem = NULL, int memsize = 0);
+	void Init(int numHeaps, const int *pNum, const size_t *pSizes, void *pMem = NULL, size_t memsize = 0);
 	void Destroy();
 
-	void *Alloc(uint32 size);
-	void *Realloc(void *pItem, uint32 size);
+	void *Alloc(size_t size);
+	void *Realloc(void *pItem, size_t size);
 	void Delete(void *pItem);
 
 #if !defined(MF_RETAIL)
 	int NumHeaps() const;
-	int SizeOfHeapItem(int heapIndex) const;
+	size_t SizeOfHeapItem(int heapIndex) const;
 	int NumInHeap(int heapIndex) const;
 	int NumUsedInHeap(int heapIndex) const;
 	int PeakNumUsedInHeap(int heapIndex) const;
