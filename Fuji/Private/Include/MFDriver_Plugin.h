@@ -5,6 +5,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 	#if defined(MF_WINDOWS)
 		#define MF_RENDERPLUGIN_D3D9
+		//#define MF_RENDERPLUGIN_D3D11
 		#define MF_RENDERPLUGIN_OPENGL
 	#endif
 #endif

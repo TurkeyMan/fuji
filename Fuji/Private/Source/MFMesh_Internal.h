@@ -1,5 +1,5 @@
-#if !defined(_MESH_H)
-#define _MESH_H
+#if !defined(_MFMESH_INTERNAL_H)
+#define _MFMESH_INTERNAL_H
 
 struct MFMaterial;
 
@@ -139,7 +139,7 @@ struct MFMeshChunk_GC : public MFMeshChunk
 };
 
 // define MFMeshChunk_Current
-#if MF_RENDERER == MF_DRIVER_D3D9 || MF_RENDERER == MF_DRIVER_OPENGL || MF_RENDERER == MF_DRIVER_PLUGIN
+#if MF_RENDERER == MF_DRIVER_D3D9 || MF_RENDERER == MF_DRIVER_D3D11 || MF_RENDERER == MF_DRIVER_OPENGL || MF_RENDERER == MF_DRIVER_PLUGIN
 typedef MFMeshChunk_Generic MFMeshChunk_Current;
 #elif MF_RENDERER == MF_DRIVER_XBOX
 typedef MFMeshChunk_XB MFMeshChunk_Current;
@@ -155,4 +155,4 @@ typedef MFMeshChunk_GC MFMeshChunk_Current;
 
 void MFMesh_FixUpMeshChunkGeneric(MFMeshChunk *pMeshChunk, void *pBase, bool load);
 
-#endif
+#endif // _MFMESH_INTERNAL_H

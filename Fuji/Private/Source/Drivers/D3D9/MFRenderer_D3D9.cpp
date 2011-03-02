@@ -239,8 +239,8 @@ void MFRenderer_ResetDisplay()
 	void MFTexture_Release();
 	MFTexture_Release();
 
-	pRenderTarget->Release();
-	pZTarget->Release();
+	pRenderTarget->Release(); pRenderTarget = NULL;
+	pZTarget->Release(); pZTarget = NULL;
 
 	// setup present params
 	D3DPRESENT_PARAMETERS present;

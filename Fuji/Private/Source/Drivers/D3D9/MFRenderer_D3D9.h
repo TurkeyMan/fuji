@@ -1,5 +1,5 @@
-#if !defined(_MFRENDERER_PC_H)
-#define _MFRENDERER_PC_H
+#if !defined(_MFRENDERER_D3D9_H)
+#define _MFRENDERER_D3D9_H
 
 #include <d3d9.h>
 
@@ -61,4 +61,4 @@ void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alp
 void MFRendererPC_SetNumWeights(int numWeights);
 int MFRendererPC_GetNumWeights();
 
-#endif // _MFRENDERER_PC_H
+#endif // _MFRENDERER_D3D9_H

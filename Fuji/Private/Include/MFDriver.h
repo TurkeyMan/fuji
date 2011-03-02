@@ -69,7 +69,7 @@
 #define MF_DRIVER_X11			2
 #define MF_DRIVER_COCOA			3
 #define MF_DRIVER_D3D9			4
-#define MF_DRIVER_D3D10			5
+#define MF_DRIVER_D3D11			5
 #define MF_DRIVER_OPENGL		6
 #define MF_DRIVER_SDL			7
 #define MF_DRIVER_SOFTWARE		8
@@ -124,6 +124,7 @@
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32
 	#define MF_RENDERER			MF_DRIVER_PLUGIN
+	//#define MF_RENDERER			MF_DRIVER_D3D11
 	#define MF_SOUND			MF_DRIVER_DSOUND
 	#define MF_HEAP				MF_DRIVER_WIN32
 	#define MF_FILESYSTEM		MF_DRIVER_WIN32

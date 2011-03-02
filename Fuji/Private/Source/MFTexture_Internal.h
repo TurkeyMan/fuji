@@ -15,6 +15,7 @@ enum MFDisplayDrivers
 	MFDD_Unknown = -1,
 
 	MFDD_D3D9 = 0,
+	MFDD_D3D11,
 	MFDD_XBox,
 	MFDD_OpenGL,
 	MFDD_PSP,
