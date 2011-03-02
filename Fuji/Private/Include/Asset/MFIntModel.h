@@ -21,7 +21,7 @@ enum MFIntModelFormat
 struct MFIntModel;
 
 MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format);
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format, const char *pName);
 
 void MFIntModel_Optimise(MFIntModel *pModel);
 

@@ -53,7 +53,9 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 		return NULL;
 
 	// load the image
-	MFIntModel *pModel = MFIntModel_CreateFromFileInMemory(pData, size, (MFIntModelFormat)format);
+	MFString name = pFilename;
+	name.TruncateExtension();
+	MFIntModel *pModel = MFIntModel_CreateFromFileInMemory(pData, size, (MFIntModelFormat)format, name.CStr());
 
 	// free file
 	MFHeap_Free(pData);
@@ -61,10 +63,10 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 	return pModel;
 }
 
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format)
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format, const char *pName)
 {
 	F3DFile *pF3D = new F3DFile;
-	MFString_Copy(pF3D->name, "model");
+	MFString_Copy(pF3D->name, pName);
 
 	switch(format)
 	{

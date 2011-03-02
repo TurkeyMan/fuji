@@ -3,9 +3,8 @@
 template<class T>
 inline MFArray<T>::MFArray()
 {
-	pData = (T*)MFHeap_Alloc(sizeof(T) * 16);
-	for(int a=0; a<16; a++) new(&pData[a]) T();
-	allocated = 16;
+	pData = NULL;
+	allocated = 0;
 	count = 0;
 }
 
@@ -31,10 +30,14 @@ inline T& MFArray<T>::operator[](int x)
 	if(x >= allocated)
 	{
 		int oldAlloc = allocated;
-		while(x >= allocated) allocated *= 2;
+		if(allocated == 0)
+			allocated = 16;
+		while(x >= allocated)
+			allocated *= 2;
 
 		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
-		for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
+		for(int a=oldAlloc; a<allocated; a++)
+			new(&pData[a]) T();
 	}
 
 	count = MFMax(count, x+1);
@@ -61,10 +64,14 @@ inline void MFArray<T>::resize(int x)
 	if(x >= allocated)
 	{
 		int oldAlloc = allocated;
-		while(x >= allocated) allocated *= 2;
+		if(allocated == 0)
+			allocated = 16;
+		while(x >= allocated)
+			allocated *= 2;
 
 		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
-		for(int a=oldAlloc; a<allocated; a++) new(&pData[a]) T();
+		for(int a=oldAlloc; a<allocated; a++)
+			new(&pData[a]) T();
 	}
 
 	count = x;
