@@ -1,6 +1,6 @@
 #include "Fuji.h"
 #include "MFSystem.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "MFRenderer.h"
 #include "MFView.h"
 #include "MFFont.h"

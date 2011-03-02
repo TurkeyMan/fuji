@@ -1,5 +1,5 @@
 #include "Fuji.h"
-#include "Display.h"
+#include "MFDisplay.h"
 #include "MFRenderer.h"
 #include "MFView.h"
 #include "MFModel.h"
