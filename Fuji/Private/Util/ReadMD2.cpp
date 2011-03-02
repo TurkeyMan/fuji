@@ -193,6 +193,12 @@ void ParseMD2File(char *pFile, uint32 length)
 	}
 }
 
+void ParseMD2FileFromMemory(char *pFile, uint32 size, F3DFile *_pModel)
+{
+	pModel = _pModel;
+	ParseMD2File(pFile, size);
+}
+
 int F3DFile::ReadMD2(const char *pFilename)
 {
 	pModel = this;

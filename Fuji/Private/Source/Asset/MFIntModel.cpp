@@ -64,12 +64,17 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format)
 {
 	F3DFile *pF3D = new F3DFile;
+	MFString_Copy(pF3D->name, "model");
 
 	switch(format)
 	{
 		case MFIMF_ASE:
 			void ParseASEFile(char *, F3DFile *);
 			ParseASEFile((char*)pMemory, pF3D);
+			break;
+		case MFIMF_MD2:
+			void ParseMD2FileFromMemory(char *pFile, uint32 size, F3DFile *_pModel);
+			ParseMD2FileFromMemory((char*)pMemory, size, pF3D);
 			break;
 		default:
 			MFDebug_Assert(false, "Unsupported model format.");
