@@ -106,9 +106,9 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2),											// TexFmt_I4
 
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),		// TexFmt_DXT1
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox),						// TexFmt_DXT2
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),											// TexFmt_DXT2
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),		// TexFmt_DXT3
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox),						// TexFmt_DXT4
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox),											// TexFmt_DXT4
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),		// TexFmt_DXT5
 
 	MFBIT(MFDD_PSP),	// TexFmt_PSP_DXT1
@@ -317,10 +317,10 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		0,	//									// TexFmt_I4
 
 		71,	// DXGI_FORMAT_BC1_UNORM			// TexFmt_DXT1
-		74,	// DXGI_FORMAT_BC2_UNORM			// TexFmt_DXT2
-		77,	// DXGI_FORMAT_BC3_UNORM			// TexFmt_DXT3
-		80,	// DXGI_FORMAT_BC4_UNORM			// TexFmt_DXT4
-		83,	// DXGI_FORMAT_BC5_UNORM			// TexFmt_DXT5
+		0,	//									// TexFmt_DXT2
+		74,	// DXGI_FORMAT_BC2_UNORM			// TexFmt_DXT3
+		0,	//									// TexFmt_DXT4
+		77,	// DXGI_FORMAT_BC3_UNORM			// TexFmt_DXT5
 
 		0,	// TexFmt_PSP_DXT1
 		0,	// TexFmt_PSP_DXT3
