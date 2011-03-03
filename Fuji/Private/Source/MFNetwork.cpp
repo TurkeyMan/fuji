@@ -85,7 +85,8 @@ RemoteGamepad* MFNetwork_GetNewNetworkGamepadPointer()
 int MFNetwork_InputServerConnectionTread(void *pUserData)
 {
 	bool connectionTerminated = false;
-	char recvBuffer[160];
+	const int recvBufferSize = 160;
+	char recvBuffer[recvBufferSize];
 
 	MFSocket connection = (MFSocket)pUserData;
 
@@ -163,7 +164,7 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 			}
 			else
 			{
-				recvBuffer[255] = 0;
+				recvBuffer[recvBufferSize - 1] = 0;
 				MFDebug_Warn(2, MFStr("Unknown packet received: \"%s\"", recvBuffer));
 			}
 

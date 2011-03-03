@@ -18,6 +18,10 @@
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D9
 	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_D3D9
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D9
+
+	//MFTexture
+	#define MFTexture_Release MFTexture_Release_D3D9
+	#define MFTexture_Recreate MFTexture_Recreate_D3D9
 #endif
 
 #include "MFTexture_Internal.h"

@@ -5,6 +5,8 @@
 #if defined(MF_RENDERPLUGIN_D3D11)
 	#define MFTexture_InitModulePlatformSpecific MFTexture_InitModulePlatformSpecific_D3D11
 	#define MFTexture_DeinitModulePlatformSpecific MFTexture_DeinitModulePlatformSpecific_D3D11
+	#define MFTexture_Release MFTexture_Release_D3D11
+	#define MFTexture_Recreate MFTexture_Recreate_D3D11
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_D3D11
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_D3D11
 	#define MFTexture_Destroy MFTexture_Destroy_D3D11
