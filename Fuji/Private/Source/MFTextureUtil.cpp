@@ -641,6 +641,8 @@ MFDisplayDrivers MFTexture_GetCurrentDisplayDriver()
 	int current = MFRenderer_GetCurrentRendererPlugin();
 	if(current == MF_DRIVER_D3D9)
 		return MFDD_D3D9;
+	else if(current == MF_DRIVER_D3D11)
+		return MFDD_D3D11;
 	else if(current == MF_DRIVER_OPENGL)
 		return MFDD_OpenGL;
 	return MFDD_Unknown;

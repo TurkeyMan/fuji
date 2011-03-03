@@ -24,6 +24,7 @@
 
 #include <d3d11.h>
 
+static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 extern HWND apphWnd;
 
@@ -143,21 +144,30 @@ void MFRenderer_ResetDisplay()
 void MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
+
 }
 
 void MFRenderer_EndFrame()
 {
 	MFCALLSTACK;
+    
+	g_pSwapChain->Present( 0, 0 );
 }
 
 void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
+	gClearColour.x = r;
+	gClearColour.y = g;
+	gClearColour.z = b;
+	gClearColour.w = a;
 }
 
 void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
 
+	float ClearColor[4] = { gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w }; // RGBA
+    g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
 }
 
 void MFRenderer_GetViewport(MFRect *pRect)

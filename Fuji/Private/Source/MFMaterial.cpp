@@ -15,6 +15,8 @@
 #include "MFFont.h"
 #include "MFInput.h"
 
+#include "MFDriver.h"
+
 #include "SysLogo256.h"
 #include "SysLogo64.h"
 #if defined(_PSP)
@@ -88,10 +90,16 @@ void MFMaterial_InitModule()
 	{
 		MFDebug_Warn(3, "Failed to load Materials.ini");
 	}
-
+	
+#if MF_RENDERER == MF_DRIVER_D3D11 || defined(MF_RENDERPLUGIN_D3D11)
+	// HACK?
+	MFTexture *pSysLogoLargeTexture = MFTexture_Create("_None");
+	MFTexture *pSysLogoSmallTexture = MFTexture_Create("_None");
+#else
 	// create the logo textures from raw data
 	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFTextureFormat)SysLogo256_format, SysLogo256_flags);
 	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFTextureFormat)SysLogo64_format, SysLogo64_flags);
+#endif
 
 	// create standard materials
 	pNoneMaterial = MFMaterial_Create("_None");

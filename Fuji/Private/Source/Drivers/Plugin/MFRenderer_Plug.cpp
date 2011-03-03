@@ -99,6 +99,8 @@ int MFRenderer_GetCurrentRendererPlugin()
 {
 	if(!MFString_CaseCmp("D3D9", gpCurrentRenderPlugin->pDriverName))
 		return MF_DRIVER_D3D9;
+	else if(!MFString_CaseCmp("D3D11", gpCurrentRenderPlugin->pDriverName))
+		return MF_DRIVER_D3D11;
 	else if(!MFString_CaseCmp("OpenGL", gpCurrentRenderPlugin->pDriverName))
 		return MF_DRIVER_OPENGL;
 	return -1;
