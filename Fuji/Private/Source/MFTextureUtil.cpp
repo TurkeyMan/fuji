@@ -75,14 +75,14 @@ static const char * const gpMFTextureFormatStrings[TexFmt_Max] =
 static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 {
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),		// TexFmt_A8R8G8B8
-	MFBIT(MFDD_PSP)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PS2),		// TexFmt_A8B8G8R8
+	MFBIT(MFDD_PSP)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PS2),	// TexFmt_A8B8G8R8
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),										// TexFmt_B8G8R8A8
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),										// TexFmt_R8G8B8A8
 
 	MFBIT(MFDD_D3D9),															// TexFmt_R8G8B8
 	0,																			// TexFmt_B8G8R8
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_OpenGL),						// TexFmt_A2R10G10B10
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_OpenGL),										// TexFmt_A2R10G10B10
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_OpenGL),						// TexFmt_A2B10G10R10
 
 	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_OpenGL),						// TexFmt_A16B16G16R16
@@ -95,7 +95,7 @@ static uint32 gMFTexturePlatformAvailability[TexFmt_Max] =
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),										// TexFmt_R5G5B5A1
 	MFBIT(MFDD_PSP)|MFBIT(MFDD_PS2)|MFBIT(MFDD_OpenGL),							// TexFmt_A1B5G5R5
 
-	MFBIT(MFDD_D3D9)|MFBIT(MFDD_D3D11)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),		// TexFmt_A4R4G4B4
+	MFBIT(MFDD_D3D9)|MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),						// TexFmt_A4R4G4B4
 	MFBIT(MFDD_OpenGL)|MFBIT(MFDD_PSP),											// TexFmt_A4B4G4R4
 	MFBIT(MFDD_XBox)|MFBIT(MFDD_OpenGL),										// TexFmt_R4G4B4A4
 
@@ -215,7 +215,7 @@ static uint32 gMFTextureBitsPerPixel[TexFmt_Max] =
 
 uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 {
-	{ // PC
+	{ // D3D9
 		21,	// D3DFMT_A8R8G8B8		// TexFmt_A8R8G8B8
 		32,	// D3DFMT_A8B8G8R8		// TexFmt_A8B8G8R8
 		0,	//						// TexFmt_B8G8R8A8
@@ -252,6 +252,75 @@ uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max] =
 		MFMAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// TexFmt_DXT3
 		MFMAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// TexFmt_DXT4
 		MFMAKEFOURCC('D', 'X', 'T', '5'),	// D3DFMT_DXT5	// TexFmt_DXT5
+
+		0,	// TexFmt_PSP_DXT1
+		0,	// TexFmt_PSP_DXT3
+		0,	// TexFmt_PSP_DXT5
+
+		0,	// TexFmt_XB_A8R8G8B8
+		0,	// TexFmt_XB_A8B8G8R8
+		0,	// TexFmt_XB_B8G8R8A8
+		0,	// TexFmt_XB_R8G8B8A8
+
+		0,	// TexFmt_XB_R5G6B5
+		0,	// TexFmt_XB_R6G5B5
+
+		0,	// TexFmt_XB_A1R5G5B5
+		0,	// TexFmt_XB_R5G5B5A1
+
+		0,	// TexFmt_XB_A4R4G4B4
+		0,	// TexFmt_XB_R4G4B4A4
+
+		0,	// TexFmt_PSP_A8B8G8R8s
+		0,	// TexFmt_PSP_B5G6R5s
+		0,	// TexFmt_PSP_A1B5G5R5s
+		0,	// TexFmt_PSP_A4B4G4R4s
+
+		0,	// TexFmt_PSP_I8s
+		0,	// TexFmt_PSP_I4s
+
+		0,	// TexFmt_PSP_DXT1s
+		0,	// TexFmt_PSP_DXT3s
+		0,	// TexFmt_PSP_DXT5s
+	},
+
+	{ // D3D11
+		87,	// DXGI_FORMAT_B8G8R8A8_UNORM		// TexFmt_A8R8G8B8
+		28,	// DXGI_FORMAT_R8G8B8A8_UNORM		// TexFmt_A8B8G8R8
+		0,	//									// TexFmt_B8G8R8A8
+		0,	//									// TexFmt_R8G8B8A8
+
+		0,	//									// TexFmt_R8G8B8
+		0,	//									// TexFmt_B8G8R8
+
+		0,	//									// TexFmt_A2R10G10B10
+		24,	// DXGI_FORMAT_R10G10B10A2_UNORM	// TexFmt_A2B10G10R10
+
+		11,	// DXGI_FORMAT_R16G16B16A16_UNORM	// TexFmt_A16B16G16R16
+
+		85,	// DXGI_FORMAT_B5G6R5_UNORM			// TexFmt_R5G6B5
+		0,	//									// TexFmt_R6G5B5
+		0,	//									// TexFmt_B5G6R5
+
+		86,	// DXGI_FORMAT_B5G5R5A1_UNORM		// TexFmt_A1R5G5B5
+		0,	//									// TexFmt_R5G5B5A1
+		0,	//									// TexFmt_A1B5G5R5
+
+		0,	//									// TexFmt_A4R4G4B4
+		0,	//									// TexFmt_A4B4G4R4
+		0,	//									// TexFmt_R4G4B4A4
+
+		10,	// DXGI_FORMAT_R16G16B16A16_FLOAT	// TexFmt_ABGR_F16
+		2,	// DXGI_FORMAT_R32G32B32A32_FLOAT	// TexFmt_ABGR_F32
+
+		0,	//									// TexFmt_I8
+		0,	//									// TexFmt_I4
+
+		71,	// DXGI_FORMAT_BC1_UNORM			// TexFmt_DXT1
+		74,	// DXGI_FORMAT_BC2_UNORM			// TexFmt_DXT2
+		77,	// DXGI_FORMAT_BC3_UNORM			// TexFmt_DXT3
+		80,	// DXGI_FORMAT_BC4_UNORM			// TexFmt_DXT4
+		83,	// DXGI_FORMAT_BC5_UNORM			// TexFmt_DXT5
 
 		0,	// TexFmt_PSP_DXT1
 		0,	// TexFmt_PSP_DXT3
