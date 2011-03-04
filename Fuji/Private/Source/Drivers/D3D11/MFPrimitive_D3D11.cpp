@@ -22,6 +22,33 @@
 
 #include "MFPrimitive.h"
 
+#include <D3D11.h>
+
+
+static const int primBufferSize = 1536;
+
+static bool gRenderQuads = false;
+
+struct LitVertexD3D11
+{
+	struct LitPos
+	{
+		float x, y, z;
+	} pos;
+
+	struct LitNormal
+	{
+		float x, y, z;
+	} normal;
+
+	unsigned int colour;
+
+	float u,v;
+};
+
+static LitVertexD3D11 primBuffer[primBufferSize];
+static LitVertexD3D11 current;
+
 void MFPrimitive_InitModule()
 {
 	MFCALLSTACK;

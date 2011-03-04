@@ -28,6 +28,7 @@
 #include <d3d11.h>
 
 extern ID3D11Device* g_pd3dDevice;
+extern ID3D11DeviceContext* g_pImmediateContext;
 
 extern int gVertexDataStride[MFVDF_Max];
 
@@ -174,12 +175,38 @@ void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 
 MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
 {
-	return NULL;
+    D3D11_BUFFER_DESC bd;
+    ZeroMemory( &bd, sizeof(bd) );
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = pVertexFormat->pElementData[0].stride * numVerts;
+    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    bd.CPUAccessFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA InitData;
+    ZeroMemory( &InitData, sizeof(InitData) );
+    InitData.pSysMem = pVertexBufferMemory;
+	
+	ID3D11Buffer* pVertexBuffer = NULL;
+    HRESULT hr = g_pd3dDevice->CreateBuffer( &bd, &InitData, &pVertexBuffer );
+    if( FAILED( hr ) )
+        return NULL;
+	
+	MFVertexBuffer *pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer));
+	pVB->pVertexDeclatation = pVertexFormat;
+	pVB->bufferType = type;
+	pVB->numVerts = numVerts;
+	pVB->bLocked = false;
+	pVB->pPlatformData = pVertexBuffer;
+
+	return pVB;
 }
 
 void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
+	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
+	pVB->Release();
 
+	MFHeap_Free(pVertexBuffer);
 }
 
 void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
@@ -194,11 +221,38 @@ void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 
 MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
 {
-	return NULL;
+    D3D11_BUFFER_DESC bd;
+    ZeroMemory(&bd, sizeof(bd));
+	
+    bd.Usage = D3D11_USAGE_DEFAULT;
+    bd.ByteWidth = sizeof(WORD) * numIndices;
+    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    bd.CPUAccessFlags = 0;
+	
+    D3D11_SUBRESOURCE_DATA InitData;
+    ZeroMemory(&InitData, sizeof(InitData));
+    InitData.pSysMem = pIndexBufferMemory;
+
+	ID3D11Buffer *pIndexBuffer = NULL;
+    HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &pIndexBuffer);
+    if (FAILED(hr))
+        return NULL;
+
+	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer) + (pIndexBufferMemory ? 0 : sizeof(uint16) * numIndices));
+	pIB->pIndices = pIndexBufferMemory ? pIndexBufferMemory : (uint16*)&pIB[1];
+	pIB->numIndices = numIndices;
+	pIB->bLocked = false;
+	pIB->pPlatformData = pIndexBuffer;
+
+	return pIB;
 }
 
 void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
+	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
+	pIB->Release();
+
+	MFHeap_Free(pIndexBuffer);
 }
 
 void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
@@ -211,24 +265,48 @@ void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 
 void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
 {
+	ID3D11InputLayout *pVertexLayout = (ID3D11InputLayout*)pVertexDeclaration->pPlatformData;
+    g_pImmediateContext->IASetInputLayout(pVertexLayout);
 }
 
 void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 {
+	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
+    // Set vertex buffer
+	UINT stride = pVertexBuffer->pVertexDeclatation->pElementData[0].stride;
+    UINT offset = 0;
+    g_pImmediateContext->IASetVertexBuffers(stream, 1, &pVB, &stride, &offset);
+
+	//if (stream == 0)
+	//	MFVertex_SetVertexDeclaration(pVertexBuffer->pVertexDeclatation);
 }
 
 static int MFVertex_GetNumPrims(MFVertexPrimType primType, int numVertices)
 {
-
+	switch(primType)
+	{
+		case MFVPT_Points:			return numVertices;
+		case MFVPT_LineList:		return numVertices / 2;
+		case MFVPT_LineStrip:		return numVertices - 1;
+		case MFVPT_TriangleList:	return numVertices / 3;
+		case MFVPT_TriangleStrip:	return numVertices - 2;
+		//case MFVPT_TriangleFan:		return numVertices - 2;
+		default:
+			MFDebug_Assert(false, "Unknown primitive type!");
+	}
 	return 0;
 }
 
 void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
 {
+    g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
+	g_pImmediateContext->Draw(numVertices, firstVertex);
 }
 
 void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
 {
+    g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
+    g_pImmediateContext->DrawIndexed(numIndices, 0, 0);
 }
 
 #endif // MF_RENDERER
