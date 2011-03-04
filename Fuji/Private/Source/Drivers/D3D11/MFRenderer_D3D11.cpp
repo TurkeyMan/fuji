@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D11 || defined(MF_RENDERPLUGIN_D3D11)
+#if (MF_RENDERER == MF_DRIVER_D3D11) || defined(MF_RENDERPLUGIN_D3D11)
 
 #if defined(MF_RENDERPLUGIN_D3D11)
 	#define MFRenderer_InitModulePlatformSpecific MFRenderer_InitModulePlatformSpecific_D3D11
@@ -144,7 +144,6 @@ void MFRenderer_ResetDisplay()
 void MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
-
 }
 
 void MFRenderer_EndFrame()

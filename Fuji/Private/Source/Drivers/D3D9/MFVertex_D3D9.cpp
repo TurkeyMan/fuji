@@ -67,7 +67,7 @@ static const BYTE gDataType[MFVDF_Max] =
 	// D3DDECLTYPE_DEC3N
 };
 
-static const D3DPRIMITIVETYPE gPrimTypes[] =
+static const D3DPRIMITIVETYPE gPrimTypes[MFVPT_Max] =
 {
 	D3DPT_POINTLIST, // MFVPT_Points
 	D3DPT_LINELIST, // MFVPT_LineList
