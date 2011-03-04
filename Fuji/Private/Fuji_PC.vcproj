@@ -1263,6 +1263,50 @@
 						</File>
 					</Filter>
 				</Filter>
+				<Filter
+					Name="D3D11"
+					>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFMaterial_D3D11.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFModel_D3D11.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFPrimitive_D3D11.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFRenderer_D3D11.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFRenderer_D3D11.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFTexture_D3D11.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Drivers\D3D11\MFVertex_D3D11.cpp"
+						>
+					</File>
+					<Filter
+						Name="Materials"
+						>
+						<File
+							RelativePath=".\Source\Drivers\D3D11\Materials\MFMat_Effect_D3D11.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Drivers\D3D11\Materials\MFMat_Standard_D3D11.cpp"
+							>
+						</File>
+					</Filter>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Images"
