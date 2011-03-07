@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
+				AdditionalDependencies="ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="true"
@@ -146,7 +146,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
+				AdditionalDependencies="ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="true"
@@ -223,7 +223,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="d3d9.lib d3dx9.lib dinput8.lib dxguid.lib Dsound.lib ogg_static.lib vorbisfile_static.lib"
+				AdditionalDependencies="ogg_static.lib vorbisfile_static.lib"
 				OutputFile="$(OutDir)/lib$(ProjectName)_$(ConfigurationName).lib"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)Middleware\vorbis\lib\x86&quot;;&quot;$(ProjectDir)Middleware\lglcd\lib\x86&quot;"
 				SuppressStartupBanner="true"
@@ -799,6 +799,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Drivers\Null\MFCompute_Null.cpp"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Drivers\Null\MFDebug_Null.cpp"
 						>
 					</File>
@@ -1307,6 +1311,14 @@
 						</File>
 					</Filter>
 				</Filter>
+				<Filter
+					Name="OpenCL"
+					>
+					<File
+						RelativePath=".\Source\Drivers\OpenCL\MFCompute_OpenCL.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Images"
@@ -1539,6 +1551,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\MFCommandLine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Include\MFCompute.h"
 				>
 			</File>
 			<File

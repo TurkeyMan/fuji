@@ -79,7 +79,7 @@ project "Fuji"
 	configuration { "windows", "not Xbox360", "not PS3" }
 		defines { "WIN32", "_WINDOWS" }
 		includedirs { "../Source/Images/WINDOWS/" }
-		links { "d3d9", "d3dx9", "dinput8", "dxguid", "Dsound", "ogg_static", "vorbisfile_static", "mad" }
+		links { "ogg_static", "vorbisfile_static", "mad" }
 
 		-- Windows 32 --
 		configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }

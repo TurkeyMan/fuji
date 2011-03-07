@@ -10,6 +10,9 @@
 	#include <windows.h>
 	#include <Mmreg.h>
 	#include <dsound.h>
+
+	#pragma comment(lib, "Dsound")
+	#pragma comment(lib, "dxguid")
 #elif defined(MF_XBOX)
 	#include <xtl.h>
 #endif
@@ -89,8 +92,10 @@ void MFSound_DeinitModulePlatformSpecific()
 {
 	MFCALLSTACK;
 
-	pDSPrimaryBuffer->Release();
-	pDirectSound->Release();
+	if(pDSPrimaryBuffer)
+		pDSPrimaryBuffer->Release();
+	if(pDirectSound)
+		pDirectSound->Release();
 }
 
 void MFSound_UpdateInternal()

@@ -68,7 +68,7 @@ static const DXGI_FORMAT gDataType[MFVDF_Max] =
 	DXGI_FORMAT_R16G16_FLOAT		// MFVDF_Float16_2
 };
 //---------------------------------------------------------------------------------------------------------------------
-static const D3D_PRIMITIVE_TOPOLOGY gPrimTopology[MFVPT_Max] =
+static const D3D11_PRIMITIVE_TOPOLOGY gPrimTopology[MFVPT_Max] =
 {
 	D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,		// MFVPT_Points
 	D3D11_PRIMITIVE_TOPOLOGY_LINELIST,		// MFVPT_LineList
@@ -78,7 +78,7 @@ static const D3D_PRIMITIVE_TOPOLOGY gPrimTopology[MFVPT_Max] =
 	D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED,		// MFVPT_TriangleFan
 };
 //---------------------------------------------------------------------------------------------------------------------
-static const D3D_PRIMITIVE gPrimType[MFVPT_Max] =
+static const D3D11_PRIMITIVE gPrimType[MFVPT_Max] =
 {
 	D3D11_PRIMITIVE_POINT,		// MFVPT_Points
 	D3D11_PRIMITIVE_LINE,		// MFVPT_LineList

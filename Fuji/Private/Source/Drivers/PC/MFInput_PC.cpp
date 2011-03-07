@@ -20,6 +20,9 @@
 #include <dinput.h>
 #include <dbt.h>
 
+#pragma comment(lib, "dinput8")
+#pragma comment(lib, "dxguid")
+
 const GUID GUID_DEVINTERFACE_HID = { 0x4D1E55B2L, 0xF16F, 0x11CF, { 0x88, 0xCB, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30 } };
 
 #if defined(ALLOW_RAW_INPUT)

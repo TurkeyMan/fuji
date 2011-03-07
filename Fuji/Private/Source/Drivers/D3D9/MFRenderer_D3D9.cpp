@@ -36,6 +36,9 @@
 
 #include <d3d9.h>
 
+#pragma comment(lib, "d3d9")
+#pragma comment(lib, "d3dx9")
+
 static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
 

@@ -24,6 +24,8 @@
 
 #include <d3d11.h>
 
+#pragma comment(lib, "d3d11")
+
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 extern HWND apphWnd;
