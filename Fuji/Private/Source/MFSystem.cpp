@@ -24,6 +24,7 @@
 #include "MFAnimScript_Internal.h"
 #include "MFVertex_Internal.h"
 #include "MFThread.h"
+#include "MFCompute_Internal.h"
 
 #if defined(MF_WINDOWS)
 	// NOTE: REMOVE ME!!!
@@ -214,6 +215,8 @@ void MFSystem_Init()
 	MFPrimitive_InitModule();
 	MFFont_InitModule();
 
+	MFCompute_InitModule();
+
 	MFCollision_InitModule();
 
 	MFNetwork_InitModule();
@@ -243,6 +246,8 @@ void MFSystem_Deinit()
 	MFNetwork_DeinitModule();
 
 	MFCollision_DeinitModule();
+
+	MFCompute_DeinitModule();
 
 	MFFont_DeinitModule();
 	MFPrimitive_DeinitModule();

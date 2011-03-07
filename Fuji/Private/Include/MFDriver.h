@@ -60,6 +60,10 @@
 	MF_PARTICLESYSTEM:
 		NULL
 		MF_PLATFORM
+
+	MF_COMPUTE:
+		NULL
+		OPENCL
 */
 
 /*** Driver list ***/
@@ -98,6 +102,7 @@
 #define MF_DRIVER_PLUGIN		31
 #define MF_DRIVER_IPHONE		32
 #define MF_DRIVER_WINDOWSMOBILE	33
+#define MF_DRIVER_OPENCL		34
 
 /*** Platform specific defines, includes and driver selection ***/
 
@@ -134,6 +139,7 @@
 	#define MF_SYSTEM			MF_DRIVER_PC
 	#define MF_TRANSLATION		MF_DRIVER_PC
 	#define MF_DEBUG			MF_DRIVER_PC
+	//#define MF_COMPUTE			MF_DRIVER_OPENCL
 
 #elif defined(MF_XBOX)
 
@@ -351,6 +357,9 @@
 #endif
 #if !defined(MF_PARTICLESYSTEM)
 	#define MF_PARTICLESYSTEM NULL
+#endif
+#if !defined(MF_COMPUTE)
+	#define MF_COMPUTE NULL
 #endif
 
 // if no OpenGL ES version was defined, set the default
