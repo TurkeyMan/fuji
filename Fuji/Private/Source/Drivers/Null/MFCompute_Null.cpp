@@ -6,6 +6,16 @@
 
 #include "MFCompute_Internal.h"
 
+void MFCompute_InitModule()
+{
+
+}
+
+void MFCompute_DeinitModule()
+{
+
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 MFComputeBuffer *MFCompute_CreateBuffer(MFCompute_ScalarType dataType, int count, void *host_ptr, MFCompute_BufferType type)
 {
