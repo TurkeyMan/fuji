@@ -183,6 +183,9 @@
     <Filter Include="Source Files\Drivers\OpenCL">
       <UniqueIdentifier>{5765a936-5bb9-4902-a9a8-85237a08e23a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Drivers\D3D11\Shaders">
+      <UniqueIdentifier>{f58b7fa3-a634-49a1-8042-9ef81209a83a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\DebugMenu.cpp">
@@ -1663,6 +1666,9 @@
     <ClInclude Include="Source\MFCompute_Internal.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Drivers\D3D11\Shaders\Registers.h">
+      <Filter>Source Files\Drivers\D3D11\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\Drivers\XBox\VertexShaders\MatStandard.vsh">
@@ -1723,5 +1729,8 @@
     <None Include="MakeGame.inc" />
     <None Include="Releasenotes.txt" />
     <None Include="Todo.txt" />
+    <None Include="Source\Drivers\D3D11\Shaders\MatStandard.hlsl">
+      <Filter>Source Files\Drivers\D3D11\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

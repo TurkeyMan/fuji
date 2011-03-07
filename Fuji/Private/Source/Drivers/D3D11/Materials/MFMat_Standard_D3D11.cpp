@@ -14,6 +14,13 @@
 #include "Materials/MFMat_Standard.h"
 #include "MFHeap.h"
 
+typedef uint8 BYTE;
+
+#include "../Shaders/MatStandard_s.h"
+
+const uint8 *g_pShaderData = g_vs_main_s;
+unsigned int g_nShaderSize  = sizeof(g_vs_main_s);
+
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {

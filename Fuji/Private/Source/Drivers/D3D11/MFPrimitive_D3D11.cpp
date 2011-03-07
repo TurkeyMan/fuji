@@ -243,9 +243,7 @@ void MFEnd()
 	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
-
-	MFVertex_LockVertexBuffer(pVertexBuffer);
-
+	
 	switch(primType)
 	{
 		case PT_PointList:

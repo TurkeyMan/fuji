@@ -567,6 +567,7 @@
     <ClInclude Include="Include\MFCompute.h" />
     <ClInclude Include="Source\DebugMenu_Internal.h" />
     <ClInclude Include="Source\Drivers\D3D11\MFRenderer_D3D11.h" />
+    <ClInclude Include="Source\Drivers\D3D11\Shaders\Registers.h" />
     <ClInclude Include="Source\MFAnimation_Internal.h" />
     <ClInclude Include="Source\MFAnimScript_Internal.h" />
     <ClInclude Include="Source\MFCallstack_Internal.h" />
@@ -772,6 +773,7 @@
     <ClInclude Include="Middleware\libpng-1.5.0\pngstruct.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Source\Drivers\D3D11\Shaders\MatStandard.hlsl" />
     <None Include="Source\Drivers\XBox\VertexShaders\MatStandard.vsh" />
     <None Include="Source\Drivers\XBox\VertexShaders\Model_LS.vsh" />
     <None Include="Source\Drivers\XBox\VertexShaders\Model_S.vsh" />

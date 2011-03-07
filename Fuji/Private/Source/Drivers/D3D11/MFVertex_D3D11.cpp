@@ -29,6 +29,10 @@
 #include <d3d11.h>
 
 //---------------------------------------------------------------------------------------------------------------------
+
+extern const uint8 *g_pShaderData;
+extern uint32 g_nShaderSize;
+
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
 
@@ -117,6 +121,8 @@ void MFVertex_DeinitModulePlatformSpecific()
 //---------------------------------------------------------------------------------------------------------------------
 MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
 {
+	MFDebug_Assert(pElementArray, "Null element array");
+
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFHeap_Alloc(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
 	pDecl->numElements = elementCount;
 	pDecl->pElements = (MFVertexElement*)&pDecl[1];
@@ -156,7 +162,7 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	
 	// this needs the vertex shader
 	ID3D11InputLayout* pVertexLayout = NULL;
-	HRESULT hr = g_pd3dDevice->CreateInputLayout(elements, elementCount, NULL, NULL, &pVertexLayout);
+	HRESULT hr = g_pd3dDevice->CreateInputLayout(elements, elementCount, g_pShaderData, g_nShaderSize, &pVertexLayout);
 	if (FAILED(hr))
 	{
 		MFHeap_Free(pDecl);
@@ -181,19 +187,25 @@ void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 //---------------------------------------------------------------------------------------------------------------------
 MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
 {
+	if (!pVertexFormat)
+	{
+		MFDebug_Error("Null vertex declaration");
+		return NULL;
+	}
+
     D3D11_BUFFER_DESC bd;
     ZeroMemory( &bd, sizeof(bd) );
 	bd.Usage = (type == MFVBType_Static) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
     bd.ByteWidth = pVertexFormat->pElementData[0].stride * numVerts;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = 0;
+    bd.CPUAccessFlags = (type == MFVBType_Static) ? 0 : D3D11_CPU_ACCESS_WRITE;
 
     D3D11_SUBRESOURCE_DATA InitData;
     ZeroMemory( &InitData, sizeof(InitData) );
     InitData.pSysMem = pVertexBufferMemory;
 	
 	ID3D11Buffer* pVertexBuffer = NULL;
-    HRESULT hr = g_pd3dDevice->CreateBuffer( &bd, &InitData, &pVertexBuffer );
+    HRESULT hr = g_pd3dDevice->CreateBuffer( &bd, pVertexBufferMemory ? &InitData : NULL, &pVertexBuffer );
     if( FAILED( hr ) )
         return NULL;
 	
@@ -220,6 +232,7 @@ void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
+	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
@@ -228,14 +241,16 @@ void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	// SJS need to use D3D11_MAP_WRITE_NO_OVERWRITE some time
 	D3D11_MAP map = (pVertexBuffer->bufferType == MFVBType_Static) ? D3D11_MAP_WRITE : D3D11_MAP_WRITE_DISCARD;
 
-	HRESULT hr = g_pImmediateContext->Map(pVB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
+	//HRESULT hr = g_pImmediateContext->Map(pVB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
 
-	if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-	{
-		MFDebug_Message("waiting on vertex buffer lock");
+	//if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
+	//{
+	//	MFDebug_Message("waiting on vertex buffer lock");
 
-		hr = g_pImmediateContext->Map(pVB, 0, map, 0, &subresource);
-	}
+	//	hr = g_pImmediateContext->Map(pVB, 0, map, 0, &subresource);
+	//}
+
+	HRESULT hr = g_pImmediateContext->Map(pVB, 0, map, 0, &subresource);
 
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to map vertex buffer");
 
@@ -253,9 +268,11 @@ void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
+	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
 	//g_pImmediateContext->CopySubresourceRegion(pVB, 0, 0, 0, 0, pVB, 0, NULL);
 	g_pImmediateContext->Unmap(pVB, 0);
+	pVertexBuffer->bLocked = false;
 }
 //---------------------------------------------------------------------------------------------------------------------
 MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
@@ -299,6 +316,7 @@ void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 {
+	MFDebug_Assert(pIndexBuffer, "Null index buffer");
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Index buffer already locked!");
 
 	*ppIndices = pIndexBuffer->pIndices;
@@ -308,6 +326,7 @@ void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
+	MFDebug_Assert(pIndexBuffer, "Null index buffer");
 	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer already locked!");
 
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
@@ -340,6 +359,8 @@ void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 {
+	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
+
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
     // Set vertex buffer
 	UINT stride = pVertexBuffer->pVertexDeclatation->pElementData[0].stride;
@@ -374,6 +395,8 @@ void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int num
 //---------------------------------------------------------------------------------------------------------------------
 void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
 {
+	MFDebug_Assert(pIndexBuffer, "Null index buffer");
+
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
 	g_pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0);
 
