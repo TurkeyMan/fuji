@@ -102,10 +102,10 @@ void MFInput_InitModulePlatformSpecific()
     XInputDebugInitKeyboardQueue( &xdkp );
 
     // Set device handles to invalid.
-    ZeroMemory( hPads, sizeof(hPads) );
+    MFZeroMemory( hPads, sizeof(hPads) );
 
     // Set drive letters to invalid.
-    ZeroMemory( chMUDrives, sizeof(chMUDrives) );
+    MFZeroMemory( chMUDrives, sizeof(chMUDrives) );
 
     // Get initial state of all connected devices.
     for( i = 0; i < NUM_DEVICE_STATES; i++ )

@@ -78,7 +78,7 @@ void MFRenderer_DeinitModulePlatformSpecific()
 int MFRenderer_CreateDisplay()
 {
 	D3DPRESENT_PARAMETERS present;
-	ZeroMemory(&present, sizeof(present));
+	MFZeroMemory(&present, sizeof(present));
 
 	if(!gDisplay.windowed)
 	{
@@ -251,7 +251,7 @@ void MFRenderer_ResetDisplay()
 
 	// setup present params
 	D3DPRESENT_PARAMETERS present;
-	ZeroMemory(&present, sizeof(present));
+	MFZeroMemory(&present, sizeof(present));
 
 	if(!gDisplay.windowed)
 	{

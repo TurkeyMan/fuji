@@ -79,7 +79,7 @@ int MFRenderer_CreateDisplay()
 	UINT numFeatureLevels = ARRAYSIZE( featureLevels );
 
     DXGI_SWAP_CHAIN_DESC sd;
-    ZeroMemory( &sd, sizeof( sd ) );
+    MFZeroMemory( &sd, sizeof( sd ) );
     sd.BufferCount = 1;
     sd.BufferDesc.Width = width;
     sd.BufferDesc.Height = height;

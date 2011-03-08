@@ -282,7 +282,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 		DICONSTANTFORCE cf              = { 0 };
 
 		DIEFFECT eff;
-		ZeroMemory( &eff, sizeof(eff) );
+		MFZeroMemory( &eff, sizeof(eff) );
 		eff.dwSize                  = sizeof(DIEFFECT);
 		eff.dwFlags                 = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
 		eff.dwDuration              = INFINITE;
@@ -323,8 +323,8 @@ void MFInput_InitModulePlatformSpecific()
 	MFCALLSTACK;
 
 	// initialise runtime data
-	ZeroMemory(gKeyState,256);
-	ZeroMemory(gPCJoysticks, sizeof(gPCJoysticks));
+	MFZeroMemory(gKeyState,256);
+	MFZeroMemory(gPCJoysticks, sizeof(gPCJoysticks));
 
 	for(int i=0; i<MFInput_MaxInputID; i++)
 		gPCJoysticks[i].XInputID = -1;
@@ -1375,7 +1375,7 @@ int InitRawMouse(bool _includeRDPMouse)
 
 	// Allocate the array for the raw mice
 	pRawMice = (MFRawMouse*)malloc(sizeof(MFRawMouse) * rawMouseCount);
-	ZeroMemory(pRawMice, sizeof(MFRawMouse) * rawMouseCount);
+	MFZeroMemory(pRawMice, sizeof(MFRawMouse) * rawMouseCount);
 
 	// Loop through all devices and set the device handles and initialize the mouse values
 	for(i = 0; i < nInputDevices; i++)

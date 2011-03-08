@@ -194,14 +194,14 @@ MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, 
 	}
 
     D3D11_BUFFER_DESC bd;
-    ZeroMemory( &bd, sizeof(bd) );
+    MFZeroMemory( &bd, sizeof(bd) );
 	bd.Usage = (type == MFVBType_Static) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
     bd.ByteWidth = pVertexFormat->pElementData[0].stride * numVerts;
     bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bd.CPUAccessFlags = (type == MFVBType_Static) ? 0 : D3D11_CPU_ACCESS_WRITE;
 
     D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory( &InitData, sizeof(InitData) );
+    MFZeroMemory( &InitData, sizeof(InitData) );
     InitData.pSysMem = pVertexBufferMemory;
 	
 	ID3D11Buffer* pVertexBuffer = NULL;
@@ -278,7 +278,7 @@ void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
 {
     D3D11_BUFFER_DESC bd;
-    ZeroMemory(&bd, sizeof(bd));
+    MFZeroMemory(&bd, sizeof(bd));
 	
     bd.Usage = D3D11_USAGE_DEFAULT;
     bd.ByteWidth = sizeof(WORD) * numIndices;
@@ -286,7 +286,7 @@ MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMe
     bd.CPUAccessFlags = 0;
 	
     D3D11_SUBRESOURCE_DATA InitData;
-    ZeroMemory(&InitData, sizeof(InitData));
+    MFZeroMemory(&InitData, sizeof(InitData));
     InitData.pSysMem = pIndexBufferMemory;
 
 	ID3D11Buffer *pIndexBuffer = NULL;
