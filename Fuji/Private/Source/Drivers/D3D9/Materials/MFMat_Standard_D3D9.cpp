@@ -40,8 +40,8 @@ int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	MFCALLSTACK;
 
-	pd3dDevice->CreateVertexShader(g_vs11_main_s, &pVS_s);
-	pd3dDevice->CreateVertexShader(g_vs11_main_a, &pVS_a);
+	pd3dDevice->CreateVertexShader(reinterpret_cast<const DWORD*>(g_vs_main_s), &pVS_s);
+	pd3dDevice->CreateVertexShader(reinterpret_cast<const DWORD*>(g_vs_main_a), &pVS_a);
 
 	return 0;
 }

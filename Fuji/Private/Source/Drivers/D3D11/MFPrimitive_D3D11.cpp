@@ -68,6 +68,7 @@ extern ID3D11DeviceContext* g_pImmediateContext;
 
 static MFVertexBuffer *pVertexBuffer = NULL;
 
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
@@ -100,7 +101,7 @@ void MFPrimitive_InitModule()
 
 	pVertexBuffer = MFVertex_CreateVertexBuffer(pDecl, primBufferSize, MFVBType_Dynamic);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DeinitModule()
 {
 	MFCALLSTACK;
@@ -109,12 +110,12 @@ void MFPrimitive_DeinitModule()
 
 	MFVertex_DestroyVertexDeclaration(pDecl);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DrawStats()
 {
 
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
@@ -145,7 +146,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 	MFRenderer_Begin();
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
@@ -164,7 +165,7 @@ void MFBegin(uint32 vertexCount)
 	current.normal.x = current.normal.z = 0.0f;
 	current.normal.y = 1.0f;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
@@ -174,25 +175,25 @@ void MFSetMatrix(const MFMatrix &mat)
 	// SJS ?
 	//MFRendererPC_SetWorldToScreenMatrix(temp);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFSetColour(float r, float g, float b, float a)
 {
 	current.colour = ((uint32)(r*255.0f))<<16 | ((uint32)(g*255.0f))<<8 | (uint32)(b*255.0f) | ((uint32)(a*255.0f))<<24;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFSetTexCoord1(float u, float v)
 {
 	current.u = u;
 	current.v = v;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFSetNormal(float x, float y, float z)
 {
 	current.normal.x = x;
 	current.normal.y = y;
 	current.normal.z = z;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
@@ -239,7 +240,7 @@ void MFSetPosition(float x, float y, float z)
 		currentVert = 0;
 	}
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFEnd()
 {
 	MFCALLSTACK;
@@ -270,11 +271,11 @@ void MFEnd()
 		break;
 	}
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 static int textureWidth, textureHeight;
 static float uScale, vScale;
 static float halfTexelU, halfTexelV;
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_BeginBlitter(int numBlits)
 {
 	MFView_Push();
@@ -295,12 +296,12 @@ void MFPrimitive_BeginBlitter(int numBlits)
 	MFPrimitive(PT_QuadList);
 	MFBegin(numBlits * 2);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
 	MFPrimitive_StretchBlit(x, y, tw, th, tx, ty, tw, th);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
@@ -308,11 +309,12 @@ void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw,
 	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
 	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_EndBlitter()
 {
 	MFEnd();
 	MFView_Pop();
 }
+//---------------------------------------------------------------------------------------------------------------------
 
 #endif // MF_RENDERER
