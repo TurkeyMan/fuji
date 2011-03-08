@@ -29,6 +29,8 @@
 #include "MFDisplay.h"
 #include "MFTexture.h"
 
+#include "MFVertex_Internal.h"
+
 #include <D3D11.h>
 
 
@@ -243,27 +245,29 @@ void MFEnd()
 	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
+
+	MFVertex_SetVertexStreamSource(0, pVertexBuffer);
 	
 	switch(primType)
 	{
-		case PT_PointList:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_POINTLIST, beginCount, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineList:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, beginCount/2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineStrip:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, beginCount-1, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriList:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, beginCount/3, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriStrip:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriFan:
-			//pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
+	case PT_PointList:
+		MFVertex_RenderVertices(MFVPT_Points, beginCount, 0);
+		break;
+	case PT_LineList:
+		MFVertex_RenderVertices(MFVPT_LineList, beginCount / 2, 0);
+		break;
+	case PT_LineStrip:
+		MFVertex_RenderVertices(MFVPT_LineStrip, beginCount - 1, 0);
+		break;
+	case PT_TriList:
+		MFVertex_RenderVertices(MFVPT_TriangleList, beginCount / 3, 0);
+		break;
+	case PT_TriStrip:
+		MFVertex_RenderVertices(MFVPT_TriangleStrip, beginCount - 2, 0);
+		break;
+	case PT_TriFan:
+		MFVertex_RenderVertices(MFVPT_TriangleFan, beginCount - 2, 0);
+		break;
 	}
 }
 

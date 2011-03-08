@@ -30,8 +30,8 @@
 
 //---------------------------------------------------------------------------------------------------------------------
 
-extern const uint8 *g_pShaderData;
-extern uint32 g_nShaderSize;
+extern const uint8 *g_pVertexShaderData;
+extern uint32 g_vertexShaderSize;
 
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
@@ -162,7 +162,7 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	
 	// this needs the vertex shader
 	ID3D11InputLayout* pVertexLayout = NULL;
-	HRESULT hr = g_pd3dDevice->CreateInputLayout(elements, elementCount, g_pShaderData, g_nShaderSize, &pVertexLayout);
+	HRESULT hr = g_pd3dDevice->CreateInputLayout(elements, elementCount, g_pVertexShaderData, g_vertexShaderSize, &pVertexLayout);
 	if (FAILED(hr))
 	{
 		MFHeap_Free(pDecl);

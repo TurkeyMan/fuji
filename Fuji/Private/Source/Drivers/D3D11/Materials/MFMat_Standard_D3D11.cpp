@@ -14,23 +14,39 @@
 #include "Materials/MFMat_Standard.h"
 #include "MFHeap.h"
 
-typedef uint8 BYTE;
+#include <D3D11.h>
 
 #include "../Shaders/MatStandard_s.h"
 
-const uint8 *g_pShaderData = g_vs_main_s;
-unsigned int g_nShaderSize  = sizeof(g_vs_main_s);
+extern ID3D11Device* g_pd3dDevice;
+extern ID3D11DeviceContext* g_pImmediateContext;
+
+const uint8 *g_pVertexShaderData = g_vs_main_s;
+unsigned int g_vertexShaderSize  = sizeof(g_vs_main_s);
+
+//const uint8 *g_pPixelShaderData = g_ps_main_s;
+//unsigned int g_pixelShaderSize  = sizeof(g_ps_main_s);
+
+ID3D11VertexShader *pVertexShader = NULL;
+ID3D11PixelShader *pPixelShader = NULL;
 
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	MFCALLSTACK;
+	
+	g_pd3dDevice->CreateVertexShader(g_pVertexShaderData, g_vertexShaderSize, NULL, &pVertexShader);
+	//g_pd3dDevice->CreatePixelShader(g_pPixelShaderData, g_pixelShaderSize, NULL, &pPixelShader);
+
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
 	MFCALLSTACK;
+	
+	if (pPixelShader) pPixelShader->Release();
+	if (pVertexShader) pVertexShader->Release();
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial)
@@ -38,6 +54,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	MFCALLSTACK;
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+	
+	g_pImmediateContext->VSSetShader(pVertexShader, NULL, 0);
+	g_pImmediateContext->PSSetShader(pPixelShader, NULL, 0);
 
 	return 0;
 }
