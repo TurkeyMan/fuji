@@ -274,22 +274,22 @@ void MFEnd()
 	switch(primType)
 	{
 	case PT_PointList:
-		MFVertex_RenderVertices(MFVPT_Points, beginCount, 0);
+		MFVertex_RenderVertices(MFVPT_Points, 0, beginCount);
 		break;
 	case PT_LineList:
-		MFVertex_RenderVertices(MFVPT_LineList, beginCount / 2, 0);
+		MFVertex_RenderVertices(MFVPT_LineList, 0, beginCount / 2);
 		break;
 	case PT_LineStrip:
-		MFVertex_RenderVertices(MFVPT_LineStrip, beginCount - 1, 0);
+		MFVertex_RenderVertices(MFVPT_LineStrip, 0, beginCount - 1);
 		break;
 	case PT_TriList:
-		MFVertex_RenderVertices(MFVPT_TriangleList, beginCount / 3, 0);
+		MFVertex_RenderVertices(MFVPT_TriangleList, 0, beginCount / 3);
 		break;
 	case PT_TriStrip:
-		MFVertex_RenderVertices(MFVPT_TriangleStrip, beginCount - 2, 0);
+		MFVertex_RenderVertices(MFVPT_TriangleStrip, 0, beginCount - 2);
 		break;
 	case PT_TriFan:
-		MFVertex_RenderVertices(MFVPT_TriangleFan, beginCount - 2, 0);
+		MFVertex_RenderVertices(MFVPT_TriangleFan, 0, beginCount - 2);
 		break;
 	}
 }

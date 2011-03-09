@@ -44,29 +44,10 @@ void MFTexture_DeinitModulePlatformSpecific()
 
 void MFTexture_Release()
 {
-	//MFTexture **ppTI = gTextureBank.Begin();
-	//while (*ppTI)
-	//{
-	//	MFTexture *pTexture = *ppTI;
-	//	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
-
-	//	if (pTemplate->flags & TEX_RenderTarget)
-	//	{
-	//		ID3D11Texture2D *pD3DTex = (ID3D11Texture2D**)&pTexture->pInternalData;
-
-	//		// release the old render target
-	//		pD3DTex->Release();
-
-	//		pTexture->pInternalData = NULL;
-	//	}
-
-	//	++ppTI;
-	//}
 }
 
 void MFTexture_Recreate()
 {
-
 }
 
 // interface functions
@@ -81,7 +62,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	DXGI_FORMAT platformFormat = (DXGI_FORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D11);
 	//hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
-	int pitch = MFTexture_GetBitsPerPixel(pTemplate->imageFormat);
+	int pitch = (MFTexture_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;
 
 	D3D11_TEXTURE2D_DESC desc;
 	MFZeroMemory(&desc, sizeof(desc));
@@ -102,25 +83,40 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	data[0].pSysMem = pTemplate->pSurfaces[0].pImageData;
 	data[0].SysMemPitch = pitch;
 
-	hr = g_pd3dDevice->CreateTexture2D(&desc, data, (ID3D11Texture2D**)&pTexture->pInternalData);
+	ID3D11Texture2D* pTex = NULL;
+
+	hr = g_pd3dDevice->CreateTexture2D(&desc, data, &pTex);
 
 	//MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
 	//MFDebug_Assert(hr != D3DERR_OUTOFVIDEOMEMORY, MFStr("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
 	//MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 	//MFDebug_Assert(hr != D3DXERR_INVALIDDATA, MFStr("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
-
-	ID3D11Texture2D* pTex = (ID3D11Texture2D*)pTexture->pInternalData;
-
+	
 	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
 
-	if (pTex)
+	if (SUCCEEDED(hr))
 	{
 		hr = pTex->SetPrivateData( WKPDID_D3DDebugObjectName, MFString_Length(pTexture->name), pTexture->name );
+
+		//// filter mip levels
+		//if (generateMipChain)
+		//	D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
+
+		ID3D11ShaderResourceView *pSRV = NULL;
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+		MFZeroMemory(&desc, sizeof(desc));
+		desc.Format = platformFormat;
+		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MostDetailedMip = 0;
+		desc.Texture2D.MipLevels = -1;
+
+		hr = g_pd3dDevice->CreateShaderResourceView(pTex, &desc, &pSRV);
+		pTex->Release();
+
+		pTexture->pInternalData = pSRV;
 	}
 	
-	//// filter mip levels
-	//if (generateMipChain)
-	//	D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
 }
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
@@ -139,8 +135,8 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	{
 		MFHeap_Free(pTexture->pTemplateData);
 
-		ID3D11Texture2D *pTex = (ID3D11Texture2D*)pTexture->pInternalData;
-		pTex->Release();
+		ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
+		pSRV->Release();
 
 		gTextureBank.Destroy(pTexture);
 

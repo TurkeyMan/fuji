@@ -41,7 +41,7 @@ struct MFMat_Standard_Data_D3D11 : public MFMat_Standard_Data
 	ID3D11RasterizerState* pRasterizerState;
 	ID3D11BlendState *pBlendState;
 	ID3D11Buffer *pConstantBuffer;
-
+	
 	CBEverything cbEverything;
 };
 
@@ -106,6 +106,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		g_pImmediateContext->PSSetSamplers(0, 1, &pData->pSamplerState);
 		
 		pData->cbEverything.mWorldToScreen = MFView_GetWorldToScreenMatrix();;
+		pData->cbEverything.mWorldToScreen.Transpose();
 		pData->cbEverything.mLocalToWorld;
 
 		g_pImmediateContext->UpdateSubresource(pData->pConstantBuffer, 0, NULL, &pData->cbEverything, 0, 0);
@@ -148,9 +149,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		//else
 		if (pData->pTextures[pData->diffuseMapIndex])
 		{
-			ID3D11Texture2D *pTexture = (ID3D11Texture2D*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
 
-
+			g_pImmediateContext->PSSetShaderResources(0, 1, &pSRV);
 
 			//MFRendererPC_SetTexture(0, pTexture);
 			//MFRendererPC_SetTexture(1, NULL);
@@ -347,12 +348,16 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	//--
 
+	MFTexture *pDiffuse = pData->pTextures[pData->diffuseMapIndex];
+
+	const bool premultipliedAlpha = pDiffuse && ((pDiffuse->pTemplateData->flags & TEX_PreMultipliedAlpha) != 0);
+
 	D3D11_BLEND_DESC blendDesc;
 	MFZeroMemory(&blendDesc, sizeof(blendDesc));
 
 	blendDesc.AlphaToCoverageEnable = false;
 	blendDesc.IndependentBlendEnable = false;
-	blendDesc.RenderTarget[0].BlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
@@ -360,6 +365,44 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+
+	switch (pData->materialType & MF_BlendMask)
+	{
+	case 0:
+		blendDesc.RenderTarget[0].BlendEnable = false;
+		break;
+
+	case MF_AlphaBlend:
+		blendDesc.RenderTarget[0].BlendEnable = true;
+		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		break;
+
+	case MF_Additive:
+		blendDesc.RenderTarget[0].BlendEnable = true;
+		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		break;
+
+	case MF_Subtractive:
+		blendDesc.RenderTarget[0].BlendEnable = true;
+		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
+		break;
+	}
 
 	g_pd3dDevice->CreateBlendState(&blendDesc, &pData->pBlendState);
 
