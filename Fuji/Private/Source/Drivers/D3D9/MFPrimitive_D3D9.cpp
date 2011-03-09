@@ -117,13 +117,15 @@ void MFPrimitive(uint32 type, uint32 hint)
 
 	primType = type & PT_PrimMask;
 
-	if(primType == PT_QuadList)
+	if (primType == PT_QuadList)
 	{
 		primType = PT_TriList;
 		gRenderQuads = true;
 	}
 	else
+	{
 		gRenderQuads = false;
+	}
 
 	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
 	if(pMatOverride)

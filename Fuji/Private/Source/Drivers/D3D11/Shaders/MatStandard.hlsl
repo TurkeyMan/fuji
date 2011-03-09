@@ -1,28 +1,17 @@
-#include "Registers.h"
 
-float4x4 mWorldToScreen : register(c_wvp);
-float4x4 mLocalToWorld : register(c_ltw);
-float4 mTexMatrix[2] : register(c_tex);
+Texture2D txDiffuse : register( t0 );
+SamplerState samLinear : register( s0 );
 
-float4 gModelColour : register(c_modelColour);
-float4 gColourMask : register(c_colourMask);
 
-cbuffer cbNeverChanges : register( b0 )
+cbuffer cbEverything : register( b0 )
 {
-    matrix View;
-};
-
-cbuffer cbChangeOnResize : register( b1 )
-{
-    matrix Projection;
-};
-
-cbuffer cbChangesEveryFrame : register( b2 )
-{
-    matrix World;
+	matrix mWorldToScreen;
+	matrix mLocalToWorld;
+	float4 mTexMatrix[2];
     float4 vMeshColor;
+	float4 gModelColour;
+	float4 gColourMask;
 };
-
 
 struct VS_INPUT
 {
@@ -42,7 +31,7 @@ struct VS_OUTPUT
     float4 uv2		: TEXCOORD1;
 };
 
-VS_OUTPUT main(in VS_INPUT input)
+VS_OUTPUT vs_main(in VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT)0;
 
@@ -59,9 +48,13 @@ VS_OUTPUT main(in VS_INPUT input)
 	output.uv2 = output.uv;
 
 	// output colour and apply colour mask
-	output.colour.xyz = input.colour.xyz*gModelColour.xyz*gColourMask.x + gColourMask.yyy;
-	output.colour.w = input.colour.w*gModelColour.w*gColourMask.z + gColourMask.w;
+	output.colour.xyz = input.colour.xyz * gModelColour.xyz * gColourMask.x + gColourMask.yyy;
+	output.colour.w = input.colour.w * gModelColour.w * gColourMask.z + gColourMask.w;
 
     return output;
 }
 
+float4 ps_main( VS_OUTPUT input) : SV_Target
+{
+    return txDiffuse.Sample( samLinear, input.uv ) * input.colour;
+}

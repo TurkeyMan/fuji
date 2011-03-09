@@ -100,6 +100,12 @@ void MFPrimitive_InitModule()
 	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
 
 	pVertexBuffer = MFVertex_CreateVertexBuffer(pDecl, primBufferSize, MFVBType_Dynamic);
+
+	if (pVertexBuffer)
+	{
+		static const char c_szName[] = "MFPrimative vertex buffer";
+		((ID3D11Buffer*)pVertexBuffer->pPlatformData)->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(c_szName), c_szName);
+	}
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DeinitModule()
@@ -246,6 +252,22 @@ void MFEnd()
 	MFCALLSTACK;
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
+
+	MFVertex_LockVertexBuffer(pVertexBuffer);
+
+	for (int a = 0; a < pVertexBuffer->pVertexDeclatation->numElements; ++a)
+	{
+		if (pVertexBuffer->pVertexDeclatation->pElements[a].stream == 0)
+		{
+			memcpy(pVertexBuffer->pVertexDeclatation->pElementData[a].pData, primBuffer, beginCount * sizeof(LitVertexD3D11));
+			break;
+		}
+	}
+
+
+	//MFVertex_CopyVertexData(pVertexBuffer, MFVE_Position, 
+
+	MFVertex_UnlockVertexBuffer(pVertexBuffer);
 
 	MFVertex_SetVertexStreamSource(0, pVertexBuffer);
 	
