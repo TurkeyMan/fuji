@@ -28,6 +28,7 @@
 #include "MFView.h"
 #include "MFDisplay.h"
 #include "MFTexture.h"
+#include "MFRenderer_D3D11.h"
 
 #include "MFVertex_Internal.h"
 
@@ -151,7 +152,9 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFRenderer_SetMatrices(NULL, 0);
 	// SJS ????
 	//MFRendererPC_SetNumWeights(0);
-	//MFRendererPC_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
+	
+	MFRenderer_D3D11_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
+
 	//MFRendererPC_SetModelColour(MFVector::white);
 
 	MFVertex_SetVertexDeclaration(pDecl);
@@ -190,8 +193,7 @@ void MFSetMatrix(const MFMatrix &mat)
 
 	MFMatrix temp;
 	MFView_GetLocalToScreen(mat, &temp);
-	// SJS ?
-	//MFRendererPC_SetWorldToScreenMatrix(temp);
+	MFRenderer_D3D11_SetWorldToScreenMatrix(temp);
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFSetColour(float r, float g, float b, float a)

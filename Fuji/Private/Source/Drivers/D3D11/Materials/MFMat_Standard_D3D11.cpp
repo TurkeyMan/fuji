@@ -17,6 +17,8 @@
 #include "MFTexture_Internal.h"
 #include "MFView.h"
 
+#include "../Shaders/Registers.h"
+
 
 #include <D3D11.h>
 
@@ -25,10 +27,8 @@
 
 #include "../Shaders/MatStandard_ps.h"
 
-struct CBEverything
+struct CBMaterial
 {
-	MFMatrix mWorldToScreen;
-	MFMatrix mLocalToWorld;
 	MFVector mTexMatrix[2];
     MFVector vMeshColor;
 	MFVector gModelColour;
@@ -42,7 +42,7 @@ struct MFMat_Standard_Data_D3D11 : public MFMat_Standard_Data
 	ID3D11BlendState *pBlendState;
 	ID3D11Buffer *pConstantBuffer;
 	
-	CBEverything cbEverything;
+	CBMaterial cbMaterial;
 };
 
 
@@ -104,15 +104,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		g_pImmediateContext->OMSetBlendState(pData->pBlendState, blend, 0xFFFFFFFF);
 		g_pImmediateContext->VSSetSamplers(0, 1, &pData->pSamplerState);
 		g_pImmediateContext->PSSetSamplers(0, 1, &pData->pSamplerState);
-		
-		pData->cbEverything.mWorldToScreen = MFView_GetWorldToScreenMatrix();;
-		pData->cbEverything.mWorldToScreen.Transpose();
-		pData->cbEverything.mLocalToWorld;
 
-		g_pImmediateContext->UpdateSubresource(pData->pConstantBuffer, 0, NULL, &pData->cbEverything, 0, 0);
+		g_pImmediateContext->UpdateSubresource(pData->pConstantBuffer, 0, NULL, &pData->cbMaterial, 0, 0);
 
-		g_pImmediateContext->VSSetConstantBuffers(0, 1, &pData->pConstantBuffer);
-		g_pImmediateContext->PSSetConstantBuffers(0, 1, &pData->pConstantBuffer);
+		g_pImmediateContext->VSSetConstantBuffers(n_cbMaterial, 1, &pData->pConstantBuffer);
+		g_pImmediateContext->PSSetConstantBuffers(n_cbMaterial, 1, &pData->pConstantBuffer);
 
 		//// set some render states
 		//if(pData->detailMapIndex)
@@ -329,7 +325,6 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_BACK;
-	rasterizerDesc.CullMode = D3D11_CULL_NONE;
 	rasterizerDesc.FrontCounterClockwise = false;
 	rasterizerDesc.DepthBias = 0;
 	rasterizerDesc.DepthBiasClamp = 0.0f;
@@ -413,24 +408,19 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	//--
 
-	MFVector mask;
-	mask.Set(1.0f, 0.0f, 1.0f, 0.0f);
-
 	MFMatrix mat = pData->textureMatrix;
 	mat.Transpose();
 
-	pData->cbEverything.mWorldToScreen = MFMatrix::identity;
-	pData->cbEverything.mLocalToWorld = MFMatrix::identity;
-	pData->cbEverything.mTexMatrix[0] = mat.GetXAxis();
-	pData->cbEverything.mTexMatrix[1] = mat.GetYAxis();
-	pData->cbEverything.vMeshColor = MFVector::white;
-	pData->cbEverything.gModelColour = MFVector::white;
-	pData->cbEverything.gColourMask = mask;
+	pData->cbMaterial.mTexMatrix[0] = mat.GetXAxis();
+	pData->cbMaterial.mTexMatrix[1] = mat.GetYAxis();
+	pData->cbMaterial.vMeshColor = MFVector::white;
+	pData->cbMaterial.gModelColour = MFVector::white;
+	pData->cbMaterial.gColourMask = MakeVector(1.0f, 0.0f, 1.0f, 0.0f);
 
 	D3D11_BUFFER_DESC desc;
 	MFZeroMemory(&desc, sizeof(desc));
 	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	desc.ByteWidth = sizeof( CBEverything );
+	desc.ByteWidth = sizeof(pData->cbMaterial);
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 

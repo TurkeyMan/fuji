@@ -21,10 +21,18 @@
 #endif
 
 #include "MFTexture_Internal.h"
+#include "Shaders/Registers.h"
 
 #include <d3d11.h>
 
 #pragma comment(lib, "d3d11")
+
+
+struct CBWorld
+{
+	MFMatrix mWorldToScreen;
+	MFMatrix mLocalToWorld;
+};
 
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
@@ -36,6 +44,9 @@ ID3D11Device*           g_pd3dDevice = NULL;
 ID3D11DeviceContext*    g_pImmediateContext = NULL;
 IDXGISwapChain*         g_pSwapChain = NULL;
 ID3D11RenderTargetView* g_pRenderTargetView = NULL;
+
+ID3D11Buffer* g_pConstantBufferWorld = NULL;
+static CBWorld cbWorld;
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -126,17 +137,41 @@ int MFRenderer_CreateDisplay()
     vp.TopLeftY = 0;
     g_pImmediateContext->RSSetViewports( 1, &vp );
 
+	//--
+
+	cbWorld.mWorldToScreen = MFMatrix::identity;
+	cbWorld.mLocalToWorld = MFMatrix::identity;
+	
+	D3D11_BUFFER_DESC desc;
+	MFZeroMemory(&desc, sizeof(desc));
+	desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	desc.ByteWidth = sizeof(cbWorld);
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	D3D11_SUBRESOURCE_DATA data;
+	MFZeroMemory(&data, sizeof(data));
+	data.pSysMem = &cbWorld;
+
+	g_pd3dDevice->CreateBuffer(&desc, &data, &g_pConstantBufferWorld);
+
+	
+	g_pImmediateContext->VSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
+	g_pImmediateContext->PSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
+
 	return 0;
 }
 
 void MFRenderer_DestroyDisplay()
 {
-    if( g_pImmediateContext ) g_pImmediateContext->ClearState();
+	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
 
-    if( g_pRenderTargetView ) g_pRenderTargetView->Release();
-    if( g_pSwapChain ) g_pSwapChain->Release();
-    if( g_pImmediateContext ) g_pImmediateContext->Release();
-    if( g_pd3dDevice ) g_pd3dDevice->Release();
+    if (g_pImmediateContext) g_pImmediateContext->ClearState();
+
+    if (g_pRenderTargetView) g_pRenderTargetView->Release();
+    if (g_pSwapChain) g_pSwapChain->Release();
+    if (g_pImmediateContext) g_pImmediateContext->Release();
+    if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
 void MFRenderer_ResetDisplay()
@@ -200,120 +235,123 @@ float MFRenderer_GetTexelCenterOffset()
 }
 //
 //// direct3d management fucntions
-//void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
+//void MFRenderer_D3D11_SetTexture(int stage, IDirect3DTexture9 *pTexture)
 //{
 //}
 //
-//void MFRendererPC_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
+//void MFRenderer_D3D11_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
 //{
 //}
 //
-//void MFRendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
+//void MFRenderer_D3D11_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
 //{
 //}
 //
-//void MFRendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
+//void MFRenderer_D3D11_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
 //{
 //}
 //
-//void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
+//void MFRenderer_D3D11_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
+//{
+//}
+
+void MFRenderer_D3D11_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
+{
+	cbWorld.mWorldToScreen.Transpose(worldToScreen);
+
+	g_pImmediateContext->UpdateSubresource(g_pConstantBufferWorld, 0, NULL, &cbWorld, 0, 0);
+}
+
+//void MFRenderer_D3D11_SetTextureMatrix(const MFMatrix &textureMatrix)
 //{
 //}
 //
-//void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
+//void MFRenderer_D3D11_SetModelColour(const MFVector &colour)
 //{
 //}
 //
-//void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix)
+//void MFRenderer_D3D11_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
 //{
 //}
 //
-//void MFRendererPC_SetModelColour(const MFVector &colour)
+//void MFRenderer_D3D11_SetNumWeights(int numWeights)
 //{
 //}
 //
-//void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
-//{
-//}
-//
-//void MFRendererPC_SetNumWeights(int numWeights)
-//{
-//}
-//
-//int MFRendererPC_GetNumWeights()
+//int MFRenderer_D3D11_GetNumWeights()
 //{
 //	return 0;
 //}
 //
-//void MFRendererPC_ApplyGPUStates()
+//void MFRenderer_D3D11_ApplyGPUStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetDefaultGPUStates()
+//void MFRenderer_D3D11_SetDefaultGPUStates()
 //{
 //
 //}
 //
-//void MFRendererPC_ApplyRenderStates()
+//void MFRenderer_D3D11_ApplyRenderStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetDefaultRenderStates()
+//void MFRenderer_D3D11_SetDefaultRenderStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
+//void MFRenderer_D3D11_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
 //{
 //}
 //
-//void MFRendererPC_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
+//void MFRenderer_D3D11_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
 //{
 //}
 //
-//void MFRendererPC_ApplyTextureStageStates()
-//{
-//
-//}
-//
-//void MFRendererPC_SetDefaultTextureStageStates()
+//void MFRenderer_D3D11_ApplyTextureStageStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
-//{
-//}
-//
-//void MFRendererPC_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
-//{
-//}
-//
-//void MFRendererPC_ApplySamplerStates()
+//void MFRenderer_D3D11_SetDefaultTextureStageStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetDefaultSamplerStates()
+//void MFRenderer_D3D11_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
+//{
+//}
+//
+//void MFRenderer_D3D11_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
+//{
+//}
+//
+//void MFRenderer_D3D11_ApplySamplerStates()
 //{
 //
 //}
 //
-//void MFRendererPC_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
+//void MFRenderer_D3D11_SetDefaultSamplerStates()
+//{
+//
+//}
+//
+//void MFRenderer_D3D11_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
 //{
 //}
 //
-//void MFRendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
+//void MFRenderer_D3D11_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
 //{
 //}
 //
-//void MFRendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
+//void MFRenderer_D3D11_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
 //{
 //}
 //
-//void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
+//void MFRenderer_D3D11_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
 //{
 //}
 

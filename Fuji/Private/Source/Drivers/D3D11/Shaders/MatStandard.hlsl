@@ -1,12 +1,17 @@
 
+#include "Registers.h"
+
 Texture2D txDiffuse : register( t0 );
 SamplerState samLinear : register( s0 );
 
-
-cbuffer cbEverything : register( b0 )
+cbuffer cbWorld : register( r_cbWorld )
 {
 	matrix mWorldToScreen;
 	matrix mLocalToWorld;
+}
+
+cbuffer cbMaterial : register( c_cbMaterial )
+{
 	float4 mTexMatrix[2];
     float4 vMeshColor;
 	float4 gModelColour;
@@ -56,5 +61,5 @@ VS_OUTPUT vs_main(in VS_INPUT input)
 
 float4 ps_main( VS_OUTPUT input) : SV_Target
 {
-    return txDiffuse.Sample( samLinear, input.uv ) * input.colour;
+    return txDiffuse.Sample( samLinear, input.uv.xy ) * input.colour;
 }
