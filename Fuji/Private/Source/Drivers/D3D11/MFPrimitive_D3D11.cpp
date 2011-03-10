@@ -58,7 +58,7 @@ struct LitVertexD3D11
 static LitVertexD3D11 primBuffer[primBufferSize];
 static LitVertexD3D11 current;
 
-static uint32 primType;
+static PrimType primType;
 static uint32 beginCount;
 static uint32 currentVert;
 
@@ -67,6 +67,8 @@ extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
 
 static MFVertexBuffer *pVertexBuffer = NULL;
+
+static int32 phase = 0;
 
 //---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_InitModule()
@@ -126,15 +128,19 @@ void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
 
-	primType = type & PT_PrimMask;
+	MFDebug_Assert(phase == 0, "not in order 0");
 
-	if(primType == PT_QuadList)
+	primType = static_cast<PrimType>(type & PT_PrimMask);
+
+	if (primType == PT_QuadList)
 	{
 		primType = PT_TriList;
 		gRenderQuads = true;
 	}
 	else
+	{
 		gRenderQuads = false;
+	}
 
 	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
 	if(pMatOverride)
@@ -151,11 +157,15 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFVertex_SetVertexDeclaration(pDecl);
 
 	MFRenderer_Begin();
+
+	phase = 1;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
+
+	MFDebug_Assert(phase == 1, "not in order 1");
 
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
@@ -170,6 +180,8 @@ void MFBegin(uint32 vertexCount)
 	current.colour = 0xFFFFFFFF;
 	current.normal.x = current.normal.z = 0.0f;
 	current.normal.y = 1.0f;
+
+	phase = 2;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFSetMatrix(const MFMatrix &mat)
@@ -251,6 +263,8 @@ void MFEnd()
 {
 	MFCALLSTACK;
 
+	MFDebug_Assert(phase == 2, "not in order 2");
+
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
 	MFVertex_LockVertexBuffer(pVertexBuffer);
@@ -277,21 +291,23 @@ void MFEnd()
 		MFVertex_RenderVertices(MFVPT_Points, 0, beginCount);
 		break;
 	case PT_LineList:
-		MFVertex_RenderVertices(MFVPT_LineList, 0, beginCount / 2);
+		MFVertex_RenderVertices(MFVPT_LineList, 0, beginCount);
 		break;
 	case PT_LineStrip:
-		MFVertex_RenderVertices(MFVPT_LineStrip, 0, beginCount - 1);
+		MFVertex_RenderVertices(MFVPT_LineStrip, 0, beginCount);
 		break;
 	case PT_TriList:
-		MFVertex_RenderVertices(MFVPT_TriangleList, 0, beginCount / 3);
+		MFVertex_RenderVertices(MFVPT_TriangleList, 0, beginCount);
 		break;
 	case PT_TriStrip:
-		MFVertex_RenderVertices(MFVPT_TriangleStrip, 0, beginCount - 2);
+		MFVertex_RenderVertices(MFVPT_TriangleStrip, 0, beginCount);
 		break;
 	case PT_TriFan:
-		MFVertex_RenderVertices(MFVPT_TriangleFan, 0, beginCount - 2);
+		MFVertex_RenderVertices(MFVPT_TriangleFan, 0, beginCount);
 		break;
 	}
+
+	phase = 0;
 }
 //---------------------------------------------------------------------------------------------------------------------
 static int textureWidth, textureHeight;
