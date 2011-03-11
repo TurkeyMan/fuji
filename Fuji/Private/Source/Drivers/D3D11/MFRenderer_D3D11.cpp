@@ -20,6 +20,7 @@
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D11
 #endif
 
+#include "MFRenderer.h"
 #include "MFRenderer_D3D11.h"
 #include "MFTexture_Internal.h"
 #include "Shaders/Registers.h"
@@ -47,6 +48,11 @@ ID3D11Device*           g_pd3dDevice = NULL;
 ID3D11DeviceContext*    g_pImmediateContext = NULL;
 IDXGISwapChain*         g_pSwapChain = NULL;
 ID3D11RenderTargetView* g_pRenderTargetView = NULL;
+ID3D11Texture2D*		g_pDepthStencil = NULL;
+ID3D11DepthStencilView*	g_pDepthStencilView = NULL;
+
+ID3D11DepthStencilState* g_pDepthStencilState = NULL;
+D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 
 ID3D11Buffer* g_pConstantBufferWorld = NULL;
 static CBWorld cbWorld;
@@ -196,13 +202,41 @@ int MFRenderer_CreateDisplay()
     hr = g_pSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&pBackBuffer );
     if( FAILED( hr ) )
         return hr;
-
+	
     hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
     pBackBuffer->Release();
     if( FAILED( hr ) )
         return hr;
+	
+	// Create depth stencil texture
+    D3D11_TEXTURE2D_DESC descDepth;
+    ZeroMemory( &descDepth, sizeof(descDepth) );
+    descDepth.Width = width;
+    descDepth.Height = height;
+    descDepth.MipLevels = 1;
+    descDepth.ArraySize = 1;
+    descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    descDepth.SampleDesc.Count = 1;
+    descDepth.SampleDesc.Quality = 0;
+    descDepth.Usage = D3D11_USAGE_DEFAULT;
+    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    descDepth.CPUAccessFlags = 0;
+    descDepth.MiscFlags = 0;
+    hr = g_pd3dDevice->CreateTexture2D( &descDepth, NULL, &g_pDepthStencil );
+    if( FAILED( hr ) )
+        return hr;
 
-    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, NULL );
+    // Create the depth stencil view
+    D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+    ZeroMemory( &descDSV, sizeof(descDSV) );
+    descDSV.Format = descDepth.Format;
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    descDSV.Texture2D.MipSlice = 0;
+    hr = g_pd3dDevice->CreateDepthStencilView( g_pDepthStencil, &descDSV, &g_pDepthStencilView );
+    if( FAILED( hr ) )
+        return hr;
+
+    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 
     // Setup the viewport
     D3D11_VIEWPORT vp;
@@ -236,14 +270,33 @@ int MFRenderer_CreateDisplay()
 	g_pImmediateContext->VSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
 	g_pImmediateContext->PSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
 
+	MFZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	depthStencilDesc.StencilEnable = false;
+	depthStencilDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &g_pDepthStencilState);
+
+	g_pImmediateContext->OMSetDepthStencilState(g_pDepthStencilState, 0);
+
 	return 0;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_DestroyDisplay()
 {
-	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
-
     if (g_pImmediateContext) g_pImmediateContext->ClearState();
+
+	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
+	
+	if (g_pDepthStencilView) g_pDepthStencilView->Release();
+	if (g_pDepthStencil) g_pDepthStencil->Release();
 
     if (g_pRenderTargetView) g_pRenderTargetView->Release();
     if (g_pSwapChain) g_pSwapChain->Release();
@@ -278,9 +331,22 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
+	
+	const bool bClearDepth = (flags & CS_ZBuffer) != 0;
+	const bool bClearStencil = (flags & CS_Stencil) != 0;
+	const bool bClearColour = (flags & CS_Colour) != 0;
 
-	float ClearColor[4] = { gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w }; // RGBA
-    g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
+	if (bClearColour)
+	{
+		float ClearColor[4] = { gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w }; // RGBA
+		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
+	}
+	
+    if (bClearDepth | bClearStencil)
+    {
+		uint32 clearFlags = (bClearDepth ? D3D11_CLEAR_DEPTH : 0) | (bClearStencil ? D3D11_CLEAR_STENCIL : 0);
+		g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, clearFlags, 1.0f, 0);
+	}
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_GetViewport(MFRect *pRect)

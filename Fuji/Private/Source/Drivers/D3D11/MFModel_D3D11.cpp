@@ -15,9 +15,10 @@
 #include "MFMesh_Internal.h"
 
 #include "MFVertex.h"
-
+#include "MFRenderer.h"
 #include "MFRenderer_D3D11.h"
 #include "MFDebug.h"
+#include "MFView.h"
 
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -60,6 +61,70 @@ void MFModel_DeinitModulePlatformSpecific()
 void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
+
+	MFMatrix *pAnimMats = NULL;
+
+	MFMatrix wts;
+
+	if(pModel->pAnimation)
+	{
+		pAnimMats = MFAnimation_CalculateMatrices(pModel->pAnimation, &pModel->worldMatrix);
+		wts = MFView_GetWorldToScreenMatrix();
+	}
+	else
+	{
+		MFView_GetLocalToScreen(pModel->worldMatrix, &wts);
+	}
+
+	//MFRenderer_SetMatrices(pAnimMats, pAnimMats ? pModel->pAnimation->numBones : 0);
+	MFRenderer_D3D11_SetWorldToScreenMatrix(wts);
+	//MFRenderer_D3D11_SetModelColour(pModel->modelColour);
+
+	
+	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
+
+	if(pMatOverride)
+		MFMaterial_SetMaterial(pMatOverride);
+
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+
+	if(pChunk)
+	{
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+
+		for(int a=0; a<pChunk->count; a++)
+		{
+			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
+			{
+				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pSubobjects[a].pMeshChunks;
+
+				if(!pMatOverride)
+					MFMaterial_SetMaterial(pMC[b].pMaterial);
+
+				if(pModel->pAnimation)
+				{
+					//MFRendererPC_SetNumWeights(pMC[b].maxBlendWeights);
+					MFRenderer_SetBatch(pMC[b].pBatchIndices, pMC[b].matrixBatchSize);
+				}
+				else
+				{
+					//MFRendererPC_SetNumWeights(0);
+				}
+
+				MFRenderer_Begin();
+
+				MeshChunkRuntimeDataD3D11 &runtimeData = (MeshChunkRuntimeDataD3D11&)pMC[b].runtimeData;
+
+				MFVertex_SetVertexDeclaration(runtimeData.pVertexDeclaration);
+				MFVertex_SetVertexStreamSource(0, runtimeData.pVertexBuffer);
+				if (runtimeData.pAnimBuffer)
+				{
+					MFVertex_SetVertexStreamSource(1, runtimeData.pAnimBuffer);
+				}
+				MFVertex_RenderIndexedVertices(MFVPT_TriangleList, pMC[b].numVertices, pMC[b].numIndices, runtimeData.pIndexBuffer);
+			}
+		}
+	}
 }
 //---------------------------------------------------------------------------------------------------------------------
 HRESULT MFModel_D3D1_CreateVertexDeclaration(MFMeshVertexFormat *pMVF, ID3D11InputLayout** ppInputLayout)

@@ -222,7 +222,12 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration2(MFMeshVertexFormat *pMVF)
 	{
 		for (int b = 0; b < pMVF->pStreams[a].numVertexElements; ++b)
 		{
+
 			MFMeshVertexElement &rElement = pMVF->pStreams[a].pElements[b];
+
+			const int componentCount = MFVertex_D3D11_GetComponentCount(rElement.type);
+
+			MFVertexDataFormat dataFormat = MFVertexD3D11_ChoooseDataType(rElement.usage, componentCount);
 
 			elements[element].SemanticName = MFRenderer_D3D11_GetSemanticName(rElement.usage);
 			elements[element].SemanticIndex = rElement.usageIndex;
@@ -231,8 +236,10 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration2(MFMeshVertexFormat *pMVF)
 			elements[element].AlignedByteOffset = pMVF->pStreams[a].pElements[b].offset;
 			elements[element].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 			elements[element].InstanceDataStepRate = 0;
-			++element;
+			
+			streamOffsets[a] += gVertexDataStride[dataFormat];
 
+			++element;
 			MFDebug_Assert(element < 32, "whoops");
 		}
 	}
@@ -351,7 +358,6 @@ void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
-	//g_pImmediateContext->CopySubresourceRegion(pVB, 0, 0, 0, 0, pVB, 0, NULL);
 	g_pImmediateContext->Unmap(pVB, 0);
 	pVertexBuffer->bLocked = false;
 }
