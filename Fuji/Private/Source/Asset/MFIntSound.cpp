@@ -24,7 +24,7 @@ MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
 	pSound->soundTemplate.sampleRate = pStream->streamInfo.sampleRate;
 	pSound->soundTemplate.numSamples = 0;
 	pSound->soundTemplate.bitsPerSample = pStream->streamInfo.bitsPerSample;
-	pSound->soundTemplate.numChannels = pStream->streamInfo.channels;
+	pSound->soundTemplate.numChannels = (uint16)pStream->streamInfo.channels;
 	pSound->soundTemplate.numStreams = 1;
 
 	return pSound;

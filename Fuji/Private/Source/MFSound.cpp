@@ -434,7 +434,7 @@ void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo)
 	pInfo->sampleRate = pSound->pTemplate->sampleRate;
 	pInfo->numSamples = pSound->pTemplate->numSamples;
 	pInfo->numChannels = pSound->pTemplate->numChannels;
-	pInfo->bitsPerSample = pSound->pTemplate->bitsPerSample;
+	pInfo->bitsPerSample = (int16)pSound->pTemplate->bitsPerSample;
 }
 
 //

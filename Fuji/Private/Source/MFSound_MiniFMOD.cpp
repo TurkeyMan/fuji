@@ -45,7 +45,7 @@ void CreateMiniFMODStream(MFAudioStream *pStream, const char *pFilename)
 
 void SeekMiniFMODStream(MFAudioStream *pStream, float seconds)
 {
-	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
+	//FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
 	// this is not so easy :/
 	// we'll just have to speed-play the mod and not fix the samples...
 }

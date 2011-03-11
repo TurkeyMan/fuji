@@ -68,7 +68,7 @@ public:
 #endif
 
 #if defined(_MFCALLSTACK_PROFILING)
-	#define MFCALLSTACK_PROFILE(name, mode) static MFCallstack_Function MFCallstack_FunctionDef = { 0LL, name, 0, MFCallstack_GetNextColour(), (mode), false }; MFCall _call(name, &MFCallstack_FunctionDef)
+	#define MFCALLSTACK_PROFILE(name, mode) static MFCallstack_Function MFCallstack_FunctionDef = { 0LL, name, 0, (uint16)MFCallstack_GetNextColour(), (mode), false }; MFCall _call(name, &MFCallstack_FunctionDef)
 #else
 	#define MFCALLSTACK_PROFILE(name, mode) MFCall _call(name, NULL)
 #endif

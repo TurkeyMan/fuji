@@ -57,8 +57,8 @@ static const BYTE gDataType[MFVDF_Max] =
 	D3DDECLTYPE_SHORT2, // MFVDF_SShort2
 	D3DDECLTYPE_SHORT4N, // MFVDF_SShort4N
 	D3DDECLTYPE_SHORT2N, // MFVDF_SShort2N
-	-1, // MFVDF_UShort4
-	-1, // MFVDF_UShort2
+	(uint8)-1, // MFVDF_UShort4
+	(uint8)-1, // MFVDF_UShort2
 	D3DDECLTYPE_USHORT4N, // MFVDF_UShort4N
 	D3DDECLTYPE_USHORT2N, // MFVDF_UShort2N
 	D3DDECLTYPE_FLOAT16_4, // MFVDF_Float16_4
@@ -121,12 +121,12 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	for(int a=0; a<elementCount; ++a)
 	{
 		MFVertexDataFormat dataFormat = MFVertexD3D9_ChoooseDataType(pElementArray[a].elementType, pElementArray[a].componentCount);
-		elements[a].Stream = pElementArray[a].stream;
-		elements[a].Offset = streamOffsets[pElementArray[a].stream];
+		elements[a].Stream = (uint16)pElementArray[a].stream;
+		elements[a].Offset = (uint16)streamOffsets[pElementArray[a].stream];
 		elements[a].Type = gDataType[dataFormat];
 		elements[a].Method = D3DDECLMETHOD_DEFAULT;
 		elements[a].Usage = gUsageSemantic[pElementArray[a].elementType];
-		elements[a].UsageIndex = pElementArray[a].elementIndex;
+		elements[a].UsageIndex = (uint8)pElementArray[a].elementIndex;
 
 		pDecl->pElementData[a].format = dataFormat;
 		pDecl->pElementData[a].offset = streamOffsets[pElementArray[a].stream];

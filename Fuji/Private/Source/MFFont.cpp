@@ -318,7 +318,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
 				}
 			}
 
-			pH->c = c;
+			pH->c = (uint16)c;
 			pH->offset = (uint16)(pText - pLineStart);
 		}
 
@@ -650,7 +650,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 		if(c == '\n')
 		{
 			++pC;
-			pH->c = c;
+			pH->c = (uint16)c;
 			break;
 		}
 		else
@@ -667,7 +667,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 				currentPos += pH->width;
 			}
 
-			pH->c = c;
+			pH->c = (uint16)c;
 			pH->offset = (uint16)(pC - pLineStart);
 		}
 
@@ -1363,45 +1363,45 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 				if(!MFString_CompareN(pT, "id", 2))
 				{
 					int id = atoi(&pT[3]);
-					pHeader->pCharacterMapping[id] = pHeader->numChars;
+					pHeader->pCharacterMapping[id] = (uint16)pHeader->numChars;
 					pHeader->maxMapping = MFMax(pHeader->maxMapping, id);
-					pC[pHeader->numChars].id = id;
+					pC[pHeader->numChars].id = (uint16)id;
 				}
 				else if(!MFString_CompareN(pT, "x=", 2))
 				{
-					pC[pHeader->numChars].x = atoi(&pT[2]);
+					pC[pHeader->numChars].x = (uint16)atoi(&pT[2]);
 				}
 				else if(!MFString_CompareN(pT, "y=", 2))
 				{
-					pC[pHeader->numChars].y = atoi(&pT[2]);
+					pC[pHeader->numChars].y = (uint16)atoi(&pT[2]);
 				}
 				else if(!MFString_CompareN(pT, "width", 5))
 				{
-					pC[pHeader->numChars].width = atoi(&pT[6]);
+					pC[pHeader->numChars].width = (uint16)atoi(&pT[6]);
 				}
 				else if(!MFString_CompareN(pT, "height", 6))
 				{
-					pC[pHeader->numChars].height = atoi(&pT[7]);
+					pC[pHeader->numChars].height = (uint16)atoi(&pT[7]);
 				}
 				else if(!MFString_CompareN(pT, "xoffset", 7))
 				{
-					pC[pHeader->numChars].xoffset = atoi(&pT[8]);
+					pC[pHeader->numChars].xoffset = (int8)atoi(&pT[8]);
 				}
 				else if(!MFString_CompareN(pT, "yoffset", 7))
 				{
-					pC[pHeader->numChars].yoffset = atoi(&pT[8]);
+					pC[pHeader->numChars].yoffset = (int8)atoi(&pT[8]);
 				}
 				else if(!MFString_CompareN(pT, "xadvance", 8))
 				{
-					pC[pHeader->numChars].xadvance = atoi(&pT[9]);
+					pC[pHeader->numChars].xadvance = (uint16)atoi(&pT[9]);
 				}
 				else if(!MFString_CompareN(pT, "page", 4))
 				{
-					pC[pHeader->numChars].page = atoi(&pT[5]);
+					pC[pHeader->numChars].page = (uint8)atoi(&pT[5]);
 				}
 				else if(!MFString_CompareN(pT, "chnl", 4))
 				{
-					pC[pHeader->numChars].channel = atoi(&pT[5]);
+					pC[pHeader->numChars].channel = (uint8)atoi(&pT[5]);
 				}
 
 				pT = strtok(NULL, " \"\t");

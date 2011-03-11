@@ -210,7 +210,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
 		int bitsPerPixel = MFTexture_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
-		int imageSize = (width * height * bitsPerPixel) >> 3;
+		//int imageSize = (width * height * bitsPerPixel) >> 3;
 		MFTextureSurfaceLevel *pSurface = &pTexture->pTemplateData->pSurfaces[0];
 		pSurface->width = width;
 		pSurface->height = height;

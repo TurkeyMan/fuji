@@ -276,7 +276,7 @@ inline const char* MFStr_TruncateExtension(const char *pFilename)
 
 inline int MFString_EncodeUTF8(int c, char *pMBChar)
 {
-	int count;
+	int count = 0;
 
 	if(c < 0x80)
 		count = 1;

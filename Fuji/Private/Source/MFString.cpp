@@ -683,7 +683,7 @@ int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString)
 
 	while(*pString)
 	{
-		*pBuffer++ = MFString_DecodeUTF8(pString, &bytes);
+		*pBuffer++ = (uint16)MFString_DecodeUTF8(pString, &bytes);
 		pString += bytes;
 	}
 	*pBuffer = 0;
@@ -1087,7 +1087,7 @@ MFString MFString::Upper() const
 
 	// copy upper case
 	for(int a=0; a<pData->bytes + 1; ++a)
-		t.pData->pMemory[a] = MFToUpper(pData->pMemory[a]);
+		t.pData->pMemory[a] = (char)MFToUpper(pData->pMemory[a]);
 
 	return t;
 }
@@ -1103,7 +1103,7 @@ MFString MFString::Lower() const
 
 	// copy lower case string
 	for(int a=0; a<pData->bytes + 1; ++a)
-		t.pData->pMemory[a] = MFToLower(pData->pMemory[a]);
+		t.pData->pMemory[a] = (char)MFToLower(pData->pMemory[a]);
 
 	return t;
 }

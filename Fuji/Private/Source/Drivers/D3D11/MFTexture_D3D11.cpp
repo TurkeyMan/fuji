@@ -109,14 +109,13 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		desc.Format = platformFormat;
 		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		desc.Texture2D.MostDetailedMip = 0;
-		desc.Texture2D.MipLevels = -1;
+		desc.Texture2D.MipLevels = (uint32)-1;
 
 		hr = g_pd3dDevice->CreateShaderResourceView(pTex, &desc, &pSRV);
 		pTex->Release();
 
 		pTexture->pInternalData = pSRV;
 	}
-	
 }
 
 MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)

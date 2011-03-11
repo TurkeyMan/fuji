@@ -111,9 +111,9 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
 			ID3Chunk *pChunkHeader = (ID3Chunk*)pData;
 			uint32 size = GetSynchSafeInt(pData + 4);
 
-			if(*pData = 'T')
+			if(*pData == 'T')
 			{
-				uint8 encoding = pData[10];
+				//uint8 encoding = pData[10];
 				const char *pString = (const char*)pData + 11;
 
 				switch(pChunkHeader->id)
@@ -251,7 +251,6 @@ int PreCacheFrameOffsets(MFMADDecoder *pDecoder)
 			else
 			{
 				// lost sync? :/
-				int x = 10;
 				return 0;
 			}
 		}

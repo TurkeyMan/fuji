@@ -150,12 +150,12 @@ HRESULT MFModelD3D9_CreateVertexDeclaration(MFMeshVertexFormat *pMVF, IDirect3DV
 	{
 		for(int b=0; b<pMVF->pStreams[a].numVertexElements; ++b)
 		{
-			elements[element].Stream = a;
-			elements[element].Offset = pMVF->pStreams[a].pElements[b].offset;
+			elements[element].Stream = (uint16)a;
+			elements[element].Offset = (uint16)pMVF->pStreams[a].pElements[b].offset;
 			elements[element].Type = gTypeTable[pMVF->pStreams[a].pElements[b].type];
 			elements[element].Method = D3DDECLMETHOD_DEFAULT;
 			elements[element].Usage = gUsageTable[pMVF->pStreams[a].pElements[b].usage];
-			elements[element].UsageIndex = pMVF->pStreams[a].pElements[b].usageIndex;
+			elements[element].UsageIndex = (uint8)pMVF->pStreams[a].pElements[b].usageIndex;
 			++element;
 		}
 	}

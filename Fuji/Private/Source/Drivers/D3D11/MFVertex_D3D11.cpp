@@ -341,22 +341,6 @@ void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 	//	MFVertex_SetVertexDeclaration(pVertexBuffer->pVertexDeclatation);
 }
 //---------------------------------------------------------------------------------------------------------------------
-static int MFVertex_GetNumPrims(MFVertexPrimType primType, int numVertices)
-{
-	switch(primType)
-	{
-		case MFVPT_Points:			return numVertices;
-		case MFVPT_LineList:		return numVertices / 2;
-		case MFVPT_LineStrip:		return numVertices - 1;
-		case MFVPT_TriangleList:	return numVertices / 3;
-		case MFVPT_TriangleStrip:	return numVertices - 2;
-		//case MFVPT_TriangleFan:		return numVertices - 2;
-		default:
-			MFDebug_Assert(false, "Unknown primitive type!");
-	}
-	return 0;
-}
-//---------------------------------------------------------------------------------------------------------------------
 void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
