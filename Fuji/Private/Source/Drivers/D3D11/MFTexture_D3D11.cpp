@@ -21,8 +21,7 @@
 #include "MFHeap.h"
 #include "MFPtrList.h"
 
-#include <D3D11.h>
-#include <D3DX11.h>
+#include "MFRenderer_D3D11.h"
 
 /**** Globals ****/
 
@@ -96,8 +95,8 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
 
 	if (SUCCEEDED(hr))
-	{
-		hr = pTex->SetPrivateData( WKPDID_D3DDebugObjectName, MFString_Length(pTexture->name), pTexture->name );
+	{	
+		MFRenderer_D3D11_SetDebugName(pTex, pTexture->name);
 
 		//// filter mip levels
 		//if (generateMipChain)

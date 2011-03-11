@@ -32,8 +32,6 @@
 
 #include "MFVertex_Internal.h"
 
-#include <D3D11.h>
-
 
 static const int primBufferSize = 1536;
 
@@ -104,11 +102,7 @@ void MFPrimitive_InitModule()
 
 	pVertexBuffer = MFVertex_CreateVertexBuffer(pDecl, primBufferSize, MFVBType_Dynamic);
 
-	if (pVertexBuffer)
-	{
-		static const char c_szName[] = "MFPrimative vertex buffer";
-		((ID3D11Buffer*)pVertexBuffer->pPlatformData)->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(c_szName), c_szName);
-	}
+	MFRenderer_D3D11_SetDebugName((ID3D11Buffer*)pVertexBuffer->pPlatformData, "MFPrimative vertex buffer");
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DeinitModule()

@@ -26,8 +26,7 @@
 #include "MFVertex_Internal.h"
 #include "MFDebug.h"
 #include "MFMesh_Internal.h"
-
-#include <d3d11.h>
+#include "MFRenderer_D3D11.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);

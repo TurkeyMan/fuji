@@ -19,8 +19,7 @@
 
 #include "../Shaders/Registers.h"
 
-
-#include <D3D11.h>
+#include "../MFRenderer_D3D11.h"
 
 #include "../Shaders/MatStandard_s.h"
 #include "../Shaders/MatStandard_a.h"
@@ -311,12 +310,10 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	g_pd3dDevice->CreateSamplerState(&samplerDesc, &pData->pSamplerState);
+	hr = g_pd3dDevice->CreateSamplerState(&samplerDesc, &pData->pSamplerState);
 
-	if (pData->pSamplerState)
-	{
-		hr = pData->pSamplerState->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pMaterial->pName), pMaterial->pName);
-	}
+
+	MFRenderer_D3D11_SetDebugName(pData->pSamplerState, pMaterial->pName);
 
 	//--
 	
@@ -334,12 +331,9 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	rasterizerDesc.MultisampleEnable = false;
 	rasterizerDesc.AntialiasedLineEnable = false;
 
-	g_pd3dDevice->CreateRasterizerState(&rasterizerDesc, &pData->pRasterizerState);
+	hr = g_pd3dDevice->CreateRasterizerState(&rasterizerDesc, &pData->pRasterizerState);
 
-	if (pData->pRasterizerState)
-	{
-		hr = pData->pRasterizerState->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pMaterial->pName), pMaterial->pName);
-	}
+	MFRenderer_D3D11_SetDebugName(pData->pRasterizerState, pMaterial->pName);
 
 	//--
 
@@ -399,12 +393,9 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 		break;
 	}
 
-	g_pd3dDevice->CreateBlendState(&blendDesc, &pData->pBlendState);
-
-	if (pData->pBlendState)
-	{
-		hr = pData->pBlendState->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pMaterial->pName), pMaterial->pName);
-	}
+	hr = g_pd3dDevice->CreateBlendState(&blendDesc, &pData->pBlendState);
+	
+	MFRenderer_D3D11_SetDebugName(pData->pBlendState, pMaterial->pName);
 
 	//--
 
@@ -424,12 +415,9 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	g_pd3dDevice->CreateBuffer(&desc, NULL, &pData->pConstantBuffer);
+	hr = g_pd3dDevice->CreateBuffer(&desc, NULL, &pData->pConstantBuffer);
 
-	if (pData->pConstantBuffer)
-	{
-		hr = pData->pConstantBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pMaterial->pName), pMaterial->pName);
-	}
+	MFRenderer_D3D11_SetDebugName(pData->pConstantBuffer, pMaterial->pName);
 }
 
 void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)

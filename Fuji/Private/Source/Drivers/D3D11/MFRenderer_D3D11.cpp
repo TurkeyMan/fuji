@@ -131,6 +131,12 @@ DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFMeshVertexDataType format)
 	return s_MFMVDF_To_DXGI[format];
 }
 //---------------------------------------------------------------------------------------------------------------------
+void MFRenderer_D3D11_SetDebugName(ID3D11DeviceChild* pResource, const char* pName)
+{
+	if (pResource)
+		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pName), pName);
+}
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_InitModulePlatformSpecific()
 {
 }
@@ -197,16 +203,23 @@ int MFRenderer_CreateDisplay()
     if( FAILED( hr ) )
         return hr;
 
+	
+	MFRenderer_D3D11_SetDebugName(g_pImmediateContext, "MFRenderer global device context");
+
     // Create a render target view
     ID3D11Texture2D* pBackBuffer = NULL;
     hr = g_pSwapChain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( LPVOID* )&pBackBuffer );
     if( FAILED( hr ) )
         return hr;
+
+	MFRenderer_D3D11_SetDebugName(pBackBuffer, "MFRenderer back buffer");
 	
     hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
     pBackBuffer->Release();
     if( FAILED( hr ) )
         return hr;
+	
+	MFRenderer_D3D11_SetDebugName(g_pRenderTargetView, "MFRenderer render target view");
 	
 	// Create depth stencil texture
     D3D11_TEXTURE2D_DESC descDepth;
@@ -226,6 +239,8 @@ int MFRenderer_CreateDisplay()
     if( FAILED( hr ) )
         return hr;
 
+	MFRenderer_D3D11_SetDebugName(g_pDepthStencil, "MFRenderer depth stencil buffer");
+
     // Create the depth stencil view
     D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
     ZeroMemory( &descDSV, sizeof(descDSV) );
@@ -235,6 +250,8 @@ int MFRenderer_CreateDisplay()
     hr = g_pd3dDevice->CreateDepthStencilView( g_pDepthStencil, &descDSV, &g_pDepthStencilView );
     if( FAILED( hr ) )
         return hr;
+	
+	MFRenderer_D3D11_SetDebugName(g_pDepthStencilView, "MFRenderer depth stencil view");
 
     g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 
@@ -265,6 +282,8 @@ int MFRenderer_CreateDisplay()
 	data.pSysMem = &cbWorld;
 
 	g_pd3dDevice->CreateBuffer(&desc, &data, &g_pConstantBufferWorld);
+	
+	MFRenderer_D3D11_SetDebugName(g_pConstantBufferWorld, "MFRenderer world constant buffer");
 
 	
 	g_pImmediateContext->VSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
@@ -287,6 +306,8 @@ int MFRenderer_CreateDisplay()
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
 
 	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &g_pDepthStencilState);
+
+	MFRenderer_D3D11_SetDebugName(g_pDepthStencilState, "MFRenderer depth stencil state");
 
 	g_pImmediateContext->OMSetDepthStencilState(g_pDepthStencilState, 0);
 
