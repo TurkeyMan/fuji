@@ -281,6 +281,10 @@ int MFRenderer_CreateDisplay()
 	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
 
 	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &g_pDepthStencilState);
 
@@ -294,13 +298,25 @@ void MFRenderer_DestroyDisplay()
     if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
 	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
+
+	if (g_pDepthStencilState) g_pDepthStencilState->Release();
 	
-	if (g_pDepthStencilView) g_pDepthStencilView->Release();
 	if (g_pDepthStencil) g_pDepthStencil->Release();
+	if (g_pDepthStencilView) g_pDepthStencilView->Release();
 
     if (g_pRenderTargetView) g_pRenderTargetView->Release();
     if (g_pSwapChain) g_pSwapChain->Release();
     if (g_pImmediateContext) g_pImmediateContext->Release();
+
+	//{
+	//	ID3D11Debug* pDebug = NULL;
+	//	g_pd3dDevice->QueryInterface(&pDebug);
+
+	//	pDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+
+	//	pDebug->Release();
+	//}
+
     if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 //---------------------------------------------------------------------------------------------------------------------
