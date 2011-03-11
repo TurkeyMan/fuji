@@ -1,6 +1,8 @@
 #include "Fuji.h"
 #include "MFMesh_Internal.h"
 
+#include "MFVertex.h"
+
 void MFMesh_FixUpMeshChunkGeneric(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {
 	MFCALLSTACK;

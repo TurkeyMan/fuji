@@ -80,22 +80,22 @@ void MFPrimitive_InitModule()
 
 	// write declaration
 	elements[0].stream = 0;
-	elements[0].elementType = MFVE_Position;
+	elements[0].elementType = MFVET_Position;
 	elements[0].elementIndex = 0;
 	elements[0].componentCount = 3;
 
 	elements[1].stream = 0;
-	elements[1].elementType = MFVE_Normal;
+	elements[1].elementType = MFVET_Normal;
 	elements[1].elementIndex = 0;
 	elements[1].componentCount = 3;
 
 	elements[2].stream = 0;
-	elements[2].elementType = MFVE_Colour;
+	elements[2].elementType = MFVET_Colour;
 	elements[2].elementIndex = 0;
 	elements[2].componentCount = 4;
 
 	elements[3].stream = 0;
-	elements[3].elementType = MFVE_TexCoord;
+	elements[3].elementType = MFVET_TexCoord;
 	elements[3].elementIndex = 0;
 	elements[3].componentCount = 2;
 

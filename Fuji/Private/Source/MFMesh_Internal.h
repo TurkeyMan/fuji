@@ -1,39 +1,31 @@
 #if !defined(_MFMESH_INTERNAL_H)
 #define _MFMESH_INTERNAL_H
 
+#include "MFVertex.h"
+
 struct MFMaterial;
 
-enum MFVertexElementType
+enum MFMeshVertexDataType
 {
-	MFVET_Position,
-	MFVET_Normal,
-	MFVET_Colour,
-	MFVET_TexCoord,
-	MFVET_Binormal,
-	MFVET_Tangent,
-	MFVET_Indices,
-	MFVET_Weights
-};
+	MFMVDT_Float1,
+	MFMVDT_Float2,
+	MFMVDT_Float3,
+	MFMVDT_Float4,
+	MFMVDT_ColourBGRA,
+	MFMVDT_UByte4,
+	MFMVDT_UByte4N,
+	MFMVDT_Short2,
+	MFMVDT_Short4,
+	MFMVDT_Short2N,
+	MFMVDT_Short4N,
+	MFMVDT_UShort2N,
+	MFMVDT_UShort4N,
+	MFMVDT_UDec3,
+	MFMVDT_Dec3N,
+	MFMVDT_Float16_2,
+	MFMVDT_Float16_4,
 
-enum MFVertexDataType
-{
-	MFVDT_Float1,
-	MFVDT_Float2,
-	MFVDT_Float3,
-	MFVDT_Float4,
-	MFVDT_ColourBGRA,
-	MFVDT_UByte4,
-	MFVDT_UByte4N,
-	MFVDT_Short2,
-	MFVDT_Short4,
-	MFVDT_Short2N,
-	MFVDT_Short4N,
-	MFVDT_UShort2N,
-	MFVDT_UShort4N,
-	MFVDT_UDec3,
-	MFVDT_Dec3N,
-	MFVDT_Float16_2,
-	MFVDT_Float16_4
+	MFMVDT_Max,
 };
 
 enum MFMeshChunkType
@@ -48,25 +40,25 @@ enum MFMeshChunkType
 };
 
 
-struct MFVertexElement
+struct MFMeshVertexElement
 {
 	MFVertexElementType usage;
 	int usageIndex;
-	MFVertexDataType type;
+	MFMeshVertexDataType type;
 	int offset;
 };
 
-struct MFVertexStream
+struct MFMeshVertexStream
 {
 	const char *pStreamName;
-	MFVertexElement *pElements;
+	MFMeshVertexElement *pElements;
 	int numVertexElements;
 	int streamStride;
 };
 
-struct MFVertexFormat
+struct MFMeshVertexFormat
 {
-	MFVertexStream *pStreams;
+	MFMeshVertexStream *pStreams;
 	int numVertexStreams;
 };
 
@@ -80,7 +72,7 @@ struct MFMeshChunk
 struct MFMeshChunk_Generic : public MFMeshChunk
 {
 	// vertex format description
-	MFVertexFormat *pVertexFormat;
+	MFMeshVertexFormat *pVertexFormat;
 
 	// vertex data pointers;
 	void **ppVertexStreams;

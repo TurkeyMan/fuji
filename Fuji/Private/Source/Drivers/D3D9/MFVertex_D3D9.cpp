@@ -32,7 +32,7 @@ extern IDirect3DDevice9 *pd3dDevice;
 
 extern int gVertexDataStride[MFVDF_Max];
 
-static const BYTE gUsageSemantic[MFVE_Max] =
+static const BYTE gUsageSemantic[MFVET_Max] =
 {
 	D3DDECLUSAGE_POSITION, // MFVE_Position,
 	D3DDECLUSAGE_NORMAL, // MFVE_Normal
@@ -82,10 +82,10 @@ MFVertexDataFormat MFVertexD3D9_ChoooseDataType(MFVertexElementType elementType,
 	const MFVertexDataFormat floatComponents[5] = { MFVDF_Unknown, MFVDF_Float1, MFVDF_Float2, MFVDF_Float3, MFVDF_Float4 };
 	switch(elementType)
 	{
-		case MFVE_Colour:
-		case MFVE_Weights:
+		case MFVET_Colour:
+		case MFVET_Weights:
 			return MFVDF_UByte4N_BGRA;	// we'd love to use the non-swizzled ones, but we want maximum backwards compatibility
-		case MFVE_Indices:
+		case MFVET_Indices:
 			return MFVDF_UByte4_RGBA;
 		default:
 			break;

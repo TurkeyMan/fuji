@@ -34,7 +34,7 @@ struct MeshChunkD3DRuntimeData
 	IDirect3DVertexDeclaration9 *vertexDecl;
 };
 
-static BYTE gUsageTable[] =
+static BYTE gUsageTable[MFVET_Max] =
 {
 	D3DDECLUSAGE_POSITION,
 	D3DDECLUSAGE_NORMAL,
@@ -46,7 +46,7 @@ static BYTE gUsageTable[] =
 	D3DDECLUSAGE_BLENDWEIGHT
 };
 
-static BYTE gTypeTable[] =
+static BYTE gTypeTable[MFMVDT_Max] =
 {
 	D3DDECLTYPE_FLOAT1,
 	D3DDECLTYPE_FLOAT2,
@@ -141,21 +141,21 @@ void MFModel_Draw(MFModel *pModel)
 	}
 }
 
-HRESULT MFModelD3D9_CreateVertexDeclaration(MFVertexFormat *pVF, IDirect3DVertexDeclaration9** ppDecl)
+HRESULT MFModelD3D9_CreateVertexDeclaration(MFMeshVertexFormat *pMVF, IDirect3DVertexDeclaration9** ppDecl)
 {
 	D3DVERTEXELEMENT9 elements[16];
 	int element = 0;
 
-	for(int a=0; a<pVF->numVertexStreams; ++a)
+	for(int a=0; a<pMVF->numVertexStreams; ++a)
 	{
-		for(int b=0; b<pVF->pStreams[a].numVertexElements; ++b)
+		for(int b=0; b<pMVF->pStreams[a].numVertexElements; ++b)
 		{
 			elements[element].Stream = a;
-			elements[element].Offset = pVF->pStreams[a].pElements[b].offset;
-			elements[element].Type = gTypeTable[pVF->pStreams[a].pElements[b].type];
+			elements[element].Offset = pMVF->pStreams[a].pElements[b].offset;
+			elements[element].Type = gTypeTable[pMVF->pStreams[a].pElements[b].type];
 			elements[element].Method = D3DDECLMETHOD_DEFAULT;
-			elements[element].Usage = gUsageTable[pVF->pStreams[a].pElements[b].usage];
-			elements[element].UsageIndex = pVF->pStreams[a].pElements[b].usageIndex;
+			elements[element].Usage = gUsageTable[pMVF->pStreams[a].pElements[b].usage];
+			elements[element].UsageIndex = pMVF->pStreams[a].pElements[b].usageIndex;
 			++element;
 		}
 	}

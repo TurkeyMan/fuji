@@ -28,49 +28,19 @@
 
 #include <d3d11.h>
 
-//---------------------------------------------------------------------------------------------------------------------
+DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);
 
+const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
+
+extern int gVertexDataStride[MFVDF_Max];
+
+//---------------------------------------------------------------------------------------------------------------------
 extern const uint8 *g_pVertexShaderData;
 extern uint32 g_vertexShaderSize;
 
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
 
-//---------------------------------------------------------------------------------------------------------------------
-extern int gVertexDataStride[MFVDF_Max];
-//---------------------------------------------------------------------------------------------------------------------
-static const char* gSemanticName[MFVE_Max] =
-{
-	"POSITION",		// MFVE_Position,
-	"NORMAL",		// MFVE_Normal
-	"COLOR",		// MFVE_Colour
-	"TEXCOORD",		// MFVE_TexCoord
-	"BINORMAL",		// MFVE_Binormal
-	"TANGENT",		// MFVE_Tangent
-	"BLENDINDICES", // MFVE_Indices
-	"BLENDWEIGHT",	// MFVE_Weights
-};
-//---------------------------------------------------------------------------------------------------------------------
-static const DXGI_FORMAT gDataType[MFVDF_Max] =
-{
-	DXGI_FORMAT_R32G32B32A32_FLOAT, // MFVDF_Float4
-	DXGI_FORMAT_R32G32B32_FLOAT,	// MFVDF_Float3
-	DXGI_FORMAT_R32G32_FLOAT,		// MFVDF_Float2
-	DXGI_FORMAT_R32_FLOAT,			// MFVDF_Float1
-	DXGI_FORMAT_R8G8B8A8_UINT,		// MFVDF_UByte4_RGBA
-	DXGI_FORMAT_R8G8B8A8_UNORM,		// MFVDF_UByte4N_RGBA
-	DXGI_FORMAT_B8G8R8A8_UNORM,		// MFVDF_UByte4N_BGRA
-	DXGI_FORMAT_R16G16B16A16_SINT,	// MFVDF_SShort4
-	DXGI_FORMAT_R16G16_SINT,		// MFVDF_SShort2
-	DXGI_FORMAT_R16G16B16A16_SNORM, // MFVDF_SShort4N
-	DXGI_FORMAT_R16G16_SNORM,		// MFVDF_SShort2N
-	DXGI_FORMAT_R16G16B16A16_UINT,	// MFVDF_UShort4
-	DXGI_FORMAT_R32G32_UINT,		// MFVDF_UShort2
-	DXGI_FORMAT_R16G16B16A16_UNORM, // MFVDF_UShort4N
-	DXGI_FORMAT_R16G16_UNORM,		// MFVDF_UShort2N
-	DXGI_FORMAT_R16G16B16A16_FLOAT,	// MFVDF_Float16_4
-	DXGI_FORMAT_R16G16_FLOAT		// MFVDF_Float16_2
-};
 //---------------------------------------------------------------------------------------------------------------------
 static const D3D11_PRIMITIVE_TOPOLOGY gPrimTopology[MFVPT_Max] =
 {
@@ -99,10 +69,10 @@ MFVertexDataFormat MFVertexD3D11_ChoooseDataType(MFVertexElementType elementType
 	const MFVertexDataFormat floatComponents[5] = { MFVDF_Unknown, MFVDF_Float1, MFVDF_Float2, MFVDF_Float3, MFVDF_Float4 };
 	switch(elementType)
 	{
-		case MFVE_Colour:
-		case MFVE_Weights:
+		case MFVET_Colour:
+		case MFVET_Weights:
 			return MFVDF_UByte4N_RGBA;
-		case MFVE_Indices:
+		case MFVET_Indices:
 			return MFVDF_UByte4_RGBA;
 		default:
 			break;
@@ -140,9 +110,9 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	{
 		MFVertexDataFormat dataFormat = MFVertexD3D11_ChoooseDataType(pElementArray[a].elementType, pElementArray[a].componentCount);
 
-		elements[a].SemanticName = gSemanticName[pElementArray[a].elementType];
+		elements[a].SemanticName = MFRenderer_D3D11_GetSemanticName(pElementArray[a].elementType);
 		elements[a].SemanticIndex = pElementArray[a].elementIndex;
-		elements[a].Format = gDataType[dataFormat];
+		elements[a].Format = MFRenderer_D3D11_GetFormat(dataFormat);
 		elements[a].InputSlot = pElementArray[a].stream;
 		elements[a].AlignedByteOffset = streamOffsets[pElementArray[a].stream];
 		elements[a].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;

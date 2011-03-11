@@ -20,8 +20,11 @@
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D11
 #endif
 
+#include "MFRenderer_D3D11.h"
 #include "MFTexture_Internal.h"
 #include "Shaders/Registers.h"
+#include "MFVertex.h"
+#include "MFMesh_Internal.h"
 
 #include <d3d11.h>
 
@@ -48,14 +51,88 @@ ID3D11RenderTargetView* g_pRenderTargetView = NULL;
 ID3D11Buffer* g_pConstantBufferWorld = NULL;
 static CBWorld cbWorld;
 
+//---------------------------------------------------------------------------------------------------------------------
+// Utils
+//---------------------------------------------------------------------------------------------------------------------
+extern int gVertexDataStride[MFVDF_Max];
+//---------------------------------------------------------------------------------------------------------------------
+static const char* s_SemanticName[MFVET_Max] =
+{
+	"POSITION",		// MFVE_Position,
+	"NORMAL",		// MFVE_Normal
+	"COLOR",		// MFVE_Colour
+	"TEXCOORD",		// MFVE_TexCoord
+	"BINORMAL",		// MFVE_Binormal
+	"TANGENT",		// MFVE_Tangent
+	"BLENDINDICES", // MFVE_Indices
+	"BLENDWEIGHT",	// MFVE_Weights
+};
+//---------------------------------------------------------------------------------------------------------------------
+const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type)
+{
+	return s_SemanticName[type];
+}
+//---------------------------------------------------------------------------------------------------------------------
+static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
+{
+	DXGI_FORMAT_R32G32B32A32_FLOAT, // MFVDF_Float4
+	DXGI_FORMAT_R32G32B32_FLOAT,	// MFVDF_Float3
+	DXGI_FORMAT_R32G32_FLOAT,		// MFVDF_Float2
+	DXGI_FORMAT_R32_FLOAT,			// MFVDF_Float1
+	DXGI_FORMAT_R8G8B8A8_UINT,		// MFVDF_UByte4_RGBA
+	DXGI_FORMAT_R8G8B8A8_UNORM,		// MFVDF_UByte4N_RGBA
+	DXGI_FORMAT_B8G8R8A8_UNORM,		// MFVDF_UByte4N_BGRA
+	DXGI_FORMAT_R16G16B16A16_SINT,	// MFVDF_SShort4
+	DXGI_FORMAT_R16G16_SINT,		// MFVDF_SShort2
+	DXGI_FORMAT_R16G16B16A16_SNORM, // MFVDF_SShort4N
+	DXGI_FORMAT_R16G16_SNORM,		// MFVDF_SShort2N
+	DXGI_FORMAT_R16G16B16A16_UINT,	// MFVDF_UShort4
+	DXGI_FORMAT_R32G32_UINT,		// MFVDF_UShort2
+	DXGI_FORMAT_R16G16B16A16_UNORM, // MFVDF_UShort4N
+	DXGI_FORMAT_R16G16_UNORM,		// MFVDF_UShort2N
+	DXGI_FORMAT_R16G16B16A16_FLOAT,	// MFVDF_Float16_4
+	DXGI_FORMAT_R16G16_FLOAT		// MFVDF_Float16_2
+};
+//---------------------------------------------------------------------------------------------------------------------
+DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format)
+{
+	return s_MFVDF_To_DXGI[format];
+}
+//---------------------------------------------------------------------------------------------------------------------
+static const DXGI_FORMAT s_MFMVDF_To_DXGI[MFMVDT_Max] =
+{
+	DXGI_FORMAT_R32_FLOAT,			//MFMVDT_Float1,
+	DXGI_FORMAT_R32G32_FLOAT,		//MFMVDT_Float2,
+	DXGI_FORMAT_R32G32B32_FLOAT,	//MFMVDT_Float3,
+	DXGI_FORMAT_R32G32B32A32_FLOAT,	//MFMVDT_Float4,
+	DXGI_FORMAT_B8G8R8A8_UNORM,		//MFMVDT_ColourBGRA,
+	DXGI_FORMAT_R8G8B8A8_UINT,		//MFMVDT_UByte4,
+	DXGI_FORMAT_R8G8B8A8_UNORM,		//MFMVDT_UByte4N,
+	DXGI_FORMAT_R16G16_SINT,		//MFMVDT_Short2,
+	DXGI_FORMAT_R16G16B16A16_SINT,	//MFMVDT_Short4,
+	DXGI_FORMAT_R16G16_SNORM,		//MFMVDT_Short2N,
+	DXGI_FORMAT_R16G16B16A16_SNORM,	//MFMVDT_Short4N,
+	DXGI_FORMAT_R16G16_UNORM,		//MFMVDT_UShort2N,
+	DXGI_FORMAT_R16G16B16A16_UNORM,	//MFMVDT_UShort4N,
+	DXGI_FORMAT_R10G10B10A2_UINT,	//MFMVDT_UDec3,
+	DXGI_FORMAT_R10G10B10A2_UNORM,	//MFMVDT_Dec3N,
+	DXGI_FORMAT_R16G16_FLOAT,		//MFMVDT_Float16_2,
+	DXGI_FORMAT_R16G16B16A16_FLOAT,	//MFMVDT_Float16_4,
+};
+//---------------------------------------------------------------------------------------------------------------------
+DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFMeshVertexDataType format)
+{
+	return s_MFMVDF_To_DXGI[format];
+}
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_InitModulePlatformSpecific()
 {
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_DeinitModulePlatformSpecific()
 {
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 int MFRenderer_CreateDisplay()
 {
 	HRESULT hr = S_OK;
@@ -161,7 +238,7 @@ int MFRenderer_CreateDisplay()
 
 	return 0;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_DestroyDisplay()
 {
 	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
@@ -173,23 +250,23 @@ void MFRenderer_DestroyDisplay()
     if (g_pImmediateContext) g_pImmediateContext->Release();
     if (g_pd3dDevice) g_pd3dDevice->Release();
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_ResetDisplay()
 {
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_EndFrame()
 {
 	MFCALLSTACK;
     
 	g_pSwapChain->Present( 0, 0 );
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
@@ -197,7 +274,7 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.z = b;
 	gClearColour.w = a;
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
@@ -205,34 +282,35 @@ void MFRenderer_ClearScreen(uint32 flags)
 	float ClearColor[4] = { gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w }; // RGBA
     g_pImmediateContext->ClearRenderTargetView( g_pRenderTargetView, ClearColor );
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_GetViewport(MFRect *pRect)
 {
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_SetViewport(MFRect *pRect)
 {
 
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_ResetViewport()
 {
 
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_SetDeviceRenderTarget()
 {
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }
+//---------------------------------------------------------------------------------------------------------------------
 //
 //// direct3d management fucntions
 //void MFRenderer_D3D11_SetTexture(int stage, IDirect3DTexture9 *pTexture)
@@ -255,13 +333,14 @@ float MFRenderer_GetTexelCenterOffset()
 //{
 //}
 
+//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_D3D11_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
 {
 	cbWorld.mWorldToScreen.Transpose(worldToScreen);
 
 	g_pImmediateContext->UpdateSubresource(g_pConstantBufferWorld, 0, NULL, &cbWorld, 0, 0);
 }
-
+//---------------------------------------------------------------------------------------------------------------------
 //void MFRenderer_D3D11_SetTextureMatrix(const MFMatrix &textureMatrix)
 //{
 //}
@@ -354,6 +433,6 @@ void MFRenderer_D3D11_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
 //void MFRenderer_D3D11_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
 //{
 //}
-
+//---------------------------------------------------------------------------------------------------------------------
 
 #endif // MF_RENDERER

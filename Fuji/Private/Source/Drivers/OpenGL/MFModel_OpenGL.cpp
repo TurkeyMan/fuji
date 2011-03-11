@@ -88,7 +88,7 @@ void MFModel_Draw(MFModel *pModel)
 				// just use conventional vertex arrays
 				for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
 				{
-					MFVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
+					MFMeshVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
 
 #if defined(USE_VBOS)
 					if(gbUseVBOs)
@@ -163,7 +163,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 		// bind the vertex buffers
 		for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
 		{
-			MFVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
+			MFMeshVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
 
 			glGenBuffers(1, &runtimeData.streams[a]);
 			glBindBuffer(GL_ARRAY_BUFFER, runtimeData.streams[a]);

@@ -447,18 +447,18 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			chunk.matrixBatchSize = batch.bones.size();
 
 			// setup vertex format structure
-			chunk.pVertexFormat = (MFVertexFormat*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFVertexFormat));
+			chunk.pVertexFormat = (MFMeshVertexFormat*)pOffset;
+			pOffset += MFALIGN16(sizeof(MFMeshVertexFormat));
 			int numVertexStreams = bAnimating ? 2 : 1;
 			chunk.pVertexFormat->numVertexStreams = numVertexStreams;
-			chunk.pVertexFormat->pStreams = (MFVertexStream*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFVertexStream)*numVertexStreams);
-			chunk.pVertexFormat->pStreams[0].pElements = (MFVertexElement*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFVertexElement)*4);
+			chunk.pVertexFormat->pStreams = (MFMeshVertexStream*)pOffset;
+			pOffset += MFALIGN16(sizeof(MFMeshVertexStream)*numVertexStreams);
+			chunk.pVertexFormat->pStreams[0].pElements = (MFMeshVertexElement*)pOffset;
+			pOffset += MFALIGN16(sizeof(MFMeshVertexElement)*4);
 			if(numVertexStreams > 1)
 			{
-				chunk.pVertexFormat->pStreams[1].pElements = (MFVertexElement*)pOffset;
-				pOffset += MFALIGN16(sizeof(MFVertexElement)*2);
+				chunk.pVertexFormat->pStreams[1].pElements = (MFMeshVertexElement*)pOffset;
+				pOffset += MFALIGN16(sizeof(MFMeshVertexElement)*2);
 			}
 
 			// write declaration
@@ -466,19 +466,19 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			chunk.pVertexFormat->pStreams[0].numVertexElements = 4;
 			chunk.pVertexFormat->pStreams[0].streamStride = sizeof(Vert);
 			chunk.pVertexFormat->pStreams[0].pElements[0].offset = 0;
-			chunk.pVertexFormat->pStreams[0].pElements[0].type = MFVDT_Float3;
+			chunk.pVertexFormat->pStreams[0].pElements[0].type = MFMVDT_Float3;
 			chunk.pVertexFormat->pStreams[0].pElements[0].usage = MFVET_Position;
 			chunk.pVertexFormat->pStreams[0].pElements[0].usageIndex = 0;
 			chunk.pVertexFormat->pStreams[0].pElements[1].offset = 12;
-			chunk.pVertexFormat->pStreams[0].pElements[1].type = MFVDT_Float3;
+			chunk.pVertexFormat->pStreams[0].pElements[1].type = MFMVDT_Float3;
 			chunk.pVertexFormat->pStreams[0].pElements[1].usage = MFVET_Normal;
 			chunk.pVertexFormat->pStreams[0].pElements[1].usageIndex = 0;
 			chunk.pVertexFormat->pStreams[0].pElements[2].offset = 24;
-			chunk.pVertexFormat->pStreams[0].pElements[2].type = MFVDT_ColourBGRA;
+			chunk.pVertexFormat->pStreams[0].pElements[2].type = MFMVDT_ColourBGRA;
 			chunk.pVertexFormat->pStreams[0].pElements[2].usage = MFVET_Colour;
 			chunk.pVertexFormat->pStreams[0].pElements[2].usageIndex = 0;
 			chunk.pVertexFormat->pStreams[0].pElements[3].offset = 28;
-			chunk.pVertexFormat->pStreams[0].pElements[3].type = MFVDT_Float2;
+			chunk.pVertexFormat->pStreams[0].pElements[3].type = MFMVDT_Float2;
 			chunk.pVertexFormat->pStreams[0].pElements[3].usage = MFVET_TexCoord;
 			chunk.pVertexFormat->pStreams[0].pElements[3].usageIndex = 0;
 
@@ -489,11 +489,11 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 				chunk.pVertexFormat->pStreams[1].streamStride = sizeof(AnimVert);
 
 #if defined(SUPPORT_D3D8)
-				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFVDT_ColourBGRA;
-				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFVDT_ColourBGRA;
+				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFMVDT_ColourBGRA;
+				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFMVDT_ColourBGRA;
 #else
-				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFVDT_UByte4;
-				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFVDT_UByte4N;
+				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFMVDT_UByte4;
+				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFMVDT_UByte4N;
 #endif
 				chunk.pVertexFormat->pStreams[1].pElements[0].offset = 0;
 				chunk.pVertexFormat->pStreams[1].pElements[0].usage = MFVET_Indices;

@@ -65,17 +65,17 @@ enum MFVertexBufferType
 
 enum MFVertexElementType
 {
-	MFVE_Position,
-	MFVE_Normal,
-	MFVE_Colour,
-	MFVE_TexCoord,
-	MFVE_Binormal,
-	MFVE_Tangent,
-	MFVE_Indices,
-	MFVE_Weights,
+	MFVET_Position,
+	MFVET_Normal,
+	MFVET_Colour,
+	MFVET_TexCoord,
+	MFVET_Binormal,
+	MFVET_Tangent,
+	MFVET_Indices,
+	MFVET_Weights,
 
-	MFVE_Max,
-	MFVE_ForceInt = 0x7FFFFFFF
+	MFVET_Max,
+	MFVET_ForceInt = 0x7FFFFFFF
 };
 
 enum MFVertexPrimType
