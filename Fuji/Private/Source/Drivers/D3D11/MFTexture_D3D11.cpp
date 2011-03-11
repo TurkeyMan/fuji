@@ -57,6 +57,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 	HRESULT hr;
 	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
+	pTexture->pInternalData = NULL;
 
 	// create texture
 	DXGI_FORMAT platformFormat = (DXGI_FORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D11);
@@ -134,8 +135,11 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	{
 		MFHeap_Free(pTexture->pTemplateData);
 
-		ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
-		pSRV->Release();
+		if (pTexture->pInternalData)
+		{
+			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
+			pSRV->Release();
+		}
 
 		gTextureBank.Destroy(pTexture);
 

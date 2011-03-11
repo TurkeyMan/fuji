@@ -65,7 +65,7 @@ void Game_Init()
 
 	pKernel = MFCompute_CreateKernel(pProgram, "vector_add_gpu");
 
-	bool set = false;
+	//bool set = false;
 
 	size_t size = BUFFER_SIZE;
 	

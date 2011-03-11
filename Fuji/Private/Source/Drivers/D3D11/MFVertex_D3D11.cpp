@@ -25,22 +25,48 @@
 #include "MFHeap.h"
 #include "MFVertex_Internal.h"
 #include "MFDebug.h"
+#include "MFMesh_Internal.h"
 
 #include <d3d11.h>
 
+//---------------------------------------------------------------------------------------------------------------------
 DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);
-
+DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFMeshVertexDataType format);
 const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
-
+//---------------------------------------------------------------------------------------------------------------------
 extern int gVertexDataStride[MFVDF_Max];
-
 //---------------------------------------------------------------------------------------------------------------------
 extern const uint8 *g_pVertexShaderData;
 extern uint32 g_vertexShaderSize;
-
+//---------------------------------------------------------------------------------------------------------------------
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
-
+//---------------------------------------------------------------------------------------------------------------------
+static const int s_componentCount[MFMVDT_Max] = 
+{
+	1, //MFMVDT_Float1,
+	2, //MFMVDT_Float2,
+	3, //MFMVDT_Float3,
+	4, //MFMVDT_Float4,
+	4, //MFMVDT_ColourBGRA,
+	4, //MFMVDT_UByte4,
+	4, //MFMVDT_UByte4N,
+	2, //MFMVDT_Short2,
+	4, //MFMVDT_Short4,
+	2, //MFMVDT_Short2N,
+	4, //MFMVDT_Short4N,
+	2, //MFMVDT_UShort2N,
+	4, //MFMVDT_UShort4N,
+	3, //MFMVDT_UDec3,
+	3, //MFMVDT_Dec3N,
+	2, //MFMVDT_Float16_2,
+	2, //MFMVDT_Float16_4,
+};
+//---------------------------------------------------------------------------------------------------------------------
+static int MFVertex_D3D11_GetComponentCount(MFMeshVertexDataType type)
+{
+	return s_componentCount[type];
+}
 //---------------------------------------------------------------------------------------------------------------------
 static const D3D11_PRIMITIVE_TOPOLOGY gPrimTopology[MFVPT_Max] =
 {
@@ -129,6 +155,91 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	// set the strides for each component
 	for (int a=0; a<elementCount; ++a)
 		pDecl->pElementData[a].stride = streamOffsets[pElementArray[a].stream];
+	
+	// this needs the vertex shader
+	ID3D11InputLayout* pVertexLayout = NULL;
+	HRESULT hr = g_pd3dDevice->CreateInputLayout(elements, elementCount, g_pVertexShaderData, g_vertexShaderSize, &pVertexLayout);
+	if (FAILED(hr))
+	{
+		MFHeap_Free(pDecl);
+		return NULL;
+	}
+
+	pDecl->pPlatformData = pVertexLayout;
+
+	return pDecl;
+}
+//---------------------------------------------------------------------------------------------------------------------
+MFVertexDeclaration *MFVertex_CreateVertexDeclaration2(MFMeshVertexFormat *pMVF)
+{
+	MFDebug_Assert(pMVF, "Null element array");
+
+	int elementCount = 0;
+
+	for (int a = 0; a < pMVF->numVertexStreams; ++a)
+	{
+		elementCount += pMVF->pStreams[a].numVertexElements;
+	}
+
+	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFHeap_Alloc(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
+	pDecl->numElements = elementCount;
+	pDecl->pElements = (MFVertexElement*)&pDecl[1];
+	pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
+	pDecl->pPlatformData = NULL;
+
+	MFZeroMemory(pDecl->pElementData, sizeof(MFVertexElementData)*elementCount);
+	
+	//MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
+	
+	int element = 0;
+
+	// build the vertex elements (lossy!)
+
+	for (int a = 0; a < pMVF->numVertexStreams; ++a)
+	{
+		for (int b = 0; b < pMVF->pStreams[a].numVertexElements; ++b)
+		{
+			MFMeshVertexElement &rElement = pMVF->pStreams[a].pElements[b];
+
+			pDecl->pElements[element].stream = a;
+			pDecl->pElements[element].elementType = rElement.usage;
+			pDecl->pElements[element].elementIndex = rElement.usageIndex;
+			pDecl->pElements[element].componentCount = MFVertex_D3D11_GetComponentCount(rElement.type);
+
+			++element;
+		}
+	}
+
+	// build the input layout
+
+	int streamOffsets[16];
+	MFZeroMemory(streamOffsets, sizeof(streamOffsets));
+
+	D3D11_INPUT_ELEMENT_DESC elements[32];
+	element = 0;
+
+	for (int a = 0; a < pMVF->numVertexStreams; ++a)
+	{
+		for (int b = 0; b < pMVF->pStreams[a].numVertexElements; ++b)
+		{
+			MFMeshVertexElement &rElement = pMVF->pStreams[a].pElements[b];
+
+			elements[element].SemanticName = MFRenderer_D3D11_GetSemanticName(rElement.usage);
+			elements[element].SemanticIndex = rElement.usageIndex;
+			elements[element].Format = MFRenderer_D3D11_GetFormat(rElement.type);
+			elements[element].InputSlot = a;
+			elements[element].AlignedByteOffset = pMVF->pStreams[a].pElements[b].offset;
+			elements[element].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			elements[element].InstanceDataStepRate = 0;
+			++element;
+
+			MFDebug_Assert(element < 32, "whoops");
+		}
+	}
+
+	// set the strides for each component
+	for (int a = 0; a < elementCount; ++a)
+		pDecl->pElementData[a].stride = streamOffsets[pDecl->pElements[a].stream];
 	
 	// this needs the vertex shader
 	ID3D11InputLayout* pVertexLayout = NULL;
