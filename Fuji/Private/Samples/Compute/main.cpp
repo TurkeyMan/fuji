@@ -143,7 +143,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 #include <pspkernel.h>
 
 //---------------------------------------------------------------------------------------------------------------------
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
 	MFZeroMemory(&initParams, sizeof(MFInitParams));
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 #else
 
 //---------------------------------------------------------------------------------------------------------------------
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
 	MFZeroMemory(&initParams, sizeof(MFInitParams));
