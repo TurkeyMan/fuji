@@ -150,7 +150,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 #if defined(USE_VBOS)
 	if(gbUseVBOs)
 	{
-		MFDebug_Assert(sizeof(MeshChunkOpenGLRuntimeData) < sizeof(pMC->runtimeData), "MeshChunkOpenGLRuntimeData is larger than runtimeData!");
+		MFDebug_Assert(sizeof(MeshChunkOpenGLRuntimeData) <= sizeof(pMC->runtimeData), "MeshChunkOpenGLRuntimeData is larger than runtimeData!");
 		MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
 
 		MFDebug_Assert(pMC->pVertexFormat->numVertexStreams <= 7, "OpenGL rendering currently supports a maximum of 7 vertex data streams.");

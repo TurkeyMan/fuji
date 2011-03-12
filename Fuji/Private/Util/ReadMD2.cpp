@@ -62,10 +62,10 @@ struct MD2Header
 	int num_glcmds;     /* number of opengl commands */
 	int num_frames;     /* number of frames */
 
-	md2_skin_t		*skins;		/* offset skin data */
-	md2_texCoord_t	*st;		/* offset texture coordinate data */
-	md2_triangle_t	*tris;		/* offset triangle data */
-	md2_frame_t		*frames;	/* offset frame data */
+	unsigned int offset_skins;	/* offset skin data */
+	unsigned int offset_st;		/* offset texture coordinate data */
+	unsigned int offset_tris;	/* offset triangle data */
+	unsigned int offset_frames;	/* offset frame data */
 	unsigned int offset_glcmds;	/* offset OpenGL command data */
 	unsigned int offset_end;	/* offset end of file */
 };
@@ -86,10 +86,10 @@ void ParseMD2File(char *pFile, uint32 length)
 	MFDebug_Assert(pHeader->ident == (('2'<<24) | ('P'<<16) | ('D'<<8) | 'I'), "Invalid MD2 header.");
 	MFDebug_Assert(pHeader->version == 8, "Invalid MD2 version.");
 
-	(char*&)pHeader->skins += (uintp)pHeader;
-	(char*&)pHeader->st += (uintp)pHeader;
-	(char*&)pHeader->tris += (uintp)pHeader;
-	(char*&)pHeader->frames += (uintp)pHeader;
+	md2_skin_t		*skins = (md2_skin_t*)(pFile + pHeader->offset_skins);
+	md2_texCoord_t	*st = (md2_texCoord_t*)(pFile + pHeader->offset_st);
+	md2_triangle_t	*tris = (md2_triangle_t*)(pFile + pHeader->offset_tris);
+	md2_frame_t		*frames = (md2_frame_t*)(pFile + pHeader->offset_frames);
 
 	MFMatrix md2Mat;
 	md2Mat.SetIdentity();
@@ -119,8 +119,8 @@ void ParseMD2File(char *pFile, uint32 length)
 
 	for(a=0; a<pHeader->num_st; a++)
 	{
-		sub.uvs[a].x = (float)pHeader->st[a].s / (float)pHeader->skinwidth;
-		sub.uvs[a].y = (float)pHeader->st[a].t / (float)pHeader->skinheight;
+		sub.uvs[a].x = (float)st[a].s / (float)pHeader->skinwidth;
+		sub.uvs[a].y = (float)st[a].t / (float)pHeader->skinheight;
 		sub.uvs[a].z = 0.0f;
 	}
 
@@ -146,13 +146,13 @@ void ParseMD2File(char *pFile, uint32 length)
 	// vertices
 	sub.positions.resize(pHeader->num_vertices);
 
-	MFVector scale = MakeVector(pHeader->frames->scale[0], pHeader->frames->scale[1], pHeader->frames->scale[2], 0.0f);
-	MFVector translate = MakeVector(pHeader->frames->translate[0], pHeader->frames->translate[1], pHeader->frames->translate[2]);
+	MFVector scale = MakeVector(frames->scale[0], frames->scale[1], frames->scale[2], 0.0f);
+	MFVector translate = MakeVector(frames->translate[0], frames->translate[1], frames->translate[2]);
 
 	for(b=0; b<pHeader->num_vertices; b++)
 	{
 		// verts
-		sub.positions[b] = MakeVector((float)pHeader->frames->verts[b].v[0], (float)pHeader->frames->verts[b].v[1], (float)pHeader->frames->verts[b].v[2]);
+		sub.positions[b] = MakeVector((float)frames->verts[b].v[0], (float)frames->verts[b].v[1], (float)frames->verts[b].v[2]);
 		sub.positions[b] = sub.positions[b]*scale + translate;
 
 		sub.positions[b] = ApplyMatrix(sub.positions[b], md2Mat);
@@ -170,17 +170,17 @@ void ParseMD2File(char *pFile, uint32 length)
 		matSub.vertices[a*3 + 1].colour = 0;
 		matSub.vertices[a*3 + 2].colour = 0;
 
-		matSub.vertices[a*3 + 0].position = pHeader->tris[a].vertex[0];
-		matSub.vertices[a*3 + 0].uv1 = pHeader->tris[a].st[0];
-		matSub.vertices[a*3 + 0].normal = pHeader->frames->verts[pHeader->tris[a].vertex[0]].normalIndex;
+		matSub.vertices[a*3 + 0].position = tris[a].vertex[0];
+		matSub.vertices[a*3 + 0].uv1 = tris[a].st[0];
+		matSub.vertices[a*3 + 0].normal = frames->verts[tris[a].vertex[0]].normalIndex;
 
-		matSub.vertices[a*3 + 1].position = pHeader->tris[a].vertex[1];
-		matSub.vertices[a*3 + 1].uv1 = pHeader->tris[a].st[1];
-		matSub.vertices[a*3 + 1].normal = pHeader->frames->verts[pHeader->tris[a].vertex[1]].normalIndex;
+		matSub.vertices[a*3 + 1].position = tris[a].vertex[1];
+		matSub.vertices[a*3 + 1].uv1 = tris[a].st[1];
+		matSub.vertices[a*3 + 1].normal = frames->verts[tris[a].vertex[1]].normalIndex;
 
-		matSub.vertices[a*3 + 2].position = pHeader->tris[a].vertex[2];
-		matSub.vertices[a*3 + 2].uv1 = pHeader->tris[a].st[2];
-		matSub.vertices[a*3 + 2].normal = pHeader->frames->verts[pHeader->tris[a].vertex[2]].normalIndex;
+		matSub.vertices[a*3 + 2].position = tris[a].vertex[2];
+		matSub.vertices[a*3 + 2].uv1 = tris[a].st[2];
+		matSub.vertices[a*3 + 2].normal = frames->verts[tris[a].vertex[2]].normalIndex;
 	}
 
 	for(a=0; a<pHeader->num_tris; a++)
