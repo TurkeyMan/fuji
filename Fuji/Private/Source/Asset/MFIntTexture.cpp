@@ -1,4 +1,13 @@
 #include "Fuji.h"
+
+#define MF_ENABLE_PNG
+
+#if defined(MF_ENABLE_PNG)
+	#include <png.h>
+	//#include "pngstruct.h"
+	//#include "pnginfo.h"
+#endif
+
 #include "MFSystem.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
@@ -6,7 +15,6 @@
 #include "MFTexture_Internal.h"
 #include "Asset/MFIntTexture.h"
 
-#define MF_ENABLE_PNG
 #if defined(MF_WINDOWS)
 //	#define MF_ENABLE_ATI_COMPRESSOR
 #endif
@@ -95,10 +103,6 @@ static const char *gFileExtensions[] =
 /**** Functions ****/
 
 #if defined(MF_ENABLE_PNG)
-#include "png.h"
-#include "pngstruct.h"
-#include "pnginfo.h"
-
 void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 {
 	MFFile_Read((MFFile*)png->io_ptr, pBuffer, (uint32)bytes, false);

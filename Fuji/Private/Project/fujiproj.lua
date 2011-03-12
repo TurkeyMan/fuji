@@ -25,13 +25,14 @@ project "Fuji"
 	-- add source for some middleware that we'll link directly on unix systems --
 	configuration { "not linux", "not macosx" }
 	files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
-	files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+	files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+	includedirs { "../Middleware/libpng-1.5.0/" }
 	configuration { }
 
 	-- setup paths --
 	includedirs { "../Source/" }
-	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/libpng-1.5.0/", "../Middleware/hqx/" }
+	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
 	objdir "../Build/"
 	targetdir "../Lib/"
 
@@ -71,7 +72,7 @@ project "Fuji"
 	configuration { "linux" }
 		defines { "_LINUX" }
 		includedirs { "../Source/Images/LINUX/" }
-		links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
+		links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
 		links { "z", "mad", "png", "json" }
 
 	-- OSX --

@@ -40,7 +40,7 @@ inline void MFFixUp(T* &pPointer, void *pBase, int fix)
 {
 	if(pPointer)
 	{
-		int offset = (int&)pBase;
+		intp offset = (intp&)pBase;
 
 		if(!fix)
 			offset = -offset;
