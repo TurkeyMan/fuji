@@ -10,6 +10,7 @@
 #include "MFHeap.h"
 #include "X11_linux.h"
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
 #include <stdio.h>
 
 // Typedefs
@@ -59,7 +60,10 @@ XSizeHints *sizeHints = NULL;
 Colormap colorMap = 0;
 Atom wm_delete_window;
 
-extern MFVector gClearColour;
+uint8 gXKeys[65535];
+XMouseState gXMouse;
+
+extern int gQuit;
 
 static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);
@@ -223,6 +227,10 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 {
 	MFCALLSTACK;
 
+	MFZeroMemory(gXKeys, sizeof(gXKeys));
+	MFZeroMemory(&gXMouse, sizeof(gXMouse));
+	gXMouse.x = -1;
+
 	gDisplay.fullscreenWidth = gDisplay.width = width;
 	gDisplay.fullscreenHeight = gDisplay.height = height;
 	gDisplay.refreshRate = 0;
@@ -359,7 +367,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		return 1;
 	}
 
-	XSelectInput(xdisplay, window, KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask | ExposureMask);
+	XSelectInput(xdisplay, window, KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | ExposureMask);
 
 	if(!XMapRaised(xdisplay, window))
 	{
@@ -474,6 +482,94 @@ bool MFDisplay_IsWidescreen()
 	MFDisplay_GetDisplayRect(&rect);
 
 	return rect.width / rect.height >= 1.6f;
+}
+
+void MFDisplay_HandleEventsX11()
+{
+	MFCALLSTACK;
+
+	XEvent event;
+
+	while(XPending(xdisplay))
+	{
+		XNextEvent(xdisplay, &event);
+		switch(event.type)
+		{
+			case ClientMessage:
+			{
+				Atom atom;
+
+				if(event.xclient.format == 8)
+				{
+					atom = event.xclient.data.b[0];
+				}
+				else if(event.xclient.format == 16)
+				{
+					atom = event.xclient.data.s[0];
+				}
+				else if(event.xclient.format == 32)
+				{
+					atom = event.xclient.data.l[0];
+				}
+				else
+				{
+					atom = 0;
+				}
+
+				if(atom == wm_delete_window)
+				{
+					gQuit = 1;
+				}
+				break;
+			}
+			case KeyPress:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 1;
+				break;
+			}
+			case KeyRelease:
+			{
+				XKeyEvent *pEv = (XKeyEvent*)&event;
+				KeySym ks = XLookupKeysym(pEv, 0);
+				if(ks<=65535)
+					gXKeys[ks] = 0;
+				break;
+			}
+			case ButtonPress:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				gXMouse.buttons[pEv->button] = 1;
+				if(pEv->button == 4)
+					gXMouse.wheel -= 1;
+				if(pEv->button == 5)
+					gXMouse.wheel += 1;
+				break;
+			}
+			case ButtonRelease:
+			{
+				XButtonEvent *pEv = (XButtonEvent*)&event;
+				gXMouse.buttons[pEv->button] = 0;
+				break;
+			}
+			case MotionNotify:
+			{
+				XMotionEvent *pEv = (XMotionEvent*)&event;
+				if(gXMouse.x == -1)
+				{
+					gXMouse.prevX = pEv->x;
+					gXMouse.prevY = pEv->y;
+				}
+				gXMouse.x = pEv->x;
+				gXMouse.y = pEv->y;
+				break;
+			}
+			default:
+				break;
+		}
+	}
 }
 
 #endif

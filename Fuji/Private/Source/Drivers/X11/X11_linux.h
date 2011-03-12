@@ -17,4 +17,12 @@ extern XF86VidModeModeInfo **vidModes;
 extern Colormap colorMap;
 extern Atom wm_delete_window;
 
+struct XMouseState
+{
+	int x, y;
+	int prevX, prevY;
+	int wheel;
+	uint8 buttons[16];
+};
+
 #endif

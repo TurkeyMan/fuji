@@ -61,7 +61,11 @@ extern MFGamepadInfo *pGamepadMappingRegistry;
 extern Display *xdisplay;
 
 extern uint16 MFKeyToXK[256];
-extern uint8 gXKeys[65535];
+
+#if MF_DISPLAY == MF_DRIVER_X11
+	extern uint8 gXKeys[65535];
+	extern XMouseState gXMouse;
+#endif
 
 // HACK: mapping for the second EMS2 gamepad
 static const int gEMS2ButtonID[GamepadType_Max] =
@@ -385,13 +389,33 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 
 	MFZeroMemory(pKeyState, sizeof(MFKeyState));
 
+#if MF_DISPLAY == MF_DRIVER_X11
 	for(int a=0; a<Key_Max; a++)
 		pKeyState->keys[a] = gXKeys[MFKeyToXK[a]];
+#endif
 }
 
 void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
 	MFZeroMemory(pMouseState, sizeof(MFMouseState));
+
+#if MF_DISPLAY == MF_DRIVER_X11
+	pMouseState->values[Mouse_XPos] = (float)gXMouse.x;
+	pMouseState->values[Mouse_YPos] = (float)gXMouse.x;
+	pMouseState->values[Mouse_XDelta] = (float)gXMouse.x - gXMouse.prevX;
+	pMouseState->values[Mouse_YDelta] = (float)gXMouse.y - gXMouse.prevY;
+	pMouseState->values[Mouse_Wheel] = (float)gXMouse.wheel;
+
+	pMouseState->buttonState[0] = gXMouse.buttons[1];
+	pMouseState->buttonState[1] = gXMouse.buttons[3];
+	pMouseState->buttonState[2] = gXMouse.buttons[2];
+	pMouseState->buttonState[3] = gXMouse.buttons[8];
+	pMouseState->buttonState[4] = gXMouse.buttons[9];
+
+	gXMouse.prevX = gXMouse.x;
+	gXMouse.prevY = gXMouse.y;
+	gXMouse.wheel = 0;
+#endif
 }
 
 void MFInput_GetAccelerometerStateInternal(int id, MFAccelerometerState *pAccelerometerState)
