@@ -401,7 +401,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 
 #if MF_DISPLAY == MF_DRIVER_X11
 	pMouseState->values[Mouse_XPos] = (float)gXMouse.x;
-	pMouseState->values[Mouse_YPos] = (float)gXMouse.x;
+	pMouseState->values[Mouse_YPos] = (float)gXMouse.y;
 	pMouseState->values[Mouse_XDelta] = (float)gXMouse.x - gXMouse.prevX;
 	pMouseState->values[Mouse_YDelta] = (float)gXMouse.y - gXMouse.prevY;
 	pMouseState->values[Mouse_Wheel] = (float)gXMouse.wheel;
