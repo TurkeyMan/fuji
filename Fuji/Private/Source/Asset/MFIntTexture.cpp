@@ -3,9 +3,13 @@
 #define MF_ENABLE_PNG
 
 #if defined(MF_ENABLE_PNG)
-	#include <png.h>
-	//#include "pngstruct.h"
-	//#include "pnginfo.h"
+	#if defined(MF_LINUX) || defined(MF_OSX)
+		#include <png.h>
+	#else
+		#include "png.h"
+		#include "pngstruct.h"
+		#include "pnginfo.h"
+	#endif
 #endif
 
 #include "MFSystem.h"

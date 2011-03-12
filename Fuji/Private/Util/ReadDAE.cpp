@@ -1,3 +1,5 @@
+#pragma warning( disable : 4530 )
+
 #include <string>
 #include <vector>
 
@@ -232,9 +234,7 @@ SourceData* GetSourceData(const char *pSourceData)
 	for(int a=0; a<(int)sourceData.size(); a++)
 	{
 		if(!MFString_CaseCmp(pSourceData, sourceData[a].id.c_str()))
-		{
 			return &sourceData[a];
-		}
 	}
 
 	return NULL;

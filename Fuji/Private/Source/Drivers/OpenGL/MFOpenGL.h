@@ -174,7 +174,6 @@
 	// VBO extension function pointers
 	extern PFNGLGENBUFFERSARBPROC glGenBuffers;
 	extern PFNGLBINDBUFFERARBPROC glBindBuffer;
-	extern PFNGLBUFFERDATAARBPROC glBufferData;
 	extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffers;
 
 	// FBO extension function pointers
@@ -195,6 +194,9 @@
 	#if !defined(MF_LINUX)
 		// Linux headers are different...
 		typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
+
+		// VBO extension function pointers
+		extern PFNGLBUFFERDATAARBPROC glBufferData;
 
 		// multitexturing extension
 		extern PFNGLACTIVETEXTUREARBPROC glActiveTexture;
