@@ -140,8 +140,11 @@ int gOpenGLVersion = 0;
 
 	PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatus = NULL;
 
-	PFNGLACTIVETEXTUREARBPROC glActiveTexture = NULL;
-	PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture = NULL;
+	#if !defined(MF_LINUX)
+		// Linux headers are different...
+		PFNGLACTIVETEXTUREARBPROC glActiveTexture = NULL;
+		PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture = NULL;
+	#endif
 #endif
 
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
@@ -379,6 +382,7 @@ int MFRenderer_CreateDisplay()
 	{
 		MFDebug_Warn(1, "Neither OpenGL 1.3 nor ARB_multitexture extension is available!");
 	}
+#if !defined(MF_LINUX)
 	else
 	{
 		if(gOpenGLVersion >= 130)
@@ -392,6 +396,7 @@ int MFRenderer_CreateDisplay()
 			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glClientActiveTextureARB");
 		}
 	}
+#endif
 #endif
 
 	glShadeModel(GL_SMOOTH);

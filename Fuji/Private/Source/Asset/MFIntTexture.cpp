@@ -132,7 +132,7 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 	// initialize stuff
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	info_ptr = png_create_info_struct(png_ptr);
-	setjmp(png_jmpbuf(png_ptr));
+//	setjmp(png_jmpbuf(png_ptr));
 
 	png_set_read_fn(png_ptr, pFile, png_file_read);
 	png_set_sig_bytes(png_ptr, 8);
@@ -148,7 +148,7 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 	png_read_update_info(png_ptr, info_ptr);
 
 	// read file
-	setjmp(png_jmpbuf(png_ptr));
+//	setjmp(png_jmpbuf(png_ptr));
 
 	row_pointers = (png_bytep*)MFHeap_Alloc((sizeof(png_bytep) + info_ptr->rowbytes)*height);
 	for(int y=0; y<height; y++)

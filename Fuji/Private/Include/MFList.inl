@@ -67,7 +67,7 @@ inline T *MFList<T>::next(T *pItem)
 template <class T>
 inline MFDoubleLinkedList<T>::MFDoubleLinkedList()
 {
-	pFront = pBack = NULL;
+	pHead = pTail = NULL;
 }
 
 template <class T>

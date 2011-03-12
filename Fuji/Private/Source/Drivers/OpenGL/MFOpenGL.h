@@ -154,7 +154,6 @@
 	typedef void (APIENTRY * PFNGLGENBUFFERSARBPROC)(GLsizei n, GLuint *buffers);
 	typedef void (APIENTRY * PFNGLDELETEBUFFERSARBPROC)(GLsizei n, const GLuint *buffers);
 	typedef void (APIENTRY * PFNGLBINDBUFFERARBPROC)(GLenum target, GLuint buffer);
-	typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
 
 	typedef void (APIENTRY * PFNGLGENRENDERBUFFERSEXTPROC)(GLsizei n, GLuint* ids);
 	typedef void (APIENTRY * PFNGLDELETERENDERBUFFERSEXTPROC)(GLsizei n, const GLuint* ids);
@@ -192,9 +191,15 @@
 
 	extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatus;
 
-	// multitexturing extension
-	extern PFNGLACTIVETEXTUREARBPROC glActiveTexture;
-	extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
+
+	#if !defined(MF_LINUX)
+		// Linux headers are different...
+		typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
+
+		// multitexturing extension
+		extern PFNGLACTIVETEXTUREARBPROC glActiveTexture;
+		extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
+	#endif
 #endif
 
 bool MFCheckForOpenGLError();
