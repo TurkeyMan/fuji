@@ -26,7 +26,7 @@ void Game_InitFilesystem()
 #if defined(MF_IPHONE)
 	mountData.pPath = MFFile_SystemPath();
 #else
-	mountData.pPath = MFFile_SystemPath("Data/");
+	mountData.pPath = MFFile_SystemPath("../Sample_Data/");
 #endif
 	MFFileSystem_Mount(hNative, &mountData);
 
@@ -95,7 +95,6 @@ int GameMain(MFInitParams *pInitParams)
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
 	MFSystem_RegisterSystemCallback(MFCB_Deinit, Game_Deinit);
 
-	
 	pInitFujiFS = MFSystem_RegisterSystemCallback(MFCB_FileSystemInit, Game_InitFilesystem);
 
 	return MFMain(pInitParams);

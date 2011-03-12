@@ -5,10 +5,34 @@
 #include "MFView.h"
 #include "MFFont.h"
 #include "MFInput.h"
+#include "MFFileSystem.h"
+#include "FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 
+MFSystemCallbackFunction pInitFujiFS = NULL;
+
 /**** Functions ****/
+
+void Game_InitFilesystem()
+{
+	// mount the game directory
+	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
+	MFMountDataNative mountData;
+	mountData.cbSize = sizeof(MFMountDataNative);
+	mountData.priority = MFMP_Normal;
+	mountData.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
+	mountData.pMountpoint = "game";
+#if defined(MF_IPHONE)
+	mountData.pPath = MFFile_SystemPath();
+#else
+	mountData.pPath = MFFile_SystemPath("../Sample_Data/");
+#endif
+	MFFileSystem_Mount(hNative, &mountData);
+
+	if(pInitFujiFS)
+		pInitFujiFS();
+}
 
 void Game_Init()
 {
@@ -112,6 +136,8 @@ int GameMain(MFInitParams *pInitParams)
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
 	MFSystem_RegisterSystemCallback(MFCB_Deinit, Game_Deinit);
+
+	pInitFujiFS = MFSystem_RegisterSystemCallback(MFCB_FileSystemInit, Game_InitFilesystem);
 
 	return MFMain(pInitParams);
 }
