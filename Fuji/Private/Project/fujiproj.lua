@@ -45,72 +45,36 @@ project "Fuji"
 	configuration "../Middleware/libjson/**.cpp"
 		flags { "StaticRuntime", "NoRTTI" }
 
-	configuration "Debug"
-		defines { "DEBUG", "_DEBUG" }
-		flags { "Symbols" }
-		targetsuffix "_Debug"
 
-	configuration "DebugOpt"
-		defines { "DEBUG", "_DEBUG" }
-		flags { "Symbols", "OptimizeSpeed" }
-		targetsuffix "_DebugOpt"
+	-- configure standard fuji stuff --
 
-	configuration "Release"
-		defines { "NDEBUG", "_RELEASE" }
-		flags { "OptimizeSpeed" }
-		targetsuffix "_Release"
-
-	configuration "Retail"
-		defines { "NDEBUG", "_RETAIL" }
-		flags { "OptimizeSpeed" }
-		targetsuffix "_Retail"
+	dofile "fujiconfig.lua"
 
 
 	-- platform specific config --
 
 	-- Linux --
 	configuration { "linux" }
-		defines { "_LINUX" }
 		includedirs { "../Source/Images/LINUX/" }
-		links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
-		links { "z", "mad", "png", "json" }
 
 	-- OSX --
 	configuration { "macosx" }
-		defines { "_OSX" }
 		includedirs { "../Source/Images/OSX/" }
-		links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
-		links { "z", "mad", "png", "json" }
 
 	-- Windows --
 	configuration { "windows", "not Xbox360", "not PS3" }
-		defines { "WIN32", "_WINDOWS" }
 		includedirs { "../Source/Images/WINDOWS/" }
-		links { "ogg_static", "vorbisfile_static", "mad", "json" }
-
-		-- Windows 32 --
-		configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
-			libdirs { "../Middleware/vorbis/lib/x86", "../Middleware/lglcd/lib/x86" }
-			
-		-- Windows 64 --
-		configuration { "windows", "x64", "not Xbox360", "not PS3" }
-			libdirs { "../Middleware/vorbis/lib/x64", "../Middleware/lglcd/lib/x64" }
 
 	-- XBox --
 	configuration "Xbox"
-		defines { "WIN32", "_XBOX" }
 		includedirs { "../Source/Images/XBOX/" }
-		libdirs { "../Middleware/vorbis/lib/xbox" }
-		links { "mad", "json" }
 
 	-- XBox 360 --
 	configuration "Xbox360"
-		defines { "WIN32", "_XBOX" }
 		includedirs { "../Source/Images/X360/" }
-		links { "mad", "json" }
 
 	-- Playstation 3 --
 	configuration "PS3"
-		defines { "_PS3" }
 		includedirs { "../Source/Images/PS3/" }
-		links { "mad", "json" }
+
+	configuration { }
