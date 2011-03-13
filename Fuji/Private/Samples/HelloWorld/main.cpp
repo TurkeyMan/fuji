@@ -8,7 +8,7 @@
 #include "Timer.h"
 #include "MFFileSystem.h"
 #include "FileSystem/MFFileSystemNative.h"
-ř
+
 /**** Globals ****/
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
