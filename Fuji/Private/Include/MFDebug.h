@@ -22,9 +22,8 @@
  * @return None.
  */
 #if defined(MF_ARCH_X86) || defined(MF_ARCH_X64)
-	#if defined(MF_COMPILER_VISUALC) && defined(MF_ARCH_X64)
-		// microsoft removed inline asm from VC-X64
-		#define MFDebug_Breakpoint()		
+	#if defined(MF_COMPILER_VISUALC)
+		#define MFDebug_Breakpoint()		__debugbreak();
 	#else
 		#if defined(MF_ASM_INTEL)
 			#define MFDebug_Breakpoint() { __asm { int 3 }; }
