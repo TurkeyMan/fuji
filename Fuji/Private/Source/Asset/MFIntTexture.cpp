@@ -1419,9 +1419,9 @@ MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 				targetFormat = TexFmt_DXT5;
 */
 			if(pTexture->opaque)
-				targetFormat = TexFmt_A8B8G8R8; //TexFmt_R5G6B5;
+				targetFormat = TexFmt_A8R8G8B8; //TexFmt_R5G6B5;
 			else if(pTexture->oneBitAlpha)
-				targetFormat = TexFmt_A1R5G5B5;
+				targetFormat = TexFmt_A8R8G8B8; //TexFmt_A1R5G5B5;
 			else
 				targetFormat = TexFmt_A8R8G8B8;
 			break;
