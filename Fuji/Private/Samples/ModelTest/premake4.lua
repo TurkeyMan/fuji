@@ -7,7 +7,7 @@ project "ModelTest"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
 	links { "Fuji" }
 

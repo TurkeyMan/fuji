@@ -7,7 +7,7 @@ project "3DBox"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
 	links { "Fuji" }
 

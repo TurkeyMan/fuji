@@ -37,7 +37,7 @@ project "Fuji"
 	targetdir "../Lib/"
 
 	defines { "_LIB" }
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
 --	pchheader "Fuji.h"
 --	pchsource "MFMain.cpp"
