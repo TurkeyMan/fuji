@@ -115,6 +115,7 @@ void MFModel_Draw(MFModel *pModel)
 								glEnableClientState(GL_COLOR_ARRAY);
 								break;
 							case MFVET_TexCoord:
+								glClientActiveTexture(GL_TEXTURE0);
 								glTexCoordPointer(2, GL_FLOAT, pStream->streamStride, pDataPointer);
 								glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 								break;
@@ -130,10 +131,11 @@ void MFModel_Draw(MFModel *pModel)
 				else
 					glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, pMC->pIndexData);
 
-				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 				glDisableClientState(GL_NORMAL_ARRAY);
 				glDisableClientState(GL_COLOR_ARRAY);
 				glDisableClientState(GL_VERTEX_ARRAY);
+				glClientActiveTexture(GL_TEXTURE0);
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			}
 		}
 	}
@@ -158,7 +160,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 		// bind the index buffer
 		glGenBuffers(1, &runtimeData.streams[7]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, runtimeData.streams[7]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pMC->numVertices, pMC->pIndexData, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pMC->numIndices, pMC->pIndexData, GL_STATIC_DRAW);
 
 		// bind the vertex buffers
 		for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
