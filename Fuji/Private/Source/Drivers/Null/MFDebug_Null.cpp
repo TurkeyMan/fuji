@@ -50,7 +50,11 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 #if !defined(_RETAIL)
 	MFCallstack_Log();
 #endif
-	
+
+#if defined(MF_LINUX) || defined(MF_OSX)
+	MFDebug_Breakpoint();
+#endif
+
 	if(!MFFont_GetDebugFont())
 		return;
 

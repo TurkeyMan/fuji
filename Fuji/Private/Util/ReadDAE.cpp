@@ -990,3 +990,11 @@ int F3DFile::ReadDAE(const char *pFilename)
 
 	return 0;
 }
+
+void ParseDAEFileFromMemory(char *pFile, uint32 size, F3DFile *_pModel)
+{
+	pModel = _pModel;
+
+	// mount a memory file and load it that way..
+	MFDebug_Assert(false, "Not written!");
+}

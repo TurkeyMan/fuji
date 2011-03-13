@@ -1004,3 +1004,9 @@ int F3DFile::ReadX(const char *pFilename)
 
 	return 0;
 }
+
+void ParseXFileFromMemory(char *pFile, F3DFile *_pModel)
+{
+	pModel = _pModel;
+	ParseXFile(pFile);
+}

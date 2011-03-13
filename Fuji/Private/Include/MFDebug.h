@@ -21,11 +21,22 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(MF_ARCH_X86)
+#if defined(MF_ARCH_X86) || defined(MF_ARCH_X64)
+	#if defined(MF_COMPILER_VISUALC) && defined(MF_ARCH_X64)
+		// microsoft removed inline asm from VC-X64
+		#define MFDebug_Breakpoint()		
+	#else
+		#if defined(MF_ASM_INTEL)
+			#define MFDebug_Breakpoint() { __asm { int 3 }; }
+		#elif defined(MF_ASM_ATNT)
+			#define MFDebug_Breakpoint() { asm("int $3"); }
+		#endif
+	#endif
+#elif defined(MF_ARCH_PPC)
 	#if defined(MF_ASM_INTEL)
-		#define MFDebug_Breakpoint() { __asm { int 3 }; }
+		#define MFDebug_Breakpoint() { __asm { trap }; }
 	#elif defined(MF_ASM_ATNT)
-		#define MFDebug_Breakpoint() { asm("int $3"); }
+		#define MFDebug_Breakpoint() { asm("trap"); }
 	#endif
 #elif defined(MF_ARCH_MIPS)
 	#if defined(MF_ASM_INTEL)
@@ -33,11 +44,7 @@
 	#elif defined(MF_ASM_ATNT)
 		#define MFDebug_Breakpoint() { asm("break"); }
 	#endif
-#elif defined(MF_ARCH_PPC)
-	// whats the PPC breakpoint?
-#endif
-
-#if !defined(MFDebug_Breakpoint)
+#else
 	#define MFDebug_Breakpoint()
 #endif
 

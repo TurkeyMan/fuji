@@ -167,7 +167,7 @@
 #elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__)
 	#define MF_ARCH_PPC
 #elif defined(__x86_64__)
-	#define MF_ARCH_X86
+	#define MF_ARCH_X64
 	#define MF_64BIT
 #elif defined(__i386__) || defined(_M_IX86)
 	#define MF_ARCH_X86

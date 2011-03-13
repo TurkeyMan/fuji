@@ -70,9 +70,21 @@ MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, 
 
 	switch(format)
 	{
+		case MFIMF_DAE:
+			void ParseDAEFileFromMemory(char *pFile, uint32 size, F3DFile *_pModel);
+			ParseDAEFileFromMemory((char*)pMemory, size, pF3D);
+			break;
+		case MFIMF_X:
+			void ParseXFileFromMemory(char *pFile, F3DFile *_pModel);
+			ParseXFileFromMemory((char*)pMemory, pF3D);
+			break;
 		case MFIMF_ASE:
 			void ParseASEFile(char *, F3DFile *);
 			ParseASEFile((char*)pMemory, pF3D);
+			break;
+		case MFIMF_OBJ:
+			void ParseOBJFileFromMemory(char *pFile, F3DFile *_pModel);
+			ParseOBJFileFromMemory((char*)pMemory, pF3D);
 			break;
 		case MFIMF_MD2:
 			void ParseMD2FileFromMemory(char *pFile, uint32 size, F3DFile *_pModel);

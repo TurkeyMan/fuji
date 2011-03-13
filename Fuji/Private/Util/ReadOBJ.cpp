@@ -348,3 +348,9 @@ int F3DFile::ReadOBJ(const char *pFilename)
 
 	return 0;
 }
+
+void ParseOBJFileFromMemory(char *pFile, F3DFile *_pModel)
+{
+	pModel = _pModel;
+	ParseOBJFile(pFile);
+}
