@@ -152,6 +152,9 @@
 #if defined(LOAD_EXTENSIONS)
 	// function pointers for opengl extensions
 	typedef void (APIENTRY * PFNGLGENBUFFERSARBPROC)(GLsizei n, GLuint *buffers);
+#if !defined(MF_LINUX)
+	typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
+#endif
 	typedef void (APIENTRY * PFNGLDELETEBUFFERSARBPROC)(GLsizei n, const GLuint *buffers);
 	typedef void (APIENTRY * PFNGLBINDBUFFERARBPROC)(GLenum target, GLuint buffer);
 
@@ -193,9 +196,6 @@
 
 
 	#if !defined(MF_LINUX)
-		// Linux headers are different...
-		typedef void (APIENTRY * PFNGLBUFFERDATAARBPROC)(GLenum target, int size, const GLvoid *data, GLenum usage);
-
 		// multitexturing extension
 		extern PFNGLACTIVETEXTUREARBPROC glActiveTexture;
 		extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture;
