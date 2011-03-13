@@ -301,7 +301,10 @@ void ParseOBJFile(const char *pFilePtr)
 		}
 		else if(!MFString_CaseCmp(pToken, "mtllib"))
 		{
-
+			// load material info?
+			//..
+			
+			pFilePtr = MFSeekNewline(pFilePtr);
 		}
 		else if(pToken[0] == '#')
 		{

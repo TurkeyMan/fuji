@@ -2010,7 +2010,12 @@ int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
 			return a;
 	}
 
-	return -1;
+	// the material doesn't seem to exist, we'll add one
+	int matId = materials.size();
+	F3DMaterial &mat = materials.push();
+	MFString_Copy(mat.name, pName);
+
+	return matId;
 }
 
 F3DMaterialSubobject::F3DMaterialSubobject()

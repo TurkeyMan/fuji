@@ -1030,6 +1030,8 @@ MFString& MFString::Sprintf(const char *pFormat, ...)
 	va_start(arglist, pFormat);
 
 	int nRes = vsnprintf(NULL, 0, pFormat, arglist);
+	va_start(arglist, pFormat);
+
 	if(nRes >= 0)
 	{
 		pData = MFStringData::Alloc();
@@ -1051,6 +1053,8 @@ MFString MFString::Format(const char *pFormat, ...)
 	va_start(arglist, pFormat);
 
 	int nRes = vsnprintf(NULL, 0, pFormat, arglist);
+	va_start(arglist, pFormat);
+
 	if(nRes >= 0)
 	{
 		t.pData = MFStringData::Alloc();

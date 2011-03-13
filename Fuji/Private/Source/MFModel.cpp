@@ -236,11 +236,11 @@ MFModel* MFModel_Create(const char *pFilename)
 			MFIntModel *pIM = NULL;
 			while(!pIM && *ppExt)
 			{
-				const char *pTempFilename = MFStr("%s%s", pFilename, *ppExt);
-				pIM = MFIntModel_CreateFromFile(pTempFilename);
+				MFString tempFilename = MFString::Format("%s%s", pFilename, *ppExt);
+				pIM = MFIntModel_CreateFromFile(tempFilename.CStr());
 				if(pIM)
 				{
-					pFilename = MFString_Copy((char*)MFHeap_Alloc(MFString_Length(pTempFilename)+1), pTempFilename);
+					pFilename = MFString_Copy((char*)MFHeap_Alloc(tempFilename.NumBytes()+1), tempFilename.CStr());
 					break;
 				}
 				++ppExt;
