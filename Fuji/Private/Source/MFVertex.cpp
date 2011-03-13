@@ -95,7 +95,7 @@ void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType 
 		{
 			for(int a=0; a<numVertices; ++a)
 			{
-				MFVector v = MFVertex_UnackVertexData(pSource, sourceDataFormat);
+				MFVector v = MFVertex_UnpackVertexData(pSource, sourceDataFormat);
 				MFVertex_PackVertexData(v, pTarget, pElementData->format);
 				pSource += sourceDataStride;
 				pTarget += pElementData->stride;

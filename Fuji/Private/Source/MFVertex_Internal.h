@@ -120,7 +120,7 @@ inline void MFVertex_PackVertexData(MFVector &source, void *pTarget, MFVertexDat
 	}
 }
 
-inline MFVector MFVertex_UnackVertexData(void *pData, MFVertexDataFormat format)
+inline MFVector MFVertex_UnpackVertexData(void *pData, MFVertexDataFormat format)
 {
 	const float scaleTable[2] = { 1.f/32768.f, 1.f/32767.f };
 	MFVector output = MFVector::identity;
