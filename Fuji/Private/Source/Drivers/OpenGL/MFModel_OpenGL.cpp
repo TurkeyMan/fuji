@@ -76,7 +76,7 @@ void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)&pSubobjects[a].pMeshChunks[b];
+				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pSubobjects[a].pMeshChunks + b;
 
 				if(!pMatOverride)
 					MFMaterial_SetMaterial(pMC->pMaterial);

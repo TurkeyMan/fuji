@@ -118,7 +118,7 @@ const char *GetValue(const char *pText, const char **ppTokenEnd = NULL)
 	const char *pVal = GetNextToken(pText, &pText);
 	const char *pSemi = GetNextToken(pText, ppTokenEnd, temp);
 
-	MFDebug_Assert(!MFString_Compare(pSemi, ";"), "Value is not terminated with a semicolon.\n");
+	MFDebug_Assert(!MFString_Compare(pSemi, ";") || !MFString_Compare(pSemi, ","), "Value is not terminated with a semicolon.\n");
 
 	return pVal;
 }
@@ -183,7 +183,7 @@ void GetIntArray(const char *pText, int *pOutput, int arrayLength, const char **
 		if(a < arrayLength-1)
 		{
 			const char *pComa = GetNextToken(pText, &pText, temp);
-			MFDebug_Assert(!MFString_Compare(pComa, ","), "Array values are separated with a coma.\n");
+			MFDebug_Assert(!MFString_Compare(pComa, ",") || !MFString_Compare(pComa, ";"), "Array values are separated with a coma.\n");
 		}
 
 		pOutput[a] = atoi(pVal);
@@ -237,7 +237,9 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 
 		// process materials...
 		const char *pToken = GetNextToken(pMatList, &pMatList);
+		MFDebug_Assert(!MFString_Compare(pToken, ";"), "Value is not terminated with a semicolon.\n");
 
+		pToken = GetNextToken(pMatList, &pMatList);
 		while(MFString_Compare(pToken, "}"))
 		{
 			if(!MFString_Compare(pToken, "Material"))
@@ -305,6 +307,29 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 						pToken = GetNextToken(pMatList, &pMatList);
 					}
 				}
+			}
+			else if(!MFString_Compare(pToken, "{"))
+			{
+				// read material name
+				const char *pMatName = GetNextToken(pMatList, &pMatList);
+
+				int matID = pModel->GetMaterialChunk()->GetMaterialIndexByName(pMatName);
+
+				F3DMaterialSubobject &matSub = sub.matSubobjects.push();
+
+				if(matID != -1)
+				{
+					matSub.materialIndex = matID;
+				}
+				else
+				{
+					matSub.materialIndex = pModel->GetMaterialChunk()->materials.size();
+					F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
+					MFString_CopyN(mat.name, pMatName, 64);
+				}
+
+				pToken = GetNextToken(pMatList, &pMatList);
+				MFDebug_Assert(!MFString_Compare(pToken, "}"), "Scope not closed.\n");
 			}
 			else
 			{

@@ -102,7 +102,7 @@ void MFModel_Draw(MFModel *pModel)
 	if(pMatOverride)
 		MFMaterial_SetMaterial(pMatOverride);
 
-	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
 	{
