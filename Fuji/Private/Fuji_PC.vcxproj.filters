@@ -998,9 +998,6 @@
     <ClCompile Include="Middleware\libpng-1.5.0\pngset.c">
       <Filter>Middleware\libpng-1.5.0</Filter>
     </ClCompile>
-    <ClCompile Include="Middleware\libpng-1.5.0\pngtest.c">
-      <Filter>Middleware\libpng-1.5.0</Filter>
-    </ClCompile>
     <ClCompile Include="Middleware\libpng-1.5.0\pngtrans.c">
       <Filter>Middleware\libpng-1.5.0</Filter>
     </ClCompile>
