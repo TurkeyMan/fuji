@@ -195,12 +195,12 @@ class F3DKeyFrame
 public:
 	F3DKeyFrame();
 
-	float time;
-
 	MFMatrix key;
 	MFQuaternion rotation;
 	MFVector scale;
 	MFVector translation;
+
+	float time;
 };
 
 class F3DAnimation

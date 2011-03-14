@@ -269,7 +269,7 @@ void F3DFile::WriteF3D(const char *pFilename)
 			case CT_Mesh:
 			{
 				pChunks[a].pOffset = (uint32)(pOffset - pFile);
-				pChunks[a].elementCount = (uint32)meshChunk.subObjects.size();
+				pChunks[a].elementCount = (uint16)meshChunk.subObjects.size();
 				pChunks[a].elementSize = sizeof(F3DMesh);
 				ExportMesh(pOffset, pFile);
 			}
@@ -278,7 +278,7 @@ void F3DFile::WriteF3D(const char *pFilename)
 			case CT_Skeleton:
 			{
 				pChunks[a].pOffset = (uint32)(pOffset - pFile);
-				pChunks[a].elementCount = (uint32)skeletonChunk.bones.size();
+				pChunks[a].elementCount = (uint16)skeletonChunk.bones.size();
 				pChunks[a].elementSize = sizeof(F3DBone);
 				ExportSkeleton(pOffset, pFile);
 			}
@@ -287,7 +287,7 @@ void F3DFile::WriteF3D(const char *pFilename)
 			case CT_Material:
 			{
 				pChunks[a].pOffset = (uint32)(pOffset - pFile);
-				pChunks[a].elementCount = (uint32)materialChunk.materials.size();
+				pChunks[a].elementCount = (uint16)materialChunk.materials.size();
 				pChunks[a].elementSize = sizeof(F3DMaterial);
 				ExportMaterial(pOffset, pFile);
 			}
@@ -555,10 +555,10 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 
 				if(bAnimating)
 				{
-					pAnimVert[c].i.w1 = vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0;
-					pAnimVert[c].i.w2 = vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0;
-					pAnimVert[c].i.w3 = vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0;
-					pAnimVert[c].i.w4 = vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0;
+					pAnimVert[c].i.w1 = (uint8)(vert.bone[0] != -1 ? batch.boneMapping[vert.bone[0]] * 3 : 0);
+					pAnimVert[c].i.w2 = (uint8)(vert.bone[1] != -1 ? batch.boneMapping[vert.bone[1]] * 3 : 0);
+					pAnimVert[c].i.w3 = (uint8)(vert.bone[2] != -1 ? batch.boneMapping[vert.bone[2]] * 3 : 0);
+					pAnimVert[c].i.w4 = (uint8)(vert.bone[3] != -1 ? batch.boneMapping[vert.bone[3]] * 3 : 0);
 					pAnimVert[c].w.w1 = (uint8)(vert.weight[0] * 255.0f);
 					pAnimVert[c].w.w2 = (uint8)(vert.weight[1] * 255.0f);
 					pAnimVert[c].w.w3 = (uint8)(vert.weight[2] * 255.0f);
@@ -575,7 +575,7 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 						weight = MFMax(weight, (int)pW[d]);
 					}
 
-					pW[biggest] += leftOver;
+					pW[biggest] += (uint8)leftOver;
 				}
 			}
 
@@ -586,9 +586,9 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			{
 				int t = batch.tris[c];
 
-				pIndices[0] = batch.vertexMapping[matsub.triangles[t].v[0]];
-				pIndices[1] = batch.vertexMapping[matsub.triangles[t].v[1]];
-				pIndices[2] = batch.vertexMapping[matsub.triangles[t].v[2]];
+				pIndices[0] = (uint16)batch.vertexMapping[matsub.triangles[t].v[0]];
+				pIndices[1] = (uint16)batch.vertexMapping[matsub.triangles[t].v[1]];
+				pIndices[2] = (uint16)batch.vertexMapping[matsub.triangles[t].v[2]];
 
 				pIndices += 3;
 			}
@@ -935,7 +935,7 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 							weight = MFMax(weight, (int)pVert->weights[d]);
 						}
 
-						pVert->weights[biggest] += leftOver;
+						pVert->weights[biggest] += (uint8)leftOver;
 
 						pVolume->min = MFMin(pVolume->min, pos);
 						pVolume->max = MFMax(pVolume->max, pos);
@@ -994,7 +994,7 @@ void *F3DFile::CreateMDL(uint32 *pSize, MFPlatform platform)
 	int skeletonChunkIndex = -1;
 	int collisionChunkIndex = -1;
 	int tagChunkIndex = -1;
-	int dataChunkIndex = -1;
+	//int dataChunkIndex = -1;
 
 	int numOutputMeshChunks = 0;
 
@@ -1145,7 +1145,7 @@ found:
 				pBoneChunk[bc].pChildren = (int16*)pOffset;
 
 				for(int b=0; b<pBoneChunk[bc].numChildren; b++)
-					pBoneChunk[bc].pChildren[b] = bone.children[b];
+					pBoneChunk[bc].pChildren[b] = (int16)bone.children[b];
 
 				pOffset += sizeof(int16)*pBoneChunk[bc].numChildren;
 
@@ -2189,7 +2189,7 @@ F3DRefPoint::F3DRefPoint()
 {
 	worldMatrix = MFMatrix::identity;
 	localMatrix = MFMatrix::identity;
-	bone[0] = -1; bone[1] = -1; bone[2] = -1; bone[3] = -1;
+	bone[0] = bone[1] = bone[2] = bone[3] = (uint16)-1;
 	weight[0] = 0.0f; weight[1] = 0.0f; weight[2] = 0.0f; weight[3] = 0.0f;
 	MFString_Copy(name, "");
 	MFString_Copy(options, "");
