@@ -7,7 +7,7 @@ project "InputTest"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
+	flags { "WinMain", "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
 	links { "Fuji" }
 
