@@ -22,6 +22,7 @@
 #include "MFPtrList.h"
 
 #include "MFRenderer_D3D11.h"
+#include <d3dx11.h>
 
 /**** Globals ****/
 
@@ -99,8 +100,8 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		MFRenderer_D3D11_SetDebugName(pTex, pTexture->name);
 
 		//// filter mip levels
-		//if (generateMipChain)
-		//	D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
+		if (generateMipChain)
+			D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
 
 		ID3D11ShaderResourceView *pSRV = NULL;
 

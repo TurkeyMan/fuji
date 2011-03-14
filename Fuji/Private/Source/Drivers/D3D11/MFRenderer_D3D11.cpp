@@ -30,6 +30,7 @@
 #include <d3d11.h>
 
 #pragma comment(lib, "d3d11")
+#pragma comment(lib, "d3dx11")
 
 
 struct CBWorld
@@ -407,6 +408,7 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_SetDeviceRenderTarget()
 {
+    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }
 //---------------------------------------------------------------------------------------------------------------------
 float MFRenderer_GetTexelCenterOffset()

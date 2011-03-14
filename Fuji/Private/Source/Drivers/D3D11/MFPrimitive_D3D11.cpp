@@ -274,9 +274,6 @@ void MFEnd()
 		}
 	}
 
-
-	//MFVertex_CopyVertexData(pVertexBuffer, MFVE_Position, 
-
 	MFVertex_UnlockVertexBuffer(pVertexBuffer);
 
 	MFVertex_SetVertexStreamSource(0, pVertexBuffer);
