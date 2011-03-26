@@ -995,6 +995,26 @@ void ParseDAEFileFromMemory(char *pFile, uint32 size, F3DFile *_pModel)
 {
 	pModel = _pModel;
 
-	// mount a memory file and load it that way..
-	MFDebug_Assert(false, "Not written!");
+	transformMatrix = MFMatrix::identity;
+
+	TiXmlDocument doc;
+	doc.Parse(pFile);
+
+	if(doc.Error())
+	{
+		MFDebug_Warn(2, "Failed to load collada file for conversion..\n");
+		return;
+	}
+
+	pRoot = doc.FirstChildElement("COLLADA");
+
+	if(!pRoot)
+	{
+		MFDebug_Warn(2, "Document has no root node..\n");
+		return;
+	}
+
+	MFString_Copy(pModel->name, "Untitled collada file");
+
+	ParseDAERootElement(pRoot);
 }
