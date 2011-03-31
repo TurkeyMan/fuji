@@ -150,7 +150,7 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 
 			MFFile_Seek(pCacheData->pBaseFile, (int)pBucket->fileOffset, MFSeek_Begin);
 			uint32 read = MFFile_Read(pCacheData->pBaseFile, pBucket->pData, pBucket->size);
-			MFDebug_Assert(read == pBucket->size, "Error reading base file...");
+			MFDebug_Assert(read == (uint32)pBucket->size, "Error reading base file...");
 		}
 
 		pBucket->lastTouched = (uint32)MFSystem_ReadRTC();

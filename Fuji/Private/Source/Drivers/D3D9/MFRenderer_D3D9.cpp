@@ -329,7 +329,7 @@ void MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
 
-	HRESULT hr = pd3dDevice->BeginScene();
+	pd3dDevice->BeginScene();
 
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

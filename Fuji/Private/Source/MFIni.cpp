@@ -56,9 +56,9 @@ bool MFIniLine::GetBool(int index)
 	if(index >= stringCount)
 		return false;
 	const char *pString = GetString(index);
-	if(!MFString_CaseCmp(pString, "true") | !MFString_CaseCmp(pString, "yes") | !MFString_CaseCmp(pString, "on") | !MFString_CaseCmp(pString, "enabled"))
+	if(!MFString_CaseCmp(pString, "true") | !MFString_CaseCmp(pString, "yes") | !MFString_CaseCmp(pString, "on") | !MFString_CaseCmpN(pString, "enable", 6))
 		return true;
-	else if(!MFString_CaseCmp(pString, "false") | !MFString_CaseCmp(pString, "no") | !MFString_CaseCmp(pString, "off") | !MFString_CaseCmp(pString, "disabled"))
+	else if(!MFString_CaseCmp(pString, "false") | !MFString_CaseCmp(pString, "no") | !MFString_CaseCmp(pString, "off") | !MFString_CaseCmpN(pString, "disable", 7))
 		return false;
 	return atoi(pString) != 0;
 }

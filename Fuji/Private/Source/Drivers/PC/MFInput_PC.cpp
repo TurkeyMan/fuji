@@ -367,7 +367,7 @@ void MFInput_InitModulePlatformSpecific()
 	OSVERSIONINFO ver;
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	BOOL r = GetVersionEx(&ver);
-	gbAllowRawMouse = ver.dwMajorVersion >= 5 && ver.dwMinorVersion >= 1;
+	gbAllowRawMouse = r != 0 && (ver.dwMajorVersion >= 5 && ver.dwMinorVersion >= 1);
 
 	if(gbAllowRawMouse && gDefaults.input.allowMultipleMice)
 	{

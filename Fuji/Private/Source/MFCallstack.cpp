@@ -249,9 +249,6 @@ void MFCallstack_Draw()
 
 		float rtcFreq = 1000000.f / (float)MFSystem_GetRTCFrequency();
 
-		uint32 frameDuration = uint32(gBeginTime - gLastBeginTime);
-		float frameTime = (float)frameDuration * rtcFreq;
-
 		MFVector callstackPos = MakeVector(xoffset, yoffset, 0.f, 0.f);
 
 		// sort the calls
@@ -289,6 +286,8 @@ void MFCallstack_Draw()
 			MFPrimitive_DrawUntexturedQuad(meterPos.x, meterPos.y, meterPos.x + meterDimensions.x, meterPos.y + meterDimensions.y, MakeVector(0.0f, 0.0f, 0.0f, 1.0f));
 
 			// draw the overhead counter
+			uint32 frameDuration = uint32(gBeginTime - gLastBeginTime);
+			float frameTime = (float)frameDuration * rtcFreq;
 			MFCallstackInternal_DrawMeterBlock(meterPos, meterDimensions, (float)(gEndTime - gLastBeginTime) / (float)frameTime, 1.0f, MakeVector(0.0f, 1.0f, 1.0f, 1.0f));
 			MFCallstackInternal_DrawMeterLabel(callstackPos, MakeVector(0.0f, 1.0f, 1.0f, 1.0f), "Frame Overhead/VSync", NULL);
 			callstackPos.y += 24.0f;
