@@ -5,7 +5,7 @@ project "mad"
 	excludes { "minimad.c" }
 
 	includedirs { "msvc++" }
-	targetdir "../../Lib/Middleware/libmad/"
+	targetdir "../../../Public/Lib/Middleware/libmad/"
 
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
 

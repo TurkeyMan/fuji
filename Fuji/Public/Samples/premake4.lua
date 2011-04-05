@@ -5,7 +5,7 @@ solution "Samples"
 	platforms { "Native", "x32", "x64" }
 
 	-- include the fuji project...
-	dofile "../Project/fujiproj.lua"
+	dofile "../../Private/Project/fujiproj.lua"
 
 	-- include each of the samples --
 	include "3DBox"

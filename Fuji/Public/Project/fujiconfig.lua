@@ -41,16 +41,16 @@ configuration { "windows", "not Xbox360", "not PS3" }
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
-		libdirs { "../Middleware/vorbis/lib/x86", "../Middleware/lglcd/lib/x86" }
+		libdirs { "../Lib/Middleware/vorbis/x86", "../Lib/Middleware/lglcd/x86" }
 		
 	-- Windows 64 --
 	configuration { "windows", "x64", "not Xbox360", "not PS3" }
-		libdirs { "../Middleware/vorbis/lib/x64", "../Middleware/lglcd/lib/x64" }
+		libdirs { "../Lib/Middleware/vorbis/x64", "../Lib/Middleware/lglcd/x64" }
 
 -- XBox --
 configuration "Xbox"
 	defines { "WIN32", "_XBOX" }
-	libdirs { "../Middleware/vorbis/lib/xbox" }
+	libdirs { "../Lib/Middleware/vorbis/xbox" }
 	links { "mad", "json" }
 
 -- XBox 360 --

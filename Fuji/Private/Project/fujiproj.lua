@@ -1,5 +1,5 @@
-includedirs { "../Include/", "../Middleware/" }
-libdirs { "../Lib/" }
+includedirs { "../../Public/Include/", "../Middleware/" }
+libdirs { "../../Public/Lib/" }
 
 include "../Middleware/libjson/"
 include "../Middleware/libmad/"
@@ -11,10 +11,9 @@ project "Fuji"
 	-- add the source code --
 	files { "../*.TXT" }
 
-	files { "../Include/**.h" }
+	files { "../../Public/Include/**.h" }
 	files { "../Source/**.h", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
-	files { "../Util/**.h", "../Util/**.cpp" }
 
 	-- include some middleware directly --
 	files { "../Middleware/tinyxml/**.h", "../Middleware/tinyxml/**.cpp" }
@@ -34,7 +33,7 @@ project "Fuji"
 	includedirs { "../Source/" }
 	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
 	objdir "../Build/"
-	targetdir "../Lib/"
+	targetdir "../../Public/Lib/"
 
 	defines { "_LIB" }
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
@@ -48,7 +47,7 @@ project "Fuji"
 
 	-- configure standard fuji stuff --
 
-	dofile "fujiconfig.lua"
+	dofile "../../Public/Project/fujiconfig.lua"
 
 
 	-- platform specific config --

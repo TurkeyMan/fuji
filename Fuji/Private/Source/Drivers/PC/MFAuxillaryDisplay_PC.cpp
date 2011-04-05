@@ -7,7 +7,7 @@
 #if defined(SUPPORT_G15)
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
-	#include "lgLcd/include/lglcd.h"
+	#include "lgLcd/lglcd.h"
 
 	#pragma comment(lib, "lglcd")
 

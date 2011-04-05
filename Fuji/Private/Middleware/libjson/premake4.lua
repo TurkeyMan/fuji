@@ -3,7 +3,7 @@ project "json"
 	language "C++"
 	files { "**.cpp", "**.h" }
 
-	targetdir "../../Lib/Middleware/libjson/"
+	targetdir "../../../Public/Lib/Middleware/libjson/"
 
 	flags { "StaticRuntime", "NoRTTI" }
 
