@@ -2,7 +2,7 @@
 #include "MFHeap.h"
 #include "MFObjectPool.h"
 
-void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects, void *_pMemory, uint32 _bytes)
+void MFObjectPool::Init(size_t _objectSize, int numObjects, int growObjects, void *_pMemory, size_t _bytes)
 {
 	objectSize = _objectSize;
 	maxItems = numObjects;
@@ -13,10 +13,13 @@ void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects, void *
 	if(_pMemory)
 	{
 		MFDebug_Assert((uint32)bytes <= _bytes, "Supplied allocation is too small!");
+		pMemory = (char*)_pMemory;
+		bOwnMemory = false;
 	}
 	else
 	{
 		pMemory = (char*)MFHeap_Alloc(bytes + sizeof(void**)*numObjects);
+		bOwnMemory = true;
 	}
 
 	ppItems = (void**)(pMemory + bytes);
@@ -35,11 +38,9 @@ void MFObjectPool::Deinit()
 		pNext = NULL;
 	}
 
-	if(pMemory)
-	{
+	if(bOwnMemory)
 		MFHeap_Free(pMemory);
-		pMemory = NULL;
-	}
+	pMemory = NULL;
 }
 
 void *MFObjectPool::Alloc()
@@ -151,7 +152,7 @@ void MFObjectPoolGroup::Deinit()
 	MFHeap_Free(pConfig);
 }
 
-void *MFObjectPoolGroup::Alloc(int bytes, int *pAllocated)
+void *MFObjectPoolGroup::Alloc(size_t bytes, size_t *pAllocated)
 {
 	for(int a=0; a<numPools; ++a)
 	{
@@ -163,14 +164,15 @@ void *MFObjectPoolGroup::Alloc(int bytes, int *pAllocated)
 		}
 	}
 
+	++overflows;
 	if(pAllocated)
 		*pAllocated = bytes;
 	return MFHeap_Alloc(bytes);
 }
 
-void *MFObjectPoolGroup::AllocAndZero(int bytes, int *pAllocated)
+void *MFObjectPoolGroup::AllocAndZero(size_t bytes, size_t *pAllocated)
 {
-	int size = 0;
+	size_t size = 0;
 	void *pNew = Alloc(bytes, &size);
 	if(pNew)
 		MFZeroMemory(pNew, size);
@@ -187,6 +189,7 @@ void MFObjectPoolGroup::Free(void *pItem)
 			return;
 	}
 
+	--overflows;
 	MFHeap_Free(pItem);
 }
 

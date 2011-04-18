@@ -554,7 +554,7 @@ public:
 	bool operator<(const MFString &string) const;			/**< Case-sensitive compare 'less' operator. */
 
 	MFString& Detach();
-	MFString& Reserve(int bytes, bool bClearString = false);
+	MFString& Reserve(size_t bytes, bool bClearString = false);
 	MFString Duplicate() const;
 
 	MFString& SetStaticString(const char *pStaticString);

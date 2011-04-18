@@ -475,8 +475,8 @@ private:
 
 	// members
 	char *pMemory;
-	int bytes;
-	int allocated;
+	size_t bytes;
+	size_t allocated;
 	int refCount;
 };
 

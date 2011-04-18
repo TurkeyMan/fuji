@@ -16,7 +16,7 @@ public:
 	MFObjectPool(int objectSize, int numObjects, int growObjects = 0) { Init(objectSize, numObjects, growObjects); }
 	~MFObjectPool() { Deinit(); }
 
-	void Init(int objectSize, int numObjects, int growObjects = 0, void *pMemory = NULL, uint32 bytes = 0);
+	void Init(size_t objectSize, int numObjects, int growObjects = 0, void *pMemory = NULL, size_t bytes = 0);
 	void Deinit();
 
 	void *Alloc();
@@ -35,14 +35,15 @@ public:
 	void *GetItem(int index);
 
 private:
-	int objectSize;
+	size_t objectSize;
 	int maxItems;
 	int allocated;
 	int grow;
 
-	void **ppItems;
 	char *pMemory;
-	int bytes;
+	void **ppItems;
+	size_t bytes;
+	bool bOwnMemory;
 
 	MFObjectPool *pNext;
 };
@@ -50,7 +51,7 @@ private:
 
 struct MFObjectPoolGroupConfig
 {
-	int objectSize;
+	size_t objectSize;
 	int numObjects;
 	int growObjects;
 };
@@ -61,8 +62,8 @@ public:
 	void Init(const MFObjectPoolGroupConfig *pPools, int numPools);
 	void Deinit();
 
-	void *Alloc(int bytes, int *pAllocated);
-	void *AllocAndZero(int bytes, int *pAllocated);
+	void *Alloc(size_t bytes, size_t *pAllocated);
+	void *AllocAndZero(size_t bytes, size_t *pAllocated);
 	void Free(void *pItem);
 
 	uint32 GetTotalMemory();
@@ -78,6 +79,7 @@ public:
 private:
 	MFObjectPoolGroupConfig *pConfig;
 	int numPools;
+	int overflows;
 
 	MFObjectPool *pPools;
 };

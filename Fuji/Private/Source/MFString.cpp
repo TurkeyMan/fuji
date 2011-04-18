@@ -975,7 +975,7 @@ MFString& MFString::Detach()
 	return *this;
 }
 
-MFString& MFString::Reserve(int bytes, bool bClearString)
+MFString& MFString::Reserve(size_t bytes, bool bClearString)
 {
 	// detach instance
 	if(pData && pData->refCount > 1)
@@ -1090,7 +1090,7 @@ MFString MFString::Upper() const
 	t.pData->bytes = pData->bytes;
 
 	// copy upper case
-	for(int a=0; a<pData->bytes + 1; ++a)
+	for(size_t a=0; a<pData->bytes + 1; ++a)
 		t.pData->pMemory[a] = (char)MFToUpper(pData->pMemory[a]);
 
 	return t;
@@ -1106,7 +1106,7 @@ MFString MFString::Lower() const
 	t.pData->bytes = pData->bytes;
 
 	// copy lower case string
-	for(int a=0; a<pData->bytes + 1; ++a)
+	for(size_t a=0; a<pData->bytes + 1; ++a)
 		t.pData->pMemory[a] = (char)MFToLower(pData->pMemory[a]);
 
 	return t;
@@ -1211,7 +1211,7 @@ MFString MFString::SubStr(int offset, int count) const
 		count = maxChars;
 
 	// bail if we don't need to do anything
-	if(count == pData->bytes)
+	if((size_t)count == pData->bytes)
 		return *this;
 
 	// allocate a new string
@@ -1227,7 +1227,7 @@ MFString MFString::SubStr(int offset, int count) const
 
 MFString& MFString::Truncate(int length)
 {
-	if(pData && length < pData->bytes)
+	if(pData && (size_t)length < pData->bytes)
 	{
 		Detach();
 		pData->bytes = length;
@@ -1289,7 +1289,7 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 	}
 
 	// limit within the strings range
-	offset = MFMin(offset, pData->bytes);
+	offset = MFMin(offset, (int)pData->bytes);
 	int maxChars = pData->bytes - offset;
 	if(range > maxChars)
 		range = maxChars;
