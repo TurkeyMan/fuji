@@ -95,16 +95,16 @@ void MFPoolHeap::Dump() const
 
 void *MFPoolHeap::Alloc()
 {
+	if(!pFreeList)
+		return NULL;
+
 	void *pItem = pFreeList;
 	pFreeList = *(void**)pFreeList;
 
 #if !defined(MF_RETAIL)
-	if(pItem != NULL)
-	{
-		numUsed++;
-		if(peakNumUsed < numUsed)
-			peakNumUsed++;
-	} 
+	numUsed++;
+	if(peakNumUsed < numUsed)
+		peakNumUsed++;
 #endif
 
 	return pItem;
@@ -359,32 +359,23 @@ void * MFPoolHeapExpanding::Alloc()
 	void *pMem = heap.Alloc();
 	if(pMem == NULL)
 	{
+		MFDebug_Assert(numberTilFull > 0, "The heap has grown larger than the maximum size requested");
+
 		MFPoolHeap *pHeap = (MFPoolHeap*)MFHeap_Alloc(sizeof(MFPoolHeap));
-		pHeap->Init(expandNum, heap.Size());
-
-		pHeap->SetNextHeap(heap.GetNextHeap());
-		heap.SetNextHeap(pHeap);
-
-		pMem = pHeap->Alloc();
-
-		// Add the rest of the new memory to the existing heap
-		for(int i = 0; i < expandNum - 1; ++i)
-			heap.Delete(pHeap->Alloc());
-
+		pHeap->Init(MFMin(numberTilFull, expandNum), heap.Size());
 		numberTilFull -= expandNum;
-		MFDebug_Assert(numberTilFull >= 0, "The heap has grown larger than the maximum size requested");
+
+		// hook up the new heap to the chain
+		pHeap->pNext = heap.pNext;
+		heap.pNext = pHeap;
+
+		// and hook up the free pointer
+		heap.pFreeList = pHeap->pFreeList;
+		heap.numItems += pHeap->numItems;
+		pHeap->pFreeList = NULL;
+		pHeap->numItems = 0;
+
+		pMem = heap.Alloc();
 	}
 	return pMem;
 }
-
-#if !defined(MF_RETAIL)
-int MFPoolHeapExpanding::NumItemsAlloced()
-{
-	int count = heap.NumUsed();
-
-	for(MFPoolHeap *pHeap = heap.GetNextHeap(); pHeap; pHeap = pHeap->GetNextHeap())
-		count += pHeap->NumUsed();
-
-	return count;
-}
-#endif

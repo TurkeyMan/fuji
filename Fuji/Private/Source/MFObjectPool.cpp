@@ -2,7 +2,7 @@
 #include "MFHeap.h"
 #include "MFObjectPool.h"
 
-void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects)
+void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects, void *_pMemory, uint32 _bytes)
 {
 	objectSize = _objectSize;
 	maxItems = numObjects;
@@ -10,7 +10,14 @@ void MFObjectPool::Init(int _objectSize, int numObjects, int growObjects)
 	allocated = 0;
 
 	bytes = _objectSize * numObjects;
-	pMemory = (char*)MFHeap_Alloc(bytes + sizeof(void**)*numObjects);
+	if(_pMemory)
+	{
+		MFDebug_Assert((uint32)bytes <= _bytes, "Supplied allocation is too small!");
+	}
+	else
+	{
+		pMemory = (char*)MFHeap_Alloc(bytes + sizeof(void**)*numObjects);
+	}
 
 	ppItems = (void**)(pMemory + bytes);
 	for(int a=0; a<numObjects; ++a)

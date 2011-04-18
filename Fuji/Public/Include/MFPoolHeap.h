@@ -3,6 +3,7 @@
 
 class MFPoolHeap
 {
+	friend class MFPoolHeapExpanding;
 public:
 	void Init(int num, size_t size, void *pMem = NULL, size_t memsize = 0);
 	void Destroy();
@@ -73,7 +74,7 @@ public:
 	void *Alloc();
 	void Delete(void *pItem) { heap.Delete(pItem); }
 
-	int NumItemsAlloced();
+	int NumItemsAlloced() { return heap.NumUsed(); }
 
 private:
 	MFPoolHeap heap;

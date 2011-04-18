@@ -16,7 +16,7 @@ public:
 	MFObjectPool(int objectSize, int numObjects, int growObjects = 0) { Init(objectSize, numObjects, growObjects); }
 	~MFObjectPool() { Deinit(); }
 
-	void Init(int objectSize, int numObjects, int growObjects = 0);
+	void Init(int objectSize, int numObjects, int growObjects = 0, void *pMemory = NULL, uint32 bytes = 0);
 	void Deinit();
 
 	void *Alloc();
