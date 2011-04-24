@@ -31,8 +31,9 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-void MFRenderer_BeginFrame()
+bool MFRenderer_BeginFrame()
 {
+	return true;
 }
 
 void MFRenderer_EndFrame()

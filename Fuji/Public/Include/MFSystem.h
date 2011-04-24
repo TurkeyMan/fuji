@@ -29,8 +29,6 @@ struct MFDefaults
 	/** Display Defaults. */
 	struct DisplayDefaults
 	{
-		uint32 displayWidth;			/**< Display width */
-		uint32 displayHeight;			/**< Display height */
 		const char *pWindowTitle;		/**< Game window title */
 		const char *pIcon;				/**< Resource name of the window icon */
 		bool hideMouseCursor;			/**< Hide the mouse cursor when it hovers over the application window */
@@ -181,6 +179,15 @@ struct MFInitParams
 
 	int argc;					//*< The argc parameter supplied to main() */
 	const char **argv;			//*< The argv paramater supplied to main() */
+
+	/**
+	 * Describe the default display.
+	 */
+	struct DisplayMode
+	{
+		MFRect displayRect;		//*< Display rect. If not set, the value returned from MFDisplay_GetDefaultRes() is used. */
+		bool bFullscreen;		//*< Fullscreen flag. */
+	} display;					//*< Display settings. */
 
 	bool hideSystemInfo;		//*< Hide the frame rate and system logo() */
 };

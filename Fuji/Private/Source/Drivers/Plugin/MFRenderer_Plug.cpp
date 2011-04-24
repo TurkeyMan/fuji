@@ -12,7 +12,8 @@
 	int MFRenderer_CreateDisplay_##driver(); \
 	void MFRenderer_DestroyDisplay_##driver(); \
 	void MFRenderer_ResetDisplay_##driver(); \
-	void MFRenderer_BeginFrame_##driver(); \
+	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
+	bool MFRenderer_BeginFrame_##driver(); \
 	void MFRenderer_EndFrame_##driver(); \
 	void MFRenderer_SetClearColour_##driver(float r, float g, float b, float a); \
 	void MFRenderer_ClearScreen_##driver(uint32 flags); \
@@ -31,6 +32,7 @@
 		MFRenderer_CreateDisplay_##driver, \
 		MFRenderer_DestroyDisplay_##driver, \
 		MFRenderer_ResetDisplay_##driver, \
+		MFRenderer_SetDisplayMode_##driver, \
 		MFRenderer_BeginFrame_##driver, \
 		MFRenderer_EndFrame_##driver, \
 		MFRenderer_SetClearColour_##driver, \
@@ -63,7 +65,8 @@ struct MFRenderPluginCallbacks
 	int (*pCreateDisplay)();
 	void (*pDestroyDisplay)();
 	void (*pResetDisplay)();
-	void (*pBeginFrame)();
+	bool (*pSetDisplayMode)(int width, int height, bool bFullscreen);
+	bool (*pBeginFrame)();
 	void (*pEndFrame)();
 	void (*pSetClearColour)(float r, float g, float b, float a);
 	void (*pClearScreen)(uint32 flags);
@@ -135,9 +138,14 @@ void MFRenderer_ResetDisplay()
 	gpCurrentRenderPlugin->pResetDisplay();
 }
 
-void MFRenderer_BeginFrame()
+bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 {
-	gpCurrentRenderPlugin->pBeginFrame();
+	return gpCurrentRenderPlugin->pSetDisplayMode(width, height, bFullscreen);
+}
+
+bool MFRenderer_BeginFrame()
+{
+	return gpCurrentRenderPlugin->pBeginFrame();
 }
 
 void MFRenderer_EndFrame()

@@ -118,14 +118,15 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 	switch(message)
 	{
 		case WM_ACTIVATE:
-			MFInputPC_Acquire(wParam != WA_INACTIVE);
+		{
+			int activate = LOWORD(wParam);
 
-			if(wParam != WA_INACTIVE)
+			MFInputPC_Acquire(activate != WA_INACTIVE);
+
+			if(activate != WA_INACTIVE)
 			{
 				if(!gDisplay.windowed)
-				{
 					MFDisplay_ResetDisplay();
-				}
 
 				// scan key states...
 
@@ -142,6 +143,7 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 					pSystemCallbacks[MFCB_LostFocus]();
 			}
 			break;
+		}
 
 		case WM_SYSCOMMAND:
 		{
@@ -150,15 +152,11 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 				case SC_KEYMENU:
 					if(initialised && lParam == VK_RETURN)
 					{
-						gDisplay.windowed = !gDisplay.windowed;
-						MFDisplay_ResetDisplay();
-
 						if(gDisplay.windowed)
-						{
-							int xframe = GetSystemMetrics(SM_CXFRAME)*2;
-							int yframe = GetSystemMetrics(SM_CYFRAME)*2 + GetSystemMetrics(SM_CYCAPTION);
-							MoveWindow(apphWnd, wndX, wndY, gDisplay.width + xframe, gDisplay.height + yframe, true);
-						}
+							MFDisplay_SetDisplayMode(gDisplay.fullscreenWidth, gDisplay.fullscreenHeight, true);
+						else
+							MFDisplay_SetDisplayMode(gDisplay.width, gDisplay.height, false);
+						MFDisplay_ResetDisplay();
 					}
 
 				case SC_SCREENSAVE:
@@ -180,7 +178,7 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 			if(initialised && gDisplay.windowed)
 			{
 				wndX = LOWORD(lParam);
-				wndY = LOWORD(lParam);
+				wndY = HIWORD(lParam);
 			}
 			break;
 
@@ -310,59 +308,33 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		rect.top=(long)0;
 		rect.bottom=(long)height;
 
-		DWORD dwStyle = WS_POPUP|WS_OVERLAPPEDWINDOW;
-		DWORD dwExStyle = 0;
-
-#if MF_RENDERER != MF_DRIVER_D3D9
+		DWORD dwStyle, dwExStyle;
+		int x, y;
 		if(!gDisplay.windowed)
 		{
 			dwExStyle = WS_EX_APPWINDOW;
 			dwStyle = WS_POPUP;
+			x = 0;
+			y = 0;
 		}
 		else
 		{
 			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 			dwStyle = WS_OVERLAPPEDWINDOW;
+			x = wndX;
+			y = wndY;
 		}
-#endif
 
 		AdjustWindowRectEx(&rect, dwStyle, FALSE, dwExStyle);
 
-		apphWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, wndX, wndY, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, apphInstance, NULL);
+		apphWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, x, y, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, apphInstance, NULL);
 		if(!apphWnd)
 		{
 			MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
 			return 3;
 		}
 
-#if MF_RENDERER != MF_DRIVER_D3D9
-		// if we're not using D3D, we'll have to manage the display mode ourselves...
-		if(!gDisplay.windowed)
-		{
-			ShowCursor(FALSE);
-
-			DEVMODE dmScreenSettings;
-			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-			dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-			dmScreenSettings.dmPelsWidth = gDisplay.fullscreenWidth;
-			dmScreenSettings.dmPelsHeight = gDisplay.fullscreenHeight;
-			dmScreenSettings.dmBitsPerPel = 32;
-			dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
-
-			if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-			{
-				if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-				{
-					gDisplay.windowed = true;
-				}
-				else
-				{
-					MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
-					return FALSE;
-				}
-			}
-		}
-#endif
+		MFRenderer_SetDisplayMode(width, height, !gDisplay.windowed);
 
 		ShowWindow(apphWnd, SW_SHOW);
 		SetForegroundWindow(apphWnd);
@@ -397,6 +369,77 @@ void MFDisplay_DestroyDisplay()
 
 	DestroyWindow(apphWnd);
 	UnregisterClass("FujiWin", apphInstance);
+}
+
+bool MFDisplay_SetDisplayMode(int width, int height, bool bFullscreen)
+{
+	// WIN32 windows need to have the window styles changed when swapping in and out of fullscreen mode
+	// fullscreen apps need to use a window with no frame
+	// windowed apps may want any number of window decorations and stuff
+	if(gDisplay.windowed == bFullscreen)
+	{
+		gDisplay.windowed = !bFullscreen;
+
+		// change of display mode...
+		RECT rect;
+		rect.left=(long)0;
+		rect.right=(long)width;
+		rect.top=(long)0;
+		rect.bottom=(long)height;
+
+		DWORD dwStyle, dwExStyle;
+		int x, y;
+		if(bFullscreen)
+		{
+			gDisplay.fullscreenWidth = width;
+			gDisplay.fullscreenHeight = height;
+			dwExStyle = WS_EX_APPWINDOW;
+			dwStyle = WS_POPUP;
+			x = 0;
+			y = 0;
+		}
+		else
+		{
+			gDisplay.width = width;
+			gDisplay.height = height;
+			dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+			dwStyle = WS_OVERLAPPEDWINDOW;
+			x = wndX;
+			y = wndY;
+		}
+
+		AdjustWindowRectEx(&rect, dwStyle, FALSE, dwExStyle);
+
+		SetWindowLong(apphWnd, GWL_STYLE, dwStyle);
+		SetWindowLong(apphWnd, GWL_EXSTYLE, dwExStyle);
+		SetWindowPos(apphWnd, HWND_NOTOPMOST, x, y, rect.right-rect.left, rect.bottom-rect.top, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+	}
+
+	return MFRenderer_SetDisplayMode(width, height, bFullscreen);
+}
+
+void MFDisplay_GetNativeRes(MFRect *pRect)
+{
+	DEVMODE dm;
+	if(EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm))
+	{
+		pRect->x = pRect->y = 0.f;
+		pRect->width = (float)dm.dmPelsWidth;
+		pRect->height = (float)dm.dmPelsHeight;
+	}
+	else
+	{
+		pRect->x = pRect->y = 0.f;
+		pRect->width = 640.f;
+		pRect->height = 480.f;
+	}
+}
+
+void MFDisplay_GetDefaultRes(MFRect *pRect)
+{
+	pRect->x = pRect->y = 0.f;
+	pRect->width = 800.f;
+	pRect->height = 480.f;
 }
 
 float MFDisplay_GetNativeAspectRatio()

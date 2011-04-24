@@ -8,6 +8,7 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_OpenGL
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_OpenGL
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_OpenGL
+	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_OpenGL
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_OpenGL
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_OpenGL
 	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_OpenGL
@@ -464,16 +465,63 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-void MFRenderer_BeginFrame()
+bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 {
-	MFCheckForOpenGLError();
+	if(bFullscreen)
+	{
+		ShowCursor(FALSE);
+
+		DEVMODE dmScreenSettings;
+		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth = width;
+		dmScreenSettings.dmPelsHeight = height;
+		dmScreenSettings.dmBitsPerPel = 32;
+		dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+		if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+		{
+			if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+			{
+				gDisplay.windowed = true;
+			}
+			else
+			{
+				MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
+				return false;
+			}
+		}
+		else
+		{
+			gDisplay.windowed = false;
+		}
+	}
+	else
+	{
+		// reset display mode...
+		//...
+
+		gDisplay.windowed = true;
+	}
+
+	return true;
+}
+
+bool MFRenderer_BeginFrame()
+{
+	if(MFCheckForOpenGLError())
+		return false;
+
 #if defined(MF_IPHONE)
 	MFRendererIPhone_MakeCurrent();
 #endif
 	MFRenderer_SetDeviceRenderTarget();
 	MFRenderer_ResetViewport();
-	MFCheckForOpenGLError();
 
+	if(MFCheckForOpenGLError())
+		return false;
+
+	return true;
 }
 
 void MFRenderer_EndFrame()
@@ -592,7 +640,7 @@ bool MFCheckForOpenGLError()
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
 	{
-		MFDebug_Log(0, MFStr("OpenGL Error: %d", err));
+		MFDebug_Warn(1, MFStr("OpenGL Error: %d", err));
 //		MFDebug_Breakpoint();
 		return true;
 	}

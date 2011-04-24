@@ -10,11 +10,12 @@ void MFRenderer_DeinitModule();
 void MFRenderer_InitModulePlatformSpecific();
 void MFRenderer_DeinitModulePlatformSpecific();
 
-void MFRenderer_BeginFrame();
+bool MFRenderer_BeginFrame();
 void MFRenderer_EndFrame();
 
 int MFRenderer_CreateDisplay();
 void MFRenderer_DestroyDisplay();
 void MFRenderer_ResetDisplay();
+bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen);
 
 #endif

@@ -51,16 +51,6 @@ MFDefaults gDefaults =
 
 	// DisplayDefaults
 	{
-#if defined(MF_PSP)
-		480,			// displayWidth
-		272,			// displayHeight
-#elif defined(MF_IPHONE)
-		320,			// displayWidth
-		480,			// displayHeight
-#else
-		640,			// displayWidth
-		480,			// displayHeight
-#endif
 		"Fuji Window",	// pWindowTitle
 		NULL,			// pIcon
 		false			// hideMouseCursor
@@ -486,12 +476,12 @@ void MFSystem_RunFrame()
 	}
 	MFSystem_PostUpdate();
 	
-	MFRenderer_BeginFrame();
-	
-	if(pSystemCallbacks[MFCB_Draw])
-		pSystemCallbacks[MFCB_Draw]();
-	MFSystem_Draw();
-	
+	if(MFRenderer_BeginFrame())
+	{
+		if(pSystemCallbacks[MFCB_Draw])
+			pSystemCallbacks[MFCB_Draw]();
+		MFSystem_Draw();
+	}
 	MFRenderer_EndFrame();
 	MFCallstack_EndFrame();
 }

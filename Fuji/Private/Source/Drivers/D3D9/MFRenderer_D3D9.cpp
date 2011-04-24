@@ -8,6 +8,7 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_D3D9
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D9
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D9
+	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D9
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D9
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D9
 	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D9
@@ -246,8 +247,16 @@ void MFRenderer_ResetDisplay()
 	void MFTexture_Release();
 	MFTexture_Release();
 
-	pRenderTarget->Release(); pRenderTarget = NULL;
-	pZTarget->Release(); pZTarget = NULL;
+	if(pRenderTarget)
+	{
+		pRenderTarget->Release();
+		pRenderTarget = NULL;
+	}
+	if(pZTarget)
+	{
+		pZTarget->Release();
+		pZTarget = NULL;
+	}
 
 	// setup present params
 	D3DPRESENT_PARAMETERS present;
@@ -302,13 +311,13 @@ void MFRenderer_ResetDisplay()
 	switch(hr)
 	{
 		case D3DERR_DEVICELOST:
-			MessageBox(0, "Reset: D3DERR_DEVICELOST", "Error!", MB_OK|MB_ICONERROR);
+			MFDebug_Warn(1, "Reset(): D3DERR_DEVICELOST");
 			break;
 		case D3DERR_DRIVERINTERNALERROR:
-			MessageBox(0, "Reset: D3DERR_DRIVERINTERNALERROR", "Error!", MB_OK|MB_ICONERROR);
+			MFDebug_Warn(1, "Reset(): D3DERR_DRIVERINTERNALERROR");
 			break;
 		case D3DERR_INVALIDCALL:
-			MessageBox(0, "Reset: D3DERR_INVALIDCALL", "Error!", MB_OK|MB_ICONERROR);
+			MFDebug_Warn(1, "Reset(): D3DERR_INVALIDCALL");
 			break;
 		case D3D_OK:
 			MFRenderer_ResetViewport();
@@ -325,17 +334,41 @@ void MFRenderer_ResetDisplay()
 	}
 }
 
-void MFRenderer_BeginFrame()
+bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+{
+	// D3D handles this automatically in Reset()
+	gDisplay.windowed = !bFullscreen;
+	if(bFullscreen)
+	{
+		gDisplay.fullscreenWidth = width;
+		gDisplay.fullscreenHeight = height;
+	}
+	else
+	{
+		gDisplay.width = width;
+		gDisplay.height = height;
+	}
+
+	if(pd3dDevice)
+		MFRenderer_ResetDisplay();
+	return true;
+}
+
+bool MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
 
-	pd3dDevice->BeginScene();
+	HRESULT hr = pd3dDevice->BeginScene();
+	if(FAILED(hr))
+		return false;
 
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
 	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	return true;
 }
 
 void MFRenderer_EndFrame()
@@ -343,7 +376,37 @@ void MFRenderer_EndFrame()
 	MFCALLSTACK;
 
 	pd3dDevice->EndScene();
-	pd3dDevice->Present(NULL, NULL, NULL, NULL);
+	HRESULT hr = pd3dDevice->Present(NULL, NULL, NULL, NULL);
+	if(FAILED(hr))
+	{
+		switch(hr)
+		{
+			case D3DERR_DEVICEREMOVED:
+				MFDebug_Warn(1, "D3DERR_DEVICEREMOVED");
+				break;
+			default:
+			{
+				hr = pd3dDevice->TestCooperativeLevel();
+				switch(hr)
+				{
+					case D3DERR_DEVICENOTRESET:
+						// try and reset the display...
+						MFRenderer_ResetDisplay();
+						break;
+					case D3DERR_DEVICELOST:
+						// this is usual when the window is hidden
+						break;
+					case D3DERR_DRIVERINTERNALERROR:
+						MFDebug_Warn(1, "D3DERR_DRIVERINTERNALERROR");
+						break;
+					default:
+						MFDebug_Warn(1, "Unknown error!");
+						break;
+				}
+				break;
+			}
+		}
+	}
 }
 
 void MFRenderer_SetClearColour(float r, float g, float b, float a)
@@ -387,18 +450,26 @@ void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
-	gCurrentViewport.x = 0.0f;
-	gCurrentViewport.y = 0.0f;
-	gCurrentViewport.width = (float)gDisplay.width;
-	gCurrentViewport.height = (float)gDisplay.height;
-
 	D3DVIEWPORT9 vp;
 	vp.X = 0;
 	vp.Y = 0;
-	vp.Width = gDisplay.width;
-	vp.Height = gDisplay.height;
+	if(gDisplay.windowed)
+	{
+		vp.Width = gDisplay.width;
+		vp.Height = gDisplay.height;
+	}
+	else
+	{
+		vp.Width = gDisplay.fullscreenWidth;
+		vp.Height = gDisplay.fullscreenHeight;
+	}
 	vp.MinZ = 0.0f;
 	vp.MaxZ = 1.0f;
+
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)vp.Width;
+	gCurrentViewport.height = (float)vp.Height;
 
 	pd3dDevice->SetViewport(&vp);
 }

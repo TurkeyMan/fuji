@@ -10,6 +10,7 @@ void MFDisplay_DeinitModule();
 // these are used by Fuji internally and not exposed to the game
 int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive);
 void MFDisplay_DestroyDisplay();
+bool MFDisplay_SetDisplayMode(int width, int height, bool bFullscreen);
 
 // display settings
 struct MFDisplaySettings

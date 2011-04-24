@@ -55,6 +55,9 @@ bool MFDisplay_SupportsFullscreen();
 void MFDisplay_GetNumDisplayModes(bool window = false, float aspectConstraint = 0.f);
 void MFDisplay_GetDisplayMode(int index, bool window = false, float aspectConstraint = 0.f);
 
+void MFDisplay_GetNativeRes(MFRect *pRect);
+void MFDisplay_GetDefaultRes(MFRect *pRect);
+
 void MFDisplay_GetDisplayRect(MFRect *pRect);
 
 float MFDisplay_GetNativeAspectRatio();

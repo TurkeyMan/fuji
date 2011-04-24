@@ -8,6 +8,7 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_D3D11
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D11
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D11
+	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D11
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D11
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D11
 	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D11
@@ -23,6 +24,7 @@
 #include "MFRenderer.h"
 #include "MFRenderer_D3D11.h"
 #include "MFTexture_Internal.h"
+#include "MFDisplay_Internal.h"
 #include "Shaders/Registers.h"
 #include "MFVertex.h"
 #include "MFMesh_Internal.h"
@@ -346,9 +348,33 @@ void MFRenderer_ResetDisplay()
 {
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_BeginFrame()
+bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+{
+	// D3D handles this automatically in Reset()
+	gDisplay.windowed = !bFullscreen;
+	if(bFullscreen)
+	{
+		gDisplay.fullscreenWidth = width;
+		gDisplay.fullscreenHeight = height;
+	}
+	else
+	{
+		gDisplay.width = width;
+		gDisplay.height = height;
+	}
+
+	if(g_pd3dDevice)
+	{
+		// change display mode
+		//...
+	}
+	return true;
+}
+//---------------------------------------------------------------------------------------------------------------------
+bool MFRenderer_BeginFrame()
 {
 	MFCALLSTACK;
+	return true;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_EndFrame()
