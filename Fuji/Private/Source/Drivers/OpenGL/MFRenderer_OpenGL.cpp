@@ -469,6 +469,7 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 {
 	if(bFullscreen)
 	{
+#if MF_DISPLAY == MF_DRIVER_WIN32
 		ShowCursor(FALSE);
 
 		DEVMODE dmScreenSettings;
@@ -495,6 +496,7 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 		{
 			gDisplay.windowed = false;
 		}
+#endif
 	}
 	else
 	{
