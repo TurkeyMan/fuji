@@ -1,0 +1,17 @@
+Source: libfuji-dev
+Section: libdevel
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Danni Coy <danni.coy@gmail.com>
+Build-Depends: debhelper (>= 7.3.16), libpng12-dev, zlib1g-dev, libgl1-mesa-dev, xorg-dev, libogg-dev, libvorbis-dev, libasound-dev, premake4
+Standards-Version: 3.9.1
+Homepage: http://www.fujiengine.org/
+
+Package: libfuji-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpng12, zlib1g, libgl1-mesa
+Suggests:
+Description: library for creating games
+  Mount Fuji is a cross platform game engine which aims to provide a set of features and tools which can be used to radically simplify the development process of games on modern hardware.
+  Mount Fuji provides a rich API which supports most flavours of PC and modern Consoles. While Mount Fuji is internally developed in C/C++ and Assembly, it is accessible by a variety of languages as a statically and dynamically linkable library.
+  The Mount Fuji engine also provides a set of data and asset management tools designed to take game assets developed in a wide variety of art and asset packages in game. Assets are converted to internal platform specific data formats to maximise efficiency and performance on all available platforms.
