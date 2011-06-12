@@ -1,13 +1,13 @@
 project "mad"
 	kind "StaticLib"
-	language "C++"
+	language "C"
 	files { "**.c", "**.h", "**.dat" }
 	excludes { "minimad.c" }
 
 	includedirs { "msvc++" }
 	targetdir "../../../Public/Lib/Middleware/libmad/"
 
-	flags { "StaticRuntime" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
 
 	defines { "_LIB", "HAVE_CONFIG_H", "ASO_ZEROCHECK", "_CRT_SECURE_NO_DEPRECATE" }
 
@@ -17,7 +17,7 @@ project "mad"
 		targetsuffix "_d"
 	configuration "DebugOpt"
 		defines { "DEBUG", "FPM_DEFAULT" }
-		flags { "Symbols", "OptimizeSpeed" }
+		flags { "Symbols", "Optimize" }
 	configuration "Release"
 		defines { "NDEBUG", "FPM_INTEL" }
 		flags { "OptimizeSpeed" }

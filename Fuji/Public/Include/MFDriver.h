@@ -104,6 +104,7 @@
 #define MF_DRIVER_WINDOWSMOBILE	33
 #define MF_DRIVER_OPENCL		34
 #define MF_DRIVER_BSDSOCKETS	35
+#define MF_DRIVER_ANDROID		36
 
 /*** Platform specific defines, includes and driver selection ***/
 
@@ -304,6 +305,31 @@
 	#define MF_THREAD		MF_DRIVER_LINUX
 	#define MF_FILESYSTEM	MF_DRIVER_LINUX
 	#define MF_SOUND		MF_DRIVER_IPHONE
+
+	#define USE_MFSOUNDBUFFER
+	#define USE_MFMIXER
+
+	#define MF_OPENGL_ES
+	#if !defined(MF_OPENGL_ES_VER)
+		#define MF_OPENGL_ES_VER 1
+	#endif
+
+#elif defined(MF_ANDROID)
+
+	#include <stdarg.h> // For varargs
+	#include <stdlib.h> // For realloc, malloc
+
+//	#define _OPENGL_CLIP_SPACE
+
+	// specify drivers
+	#define MF_DISPLAY		MF_DRIVER_ANDROID
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_INPUT		MF_DRIVER_NULL
+	#define MF_SYSTEM		MF_DRIVER_ANDROID
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_LINUX
+	#define MF_SOUND		MF_DRIVER_NULL
 
 	#define USE_MFSOUNDBUFFER
 	#define USE_MFMIXER

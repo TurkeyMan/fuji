@@ -145,6 +145,12 @@
 		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
 	#endif
+#elif defined(_ANDROID)
+	#define MF_ANDROID
+	#define MF_PLATFORM ANDROID
+	#define MF_ARCH_ARM
+	#define MF_ENDIAN_LITTLE
+	#define MF_32BIT
 #elif defined(_SYMBIAN)
 	#define MF_SYMBIAN
 	#define MF_PLATFORM SYMBIAN
@@ -250,6 +256,7 @@ enum MFPlatform
 	FP_Wii,				/**< Nintendo Wii */
 	FP_Symbian,			/**< Symbian OS */
 	FP_IPhone,			/**< IPhone OS */
+	FP_Android,			/**< Android */
 	FP_WindowsMobile,	/**< Windows Mobile */
 
 	FP_Max,		/**< Max platform */

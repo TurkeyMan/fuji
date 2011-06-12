@@ -15,7 +15,7 @@ project "json"
 		targetsuffix "_d"
 	configuration "DebugOpt"
 		defines { "DEBUG" }
-		flags { "Symbols", "OptimizeSpeed" }
+		flags { "Symbols", "Optimize" }
 	configuration "Release"
 		defines { "NDEBUG" }
 		flags { "OptimizeSpeed" }

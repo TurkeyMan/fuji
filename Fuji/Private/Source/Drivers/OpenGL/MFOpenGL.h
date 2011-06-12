@@ -9,12 +9,24 @@
 
 	#define glGetProcAddress wglGetProcAddress
 #elif defined(MF_OPENGL_ES)
-	#if MF_OPENGL_ES_VER == 1
-		#include <OpenGLES/ES1/gl.h>
-		#include <OpenGLES/ES1/glext.h>
-	#elif MF_OPENGL_ES_VER == 2
-		#include <OpenGLES/ES2/gl.h>
-		#include <OpenGLES/ES2/glext.h>
+	#if defined(MF_IPHONE)
+		#if MF_OPENGL_ES_VER == 1
+			#include <OpenGLES/ES1/gl.h>
+			#include <OpenGLES/ES1/glext.h>
+		#elif MF_OPENGL_ES_VER == 2
+			#include <OpenGLES/ES2/gl.h>
+			#include <OpenGLES/ES2/glext.h>
+		#endif
+	#elif defined(MF_ANDROID)
+		#if MF_OPENGL_ES_VER == 1
+			#include <GLES/gl.h>
+			#include <GLES/glext.h>
+		#elif MF_OPENGL_ES_VER == 2
+			#include <GLES2/gl2.h>
+			#include <GLES2/gl2ext.h>
+		#endif
+	#else
+		#error Unknown OpenGL ES include paths...
 	#endif
 #else
 	#if defined(MF_LINUX) || defined(MF_OSX)

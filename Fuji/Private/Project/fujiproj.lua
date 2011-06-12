@@ -61,8 +61,12 @@ project "Fuji"
 		includedirs { "../Source/Images/OSX/" }
 
 	-- Windows --
-	configuration { "windows", "not Xbox360", "not PS3" }
+	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		includedirs { "../Source/Images/WINDOWS/" }
+
+	-- Android --
+	configuration { "Android" }
+		includedirs { "../Source/Images/ANDROID/" }
 
 	-- XBox --
 	configuration "Xbox"
