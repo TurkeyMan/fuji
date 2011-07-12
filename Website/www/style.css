@@ -1,0 +1,19 @@
+html,body
+{
+	background:#3030ff;
+	margin:0px;
+	padding:0px;
+	color:#ffffff;
+}
+
+table,td
+{
+	margin:0px;
+	padding:0px;
+}
+
+#container
+{
+	width:960px;
+	margin:0 auto;	
+}
