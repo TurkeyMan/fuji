@@ -217,6 +217,9 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap);
  */
 bool MFHeap_ValidateMemory(const void *pMemory);
 
+// TODO...
+bool MFHeap_ValidateHeap();
+
 /**
  * Get an uncached pointer to a block of memory.
  * Returns a pointer that provides uncached access to a specified block of memory.

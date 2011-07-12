@@ -6,6 +6,15 @@ void MFUtil_CrcInit(); // generates some crc tables - system should call this on
 uint32 MFUtil_Crc(const char *buffer, int length); // generate a unique Crc number for this buffer
 uint32 MFUtil_CrcString(const char *pString);	// generate a unique Crc number for this string
 uint32 MFUtil_HashString(const char *pString); // generate a very fast hash value from a string
+
+inline uint32 MFUtil_HashPointer(void *pPointer)
+{
+	// TODO: this function could do with some work...
+	// perhaps do it differently on 64bit platforms, or use some
+	// platform specific knowledge about the memspace...
+	return (uint32)((uintp)pPointer * 2654435761UL);
+}
+
 int MFUtil_NextPowerOf2(int x);
 
 // endian flipping
