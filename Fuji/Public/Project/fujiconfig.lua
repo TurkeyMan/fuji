@@ -5,10 +5,10 @@ local function isVS()
 end
 
 local configNames = {}
-configNames.Debug = iif(isVS(), "$(Configuration)", "Debug")
-configNames.DebugOpt = iif(isVS(), "$(Configuration)", "DebugOpt")
-configNames.Release = iif(isVS(), "$(Configuration)", "Release")
-configNames.Retail = iif(isVS(), "$(Configuration)", "Retail")
+configNames.Debug = iif(isVS(), "$(ConfigurationName)", "Debug")
+configNames.DebugOpt = iif(isVS(), "$(ConfigurationName)", "DebugOpt")
+configNames.Release = iif(isVS(), "$(ConfigurationName)", "Release")
+configNames.Retail = iif(isVS(), "$(ConfigurationName)", "Retail")
 
 local platformNames = {}
 platformNames.Android = iif(isVS(), "$(Platform)", "Android")

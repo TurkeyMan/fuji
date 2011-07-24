@@ -23,7 +23,7 @@
 #include "MFCollision_Internal.h"
 #include "MFAnimScript_Internal.h"
 #include "MFVertex_Internal.h"
-#include "MFThread.h"
+#include "MFThread_Internal.h"
 #include "MFCompute_Internal.h"
 
 #if defined(MF_WINDOWS)
@@ -47,6 +47,12 @@ MFDefaults gDefaults =
 	{
 		4096,			// maxAllocations
 		2048			// maxStaticMarkers
+	},
+
+	// ThreadDefaults
+	{
+		16,				// maxThreads
+		16				// maxTlsSlots
 	},
 
 	// DisplayDefaults
@@ -167,25 +173,41 @@ void MFSystem_Quit()
 	gQuit = 1;
 }
 
-void MFSystem_Init()
+void MFSystem_InitCore()
 {
 	MFUtil_CrcInit();
 
 	MFHeap_InitModule();
+	MFThread_InitModule();
 	MFString_InitModule();
+
+	MFSockets_InitModule();
+	MFFileSystem_InitModule();
+}
+
+void MFSystem_DeinitCore()
+{
+	MFFileSystem_DeinitModule();
+	MFSockets_DeinitModule();
+
+	MFString_DeinitModule();
+	MFThread_DeinitModule();
+	MFHeap_DeinitModule();
+}
+
+void MFSystem_Init()
+{
+	MFSystem_InitCore();
+
+	gSystemTimer.Init(NULL);
+	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
 	DebugMenu_InitModule();
 	MFCallstack_InitModule();
 
-	MFSystem_InitModulePlatformSpecific();
-
 	Timer_InitModule();
-	gSystemTimer.Init(NULL);
-	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 
-	MFSockets_InitModule();
-
-	MFFileSystem_InitModule();
+	MFSystem_InitModulePlatformSpecific();
 
 	MFView_InitModule();
 	MFRenderer_InitModule();
@@ -257,19 +279,14 @@ void MFSystem_Deinit()
 	MFRenderer_DeinitModule();
 	MFView_DeinitModule();
 
-	MFFileSystem_DeinitModule();
-
-	MFSockets_DeinitModule();
+	MFSystem_DeinitModulePlatformSpecific();
 
 	Timer_DeinitModule();
-
-	MFSystem_DeinitModulePlatformSpecific();
 
 	MFCallstack_DeinitModule();
 	DebugMenu_DeinitModule();
 
-	MFString_DeinitModule();
-	MFHeap_DeinitModule();
+	MFSystem_DeinitCore();
 }
 
 void MFSystem_Update()

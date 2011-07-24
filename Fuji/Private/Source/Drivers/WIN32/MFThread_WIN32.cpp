@@ -2,7 +2,7 @@
 
 #if MF_THREAD == MF_DRIVER_WIN32
 
-#include "MFThread.h"
+#include "MFThread_Internal.h"
 #include "MFHeap.h"
 
 #if defined(MF_WINDOWS)
@@ -14,15 +14,10 @@
 
 // globals
 
-static const int gMaxThreads = 16;
-
 struct MFThreadInfoPC
 {
 	HANDLE hThread;
 	DWORD threadID;
-
-	MFThreadEntryPoint pEntryPoint;
-	void *pUserData;
 };
 
 struct MFMutexPC
@@ -31,95 +26,65 @@ struct MFMutexPC
 	char name[32];
 };
 
-static MFThreadInfoPC gThreads[gMaxThreads];
-
-
 // functions
-
-static MFThreadInfoPC* MFThreadPC_GetNewThreadInfo()
-{
-	for(int a=0; a<gMaxThreads; a++)
-	{
-		if(!gThreads[a].hThread)
-			return &gThreads[a];
-	}
-
-	return NULL;
-}
 
 static DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
-	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)lpParameter;
-	return (DWORD)pThreadInfo->pEntryPoint(pThreadInfo->pUserData);
+	return (DWORD)MFThread_ThreadProc((MFThreadInfo*)lpParameter);
 }
 
-
-// interface functions
-
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize)
+void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 {
-	MFThreadInfoPC *pThreadInfo = MFThreadPC_GetNewThreadInfo();
+	MFDebug_Assert(sizeof(MFThreadInfoPC) <= sizeof(pThreadInfo->platformSpecific), "Thread info too large!");
+	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)pThreadInfo->platformSpecific;
 
-	if(!pThreadInfo)
-		return NULL;
-
-	pThreadInfo->pEntryPoint = pEntryPoint;
-	pThreadInfo->pUserData = pUserData;
-	pThreadInfo->hThread = CreateThread(NULL, stackSize, ThreadProc, pThreadInfo, 0, &pThreadInfo->threadID);
-
-	return pThreadInfo;
+	pThreadInfoPC->hThread = CreateThread(NULL, pThreadInfo->priority, ThreadProc, pThreadInfo, 0, &pThreadInfoPC->threadID);
 }
 
 void MFThread_ExitThread(int exitCode)
 {
+	// TODO: get pThreadInfo from TLS...
+//	pThreadInfo->exitCode = exitCode;
+
 	ExitThread((DWORD)exitCode);
 }
 
-void MFThread_TerminateThread(MFThread thread)
+void MFThread_TerminateThread(MFThread pThreadInfo)
 {
-	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
+	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)pThreadInfo->platformSpecific;
+
+	pThreadInfo->exitCode = -1;
 
 #if defined(MF_XBOX)
 	#pragma message("TODO: This needs to be fixed")
 	MFDebug_Assert(false, "Cant terminate a thread on xbox.");
 #else
-	TerminateThread(pThreadInfo->hThread, (DWORD)-1);
+	TerminateThread(pThreadInfoPC->hThread, (DWORD)pThreadInfo->exitCode);
 #endif
 }
 
-int MFThread_GetExitCode(MFThread thread)
+void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 {
-	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
-	DWORD exitCode;
+	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)thread->platformSpecific;
 
-	GetExitCodeThread(pThreadInfo->hThread, &exitCode);
-
-	return (int)exitCode;
+	CloseHandle(pThreadInfoPC->hThread);
+	pThreadInfoPC->hThread = NULL;
 }
 
-void MFThread_DestroyThread(MFThread thread)
+int MFThread_GetMutexSizePlatformSpecific()
 {
-	MFThreadInfoPC *pThreadInfo = (MFThreadInfoPC*)thread;
-
-	CloseHandle(pThreadInfo->hThread);
-	pThreadInfo->hThread = NULL;
+	return sizeof(MFMutexPC);
 }
 
-
-MFMutex MFThread_CreateMutex(const char *pName)
+void MFThread_InitMutexPlatformSpecific(MFMutex mutex, const char *pName)
 {
-	MFMutexPC *pMutex = (MFMutexPC*)MFHeap_Alloc(sizeof(MFMutexPC));
-
-	if(!pMutex)
-		return NULL;
+	MFMutexPC *pMutex = (MFMutexPC*)mutex;
 
 	MFDebug_Assert(pName[0], "No name specified.");
 	MFDebug_Assert(MFString_Length(pName) <= 31, "Name must be less than 31 characters");
 	MFString_Copy(pMutex->name, pName);
 
 	InitializeCriticalSection(&pMutex->criticalSection);
-
-	return pMutex;
 }
 
 void MFThread_DestroyMutex(MFMutex mutex)

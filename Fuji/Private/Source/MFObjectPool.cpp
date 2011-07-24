@@ -27,16 +27,22 @@ void MFObjectPool::Init(size_t _objectSize, int numObjects, int growObjects, voi
 		ppItems[a] = pMemory + _objectSize*a;
 
 	pNext = NULL;
+
+	mutex = MFThread_CreateMutex("MFObjectPool alloc mutex");
 }
 
 void MFObjectPool::Deinit()
 {
+	MFThread_LockMutex(mutex);
+
 	if(pNext)
 	{
 		pNext->Deinit();
 		MFHeap_Free(pNext);
 		pNext = NULL;
 	}
+
+	MFThread_DestroyMutex(mutex);
 
 	if(bOwnMemory)
 		MFHeap_Free(pMemory);
@@ -45,25 +51,34 @@ void MFObjectPool::Deinit()
 
 void *MFObjectPool::Alloc()
 {
+	MFThread_LockMutex(mutex);
+
+	void *pAlloc = NULL;
+
 	if(allocated < maxItems)
 	{
-		return ppItems[allocated++];
+		pAlloc = ppItems[allocated++];
 	}
 	else
 	{
 		if(pNext)
 		{
-			return pNext->Alloc();
+			pAlloc = pNext->Alloc();
 		}
 		else if(grow)
 		{
+			MFHeap *pHeap = MFHeap_GetAllocHeap(pMemory);
+			MFHeap *pOld = MFHeap_SetActiveHeap(pHeap);
 			pNext = (MFObjectPool*)MFHeap_Alloc(sizeof(MFObjectPool));
 			pNext->Init(objectSize, grow, grow);
-			return pNext->Alloc();
+			MFHeap_SetActiveHeap(pOld);
+			pAlloc = pNext->Alloc();
 		}
 	}
 
-	return NULL;
+	MFThread_ReleaseMutex(mutex);
+
+	return pAlloc;
 }
 
 void *MFObjectPool::AllocAndZero()
@@ -76,6 +91,9 @@ void *MFObjectPool::AllocAndZero()
 
 int MFObjectPool::Free(void *pItem)
 {
+	MFThread_LockMutex(mutex);
+
+	int bFreed = 0;
 	if(pItem >= pMemory && pItem < pMemory + bytes)
 	{
 		for(int a=0; a<allocated; ++a)
@@ -85,14 +103,19 @@ int MFObjectPool::Free(void *pItem)
 				void *pItem = ppItems[a];
 				ppItems[a] = ppItems[--allocated];
 				ppItems[allocated] = pItem;
-				return 1;
+
+				bFreed = 1;
+				break;
 			}
 		}
 	}
 
-	if(pNext)
-		return pNext->Free(pItem);
-	return 0;
+	if(!bFreed && pNext)
+		bFreed = pNext->Free(pItem);
+
+	MFThread_ReleaseMutex(mutex);
+
+	return bFreed;
 }
 
 uint32 MFObjectPool::GetTotalMemory()
@@ -122,11 +145,11 @@ int MFObjectPool::GetNumAllocated()
 
 void *MFObjectPool::GetItem(int index)
 {
-	if(index < maxItems)
+	if(index < allocated)
 		return ppItems[index];
 
 	if(pNext)
-		return pNext->GetItem(index - maxItems);
+		return pNext->GetItem(index - allocated);
 
 	return NULL;
 }
@@ -139,6 +162,8 @@ void MFObjectPoolGroup::Init(const MFObjectPoolGroupConfig *_pPools, int _numPoo
 
 	MFCopyMemory(pConfig, _pPools, sizeof(MFObjectPoolGroupConfig)*_numPools);
 
+	mutex = MFThread_CreateMutex("MFObjectPoolGroup alloc mutex");
+
 	for(int a=0; a<_numPools; ++a)
 	{
 		pPools[a].Init(pConfig[a].objectSize, pConfig[a].numObjects, pConfig[a].growObjects);
@@ -147,27 +172,45 @@ void MFObjectPoolGroup::Init(const MFObjectPoolGroupConfig *_pPools, int _numPoo
 
 void MFObjectPoolGroup::Deinit()
 {
+	MFThread_LockMutex(mutex);
+
 	for(int a=0; a<numPools; ++a)
 		pPools[a].Deinit();
+
+	MFThread_DestroyMutex(mutex);
+
 	MFHeap_Free(pConfig);
 }
 
 void *MFObjectPoolGroup::Alloc(size_t bytes, size_t *pAllocated)
 {
+	MFThread_LockMutex(mutex);
+
+	void *pAlloc = NULL;
+
 	for(int a=0; a<numPools; ++a)
 	{
 		if(bytes <= pConfig[a].objectSize)
 		{
 			if(pAllocated)
 				*pAllocated = pConfig[a].objectSize;
-			return pPools[a].Alloc();
+			pAlloc = pPools[a].Alloc();
+			break;
 		}
 	}
 
-	++overflows;
-	if(pAllocated)
-		*pAllocated = bytes;
-	return MFHeap_Alloc(bytes);
+	if(!pAlloc)
+	{
+		++overflows;
+		if(pAllocated)
+			*pAllocated = bytes;
+		MFHeap *pHeap = MFHeap_GetAllocHeap(pConfig);
+		pAlloc = MFHeap_Alloc(bytes, pHeap);
+	}
+
+	MFThread_ReleaseMutex(mutex);
+
+	return pAlloc;
 }
 
 void *MFObjectPoolGroup::AllocAndZero(size_t bytes, size_t *pAllocated)
@@ -183,14 +226,19 @@ void *MFObjectPoolGroup::AllocAndZero(size_t bytes, size_t *pAllocated)
 
 void MFObjectPoolGroup::Free(void *pItem)
 {
+	MFThread_LockMutex(mutex);
+
 	for(int a=0; a<numPools; ++a)
 	{
 		if(pPools[a].Free(pItem))
-			return;
+			goto free_done;
 	}
 
 	--overflows;
 	MFHeap_Free(pItem);
+
+free_done:
+	MFThread_ReleaseMutex(mutex);
 }
 
 uint32 MFObjectPoolGroup::GetTotalMemory()

@@ -9,6 +9,8 @@
 #if !defined(_MFTHREAD_H)
 #define _MFTHREAD_H
 
+struct MFThreadInfo;
+
 /**
  * Thread priority.
  * Thread priority.
@@ -26,10 +28,21 @@ enum MFThreadPriority
 };
 
 /**
+ * Thread flags.
+ * Thread flags.
+ */
+enum MFThreadFlags
+{
+	MFTF_Joinable = 1,		/**< This thread will be joinable. */
+
+	MFTF_ForceInt = 0x7FFFFFFF	/**< Force enum to a uint type. */
+};
+
+/**
  * Represents a Fuji Thread.
  * Represents a Fuji Thread.
  */
-typedef void* MFThread;
+typedef MFThreadInfo* MFThread;
 
 /**
  * Represents a Fuji Mutex.
@@ -42,6 +55,12 @@ typedef void* MFMutex;
  * Represents a Fuji Semaphore.
  */
 typedef void* MFSemaphore;
+
+/**
+ * Represents a Fuji thread local store slot.
+ * Represents a Fuji thread local store slot.
+ */
+typedef void* MFTls;
 
 
 /**
@@ -57,11 +76,12 @@ typedef int (*MFThreadEntryPoint)(void *);
  * @param pEntryPoint Pointer to the entry point function for the new thread.
  * @param pUserData Pointer to be passed to the new threads entry point.
  * @param priority The threads execution priority.
+ * @param flags Optional creation flags from \a MFThreadFlags.
  * @param stackSize Size of the new threads stack.
  * @return Returns a handle to the new thread.
  * @see MFThread_TerminateThread(), MFThread_ExitThread(), MFThread_GetExitCode(), MFThread_DestroyThread()
  */
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 stackSize = 0);
+MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 flags = 0, uint32 stackSize = 0);
 
 /**
  * Exit from the current thread.
@@ -95,6 +115,14 @@ int MFThread_GetExitCode(MFThread thread);
  * @return None.
  */
 void MFThread_DestroyThread(MFThread thread);
+
+/**
+ * Join threads.
+ * Waits for the specified thread to complete.
+ * @param thread Handle to a thread to join.
+ * @return None.
+ */
+void MFThread_Join(MFThread thread);
 
 /**
  * Create a mutex object.
@@ -163,6 +191,38 @@ uint32 MFThread_WaitSemaphore(MFSemaphore semaphore);
  * @remarks Signaling a semaphore increments the semaphores count by 1. If the semaphore already contains the maximum value specified by CreateSemaphore, SignalSemaphore will wait until it has been decremented.
  */
 void MFThread_SignalSemaphore(MFSemaphore semaphore);
+
+/**
+ * Allocate a TLS slot.
+ * Allocates a thread local storage slot.
+ * @return Returns a handle to the allocated local store slot, or NULL if MFThread_TlsAlloc() failed.
+ */
+MFTls MFThread_TlsAlloc();
+
+/**
+ * Free a TLS slot.
+ * Frees a previously allocated thread local storage slot.
+ * @param tls Handle to a TLS.
+ * @return Allocated MFTls object.
+ */
+void MFThread_TlsFree(MFTls tls);
+
+/**
+ * Get the value from a TLS.
+ * Gets the value stored in a thread local store slot.
+ * @param tls Handle to a TLS.
+ * @return Value stored in the requested TLS.
+ */
+void *MFThread_GetTls(MFTls tls);
+
+/**
+ * Set the value of a tls.
+ * Sets the value stored in a thread local store slot.
+ * @param tls Handle to a TLS.
+ * @param pValue Value to set.
+ * @return Returns the old value stored in the TLS slot.
+ */
+void *MFThread_SetTls(MFTls tls, void *pValue);
 
 #endif // _MFTHREAD_H
 

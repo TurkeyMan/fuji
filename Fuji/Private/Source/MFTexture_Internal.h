@@ -1,5 +1,5 @@
-#if !defined(_TEXTURE_INTERNAL_H)
-#define _TEXTURE_INTERNAL_H
+#if !defined(_MFTEXTURE_INTERNAL_H)
+#define _MFTEXTURE_INTERNAL_H
 
 #if MF_RENDERER == MF_DRIVER_D3D9
 	#include <d3d9.h>

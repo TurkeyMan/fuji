@@ -9,6 +9,8 @@
 #if !defined(_MFOBJECTPOOL_H)
 #define _MFOBJECTPOOL_H
 
+#include "MFThread.h"
+
 class MFObjectPool
 {
 public:
@@ -46,6 +48,8 @@ private:
 	bool bOwnMemory;
 
 	MFObjectPool *pNext;
+
+	MFMutex mutex;
 };
 
 
@@ -82,6 +86,8 @@ private:
 	int overflows;
 
 	MFObjectPool *pPools;
+
+	MFMutex mutex;
 };
 
 #endif

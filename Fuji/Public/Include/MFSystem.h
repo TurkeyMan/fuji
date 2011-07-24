@@ -26,6 +26,13 @@ struct MFDefaults
 		uint32 maxStaticHeapMarkers;	/**< Maximum static heap markers */
 	} heap;
 
+	/** Thread Defaults. */
+	struct ThreadDefaults
+	{
+		uint32 maxThreads;				/**< Maximum number of threads */
+		uint32 maxTlsSlots;				/**< Maximum number of MFTls slots */
+	} thread;
+
 	/** Display Defaults. */
 	struct DisplayDefaults
 	{

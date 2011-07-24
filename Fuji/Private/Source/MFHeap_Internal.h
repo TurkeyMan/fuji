@@ -24,19 +24,13 @@ struct MFHeap
 
 	MFHeapType heapType;
 
+	size_t totalAllocated;
+	size_t totalWaste;
+	int allocCount;
+
 #if !defined(_RETAIL)
 	char heapName[32];
 #endif
-};
-
-// allocation structure. stored immediately before any fuji allocation to identify the heap it was allocated with, and verify memory integrity.
-struct MFAllocHeader
-{
-	MFHeap *pHeap;
-	uint32 size;
-	const char *pFile;
-	uint16 line;
-	uint16 alignment;
 };
 
 // static (mark/release) heap

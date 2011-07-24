@@ -119,9 +119,9 @@ void operator delete[](void *pMemory, void *pMem);
 
 
 // *** document me!! ***
-size_t MFHeap_GetTotalAllocated();
-size_t MFHeap_GetTotalWaste();
-int MFHeap_GetNumAllocations();
+size_t MFHeap_GetTotalAllocated(MFHeap *pHeap);
+size_t MFHeap_GetTotalWaste(MFHeap *pHeap);
+int MFHeap_GetNumAllocations(MFHeap *pHeap);
 
 /**
  * Get the size of an allocation.
@@ -129,8 +129,19 @@ int MFHeap_GetNumAllocations();
  * @param pMemory Pointer to an allocated block of memory.
  * @return Size, in bytes, of the block of memory that \a pMemory points to.
  * @see MFHeap_Alloc()
+ * @see MFHeap_GetAllocHeap()
  */
 uint32 MFHeap_GetAllocSize(const void *pMemory);
+
+/**
+ * Get the heap of an allocation.
+ * Get the heap of a fuji allocation.
+ * @param pMemory Pointer to an allocated block of memory.
+ * @return Pointer to the MFHeap the memory was allocated in.
+ * @see MFHeap_Alloc()
+ * @see MFHeap_GetAllocSize()
+ */
+MFHeap *MFHeap_GetAllocHeap(const void *pMemory);
 
 /**
  * Get a Heap pointer.
@@ -152,6 +163,15 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap);
  * @see MFHeap_SetActiveHeap()
  */
 MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap);
+
+/**
+ * Gets the debug heap.
+ * Returns a pointer to the debug heap.
+ * @return Pointer to the debug heap.
+ * @see MFHeap_GetHeap()
+ * @see MFHeap_SetActiveHeap()
+ */
+MFHeap* MFHeap_GetDebugHeap();
 
 /**
  * Set active heap.

@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "MFHeap_Internal.h"
+#include "MFThread_Internal.h"
 
 //#define _USE_TRACKING_HASH_TABLE
 #define _USE_ALLOC_TRACKER
@@ -32,10 +33,6 @@
 
 static int heapAlignment = 32;
 
-static size_t totalAllocated = 0;
-static size_t totalWaste = 0;
-static int allocCount = 0;
-
 // external heap
 static void* ExternalMalloc(size_t bytes, void *pUserData)
 {
@@ -59,8 +56,21 @@ static MFHeap gExternalHeap =
 	NULL,
 	NULL,
 	MFHT_External,
+	0, 0, 0,
 #if !defined(_RETAIL)
 	"External Heap"
+#endif
+};
+
+static MFHeap gDebugHeap =
+{
+	&gExternalCallbacks,
+	NULL,
+	NULL,
+	MFHT_Debug,
+	0, 0, 0,
+#if !defined(_RETAIL)
+	"Debug Heap"
 #endif
 };
 
@@ -68,7 +78,10 @@ static MFHeap gExternalHeap =
 static MFHeap *pActiveHeap = &gExternalHeap;
 static MFHeap *pOverrideHeap = NULL;
 
-static MFHeap *pDebugHeap = &gExternalHeap;
+static MFHeap *pDebugHeap = &gDebugHeap;
+
+static char gMutexBuffer[64];
+static MFMutex gAllocMutex = NULL;
 
 // custom heap
 static MFMemoryCallbacks gCustomCallbacks =
@@ -83,17 +96,34 @@ static MFHeap gCustomHeap =
 	NULL,
 	NULL,
 	MFHT_Custom,
+	0, 0, 0,
 #if !defined(_RETAIL)
 	"Custom Heap"
 #endif
 };
 
 #if !defined(_RETAIL)
-	#define MFHeap_MungwallBytes 8
-	static const char gMungwall[9] = "mungwall";
+	static const int MFHeap_MungwallBytes = 8;
+	static const char *gMungwall = "mungwall";
+
+	#define USE_PRE_MUNGWALL
+	static const char *gLlawgnum = "llawgnum";
 #else
-	#define MFHeap_MungwallBytes 0
+	static const int MFHeap_MungwallBytes 0
 #endif
+
+// allocation structure. stored immediately before any fuji allocation to identify the heap it was allocated with, and verify memory integrity.
+struct MFAllocHeader
+{
+	MFHeap *pHeap;
+	uint32 size;
+	const char *pFile;
+	uint16 line;
+	uint16 alignment;
+#if defined(USE_PRE_MUNGWALL)
+	char llawgnum[MFHeap_MungwallBytes];
+#endif
+};
 
 /*** heap tracker ***/
 
@@ -113,14 +143,22 @@ void MFHeap_InitModule()
 {
 	MFCALLSTACK;
 
+	MFDebug_Assert(MFThread_GetMutexSizePlatformSpecific() <= sizeof(gMutexBuffer), "Mutex buffer too small!");
+	MFThread_InitMutexPlatformSpecific((MFMutex)gMutexBuffer, "MFHeap alloc mutex");
+	gAllocMutex = (MFMutex)gMutexBuffer;
+
+	// any heap tracking allocations should be made in the debug space
+	MFHeap *pOld = MFHeap_SetActiveHeap(MFHeap_GetDebugHeap());
+
 #if defined(_USE_TRACKING_HASH_TABLE)
 	// set up the memory tracking hash table
 	// note: this is slightly complicated due to the chicken and egg nature
 	// of making the first allocation for the pool its self ;)
 	static const int numAllocHeaders = 1024;
-	uint32 bytes = (sizeof(MFHeap_AllocItem) + sizeof(void**)) * numAllocHeaders;
-	void *pPoolMemory = MFHeap_SystemMalloc(bytes);
-	gAllocHeaderPool.Init(sizeof(MFHeap_AllocItem), numAllocHeaders, 1024, pPoolMemory, bytes);
+//	uint32 bytes = (sizeof(MFHeap_AllocItem) + sizeof(void**)) * numAllocHeaders;
+//	void *pPoolMemory = MFHeap_Alloc(bytes);
+//	gAllocHeaderPool.Init(sizeof(MFHeap_AllocItem), numAllocHeaders, 1024, pPoolMemory, bytes);
+	gAllocHeaderPool.Init(sizeof(MFHeap_AllocItem), numAllocHeaders, 1024);
 
 	MFZeroMemory(gpAllocTable, sizeof(gpAllocTable));
 
@@ -139,6 +177,9 @@ void MFHeap_InitModule()
 	gAllocList.Init(sizeof(void*), 1024, 1024);
 	gPoolInitialised = true;
 #endif
+
+	// restore the active heap
+	MFHeap_SetActiveHeap(pOld);
 
 	// init the heap
 	MFHeap_InitModulePlatformSpecific();
@@ -161,6 +202,8 @@ void MFHeap_DeinitModule()
 	gAllocHeaderPool.Deinit();
 	MFZeroMemory(gpAllocTable, sizeof(gpAllocTable));
 #endif
+
+	MFThread_DestroyMutex(gAllocMutex);
 }
 
 void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
@@ -176,52 +219,61 @@ void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 	size_t allocExtra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
 	size_t allocBytes = bytes + allocExtra;
 
+	MFThread_LockMutex(gAllocMutex);
+
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(allocBytes, pAllocHeap->pHeapData);
+
 	MFDebug_Assert(pMemory, "Failed to allocate memory!");
-	if(!pMemory)
-		return NULL;
+	if(pMemory)
+	{
+		int alignment = (int)(MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uintp)pMemory);
 
-	int alignment = (int)(MFALIGN(pMemory + sizeof(MFAllocHeader), heapAlignment) - (uintp)pMemory);
+		pMemory += alignment;
 
-	pMemory += alignment;
+		MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
 
-	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
+		pHeader->alignment = (uint16)alignment;
+		pHeader->pHeap = pAllocHeap;
+		pHeader->size = (uint32)bytes;
+		pHeader->pFile = gpMFHeap_TrackerFile;
+		pHeader->line = (uint16)gMFHeap_TrackerLine;
+#if defined(USE_PRE_MUNGWALL)
+		MFCopyMemory(pHeader->llawgnum, gLlawgnum, MFHeap_MungwallBytes);
+#endif
 
-	pHeader->alignment = (uint16)alignment;
-	pHeader->pHeap = pAllocHeap;
-	pHeader->size = (uint32)bytes;
-	pHeader->pFile = gpMFHeap_TrackerFile;
-	pHeader->line = (uint16)gMFHeap_TrackerLine;
-
+		if(pAllocHeap->heapType != MFHT_Debug)
+		{
 #if defined(_USE_TRACKING_HASH_TABLE)
-	MFHeap_AllocItem *pAlloc = (MFHeap_AllocItem*)gAllocHeaderPool.Alloc();
-	pAlloc->header.alignment = (uint16)alignment;
-	pAlloc->header.pHeap = pAllocHeap;
-	pAlloc->header.size = (uint32)bytes;
-	pAlloc->header.pFile = gpMFHeap_TrackerFile;
-	pAlloc->header.line = (uint16)gMFHeap_TrackerLine;
-	pAlloc->pMemory = pMemory;
+			MFHeap_AllocItem *pAlloc = (MFHeap_AllocItem*)gAllocHeaderPool.Alloc();
+			pAlloc->header.alignment = (uint16)alignment;
+			pAlloc->header.pHeap = pAllocHeap;
+			pAlloc->header.size = (uint32)bytes;
+			pAlloc->header.pFile = gpMFHeap_TrackerFile;
+			pAlloc->header.line = (uint16)gMFHeap_TrackerLine;
+			pAlloc->pMemory = pMemory;
 
-	int hash = MFUtil_HashPointer(pMemory) % MFHeap_AllocTableLength;
-	pAlloc->pNext = gpAllocTable[hash];
-	gpAllocTable[hash] = pAlloc;
+			int hash = MFUtil_HashPointer(pMemory) % MFHeap_AllocTableLength;
+			pAlloc->pNext = gpAllocTable[hash];
+			gpAllocTable[hash] = pAlloc;
 #endif
 #if defined(_USE_ALLOC_TRACKER)
-	if(gPoolInitialised)
-	{
-		*(void**)gAllocList.Alloc() = pMemory;
-	}
+			if(gPoolInitialised)
+				*(void**)gAllocList.Alloc() = pMemory;
 #endif
+		}
 
 #if !defined(_RETAIL)
-	MFCopyMemory(pMemory + bytes, gMungwall, MFHeap_MungwallBytes);
+		MFCopyMemory(pMemory + bytes, gMungwall, MFHeap_MungwallBytes);
 
-	totalAllocated += allocBytes;
-	totalWaste += allocExtra;
-	++allocCount;
+		pAllocHeap->totalAllocated += allocBytes;
+		pAllocHeap->totalWaste += allocExtra;
+		++pAllocHeap->allocCount;
 
-	MFDebug_Log(2, MFStr("Alloc: %08X(%08X), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
+		MFDebug_Log(2, MFStr("Alloc: %08X(%08X), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
 #endif
+	}
+
+	MFThread_ReleaseMutex(gAllocMutex);
 
 	return (void*)pMemory;
 }
@@ -271,45 +323,51 @@ void MFHeap_Free(void *pMem)
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMem)[-1];
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
 
-#if defined(_USE_TRACKING_HASH_TABLE)
-	int hash = MFUtil_HashPointer(pMem) % MFHeap_AllocTableLength;
-	MFHeap_AllocItem *pT = gpAllocTable[hash];
-	if(pT)
+	MFThread_LockMutex(gAllocMutex);
+
+	MFHeap *pHeap = pHeader->pHeap;
+	if(pHeap->heapType != MFHT_Debug)
 	{
-		if(pT->pMemory == pMem)
+#if defined(_USE_TRACKING_HASH_TABLE)
+		int hash = MFUtil_HashPointer(pMem) % MFHeap_AllocTableLength;
+		MFHeap_AllocItem *pT = gpAllocTable[hash];
+		if(pT)
 		{
-			gpAllocTable[hash] = pT->pNext;
-			gAllocHeaderPool.Free(pT);
-		}
-		else
-		{
-			while(pT->pNext && pT->pNext->pMemory != pMem)
-				pT = pT->pNext;
-			if(pT->pNext)
+			if(pT->pMemory == pMem)
 			{
-				MFHeap_AllocItem *pTN = pT->pNext;
-				pT->pNext = pTN->pNext;
-				gAllocHeaderPool.Free(pTN);
+				gpAllocTable[hash] = pT->pNext;
+				gAllocHeaderPool.Free(pT);
+			}
+			else
+			{
+				while(pT->pNext && pT->pNext->pMemory != pMem)
+					pT = pT->pNext;
+				if(pT->pNext)
+				{
+					MFHeap_AllocItem *pTN = pT->pNext;
+					pT->pNext = pTN->pNext;
+					gAllocHeaderPool.Free(pTN);
+				}
 			}
 		}
-	}
 #endif
 #if defined(_USE_ALLOC_TRACKER)
-	if(gPoolInitialised)
-	{
-		int numAllocs = gAllocList.GetNumAllocated();
-
-		for(int a=0; a<numAllocs; ++a)
+		if(gPoolInitialised)
 		{
-			void **ppAlloc = (void**)gAllocList.GetItem(a);
-			if(*ppAlloc == pMem)
+			int numAllocs = gAllocList.GetNumAllocated();
+
+			for(int a=0; a<numAllocs; ++a)
 			{
-				gAllocList.Free(ppAlloc);
-				break;
+				void **ppAlloc = (void**)gAllocList.GetItem(a);
+				if(*ppAlloc == pMem)
+				{
+					gAllocList.Free(ppAlloc);
+					break;
+				}
 			}
 		}
-	}
 #endif
+	}
 
 #if !defined(_RETAIL)
 	int pad = 0;
@@ -317,16 +375,22 @@ void MFHeap_Free(void *pMem)
 		pad += heapAlignment;
 	size_t extra = pad + sizeof(MFAllocHeader) + MFHeap_MungwallBytes;
 
-	totalAllocated -= pHeader->size + extra;
-	totalWaste -= extra;
-	--allocCount;
+	pHeap->totalAllocated -= pHeader->size + extra;
+	pHeap->totalWaste -= extra;
+	--pHeap->allocCount;
 
-	MFDebug_Log(2, MFStr("Free: %d bytes - %s:(%d)", pHeader->size, pHeader->pFile, (int)pHeader->line));
+	MFDebug_Log(2, MFStr("Free: %08X, %d bytes - %s:(%d)", pMem, pHeader->size, pHeader->pFile, (int)pHeader->line));
 #endif
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
 
+	MFCopyMemory((char*)pMem + pHeader->size, "freefreefreefree", MFHeap_MungwallBytes);
+	MFCopyMemory((char*)pMem - 8, "freefreefreefree", MFHeap_MungwallBytes);
+	MFMemSet(pMem, 0xFE, pHeader->size);
+
 	pAllocHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pAllocHeap->pHeapData);
+
+	MFThread_ReleaseMutex(gAllocMutex);
 }
 
 // #if !(defined(_FUJI_UTIL) && defined(_LINUX)) && !defined(MF_GC)
@@ -376,19 +440,19 @@ void operator delete[](void *pMemory, void *pMem)
 }
 #endif
 
-size_t MFHeap_GetTotalAllocated()
+size_t MFHeap_GetTotalAllocated(MFHeap *pHeap)
 {
-	return totalAllocated;
+	return pHeap->totalAllocated;
 }
 
-size_t MFHeap_GetTotalWaste()
+size_t MFHeap_GetTotalWaste(MFHeap *pHeap)
 {
-	return totalWaste;
+	return pHeap->totalWaste;
 }
 
-int MFHeap_GetNumAllocations()
+int MFHeap_GetNumAllocations(MFHeap *pHeap)
 {
-	return allocCount;
+	return pHeap->allocCount;
 }
 
 // get the size of an allocation
@@ -398,6 +462,15 @@ uint32 MFHeap_GetAllocSize(const void *pMemory)
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
 	return pHeader->size;
+}
+
+// get the size of an allocation
+MFHeap *MFHeap_GetAllocHeap(const void *pMemory)
+{
+	MFCALLSTACK;
+
+	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
+	return pHeader->pHeap;
 }
 
 // get a heap pointer
@@ -432,6 +505,11 @@ MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
 	MFDebug_Assert(pHeap, "Invalid heap");
 
 	return pHeap->pTempHeap ? pHeap->pTempHeap : pHeap;
+}
+
+MFHeap* MFHeap_GetDebugHeap()
+{
+	return pDebugHeap;
 }
 
 // set active heap, return the old active heap
@@ -485,12 +563,16 @@ bool MFHeap_ValidateMemory(const void *pMemory)
 		return true;
 
 	MFAllocHeader *pHeader = &((MFAllocHeader*)pMemory)[-1];
+	if(MFMemCompare(pHeader->llawgnum, gLlawgnum, MFHeap_MungwallBytes) != 0)
+		return false;
 	return MFMemCompare((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;
 }
 
 bool MFHeap_ValidateHeap()
 {
 #if defined(_USE_ALLOC_TRACKER)
+	MFThread_LockMutex(gAllocMutex);
+
 	if(gPoolInitialised)
 	{
 		int numAllocated = gAllocList.GetNumAllocated();
@@ -504,6 +586,8 @@ bool MFHeap_ValidateHeap()
 			}
 		}
 	}
+
+	MFThread_ReleaseMutex(gAllocMutex);
 #endif
 	return true;
 }
