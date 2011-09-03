@@ -1,6 +1,3 @@
-includedirs { "../../Public/Include/", "../Middleware/" }
-libdirs { "../../Public/Lib/" }
-
 include "../Middleware/libjson/"
 include "../Middleware/libmad/"
 
@@ -30,8 +27,9 @@ project "Fuji"
 	configuration { }
 
 	-- setup paths --
-	includedirs { "../Source/" }
-	includedirs { "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
+	includedirs { "../Include/", "../Source/" }
+	includedirs { "../Middleware/", "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
+	libdirs { "../../Public/Lib/" }
 	objdir "../Build/"
 	targetdir "../../Public/Lib/"
 

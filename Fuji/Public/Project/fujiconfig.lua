@@ -23,6 +23,9 @@ platformNames.XBox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
+includedirs { "../Include/" }
+libdirs { "../Lib/" }
+
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
@@ -91,3 +94,5 @@ configuration "Xbox360"
 configuration "PS3"
 	defines { "_PS3" }
 	links { "mad", "json" }
+
+configuration { }
