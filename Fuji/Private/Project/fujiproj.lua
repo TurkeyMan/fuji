@@ -11,7 +11,7 @@ project "Fuji"
 	-- add the source code --
 	files { "../*.TXT" }
 
-	files { "../../Public/Include/**.h" }
+	files { "../../Public/Include/**.h", "../../Public/Include/**.inl" }
 	files { "../Source/**.h", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
 

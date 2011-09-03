@@ -1,1 +1,1 @@
-../Bin/premake4 gmake
+../../Public/Bin/premake4 gmake
