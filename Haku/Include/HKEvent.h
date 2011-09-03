@@ -1,6 +1,8 @@
 #if !defined(_HKEVENT_H)
 #define _HKEVENT_H
 
+#pragma warning(disable:4324)
+
 #include "fastdelegate/FastDelegate.h"
 
 struct HKEventInfo
@@ -17,15 +19,17 @@ public:
 	HKEventBase();
 	~HKEventBase();
 
+	bool IsEmpty() { return numSubscribers == 0; }
+
 	int GetNumSubscribers() { return numSubscribers; }
 
 protected:
 	void Add(fastdelegate::DelegateMemento memento);
 	void Remove(fastdelegate::DelegateMemento memento);
 
+	fastdelegate::DelegateMemento *pDelegates;
 	uint16 numSubscribers;
 	uint16 numAllocated;
-	fastdelegate::DelegateMemento *pDelegates;
 };
 
 
@@ -80,7 +84,8 @@ public:
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
 
-template<class P1>class HKEvent1 : public HKEventBase
+template<class P1>
+class HKEvent1 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate1<P1> DelegateType;
@@ -103,7 +108,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2>class HKEvent2 : public HKEventBase
+
+template<class P1, class P2>
+class HKEvent2 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate2<P1, P2> DelegateType;
@@ -126,7 +133,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3>class HKEvent3 : public HKEventBase
+
+template<class P1, class P2, class P3>
+class HKEvent3 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate3<P1, P2, P3> DelegateType;
@@ -149,7 +158,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3, class P4>class HKEvent4 : public HKEventBase
+
+template<class P1, class P2, class P3, class P4>
+class HKEvent4 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate4<P1, P2, P3, P4> DelegateType;
@@ -172,7 +183,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3, class P4, class P5>class HKEvent5 : public HKEventBase
+
+template<class P1, class P2, class P3, class P4, class P5>
+class HKEvent5 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate5<P1, P2, P3, P4, P5> DelegateType;
@@ -195,7 +208,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3, class P4, class P5, class P6>class HKEvent6 : public HKEventBase
+
+template<class P1, class P2, class P3, class P4, class P5, class P6>
+class HKEvent6 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate6<P1, P2, P3, P4, P5, P6> DelegateType;
@@ -218,7 +233,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3, class P4, class P5, class P6, class P7>class HKEvent7 : public HKEventBase
+
+template<class P1, class P2, class P3, class P4, class P5, class P6, class P7>
+class HKEvent7 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate7<P1, P2, P3, P4, P5, P6, P7> DelegateType;
@@ -241,7 +258,9 @@ public:
 
 	DelegateType GetSubscriber(int index) { DelegateType d; d.SetMemento(pDelegates[index]); return d; }
 };
-template<class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>class HKEvent8 : public HKEventBase
+
+template<class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
+class HKEvent8 : public HKEventBase
 {
 public:
 	typedef fastdelegate::FastDelegate8<P1, P2, P3, P4, P5, P6, P7, P8> DelegateType;

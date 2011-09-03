@@ -46,6 +46,7 @@ project "Fuji"
 	-- configure standard fuji stuff --
 
 	dofile "../../Public/Project/fujiconfig.lua"
+	links { "mad", "json" }
 
 
 	-- platform specific config --

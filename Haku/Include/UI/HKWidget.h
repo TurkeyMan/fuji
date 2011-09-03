@@ -1,29 +1,30 @@
 #if !defined(_HKWIDGET_H)
 #define _HKWIDGET_H
 
-// HKBaseWidget can exist in a hierarchy, and be enabled/disabled
-class HKBaseWidget
+#include "HKEvent.h"
+
+// HKWidget is an interactive entity
+class HKWidget
 {
+	friend class HKUserInterface;
+	friend class HKWidgetRenderer;
 public:
-	HKBaseWidget();
-	~HKBaseWidget();
+	typedef fastdelegate::FastDelegate1<const HKWidget &> RenderCallback;
 
-	bool SetEnabled(bool bEnable);
+	static HKWidget *Create();
 
-	HKEvent OnEnabledChanged;
-
-protected:
-	bool bEnabled;
-
-	HKWidget *pParent;
-};
-
-// HKWidget is a visible entity
-class HKWidget : public HKBaseWidget
-{
-public:
 	HKWidget();
 	~HKWidget();
+
+	virtual void Update();
+
+	const MFMatrix &GetTransform();
+	const MFMatrix &GetInvTransform();
+
+	void SetRenderDelegate(RenderCallback renderDelegate);
+
+	bool SetEnabled(bool bEnable);
+	bool SetVisible(bool bVisible);
 
 	void SetPosition(const MFVector &position);
 	void SetSize(const MFVector &size);
@@ -31,12 +32,13 @@ public:
 	void SetScale(const MFVector &scale);
 	void SetRotation(const MFVector &rotation);
 
-	bool SetVisible(bool bEnable);
+	// state change events
+	HKEvent OnEnabledChanged;
+	HKEvent OnVisibleChanged;
 
-	// standard events
+	// interactivity events
 	HKEvent OnMove;
 	HKEvent OnResize;
-	HKEvent OnVisibleChanged;
 	HKEvent OnFocusChanged;
 
 	// input events
@@ -48,24 +50,33 @@ public:
 	HKEvent OnHoverOver;	// an input source entered the bounds of a widget. applies to mouse events
 	HKEvent OnHoverOut;		// an input source left the bounds of a widget. applies to mouse events
 
+	HKEvent OnCharacter;	// if the input was able to generate a unicode character
+
 protected:
 	MFVector pos;			// relative to parent
 	MFVector size;			// size of widget volume
 	MFVector colour;		// colour modulation
 	MFVector scale;			// scale the widget
-	MFVector rotation;		// rotation of the widget
+	MFVector rot;			// rotation of the widget
 
 	MFMatrix matrix;
 	MFMatrix invMatrix;
 
-	int zDepth;
+	RenderCallback renderCallback;
+
+	const char *pTypeName;
+
+	HKWidget *pParent;
 
 	bool bVisible;
+	bool bEnabled;
 	bool bParentEnabled;	// flagged if the parent is enabled
+
+	int zDepth;
 
 	bool bMatrixDirty, bInvMatrixDirty;
 
-	virtual IntersectWidget();	// test for ray intersecting the widget
+	virtual bool IntersectWidget(const MFVector &pos, const MFVector &dir);	// test for ray intersecting the widget
 };
 
 #endif

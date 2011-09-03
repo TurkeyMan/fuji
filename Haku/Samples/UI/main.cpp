@@ -8,9 +8,14 @@
 #include "MFFileSystem.h"
 #include "FileSystem/MFFileSystemNative.h"
 
+#include "UI/HKUI.h"
+#include "UI/HKInputSource.h"
+
 /**** Globals ****/
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
+
+HKUserInterface *pUI;
 
 /**** Functions ****/
 
@@ -38,16 +43,23 @@ void Game_Init()
 {
 	MFCALLSTACK;
 
-	// load a UI file?
+	HKUserInterface::Init();
+
+	pUI = new HKUserInterface();
+	HKUserInterface::SetActiveUI(pUI);
+
+	// hard code a test UI...
+	HKWidget *pWidget = new HKWidget();
+	pUI->SetRootWidget(pWidget);
 }
 
 void Game_Update()
 {
 	MFCALLSTACK;
 
-	// nothing...?
+	HKInputSource::UpdateSources();
 
-	// i suppose the UI should update its self...
+	pUI->Update();
 }
 
 void Game_Draw()
@@ -135,12 +147,17 @@ void Game_Draw()
 
 	MFEnd();
 
+	MFView_SetOrtho();
+	pUI->Draw();
+
 	MFView_Pop();
 }
 
 void Game_Deinit()
 {
 	MFCALLSTACK;
+
+	HKUserInterface::Deinit();
 }
 
 

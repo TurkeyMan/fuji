@@ -12,3 +12,4 @@ project "UI"
 	links { "Fuji", "Haku" }
 
 	dofile "../../../Fuji/Public/Project/fujiconfig.lua"
+	dofile "../../Project/hakuconfig.lua"

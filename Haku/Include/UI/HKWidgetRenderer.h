@@ -5,8 +5,8 @@
 
 class HKWidgetRenderer
 {
-	friend class HKWidget;
 public:
+	
 
 
 protected:

@@ -1,6 +1,3 @@
-includedirs { "../Include/" }
---libdirs { "../Lib/" }
-
 project "Haku"
 	kind "StaticLib"
 	language "C++"
@@ -18,8 +15,6 @@ project "Haku"
 
 	defines { "_LIB" }
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
-
-	links { "Fuji" }
 
 --	pchheader "Haku.h"
 --	pchsource "HKMain.cpp"
