@@ -42,11 +42,8 @@ void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
 		if(buttonFlags & BF_StateButton)
 			bState = !bState;
 
-		if(!OnClicked.IsEmpty())
-		{
-			HKWidgetInputEvent clickEvent(this, down.pSource);
-			OnClicked(*this, clickEvent);
-		}
+		HKWidgetInputEvent clickEvent(this, down.pSource);
+		OnClicked(*this, clickEvent);
 	}
 	else
 	{
@@ -72,11 +69,8 @@ void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo &ev)
 		if(buttonFlags & BF_StateButton)
 			bState = !bState;
 
-		if(!OnClicked.IsEmpty())
-		{
-			HKWidgetInputEvent clickEvent(this, up.pSource);
-			OnClicked(*this, clickEvent);
-		}
+		HKWidgetInputEvent clickEvent(this, up.pSource);
+		OnClicked(*this, clickEvent);
 	}
 }
 

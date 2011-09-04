@@ -246,6 +246,51 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
 bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
 {
 	// try and handle the input event in some standard ways...
+	switch(ev.ev)
+	{
+		case HKInputManager::IE_Down:
+		{
+			HKWidgetInputEvent ie(this, ev.pSource);
+			OnDown(*this, ie);
+			return true;
+		}
+		case HKInputManager::IE_Up:
+		{
+			HKWidgetInputEvent ie(this, ev.pSource);
+			OnUp(*this, ie);
+			return true;
+		}
+		case HKInputManager::IE_Tap:
+		{
+			HKWidgetInputEvent ie(this, ev.pSource);
+			OnTap(*this, ie);
+			return true;
+		}
+		case HKInputManager::IE_Hover:
+		{
+			HKWidgetInputActionEvent ie(this, ev.pSource);
+			ie.pos = MakeVector(ev.hover.x, ev.hover.y);
+			ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
+			OnHover(*this, ie);
+			return true;
+		}
+		case HKInputManager::IE_Drag:
+		{
+			HKWidgetInputActionEvent ie(this, ev.pSource);
+			ie.pos = MakeVector(ev.hover.x, ev.hover.y);
+			ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
+			OnDrag(*this, ie);
+			return true;
+		}
+		case HKInputManager::IE_Pinch:
+		case HKInputManager::IE_Spin:
+		case HKInputManager::IE_ButtonTriggered:
+		case HKInputManager::IE_ButtonDown:
+		case HKInputManager::IE_ButtonUp:
+		case HKInputManager::IE_Wheel:
+		default:
+			break;
+	}
 
 	if(pParent)
 		return pParent->InputEvent(manager, ev);

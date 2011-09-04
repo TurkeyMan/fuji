@@ -100,7 +100,7 @@ struct HKWidgetInputActionEvent : public HKWidgetEventInfo
 
 	HKInputSource *pSource;
 	MFVector pos;
-	MFVector oldPos;
+	MFVector delta;
 };
 
 struct HKWidgetInputTextEvent : public HKWidgetEventInfo
