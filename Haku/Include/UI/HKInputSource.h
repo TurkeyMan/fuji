@@ -15,6 +15,8 @@ struct HKInputSource
 class HKInputManager
 {
 public:
+	static const int MaxSources = 64;
+
 	enum EventType
 	{
 		// screen/mouse
@@ -111,7 +113,6 @@ protected:
 		bool bDrag;			// bits represent weather the interaction is a tap or a drag
 	};
 
-	static const int MaxSources = 64;
 	static const int MaxContacts = 16;
 
 	HKInputSource sources[MaxSources];

@@ -31,14 +31,16 @@ public:
 
 	void SetRootWidget(HKWidget *pWidget) { pWidget->pParent = NULL; pRoot = pWidget; }
 
+	HKWidget *SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget);
+
 protected:
 	HKWidget *pRoot;
 	HKWidgetRenderer *pRenderer;
 
 	HKInputManager *pInputManager;
 
-	HKInputSource **ppFocusList;
-	HKInputSource **ppHoverList;
+	HKWidget *pFocusList[HKInputManager::MaxSources];
+	HKWidget *pHoverList[HKInputManager::MaxSources];
 
 	static HKUserInterface *pActive;
 	static HKWidgetFactory *pFactory;

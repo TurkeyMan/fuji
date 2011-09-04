@@ -343,6 +343,10 @@ void HKInputManager::Update()
 		{
 			for(int b=a+1; b<numMoved; ++b)
 			{
+				// only compare contacts from the same input source
+				if(contacts[moved[a].contact].pSource != contacts[moved[b].contact].pSource)
+					continue;
+
 				MFVector center;
 				MFVector newa = MakeVector(contacts[moved[a].contact].x, contacts[moved[a].contact].y);
 				MFVector newDiff = MakeVector(contacts[moved[b].contact].x, contacts[moved[b].contact].y) - newa;

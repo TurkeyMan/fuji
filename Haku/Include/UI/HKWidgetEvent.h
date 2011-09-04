@@ -6,34 +6,51 @@
 struct HKInputSource;
 class HKWidget;
 
-class HKWidgetEventInfo
+struct HKWidgetEventInfo
 {
-public:
+	HKWidgetEventInfo() {}
+	HKWidgetEventInfo(HKWidget *pSender)
+	{
+		this->pSender = pSender;
+		pUserData = NULL;
+	}
+
 	HKWidget *pSender;
 	void *pUserData;
-
-	// static methods to manage the pool
-	static void Init();
-	static void Deinit();
-
-	static HKWidgetEventInfo *Alloc(HKWidget *pSender);
-	static void Free(HKWidgetEventInfo *pEvent);
 };
 
-typedef HKEvent2<HKWidget &, HKWidgetEventInfo *> HKWidgetEvent;
+typedef HKEvent2<HKWidget &, HKWidgetEventInfo &> HKWidgetEvent;
 
 struct HKWidgetEnabledEvent : public HKWidgetEventInfo
 {
+	HKWidgetEnabledEvent(HKWidget *pSender, bool bEnabled)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->bEnabled = bEnabled;
+	}
+
 	bool bEnabled;
 };
 
 struct HKWidgetVisibilityEvent : public HKWidgetEventInfo
 {
+	HKWidgetVisibilityEvent(HKWidget *pSender, bool bVisible)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->bVisible = bVisible;
+	}
+
 	bool bVisible;
 };
 
 struct HKWidgetFocusEvent : public HKWidgetEventInfo
 {
+	HKWidgetFocusEvent(HKWidget *pSender, bool bGainedFocus)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->bGainedFocus = bGainedFocus;
+	}
+
 	bool bGainedFocus;
 
 	HKWidget *pGainedFocus;
@@ -42,23 +59,45 @@ struct HKWidgetFocusEvent : public HKWidgetEventInfo
 
 struct HKWidgetMoveEvent : public HKWidgetEventInfo
 {
+	HKWidgetMoveEvent(HKWidget *pSender)
+		: HKWidgetEventInfo(pSender)
+	{
+	}
+
 	MFVector newPos;
 	MFVector oldPos;
 };
 
 struct HKWidgetResizeEvent : public HKWidgetEventInfo
 {
+	HKWidgetResizeEvent(HKWidget *pSender)
+		: HKWidgetEventInfo(pSender)
+	{
+	}
+
 	MFVector newSize;
 	MFVector oldSize;
 };
 
 struct HKWidgetInputEvent : public HKWidgetEventInfo
 {
+	HKWidgetInputEvent(HKWidget *pSender, HKInputSource *pSource)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->pSource = pSource;
+	}
+
 	HKInputSource *pSource;
 };
 
 struct HKWidgetInputActionEvent : public HKWidgetEventInfo
 {
+	HKWidgetInputActionEvent(HKWidget *pSender, HKInputSource *pSource)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->pSource = pSource;
+	}
+
 	HKInputSource *pSource;
 	MFVector pos;
 	MFVector oldPos;
@@ -66,6 +105,13 @@ struct HKWidgetInputActionEvent : public HKWidgetEventInfo
 
 struct HKWidgetInputTextEvent : public HKWidgetEventInfo
 {
+	HKWidgetInputTextEvent(HKWidget *pSender, HKInputSource *pSource, int unicode)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->pSource = pSource;
+		this->unicode = unicode;
+	}
+
 	HKInputSource *pSource;
 	int unicode;
 };

@@ -29,10 +29,10 @@ protected:
 	bool bPressed;
 	bool bState;
 
-	void ButtonDown(HKWidget &widget, HKWidgetEventInfo *pEvent);
-	void ButtonUp(HKWidget &widget, HKWidgetEventInfo *pEvent);
-	void ButtonOver(HKWidget &widget, HKWidgetEventInfo *pEvent);
-	void ButtonOut(HKWidget &widget, HKWidgetEventInfo *pEvent);
+	void ButtonDown(HKWidget &widget, HKWidgetEventInfo &ev);
+	void ButtonUp(HKWidget &widget, HKWidgetEventInfo &ev);
+	void ButtonOver(HKWidget &widget, HKWidgetEventInfo &ev);
+	void ButtonOut(HKWidget &widget, HKWidgetEventInfo &ev);
 };
 
 #endif

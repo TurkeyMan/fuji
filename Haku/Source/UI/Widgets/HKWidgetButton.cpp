@@ -1,4 +1,5 @@
 #include "Haku.h"
+#include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetButton.h"
 
 HKWidget *HKWidgetButton::Create()
@@ -32,9 +33,9 @@ HKWidgetButton::~HKWidgetButton()
 	OnHoverOut -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonOut);
 }
 
-void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo *pEvent)
+void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
 {
-	HKWidgetInputEvent *pDown = (HKWidgetInputEvent *)pEvent;
+	HKWidgetInputEvent down = (HKWidgetInputEvent&)ev;
 
 	if(buttonFlags & BF_TriggerOnDown)
 	{
@@ -43,24 +44,26 @@ void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo *pEvent)
 
 		if(!OnClicked.IsEmpty())
 		{
-			HKWidgetInputEvent *pClickEvent = (HKWidgetInputEvent*)HKWidgetEventInfo::Alloc(this);
-			pClickEvent->pSource = pDown->pSource;
-			OnClicked(*this, pClickEvent);
-			HKWidgetEventInfo::Free(pClickEvent);
+			HKWidgetInputEvent clickEvent(this, down.pSource);
+			OnClicked(*this, clickEvent);
 		}
 	}
 	else
 	{
 		bDown = true;
 		bPressed = true;
+
+		GetUI().SetFocus(down.pSource, this);
 	}
 }
 
-void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo *pEvent)
+void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo &ev)
 {
-	HKWidgetInputEvent *pUp = (HKWidgetInputEvent *)pEvent;
+	HKWidgetInputEvent &up = (HKWidgetInputEvent&)ev;
 
 	bDown = false;
+
+	HKUserInterface::Get().SetFocus(up.pSource, NULL);
 
 	if(bPressed)
 	{
@@ -71,21 +74,19 @@ void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo *pEvent)
 
 		if(!OnClicked.IsEmpty())
 		{
-			HKWidgetInputEvent *pClickEvent = (HKWidgetInputEvent*)HKWidgetEventInfo::Alloc(this);
-			pClickEvent->pSource = pUp->pSource;
-			OnClicked(*this, pClickEvent);
-			HKWidgetEventInfo::Free(pClickEvent);
+			HKWidgetInputEvent clickEvent(this, up.pSource);
+			OnClicked(*this, clickEvent);
 		}
 	}
 }
 
-void HKWidgetButton::ButtonOver(HKWidget &sender, HKWidgetEventInfo *pEvent)
+void HKWidgetButton::ButtonOver(HKWidget &sender, HKWidgetEventInfo &ev)
 {
 	if(bDown)
 		bPressed = true;
 }
 
-void HKWidgetButton::ButtonOut(HKWidget &sender, HKWidgetEventInfo *pEvent)
+void HKWidgetButton::ButtonOut(HKWidget &sender, HKWidgetEventInfo &ev)
 {
 	if(bDown)
 		bPressed = false;

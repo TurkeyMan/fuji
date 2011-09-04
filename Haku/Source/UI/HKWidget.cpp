@@ -1,5 +1,6 @@
 #include "Haku.h"
 #include "UI/HKWidget.h"
+#include "UI/HKUI.h"
 
 #include "MFTypes.h"
 #include "MFCollision.h"
@@ -89,6 +90,21 @@ void HKWidget::SetRenderer(HKWidgetRenderer *pRenderer)
 	renderCallback = pRenderer->GetRenderDelegate();
 }
 
+HKUserInterface &HKWidget::GetUI()
+{
+	return HKUserInterface::Get();
+}
+
+int HKWidget::GetNumChildren() const
+{
+	return 0;
+}
+
+HKWidget *HKWidget::GetChild(int index) const
+{
+	return NULL;
+}
+
 bool HKWidget::SetEnabled(bool bEnable)
 {
 	bool bOld = bEnabled;
@@ -98,10 +114,8 @@ bool HKWidget::SetEnabled(bool bEnable)
 
 		if(!OnEnabledChanged.IsEmpty())
 		{
-			HKWidgetEnabledEvent *pEvent = (HKWidgetEnabledEvent*)HKWidgetEventInfo::Alloc(this);
-			pEvent->bEnabled = bEnable;
-			OnEnabledChanged(*this, pEvent);
-			HKWidgetEventInfo::Free(pEvent);
+			HKWidgetEnabledEvent ev(this, bEnable);
+			OnEnabledChanged(*this, ev);
 		}
 	}
 	return bOld;
@@ -116,10 +130,8 @@ bool HKWidget::SetVisible(bool bVisible)
 
 		if(!OnEnabledChanged.IsEmpty())
 		{
-			HKWidgetVisibilityEvent *pEvent = (HKWidgetVisibilityEvent*)HKWidgetEventInfo::Alloc(this);
-			pEvent->bVisible = bVisible;
-			OnVisibleChanged(*this, pEvent);
-			HKWidgetEventInfo::Free(pEvent);
+			HKWidgetVisibilityEvent ev(this, bVisible);
+			OnVisibleChanged(*this, ev);
 		}
 	}
 	return bOld;
@@ -134,11 +146,10 @@ void HKWidget::SetPosition(const MFVector &position)
 
 		if(!OnMove.IsEmpty())
 		{
-			HKWidgetMoveEvent *pEvent = (HKWidgetMoveEvent*)HKWidgetEventInfo::Alloc(this);
-			pEvent->oldPos = oldPos;
-			pEvent->newPos = position;
-			OnMove(*this, pEvent);
-			HKWidgetEventInfo::Free(pEvent);
+			HKWidgetMoveEvent ev(this);
+			ev.oldPos = oldPos;
+			ev.newPos = position;
+			OnMove(*this, ev);
 		}
 	}
 }
@@ -152,11 +163,10 @@ void HKWidget::SetSize(const MFVector &size)
 
 		if(!OnMove.IsEmpty())
 		{
-			HKWidgetResizeEvent *pEvent = (HKWidgetResizeEvent*)HKWidgetEventInfo::Alloc(this);
-			pEvent->oldSize = oldSize;
-			pEvent->newSize = size;
-			OnResize(*this, pEvent);
-			HKWidgetEventInfo::Free(pEvent);
+			HKWidgetResizeEvent ev(this);
+			ev.oldSize = oldSize;
+			ev.newSize = size;
+			OnResize(*this, ev);
 		}
 	}
 }
@@ -176,8 +186,11 @@ void HKWidget::SetRotation(const MFVector &rotation)
 	this->rot = rotation;
 }
 
-bool HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
+HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
 {
+	if(!bVisible)
+		return NULL;
+
 	if(size.z == 0.f)
 	{
 		// the widget is 2d, much easier
@@ -203,7 +216,22 @@ bool HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
 				size.x, size.y
 			};
 			if(MFTypes_PointInRect(intersection.x, intersection.y, &rect))
-				return true;
+			{
+				HKWidget *pIntersect = this;
+
+				int numChildren = GetNumChildren();
+				for(int a=0; a<numChildren; ++a)
+				{
+					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir);
+					if(pChild)
+					{
+						pIntersect = pChild;
+						break;
+					}
+				}
+
+				return pIntersect;
+			}
 		}
 	}
 	else
@@ -212,5 +240,14 @@ bool HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
 		//...
 	}
 
+	return NULL;
+}
+
+bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
+{
+	// try and handle the input event in some standard ways...
+
+	if(pParent)
+		return pParent->InputEvent(manager, ev);
 	return false;
 }

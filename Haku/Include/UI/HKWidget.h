@@ -3,6 +3,9 @@
 
 #include "HKWidgetEvent.h"
 #include "HKWidgetRenderer.h"
+#include "HKInputSource.h"
+
+class HKUserInterface;
 
 // HKWidget is an interactive entity
 class HKWidget
@@ -18,6 +21,11 @@ public:
 	virtual void Update();
 
 	void SetRenderer(HKWidgetRenderer *pRenderer);
+
+	HKUserInterface &GetUI();
+
+	virtual int GetNumChildren() const;
+	virtual HKWidget *GetChild(int index) const;
 
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
 
@@ -52,13 +60,13 @@ public:
 	HKWidgetEvent OnFocusChanged;
 
 	// input events
-	HKWidgetEvent OnDown;			// an input source lowered a key. applies to mouse, keyboard, touch, gamepad events
+	HKWidgetEvent OnDown;		// an input source lowered a key. applies to mouse, keyboard, touch, gamepad events
 	HKWidgetEvent OnUp;			// an input source raised a key. applies to mouse, keyboard, touch, gamepad events
-	HKWidgetEvent OnTap;			// a sequence of down followed by an up, without motion in between. applies to mouse, keyboard, touch, gamepad events
-	HKWidgetEvent OnDrag;			// an input source was moved between a 'down', and 'up' event. applies to mouse, touch events
+	HKWidgetEvent OnTap;		// a sequence of down followed by an up, without motion in between. applies to mouse, keyboard, touch, gamepad events
+	HKWidgetEvent OnDrag;		// an input source was moved between a 'down', and 'up' event. applies to mouse, touch events
 	HKWidgetEvent OnHover;		// an input source moved above a widget. applies to mouse events
 	HKWidgetEvent OnHoverOver;	// an input source entered the bounds of a widget. applies to mouse events
-	HKWidgetEvent OnHoverOut;		// an input source left the bounds of a widget. applies to mouse events
+	HKWidgetEvent OnHoverOut;	// an input source left the bounds of a widget. applies to mouse events
 
 	HKWidgetEvent OnCharacter;	// if the input was able to generate a unicode character
 
@@ -87,7 +95,8 @@ protected:
 
 	bool bMatrixDirty, bInvMatrixDirty;
 
-	virtual bool IntersectWidget(const MFVector &pos, const MFVector &dir);	// test for ray intersecting the widget
+	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir);	// test for ray intersecting the widget
+	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 };
 
 #endif
