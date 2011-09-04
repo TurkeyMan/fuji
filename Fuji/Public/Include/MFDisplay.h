@@ -3,6 +3,19 @@
 
 //#define _NEW_DISPLAY
 
+enum MFDisplayOrientation
+{
+	MFDO_Normal,
+	MFDO_90CW,
+	MFDO_90CCW,
+	MFDO_180,
+	MFDO_HFlip,
+	MFDO_VFlip,
+
+	MFDO_Max,
+	MFDO_ForceInt = 0x7FFFFFFF
+};
+
 #if defined(_NEW_DISPLAY)
 
 #define MFASPECT_1x1	(1.f)
@@ -36,6 +49,8 @@ bool MFDisplay_IsWidescreen();
 
 void MFDisplay_HandleSystemMessages();
 
+MFDisplayOrientation MFDisplay_GetDisplayOrientation();
+
 // these functions are reserved for use by the renderer, and may not be called if the renderer chooses to implement them its self
 void *MFDisplay_GetRenderBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
 void *MFDisplay_GetDisplayBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
@@ -62,6 +77,13 @@ void MFDisplay_GetDisplayRect(MFRect *pRect);
 
 float MFDisplay_GetNativeAspectRatio();
 bool MFDisplay_IsWidescreen();
+
+bool MFDisplay_HasFocus();
+
+inline MFDisplayOrientation MFDisplay_GetDisplayOrientation()
+{
+	return MFDO_Normal;
+}
 
 #endif
 

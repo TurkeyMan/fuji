@@ -4,19 +4,22 @@
 #include "UI/HKWidgetEvent.h"
 #include "UI/HKInputSource.h"
 
+#include "UI/Widgets/HKWidgetButton.h"
+
 HKUserInterface *HKUserInterface::pActive = NULL;
-HKFactory<HKWidget> *pFactory = NULL;
+HKFactory<HKWidget> *HKUserInterface::pFactory = NULL;
 
 void HKUserInterface::Init()
 {
-	HKWidgetEvent::Init();
-	HKInputSource::Init();
+	HKWidgetEventInfo::Init();
 
 	if(!pFactory)
 	{
 		pFactory = new HKFactory<HKWidget>();
 
 		HKWidgetFactory::FactoryType *pWidget = pFactory->RegisterType("HKWidget", HKWidget::Create, NULL);
+
+		pFactory->RegisterType("HKWidgetButton", HKWidgetButton::Create, pWidget);
 	}
 }
 
@@ -28,8 +31,7 @@ void HKUserInterface::Deinit()
 		pFactory = NULL;
 	}
 
-	HKInputSource::Deinit();
-	HKWidgetEvent::Deinit();
+	HKWidgetEventInfo::Deinit();
 }
 
 HKWidgetFactory::FactoryType *HKUserInterface::RegisterWidget(const char *pWidgetType, HKWidgetFactory::CreateFunc createDelegate, HKWidgetFactory::FactoryType *pParent)
@@ -51,20 +53,26 @@ HKWidget *HKUserInterface::CreateWidget(const char *pWidgetType)
 
 HKUserInterface::HKUserInterface()
 {
-
+	pInputManager = new HKInputManager();
+	pInputManager->OnInputEvent += fastdelegate::MakeDelegate(this, &HKUserInterface::OnInputEvent);
 }
 
 HKUserInterface::~HKUserInterface()
 {
-
+	delete pInputManager;
 }
 
 void HKUserInterface::Update()
 {
-
+	pInputManager->Update();
 }
 
 void HKUserInterface::Draw()
 {
+}
 
+void HKUserInterface::OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
+{
+	// do something with the new input event...
+	int x = 0;
 }

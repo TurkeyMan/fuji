@@ -3,30 +3,36 @@
 
 #include "HKEvent.h"
 
-class HKInputSource;
+struct HKInputSource;
 class HKWidget;
 
-class HKWidgetEvent
+class HKWidgetEventInfo
 {
 public:
+	HKWidget *pSender;
+	void *pUserData;
+
+	// static methods to manage the pool
 	static void Init();
 	static void Deinit();
 
-	static HKEventInfo *Alloc(HKWidget *pSender);
-	static void Free(HKEventInfo *pEvent);
+	static HKWidgetEventInfo *Alloc(HKWidget *pSender);
+	static void Free(HKWidgetEventInfo *pEvent);
 };
 
-struct HKWidgetEnabledEvent : public HKEventInfo
+typedef HKEvent2<HKWidget &, HKWidgetEventInfo *> HKWidgetEvent;
+
+struct HKWidgetEnabledEvent : public HKWidgetEventInfo
 {
 	bool bEnabled;
 };
 
-struct HKWidgetVisibilityEvent : public HKEventInfo
+struct HKWidgetVisibilityEvent : public HKWidgetEventInfo
 {
 	bool bVisible;
 };
 
-struct HKWidgetFocusEvent : public HKEventInfo
+struct HKWidgetFocusEvent : public HKWidgetEventInfo
 {
 	bool bGainedFocus;
 
@@ -34,31 +40,31 @@ struct HKWidgetFocusEvent : public HKEventInfo
 	HKWidget *pLostFocus;
 };
 
-struct HKWidgetMoveEvent : public HKEventInfo
+struct HKWidgetMoveEvent : public HKWidgetEventInfo
 {
 	MFVector newPos;
 	MFVector oldPos;
 };
 
-struct HKWidgetResizeEvent : public HKEventInfo
+struct HKWidgetResizeEvent : public HKWidgetEventInfo
 {
 	MFVector newSize;
 	MFVector oldSize;
 };
 
-struct HKWidgetInputEvent : public HKEventInfo
+struct HKWidgetInputEvent : public HKWidgetEventInfo
 {
 	HKInputSource *pSource;
 };
 
-struct HKWidgetInputActionEvent : public HKEventInfo
+struct HKWidgetInputActionEvent : public HKWidgetEventInfo
 {
 	HKInputSource *pSource;
 	MFVector pos;
 	MFVector oldPos;
 };
 
-struct HKWidgetInputTextEvent : public HKEventInfo
+struct HKWidgetInputTextEvent : public HKWidgetEventInfo
 {
 	HKInputSource *pSource;
 	int unicode;

@@ -32,6 +32,8 @@ float fieldOfView;
 extern MFInitParams gInitParams;
 extern bool gFujiInitialised;
 
+extern bool gAppHasFocus;
+
 extern HINSTANCE apphInstance;
 HWND apphWnd;
 int wndX = 24, wndY = 64;
@@ -134,11 +136,15 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 
 				// or read the state from directinput
 
+				gAppHasFocus = true;
+
 				if(pSystemCallbacks[MFCB_GainedFocus])
 					pSystemCallbacks[MFCB_GainedFocus]();
 			}
 			else
 			{
+				gAppHasFocus = false;
+
 				if(pSystemCallbacks[MFCB_LostFocus])
 					pSystemCallbacks[MFCB_LostFocus]();
 			}

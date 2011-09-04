@@ -1,6 +1,5 @@
 #include "Haku.h"
 #include "UI/HKWidget.h"
-#include "UI/HKWidgetEvent.h"
 
 #include "MFTypes.h"
 #include "MFCollision.h"
@@ -9,14 +8,14 @@ HKWidget::HKWidget()
 {
 	pTypeName = "HKWidget";
 
-	renderCallback.clear();
-
 	pos = MakeVector(0, 0, 0);
 	size = MakeVector(30, 20, 0);
 	colour = MFVector::white;
 	scale = MFVector::one;
 	rot = MFVector::zero;
 
+	renderCallback.clear();
+	pRenderer = NULL;
 	pParent = NULL;
 
 	zDepth = 0;
@@ -30,6 +29,11 @@ HKWidget::HKWidget()
 
 HKWidget::~HKWidget()
 {
+	if(pRenderer)
+	{
+		delete pRenderer;
+		pRenderer = NULL;
+	}
 }
 
 HKWidget *HKWidget::Create()
@@ -79,9 +83,10 @@ const MFMatrix &HKWidget::GetInvTransform()
 	return invMatrix;
 }
 
-void HKWidget::SetRenderDelegate(RenderCallback renderDelegate)
+void HKWidget::SetRenderer(HKWidgetRenderer *pRenderer)
 {
-	renderCallback = renderDelegate;
+	pRenderer = pRenderer;
+	renderCallback = pRenderer->GetRenderDelegate();
 }
 
 bool HKWidget::SetEnabled(bool bEnable)
@@ -93,10 +98,10 @@ bool HKWidget::SetEnabled(bool bEnable)
 
 		if(!OnEnabledChanged.IsEmpty())
 		{
-			HKWidgetEnabledEvent *pEvent = (HKWidgetEnabledEvent*)HKWidgetEvent::Alloc(this);
+			HKWidgetEnabledEvent *pEvent = (HKWidgetEnabledEvent*)HKWidgetEventInfo::Alloc(this);
 			pEvent->bEnabled = bEnable;
-			OnEnabledChanged(this, pEvent);
-			HKWidgetEvent::Free(pEvent);
+			OnEnabledChanged(*this, pEvent);
+			HKWidgetEventInfo::Free(pEvent);
 		}
 	}
 	return bOld;
@@ -111,10 +116,10 @@ bool HKWidget::SetVisible(bool bVisible)
 
 		if(!OnEnabledChanged.IsEmpty())
 		{
-			HKWidgetVisibilityEvent *pEvent = (HKWidgetVisibilityEvent*)HKWidgetEvent::Alloc(this);
+			HKWidgetVisibilityEvent *pEvent = (HKWidgetVisibilityEvent*)HKWidgetEventInfo::Alloc(this);
 			pEvent->bVisible = bVisible;
-			OnVisibleChanged(this, pEvent);
-			HKWidgetEvent::Free(pEvent);
+			OnVisibleChanged(*this, pEvent);
+			HKWidgetEventInfo::Free(pEvent);
 		}
 	}
 	return bOld;
@@ -129,11 +134,11 @@ void HKWidget::SetPosition(const MFVector &position)
 
 		if(!OnMove.IsEmpty())
 		{
-			HKWidgetMoveEvent *pEvent = (HKWidgetMoveEvent*)HKWidgetEvent::Alloc(this);
+			HKWidgetMoveEvent *pEvent = (HKWidgetMoveEvent*)HKWidgetEventInfo::Alloc(this);
 			pEvent->oldPos = oldPos;
 			pEvent->newPos = position;
-			OnMove(this, pEvent);
-			HKWidgetEvent::Free(pEvent);
+			OnMove(*this, pEvent);
+			HKWidgetEventInfo::Free(pEvent);
 		}
 	}
 }
@@ -147,11 +152,11 @@ void HKWidget::SetSize(const MFVector &size)
 
 		if(!OnMove.IsEmpty())
 		{
-			HKWidgetResizeEvent *pEvent = (HKWidgetResizeEvent*)HKWidgetEvent::Alloc(this);
+			HKWidgetResizeEvent *pEvent = (HKWidgetResizeEvent*)HKWidgetEventInfo::Alloc(this);
 			pEvent->oldSize = oldSize;
 			pEvent->newSize = size;
-			OnResize(this, pEvent);
-			HKWidgetEvent::Free(pEvent);
+			OnResize(*this, pEvent);
+			HKWidgetEventInfo::Free(pEvent);
 		}
 	}
 }

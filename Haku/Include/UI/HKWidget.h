@@ -1,7 +1,8 @@
 #if !defined(_HKWIDGET_H)
 #define _HKWIDGET_H
 
-#include "HKEvent.h"
+#include "HKWidgetEvent.h"
+#include "HKWidgetRenderer.h"
 
 // HKWidget is an interactive entity
 class HKWidget
@@ -9,8 +10,6 @@ class HKWidget
 	friend class HKUserInterface;
 	friend class HKWidgetRenderer;
 public:
-	typedef fastdelegate::FastDelegate1<const HKWidget &> RenderCallback;
-
 	static HKWidget *Create();
 
 	HKWidget();
@@ -18,10 +17,21 @@ public:
 
 	virtual void Update();
 
+	void SetRenderer(HKWidgetRenderer *pRenderer);
+
+	bool IsEnabled() const { return bEnabled && bParentEnabled; }
+
+	bool GetEnabled() const { return bEnabled; }
+	bool GetVisible() const { return bVisible; }
+
+	const MFVector &GetPosition() const { return pos; }
+	const MFVector &GetSize() const { return size; }
+	const MFVector &GetColour() const { return colour; }
+	const MFVector &GetScale() const { return scale; }
+	const MFVector &GetRotation() const { return rot; }
+
 	const MFMatrix &GetTransform();
 	const MFMatrix &GetInvTransform();
-
-	void SetRenderDelegate(RenderCallback renderDelegate);
 
 	bool SetEnabled(bool bEnable);
 	bool SetVisible(bool bVisible);
@@ -33,24 +43,24 @@ public:
 	void SetRotation(const MFVector &rotation);
 
 	// state change events
-	HKEvent OnEnabledChanged;
-	HKEvent OnVisibleChanged;
+	HKWidgetEvent OnEnabledChanged;
+	HKWidgetEvent OnVisibleChanged;
 
 	// interactivity events
-	HKEvent OnMove;
-	HKEvent OnResize;
-	HKEvent OnFocusChanged;
+	HKWidgetEvent OnMove;
+	HKWidgetEvent OnResize;
+	HKWidgetEvent OnFocusChanged;
 
 	// input events
-	HKEvent OnDown;			// an input source lowered a key. applies to mouse, keyboard, touch, gamepad events
-	HKEvent OnUp;			// an input source raised a key. applies to mouse, keyboard, touch, gamepad events
-	HKEvent OnClicked;		// a sequence of down followed by an up, without motion in between. applies to mouse, keyboard, touch, gamepad events
-	HKEvent OnDrag;			// an input source was moved between a 'down', and 'up' event. applies to mouse, touch events
-	HKEvent OnHover;		// an input source moved above a widget. applies to mouse events
-	HKEvent OnHoverOver;	// an input source entered the bounds of a widget. applies to mouse events
-	HKEvent OnHoverOut;		// an input source left the bounds of a widget. applies to mouse events
+	HKWidgetEvent OnDown;			// an input source lowered a key. applies to mouse, keyboard, touch, gamepad events
+	HKWidgetEvent OnUp;			// an input source raised a key. applies to mouse, keyboard, touch, gamepad events
+	HKWidgetEvent OnTap;			// a sequence of down followed by an up, without motion in between. applies to mouse, keyboard, touch, gamepad events
+	HKWidgetEvent OnDrag;			// an input source was moved between a 'down', and 'up' event. applies to mouse, touch events
+	HKWidgetEvent OnHover;		// an input source moved above a widget. applies to mouse events
+	HKWidgetEvent OnHoverOver;	// an input source entered the bounds of a widget. applies to mouse events
+	HKWidgetEvent OnHoverOut;		// an input source left the bounds of a widget. applies to mouse events
 
-	HKEvent OnCharacter;	// if the input was able to generate a unicode character
+	HKWidgetEvent OnCharacter;	// if the input was able to generate a unicode character
 
 protected:
 	MFVector pos;			// relative to parent
@@ -62,7 +72,8 @@ protected:
 	MFMatrix matrix;
 	MFMatrix invMatrix;
 
-	RenderCallback renderCallback;
+	HKWidgetRenderer::RenderCallback renderCallback;
+	HKWidgetRenderer *pRenderer;
 
 	const char *pTypeName;
 

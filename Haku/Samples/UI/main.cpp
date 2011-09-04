@@ -11,6 +11,8 @@
 #include "UI/HKUI.h"
 #include "UI/HKInputSource.h"
 
+#include "UI/Widgets/HKWidgetButton.h"
+
 /**** Globals ****/
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
@@ -49,15 +51,13 @@ void Game_Init()
 	HKUserInterface::SetActiveUI(pUI);
 
 	// hard code a test UI...
-	HKWidget *pWidget = new HKWidget();
-	pUI->SetRootWidget(pWidget);
+	HKWidgetButton *pButton = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
+	pUI->SetRootWidget(pButton);
 }
 
 void Game_Update()
 {
 	MFCALLSTACK;
-
-	HKInputSource::UpdateSources();
 
 	pUI->Update();
 }

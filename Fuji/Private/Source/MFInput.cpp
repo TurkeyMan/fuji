@@ -244,6 +244,7 @@ void MFInput_InitModule()
 	MFZeroMemory(gTouchPanelStates, sizeof(gTouchPanelStates[0])*MFInput_MaxInputID);
 
 	MFInput_InitModulePlatformSpecific();
+	MFInput_Update();
 }
 
 void MFInput_DeinitModule()

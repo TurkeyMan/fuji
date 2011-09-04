@@ -21,13 +21,13 @@ static const int maxEventSize = MAX(
 									sizeof(HKWidgetInputActionEvent)),
 								sizeof(HKWidgetInputTextEvent));
 
-void HKWidgetEvent::Init()
+void HKWidgetEventInfo::Init()
 {
 	if(!pEventPool)
 		pEventPool = new MFObjectPool(maxEventSize, 128, 128);
 }
 
-void HKWidgetEvent::Deinit()
+void HKWidgetEventInfo::Deinit()
 {
 	if(pEventPool)
 	{
@@ -36,15 +36,15 @@ void HKWidgetEvent::Deinit()
 	}
 }
 
-HKEventInfo *HKWidgetEvent::Alloc(HKWidget *pSender)
+HKWidgetEventInfo *HKWidgetEventInfo::Alloc(HKWidget *pSender)
 {
-	HKEventInfo *pInfo = (HKEventInfo*)pEventPool->Alloc();
+	HKWidgetEventInfo *pInfo = (HKWidgetEventInfo*)pEventPool->Alloc();
 	pInfo->pSender = pSender;
 	pInfo->pUserData = NULL;
 	return pInfo;
 }
 
-void HKWidgetEvent::Free(HKEventInfo *pInfo)
+void HKWidgetEventInfo::Free(HKWidgetEventInfo *pInfo)
 {
 	pEventPool->Free(pInfo);
 }

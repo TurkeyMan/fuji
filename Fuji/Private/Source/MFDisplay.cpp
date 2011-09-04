@@ -7,6 +7,8 @@
 MFDisplaySettings gDisplay;
 extern MFInitParams gInitParams;
 
+bool gAppHasFocus = true;
+
 void MFDisplay_InitModule()
 {
 	MFCALLSTACK;
@@ -45,4 +47,9 @@ void MFDisplay_GetDisplayRect(MFRect *pRect)
 		pRect->width = (float)gDisplay.fullscreenWidth;
 		pRect->height = (float)gDisplay.fullscreenHeight;
 	}
+}
+
+bool MFDisplay_HasFocus()
+{
+	return gAppHasFocus;
 }

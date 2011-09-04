@@ -3,10 +3,9 @@
 
 #include "HKFactory.h"
 #include "HKWidget.h"
-#include "HKWidgetEvent.h"
+#include "HKInputSource.h"
 
 class HKWidgetRenderer;
-class HKInputSource;
 
 typedef HKFactory<HKWidget> HKWidgetFactory;
 
@@ -36,10 +35,15 @@ protected:
 	HKWidget *pRoot;
 	HKWidgetRenderer *pRenderer;
 
+	HKInputManager *pInputManager;
+
 	HKInputSource **ppFocusList;
 	HKInputSource **ppHoverList;
 
 	static HKUserInterface *pActive;
+	static HKWidgetFactory *pFactory;
+
+	void OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 };
 
 #endif
