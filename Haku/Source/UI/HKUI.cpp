@@ -4,10 +4,15 @@
 #include "UI/HKWidgetEvent.h"
 #include "UI/HKInputSource.h"
 
+#include "UI/Widgets/HKWidgetLabel.h"
 #include "UI/Widgets/HKWidgetButton.h"
+#include "UI/Widgets/HKWidgetLayout.h"
+#include "UI/Widgets/HKWidgetLayoutLinear.h"
+#include "UI/Widgets/HKWidgetLayoutFrame.h"
 
 HKUserInterface *HKUserInterface::pActive = NULL;
 HKFactory<HKWidget> *HKUserInterface::pFactory = NULL;
+HKFactory<HKWidgetRenderer> *HKUserInterface::pRendererFactory = NULL;
 
 void HKUserInterface::Init()
 {
@@ -17,12 +22,31 @@ void HKUserInterface::Init()
 
 		HKWidgetFactory::FactoryType *pWidget = pFactory->RegisterType("HKWidget", HKWidget::Create, NULL);
 
+		pFactory->RegisterType("HKWidgetLabel", HKWidgetLabel::Create, pWidget);
 		pFactory->RegisterType("HKWidgetButton", HKWidgetButton::Create, pWidget);
+		pFactory->RegisterType("HKWidgetLayoutFrame", HKWidgetLayoutFrame::Create, pWidget);
+		pFactory->RegisterType("HKWidgetLayoutLinear", HKWidgetLayoutLinear::Create, pWidget);
+	}
+
+	if(!pRendererFactory)
+	{
+		pRendererFactory = new HKFactory<HKWidgetRenderer>();
+
+		pRendererFactory->RegisterType("HKWidgetLabel", HKWidgetRendererLabel::Create, NULL);
+		pRendererFactory->RegisterType("HKWidgetButton", HKWidgetRendererButton::Create, NULL);
+		pRendererFactory->RegisterType("HKWidgetLayoutFrame", HKWidgetRendererLayout::Create, NULL);
+		pRendererFactory->RegisterType("HKWidgetLayoutLinear", HKWidgetRendererLayout::Create, NULL);
 	}
 }
 
 void HKUserInterface::Deinit()
 {
+	if(pRendererFactory)
+	{
+		delete pRendererFactory;
+		pRendererFactory = NULL;
+	}
+
 	if(pFactory)
 	{
 		delete pFactory;
@@ -35,6 +59,11 @@ HKWidgetFactory::FactoryType *HKUserInterface::RegisterWidget(const char *pWidge
 	return pFactory->RegisterType(pWidgetType, createDelegate, pParent);
 }
 
+HKWidgetRendererFactory::FactoryType *HKUserInterface::RegisterWidgetRenderer(const char *pWidgetType, HKWidgetRendererFactory::CreateFunc createDelegate, HKWidgetRendererFactory::FactoryType *pParent)
+{
+	return pRendererFactory->RegisterType(pWidgetType, createDelegate, pParent);
+}
+
 HKWidgetFactory::FactoryType *HKUserInterface::FindWidgetType(const char *pWidgetType)
 {
 	return pFactory->FindType(pWidgetType);
@@ -43,7 +72,9 @@ HKWidgetFactory::FactoryType *HKUserInterface::FindWidgetType(const char *pWidge
 HKWidget *HKUserInterface::CreateWidget(const char *pWidgetType)
 {
 	HKWidget *pWidget = pFactory->Create(pWidgetType);
-//	pWidget->SetRenderDelegate(pRenderer->FindRenderer(pWidgetType);
+	HKWidgetRenderer *pRenderer = pRendererFactory->Create(pWidgetType);
+	if(pRenderer)
+		pWidget->SetRenderer(pRenderer);
 	return pWidget;
 }
 
@@ -53,7 +84,6 @@ HKUserInterface::HKUserInterface()
 	MFZeroMemory(pHoverList, sizeof(pHoverList));
 
 	pRoot = NULL;
-	pRenderer = NULL;
 
 	pInputManager = new HKInputManager();
 	pInputManager->OnInputEvent += fastdelegate::MakeDelegate(this, &HKUserInterface::OnInputEvent);
@@ -67,10 +97,21 @@ HKUserInterface::~HKUserInterface()
 void HKUserInterface::Update()
 {
 	pInputManager->Update();
+
+	pRoot->Update();
 }
+
+#include <stdio.h>
+static MFVector localPos;
 
 void HKUserInterface::Draw()
 {
+	pRoot->Draw();
+
+	char buffer[256] = "";
+	sprintf(buffer, "%g, %g: ", localPos.x, localPos.y);
+	
+	MFFont_BlitText(MFFont_GetDebugFont(), 10, 10, MFVector::yellow, buffer);
 }
 
 HKWidget *HKUserInterface::SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget)
@@ -94,7 +135,8 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, HKInputManager::Even
 		// positional events will be sent to the hierarchy
 		MFVector pos = { ev.hover.x, ev.hover.y, 0.f, 1.f };
 		MFVector dir = { 0.f, 0.f, 1.f, 1.f };
-		HKWidget *pWidget = pRoot->IntersectWidget(pos, dir);
+
+		HKWidget *pWidget = pRoot->IntersectWidget(pos, dir, &localPos);
 
 		// check if the hover has changed
 		HKWidget *pHover = pHoverList[ev.pSource->sourceID];

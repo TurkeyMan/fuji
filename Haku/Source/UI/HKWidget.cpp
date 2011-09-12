@@ -9,13 +9,12 @@ HKWidget::HKWidget()
 {
 	pTypeName = "HKWidget";
 
-	pos = MakeVector(0, 0, 0);
-	size = MakeVector(30, 20, 0);
+	pos = MFVector::zero;
+	size.Set(60, 40, 0);
 	colour = MFVector::white;
 	scale = MFVector::one;
 	rot = MFVector::zero;
 
-	renderCallback.clear();
 	pRenderer = NULL;
 	pParent = NULL;
 
@@ -44,7 +43,13 @@ HKWidget *HKWidget::Create()
 
 void HKWidget::Update()
 {
-	// do something?
+	// update the children
+	int numChildren = GetNumChildren();
+	for(int a=0; a<numChildren; ++a)
+	{
+		HKWidget *pChild = GetChild(a);
+		pChild->Update();
+	}
 }
 
 const MFMatrix &HKWidget::GetTransform()
@@ -72,6 +77,8 @@ const MFMatrix &HKWidget::GetTransform()
 		// and multiply in the parent
 		if(pParent)
 			matrix.Multiply(pParent->GetTransform(), matrix);
+
+		bMatrixDirty = false;
 	}
 
 	return matrix;
@@ -80,14 +87,16 @@ const MFMatrix &HKWidget::GetTransform()
 const MFMatrix &HKWidget::GetInvTransform()
 {
 	if(bInvMatrixDirty)
+	{
 		invMatrix.Inverse(GetTransform());
+		bInvMatrixDirty = false;
+	}
 	return invMatrix;
 }
 
 void HKWidget::SetRenderer(HKWidgetRenderer *pRenderer)
 {
-	pRenderer = pRenderer;
-	renderCallback = pRenderer->GetRenderDelegate();
+	this->pRenderer = pRenderer;
 }
 
 HKUserInterface &HKWidget::GetUI()
@@ -144,6 +153,8 @@ void HKWidget::SetPosition(const MFVector &position)
 		MFVector oldPos = pos;
 		pos = position;
 
+		DirtyMatrices();
+
 		if(!OnMove.IsEmpty())
 		{
 			HKWidgetMoveEvent ev(this);
@@ -178,15 +189,49 @@ void HKWidget::SetColour(const MFVector &colour)
 
 void HKWidget::SetScale(const MFVector &scale)
 {
-	this->scale = scale;
+	if(this->scale != scale)
+	{
+		this->scale = scale;
+
+		DirtyMatrices();
+	}
 }
 
 void HKWidget::SetRotation(const MFVector &rotation)
 {
-	this->rot = rotation;
+	if(this->rot != rotation)
+	{
+		this->rot = rotation;
+
+		DirtyMatrices();
+	}
 }
 
-HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
+void HKWidget::Draw()
+{
+	if(!bVisible)
+		return;
+
+	pRenderer->Render(*this, GetTransform());
+
+	int numChildren = GetNumChildren();
+	for(int a=0; a<numChildren; ++a)
+	{
+		HKWidget *pChild = GetChild(a);
+		pChild->Draw();
+	}
+}
+
+void HKWidget::DirtyMatrices()
+{
+	bMatrixDirty = bInvMatrixDirty = true;
+
+	int numChildren = GetNumChildren();
+	for(int a=0; a<numChildren; ++a)
+		GetChild(a)->DirtyMatrices();
+}
+
+HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos)
 {
 	if(!bVisible)
 		return NULL;
@@ -219,10 +264,13 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir)
 			{
 				HKWidget *pIntersect = this;
 
+				if(pLocalPos)
+					*pLocalPos = intersection;
+
 				int numChildren = GetNumChildren();
 				for(int a=0; a<numChildren; ++a)
 				{
-					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir);
+					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir, pLocalPos);
 					if(pChild)
 					{
 						pIntersect = pChild;

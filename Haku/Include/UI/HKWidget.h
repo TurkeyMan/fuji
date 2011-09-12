@@ -11,18 +11,18 @@ class HKUserInterface;
 class HKWidget
 {
 	friend class HKUserInterface;
-	friend class HKWidgetRenderer;
+	friend class HKWidgetLayout;
 public:
 	static HKWidget *Create();
 
 	HKWidget();
-	~HKWidget();
-
-	virtual void Update();
+	virtual ~HKWidget();
 
 	void SetRenderer(HKWidgetRenderer *pRenderer);
 
 	HKUserInterface &GetUI();
+
+	MFString GetName() const { return name; }
 
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
@@ -40,6 +40,8 @@ public:
 
 	const MFMatrix &GetTransform();
 	const MFMatrix &GetInvTransform();
+
+	void SetName(MFString name) { this->name = name; }
 
 	bool SetEnabled(bool bEnable);
 	bool SetVisible(bool bVisible);
@@ -80,12 +82,12 @@ protected:
 	MFMatrix matrix;
 	MFMatrix invMatrix;
 
-	HKWidgetRenderer::RenderCallback renderCallback;
 	HKWidgetRenderer *pRenderer;
+	HKWidget *pParent;
+
+	MFString name;
 
 	const char *pTypeName;
-
-	HKWidget *pParent;
 
 	bool bVisible;
 	bool bEnabled;
@@ -95,7 +97,12 @@ protected:
 
 	bool bMatrixDirty, bInvMatrixDirty;
 
-	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir);	// test for ray intersecting the widget
+	virtual void Update();
+	void Draw();
+
+	void DirtyMatrices();
+
+	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos);	// test for ray intersecting the widget
 	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 };
 

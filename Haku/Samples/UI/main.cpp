@@ -12,6 +12,9 @@
 #include "UI/HKInputSource.h"
 
 #include "UI/Widgets/HKWidgetButton.h"
+#include "UI/Widgets/HKWidgetLabel.h"
+#include "UI/Widgets/HKWidgetLayoutFrame.h"
+#include "UI/Widgets/HKWidgetLayoutLinear.h"
 
 /**** Globals ****/
 
@@ -51,8 +54,35 @@ void Game_Init()
 	HKUserInterface::SetActiveUI(pUI);
 
 	// hard code a test UI...
-	HKWidgetButton *pButton = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
-	pUI->SetRootWidget(pButton);
+	HKWidgetLayoutFrame *pFrame = (HKWidgetLayoutFrame*)HKUserInterface::CreateWidget("HKWidgetLayoutFrame");
+	pFrame->SetSize(MakeVector(200, 200));
+	pFrame->SetMargin(MakeVector(2, 5, 10, 20));
+	pFrame->SetPosition(MakeVector(100, 100));
+
+	HKWidgetButton *pButtonBig = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
+	pButtonBig->SetLabel("Wide Load!");
+	int i = pFrame->AddChild(pButtonBig);
+	pFrame->SetChildJustification(i, HKWidgetLayout::BottomFill);
+
+	HKWidgetLabel *pLabel = (HKWidgetLabel *)HKUserInterface::CreateWidget("HKWidgetLabel");
+	pLabel->SetLabel("Whee!");
+	i = pFrame->AddChild(pLabel);
+	pFrame->SetChildJustification(i, HKWidgetLayout::TopRight);
+
+	HKWidgetLayoutLinear *pLinear = (HKWidgetLayoutLinear*)HKUserInterface::CreateWidget("HKWidgetLayoutLinear");
+
+	HKWidgetButton *pButton1 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
+	pButton1->SetLabel("Button");
+	HKWidgetButton *pButton2 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
+	pButton2->SetLabel("Button2");
+
+	pLinear->AddChild(pButton1);
+	pLinear->AddChild(pButton2);
+
+	i = pFrame->AddChild(pLinear);
+	pFrame->SetChildJustification(i, HKWidgetLayout::Center);
+
+	pUI->SetRootWidget(pFrame);
 }
 
 void Game_Update()
@@ -147,7 +177,9 @@ void Game_Draw()
 
 	MFEnd();
 
-	MFView_SetOrtho();
+	MFRect disp;
+	MFDisplay_GetDisplayRect(&disp);
+	MFView_SetOrtho(&disp);
 	pUI->Draw();
 
 	MFView_Pop();

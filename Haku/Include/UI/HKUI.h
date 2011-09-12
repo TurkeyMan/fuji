@@ -8,6 +8,7 @@
 class HKWidgetRenderer;
 
 typedef HKFactory<HKWidget> HKWidgetFactory;
+typedef HKFactory<HKWidgetRenderer> HKWidgetRendererFactory;
 
 class HKUserInterface
 {
@@ -16,6 +17,7 @@ public:
 	static void Deinit();
 
 	static HKWidgetFactory::FactoryType *RegisterWidget(const char *pWidgetType, HKWidgetFactory::CreateFunc createDelegate, HKWidgetFactory::FactoryType *pParent);
+	static HKWidgetRendererFactory::FactoryType *RegisterWidgetRenderer(const char *pWidgetType, HKWidgetRendererFactory::CreateFunc createDelegate, HKWidgetRendererFactory::FactoryType *pParent);
 	static HKWidgetFactory::FactoryType *FindWidgetType(const char *pWidgetType);
 
 	static HKWidget *CreateWidget(const char *pWidgetType);
@@ -35,7 +37,6 @@ public:
 
 protected:
 	HKWidget *pRoot;
-	HKWidgetRenderer *pRenderer;
 
 	HKInputManager *pInputManager;
 
@@ -44,6 +45,7 @@ protected:
 
 	static HKUserInterface *pActive;
 	static HKWidgetFactory *pFactory;
+	static HKWidgetRendererFactory *pRendererFactory;
 
 	void OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 };

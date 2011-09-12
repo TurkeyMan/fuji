@@ -7,6 +7,7 @@ HKWidget *HKWidgetButton::Create()
 	return new HKWidgetButton();
 }
 
+
 HKWidgetButton::HKWidgetButton()
 {
 	pTypeName = "HKWidgetButton";
@@ -84,4 +85,27 @@ void HKWidgetButton::ButtonOut(HKWidget &sender, HKWidgetEventInfo &ev)
 {
 	if(bDown)
 		bPressed = false;
+}
+
+
+HKWidgetRenderer *HKWidgetRendererButton::Create()
+{
+	return new HKWidgetRendererButton();
+}
+
+#include "MFPrimitive.h"
+#include "MFFont.h"
+
+void HKWidgetRendererButton::Render(const HKWidget &widget, const MFMatrix &worldTransform)
+{
+	HKWidgetButton &button = (HKWidgetButton&)widget;
+
+	const MFVector &size = widget.GetSize();
+	const MFVector &colour = widget.GetColour();
+	MFString label = button.GetLabel();
+
+	MFPrimitive_DrawUntexturedQuad(0, 0, size.x, size.y, MFVector::black, worldTransform);
+	MFPrimitive_DrawUntexturedQuad(1, 1, size.x - 2, size.y - 2, button.GetPressed() ? MFVector::blue : colour, worldTransform);
+	if(!label.IsEmpty())
+		MFFont_DrawTextJustified(MFFont_GetDebugFont(), label.CStr(), MFVector::zero, size.x, size.y, MFFontJustify_Center, 10.f, MFVector::black, -1, worldTransform);
 }
