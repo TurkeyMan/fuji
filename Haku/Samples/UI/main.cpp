@@ -56,12 +56,13 @@ void Game_Init()
 	// hard code a test UI...
 	HKWidgetLayoutFrame *pFrame = (HKWidgetLayoutFrame*)HKUserInterface::CreateWidget("HKWidgetLayoutFrame");
 	pFrame->SetSize(MakeVector(200, 200));
-	pFrame->SetMargin(MakeVector(2, 5, 10, 20));
+	pFrame->SetMargin(MakeVector(5, 5, 5, 5));
 	pFrame->SetPosition(MakeVector(100, 100));
 
 	HKWidgetButton *pButtonBig = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
 	pButtonBig->SetLabel("Wide Load!");
 	int i = pFrame->AddChild(pButtonBig);
+	pFrame->SetChildMargin(i, MakeVector(2, 2, 2, 2));
 	pFrame->SetChildJustification(i, HKWidgetLayout::BottomFill);
 
 	HKWidgetLabel *pLabel = (HKWidgetLabel *)HKUserInterface::CreateWidget("HKWidgetLabel");

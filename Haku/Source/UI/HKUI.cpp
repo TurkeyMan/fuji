@@ -126,6 +126,16 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, HKInputManager::Even
 	HKWidget *pFocusWidget = pFocusList[ev.pSource->sourceID];
 	if(pFocusWidget)
 	{
+		if(ev.pSource->device == IDD_Mouse || ev.pSource->device == IDD_TouchPanel)
+		{
+			// transform the event into local space...
+			MFVector pos = { ev.hover.x, ev.hover.y, 0.f, 1.f };
+			MFVector dir = { 0.f, 0.f, 1.f, 1.f };
+			pRoot->IntersectWidget(pos, dir, &localPos);
+			ev.hover.x = localPos.x;
+			ev.hover.y = localPos.y;
+		}
+
 		if(pFocusWidget->InputEvent(manager, ev))
 			return;
 	}
@@ -159,6 +169,9 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, HKInputManager::Even
 
 		if(pWidget)
 		{
+			ev.hover.x = localPos.x;
+			ev.hover.y = localPos.y;
+
 			// send the input event
 			if(pWidget->InputEvent(manager, ev))
 				return;

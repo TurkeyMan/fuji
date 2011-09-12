@@ -39,8 +39,7 @@ protected:
 
 	void ButtonDown(HKWidget &widget, HKWidgetEventInfo &ev);
 	void ButtonUp(HKWidget &widget, HKWidgetEventInfo &ev);
-	void ButtonOver(HKWidget &widget, HKWidgetEventInfo &ev);
-	void ButtonOut(HKWidget &widget, HKWidgetEventInfo &ev);
+	void Hover(HKWidget &widget, HKWidgetEventInfo &ev);
 };
 
 class HKWidgetRendererButton : public HKWidgetRenderer

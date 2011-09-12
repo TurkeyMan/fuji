@@ -21,8 +21,7 @@ HKWidgetButton::HKWidgetButton()
 	// hook up some events
 	OnDown += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonDown);
 	OnUp += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonUp);
-	OnHoverOver += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonOver);
-	OnHoverOut += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonOut);
+	OnHover += fastdelegate::MakeDelegate(this, &HKWidgetButton::Hover);
 }
 
 HKWidgetButton::~HKWidgetButton()
@@ -30,8 +29,7 @@ HKWidgetButton::~HKWidgetButton()
 	// unhook the events
 	OnDown -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonDown);
 	OnUp -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonUp);
-	OnHoverOver -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonOver);
-	OnHoverOut -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonOut);
+	OnHover -= fastdelegate::MakeDelegate(this, &HKWidgetButton::Hover);
 }
 
 void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
@@ -75,16 +73,18 @@ void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo &ev)
 	}
 }
 
-void HKWidgetButton::ButtonOver(HKWidget &sender, HKWidgetEventInfo &ev)
+void HKWidgetButton::Hover(HKWidget &sender, HKWidgetEventInfo &ev)
 {
-	if(bDown)
-		bPressed = true;
-}
+	HKWidgetMoveEvent &hover = (HKWidgetMoveEvent&)ev;
 
-void HKWidgetButton::ButtonOut(HKWidget &sender, HKWidgetEventInfo &ev)
-{
 	if(bDown)
-		bPressed = false;
+	{
+		MFRect rect = { 0, 0, size.x, size.y };
+		if(MFTypes_PointInRect(hover.newPos.x, hover.newPos.y, &rect))
+			bPressed = true;
+		else
+			bPressed = false;
+	}
 }
 
 

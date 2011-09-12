@@ -255,6 +255,10 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 		if(MFCollision_RayPlaneTest(pos, dir, plane, &res))
 		{
 			MFVector intersection = GetInvTransform().TransformVectorH(pos + dir*res.time);
+
+			if(pLocalPos)
+				*pLocalPos = intersection;
+
 			MFRect rect =
 			{
 				0.f, 0.f,
@@ -263,9 +267,6 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 			if(MFTypes_PointInRect(intersection.x, intersection.y, &rect))
 			{
 				HKWidget *pIntersect = this;
-
-				if(pLocalPos)
-					*pLocalPos = intersection;
 
 				int numChildren = GetNumChildren();
 				for(int a=0; a<numChildren; ++a)
