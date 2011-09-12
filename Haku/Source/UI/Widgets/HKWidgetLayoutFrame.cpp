@@ -19,7 +19,10 @@ HKWidgetLayoutFrame::~HKWidgetLayoutFrame()
 
 void HKWidgetLayoutFrame::ArrangeChildren()
 {
+	// early out?
 	int numChildren = GetNumChildren();
+	if(numChildren == 0)
+		return;
 
 	if(fitFlags != 0)
 	{
@@ -58,7 +61,6 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 
 		switch(GetChildJustification(a))
 		{
-		case None:
 		case TopLeft:
 			pWidget->SetPosition(tPos);
 			break;
@@ -113,6 +115,10 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 		case Fill:
 			pWidget->SetPosition(tPos);
 			pWidget->SetSize(tSize);
+			break;
+		case None:
+			// this widget has absolute coordinates..
+		default:
 			break;
 		}
 	}

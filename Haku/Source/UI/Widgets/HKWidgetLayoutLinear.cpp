@@ -21,23 +21,42 @@ HKWidgetLayoutLinear::~HKWidgetLayoutLinear()
 
 void HKWidgetLayoutLinear::ArrangeChildren()
 {
+	// early out?
 	int numChildren = GetNumChildren();
-/*
-	// fitting it to the chuldren seems complicated... :/
-	if(fitFlags != 0)
-	{
-		// fit to largest child in each dimension
-		MFVector fit = MFVector::zero;
-		for(int a=0; a<numChildren; ++a)
-		{
-			HKWidget *pWidget = GetChild(a);
-			const MFVector &cMargin = GetChildMargin(a);
-			const MFVector &cSize = pWidget->GetSize();
+	if(numChildren == 0)
+		return;
 
-			fit.x = MFMax(fit.x, cSize.x + cMargin.x + cMargin.z + margin.x + margin.z);
+	// calculate weight and fix
+	float totalWeight = 0.f;
+	MFVector fit = MakeVector(margin.x + margin.z, margin.y + margin.w);
+	for(int a=0; a<numChildren; ++a)
+	{
+		HKWidget *pWidget = GetChild(a);
+		const MFVector &cMargin = GetChildMargin(a);
+		const MFVector &cSize = pWidget->GetSize();
+
+		if(orientation == Horizontal)
+		{
+			if((GetChildJustification(a) & 3) == 3) // fill horizontally
+				totalWeight += GetChildWeight(a);
+			else
+				fit.x += cSize.x + cMargin.x + cMargin.z;
+
 			fit.y = MFMax(fit.y, cSize.y + cMargin.y + cMargin.w + margin.y + margin.w);
 		}
+		else
+		{
+			if((GetChildJustification(a) >> 2) & 3) // fill vertically
+				totalWeight += GetChildWeight(a);
+			else
+				fit.y += cSize.y + cMargin.y + cMargin.w;
 
+			fit.x = MFMax(fit.x, cSize.x + cMargin.x + cMargin.z + margin.x + margin.z);
+		}
+	}
+
+	if(fitFlags != 0)
+	{
 		// resize the layout
 		MFVector newSize = size;
 		if(fitFlags & FitContentHorizontal)
@@ -46,9 +65,11 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 			newSize.y = fit.y;
 		SetSize(newSize);
 	}
-*/
+
 	MFVector cPos = MakeVector(margin.x, margin.y);
 	MFVector cSize = MakeVector(size.x - (margin.x + margin.z), size.y - (margin.y + margin.w));
+
+	MFVector slack = MFMax(size - fit, MFVector::zero);
 
 	for(int a=0; a<numChildren; ++a)
 	{
@@ -63,7 +84,19 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 
 		if(orientation == Horizontal)
 		{
-			cPos.x += cSize.x + cMargin.x + cMargin.z;
+			MFVector newSize = cSize;
+
+			if((GetChildJustification(a) & 3) == 3) // fill horizontally
+			{
+				// this widget fills available empty space in the parent container
+				newSize.x = slack.x * (GetChildWeight(a) / totalWeight);
+				cPos.x += newSize.x;
+				newSize.x = MFMax(0.f, newSize.x - cMargin.x - cMargin.z);
+			}
+			else
+			{
+				cPos.x += cSize.x + cMargin.x + cMargin.z;
+			}
 
 			switch((justify >> 2) & 3)
 			{
@@ -78,13 +111,27 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 				break;
 			case 3: // fill
 				pWidget->SetPosition(tPos);
-				pWidget->SetSize(MakeVector(size.x, tSize.y));
+				newSize.y = tSize.y;
 				break;
 			}
+
+			pWidget->SetSize(newSize);
 		}
 		else
 		{
-			cPos.y += cSize.y + cMargin.y + cMargin.w;
+			MFVector newSize = cSize;
+
+			if((GetChildJustification(a) >> 2) & 3) // fill vertically
+			{
+				// this widget fills available empty space in the parent container
+				newSize.y = slack.y * (GetChildWeight(a) / totalWeight);
+				cPos.y += newSize.y;
+				newSize.y = MFMax(0.f, newSize.y - cMargin.y - cMargin.w);
+			}
+			else
+			{
+				cPos.y += cSize.y + cMargin.y + cMargin.w;
+			}
 
 			switch(justify & 3)
 			{
@@ -99,9 +146,11 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 				break;
 			case 3: // fill
 				pWidget->SetPosition(tPos);
-				pWidget->SetSize(MakeVector(tSize.x, size.y));
+				newSize.x = tSize.x;
 				break;
 			}
+
+			pWidget->SetSize(newSize);
 		}
 	}
 }

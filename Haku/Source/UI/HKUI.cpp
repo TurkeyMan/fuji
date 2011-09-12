@@ -131,7 +131,7 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, HKInputManager::Even
 			// transform the event into local space...
 			MFVector pos = { ev.hover.x, ev.hover.y, 0.f, 1.f };
 			MFVector dir = { 0.f, 0.f, 1.f, 1.f };
-			pRoot->IntersectWidget(pos, dir, &localPos);
+			pFocusWidget->IntersectWidget(pos, dir, &localPos);
 			ev.hover.x = localPos.x;
 			ev.hover.y = localPos.y;
 		}

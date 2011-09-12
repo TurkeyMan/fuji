@@ -137,7 +137,7 @@ bool HKWidget::SetVisible(bool bVisible)
 	{
 		this->bVisible = bVisible;
 
-		if(!OnEnabledChanged.IsEmpty())
+		if(!OnVisibleChanged.IsEmpty())
 		{
 			HKWidgetVisibilityEvent ev(this, bVisible);
 			OnVisibleChanged(*this, ev);
@@ -172,7 +172,7 @@ void HKWidget::SetSize(const MFVector &size)
 		MFVector oldSize = this->size;
 		this->size = size;
 
-		if(!OnMove.IsEmpty())
+		if(!OnResize.IsEmpty())
 		{
 			HKWidgetResizeEvent ev(this);
 			ev.oldSize = oldSize;

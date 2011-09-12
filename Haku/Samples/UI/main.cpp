@@ -59,30 +59,32 @@ void Game_Init()
 	pFrame->SetMargin(MakeVector(5, 5, 5, 5));
 	pFrame->SetPosition(MakeVector(100, 100));
 
+	// create a big button on the bottom
 	HKWidgetButton *pButtonBig = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
 	pButtonBig->SetLabel("Wide Load!");
-	int i = pFrame->AddChild(pButtonBig);
-	pFrame->SetChildMargin(i, MakeVector(2, 2, 2, 2));
-	pFrame->SetChildJustification(i, HKWidgetLayout::BottomFill);
+	int i = pFrame->AddChild(pButtonBig, HKWidgetLayout::BottomFill, 1.f, MakeVector(2, 2, 2, 2));
 
+	// and a label, top-right
 	HKWidgetLabel *pLabel = (HKWidgetLabel *)HKUserInterface::CreateWidget("HKWidgetLabel");
-	pLabel->SetLabel("Whee!");
-	i = pFrame->AddChild(pLabel);
-	pFrame->SetChildJustification(i, HKWidgetLayout::TopRight);
+	pLabel->SetLabel("Label!");
+	i = pFrame->AddChild(pLabel, HKWidgetLayout::TopRight);
 
+	// add a row of buttons
 	HKWidgetLayoutLinear *pLinear = (HKWidgetLayoutLinear*)HKUserInterface::CreateWidget("HKWidgetLayoutLinear");
+	pLinear->SetFitFlags(HKWidgetLayoutLinear::FitContentVertical);
+	pLinear->SetSize(MakeVector(100.f, pLinear->GetSize().y));
 
 	HKWidgetButton *pButton1 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
 	pButton1->SetLabel("Button");
+	i = pLinear->AddChild(pButton1, HKWidgetLayout::CenterFill, 2.f);
+
 	HKWidgetButton *pButton2 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
 	pButton2->SetLabel("Button2");
+	i = pLinear->AddChild(pButton2, HKWidgetLayout::CenterFill, 1.f);
 
-	pLinear->AddChild(pButton1);
-	pLinear->AddChild(pButton2);
+	i = pFrame->AddChild(pLinear, HKWidgetLayout::Center);
 
-	i = pFrame->AddChild(pLinear);
-	pFrame->SetChildJustification(i, HKWidgetLayout::Center);
-
+	// set the root
 	pUI->SetRootWidget(pFrame);
 }
 

@@ -11,8 +11,6 @@ class HKWidgetLayout : public HKWidget
 public:
 	enum Justification
 	{
-		None = -1,
-
 		TopLeft = 0,
 		TopCenter,
 		TopRight,
@@ -30,6 +28,8 @@ public:
 		FillRight,
 		Fill,
 
+		None,
+
 		JustifyMax
 	};
 
@@ -42,7 +42,7 @@ public:
 	HKWidgetLayout();
 	~HKWidgetLayout();
 
-	int AddChild(HKWidget *pChild);
+	int AddChild(HKWidget *pChild, Justification justification = None, float weight = 1.f, const MFVector &margin = MFVector::zero);
 	void RemoveChild(int index);
 
 	virtual int GetNumChildren() const;
@@ -51,11 +51,13 @@ public:
 	void SetMargin(const MFVector &margin);
 	void SetFitFlags(uint32 fitFlags);
 
+	void SetChildWeight(int index, float weight);
 	void SetChildMargin(int index, const MFVector &margin);
 	void SetChildJustification(int index, Justification justification);
 
 	const MFVector &GetMargin() const { return margin; }
 
+	float GetChildWeight(int index) const { return children[index].weight; }
 	const MFVector &GetChildMargin(int index) const { return children[index].margin; }
 	Justification GetChildJustification(int index) const { return children[index].justification; }
 
@@ -65,6 +67,7 @@ protected:
 		MFVector margin;
 		HKWidget *pChild;
 		Justification justification;
+		float weight;
 	};
 
 	MFVector margin;
@@ -74,7 +77,7 @@ protected:
 
 	virtual void ArrangeChildren() = 0;
 
-	void OnChildResize(HKWidget &child, HKWidgetEventInfo &ev);
+	void OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev);
 };
 
 class HKWidgetRendererLayout : public HKWidgetRenderer

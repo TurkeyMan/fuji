@@ -7,25 +7,29 @@ HKWidgetLayout::HKWidgetLayout()
 {
 	pTypeName = "HKWidgetLayout";
 
+	OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
+
 	margin = MFVector::zero;
 	fitFlags = 0;
 }
 
 HKWidgetLayout::~HKWidgetLayout()
 {
+	OnResize -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 }
 
-int HKWidgetLayout::AddChild(HKWidget *pChild)
+int HKWidgetLayout::AddChild(HKWidget *pChild, Justification justification, float weight, const MFVector &margin)
 {
 	int id = children.size();
 
 	Child &c = children.push();
 	c.pChild = pChild;
-	c.margin = MFVector::zero;
-	c.justification = None;
+	c.weight = weight;
+	c.margin = margin;
+	c.justification = justification;
 
 	pChild->pParent = this;
-	pChild->OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnChildResize);
+	pChild->OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
 	ArrangeChildren();
 
@@ -68,6 +72,15 @@ void HKWidgetLayout::SetFitFlags(uint32 fitFlags)
 	}
 }
 
+void HKWidgetLayout::SetChildWeight(int index, float weight)
+{
+	if(children[index].weight != weight)
+	{
+		children[index].weight = weight;
+		ArrangeChildren();
+	}
+}
+
 void HKWidgetLayout::SetChildMargin(int index, const MFVector &margin)
 {
 	if(children[index].margin != margin)
@@ -86,7 +99,7 @@ void HKWidgetLayout::SetChildJustification(int index, Justification justificatio
 	}
 }
 
-void HKWidgetLayout::OnChildResize(HKWidget &child, HKWidgetEventInfo &ev)
+void HKWidgetLayout::OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev)
 {
 	// we may need to rearrange the children
 	ArrangeChildren();
