@@ -84,6 +84,8 @@ int MFThread_GetExitCode(MFThread pThreadInfo)
 
 void MFThread_DestroyThread(MFThread pThreadInfo)
 {
+	MFDebug_Assert(pThreadInfo != NULL, "Invalid thread.");
+
 	MFThread_DestroyThreadPlatformSpecific(pThreadInfo);
 
 	if(pThreadInfo->joinSemaphore)

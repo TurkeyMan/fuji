@@ -217,7 +217,7 @@ void MFPrimitive_EndBlitter();
  * @param dv Destination V coordinate.
  * @return None.
  */
-void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour=MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
 
 /**
  * Draw a textured square.
@@ -231,7 +231,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &co
  * @param dv Destination V coordinate.
  * @return None.
  */
-void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector &colour=MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
 
 /**
  * Draw an untextured square.
@@ -243,7 +243,7 @@ void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVect
  * @param colour Colour of square.
  * @return None.
  */
-void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector &colour=MFVector::one);
+void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity);
 
 /**
  * Draw an untextured square.
@@ -253,7 +253,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MF
  * @param colour Colour of square.
  * @return None.
  */
-void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector &colour=MFVector::one);
+void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity);
 
 /**
  * Draw a box.
@@ -265,7 +265,7 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, co
  * @param wireframe Renders the box in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw a sphere.
@@ -279,7 +279,7 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
  * @param wireframe Renders the sphere in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments = 8, int slices = 5, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw a capsule.
@@ -294,7 +294,7 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
  * @param wireframe Renders the capsule in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw a cylinder.
@@ -309,7 +309,7 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
  * @param wireframe Renders the cylinder in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments = 8, int slices = 5, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw a disc representing a plane.
@@ -322,7 +322,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
  * @param wireframe Renders the plane in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw a cone.
@@ -336,7 +336,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
  * @param wireframe Renders the cone in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments = 8, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
+void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments = 8, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = true);
 
 /**
  * Draw an arrow.
@@ -350,7 +350,7 @@ void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float rad
  * @param wireframe Renders the arrow in wireframe.
  * @return None.
  */
-void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector &colour=MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = false);
+void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity, bool wireframe = false);
 
 /**
  * Draw a transform.

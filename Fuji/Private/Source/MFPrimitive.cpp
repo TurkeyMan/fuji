@@ -81,7 +81,7 @@ void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVect
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector& colour, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -89,6 +89,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MF
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	MFPrimitive(PT_TriStrip | PT_Prelit | PT_Untextured);
+	MFSetMatrix(mat);
 	MFBegin(4);
 
 	MFSetColour(colour);
@@ -103,7 +104,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MF
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector& colour)
+void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector& colour, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -111,6 +112,7 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, co
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	MFPrimitive(PT_TriStrip | PT_Prelit | PT_Untextured);
+	MFSetMatrix(mat);
 	MFBegin(4);
 
 	MFSetColour(colour);
