@@ -9,7 +9,7 @@ public:
 	static HKWidget *Create();
 
 	HKWidgetLayoutFrame();
-	~HKWidgetLayoutFrame();
+	virtual ~HKWidgetLayoutFrame();
 
 protected:
 	virtual void ArrangeChildren();

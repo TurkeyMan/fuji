@@ -31,11 +31,11 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 		for(int a=0; a<numChildren; ++a)
 		{
 			HKWidget *pWidget = GetChild(a);
-			const MFVector &cMargin = GetChildMargin(a);
+			const MFVector &cMargin = pWidget->GetLayoutMargin();
 			const MFVector &cSize = pWidget->GetSize();
 
-			fit.x = MFMax(fit.x, cSize.x + cMargin.x + cMargin.z + margin.x + margin.z);
-			fit.y = MFMax(fit.y, cSize.y + cMargin.y + cMargin.w + margin.y + margin.w);
+			fit.x = MFMax(fit.x, cSize.x + cMargin.x + cMargin.z + padding.x + padding.z);
+			fit.y = MFMax(fit.y, cSize.y + cMargin.y + cMargin.w + padding.y + padding.w);
 		}
 
 		// resize the layout
@@ -47,19 +47,19 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 		SetSize(newSize);
 	}
 
-	MFVector cPos = MakeVector(margin.x, margin.y);
-	MFVector cSize = MakeVector(size.x - (margin.x + margin.z), size.y - (margin.y + margin.w));
+	MFVector cPos = MakeVector(padding.x, padding.y);
+	MFVector cSize = MakeVector(size.x - (padding.x + padding.z), size.y - (padding.y + padding.w));
 
 	for(int a=0; a<numChildren; ++a)
 	{
 		HKWidget *pWidget = GetChild(a);
 
-		const MFVector &cMargin = GetChildMargin(a);
+		const MFVector &cMargin = pWidget->GetLayoutMargin();
 		const MFVector &size = pWidget->GetSize();
 		MFVector tPos = cPos + MakeVector(cMargin.x, cMargin.y);
 		MFVector tSize = cSize - MakeVector(cMargin.x + cMargin.z, cMargin.y + cMargin.w);
 
-		switch(GetChildJustification(a))
+		switch(pWidget->GetLayoutJustification())
 		{
 		case TopLeft:
 			pWidget->SetPosition(tPos);

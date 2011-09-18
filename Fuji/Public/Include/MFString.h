@@ -581,7 +581,7 @@ public:
 	bool CompareInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
 	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
 
-	int FindChar(int c) const;
+	int FindChar(int c, int startOffset = 0) const;
 	int FindCharReverse(int c) const;
 
 	MFString Upper() const;

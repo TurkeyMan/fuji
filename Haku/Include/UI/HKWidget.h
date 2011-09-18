@@ -7,25 +7,80 @@
 
 class HKUserInterface;
 
+struct EnumKeypair
+{
+	const char *pKey;
+	int value;
+};
+
+int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys);
+uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys);
+MFString HKWidget_GetEnumFromValue(int value, const EnumKeypair *pKeys);
+MFString HKWidget_GetBitfieldFromValue(uint32 bits, const EnumKeypair *pKeys);
+
+bool HKWidget_GetBoolFromString(const char *pValue);
+MFVector HKWidget_GetVectorFromString(MFString value);
+
 // HKWidget is an interactive entity
 class HKWidget
 {
 	friend class HKUserInterface;
 	friend class HKWidgetLayout;
 public:
+	enum Justification
+	{
+		TopLeft = 0,
+		TopCenter,
+		TopRight,
+		TopFill,
+		CenterLeft,
+		Center,
+		CenterRight,
+		CenterFill,
+		BottomLeft,
+		BottomCenter,
+		BottomRight,
+		BottomFill,
+		FillLeft,
+		FillCenter,
+		FillRight,
+		Fill,
+
+		None,
+
+		JustifyMax
+	};
+
 	static HKWidget *Create();
 
 	HKWidget();
 	virtual ~HKWidget();
 
-	void SetRenderer(HKWidgetRenderer *pRenderer);
-
 	HKUserInterface &GetUI();
 
-	MFString GetName() const { return name; }
+	void SetRenderer(HKWidgetRenderer *pRenderer);
 
+	// support widget hierarchy
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
+
+	HKWidget *FindChild(const char *pName);
+
+	// arbitrary state configuration
+	virtual void SetPropertyB(const char *pProperty, bool bValue);
+	virtual void SetPropertyI(const char *pProperty, int value);
+	virtual void SetPropertyF(const char *pProperty, float value);
+	virtual void SetPropertyV(const char *pProperty, const MFVector& value);
+	virtual void SetPropertyS(const char *pProperty, const char *pValue);
+
+	virtual bool GetPropertyB(const char *pProperty);
+	virtual int GetPropertyI(const char *pProperty);
+	virtual float GetPropertyF(const char *pProperty);
+	virtual const MFVector &GetPropertyV(const char *pProperty);
+	virtual MFString GetPropertyS(const char *pProperty);
+
+	// HKWidget accessor methods
+	MFString GetName() const { return name; }
 
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
 
@@ -41,6 +96,10 @@ public:
 	const MFMatrix &GetTransform();
 	const MFMatrix &GetInvTransform();
 
+	const MFVector &GetLayoutMargin() const { return layoutMargin; }
+	float GetLayoutWeight() const { return layoutWeight; }
+	Justification GetLayoutJustification() const { return layoutJustification; }
+
 	void SetName(MFString name) { this->name = name; }
 
 	bool SetEnabled(bool bEnable);
@@ -51,6 +110,10 @@ public:
 	void SetColour(const MFVector &colour);
 	void SetScale(const MFVector &scale);
 	void SetRotation(const MFVector &rotation);
+
+	void SetLayoutMargin(const MFVector &margin);
+	void SetLayoutWeight(float weight);
+	void SetLayoutJustification(Justification justification);
 
 	// state change events
 	HKWidgetEvent OnEnabledChanged;
@@ -79,6 +142,8 @@ protected:
 	MFVector scale;			// scale the widget
 	MFVector rot;			// rotation of the widget
 
+	MFVector layoutMargin;	// margin surrounding the widget within its container
+
 	MFMatrix matrix;
 	MFMatrix invMatrix;
 
@@ -95,6 +160,9 @@ protected:
 
 	int zDepth;
 
+	Justification layoutJustification;
+	float layoutWeight;
+
 	bool bMatrixDirty, bInvMatrixDirty;
 
 	virtual void Update();
@@ -104,6 +172,10 @@ protected:
 
 	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos);	// test for ray intersecting the widget
 	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+
+	virtual void ArrangeChildren();
+
+	static const EnumKeypair sJustifyKeys[];
 };
 
 #endif

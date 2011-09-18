@@ -9,12 +9,7 @@
 #include "FileSystem/MFFileSystemNative.h"
 
 #include "UI/HKUI.h"
-#include "UI/HKInputSource.h"
-
-#include "UI/Widgets/HKWidgetButton.h"
-#include "UI/Widgets/HKWidgetLabel.h"
-#include "UI/Widgets/HKWidgetLayoutFrame.h"
-#include "UI/Widgets/HKWidgetLayoutLinear.h"
+#include "UI/HKWidgetLoader-XML.h"
 
 /**** Globals ****/
 
@@ -53,39 +48,10 @@ void Game_Init()
 	pUI = new HKUserInterface();
 	HKUserInterface::SetActiveUI(pUI);
 
-	// hard code a test UI...
-	HKWidgetLayoutFrame *pFrame = (HKWidgetLayoutFrame*)HKUserInterface::CreateWidget("HKWidgetLayoutFrame");
-	pFrame->SetSize(MakeVector(200, 200));
-	pFrame->SetMargin(MakeVector(5, 5, 5, 5));
-	pFrame->SetPosition(MakeVector(100, 100));
+	// load a test UI
+	HKWidget *pTestLayout = HKWidget_CreateFromXML("ui-test.xml");
 
-	// create a big button on the bottom
-	HKWidgetButton *pButtonBig = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
-	pButtonBig->SetLabel("Wide Load!");
-	int i = pFrame->AddChild(pButtonBig, HKWidgetLayout::BottomFill, 1.f, MakeVector(2, 2, 2, 2));
-
-	// and a label, top-right
-	HKWidgetLabel *pLabel = (HKWidgetLabel *)HKUserInterface::CreateWidget("HKWidgetLabel");
-	pLabel->SetLabel("Label!");
-	i = pFrame->AddChild(pLabel, HKWidgetLayout::TopRight);
-
-	// add a row of buttons
-	HKWidgetLayoutLinear *pLinear = (HKWidgetLayoutLinear*)HKUserInterface::CreateWidget("HKWidgetLayoutLinear");
-	pLinear->SetFitFlags(HKWidgetLayoutLinear::FitContentVertical);
-	pLinear->SetSize(MakeVector(100.f, pLinear->GetSize().y));
-
-	HKWidgetButton *pButton1 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
-	pButton1->SetLabel("Button");
-	i = pLinear->AddChild(pButton1, HKWidgetLayout::CenterFill, 2.f);
-
-	HKWidgetButton *pButton2 = (HKWidgetButton *)HKUserInterface::CreateWidget("HKWidgetButton");
-	pButton2->SetLabel("Button2");
-	i = pLinear->AddChild(pButton2, HKWidgetLayout::CenterFill, 1.f);
-
-	i = pFrame->AddChild(pLinear, HKWidgetLayout::Center);
-
-	// set the root
-	pUI->SetRootWidget(pFrame);
+	pUI->SetRootWidget(pTestLayout);
 }
 
 void Game_Update()

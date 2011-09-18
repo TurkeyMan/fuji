@@ -16,13 +16,21 @@ public:
 	};
 
 	HKWidgetButton();
-	~HKWidgetButton();
+	virtual	~HKWidgetButton();
+
+	virtual void SetPropertyB(const char *pProperty, bool bValue);
+	virtual void SetPropertyI(const char *pProperty, int value);
+	virtual void SetPropertyS(const char *pProperty, const char *pValue);
+	virtual bool GetPropertyB(const char *pProperty);
+	virtual int GetPropertyI(const char *pProperty);
+	virtual MFString GetPropertyS(const char *pProperty);
 
 	MFString GetLabel() const { return label; }
 	bool GetPressed() const { return bPressed; }
 	bool GetState() const { return bState; }
 
 	void SetLabel(MFString label) { this->label = label; }
+	void SetState(bool bState) { this->bState = bState; }
 	void SetButtonFlags(uint32 flags) { buttonFlags = flags; }
 
 	// state change events
@@ -40,6 +48,8 @@ protected:
 	void ButtonDown(HKWidget &widget, HKWidgetEventInfo &ev);
 	void ButtonUp(HKWidget &widget, HKWidgetEventInfo &ev);
 	void Hover(HKWidget &widget, HKWidgetEventInfo &ev);
+
+	static const EnumKeypair sButtonFlagKeys[];
 };
 
 class HKWidgetRendererButton : public HKWidgetRenderer

@@ -375,6 +375,8 @@ int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeCha
 
 bool MFString_IsNumber(const char *pString, bool bAllowHex)
 {
+	pString = MFSkipWhite(pString);
+
 	int numDigits = 0;
 
 	if(bAllowHex && pString[0] == '0' && pString[1] == 'x')
@@ -414,6 +416,8 @@ bool MFString_IsNumber(const char *pString, bool bAllowHex)
 
 int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 {
+	pString = MFSkipWhite(pString);
+
 	int number = 0;
 
 	if(base == 16 || (bDetectBase && pString[0] == '0' && pString[1] == 'x'))
@@ -469,6 +473,8 @@ int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 
 float MFString_AsciiToFloat(const char *pString)
 {
+	pString = MFSkipWhite(pString);
+
 	int64 number = 0;
 	float frac = 1;
 
@@ -1338,11 +1344,12 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 	return *this;
 }
 
-int MFString::FindChar(int c) const
+int MFString::FindChar(int c, int startOffset) const
 {
 	if(pData)
 	{
-		const char *pT = pData->pMemory;
+		const char *pStart = pData->pMemory + startOffset;
+		const char *pT = pStart;
 		while(*pT)
 		{
 			// decode utf8
@@ -1351,7 +1358,7 @@ int MFString::FindChar(int c) const
 
 			// check if the characters match
 			if(t == c)
-				return (int)(pT - pData->pMemory);
+				return (int)(pT - pStart);
 
 			// progress to next char
 			pT += bytes;

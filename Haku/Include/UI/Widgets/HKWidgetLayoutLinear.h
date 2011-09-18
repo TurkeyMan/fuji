@@ -15,7 +15,10 @@ public:
 	static HKWidget *Create();
 
 	HKWidgetLayoutLinear();
-	~HKWidgetLayoutLinear();
+	virtual ~HKWidgetLayoutLinear();
+
+	virtual void SetPropertyS(const char *pProperty, const char *pValue);
+	virtual MFString GetPropertyS(const char *pProperty);
 
 	Orientation GetOrientation() const { return orientation; }
 
@@ -25,6 +28,8 @@ protected:
 	Orientation orientation;
 
 	virtual void ArrangeChildren();
+
+	static const EnumKeypair sOrientationKeys[];
 };
 
 #endif

@@ -19,11 +19,64 @@ HKWidgetLabel::HKWidgetLabel()
 	pFont = MFFont_GetDebugFont();
 	justification = MFFontJustify_Top_Left;
 
+	bAutoHeight = true;
 	textHeight = MFFont_GetFontHeight(pFont);
 }
 
 HKWidgetLabel::~HKWidgetLabel()
 {
+}
+
+void HKWidgetLabel::SetPropertyF(const char *pProperty, float value)
+{
+	if(!MFString_CaseCmp(pProperty, "text_height"))
+		SetTextHeight(value);
+	else
+		HKWidget::SetPropertyF(pProperty, value);
+}
+
+void HKWidgetLabel::SetPropertyS(const char *pProperty, const char *pValue)
+{
+	if(!MFString_CaseCmp(pProperty, "text_height"))
+		SetTextHeight(MFString_AsciiToFloat(pValue));
+	else if(!MFString_CaseCmp(pProperty, "text"))
+		SetLabel(pValue);
+	else if(!MFString_CaseCmp(pProperty, "text_font"))
+	{
+		pFont = MFFont_Create(pValue);
+	}
+	else if(!MFString_CaseCmp(pProperty, "text_justification"))
+		SetTextJustification((MFFontJustify)HKWidget_GetEnumValue(pValue, sJustifyKeys));
+	else
+		HKWidget::SetPropertyS(pProperty, pValue);
+}
+
+float HKWidgetLabel::GetPropertyF(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "text_height"))
+		return GetTextHeight();
+	return HKWidget::GetPropertyF(pProperty);
+}
+
+int HKWidgetLabel::GetPropertyI(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "text_justification"))
+		return (int)justification;
+	return HKWidget::GetPropertyI(pProperty);
+}
+
+MFString HKWidgetLabel::GetPropertyS(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "text"))
+		return GetLabel();
+	else if(!MFString_CaseCmp(pProperty, "text_font"))
+	{
+//		return MFFont_GetFontName(pFont);
+		return NULL;
+	}
+	else if(!MFString_CaseCmp(pProperty, "text_justification"))
+		return HKWidget_GetEnumFromValue(GetTextJustification(), sJustifyKeys);
+	return HKWidget::GetPropertyS(pProperty);
 }
 
 void HKWidgetLabel::SetLabel(MFString label)

@@ -2,6 +2,12 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetButton.h"
 
+const EnumKeypair HKWidgetButton::sButtonFlagKeys[] =
+{
+	{ "TriggerOnDown", BF_TriggerOnDown },
+	{ "StateButton", BF_StateButton }
+};
+
 HKWidget *HKWidgetButton::Create()
 {
 	return new HKWidgetButton();
@@ -30,6 +36,59 @@ HKWidgetButton::~HKWidgetButton()
 	OnDown -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonDown);
 	OnUp -= fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonUp);
 	OnHover -= fastdelegate::MakeDelegate(this, &HKWidgetButton::Hover);
+}
+
+void HKWidgetButton::SetPropertyB(const char *pProperty, bool bValue)
+{
+	if(!MFString_CaseCmp(pProperty, "button_state"))
+		SetState(bValue);
+	else
+		HKWidget::SetPropertyB(pProperty, bValue);
+}
+
+void HKWidgetButton::SetPropertyI(const char *pProperty, int value)
+{
+	if(!MFString_CaseCmp(pProperty, "button_flags"))
+		SetButtonFlags(value);
+	else
+		HKWidget::SetPropertyI(pProperty, value);
+}
+
+void HKWidgetButton::SetPropertyS(const char *pProperty, const char *pValue)
+{
+	if(!MFString_CaseCmp(pProperty, "button_state"))
+		SetState(HKWidget_GetBoolFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "text"))
+		label = pValue;
+	else if(!MFString_CaseCmp(pProperty, "button_flags"))
+		SetButtonFlags(HKWidget_GetBitfieldValue(pValue, sButtonFlagKeys));
+	else
+		HKWidget::SetPropertyS(pProperty, pValue);
+}
+
+bool HKWidgetButton::GetPropertyB(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "button_pressed"))
+		return GetPressed();
+	else if(!MFString_CaseCmp(pProperty, "button_state"))
+		return GetState();
+	return HKWidget::GetPropertyB(pProperty);
+}
+
+int HKWidgetButton::GetPropertyI(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "button_flags"))
+		return (int)buttonFlags;
+	return HKWidget::GetPropertyI(pProperty);
+}
+
+MFString HKWidgetButton::GetPropertyS(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "text"))
+		return name;
+	else if(!MFString_CaseCmp(pProperty, "button_flags"))
+		return HKWidget_GetBitfieldFromValue(buttonFlags, sButtonFlagKeys);
+	return HKWidget::GetPropertyS(pProperty);
 }
 
 void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)

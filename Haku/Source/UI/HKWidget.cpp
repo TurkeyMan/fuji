@@ -5,6 +5,27 @@
 #include "MFTypes.h"
 #include "MFCollision.h"
 
+const EnumKeypair HKWidget::sJustifyKeys[] =
+{
+	{ "TopLeft", TopLeft },
+	{ "TopCenter", TopCenter },
+	{ "TopRight", TopRight },
+	{ "TopFill", TopFill },
+	{ "CenterLeft", CenterLeft },
+	{ "Center", Center },
+	{ "CenterRight", CenterRight },
+	{ "CenterFill", CenterFill },
+	{ "BottomLeft", BottomLeft },
+	{ "BottomCenter", BottomCenter },
+	{ "BottomRight", BottomRight },
+	{ "BottomFill", BottomFill },
+	{ "FillLeft", FillLeft },
+	{ "FillCenter", FillCenter },
+	{ "FillRight", FillRight },
+	{ "Fill", Fill },
+	{ "None", None }
+};
+
 HKWidget::HKWidget()
 {
 	pTypeName = "HKWidget";
@@ -14,6 +35,10 @@ HKWidget::HKWidget()
 	colour = MFVector::white;
 	scale = MFVector::one;
 	rot = MFVector::zero;
+
+	layoutMargin = MFVector::zero;
+	layoutJustification = None;
+	layoutWeight = 1.f;
 
 	pRenderer = NULL;
 	pParent = NULL;
@@ -114,6 +139,168 @@ HKWidget *HKWidget::GetChild(int index) const
 	return NULL;
 }
 
+void HKWidget::SetPropertyB(const char *pProperty, bool bValue)
+{
+	if(!MFString_CaseCmp(pProperty, "enabled"))
+		SetEnabled(bValue);
+	else if(!MFString_CaseCmp(pProperty, "visible"))
+		SetVisible(bValue);
+	else if(pRenderer)
+		pRenderer->SetPropertyB(pProperty, bValue);
+}
+
+void HKWidget::SetPropertyI(const char *pProperty, int value)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
+		zDepth = value;
+	else if(pRenderer)
+		pRenderer->SetPropertyI(pProperty, value);
+}
+
+void HKWidget::SetPropertyF(const char *pProperty, float value)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_weight"))
+		SetLayoutWeight(value);
+	if(pRenderer)
+		pRenderer->SetPropertyF(pProperty, value);
+}
+
+void HKWidget::SetPropertyV(const char *pProperty, const MFVector& value)
+{
+	if(!MFString_CaseCmp(pProperty, "position"))
+		SetPosition(value);
+	else if(!MFString_CaseCmp(pProperty, "size"))
+		SetSize(value);
+	else if(!MFString_CaseCmp(pProperty, "scale"))
+		SetScale(value);
+	else if(!MFString_CaseCmp(pProperty, "colour"))
+		SetColour(value);
+	else if(!MFString_CaseCmp(pProperty, "rotation"))
+		SetRotation(value);
+	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
+		SetLayoutMargin(value);
+	else if(pRenderer)
+		pRenderer->SetPropertyV(pProperty, value);
+}
+
+void HKWidget::SetPropertyS(const char *pProperty, const char *pValue)
+{
+	if(!MFString_CaseCmp(pProperty, "enabled"))
+		SetEnabled(HKWidget_GetBoolFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "visible"))
+		SetVisible(HKWidget_GetBoolFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
+		zDepth = MFString_AsciiToInteger(pValue);
+	else if(!MFString_CaseCmp(pProperty, "layout_weight"))
+		SetLayoutWeight(MFString_AsciiToFloat(pValue));
+	else if(!MFString_CaseCmp(pProperty, "position"))
+		SetPosition(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "size"))
+		SetSize(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "scale"))
+		SetScale(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "colour"))
+		SetColour(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "rotation"))
+		SetRotation(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
+		SetLayoutMargin(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "width"))
+	{
+		MFVector size = GetSize();
+		size.x = MFString_AsciiToFloat(pValue);
+		SetSize(size);
+	}
+	else if(!MFString_CaseCmp(pProperty, "height"))
+	{
+		MFVector size = GetSize();
+		size.y = MFString_AsciiToFloat(pValue);
+		SetSize(size);
+	}
+	else if(!MFString_CaseCmp(pProperty, "name"))
+		name = pValue;
+	else if(!MFString_CaseCmp(pProperty, "layout_justification"))
+		SetLayoutJustification((Justification)HKWidget_GetEnumValue(pValue, sJustifyKeys));
+	else if(pRenderer)
+		pRenderer->SetPropertyS(pProperty, pValue);
+}
+
+bool HKWidget::GetPropertyB(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "enabled"))
+		return GetEnabled();
+	else if(!MFString_CaseCmp(pProperty, "visible"))
+		return GetVisible();
+	else if(pRenderer)
+		return pRenderer->GetPropertyB(pProperty);
+	return false;
+}
+
+int HKWidget::GetPropertyI(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
+		return zDepth;
+	else if(pRenderer)
+		return pRenderer->GetPropertyI(pProperty);
+	return 0;
+}
+
+float HKWidget::GetPropertyF(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_weight"))
+		return GetLayoutWeight();
+	else if(pRenderer)
+		pRenderer->GetPropertyF(pProperty);
+	return 0.f;
+}
+
+const MFVector &HKWidget::GetPropertyV(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "position"))
+		return GetPosition();
+	else if(!MFString_CaseCmp(pProperty, "size"))
+		return GetSize();
+	else if(!MFString_CaseCmp(pProperty, "scale"))
+		return GetScale();
+	else if(!MFString_CaseCmp(pProperty, "colour"))
+		return GetColour();
+	else if(!MFString_CaseCmp(pProperty, "rotation"))
+		return GetRotation();
+	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
+		return GetLayoutMargin();
+	else if(pRenderer)
+		return pRenderer->GetPropertyV(pProperty);
+	return MFVector::zero;
+}
+
+MFString HKWidget::GetPropertyS(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "name"))
+		return name;
+	else if(!MFString_CaseCmp(pProperty, "layout_justification"))
+		return HKWidget_GetEnumFromValue(GetLayoutJustification(), sJustifyKeys);
+	else if(pRenderer)
+		return pRenderer->GetPropertyS(pProperty);
+	return NULL;
+}
+
+HKWidget *HKWidget::FindChild(const char *pName)
+{
+	if(name.CompareInsensitive(pName))
+		return this;
+
+	int numChildren = GetNumChildren();
+	for(int a=0; a<numChildren; ++a)
+	{
+		HKWidget *pChild = GetChild(a);
+		HKWidget *pFound = pChild->FindChild(pName);
+		if(pFound)
+			return pFound;
+	}
+
+	return NULL;
+}
+
 bool HKWidget::SetEnabled(bool bEnable)
 {
 	bool bOld = bEnabled;
@@ -204,6 +391,36 @@ void HKWidget::SetRotation(const MFVector &rotation)
 		this->rot = rotation;
 
 		DirtyMatrices();
+	}
+}
+
+void HKWidget::SetLayoutMargin(const MFVector &margin)
+{
+	if(layoutMargin != margin)
+	{
+		layoutMargin = margin;
+		if(pParent)
+			pParent->ArrangeChildren();
+	}
+}
+
+void HKWidget::SetLayoutWeight(float weight)
+{
+	if(layoutWeight != weight)
+	{
+		layoutWeight = weight;
+		if(pParent)
+			pParent->ArrangeChildren();
+	}
+}
+
+void HKWidget::SetLayoutJustification(Justification justification)
+{
+	if(layoutJustification != justification)
+	{
+		layoutJustification = justification;
+		if(pParent)
+			pParent->ArrangeChildren();
 	}
 }
 
@@ -344,4 +561,119 @@ bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev
 	if(pParent)
 		return pParent->InputEvent(manager, ev);
 	return false;
+}
+
+void HKWidget::ArrangeChildren()
+{
+}
+
+int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys)
+{
+	value.Trim();
+	for(int a=0; pKeys[a].pKey; ++a)
+	{
+		if(value.CompareInsensitive(pKeys[a].pKey))
+			return pKeys[a].value;
+	}
+	return -1;
+}
+
+uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys)
+{
+	if(flags.IsEmpty())
+		return 0;
+
+	uint32 value = 0;
+
+	int tokLen, offset = 0;
+	do
+	{
+		tokLen = flags.FindChar('|', offset);
+		MFString key = flags.SubStr(offset, tokLen);
+		key.Trim();
+
+		for(int a=0; pKeys[a].pKey; ++a)
+		{
+			if(key.CompareInsensitive(pKeys[a].pKey))
+			{
+				value |= pKeys[a].value;
+				break;
+			}
+		}
+		offset += tokLen + 1;
+	}
+	while(tokLen != -1);
+
+	return value;
+}
+
+MFString HKWidget_GetEnumFromValue(int value, const EnumKeypair *pKeys)
+{
+	for(int a=0; pKeys[a].pKey; ++a)
+	{
+		if(value == pKeys[a].value)
+			return pKeys[a].pKey;
+	}
+	return NULL;
+}
+
+MFString HKWidget_GetBitfieldFromValue(uint32 bits, const EnumKeypair *pKeys)
+{
+	MFString bitfield = "";
+
+	for(int a=0; a<32; ++a)
+	{
+		int bit = 1 << a;
+		if(!(bits & bit))
+			continue;
+
+		for(int b=0; pKeys[b].pKey; ++b)
+		{
+			if(pKeys[b].value == bit)
+			{
+				if(!bitfield.IsEmpty())
+					bitfield += "|";
+				bitfield += pKeys[b].pKey;
+				break;
+			}
+		}
+	}
+	return bitfield;
+}
+
+bool HKWidget_GetBoolFromString(const char *pValue)
+{
+	if(!MFString_CaseCmp(pValue, "true") ||
+		!MFString_CaseCmp(pValue, "1") ||
+		!MFString_CaseCmp(pValue, "enabled") ||
+		!MFString_CaseCmp(pValue, "on") ||
+		!MFString_CaseCmp(pValue, "yes"))
+		return true;
+	return false;
+}
+
+MFVector HKWidget_GetVectorFromString(MFString value)
+{
+	if(value.IsEmpty())
+		return MFVector::zero;
+
+	float f[4] = { 0.f, 0.f, 0.f, 0.f };
+
+	int tokLen, offset = 0;
+	int numComponents = 0;
+	do
+	{
+		tokLen = value.FindChar(',', offset);
+		MFString key = value.SubStr(offset, tokLen);
+		f[numComponents++] = key.ToFloat();
+		offset += tokLen + 1;
+	}
+	while(numComponents < 4 && tokLen != -1);
+
+	if(numComponents == 1)
+	{
+		f[1] = f[2] = f[3] = f[0];
+	}
+
+	return MakeVector(f[0], f[1], f[2], f[3]);
 }

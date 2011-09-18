@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<HKWidgetLayoutFrame position="100,100" size="200,200" layout_padding="5">
+	<HKWidgetButton text="Wide Load!" layout_justification="BottomFill" layout_margin="2" />
+	<HKWidgetLabel text="Label!" layout_justification="TopRight" />
+	<HKWidgetLayoutLinear width="100" layout_flags="FitContentVertical" layout_justification="Center">
+		<HKWidgetButton text="Button1" layout_justification="CenterFill" layout_weight="2" />
+		<HKWidgetButton text="Button2" layout_justification="CenterFill" />
+	</HKWidgetLayoutLinear>
+</HKWidgetLayoutFrame>

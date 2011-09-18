@@ -2,6 +2,11 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetLayout.h"
 
+const EnumKeypair HKWidgetLayout::sFirFlagsKeys[] =
+{
+	{ "FitContentVertical", FitContentVertical },
+	{ "FitContentHorizontal", FitContentHorizontal }
+};
 
 HKWidgetLayout::HKWidgetLayout()
 {
@@ -9,24 +14,27 @@ HKWidgetLayout::HKWidgetLayout()
 
 	OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
-	margin = MFVector::zero;
+	padding = MFVector::zero;
 	fitFlags = 0;
 }
 
 HKWidgetLayout::~HKWidgetLayout()
 {
 	OnResize -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
+
+	for(int a=0; a<children.size(); ++a)
+	{
+		if(children[a].bOwnChild)
+			delete children[a].pChild;
+	}
 }
 
-int HKWidgetLayout::AddChild(HKWidget *pChild, Justification justification, float weight, const MFVector &margin)
+int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 {
 	int id = children.size();
 
-	Child &c = children.push();
-	c.pChild = pChild;
-	c.weight = weight;
-	c.margin = margin;
-	c.justification = justification;
+	Child child = { pChild, bOwnChild };
+	children.push(child);
 
 	pChild->pParent = this;
 	pChild->OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
@@ -54,11 +62,43 @@ HKWidget *HKWidgetLayout::GetChild(int index) const
 	return children[index].pChild;
 }
 
-void HKWidgetLayout::SetMargin(const MFVector &margin)
+void HKWidgetLayout::SetPropertyV(const char *pProperty, const MFVector& value)
 {
-	if(this->margin != margin)
+	if(!MFString_CaseCmp(pProperty, "layout_padding"))
+		SetPadding(value);
+	else
+		HKWidget::SetPropertyV(pProperty, value);
+}
+
+void HKWidgetLayout::SetPropertyS(const char *pProperty, const char *pValue)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_padding"))
+		SetPadding(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "layout_flags"))
+		SetFitFlags(HKWidget_GetBitfieldValue(pValue, sFirFlagsKeys));
+	else
+		HKWidget::SetPropertyS(pProperty, pValue);
+}
+
+const MFVector &HKWidgetLayout::GetPropertyV(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_padding"))
+		return GetPadding();
+	return HKWidget::GetPropertyV(pProperty);
+}
+
+MFString HKWidgetLayout::GetPropertyS(const char *pProperty)
+{
+	if(!MFString_CaseCmp(pProperty, "layout_flags"))
+		HKWidget_GetBitfieldFromValue(fitFlags, sFirFlagsKeys);
+	return HKWidget::GetPropertyS(pProperty);
+}
+
+void HKWidgetLayout::SetPadding(const MFVector &padding)
+{
+	if(this->padding != padding)
 	{
-		this->margin = margin;
+		this->padding = padding;
 		ArrangeChildren();
 	}
 }
@@ -68,33 +108,6 @@ void HKWidgetLayout::SetFitFlags(uint32 fitFlags)
 	if(this->fitFlags != fitFlags)
 	{
 		this->fitFlags = fitFlags;
-		ArrangeChildren();
-	}
-}
-
-void HKWidgetLayout::SetChildWeight(int index, float weight)
-{
-	if(children[index].weight != weight)
-	{
-		children[index].weight = weight;
-		ArrangeChildren();
-	}
-}
-
-void HKWidgetLayout::SetChildMargin(int index, const MFVector &margin)
-{
-	if(children[index].margin != margin)
-	{
-		children[index].margin = margin;
-		ArrangeChildren();
-	}
-}
-
-void HKWidgetLayout::SetChildJustification(int index, Justification justification)
-{
-	if(children[index].justification != justification)
-	{
-		children[index].justification = justification;
 		ArrangeChildren();
 	}
 }
@@ -119,7 +132,7 @@ void HKWidgetRendererLayout::Render(const HKWidget &widget, const MFMatrix &worl
 
 	const MFVector &size = widget.GetSize();
 	const MFVector &colour = widget.GetColour();
-	const MFVector &margin = layout.GetMargin();
+	const MFVector &margin = layout.GetPadding();
 
 	MFPrimitive_DrawUntexturedQuad(0, 0, size.x, size.y, MFVector::black, worldTransform);
 	MFPrimitive_DrawUntexturedQuad(1, 1, size.x - 2, size.y - 2, MFVector::blue, worldTransform);

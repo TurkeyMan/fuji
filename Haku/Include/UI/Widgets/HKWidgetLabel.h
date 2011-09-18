@@ -12,7 +12,13 @@ public:
 	static HKWidget *Create();
 
 	HKWidgetLabel();
-	~HKWidgetLabel();
+	virtual ~HKWidgetLabel();
+
+	virtual void SetPropertyF(const char *pProperty, float value);
+	virtual void SetPropertyS(const char *pProperty, const char *pValue);
+	virtual int GetPropertyI(const char *pProperty);
+	virtual float GetPropertyF(const char *pProperty);
+	virtual MFString GetPropertyS(const char *pProperty);
 
 	MFString GetLabel() const { return label; }
 	MFFont *GetFont() const { return pFont; }
@@ -22,7 +28,7 @@ public:
 	void SetLabel(MFString label);
 	void SetFont(MFFont *pFont) { this->pFont = pFont; }
 	void SetTextJustification(MFFontJustify justification) { this->justification = justification; }
-	void SetTextHeight(float height) { this->textHeight = height; }
+	void SetTextHeight(float height) { this->textHeight = height; bAutoHeight = false; }
 
 protected:
 	MFString label;
@@ -31,6 +37,8 @@ protected:
 	MFFontJustify justification;
 
 	float textHeight;
+
+	bool bAutoHeight;
 };
 
 class HKWidgetRendererLabel : public HKWidgetRenderer

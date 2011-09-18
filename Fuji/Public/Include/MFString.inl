@@ -462,8 +462,8 @@ struct MFStringData
 	friend class MFString;
 public:
 	int GetRefCount() const { return refCount; }
-	int GetBytes() const { return bytes + 1; }
-	int GetAllocated() const { return allocated; }
+	size_t GetBytes() const { return bytes + 1; }
+	size_t GetAllocated() const { return allocated; }
 	const char *GetMemory() const { return pMemory; }
 
 private:
@@ -656,7 +656,7 @@ inline const char *MFString::CStr() const
 
 inline int MFString::NumBytes() const
 {
-	return pData ? pData->bytes : 0;
+	return pData ? (int)pData->bytes : 0;
 }
 
 inline int MFString::NumChars() const
