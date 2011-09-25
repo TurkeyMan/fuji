@@ -29,6 +29,7 @@
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
+#include "MFSystem_Internal.h"
 
 #include "MFRenderer_Internal.h"
 #include "MFRenderer_D3D9.h"
@@ -39,6 +40,8 @@
 
 #pragma comment(lib, "d3d9")
 #pragma comment(lib, "d3dx9")
+
+extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 
 static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -331,6 +334,9 @@ void MFRenderer_ResetDisplay()
 	{
 		void MFTexture_Recreate();
 		MFTexture_Recreate();
+
+		if(pSystemCallbacks[MFCB_DisplayReset])
+			pSystemCallbacks[MFCB_DisplayReset]();
 	}
 }
 

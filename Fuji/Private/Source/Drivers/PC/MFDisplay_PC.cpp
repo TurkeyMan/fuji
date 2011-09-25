@@ -275,8 +275,13 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 {
 	MFCALLSTACK;
 
-	gDisplay.fullscreenWidth = gDisplay.width = width;
-	gDisplay.fullscreenHeight = gDisplay.height = height;
+	MFRect rect;
+	MFDisplay_GetNativeRes(&rect);
+
+	gDisplay.fullscreenWidth = (int)rect.width;
+	gDisplay.fullscreenHeight = (int)rect.height;
+	gDisplay.width = width;
+	gDisplay.height = height;
 	gDisplay.refreshRate = rate;
 	gDisplay.colourDepth = 32;
 	gDisplay.windowed = true;

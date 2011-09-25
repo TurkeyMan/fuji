@@ -5,7 +5,8 @@
 const EnumKeypair HKWidgetButton::sButtonFlagKeys[] =
 {
 	{ "TriggerOnDown", BF_TriggerOnDown },
-	{ "StateButton", BF_StateButton }
+	{ "StateButton", BF_StateButton },
+	{ NULL, 0 }
 };
 
 HKWidget *HKWidgetButton::Create()
@@ -24,6 +25,8 @@ HKWidgetButton::HKWidgetButton()
 	bPressed = false;
 	bState = false;
 
+	textJustification = MFFontJustify_Center;
+
 	// hook up some events
 	OnDown += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonDown);
 	OnUp += fastdelegate::MakeDelegate(this, &HKWidgetButton::ButtonUp);
@@ -38,57 +41,21 @@ HKWidgetButton::~HKWidgetButton()
 	OnHover -= fastdelegate::MakeDelegate(this, &HKWidgetButton::Hover);
 }
 
-void HKWidgetButton::SetPropertyB(const char *pProperty, bool bValue)
-{
-	if(!MFString_CaseCmp(pProperty, "button_state"))
-		SetState(bValue);
-	else
-		HKWidget::SetPropertyB(pProperty, bValue);
-}
-
-void HKWidgetButton::SetPropertyI(const char *pProperty, int value)
-{
-	if(!MFString_CaseCmp(pProperty, "button_flags"))
-		SetButtonFlags(value);
-	else
-		HKWidget::SetPropertyI(pProperty, value);
-}
-
-void HKWidgetButton::SetPropertyS(const char *pProperty, const char *pValue)
+void HKWidgetButton::SetProperty(const char *pProperty, const char *pValue)
 {
 	if(!MFString_CaseCmp(pProperty, "button_state"))
 		SetState(HKWidget_GetBoolFromString(pValue));
-	else if(!MFString_CaseCmp(pProperty, "text"))
-		label = pValue;
 	else if(!MFString_CaseCmp(pProperty, "button_flags"))
 		SetButtonFlags(HKWidget_GetBitfieldValue(pValue, sButtonFlagKeys));
 	else
-		HKWidget::SetPropertyS(pProperty, pValue);
+		HKWidgetLabel::SetProperty(pProperty, pValue);
 }
 
-bool HKWidgetButton::GetPropertyB(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "button_pressed"))
-		return GetPressed();
-	else if(!MFString_CaseCmp(pProperty, "button_state"))
-		return GetState();
-	return HKWidget::GetPropertyB(pProperty);
-}
-
-int HKWidgetButton::GetPropertyI(const char *pProperty)
+MFString HKWidgetButton::GetProperty(const char *pProperty)
 {
 	if(!MFString_CaseCmp(pProperty, "button_flags"))
-		return (int)buttonFlags;
-	return HKWidget::GetPropertyI(pProperty);
-}
-
-MFString HKWidgetButton::GetPropertyS(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "text"))
-		return name;
-	else if(!MFString_CaseCmp(pProperty, "button_flags"))
 		return HKWidget_GetBitfieldFromValue(buttonFlags, sButtonFlagKeys);
-	return HKWidget::GetPropertyS(pProperty);
+	return HKWidgetLabel::GetProperty(pProperty);
 }
 
 void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
@@ -157,14 +124,38 @@ HKWidgetRenderer *HKWidgetRendererButton::Create()
 
 void HKWidgetRendererButton::Render(const HKWidget &widget, const MFMatrix &worldTransform)
 {
+	HKWidgetRenderer::Render(widget, worldTransform);
+
 	HKWidgetButton &button = (HKWidgetButton&)widget;
 
 	const MFVector &size = widget.GetSize();
-	const MFVector &colour = widget.GetColour();
-	MFString label = button.GetLabel();
 
-	MFPrimitive_DrawUntexturedQuad(0, 0, size.x, size.y, MFVector::black, worldTransform);
-	MFPrimitive_DrawUntexturedQuad(1, 1, size.x - 2, size.y - 2, button.GetPressed() ? MFVector::blue : colour, worldTransform);
+	if(pBackground)
+	{
+	}
+	else
+	{
+		const MFVector &colour = widget.GetColour();
+		if(colour.w > 0.f)
+		{
+
+			MFPrimitive_DrawUntexturedQuad(0, 0, size.x, size.y, MFVector::black, worldTransform);
+			MFPrimitive_DrawUntexturedQuad(1, 1, size.x - 2, size.y - 2, button.GetPressed() ? colour * MFVector::grey : colour, worldTransform);
+		}
+	}
+
+	MFString label = button.GetText();
 	if(!label.IsEmpty())
-		MFFont_DrawTextJustified(MFFont_GetDebugFont(), label.CStr(), MFVector::zero, size.x, size.y, MFFontJustify_Center, 10.f, MFVector::black, -1, worldTransform);
+	{
+		MFFont *pFont = button.GetFont();
+		float height = button.GetTextHeight();
+		float shadowDepth = button.GetShadowDepth();
+		MFFontJustify j = button.GetTextJustification();
+		const MFVector &textColour = button.GetTextColour();
+		const char *pString = label.CStr();
+
+		if(shadowDepth > 0.f)
+			MFFont_DrawTextJustified(pFont, pString, MakeVector(shadowDepth, shadowDepth), size.x, size.y, j, height, MFVector::black, -1, worldTransform);
+		MFFont_DrawTextJustified(pFont, pString, MFVector::zero, size.x, size.y, j, height, button.GetPressed() ? textColour * MFVector::grey : textColour, -1, worldTransform);
+	}
 }

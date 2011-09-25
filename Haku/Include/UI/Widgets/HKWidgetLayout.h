@@ -24,10 +24,8 @@ public:
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
 
-	virtual void SetPropertyV(const char *pProperty, const MFVector& value);
-	virtual void SetPropertyS(const char *pProperty, const char *pValue);
-	virtual const MFVector &GetPropertyV(const char *pProperty);
-	virtual MFString GetPropertyS(const char *pProperty);
+	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual MFString GetProperty(const char *pProperty);
 
 	void SetPadding(const MFVector &padding);
 	void SetFitFlags(uint32 fitFlags);
@@ -47,6 +45,8 @@ protected:
 	MFArray<Child> children;
 
 	void OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev);
+
+	virtual void ArrangeChildren() = 0;
 
 	static const EnumKeypair sFirFlagsKeys[];
 };

@@ -33,6 +33,9 @@ void MFObjectPool::Init(size_t _objectSize, int numObjects, int growObjects, voi
 
 void MFObjectPool::Deinit()
 {
+	if(!pMemory)
+		return;
+
 	MFThread_LockMutex(mutex);
 
 	if(pNext)

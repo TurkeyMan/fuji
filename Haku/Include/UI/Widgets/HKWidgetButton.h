@@ -1,10 +1,10 @@
 #if !defined(_HKWIDGET_BUTTON_H)
 #define _HKWIDGET_BUTTON_H
 
-#include "UI/HKWidget.h"
+#include "UI/Widgets/HKWidgetLabel.h"
 #include "UI/HKWidgetRenderer.h"
 
-class HKWidgetButton : public HKWidget
+class HKWidgetButton : public HKWidgetLabel
 {
 public:
 	static HKWidget *Create();
@@ -18,18 +18,12 @@ public:
 	HKWidgetButton();
 	virtual	~HKWidgetButton();
 
-	virtual void SetPropertyB(const char *pProperty, bool bValue);
-	virtual void SetPropertyI(const char *pProperty, int value);
-	virtual void SetPropertyS(const char *pProperty, const char *pValue);
-	virtual bool GetPropertyB(const char *pProperty);
-	virtual int GetPropertyI(const char *pProperty);
-	virtual MFString GetPropertyS(const char *pProperty);
+	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual MFString GetProperty(const char *pProperty);
 
-	MFString GetLabel() const { return label; }
 	bool GetPressed() const { return bPressed; }
 	bool GetState() const { return bState; }
 
-	void SetLabel(MFString label) { this->label = label; }
 	void SetState(bool bState) { this->bState = bState; }
 	void SetButtonFlags(uint32 flags) { buttonFlags = flags; }
 
@@ -37,8 +31,6 @@ public:
 	HKWidgetEvent OnClicked;
 
 protected:
-	MFString label;
-
 	uint32 buttonFlags;
 
 	bool bDown;

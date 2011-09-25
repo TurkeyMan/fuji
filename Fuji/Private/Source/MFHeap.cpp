@@ -203,7 +203,8 @@ void MFHeap_DeinitModule()
 	MFZeroMemory(gpAllocTable, sizeof(gpAllocTable));
 #endif
 
-	MFThread_DestroyMutex(gAllocMutex);
+	// TODO: gAllocMutex is not allocated by MFHeap... separate the 'deinit' from the 'destroy'
+//	MFThread_DestroyMutex(gAllocMutex);
 }
 
 void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)

@@ -17,8 +17,8 @@ public:
 	HKWidgetLayoutLinear();
 	virtual ~HKWidgetLayoutLinear();
 
-	virtual void SetPropertyS(const char *pProperty, const char *pValue);
-	virtual MFString GetPropertyS(const char *pProperty);
+	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual MFString GetProperty(const char *pProperty);
 
 	Orientation GetOrientation() const { return orientation; }
 

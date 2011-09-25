@@ -161,6 +161,8 @@ enum MFCallback
 	MFCB_DisplayLost,			/**< Display Lost callback. */
 	MFCB_DisplayReset,			/**< Reset Display callback. */
 
+	MFCB_DisplayResize,			/**< Display resize callback. */
+
 	MFCB_VerticalBlank,			/**< Vertical Blank callback. */
 
 	MFCB_Max,					/**< Max callback. */

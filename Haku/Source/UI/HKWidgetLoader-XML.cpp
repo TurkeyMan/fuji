@@ -20,9 +20,7 @@ static HKWidget *ParseElement(TiXmlElement *pElement)
 	TiXmlAttribute *pAtt = pElement->FirstAttribute();
 	while(pAtt)
 	{
-		const char *pName = pAtt->Name();
-		const char *pValue = pAtt->Value();
-		pWidget->SetPropertyS(pName, pValue);
+		pWidget->SetProperty(pAtt->Name(), pAtt->Value());
 		pAtt = pAtt->Next();
 	}
 

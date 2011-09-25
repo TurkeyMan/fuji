@@ -5,7 +5,10 @@
 #include "HKWidget.h"
 #include "HKInputSource.h"
 
+#include "MFSystem.h"
+
 class HKWidgetRenderer;
+class HKWidgetLayoutFrame;
 
 typedef HKFactory<HKWidget> HKWidgetFactory;
 typedef HKFactory<HKWidgetRenderer> HKWidgetRendererFactory;
@@ -31,12 +34,12 @@ public:
 	void Update();
 	void Draw();
 
-	void SetRootWidget(HKWidget *pWidget) { pWidget->pParent = NULL; pRoot = pWidget; }
+	void AddTopLevelWidget(HKWidget *pWidget, bool bOwnWidget);
 
 	HKWidget *SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget);
 
 protected:
-	HKWidget *pRoot;
+	HKWidgetLayoutFrame *pRoot;
 
 	HKInputManager *pInputManager;
 
@@ -48,6 +51,9 @@ protected:
 	static HKWidgetRendererFactory *pRendererFactory;
 
 	void OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+
+	static MFSystemCallbackFunction pChainResizeCallback;
+	static void ResizeCallback();
 };
 
 #endif

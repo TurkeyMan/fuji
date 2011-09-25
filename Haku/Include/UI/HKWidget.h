@@ -13,13 +13,14 @@ struct EnumKeypair
 	int value;
 };
 
-int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys);
-uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys);
-MFString HKWidget_GetEnumFromValue(int value, const EnumKeypair *pKeys);
-MFString HKWidget_GetBitfieldFromValue(uint32 bits, const EnumKeypair *pKeys);
-
 bool HKWidget_GetBoolFromString(const char *pValue);
 MFVector HKWidget_GetVectorFromString(MFString value);
+MFVector HKWidget_GetColourFromString(MFString value);
+int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys);
+uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys);
+
+MFString HKWidget_GetEnumFromValue(int value, const EnumKeypair *pKeys);
+MFString HKWidget_GetBitfieldFromValue(uint32 bits, const EnumKeypair *pKeys);
 
 // HKWidget is an interactive entity
 class HKWidget
@@ -51,6 +52,13 @@ public:
 		JustifyMax
 	};
 
+	enum Visibility
+	{
+		Visible = 0,
+		Invisible,
+		Gone
+	};
+
 	static HKWidget *Create();
 
 	HKWidget();
@@ -66,26 +74,20 @@ public:
 
 	HKWidget *FindChild(const char *pName);
 
-	// arbitrary state configuration
-	virtual void SetPropertyB(const char *pProperty, bool bValue);
-	virtual void SetPropertyI(const char *pProperty, int value);
-	virtual void SetPropertyF(const char *pProperty, float value);
-	virtual void SetPropertyV(const char *pProperty, const MFVector& value);
-	virtual void SetPropertyS(const char *pProperty, const char *pValue);
+	HKWidget *GetParent() const { return pParent; }
 
-	virtual bool GetPropertyB(const char *pProperty);
-	virtual int GetPropertyI(const char *pProperty);
-	virtual float GetPropertyF(const char *pProperty);
-	virtual const MFVector &GetPropertyV(const char *pProperty);
-	virtual MFString GetPropertyS(const char *pProperty);
+	// arbitrary state configuration
+	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual MFString GetProperty(const char *pProperty);
 
 	// HKWidget accessor methods
 	MFString GetName() const { return name; }
+	const char *GetTypeName() const { return pTypeName; }
 
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
 
 	bool GetEnabled() const { return bEnabled; }
-	bool GetVisible() const { return bVisible; }
+	Visibility GetVisible() const { return visible; }
 
 	const MFVector &GetPosition() const { return pos; }
 	const MFVector &GetSize() const { return size; }
@@ -103,7 +105,7 @@ public:
 	void SetName(MFString name) { this->name = name; }
 
 	bool SetEnabled(bool bEnable);
-	bool SetVisible(bool bVisible);
+	Visibility SetVisible(Visibility visible);
 
 	void SetPosition(const MFVector &position);
 	void SetSize(const MFVector &size);
@@ -118,6 +120,8 @@ public:
 	// state change events
 	HKWidgetEvent OnEnabledChanged;
 	HKWidgetEvent OnVisibleChanged;
+
+	HKWidgetEvent OnLayoutChanged;
 
 	// interactivity events
 	HKWidgetEvent OnMove;
@@ -154,9 +158,11 @@ protected:
 
 	const char *pTypeName;
 
-	bool bVisible;
+	Visibility visible;
 	bool bEnabled;
 	bool bParentEnabled;	// flagged if the parent is enabled
+
+	bool bAutoSize;
 
 	int zDepth;
 
@@ -173,9 +179,8 @@ protected:
 	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos);	// test for ray intersecting the widget
 	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 
-	virtual void ArrangeChildren();
-
 	static const EnumKeypair sJustifyKeys[];
+	static const EnumKeypair sVisibilityKeys[];
 };
 
 #endif

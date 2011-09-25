@@ -23,7 +23,16 @@ const EnumKeypair HKWidget::sJustifyKeys[] =
 	{ "FillCenter", FillCenter },
 	{ "FillRight", FillRight },
 	{ "Fill", Fill },
-	{ "None", None }
+	{ "None", None },
+	{ NULL, 0 }
+};
+
+const EnumKeypair HKWidget::sVisibilityKeys[] =
+{
+	{ "Visible", Visible },
+	{ "Invisible", Invisible },
+	{ "Gone", Gone },
+	{ NULL, 0 }
 };
 
 HKWidget::HKWidget()
@@ -45,9 +54,11 @@ HKWidget::HKWidget()
 
 	zDepth = 0;
 
-	bVisible = true;
+	visible = Visible;
 	bEnabled = true;
 	bParentEnabled = true;
+
+	bAutoSize = true;
 
 	bMatrixDirty = bInvMatrixDirty = true;
 }
@@ -139,56 +150,12 @@ HKWidget *HKWidget::GetChild(int index) const
 	return NULL;
 }
 
-void HKWidget::SetPropertyB(const char *pProperty, bool bValue)
-{
-	if(!MFString_CaseCmp(pProperty, "enabled"))
-		SetEnabled(bValue);
-	else if(!MFString_CaseCmp(pProperty, "visible"))
-		SetVisible(bValue);
-	else if(pRenderer)
-		pRenderer->SetPropertyB(pProperty, bValue);
-}
-
-void HKWidget::SetPropertyI(const char *pProperty, int value)
-{
-	if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
-		zDepth = value;
-	else if(pRenderer)
-		pRenderer->SetPropertyI(pProperty, value);
-}
-
-void HKWidget::SetPropertyF(const char *pProperty, float value)
-{
-	if(!MFString_CaseCmp(pProperty, "layout_weight"))
-		SetLayoutWeight(value);
-	if(pRenderer)
-		pRenderer->SetPropertyF(pProperty, value);
-}
-
-void HKWidget::SetPropertyV(const char *pProperty, const MFVector& value)
-{
-	if(!MFString_CaseCmp(pProperty, "position"))
-		SetPosition(value);
-	else if(!MFString_CaseCmp(pProperty, "size"))
-		SetSize(value);
-	else if(!MFString_CaseCmp(pProperty, "scale"))
-		SetScale(value);
-	else if(!MFString_CaseCmp(pProperty, "colour"))
-		SetColour(value);
-	else if(!MFString_CaseCmp(pProperty, "rotation"))
-		SetRotation(value);
-	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
-		SetLayoutMargin(value);
-	else if(pRenderer)
-		pRenderer->SetPropertyV(pProperty, value);
-}
-
-void HKWidget::SetPropertyS(const char *pProperty, const char *pValue)
+void HKWidget::SetProperty(const char *pProperty, const char *pValue)
 {
 	if(!MFString_CaseCmp(pProperty, "enabled"))
 		SetEnabled(HKWidget_GetBoolFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "visible"))
-		SetVisible(HKWidget_GetBoolFromString(pValue));
+		SetVisible((Visibility)HKWidget_GetEnumValue(pValue, sVisibilityKeys));
 	else if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
 		zDepth = MFString_AsciiToInteger(pValue);
 	else if(!MFString_CaseCmp(pProperty, "layout_weight"))
@@ -200,7 +167,7 @@ void HKWidget::SetPropertyS(const char *pProperty, const char *pValue)
 	else if(!MFString_CaseCmp(pProperty, "scale"))
 		SetScale(HKWidget_GetVectorFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "colour"))
-		SetColour(HKWidget_GetVectorFromString(pValue));
+		SetColour(HKWidget_GetColourFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "rotation"))
 		SetRotation(HKWidget_GetVectorFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
@@ -219,68 +186,20 @@ void HKWidget::SetPropertyS(const char *pProperty, const char *pValue)
 	}
 	else if(!MFString_CaseCmp(pProperty, "name"))
 		name = pValue;
-	else if(!MFString_CaseCmp(pProperty, "layout_justification"))
+	else if(!MFString_CaseCmp(pProperty, "layout_align"))
 		SetLayoutJustification((Justification)HKWidget_GetEnumValue(pValue, sJustifyKeys));
 	else if(pRenderer)
-		pRenderer->SetPropertyS(pProperty, pValue);
+		pRenderer->SetProperty(pProperty, pValue);
 }
 
-bool HKWidget::GetPropertyB(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "enabled"))
-		return GetEnabled();
-	else if(!MFString_CaseCmp(pProperty, "visible"))
-		return GetVisible();
-	else if(pRenderer)
-		return pRenderer->GetPropertyB(pProperty);
-	return false;
-}
-
-int HKWidget::GetPropertyI(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
-		return zDepth;
-	else if(pRenderer)
-		return pRenderer->GetPropertyI(pProperty);
-	return 0;
-}
-
-float HKWidget::GetPropertyF(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "layout_weight"))
-		return GetLayoutWeight();
-	else if(pRenderer)
-		pRenderer->GetPropertyF(pProperty);
-	return 0.f;
-}
-
-const MFVector &HKWidget::GetPropertyV(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "position"))
-		return GetPosition();
-	else if(!MFString_CaseCmp(pProperty, "size"))
-		return GetSize();
-	else if(!MFString_CaseCmp(pProperty, "scale"))
-		return GetScale();
-	else if(!MFString_CaseCmp(pProperty, "colour"))
-		return GetColour();
-	else if(!MFString_CaseCmp(pProperty, "rotation"))
-		return GetRotation();
-	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
-		return GetLayoutMargin();
-	else if(pRenderer)
-		return pRenderer->GetPropertyV(pProperty);
-	return MFVector::zero;
-}
-
-MFString HKWidget::GetPropertyS(const char *pProperty)
+MFString HKWidget::GetProperty(const char *pProperty)
 {
 	if(!MFString_CaseCmp(pProperty, "name"))
 		return name;
-	else if(!MFString_CaseCmp(pProperty, "layout_justification"))
+	else if(!MFString_CaseCmp(pProperty, "layout_align"))
 		return HKWidget_GetEnumFromValue(GetLayoutJustification(), sJustifyKeys);
 	else if(pRenderer)
-		return pRenderer->GetPropertyS(pProperty);
+		return pRenderer->GetProperty(pProperty);
 	return NULL;
 }
 
@@ -317,20 +236,26 @@ bool HKWidget::SetEnabled(bool bEnable)
 	return bOld;
 }
 
-bool HKWidget::SetVisible(bool bVisible)
+HKWidget::Visibility HKWidget::SetVisible(Visibility visible)
 {
-	bool bOld = this->bVisible;
-	if(this->bVisible != bVisible)
+	Visibility old = this->visible;
+	if(this->visible != visible)
 	{
-		this->bVisible = bVisible;
+		this->visible = visible;
+
+		if(old == Gone || visible == Gone)
+		{
+			HKWidgetGeneralEvent ev(this);
+			OnLayoutChanged(*this, ev);
+		}
 
 		if(!OnVisibleChanged.IsEmpty())
 		{
-			HKWidgetVisibilityEvent ev(this, bVisible);
+			HKWidgetVisibilityEvent ev(this, visible);
 			OnVisibleChanged(*this, ev);
 		}
 	}
-	return bOld;
+	return old;
 }
 
 void HKWidget::SetPosition(const MFVector &position)
@@ -354,10 +279,15 @@ void HKWidget::SetPosition(const MFVector &position)
 
 void HKWidget::SetSize(const MFVector &size)
 {
+	bAutoSize = false;
+
 	if(this->size != size)
 	{
 		MFVector oldSize = this->size;
 		this->size = size;
+
+		HKWidgetGeneralEvent ev(this);
+		OnLayoutChanged(*this, ev);
 
 		if(!OnResize.IsEmpty())
 		{
@@ -399,8 +329,9 @@ void HKWidget::SetLayoutMargin(const MFVector &margin)
 	if(layoutMargin != margin)
 	{
 		layoutMargin = margin;
-		if(pParent)
-			pParent->ArrangeChildren();
+
+		HKWidgetGeneralEvent ev(this);
+		OnLayoutChanged(*this, ev);
 	}
 }
 
@@ -409,8 +340,9 @@ void HKWidget::SetLayoutWeight(float weight)
 	if(layoutWeight != weight)
 	{
 		layoutWeight = weight;
-		if(pParent)
-			pParent->ArrangeChildren();
+
+		HKWidgetGeneralEvent ev(this);
+		OnLayoutChanged(*this, ev);
 	}
 }
 
@@ -419,17 +351,19 @@ void HKWidget::SetLayoutJustification(Justification justification)
 	if(layoutJustification != justification)
 	{
 		layoutJustification = justification;
-		if(pParent)
-			pParent->ArrangeChildren();
+
+		HKWidgetGeneralEvent ev(this);
+		OnLayoutChanged(*this, ev);
 	}
 }
 
 void HKWidget::Draw()
 {
-	if(!bVisible)
+	if(GetVisible() != Visible)
 		return;
 
-	pRenderer->Render(*this, GetTransform());
+	if(pRenderer)
+		pRenderer->Render(*this, GetTransform());
 
 	int numChildren = GetNumChildren();
 	for(int a=0; a<numChildren; ++a)
@@ -450,7 +384,7 @@ void HKWidget::DirtyMatrices()
 
 HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos)
 {
-	if(!bVisible)
+	if(GetVisible() != Visible)
 		return NULL;
 
 	if(size.z == 0.f)
@@ -486,7 +420,7 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 				HKWidget *pIntersect = this;
 
 				int numChildren = GetNumChildren();
-				for(int a=0; a<numChildren; ++a)
+				for(int a=numChildren-1; a>=0; --a)
 				{
 					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir, pLocalPos);
 					if(pChild)
@@ -561,10 +495,6 @@ bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev
 	if(pParent)
 		return pParent->InputEvent(manager, ev);
 	return false;
-}
-
-void HKWidget::ArrangeChildren()
-{
 }
 
 int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys)
@@ -674,6 +604,48 @@ MFVector HKWidget_GetVectorFromString(MFString value)
 	{
 		f[1] = f[2] = f[3] = f[0];
 	}
+
+	return MakeVector(f[0], f[1], f[2], f[3]);
+}
+
+MFVector HKWidget_GetColourFromString(MFString value)
+{
+	if(value.IsEmpty())
+		return MFVector::white;
+
+	if(value.CompareInsensitive("black"))
+		return MFVector::black;
+	else if(value.CompareInsensitive("white"))
+		return MFVector::white;
+	else if(value.CompareInsensitive("red"))
+		return MFVector::red;
+	else if(value.CompareInsensitive("blue"))
+		return MFVector::blue;
+	else if(value.CompareInsensitive("green"))
+		return MFVector::green;
+	else if(value.CompareInsensitive("yellow"))
+		return MFVector::yellow;
+	else if(value.CompareInsensitive("orange"))
+		return MakeVector(1,0.5,0,1);
+	else if(value.CompareInsensitive("grey"))
+		return MFVector::grey;
+	else if(value.CompareInsensitive("lightgrey"))
+		return MFVector::yellow;
+	else if(value.CompareInsensitive("darkgrey"))
+		return MFVector::yellow;
+
+	float f[4] = { 0.f, 0.f, 0.f, 1.f };
+
+	int tokLen, offset = 0;
+	int numComponents = 0;
+	do
+	{
+		tokLen = value.FindChar(',', offset);
+		MFString key = value.SubStr(offset, tokLen);
+		f[numComponents++] = key.ToFloat();
+		offset += tokLen + 1;
+	}
+	while(numComponents < 4 && tokLen != -1);
 
 	return MakeVector(f[0], f[1], f[2], f[3]);
 }

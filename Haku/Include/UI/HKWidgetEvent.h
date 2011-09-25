@@ -21,6 +21,14 @@ struct HKWidgetEventInfo
 
 typedef HKEvent2<HKWidget &, HKWidgetEventInfo &> HKWidgetEvent;
 
+struct HKWidgetGeneralEvent : public HKWidgetEventInfo
+{
+	HKWidgetGeneralEvent(HKWidget *pSender)
+		: HKWidgetEventInfo(pSender)
+	{
+	}
+};
+
 struct HKWidgetEnabledEvent : public HKWidgetEventInfo
 {
 	HKWidgetEnabledEvent(HKWidget *pSender, bool bEnabled)
@@ -34,13 +42,13 @@ struct HKWidgetEnabledEvent : public HKWidgetEventInfo
 
 struct HKWidgetVisibilityEvent : public HKWidgetEventInfo
 {
-	HKWidgetVisibilityEvent(HKWidget *pSender, bool bVisible)
+	HKWidgetVisibilityEvent(HKWidget *pSender, int visible)
 		: HKWidgetEventInfo(pSender)
 	{
-		this->bVisible = bVisible;
+		this->visible = visible;
 	}
 
-	bool bVisible;
+	int visible;
 };
 
 struct HKWidgetFocusEvent : public HKWidgetEventInfo

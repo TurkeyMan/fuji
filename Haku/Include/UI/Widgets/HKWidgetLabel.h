@@ -14,31 +14,40 @@ public:
 	HKWidgetLabel();
 	virtual ~HKWidgetLabel();
 
-	virtual void SetPropertyF(const char *pProperty, float value);
-	virtual void SetPropertyS(const char *pProperty, const char *pValue);
-	virtual int GetPropertyI(const char *pProperty);
-	virtual float GetPropertyF(const char *pProperty);
-	virtual MFString GetPropertyS(const char *pProperty);
+	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual MFString GetProperty(const char *pProperty);
 
-	MFString GetLabel() const { return label; }
+	MFString GetText() const { return text; }
+	MFString GetFontName() const { return font; }
 	MFFont *GetFont() const { return pFont; }
-	MFFontJustify GetTextJustification() const { return justification; }
+	const MFVector &GetTextColour() { return textColour; }
+	MFFontJustify GetTextJustification() const { return textJustification; }
 	float GetTextHeight() const { return textHeight; }
+	float GetShadowDepth() const { return shadowDepth; }
 
-	void SetLabel(MFString label);
-	void SetFont(MFFont *pFont) { this->pFont = pFont; }
-	void SetTextJustification(MFFontJustify justification) { this->justification = justification; }
-	void SetTextHeight(float height) { this->textHeight = height; bAutoHeight = false; }
+	void LoadFont(MFString font);
+
+	void SetText(MFString Text);
+	void SetFont(MFFont *pFont);
+	void SetTextColour(const MFVector &colour) { textColour = colour; }
+	void SetTextJustification(MFFontJustify justification) { this->textJustification = justification; }
+	void SetTextHeight(float height) { this->textHeight = height; bAutoTextHeight = false; }
+	void SetShadowDepth(float depth) { shadowDepth = depth; }
 
 protected:
-	MFString label;
+	MFVector textColour;
+
+	MFString text;
+	MFString font;
 
 	MFFont *pFont;
-	MFFontJustify justification;
+	MFFontJustify textJustification;
 
 	float textHeight;
+	float shadowDepth;
 
-	bool bAutoHeight;
+	bool bAutoTextHeight;
+	bool bOwnFont;
 };
 
 class HKWidgetRendererLabel : public HKWidgetRenderer

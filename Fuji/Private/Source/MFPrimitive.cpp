@@ -21,7 +21,7 @@ void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
 	MFPrimitive_StretchBlit(x, y, w, h, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
 }
 
-void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -29,6 +29,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& co
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	MFPrimitive(PT_TriStrip | PT_Prelit);
+	MFSetMatrix(mat);
 	MFBegin(4);
 
 	MFSetColour(colour);
@@ -51,7 +52,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& co
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector& colour, float su, float sv, float du, float dv)
+void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -59,6 +60,7 @@ void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVect
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 
 	MFPrimitive(PT_TriStrip | PT_Prelit);
+	MFSetMatrix(mat);
 	MFBegin(4);
 
 	MFSetColour(colour);

@@ -14,79 +14,71 @@ HKWidgetLabel::HKWidgetLabel()
 {
 	pTypeName = "HKWidgetLabel";
 
-	colour = MFVector::black;
+	textColour = MFVector::black;
 
 	pFont = MFFont_GetDebugFont();
-	justification = MFFontJustify_Top_Left;
+	bOwnFont = false;
 
-	bAutoHeight = true;
+	textJustification = MFFontJustify_Top_Left;
+
+	bAutoTextHeight = true;
 	textHeight = MFFont_GetFontHeight(pFont);
 }
 
 HKWidgetLabel::~HKWidgetLabel()
 {
+	if(bOwnFont)
+		MFFont_Destroy(pFont);
 }
 
-void HKWidgetLabel::SetPropertyF(const char *pProperty, float value)
-{
-	if(!MFString_CaseCmp(pProperty, "text_height"))
-		SetTextHeight(value);
-	else
-		HKWidget::SetPropertyF(pProperty, value);
-}
-
-void HKWidgetLabel::SetPropertyS(const char *pProperty, const char *pValue)
-{
-	if(!MFString_CaseCmp(pProperty, "text_height"))
-		SetTextHeight(MFString_AsciiToFloat(pValue));
-	else if(!MFString_CaseCmp(pProperty, "text"))
-		SetLabel(pValue);
-	else if(!MFString_CaseCmp(pProperty, "text_font"))
-	{
-		pFont = MFFont_Create(pValue);
-	}
-	else if(!MFString_CaseCmp(pProperty, "text_justification"))
-		SetTextJustification((MFFontJustify)HKWidget_GetEnumValue(pValue, sJustifyKeys));
-	else
-		HKWidget::SetPropertyS(pProperty, pValue);
-}
-
-float HKWidgetLabel::GetPropertyF(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "text_height"))
-		return GetTextHeight();
-	return HKWidget::GetPropertyF(pProperty);
-}
-
-int HKWidgetLabel::GetPropertyI(const char *pProperty)
-{
-	if(!MFString_CaseCmp(pProperty, "text_justification"))
-		return (int)justification;
-	return HKWidget::GetPropertyI(pProperty);
-}
-
-MFString HKWidgetLabel::GetPropertyS(const char *pProperty)
+void HKWidgetLabel::SetProperty(const char *pProperty, const char *pValue)
 {
 	if(!MFString_CaseCmp(pProperty, "text"))
-		return GetLabel();
+		SetText(pValue);
+	else if(!MFString_CaseCmp(pProperty, "text_colour"))
+		SetTextColour(HKWidget_GetColourFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "text_height"))
+		SetTextHeight(MFString_AsciiToFloat(pValue));
+	else if(!MFString_CaseCmp(pProperty, "text_shadowDepth"))
+		SetShadowDepth(MFString_AsciiToFloat(pValue));
 	else if(!MFString_CaseCmp(pProperty, "text_font"))
 	{
-//		return MFFont_GetFontName(pFont);
-		return NULL;
+		if(bOwnFont)
+			MFFont_Destroy(pFont);
+		pFont = MFFont_Create(pValue);
+		bOwnFont = true;
 	}
-	else if(!MFString_CaseCmp(pProperty, "text_justification"))
-		return HKWidget_GetEnumFromValue(GetTextJustification(), sJustifyKeys);
-	return HKWidget::GetPropertyS(pProperty);
+	else if(!MFString_CaseCmp(pProperty, "text_align"))
+		SetTextJustification((MFFontJustify)HKWidget_GetEnumValue(pValue, sJustifyKeys));
+	else
+		HKWidget::SetProperty(pProperty, pValue);
 }
 
-void HKWidgetLabel::SetLabel(MFString label)
+MFString HKWidgetLabel::GetProperty(const char *pProperty)
 {
-	this->label = label;
+	if(!MFString_CaseCmp(pProperty, "text"))
+		return GetText();
+	else if(!MFString_CaseCmp(pProperty, "text_font"))
+	{
+		if(bOwnFont)
+			return font;
+		else
+//			return MFFont_GetFontName(pFont);
+			return NULL;
+	}
+	else if(!MFString_CaseCmp(pProperty, "text_align"))
+		return HKWidget_GetEnumFromValue(GetTextJustification(), sJustifyKeys);
+	return HKWidget::GetProperty(pProperty);
+}
 
-	if(!label.IsEmpty())
+void HKWidgetLabel::SetText(MFString text)
+{
+	this->text = text;
+
+	if(!text.IsEmpty())
 	{
 		// resize the widget accordingly
-		float height, width = MFFont_GetStringWidth(pFont, label.CStr(), textHeight, 0.f, -1, &height);
+		float height, width = MFFont_GetStringWidth(pFont, text.CStr(), textHeight, 0.f, -1, &height);
 		SetSize(MakeVector(width, height));
 	}
 }
@@ -99,12 +91,23 @@ HKWidgetRenderer *HKWidgetRendererLabel::Create()
 
 void HKWidgetRendererLabel::Render(const HKWidget &widget, const MFMatrix &worldTransform)
 {
+	HKWidgetRenderer::Render(widget, worldTransform);
+
 	HKWidgetLabel &label = (HKWidgetLabel&)widget;
 
-	const MFVector &size = widget.GetSize();
-	const MFVector &colour = widget.GetColour();
-	MFString l = label.GetLabel();
-
+	MFString l = label.GetText();
 	if(!l.IsEmpty())
-		MFFont_DrawTextJustified(label.GetFont(), l.CStr(), MFVector::zero, size.x, size.y, label.GetTextJustification(), label.GetTextHeight(), colour, -1, worldTransform);
+	{
+		MFFont *pFont = label.GetFont();
+		float height = label.GetTextHeight();
+		float shadowDepth = label.GetShadowDepth();
+		const MFVector &size = widget.GetSize();
+		const MFVector &textColour = label.GetTextColour();
+		MFFontJustify j = label.GetTextJustification();
+		const char *pString = l.CStr();
+
+		if(shadowDepth > 0.f)
+			MFFont_DrawTextJustified(pFont, pString, MakeVector(shadowDepth, shadowDepth), size.x, size.y, j, height, MFVector::black, -1, worldTransform);
+		MFFont_DrawTextJustified(pFont, pString, MFVector::zero, size.x, size.y, j, height, textColour, -1, worldTransform);
+	}
 }

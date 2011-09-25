@@ -217,7 +217,7 @@ void MFPrimitive_EndBlitter();
  * @param dv Destination V coordinate.
  * @return None.
  */
-void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f, const MFMatrix &mat = MFMatrix::identity);
 
 /**
  * Draw a textured square.
@@ -231,7 +231,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &co
  * @param dv Destination V coordinate.
  * @return None.
  */
-void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f);
+void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f, const MFMatrix &mat = MFMatrix::identity);
 
 /**
  * Draw an untextured square.

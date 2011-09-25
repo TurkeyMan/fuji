@@ -51,7 +51,7 @@ void Game_Init()
 	// load a test UI
 	HKWidget *pTestLayout = HKWidget_CreateFromXML("ui-test.xml");
 
-	pUI->SetRootWidget(pTestLayout);
+	pUI->AddTopLevelWidget(pTestLayout, true);
 }
 
 void Game_Update()
