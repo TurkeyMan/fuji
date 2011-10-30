@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKWIDGET_RENDERER_H)
 #define _HKWIDGET_RENDERER_H
 
@@ -14,7 +15,7 @@ public:
 
 	virtual void Render(const HKWidget &widget, const MFMatrix &worldTransform);
 
-	virtual void SetProperty(const char *pProperty, const char *pValue);
+	virtual bool SetProperty(const char *pProperty, const char *pValue);
 	virtual MFString GetProperty(const char *pProperty);
 
 protected:

@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKWIDGETEVENT_H)
 #define _HKWIDGETEVENT_H
 
@@ -111,9 +112,9 @@ struct HKWidgetInputActionEvent : public HKWidgetEventInfo
 	MFVector delta;
 };
 
-struct HKWidgetInputTextEvent : public HKWidgetEventInfo
+struct HKWidgetInputCharacterEvent : public HKWidgetEventInfo
 {
-	HKWidgetInputTextEvent(HKWidget *pSender, HKInputSource *pSource, int unicode)
+	HKWidgetInputCharacterEvent(HKWidget *pSender, HKInputSource *pSource, int unicode)
 		: HKWidgetEventInfo(pSender)
 	{
 		this->pSource = pSource;
@@ -122,6 +123,19 @@ struct HKWidgetInputTextEvent : public HKWidgetEventInfo
 
 	HKInputSource *pSource;
 	int unicode;
+};
+
+struct HKWidgetTextEvent : public HKWidgetEventInfo
+{
+	HKWidgetTextEvent(HKWidget *pSender, MFString string)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->pSource = pSource;
+		this->string = string;
+	}
+
+	HKInputSource *pSource;
+	MFString string;
 };
 
 #endif

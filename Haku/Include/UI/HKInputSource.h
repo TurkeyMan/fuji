@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKINPUTSOURCE_H)
 #define _HKINPUTSOURCE_H
 
@@ -32,6 +33,7 @@ public:
 		IE_ButtonTriggered,
 		IE_ButtonDown,
 		IE_ButtonUp,
+		IE_Character,
 		IE_Wheel,
 	};
 
@@ -96,6 +98,8 @@ public:
 
 	float SetDragThreshold(float threshold);
 
+	HKInputSource *FindSource(MFInputDevice device, int deviceID = 0);
+
 	InputEvent OnInputEvent;
 
 protected:
@@ -130,6 +134,7 @@ protected:
 	void ScanForDevices();
 	MFVector CorrectPosition(float x, float y);
 	void InitEvent(EventInfo &info, EventType ev, int contact);
+	void InitButtonEvent(EventInfo &info, EventType ev, int button, int source);
 };
 
 #endif

@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKWIDGETLOADER_XML_H)
 #define _HKWIDGETLOADER_XML_H
 

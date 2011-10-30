@@ -198,7 +198,9 @@ public:
 	static const MFVector zero;		/**< Constant ZERO vector { 0, 0, 0, 0 } */
 	static const MFVector one;		/**< Constant ONE vector { 1, 1, 1, 1 } */
 	static const MFVector identity;	/**< Constant IDENTITY vector { 0, 0, 0, 1 } */
-	static const MFVector up;		/**< Constant UP vector { 0, 1, 0, 1 } */
+	static const MFVector up;		/**< Constant UP (+Y) vector { 0, 1, 0, 1 } */
+	static const MFVector right;	/**< Constant RIGHT (+X) vector { 1, 0, 0, 1 } */
+	static const MFVector forward;	/**< Constant FORWARD (+Z) vector { 0, 0, 1, 1 } */
 
 	static const MFVector red;		/**< Constant RED colour vector { 1, 0, 0, 1 } */
 	static const MFVector green;	/**< Constant GREEN colour vector { 0, 1, 0, 1 } */
@@ -206,7 +208,9 @@ public:
 	static const MFVector yellow;	/**< Constant YELLOW colour vector { 1, 1, 0, 1 } */
 	static const MFVector white;	/**< Constant WHITE colour vector { 1, 1, 1, 1 } */
 	static const MFVector black;	/**< Constant BLACK colour vector { 0, 0, 0, 1 } */
-
+	static const MFVector grey;		/**< Constant GREY colour vector { 0.5, 0.5, 0.5, 1 } */
+	static const MFVector lightgrey;/**< Constant LIGHT GREY colour vector { 0.8, 0.8, 0.8, 1 } */
+	static const MFVector darkgrey;	/**< Constant DARK GREY colour vector { 0.3, 0.3, 0.3, 1 } */
 
 	// general purpose vector operators
 

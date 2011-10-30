@@ -183,6 +183,36 @@ void HKInputManager::Update()
 				}
 			}
 		}
+
+		if(MFDisplay_HasFocus())
+		{
+			if(device == IDD_Keyboard)
+			{
+				for(int b=0; b<Key_Max; ++b)
+				{
+					if(MFInput_WasPressed(b, device, deviceID))
+					{
+						EventInfo info;
+						InitButtonEvent(info, IE_ButtonDown, b, a);
+						OnInputEvent(*this, info);
+
+						// button trigger supports repeats... (not yet supported)
+//						info.ev = IE_ButtonTriggered;
+//						OnInputEvent(*this, info);
+					}
+					else if(MFInput_WasReleased(b, device, deviceID))
+					{
+						EventInfo info;
+						InitButtonEvent(info, IE_ButtonUp, b, a);
+						OnInputEvent(*this, info);
+					}
+				}
+			}
+
+			if(device == IDD_Gamepad)
+			{
+			}
+		}
 	}
 
 	// track moved contacts
@@ -386,6 +416,16 @@ float HKInputManager::SetDragThreshold(float threshold)
 	return old;
 }
 
+HKInputSource *HKInputManager::FindSource(MFInputDevice device, int deviceID)
+{
+	for(int a=0; a<numDevices; ++a)
+	{
+		if(sources[a].device == device && sources[a].deviceID == deviceID)
+			return &sources[a];
+	}
+	return NULL;
+}
+
 void HKInputManager::ScanForDevices()
 {
 	// *** TODO: support hot-swapping devices... ***
@@ -467,6 +507,14 @@ void HKInputManager::InitEvent(EventInfo &info, EventType ev, int contact)
 	// the mouse buttons are stored according to the MFInput enum values
 	if(info.buttonID != -1 && info.pSource->device == IDD_Mouse)
 		info.buttonID -= Mouse_LeftButton;
+}
+
+void HKInputManager::InitButtonEvent(EventInfo &info, EventType ev, int button, int source)
+{
+	info.ev = ev;
+	info.contact = -1;
+	info.pSource = &sources[source];
+	info.buttonID = button;
 }
 
 void HKInputManager::Contact::Init(HKInputSource *_pSource, int _buttonID, float _x, float _y)

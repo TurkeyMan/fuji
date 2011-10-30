@@ -40,7 +40,7 @@ HKWidget::HKWidget()
 	pTypeName = "HKWidget";
 
 	pos = MFVector::zero;
-	size.Set(60, 40, 0);
+	size = MFVector::zero;
 	colour = MFVector::white;
 	scale = MFVector::one;
 	rot = MFVector::zero;
@@ -58,8 +58,8 @@ HKWidget::HKWidget()
 	bEnabled = true;
 	bParentEnabled = true;
 
-	bAutoSize = true;
-
+	bAutoWidth = bAutoHeight = true;
+	bClickable = bDragable = false;
 	bMatrixDirty = bInvMatrixDirty = true;
 }
 
@@ -135,7 +135,7 @@ void HKWidget::SetRenderer(HKWidgetRenderer *pRenderer)
 	this->pRenderer = pRenderer;
 }
 
-HKUserInterface &HKWidget::GetUI()
+HKUserInterface &HKWidget::GetUI() const
 {
 	return HKUserInterface::Get();
 }
@@ -156,47 +156,69 @@ void HKWidget::SetProperty(const char *pProperty, const char *pValue)
 		SetEnabled(HKWidget_GetBoolFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "visible"))
 		SetVisible((Visibility)HKWidget_GetEnumValue(pValue, sVisibilityKeys));
-	else if(!MFString_CaseCmp(pProperty, "layout_zDepth"))
+	else if(!MFString_CaseCmp(pProperty, "zDepth"))
 		zDepth = MFString_AsciiToInteger(pValue);
-	else if(!MFString_CaseCmp(pProperty, "layout_weight"))
+	else if(!MFString_CaseCmp(pProperty, "weight"))
 		SetLayoutWeight(MFString_AsciiToFloat(pValue));
 	else if(!MFString_CaseCmp(pProperty, "position"))
 		SetPosition(HKWidget_GetVectorFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "size"))
 		SetSize(HKWidget_GetVectorFromString(pValue));
+	else if(!MFString_CaseCmp(pProperty, "width"))
+		SetWidth(MFString_AsciiToFloat(pValue));
+	else if(!MFString_CaseCmp(pProperty, "height"))
+		SetHeight(MFString_AsciiToFloat(pValue));
 	else if(!MFString_CaseCmp(pProperty, "scale"))
 		SetScale(HKWidget_GetVectorFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "colour"))
 		SetColour(HKWidget_GetColourFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "rotation"))
 		SetRotation(HKWidget_GetVectorFromString(pValue));
-	else if(!MFString_CaseCmp(pProperty, "layout_margin"))
+	else if(!MFString_CaseCmp(pProperty, "margin"))
 		SetLayoutMargin(HKWidget_GetVectorFromString(pValue));
-	else if(!MFString_CaseCmp(pProperty, "width"))
-	{
-		MFVector size = GetSize();
-		size.x = MFString_AsciiToFloat(pValue);
-		SetSize(size);
-	}
-	else if(!MFString_CaseCmp(pProperty, "height"))
-	{
-		MFVector size = GetSize();
-		size.y = MFString_AsciiToFloat(pValue);
-		SetSize(size);
-	}
-	else if(!MFString_CaseCmp(pProperty, "name"))
-		name = pValue;
-	else if(!MFString_CaseCmp(pProperty, "layout_align"))
+	else if(!MFString_CaseCmp(pProperty, "id"))
+		id = pValue;
+	else if(!MFString_CaseCmp(pProperty, "align"))
 		SetLayoutJustification((Justification)HKWidget_GetEnumValue(pValue, sJustifyKeys));
-	else if(pRenderer)
-		pRenderer->SetProperty(pProperty, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onEnabledChanged"))
+		HKWidget_BindWidgetEvent(OnEnabledChanged, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onVisibleChanged"))
+		HKWidget_BindWidgetEvent(OnVisibleChanged, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onLayoutChanged"))
+		HKWidget_BindWidgetEvent(OnLayoutChanged, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onMove"))
+		HKWidget_BindWidgetEvent(OnMove, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onResize"))
+		HKWidget_BindWidgetEvent(OnResize, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onFocusChanged"))
+		HKWidget_BindWidgetEvent(OnFocusChanged, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onDown"))
+		HKWidget_BindWidgetEvent(OnDown, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onUp"))
+		HKWidget_BindWidgetEvent(OnUp, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onTap"))
+		HKWidget_BindWidgetEvent(OnTap, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onDrag"))
+		HKWidget_BindWidgetEvent(OnDrag, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onHover"))
+		HKWidget_BindWidgetEvent(OnHover, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onHoverOver"))
+		HKWidget_BindWidgetEvent(OnHoverOver, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onHoverOut"))
+		HKWidget_BindWidgetEvent(OnHoverOut, pValue);
+	else if(!MFString_CaseCmp(pProperty, "onCharacter"))
+		HKWidget_BindWidgetEvent(OnCharacter, pValue);
+	else if(pRenderer && pRenderer->SetProperty(pProperty, pValue))
+		return;
+	else
+		MFDebug_Warn(2, MFString::Format("Unknown property for '%s': %s='%s'", GetTypeName(), pProperty, pValue).CStr());
 }
 
 MFString HKWidget::GetProperty(const char *pProperty)
 {
-	if(!MFString_CaseCmp(pProperty, "name"))
-		return name;
-	else if(!MFString_CaseCmp(pProperty, "layout_align"))
+	if(!MFString_CaseCmp(pProperty, "id"))
+		return id;
+	else if(!MFString_CaseCmp(pProperty, "align"))
 		return HKWidget_GetEnumFromValue(GetLayoutJustification(), sJustifyKeys);
 	else if(pRenderer)
 		return pRenderer->GetProperty(pProperty);
@@ -205,7 +227,7 @@ MFString HKWidget::GetProperty(const char *pProperty)
 
 HKWidget *HKWidget::FindChild(const char *pName)
 {
-	if(name.CompareInsensitive(pName))
+	if(id.EqualsInsensitive(pName))
 		return this;
 
 	int numChildren = GetNumChildren();
@@ -277,17 +299,12 @@ void HKWidget::SetPosition(const MFVector &position)
 	}
 }
 
-void HKWidget::SetSize(const MFVector &size)
+void HKWidget::Resize(const MFVector &size)
 {
-	bAutoSize = false;
-
 	if(this->size != size)
 	{
 		MFVector oldSize = this->size;
 		this->size = size;
-
-		HKWidgetGeneralEvent ev(this);
-		OnLayoutChanged(*this, ev);
 
 		if(!OnResize.IsEmpty())
 		{
@@ -296,6 +313,9 @@ void HKWidget::SetSize(const MFVector &size)
 			ev.newSize = size;
 			OnResize(*this, ev);
 		}
+
+		HKWidgetGeneralEvent ev(this);
+		OnLayoutChanged(*this, ev);
 	}
 }
 
@@ -450,21 +470,33 @@ bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev
 	{
 		case HKInputManager::IE_Down:
 		{
-			HKWidgetInputEvent ie(this, ev.pSource);
-			OnDown(*this, ie);
-			return true;
+			if(bClickable)
+			{
+				HKWidgetInputEvent ie(this, ev.pSource);
+				OnDown(*this, ie);
+				return true;
+			}
+			break;
 		}
 		case HKInputManager::IE_Up:
 		{
-			HKWidgetInputEvent ie(this, ev.pSource);
-			OnUp(*this, ie);
-			return true;
+			if(bClickable)
+			{
+				HKWidgetInputEvent ie(this, ev.pSource);
+				OnUp(*this, ie);
+				return true;
+			}
+			break;
 		}
 		case HKInputManager::IE_Tap:
 		{
-			HKWidgetInputEvent ie(this, ev.pSource);
-			OnTap(*this, ie);
-			return true;
+			if(bClickable)
+			{
+				HKWidgetInputEvent ie(this, ev.pSource);
+				OnTap(*this, ie);
+				return true;
+			}
+			break;
 		}
 		case HKInputManager::IE_Hover:
 		{
@@ -476,11 +508,15 @@ bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev
 		}
 		case HKInputManager::IE_Drag:
 		{
-			HKWidgetInputActionEvent ie(this, ev.pSource);
-			ie.pos = MakeVector(ev.hover.x, ev.hover.y);
-			ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
-			OnDrag(*this, ie);
-			return true;
+			if(bDragable)
+			{
+				HKWidgetInputActionEvent ie(this, ev.pSource);
+				ie.pos = MakeVector(ev.hover.x, ev.hover.y);
+				ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
+				OnDrag(*this, ie);
+				return true;
+			}
+			break;
 		}
 		case HKInputManager::IE_Pinch:
 		case HKInputManager::IE_Spin:
@@ -502,7 +538,7 @@ int HKWidget_GetEnumValue(MFString value, const EnumKeypair *pKeys)
 	value.Trim();
 	for(int a=0; pKeys[a].pKey; ++a)
 	{
-		if(value.CompareInsensitive(pKeys[a].pKey))
+		if(value.EqualsInsensitive(pKeys[a].pKey))
 			return pKeys[a].value;
 	}
 	return -1;
@@ -524,7 +560,7 @@ uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys)
 
 		for(int a=0; pKeys[a].pKey; ++a)
 		{
-			if(key.CompareInsensitive(pKeys[a].pKey))
+			if(key.EqualsInsensitive(pKeys[a].pKey))
 			{
 				value |= pKeys[a].value;
 				break;
@@ -613,25 +649,25 @@ MFVector HKWidget_GetColourFromString(MFString value)
 	if(value.IsEmpty())
 		return MFVector::white;
 
-	if(value.CompareInsensitive("black"))
+	if(value.EqualsInsensitive("black"))
 		return MFVector::black;
-	else if(value.CompareInsensitive("white"))
+	else if(value.EqualsInsensitive("white"))
 		return MFVector::white;
-	else if(value.CompareInsensitive("red"))
+	else if(value.EqualsInsensitive("red"))
 		return MFVector::red;
-	else if(value.CompareInsensitive("blue"))
+	else if(value.EqualsInsensitive("blue"))
 		return MFVector::blue;
-	else if(value.CompareInsensitive("green"))
+	else if(value.EqualsInsensitive("green"))
 		return MFVector::green;
-	else if(value.CompareInsensitive("yellow"))
+	else if(value.EqualsInsensitive("yellow"))
 		return MFVector::yellow;
-	else if(value.CompareInsensitive("orange"))
+	else if(value.EqualsInsensitive("orange"))
 		return MakeVector(1,0.5,0,1);
-	else if(value.CompareInsensitive("grey"))
+	else if(value.EqualsInsensitive("grey"))
 		return MFVector::grey;
-	else if(value.CompareInsensitive("lightgrey"))
+	else if(value.EqualsInsensitive("lightgrey"))
 		return MFVector::yellow;
-	else if(value.CompareInsensitive("darkgrey"))
+	else if(value.EqualsInsensitive("darkgrey"))
 		return MFVector::yellow;
 
 	float f[4] = { 0.f, 0.f, 0.f, 1.f };
@@ -648,4 +684,11 @@ MFVector HKWidget_GetColourFromString(MFString value)
 	while(numComponents < 4 && tokLen != -1);
 
 	return MakeVector(f[0], f[1], f[2], f[3]);
+}
+
+void HKWidget_BindWidgetEvent(HKWidgetEvent &event, const char *pEventName)
+{
+	HKWidgetEvent::Delegate &d = HKUserInterface::GetEventHandler(pEventName);
+	if(&d != NULL)
+		event += d;
 }

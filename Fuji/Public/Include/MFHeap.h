@@ -272,6 +272,19 @@ void MFHeap_PushGroupName(const char *pGroupName);
 void MFHeap_PopGroupName();
 
 
+/** @internal */
+class MFHeapScope
+{
+public:
+	MFHeapScope(MFHeapType type) { pOld = MFHeap_SetActiveHeap(MFHeap_GetHeap(type)); }
+	~MFHeapScope() { MFHeap_SetActiveHeap(pOld); }
+	MFHeap *pOld;
+};
+
+/**
+ */
+#define MFHEAP_SCOPE(type) MFHeapScope scopeHeap(type)
+
 /*** internal ***/
 
 // user alloc macros

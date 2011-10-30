@@ -10,12 +10,16 @@
 #include "UI/Widgets/HKWidgetLayoutLinear.h"
 #include "UI/Widgets/HKWidgetLayoutFrame.h"
 #include "UI/Widgets/HKWidgetPrefab.h"
+#include "UI/Widgets/HKWidgetTextbox.h"
+#include "UI/Widgets/HKWidgetListbox.h"
 
 #include "MFDisplay.h"
 
 HKUserInterface *HKUserInterface::pActive = NULL;
 HKFactory<HKWidget> *HKUserInterface::pFactory = NULL;
 HKFactory<HKWidgetRenderer> *HKUserInterface::pRendererFactory = NULL;
+
+HKOpenHashTable<HKWidgetEvent::Delegate> HKUserInterface::eventHandlerRegistry;
 
 MFSystemCallbackFunction HKUserInterface::pChainResizeCallback = NULL;
 
@@ -28,30 +32,38 @@ void HKUserInterface::Init()
 	{
 		pFactory = new HKFactory<HKWidget>();
 
-		HKWidgetFactory::FactoryType *pWidget = pFactory->RegisterType("HKWidget", HKWidget::Create, NULL);
+		HKWidgetFactory::FactoryType *pWidget = pFactory->RegisterType("Widget", HKWidget::Create, NULL);
 
-		HKWidgetFactory::FactoryType *pLabel = pFactory->RegisterType("HKWidgetLabel", HKWidgetLabel::Create, pWidget);
-		pFactory->RegisterType("HKWidgetButton", HKWidgetButton::Create, pLabel);
-		pFactory->RegisterType("HKWidgetLayoutFrame", HKWidgetLayoutFrame::Create, pWidget);
-		pFactory->RegisterType("HKWidgetLayoutLinear", HKWidgetLayoutLinear::Create, pWidget);
-		pFactory->RegisterType("HKWidgetPrefab", HKWidgetPrefab::Create, pWidget);
+		HKWidgetFactory::FactoryType *pLabel = pFactory->RegisterType("Label", HKWidgetLabel::Create, pWidget);
+		pFactory->RegisterType("Button", HKWidgetButton::Create, pLabel);
+		pFactory->RegisterType("Frame", HKWidgetLayoutFrame::Create, pWidget);
+		pFactory->RegisterType("LinearLayout", HKWidgetLayoutLinear::Create, pWidget);
+		pFactory->RegisterType("Prefab", HKWidgetPrefab::Create, pWidget);
+		pFactory->RegisterType("Textbox", HKWidgetTextbox::Create, pWidget);
+		pFactory->RegisterType("Listbox", HKWidgetTextbox::Create, pWidget);
 	}
 
 	if(!pRendererFactory)
 	{
 		pRendererFactory = new HKFactory<HKWidgetRenderer>();
 
-		HKWidgetRendererFactory::FactoryType *pWidget = pRendererFactory->RegisterType("HKWidget", HKWidgetRenderer::Create, NULL);
-		pRendererFactory->RegisterType("HKWidgetLabel", HKWidgetRendererLabel::Create, pWidget);
-		pRendererFactory->RegisterType("HKWidgetButton", HKWidgetRendererButton::Create, pWidget);
-		pRendererFactory->RegisterType("HKWidgetLayoutFrame", HKWidgetRenderer::Create, pWidget);
-		pRendererFactory->RegisterType("HKWidgetLayoutLinear", HKWidgetRenderer::Create, pWidget);
-		pRendererFactory->RegisterType("HKWidgetpREFAB", HKWidgetRenderer::Create, pWidget);
+		HKWidgetRendererFactory::FactoryType *pWidget = pRendererFactory->RegisterType("Widget", HKWidgetRenderer::Create, NULL);
+		pRendererFactory->RegisterType("Label", HKWidgetRendererLabel::Create, pWidget);
+		pRendererFactory->RegisterType("Button", HKWidgetRendererButton::Create, pWidget);
+		pRendererFactory->RegisterType("Frame", HKWidgetRenderer::Create, pWidget);
+		pRendererFactory->RegisterType("LinearLayout", HKWidgetRenderer::Create, pWidget);
+		pRendererFactory->RegisterType("Prefab", HKWidgetRenderer::Create, pWidget);
+		pRendererFactory->RegisterType("Textbox", HKWidgetRendererTextbox::Create, pWidget);
+		pRendererFactory->RegisterType("Listbox", HKWidgetRenderer::Create, pWidget);
 	}
+
+	eventHandlerRegistry.Init(256, 256, 32);
 }
 
 void HKUserInterface::Deinit()
 {
+	eventHandlerRegistry.Deinit();
+
 	if(pRendererFactory)
 	{
 		delete pRendererFactory;
@@ -89,12 +101,22 @@ HKWidget *HKUserInterface::CreateWidget(const char *pWidgetType)
 	return pWidget;
 }
 
+void HKUserInterface::RegisterEventHandler(MFString name, HKWidgetEvent::Delegate handler)
+{
+	eventHandlerRegistry.Add(name, handler);
+}
+
+HKWidgetEvent::Delegate& HKUserInterface::GetEventHandler(MFString name)
+{
+	return eventHandlerRegistry[name];
+}
+
 HKUserInterface::HKUserInterface()
 {
 	MFZeroMemory(pFocusList, sizeof(pFocusList));
 	MFZeroMemory(pHoverList, sizeof(pHoverList));
 
-	pRoot = (HKWidgetLayoutFrame*)CreateWidget("HKWidgetLayoutFrame");
+	pRoot = (HKWidgetLayoutFrame*)CreateWidget("Frame");
 
 	MFRect rect;
 //	MFView_GetOrthoRect(&rect);

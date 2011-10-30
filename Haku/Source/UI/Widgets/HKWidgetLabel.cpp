@@ -23,6 +23,9 @@ HKWidgetLabel::HKWidgetLabel()
 
 	bAutoTextHeight = true;
 	textHeight = MFFont_GetFontHeight(pFont);
+
+	if(bAutoHeight)
+		UpdateHeight(textHeight);
 }
 
 HKWidgetLabel::~HKWidgetLabel()
@@ -47,6 +50,11 @@ void HKWidgetLabel::SetProperty(const char *pProperty, const char *pValue)
 			MFFont_Destroy(pFont);
 		pFont = MFFont_Create(pValue);
 		bOwnFont = true;
+
+		if(bAutoTextHeight)
+			textHeight = MFFont_GetFontHeight(pFont);
+
+		AdjustSize();
 	}
 	else if(!MFString_CaseCmp(pProperty, "text_align"))
 		SetTextJustification((MFFontJustify)HKWidget_GetEnumValue(pValue, sJustifyKeys));
@@ -75,14 +83,36 @@ void HKWidgetLabel::SetText(MFString text)
 {
 	this->text = text;
 
-	if(!text.IsEmpty())
-	{
-		// resize the widget accordingly
-		float height, width = MFFont_GetStringWidth(pFont, text.CStr(), textHeight, 0.f, -1, &height);
-		SetSize(MakeVector(width, height));
-	}
+	AdjustSize();
 }
 
+void HKWidgetLabel::AdjustSize()
+{
+	if(bAutoWidth || bAutoHeight)
+	{
+		MFVector newSize = size;
+
+		if(!text.IsEmpty())
+		{
+			// resize the widget accordingly
+			float height, width = MFFont_GetStringWidth(pFont, text.CStr(), textHeight, bAutoWidth ? 0.f : size.x, -1, &height);
+
+			if(bAutoWidth)
+				newSize.x = width;
+			if(bAutoHeight)
+				newSize.y = height;
+		}
+		else
+		{
+			if(bAutoWidth)
+				newSize.x = 0.f;
+			if(bAutoHeight)
+				newSize.y = 0.f;
+		}
+
+		Resize(newSize);
+	}
+}
 
 HKWidgetRenderer *HKWidgetRendererLabel::Create()
 {

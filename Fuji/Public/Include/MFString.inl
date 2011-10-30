@@ -605,28 +605,28 @@ inline bool MFString::operator>(const MFString &string) const
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) > 0;
 }
 
-inline bool MFString::Compare(const char *pString) const
+inline bool MFString::Equals(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData == pString;
 	return MFString_Compare(pData->pMemory, pString) == 0;
 }
 
-inline bool MFString::Compare(const MFString &string) const
+inline bool MFString::Equals(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData == string.pData;
 	return MFString_Compare(pData->pMemory, string.pData->pMemory) == 0;
 }
 
-inline bool MFString::CompareInsensitive(const char *pString) const
+inline bool MFString::EqualsInsensitive(const char *pString) const
 {
 	if(!pData || !pString)
 		return (const char *)pData == pString;
 	return MFString_CaseCmp(pData->pMemory, pString) == 0;
 }
 
-inline bool MFString::CompareInsensitive(const MFString &string) const
+inline bool MFString::EqualsInsensitive(const MFString &string) const
 {
 	if(!pData || !string.pData)
 		return pData == string.pData;

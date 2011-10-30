@@ -21,6 +21,8 @@ HKWidgetButton::HKWidgetButton()
 
 	buttonFlags = 0;
 
+	bClickable = true;
+
 	bDown = false;
 	bPressed = false;
 	bState = false;
@@ -47,6 +49,8 @@ void HKWidgetButton::SetProperty(const char *pProperty, const char *pValue)
 		SetState(HKWidget_GetBoolFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "button_flags"))
 		SetButtonFlags(HKWidget_GetBitfieldValue(pValue, sButtonFlagKeys));
+	else if(!MFString_CaseCmp(pProperty, "onClicked"))
+		HKWidget_BindWidgetEvent(OnClicked, pValue);
 	else
 		HKWidgetLabel::SetProperty(pProperty, pValue);
 }

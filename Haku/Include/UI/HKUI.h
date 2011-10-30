@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKUI_H)
 #define _HKUI_H
 
@@ -6,6 +7,7 @@
 #include "HKInputSource.h"
 
 #include "MFSystem.h"
+#include "HKOpenHashTable.h"
 
 class HKWidgetRenderer;
 class HKWidgetLayoutFrame;
@@ -25,6 +27,9 @@ public:
 
 	static HKWidget *CreateWidget(const char *pWidgetType);
 
+	static void RegisterEventHandler(MFString name, HKWidgetEvent::Delegate handler);
+	static HKWidgetEvent::Delegate& GetEventHandler(MFString name);
+
 	static void SetActiveUI(HKUserInterface *pUI) { pActive = pUI; }
 	static HKUserInterface &Get() { return *pActive; }
 
@@ -37,6 +42,7 @@ public:
 	void AddTopLevelWidget(HKWidget *pWidget, bool bOwnWidget);
 
 	HKWidget *SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget);
+	HKWidget *GetFocus(HKInputSource *pSource) const { return pFocusList[pSource->sourceID]; }
 
 protected:
 	HKWidgetLayoutFrame *pRoot;
@@ -49,6 +55,8 @@ protected:
 	static HKUserInterface *pActive;
 	static HKWidgetFactory *pFactory;
 	static HKWidgetRendererFactory *pRendererFactory;
+
+	static HKOpenHashTable<HKWidgetEvent::Delegate> eventHandlerRegistry;
 
 	void OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
 

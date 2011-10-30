@@ -31,7 +31,7 @@ public:
 	void SetFont(MFFont *pFont);
 	void SetTextColour(const MFVector &colour) { textColour = colour; }
 	void SetTextJustification(MFFontJustify justification) { this->textJustification = justification; }
-	void SetTextHeight(float height) { this->textHeight = height; bAutoTextHeight = false; }
+	void SetTextHeight(float height) { this->textHeight = height; bAutoTextHeight = false; AdjustSize(); }
 	void SetShadowDepth(float depth) { shadowDepth = depth; }
 
 protected:
@@ -48,6 +48,8 @@ protected:
 
 	bool bAutoTextHeight;
 	bool bOwnFont;
+
+	void AdjustSize();
 };
 
 class HKWidgetRendererLabel : public HKWidgetRenderer

@@ -4,6 +4,7 @@
 
 const EnumKeypair HKWidgetLayout::sFirFlagsKeys[] =
 {
+	{ "FitContent", FitContentVertical|FitContentHorizontal },
 	{ "FitContentVertical", FitContentVertical },
 	{ "FitContentHorizontal", FitContentHorizontal },
 	{ NULL, 0 }
@@ -53,6 +54,17 @@ void HKWidgetLayout::RemoveChild(int index)
 //	ArrangeChildren()
 }
 
+void HKWidgetLayout::ClearChildren()
+{
+	for(int a=0; a<children.size(); ++a)
+	{
+		if(children[a].bOwnChild)
+			delete children[a].pChild;
+	}
+
+	children.clear();
+}
+
 int HKWidgetLayout::GetNumChildren() const
 {
 	return children.size();
@@ -65,7 +77,7 @@ HKWidget *HKWidgetLayout::GetChild(int index) const
 
 void HKWidgetLayout::SetProperty(const char *pProperty, const char *pValue)
 {
-	if(!MFString_CaseCmp(pProperty, "layout_padding"))
+	if(!MFString_CaseCmp(pProperty, "padding"))
 		SetPadding(HKWidget_GetVectorFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "layout_flags"))
 		SetFitFlags(HKWidget_GetBitfieldValue(pValue, sFirFlagsKeys));
@@ -85,7 +97,13 @@ void HKWidgetLayout::SetPadding(const MFVector &padding)
 	if(this->padding != padding)
 	{
 		this->padding = padding;
-		ArrangeChildren();
+
+		// potentially 
+		MFVector newSize = MFMax(size, MakeVector(padding.x + padding.z, padding.y + padding.w));
+		if(newSize != size)
+			Resize(newSize);
+		else
+			ArrangeChildren();
 	}
 }
 

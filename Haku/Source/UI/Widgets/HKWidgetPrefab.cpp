@@ -34,8 +34,17 @@ MFString HKWidgetPrefab::GetProperty(const char *pProperty)
 
 void HKWidgetPrefab::LoadPrefab(const char *pPrefab)
 {
-	HKWidget *pPrefabRoot = HKWidget_CreateFromXML(pPrefab);
-	AddChild(pPrefabRoot);
+	prefab = pPrefab;
+
+	if(MFString_EndsWith(pPrefab, ".xml"))
+	{
+		HKWidget *pPrefabRoot = HKWidget_CreateFromXML(pPrefab);
+		AddChild(pPrefabRoot);
+	}
+	else
+	{
+		//... error?
+	}
 }
 
 void HKWidgetPrefab::ArrangeChildren()

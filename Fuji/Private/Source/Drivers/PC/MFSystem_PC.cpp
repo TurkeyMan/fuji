@@ -9,6 +9,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+// support delay loading of DLL's in windows build.
+#pragma comment(lib, "delayimp")
+
 extern MFInitParams gInitParams;
 
 HINSTANCE apphInstance;

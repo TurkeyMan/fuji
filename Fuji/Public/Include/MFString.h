@@ -405,8 +405,7 @@ int MFString_DecodeUTF8(const char *pMBChar, int *pNumBytes);
 char *MFString_NextChar(const char *pChar);
 char *MFString_PrevChar(const char *pChar);
 
-int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString);
-int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString);
+int MFWString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString);
 
 uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
 
@@ -415,15 +414,15 @@ uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
 //
 
 /**
- * Convert a unicode string to a UTF8 string.
- * Converts a unicode string to a UTF8 string placing the result in the target buffer.
+ * Convert a UTF16 string to a UTF8 string.
+ * Converts a UTF16 string to a UTF8 string placing the result in the target buffer.
  * @param pBuffer Target buffer to output the resulting string.
- * @param pUnicodeString Unicode string to convert.
- * @return Returns the number of characters copied, NOT the length of the result string in bytes.
+ * @param pString UTF16 string to convert.
+ * @return Returns the length of the result string in bytes.
  * @see MFString_UFT8ToWChar()
  * @see MFString_UFT8AsWChar()
  */
-int MFWString_ToUFT8(char *pBuffer, const uint16 *pUnicodeString);
+int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString);
 
 /**
  * Get the length of a unicode string.
@@ -576,10 +575,10 @@ public:
 
 	uint32 GetHash() const;									/**< Generate a fast hash for this string. */
 
-	bool Compare(const char *pString) const;				/**< Case-sensitive 'equal' comparison. */
-	bool Compare(const MFString &string) const;				/**< Case-sensitive 'equal' comparison. */
-	bool CompareInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
-	bool CompareInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
+	bool Equals(const char *pString) const;					/**< Case-sensitive 'equal' comparison. */
+	bool Equals(const MFString &string) const;				/**< Case-sensitive 'equal' comparison. */
+	bool EqualsInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
+	bool EqualsInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
 
 	int FindChar(int c, int startOffset = 0) const;
 	int FindCharReverse(int c) const;

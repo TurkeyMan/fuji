@@ -21,6 +21,8 @@ public:
 	int AddChild(HKWidget *pChild, bool bOwnChild = false);
 	void RemoveChild(int index);
 
+	void ClearChildren();
+
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
 
@@ -47,6 +49,7 @@ protected:
 	void OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev);
 
 	virtual void ArrangeChildren() = 0;
+	void ResizeChild(HKWidget *pChild, const MFVector &newSize) { pChild->Resize(newSize); }
 
 	static const EnumKeypair sFirFlagsKeys[];
 };

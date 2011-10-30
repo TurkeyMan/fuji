@@ -22,29 +22,43 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 	// early out?
 	int numChildren = GetNumChildren();
 	if(numChildren == 0)
+	{
+		if(bAutoWidth || bAutoHeight)
+		{
+			// resize the layout
+			MFVector newSize = GetSize();
+			if(bAutoWidth)
+				newSize.x = padding.x + padding.z;
+			if(bAutoHeight)
+				newSize.y = padding.y + padding.w;
+			Resize(newSize);
+		}
 		return;
+	}
 
-	if(fitFlags != 0)
+	bool bFitWidth = bAutoWidth && (layoutJustification & 3) != 3; // fitFlags & FitContentHorizontal
+	bool bFitHeight = bAutoHeight && (layoutJustification >> 2) != 3; // fitFlags & FitContentVertical
+
+	if(bFitWidth || bFitHeight)
 	{
 		// fit to largest child in each dimension
 		MFVector fit = MFVector::zero;
 		for(int a=0; a<numChildren; ++a)
 		{
 			HKWidget *pWidget = GetChild(a);
-			const MFVector &cMargin = pWidget->GetLayoutMargin();
-			const MFVector &cSize = pWidget->GetSize();
+			const MFVector &cSize = pWidget->GetSizeWithMargin();
 
-			fit.x = MFMax(fit.x, cSize.x + cMargin.x + cMargin.z + padding.x + padding.z);
-			fit.y = MFMax(fit.y, cSize.y + cMargin.y + cMargin.w + padding.y + padding.w);
+			fit.x = MFMax(fit.x, cSize.x + padding.x + padding.z);
+			fit.y = MFMax(fit.y, cSize.y + padding.y + padding.w);
 		}
 
 		// resize the layout
-		MFVector newSize = size;
-		if(fitFlags & FitContentHorizontal)
+		MFVector newSize = GetSize();
+		if(bFitWidth)
 			newSize.x = fit.x;
-		if(fitFlags & FitContentVertical)
+		if(bFitHeight)
 			newSize.y = fit.y;
-		SetSize(newSize);
+		Resize(newSize);
 	}
 
 	MFVector cPos = MakeVector(padding.x, padding.y);
@@ -72,7 +86,7 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 			break;
 		case TopFill:
 			pWidget->SetPosition(tPos);
-			pWidget->SetSize(MakeVector(tSize.x, size.y));
+			ResizeChild(pWidget, MakeVector(tSize.x, size.y));
 			break;
 		case CenterLeft:
 			pWidget->SetPosition(tPos + MakeVector(0, (tSize.y - size.y) * 0.5f));
@@ -85,7 +99,7 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 			break;
 		case CenterFill:
 			pWidget->SetPosition(tPos + MakeVector(0, (tSize.y - size.y) * 0.5f));
-			pWidget->SetSize(MakeVector(tSize.x, size.y));
+			ResizeChild(pWidget, MakeVector(tSize.x, size.y));
 			break;
 		case BottomLeft:
 			pWidget->SetPosition(tPos + MakeVector(0, tSize.y - size.y));
@@ -98,23 +112,23 @@ void HKWidgetLayoutFrame::ArrangeChildren()
 			break;
 		case BottomFill:
 			pWidget->SetPosition(tPos + MakeVector(0, tSize.y - size.y));
-			pWidget->SetSize(MakeVector(tSize.x, size.y));
+			ResizeChild(pWidget, MakeVector(tSize.x, size.y));
 			break;
 		case FillLeft:
 			pWidget->SetPosition(tPos);
-			pWidget->SetSize(MakeVector(size.x, tSize.y));
+			ResizeChild(pWidget, MakeVector(size.x, tSize.y));
 			break;
 		case FillCenter:
 			pWidget->SetPosition(tPos + MakeVector((tSize.x - size.x) * 0.5f, 0));
-			pWidget->SetSize(MakeVector(size.x, tSize.y));
+			ResizeChild(pWidget, MakeVector(size.x, tSize.y));
 			break;
 		case FillRight:
 			pWidget->SetPosition(tPos + MakeVector(tSize.x - size.x, 0));
-			pWidget->SetSize(MakeVector(size.x, tSize.y));
+			ResizeChild(pWidget, MakeVector(size.x, tSize.y));
 			break;
 		case Fill:
 			pWidget->SetPosition(tPos);
-			pWidget->SetSize(tSize);
+			ResizeChild(pWidget, tSize);
 			break;
 		case None:
 			// this widget has absolute coordinates..

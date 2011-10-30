@@ -65,11 +65,19 @@ configuration { "macosx" }
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
 	links { "ogg_static", "vorbisfile_static" }
+	linkoptions { "/Delay:unload" }
+
+	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11
+	linkoptions { "/DelayLoad:d3d9.dll", "/DelayLoad:D3DX9_42.dll" }		-- D3D9
+	linkoptions { "/DelayLoad:opengl32.dll" }								-- OpenGL
+	linkoptions { "/DelayLoad:dsound.dll" }									-- Sound
+	linkoptions { "/DelayLoad:xinput1_3.dll", "/DelayLoad:dinput8.dll" }	-- Input
+	linkoptions { "/DelayLoad:ws2_32.dll" }									-- Winsock
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
 		libdirs { "../Lib/Middleware/vorbis/x86", "../Lib/Middleware/lglcd/x86" }
-		
+
 	-- Windows 64 --
 	configuration { "windows", "x64", "not Xbox360", "not PS3" }
 		libdirs { "../Lib/Middleware/vorbis/x64", "../Lib/Middleware/lglcd/x64" }

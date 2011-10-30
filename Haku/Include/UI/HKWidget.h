@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKWIDGET_H)
 #define _HKWIDGET_H
 
@@ -21,6 +22,8 @@ uint32 HKWidget_GetBitfieldValue(MFString flags, const EnumKeypair *pKeys);
 
 MFString HKWidget_GetEnumFromValue(int value, const EnumKeypair *pKeys);
 MFString HKWidget_GetBitfieldFromValue(uint32 bits, const EnumKeypair *pKeys);
+
+void HKWidget_BindWidgetEvent(HKWidgetEvent &event, const char *pEventName);
 
 // HKWidget is an interactive entity
 class HKWidget
@@ -64,7 +67,7 @@ public:
 	HKWidget();
 	virtual ~HKWidget();
 
-	HKUserInterface &GetUI();
+	HKUserInterface &GetUI() const;
 
 	void SetRenderer(HKWidgetRenderer *pRenderer);
 
@@ -81,10 +84,13 @@ public:
 	virtual MFString GetProperty(const char *pProperty);
 
 	// HKWidget accessor methods
-	MFString GetName() const { return name; }
+	MFString GetID() const { return id; }
 	const char *GetTypeName() const { return pTypeName; }
 
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
+
+	bool IsClickable() const { return bClickable; }
+	bool IsDragable() const { return bDragable; }
 
 	bool GetEnabled() const { return bEnabled; }
 	Visibility GetVisible() const { return visible; }
@@ -102,13 +108,20 @@ public:
 	float GetLayoutWeight() const { return layoutWeight; }
 	Justification GetLayoutJustification() const { return layoutJustification; }
 
-	void SetName(MFString name) { this->name = name; }
+	MFVector GetSizeWithMargin() const { return MakeVector(size.x + layoutMargin.x + layoutMargin.z, size.y + layoutMargin.y + layoutMargin.w, size.z, size.w); }
+
+	void SetID(MFString id) { this->id = id; }
 
 	bool SetEnabled(bool bEnable);
 	Visibility SetVisible(Visibility visible);
 
+	bool SetClickable(bool bClickable) { bool bOld = this->bClickable; this->bClickable = bClickable; return bOld; }
+	bool SetDragable(bool bDragable) { bool bOld = this->bDragable; this->bDragable = bDragable; return bOld; }
+
 	void SetPosition(const MFVector &position);
-	void SetSize(const MFVector &size);
+	void SetSize(const MFVector &size) { bAutoWidth = bAutoHeight = false; Resize(size); }
+	void SetWidth(float width) { bAutoWidth = false; UpdateWidth(width); }
+	void SetHeight(float height) { bAutoHeight = false; UpdateHeight(height); }
 	void SetColour(const MFVector &colour);
 	void SetScale(const MFVector &scale);
 	void SetRotation(const MFVector &rotation);
@@ -154,7 +167,7 @@ protected:
 	HKWidgetRenderer *pRenderer;
 	HKWidget *pParent;
 
-	MFString name;
+	MFString id;
 
 	const char *pTypeName;
 
@@ -162,7 +175,8 @@ protected:
 	bool bEnabled;
 	bool bParentEnabled;	// flagged if the parent is enabled
 
-	bool bAutoSize;
+	bool bAutoWidth, bAutoHeight;
+	bool bClickable, bDragable;
 
 	int zDepth;
 
@@ -175,6 +189,10 @@ protected:
 	void Draw();
 
 	void DirtyMatrices();
+
+	void Resize(const MFVector &size);
+	void UpdateWidth(float width) { MFVector newSize = GetSize(); newSize.x = width; Resize(newSize); }
+	void UpdateHeight(float height) { MFVector newSize = GetSize(); newSize.y = height; Resize(newSize); }
 
 	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos);	// test for ray intersecting the widget
 	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);

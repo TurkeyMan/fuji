@@ -55,20 +55,23 @@ void HKWidgetRenderer::Render(const HKWidget &widget, const MFMatrix &worldTrans
 	}
 }
 
-void HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
+bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
 {
 	if(!MFString_CaseCmp(pProperty, "background_image"))
 	{
 		if(pBackground)
 			MFMaterial_Destroy(pBackground);
 		pBackground = MFMaterial_Create(pValue);
+		return true;
 	}
 	else if(!MFString_CaseCmp(pProperty, "background_colour"))
 	{
-		bgColour = HKWidget_GetVectorFromString(pValue);
+		bgColour = HKWidget_GetColourFromString(pValue);
 		if(bgColour.w == 0.f)
 			bgColour.w = 1.f;
+		return true;
 	}
+	return false;
 }
 
 MFString HKWidgetRenderer::GetProperty(const char *pProperty)
