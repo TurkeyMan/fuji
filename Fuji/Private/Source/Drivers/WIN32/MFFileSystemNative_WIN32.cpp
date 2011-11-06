@@ -25,6 +25,23 @@ void MFFileSystemNative_Unregister()
 
 }
 
+static void CreateDir(const char *pPath)
+{
+	if(!pPath || *pPath == 0)
+		return;
+
+	// strip trailing '/'
+	((char*)pPath)[MFString_Length(pPath)-1] = 0;
+
+	// the path is empty
+	if(*pPath == 0)
+		return;
+
+	CreateDir(MFStr_GetFilePath(pPath));
+
+	CreateDirectory(pPath, NULL);
+}
+
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
@@ -40,7 +57,10 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
-	DWORD create = (pOpenData->openFlags&MFOF_Read) ? ((pOpenData->openFlags&MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
+	if(pOpenData->openFlags & MFOF_CreateDirectory)
+		CreateDir(MFStr_GetFilePath(pFilename));
+
+	DWORD create = (pOpenData->openFlags & MFOF_Read) ? ((pOpenData->openFlags & MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
 
 	pFile->pFilesysData = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, create, NULL, NULL);
 

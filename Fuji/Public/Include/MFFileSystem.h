@@ -33,6 +33,8 @@ enum MFOpenFlags
 	MFOF_Text	= 4,	/**< Open file in text mode */
 	MFOF_Binary	= 8,	/**< Open file in binary mode */
 
+	MFOF_CreateDirectory = 16,	/**< Create the directory if it doesn't already exist */
+
 	MFOF_User	= 256,	/**< User flags begin here (for use by other file systems) */
 
 	MFOF_ForceInt = 0x7FFFFFFF /**< Force open flags to an int type */
@@ -392,7 +394,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL, bool b
  * @param size Size of the buffer to write.
  * @return Returns 0 if the file was succesfully written.
  */
-int MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size);
+int MFFileSystem_Save(const char *pFilename, const char *pBuffer, uint32 size);
 
 /**
  * Get the size of a file.

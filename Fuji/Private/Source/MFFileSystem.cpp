@@ -974,13 +974,21 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead, bool bAppendN
 	return pBuffer;
 }
 
-int MFFileSystem_Save(const char *pFilename, char *pBuffer, uint32 size)
+int MFFileSystem_Save(const char *pFilename, const char *pBuffer, uint32 size)
 {
 	MFCALLSTACK;
 
-	MFDebug_Assert(false, "Not Written....");
+	int bytesWritten = 0;
 
-	return -1;
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Write|MFOF_Binary|MFOF_CreateDirectory);
+	if(hFile)
+	{
+		bytesWritten = MFFile_Write(hFile, pBuffer, size, false);
+
+		MFFile_Close(hFile);
+	}
+
+	return bytesWritten;
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
