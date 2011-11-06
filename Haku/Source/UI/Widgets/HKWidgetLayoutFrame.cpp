@@ -2,15 +2,15 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetLayoutFrame.h"
 
-HKWidget *HKWidgetLayoutFrame::Create()
+HKWidget *HKWidgetLayoutFrame::Create(HKWidgetType *pType)
 {
-	return new HKWidgetLayoutFrame();
+	return new HKWidgetLayoutFrame(pType);
 }
 
 
-HKWidgetLayoutFrame::HKWidgetLayoutFrame()
+HKWidgetLayoutFrame::HKWidgetLayoutFrame(HKWidgetType *pType)
+: HKWidgetLayout(pType)
 {
-	pTypeName = "HKWidgetLayoutFrame";
 }
 
 HKWidgetLayoutFrame::~HKWidgetLayoutFrame()

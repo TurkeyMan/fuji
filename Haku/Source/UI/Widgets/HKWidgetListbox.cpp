@@ -1,6 +1,7 @@
 #include "Haku.h"
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetListbox.h"
+#include "UI/Widgets/HKWidgetLayoutFrame.h"
 
 const EnumKeypair HKWidgetListbox::sOrientationKeys[] =
 {
@@ -9,23 +10,26 @@ const EnumKeypair HKWidgetListbox::sOrientationKeys[] =
 	{ NULL, 0 }
 };
 
-HKWidget *HKWidgetListbox::Create()
+HKWidget *HKWidgetListbox::Create(HKWidgetType *pType)
 {
-	return new HKWidgetListbox();
+	return new HKWidgetListbox(pType);
 }
 
 
-HKWidgetListbox::HKWidgetListbox()
+HKWidgetListbox::HKWidgetListbox(HKWidgetType *pType)
+: HKWidgetLayout(pType)
 {
-	pTypeName = "HKWidgetListbox";
-
-	orientation = Horizontal;
+	orientation = Vertical;
 
 	pAdapter = NULL;
 
 	contentSize = 0.f;
 	prevScrollOffset = scrollOffset = 0.f;
 	velocity = 0.f;
+
+	flags = 0;
+
+	padding = MakeVector(2,2,2,2);
 
 	bDragable = true;
 	bClickable = true;
@@ -42,6 +46,8 @@ void HKWidgetListbox::SetProperty(const char *pProperty, const char *pValue)
 {
 	if(!MFString_CaseCmp(pProperty, "orientation"))
 		SetOrientation((Orientation)HKWidget_GetEnumValue(pValue, sOrientationKeys));
+	else if(!MFString_CaseCmp(pProperty, "hoverSelect"))
+		flags |= HKWidget_GetBoolFromString(pValue) ? HoverSelect : 0;
 	else if(!MFString_CaseCmp(pProperty, "onSelChanged"))
 		HKWidget_BindWidgetEvent(OnSelChanged, pValue);
 	HKWidgetLayout::SetProperty(pProperty, pValue);
@@ -56,21 +62,34 @@ MFString HKWidgetListbox::GetProperty(const char *pProperty)
 
 void HKWidgetListbox::Update()
 {
-	if(!bDragging && velocity != 0.f)
+	if(!bDragging)
 	{
-		// apply scroll velocity
-		velocity *= 1.f - MFSystem_TimeDelta();
-		if(velocity < 0.01f)
+		if(velocity != 0.f)
 		{
-			velocity = 0.f;
-			scrollOffset = MFFloor(scrollOffset);
+			// apply scroll velocity
+			velocity *= 1.f - MFSystem_TimeDelta()*10.f;
+			if(velocity < 0.01f)
+				velocity = 0.f;
+
+			scrollOffset += velocity * MFSystem_TimeDelta();
 		}
 
-		scrollOffset += velocity;
-
-		MFClamp(0.f, scrollOffset, contentSize);
+		if(scrollOffset > 0.f)
+		{
+			scrollOffset = MFMax(scrollOffset - MFMax(scrollOffset * 10.f * MFSystem_TimeDelta(), 1.f), 0.f);
+		}
+		else
+		{
+			float listSize = orientation == Horizontal ? size.x - (padding.x + padding.z) : size.y - (padding.y + padding.w);
+			float overflow = MFMin(listSize - (contentSize + scrollOffset), -scrollOffset);
+			if(overflow > 0.f)
+			{
+				scrollOffset = MFMin(scrollOffset + MFMax(overflow * 10.f * MFSystem_TimeDelta(), 1.f), scrollOffset + overflow);
+			}
+		}
 	}
 
+	scrollOffset = MFFloor(scrollOffset);
 	if(scrollOffset != prevScrollOffset)
 	{
 		prevScrollOffset = scrollOffset;
@@ -78,7 +97,7 @@ void HKWidgetListbox::Update()
 	}
 }
 
-bool HKWidgetListbox::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
+bool HKWidgetListbox::InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev)
 {
 	// try and handle the input event in some standard ways...
 	switch(ev.ev)
@@ -93,6 +112,8 @@ bool HKWidgetListbox::InputEvent(HKInputManager &manager, HKInputManager::EventI
 		case HKInputManager::IE_Up:
 		{
 			bDragging = false;
+
+			GetUI().SetFocus(ev.pSource, NULL);
 			break;
 		}
 		case HKInputManager::IE_Drag:
@@ -101,9 +122,12 @@ bool HKWidgetListbox::InputEvent(HKInputManager &manager, HKInputManager::EventI
 			float delta = orientation == Horizontal ? ev.drag.deltaX : ev.drag.deltaY;
 			scrollOffset += delta;
 
-			velocity = velocity*.3f + (delta / MFSystem_TimeDelta())*.7f;
+			const float smooth = 0.5f;
+			velocity = velocity*smooth + (delta / MFSystem_TimeDelta())*(1.f-smooth);
 
 			bDragging = true;
+
+			GetUI().SetFocus(ev.pSource, this);
 			break;
 		}
 		default:
@@ -123,6 +147,8 @@ void HKWidgetListbox::ArrangeChildren()
 	MFVector pPos = orientation == Horizontal ? MakeVector(padding.x + scrollOffset, padding.y) : MakeVector(padding.x, padding.y + scrollOffset);
 	MFVector pSize = MakeVector(size.x - (padding.x + padding.z), size.y - (padding.y + padding.w));
 
+	contentSize = 0.f;
+
 	for(int a=0; a<numChildren; ++a)
 	{
 		HKWidget *pWidget = GetChild(a);
@@ -135,28 +161,64 @@ void HKWidgetListbox::ArrangeChildren()
 		MFVector tPos = pPos + MakeVector(cMargin.x, cMargin.y);
 		MFVector tSize = MFMax(pSize - MakeVector(cMargin.x + cMargin.z, cMargin.y + cMargin.w), MFVector::zero);
 
-		MFVector newSize = cSize;
-
 		if(orientation == Horizontal)
 		{
-			pPos.x += cSize.x + cMargin.x + cMargin.z;
+			float itemSize = cSize.x + cMargin.x + cMargin.z;
+			contentSize += itemSize;
+			pPos.x += itemSize;
 			pWidget->SetPosition(tPos);
-			newSize.y = tSize.y;
+			pWidget->SetHeight(tSize.y);
 		}
 		else
 		{
-			pPos.y += cSize.y + cMargin.y + cMargin.w;
+			float itemSize = cSize.y + cMargin.y + cMargin.w;
+			contentSize += itemSize;
+			pPos.y += itemSize;
 			pWidget->SetPosition(tPos);
-			newSize.x = tSize.x;
+			pWidget->SetWidth(tSize.x);
 		}
-
-		ResizeChild(pWidget, newSize);
 	}
+}
+
+void HKWidgetListbox::SetSelection(int item)
+{
+	if(selection != item)
+	{
+		if(selection > -1)
+			children[selection].pChild->GetRenderer()->SetProperty("background_colour", "0,0,0,0");
+		if(item > -1)
+			children[item].pChild->GetRenderer()->SetProperty("background_colour", "0,0,1,0.75f");
+
+		selection = item;
+
+		HKWidgetEventInfo ev(this);
+		OnSelChanged(*this, ev);
+	}
+}
+
+void HKWidgetListbox::AddView(HKWidget *pView)
+{
+	// it might be better to write a custom ListItem widget here, Frame might be a bit heavy for the purpose...
+	HKWidgetLayoutFrame *pFrame = GetUI().CreateWidget<HKWidgetLayoutFrame>();
+	pFrame->AddChild(pView, true);
+	pFrame->SetClickable(true);
+
+	// make child clickable
+	pFrame->OnDown += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnItemDown);
+	pFrame->OnTap += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnItemClick);
+	pFrame->OnHoverOver += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnItemOver);
+	pFrame->OnHoverOut += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnItemOut);
+
+	AddChild(pFrame, true);
 }
 
 void HKWidgetListbox::Bind(HKListAdapter &adapter)
 {
+	Unbind();
+
 	pAdapter = &adapter;
+
+	// subscribe for list adapter events
 	adapter.onInsertItem += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnInsert);
 	adapter.onRemoveItem += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnRemove);
 	adapter.onTouchItem += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnChange);
@@ -166,44 +228,80 @@ void HKWidgetListbox::Bind(HKListAdapter &adapter)
 	for(int a=0; a<numItems; ++a)
 	{
 		HKWidget *pItem = adapter.GetItemView(a);
-		AddChild(pItem, true);
-
-		// make child clickable
-		//...
-		// subscribe to childs onDown and onClick
-		//... prodice item-click events of some sort
+		AddView(pItem);
 	}
-
-	scrollOffset = 0.f;
 }
 
 void HKWidgetListbox::Unbind()
 {
 	if(pAdapter)
 	{
+		// unsubscribe from adapter
 		pAdapter->onInsertItem -= fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnInsert);
 		pAdapter->onRemoveItem -= fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnRemove);
 		pAdapter->onTouchItem -= fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnChange);
 		pAdapter = NULL;
 	}
 
-	// unsubscribe from child click events
-	//...
+	selection = -1;
+	scrollOffset = 0.f;
 
 	ClearChildren();
 }
 
 void HKWidgetListbox::OnInsert(int position, HKListAdapter &adapter)
 {
-	// insert...
+	SetSelection(-1);
+
+	HKWidget *pView = adapter.GetItemView(position);
+	AddView(pView);
 }
 
 void HKWidgetListbox::OnRemove(int position, HKListAdapter &adapter)
 {
-	// remove...
+	SetSelection(-1);
+
+	RemoveChild(position);
 }
 
 void HKWidgetListbox::OnChange(int position, HKListAdapter &adapter)
 {
-	adapter.UpdateItemView(position, children[position].pChild);
+	adapter.UpdateItemView(position, GetItemView(position));
+}
+
+void HKWidgetListbox::OnItemDown(HKWidget &widget, const HKWidgetEventInfo &ev)
+{
+	// a down stroke should immediately stop any innertial scrolling
+	velocity = 0.f;
+	scrollOffset = MFFloor(scrollOffset);
+
+	if(!(flags & HoverSelect))
+		SetSelection(GetChildIndex(&widget));
+}
+
+void HKWidgetListbox::OnItemClick(HKWidget &widget, const HKWidgetEventInfo &ev)
+{
+	OnClicked(*this, ev);
+}
+
+void HKWidgetListbox::OnItemOver(HKWidget &widget, const HKWidgetEventInfo &ev)
+{
+	if(flags & HoverSelect)
+		SetSelection(GetChildIndex(&widget));
+}
+
+void HKWidgetListbox::OnItemOut(HKWidget &widget, const HKWidgetEventInfo &ev)
+{
+	if(flags & HoverSelect)
+		SetSelection(-1);
+}
+
+int HKWidgetListbox::GetChildIndex(HKWidget *pWidget)
+{
+	for(int a=0; a<children.size(); ++a)
+	{
+		if(children[a].pChild == pWidget)
+			return a;
+	}
+	return -1;
 }

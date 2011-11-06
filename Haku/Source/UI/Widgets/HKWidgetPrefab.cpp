@@ -3,14 +3,14 @@
 #include "UI/Widgets/HKWidgetPrefab.h"
 #include "UI/HKWidgetLoader-XML.h"
 
-HKWidget *HKWidgetPrefab::Create()
+HKWidget *HKWidgetPrefab::Create(HKWidgetType *pType)
 {
-	return new HKWidgetPrefab();
+	return new HKWidgetPrefab(pType);
 }
 
-HKWidgetPrefab::HKWidgetPrefab()
+HKWidgetPrefab::HKWidgetPrefab(HKWidgetType *pType)
+: HKWidgetLayout(pType)
 {
-	pTypeName = "HKWidgetPrefab";
 }
 
 HKWidgetPrefab::~HKWidgetPrefab()

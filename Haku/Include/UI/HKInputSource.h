@@ -89,7 +89,7 @@ public:
 		};
 	};
 
-	typedef HKEvent2<HKInputManager &, EventInfo &> InputEvent;
+	typedef HKEvent2<HKInputManager &, const EventInfo &> InputEvent;
 
 	HKInputManager();
 	~HKInputManager();

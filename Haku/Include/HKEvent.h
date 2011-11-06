@@ -12,7 +12,7 @@ struct HKEventInfo
 	void *pUserData;
 };
 
-typedef fastdelegate::FastDelegate2<void *, HKEventInfo *> HKEventDelegate;
+typedef fastdelegate::FastDelegate2<void *, const HKEventInfo *> HKEventDelegate;
 
 class HKEventBase
 {
@@ -40,7 +40,7 @@ class HKEvent : public HKEventBase
 {
 public:
 	// C# style operators
-	inline void operator () (void *pSender, HKEventInfo *pInfo)
+	inline void operator () (void *pSender, const HKEventInfo *pInfo)
 	{
 		for(int i=0; i<numSubscribers; ++i)
 		{

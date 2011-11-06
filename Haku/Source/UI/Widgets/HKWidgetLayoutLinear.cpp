@@ -9,16 +9,15 @@ const EnumKeypair HKWidgetLayoutLinear::sOrientationKeys[] =
 	{ NULL, 0 }
 };
 
-HKWidget *HKWidgetLayoutLinear::Create()
+HKWidget *HKWidgetLayoutLinear::Create(HKWidgetType *pType)
 {
-	return new HKWidgetLayoutLinear();
+	return new HKWidgetLayoutLinear(pType);
 }
 
 
-HKWidgetLayoutLinear::HKWidgetLayoutLinear()
+HKWidgetLayoutLinear::HKWidgetLayoutLinear(HKWidgetType *pType)
+: HKWidgetLayout(pType)
 {
-	pTypeName = "HKWidgetLayoutLinear";
-
 	orientation = Horizontal;
 }
 

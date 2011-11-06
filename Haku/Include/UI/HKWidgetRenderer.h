@@ -2,13 +2,19 @@
 #if !defined(_HKWIDGET_RENDERER_H)
 #define _HKWIDGET_RENDERER_H
 
+#include "HKFactory.h"
+
+class HKWidgetRenderer;
+typedef HKFactory<HKWidgetRenderer> HKWidgetRendererFactory;
+typedef HKWidgetRendererFactory::FactoryType HKWidgetRendererType;
+
 class HKWidget;
 struct MFMaterial;
 
 class HKWidgetRenderer
 {
 public:
-	static HKWidgetRenderer *Create();
+	static HKWidgetRenderer *Create(HKWidgetRendererType *pType);
 
 	HKWidgetRenderer();
 	virtual ~HKWidgetRenderer();

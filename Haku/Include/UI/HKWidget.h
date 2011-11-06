@@ -5,6 +5,11 @@
 #include "HKWidgetEvent.h"
 #include "HKWidgetRenderer.h"
 #include "HKInputSource.h"
+#include "HKFactory.h"
+
+class HKWidget;
+typedef HKFactory<HKWidget> HKWidgetFactory;
+typedef HKWidgetFactory::FactoryType HKWidgetType;
 
 class HKUserInterface;
 
@@ -62,20 +67,26 @@ public:
 		Gone
 	};
 
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Widget"; }
 
-	HKWidget();
+	HKWidget(HKWidgetType *pType);
 	virtual ~HKWidget();
 
 	HKUserInterface &GetUI() const;
 
 	void SetRenderer(HKWidgetRenderer *pRenderer);
+	HKWidgetRenderer *GetRenderer() const { return pRenderer; }
+
+	const char *GetTypeName() const { return pType->typeName; }
+	bool IsType(const char *pType) const;
 
 	// support widget hierarchy
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
 
 	HKWidget *FindChild(const char *pName);
+	template<typename T> T *FindChild(const char *pName);
 
 	HKWidget *GetParent() const { return pParent; }
 
@@ -85,7 +96,6 @@ public:
 
 	// HKWidget accessor methods
 	MFString GetID() const { return id; }
-	const char *GetTypeName() const { return pTypeName; }
 
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
 
@@ -169,7 +179,7 @@ protected:
 
 	MFString id;
 
-	const char *pTypeName;
+	HKWidgetType *pType;
 
 	Visibility visible;
 	bool bEnabled;
@@ -195,10 +205,23 @@ protected:
 	void UpdateHeight(float height) { MFVector newSize = GetSize(); newSize.y = height; Resize(newSize); }
 
 	virtual HKWidget *IntersectWidget(const MFVector &pos, const MFVector &dir, MFVector *pLocalPos);	// test for ray intersecting the widget
-	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+	virtual bool InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
 
 	static const EnumKeypair sJustifyKeys[];
 	static const EnumKeypair sVisibilityKeys[];
 };
+
+template<typename T>
+inline T *HKWidget::FindChild(const char *pName)
+{
+	HKWidget *pWidget = FindChild(pName);
+
+	bool bOfType = pWidget->IsType(T::TypeName());
+	MFDebug_Assert(bOfType, MFStr("Widget id='%s' is not of expected type '%s'! (%s)", pName, T::TypeName(), pWidget->GetTypeName()));
+
+	if(!bOfType)
+		return NULL;
+	return (T*)pWidget;
+}
 
 #endif

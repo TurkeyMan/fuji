@@ -35,9 +35,9 @@ const EnumKeypair HKWidget::sVisibilityKeys[] =
 	{ NULL, 0 }
 };
 
-HKWidget::HKWidget()
+HKWidget::HKWidget(HKWidgetType *_pType)
 {
-	pTypeName = "HKWidget";
+	pType = _pType;
 
 	pos = MFVector::zero;
 	size = MFVector::zero;
@@ -72,9 +72,9 @@ HKWidget::~HKWidget()
 	}
 }
 
-HKWidget *HKWidget::Create()
+HKWidget *HKWidget::Create(HKWidgetType *pType)
 {
-	return new HKWidget();
+	return new HKWidget(pType);
 }
 
 void HKWidget::Update()
@@ -138,6 +138,18 @@ void HKWidget::SetRenderer(HKWidgetRenderer *pRenderer)
 HKUserInterface &HKWidget::GetUI() const
 {
 	return HKUserInterface::Get();
+}
+
+bool HKWidget::IsType(const char *_pType) const
+{
+	HKWidgetType *pT = pType;
+	while(pT)
+	{
+		if(!MFString_Compare(_pType, pType->typeName))
+			return true;
+		pT = pT->pParent;
+	}
+	return false;
 }
 
 int HKWidget::GetNumChildren() const
@@ -227,10 +239,15 @@ MFString HKWidget::GetProperty(const char *pProperty)
 
 HKWidget *HKWidget::FindChild(const char *pName)
 {
-	if(id.EqualsInsensitive(pName))
-		return this;
-
 	int numChildren = GetNumChildren();
+
+	for(int a=0; a<numChildren; ++a)
+	{
+		HKWidget *pChild = GetChild(a);
+		if(pChild->GetID().EqualsInsensitive(pName))
+			return pChild;
+	}
+
 	for(int a=0; a<numChildren; ++a)
 	{
 		HKWidget *pChild = GetChild(a);
@@ -463,7 +480,7 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 	return NULL;
 }
 
-bool HKWidget::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
+bool HKWidget::InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev)
 {
 	// try and handle the input event in some standard ways...
 	switch(ev.ev)
@@ -666,9 +683,9 @@ MFVector HKWidget_GetColourFromString(MFString value)
 	else if(value.EqualsInsensitive("grey"))
 		return MFVector::grey;
 	else if(value.EqualsInsensitive("lightgrey"))
-		return MFVector::yellow;
+		return MFVector::lightgrey;
 	else if(value.EqualsInsensitive("darkgrey"))
-		return MFVector::yellow;
+		return MFVector::darkgrey;
 
 	float f[4] = { 0.f, 0.f, 0.f, 1.f };
 

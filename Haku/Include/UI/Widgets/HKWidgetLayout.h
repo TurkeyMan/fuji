@@ -15,7 +15,7 @@ public:
 		FitContentHorizontal = 2,
 	};
 
-	HKWidgetLayout();
+	HKWidgetLayout(HKWidgetType *pType);
 	virtual ~HKWidgetLayout();
 
 	int AddChild(HKWidget *pChild, bool bOwnChild = false);
@@ -46,7 +46,7 @@ protected:
 
 	MFArray<Child> children;
 
-	void OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev);
+	void OnLayoutDirty(HKWidget &child, const HKWidgetEventInfo &ev);
 
 	virtual void ArrangeChildren() = 0;
 	void ResizeChild(HKWidget *pChild, const MFVector &newSize) { pChild->Resize(newSize); }

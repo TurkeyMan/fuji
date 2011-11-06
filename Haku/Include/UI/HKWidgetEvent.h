@@ -20,7 +20,7 @@ struct HKWidgetEventInfo
 	void *pUserData;
 };
 
-typedef HKEvent2<HKWidget &, HKWidgetEventInfo &> HKWidgetEvent;
+typedef HKEvent2<HKWidget &, const HKWidgetEventInfo &> HKWidgetEvent;
 
 struct HKWidgetGeneralEvent : public HKWidgetEventInfo
 {

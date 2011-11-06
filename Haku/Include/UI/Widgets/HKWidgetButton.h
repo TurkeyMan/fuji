@@ -7,7 +7,8 @@
 class HKWidgetButton : public HKWidgetLabel
 {
 public:
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Button"; }
 
 	enum ButtonFlags
 	{
@@ -15,7 +16,7 @@ public:
 		BF_StateButton = 0x2
 	};
 
-	HKWidgetButton();
+	HKWidgetButton(HKWidgetType *pType);
 	virtual	~HKWidgetButton();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);
@@ -37,9 +38,9 @@ protected:
 	bool bPressed;
 	bool bState;
 
-	void ButtonDown(HKWidget &widget, HKWidgetEventInfo &ev);
-	void ButtonUp(HKWidget &widget, HKWidgetEventInfo &ev);
-	void Hover(HKWidget &widget, HKWidgetEventInfo &ev);
+	void ButtonDown(HKWidget &widget, const HKWidgetEventInfo &ev);
+	void ButtonUp(HKWidget &widget, const HKWidgetEventInfo &ev);
+	void Hover(HKWidget &widget, const HKWidgetEventInfo &ev);
 
 	static const EnumKeypair sButtonFlagKeys[];
 };
@@ -47,7 +48,7 @@ protected:
 class HKWidgetRendererButton : public HKWidgetRenderer
 {
 public:
-	static HKWidgetRenderer *Create();
+	static HKWidgetRenderer *Create(HKWidgetRendererType *pType);
 protected:
 	virtual void Render(const HKWidget &widget, const MFMatrix &worldTransform);
 };

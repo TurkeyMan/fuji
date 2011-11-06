@@ -4,16 +4,15 @@
 
 #include "MFFont.h"
 
-HKWidget *HKWidgetLabel::Create()
+HKWidget *HKWidgetLabel::Create(HKWidgetType *pType)
 {
-	return new HKWidgetLabel();
+	return new HKWidgetLabel(pType);
 }
 
 
-HKWidgetLabel::HKWidgetLabel()
+HKWidgetLabel::HKWidgetLabel(HKWidgetType *pType)
+: HKWidget(pType)
 {
-	pTypeName = "HKWidgetLabel";
-
 	textColour = MFVector::black;
 
 	pFont = MFFont_GetDebugFont();
@@ -23,6 +22,7 @@ HKWidgetLabel::HKWidgetLabel()
 
 	bAutoTextHeight = true;
 	textHeight = MFFont_GetFontHeight(pFont);
+	shadowDepth = 0.f;
 
 	if(bAutoHeight)
 		UpdateHeight(textHeight);
@@ -107,14 +107,14 @@ void HKWidgetLabel::AdjustSize()
 			if(bAutoWidth)
 				newSize.x = 0.f;
 			if(bAutoHeight)
-				newSize.y = 0.f;
+				newSize.y = textHeight;
 		}
 
 		Resize(newSize);
 	}
 }
 
-HKWidgetRenderer *HKWidgetRendererLabel::Create()
+HKWidgetRenderer *HKWidgetRendererLabel::Create(HKWidgetRendererType *pType)
 {
 	return new HKWidgetRendererLabel();
 }

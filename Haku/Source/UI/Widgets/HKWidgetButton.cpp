@@ -9,16 +9,15 @@ const EnumKeypair HKWidgetButton::sButtonFlagKeys[] =
 	{ NULL, 0 }
 };
 
-HKWidget *HKWidgetButton::Create()
+HKWidget *HKWidgetButton::Create(HKWidgetType *pType)
 {
-	return new HKWidgetButton();
+	return new HKWidgetButton(pType);
 }
 
 
-HKWidgetButton::HKWidgetButton()
+HKWidgetButton::HKWidgetButton(HKWidgetType *pType)
+: HKWidgetLabel(pType)
 {
-	pTypeName = "HKWidgetButton";
-
 	buttonFlags = 0;
 
 	bClickable = true;
@@ -62,8 +61,11 @@ MFString HKWidgetButton::GetProperty(const char *pProperty)
 	return HKWidgetLabel::GetProperty(pProperty);
 }
 
-void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
+void HKWidgetButton::ButtonDown(HKWidget &sender, const HKWidgetEventInfo &ev)
 {
+	if(!bEnabled)
+		return;
+
 	HKWidgetInputEvent down = (HKWidgetInputEvent&)ev;
 
 	if(buttonFlags & BF_TriggerOnDown)
@@ -83,13 +85,16 @@ void HKWidgetButton::ButtonDown(HKWidget &sender, HKWidgetEventInfo &ev)
 	}
 }
 
-void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo &ev)
+void HKWidgetButton::ButtonUp(HKWidget &sender, const HKWidgetEventInfo &ev)
 {
+	if(!bEnabled)
+		return;
+
 	HKWidgetInputEvent &up = (HKWidgetInputEvent&)ev;
 
 	bDown = false;
 
-	HKUserInterface::Get().SetFocus(up.pSource, NULL);
+	GetUI().SetFocus(up.pSource, NULL);
 
 	if(bPressed)
 	{
@@ -103,8 +108,11 @@ void HKWidgetButton::ButtonUp(HKWidget &sender, HKWidgetEventInfo &ev)
 	}
 }
 
-void HKWidgetButton::Hover(HKWidget &sender, HKWidgetEventInfo &ev)
+void HKWidgetButton::Hover(HKWidget &sender, const HKWidgetEventInfo &ev)
 {
+	if(!bEnabled)
+		return;
+
 	HKWidgetMoveEvent &hover = (HKWidgetMoveEvent&)ev;
 
 	if(bDown)
@@ -118,7 +126,7 @@ void HKWidgetButton::Hover(HKWidget &sender, HKWidgetEventInfo &ev)
 }
 
 
-HKWidgetRenderer *HKWidgetRendererButton::Create()
+HKWidgetRenderer *HKWidgetRendererButton::Create(HKWidgetRendererType *pType)
 {
 	return new HKWidgetRendererButton();
 }

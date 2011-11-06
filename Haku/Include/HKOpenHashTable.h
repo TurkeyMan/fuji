@@ -18,95 +18,36 @@ private:
 	};
 
 public:
+	typedef T* Iterator;
+
 	void Init(int _tableSize, int maxItems, int growItems = 0);
 	void Deinit();
 
-	T& operator[](MFString key) const		{ return Get(key.GetHash()); }
-	T& operator[](const char *pKey) const	{ return Get(MFUtil_HashString(pKey)); }
+	T& operator[](MFString key) const		{ return *Get(key.GetHash()); }
+	T& operator[](const char *pKey) const	{ return *Get(MFUtil_HashString(pKey)); }
 
-	T& Get(uint32 hash) const;
-	T& Get(MFString key) const				{ return Get(key.GetHash()); }
-	T& Get(const char *pKey) const			{ return Get(MFUtil_HashString(pKey)); }
+	Iterator Get(uint32 hash) const;
+	Iterator Get(MFString key) const		{ return Get(key.GetHash()); }
+	Iterator Get(const char *pKey) const	{ return Get(MFUtil_HashString(pKey)); }
 
 	T& Create(uint32 hash);
 	T& Create(T& item, MFString key)		{ return Create(key.GetHash()); }
 	T& Create(T& item, const char *pKey)	{ return Create(MFUtil_HashString(pKey)); }
 
-	T& Add(uint32 hash, T& item);
-	T& Add(MFString key, T& item)			{ return Add(key.GetHash(), item); }
-	T& Add(const char *pKey, T& item)		{ return Add(MFUtil_HashString(pKey), item); }
+	T& Add(uint32 hash, const T& item);
+	T& Add(MFString key, const T& item)		{ return Add(key.GetHash(), item); }
+	T& Add(const char *pKey, const T& item)	{ return Add(MFUtil_HashString(pKey), item); }
 
 	void Destroy(uint32 hash);
 	void Destroy(MFString key)				{ Destroy(key.GetHash()); }
 	void Destroy(const char *pKey)			{ Destroy(MFUtil_HashString(pKey)); }
 
-	void Destroy(T& item);
+	void Destroy(const T& item);
 
-/*
-	T* First() const
-	{
-		if(!itemCount)
-			return NULL;
+	Iterator First() const;
+	Iterator Next(Iterator pI) const;
 
-		for(int a=0; a<tableSize; ++a)
-		{
-			if(ppItems[a])
-				return ppItems[a]->pItem;
-		}
-		return NULL;
-	}
-
-	T* Next(T *pItem) const
-	{
-		if(!pItem)
-			return First();
-
-		uint32 i = GetTableIndex(pItem->GetName().CStr());
-		HashItem *pTemp = ppItems[i];
-
-		while(pTemp && pTemp->pItem != pItem)
-			pTemp = pTemp->pNext;
-
-		if(!pTemp)
-			return NULL;
-		else if(pTemp->pNext)
-			return pTemp->pNext->pItem;
-		else
-		{
-			for(int a=i+1; a<tableSize; ++a)
-			{
-				if(ppItems[a])
-					return ppItems[a]->pItem;
-			}
-		}
-		return NULL;
-	}
-
-	T* NextMatch(T *pItem) const
-	{
-		if(!pItem)
-			return NULL;
-
-		uint32 i = GetTableIndex(pItem->GetName().CStr());
-		HashItem *pTemp = ppItems[i];
-
-		while(pTemp && pTemp->pItem != pItem)
-			pTemp = pTemp->pNext;
-
-		if(pTemp)
-		{
-			pTemp = pTemp->pNext;
-			while(pTemp)
-			{
-				if(pTemp->pItem->GetName() == pItem->GetName())
-					return pTemp->pItem;
-				pTemp = pTemp->pNext;
-			}
-		}
-
-		return NULL;
-	}
-*/
+	Iterator NextMatch(Iterator pI) const;
 
 protected:
 	MFObjectPool itemPool;
@@ -147,7 +88,7 @@ inline void HKOpenHashTable<T>::Deinit()
 }
 
 template <typename T>
-inline T& HKOpenHashTable<T>::Get(uint32 hash) const
+inline typename HKOpenHashTable<T>::Iterator HKOpenHashTable<T>::Get(uint32 hash) const
 {
 	uint32 i = GetTableIndex(hash);
 	HashItem *pItem = ppItems[i];
@@ -155,7 +96,7 @@ inline T& HKOpenHashTable<T>::Get(uint32 hash) const
 	while(pItem && pItem->hash != hash)
 		pItem = pItem->pNext;
 
-	return pItem ? pItem->item : *(T*)NULL;
+	return pItem ? &pItem->item : (Iterator)NULL;
 }
 
 template <typename T>
@@ -176,7 +117,7 @@ inline T& HKOpenHashTable<T>::Create(uint32 hash)
 }
 
 template <typename T>
-inline T& HKOpenHashTable<T>::Add(uint32 hash, T& item)
+inline T& HKOpenHashTable<T>::Add(uint32 hash, const T& item)
 {
 	T& newItem = Create(hash);
 	newItem = item;
@@ -197,7 +138,7 @@ inline void HKOpenHashTable<T>::Destroy(uint32 hash)
 	}
 	else
 	{
-		while(pTemp->pNext && MFString_CaseCmp(pTemp->pName, pName))
+		while(pTemp->pNext && pTemp->hash != hash)
 			pTemp = pTemp->pNext;
 		if(pTemp->pNext)
 		{
@@ -206,19 +147,16 @@ inline void HKOpenHashTable<T>::Destroy(uint32 hash)
 		}
 	}
 
-	T *pItem = pDel->pItem;
 	if(pDel)
 	{
 		pDel->item.~T();
 		itemPool.Free(pDel);
 		--itemCount;
 	}
-
-	return pItem;
 }
 
 template <typename T>
-inline void HKOpenHashTable<T>::Destroy(T& item)
+inline void HKOpenHashTable<T>::Destroy(const T& item)
 {
 	HashItem *pDel = NULL;
 	for(int a=0; a<tableSize; ++a)
@@ -249,6 +187,75 @@ inline void HKOpenHashTable<T>::Destroy(T& item)
 		itemPool.Free(pDel);
 		--itemCount;
 	}
+}
+
+template <typename T>
+inline typename HKOpenHashTable<T>::Iterator HKOpenHashTable<T>::First() const
+{
+	if(!itemCount)
+		return NULL;
+
+	for(int a=0; a<tableSize; ++a)
+	{
+		if(ppItems[a])
+			return &ppItems[a]->item;
+	}
+	return NULL;
+}
+
+template <typename T>
+inline typename HKOpenHashTable<T>::Iterator HKOpenHashTable<T>::Next(Iterator pItem) const
+{
+	if(!pItem)
+		return First();
+
+	HashItem *pI = (HashItem*)pItem;
+	uint32 i = GetTableIndex(pI->hash);
+	HashItem *pTemp = ppItems[i];
+
+	while(pTemp && &pTemp->item != pItem)
+		pTemp = pTemp->pNext;
+
+	if(!pTemp)
+		return NULL;
+	else if(pTemp->pNext)
+		return &pTemp->pNext->item;
+	else
+	{
+		for(int a=i+1; a<tableSize; ++a)
+		{
+			if(ppItems[a])
+				return &ppItems[a]->item;
+		}
+	}
+	return NULL;
+}
+
+template <typename T>
+inline typename HKOpenHashTable<T>::Iterator HKOpenHashTable<T>::NextMatch(Iterator pItem) const
+{
+	if(pItem == NULL)
+		return NULL;
+
+	HashItem *pI = (HashItem*)pItem;
+	uint32 i = GetTableIndex(pI->hash);
+	HashItem *pTemp = ppItems[i];
+
+	while(pTemp && &pTemp->item != pItem)
+		pTemp = pTemp->pNext;
+
+	if(pTemp)
+	{
+		pTemp = pTemp->pNext;
+		while(pTemp)
+		{
+			if(pTemp->hash == pI->hash)
+				return &pTemp->item;
+			pTemp = pTemp->pNext;
+		}
+	}
+
+	return NULL;
 }
 
 #endif

@@ -264,7 +264,13 @@ void HKInputManager::Update()
 						float distX = pos.x - contacts[a].downX;
 						float distY = pos.y - contacts[a].downY;
 						if(MFSqrt(distX*distX + distY*distY) >= dragThreshold)
+						{
 							contacts[a].bDrag = true;
+
+							// the first drag needs to compensate for the drag threshold
+							info.hover.deltaX = pos.x - contacts[a].downX;
+							info.hover.deltaY = pos.y - contacts[a].downY;
+						}
 					}
 
 					if(contacts[a].bDrag && contacts[a].bState)
@@ -341,6 +347,8 @@ void HKInputManager::Update()
 				if(!contacts[a].bDrag && MFSqrt(distX*distX + distY*distY) >= dragThreshold)
 				{
 					contacts[a].bDrag = true;
+
+					// the first drag needs to compensate for the drag threshold
 					info.hover.deltaX = pos.x - contacts[a].downX;
 					info.hover.deltaY = pos.y - contacts[a].downY;
 				}

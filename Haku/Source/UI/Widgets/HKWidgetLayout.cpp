@@ -10,10 +10,9 @@ const EnumKeypair HKWidgetLayout::sFirFlagsKeys[] =
 	{ NULL, 0 }
 };
 
-HKWidgetLayout::HKWidgetLayout()
+HKWidgetLayout::HKWidgetLayout(HKWidgetType *pType)
+: HKWidget(pType)
 {
-	pTypeName = "HKWidgetLayout";
-
 	OnResize += fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
 	padding = MFVector::zero;
@@ -48,10 +47,19 @@ int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 
 void HKWidgetLayout::RemoveChild(int index)
 {
-	MFDebug_Assert(false, "Need to remove child from the list");
+	children[index].pChild->OnLayoutChanged -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
-//	children[index].pChild->OnLayoutChanged -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
-//	ArrangeChildren()
+	if(children[index].bOwnChild)
+		delete children[index].pChild;
+
+	if(index == children.size() - 1)
+		children.pop();
+	else
+	{
+		MFDebug_Assert(false, "Need to remove child from the list");
+	}
+
+	ArrangeChildren();
 }
 
 void HKWidgetLayout::ClearChildren()
@@ -116,7 +124,7 @@ void HKWidgetLayout::SetFitFlags(uint32 fitFlags)
 	}
 }
 
-void HKWidgetLayout::OnLayoutDirty(HKWidget &child, HKWidgetEventInfo &ev)
+void HKWidgetLayout::OnLayoutDirty(HKWidget &child, const HKWidgetEventInfo &ev)
 {
 	// we may need to rearrange the children
 	ArrangeChildren();

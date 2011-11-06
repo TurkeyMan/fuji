@@ -9,9 +9,10 @@
 class HKWidgetLabel : public HKWidget
 {
 public:
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Label"; }
 
-	HKWidgetLabel();
+	HKWidgetLabel(HKWidgetType *pType);
 	virtual ~HKWidgetLabel();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);
@@ -55,7 +56,7 @@ protected:
 class HKWidgetRendererLabel : public HKWidgetRenderer
 {
 public:
-	static HKWidgetRenderer *Create();
+	static HKWidgetRenderer *Create(HKWidgetRendererType *pType);
 protected:
 	virtual void Render(const HKWidget &widget, const MFMatrix &worldTransform);
 };

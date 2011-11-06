@@ -6,9 +6,10 @@
 class HKWidgetPrefab : public HKWidgetLayout
 {
 public:
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Prefab"; }
 
-	HKWidgetPrefab();
+	HKWidgetPrefab(HKWidgetType *pType);
 	virtual ~HKWidgetPrefab();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);

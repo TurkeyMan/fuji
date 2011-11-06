@@ -6,9 +6,10 @@
 class HKWidgetLayoutFrame : public HKWidgetLayout
 {
 public:
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Frame"; }
 
-	HKWidgetLayoutFrame();
+	HKWidgetLayoutFrame(HKWidgetType *pType);
 	virtual ~HKWidgetLayoutFrame();
 
 protected:

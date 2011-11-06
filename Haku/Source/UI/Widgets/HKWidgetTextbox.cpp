@@ -14,17 +14,16 @@ const EnumKeypair HKWidgetTextbox::sTypeStrings[] =
 
 float HKWidgetTextbox::blinkTime = 0.4f;
 
-HKWidget *HKWidgetTextbox::Create()
+HKWidget *HKWidgetTextbox::Create(HKWidgetType *pType)
 {
-	return new HKWidgetTextbox();
+	return new HKWidgetTextbox(pType);
 }
 
 
-HKWidgetTextbox::HKWidgetTextbox()
+HKWidgetTextbox::HKWidgetTextbox(HKWidgetType *pType)
+: HKWidget(pType)
 {
 	stringLogic.SetChangeCallback(fastdelegate::MakeDelegate(this, &HKWidgetTextbox::StringChangeCallback));
-
-	pTypeName = "HKWidgetTextbox";
 
 	pFocusKeyboard = NULL;
 
@@ -58,7 +57,7 @@ void HKWidgetTextbox::Update()
 		stringLogic.Update();
 }
 
-bool HKWidgetTextbox::InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev)
+bool HKWidgetTextbox::InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev)
 {
 	// try and handle the input event in some standard ways...
 	switch(ev.ev)
@@ -209,7 +208,7 @@ void HKWidgetTextbox::UpdateCursorPos(float x, bool bUpdateSelection)
 #include "MFPrimitive.h"
 #include "MFSystem.h"
 
-HKWidgetRenderer *HKWidgetRendererTextbox::Create()
+HKWidgetRenderer *HKWidgetRendererTextbox::Create(HKWidgetRendererType *pType)
 {
 	return new HKWidgetRendererTextbox();
 }

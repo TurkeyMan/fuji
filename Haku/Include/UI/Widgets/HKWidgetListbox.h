@@ -3,48 +3,7 @@
 #define _HKWIDGET_LISTBOX_H
 
 #include "UI/Widgets/HKWidgetLayout.h"
-#include "HKDynamicArray.h"
-
-class HKListAdapter
-{
-public:
-	typedef HKEvent2<int, HKListAdapter&> HKListAdapterEvent;
-
-	HKListAdapter() {}
-	virtual ~HKListAdapter() {}
-
-	virtual int GetNumItems() = 0;
-
-	virtual HKWidget *GetItemView(int item) = 0;
-	virtual void UpdateItemView(int item, HKWidget *pLayout) = 0;
-
-	HKListAdapterEvent onInsertItem;
-	HKListAdapterEvent onRemoveItem;
-	HKListAdapterEvent onTouchItem;
-};
-
-template<class T>
-class HKArrayAdapter : public HKListAdapter
-{
-	HKArrayAdapter(HKDynamicArray<T> &_array) : array(_array)
-	{
-		array.onInsert += onInsertItem.GetDelegate();
-		array.onRemove += onRemoveItem.GetDelegate();
-		array.onChange += onTouchItem.GetDelegate();
-	}
-
-	virtual ~HKArrayAdapter()
-	{
-		array.onInsert -= onInsertItem.GetDelegate();
-		array.onRemove -= onRemoveItem.GetDelegate();
-		array.onChange -= onTouchItem.GetDelegate();
-	}
-
-	virtual int GetNumItems() { return array.length(); };
-
-protected:
-	HKDynamicArray<T> &array;
-};
+#include "UI/HKListAdapter.h"
 
 class HKWidgetListbox : public HKWidgetLayout
 {
@@ -55,24 +14,37 @@ public:
 		Vertical
 	};
 
-	static HKWidget *Create();
+	enum Flags
+	{
+		HoverSelect = 1
+	};
 
-	HKWidgetListbox();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Listbox"; }
+
+	HKWidgetListbox(HKWidgetType *pType);
 	virtual ~HKWidgetListbox();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);
 	virtual MFString GetProperty(const char *pProperty);
 
 	Orientation GetOrientation() const { return orientation; }
+	int GetSelection() { return selection; }
 
 	void SetOrientation(Orientation orientation) { this->orientation = orientation; }
+	void SetFlags(uint32 flags) { this->flags = flags; }
+	void SetSelection(int item);
 
 	void Bind(HKListAdapter &adapter);
 	void Unbind();
 
 	HKListAdapter *GetAdapter() const { return pAdapter; }
 
+	int GetNumItems() const { return pAdapter ? pAdapter->GetNumItems() : 0; }
+	HKWidget *GetItemView(int item) const { return children[item].pChild->GetChild(0); }
+
 	HKWidgetEvent OnSelChanged;
+	HKWidgetEvent OnClicked;
 
 protected:
 	Orientation orientation;
@@ -81,21 +53,31 @@ protected:
 	HKWidgetLayout *pChildren;
 
 	int selection;
-	bool bHoverSelect;
 
 	float contentSize;
 	float scrollOffset, prevScrollOffset;
 	float velocity;
 
+	uint32 flags;
+
 	bool bDragging;
 
+	void AddView(HKWidget *pView);
+
 	virtual void Update();
-	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+	virtual bool InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
 	virtual void ArrangeChildren();
 
 	void OnInsert(int position, HKListAdapter &adapter);
 	void OnRemove(int position, HKListAdapter &adapter);
 	void OnChange(int position, HKListAdapter &adapter);
+
+	void OnItemDown(HKWidget &widget, const HKWidgetEventInfo &ev);
+	void OnItemClick(HKWidget &widget, const HKWidgetEventInfo &ev);
+	void OnItemOver(HKWidget &widget, const HKWidgetEventInfo &ev);
+	void OnItemOut(HKWidget &widget, const HKWidgetEventInfo &ev);
+
+	int GetChildIndex(HKWidget *pWidget);
 
 	static const EnumKeypair sOrientationKeys[];
 };

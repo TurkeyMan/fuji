@@ -12,9 +12,10 @@ public:
 		Vertical
 	};
 
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "LinearLayout"; }
 
-	HKWidgetLayoutLinear();
+	HKWidgetLayoutLinear(HKWidgetType *pType);
 	virtual ~HKWidgetLayoutLinear();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);

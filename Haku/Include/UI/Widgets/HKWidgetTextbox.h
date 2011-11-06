@@ -12,9 +12,10 @@ class HKWidgetTextbox : public HKWidget
 {
 	friend class HKWidgetRendererTextbox;
 public:
-	static HKWidget *Create();
+	static HKWidget *Create(HKWidgetType *pType);
+	static const char *TypeName() { return "Textbox"; }
 
-	HKWidgetTextbox();
+	HKWidgetTextbox(HKWidgetType *pType);
 	virtual ~HKWidgetTextbox();
 
 	virtual void SetProperty(const char *pProperty, const char *pValue);
@@ -45,7 +46,7 @@ public:
 
 protected:
 	virtual void Update();
-	virtual bool InputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+	virtual bool InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
 	void StringChangeCallback(const char *pString);
 	void UpdateCursorPos(float x, bool bUpdateSelection);
 
@@ -72,7 +73,7 @@ protected:
 class HKWidgetRendererTextbox : public HKWidgetRenderer
 {
 public:
-	static HKWidgetRenderer *Create();
+	static HKWidgetRenderer *Create(HKWidgetRendererType *pType);
 protected:
 	virtual void Render(const HKWidget &widget, const MFMatrix &worldTransform);
 };

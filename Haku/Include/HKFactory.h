@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_HKFACTORY_H)
 #define _HKFACTORY_H
 
@@ -7,7 +8,8 @@ template <typename T>
 class HKFactory
 {
 public:
-	typedef fastdelegate::FastDelegate0<T*> CreateFunc;
+	struct FactoryType;
+	typedef fastdelegate::FastDelegate1<FactoryType *, T*> CreateFunc;
 
 	struct FactoryType
 	{
@@ -38,7 +40,7 @@ public:
 			{
 				if(ppType)
 					*ppType = pType;
-				return (T*)pType->createFunc();
+				return (T*)pType->createFunc(pType);
 			}
 		}
 

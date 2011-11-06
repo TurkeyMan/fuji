@@ -8,7 +8,7 @@
 #include "MFRenderer.h"
 #include "MFPrimitive.h"
 
-HKWidgetRenderer *HKWidgetRenderer::Create()
+HKWidgetRenderer *HKWidgetRenderer::Create(HKWidgetRendererType *pType)
 {
 	return new HKWidgetRenderer;
 }
@@ -67,8 +67,6 @@ bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
 	else if(!MFString_CaseCmp(pProperty, "background_colour"))
 	{
 		bgColour = HKWidget_GetColourFromString(pValue);
-		if(bgColour.w == 0.f)
-			bgColour.w = 1.f;
 		return true;
 	}
 	return false;

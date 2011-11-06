@@ -2,7 +2,6 @@
 #if !defined(_HKUI_H)
 #define _HKUI_H
 
-#include "HKFactory.h"
 #include "HKWidget.h"
 #include "HKInputSource.h"
 
@@ -12,9 +11,6 @@
 class HKWidgetRenderer;
 class HKWidgetLayoutFrame;
 
-typedef HKFactory<HKWidget> HKWidgetFactory;
-typedef HKFactory<HKWidgetRenderer> HKWidgetRendererFactory;
-
 class HKUserInterface
 {
 public:
@@ -22,10 +18,12 @@ public:
 	static void Deinit();
 
 	static HKWidgetFactory::FactoryType *RegisterWidget(const char *pWidgetType, HKWidgetFactory::CreateFunc createDelegate, HKWidgetFactory::FactoryType *pParent);
+	template <typename T> inline static HKWidgetFactory::FactoryType *RegisterWidget(HKWidgetFactory::FactoryType *pParent) { return RegisterWidget(T::TypeName(), T::Create, pParent); }
 	static HKWidgetRendererFactory::FactoryType *RegisterWidgetRenderer(const char *pWidgetType, HKWidgetRendererFactory::CreateFunc createDelegate, HKWidgetRendererFactory::FactoryType *pParent);
 	static HKWidgetFactory::FactoryType *FindWidgetType(const char *pWidgetType);
 
 	static HKWidget *CreateWidget(const char *pWidgetType);
+	template<typename T> inline static T *CreateWidget() { return (T*)CreateWidget(T::TypeName()); }
 
 	static void RegisterEventHandler(MFString name, HKWidgetEvent::Delegate handler);
 	static HKWidgetEvent::Delegate& GetEventHandler(MFString name);
@@ -58,7 +56,9 @@ protected:
 
 	static HKOpenHashTable<HKWidgetEvent::Delegate> eventHandlerRegistry;
 
-	void OnInputEvent(HKInputManager &manager, HKInputManager::EventInfo &ev);
+	void LocaliseInput(HKInputManager::EventInfo &ev, HKWidget *pWidget, MFVector &localPos);
+
+	void OnInputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
 
 	static MFSystemCallbackFunction pChainResizeCallback;
 	static void ResizeCallback();
