@@ -22,6 +22,7 @@ HKWidgetListbox::HKWidgetListbox(HKWidgetType *pType)
 	orientation = Vertical;
 
 	pAdapter = NULL;
+	pOldFocus = NULL;
 
 	contentSize = 0.f;
 	prevScrollOffset = scrollOffset = 0.f;
@@ -29,12 +30,12 @@ HKWidgetListbox::HKWidgetListbox(HKWidgetType *pType)
 
 	flags = 0;
 
-	padding = MakeVector(2,2,2,2);
+	bDragging = false;
 
 	bDragable = true;
 	bClickable = true;
 
-	bDragging = false;
+	padding = MakeVector(2,2,2,2);
 }
 
 HKWidgetListbox::~HKWidgetListbox()
@@ -107,13 +108,23 @@ bool HKWidgetListbox::InputEvent(HKInputManager &manager, const HKInputManager::
 			// immediately stop the thing from scrolling
 			velocity = 0.f;
 			scrollOffset = MFFloor(scrollOffset);
+
+			// if the down stroke is outside the listbox, we have triggered a non-click
+			MFRect rect = { 0.f, 0.f, size.x, size.y };
+			if(!MFTypes_PointInRect(ev.down.x, ev.down.y, &rect))
+			{
+				HKWidgetSelectEvent sel(this, -1);
+				OnClicked(*this, sel);
+			}
 			break;
 		}
 		case HKInputManager::IE_Up:
 		{
-			bDragging = false;
-
-			GetUI().SetFocus(ev.pSource, NULL);
+			if(bDragging)
+			{
+				bDragging = false;
+				GetUI().SetFocus(ev.pSource, pOldFocus);
+			}
 			break;
 		}
 		case HKInputManager::IE_Drag:
@@ -125,9 +136,11 @@ bool HKWidgetListbox::InputEvent(HKInputManager &manager, const HKInputManager::
 			const float smooth = 0.5f;
 			velocity = velocity*smooth + (delta / MFSystem_TimeDelta())*(1.f-smooth);
 
-			bDragging = true;
-
-			GetUI().SetFocus(ev.pSource, this);
+			if(!bDragging)
+			{
+				bDragging = true;
+				pOldFocus = GetUI().SetFocus(ev.pSource, this);
+			}
 			break;
 		}
 		default:
@@ -180,6 +193,14 @@ void HKWidgetListbox::ArrangeChildren()
 	}
 }
 
+float HKWidgetListbox::GetMaxSize() const
+{
+	if(orientation == Horizontal)
+		return contentSize + padding.x + padding.z;
+	else
+		return contentSize + padding.y + padding.w;
+}
+
 void HKWidgetListbox::SetSelection(int item)
 {
 	if(selection != item)
@@ -191,7 +212,7 @@ void HKWidgetListbox::SetSelection(int item)
 
 		selection = item;
 
-		HKWidgetEventInfo ev(this);
+		HKWidgetSelectEvent ev(this, item);
 		OnSelChanged(*this, ev);
 	}
 }
@@ -202,6 +223,7 @@ void HKWidgetListbox::AddView(HKWidget *pView)
 	HKWidgetLayoutFrame *pFrame = GetUI().CreateWidget<HKWidgetLayoutFrame>();
 	pFrame->AddChild(pView, true);
 	pFrame->SetClickable(true);
+	pFrame->SetHoverable(true);
 
 	// make child clickable
 	pFrame->OnDown += fastdelegate::MakeDelegate(this, &HKWidgetListbox::OnItemDown);
@@ -281,7 +303,8 @@ void HKWidgetListbox::OnItemDown(HKWidget &widget, const HKWidgetEventInfo &ev)
 
 void HKWidgetListbox::OnItemClick(HKWidget &widget, const HKWidgetEventInfo &ev)
 {
-	OnClicked(*this, ev);
+	HKWidgetSelectEvent sel(ev.pSender, GetChildIndex(&widget));
+	OnClicked(*this, sel);
 }
 
 void HKWidgetListbox::OnItemOver(HKWidget &widget, const HKWidgetEventInfo &ev)

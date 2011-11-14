@@ -19,6 +19,7 @@ public:
 	virtual ~HKWidgetLayout();
 
 	int AddChild(HKWidget *pChild, bool bOwnChild = false);
+	void RemoveChild(HKWidget *pChild);
 	void RemoveChild(int index);
 
 	void ClearChildren();

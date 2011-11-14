@@ -12,6 +12,7 @@
 #include "UI/Widgets/HKWidgetPrefab.h"
 #include "UI/Widgets/HKWidgetTextbox.h"
 #include "UI/Widgets/HKWidgetListbox.h"
+#include "UI/Widgets/HKWidgetSelectbox.h"
 
 #include "MFDisplay.h"
 
@@ -36,11 +37,12 @@ void HKUserInterface::Init()
 
 		HKWidgetFactory::FactoryType *pLabel = RegisterWidget<HKWidgetLabel>(pWidget);
 		RegisterWidget<HKWidgetButton>(pLabel);
-		RegisterWidget<HKWidgetLayoutFrame>(pWidget);
+		HKWidgetFactory::FactoryType *pFrame = RegisterWidget<HKWidgetLayoutFrame>(pWidget);
 		RegisterWidget<HKWidgetLayoutLinear>(pWidget);
-		RegisterWidget<HKWidgetPrefab>(pWidget);
+		RegisterWidget<HKWidgetPrefab>(pFrame);
 		RegisterWidget<HKWidgetTextbox>(pWidget);
 		RegisterWidget<HKWidgetListbox>(pWidget);
+		RegisterWidget<HKWidgetSelectbox>(pFrame);
 	}
 
 	if(!pRendererFactory)
@@ -55,6 +57,7 @@ void HKUserInterface::Init()
 		pRendererFactory->RegisterType(HKWidgetPrefab::TypeName(), HKWidgetRenderer::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetTextbox::TypeName(), HKWidgetRendererTextbox::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetListbox::TypeName(), HKWidgetRenderer::Create, pWidget);
+		pRendererFactory->RegisterType(HKWidgetSelectbox::TypeName(), HKWidgetRenderer::Create, pWidget);
 	}
 
 	eventHandlerRegistry.Init(256, 256, 32);
@@ -155,6 +158,11 @@ void HKUserInterface::AddTopLevelWidget(HKWidget *pWidget, bool bOwnWidget)
 	pRoot->AddChild(pWidget, bOwnWidget);
 }
 
+void HKUserInterface::RemoveTopLevelWidget(HKWidget *pWidget)
+{
+	pRoot->RemoveChild(pWidget);
+}
+
 HKWidget *HKUserInterface::SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget)
 {
 	HKWidget *pOld = pFocusList[pSource->sourceID];
@@ -187,25 +195,6 @@ void HKUserInterface::LocaliseInput(HKInputManager::EventInfo &ev, HKWidget *pWi
 void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev)
 {
 	HKWidget *pFocusWidget = pFocusList[ev.pSource->sourceID];
-	if(pFocusWidget)
-	{
-		HKInputManager::EventInfo transformedEv = ev;
-
-		if(ev.pSource->device == IDD_Mouse || ev.pSource->device == IDD_TouchPanel)
-		{
-			// transform the event into local space...
-			MFVector pos = { ev.hover.x, ev.hover.y, 0.f, 1.f };
-			MFVector dir = { 0.f, 0.f, 1.f, 1.f };
-
-			MFVector localPos;
-			pFocusWidget->IntersectWidget(pos, dir, &localPos);
-
-			LocaliseInput(transformedEv, pFocusWidget, localPos);
-		}
-
-		if(pFocusWidget->InputEvent(manager, transformedEv))
-			return;
-	}
 
 	if(ev.pSource->device == IDD_Mouse || ev.pSource->device == IDD_TouchPanel)
 	{
@@ -214,7 +203,18 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager
 		MFVector dir = { 0.f, 0.f, 1.f, 1.f };
 
 		MFVector localPos;
-		HKWidget *pWidget = pRoot->IntersectWidget(pos, dir, &localPos);
+
+		HKWidget *pWidget = NULL;
+		if(pFocusWidget)
+		{
+			pWidget = pFocusWidget->IntersectWidget(pos, dir, &localPos);
+			if(!pWidget)
+				pWidget = pFocusWidget;
+		}
+		else
+		{
+			pWidget = pRoot->IntersectWidget(pos, dir, &localPos);
+		}
 
 		// check if the hover has changed
 		HKWidget *pHover = pHoverList[ev.pSource->sourceID];
@@ -244,6 +244,11 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager
 			if(pWidget->InputEvent(manager, transformedEv))
 				return;
 		}
+	}
+	else if(pFocusWidget)
+	{
+		// non-positional events
+		pFocusWidget->InputEvent(manager, ev);
 	}
 }
 

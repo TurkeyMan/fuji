@@ -633,6 +633,42 @@ inline bool MFString::EqualsInsensitive(const MFString &string) const
 	return MFString_CaseCmp(pData->pMemory, string.pData->pMemory) == 0;
 }
 
+inline bool MFString::BeginsWith(const char *pString) const
+{
+	if(!pString)
+		return true;
+	if(!pData)
+		return (const char *)pData == pString;
+	return MFString_BeginsWith(pData->pMemory, pString);
+}
+
+inline bool MFString::BeginsWith(const MFString &string) const
+{
+	if(!string.pData)
+		return true;
+	if(!pData)
+		return pData == string.pData;
+	return MFString_BeginsWith(pData->pMemory, string.pData->pMemory);
+}
+
+inline bool MFString::EndsWith(const char *pString) const
+{
+	if(!pString)
+		return true;
+	if(!pData)
+		return (const char *)pData == pString;
+	return MFString_EndsWith(pData->pMemory, pString);
+}
+
+inline bool MFString::EndsWith(const MFString &string) const
+{
+	if(!string.pData)
+		return true;
+	if(!pData)
+		return pData == string.pData;
+	return MFString_EndsWith(pData->pMemory, string.pData->pMemory);
+}
+
 inline MFString MFString::Duplicate() const
 {
 	MFString t(*this);

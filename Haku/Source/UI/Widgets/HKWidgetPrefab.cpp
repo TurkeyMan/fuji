@@ -9,7 +9,7 @@ HKWidget *HKWidgetPrefab::Create(HKWidgetType *pType)
 }
 
 HKWidgetPrefab::HKWidgetPrefab(HKWidgetType *pType)
-: HKWidgetLayout(pType)
+: HKWidgetLayoutFrame(pType)
 {
 }
 
@@ -34,6 +34,8 @@ MFString HKWidgetPrefab::GetProperty(const char *pProperty)
 
 void HKWidgetPrefab::LoadPrefab(const char *pPrefab)
 {
+	ClearChildren();
+
 	prefab = pPrefab;
 
 	if(MFString_EndsWith(pPrefab, ".xml"))
@@ -43,14 +45,6 @@ void HKWidgetPrefab::LoadPrefab(const char *pPrefab)
 	}
 	else
 	{
-		//... error?
-	}
-}
-
-void HKWidgetPrefab::ArrangeChildren()
-{
-	for(int a=0; a<children.size(); ++a)
-	{
-		children[a].pChild->SetSize(GetSize());
+		MFDebug_Assert(false, "Unknown prefab format!");
 	}
 }

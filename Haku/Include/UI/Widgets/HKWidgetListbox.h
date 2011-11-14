@@ -28,13 +28,6 @@ public:
 	virtual void SetProperty(const char *pProperty, const char *pValue);
 	virtual MFString GetProperty(const char *pProperty);
 
-	Orientation GetOrientation() const { return orientation; }
-	int GetSelection() { return selection; }
-
-	void SetOrientation(Orientation orientation) { this->orientation = orientation; }
-	void SetFlags(uint32 flags) { this->flags = flags; }
-	void SetSelection(int item);
-
 	void Bind(HKListAdapter &adapter);
 	void Unbind();
 
@@ -43,6 +36,15 @@ public:
 	int GetNumItems() const { return pAdapter ? pAdapter->GetNumItems() : 0; }
 	HKWidget *GetItemView(int item) const { return children[item].pChild->GetChild(0); }
 
+	Orientation GetOrientation() const { return orientation; }
+	int GetSelection() { return selection; }
+
+	float GetMaxSize() const;
+
+	void SetOrientation(Orientation orientation) { this->orientation = orientation; }
+	void SetFlags(uint32 flags) { this->flags = flags; }
+	void SetSelection(int item);
+
 	HKWidgetEvent OnSelChanged;
 	HKWidgetEvent OnClicked;
 
@@ -50,7 +52,7 @@ protected:
 	Orientation orientation;
 
 	HKListAdapter *pAdapter;
-	HKWidgetLayout *pChildren;
+	HKWidget *pOldFocus;
 
 	int selection;
 

@@ -41,24 +41,27 @@ MFString HKWidgetLayoutLinear::GetProperty(const char *pProperty)
 
 void HKWidgetLayoutLinear::ArrangeChildren()
 {
+	bool bFitWidth = bAutoWidth && GetHAlign() != Align_Fill; // fitFlags & FitContentHorizontal
+	bool bFitHeight = bAutoHeight && GetVAlign() != VAlign_Fill; // fitFlags & FitContentVertical
+
 	// early out?
 	int numChildren = GetNumChildren();
 	if(numChildren == 0)
 	{
-		if(bAutoWidth || bAutoHeight)
+		if(bFitWidth || bFitHeight)
 		{
 			// resize the layout
 			MFVector newSize = GetSize();
-			if(bAutoWidth)
+			if(bFitWidth)
 				newSize.x = padding.x + padding.z;
-			if(bAutoHeight)
+			if(bFitHeight)
 				newSize.y = padding.y + padding.w;
 			Resize(newSize);
 		}
 		return;
 	}
 
-	// calculate weight and fix
+	// calculate weight and fit
 	float totalWeight = 0.f;
 	MFVector fit = MakeVector(padding.x + padding.z, padding.y + padding.w);
 	for(int a=0; a<numChildren; ++a)
@@ -71,7 +74,7 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 
 		if(orientation == Horizontal)
 		{
-			if((pWidget->GetLayoutJustification() & 3) == 3) // fill horizontally
+			if(pWidget->GetHAlign() == Align_Fill) // fill horizontally
 				totalWeight += pWidget->GetLayoutWeight();
 			else
 				fit.x += cSize.x;
@@ -80,7 +83,7 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 		}
 		else
 		{
-			if((pWidget->GetLayoutJustification() >> 2) & 3) // fill vertically
+			if(pWidget->GetVAlign() == VAlign_Fill) // fill vertically
 				totalWeight += pWidget->GetLayoutWeight();
 			else
 				fit.y += cSize.y;
@@ -88,9 +91,6 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 			fit.x = MFMax(fit.x, cSize.x + padding.x + padding.z);
 		}
 	}
-
-	bool bFitWidth = bAutoWidth && (layoutJustification & 3) != 3; // fitFlags & FitContentHorizontal
-	bool bFitHeight = bAutoHeight && (layoutJustification >> 2) != 3; // fitFlags & FitContentVertical
 
 	if(bFitWidth || bFitHeight)
 	{
@@ -120,13 +120,14 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 		MFVector tPos = pPos + MakeVector(cMargin.x, cMargin.y);
 		MFVector tSize = MFMax(pSize - MakeVector(cMargin.x + cMargin.z, cMargin.y + cMargin.w), MFVector::zero);
 
-		uint32 justify = pWidget->GetLayoutJustification();
+		Align align = pWidget->GetHAlign();
+		VAlign valign = pWidget->GetVAlign();
 
 		MFVector newSize = cSize;
 
 		if(orientation == Horizontal)
 		{
-			if((justify & 3) == 3) // fill horizontally
+			if(align == Align_Fill) // fill horizontally
 			{
 				// this widget fills available empty space in the parent container
 				newSize.x = slack.x * (pWidget->GetLayoutWeight() / totalWeight);
@@ -138,18 +139,19 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 				pPos.x += cSize.x + cMargin.x + cMargin.z;
 			}
 
-			switch((justify >> 2) & 3)
+			switch(valign)
 			{
-			case 0: // top
+			case VAlign_None:
+			case VAlign_Top:
 				pWidget->SetPosition(tPos);
 				break;
-			case 1: // center
+			case VAlign_Center:
 				pWidget->SetPosition(tPos + MakeVector(0, MFMax(tSize.y - cSize.y, 0.f) * 0.5f));
 				break;
-			case 2: // bottom
+			case VAlign_Bottom:
 				pWidget->SetPosition(tPos + MakeVector(0, MFMax(tSize.y - cSize.y, 0.f)));
 				break;
-			case 3: // fill
+			case VAlign_Fill:
 				pWidget->SetPosition(tPos);
 				newSize.y = tSize.y;
 				break;
@@ -157,7 +159,7 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 		}
 		else
 		{
-			if((justify >> 2) & 3) // fill vertically
+			if(valign == VAlign_Fill) // fill vertically
 			{
 				// this widget fills available empty space in the parent container
 				newSize.y = slack.y * (pWidget->GetLayoutWeight() / totalWeight);
@@ -169,18 +171,19 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 				pPos.y += cSize.y + cMargin.y + cMargin.w;
 			}
 
-			switch(justify & 3)
+			switch(align)
 			{
-			case 0: // left
+			case Align_None:
+			case Align_Left:
 				pWidget->SetPosition(tPos);
 				break;
-			case 1: // center
+			case Align_Center:
 				pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f) * 0.5f, 0));
 				break;
-			case 2: // right
+			case Align_Right:
 				pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f), 0));
 				break;
-			case 3: // fill
+			case Align_Fill:
 				pWidget->SetPosition(tPos);
 				newSize.x = tSize.x;
 				break;

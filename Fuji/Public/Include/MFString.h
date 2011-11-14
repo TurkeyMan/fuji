@@ -580,6 +580,11 @@ public:
 	bool EqualsInsensitive(const char *pString) const;		/**< Case-insensitive 'equal' comparison. */
 	bool EqualsInsensitive(const MFString &string) const;	/**< Case-insensitive 'equal' comparison. */
 
+	bool BeginsWith(const char *pString) const;
+	bool BeginsWith(const MFString &string) const;
+	bool EndsWith(const char *pString) const;
+	bool EndsWith(const MFString &string) const;
+
 	int FindChar(int c, int startOffset = 0) const;
 	int FindCharReverse(int c) const;
 

@@ -45,6 +45,27 @@ int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 	return id;
 }
 
+void HKWidgetLayout::RemoveChild(HKWidget *pChild)
+{
+	int index = -1;
+	for(int a=0; a<children.size(); ++a)
+	{
+		if(children[a].pChild == pChild)
+		{
+			index = a;
+			break;
+		}
+	}
+
+	if(index == -1)
+	{
+		MFDebug_Assert(false, "Child does not exist!");
+		return;
+	}
+
+	RemoveChild(index);
+}
+
 void HKWidgetLayout::RemoveChild(int index)
 {
 	children[index].pChild->OnLayoutChanged -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);

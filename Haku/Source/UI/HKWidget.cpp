@@ -52,6 +52,8 @@ HKWidget::HKWidget(HKWidgetType *_pType)
 	pRenderer = NULL;
 	pParent = NULL;
 
+	pUserData = NULL;
+
 	zDepth = 0;
 
 	visible = Visible;
@@ -59,7 +61,7 @@ HKWidget::HKWidget(HKWidgetType *_pType)
 	bParentEnabled = true;
 
 	bAutoWidth = bAutoHeight = true;
-	bClickable = bDragable = false;
+	bClickable = bDragable = bHoverable = false;
 	bMatrixDirty = bInvMatrixDirty = true;
 }
 
@@ -459,9 +461,13 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 				int numChildren = GetNumChildren();
 				for(int a=numChildren-1; a>=0; --a)
 				{
-					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir, pLocalPos);
+					MFVector childLocal;
+					HKWidget *pChild = GetChild(a)->IntersectWidget(pos, dir, &childLocal);
 					if(pChild)
 					{
+						if(pLocalPos)
+							*pLocalPos = childLocal;
+
 						pIntersect = pChild;
 						break;
 					}
@@ -517,11 +523,15 @@ bool HKWidget::InputEvent(HKInputManager &manager, const HKInputManager::EventIn
 		}
 		case HKInputManager::IE_Hover:
 		{
-			HKWidgetInputActionEvent ie(this, ev.pSource);
-			ie.pos = MakeVector(ev.hover.x, ev.hover.y);
-			ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
-			OnHover(*this, ie);
-			return true;
+			if(bHoverable)
+			{
+				HKWidgetInputActionEvent ie(this, ev.pSource);
+				ie.pos = MakeVector(ev.hover.x, ev.hover.y);
+				ie.delta = MakeVector(ev.hover.deltaX, ev.hover.deltaY);
+				OnHover(*this, ie);
+				return true;
+			}
+			break;
 		}
 		case HKInputManager::IE_Drag:
 		{
@@ -665,6 +675,12 @@ MFVector HKWidget_GetColourFromString(MFString value)
 {
 	if(value.IsEmpty())
 		return MFVector::white;
+
+	if(value.BeginsWith("$") || value.BeginsWith("0x"))
+	{
+		MFDebug_Assert(false, "Hex colours not supported... pester manu!");
+		return MFVector::white;
+	}
 
 	if(value.EqualsInsensitive("black"))
 		return MFVector::black;

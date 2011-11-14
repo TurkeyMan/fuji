@@ -38,6 +38,7 @@ public:
 	void Draw();
 
 	void AddTopLevelWidget(HKWidget *pWidget, bool bOwnWidget);
+	void RemoveTopLevelWidget(HKWidget *pWidget);
 
 	HKWidget *SetFocus(HKInputSource *pSource, HKWidget *pFocusWidget);
 	HKWidget *GetFocus(HKInputSource *pSource) const { return pFocusList[pSource->sourceID]; }

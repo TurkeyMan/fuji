@@ -19,25 +19,25 @@ HKWidgetLayoutFrame::~HKWidgetLayoutFrame()
 
 void HKWidgetLayoutFrame::ArrangeChildren()
 {
+	bool bFitWidth = bAutoWidth && GetHAlign() != Align_Fill; // fitFlags & FitContentHorizontal
+	bool bFitHeight = bAutoHeight && GetVAlign() != VAlign_Fill; // fitFlags & FitContentVertical
+
 	// early out?
 	int numChildren = GetNumChildren();
 	if(numChildren == 0)
 	{
-		if(bAutoWidth || bAutoHeight)
+		if(bFitWidth || bFitHeight)
 		{
 			// resize the layout
 			MFVector newSize = GetSize();
-			if(bAutoWidth)
+			if(bFitWidth)
 				newSize.x = padding.x + padding.z;
-			if(bAutoHeight)
+			if(bFitHeight)
 				newSize.y = padding.y + padding.w;
 			Resize(newSize);
 		}
 		return;
 	}
-
-	bool bFitWidth = bAutoWidth && (layoutJustification & 3) != 3; // fitFlags & FitContentHorizontal
-	bool bFitHeight = bAutoHeight && (layoutJustification >> 2) != 3; // fitFlags & FitContentVertical
 
 	if(bFitWidth || bFitHeight)
 	{

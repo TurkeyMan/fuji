@@ -55,7 +55,6 @@ protected:
 	HKStringEntryLogic stringLogic;
 
 	MFString font;
-
 	MFFont *pFont;
 
 	HKInputSource *pFocusKeyboard;

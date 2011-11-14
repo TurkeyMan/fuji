@@ -36,6 +36,30 @@ class HKWidget
 	friend class HKUserInterface;
 	friend class HKWidgetLayout;
 public:
+	enum Align
+	{
+		Align_None = -1,
+
+		Align_Left = 0,
+		Align_Center,
+		Align_Right,
+		Align_Fill,
+
+		Align_Max
+	};
+
+	enum VAlign
+	{
+		VAlign_None = -1,
+
+		VAlign_Top = 0,
+		VAlign_Center,
+		VAlign_Bottom,
+		VAlign_Fill,
+
+		VAlign_Max
+	};
+
 	enum Justification
 	{
 		TopLeft = 0,
@@ -81,6 +105,9 @@ public:
 	const char *GetTypeName() const { return pType->typeName; }
 	bool IsType(const char *pType) const;
 
+	void SetUserData(void *pUserData) { this->pUserData = pUserData; }
+	void *GetUserData() const { return pUserData; }
+
 	// support widget hierarchy
 	virtual int GetNumChildren() const;
 	virtual HKWidget *GetChild(int index) const;
@@ -117,6 +144,8 @@ public:
 	const MFVector &GetLayoutMargin() const { return layoutMargin; }
 	float GetLayoutWeight() const { return layoutWeight; }
 	Justification GetLayoutJustification() const { return layoutJustification; }
+	Align GetHAlign() const { return layoutJustification == None ? Align_None : (Align)(layoutJustification & 3); }
+	VAlign GetVAlign() const { return layoutJustification == None ? VAlign_None : (VAlign)((layoutJustification >> 2) & 3); } 
 
 	MFVector GetSizeWithMargin() const { return MakeVector(size.x + layoutMargin.x + layoutMargin.z, size.y + layoutMargin.y + layoutMargin.w, size.z, size.w); }
 
@@ -127,6 +156,7 @@ public:
 
 	bool SetClickable(bool bClickable) { bool bOld = this->bClickable; this->bClickable = bClickable; return bOld; }
 	bool SetDragable(bool bDragable) { bool bOld = this->bDragable; this->bDragable = bDragable; return bOld; }
+	bool SetHoverable(bool bHoverable) { bool bOld = this->bHoverable; this->bHoverable = bHoverable; return bOld; }
 
 	void SetPosition(const MFVector &position);
 	void SetSize(const MFVector &size) { bAutoWidth = bAutoHeight = false; Resize(size); }
@@ -174,19 +204,20 @@ protected:
 	MFMatrix matrix;
 	MFMatrix invMatrix;
 
-	HKWidgetRenderer *pRenderer;
+	HKWidgetType *pType;
 	HKWidget *pParent;
+	HKWidgetRenderer *pRenderer;
+
+	void *pUserData;
 
 	MFString id;
-
-	HKWidgetType *pType;
 
 	Visibility visible;
 	bool bEnabled;
 	bool bParentEnabled;	// flagged if the parent is enabled
 
 	bool bAutoWidth, bAutoHeight;
-	bool bClickable, bDragable;
+	bool bClickable, bDragable, bHoverable;
 
 	int zDepth;
 
@@ -215,6 +246,8 @@ template<typename T>
 inline T *HKWidget::FindChild(const char *pName)
 {
 	HKWidget *pWidget = FindChild(pName);
+	if(!pWidget)
+		return NULL;
 
 	bool bOfType = pWidget->IsType(T::TypeName());
 	MFDebug_Assert(bOfType, MFStr("Widget id='%s' is not of expected type '%s'! (%s)", pName, T::TypeName(), pWidget->GetTypeName()));

@@ -138,4 +138,15 @@ struct HKWidgetTextEvent : public HKWidgetEventInfo
 	MFString string;
 };
 
+struct HKWidgetSelectEvent : public HKWidgetEventInfo
+{
+	HKWidgetSelectEvent(HKWidget *pSender, int selection)
+		: HKWidgetEventInfo(pSender)
+	{
+		this->selection = selection;
+	}
+
+	int selection;
+};
+
 #endif

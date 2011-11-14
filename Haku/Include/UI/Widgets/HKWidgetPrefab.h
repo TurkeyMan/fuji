@@ -1,9 +1,9 @@
 #if !defined(_HKWIDGET_PREFAB_H)
 #define _HKWIDGET_PREFAB_H
 
-#include "UI/Widgets/HKWidgetLayout.h"
+#include "UI/Widgets/HKWidgetLayoutFrame.h"
 
-class HKWidgetPrefab : public HKWidgetLayout
+class HKWidgetPrefab : public HKWidgetLayoutFrame
 {
 public:
 	static HKWidget *Create(HKWidgetType *pType);
@@ -19,8 +19,6 @@ public:
 
 protected:
 	MFString prefab;
-
-	virtual void ArrangeChildren();
 };
 
 #endif
