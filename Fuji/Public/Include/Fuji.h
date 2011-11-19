@@ -93,13 +93,12 @@
 		#define MF_PLATFORM WINDOWS
 
 		// detect the architecture
-		#if defined(_WIN64)
+		#if defined(_M_IA64)
 			#define MF_64BIT
-			#if defined(_M_IX86)
-				#define MF_ARCH_ITANIUM
-			#else
-				#define MF_ARCH_X64
-			#endif
+			#define MF_ARCH_ITANIUM
+		#elif defined(_M_X64) || defined(_M_AMD64)
+			#define MF_64BIT
+			#define MF_ARCH_X64
 		#else
 			#define MF_32BIT
 			#define MF_ARCH_X86

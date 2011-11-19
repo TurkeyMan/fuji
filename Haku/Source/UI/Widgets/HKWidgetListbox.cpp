@@ -208,7 +208,7 @@ void HKWidgetListbox::SetSelection(int item)
 		if(selection > -1)
 			children[selection].pChild->GetRenderer()->SetProperty("background_colour", "0,0,0,0");
 		if(item > -1)
-			children[item].pChild->GetRenderer()->SetProperty("background_colour", "0,0,1,0.75f");
+			children[item].pChild->GetRenderer()->SetProperty("background_colour", "0,0,1,0.6f");
 
 		selection = item;
 

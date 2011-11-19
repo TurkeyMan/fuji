@@ -37,6 +37,7 @@ void MFTexture_InitModulePlatformSpecific();
 void MFTexture_DeinitModulePlatformSpecific();
 
 void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture);
 
 // texture TemplateData
 struct MFTextureTemplateData
@@ -90,6 +91,11 @@ struct MFTexture
 	MFTextureTemplateData *pTemplateData;
 	int refCount;
 };
+
+// typedef the texture pool
+#include "MFOpenHashTable.h"
+typedef MFOpenHashTable<MFTexture> MFTexturePool;
+extern MFTexturePool gTextureBank;
 
 #if !defined(_FUJI_UTIL)
 // a debug menu texture information display object

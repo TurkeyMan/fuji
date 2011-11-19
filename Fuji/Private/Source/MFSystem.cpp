@@ -75,11 +75,6 @@ MFDefaults gDefaults =
 		480.0f			// orthoMaxY
 	},
 
-	// TextureDefaults
-	{
-		256				// maxTextures
-	},
-
 	// MaterialDefaults
 	{
 		32,				// maxMaterialTypes

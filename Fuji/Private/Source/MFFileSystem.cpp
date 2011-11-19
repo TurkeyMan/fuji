@@ -416,14 +416,14 @@ int MFFile_Close(MFFile* fileHandle)
 }
 
 // read/write functions
-int MFFile_Read(MFFile* fileHandle, void *pBuffer, uint32 bytes, bool async)
+int MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
 {
 	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
 }
 
-int MFFile_Write(MFFile* fileHandle, const void *pBuffer, uint32 bytes, bool async)
+int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
 {
 	MFCALLSTACK;
 

@@ -11,7 +11,7 @@
 	void MFTexture_DeinitModulePlatformSpecific_##driver(); \
 	void MFTexture_CreatePlatformSpecific_##driver(MFTexture *pTexture, bool generateMipChain); \
 	MFTexture* MFTexture_CreateRenderTarget_##driver(const char *pName, int width, int height, MFTextureFormat targetFormat); \
-	int MFTexture_Destroy_##driver(MFTexture *pTexture);
+	void MFTexture_DestroyPlatformSpecific_##driver(MFTexture *pTexture);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -20,7 +20,7 @@
 		MFTexture_DeinitModulePlatformSpecific_##driver, \
 		MFTexture_CreatePlatformSpecific_##driver, \
 		MFTexture_CreateRenderTarget_##driver, \
-		MFTexture_Destroy_##driver, \
+		MFTexture_DestroyPlatformSpecific_##driver, \
 	},
 
 // declare the available plugins
@@ -42,7 +42,7 @@ struct MFTexturePluginCallbacks
 	void (*pDeinitModulePlatformSpecific)();
 	void (*pCreatePlatformSpecific)(MFTexture *pTexture, bool generateMipChain);
 	MFTexture* (*pCreateRenderTarget)(const char *pName, int width, int height, MFTextureFormat targetFormat);
-	int (*pDestroy)(MFTexture *pTexture);
+	void (*pDestroyPlatformSpecific)(MFTexture *pTexture);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -89,9 +89,9 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	return gpCurrentTexturePlugin->pCreateRenderTarget(pName, width, height, targetFormat);
 }
 
-int MFTexture_Destroy(MFTexture *pTexture)
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
-	return gpCurrentTexturePlugin->pDestroy(pTexture);
+	gpCurrentTexturePlugin->pDestroyPlatformSpecific(pTexture);
 }
 
 #endif // MF_RENDERER

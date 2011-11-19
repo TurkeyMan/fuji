@@ -40,18 +40,18 @@ void MFString_DeinitModule()
 
 MFString MFString_GetStats()
 {
-	uint32 overhead = stringPool.GetTotalMemory() + stringPool.GetOverheadMemory() + stringHeap.GetOverheadMemory();
-	uint32 waste = 0, averageSize = 0;
+	size_t overhead = stringPool.GetTotalMemory() + stringPool.GetOverheadMemory() + stringHeap.GetOverheadMemory();
+	size_t waste = 0, averageSize = 0;
 
 	// calculate waste
 	int numStrings = stringPool.GetNumAllocated();
 	for(int a=0; a<numStrings; ++a)
 	{
 		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
-		int allocated = pString->GetAllocated();
+		size_t allocated = pString->GetAllocated();
 		if(allocated)
 		{
-			int bytes = pString->GetBytes();
+			size_t bytes = pString->GetBytes();
 			averageSize += bytes;
 			waste += allocated - bytes;
 		}
@@ -820,7 +820,7 @@ MFString::MFString(const char *pString, int maxChars)
 
 		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 
-		MFString_CopyN(pData->pMemory, pString, pData->bytes);
+		MFString_CopyN(pData->pMemory, pString, (int)pData->bytes);
 		pData->pMemory[pData->bytes] = 0;
 	}
 }
@@ -882,8 +882,8 @@ MFString& MFString::operator+=(const MFString &string)
 	}
 	else
 	{
-		int sumBytes = pData->bytes + string.pData->bytes;
-		int bytesNeeded = sumBytes + 1;
+		size_t sumBytes = pData->bytes + string.pData->bytes;
+		size_t bytesNeeded = sumBytes + 1;
 
 		Reserve(bytesNeeded);
 
@@ -902,9 +902,9 @@ MFString MFString::operator+(const MFString &string) const
 	if(!pData)
 		return string;
 
-	int bytes = pData->bytes + string.pData->bytes;
+	size_t bytes = pData->bytes + string.pData->bytes;
 
-	MFString t(bytes + 1);
+	MFString t((int)bytes + 1);
 	t.pData->bytes = bytes;
 
 	MFString_CopyCat(t.pData->pMemory, pData->pMemory, string.pData->pMemory);
@@ -1092,7 +1092,7 @@ MFString MFString::Upper() const
 		return *this;
 
 	// allocate a new string
-	MFString t(pData->bytes + 1);
+	MFString t((int)pData->bytes + 1);
 	t.pData->bytes = pData->bytes;
 
 	// copy upper case
@@ -1108,7 +1108,7 @@ MFString MFString::Lower() const
 		return *this;
 
 	// allocate a new string
-	MFString t(pData->bytes + 1);
+	MFString t((int)pData->bytes + 1);
 	t.pData->bytes = pData->bytes;
 
 	// copy lower case string
@@ -1123,7 +1123,7 @@ MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
 	if(pData)
 	{
 		const char *pSrc = pData->pMemory;
-		int offset = 0;
+		size_t offset = 0;
 
 		// trim start
 		if(bFront)
@@ -1132,7 +1132,7 @@ MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
 				++offset;
 		}
 
-		int count = pData->bytes - offset;
+		size_t count = pData->bytes - offset;
 
 		// trim end
 		if(bEnd)
@@ -1145,7 +1145,7 @@ MFString& MFString::Trim(bool bFront, bool bEnd, const char *pCharacters)
 			}
 		}
 
-		*this = SubStr(offset, count);
+		*this = SubStr((int)offset, (int)count);
 	}
 
 	return *this;
@@ -1212,12 +1212,12 @@ MFString MFString::SubStr(int offset, int count) const
 		return *this;
 
 	// limit within the strings range
-	int maxChars = pData->bytes - offset;
+	int maxChars = (int)pData->bytes - offset;
 	if(count < 0 || count > maxChars)
 		count = maxChars;
 
 	// bail if we don't need to do anything
-	if((size_t)count == pData->bytes)
+	if(count == (int)pData->bytes)
 		return *this;
 
 	// allocate a new string
@@ -1261,7 +1261,7 @@ MFString& MFString::ClearRange(int offset, int length)
 		return *this;
 
 	// limit within the strings range
-	int maxChars = pData->bytes - offset;
+	int maxChars = (int)pData->bytes - offset;
 	if(length > maxChars)
 		length = maxChars;
 
@@ -1272,7 +1272,7 @@ MFString& MFString::ClearRange(int offset, int length)
 	// clear the range
 	Detach();
 
-	int postBytes = pData->bytes - (offset + length);
+	int postBytes = (int)pData->bytes - (offset + length);
 	pData->bytes -= length;
 
 	char *pReplace = pData->pMemory + offset;
@@ -1296,7 +1296,7 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 
 	// limit within the strings range
 	offset = MFMin(offset, (int)pData->bytes);
-	int maxChars = pData->bytes - offset;
+	int maxChars = (int)pData->bytes - offset;
 	if(range > maxChars)
 		range = maxChars;
 
@@ -1306,7 +1306,7 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 		return *this;
 
 	int reposition = strLen - range;
-	int newSize = pData->bytes + reposition;
+	int newSize = (int)pData->bytes + reposition;
 
 	// reserve memory for the new string
 	Reserve(newSize);
@@ -1326,7 +1326,7 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 		}
 		else
 		{
-			int len = pData->bytes - tailOffset;
+			int len = (int)pData->bytes - tailOffset;
 			while(len >= 0)
 			{
 				pDest[len] = pSrc[len];

@@ -42,9 +42,16 @@ struct MFFont
 
 	MFMaterial **ppPages;
 	int numPages;
+
+	int refCount;
 };
 
 void MFFont_InitModule();
 void MFFont_DeinitModule();
+
+// typedef the texture pool
+#include "MFOpenHashTable.h"
+typedef MFOpenHashTable<MFFont*> MFFontPool;
+extern MFFontPool gFontBank;
 
 #endif // _MFFONT_INTERNAL_H

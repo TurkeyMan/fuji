@@ -121,32 +121,45 @@ int MFObjectPool::Free(void *pItem)
 	return bFreed;
 }
 
-uint32 MFObjectPool::GetTotalMemory()
+bool MFObjectPool::Owns(const void *pItem) const
+{
+	const MFObjectPool *pThis = this;
+
+	while(pThis)
+	{
+		if(pItem >= pThis->pMemory && pItem < pThis->pMemory + pThis->bytes)
+			return true;
+		pThis = pThis->pNext;
+	}
+	return false;
+}
+
+size_t MFObjectPool::GetTotalMemory() const
 {
 	return objectSize * GetNumReserved();
 }
 
-uint32 MFObjectPool::GetAllocatedMemory()
+size_t MFObjectPool::GetAllocatedMemory() const
 {
 	return objectSize * GetNumAllocated();
 }
 
-uint32 MFObjectPool::GetOverheadMemory()
+size_t MFObjectPool::GetOverheadMemory() const
 {
 	return sizeof(void**) * GetNumReserved() + sizeof(*this);
 }
 
-int MFObjectPool::GetNumReserved()
+int MFObjectPool::GetNumReserved() const
 {
 	return maxItems + (pNext ? pNext->GetNumReserved() : 0);
 }
 
-int MFObjectPool::GetNumAllocated()
+int MFObjectPool::GetNumAllocated() const
 {
 	return allocated + (pNext ? pNext->GetNumAllocated() : 0);
 }
 
-void *MFObjectPool::GetItem(int index)
+void *MFObjectPool::GetItem(int index) const
 {
 	if(index < allocated)
 		return ppItems[index];
@@ -244,31 +257,41 @@ free_done:
 	MFThread_ReleaseMutex(mutex);
 }
 
-uint32 MFObjectPoolGroup::GetTotalMemory()
+bool MFObjectPoolGroup::Owns(const void *pItem) const
 {
-	int total = 0;
+	for(int a=0; a<numPools; ++a)
+	{
+		if(pPools[a].Owns(pItem))
+			return true;
+	}
+	return false;
+}
+
+size_t MFObjectPoolGroup::GetTotalMemory() const
+{
+	size_t total = 0;
 	for(int a=0; a<numPools; ++a)
 		total += pPools[a].GetTotalMemory();
 	return total;
 }
 
-uint32 MFObjectPoolGroup::GetAllocatedMemory()
+size_t MFObjectPoolGroup::GetAllocatedMemory() const
 {
-	int allocated = 0;
+	size_t allocated = 0;
 	for(int a=0; a<numPools; ++a)
 		allocated += pPools[a].GetAllocatedMemory();
 	return allocated;
 }
 
-uint32 MFObjectPoolGroup::GetOverheadMemory()
+size_t MFObjectPoolGroup::GetOverheadMemory() const
 {
-	int overhead = 0;
+	size_t overhead = 0;
 	for(int a=0; a<numPools; ++a)
 		overhead += pPools[a].GetOverheadMemory();
 	return overhead;
 }
 
-int MFObjectPoolGroup::GetNumReserved()
+int MFObjectPoolGroup::GetNumReserved() const
 {
 	int reserved = 0;
 	for(int a=0; a<numPools; ++a)
@@ -276,7 +299,7 @@ int MFObjectPoolGroup::GetNumReserved()
 	return reserved;
 }
 
-int MFObjectPoolGroup::GetNumAllocated()
+int MFObjectPoolGroup::GetNumAllocated() const
 {
 	int allocated = 0;
 	for(int a=0; a<numPools; ++a)

@@ -64,7 +64,7 @@ configuration { "macosx" }
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
-	links { "ogg_static", "vorbisfile_static" }
+	links { "ogg_static", "vorbis_static", "vorbisfile_static" }
 	linkoptions { "/Delay:unload" }
 
 	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11

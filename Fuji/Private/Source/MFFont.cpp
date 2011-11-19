@@ -19,6 +19,8 @@
 
 // globals
 
+MFFontPool gFontBank;
+
 MFFont *MFFont_CreateFromSourceData(const char *pFilename);
 
 #define MAX_TEXT_LINES 30					// maximum number of lines we can handle in one draw text
@@ -124,6 +126,8 @@ void MFFont_InitModule()
 {
 	MFCALLSTACK;
 
+	gFontBank.Init(256, 16, 16);
+
 	gpDebugFont = MFFont_Create("Arial");
 }
 
@@ -138,6 +142,14 @@ MFFont* MFFont_Create(const char *pFilename)
 {
 	MFCALLSTACK;
 
+	// see if it's already loaded
+	MFFontPool::Iterator it = gFontBank.Get(pFilename);
+	if(it)
+	{
+		++(*it)->refCount;
+		return *it;
+	}
+
 	// load font file
 	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fft", pFilename));
 	if(!pFont)
@@ -149,6 +161,9 @@ MFFont* MFFont_Create(const char *pFilename)
 	MFDebug_Assert(pFont, MFStr("Unable to load font '%s'", pFilename));
 	if(!pFont)
 		return NULL;
+
+	pFont->refCount = 1;
+	gFontBank.Add(pFilename, pFont);
 
 	// fixup pointers
 	MFFixUp(pFont->pName, pFont, 1);
@@ -183,14 +198,23 @@ void MFFont_Destroy(MFFont *pFont)
 {
 	MFCALLSTACK;
 
-	// destroy materials
-	for(int a=0; a<pFont->numPages; a++)
-	{
-		MFMaterial_Destroy(pFont->ppPages[a]);
-	}
+	--pFont->refCount;
 
-	// destroy font
-	MFHeap_Free(pFont);
+	if(pFont->refCount == 0)
+	{
+		// remove it from the registry
+		// TODO: this is a scanning destroy, do this by hash...?
+		gFontBank.Destroy(pFont);
+
+		// destroy materials
+		for(int a=0; a<pFont->numPages; a++)
+		{
+			MFMaterial_Destroy(pFont->ppPages[a]);
+		}
+
+		// destroy font
+		MFHeap_Free(pFont);
+	}
 }
 
 MFFont* MFFont_GetDebugFont()

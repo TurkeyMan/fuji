@@ -9,7 +9,7 @@
 	#define MFTexture_Recreate MFTexture_Recreate_D3D9
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_D3D9
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_D3D9
-	#define MFTexture_Destroy MFTexture_Destroy_D3D9
+	#define MFTexture_DestroyPlatformSpecific MFTexture_DestroyPlatformSpecific_D3D9
 #endif
 
 /**** Defines ****/
@@ -20,13 +20,11 @@
 #include "MFTexture_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFFileSystem_Internal.h"
-#include "MFPtrList.h"
 
 #include <d3dx9.h>
 
 /**** Globals ****/
 
-extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
 extern IDirect3DDevice9 *pd3dDevice;
@@ -43,10 +41,10 @@ void MFTexture_DeinitModulePlatformSpecific()
 
 void MFTexture_Release()
 {
-	MFTexture **ppTI = gTextureBank.Begin();
-	while(*ppTI)
+	MFTexturePool::Iterator pTex = gTextureBank.First();
+
+	while(pTex)
 	{
-		MFTexture *pTex = *ppTI;
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
@@ -59,16 +57,16 @@ void MFTexture_Release()
 			pTex->pInternalData = NULL;
 		}
 
-		++ppTI;
+		pTex = gTextureBank.Next(pTex);
 	}
 }
 
 void MFTexture_Recreate()
 {
-	MFTexture **ppTI = gTextureBank.Begin();
-	while(*ppTI)
+	MFTexturePool::Iterator pTex = gTextureBank.First();
+
+	while(pTex)
 	{
-		MFTexture *pTex = *ppTI;
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
@@ -78,7 +76,7 @@ void MFTexture_Recreate()
 			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
 		}
 
-		++ppTI;
+		pTex = gTextureBank.Next(pTex);
 	}
 }
 
@@ -120,7 +118,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 
 	if(!pTexture)
 	{
-		pTexture = gTextureBank.Create();
+		pTexture = &gTextureBank.Create(pName);
 
 		if(targetFormat & TexFmt_SelectNicest)
 		{
@@ -155,7 +153,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		if(hr != D3D_OK)
 		{
 			MFHeap_Free(pTexture->pTemplateData);
-			gTextureBank.Destroy(pTexture);
+			gTextureBank.DestroyItem(*pTexture);
 			pTexture = NULL;
 		}
 	}
@@ -167,26 +165,12 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	return pTexture;
 }
 
-int MFTexture_Destroy(MFTexture *pTexture)
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
-	--pTexture->refCount;
-
-	// if no references left, destroy texture
-	if(!pTexture->refCount)
-	{
-		MFHeap_Free(pTexture->pTemplateData);
-
-		IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
-		pTex->Release();
-
-		gTextureBank.Destroy(pTexture);
-
-		return 0;
-	}
-
-	return pTexture->refCount;
+	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
+	pTex->Release();
 }
 
 #endif // MF_RENDERER

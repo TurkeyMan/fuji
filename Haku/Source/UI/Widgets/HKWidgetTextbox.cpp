@@ -219,7 +219,6 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 
 	HKWidgetRenderer::Render(widget, worldTransform);
 
-	const MFVector &size = widget.GetSize();
 	float textHeight = tb.GetTextHeight();
 	float padding = tb.padding;
 
@@ -235,28 +234,6 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 	bool bEnabled = widget.IsEnabled();
 	bool bHasFocus = tb.HasFocus();
 
-	// draw the frame and selection
-	MFPrimitive(PT_TriStrip | PT_Prelit | PT_Untextured);
-	MFSetMatrix(worldTransform);
-
-	MFBegin(bDrawSelection ? 16 : 10);
-
-	MFSetColour(MFVector::white);
-	MFSetPosition(0.f, 0.f, 0);
-	MFSetPosition(size.x, 0.f, 0);
-	MFSetPosition(0.f, size.y, 0);
-	MFSetPosition(size.x, size.y, 0);
-
-	// degen
-	MFSetPosition(0.f+size.x, 0.f+size.y, 0);
-	MFSetPosition(padding, padding, 0);
-
-	MFSetColour(MFVector::black);
-	MFSetPosition(padding, padding, 0);
-	MFSetPosition(size.x-padding, padding, 0);
-	MFSetPosition(padding, size.y-padding, 0);
-	MFSetPosition(size.x-padding, size.y-padding, 0);
-
 	if(bDrawSelection)
 	{
 		// draw selection (if selected)
@@ -266,21 +243,9 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 		float selMinX = MFFont_GetStringWidth(pFont, pString, textHeight, 10000, selMin);
 		float selMaxX = MFFont_GetStringWidth(pFont, pString, textHeight, 10000, selMax);
 
-		// degen
-		MFSetPosition(size.x-padding, size.y-padding, 0);
-		MFSetPosition(padding+selMinX, padding, 0);
-
-		if(bHasFocus)
-			MFSetColour(0, 0, 0.6f, 1);
-		else
-			MFSetColour(0.4f, 0.4f, 0.4f, 1);
-		MFSetPosition(padding+selMinX, padding, 0);
-		MFSetPosition(padding+selMaxX, padding, 0);
-		MFSetPosition(padding+selMinX, padding+textHeight, 0);
-		MFSetPosition(padding+selMaxX, padding+textHeight, 0);
+		MFVector selectionColour = bHasFocus ? MakeVector(0, 0, 1, 0.6f) : MakeVector(1, 1, 1, 0.4f);
+		MFPrimitive_DrawUntexturedQuad(padding+selMinX, padding, selMaxX-selMinX, textHeight, selectionColour, worldTransform);
 	}
-
-	MFEnd();
 
 	if(!text.IsEmpty())
 	{
@@ -302,18 +267,7 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 			float cursorX = MFFont_GetStringWidth(pFont, pString, textHeight, 10000, cursorPos);
 
 			// render cursor
-			MFPrimitive(PT_TriStrip | PT_Prelit | PT_Untextured);
-			MFSetMatrix(worldTransform);
-
-			MFBegin(4);
-
-			MFSetColour(MFVector::white);
-			MFSetPosition(padding+cursorX, padding+1.f, 0);
-			MFSetPosition(padding+2.f+cursorX, padding+1.f, 0);
-			MFSetPosition(padding+cursorX, padding+textHeight-1.f, 0);
-			MFSetPosition(padding+2.f+cursorX, padding+textHeight-1.f, 0);
-
-			MFEnd();
+			MFPrimitive_DrawUntexturedQuad(padding+cursorX, padding+1.f, 2, textHeight-2.f, MFVector::white, worldTransform);
 		}
 	}
 }

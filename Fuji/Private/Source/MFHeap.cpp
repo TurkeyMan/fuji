@@ -80,7 +80,7 @@ static MFHeap *pOverrideHeap = NULL;
 
 static MFHeap *pDebugHeap = &gDebugHeap;
 
-static char gMutexBuffer[64];
+static char gMutexBuffer[72];
 static MFMutex gAllocMutex = NULL;
 
 // custom heap

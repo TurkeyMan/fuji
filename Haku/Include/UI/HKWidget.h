@@ -3,11 +3,11 @@
 #define _HKWIDGET_H
 
 #include "HKWidgetEvent.h"
-#include "HKWidgetRenderer.h"
 #include "HKInputSource.h"
 #include "HKFactory.h"
 
 class HKWidget;
+class HKWidgetRenderer;
 typedef HKFactory<HKWidget> HKWidgetFactory;
 typedef HKWidgetFactory::FactoryType HKWidgetType;
 
@@ -35,6 +35,7 @@ class HKWidget
 {
 	friend class HKUserInterface;
 	friend class HKWidgetLayout;
+	friend class HKWidgetRenderer;
 public:
 	enum Align
 	{
@@ -124,6 +125,8 @@ public:
 	// HKWidget accessor methods
 	MFString GetID() const { return id; }
 
+	MFString GetStyle() const { return style; }
+
 	bool IsEnabled() const { return bEnabled && bParentEnabled; }
 
 	bool IsClickable() const { return bClickable; }
@@ -150,6 +153,9 @@ public:
 	MFVector GetSizeWithMargin() const { return MakeVector(size.x + layoutMargin.x + layoutMargin.z, size.y + layoutMargin.y + layoutMargin.w, size.z, size.w); }
 
 	void SetID(MFString id) { this->id = id; }
+
+	void SetStyle(MFString style);
+	void SetStyleDisabled(MFString style);
 
 	bool SetEnabled(bool bEnable);
 	Visibility SetVisible(Visibility visible);
@@ -212,6 +218,9 @@ protected:
 
 	MFString id;
 
+	MFString style;
+	MFString styleDisabled;
+
 	Visibility visible;
 	bool bEnabled;
 	bool bParentEnabled;	// flagged if the parent is enabled
@@ -228,6 +237,9 @@ protected:
 
 	virtual void Update();
 	void Draw();
+
+	void ApplyStyle(MFString style);
+	virtual void UpdateStyle();
 
 	void DirtyMatrices();
 

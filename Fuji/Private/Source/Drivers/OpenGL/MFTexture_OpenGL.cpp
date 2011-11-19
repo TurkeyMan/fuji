@@ -7,7 +7,7 @@
 	#define MFTexture_DeinitModulePlatformSpecific MFTexture_DeinitModulePlatformSpecific_OpenGL
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_OpenGL
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_OpenGL
-	#define MFTexture_Destroy MFTexture_Destroy_OpenGL
+	#define MFTexture_DestroyPlatformSpecific MFTexture_DestroyPlatformSpecific_OpenGL
 #endif
 
 /**** Includes ****/
@@ -23,7 +23,6 @@
 
 /**** Globals ****/
 
-extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
 struct GLFormat
@@ -173,7 +172,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 
 	if(!pTexture)
 	{
-		pTexture = gTextureBank.Create();
+		pTexture = &gTextureBank.Create(pName);
 
 		if(targetFormat & TexFmt_SelectNicest)
 		{
@@ -270,25 +269,12 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	return pTexture;
 }
 
-int MFTexture_Destroy(MFTexture *pTexture)
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
-	pTexture->refCount--;
-
-	// if no references left, destroy texture
-	if(!pTexture->refCount)
-	{
-		GLuint *pTextures = (GLuint*)&pTexture->pInternalData;
-		glDeleteTextures(1, pTextures);
-
-		MFHeap_Free(pTexture->pTemplateData);
-		gTextureBank.Destroy(pTexture);
-
-		return 0;
-	}
-
-	return pTexture->refCount;
+	GLuint *pTextures = (GLuint*)&pTexture->pInternalData;
+	glDeleteTextures(1, pTextures);
 }
 
 #endif

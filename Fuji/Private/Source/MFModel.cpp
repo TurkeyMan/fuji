@@ -13,11 +13,11 @@
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
-MFPtrList<MFModelTemplate> gModelBank;
+MFModelPool gModelBank;
 
 void MFModel_InitModule()
 {
-	gModelBank.Init("Model Bank", gDefaults.model.maxModels);
+	gModelBank.Init(256, 64, 64);
 
 	MFModel_InitModulePlatformSpecific();
 }
@@ -25,10 +25,10 @@ void MFModel_InitModule()
 void MFModel_DeinitModule()
 {
 	// list all non-freed textures...
-	MFModelTemplate **ppI = gModelBank.Begin();
+	MFModelPool::Iterator pI = gModelBank.First();
 	bool bShowHeader = true;
 
-	while(*ppI)
+	while(pI)
 	{
 		if(bShowHeader)
 		{
@@ -36,11 +36,11 @@ void MFModel_DeinitModule()
 			MFDebug_Message("\nUn-freed models:\n----------------------------------------------------------");
 		}
 
-		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->pName, (*ppI)->refCount));
+		MFDebug_Message(MFStr("'%s' - x%d", (*pI)->pName, (*pI)->refCount));
 
 		// Destroy template...
 
-		ppI++;
+		pI = gModelBank.Next(pI);
 	}
 
 	MFModel_DeinitModulePlatformSpecific();
@@ -59,22 +59,6 @@ MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelD
 	}
 
 	return pChunk;
-}
-
-MFModelTemplate* MFModel_FindTemplate(const char *pName)
-{
-	MFCALLSTACK;
-
-	MFModelTemplate **ppIterator = gModelBank.Begin();
-
-	while(*ppIterator)
-	{
-		if(!MFString_CaseCmp(pName, (*ppIterator)->pFilename)) return *ppIterator;
-
-		ppIterator++;
-	}
-
-	return NULL;
 }
 
 void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
@@ -205,7 +189,9 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 
 MFModel* MFModel_Create(const char *pFilename)
 {
-	MFModelTemplate *pTemplate = MFModel_FindTemplate(pFilename);
+	// see if it's already loaded
+	MFModelPool::Iterator it = gModelBank.Get(pFilename);
+	MFModelTemplate *pTemplate = it ? *it : NULL;
 
 	if(!pTemplate)
 	{
@@ -265,7 +251,7 @@ MFModel* MFModel_Create(const char *pFilename)
 		pTemplate = (MFModelTemplate*)pTemplateData;
 		pTemplate->pFilename = pFilename;
 
-		gModelBank.Create(pTemplate);
+		gModelBank.Add(pFilename, pTemplate);
 
 		MFModel_FixUp(pTemplate, true);
 
@@ -339,7 +325,10 @@ int MFModel_Destroy(MFModel *pModel)
 			}
 		}
 
-		gModelBank.Destroy(pModel->pTemplate);
+		// remove it from the registry
+		// TODO: this is a scanning destroy, do this by hash...?
+		gModelBank.Destroy(pModel->pTemplate->pFilename);
+
 		MFHeap_Free(pModel->pTemplate);
 	}
 

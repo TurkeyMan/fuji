@@ -120,7 +120,7 @@ int MFFile_Close(MFFile *pFile);
  * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes read.
  */
-int MFFile_Read(MFFile *pFile, void *pBuffer, uint32 bytes, bool async = false);
+int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
 
 /**
  * Write to a file.
@@ -131,7 +131,7 @@ int MFFile_Read(MFFile *pFile, void *pBuffer, uint32 bytes, bool async = false);
  * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes written.
  */
-int MFFile_Write(MFFile *pFile, const void *pBuffer, uint32 bytes, bool async = false);
+int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
 
 /**
  * Seek the file.

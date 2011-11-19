@@ -132,12 +132,13 @@ void HKWidgetRendererLabel::Render(const HKWidget &widget, const MFMatrix &world
 		float height = label.GetTextHeight();
 		float shadowDepth = label.GetShadowDepth();
 		const MFVector &size = widget.GetSize();
+		const MFVector &colour = widget.GetColour();
 		const MFVector &textColour = label.GetTextColour();
 		MFFontJustify j = label.GetTextJustification();
 		const char *pString = l.CStr();
 
 		if(shadowDepth > 0.f)
 			MFFont_DrawTextJustified(pFont, pString, MakeVector(shadowDepth, shadowDepth), size.x, size.y, j, height, MFVector::black, -1, worldTransform);
-		MFFont_DrawTextJustified(pFont, pString, MFVector::zero, size.x, size.y, j, height, textColour, -1, worldTransform);
+		MFFont_DrawTextJustified(pFont, pString, MFVector::zero, size.x, size.y, j, height, textColour * colour, -1, worldTransform);
 	}
 }

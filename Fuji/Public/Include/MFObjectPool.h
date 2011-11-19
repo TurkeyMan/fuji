@@ -14,8 +14,8 @@
 class MFObjectPool
 {
 public:
-	MFObjectPool() { ppItems = NULL; pMemory = NULL; pNext = NULL; bytes = allocated = maxItems = objectSize = grow = 0; }
-	MFObjectPool(int objectSize, int numObjects, int growObjects = 0) { Init(objectSize, numObjects, growObjects); }
+	MFObjectPool() { ppItems = NULL; pMemory = NULL; pNext = NULL; bytes = objectSize = 0; allocated = maxItems = grow = 0; }
+	MFObjectPool(size_t objectSize, int numObjects, int growObjects = 0) { Init(objectSize, numObjects, growObjects); }
 	~MFObjectPool() { Deinit(); }
 
 	void Init(size_t objectSize, int numObjects, int growObjects = 0, void *pMemory = NULL, size_t bytes = 0);
@@ -25,16 +25,18 @@ public:
 	void *AllocAndZero();
 	int Free(void *pItem);
 
-	uint32 GetObjectSize() { return objectSize; }
+	bool Owns(const void *pItem) const;
 
-	uint32 GetTotalMemory();
-	uint32 GetAllocatedMemory();
-	uint32 GetOverheadMemory();
+	size_t GetObjectSize() const { return objectSize; }
 
-	int GetNumReserved();
-	int GetNumAllocated();
+	size_t GetTotalMemory() const;
+	size_t GetAllocatedMemory() const;
+	size_t GetOverheadMemory() const;
 
-	void *GetItem(int index);
+	int GetNumReserved() const;
+	int GetNumAllocated() const;
+
+	void *GetItem(int index) const;
 
 private:
 	size_t objectSize;
@@ -70,15 +72,17 @@ public:
 	void *AllocAndZero(size_t bytes, size_t *pAllocated);
 	void Free(void *pItem);
 
-	uint32 GetTotalMemory();
-	uint32 GetAllocatedMemory();
-	uint32 GetOverheadMemory();
+	bool Owns(const void *pItem) const;
 
-	int GetNumReserved();
-	int GetNumAllocated();
+	size_t GetTotalMemory() const;
+	size_t GetAllocatedMemory() const;
+	size_t GetOverheadMemory() const;
 
-	int GetNumPools() { return numPools; }
-	MFObjectPool *GetPool(int pool) { return pPools + pool; }
+	int GetNumReserved() const;
+	int GetNumAllocated() const;
+
+	int GetNumPools() const { return numPools; }
+	MFObjectPool *GetPool(int pool) const { return pPools + pool; }
 
 private:
 	MFObjectPoolGroupConfig *pConfig;

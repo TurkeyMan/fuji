@@ -3,6 +3,7 @@
 #define _HKUI_H
 
 #include "HKWidget.h"
+#include "HKWidgetRenderer.h"
 #include "HKInputSource.h"
 
 #include "MFSystem.h"

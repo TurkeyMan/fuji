@@ -21,6 +21,7 @@ HKWidgetButton::HKWidgetButton(HKWidgetType *pType)
 	buttonFlags = 0;
 
 	bClickable = true;
+	bHoverable = true;
 
 	bDown = false;
 	bPressed = false;
@@ -44,7 +45,11 @@ HKWidgetButton::~HKWidgetButton()
 
 void HKWidgetButton::SetProperty(const char *pProperty, const char *pValue)
 {
-	if(!MFString_CaseCmp(pProperty, "button_state"))
+	if(!MFString_CaseCmp(pProperty, "style_pressed"))
+		SetStylePressed(pValue);
+	else if(!MFString_CaseCmp(pProperty, "style_selected"))
+		SetStyleState(pValue);
+	else if(!MFString_CaseCmp(pProperty, "button_state"))
 		SetState(HKWidget_GetBoolFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "button_flags"))
 		SetButtonFlags(HKWidget_GetBitfieldValue(pValue, sButtonFlagKeys));
@@ -61,6 +66,36 @@ MFString HKWidgetButton::GetProperty(const char *pProperty)
 	return HKWidgetLabel::GetProperty(pProperty);
 }
 
+void HKWidgetButton::SetPressed(bool bPressed)
+{
+	if(bPressed != this->bPressed)
+	{
+		this->bPressed = bPressed;
+		UpdateStyle();
+	}
+}
+
+void HKWidgetButton::SetButtonState(bool bState)
+{
+	if(bState != this->bState)
+	{
+		this->bState = bState;
+		UpdateStyle();
+	}
+}
+
+void HKWidgetButton::UpdateStyle()
+{
+	if(!bEnabled && !styleDisabled.IsEmpty())
+		ApplyStyle(styleDisabled);
+	else if(bPressed && !stylePressed.IsEmpty())
+		ApplyStyle(stylePressed);
+	else if(bState && !styleOnState.IsEmpty())
+		ApplyStyle(styleOnState);
+	else if(!style.IsEmpty())
+		ApplyStyle(style);
+}
+
 void HKWidgetButton::ButtonDown(HKWidget &sender, const HKWidgetEventInfo &ev)
 {
 	if(!bEnabled)
@@ -71,7 +106,7 @@ void HKWidgetButton::ButtonDown(HKWidget &sender, const HKWidgetEventInfo &ev)
 	if(buttonFlags & BF_TriggerOnDown)
 	{
 		if(buttonFlags & BF_StateButton)
-			bState = !bState;
+			SetButtonState(!bState);
 
 		HKWidgetInputEvent clickEvent(this, down.pSource);
 		OnClicked(*this, clickEvent);
@@ -79,7 +114,7 @@ void HKWidgetButton::ButtonDown(HKWidget &sender, const HKWidgetEventInfo &ev)
 	else
 	{
 		bDown = true;
-		bPressed = true;
+		SetPressed(true);
 
 		GetUI().SetFocus(down.pSource, this);
 	}
@@ -98,10 +133,10 @@ void HKWidgetButton::ButtonUp(HKWidget &sender, const HKWidgetEventInfo &ev)
 
 	if(bPressed)
 	{
-		bPressed = false;
+		SetPressed(false);
 
 		if(buttonFlags & BF_StateButton)
-			bState = !bState;
+			SetButtonState(!bState);
 
 		HKWidgetInputEvent clickEvent(this, up.pSource);
 		OnClicked(*this, clickEvent);
@@ -119,55 +154,8 @@ void HKWidgetButton::Hover(HKWidget &sender, const HKWidgetEventInfo &ev)
 	{
 		MFRect rect = { 0, 0, size.x, size.y };
 		if(MFTypes_PointInRect(hover.newPos.x, hover.newPos.y, &rect))
-			bPressed = true;
+			SetPressed(true);
 		else
-			bPressed = false;
-	}
-}
-
-
-HKWidgetRenderer *HKWidgetRendererButton::Create(HKWidgetRendererType *pType)
-{
-	return new HKWidgetRendererButton();
-}
-
-#include "MFPrimitive.h"
-#include "MFFont.h"
-
-void HKWidgetRendererButton::Render(const HKWidget &widget, const MFMatrix &worldTransform)
-{
-	HKWidgetRenderer::Render(widget, worldTransform);
-
-	HKWidgetButton &button = (HKWidgetButton&)widget;
-
-	const MFVector &size = widget.GetSize();
-
-	if(pBackground)
-	{
-	}
-	else
-	{
-		const MFVector &colour = widget.GetColour();
-		if(colour.w > 0.f)
-		{
-
-			MFPrimitive_DrawUntexturedQuad(0, 0, size.x, size.y, MFVector::black, worldTransform);
-			MFPrimitive_DrawUntexturedQuad(1, 1, size.x - 2, size.y - 2, button.GetPressed() ? colour * MFVector::grey : colour, worldTransform);
-		}
-	}
-
-	MFString label = button.GetText();
-	if(!label.IsEmpty())
-	{
-		MFFont *pFont = button.GetFont();
-		float height = button.GetTextHeight();
-		float shadowDepth = button.GetShadowDepth();
-		MFFontJustify j = button.GetTextJustification();
-		const MFVector &textColour = button.GetTextColour();
-		const char *pString = label.CStr();
-
-		if(shadowDepth > 0.f)
-			MFFont_DrawTextJustified(pFont, pString, MakeVector(shadowDepth, shadowDepth), size.x, size.y, j, height, MFVector::black, -1, worldTransform);
-		MFFont_DrawTextJustified(pFont, pString, MFVector::zero, size.x, size.y, j, height, button.GetPressed() ? textColour * MFVector::grey : textColour, -1, worldTransform);
+			SetPressed(false);
 	}
 }

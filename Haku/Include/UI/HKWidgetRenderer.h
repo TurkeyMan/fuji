@@ -2,6 +2,7 @@
 #if !defined(_HKWIDGET_RENDERER_H)
 #define _HKWIDGET_RENDERER_H
 
+#include "HKWidget.h"
 #include "HKFactory.h"
 
 class HKWidgetRenderer;
@@ -25,8 +26,14 @@ public:
 	virtual MFString GetProperty(const char *pProperty);
 
 protected:
-	MFVector bgColour;
-	MFMaterial *pBackground;
+	MFVector padding;
+	MFVector colour;
+	MFVector border;		// width: left, top, right, bottom
+	MFVector borderColour;
+	MFMaterial *pImage;
+	HKWidget::Justification imageAlignment;
+	float texWidth, texHeight;
+	float margin9Cell;
 };
 
 #endif

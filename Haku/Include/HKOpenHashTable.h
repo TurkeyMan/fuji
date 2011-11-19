@@ -12,6 +12,9 @@ class HKOpenHashTable
 private:
 	struct HashItem
 	{
+		HashItem() {}
+		HashItem(const T &item) : item(item) {}
+
 		T item;
 		uint32 hash;
 		HashItem *pNext;
@@ -119,9 +122,18 @@ inline T& HKOpenHashTable<T>::Create(uint32 hash)
 template <typename T>
 inline T& HKOpenHashTable<T>::Add(uint32 hash, const T& item)
 {
-	T& newItem = Create(hash);
-	newItem = item;
-	return newItem;
+	HashItem *pNew = (HashItem*)itemPool.Alloc();
+	new(&pNew->item) T(item);
+
+	pNew->hash = hash;
+
+	uint32 i = GetTableIndex(hash);
+	pNew->pNext = ppItems[i];
+	ppItems[i] = pNew;
+
+	++itemCount;
+
+	return pNew->item;
 }
 
 template <typename T>

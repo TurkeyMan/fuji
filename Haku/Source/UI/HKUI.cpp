@@ -3,6 +3,7 @@
 #include "UI/HKUI.h"
 #include "UI/HKWidgetEvent.h"
 #include "UI/HKInputSource.h"
+#include "UI/HKWidgetStyle.h"
 
 #include "UI/Widgets/HKWidgetLabel.h"
 #include "UI/Widgets/HKWidgetButton.h"
@@ -26,6 +27,8 @@ MFSystemCallbackFunction HKUserInterface::pChainResizeCallback = NULL;
 
 void HKUserInterface::Init()
 {
+	HKWidgetStyle::Init();
+
 //	pChainResizeCallback = MFSystem_RegisterSystemCallback(MFCB_DisplayResize, ResizeCallback);
 	pChainResizeCallback = MFSystem_RegisterSystemCallback(MFCB_DisplayReset, ResizeCallback);
 
@@ -51,7 +54,7 @@ void HKUserInterface::Init()
 
 		HKWidgetRendererFactory::FactoryType *pWidget = pRendererFactory->RegisterType(HKWidget::TypeName(), HKWidgetRenderer::Create, NULL);
 		pRendererFactory->RegisterType(HKWidgetLabel::TypeName(), HKWidgetRendererLabel::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetButton::TypeName(), HKWidgetRendererButton::Create, pWidget);
+		pRendererFactory->RegisterType(HKWidgetButton::TypeName(), HKWidgetRendererLabel::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetLayoutFrame::TypeName(), HKWidgetRenderer::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetLayoutLinear::TypeName(), HKWidgetRenderer::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetPrefab::TypeName(), HKWidgetRenderer::Create, pWidget);
@@ -78,6 +81,8 @@ void HKUserInterface::Deinit()
 		delete pFactory;
 		pFactory = NULL;
 	}
+
+	HKWidgetStyle::Deinit();
 }
 
 HKWidgetFactory::FactoryType *HKUserInterface::RegisterWidget(const char *pWidgetType, HKWidgetFactory::CreateFunc createDelegate, HKWidgetFactory::FactoryType *pParent)

@@ -109,7 +109,7 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
 		if(pID3->major > 2)
 		{
 			ID3Chunk *pChunkHeader = (ID3Chunk*)pData;
-			uint32 size = GetSynchSafeInt(pData + 4);
+			int size = GetSynchSafeInt(pData + 4);
 
 			if(*pData == 'T')
 			{
@@ -119,17 +119,17 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
 				switch(pChunkHeader->id)
 				{
 					case MFMAKEFOURCC('T', 'I', 'T', '2'):
-						MFString_CopyN(pStream->streamInfo.songName, pString, MFMin(size-1, sizeof(pStream->streamInfo.songName)-1));
+						MFString_CopyN(pStream->streamInfo.songName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.songName)-1));
 						break;
 					case MFMAKEFOURCC('T', 'A', 'L', 'B'):
-						MFString_CopyN(pStream->streamInfo.albumName, pString, MFMin(size-1, sizeof(pStream->streamInfo.albumName)-1));
+						MFString_CopyN(pStream->streamInfo.albumName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.albumName)-1));
 						break;
 					case MFMAKEFOURCC('T', 'P', 'E', '1'):
 					case MFMAKEFOURCC('T', 'P', 'E', '2'):
-						MFString_CopyN(pStream->streamInfo.artistName, pString, MFMin(size-1, sizeof(pStream->streamInfo.artistName)-1));
+						MFString_CopyN(pStream->streamInfo.artistName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.artistName)-1));
 						break;
 					case MFMAKEFOURCC('T', 'C', 'O', 'N'):
-						MFString_CopyN(pStream->streamInfo.genre, pString, MFMin(size-1, sizeof(pStream->streamInfo.genre)-1));
+						MFString_CopyN(pStream->streamInfo.genre, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.genre)-1));
 						break;
 				}
 			}

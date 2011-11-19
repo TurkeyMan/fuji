@@ -415,7 +415,7 @@
 	// libMAD mp3 codec
 	#define	MAD_STREAM
 #endif
-#if defined(MF_WINDOWS)
+#if defined(MF_WINDOWS) && !defined(MF_64BIT)
 	// MiniFMOD can decode old XM tracker format tunes
 	#define MINIFMOD_STREAM
 #endif

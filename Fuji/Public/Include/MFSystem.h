@@ -55,12 +55,6 @@ struct MFDefaults
 		float orthoMaxY;				/**< Ortho max Y */
 	} view;
 
-	/** Texture Defaults. */
-	struct TextureDefaults
-	{
-		uint32 maxTextures;				/**< Maximum loaded textures */
-	} texture;
-
 	/** Material Defaults. */
 	struct MaterialDefaults
 	{

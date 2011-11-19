@@ -4,7 +4,6 @@
 #include "MFInput.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
-#include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "MFSystem.h"
 #include "Asset/MFIntTexture.h"
@@ -23,7 +22,7 @@
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
 // globals
-MFPtrListDL<MFTexture> gTextureBank;
+MFTexturePool gTextureBank;
 TextureBrowser texBrowser;
 
 char blankBuffer[8*8*4];
@@ -34,7 +33,7 @@ MFTexture *pWhiteTexture;
 // functions
 void MFTexture_InitModule()
 {
-	gTextureBank.Init("Texture Bank", gDefaults.texture.maxTextures);
+	gTextureBank.Init(256, 64, 64);
 
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
@@ -55,10 +54,10 @@ void MFTexture_DeinitModule()
 	MFTexture_Destroy(pWhiteTexture);
 
 	// list all non-freed textures...
-	MFTexture **ppI = gTextureBank.Begin();
+	MFTexturePool::Iterator pI = gTextureBank.First();
 	bool bShowHeader = true;
 
-	while(*ppI)
+	while(pI)
 	{
 		if(bShowHeader)
 		{
@@ -66,12 +65,12 @@ void MFTexture_DeinitModule()
 			MFDebug_Message("Un-freed textures:\n----------------------------------------------------------");
 		}
 
-		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->name, (*ppI)->refCount));
+		MFDebug_Message(MFStr("'%s' - x%d", pI->name, pI->refCount));
 
-		(*ppI)->refCount = 1;
-		MFTexture_Destroy(*ppI);
+		pI->refCount = 1;
+		MFTexture_Destroy(pI);
 
-		ppI++;
+		pI = gTextureBank.Next(pI);
 	}
 
 	gTextureBank.Deinit();
@@ -81,17 +80,7 @@ void MFTexture_DeinitModule()
 
 MFTexture* MFTexture_FindTexture(const char *pName)
 {
-	MFTexture **ppIterator = gTextureBank.Begin();
-
-	while(*ppIterator)
-	{
-		if(!MFString_CaseCmp(pName, (*ppIterator)->name))
-			return *ppIterator;
-
-		ppIterator++;
-	}
-
-	return NULL;
+	return gTextureBank.Get(pName);
 }
 
 MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
@@ -141,7 +130,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
-		pTexture = gTextureBank.Create();
+		pTexture = &gTextureBank.Create(pName);
 
 		pTexture->refCount = 0;
 		pTexture->pTemplateData = pTemplate;
@@ -172,7 +161,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 
 	if(!pTexture)
 	{
-		pTexture = gTextureBank.Create();
+		pTexture = &gTextureBank.Create(pName);
 		pTexture->refCount = 0;
 
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
@@ -663,7 +652,7 @@ MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int source
 
 	if(!pTexture)
 	{
-		pTexture = gTextureBank.Create();
+		pTexture = &gTextureBank.Create(pName);
 		pTexture->refCount = 0;
 
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
@@ -799,6 +788,25 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, TEX_CopyMemory, false);
 }
 
+int MFTexture_Destroy(MFTexture *pTexture)
+{
+	MFCALLSTACK;
+
+	--pTexture->refCount;
+
+	// if no references left, destroy texture
+	if(!pTexture->refCount)
+	{
+		MFTexture_DestroyPlatformSpecific(pTexture);
+
+		MFHeap_Free(pTexture->pTemplateData);
+		gTextureBank.DestroyItem(*pTexture);
+		return 0;
+	}
+
+	return pTexture->refCount;
+}
+
 void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
 {
 	if(pWidth)
@@ -830,12 +838,10 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 {
 	MFVector pos = _pos;
 
-	MFTexture **i;
-	i = gTextureBank.Begin();
+	MFTexturePool::Iterator pTexture = gTextureBank.First();
 
-	for(int a=0; a<selection; a++) i++;
-
-	MFTexture *pTexture = *i;
+	for(int a=0; a<selection; a++)
+		pTexture = gTextureBank.Next(pTexture);
 
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->name));
@@ -942,7 +948,7 @@ void TextureBrowser::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		int texCount = gTextureBank.GetLength();
+		int texCount = gTextureBank.GetNumItems();
 
 		if(MFInput_WasPressed(Button_DLeft, IDD_Gamepad))
 		{

@@ -112,5 +112,9 @@ struct BinaryFilesystemChunk
 	// it could contain texture data, or other relevant model related data..
 };
 
+// typedef the model pool
+#include "MFOpenHashTable.h"
+typedef MFOpenHashTable<MFModelTemplate*> MFModelPool;
+extern MFModelPool gModelBank;
 
 #endif

@@ -9,7 +9,7 @@
 	#define MFTexture_Recreate MFTexture_Recreate_D3D11
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_D3D11
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_D3D11
-	#define MFTexture_Destroy MFTexture_Destroy_D3D11
+	#define MFTexture_DestroyPlatformSpecific MFTexture_DestroyPlatformSpecific_D3D11
 #endif
 
 /**** Defines ****/
@@ -26,7 +26,6 @@
 
 /**** Globals ****/
 
-extern MFPtrListDL<MFTexture> gTextureBank;
 extern MFTexture *pNoneTexture;
 
 extern ID3D11Device* g_pd3dDevice;
@@ -124,29 +123,15 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 	return NULL;
 }
 
-int MFTexture_Destroy(MFTexture *pTexture)
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
-	--pTexture->refCount;
-
-	// if no references left, destroy texture
-	if (!pTexture->refCount)
+	if(pTexture->pInternalData)
 	{
-		MFHeap_Free(pTexture->pTemplateData);
-
-		if (pTexture->pInternalData)
-		{
-			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
-			pSRV->Release();
-		}
-
-		gTextureBank.Destroy(pTexture);
-
-		return 0;
+		ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
+		pSRV->Release();
 	}
-
-	return pTexture->refCount;
 }
 
 #endif // MF_RENDERER

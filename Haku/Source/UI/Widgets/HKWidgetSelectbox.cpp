@@ -73,7 +73,9 @@ bool HKWidgetSelectbox::InputEvent(HKInputManager &manager, const HKInputManager
 
 void HKWidgetSelectbox::SetProperty(const char *pProperty, const char *pValue)
 {
-	if(!MFString_CaseCmp(pProperty, "onSelChanged"))
+	if(!MFString_CaseCmp(pProperty, "style_popup"))
+		pListbox->SetStyle(pValue);
+	else if(!MFString_CaseCmp(pProperty, "onSelChanged"))
 		HKWidget_BindWidgetEvent(OnSelChanged, pValue);
 	else
 		HKWidgetLayoutFrame::SetProperty(pProperty, pValue);

@@ -1,6 +1,7 @@
 #include "Haku.h"
 #include "UI/HKWidget.h"
 #include "UI/HKUI.h"
+#include "UI/HKWidgetStyle.h"
 
 #include "MFTypes.h"
 #include "MFCollision.h"
@@ -166,7 +167,11 @@ HKWidget *HKWidget::GetChild(int index) const
 
 void HKWidget::SetProperty(const char *pProperty, const char *pValue)
 {
-	if(!MFString_CaseCmp(pProperty, "enabled"))
+	if(!MFString_CaseCmp(pProperty, "style"))
+		SetStyle(pValue);
+	else if(!MFString_CaseCmp(pProperty, "style_disabled"))
+		SetStyleDisabled(pValue);
+	else if(!MFString_CaseCmp(pProperty, "enabled"))
 		SetEnabled(HKWidget_GetBoolFromString(pValue));
 	else if(!MFString_CaseCmp(pProperty, "visible"))
 		SetVisible((Visibility)HKWidget_GetEnumValue(pValue, sVisibilityKeys));
@@ -261,12 +266,36 @@ HKWidget *HKWidget::FindChild(const char *pName)
 	return NULL;
 }
 
+void HKWidget::SetStyle(MFString style)
+{
+	if(this->style == style)
+		return;
+
+	this->style = style;
+
+	if(IsEnabled() || styleDisabled.IsEmpty())
+		ApplyStyle(style);
+}
+
+void HKWidget::SetStyleDisabled(MFString style)
+{
+	if(styleDisabled == style)
+		return;
+
+	styleDisabled = style;
+
+	if(!IsEnabled())
+		ApplyStyle(style);
+}
+
 bool HKWidget::SetEnabled(bool bEnable)
 {
 	bool bOld = bEnabled;
 	if(bEnabled != bEnable)
 	{
 		bEnabled = bEnable;
+
+		UpdateStyle();
 
 		if(!OnEnabledChanged.IsEmpty())
 		{
@@ -394,6 +423,24 @@ void HKWidget::SetLayoutJustification(Justification justification)
 		HKWidgetGeneralEvent ev(this);
 		OnLayoutChanged(*this, ev);
 	}
+}
+
+void HKWidget::ApplyStyle(MFString style)
+{
+	if(style.IsEmpty())
+		return;
+
+	HKWidgetStyle *pStyle = HKWidgetStyle::FindStyle(style.CStr());
+	if(pStyle)
+		pStyle->Apply(this);
+}
+
+void HKWidget::UpdateStyle()
+{
+	if(!bEnabled && !styleDisabled.IsEmpty())
+		ApplyStyle(styleDisabled);
+	else if(!style.IsEmpty())
+		ApplyStyle(style);
 }
 
 void HKWidget::Draw()
