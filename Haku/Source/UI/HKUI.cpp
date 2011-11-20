@@ -54,13 +54,7 @@ void HKUserInterface::Init()
 
 		HKWidgetRendererFactory::FactoryType *pWidget = pRendererFactory->RegisterType(HKWidget::TypeName(), HKWidgetRenderer::Create, NULL);
 		pRendererFactory->RegisterType(HKWidgetLabel::TypeName(), HKWidgetRendererLabel::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetButton::TypeName(), HKWidgetRendererLabel::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetLayoutFrame::TypeName(), HKWidgetRenderer::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetLayoutLinear::TypeName(), HKWidgetRenderer::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetPrefab::TypeName(), HKWidgetRenderer::Create, pWidget);
 		pRendererFactory->RegisterType(HKWidgetTextbox::TypeName(), HKWidgetRendererTextbox::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetListbox::TypeName(), HKWidgetRenderer::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetSelectbox::TypeName(), HKWidgetRenderer::Create, pWidget);
 	}
 
 	eventHandlerRegistry.Init(256, 256, 32);
@@ -102,10 +96,20 @@ HKWidgetFactory::FactoryType *HKUserInterface::FindWidgetType(const char *pWidge
 
 HKWidget *HKUserInterface::CreateWidget(const char *pWidgetType)
 {
-	HKWidget *pWidget = pFactory->Create(pWidgetType);
+	HKWidgetFactory::FactoryType *pType;
+	HKWidget *pWidget = pFactory->Create(pWidgetType, &pType);
+	if(!pWidget)
+		return NULL;
+
 	HKWidgetRenderer *pRenderer = pRendererFactory->Create(pWidgetType);
+	while(!pRenderer && pType->pParent)
+	{
+		pType = pType->pParent;
+		pRenderer = pRendererFactory->Create(pType->typeName);
+	}
 	if(pRenderer)
 		pWidget->SetRenderer(pRenderer);
+
 	return pWidget;
 }
 
