@@ -11,6 +11,7 @@
 
 class MFIni;
 struct MFTexture;
+struct MFIniEnumKey;
 
 /**
  * @struct MFMaterial
@@ -45,14 +46,17 @@ enum MFStockMaterials
  */
 enum MFParamType
 {
-	MFParamType_Unknown,	/**< Unknown parameter type */
+	MFParamType_None,		/**< No parameter */
 
+	MFParamType_Constant,	/**< Constant parameter type */
 	MFParamType_String,		/**< String parameter type */
 	MFParamType_Float,		/**< Floating point parameter type */
 	MFParamType_Int,		/**< Integer parameter type */
+	MFParamType_Enum,		/**< Parameter is an enumeration */
 	MFParamType_Bool,		/**< Boolean parameter type */
 	MFParamType_Vector3,	/**< 3D vector parameter type */
 	MFParamType_Vector4,	/**< 4D vector parameter type */
+	MFParamType_Colour,		/**< Colour parameter type */
 	MFParamType_Matrix,		/**< Matrix parameter type */
 
 	MFParamType_Max,		/**< Maximum parameter type */
@@ -65,10 +69,22 @@ enum MFParamType
  */
 struct MFMaterialParameterInfo
 {
-	const char *pParameterName;	/**< Name of the parameter */
+	struct ParameterDetails
+	{
+		MFParamType type;
+		int defaultValue;
+		MFIniEnumKey *pEnumKeys;
+	};
 
-	MFParamType *pArgTypes;		/**< Pointer to an array of argument types for each argument index */
-	int numArgs;				/**< Number of arguments for this parameter */
+	const char *pParameterName;		/**< Name of the parameter */
+
+	int parameterIndex;				/**< Index of the parameter */
+
+	ParameterDetails argIndexHigh;	/**< (Optional) Arg index HiWord details */
+	ParameterDetails argIndex;		/**< (Optional) Arg index details */
+
+	ParameterDetails *pValues;		/**< Pointer to an array of parameter details describing the value struct */
+	int numValues;					/**< Number of elements in the argument struct */
 };
 
 /**
@@ -206,23 +222,22 @@ const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterInde
 int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
 
 /**
- * Get the number of arguments for a parameter.
- * Gets the number of arguments for a parameter.
+ * Get parameter info by name.
+ * Gets information about the specified material parameter.
  * @param pMaterial Pointer to a material instance.
- * @param parameterIndex Index of the parameter to find the arg count for.
- * @return Returns the number of arguments for a parameter.
+ * @param parameterIndex Parameter index.
+ * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-int MFMaterial_GetNumParameterArgs(MFMaterial *pMaterial, int parameterIndex);
+MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex);
 
 /**
- * Get the ParamType for a parameter argument.
- * Gets the ParamType for a parameter argument.
+ * Get parameter info by name.
+ * Gets information about the specified material parameter.
  * @param pMaterial Pointer to a material instance.
- * @param parameterIndex Index of the parameter.
- * @param argIndex Argument index of the parameter.
- * @return Returns the ParamType of the parameter argument.
+ * @param pParameterName String representing a parameter name.
+ * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-MFParamType	MFMaterial_GetParameterArgType(MFMaterial *pMaterial, int parameterIndex, int argIndex);
+MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName);
 
 /**
  * Get the value of a parameter.

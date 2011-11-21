@@ -24,7 +24,7 @@ float MFIniLine::GetFloat(int index)
 {
 	if(index >= stringCount)
 		return 0.0f;
-	return (float)atof(GetString(index));
+	return (float)MFString_AsciiToFloat(GetString(index));
 }
 
 int MFIniLine::GetInt(int index, int base)
@@ -34,18 +34,18 @@ int MFIniLine::GetInt(int index, int base)
 	return MFString_AsciiToInteger(GetString(index), false, base);
 }
 
-int MFIniLine::GetIntString(int index, const char **ppStrings, int numStrings)
+int MFIniLine::GetEnum(int index, MFIniEnumKey *pKeys)
 {
-	int i = 0;
 	const char *pString = GetString(index);
 
-	while(numStrings && ppStrings[i])
-	{
-		if(!MFString_CaseCmp(ppStrings[i], pString))
-			return i;
+	if(MFString_IsNumber(pString))
+		return MFString_AsciiToInteger(pString);
 
-		++i;
-		--numStrings;
+	while(pKeys->pKey)
+	{
+		if(!MFString_CaseCmp(pString, pKeys->pKey))
+			return pKeys->value;
+		++pKeys;
 	}
 
 	return -1;
@@ -60,7 +60,7 @@ bool MFIniLine::GetBool(int index)
 		return true;
 	else if(!MFString_CaseCmp(pString, "false") | !MFString_CaseCmp(pString, "no") | !MFString_CaseCmp(pString, "off") | !MFString_CaseCmpN(pString, "disable", 7))
 		return false;
-	return atoi(pString) != 0;
+	return MFString_AsciiToInteger(pString) != 0;
 }
 
 MFVector MFIniLine::GetVector2(int index)
@@ -79,6 +79,36 @@ MFVector MFIniLine::GetVector4(int index)
 {
 	MFDebug_Assert(stringCount >= index + 4, "Line does not have enough data");
 	return MakeVector(GetFloat(index), GetFloat(index+1), GetFloat(index+2), GetFloat(index+3));
+}
+
+MFVector MFIniLine::GetColour(int index)
+{
+	if(stringCount == index + 1)
+	{
+		const char *pString = GetString(index);
+		if(MFString_BeginsWith(pString, "0x") || MFString_BeginsWith(pString, "$"))
+		{
+			uint32 colour = MFString_AsciiToInteger(pString, false, 16);
+			if(MFString_Length(pString) <= 8)
+				colour |= 0xFF000000;
+
+			MFVector c;
+			c.FromPackedColour(colour);
+			return c;
+		}
+
+		MFDebug_Assert(false, "String does not appear to be a colour...");
+	}
+	else if(stringCount == index + 3)
+	{
+		return MakeVector(GetVector3(index), 1.f);
+	}
+	else if(stringCount == index + 4)
+	{
+		return GetVector4(index);
+	}
+
+	return MFVector::white;
 }
 
 MFMatrix MFIniLine::GetMatrix(int index)

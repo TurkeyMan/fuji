@@ -3,7 +3,7 @@
 #include "UI/HKWidgetRenderer.h"
 
 #include "MFMaterial.h"
-#include "../../Private/Source/Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard.h"
 #include "MFTexture.h"
 #include "MFRenderer.h"
 #include "MFPrimitive.h"
@@ -87,7 +87,7 @@ bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
 		if(pImage)
 		{
 			int texW, texH;
-			MFTexture *pTex = MFMaterial_GetParameterT(pImage, MFMatStandard_DifuseMap, 0);
+			MFTexture *pTex = MFMaterial_GetParameterT(pImage, MFMatStandard_Texture, MFMatStandard_Tex_DifuseMap);
 			MFTexture_GetTextureDimensions(pTex, &texW, &texH);
 
 			texWidth = (float)texW;

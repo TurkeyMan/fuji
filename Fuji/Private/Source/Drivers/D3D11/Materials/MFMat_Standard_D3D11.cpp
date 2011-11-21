@@ -12,7 +12,7 @@
 
 #include "MFMaterial.h"
 #include "MFMaterial_Internal.h"
-#include "Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard_Internal.h"
 #include "MFHeap.h"
 #include "MFTexture_Internal.h"
 #include "MFView.h"
@@ -93,7 +93,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	g_pImmediateContext->VSSetShader(pVertexShader, NULL, 0);
 	g_pImmediateContext->PSSetShader(pPixelShader, NULL, 0);
 
-	if (pSetMaterial != pMaterial)
+	if(pSetMaterial != pMaterial)
 	{
 		bool premultipliedAlpha = false;
 
@@ -142,9 +142,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		//	MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 		//}
 		//else
-		if (pData->pTextures[pData->diffuseMapIndex])
+		if(pData->textures[pData->diffuseMapIndex].pTexture)
 		{
-			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
 
 			g_pImmediateContext->PSSetShaderResources(0, 1, &pSRV);
 
@@ -164,7 +164,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 			//premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
 
-			if (premultipliedAlpha)
+			if(premultipliedAlpha)
 			{
 //				// we need to scale the colour intensity by the vertex alpha since it wont happen during the blend.
 //				MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
@@ -337,7 +337,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	//--
 
-	MFTexture *pDiffuse = pData->pTextures[pData->diffuseMapIndex];
+	MFTexture *pDiffuse = pData->textures[pData->diffuseMapIndex].pTexture;
 
 	const bool premultipliedAlpha = pDiffuse && ((pDiffuse->pTemplateData->flags & TEX_PreMultipliedAlpha) != 0);
 
@@ -358,39 +358,39 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	switch (pData->materialType & MF_BlendMask)
 	{
-	case 0:
-		blendDesc.RenderTarget[0].BlendEnable = false;
-		break;
+		case 0:
+			blendDesc.RenderTarget[0].BlendEnable = false;
+			break;
 
-	case MF_AlphaBlend:
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		break;
+		case MF_AlphaBlend:
+			blendDesc.RenderTarget[0].BlendEnable = true;
+			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			break;
 
-	case MF_Additive:
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		break;
+		case MF_Additive:
+			blendDesc.RenderTarget[0].BlendEnable = true;
+			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			break;
 
-	case MF_Subtractive:
-		blendDesc.RenderTarget[0].BlendEnable = true;
-		blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-		blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
-		break;
+		case MF_Subtractive:
+			blendDesc.RenderTarget[0].BlendEnable = true;
+			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
+			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
+			break;
 	}
 
 	hr = g_pd3dDevice->CreateBlendState(&blendDesc, &pData->pBlendState);
@@ -426,15 +426,15 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
 
-	for (uint32 a = 0; a < pData->textureCount; a++)
+	for(uint32 a = 0; a < pData->textureCount; a++)
 	{
-		MFTexture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->textures[a].pTexture);
 	}
 
-	if (pData->pSamplerState) pData->pSamplerState->Release();
-	if (pData->pRasterizerState) pData->pRasterizerState->Release();
-	if (pData->pBlendState) pData->pBlendState->Release();
-	if (pData->pConstantBuffer) pData->pConstantBuffer->Release();
+	if(pData->pSamplerState) pData->pSamplerState->Release();
+	if(pData->pRasterizerState) pData->pRasterizerState->Release();
+	if(pData->pBlendState) pData->pBlendState->Release();
+	if(pData->pConstantBuffer) pData->pConstantBuffer->Release();
 
 	MFHeap_Free(pMaterial->pInstanceData);
 }

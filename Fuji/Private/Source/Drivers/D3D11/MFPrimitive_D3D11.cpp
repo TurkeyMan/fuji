@@ -316,7 +316,7 @@ void MFPrimitive_BeginBlitter(int numBlits)
 	MFView_SetOrtho(&rect);
 
 	MFMaterial *pMat = MFMaterial_GetCurrent();
-	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_DifuseMap, 0);
+	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_Texture, MFMatStandard_Tex_DifuseMap);
 	MFTexture_GetTextureDimensions(pTex, &textureWidth, &textureHeight);
 
 	uScale = 1.0f / (float)textureWidth;

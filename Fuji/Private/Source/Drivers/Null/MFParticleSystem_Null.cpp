@@ -3,6 +3,7 @@
 #if MF_PARTICLESYSTEM == MF_DRIVER_NULL
 
 #include "MFSystem.h"
+#include "Materials/MFMat_Standard.h"
 #include "MFParticleSystem_Internal.h"
 #include "MFPrimitive.h"
 #include "MFView.h"
@@ -20,8 +21,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 		pSystem->pMaterial = MFMaterial_Create(pParticleParams->pMaterial);
 
 //		int additive = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "additive");
-		int zwrite = MFMaterial_GetParameterIndexFromName(pSystem->pMaterial, "zwrite");
-		MFMaterial_SetParameterI(pSystem->pMaterial, zwrite, 0, 0);
+		MFMaterial_SetParameterI(pSystem->pMaterial, MFMatStandard_ZWrite, 0, 0);
 	}
 
 	pSystem->particles.Init("ParticleSystem", pSystem->params.maxActiveParticles);

@@ -1,72 +1,140 @@
 #include "Fuji.h"
 #include "MFSystem.h"
+#include "MFIni.h"
 
 #include "MFMaterial_Internal.h"
-#include "Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard_Internal.h"
 
-static MFParamType lit[] = { MFParamType_Bool };
-static MFParamType prelit[] = { MFParamType_Bool };
-static MFParamType diffusecolour[] = { MFParamType_Vector4 };
-static MFParamType ambientcolour[] = { MFParamType_Vector4 };
-static MFParamType specularcolour[] = { MFParamType_Vector4 };
-static MFParamType specularpower[] = { MFParamType_Float };
-static MFParamType emissivecolour[] = { MFParamType_Vector4 };
-static MFParamType mask[] = { MFParamType_Bool };
-static MFParamType alpharef[] = { MFParamType_Float };
-static MFParamType cullmode[] = { MFParamType_Int };
-static MFParamType zread[] = { MFParamType_Bool };
-static MFParamType zwrite[] = { MFParamType_Bool };
-static MFParamType additive[] = { MFParamType_Bool };
-static MFParamType subtractive[] = { MFParamType_Bool };
-static MFParamType alpha[] = { MFParamType_Bool };
-static MFParamType blend[] = { MFParamType_Int };
-static MFParamType texture[] = { MFParamType_String };
-static MFParamType diffusemap[] = { MFParamType_String };
-static MFParamType diffusemap2[] = { MFParamType_String };
-static MFParamType normalmap[] = { MFParamType_String };
-static MFParamType detailmap[] = { MFParamType_String };
-static MFParamType envmap[] = { MFParamType_String };
-static MFParamType lightmap[] = { MFParamType_String };
-static MFParamType bumpmap[] = { MFParamType_String };
-static MFParamType reflectionmap[] = { MFParamType_String };
-static MFParamType specularmap[] = { MFParamType_String };
-static MFParamType celshading[] = { MFParamType_Unknown };
-static MFParamType phong[] = { MFParamType_Unknown };
-static MFParamType animated[] = { MFParamType_Int, MFParamType_Int, MFParamType_Float };
-static MFParamType tile[] = { MFParamType_Int, MFParamType_Int, MFParamType_Int, MFParamType_Int };
+static MFIniEnumKey sBlendKeys[] =
+{
+	{ "none",			MFMatStandard_Blend_None },
+	{ "alpha",			MFMatStandard_Blend_Alpha },
+	{ "additive",		MFMatStandard_Blend_Additive },
+	{ "subtractive",	MFMatStandard_Blend_Subtractive },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sCullKeys[] =
+{
+	{ "none",		MFMatStandard_Cull_None },
+	{ "ccw",		MFMatStandard_Cull_CCW },
+	{ "cw",			MFMatStandard_Cull_CW },
+	{ "default",	MFMatStandard_Cull_Default },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sTextureKeys[] =
+{
+	{ "diffuse",	MFMatStandard_Tex_DifuseMap },
+	{ "diffuse2",	MFMatStandard_Tex_DiffuseMap2 },
+	{ "normal",		MFMatStandard_Tex_NormalMap },
+	{ "detail",		MFMatStandard_Tex_DetailMap },
+	{ "env",		MFMatStandard_Tex_EnvMap },
+	{ "light",		MFMatStandard_Tex_LightMap },
+	{ "bump",		MFMatStandard_Tex_BumpMap },
+	{ "reflection",	MFMatStandard_Tex_ReflectionMap },
+	{ "specular",	MFMatStandard_Tex_SpecularMap },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sTextureAddreessKeys[] =
+{
+	{ "addressu",		MFMatStandard_TexFlag_AddressU },
+	{ "addressv",		MFMatStandard_TexFlag_AddressV },
+	{ "addressw",		MFMatStandard_TexFlag_AddressW },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sTextureFilterKeys[] =
+{
+	{ "magfilter",		MFMatStandard_TexFlag_MagFilter },
+	{ "minfilter",		MFMatStandard_TexFlag_MinFilter },
+	{ "mipfilter",		MFMatStandard_TexFlag_MipFilter },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sTextureAddressValueKeys[] =
+{
+	{ "wrap",			MFMatStandard_TexAddress_Wrap },
+	{ "mirror",			MFMatStandard_TexAddress_Mirror },
+	{ "clamp",			MFMatStandard_TexAddress_Clamp },
+	{ "border",			MFMatStandard_TexAddress_Border },
+	{ "mirroronce",		MFMatStandard_TexAddress_MirrorOnce },
+	{ NULL, 0 }
+};
+
+static MFIniEnumKey sTextureFilterValueKeys[] =
+{
+	{ "none",			MFMatStandard_TexFilter_None },
+	{ "nearest",		MFMatStandard_TexFilter_Point },
+	{ "linear",			MFMatStandard_TexFilter_Linear },
+	{ "anisotropic",	MFMatStandard_TexFilter_Anisotropic },
+	{ NULL, 0 }
+};
+
+static MFMaterialParameterInfo::ParameterDetails boolValue[] = { { MFParamType_Bool, 1 } };
+static MFMaterialParameterInfo::ParameterDetails intValue[] = { { MFParamType_Int, 1 } };
+static MFMaterialParameterInfo::ParameterDetails floatValue[] = { { MFParamType_Float } };
+static MFMaterialParameterInfo::ParameterDetails colourValue[] = { { MFParamType_Colour } };
+static MFMaterialParameterInfo::ParameterDetails stringValue[] = { { MFParamType_String } };
+static MFMaterialParameterInfo::ParameterDetails matrixValue[] = { { MFParamType_Matrix } };
+
+static MFMaterialParameterInfo::ParameterDetails blend[] = { { MFParamType_Enum, 1, sBlendKeys } };
+static MFMaterialParameterInfo::ParameterDetails cull[] = { { MFParamType_Enum, 1, sCullKeys } };
+static MFMaterialParameterInfo::ParameterDetails textureaddress[] = { { MFParamType_Enum, MFMatStandard_TexAddress_Wrap, sTextureAddressValueKeys } };
+static MFMaterialParameterInfo::ParameterDetails texturefilter[] = { { MFParamType_Enum, MFMatStandard_TexFilter_Linear, sTextureFilterValueKeys } };
+static MFMaterialParameterInfo::ParameterDetails animated[] = { { MFParamType_Int }, { MFParamType_Int }, { MFParamType_Float } };
+static MFMaterialParameterInfo::ParameterDetails tile[] = { { MFParamType_Int }, { MFParamType_Int }, { MFParamType_Int }, { MFParamType_Int } };
+
+static MFMaterialParameterInfo::ParameterDetails additive[] = { { MFParamType_Constant, MFMatStandard_Blend_Additive } };
+static MFMaterialParameterInfo::ParameterDetails subtractive[] = { { MFParamType_Constant, MFMatStandard_Blend_Subtractive } };
+static MFMaterialParameterInfo::ParameterDetails alpha[] = { { MFParamType_Constant, MFMatStandard_Blend_Alpha } };
 
 MFMaterialParameterInfo parameterInformation[] =
 {
-	{ "lit", lit, sizeof(lit)/sizeof(MFParamType) },
-	{ "prelit", prelit, sizeof(prelit)/sizeof(MFParamType) },
-	{ "diffusecolour", diffusecolour, sizeof(diffusecolour)/sizeof(MFParamType) },
-	{ "ambientcolour", ambientcolour, sizeof(ambientcolour)/sizeof(MFParamType) },
-	{ "specularcolour", specularcolour, sizeof(specularcolour)/sizeof(MFParamType) },
-	{ "specularpower", specularpower, sizeof(specularpower)/sizeof(MFParamType) },
-	{ "emissivecolour", emissivecolour, sizeof(emissivecolour)/sizeof(MFParamType) },
-	{ "mask", mask, sizeof(mask)/sizeof(MFParamType) },
-	{ "alpharef", alpharef, sizeof(alpharef)/sizeof(MFParamType) },
-	{ "cullmode", cullmode, sizeof(cullmode)/sizeof(MFParamType) },
-	{ "zread", zread, sizeof(zread)/sizeof(MFParamType) },
-	{ "zwrite", zwrite, sizeof(zwrite)/sizeof(MFParamType) },
-	{ "additive", additive, sizeof(additive)/sizeof(MFParamType) },
-	{ "subtractive", subtractive, sizeof(subtractive)/sizeof(MFParamType) },
-	{ "alpha", alpha, sizeof(alpha)/sizeof(MFParamType) },
-	{ "blend", blend, sizeof(blend)/sizeof(MFParamType) },
-	{ "texture", texture, sizeof(texture)/sizeof(MFParamType) },
-	{ "diffusemap", diffusemap, sizeof(diffusemap)/sizeof(MFParamType) },
-	{ "diffusemap2", diffusemap2, sizeof(diffusemap2)/sizeof(MFParamType) },
-	{ "normalmap", normalmap, sizeof(normalmap)/sizeof(MFParamType) },
-	{ "detailmap", detailmap, sizeof(detailmap)/sizeof(MFParamType) },
-	{ "envmap", envmap, sizeof(envmap)/sizeof(MFParamType) },
-	{ "lightmap", lightmap, sizeof(lightmap)/sizeof(MFParamType) },
-	{ "bumpmap", bumpmap, sizeof(bumpmap)/sizeof(MFParamType) },
-	{ "reflectionmap", reflectionmap, sizeof(reflectionmap)/sizeof(MFParamType) },
-	{ "specularmap", specularmap, sizeof(specularmap)/sizeof(MFParamType) },
-	{ "celshading", celshading, sizeof(celshading)/sizeof(MFParamType) },
-	{ "phong", phong, sizeof(phong)/sizeof(MFParamType) },
-	{ "animated", animated, sizeof(animated)/sizeof(MFParamType) },
-	{ "tile", tile, sizeof(tile)/sizeof(MFParamType) }
+	// name				paramIndex						argIndex hiword							argIndex													values...
+	{ "lit",			MFMatStandard_Lit,				{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "prelit",			MFMatStandard_Prelit,			{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "diffusecolour",	MFMatStandard_DiffuseColour,	{ MFParamType_None },					{ MFParamType_None },										colourValue, 1 },
+	{ "ambientcolour",	MFMatStandard_AmbientColour,	{ MFParamType_None },					{ MFParamType_None },										colourValue, 1 },
+	{ "specularcolour",	MFMatStandard_SpecularColour,	{ MFParamType_None },					{ MFParamType_None },										colourValue, 1 },
+	{ "specularpower",	MFMatStandard_SpecularPower,	{ MFParamType_None },					{ MFParamType_None },										floatValue, 1 },
+	{ "emissivecolour",	MFMatStandard_EmissiveColour,	{ MFParamType_None },					{ MFParamType_None },										colourValue, 1 },
+	{ "mask",			MFMatStandard_Mask,				{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "alpharef",		MFMatStandard_AlphaRef,			{ MFParamType_None },					{ MFParamType_None },										floatValue, 1 },
+	{ "cullmode",		MFMatStandard_CullMode,			{ MFParamType_None },					{ MFParamType_None },										cull, 1 },
+	{ "zread",			MFMatStandard_ZRead,			{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "zwrite",			MFMatStandard_ZWrite,			{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "blend",			MFMatStandard_Blend,			{ MFParamType_None },					{ MFParamType_None },										blend, 1 },
+	{ "celshading",		MFMatStandard_CelShading,		{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+	{ "phong",			MFMatStandard_Phong,			{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
+
+	{ "texture",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Enum, 0, sTextureKeys },						stringValue, 1 },
+	{ "textureaddress",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureAddreessKeys },				textureaddress, 1 },
+	{ "texturefilter",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureFilterKeys },				texturefilter, 1 },
+	{ "bordercolour",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_None, MFMatStandard_TexFlag_BorderColour },	colourValue, 1 },
+	{ "texturematrix",	MFMatStandard_TextureMatrix,	{ MFParamType_None },					{ MFParamType_None },										matrixValue, 1 },
+
+	{ "animated",		MFMatStandard_Animated,			{ MFParamType_None },					{ MFParamType_None },										animated, sizeof(animated)/sizeof(MFMaterialParameterInfo::ParameterDetails) },
+	{ "tile",			MFMatStandard_Tile,				{ MFParamType_None },					{ MFParamType_None },										tile, sizeof(tile)/sizeof(MFMaterialParameterInfo::ParameterDetails) },
+
+	// handy macros
+	{ "additive",		MFMatStandard_Blend,			{ MFParamType_None },					{ MFParamType_None },										additive, 1 },
+	{ "subtractive",	MFMatStandard_Blend,			{ MFParamType_None },					{ MFParamType_None },										subtractive, 1 },
+	{ "alpha",			MFMatStandard_Blend,			{ MFParamType_None },					{ MFParamType_None },										alpha, 1 },
+
+	{ "addressu",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_AddressU },	textureaddress, 1 },
+	{ "addressv",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_AddressV },	textureaddress, 1 },
+	{ "minfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MinFilter },	texturefilter, 1 },
+	{ "magfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MagFilter },	texturefilter, 1 },
+	{ "mipfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MipFilter },	texturefilter, 1 },
+
+	{ "diffusemap",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_DifuseMap },		stringValue, 1 },
+	{ "diffusemap2",	MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_DiffuseMap2 },	stringValue, 1 },
+	{ "normalmap",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_NormalMap },		stringValue, 1 },
+	{ "detailmap",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_DetailMap },		stringValue, 1 },
+	{ "envmap",			MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_EnvMap },			stringValue, 1 },
+	{ "lightmap",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Constant, MFMatStandard_Tex_LightMap },		stringValue, 1 }
 };
 
 void MFMat_Standard_Register()
@@ -149,66 +217,91 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 		case MFMatStandard_ZWrite:
 			pData->materialType = (pData->materialType & ~MF_NoZWrite) | (value ? 0 : MF_NoZWrite);
 			break;
-		case MFMatStandard_Additive:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (value ? MF_Additive : 0);
-			break;
-		case MFMatStandard_Subtractive:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (value ? MF_Subtractive : 0);
-			break;
-		case MFMatStandard_Alpha:
-			pData->materialType = (pData->materialType & ~MF_BlendMask) | (value ? MF_AlphaBlend : 0);
-			break;
 		case MFMatStandard_Blend:
 			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)(value) << 1);
 			break;
 		case MFMatStandard_Texture:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->textureCount++;
+			pData->textures[pData->textureCount].mipFilter = MFMatStandard_TexFilter_Linear;
+			pData->textures[pData->textureCount].minFilter = MFMatStandard_TexFilter_Linear;
+			pData->textures[pData->textureCount].magFilter = MFMatStandard_TexFilter_Linear;
+			switch(argIndex)
+			{
+				case MFMatStandard_Tex_DifuseMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->diffuseMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_DiffuseMap2:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->diffuseMap2Index = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_NormalMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->normalMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_DetailMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->detailMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_EnvMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->envMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_LightMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->lightMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_BumpMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->bumpMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_ReflectionMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->reflectionMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_SpecularMap:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->specularMapIndex = pData->textureCount;
+					pData->textureCount++;
+					break;
+				case MFMatStandard_Tex_Texture:
+					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textureCount++;
+					break;
+			}
 			break;
-		case MFMatStandard_DifuseMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->diffuseMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_DiffuseMap2:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->diffuseMap2Index = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_NormalMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->normalMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_DetailMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->detailMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_EnvMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->envMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_LightMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->lightMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_BumpMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->bumpMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_ReflectionMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->reflectionMapIndex = pData->textureCount;
-			pData->textureCount++;
-			break;
-		case MFMatStandard_SpecularMap:
-			pData->pTextures[pData->textureCount] = MFTexture_Create((const char *)value);
-			pData->specularMapIndex = pData->textureCount;
-			pData->textureCount++;
+		case MFMatStandard_TextureFlags:
+			switch(argIndex & 0xFFFF)
+			{
+				case MFMatStandard_TexFlag_AddressU:
+					pData->textures[argIndex >> 16].addressU = value;
+					break;
+				case MFMatStandard_TexFlag_AddressV:
+					pData->textures[argIndex >> 16].addressV = value;
+					break;
+				case MFMatStandard_TexFlag_AddressW:
+					pData->textures[argIndex >> 16].addressW = value;
+					break;
+				case MFMatStandard_TexFlag_MagFilter:
+					pData->textures[argIndex >> 16].magFilter = value;
+					break;
+				case MFMatStandard_TexFlag_MinFilter:
+					pData->textures[argIndex >> 16].minFilter = value;
+					break;
+				case MFMatStandard_TexFlag_MipFilter:
+					pData->textures[argIndex >> 16].mipFilter = value;
+					break;
+				case MFMatStandard_TexFlag_BorderColour:
+					pData->textures[argIndex >> 16].borderColour = ((MFVector&)value).ToPackedColour();
+					break;
+			}
 			break;
 		case MFMatStandard_CelShading:
 			pData->materialType |= MF_CelShading;
@@ -218,43 +311,29 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 			break;
 		case MFMatStandard_Animated:
 		{
+			MFMat_Standard_AnimParams *pAnim = (MFMat_Standard_AnimParams*)value;
+
 			pData->materialType |= MF_Animating;
 
-			switch(argIndex)
-			{
-				case 0:	// uFrames
-					pData->uFrames = (int)value;
-					break;
-				case 1:	// vFrames
-					pData->vFrames = (int)value;
-					break;
-				case 2:	// frameTime
-					pData->frameTime = *(float*)value;
-					break;
-			}
+			pData->uFrames = pAnim->hFrames;
+			pData->vFrames = pAnim->vFrames;
+			pData->frameTime = pAnim->frameTime;
 
-			pData->textureMatrix.SetScale(MakeVector(MFRcp((float)pData->uFrames), MFRcp((float)pData->vFrames), 1.0f));
+			pData->textureMatrix.SetScale(MakeVector(MFRcp((float)pAnim->hFrames), MFRcp((float)pAnim->vFrames), 1.0f));
 			break;
 		}
 		case MFMatStandard_Tile:
 		{
-			switch(argIndex)
-			{
-				case 0:
-					pData->uFrames = (int)(value);
-					break;
-				case 1:
-					pData->vFrames = (int)(value);
-					break;
-				case 2:
-					pData->curFrame = (int)(value);
-					break;
-				case 3:
-					pData->curFrame = (pData->curFrame % pData->uFrames) + (int)(value) * pData->uFrames;
-					pData->textureMatrix.SetScale(MakeVector(1.0f/(float)pData->uFrames, 1.0f/(float)pData->vFrames, 1.0f));
-					pData->textureMatrix.SetTrans3(MakeVector(1.0f/(float)pData->uFrames * (float)(pData->curFrame % pData->uFrames), 1.0f/(float)pData->vFrames * (float)(pData->curFrame / pData->vFrames), 0.0f));
-					break;
-			}
+			MFMat_Standard_TileParams *pTile = (MFMat_Standard_TileParams*)value;
+
+			pData->uFrames = pTile->hFrames;
+			pData->vFrames = pTile->vFrames;
+			pData->curFrame = pTile->vFrame*pTile->hFrames + pTile->hFrame;
+
+			float hScale = MFRcp((float)pTile->hFrames);
+			float vScale = MFRcp((float)pTile->vFrames);
+			pData->textureMatrix.SetScale(MakeVector(hScale, vScale, 1.0f));
+			pData->textureMatrix.SetTrans3(MakeVector(hScale * (float)pTile->hFrame, vScale * (float)pTile->vFrame, 0.0f));
 			break;
 		}
 	}
@@ -294,25 +373,49 @@ uintp MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int
 		case MFMatStandard_ZWrite:
 			return (pData->materialType & MF_NoZWrite) ? 0 : 1;
 		case MFMatStandard_Texture:
-			return (uintp)pData->pTextures[argIndex];
-		case MFMatStandard_DifuseMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_DiffuseMap2:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_NormalMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_DetailMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_EnvMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_LightMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_BumpMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_ReflectionMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
-		case MFMatStandard_SpecularMap:
-			return (uintp)pData->pTextures[pData->diffuseMapIndex];
+			switch(argIndex)
+			{
+				case MFMatStandard_Tex_DifuseMap:
+					return (uintp)pData->textures[pData->diffuseMapIndex].pTexture;
+				case MFMatStandard_Tex_DiffuseMap2:
+					return (uintp)pData->textures[pData->diffuseMap2Index].pTexture;
+				case MFMatStandard_Tex_NormalMap:
+					return (uintp)pData->textures[pData->normalMapIndex].pTexture;
+				case MFMatStandard_Tex_DetailMap:
+					return (uintp)pData->textures[pData->detailMapIndex].pTexture;
+				case MFMatStandard_Tex_EnvMap:
+					return (uintp)pData->textures[pData->envMapIndex].pTexture;
+				case MFMatStandard_Tex_LightMap:
+					return (uintp)pData->textures[pData->lightMapIndex].pTexture;
+				case MFMatStandard_Tex_BumpMap:
+					return (uintp)pData->textures[pData->bumpMapIndex].pTexture;
+				case MFMatStandard_Tex_ReflectionMap:
+					return (uintp)pData->textures[pData->reflectionMapIndex].pTexture;
+				case MFMatStandard_Tex_SpecularMap:
+					return (uintp)pData->textures[pData->specularMapIndex].pTexture;
+				case MFMatStandard_Tex_Texture:
+					return (uintp)pData->textures[(uintp)pValue].pTexture;
+			}
+			break;
+		case MFMatStandard_TextureFlags:
+			switch(argIndex & 0xFFFF)
+			{
+				case MFMatStandard_TexFlag_AddressU:
+					return pData->textures[argIndex >> 16].addressU;
+				case MFMatStandard_TexFlag_AddressV:
+					return pData->textures[argIndex >> 16].addressV;
+				case MFMatStandard_TexFlag_AddressW:
+					return pData->textures[argIndex >> 16].addressW;
+				case MFMatStandard_TexFlag_MagFilter:
+					return pData->textures[argIndex >> 16].magFilter;
+				case MFMatStandard_TexFlag_MinFilter:
+					return pData->textures[argIndex >> 16].minFilter;
+				case MFMatStandard_TexFlag_MipFilter:
+					return pData->textures[argIndex >> 16].mipFilter;
+				case MFMatStandard_TexFlag_BorderColour:
+					return pData->textures[argIndex >> 16].borderColour;
+			}
+			break;
 		case MFMatStandard_TextureMatrix:
 			*(MFMatrix*)pValue = pData->textureMatrix;
 			break;

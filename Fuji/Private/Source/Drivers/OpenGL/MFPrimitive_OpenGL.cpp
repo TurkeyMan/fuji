@@ -284,7 +284,7 @@ void MFPrimitive_BeginBlitter(int numBlits)
 
 	MFMaterial *pMat = MFMaterial_GetCurrent();
 
-	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_DifuseMap, 0);
+	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_Texture, MFMatStandard_Tex_DifuseMap);
 	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
 	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
 

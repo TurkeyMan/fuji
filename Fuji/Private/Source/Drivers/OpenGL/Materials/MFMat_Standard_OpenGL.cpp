@@ -15,7 +15,7 @@
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
-#include "Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard_Internal.h"
 
 #include "../MFOpenGL.h"
 
@@ -44,8 +44,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		if(pData->detailMapIndex)
 		{
 			// HACK: for compound multitexturing
-			GLuint diffuse = (GLuint)(size_t)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
-			GLuint detail = (GLuint)(size_t)pData->pTextures[pData->detailMapIndex]->pInternalData;
+			GLuint diffuse = (GLuint)(size_t)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
+			GLuint detail = (GLuint)(size_t)pData->textures[pData->detailMapIndex].pTexture->pInternalData;
 
 			glActiveTexture(GL_TEXTURE0);
 		    glEnable(GL_TEXTURE_2D);
@@ -60,16 +60,16 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			glMatrixMode(GL_TEXTURE);
 			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
 		}
-		else if(pData->pTextures[pData->diffuseMapIndex])
+		else if(pData->textures[pData->diffuseMapIndex].pTexture)
 		{
 			glActiveTexture(GL_TEXTURE0);
 		    glEnable(GL_TEXTURE_2D);
 
-			GLuint textureID = *(GLuint*)&pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			GLuint textureID = *(GLuint*)&pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
 			glBindTexture(GL_TEXTURE_2D, textureID);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
+			premultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
 
 			glMatrixMode(GL_TEXTURE);
 			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
@@ -162,7 +162,7 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
-		MFTexture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->textures[a].pTexture);
 	}
 
 	MFHeap_Free(pMaterial->pInstanceData);

@@ -16,7 +16,7 @@
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "../MFRenderer_D3D9.h"
-#include "Materials/MFMat_Standard.h"
+#include "Materials/MFMat_Standard_Internal.h"
 
 #include "../Shaders/MatStandard_s.h"
 #include "../Shaders/MatStandard_a.h"
@@ -34,6 +34,23 @@ extern int gNumAnimMats;
 
 extern const uint16 *pCurrentBatch;
 extern int gNumBonesInBatch;
+
+static const uint32 sFilterModes[] =
+{
+    D3DTEXF_NONE,
+    D3DTEXF_POINT,
+    D3DTEXF_LINEAR,
+    D3DTEXF_ANISOTROPIC
+};
+
+static const uint32 sAddressModes[] =
+{
+    D3DTADDRESS_WRAP,
+    D3DTADDRESS_MIRROR,
+    D3DTADDRESS_CLAMP,
+    D3DTADDRESS_BORDER,
+    D3DTADDRESS_MIRRORONCE
+};
 
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
@@ -68,139 +85,153 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		if(pData->detailMapIndex)
 		{
 			// HACK: for compound multitexturing
-			IDirect3DTexture9 *pDiffuse = (IDirect3DTexture9*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
-			IDirect3DTexture9 *pDetail = (IDirect3DTexture9*)pData->pTextures[pData->detailMapIndex]->pInternalData;
+			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
+			MFMat_Standard_Data::Texture &detail = pData->textures[pData->detailMapIndex];
 
-			MFRendererPC_SetTexture(0, pDetail);
-			MFRendererPC_SetTexture(1, pDiffuse);
+			IDirect3DTexture9 *pDiffuse = (IDirect3DTexture9*)diffuse.pTexture->pInternalData;
+			IDirect3DTexture9 *pDetail = (IDirect3DTexture9*)detail.pTexture->pInternalData;
 
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
-			MFRendererPC_SetSamplerState(1, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(1, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(1, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+			pd3dDevice->SetTexture(0, pDetail);
+			pd3dDevice->SetTexture(1, pDiffuse);
 
-			MFRendererPC_SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			// set the mip filter to nearest!!!
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, sFilterModes[detail.minFilter]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, sFilterModes[detail.magFilter]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, sFilterModes[detail.mipFilter]);
+			pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, sFilterModes[diffuse.minFilter]);
+			pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, sFilterModes[diffuse.magFilter]);
+			pd3dDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, sFilterModes[diffuse.mipFilter]);
 
-			MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
-			MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
-			MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_ADD);
-			MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, sAddressModes[detail.addressU]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, sAddressModes[detail.addressV]);
+			pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, sAddressModes[diffuse.addressU]);
+			pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, sAddressModes[diffuse.addressV]);
+
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_ADD);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 
 			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 		}
-		else if(pData->pTextures[pData->diffuseMapIndex])
+		else if(pData->textures[pData->diffuseMapIndex].pTexture)
 		{
-			IDirect3DTexture9 *pTexture = (IDirect3DTexture9*)pData->pTextures[pData->diffuseMapIndex]->pInternalData;
+			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
 
-			MFRendererPC_SetTexture(0, pTexture);
-			MFRendererPC_SetTexture(1, NULL);
+			IDirect3DTexture9 *pTexture = (IDirect3DTexture9*)diffuse.pTexture->pInternalData;
 
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-			MFRendererPC_SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+			pd3dDevice->SetTexture(0, pTexture);
+			pd3dDevice->SetTexture(1, NULL);
 
-			MFRendererPC_SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-			MFRendererPC_SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, sFilterModes[diffuse.minFilter]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, sFilterModes[diffuse.magFilter]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, sFilterModes[diffuse.mipFilter]);
+
+			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, sAddressModes[diffuse.addressU]);
+			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, sAddressModes[diffuse.addressV]);
+
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
 
 			MFRendererPC_SetTextureMatrix(pData->textureMatrix);
 
-			premultipliedAlpha = !!(pData->pTextures[pData->diffuseMapIndex]->pTemplateData->flags & TEX_PreMultipliedAlpha);
+			premultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
 
 			if(premultipliedAlpha)
 			{
 				// we need to scale the colour intensity by the vertex alpha since it wont happen during the blend.
-				MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
-				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
 
-//				MFRendererPC_SetTextureStageState(1, D3DTSS_CONSTANT, 0);
+//				pd3dDevice->SetTextureStageState(1, D3DTSS_CONSTANT, 0);
 
-				MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
-				MFRendererPC_SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEMP);
-				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEMP);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
 			}
 			else
 			{
-				MFRendererPC_SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-				MFRendererPC_SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 			}
 		}
 		else
 		{
-			MFRendererPC_SetTexture(0, NULL);
+			pd3dDevice->SetTexture(0, NULL);
 		}
 
 		switch(pData->materialType&MF_BlendMask)
 		{
 			case 0:
-				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+				pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
 				break;
 			case MF_AlphaBlend:
-				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
-				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				pd3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+				pd3dDevice->SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
+				pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
 			case MF_Additive:
-				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
-				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				pd3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+				pd3dDevice->SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
+				pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 			case MF_Subtractive:
-				MFRendererPC_SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				MFRendererPC_SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
-				MFRendererPC_SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
-				MFRendererPC_SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+				pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				pd3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
+				pd3dDevice->SetRenderState(D3DRS_SRCBLEND, premultipliedAlpha ? D3DBLEND_ONE : D3DBLEND_SRCALPHA);
+				pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 				break;
 		}
 
 		if(pData->materialType & MF_Mask)
 		{
-			MFRendererPC_SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-			MFRendererPC_SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-			MFRendererPC_SetRenderState(D3DRS_ALPHAREF, 0xFF);
+			pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			pd3dDevice->SetRenderState(D3DRS_ALPHAREF, 0xFF);
 		}
 		else
 		{
-			MFRendererPC_SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
 		}
 
-		switch(pData->materialType&MF_CullMode)
+		switch((pData->materialType & MF_CullMode) >> 6)
 		{
-			case 0<<6:
-				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+			case 0:
+				pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 				break;
-			case 1<<6:
-				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+			case 1:
+				pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 				break;
-			case 2<<6:
-				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+			case 2:
+				pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 				break;
-			case 3<<6:
+			case 3:
 				// 'default' ?
-				MFRendererPC_SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+				pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 				break;
 		}
 
 		if(!(pData->materialType&MF_NoZRead) || !(pData->materialType&MF_NoZWrite))
 		{
-			MFRendererPC_SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-			MFRendererPC_SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
-			MFRendererPC_SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
+			pd3dDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
+			pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, (pData->materialType&MF_NoZWrite) ? FALSE : TRUE);
+			pd3dDevice->SetRenderState(D3DRS_ZFUNC, (pData->materialType&MF_NoZRead) ? D3DCMP_ALWAYS : D3DCMP_LESSEQUAL);
 		}
 		else
 		{
-			MFRendererPC_SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+			pd3dDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 		}
 	}
 
@@ -251,7 +282,7 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 	{
-		MFTexture_Destroy(pData->pTextures[a]);
+		MFTexture_Destroy(pData->textures[a].pTexture);
 	}
 
 	MFHeap_Free(pMaterial->pInstanceData);

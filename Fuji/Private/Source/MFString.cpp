@@ -420,11 +420,13 @@ int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 
 	int number = 0;
 
-	if(base == 16 || (bDetectBase && pString[0] == '0' && pString[1] == 'x'))
+	if(base == 16 || (bDetectBase && ((pString[0] == '0' && pString[1] == 'x') || pString[0] == '$')))
 	{
 		// hex number
 		if(pString[0] == '0' && pString[1] == 'x')
 			pString += 2;
+		else if(pString[0] == '$')
+			pString += 1;
 
 		while(*pString)
 		{

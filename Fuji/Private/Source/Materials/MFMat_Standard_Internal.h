@@ -1,45 +1,7 @@
-#if !defined(_MFMAT_STANDARD_H)
-#define _MFMAT_STANDARD_H
+#if !defined(_MFMAT_STANDARD_INTERNAL_H)
+#define _MFMAT_STANDARD_INTERNAL_H
 
-enum MFMat_Standard_Parameters
-{
-	MFMatStandard_Unknown = -1,
-
-	MFMatStandard_Lit = 0,
-	MFMatStandard_Prelit,
-	MFMatStandard_DiffuseColour,
-	MFMatStandard_AmbientColour,
-	MFMatStandard_SpecularColour,
-	MFMatStandard_SpecularPower,
-	MFMatStandard_EmissiveColour,
-	MFMatStandard_Mask,
-	MFMatStandard_AlphaRef,
-	MFMatStandard_CullMode,
-	MFMatStandard_ZRead,
-	MFMatStandard_ZWrite,
-	MFMatStandard_Additive,
-	MFMatStandard_Subtractive,
-	MFMatStandard_Alpha,
-	MFMatStandard_Blend,
-	MFMatStandard_Texture,
-	MFMatStandard_DifuseMap,
-	MFMatStandard_DiffuseMap2,
-	MFMatStandard_NormalMap,
-	MFMatStandard_DetailMap,
-	MFMatStandard_EnvMap,
-	MFMatStandard_LightMap,
-	MFMatStandard_BumpMap,
-	MFMatStandard_ReflectionMap,
-	MFMatStandard_SpecularMap,
-	MFMatStandard_CelShading,
-	MFMatStandard_Phong,
-	MFMatStandard_Animated,
-	MFMatStandard_Tile,
-	MFMatStandard_TextureMatrix,
-
-	MFMatStandard_Max,
-	MFMatStandard_ForceInt = 0x7FFFFFFF
-};
+#include "Materials/MFMat_Standard.h"
 
 enum MaterialFlags
 {
@@ -77,6 +39,20 @@ enum MaterialFlags
 
 struct MFMat_Standard_Data
 {
+	struct Texture
+	{
+		MFTexture  *pTexture;
+
+		uint32		addressU	: 3;
+		uint32		addressV	: 3;
+		uint32		addressW	: 3;
+		uint32		minFilter	: 3;
+		uint32		magFilter	: 3;
+		uint32		mipFilter	: 3;
+
+		uint32		borderColour;
+	};
+
 	// Members
 	MFMatrix	textureMatrix;
 
@@ -91,7 +67,7 @@ struct MFMat_Standard_Data
 
 	uint32		materialType;
 
-	MFTexture  *pTextures[8];
+	Texture		textures[8];
 	uint32		textureCount;
 
 	int			uFrames, vFrames, curFrame;

@@ -23,9 +23,15 @@
 struct MFStringCache;
 class MFIni;
 
+struct MFIniEnumKey
+{
+	const char *pKey;
+	int value;
+};
+
 class MFIniLine
 {
-friend class MFIni;
+	friend class MFIni;
 public:
 	MFIniLine *Next() { return (terminate ? NULL : this+subtreeLineCount+1); }
 	MFIniLine *Sub() { return (subtreeLineCount > 0) ? this+1 : NULL; }
@@ -39,12 +45,13 @@ public:
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index, int base = 10);
-	int GetIntString(int index, const char **ppStrings, int numStrings = -1);
+	int GetEnum(int index, MFIniEnumKey *pKeys);
 	bool GetBool(int index);
 	MFVector GetVector2(int index);
 	MFVector GetVector3(int index);
 	MFVector GetVector4(int index);
 	MFMatrix GetMatrix(int index);
+	MFVector GetColour(int index);
 
 	int GetLineNumber() { return lineNumber; }
 	MFString GetLine();
@@ -68,7 +75,7 @@ protected:
 
 class MFIni
 {
-friend class MFIniLine;
+	friend class MFIniLine;
 public:
 	static MFIni *Create(const char *pFilename);
 	static MFIni *CreateFromMemory(const char *pMemory);

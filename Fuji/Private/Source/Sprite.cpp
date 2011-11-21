@@ -13,11 +13,15 @@ void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colou
 	pMaterial = MFMaterial_Create(pFilename);
 
 	MFDebug_Assert(!MFString_Compare(pMaterial->pType->pTypeName, "Standard"), "Sprites MUST be created from a 'Standard' material.");
-	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	MFTexture *pTex = MFMaterial_GetParameterT(pMaterial, MFMatStandard_Texture, MFMatStandard_Tex_DifuseMap);
+
+	int texW, texH;
+	MFTexture_GetTextureDimensions(pTex, &texW, &texH);
 
 	pivot = MakeVector(0.0f, 0.0f);
 	position = MakeVector(0.0f, 0.0f);
-	scale = MakeVector((float)pData->pTextures[0]->pTemplateData->pSurfaces[0].width, (float)pData->pTextures[0]->pTemplateData->pSurfaces[0].height);
+	scale = MakeVector((float)texW, (float)texH);
 	angle = 0.0f;
 	visible = false;
 }
