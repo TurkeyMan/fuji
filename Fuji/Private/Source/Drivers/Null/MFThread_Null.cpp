@@ -7,7 +7,7 @@
 
 // interface functions
 
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize)
+void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 {
 	return NULL;
 }
@@ -20,12 +20,7 @@ void MFThread_TerminateThread(MFThread thread)
 {
 }
 
-int MFThread_GetExitCode(MFThread thread)
-{
-	return 0;
-}
-
-void MFThread_DestroyThread(MFThread thread)
+void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 {
 }
 

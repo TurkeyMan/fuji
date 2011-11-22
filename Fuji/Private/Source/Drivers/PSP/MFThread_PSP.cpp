@@ -44,8 +44,9 @@ int ThreadProc(SceSize args, void *argp)
 
 // interface functions
 
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize)
+void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 {
+	fix me!
 	MFThreadInfoPSP *pThreadInfo = MFThreadPC_GetNewThreadInfo();
 
 	if(!pThreadInfo)
@@ -75,13 +76,7 @@ void MFThread_TerminateThread(MFThread thread)
 	sceKernelTerminateThread(pThreadInfo->hThread);
 }
 
-int MFThread_GetExitCode(MFThread thread)
-{
-//	MFThreadInfoPSP *pThreadInfo = (MFThreadInfoPSP*)thread;
-	return 0;
-}
-
-void MFThread_DestroyThread(MFThread thread)
+void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 {
 	MFThreadInfoPSP *pThreadInfo = (MFThreadInfoPSP*)thread;
 

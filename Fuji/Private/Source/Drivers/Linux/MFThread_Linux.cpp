@@ -7,11 +7,29 @@
 
 #include <pthread.h>
 
-// interface functions
-
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 stackSize)
+struct MFThreadInfoLinux
 {
 	pthread_t thread;
+};
+
+struct MFMutexLinux
+{
+	pthread_mutex_t mutex;
+	char name[32];
+};
+
+// interface functions
+
+static void *ThreadProc(void *pUserData)
+{
+	MFThread_ThreadProc((MFThreadInfo*)pUserData);
+	return NULL;
+}
+
+void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
+{
+	MFDebug_Assert(sizeof(MFThreadInfoPC) <= sizeof(pThreadInfo->platformSpecific), "Thread info too large!");
+	MFThreadInfoLinux *pThreadInfoLinux = (MFThreadInfoLinux*)pThreadInfo->platformSpecific;
 
 	// set the attributes
 //	pthread_attr_t attr;
@@ -19,9 +37,7 @@ MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint
 //	attr.stacksize = MFMax(stackSize, PTHREAD_STACK_MIN);
 //	attr.schedparam.sched_priority = priority; // we can set the priority here, we'll just use the default for the moment...
 
-	pthread_create(&thread, NULL, (void*(*)(void*))pEntryPoint, pUserData);
-
-	return (MFThread&)thread;
+	pthread_create(&pThreadInfoLinux->thread, NULL, ThreadProc, pThreadInfo);
 }
 
 void MFThread_ExitThread(int exitCode)
@@ -34,39 +50,43 @@ void MFThread_TerminateThread(MFThread thread)
 	MFDebug_Assert(false, "Not written...");
 }
 
-int MFThread_GetExitCode(MFThread thread)
-{
-	MFDebug_Assert(false, "Not written...");
-	return 0;
-}
-
-void MFThread_DestroyThread(MFThread thread)
+void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 {
 }
 
 
-MFMutex MFThread_CreateMutex(const char *pName)
+int MFThread_GetMutexSizePlatformSpecific()
 {
-	pthread_mutex_t *pMutex = (pthread_mutex_t*)MFHeap_Alloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(pMutex, NULL);
+	return sizeof(MFMutexLinux);
+}
 
-	return pMutex;
+void MFThread_InitMutexPlatformSpecific(MFMutex mutex, const char *pName)
+{
+	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
+
+	MFDebug_Assert(pName[0], "No name specified.");
+	MFDebug_Assert(MFString_Length(pName) <= 31, "Name must be less than 31 characters");
+	MFString_Copy(pMutex->name, pName);
+
+	pthread_mutex_init(&pMutex->mutex, NULL);
 }
 
 void MFThread_DestroyMutex(MFMutex mutex)
 {
-	pthread_mutex_destroy((pthread_mutex_t*)mutex);
-	MFHeap_Free(mutex);
+	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
+	pthread_mutex_destroy(&pMutex->mutex);
 }
 
 void MFThread_LockMutex(MFMutex mutex)
 {
-	pthread_mutex_lock((pthread_mutex_t*)mutex);
+	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
+	pthread_mutex_lock(&pMutex->mutex);
 }
 
 void MFThread_ReleaseMutex(MFMutex mutex)
 {
-	pthread_mutex_unlock((pthread_mutex_t*)mutex);
+	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
+	pthread_mutex_unlock(&pMutex->mutex);
 }
 
 MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
