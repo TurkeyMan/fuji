@@ -2,7 +2,7 @@
 
 #if MF_THREAD == MF_DRIVER_LINUX
 
-#include "MFThread.h"
+#include "MFThread_Internal.h"
 #include "MFHeap.h"
 
 #include <pthread.h>
@@ -28,7 +28,7 @@ static void *ThreadProc(void *pUserData)
 
 void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 {
-	MFDebug_Assert(sizeof(MFThreadInfoPC) <= sizeof(pThreadInfo->platformSpecific), "Thread info too large!");
+	MFDebug_Assert(sizeof(MFThreadInfoLinux) <= sizeof(pThreadInfo->platformSpecific), "Thread info too large!");
 	MFThreadInfoLinux *pThreadInfoLinux = (MFThreadInfoLinux*)pThreadInfo->platformSpecific;
 
 	// set the attributes
