@@ -21,6 +21,43 @@
 
 static MFMaterial *pSetMaterial = 0;
 
+static const GLint glTexFilters[] =
+{
+	// mip none
+	GL_NEAREST,					// MFMatStandard_TexFilter_None
+	GL_NEAREST,					// MFMatStandard_TexFilter_Point
+	GL_LINEAR,					// MFMatStandard_TexFilter_Linear
+	GL_LINEAR,					// MFMatStandard_TexFilter_Anisotropic
+
+	// mip nearest
+	GL_NEAREST_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_None
+	GL_NEAREST_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Point
+	GL_LINEAR_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Linear
+	GL_LINEAR_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Anisotropic
+
+	// mip linear
+	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_None
+	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Point
+	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Linear
+	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Anisotropic
+
+	// mip anisotropic
+	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_None
+	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Point
+	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Linear
+	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Anisotropic
+};
+
+static const GLint glTexAddressing[MFMatStandard_TexAddress_Max] =
+{
+	GL_REPEAT,	// MFMatStandard_TexAddress_Wrap
+	GL_CLAMP,	// MFMatStandard_TexAddress_Mirror
+	GL_CLAMP,	// MFMatStandard_TexAddress_Clamp
+	GL_CLAMP,	// MFMatStandard_TexAddress_Border
+	GL_CLAMP	// MFMatStandard_TexAddress_MirrorOnce
+};
+
+
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
 	return 0;
@@ -28,6 +65,20 @@ int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 
 void MFMat_Standard_UnregisterMaterial()
 {
+}
+
+inline void MFMat_Standard_SetTextureFlags(MFMat_Standard_Data::Texture &tex)
+{
+	GLuint texId = (GLuint)(size_t)tex.pTexture->pInternalData;
+
+	glBindTexture(GL_TEXTURE_2D, texId);
+
+	int minFilter = tex.pTexture->pTemplateData->mipLevels > 1 ? (tex.minFilter | (tex.mipFilter << 2)) : tex.minFilter;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexFilters[minFilter]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glTexFilters[tex.magFilter]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glTexAddressing[tex.addressU]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glTexAddressing[tex.addressV]);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial)
@@ -38,23 +89,27 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 	if(pSetMaterial != pMaterial)
 	{
+#if MFMatStandard_TexFilter_Max > 4
+		#error "glTexFilters only supports 4 mip filters..."
+#endif
+
 	    bool premultipliedAlpha = false;
 
 		// set some render states
 		if(pData->detailMapIndex)
 		{
 			// HACK: for compound multitexturing
-			GLuint diffuse = (GLuint)(size_t)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
-			GLuint detail = (GLuint)(size_t)pData->textures[pData->detailMapIndex].pTexture->pInternalData;
+			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
+			MFMat_Standard_Data::Texture &detail = pData->textures[pData->detailMapIndex];
 
 			glActiveTexture(GL_TEXTURE0);
 		    glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, detail);
+			MFMat_Standard_SetTextureFlags(detail);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 			glActiveTexture(GL_TEXTURE1);
 		    glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, diffuse);
+			MFMat_Standard_SetTextureFlags(diffuse);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 
 			glMatrixMode(GL_TEXTURE);
@@ -62,11 +117,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		}
 		else if(pData->textures[pData->diffuseMapIndex].pTexture)
 		{
+			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
+
 			glActiveTexture(GL_TEXTURE0);
 		    glEnable(GL_TEXTURE_2D);
-
-			GLuint textureID = *(GLuint*)&pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
-			glBindTexture(GL_TEXTURE_2D, textureID);
+			MFMat_Standard_SetTextureFlags(diffuse);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 			premultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);

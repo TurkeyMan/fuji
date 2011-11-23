@@ -139,7 +139,6 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 #if !defined(MF_OPENGL_ES)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMips);
 #endif
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, numMips ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 
 		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
 		MFCheckForOpenGLError();
@@ -153,7 +152,6 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 #if !defined(MF_OPENGL_ES)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, pTemplate->mipLevels);
 #endif
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, pTemplate->mipLevels > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 
 		for(int a=0; a<pTemplate->mipLevels; a++)
 		{
@@ -235,10 +233,6 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
 		pTexture->pInternalData = (void*)(uintp)textureID;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 #if !defined(MF_OPENGL_ES)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 #endif

@@ -31,4 +31,8 @@ void MFSystem_DrawPlatformSpecific();
 	void MFSystem_MessageBox(char *title, char *message);
 #endif
 
+#if defined(MF_WINDOWS)
+	const char * MFSystemPC_GetLastError();
+#endif
+
 #endif

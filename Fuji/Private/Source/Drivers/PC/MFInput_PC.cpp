@@ -13,7 +13,7 @@
 #include "MFInput_Internal.h"
 #include "MFHeap.h"
 #include "MFIni.h"
-#include "MFSystem.h"
+#include "MFSystem_Internal.h"
 
 #include "MFInputMappings_PC.h"
 
@@ -1262,7 +1262,9 @@ int RegisterRawMouse(void)
 #endif
 
 	// Register to receive the WM_INPUT message for any change in mouse (buttons, wheel, and movement will all generate the same message)
-	MFDebug_Assert(_RRID(rid, sizeof(rid)/sizeof(rid[0]), sizeof(rid[0])), "Error: RegisterRawInputDevices() failed");
+	BOOL succeeded = _RRID(rid, sizeof(rid)/sizeof(rid[0]), sizeof(rid[0]));
+	if(!succeeded)
+		MFDebug_Assert(false, MFStr("RegisterRawInputDevices() failed: %s", MFSystemPC_GetLastError()));
 
 	return 0;
 }

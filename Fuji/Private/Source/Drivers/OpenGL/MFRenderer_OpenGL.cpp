@@ -21,6 +21,7 @@
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_OpenGL
 #endif
 
+#include "MFSystem_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
@@ -66,7 +67,7 @@ int gOpenGLVersion = 0;
 		if(!glXQueryExtension(xdisplay, NULL, NULL))
 		{
 			MFDebug_Error("GLX extension not available");
-			MFDisplay_DestroyDisplay();
+			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -74,7 +75,7 @@ int gOpenGLVersion = 0;
 		if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3))
 		{
 			MFDebug_Error(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
-			MFDisplay_DestroyDisplay();
+			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -87,7 +88,7 @@ int gOpenGLVersion = 0;
 			if(numConfigs == 0)
 			{
 				MFDebug_Error("Unable to obtain a suitable glX FBConfig");
-				MFDisplay_DestroyDisplay();
+				MFRenderer_DestroyDisplay();
 				return NULL;
 			}
 		}
@@ -95,14 +96,14 @@ int gOpenGLVersion = 0;
 		if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL)
 		{
 			MFDebug_Error("Unable to obtain a visualInfo structure for the associated FBConfig");
-			MFDisplay_DestroyDisplay();
+			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
 		if(visualInfo->depth < 16)
 		{
 			MFDebug_Error("Need at least a 16 bit screen!");
-			MFDisplay_DestroyDisplay();
+			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -193,14 +194,14 @@ int MFRenderer_CreateDisplay()
 	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
 	{
 		MFDebug_Error("Unable to associate window with a GLXWindow");
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		return 1;
 	}
 
 	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true)))
 	{
 		MFDebug_Error("Unable to create GLXContext");
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		return 1;
 	}
 
@@ -210,7 +211,7 @@ int MFRenderer_CreateDisplay()
 	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext))
 	{
 		MFDebug_Error("Unable to bind GLXContext");
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		return 1;
 	}
 
@@ -223,7 +224,7 @@ int MFRenderer_CreateDisplay()
 		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2)
 		{
 			MFDebug_Error("Unable to determine OpenGl version");
-			MFDisplay_DestroyDisplay();
+			MFRenderer_DestroyDisplay();
 			return 1;
 		}
 	}
@@ -231,7 +232,7 @@ int MFRenderer_CreateDisplay()
 	if(majorGLVersion == 1 && minorGLVersion < 4)
 	{
 		MFDebug_Error("Need at least OpenGL version 1.4");
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		return 1;
 	}
 
@@ -252,8 +253,8 @@ int MFRenderer_CreateDisplay()
 		0, // Shift Bit Ignored
 		0, // No Accumulation Buffer
 		0, 0, 0, 0, // Accumulation Bits Ignored
-		16, // 16Bit Z-Buffer (Depth Buffer)
-		0, // No Stencil Buffer
+		24, // 16Bit Z-Buffer (Depth Buffer)
+		8, // No Stencil Buffer
 		0, // No Auxiliary Buffer
 		PFD_MAIN_PLANE, // Main Drawing Layer
 		0, // Reserved
@@ -263,7 +264,7 @@ int MFRenderer_CreateDisplay()
 	hDC = GetDC(apphWnd);
 	if(!hDC)
 	{
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		MessageBox(NULL, "Can't Create A GL Device Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 1;
 	}
@@ -271,14 +272,14 @@ int MFRenderer_CreateDisplay()
 	pixelFormat = ChoosePixelFormat(hDC, &pfd);
 	if(!pixelFormat)
 	{
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		MessageBox(NULL, "Can't Find A Suitable PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 2;
 	}
 
 	if(!SetPixelFormat(hDC, pixelFormat, &pfd))
 	{
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		MessageBox(NULL, "Can't Set The PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 3;
 	}
@@ -286,14 +287,23 @@ int MFRenderer_CreateDisplay()
 	hRC = wglCreateContext(hDC);
 	if(!hRC)
 	{
-		MFDisplay_DestroyDisplay();
-		MessageBox(NULL, "Can't Create A GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
+		// *** driver bug ***
+		// HACK: do it again...
+		SetPixelFormat(hDC, pixelFormat, &pfd);
+		hRC = wglCreateContext(hDC);
+	}
+
+	if(!hRC)
+	{
+		MessageBox(NULL, MFStr("Failed to create OpenGL context: %s", MFSystemPC_GetLastError()), "ERROR", MB_OK|MB_ICONEXCLAMATION);
+
+		MFRenderer_DestroyDisplay();
 		return 4;
 	}
 
 	if(!wglMakeCurrent(hDC, hRC))
 	{
-		MFDisplay_DestroyDisplay();
+		MFRenderer_DestroyDisplay();
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
