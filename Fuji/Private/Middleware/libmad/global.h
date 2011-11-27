@@ -68,9 +68,8 @@
 # elif defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA644)
 #   define FPM_64BIT
 # elif defined(__i386__) || defined(_M_IX86)
-#error
 #   define FPM_INTEL
-# elif defined(__arm__) || defined(_ANDROID) || defined(_SYMBIAN)
+# elif defined(__arm__) || defined(ANDROID_NDK) || defined(ANDROID) || defined(__ANDROID__) || defined(_SYMBIAN)
 #   define FPM_ARM
 # elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(_M_MPPC) || defined(_GC) || defined(__wii__) || defined(_WII)
 #   define FPM_PPC

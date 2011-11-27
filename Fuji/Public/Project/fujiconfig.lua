@@ -4,11 +4,21 @@ local function isVS()
 	return _ACTION == "vs2010" or _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002"
 end
 
+local function getConfigName(configName)
+	-- how annoying that vs2010 decided to change the name of this macro! >_<
+	if _ACTION == "vs2010" then
+		return "$(Configuration)"
+	elseif _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002" then
+		return "$(ConfigurationName)"
+	end
+	return configName
+end
+
 local configNames = {}
-configNames.Debug = iif(isVS(), "$(ConfigurationName)", "Debug")
-configNames.DebugOpt = iif(isVS(), "$(ConfigurationName)", "DebugOpt")
-configNames.Release = iif(isVS(), "$(ConfigurationName)", "Release")
-configNames.Retail = iif(isVS(), "$(ConfigurationName)", "Retail")
+configNames.Debug = getConfigName("Debug")
+configNames.DebugOpt = getConfigName("DebugOpt")
+configNames.Release = getConfigName("Release")
+configNames.Retail = getConfigName("Retail")
 
 local platformNames = {}
 platformNames.Android = iif(isVS(), "$(Platform)", "Android")
@@ -64,7 +74,7 @@ configuration { "macosx" }
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
-	links { "ogg_static", "vorbis_static", "vorbisfile_static" }
+	links { "ogg_static", "vorbis_static", "vorbisfile_static", "mad", "json" }
 	linkoptions { "/Delay:unload" }
 
 	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11
@@ -84,7 +94,10 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 
 -- Android --
 configuration "Android"
-	defines { "_ANDROID" }
+	if not isVS() then
+		-- vs-android defines these automatically
+		defines { "ANDROID_NDK", "ANDROID", "__ANDROID__" }
+	end
 	links { "mad", "json" }
 
 -- XBox --

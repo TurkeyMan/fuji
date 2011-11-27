@@ -51,7 +51,7 @@ uint64 MFSystem_GetRTCFrequency()
 const char * MFSystem_GetSystemName()
 {
 	static char buffer[128] = "Android";
-	DWORD bufferSize = sizeof(buffer);
+//	uint32 bufferSize = sizeof(buffer);
 	//...
 	return buffer;
 }

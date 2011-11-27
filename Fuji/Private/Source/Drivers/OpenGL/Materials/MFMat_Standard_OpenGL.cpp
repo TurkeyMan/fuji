@@ -50,11 +50,11 @@ static const GLint glTexFilters[] =
 
 static const GLint glTexAddressing[MFMatStandard_TexAddress_Max] =
 {
-	GL_REPEAT,	// MFMatStandard_TexAddress_Wrap
-	GL_CLAMP,	// MFMatStandard_TexAddress_Mirror
-	GL_CLAMP,	// MFMatStandard_TexAddress_Clamp
-	GL_CLAMP,	// MFMatStandard_TexAddress_Border
-	GL_CLAMP	// MFMatStandard_TexAddress_MirrorOnce
+	GL_REPEAT,					// MFMatStandard_TexAddress_Wrap
+	GL_MIRRORED_REPEAT,			// MFMatStandard_TexAddress_Mirror
+	GL_CLAMP_TO_EDGE,			// MFMatStandard_TexAddress_Clamp
+	GL_CLAMP_TO_BORDER,			// MFMatStandard_TexAddress_Border
+	GL_MIRROR_CLAMP_TO_EDGE_EXT // MFMatStandard_TexAddress_MirrorOnce
 };
 
 

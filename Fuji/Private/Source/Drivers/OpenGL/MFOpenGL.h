@@ -18,6 +18,7 @@
 			#include <OpenGLES/ES2/glext.h>
 		#endif
 	#elif defined(MF_ANDROID)
+		#define GL_GLEXT_PROTOTYPES
 		#if MF_OPENGL_ES_VER == 1
 			#include <GLES/gl.h>
 			#include <GLES/glext.h>
@@ -42,6 +43,24 @@
 #endif
 
 // define missing opengl constants
+#if !defined(GL_CLAMP_TO_EDGE)
+	#define GL_CLAMP_TO_EDGE					0x812F
+#endif
+#if !defined(GL_CLAMP_TO_BORDER)
+	#define GL_CLAMP_TO_BORDER					0x812D
+#endif
+#if !defined(GL_MIRRORED_REPEAT)
+	#define GL_MIRRORED_REPEAT					0x8370
+#endif
+#if !defined(GL_MIRROR_CLAMP_EXT)
+	#define GL_MIRROR_CLAMP_EXT					0x8742
+#endif
+#if !defined(GL_MIRROR_CLAMP_TO_EDGE_EXT)
+	#define GL_MIRROR_CLAMP_TO_EDGE_EXT			0x8743
+#endif
+#if !defined(GL_MIRROR_CLAMP_TO_BORDER_EXT)
+	#define GL_MIRROR_CLAMP_TO_BORDER_EXT		0x8912
+#endif
 #if !defined(GL_TEXTURE_MAX_LEVEL)
 	#define GL_TEXTURE_MAX_LEVEL				0x813D
 #endif

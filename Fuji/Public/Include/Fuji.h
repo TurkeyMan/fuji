@@ -144,12 +144,16 @@
 		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
 	#endif
-#elif defined(_ANDROID)
+#elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID
 	#define MF_PLATFORM ANDROID
-	#define MF_ARCH_ARM
-	#define MF_ENDIAN_LITTLE
-	#define MF_32BIT
+	#if defined(__arm__)
+		#define MF_ARCH_ARM
+		#define MF_ENDIAN_LITTLE
+		#define MF_32BIT
+	#else
+		#error "Unsupported Android Architecture!"
+	#endif
 #elif defined(_SYMBIAN)
 	#define MF_SYMBIAN
 	#define MF_PLATFORM SYMBIAN
