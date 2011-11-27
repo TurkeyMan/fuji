@@ -324,12 +324,13 @@
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_ANDROID
 	#define MF_RENDERER		MF_DRIVER_OPENGL
-	#define MF_INPUT		MF_DRIVER_NULL
+	#define MF_INPUT		MF_DRIVER_ANDROID
 	#define MF_SYSTEM		MF_DRIVER_ANDROID
 	#define MF_TRANSLATION	MF_DRIVER_LINUX
 	#define MF_THREAD		MF_DRIVER_LINUX
 	#define MF_FILESYSTEM	MF_DRIVER_LINUX
 	#define MF_SOUND		MF_DRIVER_NULL
+	#define MF_DEBUG		MF_DRIVER_ANDROID
 
 	#define USE_MFSOUNDBUFFER
 	#define USE_MFMIXER
@@ -411,7 +412,7 @@
 	// vorbis codec
 	#define	VORBIS_STREAM
 #endif
-#if defined(MF_WINDOWS)
+#if defined(MF_WINDOWS) || defined(MF_ANDROID)
 	// libMAD mp3 codec
 	#define	MAD_STREAM
 #endif

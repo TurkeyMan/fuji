@@ -43,6 +43,12 @@
 	#elif defined(MF_ASM_ATNT)
 		#define MFDebug_Breakpoint() { asm("break"); }
 	#endif
+#elif defined(MF_ARCH_ARM)
+	#if defined(MF_ASM_INTEL)
+		#define MFDebug_Breakpoint() { __asm { bkpt }; }
+	#elif defined(MF_ASM_ATNT)
+		#define MFDebug_Breakpoint() { asm("bkpt"); }
+	#endif
 #else
 	#define MFDebug_Breakpoint()
 #endif
