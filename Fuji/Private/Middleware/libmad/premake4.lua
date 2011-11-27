@@ -12,15 +12,15 @@ project "mad"
 	defines { "_LIB", "HAVE_CONFIG_H", "ASO_ZEROCHECK", "_CRT_SECURE_NO_DEPRECATE" }
 
 	configuration "Debug"
-		defines { "DEBUG", "FPM_DEFAULT" }
+		defines { "DEBUG" }
 		flags { "Symbols" }
 		targetsuffix "_d"
 	configuration "DebugOpt"
-		defines { "DEBUG", "FPM_DEFAULT" }
+		defines { "DEBUG" }
 		flags { "Symbols", "Optimize" }
 	configuration "Release"
-		defines { "NDEBUG", "FPM_INTEL" }
+		defines { "NDEBUG" }
 		flags { "OptimizeSpeed" }
 	configuration "Retail"
-		defines { "NDEBUG", "FPM_INTEL" }
+		defines { "NDEBUG" }
 		flags { "OptimizeSpeed" }

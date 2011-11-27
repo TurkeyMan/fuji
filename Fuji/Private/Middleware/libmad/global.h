@@ -55,4 +55,43 @@
 #  endif
 # endif
 
+// select the appropriate decoder
+# if defined(_XBOX)
+#   if _XBOX_VER < 200
+#error
+#     define FPM_INTEL
+#   elif _XBOX_VER >= 200
+#     define FPM_PPC
+#   else
+#     error XBox version undefined...
+#   endif
+# elif defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA644)
+#   define FPM_64BIT
+# elif defined(__i386__) || defined(_M_IX86)
+#error
+#   define FPM_INTEL
+# elif defined(__arm__) || defined(_ANDROID) || defined(_SYMBIAN)
+#   define FPM_ARM
+# elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(_M_MPPC) || defined(_GC) || defined(__wii__) || defined(_WII)
+#   define FPM_PPC
+# elif defined(__ppc64__) || defined(__PPU__)
+#   define FPM_PPC
+# elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips) || defined(__mips__) || defined(__MIPSEL__) || defined(_MIPSEL) || defined(__MIPSEL) || defined(_M_MRX000) \
+	|| defined(PSP) || defined(__psp__) || defined(__PSP__) || defined(_PSP) || defined(_EE_) || defined(_EE) || defined(_R5900) || defined(__R5900)
+#   define FPM_MIPS
+# elif defined(_DC) || defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
+#   define FPM_DEFAULT
+# elif defined(TARGET_OS_IPHONE)
+#   include <TargetConditionals.h>
+#   if TARGET_IPHONE_SIMULATOR == 1
+#error
+#     define FPM_INTEL
+#   else
+#     define FPM_ARM
+#   endif
+# else
+# pragma message("Unknown architecture!")
+#   define FPM_DEFAULT
+# endif
+
 # endif
