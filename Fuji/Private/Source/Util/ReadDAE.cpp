@@ -269,7 +269,7 @@ void ReadSourceData(TiXmlElement *pSource, SourceData &data)
 
 	int dataCount;
 	pArray->Attribute("count", &dataCount);
-	MFDebug_Assert(data.data.size() * data.validComponents == dataCount, "Not enough data in array for all data specified by the technique.\n");
+	MFDebug_Assert((int)data.data.size() * data.validComponents == dataCount, "Not enough data in array for all data specified by the technique.\n");
 
 	const char *pText = pArray->GetText();
 
@@ -292,7 +292,7 @@ void ReadSourceData(TiXmlElement *pSource, SourceData &data)
 		}
 	}
 
-	MFDebug_Assert(j == data.data.size(), "Inforect amount of data in array.\n");
+	MFDebug_Assert(j == (int)data.data.size(), "Inforect amount of data in array.\n");
 }
 
 MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
@@ -842,7 +842,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		MFString_Copy(ref.name, pNodeName);
 		ref.worldMatrix = worldMat;
 		ref.localMatrix = localMat;
-		ref.bone[0] = -1;
+		ref.bone[0] = (uint16)-1;
 	}
 	else if(!MFString_CaseCmpN(pNodeName, "z_", 2))
 	{
@@ -991,7 +991,7 @@ int F3DFile::ReadDAE(const char *pFilename)
 	return 0;
 }
 
-void ParseDAEFileFromMemory(char *pFile, uint32 size, F3DFile *_pModel)
+void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 {
 	pModel = _pModel;
 

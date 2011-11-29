@@ -238,7 +238,7 @@ MFSound *MFSound_Create(const char *pName)
 
 	if(!pSound)
 	{
-		uint32 fileSize;
+		size_t fileSize;
 
 		// load the template
 		const char *pFileName = MFStr("%s.snd", pName);

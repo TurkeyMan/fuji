@@ -10,20 +10,11 @@ class MFArray
 {
 public:
 	MFArray();
-	MFArray(int _count);
-
+	MFArray(int maxItems);
 	~MFArray();
 
-	T& operator[](int x);
-	const T& operator[](int x) const;
-
-	int size() const;
-	void resize(int x);
-	void clear();
-
-	T& push();
-	T& push(const T &x);
-	T& pop();
+	T& operator[](int i);
+	const T& operator[](int i) const;
 
 	T& front();
 	const T& front() const;
@@ -31,9 +22,21 @@ public:
 	T& back();
 	const T& back() const;
 
+	T& push();
+	T& push(const T &item);
+	T& pop();
+
+	int reserve(int maxItems);
+
+	int size() const;
+	void resize(int length);
+	void clear();
+
 	T* getpointer() const;
 
 protected:
+	int alloc(int count);
+
 	int count;
 	int allocated;
 	T *pData;

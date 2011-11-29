@@ -32,6 +32,14 @@ MFStringCache* MFStringCache_Create(size_t maxSize);
 void MFStringCache_Destroy(MFStringCache *pCache);
 
 /**
+ * Clear a string cache.
+ * Clears a string cache.
+ * @param pCache String cache to clear.
+ * @return None.
+ */
+void MFStringCache_Clear(MFStringCache *pCache);
+
+/**
  * Add a string to a string cache.
  * Adds a string to a string cache.
  * @param pCache Target string cache.

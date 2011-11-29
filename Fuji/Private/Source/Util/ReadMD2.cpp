@@ -77,7 +77,7 @@ vec3_t normalTable[numNormals] =
 	#include "MD2Normals.h"
 };
 
-void ParseMD2File(char *pFile, uint32 length)
+void ParseMD2File(char *pFile, size_t length)
 {
 	int a, b;
 
@@ -86,7 +86,7 @@ void ParseMD2File(char *pFile, uint32 length)
 	MFDebug_Assert(pHeader->ident == (('2'<<24) | ('P'<<16) | ('D'<<8) | 'I'), "Invalid MD2 header.");
 	MFDebug_Assert(pHeader->version == 8, "Invalid MD2 version.");
 
-	md2_skin_t		*skins = (md2_skin_t*)(pFile + pHeader->offset_skins);
+//	md2_skin_t		*skins = (md2_skin_t*)(pFile + pHeader->offset_skins);
 	md2_texCoord_t	*st = (md2_texCoord_t*)(pFile + pHeader->offset_st);
 	md2_triangle_t	*tris = (md2_triangle_t*)(pFile + pHeader->offset_tris);
 	md2_frame_t		*frames = (md2_frame_t*)(pFile + pHeader->offset_frames);
@@ -193,7 +193,7 @@ void ParseMD2File(char *pFile, uint32 length)
 	}
 }
 
-void ParseMD2FileFromMemory(char *pFile, uint32 size, F3DFile *_pModel)
+void ParseMD2FileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 {
 	pModel = _pModel;
 	ParseMD2File(pFile, size);
@@ -203,7 +203,7 @@ int F3DFile::ReadMD2(const char *pFilename)
 {
 	pModel = this;
 
-	uint32 size;
+	size_t size;
 	char *pFile = MFFileSystem_Load(pFilename, &size);
 	if(!pFile)
 	{

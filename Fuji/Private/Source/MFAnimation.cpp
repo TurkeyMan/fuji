@@ -70,15 +70,15 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 		if(hFile)
 		{
-			int size = MFFile_GetSize(hFile);
+			int64 size = MFFile_GetSize(hFile);
 
 			if(size > 0)
 			{
 				char *pTemplateData;
 
 				// allocate memory and load file
-				pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
-				MFFile_Read(hFile, pTemplateData, size);
+				pTemplateData = (char*)MFHeap_Alloc((size_t)size + MFString_Length(pFilename) + 1);
+				MFFile_Read(hFile, pTemplateData, (size_t)size);
 
 				// check ID string
 				MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");

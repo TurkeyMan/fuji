@@ -9,10 +9,10 @@ struct MFIntSound
 };
 
 MFIntSound *MFIntSound_CreateFromFile(const char *pFilename);
-MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, uint32 size, const char *pFormatExtension);
+MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, size_t size, const char *pFormatExtension);
 
 void MFIntSound_Destroy(MFIntSound *pSound);
 
-void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, uint32 *pSize, MFPlatform platform);
+void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, size_t *pSize, MFPlatform platform);
 
 #endif

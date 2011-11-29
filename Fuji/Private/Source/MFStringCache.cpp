@@ -36,6 +36,14 @@ void MFStringCache_Destroy(MFStringCache *pCache)
 	MFHeap_Free(pCache);
 }
 
+void MFStringCache_Clear(MFStringCache *pCache)
+{
+	MFCALLSTACK;
+
+	pCache->pMem[0] = pCache->pMem[1] = 0;
+	pCache->used = 2;
+}
+
 const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 {
 	MFCALLSTACK;

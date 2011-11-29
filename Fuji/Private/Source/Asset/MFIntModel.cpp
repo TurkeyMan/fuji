@@ -47,7 +47,7 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 		bAppendNull = true;
 
 	// load file
-	uint32 size;
+	size_t size;
 	char *pData = MFFileSystem_Load(pFilename, &size, bAppendNull);
 	if(!pData)
 		return NULL;
@@ -63,7 +63,7 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 	return pModel;
 }
 
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format, const char *pName)
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName)
 {
 	F3DFile *pF3D = new F3DFile;
 	MFString_Copy(pF3D->name, pName);
@@ -71,7 +71,7 @@ MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, 
 	switch(format)
 	{
 		case MFIMF_DAE:
-			void ParseDAEFileFromMemory(char *pFile, uint32 size, F3DFile *_pModel);
+			void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 			ParseDAEFileFromMemory((char*)pMemory, size, pF3D);
 			break;
 		case MFIMF_X:
@@ -87,7 +87,7 @@ MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, 
 			ParseOBJFileFromMemory((char*)pMemory, pF3D);
 			break;
 		case MFIMF_MD2:
-			void ParseMD2FileFromMemory(char *pFile, uint32 size, F3DFile *_pModel);
+			void ParseMD2FileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 			ParseMD2FileFromMemory((char*)pMemory, size, pF3D);
 			break;
 		default:
@@ -104,7 +104,7 @@ void MFIntModel_Optimise(MFIntModel *pModel)
 	pF3D->Optimise();
 }
 
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform)
+void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
@@ -125,7 +125,7 @@ void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *p
 	}
 }
 
-void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform)
+void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 

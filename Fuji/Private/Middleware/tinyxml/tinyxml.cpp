@@ -980,10 +980,10 @@ bool TiXmlDocument::LoadFile( const char* filename, TiXmlEncoding encoding )
 	if ( file )
 	{
 		// Get the file size, so we can pre-allocate the string. HUGE speed impact.
-		long length = MFFile_GetSize(file);
+		long length = (long)MFFile_GetSize(file);
 
 		// Strange case, but good to handle up front.
-		if ( length == 0 )
+		if ( length <= 0 )
 		{
 			MFFile_Close( file );
 			return false;

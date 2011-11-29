@@ -96,7 +96,7 @@ struct BMPPaletteEntry /**** Colormap entry structure ****/
 
 /**** Globals ****/
 
-static const char *gFileExtensions[] =
+static const char *gFileExtensions[MFITF_Max] =
 {
 	".tga",
 	".bmp",
@@ -112,7 +112,7 @@ void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 	MFFile_Read((MFFile*)png->io_ptr, pBuffer, (uint32)bytes, false);
 }
 
-MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
+MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 {
 	if(png_sig_cmp((uint8*)pMemory, 0, 8))
 	{
@@ -347,7 +347,7 @@ MFIntTexture* LoadPNG(const void *pMemory, uint32 size)
 }
 #endif
 
-MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
+MFIntTexture* LoadTGA(const void *pMemory, size_t imageSize)
 {
 	unsigned char *pTarga = (unsigned char *)pMemory;
 
@@ -566,7 +566,7 @@ MFIntTexture* LoadTGA(const void *pMemory, uint32 imageSize)
 	return pImage;
 }
 
-MFIntTexture* LoadBMP(const void *pMemory, uint32 imageSize)
+MFIntTexture* LoadBMP(const void *pMemory, size_t imageSize)
 {
 	unsigned char *pBMP = (unsigned char *)pMemory;
 
@@ -1338,7 +1338,7 @@ MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 		return NULL;
 
 	// load file
-	uint32 size;
+	size_t size;
 	char *pData = MFFileSystem_Load(pFilename, &size);
 	if(!pData)
 		return NULL;
@@ -1352,7 +1352,7 @@ MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 	return pImage;
 }
 
-MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntTextureFormat format)
+MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format)
 {
 	MFIntTexture *pImage = NULL;
 
@@ -1467,7 +1467,7 @@ MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 	return targetFormat;
 }
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, uint32 *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
+void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
 {
 	*ppTemplateData = NULL;
 	if(pSize)
@@ -1491,7 +1491,7 @@ void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateDat
 		PremultiplyAlpha(pTexture);
 
 	// calculate texture data size..
-	uint32 imageBytes = (uint32)MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
+	size_t imageBytes = MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
 
 	for(int a=0; a<pTexture->numSurfaces; a++)
 	{

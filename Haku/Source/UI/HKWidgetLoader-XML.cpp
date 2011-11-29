@@ -43,7 +43,7 @@ static HKWidget *ParseElement(TiXmlElement *pElement)
 
 HKWidget *HKWidget_CreateFromXML(const char *pFilename)
 {
-	uint32 len;
+	size_t len;
 	char *pFile = MFFileSystem_Load(pFilename, &len, true);
 
 	if(!pFile)

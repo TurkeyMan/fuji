@@ -966,7 +966,7 @@ void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, void *pBase, void *
 	}
 }
 
-void *F3DFile::CreateMDL(uint32 *pSize, MFPlatform platform)
+void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 {
 	int a, b = 0;
 
@@ -1337,7 +1337,7 @@ found:
 	return pMDL;
 }
 
-void *F3DFile::CreateANM(uint32 *pSize, MFPlatform platform)
+void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 {
 	if(!animationChunk.anims.size())
 	{

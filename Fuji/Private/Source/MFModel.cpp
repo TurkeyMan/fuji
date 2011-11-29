@@ -200,13 +200,13 @@ MFModel* MFModel_Create(const char *pFilename)
 		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 		if(hFile)
 		{
-			int size = MFFile_GetSize(hFile);
+			int64 size = MFFile_GetSize(hFile);
 
 			if(size > 0)
 			{
 				// allocate memory and load file
-				pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
-				MFFile_Read(hFile, pTemplateData, size);
+				pTemplateData = (char*)MFHeap_Alloc((size_t)size + MFString_Length(pFilename) + 1);
+				MFFile_Read(hFile, pTemplateData, (size_t)size);
 				MFFile_Close(hFile);
 
 				MFString_Copy(&pTemplateData[size], pFilename);

@@ -467,11 +467,13 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 	bool cacheFile = true;
 	if(pStream->createFlags & MFASF_AllowBuffering)
 	{
-		uint32 fileSize = MFFile_GetSize(hFile);
-		void *pMP3File = MFHeap_Alloc(fileSize);
+		int64 fileSize = MFFile_GetSize(hFile);
+		MFDebug_Assert(fileSize > 0, "File is empty, or length is unknown.");
+
+		void *pMP3File = MFHeap_Alloc((size_t)fileSize);
 		if(pMP3File)
 		{
-			MFFile_Read(hFile, pMP3File, fileSize);
+			MFFile_Read(hFile, pMP3File, (size_t)fileSize);
 			MFFile_Close(hFile);
 
 			MFOpenDataMemory memoryFile;
@@ -479,7 +481,7 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 			memoryFile.openFlags = MFOF_Read | MFOF_Binary;
 			memoryFile.pMemoryPointer = pMP3File;
 			memoryFile.fileSize = fileSize;
-			memoryFile.allocated = fileSize;
+			memoryFile.allocated = (size_t)fileSize;
 			memoryFile.ownsMemory = true;
 			hFile = MFFile_Open(MFFileSystem_GetInternalFileSystemHandle(MFFSH_MemoryFileSystem), &memoryFile);
 			cacheFile = false;

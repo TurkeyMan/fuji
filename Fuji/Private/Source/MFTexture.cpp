@@ -89,7 +89,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 	if(!pTexture)
 	{
-		uint32 fileSize;
+		size_t fileSize;
 
 		const char *pFileName = MFStr("%s.tex", pName);
 

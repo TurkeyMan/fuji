@@ -107,7 +107,8 @@ const char * MFSystem_GetSystemName()
 const char * MFSystemPC_GetLastError()
 {
 	char errorMessage[256];
-	int len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), LANG_USER_DEFAULT, errorMessage, sizeof(errorMessage), NULL);
+//	int len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), LANG_USER_DEFAULT, errorMessage, sizeof(errorMessage), NULL);
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), LANG_USER_DEFAULT, errorMessage, sizeof(errorMessage), NULL);
 	return MFStr(errorMessage);
 }
 

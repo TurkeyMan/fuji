@@ -153,13 +153,13 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 			MFDebug_Assert(read == (uint32)pBucket->size, "Error reading base file...");
 		}
 
-		pBucket->lastTouched = (uint32)MFSystem_ReadRTC();
+		pBucket->lastTouched = MFSystem_ReadRTC();
 
 		int64 bucketOffset = pFile->offset - pBucket->fileOffset;
 		int64 bytesRemaining = pBucket->size - bucketOffset;
 		int64 bytesToCopy = MFMin(bytes, bytesRemaining);
 
-		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, (uint32)bytesToCopy);
+		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, (size_t)bytesToCopy);
 
 		bytes -= bytesToCopy;
 		(char*&)pBuffer += bytesToCopy;

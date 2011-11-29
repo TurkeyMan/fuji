@@ -98,6 +98,7 @@ configuration "Android"
 		-- vs-android defines these automatically
 		defines { "ANDROID_NDK", "ANDROID", "__ANDROID__" }
 	end
+	links { "z", "log", "android", "GLESv1_CM", "jnigraphics" }
 	links { "mad", "json" }
 
 -- XBox --

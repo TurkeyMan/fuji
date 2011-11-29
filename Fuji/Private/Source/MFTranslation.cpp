@@ -1,14 +1,9 @@
 #include "Fuji.h"
-#include "MFTranslation.h"
-#include "MFFileSystem.h"
 #include "MFHeap.h"
-
-struct MFStringTable
-{
-	uint32 magic;
-	int numStrings;
-	const char *pStrings[1];
-};
+#include "MFSystem.h"
+#include "MFFileSystem.h"
+#include "MFTranslation_Internal.h"
+#include "Asset/MFIntStringTable.h"
 
 static const char * const languageNamesEnglish[MFLang_Max] =
 {
@@ -56,6 +51,17 @@ const char* MFTranslation_GetLanguageName(MFLanguage language, bool native)
 	return native ? languageNamesNative[language] : languageNamesEnglish[language];
 }
 
+MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName)
+{
+	for(int a=0; a<MFLang_Max; ++a)
+	{
+		if(!MFString_CaseCmp(pLanguageName, languageNamesEnglish[a]))
+			return (MFLanguage)a;
+	}
+
+	return MFLang_Unknown;
+}
+
 MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
 {
 	MFStringTable *pStringTable = NULL;
@@ -100,6 +106,19 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 			pFile = MFStr("%s.%s", pFilename, MFTranslation_GetLanguageName(MFLang_English, false));
 			pStringTable = (MFStringTable*)MFFileSystem_Load(pFile);
 		}
+	}
+	else
+	{
+		// convert from source data...
+		MFIntStringTable *pIntStrings = MFIntStringTable_CreateFromFile(MFStr("%s.csv", pFilename));
+
+		// find the one we want...
+		pStringTable = MFIntStringTable_CreateRuntimeData(pIntStrings, language, MFSystem_GetCurrentPlatform(), NULL);
+		if(!pStringTable)
+			pStringTable = MFIntStringTable_CreateRuntimeData(pIntStrings, fallback, MFSystem_GetCurrentPlatform(), NULL);
+
+		// free the int string table
+		MFIntStringTable_Destroy(pIntStrings);
 	}
 
 	MFDebug_Assert(pStringTable, MFStr("String table '%s' does not exist", pFilename));

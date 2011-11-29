@@ -19,7 +19,7 @@ project "Fuji"
 --	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
 
 	-- add source for some middleware that we'll link directly on unix systems --
-	configuration { "not linux", "not macosx" }
+	configuration { "not linux", "not macosx", "not Android" }
 	files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
 	files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }

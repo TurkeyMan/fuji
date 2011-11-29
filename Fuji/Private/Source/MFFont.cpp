@@ -1268,7 +1268,7 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 
 MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 {
-	uint32 bytes = 0;
+	size_t bytes = 0;
 	char *pBuffer = MFFileSystem_Load(pFilename, &bytes, true);
 
 	if(!pBuffer)

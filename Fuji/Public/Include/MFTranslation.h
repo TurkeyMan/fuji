@@ -7,6 +7,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFTRANSLATION_H)
 #define _MFTRANSLATION_H
 
@@ -69,6 +70,14 @@ const char* MFTranslation_GetLanguageName(MFLanguage language, bool native = fal
  * @return Returns the system default language.
  */
 MFLanguage MFTranslation_GetDefaultLanguage();
+
+/**
+ * Get the id for a language.
+ * Gets the language id of a given language.
+ * @param pLanguageName The name of the language requested.
+ * @return Returns the specified language.
+ */
+MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName);
 
 /**
  * Load a translation string table.

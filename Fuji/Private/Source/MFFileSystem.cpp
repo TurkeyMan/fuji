@@ -444,9 +444,9 @@ int MFFile_Tell(MFFile* fileHandle)
 }
 
 // get file stream length (retuurs -1 for an undefined stream length)
-int MFFile_GetSize(MFFile* fileHandle)
+int64 MFFile_GetSize(MFFile* fileHandle)
 {
-	return (int)fileHandle->length;
+	return fileHandle->length;
 }
 
 bool MFFile_IsEOF(MFFile* fileHandle)
@@ -943,7 +943,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 }
 
 // read/write a file to a filesystem
-char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead, bool bAppendNullByte)
+char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool bAppendNullByte)
 {
 	MFCALLSTACK;
 
@@ -953,19 +953,19 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead, bool bAppendN
 
 	if(hFile)
 	{
-		int size = MFFile_GetSize(hFile);
+		int64 size = MFFile_GetSize(hFile);
 
 		if(size > 0)
 		{
-			pBuffer = (char*)MFHeap_Alloc(size + (bAppendNullByte ? 1 : 0));
+			pBuffer = (char*)MFHeap_Alloc((size_t)size + (bAppendNullByte ? 1 : 0));
 
-			int bytesRead = MFFile_Read(hFile, pBuffer, size);
+			int bytesRead = MFFile_Read(hFile, pBuffer, (size_t)size);
 
 			if(bAppendNullByte)
 				pBuffer[size] = 0;
 
 			if(pBytesRead)
-				*pBytesRead = bytesRead;
+				*pBytesRead = (size_t)bytesRead;
 		}
 
 		MFFile_Close(hFile);
@@ -974,7 +974,7 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead, bool bAppendN
 	return pBuffer;
 }
 
-int MFFileSystem_Save(const char *pFilename, const char *pBuffer, uint32 size)
+int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
 {
 	MFCALLSTACK;
 
@@ -992,11 +992,11 @@ int MFFileSystem_Save(const char *pFilename, const char *pBuffer, uint32 size)
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
-int MFFileSystem_GetSize(const char *pFilename)
+int64 MFFileSystem_GetSize(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	int size = 0;
+	int64 size = 0;
 
 	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
 
@@ -1175,7 +1175,7 @@ void MFFileSystem_FindClose(MFFind *pFind)
 	gFinds.Destroy(pFind);
 }
 
-MFFile* MFFile_CreateMemoryFile(const void *pMemory, uint32 size, bool writable, bool ownMemory)
+MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable, bool ownMemory)
 {
 	MFOpenDataMemory memory;
 	memory.cbSize = sizeof(MFOpenDataMemory);

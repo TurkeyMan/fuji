@@ -829,10 +829,17 @@ MFString::MFString(const char *pString, int maxChars)
 
 MFString::MFString(int preallocatedBytes)
 {
-	pData = MFStringData::Alloc();
-	pData->bytes = 0;
-	pData->pMemory = (char*)stringHeap.Alloc(preallocatedBytes, &pData->allocated);
-	pData->pMemory[0] = 0;
+	if(preallocatedBytes > 0)
+	{
+		pData = MFStringData::Alloc();
+		pData->bytes = 0;
+		pData->pMemory = (char*)stringHeap.Alloc(preallocatedBytes, &pData->allocated);
+		pData->pMemory[0] = 0;
+	}
+	else
+	{
+		pData = NULL;
+	}
 }
 
 MFString& MFString::operator=(const char *pString)

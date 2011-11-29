@@ -9,47 +9,41 @@ inline MFArray<T>::MFArray()
 }
 
 template<class T>
-inline MFArray<T>::MFArray(int _count)
+inline MFArray<T>::MFArray(int maxItems)
 {
-	pData = (T*)MFHeap_Alloc(sizeof(T) * _count);
-	for(int a=0; a<_count; a++) new(&pData[a]) T();
-	allocated = count = _count;
+	pData = NULL;
+	count = allocated = 0;
+
+	reserve(maxItems);
 }
 
 template<class T>
 inline MFArray<T>::~MFArray()
 {
-	MFHeap_Free(pData);
+	clear();
+
+	if(pData)
+		MFHeap_Free(pData);
 }
 
 template<class T>
-inline T& MFArray<T>::operator[](int x)
+inline T& MFArray<T>::operator[](int i)
 {
-	MFDebug_Assert(x >= 0, "Index out of bounds.");
-
-	if(x >= allocated)
-	{
-		int oldAlloc = allocated;
-		if(allocated == 0)
-			allocated = 16;
-		while(x >= allocated)
-			allocated *= 2;
-
-		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
-		for(int a=oldAlloc; a<allocated; a++)
-			new(&pData[a]) T();
-	}
-
-	count = MFMax(count, x+1);
-
-	return pData[x];
+	MFDebug_Assert(i >= 0 && i < count, "Index out of bounds.");
+	return pData[i];
 }
 
 template<class T>
-inline const T& MFArray<T>::operator[](int x) const
+inline const T& MFArray<T>::operator[](int i) const
 {
-	MFDebug_Assert(x >= 0 && x < count, "Index out of bounds.");
-	return pData[x];
+	MFDebug_Assert(i >= 0 && i < count, "Index out of bounds.");
+	return pData[i];
+}
+
+template<class T>
+inline int MFArray<T>::reserve(int maxItems)
+{
+	return alloc(maxItems);
 }
 
 template<class T>
@@ -59,76 +53,98 @@ inline int MFArray<T>::size() const
 }
 
 template<class T>
-inline void MFArray<T>::resize(int x)
+inline void MFArray<T>::resize(int maxItems)
 {
-	if(x >= allocated)
-	{
-		int oldAlloc = allocated;
-		if(allocated == 0)
-			allocated = 16;
-		while(x >= allocated)
-			allocated *= 2;
+	while(count < maxItems)
+		push();
 
-		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * allocated);
-		for(int a=oldAlloc; a<allocated; a++)
-			new(&pData[a]) T();
-	}
-
-	count = x;
+	while(count > maxItems)
+		pop();
 }
 
 template<class T>
 inline void MFArray<T>::clear()
 {
-	count = 0;
+	resize(0);
 }
 
 template<class T>
 inline T& MFArray<T>::push()
 {
-	return operator[](size());
+	alloc(count + 1);
+	T& newItem = pData[count++];
+	new(&newItem) T();
+	return newItem;
 }
 
 template<class T>
-inline T& MFArray<T>::push(const T &x)
+inline T& MFArray<T>::push(const T &item)
 {
-	return operator[](size()) = x;
+	alloc(count + 1);
+	T& newItem = pData[count++];
+	new(&newItem) T(item);
+	return newItem;
 }
 
 template<class T>
 inline T& MFArray<T>::pop()
 {
-	--count;
+	MFDebug_Assert(count > 0, "Array is empty.");
 
-	return pData[count-1];
+	T &item = pData[--count];
+	item.~T();
+	return item;
 }
 
 template<class T>
 inline T& MFArray<T>::front()
 {
-	return operator[](0);
+	MFDebug_Assert(count > 0, "Array is empty.");
+	return pData[0];
 }
 
 template<class T>
 inline const T& MFArray<T>::front() const
 {
-	return operator[](0);
+	MFDebug_Assert(count > 0, "Array is empty.");
+	return pData[0];
 }
 
 template<class T>
 inline T& MFArray<T>::back()
 {
-	return pData[count-1];
+	MFDebug_Assert(count > 0, "Array is empty.");
+	return pData[count - 1];
 }
 
 template<class T>
 inline const T& MFArray<T>::back() const
 {
-	return pData[count-1];
+	MFDebug_Assert(count > 0, "Array is empty.");
+	return pData[count - 1];
 }
 
 template<class T>
 inline T* MFArray<T>::getpointer() const
 {
 	return pData;
+}
+
+template<class T>
+inline int MFArray<T>::alloc(int count)
+{
+	if(count <= allocated)
+		return allocated;
+
+	int toAlloc = pData ? allocated : 8;
+	while(toAlloc < count)
+		toAlloc *= 2;
+
+	if(toAlloc > allocated)
+	{
+		pData = (T*)MFHeap_Realloc(pData, sizeof(T) * toAlloc);
+		allocated = toAlloc;
+	}
+
+	return allocated;
 }

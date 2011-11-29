@@ -21,11 +21,11 @@ enum MFIntModelFormat
 struct MFIntModel;
 
 MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntModelFormat format, const char *pName);
+MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName);
 
 void MFIntModel_Optimise(MFIntModel *pModel);
 
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, uint32 *pSize, MFPlatform platform);
+void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform);
 
 void MFIntModel_Destroy(MFIntModel *pModel);
 

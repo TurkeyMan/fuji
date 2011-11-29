@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFINTTEXTURE_H)
 #define _MFINTTEXTURE_H
 
@@ -43,11 +44,11 @@ struct MFIntTexture
 };
 
 MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename);
-MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, uint32 size, MFIntTextureFormat format);
+MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format);
 
 void MFIntTexture_Destroy(MFIntTexture *pTexture);
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, uint32 *pSize, MFPlatform platform, uint32 flags = 0, MFTextureFormat targetFormat = TexFmt_Unknown);
+void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags = 0, MFTextureFormat targetFormat = TexFmt_Unknown);
 
 void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename);
 

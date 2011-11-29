@@ -24,7 +24,7 @@ bool HKWidgetLayoutDescriptor::LoadFromXML(const char *pFilename)
 	DestroyNode(pRoot);
 
 	// attempt to load the xml document
-	uint32 len;
+	size_t len;
 	char *pFile = MFFileSystem_Load(pFilename, &len, true);
 
 	if(!pFile)

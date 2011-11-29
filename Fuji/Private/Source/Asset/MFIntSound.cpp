@@ -30,7 +30,7 @@ MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
 	return pSound;
 }
 
-MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, uint32 size, const char *pFormatExtension)
+MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, size_t size, const char *pFormatExtension)
 {
 	// create a memory file, and then use CreateFromFile()
 	return NULL;
@@ -42,7 +42,7 @@ void MFIntSound_Destroy(MFIntSound *pSound)
 	MFHeap_Free(pSound);
 }
 
-void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, uint32 *pSize, MFPlatform platform)
+void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	*ppOutput = NULL;
 
@@ -75,7 +75,7 @@ void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, uint32 *p
 	int numSamples = bytes / sampleSize;
 
 	// construct MFSoundTemplate
-	uint32 templateBytes = sizeof(MFSoundTemplate) + sizeof(char*)*pSound->soundTemplate.numStreams + sampleSize*numSamples;
+	size_t templateBytes = sizeof(MFSoundTemplate) + sizeof(char*)*pSound->soundTemplate.numStreams + sampleSize*numSamples;
 	MFSoundTemplate *pTemplate = (MFSoundTemplate*)MFHeap_Alloc(templateBytes);
 	MFCopyMemory(pTemplate, &pSound->soundTemplate, sizeof(MFSoundTemplate));
 	pTemplate->numSamples = numSamples;

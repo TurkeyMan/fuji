@@ -352,8 +352,8 @@ public:
 	int ReadMEMD2(const char *pFilename);
 
 	void WriteF3D(const char *pFilename);
-	void *CreateMDL(uint32 *pSize, MFPlatform platform);
-	void *CreateANM(uint32 *pSize, MFPlatform platform);
+	void *CreateMDL(size_t *pSize, MFPlatform platform);
+	void *CreateANM(size_t *pSize, MFPlatform platform);
 
 	void ProcessSkeletonData();
 	void ProcessCollisionData();

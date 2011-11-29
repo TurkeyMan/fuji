@@ -157,7 +157,7 @@ int MFFile_Tell(MFFile *pFile);
  * @param pFile Pointer to an open file.
  * @return Returns the size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
  */
-int MFFile_GetSize(MFFile *pFile);
+int64 MFFile_GetSize(MFFile *pFile);
 
 /**
  * Check for end of file.
@@ -384,7 +384,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MF
  * @param bAppendNullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
  * @return Returns a pointer to a new buffer containing the file that was loaded.
  */
-char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL, bool bAppendNullByte = false);
+char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, bool bAppendNullByte = false);
 
 /**
  * Write a file to a filesystem.
@@ -394,15 +394,16 @@ char* MFFileSystem_Load(const char *pFilename, uint32 *pBytesRead = NULL, bool b
  * @param size Size of the buffer to write.
  * @return Returns 0 if the file was succesfully written.
  */
-int MFFileSystem_Save(const char *pFilename, const char *pBuffer, uint32 size);
+int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size);
 
 /**
  * Get the size of a file.
  * Gets the size of a file.
  * @param pFilename The name of the file to find the size.
- * @return Returns the size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists.
+ * @return Returns the size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0.
+ * @remarks If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists. MFFileSystem_GetSize may also return -1 if the files length is not known, for instance, an endless or unknown length network stream.
  */
-int MFFileSystem_GetSize(const char *pFilename);
+int64 MFFileSystem_GetSize(const char *pFilename);
 
 /**
  * See if a file is available to the filesystem.
@@ -462,7 +463,7 @@ void MFFileSystem_FindClose(MFFind *pFind);
 /////////////////////////////////////
 // helper functions, to make life easier
 
-MFFile* MFFile_CreateMemoryFile(const void *pMemory, uint32 size, bool writable = false, bool ownMemory = false);
+MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable = false, bool ownMemory = false);
 
 
 /////////////////////////////////////

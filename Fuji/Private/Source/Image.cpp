@@ -129,7 +129,7 @@ FujiImage* LoadTGA(const char *filename, bool flipped)
 	unsigned char *contents, *position;
 	bool isSavedFlipped = true;
 
-	uint32 bytesRead;
+	size_t bytesRead;
 
 	MFHeap_SetHeapOverride(MFHeap_GetHeap(MFHT_ActiveTemporary));
 	contents = (unsigned char *)MFFileSystem_Load(filename, &bytesRead);
