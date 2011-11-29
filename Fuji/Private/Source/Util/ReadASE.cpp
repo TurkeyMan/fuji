@@ -569,8 +569,9 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetInt(pFilePtr, &count);
 
-		pSub->matSubobjects[0].triangles.resize(count);
-		pSub->matSubobjects[0].vertices.resize(count*3);
+		F3DMaterialSubobject &sub = pSub->matSubobjects.push();
+		sub.triangles.resize(count);
+		sub.vertices.resize(count*3);
 		pSub->normals.resize(count*3);
 	}
 	else if(!MFString_CaseCmp(pToken, "*MESH_VERTEX_LIST"))
