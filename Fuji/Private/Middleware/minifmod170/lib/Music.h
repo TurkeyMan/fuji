@@ -51,8 +51,8 @@
 #endif
 
 // Single note type - contains info on 1 note in a pattern
-typedef struct 
-{        
+typedef struct
+{
 	unsigned char	note;			// note to play at     (0-133) 132=none,133=keyoff
 	unsigned char	number;			// sample being played (0-99)
 	unsigned char	volume;			// volume column value (0-64)  255=no volume
@@ -60,7 +60,7 @@ typedef struct
 	unsigned char	eparam;			// effect parameter    (0-255)
 } FMUSIC_NOTE;
 
-// pattern data type 
+// pattern data type
 typedef struct
 {
 	int		rows;
@@ -88,30 +88,30 @@ typedef struct
 // Multi sample extended instrument
 typedef struct FMUSIC_INSTRUMENT
 {
-	int			numsamples;			// number of samples in this instrument 
-	FSOUND_SAMPLE	*sample[16];		// 16 samples per instrument 
-	unsigned char	keymap[96];			// sample keymap assignments 
-										
+	int			numsamples;			// number of samples in this instrument
+	FSOUND_SAMPLE	*sample[16];		// 16 samples per instrument
+	unsigned char	keymap[96];			// sample keymap assignments
+
 	unsigned short	VOLPoints[40];		// Volume envelope points (80 bytes - enough for 25 3 byte IT envelopes)
-	unsigned short	PANPoints[40];		// Panning envelope points 
+	unsigned short	PANPoints[40];		// Panning envelope points
 
 	// ====================================================================================
 	// 16 bytes read here in the loader for size, dont alter order or insert!!!
-	unsigned char	VOLnumpoints;		// Number of volume envelope points 
-	unsigned char	PANnumpoints;		// Number of panning envelope points 
-	unsigned char	VOLsustain;			// Volume sustain point 
-	unsigned char	VOLLoopStart;		// Volume envelope loop start 
-	unsigned char	VOLLoopEnd;			// Volume envelope loop end 
-	unsigned char	PANsustain;			// Panning sustain point 
-	unsigned char	PANLoopStart;		// Panning envelope loop start 
-	unsigned char	PANLoopEnd;			// Panning envelope loop end 
-	unsigned char	VOLtype;			// Type of envelope,bit 0:On 1:Sustain 2:Loop 
-	unsigned char	PANtype;			// Type of envelope,bit 0:On 1:Sustain 2:Loop 
-	unsigned char	VIBtype;			// Instrument Vibrato type 
-	unsigned char	VIBsweep;			// Time it takes for vibrato to fully kick in 
-	unsigned char	VIBdepth;			// depth of vibrato 
-	unsigned char	VIBrate;			// rate of vibrato 
-	unsigned short	VOLfade;			// fade out value 
+	unsigned char	VOLnumpoints;		// Number of volume envelope points
+	unsigned char	PANnumpoints;		// Number of panning envelope points
+	unsigned char	VOLsustain;			// Volume sustain point
+	unsigned char	VOLLoopStart;		// Volume envelope loop start
+	unsigned char	VOLLoopEnd;			// Volume envelope loop end
+	unsigned char	PANsustain;			// Panning sustain point
+	unsigned char	PANLoopStart;		// Panning envelope loop start
+	unsigned char	PANLoopEnd;			// Panning envelope loop end
+	unsigned char	VOLtype;			// Type of envelope,bit 0:On 1:Sustain 2:Loop
+	unsigned char	PANtype;			// Type of envelope,bit 0:On 1:Sustain 2:Loop
+	unsigned char	VIBtype;			// Instrument Vibrato type
+	unsigned char	VIBsweep;			// Time it takes for vibrato to fully kick in
+	unsigned char	VIBdepth;			// depth of vibrato
+	unsigned char	VIBrate;			// rate of vibrato
+	unsigned short	VOLfade;			// fade out value
 	// ====================================================================================
 
 
@@ -122,64 +122,64 @@ typedef struct FMUSIC_INSTRUMENT
 // Channel type - contains information on a mod channel
 typedef struct FMUSIC_CHANNEL
 {
-									
-	unsigned char  	note;  				// last note set in channel 
-	unsigned char	samp;				// last sample set in channel 
-										
-	unsigned char	notectrl;			// flags for FSOUND 
-					
-	FSOUND_CHANNEL	*cptr;				// pointer to FSOUND system mixing channel 
-	FSOUND_SAMPLE	*sptr;				// pointer to FSOUND system sample 
 
-	int			freq;				// current mod frequency period for this channel 
-	int			volume;				// current mod volume for this channel 
-	int			pan;				// current mod pan for this channel 
-	int			voldelta;			// delta for volume commands.. tremolo/tremor etc 
-	int			freqdelta;			// delta for frequency commands.. vibrato/arpeggio etc 
+	unsigned char  	note;  				// last note set in channel
+	unsigned char	samp;				// last sample set in channel
+
+	unsigned char	notectrl;			// flags for FSOUND
+
+	FSOUND_CHANNEL	*cptr;				// pointer to FSOUND system mixing channel
+	FSOUND_SAMPLE	*sptr;				// pointer to FSOUND system sample
+
+	int			freq;				// current mod frequency period for this channel
+	int			volume;				// current mod volume for this channel
+	int			pan;				// current mod pan for this channel
+	int			voldelta;			// delta for volume commands.. tremolo/tremor etc
+	int			freqdelta;			// delta for frequency commands.. vibrato/arpeggio etc
 	int			pandelta;			// delta for pan commands.. panbrello
-										
-	int			samp_globalvol;		// this current sample's global volume 
-										
-	int			envvoltick;			// tick counter for envelope position 
-	int			envvolpos;			// envelope position 
-	int			envvolfrac;			// fractional interpolated envelope volume 
-	int			envvol;				// final interpolated envelope volume 
-	int			envvoldelta;		// delta step between points 
-	signed char	envvolstopped;		// flag to say whether envelope has finished or not 
-										
-	int			envpantick;			// tick counter for envelope position 
-	int			envpanpos;			// envelope position 
-	int			envpanfrac;			// fractional interpolated envelope pan 
-	int			envpan;				// final interpolated envelope pan 
-	int			envpandelta;		// delta step between points 
-	signed char	envpanstopped;		// flag to say whether envelope has finished or not 
-										
-	int			fadeoutvol;			// volume fade out 
+
+	int			samp_globalvol;		// this current sample's global volume
+
+	int			envvoltick;			// tick counter for envelope position
+	int			envvolpos;			// envelope position
+	int			envvolfrac;			// fractional interpolated envelope volume
+	int			envvol;				// final interpolated envelope volume
+	int			envvoldelta;		// delta step between points
+	signed char	envvolstopped;		// flag to say whether envelope has finished or not
+
+	int			envpantick;			// tick counter for envelope position
+	int			envpanpos;			// envelope position
+	int			envpanfrac;			// fractional interpolated envelope pan
+	int			envpan;				// final interpolated envelope pan
+	int			envpandelta;		// delta step between points
+	signed char	envpanstopped;		// flag to say whether envelope has finished or not
+
+	int			fadeoutvol;			// volume fade out
 	int			ivibpos;   			// instrument vibrato position
 	int			ivibsweeppos;		// instrument vibrato sweep position
-	signed char	fade;				// flag whether to start fade or not 
-	signed char	keyoff;				// flag whether keyoff has been hit or not) 
-									
-	unsigned char	inst;				// last instrument set in channel 
-	unsigned char  	realnote;  			// last realnote set in channel 
-	unsigned int	period;				// last period set in channel 
-	unsigned char	recenteffect;		// previous row's effect.. used to correct tremolo volume 
+	signed char	fade;				// flag whether to start fade or not
+	signed char	keyoff;				// flag whether keyoff has been hit or not)
+
+	unsigned char	inst;				// last instrument set in channel
+	unsigned char  	realnote;  			// last realnote set in channel
+	unsigned int	period;				// last period set in channel
+	unsigned char	recenteffect;		// previous row's effect.. used to correct tremolo volume
 
 	unsigned int	sampleoffset;		// sample offset for this channel in SAMPLES
 
-	int			globalvolume;		// global volume for this channel 
+	int			globalvolume;		// global volume for this channel
 //	unsigned char	portaupdown;  		// last porta up or down value (S3M / IT)
-	unsigned char	portadown;  		// last porta down value (XM) 
-	unsigned char	portaup;   			// last porta up value (XM) 
-	unsigned char	xtraportadown;		// last porta down value (XM) 
-	unsigned char	xtraportaup;  		// last porta up value (XM) 
+	unsigned char	portadown;  		// last porta down value (XM)
+	unsigned char	portaup;   			// last porta up value (XM)
+	unsigned char	xtraportadown;		// last porta down value (XM)
+	unsigned char	xtraportaup;  		// last porta up value (XM)
 	unsigned char	volslide;   		// last volume slide value (XM + S3M)
-	unsigned char	panslide;			// pan slide parameter (XM) 
+	unsigned char	panslide;			// pan slide parameter (XM)
 	unsigned char	retrigx;   			// last retrig volume slide used (XM + S3M)
 	unsigned char	retrigy;   			// last retrig tick count used (XM + S3M)
 //	unsigned char	retrigcount;		// retrig timer (IT)
 
-	int			portatarget; 		// note to porta to 
+	int			portatarget; 		// note to porta to
 	unsigned char	portaspeed;			// porta speed
 //	unsigned char	portareached;		// flag for IT to say portamento has been reached
 
@@ -187,40 +187,40 @@ typedef struct FMUSIC_CHANNEL
 	unsigned char	vibspeed;  			// vibrato speed
 	unsigned char	vibdepth;  			// vibrato depth
 	unsigned char	vibtype;			// vibrato type (IT) .. I cant believe this shit
-	
+
 	signed char		tremolopos;   		// tremolo position
 	unsigned char  	tremolospeed; 		// tremolo speed
 	unsigned char  	tremolodepth; 		// tremolo depth
-	
+
 	int			panbrellopos;  		// panbrello position
 	unsigned char  	panbrellospeed;		// panbrello speed
 	unsigned char  	panbrellodepth;		// panbrello depth
-	
+
 	unsigned char	tremorpos; 			// tremor position (XM + S3M)
-	unsigned char 	tremoron;   		// remembered parameters for tremor (XM + S3M) 
-	unsigned char 	tremoroff;   		// remembered parameters for tremor (XM + S3M) 
-	unsigned char	arpeggio;			// remembered parameters for arpeggio (S3M) 
- 	int			patlooprow;			
+	unsigned char 	tremoron;   		// remembered parameters for tremor (XM + S3M)
+	unsigned char 	tremoroff;   		// remembered parameters for tremor (XM + S3M)
+	unsigned char	arpeggio;			// remembered parameters for arpeggio (S3M)
+ 	int			patlooprow;
  	int 			patloopno;  		// pattern loop variables for effect  E6x
 	unsigned char  	channelvsl;			// global volume slide parameters
 
 	unsigned char	specialparam;		// remembered parameter for Sxy
 	unsigned char 	wavecontrol;		// waveform type for vibrato and tremolo (4bits each)
-	unsigned char 	wavecontrolvib;		// waveform type for vibrato (IT) 
+	unsigned char 	wavecontrolvib;		// waveform type for vibrato (IT)
 	unsigned char 	wavecontroltrem;	// waveform type for tremolo (IT)
 	unsigned char 	wavecontrolpan;		// waveform type for panbrello (IT)
 
-	unsigned char	finevsldown;		// parameter for fine volume slide down 
-	unsigned char	finevslup;			// parameter for fine volume slide down 
+	unsigned char	finevsldown;		// parameter for fine volume slide down
+	unsigned char	finevslup;			// parameter for fine volume slide down
 	unsigned char	fineportaup;		// parameter for fine porta slide up
-	unsigned char	fineportadown;		// parameter for fine porta slide down 
-	unsigned char	highoffset;			// high part of sample offset - ie the 'y' part of yxx00 (IT) 
-	unsigned char	volcolumn_volslide; // volume column parameter remembered for volume sliding (IT) 
+	unsigned char	fineportadown;		// parameter for fine porta slide down
+	unsigned char	highoffset;			// high part of sample offset - ie the 'y' part of yxx00 (IT)
+	unsigned char	volcolumn_volslide; // volume column parameter remembered for volume sliding (IT)
 } FMUSIC_CHANNEL;
 
 
 // Song type - contains info on song
-typedef struct FMUSIC_MODULE 
+typedef struct FMUSIC_MODULE
 {
 	FMUSIC_PATTERN	*pattern;			// patterns array for this song
 	FMUSIC_INSTRUMENT *instrument;		// instrument array for this song (not used in MOD/S3M)
@@ -250,7 +250,7 @@ typedef struct FMUSIC_MODULE
 
 	int				globalvolume;		// global mod volume
 	unsigned char	globalvsl;			// global mod volume
-	int				tick;				// current mod tick	
+	int				tick;				// current mod tick
 	int				speed;				// speed of song in ticks per row
 	int				bpm;				// speed of song in bpm
 	int				row;				// current row in pattern
@@ -272,7 +272,7 @@ typedef struct FMUSIC_MODULE
 
 //= VARIABLE EXTERNS ========================================================================
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 

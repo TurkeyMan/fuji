@@ -18,7 +18,7 @@
 #include "DebugMenu.h"
 
 // internal functions
-void DebugMenu_InitModule();
+MFInitStatus DebugMenu_InitModule();
 void DebugMenu_DeinitModule();
 
 void DebugMenu_Update();

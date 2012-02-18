@@ -6,8 +6,8 @@
 /**** Includes ****/
 
 #include "Fuji.h"
-#include "Timer.h"
 #include "MFSystem.h"
+#include "Timer.h"
 #include "DebugMenu.h"
 
 /**** Globals ****/
@@ -23,9 +23,11 @@ void UpdateRate(MenuObject *pObject, void *pData)
 	gSystemTimer.SetRate(((MenuItemFloat*)pObject)->data);
 }
 
-void Timer_InitModule()
+MFInitStatus Timer_InitModule()
 {
 	DebugMenu_AddItem("Game Playback Rate", "Fuji Options", &playRate, UpdateRate);
+
+	return MFAIC_Succeeded;
 }
 
 void Timer_DeinitModule()

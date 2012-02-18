@@ -15,7 +15,6 @@ bool isortho = false;
 float fieldOfView;
 
 extern MFInitParams gInitParams;
-extern bool gFujiInitialised;
 
 bool initialised = false;
 

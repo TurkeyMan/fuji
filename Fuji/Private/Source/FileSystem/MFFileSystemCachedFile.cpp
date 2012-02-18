@@ -7,7 +7,7 @@
 
 MFPtrListDL<MFFileCachedData> gCachedFiles;
 
-void MFFileSystemCachedFile_InitModule()
+MFInitStatus MFFileSystemCachedFile_InitModule()
 {
 	MFCALLSTACK;
 
@@ -30,6 +30,8 @@ void MFFileSystemCachedFile_InitModule()
 	fsCallbacks.FindClose = NULL;
 
 	hCachedFileSystem = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
+
+	return MFAIC_Succeeded;
 }
 
 void MFFileSystemCachedFile_DeinitModule()

@@ -7,7 +7,7 @@
 #include "HKInputSource.h"
 
 #include "MFSystem.h"
-#include "HKOpenHashTable.h"
+#include "MFOpenHashTable.h"
 
 class HKWidgetRenderer;
 class HKWidgetLayoutFrame;
@@ -56,7 +56,7 @@ protected:
 	static HKWidgetFactory *pFactory;
 	static HKWidgetRendererFactory *pRendererFactory;
 
-	static HKOpenHashTable<HKWidgetEvent::Delegate> eventHandlerRegistry;
+	static MFOpenHashTable<HKWidgetEvent::Delegate> eventHandlerRegistry;
 
 	void LocaliseInput(HKInputManager::EventInfo &ev, HKWidget *pWidget, MFVector &localPos);
 

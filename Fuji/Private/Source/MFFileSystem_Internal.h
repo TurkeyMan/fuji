@@ -9,7 +9,7 @@ struct MFTOCEntry;
 struct MFMount;
 
 // internal functions
-void MFFileSystem_InitModule();
+MFInitStatus MFFileSystem_InitModule();
 void MFFileSystem_DeinitModule();
 
 MFMount *MFFileSystem_FindVolume(const char *pVolumeName);

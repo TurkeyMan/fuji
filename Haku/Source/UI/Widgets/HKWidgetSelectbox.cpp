@@ -128,6 +128,9 @@ void HKWidgetSelectbox::Unbind()
 
 void HKWidgetSelectbox::SetSelection(int item)
 {
+	if(item >= pAdapter->GetNumItems())
+		item = -1;
+
 	if(selection != item)
 	{
 		selection = item;

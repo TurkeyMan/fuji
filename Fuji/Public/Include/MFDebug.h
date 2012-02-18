@@ -21,9 +21,13 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(MF_ARCH_X86) || defined(MF_ARCH_X64)
+#if defined(_NACL)
+	// int 3 is an illegal instruction in NaCl
+	#include <assert.h>
+	#define MFDebug_Breakpoint()		assert(false)
+#elif defined(MF_ARCH_X86) || defined(MF_ARCH_X64)
 	#if defined(MF_COMPILER_VISUALC)
-		#define MFDebug_Breakpoint()		__debugbreak();
+		#define MFDebug_Breakpoint()	__debugbreak();
 	#else
 		#if defined(MF_ASM_INTEL)
 			#define MFDebug_Breakpoint() { __asm { int 3 }; }
@@ -104,7 +108,7 @@ void MFDebug_Error(const char *pErrorMessage);
  * @param pWarningMessage Message to log to the debugger.
  * @return None.
  * @remarks The warning level output can be controlled at runtime.
- * 
+ *
  * Valid Warning levels:
  * - 0 - Warning will be always be displayed. For critical warnings.
  * - 1 - Critical Warning. Application will probably not run correctly.
@@ -121,7 +125,7 @@ void MFDebug_Warn(int level, const char *pWarningMessage);
  * @param pMessage Message to log to the debugger.
  * @return None.
  * @remarks The log level output can be controlled at runtime.
- * 
+ *
  * Valid Log levels:
  * - 0 - Messages will be always be displayed.
  * - 1 - Important message.

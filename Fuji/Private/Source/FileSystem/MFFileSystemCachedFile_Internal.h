@@ -4,7 +4,7 @@
 #include "FileSystem/MFFileSystemCachedFile.h"
 
 // internal functions
-void MFFileSystemCachedFile_InitModule();
+MFInitStatus MFFileSystemCachedFile_InitModule();
 void MFFileSystemCachedFile_DeinitModule();
 
 // filesystem callbacks

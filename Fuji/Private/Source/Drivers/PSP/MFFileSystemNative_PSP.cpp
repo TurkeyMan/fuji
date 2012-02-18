@@ -11,6 +11,11 @@
 
 const char *gPSPSystemPath __attribute__((weak)) = "host0:";
 
+MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
+{
+	return MFAIC_Succeeded;
+}
+
 void MFFileSystemNative_Register()
 {
 

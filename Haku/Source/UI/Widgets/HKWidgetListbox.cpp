@@ -203,6 +203,9 @@ float HKWidgetListbox::GetMaxSize() const
 
 void HKWidgetListbox::SetSelection(int item)
 {
+	if(item >= children.size())
+		item = -1;
+
 	if(selection != item)
 	{
 		if(selection > -1)

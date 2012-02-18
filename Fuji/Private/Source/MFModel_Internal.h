@@ -8,7 +8,7 @@
 
 struct MFModelTemplate;
 
-void MFModel_InitModule();
+MFInitStatus MFModel_InitModule();
 void MFModel_DeinitModule();
 
 void MFModel_InitModulePlatformSpecific();

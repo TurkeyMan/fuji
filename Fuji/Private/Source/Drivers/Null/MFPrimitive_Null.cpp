@@ -7,7 +7,7 @@
 uint32 beginCount;
 uint32 currentVert;
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 }
 

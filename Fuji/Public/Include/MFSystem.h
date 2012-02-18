@@ -140,7 +140,8 @@ enum MFCallback
 {
 	MFCB_Unknown = -1,			/**< Unknown callback. */
 
-	MFCB_FileSystemInit = 0,	/**< File system init callback. This is called after the filesystem initialises, before Fuji attempts to load any debug resources. */
+	MFCB_RegisterModules = 0,	/**< Register modules callback. This is called after the Fuji modules are registered, allowing registration of custom modules. */
+	MFCB_FileSystemInit,		/**< File system init callback. This is called after the filesystem initialises, before Fuji attempts to load any debug resources. */
 	MFCB_InitDone,				/**< Post engine init callback. Called after Fuji has completed initialisation. */
 	MFCB_Deinit,				/**< Deinit callback. */
 

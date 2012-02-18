@@ -11,7 +11,7 @@ struct MFFileMemoryData
 };
 
 // internal functions
-void MFFileSystemMemory_InitModule();
+MFInitStatus MFFileSystemMemory_InitModule();
 void MFFileSystemMemory_DeinitModule();
 
 // filesystem callbacks

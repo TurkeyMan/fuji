@@ -3,9 +3,11 @@
 
 static int gIsInitialised = 0;
 
-void MFSockets_InitModule()
+MFInitStatus MFSockets_InitModule()
 {
 	gIsInitialised = MFSockets_InitModulePlatformSpecific();
+
+	return MFAIC_Succeeded;
 }
 
 void MFSockets_DeinitModule()

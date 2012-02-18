@@ -69,12 +69,14 @@
 
 #endif // _MFCALLSTACK
 
-void MFCallstack_InitModule()
+MFInitStatus MFCallstack_InitModule()
 {
 #if defined(_MFCALLSTACK_PROFILING)
 	DebugMenu_AddItem("Draw Callstack Profile", "Fuji Options", &drawCallstack);
 	DebugMenu_AddItem("Draw Profile Meter", "Fuji Options", &drawCallstackMeter);
 #endif
+
+	return MFAIC_Succeeded;
 }
 
 void MFCallstack_DeinitModule()

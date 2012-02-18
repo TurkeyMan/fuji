@@ -4,8 +4,10 @@
 #include "FileSystem/MFFileSystemNative.h"
 
 // internal functions
-void MFFileSystemNative_InitModule();
+MFInitStatus MFFileSystemNative_InitModule();
 void MFFileSystemNative_DeinitModule();
+
+MFInitStatus MFFileSystemNative_InitModulePlatformSpecific();
 
 // filesystem callbacks
 void MFFileSystemNative_Register();

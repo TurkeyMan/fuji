@@ -6,7 +6,7 @@
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
-	void MFPrimitive_InitModule_##driver(); \
+	MFInitStatus MFPrimitive_InitModule_##driver(); \
 	void MFPrimitive_DeinitModule_##driver(); \
 	void MFPrimitive_DrawStats_##driver(); \
 	void MFPrimitive_##driver(uint32 type, uint32 hint); \
@@ -57,7 +57,7 @@
 struct MFPrimitivePluginCallbacks
 {
 	const char *pDriverName;
-	void (*pInitModule)();
+	MFInitStatus (*pInitModule)();
 	void (*pDeinitModule)();
 	void (*pDrawStats)();
 	void (*pMFPrimitive)(uint32 type, uint32 hint);
@@ -94,13 +94,15 @@ MFPrimitivePluginCallbacks *gpCurrentPrimitivePlugin = NULL;
 
 /*** Function Wrappers ***/
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 	// choose the plugin from init settings
 	gpCurrentPrimitivePlugin = &gPrimitivePlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
 	gpCurrentPrimitivePlugin->pInitModule();
+
+	return MFAIC_Succeeded;
 }
 
 void MFPrimitive_DeinitModule()

@@ -107,7 +107,7 @@ int MFSound_UpdateThread(void *pUserData)
 }
 #endif
 
-void MFSound_InitModule()
+MFInitStatus MFSound_InitModule()
 {
 	MFCALLSTACK;
 
@@ -156,6 +156,8 @@ void MFSound_InitModule()
 	gSoundMutex = MFThread_CreateMutex("MFSound Mutex");
 	gAudioThread = MFThread_CreateThread("MFSound Thread", MFSound_UpdateThread, NULL, MFPriority_AboveNormal);
 #endif
+
+	return MFAIC_Succeeded;
 }
 
 void MFSound_DeinitModule()

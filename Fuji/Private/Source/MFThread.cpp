@@ -3,41 +3,36 @@
 #include "MFThread_Internal.h"
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
+#include "MFObjectPool.h"
 
 // globals
-
-static MFThreadInfo *gpThreads;
 
 static MFTls gThreadTls;
 
 static int gMutexSize = MFThread_GetMutexSizePlatformSpecific();
+static MFObjectPool gThreadInfo;
 
 // functions
 
-void MFThread_InitModule()
+MFInitStatus MFThread_InitModule()
 {
 	gMutexSize = MFThread_GetMutexSizePlatformSpecific();
 
-	gpThreads = (MFThreadInfo*)MFHeap_AllocAndZero(sizeof(MFThreadInfo)*gDefaults.thread.maxThreads);
+	gThreadInfo.Init(sizeof(MFThreadInfo), gDefaults.thread.maxThreads, gDefaults.thread.maxThreads);
 //	gThreadTls = MFThread_TlsAlloc();
+
+	return MFAIC_Succeeded;
 }
 
 void MFThread_DeinitModule()
 {
 //	MFThread_TlsFree(gThreadTls);
-	MFHeap_Free(gpThreads);
+	gThreadInfo.Deinit();
 }
 
 static MFThreadInfo* MFThread_GetNewThreadInfo()
 {
-	// TODO: ALLOC FROM LOCK-FREE POOL
-	for(uint32 a=0; a<gDefaults.thread.maxThreads; a++)
-	{
-		if(!gpThreads[a].pEntryPoint)
-			return &gpThreads[a];
-	}
-
-	return NULL;
+	return (MFThreadInfo*)gThreadInfo.Alloc();
 }
 
 int MFThread_ThreadProc(MFThreadInfo *pThreadInfo)
@@ -94,7 +89,7 @@ void MFThread_DestroyThread(MFThread pThreadInfo)
 		pThreadInfo->joinSemaphore = NULL;
 	}
 
-	pThreadInfo->pEntryPoint = NULL;
+	gThreadInfo.Free(pThreadInfo);
 }
 
 void MFThread_Join(MFThread pThreadInfo)

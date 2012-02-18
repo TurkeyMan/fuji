@@ -26,7 +26,7 @@ static int gNativeFunctionCount = 0;
 
 /*** Functions ***/
 
-void MFScript_InitModule()
+MFInitStatus MFScript_InitModule()
 {
 	
 }

@@ -6,7 +6,7 @@
 #include "MFMaterial.h"
 
 // internal functions
-void MFParticleSystem_InitModule();
+MFInitStatus MFParticleSystem_InitModule();
 void MFParticleSystem_DeinitModule();
 
 struct MFParticle

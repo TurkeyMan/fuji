@@ -101,6 +101,26 @@ enum MFSocketOptions
 	MFSO_ForceInt = 0x7FFFFFFF	/**< Force SocketOptions to int type */
 };
 
+/**
+ * Socket errors.
+ * Socket errors.
+ */
+enum MFSocketError
+{
+	MFSockError_Unknown = -1,
+
+	MFSockError_None = 0,
+	MFSockError_WouldBlock,
+	MFSockError_TimedOut,
+	MFSockError_Interrupted,
+	MFSockError_AlreadyInProgress,
+	MFSockError_NetworkUnreachable,
+	MFSockError_HostUnreachable,
+	MFSockError_ConnectionRefused,
+	MFSockError_IsConnected,
+
+	MFSockError_ForceInt = 0x7FFFFFFF	/**< Force SocketError to int type */
+};
 
 /**
  * Inet Address.
@@ -365,6 +385,13 @@ int MFSockets_GetAddressInfo(const char *pAddress, const char *pServiceName, con
  * @return If no error occurs, zero is returned.
  */
 int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const void* optval, int optlen);
+
+/**
+ * Get the last socket error.
+ * Gets the last socket error.
+ * @return Returns the last socket error.
+ */
+MFSocketError MFSockets_GetLastError();
 
 #endif
 

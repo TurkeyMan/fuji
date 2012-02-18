@@ -11,7 +11,7 @@
 struct MFMaterialType;
 
 // material functions
-void MFMaterial_InitModule();
+MFInitStatus MFMaterial_InitModule();
 void MFMaterial_DeinitModule();
 
 void MFMaterial_Update();

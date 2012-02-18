@@ -33,7 +33,7 @@ int  r, g, b, a;
 #define NUM_VERTS	(4096*4)
 #define GIF_AD		0x0E
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
 	if(packet_allocate(&packet, 1024) < 0)

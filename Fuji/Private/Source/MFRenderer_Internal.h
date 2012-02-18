@@ -4,7 +4,7 @@
 #include "MFRenderer.h"
 
 // init/deinit
-void MFRenderer_InitModule();
+MFInitStatus MFRenderer_InitModule();
 void MFRenderer_DeinitModule();
 
 void MFRenderer_InitModulePlatformSpecific();

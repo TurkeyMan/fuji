@@ -7,7 +7,7 @@ struct MFSoundDataInternal;
 struct MFVoiceDataInternal;
 struct MFStreamCallbacks;
 
-void MFSound_InitModule();
+MFInitStatus MFSound_InitModule();
 void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize);
 void MFSound_DeinitModule();
 void MFSound_DeinitModulePlatformSpecific();

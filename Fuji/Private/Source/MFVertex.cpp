@@ -23,9 +23,11 @@ int gVertexDataStride[MFVDF_Max] =
 	4	// MFVDF_Float16_2
 };
 
-void MFVertex_InitModule()
+MFInitStatus MFVertex_InitModule()
 {
 	MFVertex_InitModulePlatformSpecific();
+
+	return MFAIC_Succeeded;
 }
 
 void MFVertex_DeinitModule()

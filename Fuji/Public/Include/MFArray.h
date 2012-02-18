@@ -32,6 +32,8 @@ public:
 	void resize(int length);
 	void clear();
 
+	void remove(int i);
+
 	T* getpointer() const;
 
 protected:

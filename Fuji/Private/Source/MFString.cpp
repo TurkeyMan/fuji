@@ -26,10 +26,12 @@ static const MFObjectPoolGroupConfig gStringGroups[] =
 	{ 1024, 4, 4 }
 };
 
-void MFString_InitModule()
+MFInitStatus MFString_InitModule()
 {
 	stringHeap.Init(gStringGroups, sizeof(gStringGroups) / sizeof(gStringGroups[0]));
 	stringPool.Init(sizeof(MFStringData), 128, 128);
+
+	return MFAIC_Succeeded;
 }
 
 void MFString_DeinitModule()

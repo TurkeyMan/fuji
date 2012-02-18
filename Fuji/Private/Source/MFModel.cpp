@@ -15,11 +15,13 @@
 
 MFModelPool gModelBank;
 
-void MFModel_InitModule()
+MFInitStatus MFModel_InitModule()
 {
 	gModelBank.Init(256, 64, 64);
 
 	MFModel_InitModulePlatformSpecific();
+
+	return MFAIC_Succeeded;
 }
 
 void MFModel_DeinitModule()

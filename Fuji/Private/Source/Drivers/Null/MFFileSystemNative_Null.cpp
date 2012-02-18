@@ -17,8 +17,14 @@
 	#endif
 #endif
 
+MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
+{
+	return MFAIC_Succeeded;
+}
+
 void MFFileSystemNative_Register()
 {
+
 }
 
 void MFFileSystemNative_Unregister()

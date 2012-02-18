@@ -46,7 +46,7 @@ struct MFFont
 	int refCount;
 };
 
-void MFFont_InitModule();
+MFInitStatus MFFont_InitModule();
 void MFFont_DeinitModule();
 
 // typedef the texture pool

@@ -5,9 +5,11 @@
 
 MFPtrList<MFAnimScriptTemplate> gAnimScripts;
 
-void MFAnimScript_InitModule()
+MFInitStatus MFAnimScript_InitModule()
 {
 	gAnimScripts.Init("Anim Script Templates", 256);
+
+	return MFAIC_Succeeded;
 }
 
 void MFAnimScript_DeinitModule()

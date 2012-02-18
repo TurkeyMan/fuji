@@ -12,11 +12,13 @@ static MenuItemBool gShowCollision;
 
 /**** Internal Functions ****/
 
-void MFCollision_InitModule()
+MFInitStatus MFCollision_InitModule()
 {
 	gItemList.Init("Collision Items", 256);
 
 	DebugMenu_AddItem("Show Collision", "Fuji Options", &gShowCollision, NULL, NULL);
+
+	return MFAIC_Succeeded;
 }
 
 void MFCollision_DeinitModule()

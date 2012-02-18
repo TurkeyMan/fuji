@@ -166,6 +166,18 @@
 	#define MF_DC
 	#define MF_PLATFORM DC
 	#define MF_32BIT
+#elif defined(_NACL)
+	#define MF_NACL
+	#define MF_PLATFORM NACL
+	#if defined(__x86_64__)
+		#define MF_ARCH_X64
+		#define MF_64BIT
+	#elif defined(__i386__)
+		#define MF_ARCH_X86
+		#define MF_32BIT
+	#else
+		#error "Unknown architecture?!"
+	#endif
 #elif defined(__arm__)
 	#define MF_ARCH_ARM
 #elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips) || defined(__mips__) || defined(__MIPSEL__) || defined(_MIPSEL) || defined(__MIPSEL)
@@ -261,6 +273,7 @@ enum MFPlatform
 	FP_IPhone,			/**< IPhone OS */
 	FP_Android,			/**< Android */
 	FP_WindowsMobile,	/**< Windows Mobile */
+	FP_NativeClient,	/**< Native Client (NaCL) */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
@@ -344,7 +357,10 @@ enum MFEndian
 #define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
 #endif
 
+
 /*** Additional includes ***/
+
+#include "MFModule.h"
 
 #include "MFString.h"
 #include "MFMath.h"

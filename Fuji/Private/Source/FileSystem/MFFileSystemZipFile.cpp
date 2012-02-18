@@ -8,7 +8,7 @@
 #include <zlib/minizip/unzip.h>
 #include <zlib/minizip/ioapi.h>
 
-void MFFileSystemZipFile_InitModule()
+MFInitStatus MFFileSystemZipFile_InitModule()
 {
 	MFCALLSTACK;
 
@@ -29,6 +29,8 @@ void MFFileSystemZipFile_InitModule()
 	fsCallbacks.FindClose = MFFileZipFile_FindClose;
 
 	hZipFileSystem = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
+
+	return MFAIC_Succeeded;
 }
 
 void MFFileSystemZipFile_DeinitModule()

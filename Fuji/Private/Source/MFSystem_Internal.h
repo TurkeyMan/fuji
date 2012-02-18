@@ -9,11 +9,12 @@ void MFSystem_RunFrame();
 
 void MFSystem_UpdateTimeDelta();
 
-void MFSystem_Init();
+MFInitStatus MFSystem_InitModule();
+void MFSystem_DeinitModule();
+
 void MFSystem_Update();
 void MFSystem_PostUpdate();
 void MFSystem_Draw();
-void MFSystem_Deinit();
 
 void MFSystem_InitModulePlatformSpecific();
 void MFSystem_DeinitModulePlatformSpecific();

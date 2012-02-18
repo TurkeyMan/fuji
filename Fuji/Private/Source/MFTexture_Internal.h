@@ -30,7 +30,7 @@ struct MFTexture;
 struct MFTextureSurfaceLevel;
 
 // functions
-void MFTexture_InitModule();
+MFInitStatus MFTexture_InitModule();
 void MFTexture_DeinitModule();
 
 void MFTexture_InitModulePlatformSpecific();

@@ -4,7 +4,7 @@
 #include "MFDisplay.h"
 
 // internal functions
-void MFDisplay_InitModule();
+MFInitStatus MFDisplay_InitModule();
 void MFDisplay_DeinitModule();
 
 // these are used by Fuji internally and not exposed to the game

@@ -4,7 +4,7 @@
 #include "MFView.h"
 
 // internal functions
-void MFView_InitModule();
+MFInitStatus MFView_InitModule();
 void MFView_DeinitModule();
 
 // view structure

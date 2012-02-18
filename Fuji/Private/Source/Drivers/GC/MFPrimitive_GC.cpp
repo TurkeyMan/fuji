@@ -26,7 +26,7 @@ static uint8 gPTLookup[7] =
 	GX_QUADS
 };
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 }
 

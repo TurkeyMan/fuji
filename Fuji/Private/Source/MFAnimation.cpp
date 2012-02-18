@@ -10,9 +10,11 @@ MFPtrList<MFAnimationTemplate> gAnimationBank;
 // 128 temp matrices for intermediate calculation data
 MFMatrix gWorkingMats[128];
 
-void MFAnimation_InitModule()
+MFInitStatus MFAnimation_InitModule()
 {
 	gAnimationBank.Init("Animation Bank", gDefaults.animation.maxAnimations);
+
+	return MFAIC_Succeeded;
 }
 
 void MFAnimation_DeinitModule()

@@ -76,7 +76,7 @@ static size_t shrRoundUp(size_t local_work_size, size_t size)
 }
 //---------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_InitModule()
+MFInitStatus MFCompute_InitModule()
 {
 	const int MAX_PLATFORMS = 32;
 	cl_platform_id platforms[MAX_PLATFORMS];

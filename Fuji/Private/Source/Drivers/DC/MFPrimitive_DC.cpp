@@ -15,7 +15,7 @@ uint32 primType;
 uint32 beginCount;
 uint32 currentVert;
 
-void Primitive_InitModule()
+MFInitStatus Primitive_InitModule()
 {
 	CALLSTACK;
 }

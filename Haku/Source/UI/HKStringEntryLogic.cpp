@@ -314,7 +314,7 @@ void HKStringEntryLogic::Update()
 						const uint16 wstr[] = { (uint16)ascii, 0 };
 						char insert[5];
 						MFString_CopyUTF16ToUTF8(insert, wstr);
-						buffer.Replace(selMin, selRange, MFString::Static(insert));
+						buffer.Replace(selMin, selRange, insert);
 						cursorPos = selMin + 1;
 
 						selectionStart = selectionEnd = cursorPos;

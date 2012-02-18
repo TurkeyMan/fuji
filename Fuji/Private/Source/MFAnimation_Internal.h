@@ -6,7 +6,7 @@
 
 struct MFAnimationTemplate;
 
-void MFAnimation_InitModule();
+MFInitStatus MFAnimation_InitModule();
 void MFAnimation_DeinitModule();
 
 struct MFAnimationCurrentFrame

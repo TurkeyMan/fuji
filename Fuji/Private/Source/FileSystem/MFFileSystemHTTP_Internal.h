@@ -18,7 +18,7 @@ struct MFFileHTTPData
 };
 
 // internal functions
-void MFFileSystemHTTP_InitModule();
+MFInitStatus MFFileSystemHTTP_InitModule();
 void MFFileSystemHTTP_DeinitModule();
 
 // filesystem callbacks

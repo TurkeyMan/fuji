@@ -12,7 +12,7 @@ MFRect MFView::defaultOrthoRect;
 MFView *gpViewStack = NULL;
 MFView *pCurrentView = NULL;
 
-void MFView_InitModule()
+MFInitStatus MFView_InitModule()
 {
 	// allocate view stack
 	gpViewStack = (MFView*)MFHeap_Alloc(sizeof(MFView) * gDefaults.view.maxViewsOnStack);
@@ -38,6 +38,8 @@ void MFView_InitModule()
 
 	pCurrentView = gpViewStack;
 	MFView_SetDefault();
+
+	return MFAIC_Succeeded;
 }
 
 void MFView_DeinitModule()

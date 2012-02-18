@@ -22,7 +22,7 @@ struct MFThreadInfo
 	char platformSpecific[16];
 };
 
-void MFThread_InitModule();
+MFInitStatus MFThread_InitModule();
 void MFThread_DeinitModule();
 
 int MFThread_ThreadProc(MFThreadInfo *pThreadInfo);

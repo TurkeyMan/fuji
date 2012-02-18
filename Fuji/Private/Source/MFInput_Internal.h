@@ -15,7 +15,7 @@ struct MFAccelerometerState;
 struct MFTouchPanelState;
 
 // internal functions
-void MFInput_InitModule();
+MFInitStatus MFInput_InitModule();
 void MFInput_DeinitModule();
 void MFInput_Update();
 

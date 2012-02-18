@@ -35,6 +35,13 @@
 
 int gOpenGLVersion = 0;
 
+#if defined(MF_OPENGL_ES) && MF_OPENGL_ES_VER == 1
+	bool gOpenGLUseShaders = false;
+#else
+	// maybe we want to detect old PC hardware somehow... this'll do for now.
+	bool gOpenGLUseShaders = true;
+#endif
+
 #if MF_DISPLAY == MF_DRIVER_X11
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>
@@ -111,7 +118,7 @@ int gOpenGLVersion = 0;
 	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	#pragma comment(lib, "Opengl32")
-//	#pragma comment(lib, "Glu32")
+	#pragma comment(lib, "Glu32")
 
 	extern HINSTANCE apphInstance;
 	extern HWND apphWnd;
@@ -123,62 +130,8 @@ int gOpenGLVersion = 0;
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
-#if defined(LOAD_EXTENSIONS)
-	PFNGLGENBUFFERSARBPROC glGenBuffers = NULL;
-	PFNGLBINDBUFFERARBPROC glBindBuffer = NULL;
-	PFNGLBUFFERDATAARBPROC glBufferData = NULL;
-	PFNGLDELETEBUFFERSARBPROC glDeleteBuffers = NULL;
-
-	PFNGLGENRENDERBUFFERSEXTPROC glGenRenderbuffers = NULL;
-	PFNGLDELETERENDERBUFFERSEXTPROC glDeleteRenderbuffers = NULL;
-	PFNGLBINDRENDERBUFFEREXTPROC glBindRenderbuffer = NULL;
-	PFNGLRENDERBUFFERSTORAGEEXTPROC glRenderbufferStorage = NULL;
-
-	PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffers = NULL;
-	PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffers = NULL;
-	PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebuffer = NULL;
-	PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2D = NULL;
-	PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC glFramebufferRenderbuffer = NULL;
-
-	PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatus = NULL;
-
-	#if !defined(MF_LINUX)
-		// Linux headers are different...
-		PFNGLACTIVETEXTUREARBPROC glActiveTexture = NULL;
-		PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTexture = NULL;
-	#endif
-#endif
-
 static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 static MFRect gCurrentViewport;
-
-bool IsExtensionSupported(const char *extension)
-{
-	const GLubyte *extensions = NULL;
-	const GLubyte *start;
-	GLubyte *where, *terminator;
-
-	// Extension names should not have spaces.
-	where = (GLubyte *) MFString_Chr(extension, ' ');
-	if(where || *extension == '\0')
-		return false;
-	extensions = glGetString(GL_EXTENSIONS);
-
-    // It takes a bit of care to be fool-proof about parsing the OpenGL extensions string. Don't be fooled by sub-strings, etc.
-	start = extensions;
-	for(;;)
-	{
-		where = (GLubyte *)strstr((const char *)start, extension);
-		if(!where)
-			break;
-		terminator = where + MFString_Length(extension);
-		if(where == start || *(where - 1) == ' ')
-			if(*terminator == ' ' || *terminator == '\0')
-				return true;
-		start = terminator;
-	}
-	return false;
-}
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -235,9 +188,6 @@ int MFRenderer_CreateDisplay()
 		MFRenderer_DestroyDisplay();
 		return 1;
 	}
-
-	// Might want to check for extensions here
-	//...
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	GLuint pixelFormat;
 
@@ -309,6 +259,8 @@ int MFRenderer_CreateDisplay()
 	}
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
 	MFRendererIPhone_MakeCurrent();
+#elif MF_DISPLAY == MF_DRIVER_NACL
+	// do we need to do anything?
 #endif
 
     // get the opengl version
@@ -318,106 +270,20 @@ int MFRenderer_CreateDisplay()
 	float ver = MFString_AsciiToFloat(pVersion);
 	gOpenGLVersion = (int)(ver * 100);
 
-#if defined(LOAD_EXTENSIONS)
-	// try and load some extensions
-	// try and load the buffer object extensions
-	if(gOpenGLVersion < 150 && !IsExtensionSupported("GL_ARB_vertex_buffer_object"))
-	{
-		MFDebug_Warn(1, "Neither OpenGL 1.5 nor GL_ARB_vertex_buffer_object extension is available!");
-	}
-	else
-	{
-		// link the VBO extension
-		if(gOpenGLVersion >= 150)
-		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress((GLstring)"glBindBuffer");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress((GLstring)"glBufferData");
-//			glBufferSubData = glGetProcAddress((GLstring)"glBufferSubData");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress((GLstring)"glDeleteBuffers");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress((GLstring)"glGenBuffers");
-//			glMapBuffer = glGetProcAddress((GLstring)"glMapBuffer");
-//			glUnmapBuffer = glGetProcAddress((GLstring)"glUnmapBuffer");
-		}
-		else
-		{
-			glBindBuffer = (PFNGLBINDBUFFERARBPROC)glGetProcAddress((GLstring)"glBindBufferARB");
-			glBufferData = (PFNGLBUFFERDATAARBPROC)glGetProcAddress((GLstring)"glBufferDataARB");
-//			glBufferSubData = glGetProcAddress((GLstring)"glBufferSubDataARB");
-			glDeleteBuffers = (PFNGLDELETEBUFFERSARBPROC)glGetProcAddress((GLstring)"glDeleteBuffersARB");
-			glGenBuffers = (PFNGLGENBUFFERSARBPROC)glGetProcAddress((GLstring)"glGenBuffersARB");
-//			glMapBuffer = glGetProcAddress((GLstring)"glMapBufferARB");
-//			glUnmapBuffer = glGetProcAddress((GLstring)"glUnmapBufferARB");
-		}
-	}
-
-	if(gOpenGLVersion < 300 && !IsExtensionSupported("GL_EXT_framebuffer_object"))
-	{
-		MFDebug_Warn(1, "Neither OpenGL 1.5 nor GL_ARB_vertex_buffer_object extension is available!");
-	}
-	else
-	{
-		// link the FBO extension
-		if(gOpenGLVersion >= 300)
-		{
-			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenRenderbuffers");
-			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteRenderbuffers");
-			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindRenderbuffer");
-			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress((GLstring)"glRenderbufferStorage");
-
-			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenFramebuffers");
-			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteFramebuffers");
-			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindFramebuffer");
-			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress((GLstring)"glFramebufferTexture2D");
-			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glFramebufferRenderbuffer");
-
-			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress((GLstring)"glCheckFramebufferStatus");
-		}
-		else
-		{
-			glGenRenderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenRenderbuffersEXT");
-			glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteRenderbuffersEXT");
-			glBindRenderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindRenderbufferEXT");
-			glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)glGetProcAddress((GLstring)"glRenderbufferStorageEXT");
-
-			glGenFramebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glGenFramebuffersEXT");
-			glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)glGetProcAddress((GLstring)"glDeleteFramebuffersEXT");
-			glBindFramebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)glGetProcAddress((GLstring)"glBindFramebufferEXT");
-			glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)glGetProcAddress((GLstring)"glFramebufferTexture2DEXT");
-			glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)glGetProcAddress((GLstring)"glFramebufferRenderbufferEXT");
-
-			glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)glGetProcAddress((GLstring)"glCheckFramebufferStatusEXT");
-		}
-	}
-
-	if(gOpenGLVersion < 130 && !IsExtensionSupported("GL_ARB_multitexture"))
-	{
-		MFDebug_Warn(1, "Neither OpenGL 1.3 nor ARB_multitexture extension is available!");
-	}
-#if !defined(MF_LINUX)
-	else
-	{
-		if(gOpenGLVersion >= 130)
-		{
-			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glActiveTexture");
-			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glClientActiveTexture");
-		}
-		else
-		{
-			glActiveTexture = (PFNGLACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glActiveTextureARB");
-			glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREARBPROC)glGetProcAddress((GLstring)"glClientActiveTextureARB");
-		}
-	}
-#endif
+#if !defined(MF_OPENGL_ES)
+	// glew wrangles all the horrid extensions...
+	GLenum r = glewInit();
+	MFDebug_Assert(r == GLEW_OK, "Error loading extensions!");
 #endif
 
-	glShadeModel(GL_SMOOTH);
+#if !defined(MF_OPENGL_ES)
 	glEnable(GL_LINE_SMOOTH);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 //	glFrontFace(GL_CW);
 //	glCullFace(GL_BACK);
 
 	glDisable(GL_LIGHTING);
+#endif
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -548,13 +414,7 @@ void MFRenderer_EndFrame()
 	MFRendererIPhone_SwapBuffers();
 #endif
 
-	GLenum err = glGetError();
-	if(err != GL_NO_ERROR)
-	{
-		MFDebug_Log(0, MFStr("OpenGL Error: %d", err));
-		MFDebug_Breakpoint();
-	}
-//	MFDebug_Assert(err == GL_NO_ERROR, "OpenGL error!");
+	MFCheckForOpenGLError(true);
 }
 
 void MFRenderer_SetClearColour(float r, float g, float b, float a)
@@ -619,7 +479,7 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 	else
 	{
 		glDisable(GL_DEPTH_TEST);
-		
+
 //		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 	}
 	MFCheckForOpenGLError();
@@ -647,13 +507,185 @@ float MFRenderer_GetTexelCenterOffset()
 	return 0.f;
 }
 
-bool MFCheckForOpenGLError()
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+GLuint MFRenderer_OpenGL_CompileShader(const char *pShader, MFOpenGL_ShaderType shaderType)
+{
+	static const GLenum shaterTypes[] =
+	{
+		GL_VERTEX_SHADER,	// MFOGL_ShaderType_VertexShader
+		GL_FRAGMENT_SHADER,	// MFOGL_ShaderType_FragmentShader
+		GL_GEOMETRY_SHADER	// MFOGL_ShaderType_GeometryShader
+	};
+
+	GLuint shader = glCreateShader(shaterTypes[shaderType]);
+
+	glShaderSource(shader, 1, &pShader, NULL);
+	glCompileShader(shader);
+
+	// make sure the compilation was successful
+	GLint result;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+	if(result == GL_FALSE)
+	{
+		// get the shader info log
+//		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+		char log[1024];
+		glGetShaderInfoLog(shader, sizeof(log), &result, log);
+
+		// print an error message and the info log
+		MFDebug_Assert(1, MFStr("MFRenderer_OpenGL_CompileShader(): Unable to compile shader: %s\n", log));
+
+		glDeleteShader(shader);
+		shader = 0;
+	}
+
+	return shader;
+}
+
+GLuint MFRenderer_OpenGL_CreateProgram(GLuint vertexShader, GLuint fragmentShader, GLuint geometryShader)
+{
+	// create and link a program
+	GLuint program = glCreateProgram();
+
+	glAttachShader(program, vertexShader);
+	glAttachShader(program, fragmentShader);
+	if(geometryShader != 0)
+		glAttachShader(program, geometryShader);
+
+	glLinkProgram(program);
+
+	// make sure we lake properly
+	GLint result;
+	glGetProgramiv(program, GL_LINK_STATUS, &result);
+	if(result == GL_FALSE)
+	{
+		// get the program info log
+//		glGetProgramiv(g_program, GL_INFO_LOG_LENGTH, &length);
+		char log[1024];
+		glGetProgramInfoLog(program, sizeof(log), &result, log);
+
+		// print an error message and the info log
+		MFDebug_Assert(1, MFStr("MFRenderer_OpenGL_CreateProgram(): Unable to link program: %s\n", log));
+
+		glDeleteProgram(program);
+		program = 0;
+	}
+
+	return program;
+}
+
+GLuint gCurrentShaderProgram;
+void MFRenderer_OpenGL_SetShaderProgram(GLuint program)
+{
+	gCurrentShaderProgram = program;
+	glUseProgram(program);
+}
+
+bool MFRenderer_OpenGL_SetUniformV(const char *pName, const MFVector *pV, int numVectors)
+{
+	GLint uniform = glGetUniformLocation(gCurrentShaderProgram, pName);
+	if(uniform != -1)
+	{
+		glUniform4fv(uniform, numVectors, (float*)pV);
+		MFCheckForOpenGLError(true);
+	}
+	return uniform != -1;
+}
+
+bool MFRenderer_OpenGL_SetUniformM(const char *pName, const MFMatrix *pM, int numMatrices)
+{
+	GLint uniform = glGetUniformLocation(gCurrentShaderProgram, pName);
+	if(uniform != -1)
+	{
+		glUniformMatrix4fv(uniform, numMatrices, GL_FALSE, (float*)pM);
+		MFCheckForOpenGLError(true);
+	}
+	return uniform != -1;
+}
+
+bool MFRenderer_OpenGL_SetUniformS(const char *pName, int sampler)
+{
+	GLint uniform = glGetUniformLocation(gCurrentShaderProgram, pName);
+	if(uniform != -1)
+	{
+		glUniform1i(uniform, sampler);
+		MFCheckForOpenGLError(true);
+	}
+	return uniform != -1;
+}
+#endif
+
+void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat)
+{
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+	if(MFOpenGL_UseShaders())
+	{
+		static MFMatrix proj;
+		switch(type)
+		{
+			case MFOGL_ShaderType_Projection:
+			{
+				proj = mat;
+				break;
+			}
+			case MFOGL_ShaderType_WorldView:
+			{
+				MFRenderer_OpenGL_SetUniformM("wvMatrix", &mat);
+
+				MFMatrix wvp;
+				wvp.Multiply4x4(mat, proj);
+				MFRenderer_OpenGL_SetUniformM("wvpMatrix", &wvp);
+				break;
+			}
+			case MFOGL_ShaderType_Texture:
+			{
+				MFRenderer_OpenGL_SetUniformM("texMatrix", &mat);
+				break;
+			}
+		}
+	}
+	else
+#endif
+	{
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
+		static const GLenum matTypes[] =
+		{
+			GL_PROJECTION,	// MFOGL_ShaderType_Projection
+			GL_MODELVIEW,	// MFOGL_ShaderType_WorldView
+			GL_TEXTURE		// MFOGL_ShaderType_Texture
+		};
+
+		glMatrixMode(matTypes[type]);
+		glLoadMatrixf((GLfloat*)&mat);
+#endif
+	}
+}
+
+bool MFCheckForOpenGLError(bool bBreakOnError)
 {
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
 	{
-		MFDebug_Warn(1, MFStr("OpenGL Error: %d", err));
-//		MFDebug_Breakpoint();
+#if !defined(MF_OPENGL_ES)
+		const GLubyte *errorString = gluErrorString(err);
+		if(bBreakOnError)
+		{
+			MFDebug_Assert(err == GL_NO_ERROR, MFStr("OpenGL Error %04X: %s", err, errorString));
+		}
+		else
+		{
+			MFDebug_Warn(1, MFStr("OpenGL Error %04X: %s", err, errorString));
+		}
+#else
+		if(bBreakOnError)
+		{
+			MFDebug_Assert(err == GL_NO_ERROR, MFStr("OpenGL Error: %04X", err));
+		}
+		else
+		{
+			MFDebug_Warn(1, MFStr("OpenGL Error: %04X", err));
+		}
+#endif
 		return true;
 	}
 	return false;

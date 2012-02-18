@@ -235,7 +235,7 @@ static const char * const gKeyNames[] =
 };
 
 // Functions
-void MFInput_InitModule()
+MFInitStatus MFInput_InitModule()
 {
 	MFZeroMemory(gGamepadStates, sizeof(gGamepadStates[0])*MFInput_MaxInputID);
 	MFZeroMemory(gKeyStates, sizeof(gKeyStates[0])*MFInput_MaxInputID);
@@ -245,6 +245,8 @@ void MFInput_InitModule()
 
 	MFInput_InitModulePlatformSpecific();
 	MFInput_Update();
+
+	return MFAIC_Succeeded;
 }
 
 void MFInput_DeinitModule()

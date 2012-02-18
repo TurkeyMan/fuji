@@ -6,7 +6,7 @@
 
 MFPtrListDL<MFFileMemoryData> gMemoryFiles;
 
-void MFFileSystemMemory_InitModule()
+MFInitStatus MFFileSystemMemory_InitModule()
 {
 	gMemoryFiles.Init("Memory Files", gDefaults.filesys.maxOpenFiles);
 
@@ -27,6 +27,8 @@ void MFFileSystemMemory_InitModule()
 	fsCallbacks.FindClose = NULL;
 
 	hMemoryFileSystem = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
+
+	return MFAIC_Succeeded;
 }
 
 void MFFileSystemMemory_DeinitModule()

@@ -57,14 +57,109 @@ static const GLint glTexAddressing[MFMatStandard_TexAddress_Max] =
 	GL_MIRROR_CLAMP_TO_EDGE_EXT // MFMatStandard_TexAddress_MirrorOnce
 };
 
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+	static GLuint gDefVertexShader = 0;
+	static GLuint gDefFragmentShaderUntextured = 0;
+	static GLuint gDefFragmentShaderTextured = 0;
+	static GLuint gDefFragmentShaderMultiTextured = 0;
+
+	static GLuint gDefShaderProgramUntextured = 0;
+	static GLuint gDefShaderProgramTextured = 0;
+	static GLuint gDefShaderProgramMultiTextured = 0;
+
+	static const GLchar gVertexShader[] = "					\n\
+		uniform mat4 wvMatrix;								\n\
+		uniform mat4 wvpMatrix;								\n\
+		uniform mat4 texMatrix;								\n\
+															\n\
+		attribute vec3 vPos;								\n\
+		attribute vec3 vNormal;								\n\
+		attribute vec4 vColour;								\n\
+		attribute vec2 vUV0;								\n\
+		attribute vec2 vUV1;								\n\
+															\n\
+		varying vec4 oColour;								\n\
+		varying vec2 oUV0;									\n\
+		varying vec2 oUV1;									\n\
+															\n\
+		void main()											\n\
+		{													\n\
+			oColour = vColour;								\n\
+			oUV0 = vUV0;									\n\
+			oUV1 = vUV1;									\n\
+			gl_Position = wvpMatrix * vec4(vPos, 1.0);		\n\
+		}													";
+
+	static const GLchar gFragmentShaderUntextured[] = "			\n\
+		varying vec4 oColour;									\n\
+		void main(void)											\n\
+		{														\n\
+			gl_FragColor = oColour;								\n\
+		}														";
+
+	static const GLchar gFragmentShaderTextured[] = "			\n\
+		uniform sampler2D diffuse;								\n\
+		varying vec4 oColour;									\n\
+		varying vec2 oUV0;										\n\
+		void main(void)											\n\
+		{														\n\
+			gl_FragColor = texture2D(diffuse, oUV0) * oColour;	\n\
+		}														";
+
+	static const GLchar gFragmentShaderMultiTextured[] = "		\n\
+		uniform sampler2D diffuse;								\n\
+		uniform sampler2D detail;								\n\
+		varying vec4 oColour;									\n\
+		varying vec2 oUV0;										\n\
+		varying vec2 oUV1;										\n\
+		void main(void)											\n\
+		{														\n\
+			vec4 image = texture2D(diffuse, oUV0);				\n\
+			vec4 colour = texture2D(detail, oUV0) * oColour;	\n\
+			gl_FragColor = vec4(image.xyz, 0) + colour;			\n\
+		}														";
+#endif
 
 int MFMat_Standard_RegisterMaterial(void *pPlatformData)
 {
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+	if(MFOpenGL_UseShaders())
+	{
+		// probably compile the shaders now i guess...
+		gDefVertexShader = MFRenderer_OpenGL_CompileShader(gVertexShader, MFOGL_ShaderType_VertexShader);
+		gDefFragmentShaderUntextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderUntextured, MFOGL_ShaderType_FragmentShader);
+		gDefFragmentShaderTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderTextured, MFOGL_ShaderType_FragmentShader);
+		gDefFragmentShaderMultiTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderMultiTextured, MFOGL_ShaderType_FragmentShader);
+
+#if defined(MF_OPENGL_ES)
+		glReleaseShaderCompiler();
+#endif
+
+		// create and link a program
+		gDefShaderProgramUntextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderUntextured);
+		gDefShaderProgramTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderTextured);
+		gDefShaderProgramMultiTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderMultiTextured);
+	}
+#endif
+
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+	if(MFOpenGL_UseShaders())
+	{
+		glDeleteProgram(gDefShaderProgramUntextured);
+		glDeleteProgram(gDefShaderProgramTextured);
+		glDeleteProgram(gDefShaderProgramMultiTextured);
+
+		glDeleteShader(gDefVertexShader);
+		glDeleteShader(gDefFragmentShaderUntextured);
+		glDeleteShader(gDefFragmentShaderTextured);
+		glDeleteShader(gDefFragmentShaderMultiTextured);
+	}
+#endif
 }
 
 inline void MFMat_Standard_SetTextureFlags(MFMat_Standard_Data::Texture &tex)
@@ -102,35 +197,70 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
 			MFMat_Standard_Data::Texture &detail = pData->textures[pData->detailMapIndex];
 
-			glActiveTexture(GL_TEXTURE0);
-		    glEnable(GL_TEXTURE_2D);
-			MFMat_Standard_SetTextureFlags(detail);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+			if(MFOpenGL_UseShaders())
+			{
+				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
 
-			glActiveTexture(GL_TEXTURE1);
-		    glEnable(GL_TEXTURE_2D);
-			MFMat_Standard_SetTextureFlags(diffuse);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
+				glActiveTexture(GL_TEXTURE0);
+				MFMat_Standard_SetTextureFlags(detail);
+				MFRenderer_OpenGL_SetUniformS("detail", 0);
 
-			glMatrixMode(GL_TEXTURE);
-			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
+				glActiveTexture(GL_TEXTURE1);
+				MFMat_Standard_SetTextureFlags(diffuse);
+				MFRenderer_OpenGL_SetUniformS("diffuse", 1);
+			}
+			else
+#endif
+			{
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
+				glActiveTexture(GL_TEXTURE0);
+				glEnable(GL_TEXTURE_2D);
+
+				MFMat_Standard_SetTextureFlags(detail);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+				glActiveTexture(GL_TEXTURE1);
+				glEnable(GL_TEXTURE_2D);
+
+				MFMat_Standard_SetTextureFlags(diffuse);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
+#endif
+			}
+
+			MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Texture, pData->textureMatrix);
 		}
 		else if(pData->textures[pData->diffuseMapIndex].pTexture)
 		{
 			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
 
-			glActiveTexture(GL_TEXTURE0);
-		    glEnable(GL_TEXTURE_2D);
-			MFMat_Standard_SetTextureFlags(diffuse);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
 			premultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
 
-			glMatrixMode(GL_TEXTURE);
-			glLoadMatrixf((GLfloat *)&pData->textureMatrix);
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+			if(MFOpenGL_UseShaders())
+			{
+				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
 
-			glActiveTexture(GL_TEXTURE1);
-		    glDisable(GL_TEXTURE_2D);
+				glActiveTexture(GL_TEXTURE0);
+				MFMat_Standard_SetTextureFlags(diffuse);
+				MFRenderer_OpenGL_SetUniformS("diffuse", 0);
+			}
+			else
+#endif
+			{
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
+				glActiveTexture(GL_TEXTURE0);
+				glEnable(GL_TEXTURE_2D);
+
+				MFMat_Standard_SetTextureFlags(diffuse);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+				glActiveTexture(GL_TEXTURE1);
+				glDisable(GL_TEXTURE_2D);
+#endif
+			}
+
+			MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Texture, pData->textureMatrix);
 		}
 		else
 		{
@@ -138,6 +268,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		    glDisable(GL_TEXTURE_2D);
 			glActiveTexture(GL_TEXTURE1);
 		    glDisable(GL_TEXTURE_2D);
+
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+			if(MFOpenGL_UseShaders())
+				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
+#endif
 		}
 
 		switch(pData->materialType&MF_BlendMask)
@@ -183,6 +318,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
 		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
 	}
+
+	MFCheckForOpenGLError(true);
 
 	return 0;
 }

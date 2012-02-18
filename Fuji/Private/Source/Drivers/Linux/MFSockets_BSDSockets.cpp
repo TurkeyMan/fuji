@@ -8,6 +8,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 int MFSockets_InitModulePlatformSpecific()
 {
@@ -329,6 +330,31 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 	{
 		return setsockopt((int)(intp)socket, SOL_SOCKET, option, (const char *)optval, optlen);
 	}
+}
+
+MFSocketError MFSockets_GetLastError()
+{
+	switch(errno)
+	{
+		case EINPROGRESS:
+			return MFSockError_WouldBlock;
+		case ETIMEDOUT:
+			return MFSockError_TimedOut;
+		case EINTR:
+			return MFSockError_Interrupted;
+		case EALREADY:
+			return MFSockError_AlreadyInProgress;
+		case ENETUNREACH:
+			return MFSockError_NetworkUnreachable;
+		case EHOSTUNREACH:
+			return MFSockError_HostUnreachable;
+		case ECONNREFUSED:
+			return MFSockError_ConnectionRefused;
+		case EISCONN:
+			return MFSockError_IsConnected;
+	}
+
+	return MFSockError_Unknown;
 }
 
 #endif // MF_SOCKETS

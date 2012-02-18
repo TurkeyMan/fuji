@@ -31,11 +31,10 @@
 	#include <windows.h>
 #endif
 
+bool MFModule_InitModules();
+
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
-
-void MFString_InitModule();
-void MFString_DeinitModule();
 
 // extern to platform
 extern MFPlatform gCurrentPlatform;
@@ -131,7 +130,7 @@ MFDefaults gDefaults =
 
 	// PluginSelectionDefaults
 	{
-		0,	// renderPlugin
+		2,	// renderPlugin
 		0,	// soundPlugin
 		0	// inputPlugin
 	}
@@ -139,14 +138,15 @@ MFDefaults gDefaults =
 
 // TODO: This is crude, fix this...
 void MFFileSystem_RegisterDefaultArchives();
-MFSystemCallbackFunction pSystemCallbacks[MFCB_Max] = { MFFileSystem_RegisterDefaultArchives, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+MFSystemCallbackFunction pSystemCallbacks[MFCB_Max] = { NULL, MFFileSystem_RegisterDefaultArchives, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
-bool gFujiInitialised = false;
 bool gDrawSystemInfo = true;
 int gQuit = 0;
 int gRestart = 1;
 uint32 gFrameCount = 0;
 float gSystemTimeDelta;
+
+extern bool gFujiInitialised;
 
 #if !defined(_FUJI_UTIL)
 MenuItemStatic quitOption;
@@ -168,120 +168,19 @@ void MFSystem_Quit()
 	gQuit = 1;
 }
 
-void MFSystem_InitCore()
+MFInitStatus MFSystem_InitModule()
 {
-	MFUtil_CrcInit();
-
-	MFHeap_InitModule();
-	MFThread_InitModule();
-	MFString_InitModule();
-
-	MFSockets_InitModule();
-	MFFileSystem_InitModule();
-}
-
-void MFSystem_DeinitCore()
-{
-	MFFileSystem_DeinitModule();
-	MFSockets_DeinitModule();
-
-	MFString_DeinitModule();
-	MFThread_DeinitModule();
-	MFHeap_DeinitModule();
-}
-
-void MFSystem_Init()
-{
-	MFSystem_InitCore();
-
-	gSystemTimer.Init(NULL);
-	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
-
-	DebugMenu_InitModule();
-	MFCallstack_InitModule();
-
-	Timer_InitModule();
-
 	MFSystem_InitModulePlatformSpecific();
-
-	MFView_InitModule();
-	MFRenderer_InitModule();
-	MFDisplay_InitModule();
-	MFInput_InitModule();
-
-	MFSound_InitModule();
-
-	MFTexture_InitModule();
-	MFMaterial_InitModule();
-
-	MFVertex_InitModule();
-	MFModel_InitModule();
-	MFAnimation_InitModule();
-	MFAnimScript_InitModule();
-
-	MFPrimitive_InitModule();
-	MFFont_InitModule();
-
-	MFCompute_InitModule();
-
-	MFCollision_InitModule();
-
-	MFNetwork_InitModule();
-
-#if defined(_ENABLE_SCRIPTING)
-	MFScript_InitModule();
-#endif
 
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
-	MFHeap_Mark();
-
-	gFujiInitialised = true;
+	return MFAIC_Succeeded;
 }
 
-void MFSystem_Deinit()
+void MFSystem_DeinitModule()
 {
-	MFCALLSTACK;
-
-	MFHeap_Release();
-
-#if defined(_ENABLE_SCRIPTING)
-	MFScript_DeinitModule();
-#endif
-
-	MFNetwork_DeinitModule();
-
-	MFCollision_DeinitModule();
-
-	MFCompute_DeinitModule();
-
-	MFFont_DeinitModule();
-	MFPrimitive_DeinitModule();
-
-	MFAnimScript_DeinitModule();
-	MFAnimation_DeinitModule();
-	MFModel_DeinitModule();
-	MFVertex_DeinitModule();
-
-	MFMaterial_DeinitModule();
-	MFTexture_DeinitModule();
-
-	MFSound_DeinitModule();
-
-	MFInput_DeinitModule();
-	MFDisplay_DeinitModule();
-	MFRenderer_DeinitModule();
-	MFView_DeinitModule();
-
 	MFSystem_DeinitModulePlatformSpecific();
-
-	Timer_DeinitModule();
-
-	MFCallstack_DeinitModule();
-	DebugMenu_DeinitModule();
-
-	MFSystem_DeinitCore();
 }
 
 void MFSystem_Update()
@@ -441,45 +340,46 @@ int MFSystem_GameLoop()
 	MFCALLSTACK;
 
 	// initialise the system and create displays etc..
-	MFSystem_Init();
+	MFModule_RegisterModules();
 
 	while(gRestart)
 	{
 		gRestart = 0;
 		gQuit = 0;
 
-		if(pSystemCallbacks[MFCB_InitDone])
-			pSystemCallbacks[MFCB_InitDone]();
-
-		// init the timedelta
-		MFSystem_UpdateTimeDelta();
-
 		while(!gQuit)
-		{
 			MFSystem_RunFrame();
-		}
 
 		if(pSystemCallbacks[MFCB_Deinit])
 			pSystemCallbacks[MFCB_Deinit]();
 	}
 
-	MFSystem_Deinit();
+	// TODO: deinit all modules
+	//...
 
 	return gQuit;
 }
 
 void MFSystem_RunFrame()
 {
+	// allow fuji to complete initialisation
+	if(!gFujiInitialised)
+	{
+		if(!MFModule_InitModules())
+			return;
+	}
+
+	// run 1 frame
 	MFCallstack_BeginFrame();
 
 	if(pSystemCallbacks[MFCB_HandleSystemMessages])
 		pSystemCallbacks[MFCB_HandleSystemMessages]();
 	else
 		MFSystem_HandleEventsPlatformSpecific();
-	
+
 	MFSystem_UpdateTimeDelta();
 	gFrameCount++;
-	
+
 	MFSystem_Update();
 	if(!DebugMenu_IsEnabled())
 	{
@@ -487,7 +387,7 @@ void MFSystem_RunFrame()
 			pSystemCallbacks[MFCB_Update]();
 	}
 	MFSystem_PostUpdate();
-	
+
 	if(MFRenderer_BeginFrame())
 	{
 		if(pSystemCallbacks[MFCB_Draw])
@@ -552,7 +452,7 @@ const char * MFSystem_GetSettingString(int tabDepth)
 
 void MFSystem_InitFromSettings(const MFIniLine *pSettings)
 {
-	
+
 }
 
 MFPlatform MFSystem_GetCurrentPlatform()

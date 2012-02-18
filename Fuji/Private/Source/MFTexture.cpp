@@ -31,7 +31,7 @@ MFTexture *pNoneTexture;
 MFTexture *pWhiteTexture;
 
 // functions
-void MFTexture_InitModule()
+MFInitStatus MFTexture_InitModule()
 {
 	gTextureBank.Init(256, 64, 64);
 
@@ -46,6 +46,8 @@ void MFTexture_InitModule()
 		pNoneTexture = MFTexture_CreateBlank("_None", MakeVector(1.0f, 0.0f, 0.5, 1.0f));
 
 	pWhiteTexture = MFTexture_CreateBlank("_White", MFVector::one);
+
+	return MFAIC_Succeeded;
 }
 
 void MFTexture_DeinitModule()

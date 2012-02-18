@@ -74,7 +74,7 @@ MaterialBrowser matBrowser;
 
 /**** Functions ****/
 
-void MFMaterial_InitModule()
+MFInitStatus MFMaterial_InitModule()
 {
 	MFCALLSTACK;
 
@@ -136,6 +136,8 @@ void MFMaterial_InitModule()
 	MFTexture_Destroy(pChargingTexture);
 	MFTexture_Destroy(pUSBTexture);
 #endif
+
+	return MFAIC_Succeeded;
 }
 
 void MFMaterial_DeinitModule()

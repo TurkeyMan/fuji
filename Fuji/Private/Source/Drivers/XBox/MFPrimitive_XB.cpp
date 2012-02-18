@@ -22,7 +22,7 @@ MFVector prevUV;
 
 /*** functions ***/
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 
 }

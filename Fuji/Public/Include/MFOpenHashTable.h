@@ -1,5 +1,5 @@
-#if !defined(_MFOpenHashTable_H)
-#define _MFOpenHashTable_H
+#if !defined(_MFOPENHASHTABLE_H)
+#define _MFOPENHASHTABLE_H
 
 #include "MFHeap.h"
 #include "MFObjectPool.h"

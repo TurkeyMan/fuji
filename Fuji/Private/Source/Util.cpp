@@ -103,6 +103,13 @@ char *ModuleName(char *pSourceFileName)
 	return x == -1 ? pSourceFileName : &pSourceFileName[x+1];
 }
 
+MFInitStatus MFUtil_InitModule()
+{
+	MFUtil_CrcInit();
+
+	return MFAIC_Succeeded;
+}
+
 // CRC functions
 static uint32 gCrc32Table[256];
 #define CRC32_POLY 0x04c11db7

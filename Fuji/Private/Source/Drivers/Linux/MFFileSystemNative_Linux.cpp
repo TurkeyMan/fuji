@@ -12,8 +12,14 @@
 #include <unistd.h>
 #include <dirent.h>
 
+MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
+{
+	return MFAIC_Succeeded;
+}
+
 void MFFileSystemNative_Register()
 {
+
 }
 
 void MFFileSystemNative_Unregister()

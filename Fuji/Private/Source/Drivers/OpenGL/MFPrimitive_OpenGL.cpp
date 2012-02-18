@@ -65,9 +65,11 @@ static int gPrimTypes[7] =
 #endif
 };
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
+
+	return MFAIC_Succeeded;
 }
 
 void MFPrimitive_DeinitModule()
@@ -101,18 +103,16 @@ void MFPrimitive(uint32 type, uint32 hint)
 	else if(type & PT_Untextured)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf((GLfloat *)&MFView_GetViewToScreenMatrix());
-
-	glMatrixMode(GL_MODELVIEW);
-	if(MFView_IsOrtho())
-		glLoadMatrixf((GLfloat *)&MFMatrix::identity);
-	else
-		glLoadMatrixf((GLfloat *)&MFView_GetWorldToViewMatrix());
-
 	glDepthRange(0.0f, 1.0f);
 
 	MFRenderer_Begin();
+
+	MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Projection, MFView_GetViewToScreenMatrix());
+
+	if(MFView_IsOrtho())
+		MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, MFMatrix::identity);
+	else
+		MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, MFView_GetWorldToViewMatrix());
 }
 
 void MFBegin(uint32 vertexCount)
@@ -141,9 +141,8 @@ void MFSetMatrix(const MFMatrix &mat)
 	MFCALLSTACK;
 
 	MFMatrix localToView;
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf((GLfloat *)MFView_GetLocalToView(mat, &localToView));
+	MFView_GetLocalToView(mat, &localToView);
+	MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, localToView);
 }
 
 void MFSetColour(float r, float g, float b, float a)
@@ -233,41 +232,106 @@ void MFSetPosition(float x, float y, float z)
 void MFEnd()
 {
 	MFCALLSTACK;
-
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
 	if(beginCount)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
-		glEnableClientState(GL_VERTEX_ARRAY);
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+		if(MFOpenGL_UseShaders())
+		{
+			GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
+			GLint pos = glGetAttribLocation(program, "vPos");
+			GLint normal = glGetAttribLocation(program, "vNormal");
+			GLint colour = glGetAttribLocation(program, "vColour");
+			GLint uv0 = glGetAttribLocation(program, "vUV0");
+			GLint uv1 = glGetAttribLocation(program, "vUV1");
 
-		glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
-		glEnableClientState(GL_NORMAL_ARRAY);
+			// gles2 uses some new functions...
+			if(pos != -1)
+			{
+				glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), &primBuffer[0].x);
+				glEnableVertexAttribArray(pos);
+			}
 
-		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
-		glEnableClientState(GL_COLOR_ARRAY);
+			if(normal != -1)
+			{
+				glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), &primBuffer[0].nx);
+				glEnableVertexAttribArray(normal);
+			}
 
-		glClientActiveTexture(GL_TEXTURE0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			if(colour != -1)
+			{
+				glVertexAttribPointer(colour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vert), &primBuffer[0].colour);
+				glEnableVertexAttribArray(colour);
+			}
 
-		glClientActiveTexture(GL_TEXTURE1);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+			if(uv0 != -1)
+			{
+				glActiveTexture(GL_TEXTURE0);
 
-		glDrawArrays(gPrimTypes[primType], 0, beginCount);
+				glVertexAttribPointer(uv0, 2, GL_FLOAT, GL_TRUE, sizeof(Vert), &primBuffer[0].u);
+				glEnableVertexAttribArray(uv0);
+			}
 
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
+			if(uv1 != -1)
+			{
+				glActiveTexture(GL_TEXTURE1);
 
-		glClientActiveTexture(GL_TEXTURE0);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glClientActiveTexture(GL_TEXTURE1);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				glVertexAttribPointer(uv1, 2, GL_FLOAT, GL_TRUE, sizeof(Vert), &primBuffer[0].u);
+				glEnableVertexAttribArray(uv1);
+			}
+
+			glDrawArrays(gPrimTypes[primType], 0, beginCount);
+
+			if(pos != -1)
+				glDisableVertexAttribArray(pos);
+			if(normal != -1)
+				glDisableVertexAttribArray(normal);
+			if(colour != -1)
+				glDisableVertexAttribArray(colour);
+			if(uv0 != -1)
+				glDisableVertexAttribArray(uv0);
+			if(uv1 != -1)
+				glDisableVertexAttribArray(uv1);
+		}
+		else
+#endif
+		{
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
+			glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
+			glEnableClientState(GL_VERTEX_ARRAY);
+
+			glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
+			glEnableClientState(GL_NORMAL_ARRAY);
+
+			glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
+			glEnableClientState(GL_COLOR_ARRAY);
+
+			glClientActiveTexture(GL_TEXTURE0);
+			glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			glClientActiveTexture(GL_TEXTURE1);
+			glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			glDrawArrays(gPrimTypes[primType], 0, beginCount);
+
+			glDisableClientState(GL_VERTEX_ARRAY);
+			glDisableClientState(GL_NORMAL_ARRAY);
+			glDisableClientState(GL_COLOR_ARRAY);
+
+			glClientActiveTexture(GL_TEXTURE0);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+			glClientActiveTexture(GL_TEXTURE1);
+			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
+		}
 	}
+
+	MFCheckForOpenGLError(true);
 }
 
 

@@ -6,8 +6,9 @@
 
 #include "MFCompute_Internal.h"
 
-void MFCompute_InitModule()
+MFInitStatus MFCompute_InitModule()
 {
+	return MFAIC_Succeeded;
 }
 
 void MFCompute_DeinitModule()

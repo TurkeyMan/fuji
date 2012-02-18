@@ -36,8 +36,9 @@ static DWORD WINAPI ThreadProc(LPVOID lpParameter)
 void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 {
 	MFDebug_Assert(sizeof(MFThreadInfoPC) <= sizeof(pThreadInfo->platformSpecific), "Thread info too large!");
-	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)pThreadInfo->platformSpecific;
+	MFDebug_Assert(pThreadInfo->pEntryPoint != NULL, "No entry point specified!");
 
+	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)pThreadInfo->platformSpecific;
 	pThreadInfoPC->hThread = CreateThread(NULL, pThreadInfo->priority, ThreadProc, pThreadInfo, 0, &pThreadInfoPC->threadID);
 }
 

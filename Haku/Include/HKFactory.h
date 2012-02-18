@@ -44,7 +44,7 @@ public:
 			}
 		}
 
-		MFDebug_Warn(2, MFStr("Unknown factory type: '%s'", pTypeName));
+		MFDebug_Assert(2, MFStr("Unknown factory type: '%s'", pTypeName));
 
 		return NULL;
 	}

@@ -139,7 +139,7 @@ void MFHeap_SetLineAndFile(int line, const char *pFile)
 
 /*** functions ***/
 
-void MFHeap_InitModule()
+MFInitStatus MFHeap_InitModule()
 {
 	MFCALLSTACK;
 
@@ -183,6 +183,8 @@ void MFHeap_InitModule()
 
 	// init the heap
 	MFHeap_InitModulePlatformSpecific();
+
+	return MFAIC_Succeeded;
 }
 
 void MFHeap_DeinitModule()
@@ -270,7 +272,7 @@ void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 		pAllocHeap->totalWaste += allocExtra;
 		++pAllocHeap->allocCount;
 
-		MFDebug_Log(2, MFStr("Alloc: %08X(%08X), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
+//		MFDebug_Log(2, MFStr("Alloc: %08X(%08X), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
 #endif
 	}
 
@@ -380,7 +382,7 @@ void MFHeap_Free(void *pMem)
 	pHeap->totalWaste -= extra;
 	--pHeap->allocCount;
 
-	MFDebug_Log(2, MFStr("Free: %08X, %d bytes - %s:(%d)", pMem, pHeader->size, pHeader->pFile, (int)pHeader->line));
+//	MFDebug_Log(2, MFStr("Free: %08X, %d bytes - %s:(%d)", pMem, pHeader->size, pHeader->pFile, (int)pHeader->line));
 #endif
 
 	MFHeap *pAllocHeap = pHeader->pHeap;
@@ -399,29 +401,29 @@ void MFHeap_Free(void *pMem)
 // void* operator new(size_t size)
 // {
 // //	MFDebug_Message(MFStr("new %d bytes", size));
-// 
+//
 // 	return MFHeap_AllocInternal(size);
 // }
-// 
+//
 // void* operator new[](size_t size)
 // {
 // //	MFDebug_Message(MFStr("new %d bytes", size));
-// 
+//
 // 	return MFHeap_AllocInternal(size);
 // }
-// 
+//
 // void operator delete(void *pMemory)
 // {
 // 	MFHeap_Free(pMemory);
 // }
-// 
+//
 // void operator delete[](void *pMemory)
 // {
 // 	MFHeap_Free(pMemory);
 // }
 // #endif
 
-#if !(defined(MF_WINDOWS) || defined(MF_XBOX)) && !defined(_FUJI_UTIL) 
+#if !(defined(MF_WINDOWS) || defined(MF_XBOX)) && !defined(_FUJI_UTIL)
 void* operator new(size_t size, void *pMem)
 {
 	return pMem;

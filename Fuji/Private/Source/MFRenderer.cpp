@@ -16,7 +16,7 @@ int gNumAnimMats = 0;
 const uint16 *pCurrentBatch = NULL;
 int gNumBonesInBatch = 0;
 
-void MFRenderer_InitModule()
+MFInitStatus MFRenderer_InitModule()
 {
 	MFCALLSTACK;
 
@@ -29,6 +29,8 @@ void MFRenderer_InitModule()
 	}
 
 	MFRenderer_InitModulePlatformSpecific();
+
+	return MFAIC_Succeeded;
 }
 
 void MFRenderer_DeinitModule()

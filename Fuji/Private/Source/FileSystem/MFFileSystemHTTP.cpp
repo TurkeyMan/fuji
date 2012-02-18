@@ -9,7 +9,7 @@
 
 static MFPtrListDL<MFFileHTTPData> gHTTPFiles;
  
-void MFFileSystemHTTP_InitModule()
+MFInitStatus MFFileSystemHTTP_InitModule()
 {
 	if(MFSockets_IsActive())
 	{
@@ -36,6 +36,8 @@ void MFFileSystemHTTP_InitModule()
 
 		gHTTPFiles.Init("HTTP Files", gDefaults.filesys.maxHTTPFiles, gHTTPFileSize);
 	}
+
+	return MFAIC_Succeeded;
 }
 
 void MFFileSystemHTTP_DeinitModule()

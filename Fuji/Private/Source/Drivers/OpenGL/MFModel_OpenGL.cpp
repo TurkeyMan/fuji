@@ -50,6 +50,7 @@ void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
 
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
 	MFMatrix localToView;
 
 	glMatrixMode(GL_PROJECTION);
@@ -139,6 +140,10 @@ void MFModel_Draw(MFModel *pModel)
 			}
 		}
 	}
+#else
+	// GLES2.0
+	MFDebug_Assert(false, "GLES 2.0 not yet supported!");
+#endif
 }
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)

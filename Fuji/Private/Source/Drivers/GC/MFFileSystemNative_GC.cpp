@@ -5,6 +5,11 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative.h"
 
+MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
+{
+	return MFAIC_Succeeded;
+}
+
 void MFFileSystemNative_Register()
 {
 

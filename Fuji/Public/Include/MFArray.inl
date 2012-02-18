@@ -69,6 +69,14 @@ inline void MFArray<T>::clear()
 }
 
 template<class T>
+inline void MFArray<T>::remove(int i)
+{
+	for(int a=i; a<count; ++a)
+		pData[a] = pData[a + 1];
+	--count;
+}
+
+template<class T>
 inline T& MFArray<T>::push()
 {
 	alloc(count + 1);

@@ -83,4 +83,9 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 	return 0;
 }
 
+MFSocketError MFSockets_GetLastError()
+{
+	return MFSockError_Unknown;
+}
+
 #endif

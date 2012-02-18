@@ -48,7 +48,7 @@ void MessageCallback(const asSMessageInfo *msg, void *param)
 	MFDebug_Message(MFStr("%s.as(%d, %d) : %s%s\n", msg->section, msg->row, msg->col, type, msg->message));
 }
 
-void MFScript_InitModule()
+MFInitStatus MFScript_InitModule()
 {
 	MFCALLSTACK;
 

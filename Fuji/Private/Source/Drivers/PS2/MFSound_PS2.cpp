@@ -4,7 +4,7 @@
 
 #include "MFVector.h"
 
-void MFSound_InitModule()
+MFInitStatus MFSound_InitModule()
 {
 }
 

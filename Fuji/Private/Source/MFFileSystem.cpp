@@ -1,6 +1,8 @@
 #include "Fuji.h"
 #include "MFSystem.h"
+#include "MFModule.h"
 #include "MFSockets.h"
+#include "MFModule_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 #include "FileSystem/MFFileSystemMemory_Internal.h"
@@ -238,7 +240,37 @@ void MFFileSystem_RegisterDefaultArchives()
 	}
 }
 
-void MFFileSystem_InitModule()
+MFInitStatus MFFileSystem_InitFileSystems()
+{
+	// call the filesystem init callback
+	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
+	if(pFilesystemInitCallback)
+		pFilesystemInitCallback();
+
+	return MFAIC_Succeeded;
+}
+
+uint64 MFFileSystem_RegisterFilesystemModules(int filesystemModule)
+{
+	uint64 fsBit = 1ULL << filesystemModule;
+
+	// mount filesystems
+	uint64 filesystems = 0;
+	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemNative", MFFileSystemNative_InitModule, MFFileSystemNative_DeinitModule, fsBit);
+	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemMemory", MFFileSystemMemory_InitModule, MFFileSystemMemory_DeinitModule, fsBit);
+	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemCachedFile", MFFileSystemCachedFile_InitModule, MFFileSystemCachedFile_DeinitModule, fsBit);
+	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemZipFile", MFFileSystemZipFile_InitModule, MFFileSystemZipFile_DeinitModule, fsBit);
+
+	uint64 socketsBit = MFModule_GetBuiltinModuleMask(MFBIM_MFSockets);
+	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemHTTP", MFFileSystemHTTP_InitModule, MFFileSystemHTTP_DeinitModule, fsBit | socketsBit);
+
+	gBuiltinModuleIDs[MFBIM_MFFileSystem] = (char)MFModule_RegisterModule("MFFileSystem", MFFileSystem_InitFileSystems, NULL, filesystems);
+	filesystems |= MFModule_GetBuiltinModuleMask(MFBIM_MFFileSystem);
+
+	return filesystems;
+}
+
+MFInitStatus MFFileSystem_InitModule()
 {
 	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
 
@@ -248,17 +280,7 @@ void MFFileSystem_InitModule()
 
 	gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
 
-	// mount filesystems
-	MFFileSystemNative_InitModule();
-	MFFileSystemMemory_InitModule();
-	MFFileSystemCachedFile_InitModule();
-	MFFileSystemZipFile_InitModule();
-	MFFileSystemHTTP_InitModule();
-
-	// call the filesystem init callback
-	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
-	if(pFilesystemInitCallback)
-		pFilesystemInitCallback();
+	return MFAIC_Succeeded;
 }
 
 void MFFileSystem_DeinitModule()

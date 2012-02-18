@@ -21,7 +21,7 @@ HKUserInterface *HKUserInterface::pActive = NULL;
 HKFactory<HKWidget> *HKUserInterface::pFactory = NULL;
 HKFactory<HKWidgetRenderer> *HKUserInterface::pRendererFactory = NULL;
 
-HKOpenHashTable<HKWidgetEvent::Delegate> HKUserInterface::eventHandlerRegistry;
+MFOpenHashTable<HKWidgetEvent::Delegate> HKUserInterface::eventHandlerRegistry;
 
 MFSystemCallbackFunction HKUserInterface::pChainResizeCallback = NULL;
 

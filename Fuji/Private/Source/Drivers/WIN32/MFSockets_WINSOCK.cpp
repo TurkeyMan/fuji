@@ -395,4 +395,31 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 	}
 }
 
+MFSocketError MFSockets_GetLastError()
+{
+	int error = WSAGetLastError();
+	switch(error)
+	{
+		case WSAEWOULDBLOCK:
+			return MFSockError_WouldBlock;
+		case WSAETIMEDOUT:
+			return MFSockError_TimedOut;
+		case WSAEINTR:
+			return MFSockError_Interrupted;
+		case WSAEALREADY:
+			return MFSockError_AlreadyInProgress;
+		case WSAENETUNREACH:
+			return MFSockError_NetworkUnreachable;
+		case WSAEHOSTUNREACH:
+			return MFSockError_HostUnreachable;
+		case WSAECONNREFUSED:
+			return MFSockError_ConnectionRefused;
+		case WSAEISCONN:
+			return MFSockError_IsConnected;
+	}
+
+	MFDebug_Assert(false, "Unimplemented socket error!");
+	return MFSockError_Unknown;
+}
+
 #endif // MF_SOCKETS

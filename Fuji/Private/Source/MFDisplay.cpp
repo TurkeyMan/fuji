@@ -9,7 +9,7 @@ extern MFInitParams gInitParams;
 
 bool gAppHasFocus = true;
 
-void MFDisplay_InitModule()
+MFInitStatus MFDisplay_InitModule()
 {
 	MFCALLSTACK;
 
@@ -23,7 +23,8 @@ void MFDisplay_InitModule()
 
 	error = MFDisplay_CreateDisplay((int)gInitParams.display.displayRect.width, (int)gInitParams.display.displayRect.height, 32, 60, true, false, false, false);
 	if(error)
-		return;
+		return MFAIC_Failed;
+	return MFAIC_Succeeded;
 }
 
 void MFDisplay_DeinitModule()

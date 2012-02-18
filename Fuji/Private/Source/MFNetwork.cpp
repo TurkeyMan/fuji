@@ -404,10 +404,12 @@ void MFNetwork_BeginScriptDebugServer()
 
 
 
-void MFNetwork_InitModule()
+MFInitStatus MFNetwork_InitModule()
 {
 	MFZeroMemory(gNetworkGamepads, sizeof(gNetworkGamepads));
 	MFZeroMemory(gSharedDevices, sizeof(gSharedDevices));
+
+	return MFAIC_Succeeded;
 }
 
 void MFNetwork_DeinitModule()

@@ -4,7 +4,7 @@
 #include "FileSystem/MFFileSystemZipFile.h"
 
 // internal functions
-void MFFileSystemZipFile_InitModule();
+MFInitStatus MFFileSystemZipFile_InitModule();
 void MFFileSystemZipFile_DeinitModule();
 
 // filesystem callbacks

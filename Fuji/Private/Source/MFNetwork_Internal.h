@@ -4,7 +4,7 @@
 #include "MFNetwork.h"
 #include "MFInput_Internal.h"
 
-void MFNetwork_InitModule();
+MFInitStatus MFNetwork_InitModule();
 void MFNetwork_DeinitModule();
 void MFNetwork_Update();
 

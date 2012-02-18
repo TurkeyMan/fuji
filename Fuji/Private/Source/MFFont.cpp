@@ -122,13 +122,15 @@ float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pSca
 
 // font functions
 
-void MFFont_InitModule()
+MFInitStatus MFFont_InitModule()
 {
 	MFCALLSTACK;
 
 	gFontBank.Init(256, 16, 16);
 
 	gpDebugFont = MFFont_Create("Arial");
+
+	return MFAIC_Succeeded;
 }
 
 void MFFont_DeinitModule()
@@ -291,6 +293,9 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 
 float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
+	if(!pText)
+		return 0.f;
+
 	if(((uint8*)pText)[0] == 0xFF && ((uint8*)pText)[1] == 0xFE)
 		return MFFont_GetStringWidthW(pFont, (const uint16*)pText, height, lineWidth, maxLen, pTotalHeight);
 

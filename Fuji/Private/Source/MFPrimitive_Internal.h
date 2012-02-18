@@ -3,7 +3,7 @@
 
 #include "MFPrimitive.h"
 
-void MFPrimitive_InitModule();
+MFInitStatus MFPrimitive_InitModule();
 void MFPrimitive_DeinitModule();
 
 void MFPrimitive_DrawStats();

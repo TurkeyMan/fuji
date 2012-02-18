@@ -38,7 +38,7 @@ uint32 currentVert = 0;
 const char *pPrimStrings[] = { "Disabled", "Enabled", NULL };
 MenuItemIntString showPrimitiveStats(pPrimStrings, 0);
 
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
 

@@ -3,7 +3,7 @@
 
 #include "MFSockets.h"
 
-void MFSockets_InitModule();
+MFInitStatus MFSockets_InitModule();
 void MFSockets_DeinitModule();
 
 int MFSockets_InitModulePlatformSpecific();

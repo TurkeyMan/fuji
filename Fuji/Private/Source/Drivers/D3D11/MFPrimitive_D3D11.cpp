@@ -70,7 +70,7 @@ static MFVertexBuffer *pVertexBuffer = NULL;
 static int32 phase = 0;
 
 //---------------------------------------------------------------------------------------------------------------------
-void MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
 	
@@ -103,6 +103,8 @@ void MFPrimitive_InitModule()
 	pVertexBuffer = MFVertex_CreateVertexBuffer(pDecl, primBufferSize, MFVBType_Dynamic);
 
 	MFRenderer_D3D11_SetDebugName((ID3D11Buffer*)pVertexBuffer->pPlatformData, "MFPrimative vertex buffer");
+
+	return MFAIC_Succeeded;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DeinitModule()

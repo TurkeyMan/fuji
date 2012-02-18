@@ -105,6 +105,7 @@
 #define MF_DRIVER_OPENCL		34
 #define MF_DRIVER_BSDSOCKETS	35
 #define MF_DRIVER_ANDROID		36
+#define MF_DRIVER_NACL			37
 
 /*** Platform specific defines, includes and driver selection ***/
 
@@ -345,6 +346,34 @@
 	#define MF_NO_CRT
 
 	// specify drivers
+
+#elif defined(MF_NACL)
+
+	#include <stdarg.h> // For varargs
+	#include <stdlib.h> // For realloc, malloc
+	#include <sys/types.h> // expose ssize_t
+
+//	#define _OPENGL_CLIP_SPACE
+
+	// specify drivers
+	#define MF_DISPLAY		MF_DRIVER_NACL
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_INPUT		MF_DRIVER_NACL
+	#define MF_SYSTEM		MF_DRIVER_NACL
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_NACL
+	#define MF_SOCKETS		MF_DRIVER_NULL
+	#define MF_SOUND		MF_DRIVER_NULL
+	#define MF_DEBUG		MF_DRIVER_NACL
+
+	#define USE_MFSOUNDBUFFER
+	#define USE_MFMIXER
+
+	#define MF_OPENGL_ES
+	#if !defined(MF_OPENGL_ES_VER)
+		#define MF_OPENGL_ES_VER 2
+	#endif
 
 #endif
 

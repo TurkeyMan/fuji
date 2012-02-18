@@ -49,7 +49,7 @@ uint32 MenuItemColour::presets[COLOUR_PRESETS] =
 	0xFF000000	// black
 };
 
-void DebugMenu_InitModule()
+MFInitStatus DebugMenu_InitModule()
 {
 	// create root menu
 	MFString_Copy(rootMenu.name, "root");
@@ -67,6 +67,8 @@ void DebugMenu_InitModule()
 	DebugMenu_AddItem("Menu Dimensions", "Debug Menu Options", &menuDim);
 	DebugMenu_AddItem("Menu Colour", "Debug Menu Options", &menuCol);
 	DebugMenu_AddItem("Menu Item Colour", "Debug Menu Options", &menuItemCom);
+
+	return MFAIC_Succeeded;
 }
 
 void DebugMenu_DeinitModule()

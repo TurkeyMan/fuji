@@ -3,7 +3,7 @@
 
 #include "MFVertex.h"
 
-void MFVertex_InitModule();
+MFInitStatus MFVertex_InitModule();
 void MFVertex_DeinitModule();
 
 void MFVertex_InitModulePlatformSpecific();

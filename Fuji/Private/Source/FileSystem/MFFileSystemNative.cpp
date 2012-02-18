@@ -3,25 +3,32 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 
-void MFFileSystemNative_InitModule()
+MFInitStatus MFFileSystemNative_InitModule()
 {
-	MFFileSystemCallbacks fsCallbacks;
+	MFInitStatus status = MFFileSystemNative_InitModulePlatformSpecific();
 
-	fsCallbacks.RegisterFS = MFFileSystemNative_Register;
-	fsCallbacks.UnregisterFS = MFFileSystemNative_Unregister;
-	fsCallbacks.FSMount = MFFileSystemNative_Mount;
-	fsCallbacks.FSDismount = MFFileSystemNative_Dismount;
-	fsCallbacks.FSOpen = MFFileSystemNative_Open;
-	fsCallbacks.Open = MFFileNative_Open;
-	fsCallbacks.Close = MFFileNative_Close;
-	fsCallbacks.Read = MFFileNative_Read;
-	fsCallbacks.Write = MFFileNative_Write;
-	fsCallbacks.Seek = MFFileNative_Seek;
-	fsCallbacks.FindFirst = MFFileNative_FindFirst;
-	fsCallbacks.FindNext = MFFileNative_FindNext;
-	fsCallbacks.FindClose = MFFileNative_FindClose;
+	if(status == MFAIC_Succeeded)
+	{
+		MFFileSystemCallbacks fsCallbacks;
 
-	hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
+		fsCallbacks.RegisterFS = MFFileSystemNative_Register;
+		fsCallbacks.UnregisterFS = MFFileSystemNative_Unregister;
+		fsCallbacks.FSMount = MFFileSystemNative_Mount;
+		fsCallbacks.FSDismount = MFFileSystemNative_Dismount;
+		fsCallbacks.FSOpen = MFFileSystemNative_Open;
+		fsCallbacks.Open = MFFileNative_Open;
+		fsCallbacks.Close = MFFileNative_Close;
+		fsCallbacks.Read = MFFileNative_Read;
+		fsCallbacks.Write = MFFileNative_Write;
+		fsCallbacks.Seek = MFFileNative_Seek;
+		fsCallbacks.FindFirst = MFFileNative_FindFirst;
+		fsCallbacks.FindNext = MFFileNative_FindNext;
+		fsCallbacks.FindClose = MFFileNative_FindClose;
+
+		hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);\
+	}
+
+	return status;
 }
 
 void MFFileSystemNative_DeinitModule()

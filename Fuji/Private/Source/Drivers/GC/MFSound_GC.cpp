@@ -10,7 +10,7 @@
 #include "MFPrimitive.h"
 #include "DebugMenu_Internal.h"
 
-void MFSound_InitModule()
+MFInitStatus MFSound_InitModule()
 {
 	MFCALLSTACK;
 }
