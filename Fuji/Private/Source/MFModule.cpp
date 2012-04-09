@@ -242,7 +242,7 @@ bool MFModule_InitModules()
 {
 	for(int a=0; a<gNumModules; ++a)
 	{
-		uint64 bit = 1 << a;
+		uint64 bit = 1ULL << a;
 
 		if(!(gModuleInitComplete & bit) && (gModuleInitComplete & gModules[a].prerequisites) == gModules[a].prerequisites)
 		{
@@ -280,7 +280,6 @@ bool MFModule_InitModules()
 		}
 	}
 
-MFDebug_Message("check finished");
 	if(gModuleInitComplete == (1ULL << gNumModules) - 1)
 	{
 		gFujiInitialised = true;

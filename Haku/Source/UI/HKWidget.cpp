@@ -227,7 +227,7 @@ void HKWidget::SetProperty(const char *pProperty, const char *pValue)
 		HKWidget_BindWidgetEvent(OnHoverOut, pValue);
 	else if(!MFString_CaseCmp(pProperty, "onCharacter"))
 		HKWidget_BindWidgetEvent(OnCharacter, pValue);
-	else if(pRenderer && pRenderer->SetProperty(pProperty, pValue))
+	else if(pRenderer && pRenderer->SetProperty(pProperty, pValue, this))
 		return;
 	else
 		MFDebug_Warn(2, MFString::Format("Unknown property for '%s': %s='%s'", GetTypeName(), pProperty, pValue).CStr());
@@ -535,6 +535,13 @@ HKWidget *HKWidget::IntersectWidget(const MFVector &pos, const MFVector &dir, MF
 
 bool HKWidget::InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev)
 {
+	// allow a registered hook to process the event...
+	if(!inputEventHook.empty())
+	{
+		if(inputEventHook(manager, ev))
+			return true;
+	}
+
 	// try and handle the input event in some standard ways...
 	switch(ev.ev)
 	{

@@ -23,6 +23,7 @@ public:
 		// screen/mouse
 		IE_Down,
 		IE_Up,
+		IE_Cancel,
 		IE_Tap,
 		IE_Hover,
 		IE_Drag,

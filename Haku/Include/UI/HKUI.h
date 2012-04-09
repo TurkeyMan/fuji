@@ -51,6 +51,7 @@ protected:
 
 	HKWidget *pFocusList[HKInputManager::MaxSources];
 	HKWidget *pHoverList[HKInputManager::MaxSources];
+	HKWidget *pDownOver[HKInputManager::MaxSources];
 
 	static HKUserInterface *pActive;
 	static HKWidgetFactory *pFactory;

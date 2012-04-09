@@ -52,9 +52,9 @@ void HKUserInterface::Init()
 	{
 		pRendererFactory = new HKFactory<HKWidgetRenderer>();
 
-		HKWidgetRendererFactory::FactoryType *pWidget = pRendererFactory->RegisterType(HKWidget::TypeName(), HKWidgetRenderer::Create, NULL);
-		pRendererFactory->RegisterType(HKWidgetLabel::TypeName(), HKWidgetRendererLabel::Create, pWidget);
-		pRendererFactory->RegisterType(HKWidgetTextbox::TypeName(), HKWidgetRendererTextbox::Create, pWidget);
+		HKWidgetRendererFactory::FactoryType *pWidget = RegisterWidgetRenderer(HKWidget::TypeName(), HKWidgetRenderer::Create, NULL);
+		RegisterWidgetRenderer(HKWidgetLabel::TypeName(), HKWidgetRendererLabel::Create, pWidget);
+		RegisterWidgetRenderer(HKWidgetTextbox::TypeName(), HKWidgetRendererTextbox::Create, pWidget);
 	}
 
 	eventHandlerRegistry.Init(256, 256, 32);
@@ -223,6 +223,16 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager
 		else
 		{
 			pWidget = pRoot->IntersectWidget(pos, dir, &localPos);
+		}
+
+		// update the down widget
+		if(ev.ev == HKInputManager::IE_Down)
+			pDownOver[ev.pSource->sourceID] = pWidget;
+		else if(ev.ev == HKInputManager::IE_Tap)
+		{
+			// if we receive a tap event, check that it was on the same widget we recorded the down event for
+			if(pDownOver[ev.pSource->sourceID] != pWidget)
+				return;
 		}
 
 		// check if the hover has changed

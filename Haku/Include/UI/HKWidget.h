@@ -37,6 +37,8 @@ class HKWidget
 	friend class HKWidgetLayout;
 	friend class HKWidgetRenderer;
 public:
+	typedef fastdelegate::FastDelegate2<HKInputManager&, const HKInputManager::EventInfo&, bool> InputEventDelegate;
+
 	enum Align
 	{
 		Align_None = -1,
@@ -105,6 +107,8 @@ public:
 
 	const char *GetTypeName() const { return pType->typeName; }
 	bool IsType(const char *pType) const;
+
+	InputEventDelegate RegisterInputEventHook(InputEventDelegate eventHook) { InputEventDelegate old = inputEventHook; inputEventHook = eventHook; return old; }
 
 	void SetUserData(void *pUserData) { this->pUserData = pUserData; }
 	void *GetUserData() const { return pUserData; }
@@ -213,6 +217,8 @@ protected:
 	HKWidgetType *pType;
 	HKWidget *pParent;
 	HKWidgetRenderer *pRenderer;
+
+	InputEventDelegate inputEventHook;
 
 	void *pUserData;
 

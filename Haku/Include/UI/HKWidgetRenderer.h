@@ -22,7 +22,7 @@ public:
 
 	virtual void Render(const HKWidget &widget, const MFMatrix &worldTransform);
 
-	virtual bool SetProperty(const char *pProperty, const char *pValue);
+	virtual bool SetProperty(const char *pProperty, const char *pValue, HKWidget *pWidget = NULL);
 	virtual MFString GetProperty(const char *pProperty);
 
 protected:

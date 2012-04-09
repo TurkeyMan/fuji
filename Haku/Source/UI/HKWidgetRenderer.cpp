@@ -77,7 +77,7 @@ void HKWidgetRenderer::Render(const HKWidget &widget, const MFMatrix &worldTrans
 	}
 }
 
-bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
+bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue, HKWidget *pWidget)
 {
 	if(!MFString_CaseCmp(pProperty, "background_image"))
 	{
@@ -92,6 +92,16 @@ bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue)
 
 			texWidth = (float)texW;
 			texHeight = (float)texH;
+
+			if(pWidget && (pWidget->bAutoWidth || pWidget->bAutoHeight))
+			{
+				if(pWidget->bAutoWidth && pWidget->bAutoHeight)
+					pWidget->Resize(MakeVector(texWidth, texHeight));
+				else if(pWidget->bAutoWidth)
+					pWidget->UpdateWidth(texWidth);
+				else
+					pWidget->UpdateHeight(texHeight);
+			}
 		}
 		return true;
 	}
