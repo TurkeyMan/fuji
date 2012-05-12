@@ -53,21 +53,21 @@ void MFSystem_DrawPlatformSpecific()
 {
 }
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	uint64 tickCount;
 	QueryPerformanceCounter((LARGE_INTEGER*)&tickCount);
 	return tickCount;
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	uint64 freq;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
 	return freq;
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	return "XBox";
 }

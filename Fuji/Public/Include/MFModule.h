@@ -41,22 +41,22 @@ typedef void (MFDeinitCallback)();
  * @param prerequisites A bitfield of modules that must be loaded prior to this module.
  * @return Returns an ID identifying the module.
  */
-int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites = 0);
+MF_API int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites = 0);
 
-uint64 MFModule_RegisterCoreModules();
+MF_API uint64 MFModule_RegisterCoreModules();
 
-uint64 MFModule_RegisterModules();
+MF_API uint64 MFModule_RegisterModules();
 
-int MFModule_GetNumModules();
+MF_API int MFModule_GetNumModules();
 
-int MFModule_GetModuleID(const char *pName);
+MF_API int MFModule_GetModuleID(const char *pName);
 
-const char *MFModule_GetModuleName(int id);
+MF_API const char *MFModule_GetModuleName(int id);
 
-bool MFModule_IsModuleInitialised(int id);
-bool MFModule_DidModuleInitialisationFail(int id);
+MF_API bool MFModule_IsModuleInitialised(int id);
+MF_API bool MFModule_DidModuleInitialisationFail(int id);
 
-uint64 MFModule_GetModuleMask(const char **ppModuleNames);
+MF_API uint64 MFModule_GetModuleMask(const char **ppModuleNames);
 
 #endif // _MFMODULE_H
 

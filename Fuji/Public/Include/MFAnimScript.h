@@ -25,7 +25,7 @@ struct MFAnimScript;
  * @return Returns a new instance of the specified animscript.
  * @see MFAnimScript_Destroy()
  */
-MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel);
+MF_API MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel);
 
 /**
  * Destroy an animscript.
@@ -34,7 +34,7 @@ MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel);
  * @return None.
  * @see MFAnimScript_Create()
  */
-void MFAnimScript_Destroy(MFAnimScript *pAnimScript);
+MF_API void MFAnimScript_Destroy(MFAnimScript *pAnimScript);
 
 /**
  * Get the number of animation sequences in the anim script.
@@ -43,7 +43,7 @@ void MFAnimScript_Destroy(MFAnimScript *pAnimScript);
  * @return The number of sequences in the anim script.
  * @see MFAnimScript_Create(), MFAnimScript_SetSequence()
  */
-int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript);
+MF_API int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript);
 
 /**
  * Play an animation sequence.
@@ -54,7 +54,7 @@ int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript);
  * @return None.
  * @see MFAnimScript_Create(), MFAnimScript_GetNumSequences(), MFAnimScript_FindSequence()
  */
-void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime = 0.0f);
+MF_API void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime = 0.0f);
 
 /**
  * Get the name of an animation sequence.
@@ -64,7 +64,7 @@ void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tw
  * @return The name of the specified.
  * @see MFAnimScript_FindSequence()
  */
-const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence);
+MF_API const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence);
 
 /**
  * Find an animation sequence.
@@ -74,7 +74,7 @@ const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence
  * @return The ID of the named sequence, or -1 of the sequence does not exist.
  * @see MFAnimScript_GetSequenceName()
  */
-int MFAnimScript_FindSequence(MFAnimScript *pAnimScript, const char *pSequenceName);
+MF_API int MFAnimScript_FindSequence(MFAnimScript *pAnimScript, const char *pSequenceName);
 
 #endif
 

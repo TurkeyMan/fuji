@@ -26,7 +26,7 @@ void MFCollision_DeinitModule()
 	gItemList.Deinit();
 }
 
-void MFCollision_DebugDraw()
+MF_API void MFCollision_DebugDraw()
 {
 	if(!gShowCollision)
 		return;
@@ -75,9 +75,9 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 				if(pMesh->pTriangles[a].flags)
 					MFSetColour(1.0f, 0.0f, 0.0f, 0.5f);
 
-				MFSetPosition(pMesh->pTriangles[a].verts[0]);
-				MFSetPosition(pMesh->pTriangles[a].verts[1]);
-				MFSetPosition(pMesh->pTriangles[a].verts[2]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[0]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[1]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[2]);
 
 				if(pMesh->pTriangles[a].flags)
 				{
@@ -92,16 +92,16 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 			MFPrimitive(PT_LineList);
 			MFSetMatrix(pItem->worldPos);
 			MFBegin(pMesh->numTris * 12);
-			MFSetColour(colour);
+			MFSetColourV(colour);
 
 			for(a=0; a<pMesh->numTris; a++)
 			{
-				MFSetPosition(pMesh->pTriangles[a].verts[0]);
-				MFSetPosition(pMesh->pTriangles[a].verts[1]);
-				MFSetPosition(pMesh->pTriangles[a].verts[1]);
-				MFSetPosition(pMesh->pTriangles[a].verts[2]);
-				MFSetPosition(pMesh->pTriangles[a].verts[2]);
-				MFSetPosition(pMesh->pTriangles[a].verts[0]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[0]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[1]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[1]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[2]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[2]);
+				MFSetPositionV(pMesh->pTriangles[a].verts[0]);
 
 				MFVector e1, e2, e3;
 
@@ -109,12 +109,12 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 				e2 = (pMesh->pTriangles[a].verts[1] + pMesh->pTriangles[a].verts[2]) * 0.5f;
 				e3 = (pMesh->pTriangles[a].verts[2] + pMesh->pTriangles[a].verts[0]) * 0.5f;
 
-				MFSetPosition(e1);
-				MFSetPosition(e1 + pMesh->pTriangles[a].edgePlanes[0] * 2.0f);
-				MFSetPosition(e2);
-				MFSetPosition(e2 + pMesh->pTriangles[a].edgePlanes[1] * 2.0f);
-				MFSetPosition(e3);
-				MFSetPosition(e3 + pMesh->pTriangles[a].edgePlanes[2] * 2.0f);
+				MFSetPositionV(e1);
+				MFSetPositionV(e1 + pMesh->pTriangles[a].edgePlanes[0] * 2.0f);
+				MFSetPositionV(e2);
+				MFSetPositionV(e2 + pMesh->pTriangles[a].edgePlanes[1] * 2.0f);
+				MFSetPositionV(e3);
+				MFSetPositionV(e3 + pMesh->pTriangles[a].edgePlanes[2] * 2.0f);
 
 //				MFVector c = (pMesh->pTriangles[a].verts[0] + pMesh->pTriangles[a].verts[1] + pMesh->pTriangles[a].verts[2]) * (1.0f / 3.0f);
 
@@ -135,7 +135,7 @@ void MFCollision_DrawItem(MFCollisionItem *pItem)
 
 /**** Support Functions ****/
 
-void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVector& p1, const MFVector& p2, MFCollisionTriangle *pTri)
+MF_API void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVector& p1, const MFVector& p2, MFCollisionTriangle *pTri)
 {
 	// generate face plane
 	pTri->plane = MFCollision_MakePlaneFromPoints(p0, p1, p2);
@@ -173,7 +173,7 @@ void MFCollision_DestroyCollisionItem(MFCollisionItem *pItem)
 	MFHeap_Free(pItem);
 }
 
-MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris)
+MF_API MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris)
 {
 	MFDebug_Assert(numTris > 0, "Cant create collision mesh with no triangles..");
 
@@ -247,7 +247,7 @@ void MFCollision_CalculateDynamicBoundingVolume(MFCollisionItem *pItem)
 	}
 }
 
-MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
+MF_API MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
 {
 	MFDebug_Assert(pDynamicCollisionMesh->pTemplate->type == MFCT_Mesh, "Collision item is not an MFCollisionMesh.");
 
@@ -255,12 +255,12 @@ MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollis
 	return pMesh->pTriangles;
 }
 
-void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
+MF_API void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh)
 {
 	MFCollision_CalculateDynamicBoundingVolume(pDynamicCollisionMesh);
 }
 
-void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem)
+MF_API void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem)
 {
 	MFHeap_Free(pItem->pTemplate);
 	MFCollision_DestroyCollisionItem(pItem);
@@ -1030,7 +1030,7 @@ bool MFCollision_TriHull()
 
 /**** Manager ****/
 
-MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult)
+MF_API MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult)
 {
 	MFBoundingVolume rayVolume;
 
@@ -1071,7 +1071,7 @@ MFCollisionItem* MFCollision_RayTest(const MFVector& rayPos, const MFVector& ray
 	return pItem;
 }
 
-MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult)
+MF_API MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult)
 {
 	MFBoundingVolume rayVolume;
 
@@ -1112,7 +1112,7 @@ MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius,
 	return pItem;
 }
 
-MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult)
+MF_API MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult)
 {
 	MFBoundingVolume rayVolume;
 
@@ -1294,7 +1294,7 @@ MFCollisionItem* MFCollision_SweepSphereFieldTest(const MFVector &sweepSpherePos
 	return pItem;
 }
 
-MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize)
+MF_API MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize)
 {
 	MFCollisionItem *pItem;
 	MFCollisionTemplate *pTemplate;
@@ -1321,7 +1321,7 @@ MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItem
 	return pItem;
 }
 
-void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
+MF_API void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags)
 {
 	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
 
@@ -1331,7 +1331,7 @@ void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem,
 	pFieldData->itemList.Create(pItem);
 }
 
-void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel)
+MF_API void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel)
 {
 	MFDebug_Assert(pField->pTemplate->type == MFCT_Field, "pField is not a collision field.");
 
@@ -1355,7 +1355,7 @@ void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel)
 	}
 }
 
-void MFCollision_BuildField(MFCollisionItem *pField)
+MF_API void MFCollision_BuildField(MFCollisionItem *pField)
 {
 	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate;
 
@@ -1447,7 +1447,7 @@ void MFCollision_BuildField(MFCollisionItem *pField)
 	MFHeap_ValidateMemory(pFieldData->pppItems);
 }
 
-void MFCollision_ClearField(MFCollisionItem *pField)
+MF_API void MFCollision_ClearField(MFCollisionItem *pField)
 {
 	MFCollisionField *pFieldData = (MFCollisionField*)pField->pTemplate->pCollisionTemplateData;
 
@@ -1460,7 +1460,7 @@ void MFCollision_ClearField(MFCollisionItem *pField)
 	pFieldData->itemList.Clear();
 }
 
-void MFCollision_DestroyField(MFCollisionItem *pField)
+MF_API void MFCollision_DestroyField(MFCollisionItem *pField)
 {
 	MFCollision_ClearField(pField);
 

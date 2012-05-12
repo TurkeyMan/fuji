@@ -417,7 +417,7 @@ void MFRenderer_EndFrame()
 	MFCheckForOpenGLError(true);
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -425,7 +425,7 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACK;
 
@@ -436,12 +436,12 @@ void MFRenderer_ClearScreen(uint32 flags)
 	MFCheckForOpenGLError();
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
+MF_API void MFRenderer_GetViewport(MFRect *pRect)
 {
 	*pRect = gCurrentViewport;
 }
 
-void MFRenderer_SetViewport(MFRect *pRect)
+MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;
 
@@ -450,7 +450,7 @@ void MFRenderer_SetViewport(MFRect *pRect)
 	MFCheckForOpenGLError();
 }
 
-void MFRenderer_ResetViewport()
+MF_API void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
@@ -463,7 +463,7 @@ void MFRenderer_ResetViewport()
 	MFCheckForOpenGLError();
 }
 
-void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFCheckForOpenGLError();
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
@@ -488,7 +488,7 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 	MFRenderer_SetViewport(&viewport);
 }
 
-void MFRenderer_SetDeviceRenderTarget()
+MF_API void MFRenderer_SetDeviceRenderTarget()
 {
 #if defined(MF_IPHONE)
 	MFRendererIPhone_SetBackBuffer();
@@ -502,7 +502,7 @@ void MFRenderer_SetDeviceRenderTarget()
 	glEnable(GL_DEPTH_TEST);
 }
 
-float MFRenderer_GetTexelCenterOffset()
+MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.f;
 }

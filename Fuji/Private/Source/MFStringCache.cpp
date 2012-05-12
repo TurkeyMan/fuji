@@ -14,7 +14,7 @@ struct MFStringCache
 };
 
 
-MFStringCache* MFStringCache_Create(size_t maxSize)
+MF_API MFStringCache* MFStringCache_Create(size_t maxSize)
 {
 	MFCALLSTACK;
 
@@ -29,14 +29,14 @@ MFStringCache* MFStringCache_Create(size_t maxSize)
 	return pCache;
 }
 
-void MFStringCache_Destroy(MFStringCache *pCache)
+MF_API void MFStringCache_Destroy(MFStringCache *pCache)
 {
 	MFCALLSTACK;
 
 	MFHeap_Free(pCache);
 }
 
-void MFStringCache_Clear(MFStringCache *pCache)
+MF_API void MFStringCache_Clear(MFStringCache *pCache)
 {
 	MFCALLSTACK;
 
@@ -44,7 +44,7 @@ void MFStringCache_Clear(MFStringCache *pCache)
 	pCache->used = 2;
 }
 
-const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
+MF_API const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 {
 	MFCALLSTACK;
 
@@ -78,19 +78,19 @@ const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewString)
 }
 
 // get cache for direct read/write
-char* MFStringCache_GetCache(MFStringCache *pCache)
+MF_API char* MFStringCache_GetCache(MFStringCache *pCache)
 {
 	return pCache->pMem;
 }
 
 // get the actual used size of the cache
-size_t MFStringCache_GetSize(MFStringCache *pCache)
+MF_API size_t MFStringCache_GetSize(MFStringCache *pCache)
 {
 	return pCache->used;
 }
 
 // use this if you have filled the cache yourself
-void MFStringCache_SetSize(MFStringCache *pCache, size_t used)
+MF_API void MFStringCache_SetSize(MFStringCache *pCache, size_t used)
 {
 	pCache->used = used;
 }
@@ -108,7 +108,7 @@ struct MFWStringCache
 };
 
 
-MFWStringCache* MFWStringCache_Create(size_t maxSize)
+MF_API MFWStringCache* MFWStringCache_Create(size_t maxSize)
 {
 	MFCALLSTACK;
 
@@ -123,14 +123,14 @@ MFWStringCache* MFWStringCache_Create(size_t maxSize)
 	return pCache;
 }
 
-void MFWStringCache_Destroy(MFWStringCache *pCache)
+MF_API void MFWStringCache_Destroy(MFWStringCache *pCache)
 {
 	MFCALLSTACK;
 
 	MFHeap_Free(pCache);
 }
 
-const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString)
+MF_API const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString)
 {
 	MFCALLSTACK;
 
@@ -160,19 +160,19 @@ const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewStrin
 }
 
 // get cache for direct read/write
-uint16* MFWStringCache_GetCache(MFWStringCache *pCache)
+MF_API uint16* MFWStringCache_GetCache(MFWStringCache *pCache)
 {
 	return pCache->pMem;
 }
 
 // get the actual used size of the cache
-size_t MFWStringCache_GetSize(MFWStringCache *pCache)
+MF_API size_t MFWStringCache_GetSize(MFWStringCache *pCache)
 {
 	return pCache->used;
 }
 
 // use this if you have filled the cache yourself
-void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used)
+MF_API void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used)
 {
 	pCache->used = used;
 }

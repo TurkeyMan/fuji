@@ -43,7 +43,7 @@ void MFSystem_DrawPlatformSpecific()
 }
 #endif // !defined(_FUJI_UTIL)
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	MFCALLSTACK;
 
@@ -69,12 +69,12 @@ uint64 MFSystem_ReadRTC()
 	}
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	return 1000000; // microseconds
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	static utsname name;
 	uname(&name);

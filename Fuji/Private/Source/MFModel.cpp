@@ -189,7 +189,7 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 	return NULL;
 }
 
-MFModel* MFModel_Create(const char *pFilename)
+MF_API MFModel* MFModel_Create(const char *pFilename)
 {
 	// see if it's already loaded
 	MFModelPool::Iterator it = gModelBank.Get(pFilename);
@@ -288,7 +288,7 @@ MFModel* MFModel_Create(const char *pFilename)
 	return pModel;
 }
 
-MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename)
+MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename)
 {
 	MFModel *pModel = MFModel_Create(pFilename);
 
@@ -298,7 +298,7 @@ MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimati
 	return pModel;
 }
 
-int MFModel_Destroy(MFModel *pModel)
+MF_API int MFModel_Destroy(MFModel *pModel)
 {
 	// free instance data
 	if(pModel->pAnimation)
@@ -341,22 +341,22 @@ int MFModel_Destroy(MFModel *pModel)
 }
 
 
-void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
+MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 {
 	pModel->worldMatrix = worldMatrix;
 }
 
-void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
+MF_API void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
 {
 	pModel->modelColour = colour;
 }
 
-const char* MFModel_GetName(MFModel *pModel)
+MF_API const char* MFModel_GetName(MFModel *pModel)
 {
 	return pModel->pTemplate->pName;
 }
 
-int MFModel_GetNumSubObjects(MFModel *pModel)
+MF_API int MFModel_GetNumSubObjects(MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -366,7 +366,7 @@ int MFModel_GetNumSubObjects(MFModel *pModel)
 	return 0;
 }
 
-int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
+MF_API int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -384,7 +384,7 @@ int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
 	return -1;
 }
 
-const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
+MF_API const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -399,32 +399,32 @@ const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
 	return NULL;
 }
 
-void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable)
+MF_API void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable)
 {
 	MFDebug_Assert(false, "Not written...");
 }
 
-bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index)
+MF_API bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index)
 {
 	return true;
 }
 
-MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
+MF_API MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
 {
 	return &pModel->pTemplate->boundingVolume;
 }
 
-MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex)
+MF_API MFMeshChunk* MFModel_GetMeshChunk(MFModel *pModel, int subobjectIndex, int meshChunkIndex)
 {
 	return MFModel_GetMeshChunkInternal(pModel->pTemplate, subobjectIndex, meshChunkIndex);
 }
 
-MFAnimation *MFModel_GetAnimation(MFModel *pModel)
+MF_API MFAnimation *MFModel_GetAnimation(MFModel *pModel)
 {
 	return pModel->pAnimation;
 }
 
-int MFModel_GetNumBones(MFModel *pModel)
+MF_API int MFModel_GetNumBones(MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -434,7 +434,7 @@ int MFModel_GetNumBones(MFModel *pModel)
 	return 0;
 }
 
-const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
+MF_API const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -449,7 +449,7 @@ const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
 	return 0;
 }
 
-const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
+MF_API const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -464,7 +464,7 @@ const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
 	return MFMatrix::identity;
 }
 
-int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
+MF_API int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -482,7 +482,7 @@ int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
 	return -1;
 }
 
-int MFModel_GetNumTags(MFModel *pModel)
+MF_API int MFModel_GetNumTags(MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
 
@@ -492,7 +492,7 @@ int MFModel_GetNumTags(MFModel *pModel)
 	return 0;
 }
 
-const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
+MF_API const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
 {
 	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
 
@@ -508,7 +508,7 @@ const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
 	return NULL;
 }
 
-const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
+MF_API const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
 {
 	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
 
@@ -524,7 +524,7 @@ const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
 	return MFMatrix::identity;
 }
 
-int MFModel_GetTagIndex(MFModel *pModel, const char *pName)
+MF_API int MFModel_GetTagIndex(MFModel *pModel, const char *pName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
 

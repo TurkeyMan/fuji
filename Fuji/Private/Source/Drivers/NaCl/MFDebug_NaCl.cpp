@@ -7,7 +7,7 @@
 #include "MFSystem_NaCl.h"
 
 // Output a string to the debugger.
-void MFDebug_Message(const char *pMessage)
+MF_API void MFDebug_Message(const char *pMessage)
 {
 	FujiModule *pModule = (FujiModule*)pp::Module::Get();
 	Fuji *pInstance = pModule->GetInstance();
@@ -22,7 +22,7 @@ bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)
 	return false;
 }
 
-void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
 	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
 	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));

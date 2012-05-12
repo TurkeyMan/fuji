@@ -51,7 +51,7 @@ void Sprite::Draw()
 	MFSetMatrix(world);
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
+	MFSetColourV(MFVector::white);
 	MFSetTexCoord1(0,0);
 	MFSetPosition((-pivot.x) * scale.x, (-pivot.y) * scale.y, 0);
 	MFSetTexCoord1(1,0);

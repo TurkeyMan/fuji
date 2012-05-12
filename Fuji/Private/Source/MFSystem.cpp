@@ -163,7 +163,7 @@ void RestartCallback(MenuObject *pMenu, void *pData)
 	gRestart = 1;
 }
 
-void MFSystem_Quit()
+MF_API void MFSystem_Quit()
 {
 	gQuit = 1;
 }
@@ -294,11 +294,11 @@ void MFSystem_Draw()
 
 		float xaspect = 25 * MFDisplay_GetNativeAspectRatio();
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
+		MFFont_DrawText2f(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			MFFont_DrawTextf(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+			MFFont_DrawText2f(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 
@@ -419,13 +419,13 @@ void MFSystem_UpdateTimeDelta()
 	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
 }
 
-float MFSystem_GetFPS()
+MF_API float MFSystem_GetFPS()
 {
 	return gSystemTimer.GetFPS();
 }
 #endif // !defined(_FUJI_UTIL)
 
-MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction)
+MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
@@ -434,14 +434,14 @@ MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MF
 	return pOldCallback;
 }
 
-MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
+MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
 	return pSystemCallbacks[callback];
 }
 
-const char * MFSystem_GetSettingString(int tabDepth)
+MF_API const char * MFSystem_GetSettingString(int tabDepth)
 {
 	const char *pSettings = "";
 
@@ -450,12 +450,22 @@ const char * MFSystem_GetSettingString(int tabDepth)
 	return pSettings;
 }
 
-void MFSystem_InitFromSettings(const MFIniLine *pSettings)
+MF_API void MFSystem_InitFromSettings(const MFIniLine *pSettings)
 {
 
 }
 
-MFPlatform MFSystem_GetCurrentPlatform()
+MF_API MFPlatform MFSystem_GetCurrentPlatform()
 {
 	return gCurrentPlatform;
+}
+
+MF_API float MFSystem_GetTimeDelta()
+{
+	return gSystemTimeDelta;
+}
+
+MF_API uint32 MFSystem_GetFrameCounter()
+{
+	return gFrameCount;
 }

@@ -48,7 +48,7 @@ void MFPrimitive_DeinitModule()
 	packet_free(&packet);
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
 
@@ -70,7 +70,7 @@ int width, height;
 
 // TODO: Remove all this and replace with a custom format that is sent to vu1 for
 // transformation, lighting and being able to deal with other prim types!
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
@@ -119,17 +119,12 @@ void MFBegin(uint32 vertexCount)
 	packet_append_64(&packet, GIF_REG_PRIM);
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
-}
-
-void MFSetColour(float rr, float gg, float bb, float aa)
+MF_API void MFSetColour(float rr, float gg, float bb, float aa)
 {
 	r = (unsigned int)(256*rr);
 	g = (unsigned int)(256*gg);
@@ -137,11 +132,7 @@ void MFSetColour(float rr, float gg, float bb, float aa)
 	a = (unsigned int)(128*aa);
 }
 
-void MFSetColour(uint32 col)
-{
-}
-
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	unsigned int iu = (unsigned int)(u * width);
 	unsigned int iv = (unsigned int)(v * height);
@@ -150,26 +141,16 @@ void MFSetTexCoord1(float u, float v)
 	packet_append_64(&packet, GIF_REG_UV);
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	MFSetNormal(normal.x, normal.y, normal.z);
-}
-
 void MFPrimitive_DrawStats()
 {
 	MFCALLSTACK;
 }
 
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
-}
-
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
@@ -184,7 +165,7 @@ void MFSetPosition(float x, float y, float z)
 }
 
 void textured_sprite(unsigned int vaddr, int x, int y, int width, int height);
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFCALLSTACK;
 

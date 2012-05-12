@@ -164,7 +164,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFCheckForOpenGLError();
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 

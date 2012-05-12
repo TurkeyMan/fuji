@@ -109,7 +109,7 @@ struct MFSweepSphereResult
  * This will draw the collision debugging information using the currently configured view.
  * @return None.
  */
-void MFCollision_DebugDraw();
+MF_API void MFCollision_DebugDraw();
 
 /*** Helper functions ***/
 
@@ -119,9 +119,10 @@ void MFCollision_DebugDraw();
  * @param lineStart Start of line segment.
  * @param lineEnd End of line segmnt.
  * @param point Point of reference to find the closest point on the line.
+ * @param pOutput Pointer to an MFVector that received the output.
  * @return Returns the nearest point on the ray to the specified point.
  */
-MFVector MFCollision_NearestPointOnLine(const MFVector& lineStart, const MFVector& lineEnd, const MFVector& point);
+MFVector& MFCollision_NearestPointOnLine(const MFVector& lineStart, const MFVector& lineEnd, const MFVector& point, MFVector *pOutput);
 
 /**
  * Generate a plane from 3 points.
@@ -151,7 +152,7 @@ MFVector MFCollision_MakePlaneFromPointAndNormal(const MFVector &point, const MF
  * @param pTri Pointer to an MFCollisionTriangle structure to be generated from the points.
  * @return None.
  */
-void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVector& p1, const MFVector& p2, MFCollisionTriangle *pTri);
+MF_API void MFCollision_MakeCollisionTriangleFromPoints(const MFVector &p0, const MFVector& p1, const MFVector& p2, MFCollisionTriangle *pTri);
 
 
 /**** General collision tests ****/
@@ -176,7 +177,7 @@ bool MFCollision_TestAABB(const MFVector &min1, const MFVector &max1, const MFVe
  * @param pResult Optional pointer to an MFRayIntersectionResult structire to receive details about the intersection.
  * @return Returns a pointer to the nearest CollisionItem intersected by the ray. Return value is NULL if no intersection occurred.
  */
-MFCollisionItem* MFCollision_RayTest(const MFVector &rayPos, const MFVector &rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult);
+MF_API MFCollisionItem* MFCollision_RayTest(const MFVector &rayPos, const MFVector &rayDir, MFCollisionItem *pItem, MFRayIntersectionResult *pResult);
 
 /**
  * Test a sphere for intersection with an arbitrary CollisionItem.
@@ -187,7 +188,7 @@ MFCollisionItem* MFCollision_RayTest(const MFVector &rayPos, const MFVector &ray
  * @param pResult Optional pointer to an MFCollisionResult which will receive information about the intersection.
  * @return Returns a pointer to the nearest CollisionItem intersected by the sphere. Return value is NULL if no intersection occurred.
  */
-MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult);
+MF_API MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius, MFCollisionItem *pItem, MFCollisionResult *pResult);
 
 /**
  * Test a sweeping sphere for intersection with an arbitrary CollisionItem.
@@ -199,7 +200,7 @@ MFCollisionItem* MFCollision_SphereTest(const MFVector &spherePos, float radius,
  * @param pResult Optional pointer to an MFSweepSphereResult which will receive information about the intersection.
  * @return Returns a pointer to the nearest CollisionItem intersected by the sweeping sphere. Return value is NULL if no intersection occurred.
  */
-MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult);
+MF_API MFCollisionItem* MFCollision_SweepSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem *pItem, MFSweepSphereResult *pResult);
 
 
 /*** Arbitrary primitive intersections ***/
@@ -227,7 +228,7 @@ bool MFCollision_RayPlaneTest(const MFVector& rayPos, const MFVector& rayDir, co
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
  * @return Returns true if the ray intersects the slab.
  */
-bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float slabHalfWidth, MFRayIntersectionResult *pResult = NULL);
+MF_API bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& plane, float slabHalfWidth, MFRayIntersectionResult *pResult = NULL);
 
 /**
  * Intersect a ray with a sphere.
@@ -239,7 +240,7 @@ bool MFCollision_RaySlabTest(const MFVector& rayPos, const MFVector& rayDir, con
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
  * @return Returns true if the ray intersects the sphere.
  */
-bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, MFRayIntersectionResult *pResult = NULL);
+MF_API bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& spherePos, float radius, MFRayIntersectionResult *pResult = NULL);
 
 /**
  * Intersect a ray with a cylinder.
@@ -254,7 +255,7 @@ bool MFCollision_RaySphereTest(const MFVector& rayPos, const MFVector& rayDir, c
  * @param pCylinderTime Optional pointer to a float that receives the time of intersection along the cylinders ray.
  * @return Returns true if the ray intersects the cylinder.
  */
-bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& cylinderPos, const MFVector& cylinderDir, float cylinderRadius, bool capped, MFRayIntersectionResult *pResult = NULL, float *pCylinderTime = NULL);
+MF_API bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& cylinderPos, const MFVector& cylinderDir, float cylinderRadius, bool capped, MFRayIntersectionResult *pResult = NULL, float *pCylinderTime = NULL);
 
 /**
  * Intersect a ray with a capsule.
@@ -267,7 +268,7 @@ bool MFCollision_RayCylinderTest(const MFVector& rayPos, const MFVector& rayDir,
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
  * @return Returns true if the ray intersects the capsule.
  */
-bool MFCollision_RayCapsuleTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& capsulePos, const MFVector& capsuleDir, float capsuleRadius, MFRayIntersectionResult *pResult = NULL);
+MF_API bool MFCollision_RayCapsuleTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& capsulePos, const MFVector& capsuleDir, float capsuleRadius, MFRayIntersectionResult *pResult = NULL);
 
 /**
  * Intersect a ray with a box.
@@ -279,7 +280,7 @@ bool MFCollision_RayCapsuleTest(const MFVector& rayPos, const MFVector& rayDir, 
  * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
  * @return Returns true if the ray intersects the box.
  */
-bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, MFRayIntersectionResult *pResult = NULL);
+MF_API bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, const MFVector& boxPos, const MFVector& boxRadius, MFRayIntersectionResult *pResult = NULL);
 
 
 // sphere intersections
@@ -293,7 +294,7 @@ bool MFCollision_RayBoxTest(const MFVector& rayPos, const MFVector& rayDir, cons
  * @param pResult Optional pointer to an MFCollisionResult structire to receive details about the intersection.
  * @return Returns true if the sphere and plane intersect.
  */
-bool MFCollision_SpherePlaneTest(const MFVector& spherePos, float radius, const MFVector& plane, MFCollisionResult *pResult);
+MF_API bool MFCollision_SpherePlaneTest(const MFVector& spherePos, float radius, const MFVector& plane, MFCollisionResult *pResult);
 
 /**
  * Intersect a sphere with a sphere.
@@ -305,7 +306,7 @@ bool MFCollision_SpherePlaneTest(const MFVector& spherePos, float radius, const 
  * @param pResult Optional pointer to an MFCollisionResult structire to receive details about the intersection.
  * @return Returns true if the spheres intersect.
  */
-bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFVector &pos2, float radius2, MFCollisionResult *pResult);
+MF_API bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFVector &pos2, float radius2, MFCollisionResult *pResult);
 
 
 // sweep sphere intersections
@@ -321,7 +322,7 @@ bool MFCollision_SphereSphereTest(const MFVector &pos1, float radius1, const MFV
  * @param pResult Optional pointer to an MFSweepSphereResult structure to receive details about the collision.
  * @return Returns true if the spheres intersect.
  */
-bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFVector &sphere, float sphereRadius, MFSweepSphereResult *pResult);
+MF_API bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFVector &sphere, float sphereRadius, MFSweepSphereResult *pResult);
 
 
 /**
@@ -334,7 +335,7 @@ bool MFCollision_SweepSphereSphereTest(const MFVector &sweepSpherePos, const MFV
  * @param pResult Optional pointer to an MFSweepSphereResult structure to receive details about the collision.
  * @return Returns true if the sweeping sphere and triangle intersect.
  */
-bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult);
+MF_API bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVector &sweepSphereVelocity, float sweepSphereRadius, const MFCollisionTriangle &tri, MFSweepSphereResult *pResult);
 
 
 /*** Collision item functions ***/
@@ -346,7 +347,7 @@ bool MFCollision_SweepSphereTriTest(const MFVector &sweepSpherePos, const MFVect
  * @param numTris Number of tris in the mesh.
  * @return Returns a pointer to the newly created dynamic collision mesh.
  */
-MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris);
+MF_API MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, int numTris);
 
 /**
  * Lock a dynamic collision mesh triangle buffer.
@@ -354,7 +355,7 @@ MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char *pItemName, i
  * @param pDynamicCollisionMesh The dynamic mesh collision item to lock.
  * @return Returns a pointer to an area in memory where the triangle buffer should be written.
  */
-MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
+MF_API MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
 
 /**
  * Unlock a dynamic collision mesh triangle buffer.
@@ -363,7 +364,7 @@ MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollis
  * @return None.
  * @remarks The bounding volume for the mesh will be generated at this time.
  */
-void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
+MF_API void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDynamicCollisionMesh);
 
 /**
  * Destroy a dynamic collision item.
@@ -371,7 +372,7 @@ void MFCollision_UnlockDynamicCollisionMeshTriangleBuffer(MFCollisionItem *pDyna
  * @param pItem The MFCollisionItem to be destroyed.
  * @return None.
  */
-void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem);
+MF_API void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem);
 
 
 /**** Collision field ****/
@@ -384,7 +385,7 @@ void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem *pItem);
  * @param cellSize The size of the cells in the x, y and z axiis.
  * @return Returns a pointer to the newly created collision field.
  */
-MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize);
+MF_API MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItemCount, const MFVector &cellSize);
 
 /**
  * Add an item to a field.
@@ -394,7 +395,7 @@ MFCollisionItem* MFCollision_CreateField(const char *pFieldName, int maximumItem
  * @param itemFlags 0, or a combination of values from the MFCollisionItemFlags enumerated type detailing the item being added.
  * @return None.
  */
-void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags);
+MF_API void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem, uint32 itemFlags);
 
 /**
  * Add a model to a field.
@@ -403,7 +404,7 @@ void MFCollision_AddItemToField(MFCollisionItem *pField, MFCollisionItem *pItem,
  * @param pModel An MFModel that contains some collision items.
  * @return None.
  */
-void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel);
+MF_API void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel);
 
 /**
  * Build a collision field.
@@ -412,7 +413,7 @@ void MFCollision_AddModelToField(MFCollisionItem *pField, MFModel *pModel);
  * @return None.
  * @remarks This must be called after all items have been added to the field. After this is called, no more items can be added to the field without first clearing the field.
  */
-void MFCollision_BuildField(MFCollisionItem *pField);
+MF_API void MFCollision_BuildField(MFCollisionItem *pField);
 
 /**
  * Clear a collision field.
@@ -420,7 +421,7 @@ void MFCollision_BuildField(MFCollisionItem *pField);
  * @param pField The collision field to clear.
  * @return None.
  */
-void MFCollision_ClearField(MFCollisionItem *pField);
+MF_API void MFCollision_ClearField(MFCollisionItem *pField);
 
 /**
  * Destroy a collision field.
@@ -428,7 +429,7 @@ void MFCollision_ClearField(MFCollisionItem *pField);
  * @param pField The collision field to destroy.
  * @return None.
  */
-void MFCollision_DestroyField(MFCollisionItem *pField);
+MF_API void MFCollision_DestroyField(MFCollisionItem *pField);
 
 
 #include "MFCollision.inl"

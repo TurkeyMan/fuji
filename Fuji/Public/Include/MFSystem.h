@@ -201,14 +201,14 @@ struct MFInitParams
  * Begin initialisation of Fuji, and continue with the Fuji main loop.
  * @return An error code that can be returned to the OS.
  */
-int MFMain(MFInitParams *pInitPrams);
+MF_API int MFMain(MFInitParams *pInitPrams);
 
 /**
  * Quit the Fuji application.
  * Quits the Fuji application.
  * @return None.
  */
-void MFSystem_Quit();
+MF_API void MFSystem_Quit();
 
 /**
  * Set a Fuji system callback.
@@ -217,7 +217,7 @@ void MFSystem_Quit();
  * @param pCallbackFunction Pointer to the callback function.
  * @return Returns a pointer to the old callback function which MUST be called in the new registered callback.
  */
-MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
+MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
 
 /**
  * Get a Fuji system callback function.
@@ -225,7 +225,7 @@ MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MF
  * @param callback The callback to get from the MFCallback enum.
  * @return Returns the currently registered callback function for the requested callback.
  */
-MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
+MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
 /**
  * Generate engine initialisation data.
@@ -233,7 +233,7 @@ MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
  * @param tabDepth Initial tab depth for ini generation.
  * @return Returns a string containing initialisation parameters for the engine in MFIni '.ini' format.
  */
-const char * MFSystem_GetSettingString(int tabDepth);
+MF_API const char * MFSystem_GetSettingString(int tabDepth);
 
 /**
  * Initialise Fuji from saved settings.
@@ -241,7 +241,7 @@ const char * MFSystem_GetSettingString(int tabDepth);
  * @param pSettings Pointer to the first MFiniLine in an options group containing engine initialisation options.
  * @return None.
  */
-void MFSystem_InitFromSettings(const MFIniLine *pSettings);
+MF_API void MFSystem_InitFromSettings(const MFIniLine *pSettings);
 
 /**
  * Gets the current platform.
@@ -250,7 +250,7 @@ void MFSystem_InitFromSettings(const MFIniLine *pSettings);
  * @see MFSystem_GetPlatformString()
  * @see MFSystem_GetPlatformName()
  */
-MFPlatform MFSystem_GetCurrentPlatform();
+MF_API MFPlatform MFSystem_GetCurrentPlatform();
 
 /**
  * Gets a platform identifier string.
@@ -260,7 +260,7 @@ MFPlatform MFSystem_GetCurrentPlatform();
  * @see MFSystem_GetCurrentPlatform()
  * @see MFSystem_GetPlatformName()
  */
-const char * MFSystem_GetPlatformString(int platform);
+MF_API const char * MFSystem_GetPlatformString(int platform);
 
 /**
  * Gets a platform name.
@@ -270,14 +270,14 @@ const char * MFSystem_GetPlatformString(int platform);
  * @see MFSystem_GetCurrentPlatform()
  * @see MFSystem_GetPlatformString()
  */
-const char * MFSystem_GetPlatformName(int platform);
+MF_API const char * MFSystem_GetPlatformName(int platform);
 
 /**
  * Gets the name of this system.
  * Gets a user friendly name for this system. Typically a network identification name.
  * @return Returns the system name string.
  */
-const char * MFSystem_GetSystemName();
+MF_API const char * MFSystem_GetSystemName();
 
 /**
  * Gets a platforms native endian.
@@ -286,7 +286,7 @@ const char * MFSystem_GetSystemName();
  * @return The hardware endian of the specified platform.
  * @see MFSystem_GetCurrentPlatform()
  */
-MFEndian MFSystem_GetPlatformEndian(int platform);
+MF_API MFEndian MFSystem_GetPlatformEndian(int platform);
 
 /**
  * Read the time stamp counter.
@@ -294,7 +294,7 @@ MFEndian MFSystem_GetPlatformEndian(int platform);
  * @return The time stamp counters current tick.
  * @see MFSystem_GetRTCFrequency()
  */
-uint64 MFSystem_ReadRTC();
+MF_API uint64 MFSystem_ReadRTC();
 
 /**
  * Read the time stamp counter frequency.
@@ -302,7 +302,7 @@ uint64 MFSystem_ReadRTC();
  * @return The time stamp counters clock frequency.
  * @see MFSystem_ReadRTC()
  */
-uint64 MFSystem_GetRTCFrequency();
+MF_API uint64 MFSystem_GetRTCFrequency();
 
 /**
  * Gets the current time delta.
@@ -313,12 +313,20 @@ uint64 MFSystem_GetRTCFrequency();
 float MFSystem_TimeDelta();
 
 /**
+ * Gets the current time delta.
+ * Gets the current time delta.
+ * @return The current time delta.
+ * @see MFSystem_GetFPS()
+ */
+MF_API float MFSystem_GetTimeDelta();
+
+/**
  * Gets the current frame rate.
  * Gets the current frame rate.
  * @return The current frame rate.
  * @see MFSystem_TimeDelta()
  */
-float MFSystem_GetFPS();
+MF_API float MFSystem_GetFPS();
 
 /**
  * Gets the current frame.
@@ -326,7 +334,15 @@ float MFSystem_GetFPS();
  * @return The current frame count.
  * @see MFSystem_GetFPS()
  */
-uint32 MFSystem_GetFrameCounter();
+uint32 MFSystem_FrameCounter();
+
+/**
+ * Gets the current frame.
+ * Gets the current frame count.
+ * @return The current frame count.
+ * @see MFSystem_GetFPS()
+ */
+MF_API uint32 MFSystem_GetFrameCounter();
 
 #include "MFSystem.inl"
 

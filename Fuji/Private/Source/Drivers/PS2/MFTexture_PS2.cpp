@@ -20,7 +20,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	// no processing required on PS2..
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	MFCALLSTACK;
 

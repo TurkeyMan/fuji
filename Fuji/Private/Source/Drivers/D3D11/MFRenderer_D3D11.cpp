@@ -384,7 +384,7 @@ void MFRenderer_EndFrame()
 	g_pSwapChain->Present( 0, 0 );
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -392,7 +392,7 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
 	
@@ -413,31 +413,31 @@ void MFRenderer_ClearScreen(uint32 flags)
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_GetViewport(MFRect *pRect)
+MF_API void MFRenderer_GetViewport(MFRect *pRect)
 {
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_SetViewport(MFRect *pRect)
-{
-
-}
-//---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_ResetViewport()
+MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_ResetViewport()
 {
 
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_SetDeviceRenderTarget()
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+{
+
+}
+//---------------------------------------------------------------------------------------------------------------------
+MF_API void MFRenderer_SetDeviceRenderTarget()
 {
     g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }
 //---------------------------------------------------------------------------------------------------------------------
-float MFRenderer_GetTexelCenterOffset()
+MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }

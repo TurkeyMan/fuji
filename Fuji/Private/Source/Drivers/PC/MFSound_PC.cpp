@@ -188,7 +188,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 		pSound->pInternal->p3DBuffer->Release();
 }
 
-int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	MFDebug_Assert(!(pSound->flags & MFPF_Locked), MFStr("Dynamic sound '%s' is already locked.", pSound->name));
 
@@ -209,7 +209,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
 	return 0;
 }
 
-void MFSound_Unlock(MFSound *pSound)
+MF_API void MFSound_Unlock(MFSound *pSound)
 {
 	MFDebug_Assert(pSound->flags & MFPF_Locked, MFStr("Dynamic sound '%s' is not locked.", pSound->name));
 
@@ -267,7 +267,7 @@ void MFSound_PlayInternal(MFVoice *pVoice)
 		pVoice->flags |= MFPF_Paused;
 }
 
-void MFSound_Pause(MFVoice *pVoice, bool pause)
+MF_API void MFSound_Pause(MFVoice *pVoice, bool pause)
 {
 	MFCALLSTACK;
 
@@ -284,34 +284,34 @@ void MFSound_Pause(MFVoice *pVoice, bool pause)
 	}
 }
 
-void MFSound_Stop(MFVoice *pVoice)
+MF_API void MFSound_Stop(MFVoice *pVoice)
 {
 	MFCALLSTACK;
 
 	pVoice->pInternal->pBuffer8->Stop();
 }
 
-void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+MF_API void MFSound_SetListenerPos(const MFMatrix& listenerPos)
 {
 	MFCALLSTACK;
 
 }
 
-void MFSound_SetVolume(MFVoice *pVoice, float volume)
+MF_API void MFSound_SetVolume(MFVoice *pVoice, float volume)
 {
 	MFCALLSTACK;
 
 	pVoice->pInternal->pBuffer8->SetVolume(MFSoundInternal_GetDecibels(volume));
 }
 
-void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
+MF_API void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 {
 	MFCALLSTACK;
 
 	pVoice->pInternal->pBuffer8->SetFrequency((DWORD)((float)pVoice->pSound->pTemplate->sampleRate * rate));
 }
 
-void MFSound_SetPan(MFVoice *pVoice, float pan)
+MF_API void MFSound_SetPan(MFVoice *pVoice, float pan)
 {
 	if(pVoice->pSound->pTemplate->numChannels == 2)
 	{
@@ -328,7 +328,7 @@ void MFSound_SetPan(MFVoice *pVoice, float pan)
 	}
 }
 
-void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+MF_API void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 {
 	MFCALLSTACK;
 
@@ -338,7 +338,7 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 	pVoice->pInternal->pBuffer8->SetCurrentPosition(offset);
 }
 
-void MFSound_SetMasterVolume(float volume)
+MF_API void MFSound_SetMasterVolume(float volume)
 {
 	MFCALLSTACK;
 

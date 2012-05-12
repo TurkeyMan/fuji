@@ -7,7 +7,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-MFLanguage MFTranslation_GetDefaultLanguage()
+MF_API MFLanguage MFTranslation_GetDefaultLanguage()
 {
 	MFLanguage language;
 

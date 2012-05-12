@@ -8,7 +8,7 @@
 #include "MFPrimitive.h"
 #include "MFView.h"
 
-MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
+MF_API MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 {
 	MFParticleSystem *pSystem = (MFParticleSystem*)MFHeap_Alloc(sizeof(MFParticleSystem));
 
@@ -29,7 +29,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
 	return pSystem;
 }
 
-void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem)
+MF_API void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem)
 {
 	pParticleSystem->particles.Deinit();
 
@@ -70,7 +70,7 @@ void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMa
 
 		MFVector pos = ApplyMatrixH(pParticle->pos, ltv);
 
-		MFSetColour(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
+		MFSetColourV(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
 		MFSetTexCoord1(1, 0);
 		MFSetPosition(pos.x + xoff, pos.y + yoff, pos.z);
 		MFSetTexCoord1(0, 1);
@@ -94,7 +94,7 @@ void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMa
 	MFEnd();
 }
 
-void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
+MF_API void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 {
 	int numParticles = pParticleSystem->particles.GetLength();
 	if(numParticles == 0)
@@ -138,7 +138,7 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 
 		MFVector pos = ApplyMatrixH(pParticle->pos, ltv);
 
-		MFSetColour(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
+		MFSetColourV(MakeVector(pParticle->colour, pParticle->colour.w * alpha));
 		MFSetTexCoord1(0, 0);
 		MFSetPosition(pos.x - halfSize, pos.y + halfSize, pos.z);
 		MFSetTexCoord1(1, 1);
@@ -156,7 +156,7 @@ void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	MFView_Pop();
 }
 
-MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams)
+MF_API MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams)
 {
 	MFParticleEmitter *pEmitter = (MFParticleEmitter*)MFHeap_Alloc(sizeof(MFParticleEmitter));
 
@@ -167,12 +167,12 @@ MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *p
 	return pEmitter;
 }
 
-void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pParticleEmitter)
+MF_API void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pParticleEmitter)
 {
 	MFHeap_Free(pParticleEmitter);
 }
 
-void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
+MF_API void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
 {
 	MFParticleEmitterParameters *pE = &pEmitter->params;
 	MFParticleSystem *pParticleSystem = pE->pParticleSystem;
@@ -258,7 +258,7 @@ void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
 	}
 }
 
-void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter)
+MF_API void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter)
 {
 	// emit new particles
 	pEmitter->emitTimeout += MFSystem_TimeDelta();
@@ -271,7 +271,7 @@ void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter)
 	}
 }
 
-void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles)
+MF_API void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles)
 {
 	for(int a=0; a<numParticles; ++a)
 	{
@@ -279,7 +279,7 @@ void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles)
 	}
 }
 
-void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix)
+MF_API void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix)
 {
 	pEmitter->params.position = worldMatrix;
 }

@@ -251,7 +251,7 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 	{
 		// draw text
 		const MFVector &textColour = tb.GetTextColour();
-		MFFont_DrawText(pFont, padding, padding, textHeight, bEnabled ? textColour : MFVector::grey, pString, -1, worldTransform);
+		MFFont_DrawText2(pFont, padding, padding, textHeight, bEnabled ? textColour : MFVector::grey, pString, -1, worldTransform);
 	}
 
 	if(bHasFocus)

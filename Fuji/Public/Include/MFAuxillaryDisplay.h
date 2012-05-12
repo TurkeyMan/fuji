@@ -63,14 +63,14 @@ struct MFAuxDisplayProperties
  * @param pAppName The name of the app as may appear on the auxillary display.
  * @return None.
  */
-void MFAuxDisplay_Init(const char *pAppName);
+MF_API void MFAuxDisplay_Init(const char *pAppName);
 
 /**
  * De-initislise the auxillary display module.
  * De-initislises the auxillary display module. Call this when you have finished with the auxillary display device.
  * @return None.
  */
-void MFAuxDisplay_Deinit();
+MF_API void MFAuxDisplay_Deinit();
 
 /**
  * Update the auxillary display module.
@@ -78,14 +78,14 @@ void MFAuxDisplay_Deinit();
  * @return None.
  * @remarks This function will perform various update functionality such as read any available input from the device.
  */
-void MFAuxDisplay_Update();
+MF_API void MFAuxDisplay_Update();
 
 /**
  * Get the number of auxillary display devices.
  * Gets the number of auxillary display devices.
  * @return Returns the number of available auxillary display devices.
  */
-int MFAuxDisplay_GetNumberOfDisplays();
+MF_API int MFAuxDisplay_GetNumberOfDisplays();
 
 /**
  * Get the device properties for the specified auxillary display device.
@@ -94,7 +94,7 @@ int MFAuxDisplay_GetNumberOfDisplays();
  * @param pProperties Pointer to an \a MFAuxDisplayProperties structure to receive the device properties.
  * @return None.
  */
-void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProperties);
+MF_API void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProperties);
 
 /**
  * Lock the focus of the auxillary display.
@@ -103,7 +103,7 @@ void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProp
  * @param lock If true, the device will attempt to lock focus of the screen. If false, focus lock will be released.
  * @return None.
  */
-void MFAuxDisplay_LockScreen(int device, bool lock);
+MF_API void MFAuxDisplay_LockScreen(int device, bool lock);
 
 /**
  * Upload an image to the auxillary display device.
@@ -113,7 +113,7 @@ void MFAuxDisplay_LockScreen(int device, bool lock);
  * @param priorioty Priority of the image being displayed If the priority is high and the application does not have focus on the device, the focus may be granted for the image to be displayed immediately.
  * @return None.
  */
-void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priorioty);
+MF_API void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priorioty);
 
 /**
  * Read the button state of an auxillary display device key.
@@ -122,7 +122,7 @@ void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int prioriot
  * @param button The button ID to read.
  * @return Returns the state of the button.
  */
-int MFAuxDisplay_ReadButton(int device, int button);
+MF_API int MFAuxDisplay_ReadButton(int device, int button);
 
 /**
  * Read the button pressed state from the auxillary display device.
@@ -131,7 +131,7 @@ int MFAuxDisplay_ReadButton(int device, int button);
  * @param button The button ID to read.
  * @return Returns true if the button was pressed this frame.
  */
-bool MFAuxDisplay_WasPressed(int device, int button);
+MF_API bool MFAuxDisplay_WasPressed(int device, int button);
 
 /**
  * Read the button released state from the auxillary display device.
@@ -140,7 +140,7 @@ bool MFAuxDisplay_WasPressed(int device, int button);
  * @param button The button ID to read.
  * @return Returns true if the button was released this frame.
  */
-bool MFAuxDisplay_WasReleased(int device, int button);
+MF_API bool MFAuxDisplay_WasReleased(int device, int button);
 
 #endif // _MFAUXILLARYDISPLAY_H
 

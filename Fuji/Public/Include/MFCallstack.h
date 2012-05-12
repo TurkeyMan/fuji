@@ -102,7 +102,7 @@ public:
  * Logs the callback to the console.
  * @return None. 
  */
-void MFCallstack_Log();
+MF_API void MFCallstack_Log();
 
 /**
  * Get a string containing the current callstack.
@@ -110,7 +110,7 @@ void MFCallstack_Log();
  * @return Pointer to a string containing the current callstack.
  * @remarks The string is allocated in the circular temporary string buffer, results should not be stored long term.
  */
-const char* MFCallstack_GetCallstackString();
+MF_API const char* MFCallstack_GetCallstackString();
 
 #endif // _MFCALLSTACK_H
 

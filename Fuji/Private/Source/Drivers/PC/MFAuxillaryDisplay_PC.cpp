@@ -27,7 +27,7 @@ static char gSoftKeystate[MAX_AUX_DISPLAYS][MAX_SOFT_KEYS];
 
 static int gConnection;
 
-void MFAuxDisplay_Init(const char *pAppName)
+MF_API void MFAuxDisplay_Init(const char *pAppName)
 {
 	MFZeroMemory(gSoftKeystate, sizeof(gSoftKeystate));
 	MFZeroMemory(gLastKeystate, sizeof(gSoftKeystate));
@@ -97,7 +97,7 @@ void MFAuxDisplay_Init(const char *pAppName)
 #endif
 }
 
-void MFAuxDisplay_Deinit()
+MF_API void MFAuxDisplay_Deinit()
 {
 #if defined(SUPPORT_G15)
 	if(gG15Available)
@@ -112,7 +112,7 @@ void MFAuxDisplay_Deinit()
 #endif
 }
 
-void MFAuxDisplay_Update()
+MF_API void MFAuxDisplay_Update()
 {
 	MFCopyMemory(gLastKeystate, gSoftKeystate, sizeof(gLastKeystate));
 
@@ -129,26 +129,26 @@ void MFAuxDisplay_Update()
 #endif
 }
 
-int MFAuxDisplay_GetNumberOfDisplays()
+MF_API int MFAuxDisplay_GetNumberOfDisplays()
 {
 	return gNumDisplays;
 }
 
-void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProperties)
+MF_API void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProperties)
 {
 	MFDebug_Assert(device < gNumDisplays, "Invalid auxillary display.");
 
 	MFCopyMemory(pProperties, &gAuxDeviceProperties[device], sizeof(*pProperties));
 }
 
-void MFAuxDisplay_LockScreen(int device, bool lock)
+MF_API void MFAuxDisplay_LockScreen(int device, bool lock)
 {
 #if defined(SUPPORT_G15)
 	lgLcdSetAsLCDForegroundApp(gDeviceHandles[device], lock ? LGLCD_LCD_FOREGROUND_APP_YES : LGLCD_LCD_FOREGROUND_APP_NO);
 #endif
 }
 
-void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priority)
+MF_API void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priority)
 {
 #if defined(SUPPORT_G15)
 	lgLcdBitmap160x43x1 header;
@@ -159,17 +159,17 @@ void MFAuxDisplay_UploadImage(int device, const char *pImageBuffer, int priority
 #endif
 }
 
-int MFAuxDisplay_ReadButton(int device, int button)
+MF_API int MFAuxDisplay_ReadButton(int device, int button)
 {
 	return gSoftKeystate[device][button];
 }
 
-bool MFAuxDisplay_WasPressed(int device, int button)
+MF_API bool MFAuxDisplay_WasPressed(int device, int button)
 {
 	return gSoftKeystate[device][button] && !gLastKeystate[device][button];
 }
 
-bool MFAuxDisplay_WasReleased(int device, int button)
+MF_API bool MFAuxDisplay_WasReleased(int device, int button)
 {
 	return !gSoftKeystate[device][button] && gLastKeystate[device][button];
 }

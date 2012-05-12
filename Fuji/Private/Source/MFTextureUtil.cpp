@@ -663,7 +663,7 @@ MFDisplayDrivers MFTexture_GetCurrentDisplayDriver()
 #endif
 }
 
-bool MFTexture_IsAvailable(int format)
+MF_API bool MFTexture_IsAvailable(int format)
 {
 	MFDisplayDrivers driver = MFTexture_GetCurrentDisplayDriver();
 	if(driver == MFDD_Unknown)
@@ -672,22 +672,22 @@ bool MFTexture_IsAvailable(int format)
 }
 #endif
 
-const char * const MFTexture_GetFormatString(int format)
+MF_API const char * const MFTexture_GetFormatString(int format)
 {
 	return gpMFTextureFormatStrings[format];
 }
 
-uint32 MFTexture_GetPlatformAvailability(int format)
+MF_API uint32 MFTexture_GetPlatformAvailability(int format)
 {
 	return gMFTexturePlatformAvailability[format];
 }
 
-bool MFTexture_IsAvailableOnPlatform(int format, int platform)
+MF_API bool MFTexture_IsAvailableOnPlatform(int format, int platform)
 {
 	return (gMFTexturePlatformAvailability[format] & MFBIT(platform)) != 0;
 }
 
-int MFTexture_GetBitsPerPixel(int format)
+MF_API int MFTexture_GetBitsPerPixel(int format)
 {
 	return gMFTextureBitsPerPixel[format];
 }

@@ -339,7 +339,7 @@ const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 	return gPS2Buttons[button];
 }
 
-bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
+MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	switch(keyboardState)
 	{

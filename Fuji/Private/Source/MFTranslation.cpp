@@ -46,12 +46,12 @@ static const char * const languageNamesNative[MFLang_Max] =
 };
 
 
-const char* MFTranslation_GetLanguageName(MFLanguage language, bool native)
+MF_API const char* MFTranslation_GetLanguageName(MFLanguage language, bool native)
 {
 	return native ? languageNamesNative[language] : languageNamesEnglish[language];
 }
 
-MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName)
+MF_API MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName)
 {
 	for(int a=0; a<MFLang_Max; ++a)
 	{
@@ -62,7 +62,7 @@ MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName)
 	return MFLang_Unknown;
 }
 
-MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
+MF_API MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
 {
 	MFStringTable *pStringTable = NULL;
 
@@ -80,7 +80,7 @@ MFStringTable* MFTranslation_LoadEnumStringTable(const char *pFilename)
 	return pStringTable;
 }
 
-MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage language, MFLanguage fallback)
+MF_API MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage language, MFLanguage fallback)
 {
 	MFStringTable *pStringTable = NULL;
 
@@ -132,17 +132,17 @@ MFStringTable* MFTranslation_LoadStringTable(const char *pFilename, MFLanguage l
 	return pStringTable;
 }
 
-void MFTranslation_DestroyStringTable(MFStringTable *pTable)
+MF_API void MFTranslation_DestroyStringTable(MFStringTable *pTable)
 {
 	MFHeap_Free(pTable);
 }
 
-int MFTranslation_GetNumStrings(MFStringTable *pTable)
+MF_API int MFTranslation_GetNumStrings(MFStringTable *pTable)
 {
 	return pTable->numStrings;
 }
 
-int MFTranslation_FindString(MFStringTable *pTable, const char *pString)
+MF_API int MFTranslation_FindString(MFStringTable *pTable, const char *pString)
 {
 	for(int a=0; a<pTable->numStrings; a++)
 	{
@@ -153,7 +153,7 @@ int MFTranslation_FindString(MFStringTable *pTable, const char *pString)
 	return -1;
 }
 
-const char* MFTranslation_GetString(MFStringTable *pTable, int stringID)
+MF_API const char* MFTranslation_GetString(MFStringTable *pTable, int stringID)
 {
 	MFDebug_Assert(stringID < pTable->numStrings, "String does not exist in the string table");
 

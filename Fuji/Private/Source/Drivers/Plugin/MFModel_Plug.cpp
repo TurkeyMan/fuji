@@ -9,7 +9,7 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFModel_InitModulePlatformSpecific_##driver(); \
 	void MFModel_DeinitModulePlatformSpecific_##driver(); \
-	void MFModel_Draw_##driver(MFModel *pModel); \
+	MF_API void MFModel_Draw_##driver(MFModel *pModel); \
 	void MFModel_CreateMeshChunk_##driver(MFMeshChunk *pMeshChunk); \
 	void MFModel_DestroyMeshChunk_##driver(MFMeshChunk *pMeshChunk); \
 	void MFModel_FixUpMeshChunk_##driver(MFMeshChunk *pMC, void *pBase, bool load);
@@ -82,7 +82,7 @@ void MFModel_DeinitModulePlatformSpecific()
 	gpCurrentModelPlugin->pDeinitModulePlatformSpecific();
 }
 
-void MFModel_Draw(MFModel *pModel)
+MF_API void MFModel_Draw(MFModel *pModel)
 {
 	gpCurrentModelPlugin->pDraw(pModel);
 }

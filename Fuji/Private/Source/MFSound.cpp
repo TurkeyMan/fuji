@@ -232,7 +232,7 @@ void MFSound_Update()
 	}
 }
 
-MFSound *MFSound_Create(const char *pName)
+MF_API MFSound *MFSound_Create(const char *pName)
 {
 	MFCALLSTACK;
 
@@ -304,7 +304,7 @@ MFSound *MFSound_Create(const char *pName)
 	return pSound;
 }
 
-MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint32 flags)
+MF_API MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint32 flags)
 {
 	MFCALLSTACK;
 
@@ -349,7 +349,7 @@ MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannel
 	return pSound;
 }
 
-int MFSound_Destroy(MFSound *pSound)
+MF_API int MFSound_Destroy(MFSound *pSound)
 {
 	MFCALLSTACK;
 
@@ -367,7 +367,7 @@ int MFSound_Destroy(MFSound *pSound)
 	return refCount;
 }
 
-MFSound *MFSound_FindSound(const char *pSoundName)
+MF_API MFSound *MFSound_FindSound(const char *pSoundName)
 {
 	MFCALLSTACK;
 
@@ -384,7 +384,7 @@ MFSound *MFSound_FindSound(const char *pSoundName)
 	return NULL;
 }
 
-MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
+MF_API MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 {
 	MFCALLSTACK;
 
@@ -409,7 +409,7 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags)
 	return pVoice;
 }
 
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
+MF_API uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFSound_LockMutex(true);
 
@@ -426,12 +426,12 @@ uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 	return play / bytesPerSample;
 }
 
-MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice)
+MF_API MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice)
 {
 	return pVoice->pSound;
 }
 
-void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo)
+MF_API void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo)
 {
 	pInfo->sampleRate = pSound->pTemplate->sampleRate;
 	pInfo->numSamples = pSound->pTemplate->numSamples;
@@ -468,7 +468,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	}
 }
 
-int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	MFCALLSTACK;
 
@@ -508,7 +508,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
 	return 0;
 }
 
-void MFSound_Unlock(MFSound *pSound)
+MF_API void MFSound_Unlock(MFSound *pSound)
 {
 	MFCALLSTACK;
 
@@ -527,7 +527,7 @@ void MFSound_Unlock(MFSound *pSound)
 // MFAudioStream related functions
 //
 
-void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks)
+MF_API void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks)
 {
 	MFStreamHandler *pHandler = (MFStreamHandler*)MFHeap_Alloc(sizeof(MFStreamHandler));
 
@@ -538,7 +538,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
 	gStreamHandlers.Create(pHandler);
 }
 
-MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
+MF_API MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 {
 	MFCALLSTACK;
 
@@ -620,7 +620,7 @@ MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags)
 	return pStream;
 }
 
-void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags)
+MF_API void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags)
 {
 	MFCALLSTACK;
 
@@ -659,7 +659,7 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 	MFSound_FillBuffer(pStream, lockSize);
 }
 
-void MFSound_DestroyStream(MFAudioStream *pStream)
+MF_API void MFSound_DestroyStream(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
 
@@ -687,7 +687,7 @@ void MFSound_DestroyStream(MFAudioStream *pStream)
 	MFSound_LockMutex(false);
 }
 
-void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
+MF_API void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 {
 	MFCALLSTACK;
 
@@ -710,7 +710,7 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds)
 	MFSound_LockMutex(false);
 }
 
-void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
+MF_API void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 {
 	MFCALLSTACK;
 
@@ -733,12 +733,12 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause)
 	MFSound_LockMutex(false);
 }
 
-MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream)
+MF_API MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream)
 {
 	return pStream->pStreamVoice;
 }
 
-const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType)
+MF_API const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType)
 {
 	switch(infoType)
 	{
@@ -818,7 +818,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 		pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
 }
 
-int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes)
+MF_API int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes)
 {
 	return pStream->pStreamHandler->callbacks.pGetSamples(pStream, pBuffer, bytes);
 }
@@ -841,15 +841,15 @@ void MFSound_Draw()
 			MFSoundTemplate *pT = gMusicTracks[a].pStreamVoice->pSound->pTemplate;
 			uint32 bufferSize = (pT->numSamples * pT->numChannels * pT->bitsPerSample) >> 3;
 
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Stream: '%s'", gMusicTracks[a].name);
+			MFFont_DrawText2f(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Stream: '%s'", gMusicTracks[a].name);
 			y += 20.0f;
-			MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
+			MFFont_DrawText2f(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "TrackLength: %d:%02d, CurrentTime: %d:%02d", ((int)gMusicTracks[a].trackLength) / 60, ((int)gMusicTracks[a].trackLength) % 60, ((int)gMusicTracks[a].currentTime) / 60, ((int)gMusicTracks[a].currentTime) % 60);
 			y += 25.0f;
 
 			MFPrimitive(PT_TriStrip|PT_Untextured);
 
 			MFBegin(46);
-			MFSetColour(MFVector::white);
+			MFSetColourV(MFVector::white);
 			MFSetPosition(23.0f, y-2.0f, 0.0f);
 			MFSetPosition(617.0f, y-2.0f, 0.0f);
 			MFSetPosition(23.0f, y+22.0f, 0.0f);
@@ -869,7 +869,7 @@ void MFSound_Draw()
 			MFSetPosition(615.0f, y+20.0f, 0.0f);
 			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(MakeVector(0.5f, 0.5f, 1, 1));
+			MFSetColour(0.5f, 0.5f, 1, 1);
 			MFSetPosition(xPlayback-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayback+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayback-1.0f, y+21.0f, 0.0f);
@@ -879,7 +879,7 @@ void MFSound_Draw()
 			y += 30.0f;
 			MFSetPosition(98.0f, y-2.0f, 0.0f);
 
-			MFSetColour(MFVector::white);
+			MFSetColourV(MFVector::white);
 			MFSetPosition(98.0f, y-2.0f, 0.0f);
 			MFSetPosition(502.0f, y-2.0f, 0.0f);
 			MFSetPosition(98.0f, y+22.0f, 0.0f);
@@ -902,7 +902,7 @@ void MFSound_Draw()
 			MFSetPosition(500.0f, y+20.0f, 0.0f);
 			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(MFVector::yellow);
+			MFSetColourV(MFVector::yellow);
 			MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
@@ -913,7 +913,7 @@ void MFSound_Draw()
 			MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
 			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 
-			MFSetColour(MFVector::red);
+			MFSetColourV(MFVector::red);
 			MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
 			MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);
@@ -945,11 +945,11 @@ void MFSound_Draw()
 
 		uint32 bufferSize = (pT->numSamples * pT->numChannels * pT->bitsPerSample) >> 3;
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Voice: '%s'", pV->pSound->name);
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 20.0f, y, 20.0f, MakeVector(1,1,0,1), "Voice: '%s'", pV->pSound->name);
 		y += 20.0f;
 
 //		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d, AvgBitrate: %dkbps, Version: %d", pV->pSound->pTemplate->numChannels, pV->pSound->pTemplate->sampleRate, gMusicTracks[a].pInfo->bitrate_nominal/1000, gMusicTracks[a].pInfo->version);
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d", pT->numChannels, pT->sampleRate);
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Channels: %d, Samplerate: %d", pT->numChannels, pT->sampleRate);
 		y += 20.0f;
 /*
 #if defined(VORBIS_STREAM)
@@ -1000,7 +1000,7 @@ void MFSound_Draw()
 #endif
 */
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 30.0f, y, 20.0f, MFVector::one, "Buffer:");
 /*
 		MFPrimitive_DrawUntexturedQuad(MakeVector(98.0f, y-2.0f), MakeVector(502.0f, y+22.0f), 0xFFFFFFFF);
 		MFPrimitive_DrawUntexturedQuad(MakeVector(100.0f, y), MakeVector(500.0f, y+20.0f), 0xFF404040);
@@ -1011,7 +1011,7 @@ void MFSound_Draw()
 		MFPrimitive(PT_TriStrip|PT_Untextured);
 
 		MFBegin(22);
-		MFSetColour(MFVector::white);
+		MFSetColourV(MFVector::white);
 		MFSetPosition(98.0f, y-2.0f, 0.0f);
 		MFSetPosition(502.0f, y-2.0f, 0.0f);
 		MFSetPosition(98.0f, y+22.0f, 0.0f);
@@ -1034,7 +1034,7 @@ void MFSound_Draw()
 		MFSetPosition(500.0f, y+20.0f, 0.0f);
 		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 
-		MFSetColour(MFVector::yellow);
+		MFSetColourV(MFVector::yellow);
 		MFSetPosition(xPlayCursor-1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xPlayCursor+1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xPlayCursor-1.0f, y+21.0f, 0.0f);
@@ -1045,7 +1045,7 @@ void MFSound_Draw()
 		MFSetPosition(xPlayCursor+1.0f, y+21.0f, 0.0f);
 		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 
-		MFSetColour(MFVector::red);
+		MFSetColourV(MFVector::red);
 		MFSetPosition(xWriteCursor-1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xWriteCursor+1.0f, y-1.0f, 0.0f);
 		MFSetPosition(xWriteCursor-1.0f, y+21.0f, 0.0f);

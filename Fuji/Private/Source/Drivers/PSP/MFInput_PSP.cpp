@@ -108,7 +108,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	pGamepadState->values[Axis_RY] = 0.0f;
 }
 
-uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+MF_API uint32 MFInput_GetDeviceFlags(int device, int deviceID)
 {
 	return 0;
 }
@@ -151,7 +151,7 @@ const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 	return gPSPButtons[button];
 }
 
-bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
+MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	switch(keyboardState)
 	{

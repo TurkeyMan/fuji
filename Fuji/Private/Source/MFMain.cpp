@@ -26,7 +26,7 @@ extern bool gDrawSystemInfo;
 	}
 #endif
 
-int MFMain(MFInitParams *pInitParams)
+MF_API int MFMain(MFInitParams *pInitParams)
 {
 	MFCALLSTACK;
 

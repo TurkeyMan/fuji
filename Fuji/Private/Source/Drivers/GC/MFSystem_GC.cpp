@@ -26,17 +26,17 @@ void MFSystem_DrawPlatformSpecific()
 {
 }
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	return 0;
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	return 1000;
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 #if defined(MF_GC)
 	return "Nintendo Gamecube";

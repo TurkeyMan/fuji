@@ -173,7 +173,7 @@ T MFClamp(T x, T y, T z);
  * @return None.
  * @see MFRand(), MFRand_Unit()
  */
-void MFRand_Seed(uint32 seed);
+MF_API void MFRand_Seed(uint32 seed);
 
 /**
  * Get a pseudo-random number.
@@ -181,7 +181,7 @@ void MFRand_Seed(uint32 seed);
  * @return Returns a pseudo random number in the range of 0 to 2^32-1 (4294967295).
  * @see MFRand_Unit(), MFRand_Range()
  */
-uint32 MFRand();
+MF_API uint32 MFRand();
 
 /**
  * Get a pseudo-random number between 0.0f and 1.0f.

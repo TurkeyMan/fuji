@@ -48,7 +48,7 @@ int MFThread_ThreadProc(MFThreadInfo *pThreadInfo)
 
 // interface functions
 
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 flags, uint32 stackSize)
+MF_API MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority, uint32 flags, uint32 stackSize)
 {
 	MFThreadInfo *pThreadInfo = MFThread_GetNewThreadInfo();
 
@@ -72,12 +72,12 @@ MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint
 	return pThreadInfo;
 }
 
-int MFThread_GetExitCode(MFThread pThreadInfo)
+MF_API int MFThread_GetExitCode(MFThread pThreadInfo)
 {
 	return pThreadInfo->exitCode;
 }
 
-void MFThread_DestroyThread(MFThread pThreadInfo)
+MF_API void MFThread_DestroyThread(MFThread pThreadInfo)
 {
 	MFDebug_Assert(pThreadInfo != NULL, "Invalid thread.");
 
@@ -92,7 +92,7 @@ void MFThread_DestroyThread(MFThread pThreadInfo)
 	gThreadInfo.Free(pThreadInfo);
 }
 
-void MFThread_Join(MFThread pThreadInfo)
+MF_API void MFThread_Join(MFThread pThreadInfo)
 {
 	MFDebug_Assert(pThreadInfo->flags & MFTF_Joinable, "Thread is not joinable.");
 
@@ -100,7 +100,7 @@ void MFThread_Join(MFThread pThreadInfo)
 }
 
 
-MFMutex MFThread_CreateMutex(const char *pName)
+MF_API MFMutex MFThread_CreateMutex(const char *pName)
 {
 	MFMutex mutex = MFHeap_Alloc(gMutexSize);
 	if(!mutex)

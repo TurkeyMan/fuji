@@ -66,7 +66,7 @@ void MFSystem_DrawPlatformSpecific()
 }
 #endif
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	// CRAPPY TIMER CODE I TOOK FROM LINUX
 	static bool firstcall=1;
@@ -91,12 +91,12 @@ uint64 MFSystem_ReadRTC()
 	}
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	return 1000000; // microseconds
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	static char buffer[128] = "Android";
 //	uint32 bufferSize = sizeof(buffer);

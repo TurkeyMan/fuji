@@ -10,7 +10,7 @@
 	void MFTexture_InitModulePlatformSpecific_##driver(); \
 	void MFTexture_DeinitModulePlatformSpecific_##driver(); \
 	void MFTexture_CreatePlatformSpecific_##driver(MFTexture *pTexture, bool generateMipChain); \
-	MFTexture* MFTexture_CreateRenderTarget_##driver(const char *pName, int width, int height, MFTextureFormat targetFormat); \
+	MF_API MFTexture* MFTexture_CreateRenderTarget_##driver(const char *pName, int width, int height, MFTextureFormat targetFormat); \
 	void MFTexture_DestroyPlatformSpecific_##driver(MFTexture *pTexture);
 
 #define DEFINE_PLUGIN(driver) \
@@ -84,7 +84,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	gpCurrentTexturePlugin->pCreatePlatformSpecific(pTexture, generateMipChain);
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
 {
 	return gpCurrentTexturePlugin->pCreateRenderTarget(pName, width, height, targetFormat);
 }

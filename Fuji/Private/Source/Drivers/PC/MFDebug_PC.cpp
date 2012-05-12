@@ -8,7 +8,7 @@
 #include <windows.h>
 
 // Output a string to the debugger.
-void MFDebug_Message(const char *pMessage)
+MF_API void MFDebug_Message(const char *pMessage)
 {
 	OutputDebugString((LPCTSTR)MFStr("%s\n", pMessage));
 }
@@ -27,7 +27,7 @@ bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)
 
 #if defined(_FUJI_UTIL)
 
-void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
 	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
 	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));
@@ -41,7 +41,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
 
 #else
 
-void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
 	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
 	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));

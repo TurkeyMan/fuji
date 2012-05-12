@@ -264,7 +264,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	}
 }
 
-int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	MFCALLSTACK;
 
@@ -304,7 +304,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
 	return 0;
 }
 
-void MFSound_Unlock(MFSound *pSound)
+MF_API void MFSound_Unlock(MFSound *pSound)
 {
 	MFCALLSTACK;
 
@@ -349,7 +349,7 @@ void MFSound_PlayInternal(MFVoice *pVoice)
 		PrimeBuffer(pVoice);
 }
 
-void MFSound_Pause(MFVoice *pVoice, bool pause)
+MF_API void MFSound_Pause(MFVoice *pVoice, bool pause)
 {
 	MFCALLSTACK;
 
@@ -362,7 +362,7 @@ void MFSound_Pause(MFVoice *pVoice, bool pause)
 	}
 }
 
-void MFSound_Stop(MFVoice *pVoice)
+MF_API void MFSound_Stop(MFVoice *pVoice)
 {
 	MFCALLSTACK;
 
@@ -370,15 +370,15 @@ void MFSound_Stop(MFVoice *pVoice)
 	pInt->bFinished = true;
 }
 
-void MFSound_SetListenerPos(const MFMatrix& listenerPos)
+MF_API void MFSound_SetListenerPos(const MFMatrix& listenerPos)
 {
 }
 
-void MFSound_SetMasterVolume(float volume)
+MF_API void MFSound_SetMasterVolume(float volume)
 {
 }
 
-void MFSound_SetVolume(MFVoice *pVoice, float volume)
+MF_API void MFSound_SetVolume(MFVoice *pVoice, float volume)
 {
 	MFCALLSTACK;
 
@@ -389,7 +389,7 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume)
 	pInt->rVolume = (uint16)(volume * MFMin(1.0f + pInt->pan, 1.0f) * (float)0x8000);
 }
 
-void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
+MF_API void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 {
 	MFCALLSTACK;
 
@@ -397,7 +397,7 @@ void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate)
 	pInt->rate = rate;
 }
 
-void MFSound_SetPan(MFVoice *pVoice, float pan)
+MF_API void MFSound_SetPan(MFVoice *pVoice, float pan)
 {
 	MFCALLSTACK;
 
@@ -408,14 +408,14 @@ void MFSound_SetPan(MFVoice *pVoice, float pan)
 	pInt->rVolume = (uint16)(pInt->volume * MFMin(1.0f + pan, 1.0f) * (float)0x8000);
 }
 
-void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
+MF_API void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 {
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 
 	pInt->offset = MFMin((uint32)((float)pVoice->pSound->pTemplate->sampleRate * seconds), (uint32)pVoice->pSound->pTemplate->numSamples) << 10;
 }
 
-uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
+MF_API uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFVoiceDataInternal *pInt = (MFVoiceDataInternal*)pVoice->pInternal;
 	MFSoundTemplate *pT = pVoice->pSound->pTemplate;

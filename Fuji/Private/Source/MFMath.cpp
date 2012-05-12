@@ -13,7 +13,7 @@ static uint32 mt[N]; // the array for the state vector
 static int mti=N+1; // mti==N+1 means mt[N] is not initialized
 
 // initializes mt[N] with a seed
-void MFRand_Seed(uint32 s)
+MF_API void MFRand_Seed(uint32 s)
 {
 	mt[0]= s & 0xffffffffUL;
 	for(mti=1; mti<N; mti++)
@@ -28,7 +28,7 @@ void MFRand_Seed(uint32 s)
 	}
 }
 
-uint32 MFRand()
+MF_API uint32 MFRand()
 {
 	uint32 y;
 	static uint32 mag01[2] = { 0x0UL, MATRIX_A };

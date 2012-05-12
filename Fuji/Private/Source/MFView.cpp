@@ -52,7 +52,7 @@ void MFView_DeinitModule()
 	}
 }
 
-void MFView_Push()
+MF_API void MFView_Push()
 {
 	MFDebug_Assert(pCurrentView - gpViewStack < (int)gDefaults.view.maxViewsOnStack, "Error: Exceeded maximum views on the stack. Increase 'gDefaults.view.maxViewsOnStack'.");
 
@@ -61,7 +61,7 @@ void MFView_Push()
 	*pCurrentView = pCurrentView[-1];
 }
 
-void MFView_Pop()
+MF_API void MFView_Pop()
 {
 	MFDebug_Assert(pCurrentView > gpViewStack, "Error: No views on the stack!");
 
@@ -69,12 +69,12 @@ void MFView_Pop()
 }
 
 
-void MFView_SetDefault()
+MF_API void MFView_SetDefault()
 {
 	*pCurrentView = MFView::defaultView;
 }
 
-void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPlane)
+MF_API void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPlane)
 {
 	pCurrentView->fov = fieldOfView;
 	pCurrentView->nearPlane = nearPlane;
@@ -87,7 +87,7 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
 	}
 }
 
-void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
+MF_API void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
 {
 	pCurrentView->projection = projectionMatrix;
 
@@ -97,7 +97,7 @@ void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
 	pCurrentView->viewProjDirty = true;
 }
 
-void MFView_SetAspectRatio(float aspectRatio)
+MF_API void MFView_SetAspectRatio(float aspectRatio)
 {
 	pCurrentView->aspectRatio = aspectRatio;
 
@@ -108,7 +108,7 @@ void MFView_SetAspectRatio(float aspectRatio)
 	}
 }
 
-void MFView_SetProjection()
+MF_API void MFView_SetProjection()
 {
 	MFCALLSTACK;
 
@@ -122,7 +122,7 @@ void MFView_SetProjection()
 	}
 }
 
-void MFView_SetOrtho(MFRect *pOrthoRect)
+MF_API void MFView_SetOrtho(MFRect *pOrthoRect)
 {
 	MFCALLSTACK;
 
@@ -141,17 +141,17 @@ void MFView_SetOrtho(MFRect *pOrthoRect)
 	}
 }
 
-void MFView_GetOrthoRect(MFRect *pOrthoRect)
+MF_API void MFView_GetOrthoRect(MFRect *pOrthoRect)
 {
 	*pOrthoRect = pCurrentView->orthoRect;
 }
 
-bool MFView_IsOrtho()
+MF_API bool MFView_IsOrtho()
 {
 	return pCurrentView->isOrtho;
 }
 
-void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
+MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
 {
 	pCurrentView->cameraMatrix = cameraMatrix;
 
@@ -159,12 +159,12 @@ void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
 	pCurrentView->viewProjDirty = true;
 }
 
-const MFMatrix& MFView_GetCameraMatrix()
+MF_API const MFMatrix& MFView_GetCameraMatrix()
 {
 	return pCurrentView->cameraMatrix;
 }
 
-const MFMatrix& MFView_GetWorldToViewMatrix()
+MF_API const MFMatrix& MFView_GetWorldToViewMatrix()
 {
 	if(pCurrentView->viewDirty)
 	{
@@ -228,7 +228,7 @@ void MFViewInternal_OrthoMatrix(MFMatrix *pMat)
 #endif
 }
 
-const MFMatrix& MFView_GetViewToScreenMatrix()
+MF_API const MFMatrix& MFView_GetViewToScreenMatrix()
 {
 	if(pCurrentView->projDirty)
 	{
@@ -247,7 +247,7 @@ const MFMatrix& MFView_GetViewToScreenMatrix()
 	return pCurrentView->projection;
 }
 
-const MFMatrix& MFView_GetWorldToScreenMatrix()
+MF_API const MFMatrix& MFView_GetWorldToScreenMatrix()
 {
 	if(pCurrentView->viewProjDirty)
 	{
@@ -258,21 +258,21 @@ const MFMatrix& MFView_GetWorldToScreenMatrix()
 	return pCurrentView->viewProj;
 }
 
-MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput)
+MF_API MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
 	pOutput->Multiply4x4(localToWorld, MFView_GetWorldToScreenMatrix());
 
 	return pOutput;
 }
 
-MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
+MF_API MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput)
 {
 	pOutput->Multiply4x4(localToWorld, MFView_GetWorldToViewMatrix());
 
 	return pOutput;
 }
 
-void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
+MF_API void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
 {
 	MFMatrix proj, viewProj, view;
 
@@ -307,7 +307,7 @@ void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult)
 	*pResult = transformed * MakeVector(pCurrentView->orthoRect.width*0.5f, pCurrentView->orthoRect.height*0.5f) + MakeVector(pCurrentView->orthoRect.x, pCurrentView->orthoRect.y);
 }
 
-void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult, MFVector *pResultRayDir)
+MF_API void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult, MFVector *pResultRayDir)
 {
 	MFMatrix proj, viewProj, view;
 

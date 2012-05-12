@@ -60,7 +60,7 @@ MFInitStatus DebugMenu_InitModule()
 	rootMenu.pUserData = NULL;
 	rootMenu.selection = 0;
 
-	DebugMenu_AddMenu("Fuji Options", &rootMenu);
+	DebugMenu_AddMenuTo("Fuji Options", &rootMenu);
 	DebugMenu_AddMenu("Debug Menu Options", "Fuji Options");
 
 	DebugMenu_AddItem("Menu Position", "Debug Menu Options", &menuPos);
@@ -77,12 +77,12 @@ void DebugMenu_DeinitModule()
 	DebugMenu_DestroyMenuTree(&rootMenu);
 }
 
-Menu* DebugMenu_GetRootMenu()
+MF_API Menu* DebugMenu_GetRootMenu()
 {
 	return &rootMenu;
 }
 
-bool DebugMenu_IsEnabled()
+MF_API bool DebugMenu_IsEnabled()
 {
 	return debugMenuEnabled;
 }
@@ -125,7 +125,7 @@ void DebugMenu_Draw()
 	MFView_Pop();
 }
 
-void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
+MF_API void DebugMenu_AddItemTo(const char *name, Menu *pParent, MenuObject *pObject, DebugCallback callback, void *userData)
 {
 	MFDebug_Assert(pParent, "Invalid parent menu.");
 	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
@@ -144,12 +144,12 @@ void DebugMenu_AddItem(const char *name, Menu *pParent, MenuObject *pObject, Deb
 	++pParent->numChildren;
 }
 
-void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback, void *userData)
+MF_API void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback, void *userData)
 {
-	DebugMenu_AddItem(name, DebugMenu_GetMenuByName(pParentName), pObject, callback, userData);
+	DebugMenu_AddItemTo(name, DebugMenu_GetMenuByName(pParentName), pObject, callback, userData);
 }
 
-void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, void *userData)
+MF_API void DebugMenu_AddMenuTo(const char *name, Menu *pParent, DebugCallback callback, void *userData)
 {
 	MFDebug_Assert(pParent, "Invalid parent menu.");
 	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
@@ -175,12 +175,12 @@ void DebugMenu_AddMenu(const char *name, Menu *pParent, DebugCallback callback, 
 	++pParent->numChildren;
 }
 
-void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback, void *userData)
+MF_API void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback, void *userData)
 {
-	DebugMenu_AddMenu(name, DebugMenu_GetMenuByName(pParentName), callback, userData);
+	DebugMenu_AddMenuTo(name, DebugMenu_GetMenuByName(pParentName), callback, userData);
 }
 
-bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
+MF_API bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 {
 	for(int a=0; a<pSearchMenu->numChildren; a++)
 	{
@@ -200,7 +200,7 @@ bool DebugMenu_DestroyMenu(const char *pName, Menu *pSearchMenu)
 	return false;
 }
 
-void DebugMenu_DestroyMenuTree(Menu *pMenu)
+MF_API void DebugMenu_DestroyMenuTree(Menu *pMenu)
 {
 	int a;
 
@@ -229,7 +229,7 @@ void DebugMenu_DestroyMenuTree(Menu *pMenu)
 		delete pMenu;
 }
 
-Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu)
+MF_API Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu)
 {
 	Menu *pResult = NULL;
 
@@ -329,17 +329,17 @@ void Menu::Draw()
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(colour*0.4f);
+	MFSetColourV(colour*0.4f);
 	MFSetPosition(menuPosition.x, menuPosition.y, 0);
-	MFSetColour(colour*0.8f);
+	MFSetColourV(colour*0.8f);
 	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y, 0);
-	MFSetColour(colour*0.6f);
+	MFSetColourV(colour*0.6f);
 	MFSetPosition(menuPosition.x, menuPosition.y+menuDimensions.y, 0);
-	MFSetColour(colour);
+	MFSetColourV(colour);
 	MFSetPosition(menuPosition.x+menuDimensions.x, menuPosition.y+menuDimensions.y, 0);
 	MFEnd();
 
-	MFFont_DrawText(MFFont_GetDebugFont(), menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
+	MFFont_DrawText2(MFFont_GetDebugFont(), menuPosition.x+10.0f, menuPosition.y+5.0f, MENU_FONT_HEIGHT*1.5f, MakeVector(1,0.6875f,0.5f,1), name);
 
 	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 	float logoMargin = 5.0f;
@@ -347,7 +347,7 @@ void Menu::Draw()
 
 	MFPrimitive(PT_TriStrip);
 	MFBegin(4);
-	MFSetColour(MFVector::white);
+	MFSetColourV(MFVector::white);
 	MFSetTexCoord1(0,0);
 	MFSetPosition((menuPosition.x+menuDimensions.x) - logoMargin*2 - iconSize, menuPosition.y + logoMargin, 0);
 	MFSetTexCoord1(1,0);
@@ -661,21 +661,21 @@ float MenuItemColour::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
-	MFSetPosition(pos);
-	MFSetPosition(pos + MakeVector(45.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFSetColourV(MFVector::white);
+	MFSetPositionV(pos);
+	MFSetPositionV(pos + MakeVector(45.0f, 0.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(45.0f, MENU_FONT_HEIGHT*1.5f-4.0f, 0.0f));
 	MFEnd();
 
 	pos += MakeVector(2.0f, 2.0f, 0.0f);
 
 	MFBegin(4);
-	MFSetColour(*pData);
-	MFSetPosition(pos);
-	MFSetPosition(pos + MakeVector(41.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFSetColourV(*pData);
+	MFSetPositionV(pos);
+	MFSetPositionV(pos + MakeVector(41.0f, 0.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(0.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(41.0f, MENU_FONT_HEIGHT*1.5f-8.0f, 0.0f));
 	MFEnd();
 
 	return MENU_FONT_HEIGHT*1.5f;

@@ -102,7 +102,7 @@ void MFVertex_DeinitModulePlatformSpecific()
 {
 }
 
-MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
 {
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFHeap_Alloc(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
 	pDecl->numElements = elementCount;
@@ -154,7 +154,7 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementA
 	return pDecl;
 }
 
-void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
+MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 {
 	IDirect3DVertexDeclaration9 *pDecl = (IDirect3DVertexDeclaration9*)pDeclaration->pPlatformData;
 	pDecl->Release();
@@ -162,7 +162,7 @@ void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 	MFHeap_Free(pDeclaration);
 }
 
-MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
 {
 	DWORD usage = type == MFVBType_Static ? D3DUSAGE_WRITEONLY : D3DUSAGE_DYNAMIC;
 	D3DPOOL pool = usage == D3DUSAGE_DYNAMIC ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
@@ -191,7 +191,7 @@ MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, 
 	return pVB;
 }
 
-void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	IDirect3DVertexBuffer9 *pVB = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
 	pVB->Release();
@@ -199,7 +199,7 @@ void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	MFHeap_Free(pVertexBuffer);
 }
 
-void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
@@ -220,7 +220,7 @@ void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	pVertexBuffer->bLocked = true;
 }
 
-void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
@@ -231,7 +231,7 @@ void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	pVertexBuffer->bLocked = false;
 }
 
-MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
+MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
 {
 	IDirect3DIndexBuffer9 *pIndexBuffer;
 	HRESULT hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pIndexBuffer, NULL);
@@ -256,7 +256,7 @@ MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMe
 	return NULL;
 }
 
-void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	IDirect3DIndexBuffer9 *pIB = (IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData;
 	pIB->Release();
@@ -264,7 +264,7 @@ void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	MFHeap_Free(pIndexBuffer);
 }
 
-void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
+MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 {
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Index buffer already locked!");
 
@@ -273,7 +273,7 @@ void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 	pIndexBuffer->bLocked = true;
 }
 
-void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer already locked!");
 
@@ -287,13 +287,13 @@ void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	pIndexBuffer->bLocked = false;
 }
 
-void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
+MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
 {
 	IDirect3DVertexDeclaration9 *pVertexDecl = (IDirect3DVertexDeclaration9*)pVertexDeclaration->pPlatformData;
 	pd3dDevice->SetVertexDeclaration(pVertexDecl);
 }
 
-void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 {
 	IDirect3DVertexBuffer9 *pVertBuffer = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
 	pd3dDevice->SetStreamSource(stream, pVertBuffer, 0, pVertexBuffer->pVertexDeclatation->pElementData[0].stride);
@@ -318,12 +318,12 @@ static int MFVertex_GetNumPrims(MFVertexPrimType primType, int numVertices)
 	return 0;
 }
 
-void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
 {
 	pd3dDevice->DrawPrimitive(gPrimTypes[primType], firstVertex, MFVertex_GetNumPrims(primType, numVertices));
 }
 
-void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
 {
 	pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData);
 	pd3dDevice->DrawIndexedPrimitive(gPrimTypes[primType], 0, 0, numVertices, 0, MFVertex_GetNumPrims(primType, numVertices));

@@ -1,15 +1,27 @@
 include "../Middleware/libjson/"
 include "../Middleware/libmad/"
 
-project "Fuji"
-	kind "StaticLib"
+projName = "Fuji"
+
+if fujiDll == true then
+	projName = "FujiDLL"
+end
+
+project (projName)
+    if fujiDll == true then
+		kind "SharedLib"
+		targetname "Fuji"
+		defines { "MF_DLL" }
+	else
+		kind "StaticLib"
+	end
 	language "C++"
 
 	-- add the source code --
 	files { "../*.TXT" }
 
 	files { "../../Public/Include/**.h", "../../Public/Include/**.inl" }
-	files { "../Source/**.h", "../Source/**.cpp", "../Source/**.inc" }
+	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
 
 	-- include some middleware directly --
@@ -20,10 +32,10 @@ project "Fuji"
 
 	-- add source for some middleware that we'll link directly on unix systems --
 	configuration { "not linux", "not macosx", "not Android" }
-	files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
-	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
-	files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
-	includedirs { "../Middleware/libpng-1.5.0/" }
+		files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
+		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+		files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+		includedirs { "../Middleware/libpng-1.5.0/" }
 	configuration { }
 
 	-- setup paths --

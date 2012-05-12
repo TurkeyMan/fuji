@@ -40,12 +40,12 @@ void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 	pthread_create(&pThreadInfoLinux->thread, NULL, ThreadProc, pThreadInfo);
 }
 
-void MFThread_ExitThread(int exitCode)
+MF_API void MFThread_ExitThread(int exitCode)
 {
 	pthread_exit((void*&)exitCode);
 }
 
-void MFThread_TerminateThread(MFThread thread)
+MF_API void MFThread_TerminateThread(MFThread thread)
 {
 	MFDebug_Assert(false, "Not written...");
 }
@@ -71,42 +71,42 @@ void MFThread_InitMutexPlatformSpecific(MFMutex mutex, const char *pName)
 	pthread_mutex_init(&pMutex->mutex, NULL);
 }
 
-void MFThread_DestroyMutex(MFMutex mutex)
+MF_API void MFThread_DestroyMutex(MFMutex mutex)
 {
 	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
 	pthread_mutex_destroy(&pMutex->mutex);
 }
 
-void MFThread_LockMutex(MFMutex mutex)
+MF_API void MFThread_LockMutex(MFMutex mutex)
 {
 	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
 	pthread_mutex_lock(&pMutex->mutex);
 }
 
-void MFThread_ReleaseMutex(MFMutex mutex)
+MF_API void MFThread_ReleaseMutex(MFMutex mutex)
 {
 	MFMutexLinux *pMutex = (MFMutexLinux*)mutex;
 	pthread_mutex_unlock(&pMutex->mutex);
 }
 
-MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
+MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
 {
 	MFDebug_Assert(false, "Not written...");
 	return NULL;
 }
 
-void MFThread_DestroySemaphore(MFSemaphore semaphore)
+MF_API void MFThread_DestroySemaphore(MFSemaphore semaphore)
 {
 	MFDebug_Assert(false, "Not written...");
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
+MF_API uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
 	MFDebug_Assert(false, "Not written...");
 	return 0;
 }
 
-void MFThread_SignalSemaphore(MFSemaphore semaphore)
+MF_API void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	MFDebug_Assert(false, "Not written...");
 }

@@ -194,7 +194,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	}
 }
 
-uint32 MFInput_GetDeviceFlags(int device, int deviceID)
+MF_API uint32 MFInput_GetDeviceFlags(int device, int deviceID)
 {
 	return 0;
 }
@@ -238,7 +238,7 @@ const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 	return XBoxButtons[button];
 }
 
-bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
+MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	SHORT ks = 0;
 

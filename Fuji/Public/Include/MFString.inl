@@ -715,9 +715,9 @@ inline bool MFString::IsNumeric() const
 	return pData ? MFString_IsNumber(pData->pMemory) : false;
 }
 
+MF_API uint32 MFUtil_HashString(const char *pString);
 inline uint32 MFString::GetHash() const
 {
-	uint32 MFUtil_HashString(const char *pString);
 	return pData ? MFUtil_HashString(pData->pMemory) : 0;
 }
 

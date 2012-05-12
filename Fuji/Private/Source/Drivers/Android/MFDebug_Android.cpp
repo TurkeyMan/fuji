@@ -10,7 +10,7 @@
 //#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
 
 // Output a string to the debugger.
-void MFDebug_Message(const char *pMessage)
+MF_API void MFDebug_Message(const char *pMessage)
 {
 	__android_log_print(ANDROID_LOG_INFO, "native-activity", "%s\n", pMessage);
 }
@@ -22,7 +22,7 @@ bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)
 	return false;
 }
 
-void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
+MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
 	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
 	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));

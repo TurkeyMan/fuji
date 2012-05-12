@@ -102,7 +102,7 @@ void MFSystem_DrawPlatformSpecific()
 }
 
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	uint64         t;
 	// Tn_COUNT is 16 bit precision. Therefore, each
@@ -115,7 +115,7 @@ uint64 MFSystem_ReadRTC()
 	return t;
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	// I am using 1/256 of the BUSCLK below in the Tn_MODE register
 	// which means that the timer will count at a rate of:
@@ -126,7 +126,7 @@ uint64 MFSystem_GetRTCFrequency()
 	return 1000000;
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	return "Playstation2";
 }

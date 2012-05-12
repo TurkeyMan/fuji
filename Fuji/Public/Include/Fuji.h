@@ -246,6 +246,26 @@
 
 	// Disable depreciated bullshit
 	#pragma warning(disable:4996)
+
+	// Disable C-linkage returning UDT (user data type)
+	#pragma warning(disable:4190)
+#endif
+
+
+/*** Shared object/DLL support ***/
+
+#if defined(MF_COMPILER_VISUALC)
+	#define MF_EXPORT __declspec(dllexport)
+	#define MF_EXPORT_VARIABLE __declspec(dllexport)
+#else
+	#define MF_EXPORT
+	#define MF_EXPORT_VARIABLE
+#endif
+
+#if defined(MF_DLL)
+	#define MF_API extern "C" MF_EXPORT
+#else
+	#define MF_API extern "C"
 #endif
 
 

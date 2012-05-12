@@ -11,17 +11,17 @@
 
 /**** Functions ****/
 
-void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
+MF_API void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
 {
 	MFPrimitive_Blit(x, y, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
 }
 
-void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
+MF_API void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
 {
 	MFPrimitive_StretchBlit(x, y, w, h, (int)uvs.x, (int)uvs.y, (int)uvs.width, (int)uvs.height);
 }
 
-void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
+MF_API void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -32,7 +32,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& co
 	MFSetMatrix(mat);
 	MFBegin(4);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	MFSetTexCoord1(su, sv);
 	MFSetPosition(x, y, 0);
@@ -52,7 +52,7 @@ void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector& co
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
+MF_API void MFPrimitive_DrawQuadV(const MFVector &min, const MFVector &max, const MFVector& colour, float su, float sv, float du, float dv, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -63,7 +63,7 @@ void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVect
 	MFSetMatrix(mat);
 	MFBegin(4);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	MFSetTexCoord1(su, sv);
 	MFSetPosition(min.x, min.y, min.z);
@@ -83,7 +83,7 @@ void MFPrimitive_DrawQuad(const MFVector &min, const MFVector &max, const MFVect
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector& colour, const MFMatrix &mat)
+MF_API void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector& colour, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -94,7 +94,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MF
 	MFSetMatrix(mat);
 	MFBegin(4);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 	MFSetPosition(x, y, 0);
 	MFSetPosition(x+w, y, 0);
 	MFSetPosition(x, y+h, 0);
@@ -106,7 +106,7 @@ void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MF
 //	D3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 }
 
-void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, const MFVector& colour, const MFMatrix &mat)
+MF_API void MFPrimitive_DrawUntexturedQuadV(const MFVector &min, const MFVector &max, const MFVector& colour, const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -117,7 +117,7 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, co
 	MFSetMatrix(mat);
 	MFBegin(4);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 	MFSetPosition(min.x, min.y, min.z);
 	MFSetPosition(max.x, min.y, min.z);
 	MFSetPosition(min.x, max.y, min.z);
@@ -130,7 +130,7 @@ void MFPrimitive_DrawUntexturedQuad(const MFVector &min, const MFVector &max, co
 }
 
 // draw a box from a min and a max
-void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -142,7 +142,7 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 
 		MFBegin(24);
 
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		MFSetPosition(boxMin.x, boxMin.y, boxMin.z);
 		MFSetPosition(boxMax.x, boxMin.y, boxMin.z);
@@ -177,17 +177,17 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 
 		// draw the axii's
 		MFBegin(2);
-		MFSetColour(MFVector::green);
+		MFSetColourV(MFVector::green);
 		MFSetPosition(center.x, center.y + 10.0f, center.z);
 		MFSetPosition(center.x, center.y, center.z);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(MFVector::red);
+		MFSetColourV(MFVector::red);
 		MFSetPosition(center.x, center.y, center.z);
 		MFSetPosition(center.x + 10.0f, center.y, center.z);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(MFVector::blue);
+		MFSetColourV(MFVector::blue);
 		MFSetPosition(center.x, center.y, center.z);
 		MFSetPosition(center.x, center.y, center.z + 10.0f);
 		MFEnd();
@@ -200,7 +200,7 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 
 		MFBegin(34);
 
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		MFSetNormal(0.0f,0.0f,-1.0f);
 		MFSetPosition(boxMin.x, boxMax.y, boxMin.z); // front
@@ -258,7 +258,7 @@ void MFPrimitive_DrawBox(const MFVector &boxMin, const MFVector &boxMax, const M
 }
 
 // draw's a sphere .. position.w defines position.w
-void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -275,7 +275,7 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
 	MFSetMatrix(mat);
 
 	MFBegin(segments*(slices+1)+1);
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	for(i=0, j=0, inc=1; j<segments;)
 	{
@@ -312,7 +312,7 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
 		around = 0.0f;
 
 		MFBegin(segments+1);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		for(int j=0; j<segments+1; j++)
 		{
@@ -327,24 +327,24 @@ void MFPrimitive_DrawSphere(const MFVector &position, float radius, int segments
 
 	// draw the axii's
 	MFBegin(2);
-	MFSetColour(MFVector::green);
+	MFSetColourV(MFVector::green);
 	MFSetPosition(position.x, position.y + radius * 0.5f, position.z);
 	MFSetPosition(position.x, position.y, position.z);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(MFVector::red);
+	MFSetColourV(MFVector::red);
 	MFSetPosition(position.x, position.y, position.z);
 	MFSetPosition(position.x + radius * 0.5f, position.y, position.z);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(MFVector::blue);
+	MFSetColourV(MFVector::blue);
 	MFSetPosition(position.x, position.y, position.z);
 	MFSetPosition(position.x, position.y, position.z + radius * 0.5f);
 	MFEnd();
 }
 
 // draw's a capsule from a start and end point and a position.w
-void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -385,7 +385,7 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 	MFSetMatrix(m2);
 
 	MFBegin(segments*(slices+2)+1);
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	for(i=0, j=0, inc=1; j<segments;)
 	{
@@ -434,7 +434,7 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 		}
 
 		MFBegin(segments+1);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		for(int j=0; j<segments+1; j++)
 		{
@@ -455,7 +455,7 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 		around = 0.0f;
 
 		MFBegin(segments+1);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		for(int j=0; j<segments+1; j++)
 		{
@@ -477,24 +477,24 @@ void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &endPoin
 
 	// draw the axii's
 	MFBegin(2);
-	MFSetColour(MFVector::green);
+	MFSetColourV(MFVector::green);
 	MFSetPosition(0.0f, radius * 0.5f, 0.0f);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(MFVector::red);
+	MFSetColourV(MFVector::red);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(radius * 0.5f, 0.0f, 0.0f);
 	MFEnd();
 	MFBegin(2);
-	MFSetColour(MFVector::blue);
+	MFSetColourV(MFVector::blue);
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(0.0f, 0.0f, radius * 0.5f);
 	MFEnd();
 }
 
 // draw's a cylinder from a position position.w and height
-void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoint, float radius, int segments, int slices, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -527,7 +527,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 		MFSetMatrix(m2);
 
 		MFBegin(segments*3 + 1);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		for(i=0, j=-1, inc=-1; j<segments; i+=inc)
 		{
@@ -556,7 +556,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 			around = 0.0f;
 
 			MFBegin(segments+1);
-			MFSetColour(colour);
+			MFSetColourV(colour);
 
 			for(int j=0; j<segments+1; j++)
 			{
@@ -578,17 +578,17 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 
 		// draw the axii's
 		MFBegin(2);
-		MFSetColour(MFVector::green);
+		MFSetColourV(MFVector::green);
 		MFSetPosition(0.0f, radius * 0.5f, 0.0f);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(MFVector::red);
+		MFSetColourV(MFVector::red);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFSetPosition(radius * 0.5f, 0.0f, 0.0f);
 		MFEnd();
 		MFBegin(2);
-		MFSetColour(MFVector::blue);
+		MFSetColourV(MFVector::blue);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		MFSetPosition(0.0f, 0.0f, radius * 0.5f);
 		MFEnd();
@@ -600,7 +600,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 
 		// bottom cap
 		MFBegin((segments+1)*2);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 		MFSetNormal(0.0f,1.0f,0.0f);
 		MFSetPosition(0.0f, len, 0.0f);
 		for(i=0; i<segments; i++)
@@ -616,7 +616,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 		around = MFPI*2;
 
 		MFBegin((segments+1)*2);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 		MFSetNormal(0.0f,-1.0f,0.0f);
 		MFSetPosition(0.0f, 0.0f, 0.0f);
 		for(i=0; i<segments; i++)
@@ -632,7 +632,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 		MFPrimitive(PT_TriStrip|PT_Prelit|PT_Untextured);
 		MFSetMatrix(m2);
 		MFBegin((segments+1)*2);
-		MFSetColour(colour);
+		MFSetColourV(colour);
 		around = 0.0f;
 		for(i=0; i<segments; i++)
 		{
@@ -649,7 +649,7 @@ void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector &endPoi
 }
 
 // draw's a plane from a position normal and span
-void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float span, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -674,7 +674,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
 	MFSetMatrix(m2);
 
 	MFBegin(segments*2+6);
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	for(i=0; i<segments; i++)
 	{
@@ -685,7 +685,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
 
 	float normalLen = span*0.25f;
 
-	MFSetColour(MakeVector(1,1,0,colour.w));
+	MFSetColourV(MakeVector(1,1,0,colour.w));
 	MFSetPosition(0.0f, 0.0f, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
 	MFSetPosition(0.0f, normalLen, 0.0f);
@@ -701,7 +701,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
 	around = 0.0f;
 
 	MFBegin(segments+1);
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	for(int j=0; j<segments+1; j++)
 	{
@@ -712,7 +712,7 @@ void MFPrimitive_DrawPlane(const MFVector &point, const MFVector &normal, float 
 	MFEnd();
 }
 
-void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float radius, int segments, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 
@@ -745,7 +745,7 @@ void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float rad
 
 	MFBegin(wireframe?segments*4:(segments+1)*2);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	if(!wireframe)
 	{
@@ -779,7 +779,7 @@ void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float rad
 	// draw base
 	MFBegin(wireframe?segments*2:(segments+1)*2);
 
-	MFSetColour(colour);
+	MFSetColourV(colour);
 
 	around = MFPI*2.0f;
 
@@ -802,7 +802,7 @@ void MFPrimitive_DrawCone(const MFVector &base, const MFVector &point, float rad
 	MFEnd();
 }
 
-void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
+MF_API void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float length, float radius, const MFVector& colour, const MFMatrix &mat, bool wireframe)
 {
 	MFCALLSTACK;
 	MFVector v = dir;
@@ -814,9 +814,9 @@ void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float lengt
 		MFPrimitive(PT_LineList|PT_Prelit|PT_Untextured);
 		MFSetMatrix(mat);
 		MFBegin(2);
-		MFSetColour(colour);
-		MFSetPosition(pos);
-		MFSetPosition(pos+v);
+		MFSetColourV(colour);
+		MFSetPositionV(pos);
+		MFSetPositionV(pos+v);
 		MFEnd();
 	}
 	else
@@ -825,7 +825,7 @@ void MFPrimitive_DrawArrow(const MFVector& pos, const MFVector& dir, float lengt
 	MFPrimitive_DrawCone(pos+v, pos+v+v*0.25f, length*0.03f + radius*2.0f, 5, colour, mat, wireframe);
 }
 
-void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
+MF_API void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 {
 	MFCALLSTACK;
 
@@ -835,15 +835,15 @@ void MFPrimitive_DrawTransform(const MFMatrix& _mat, float scale, bool lite)
 		MFSetMatrix(_mat);
 		MFBegin(6);
 
-		MFSetColour(MFVector::red);
+		MFSetColourV(MFVector::red);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(scale*0.8f,0.0f,0.0f);
 
-		MFSetColour(MFVector::green);
+		MFSetColourV(MFVector::green);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(0.0f,scale*0.8f,0.0f);
 
-		MFSetColour(MFVector::blue);
+		MFSetColourV(MFVector::blue);
 		MFSetPosition(0.0f,0.0f,0.0f);
 		MFSetPosition(0.0f,0.0f,scale*0.8f);
 		MFEnd();

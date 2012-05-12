@@ -535,19 +535,19 @@ void ClockRateCallback(MenuObject *pMenu, void *pData)
 }
 
 // RTC functions
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	uint64 t;
 	sceRtcGetCurrentTick(&t);
 	return t;
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	return 1000000;
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	return systemName;
 }

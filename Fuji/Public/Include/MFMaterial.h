@@ -119,7 +119,7 @@ struct MFMaterialCallbacks
  * @param pFilename Filename of definitions file.
  * @return If no error occurs, 0 is returned.
  */
-int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename);
+MF_API int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename);
 
 /**
  * Add a material definitions ini.
@@ -128,7 +128,7 @@ int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename);
  * @param pMatDefs Pointer to an ini file containing material definitions.
  * @return If no error occurs, 0 is returned.
  */
-int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs);
+MF_API int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs);
 
 /**
  * Remove a material definitions file.
@@ -136,7 +136,7 @@ int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs);
  * @param pName Name of material definitions to remove.
  * @return None.
  */
-void MFMaterial_RemoveDefinitions(const char *pName);
+MF_API void MFMaterial_RemoveDefinitions(const char *pName);
 
 /**
  * Create a material instance.
@@ -144,7 +144,7 @@ void MFMaterial_RemoveDefinitions(const char *pName);
  * @param pName Name of material to create.
  * @return Returns a new instance of the target material.
  */
-MFMaterial*	MFMaterial_Create(const char *pName);
+MF_API MFMaterial*	MFMaterial_Create(const char *pName);
 
 /**
  * Destroy a material instance.
@@ -152,7 +152,7 @@ MFMaterial*	MFMaterial_Create(const char *pName);
  * @param pMaterial Material instance to destroy.
  * @return Returns the new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
  */
-int MFMaterial_Destroy(MFMaterial *pMaterial);
+MF_API int MFMaterial_Destroy(MFMaterial *pMaterial);
 
 /**
  * Find a material.
@@ -161,7 +161,7 @@ int MFMaterial_Destroy(MFMaterial *pMaterial);
  * @return Returns a pointer to the material. If the material was not found, NULL is returned.
  * @remarks Note that MFMaterial_Find does NOT increment the materials reference count so you do not need to destroy the pointer returned by MFMaterial_Find.
  */
-MFMaterial*	MFMaterial_Find(const char *pName);
+MF_API MFMaterial*	MFMaterial_Find(const char *pName);
 
 /**
  * Get a pointer to a stock material.
@@ -169,7 +169,7 @@ MFMaterial*	MFMaterial_Find(const char *pName);
  * @param materialIdentifier Identifier of the stock material.
  * @return Returns a pointer to the specified stock material.
  */
-MFMaterial*	MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier);
+MF_API MFMaterial*	MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier);
 
 /**
  * Set the current active material.
@@ -177,21 +177,21 @@ MFMaterial*	MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier);
  * @param pMaterial Pointer to a material to set as the active material.
  * @return None.
  */
-void MFMaterial_SetMaterial(const MFMaterial *pMaterial);
+MF_API void MFMaterial_SetMaterial(const MFMaterial *pMaterial);
 
 /**
  * Get the current active material.
  * Gets the current active material.
  * @return Pointer to the current active material.
  */
-MFMaterial*	MFMaterial_GetCurrent();
+MF_API MFMaterial*	MFMaterial_GetCurrent();
 
 /**
  * Get a materials name.
  * Gets a materials name.
  * @return The name of the specified material.
  */
-const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial);
+MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial);
 
 // material control
 
@@ -201,7 +201,7 @@ const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial);
  * @param pMaterial Pointer to a material instance.
  * @return Returns the number of parameters exposed by the material.
  */
-int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
+MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
 
 /**
  * Get the name of a parameter.
@@ -210,7 +210,7 @@ int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
  * @param parameterIndex Parameter index.
  * @return Returns a string representing the parameter name.
  */
-const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex);
+MF_API const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex);
 
 /**
  * Get the index of a parameter from a parameter name.
@@ -219,7 +219,7 @@ const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterInde
  * @param pParameterName String representing a parameter name.
  * @return Returns the index of the parameter. -1 if the parameter does not exist.
  */
-int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
+MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
 
 /**
  * Get parameter info by name.
@@ -228,7 +228,7 @@ int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pPar
  * @param parameterIndex Parameter index.
  * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex);
+MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex);
 
 /**
  * Get parameter info by name.
@@ -237,7 +237,7 @@ MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int 
  * @param pParameterName String representing a parameter name.
  * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName);
+MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName);
 
 /**
  * Get the value of a parameter.
@@ -248,7 +248,7 @@ MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMateri
  * @param pValue Pointer to a buffer to receive non-integer parameter data.
  * @return Returns the value of integer or poitner parameters, otherwise returns 0 on success.
  */
-uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue = NULL);
+MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue = NULL);
 
 /**
  * Get the value of an integer parameter.
@@ -328,7 +328,7 @@ inline MFTexture *MFMaterial_GetParameterT(MFMaterial *pMaterial, int parameterI
  * @param value The value to assign to the parameter.
  * @return None.
  */
-void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
+MF_API void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
 
 /**
  * Set the value of an integer parameter.
@@ -421,7 +421,7 @@ inline void MFMaterial_SetParameterS(MFMaterial *pMaterial, int parameterIndex, 
  * @param pCallbacks Pointer to an MFMaterialCallbacks structure which defines a set of callbacks to interact with the material.
  * @return None.
  */
-void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks);
+MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks);
 
 /**
  * Unregister a material type.
@@ -429,7 +429,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
  * @param pName The name of the material type to de-register.
  * @return None.
  */
-void MFMaterial_UnregisterMaterialType(const char *pName);
+MF_API void MFMaterial_UnregisterMaterialType(const char *pName);
 
 #endif // _MFMATERIAL_H
 

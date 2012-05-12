@@ -100,7 +100,7 @@ struct MFParticleEmitterParameters
  * @see MFParticleSystem_Destroy()
  * @see MFParticleSystem_Draw()
  */
-MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams);
+MF_API MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams);
 
 /**
  * Dstroy a particle system.
@@ -110,7 +110,7 @@ MFParticleSystem* MFParticleSystem_Create(MFParticleParameters *pParticleParams)
  * @see MFParticleSystem_Create()
  * @see MFParticleSystem_Draw()
  */
-void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem);
+MF_API void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem);
 
 /**
  * Draw a particle system.
@@ -119,17 +119,17 @@ void MFParticleSystem_Destroy(MFParticleSystem *pParticleSystem);
  * @return None.
  * @see MFParticleSystem_Create()
  */
-void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem);
+MF_API void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem);
 
 
 
-MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams);
+MF_API MFParticleEmitter* MFParticleSystem_CreateEmitter(MFParticleEmitterParameters *pEmitterParams);
 
-void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pEmitter);
+MF_API void MFParticleSystem_DestroyEmitter(MFParticleEmitter *pEmitter);
 
-void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter);
+MF_API void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter);
 
-void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles);
+MF_API void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles);
 
 /**
  * Set the particle emitter world matrix.
@@ -139,7 +139,7 @@ void MFParticleSystem_BurstEmit(MFParticleEmitter *pEmitter, int numParticles);
  * @return None.
  * @see MFParticleSystem_Draw()
  */
-void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix);
+MF_API void MFParticleSystem_SetWorldMatrix(MFParticleEmitter *pEmitter, const MFMatrix &worldMatrix);
 
 #endif
 

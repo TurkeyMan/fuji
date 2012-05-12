@@ -15,14 +15,14 @@
 	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
 	bool MFRenderer_BeginFrame_##driver(); \
 	void MFRenderer_EndFrame_##driver(); \
-	void MFRenderer_SetClearColour_##driver(float r, float g, float b, float a); \
-	void MFRenderer_ClearScreen_##driver(uint32 flags); \
-	void MFRenderer_GetViewport_##driver(MFRect *pRect); \
-	void MFRenderer_SetViewport_##driver(MFRect *pRect); \
-	void MFRenderer_ResetViewport_##driver(); \
-	void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
-	void MFRenderer_SetDeviceRenderTarget_##driver(); \
-	float MFRenderer_GetTexelCenterOffset_##driver();
+	MF_API void MFRenderer_SetClearColour_##driver(float r, float g, float b, float a); \
+	MF_API void MFRenderer_ClearScreen_##driver(uint32 flags); \
+	MF_API void MFRenderer_GetViewport_##driver(MFRect *pRect); \
+	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
+	MF_API void MFRenderer_ResetViewport_##driver(); \
+	MF_API void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
+	MF_API void MFRenderer_SetDeviceRenderTarget_##driver(); \
+	MF_API float MFRenderer_GetTexelCenterOffset_##driver();
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -153,42 +153,42 @@ void MFRenderer_EndFrame()
 	gpCurrentRenderPlugin->pEndFrame();
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
 	gpCurrentRenderPlugin->pSetClearColour(r, g, b, a);
 }
 
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(uint32 flags)
 {
 	gpCurrentRenderPlugin->pClearScreen(flags);
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
+MF_API void MFRenderer_GetViewport(MFRect *pRect)
 {
 	gpCurrentRenderPlugin->pGetViewport(pRect);
 }
 
-void MFRenderer_SetViewport(MFRect *pRect)
+MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 	gpCurrentRenderPlugin->pSetViewport(pRect);
 }
 
-void MFRenderer_ResetViewport()
+MF_API void MFRenderer_ResetViewport()
 {
 	gpCurrentRenderPlugin->pResetViewport();
 }
 
-void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget, pZTarget);
 }
 
-void MFRenderer_SetDeviceRenderTarget()
+MF_API void MFRenderer_SetDeviceRenderTarget()
 {
 	gpCurrentRenderPlugin->pSetDeviceRenderTarget();
 }
 
-float MFRenderer_GetTexelCenterOffset()
+MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return gpCurrentRenderPlugin->pGetTexelCenterOffset();
 }

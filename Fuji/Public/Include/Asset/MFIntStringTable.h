@@ -16,13 +16,13 @@ enum MFIntStringTableFormat
 
 struct MFIntStringTable;
 
-MFIntStringTable *MFIntStringTable_CreateFromFile(const char *pFilename);
-MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntStringTableFormat format);
+MF_API MFIntStringTable *MFIntStringTable_CreateFromFile(const char *pFilename);
+MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntStringTableFormat format);
 
-void MFIntStringTable_Destroy(MFIntStringTable *pStringTable);
+MF_API void MFIntStringTable_Destroy(MFIntStringTable *pStringTable);
 
-MFStringTable *MFIntStringTable_CreateRuntimeData(MFIntStringTable *pStringTable, MFLanguage language, MFPlatform platform, size_t *pSize);
+MF_API MFStringTable *MFIntStringTable_CreateRuntimeData(MFIntStringTable *pStringTable, MFLanguage language, MFPlatform platform, size_t *pSize);
 
-void MFIntStringTable_WriteEnumsToHeaderFile(MFIntStringTable *pStringTable, const char *pFilename);
+MF_API void MFIntStringTable_WriteEnumsToHeaderFile(MFIntStringTable *pStringTable, const char *pFilename);
 
 #endif

@@ -18,7 +18,7 @@
  * @param size Size of data to copy in bytes.
  * @return None.
  */
-void MFCopyMemory(void *pDest, const void *pSrc, size_t size);
+MF_API void MFCopyMemory(void *pDest, const void *pSrc, size_t size);
 
 /**
  * Zero memory.
@@ -27,7 +27,7 @@ void MFCopyMemory(void *pDest, const void *pSrc, size_t size);
  * @param size Size of data to initialise in bytes.
  * @return None.
  */
-void MFZeroMemory(void *pDest, size_t size);
+MF_API void MFZeroMemory(void *pDest, size_t size);
 
 /**
  * Initialise memory.
@@ -37,7 +37,7 @@ void MFZeroMemory(void *pDest, size_t size);
  * @param size Number of bytes to initialise.
  * @return None.
  */
-void MFMemSet(void *pDest, int value, size_t size);
+MF_API void MFMemSet(void *pDest, int value, size_t size);
 
 /**
  * Compare memory.
@@ -47,7 +47,7 @@ void MFMemSet(void *pDest, int value, size_t size);
  * @param size Number of bytes to compate.
  * @return Return the difference of the first encountered differing byte. Returns 0 if buffers are identical.
  */
-int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size);
+MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size);
 
 /**
  * Get the length of a string.
@@ -256,7 +256,7 @@ const char* MFStr_TruncateExtension(const char *pFilename);
  * @param bCaseSensitive Perform the pattern match with case sensitivity.
  * @return Returns true if the pattern matches the filename.
  */
-bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL, bool bCaseSensitive = false);
+MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL, bool bCaseSensitive = false);
 
 /**
  * URL encode a string.
@@ -266,7 +266,7 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
  * @return Returns the URL encoded string.
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
-const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars = NULL);
+MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars = NULL);
 
 /**
  * URL encode a string.
@@ -277,7 +277,7 @@ const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars
  * @return Return the length of the output string, excluding the terminating NULL.
  * @remarks If pDest is NULL, the output length will be calculated but no output will be written.
  */
-int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars = NULL);
+MF_API int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars = NULL);
 
 /**
  * Get a formatted a string.
@@ -308,11 +308,11 @@ const char* MFStrN(const char *source, size_t n);
  * @param bAllowHex Test also if the string is a hexadecimal number.
  * @return Returns true if the string was a valid number.
  */
-bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
+MF_API bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
 
-int MFString_AsciiToInteger(const char *pString, bool bDetectBase = true, int base = 10);
+MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase = true, int base = 10);
 
-float MFString_AsciiToFloat(const char *pString);
+MF_API float MFString_AsciiToFloat(const char *pString);
 
 /**
  * Test if the specified character is a while space character.

@@ -74,7 +74,7 @@ enum MFPlayFlags
  * @return Returns s pointer to the newly created sound, or NULL on failure.
  * @see MFSound_Destroy(), MFSound_Play()
  */
-MFSound *MFSound_Create(const char *pName);
+MF_API MFSound *MFSound_Create(const char *pName);
 
 //MFSound *MFSound_CreateFromMemory(const char *pName, const char *pData);
 
@@ -92,7 +92,7 @@ MFSound *MFSound_Create(const char *pName);
  * @return Returns s pointer to the newly created sound buffer, or NULL on failure.
  * @see MFSound_Destroy(), MFSound_Play(), MFSound_LockDynamic(), MFSound_UnlockDynamic()
  */
-MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint32 flags);
+MF_API MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint32 flags);
 
 /**
  * Destroy a sound.
@@ -101,7 +101,7 @@ MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int numChannel
  * @return Returns the new reference count of the sound. If the returned reference count is 0, the sound is destroyed.
  * @see MFSound_Create()
  */
-int MFSound_Destroy(MFSound *pSound);
+MF_API int MFSound_Destroy(MFSound *pSound);
 
 /**
  * Find a sound.
@@ -110,7 +110,7 @@ int MFSound_Destroy(MFSound *pSound);
  * @return Returns a pointer to the sound or NULL if the sound was not found.
  * @remarks MFSound_FindSound() does NOT increment the internal reference count of the object.
  */
-MFSound *MFSound_FindSound(const char *pName);
+MF_API MFSound *MFSound_FindSound(const char *pName);
 
 /**
  * Lock a sound buffer.
@@ -125,7 +125,7 @@ MFSound *MFSound_FindSound(const char *pName);
  * @return Returns 0 on success.
  * @see MFSound_Unlock(), MFSound_CreateDynamic()
  */
-int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
+MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
 
 /**
  * Unlock a sound buffer.
@@ -133,7 +133,7 @@ int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *
  * @return None.
  * @see MFSound_Lock()
  */
-void MFSound_Unlock(MFSound *pSound);
+MF_API void MFSound_Unlock(MFSound *pSound);
 
 /**
  * Play a sound.
@@ -143,7 +143,7 @@ void MFSound_Unlock(MFSound *pSound);
  * @return Returns the voice ID.
  * @see MFSound_Stop(), MFSound_Create()
  */
-MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags = 0);
+MF_API MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags = 0);
 
 /**
  * Pause a sound.
@@ -153,7 +153,7 @@ MFVoice *MFSound_Play(MFSound *pSound, uint32 playFlags = 0);
  * @return Returns None.
  * @see MFSound_Play()
  */
-void MFSound_Pause(MFVoice *pVoice, bool pause = true);
+MF_API void MFSound_Pause(MFVoice *pVoice, bool pause = true);
 
 /**
  * Stop a sound.
@@ -163,7 +163,7 @@ void MFSound_Pause(MFVoice *pVoice, bool pause = true);
  * @remarks The void ID is obtained when calling MFSound_Play()
  * @see MFSound_Play()
  */
-void MFSound_Stop(MFVoice *pVoice);
+MF_API void MFSound_Stop(MFVoice *pVoice);
 
 /**
  * Set the sound listener position.
@@ -171,7 +171,7 @@ void MFSound_Stop(MFVoice *pVoice);
  * @param listenerPos A matrix representing the position and orientation of the listener in world space.
  * @return None.
  */
-void MFSound_SetListenerPos(const MFMatrix& listenerPos);
+MF_API void MFSound_SetListenerPos(const MFMatrix& listenerPos);
 
 /**
  * Set the volume of a voice.
@@ -180,7 +180,7 @@ void MFSound_SetListenerPos(const MFMatrix& listenerPos);
  * @param volume Volume of the voice. The volume can range from 0.0f to 1.0f.
  * @return None.
  */
-void MFSound_SetVolume(MFVoice *pVoice, float volume);
+MF_API void MFSound_SetVolume(MFVoice *pVoice, float volume);
 
 /**
  * Set the playback rate for a voice.
@@ -189,7 +189,7 @@ void MFSound_SetVolume(MFVoice *pVoice, float volume);
  * @param rate Playback rate for the sound. Default is 1.0f.
  * @return None.
  */
-void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
+MF_API void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
 
 /**
  * Set the voices pan.
@@ -198,7 +198,7 @@ void MFSound_SetPlaybackRate(MFVoice *pVoice, float rate);
  * @param pan Pan value where 0 is centered, -1 is fully to the left speaker, and +1 is fully to the right.
  * @return None.
  */
-void MFSound_SetPan(MFVoice *pVoice, float pan);
+MF_API void MFSound_SetPan(MFVoice *pVoice, float pan);
 
 /**
  * Set playback offset.
@@ -207,7 +207,7 @@ void MFSound_SetPan(MFVoice *pVoice, float pan);
  * @param seconds Playback offset, in seconds.
  * @return None.
  */
-void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
+MF_API void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
 
 /**
  * Set the master volume.
@@ -216,7 +216,7 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds);
  * @return None.
  * @remarks The master volume modulates ALL playing audio, including all playing voices and music tracks.
  */
-void MFSound_SetMasterVolume(float volume);
+MF_API void MFSound_SetMasterVolume(float volume);
 
 /**
  * Get the current play cursor, in samples.
@@ -225,7 +225,7 @@ void MFSound_SetMasterVolume(float volume);
  * @param pWriteCursor Optional pointer to a uint32 that received the position of the write cursor.
  * @return Returns the play cursor's position, in samples.
  */
-uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
+MF_API uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
 
 /**
  * Get the sound buffer from a voice.
@@ -233,7 +233,7 @@ uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
  * @param pVoice Pointer to a playing voice.
  * @return Returns the voices associated sound buffer.
  */
-MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice);
+MF_API MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice);
 
 /**
  * Get info about a sound.
@@ -242,7 +242,7 @@ MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice);
  * @param pInfo Pointer to an MFSoundInfo struct that receives information about the MFSound.
  * @return None.
  */
-void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
+MF_API void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
 
 /*** Music playback ***/
 
@@ -294,7 +294,7 @@ struct MFStreamCallbacks
  * @param pCallbacks Pointer to an MFStreamCallbacks structure which defines the stream access callbacks.
  * @return None.
  */
-void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks);
+MF_API void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamExtension, MFStreamCallbacks *pCallbacks);
 
 /**
  * Create audio stream.
@@ -303,7 +303,7 @@ void MFSound_RegisterStreamHandler(const char *pStreamType, const char *pStreamE
  * @param flags Optional combination of flags from the MFAudioStreamFlags enum defining various stream options.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
-MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags = 0);
+MF_API MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags = 0);
 
 /**
  * Begin stream playback.
@@ -312,7 +312,7 @@ MFAudioStream *MFSound_CreateStream(const char *pFilename, uint32 flags = 0);
  * @param playFlags Optional combination of flags from the MFPlayFlags enum defining playback state.
  * @return Returns a pointer to the created MFAudioStream or NULL on failure.
  */
-void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags = 0);
+MF_API void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags = 0);
 
 /**
  * Destroy a music track.
@@ -320,7 +320,7 @@ void MFSound_PlayStream(MFAudioStream *pStream, uint32 playFlags = 0);
  * @param pStream Pointer to an MFAudioStream.
  * @return None.
  */
-void MFSound_DestroyStream(MFAudioStream *pStream);
+MF_API void MFSound_DestroyStream(MFAudioStream *pStream);
 
 /**
  * Seek the stream.
@@ -329,7 +329,7 @@ void MFSound_DestroyStream(MFAudioStream *pStream);
  * @param seconds Seek offset in seconds from the start of the stream.
  * @return None.
  */
-void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
+MF_API void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
 
 /**
  * Pause stream playback.
@@ -338,7 +338,7 @@ void MFSound_SeekStream(MFAudioStream *pStream, float seconds);
  * @param pause true to pause the stream, false to resume playback.
  * @return None.
  */
-void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
+MF_API void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
 
 /**
  * Get the voice associated with an MFAudioStream.
@@ -346,7 +346,7 @@ void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
  * @param pStream Pointer to an MFAudioStream.
  * @return Returns a pointer to the MFVoice associated with the stream.
  */
-MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
+MF_API MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
 
 /**
  * Get information associated with an audio stream.
@@ -355,7 +355,7 @@ MFVoice *MFSound_GetStreamVoice(MFAudioStream *pStream);
  * @param infoType The type of information to fetch.
  * @return Returns a string containing the requested infomation.
  */
-const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType);
+MF_API const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType);
 
 /**
  * Read sample data from an audio stream.
@@ -365,7 +365,7 @@ const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoT
  * @param bytes number of bytes to read from the stream.
  * @return Returns the number of bytes read.
  */
-int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes);
+MF_API int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes);
 
 #endif // _MFSOUND_H
 

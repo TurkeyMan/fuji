@@ -113,7 +113,7 @@ void MFPrimitive_DrawStats()
 
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
 
@@ -145,7 +145,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFRenderer_Begin();
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
@@ -164,7 +164,7 @@ void MFBegin(uint32 vertexCount)
 	current.normal.y = 1.0f;
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
@@ -173,25 +173,25 @@ void MFSetMatrix(const MFMatrix &mat)
 	MFRendererPC_SetWorldToScreenMatrix(temp);
 }
 
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 	current.colour = ((uint32)(r*255.0f))<<16 | ((uint32)(g*255.0f))<<8 | (uint32)(b*255.0f) | ((uint32)(a*255.0f))<<24;
 }
 
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	current.u = u;
 	current.v = v;
 }
 
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 	current.normal.x = x;
 	current.normal.y = y;
 	current.normal.z = z;
 }
 
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
@@ -238,7 +238,7 @@ void MFSetPosition(float x, float y, float z)
 	}
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFCALLSTACK;
 
@@ -272,7 +272,7 @@ static int textureWidth, textureHeight;
 static float uScale, vScale;
 static float halfTexelU, halfTexelV;
 
-void MFPrimitive_BeginBlitter(int numBlits)
+MF_API void MFPrimitive_BeginBlitter(int numBlits)
 {
 	MFView_Push();
 
@@ -294,12 +294,12 @@ void MFPrimitive_BeginBlitter(int numBlits)
 	MFBegin(numBlits * 2);
 }
 
-void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
 	MFPrimitive_StretchBlit(x, y, tw, th, tx, ty, tw, th);
 }
 
-void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
 	MFSetPosition((float)x, (float)y, 0.0f);
@@ -307,7 +307,7 @@ void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw,
 	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
 }
 
-void MFPrimitive_EndBlitter()
+MF_API void MFPrimitive_EndBlitter()
 {
 	MFEnd();
 	MFView_Pop();

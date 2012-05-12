@@ -27,7 +27,7 @@ static const char *gFileExtensions[] =
 
 /**** Functions ****/
 
-MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
+MF_API MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 {
 	// find format
 	const char *pExt = MFString_GetFileExtension(pFilename);
@@ -63,7 +63,13 @@ MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 	return pModel;
 }
 
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName)
+void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
+void ParseXFileFromMemory(char *pFile, F3DFile *_pModel);
+void ParseASEFile(char *, F3DFile *);
+void ParseOBJFileFromMemory(char *pFile, F3DFile *_pModel);
+void ParseMD2FileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
+
+MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName)
 {
 	F3DFile *pF3D = new F3DFile;
 	MFString_Copy(pF3D->name, pName);
@@ -71,23 +77,18 @@ MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, 
 	switch(format)
 	{
 		case MFIMF_DAE:
-			void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 			ParseDAEFileFromMemory((char*)pMemory, size, pF3D);
 			break;
 		case MFIMF_X:
-			void ParseXFileFromMemory(char *pFile, F3DFile *_pModel);
 			ParseXFileFromMemory((char*)pMemory, pF3D);
 			break;
 		case MFIMF_ASE:
-			void ParseASEFile(char *, F3DFile *);
 			ParseASEFile((char*)pMemory, pF3D);
 			break;
 		case MFIMF_OBJ:
-			void ParseOBJFileFromMemory(char *pFile, F3DFile *_pModel);
 			ParseOBJFileFromMemory((char*)pMemory, pF3D);
 			break;
 		case MFIMF_MD2:
-			void ParseMD2FileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 			ParseMD2FileFromMemory((char*)pMemory, size, pF3D);
 			break;
 		default:
@@ -97,14 +98,14 @@ MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, 
 	return (MFIntModel*)pF3D;
 }
 
-void MFIntModel_Optimise(MFIntModel *pModel)
+MF_API void MFIntModel_Optimise(MFIntModel *pModel)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
 	pF3D->Optimise();
 }
 
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
@@ -125,7 +126,7 @@ void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *p
 	}
 }
 
-void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
@@ -140,7 +141,7 @@ void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t 
 	}
 }
 
-void MFIntModel_Destroy(MFIntModel *pModel)
+MF_API void MFIntModel_Destroy(MFIntModel *pModel)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 	delete pF3D;

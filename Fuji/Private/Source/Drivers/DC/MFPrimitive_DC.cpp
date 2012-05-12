@@ -25,7 +25,7 @@ void Primitive_DeinitModule()
 	CALLSTACK;
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	CALLSTACK;
 
@@ -39,7 +39,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	Renderer_Begin();
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	CALLSTACK;
 
@@ -47,50 +47,31 @@ void MFBegin(uint32 vertexCount)
 	currentVert = 0;
 }
 
-void MFSetMatrix(const Matrix &mat)
+MF_API void MFSetMatrix(const Matrix &mat)
 {
 	CALLSTACK;
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
-}
-
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 }
 
-void MFSetColour(uint32 col)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 }
 
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	MFSetNormal(normal.x, normal.y, normal.z);
-}
-
-void MFSetNormal(float x, float y, float z)
-{
-}
-
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
-}
-
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	CALLSTACK;
 
 	++currentVert;
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	CALLSTACK;
 

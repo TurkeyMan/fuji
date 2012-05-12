@@ -81,7 +81,7 @@ typedef int (*MFThreadEntryPoint)(void *);
  * @return Returns a handle to the new thread.
  * @see MFThread_TerminateThread(), MFThread_ExitThread(), MFThread_GetExitCode(), MFThread_DestroyThread()
  */
-MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 flags = 0, uint32 stackSize = 0);
+MF_API MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 flags = 0, uint32 stackSize = 0);
 
 /**
  * Exit from the current thread.
@@ -89,7 +89,7 @@ MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint
  * @param exitCode The code to return from the thread, this is the same as the return value for the threads entry point function.
  * @return None.
  */
-void MFThread_ExitThread(int exitCode);
+MF_API void MFThread_ExitThread(int exitCode);
 
 /**
  * Terminate a thread.
@@ -98,7 +98,7 @@ void MFThread_ExitThread(int exitCode);
  * @return None.
  * @remarks Caution: Terminating a thread can be dangerous. Users should take care to make sure the thread has no locks on mutual exclusive data when it is terminated.
  */
-void MFThread_TerminateThread(MFThread thread);
+MF_API void MFThread_TerminateThread(MFThread thread);
 
 /**
  * Get a threads exit code.
@@ -106,7 +106,7 @@ void MFThread_TerminateThread(MFThread thread);
  * @param thread Handle to a finished thread.
  * @return Returns the threads exit code.
  */
-int MFThread_GetExitCode(MFThread thread);
+MF_API int MFThread_GetExitCode(MFThread thread);
 
 /**
  * Destroy a thread.
@@ -114,7 +114,7 @@ int MFThread_GetExitCode(MFThread thread);
  * @param thread Handle to a thread to destroy.
  * @return None.
  */
-void MFThread_DestroyThread(MFThread thread);
+MF_API void MFThread_DestroyThread(MFThread thread);
 
 /**
  * Join threads.
@@ -122,7 +122,7 @@ void MFThread_DestroyThread(MFThread thread);
  * @param thread Handle to a thread to join.
  * @return None.
  */
-void MFThread_Join(MFThread thread);
+MF_API void MFThread_Join(MFThread thread);
 
 /**
  * Create a mutex object.
@@ -130,7 +130,7 @@ void MFThread_Join(MFThread thread);
  * @param pName Name to identify the mutex.
  * @return Returns a handle to the created mutex.
  */
-MFMutex MFThread_CreateMutex(const char *pName);
+MF_API MFMutex MFThread_CreateMutex(const char *pName);
 
 /**
  * Destroy a mutex object.
@@ -138,7 +138,7 @@ MFMutex MFThread_CreateMutex(const char *pName);
  * @param mutex Handle of mutex to destroy.
  * @return None.
  */
-void MFThread_DestroyMutex(MFMutex mutex);
+MF_API void MFThread_DestroyMutex(MFMutex mutex);
 
 /**
  * Lock a mutex object.
@@ -146,7 +146,7 @@ void MFThread_DestroyMutex(MFMutex mutex);
  * @param mutex Handle of mutex to lock.
  * @return None.
  */
-void MFThread_LockMutex(MFMutex mutex);
+MF_API void MFThread_LockMutex(MFMutex mutex);
 
 /**
  * Release a mutex object.
@@ -154,7 +154,7 @@ void MFThread_LockMutex(MFMutex mutex);
  * @param mutex Handle of mutex to release.
  * @return None.
  */
-void MFThread_ReleaseMutex(MFMutex mutex);
+MF_API void MFThread_ReleaseMutex(MFMutex mutex);
 
 /**
  * Create a semaphore object.
@@ -164,7 +164,7 @@ void MFThread_ReleaseMutex(MFMutex mutex);
  * @param startCount Starting count for the semaphore.
  * @return Returns a handle to the created semaphore.
  */
-MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount);
+MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount);
 
 /**
  * Destroy a semaphore object.
@@ -172,7 +172,7 @@ MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startC
  * @param semaphore Handle of semaphore to destroy.
  * @return None.
  */
-void MFThread_DestroySemaphore(MFSemaphore semaphore);
+MF_API void MFThread_DestroySemaphore(MFSemaphore semaphore);
 
 /**
  * Wait on a semaphore object.
@@ -181,7 +181,7 @@ void MFThread_DestroySemaphore(MFSemaphore semaphore);
  * @return None.
  * @remarks MFThread_WaitSemaphore will succeed when the semaphore count is greater than zero. When a wait successfully completes, the semaphore is decremented by 1.
  */
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore);
+MF_API uint32 MFThread_WaitSemaphore(MFSemaphore semaphore);
 
 /**
  * Signal a semaphore object.
@@ -190,14 +190,14 @@ uint32 MFThread_WaitSemaphore(MFSemaphore semaphore);
  * @return None.
  * @remarks Signaling a semaphore increments the semaphores count by 1. If the semaphore already contains the maximum value specified by CreateSemaphore, SignalSemaphore will wait until it has been decremented.
  */
-void MFThread_SignalSemaphore(MFSemaphore semaphore);
+MF_API void MFThread_SignalSemaphore(MFSemaphore semaphore);
 
 /**
  * Allocate a TLS slot.
  * Allocates a thread local storage slot.
  * @return Returns a handle to the allocated local store slot, or NULL if MFThread_TlsAlloc() failed.
  */
-MFTls MFThread_TlsAlloc();
+MF_API MFTls MFThread_TlsAlloc();
 
 /**
  * Free a TLS slot.
@@ -205,7 +205,7 @@ MFTls MFThread_TlsAlloc();
  * @param tls Handle to a TLS.
  * @return Allocated MFTls object.
  */
-void MFThread_TlsFree(MFTls tls);
+MF_API void MFThread_TlsFree(MFTls tls);
 
 /**
  * Get the value from a TLS.
@@ -213,7 +213,7 @@ void MFThread_TlsFree(MFTls tls);
  * @param tls Handle to a TLS.
  * @return Value stored in the requested TLS.
  */
-void *MFThread_GetTls(MFTls tls);
+MF_API void *MFThread_GetTls(MFTls tls);
 
 /**
  * Set the value of a tls.
@@ -222,7 +222,7 @@ void *MFThread_GetTls(MFTls tls);
  * @param pValue Value to set.
  * @return Returns the old value stored in the TLS slot.
  */
-void *MFThread_SetTls(MFTls tls, void *pValue);
+MF_API void *MFThread_SetTls(MFTls tls, void *pValue);
 
 #endif // _MFTHREAD_H
 

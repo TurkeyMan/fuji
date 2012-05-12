@@ -42,7 +42,7 @@ void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 	pThreadInfoPC->hThread = CreateThread(NULL, pThreadInfo->priority, ThreadProc, pThreadInfo, 0, &pThreadInfoPC->threadID);
 }
 
-void MFThread_ExitThread(int exitCode)
+MF_API void MFThread_ExitThread(int exitCode)
 {
 	// TODO: get pThreadInfo from TLS...
 //	pThreadInfo->exitCode = exitCode;
@@ -50,7 +50,7 @@ void MFThread_ExitThread(int exitCode)
 	ExitThread((DWORD)exitCode);
 }
 
-void MFThread_TerminateThread(MFThread pThreadInfo)
+MF_API void MFThread_TerminateThread(MFThread pThreadInfo)
 {
 	MFThreadInfoPC *pThreadInfoPC = (MFThreadInfoPC*)pThreadInfo->platformSpecific;
 
@@ -88,7 +88,7 @@ void MFThread_InitMutexPlatformSpecific(MFMutex mutex, const char *pName)
 	InitializeCriticalSection(&pMutex->criticalSection);
 }
 
-void MFThread_DestroyMutex(MFMutex mutex)
+MF_API void MFThread_DestroyMutex(MFMutex mutex)
 {
 	MFMutexPC *pMutex = (MFMutexPC*)mutex;
 
@@ -97,37 +97,37 @@ void MFThread_DestroyMutex(MFMutex mutex)
 	MFHeap_Free(pMutex);
 }
 
-void MFThread_LockMutex(MFMutex mutex)
+MF_API void MFThread_LockMutex(MFMutex mutex)
 {
 	MFMutexPC *pMutex = (MFMutexPC*)mutex;
 
 	EnterCriticalSection(&pMutex->criticalSection);
 }
 
-void MFThread_ReleaseMutex(MFMutex mutex)
+MF_API void MFThread_ReleaseMutex(MFMutex mutex)
 {
 	MFMutexPC *pMutex = (MFMutexPC*)mutex;
 
 	LeaveCriticalSection(&pMutex->criticalSection);
 }
 
-MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
+MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
 {
 	return CreateSemaphore(NULL, startCount, maxCount, pName);
 }
 
-void MFThread_DestroySemaphore(MFSemaphore semaphore)
+MF_API void MFThread_DestroySemaphore(MFSemaphore semaphore)
 {
 	CloseHandle(semaphore);
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
+MF_API uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
 	DWORD r = WaitForSingleObject(semaphore, INFINITE);
 	return r == WAIT_OBJECT_0 ? 0 : 1;
 }
 
-void MFThread_SignalSemaphore(MFSemaphore semaphore)
+MF_API void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	ReleaseSemaphore(semaphore, 1, NULL);
 }

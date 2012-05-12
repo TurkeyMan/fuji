@@ -37,7 +37,7 @@ static const char KEYtoASCIISHIFT[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',
 static const char KEYtoASCIICAPS[256]		= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 static const char KEYtoASCIICAPSSHIFT[256]	= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0, '"',0,0,'*','+','<','_','>','?',')','!','@','#','$','%','^','&','*','(',',',':','=','+',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','{', '|','}',0,0,'~',0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,'¥',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-char MFInput_KeyToAscii(int key, bool shift, bool caps)
+MF_API char MFInput_KeyToAscii(int key, bool shift, bool caps)
 {
 	if(shift)
 	{
@@ -416,7 +416,7 @@ void MFInput_Update()
 	}
 }
 
-bool MFInput_IsAvailable(int device, int deviceID)
+MF_API bool MFInput_IsAvailable(int device, int deviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -432,7 +432,7 @@ bool MFInput_IsAvailable(int device, int deviceID)
 	return available;
 }
 
-bool MFInput_IsConnected(int device, int deviceID)
+MF_API bool MFInput_IsConnected(int device, int deviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -450,7 +450,7 @@ bool MFInput_IsConnected(int device, int deviceID)
 	return connected;
 }
 
-bool MFInput_IsReady(int device, int deviceID)
+MF_API bool MFInput_IsReady(int device, int deviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= 0 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -468,7 +468,7 @@ bool MFInput_IsReady(int device, int deviceID)
 	return ready;
 }
 
-float MFInput_Read(int button, int device, int deviceID, float *pPrevState)
+MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevState)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -559,7 +559,7 @@ float MFInput_Read(int button, int device, int deviceID, float *pPrevState)
 	return 0.0f;
 }
 
-bool MFInput_WasPressed(int button, int device, int deviceID)
+MF_API bool MFInput_WasPressed(int button, int device, int deviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -600,7 +600,7 @@ bool MFInput_WasPressed(int button, int device, int deviceID)
 	return false;
 }
 
-bool MFInput_WasReleased(int button, int device, int deviceID)
+MF_API bool MFInput_WasReleased(int button, int device, int deviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 	MFDebug_Assert(deviceID >= -1 && deviceID < MFInput_MaxInputID, "Invalid DeviceID");
@@ -641,37 +641,32 @@ bool MFInput_WasReleased(int button, int device, int deviceID)
 	return false;
 }
 
-int MFInput_GetNumGamepads()
+MF_API int MFInput_GetNumGamepads()
 {
 	return gNumGamepads;
 }
 
-int MFInput_GetNumKeyboards()
+MF_API int MFInput_GetNumKeyboards()
 {
 	return gNumKeyboards;
 }
 
-int MFInput_GetNumPointers()
+MF_API int MFInput_GetNumPointers()
 {
 	return gNumPointers;
 }
 
-int MFInput_GetNumAccelerometers()
+MF_API int MFInput_GetNumAccelerometers()
 {
 	return gNumAccelerometers;
 }
 
-int MFInput_GetNumTouchPanels()
+MF_API int MFInput_GetNumTouchPanels()
 {
 	return gNumTouchPanels;
 }
 
-void MFSetMouseMode(uint32 mouseMode)
-{
-	MFDebug_Assert(false, "SetMouseMode not written");
-}
-
-MFVector MFInput_ReadMousePos(int mouseID)
+MF_API MFVector MFInput_ReadMousePos(int mouseID)
 {
 	MFVector pos = MFVector::identity;
 
@@ -692,7 +687,7 @@ MFVector MFInput_ReadMousePos(int mouseID)
 	return pos;
 }
 
-MFVector MFInput_ReadMouseDelta(int mouseID)
+MF_API MFVector MFInput_ReadMouseDelta(int mouseID)
 {
 	MFVector delta = MFVector::zero;
 
@@ -713,22 +708,22 @@ MFVector MFInput_ReadMouseDelta(int mouseID)
 	return delta;
 }
 
-void MFInput_SetMouseMode(int mode)
+MF_API void MFInput_SetMouseMode(int mode)
 {
 	MFDebug_Assert(false, "SetMouseMode not written");
 }
 
-void MFInput_SetMouseAcceleration(float multiplier)
+MF_API void MFInput_SetMouseAcceleration(float multiplier)
 {
 	MFDebug_Assert(false, "SetMouseAcceleration not written");
 }
 
-MFTouchPanelState *MFInput_GetContactInfo(int touchPanel)
+MF_API MFTouchPanelState *MFInput_GetContactInfo(int touchPanel)
 {
 	return &gTouchPanelStates[touchPanel];
 }
 
-const char* MFInput_GetDeviceName(int device, int deviceID)
+MF_API const char* MFInput_GetDeviceName(int device, int deviceID)
 {
 	if(deviceID >= gNetGamepadStart && device == IDD_Gamepad)
 	{
@@ -744,7 +739,7 @@ const char* MFInput_GetDeviceName(int device, int deviceID)
 	}
 }
 
-const char* MFInput_GetGamepadButtonName(int button, int deviceID)
+MF_API const char* MFInput_GetGamepadButtonName(int button, int deviceID)
 {
 	if(deviceID >= gNetGamepadStart)
 	{
@@ -760,7 +755,7 @@ const char* MFInput_GetGamepadButtonName(int button, int deviceID)
 	}
 }
 
-const char* MFInput_EnumerateString(int button, int device, int deviceID, bool includeDevice, bool includeDeviceID)
+MF_API const char* MFInput_EnumerateString(int button, int device, int deviceID, bool includeDevice, bool includeDeviceID)
 {
 	MFDebug_Assert(device >= 0 && device < IDD_Max, "Invalid Input Device");
 
@@ -784,12 +779,12 @@ const char* MFInput_EnumerateString(int button, int device, int deviceID, bool i
 	return "";
 }
 
-void MFInput_SetDeadZone(float deadZone)
+MF_API void MFInput_SetDeadZone(float deadZone)
 {
 	gGamepadDeadZone = deadZone;
 }
 
-float MFInput_GetDeadZone()
+MF_API float MFInput_GetDeadZone()
 {
 	return gGamepadDeadZone;
 }

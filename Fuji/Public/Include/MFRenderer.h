@@ -104,17 +104,17 @@ enum MFClearScreenFlags
 	CS_ForceInt	= 0x7FFFFFFF
 };
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a);
-void MFRenderer_ClearScreen(uint32 flags = CS_All);
+MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a);
+MF_API void MFRenderer_ClearScreen(uint32 flags = CS_All);
 
-void MFRenderer_GetViewport(MFRect *pRect);
-void MFRenderer_SetViewport(MFRect *pRect);
-void MFRenderer_ResetViewport();
+MF_API void MFRenderer_GetViewport(MFRect *pRect);
+MF_API void MFRenderer_SetViewport(MFRect *pRect);
+MF_API void MFRenderer_ResetViewport();
 
-void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
-void MFRenderer_SetDeviceRenderTarget();
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
+MF_API void MFRenderer_SetDeviceRenderTarget();
 
-float MFRenderer_GetTexelCenterOffset();
+MF_API float MFRenderer_GetTexelCenterOffset();
 
 /**
  * Begin a render block.
@@ -122,7 +122,7 @@ float MFRenderer_GetTexelCenterOffset();
  * @return Remaining number of passes.
  * @remarks MFRenderer_Begin() should be called in a while loop to perform multipass effects. The same geometry should be submitted for each renderer pass.
  */
-int MFRenderer_Begin(); // returns number of passes remaining..
+MF_API int MFRenderer_Begin(); // returns number of passes remaining..
 
 /**
  * Get a transform matrix.
@@ -130,7 +130,7 @@ int MFRenderer_Begin(); // returns number of passes remaining..
  * @param type The matrix type to retrieve.
  * @return Returns a const reference to the specified matrix.
  */
-const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type);
+MF_API const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type);
 
 /**
  * Set a transform matrix.
@@ -139,7 +139,7 @@ const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type);
  * @param matrix A matrix to set as the specified matrix type.
  * @return None.
  */
-void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix);
+MF_API void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix);
 
 /**
  * Set the animation matrices.
@@ -148,7 +148,7 @@ void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix);
  * @param numMatrices The number of matrices that \a pMatrices points to.
  * @return None.
  */
-void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
+MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
 
 /**
  * Set the current animation bone batch.
@@ -157,14 +157,14 @@ void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
  * @param numBonesInBatch The number of bones in the batch.
  * @return None.
  */
-void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch);
+MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch);
 
 /**
  * Flush the renderer settings to the hardware.
  * Flushes the renderer settings to the hardware.
  * @return None.
  */
-void MFRenderer_FlushSettings();
+MF_API void MFRenderer_FlushSettings();
 
 /**
  * Render a mesh chunk.
@@ -172,7 +172,7 @@ void MFRenderer_FlushSettings();
  * @param pMeshChunk Pointer to the mesh chunk to be rendered.
  * @return None.
  */
-void MFRenderer_RenderMeshChunk(MFMeshChunk *pMeshChunk);
+MF_API void MFRenderer_RenderMeshChunk(MFMeshChunk *pMeshChunk);
 
 /**
  * Begin an immediate mode block.
@@ -181,7 +181,7 @@ void MFRenderer_RenderMeshChunk(MFMeshChunk *pMeshChunk);
  * @param renderFlags Flags to be passed to the renderer. Should be a combination of flags from the MFRenderFlags enumerated type.
  * @return Ummmm? Some kind of error?
  */
-int MFRenderer_BeginImmediate(MFPrimType primType, uint32 renderFlags);
+MF_API int MFRenderer_BeginImmediate(MFPrimType primType, uint32 renderFlags);
 
 /**
  * Begin submiting vertices to the renderer.
@@ -189,7 +189,7 @@ int MFRenderer_BeginImmediate(MFPrimType primType, uint32 renderFlags);
  * @param numVertices Number of vertices to be submitted.
  * @return Ummmm? Some kind of error?
  */
-int MFRenderer_RenderVertices(int numVertices);
+MF_API int MFRenderer_RenderVertices(int numVertices);
 
 /**
  * Submit vertex data.
@@ -201,7 +201,7 @@ int MFRenderer_RenderVertices(int numVertices);
  * @param w W component of data.
  * @return None.
  */
-void MFRenderer_SetVertexData4f(MFVertexComponent vertexComponent, float x, float y, float z, float w);
+MF_API void MFRenderer_SetVertexData4f(MFVertexComponent vertexComponent, float x, float y, float z, float w);
 
 /**
  * Submit vertex data.
@@ -210,21 +210,21 @@ void MFRenderer_SetVertexData4f(MFVertexComponent vertexComponent, float x, floa
  * @param data Vector specifying data for the vertex component.
  * @return None.
  */
-void MFRenderer_SetVertexData4v(MFVertexComponent vertexComponent, const MFVector &data);
+MF_API void MFRenderer_SetVertexData4v(MFVertexComponent vertexComponent, const MFVector &data);
 
 /**
  * End submitting vertices.
  * Ends submition of vertices.
  * @return None.
  */
-void MFRenderer_EndVertices();
+MF_API void MFRenderer_EndVertices();
 
 /**
  * End immediate mode rendering.
  * Ends immediate mode rendering.
  * @return None.
  */
-void MFRenderer_EndImmediate();
+MF_API void MFRenderer_EndImmediate();
 
 
 enum MFRenderState
@@ -250,7 +250,7 @@ enum MFRenderState
  * @param value Value to set.
  * @return Returns the old value.
  */
-uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value);
+MF_API uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value);
 
 /**
  * Get the value of a global renderstate override state.
@@ -258,7 +258,7 @@ uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value);
  * @param renderState The global renderstate to get.
  * @return Returns the current value of the global renderstate.
  */
-uintp MFRenderer_GetRenderStateOverride(uint32 renderState);
+MF_API uintp MFRenderer_GetRenderStateOverride(uint32 renderState);
 
 #endif // _MFRENDERER_H
 

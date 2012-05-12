@@ -99,28 +99,28 @@ struct MFVertexElement
 	int componentCount;
 };
 
-MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
-void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration);
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
+MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration);
 
-MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL);
-void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer);
-void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer);
-void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
-void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
-void MFVertex_ReadVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector *pData);
-void MFVertex_SetVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 data);
-void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 *pData);
-void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer);
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL);
+MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer);
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer);
+MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
+MF_API void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
+MF_API void MFVertex_ReadVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector *pData);
+MF_API void MFVertex_SetVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 data);
+MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 *pData);
+MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer);
 
-MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory = NULL);
-void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer);
-void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 *pIndices);
-void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer);
+MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory = NULL);
+MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer);
+MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices);
+MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer);
 
-void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration);
-void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer);
-void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices);
-void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer);
+MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration);
+MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer);
+MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices);
+MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer);
 
 #endif
 

@@ -21,7 +21,7 @@ struct MFStringCache;
  * @param maxSize First byte.
  * @return Returns a handle to the newly created string cache.
  */
-MFStringCache* MFStringCache_Create(size_t maxSize);
+MF_API MFStringCache* MFStringCache_Create(size_t maxSize);
 
 /**
  * Destroy a string cache.
@@ -29,7 +29,7 @@ MFStringCache* MFStringCache_Create(size_t maxSize);
  * @param pCache String cache to destroy.
  * @return None.
  */
-void MFStringCache_Destroy(MFStringCache *pCache);
+MF_API void MFStringCache_Destroy(MFStringCache *pCache);
 
 /**
  * Clear a string cache.
@@ -37,7 +37,7 @@ void MFStringCache_Destroy(MFStringCache *pCache);
  * @param pCache String cache to clear.
  * @return None.
  */
-void MFStringCache_Clear(MFStringCache *pCache);
+MF_API void MFStringCache_Clear(MFStringCache *pCache);
 
 /**
  * Add a string to a string cache.
@@ -46,7 +46,7 @@ void MFStringCache_Clear(MFStringCache *pCache);
  * @param pNewString String to add to the cache.
  * @return Returns a pointer to the string in the string cache.
  */
-const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
+MF_API const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
 
 /**
  * Get a pointer to the cache memory.
@@ -54,7 +54,7 @@ const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
  * @param pCache Target string cache.
  * @return Returns a pointer to the string in the string cache.
  */
-char* MFStringCache_GetCache(MFStringCache *pCache);
+MF_API char* MFStringCache_GetCache(MFStringCache *pCache);
 
 /**
  * Get the actual used size of a string cache.
@@ -62,7 +62,7 @@ char* MFStringCache_GetCache(MFStringCache *pCache);
  * @param pCache Target string cache.
  * @return Returns the number of bytes currently used.
  */
-size_t MFStringCache_GetSize(MFStringCache *pCache);
+MF_API size_t MFStringCache_GetSize(MFStringCache *pCache);
 
 /**
  * Set the number of bytes used in a string cache.
@@ -71,7 +71,7 @@ size_t MFStringCache_GetSize(MFStringCache *pCache);
  * @param used New number of bytes used.
  * @return None.
  */
-void MFStringCache_SetSize(MFStringCache *pCache, size_t used);
+MF_API void MFStringCache_SetSize(MFStringCache *pCache, size_t used);
 
 //
 // unicode support
@@ -89,7 +89,7 @@ struct MFWStringCache;
  * @param maxSize First byte.
  * @return Returns a handle to the newly created unicode string cache.
  */
-MFWStringCache* MFWStringCache_Create(size_t maxSize);
+MF_API MFWStringCache* MFWStringCache_Create(size_t maxSize);
 
 /**
  * Destroy a unicode string cache.
@@ -97,7 +97,7 @@ MFWStringCache* MFWStringCache_Create(size_t maxSize);
  * @param pCache String cache to destroy.
  * @return None.
  */
-void MFWStringCache_Destroy(MFWStringCache *pCache);
+MF_API void MFWStringCache_Destroy(MFWStringCache *pCache);
 
 /**
  * Add a unicode string to a unicode string cache.
@@ -106,7 +106,7 @@ void MFWStringCache_Destroy(MFWStringCache *pCache);
  * @param pNewString String to add to the cache.
  * @return Returns a pointer to the string in the unicode string cache.
  */
-const uint16* MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString);
+MF_API const uint16* MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString);
 
 /**
  * Get a pointer to the cache memory.
@@ -114,7 +114,7 @@ const uint16* MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewStrin
  * @param pCache Target unicode string cache.
  * @return Returns a pointer to the string in the unicode string cache.
  */
-uint16* MFWStringCache_GetCache(MFWStringCache *pCache);
+MF_API uint16* MFWStringCache_GetCache(MFWStringCache *pCache);
 
 /**
  * Get the actual used size of a unicode string cache.
@@ -122,7 +122,7 @@ uint16* MFWStringCache_GetCache(MFWStringCache *pCache);
  * @param pCache Target unicode string cache.
  * @return Returns the number of bytes currently used.
  */
-size_t MFWStringCache_GetSize(MFWStringCache *pCache);
+MF_API size_t MFWStringCache_GetSize(MFWStringCache *pCache);
 
 /**
  * Set the number of bytes used in a unicode string cache.
@@ -131,7 +131,7 @@ size_t MFWStringCache_GetSize(MFWStringCache *pCache);
  * @param used New number of bytes used.
  * @return None.
  */
-void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used);
+MF_API void MFWStringCache_SetSize(MFWStringCache *pCache, size_t used);
 
 #endif
 

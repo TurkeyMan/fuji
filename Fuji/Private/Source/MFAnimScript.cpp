@@ -32,7 +32,7 @@ MFAnimScriptTemplate *pMFAnimScriptInternal_Find(const char *pScript)
 	return NULL;
 }
 
-MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel)
+MF_API MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel)
 {
 	MFAnimScriptTemplate *pTemplate = pMFAnimScriptInternal_Find(pFilename);
 
@@ -106,7 +106,7 @@ MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel)
 	return pScript;
 }
 
-void MFAnimScript_Destroy(MFAnimScript *pAnimScript)
+MF_API void MFAnimScript_Destroy(MFAnimScript *pAnimScript)
 {
 	--pAnimScript->pTemplate->refCount;
 
@@ -116,23 +116,23 @@ void MFAnimScript_Destroy(MFAnimScript *pAnimScript)
 	MFHeap_Free(pAnimScript);
 }
 
-int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript)
+MF_API int MFAnimScript_GetNumSequences(MFAnimScript *pAnimScript)
 {
 	return pAnimScript->pTemplate->numSequences;
 }
 
-void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime)
+MF_API void MFAnimScript_PlaySequence(MFAnimScript *pAnimScript, int sequence, float tweenTime)
 {
 	pAnimScript->currentSequence = sequence;
 	pAnimScript->currentFrame = pAnimScript->pTemplate->pSequences[sequence].startFrame;
 }
 
-const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence)
+MF_API const char* MFAnimScript_GetSequenceName(MFAnimScript *pAnimScript, int sequence)
 {
 	return pAnimScript->pTemplate->pSequences[sequence].pName;
 }
 
-int MFAnimScript_FindSequence(MFAnimScript *pAnimScript, const char *pSequenceName)
+MF_API int MFAnimScript_FindSequence(MFAnimScript *pAnimScript, const char *pSequenceName)
 {
 	for(int a=0; a<pAnimScript->pTemplate->numSequences; a++)
 	{

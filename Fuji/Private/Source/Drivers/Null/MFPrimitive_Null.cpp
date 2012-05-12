@@ -20,79 +20,62 @@ void MFPrimitive_DrawStats()
 
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	beginCount = vertexCount;
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 }
 
-void MFSetColour(const MFVector &colour)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 }
 
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 }
 
-void MFSetColour(uint32 col)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetTexCoord1(float u, float v)
-{
-}
-
-void MFSetNormal(const MFVector &normal)
-{
-}
-
-void MFSetNormal(float x, float y, float z)
-{
-}
-
-void MFSetPosition(const MFVector &pos)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	++currentVert;
 }
 
-void MFSetPosition(float x, float y, float z)
-{
-	++currentVert;
-}
-
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 }
 
-void MFPrimitive_BeginBlitter(int numBlits)
+MF_API void MFPrimitive_BeginBlitter(int numBlits)
 {
 }
 
-void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
 }
 
-void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
+MF_API void MFPrimitive_BlitRect(int x, int y, const MFRect &uvs)
 {
 }
 
-void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 }
 
-void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
+MF_API void MFPrimitive_StretchBlitRect(int x, int y, int w, int h, const MFRect &uvs)
 {
 }
 
-void MFPrimitive_EndBlitter()
+MF_API void MFPrimitive_EndBlitter()
 {
 }
 

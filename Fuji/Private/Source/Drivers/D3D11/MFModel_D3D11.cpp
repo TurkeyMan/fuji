@@ -27,7 +27,7 @@ DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFMeshVertexDataType format);
 const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
 MFVertexDataFormat MFMesh_ConvertMeshVertexDataType(MFMeshVertexDataType type);
 MFVertexDeclaration *MFVertex_CreateVertexDeclaration2(MFMeshVertexFormat *pMVF);
-MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
 
 //---------------------------------------------------------------------------------------------------------------------
 extern ID3D11Device* g_pd3dDevice;
@@ -58,7 +58,7 @@ void MFModel_DeinitModulePlatformSpecific()
 	MFCALLSTACK;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFModel_Draw(MFModel *pModel)
+MF_API void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
 

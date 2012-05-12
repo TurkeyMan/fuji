@@ -38,23 +38,23 @@ struct MFDisplayMode
 	uint32 createFlags;
 };
 
-MFDisplay *MFDisplay_Create(const char *pName, MFDisplayMode *pDisplayMode);
-void MFDisplay_Destroy(MFDisplay *pDisplay);
+MF_API MFDisplay *MFDisplay_Create(const char *pName, MFDisplayMode *pDisplayMode);
+MF_API void MFDisplay_Destroy(MFDisplay *pDisplay);
 
-int MFDisplay_GetDisplayModeCount();
-void MFDisplay_GetDisplayMode(MFDisplayMode *pDisplayMode);
+MF_API int MFDisplay_GetDisplayModeCount();
+MF_API void MFDisplay_GetDisplayMode(MFDisplayMode *pDisplayMode);
 
-float MFDisplay_GetNativeAspectRatio();
-bool MFDisplay_IsWidescreen();
+MF_API float MFDisplay_GetNativeAspectRatio();
+MF_API bool MFDisplay_IsWidescreen();
 
-void MFDisplay_HandleSystemMessages();
+MF_API void MFDisplay_HandleSystemMessages();
 
-MFDisplayOrientation MFDisplay_GetDisplayOrientation();
+MF_API MFDisplayOrientation MFDisplay_GetDisplayOrientation();
 
 // these functions are reserved for use by the renderer, and may not be called if the renderer chooses to implement them its self
-void *MFDisplay_GetRenderBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
-void *MFDisplay_GetDisplayBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
-void MFDisplay_BlitToScreen(MFDisplay *pDisplay);
+MF_API void *MFDisplay_GetRenderBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
+MF_API void *MFDisplay_GetDisplayBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
+MF_API void MFDisplay_BlitToScreen(MFDisplay *pDisplay);
 
 /////////////////////////////////////////////////////////////////////////////////
 #else
@@ -66,21 +66,21 @@ const float MFAspect_16x9 = 16.f/9.f;
 const float MFAspect_16x10 = 16.f/10.f;
 
 // interface functions
-bool MFDisplay_SupportsFullscreen();
-void MFDisplay_GetNumDisplayModes(bool window = false, float aspectConstraint = 0.f);
-void MFDisplay_GetDisplayMode(int index, bool window = false, float aspectConstraint = 0.f);
+MF_API bool MFDisplay_SupportsFullscreen();
+MF_API void MFDisplay_GetNumDisplayModes(bool window = false, float aspectConstraint = 0.f);
+MF_API void MFDisplay_GetDisplayMode(int index, bool window = false, float aspectConstraint = 0.f);
 
-void MFDisplay_GetNativeRes(MFRect *pRect);
-void MFDisplay_GetDefaultRes(MFRect *pRect);
+MF_API void MFDisplay_GetNativeRes(MFRect *pRect);
+MF_API void MFDisplay_GetDefaultRes(MFRect *pRect);
 
-void MFDisplay_GetDisplayRect(MFRect *pRect);
+MF_API void MFDisplay_GetDisplayRect(MFRect *pRect);
 
-float MFDisplay_GetNativeAspectRatio();
-bool MFDisplay_IsWidescreen();
+MF_API float MFDisplay_GetNativeAspectRatio();
+MF_API bool MFDisplay_IsWidescreen();
 
-bool MFDisplay_HasFocus();
+MF_API bool MFDisplay_HasFocus();
 
-inline MFDisplayOrientation MFDisplay_GetDisplayOrientation()
+MF_API inline MFDisplayOrientation MFDisplay_GetDisplayOrientation()
 {
 	return MFDO_Normal;
 }

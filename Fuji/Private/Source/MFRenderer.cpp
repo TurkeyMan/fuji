@@ -40,7 +40,7 @@ void MFRenderer_DeinitModule()
 	MFRenderer_DeinitModulePlatformSpecific();
 }
 
-int MFRenderer_Begin()
+MF_API int MFRenderer_Begin()
 {
 	MFCALLSTACK;
 
@@ -48,33 +48,33 @@ int MFRenderer_Begin()
 	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial);
 }
 
-const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type)
+MF_API const MFMatrix& MFRenderer_GetMatrix(MFMatrixType type)
 {
 	MFCALLSTACK;
 
 	return gTransformationMatrices[type];
 }
 
-void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix)
+MF_API void MFRenderer_SetMatrix(MFMatrixType type, const MFMatrix &matrix)
 {
 	MFCALLSTACK;
 
 	gTransformationMatrices[type] = matrix;
 }
 
-void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices)
+MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices)
 {
 	pAnimMats = pMatrices;
 	gNumAnimMats = numMatrices;
 }
 
-void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
+MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
 {
 	pCurrentBatch = pBatch;
 	gNumBonesInBatch = numBonesInBatch;
 }
 
-uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value)
+MF_API uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value)
 {
 	MFCALLSTACK;
 
@@ -84,7 +84,7 @@ uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value)
 	return t;
 }
 
-uintp MFRenderer_GetRenderStateOverride(uint32 renderState)
+MF_API uintp MFRenderer_GetRenderStateOverride(uint32 renderState)
 {
 	MFCALLSTACK;
 

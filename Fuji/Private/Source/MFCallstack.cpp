@@ -84,12 +84,12 @@ void MFCallstack_DeinitModule()
 
 }
 
-void MFCallstack_Log()
+MF_API void MFCallstack_Log()
 {
 	MFDebug_Message(MFCallstack_GetCallstackString());
 }
 
-const char* MFCallstack_GetCallstackString()
+MF_API const char* MFCallstack_GetCallstackString()
 {
 #if defined(_MFCALLSTACK)
 	char callstack[2048] = "";

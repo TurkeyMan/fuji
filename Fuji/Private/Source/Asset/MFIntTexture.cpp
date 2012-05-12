@@ -1323,7 +1323,7 @@ void PremultiplyAlpha(MFIntTexture *pImage)
 	}
 }
 
-MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
+MF_API MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 {
 	// find format
 	const char *pExt = MFString_GetFileExtension(pFilename);
@@ -1352,7 +1352,7 @@ MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 	return pImage;
 }
 
-MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format)
+MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format)
 {
 	MFIntTexture *pImage = NULL;
 
@@ -1387,7 +1387,7 @@ MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t si
 	return pImage;
 }
 
-void MFIntTexture_Destroy(MFIntTexture *pTexture)
+MF_API void MFIntTexture_Destroy(MFIntTexture *pTexture)
 {
 	for(int a=0; a<pTexture->numSurfaces; a++)
 	{
@@ -1402,7 +1402,7 @@ void MFIntTexture_Destroy(MFIntTexture *pTexture)
 		MFHeap_Free(pTexture);
 }
 
-MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
+MF_API MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 {
 	MFTextureFormat targetFormat = TexFmt_A8B8G8R8;
 
@@ -1467,7 +1467,7 @@ MFTextureFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platform)
 	return targetFormat;
 }
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
+MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags, MFTextureFormat targetFormat)
 {
 	*ppTemplateData = NULL;
 	if(pSize)
@@ -1587,17 +1587,17 @@ void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateDat
 		*pSize = imageBytes;
 }
 
-void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename)
+MF_API void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename)
 {
 
 }
 
-void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels, uint32 mipFilterOptions)
+MF_API void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels, uint32 mipFilterOptions)
 {
 
 }
 
-void MFIntTexture_ScanImage(MFIntTexture *pTexture)
+MF_API void MFIntTexture_ScanImage(MFIntTexture *pTexture)
 {
 	pTexture->opaque = true;
 	pTexture->oneBitAlpha = true;
@@ -1622,7 +1622,7 @@ void MFIntTexture_ScanImage(MFIntTexture *pTexture)
 	}
 }
 
-void MFIntTexture_FlipImage(MFIntTexture *pTexture)
+MF_API void MFIntTexture_FlipImage(MFIntTexture *pTexture)
 {
 	for(int a=0; a<pTexture->numSurfaces; a++)
 	{

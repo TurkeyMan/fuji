@@ -212,7 +212,7 @@ void MFMaterial_Update()
 }
 
 // interface functions
-int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
+MF_API int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -235,7 +235,7 @@ int MFMaterial_AddDefinitionsFile(const char *pName, const char *pFilename)
 	return 0;
 }
 
-int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs)
+MF_API int MFMaterial_AddDefinitionsIni(const char *pName, MFIni *pMatDefs)
 {
 	MFCALLSTACK;
 
@@ -264,7 +264,7 @@ void MFMaterial_DestroyDefinition(MaterialDefinition *pDefinition)
 	gMaterialDefList.Destroy(pDefinition);
 }
 
-void MFMaterial_RemoveDefinitions(const char *pName)
+MF_API void MFMaterial_RemoveDefinitions(const char *pName)
 {
 	MFCALLSTACK;
 
@@ -295,7 +295,7 @@ void MFMaterial_RemoveDefinitions(const char *pName)
 	}
 }
 
-void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks)
+MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks)
 {
 	MFCALLSTACK;
 
@@ -314,7 +314,7 @@ void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallback
 	pCallbacks->pRegisterMaterial(NULL);
 }
 
-void MFMaterial_UnregisterMaterialType(const char *pName)
+MF_API void MFMaterial_UnregisterMaterialType(const char *pName)
 {
 	MFCALLSTACK;
 
@@ -346,7 +346,7 @@ MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName)
 	return NULL;
 }
 
-MFMaterial* MFMaterial_Create(const char *pName)
+MF_API MFMaterial* MFMaterial_Create(const char *pName)
 {
 	MFCALLSTACK;
 
@@ -391,7 +391,7 @@ MFMaterial* MFMaterial_Create(const char *pName)
 	return pMat;
 }
 
-int MFMaterial_Destroy(MFMaterial *pMaterial)
+MF_API int MFMaterial_Destroy(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
@@ -409,7 +409,7 @@ int MFMaterial_Destroy(MFMaterial *pMaterial)
 	return pMaterial->refCount;
 }
 
-MFMaterial* MFMaterial_Find(const char *pName)
+MF_API MFMaterial* MFMaterial_Find(const char *pName)
 {
 	MFCALLSTACK;
 
@@ -425,17 +425,17 @@ MFMaterial* MFMaterial_Find(const char *pName)
 	return NULL;
 }
 
-MFMaterial* MFMaterial_GetCurrent()
+MF_API MFMaterial* MFMaterial_GetCurrent()
 {
 	return pCurrentMaterial;
 }
 
-const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
+MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
 {
 	return pMaterial->pName;
 }
 
-void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
+MF_API void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
@@ -445,7 +445,7 @@ void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
 	pCurrentMaterial = (MFMaterial*)pMaterial;
 }
 
-MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
+MF_API MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier)
 {
 	MFCALLSTACK;
 
@@ -734,12 +734,12 @@ MFDebug_Assert(false, "Fix Me!!!");
 	}
 }
 
-int MFMaterial_GetNumParameters(MFMaterial *pMaterial)
+MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial)
 {
 	return pMaterial->pType->materialCallbacks.pGetNumParams ? pMaterial->pType->materialCallbacks.pGetNumParams() : 0;
 }
 
-const char* MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex)
+MF_API const char* MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 
@@ -749,7 +749,7 @@ const char* MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterInde
 	return pInfo->pParameterName;
 }
 
-int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName)
+MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 
@@ -758,31 +758,31 @@ int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pPar
 	{
 		MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(a);
 		if(!MFString_CaseCmp(pInfo->pParameterName, pParameterName))
-			return a;
+			return pInfo->parameterIndex;
 	}
 
 	return -1;
 }
 
-MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex)
+MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 	return pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
 }
 
-MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName)
+MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName)
 {
 	int param = MFMaterial_GetParameterIndexFromName(pMaterial, pParameterName);
 	return MFMaterial_GetParameterInfo(pMaterial, param);
 }
 
-void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value)
+MF_API void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, parameterIndex, argIndex, value);
 }
 
-uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
 	return pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, parameterIndex, argIndex, pValue);
@@ -828,11 +828,11 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
-	MFSetPosition(pos);
-	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetColourV(MFVector::white);
+	MFSetPositionV(pos);
+	MFSetPositionV(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
 	MFEnd();
 
 	pos += MakeVector(2.0f, 2.0f, 0.0f);
@@ -849,7 +849,7 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 			y = pos.y + (float)a*h;
 
 			MFBegin(4);
-			MFSetColour(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
+			MFSetColourV(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
 			MFSetPosition(x,y,0);
 			MFSetPosition(x+w,y,0);
 			MFSetPosition(x,y+h,0);
@@ -863,15 +863,15 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 	MFPrimitive(PT_TriStrip);
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
+	MFSetColourV(MFVector::white);
 	MFSetTexCoord1(0.0f,0.0f);
-	MFSetPosition(pos);
+	MFSetPositionV(pos);
 	MFSetTexCoord1(1.0f,0.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE, 0.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE, 0.0f, 0.0f));
 	MFSetTexCoord1(0.0f,1.0f);
-	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE, 0.0f));
+	MFSetPositionV(pos + MakeVector(0.0f, TEX_SIZE, 0.0f));
 	MFSetTexCoord1(1.0f,1.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE, TEX_SIZE, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE, TEX_SIZE, 0.0f));
 	MFEnd();
 
 	return TEX_SIZE + 8.0f;

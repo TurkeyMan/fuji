@@ -93,22 +93,22 @@ void MFString_Dump()
 	}
 }
 
-void MFCopyMemory(void *pDest, const void *pSrc, size_t size)
+MF_API void MFCopyMemory(void *pDest, const void *pSrc, size_t size)
 {
 	memcpy(pDest, pSrc, size);
 }
 
-void MFMemSet(void *pDest, int value, size_t size)
+MF_API void MFMemSet(void *pDest, int value, size_t size)
 {
 	memset(pDest, value, size);
 }
 
-void MFZeroMemory(void *pDest, size_t size)
+MF_API void MFZeroMemory(void *pDest, size_t size)
 {
 	memset(pDest, 0, size);
 }
 
-int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)
+MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)
 {
 	return memcmp(pBuf1, pBuf2, size);
 }
@@ -267,7 +267,7 @@ char* MFString_RChr(const char *pSource, int c)
 	return pLast;
 }
 
-bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory, bool bCaseSensitive)
+MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory, bool bCaseSensitive)
 {
 	if(!pPattern || !pFilename)
 		return false;
@@ -313,7 +313,7 @@ bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const ch
 	return false;
 }
 
-const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars)
+MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
@@ -340,7 +340,7 @@ const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars
 	return pBuffer;
 }
 
-int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars)
+MF_API int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars)
 {
 	int sourceLen = MFString_Length(pString);
 	int destLen = 0;
@@ -375,7 +375,7 @@ int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeCha
 	return destLen;
 }
 
-bool MFString_IsNumber(const char *pString, bool bAllowHex)
+MF_API bool MFString_IsNumber(const char *pString, bool bAllowHex)
 {
 	pString = MFSkipWhite(pString);
 
@@ -416,7 +416,7 @@ bool MFString_IsNumber(const char *pString, bool bAllowHex)
 	return numDigits > 0 ? true : false;
 }
 
-int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
+MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 {
 	pString = MFSkipWhite(pString);
 
@@ -475,7 +475,7 @@ int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
 	return number;
 }
 
-float MFString_AsciiToFloat(const char *pString)
+MF_API float MFString_AsciiToFloat(const char *pString)
 {
 	pString = MFSkipWhite(pString);
 

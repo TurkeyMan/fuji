@@ -20,13 +20,13 @@ enum MFIntModelFormat
 
 struct MFIntModel;
 
-MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
-MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName);
+MF_API MFIntModel *MFIntModel_CreateFromFile(const char *pFilename);
+MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName);
 
-void MFIntModel_Optimise(MFIntModel *pModel);
+MF_API void MFIntModel_Optimise(MFIntModel *pModel);
 
-void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform);
+MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform);
 
-void MFIntModel_Destroy(MFIntModel *pModel);
+MF_API void MFIntModel_Destroy(MFIntModel *pModel);
 
 #endif

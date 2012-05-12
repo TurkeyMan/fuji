@@ -65,7 +65,7 @@ extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 
 /**** Functions ****/
 
-int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites)
+MF_API int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites)
 {
 	MFDebug_Assert(gNumModules < MaxModules, "Maximum modules!");
 
@@ -77,17 +77,17 @@ int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFuncti
 	return id;
 }
 
-int MFModule_GetNumModules()
+MF_API int MFModule_GetNumModules()
 {
 	return gNumModules;
 }
 
-const char *MFModule_GetModuleName(int id)
+MF_API const char *MFModule_GetModuleName(int id)
 {
 	return gModules[id].pModuleName;
 }
 
-int MFModule_GetModuleID(const char *pName)
+MF_API int MFModule_GetModuleID(const char *pName)
 {
 	for(int a=0; a<gNumModules; ++a)
 	{
@@ -97,17 +97,17 @@ int MFModule_GetModuleID(const char *pName)
 	return -1;
 }
 
-bool MFModule_IsModuleInitialised(int id)
+MF_API bool MFModule_IsModuleInitialised(int id)
 {
 	return (gModuleInitComplete & (1ULL << id)) != 0;
 }
 
-bool MFModule_DidModuleInitialisationFail(int id)
+MF_API bool MFModule_DidModuleInitialisationFail(int id)
 {
 	return (gModuleInitFailed & (1ULL << id)) != 0;
 }
 
-uint64 MFModule_GetModuleMask(const char **ppModuleNames)
+MF_API uint64 MFModule_GetModuleMask(const char **ppModuleNames)
 {
 	uint64 mask = 0;
 	for(int b=0; ppModuleNames[b]; ++b)

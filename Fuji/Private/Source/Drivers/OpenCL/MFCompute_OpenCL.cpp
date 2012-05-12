@@ -149,7 +149,7 @@ void MFCompute_DeinitModule()
 	g_OpenCL_context = 0;
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFComputeBuffer *MFCompute_CreateBuffer(MFCompute_ScalarType dataType, int count, void *host_ptr, MFCompute_BufferType type)
+MF_API MFComputeBuffer *MFCompute_CreateBuffer(MFCompute_ScalarType dataType, int count, void *host_ptr, MFCompute_BufferType type)
 {
 	MFComputeBuffer *pBuffer = NULL;
 	cl_int error = 0;
@@ -166,7 +166,7 @@ MFComputeBuffer *MFCompute_CreateBuffer(MFCompute_ScalarType dataType, int count
 	return pBuffer;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_DestroyBuffer(MFComputeBuffer *pBuffer)
+MF_API void MFCompute_DestroyBuffer(MFComputeBuffer *pBuffer)
 {
 	if (pBuffer)
 	{
@@ -177,7 +177,7 @@ void MFCompute_DestroyBuffer(MFComputeBuffer *pBuffer)
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFComputeProgram *MFCompute_CreateProgram(const char* source, size_t size)
+MF_API MFComputeProgram *MFCompute_CreateProgram(const char* source, size_t size)
 {
 	MFComputeProgram *pProgram = NULL;
 	cl_int error = 0;
@@ -210,7 +210,7 @@ MFComputeProgram *MFCompute_CreateProgram(const char* source, size_t size)
 	return pProgram;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_DestroyProgram(MFComputeProgram *pProgram)
+MF_API void MFCompute_DestroyProgram(MFComputeProgram *pProgram)
 {
 	if (pProgram)
 	{
@@ -219,7 +219,7 @@ void MFCompute_DestroyProgram(MFComputeProgram *pProgram)
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFComputeKernel *MFCompute_CreateKernel(MFComputeProgram *pProgram, const char *kernel_name)
+MF_API MFComputeKernel *MFCompute_CreateKernel(MFComputeProgram *pProgram, const char *kernel_name)
 {
 	MFComputeKernel *pKernel = NULL;
 	cl_int error = 0;
@@ -233,7 +233,7 @@ MFComputeKernel *MFCompute_CreateKernel(MFComputeProgram *pProgram, const char *
 	return pKernel;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_DestroyKernel(MFComputeKernel *pKernel)
+MF_API void MFCompute_DestroyKernel(MFComputeKernel *pKernel)
 {
 	if (pKernel)
 	{
@@ -241,21 +241,21 @@ void MFCompute_DestroyKernel(MFComputeKernel *pKernel)
 		MFHeap_Free(pKernel);
 	}
 }
-bool MFCompute_SetKernelArg(MFComputeKernel *pKernel, uint32 arg_index, MFComputeBuffer *pBuffer)
+MF_API bool MFCompute_SetKernelArgBuffer(MFComputeKernel *pKernel, uint32 arg_index, MFComputeBuffer *pBuffer)
 {
 	cl_int error = 0;
 	error = clSetKernelArg(pKernel->kernel, arg_index, sizeof(cl_mem), &pBuffer->mem);
 	return (error == CL_SUCCESS);
 }
 //---------------------------------------------------------------------------------------------------------------------
-bool MFCompute_SetKernelArg(MFComputeKernel *pKernel, uint32 arg_index, uint32 arg_size, const void *arg_value)
+MF_API bool MFCompute_SetKernelArg(MFComputeKernel *pKernel, uint32 arg_index, uint32 arg_size, const void *arg_value)
 {
 	cl_int error = 0;
 	error = clSetKernelArg(pKernel->kernel, arg_index, arg_size, arg_value);
 	return (error == CL_SUCCESS);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_Enqueue(MFComputeKernel *pKernel, uint32 workItems)
+MF_API void MFCompute_Enqueue(MFComputeKernel *pKernel, uint32 workItems)
 {
 	const size_t local_work_size = 512;
 	const size_t global_work_size = shrRoundUp(local_work_size, workItems);
@@ -265,7 +265,7 @@ void MFCompute_Enqueue(MFComputeKernel *pKernel, uint32 workItems)
 	error = error;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFCompute_ReadBuffer(MFComputeBuffer *pBuffer, uint32 size, void *ptr)
+MF_API void MFCompute_ReadBuffer(MFComputeBuffer *pBuffer, uint32 size, void *ptr)
 {
 	cl_int error = 0;
 	error = clEnqueueReadBuffer(g_OpenCL_queue, pBuffer->mem, CL_TRUE, 0, size, ptr, 0, NULL, NULL);

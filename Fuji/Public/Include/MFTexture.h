@@ -173,7 +173,7 @@ struct MFScaleImage
  * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
  * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
  */
-MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
+MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
 
 /**
  * Create a dynamic texture.
@@ -187,7 +187,7 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
  * @remarks If the specified texture has already been created, MFTexture_CreateDynamic will fail.
  * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
  */
-MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags = 0);
+MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags = 0);
 
 /**
  * Create a texture from raw data.
@@ -204,9 +204,9 @@ MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFT
  * @remarks If TexFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFTexture_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
  * @see MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFTexture_IsAvailableOnPlatform()
  */
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
+MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
 
-void MFTexture_ScaleImage(MFScaleImage *pScaleData);
+MF_API void MFTexture_ScaleImage(MFScaleImage *pScaleData);
 
 /**
  * Create a scaled texture from raw data.
@@ -225,7 +225,7 @@ void MFTexture_ScaleImage(MFScaleImage *pScaleData);
  * @remarks If TexFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFTexture_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
  * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFTexture_IsAvailableOnPlatform()
  */
-MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFTextureFormat format, MFScalingAlgorithm algorithm, uint32 flags = 0, uint32 *pPalette = 0);
+MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFTextureFormat format, MFScalingAlgorithm algorithm, uint32 flags = 0, uint32 *pPalette = 0);
 
 /**
  * Creates a render target texture.
@@ -236,7 +236,7 @@ MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int source
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
  * @see MFTexture_Create(), MFTexture_Destroy()
  */
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat = TexFmt_SelectNicest);
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat = TexFmt_SelectNicest);
 
 /**
  * Destroys a Texture.
@@ -245,7 +245,7 @@ MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height
  * @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
  * @see MFTexture_Create()
  */
-int MFTexture_Destroy(MFTexture *pTexture);
+MF_API int MFTexture_Destroy(MFTexture *pTexture);
 
 /**
  * Find an existing texture.
@@ -256,7 +256,7 @@ int MFTexture_Destroy(MFTexture *pTexture);
  * @remarks MFTexture_Create does NOT increase the reference count of the texture so it is not required to destroy any texture returned by MFTexture_FindTexture().
  * @see MFTexture_Create()
  */
-MFTexture* MFTexture_FindTexture(const char *pName);
+MF_API MFTexture* MFTexture_FindTexture(const char *pName);
 
 /**
  * Create a blank plain coloured texture.
@@ -266,7 +266,7 @@ MFTexture* MFTexture_FindTexture(const char *pName);
  * @return Returns a pointer to a newly created blank texture.
  * @see MFTexture_Create()
  */
-MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
+MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
 
 /**
  * Get a string representing the texture format.
@@ -275,7 +275,7 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
  * @return Pointer to a string representing the texture format.
  * @see MFTexture_GetPlatformAvailability(), MFTexture_GetBitsPerPixel()
  */
-const char * const MFTexture_GetFormatString(int format);
+MF_API const char * const MFTexture_GetFormatString(int format);
 
 /**
  * Gets all platforms that support the specified texture format in hardware.
@@ -284,7 +284,7 @@ const char * const MFTexture_GetFormatString(int format);
  * @return Result is a bitfield where each bit represents hardware support for a specific platform. Platform support can be tested, for example, using: ( result & MFBIT(FP_PC) ) != 0.
  * @see MFTexture_GetFormatString(), MFTexture_GetBitsPerPixel()
  */
-uint32 MFTexture_GetPlatformAvailability(int format);
+MF_API uint32 MFTexture_GetPlatformAvailability(int format);
 
 /**
  * Tests to see if a texture format is available on the current platform.
@@ -293,7 +293,7 @@ uint32 MFTexture_GetPlatformAvailability(int format);
  * @return Returns true if specified format is supported in hardware.
  * @see MFTexture_GetPlatformAvailability()
  */
-bool MFTexture_IsAvailable(int format);
+MF_API bool MFTexture_IsAvailable(int format);
 
 /**
  * Tests to see if a texture format is available on a specified platform.
@@ -303,7 +303,7 @@ bool MFTexture_IsAvailable(int format);
  * @return Returns true if specified format is supported in hardware.
  * @see MFTexture_GetPlatformAvailability()
  */
-bool MFTexture_IsAvailableOnPlatform(int format, int platform);
+MF_API bool MFTexture_IsAvailableOnPlatform(int format, int platform);
 
 /**
  * Get the average number of bits per pixel for a specified format.
@@ -312,9 +312,9 @@ bool MFTexture_IsAvailableOnPlatform(int format, int platform);
  * @return Returns the number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
  * @see MFTexture_GetPlatformAvailability(), MFTexture_GetFormatString()
  */
-int MFTexture_GetBitsPerPixel(int format);
+MF_API int MFTexture_GetBitsPerPixel(int format);
 
-void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight);
+MF_API void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight);
 
 #endif // _TEXTURE_H
 

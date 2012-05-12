@@ -9,18 +9,18 @@
 	MFInitStatus MFPrimitive_InitModule_##driver(); \
 	void MFPrimitive_DeinitModule_##driver(); \
 	void MFPrimitive_DrawStats_##driver(); \
-	void MFPrimitive_##driver(uint32 type, uint32 hint); \
-	void MFBegin_##driver(uint32 vertexCount); \
-	void MFSetMatrix_##driver(const MFMatrix &mat); \
-	void MFSetColour_##driver(float r, float g, float b, float a); \
-	void MFSetTexCoord1_##driver(float u, float v); \
-	void MFSetNormal_##driver(float x, float y, float z); \
-	void MFSetPosition_##driver(float x, float y, float z); \
-	void MFEnd_##driver(); \
-	void MFPrimitive_BeginBlitter_##driver(int numBlits); \
-	void MFPrimitive_Blit_##driver(int x, int y, int tx, int ty, int tw, int th); \
-	void MFPrimitive_StretchBlit_##driver(int x, int y, int w, int h, int tx, int ty, int tw, int th); \
-	void MFPrimitive_EndBlitter_##driver();
+	MF_API void MFPrimitive_##driver(uint32 type, uint32 hint); \
+	MF_API void MFBegin_##driver(uint32 vertexCount); \
+	MF_API void MFSetMatrix_##driver(const MFMatrix &mat); \
+	MF_API void MFSetColour_##driver(float r, float g, float b, float a); \
+	MF_API void MFSetTexCoord1_##driver(float u, float v); \
+	MF_API void MFSetNormal_##driver(float x, float y, float z); \
+	MF_API void MFSetPosition_##driver(float x, float y, float z); \
+	MF_API void MFEnd_##driver(); \
+	MF_API void MFPrimitive_BeginBlitter_##driver(int numBlits); \
+	MF_API void MFPrimitive_Blit_##driver(int x, int y, int tx, int ty, int tw, int th); \
+	MF_API void MFPrimitive_StretchBlit_##driver(int x, int y, int w, int h, int tx, int ty, int tw, int th); \
+	MF_API void MFPrimitive_EndBlitter_##driver();
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -115,62 +115,62 @@ void MFPrimitive_DrawStats()
 	gpCurrentPrimitivePlugin->pDrawStats();
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	gpCurrentPrimitivePlugin->pMFPrimitive(type, hint);
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	gpCurrentPrimitivePlugin->pMFBegin(vertexCount);
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	gpCurrentPrimitivePlugin->pMFSetMatrix(mat);
 }
 
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 	gpCurrentPrimitivePlugin->pMFSetColour(r, g, b, a);
 }
 
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	gpCurrentPrimitivePlugin->pMFSetTexCoord1(u, v);
 }
 
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 	gpCurrentPrimitivePlugin->pMFSetNormal(x, y, z);
 }
 
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	gpCurrentPrimitivePlugin->pMFSetPosition(x, y, z);
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	gpCurrentPrimitivePlugin->pMFEnd();
 }
 
-void MFPrimitive_BeginBlitter(int numBlits)
+MF_API void MFPrimitive_BeginBlitter(int numBlits)
 {
 	gpCurrentPrimitivePlugin->pBeginBlitter(numBlits);
 }
 
-void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 {
 	gpCurrentPrimitivePlugin->pBlit(x, y, tx, ty, tw, th);
 }
 
-void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
+MF_API void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
 	gpCurrentPrimitivePlugin->pStretchBlit(x, y, w, h, tx, ty, tw, th);
 }
 
-void MFPrimitive_EndBlitter()
+MF_API void MFPrimitive_EndBlitter()
 {
 	gpCurrentPrimitivePlugin->pEndBlitter();
 }

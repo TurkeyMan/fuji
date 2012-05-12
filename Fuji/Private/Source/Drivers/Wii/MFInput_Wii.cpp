@@ -116,7 +116,7 @@ const char* MFInput_GetGamepadButtonNameInternal(int button, int sourceID)
 	return gGCButtonNames[button];
 }
 
-bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
+MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 {
 	return false;
 }

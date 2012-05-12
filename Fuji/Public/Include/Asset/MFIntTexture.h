@@ -43,17 +43,17 @@ struct MFIntTexture
 	bool oneBitAlpha;
 };
 
-MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename);
-MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format);
+MF_API MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename);
+MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntTextureFormat format);
 
-void MFIntTexture_Destroy(MFIntTexture *pTexture);
+MF_API void MFIntTexture_Destroy(MFIntTexture *pTexture);
 
-void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags = 0, MFTextureFormat targetFormat = TexFmt_Unknown);
+MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags = 0, MFTextureFormat targetFormat = TexFmt_Unknown);
 
-void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename);
+MF_API void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename);
 
-void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels, uint32 mipFilterOptions);
-void MFIntTexture_ScanImage(MFIntTexture *pTexture);
-void MFIntTexture_FlipImage(MFIntTexture *pTexture);
+MF_API void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels, uint32 mipFilterOptions);
+MF_API void MFIntTexture_ScanImage(MFIntTexture *pTexture);
+MF_API void MFIntTexture_FlipImage(MFIntTexture *pTexture);
 
 #endif

@@ -64,12 +64,12 @@ void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 	return pThreadInfo;
 }
 
-void MFThread_ExitThread(int exitCode)
+MF_API void MFThread_ExitThread(int exitCode)
 {
 	sceKernelExitThread(exitCode);
 }
 
-void MFThread_TerminateThread(MFThread thread)
+MF_API void MFThread_TerminateThread(MFThread thread)
 {
 	MFThreadInfoPSP *pThreadInfo = (MFThreadInfoPSP*)thread;
 
@@ -85,42 +85,42 @@ void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 }
 
 
-MFMutex MFThread_CreateMutex(const char *pName)
+MF_API MFMutex MFThread_CreateMutex(const char *pName)
 {
 	return (MFMutex)sceKernelCreateSema(pName, 0, 1, 1, NULL);
 }
 
-void MFThread_DestroyMutex(MFMutex mutex)
+MF_API void MFThread_DestroyMutex(MFMutex mutex)
 {
 	sceKernelDeleteSema((SceUID)mutex);
 }
 
-void MFThread_LockMutex(MFMutex mutex)
+MF_API void MFThread_LockMutex(MFMutex mutex)
 {
 	sceKernelWaitSema((SceUID)mutex, 1, NULL);
 }
 
-void MFThread_ReleaseMutex(MFMutex mutex)
+MF_API void MFThread_ReleaseMutex(MFMutex mutex)
 {
 	sceKernelSignalSema((SceUID)mutex, 1);
 }
 
-MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
+MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
 {
 	return (MFSemaphore)sceKernelCreateSema(pName, 0, startCount, maxCount, NULL);
 }
 
-void MFThread_DestroySemaphore(MFSemaphore semaphore)
+MF_API void MFThread_DestroySemaphore(MFSemaphore semaphore)
 {
 	sceKernelDeleteSema((SceUID)semaphore);
 }
 
-uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
+MF_API uint32 MFThread_WaitSemaphore(MFSemaphore semaphore)
 {
 	return (uint32)sceKernelWaitSema((SceUID)semaphore, 1, NULL);
 }
 
-void MFThread_SignalSemaphore(MFSemaphore semaphore)
+MF_API void MFThread_SignalSemaphore(MFSemaphore semaphore)
 {
 	sceKernelSignalSema((SceUID)semaphore, 1);
 }

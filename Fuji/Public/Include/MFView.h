@@ -17,7 +17,7 @@
  * @return None.
  * @see MFView_Pop()
  */
-void MFView_Push();
+MF_API void MFView_Push();
 
 /**
  * Pop the top view state.
@@ -25,7 +25,7 @@ void MFView_Push();
  * @return None.
  * @see MFView_Push()
  */
-void MFView_Pop();
+MF_API void MFView_Pop();
 
 /**
  * Configure the view to defaults.
@@ -34,7 +34,7 @@ void MFView_Pop();
  * @see MFView_Push()
  * @see MFView_Pop()
  */
-void MFView_SetDefault();
+MF_API void MFView_SetDefault();
 
 /**
  * Configure the projection matrix.
@@ -46,7 +46,7 @@ void MFView_SetDefault();
  * @see MFView_SetProjection()
  * @see MFView_SetAspectRatio()
  */
-void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPlane);
+MF_API void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPlane);
 
 /**
  * Set a custom projection matrix.
@@ -57,7 +57,7 @@ void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float farPla
  * @see MFView_SetProjection()
  * @see MFView_SetOrtho()
  */
-void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp);
+MF_API void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp);
 
 /**
  * Set the aspect ratio.
@@ -66,7 +66,7 @@ void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp);
  * @return None.
  * @see MFView_ConfigureProjection()
  */
-void MFView_SetAspectRatio(float aspectRatio);
+MF_API void MFView_SetAspectRatio(float aspectRatio);
 
 /**
  * Set the view to projection mode.
@@ -74,7 +74,7 @@ void MFView_SetAspectRatio(float aspectRatio);
  * @return None.
  * @see MFView_SetOrtho()
  */
-void MFView_SetProjection();
+MF_API void MFView_SetProjection();
 
 /**
  * Set the view to orthographic mode.
@@ -83,7 +83,7 @@ void MFView_SetProjection();
  * @return None.
  * @see MFView_SetProjection()
  */
-void MFView_SetOrtho(MFRect *pOrthoRect = NULL);
+MF_API void MFView_SetOrtho(MFRect *pOrthoRect = NULL);
 
 /**
  * Get the current ortho rect.
@@ -92,7 +92,7 @@ void MFView_SetOrtho(MFRect *pOrthoRect = NULL);
  * @return None.
  * @see MFView_SetOrtho()
  */
-void MFView_GetOrthoRect(MFRect *pOrthoRect);
+MF_API void MFView_GetOrthoRect(MFRect *pOrthoRect);
 
 /**
  * Test for ortho state.
@@ -100,7 +100,7 @@ void MFView_GetOrthoRect(MFRect *pOrthoRect);
  * @return Returns true if ortho mode is enabled.
  * @see MFView_SetOrtho()
  */
-bool MFView_IsOrtho();
+MF_API bool MFView_IsOrtho();
 
 /**
  * Sets the camera matrix.
@@ -109,7 +109,7 @@ bool MFView_IsOrtho();
  * @return None.
  * @see MFView_GetCameraMatrix()
  */
-void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
+MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
 
 /**
  * Gets the camera matrix.
@@ -117,7 +117,7 @@ void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
  * @return Const ref to the current camera matrix.
  * @see MFView_SetCameraMatrix()
  */
-const MFMatrix& MFView_GetCameraMatrix();
+MF_API const MFMatrix& MFView_GetCameraMatrix();
 
 /**
  * Gets the World to View matrix.
@@ -126,7 +126,7 @@ const MFMatrix& MFView_GetCameraMatrix();
  * @see MFView_GetViewToScreenMatrix()
  * @see MFView_GetWorldToScreenMatrix()
  */
-const MFMatrix& MFView_GetWorldToViewMatrix();
+MF_API const MFMatrix& MFView_GetWorldToViewMatrix();
 
 /**
  * Gets the View to Screen matrix.
@@ -135,7 +135,7 @@ const MFMatrix& MFView_GetWorldToViewMatrix();
  * @see MFView_GetWorldToViewMatrix()
  * @see MFView_GetWorldToScreenMatrix()
  */
-const MFMatrix& MFView_GetViewToScreenMatrix();
+MF_API const MFMatrix& MFView_GetViewToScreenMatrix();
 
 /**
  * Gets the World to Screen matrix.
@@ -144,7 +144,7 @@ const MFMatrix& MFView_GetViewToScreenMatrix();
  * @see MFView_GetWorldToViewMatrix()
  * @see MFView_GetViewToScreenMatrix()
  */
-const MFMatrix& MFView_GetWorldToScreenMatrix();
+MF_API const MFMatrix& MFView_GetWorldToScreenMatrix();
 
 /**
  * Builds a Local to Screen matrix.
@@ -155,7 +155,7 @@ const MFMatrix& MFView_GetWorldToScreenMatrix();
  * @see MFView_GetWorldToScreenMatrix()
  * @see MFView_GetLocalToView()
  */
-MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput);
+MF_API MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutput);
 
 /**
  * Builds a Local to View matrix.
@@ -166,12 +166,12 @@ MFMatrix* MFView_GetLocalToScreen(const MFMatrix& localToWorld, MFMatrix *pOutpu
  * @see MFView_GetWorldToViewMatrix()
  * @see MFView_GetLocalToScreen()
  */
-MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput);
+MF_API MFMatrix* MFView_GetLocalToView(const MFMatrix& localToWorld, MFMatrix *pOutput);
 
 
 // not sure how to do these, since we dont store either matrix, and we only have one available at a time...
-void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult);
-void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult);
+MF_API void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult, MFVector *pResultRayDir);
+MF_API void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult);
 
 #endif
 

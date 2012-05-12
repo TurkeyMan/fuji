@@ -10,7 +10,7 @@
 #define _MFANIMATION_H
 
 struct MFModel;
-class MFMatrix;
+struct MFMatrix;
 
 /**
  * @struct MFAnimation
@@ -26,7 +26,7 @@ struct MFAnimation;
  * @return Returns a new instance of the specified animation.
  * @see MFAnimation_Destroy(), MFAnimation_CalculateMatrices()
  */
-MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
+MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
 
 /**
  * Destroy an animation.
@@ -35,7 +35,7 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
  * @return Returns the new reference count of the animation. If the returned reference count is 0, the animation is model.
  * @see MFAnimation_Create()
  */
-int MFAnimation_Destroy(MFAnimation *pAnimation);
+MF_API int MFAnimation_Destroy(MFAnimation *pAnimation);
 
 /**
  * Calculate the animation matrices.
@@ -45,7 +45,7 @@ int MFAnimation_Destroy(MFAnimation *pAnimation);
  * @return Returns a pointer to the array of calculated animation matrices.
  * @see MFAnimation_Create()
  */
-MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld);
+MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld);
 
 /**
  * Get the animations frame range.
@@ -56,7 +56,7 @@ MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLoca
  * @return None.
  * @see MFAnimation_SetFrame()
  */
-void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime);
+MF_API void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime);
 
 /**
  * Set the current frame.
@@ -66,7 +66,7 @@ void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float
  * @return None.
  * @see MFAnimation_GetFrameRange()
  */
-void MFAnimation_SetFrame(MFAnimation *pAnimation, float frameTime);
+MF_API void MFAnimation_SetFrame(MFAnimation *pAnimation, float frameTime);
 
 #endif
 

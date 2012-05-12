@@ -8,7 +8,7 @@
 
 /**** Structures ****/
 
-MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
+MF_API MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
 {
 	MFAudioStream *pStream = MFSound_CreateStream(pFilename, MFASF_DecodeOnly | MFASF_QueryLength);
 	if(!pStream)
@@ -30,19 +30,19 @@ MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
 	return pSound;
 }
 
-MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, size_t size, const char *pFormatExtension)
+MF_API MFIntSound *MFIntSound_CreateFromFileInMemory(const void *pMemory, size_t size, const char *pFormatExtension)
 {
 	// create a memory file, and then use CreateFromFile()
 	return NULL;
 }
 
-void MFIntSound_Destroy(MFIntSound *pSound)
+MF_API void MFIntSound_Destroy(MFIntSound *pSound)
 {
 	MFSound_DestroyStream((MFAudioStream*)pSound->pInternal);
 	MFHeap_Free(pSound);
 }
 
-void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	*ppOutput = NULL;
 

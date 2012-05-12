@@ -63,7 +63,7 @@
 #if !defined(_RETAIL)
 
 // external debug assert functions
-void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line);
+MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line);
 
 /**
  * @fn void MFDebug_Assert(bool condition, const char *pMessage)
@@ -91,7 +91,7 @@ void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *
  * @param pMessage Message to be written to the debug output.
  * @return None.
  */
-void MFDebug_Message(const char *pMessage);
+MF_API void MFDebug_Message(const char *pMessage);
 
 /**
  * Notifies the user of a critical error.
@@ -99,7 +99,7 @@ void MFDebug_Message(const char *pMessage);
  * @param pErrorMessage Error message.
  * @return None.
  */
-void MFDebug_Error(const char *pErrorMessage);
+MF_API void MFDebug_Error(const char *pErrorMessage);
 
 /**
  * Notifies the user of a runtime warning.
@@ -116,7 +116,7 @@ void MFDebug_Error(const char *pErrorMessage);
  * - 3 - General Warning. For general information feedback.
  * - 4 - Low Warning. For small generally unimportant details.
  */
-void MFDebug_Warn(int level, const char *pWarningMessage);
+MF_API void MFDebug_Warn(int level, const char *pWarningMessage);
 
 /**
  * Log a message to the debug output.
@@ -133,7 +133,7 @@ void MFDebug_Warn(int level, const char *pWarningMessage);
  * - 3 - Typically unwanted message.
  * - 4 - Very trivial and probably frequent spammy message.
  */
-void MFDebug_Log(int level, const char *pMessage);
+MF_API void MFDebug_Log(int level, const char *pMessage);
 
 /**
  * Sets the maximum warning level.
@@ -141,7 +141,7 @@ void MFDebug_Log(int level, const char *pMessage);
  * @param maxLevel Maximum warning level (0-4).
  * @return None.
  */
-void MFDebug_SetMaximumWarningLevel(int maxLevel);
+MF_API void MFDebug_SetMaximumWarningLevel(int maxLevel);
 
 /**
  * Sets the maximum log level.
@@ -149,7 +149,7 @@ void MFDebug_SetMaximumWarningLevel(int maxLevel);
  * @param maxLevel Maximum log level (0-4).
  * @return None.
  */
-void MFDebug_SetMaximumLogLevel(int maxLevel);
+MF_API void MFDebug_SetMaximumLogLevel(int maxLevel);
 
 #else
 

@@ -26,9 +26,8 @@ enum MFSwizzleFlags
 };
 
 MFALIGN_BEGIN(16)
-class MFVector
+struct MF_EXPORT_VARIABLE MFVector
 {
-public:
 	struct
 	{
 		float x, y, z, w;
@@ -184,9 +183,8 @@ MFVector MFRand_Vector();
  * Vector class to perform various vector operations.
  * Vector class used throughout Fuji. Optimised for each platform.
  */
-class MFVector
+struct MF_EXPORT_VARIABLE MFVector
 {
-public:
 	struct
 	{
 		float x; /**< X component */

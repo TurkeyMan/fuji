@@ -31,7 +31,7 @@ Texture* MFTexture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-Texture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
+MF_API Texture* MFTexture_CreateRenderTarget(const char *pName, int width, int height)
 {
 	MFDebug_Assert(false, "Not Written...");
 

@@ -80,12 +80,12 @@ void MFTexture_DeinitModule()
 	MFTexture_DeinitModulePlatformSpecific();
 }
 
-MFTexture* MFTexture_FindTexture(const char *pName)
+MF_API MFTexture* MFTexture_FindTexture(const char *pName)
 {
 	return gTextureBank.Get(pName);
 }
 
-MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
+MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -148,14 +148,14 @@ MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 	return pTexture;
 }
 
-MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags)
+MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFTextureFormat format, uint32 flags)
 {
 	MFDebug_Assert(false, "Not written!");
 
 	return NULL;
 }
 
-MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFTextureFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
 {
 	MFCALLSTACK;
 
@@ -283,7 +283,7 @@ MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width
 	return pTexture;
 }
 
-void MFTexture_ScaleImage(MFScaleImage *pScaleData)
+MF_API void MFTexture_ScaleImage(MFScaleImage *pScaleData)
 {
 	uint32 *pSource = (uint32*)pScaleData->pSourceImage;
 	uint32 *pDest = (uint32*)pScaleData->pTargetBuffer;
@@ -646,7 +646,7 @@ void MFTexture_ScaleImage(MFScaleImage *pScaleData)
 	}
 }
 
-MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int destWidth, int destHeight, MFTextureFormat format, MFScalingAlgorithm algorithm, uint32 flags, uint32 *pPalette)
+MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int destWidth, int destHeight, MFTextureFormat format, MFScalingAlgorithm algorithm, uint32 flags, uint32 *pPalette)
 {
 	MFCALLSTACK;
 
@@ -779,7 +779,7 @@ MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int source
 	return pTexture;
 }
 
-MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
+MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 {
 	uint32 *pPixels = (uint32*)blankBuffer;
 
@@ -790,7 +790,7 @@ MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour)
 	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, TexFmt_A8R8G8B8, TEX_CopyMemory, false);
 }
 
-int MFTexture_Destroy(MFTexture *pTexture)
+MF_API int MFTexture_Destroy(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
@@ -809,7 +809,7 @@ int MFTexture_Destroy(MFTexture *pTexture)
 	return pTexture->refCount;
 }
 
-void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
+MF_API void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
 {
 	if(pWidth)
 		*pWidth = pTexture->pTemplateData->pSurfaces[0].width;
@@ -854,11 +854,11 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	MFPrimitive(PT_TriStrip|PT_Untextured);
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
-	MFSetPosition(pos);
-	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
-	MFSetPosition(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetColourV(MFVector::white);
+	MFSetPositionV(pos);
+	MFSetPositionV(pos + MakeVector(TEX_SIZE + 4.0f, 0.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(0.0f, TEX_SIZE + 4.0f, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE + 4.0f, TEX_SIZE + 4.0f, 0.0f));
 	MFEnd();
 
 	pos += MakeVector(2.0f, 2.0f, 0.0f);
@@ -875,7 +875,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 			y = pos.y + (float)a*h;
 
 			MFBegin(4);
-			MFSetColour(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
+			MFSetColourV(((a+b)&1) ? MakeVector(.75f, .75f, .75f, 1.f) : MakeVector(.2f, .2f, .2f, 1.f));
 			MFSetPosition(x,y,0);
 			MFSetPosition(x+w,y,0);
 			MFSetPosition(x,y+h,0);
@@ -932,15 +932,15 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 #endif
 
 	MFBegin(4);
-	MFSetColour(MFVector::white);
+	MFSetColourV(MFVector::white);
 	MFSetTexCoord1(0.0f,0.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(1.0f,0.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f - TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(0.0f,1.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE*0.5f - TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
 	MFSetTexCoord1(1.0f,1.0f);
-	MFSetPosition(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
+	MFSetPositionV(pos + MakeVector(TEX_SIZE*0.5f + TEX_SIZE*xaspect, TEX_SIZE*0.5f + TEX_SIZE*yaspect, 0.0f));
 	MFEnd();
 
 	return TEX_SIZE + 8.0f;

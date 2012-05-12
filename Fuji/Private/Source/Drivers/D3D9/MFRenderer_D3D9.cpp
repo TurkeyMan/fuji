@@ -415,7 +415,7 @@ void MFRenderer_EndFrame()
 	}
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
 {
 	gClearColour.x = r;
 	gClearColour.y = g;
@@ -423,19 +423,19 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
 
 	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
+MF_API void MFRenderer_GetViewport(MFRect *pRect)
 {
 	*pRect = gCurrentViewport;
 }
 
-void MFRenderer_SetViewport(MFRect *pRect)
+MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;
 
@@ -452,7 +452,7 @@ void MFRenderer_SetViewport(MFRect *pRect)
 	pd3dDevice->SetViewport(&vp);
 }
 
-void MFRenderer_ResetViewport()
+MF_API void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
@@ -480,7 +480,7 @@ void MFRenderer_ResetViewport()
 	pd3dDevice->SetViewport(&vp);
 }
 
-void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
 
@@ -509,13 +509,13 @@ void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 	}
 }
 
-void MFRenderer_SetDeviceRenderTarget()
+MF_API void MFRenderer_SetDeviceRenderTarget()
 {
 	pd3dDevice->SetRenderTarget(0, pRenderTarget);
 	pd3dDevice->SetDepthStencilSurface(pZTarget);
 }
 
-float MFRenderer_GetTexelCenterOffset()
+MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }

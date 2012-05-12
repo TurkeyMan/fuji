@@ -34,7 +34,9 @@ static const char * const gPlatformStrings[FP_Max] =
 	"WII",
 	"SYM",
 	"IPH",
-	"WM"
+	"AND",
+	"WM",
+	"NACL"
 };
 
 static const char * const gPlatformNames[FP_Max] =
@@ -53,7 +55,9 @@ static const char * const gPlatformNames[FP_Max] =
 	"Nintendo Wii",
 	"Symbian",
 	"iPhone",
-	"Windows Mobile"
+	"Android",
+	"Windows Mobile",
+	"Native Client"
 };
 
 static MFEndian gPlatformEndian[FP_Max] =
@@ -75,17 +79,17 @@ static MFEndian gPlatformEndian[FP_Max] =
 	MFEndian_LittleEndian
 };
 
-const char * MFSystem_GetPlatformString(int platform)
+MF_API const char * MFSystem_GetPlatformString(int platform)
 {
 	return gPlatformStrings[platform];
 }
 
-const char * MFSystem_GetPlatformName(int platform)
+MF_API const char * MFSystem_GetPlatformName(int platform)
 {
 	return gPlatformNames[platform];
 }
 
-MFEndian MFSystem_GetPlatformEndian(int platform)
+MF_API MFEndian MFSystem_GetPlatformEndian(int platform)
 {
 	return gPlatformEndian[platform];
 }
@@ -129,7 +133,7 @@ void MFUtil_CrcInit()
 }
 
 // generate a unique Crc value for this buffer
-uint32 MFUtil_Crc(const char *pBuffer, int length)
+MF_API uint32 MFUtil_Crc(const char *pBuffer, int length)
 {
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
@@ -140,7 +144,7 @@ uint32 MFUtil_Crc(const char *pBuffer, int length)
 }
 
 // generate a unique Crc value for this string, strings are treated case INSENSITIVE
-uint32 MFUtil_CrcString(const char *pString)
+MF_API uint32 MFUtil_CrcString(const char *pString)
 {
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
@@ -156,7 +160,7 @@ uint32 MFUtil_CrcString(const char *pString)
 #if defined(USE_FNV)
 
 // using the FNV-1a hash algorithm
-uint32 MFUtil_HashString(const char *pString)
+MF_API uint32 MFUtil_HashString(const char *pString)
 {
 	uint32 hash = 2166136261;
 
@@ -169,7 +173,7 @@ uint32 MFUtil_HashString(const char *pString)
 #else
 
 // using the one-at-a-time algorithm
-uint32 MFUtil_HashString(const char *s)
+MF_API uint32 MFUtil_HashString(const char *s)
 {
     uint32 hash = 0;
 

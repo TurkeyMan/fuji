@@ -114,7 +114,7 @@ void MFVertex_DeinitModulePlatformSpecific()
 {
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
 {
 	MFDebug_Assert(pElementArray, "Null element array");
 
@@ -261,7 +261,7 @@ MFVertexDeclaration *MFVertex_CreateVertexDeclaration2(MFMeshVertexFormat *pMVF)
 	return pDecl;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
+MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 {
 	if (pDeclaration)
 	{
@@ -272,7 +272,7 @@ void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 	MFHeap_Free(pDeclaration);
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
 {
 	if (!pVertexFormat)
 	{
@@ -306,7 +306,7 @@ MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, 
 	return pVB;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	if (pVertexBuffer)
 	{
@@ -317,7 +317,7 @@ void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	MFHeap_Free(pVertexBuffer);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
@@ -353,7 +353,7 @@ void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	pVertexBuffer->bLocked = true;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
@@ -361,7 +361,7 @@ void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	pVertexBuffer->bLocked = false;
 }
 //---------------------------------------------------------------------------------------------------------------------
-MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
+MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
 {
     D3D11_BUFFER_DESC bd;
     MFZeroMemory(&bd, sizeof(bd));
@@ -389,7 +389,7 @@ MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMe
 	return pIB;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	if (pIndexBuffer)
 	{
@@ -400,7 +400,7 @@ void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	MFHeap_Free(pIndexBuffer);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
+MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 {
 	MFDebug_Assert(pIndexBuffer, "Null index buffer");
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Index buffer already locked!");
@@ -410,7 +410,7 @@ void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 	pIndexBuffer->bLocked = true;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer, "Null index buffer");
 	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer already locked!");
@@ -437,13 +437,13 @@ void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	pIndexBuffer->bLocked = false;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
+MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
 {
 	ID3D11InputLayout *pVertexLayout = pVertexDeclaration ? (ID3D11InputLayout*)pVertexDeclaration->pPlatformData : NULL;
     g_pImmediateContext->IASetInputLayout(pVertexLayout);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 
@@ -457,13 +457,13 @@ void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 	//	MFVertex_SetVertexDeclaration(pVertexBuffer->pVertexDeclatation);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
 	g_pImmediateContext->Draw(numVertices, firstVertex);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer, "Null index buffer");
 

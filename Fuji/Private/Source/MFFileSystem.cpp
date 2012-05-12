@@ -373,7 +373,7 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 }
 
 // interface functions
-const char* MFFile_SystemPath(const char *pFilename)
+MF_API const char* MFFile_SystemPath(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -387,7 +387,7 @@ const char* MFFile_SystemPath(const char *pFilename)
 #endif
 }
 
-const char* MFFile_HomePath(const char *pFilename)
+MF_API const char* MFFile_HomePath(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -407,7 +407,7 @@ const char* MFFile_HomePath(const char *pFilename)
 
 ///////////////////////////
 // file access functions
-MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
+MF_API MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
 
@@ -427,7 +427,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 	return pFile;
 }
 
-int MFFile_Close(MFFile* fileHandle)
+MF_API int MFFile_Close(MFFile* fileHandle)
 {
 	MFCALLSTACK;
 
@@ -438,14 +438,14 @@ int MFFile_Close(MFFile* fileHandle)
 }
 
 // read/write functions
-int MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
+MF_API int MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
 {
 	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
 }
 
-int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
+MF_API int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
 {
 	MFCALLSTACK;
 
@@ -453,51 +453,51 @@ int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool asy
 }
 
 // offset management (these are stdio function signature compliant)
-int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+MF_API int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
 	return ppFileSystemList[fileHandle->filesystem]->callbacks.Seek(fileHandle, bytes, relativity);
 }
 
-int MFFile_Tell(MFFile* fileHandle)
+MF_API int MFFile_Tell(MFFile* fileHandle)
 {
 	return (int)fileHandle->offset;
 }
 
 // get file stream length (retuurs -1 for an undefined stream length)
-int64 MFFile_GetSize(MFFile* fileHandle)
+MF_API int64 MFFile_GetSize(MFFile* fileHandle)
 {
 	return fileHandle->length;
 }
 
-bool MFFile_IsEOF(MFFile* fileHandle)
+MF_API bool MFFile_IsEOF(MFFile* fileHandle)
 {
 	return fileHandle->offset == fileHandle->length;
 }
 
 // stdio signiture functions (these can be used as a callback to many libs and API's)
-size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
+MF_API size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
 	return (size_t)MFFile_Read((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
 }
 
-size_t MFFile_StdWrite(void *pBuffer, size_t size, size_t count, void* fileHandle)
+MF_API size_t MFFile_StdWrite(const void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
 	return (size_t)MFFile_Write((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
 }
-int MFFile_StdClose(void* fileHandle)
+MF_API int MFFile_StdClose(void* fileHandle)
 {
 	return MFFile_Close((MFFile*)fileHandle);
 }
 
-long MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
+MF_API long MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
 {
 	long seek = (long)MFFile_Seek((MFFile*)fileHandle, (int)bytes, (MFFileSeek)relativity);
 	return seek < 0 ? seek : 0;
 }
 
-long MFFile_StdTell(void* fileHandle)
+MF_API long MFFile_StdTell(void* fileHandle)
 {
 	return (long)MFFile_Tell((MFFile*)fileHandle);
 }
@@ -506,7 +506,7 @@ long MFFile_StdTell(void* fileHandle)
 // mounted filesystem access
 
 // return a handle to a specific filesystem
-MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle)
+MF_API MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle)
 {
 	MFCALLSTACK;
 
@@ -775,7 +775,7 @@ int MFFileSystem_AddVolume(MFMount *pMount)
 }
 
 // mount a filesystem
-int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
+MF_API int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 {
 	MFCALLSTACK;
 
@@ -800,7 +800,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 	return MFFileSystem_AddVolume(pMount);
 }
 
-int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority, uint32 flags)
+MF_API int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority, uint32 flags)
 {
 	const char *pColon = MFString_Chr(pFujiPath, ':');
 	if(!pColon)
@@ -827,7 +827,7 @@ int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, i
 	return MFFileSystem_AddVolume(pNew);
 }
 
-int MFFileSystem_Dismount(const char *pMountpoint)
+MF_API int MFFileSystem_Dismount(const char *pMountpoint)
 {
 	MFCALLSTACK;
 
@@ -918,7 +918,7 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 }
 
 // open a file from the mounted filesystem stack
-MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
+MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
 	MFCALLSTACK;
 
@@ -965,7 +965,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 }
 
 // read/write a file to a filesystem
-char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool bAppendNullByte)
+MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool bAppendNullByte)
 {
 	MFCALLSTACK;
 
@@ -996,7 +996,7 @@ char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool bAppendN
 	return pBuffer;
 }
 
-int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
+MF_API int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
 {
 	MFCALLSTACK;
 
@@ -1014,7 +1014,7 @@ int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
-int64 MFFileSystem_GetSize(const char *pFilename)
+MF_API int64 MFFileSystem_GetSize(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -1032,7 +1032,7 @@ int64 MFFileSystem_GetSize(const char *pFilename)
 }
 
 // returns true if the file can be found within the mounted filesystem stack
-bool MFFileSystem_Exists(const char *pFilename)
+MF_API bool MFFileSystem_Exists(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -1049,7 +1049,7 @@ bool MFFileSystem_Exists(const char *pFilename)
 	return exists;
 }
 
-int MFFileSystem_GetNumVolumes()
+MF_API int MFFileSystem_GetNumVolumes()
 {
 	int numVolumes = 0;
 
@@ -1064,7 +1064,7 @@ int MFFileSystem_GetNumVolumes()
 	return numVolumes;
 }
 
-void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
+MF_API void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
 {
 	MFMount *pMount = pMountList;
 
@@ -1079,7 +1079,7 @@ void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
 	*pVolumeInfo = pMount->volumeInfo;
 }
 
-MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData)
+MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData)
 {
 	const char *pMountpoint = NULL;
 	MFFind *pFind = NULL;
@@ -1156,7 +1156,7 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
 	return pFind;
 }
 
-bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
+MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
 	if(!(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
@@ -1189,7 +1189,7 @@ bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 	return true;
 }
 
-void MFFileSystem_FindClose(MFFind *pFind)
+MF_API void MFFileSystem_FindClose(MFFind *pFind)
 {
 	if(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC)
 		ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindClose(pFind);
@@ -1197,7 +1197,7 @@ void MFFileSystem_FindClose(MFFind *pFind)
 	gFinds.Destroy(pFind);
 }
 
-MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable, bool ownMemory)
+MF_API MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable, bool ownMemory)
 {
 	MFOpenDataMemory memory;
 	memory.cbSize = sizeof(MFOpenDataMemory);

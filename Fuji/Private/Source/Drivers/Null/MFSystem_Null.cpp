@@ -26,17 +26,17 @@ void MFSystem_DrawPlatformSpecific()
 {
 }
 
-uint64 MFSystem_ReadRTC()
+MF_API uint64 MFSystem_ReadRTC()
 {
 	return (uint64)clock();
 }
 
-uint64 MFSystem_GetRTCFrequency()
+MF_API uint64 MFSystem_GetRTCFrequency()
 {
 	return CLOCKS_PER_SEC;
 }
 
-const char * MFSystem_GetSystemName()
+MF_API const char * MFSystem_GetSystemName()
 {
 	return "null";
 }

@@ -37,7 +37,7 @@ void MFPrimitive_DrawStats()
 
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
 
@@ -59,7 +59,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFRenderer_Begin();
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
@@ -98,29 +98,19 @@ void MFBegin(uint32 vertexCount)
 	pd3dDevice->SetVertexData4f(D3DVSDE_NORMAL, 0, 1, 0, 0);
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
 	pd3dDevice->SetTransform(D3DTS_WORLD, (D3DMATRIX*)&mat);
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, colour.x, colour.y, colour.z, colour.w);
-}
-
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 	pd3dDevice->SetVertexData4f(D3DVSDE_DIFFUSE, r, g, b, a);
 }
 
-void MFSetColour(uint32 col)
-{
-	pd3dDevice->SetVertexData4ub(D3DVSDE_DIFFUSE, (col>>16)&0xFF, (col>>8)&0xFF, col&0xFF, (col>>24)&0xFF);
-}
-
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	if(primType == PT_QuadList)
 		prevUV.Set(prevUV.z, prevUV.w, u, v);
@@ -128,22 +118,12 @@ void MFSetTexCoord1(float u, float v)
 		pd3dDevice->SetVertexData2f(D3DVSDE_TEXCOORD0, u, v);
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	pd3dDevice->SetVertexData4f(D3DVSDE_NORMAL, normal.x, normal.y, normal.z, 0.0f);
-}
-
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 	pd3dDevice->SetVertexData4f(D3DVSDE_NORMAL, x, y, z, 0.0f);
 }
 
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
-}
-
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	if(primType == PT_QuadList)
 	{
@@ -170,7 +150,7 @@ void MFSetPosition(float x, float y, float z)
 	++currentVert;
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFCALLSTACK;
 

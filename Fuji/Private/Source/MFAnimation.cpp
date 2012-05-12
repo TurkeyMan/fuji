@@ -62,7 +62,7 @@ void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
 	}
 }
 
-MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
+MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 {
 	MFAnimationTemplate *pTemplate = MFAnimation_FindTemplate(pFilename);
 
@@ -159,7 +159,7 @@ MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	return pAnimation;
 }
 
-int MFAnimation_Destroy(MFAnimation *pAnimation)
+MF_API int MFAnimation_Destroy(MFAnimation *pAnimation)
 {
 	--pAnimation->pTemplate->refCount;
 	int refCount = pAnimation->pTemplate->refCount;
@@ -175,7 +175,7 @@ int MFAnimation_Destroy(MFAnimation *pAnimation)
 	return refCount;
 }
 
-MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)
+MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)
 {
 	MFAnimationBone *pAnims = pAnimation->pTemplate->pBones;
 	MFModelBone *pBones = pAnimation->pBones;
@@ -262,7 +262,7 @@ MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLoca
 	return pAnimation->pMatrices;
 }
 
-void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime)
+MF_API void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime)
 {
 	if(pStartTime)
 		*pStartTime = pAnimation->pTemplate->startTime;
@@ -270,7 +270,7 @@ void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float
 		*pEndTime = pAnimation->pTemplate->endTime;
 }
 
-void MFAnimation_SetFrame(MFAnimation *pAnimation, float frameTime)
+MF_API void MFAnimation_SetFrame(MFAnimation *pAnimation, float frameTime)
 {
 	pAnimation->blendLayer.frameTime = frameTime;
 }

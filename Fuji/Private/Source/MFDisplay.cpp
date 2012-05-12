@@ -34,7 +34,7 @@ void MFDisplay_DeinitModule()
 	MFDisplay_DestroyDisplay();
 }
 
-void MFDisplay_GetDisplayRect(MFRect *pRect)
+MF_API void MFDisplay_GetDisplayRect(MFRect *pRect)
 {
 	pRect->x = 0.0f;
 	pRect->y = 0.0f;
@@ -50,7 +50,7 @@ void MFDisplay_GetDisplayRect(MFRect *pRect)
 	}
 }
 
-bool MFDisplay_HasFocus()
+MF_API bool MFDisplay_HasFocus()
 {
 	return gAppHasFocus;
 }

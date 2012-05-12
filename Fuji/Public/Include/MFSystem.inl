@@ -7,7 +7,7 @@ inline float MFSystem_TimeDelta()
 	return gSystemTimeDelta;
 }
 
-inline uint32 MFSystem_GetFrameCounter()
+inline uint32 MFSystem_FrameCounter()
 {
 	return gFrameCount;
 }

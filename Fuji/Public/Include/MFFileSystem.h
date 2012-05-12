@@ -69,7 +69,7 @@ enum MFJobState
  * @param filename Filename to append to the path. This may be set to NULL.
  * @return Returns the path to the game data directory.
  */
-const char* MFFile_SystemPath(const char *filename = NULL);
+MF_API const char* MFFile_SystemPath(const char *filename = NULL);
 
 /**
  * Gets the system home path.
@@ -78,7 +78,7 @@ const char* MFFile_SystemPath(const char *filename = NULL);
  * @return Returns the path to the game home directory.
  * @remarks The home path is typically used for debugging and development purposes (writing logs, screenshots, etc). The game should not require access to the home path.
  */
-const char* MFFile_HomePath(const char *filename = NULL);
+MF_API const char* MFFile_HomePath(const char *filename = NULL);
 
 
 ///////////////////////////
@@ -101,7 +101,7 @@ struct MFOpenData
  * @param pOpenData Pointer to an MFOpenData structure describing the file to open.
  * @return Returns a pointer to the newly opened file, returns NULL if the file open failed.
  */
-MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
+MF_API MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
 
 /**
  * Close a file.
@@ -109,7 +109,7 @@ MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData);
  * @param pFile Pointer to an open file.
  * @return Returns 0 if the file was successfully closed.
  */
-int MFFile_Close(MFFile *pFile);
+MF_API int MFFile_Close(MFFile *pFile);
 
 /**
  * Read data from a file.
@@ -120,7 +120,7 @@ int MFFile_Close(MFFile *pFile);
  * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes read.
  */
-int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
+MF_API int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
 
 /**
  * Write to a file.
@@ -131,7 +131,7 @@ int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
  * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
  * @return Returns the number of bytes written.
  */
-int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
+MF_API int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
 
 /**
  * Seek the file.
@@ -141,7 +141,7 @@ int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = 
  * @param relativity Member of the MFFileSeek enumerated type where to begin the seek.
  * @return Returns the new file offset in bytes.
  */
-int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
+MF_API int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 
 /**
  * Tell the file position.
@@ -149,7 +149,7 @@ int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
  * @param pFile Pointer to an open file.
  * @return Returns the file pointer offset in bytes.
  */
-int MFFile_Tell(MFFile *pFile);
+MF_API int MFFile_Tell(MFFile *pFile);
 
 /**
  * Get the size of a file.
@@ -157,7 +157,7 @@ int MFFile_Tell(MFFile *pFile);
  * @param pFile Pointer to an open file.
  * @return Returns the size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
  */
-int64 MFFile_GetSize(MFFile *pFile);
+MF_API int64 MFFile_GetSize(MFFile *pFile);
 
 /**
  * Check for end of file.
@@ -165,7 +165,7 @@ int64 MFFile_GetSize(MFFile *pFile);
  * @param pFile Pointer to an open file.
  * @return Returns true if the file pointer has reached the end of the file, otherwise false.
  */
-bool MFFile_IsEOF(MFFile *pFile);
+MF_API bool MFFile_IsEOF(MFFile *pFile);
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
 
@@ -176,7 +176,7 @@ bool MFFile_IsEOF(MFFile *pFile);
  * @return Returns 0 if the file was successfully closed.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-int MFFile_StdClose(void* stream);
+MF_API int MFFile_StdClose(void* stream);
 
 /**
  * Read data from a file.
@@ -188,7 +188,7 @@ int MFFile_StdClose(void* stream);
  * @return Returns the number of bytes read.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* stream);
+MF_API size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* stream);
 
 /**
  * Write to a file.
@@ -200,7 +200,7 @@ size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* stream);
  * @return Returns the number of bytes written.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count, void* stream);
+MF_API size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count, void* stream);
 
 /**
  * Seek the file.
@@ -211,7 +211,7 @@ size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count, void* stre
  * @return Returns the new file offset in bytes.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-long MFFile_StdSeek(void* stream, long offset, int whence);
+MF_API long MFFile_StdSeek(void* stream, long offset, int whence);
 
 /**
  * Tell the file position.
@@ -220,7 +220,7 @@ long MFFile_StdSeek(void* stream, long offset, int whence);
  * @return Returns the file pointer offset in bytes.
  * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
  */
-long MFFile_StdTell(void* stream);
+MF_API long MFFile_StdTell(void* stream);
 
 
 //////////////////////////////
@@ -337,7 +337,7 @@ struct MFVolumeInfo
  * @param fileSystemHandle Enum of the filesystem to retrieve.
  * @return Returns the FileSystemHandle for the specified filesystem.
  */
-MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle);
+MF_API MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle);
 
 /**
  * Mounts a filesystem.
@@ -346,7 +346,7 @@ MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles 
  * @param pMountData Pointer to a MFMountData structure filled with all the mount parameters.
  * @return Returns 0 if filesystem was successfully mounted.
  */
-int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData);
+MF_API int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData);
 
 /**
  * Mounts a filesystem from a fuji path.
@@ -357,7 +357,7 @@ int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData);
  * @param flags Mount flags, this can be any combination of values from the MFMountFlags enum.
  * @return Returns 0 if filesystem was successfully mounted.
  */
-int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority = MFMP_Normal, uint32 flags = 0);
+MF_API int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, int priority = MFMP_Normal, uint32 flags = 0);
 
 /**
  * Dismount a filesystem.
@@ -365,7 +365,7 @@ int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFujiPath, i
  * @param pMountpoint The name of the mountpoint for the filesystem to dismount.
  * @return Returns 0 if the filesystem was successfully dismounted.
  */
-int MFFileSystem_Dismount(const char *pMountpoint);
+MF_API int MFFileSystem_Dismount(const char *pMountpoint);
 
 /**
  * Open a file from the mounted filesystem stack.
@@ -374,7 +374,7 @@ int MFFileSystem_Dismount(const char *pMountpoint);
  * @param openFlags Open file flags.
  * @return Returns a pointer to the opened file. Returns NULL if open failed.
  */
-MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
+MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MFOF_Binary);
 
 /**
  * Load a file from the filesystem.
@@ -384,7 +384,7 @@ MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_Read|MF
  * @param bAppendNullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
  * @return Returns a pointer to a new buffer containing the file that was loaded.
  */
-char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, bool bAppendNullByte = false);
+MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, bool bAppendNullByte = false);
 
 /**
  * Write a file to a filesystem.
@@ -394,7 +394,7 @@ char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, bool b
  * @param size Size of the buffer to write.
  * @return Returns 0 if the file was succesfully written.
  */
-int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size);
+MF_API int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size);
 
 /**
  * Get the size of a file.
@@ -403,7 +403,7 @@ int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size);
  * @return Returns the size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0.
  * @remarks If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists. MFFileSystem_GetSize may also return -1 if the files length is not known, for instance, an endless or unknown length network stream.
  */
-int64 MFFileSystem_GetSize(const char *pFilename);
+MF_API int64 MFFileSystem_GetSize(const char *pFilename);
 
 /**
  * See if a file is available to the filesystem.
@@ -411,14 +411,14 @@ int64 MFFileSystem_GetSize(const char *pFilename);
  * @param pFilename The filename to search the filesystem for.
  * @return Returns true if the file can be found within the mounted filesystem stack.
  */
-bool MFFileSystem_Exists(const char *pFilename);
+MF_API bool MFFileSystem_Exists(const char *pFilename);
 
 /**
  * Get number of available volumes.
  * Gets the number of available volumes.
  * @return The number of mounted volumes.
  */
-int MFFileSystem_GetNumVolumes();
+MF_API int MFFileSystem_GetNumVolumes();
 
 /**
  * Get volume mount details.
@@ -427,7 +427,7 @@ int MFFileSystem_GetNumVolumes();
  * @param pVolumeInfo Pointer to an MFVolumeInfo structre that receives the volumes mount details.
  * @return None.
  */
-void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
+MF_API void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
 
 /**
  * Begin a find for files.
@@ -438,7 +438,7 @@ void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
  * @remarks Currently the only valid filename pattern is '*'. For example: "data:subdir/ *" is a valid search pattern.
  * @see MFFileSystem_FindNext(), MFFileSystem_FindClose()
  */
-MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData);
+MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData);
 
 /**
  * Find the next file.
@@ -448,7 +448,7 @@ MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData
  * @return Returns true on success or false if there are no more files in the directory.
  * @see MFFileSystem_FindFirst(), MFFileSystem_FindClose()
  */
-bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);
+MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);
 
 /**
  * Close an open find.
@@ -457,13 +457,13 @@ bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);
  * @return None.
  * @see MFFileSystem_FindFirst()
  */
-void MFFileSystem_FindClose(MFFind *pFind);
+MF_API void MFFileSystem_FindClose(MFFind *pFind);
 
 
 /////////////////////////////////////
 // helper functions, to make life easier
 
-MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable = false, bool ownMemory = false);
+MF_API MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable = false, bool ownMemory = false);
 
 
 /////////////////////////////////////

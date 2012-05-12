@@ -130,7 +130,7 @@ struct MFAllocHeader
 static int gMFHeap_TrackerLine = 0;
 static const char *gpMFHeap_TrackerFile = "Unknown in RETAIL build";
 
-void MFHeap_SetLineAndFile(int line, const char *pFile)
+MF_API void MFHeap_SetLineAndFile(int line, const char *pFile)
 {
 	gMFHeap_TrackerLine = line;
 	gpMFHeap_TrackerFile = pFile;
@@ -209,7 +209,7 @@ void MFHeap_DeinitModule()
 //	MFThread_DestroyMutex(gAllocMutex);
 }
 
-void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
+MF_API void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 {
 	MFCALLSTACK;
 
@@ -281,7 +281,7 @@ void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 	return (void*)pMemory;
 }
 
-void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap)
+MF_API void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap)
 {
 	void *pMem = MFHeap_AllocInternal(bytes, pHeap);
 	if(pMem)
@@ -289,7 +289,7 @@ void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap)
 	return pMem;
 }
 
-void *MFHeap_ReallocInternal(void *pMem, size_t bytes)
+MF_API void *MFHeap_ReallocInternal(void *pMem, size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -313,7 +313,7 @@ void *MFHeap_ReallocInternal(void *pMem, size_t bytes)
 	}
 }
 
-void MFHeap_Free(void *pMem)
+MF_API void MFHeap_Free(void *pMem)
 {
 	MFCALLSTACK;
 
@@ -443,23 +443,23 @@ void operator delete[](void *pMemory, void *pMem)
 }
 #endif
 
-size_t MFHeap_GetTotalAllocated(MFHeap *pHeap)
+MF_API size_t MFHeap_GetTotalAllocated(MFHeap *pHeap)
 {
 	return pHeap->totalAllocated;
 }
 
-size_t MFHeap_GetTotalWaste(MFHeap *pHeap)
+MF_API size_t MFHeap_GetTotalWaste(MFHeap *pHeap)
 {
 	return pHeap->totalWaste;
 }
 
-int MFHeap_GetNumAllocations(MFHeap *pHeap)
+MF_API int MFHeap_GetNumAllocations(MFHeap *pHeap)
 {
 	return pHeap->allocCount;
 }
 
 // get the size of an allocation
-uint32 MFHeap_GetAllocSize(const void *pMemory)
+MF_API uint32 MFHeap_GetAllocSize(const void *pMemory)
 {
 	MFCALLSTACK;
 
@@ -468,7 +468,7 @@ uint32 MFHeap_GetAllocSize(const void *pMemory)
 }
 
 // get the size of an allocation
-MFHeap *MFHeap_GetAllocHeap(const void *pMemory)
+MF_API MFHeap *MFHeap_GetAllocHeap(const void *pMemory)
 {
 	MFCALLSTACK;
 
@@ -477,7 +477,7 @@ MFHeap *MFHeap_GetAllocHeap(const void *pMemory)
 }
 
 // get a heap pointer
-MFHeap* MFHeap_GetHeap(MFHeapType heap)
+MF_API MFHeap* MFHeap_GetHeap(MFHeapType heap)
 {
 	MFCALLSTACK;
 
@@ -502,7 +502,7 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap)
 }
 
 // gets the temp heap associated with a heap
-MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
+MF_API MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
 {
 	MFCALLSTACK;
 	MFDebug_Assert(pHeap, "Invalid heap");
@@ -510,13 +510,13 @@ MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap)
 	return pHeap->pTempHeap ? pHeap->pTempHeap : pHeap;
 }
 
-MFHeap* MFHeap_GetDebugHeap()
+MF_API MFHeap* MFHeap_GetDebugHeap()
 {
 	return pDebugHeap;
 }
 
 // set active heap, return the old active heap
-MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap)
+MF_API MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap)
 {
 	MFHeap *pOld = pActiveHeap;
 	pActiveHeap = pHeap ? pHeap : &gExternalHeap;
@@ -524,7 +524,7 @@ MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap)
 }
 
 // set allocation alignment, return old alignment
-int MFHeap_SetAllocAlignment(int bytes)
+MF_API int MFHeap_SetAllocAlignment(int bytes)
 {
 	int oldAlignment = heapAlignment;
 	heapAlignment = bytes < 4 ? 4 : bytes;
@@ -532,18 +532,18 @@ int MFHeap_SetAllocAlignment(int bytes)
 }
 
 // push/pop a heap marker for static heaps
-void MFHeap_Mark(MFHeap *pHeap)
+MF_API void MFHeap_Mark(MFHeap *pHeap)
 {
 
 }
 
-void MFHeap_Release(MFHeap *pHeap)
+MF_API void MFHeap_Release(MFHeap *pHeap)
 {
 
 }
 
 // register a custom heap that can be used by the game
-void MFHeap_RegisterCustomHeap(MFMemoryCallbacks *pCallbacks, void *pUserData)
+MF_API void MFHeap_RegisterCustomHeap(const MFMemoryCallbacks *pCallbacks, void *pUserData)
 {
 	MFCALLSTACK;
 
@@ -552,13 +552,13 @@ void MFHeap_RegisterCustomHeap(MFMemoryCallbacks *pCallbacks, void *pUserData)
 }
 
 // set override heap. any allocation operations are forced to use this override heap.
-void MFHeap_SetHeapOverride(MFHeap *pHeap)
+MF_API void MFHeap_SetHeapOverride(MFHeap *pHeap)
 {
 	pOverrideHeap = pHeap;
 }
 
 // validate a block of memory. returns false if memory had been corrupted.
-bool MFHeap_ValidateMemory(const void *pMemory)
+MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 {
 	MFCALLSTACK;
 
@@ -571,7 +571,7 @@ bool MFHeap_ValidateMemory(const void *pMemory)
 	return MFMemCompare((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;
 }
 
-bool MFHeap_ValidateHeap()
+MF_API bool MFHeap_ValidateHeap()
 {
 #if defined(_USE_ALLOC_TRACKER)
 	MFThread_LockMutex(gAllocMutex);
@@ -596,12 +596,12 @@ bool MFHeap_ValidateHeap()
 }
 
 // memory allocation groups for profiling
-void MFHeap_PushGroupName(const char *pGroupName)
+MF_API void MFHeap_PushGroupName(const char *pGroupName)
 {
 
 }
 
-void MFHeap_PopGroupName()
+MF_API void MFHeap_PopGroupName()
 {
 
 }

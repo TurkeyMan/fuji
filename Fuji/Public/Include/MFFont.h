@@ -60,7 +60,7 @@ enum MFFontJustify
  * @return Pointer to an MFFont structure representing the newly created font.
  * @see MFFont_Destroy()
  */
-MFFont* MFFont_Create(const char *pFilename);
+MF_API MFFont* MFFont_Create(const char *pFilename);
 
 /**
  * Destroy a font.
@@ -69,7 +69,7 @@ MFFont* MFFont_Create(const char *pFilename);
  * @return None.
  * @see MFFont_Create()
  */
-void MFFont_Destroy(MFFont *pFont);
+MF_API void MFFont_Destroy(MFFont *pFont);
 
 /**
  * Get the height of a font.
@@ -78,7 +78,7 @@ void MFFont_Destroy(MFFont *pFont);
  * @return The native height (in texels) of the specified font.
  * @see MFFont_Create()
  */
-float MFFont_GetFontHeight(MFFont *pFont);
+MF_API float MFFont_GetFontHeight(MFFont *pFont);
 
 /**
  * Get the width of a character.
@@ -88,7 +88,7 @@ float MFFont_GetFontHeight(MFFont *pFont);
  * @return The native width (in texels) of the specified character.
  * @see MFFont_Create()
  */
-float MFFont_GetCharacterWidth(MFFont *pFont, int character);
+MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character);
 
 /**
  * Get the character offset into a string.
@@ -100,7 +100,7 @@ float MFFont_GetCharacterWidth(MFFont *pFont, int character);
  * @return The physical offset of the specified character in the string from the string starting position.
  * @see MFFont_GetStringWidth()
  */
-MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height);
+MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height);
 
 /**
  * Get the physical width of a string.
@@ -114,7 +114,7 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
  * @return The physical width of the specified string rendered by the specified font.
  * @see MFFont_Create()
  */
-float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth = 0.0f, int maxLen = -1, float *pTotalHeight = NULL);
+MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth = 0.0f, int maxLen = -1, float *pTotalHeight = NULL);
 
 /**
  * Blit a string to the screen.
@@ -127,7 +127,7 @@ float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, floa
  * @param maxChars Maximum number of chars to render from the source string.
  * @return Returns 0 if there were no errors.
  */
-int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars = -1);
+MF_API int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars = -1);
 
 /**
  * Blit a formatted string to the screen.
@@ -141,7 +141,7 @@ int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const c
  * @return Returns 0 if there were no errors.
  * @remarks The MFFont_BlitTextf format string conforms with all the standard printf format standards.
  */
-int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...);
+MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...);
 
 /**
  * Render a string.
@@ -155,7 +155,7 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
  * @param ltw Local to world matrix used to render the string.
  * @return Returns the height of the text rendered.
  */
-float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 /**
  * Render a string.
@@ -170,7 +170,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
  * @param ltw Local to world matrix used to render the string.
  * @return Returns the height of the text rendered.
  */
-float MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawText2(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 /**
  * Render a formatted string.
@@ -184,7 +184,7 @@ float MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVec
  * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
+MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
 
 /**
  * Render a formatted string.
@@ -199,11 +199,11 @@ float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const M
  * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
+MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
 
-float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
-float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 
 /**
@@ -211,7 +211,7 @@ float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &
  * Gets a pointer to the debug font.
  * @return Returns a pointer to the debug font.
  */
-MFFont* MFFont_GetDebugFont();
+MF_API MFFont* MFFont_GetDebugFont();
 
 #endif // _MFFONT_H
 

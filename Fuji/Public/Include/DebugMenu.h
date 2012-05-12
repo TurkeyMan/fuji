@@ -32,17 +32,17 @@ enum MenuType
 };
 
 // interface functions
-bool DebugMenu_IsEnabled();
-Menu* DebugMenu_GetRootMenu();
+MF_API bool DebugMenu_IsEnabled();
+MF_API Menu* DebugMenu_GetRootMenu();
 
-void DebugMenu_AddItem(const char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddMenu(const char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
-void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback = NULL, void *userData = NULL);
-bool DebugMenu_DestroyMenu(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
-void DebugMenu_DestroyMenuTree(Menu *pMenu);
+MF_API void DebugMenu_AddItemTo(const char *name, Menu *parent, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+MF_API void DebugMenu_AddItem(const char *name, const char *pParentName, MenuObject *pObject, DebugCallback callback = NULL, void *userData = NULL);
+MF_API void DebugMenu_AddMenuTo(const char *name, Menu *parent, DebugCallback callback = NULL, void *userData = NULL);
+MF_API void DebugMenu_AddMenu(const char *name, const char *pParentName, DebugCallback callback = NULL, void *userData = NULL);
+MF_API bool DebugMenu_DestroyMenu(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
+MF_API void DebugMenu_DestroyMenuTree(Menu *pMenu);
 
-Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
+MF_API Menu* DebugMenu_GetMenuByName(const char *name, Menu *pSearchMenu = DebugMenu_GetRootMenu());
 
 // menu items
 class MenuObject

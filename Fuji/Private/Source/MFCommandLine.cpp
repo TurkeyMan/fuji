@@ -3,12 +3,12 @@
 
 extern char *gpCommandLineBuffer;
 
-const char * MFCommandLine_GetCommandLineString()
+MF_API const char * MFCommandLine_GetCommandLineString()
 {
 	return gpCommandLineBuffer;
 }
 
-bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue)
+MF_API bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue)
 {
 	const char *pValue = MFCommandLine_GetString(pParameter);
 
@@ -18,21 +18,21 @@ bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue)
 	return pValue ? true : false;
 }
 
-int MFCommandLine_GetInt(const char *pParameter, int defaultValue)
+MF_API int MFCommandLine_GetInt(const char *pParameter, int defaultValue)
 {
 	const char *pValue = MFCommandLine_GetString(pParameter);
 
 	return pValue ? atoi(pValue) : defaultValue;
 }
 
-float MFCommandLine_GetFloat(const char *pParameter, float defaultValue)
+MF_API float MFCommandLine_GetFloat(const char *pParameter, float defaultValue)
 {
 	const char *pValue = MFCommandLine_GetString(pParameter);
 
 	return pValue ? (float)atof(pValue) : defaultValue;
 }
 
-const char* MFCommandLine_GetString(const char *pParameter)
+MF_API const char* MFCommandLine_GetString(const char *pParameter)
 {
 	if(!gpCommandLineBuffer)
 		return NULL;

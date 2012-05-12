@@ -13,9 +13,8 @@
 #include "MFQuaternion.h"
 
 MFALIGN_BEGIN(16)
-class MFMatrix
+struct MF_EXPORT_VARIABLE MFMatrix
 {
-public:
 	float m[16];
 
 	static const MFMatrix identity;
@@ -106,9 +105,8 @@ MFVector ApplyMatrix3(const MFVector& vector, const MFMatrix &matrix);
  * Matrix class to perform various matrix operations.
  * Matrix class used throughout Fuji. Optimised for each platform.
  */
-class MFMatrix
+struct MFMatrix
 {
-public:
 	float m[16]; /**< 4x4 array of floats */
 
 	static const MFMatrix identity;	/**< Constant identity matrix */

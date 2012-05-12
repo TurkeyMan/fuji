@@ -5,9 +5,9 @@ MFInitStatus MFUtil_InitModule();
 
 // CRC functions
 void MFUtil_CrcInit(); // generates some crc tables - system should call this once
-uint32 MFUtil_Crc(const char *buffer, int length); // generate a unique Crc number for this buffer
-uint32 MFUtil_CrcString(const char *pString);	// generate a unique Crc number for this string
-uint32 MFUtil_HashString(const char *pString); // generate a very fast hash value from a string
+MF_API uint32 MFUtil_Crc(const char *buffer, int length); // generate a unique Crc number for this buffer
+MF_API uint32 MFUtil_CrcString(const char *pString);	// generate a unique Crc number for this string
+MF_API uint32 MFUtil_HashString(const char *pString); // generate a very fast hash value from a string
 
 inline uint32 MFUtil_HashPointer(void *pPointer)
 {

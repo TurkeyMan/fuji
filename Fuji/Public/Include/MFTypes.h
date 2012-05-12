@@ -72,7 +72,7 @@ typedef ssize_t				intp;
 #endif
 
 /**
- * Represents a spacial rectangle.
+ * Represents a spatial rectangle.
  */
 struct MFRect
 {
@@ -90,7 +90,7 @@ inline bool MFTypes_PointInRect(float x, float y, MFRect *pRect)
 
 inline bool MFTypes_RectOverlap(MFRect *pRect1, MFRect *pRect2)
 {
-	return false;
+	return pRect1->x < pRect2->x + pRect2->width && pRect1->x + pRect1->width > pRect2->x && pRect1->y < pRect2->y + pRect2->height && pRect1->y + pRect1->height > pRect2->y;
 }
 
 #endif // _MFTYPES_H

@@ -39,11 +39,11 @@ void MFPrimitive_DrawStats()
 
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	beginCount = vertexCount;
 	currentVert = 0;
@@ -51,49 +51,29 @@ void MFBegin(uint32 vertexCount)
 	GX_Begin(gPTLookup[primType], GX_VTXFMT0, beginCount);
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 
 //	GX_LoadPosMtxImm(mat, 0);
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
-}
-
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 	GX_Color4u8((uint8)(r*255.0f), (uint8)(g*255.0f), (uint8)(b*255.0f), (uint8)(a*255.0f));
 }
 
-void MFSetColour(uint32 col)
-{
-	GX_Color1u32(col);
-}
-
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	GX_TexCoord2f32(u, v);
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	MFSetNormal(normal.x, normal.y, normal.z);
-}
-
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 	GX_Normal3f32(x, y, z);
 }
 
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
-}
-
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
@@ -101,7 +81,7 @@ void MFSetPosition(float x, float y, float z)
 	++currentVert;
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFCALLSTACK;
 

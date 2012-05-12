@@ -71,7 +71,7 @@ void MFPrimitive_DrawStats()
 	}
 }
 
-void MFPrimitive(uint32 type, uint32 hint)
+MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	MFCALLSTACK;
 
@@ -93,7 +93,7 @@ void MFPrimitive(uint32 type, uint32 hint)
 	MFRenderer_Begin();
 }
 
-void MFBegin(uint32 vertexCount)
+MF_API void MFBegin(uint32 vertexCount)
 {
 	MFCALLSTACK;
 
@@ -107,18 +107,13 @@ void MFBegin(uint32 vertexCount)
 	MFDebug_Assert(startVert+vertexCount < NUM_VERTS, MFStr("Exceeded primitive vertex cache %d", NUM_VERTS));
 }
 
-void MFSetMatrix(const MFMatrix &mat)
+MF_API void MFSetMatrix(const MFMatrix &mat)
 {
 	MFCALLSTACK;
 	sceGuSetMatrix(2, (ScePspFMatrix4*)&mat);
 }
 
-void MFSetColour(const MFVector &colour)
-{
-	MFSetColour(colour.x, colour.y, colour.z, colour.w);
-}
-
-void MFSetColour(float r, float g, float b, float a)
+MF_API void MFSetColour(float r, float g, float b, float a)
 {
 	current.colour = ((uint32)(a*255.0f) << 24) |
 					 ((uint32)(b*255.0f) << 16) |
@@ -126,32 +121,17 @@ void MFSetColour(float r, float g, float b, float a)
 					  (uint32)(r*255.0f);
 }
 
-void MFSetColour(uint32 col)
-{
-	current.colour = col;
-}
-
-void MFSetTexCoord1(float u, float v)
+MF_API void MFSetTexCoord1(float u, float v)
 {
 	current.u = u;
 	current.v = v;
 }
 
-void MFSetNormal(const MFVector &normal)
-{
-	MFSetNormal(normal.x, normal.y, normal.z);
-}
-
-void MFSetNormal(float x, float y, float z)
+MF_API void MFSetNormal(float x, float y, float z)
 {
 }
 
-void MFSetPosition(const MFVector &pos)
-{
-	MFSetPosition(pos.x, pos.y, pos.z);
-}
-
-void MFSetPosition(float x, float y, float z)
+MF_API void MFSetPosition(float x, float y, float z)
 {
 	MFCALLSTACK;
 
@@ -163,7 +143,7 @@ void MFSetPosition(float x, float y, float z)
 	++currentVert;
 }
 
-void MFEnd()
+MF_API void MFEnd()
 {
 	MFCALLSTACK;
 

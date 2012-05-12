@@ -112,7 +112,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		D3DXFilterTexture(pTex, NULL, 0, D3DX_DEFAULT);
 }
 
-MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 

@@ -40,7 +40,7 @@ static const char *gFileExtensions[MFISTF_Max] =
 
 /**** Functions ****/
 
-MFIntStringTable *MFIntStringTable_CreateFromFile(const char *pFilename)
+MF_API MFIntStringTable *MFIntStringTable_CreateFromFile(const char *pFilename)
 {
 	// find format
 	const char *pExt = MFString_GetFileExtension(pFilename);
@@ -176,7 +176,7 @@ static bool ReadCSVLine(const char *&pFile, size_t &bytesRemaining, MFArray<MFSt
 	return true;
 }
 
-MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntStringTableFormat format)
+MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntStringTableFormat format)
 {
 	const uint8 *pBOM = (const uint8 *)pMemory;
 	if(pBOM[0] == 0xEF && pBOM[1] == 0xBB && pBOM[2] == 0xBF)
@@ -340,7 +340,7 @@ MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMemory, s
 	return pStringTable;
 }
 
-void MFIntStringTable_Destroy(MFIntStringTable *pStringTable)
+MF_API void MFIntStringTable_Destroy(MFIntStringTable *pStringTable)
 {
 	for(int a=0; a<pStringTable->numLanguages; ++a)
 		MFHeap_Free(pStringTable->pLanguages[a].pTemplate);
@@ -348,7 +348,7 @@ void MFIntStringTable_Destroy(MFIntStringTable *pStringTable)
 	MFHeap_Free(pStringTable);
 }
 
-MFStringTable *MFIntStringTable_CreateRuntimeData(MFIntStringTable *pStringTable, MFLanguage language, MFPlatform platform, size_t *pSize)
+MF_API MFStringTable *MFIntStringTable_CreateRuntimeData(MFIntStringTable *pStringTable, MFLanguage language, MFPlatform platform, size_t *pSize)
 {
 	for(int a=0; a<pStringTable->numLanguages; ++a)
 	{
@@ -375,7 +375,7 @@ MFStringTable *MFIntStringTable_CreateRuntimeData(MFIntStringTable *pStringTable
 	return NULL;
 }
 
-void MFIntStringTable_WriteEnumsToHeaderFile(MFIntStringTable *pStringTable, const char *pFilename)
+MF_API void MFIntStringTable_WriteEnumsToHeaderFile(MFIntStringTable *pStringTable, const char *pFilename)
 {
 
 }

@@ -12,7 +12,7 @@ void MFModel_DeinitModulePlatformSpecific()
 {
 }
 
-void MFModel_Draw(MFModel *pModel)
+MF_API void MFModel_Draw(MFModel *pModel)
 {
 }
 

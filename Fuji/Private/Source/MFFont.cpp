@@ -140,7 +140,7 @@ void MFFont_DeinitModule()
 	MFFont_Destroy(gpDebugFont);
 }
 
-MFFont* MFFont_Create(const char *pFilename)
+MF_API MFFont* MFFont_Create(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -196,7 +196,7 @@ MFFont* MFFont_Create(const char *pFilename)
 	return pFont;
 }
 
-void MFFont_Destroy(MFFont *pFont)
+MF_API void MFFont_Destroy(MFFont *pFont)
 {
 	MFCALLSTACK;
 
@@ -219,19 +219,19 @@ void MFFont_Destroy(MFFont *pFont)
 	}
 }
 
-MFFont* MFFont_GetDebugFont()
+MF_API MFFont* MFFont_GetDebugFont()
 {
 	return gpDebugFont;
 }
 
-float MFFont_GetFontHeight(MFFont *pFont)
+MF_API float MFFont_GetFontHeight(MFFont *pFont)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
 	return (float)pFont->height;
 }
 
-float MFFont_GetCharacterWidth(MFFont *pFont, int character)
+MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
@@ -239,7 +239,7 @@ float MFFont_GetCharacterWidth(MFFont *pFont, int character)
 	return (float)pFont->pChars[id].xadvance;
 }
 
-MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height)
+MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
@@ -291,7 +291,7 @@ MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, floa
 	return currentPos;
 }
 
-float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
+MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
 	if(!pText)
 		return 0.f;
@@ -473,13 +473,13 @@ static int GetRenderableLength(MFFont *pFont, const char *pText, int *pTotal, in
 	return renderable;
 }
 
-int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars)
+MF_API int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const char *pText, int maxChars)
 {
 	float texelCenter = MFRenderer_GetTexelCenterOffset();
 	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, pText, maxChars);
 }
 
-int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...)
+MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...)
 {
 	char buffer[1024];
 
@@ -494,7 +494,7 @@ int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const 
 	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, buffer);
 }
 
-float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
 {
 	MFCALLSTACK;
 
@@ -540,7 +540,7 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 
 		MFBegin(renderable*2);
 
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		pos_x = pos.x;
 		pos_y = pos.y;
@@ -614,12 +614,12 @@ float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MF
 	return (pos_y-pos.y) + height;
 }
 
-float MFFont_DrawText(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawText2(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
 {
 	return MFFont_DrawText(pFont, MakeVector(x, y, 0.0f), height, colour, pText, maxChars, ltw);
 }
 
-float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...)
+MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...)
 {
 	MFCALLSTACK;
 
@@ -635,7 +635,7 @@ float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const M
 	return MFFont_DrawText(pFont, pos, height, colour, buffer, -1);
 }
 
-float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...)
+MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...)
 {
 	MFCALLSTACK;
 
@@ -849,7 +849,7 @@ MFVector MFFont_GetCharPosJustified(MFFont *pFont, const char *pText, float text
 }
 
 
-float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
 {
   const char *pCurrentLine = pText;
 
@@ -935,7 +935,7 @@ float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector 
   return currentPos.y;
 }
 
-float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
 {
   const char *pCurrentLine = pText;
 
@@ -1212,7 +1212,7 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 
 		MFBegin(renderable*2);
 
-		MFSetColour(colour);
+		MFSetColourV(colour);
 
 		pos_x = pos.x;
 		pos_y = pos.y;

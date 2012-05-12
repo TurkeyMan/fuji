@@ -54,7 +54,7 @@ struct MFMemoryCallbacks
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap = NULL);
+MF_API void* MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap = NULL);
 
 /**
  * @fn void* MFHeap_AllocAndZero(size_t bytes, MFHeap *pHeap)
@@ -67,7 +67,7 @@ void* MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap = NULL);
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap = NULL);
+MF_API void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap = NULL);
 
 /**
  * @fn void* MFHeap_Realloc(void *pMem, size_t bytes)
@@ -81,7 +81,7 @@ void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap *pHeap = NULL);
  * @see MFHeap_Alloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_ReallocInternal(void *pMem, size_t bytes);
+MF_API void* MFHeap_ReallocInternal(void *pMem, size_t bytes);
 
 // these are here to satisfy doxygen
 #if 0
@@ -99,7 +99,7 @@ void* MFHeap_TAlloc(size_t bytes);
  * @see MFHeap_Alloc()
  * @see MFHeap_Realloc()
  */
-void  MFHeap_Free(void *pMem);
+MF_API void MFHeap_Free(void *pMem);
 
 #if !defined(_FUJI_UTIL)
 // FIXME
@@ -119,9 +119,9 @@ void operator delete[](void *pMemory, void *pMem);
 
 
 // *** document me!! ***
-size_t MFHeap_GetTotalAllocated(MFHeap *pHeap);
-size_t MFHeap_GetTotalWaste(MFHeap *pHeap);
-int MFHeap_GetNumAllocations(MFHeap *pHeap);
+MF_API size_t MFHeap_GetTotalAllocated(MFHeap *pHeap);
+MF_API size_t MFHeap_GetTotalWaste(MFHeap *pHeap);
+MF_API int MFHeap_GetNumAllocations(MFHeap *pHeap);
 
 /**
  * Get the size of an allocation.
@@ -131,7 +131,7 @@ int MFHeap_GetNumAllocations(MFHeap *pHeap);
  * @see MFHeap_Alloc()
  * @see MFHeap_GetAllocHeap()
  */
-uint32 MFHeap_GetAllocSize(const void *pMemory);
+MF_API uint32 MFHeap_GetAllocSize(const void *pMemory);
 
 /**
  * Get the heap of an allocation.
@@ -141,7 +141,7 @@ uint32 MFHeap_GetAllocSize(const void *pMemory);
  * @see MFHeap_Alloc()
  * @see MFHeap_GetAllocSize()
  */
-MFHeap *MFHeap_GetAllocHeap(const void *pMemory);
+MF_API MFHeap *MFHeap_GetAllocHeap(const void *pMemory);
 
 /**
  * Get a Heap pointer.
@@ -151,7 +151,7 @@ MFHeap *MFHeap_GetAllocHeap(const void *pMemory);
  * @see MFHeap_GetTempHeap()
  * @see MFHeap_SetActiveHeap()
  */
-MFHeap* MFHeap_GetHeap(MFHeapType heap);
+MF_API MFHeap* MFHeap_GetHeap(MFHeapType heap);
 
 /**
  * Gets the temp heap associated with a heap.
@@ -162,7 +162,7 @@ MFHeap* MFHeap_GetHeap(MFHeapType heap);
  * @see MFHeap_GetHeap()
  * @see MFHeap_SetActiveHeap()
  */
-MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap);
+MF_API MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap);
 
 /**
  * Gets the debug heap.
@@ -171,7 +171,7 @@ MFHeap* MFHeap_GetTempHeap(MFHeap *pHeap);
  * @see MFHeap_GetHeap()
  * @see MFHeap_SetActiveHeap()
  */
-MFHeap* MFHeap_GetDebugHeap();
+MF_API MFHeap* MFHeap_GetDebugHeap();
 
 /**
  * Set active heap.
@@ -181,7 +181,7 @@ MFHeap* MFHeap_GetDebugHeap();
  * @return Pointer to the old active heap.
  * @see MFHeap_GetHeap()
  */
-MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap);
+MF_API MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap);
 
 /**
  * Set allocation alignment.
@@ -191,7 +191,7 @@ MFHeap* MFHeap_SetActiveHeap(MFHeap *pHeap);
  * @remarks The allocation alignment is the minimum byte boundary where memory can be allocated. The default allocation alignment is 32 bytes.
  * @see MFHeap_AllocInternal()
  */
-int MFHeap_SetAllocAlignment(int bytes);
+MF_API int MFHeap_SetAllocAlignment(int bytes);
 
 /**
  * Push a heap marker.
@@ -200,7 +200,7 @@ int MFHeap_SetAllocAlignment(int bytes);
  * @return None.
  * @see MFHeap_Release()
  */
-void MFHeap_Mark(MFHeap *pHeap = NULL);
+MF_API void MFHeap_Mark(MFHeap *pHeap = NULL);
 
 /**
  * Pop a heap marker.
@@ -209,7 +209,7 @@ void MFHeap_Mark(MFHeap *pHeap = NULL);
  * @return None.
  * @see MFHeap_Mark()
  */
-void MFHeap_Release(MFHeap *pHeap = NULL);
+MF_API void MFHeap_Release(MFHeap *pHeap = NULL);
 
 /**
  * Registers a custom heap.
@@ -219,7 +219,7 @@ void MFHeap_Release(MFHeap *pHeap = NULL);
  * @return None.
  * @see MFHeap_GetHeap()
  */
-void MFHeap_RegisterCustomHeap(const MFMemoryCallbacks *pCallbacks, void *pUserData);
+MF_API void MFHeap_RegisterCustomHeap(const MFMemoryCallbacks *pCallbacks, void *pUserData);
 
 /**
  * Set over-ride heap.
@@ -227,7 +227,7 @@ void MFHeap_RegisterCustomHeap(const MFMemoryCallbacks *pCallbacks, void *pUserD
  * @param pHeap Pointer to a heap that will be used for ALL following memory operations. Pass NULL to release the override heap.
  * @return None.
  */
-void MFHeap_SetHeapOverride(MFHeap *pHeap);
+MF_API void MFHeap_SetHeapOverride(MFHeap *pHeap);
 
 /**
  * Validate a block of memory.
@@ -235,10 +235,10 @@ void MFHeap_SetHeapOverride(MFHeap *pHeap);
  * @param pMemory Pointer to a block of memory to validate.
  * @return Returns TRUE is memory is in a valid, FALSE otherwise.
  */
-bool MFHeap_ValidateMemory(const void *pMemory);
+MF_API bool MFHeap_ValidateMemory(const void *pMemory);
 
 // TODO...
-bool MFHeap_ValidateHeap();
+MF_API bool MFHeap_ValidateHeap();
 
 /**
  * Get an uncached pointer to a block of memory.
@@ -247,14 +247,14 @@ bool MFHeap_ValidateHeap();
  * @return Returns Pointer to the same block of memory with uncached read and write access.
  * @remarks This function is not guaranteed to return a genuine uncached pointer. Some platforms dont have an uncached addressing mode. This should be used for performance optimisation only.
  */
-void* MFHeap_GetUncachedPointer(void *pPointer);
+MF_API void* MFHeap_GetUncachedPointer(void *pPointer);
 
 /**
  * Flushes the Data Cache.
  * Flushes the Data Cache.
  * @return None.
  */
-void MFHeap_FlushDCache();
+MF_API void MFHeap_FlushDCache();
 
 /**
  * Push a memory allocation group.
@@ -262,14 +262,14 @@ void MFHeap_FlushDCache();
  * @param pGroupName Pointer to a string containing the group name for following allocations.
  * @return None.
  */
-void MFHeap_PushGroupName(const char *pGroupName);
+MF_API void MFHeap_PushGroupName(const char *pGroupName);
 
 /**
  * Pop a memory allocation group.
  * Pops a memory allocation group that is used for heap tracking and profiling.
  * @return None.
  */
-void MFHeap_PopGroupName();
+MF_API void MFHeap_PopGroupName();
 
 
 /** @internal */
@@ -290,7 +290,7 @@ public:
 // user alloc macros
 #if !defined(_RETAIL)
 	// to trace memory allocations
-	void MFHeap_SetLineAndFile(int line, const char *pFile);
+	MF_API void MFHeap_SetLineAndFile(int line, const char *pFile);
 
 	/** @internal */
 	static class MFHeapDebug
