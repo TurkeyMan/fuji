@@ -21,7 +21,7 @@ MF_API int MFAuxDisplay_GetNumberOfDisplays()
 	return 0;
 }
 
-MF_API void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties &pProperties)
+MF_API void MFAuxDisplay_GetDisplayProperties(int device, MFAuxDisplayProperties *pProperties)
 {
 	MFDebug_Assert(false, "Invalid auxillary display.");
 }

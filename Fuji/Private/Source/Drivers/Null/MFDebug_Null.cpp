@@ -92,19 +92,19 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 			MFEnd();
 		}
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue.");
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 110, 60, 20, MakeVector(1,0,0,1), "Software Failure. Press left mouse button to continue.");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 240, 80, 20, MakeVector(1,0,0,1), "Guru Meditation: ");
 
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 140, 20, MakeVector(1,0,0,1), MFStr("Failed Condition: %s", pReason));
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 160, 20, MakeVector(1,0,0,1), MFStr("File: %s, Line: %d", pFile, line));
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 190, 20, MakeVector(1,0,0,1), MFStr("Message: %s", pMessage));
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 120, 20, MakeVector(1,0,0,1), "Assertion Failure:");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 140, 20, MakeVector(1,0,0,1), MFStr("Failed Condition: %s", pReason));
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 160, 20, MakeVector(1,0,0,1), MFStr("File: %s, Line: %d", pFile, line));
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 190, 20, MakeVector(1,0,0,1), MFStr("Message: %s", pMessage));
 
 #if !defined(_RETAIL)
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 100, 250.0f, 20, MakeVector(1,0,0,1), MFCallstack_GetCallstackString());
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack:");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 100, 250.0f, 20, MakeVector(1,0,0,1), MFCallstack_GetCallstackString());
 #else
-		MFFont_DrawTextf(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in RETAIL builds");
+		MFFont_DrawText2f(MFFont_GetDebugFont(), 80, 230, 20, MakeVector(1,0,0,1), "Callstack not available in RETAIL builds");
 #endif
 
 //		MFSystem_Draw();
