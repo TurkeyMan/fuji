@@ -62,7 +62,8 @@ MFString MFString_GetStats()
 	if(numStrings)
 		averageSize /= numStrings;
 
-	MFString desc(1024);
+	MFString desc;
+    desc.Reserve(1024);
 	desc = MFStr("String heap memory: %d allocated/%d reserved + %d overhead  Waste: %d  Average length: %d\n\tPool: %d/%d", stringHeap.GetAllocatedMemory(), stringHeap.GetTotalMemory(), overhead, waste, averageSize, stringPool.GetNumAllocated(), stringPool.GetNumReserved());
 
 	int numGroups = stringHeap.GetNumPools();
@@ -829,21 +830,6 @@ MFString::MFString(const char *pString, int maxChars)
 	}
 }
 
-MFString::MFString(int preallocatedBytes)
-{
-	if(preallocatedBytes > 0)
-	{
-		pData = MFStringData::Alloc();
-		pData->bytes = 0;
-		pData->pMemory = (char*)stringHeap.Alloc(preallocatedBytes, &pData->allocated);
-		pData->pMemory[0] = 0;
-	}
-	else
-	{
-		pData = NULL;
-	}
-}
-
 MFString& MFString::operator=(const char *pString)
 {
 	if(pString)
@@ -915,7 +901,8 @@ MFString MFString::operator+(const MFString &string) const
 
 	size_t bytes = pData->bytes + string.pData->bytes;
 
-	MFString t((int)bytes + 1);
+	MFString t;
+    t.Reserve(bytes + 1);
 	t.pData->bytes = bytes;
 
 	MFString_CopyCat(t.pData->pMemory, pData->pMemory, string.pData->pMemory);
@@ -1103,7 +1090,8 @@ MFString MFString::Upper() const
 		return *this;
 
 	// allocate a new string
-	MFString t((int)pData->bytes + 1);
+	MFString t;
+    t.Reserve(pData->bytes + 1);
 	t.pData->bytes = pData->bytes;
 
 	// copy upper case
@@ -1119,7 +1107,8 @@ MFString MFString::Lower() const
 		return *this;
 
 	// allocate a new string
-	MFString t((int)pData->bytes + 1);
+	MFString t;
+    t.Reserve(pData->bytes + 1);
 	t.pData->bytes = pData->bytes;
 
 	// copy lower case string
@@ -1232,7 +1221,8 @@ MFString MFString::SubStr(int offset, int count) const
 		return *this;
 
 	// allocate a new string
-	MFString t(count+1);
+	MFString t;
+    t.Reserve(count + 1);
 	t.pData->bytes = count;
 
 	// copy sub string

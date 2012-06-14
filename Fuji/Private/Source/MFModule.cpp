@@ -240,6 +240,8 @@ uint64 MFModule_RegisterModules()
 
 bool MFModule_InitModules()
 {
+	uint64 timer;
+
 	for(int a=0; a<gNumModules; ++a)
 	{
 		uint64 bit = 1ULL << a;
@@ -251,6 +253,7 @@ bool MFModule_InitModules()
 			{
 				MFDebug_Message(MFStr("Init %s...", gModules[a].pModuleName));
 
+				timer = MFSystem_ReadRTC();
 				complete = gModules[a].pInitFunction();
 			}
 			else
@@ -264,18 +267,22 @@ bool MFModule_InitModules()
 
 			if(complete == MFAIC_Succeeded)
 			{
+				uint64 initTime = (MFSystem_ReadRTC() - timer) * 1000 / MFSystem_GetRTCFrequency();
+
 				gModuleInitComplete |= bit;
 
 				// if logging is initialised
-				MFDebug_Message(MFStr("Init %s complete", gModules[a].pModuleName));
+				MFDebug_Message(MFStr("Init %s complete in %dms", gModules[a].pModuleName, (int)initTime));
 			}
 			else if(complete == MFAIC_Failed)
 			{
+				uint64 initTime = (MFSystem_ReadRTC() - timer) * 1000 / MFSystem_GetRTCFrequency();
+
 				gModuleInitComplete |= bit;
 				gModuleInitFailed |= bit;
 
 				// if logging is initialised
-				MFDebug_Error(MFStr("Init %s FAILED!", gModules[a].pModuleName));
+				MFDebug_Error(MFStr("Init %s FAILED in %dms!", gModules[a].pModuleName, (int)initTime));
 			}
 		}
 	}
