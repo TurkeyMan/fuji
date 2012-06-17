@@ -14,47 +14,69 @@ local function getConfigName(configName)
 	return configName
 end
 
-local configNames = {}
+configNames = {}
 configNames.Debug = getConfigName("Debug")
 configNames.DebugOpt = getConfigName("DebugOpt")
 configNames.Release = getConfigName("Release")
 configNames.Retail = getConfigName("Retail")
 
-local platformNames = {}
-platformNames.Android = iif(isVS(), "$(Platform)", "Android")
-platformNames.iOS = iif(isVS(), "$(Platform)", "iOS")
-platformNames.PS2 = iif(isVS(), "$(Platform)", "PS2")
+platformNames = {}
+--platformNames.Native = iif(isVS(), "$(Platform)", "")
+platformNames.Native = ""
+--platformNames.x32 = iif(isVS(), "$(Platform)", "x32")
+platformNames.x32 = "x32"
+--platformNames.x64 = iif(isVS(), "$(Platform)", "x64")
+platformNames.x64 = "x64"
+--platformNames.Android = iif(isVS(), "$(Platform)", "Android")
+--platformNames.iOS = iif(isVS(), "$(Platform)", "iOS")
+--platformNames.PS2 = iif(isVS(), "$(Platform)", "PS2")
 platformNames.PS3 = iif(isVS(), "$(Platform)", "PS3")
-platformNames.PSP = iif(isVS(), "$(Platform)", "PSP")
-platformNames.Win32 = iif(isVS(), "$(Platform)", "Win32")
-platformNames.Win64 = iif(isVS(), "$(Platform)", "Win64")
-platformNames.XBox = iif(isVS(), "$(Platform)", "XBox")
-platformNames.XBox360 = iif(isVS(), "$(Platform)", "XBox360")
+--platformNames.PSP = iif(isVS(), "$(Platform)", "PSP")
+--platformNames.XBox = iif(isVS(), "$(Platform)", "XBox")
+platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
+fujiVersion = "0.7.1"
+
 includedirs { "../Include/", "../../Private/Middleware/" }
-libdirs { "../Lib/" }
+--libdirs { "../Lib/" }
 
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
-	targetsuffix ("_" .. configNames.Debug)
+	if isVS() then
+		targetsuffix ("_" .. configNames.Debug)
+	else
+		targetsuffix ("-debug-" .. fujiVersion)
+	end
 
 configuration "DebugOpt"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols", "Optimize" }
-	targetsuffix ("_" .. configNames.DebugOpt)
+	if isVS() then
+		targetsuffix ("_" .. configNames.DebugOpt)
+	else
+		targetsuffix ("-debugopt-" .. fujiVersion)
+	end
 
 configuration "Release"
 	defines { "NDEBUG", "_RELEASE" }
 	flags { "OptimizeSpeed" }
-	targetsuffix ("_" .. configNames.Release)
+	if isVS() then
+		targetsuffix ("_" .. configNames.Release)
+	else
+		targetsuffix ("-" .. fujiVersion)
+	end
 
 configuration "Retail"
 	defines { "NDEBUG", "_RETAIL" }
 	flags { "OptimizeSpeed" }
-	targetsuffix ("_" .. configNames.Retail)
+	if isVS() then
+		targetsuffix ("_" .. configNames.Retail)
+	else
+		targetsuffix ("-" .. fujiVersion)
+	end
 
 
 -- platform specific config --

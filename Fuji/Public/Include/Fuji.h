@@ -262,7 +262,7 @@
 	#define MF_EXPORT_VARIABLE
 #endif
 
-#if defined(MF_DLL)
+#if defined(MF_SHAREDLIB)
 	#define MF_API extern "C" MF_EXPORT
 #else
 	#define MF_API extern "C"

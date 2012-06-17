@@ -8,14 +8,14 @@ if fujiDll == true then
 end
 
 project (projName)
-    if fujiDll == true then
+	language "C++"
+	if fujiDll == true then
 		kind "SharedLib"
 		targetname "Fuji"
-		defines { "MF_DLL" }
+		defines { "MF_SHAREDLIB" }
 	else
 		kind "StaticLib"
 	end
-	language "C++"
 
 	-- add the source code --
 	files { "../*.TXT" }
@@ -41,7 +41,7 @@ project (projName)
 	-- setup paths --
 	includedirs { "../Include/", "../Source/", "../../Public/Include/" }
 	includedirs { "../Middleware/", "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
-	libdirs { "../../Public/Lib/" }
+--	libdirs { "../../Public/Lib/" }
 	objdir "../Build/"
 	targetdir "../../Public/Lib/"
 
@@ -59,6 +59,13 @@ project (projName)
 
 	dofile "../../Public/Project/fujiconfig.lua"
 	links { "mad", "json" }
+
+
+	-- setup output directories --
+	for i, p in pairs(platformNames) do
+		configuration { i }
+			targetdir("../../Public/Lib/" .. iif(p, p .. "/", ""))
+	end
 
 
 	-- platform specific config --
