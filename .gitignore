@@ -1,0 +1,10 @@
+/Fuji/Public/Lib
+/Fuji/Private/Build
+/Fuji/Private/Project
+/Haku/Lib
+/Haku/Build
+/Haku/Project
+*.o
+*.d
+Makefile
+*.make

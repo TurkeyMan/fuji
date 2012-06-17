@@ -7,7 +7,7 @@ MFInitParams gInitParams;
 extern bool gDrawSystemInfo;
 
 #if defined(USE_LIBJSON)
-	#include <libjson/libjson.h>
+	#include <libjson.h>
 	#include "MFHeap.h"
 
 	static void *mf_json_malloc(unsigned long bytes)

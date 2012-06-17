@@ -37,15 +37,17 @@ newaction {
 
 		installDir = _OPTIONS["install-dir"]
 		includePath = iif(installDir, installDir, "/usr/local") .. "/include/Fuji/"
-		libPath = iif(installDir, installDir, "/usr/local") .. "/lib/"
+		libPath = iif(installDir, installDir, "/usr/local")
 
 		-- copy includes --
 		print("Copying includes to: " .. includePath)
 		copyFiles("../../Public/Include", includePath, "**.h", "**.inl")
 
 		-- copy libs --
-		print("Copying libs to: " .. libPath)
-		copyFiles("../../Public/Lib", libPath, "**.a", "**.so", "**.lib", "**.dll", "**.pdb")
+		print("Copying libs to: " .. libPath .. "/lib")
+		copyFiles("../../Public/Lib", libPath .. "/lib/", "*.a", "*.so")
+--		copyFiles("../../Public/Lib/x32", libPath, "*.a", "*.so")
+--		copyFiles("../../Public/Lib/x64", libPath, "*.a", "*.so")
 
 		-- install documentation --
 		print("Installing documentation: ** NOT DONE **")

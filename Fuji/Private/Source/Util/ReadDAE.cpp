@@ -7,7 +7,7 @@
 #include "Util/F3D.h"
 #include "MFMatrix.h"
 
-#include "tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 static F3DFile *pModel;
 
@@ -86,7 +86,7 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 	TiXmlElement *pContributor = pAsset->FirstChildElement("contributor");
 
 	TiXmlElement *pContrib = pContributor ? pContributor : pAsset;
-	
+
 	TiXmlElement *pAuthor = pContrib->FirstChildElement("author");
 	TiXmlElement *pAuthoringTool = pContrib->FirstChildElement("authoring_tool");
 //	TiXmlElement *pSourceData = pContrib->FirstChildElement("source_data");
@@ -706,7 +706,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 void ParseDAEAnimation(TiXmlElement *pSceneNode)
 {
-	
+
 }
 
 void ParseDAELight(TiXmlElement *pLightNode)

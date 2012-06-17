@@ -4,7 +4,7 @@
 
 #include "MFFileSystem.h"
 
-#include "tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 MFOpenHashTable<HKWidgetStyle> HKWidgetStyle::sStyles;
 

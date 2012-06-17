@@ -6,7 +6,7 @@
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 
-#include "tinyxml/tinyxml.h"
+#include <tinyxml.h>
 
 HKWidgetLayoutDescriptor::HKWidgetLayoutDescriptor()
 {

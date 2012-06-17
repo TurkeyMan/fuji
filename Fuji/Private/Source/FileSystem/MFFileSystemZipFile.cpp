@@ -3,10 +3,10 @@
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemZipFile_Internal.h"
 
-#include <zlib/zlib.h>
-#include <zlib/minizip/zip.h>
-#include <zlib/minizip/unzip.h>
-#include <zlib/minizip/ioapi.h>
+#include <zlib.h>
+#include "minizip/zip.h"
+#include "minizip/unzip.h"
+#include "minizip/ioapi.h"
 
 MFInitStatus MFFileSystemZipFile_InitModule()
 {
@@ -43,7 +43,7 @@ void MFFileSystemZipFile_DeinitModule()
 // filesystem callbacks
 voidpf zopen_file_func(voidpf opaque, const char* filename, int mode)
 {
-	return opaque; 
+	return opaque;
 }
 
 uLong zread_file_func(voidpf opaque, voidpf stream, void* buf, uLong size)
@@ -68,7 +68,7 @@ long zseek_file_func(voidpf opaque, voidpf stream, uLong offset, int origin)
 
 int zclose_file_func(voidpf opaque, voidpf stream)
 {
-	return 0; 
+	return 0;
 }
 
 int ztesterror_file_func(voidpf opaque, voidpf stream)

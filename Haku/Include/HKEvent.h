@@ -2,7 +2,9 @@
 #if !defined(_HKEVENT_H)
 #define _HKEVENT_H
 
-#pragma warning(disable:4324)
+#if defined(MF_COMPILER_VISUALC)
+	#pragma warning(disable:4324)
+#endif
 
 #include "fastdelegate/FastDelegate.h"
 

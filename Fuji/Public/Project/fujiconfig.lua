@@ -1,6 +1,6 @@
 -- some code to take advantage of visual studios project macros
 
-local function isVS()
+function isVS()
 	return _ACTION == "vs2010" or _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002"
 end
 
@@ -37,46 +37,29 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
-fujiVersion = "0.7.1"
-
-includedirs { "../Include/", "../../Private/Middleware/" }
+includedirs { "../Include/" }
+includedirs { "../../Private/Middleware/libjson" }
 --libdirs { "../Lib/" }
 
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
-	if isVS() then
-		targetsuffix ("_" .. configNames.Debug)
-	else
-		targetsuffix ("-debug-" .. fujiVersion)
-	end
+	targetsuffix ("_" .. configNames.Debug)
 
 configuration "DebugOpt"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols", "Optimize" }
-	if isVS() then
-		targetsuffix ("_" .. configNames.DebugOpt)
-	else
-		targetsuffix ("-debugopt-" .. fujiVersion)
-	end
+	targetsuffix ("_" .. configNames.DebugOpt)
 
 configuration "Release"
 	defines { "NDEBUG", "_RELEASE" }
 	flags { "OptimizeSpeed" }
-	if isVS() then
-		targetsuffix ("_" .. configNames.Release)
-	else
-		targetsuffix ("-" .. fujiVersion)
-	end
+	targetsuffix ("_" .. configNames.Release)
 
 configuration "Retail"
 	defines { "NDEBUG", "_RETAIL" }
 	flags { "OptimizeSpeed" }
-	if isVS() then
-		targetsuffix ("_" .. configNames.Retail)
-	else
-		targetsuffix ("-" .. fujiVersion)
-	end
+	targetsuffix ("_" .. configNames.Retail)
 
 
 -- platform specific config --
@@ -85,7 +68,7 @@ configuration "Retail"
 configuration { "linux" }
 	defines { "_LINUX" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
-	links { "z", "png", "mad", "json" }
+	links { "z", "png", "mad", "tinyxml", "json" }
 
 -- OSX --
 configuration { "macosx" }

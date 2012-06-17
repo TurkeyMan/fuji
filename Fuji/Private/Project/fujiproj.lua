@@ -1,5 +1,10 @@
+-- add dependent projects
 include "../Middleware/libjson/"
-include "../Middleware/libmad/"
+if _OS ~= "linux" then
+	include "../Middleware/libmad/"
+end
+
+fujiVersion = "0.7.1"
 
 projName = "Fuji"
 
@@ -17,6 +22,12 @@ project (projName)
 		kind "StaticLib"
 	end
 
+	-- setup paths --
+	includedirs { "../Include/", "../Source/", "../../Public/Include/" }
+	--	libdirs { "../../Public/Lib/" }
+	objdir "../Build/"
+	targetdir "../../Public/Lib/"
+
 	-- add the source code --
 	files { "../*.TXT" }
 
@@ -25,25 +36,24 @@ project (projName)
 	excludes { "../Source/Images/**" }
 
 	-- include some middleware directly --
-	files { "../Middleware/tinyxml/**.h", "../Middleware/tinyxml/**.cpp" }
 	files { "../Middleware/zlib/minizip/**.h", "../Middleware/zlib/minizip/**.c" }
---	files { "../Middleware/libjson/**.h", "../Middleware/libjson/**.cpp" }
+	includedirs { "../Middleware/zlib" }
 --	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
-
-	-- add source for some middleware that we'll link directly on unix systems --
+--	files { "../Middleware/libjson/**.h", "../Middleware/libjson/**.cpp" }
+	includedirs { "../Middleware/libjson/" }
+	includedirs { "../Middleware/hqx/" }
+--	includedirs { "../Middleware/angelscript/include/" }
+	configuration { "not linux" }
+		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
+		files { "../Middleware/tinyxml/**.h", "../Middleware/tinyxml/**.cpp" }
+		includedirs { "../Middleware/tinyxml" }
 	configuration { "not linux", "not macosx", "not Android" }
 		files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
-		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+		includedirs { "../Middleware/zlib" }
 		files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 		includedirs { "../Middleware/libpng-1.5.0/" }
+		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
 	configuration { }
-
-	-- setup paths --
-	includedirs { "../Include/", "../Source/", "../../Public/Include/" }
-	includedirs { "../Middleware/", "../Middleware/zlib", "../Middleware/angelscript/include/", "../Middleware/vorbis/include/", "../Middleware/libmad/", "../Middleware/hqx/" }
---	libdirs { "../../Public/Lib/" }
-	objdir "../Build/"
-	targetdir "../../Public/Lib/"
 
 	defines { "_LIB" }
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
@@ -56,9 +66,7 @@ project (projName)
 
 
 	-- configure standard fuji stuff --
-
 	dofile "../../Public/Project/fujiconfig.lua"
-	links { "mad", "json" }
 
 
 	-- setup output directories --
@@ -66,6 +74,34 @@ project (projName)
 		configuration { i }
 			targetdir("../../Public/Lib/" .. iif(p, p .. "/", ""))
 	end
+
+	configuration "Debug"
+		if isVS() then
+			targetsuffix ("_" .. configNames.Debug)
+		else
+			targetsuffix ("-debug-" .. fujiVersion)
+		end
+
+	configuration "DebugOpt"
+		if isVS() then
+			targetsuffix ("_" .. configNames.DebugOpt)
+		else
+			targetsuffix ("-debugopt-" .. fujiVersion)
+		end
+
+	configuration "Release"
+		if isVS() then
+			targetsuffix ("_" .. configNames.Release)
+		else
+			targetsuffix ("-" .. fujiVersion)
+		end
+
+	configuration "Retail"
+		if isVS() then
+			targetsuffix ("_" .. configNames.Retail)
+		else
+			targetsuffix ("-" .. fujiVersion)
+		end
 
 
 	-- platform specific config --
