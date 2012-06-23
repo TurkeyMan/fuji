@@ -1,7 +1,6 @@
-#pragma warning( disable : 4530 )
-
-#include <string>
-#include <vector>
+#if defined(_MSC_VER)
+	#pragma warning( disable : 4530 )
+#endif
 
 #include "Fuji.h"
 #include "Util/F3D.h"
@@ -15,22 +14,6 @@ MFXMLNode* pRoot;
 MFMatrix transformMatrix;
 MFMatrix invTransformMatrix;
 bool flipWinding = false;
-
-void startElement(void *userData, const char *name, const char **atts)
-{
-  int i;
-  int *depthPtr = (int*)userData;
-  for (i = 0; i < *depthPtr; i++)
-    putchar('\t');
-  puts(name);
-  *depthPtr += 1;
-}
-
-void endElement(void *userData, const char *name)
-{
-  int *depthPtr = (int*)userData;
-  *depthPtr -= 1;
-}
 
 bool TestID(MFXMLNode *pLib, const char *pLibName)
 {
@@ -213,17 +196,27 @@ ComponentType GetComponentType(const char *pType)
 	return CT_Unknown;
 }
 
+struct DataSource
+{
+	DataSource() {}
+	DataSource(const ComponentType &first, const MFString &second)
+		: first(first), second(second) {}
+
+	ComponentType first;
+	MFString second;
+};
+
 class SourceData
 {
 public:
 	SourceData() {}
 	~SourceData() {}
-	std::string id;
-	std::vector<std::vector<float> > data;
+	MFString id;
+	MFArray<MFArray<float> > data;
 	int validComponents;
 };
 
-std::vector<SourceData> sourceData;
+MFArray<SourceData> sourceData;
 
 SourceData* GetSourceData(const char *pSourceData)
 {
@@ -232,7 +225,7 @@ SourceData* GetSourceData(const char *pSourceData)
 
 	for(int a=0; a<(int)sourceData.size(); a++)
 	{
-		if(!MFString_CaseCmp(pSourceData, sourceData[a].id.c_str()))
+		if(!MFString_CaseCmp(pSourceData, sourceData[a].id.CStr()))
 			return &sourceData[a];
 	}
 
@@ -275,7 +268,7 @@ void ReadSourceData(MFXMLNode *pSource, SourceData &data)
 
 	while(*pText)
 	{
-		data.data[j].push_back((float)atof(pText));
+		data.data[j].push((float)atof(pText));
 
 		while(*pText && !MFIsWhite(*pText))
 			++pText;
@@ -339,9 +332,8 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 	{
 		MFXMLNode *pMeshElement = pMesh->FirstChild();
 
-		typedef std::pair<ComponentType, std::string> DataSource;
-		typedef std::vector<DataSource> DataSources;
-		std::vector<DataSources> components;
+		typedef MFArray<DataSource> DataSources;
+		MFArray<DataSources> components;
 		components.resize(1);
 		sourceData.clear();
 
@@ -354,7 +346,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 				const char *pName = pMeshElement->Attribute("id");
 
 				SourceData x;
-				sourceData.push_back(x);
+				sourceData.push(x);
 				SourceData &data = sourceData.back();
 				data.id = pName;
 
@@ -369,7 +361,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					const char *pSemantic = pInputs->Attribute("semantic");
 					const char *pSource = pInputs->Attribute("source");
 
-					components[0].push_back(DataSource(GetComponentType(pSemantic), pSource));
+					components[0].push(DataSource(GetComponentType(pSemantic), pSource));
 
 					pInputs = pInputs->NextSibling("input");
 				}
@@ -430,8 +422,8 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					const char *pSource = pInputs->Attribute("source");
 
 					DataSources t;
-					t.push_back(DataSource(GetComponentType(pSemantic), pSource));
-					components.push_back(t);
+					t.push(DataSource(GetComponentType(pSemantic), pSource));
+					components.push(t);
 
 					pInputs = pInputs->NextSibling("input");
 				}
@@ -450,7 +442,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 						{
 							case CT_UV1:
 							{
-								SourceData *pData = GetSourceData(sources[b].second.c_str());
+								SourceData *pData = GetSourceData(sources[b].second.CStr());
 
 								if(pData)
 								{
@@ -470,7 +462,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 							}
 							case CT_Colour:
 							{
-								SourceData *pData = GetSourceData(sources[b].second.c_str());
+								SourceData *pData = GetSourceData(sources[b].second.CStr());
 
 								if(pData)
 								{
@@ -495,7 +487,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 							case CT_Binormal:
 							case CT_Tangent:
 							{
-								SourceData *pData = GetSourceData(sources[b].second.c_str());
+								SourceData *pData = GetSourceData(sources[b].second.CStr());
 
 								if(pData)
 								{
@@ -618,7 +610,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 									break;
 								case CT_Weights:
 								{
-									SourceData *pData = GetSourceData(sources[b].second.c_str());
+									SourceData *pData = GetSourceData(sources[b].second.CStr());
 
 									if(pData)
 									{
@@ -631,7 +623,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 								}
 								case CT_Indices:
 								{
-									SourceData *pData = GetSourceData(sources[b].second.c_str());
+									SourceData *pData = GetSourceData(sources[b].second.CStr());
 
 									if(pData)
 									{
@@ -727,7 +719,7 @@ void FindAndAddGeometryToScene(MFXMLNode *pInstanceNode, MFXMLNode *pParentNode,
 	}
 	else
 	{
-		printf("Object '%s' not found in library...\n", pObjectName);
+		MFDebug_Warn(1, MFStr("Object '%s' not found in library...\n", pObjectName));
 	}
 }
 
@@ -920,7 +912,7 @@ void ParseDAEScene(MFXMLNode *pSceneNode)
 			else
 			{
 				// scene not found..
-				printf("Scene '%s' not found!\n", pURL);
+				MFDebug_Warn(1, MFStr("Scene '%s' not found!\n", pURL));
 			}
 		}
 
