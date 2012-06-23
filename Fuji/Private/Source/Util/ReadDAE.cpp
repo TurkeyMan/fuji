@@ -6,12 +6,11 @@
 #include "Fuji.h"
 #include "Util/F3D.h"
 #include "MFMatrix.h"
-
-#include <tinyxml.h>
+#include "MFDocumentXML.h"
 
 static F3DFile *pModel;
 
-TiXmlElement* pRoot;
+MFXMLNode* pRoot;
 
 MFMatrix transformMatrix;
 MFMatrix invTransformMatrix;
@@ -33,7 +32,7 @@ void endElement(void *userData, const char *name)
   *depthPtr -= 1;
 }
 
-bool TestID(TiXmlElement *pLib, const char *pLibName)
+bool TestID(MFXMLNode *pLib, const char *pLibName)
 {
 	const char *pName = pLib->Attribute("id");
 	if(pName && !MFString_CaseCmp(pName, pLibName))
@@ -41,67 +40,67 @@ bool TestID(TiXmlElement *pLib, const char *pLibName)
 	return false;
 }
 
-TiXmlElement* FindObjectInLibrary(const char *pLibName, const char *pLibrary, const char *pLibContent)
+MFXMLNode* FindObjectInLibrary(const char *pLibName, const char *pLibrary, const char *pLibContent)
 {
 	if(pLibName[0] == '#')
 		++pLibName;
 
-	TiXmlElement *pLib = pRoot->FirstChildElement(pLibrary);
+	MFXMLNode *pLib = pRoot->FirstChild(pLibrary);
 
 	while(pLib)
 	{
-		TiXmlElement *pObject = pLib->FirstChildElement(pLibContent);
+		MFXMLNode *pObject = pLib->FirstChild(pLibContent);
 
 		while(pObject)
 		{
 			if(TestID(pObject, pLibName))
 				return pObject;
 
-			pObject = pObject->NextSiblingElement(pLibContent);
+			pObject = pObject->NextSibling(pLibContent);
 		}
 
-		pLib = pLib->NextSiblingElement(pLibrary);
+		pLib = pLib->NextSibling(pLibrary);
 	}
 
 	return NULL;
 }
 
-TiXmlElement* GetSceneLib(const char *pLibName)
+MFXMLNode* GetSceneLib(const char *pLibName)
 {
 	return FindObjectInLibrary(pLibName, "library_visual_scenes", "visual_scene");
 }
 
-TiXmlElement* GetGeometryLib(const char *pLibName)
+MFXMLNode* GetGeometryLib(const char *pLibName)
 {
 	return FindObjectInLibrary(pLibName, "library_geometries", "geometry");
 }
 
-TiXmlElement* GetMaterialLib(const char *pLibName)
+MFXMLNode* GetMaterialLib(const char *pLibName)
 {
 	return FindObjectInLibrary(pLibName, "library_materials", "material");
 }
 
-void ParseDAEAsset(TiXmlElement *pAsset)
+void ParseDAEAsset(MFXMLNode *pAsset)
 {
-	TiXmlElement *pContributor = pAsset->FirstChildElement("contributor");
+	MFXMLNode *pContributor = pAsset->FirstChild("contributor");
 
-	TiXmlElement *pContrib = pContributor ? pContributor : pAsset;
+	MFXMLNode *pContrib = pContributor ? pContributor : pAsset;
 
-	TiXmlElement *pAuthor = pContrib->FirstChildElement("author");
-	TiXmlElement *pAuthoringTool = pContrib->FirstChildElement("authoring_tool");
-//	TiXmlElement *pSourceData = pContrib->FirstChildElement("source_data");
+	MFXMLNode *pAuthor = pContrib->FirstChild("author");
+	MFXMLNode *pAuthoringTool = pContrib->FirstChild("authoring_tool");
+//	MFXMLNode *pSourceData = pContrib->FirstChild("source_data");
 
-	TiXmlElement *pUp = pAsset->FirstChildElement("up_axis");
-	TiXmlElement *pUnit = pAsset->FirstChildElement("unit");
-	TiXmlElement *pCopyright = pAsset->FirstChildElement("copyright");
-//	TiXmlElement *pCreated = pAsset->FirstChildElement("created");
-//	TiXmlElement *pLastModified = pAsset->FirstChildElement("modified");
-//	TiXmlElement *pRevision = pAsset->FirstChildElement("revision");
+	MFXMLNode *pUp = pAsset->FirstChild("up_axis");
+	MFXMLNode *pUnit = pAsset->FirstChild("unit");
+	MFXMLNode *pCopyright = pAsset->FirstChild("copyright");
+//	MFXMLNode *pCreated = pAsset->FirstChild("created");
+//	MFXMLNode *pLastModified = pAsset->FirstChild("modified");
+//	MFXMLNode *pRevision = pAsset->FirstChild("revision");
 
 	if(pUp)
 	{
 		// the axiis need to be swapped about into ingame axiis
-		const char *pAxis = pUp->GetText();
+		const char *pAxis = pUp->Value();
 
 		MFVector x, y, z;
 		x = transformMatrix.GetXAxis();
@@ -137,28 +136,28 @@ void ParseDAEAsset(TiXmlElement *pAsset)
 	if(pAuthor)
 	{
 		// get the author (for kicks)
-		const char *pAuth = pAuthor->GetText();
+		const char *pAuth = pAuthor->Value();
 		MFString_Copy(pModel->author, pAuth);
 	}
 
 	if(pCopyright)
 	{
 		// get the author (for kicks)
-		const char *pCopyrightString = pCopyright->GetText();
+		const char *pCopyrightString = pCopyright->Value();
 		MFString_Copy(pModel->copyrightString, pCopyrightString);
 	}
 
 	if(pAuthoringTool)
 	{
 		// get the authoring tool (for kicks)
-		const char *pAuthTool = pAuthoringTool->GetText();
+		const char *pAuthTool = pAuthoringTool->Value();
 		MFString_Copy(pModel->authoringTool, pAuthTool);
 	}
 
 	invTransformMatrix.Inverse(transformMatrix);
 }
 
-int ParseDAEMaterial(TiXmlElement *pMaterialNode)
+int ParseDAEMaterial(MFXMLNode *pMaterialNode)
 {
 	const char *pName = pMaterialNode->Attribute("name");
 
@@ -240,38 +239,36 @@ SourceData* GetSourceData(const char *pSourceData)
 	return NULL;
 }
 
-void ReadSourceData(TiXmlElement *pSource, SourceData &data)
+void ReadSourceData(MFXMLNode *pSource, SourceData &data)
 {
-	TiXmlElement *pTechnique = pSource->FirstChildElement("technique_common");
+	MFXMLNode *pTechnique = pSource->FirstChild("technique_common");
 
 	if(pTechnique)
 	{
-		TiXmlElement *pAccessor = pTechnique->FirstChildElement("accessor");
+		MFXMLNode *pAccessor = pTechnique->FirstChild("accessor");
 
-		int count, stride;
-		pAccessor->Attribute("count", &count);
-		pAccessor->Attribute("stride", &stride);
+		int count = pAccessor->IntAttribute("count");
+		int stride =pAccessor->IntAttribute("stride");
 
 		data.validComponents = stride;
 		data.data.resize(count);
 	}
 
-	TiXmlElement *pArray;
-	pArray = pSource->FirstChildElement("array");
+	MFXMLNode *pArray;
+	pArray = pSource->FirstChild("array");
 	MFDebug_Assert(!pArray, "'array' not supported for vertex data.\n");
-	pArray = pSource->FirstChildElement("int_array");
+	pArray = pSource->FirstChild("int_array");
 	MFDebug_Assert(!pArray, "'int_array' not supported for vertex data.\n");
-	pArray = pSource->FirstChildElement("Name_array");
+	pArray = pSource->FirstChild("Name_array");
 	MFDebug_Assert(!pArray, "'Name_array' not supported for vertex data.\n");
 
-	pArray = pSource->FirstChildElement("float_array");
+	pArray = pSource->FirstChild("float_array");
 	MFDebug_Assert(pArray, "source has no array data.\n");
 
-	int dataCount;
-	pArray->Attribute("count", &dataCount);
+	int dataCount = pArray->IntAttribute("count");
 	MFDebug_Assert((int)data.data.size() * data.validComponents == dataCount, "Not enough data in array for all data specified by the technique.\n");
 
-	const char *pText = pArray->GetText();
+	const char *pText = pArray->Value();
 
 	int i=0;
 	int j=0;
@@ -319,7 +316,7 @@ MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
 	return NULL;
 }
 
-void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransform)
+void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 {
 	int a,b;
 
@@ -336,11 +333,11 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 	MFString_Copy(subObject.name, pName);
 
-	TiXmlElement *pMesh = pGeometryNode->FirstChildElement("mesh");
+	MFXMLNode *pMesh = pGeometryNode->FirstChild("mesh");
 
 	while(pMesh)
 	{
-		TiXmlElement *pMeshElement = pMesh->FirstChildElement();
+		MFXMLNode *pMeshElement = pMesh->FirstChild();
 
 		typedef std::pair<ComponentType, std::string> DataSource;
 		typedef std::vector<DataSource> DataSources;
@@ -350,7 +347,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 		while(pMeshElement)
 		{
-			const char *pValue = pMeshElement->Value();
+			const char *pValue = pMeshElement->Name();
 
 			if(!MFString_CaseCmp(pValue, "source"))
 			{
@@ -365,7 +362,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 			}
 			else if(!MFString_CaseCmp(pValue, "vertices"))
 			{
-				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
+				MFXMLNode *pInputs = pMeshElement->FirstChild("input");
 
 				while(pInputs)
 				{
@@ -374,12 +371,12 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 
 					components[0].push_back(DataSource(GetComponentType(pSemantic), pSource));
 
-					pInputs = pInputs->NextSiblingElement("input");
+					pInputs = pInputs->NextSibling("input");
 				}
 			}
 			else if(!MFString_CaseCmp(pValue, "polylist") || !MFString_CaseCmp(pValue, "triangles"))
 			{
-				TiXmlElement *pInputs = pMeshElement->FirstChildElement("input");
+				MFXMLNode *pInputs = pMeshElement->FirstChild("input");
 
 				MFDebug_Assert(pInputs, "No inputs for polygons.\n");
 
@@ -396,7 +393,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				if(pMaterial)
 				{
 					// find material in the library
-					TiXmlElement *pMat = GetMaterialLib(pMaterial);
+					MFXMLNode *pMat = GetMaterialLib(pMaterial);
 
 					if(pMat)
 					{
@@ -424,7 +421,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					}
 				}
 
-				pInputs = pInputs->NextSiblingElement("input");
+				pInputs = pInputs->NextSibling("input");
 
 				while(pInputs)
 				{
@@ -436,7 +433,7 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 					t.push_back(DataSource(GetComponentType(pSemantic), pSource));
 					components.push_back(t);
 
-					pInputs = pInputs->NextSiblingElement("input");
+					pInputs = pInputs->NextSibling("input");
 				}
 
 				int numIndices = (int)components.size();
@@ -537,10 +534,10 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				if(!MFString_CaseCmp(pValue, "polylist"))
 				{
 
-					TiXmlElement *pVCount = pMeshElement->FirstChildElement("vcount");
+					MFXMLNode *pVCount = pMeshElement->FirstChild("vcount");
 					MFDebug_Assert(pVCount, "No <vcount> in <polylist>");
 
-					const char *pVCountString = pVCount->GetText();
+					const char *pVCountString = pVCount->Value();
 					pVCountString = MFSkipWhite(pVCountString);
 
 					while(*pVCountString)
@@ -569,10 +566,10 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				}
 
 				// read polygons
-				TiXmlElement *pPolygon = pMeshElement->FirstChildElement("p");
+				MFXMLNode *pPolygon = pMeshElement->FirstChild("p");
 				MFDebug_Assert(pPolygon, "No <p> in <polylist>");
 
-				const char *pText = pPolygon->GetText();
+				const char *pText = pPolygon->Value();
 
 				// build the vertex and face lists
 				int tri = 0;
@@ -674,10 +671,10 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 				}
 			}
 
-			pMeshElement = pMeshElement->NextSiblingElement();
+			pMeshElement = pMeshElement->NextSibling();
 		}
 
-		pMesh = pMesh->NextSiblingElement("mesh");
+		pMesh = pMesh->NextSibling("mesh");
 	}
 
 	for(a=0; a<subObject.positions.size(); a++)
@@ -704,25 +701,25 @@ void ParseDAEGeometry(TiXmlElement *pGeometryNode, const MFMatrix &worldTransfor
 	}
 }
 
-void ParseDAEAnimation(TiXmlElement *pSceneNode)
+void ParseDAEAnimation(MFXMLNode *pSceneNode)
 {
 
 }
 
-void ParseDAELight(TiXmlElement *pLightNode)
+void ParseDAELight(MFXMLNode *pLightNode)
 {
 
 }
 
-void ParseDAECamera(TiXmlElement *pCameraNode)
+void ParseDAECamera(MFXMLNode *pCameraNode)
 {
 
 }
 
-void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParentNode, const char *pObjectName, const MFMatrix &matrix)
+void FindAndAddGeometryToScene(MFXMLNode *pInstanceNode, MFXMLNode *pParentNode, const char *pObjectName, const MFMatrix &matrix)
 {
 	// scan library for object
-	TiXmlElement *pObject = GetGeometryLib(pObjectName);
+	MFXMLNode *pObject = GetGeometryLib(pObjectName);
 
 	if(pObject)
 	{
@@ -734,22 +731,22 @@ void FindAndAddGeometryToScene(TiXmlElement *pInstanceNode, TiXmlElement *pParen
 	}
 }
 
-void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, const char *pParentName)
+void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const char *pParentName)
 {
-	TiXmlElement *pTransform;
+	MFXMLNode *pTransform;
 	MFMatrix localMat = MFMatrix::identity;
 
 	// build the transform
-	pTransform = pSceneNode->FirstChildElement();
+	pTransform = pSceneNode->FirstChild();
 
 	while(pTransform)
 	{
-		const char *pTransformValue = pTransform->Value();
+		const char *pTransformValue = pTransform->Name();
 
 		if(!MFString_CaseCmp(pTransformValue, "matrix"))
 		{
 			// apply this node's transformation matrix to the current transform
-			const char *pMat = pTransform->GetText();
+			const char *pMat = pTransform->Value();
 
 			int lookup[16] = { 0,4,8,12, 1,5,9,13, 2,6,10,14, 3,7,11,15 };
 			for(int c=0; *pMat && c<16; c++)
@@ -765,7 +762,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		else if(!MFString_CaseCmp(pTransformValue, "translate"))
 		{
 			// just translate the current transform
-			const char *pTrans = pTransform->GetText();
+			const char *pTrans = pTransform->Value();
 			MFVector translation = MFVector::identity;
 
 			int c = 0;
@@ -785,7 +782,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		else if(!MFString_CaseCmp(pTransformValue, "scale"))
 		{
 			// scale the current transform
-			const char *pScale = pTransform->GetText();
+			const char *pScale = pTransform->Value();
 			MFVector scale = MFVector::identity;
 
 			int c = 0;
@@ -805,7 +802,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		else if(!MFString_CaseCmp(pTransformValue, "rotate"))
 		{
 			// rotate the current transform
-			const char *pRot = pTransform->GetText();
+			const char *pRot = pTransform->Value();
 			MFVector rot = MFVector::zero;
 
 			int c = 0;
@@ -823,7 +820,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 			localMat.Rotate(rot, MFDEGREES(rot.w));
 		}
 
-		pTransform = pTransform->NextSiblingElement();
+		pTransform = pTransform->NextSibling();
 	}
 
 	localMat.Multiply4x4(invTransformMatrix, localMat).Multiply4x4(transformMatrix);
@@ -856,7 +853,7 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 	else
 	{
 		// check for a geometry node
-		TiXmlElement *pGeometry = pSceneNode->FirstChildElement("instance_geometry");
+		MFXMLNode *pGeometry = pSceneNode->FirstChild("instance_geometry");
 		if(pGeometry)
 		{
 			// get object name
@@ -884,34 +881,34 @@ void ParseSceneNode(TiXmlElement *pSceneNode, const MFMatrix &parentMatrix, cons
 		}
 
 		// all the other stuff
-//		TiXmlElement *pInstance = pSceneNode->FirstChildElement("instance_camera");
+//		MFXMLNode *pInstance = pSceneNode->FirstChild("instance_camera");
 	}
 
 	// recurse child nodes
-	TiXmlElement *pNode = pSceneNode->FirstChildElement("node");
+	MFXMLNode *pNode = pSceneNode->FirstChild("node");
 	while(pNode)
 	{
 		// and recurse for child nodes
 		ParseSceneNode(pNode, worldMat, pNodeName);
 
-		pNode = pNode->NextSiblingElement("node");
+		pNode = pNode->NextSibling("node");
 	}
 }
 
-void ParseDAEScene(TiXmlElement *pSceneNode)
+void ParseDAEScene(MFXMLNode *pSceneNode)
 {
-	TiXmlElement *pScene;
-	pScene = pSceneNode->FirstChildElement();
+	MFXMLNode *pScene;
+	pScene = pSceneNode->FirstChild();
 
 	while(pScene)
 	{
-		const char *pValue = pScene->Value();
+		const char *pValue = pScene->Name();
 
 		if(!MFString_CaseCmp(pValue, "instance_visual_scene"))
 		{
 			const char *pURL = pScene->Attribute("url");
 
-			TiXmlElement *pSceneRoot = GetSceneLib(pURL);
+			MFXMLNode *pSceneRoot = GetSceneLib(pURL);
 
 			if(pSceneRoot)
 			{
@@ -927,17 +924,17 @@ void ParseDAEScene(TiXmlElement *pSceneNode)
 			}
 		}
 
-		pScene = pScene->NextSiblingElement();
+		pScene = pScene->NextSibling();
 	}
 }
 
-void ParseDAERootElement(TiXmlElement *pRoot)
+void ParseDAERoot(MFXMLNode *pRoot)
 {
-	TiXmlElement *pElement = pRoot->FirstChildElement();
+	MFXMLNode *pElement = pRoot->FirstChild();
 
 	while(pElement)
 	{
-		const char *pValue = pElement->Value();
+		const char *pValue = pElement->Name();
 
 		if(!MFString_CaseCmp(pValue, "asset"))
 		{
@@ -957,7 +954,7 @@ void ParseDAERootElement(TiXmlElement *pRoot)
 		}
 
 
-		pElement = pElement->NextSiblingElement();
+		pElement = pElement->NextSibling();
 	}
 }
 
@@ -967,27 +964,27 @@ int F3DFile::ReadDAE(const char *pFilename)
 
 	transformMatrix = MFMatrix::identity;
 
-	TiXmlDocument doc(pFilename);
-	bool loadOkay = doc.LoadFile();
-
-	if(!loadOkay)
+	// attempt to load the xml document
+	MFDocumentXML *pDoc = MFParseXML_ParseFile(pFilename);
+	if(!pDoc)
 	{
 		MFDebug_Warn(2, MFStr("Failed to load collada file '%s' for conversion..\n", pFilename));
 		return -1;
 	}
 
-	pRoot = doc.FirstChildElement("COLLADA");
-
+	pRoot = MFParseXML_RootNode(pDoc, "COLLADA");
 	if(!pRoot)
 	{
 		MFDebug_Warn(2, "Document has no root node..\n");
+		MFParseXML_DestroyDocument(pDoc);
 		return 1;
 	}
 
 	MFString_Copy(pModel->name, "Untitled collada file");
 
-	ParseDAERootElement(pRoot);
+	ParseDAERoot(pRoot);
 
+	MFParseXML_DestroyDocument(pDoc);
 	return 0;
 }
 
@@ -997,24 +994,25 @@ void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 
 	transformMatrix = MFMatrix::identity;
 
-	TiXmlDocument doc;
-	doc.Parse(pFile);
-
-	if(doc.Error())
+	// attempt to load the xml document
+	MFDocumentXML *pDoc = MFParseXML_Parse(pFile);
+	if(!pDoc)
 	{
 		MFDebug_Warn(2, "Failed to load collada file for conversion..\n");
 		return;
 	}
 
-	pRoot = doc.FirstChildElement("COLLADA");
-
+	pRoot = MFParseXML_RootNode(pDoc, "COLLADA");
 	if(!pRoot)
 	{
 		MFDebug_Warn(2, "Document has no root node..\n");
+		MFParseXML_DestroyDocument(pDoc);
 		return;
 	}
 
 	MFString_Copy(pModel->name, "Untitled collada file");
 
-	ParseDAERootElement(pRoot);
+	ParseDAERoot(pRoot);
+
+	MFParseXML_DestroyDocument(pDoc);
 }

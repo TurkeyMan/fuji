@@ -4,7 +4,7 @@
 
 #include "HKWidget.h"
 
-class TiXmlElement;
+class MFXMLNode;
 
 class HKWidgetLayoutDescriptor
 {
@@ -36,7 +36,7 @@ protected:
 	HKWidget *Spawn(Node *pNode);
 	void DestroyNode(Node *pNode);
 
-	static Node *ParseElement(TiXmlElement *pElement);
+	static Node *ParseElement(MFXMLNode *pElement);
 };
 
 #endif

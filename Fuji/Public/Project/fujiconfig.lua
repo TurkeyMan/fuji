@@ -38,7 +38,6 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 -- configurations --
 
 includedirs { "../Include/" }
-includedirs { "../../Private/Middleware/libjson" }
 --libdirs { "../Lib/" }
 
 configuration "Debug"
@@ -68,18 +67,18 @@ configuration "Retail"
 configuration { "linux" }
 	defines { "_LINUX" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
-	links { "z", "png", "mad", "tinyxml", "json" }
+	links { "z", "png", "mad" }
 
 -- OSX --
 configuration { "macosx" }
 	defines { "_OSX" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
-	links { "z", "png", "mad", "json" }
+	links { "z", "png", "mad" }
 
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
-	links { "ogg_static", "vorbis_static", "vorbisfile_static", "mad", "json" }
+	links { "ogg_static", "vorbis_static", "vorbisfile_static", "mad" }
 	linkoptions { "/Delay:unload" }
 
 	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11
@@ -104,7 +103,7 @@ configuration "Android"
 		defines { "ANDROID_NDK", "ANDROID", "__ANDROID__" }
 	end
 	links { "z", "log", "android", "GLESv1_CM", "jnigraphics" }
-	links { "mad", "json" }
+	links { "mad" }
 
 -- XBox --
 configuration "Xbox"
@@ -118,6 +117,6 @@ configuration "Xbox360"
 -- Playstation 3 --
 configuration "PS3"
 	defines { "_PS3" }
-	links { "mad", "json" }
+	links { "mad" }
 
 configuration { }

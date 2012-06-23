@@ -4,6 +4,10 @@
 /Haku/Lib
 /Haku/Build
 /Haku/Project
+/Fuji/Private/Middleware/*/obj
+*.obj
+*.idb
+*.user
 *.o
 *.d
 Makefile

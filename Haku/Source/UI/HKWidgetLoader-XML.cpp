@@ -5,19 +5,18 @@
 
 #include "MFFileSystem.h"
 #include "MFHeap.h"
+#include "MFDocumentXML.h"
 
-#include <tinyxml.h>
-
-static HKWidget *ParseElement(TiXmlElement *pElement)
+static HKWidget *ParseElement(MFXMLNode *pElement)
 {
 	// create widget
-	const char *pType = pElement->Value();
+	const char *pType = pElement->Name();
 	HKWidget *pWidget = HKUserInterface::CreateWidget(pType);
 	if(!pWidget)
 		return NULL;
 
 	// apply properties
-	TiXmlAttribute *pAtt = pElement->FirstAttribute();
+	MFXMLAttribute *pAtt = pElement->FirstAttribute();
 	while(pAtt)
 	{
 		pWidget->SetProperty(pAtt->Name(), pAtt->Value());
@@ -25,7 +24,7 @@ static HKWidget *ParseElement(TiXmlElement *pElement)
 	}
 
 	// load children
-	TiXmlElement *pChildElement = pElement->FirstChildElement();
+	MFXMLNode *pChildElement = pElement->FirstChild();
 	while(pChildElement)
 	{
 		HKWidget *pChild = ParseElement(pChildElement);
@@ -35,7 +34,7 @@ static HKWidget *ParseElement(TiXmlElement *pElement)
 			pLayout->AddChild(pChild, true);
 		}
 
-		pChildElement = pChildElement->NextSiblingElement();
+		pChildElement = pChildElement->NextSibling();
 	}
 
 	return pWidget;
@@ -43,21 +42,15 @@ static HKWidget *ParseElement(TiXmlElement *pElement)
 
 HKWidget *HKWidget_CreateFromXML(const char *pFilename)
 {
-	size_t len;
-	char *pFile = MFFileSystem_Load(pFilename, &len, true);
-
-	if(!pFile)
+	// attempt to load the xml document
+	MFDocumentXML *pDoc = MFParseXML_ParseFile(pFilename);
+	if(!pDoc)
 		return NULL;
 
-	TiXmlDocument doc;
-	doc.Parse(pFile);
+	MFXMLNode *pElement = MFParseXML_RootNode(pDoc);
+	HKWidget *pWidget = ParseElement(pElement);
 
-	if(doc.Error())
-	{
-		MFHeap_Free(pFile);
-		return NULL;
-	}
+	MFParseXML_DestroyDocument(pDoc);
 
-	TiXmlElement *pElement = doc.FirstChildElement();
-	return ParseElement(pElement);
+	return pWidget;
 }

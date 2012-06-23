@@ -1,5 +1,4 @@
 -- add dependent projects
-include "../Middleware/libjson/"
 if _OS ~= "linux" then
 	include "../Middleware/libmad/"
 end
@@ -24,50 +23,43 @@ project (projName)
 
 	-- setup paths --
 	includedirs { "../Include/", "../Source/", "../../Public/Include/" }
-	--	libdirs { "../../Public/Lib/" }
+--	libdirs { "../../Public/Lib/" }
 	objdir "../Build/"
 	targetdir "../../Public/Lib/"
 
 	-- add the source code --
 	files { "../*.TXT" }
 
-	files { "../../Public/Include/**.h", "../../Public/Include/**.inl" }
+	files { "../../Public/Include/**.h", "../../Public/Include/**.hpp", "../../Public/Include/**.inl" }
 	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
 
 	-- include some middleware directly --
 	files { "../Middleware/zlib/minizip/**.h", "../Middleware/zlib/minizip/**.c" }
 	includedirs { "../Middleware/zlib" }
---	files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
---	files { "../Middleware/libjson/**.h", "../Middleware/libjson/**.cpp" }
-	includedirs { "../Middleware/libjson/" }
 	includedirs { "../Middleware/hqx/" }
 --	includedirs { "../Middleware/angelscript/include/" }
 	configuration { "not linux" }
 		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
-		files { "../Middleware/tinyxml/**.h", "../Middleware/tinyxml/**.cpp" }
-		includedirs { "../Middleware/tinyxml" }
 	configuration { "not linux", "not macosx", "not Android" }
 		files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 		includedirs { "../Middleware/zlib" }
 		files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 		includedirs { "../Middleware/libpng-1.5.0/" }
 		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
+		includedirs { "../Middleware/" }
 	configuration { }
 
-	defines { "_LIB" }
+	-- project configuration --
+
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
 --	pchheader "Fuji.h"
 --	pchsource "MFMain.cpp"
 
-	configuration "../Middleware/libjson/**.cpp"
-		flags { "StaticRuntime", "NoRTTI" }
-
-
 	-- configure standard fuji stuff --
 	dofile "../../Public/Project/fujiconfig.lua"
-
 
 	-- setup output directories --
 	for i, p in pairs(platformNames) do

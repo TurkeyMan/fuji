@@ -2,9 +2,7 @@
 #include "UI/HKWidgetStyle.h"
 #include "UI/HKWidget.h"
 
-#include "MFFileSystem.h"
-
-#include <tinyxml.h>
+#include "MFDocumentXML.h"
 
 MFOpenHashTable<HKWidgetStyle> HKWidgetStyle::sStyles;
 
@@ -21,34 +19,20 @@ void HKWidgetStyle::Deinit()
 bool HKWidgetStyle::LoadStylesFromXML(const char *pFilename)
 {
 	// attempt to load the xml document
-	size_t len;
-	char *pFile = MFFileSystem_Load(pFilename, &len, true);
-
-	if(!pFile)
+	MFDocumentXML *pDoc = MFParseXML_ParseFile(pFilename);
+	if(!pDoc)
 		return false;
-
-	TiXmlDocument doc;
-	{
-		MFHEAP_SCOPE(MFHT_ActiveTemporary);
-		doc.Parse(pFile);
-	}
-
-	if(doc.Error())
-	{
-		MFHeap_Free(pFile);
-		return false;
-	}
 
 	// build the node tree
-	TiXmlElement *pElement = doc.FirstChildElement();
+	MFXMLNode *pElement = MFParseXML_RootNode(pDoc);
 	while(pElement)
 	{
-		if(!MFString_CaseCmp(pElement->Value(), "Resources"))
+		if(!MFString_CaseCmp(pElement->Name(), "Resources"))
 		{
-			TiXmlElement *pStyle = pElement->FirstChildElement();
+			MFXMLNode *pStyle = pElement->FirstChild();
 			while(pStyle)
 			{
-				if(!MFString_CaseCmp(pStyle->Value(), "Style"))
+				if(!MFString_CaseCmp(pStyle->Name(), "Style"))
 				{
 					const char *pName = pStyle->Attribute("id");
 					const char *pParent = pStyle->Attribute("parent");
@@ -57,15 +41,15 @@ bool HKWidgetStyle::LoadStylesFromXML(const char *pFilename)
 					style.name = pName;
 					style.parent = pParent;
 
-					TiXmlElement *pProperty = pStyle->FirstChildElement();
+					MFXMLNode *pProperty = pStyle->FirstChild();
 					while(pProperty)
 					{
-						if(!MFString_CaseCmp(pProperty->Value(), "Property"))
+						if(!MFString_CaseCmp(pProperty->Name(), "Property"))
 						{
 							const char *pPropertyName = pProperty->Attribute("id");
 							MFDebug_Assert(pPropertyName, "Expected 'id=...'. Property name is not defined!");
 
-							const char *pValue = pProperty->GetText();
+							const char *pValue = pProperty->Value();
 
 							Property &p = style.properties.push();
 							++style.numProperties;
@@ -73,9 +57,9 @@ bool HKWidgetStyle::LoadStylesFromXML(const char *pFilename)
 							p.property = pPropertyName;
 							p.property = pValue;
 						}
-						else if(!MFString_CaseCmp(pProperty->Value(), "Properties"))
+						else if(!MFString_CaseCmp(pProperty->Name(), "Properties"))
 						{
-							TiXmlAttribute *pProp = pProperty->FirstAttribute();
+							MFXMLAttribute *pProp = pProperty->FirstAttribute();
 							while(pProp)
 							{
 								Property &p = style.properties.push();
@@ -88,18 +72,18 @@ bool HKWidgetStyle::LoadStylesFromXML(const char *pFilename)
 							}
 						}
 
-						pProperty = pProperty->NextSiblingElement();
+						pProperty = pProperty->NextSibling();
 					}
 				}
 
-				pStyle = pStyle->NextSiblingElement();
+				pStyle = pStyle->NextSibling();
 			}
 		}
 
-		pElement = pElement->NextSiblingElement();
+		pElement = pElement->NextSibling();
 	}
 
-	MFHeap_Free(pFile);
+	MFParseXML_DestroyDocument(pDoc);
 	return true;
 }
 

@@ -2,7 +2,7 @@
 #if !defined(_HKSTRING_ENTRY_LOGIC)
 #define _HKSTRING_ENTRY_LOGIC
 
-#include "fastdelegate/FastDelegate.h"
+#include "Middleware/FastDelegate.h"
 
 class HKStringEntryLogic
 {

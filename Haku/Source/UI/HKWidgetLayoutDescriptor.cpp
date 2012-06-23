@@ -5,8 +5,7 @@
 
 #include "MFFileSystem.h"
 #include "MFHeap.h"
-
-#include <tinyxml.h>
+#include "MFDocumentXML.h"
 
 HKWidgetLayoutDescriptor::HKWidgetLayoutDescriptor()
 {
@@ -24,29 +23,15 @@ bool HKWidgetLayoutDescriptor::LoadFromXML(const char *pFilename)
 	DestroyNode(pRoot);
 
 	// attempt to load the xml document
-	size_t len;
-	char *pFile = MFFileSystem_Load(pFilename, &len, true);
-
-	if(!pFile)
-		return false;
-
-	TiXmlDocument doc;
-	{
-		MFHEAP_SCOPE(MFHT_ActiveTemporary);
-		doc.Parse(pFile);
-	}
-
-	if(doc.Error())
-	{
-		MFHeap_Free(pFile);
-		return false;
-	}
+	MFDocumentXML *pDoc = MFParseXML_ParseFile(pFilename);
+	if(!pDoc)
+		return NULL;
 
 	// build the node tree
-	TiXmlElement *pElement = doc.FirstChildElement();
+	MFXMLNode *pElement = MFParseXML_RootNode(pDoc);
 	pRoot = ParseElement(pElement);
 
-	MFHeap_Free(pFile);
+	MFParseXML_DestroyDocument(pDoc);
 	return true;
 }
 
@@ -93,15 +78,15 @@ void HKWidgetLayoutDescriptor::DestroyNode(Node *pNode)
 	MFHeap_Free(pNode);
 }
 
-HKWidgetLayoutDescriptor::Node *HKWidgetLayoutDescriptor::ParseElement(TiXmlElement *pElement)
+HKWidgetLayoutDescriptor::Node *HKWidgetLayoutDescriptor::ParseElement(MFXMLNode *pElement)
 {
 	// count child items
 	int numAttributes = 0;
-	for(TiXmlAttribute *pAtt = pElement->FirstAttribute(); pAtt; pAtt = pAtt->Next())
+	for(MFXMLAttribute *pAtt = pElement->FirstAttribute(); pAtt; pAtt = pAtt->Next())
 		++numAttributes;
 
 	int numChildren = 0;
-	for(TiXmlElement *pChildElement = pElement->FirstChildElement(); pChildElement; pChildElement = pChildElement->NextSiblingElement())
+	for(MFXMLNode *pChildElement = pElement->FirstChild(); pChildElement; pChildElement = pChildElement->NextSibling())
 		++numChildren;
 
 	// allocate the node
@@ -112,10 +97,10 @@ HKWidgetLayoutDescriptor::Node *HKWidgetLayoutDescriptor::ParseElement(TiXmlElem
 	pNode->numChildren = numChildren;
 
 	// assign name
-	pNode->type = pElement->Value();
+	pNode->type = pElement->Name();
 
 	// get properties
-	TiXmlAttribute *pAtt = pElement->FirstAttribute();
+	MFXMLAttribute *pAtt = pElement->FirstAttribute();
 	for(int a=0; a<numAttributes; ++a)
 	{
 		pNode->pAttributes[a].property = pAtt->Name();
@@ -124,11 +109,11 @@ HKWidgetLayoutDescriptor::Node *HKWidgetLayoutDescriptor::ParseElement(TiXmlElem
 	}
 
 	// and parse the children
-	TiXmlElement *pChildElement = pElement->FirstChildElement();
+	MFXMLNode *pChildElement = pElement->FirstChild();
 	for(int a=0; a<numChildren; ++a)
 	{
 		pNode->ppChildren[a] = ParseElement(pChildElement);
-		pChildElement = pChildElement->NextSiblingElement();
+		pChildElement = pChildElement->NextSibling();
 	}
 
 	return pNode;

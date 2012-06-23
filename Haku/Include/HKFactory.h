@@ -2,7 +2,7 @@
 #if !defined(_HKFACTORY_H)
 #define _HKFACTORY_H
 
-#include "fastdelegate/FastDelegate.h"
+#include "Middleware/FastDelegate.h"
 
 template <typename T>
 class HKFactory
