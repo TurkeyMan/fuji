@@ -94,19 +94,19 @@ void MFString_Dump()
 	}
 }
 
-MF_API void MFCopyMemory(void *pDest, const void *pSrc, size_t size)
+MF_API void *MFCopyMemory(void *pDest, const void *pSrc, size_t size)
 {
-	memcpy(pDest, pSrc, size);
+	return memcpy(pDest, pSrc, size);
 }
 
-MF_API void MFMemSet(void *pDest, int value, size_t size)
+MF_API void *MFMemSet(void *pDest, int value, size_t size)
 {
-	memset(pDest, value, size);
+	return memset(pDest, value, size);
 }
 
-MF_API void MFZeroMemory(void *pDest, size_t size)
+MF_API void *MFZeroMemory(void *pDest, size_t size)
 {
-	memset(pDest, 0, size);
+	return memset(pDest, 0, size);
 }
 
 MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)

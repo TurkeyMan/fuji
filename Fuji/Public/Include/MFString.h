@@ -16,18 +16,18 @@
  * @param pDest Pointer to the destination buffer.
  * @param pSrc Pointer to the source buffer.
  * @param size Size of data to copy in bytes.
- * @return None.
+ * @return Returns pDest for convenience.
  */
-MF_API void MFCopyMemory(void *pDest, const void *pSrc, size_t size);
+MF_API void *MFCopyMemory(void *pDest, const void *pSrc, size_t size);
 
 /**
  * Zero memory.
  * Initialise a region of memory to zero.
  * @param pDest Pointer to the target buffer.
  * @param size Size of data to initialise in bytes.
- * @return None.
+ * @return Returns pDest for convenience.
  */
-MF_API void MFZeroMemory(void *pDest, size_t size);
+MF_API void *MFZeroMemory(void *pDest, size_t size);
 
 /**
  * Initialise memory.
@@ -35,9 +35,9 @@ MF_API void MFZeroMemory(void *pDest, size_t size);
  * @param pDest Pointer to the target buffer.
  * @param value Value written to each byte in the memory region.
  * @param size Number of bytes to initialise.
- * @return None.
+ * @return Returns pDest for convenience.
  */
-MF_API void MFMemSet(void *pDest, int value, size_t size);
+MF_API void *MFMemSet(void *pDest, int value, size_t size);
 
 /**
  * Compare memory.

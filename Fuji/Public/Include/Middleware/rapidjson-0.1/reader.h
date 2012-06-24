@@ -9,8 +9,14 @@
 #include "internal/stack.h"
 #include <csetjmp>
 
-#if defined(RAPIDJSON_SSE42) || defined(RAPIDJSON_SSE2)
-#include <intrin.h>
+#if defined(_WIN32) && (defined(RAPIDJSON_SSE42) || defined(RAPIDJSON_SSE2))
+	#include <intrin.h>
+#else
+	#ifdef RAPIDJSON_SSE42
+		#include <nmmintrin.h>
+	#elif defined(RAPIDJSON_SSE2)
+		#include <emmintrin.h>
+	#endif
 #endif
 
 #ifndef RAPIDJSON_PARSE_ERROR

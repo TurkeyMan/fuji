@@ -4,7 +4,6 @@
 // Copyright (c) 2011 Milo Yip (miloyip@gmail.com)
 // Version 0.1
 
-//#include <cstdlib>	// malloc(), realloc(), free()
 #include <cstring>	// memcpy()
 
 ///////////////////////////////////////////////////////////////////////////////

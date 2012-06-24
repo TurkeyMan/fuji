@@ -3,10 +3,6 @@
 #include "MFFileSystem.h"
 #include "MFDocumentJSON.h"
 
-#define RAPIDJSON_NO_INT64DEFINE
-typedef int64 int64_t;
-typedef uint64 uint64_t;
-
 #if defined(MF_ENDIAN_BIG)
 	#define RAPIDJSON_ENDIAN 1 // RAPIDJSON_BIGENDIAN
 #else
