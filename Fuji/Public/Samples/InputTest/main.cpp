@@ -63,7 +63,7 @@ void Game_Draw()
 	{
 		if(MFInput_IsAvailable(IDD_Gamepad, a))
 		{
-			MFFont_DrawText(MFFont_GetDebugFont(), x-10.0f, 15.0f, 15.0f, MFVector::one, MFStr("%s (%d):", MFInput_GetDeviceName(IDD_Gamepad,a), a));
+			MFFont_DrawText2(MFFont_GetDebugFont(), x-10.0f, 15.0f, 15.0f, MFVector::one, MFStr("%s (%d):", MFInput_GetDeviceName(IDD_Gamepad,a), a));
 
 			if(MFInput_IsReady(IDD_Gamepad, a))
 			{
@@ -72,14 +72,14 @@ void Game_Draw()
 				{
 					float value = MFInput_Read(b, IDD_Gamepad, a);
 //					int ival = (int)(value * 255.f);
-//					MFFont_DrawText(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g - %d (0x%02X)", MFInput_EnumerateString(b, IDD_Gamepad, a), value, ival, ival));
-					MFFont_DrawText(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g", MFInput_EnumerateString(b, IDD_Gamepad, a), value));
+//					MFFont_DrawText2(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g - %d (0x%02X)", MFInput_EnumerateString(b, IDD_Gamepad, a), value, ival, ival));
+					MFFont_DrawText2(MFFont_GetDebugFont(), x, y, 15.0f, MFVector::one, MFStr("%s: %.3g", MFInput_EnumerateString(b, IDD_Gamepad, a), value));
 					y += 15.0f;
 				}
 			}
 			else
 			{
-				MFFont_DrawText(MFFont_GetDebugFont(), x, 30.0f, 15.0f, MakeVector(1.0f, 0.0f, 0.0f, 1.0f), "Disconnected...");
+				MFFont_DrawText2(MFFont_GetDebugFont(), x, 30.0f, 15.0f, MakeVector(1.0f, 0.0f, 0.0f, 1.0f), "Disconnected...");
 			}
 
 			x += 170.0f;
@@ -91,9 +91,9 @@ void Game_Draw()
 	x = 80.0f;
 	for(a=0; a<numMouses; a++)
 	{
-		MFFont_DrawText(MFFont_GetDebugFont(), x, 355.0f, 15.0f, MFVector::one, MFStr("Mouse Pos: %g, %g", MFInput_Read(Mouse_XPos, IDD_Mouse, a), MFInput_Read(Mouse_YPos, IDD_Mouse, a)));
-		MFFont_DrawText(MFFont_GetDebugFont(), x, 370.0f, 15.0f, MFVector::one, MFStr("Mouse Delta: %g, %g", MFInput_Read(Mouse_XDelta, IDD_Mouse, a), MFInput_Read(Mouse_YDelta, IDD_Mouse, a)));
-		MFFont_DrawText(MFFont_GetDebugFont(), x, 385.0f, 15.0f, MFVector::one, MFStr("Mouse Wheel: %g, %g", MFInput_Read(Mouse_Wheel, IDD_Mouse, a), MFInput_Read(Mouse_Wheel2, IDD_Mouse, a)));
+		MFFont_DrawText2(MFFont_GetDebugFont(), x, 355.0f, 15.0f, MFVector::one, MFStr("Mouse Pos: %g, %g", MFInput_Read(Mouse_XPos, IDD_Mouse, a), MFInput_Read(Mouse_YPos, IDD_Mouse, a)));
+		MFFont_DrawText2(MFFont_GetDebugFont(), x, 370.0f, 15.0f, MFVector::one, MFStr("Mouse Delta: %g, %g", MFInput_Read(Mouse_XDelta, IDD_Mouse, a), MFInput_Read(Mouse_YDelta, IDD_Mouse, a)));
+		MFFont_DrawText2(MFFont_GetDebugFont(), x, 385.0f, 15.0f, MFVector::one, MFStr("Mouse Wheel: %g, %g", MFInput_Read(Mouse_Wheel, IDD_Mouse, a), MFInput_Read(Mouse_Wheel2, IDD_Mouse, a)));
 		pText = "Mouse Buttons:";
 		for(b=Mouse_MaxAxis; b<Mouse_Max; b++)
 		{
@@ -102,7 +102,7 @@ void Game_Draw()
 				pText = MFStr("%s %s", pText, MFInput_EnumerateString(b, IDD_Mouse, a));
 			}
 		}
-		MFFont_DrawText(MFFont_GetDebugFont(), x, 400.0f, 15.0f, MFVector::one, pText);
+		MFFont_DrawText2(MFFont_GetDebugFont(), x, 400.0f, 15.0f, MFVector::one, pText);
 
 		x += 170.0f;
 	}
@@ -115,7 +115,7 @@ void Game_Draw()
 			pText = MFStr("%s %s", pText, MFInput_EnumerateString(a, IDD_Keyboard, 0));
 		}
 	}
-	MFFont_DrawText(MFFont_GetDebugFont(), 80.0f, 430.0f, 15.0f, MFVector::one, pText);
+	MFFont_DrawText2(MFFont_GetDebugFont(), 80.0f, 430.0f, 15.0f, MFVector::one, pText);
 
 	MFView_Pop();
 }

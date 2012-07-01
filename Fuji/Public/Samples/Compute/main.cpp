@@ -69,9 +69,9 @@ void Game_Init()
 
 	size_t size = BUFFER_SIZE;
 	
-	MFCompute_SetKernelArg(pKernel, 0, pBufferA);
-	MFCompute_SetKernelArg(pKernel, 1, pBufferB);
-	MFCompute_SetKernelArg(pKernel, 2, pBufferR);
+	MFCompute_SetKernelArgBuffer(pKernel, 0, pBufferA);
+	MFCompute_SetKernelArgBuffer(pKernel, 1, pBufferB);
+	MFCompute_SetKernelArgBuffer(pKernel, 2, pBufferR);
 	MFCompute_SetKernelArg(pKernel, 3, sizeof(size_t), &size);
 
 	MFCompute_Enqueue(pKernel, BUFFER_SIZE);

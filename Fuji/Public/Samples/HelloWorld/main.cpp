@@ -88,7 +88,7 @@ void Game_Draw()
 	MFView_SetOrtho();
 
 	// render some text
-	MFFont_DrawText(MFFont_GetDebugFont(), 200.f, 200.f, 50.f, MFVector::one, "Hello World!");
+	MFFont_DrawText2(MFFont_GetDebugFont(), 200.f, 200.f, 50.f, MFVector::one, "Hello World!");
 
 	// pop the current view
 	MFView_Pop();
