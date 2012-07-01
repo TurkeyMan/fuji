@@ -51,7 +51,8 @@ void HKWidgetListbox::SetProperty(const char *pProperty, const char *pValue)
 		flags |= HKWidget_GetBoolFromString(pValue) ? HoverSelect : 0;
 	else if(!MFString_CaseCmp(pProperty, "onSelChanged"))
 		HKWidget_BindWidgetEvent(OnSelChanged, pValue);
-	HKWidgetLayout::SetProperty(pProperty, pValue);
+	else
+		HKWidgetLayout::SetProperty(pProperty, pValue);
 }
 
 MFString HKWidgetListbox::GetProperty(const char *pProperty)

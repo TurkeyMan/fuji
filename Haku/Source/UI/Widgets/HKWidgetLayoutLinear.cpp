@@ -29,7 +29,8 @@ void HKWidgetLayoutLinear::SetProperty(const char *pProperty, const char *pValue
 {
 	if(!MFString_CaseCmp(pProperty, "orientation"))
 		SetOrientation((Orientation)HKWidget_GetEnumValue(pValue, sOrientationKeys));
-	HKWidgetLayout::SetProperty(pProperty, pValue);
+	else
+		HKWidgetLayout::SetProperty(pProperty, pValue);
 }
 
 MFString HKWidgetLayoutLinear::GetProperty(const char *pProperty)
