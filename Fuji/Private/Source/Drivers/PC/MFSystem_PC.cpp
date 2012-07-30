@@ -112,4 +112,23 @@ const char * MFSystemPC_GetLastError()
 	return MFStr(errorMessage);
 }
 
+#if _MSC_VER == 1700
+	#include <intrin.h>
+	#pragma intrinsic (_InterlockedIncrement)
+	#pragma intrinsic (_InterlockedDecrement)
+
+	extern "C"
+	{
+		long _Atomic_fetch_add_4(long volatile *addend)
+		{
+			return _InterlockedIncrement(addend);
+		}
+
+		long _Atomic_fetch_sub_4(long volatile *addend)
+		{
+			return _InterlockedDecrement(addend);
+		}
+	}
+#endif
+
 #endif // MF_SYSTEM
