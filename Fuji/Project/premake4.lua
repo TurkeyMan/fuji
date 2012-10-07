@@ -36,18 +36,19 @@ newaction {
 		end
 
 		installDir = _OPTIONS["install-dir"]
-		includePath = iif(installDir, installDir, "/usr/local") .. "/include/Fuji/"
-		libPath = iif(installDir, installDir, "/usr/local")
+		includePath = iif(installDir, installDir, "/usr/local") .. "/include"
+		libPath = iif(installDir, installDir, "/usr/local") .. "/lib"
 
 		-- copy includes --
 		print("Copying includes to: " .. includePath)
-		copyFiles("../../Public/Include", includePath, "**.h", "**.inl")
+		copyFiles("../../dist/include/Fuji", includePath .. "/Fuji", "**.h", "**.inl")
+		copyFiles("../../dist/include/Haku", includePath .. "/Haku", "**.h", "**.inl")
 
 		-- copy libs --
-		print("Copying libs to: " .. libPath .. "/lib")
-		copyFiles("../../Public/Lib", libPath .. "/lib/", "*.a", "*.so")
---		copyFiles("../../Public/Lib/x32", libPath, "*.a", "*.so")
---		copyFiles("../../Public/Lib/x64", libPath, "*.a", "*.so")
+		print("Copying libs to: " .. libPath)
+		copyFiles("../../dist/lib", libPath, "*.a", "*.so*")
+--		copyFiles("../../dist/lib/i386-linux-gnu", libPath .. "/i386-linux-gnu", "*.a", "*.so*")
+--		copyFiles("../../dist/lib/x86_64-linux-gnu", libPath .. "/x86_64-linux-gnu", "*.a", "*.so*")
 
 		-- install documentation --
 		print("Installing documentation: ** NOT DONE **")

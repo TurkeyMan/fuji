@@ -22,31 +22,31 @@ project (projName)
 	end
 
 	-- setup paths --
-	includedirs { "../Include/", "../Source/", "../../Public/Include/" }
---	libdirs { "../../Public/Lib/" }
-	objdir "../Build/"
-	targetdir "../../Public/Lib/"
+	includedirs { "../Source", "../../dist/include/Fuji" }
+--	libdirs { "../../dist/lib" }
+	objdir "../Build"
+	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }
 
-	files { "../../Public/Include/**.h", "../../Public/Include/**.hpp", "../../Public/Include/**.inl" }
+	files { "../../dist/include/Fuji/**.h", "../../dist/include/Fuji/**.inl" }
 	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
 
 	-- include some middleware directly --
 	files { "../Middleware/zlib/minizip/**.h", "../Middleware/zlib/minizip/**.c" }
 	includedirs { "../Middleware/zlib" }
-	includedirs { "../Middleware/hqx/" }
---	includedirs { "../Middleware/angelscript/include/" }
 	configuration { "not linux" }
 		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
+	if os.get() ~= "linux" then
 	configuration { "not linux", "not macosx", "not Android" }
 		files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 		includedirs { "../Middleware/zlib" }
 		files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 		includedirs { "../Middleware/libpng-1.5.0/" }
 		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+	end
 	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		includedirs { "../Middleware/" }
 	configuration { }
@@ -59,12 +59,12 @@ project (projName)
 --	pchsource "MFMain.cpp"
 
 	-- configure standard fuji stuff --
-	dofile "../../Public/Project/fujiconfig.lua"
+	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
 	for i, p in pairs(platformNames) do
 		configuration { i }
-			targetdir("../../Public/Lib/" .. iif(p, p .. "/", ""))
+			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
 	end
 
 	configuration "Debug"

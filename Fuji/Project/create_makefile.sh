@@ -1,1 +1,1 @@
-../../Public/Bin/premake4 --sharedlib gmake
+../../dist/bin/premake4 --sharedlib gmake

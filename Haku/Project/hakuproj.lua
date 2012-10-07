@@ -17,14 +17,14 @@ project (projName)
 	end
 
 	-- setup paths --
-	includedirs { "../Include/", "../Source/" }
-	objdir "../Build/"
-	targetdir "../Lib/"
+	includedirs { "../../dist/include/Haku" }
+	objdir "../Build"
+	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }
 
-	files { "../Include/**.h", "../Include/**.inl" }
+	files { "../../dist/include/Haku/**.h", "../../dist/include/Haku/**.inl" }
 	files { "../Source/**.h", "../Source/**.cpp" }
 
 	-- project configuration --
@@ -35,12 +35,12 @@ project (projName)
 --	pchsource "HKMain.cpp"
 
 	-- configure standard fuji stuff --
-	dofile "../../Fuji/Public/Project/fujiconfig.lua"
+	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
 	for i, p in pairs(platformNames) do
 		configuration { i }
-			targetdir("../../Fuji/Public/Lib/" .. iif(p, p .. "/", ""))
+			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
 	end
 
 	configuration "Debug"

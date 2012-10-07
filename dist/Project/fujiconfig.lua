@@ -37,9 +37,6 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
-includedirs { "../Include/" }
---libdirs { "../Lib/" }
-
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
@@ -90,11 +87,11 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
-		libdirs { "../Lib/Middleware/vorbis/x86", "../Lib/Middleware/lglcd/x86" }
+		libdirs { "../lib/x86/vorbis", "../lib/x86/lglcd" }
 
 	-- Windows 64 --
 	configuration { "windows", "x64", "not Xbox360", "not PS3" }
-		libdirs { "../Lib/Middleware/vorbis/x64", "../Lib/Middleware/lglcd/x64" }
+		libdirs { "../lib/x64/vorbis", "../lib/x64/lglcd" }
 
 -- Android --
 configuration "Android"
@@ -108,7 +105,7 @@ configuration "Android"
 -- XBox --
 configuration "Xbox"
 	defines { "WIN32", "_XBOX" }
-	libdirs { "../Lib/Middleware/vorbis/xbox" }
+	libdirs { "../lib/xbox/vorbis" }
 
 -- XBox 360 --
 configuration "Xbox360"
