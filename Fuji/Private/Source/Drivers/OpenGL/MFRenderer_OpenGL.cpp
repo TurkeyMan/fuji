@@ -135,6 +135,13 @@ static MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
 {
+#if MF_DISPLAY == MF_DRIVER_X11
+	glXChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glXGetProcAddress((const GLubyte*)"glXChooseFBConfig");
+	glXGetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC)glXGetProcAddress((const GLubyte*)"glXGetVisualFromFBConfig");
+	glXCreateWindow = (PFNGLXCREATEWINDOWPROC)glXGetProcAddress((const GLubyte*)"glXCreateWindow");
+	glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glXGetProcAddress((const GLubyte*)"glXCreateNewContext");
+	glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glXGetProcAddress((const GLubyte*)"glXMakeContextCurrent");
+#endif
 }
 
 void MFRenderer_DeinitModulePlatformSpecific()
@@ -294,6 +301,18 @@ int MFRenderer_CreateDisplay()
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+
+#if defined(MF_OPENGL_ES)
+	// we need the EGL display apparently...
+//	eglSwapInterval(, 1);
+#else
+#if MF_DISPLAY == MF_DRIVER_X11
+    GLXDrawable drawable = glXGetCurrentDrawable();
+    glXSwapIntervalEXT(xdisplay, drawable, 1);
+#elif MF_DISPLAY == MF_DRIVER_WIN32
+    wglSwapInterval(1);
+#endif
+#endif
 
 	return 0;
 }

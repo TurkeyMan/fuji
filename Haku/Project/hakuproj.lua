@@ -40,7 +40,7 @@ project (projName)
 	-- setup output directories --
 	for i, p in pairs(platformNames) do
 		configuration { i }
-			targetdir("../../Public/Lib/" .. iif(p, p .. "/", ""))
+			targetdir("../../Fuji/Public/Lib/" .. iif(p, p .. "/", ""))
 	end
 
 	configuration "Debug"
