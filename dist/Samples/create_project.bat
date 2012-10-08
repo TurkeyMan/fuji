@@ -24,35 +24,35 @@ GOTO END
 
 :EIGHT
  ECHO Creating GNU Makefile...
- ..\Bin\premake4.exe gmake
+ ..\bin\premake4.exe gmake
  GOTO END
 :SEVEN
  ECHO Creating CodeLite Project...
- ..\Bin\premake4.exe codelite
+ ..\bin\premake4.exe codelite
  GOTO END
 :SIX
  ECHO Creating Code::Blocks Project...
- ..\Bin\premake4.exe codeblocks
+ ..\bin\premake4.exe codeblocks
  GOTO END
 :FIVE
  ECHO Creating VS2002 Project...
- ..\Bin\premake4.exe vs2002
+ ..\bin\premake4.exe vs2002
  GOTO END
 :FOUR
  ECHO Creating VS2003 Project...
- ..\Bin\premake4.exe vs2003
+ ..\bin\premake4.exe vs2003
  GOTO END
 :THREE
  ECHO Creating VS2005 Project...
- ..\Bin\premake4.exe vs2005
+ ..\bin\premake4.exe vs2005
  GOTO END
 :TWO
  ECHO Creating VS2008 Project...
- ..\Bin\premake4.exe vs2008
+ ..\bin\premake4.exe vs2008
  GOTO END
 :ONE
  ECHO Creating VS2010 Project...
- ..\Bin\premake4.exe vs2010
+ ..\bin\premake4.exe vs2010
  GOTO END
 
 :END
