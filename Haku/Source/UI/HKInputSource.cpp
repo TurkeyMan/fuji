@@ -1,9 +1,9 @@
 #include "Haku.h"
 #include "UI/HKInputSource.h"
 
-#include "MFDisplay.h"
-#include "MFInput.h"
-#include "MFSystem.h"
+#include "Fuji/MFDisplay.h"
+#include "Fuji/MFInput.h"
+#include "Fuji/MFSystem.h"
 
 HKInputManager::HKInputManager()
 {

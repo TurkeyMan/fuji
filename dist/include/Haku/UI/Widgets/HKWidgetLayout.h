@@ -4,7 +4,7 @@
 #include "UI/HKWidget.h"
 #include "UI/HKWidgetRenderer.h"
 
-#include "MFArray.h"
+#include "Fuji/MFArray.h"
 
 class HKWidgetLayout : public HKWidget
 {

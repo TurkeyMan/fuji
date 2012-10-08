@@ -17,6 +17,10 @@ project (projName)
 		kind "SharedLib"
 		targetname "Fuji"
 		defines { "MF_SHAREDLIB" }
+		if os.get() == "linux" then
+			-- linux shared libs append the version number AFTER the extension
+			targetextension(".so." .. fujiVersion)
+		end
 	else
 		kind "StaticLib"
 	end
@@ -68,31 +72,31 @@ project (projName)
 	end
 
 	configuration "Debug"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Debug)
 		else
-			targetsuffix ("-debug-" .. fujiVersion)
+			targetsuffix ("-debug")
 		end
 
 	configuration "DebugOpt"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.DebugOpt)
 		else
-			targetsuffix ("-debugopt-" .. fujiVersion)
+			targetsuffix ("-debugopt")
 		end
 
 	configuration "Release"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Release)
 		else
-			targetsuffix ("-" .. fujiVersion)
+			targetsuffix ("")
 		end
 
 	configuration "Retail"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Retail)
 		else
-			targetsuffix ("-" .. fujiVersion)
+			targetsuffix ("")
 		end
 
 

@@ -1,10 +1,10 @@
 #include "Haku.h"
 #include "UI/HKStringEntryLogic.h"
 
-#include "MFInput.h"
-#include "MFString.h"
-#include "MFHeap.h"
-#include "MFSystem.h"
+#include "Fuji/MFInput.h"
+#include "Fuji/MFString.h"
+#include "Fuji/MFHeap.h"
+#include "Fuji/MFSystem.h"
 
 #if defined(MF_WINDOWS)
 	// support the windows clip board

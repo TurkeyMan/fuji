@@ -2,7 +2,7 @@
 #if !defined(_HKINPUTSOURCE_H)
 #define _HKINPUTSOURCE_H
 
-#include "MFInput.h"
+#include "Fuji/MFInput.h"
 #include "HKEvent.h"
 
 struct HKInputSource

@@ -6,8 +6,8 @@
 #include "HKWidgetRenderer.h"
 #include "HKInputSource.h"
 
-#include "MFSystem.h"
-#include "MFOpenHashTable.h"
+#include "Fuji/MFSystem.h"
+#include "Fuji/MFOpenHashTable.h"
 
 class HKWidgetRenderer;
 class HKWidgetLayoutFrame;

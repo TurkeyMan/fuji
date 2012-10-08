@@ -3,8 +3,8 @@
 #include "UI/HKUI.h"
 #include "UI/HKWidgetStyle.h"
 
-#include "MFTypes.h"
-#include "MFCollision.h"
+#include "Fuji/MFTypes.h"
+#include "Fuji/MFCollision.h"
 
 const EnumKeypair HKWidget::sJustifyKeys[] =
 {

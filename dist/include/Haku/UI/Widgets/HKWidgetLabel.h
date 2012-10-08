@@ -4,7 +4,7 @@
 #include "UI/HKWidget.h"
 #include "UI/HKWidgetRenderer.h"
 
-#include "MFFont.h"
+#include "Fuji/MFFont.h"
 
 class HKWidgetLabel : public HKWidget
 {

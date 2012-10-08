@@ -2,7 +2,7 @@
 #include "UI/HKWidgetStyle.h"
 #include "UI/HKWidget.h"
 
-#include "MFDocumentXML.h"
+#include "Fuji/MFDocumentXML.h"
 
 MFOpenHashTable<HKWidgetStyle> HKWidgetStyle::sStyles;
 

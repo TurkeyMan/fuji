@@ -17,6 +17,7 @@ project (projName)
 	end
 
 	-- setup paths --
+	includedirs { "../../dist/include" }
 	includedirs { "../../dist/include/Haku" }
 	objdir "../Build"
 	targetdir "../../dist/lib"
@@ -44,31 +45,31 @@ project (projName)
 	end
 
 	configuration "Debug"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Debug)
 		else
-			targetsuffix ("-debug-" .. hakuVersion)
+			targetsuffix ("-debug")
 		end
 
 	configuration "DebugOpt"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.DebugOpt)
 		else
-			targetsuffix ("-debugopt-" .. hakuVersion)
+			targetsuffix ("-debugopt")
 		end
 
 	configuration "Release"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Release)
 		else
-			targetsuffix ("-" .. hakuVersion)
+			targetsuffix ("")
 		end
 
 	configuration "Retail"
-		if isVS() then
+		if os.get() == "windows" then
 			targetsuffix ("_" .. configNames.Retail)
 		else
-			targetsuffix ("-" .. hakuVersion)
+			targetsuffix ("")
 		end
 
 	configuration { }

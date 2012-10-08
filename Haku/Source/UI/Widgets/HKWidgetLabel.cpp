@@ -2,7 +2,7 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetLabel.h"
 
-#include "MFFont.h"
+#include "Fuji/MFFont.h"
 
 HKWidget *HKWidgetLabel::Create(HKWidgetType *pType)
 {

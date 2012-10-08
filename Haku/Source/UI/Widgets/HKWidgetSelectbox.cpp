@@ -2,7 +2,7 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetSelectbox.h"
 
-#include "MFFont.h"
+#include "Fuji/MFFont.h"
 
 HKWidget *HKWidgetSelectbox::Create(HKWidgetType *pType)
 {

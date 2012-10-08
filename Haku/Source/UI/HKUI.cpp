@@ -15,7 +15,7 @@
 #include "UI/Widgets/HKWidgetListbox.h"
 #include "UI/Widgets/HKWidgetSelectbox.h"
 
-#include "MFDisplay.h"
+#include "Fuji/MFDisplay.h"
 
 HKUserInterface *HKUserInterface::pActive = NULL;
 HKFactory<HKWidget> *HKUserInterface::pFactory = NULL;

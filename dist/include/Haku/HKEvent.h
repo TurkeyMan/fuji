@@ -6,7 +6,7 @@
 	#pragma warning(disable:4324)
 #endif
 
-#include "Middleware/FastDelegate.h"
+#include "Fuji/Middleware/FastDelegate.h"
 
 struct HKEventInfo
 {

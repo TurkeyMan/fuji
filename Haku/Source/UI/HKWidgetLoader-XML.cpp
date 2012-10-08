@@ -3,9 +3,9 @@
 #include "UI/Widgets/HKWidgetLayout.h"
 #include "UI/HKUI.h"
 
-#include "MFFileSystem.h"
-#include "MFHeap.h"
-#include "MFDocumentXML.h"
+#include "Fuji/MFFileSystem.h"
+#include "Fuji/MFHeap.h"
+#include "Fuji/MFDocumentXML.h"
 
 static HKWidget *ParseElement(MFXMLNode *pElement)
 {

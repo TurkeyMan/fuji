@@ -2,11 +2,11 @@
 #include "UI/HKWidget.h"
 #include "UI/HKWidgetRenderer.h"
 
-#include "MFMaterial.h"
-#include "Materials/MFMat_Standard.h"
-#include "MFTexture.h"
-#include "MFRenderer.h"
-#include "MFPrimitive.h"
+#include "Fuji/MFMaterial.h"
+#include "Fuji/Materials/MFMat_Standard.h"
+#include "Fuji/MFTexture.h"
+#include "Fuji/MFRenderer.h"
+#include "Fuji/MFPrimitive.h"
 
 HKWidgetRenderer *HKWidgetRenderer::Create(HKWidgetRendererType *pType)
 {

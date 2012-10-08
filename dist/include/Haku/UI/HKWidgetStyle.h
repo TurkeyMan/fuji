@@ -2,8 +2,8 @@
 #if !defined(_HKWIDGET_STYLE_H)
 #define _HKWIDGET_STYLE_H
 
-#include "MFOpenHashTable.h"
-#include "MFArray.h"
+#include "Fuji/MFOpenHashTable.h"
+#include "Fuji/MFArray.h"
 
 class TiXmlElement;
 class HKWidget;

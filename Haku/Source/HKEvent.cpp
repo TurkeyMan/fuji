@@ -1,7 +1,7 @@
 #include "Haku.h"
 #include "HKEvent.h"
 
-#include "MFHeap.h"
+#include "Fuji/MFHeap.h"
 
 HKEventBase::HKEventBase()
 {

@@ -2,7 +2,7 @@
 #include "UI/HKUI.h"
 #include "UI/Widgets/HKWidgetTextbox.h"
 
-#include "MFFont.h"
+#include "Fuji/MFFont.h"
 
 const EnumKeypair HKWidgetTextbox::sTypeStrings[] =
 {
@@ -203,10 +203,10 @@ void HKWidgetTextbox::UpdateCursorPos(float x, bool bUpdateSelection)
 }
 
 
-#include "MFRenderer.h"
-#include "MFTexture.h"
-#include "MFPrimitive.h"
-#include "MFSystem.h"
+#include "Fuji/MFRenderer.h"
+#include "Fuji/MFTexture.h"
+#include "Fuji/MFPrimitive.h"
+#include "Fuji/MFSystem.h"
 
 HKWidgetRenderer *HKWidgetRendererTextbox::Create(HKWidgetRendererType *pType)
 {
