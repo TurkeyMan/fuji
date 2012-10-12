@@ -307,10 +307,10 @@ int MFRenderer_CreateDisplay()
 //	eglSwapInterval(, 1);
 #else
 #if MF_DISPLAY == MF_DRIVER_X11
-    GLXDrawable drawable = glXGetCurrentDrawable();
-    glXSwapIntervalEXT(xdisplay, drawable, 1);
+	GLXDrawable drawable = glXGetCurrentDrawable();
+	glXSwapIntervalEXT(xdisplay, drawable, 1);
 #elif MF_DISPLAY == MF_DRIVER_WIN32
-    wglSwapInterval(1);
+//	wglSwapInterval(1);
 #endif
 #endif
 
