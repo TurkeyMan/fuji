@@ -19,7 +19,7 @@
 
 // globals
 
-MFFontPool gFontBank;
+MFFontPool* gpFontBank = NULL;
 
 MFFont *MFFont_CreateFromSourceData(const char *pFilename);
 
@@ -126,7 +126,9 @@ MFInitStatus MFFont_InitModule()
 {
 	MFCALLSTACK;
 
-	gFontBank.Init(256, 16, 16);
+	gpFontBank = new MFFontPool();
+
+	gpFontBank->Init(256, 16, 16);
 
 	gpDebugFont = MFFont_Create("Arial");
 
@@ -138,6 +140,9 @@ void MFFont_DeinitModule()
 	MFCALLSTACK;
 
 	MFFont_Destroy(gpDebugFont);
+
+	delete gpFontBank;
+	gpFontBank = NULL;
 }
 
 MF_API MFFont* MFFont_Create(const char *pFilename)
@@ -145,7 +150,7 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 	MFCALLSTACK;
 
 	// see if it's already loaded
-	MFFontPool::Iterator it = gFontBank.Get(pFilename);
+	MFFontPool::Iterator it = gpFontBank->Get(pFilename);
 	if(it)
 	{
 		++(*it)->refCount;
@@ -165,7 +170,7 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 		return NULL;
 
 	pFont->refCount = 1;
-	gFontBank.Add(pFilename, pFont);
+	gpFontBank->Add(pFilename, pFont);
 
 	// fixup pointers
 	MFFixUp(pFont->pName, pFont, 1);
@@ -206,7 +211,7 @@ MF_API void MFFont_Destroy(MFFont *pFont)
 	{
 		// remove it from the registry
 		// TODO: this is a scanning destroy, do this by hash...?
-		gFontBank.Destroy(pFont);
+		gpFontBank->Destroy(pFont);
 
 		// destroy materials
 		for(int a=0; a<pFont->numPages; a++)

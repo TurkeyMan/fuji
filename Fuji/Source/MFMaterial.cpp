@@ -758,7 +758,7 @@ MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const cha
 	{
 		MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(a);
 		if(!MFString_CaseCmp(pInfo->pParameterName, pParameterName))
-			return pInfo->parameterIndex;
+			return a; //pInfo->parameterIndex;
 	}
 
 	return -1;
