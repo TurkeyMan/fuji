@@ -7,6 +7,23 @@
 #include "MFMatrix.h"
 #include "MFDocumentXML.h"
 
+bool DAEIsWhite(int c)
+{
+	return c==' ' || c=='\n' || c=='\r' || c=='\t' || c==0x3000;
+}
+
+inline char* DAESkipWhite(char *pC)
+{
+	while(DAEIsWhite(*pC)) pC++;
+	return pC;
+}
+
+inline const char* DAESkipWhite(const char *pC)
+{
+	while(DAEIsWhite(*pC)) pC++;
+	return pC;
+}
+
 static F3DFile *pModel;
 
 MFXMLNode* pRoot;
@@ -199,6 +216,8 @@ ComponentType GetComponentType(const char *pType)
 struct DataSource
 {
 	DataSource() {}
+	DataSource(const DataSource &from)
+		: first(from.first), second(from.second) {}
 	DataSource(const ComponentType &first, const MFString &second)
 		: first(first), second(second) {}
 
@@ -262,6 +281,7 @@ void ReadSourceData(MFXMLNode *pSource, SourceData &data)
 	MFDebug_Assert((int)data.data.size() * data.validComponents == dataCount, "Not enough data in array for all data specified by the technique.\n");
 
 	const char *pText = pArray->Value();
+	pText = DAESkipWhite(pText);
 
 	int i=0;
 	int j=0;
@@ -270,9 +290,9 @@ void ReadSourceData(MFXMLNode *pSource, SourceData &data)
 	{
 		data.data[j].push((float)atof(pText));
 
-		while(*pText && !MFIsWhite(*pText))
+		while(*pText && !DAEIsWhite(*pText))
 			++pText;
-		pText = MFSkipWhite(pText);
+		pText = DAESkipWhite(pText);
 
 		++i;
 		if(i >= data.validComponents)
@@ -421,9 +441,8 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					const char *pSemantic = pInputs->Attribute("semantic");
 					const char *pSource = pInputs->Attribute("source");
 
-					DataSources t;
+					DataSources &t = components.push();
 					t.push(DataSource(GetComponentType(pSemantic), pSource));
-					components.push(t);
 
 					pInputs = pInputs->NextSibling("input");
 				}
@@ -446,15 +465,16 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 								if(pData)
 								{
-									MFArray<MFVector> *pDataArray = GetSemanticArray(subObject, sources[b].first);
+									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
 									for(c=0; c<(int)pData->data.size(); c++)
 									{
-										MFVector &v = pDataArray->push();
+										MFVector &v = dataArray.push();
+										MFArray<float> &row = pData->data[c];
 
 										for(d=0; d<MFMin(pData->validComponents, 4); d++)
 										{
-											v[d] = d == 1 ? 1.0f - pData->data[c][d] : pData->data[c][d];
+											v[d] = d == 1 ? 1.0f - row[d] : row[d];
 										}
 									}
 								}
@@ -466,16 +486,15 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 								if(pData)
 								{
-									MFArray<MFVector> *pDataArray = GetSemanticArray(subObject, sources[b].first);
+									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
 									for(c=0; c<(int)pData->data.size(); c++)
 									{
-										MFVector &v = pDataArray->push();
+										MFVector &v = dataArray.push();
+										MFArray<float> &row = pData->data[c];
 
 										for(d=0; d<MFMin(pData->validComponents, 4); d++)
-										{
-											v[d] = pData->data[c][d];
-										}
+											v[d] = row[d];
 										if(pData->validComponents < 4)
 											v[3] = 1.0f;
 									}
@@ -491,16 +510,15 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 								if(pData)
 								{
-									MFArray<MFVector> *pDataArray = GetSemanticArray(subObject, sources[b].first);
+									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
 									for(c=0; c<(int)pData->data.size(); c++)
 									{
-										MFVector &v = pDataArray->push();
+										MFVector &v = dataArray.push();
+										MFArray<float> &row = pData->data[c];
 
 										for(d=0; d<MFMin(pData->validComponents, 4); d++)
-										{
-											v[d] = pData->data[c][d];
-										}
+											v[d] = row[d];
 									}
 								}
 								break;
@@ -530,17 +548,17 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					MFDebug_Assert(pVCount, "No <vcount> in <polylist>");
 
 					const char *pVCountString = pVCount->Value();
-					pVCountString = MFSkipWhite(pVCountString);
+					pVCountString = DAESkipWhite(pVCountString);
 
 					while(*pVCountString)
 					{
 						int vcount = atoi(pVCountString);
 						vertCounts.push(vcount);
 
-						while(*pVCountString && !MFIsWhite(*pVCountString))
+						while(*pVCountString && !DAEIsWhite(*pVCountString))
 							++pVCountString;
 
-						pVCountString = MFSkipWhite(pVCountString);
+						pVCountString = DAESkipWhite(pVCountString);
 					}
 				}
 				else if(!MFString_CaseCmp(pValue, "triangles"))
@@ -562,6 +580,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 				MFDebug_Assert(pPolygon, "No <p> in <polylist>");
 
 				const char *pText = pPolygon->Value();
+				pText = DAESkipWhite(pText);
 
 				// build the vertex and face lists
 				int tri = 0;
@@ -646,9 +665,9 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 							}
 						}
 
-						while(*pText && !MFIsWhite(*pText))
+						while(*pText && !DAEIsWhite(*pText))
 							++pText;
-						pText = MFSkipWhite(pText);
+						pText = DAESkipWhite(pText);
 					}
 
 					++vert;
@@ -745,9 +764,9 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 			{
 				localMat.m[lookup[c]] = (float)atof(pMat);
 
-				while(*pMat && !MFIsWhite(*pMat))
+				while(*pMat && !DAEIsWhite(*pMat))
 					pMat++;
-				while(MFIsWhite(*pMat))
+				while(DAEIsWhite(*pMat))
 					pMat++;
 			}
 		}
@@ -763,9 +782,9 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 				translation[c] = (float)atof(pTrans);
 				++c;
 
-				while(*pTrans && !MFIsWhite(*pTrans))
+				while(*pTrans && !DAEIsWhite(*pTrans))
 					pTrans++;
-				while(MFIsWhite(*pTrans))
+				while(DAEIsWhite(*pTrans))
 					pTrans++;
 			}
 
@@ -783,9 +802,9 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 				scale[c] = (float)atof(pScale);
 				++c;
 
-				while(*pScale && !MFIsWhite(*pScale))
+				while(*pScale && !DAEIsWhite(*pScale))
 					pScale++;
-				while(MFIsWhite(*pScale))
+				while(DAEIsWhite(*pScale))
 					pScale++;
 			}
 
@@ -803,9 +822,9 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 				rot[c] = (float)atof(pRot);
 				++c;
 
-				while(*pRot && !MFIsWhite(*pRot))
+				while(*pRot && !DAEIsWhite(*pRot))
 					pRot++;
-				while(MFIsWhite(*pRot))
+				while(DAEIsWhite(*pRot))
 					pRot++;
 			}
 
@@ -833,7 +852,7 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 		ref.localMatrix = localMat;
 		ref.bone[0] = (uint16)-1;
 	}
-	else if(!MFString_CaseCmpN(pNodeName, "z_", 2))
+	else if(!MFString_CaseCmpN(pNodeName, "z_", 2) || !MFString_CaseCmpN(pNodeName, "bn_", 3))
 	{
 		F3DBone &bone = pModel->GetSkeletonChunk()->bones.push();
 

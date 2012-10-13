@@ -11,6 +11,7 @@ class MFArray
 public:
 	MFArray();
 	MFArray(int maxItems);
+	MFArray(const MFArray &from);
 	~MFArray();
 
 	T& operator[](int i);

@@ -43,7 +43,7 @@ MF_API MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 
 	// some text formats need a null character appended for processing
 	bool bAppendNull = false;
-	if(format == MFIMF_X || format == MFIMF_ASE || format == MFIMF_OBJ)
+	if(format == MFIMF_X || format == MFIMF_DAE || format == MFIMF_ASE || format == MFIMF_OBJ)
 		bAppendNull = true;
 
 	// load file

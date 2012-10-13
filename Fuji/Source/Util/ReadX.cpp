@@ -237,9 +237,11 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 
 		// process materials...
 		const char *pToken = GetNextToken(pMatList, &pMatList);
-		MFDebug_Assert(!MFString_Compare(pToken, ";"), "Value is not terminated with a semicolon.\n");
+//		MFDebug_Assert(!MFString_Compare(pToken, ";"), "Value is not terminated with a semicolon.\n");
 
-		pToken = GetNextToken(pMatList, &pMatList);
+		if(!MFString_Compare(pToken, ";"))
+			pToken = GetNextToken(pMatList, &pMatList);
+
 		while(MFString_Compare(pToken, "}"))
 		{
 			if(!MFString_Compare(pToken, "Material"))
@@ -480,12 +482,14 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 
 	// get num weights
 	int numWeights = GetInt(pText, &pText);
-	MFDebug_Assert(numWeights == numPositions, "Number of weights's does not match the number of verts in the mesh.");
 
-	int *pIndices = (int*)MFHeap_Alloc(sizeof(int) * numWeights);
+	if(numWeights > 0)
+		MFDebug_Assert(numWeights == numPositions, "Number of weights's does not match the number of verts in the mesh.");
+
+	int *pIndices = numWeights > 0 ? (int*)MFHeap_Alloc(sizeof(int) * numWeights) : NULL;
 	GetIntArray(pText, pIndices, numWeights, &pText);
 
-	float *pWeights = (float*)MFHeap_Alloc(sizeof(float) * numWeights);
+	float *pWeights = numWeights > 0 ? (float*)MFHeap_Alloc(sizeof(float) * numWeights) : NULL;
 	GetFloatArray(pText, pWeights, numWeights, &pText);
 
 	MFMatrix matrixOffset;
@@ -494,44 +498,47 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 
 	SkipToken(pText, "}");
 
-	// now we want to do something with all this data...
-	F3DSkeletonChunk *pSC = pModel->GetSkeletonChunk();
-
-	int boneID = pSC->FindBone(pName);
-
-	// if boneID == -1 we dont want to process this data
-	if(boneID == -1)
-		return pText;
-
-	// check weights are sequential
-	for(int a=0; a<numWeights; a++)
-		MFDebug_Assert(a == pIndices[a], "Weight array is not sequential!");
-
-	for(int a=0; a<sub.matSubobjects.size(); a++)
-		++sub.matSubobjects[a].numBones;
-
-	// map to faces
-	for(int m=0; m<sub.matSubobjects.size(); m++)
+	if(numWeights > 0)
 	{
-		int totalVerts = sub.matSubobjects[m].vertices.size();
-		for(int a=0; a<totalVerts; a++)
+		// now we want to do something with all this data...
+		F3DSkeletonChunk *pSC = pModel->GetSkeletonChunk();
+
+		int boneID = pSC->FindBone(pName);
+
+		// if boneID == -1 we dont want to process this data
+		if(boneID == -1)
+			return pText;
+
+		// check weights are sequential
+		for(int a=0; a<numWeights; a++)
+			MFDebug_Assert(a == pIndices[a], "Weight array is not sequential!");
+
+		for(int a=0; a<sub.matSubobjects.size(); a++)
+			++sub.matSubobjects[a].numBones;
+
+		// map to faces
+		for(int m=0; m<sub.matSubobjects.size(); m++)
 		{
-			F3DVertex &v = sub.matSubobjects[m].vertices[a];
-
-			int i = v.position;
-			const int numBones = sizeof(v.bone)/sizeof(v.bone[0]);
-
-			if(pWeights[i] != 0.0f)
+			int totalVerts = sub.matSubobjects[m].vertices.size();
+			for(int a=0; a<totalVerts; a++)
 			{
-				for(int b=0; b<numBones; b++)
+				F3DVertex &v = sub.matSubobjects[m].vertices[a];
+
+				int i = v.position;
+				const int numBones = sizeof(v.bone)/sizeof(v.bone[0]);
+
+				if(pWeights[i] != 0.0f)
 				{
-					if(v.bone[b] == -1)
+					for(int b=0; b<numBones; b++)
 					{
-						v.weight[b] = pWeights[i];
-						v.bone[b] = boneID;
-						pSC->bones[boneID].bIsSkinned = true;
-						sub.matSubobjects[m].maxWeights = MFMax(sub.matSubobjects[m].maxWeights, b+1);
-						break;
+						if(v.bone[b] == -1)
+						{
+							v.weight[b] = pWeights[i];
+							v.bone[b] = boneID;
+							pSC->bones[boneID].bIsSkinned = true;
+							sub.matSubobjects[m].maxWeights = MFMax(sub.matSubobjects[m].maxWeights, b+1);
+							break;
+						}
 					}
 				}
 			}
