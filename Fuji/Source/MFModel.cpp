@@ -191,8 +191,10 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 
 MF_API MFModel* MFModel_Create(const char *pFilename)
 {
+	const char* pOriginalFilename = pFilename;
+
 	// see if it's already loaded
-	MFModelPool::Iterator it = gModelBank.Get(pFilename);
+	MFModelPool::Iterator it = gModelBank.Get(pOriginalFilename);
 	MFModelTemplate *pTemplate = it ? *it : NULL;
 
 	if(!pTemplate)
@@ -253,7 +255,7 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 		pTemplate = (MFModelTemplate*)pTemplateData;
 		pTemplate->pFilename = pFilename;
 
-		gModelBank.Add(pFilename, pTemplate);
+		gModelBank.Add(pOriginalFilename, pTemplate);
 
 		MFModel_FixUp(pTemplate, true);
 
@@ -329,7 +331,7 @@ MF_API int MFModel_Destroy(MFModel *pModel)
 
 		// remove it from the registry
 		// TODO: this is a scanning destroy, do this by hash...?
-		gModelBank.Destroy(pModel->pTemplate->pFilename);
+		gModelBank.Destroy(pModel->pTemplate->pName);
 
 		MFHeap_Free(pModel->pTemplate);
 	}
