@@ -9,6 +9,17 @@ inline MFArray<T>::MFArray()
 }
 
 template<class T>
+inline MFArray<T>::MFArray(const MFArray &from)
+{
+	pData = NULL;
+	allocated = 0;
+	count = 0;
+
+	for(int i=0; i<from.size(); ++i)
+		push(from[i]);
+}
+
+template<class T>
 inline MFArray<T>::MFArray(int maxItems)
 {
 	pData = NULL;
@@ -29,6 +40,8 @@ inline MFArray<T>::~MFArray()
 template<class T>
 inline T& MFArray<T>::operator[](int i)
 {
+	if(count <= i)
+		resize(i + 1);
 	MFDebug_Assert(i >= 0 && i < count, "Index out of bounds.");
 	return pData[i];
 }
