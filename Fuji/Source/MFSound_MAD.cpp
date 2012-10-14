@@ -101,7 +101,7 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
 		if(pID3->major == 2)
 		{
 			// for the moment, to be safe...
-			MFDebug_Assert(false, "Make this work!!");
+//			MFDebug_Assert(false, "Make this work!!");
 			return;
 
 			//int size = (int)pData[5] | ((int)pData[4] << 7) | ((int)pData[3] << 14);
