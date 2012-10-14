@@ -239,7 +239,17 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 			if(pIM)
 			{
 				MFIntModel_Optimise(pIM);
-				MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplateData, NULL, MFSystem_GetCurrentPlatform());
+
+				size_t size;
+				MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplateData, &size, MFSystem_GetCurrentPlatform());
+
+				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.mdl", pOriginalFilename), MFOF_Write | MFOF_Binary);
+				if(pFile)
+				{
+					MFFile_Write(pFile, pTemplateData, size, false);
+					MFFile_Close(pFile);
+				}
+
 				MFIntModel_Destroy(pIM);
 			}
 #endif

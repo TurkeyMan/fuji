@@ -262,7 +262,16 @@ MF_API MFSound *MFSound_Create(const char *pName)
 
 			if(pIS)
 			{
-				MFIntSound_CreateRuntimeData(pIS, (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform());
+				size_t size;
+				MFIntSound_CreateRuntimeData(pIS, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform());
+
+				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.snd", pName), MFOF_Write | MFOF_Binary);
+				if(pFile)
+				{
+					MFFile_Write(pFile, pTemplate, size, false);
+					MFFile_Close(pFile);
+				}
+
 				MFIntSound_Destroy(pIS);
 			}
 #endif

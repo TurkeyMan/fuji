@@ -112,7 +112,16 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 			if(pIT)
 			{
-				MFIntTexture_CreateRuntimeData(pIT, &pTemplate, NULL, MFSystem_GetCurrentPlatform());
+				size_t size;
+				MFIntTexture_CreateRuntimeData(pIT, &pTemplate, &size, MFSystem_GetCurrentPlatform());
+
+				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.tex", pName), MFOF_Write | MFOF_Binary);
+				if(pFile)
+				{
+					MFFile_Write(pFile, pTemplate, size, false);
+					MFFile_Close(pFile);
+				}
+
 				MFIntTexture_Destroy(pIT);
 			}
 #endif
