@@ -985,6 +985,8 @@ void LoadTextXFile(const char *pText)
 	{
 		ParseAnimationSet(gAnimSets[a]);
 	}
+
+	gMeshChunks.clear();
 }
 
 void ParseXFile(char *pFilePtr)
