@@ -284,7 +284,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 	gDisplay.height = height;
 	gDisplay.refreshRate = rate;
 	gDisplay.colourDepth = 32;
-	gDisplay.windowed = true;
+	gDisplay.windowed = !gInitParams.display.bFullscreen; // Hacked like a boss
 	gDisplay.wide = false;
 	gDisplay.progressive = true;
 
