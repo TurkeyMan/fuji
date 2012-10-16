@@ -231,7 +231,7 @@ enum MFRendererDrivers
 //	#define _OPENGL_CLIP_SPACE
 
 	// specify drivers
-	#define MF_DISPLAY		MF_DRIVER_X11
+	#define MF_DISPLAY		MF_DRIVER_OSX
 	#define MF_RENDERER		MF_DRIVER_OPENGL
 	#define MF_SYSTEM		MF_DRIVER_X11
 	#define MF_TRANSLATION	MF_DRIVER_LINUX
