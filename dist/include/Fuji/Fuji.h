@@ -66,6 +66,8 @@
 	#define MF_COMPILER_VISUALC
 #elif defined(__GNUC__)
 	#define MF_COMPILER_GCC
+#elif defined(__clang__)
+	#define MF_COMPILER_CLANG
 #else
 	#error Unrecognised compiler. Contact Fuji dev team or add an entry here...
 #endif
@@ -143,7 +145,7 @@
 		#define MF_ARCH_ARM
 		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
-	#endif
+	#endif	
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID
 	#define MF_PLATFORM ANDROID
