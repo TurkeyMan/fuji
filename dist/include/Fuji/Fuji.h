@@ -145,7 +145,26 @@
 		#define MF_ARCH_ARM
 		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
-	#endif	
+	#endif
+#elif defined(__APPLE__)
+	#define MF_OSX
+	#define MF_PLATFORM OSX
+
+	#if defined(__LP64__) || defined(_LP64)
+		#define MF_64BIT
+	#else
+		#define MF_32BIT
+	#endif
+
+	#if defined(__x86_64__)
+		#define MF_ARCH_X64
+	#elif defined(__i386__)
+		#define MF_ARCH_X86
+	#elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(__ppc64__)
+		#define MF_ARCH_PPC
+	#else
+		#error "Unsupported Mac OS X Architecture"
+	#endif
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID
 	#define MF_PLATFORM ANDROID
