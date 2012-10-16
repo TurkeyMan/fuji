@@ -64,10 +64,10 @@
 // detect compiler
 #if defined(_MSC_VER)
 	#define MF_COMPILER_VISUALC
-#elif defined(__GNUC__)
-	#define MF_COMPILER_GCC
 #elif defined(__clang__)
 	#define MF_COMPILER_CLANG
+#elif defined(__GNUC__)
+	#define MF_COMPILER_GCC
 #else
 	#error Unrecognised compiler. Contact Fuji dev team or add an entry here...
 #endif
@@ -359,7 +359,7 @@ enum MFEndian
 	#define MFALIGN_END(n)
 	#define MFPACKED
 	#define MFALWAYS_INLINE __forceinline
-#elif defined(MF_COMPILER_GCC)
+#elif defined(MF_COMPILER_GCC) || defined(MF_COMPILER_CLANG)
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n) __attribute__((aligned(n)))
 	#define MFPACKED __attribute__((packed))
