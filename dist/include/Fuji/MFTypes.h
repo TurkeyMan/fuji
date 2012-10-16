@@ -66,6 +66,12 @@ typedef size_t				uintp;
 	#else
 		typedef _W64 long	intp;
 	#endif
+#elif defined(MF_COMPILER_CLANG)
+	#if defined(MF_64BIT)
+		typedef int64		intp;
+	#else
+		typedef int32		intp;
+	#endif
 #else
 typedef ssize_t				intp;
 #endif
