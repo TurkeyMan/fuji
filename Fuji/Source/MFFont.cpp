@@ -1300,7 +1300,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	while(pToken)
 	{
 		int len = MFString_Length(pToken);
-		pBuffer += len + 2;
+		pBuffer += len + 1;
 
 		char *pT = strtok(pToken, " \t");
 

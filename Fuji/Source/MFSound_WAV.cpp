@@ -9,26 +9,26 @@
 
 struct WAVChunk
 {
-	int id;
-	long size;
+	int32 id;
+	int32 size;
 };
 
 struct WAVFormatChunk
 {
-	short wFormatTag;
-	unsigned short nChannels;
-	unsigned long nSamplesPerSec;
-	unsigned long nAvgBytesPerSec;
-	unsigned short wBlockAlign;
-	unsigned short wBitsPerSample;
-	unsigned short cbSize; 
+	int16 wFormatTag;
+	uint16 nChannels;
+	uint32 nSamplesPerSec;
+	uint32 nAvgBytesPerSec;
+	uint16 wBlockAlign;
+	uint16 wBitsPerSample;
+	uint16 cbSize; 
 };
 
 struct RIFFHeader
 {
-	int RIFF;
-	long size;
-	int WAVE;
+	uint32 RIFF;
+	int32 size;
+	uint32 WAVE;
 };
 
 struct MFWAVStream
