@@ -68,8 +68,11 @@ solution "Fuji"
 		configurations { "Debug", "DebugOpt", "Release", "Retail" }
 	end
 
---	platforms { "Native", "x32", "x64" }
-	platforms { "Native" }
+	if os.get() == "windows" then
+		platforms { "x32", "x64" }
+	else
+		platforms { "Native" }
+	end
 
 	-- Static lib project
 	dofile "Fuji/Project/fujiproj.lua"

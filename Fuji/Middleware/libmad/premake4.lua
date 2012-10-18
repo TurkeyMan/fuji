@@ -5,7 +5,13 @@ project "mad"
 	excludes { "minimad.c" }
 
 	includedirs { "msvc++" }
-	targetdir "../../../Public/Lib/Middleware/libmad/"
+	targetdir "../../../dist/lib/libmad/"
+
+	-- setup output directories --
+	for i, p in pairs(platformNames) do
+		configuration { i }
+			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
+	end
 
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
 
