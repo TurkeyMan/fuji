@@ -69,7 +69,7 @@ solution "Fuji"
 	end
 
 	if os.get() == "windows" then
-		platforms { "x32", "x64" }
+		platforms { "Native", "x32", "x64" }
 	else
 		platforms { "Native" }
 	end
