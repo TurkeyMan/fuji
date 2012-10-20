@@ -571,13 +571,15 @@ static void ExpandAllocTable()
 	for(int i=0; i<MFHeap_AllocTableLength; ++i)
 	{
 		if(gpAllocTable[i])
+		{
 			gpAllocTable[i] = (MFHeap_AllocItem*)((char*)gpAllocTable[i] + diff);
 
-		MFHeap_AllocItem *pI = gpAllocTable[i];
-		while(pI)
-		{
-			pI->pNext = (MFHeap_AllocItem*)((char*)pI->pNext + diff);
-			pI = pI->pNext;
+			MFHeap_AllocItem *pI = gpAllocTable[i];
+			while(pI->pNext)
+			{
+				pI->pNext = (MFHeap_AllocItem*)((char*)pI->pNext + diff);
+				pI = pI->pNext;
+			}
 		}
 	}
 

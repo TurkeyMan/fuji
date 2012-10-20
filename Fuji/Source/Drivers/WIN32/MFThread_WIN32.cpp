@@ -72,7 +72,7 @@ void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 	pThreadInfoPC->hThread = NULL;
 }
 
-int MFThread_GetMutexSizePlatformSpecific()
+size_t MFThread_GetMutexSizePlatformSpecific()
 {
 	return sizeof(MFMutexPC);
 }

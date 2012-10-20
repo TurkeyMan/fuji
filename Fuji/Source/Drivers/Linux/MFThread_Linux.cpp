@@ -55,7 +55,7 @@ void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 }
 
 
-int MFThread_GetMutexSizePlatformSpecific()
+size_t MFThread_GetMutexSizePlatformSpecific()
 {
 	return sizeof(MFMutexLinux);
 }

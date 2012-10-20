@@ -336,18 +336,20 @@ enum MFEndian
 #if defined(MF_COMPILER_VISUALC)
 	#define MFALIGN_BEGIN(n) __declspec(align(n))
 	#define MFALIGN_END(n)
+	#define MFPACKED
+	#define MFALWAYS_INLINE __forceinline
 #elif defined(MF_COMPILER_GCC)
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n) __attribute__((aligned(n)))
+	#define MFPACKED __attribute__((packed))
+	#define __forceinline inline
+	#define MFALWAYS_INLINE __inline__ __attribute__((always_inline))
 #else
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n)
-#endif
-
-#if defined(MF_COMPILER_GCC)
-	#define MFPACKED __attribute__((packed))
-#else
 	#define MFPACKED
+	#define __forceinline inline
+	#define MFALWAYS_INLINE inline
 #endif
 
 

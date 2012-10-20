@@ -30,7 +30,7 @@ int MFThread_ThreadProc(MFThreadInfo *pThreadInfo);
 void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo);
 void MFThread_DestroyThreadPlatformSpecific(MFThread thread);
 
-int MFThread_GetMutexSizePlatformSpecific();
+size_t MFThread_GetMutexSizePlatformSpecific();
 void MFThread_InitMutexPlatformSpecific(MFMutex mutex, const char *pName);
 
 #endif

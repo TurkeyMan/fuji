@@ -43,6 +43,7 @@ typedef unsigned int		uint128[4];
 #if !defined(_DC) // Bloody Kallistos defines all these
 
 #if defined(__GNUC__)
+#include <stddef.h>
 typedef unsigned long long	uint64;
 typedef long long 			int64;
 #else

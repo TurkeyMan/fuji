@@ -9,7 +9,7 @@
 
 static MFTls gThreadTls;
 
-static int gMutexSize = MFThread_GetMutexSizePlatformSpecific();
+static size_t gMutexSize = MFThread_GetMutexSizePlatformSpecific();
 static MFObjectPool gThreadInfo;
 
 // functions
