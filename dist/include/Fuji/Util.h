@@ -9,12 +9,23 @@ MF_API uint32 MFUtil_Crc(const char *buffer, int length); // generate a unique C
 MF_API uint32 MFUtil_CrcString(const char *pString);	// generate a unique Crc number for this string
 MF_API uint32 MFUtil_HashString(const char *pString); // generate a very fast hash value from a string
 
-inline uint32 MFUtil_HashPointer(void *pPointer)
+inline size_t MFUtil_HashPointer(const void *pPointer)
 {
 	// TODO: this function could do with some work...
 	// perhaps do it differently on 64bit platforms, or use some
 	// platform specific knowledge about the memspace...
-	return (uint32)((uintp)pPointer * 2654435761UL);
+	return (size_t)pPointer >> 6;
+/*
+	// uber hash
+	size_t Value = (size_t)pPointer;
+    Value = ~Value + (Value << 15);
+    Value = Value ^ (Value >> 12);
+    Value = Value + (Value << 2);
+    Value = Value ^ (Value >> 4);
+    Value = Value * 2057;
+    Value = Value ^ (Value >> 16);
+    return Value;
+*/
 }
 
 int MFUtil_NextPowerOf2(int x);
