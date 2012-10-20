@@ -28,11 +28,13 @@ newaction {
 		local installDir = _OPTIONS["install-dir"]
 		includePath = iif(installDir, installDir, "/usr/local") .. "/include"
 		libPath = iif(installDir, installDir, "/usr/local") .. "/lib"
+		docPath = iif(installDir, installDir, "/usr/local") .. "/share/doc"
 
 		-- copy includes --
 		print("Copying includes to: " .. includePath)
 		copyFiles("dist/include/Fuji", includePath .. "/Fuji", "**.h", "**.inl")
 		copyFiles("dist/include/Haku", includePath .. "/Haku", "**.h", "**.inl")
+		copyFiles("dist/include/d2", includePath .. "/d2", "**.d", "**.di")
 
 		-- copy libs --
 		print("Copying libs to: " .. libPath)
@@ -57,7 +59,8 @@ newaction {
 		end
 
 		-- install documentation --
-		print("Installing documentation: ** NOT DONE **")
+		print("Installing documentation to: " .. docPath)
+		copyFiles("dist/doc", docPath .. "/Fuji", "**.chm")
 	end
 }
 
