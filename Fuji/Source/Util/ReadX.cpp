@@ -603,23 +603,31 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 	for(int a=0; a<numFaces; a++)
 	{
 		int matSub = pMatFaces ? pMatFaces[a] : 0;
+		F3DMaterialSubobject &matsub = sub.matSubobjects[matSub];
 
 		int numPoints = GetInt(pText, &pText);
 		MFDebug_Assert(numPoints < 16, "Exceeded maximum 16 points per face...");
 		GetIntArray(pText, face, numPoints, &pText);
 
+		int firstVert = numVerts[matSub];
+		numVerts[matSub] += numPoints;
+		if(matsub.vertices.size() < numVerts[matSub])
+			matsub.vertices.resize(numVerts[matSub]);
+
+		int firstTri = numTris[matSub];
+		numTris[matSub] += numPoints-2;
+		if(matsub.triangles.size() < numTris[matSub])
+			matsub.triangles.resize(numTris[matSub]);
+
 		for(int b=0; b<numPoints; b++)
-			sub.matSubobjects[matSub].vertices[numVerts[matSub]+b].position = face[b];
+			matsub.vertices[firstVert+b].position = face[b];
 
 		for(int b=0; b<numPoints-2; b++)
 		{
-			sub.matSubobjects[matSub].triangles[numTris[matSub]+b].v[0] = numVerts[matSub]+0;
-			sub.matSubobjects[matSub].triangles[numTris[matSub]+b].v[1] = numVerts[matSub]+b+1;
-			sub.matSubobjects[matSub].triangles[numTris[matSub]+b].v[2] = numVerts[matSub]+b+2;
+			matsub.triangles[firstTri+b].v[0] = firstVert+0;
+			matsub.triangles[firstTri+b].v[1] = firstVert+b+1;
+			matsub.triangles[firstTri+b].v[2] = firstVert+b+2;
 		}
-
-		numVerts[matSub] += numPoints;
-		numTris[matSub] += numPoints-2;
 
 		if(a < numFaces-1)
 			SkipToken(pText, ",");

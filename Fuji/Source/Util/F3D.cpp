@@ -1655,6 +1655,7 @@ void F3DFile::Optimise()
 			vertexMapping.resize(matsub.vertices.size());
 
 			int vertSize = matsub.vertices.size();
+			vertexUsage.resize(vertSize);
 
 			for(c=0; c<vertSize; c++)
 				vertexUsage[c] = 1;
