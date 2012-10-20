@@ -1276,6 +1276,28 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 	return (pos_y-pos.y) + height;
 }
 
+static char *GetNextLine(char *&pText)
+{
+	while(MFIsNewline(*pText))
+		++pText;
+
+	if(*pText == 0)
+		return NULL;
+
+	char *pLineStart = pText;
+	while(*pText && !MFIsNewline(*pText))
+		++pText;
+
+	// termiante the line with a NULL
+	if(*pText)
+	{
+		*pText = 0;
+		++pText;
+	}
+
+	return pLineStart;
+}
+
 MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 {
 	size_t bytes = 0;
@@ -1296,13 +1318,10 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 
 	MFFontChar *pC = (MFFontChar*)MFHeap_Alloc(sizeof(MFFontChar) * 65535);
 
-	char *pToken = strtok(pBuffer, "\n\r");
-	while(pToken)
+	char *pLine, *pText = pBuffer;
+	while(pLine = GetNextLine(pText))
 	{
-		int len = MFString_Length(pToken);
-		pBuffer += len + 2;
-
-		char *pT = strtok(pToken, " \t");
+		char *pT = strtok(pLine, " \t");
 
 		if(!MFString_Compare(pT, "info"))
 		{
@@ -1443,8 +1462,6 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 
 			++pHeader->numChars;
 		}
-
-		pToken = strtok(pBuffer, "\n\r");
 	}
 
 	// append characters to file
@@ -1483,6 +1500,7 @@ MFFont *MFFont_CreateFromSourceData(const char *pFilename)
 	MFStringCache_Destroy(pStr);
 	MFHeap_Free(pC);
 	MFHeap_Free(pFontFile);
+	MFHeap_Free(pBuffer);
 
 	return pFont;
 }
