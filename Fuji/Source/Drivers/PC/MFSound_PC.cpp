@@ -200,6 +200,8 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 	MFCopyMemory(pBuffer, pData, len);
 
 	MFSound_Unlock(pSound);
+
+	return len;
 }
 
 MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
