@@ -15,7 +15,9 @@
 #define INPUT_BUFFER_SIZE	(5*8192)
 #define OUTPUT_BUFFER_SIZE	8192 /* Must be an integer multiple of 4. */
 
-#include <global.h>
+#if !defined(MF_LINUX) && !defined(MF_OSX)
+	#include <global.h>
+#endif
 #include <mad.h>
 
 struct MFID3

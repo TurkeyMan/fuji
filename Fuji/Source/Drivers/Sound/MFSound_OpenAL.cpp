@@ -16,6 +16,7 @@
 struct MFSoundDataInternal
 {
 	ALuint buffer;
+	ALenum format;
 };
 
 struct MFVoiceDataInternal
@@ -59,6 +60,7 @@ static int gNumCaptureDevices = 0;
 static int gDefaultOutputDevice = -1;
 static int gDefaultCaptureDevice = -1;
 
+
 /**** Globals ****/
 
 static uint32 gAPIVersion;
@@ -66,6 +68,8 @@ static uint32 gAPIVersion;
 static Context *gpCurrentContext = NULL;
 
 static PFNALBUFFERDATASTATICPROC alBufferDataStatic = NULL;
+static PFNALBUFFERSUBDATASOFTPROC alBufferSubDataSOFT = NULL;
+
 
 /**** Functions ****/
 
@@ -113,6 +117,8 @@ static Context *CreateContext(int deviceId)
 
 	if(pContext->ext.static_buffer)
 		alBufferDataStatic = (PFNALBUFFERDATASTATICPROC)alGetProcAddress("alBufferDataStatic");
+	if(pContext->ext.buffer_sub_data)
+		alBufferSubDataSOFT = (PFNALBUFFERSUBDATASOFTPROC)alGetProcAddress("alBufferSubDataSOFT");
 
 	alListener3f(AL_POSITION, 0, 0, 0);
 	alListener3f(AL_VELOCITY, 0, 0, 0);
@@ -241,12 +247,64 @@ bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
 
 void MFSound_CreateInternal(MFSound *pSound)
 {
-	alGenBuffers(1, &pSound->pInternal->buffer);
+	MFSoundTemplate *pTemplate = pSound->pTemplate;
+	MFSoundDataInternal *pInternal = pSound->pInternal;
+
+	alGenBuffers(1, &pInternal->buffer);
+
+	// if dynamic, allocate buffer
+	if(pTemplate->flags & MFSF_Dynamic)
+	{
+		long bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
+
+		if(gpCurrentContext->ext.static_buffer)
+		{
+			pTemplate->ppStreams = (char**)MFHeap_Alloc(sizeof(char*) + bufferSize);
+			pTemplate->ppStreams[0] = (char*)&pTemplate->ppStreams[1];
+
+			alBufferDataStatic(pInternal->buffer, pInternal->format, pTemplate->ppStreams[0], bufferSize, pTemplate->sampleRate);
+		}
+		else if(gpCurrentContext->ext.buffer_sub_data)
+		{
+			switch((pTemplate->numChannels << 16) | pTemplate->bitsPerSample)
+			{
+				case 0x10000 | 8:	pInternal->format = AL_FORMAT_MONO8;	break;
+				case 0x20000 | 8:	pInternal->format = AL_FORMAT_STEREO8;	break;
+				case 0x10000 | 16:	pInternal->format = AL_FORMAT_MONO16;	break;
+				case 0x20000 | 16:	pInternal->format = AL_FORMAT_STEREO16;	break;
+				case 0x10000 | 32:
+					if(gpCurrentContext->ext.float32)
+						pInternal->format = AL_FORMAT_MONO_FLOAT32;
+					else
+						MFDebug_Assert(false, "Unsupported sample format!");
+					break;
+				case 0x20000 | 32:
+					if(gpCurrentContext->ext.float32)
+						pInternal->format = AL_FORMAT_STEREO_FLOAT32;
+					else
+						MFDebug_Assert(false, "Unsupported sample format!");
+					break;
+				default:
+					MFDebug_Assert(false, "Unsupported sample format!");
+					break;
+			}
+
+			// set buffer data with null allocates a buffer filled with undefined junk
+			alBufferData(pInternal->buffer, pInternal->format, NULL, bufferSize, pTemplate->sampleRate);
+		}
+	}
 }
 
 void MFSound_DestroyInternal(MFSound *pSound)
 {
 	alDeleteBuffers(1, &pSound->pInternal->buffer);
+	
+	// if dynamic, free buffer
+	if(pSound->pTemplate->flags & MFSF_Dynamic)
+	{
+		if(gpCurrentContext->ext.static_buffer)
+			MFHeap_Free(pSound->pTemplate->ppStreams);
+	}
 }
 
 MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size)
@@ -254,37 +312,36 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 	MFSoundTemplate *pTemplate = pSound->pTemplate;
 	MFSoundDataInternal *pInternal = pSound->pInternal;
 
-	ALenum format;
 	bool bTranscode = false;
 	switch((pTemplate->numChannels << 16) | pTemplate->bitsPerSample)
 	{
-		case 0x10000 | 8:	format = AL_FORMAT_MONO8;		break;
-		case 0x20000 | 8:	format = AL_FORMAT_STEREO8;		break;
-		case 0x10000 | 16:	format = AL_FORMAT_MONO16;		break;
-		case 0x20000 | 16:	format = AL_FORMAT_STEREO16;	break;
+		case 0x10000 | 8:	pInternal->format = AL_FORMAT_MONO8;	break;
+		case 0x20000 | 8:	pInternal->format = AL_FORMAT_STEREO8;	break;
+		case 0x10000 | 16:	pInternal->format = AL_FORMAT_MONO16;	break;
+		case 0x20000 | 16:	pInternal->format = AL_FORMAT_STEREO16;	break;
 		case 0x10000 | 24:
-			format = AL_FORMAT_MONO16;
+			pInternal->format = AL_FORMAT_MONO16;
 			bTranscode = true;
 			break;
 		case 0x20000 | 24:
-			format = AL_FORMAT_STEREO16;
+			pInternal->format = AL_FORMAT_STEREO16;
 			bTranscode = true;
 			break;
 		case 0x10000 | 32:
 			if(gpCurrentContext->ext.float32)
-				format = AL_FORMAT_MONO_FLOAT32;
+				pInternal->format = AL_FORMAT_MONO_FLOAT32;
 			else
 			{
-				format = AL_FORMAT_MONO16;
+				pInternal->format = AL_FORMAT_MONO16;
 				bTranscode = true;
 			}
 			break;
 		case 0x20000 | 32:
 			if(gpCurrentContext->ext.float32)
-				format = AL_FORMAT_STEREO_FLOAT32;
+				pInternal->format = AL_FORMAT_STEREO_FLOAT32;
 			else
 			{
-				format = AL_FORMAT_STEREO16;
+				pInternal->format = AL_FORMAT_STEREO16;
 				bTranscode = true;
 			}
 			break;
@@ -296,9 +353,9 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 	if(!bTranscode)
 	{
 		if(gpCurrentContext->ext.static_buffer)
-			alBufferDataStatic(pInternal->buffer, format, (ALvoid*)pData, size, pTemplate->sampleRate);
+			alBufferDataStatic(pInternal->buffer, pInternal->format, (ALvoid*)pData, size, pTemplate->sampleRate);
 		else
-			alBufferData(pInternal->buffer, format, pData, size, pTemplate->sampleRate);
+			alBufferData(pInternal->buffer, pInternal->format, pData, size, pTemplate->sampleRate);
 	}
 	else
 	{
@@ -332,7 +389,7 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 			}
 		}
 
-		alBufferData(pInternal->buffer, format, pTranscodeBuffer, size, pTemplate->sampleRate);
+		alBufferData(pInternal->buffer, pInternal->format, pTranscodeBuffer, size, pTemplate->sampleRate);
 
 		MFHeap_Free(pTranscodeBuffer);
 	}
@@ -342,24 +399,97 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 
 MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
-	MFDebug_Assert(false, "Not supported!");
-
 	MFDebug_Assert(!(pSound->flags & MFPF_Locked), MFStr("Dynamic sound '%s' is already locked.", pSound->name));
+
+	MFSoundTemplate *pTemplate = pSound->pTemplate;
+
+	long bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
+	MFDebug_Assert(offset < bufferSize, "MFSound_Lock: Invalid buffer offset.");
+
+	if(bytes > bufferSize)
+		bytes = bufferSize;
+
+	if(gpCurrentContext->ext.buffer_sub_data)
+	{
+		// return some temp memory for the user to write to (TODO: do we want to allocate this better?)
+		pSound->pLock1 = MFHeap_TAlloc(bytes);
+		pSound->lockSize1 = bytes;
+		pSound->pLock2 = NULL;
+		pSound->lockSize2 = 0;
+	}
+	else if(gpCurrentContext->ext.static_buffer)
+	{
+		// we own the buffer under apple's implementation, just return the direct pointer
+		pSound->pLock1 = pTemplate->ppStreams[0] + offset;
+
+		if(offset + bytes > bufferSize)
+		{
+			pSound->lockSize1 = bufferSize - offset;
+			pSound->pLock2 = pTemplate->ppStreams[0];
+			pSound->lockSize2 = bytes - pSound->lockSize1;
+		}
+		else
+		{
+			pSound->lockSize1 = bytes;
+			pSound->pLock2 = NULL;
+			pSound->lockSize2 = 0;
+		}
+	}
+	else
+	{
+		MFDebug_Warn(1, "No direct buffer management extension available!");
+
+		pSound->pLock1 = NULL;
+		pSound->lockSize1 = 0;
+		pSound->pLock2 = NULL;
+		pSound->lockSize2 = 0;
+	}
 
 	pSound->flags |= MFPF_Locked;
 	pSound->lockOffset = offset;
 	pSound->lockBytes = bytes;
+
+	*ppData = pSound->pLock1;
+	*pSize = pSound->lockSize1;
+	if(ppData2)
+	{
+		*ppData2 = pSound->pLock2;
+		*pSize2 = pSound->lockSize2;
+	}
 
 	return 0;
 }
 
 MF_API void MFSound_Unlock(MFSound *pSound)
 {
-	MFDebug_Assert(false, "Not supported!");
-
 	MFDebug_Assert(pSound->flags & MFPF_Locked, MFStr("Dynamic sound '%s' is not locked.", pSound->name));
 
-	//...
+	MFSoundTemplate *pTemplate = pSound->pTemplate;
+	MFSoundDataInternal *pInternal = pSound->pInternal;
+
+	if(gpCurrentContext->ext.buffer_sub_data)
+	{
+		// write data to the buffer
+		long bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
+		int untilEnd = bufferSize - pSound->lockOffset;
+		
+		if(pSound->lockBytes > untilEnd)
+		{
+			alBufferSubDataSOFT(pInternal->buffer, pInternal->format, pSound->pLock1, pSound->lockOffset, untilEnd);
+			alBufferSubDataSOFT(pInternal->buffer, pInternal->format, (char*)pSound->pLock1 + untilEnd, 0, pSound->lockBytes - untilEnd);
+		}
+		else
+		{
+			alBufferSubDataSOFT(pInternal->buffer, pInternal->format, pSound->pLock1, pSound->lockOffset, pSound->lockBytes);
+		}
+
+		MFHeap_Free(pSound->pLock1);
+	}
+
+	pSound->pLock1 = NULL;
+	pSound->lockSize1 = 0;
+	pSound->pLock2 = NULL;
+	pSound->lockSize2 = 0;
 
 	pSound->flags = pSound->flags & ~MFPF_Locked;
 }
@@ -460,13 +590,21 @@ uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFCALLSTACK;
 
-	ALint cursor;
-	alGetSourcei(pVoice->pInternal->source, AL_BYTE_OFFSET, &cursor);
+	ALint offset[2];
+	if(gpCurrentContext->ext.buffer_sub_data)
+	{
+		alGetSourceiv(pVoice->pInternal->source, AL_BYTE_RW_OFFSETS_SOFT, offset);
+	}
+	else
+	{
+		alGetSourcei(pVoice->pInternal->source, AL_BYTE_OFFSET, &offset[0]);
+		offset[1] = offset[0];
+	}
 
 	if(pWriteCursor)
-		*pWriteCursor = (uint32)cursor;
+		*pWriteCursor = (uint32)offset[1];
 
-	return (uint32)cursor;
+	return (uint32)offset[0];
 }
 
 #endif // MF_SOUND
