@@ -141,7 +141,7 @@ void MFSound_CreateInternal(MFSound *pSound)
 	desc.dwReserved = 0;
 	desc.guid3DAlgorithm = DS3DALG_DEFAULT;
 
-	// if we're not creating a dynamic duffer we should probably make it static..
+	// if we're not creating a dynamic buffer we should probably make it static..
 	if(!(pTemplate->flags & MFSF_Dynamic))
 		desc.dwFlags |= DSBCAPS_STATIC;
 
@@ -186,6 +186,20 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	pSound->pInternal->pBuffer->Release();
 	if(pSound->pInternal->p3DBuffer)
 		pSound->pInternal->p3DBuffer->Release();
+}
+
+MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size)
+{
+	// lock the buffers and copy in the data
+	void *pBuffer;
+	uint32 len;
+	
+	MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
+	MFDebug_Assert(len == size, "Incorrect number of bytes in source buffer.");
+
+	MFCopyMemory(pBuffer, pData, len);
+
+	MFSound_Unlock(pSound);
 }
 
 MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)

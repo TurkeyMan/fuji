@@ -113,6 +113,16 @@ MF_API int MFSound_Destroy(MFSound *pSound);
 MF_API MFSound *MFSound_FindSound(const char *pName);
 
 /**
+ * Fill a sound buffer with sample data.
+ * Fills a sound buffer with sample data.
+ * @param pSound Pointer to the sound to lock.
+ * @param pData Pointer to a buffer containing sample data.
+ * @param size Size in bytes of the buffer pointed to by \a pData.
+ * @return Returns number of bytes written.
+ */
+MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size);
+
+/**
  * Lock a sound buffer.
  * Locks a sound buffer for writing.
  * @param pSound Pointer to the sound to lock.

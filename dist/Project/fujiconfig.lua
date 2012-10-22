@@ -63,8 +63,12 @@ configuration "Retail"
 -- Linux --
 configuration { "linux" }
 	defines { "_LINUX" }
-	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile", "asound", "portaudio" }
+	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
 	links { "z", "png", "mad" }
+--	links { "asound" }
+--	links { "portaudio" }
+--	links { "pulse" }
+	links { "openal" }
 
 -- OSX --
 configuration { "macosx" }

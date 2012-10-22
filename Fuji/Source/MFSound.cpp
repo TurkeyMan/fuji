@@ -299,13 +299,8 @@ MF_API MFSound *MFSound_Create(const char *pName)
 
 		MFSound_CreateInternal(pSound);
 
-		// lock the buffers and copy in the data
-		void *pBuffer;
-		uint32 len;
-
-		MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
-		MFCopyMemory(pBuffer, pTemplate->ppStreams[0], len);
-		MFSound_Unlock(pSound);
+		uint32 bytes = pTemplate->numSamples*pTemplate->numChannels*pTemplate->bitsPerSample / 8;
+		MFSound_SetBufferData(pSound, pTemplate->ppStreams[0], bytes);
 	}
 
 	++pSound->refCount;
