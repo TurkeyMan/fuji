@@ -152,19 +152,21 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 	}
 	else
 	{
-		bCanEnumerate = alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE;
+		bCanEnumerate = alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") == AL_TRUE;
 		bHasCapture = alcIsExtensionPresent(NULL, "ALC_EXT_CAPTURE") == AL_TRUE;
 	}
 
 	if(bCanEnumerate)
 	{
-		const char *pDevices = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+		const char *pDevices = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
 		const char *pDefault = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
 		while(pDevices && *pDevices)
 		{
 			if(!MFString_Compare(pDevices, pDefault))
 				gDefaultOutputDevice = gNumOutputDevices;
-			
+
+			MFDebug_Log(2, MFStr("OpenAL: found output device '%s'%s", pDevices, gDefaultOutputDevice == gNumOutputDevices ? " (default)" : ""));
+
 			OutputDevice &device = gOutputDevices[gNumOutputDevices++];
 			MFString_CopyN(device.name, pDevices, sizeof(device.name)-1);
 			device.name[sizeof(device.name)-1] = 0;
@@ -183,6 +185,8 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 			{
 				if(!MFString_Compare(pDevices, pDefault))
 					gDefaultCaptureDevice = gNumCaptureDevices;
+
+				MFDebug_Log(2, MFStr("OpenAL: found capture device '%s'%s", pDevices, gDefaultCaptureDevice == gNumCaptureDevices ? " (default)" : ""));
 
 				CaptureDevice &device = gCaptureDevices[gNumCaptureDevices++];
 				MFString_CopyN(device.name, pDevices, sizeof(device.name)-1);

@@ -481,15 +481,15 @@ void MFDisplay_GetNativeRes(MFRect *pRect)
 	// TODO: need to find the current desktop res in linux
 
 	pRect->x = pRect->y = 0.f;
-	pRect->width = 800.f;
-	pRect->height = 480.f;
+	pRect->width = 1280.f;
+	pRect->height = 720.f;
 }
 
 void MFDisplay_GetDefaultRes(MFRect *pRect)
 {
 	pRect->x = pRect->y = 0.f;
-	pRect->width = 800.f;
-	pRect->height = 480.f;
+	pRect->width = 1280.f;
+	pRect->height = 720.f;
 }
 
 float MFDisplay_GetNativeAspectRatio()
