@@ -72,7 +72,7 @@ void MFTexture_Recreate()
 		if(pTemplate->flags & TEX_RenderTarget)
 		{
 			// recreate a new one
-			D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D9);
+			D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D9);
 			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
 		}
 
@@ -89,7 +89,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 
 	// create texture
-	D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D9);
+	D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D9);
 	hr = D3DXCreateTexture(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
 	MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
@@ -112,7 +112,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		D3DXFilterTexture(pTex, NULL, 0, D3DX_DEFAULT);
 }
 
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -120,9 +120,9 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 	{
 		pTexture = &gTextureBank.Create(pName);
 
-		if(targetFormat & TexFmt_SelectNicest)
+		if(targetFormat & ImgFmt_SelectNicest)
 		{
-			targetFormat = TexFmt_A8R8G8B8;
+			targetFormat = ImgFmt_A8R8G8B8;
 		}
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
@@ -134,7 +134,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 		pTexture->pTemplateData->pSurfaces->width = width;
 		pTexture->pTemplateData->pSurfaces->height = height;
-		pTexture->pTemplateData->pSurfaces->bitsPerPixel = MFTexture_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
+		pTexture->pTemplateData->pSurfaces->bitsPerPixel = MFImage_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
 		pTexture->pTemplateData->pSurfaces->xBlocks = width;
 		pTexture->pTemplateData->pSurfaces->yBlocks = height;
 		pTexture->pTemplateData->pSurfaces->bitsPerBlock = pTexture->pTemplateData->pSurfaces->bitsPerPixel;
@@ -147,7 +147,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
-		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFDD_D3D9);
+		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFRD_D3D9);
 		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
 
 		if(hr != D3D_OK)

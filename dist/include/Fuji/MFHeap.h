@@ -131,7 +131,7 @@ MF_API int MFHeap_GetNumAllocations(MFHeap *pHeap);
  * @see MFHeap_Alloc()
  * @see MFHeap_GetAllocHeap()
  */
-MF_API uint32 MFHeap_GetAllocSize(const void *pMemory);
+MF_API size_t MFHeap_GetAllocSize(const void *pMemory);
 
 /**
  * Get the heap of an allocation.

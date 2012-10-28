@@ -394,7 +394,7 @@ MF_API int MFHeap_GetNumAllocations(MFHeap *pHeap)
 }
 
 // get the size of an allocation
-MF_API uint32 MFHeap_GetAllocSize(const void *pMemory)
+MF_API size_t MFHeap_GetAllocSize(const void *pMemory)
 {
 	MFCALLSTACK;
 

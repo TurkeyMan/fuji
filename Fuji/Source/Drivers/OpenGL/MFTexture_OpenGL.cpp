@@ -37,62 +37,62 @@ struct GLFormat
 // i havent verified that all of these formats are correct, some might be wrong...
 GLFormat gGLFormats[] =
 {
-	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV },						// TexFmt_A8R8G8B8
-	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },							// TexFmt_A8B8G8R8
-	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8 },							// TexFmt_B8G8R8A8
-	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8 },								// TexFmt_R8G8B8A8
-	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// TexFmt_A2R10G10B10
-	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// TexFmt_A2B10G10R10
-	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// TexFmt_A16B16G16R16
-	{ GL_RGB5, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// TexFmt_R5G6B5
-																				// TexFmt_R6G5B5
-	{ GL_RGB5, GL_BGR_EXT, GL_UNSIGNED_SHORT_5_6_5_REV },						// TexFmt_B5G6R5
-	{ GL_RGB5_A1, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV },					// TexFmt_A1R5G5B5
-	{ GL_RGB5_A1, GL_ABGR_EXT, GL_UNSIGNED_SHORT_5_5_5_1 },						// TexFmt_R5G5B5A1
-	{ GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// TexFmt_A1B5G5R5
-	{ GL_RGBA4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV },					// TexFmt_A4R4G4B4
-	{ GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// TexFmt_A4B4G4R4
-	{ GL_RGBA4, GL_ABGR_EXT, GL_UNSIGNED_SHORT_4_4_4_4 },						// TexFmt_R4G4B4A4
-	{ GL_RGBA16F_ARB, GL_RGBA, GL_HALF_FLOAT_ARB },								// TexFmt_ABGR_F16
-	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// TexFmt_ABGR_F32
-	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// TexFmt_I8
-																				// TexFmt_I4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// TexFmt_DXT1
-																				// TexFmt_DXT2
-	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// TexFmt_DXT3
-																				// TexFmt_DXT4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// TexFmt_DXT5
+	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV },						// ImgFmt_A8R8G8B8
+	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },							// ImgFmt_A8B8G8R8
+	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8 },							// ImgFmt_B8G8R8A8
+	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8 },								// ImgFmt_R8G8B8A8
+	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// ImgFmt_A2R10G10B10
+	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// ImgFmt_A2B10G10R10
+	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_A16B16G16R16
+	{ GL_RGB5, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
+																				// ImgFmt_R6G5B5
+	{ GL_RGB5, GL_BGR_EXT, GL_UNSIGNED_SHORT_5_6_5_REV },						// ImgFmt_B5G6R5
+	{ GL_RGB5_A1, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV },					// ImgFmt_A1R5G5B5
+	{ GL_RGB5_A1, GL_ABGR_EXT, GL_UNSIGNED_SHORT_5_5_5_1 },						// ImgFmt_R5G5B5A1
+	{ GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// ImgFmt_A1B5G5R5
+	{ GL_RGBA4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV },					// ImgFmt_A4R4G4B4
+	{ GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_A4B4G4R4
+	{ GL_RGBA4, GL_ABGR_EXT, GL_UNSIGNED_SHORT_4_4_4_4 },						// ImgFmt_R4G4B4A4
+	{ GL_RGBA16F_ARB, GL_RGBA, GL_HALF_FLOAT_ARB },								// ImgFmt_ABGR_F16
+	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// ImgFmt_ABGR_F32
+	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_I8
+																				// ImgFmt_I4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
+																				// ImgFmt_DXT2
+	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
+																				// ImgFmt_DXT4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// ImgFmt_DXT5
 };
 #else
 // opengl format table.. man, opengl's texture format management is a complete shambles!!!!
 // i havent verified that all of these formats are correct, some might be wrong...
 GLFormat gGLFormats[] =
 {
-	{ GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE },										// TexFmt_A8R8G8B8
-	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },										// TexFmt_A8B8G8R8
-	{ GL_RGBA, GL_BGRA, 0 },													// TexFmt_B8G8R8A8
-	{ GL_RGBA, GL_RGBA, 0 },													// TexFmt_R8G8B8A8
-	{ 0, GL_BGRA, 0 },															// TexFmt_A2R10G10B10   **
-	{ 0, GL_RGBA, 0 },															// TexFmt_A2B10G10R10   **
-	{ 0, GL_RGBA, 0 },															// TexFmt_A16B16G16R16  **
-	{ GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// TexFmt_R5G6B5
-																				// TexFmt_R6G5B5
-	{ GL_RGB, GL_RGB, 0 },														// TexFmt_B5G6R5
-	{ GL_RGBA, GL_BGRA, 0 },													// TexFmt_A1R5G5B5
-	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// TexFmt_R5G5B5A1
-	{ GL_RGBA, GL_RGBA, 0 },													// TexFmt_A1B5G5R5
-	{ GL_RGBA, GL_BGRA, 0 },													// TexFmt_A4R4G4B4
-	{ GL_RGBA, GL_RGBA, 0 },													// TexFmt_A4B4G4R4
-	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// TexFmt_R4G4B4A4
-	{ 0, GL_RGBA, 0 },															// TexFmt_ABGR_F16
-	{ 0, GL_RGBA, 0 },															// TexFmt_ABGR_F32
-	{ 0, 0, GL_UNSIGNED_BYTE },													// TexFmt_I8
-																				// TexFmt_I4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// TexFmt_DXT1
-																				// TexFmt_DXT2
-	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// TexFmt_DXT3
-																				// TexFmt_DXT4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// TexFmt_DXT5
+	{ GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE },										// ImgFmt_A8R8G8B8
+	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },										// ImgFmt_A8B8G8R8
+	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_B8G8R8A8
+	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_R8G8B8A8
+	{ 0, GL_BGRA, 0 },															// ImgFmt_A2R10G10B10   **
+	{ 0, GL_RGBA, 0 },															// ImgFmt_A2B10G10R10   **
+	{ 0, GL_RGBA, 0 },															// ImgFmt_A16B16G16R16  **
+	{ GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
+																				// ImgFmt_R6G5B5
+	{ GL_RGB, GL_RGB, 0 },														// ImgFmt_B5G6R5
+	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_A1R5G5B5
+	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// ImgFmt_R5G5B5A1
+	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_A1B5G5R5
+	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_A4R4G4B4
+	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_A4B4G4R4
+	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_R4G4B4A4
+	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F16
+	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F32
+	{ 0, 0, GL_UNSIGNED_BYTE },													// ImgFmt_I8
+																				// ImgFmt_I4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
+																				// ImgFmt_DXT2
+	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
+																				// ImgFmt_DXT4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// ImgFmt_DXT5
 };
 #endif
 
@@ -124,7 +124,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	pTexture->pInternalData = (void*)(uintp)textureID;
 
-	uint32 platformFormat = MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_OpenGL);
+	uint32 platformFormat = MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_OpenGL);
 	MFDebug_Assert(platformFormat < (uint32)gMaxGLFormats, "Platform format is undefined...");
 
 	GLFormat &format = gGLFormats[platformFormat];
@@ -164,7 +164,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFCheckForOpenGLError();
 }
 
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_FindTexture(pName);
 
@@ -172,29 +172,29 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 	{
 		pTexture = &gTextureBank.Create(pName);
 
-		if(targetFormat & TexFmt_SelectNicest)
+		if(targetFormat & ImgFmt_SelectNicest)
 		{
 #if defined(MF_IPHONE)
 			switch(targetFormat)
 			{
-				case TexFmt_SelectNicest:
-					targetFormat = TexFmt_A8R8G8B8;
+				case ImgFmt_SelectNicest:
+					targetFormat = ImgFmt_A8R8G8B8;
 					break;
-				case TexFmt_SelectNicest_NoAlpha:
-					targetFormat = TexFmt_R8G8B8;
+				case ImgFmt_SelectNicest_NoAlpha:
+					targetFormat = ImgFmt_R8G8B8;
 					break;
-				case TexFmt_SelectFastest:
-					targetFormat = TexFmt_R4G4B4A4;
+				case ImgFmt_SelectFastest:
+					targetFormat = ImgFmt_R4G4B4A4;
 					break;
-				case TexFmt_SelectFastest_Masked:
-					targetFormat = TexFmt_R5G5B5A1;
+				case ImgFmt_SelectFastest_Masked:
+					targetFormat = ImgFmt_R5G5B5A1;
 					break;
-				case TexFmt_SelectFastest_NoAlpha:
-					targetFormat = TexFmt_R5G6B5;
+				case ImgFmt_SelectFastest_NoAlpha:
+					targetFormat = ImgFmt_R5G6B5;
 					break;
 			}
 #else
-			targetFormat = TexFmt_A8R8G8B8;
+			targetFormat = ImgFmt_A8R8G8B8;
 #endif
 		}
 
@@ -206,7 +206,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pTexture->pTemplateData->mipLevels = 1;
 		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
-		int bitsPerPixel = MFTexture_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
+		int bitsPerPixel = MFImage_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
 		//int imageSize = (width * height * bitsPerPixel) >> 3;
 		MFTextureSurfaceLevel *pSurface = &pTexture->pTemplateData->pSurfaces[0];
 		pSurface->width = width;
@@ -237,7 +237,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
 #endif
 
-		uint32 platformFormat = MFTexture_GetPlatformFormatID(targetFormat, MFDD_OpenGL);
+		uint32 platformFormat = MFTexture_GetPlatformFormatID(targetFormat, MFRD_OpenGL);
 		GLFormat &format = gGLFormats[platformFormat];
 		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
 

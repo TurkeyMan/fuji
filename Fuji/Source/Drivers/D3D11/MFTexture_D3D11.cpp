@@ -59,10 +59,10 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	pTexture->pInternalData = NULL;
 
 	// create texture
-	DXGI_FORMAT platformFormat = (DXGI_FORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFDD_D3D11);
+	DXGI_FORMAT platformFormat = (DXGI_FORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D11);
 	//hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
-	int pitch = (MFTexture_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;
+	int pitch = (MFImage_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;
 
 	D3D11_TEXTURE2D_DESC desc;
 	MFZeroMemory(&desc, sizeof(desc));
@@ -118,7 +118,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	}
 }
 
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFTextureFormat targetFormat)
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
 	return NULL;
 }

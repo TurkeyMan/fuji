@@ -98,8 +98,8 @@ MFInitStatus MFMaterial_InitModule()
 	MFTexture *pSysLogoSmallTexture = MFTexture_Create("_None");
 #else
 	// create the logo textures from raw data
-	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFTextureFormat)SysLogo256_format, SysLogo256_flags);
-	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFTextureFormat)SysLogo64_format, SysLogo64_flags);
+	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFImageFormat)SysLogo256_format, SysLogo256_flags);
+	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFImageFormat)SysLogo64_format, SysLogo64_flags);
 #endif
 
 	// create standard materials
@@ -118,11 +118,11 @@ MFInitStatus MFMaterial_InitModule()
 
 #if defined(_PSP)
 	// create PSP specific stock materials
-	MFTexture *pConnectedTexture = MFTexture_CreateFromRawData("connected", connected_data, connected_width, connected_height, (MFTextureFormat)connected_format, connected_flags);
-	MFTexture *pDisconnectedTexture = MFTexture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, (MFTextureFormat)disconnected_format, disconnected_flags);
-	MFTexture *pPowerTexture = MFTexture_CreateFromRawData("power", power_data, power_width, power_height, (MFTextureFormat)power_format, power_flags);
-	MFTexture *pChargingTexture = MFTexture_CreateFromRawData("charging", charging_data, charging_width, charging_height, (MFTextureFormat)charging_format, charging_flags);
-	MFTexture *pUSBTexture = MFTexture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, (MFTextureFormat)usb_icon_format, usb_icon_flags);
+	MFTexture *pConnectedTexture = MFTexture_CreateFromRawData("connected", connected_data, connected_width, connected_height, (MFImageFormat)connected_format, connected_flags);
+	MFTexture *pDisconnectedTexture = MFTexture_CreateFromRawData("disconnected", disconnected_data, disconnected_width, disconnected_height, (MFImageFormat)disconnected_format, disconnected_flags);
+	MFTexture *pPowerTexture = MFTexture_CreateFromRawData("power", power_data, power_width, power_height, (MFImageFormat)power_format, power_flags);
+	MFTexture *pChargingTexture = MFTexture_CreateFromRawData("charging", charging_data, charging_width, charging_height, (MFImageFormat)charging_format, charging_flags);
+	MFTexture *pUSBTexture = MFTexture_CreateFromRawData("usb_icon", usb_icon_data, usb_icon_width, usb_icon_height, (MFImageFormat)usb_icon_format, usb_icon_flags);
 
 	pConnected = MFMaterial_Create("connected");
 	pDisconnected = MFMaterial_Create("disconnected");

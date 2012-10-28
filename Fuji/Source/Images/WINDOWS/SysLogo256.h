@@ -3,7 +3,7 @@
 
 const int SysLogo256_width  = 256;
 const int SysLogo256_height = 256;
-const int SysLogo256_format = TexFmt_A4R4G4B4;
+const int SysLogo256_format = ImgFmt_A4R4G4B4;
 const int SysLogo256_bpp    = 16;
 const int SysLogo256_flags  = 0x00000005;
 

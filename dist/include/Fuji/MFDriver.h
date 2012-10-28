@@ -107,6 +107,23 @@
 #define MF_DRIVER_ANDROID		36
 #define MF_DRIVER_NACL			37
 
+
+// we need a list of all available renderer drivers
+enum MFRendererDrivers
+{
+	MFRD_Unknown = -1,
+
+	MFRD_D3D9 = 0,
+	MFRD_D3D11,
+	MFRD_XBox,
+	MFRD_OpenGL,
+	MFRD_PSP,
+	MFRD_PS2,
+
+	MFRD_Max,
+	MFRD_ForceInt = 0x7FFFFFFF
+};
+
 /*** Platform specific defines, includes and driver selection ***/
 
 #if defined(MF_WINDOWS)

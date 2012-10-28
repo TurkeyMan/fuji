@@ -9,22 +9,6 @@
 
 #include "MFTexture.h"
 
-// we need a list of all available display drivers
-enum MFDisplayDrivers
-{
-	MFDD_Unknown = -1,
-
-	MFDD_D3D9 = 0,
-	MFDD_D3D11,
-	MFDD_XBox,
-	MFDD_OpenGL,
-	MFDD_PSP,
-	MFDD_PS2,
-
-	MFDD_Max,
-	MFDD_ForceInt = 0x7FFFFFFF
-};
-
 // forward declarations
 struct MFTexture;
 struct MFTextureSurfaceLevel;
@@ -43,7 +27,7 @@ void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture);
 struct MFTextureTemplateData
 {
 	uint32 magicNumber;
-	MFTextureFormat imageFormat;
+	MFImageFormat imageFormat;
 	uint32 reserved;
 	int mipLevels;
 	uint32 flags;
@@ -117,11 +101,11 @@ public:
 };
 #endif
 
-extern uint32 gMFTexturePlatformFormat[MFDD_Max][TexFmt_Max];
+extern uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max];
 
-inline uint32 MFTexture_GetPlatformFormatID(MFTextureFormat format, MFDisplayDrivers displayDriver)
+inline uint32 MFTexture_GetPlatformFormatID(MFImageFormat format, MFRendererDrivers rendererDriver)
 {
-	return gMFTexturePlatformFormat[displayDriver][format];
+	return gMFImagePlatformFormat[rendererDriver][format];
 }
 
 #endif
