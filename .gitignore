@@ -13,7 +13,6 @@ Makefile
 *.make
 *.mk
 *.o
-*.d
 *.workspace*
 *.userprefs
 *.tags
