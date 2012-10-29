@@ -2,7 +2,7 @@
 #if !defined(_HKWIDGETEVENT_H)
 #define _HKWIDGETEVENT_H
 
-#include "HKEvent.h"
+#include "../HKEvent.h"
 
 struct HKInputSource;
 class HKWidget;

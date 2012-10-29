@@ -4,7 +4,7 @@
 
 #include "HKWidgetEvent.h"
 #include "HKInputSource.h"
-#include "HKFactory.h"
+#include "../HKFactory.h"
 
 class HKWidget;
 class HKWidgetRenderer;

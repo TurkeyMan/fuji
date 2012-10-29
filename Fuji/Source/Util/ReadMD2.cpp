@@ -100,12 +100,13 @@ void ParseMD2File(char *pFile, size_t length)
 	// material
 	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
 
-	MFString_Copy(pMatChunk->materials[0].name, pModel->name);
-	MFString_Copy(pMatChunk->materials[0].maps[0], pModel->name);
+	F3DMaterial &mat = pMatChunk->materials.push();
+	MFString_Copy(mat.name, pModel->name);
+	MFString_Copy(mat.maps[0], pModel->name);
 
 	// mesh data
 	F3DMeshChunk *pMC = pModel->GetMeshChunk();
-	F3DSubObject &sub = pMC->subObjects[0];
+	F3DSubObject &sub = pMC->subObjects.push();
 
 	// copy name (TODO: remove file extension)
 	MFString_Copy(sub.name, pModel->name);
@@ -159,7 +160,7 @@ void ParseMD2File(char *pFile, size_t length)
 	}
 
 	// trnangles
-	F3DMaterialSubobject &matSub = sub.matSubobjects[0];
+	F3DMaterialSubobject &matSub = sub.matSubobjects.push();
 	matSub.materialIndex = 0;
 
 	matSub.vertices.resize(pHeader->num_tris * 3);
@@ -182,6 +183,8 @@ void ParseMD2File(char *pFile, size_t length)
 		matSub.vertices[a*3 + 2].uv1 = tris[a].st[2];
 		matSub.vertices[a*3 + 2].normal = frames->verts[tris[a].vertex[2]].normalIndex;
 	}
+
+	matSub.triangles.resize(pHeader->num_tris);
 
 	for(a=0; a<pHeader->num_tris; a++)
 	{

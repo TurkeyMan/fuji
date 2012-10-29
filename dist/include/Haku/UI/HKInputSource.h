@@ -3,7 +3,7 @@
 #define _HKINPUTSOURCE_H
 
 #include "Fuji/MFInput.h"
-#include "HKEvent.h"
+#include "../HKEvent.h"
 
 struct HKInputSource
 {

@@ -1,11 +1,11 @@
-#include "Fuji.h"
-#include "MFDisplay.h"
-#include "MFRenderer.h"
-#include "MFView.h"
-#include "MFModel.h"
-#include "MFSystem.h"
-#include "MFFileSystem.h"
-#include "FileSystem/MFFileSystemNative.h"
+#include "Fuji/Fuji.h"
+#include "Fuji/MFDisplay.h"
+#include "Fuji/MFRenderer.h"
+#include "Fuji/MFView.h"
+#include "Fuji/MFModel.h"
+#include "Fuji/MFSystem.h"
+#include "Fuji/MFFileSystem.h"
+#include "Fuji/FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 

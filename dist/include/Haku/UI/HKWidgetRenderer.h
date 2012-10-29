@@ -3,7 +3,7 @@
 #define _HKWIDGET_RENDERER_H
 
 #include "HKWidget.h"
-#include "HKFactory.h"
+#include "../HKFactory.h"
 
 class HKWidgetRenderer;
 typedef HKFactory<HKWidgetRenderer> HKWidgetRendererFactory;

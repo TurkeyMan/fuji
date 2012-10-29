@@ -1,8 +1,8 @@
-#include "Fuji.h"
-#include "MFSystem.h"
-#include "MFHeap.h"
-#include "MFCompute.h"
-#include "MFRenderer.h"
+#include "Fuji/Fuji.h"
+#include "Fuji/MFSystem.h"
+#include "Fuji/MFHeap.h"
+#include "Fuji/MFCompute.h"
+#include "Fuji/MFRenderer.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 /**** Globals ****/
