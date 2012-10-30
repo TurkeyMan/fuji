@@ -50,17 +50,10 @@ MF_API void MFModel_Draw(MFModel *pModel)
 {
 	MFCALLSTACK;
 
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-	MFMatrix localToView;
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadMatrixf((GLfloat*)&MFView_GetViewToScreenMatrix());
-
-	glMatrixMode(GL_MODELVIEW);
-	if(MFView_IsOrtho())
-		glLoadMatrixf((GLfloat*)&pModel->worldMatrix);
-	else
-		glLoadMatrixf((GLfloat*)MFView_GetLocalToView(pModel->worldMatrix, &localToView));
+#if !defined(MF_OPENGL_SUPPORT_SHADERS)
+	// GLES2.0
+	MFDebug_Assert(false, "GLES 1.0 no longer supported!");
+#endif
 
 	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
 
@@ -84,6 +77,24 @@ MF_API void MFModel_Draw(MFModel *pModel)
 
 				MFRenderer_Begin();
 
+				MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Projection, MFView_GetViewToScreenMatrix());
+
+				if(MFView_IsOrtho())
+					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, pModel->worldMatrix);
+				else
+				{
+					MFMatrix localToView;
+					MFView_GetLocalToView(pModel->worldMatrix, &localToView);
+					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, localToView);
+				}
+
+				// find vertex attrib locations
+				GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
+				GLint pos = glGetAttribLocation(program, "vPos");
+				GLint normal = glGetAttribLocation(program, "vNormal");
+				GLint colour = glGetAttribLocation(program, "vColour");
+				GLint uv0 = glGetAttribLocation(program, "vUV0");
+
 				MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
 
 				// just use conventional vertex arrays
@@ -104,21 +115,33 @@ MF_API void MFModel_Draw(MFModel *pModel)
 						switch(pStream->pElements[b].usage)
 						{
 							case MFVET_Position:
-								glVertexPointer(3, GL_FLOAT, pStream->streamStride, pDataPointer);
-								glEnableClientState(GL_VERTEX_ARRAY);
+								if(pos != -1)
+								{
+									glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, pStream->streamStride, pDataPointer);
+									glEnableVertexAttribArray(pos);
+								}
 								break;
 							case MFVET_Normal:
-								glNormalPointer(GL_FLOAT, pStream->streamStride, pDataPointer);
-								glEnableClientState(GL_NORMAL_ARRAY);
+								if(normal != -1)
+								{
+									glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, pStream->streamStride, pDataPointer);
+									glEnableVertexAttribArray(normal);
+								}
 								break;
 							case MFVET_Colour:
-								glColorPointer(4, GL_UNSIGNED_BYTE, pStream->streamStride, pDataPointer);
-								glEnableClientState(GL_COLOR_ARRAY);
+								if(colour != -1)
+								{
+									glVertexAttribPointer(colour, 4, GL_UNSIGNED_BYTE, GL_TRUE, pStream->streamStride, pDataPointer);
+									glEnableVertexAttribArray(colour);
+								}
 								break;
 							case MFVET_TexCoord:
-								glClientActiveTexture(GL_TEXTURE0);
-								glTexCoordPointer(2, GL_FLOAT, pStream->streamStride, pDataPointer);
-								glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+								if(uv0 != -1)
+								{
+									glActiveTexture(GL_TEXTURE0);
+									glVertexAttribPointer(uv0, 2, GL_FLOAT, GL_TRUE, pStream->streamStride, pDataPointer);
+									glEnableVertexAttribArray(uv0);
+								}
 								break;
 						}
 					}
@@ -132,18 +155,17 @@ MF_API void MFModel_Draw(MFModel *pModel)
 				else
 					glDrawElements(GL_TRIANGLES, pMC->numIndices, GL_UNSIGNED_SHORT, pMC->pIndexData);
 
-				glDisableClientState(GL_NORMAL_ARRAY);
-				glDisableClientState(GL_COLOR_ARRAY);
-				glDisableClientState(GL_VERTEX_ARRAY);
-				glClientActiveTexture(GL_TEXTURE0);
-				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				if(pos != -1)
+					glDisableVertexAttribArray(pos);
+				if(normal != -1)
+					glDisableVertexAttribArray(normal);
+				if(colour != -1)
+					glDisableVertexAttribArray(colour);
+				if(uv0 != -1)
+					glDisableVertexAttribArray(uv0);
 			}
 		}
 	}
-#else
-	// GLES2.0
-	MFDebug_Assert(false, "GLES 2.0 not yet supported!");
-#endif
 }
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
