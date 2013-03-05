@@ -1,8 +1,8 @@
 #if !defined(_HKWIDGET_BUTTON_H)
 #define _HKWIDGET_BUTTON_H
 
-#include "UI/Widgets/HKWidgetLabel.h"
-#include "UI/HKWidgetRenderer.h"
+#include "Haku/UI/Widgets/HKWidgetLabel.h"
+#include "Haku/UI/HKWidgetRenderer.h"
 
 class HKWidgetButton : public HKWidgetLabel
 {

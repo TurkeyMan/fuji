@@ -2,8 +2,8 @@
 #if !defined(_HKLISTADAPTER_H)
 #define _HKLISTADAPTER_H
 
-#include "HKEvent.h"
-#include "HKDynamicArray.h"
+#include "Haku/HKEvent.h"
+#include "Haku/HKDynamicArray.h"
 
 class HKListAdapter
 {

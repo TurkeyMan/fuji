@@ -1,7 +1,7 @@
 #if !defined(_HKWIDGET_FRAMELAYOUT_H)
 #define _HKWIDGET_FRAMELAYOUT_H
 
-#include "UI/Widgets/HKWidgetLayout.h"
+#include "Haku/UI/Widgets/HKWidgetLayout.h"
 
 class HKWidgetLayoutFrame : public HKWidgetLayout
 {

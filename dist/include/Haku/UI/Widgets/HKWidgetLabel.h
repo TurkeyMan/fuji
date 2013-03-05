@@ -1,8 +1,8 @@
 #if !defined(_HKWIDGET_LABEL_H)
 #define _HKWIDGET_LABEL_H
 
-#include "UI/HKWidget.h"
-#include "UI/HKWidgetRenderer.h"
+#include "Haku/UI/HKWidget.h"
+#include "Haku/UI/HKWidgetRenderer.h"
 
 #include "Fuji/MFFont.h"
 

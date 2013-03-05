@@ -6,7 +6,7 @@
 #if !defined(_MFFILESYSTEM_HTTP_H)
 #define _MFFILESYSTEM_HTTP_H
 
-#include "MFFileSystem.h"
+#include "Fuji/MFFileSystem.h"
 
 /**
  * HTTP 'POST' arguments.

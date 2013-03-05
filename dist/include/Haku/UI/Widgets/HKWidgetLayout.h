@@ -1,8 +1,8 @@
 #if !defined(_HKWIDGET_LAYOUT_H)
 #define _HKWIDGET_LAYOUT_H
 
-#include "UI/HKWidget.h"
-#include "UI/HKWidgetRenderer.h"
+#include "Haku/UI/HKWidget.h"
+#include "Haku/UI/HKWidgetRenderer.h"
 
 #include "Fuji/MFArray.h"
 
