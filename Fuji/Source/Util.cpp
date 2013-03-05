@@ -192,14 +192,3 @@ MF_API uint32 MFUtil_HashString(const char *s)
 }
 
 #endif
-
-int MFUtil_NextPowerOf2(int x)
-{
-	--x;
-	x |= x >> 1;
-	x |= x >> 2;
-	x |= x >> 4;
-	x |= x >> 8;
-	x |= x >> 16;
-	return ++x;
-}

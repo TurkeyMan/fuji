@@ -5,8 +5,14 @@ MFInitStatus MFUtil_InitModule();
 
 // CRC functions
 void MFUtil_CrcInit(); // generates some crc tables - system should call this once
-MF_API uint32 MFUtil_Crc(const char *buffer, int length); // generate a unique Crc number for this buffer
+MF_API uint32 MFUtil_Crc(const char *pBuffer, int length); // generate a unique Crc number for this buffer
 MF_API uint32 MFUtil_CrcString(const char *pString);	// generate a unique Crc number for this string
+
+inline uint32 MFUtil_HashBuffer(const void *pBuffer, size_t length)
+{
+	return MFUtil_Crc((const char*)pBuffer, (int)length);
+}
+
 MF_API uint32 MFUtil_HashString(const char *pString); // generate a very fast hash value from a string
 
 inline size_t MFUtil_HashPointer(const void *pPointer)
@@ -28,7 +34,17 @@ inline size_t MFUtil_HashPointer(const void *pPointer)
 */
 }
 
-int MFUtil_NextPowerOf2(int x);
+template<typename T>
+inline T MFUtil_NextPowerOf2(T x)
+{
+	--x;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	return ++x;
+}
 
 // endian flipping
 #if defined(MFBIG_ENDIAN)
