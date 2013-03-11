@@ -315,8 +315,8 @@ int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, const c
 int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...);
 float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
 float MFFont_DrawTextf(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
-float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
-float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &colour, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &colour, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 */
 
 	// register MFModel functions

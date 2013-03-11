@@ -41,10 +41,11 @@ void MFTexture_DeinitModulePlatformSpecific()
 
 void MFTexture_Release()
 {
-	MFTexturePool::Iterator pTex = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 
-	while(pTex)
+	while(pI)
 	{
+		MFTexture *pTex = (MFTexture*)MFResource_Get(pI);
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
@@ -57,16 +58,17 @@ void MFTexture_Release()
 			pTex->pInternalData = NULL;
 		}
 
-		pTex = gTextureBank.Next(pTex);
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
 }
 
 void MFTexture_Recreate()
 {
-	MFTexturePool::Iterator pTex = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 
-	while(pTex)
+	while(pI)
 	{
+		MFTexture *pTex = (MFTexture*)MFResource_Get(pI);
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
@@ -76,7 +78,7 @@ void MFTexture_Recreate()
 			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
 		}
 
-		pTex = gTextureBank.Next(pTex);
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
 }
 
@@ -118,7 +120,12 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 	if(!pTexture)
 	{
-		pTexture = &gTextureBank.Create(pName);
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->refCount = 1;
+
+		MFResource_AddResource(pTexture);
 
 		if(targetFormat & ImgFmt_SelectNicest)
 		{
@@ -143,7 +150,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pTexture->pTemplateData->pSurfaces->pPaletteEntries = NULL;
 		pTexture->pTemplateData->pSurfaces->paletteBufferLength = 0;
 
-		pTexture->refCount = 1;
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
@@ -153,7 +159,8 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		if(hr != D3D_OK)
 		{
 			MFHeap_Free(pTexture->pTemplateData);
-			gTextureBank.DestroyItem(*pTexture);
+			MFResource_RemoveResource(pTexture);
+			MFHeap_Free(pTexture);
 			pTexture = NULL;
 		}
 	}

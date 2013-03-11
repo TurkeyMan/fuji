@@ -213,8 +213,6 @@ MF_API void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 	MFThread_LockMutex(gAllocMutex);
 
 	char *pMemory = (char*)pAllocHeap->pCallbacks->pMalloc(allocBytes, pAllocHeap->pHeapData);
-
-	MFDebug_Assert(pMemory, "Failed to allocate memory!");
 	if(pMemory)
 	{
 #if defined(_USE_TRACKING_HASH_TABLE)
@@ -319,7 +317,9 @@ MF_API void MFHeap_Free(void *pMem)
 #endif
 
 	MFCopyMemory((char*)pMem + pHeader->size, "freefreefreefree", MFHeap_MungwallBytes);
-	MFCopyMemory((char*)pMem - MFHeap_MungwallBytes, "freefreefreefree", MFHeap_MungwallBytes);
+#if defined(USE_PRE_MUNGWALL)
+	MFCopyMemory((char*)pMem - MFHeap_MungwallBytes, "eerfeerfeerfeerf", MFHeap_MungwallBytes);
+#endif
 	MFMemSet(pMem, 0xFE, pHeader->size);
 
 	pHeap->pCallbacks->pFree((char*)pMem - pHeader->alignment, pHeap->pHeapData);
@@ -501,9 +501,20 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 		return true;
 
 	MFAllocHeader *pHeader = GetAllocHeader(pMemory);
-	if(MFMemCompare((const char*)pMemory - MFHeap_MungwallBytes, gLlawgnum, MFHeap_MungwallBytes) != 0)
+	if(!pHeader)
+	{
+		MFDebug_Warn(0, MFStr("Missing allocation header for allocation 0x%08X.", pMemory));
 		return false;
-	return MFMemCompare((char*&)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0;
+	}
+
+#if defined(USE_PRE_MUNGWALL)
+	if(MFMemCompare((const char*)pMemory - MFHeap_MungwallBytes, gLlawgnum, MFHeap_MungwallBytes) == 0)
+#endif
+	if(MFMemCompare((const char*)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0)
+		return true;
+
+	MFDebug_Log(0, MFStr("%s(%d) : Corrupted mungwall detected in allocation 0x%08X.", pHeader->pFile, pHeader->line, pMemory));
+	return false;
 }
 
 // memory allocation groups for profiling
@@ -555,7 +566,7 @@ static void ExpandAllocTable()
 
 	// resize the pool
 	MFHeap_AllocItem *pNewItemPool = (MFHeap_AllocItem*)MFHeap_SystemRealloc(gpItemPool, sizeof(MFHeap_AllocItem)*poolSize + sizeof(MFHeap_AllocItem*)*poolSize);
-	MFHeap_AllocItem **ppNewFreeList = (MFHeap_AllocItem**)&gpItemPool[poolSize];
+	MFHeap_AllocItem **ppNewFreeList = (MFHeap_AllocItem**)&pNewItemPool[poolSize];
 
 	// calculate the pointer diff between the old and new pool
 	ptrdiff_t diff = (char*)pNewItemPool - (char*)gpItemPool;
@@ -636,8 +647,8 @@ static MFAllocHeader *GetAllocHeader(const void *pMemory)
 	MFHeap_AllocItem *pI = gpAllocTable[hash];
 	while(pI && pI->pMemory != pMemory)
 		pI = pI->pNext;
-	MFDebug_Assert(pI, "No allocation record! O_O");
-
+	if(!pI)
+		return NULL;
 	return &pI->header;
 }
 #endif

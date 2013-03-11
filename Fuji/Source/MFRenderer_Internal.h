@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFRENDERER_INTERNAL_H)
 #define _MFRENDERER_INTERNAL_H
 

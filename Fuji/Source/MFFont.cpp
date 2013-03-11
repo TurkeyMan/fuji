@@ -864,7 +864,7 @@ MFVector MFFont_GetCharPosJustified(MFFont *pFont, const char *pText, float text
 }
 
 
-MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &colour, int numChars, const MFMatrix &ltw)
 {
   const char *pCurrentLine = pText;
 
@@ -933,7 +933,7 @@ MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MF
       }
     }
 
-    MFFont_DrawText(pFont, currentPos+pos, textHeight, color, pCurrentLine, (int)MFMin((uint32)lastSignificantChar, (uint32)numChars), ltw);
+    MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, (int)MFMin((uint32)lastSignificantChar, (uint32)numChars), ltw);
 
     // increment height
     currentPos.y += height;
@@ -950,7 +950,7 @@ MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MF
   return currentPos.y;
 }
 
-MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars, const MFMatrix &ltw)
+MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &colour, int numChars, const MFMatrix &ltw)
 {
   const char *pCurrentLine = pText;
 
@@ -1023,7 +1023,7 @@ MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFV
       }
     }
 
-    MFFont_DrawText(pFont, currentPos+pos, textHeight, color, pCurrentLine, charsToDraw, ltw);
+    MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, charsToDraw, ltw);
 
     // increment height
     currentPos.y += height;

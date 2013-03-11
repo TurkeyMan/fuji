@@ -8,6 +8,7 @@
 #include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
 #include "MFDisplay_Internal.h"
+#include "MFResource_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel_Internal.h"
@@ -21,6 +22,7 @@
 #include "Timer.h"
 #include "MFFont.h"
 #include "MFRenderer_Internal.h"
+#include "MFRenderState_Internal.h"
 #include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
 #include "MFNetwork_Internal.h"
@@ -154,7 +156,7 @@ uint64 MFModule_RegisterCoreModules()
 	return gCoreModules;
 }
 
-uint64 MFModule_RegisterModules()
+uint64 MFModule_RegisterEngineModules()
 {
 	uint64 modules = MFModule_RegisterCoreModules();
 
@@ -178,7 +180,10 @@ uint64 MFModule_RegisterModules()
 	gBuiltinModuleIDs[MFBIM_MFSystem] = (char)MFModule_RegisterModule("MFSystem", MFSystem_InitModule, MFSystem_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSystem);
 
-	basicModules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSystem);
+	gBuiltinModuleIDs[MFBIM_MFResource] = (char)MFModule_RegisterModule("MFResource", MFResource_InitModule, MFResource_DeinitModule, basicModules);
+	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFResource);
+
+	basicModules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSystem) | MFModule_GetBuiltinModuleMask(MFBIM_MFResource);
 
 	gBuiltinModuleIDs[MFBIM_MFView] = (char)MFModule_RegisterModule("MFView", MFView_InitModule, MFView_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFView);
@@ -194,6 +199,11 @@ uint64 MFModule_RegisterModules()
 
 	gBuiltinModuleIDs[MFBIM_MFSound] = (char)MFModule_RegisterModule("MFSound", MFSound_InitModule, MFSound_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSound);
+
+	gBuiltinModuleIDs[MFBIM_MFRenderState] = (char)MFModule_RegisterModule("MFRenderState", MFRenderState_InitModule, MFRenderState_DeinitModule, renderer);
+	uint64 renderState = MFModule_GetBuiltinModuleMask(MFBIM_MFRenderState);
+	renderer |= renderState;
+	modules |= renderState;
 
 	gBuiltinModuleIDs[MFBIM_MFTexture] = (char)MFModule_RegisterModule("MFTexture", MFTexture_InitModule, MFTexture_DeinitModule, renderer);
 	uint64 texture = MFModule_GetBuiltinModuleMask(MFBIM_MFTexture);
@@ -240,7 +250,7 @@ uint64 MFModule_RegisterModules()
 
 bool MFModule_InitModules()
 {
-	uint64 timer;
+	uint64 timer = 0;
 
 	for(int a=0; a<gNumModules; ++a)
 	{

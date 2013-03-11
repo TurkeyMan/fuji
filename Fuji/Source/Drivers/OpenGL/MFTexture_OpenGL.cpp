@@ -170,7 +170,12 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 	if(!pTexture)
 	{
-		pTexture = &gTextureBank.Create(pName);
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->refCount = 0;
+
+		MFResource_AddResource(pTexture);
 
 		if(targetFormat & ImgFmt_SelectNicest)
 		{
@@ -220,7 +225,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pSurface->pPaletteEntries = NULL;
 		pSurface->paletteBufferLength = 0;
 
-		pTexture->refCount = 0;
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 

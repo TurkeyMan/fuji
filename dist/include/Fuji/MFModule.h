@@ -45,7 +45,7 @@ MF_API int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pIni
 
 MF_API uint64 MFModule_RegisterCoreModules();
 
-MF_API uint64 MFModule_RegisterModules();
+MF_API uint64 MFModule_RegisterEngineModules();
 
 MF_API int MFModule_GetNumModules();
 

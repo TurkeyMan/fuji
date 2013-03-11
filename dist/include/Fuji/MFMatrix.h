@@ -2,7 +2,7 @@
  * @file MFMatrix.h
  * @brief Describes the Mount Fuji Engine matrix class.
  * @author Manu Evans
- * @defgroup MFMatrix Matrix math Class
+ * @defgroup MFMatrix Matrix Math Class
  * @{
  */
 

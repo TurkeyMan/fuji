@@ -340,7 +340,7 @@ int MFSystem_GameLoop()
 	MFCALLSTACK;
 
 	// initialise the system and create displays etc..
-	MFModule_RegisterModules();
+	MFModule_RegisterEngineModules();
 
 	while(gRestart)
 	{

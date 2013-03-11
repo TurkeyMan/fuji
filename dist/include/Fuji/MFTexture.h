@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFTEXTURE_H)
 #define _MFTEXTURE_H
 

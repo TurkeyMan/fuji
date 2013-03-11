@@ -6,12 +6,14 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFRENDERER_H)
 #define _MFRENDERER_H
 
 #include "MFMatrix.h"
 
 struct MFTexture;
+struct MFStateBlock;
 
 /**
  * @struct MFMeshChunk
@@ -259,6 +261,83 @@ MF_API uintp MFRenderer_SetRenderStateOverride(uint32 renderState, uintp value);
  * @return Returns the current value of the global renderstate.
  */
 MF_API uintp MFRenderer_GetRenderStateOverride(uint32 renderState);
+
+
+
+
+// new renderer interface...
+
+enum MFRenderLayerSortMode
+{
+	MFRL_SM_Unknown = -1,
+
+	MFRL_SM_Default = 0,
+	MFRL_SM_FrontToBack,
+	MFRL_SM_BackToFront,
+
+	MFRL_SM_Max,
+	MFRL_SM_ForceInt = 0x7FFFFFFF,
+};
+
+
+MFALIGN_BEGIN(16)
+struct MFRenderElement // 42 bytes atm... compress state block handles?
+{
+	// sorting (cost):
+	//   dx9  - shaders, shader constants, render targets, decl, sampler state, vert/index buffer, textures, render states, drawprim
+	//        - pShader, pView, pEntity, pMaterial ???
+	//   dx11 - textures...
+	//        - pMaterial, pShader, pView, pEntity ???
+
+//	MFRenderElementData *pData;
+	uint8 type;
+	uint8 primarySortKey;
+	uint16 zSort;
+//	MFShaderTechnique *pShaderTechnique;
+
+	MFStateBlock *pViewState;
+	MFStateBlock *pEntityState;
+//	MFStateBlock *pEntityOverrideState;
+	MFStateBlock *pMaterialState;
+	MFStateBlock *pGeometryState;
+
+	uint64 vertexBufferOffset : 20;
+	uint64 indexBufferOffset : 20;
+	uint64 vertexCount : 20;
+	uint64 primType : 3;
+	uint64 renderIndexed : 1;
+
+//	MFRenderInstance *pInstances;
+	uint8 numInstances;
+
+	uint8 animBatch;
+
+	uint16 unused;
+
+//	MFRenderElementDebug *pDbg; // name/model/event/etc...
+}
+MFALIGN_END(16);
+
+struct MFRenderLayer
+{
+	// render target config
+
+	MFRenderLayerSortMode sortMode;
+	MFStateBlock *pLayer;
+
+	MFRenderElement *pElements;
+};
+
+struct MFRenderer
+{
+	// layers
+	MFRenderLayer *pLayers;
+	int numLayers;
+
+	MFStateBlock *pGlobal;
+	MFStateBlock *pOverride;
+};
+
 
 #endif // _MFRENDERER_H
 

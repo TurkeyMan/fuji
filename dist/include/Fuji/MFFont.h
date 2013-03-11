@@ -201,9 +201,9 @@ MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, 
  */
 MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
 
-MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &colour, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
-MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &color, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
+MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &colour, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
 
 /**

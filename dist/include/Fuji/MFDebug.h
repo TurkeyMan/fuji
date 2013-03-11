@@ -57,6 +57,21 @@
 	#define MFDebug_Breakpoint()
 #endif
 
+struct MFCodeLocation
+{
+	MFCodeLocation(const char *pComment = NULL, void *pUserData = NULL, const char *pFile = __FILE__, int line = __LINE__)
+	: pFile(pFile)
+	, line(line)
+	, pComment(pComment)
+	, pUserData(pUserData)
+	{
+	}
+
+	const char *pFile;
+	int line;
+	const char *pComment;
+	void *pUserData;
+};
 
 /*** Useful debuging functions ***/
 
