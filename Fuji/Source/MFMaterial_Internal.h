@@ -9,6 +9,7 @@
 #include "DebugMenu_Internal.h"
 
 struct MFMaterialType;
+struct MFStateBlock;
 
 // material functions
 MFInitStatus MFMaterial_InitModule();
@@ -31,6 +32,9 @@ struct MFMaterial
 
 	MFMaterialType *pType;
 	void *pInstanceData;
+
+	MFStateBlock *pMaterialState;
+	bool bStateDirty;
 
 	int refCount;
 };

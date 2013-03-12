@@ -427,7 +427,7 @@ MF_API void MFRenderer_ClearScreen(uint32 flags)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, ((flags & MFRCF_Colour) ? D3DCLEAR_TARGET : NULL)|((flags & MFRCF_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags & MFRCF_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
 }
 
 MF_API void MFRenderer_GetViewport(MFRect *pRect)

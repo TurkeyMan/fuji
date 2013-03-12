@@ -61,14 +61,14 @@ enum MFStateConstant_Vector
 	MFSCV_FogColour,
 	MFSCV_FogParams1,
 	MFSCV_FogParams2,
-	MFSCV_RenderState,
+	MFSCV_RenderState,			/**< x = alpha ref, ...? */
 	MFSCV_MaterialDiffuseColour,
 	MFSCV_DiffuseColour,
 	MFSCV_AmbientColour,
 
 	MFSCV_Fuji0, MFSCV_Fuji1, MFSCV_Fuji2, MFSCV_Fuji3, MFSCV_Fuji4, MFSCV_Fuji5, MFSCV_Fuji6,
 
-	MFSCV_LightCounts,			/**< x = Directional, y = omni count, z = spot count */
+	MFSCV_LightCounts,			/**< x = directional, y = omni count, z = spot count */
 
 	MFSCV_User0, MFSCV_User1, MFSCV_User2, MFSCV_User3, MFSCV_User4, MFSCV_User5, MFSCV_User6, MFSCV_User7,
 	MFSCV_User8, MFSCV_User9, MFSCV_User10, MFSCV_User11, MFSCV_User12, MFSCV_User13, MFSCV_User14, MFSCV_User15,
@@ -130,10 +130,10 @@ enum MFStateConstant_Bool
 	MFSCB_ShadowGeneration,
 	MFSCB_ShadowReceiving,
 	MFSCB_Opaque,
+	MFSCB_AlphaTest,
 	MFSCB_Fuji0,
 	MFSCB_Fuji1,
 	MFSCB_Fuji2,
-	MFSCB_Fuji3,
 	MFSCB_User0,
 	MFSCB_User1,
 	MFSCB_User2,
@@ -169,8 +169,7 @@ enum MFStateConstant_Bool
 
 #define MFSCB_Fuji(i) (MFStateConstant_Bool)(MFSCB_Fuji0 + i)
 #define MFSCB_User(i) (MFStateConstant_Bool)(MFSCB_User0 + i)
-#define MFSCB_UserTexSet(i) (MFStateConstant_Bool)(MFSCB_UserTex0Set + i)
-#define MFSCB_VertexTexSet(i) (MFStateConstant_Bool)(MFSCB_VertexTex0Set + i)
+#define MFSCB_TexSet(i) (MFStateConstant_Bool)(MFSCB_DiffuseSet + i)
 
 enum MFStateConstant_RenderState
 {
@@ -581,14 +580,14 @@ MF_API void MFStateBlock_Destroy(MFStateBlock *pStateBlock);
 MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource);
 MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest);
 MF_API MFStateBlock* MFStateBlock_Merge(MFStateBlock *pSource1, MFStateBlock *pSource2);
-MF_API void MFStateBlock_Reset(MFStateBlock *pStateBlock);
+MF_API void MFStateBlock_Clear(MFStateBlock *pStateBlock);
 
 MF_API size_t MFStateBlock_GetAllocatedBytes(MFStateBlock *pStateBlock);
 MF_API size_t MFStateBlock_GetUsedBytes(MFStateBlock *pStateBlock);
 MF_API size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
 
 MF_API bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state);
-MF_API bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector &state);
+MF_API bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, const MFVector &state);
 MF_API bool MFStateBlock_SetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, const MFMatrix &state);
 MF_API bool MFStateBlock_SetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture *pTexture);
 MF_API bool MFStateBlock_SetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void *pState);

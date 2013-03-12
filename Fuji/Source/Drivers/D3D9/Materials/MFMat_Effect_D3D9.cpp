@@ -38,7 +38,7 @@ int MFMat_Effect_Begin(MFMaterial *pMaterial)
 	return 0;
 }
 
-void MFMat_Effect_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Effect_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
@@ -47,7 +47,7 @@ void MFMat_Effect_CreateInstance(MFMaterial *pMaterial)
 	MFZeroMemory(pData, sizeof(MFMat_Effect_Data));
 }
 
-void MFMat_Effect_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Effect_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 

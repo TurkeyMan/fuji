@@ -10,8 +10,9 @@
 #define _MFMATERIAL_H
 
 class MFIni;
-struct MFTexture;
 struct MFIniEnumKey;
+struct MFTexture;
+struct MFStateBlock;
 
 /**
  * @struct MFMaterial
@@ -99,9 +100,11 @@ struct MFMaterialCallbacks
 	void      (*pCreateInstance)(MFMaterial *pMaterial);	/**< Pointer to the CreateInstance function */
 	void      (*pDestroyInstance)(MFMaterial *pMaterial);	/**< Pointer to the DestroyInstance function */
 
-	int       (*pBegin)(MFMaterial *pMaterial);				/**< Pointer to the Begin function */
-
 	void      (*pUpdate)(MFMaterial *pMaterial);			/**< Pointer to the Update function */
+
+	void      (*pBuildStateBlock)(MFMaterial *pMaterial);	/**< Pointer to the BuildStateBlock function */
+
+	int       (*pBegin)(MFMaterial *pMaterial);				/**< Pointer to the Begin function */
 
 	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
 	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function */
@@ -191,7 +194,14 @@ MF_API MFMaterial*	MFMaterial_GetCurrent();
  * Gets a materials name.
  * @return The name of the specified material.
  */
-MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial);
+MF_API const char* MFMaterial_GetMaterialName(MFMaterial *pMaterial);
+
+/**
+ * Get a materials state block.
+ * Gets a materials state block.
+ * @return An MFStateBlock representing the given material.
+ */
+MF_API MFStateBlock* MFMaterial_GetMaterialStateBlock(MFMaterial *pMaterial);
 
 // material control
 

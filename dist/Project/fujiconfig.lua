@@ -127,7 +127,7 @@ configuration "PS3"
 configuration "Dreamcast"
 	defines { "_DC" }
 	-- http://yam.20to4.net/dreamcast/hints/index.html <- some performance thoughts
-	compileoptions { "-m4-single" "-ml", "-mfused-madd", "-mfsca", "-mfsrra", "-mdalign" } // --ffast-math, -mfmovd ??
+--	compileoptions { "-m4-single", "-ml", "-mfused-madd", "-mfsca", "-mfsrra", "-mdalign" } -- "--ffast-math", "-mfmovd" ??
 
 
 configuration { }

@@ -6,8 +6,8 @@
 	#define MFMat_Standard_RegisterMaterial MFMat_Standard_RegisterMaterial_D3D9
 	#define MFMat_Standard_UnregisterMaterial MFMat_Standard_UnregisterMaterial_D3D9
 	#define MFMat_Standard_Begin MFMat_Standard_Begin_D3D9
-	#define MFMat_Standard_CreateInstance MFMat_Standard_CreateInstance_D3D9
-	#define MFMat_Standard_DestroyInstance MFMat_Standard_DestroyInstance_D3D9
+	#define MFMat_Standard_CreateInstancePlatformSpecific MFMat_Standard_CreateInstancePlatformSpecific_D3D9
+	#define MFMat_Standard_DestroyInstancePlatformSpecific MFMat_Standard_DestroyInstancePlatformSpecific_D3D9
 #endif
 
 #include "MFHeap.h"
@@ -252,7 +252,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	return 0;
 }
 
-void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 
@@ -274,7 +274,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->alphaRef = 1.0f;
 }
 
-void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
 	MFCALLSTACK;
 

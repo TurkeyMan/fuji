@@ -11,6 +11,7 @@
 #include "MFIni.h"
 #include "MFPtrList.h"
 #include "MFSystem.h"
+#include "MFRenderState.h"
 
 #include "MFPrimitive.h"
 #include "MFFont.h"
@@ -362,6 +363,10 @@ MF_API MFMaterial* MFMaterial_Create(const char *pName)
 
 		gMaterialList.Create(pMat);
 
+		// TODO: how to determine size?
+		pMat->pMaterialState = MFStateBlock_Create(256);
+		pMat->bStateDirty = true;
+
 		MaterialDefinition *pDef = pDefinitionRegistry;
 		while(pDef)
 		{
@@ -433,6 +438,17 @@ MF_API MFMaterial* MFMaterial_GetCurrent()
 MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
 {
 	return pMaterial->pName;
+}
+
+MF_API MFStateBlock* MFMaterial_GetMaterialStateBlock(MFMaterial *pMaterial)
+{
+	if(pMaterial->bStateDirty)
+	{
+		pMaterial->pType->materialCallbacks.pBuildStateBlock(pMaterial);
+		pMaterial->bStateDirty = false;
+	}
+
+	return pMaterial->pMaterialState;
 }
 
 MF_API void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
@@ -780,6 +796,10 @@ MF_API void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, i
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, parameterIndex, argIndex, value);
+
+	// dirty the stateblock
+	// TODO: this is pretty harsh, perhaps we can reduce the damage?
+	pMaterial->bStateDirty = true;
 }
 
 MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)

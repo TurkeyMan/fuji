@@ -13,6 +13,8 @@
 #include "MFMatrix.h"
 
 struct MFTexture;
+struct MFMaterial;
+struct MFModel;
 struct MFStateBlock;
 
 /**
@@ -96,18 +98,19 @@ enum MFVertexComponent
 };
 
 // new from display...
-enum MFClearScreenFlags
+enum MFRenderClearFlags
 {
-	CS_Colour	= 1,
-	CS_ZBuffer	= 2,
-	CS_Stencil	= 4,
+	MFRCF_Colour		= 1,
+	MFRCF_ZBuffer		= 2,
+	MFRCF_Stencil		= 4,
 
-	CS_All		= CS_Colour | CS_ZBuffer | CS_Stencil,
-	CS_ForceInt	= 0x7FFFFFFF
+	MFRCF_All			= MFRCF_Colour | MFRCF_ZBuffer | MFRCF_Stencil,
+	MFRCF_DepthStencil	= MFRCF_ZBuffer | MFRCF_Stencil,
+	MFRCF_ForceInt		= 0x7FFFFFFF
 };
 
 MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a);
-MF_API void MFRenderer_ClearScreen(uint32 flags = CS_All);
+MF_API void MFRenderer_ClearScreen(uint32 flags = MFRCF_All);
 
 MF_API void MFRenderer_GetViewport(MFRect *pRect);
 MF_API void MFRenderer_SetViewport(MFRect *pRect);
@@ -280,64 +283,41 @@ enum MFRenderLayerSortMode
 };
 
 
-MFALIGN_BEGIN(16)
-struct MFRenderElement // 42 bytes atm... compress state block handles?
+struct MFRenderer;
+
+struct MFRenderLayer;
+
+MF_API MFRenderer* MFRenderer_Create(int numLayers, MFStateBlock *pGlobal, MFStateBlock *pOverride);
+MF_API void MFRenderer_Destroy(MFRenderer *pRenderer);
+MF_API MFRenderLayer* MFRenderer_GetLayer(MFRenderer *pRenderer, int layer);
+
+MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer);
+MF_API void MFRenderer_Kick(MFRenderer *pRenderer);
+
+MF_API MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer *pRenderer, MFStateBlock *pGlobal);
+MF_API MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer *pRenderer, MFStateBlock *pOverride);
+
+MF_API void MFRenderer_CloneLayer(MFRenderer *pRenderer, int sourceLayer, int destLayer);
+
+MF_API void MFRenderLayer_SetLayerStateBlock(MFRenderLayer *pLayer, MFStateBlock *pState);
+MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
+//MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
+
+//MF_API void MFRenderLayer_Clear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags = MFRCF_All, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
+
+MF_API void MFRenderLayer_AddModel(MFRenderLayer *pLayer, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
+MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
+MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
+
+MF_API void MFRenderLayer_AddFence(MFRenderLayer *pLayer);
+
+
+// helpers...
+__forceinline MFRenderer* MFRenderer_SetLayerStateBlock(MFRenderer *pRenderer, int layer, MFStateBlock *pState)
 {
-	// sorting (cost):
-	//   dx9  - shaders, shader constants, render targets, decl, sampler state, vert/index buffer, textures, render states, drawprim
-	//        - pShader, pView, pEntity, pMaterial ???
-	//   dx11 - textures...
-	//        - pMaterial, pShader, pView, pEntity ???
-
-//	MFRenderElementData *pData;
-	uint8 type;
-	uint8 primarySortKey;
-	uint16 zSort;
-//	MFShaderTechnique *pShaderTechnique;
-
-	MFStateBlock *pViewState;
-	MFStateBlock *pEntityState;
-//	MFStateBlock *pEntityOverrideState;
-	MFStateBlock *pMaterialState;
-	MFStateBlock *pGeometryState;
-
-	uint64 vertexBufferOffset : 20;
-	uint64 indexBufferOffset : 20;
-	uint64 vertexCount : 20;
-	uint64 primType : 3;
-	uint64 renderIndexed : 1;
-
-//	MFRenderInstance *pInstances;
-	uint8 numInstances;
-
-	uint8 animBatch;
-
-	uint16 unused;
-
-//	MFRenderElementDebug *pDbg; // name/model/event/etc...
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, layer);
+	MFRenderLayer_SetLayerStateBlock(pLayer, pState);
 }
-MFALIGN_END(16);
-
-struct MFRenderLayer
-{
-	// render target config
-
-	MFRenderLayerSortMode sortMode;
-	MFStateBlock *pLayer;
-
-	MFRenderElement *pElements;
-};
-
-struct MFRenderer
-{
-	// layers
-	MFRenderLayer *pLayers;
-	int numLayers;
-
-	MFStateBlock *pGlobal;
-	MFStateBlock *pOverride;
-};
-
 
 #endif // _MFRENDERER_H
 

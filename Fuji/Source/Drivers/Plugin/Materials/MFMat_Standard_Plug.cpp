@@ -10,8 +10,8 @@
 	int MFMat_Standard_RegisterMaterial_##driver(void *pPlatformData); \
 	void MFMat_Standard_UnregisterMaterial_##driver(); \
 	int MFMat_Standard_Begin_##driver(MFMaterial *pMaterial); \
-	void MFMat_Standard_CreateInstance_##driver(MFMaterial *pMaterial); \
-	void MFMat_Standard_DestroyInstance_##driver(MFMaterial *pMaterial);
+	void MFMat_Standard_CreateInstancePlatformSpecific_##driver(MFMaterial *pMaterial); \
+	void MFMat_Standard_DestroyInstancePlatformSpecific_##driver(MFMaterial *pMaterial);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -19,8 +19,8 @@
 		MFMat_Standard_RegisterMaterial_##driver, \
 		MFMat_Standard_UnregisterMaterial_##driver, \
 		MFMat_Standard_Begin_##driver, \
-		MFMat_Standard_CreateInstance_##driver, \
-		MFMat_Standard_DestroyInstance_##driver \
+		MFMat_Standard_CreateInstancePlatformSpecific_##driver, \
+		MFMat_Standard_DestroyInstancePlatformSpecific_##driver \
 	},
 
 // declare the available plugins
@@ -41,8 +41,8 @@ struct MFMat_StandardPluginCallbacks
 	int (*pRegisterMaterial)(void *pPlatformData);
 	void (*pUnregisterMaterial)();
 	int (*pBegin)(MFMaterial *pMaterial);
-	void (*pCreateInstance)(MFMaterial *pMaterial);
-	void (*pDestroyInstance)(MFMaterial *pMaterial);
+	void (*pCreateInstancePlatformSpecific)(MFMaterial *pMaterial);
+	void (*pDestroyInstancePlatformSpecific)(MFMaterial *pMaterial);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -83,14 +83,14 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	return gpCurrentMatStandardPlugin->pBegin(pMaterial);
 }
 
-void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	gpCurrentMatStandardPlugin->pCreateInstance(pMaterial);
+	gpCurrentMatStandardPlugin->pCreateInstancePlatformSpecific(pMaterial);
 }
 
-void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	gpCurrentMatStandardPlugin->pDestroyInstance(pMaterial);
+	gpCurrentMatStandardPlugin->pDestroyInstancePlatformSpecific(pMaterial);
 }
 
 #endif // MF_RENDERER
