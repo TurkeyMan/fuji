@@ -16,6 +16,9 @@ enum MFResourceType
 	MFRT_Unknown = -1,
 
 	MFRT_Texture = 0,
+	MFRT_VertexDecl,
+	MFRT_VertexBuffer,
+	MFRT_IndexBuffer,
 	MFRT_Model,
 	MFRT_Animation,
 	MFRT_Sound,

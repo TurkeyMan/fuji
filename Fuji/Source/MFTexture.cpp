@@ -150,7 +150,6 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
-
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
 	}
 

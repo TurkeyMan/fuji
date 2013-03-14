@@ -5,14 +5,14 @@
 #if defined(MF_RENDERPLUGIN_D3D9)
 	#define MFVertex_InitModulePlatformSpecific MFVertex_InitModulePlatformSpecific_D3D9
 	#define MFVertex_DeinitModulePlatformSpecific MFVertex_DeinitModulePlatformSpecific_D3D9
-	#define MFVertex_CreateVertexDeclaration MFVertex_CreateVertexDeclaration_D3D9
-	#define MFVertex_DestroyVertexDeclaration MFVertex_DestroyVertexDeclaration_D3D9
-	#define MFVertex_CreateVertexBuffer MFVertex_CreateVertexBuffer_D3D9
-	#define MFVertex_DestroyVertexBuffer MFVertex_DestroyVertexBuffer_D3D9
+	#define MFVertex_CreateVertexDeclarationPlatformSpecific MFVertex_CreateVertexDeclarationPlatformSpecific_D3D9
+	#define MFVertex_DestroyVertexDeclarationPlatformSpecific MFVertex_DestroyVertexDeclarationPlatformSpecific_D3D9
+	#define MFVertex_CreateVertexBufferPlatformSpecific MFVertex_CreateVertexBufferPlatformSpecific_D3D9
+	#define MFVertex_DestroyVertexBufferPlatformSpecific MFVertex_DestroyVertexBufferPlatformSpecific_D3D9
 	#define MFVertex_LockVertexBuffer MFVertex_LockVertexBuffer_D3D9
 	#define MFVertex_UnlockVertexBuffer MFVertex_UnlockVertexBuffer_D3D9
-	#define MFVertex_CreateIndexBuffer MFVertex_CreateIndexBuffer_D3D9
-	#define MFVertex_DestroyIndexBuffer MFVertex_DestroyIndexBuffer_D3D9
+	#define MFVertex_CreateIndexBufferPlatformSpecific MFVertex_CreateIndexBufferPlatformSpecific_D3D9
+	#define MFVertex_DestroyIndexBufferPlatformSpecific MFVertex_DestroyIndexBufferPlatformSpecific_D3D9
 	#define MFVertex_LockIndexBuffer MFVertex_LockIndexBuffer_D3D9
 	#define MFVertex_UnlockIndexBuffer MFVertex_UnlockIndexBuffer_D3D9
 	#define MFVertex_SetVertexDeclaration MFVertex_SetVertexDeclaration_D3D9
@@ -102,101 +102,85 @@ void MFVertex_DeinitModulePlatformSpecific()
 {
 }
 
-MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
+bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
-	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFHeap_Alloc(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
-	pDecl->numElements = elementCount;
-	pDecl->pElements = (MFVertexElement*)&pDecl[1];
-	pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
-	pDecl->pPlatformData = NULL;
-
-	MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
-	MFZeroMemory(pDecl->pElementData, sizeof(MFVertexElementData)*elementCount);
+	MFVertexElement *pElements = pDeclaration->pElements;
+	MFVertexElementData *pElementData = pDeclaration->pElementData;
 
 	int streamOffsets[16];
 	MFZeroMemory(streamOffsets, sizeof(streamOffsets));
 
 	D3DVERTEXELEMENT9 elements[32];
 	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
-	for(int a=0; a<elementCount; ++a)
+	for(int a=0; a<pDeclaration->numElements; ++a)
 	{
-		MFVertexDataFormat dataFormat = MFVertexD3D9_ChoooseDataType(pElementArray[a].elementType, pElementArray[a].componentCount);
-		elements[a].Stream = (uint16)pElementArray[a].stream;
-		elements[a].Offset = (uint16)streamOffsets[pElementArray[a].stream];
+		MFVertexDataFormat dataFormat = MFVertexD3D9_ChoooseDataType(pElements[a].elementType, pElements[a].componentCount);
+		elements[a].Stream = (uint16)pElements[a].stream;
+		elements[a].Offset = (uint16)streamOffsets[pElements[a].stream];
 		elements[a].Type = gDataType[dataFormat];
 		elements[a].Method = D3DDECLMETHOD_DEFAULT;
-		elements[a].Usage = gUsageSemantic[pElementArray[a].elementType];
-		elements[a].UsageIndex = (uint8)pElementArray[a].elementIndex;
+		elements[a].Usage = gUsageSemantic[pElements[a].elementType];
+		elements[a].UsageIndex = (uint8)pElements[a].elementIndex;
 
-		pDecl->pElementData[a].format = dataFormat;
-		pDecl->pElementData[a].offset = streamOffsets[pElementArray[a].stream];
-		pDecl->pElementData[a].stride = 0;
-		pDecl->pElementData[a].pData = NULL;
+		pElementData[a].format = dataFormat;
+		pElementData[a].offset = streamOffsets[pElements[a].stream];
+		pElementData[a].stride = 0;
+		pElementData[a].pData = NULL;
 
-		streamOffsets[pElementArray[a].stream] += gVertexDataStride[dataFormat];
+		streamOffsets[pElements[a].stream] += gVertexDataStride[dataFormat];
 	}
-	elements[elementCount] = endMacro;
+	elements[pDeclaration->numElements] = endMacro;
 
 	// set the strides for each component
-	for(int a=0; a<elementCount; ++a)
-		pDecl->pElementData[a].stride = streamOffsets[pElementArray[a].stream];
+	for(int a=0; a<pDeclaration->numElements; ++a)
+		pElementData[a].stride = streamOffsets[pElements[a].stream];
 
 	IDirect3DVertexDeclaration9 *pVertexDecl;
 	HRESULT hr = pd3dDevice->CreateVertexDeclaration(elements, &pVertexDecl);
 	if(FAILED(hr))
-	{
-		MFHeap_Free(pDecl);
-		return NULL;
-	}
+		return false;
 
-	pDecl->pPlatformData = pVertexDecl;
+	pDeclaration->pPlatformData = pVertexDecl;
 
-	return pDecl;
+	return true;
 }
 
-MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
+void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
 	IDirect3DVertexDeclaration9 *pDecl = (IDirect3DVertexDeclaration9*)pDeclaration->pPlatformData;
 	pDecl->Release();
-
-	MFHeap_Free(pDeclaration);
 }
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
+bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory)
 {
-	DWORD usage = type == MFVBType_Static ? D3DUSAGE_WRITEONLY : D3DUSAGE_DYNAMIC;
+	DWORD usage = pVertexBuffer->type == MFVBType_Static ? D3DUSAGE_WRITEONLY : D3DUSAGE_DYNAMIC;
 	D3DPOOL pool = usage == D3DUSAGE_DYNAMIC ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
 
+	int stride = pVertexBuffer->pVertexDeclatation->pElementData[0].stride;
+
 	IDirect3DVertexBuffer9 *pVertBuffer;
-	HRESULT hr = pd3dDevice->CreateVertexBuffer(pVertexFormat->pElementData[0].stride*numVerts, usage, 0, pool, &pVertBuffer, NULL);
+	HRESULT hr = pd3dDevice->CreateVertexBuffer(stride*pVertexBuffer->numVerts, usage, 0, pool, &pVertBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create vertex buffer");
 	if(FAILED(hr))
-		return NULL;
+		return false;
 
-	MFVertexBuffer *pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer));
-	pVB->pVertexDeclatation = pVertexFormat;
-	pVB->bufferType = type;
-	pVB->numVerts = numVerts;
-	pVB->bLocked = false;
-	pVB->pPlatformData = pVertBuffer;
+	pVertexBuffer->pPlatformData = pVertBuffer;
 
 	if(pVertexBufferMemory)
 	{
 		void *pData;
 		pVertBuffer->Lock(0, 0, &pData, D3DLOCK_DISCARD);
-		MFCopyMemory(pData, pVertexBufferMemory, pVertexFormat->pElementData[0].stride*numVerts);
+		MFCopyMemory(pData, pVertexBufferMemory, stride*pVertexBuffer->numVerts);
 		pVertBuffer->Unlock();
 	}
 
-	return pVB;
+	return true;
 }
 
-MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
+void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 {
 	IDirect3DVertexBuffer9 *pVB = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
 	pVB->Release();
-
-	MFHeap_Free(pVertexBuffer);
 }
 
 MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
@@ -231,37 +215,31 @@ MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	pVertexBuffer->bLocked = false;
 }
 
-MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
+bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory)
 {
-	IDirect3DIndexBuffer9 *pIndexBuffer;
-	HRESULT hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pIndexBuffer, NULL);
+	IDirect3DIndexBuffer9 *pIB;
+	HRESULT hr = pd3dDevice->CreateIndexBuffer(sizeof(uint16)*pIndexBuffer->numIndices, 0, D3DFMT_INDEX16, D3DPOOL_MANAGED, &pIB, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create index buffer");
 	if(FAILED(hr))
-		return NULL;
+		return false;
 
-	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer) + (pIndexBufferMemory ? 0 : sizeof(uint16)*numIndices));
-	pIB->pIndices = pIndexBufferMemory ? pIndexBufferMemory : (uint16*)&pIB[1];
-	pIB->numIndices = numIndices;
-	pIB->bLocked = false;
-	pIB->pPlatformData = pIndexBuffer;
+	pIndexBuffer->pPlatformData = pIndexBuffer;
 
 	if(pIndexBufferMemory)
 	{
 		void *pData;
-		pIndexBuffer->Lock(0, 0, &pData, D3DLOCK_DISCARD);
-		MFCopyMemory(pData, pIndexBufferMemory, sizeof(uint16)*numIndices);
-		pIndexBuffer->Unlock();
+		pIB->Lock(0, 0, &pData, D3DLOCK_DISCARD);
+		MFCopyMemory(pData, pIndexBufferMemory, sizeof(uint16)*pIndexBuffer->numIndices);
+		pIB->Unlock();
 	}
 
-	return NULL;
+	return true;
 }
 
-MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
+void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer)
 {
 	IDirect3DIndexBuffer9 *pIB = (IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData;
 	pIB->Release();
-
-	MFHeap_Free(pIndexBuffer);
 }
 
 MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)

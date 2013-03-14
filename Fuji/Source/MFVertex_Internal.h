@@ -2,12 +2,7 @@
 #define _MFVERTEX_INTERNAL_H
 
 #include "MFVertex.h"
-
-MFInitStatus MFVertex_InitModule();
-void MFVertex_DeinitModule();
-
-void MFVertex_InitModulePlatformSpecific();
-void MFVertex_DeinitModulePlatformSpecific();
+#include "MFResource.h"
 
 struct MFVertexElementData
 {
@@ -17,7 +12,7 @@ struct MFVertexElementData
 	MFVertexDataFormat format;
 };
 
-struct MFVertexDeclaration
+struct MFVertexDeclaration : public MFResource
 {
 	MFVertexElement *pElements;
 	MFVertexElementData *pElementData;
@@ -25,7 +20,7 @@ struct MFVertexDeclaration
 	void *pPlatformData;
 };
 
-struct MFVertexBuffer
+struct MFVertexBuffer : public MFResource
 {
 	MFVertexDeclaration *pVertexDeclatation;
 	MFVertexBufferType bufferType;
@@ -33,9 +28,11 @@ struct MFVertexBuffer
 	void *pPlatformData;
 
 	bool bLocked;
+
+	MFVertexBuffer *pNextScratchBuffer;
 };
 
-struct MFIndexBuffer
+struct MFIndexBuffer : public MFResource
 {
 	uint16 *pIndices;
 	int numIndices;
@@ -43,6 +40,18 @@ struct MFIndexBuffer
 
 	bool bLocked;
 };
+
+MFInitStatus MFVertex_InitModule();
+void MFVertex_DeinitModule();
+
+void MFVertex_InitModulePlatformSpecific();
+void MFVertex_DeinitModulePlatformSpecific();
+bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
+void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
+bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory);
+void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer);
+bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory);
+void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer);
 
 inline void MFVertex_PackVertexData(MFVector &source, void *pTarget, MFVertexDataFormat format)
 {

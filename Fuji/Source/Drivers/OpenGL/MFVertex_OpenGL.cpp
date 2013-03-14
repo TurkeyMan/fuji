@@ -5,14 +5,14 @@
 #if defined(MF_RENDERPLUGIN_OPENGL)
 	#define MFVertex_InitModulePlatformSpecific MFVertex_InitModulePlatformSpecific_OpenGL
 	#define MFVertex_DeinitModulePlatformSpecific MFVertex_DeinitModulePlatformSpecific_OpenGL
-	#define MFVertex_CreateVertexDeclaration MFVertex_CreateVertexDeclaration_OpenGL
-	#define MFVertex_DestroyVertexDeclaration MFVertex_DestroyVertexDeclaration_OpenGL
-	#define MFVertex_CreateVertexBuffer MFVertex_CreateVertexBuffer_OpenGL
-	#define MFVertex_DestroyVertexBuffer MFVertex_DestroyVertexBuffer_OpenGL
+	#define MFVertex_CreateVertexDeclarationPlatformSpecific MFVertex_CreateVertexDeclarationPlatformSpecific_OpenGL
+	#define MFVertex_DestroyVertexDeclarationPlatformSpecific MFVertex_DestroyVertexDeclarationPlatformSpecific_OpenGL
+	#define MFVertex_CreateVertexBufferPlatformSpecific MFVertex_CreateVertexBufferPlatformSpecific_OpenGL
+	#define MFVertex_DestroyVertexBufferPlatformSpecific MFVertex_DestroyVertexBufferPlatformSpecific_OpenGL
 	#define MFVertex_LockVertexBuffer MFVertex_LockVertexBuffer_OpenGL
 	#define MFVertex_UnlockVertexBuffer MFVertex_UnlockVertexBuffer_OpenGL
-	#define MFVertex_CreateIndexBuffer MFVertex_CreateIndexBuffer_OpenGL
-	#define MFVertex_DestroyIndexBuffer MFVertex_DestroyIndexBuffer_OpenGL
+	#define MFVertex_CreateIndexBufferPlatformSpecific MFVertex_CreateIndexBufferPlatformSpecific_OpenGL
+	#define MFVertex_DestroyIndexBufferPlatformSpecific MFVertex_DestroyIndexBufferPlatformSpecific_OpenGL
 	#define MFVertex_LockIndexBuffer MFVertex_LockIndexBuffer_OpenGL
 	#define MFVertex_UnlockIndexBuffer MFVertex_UnlockIndexBuffer_OpenGL
 	#define MFVertex_SetVertexDeclaration MFVertex_SetVertexDeclaration_OpenGL
@@ -32,22 +32,22 @@ void MFVertex_DeinitModulePlatformSpecific()
 {
 }
 
-MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
+bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
-	return NULL;
+	return false;
 }
 
-void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
+void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
 
 }
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
+bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory)
 {
-	return NULL;
+	return false;
 }
 
-MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
+void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 {
 
 }
@@ -62,12 +62,12 @@ MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 
 }
 
-MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
+bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory)
 {
-	return NULL;
+	return false;
 }
 
-MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
+void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer)
 {
 
 }

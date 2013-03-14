@@ -93,6 +93,8 @@ MF_API uintp MFRenderer_GetRenderStateOverride(uint32 renderState)
 }
 
 
+//////////////////
+
 MF_API MFRenderer* MFRenderer_Create(int numLayers, MFStateBlock *pGlobal, MFStateBlock *pOverride)
 {
 	MFRenderer *pRenderer = (MFRenderer*)MFHeap_AllocAndZero(sizeof(MFRenderer) + sizeof(MFRenderLayer)*numLayers);
@@ -157,7 +159,7 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 
 //MF_API void MFRenderLayer_Clear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags = MFRCF_All, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
 
-MF_API void MFRenderLayer_AddModel(MFRenderLayer *pLayer, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride)
+MF_API void MFRenderLayer_AddModel(MFRenderLayer *pLayer, MFModel *pModel, MFStateBlock *pEntity, MFMaterial *pMaterial)
 {
 /*
 	MFRenderElement &e = pLayer->elements.push();
@@ -196,7 +198,7 @@ MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMesh
 
 //	e.pShaderTechnique = NULL;
 
-//	e.pViewState = NULL;
+	e.pViewState = NULL;
 	e.pGeometryState = pMeshStateBlock;
 	e.pEntityState = pEntity;
 	e.pMaterialState = MFMaterial_GetMaterialStateBlock(pMaterial);
@@ -223,7 +225,7 @@ MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock
 
 //	e.pShaderTechnique = NULL;
 
-//	e.pViewState = NULL;
+	e.pViewState = NULL;
 	e.pGeometryState = pMeshStateBlock;
 	e.pEntityState = pEntity;
 	e.pMaterialState = MFMaterial_GetMaterialStateBlock(pMaterial);

@@ -305,7 +305,7 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 
 //MF_API void MFRenderLayer_Clear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags = MFRCF_All, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
 
-MF_API void MFRenderLayer_AddModel(MFRenderLayer *pLayer, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
+MF_API void MFRenderLayer_AddModel(MFRenderLayer *pLayer, MFModel *pModel, MFStateBlock *pEntity, MFMaterial *pMaterial);
 MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
 MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride);
 
