@@ -16,7 +16,7 @@ extern uint32 currentRenderFlags;
 
 extern IDirect3DDevice9 *pd3dDevice;
 
-int MFMat_Effect_RegisterMaterial(void *pPlatformData)
+int MFMat_Effect_RegisterMaterial(MFMaterialType *pType)
 {
 	MFCALLSTACK;
 
@@ -29,7 +29,7 @@ void MFMat_Effect_UnregisterMaterial()
 
 }
 
-int MFMat_Effect_Begin(MFMaterial *pMaterial)
+int MFMat_Effect_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
 

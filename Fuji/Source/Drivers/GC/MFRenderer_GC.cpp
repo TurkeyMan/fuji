@@ -42,15 +42,7 @@ void MFRenderer_EndFrame()
 
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACK;
 }

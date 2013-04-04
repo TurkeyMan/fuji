@@ -11,8 +11,6 @@
 bool isortho = false;
 float fieldOfView;
 
-extern MFVector gClearColour;
-
 void MFDisplay_DestroyWindow()
 {
 	MFCALLSTACK;
@@ -56,15 +54,7 @@ void MFDisplay_EndFrame()
 	while(!(*CSR & 8));
 }
 
-void MFDisplay_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-void MFDisplay_ClearScreen(uint32 flags)
+void MFDisplay_ClearScreen(MFRenderClearFlags flags, MFVector colour, float z, int stencil)
 {
 	MFCALLSTACK;
 	graph_set_clearbuffer(gClearColour.x * 256, gClearColour.y*256, gClearColour.z*256);

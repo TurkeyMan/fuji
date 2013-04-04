@@ -13,12 +13,12 @@ struct MFView
 	static MFView defaultView;
 	static MFRect defaultOrthoRect;
 
-	MFRect orthoRect;
-
 	MFMatrix projection;
 	MFMatrix cameraMatrix;
 	MFMatrix view;
 	MFMatrix viewProj;
+
+	MFRect orthoRect;
 
 	float fov;
 	float nearPlane, farPlane;
@@ -29,6 +29,8 @@ struct MFView
 	bool projDirty;
 	bool isOrtho;
 	bool customProjection;
+
+	MFStateBlock *pStateBlock;
 };
 
 #endif

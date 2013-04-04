@@ -12,11 +12,13 @@
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
+MFRenderer *pRenderer = NULL;
+
 /**** Functions ****/
 
 void Game_InitFilesystem()
 {
-	// mount the game directory
+	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -36,22 +38,26 @@ void Game_InitFilesystem()
 
 void Game_Init()
 {
-	MFCALLSTACK;
+	// create the renderer with a single layer that clears before rendering
+	MFRenderLayerDescription layers[] = { "Scene" };
+	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
+	MFRenderer_SetCurrent(pRenderer);
+
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
+	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
+
+	MFRenderLayerSet layerSet;
+	MFZeroMemory(&layerSet, sizeof(layerSet));
+	layerSet.pSolidLayer = pLayer;
+	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
 }
 
 void Game_Update()
 {
-	MFCALLSTACK;
 }
 
 void Game_Draw()
 {
-	MFCALLSTACK;
-
-	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFRenderer_ClearScreen();
-
-	MFView_Push();
 	MFView_SetOrtho();
 
 	const char *pText;
@@ -116,19 +122,17 @@ void Game_Draw()
 		}
 	}
 	MFFont_DrawText2(MFFont_GetDebugFont(), 80.0f, 430.0f, 15.0f, MFVector::one, pText);
-
-	MFView_Pop();
 }
 
 void Game_Deinit()
 {
-	MFCALLSTACK;
+	MFRenderer_Destroy(pRenderer);
 }
 
 
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 //	gDefaults.input.useXInput = false;
 

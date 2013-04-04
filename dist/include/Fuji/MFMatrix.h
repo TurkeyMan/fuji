@@ -43,6 +43,9 @@ struct MF_EXPORT_VARIABLE MFMatrix
 	MFMatrix& SetRotationZ(float angle);
 	MFMatrix& SetScale(const MFVector& scale);
 
+	MFMatrix& SetPerspective(float fov, float near, float far, float aspectRatio);
+	MFMatrix& SetOrthographic(MFRect orthoRect, float near, float far);
+
 	MFQuaternion GetRotationQ() const;
 
 	MFMatrix& LookAt(const MFVector& pos, const MFVector& at, const MFVector& up = MFVector::up);

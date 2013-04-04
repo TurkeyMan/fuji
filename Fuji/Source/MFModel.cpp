@@ -9,16 +9,14 @@
 #include "MFMesh_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFRenderer.h"
+#include "MFRenderState.h"
+#include "MFVertex.h"
 #include "Asset/MFIntModel.h"
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
-MFModelPool gModelBank;
-
 MFInitStatus MFModel_InitModule()
 {
-	gModelBank.Init(256, 64, 64);
-
 	MFModel_InitModulePlatformSpecific();
 
 	return MFAIC_Succeeded;
@@ -26,10 +24,10 @@ MFInitStatus MFModel_InitModule()
 
 void MFModel_DeinitModule()
 {
-	// list all non-freed textures...
-	MFModelPool::Iterator pI = gModelBank.First();
 	bool bShowHeader = true;
 
+	// list all non-freed textures...
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Model);
 	while(pI)
 	{
 		if(bShowHeader)
@@ -38,16 +36,15 @@ void MFModel_DeinitModule()
 			MFDebug_Message("\nUn-freed models:\n----------------------------------------------------------");
 		}
 
-		MFDebug_Message(MFStr("'%s' - x%d", (*pI)->pName, (*pI)->refCount));
+		MFModelTemplate *pModel = (MFModelTemplate*)MFResource_Get(pI);
+		MFDebug_Message(MFStr("'%s' - x%d", pModel->pName, pModel->refCount));
 
 		// Destroy template...
 
-		pI = gModelBank.Next(pI);
+		MFResource_EnumerateNext(pI, MFRT_Model);
 	}
 
 	MFModel_DeinitModulePlatformSpecific();
-
-	gModelBank.Deinit();
 }
 
 MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID)
@@ -194,8 +191,7 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 	const char* pOriginalFilename = pFilename;
 
 	// see if it's already loaded
-	MFModelPool::Iterator it = gModelBank.Get(pOriginalFilename);
-	MFModelTemplate *pTemplate = it ? *it : NULL;
+	MFModelTemplate *pTemplate = (MFModelTemplate*)MFResource_FindResource(MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1);
 
 	if(!pTemplate)
 	{
@@ -258,14 +254,17 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 		if(!pTemplateData)
 			return NULL;
 
+		pTemplate = (MFModelTemplate*)pTemplateData;
+
 		// check ID string
-		MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
+		MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
+
+		pTemplate->hash = MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1;
+
+		MFResource_AddResource(pTemplate);
 
 		// store filename for later reference
-		pTemplate = (MFModelTemplate*)pTemplateData;
 		pTemplate->pFilename = pFilename;
-
-		gModelBank.Add(pOriginalFilename, pTemplate);
 
 		MFModel_FixUp(pTemplate, true);
 
@@ -281,7 +280,33 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 
 				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 				{
-					MFModel_CreateMeshChunk(MFModel_GetMeshChunkInternal(pTemplate, a, b));
+					MFMeshChunk *pMC = MFModel_GetMeshChunkInternal(pTemplate, a, b);
+					pMC->pGeomState = MFStateBlock_Create(128);
+
+					if(pMC->type == MFMCT_Generic)
+					{
+						MFMeshChunk_Generic *pMCG = (MFMeshChunk_Generic*)pMC;
+						pMC->pDecl = MFVertex_CreateVertexDeclaration(pMCG->pElements, pMCG->elementCount);
+
+						MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_VertexDeclaration, pMC->pDecl);
+
+						for(int s=0; s<pMCG->numVertexStreams; ++s)
+						{
+							MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
+							if(pVBDecl)
+							{
+								pMC->pVertexBuffers[s] = MFVertex_CreateVertexBuffer(pVBDecl, pMC->numVertices, MFVBType_Static, pMCG->ppVertexStreams[s]);
+
+								MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_VertexBuffer(s), pMC->pVertexBuffers[s]);
+							}
+						}
+
+						pMC->pIndexBuffer = MFVertex_CreateIndexBuffer(pMC->numIndices, pMCG->pIndexData);
+
+						MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_IndexBuffer, pMC->pIndexBuffer);
+					}
+
+					MFModel_CreateMeshChunk(pMC);
 				}
 			}
 		}
@@ -334,14 +359,29 @@ MF_API int MFModel_Destroy(MFModel *pModel)
 
 				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 				{
-					MFModel_DestroyMeshChunk(MFModel_GetMeshChunk(pModel, a, b));
+					MFMeshChunk *pMC = MFModel_GetMeshChunkInternal(pModel->pTemplate, a, b);
+
+					MFModel_DestroyMeshChunk(pMC);
+
+					MFStateBlock_Destroy(pMC->pGeomState);
+
+					if(pMC->pDecl)
+						MFVertex_DestroyVertexDeclaration(pMC->pDecl);
+
+					for(int s=0; s<8; ++s)
+					{
+						if(pMC->pVertexBuffers[s])
+							MFVertex_DestroyVertexBuffer(pMC->pVertexBuffers[s]);
+					}
+
+					if(pMC->pIndexBuffer)
+						MFVertex_DestroyIndexBuffer(pMC->pIndexBuffer);
 				}
 			}
 		}
 
 		// remove it from the registry
-		// TODO: this is a scanning destroy, do this by hash...?
-		gModelBank.Destroy(pModel->pTemplate->pName);
+		MFResource_RemoveResource(pModel->pTemplate);
 
 		MFHeap_Free(pModel->pTemplate);
 	}
@@ -352,6 +392,36 @@ MF_API int MFModel_Destroy(MFModel *pModel)
 	return refCount;
 }
 
+
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+{
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
+	if(!pChunk)
+		return;
+
+	MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+	for(int s = 0; s < pChunk->count; s++)
+	{
+		MFModelSubObject &sub = pSubobjects[s];
+
+		for(int m = 0; m < sub.numMeshChunks; ++m)
+		{
+			MFMeshChunk &mc = sub.pMeshChunks[m];
+
+			// set world matrix and colour
+//			if(sub.subobjectAnimMatrix != -1 && pModel->pAnimation)
+//				//TODO!
+//			else
+				MFStateBlock_SetMatrix(mc.pGeomState, MFSCM_World, pModel->worldMatrix);
+//			MFStateBlock_SetVector(mc.pGeomState, MFSCV_DiffuseColour, pModel->modelColour);
+
+			if(mc.pIndexBuffer)
+				MFRenderLayer_AddIndexedVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numIndices, MFPT_TriangleList, mc.pMaterial, pEntity, pMaterialOverride, pView);
+			else
+				MFRenderLayer_AddVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numVertices, MFPT_TriangleList, mc.pMaterial, pEntity, pMaterialOverride, pView);
+		}
+	}
+}
 
 MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 {

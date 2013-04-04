@@ -2,7 +2,7 @@
 #define _MFMAT_STANDARD_INTERNAL_H
 
 #include "Materials/MFMat_Standard.h"
-#include "MFRenderState.h"
+#include "MFRenderer_Internal.h"
 
 enum MaterialFlags
 {
@@ -97,7 +97,7 @@ struct MFMat_Standard_Data
 	MFSamplerState *pSamplerState[8];
 };
 
-int       MFMat_Standard_RegisterMaterial(void *pPlatformData);
+int       MFMat_Standard_RegisterMaterial(MFMaterialType *pType);
 void      MFMat_Standard_UnregisterMaterial();
 void      MFMat_Standard_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Standard_DestroyInstance(MFMaterial *pMaterial);
@@ -105,7 +105,7 @@ void      MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial);
 void      MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial);
 void      MFMat_Standard_Update(MFMaterial *pMaterial);
 void      MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial);
-int       MFMat_Standard_Begin(MFMaterial *pMaterial);
+int       MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state);
 void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
 uintp     MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Standard_GetNumParams();

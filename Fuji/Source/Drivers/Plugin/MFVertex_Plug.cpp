@@ -13,7 +13,7 @@
 	void MFVertex_DestroyVertexDeclarationPlatformSpecific_##driver(MFVertexDeclaration *pDeclaration); \
 	bool MFVertex_CreateVertexBufferPlatformSpecific_##driver(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory); \
 	void MFVertex_DestroyVertexBufferPlatformSpecific_##driver(MFVertexBuffer *pVertexBuffer); \
-	MF_API void MFVertex_LockVertexBuffer_##driver(MFVertexBuffer *pVertexBuffer); \
+	MF_API void MFVertex_LockVertexBuffer_##driver(MFVertexBuffer *pVertexBuffer, void **ppVertices); \
 	MF_API void MFVertex_UnlockVertexBuffer_##driver(MFVertexBuffer *pVertexBuffer); \
 	bool MFVertex_CreateIndexBufferPlatformSpecific_##driver(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory); \
 	void MFVertex_DestroyIndexBufferPlatformSpecific_##driver(MFIndexBuffer *pIndexBuffer); \
@@ -21,8 +21,9 @@
 	MF_API void MFVertex_UnlockIndexBuffer_##driver(MFIndexBuffer *pIndexBuffer); \
 	MF_API void MFVertex_SetVertexDeclaration_##driver(MFVertexDeclaration *pVertexDeclaration); \
 	MF_API void MFVertex_SetVertexStreamSource_##driver(int stream, MFVertexBuffer *pVertexBuffer); \
-	MF_API void MFVertex_RenderVertices_##driver(MFVertexPrimType primType, int firstVertex, int numVertices); \
-	MF_API void MFVertex_RenderIndexedVertices_##driver(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer);
+	MF_API void MFVertex_SetIndexBuffer_##driver(MFIndexBuffer *pIndexBuffer); \
+	MF_API void MFVertex_RenderVertices_##driver(MFPrimType primType, int firstVertex, int numVertices); \
+	MF_API void MFVertex_RenderIndexedVertices_##driver(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -41,6 +42,7 @@
 		MFVertex_UnlockIndexBuffer_##driver, \
 		MFVertex_SetVertexDeclaration_##driver, \
 		MFVertex_SetVertexStreamSource_##driver, \
+		MFVertex_SetIndexBuffer_##driver, \
 		MFVertex_RenderVertices_##driver, \
 		MFVertex_RenderIndexedVertices_##driver, \
 	},
@@ -66,7 +68,7 @@ struct MFVertexPluginCallbacks
 	void (*pDestroyVertexDeclarationPlatformSpecific)(MFVertexDeclaration *pDeclaration);
 	bool (*pCreateVertexBufferPlatformSpecific)(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory);
 	void (*pDestroyVertexBufferPlatformSpecific)(MFVertexBuffer *pVertexBuffer);
-	void (*pLockVertexBuffer)(MFVertexBuffer *pVertexBuffer);
+	void (*pLockVertexBuffer)(MFVertexBuffer *pVertexBuffer, void **ppVertices);
 	void (*pUnlockVertexBuffer)(MFVertexBuffer *pVertexBuffer);
 	bool (*pCreateIndexBufferPlatformSpecific)(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory);
 	void (*pDestroyIndexBufferPlatformSpecific)(MFIndexBuffer *pIndexBuffer);
@@ -74,8 +76,9 @@ struct MFVertexPluginCallbacks
 	void (*pUnlockIndexBuffer)(MFIndexBuffer *pIndexBuffer);
 	void (*pSetVertexDeclaration)(MFVertexDeclaration *pVertexDeclaration);
 	void (*pSetVertexStreamSource)(int stream, MFVertexBuffer *pVertexBuffer);
-	void (*pRenderVertices)(MFVertexPrimType primType, int firstVertex, int numVertices);
-	void (*pRenderIndexedVertices)(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer);
+	void (*pSetIndexBuffer)(MFIndexBuffer *pIndexBuffer);
+	void (*pRenderVertices)(MFPrimType primType, int firstVertex, int numVertices);
+	void (*pRenderIndexedVertices)(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -132,9 +135,9 @@ void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 	gpCurrentVertexPlugin->pDestroyVertexBufferPlatformSpecific(pVertexBuffer);
 }
 
-MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices)
 {
-	gpCurrentVertexPlugin->pLockVertexBuffer(pVertexBuffer);
+	gpCurrentVertexPlugin->pLockVertexBuffer(pVertexBuffer, ppVertices);
 }
 
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
@@ -172,14 +175,19 @@ MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBu
 	gpCurrentVertexPlugin->pSetVertexStreamSource(stream, pVertexBuffer);
 }
 
-MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
+{
+	gpCurrentVertexPlugin->pSetIndexBuffer(pIndexBuffer);
+}
+
+MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
 {
 	gpCurrentVertexPlugin->pRenderVertices(primType, firstVertex, numVertices);
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
-	gpCurrentVertexPlugin->pRenderIndexedVertices(primType, numVertices, numIndices, pIndexBuffer);
+	gpCurrentVertexPlugin->pRenderIndexedVertices(primType, vertexOffset, indexOffset, numVertices, numIndices);
 }
 
 #endif // MF_RENDERER

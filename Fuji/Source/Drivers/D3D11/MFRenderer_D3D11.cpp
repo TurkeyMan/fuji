@@ -11,7 +11,6 @@
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D11
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D11
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D11
-	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D11
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D11
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D11
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D11
@@ -40,8 +39,6 @@ struct CBWorld
 	MFMatrix mWorldToScreen;
 	MFMatrix mLocalToWorld;
 };
-
-static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 extern HWND apphWnd;
 
@@ -84,6 +81,7 @@ const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type)
 //---------------------------------------------------------------------------------------------------------------------
 static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
 {
+	(DXGI_FORMAT)-1,				// MFVDF_Auto
 	DXGI_FORMAT_R32G32B32A32_FLOAT, // MFVDF_Float4
 	DXGI_FORMAT_R32G32B32_FLOAT,	// MFVDF_Float3
 	DXGI_FORMAT_R32G32_FLOAT,		// MFVDF_Float2
@@ -100,38 +98,14 @@ static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
 	DXGI_FORMAT_R16G16B16A16_UNORM, // MFVDF_UShort4N
 	DXGI_FORMAT_R16G16_UNORM,		// MFVDF_UShort2N
 	DXGI_FORMAT_R16G16B16A16_FLOAT,	// MFVDF_Float16_4
-	DXGI_FORMAT_R16G16_FLOAT		// MFVDF_Float16_2
+	DXGI_FORMAT_R16G16_FLOAT,		// MFVDF_Float16_2
+	(DXGI_FORMAT)-1,				// MFVDF_UDec3
+	(DXGI_FORMAT)-1					// MFVDF_Dec3N
 };
 //---------------------------------------------------------------------------------------------------------------------
 DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format)
 {
 	return s_MFVDF_To_DXGI[format];
-}
-//---------------------------------------------------------------------------------------------------------------------
-static const DXGI_FORMAT s_MFMVDF_To_DXGI[MFMVDT_Max] =
-{
-	DXGI_FORMAT_R32_FLOAT,			//MFMVDT_Float1,
-	DXGI_FORMAT_R32G32_FLOAT,		//MFMVDT_Float2,
-	DXGI_FORMAT_R32G32B32_FLOAT,	//MFMVDT_Float3,
-	DXGI_FORMAT_R32G32B32A32_FLOAT,	//MFMVDT_Float4,
-	DXGI_FORMAT_B8G8R8A8_UNORM,		//MFMVDT_ColourBGRA,
-	DXGI_FORMAT_R8G8B8A8_UINT,		//MFMVDT_UByte4,
-	DXGI_FORMAT_R8G8B8A8_UNORM,		//MFMVDT_UByte4N,
-	DXGI_FORMAT_R16G16_SINT,		//MFMVDT_Short2,
-	DXGI_FORMAT_R16G16B16A16_SINT,	//MFMVDT_Short4,
-	DXGI_FORMAT_R16G16_SNORM,		//MFMVDT_Short2N,
-	DXGI_FORMAT_R16G16B16A16_SNORM,	//MFMVDT_Short4N,
-	DXGI_FORMAT_R16G16_UNORM,		//MFMVDT_UShort2N,
-	DXGI_FORMAT_R16G16B16A16_UNORM,	//MFMVDT_UShort4N,
-	DXGI_FORMAT_R10G10B10A2_UINT,	//MFMVDT_UDec3,
-	DXGI_FORMAT_R10G10B10A2_UNORM,	//MFMVDT_Dec3N,
-	DXGI_FORMAT_R16G16_FLOAT,		//MFMVDT_Float16_2,
-	DXGI_FORMAT_R16G16B16A16_FLOAT,	//MFMVDT_Float16_4,
-};
-//---------------------------------------------------------------------------------------------------------------------
-DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFMeshVertexDataType format)
-{
-	return s_MFMVDF_To_DXGI[format];
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_D3D11_SetDebugName(ID3D11DeviceChild* pResource, const char* pName)
@@ -384,15 +358,7 @@ void MFRenderer_EndFrame()
 	g_pSwapChain->Present( 0, 0 );
 }
 //---------------------------------------------------------------------------------------------------------------------
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-//---------------------------------------------------------------------------------------------------------------------
-MF_API void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACKc;
 	
@@ -402,14 +368,14 @@ MF_API void MFRenderer_ClearScreen(uint32 flags)
 
 	if (bClearColour)
 	{
-		float ClearColor[4] = { gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w }; // RGBA
-		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
+		float clearColor[4] = { colour.x, colour.y, colour.z, colour.w }; // RGBA
+		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, clearColor);
 	}
 	
     if (bClearDepth | bClearStencil)
     {
 		uint32 clearFlags = (bClearDepth ? D3D11_CLEAR_DEPTH : 0) | (bClearStencil ? D3D11_CLEAR_STENCIL : 0);
-		g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, clearFlags, 1.0f, 0);
+		g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, clearFlags, z, (UINT8)stencil);
 	}
 }
 //---------------------------------------------------------------------------------------------------------------------

@@ -1,17 +1,21 @@
 #include "Fuji.h"
 #include "MFRenderState_Internal.h"
-
+#include "MFHeap.h"
 #include "MFModule.h"
-#include "MFOpenHashTable.h"
+#include "MFObjectPool.h"
+
+MFObjectPool gTempStateBlocks;
 
 MFInitStatus MFRenderState_InitModule()
 {
+	gTempStateBlocks.Init(sizeof(MFStateBlock*), 256, 256);
+
 	return MFAIC_Succeeded;
 }
 
 void MFRenderState_DeinitModule()
 {
-
+	gTempStateBlocks.Deinit();
 }
 
 MF_API MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc)
@@ -158,25 +162,21 @@ MF_API MFStateBlock* MFStateBlock_Create(uint32 size)
 {
 	MFDebug_Assert(size >= MFStateBlock::MINIMUM_SIZE && MFUtil_NextPowerOf2(size) == size, "Invalid size. Must be a power of 2, and >= MFStateBlock::MINIMUM_SIZE bytes");
 
-	MFStateBlock *pSB = (MFStateBlock*)MFHeap_Alloc(size);
+	MFStateBlock *pSB = (MFStateBlock*)MFHeap_AllocAndZero(size);
 
 	// calculate the size
 	int shift = 0;
 	for(uint32 s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
 
 	pSB->allocated = shift;
-	pSB->used = 0;
-	pSB->numStateChanges = 0;
-	pSB->boolsSet = 0;
-	pSB->dirLightCount = 0;
-	pSB->spotLightCount = 0;
-	pSB->omniLightCount = 0;
 
 	return pSB;
 }
 
 MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size)
 {
+	return MFStateBlock_Create(size);
+
 	MFDebug_Assert(false, "TODO!");
 
 	// allocate from per-frame temp mem
@@ -269,7 +269,7 @@ static MFStateBlock::MFStateBlockStateChange* AllocState(MFStateBlock *pStateBlo
 {
 	MFStateBlock::MFStateBlockStateChange *pStates = pStateBlock->GetStateChanges();
 
-	bool bGrowStateList = (pStateBlock->numStateChanges & 3) == 3;
+	bool bGrowStateList = (pStateBlock->numStateChanges & 3) == 0;
 
 	size_t memNeeded = numVectors*16 + (bGrowStateList ? 16 : 0);
 	if(pStateBlock->GetFree() < memNeeded)

@@ -97,10 +97,7 @@ MF_API void MFPrimitive(uint32 type, uint32 hint)
 		gImmitateQuads = false;
 #endif
 
-	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
-	if(pMatOverride)
-		MFMaterial_SetMaterial(pMatOverride);
-	else if(type & PT_Untextured)
+	if(type & PT_Untextured)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 
 	glDepthRange(0.0f, 1.0f);

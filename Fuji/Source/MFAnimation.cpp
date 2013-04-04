@@ -1,41 +1,26 @@
 #include "Fuji.h"
-#include "MFPtrList.h"
-#include "MFSystem.h"
 #include "MFAnimation_Internal.h"
-#include "MFFileSystem.h"
 #include "MFModel_Internal.h"
-
-MFPtrList<MFAnimationTemplate> gAnimationBank;
+#include "MFFileSystem.h"
+#include "MFSystem.h"
+#include "MFHeap.h"
+#include "MFResource.h"
 
 // 128 temp matrices for intermediate calculation data
 MFMatrix gWorkingMats[128];
 
 MFInitStatus MFAnimation_InitModule()
 {
-	gAnimationBank.Init("Animation Bank", gDefaults.animation.maxAnimations);
-
 	return MFAIC_Succeeded;
 }
 
 void MFAnimation_DeinitModule()
 {
-	gAnimationBank.Deinit();
 }
 
 MFAnimationTemplate* MFAnimation_FindTemplate(const char *pName)
 {
-	MFCALLSTACK;
-
-	MFAnimationTemplate **ppIterator = gAnimationBank.Begin();
-
-	while(*ppIterator)
-	{
-		if(!MFString_CaseCmp(pName, (*ppIterator)->pFilename)) return *ppIterator;
-
-		ppIterator++;
-	}
-
-	return NULL;
+	return (MFAnimationTemplate*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0xA010A010);
 }
 
 void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
@@ -82,18 +67,19 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 				pTemplateData = (char*)MFHeap_Alloc((size_t)size + MFString_Length(pFilename) + 1);
 				MFFile_Read(hFile, pTemplateData, (size_t)size);
 
-				// check ID string
-				MFDebug_Assert(*(uint32*)pTemplateData == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");
-
-				// store filename for later reference
 				pTemplate = (MFAnimationTemplate*)pTemplateData;
+
+				// check ID string
+				MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");
+
+				pTemplate->hash = MFUtil_HashString(pFilename) ^ 0xA010A010;
 
 				MFString_Copy(&pTemplateData[size], pFilename);
 				pTemplate->pFilename = &pTemplateData[size];
 
-				gAnimationBank.Create(pTemplate);
-
 				MFAnimation_FixUp(pTemplate, true);
+
+				MFResource_AddResource(pTemplate);
 			}
 
 			MFFile_Close(hFile);
@@ -166,7 +152,7 @@ MF_API int MFAnimation_Destroy(MFAnimation *pAnimation)
 
 	if(!pAnimation->pTemplate->refCount)
 	{
-		gAnimationBank.Destroy(pAnimation->pTemplate);
+		MFResource_RemoveResource(pAnimation->pTemplate);
 		MFHeap_Free(pAnimation->pTemplate);
 	}
 

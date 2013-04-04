@@ -14,13 +14,13 @@ struct MFMat_Effect_Data
 #endif
 };
 
-int       MFMat_Effect_RegisterMaterial(void *pPlatformData);
+int       MFMat_Effect_RegisterMaterial(MFMaterialType *pType);
 void      MFMat_Effect_UnregisterMaterial();
 void      MFMat_Effect_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Effect_DestroyInstance(MFMaterial *pMaterial);
 void      MFMat_Effect_Update(MFMaterial *pMaterial);
 void      MFMat_Effect_BuildStateBlock(MFMaterial *pMaterial);
-int       MFMat_Effect_Begin(MFMaterial *pMaterial);
+int       MFMat_Effect_Begin(MFMaterial *pMaterial, MFRendererState &state);
 void      MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, size_t value);
 uintp     MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Effect_GetNumParams();

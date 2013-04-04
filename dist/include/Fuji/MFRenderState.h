@@ -42,6 +42,14 @@ enum MFStateConstant_Matrix
 
 	MFSCM_Max,
 
+	MFSCM_ManagedStart = MFSCM_World,
+	MFSCM_NumManaged = MFSCM_ShadowMap - MFSCM_ManagedStart,
+
+	MFSCM_DerivedStart = MFSCM_View,
+	MFSCM_NumDerived = MFSCM_Max - MFSCM_DerivedStart,
+
+	MFSCM_NumSetable = MFSCM_DerivedStart,
+
 	MFSCM_FujiMatrixCount = MFSCM_User0 - MFSCM_Fuji0,
 	MFSCM_UserMatrixCount = MFSCM_UV0 - MFSCM_User0,
 	MFSCM_UVMatrixCount = MFSCM_View - MFSCM_UV0,
@@ -518,7 +526,7 @@ struct MFDepthStencilStateDesc
 	uint8 stencilReadMask;
 	uint8 stencilWriteMask;
 	StencilOpDesc frontFace;
-	StencilOpDesc fackFace;
+	StencilOpDesc backFace;
 
 	MFDepthStencilStateDesc()
 	{

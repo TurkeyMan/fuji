@@ -15,13 +15,15 @@
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
+MFRenderer *pRenderer = NULL;
+
 HKUserInterface *pUI;
 
 /**** Functions ****/
 
 void Game_InitFilesystem()
 {
-	// mount the game directory
+	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -41,8 +43,20 @@ void Game_InitFilesystem()
 
 void Game_Init()
 {
-	MFCALLSTACK;
+	// create the renderer with a single layer that clears before rendering
+	MFRenderLayerDescription layers[] = { "Scene" };
+	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
+	MFRenderer_SetCurrent(pRenderer);
 
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
+	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
+
+	MFRenderLayerSet layerSet;
+	MFZeroMemory(&layerSet, sizeof(layerSet));
+	layerSet.pSolidLayer = pLayer;
+	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
+
+	// init HKUserInterface
 	HKUserInterface::Init();
 
 	pUI = new HKUserInterface();
@@ -56,20 +70,12 @@ void Game_Init()
 
 void Game_Update()
 {
-	MFCALLSTACK;
-
 	pUI->Update();
 }
 
 void Game_Draw()
 {
-	MFCALLSTACK;
-
-	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFRenderer_ClearScreen();
-
 	// Set identity camera (no camera)
-	MFView_Push();
 	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
 	MFView_SetProjection();
 
@@ -150,21 +156,19 @@ void Game_Draw()
 	MFDisplay_GetDisplayRect(&disp);
 	MFView_SetOrtho(&disp);
 	pUI->Draw();
-
-	MFView_Pop();
 }
 
 void Game_Deinit()
 {
-	MFCALLSTACK;
-
 	HKUserInterface::Deinit();
+
+	MFRenderer_Destroy(pRenderer);
 }
 
 
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);

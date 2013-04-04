@@ -11,7 +11,6 @@
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D9
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D9
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D9
-	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D9
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D9
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D9
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D9
@@ -25,6 +24,7 @@
 	#define MFTexture_Recreate MFTexture_Recreate_D3D9
 #endif
 
+#include "MFVertex_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
@@ -52,8 +52,6 @@ static IDirect3DSurface9 *pZTarget = NULL;
 static D3DCAPS9 deviceCaps;
 
 extern HWND apphWnd;
-
-static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 
 static int gNumWeights = 0;
 static MFRect gCurrentViewport;
@@ -368,12 +366,6 @@ bool MFRenderer_BeginFrame()
 	if(FAILED(hr))
 		return false;
 
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
 	return true;
 }
 
@@ -415,19 +407,11 @@ void MFRenderer_EndFrame()
 	}
 }
 
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-MF_API void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags & MFRCF_Colour) ? D3DCLEAR_TARGET : NULL)|((flags & MFRCF_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags & MFRCF_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, ((flags & MFRCF_Colour) ? D3DCLEAR_TARGET : NULL)|((flags & MFRCF_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags & MFRCF_Stencil) ? D3DCLEAR_STENCIL : NULL), colour.ToPackedColour(), z, stencil);
 }
 
 MF_API void MFRenderer_GetViewport(MFRect *pRect)
@@ -519,6 +503,82 @@ MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }
+
+static int SortDefault(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static int SortBackToFront(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE2->zSort - pE1->zSort;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static int SortFrontToBack(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE1->zSort - pE2->zSort;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static MFRenderSortFunction gSortFunctions[MFRL_SM_Max] =
+{
+  SortDefault,
+  SortFrontToBack,
+  SortBackToFront
+};
+
+void MFRendererInternal_SortElements(MFRenderLayer &layer)
+{
+	qsort(layer.elements.getpointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
+}
+
+//void MFRendererInternal_RenderElement(MFRendererState &state, MFRenderElement &element)
+
 
 // direct3d management fucntions
 void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)

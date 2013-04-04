@@ -17,6 +17,7 @@
 	#define MFVertex_UnlockIndexBuffer MFVertex_UnlockIndexBuffer_OpenGL
 	#define MFVertex_SetVertexDeclaration MFVertex_SetVertexDeclaration_OpenGL
 	#define MFVertex_SetVertexStreamSource MFVertex_SetVertexStreamSource_OpenGL
+	#define MFVertex_SetIndexBuffer MFVertex_SetIndexBuffer_OpenGL
 	#define MFVertex_RenderVertices MFVertex_RenderVertices_OpenGL
 	#define MFVertex_RenderIndexedVertices MFVertex_RenderIndexedVertices_OpenGL
 #endif
@@ -52,7 +53,7 @@ void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 
 }
 
-MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices)
 {
 
 }
@@ -92,12 +93,17 @@ MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBu
 
 }
 
-MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
+{
+
+}
+
+MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
 
 }

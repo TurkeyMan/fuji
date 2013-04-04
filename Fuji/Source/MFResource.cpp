@@ -54,7 +54,7 @@ MF_API MFResource* MFResource_FindResource(uint32 hash)
 
 MF_API MFResourceType MFResource_GetType(MFResource *pResource)
 {
-	return pResource->type;
+	return (MFResourceType)pResource->type;
 }
 
 MF_API uint32 MFResource_GetHash(MFResource *pResource)
@@ -82,7 +82,7 @@ MF_API MFResourceIterator* MFResource_EnumerateFirst(MFResourceType type)
 
 MF_API MFResourceIterator* MFResource_EnumerateNext(MFResourceIterator *pIterator, MFResourceType type)
 {
-	MFResourceHashTable::Iterator i = (MFResourceHashTable::Iterator)pIterator;
+	MFResourceHashTable::Iterator i = gResourceTable.Next((MFResourceHashTable::Iterator)pIterator);
 	while(i && type != MFRT_All && (*i)->type != type)
 		i = gResourceTable.Next(i);
 	return (MFResourceIterator*)i;

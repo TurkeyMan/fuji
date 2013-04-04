@@ -155,11 +155,25 @@ void MFMat_Standard_Register()
 	matStandardCallbacks.pGetNumParams = MFMat_Standard_GetNumParams;
 	matStandardCallbacks.pGetParameterInfo = MFMat_Standard_GetParameterInfo;
 
-	MFMaterial_RegisterMaterialType("Standard", &matStandardCallbacks);
+	MFMaterial_RegisterMaterialType("Standard", &matStandardCallbacks, sizeof(MFMat_Standard_Data));
 }
 
 void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 {
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	pData->ambient = MFVector::one;
+	pData->diffuse = MFVector::one;
+
+	pData->materialType = MF_AlphaBlend | 1<<6 /* back face culling */;
+	pData->opaque = true;
+
+	pData->textureMatrix = MFMatrix::identity;
+	pData->uFrames = 1;
+	pData->vFrames = 1;
+
+	pData->alphaRef = 1.0f;
+
 	MFMat_Standard_CreateInstancePlatformSpecific(pMaterial);
 }
 
@@ -167,9 +181,10 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 {
 	MFMat_Standard_DestroyInstancePlatformSpecific(pMaterial);
 
-	MFStateBlock_Clear(pMaterial->pMaterialState);
-
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	for(uint32 a=0; a<pData->textureCount; a++)
+		MFTexture_Destroy(pData->textures[a].pTexture);
 
 	if(pData->pRasteriserState)
 		MFRasteriserState_Destroy(pData->pRasteriserState);
@@ -224,17 +239,16 @@ void MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial)
 
 	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_MaterialDiffuseColour, pData->diffuse);
 	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_AmbientColour, pData->ambient);
+	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_User0, MakeVector(1, 0, 1, 0));
 
 	MFStateBlock_SetMatrix(pMaterial->pMaterialState, MFSCM_UV0, pData->textureMatrix);
 
-	if(pData->opaque)
-		MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_Opaque, true);
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_Opaque, pData->opaque != 0);
 
-	if(pData->materialType & MF_Mask)
-	{
-		MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_AlphaTest, true);
+	bool bAlphaTest = !!(pData->materialType & MF_Mask);
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_AlphaTest, bAlphaTest);
+	if(bAlphaTest)
 		MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_RenderState, MakeVector(pData->alphaRef, 0, 0, 0));
-	}
 
 	// rasteriser state
 	MFRasteriserStateDesc rasteriserDesc;
@@ -255,6 +269,8 @@ void MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial)
 	blendDesc.bIndependentBlendEnable = false;
 
 	bool bPremultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_User0, bPremultipliedAlpha);
+
 	switch(pData->materialType&MF_BlendMask)
 	{
 		case 0:

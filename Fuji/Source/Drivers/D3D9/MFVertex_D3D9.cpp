@@ -17,6 +17,7 @@
 	#define MFVertex_UnlockIndexBuffer MFVertex_UnlockIndexBuffer_D3D9
 	#define MFVertex_SetVertexDeclaration MFVertex_SetVertexDeclaration_D3D9
 	#define MFVertex_SetVertexStreamSource MFVertex_SetVertexStreamSource_D3D9
+	#define MFVertex_SetIndexBuffer MFVertex_SetIndexBuffer_D3D9
 	#define MFVertex_RenderVertices MFVertex_RenderVertices_D3D9
 	#define MFVertex_RenderIndexedVertices MFVertex_RenderIndexedVertices_D3D9
 #endif
@@ -46,6 +47,7 @@ static const BYTE gUsageSemantic[MFVET_Max] =
 
 static const BYTE gDataType[MFVDF_Max] =
 {
+	(BYTE)-1, // MFVDF_Auto
 	D3DDECLTYPE_FLOAT4, // MFVDF_Float4
 	D3DDECLTYPE_FLOAT3, // MFVDF_Float3
 	D3DDECLTYPE_FLOAT2, // MFVDF_Float2
@@ -57,17 +59,17 @@ static const BYTE gDataType[MFVDF_Max] =
 	D3DDECLTYPE_SHORT2, // MFVDF_SShort2
 	D3DDECLTYPE_SHORT4N, // MFVDF_SShort4N
 	D3DDECLTYPE_SHORT2N, // MFVDF_SShort2N
-	(uint8)-1, // MFVDF_UShort4
-	(uint8)-1, // MFVDF_UShort2
+	(BYTE)-1, // MFVDF_UShort4
+	(BYTE)-1, // MFVDF_UShort2
 	D3DDECLTYPE_USHORT4N, // MFVDF_UShort4N
 	D3DDECLTYPE_USHORT2N, // MFVDF_UShort2N
 	D3DDECLTYPE_FLOAT16_4, // MFVDF_Float16_4
-	D3DDECLTYPE_FLOAT16_2 // MFVDF_Float16_2
-	// D3DDECLTYPE_UDEC3
-	// D3DDECLTYPE_DEC3N
+	D3DDECLTYPE_FLOAT16_2, // MFVDF_Float16_2
+	D3DDECLTYPE_UDEC3, // MFVDF_UDec3
+	D3DDECLTYPE_DEC3N // MFVDF_Dec3N
 };
 
-static const D3DPRIMITIVETYPE gPrimTypes[MFVPT_Max] =
+static const D3DPRIMITIVETYPE gPrimTypes[MFPT_Max] =
 {
 	D3DPT_POINTLIST, // MFVPT_Points
 	D3DPT_LINELIST, // MFVPT_LineList
@@ -114,13 +116,19 @@ bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDecl
 	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
 	for(int a=0; a<pDeclaration->numElements; ++a)
 	{
-		MFVertexDataFormat dataFormat = MFVertexD3D9_ChoooseDataType(pElements[a].elementType, pElements[a].componentCount);
+		MFVertexDataFormat dataFormat;
+		if(pElements[a].format == MFVDF_Auto)
+			dataFormat = MFVertexD3D9_ChoooseDataType(pElements[a].type, pElements[a].componentCount);
+		else
+			dataFormat = pElements[a].format;
+		MFDebug_Assert(gDataType[dataFormat] != (BYTE)-1, "Invalid vertex data format!");
+
 		elements[a].Stream = (uint16)pElements[a].stream;
 		elements[a].Offset = (uint16)streamOffsets[pElements[a].stream];
 		elements[a].Type = gDataType[dataFormat];
 		elements[a].Method = D3DDECLMETHOD_DEFAULT;
-		elements[a].Usage = gUsageSemantic[pElements[a].elementType];
-		elements[a].UsageIndex = (uint8)pElements[a].elementIndex;
+		elements[a].Usage = gUsageSemantic[pElements[a].type];
+		elements[a].UsageIndex = (uint8)pElements[a].index;
 
 		pElementData[a].format = dataFormat;
 		pElementData[a].offset = streamOffsets[pElements[a].stream];
@@ -128,6 +136,7 @@ bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDecl
 		pElementData[a].pData = NULL;
 
 		streamOffsets[pElements[a].stream] += gVertexDataStride[dataFormat];
+		pDeclaration->streamsUsed |= MFBIT(pElements[a].stream);
 	}
 	elements[pDeclaration->numElements] = endMacro;
 
@@ -183,7 +192,7 @@ void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 	pVB->Release();
 }
 
-MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices)
 {
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
@@ -192,6 +201,9 @@ MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	void *pData;
 	HRESULT hr = pVB->Lock(0, 0, &pData, pVertexBuffer->bufferType == MFVBType_Static ? 0 : D3DLOCK_DISCARD);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vertex buffer");
+
+	if(ppVertices)
+		*ppVertices = pData;
 
 	for(int a=0; a<pVertexBuffer->pVertexDeclatation->numElements; ++a)
 	{
@@ -223,7 +235,7 @@ bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uin
 	if(FAILED(hr))
 		return false;
 
-	pIndexBuffer->pPlatformData = pIndexBuffer;
+	pIndexBuffer->pPlatformData = pIB;
 
 	if(pIndexBufferMemory)
 	{
@@ -275,36 +287,37 @@ MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBu
 {
 	IDirect3DVertexBuffer9 *pVertBuffer = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
 	pd3dDevice->SetStreamSource(stream, pVertBuffer, 0, pVertexBuffer->pVertexDeclatation->pElementData[0].stride);
-
-	if(stream == 0)
-		MFVertex_SetVertexDeclaration(pVertexBuffer->pVertexDeclatation);
 }
 
-static int MFVertex_GetNumPrims(MFVertexPrimType primType, int numVertices)
+MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
+{
+	pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData);
+}
+
+static int MFVertex_GetNumPrims(MFPrimType primType, int numVertices)
 {
 	switch(primType)
 	{
-		case MFVPT_Points:			return numVertices;
-		case MFVPT_LineList:		return numVertices / 2;
-		case MFVPT_LineStrip:		return numVertices - 1;
-		case MFVPT_TriangleList:	return numVertices / 3;
-		case MFVPT_TriangleStrip:	return numVertices - 2;
-		case MFVPT_TriangleFan:		return numVertices - 2;
+		case MFPT_Points:			return numVertices;
+		case MFPT_LineList:			return numVertices / 2;
+		case MFPT_LineStrip:		return numVertices - 1;
+		case MFPT_TriangleList:		return numVertices / 3;
+		case MFPT_TriangleStrip:	return numVertices - 2;
+		case MFPT_TriangleFan:		return numVertices - 2;
 		default:
 			MFDebug_Assert(false, "Unknown primitive type!");
 	}
 	return 0;
 }
 
-MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
 {
 	pd3dDevice->DrawPrimitive(gPrimTypes[primType], firstVertex, MFVertex_GetNumPrims(primType, numVertices));
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
-	pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData);
-	pd3dDevice->DrawIndexedPrimitive(gPrimTypes[primType], 0, 0, numVertices, 0, MFVertex_GetNumPrims(primType, numVertices));
+	pd3dDevice->DrawIndexedPrimitive(gPrimTypes[primType], 0, 0, numVertices, 0, MFVertex_GetNumPrims(primType, numIndices));
 }
 
 #endif // MF_RENDERER

@@ -9,6 +9,8 @@
 #if !defined(_MFVIEW_H)
 #define _MFVIEW_H
 
+struct MFStateBlock;
+
 #include "MFMatrix.h"
 
 /**
@@ -118,6 +120,14 @@ MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
  * @see MFView_SetCameraMatrix()
  */
 MF_API const MFMatrix& MFView_GetCameraMatrix();
+
+/**
+ * Gets a state block for the current view.
+ * Gets an MFStateBlock of the current view.
+ * @return An MFStateBlock representing the current view state.
+ * @see MFView_SetCameraMatrix()
+ */
+MF_API MFStateBlock* MFView_GetViewState();
 
 /**
  * Gets the World to View matrix.

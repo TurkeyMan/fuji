@@ -20,7 +20,7 @@ void MFMat_Effect_Register()
 	matEffectCallbacks.pGetNumParams = MFMat_Effect_GetNumParams;
 	matEffectCallbacks.pGetParameterInfo = MFMat_Effect_GetParameterInfo;
 
-	MFMaterial_RegisterMaterialType("Effect", &matEffectCallbacks);
+	MFMaterial_RegisterMaterialType("Effect", &matEffectCallbacks, sizeof(MFMat_Effect_Data));
 }
 
 void MFMat_Effect_Update(MFMaterial *pMaterial)

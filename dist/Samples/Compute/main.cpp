@@ -105,14 +105,13 @@ void Game_Draw()
 {
 	MFCALLSTACK;
 
-	MFRenderer_SetClearColour(0.5f, 0.0f, 0.2f, 1.0f);
-	MFRenderer_ClearScreen();
+	MFRenderer_ClearScreen(MFRCF_All, MakeVector(0.5f, 0.0f, 0.2f, 1.0f));
 
 }
 //---------------------------------------------------------------------------------------------------------------------
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);

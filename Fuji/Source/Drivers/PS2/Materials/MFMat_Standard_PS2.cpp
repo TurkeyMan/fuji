@@ -21,7 +21,7 @@ MFMaterial *pSetMaterial;
 extern uint32 renderSource;
 extern uint32 currentRenderFlags;
 
-int MFMat_Standard_RegisterMaterial(void *pPlatformData)
+int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
 	MFCALLSTACK;
 
@@ -90,7 +90,7 @@ void textured_sprite(unsigned int vaddr, int x, int y, int width, int height){
 }
 
 
-int MFMat_Standard_Begin(MFMaterial *pMaterial)
+int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
 

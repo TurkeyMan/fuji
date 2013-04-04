@@ -79,7 +79,7 @@ void MFTexture_DeinitModule()
 
 MF_API MFTexture* MFTexture_FindTexture(const char *pName)
 {
-	return (MFTexture*)MFResource_FindResource(MFUtil_HashString(pName));
+	return (MFTexture*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0x7e407e40);
 }
 
 MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
@@ -141,7 +141,7 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
 		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
 
 		MFResource_AddResource(pTexture);
@@ -175,7 +175,7 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
 	{
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
 		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
 
 		MFResource_AddResource(pTexture);
@@ -307,7 +307,7 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 	{
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
 		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
 
 		MFResource_AddResource(pTexture);

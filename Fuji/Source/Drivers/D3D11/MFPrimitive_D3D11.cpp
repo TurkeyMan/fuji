@@ -78,23 +78,23 @@ MFInitStatus MFPrimitive_InitModule()
 
 	// write declaration
 	elements[0].stream = 0;
-	elements[0].elementType = MFVET_Position;
-	elements[0].elementIndex = 0;
+	elements[0].type = MFVET_Position;
+	elements[0].index = 0;
 	elements[0].componentCount = 3;
 
 	elements[1].stream = 0;
-	elements[1].elementType = MFVET_Normal;
-	elements[1].elementIndex = 0;
+	elements[1].type = MFVET_Normal;
+	elements[1].index = 0;
 	elements[1].componentCount = 3;
 
 	elements[2].stream = 0;
-	elements[2].elementType = MFVET_Colour;
-	elements[2].elementIndex = 0;
+	elements[2].type = MFVET_Colour;
+	elements[2].index = 0;
 	elements[2].componentCount = 4;
 
 	elements[3].stream = 0;
-	elements[3].elementType = MFVET_TexCoord;
-	elements[3].elementIndex = 0;
+	elements[3].type = MFVET_TexCoord;
+	elements[3].index = 0;
 	elements[3].componentCount = 2;
 
 	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
@@ -139,10 +139,7 @@ MF_API void MFPrimitive(uint32 type, uint32 hint)
 		gRenderQuads = false;
 	}
 
-	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
-	if(pMatOverride)
-		MFMaterial_SetMaterial(pMatOverride);
-	else if(type & PT_Untextured)
+	if(type & PT_Untextured)
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
 
 	MFRenderer_SetMatrices(NULL, 0);
@@ -265,17 +262,9 @@ MF_API void MFEnd()
 
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
-	MFVertex_LockVertexBuffer(pVertexBuffer);
-
-	for (int a = 0; a < pVertexBuffer->pVertexDeclatation->numElements; ++a)
-	{
-		if (pVertexBuffer->pVertexDeclatation->pElements[a].stream == 0)
-		{
-			memcpy(pVertexBuffer->pVertexDeclatation->pElementData[a].pData, primBuffer, beginCount * sizeof(LitVertexD3D11));
-			break;
-		}
-	}
-
+	void *pBuffer;
+	MFVertex_LockVertexBuffer(pVertexBuffer, &pBuffer);
+	MFCopyMemory(pBuffer, primBuffer, beginCount * sizeof(LitVertexD3D11));
 	MFVertex_UnlockVertexBuffer(pVertexBuffer);
 
 	MFVertex_SetVertexStreamSource(0, pVertexBuffer);
@@ -283,22 +272,22 @@ MF_API void MFEnd()
 	switch(primType)
 	{
 	case PT_PointList:
-		MFVertex_RenderVertices(MFVPT_Points, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_Points, 0, beginCount);
 		break;
 	case PT_LineList:
-		MFVertex_RenderVertices(MFVPT_LineList, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_LineList, 0, beginCount);
 		break;
 	case PT_LineStrip:
-		MFVertex_RenderVertices(MFVPT_LineStrip, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_LineStrip, 0, beginCount);
 		break;
 	case PT_TriList:
-		MFVertex_RenderVertices(MFVPT_TriangleList, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_TriangleList, 0, beginCount);
 		break;
 	case PT_TriStrip:
-		MFVertex_RenderVertices(MFVPT_TriangleStrip, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_TriangleStrip, 0, beginCount);
 		break;
 	case PT_TriFan:
-		MFVertex_RenderVertices(MFVPT_TriangleFan, 0, beginCount);
+		MFVertex_RenderVertices(MFPT_TriangleFan, 0, beginCount);
 		break;
 	}
 

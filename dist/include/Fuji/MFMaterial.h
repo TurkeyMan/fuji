@@ -13,6 +13,8 @@ class MFIni;
 struct MFIniEnumKey;
 struct MFTexture;
 struct MFStateBlock;
+struct MFRendererState;
+struct MFMaterialType;
 
 /**
  * @struct MFMaterial
@@ -94,22 +96,33 @@ struct MFMaterialParameterInfo
  */
 struct MFMaterialCallbacks
 {
-	int       (*pRegisterMaterial)(void *pPlatformData);	/**< Pointer to the RegisterMaterial function */
-	void      (*pUnregisterMaterial)();						/**< Pointer to the UnregisterMaterial function */
+	int       (*pRegisterMaterial)(MFMaterialType *pType);				/**< Pointer to the RegisterMaterial function */
+	void      (*pUnregisterMaterial)();									/**< Pointer to the UnregisterMaterial function */
 
-	void      (*pCreateInstance)(MFMaterial *pMaterial);	/**< Pointer to the CreateInstance function */
-	void      (*pDestroyInstance)(MFMaterial *pMaterial);	/**< Pointer to the DestroyInstance function */
+	void      (*pCreateInstance)(MFMaterial *pMaterial);				/**< Pointer to the CreateInstance function */
+	void      (*pDestroyInstance)(MFMaterial *pMaterial);				/**< Pointer to the DestroyInstance function */
 
-	void      (*pUpdate)(MFMaterial *pMaterial);			/**< Pointer to the Update function */
+	void      (*pUpdate)(MFMaterial *pMaterial);						/**< Pointer to the Update function */
 
-	void      (*pBuildStateBlock)(MFMaterial *pMaterial);	/**< Pointer to the BuildStateBlock function */
+	void      (*pBuildStateBlock)(MFMaterial *pMaterial);				/**< Pointer to the BuildStateBlock function */
 
-	int       (*pBegin)(MFMaterial *pMaterial);				/**< Pointer to the Begin function */
+	int       (*pBegin)(MFMaterial *pMaterial, MFRendererState &state);	/**< Pointer to the Begin function */
 
-	int       (*pGetNumParams)();							/**< Pointer to the GetNumParams function */
+	int       (*pGetNumParams)();										/**< Pointer to the GetNumParams function */
 	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function */
 	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);	/**< Pointer to a SetParameter function */
 	uintp     (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
+};
+
+/**
+ * Material type.
+ * Describes a material type.
+ */
+struct MFMaterialType
+{
+	MFMaterialCallbacks materialCallbacks;	/**< Material type callbacks */
+	char *pTypeName;						/**< Material type name */
+	size_t instanceDataSize;				/**< Size of the instance data in bytes */
 };
 
 
@@ -429,9 +442,10 @@ inline void MFMaterial_SetParameterS(MFMaterial *pMaterial, int parameterIndex, 
  * Registers a new material type with the material system.
  * @param pName The name of the new material type.
  * @param pCallbacks Pointer to an MFMaterialCallbacks structure which defines a set of callbacks to interact with the material.
+ * @param instanceDataSize Size of the instance data allocation in bytes.
  * @return None.
  */
-MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks);
+MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks, size_t instanceDataSize);
 
 /**
  * Unregister a material type.

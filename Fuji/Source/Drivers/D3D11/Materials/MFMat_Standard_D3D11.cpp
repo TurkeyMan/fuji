@@ -66,9 +66,11 @@ ID3D11PixelShader *pPixelShader = NULL;
 
 
 
-int MFMat_Standard_RegisterMaterial(void *pPlatformData)
+int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
 	MFCALLSTACK;
+
+	pType->instanceDataSize = sizeof(MFMat_Standard_Data_D3D11);
 	
 	g_pd3dDevice->CreateVertexShader(g_pVertexShaderData, g_vertexShaderSize, NULL, &pVertexShader);
 	g_pd3dDevice->CreatePixelShader(g_pPixelShaderData, g_pixelShaderSize, NULL, &pPixelShader);
@@ -84,7 +86,7 @@ void MFMat_Standard_UnregisterMaterial()
 	if (pVertexShader) pVertexShader->Release();
 }
 
-int MFMat_Standard_Begin(MFMaterial *pMaterial)
+int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
 
@@ -271,24 +273,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 
 void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	MFCALLSTACK;
-
-	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Standard_Data_D3D11));
 	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
-
-	MFZeroMemory(pData, sizeof(MFMat_Standard_Data_D3D11));
-	
-	pData->ambient = MFVector::one;
-	pData->diffuse = MFVector::one;
-
-	pData->materialType = MF_AlphaBlend | 1<<6 /* back face culling */;
-	pData->opaque = true;
-
-	pData->textureMatrix = MFMatrix::identity;
-	pData->uFrames = 1;
-	pData->vFrames = 1;
-
-	pData->alphaRef = 1.0f;
 	
 	//--
 	HRESULT hr;
@@ -422,21 +407,12 @@ void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 
 void MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	MFCALLSTACK;
-
 	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
-
-	for(uint32 a = 0; a < pData->textureCount; a++)
-	{
-		MFTexture_Destroy(pData->textures[a].pTexture);
-	}
 
 	if(pData->pSamplerState) pData->pSamplerState->Release();
 	if(pData->pRasterizerState) pData->pRasterizerState->Release();
 	if(pData->pBlendState) pData->pBlendState->Release();
 	if(pData->pConstantBuffer) pData->pConstantBuffer->Release();
-
-	MFHeap_Free(pMaterial->pInstanceData);
 }
 
 #endif // MF_RENDERER

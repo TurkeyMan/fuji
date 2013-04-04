@@ -15,8 +15,6 @@ IDirect3D8 *d3d8;
 IDirect3DDevice8 *pd3dDevice;
 D3DCAPS8 deviceCaps;
 
-MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
-
 MFRect gCurrentViewport;
 
 extern bool gbLetterBox;
@@ -119,11 +117,11 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void MFRenderer_ClearScreen(uint32 flags)
+void MFRenderer_ClearScreen(MFRenderClearFlags flags, MFVector colour, float z, int stencil)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
+	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), colour.ToPackedColour(), z, stencil);
 }
 
 void MFRenderer_GetViewport(MFRect *pRect)

@@ -11,7 +11,6 @@
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_OpenGL
 	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_OpenGL
 	#define MFRenderer_EndFrame MFRenderer_EndFrame_OpenGL
-	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_OpenGL
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_OpenGL
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_OpenGL
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_OpenGL
@@ -130,7 +129,6 @@ int gOpenGLVersion = 0;
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
-static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
 static MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
@@ -298,7 +296,6 @@ int MFRenderer_CreateDisplay()
 	glEnable(GL_TEXTURE_2D);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -436,22 +433,19 @@ void MFRenderer_EndFrame()
 	MFCheckForOpenGLError(true);
 }
 
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-MF_API void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACK;
 
-	int mask = ((flags & MFRCF_Colour) ? GL_COLOR_BUFFER_BIT : 0) | ((flags & MFRCF_ZBuffer) ? GL_DEPTH_BUFFER_BIT : 0);
+	int mask = ((flags & MFRCF_Colour) ? GL_COLOR_BUFFER_BIT : 0) |
+				((flags & MFRCF_ZBuffer) ? GL_DEPTH_BUFFER_BIT : 0) |
+				((flags & MFRCF_Stencil) ? GL_STENCIL_BUFFER_BIT : 0);
 
-	glClearColor(gClearColour.x, gClearColour.y, gClearColour.z, gClearColour.w);
+	glClearColor(colour.x, colour.y, colour.z, colour.w);
+	glClearDepth(z);
+	glClearStencil(stencil);
 	glClear(mask);
+
 	MFCheckForOpenGLError();
 }
 

@@ -17,6 +17,8 @@ struct MFVertexDeclaration : public MFResource
 	MFVertexElement *pElements;
 	MFVertexElementData *pElementData;
 	int numElements;
+	uint32 streamsUsed;
+	MFVertexDeclaration *pStreamDecl[8];
 	void *pPlatformData;
 };
 

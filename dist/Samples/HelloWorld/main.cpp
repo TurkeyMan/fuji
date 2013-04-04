@@ -2,6 +2,7 @@
 #include "Fuji/MFSystem.h"
 #include "Fuji/MFDisplay.h"
 #include "Fuji/MFRenderer.h"
+#include "Fuji/MFRenderState.h"
 #include "Fuji/MFView.h"
 #include "Fuji/MFFont.h"
 #include "Fuji/MFInput.h"
@@ -13,11 +14,13 @@
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
+MFRenderer *pRenderer = NULL;
+
 /**** Functions ****/
 
 void Game_InitFilesystem()
 {
-	// mount the game directory
+	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -37,7 +40,18 @@ void Game_InitFilesystem()
 
 void Game_Init()
 {
-	MFCALLSTACK;
+	// create the renderer with a single layer that clears before rendering
+	MFRenderLayerDescription layers[] = { "Scene" };
+	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
+	MFRenderer_SetCurrent(pRenderer);
+
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
+	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
+
+	MFRenderLayerSet layerSet;
+	MFZeroMemory(&layerSet, sizeof(layerSet));
+	layerSet.pSolidLayer = pLayer;
+	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
 }
 
 #define CHK_BUTTON(x) \
@@ -45,8 +59,6 @@ void Game_Init()
 
 void Game_Update()
 {
-	MFCALLSTACK;
-
 	MFDebug_Message(MFStr("Time is %f- %f FPS\t", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS()));
 	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_LX, IDD_Gamepad), MFInput_Read(Axis_LY, IDD_Gamepad)));
 	MFDebug_Message(MFStr("Right (%1.4f, %1.4f) ", MFInput_Read(Axis_RX, IDD_Gamepad), MFInput_Read(Axis_RY, IDD_Gamepad)));
@@ -75,34 +87,22 @@ void Game_Update()
 
 void Game_Draw()
 {
-	MFCALLSTACK;
-
-	// set clear colour and clear the screen
-	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFRenderer_ClearScreen();
-
-	// push current view onto the stack
-	MFView_Push();
-
 	// set orthographic projection
 	MFView_SetOrtho();
 
 	// render some text
 	MFFont_DrawText2(MFFont_GetDebugFont(), 200.f, 200.f, 50.f, MFVector::one, "Hello World!");
-
-	// pop the current view
-	MFView_Pop();
 }
 
 void Game_Deinit()
 {
-	MFCALLSTACK;
+	MFRenderer_Destroy(pRenderer);
 }
 
 
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);

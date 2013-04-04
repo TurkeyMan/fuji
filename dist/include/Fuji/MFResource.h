@@ -16,6 +16,7 @@ enum MFResourceType
 	MFRT_Unknown = -1,
 
 	MFRT_Texture = 0,
+	MFRT_Material,
 	MFRT_VertexDecl,
 	MFRT_VertexBuffer,
 	MFRT_IndexBuffer,
@@ -39,9 +40,9 @@ enum MFResourceType
 
 struct MFResource
 {
-	MFResourceType type;
 	uint32 hash;
-	int refCount;
+	int16 type;
+	int16 refCount;
 };
 
 struct MFResourceIterator;

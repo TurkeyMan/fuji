@@ -232,7 +232,13 @@ void MFSystem_Draw()
 	MFCALLSTACKc;
 
 #if !defined(_RETAIL)
-	MFView_Push();
+	MFRenderer *pRenderer = MFRenderer_GetCurrent();
+
+	MFRenderLayerSet set;
+	MFZeroMemory(&set, sizeof(set));
+	set.pSolidLayer = MFRenderer_GetDebugLayer(pRenderer);
+	MFRenderer_SetRenderLayerSet(pRenderer, &set);
+
 	MFView_SetDefault();
 
 	MFRect rect;
@@ -330,8 +336,6 @@ void MFSystem_Draw()
 	MFView_SetOrtho(&rect);
 
 	DebugMenu_Draw();
-
-	MFView_Pop();
 #endif
 }
 
@@ -390,10 +394,21 @@ void MFSystem_RunFrame()
 
 	if(MFRenderer_BeginFrame())
 	{
+		MFRenderer *pRenderer = MFRenderer_GetCurrent();
+//		MFRenderer_Begin(pRenderer);
+
+		MFView_SetDefault();
 		if(pSystemCallbacks[MFCB_Draw])
 			pSystemCallbacks[MFCB_Draw]();
 		MFSystem_Draw();
+
+//		MFRenderer_End(MFRenderer *pRenderer);
+
+		// build and kick the GPU command buffers
+		MFRenderer_BuildCommandBuffers(pRenderer);
+		MFRenderer_Kick(pRenderer);
 	}
+
 	MFRenderer_EndFrame();
 	MFCallstack_EndFrame();
 }

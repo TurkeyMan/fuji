@@ -5,6 +5,7 @@
 
 int gVertexDataStride[MFVDF_Max] =
 {
+	0,	// MFVDF_Auto
 	16,	// MFVDF_Float4
 	12,	// MFVDF_Float3
 	8,	// MFVDF_Float2
@@ -21,7 +22,9 @@ int gVertexDataStride[MFVDF_Max] =
 	8,	// MFVDF_UShort4N
 	4,	// MFVDF_UShort2N
 	8,	// MFVDF_Float16_4
-	4	// MFVDF_Float16_2
+	4,	// MFVDF_Float16_2
+	4,	// MFVDF_UDec3
+	4	// MFVDF_Dec3N
 };
 
 static MFVertexBuffer *gpScratchBufferList = NULL;
@@ -45,7 +48,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_FindResource(hash);
 	if(!pDecl)
 	{
-		pDecl = (MFVertexDeclaration*)MFHeap_Alloc(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
+		pDecl = (MFVertexDeclaration*)MFHeap_AllocAndZero(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
 		pDecl->type = MFRT_VertexDecl;
 		pDecl->hash = hash;
 		pDecl->refCount = 0;
@@ -54,6 +57,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 		pDecl->pElements = (MFVertexElement*)&pDecl[1];
 		pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
 		pDecl->pPlatformData = NULL;
+		pDecl->streamsUsed = 0;
 
 		MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
 		MFZeroMemory(pDecl->pElementData, sizeof(MFVertexElementData)*elementCount);
@@ -64,7 +68,31 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 			return NULL;
 		}
 
+		MFDebug_Assert(pDecl->streamsUsed != 0, "Stream usage was not assigned!");
+
 		MFResource_AddResource(pDecl);
+
+		if(pDecl->streamsUsed != 1)
+		{
+			// create the stream declarations...
+			MFVertexElement elements[64];
+			for(int s=0; s<8; ++s)
+			{
+				int streamElements = 0;
+				for(int e=0; e<elementCount; ++e)
+				{
+					if(pElementArray[e].stream == s)
+					{
+						elements[streamElements] = pElementArray[e];
+						elements[streamElements].stream = 0;
+						++streamElements;
+					}
+				}
+
+				if(streamElements)
+					pDecl->pStreamDecl[s] = MFVertex_CreateVertexDeclaration(elements, streamElements);
+			}
+		}
 	}
 
 	++pDecl->refCount;
@@ -77,10 +105,24 @@ MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 	if(--pDeclaration->refCount > 0)
 		return;
 
+	if(pDeclaration->streamsUsed != 1)
+	{
+		for(int a=0; a<8; ++a)
+			if(pDeclaration->pStreamDecl[a])
+				MFVertex_DestroyVertexDeclaration(pDeclaration->pStreamDecl[a]);
+	}
+
 	MFResource_RemoveResource(pDeclaration);
 
 	MFVertex_DestroyVertexDeclarationPlatformSpecific(pDeclaration);
 	MFHeap_Free(pDeclaration);
+}
+
+MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *pDeclaration, int stream)
+{
+	if(pDeclaration->streamsUsed == 1)
+		return pDeclaration;
+	return pDeclaration->pStreamDecl[stream];
 }
 
 MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
@@ -120,8 +162,8 @@ MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	if(--pVertexBuffer->refCount > 0)
 		return;
 
-	MFDebug_Assert(pVertexBuffer->type != MFVBType_Scratch, "Scratch buffers should not be freed!");
-	if(pVertexBuffer->type == MFVBType_Scratch)
+	MFDebug_Assert(pVertexBuffer->bufferType != MFVBType_Scratch, "Scratch buffers should not be freed!");
+	if(pVertexBuffer->bufferType == MFVBType_Scratch)
 		return;
 
 	MFResource_RemoveResource(pVertexBuffer);
@@ -136,10 +178,10 @@ static MFVertexElement *MFVertex_FindVertexElement(MFVertexBuffer *pVertexBuffer
 
 	for(int a=0; a<pDecl->numElements; ++a)
 	{
-		if(pDecl->pElements[a].elementType == targetElement && pDecl->pElements[a].elementIndex == targetElementIndex)
+		if(pDecl->pElements[a].type == targetElement && pDecl->pElements[a].index == targetElementIndex)
 		{
 			if(ppElementData)
-				*ppElementData = pVertexBuffer->pVertexDeclatation->pElementData + a;
+				*ppElementData = pDecl->pElementData + a;
 			return pDecl->pElements + a;
 		}
 	}

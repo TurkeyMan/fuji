@@ -3,6 +3,7 @@
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "MFSystem.h"
+#include "MFRenderState.h"
 
 #include <math.h>
 
@@ -84,6 +85,8 @@ MF_API void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float
 	{
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
+
+		pCurrentView->pStateBlock = NULL;
 	}
 }
 
@@ -95,6 +98,8 @@ MF_API void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
 	pCurrentView->customProjection = true;
 	pCurrentView->projDirty = false;
 	pCurrentView->viewProjDirty = true;
+
+	pCurrentView->pStateBlock = NULL;
 }
 
 MF_API void MFView_SetAspectRatio(float aspectRatio)
@@ -105,6 +110,8 @@ MF_API void MFView_SetAspectRatio(float aspectRatio)
 	{
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
+
+		pCurrentView->pStateBlock = NULL;
 	}
 }
 
@@ -119,6 +126,8 @@ MF_API void MFView_SetProjection()
 		pCurrentView->viewProjDirty = true;
 		pCurrentView->projDirty = true;
 		pCurrentView->customProjection = false;
+
+		pCurrentView->pStateBlock = NULL;
 	}
 }
 
@@ -134,10 +143,10 @@ MF_API void MFView_SetOrtho(MFRect *pOrthoRect)
 		pCurrentView->projDirty = true;
 		pCurrentView->customProjection = false;
 
+		pCurrentView->pStateBlock = NULL;
+
 		if(pOrthoRect)
-		{
 			pCurrentView->orthoRect = *pOrthoRect;
-		}
 	}
 }
 
@@ -157,11 +166,25 @@ MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
 
 	pCurrentView->viewDirty = true;
 	pCurrentView->viewProjDirty = true;
+
+	pCurrentView->pStateBlock = NULL;
 }
 
 MF_API const MFMatrix& MFView_GetCameraMatrix()
 {
 	return pCurrentView->cameraMatrix;
+}
+
+MF_API MFStateBlock* MFView_GetViewState()
+{
+	if(!pCurrentView->pStateBlock)
+	{
+		pCurrentView->pStateBlock = MFStateBlock_CreateTemporary(256);
+		MFStateBlock_SetMatrix(pCurrentView->pStateBlock, MFSCM_Projection, MFView_GetViewToScreenMatrix());
+		MFStateBlock_SetMatrix(pCurrentView->pStateBlock, MFSCM_Camera, pCurrentView->isOrtho ? MFMatrix::identity : pCurrentView->cameraMatrix);
+	}
+
+	return pCurrentView->pStateBlock;
 }
 
 MF_API const MFMatrix& MFView_GetWorldToViewMatrix()
@@ -178,69 +201,14 @@ MF_API const MFMatrix& MFView_GetWorldToViewMatrix()
 	return pCurrentView->view;
 }
 
-void MFViewInternal_ProjectionMatrix(MFMatrix *pMat)
-{
-	// construct perspective projection
-	float zn = pCurrentView->nearPlane;
-	float zf = pCurrentView->farPlane;
-
-	float a = pCurrentView->fov * 0.5f;
-
-	float h = MFCos(a) / MFSin(a);
-	float w = h / pCurrentView->aspectRatio;
-
-	float zd = zf-zn;
-	float zs = zf/zd;
-
-#if defined(_OPENGL_CLIP_SPACE)
-	pMat->m[0] = w;		pMat->m[1] = 0.0f;	pMat->m[2] = 0.0f;				pMat->m[3] = 0.0f;
-	pMat->m[4] = 0.0f;	pMat->m[5] = h;		pMat->m[6] = 0.0f;				pMat->m[7] = 0.0f;
-	pMat->m[8] = 0.0f;	pMat->m[9] = 0.0f;	pMat->m[10] = 2.0f*zs;			pMat->m[11] = 1.0f;
-	pMat->m[12] = 0.0f;	pMat->m[13] = 0.0f;	pMat->m[14] = -2.0f*zn*zs-zf;	pMat->m[15] = 0.0f;
-#else
-	pMat->m[0] = w;		pMat->m[1] = 0.0f;	pMat->m[2] = 0.0f;		pMat->m[3] = 0.0f;
-	pMat->m[4] = 0.0f;	pMat->m[5] = h;		pMat->m[6] = 0.0f;		pMat->m[7] = 0.0f;
-	pMat->m[8] = 0.0f;	pMat->m[9] = 0.0f;	pMat->m[10] = zs;		pMat->m[11] = 1.0f;
-	pMat->m[12] = 0.0f;	pMat->m[13] = 0.0f;	pMat->m[14] = -zn*zs;	pMat->m[15] = 0.0f;
-#endif
-}
-
-void MFViewInternal_OrthoMatrix(MFMatrix *pMat)
-{
-	// construct ortho projection
-	float l = pCurrentView->orthoRect.x;
-	float r = pCurrentView->orthoRect.x + pCurrentView->orthoRect.width;
-	float b = pCurrentView->orthoRect.y + pCurrentView->orthoRect.height;
-	float t = pCurrentView->orthoRect.y;
-	float zn = 0.0f;
-	float zf = 1.0f;
-
-#if defined(_OPENGL_CLIP_SPACE)
-	pMat->m[0] = 2.0f/(r-l);	pMat->m[1] = 0.0f;			pMat->m[2] = 0.0f;			pMat->m[3] = 0.0f;
-	pMat->m[4] = 0.0f;			pMat->m[5] = 2.0f/(t-b);	pMat->m[6] = 0.0f;			pMat->m[7] = 0.0f;
-	pMat->m[8] = 0.0f;			pMat->m[9] = 0.0f;			pMat->m[10] = 1.0f/(zf-zn);	pMat->m[11] = 0.0f;
-	pMat->m[12] = (l+r)/(l-r);	pMat->m[13] = (t+b)/(b-t);	pMat->m[14] = zn/(zn-zf);	pMat->m[15] = 1.0f;
-#else
-	pMat->m[0] = 2.0f/(r-l);	pMat->m[1] = 0.0f;			pMat->m[2] = 0.0f;			pMat->m[3] = 0.0f;
-	pMat->m[4] = 0.0f;			pMat->m[5] = 2.0f/(t-b);	pMat->m[6] = 0.0f;			pMat->m[7] = 0.0f;
-	pMat->m[8] = 0.0f;			pMat->m[9] = 0.0f;			pMat->m[10] = 1.0f/(zf-zn);	pMat->m[11] = 0.0f;
-	pMat->m[12] = (l+r)/(l-r);	pMat->m[13] = (t+b)/(b-t);	pMat->m[14] = zn/(zn-zf);	pMat->m[15] = 1.0f;
-#endif
-}
-
 MF_API const MFMatrix& MFView_GetViewToScreenMatrix()
 {
 	if(pCurrentView->projDirty)
 	{
 		if(pCurrentView->isOrtho)
-		{
-			MFViewInternal_OrthoMatrix(&pCurrentView->projection);
-		}
+			pCurrentView->projection.SetOrthographic(pCurrentView->orthoRect, 0.f, 1.f);
 		else
-		{
-			MFViewInternal_ProjectionMatrix(&pCurrentView->projection);
-		}
-
+			pCurrentView->projection.SetPerspective(pCurrentView->fov, pCurrentView->nearPlane, pCurrentView->farPlane, pCurrentView->aspectRatio);
 		pCurrentView->projDirty = false;
 	}
 
@@ -277,7 +245,7 @@ MF_API void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult
 	MFMatrix proj, viewProj, view;
 
 	// get the perspective projection matrix
-	MFViewInternal_ProjectionMatrix(&proj);
+	proj.SetPerspective(pCurrentView->fov, pCurrentView->nearPlane, pCurrentView->farPlane, pCurrentView->aspectRatio);
 
 	// in this special case, we'll make the projection matrix produce a 0-1 value in z across all platforms (some platforms project into different 'z' spaces)
 	float zn = pCurrentView->nearPlane;
@@ -312,7 +280,7 @@ MF_API void MFView_TransformPoint2DTo3D(const MFVector& point, MFVector *pResult
 	MFMatrix proj, viewProj, view;
 
 	// get the perspective projection matrix
-	MFViewInternal_ProjectionMatrix(&proj);
+	proj.SetPerspective(pCurrentView->fov, pCurrentView->nearPlane, pCurrentView->farPlane, pCurrentView->aspectRatio);
 
 	// in this special case, we'll make the projection matrix produce a 0-1 value in z across all platforms (some platforms project into different 'z' spaces)
 	float zn = pCurrentView->nearPlane;

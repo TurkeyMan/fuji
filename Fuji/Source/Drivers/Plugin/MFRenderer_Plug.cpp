@@ -4,6 +4,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFSystem_Internal.h"
+#include "MFRenderer.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -15,8 +16,7 @@
 	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
 	bool MFRenderer_BeginFrame_##driver(); \
 	void MFRenderer_EndFrame_##driver(); \
-	MF_API void MFRenderer_SetClearColour_##driver(float r, float g, float b, float a); \
-	MF_API void MFRenderer_ClearScreen_##driver(uint32 flags); \
+	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
 	MF_API void MFRenderer_GetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_ResetViewport_##driver(); \
@@ -35,7 +35,6 @@
 		MFRenderer_SetDisplayMode_##driver, \
 		MFRenderer_BeginFrame_##driver, \
 		MFRenderer_EndFrame_##driver, \
-		MFRenderer_SetClearColour_##driver, \
 		MFRenderer_ClearScreen_##driver, \
 		MFRenderer_GetViewport_##driver, \
 		MFRenderer_SetViewport_##driver, \
@@ -68,8 +67,7 @@ struct MFRenderPluginCallbacks
 	bool (*pSetDisplayMode)(int width, int height, bool bFullscreen);
 	bool (*pBeginFrame)();
 	void (*pEndFrame)();
-	void (*pSetClearColour)(float r, float g, float b, float a);
-	void (*pClearScreen)(uint32 flags);
+	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
 	void (*pGetViewport)(MFRect *pRect);
 	void (*pSetViewport)(MFRect *pRect);
 	void (*pResetViewport)();
@@ -153,14 +151,9 @@ void MFRenderer_EndFrame()
 	gpCurrentRenderPlugin->pEndFrame();
 }
 
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
-	gpCurrentRenderPlugin->pSetClearColour(r, g, b, a);
-}
-
-MF_API void MFRenderer_ClearScreen(uint32 flags)
-{
-	gpCurrentRenderPlugin->pClearScreen(flags);
+	gpCurrentRenderPlugin->pClearScreen(flags, colour, z, stencil);
 }
 
 MF_API void MFRenderer_GetViewport(MFRect *pRect)
