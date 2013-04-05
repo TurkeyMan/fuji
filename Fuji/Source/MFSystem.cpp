@@ -48,10 +48,11 @@ MFDefaults gDefaults =
 		2048			// maxStaticMarkers
 	},
 
-	// ThreadDefaults
+	// SystemDefaults
 	{
-		16,				// maxThreads
-		16				// maxTlsSlots
+		MFPriority_Normal,	// threadPriority
+		16,					// maxThreads
+		16					// maxTlsSlots
 	},
 
 	// DisplayDefaults
@@ -59,6 +60,11 @@ MFDefaults gDefaults =
 		"Fuji Window",	// pWindowTitle
 		NULL,			// pIcon
 		false			// hideMouseCursor
+	},
+
+	// RenderDefaults
+	{
+		256*1024		// renderHeapSize
 	},
 
 	// ViewDefaults
@@ -116,11 +122,6 @@ MFDefaults gDefaults =
 		true,			// systemMouseUseWindowsCursor
 		true,			// useDirectInputKeyboard
 		true			// useXInput
-	},
-
-	// SystemDefaults
-	{
-		MFPriority_Normal	// threadPriority
 	},
 
 	// MiscellaneousDefaults
@@ -395,14 +396,11 @@ void MFSystem_RunFrame()
 	if(MFRenderer_BeginFrame())
 	{
 		MFRenderer *pRenderer = MFRenderer_GetCurrent();
-//		MFRenderer_Begin(pRenderer);
 
 		MFView_SetDefault();
 		if(pSystemCallbacks[MFCB_Draw])
 			pSystemCallbacks[MFCB_Draw]();
 		MFSystem_Draw();
-
-//		MFRenderer_End(MFRenderer *pRenderer);
 
 		// build and kick the GPU command buffers
 		MFRenderer_BuildCommandBuffers(pRenderer);

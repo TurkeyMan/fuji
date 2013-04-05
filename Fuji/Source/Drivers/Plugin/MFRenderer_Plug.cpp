@@ -14,8 +14,8 @@
 	void MFRenderer_DestroyDisplay_##driver(); \
 	void MFRenderer_ResetDisplay_##driver(); \
 	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
-	bool MFRenderer_BeginFrame_##driver(); \
-	void MFRenderer_EndFrame_##driver(); \
+	bool MFRenderer_BeginFramePlatformSpecific_##driver(); \
+	void MFRenderer_EndFramePlatformSpecific_##driver(); \
 	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
 	MF_API void MFRenderer_GetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
@@ -33,8 +33,8 @@
 		MFRenderer_DestroyDisplay_##driver, \
 		MFRenderer_ResetDisplay_##driver, \
 		MFRenderer_SetDisplayMode_##driver, \
-		MFRenderer_BeginFrame_##driver, \
-		MFRenderer_EndFrame_##driver, \
+		MFRenderer_BeginFramePlatformSpecific_##driver, \
+		MFRenderer_EndFramePlatformSpecific_##driver, \
 		MFRenderer_ClearScreen_##driver, \
 		MFRenderer_GetViewport_##driver, \
 		MFRenderer_SetViewport_##driver, \
@@ -65,8 +65,8 @@ struct MFRenderPluginCallbacks
 	void (*pDestroyDisplay)();
 	void (*pResetDisplay)();
 	bool (*pSetDisplayMode)(int width, int height, bool bFullscreen);
-	bool (*pBeginFrame)();
-	void (*pEndFrame)();
+	bool (*pBeginFramePlatformSpecific)();
+	void (*pEndFramePlatformSpecific)();
 	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
 	void (*pGetViewport)(MFRect *pRect);
 	void (*pSetViewport)(MFRect *pRect);
@@ -141,14 +141,14 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	return gpCurrentRenderPlugin->pSetDisplayMode(width, height, bFullscreen);
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
-	return gpCurrentRenderPlugin->pBeginFrame();
+	return gpCurrentRenderPlugin->pBeginFramePlatformSpecific();
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
-	gpCurrentRenderPlugin->pEndFrame();
+	gpCurrentRenderPlugin->pEndFramePlatformSpecific();
 }
 
 MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)

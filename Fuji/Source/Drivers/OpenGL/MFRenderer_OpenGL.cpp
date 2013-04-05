@@ -9,8 +9,8 @@
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_OpenGL
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_OpenGL
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_OpenGL
-	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_OpenGL
-	#define MFRenderer_EndFrame MFRenderer_EndFrame_OpenGL
+	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_OpenGL
+	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_OpenGL
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_OpenGL
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_OpenGL
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_OpenGL
@@ -401,7 +401,7 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	return true;
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
 	if(MFCheckForOpenGLError())
 		return false;
@@ -418,7 +418,7 @@ bool MFRenderer_BeginFrame()
 	return true;
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -567,7 +567,7 @@ GLuint MFRenderer_OpenGL_CreateProgram(GLuint vertexShader, GLuint fragmentShade
 
 	glLinkProgram(program);
 
-	// make sure we lake properly
+	// make sure we lank properly
 	GLint result;
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
 	if(result == GL_FALSE)
@@ -588,10 +588,14 @@ GLuint MFRenderer_OpenGL_CreateProgram(GLuint vertexShader, GLuint fragmentShade
 }
 
 GLuint gCurrentShaderProgram;
-void MFRenderer_OpenGL_SetShaderProgram(GLuint program)
+bool MFRenderer_OpenGL_SetShaderProgram(GLuint program)
 {
+	if(gCurrentShaderProgram == program)
+		return false;
+
 	gCurrentShaderProgram = program;
 	glUseProgram(program);
+	return true;
 }
 
 bool MFRenderer_OpenGL_SetUniformV(const char *pName, const MFVector *pV, int numVectors)
@@ -636,12 +640,12 @@ void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat)
 		static MFMatrix proj;
 		switch(type)
 		{
-			case MFOGL_ShaderType_Projection:
+			case MFOGL_MatrixType_Projection:
 			{
 				proj = mat;
 				break;
 			}
-			case MFOGL_ShaderType_WorldView:
+			case MFOGL_MatrixType_WorldView:
 			{
 				MFRenderer_OpenGL_SetUniformM("wvMatrix", &mat);
 
@@ -650,7 +654,7 @@ void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat)
 				MFRenderer_OpenGL_SetUniformM("wvpMatrix", &wvp);
 				break;
 			}
-			case MFOGL_ShaderType_Texture:
+			case MFOGL_MatrixType_Texture:
 			{
 				MFRenderer_OpenGL_SetUniformM("texMatrix", &mat);
 				break;

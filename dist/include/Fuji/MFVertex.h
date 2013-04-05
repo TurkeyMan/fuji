@@ -96,7 +96,7 @@ enum MFPrimType
 	MFPT_TriangleList,	/**< Triangle list */
 	MFPT_TriangleStrip,	/**< Triangle strip */
 	MFPT_TriangleFan,	/**< Triangle fan */
-//	MFPT_QuadList,		/**< Quad list */
+	MFPT_QuadList,		/**< Quad list */
 
 	MFPT_Max,			/**< Maximum prim type */
 	MFPT_ForceInt = 0x7FFFFFFF	/**< Force PrimType to an int type */

@@ -79,7 +79,7 @@ void MFRenderer_ResetDisplay()
 
 extern uint32 currentVert;
 
-void MFRenderer_BeginFrame()
+void MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -88,7 +88,7 @@ void MFRenderer_BeginFrame()
 	sceGuStart(0, displayList);
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 

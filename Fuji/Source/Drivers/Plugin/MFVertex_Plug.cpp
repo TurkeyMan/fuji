@@ -9,6 +9,7 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFVertex_InitModulePlatformSpecific_##driver(); \
 	void MFVertex_DeinitModulePlatformSpecific_##driver(); \
+	MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific_##driver(MFVertexElementType elementType, int components); \
 	bool MFVertex_CreateVertexDeclarationPlatformSpecific_##driver(MFVertexDeclaration *pDeclaration); \
 	void MFVertex_DestroyVertexDeclarationPlatformSpecific_##driver(MFVertexDeclaration *pDeclaration); \
 	bool MFVertex_CreateVertexBufferPlatformSpecific_##driver(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory); \
@@ -30,6 +31,7 @@
 		#driver, \
 		MFVertex_InitModulePlatformSpecific_##driver, \
 		MFVertex_DeinitModulePlatformSpecific_##driver, \
+		MFVertex_ChoooseVertexDataTypePlatformSpecific_##driver, \
 		MFVertex_CreateVertexDeclarationPlatformSpecific_##driver, \
 		MFVertex_DestroyVertexDeclarationPlatformSpecific_##driver, \
 		MFVertex_CreateVertexBufferPlatformSpecific_##driver, \
@@ -64,6 +66,7 @@ struct MFVertexPluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
+	MFVertexDataFormat (*pChoooseVertexDataTypePlatformSpecific)(MFVertexElementType elementType, int components);
 	bool (*pCreateVertexDeclarationPlatformSpecific)(MFVertexDeclaration *pDeclaration);
 	void (*pDestroyVertexDeclarationPlatformSpecific)(MFVertexDeclaration *pDeclaration);
 	bool (*pCreateVertexBufferPlatformSpecific)(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory);
@@ -113,6 +116,11 @@ void MFVertex_InitModulePlatformSpecific()
 void MFVertex_DeinitModulePlatformSpecific()
 {
 	gpCurrentVertexPlugin->pDeinitModulePlatformSpecific();
+}
+
+MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElementType elementType, int components)
+{
+	return gpCurrentVertexPlugin->pChoooseVertexDataTypePlatformSpecific(elementType, components);
 }
 
 bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)

@@ -100,9 +100,9 @@ enum MFOpenGL_ShaderType
 
 enum MFOpenGL_MatrixType
 {
-	MFOGL_ShaderType_Projection = 0,
-	MFOGL_ShaderType_WorldView,
-	MFOGL_ShaderType_Texture
+	MFOGL_MatrixType_Projection = 0,
+	MFOGL_MatrixType_WorldView,
+	MFOGL_MatrixType_Texture
 };
 
 GLuint MFRenderer_OpenGL_CompileShader(const char *pShader, MFOpenGL_ShaderType shaderType);
@@ -110,7 +110,7 @@ GLuint MFRenderer_OpenGL_CreateProgram(GLuint vertexShader, GLuint fragmentShade
 
 void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat);
 
-void MFRenderer_OpenGL_SetShaderProgram(GLuint program);
+bool MFRenderer_OpenGL_SetShaderProgram(GLuint program);
 bool MFRenderer_OpenGL_SetUniformV(const char *pName, const MFVector *pV, int numVectors = 1);
 bool MFRenderer_OpenGL_SetUniformM(const char *pName, const MFMatrix *pM, int numMatrices = 1);
 bool MFRenderer_OpenGL_SetUniformS(const char *pName, int sampler);

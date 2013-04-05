@@ -6,10 +6,8 @@
 
 struct MFVertexElementData
 {
-	void *pData;
 	int offset;
 	int stride;
-	MFVertexDataFormat format;
 };
 
 struct MFVertexDeclaration : public MFResource
@@ -27,27 +25,34 @@ struct MFVertexBuffer : public MFResource
 	MFVertexDeclaration *pVertexDeclatation;
 	MFVertexBufferType bufferType;
 	int numVerts;
-	void *pPlatformData;
 
 	bool bLocked;
+	void *pLocked;
+
+	void *pPlatformData;
 
 	MFVertexBuffer *pNextScratchBuffer;
 };
 
 struct MFIndexBuffer : public MFResource
 {
-	uint16 *pIndices;
+//	uint16 *pIndices;
 	int numIndices;
-	void *pPlatformData;
 
 	bool bLocked;
+	void *pLocked;
+
+	void *pPlatformData;
 };
 
 MFInitStatus MFVertex_InitModule();
 void MFVertex_DeinitModule();
 
+void MFVertex_EndFrame();
+
 void MFVertex_InitModulePlatformSpecific();
 void MFVertex_DeinitModulePlatformSpecific();
+MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElementType elementType, int components);
 bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
 void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
 bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory);

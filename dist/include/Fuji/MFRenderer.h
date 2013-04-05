@@ -67,6 +67,8 @@ MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
  */
 MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch);
 
+MF_API void* MFRenderer_AllocateRenderMemory(size_t bytes, size_t alignment = 16);
+
 
 // new renderer interface...
 

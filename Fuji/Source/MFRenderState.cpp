@@ -1,21 +1,16 @@
 #include "Fuji.h"
 #include "MFRenderState_Internal.h"
+#include "MFRenderer.h"
 #include "MFHeap.h"
 #include "MFModule.h"
-#include "MFObjectPool.h"
-
-MFObjectPool gTempStateBlocks;
 
 MFInitStatus MFRenderState_InitModule()
 {
-	gTempStateBlocks.Init(sizeof(MFStateBlock*), 256, 256);
-
 	return MFAIC_Succeeded;
 }
 
 void MFRenderState_DeinitModule()
 {
-	gTempStateBlocks.Deinit();
 }
 
 MF_API MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc)
@@ -175,12 +170,18 @@ MF_API MFStateBlock* MFStateBlock_Create(uint32 size)
 
 MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size)
 {
-	return MFStateBlock_Create(size);
+	MFDebug_Assert(size >= MFStateBlock::MINIMUM_SIZE && MFUtil_NextPowerOf2(size) == size, "Invalid size. Must be a power of 2, and >= MFStateBlock::MINIMUM_SIZE bytes");
 
-	MFDebug_Assert(false, "TODO!");
+	MFStateBlock *pSB = (MFStateBlock*)MFRenderer_AllocateRenderMemory(size);
+	MFZeroMemory(pSB, size);
 
-	// allocate from per-frame temp mem
-	return NULL;
+	// calculate the size
+	int shift = 0;
+	for(uint32 s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
+
+	pSB->allocated = shift;
+
+	return pSB;
 }
 
 MF_API void MFStateBlock_Destroy(MFStateBlock *pStateBlock)

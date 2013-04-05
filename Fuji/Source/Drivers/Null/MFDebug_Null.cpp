@@ -68,7 +68,7 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 		MFSystem_Update();
 		MFSystem_PostUpdate();
 
-		MFRenderer_BeginFrame();
+		MFRenderer_BeginFramePlatformSpecific();
 
 		MFRenderer_SetClearColour(0,0,0,0);
 		MFRenderer_ClearScreen();
@@ -108,7 +108,7 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 #endif
 
 //		MFSystem_Draw();
-		MFRenderer_EndFrame();
+		MFRenderer_EndFramePlatformSpecific();
 	}
 }
 

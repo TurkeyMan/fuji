@@ -63,12 +63,12 @@ int MFRenderer_CreateDisplay()
 	// clear frame buffers to black
 	MFVector oldColour = gClearColour;
 	MFRenderer_SetClearColour(0,0,0,0);
-	MFRenderer_BeginFrame();
+	MFRenderer_BeginFramePlatformSpecific();
 	MFRenderer_ClearScreen(CS_All);
-	MFRenderer_EndFrame();
-	MFRenderer_BeginFrame();
+	MFRenderer_EndFramePlatformSpecific();
+	MFRenderer_BeginFramePlatformSpecific();
 	MFRenderer_ClearScreen(CS_All);
-	MFRenderer_EndFrame();
+	MFRenderer_EndFramePlatformSpecific();
 	MFRenderer_SetClearColour(oldColour.x, oldColour.y, oldColour.z, oldColour.w);
 
 	return 0;
@@ -88,7 +88,7 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-void MFRenderer_BeginFrame()
+void MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -101,7 +101,7 @@ void MFRenderer_BeginFrame()
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 

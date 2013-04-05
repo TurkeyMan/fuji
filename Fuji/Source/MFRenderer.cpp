@@ -6,6 +6,7 @@
 #include "MFModel.h"
 #include "MFView.h"
 #include "MFHeap.h"
+#include "MFSystem.h"
 
 extern MFMaterial *pCurrentMaterial;
 
@@ -18,9 +19,20 @@ int gNumBonesInBatch = 0;
 static MFRenderer *gpCurrentRenderer = NULL;
 static MFRenderLayerSet gCurrentLayers;
 
+static char *pRenderMemory = NULL;
+static size_t gRenderMemorySize = 0;
+static size_t gRenderMemoryOffset = 0;
+static size_t gRenderMemoryMark = 0;
+
 MFInitStatus MFRenderer_InitModule()
 {
 	MFCALLSTACK;
+
+	gRenderMemorySize = gDefaults.render.renderHeapSize;
+
+	int old = MFHeap_SetAllocAlignment(128); // 4k maybe? texture page?
+	pRenderMemory = (char*)MFHeap_Alloc(gRenderMemorySize);
+	MFHeap_SetAllocAlignment(old);
 
 	MFRenderer_InitModulePlatformSpecific();
 
@@ -32,6 +44,24 @@ void MFRenderer_DeinitModule()
 	MFCALLSTACK;
 
 	MFRenderer_DeinitModulePlatformSpecific();
+
+	MFHeap_Free(pRenderMemory);
+}
+
+bool MFRenderer_BeginFrame()
+{
+	return MFRenderer_BeginFramePlatformSpecific();
+}
+
+void MFRenderer_EndFrame()
+{
+	MFRenderer_EndFramePlatformSpecific();
+
+	// free scratch buffers
+	MFVertex_EndFrame();
+
+	// move the render memory marker to the current offset
+	gRenderMemoryMark = gRenderMemoryOffset;
 }
 
 MF_API int MFRenderer_Begin()
@@ -54,6 +84,30 @@ MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
 	gNumBonesInBatch = numBonesInBatch;
 }
 
+
+MF_API void* MFRenderer_AllocateRenderMemory(size_t bytes, size_t alignment)
+{
+	MFDebug_Assert(bytes <= gRenderMemorySize, "Allocation is larger than render memory heap!");
+
+	size_t end = gRenderMemoryOffset < gRenderMemoryMark ? gRenderMemoryMark-1 : gRenderMemorySize;
+
+	while(end - MFALIGN(gRenderMemoryOffset, alignment) < bytes)
+	{
+		if(gRenderMemoryOffset >= gRenderMemoryMark)
+		{
+			gRenderMemoryOffset = 0;
+			end = gRenderMemoryMark-1;
+			continue;
+		}
+
+		MFDebug_Assert(false, "Out of render memory!");
+		return NULL;
+	}
+
+	void *pMem = pRenderMemory + MFALIGN(gRenderMemoryOffset, alignment);
+	gRenderMemoryOffset = MFALIGN(gRenderMemoryOffset, alignment) + bytes;
+	return pMem;
+}
 
 //////////////////
 

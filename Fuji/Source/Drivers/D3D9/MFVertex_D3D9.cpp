@@ -5,6 +5,7 @@
 #if defined(MF_RENDERPLUGIN_D3D9)
 	#define MFVertex_InitModulePlatformSpecific MFVertex_InitModulePlatformSpecific_D3D9
 	#define MFVertex_DeinitModulePlatformSpecific MFVertex_DeinitModulePlatformSpecific_D3D9
+	#define MFVertex_ChoooseVertexDataTypePlatformSpecific MFVertex_ChoooseVertexDataTypePlatformSpecific_D3D9
 	#define MFVertex_CreateVertexDeclarationPlatformSpecific MFVertex_CreateVertexDeclarationPlatformSpecific_D3D9
 	#define MFVertex_DestroyVertexDeclarationPlatformSpecific MFVertex_DestroyVertexDeclarationPlatformSpecific_D3D9
 	#define MFVertex_CreateVertexBufferPlatformSpecific MFVertex_CreateVertexBufferPlatformSpecific_D3D9
@@ -79,7 +80,15 @@ static const D3DPRIMITIVETYPE gPrimTypes[MFPT_Max] =
 	D3DPT_TRIANGLEFAN, // MFVPT_TriangleFan
 };
 
-MFVertexDataFormat MFVertexD3D9_ChoooseDataType(MFVertexElementType elementType, int components)
+void MFVertex_InitModulePlatformSpecific()
+{
+}
+
+void MFVertex_DeinitModulePlatformSpecific()
+{
+}
+
+MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElementType elementType, int components)
 {
 	const MFVertexDataFormat floatComponents[5] = { MFVDF_Unknown, MFVDF_Float1, MFVDF_Float2, MFVDF_Float3, MFVDF_Float4 };
 	switch(elementType)
@@ -96,53 +105,25 @@ MFVertexDataFormat MFVertexD3D9_ChoooseDataType(MFVertexElementType elementType,
 	return floatComponents[components];
 }
 
-void MFVertex_InitModulePlatformSpecific()
-{
-}
-
-void MFVertex_DeinitModulePlatformSpecific()
-{
-}
-
 bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
 	MFVertexElement *pElements = pDeclaration->pElements;
 	MFVertexElementData *pElementData = pDeclaration->pElementData;
 
-	int streamOffsets[16];
-	MFZeroMemory(streamOffsets, sizeof(streamOffsets));
-
 	D3DVERTEXELEMENT9 elements[32];
 	D3DVERTEXELEMENT9 endMacro = D3DDECL_END();
 	for(int a=0; a<pDeclaration->numElements; ++a)
 	{
-		MFVertexDataFormat dataFormat;
-		if(pElements[a].format == MFVDF_Auto)
-			dataFormat = MFVertexD3D9_ChoooseDataType(pElements[a].type, pElements[a].componentCount);
-		else
-			dataFormat = pElements[a].format;
-		MFDebug_Assert(gDataType[dataFormat] != (BYTE)-1, "Invalid vertex data format!");
+		MFDebug_Assert(gDataType[pElements[a].format] != (BYTE)-1, "Invalid vertex data format!");
 
 		elements[a].Stream = (uint16)pElements[a].stream;
-		elements[a].Offset = (uint16)streamOffsets[pElements[a].stream];
-		elements[a].Type = gDataType[dataFormat];
+		elements[a].Offset = (uint16)pElementData[a].offset;
+		elements[a].Type = gDataType[pElements[a].format];
 		elements[a].Method = D3DDECLMETHOD_DEFAULT;
 		elements[a].Usage = gUsageSemantic[pElements[a].type];
 		elements[a].UsageIndex = (uint8)pElements[a].index;
-
-		pElementData[a].format = dataFormat;
-		pElementData[a].offset = streamOffsets[pElements[a].stream];
-		pElementData[a].stride = 0;
-		pElementData[a].pData = NULL;
-
-		streamOffsets[pElements[a].stream] += gVertexDataStride[dataFormat];
-		pDeclaration->streamsUsed |= MFBIT(pElements[a].stream);
 	}
 	elements[pDeclaration->numElements] = endMacro;
-
-	// set the strides for each component
-	for(int a=0; a<pDeclaration->numElements; ++a)
-		pElementData[a].stride = streamOffsets[pElements[a].stream];
 
 	IDirect3DVertexDeclaration9 *pVertexDecl;
 	HRESULT hr = pd3dDevice->CreateVertexDeclaration(elements, &pVertexDecl);
@@ -162,8 +143,29 @@ void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDec
 
 bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory)
 {
-	DWORD usage = pVertexBuffer->type == MFVBType_Static ? D3DUSAGE_WRITEONLY : D3DUSAGE_DYNAMIC;
-	D3DPOOL pool = usage == D3DUSAGE_DYNAMIC ? D3DPOOL_DEFAULT : D3DPOOL_MANAGED;
+	DWORD usage;
+	D3DPOOL pool;
+	switch(pVertexBuffer->bufferType)
+	{
+		case MFVBType_Static:
+			pool = D3DPOOL_MANAGED;
+			usage = 0;
+			break;
+		case MFVBType_Dynamic:
+			pool = D3DPOOL_DEFAULT;
+			usage = D3DUSAGE_WRITEONLY;
+			usage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			break;
+		case MFVBType_Scratch:
+			// Maybe it's better to use UP draw calls for scratch buffers?
+			pool = D3DPOOL_DEFAULT;
+			usage = D3DUSAGE_WRITEONLY;
+//			usage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY; // DYNAMIC is supposedly only for frequent locking... we don't intend to lock more than once 
+			break;
+		default:
+			MFDebug_Assert(false, "Invalid vertex buffer type!");
+			return false;
+	}
 
 	int stride = pVertexBuffer->pVertexDeclatation->pElementData[0].stride;
 
@@ -197,33 +199,23 @@ MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVe
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
 	IDirect3DVertexBuffer9 *pVB = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
-
-	void *pData;
-	HRESULT hr = pVB->Lock(0, 0, &pData, pVertexBuffer->bufferType == MFVBType_Static ? 0 : D3DLOCK_DISCARD);
+	HRESULT hr = pVB->Lock(0, 0, &pVertexBuffer->pLocked, pVertexBuffer->bufferType == MFVBType_Dynamic ? D3DLOCK_DISCARD | D3DLOCK_NOOVERWRITE : 0);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock vertex buffer");
 
 	if(ppVertices)
-		*ppVertices = pData;
-
-	for(int a=0; a<pVertexBuffer->pVertexDeclatation->numElements; ++a)
-	{
-		if(pVertexBuffer->pVertexDeclatation->pElements[a].stream == 0)
-			pVertexBuffer->pVertexDeclatation->pElementData[a].pData = (char*)pData + pVertexBuffer->pVertexDeclatation->pElementData[a].offset;
-		else
-			pVertexBuffer->pVertexDeclatation->pElementData[a].pData = NULL;
-	}
+		*ppVertices = pVertexBuffer->pLocked;
 
 	pVertexBuffer->bLocked = true;
 }
 
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
-	MFDebug_Assert(pVertexBuffer->bLocked, "Vertex buffer already locked!");
+	MFDebug_Assert(pVertexBuffer->bLocked, "Vertex buffer not locked!");
 
 	IDirect3DVertexBuffer9 *pVertBuffer = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
-
 	pVertBuffer->Unlock();
 
+	pVertexBuffer->pLocked = NULL;
 	pVertexBuffer->bLocked = false;
 }
 
@@ -258,15 +250,27 @@ MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppInd
 {
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Index buffer already locked!");
 
-	*ppIndices = pIndexBuffer->pIndices;
+	IDirect3DIndexBuffer9 *pIB = (IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData;
+	HRESULT hr = pIB->Lock(0, sizeof(uint16)*pIndexBuffer->numIndices, &pIndexBuffer->pLocked, 0);
+	MFDebug_Assert(SUCCEEDED(hr), "Failed to lock index buffer");
+
+	if(ppIndices)
+		*ppIndices = (uint16*)pIndexBuffer->pLocked;
 
 	pIndexBuffer->bLocked = true;
 }
 
 MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
-	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer already locked!");
+	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer not locked!");
 
+	IDirect3DIndexBuffer9 *pIB = (IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData;
+	pIB->Unlock();
+
+	pIndexBuffer->pLocked = NULL;
+	pIndexBuffer->bLocked = false;
+/*
+	// why on earth did I defer the index locking to a post process???
 	IDirect3DIndexBuffer9 *pIB = (IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData;
 
 	void *pData;
@@ -275,6 +279,7 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	pIB->Unlock();
 
 	pIndexBuffer->bLocked = false;
+*/
 }
 
 MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)

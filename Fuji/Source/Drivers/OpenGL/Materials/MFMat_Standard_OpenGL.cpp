@@ -10,11 +10,9 @@
 	#define MFMat_Standard_DestroyInstancePlatformSpecific MFMat_Standard_DestroyInstancePlatformSpecific_OpenGL
 #endif
 
-#include "MFHeap.h"
+#include "MFRenderState_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
-#include "MFDisplay_Internal.h"
-#include "MFView_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
 
 #include "../MFOpenGL.h"
@@ -48,13 +46,55 @@ static const GLint glTexFilters[] =
 	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Anisotropic
 };
 
-static const GLint glTexAddressing[MFMatStandard_TexAddress_Max] =
+static const GLint glTexAddressing[MFTexAddressMode_Max] =
 {
 	GL_REPEAT,					// MFMatStandard_TexAddress_Wrap
 	GL_MIRRORED_REPEAT,			// MFMatStandard_TexAddress_Mirror
 	GL_CLAMP_TO_EDGE,			// MFMatStandard_TexAddress_Clamp
 	GL_CLAMP_TO_BORDER,			// MFMatStandard_TexAddress_Border
 	GL_MIRROR_CLAMP_TO_EDGE_EXT // MFMatStandard_TexAddress_MirrorOnce
+};
+
+static const GLenum glBlendOp[MFBlendOp_BlendOpCount] =
+{
+    GL_FUNC_ADD,
+    GL_FUNC_SUBTRACT,
+    GL_FUNC_REVERSE_SUBTRACT,
+    GL_MIN,
+    GL_MAX
+};
+
+static const GLenum glBlendArg[MFBlendArg_Max] =
+{
+	GL_ZERO,
+	GL_ONE,
+	GL_SRC_COLOR,
+	GL_ONE_MINUS_SRC_COLOR,
+	GL_SRC_ALPHA,
+	GL_ONE_MINUS_SRC_ALPHA,
+	GL_DST_COLOR,
+	GL_ONE_MINUS_DST_COLOR,
+	GL_DST_ALPHA,
+	GL_ONE_MINUS_DST_ALPHA,
+	GL_SRC_ALPHA_SATURATE,
+	GL_CONSTANT_COLOR,
+	GL_ONE_MINUS_CONSTANT_COLOR,
+	GL_SRC1_COLOR,
+	GL_ONE_MINUS_SRC1_COLOR,
+	GL_SRC1_ALPHA,
+	GL_ONE_MINUS_SRC1_ALPHA,
+};
+
+static const GLenum glCompareFunc[MFComparisonFunc_Max] =
+{
+	GL_NEVER,
+	GL_LESS,
+	GL_EQUAL,
+	GL_LEQUAL,
+	GL_GREATER,
+	GL_NOTEQUAL,
+	GL_GEQUAL,
+	GL_ALWAYS
 };
 
 #if defined(MF_OPENGL_SUPPORT_SHADERS)
@@ -162,162 +202,271 @@ void MFMat_Standard_UnregisterMaterial()
 #endif
 }
 
-inline void MFMat_Standard_SetTextureFlags(MFMat_Standard_Data::Texture &tex)
+inline void MFMat_Standard_SetSamplerState(MFSamplerState *pSampler, int sampler, const char *pName)
 {
-	GLuint texId = (GLuint)(size_t)tex.pTexture->pInternalData;
+	glActiveTexture(GL_TEXTURE0 + sampler);
 
-	glBindTexture(GL_TEXTURE_2D, texId);
-
-	int minFilter = tex.pTexture->pTemplateData->mipLevels > 1 ? (tex.minFilter | (tex.mipFilter << 2)) : tex.minFilter;
+//	int minFilter = tex.pTexture->pTemplateData->mipLevels > 1 ? (tex.minFilter | (tex.mipFilter << 2)) : tex.minFilter;
+	int minFilter = (pSampler->stateDesc.mipFilter << 2) | pSampler->stateDesc.minFilter;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexFilters[minFilter]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glTexFilters[tex.magFilter]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glTexFilters[pSampler->stateDesc.magFilter]);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glTexAddressing[tex.addressU]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glTexAddressing[tex.addressV]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glTexAddressing[pSampler->stateDesc.addressU]);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glTexAddressing[pSampler->stateDesc.addressV]);
+
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+	if(MFOpenGL_UseShaders())
+		MFRenderer_OpenGL_SetUniformS(pName, sampler);
+#endif
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
 
-	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
-
-	if(pSetMaterial != pMaterial)
-	{
 #if MFMatStandard_TexFilter_Max > 4
-		#error "glTexFilters only supports 4 mip filters..."
+	#error "glTexFilters only supports 4 mip filters..."
 #endif
 
-	    bool premultipliedAlpha = false;
+	bool bDetailPresent = state.isSet(MFSB_CT_Bool, MFSCB_DetailMapSet);
+	bool bDiffusePresent = state.isSet(MFSB_CT_Bool, MFSCB_DiffuseSet);
 
-		// set some render states
-		if(pData->detailMapIndex)
+	if(bDetailPresent)
+	{
+		// set detail map
+		MFTexture *pDetail = state.pTextures[MFSCT_DetailMap];
+		if(state.pTexturesSet[MFSCT_DetailMap] != pDetail)
 		{
-			// HACK: for compound multitexturing
-			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
-			MFMat_Standard_Data::Texture &detail = pData->textures[pData->detailMapIndex];
+			state.pTexturesSet[MFSCT_DetailMap] = pDetail;
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-			if(MFOpenGL_UseShaders())
-			{
-				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
-
-				glActiveTexture(GL_TEXTURE0);
-				MFMat_Standard_SetTextureFlags(detail);
-				MFRenderer_OpenGL_SetUniformS("detail", 0);
-
-				glActiveTexture(GL_TEXTURE1);
-				MFMat_Standard_SetTextureFlags(diffuse);
-				MFRenderer_OpenGL_SetUniformS("diffuse", 1);
-			}
-			else
-#endif
-			{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-				glActiveTexture(GL_TEXTURE0);
-				glEnable(GL_TEXTURE_2D);
-
-				MFMat_Standard_SetTextureFlags(detail);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-				glActiveTexture(GL_TEXTURE1);
-				glEnable(GL_TEXTURE_2D);
-
-				MFMat_Standard_SetTextureFlags(diffuse);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-#endif
-			}
-
-			MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Texture, pData->textureMatrix);
-		}
-		else if(pData->textures[pData->diffuseMapIndex].pTexture)
-		{
-			MFMat_Standard_Data::Texture &diffuse = pData->textures[pData->diffuseMapIndex];
-
-			premultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
-
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-			if(MFOpenGL_UseShaders())
-			{
-				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
-
-				glActiveTexture(GL_TEXTURE0);
-				MFMat_Standard_SetTextureFlags(diffuse);
-				MFRenderer_OpenGL_SetUniformS("diffuse", 0);
-			}
-			else
-#endif
-			{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-				glActiveTexture(GL_TEXTURE0);
-				glEnable(GL_TEXTURE_2D);
-
-				MFMat_Standard_SetTextureFlags(diffuse);
-				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-				glActiveTexture(GL_TEXTURE1);
-				glDisable(GL_TEXTURE_2D);
-#endif
-			}
-
-			MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Texture, pData->textureMatrix);
-		}
-		else
-		{
 			glActiveTexture(GL_TEXTURE0);
-		    glDisable(GL_TEXTURE_2D);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDetail->pInternalData);
+		}
+
+		// set detail map sampler
+		MFSamplerState *pDetailSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DetailMapSamplerState];
+		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
+		{
+			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
+
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+			if(MFOpenGL_UseShaders())
+				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
+#endif
+			MFMat_Standard_SetSamplerState(pDetailSamp, 0, "detail");
+		}
+	}
+	else
+	{
+		if(state.pTexturesSet[MFSCT_DetailMap] != NULL)
+		{
+			state.pTexturesSet[MFSCT_DetailMap] = NULL;
+
 			glActiveTexture(GL_TEXTURE1);
-		    glDisable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_2D);
+		}
+	}
+
+	if(bDiffusePresent)
+	{
+		int diffuseSlot = bDetailPresent ? 1 : 0;
+
+		// set diffuse map
+		MFTexture *pDiffuse = state.pTextures[MFSCT_Diffuse];
+		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse || state.boolChanged(MFSCB_DetailMapSet))
+		{
+			state.pTexturesSet[MFSCT_Diffuse] = pDiffuse;
+
+			glActiveTexture(GL_TEXTURE0 + diffuseSlot);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDiffuse->pInternalData);
+		}
+
+		// set diffuse map sampler
+		MFSamplerState *pDiffuseSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DiffuseSamplerState];
+		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp || state.boolChanged(MFSCB_DetailMapSet))
+		{
+			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
+
+#if defined(MF_OPENGL_SUPPORT_SHADERS)
+			if(!bDetailPresent && MFOpenGL_UseShaders())
+				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
+#endif
+			MFMat_Standard_SetSamplerState(pDiffuseSamp, diffuseSlot, "diffuse");
+		}
+	}
+	else
+	{
+		if(state.pTexturesSet[MFSCT_Diffuse] != NULL)
+		{
+			state.pTexturesSet[MFSCT_Diffuse] = NULL;
+
+			glActiveTexture(GL_TEXTURE0);
+			glDisable(GL_TEXTURE_2D);
 
 #if defined(MF_OPENGL_SUPPORT_SHADERS)
 			if(MFOpenGL_UseShaders())
 				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
 #endif
 		}
+	}
 
-		switch(pData->materialType&MF_BlendMask)
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
+	// configure the texture combiner (can we cache this?)
+	if(state.boolChanged(MFSCB_DetailMapSet) || state.boolChanged(MFSCB_DiffuseSet) || state.boolChanged(MFSCB_User0))
+	{
+		const uint32 mask = MFBIT(MFSCB_DetailMapSet) | MFBIT(MFSCB_DiffuseSet) | MFBIT(MFSCB_User0);
+		state.boolsSet = (state.boolsSet & ~mask) | (state.bools & mask);
+
+		if(bDetailPresent)
 		{
-			case 0:
-				glDisable(GL_BLEND);
-				break;
-			case MF_AlphaBlend:
-				glEnable(GL_BLEND);
-				glBlendFunc(premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				break;
-			case MF_Additive:
-				glEnable(GL_BLEND);
-				glBlendFunc(premultipliedAlpha ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
-				break;
-			case MF_Subtractive:
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-				break;
+			glActiveTexture(GL_TEXTURE0);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			glActiveTexture(GL_TEXTURE1);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 		}
-
-		switch(pData->materialType&MF_CullMode)
+		else
 		{
-			case 0<<6:
+			glActiveTexture(GL_TEXTURE0);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+			if(state.getBool(MFSCB_User0))
+			{
+				// premultiplied alpha?
+			}
+			else
+			{
+				// and not...
+			}
+		}
+	}
+#endif
+
+	if(state.pMatrixStatesSet[MFSCM_Projection] != state.pMatrixStates[MFSCM_Projection])
+	{
+		MFMatrix *pProj = state.pMatrixStates[MFSCM_Projection];
+		state.pMatrixStatesSet[MFSCM_Projection] = pProj;
+
+		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Projection, *pProj);
+	}
+
+	if(state.pMatrixStatesSet[MFSCM_WorldView] != state.pMatrixStates[MFSCM_WorldView])
+	{
+		MFMatrix *pWV = state.getDerivedMatrix(MFSCM_WorldView);
+		state.pMatrixStates[MFSCM_WorldView] = pWV;
+
+		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, *pWV);
+	}
+
+	if(state.pMatrixStatesSet[MFSCM_UV0] != state.pMatrixStates[MFSCM_UV0])
+	{
+		MFMatrix *pUV0 = state.pMatrixStates[MFSCM_UV0];
+		state.pMatrixStatesSet[MFSCM_UV0] = pUV0;
+
+		if(bDetailPresent)
+		{
+			glActiveTexture(GL_TEXTURE1);
+			MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Texture, *pUV0);
+		}
+		glActiveTexture(GL_TEXTURE0);
+		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Texture, *pUV0);
+	}
+/*
+	if(state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] != state.pVectorStates[MFSCV_MaterialDiffuseColour])
+	{
+		MFVector *pDiffuseColour = state.pVectorStates[MFSCV_MaterialDiffuseColour];
+		state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] = pDiffuseColour;
+
+//		pd3dDevice->SetVertexShaderConstantF(r_modelColour, (float*)pDiffuseColour, 1);
+	}
+*/
+
+	// blend state
+	MFBlendState *pBlendState = (MFBlendState*)state.pRenderStates[MFSCRS_BlendState];
+	if(state.pRenderStatesSet[MFSCRS_BlendState] != pBlendState)
+	{
+		state.pRenderStatesSet[MFSCRS_BlendState] = pBlendState;
+
+		MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[0];
+		if(target.bEnable)
+		{
+			glEnable(GL_BLEND);
+
+			glBlendEquation(glBlendOp[target.blendOp]);
+			glBlendFuncSeparate(glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
+//			glBlendFunc(glBlendArg[target.srcBlend], glBlendArg[target.destBlend]);
+		}
+		else
+			glDisable(GL_BLEND);
+	}
+
+	// rasteriser state
+	MFRasteriserState *pRasteriserState = (MFRasteriserState*)state.pRenderStates[MFSCRS_RasteriserState];
+	if(state.pRenderStatesSet[MFSCRS_RasteriserState] != pRasteriserState)
+	{
+		state.pRenderStatesSet[MFSCRS_RasteriserState] = pRasteriserState;
+
+		switch(pRasteriserState->stateDesc.cullMode)
+		{
+			case MFCullMode_None:
 				glDisable(GL_CULL_FACE);
 				break;
-			case 1<<6:
+			case MFCullMode_CCW:
 				glEnable(GL_CULL_FACE);
-				glCullFace(GL_FRONT);
-				break;
-			case 2<<6:
-				glEnable(GL_CULL_FACE);
+				glFrontFace(GL_CW);
 				glCullFace(GL_BACK);
 				break;
-			case 3<<6:
-				// 'default' ?
+			case MFCullMode_CW:
 				glEnable(GL_CULL_FACE);
-				glCullFace(GL_FRONT);
+				glFrontFace(GL_CCW);
+				glCullFace(GL_BACK);
 				break;
 		}
-
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc((pData->materialType&MF_NoZRead) ? GL_ALWAYS : GL_LEQUAL);
-		glDepthMask((pData->materialType&MF_NoZWrite) ? 0 : 1);
 	}
+
+	// depth/stencil state
+	MFDepthStencilState *pDSState = (MFDepthStencilState*)state.pRenderStates[MFSCRS_DepthStencilState];
+	if(state.pRenderStatesSet[MFSCRS_DepthStencilState] != pDSState)
+	{
+		state.pRenderStatesSet[MFSCRS_DepthStencilState] = pDSState;
+
+		if(pDSState->stateDesc.bDepthEnable)
+		{
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(glCompareFunc[pDSState->stateDesc.depthFunc]);
+			glDepthMask(pDSState->stateDesc.depthWriteMask == MFDepthWriteMask_Zero ? GL_FALSE : GL_TRUE);
+		}
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
+
+	// setup alpha test
+	if(state.boolChanged(MFSCB_AlphaTest) || (state.pVectorStatesSet[MFSCV_RenderState] != state.pVectorStates[MFSCV_RenderState] && state.getBool(MFSCB_AlphaTest)))
+	{
+		MFVector *pRS = state.pVectorStates[MFSCV_RenderState];
+		state.pVectorStatesSet[MFSCV_RenderState] = pRS;
+		state.boolsSet = (state.boolsSet & ~MFBIT(MFSCB_AlphaTest)) | (state.bools & MFBIT(MFSCB_AlphaTest));
+
+		if(state.getBool(MFSCB_AlphaTest))
+		{
+			glEnable(GL_ALPHA_TEST);
+			glAlphaFunc(GL_GEQUAL, pRS->x);
+		}
+		else
+			glDisable(GL_ALPHA_TEST);
+	}
+/*
+	// set clour/alpha scales
+	if(state.pVectorStatesSet[MFSCV_User0] != state.pVectorStates[MFSCV_User0])
+	{
+		MFVector *pMask = state.pVectorStates[MFSCV_User0];
+		state.pVectorStatesSet[MFSCV_User0] = pMask;
+
+//		pd3dDevice->SetVertexShaderConstantF(r_colourMask, (float*)pMask, 1);
+	}
+*/
 
 	MFCheckForOpenGLError(true);
 

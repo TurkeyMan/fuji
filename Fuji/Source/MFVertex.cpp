@@ -1,5 +1,6 @@
 #include "Fuji.h"
 #include "MFVertex_Internal.h"
+#include "MFRenderer.h"
 #include "MFHeap.h"
 #include "MFVector.h"
 
@@ -41,8 +42,26 @@ void MFVertex_DeinitModule()
 	MFVertex_DeinitModulePlatformSpecific();
 }
 
+void MFVertex_EndFrame()
+{
+	while(gpScratchBufferList)
+	{
+		// allow the platform to release any hardware resources...
+		MFVertex_DestroyVertexBufferPlatformSpecific(gpScratchBufferList);
+
+		gpScratchBufferList = gpScratchBufferList->pNextScratchBuffer;
+	}
+}
+
 MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
 {
+	// assign the auto format components before calculating the hash
+	for(int e=0; e<elementCount; ++e)
+	{
+		if(pElementArray[e].format == MFVDF_Auto)
+			pElementArray[e].format = MFVertex_ChoooseVertexDataTypePlatformSpecific(pElementArray[e].type, pElementArray[e].componentCount);
+	}
+
 	uint32 hash = MFUtil_HashBuffer(pElementArray, sizeof(MFVertexElement)*elementCount);
 
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_FindResource(hash);
@@ -51,24 +70,35 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 		pDecl = (MFVertexDeclaration*)MFHeap_AllocAndZero(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
 		pDecl->type = MFRT_VertexDecl;
 		pDecl->hash = hash;
-		pDecl->refCount = 0;
 
 		pDecl->numElements = elementCount;
 		pDecl->pElements = (MFVertexElement*)&pDecl[1];
 		pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
-		pDecl->pPlatformData = NULL;
-		pDecl->streamsUsed = 0;
 
 		MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
-		MFZeroMemory(pDecl->pElementData, sizeof(MFVertexElementData)*elementCount);
+
+		int streamOffsets[16];
+		MFZeroMemory(streamOffsets, sizeof(streamOffsets));
+
+		// set the element data and calculate the strides
+		for(int e=0; e<elementCount; ++e)
+		{
+			pDecl->pElementData[e].offset = streamOffsets[pElementArray[e].stream];
+			pDecl->pElementData[e].stride = 0;
+
+			streamOffsets[pElementArray[e].stream] += gVertexDataStride[pElementArray[e].format];
+			pDecl->streamsUsed |= MFBIT(pElementArray[e].stream);
+		}
+
+		// set the strides for each component
+		for(int e=0; e<elementCount; ++e)
+			pDecl->pElementData[e].stride = streamOffsets[pElementArray[e].stream];
 
 		if(!MFVertex_CreateVertexDeclarationPlatformSpecific(pDecl))
 		{
 			MFHeap_Free(pDecl);
 			return NULL;
 		}
-
-		MFDebug_Assert(pDecl->streamsUsed != 0, "Stream usage was not assigned!");
 
 		MFResource_AddResource(pDecl);
 
@@ -127,7 +157,11 @@ MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *p
 
 MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
 {
-	MFVertexBuffer *pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer));
+	MFVertexBuffer *pVB;
+	if(type == MFVBType_Scratch)
+		pVB = (MFVertexBuffer*)MFRenderer_AllocateRenderMemory(sizeof(MFVertexBuffer));
+	else
+		pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer));
 	pVB->type = MFRT_VertexBuffer;
 	pVB->hash = (uint32)pVB;
 	pVB->refCount = 1;
@@ -141,7 +175,8 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexF
 
 	if(!MFVertex_CreateVertexBufferPlatformSpecific(pVB, pVertexBufferMemory))
 	{
-		MFHeap_Free(pVB);
+		if(type != MFVBType_Scratch)
+			MFHeap_Free(pVB);
 		return NULL;
 	}
 
@@ -172,62 +207,62 @@ MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	MFHeap_Free(pVertexBuffer);
 }
 
-static MFVertexElement *MFVertex_FindVertexElement(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, MFVertexElementData **ppElementData)
+static int MFVertex_FindVertexElement(MFVertexDeclaration *pDecl, MFVertexElementType targetElement, int targetElementIndex)
 {
-	MFVertexDeclaration *pDecl = pVertexBuffer->pVertexDeclatation;
-
 	for(int a=0; a<pDecl->numElements; ++a)
 	{
 		if(pDecl->pElements[a].type == targetElement && pDecl->pElements[a].index == targetElementIndex)
-		{
-			if(ppElementData)
-				*ppElementData = pDecl->pElementData + a;
-			return pDecl->pElements + a;
-		}
+			return a;
 	}
-
-	return NULL;
+	return -1;
 }
 
 MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices)
 {
-	MFVertexElementData *pElementData;
-	if(!pVertexBuffer->bLocked || !MFVertex_FindVertexElement(pVertexBuffer, targetElement, targetElementIndex, &pElementData))
+	MFVertexDeclaration *pDecl = pVertexBuffer->pVertexDeclatation;
+	int element = MFVertex_FindVertexElement(pDecl, targetElement, targetElementIndex);
+
+	if(!pVertexBuffer->bLocked || element == -1)
 		return;
 
 	MFDebug_Assert(numVertices <= pVertexBuffer->numVerts, "Too manu vertices for vertex buffer!");
 
-	if(pElementData->format == sourceDataFormat && pElementData->stride == sourceDataStride)
+	MFVertexDataFormat format = pDecl->pElements[element].format;
+	int stride = pDecl->pElementData[element].stride;
+	int offset = pDecl->pElementData[element].offset;
+	void *pElementData = (char*)pVertexBuffer->pLocked + offset;
+
+	if(format == sourceDataFormat && stride == sourceDataStride)
 	{
-		// direct stream copy
-		MFCopyMemory(pElementData->pData, pSourceData, numVertices * sourceDataStride);
+		// The stream has only a single element, we can memcopy
+		MFCopyMemory(pElementData, pSourceData, numVertices * sourceDataStride);
 	}
-	else if(pElementData->format == sourceDataFormat)
+	else if(format == sourceDataFormat)
 	{
 		// interleaved stream copy
 		char *pSource = (char*)pSourceData;
-		char *pTarget = (char*)pElementData->pData;
+		char *pTarget = (char*)pElementData;
 		int dataSize = gVertexDataStride[sourceDataFormat];
 		for(int a=0; a<numVertices; ++a)
 		{
 			MFCopyMemory(pTarget, pSource, dataSize);
 			pSource += sourceDataStride;
-			pTarget += pElementData->stride;
+			pTarget += stride;
 		}
 	}
 	else
 	{
 		// transcode formats....
 		char *pSource = (char*)pSourceData;
-		char *pTarget = (char*)pElementData->pData;
+		char *pTarget = (char*)pElementData;
 		if(sourceDataFormat == MFVDF_Float4)
 		{
 			// this is a really common case (filling a vertex buffer with generated vertex data, or blanket setting to zero/one)
 			for(int a=0; a<numVertices; ++a)
 			{
-				MFVertex_PackVertexData(*(MFVector*)pSource, pTarget, pElementData->format);
+				MFVertex_PackVertexData(*(MFVector*)pSource, pTarget, format);
 				pSource += sourceDataStride;
-				pTarget += pElementData->stride;
+				pTarget += stride;
 			}
 		}
 		else
@@ -235,9 +270,9 @@ MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexEleme
 			for(int a=0; a<numVertices; ++a)
 			{
 				MFVector v = MFVertex_UnpackVertexData(pSource, sourceDataFormat);
-				MFVertex_PackVertexData(v, pTarget, pElementData->format);
+				MFVertex_PackVertexData(v, pTarget, format);
 				pSource += sourceDataStride;
-				pTarget += pElementData->stride;
+				pTarget += stride;
 			}
 		}
 	}
@@ -265,12 +300,14 @@ MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexEl
 
 MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
 {
-	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer) + (pIndexBufferMemory ? 0 : sizeof(uint16)*numIndices));
+	// Why did I allocate a buffer for the index data here???
+//	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer) + (pIndexBufferMemory ? 0 : sizeof(uint16)*numIndices));
+	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer));
 	pIB->type = MFRT_IndexBuffer;
 	pIB->hash = (uint32)pIB;
 	pIB->refCount = 1;
 
-	pIB->pIndices = pIndexBufferMemory ? pIndexBufferMemory : (uint16*)&pIB[1];
+//	pIB->pIndices = pIndexBufferMemory ? pIndexBufferMemory : (uint16*)&pIB[1];
 	pIB->numIndices = numIndices;
 	pIB->bLocked = false;
 	pIB->pPlatformData = NULL;

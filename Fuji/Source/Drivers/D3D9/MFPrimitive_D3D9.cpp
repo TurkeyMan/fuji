@@ -59,7 +59,7 @@ static MFMesh currentPrim;
 static MFVertexBuffer *pVB;
 static LitVertex *pLocked;
 
-static bool gRenderQuads = false;
+static bool gImmitateQuads = false;
 static LitVertex current;
 static int currentVert;
 
@@ -67,8 +67,6 @@ static int currentVert;
 
 MFInitStatus MFPrimitive_InitModule()
 {
-	MFCALLSTACK;
-
 	MFVertexElement elements[4];
 
 	// write declaration
@@ -104,8 +102,6 @@ MFInitStatus MFPrimitive_InitModule()
 
 void MFPrimitive_DeinitModule()
 {
-	MFCALLSTACK;
-
 	MFVertex_DestroyVertexDeclaration(pDecl);
 }
 
@@ -130,13 +126,14 @@ MF_API void MFPrimitive(uint32 type, uint32 hint)
 	else
 		pMaterial = MFMaterial_GetCurrent();
 
-	if(currentPrim.primType == PT_QuadList)
+	if(currentPrim.primType == MFPT_QuadList)
 	{
+		// D3D9 doesn't support rendering quads...
 		currentPrim.primType = MFPT_TriangleList;
-		gRenderQuads = true;
+		gImmitateQuads = true;
 	}
 	else
-		gRenderQuads = false;
+		gImmitateQuads = false;
 }
 
 MF_API void MFBegin(uint32 vertexCount)
@@ -144,7 +141,7 @@ MF_API void MFBegin(uint32 vertexCount)
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
 	currentPrim.numVertices = vertexCount;
-	if(gRenderQuads)
+	if(gImmitateQuads)
 		currentPrim.numVertices *= 3;
 
 	// create an appropriate vertex buffer
@@ -191,7 +188,7 @@ MF_API void MFSetPosition(float x, float y, float z)
 	current.pos.y = y;
 	current.pos.z = z;
 
-	if(gRenderQuads && (currentVert & 1))
+	if(gImmitateQuads && (currentVert & 1))
 	{
 		LitVertex &prev = pLocked[currentVert - 1];
 

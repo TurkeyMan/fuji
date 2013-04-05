@@ -31,12 +31,12 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
 	return true;
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 

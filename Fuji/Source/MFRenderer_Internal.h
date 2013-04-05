@@ -9,12 +9,13 @@
 // init/deinit
 MFInitStatus MFRenderer_InitModule();
 void MFRenderer_DeinitModule();
+bool MFRenderer_BeginFrame();
+void MFRenderer_EndFrame();
 
 void MFRenderer_InitModulePlatformSpecific();
 void MFRenderer_DeinitModulePlatformSpecific();
-
-bool MFRenderer_BeginFrame();
-void MFRenderer_EndFrame();
+bool MFRenderer_BeginFramePlatformSpecific();
+void MFRenderer_EndFramePlatformSpecific();
 
 int MFRenderer_CreateDisplay();
 void MFRenderer_DestroyDisplay();

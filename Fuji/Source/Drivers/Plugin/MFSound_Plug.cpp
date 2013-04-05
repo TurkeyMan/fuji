@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOUND == MF_DRIVER_ALSA
+#if MF_SOUND == MF_DRIVER_PLUGIN
 
 #include "MFHeap.h"
 #include "MFPtrList.h"

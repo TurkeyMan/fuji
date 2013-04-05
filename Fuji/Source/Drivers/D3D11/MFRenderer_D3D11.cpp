@@ -9,8 +9,8 @@
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D11
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D11
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D11
-	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D11
-	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D11
+	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_D3D11
+	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_D3D11
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D11
 	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D11
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D11
@@ -59,54 +59,6 @@ static CBWorld cbWorld;
 
 //---------------------------------------------------------------------------------------------------------------------
 // Utils
-//---------------------------------------------------------------------------------------------------------------------
-extern int gVertexDataStride[MFVDF_Max];
-//---------------------------------------------------------------------------------------------------------------------
-static const char* s_SemanticName[MFVET_Max] =
-{
-	"POSITION",		// MFVE_Position,
-	"NORMAL",		// MFVE_Normal
-	"COLOR",		// MFVE_Colour
-	"TEXCOORD",		// MFVE_TexCoord
-	"BINORMAL",		// MFVE_Binormal
-	"TANGENT",		// MFVE_Tangent
-	"BLENDINDICES", // MFVE_Indices
-	"BLENDWEIGHT",	// MFVE_Weights
-};
-//---------------------------------------------------------------------------------------------------------------------
-const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type)
-{
-	return s_SemanticName[type];
-}
-//---------------------------------------------------------------------------------------------------------------------
-static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
-{
-	(DXGI_FORMAT)-1,				// MFVDF_Auto
-	DXGI_FORMAT_R32G32B32A32_FLOAT, // MFVDF_Float4
-	DXGI_FORMAT_R32G32B32_FLOAT,	// MFVDF_Float3
-	DXGI_FORMAT_R32G32_FLOAT,		// MFVDF_Float2
-	DXGI_FORMAT_R32_FLOAT,			// MFVDF_Float1
-	DXGI_FORMAT_R8G8B8A8_UINT,		// MFVDF_UByte4_RGBA
-	DXGI_FORMAT_R8G8B8A8_UNORM,		// MFVDF_UByte4N_RGBA
-	DXGI_FORMAT_B8G8R8A8_UNORM,		// MFVDF_UByte4N_BGRA
-	DXGI_FORMAT_R16G16B16A16_SINT,	// MFVDF_SShort4
-	DXGI_FORMAT_R16G16_SINT,		// MFVDF_SShort2
-	DXGI_FORMAT_R16G16B16A16_SNORM, // MFVDF_SShort4N
-	DXGI_FORMAT_R16G16_SNORM,		// MFVDF_SShort2N
-	DXGI_FORMAT_R16G16B16A16_UINT,	// MFVDF_UShort4
-	DXGI_FORMAT_R32G32_UINT,		// MFVDF_UShort2
-	DXGI_FORMAT_R16G16B16A16_UNORM, // MFVDF_UShort4N
-	DXGI_FORMAT_R16G16_UNORM,		// MFVDF_UShort2N
-	DXGI_FORMAT_R16G16B16A16_FLOAT,	// MFVDF_Float16_4
-	DXGI_FORMAT_R16G16_FLOAT,		// MFVDF_Float16_2
-	(DXGI_FORMAT)-1,				// MFVDF_UDec3
-	(DXGI_FORMAT)-1					// MFVDF_Dec3N
-};
-//---------------------------------------------------------------------------------------------------------------------
-DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format)
-{
-	return s_MFVDF_To_DXGI[format];
-}
 //---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_D3D11_SetDebugName(ID3D11DeviceChild* pResource, const char* pName)
 {
@@ -345,13 +297,13 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	return true;
 }
 //---------------------------------------------------------------------------------------------------------------------
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 	return true;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
     

@@ -28,18 +28,12 @@ struct MeshChunkOpenGLRuntimeData
 
 #define USE_VBOS
 
-bool gbUseVBOs = false;
+extern bool gbUseVBOs;
 
 /*** Functions ****/
 
 void MFModel_InitModulePlatformSpecific()
 {
-#if defined(USE_VBOS)
-	if(glBindBuffer && glBufferData && glDeleteBuffers && glGenBuffers)
-		gbUseVBOs = true;
-	else
-		MFDebug_Warn(1, "MFModel: OpenGL Vertex Buffer Object extension not loaded, performance may suffer.");
-#endif
 }
 
 void MFModel_DeinitModulePlatformSpecific()
@@ -71,15 +65,15 @@ MF_API void MFModel_Draw(MFModel *pModel)
 
 				MFRenderer_Begin();
 
-				MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Projection, MFView_GetViewToScreenMatrix());
+				MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Projection, MFView_GetViewToScreenMatrix());
 
 				if(MFView_IsOrtho())
-					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, pModel->worldMatrix);
+					MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, pModel->worldMatrix);
 				else
 				{
 					MFMatrix localToView;
 					MFView_GetLocalToView(pModel->worldMatrix, &localToView);
-					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, localToView);
+					MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, localToView);
 				}
 /*
 				// find vertex attrib locations
