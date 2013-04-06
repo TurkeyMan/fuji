@@ -106,8 +106,11 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 		{
 			// create the stream declarations...
 			MFVertexElement elements[64];
-			for(int s=0; s<8; ++s)
+			for(int s=0; s<16; ++s)
 			{
+				if(!(pDecl->streamsUsed & (1 << s)))
+					continue;
+
 				int streamElements = 0;
 				for(int e=0; e<elementCount; ++e)
 				{
@@ -160,7 +163,7 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexF
 	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFVertexBuffer *pVB;
 	if(type == MFVBType_Scratch)
-		pVB = (MFVertexBuffer*)MFRenderer_AllocateRenderMemory(sizeof(MFVertexBuffer) + nameLen);
+		pVB = (MFVertexBuffer*)MFRenderer_AllocateScratchMemory(sizeof(MFVertexBuffer) + nameLen);
 	else
 		pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer) + nameLen);
 	MFZeroMemory(pVB, sizeof(MFVertexBuffer));

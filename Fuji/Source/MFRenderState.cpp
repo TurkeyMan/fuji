@@ -171,7 +171,7 @@ MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size)
 {
 	MFDebug_Assert(size >= MFStateBlock::MINIMUM_SIZE && MFUtil_NextPowerOf2(size) == size, "Invalid size. Must be a power of 2, and >= MFStateBlock::MINIMUM_SIZE bytes");
 
-	MFStateBlock *pSB = (MFStateBlock*)MFRenderer_AllocateRenderMemory(size);
+	MFStateBlock *pSB = (MFStateBlock*)MFRenderer_AllocateScratchMemory(size);
 	MFZeroMemory(pSB, size);
 
 	// calculate the size

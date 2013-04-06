@@ -19,19 +19,18 @@ int gNumBonesInBatch = 0;
 static MFRenderer *gpCurrentRenderer = NULL;
 static MFRenderLayerSet gCurrentLayers;
 
-static char *pRenderMemory = NULL;
-static size_t gRenderMemorySize = 0;
-static size_t gRenderMemoryOffset = 0;
-static size_t gRenderMemoryMark = 0;
+static char *pScratchMemory = NULL;
+static size_t gScratchMemorySize = 0;
+static size_t gScratchMemoryOffset = 0;
+static size_t gScratchMemoryMark = 0;
+static size_t gScratchMemoryPeak = 0;
 
 MFInitStatus MFRenderer_InitModule()
 {
-	MFCALLSTACK;
-
-	gRenderMemorySize = gDefaults.render.renderHeapSize;
+	gScratchMemorySize = gDefaults.render.renderHeapSize;
 
 	int old = MFHeap_SetAllocAlignment(128); // 4k maybe? texture page?
-	pRenderMemory = (char*)MFHeap_Alloc(gRenderMemorySize);
+	pScratchMemory = (char*)MFHeap_Alloc(gScratchMemorySize);
 	MFHeap_SetAllocAlignment(old);
 
 	MFRenderer_InitModulePlatformSpecific();
@@ -41,11 +40,9 @@ MFInitStatus MFRenderer_InitModule()
 
 void MFRenderer_DeinitModule()
 {
-	MFCALLSTACK;
-
 	MFRenderer_DeinitModulePlatformSpecific();
 
-	MFHeap_Free(pRenderMemory);
+	MFHeap_Free(pScratchMemory);
 }
 
 bool MFRenderer_BeginFrame()
@@ -60,8 +57,12 @@ void MFRenderer_EndFrame()
 	// free scratch buffers
 	MFVertex_EndFrame();
 
+	// calculate the high water mark for the scratch memory
+	size_t size = gScratchMemoryOffset < gScratchMemoryMark ? gScratchMemorySize - gScratchMemoryMark + gScratchMemoryOffset : gScratchMemoryOffset - gScratchMemoryMark;
+	gScratchMemoryPeak = MFMax(gScratchMemoryPeak, size);
+
 	// move the render memory marker to the current offset
-	gRenderMemoryMark = gRenderMemoryOffset;
+	gScratchMemoryMark = gScratchMemoryOffset;
 }
 
 MF_API int MFRenderer_Begin()
@@ -84,19 +85,23 @@ MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch)
 	gNumBonesInBatch = numBonesInBatch;
 }
 
-
-MF_API void* MFRenderer_AllocateRenderMemory(size_t bytes, size_t alignment)
+MF_API void* MFRenderer_AllocateCommandBufferMemory(size_t bytes, size_t alignment)
 {
-	MFDebug_Assert(bytes <= gRenderMemorySize, "Allocation is larger than render memory heap!");
+	return NULL;
+}
 
-	size_t end = gRenderMemoryOffset < gRenderMemoryMark ? gRenderMemoryMark-1 : gRenderMemorySize;
+MF_API void* MFRenderer_AllocateScratchMemory(size_t bytes, size_t alignment)
+{
+	MFDebug_Assert(bytes <= gScratchMemorySize, "Allocation is larger than render memory heap!");
 
-	while(end - MFALIGN(gRenderMemoryOffset, alignment) < bytes)
+	size_t end = gScratchMemoryOffset < gScratchMemoryMark ? gScratchMemoryMark-1 : gScratchMemorySize;
+
+	while(end - MFALIGN(gScratchMemoryOffset, alignment) < bytes)
 	{
-		if(gRenderMemoryOffset >= gRenderMemoryMark)
+		if(gScratchMemoryOffset >= gScratchMemoryMark)
 		{
-			gRenderMemoryOffset = 0;
-			end = gRenderMemoryMark-1;
+			gScratchMemoryOffset = 0;
+			end = gScratchMemoryMark-1;
 			continue;
 		}
 
@@ -104,9 +109,22 @@ MF_API void* MFRenderer_AllocateRenderMemory(size_t bytes, size_t alignment)
 		return NULL;
 	}
 
-	void *pMem = pRenderMemory + MFALIGN(gRenderMemoryOffset, alignment);
-	gRenderMemoryOffset = MFALIGN(gRenderMemoryOffset, alignment) + bytes;
+	void *pMem = pScratchMemory + MFALIGN(gScratchMemoryOffset, alignment);
+	gScratchMemoryOffset = MFALIGN(gScratchMemoryOffset, alignment) + bytes;
 	return pMem;
+}
+
+MF_API void MFRenderer_GetMemoryStats(size_t *pCommandBuffer, size_t *pCommandBufferPeak, size_t *pScratch, size_t *pScratchPeak)
+{
+	// TODO: return details...
+	if(pCommandBuffer)
+		*pCommandBuffer = 0;
+	if(pCommandBufferPeak)
+		*pCommandBufferPeak = 0;
+	if(pScratch)
+		*pScratch = gScratchMemoryOffset < gScratchMemoryMark ? gScratchMemorySize - gScratchMemoryMark + gScratchMemoryOffset : gScratchMemoryOffset - gScratchMemoryMark;
+	if(pScratchPeak)
+		*pScratchPeak = gScratchMemoryPeak;
 }
 
 //////////////////
@@ -174,18 +192,6 @@ MF_API void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet
 {
 	gCurrentLayers = *pLayerSet;
 }
-
-/*
-MF_API void MFRenderer_Begin(MFRenderer *pRenderer)
-{
-	//...
-}
-
-MF_API void MFRenderer_End(MFRenderer *pRenderer)
-{
-	//...
-}
-*/
 
 MF_API void MFRenderer_AddVertices(MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
 {
@@ -255,7 +261,7 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, MFStateBlock **
 
 		// get a mask of the bools that have not been set
 		uint32 boolsToSet = pSB->boolsSet & ~state.rsSet[MFSB_CT_Bool];
-		 
+
 		// mark bools as set
 		state.rsSet[MFSB_CT_Bool] |= boolsToSet;
 
@@ -360,11 +366,11 @@ static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement
 		required[MFSB_CT_RenderState] |= MFBIT(MFSCRS_IndexBuffer);
 
 	// add misc requirements
-	if(state.isSet(MFSB_CT_Bool, MFSCB_Animated) && state.bools & MFBIT(MFSCB_Animated))
+	if(state.getBool(MFSCB_Animated))
 		required[MFSB_CT_Misc] |= MFBIT(MFSCMisc_AnimationMatrices);
-	if(state.isSet(MFSB_CT_Bool, MFSCB_AlphaTest) && state.bools & MFBIT(MFSCB_AlphaTest))
+	if(state.getBool(MFSCB_AlphaTest))
 		required[MFSB_CT_Vector] |= MFBIT(MFSCV_RenderState);
-	
+
 	// add material requirements
 	//...
 	// HACK: hardcode the matrices for now...
@@ -399,11 +405,6 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 		// gather render states
 		MFRenderer_ApplyRenderStates(state, state.pStateBlocks, MFSBT_Layer);
 
-#if defined(MF_DEBUG)
-		// check that all required states are set
-		MFRenderer_CheckRequirements(state, element);
-#endif
-
 		// select the technique here? or do it inside RenderElement()?
 		//...
 		// selection criteria:
@@ -411,6 +412,11 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 		//  - lights
 		//  - constants present
 		//  - values of constants?
+
+#if defined(MF_DEBUG)
+		// check that all required states are set
+		MFRenderer_CheckRequirements(state, element);
+#endif
 
 		// apply render state
 		element.pMaterial->pType->materialCallbacks.pBegin(element.pMaterial, state);
@@ -524,7 +530,25 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 	pLayer->sortMode = sortMode;
 }
 
-//MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
+MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
+{
+
+}
+
+MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture)
+{
+
+}
+
+MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
+{
+
+}
+
+MF_API void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture)
+{
+
+}
 
 MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags, const MFVector &colour, float z, int stencil)
 {

@@ -18,11 +18,10 @@
 #include "MFFileSystem_Internal.h"
 #include "MFFont_Internal.h"
 #include "MFPrimitive_Internal.h"
-#include "DebugMenu.h"
-#include "Timer.h"
-#include "MFFont.h"
 #include "MFRenderer_Internal.h"
 #include "MFRenderState_Internal.h"
+#include "MFShader_Internal.h"
+#include "MFEffect_Internal.h"
 #include "MFSound_Internal.h"
 #include "MFSockets_Internal.h"
 #include "MFNetwork_Internal.h"
@@ -32,6 +31,8 @@
 #include "MFVertex_Internal.h"
 #include "MFThread_Internal.h"
 #include "MFCompute_Internal.h"
+#include "DebugMenu.h"
+#include "Timer.h"
 
 
 MFInitStatus MFString_InitModule();
@@ -204,6 +205,13 @@ uint64 MFModule_RegisterEngineModules()
 	uint64 renderState = MFModule_GetBuiltinModuleMask(MFBIM_MFRenderState);
 	renderer |= renderState;
 	modules |= renderState;
+
+	gBuiltinModuleIDs[MFBIM_MFShader] = (char)MFModule_RegisterModule("MFShader", MFShader_InitModule, MFShader_DeinitModule, renderer);
+	uint64 shader = MFModule_GetBuiltinModuleMask(MFBIM_MFShader);
+	modules |= shader;
+	gBuiltinModuleIDs[MFBIM_MFEffect] = (char)MFModule_RegisterModule("MFEffect", MFEffect_InitModule, MFEffect_DeinitModule, shader);
+	uint64 effect = MFModule_GetBuiltinModuleMask(MFBIM_MFEffect);
+	modules |= effect;
 
 	gBuiltinModuleIDs[MFBIM_MFTexture] = (char)MFModule_RegisterModule("MFTexture", MFTexture_InitModule, MFTexture_DeinitModule, renderer);
 	uint64 texture = MFModule_GetBuiltinModuleMask(MFBIM_MFTexture);

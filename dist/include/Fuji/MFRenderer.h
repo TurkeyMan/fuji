@@ -67,8 +67,11 @@ MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices);
  */
 MF_API void MFRenderer_SetBatch(const uint16 *pBatch, int numBonesInBatch);
 
-MF_API void* MFRenderer_AllocateRenderMemory(size_t bytes, size_t alignment = 16);
+MF_API void* MFRenderer_AllocateCommandBufferMemory(size_t bytes, size_t alignment = 16);
 
+MF_API void* MFRenderer_AllocateScratchMemory(size_t bytes, size_t alignment = 16);
+
+MF_API void MFRenderer_GetMemoryStats(size_t *pCommandBuffer, size_t *pCommandBufferPeak, size_t *pScratch, size_t *pScratchPeak);
 
 // new renderer interface...
 
@@ -114,8 +117,6 @@ MF_API MFRenderLayer* MFRenderer_GetDebugLayer(MFRenderer *pRenderer);
 
 MF_API void MFRenderer_CloneLayer(MFRenderer *pRenderer, int sourceLayer, int destLayer);
 
-//MF_API void MFRenderer_Begin(MFRenderer *pRenderer);
-//MF_API void MFRenderer_End(MFRenderer *pRenderer);
 MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer);
 MF_API void MFRenderer_Kick(MFRenderer *pRenderer);
 
@@ -129,7 +130,11 @@ MF_API void MFRenderer_AddIndexedVertices(MFStateBlock *pMeshStateBlock, int fir
 
 MF_API void MFRenderLayer_SetLayerStateBlock(MFRenderLayer *pLayer, MFStateBlock *pState);
 MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
-//MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
+
+MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
+MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+MF_API void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);
 
 MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
 
