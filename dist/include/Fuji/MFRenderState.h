@@ -320,7 +320,7 @@ enum MFTexFilter
 	MFTexFilter_Point,
 	MFTexFilter_Linear,
 	MFTexFilter_Anisotropic,
-	MFTexFilter_Text_1Bit,
+//	MFTexFilter_Text_1Bit,
 
 	MFTexFilter_Max,
 	MFTexFilter_ForceInt = 0x7FFFFFFF
@@ -534,8 +534,9 @@ struct MFDepthStencilStateDesc
 		depthFunc = MFComparisonFunc_Less;
 		depthWriteMask = MFDepthWriteMask_All;
 		bStencilEnable = false;
-		stencilReadMask = 0;
-		stencilWriteMask = 0;
+		stencilReadMask = 0xFF;
+		stencilWriteMask = 0xFF;
+		backFace.stencilFunc = MFComparisonFunc_Never;
 	}
 };
 

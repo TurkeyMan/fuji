@@ -195,7 +195,7 @@ MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVe
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
 	if(gbUseVBOs)
-		pVertexBuffer->pLocked = MFHeap_Alloc(pVertexBuffer->numVerts*pVertexBuffer->pVertexDeclatation->pElementData[0].stride, MFHeap_GetDebugHeap());
+		pVertexBuffer->pLocked = MFHeap_Alloc(pVertexBuffer->numVerts*pVertexBuffer->pVertexDeclatation->pElementData[0].stride, MFHeap_GetHeap(MFHT_ActiveTemporary));
 	else
 		pVertexBuffer->pLocked = pVertexBuffer->pPlatformData;
 
@@ -265,7 +265,7 @@ MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppInd
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Vertex buffer already locked!");
 
 	if(gbUseVBOs)
-		pIndexBuffer->pLocked = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices, MFHeap_GetDebugHeap());
+		pIndexBuffer->pLocked = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices, MFHeap_GetHeap(MFHT_ActiveTemporary));
 	else
 		pIndexBuffer->pLocked = pIndexBuffer->pPlatformData;
 

@@ -20,18 +20,16 @@
 	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_D3D9
 #endif
 
-#include "MFDisplay_Internal.h"
-#include "MFView.h"
-#include "MFVector.h"
-#include "MFMatrix.h"
-#include "MFPrimitive.h"
-#include "MFTexture_Internal.h"
 #include "MFRenderer.h"
 #include "MFRenderState.h"
 #include "MFRenderer_D3D9.h"
-#include "MFMaterial.h"
 #include "MFVertex.h"
+#include "MFPrimitive.h"
+#include "MFMaterial.h"
+#include "MFView.h"
+#include "MFDisplay.h"
 
+#include "MFTexture_Internal.h"
 #include "Materials/MFMat_Standard.h"
 
 struct LitVertex
@@ -59,9 +57,10 @@ static MFMesh currentPrim;
 static MFVertexBuffer *pVB;
 static LitVertex *pLocked;
 
-static bool gImmitateQuads = false;
 static LitVertex current;
 static int currentVert;
+
+static bool gImmitateQuads = false;
 
 /*** functions ***/
 

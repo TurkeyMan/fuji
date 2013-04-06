@@ -30,18 +30,18 @@
 #include "MFMesh_Internal.h"
 #include "MFRenderer_D3D11.h"
 
-//---------------------------------------------------------------------------------------------------------------------
+
 DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);
 const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
-//---------------------------------------------------------------------------------------------------------------------
+
 extern int gVertexDataStride[MFVDF_Max];
-//---------------------------------------------------------------------------------------------------------------------
+
 extern const uint8 *g_pVertexShaderData;
 extern uint32 g_vertexShaderSize;
-//---------------------------------------------------------------------------------------------------------------------
+
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
-//---------------------------------------------------------------------------------------------------------------------
+
 static const char* s_SemanticName[MFVET_Max] =
 {
 	"POSITION",		// MFVE_Position,
@@ -53,7 +53,7 @@ static const char* s_SemanticName[MFVET_Max] =
 	"BLENDINDICES", // MFVE_Indices
 	"BLENDWEIGHT",	// MFVE_Weights
 };
-//---------------------------------------------------------------------------------------------------------------------
+
 static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
 {
 	(DXGI_FORMAT)-1,				// MFVDF_Auto
@@ -77,7 +77,7 @@ static const DXGI_FORMAT s_MFVDF_To_DXGI[MFVDF_Max] =
 	(DXGI_FORMAT)-1,				// MFVDF_UDec3
 	(DXGI_FORMAT)-1					// MFVDF_Dec3N
 };
-//---------------------------------------------------------------------------------------------------------------------
+
 static const D3D11_PRIMITIVE_TOPOLOGY gPrimTopology[MFPT_Max] =
 {
 	D3D11_PRIMITIVE_TOPOLOGY_POINTLIST,		// MFVPT_Points
@@ -87,7 +87,7 @@ static const D3D11_PRIMITIVE_TOPOLOGY gPrimTopology[MFPT_Max] =
 	D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,	// MFVPT_TriangleStrip
 	D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED,		// MFVPT_TriangleFan
 };
-//---------------------------------------------------------------------------------------------------------------------
+
 static const D3D11_PRIMITIVE gPrimType[MFPT_Max] =
 {
 	D3D11_PRIMITIVE_POINT,		// MFVPT_Points
@@ -97,7 +97,7 @@ static const D3D11_PRIMITIVE gPrimType[MFPT_Max] =
 	D3D11_PRIMITIVE_TRIANGLE,	// MFVPT_TriangleStrip
 	D3D11_PRIMITIVE_UNDEFINED,	// MFVPT_TriangleFan
 };
-//---------------------------------------------------------------------------------------------------------------------
+
 MFVertexDataFormat MFVertexD3D11_ChoooseDataType(MFVertexElementType elementType, int components)
 {
 	MFDebug_Assert((components >= 0) && (components <= 4), "Invalid number of components");
@@ -116,15 +116,15 @@ MFVertexDataFormat MFVertexD3D11_ChoooseDataType(MFVertexElementType elementType
 	// everything else is a float for now...
 	return floatComponents[components];
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFVertex_InitModulePlatformSpecific()
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFVertex_DeinitModulePlatformSpecific()
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElementType elementType, int components)
 {
 	const MFVertexDataFormat floatComponents[5] = { MFVDF_Unknown, MFVDF_Float1, MFVDF_Float2, MFVDF_Float3, MFVDF_Float4 };
@@ -141,7 +141,7 @@ MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElemen
 	// everything else is a float for now...
 	return floatComponents[components];
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
 	MFVertexElement *pElements = pDeclaration->pElements;
@@ -171,200 +171,231 @@ bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDecl
 
 	return true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration)
 {
 	ID3D11InputLayout *pVertexLayout = (ID3D11InputLayout*)pDeclaration->pPlatformData;
 	pVertexLayout->Release();
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory)
 {
-    D3D11_BUFFER_DESC bd;
-    MFZeroMemory(&bd, sizeof(bd));
-	bd.Usage = (pVertexBuffer->type == MFVBType_Static) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = pVertexBuffer->pVertexDeclatation->pElementData[0].stride * pVertexBuffer->numVerts;
-    bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    bd.CPUAccessFlags = (pVertexBuffer->type == MFVBType_Static) ? 0 : D3D11_CPU_ACCESS_WRITE;
+	if(pVertexBuffer->bufferType == MFVBType_Dynamic || pVertexBufferMemory)
+	{
+		D3D11_BUFFER_DESC bd;
+		MFZeroMemory(&bd, sizeof(bd));
+		bd.Usage = (pVertexBuffer->bufferType == MFVBType_Dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_IMMUTABLE;
+		bd.ByteWidth = pVertexBuffer->pVertexDeclatation->pElementData[0].stride * pVertexBuffer->numVerts;
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = (pVertexBuffer->bufferType == MFVBType_Dynamic) ? D3D11_CPU_ACCESS_WRITE : 0;
 
-    D3D11_SUBRESOURCE_DATA InitData;
-    MFZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = pVertexBufferMemory;
+		D3D11_SUBRESOURCE_DATA InitData;
+		MFZeroMemory(&InitData, sizeof(InitData));
+		InitData.pSysMem = pVertexBufferMemory;
 	
-	ID3D11Buffer* pVB = NULL;
-    HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, pVertexBufferMemory ? &InitData : NULL, &pVB);
-    if(FAILED(hr))
-        return false;
+		ID3D11Buffer* pVB = NULL;
+		HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, pVertexBufferMemory ? &InitData : NULL, &pVB);
+		if(FAILED(hr))
+			return false;
 	
-	pVertexBuffer->pPlatformData = pVB;
+		pVertexBuffer->pPlatformData = pVB;
+	}
 
 	return true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 {
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
-	pVB->Release();
+	if(pVB)
+		pVB->Release();
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
-	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
-
-	D3D11_MAPPED_SUBRESOURCE subresource;
-	D3D11_MAP map = (pVertexBuffer->bufferType == MFVBType_Dynamic) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE;
-	HRESULT hr = g_pImmediateContext->Map(pVB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
-
-	if(hr == DXGI_ERROR_WAS_STILL_DRAWING)
+	if(pVertexBuffer->bufferType == MFVBType_Dynamic)
 	{
-		MFDebug_Message("waiting on vertex buffer lock");
-		hr = g_pImmediateContext->Map(pVB, 0, map, 0, &subresource);
+		ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
+
+		D3D11_MAPPED_SUBRESOURCE subresource;
+		D3D11_MAP map = (pVertexBuffer->bufferType == MFVBType_Dynamic) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE;
+		HRESULT hr = g_pImmediateContext->Map(pVB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
+
+		if(hr == DXGI_ERROR_WAS_STILL_DRAWING)
+		{
+			MFDebug_Message("waiting on vertex buffer lock");
+			hr = g_pImmediateContext->Map(pVB, 0, map, 0, &subresource);
+		}
+
+		MFDebug_Assert(SUCCEEDED(hr), "Failed to map vertex buffer");
+
+		pVertexBuffer->pLocked = subresource.pData;
+	}
+	else
+	{
+		pVertexBuffer->pLocked = MFHeap_Alloc(pVertexBuffer->numVerts*pVertexBuffer->pVertexDeclatation->pElementData[0].stride, MFHeap_GetHeap(MFHT_ActiveTemporary));
 	}
 
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to map vertex buffer");
-
-	pVertexBuffer->pLocked = subresource.pData;
-
 	if(ppVertices)
-		*ppVertices = subresource.pData;
+		*ppVertices = pVertexBuffer->pLocked;
 
 	pVertexBuffer->bLocked = true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
-	g_pImmediateContext->Unmap(pVB, 0);
+	if(pVertexBuffer->bufferType == MFVBType_Dynamic)
+	{
+		g_pImmediateContext->Unmap(pVB, 0);
+	}
+	else
+	{
+		if(pVB)
+			pVB->Release();
 
+		D3D11_BUFFER_DESC bd;
+		MFZeroMemory(&bd, sizeof(bd));
+		bd.Usage = D3D11_USAGE_IMMUTABLE;
+		bd.ByteWidth = pVertexBuffer->pVertexDeclatation->pElementData[0].stride * pVertexBuffer->numVerts;
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+		D3D11_SUBRESOURCE_DATA initData;
+		MFZeroMemory(&initData, sizeof(initData));
+		initData.pSysMem = pVertexBuffer->pLocked;
+	
+		HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, &initData, &pVB);
+		MFDebug_Assert(SUCCEEDED(hr), "Couldn't create vertex buffer!");
+		if(FAILED(hr))
+		{
+			pVertexBuffer->pPlatformData = NULL;
+			return;
+		}
+
+		pVertexBuffer->pPlatformData = pVB;
+
+		MFHeap_Free(pVertexBuffer->pLocked);
+	}
+
+	pVertexBuffer->pLocked = NULL;
 	pVertexBuffer->bLocked = false;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory)
 {
-    D3D11_BUFFER_DESC bd;
-    MFZeroMemory(&bd, sizeof(bd));
+	if(pIndexBufferMemory)
+	{
+		D3D11_BUFFER_DESC bd;
+		MFZeroMemory(&bd, sizeof(bd));
 	
-    bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(WORD) * pIndexBuffer->numIndices;
-    bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    bd.CPUAccessFlags = 0;
+		bd.Usage = D3D11_USAGE_IMMUTABLE;
+		bd.ByteWidth = sizeof(WORD) * pIndexBuffer->numIndices;
+		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	
-    D3D11_SUBRESOURCE_DATA InitData;
-    MFZeroMemory(&InitData, sizeof(InitData));
-    InitData.pSysMem = pIndexBufferMemory;
+		D3D11_SUBRESOURCE_DATA initData;
+		MFZeroMemory(&initData, sizeof(initData));
+		initData.pSysMem = pIndexBufferMemory;
 
-	ID3D11Buffer *pIB = NULL;
-    HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, &InitData, &pIB);
-    if (FAILED(hr))
-        return false;
+		ID3D11Buffer *pIB = NULL;
+		HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, &initData, &pIB);
+		if (FAILED(hr))
+			return false;
 
-	pIndexBuffer->pPlatformData = pIB;
+		pIndexBuffer->pPlatformData = pIB;
+	}
 
 	return true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer)
 {
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
-	pIB->Release();
+	if(pIB)
+		pIB->Release();
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 {
 	MFDebug_Assert(pIndexBuffer, "NULL index buffer");
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Index buffer already locked!");
 
-//	*ppIndices = pIndexBuffer->pIndices;
-
-	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
-
-	D3D11_MAPPED_SUBRESOURCE subresource;
-	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
-	HRESULT hr = g_pImmediateContext->Map(pIB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
-
-	if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-	{
-		MFDebug_Message("waiting on index buffer lock");
-		hr = g_pImmediateContext->Map(pIB, 0, map, 0, &subresource);
-	}
-
-	MFDebug_Assert(SUCCEEDED(hr), "Failed to map vertex buffer");
-
-	pIndexBuffer->pLocked = subresource.pData;
+	pIndexBuffer->pLocked = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices, MFHeap_GetHeap(MFHT_ActiveTemporary));
 
 	if(ppIndices)
-		*ppIndices = (uint16*)subresource.pData;
+		*ppIndices = (uint16*)pIndexBuffer->pLocked;
 
 	pIndexBuffer->bLocked = true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer, "NULL index buffer");
 	MFDebug_Assert(pIndexBuffer->bLocked, "Index buffer not locked!");
 
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
-/*
+	if(pIB)
+		pIB->Release();
+
+	D3D11_BUFFER_DESC bd;
+	MFZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_IMMUTABLE;
+	bd.ByteWidth = sizeof(WORD) * pIndexBuffer->numIndices;
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	
-	D3D11_MAPPED_SUBRESOURCE subresource;
-	D3D11_MAP map = D3D11_MAP_WRITE_DISCARD;
-	HRESULT hr = g_pImmediateContext->Map(pIB, 0, map, D3D11_MAP_FLAG_DO_NOT_WAIT, &subresource);
+	D3D11_SUBRESOURCE_DATA initData;
+	MFZeroMemory(&initData, sizeof(initData));
+	initData.pSysMem = pIndexBuffer->pLocked;
 
-	if (hr == DXGI_ERROR_WAS_STILL_DRAWING)
-	{
-		MFDebug_Message("waiting on index buffer lock");
-		hr = g_pImmediateContext->Map(pIB, 0, map, 0, &subresource);
-	}
+	HRESULT hr = g_pd3dDevice->CreateBuffer(&bd, &initData, &pIB);
+	MFDebug_Assert(SUCCEEDED(hr), "Couldn't create index buffer!");
+	if (FAILED(hr))
+		return;
 
-	MFCopyMemory(subresource.pData, pIndexBuffer->pIndices, sizeof(uint16) * pIndexBuffer->numIndices);
-*/
-	g_pImmediateContext->Unmap(pIB, 0);
+	pIndexBuffer->pPlatformData = pIB;
 
+	MFHeap_Free(pIndexBuffer->pLocked);
+
+	pIndexBuffer->pLocked = NULL;
 	pIndexBuffer->bLocked = false;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
 {
 	ID3D11InputLayout *pVertexLayout = pVertexDeclaration ? (ID3D11InputLayout*)pVertexDeclaration->pPlatformData : NULL;
     g_pImmediateContext->IASetInputLayout(pVertexLayout);
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 
 	ID3D11Buffer *pVB = (ID3D11Buffer*)pVertexBuffer->pPlatformData;
-    // Set vertex buffer
 	UINT stride = pVertexBuffer->pVertexDeclatation->pElementData[0].stride;
     UINT offset = 0;
     g_pImmediateContext->IASetVertexBuffers(stream, 1, &pVB, &stride, &offset);
-
-	//if (stream == 0)
-	//	MFVertex_SetVertexDeclaration(pVertexBuffer->pVertexDeclatation);
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
 	g_pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0);
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
 	g_pImmediateContext->Draw(numVertices, firstVertex);
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
     g_pImmediateContext->DrawIndexed(numIndices, indexOffset, vertexOffset);
 }
-//---------------------------------------------------------------------------------------------------------------------
 
 #endif // MF_RENDERER

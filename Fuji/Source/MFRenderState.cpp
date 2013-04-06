@@ -6,11 +6,14 @@
 
 MFInitStatus MFRenderState_InitModule()
 {
+	MFRenderState_InitModulePlatformSpecific();
+
 	return MFAIC_Succeeded;
 }
 
 void MFRenderState_DeinitModule()
 {
+	MFRenderState_DeinitModulePlatformSpecific();
 }
 
 MF_API MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc)
@@ -20,16 +23,15 @@ MF_API MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc)
 	MFBlendState *pBS = (MFBlendState*)MFResource_FindResource(hash);
 	if(!pBS)
 	{
-		pBS = (MFBlendState*)MFHeap_Alloc(sizeof(MFBlendState));
+		pBS = (MFBlendState*)MFHeap_AllocAndZero(sizeof(MFBlendState));
 		pBS->type = MFRT_BlendState;
 		pBS->hash = hash;
-		pBS->refCount = 0;
 
 		pBS->stateDesc = *pDesc;
 
-		MFResource_AddResource(pBS);
+		MFBlendState_CreatePlatformSpecific(pBS);
 
-		//... CreateInternal?
+		MFResource_AddResource(pBS);
 	}
 
 	++pBS->refCount;
@@ -41,7 +43,7 @@ MF_API void MFBlendState_Destroy(MFBlendState *pBlendState)
 {
 	if(--pBlendState->refCount == 0)
 	{
-		//... DestroyInternal?
+		MFBlendState_DestroyPlatformSpecific(pBlendState);
 
 		MFResource_RemoveResource(pBlendState);
 		MFHeap_Free(pBlendState);
@@ -55,16 +57,15 @@ MF_API MFSamplerState* MFSamplerState_Create(MFSamplerStateDesc *pDesc)
 	MFSamplerState *pSS = (MFSamplerState*)MFResource_FindResource(hash);
 	if(!pSS)
 	{
-		pSS = (MFSamplerState*)MFHeap_Alloc(sizeof(MFSamplerState));
+		pSS = (MFSamplerState*)MFHeap_AllocAndZero(sizeof(MFSamplerState));
 		pSS->type = MFRT_SamplerState;
 		pSS->hash = hash;
-		pSS->refCount = 0;
 
 		pSS->stateDesc = *pDesc;
 
-		MFResource_AddResource(pSS);
+		MFSamplerState_CreatePlatformSpecific(pSS);
 
-		//... CreateInternal?
+		MFResource_AddResource(pSS);
 	}
 
 	++pSS->refCount;
@@ -76,7 +77,7 @@ void MFSamplerState_Destroy(MFSamplerState *pSamplerState)
 {
 	if(--pSamplerState->refCount == 0)
 	{
-		//... DestroyInternal?
+		MFSamplerState_DestroyPlatformSpecific(pSamplerState);
 
 		MFResource_RemoveResource(pSamplerState);
 		MFHeap_Free(pSamplerState);
@@ -90,16 +91,15 @@ MF_API MFDepthStencilState* MFDepthStencilState_Create(MFDepthStencilStateDesc *
 	MFDepthStencilState *pDSS = (MFDepthStencilState*)MFResource_FindResource(hash);
 	if(!pDSS)
 	{
-		pDSS = (MFDepthStencilState*)MFHeap_Alloc(sizeof(MFDepthStencilState));
+		pDSS = (MFDepthStencilState*)MFHeap_AllocAndZero(sizeof(MFDepthStencilState));
 		pDSS->type = MFRT_DepthStencilState;
 		pDSS->hash = hash;
-		pDSS->refCount = 0;
 
 		pDSS->stateDesc = *pDesc;
 
-		MFResource_AddResource(pDSS);
+		MFDepthStencilState_CreatePlatformSpecific(pDSS);
 
-		//... CreateInternal?
+		MFResource_AddResource(pDSS);
 	}
 
 	++pDSS->refCount;
@@ -111,7 +111,7 @@ MF_API void MFDepthStencilState_Destroy(MFDepthStencilState *pDepthStencilState)
 {
 	if(--pDepthStencilState->refCount == 0)
 	{
-		//... DestroyInternal?
+		MFDepthStencilState_DestroyPlatformSpecific(pDepthStencilState);
 
 		MFResource_RemoveResource(pDepthStencilState);
 		MFHeap_Free(pDepthStencilState);
@@ -125,16 +125,15 @@ MF_API MFRasteriserState* MFRasteriserState_Create(MFRasteriserStateDesc *pDesc)
 	MFRasteriserState *pRS = (MFRasteriserState*)MFResource_FindResource(hash);
 	if(!pRS)
 	{
-		pRS = (MFRasteriserState*)MFHeap_Alloc(sizeof(MFRasteriserState));
+		pRS = (MFRasteriserState*)MFHeap_AllocAndZero(sizeof(MFRasteriserState));
 		pRS->type = MFRT_RasteriserState;
 		pRS->hash = hash;
-		pRS->refCount = 0;
 
 		pRS->stateDesc = *pDesc;
 
-		MFResource_AddResource(pRS);
+		MFRasteriserState_CreatePlatformSpecific(pRS);
 
-		//... CreateInternal?
+		MFResource_AddResource(pRS);
 	}
 
 	++pRS->refCount;
@@ -146,7 +145,7 @@ MF_API void MFRasteriserState_Destroy(MFRasteriserState *pRasteriserState)
 {
 	if(--pRasteriserState->refCount == 0)
 	{
-		//... DestroyInternal?
+		MFRasteriserState_DestroyPlatformSpecific(pRasteriserState);
 
 		MFResource_RemoveResource(pRasteriserState);
 		MFHeap_Free(pRasteriserState);

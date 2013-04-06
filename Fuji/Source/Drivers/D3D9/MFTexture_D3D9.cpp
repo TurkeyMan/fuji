@@ -20,6 +20,7 @@
 #include "MFTexture_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFFileSystem_Internal.h"
+#include "MFRenderer_D3D9.h"
 
 #include <d3dx9.h>
 
@@ -76,6 +77,7 @@ void MFTexture_Recreate()
 			// recreate a new one
 			D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D9);
 			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
+			MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTex->pInternalData, pTex->name);
 		}
 
 		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
@@ -102,6 +104,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(hr == D3D_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
 
 	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
+	MFRenderer_D3D9_SetDebugName(pTex, pTexture->name);
 
 	// copy image data
 	D3DLOCKED_RECT rect;
@@ -161,8 +164,10 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 			MFHeap_Free(pTexture->pTemplateData);
 			MFResource_RemoveResource(pTexture);
 			MFHeap_Free(pTexture);
-			pTexture = NULL;
+			return NULL;
 		}
+
+		MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTexture->pInternalData, pTexture->name);
 	}
 	else
 	{

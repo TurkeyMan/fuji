@@ -51,29 +51,28 @@ ID3D11RenderTargetView* g_pRenderTargetView = NULL;
 ID3D11Texture2D*		g_pDepthStencil = NULL;
 ID3D11DepthStencilView*	g_pDepthStencilView = NULL;
 
-ID3D11DepthStencilState* g_pDepthStencilState = NULL;
-D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-
 ID3D11Buffer* g_pConstantBufferWorld = NULL;
 static CBWorld cbWorld;
 
-//---------------------------------------------------------------------------------------------------------------------
+
 // Utils
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_D3D11_SetDebugName(ID3D11DeviceChild* pResource, const char* pName)
 {
+#if !defined(MF_RETAIL)
 	if (pResource)
 		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pName), pName);
+#endif
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_InitModulePlatformSpecific()
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_DeinitModulePlatformSpecific()
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 int MFRenderer_CreateDisplay()
 {
 	HRESULT hr = S_OK;
@@ -132,7 +131,6 @@ int MFRenderer_CreateDisplay()
     if( FAILED( hr ) )
         return hr;
 
-	
 	MFRenderer_D3D11_SetDebugName(g_pImmediateContext, "MFRenderer global device context");
 
     // Create a render target view
@@ -142,14 +140,14 @@ int MFRenderer_CreateDisplay()
         return hr;
 
 	MFRenderer_D3D11_SetDebugName(pBackBuffer, "MFRenderer back buffer");
-	
+
     hr = g_pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &g_pRenderTargetView );
     pBackBuffer->Release();
     if( FAILED( hr ) )
         return hr;
-	
+
 	MFRenderer_D3D11_SetDebugName(g_pRenderTargetView, "MFRenderer render target view");
-	
+
 	// Create depth stencil texture
     D3D11_TEXTURE2D_DESC descDepth;
     ZeroMemory( &descDepth, sizeof(descDepth) );
@@ -179,7 +177,7 @@ int MFRenderer_CreateDisplay()
     hr = g_pd3dDevice->CreateDepthStencilView( g_pDepthStencil, &descDSV, &g_pDepthStencilView );
     if( FAILED( hr ) )
         return hr;
-	
+
 	MFRenderer_D3D11_SetDebugName(g_pDepthStencilView, "MFRenderer depth stencil view");
 
     g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
@@ -211,46 +209,21 @@ int MFRenderer_CreateDisplay()
 	data.pSysMem = &cbWorld;
 
 	g_pd3dDevice->CreateBuffer(&desc, &data, &g_pConstantBufferWorld);
-	
+
 	MFRenderer_D3D11_SetDebugName(g_pConstantBufferWorld, "MFRenderer world constant buffer");
 
-	
 	g_pImmediateContext->VSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
 	g_pImmediateContext->PSSetConstantBuffers(n_cbWorld, 1, &g_pConstantBufferWorld);
 
-	MFZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	depthStencilDesc.StencilEnable = false;
-	depthStencilDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-	depthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NEVER;
-
-	g_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &g_pDepthStencilState);
-
-	MFRenderer_D3D11_SetDebugName(g_pDepthStencilState, "MFRenderer depth stencil state");
-
-	g_pImmediateContext->OMSetDepthStencilState(g_pDepthStencilState, 0);
-
 	return 0;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_DestroyDisplay()
 {
     if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
 	if (g_pConstantBufferWorld) g_pConstantBufferWorld->Release();
 
-	if (g_pDepthStencilState) g_pDepthStencilState->Release();
-	
 	if (g_pDepthStencil) g_pDepthStencil->Release();
 	if (g_pDepthStencilView) g_pDepthStencilView->Release();
 
@@ -269,11 +242,11 @@ void MFRenderer_DestroyDisplay()
 
     if (g_pd3dDevice) g_pd3dDevice->Release();
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_ResetDisplay()
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 {
 	// D3D handles this automatically in Reset()
@@ -296,20 +269,20 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	}
 	return true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 bool MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 	return true;
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
-    
+   
 	g_pSwapChain->Present( 0, 0 );
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACKc;
@@ -323,165 +296,48 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 		float clearColor[4] = { colour.x, colour.y, colour.z, colour.w }; // RGBA
 		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, clearColor);
 	}
-	
+
     if (bClearDepth | bClearStencil)
     {
 		uint32 clearFlags = (bClearDepth ? D3D11_CLEAR_DEPTH : 0) | (bClearStencil ? D3D11_CLEAR_STENCIL : 0);
 		g_pImmediateContext->ClearDepthStencilView(g_pDepthStencilView, clearFlags, z, (UINT8)stencil);
 	}
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_GetViewport(MFRect *pRect)
 {
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_ResetViewport()
 {
 
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API void MFRenderer_SetDeviceRenderTarget()
 {
     g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }
-//---------------------------------------------------------------------------------------------------------------------
+
 MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }
-//---------------------------------------------------------------------------------------------------------------------
-//
-//// direct3d management fucntions
-//void MFRenderer_D3D11_SetTexture(int stage, IDirect3DTexture9 *pTexture)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
-//{
-//}
 
-//---------------------------------------------------------------------------------------------------------------------
 void MFRenderer_D3D11_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
 {
 	cbWorld.mWorldToScreen.Transpose(worldToScreen);
 
 	g_pImmediateContext->UpdateSubresource(g_pConstantBufferWorld, 0, NULL, &cbWorld, 0, 0);
 }
-//---------------------------------------------------------------------------------------------------------------------
-//void MFRenderer_D3D11_SetTextureMatrix(const MFMatrix &textureMatrix)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetModelColour(const MFVector &colour)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
-//{
-//}
-//
-//void MFRenderer_D3D11_SetNumWeights(int numWeights)
-//{
-//}
-//
-//int MFRenderer_D3D11_GetNumWeights()
-//{
-//	return 0;
-//}
-//
-//void MFRenderer_D3D11_ApplyGPUStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetDefaultGPUStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_ApplyRenderStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetDefaultRenderStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
-//{
-//}
-//
-//void MFRenderer_D3D11_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
-//{
-//}
-//
-//void MFRenderer_D3D11_ApplyTextureStageStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetDefaultTextureStageStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
-//{
-//}
-//
-//void MFRenderer_D3D11_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
-//{
-//}
-//
-//void MFRenderer_D3D11_ApplySamplerStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetDefaultSamplerStates()
-//{
-//
-//}
-//
-//void MFRenderer_D3D11_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
-//{
-//}
-//
-//void MFRenderer_D3D11_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
-//{
-//}
-//
-//void MFRenderer_D3D11_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
-//{
-//}
-//
-//void MFRenderer_D3D11_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
-//{
-//}
-//---------------------------------------------------------------------------------------------------------------------
 
 #endif // MF_RENDERER

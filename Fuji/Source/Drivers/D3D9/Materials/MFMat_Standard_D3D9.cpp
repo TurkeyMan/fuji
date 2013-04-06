@@ -21,19 +21,11 @@
 #include "../Shaders/MatStandard_a.h"
 
 
-static MFMaterial *pSetMaterial = 0;
-extern uint32 renderSource;
-extern uint32 currentRenderFlags;
-
 extern IDirect3DDevice9 *pd3dDevice;
+extern D3DCAPS9 gD3D9DeviceCaps;
+
 IDirect3DVertexShader9 *pVS_s = NULL;
 IDirect3DVertexShader9 *pVS_a = NULL;
-
-extern const MFMatrix *pAnimMats;
-extern int gNumAnimMats;
-
-extern const uint16 *pCurrentBatch;
-extern int gNumBonesInBatch;
 
 static const DWORD sFilterModes[MFTexFilter_Max] =
 {
@@ -41,7 +33,7 @@ static const DWORD sFilterModes[MFTexFilter_Max] =
     D3DTEXF_POINT,
     D3DTEXF_LINEAR,
     D3DTEXF_ANISOTROPIC,
-	D3DTEXF_NONE // MFTexFilter_Text_1Bit - unsupported!
+//	D3DTEXF_NONE // MFTexFilter_Text_1Bit - unsupported!
 };
 
 static const DWORD sAddressModes[MFTexAddressMode_Max] =
@@ -53,54 +45,6 @@ static const DWORD sAddressModes[MFTexAddressMode_Max] =
     D3DTADDRESS_MIRRORONCE
 };
 
-static const DWORD sBlendOp[MFBlendOp_BlendOpCount] =
-{
-    D3DBLENDOP_ADD,
-    D3DBLENDOP_SUBTRACT,
-    D3DBLENDOP_REVSUBTRACT,
-    D3DBLENDOP_MIN,
-    D3DBLENDOP_MAX
-};
-
-static const DWORD sBlendArg[MFBlendArg_Max] =
-{
-	D3DBLEND_ZERO,
-	D3DBLEND_ONE,
-	D3DBLEND_SRCCOLOR,
-	D3DBLEND_INVSRCCOLOR,
-	D3DBLEND_SRCALPHA,
-	D3DBLEND_INVSRCALPHA,
-	D3DBLEND_DESTCOLOR,
-	D3DBLEND_INVDESTCOLOR,
-	D3DBLEND_DESTALPHA,
-	D3DBLEND_INVDESTALPHA,
-	D3DBLEND_SRCALPHASAT,
-	D3DBLEND_BLENDFACTOR,
-	D3DBLEND_INVBLENDFACTOR,
-	D3DBLEND_SRCCOLOR2,
-	D3DBLEND_INVSRCCOLOR2,
-	D3DBLEND_ZERO,
-	D3DBLEND_ZERO,
-};
-
-static const DWORD sCullMode[MFCullMode_Max] =
-{
-	D3DCULL_NONE,
-	D3DCULL_CCW,
-	D3DCULL_CW,
-};
-
-static const DWORD sCompareFunc[MFComparisonFunc_Max] =
-{
-	D3DCMP_NEVER,
-	D3DCMP_LESS,
-	D3DCMP_EQUAL,
-	D3DCMP_LESSEQUAL,
-	D3DCMP_GREATER,
-	D3DCMP_NOTEQUAL,
-	D3DCMP_GREATEREQUAL,
-	D3DCMP_ALWAYS,
-};
 
 int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
@@ -118,6 +62,25 @@ void MFMat_Standard_UnregisterMaterial()
 
 	pVS_s->Release();
 	pVS_a->Release();
+}
+
+static void MFMat_Standard_SetSamplerState(int sampler, MFSamplerState *pSamp)
+{
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MINFILTER, sFilterModes[pSamp->stateDesc.minFilter]);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MAGFILTER, sFilterModes[pSamp->stateDesc.magFilter]);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MIPFILTER, sFilterModes[pSamp->stateDesc.mipFilter]);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_ADDRESSU, sAddressModes[pSamp->stateDesc.addressU]);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_ADDRESSV, sAddressModes[pSamp->stateDesc.addressV]);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_ADDRESSW, sAddressModes[pSamp->stateDesc.addressW]);
+
+	if(pSamp->stateDesc.magFilter == MFTexFilter_Anisotropic || pSamp->stateDesc.minFilter == MFTexFilter_Anisotropic || pSamp->stateDesc.mipFilter == MFTexFilter_Anisotropic)
+		pd3dDevice->SetSamplerState(sampler, D3DSAMP_MAXANISOTROPY, pSamp->stateDesc.maxAnisotropy);
+
+	if(pSamp->stateDesc.addressU == MFTexAddressMode_Border || pSamp->stateDesc.addressV == MFTexAddressMode_Border || pSamp->stateDesc.addressW == MFTexAddressMode_Border)
+		pd3dDevice->SetSamplerState(sampler, D3DSAMP_BORDERCOLOR, pSamp->stateDesc.borderColour.ToPackedColour());
+
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MAXMIPLEVEL, (DWORD)pSamp->stateDesc.maxLOD);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MIPMAPLODBIAS , (DWORD)pSamp->stateDesc.mipLODBias);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
@@ -170,12 +133,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
 		{
 			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
-
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MINFILTER, sFilterModes[pDetailSamp->stateDesc.minFilter]);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MAGFILTER, sFilterModes[pDetailSamp->stateDesc.magFilter]);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_MIPFILTER, sFilterModes[pDetailSamp->stateDesc.mipFilter]);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSU, sAddressModes[pDetailSamp->stateDesc.addressU]);
-			pd3dDevice->SetSamplerState(1, D3DSAMP_ADDRESSV, sAddressModes[pDetailSamp->stateDesc.addressV]);
+			MFMat_Standard_SetSamplerState(1, pDetailSamp);
 		}
 	}
 	else
@@ -202,12 +160,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp)
 		{
 			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
-
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, sFilterModes[pDiffuseSamp->stateDesc.minFilter]);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, sFilterModes[pDiffuseSamp->stateDesc.magFilter]);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_MIPFILTER, sFilterModes[pDiffuseSamp->stateDesc.mipFilter]);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, sAddressModes[pDiffuseSamp->stateDesc.addressU]);
-			pd3dDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, sAddressModes[pDiffuseSamp->stateDesc.addressV]);
+			MFMat_Standard_SetSamplerState(0, pDiffuseSamp);
 		}
 	}
 	else
@@ -272,17 +225,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	if(state.pRenderStatesSet[MFSCRS_BlendState] != pBlendState)
 	{
 		state.pRenderStatesSet[MFSCRS_BlendState] = pBlendState;
-
-		MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[0];
-		pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, target.bEnable ? TRUE : FALSE);
-		if(target.bEnable)
-		{
-			pd3dDevice->SetRenderState(D3DRS_BLENDOP, sBlendOp[target.blendOp]);
-			pd3dDevice->SetRenderState(D3DRS_SRCBLEND, sBlendArg[target.srcBlend]);
-			pd3dDevice->SetRenderState(D3DRS_SRCBLENDALPHA, sBlendArg[target.srcBlendAlpha]);
-			pd3dDevice->SetRenderState(D3DRS_DESTBLEND, sBlendArg[target.destBlend]);
-			pd3dDevice->SetRenderState(D3DRS_DESTBLENDALPHA, sBlendArg[target.destBlendAlpha]);
-		}
+		IDirect3DStateBlock9 *pSB = (IDirect3DStateBlock9*)pBlendState->pPlatformData;
+		pSB->Apply();
 	}
 
 	// rasteriser state
@@ -290,8 +234,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	if(state.pRenderStatesSet[MFSCRS_RasteriserState] != pRasteriserState)
 	{
 		state.pRenderStatesSet[MFSCRS_RasteriserState] = pRasteriserState;
-
-		pd3dDevice->SetRenderState(D3DRS_CULLMODE, sCullMode[pRasteriserState->stateDesc.cullMode]);
+		IDirect3DStateBlock9 *pSB = (IDirect3DStateBlock9*)pRasteriserState->pPlatformData;
+		pSB->Apply();
 	}
 
 	// depth/stencil state
@@ -299,15 +243,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	if(state.pRenderStatesSet[MFSCRS_DepthStencilState] != pDSState)
 	{
 		state.pRenderStatesSet[MFSCRS_DepthStencilState] = pDSState;
-
-		bool bDepthTest = pDSState->stateDesc.bDepthEnable;
-		pd3dDevice->SetRenderState(D3DRS_ZENABLE, bDepthTest ? D3DZB_TRUE : D3DZB_FALSE);
-
-		if(bDepthTest)
-		{
-			pd3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, pDSState->stateDesc.depthWriteMask == MFDepthWriteMask_Zero ? FALSE : TRUE);
-			pd3dDevice->SetRenderState(D3DRS_ZFUNC, sCompareFunc[pDSState->stateDesc.depthFunc]);
-		}
+		IDirect3DStateBlock9 *pSB = (IDirect3DStateBlock9*)pDSState->pPlatformData;
+		pSB->Apply();
 	}
 
 	// setup alpha test
@@ -320,13 +257,11 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.getBool(MFSCB_AlphaTest))
 		{
 			pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-			pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+//			pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL); // this is set globally, never changes
 			pd3dDevice->SetRenderState(D3DRS_ALPHAREF, (DWORD)MFClamp(0.f, pRS->x * 255.f, 255.f));
 		}
 		else
-		{
 			pd3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-		}
 	}
 
 	// set alpha ref

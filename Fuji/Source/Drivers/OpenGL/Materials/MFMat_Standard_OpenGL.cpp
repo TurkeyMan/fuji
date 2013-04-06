@@ -17,8 +17,6 @@
 
 #include "../MFOpenGL.h"
 
-static MFMaterial *pSetMaterial = 0;
-
 static const GLint glTexFilters[] =
 {
 	// mip none

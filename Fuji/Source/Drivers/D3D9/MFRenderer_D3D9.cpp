@@ -36,7 +36,7 @@
 
 #include "Shaders/Registers.h"
 
-#include <d3d9.h>
+#include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
 #pragma comment(lib, "d3dx9")
@@ -49,12 +49,20 @@ IDirect3DDevice9 *pd3dDevice;
 static IDirect3DSurface9 *pRenderTarget = NULL;
 static IDirect3DSurface9 *pZTarget = NULL;
 
-static D3DCAPS9 deviceCaps;
+D3DCAPS9 gD3D9DeviceCaps;
 
 extern HWND apphWnd;
 
 static int gNumWeights = 0;
 static MFRect gCurrentViewport;
+
+void MFRenderer_D3D9_SetDebugName(IDirect3DResource9* pResource, const char* pName)
+{
+#if !defined(MF_RETAIL)
+	if (pResource)
+		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, pName, MFString_Length(pName), 0);
+#endif
+}
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -66,7 +74,7 @@ void MFRenderer_InitModulePlatformSpecific()
 		return;
 	}
 
-	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &deviceCaps);
+	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &gD3D9DeviceCaps);
 }
 
 void MFRenderer_DeinitModulePlatformSpecific()
@@ -123,7 +131,7 @@ int MFRenderer_CreateDisplay()
 	int b=0;
 	DWORD processing = D3DCREATE_MULTITHREADED;
 
-	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((deviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
+	if(gD3D9DeviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((gD3D9DeviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
 	{
 		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	}
@@ -203,13 +211,12 @@ int MFRenderer_CreateDisplay()
 	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
-	pd3dDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	pd3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, (gD3D9DeviceCaps.StencilCaps & D3DSTENCILCAPS_TWOSIDED) ? TRUE : FALSE);
 
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	// we always use this alpha test for 'masking'...
+	pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 
 	D3DVIEWPORT9 vp;
 	pd3dDevice->GetViewport(&vp);
@@ -247,6 +254,8 @@ void MFRenderer_ResetDisplay()
 	// free resources
 	void MFTexture_Release();
 	MFTexture_Release();
+	void MFRenderState_Release();
+	MFRenderState_Release();
 
 	if(pRenderTarget)
 	{
@@ -332,6 +341,8 @@ void MFRenderer_ResetDisplay()
 	{
 		void MFTexture_Recreate();
 		MFTexture_Recreate();
+		void MFRenderState_Recreate();
+		MFRenderState_Recreate();
 
 		if(pSystemCallbacks[MFCB_DisplayReset])
 			pSystemCallbacks[MFCB_DisplayReset]();

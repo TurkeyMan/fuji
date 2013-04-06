@@ -67,7 +67,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_FindResource(hash);
 	if(!pDecl)
 	{
-		pDecl = (MFVertexDeclaration*)MFHeap_AllocAndZero(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement)+sizeof(MFVertexElementData))*elementCount);
+		pDecl = (MFVertexDeclaration*)MFHeap_AllocAndZero(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement) + sizeof(MFVertexElementData))*elementCount);
 		pDecl->type = MFRT_VertexDecl;
 		pDecl->hash = hash;
 
@@ -155,23 +155,28 @@ MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *p
 	return pDeclaration->pStreamDecl[stream];
 }
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory)
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
 {
+	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFVertexBuffer *pVB;
 	if(type == MFVBType_Scratch)
-		pVB = (MFVertexBuffer*)MFRenderer_AllocateRenderMemory(sizeof(MFVertexBuffer));
+		pVB = (MFVertexBuffer*)MFRenderer_AllocateRenderMemory(sizeof(MFVertexBuffer) + nameLen);
 	else
-		pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer));
+		pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer) + nameLen);
+	MFZeroMemory(pVB, sizeof(MFVertexBuffer));
+
 	pVB->type = MFRT_VertexBuffer;
 	pVB->hash = (uint32)pVB;
 	pVB->refCount = 1;
+	if(pName)
+	{
+		pVB->pName = (const char*)pVB + sizeof(MFVertexBuffer);
+		MFString_Copy((char*)pVB->pName, pName);
+	}
 
 	pVB->pVertexDeclatation = pVertexFormat;
 	pVB->bufferType = type;
 	pVB->numVerts = numVerts;
-	pVB->bLocked = false;
-	pVB->pPlatformData = NULL;
-	pVB->pNextScratchBuffer = NULL;
 
 	if(!MFVertex_CreateVertexBufferPlatformSpecific(pVB, pVertexBufferMemory))
 	{
@@ -298,19 +303,20 @@ MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexEl
 
 }
 
-MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory)
+MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory, const char *pName)
 {
-	// Why did I allocate a buffer for the index data here???
-//	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer) + (pIndexBufferMemory ? 0 : sizeof(uint16)*numIndices));
-	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_Alloc(sizeof(MFIndexBuffer));
+	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_AllocAndZero(sizeof(MFIndexBuffer) + nameLen);
 	pIB->type = MFRT_IndexBuffer;
 	pIB->hash = (uint32)pIB;
 	pIB->refCount = 1;
+	if(pName)
+	{
+		pIB->pName = (const char*)pIB + sizeof(MFIndexBuffer);
+		MFString_Copy((char*)pIB->pName, pName);
+	}
 
-//	pIB->pIndices = pIndexBufferMemory ? pIndexBufferMemory : (uint16*)&pIB[1];
 	pIB->numIndices = numIndices;
-	pIB->bLocked = false;
-	pIB->pPlatformData = NULL;
 
 	if(!MFVertex_CreateIndexBufferPlatformSpecific(pIB, pIndexBufferMemory))
 	{

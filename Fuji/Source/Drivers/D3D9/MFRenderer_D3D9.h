@@ -3,6 +3,8 @@
 
 #include <d3d9.h>
 
+void MFRenderer_D3D9_SetDebugName(IDirect3DResource9* pResource, const char* pName);
+
 void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen);
 void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix);
 void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix);

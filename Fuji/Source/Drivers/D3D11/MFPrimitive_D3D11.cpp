@@ -20,22 +20,17 @@
 	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_D3D11
 #endif
 
-#include "MFPrimitive.h"
-#include "MFVertex.h"
-#include "MFMaterial.h"
-#include "Materials/MFMat_Standard.h"
 #include "MFRenderer.h"
+#include "MFRenderState.h"
+#include "MFRenderer_D3D11.h"
+#include "MFVertex.h"
+#include "MFPrimitive.h"
+#include "MFMaterial.h"
 #include "MFView.h"
 #include "MFDisplay.h"
+
 #include "MFTexture.h"
-#include "MFRenderer_D3D11.h"
-
-#include "MFVertex_Internal.h"
-
-
-static const int primBufferSize = 1536;
-
-static bool gRenderQuads = false;
+#include "Materials/MFMat_Standard.h"
 
 struct LitVertexD3D11
 {
@@ -54,26 +49,24 @@ struct LitVertexD3D11
 	float u,v;
 };
 
-static LitVertexD3D11 primBuffer[primBufferSize];
-static LitVertexD3D11 current;
-
-static PrimType primType;
-static uint32 beginCount;
-static uint32 currentVert;
-
 static MFVertexDeclaration *pDecl;
-extern ID3D11Device* g_pd3dDevice;
-extern ID3D11DeviceContext* g_pImmediateContext;
 
-static MFVertexBuffer *pVertexBuffer = NULL;
+static MFMaterial *pMaterial;
+
+static MFMesh currentPrim;
+static MFVertexBuffer *pVB;
+static LitVertexD3D11 *pLocked;
+
+static LitVertexD3D11 current;
+static int currentVert;
+
+static bool gImmitateQuads = false;
 
 static int32 phase = 0;
 
 //---------------------------------------------------------------------------------------------------------------------
 MFInitStatus MFPrimitive_InitModule()
 {
-	MFCALLSTACK;
-	
 	MFVertexElement elements[4];
 
 	// write declaration
@@ -81,38 +74,34 @@ MFInitStatus MFPrimitive_InitModule()
 	elements[0].type = MFVET_Position;
 	elements[0].index = 0;
 	elements[0].componentCount = 3;
+	elements[0].format = MFVDF_Float3;
 
 	elements[1].stream = 0;
 	elements[1].type = MFVET_Normal;
 	elements[1].index = 0;
 	elements[1].componentCount = 3;
+	elements[1].format = MFVDF_Float3;
 
 	elements[2].stream = 0;
 	elements[2].type = MFVET_Colour;
 	elements[2].index = 0;
 	elements[2].componentCount = 4;
+	elements[2].format = MFVDF_UByte4N_BGRA;
 
 	elements[3].stream = 0;
 	elements[3].type = MFVET_TexCoord;
 	elements[3].index = 0;
 	elements[3].componentCount = 2;
+	elements[3].format = MFVDF_Float2;
 
 	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
 	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
-
-	pVertexBuffer = MFVertex_CreateVertexBuffer(pDecl, primBufferSize, MFVBType_Dynamic);
-
-	MFRenderer_D3D11_SetDebugName((ID3D11Buffer*)pVertexBuffer->pPlatformData, "MFPrimative vertex buffer");
 
 	return MFAIC_Succeeded;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MFPrimitive_DeinitModule()
 {
-	MFCALLSTACK;
-
-	MFVertex_DestroyVertexBuffer(pVertexBuffer); pVertexBuffer = NULL;
-
 	MFVertex_DestroyVertexDeclaration(pDecl);
 }
 //---------------------------------------------------------------------------------------------------------------------
@@ -123,52 +112,50 @@ void MFPrimitive_DrawStats()
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
-	MFCALLSTACK;
-
 	MFDebug_Assert(phase == 0, "not in order 0");
 
-	primType = static_cast<PrimType>(type & PT_PrimMask);
+	currentPrim.primType = (MFPrimType)(type & PT_PrimMask);
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(128);
+	currentPrim.indexOffset = 0;
+	currentPrim.vertexOffset = 0;
+	currentPrim.numIndices = 0;
 
-	if (primType == PT_QuadList)
-	{
-		primType = PT_TriList;
-		gRenderQuads = true;
-	}
-	else
-	{
-		gRenderQuads = false;
-	}
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, MFMatrix::identity);
 
 	if(type & PT_Untextured)
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
+		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
+	else
+		pMaterial = MFMaterial_GetCurrent();
 
-	MFRenderer_SetMatrices(NULL, 0);
-	// SJS ????
-	//MFRendererPC_SetNumWeights(0);
-	
-	MFRenderer_D3D11_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
-
-	//MFRendererPC_SetModelColour(MFVector::white);
-
-	MFVertex_SetVertexDeclaration(pDecl);
-
-	MFRenderer_Begin();
+	if(currentPrim.primType == MFPT_QuadList)
+	{
+		// D3D9 doesn't support rendering quads...
+		currentPrim.primType = MFPT_TriangleList;
+		gImmitateQuads = true;
+	}
+	else
+		gImmitateQuads = false;
 
 	phase = 1;
 }
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFBegin(uint32 vertexCount)
 {
-	MFCALLSTACK;
-
 	MFDebug_Assert(phase == 1, "not in order 1");
 
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
-	if(gRenderQuads)
-		beginCount = vertexCount * 3;
-	else
-		beginCount = vertexCount;
+	currentPrim.numVertices = vertexCount;
+	if(gImmitateQuads)
+		currentPrim.numVertices *= 3;
+
+	// create an appropriate vertex buffer
+	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
+
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
+
+	MFVertex_LockVertexBuffer(pVB, (void**)&pLocked);
 
 	currentVert = 0;
 
@@ -182,11 +169,7 @@ MF_API void MFBegin(uint32 vertexCount)
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFSetMatrix(const MFMatrix &mat)
 {
-	MFCALLSTACK;
-
-	MFMatrix temp;
-	MFView_GetLocalToScreen(mat, &temp);
-	MFRenderer_D3D11_SetWorldToScreenMatrix(temp);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, mat);
 }
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFSetColour(float r, float g, float b, float a)
@@ -209,87 +192,47 @@ MF_API void MFSetNormal(float x, float y, float z)
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFSetPosition(float x, float y, float z)
 {
-	MFCALLSTACK;
-
 	current.pos.x = x;
 	current.pos.y = y;
 	current.pos.z = z;
 
-	if(gRenderQuads && (currentVert & 1))
+	if(gImmitateQuads && (currentVert & 1))
 	{
-		LitVertexD3D11 &prev = primBuffer[currentVert - 1];
+		LitVertexD3D11 &prev = pLocked[currentVert - 1];
 
-		primBuffer[currentVert + 0] = prev;
-		primBuffer[currentVert + 1] = prev;
-		primBuffer[currentVert + 2] = current;
-		primBuffer[currentVert + 3] = current;
-		primBuffer[currentVert + 4] = current;
+		pLocked[currentVert + 0] = prev;
+		pLocked[currentVert + 1] = prev;
+		pLocked[currentVert + 2] = current;
+		pLocked[currentVert + 3] = current;
+		pLocked[currentVert + 4] = current;
 
-		primBuffer[currentVert + 0].pos.x = current.pos.x;
-		primBuffer[currentVert + 1].pos.y = current.pos.y;
-		primBuffer[currentVert + 2].pos.x = prev.pos.x;
-		primBuffer[currentVert + 3].pos.y = prev.pos.y;
+		pLocked[currentVert + 0].pos.x = current.pos.x;
+		pLocked[currentVert + 1].pos.y = current.pos.y;
+		pLocked[currentVert + 2].pos.x = prev.pos.x;
+		pLocked[currentVert + 3].pos.y = prev.pos.y;
 
-		primBuffer[currentVert + 0].u = current.u;
-		primBuffer[currentVert + 1].v = current.v;
-		primBuffer[currentVert + 2].u = prev.u;
-		primBuffer[currentVert + 3].v = prev.v;
+		pLocked[currentVert + 0].u = current.u;
+		pLocked[currentVert + 1].v = current.v;
+		pLocked[currentVert + 2].u = prev.u;
+		pLocked[currentVert + 3].v = prev.v;
 
 		currentVert += 4;
 	}
 	else
-		primBuffer[currentVert] = current;
+		pLocked[currentVert] = current;
 
 	++currentVert;
-
-	if(currentVert >= primBufferSize)
-	{
-		int newBeginCount = beginCount - currentVert;
-		beginCount = currentVert;
-
-		MFEnd();
-
-		beginCount = newBeginCount;
-		currentVert = 0;
-	}
 }
 //---------------------------------------------------------------------------------------------------------------------
 MF_API void MFEnd()
 {
-	MFCALLSTACK;
-
 	MFDebug_Assert(phase == 2, "not in order 2");
 
-	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
+	MFVertex_UnlockVertexBuffer(pVB);
 
-	void *pBuffer;
-	MFVertex_LockVertexBuffer(pVertexBuffer, &pBuffer);
-	MFCopyMemory(pBuffer, primBuffer, beginCount * sizeof(LitVertexD3D11));
-	MFVertex_UnlockVertexBuffer(pVertexBuffer);
+	MFDebug_Assert(currentVert == currentPrim.numVertices, "Incorrect number of vertices.");
 
-	MFVertex_SetVertexStreamSource(0, pVertexBuffer);
-	
-	switch(primType)
-	{
-	case PT_PointList:
-		MFVertex_RenderVertices(MFPT_Points, 0, beginCount);
-		break;
-	case PT_LineList:
-		MFVertex_RenderVertices(MFPT_LineList, 0, beginCount);
-		break;
-	case PT_LineStrip:
-		MFVertex_RenderVertices(MFPT_LineStrip, 0, beginCount);
-		break;
-	case PT_TriList:
-		MFVertex_RenderVertices(MFPT_TriangleList, 0, beginCount);
-		break;
-	case PT_TriStrip:
-		MFVertex_RenderVertices(MFPT_TriangleStrip, 0, beginCount);
-		break;
-	case PT_TriFan:
-		MFVertex_RenderVertices(MFPT_TriangleFan, 0, beginCount);
-		break;
-	}
+	MFRenderer_AddMesh(&currentPrim, pMaterial, NULL, NULL, MFView_GetViewState());
 
 	phase = 0;
 }

@@ -295,13 +295,15 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 							MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
 							if(pVBDecl)
 							{
-								pMC->pVertexBuffers[s] = MFVertex_CreateVertexBuffer(pVBDecl, pMC->numVertices, MFVBType_Static, pMCG->ppVertexStreams[s]);
+								const char *pVBName = MFStr("%s|%s[%d:%d]", pTemplate->pFilename, pSubobjects[a].pSubObjectName, b, s);
+								pMC->pVertexBuffers[s] = MFVertex_CreateVertexBuffer(pVBDecl, pMC->numVertices, MFVBType_Static, pMCG->ppVertexStreams[s], pVBName);
 
 								MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_VertexBuffer(s), pMC->pVertexBuffers[s]);
 							}
 						}
 
-						pMC->pIndexBuffer = MFVertex_CreateIndexBuffer(pMC->numIndices, pMCG->pIndexData);
+						const char *pIBName = MFStr("%s|%s[%d]", pTemplate->pFilename, pSubobjects[a].pSubObjectName, b);
+						pMC->pIndexBuffer = MFVertex_CreateIndexBuffer(pMC->numIndices, pMCG->pIndexData, pIBName);
 
 						MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_IndexBuffer, pMC->pIndexBuffer);
 					}

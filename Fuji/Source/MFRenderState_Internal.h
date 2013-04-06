@@ -13,21 +13,25 @@ void MFRenderState_DeinitModule();
 struct MFBlendState : public MFResource
 {
 	MFBlendStateDesc stateDesc;
+	void *pPlatformData;
 };
 
 struct MFSamplerState : public MFResource
 {
 	MFSamplerStateDesc stateDesc;
+	void *pPlatformData;
 };
 
 struct MFDepthStencilState : public MFResource
 {
 	MFDepthStencilStateDesc stateDesc;
+	void *pPlatformData;
 };
 
 struct MFRasteriserState : public MFResource
 {
 	MFRasteriserStateDesc stateDesc;
+	void *pPlatformData;
 };
 
 MFALIGN_BEGIN(16)
@@ -72,5 +76,16 @@ struct MFStateBlock
 	__forceinline size_t GetFree()	{ return GetSize() - GetUsed(); }
 }
 MFALIGN_END(16);
+
+void MFRenderState_InitModulePlatformSpecific();
+void MFRenderState_DeinitModulePlatformSpecific();
+bool MFBlendState_CreatePlatformSpecific(MFBlendState *pBS);
+void MFBlendState_DestroyPlatformSpecific(MFBlendState *pBS);
+bool MFSamplerState_CreatePlatformSpecific(MFSamplerState *pSS);
+void MFSamplerState_DestroyPlatformSpecific(MFSamplerState *pSS);
+bool MFDepthStencilState_CreatePlatformSpecific(MFDepthStencilState *pDSS);
+void MFDepthStencilState_DestroyPlatformSpecific(MFDepthStencilState *pDSS);
+bool MFRasteriserState_CreatePlatformSpecific(MFRasteriserState *pRS);
+void MFRasteriserState_DestroyPlatformSpecific(MFRasteriserState *pRS);
 
 #endif

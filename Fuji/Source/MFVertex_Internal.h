@@ -15,8 +15,11 @@ struct MFVertexDeclaration : public MFResource
 	MFVertexElement *pElements;
 	MFVertexElementData *pElementData;
 	int numElements;
+
 	uint32 streamsUsed;
+
 	MFVertexDeclaration *pStreamDecl[8];
+
 	void *pPlatformData;
 };
 
@@ -29,6 +32,8 @@ struct MFVertexBuffer : public MFResource
 	bool bLocked;
 	void *pLocked;
 
+	const char *pName;
+
 	void *pPlatformData;
 
 	MFVertexBuffer *pNextScratchBuffer;
@@ -36,7 +41,6 @@ struct MFVertexBuffer : public MFResource
 
 struct MFIndexBuffer : public MFResource
 {
-//	uint16 *pIndices;
 	int numIndices;
 
 	bool bLocked;

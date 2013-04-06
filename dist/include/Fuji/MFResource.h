@@ -43,6 +43,7 @@ struct MFResource
 	uint32 hash;
 	int16 type;
 	int16 refCount;
+	const char *pName;
 };
 
 struct MFResourceIterator;

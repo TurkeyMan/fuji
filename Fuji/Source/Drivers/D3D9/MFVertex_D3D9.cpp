@@ -27,6 +27,7 @@
 #include "MFHeap.h"
 #include "MFVertex_Internal.h"
 #include "MFRenderer.h"
+#include "MFRenderer_D3D9.h"
 
 #include <d3d9.h>
 
@@ -175,6 +176,8 @@ bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, 
 	if(FAILED(hr))
 		return false;
 
+	if(pVertexBuffer->pName)
+		MFRenderer_D3D9_SetDebugName(pVertBuffer, pVertexBuffer->pName);
 	pVertexBuffer->pPlatformData = pVertBuffer;
 
 	if(pVertexBufferMemory)
@@ -227,6 +230,8 @@ bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uin
 	if(FAILED(hr))
 		return false;
 
+	if(pIndexBuffer->pName)
+		MFRenderer_D3D9_SetDebugName(pIB, pIndexBuffer->pName);
 	pIndexBuffer->pPlatformData = pIB;
 
 	if(pIndexBufferMemory)
