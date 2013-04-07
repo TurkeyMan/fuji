@@ -30,7 +30,7 @@ enum MFShaderType
 
 MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename);
 MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, const char *pName = NULL);
-MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShader, size_t bytes, const char *pName = NULL);
+MFShader* MFShader_CreateFromBinary(MFShaderType type, const void *pShader, size_t bytes, const char *pName = NULL);
 MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, const char *pName = NULL);
 void MFShader_Destroy(MFShader *pShader);
 

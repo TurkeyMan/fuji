@@ -67,6 +67,11 @@ MF_API int MFResource_GetRefCount(MFResource *pResource)
 	return pResource->refCount;
 }
 
+MF_API const char* MFResource_GetName(MFResource *pResource)
+{
+	return pResource->pName;
+}
+
 MF_API int MFResource_GetNumResources(MFResourceType type)
 {
 	return gResourceCounts[type + 2];

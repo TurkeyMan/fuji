@@ -51,7 +51,7 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
  */
 MF_API int MFModel_Destroy(MFModel *pModel);
 
-MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView);
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
 /**
  * Draw a model.

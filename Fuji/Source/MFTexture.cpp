@@ -466,7 +466,7 @@ MF_API int MFTexture_Destroy(MFTexture *pTexture)
 	return pTexture->refCount;
 }
 
-MF_API void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
+MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight)
 {
 	if(pWidth)
 		*pWidth = pTexture->pTemplateData->pSurfaces[0].width;

@@ -287,19 +287,19 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 */
 }
 
-MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
+MF_API void MFVertex_SetVertexDeclaration(const MFVertexDeclaration *pVertexDeclaration)
 {
 	IDirect3DVertexDeclaration9 *pVertexDecl = (IDirect3DVertexDeclaration9*)pVertexDeclaration->pPlatformData;
 	pd3dDevice->SetVertexDeclaration(pVertexDecl);
 }
 
-MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_SetVertexStreamSource(int stream, const MFVertexBuffer *pVertexBuffer)
 {
 	IDirect3DVertexBuffer9 *pVertBuffer = (IDirect3DVertexBuffer9*)pVertexBuffer->pPlatformData;
 	pd3dDevice->SetStreamSource(stream, pVertBuffer, 0, pVertexBuffer->pVertexDeclatation->pElementData[0].stride);
 }
 
-MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 {
 	pd3dDevice->SetIndices((IDirect3DIndexBuffer9*)pIndexBuffer->pPlatformData);
 }

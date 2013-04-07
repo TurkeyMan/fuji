@@ -49,7 +49,7 @@ extern (C) void MFView_ConfigureProjection(float fieldOfView, float nearPlane, f
 * @see MFView_SetProjection()
 * @see MFView_SetOrtho()
 */
-extern (C) void MFView_SetCustomProjection(ref MFMatrix projectionMatrix, bool bYIsUp);
+extern (C) void MFView_SetCustomProjection(ref const(MFMatrix) projectionMatrix, bool bYIsUp);
 
 /**
 * Set the aspect ratio.
@@ -75,7 +75,7 @@ extern (C) void MFView_SetProjection();
 * @return None.
 * @see MFView_SetProjection()
 */
-extern (C) void MFView_SetOrtho(MFRect *pOrthoRect = null);
+extern (C) void MFView_SetOrtho(const(MFRect)* pOrthoRect = null);
 
 /**
 * Get the current ortho rect.
@@ -101,7 +101,7 @@ extern (C) bool MFView_IsOrtho();
 * @return None.
 * @see MFView_GetCameraMatrix()
 */
-extern (C) void MFView_SetCameraMatrix(const ref MFMatrix cameraMatrix);
+extern (C) void MFView_SetCameraMatrix(ref const(MFMatrix) cameraMatrix);
 
 /**
 * Gets the camera matrix.

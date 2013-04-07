@@ -31,9 +31,6 @@
 #include "MFRenderer_D3D11.h"
 
 
-DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);
-const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
-
 extern int gVertexDataStride[MFVDF_Max];
 
 extern const uint8 *g_pVertexShaderData;
@@ -364,13 +361,13 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	pIndexBuffer->bLocked = false;
 }
 
-MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
+MF_API void MFVertex_SetVertexDeclaration(const MFVertexDeclaration *pVertexDeclaration)
 {
 	ID3D11InputLayout *pVertexLayout = pVertexDeclaration ? (ID3D11InputLayout*)pVertexDeclaration->pPlatformData : NULL;
     g_pImmediateContext->IASetInputLayout(pVertexLayout);
 }
 
-MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_SetVertexStreamSource(int stream, const MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer, "Null vertex buffer");
 
@@ -380,7 +377,7 @@ MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBu
     g_pImmediateContext->IASetVertexBuffers(stream, 1, &pVB, &stride, &offset);
 }
 
-MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 {
 	ID3D11Buffer *pIB = (ID3D11Buffer*)pIndexBuffer->pPlatformData;
 	g_pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0);

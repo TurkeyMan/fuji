@@ -193,22 +193,22 @@ MF_API void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet
 	gCurrentLayers = *pLayerSet;
 }
 
-MF_API void MFRenderer_AddVertices(MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderer_AddVertices(MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderLayer_AddVertices(gCurrentLayers.pSolidLayer, pMeshStateBlock, firstVertex, numVertices, primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderer_AddIndexedVertices(MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderer_AddIndexedVertices(MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderLayer_AddIndexedVertices(gCurrentLayers.pSolidLayer, pMeshStateBlock, firstIndex, numVertices, primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderLayer_AddMesh(gCurrentLayers.pSolidLayer, pMesh, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderLayer_AddModel(&gCurrentLayers, pModel, pEntity, pMaterialOverride, pView);
 }
@@ -247,7 +247,7 @@ MFMatrix *MFRendererState::getDerivedMatrix(MFStateConstant_Matrix matrix)
 	return pMatrixStatesSet[matrix];
 }
 
-static void MFRenderer_ApplyRenderStates(MFRendererState &state, MFStateBlock **ppStateBlocks, int numStateBlocks)
+static void MFRenderer_ApplyRenderStates(MFRendererState &state, const MFStateBlock **ppStateBlocks, int numStateBlocks)
 {
 	// prime 'set' flags from mask
 	MFCopyMemory(state.rsSet, state.rsMask, sizeof(state.rsSet));
@@ -255,7 +255,7 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, MFStateBlock **
 	// for each stateblock in order of precedence
 	for(int sb = numStateBlocks-1; sb >= 0; --sb)
 	{
-		MFStateBlock *pSB = ppStateBlocks[sb];
+		const MFStateBlock *pSB = ppStateBlocks[sb];
 		if(!pSB)
 			continue;
 
@@ -269,10 +269,10 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, MFStateBlock **
 		state.bools = (state.bools & ~boolsToSet) | (pSB->bools & boolsToSet);
 
 		// set render states
-		MFStateBlock::MFStateBlockStateChange *pStateChanges = pSB->GetStateChanges();
+		const MFStateBlock::MFStateBlockStateChange *pStateChanges = pSB->GetStateChanges();
 		for(int s = 0; s < pSB->numStateChanges; ++s)
 		{
-			MFStateBlock::MFStateBlockStateChange &sc = pStateChanges[s];
+			const MFStateBlock::MFStateBlockStateChange &sc = pStateChanges[s];
 
 			// if the state was cleared, of already set, skip it...
 			if(!sc.stateSet || state.isSet(sc.constantType, sc.constant))
@@ -282,7 +282,7 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, MFStateBlock **
 			state.rsSet[sc.constantType] |= MFBIT(sc.constant);
 
 			// set the state
-			void *pData = pSB->GetStateData(sc.offset*4);
+			const void *pData = pSB->GetStateData(sc.offset*4);
 
 			switch(sc.constantType)
 			{
@@ -558,7 +558,7 @@ MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags cle
 	pLayer->clearStencil = stencil;
 }
 
-MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	if(pMesh->numIndices)
 		MFRenderLayer_AddIndexedVertices(pLayer, pMesh->pMeshState, pMesh->indexOffset, pMesh->numIndices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
@@ -566,12 +566,12 @@ MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMateri
 		MFRenderLayer_AddVertices(pLayer, pMesh->pMeshState, pMesh->vertexOffset, pMesh->numVertices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFModel_SubmitGeometry(pModel, pLayerSet, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderElement &e = pLayer->elements.push();
 
@@ -599,7 +599,7 @@ MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMesh
 //	e.animBatch = 0;
 }
 
-MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderElement &e = pLayer->elements.push();
 

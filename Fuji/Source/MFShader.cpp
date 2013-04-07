@@ -24,7 +24,7 @@ MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, cons
 	return NULL;
 }
 
-MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShader, size_t bytes, const char *pName)
+MFShader* MFShader_CreateFromBinary(MFShaderType type, const void *pShader, size_t bytes, const char *pName)
 {
 	return NULL;
 }

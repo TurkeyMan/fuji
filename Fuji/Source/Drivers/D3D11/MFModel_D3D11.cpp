@@ -22,11 +22,6 @@
 
 
 //---------------------------------------------------------------------------------------------------------------------
-DXGI_FORMAT MFRenderer_D3D11_GetFormat(MFVertexDataFormat format);
-const char* MFRenderer_D3D11_GetSemanticName(MFVertexElementType type);
-MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
-
-//---------------------------------------------------------------------------------------------------------------------
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
 //---------------------------------------------------------------------------------------------------------------------

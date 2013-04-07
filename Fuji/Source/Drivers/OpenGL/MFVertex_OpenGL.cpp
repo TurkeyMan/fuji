@@ -31,9 +31,9 @@
 
 struct MFVertex_RenderBuffers
 {
-	MFVertexDeclaration *pVertexDeclaration;
-	MFVertexBuffer *pVertexBuffer[16];
-	MFIndexBuffer *pIndexBuffer;
+	const MFVertexDeclaration *pVertexDeclaration;
+	const MFVertexBuffer *pVertexBuffer[16];
+	const MFIndexBuffer *pIndexBuffer;
 };
 
 /*** Globals ****/
@@ -294,17 +294,17 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 	pIndexBuffer->bLocked = false;
 }
 
-MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration)
+MF_API void MFVertex_SetVertexDeclaration(const MFVertexDeclaration *pVertexDeclaration)
 {
 	gRenderBuffers.pVertexDeclaration = pVertexDeclaration;
 }
 
-MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer)
+MF_API void MFVertex_SetVertexStreamSource(int stream, const MFVertexBuffer *pVertexBuffer)
 {
 	gRenderBuffers.pVertexBuffer[stream] = pVertexBuffer;
 }
 
-MF_API void MFVertex_SetIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 {
 	gRenderBuffers.pIndexBuffer = pIndexBuffer;
 }

@@ -69,11 +69,13 @@ struct MFStateBlock
 	uint16 unused;
 
 	__forceinline MFStateBlockStateChange* GetStateChanges() { return (MFStateBlockStateChange*)((char*)this + sizeof(MFStateBlock)); }
+	__forceinline const MFStateBlockStateChange* GetStateChanges() const { return (const MFStateBlockStateChange*)((const char*)this + sizeof(MFStateBlock)); }
 	__forceinline void* GetStateData(size_t offset = 0) { return (void*)(MFALIGN16(GetStateChanges() + numStateChanges) + offset); }
+	__forceinline const void* GetStateData(size_t offset = 0) const { return (const void*)(MFALIGN16(GetStateChanges() + numStateChanges) + offset); }
 
-	__forceinline size_t GetSize()	{ return MINIMUM_SIZE << allocated; }
-	__forceinline size_t GetUsed()	{ return 16 * used + ((char*)GetStateData() - (char*)this); }
-	__forceinline size_t GetFree()	{ return GetSize() - GetUsed(); }
+	__forceinline size_t GetSize() const { return MINIMUM_SIZE << allocated; }
+	__forceinline size_t GetUsed() const { return 16 * used + ((char*)GetStateData() - (char*)this); }
+	__forceinline size_t GetFree() const { return GetSize() - GetUsed(); }
 }
 MFALIGN_END(16);
 

@@ -53,13 +53,16 @@ void MFVertex_EndFrame()
 	}
 }
 
-MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount)
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexElement *pElementArray, int elementCount)
 {
 	// assign the auto format components before calculating the hash
+	MFVertexDataFormat elementFormat[16];
 	for(int e=0; e<elementCount; ++e)
 	{
 		if(pElementArray[e].format == MFVDF_Auto)
-			pElementArray[e].format = MFVertex_ChoooseVertexDataTypePlatformSpecific(pElementArray[e].type, pElementArray[e].componentCount);
+			elementFormat[e] = MFVertex_ChoooseVertexDataTypePlatformSpecific(pElementArray[e].type, pElementArray[e].componentCount);
+		else
+			elementFormat[e] = pElementArray[e].format;
 	}
 
 	uint32 hash = MFUtil_HashBuffer(pElementArray, sizeof(MFVertexElement)*elementCount);
@@ -76,6 +79,8 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pE
 		pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
 
 		MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
+		for(int e=0; e<elementCount; ++e)
+			pDecl->pElements[e].format = elementFormat[e];
 
 		int streamOffsets[16];
 		MFZeroMemory(streamOffsets, sizeof(streamOffsets));
@@ -151,14 +156,14 @@ MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
 	MFHeap_Free(pDeclaration);
 }
 
-MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *pDeclaration, int stream)
+MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream)
 {
 	if(pDeclaration->streamsUsed == 1)
 		return pDeclaration;
 	return pDeclaration->pStreamDecl[stream];
 }
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
 {
 	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFVertexBuffer *pVB;
@@ -215,7 +220,7 @@ MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
 	MFHeap_Free(pVertexBuffer);
 }
 
-static int MFVertex_FindVertexElement(MFVertexDeclaration *pDecl, MFVertexElementType targetElement, int targetElementIndex)
+static int MFVertex_FindVertexElement(const MFVertexDeclaration *pDecl, MFVertexElementType targetElement, int targetElementIndex)
 {
 	for(int a=0; a<pDecl->numElements; ++a)
 	{
@@ -227,7 +232,7 @@ static int MFVertex_FindVertexElement(MFVertexDeclaration *pDecl, MFVertexElemen
 
 MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices)
 {
-	MFVertexDeclaration *pDecl = pVertexBuffer->pVertexDeclatation;
+	const MFVertexDeclaration *pDecl = pVertexBuffer->pVertexDeclatation;
 	int element = MFVertex_FindVertexElement(pDecl, targetElement, targetElementIndex);
 
 	if(!pVertexBuffer->bLocked || element == -1)

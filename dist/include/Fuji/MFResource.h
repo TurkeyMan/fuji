@@ -58,6 +58,7 @@ MF_API MFResource* MFResource_FindResource(uint32 hash);
 MF_API MFResourceType MFResource_GetType(MFResource *pResource);
 MF_API uint32 MFResource_GetHash(MFResource *pResource);
 MF_API int MFResource_GetRefCount(MFResource *pResource);
+MF_API const char* MFResource_GetName(MFResource *pResource);
 
 MF_API int MFResource_GetNumResources(MFResourceType type = MFRT_All);
 

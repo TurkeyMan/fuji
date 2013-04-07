@@ -90,7 +90,7 @@ MF_API void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float
 	}
 }
 
-MF_API void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp)
+MF_API void MFView_SetCustomProjection(const MFMatrix &projectionMatrix, bool bYIsUp)
 {
 	pCurrentView->projection = projectionMatrix;
 
@@ -131,7 +131,7 @@ MF_API void MFView_SetProjection()
 	}
 }
 
-MF_API void MFView_SetOrtho(MFRect *pOrthoRect)
+MF_API void MFView_SetOrtho(const MFRect *pOrthoRect)
 {
 	MFCALLSTACK;
 
@@ -175,7 +175,7 @@ MF_API const MFMatrix& MFView_GetCameraMatrix()
 	return pCurrentView->cameraMatrix;
 }
 
-MF_API MFStateBlock* MFView_GetViewState()
+MF_API const MFStateBlock* MFView_GetViewState()
 {
 	if(!pCurrentView->pStateBlock)
 	{

@@ -56,7 +56,7 @@ struct MFRenderElement // 42 bytes atm... compress state block handles?
 	MFMaterial *pMaterial;
 //	MFRenderTechnique *pRenderTechnique;
 
-	MFStateBlock *pViewState;
+	const MFStateBlock *pViewState;
 	MFStateBlock *pGeometryState;
 	MFStateBlock *pEntityState;
 	MFStateBlock *pMaterialState;
@@ -132,7 +132,7 @@ struct MFRendererState
 
 	uint32 bools, boolsSet;
 
-	MFStateBlock *pStateBlocks[MFSBT_Max];
+	const MFStateBlock *pStateBlocks[MFSBT_Max];
 
 	MFMatrix *pMatrixStates[MFSCM_Max];
 	MFMatrix *pMatrixStatesSet[MFSCM_Max];

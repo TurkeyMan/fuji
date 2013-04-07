@@ -292,7 +292,7 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 
 						for(int s=0; s<pMCG->numVertexStreams; ++s)
 						{
-							MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
+							const MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
 							if(pVBDecl)
 							{
 								const char *pVBName = MFStr("%s|%s[%d:%d]", pTemplate->pFilename, pSubobjects[a].pSubObjectName, b, s);
@@ -395,7 +395,7 @@ MF_API int MFModel_Destroy(MFModel *pModel)
 }
 
 
-MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, MFStateBlock *pView)
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 	if(!pChunk)
