@@ -114,11 +114,6 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, MFVector colour, fl
 	sceGuClear( ((flags&CS_Colour) ? GU_COLOR_BUFFER_BIT : NULL) | ((flags&CS_ZBuffer) ? GU_DEPTH_BUFFER_BIT : NULL) );
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
-}
-
 void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;

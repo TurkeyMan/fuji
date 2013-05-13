@@ -179,7 +179,7 @@ extern (C) MFMaterial* MFMaterial_GetCurrent();
 * Gets a materials name.
 * @return The name of the specified material.
 */
-extern (C) const(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial);
+extern (C) const(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial) pure;
 
 // material control
 
@@ -436,7 +436,7 @@ final class Material
 	@property MFMaterial* handle() pure nothrow					{ return cast(MFMaterial*)this; }
 	@property const(MFMaterial)* handle() const pure nothrow	{ return cast(const(MFMaterial)*)this; }
 
-	@property string name() const
+	@property string name() const pure
 	{
 		auto pName = MFMaterial_GetMaterialName(cast(MFMaterial*)this);
 		return cast(string)pName[0..strlen(pName)];

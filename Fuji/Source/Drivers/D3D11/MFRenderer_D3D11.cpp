@@ -12,11 +12,11 @@
 	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_D3D11
 	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_D3D11
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D11
-	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D11
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D11
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D11
+	#define MFRenderer_GetDeviceRenderTarget MFRenderer_GetDeviceRenderTarget_D3D11
+	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_D3D11
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D11
-	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_D3D11
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D11
 #endif
 
@@ -304,10 +304,6 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 	}
 }
 
-MF_API void MFRenderer_GetViewport(MFRect *pRect)
-{
-}
-
 MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 
@@ -318,14 +314,19 @@ MF_API void MFRenderer_ResetViewport()
 
 }
 
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
 {
-
+	return NULL;
 }
 
-MF_API void MFRenderer_SetDeviceRenderTarget()
+MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
 {
-    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
+	return NULL;
+}
+
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+{
+//    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }
 
 MF_API float MFRenderer_GetTexelCenterOffset()

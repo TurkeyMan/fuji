@@ -12,11 +12,11 @@
 	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_OpenGL
 	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_OpenGL
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_OpenGL
-	#define MFRenderer_GetViewport MFRenderer_GetViewport_OpenGL
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_OpenGL
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_OpenGL
+	#define MFRenderer_GetDeviceRenderTarget MFRenderer_GetDeviceRenderTarget_OpenGL
+	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_OpenGL
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_OpenGL
-	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_OpenGL
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_OpenGL
 #endif
 
@@ -449,11 +449,6 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 	MFCheckForOpenGLError();
 }
 
-MF_API void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
-}
-
 MF_API void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;
@@ -476,11 +471,29 @@ MF_API void MFRenderer_ResetViewport()
 	MFCheckForOpenGLError();
 }
 
+MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+{
+	return NULL;
+}
+
+MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
+{
+	return NULL;
+}
+
 MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFCheckForOpenGLError();
+
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(uintp)pRenderTarget->pTemplateData->pSurfaces[0].pImageData);
+
+	GLuint buffer = (GLuint)(uintp)pRenderTarget->pTemplateData->pSurfaces[0].pImageData;
+#if defined(MF_IPHONE)
+	if(buffer == 0)
+		MFRendererIPhone_SetBackBuffer();
+	else
+#endif
+	glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
 	if(pZTarget)
 	{
@@ -495,24 +508,11 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 
 //		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 	}
+
 	MFCheckForOpenGLError();
 
 	MFRect viewport = { 0.f, 0.f, (float)pRenderTarget->pTemplateData->pSurfaces[0].width, (float)pRenderTarget->pTemplateData->pSurfaces[0].height };
 	MFRenderer_SetViewport(&viewport);
-}
-
-MF_API void MFRenderer_SetDeviceRenderTarget()
-{
-#if defined(MF_IPHONE)
-	MFRendererIPhone_SetBackBuffer();
-#else
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
-
-	MFRect viewport = { 0.f, 0.f, (float)gDisplay.width, (float)gDisplay.height };
-	MFRenderer_SetViewport(&viewport);
-
-	glEnable(GL_DEPTH_TEST);
 }
 
 MF_API float MFRenderer_GetTexelCenterOffset()

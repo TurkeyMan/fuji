@@ -140,4 +140,4 @@ extern (C) MFTexture* MFTexture_CreateBlank(const(char)* pName, ref const(MFVect
 */
 extern (C) bool MFTexture_IsAvailable(int format);
 
-extern (C) void MFTexture_GetTextureDimensions(const(MFTexture)* pTexture, int* pWidth, int* pHeight);
+extern (C) void MFTexture_GetTextureDimensions(const(MFTexture)* pTexture, int* pWidth, int* pHeight) pure;

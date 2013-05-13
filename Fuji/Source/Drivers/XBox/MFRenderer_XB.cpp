@@ -124,11 +124,6 @@ void MFRenderer_ClearScreen(MFRenderClearFlags flags, MFVector colour, float z, 
 	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), colour.ToPackedColour(), z, stencil);
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
-}
-
 void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;

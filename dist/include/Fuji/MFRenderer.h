@@ -32,11 +32,12 @@ enum MFRenderClearFlags
 
 MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags = MFRCF_All, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
 
-MF_API void MFRenderer_GetViewport(MFRect *pRect);
 MF_API void MFRenderer_SetViewport(MFRect *pRect);
 MF_API void MFRenderer_ResetViewport();
 
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
+MF_API MFTexture* MFRenderer_GetDeviceRenderTarget();
+MF_API MFTexture* MFRenderer_GetDeviceDepthStencil();
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pDepthStencil);
 MF_API void MFRenderer_SetDeviceRenderTarget();
 
 MF_API float MFRenderer_GetTexelCenterOffset();

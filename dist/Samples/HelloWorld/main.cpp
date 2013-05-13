@@ -41,7 +41,7 @@ void Game_InitFilesystem()
 void Game_Init()
 {
 	// create the renderer with a single layer that clears before rendering
-	MFRenderLayerDescription layers[] = { "Scene" };
+	MFRenderLayerDescription layers[] = { { "Scene" } };
 	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
 	MFRenderer_SetCurrent(pRenderer);
 

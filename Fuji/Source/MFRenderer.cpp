@@ -73,6 +73,11 @@ MF_API int MFRenderer_Begin()
 	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial, *(MFRendererState*)NULL);
 }
 
+MF_API void MFRenderer_SetDeviceRenderTarget()
+{
+	MFRenderer_SetRenderTarget(MFRenderer_GetDeviceRenderTarget(), MFRenderer_GetDeviceDepthStencil());
+}
+
 MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices)
 {
 	pAnimMats = pMatrices;
@@ -143,6 +148,9 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 	pRenderer->pGlobal = pGlobal;
 	pRenderer->pOverride = pOverride;
 
+	MFTexture *pRenderTarget = MFRenderer_GetDeviceRenderTarget();
+	MFTexture *pDepthStencil = MFRenderer_GetDeviceDepthStencil();
+
 	for(int a=0; a<numLayers; ++a)
 	{
 #if !defined(MF_RETAIL)
@@ -152,6 +160,8 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 		}
 #endif
 		pRenderer->pLayers[a].pName = pLayers[a].pName;
+		pRenderer->pLayers[a].pRenderTarget[0] = pRenderTarget;
+		pRenderer->pLayers[a].pDepthStencil = pDepthStencil;
 	}
 
 	return pRenderer;
@@ -484,6 +494,7 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 		state.pStateBlocks[MFSBT_Override] = pRenderer->pOverride;
 
 		// configure render target
+		MFRenderer_SetRenderTarget(layer.pRenderTarget[0], layer.pDepthStencil);
 
 		// clear render target
 		if(layer.clearFlags != MFRCF_None)
@@ -532,12 +543,12 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 
 MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
 {
-
+	pLayer->pRenderTarget[targetIndex] = pTexture;
 }
 
 MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture)
 {
-
+	pLayer->pDepthStencil = pTexture;
 }
 
 MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)

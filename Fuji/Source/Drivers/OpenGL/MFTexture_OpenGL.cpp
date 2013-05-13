@@ -172,7 +172,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 	{
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
 		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName);
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
 
 		MFResource_AddResource(pTexture);
@@ -255,8 +255,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 		uint32 status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		MFDebug_Assert(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
-
-		MFRenderer_SetDeviceRenderTarget();
 
 		if(!MFCheckForOpenGLError())
 			MFDebug_Log(0, "RenderTarget created successfully!");

@@ -13,6 +13,7 @@ solution "Samples"
 	include "HelloWorld"
 	include "InputTest"
 	include "ModelTest"
+	include "RenderTarget"
 
 	-- include the Haku project...
 	dofile "../../Haku/Project/hakuproj.lua"

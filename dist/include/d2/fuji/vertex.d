@@ -98,7 +98,7 @@ struct MFMesh
 
 extern (C) MFVertexDeclaration* MFVertex_CreateVertexDeclaration(MFVertexElement* pElementArray, int elementCount);
 extern (C) void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration* pDeclaration);
-extern (C) const(MFVertexDeclaration)* MFVertex_GetStreamDeclaration(const(MFVertexDeclaration)* pDeclaration, int stream);
+extern (C) const(MFVertexDeclaration)* MFVertex_GetStreamDeclaration(const(MFVertexDeclaration)* pDeclaration, int stream) pure;
 
 extern (C) MFVertexBuffer* MFVertex_CreateVertexBuffer(MFVertexDeclaration* pVertexFormat, int numVerts, MFVertexBufferType type, void* pVertexBufferMemory = null, const(char)* pName = null);
 extern (C) void MFVertex_DestroyVertexBuffer(MFVertexBuffer* pVertexBuffer);

@@ -47,11 +47,6 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 	MFCALLSTACK;
 }
 
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
-}
-
 void MFRenderer_SetViewport(MFRect *pRect)
 {
 	MFCALLSTACK;

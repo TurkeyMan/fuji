@@ -86,7 +86,8 @@ struct MFRenderLayer
 	int clearStencil;
 	MFRenderClearFlags clearFlags;
 
-	// render target config
+	MFTexture *pRenderTarget[4];
+	MFTexture *pDepthStencil;
 
 	MFRenderLayerSortMode sortMode;
 	MFStateBlock *pLayer;

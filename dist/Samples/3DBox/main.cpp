@@ -52,7 +52,7 @@ void Game_InitFilesystem()
 void Game_Init()
 {
 	// create the renderer with a single layer that clears before rendering
-	MFRenderLayerDescription layers[] = { "Scene" };
+	MFRenderLayerDescription layers[] = { { "Scene" } };
 	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
 	MFRenderer_SetCurrent(pRenderer);
 
@@ -118,7 +118,7 @@ void BuildVertexBuffer()
 	{
 		{ 0, MFVET_Position, 0, 3 },
 		{ 0, MFVET_TexCoord, 0, 2 },
-		{ 0, MFVET_Colour, 0, 2 }
+		{ 0, MFVET_Colour, 0, 4 }
 	};
 
 	pVertexDecl = MFVertex_CreateVertexDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
@@ -177,7 +177,7 @@ void BuildVertexBuffer()
 
 		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
 		{ {  1, -1, -1 }, { 1, 1 }, 0xFFFFFFFF },
-		{ {  1, -1,  1 }, { 0, 1 }, 0xFFFFFFFF },
+		{ {  1, -1,  1 }, { 0, 1 }, 0xFFFFFFFF }
 	};
 
 	pVertexBuffer = MFVertex_CreateVertexBuffer(pVertexDecl, 12*3, MFVBType_Static, verts);

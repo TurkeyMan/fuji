@@ -56,16 +56,15 @@ void MFVertex_EndFrame()
 MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexElement *pElementArray, int elementCount)
 {
 	// assign the auto format components before calculating the hash
-	MFVertexDataFormat elementFormat[16];
+	MFVertexElement elements[16];
+	MFCopyMemory(elements, pElementArray, sizeof(MFVertexElement)*elementCount);
 	for(int e=0; e<elementCount; ++e)
 	{
 		if(pElementArray[e].format == MFVDF_Auto)
-			elementFormat[e] = MFVertex_ChoooseVertexDataTypePlatformSpecific(pElementArray[e].type, pElementArray[e].componentCount);
-		else
-			elementFormat[e] = pElementArray[e].format;
+			elements[e].format = MFVertex_ChoooseVertexDataTypePlatformSpecific(pElementArray[e].type, pElementArray[e].componentCount);
 	}
 
-	uint32 hash = MFUtil_HashBuffer(pElementArray, sizeof(MFVertexElement)*elementCount);
+	uint32 hash = MFUtil_HashBuffer(elements, sizeof(MFVertexElement)*elementCount);
 
 	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_FindResource(hash);
 	if(!pDecl)
@@ -78,9 +77,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 		pDecl->pElements = (MFVertexElement*)&pDecl[1];
 		pDecl->pElementData = (MFVertexElementData*)&pDecl->pElements[elementCount];
 
-		MFCopyMemory(pDecl->pElements, pElementArray, sizeof(MFVertexElement)*elementCount);
-		for(int e=0; e<elementCount; ++e)
-			pDecl->pElements[e].format = elementFormat[e];
+		MFCopyMemory(pDecl->pElements, elements, sizeof(MFVertexElement)*elementCount);
 
 		int streamOffsets[16];
 		MFZeroMemory(streamOffsets, sizeof(streamOffsets));
@@ -88,16 +85,16 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 		// set the element data and calculate the strides
 		for(int e=0; e<elementCount; ++e)
 		{
-			pDecl->pElementData[e].offset = streamOffsets[pElementArray[e].stream];
+			pDecl->pElementData[e].offset = streamOffsets[elements[e].stream];
 			pDecl->pElementData[e].stride = 0;
 
-			streamOffsets[pElementArray[e].stream] += gVertexDataStride[pElementArray[e].format];
-			pDecl->streamsUsed |= MFBIT(pElementArray[e].stream);
+			streamOffsets[elements[e].stream] += gVertexDataStride[elements[e].format];
+			pDecl->streamsUsed |= MFBIT(elements[e].stream);
 		}
 
 		// set the strides for each component
 		for(int e=0; e<elementCount; ++e)
-			pDecl->pElementData[e].stride = streamOffsets[pElementArray[e].stream];
+			pDecl->pElementData[e].stride = streamOffsets[elements[e].stream];
 
 		if(!MFVertex_CreateVertexDeclarationPlatformSpecific(pDecl))
 		{
@@ -119,9 +116,9 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 				int streamElements = 0;
 				for(int e=0; e<elementCount; ++e)
 				{
-					if(pElementArray[e].stream == s)
+					if(elements[e].stream == s)
 					{
-						elements[streamElements] = pElementArray[e];
+						elements[streamElements] = elements[e];
 						elements[streamElements].stream = 0;
 						++streamElements;
 					}
