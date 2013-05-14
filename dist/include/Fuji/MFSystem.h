@@ -26,12 +26,13 @@ struct MFDefaults
 		uint32 maxStaticHeapMarkers;	/**< Maximum static heap markers */
 	} heap;
 
-	/** Thread Defaults. */
-	struct ThreadDefaults
+	/** System Defaults. */
+	struct SystemDefaults
 	{
+		int threadPriority;				/**< Main thread priority */
 		uint32 maxThreads;				/**< Maximum number of threads */
 		uint32 maxTlsSlots;				/**< Maximum number of MFTls slots */
-	} thread;
+	} system;
 
 	/** Display Defaults. */
 	struct DisplayDefaults
@@ -40,6 +41,12 @@ struct MFDefaults
 		const char *pIcon;				/**< Resource name of the window icon */
 		bool hideMouseCursor;			/**< Hide the mouse cursor when it hovers over the application window */
 	} display;
+
+	/** Render Defaults. */
+	struct RenderDefaults
+	{
+		size_t renderHeapSize;			/**< Size of the renderer temp heap */
+	} render;
 
 	/** View Defaults. */
 	struct ViewDefaults
@@ -104,12 +111,6 @@ struct MFDefaults
 		bool useDirectInputKeyboard;		/**< Use DirectInput to read the keyboard */
 		bool useXInput;						/**< Use XInput when available on PC */
 	} input;
-
-	/** System Defaults. */
-	struct SystemDefaults
-	{
-		int threadPriority;					/**< Main thread priority */
-	} system;
 
 	/** Miscellaneous Defaults. */
 	struct MiscellaneousDefaults

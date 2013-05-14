@@ -57,14 +57,9 @@ struct MFAnimationBone
 	int numFrames;
 };
 
-struct MFAnimationTemplate
+struct MFAnimationTemplate : MFResource
 {
-	union
-	{
-		uint32 IDtag;
-		const char *pFilename;
-	};
-
+	const char *pFilename;
 	const char *pName;
 
 	MFAnimationBone *pBones;

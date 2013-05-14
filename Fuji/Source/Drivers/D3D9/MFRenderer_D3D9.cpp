@@ -9,15 +9,14 @@
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D9
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D9
 	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D9
-	#define MFRenderer_BeginFrame MFRenderer_BeginFrame_D3D9
-	#define MFRenderer_EndFrame MFRenderer_EndFrame_D3D9
-	#define MFRenderer_SetClearColour MFRenderer_SetClearColour_D3D9
+	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_D3D9
+	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_D3D9
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D9
-	#define MFRenderer_GetViewport MFRenderer_GetViewport_D3D9
 	#define MFRenderer_SetViewport MFRenderer_SetViewport_D3D9
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D9
+	#define MFRenderer_GetDeviceRenderTarget MFRenderer_GetDeviceRenderTarget_D3D9
+	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_D3D9
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D9
-	#define MFRenderer_SetDeviceRenderTarget MFRenderer_SetDeviceRenderTarget_D3D9
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D9
 
 	//MFTexture
@@ -25,6 +24,7 @@
 	#define MFTexture_Recreate MFTexture_Recreate_D3D9
 #endif
 
+#include "MFVertex_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFDisplay_Internal.h"
@@ -36,7 +36,7 @@
 
 #include "Shaders/Registers.h"
 
-#include <d3d9.h>
+#include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
 #pragma comment(lib, "d3dx9")
@@ -49,14 +49,27 @@ IDirect3DDevice9 *pd3dDevice;
 static IDirect3DSurface9 *pRenderTarget = NULL;
 static IDirect3DSurface9 *pZTarget = NULL;
 
-static D3DCAPS9 deviceCaps;
+static MFTexture gDeviceRenderTarget;
+static MFTextureTemplateData gDeviceRenderTargetTemplate;
+static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
+static MFTexture gDeviceZTarget;
+static MFTextureTemplateData gDeviceZTargetTemplate;
+static MFTextureSurfaceLevel gDeviceZTargetSurface;
+
+D3DCAPS9 gD3D9DeviceCaps;
 
 extern HWND apphWnd;
 
-static MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
-
 static int gNumWeights = 0;
 static MFRect gCurrentViewport;
+
+void MFRenderer_D3D9_SetDebugName(IDirect3DResource9* pResource, const char* pName)
+{
+#if !defined(MF_RETAIL)
+	if (pResource)
+		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, pName, MFString_Length(pName), 0);
+#endif
+}
 
 void MFRenderer_InitModulePlatformSpecific()
 {
@@ -68,7 +81,26 @@ void MFRenderer_InitModulePlatformSpecific()
 		return;
 	}
 
-	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &deviceCaps);
+	d3d9->GetDeviceCaps(0, D3DDEVTYPE_HAL, &gD3D9DeviceCaps);
+
+	MFZeroMemory(&gDeviceRenderTarget, sizeof(gDeviceRenderTarget));
+	MFZeroMemory(&gDeviceRenderTargetTemplate, sizeof(gDeviceRenderTargetTemplate));
+	MFZeroMemory(&gDeviceRenderTargetSurface, sizeof(gDeviceRenderTargetSurface));
+	MFZeroMemory(&gDeviceZTarget, sizeof(gDeviceZTarget));
+	MFZeroMemory(&gDeviceZTargetTemplate, sizeof(gDeviceZTargetTemplate));
+	MFZeroMemory(&gDeviceZTargetSurface, sizeof(gDeviceZTargetSurface));
+
+	gDeviceRenderTarget.pTemplateData = &gDeviceRenderTargetTemplate;
+	MFString_Copy(gDeviceRenderTarget.name, "Device Render Target");
+	gDeviceRenderTargetTemplate.pSurfaces = &gDeviceRenderTargetSurface;
+	gDeviceRenderTargetTemplate.flags = TEX_RenderTarget;
+	gDeviceRenderTargetTemplate.mipLevels = 1;
+
+	gDeviceZTarget.pTemplateData = &gDeviceZTargetTemplate;
+	MFString_Copy(gDeviceZTarget.name, "Device Depth Stencil");
+	gDeviceZTargetTemplate.pSurfaces = &gDeviceZTargetSurface;
+	gDeviceZTargetTemplate.flags = TEX_RenderTarget;
+	gDeviceZTargetTemplate.mipLevels = 1;
 }
 
 void MFRenderer_DeinitModulePlatformSpecific()
@@ -125,7 +157,7 @@ int MFRenderer_CreateDisplay()
 	int b=0;
 	DWORD processing = D3DCREATE_MULTITHREADED;
 
-	if(deviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((deviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
+	if(gD3D9DeviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((gD3D9DeviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
 	{
 		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	}
@@ -205,13 +237,24 @@ int MFRenderer_CreateDisplay()
 	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
-	pd3dDevice->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	gDeviceRenderTarget.pTemplateData->imageFormat = (PixelFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
 
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
+
+	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	pd3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+	pd3dDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, (gD3D9DeviceCaps.StencilCaps & D3DSTENCILCAPS_TWOSIDED) ? TRUE : FALSE);
+
+	// we always use this alpha test for 'masking'...
+	pd3dDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 
 	D3DVIEWPORT9 vp;
 	pd3dDevice->GetViewport(&vp);
@@ -249,6 +292,8 @@ void MFRenderer_ResetDisplay()
 	// free resources
 	void MFTexture_Release();
 	MFTexture_Release();
+	void MFRenderState_Release();
+	MFRenderState_Release();
 
 	if(pRenderTarget)
 	{
@@ -330,10 +375,24 @@ void MFRenderer_ResetDisplay()
 	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
+	gDeviceRenderTarget.pTemplateData->imageFormat = (present.BackBufferFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
+
+	gDeviceZTarget.pInternalData = pZTarget;
+	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+
 	if(SUCCEEDED(hr))
 	{
 		void MFTexture_Recreate();
 		MFTexture_Recreate();
+		void MFRenderState_Recreate();
+		MFRenderState_Recreate();
 
 		if(pSystemCallbacks[MFCB_DisplayReset])
 			pSystemCallbacks[MFCB_DisplayReset]();
@@ -360,7 +419,7 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	return true;
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -368,16 +427,10 @@ bool MFRenderer_BeginFrame()
 	if(FAILED(hr))
 		return false;
 
-	pd3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-	pd3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	pd3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
 	return true;
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -415,24 +468,11 @@ void MFRenderer_EndFrame()
 	}
 }
 
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-MF_API void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
-}
-
-MF_API void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
+	pd3dDevice->Clear(0, NULL, ((flags & MFRCF_Colour) ? D3DCLEAR_TARGET : NULL)|((flags & MFRCF_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags & MFRCF_Stencil) ? D3DCLEAR_STENCIL : NULL), colour.ToPackedColour(), z, stencil);
 }
 
 MF_API void MFRenderer_SetViewport(MFRect *pRect)
@@ -480,28 +520,30 @@ MF_API void MFRenderer_ResetViewport()
 	pd3dDevice->SetViewport(&vp);
 }
 
+MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+{
+	return &gDeviceRenderTarget;
+}
+
+MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
+{
+	return &gDeviceZTarget;
+}
+
 MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
 
 	if(pRenderTarget)
 	{
-		IDirect3DTexture9 *pRT = (IDirect3DTexture9*)pRenderTarget->pInternalData;
-
-		IDirect3DSurface9 *pSurface;
-		pRT->GetSurfaceLevel(0, &pSurface);
+		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pRenderTarget->pTemplateData->pSurfaces[0].pImageData;
 		pd3dDevice->SetRenderTarget(0, pSurface);
-		pSurface->Release();
 	}
 
 	if(pZTarget)
 	{
-		IDirect3DTexture9 *pRT = (IDirect3DTexture9*)pRenderTarget->pInternalData;
-
-		IDirect3DSurface9 *pSurface;
-		pRT->GetSurfaceLevel(0, &pSurface);
+		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pZTarget->pTemplateData->pSurfaces[0].pImageData;
 		pd3dDevice->SetDepthStencilSurface(pSurface);
-		pSurface->Release();
 	}
 	else
 	{
@@ -509,38 +551,88 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 	}
 }
 
-MF_API void MFRenderer_SetDeviceRenderTarget()
-{
-	pd3dDevice->SetRenderTarget(0, pRenderTarget);
-	pd3dDevice->SetDepthStencilSurface(pZTarget);
-}
-
 MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
 }
 
+static int SortDefault(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static int SortBackToFront(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE2->zSort - pE1->zSort;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static int SortFrontToBack(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE1->zSort - pE2->zSort;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	if(pred) return pred;
+	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	if(pred) return pred;
+	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	if(pred) return pred;
+	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	return pred;
+}
+
+static MFRenderSortFunction gSortFunctions[MFRL_SM_Max] =
+{
+  SortDefault,
+  SortFrontToBack,
+  SortBackToFront
+};
+
+void MFRendererInternal_SortElements(MFRenderLayer &layer)
+{
+	qsort(layer.elements.getpointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
+}
+
+//void MFRendererInternal_RenderElement(MFRendererState &state, MFRenderElement &element)
+
+
 // direct3d management fucntions
-void MFRendererPC_SetTexture(int stage, IDirect3DTexture9 *pTexture)
-{
-	pd3dDevice->SetTexture(stage, pTexture);
-}
-
-void MFRendererPC_SetVertexShader(IDirect3DVertexShader9 *pVertexShader)
-{
-	pd3dDevice->SetVertexShader(pVertexShader);
-}
-
-void MFRendererPC_SetStreamSource(int stream, IDirect3DVertexBuffer9 *pVertexBuffer, int offset, int stride)
-{
-	pd3dDevice->SetStreamSource(stream, pVertexBuffer, offset, stride);
-}
-
-void MFRendererPC_SetIndices(IDirect3DIndexBuffer9 *pIndexBuffer)
-{
-	pd3dDevice->SetIndices(pIndexBuffer);
-}
-
 void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
 {
 	MFMatrix mat = animationMatrix;
@@ -567,12 +659,6 @@ void MFRendererPC_SetModelColour(const MFVector &colour)
 	pd3dDevice->SetVertexShaderConstantF(r_modelColour, colour, 1);
 }
 
-void MFRendererPC_SetColourMask(float colourModulate, float colourAdd, float alphaModulate, float alphaAdd)
-{
-	float mask[4] = { colourModulate, colourAdd, alphaModulate, alphaAdd };
-	pd3dDevice->SetVertexShaderConstantF(r_colourMask, mask, 1);
-}
-
 void MFRendererPC_SetNumWeights(int numWeights)
 {
 	gNumWeights = numWeights;
@@ -586,224 +672,6 @@ void MFRendererPC_SetNumWeights(int numWeights)
 int MFRendererPC_GetNumWeights()
 {
 	return gNumWeights;
-}
-
-void MFRendererPC_ApplyGPUStates()
-{
-
-}
-
-void MFRendererPC_SetDefaultGPUStates()
-{
-
-}
-
-void MFRendererPC_ApplyRenderStates()
-{
-
-}
-
-void MFRendererPC_SetDefaultRenderStates()
-{
-
-}
-
-void MFRendererPC_SetRenderState(D3DRENDERSTATETYPE type, uint32 value)
-{
-	pd3dDevice->SetRenderState(type, value);
-}
-
-void MFRendererPC_GetRenderState(D3DRENDERSTATETYPE type, uint32 *pValue)
-{
-	pd3dDevice->GetRenderState(type, (DWORD*)pValue);
-}
-
-void MFRendererPC_ApplyTextureStageStates()
-{
-
-}
-
-void MFRendererPC_SetDefaultTextureStageStates()
-{
-
-}
-
-void MFRendererPC_SetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 value)
-{
-	pd3dDevice->SetTextureStageState(stage, type, value);
-}
-
-void MFRendererPC_GetTextureStageState(int stage, D3DTEXTURESTAGESTATETYPE type, uint32 *pValue)
-{
-	pd3dDevice->GetTextureStageState(stage, type, (DWORD*)pValue);
-}
-
-void MFRendererPC_ApplySamplerStates()
-{
-
-}
-
-void MFRendererPC_SetDefaultSamplerStates()
-{
-
-}
-
-void MFRendererPC_SetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 value)
-{
-	pd3dDevice->SetSamplerState(sampler, type, value);
-}
-
-void MFRendererPC_GetSamplerState(int sampler, D3DSAMPLERSTATETYPE type, uint32 *pValue)
-{
-	pd3dDevice->GetSamplerState(sampler, type, (DWORD*)pValue);
-}
-
-void MFRendererPC_ConvertFloatToPCVF(const float *pFloat, char *pData, PCVF_Type type, int *pNumBytesWritten)
-{
-	int numBytes = 0;
-
-	switch(type)
-	{
-		case PCVF_Float4:
-			((float*)pData)[3] = pFloat[3];
-			numBytes = 4;
-		case PCVF_Float3:
-			((float*)pData)[2] = pFloat[2];
-			numBytes += 4;
-		case PCVF_Float2:
-			((float*)pData)[1] = pFloat[1];
-			numBytes += 4;
-		case PCVF_Float1:
-			((float*)pData)[0] = pFloat[0];
-			numBytes += 4;
-			break;
-
-		case PCVF_D3DColor:
-			*(uint32*)pData = (((uint32)(pFloat[3] * 255.0f) & 0xFF) << 24) |
-							  (((uint32)(pFloat[0] * 255.0f) & 0xFF) << 16) |
-							  (((uint32)(pFloat[1] * 255.0f) & 0xFF) << 8) |
-							   ((uint32)(pFloat[2] * 255.0f) & 0xFF);
-			numBytes = 4;
-			break;
-
-		case PCVF_UByte4:
-			pData[0] = (uint8)pFloat[0];
-			pData[1] = (uint8)pFloat[1];
-			pData[2] = (uint8)pFloat[2];
-			pData[3] = (uint8)pFloat[3];
-			numBytes = 4;
-			break;
-
-		case PCVF_Short4:
-			((int16*)pData)[2] = (int16)pFloat[2];
-			((int16*)pData)[3] = (int16)pFloat[3];
-			numBytes = 4;
-		case PCVF_Short2:
-			((int16*)pData)[0] = (int16)pFloat[0];
-			((int16*)pData)[1] = (int16)pFloat[1];
-			numBytes += 4;
-			break;
-
-		case PCVF_UByte4N:
-			break;
-
-		case PCVF_Short2N:
-			break;
-
-		case PCVF_Short4N:
-			break;
-
-		case PCVF_UShort2N:
-			break;
-
-		case PCVF_UShort4N:
-			break;
-
-		case PCVF_UDec3:
-			break;
-
-		case PCVF_Dec3N:
-			break;
-
-		case PCVF_Float16_2:
-			break;
-
-		case PCVF_Float16_4:
-			break;
-
-		default:
-			MFDebug_Assert(false, "Invalid PCVF_Type");
-	}
-
-	if(pNumBytesWritten)
-		*pNumBytesWritten = numBytes;
-}
-
-void MFRendererPC_ConvertPCVFToFloat(const char *pData, float *pFloat, PCVF_Type type, int *pNumComponentsWritten)
-{
-	int numComponents = 0;
-
-	switch(type)
-	{
-		case PCVF_Float4:
-			pFloat[3] = ((float*)pData)[3];
-			++numComponents;
-		case PCVF_Float3:
-			pFloat[2] = ((float*)pData)[2];
-			++numComponents;
-		case PCVF_Float2:
-			pFloat[1] = ((float*)pData)[1];
-			++numComponents;
-		case PCVF_Float1:
-			pFloat[0] = ((float*)pData)[0];
-			++numComponents;
-			break;
-
-		case PCVF_D3DColor:
-			break;
-
-		case PCVF_UByte4:
-			break;
-
-		case PCVF_Short2:
-			break;
-
-		case PCVF_Short4:
-			break;
-
-		case PCVF_UByte4N:
-			break;
-
-		case PCVF_Short2N:
-			break;
-
-		case PCVF_Short4N:
-			break;
-
-		case PCVF_UShort2N:
-			break;
-
-		case PCVF_UShort4N:
-			break;
-
-		case PCVF_UDec3:
-			break;
-
-		case PCVF_Dec3N:
-			break;
-
-		case PCVF_Float16_2:
-			break;
-
-		case PCVF_Float16_4:
-			break;
-
-		default:
-			MFDebug_Assert(false, "Invalid PCVF_Type");
-	}
-
-	if(pNumComponentsWritten)
-		*pNumComponentsWritten = numComponents;
 }
 
 #endif // MF_RENDERER

@@ -20,6 +20,7 @@
 #include "MFTexture_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFFileSystem_Internal.h"
+#include "MFRenderer_D3D9.h"
 
 #include <d3dx9.h>
 
@@ -41,42 +42,54 @@ void MFTexture_DeinitModulePlatformSpecific()
 
 void MFTexture_Release()
 {
-	MFTexturePool::Iterator pTex = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 
-	while(pTex)
+	while(pI)
 	{
+		MFTexture *pTex = (MFTexture*)MFResource_Get(pI);
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
 		{
-			IDirect3DTexture9 *pD3DTex = (IDirect3DTexture9*)pTex->pInternalData;
-
 			// release the old render target
+			IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pTemplate->pSurfaces[0].pImageData;
+			pSurface->Release();
+
+			IDirect3DTexture9 *pD3DTex = (IDirect3DTexture9*)pTex->pInternalData;
 			pD3DTex->Release();
 
 			pTex->pInternalData = NULL;
 		}
 
-		pTex = gTextureBank.Next(pTex);
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
 }
 
 void MFTexture_Recreate()
 {
-	MFTexturePool::Iterator pTex = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 
-	while(pTex)
+	while(pI)
 	{
+		MFTexture *pTex = (MFTexture*)MFResource_Get(pI);
 		MFTextureTemplateData *pTemplate = pTex->pTemplateData;
 
 		if(pTemplate->flags & TEX_RenderTarget)
 		{
 			// recreate a new one
 			D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D9);
-			pd3dDevice->CreateTexture(pTemplate->pSurfaces->width, pTemplate->pSurfaces->height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTex->pInternalData, NULL);
+			IDirect3DTexture9 *pD3DTex;
+			pd3dDevice->CreateTexture(pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
+			pTex->pInternalData = pD3DTex;
+
+			IDirect3DSurface9 *pSurface;
+			pD3DTex->GetSurfaceLevel(0, &pSurface);
+			pTemplate->pSurfaces[0].pImageData = (char*)pSurface;
+
+			MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTex->pInternalData, pTex->name);
 		}
 
-		pTex = gTextureBank.Next(pTex);
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
 }
 
@@ -100,6 +113,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(hr == D3D_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
 
 	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
+	MFRenderer_D3D9_SetDebugName(pTex, pTexture->name);
 
 	// copy image data
 	D3DLOCKED_RECT rect;
@@ -118,7 +132,12 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 	if(!pTexture)
 	{
-		pTexture = &gTextureBank.Create(pName);
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
+		pTexture->refCount = 1;
+
+		MFResource_AddResource(pTexture);
 
 		if(targetFormat & ImgFmt_SelectNicest)
 		{
@@ -132,30 +151,38 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pTexture->pTemplateData->mipLevels = 1;
 		pTexture->pTemplateData->flags = TEX_RenderTarget;
 
-		pTexture->pTemplateData->pSurfaces->width = width;
-		pTexture->pTemplateData->pSurfaces->height = height;
-		pTexture->pTemplateData->pSurfaces->bitsPerPixel = MFImage_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
-		pTexture->pTemplateData->pSurfaces->xBlocks = width;
-		pTexture->pTemplateData->pSurfaces->yBlocks = height;
-		pTexture->pTemplateData->pSurfaces->bitsPerBlock = pTexture->pTemplateData->pSurfaces->bitsPerPixel;
-		pTexture->pTemplateData->pSurfaces->pImageData = NULL;
-		pTexture->pTemplateData->pSurfaces->bufferLength = 0;
-		pTexture->pTemplateData->pSurfaces->pPaletteEntries = NULL;
-		pTexture->pTemplateData->pSurfaces->paletteBufferLength = 0;
+		pTexture->pTemplateData->pSurfaces[0].width = width;
+		pTexture->pTemplateData->pSurfaces[0].height = height;
+		pTexture->pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
+		pTexture->pTemplateData->pSurfaces[0].xBlocks = width;
+		pTexture->pTemplateData->pSurfaces[0].yBlocks = height;
+		pTexture->pTemplateData->pSurfaces[0].bitsPerBlock = pTexture->pTemplateData->pSurfaces[0].bitsPerPixel;
+		pTexture->pTemplateData->pSurfaces[0].pImageData = NULL;
+		pTexture->pTemplateData->pSurfaces[0].bufferLength = 0;
+		pTexture->pTemplateData->pSurfaces[0].pPaletteEntries = NULL;
+		pTexture->pTemplateData->pSurfaces[0].paletteBufferLength = 0;
 
-		pTexture->refCount = 1;
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
 		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFRD_D3D9);
-		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, (IDirect3DTexture9**)&pTexture->pInternalData, NULL);
+		IDirect3DTexture9 *pD3DTex;
+		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
+		pTexture->pInternalData = pD3DTex;
 
 		if(hr != D3D_OK)
 		{
 			MFHeap_Free(pTexture->pTemplateData);
-			gTextureBank.DestroyItem(*pTexture);
-			pTexture = NULL;
+			MFResource_RemoveResource(pTexture);
+			MFHeap_Free(pTexture);
+			return NULL;
 		}
+
+		IDirect3DSurface9 *pSurface;
+		pD3DTex->GetSurfaceLevel(0, &pSurface);
+		pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pSurface;
+
+		MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTexture->pInternalData, pTexture->name);
 	}
 	else
 	{
@@ -168,6 +195,12 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
+
+	if(pTexture->pTemplateData->flags & TEX_RenderTarget)
+	{
+		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pTexture->pTemplateData->pSurfaces[0].pImageData;
+		pSurface->Release();
+	}
 
 	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
 	pTex->Release();

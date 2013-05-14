@@ -48,10 +48,11 @@ MFDefaults gDefaults =
 		2048			// maxStaticMarkers
 	},
 
-	// ThreadDefaults
+	// SystemDefaults
 	{
-		16,				// maxThreads
-		16				// maxTlsSlots
+		MFPriority_Normal,	// threadPriority
+		16,					// maxThreads
+		16					// maxTlsSlots
 	},
 
 	// DisplayDefaults
@@ -59,6 +60,11 @@ MFDefaults gDefaults =
 		"Fuji Window",	// pWindowTitle
 		NULL,			// pIcon
 		false			// hideMouseCursor
+	},
+
+	// RenderDefaults
+	{
+		256*1024		// renderHeapSize
 	},
 
 	// ViewDefaults
@@ -116,11 +122,6 @@ MFDefaults gDefaults =
 		true,			// systemMouseUseWindowsCursor
 		true,			// useDirectInputKeyboard
 		true			// useXInput
-	},
-
-	// SystemDefaults
-	{
-		MFPriority_Normal	// threadPriority
 	},
 
 	// MiscellaneousDefaults
@@ -232,7 +233,13 @@ void MFSystem_Draw()
 	MFCALLSTACKc;
 
 #if !defined(_RETAIL)
-	MFView_Push();
+	MFRenderer *pRenderer = MFRenderer_GetCurrent();
+
+	MFRenderLayerSet set;
+	MFZeroMemory(&set, sizeof(set));
+	set.pSolidLayer = MFRenderer_GetDebugLayer(pRenderer);
+	MFRenderer_SetRenderLayerSet(pRenderer, &set);
+
 	MFView_SetDefault();
 
 	MFRect rect;
@@ -330,8 +337,6 @@ void MFSystem_Draw()
 	MFView_SetOrtho(&rect);
 
 	DebugMenu_Draw();
-
-	MFView_Pop();
 #endif
 }
 
@@ -340,7 +345,7 @@ int MFSystem_GameLoop()
 	MFCALLSTACK;
 
 	// initialise the system and create displays etc..
-	MFModule_RegisterModules();
+	MFModule_RegisterEngineModules();
 
 	while(gRestart)
 	{
@@ -390,10 +395,18 @@ void MFSystem_RunFrame()
 
 	if(MFRenderer_BeginFrame())
 	{
+		MFRenderer *pRenderer = MFRenderer_GetCurrent();
+
+		MFView_SetDefault();
 		if(pSystemCallbacks[MFCB_Draw])
 			pSystemCallbacks[MFCB_Draw]();
 		MFSystem_Draw();
+
+		// build and kick the GPU command buffers
+		MFRenderer_BuildCommandBuffers(pRenderer);
+		MFRenderer_Kick(pRenderer);
 	}
+
 	MFRenderer_EndFrame();
 	MFCallstack_EndFrame();
 }

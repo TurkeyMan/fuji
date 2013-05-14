@@ -1,22 +1,27 @@
 #include "Fuji/Fuji.h"
 #include "Fuji/MFDisplay.h"
 #include "Fuji/MFRenderer.h"
-#include "Fuji/MFView.h"
+#include "Fuji/MFRenderState.h"
 #include "Fuji/MFModel.h"
+#include "Fuji/MFView.h"
 #include "Fuji/MFSystem.h"
 #include "Fuji/MFFileSystem.h"
 #include "Fuji/FileSystem/MFFileSystemNative.h"
 
 /**** Globals ****/
 
-MFModel *pModel;
 MFSystemCallbackFunction pInitFujiFS = NULL;
+
+MFRenderer *pRenderer = NULL;
+
+MFModel *pModel;
+
 
 /**** Functions ****/
 
 void Game_InitFilesystem()
 {
-	// mount the game directory
+	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -36,59 +41,58 @@ void Game_InitFilesystem()
 
 void Game_Init()
 {
-	MFCALLSTACK;
+	// create the renderer with a single layer that clears before rendering
+	MFRenderLayerDescription layers[] = { { "Scene" } };
+	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
+	MFRenderer_SetCurrent(pRenderer);
 
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
+	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
+
+	MFRenderLayerSet layerSet;
+	MFZeroMemory(&layerSet, sizeof(layerSet));
+	layerSet.pSolidLayer = pLayer;
+	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
+
+	// load model
 	pModel = MFModel_Create("astro");
 }
 
 void Game_Update()
 {
-	MFCALLSTACK;
+	// calculate a spinning world matrix
+	MFMatrix world;
+	world.SetTranslation(MakeVector(0, -5, 50));
+
+	static float rotation = 0.0f;
+	rotation += MFSystem_TimeDelta();
+	world.RotateY(rotation);
+
+	// set world matrix to the model
+	MFModel_SetWorldMatrix(pModel, world);
 }
 
 void Game_Draw()
 {
-	MFCALLSTACK;
-
-	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFRenderer_ClearScreen();
-
-	// Set identity camera (no camera)
-	MFView_Push();
+	// set projection
 	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
 	MFView_SetProjection();
 
-	// set the world matrix to identity
-	MFMatrix world = MFMatrix::identity;
-
-	// move the model into the scene (along the z axis), and down a little bit.
-	world.Translate(MakeVector(0, -5, 50));
-
-	// increment rotation
-	static float rotation = 0.0f;
-	rotation += MFSystem_TimeDelta();
-
-	// rotate the box
-	world.RotateY(rotation);
-
-	// draw the model
-	MFModel_SetWorldMatrix(pModel, world);
-	MFModel_Draw(pModel);
-
-	MFView_Pop();
+	// render the mesh
+	MFRenderer_AddModel(pModel, NULL, NULL, MFView_GetViewState());
 }
 
 void Game_Deinit()
 {
-	MFCALLSTACK;
-
 	MFModel_Destroy(pModel);
+
+	MFRenderer_Destroy(pRenderer);
 }
 
 
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);

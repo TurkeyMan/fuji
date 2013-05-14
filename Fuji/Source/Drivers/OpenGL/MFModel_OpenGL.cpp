@@ -28,18 +28,12 @@ struct MeshChunkOpenGLRuntimeData
 
 #define USE_VBOS
 
-bool gbUseVBOs = false;
+extern bool gbUseVBOs;
 
 /*** Functions ****/
 
 void MFModel_InitModulePlatformSpecific()
 {
-#if defined(USE_VBOS)
-	if(glBindBuffer && glBufferData && glDeleteBuffers && glGenBuffers)
-		gbUseVBOs = true;
-	else
-		MFDebug_Warn(1, "MFModel: OpenGL Vertex Buffer Object extension not loaded, performance may suffer.");
-#endif
 }
 
 void MFModel_DeinitModulePlatformSpecific()
@@ -55,11 +49,6 @@ MF_API void MFModel_Draw(MFModel *pModel)
 	MFDebug_Assert(false, "GLES 1.0 no longer supported!");
 #endif
 
-	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
-
-	if(pMatOverride)
-		MFMaterial_SetMaterial(pMatOverride);
-
 	MFModelDataChunk *pChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
 	if(pChunk)
@@ -72,22 +61,21 @@ MF_API void MFModel_Draw(MFModel *pModel)
 			{
 				MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pSubobjects[a].pMeshChunks + b;
 
-				if(!pMatOverride)
-					MFMaterial_SetMaterial(pMC->pMaterial);
+				MFMaterial_SetMaterial(pMC->pMaterial);
 
 				MFRenderer_Begin();
 
-				MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Projection, MFView_GetViewToScreenMatrix());
+				MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Projection, MFView_GetViewToScreenMatrix());
 
 				if(MFView_IsOrtho())
-					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, pModel->worldMatrix);
+					MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, pModel->worldMatrix);
 				else
 				{
 					MFMatrix localToView;
 					MFView_GetLocalToView(pModel->worldMatrix, &localToView);
-					MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, localToView);
+					MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, localToView);
 				}
-
+/*
 				// find vertex attrib locations
 				GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
 				GLint pos = glGetAttribLocation(program, "vPos");
@@ -98,13 +86,11 @@ MF_API void MFModel_Draw(MFModel *pModel)
 				MeshChunkOpenGLRuntimeData &runtimeData = (MeshChunkOpenGLRuntimeData&)pMC->runtimeData;
 
 				// just use conventional vertex arrays
-				for(int a=0; a<pMC->pVertexFormat->numVertexStreams; ++a)
+				for(int e=0; e<pMC->elementCount; ++e)
 				{
-					MFMeshVertexStream *pStream = &pMC->pVertexFormat->pStreams[a];
-
 #if defined(USE_VBOS)
 					if(gbUseVBOs)
-						glBindBuffer(GL_ARRAY_BUFFER, runtimeData.streams[a]);
+						glBindBuffer(GL_ARRAY_BUFFER, runtimeData.streams[pMC->pElements[e].stream]);
 #endif
 
 					for(int b=0; b<pStream->numVertexElements; ++b)
@@ -163,6 +149,7 @@ MF_API void MFModel_Draw(MFModel *pModel)
 					glDisableVertexAttribArray(colour);
 				if(uv0 != -1)
 					glDisableVertexAttribArray(uv0);
+*/
 			}
 		}
 	}
@@ -175,7 +162,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
 
 	pMC->pMaterial = MFMaterial_Create((char*)pMC->pMaterial);
-
+/*
 #if defined(USE_VBOS)
 	if(gbUseVBOs)
 	{
@@ -200,6 +187,7 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 		}
 	}
 #endif
+*/
 }
 
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
@@ -207,7 +195,7 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 	MFCALLSTACK;
 
 	MFMeshChunk_Generic *pMC = (MFMeshChunk_Generic*)pMeshChunk;
-
+/*
 #if defined(USE_VBOS)
 	if(gbUseVBOs)
 	{
@@ -221,6 +209,7 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 		glDeleteBuffers(1, &runtimeData.streams[7]);
 	}
 #endif
+*/
 
 	MFMaterial_Destroy(pMC->pMaterial);
 }

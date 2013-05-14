@@ -21,7 +21,6 @@
 // 256k display buffer...
 static unsigned int __attribute__((aligned(16))) displayList[256 * 1024];
 
-uint32 clearColour = 0xFF400000;
 MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
@@ -80,7 +79,7 @@ void MFRenderer_ResetDisplay()
 
 extern uint32 currentVert;
 
-void MFRenderer_BeginFrame()
+void MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -89,7 +88,7 @@ void MFRenderer_BeginFrame()
 	sceGuStart(0, displayList);
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -100,8 +99,10 @@ void MFRenderer_EndFrame()
 	sceGuSwapBuffers();
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, MFVector colour, float z, int stencil)
 {
+	MFCALLSTACK;
+
 	clearColour = ((uint32)(a*255.0f) << 24) |
 				  ((uint32)(b*255.0f) << 16) |
 				  ((uint32)(g*255.0f) << 8) |
@@ -109,18 +110,8 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 
 	sceGuClearColor(clearColour);
 	sceGuClearDepth(0xFFFF);
-}
-
-void MFRenderer_ClearScreen(uint32 flags)
-{
-	MFCALLSTACK;
 
 	sceGuClear( ((flags&CS_Colour) ? GU_COLOR_BUFFER_BIT : NULL) | ((flags&CS_ZBuffer) ? GU_DEPTH_BUFFER_BIT : NULL) );
-}
-
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
 }
 
 void MFRenderer_SetViewport(MFRect *pRect)

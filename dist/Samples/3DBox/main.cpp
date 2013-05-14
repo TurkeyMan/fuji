@@ -1,23 +1,37 @@
 #include "Fuji/Fuji.h"
 #include "Fuji/MFDisplay.h"
 #include "Fuji/MFRenderer.h"
-#include "Fuji/MFView.h"
+#include "Fuji/MFRenderState.h"
 #include "Fuji/MFMaterial.h"
-#include "Fuji/MFPrimitive.h"
+#include "Fuji/MFVertex.h"
+#include "Fuji/MFView.h"
 #include "Fuji/MFSystem.h"
 #include "Fuji/MFFileSystem.h"
 #include "Fuji/FileSystem/MFFileSystemNative.h"
 
+void BuildVertexBuffer();
+
+
 /**** Globals ****/
 
-MFMaterial *pMat;
 MFSystemCallbackFunction pInitFujiFS = NULL;
+
+MFRenderer *pRenderer = NULL;
+
+MFMaterial *pMaterial = NULL;
+
+MFVertexDeclaration *pVertexDecl = NULL;
+MFVertexBuffer *pVertexBuffer = NULL;
+MFStateBlock *pMeshStateBlock = NULL;
+
+MFStateBlock *pEntityStateBlock = NULL;
+
 
 /**** Functions ****/
 
 void Game_InitFilesystem()
 {
-	// mount the game directory
+	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
 	MFMountDataNative mountData;
 	mountData.cbSize = sizeof(MFMountDataNative);
@@ -37,151 +51,146 @@ void Game_InitFilesystem()
 
 void Game_Init()
 {
-	MFCALLSTACK;
+	// create the renderer with a single layer that clears before rendering
+	MFRenderLayerDescription layers[] = { { "Scene" } };
+	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
+	MFRenderer_SetCurrent(pRenderer);
 
-	pMat = MFMaterial_Create("samnmax");
+	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
+	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
+
+	MFRenderLayerSet layerSet;
+	MFZeroMemory(&layerSet, sizeof(layerSet));
+	layerSet.pSolidLayer = pLayer;
+	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
+
+	// create a materual
+	pMaterial = MFMaterial_Create("samnmax");
+
+	// build a vertex buffer
+	BuildVertexBuffer();
+
+	// create a stateblock for the entity
+	pEntityStateBlock = MFStateBlock_Create(128);
 }
 
 void Game_Update()
 {
-	MFCALLSTACK;
+	// calculate a spinning world matrix
+	MFMatrix world;
+	world.SetTranslation(MakeVector(0, 0, 5));
+
+	static float rotation = 0.0f;
+	rotation += MFSystem_TimeDelta();
+	world.RotateYPR(rotation, rotation * 2.0f, rotation * 0.5f);
+
+	// set world matrix to the entity stateblock
+	MFStateBlock_SetMatrix(pEntityStateBlock, MFSCM_World, world);
 }
 
 void Game_Draw()
 {
-	MFCALLSTACK;
-
-	MFRenderer_SetClearColour(0.f, 0.f, 0.2f, 1.f);
-	MFRenderer_ClearScreen();
-
-	// Set identity camera (no camera)
-	MFView_Push();
+	// set projection
 	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
 	MFView_SetProjection();
 
-	MFMaterial_SetMaterial(pMat);
-
-	// set the world matrix to identity
-	MFMatrix world = MFMatrix::identity;
-
-	// move the box into the scene (along the z axis)
-	world.Translate(MakeVector(0, 0, 5));
-
-	// increment rotation
-	static float rotation = 0.0f;
-	rotation += MFSystem_TimeDelta();
-
-	// rotate the box
-	world.RotateYPR(rotation, rotation * 2.0f, rotation * 0.5f);
-
-	// begin rendering the box
-	MFPrimitive(PT_TriList);
-	MFSetMatrix(world);
-
-	// begin rendering 12 triangles (12 * 3 vertices)
-	MFBegin(3 * 12);
-
-	// draw a bunch of triangles
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1, -1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition(-1, 1, -1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1, -1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1, -1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1, -1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition( 1,-1, -1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition( 1,-1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition(-1, 1,1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition( 1,-1,1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition( 1,-1,-1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition( 1,-1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,-1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition( 1, 1,1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition(-1, 1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition(-1, 1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition(-1, 1,-1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition(-1,-1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1, 1,1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition( 1, 1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1, 1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1, 1,-1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition(-1, 1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,0);
-	MFSetPosition(-1,-1,-1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1,-1,-1);
-
-	MFSetTexCoord1(0,0);
-	MFSetPosition(-1,-1,1);
-	MFSetTexCoord1(1,1);
-	MFSetPosition( 1,-1,-1);
-	MFSetTexCoord1(0,1);
-	MFSetPosition( 1,-1,1);
-
-	MFEnd();
-
-	MFView_Pop();
+	// render the mesh
+	MFRenderer_AddVertices(pMeshStateBlock, 0, 3*12, MFPT_TriangleList, pMaterial, pEntityStateBlock, NULL, MFView_GetViewState());
 }
 
 void Game_Deinit()
 {
-	MFCALLSTACK;
+	MFStateBlock_Destroy(pEntityStateBlock);
 
-	MFMaterial_Destroy(pMat);
+	MFStateBlock_Destroy(pMeshStateBlock);
+	MFVertex_DestroyVertexBuffer(pVertexBuffer);
+	MFVertex_DestroyVertexDeclaration(pVertexDecl);
+
+	MFMaterial_Destroy(pMaterial);
+
+	MFRenderer_Destroy(pRenderer);
 }
 
+void BuildVertexBuffer()
+{
+	// create vertex format declaration
+	MFVertexElement elements[] =
+	{
+		{ 0, MFVET_Position, 0, 3 },
+		{ 0, MFVET_TexCoord, 0, 2 },
+		{ 0, MFVET_Colour, 0, 4 }
+	};
+
+	pVertexDecl = MFVertex_CreateVertexDeclaration(elements, sizeof(elements)/sizeof(elements[0]));
+
+	// create vertex buffer
+	struct Vertex
+	{
+		float pos[3];
+		float uv[2];
+		uint32 col;
+	} verts[12 * 3] = // 12 triangles, 2 per 6 faces of a cube
+	{
+		{ { -1, -1, -1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ { -1,  1, -1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1, -1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ {  1, -1, -1 }, { 0, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1, -1,  1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ {  1,  1,  1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1,  1,  1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ { -1,  1,  1 }, { 0, 1 }, 0xFFFFFFFF },
+
+		{ {  1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1, -1, -1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ {  1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ {  1,  1,  1 }, { 0, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ { -1,  1,  1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ { -1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ { -1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ { -1, -1, -1 }, { 0, 1 }, 0xFFFFFFFF },
+
+		{ { -1,  1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1,  1,  1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ { -1,  1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1,  1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ { -1,  1, -1 }, { 0, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ { -1, -1, -1 }, { 1, 0 }, 0xFFFFFFFF },
+		{ {  1, -1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+
+		{ { -1, -1,  1 }, { 0, 0 }, 0xFFFFFFFF },
+		{ {  1, -1, -1 }, { 1, 1 }, 0xFFFFFFFF },
+		{ {  1, -1,  1 }, { 0, 1 }, 0xFFFFFFFF }
+	};
+
+	pVertexBuffer = MFVertex_CreateVertexBuffer(pVertexDecl, 12*3, MFVBType_Static, verts);
+
+	// create state block containing geometry data
+	pMeshStateBlock = MFStateBlock_Create(64);
+	MFStateBlock_SetRenderState(pMeshStateBlock, MFSCRS_VertexDeclaration, pVertexDecl);
+	MFStateBlock_SetRenderState(pMeshStateBlock, MFSCRS_VertexBuffer(0), pVertexBuffer);
+}
 
 int GameMain(MFInitParams *pInitParams)
 {
-	MFRand_Seed((uint32)MFSystem_ReadRTC());
+	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);

@@ -21,20 +21,19 @@
 #endif
 
 #include "MFPrimitive.h"
-#include "MFMaterial.h"
 #include "MFView.h"
 #include "MFTexture_Internal.h"
 #include "MFRenderer.h"
 #include "MFDisplay.h"
 #include "Materials/MFMat_Standard.h"
+#include "MFRenderer.h"
+#include "MFRenderState.h"
+#include "MFMaterial.h"
+#include "MFVertex.h"
 
 #include "MFOpenGL.h"
 
 static const int primBufferSize = 1536;
-
-#if defined(MF_OPENGL_ES)
-static bool gImmitateQuads = false;
-#endif
 
 struct Vert
 {
@@ -44,30 +43,55 @@ struct Vert
 	uint32 colour;
 };
 
-static Vert primBuffer[primBufferSize];
+static MFVertexDeclaration *pDecl;
+
+static MFMaterial *pMaterial;
+
+static MFMesh currentPrim;
+static MFVertexBuffer *pVB;
+static Vert *pLocked;
+
 static Vert current;
+static int currentVert;
 
-static uint32 beginCount;
-static uint32 currentVert;
-
-static uint32 primType;
-
-static int gPrimTypes[7] =
-{
-	GL_POINTS,
-	GL_LINES,
-	GL_LINE_STRIP,
-	GL_TRIANGLES,
-	GL_TRIANGLE_STRIP,
-	GL_TRIANGLE_FAN,
-#if !defined(MF_OPENGL_ES)
-	GL_QUADS // OpenGLES does't support quad rendering, so we'll have to simulate with triangles
+#if defined(MF_OPENGL_ES)
+static bool gImmitateQuads = false;
 #endif
-};
+
 
 MFInitStatus MFPrimitive_InitModule()
 {
 	MFCALLSTACK;
+
+	MFVertexElement elements[4];
+
+	// write declaration
+	elements[0].stream = 0;
+	elements[0].type = MFVET_Position;
+	elements[0].index = 0;
+	elements[0].componentCount = 3;
+	elements[0].format = MFVDF_Float3;
+
+	elements[1].stream = 0;
+	elements[1].type = MFVET_TexCoord;
+	elements[1].index = 0;
+	elements[1].componentCount = 2;
+	elements[1].format = MFVDF_Float2;
+
+	elements[2].stream = 0;
+	elements[2].type = MFVET_Normal;
+	elements[2].index = 0;
+	elements[2].componentCount = 3;
+	elements[2].format = MFVDF_Float3;
+
+	elements[3].stream = 0;
+	elements[3].type = MFVET_Colour;
+	elements[3].index = 0;
+	elements[3].componentCount = 4;
+	elements[3].format = MFVDF_UByte4N_RGBA;
+
+	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
+	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
 
 	return MFAIC_Succeeded;
 }
@@ -75,6 +99,8 @@ MFInitStatus MFPrimitive_InitModule()
 void MFPrimitive_DeinitModule()
 {
 	MFCALLSTACK;
+
+	MFVertex_DestroyVertexDeclaration(pDecl);
 }
 
 void MFPrimitive_DrawStats()
@@ -83,50 +109,47 @@ void MFPrimitive_DrawStats()
 
 MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
-	MFCALLSTACK;
+	currentPrim.primType = (MFPrimType)(type & PT_PrimMask);
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(128);
+	currentPrim.indexOffset = 0;
+	currentPrim.vertexOffset = 0;
+	currentPrim.numIndices = 0;
 
-	primType = type & PT_PrimMask;
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, MFMatrix::identity);
+
+	if(type & PT_Untextured)
+		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
+	else
+		pMaterial = MFMaterial_GetCurrent();
 
 #if defined(MF_OPENGL_ES)
-	if(primType == PT_QuadList)
+	if(currentPrim.primType == MFPT_QuadList)
 	{
-		primType = PT_TriList;
+		currentPrim.primType = MFPT_TriangleList;
 		gImmitateQuads = true;
 	}
 	else
 		gImmitateQuads = false;
 #endif
-
-	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
-	if(pMatOverride)
-		MFMaterial_SetMaterial(pMatOverride);
-	else if(type & PT_Untextured)
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
-
-	glDepthRange(0.0f, 1.0f);
-
-	MFRenderer_Begin();
-
-	MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_Projection, MFView_GetViewToScreenMatrix());
-
-	if(MFView_IsOrtho())
-		MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, MFMatrix::identity);
-	else
-		MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, MFView_GetWorldToViewMatrix());
 }
 
 MF_API void MFBegin(uint32 vertexCount)
 {
-	MFCALLSTACK;
-
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
+	currentPrim.numVertices = (currentPrim.primType == MFPT_QuadList) ? vertexCount*2 : vertexCount;
 #if defined(MF_OPENGL_ES)
 	if(gImmitateQuads)
-		beginCount = vertexCount * 3;
-	else
+		currentPrim.numVertices = vertexCount * 3;
 #endif
-	beginCount = (primType == PT_QuadList) ? vertexCount*2 : vertexCount;
+
+	// create an appropriate vertex buffer
+	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
+
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
+
+	MFVertex_LockVertexBuffer(pVB, (void**)&pLocked);
 
 	currentVert = 0;
 
@@ -138,11 +161,7 @@ MF_API void MFBegin(uint32 vertexCount)
 
 MF_API void MFSetMatrix(const MFMatrix &mat)
 {
-	MFCALLSTACK;
-
-	MFMatrix localToView;
-	MFView_GetLocalToView(mat, &localToView);
-	MFRenderer_OpenGL_SetMatrix(MFOGL_ShaderType_WorldView, localToView);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, mat);
 }
 
 MF_API void MFSetColour(float r, float g, float b, float a)
@@ -174,63 +193,61 @@ MF_API void MFSetPosition(float x, float y, float z)
 #if defined(MF_OPENGL_ES)
 	if(gImmitateQuads && (currentVert & 1))
 	{
-		Vert &prev = primBuffer[currentVert - 1];
+		Vert &prev = pLocked[currentVert - 1];
 
-		primBuffer[currentVert + 0] = prev;
-		primBuffer[currentVert + 1] = prev;
-		primBuffer[currentVert + 2] = current;
-		primBuffer[currentVert + 3] = current;
-		primBuffer[currentVert + 4] = current;
+		pLocked[currentVert + 0] = prev;
+		pLocked[currentVert + 1] = prev;
+		pLocked[currentVert + 2] = current;
+		pLocked[currentVert + 3] = current;
+		pLocked[currentVert + 4] = current;
 
-		primBuffer[currentVert + 0].x = current.x;
-		primBuffer[currentVert + 1].y = current.y;
-		primBuffer[currentVert + 2].x = prev.x;
-		primBuffer[currentVert + 3].y = prev.y;
+		pLocked[currentVert + 0].x = current.x;
+		pLocked[currentVert + 1].y = current.y;
+		pLocked[currentVert + 2].x = prev.x;
+		pLocked[currentVert + 3].y = prev.y;
 
-		primBuffer[currentVert + 0].u = current.u;
-		primBuffer[currentVert + 1].v = current.v;
-		primBuffer[currentVert + 2].u = prev.u;
-		primBuffer[currentVert + 3].v = prev.v;
+		pLocked[currentVert + 0].u = current.u;
+		pLocked[currentVert + 1].v = current.v;
+		pLocked[currentVert + 2].u = prev.u;
+		pLocked[currentVert + 3].v = prev.v;
 
 		currentVert += 4;
 	}
 #else
-	if(primType == PT_QuadList && (currentVert & 1))
+	if(currentPrim.primType == PT_QuadList && (currentVert & 1))
 	{
-		Vert &prev = primBuffer[currentVert - 1];
+		Vert &prev = pLocked[currentVert - 1];
 
-		primBuffer[currentVert + 0] = prev;
-		primBuffer[currentVert + 1] = current;
-		primBuffer[currentVert + 2] = current;
+		pLocked[currentVert + 0] = prev;
+		pLocked[currentVert + 1] = current;
+		pLocked[currentVert + 2] = current;
 
-		primBuffer[currentVert + 0].x = current.x;
-		primBuffer[currentVert + 2].x = prev.x;
+		pLocked[currentVert + 0].x = current.x;
+		pLocked[currentVert + 2].x = prev.x;
 
-		primBuffer[currentVert + 0].u = current.u;
-		primBuffer[currentVert + 2].u = prev.u;
+		pLocked[currentVert + 0].u = current.u;
+		pLocked[currentVert + 2].u = prev.u;
 
 		currentVert += 2;
 	}
 #endif
 	else
-		primBuffer[currentVert] = current;
+		pLocked[currentVert] = current;
 
 	++currentVert;
-
-	if(currentVert >= primBufferSize)
-	{
-		int newBeginCount = beginCount - currentVert;
-		beginCount = currentVert;
-
-		MFEnd();
-
-		beginCount = newBeginCount;
-		currentVert = 0;
-	}
 }
 
 MF_API void MFEnd()
 {
+	MFVertex_UnlockVertexBuffer(pVB);
+
+	MFDebug_Assert(currentVert == currentPrim.numVertices, "Incorrect number of vertices.");
+
+	MFRenderer_AddMesh(&currentPrim, pMaterial, NULL, NULL, MFView_GetViewState());
+
+/*
+	// *** pre-shader render code! ***
+
 	MFCALLSTACK;
 	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
 
@@ -238,100 +255,35 @@ MF_API void MFEnd()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-		if(MFOpenGL_UseShaders())
-		{
-			GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
-			GLint pos = glGetAttribLocation(program, "vPos");
-			GLint normal = glGetAttribLocation(program, "vNormal");
-			GLint colour = glGetAttribLocation(program, "vColour");
-			GLint uv0 = glGetAttribLocation(program, "vUV0");
-			GLint uv1 = glGetAttribLocation(program, "vUV1");
+		glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
+		glEnableClientState(GL_VERTEX_ARRAY);
 
-			// gles2 uses some new functions...
-			if(pos != -1)
-			{
-				glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), &primBuffer[0].x);
-				glEnableVertexAttribArray(pos);
-			}
+		glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
+		glEnableClientState(GL_NORMAL_ARRAY);
 
-			if(normal != -1)
-			{
-				glVertexAttribPointer(normal, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), &primBuffer[0].nx);
-				glEnableVertexAttribArray(normal);
-			}
+		glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
+		glEnableClientState(GL_COLOR_ARRAY);
 
-			if(colour != -1)
-			{
-				glVertexAttribPointer(colour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vert), &primBuffer[0].colour);
-				glEnableVertexAttribArray(colour);
-			}
+		glClientActiveTexture(GL_TEXTURE0);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-			if(uv0 != -1)
-			{
-				glActiveTexture(GL_TEXTURE0);
+		glClientActiveTexture(GL_TEXTURE1);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-				glVertexAttribPointer(uv0, 2, GL_FLOAT, GL_TRUE, sizeof(Vert), &primBuffer[0].u);
-				glEnableVertexAttribArray(uv0);
-			}
+		glDrawArrays(gPrimTypes[primType], 0, beginCount);
 
-			if(uv1 != -1)
-			{
-				glActiveTexture(GL_TEXTURE1);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
 
-				glVertexAttribPointer(uv1, 2, GL_FLOAT, GL_TRUE, sizeof(Vert), &primBuffer[0].u);
-				glEnableVertexAttribArray(uv1);
-			}
-
-			glDrawArrays(gPrimTypes[primType], 0, beginCount);
-
-			if(pos != -1)
-				glDisableVertexAttribArray(pos);
-			if(normal != -1)
-				glDisableVertexAttribArray(normal);
-			if(colour != -1)
-				glDisableVertexAttribArray(colour);
-			if(uv0 != -1)
-				glDisableVertexAttribArray(uv0);
-			if(uv1 != -1)
-				glDisableVertexAttribArray(uv1);
-		}
-		else
-#endif
-		{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-			glVertexPointer(3, GL_FLOAT, sizeof(Vert), &primBuffer[0].x);
-			glEnableClientState(GL_VERTEX_ARRAY);
-
-			glNormalPointer(GL_FLOAT, sizeof(Vert), &primBuffer[0].nx);
-			glEnableClientState(GL_NORMAL_ARRAY);
-
-			glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vert), &primBuffer[0].colour);
-			glEnableClientState(GL_COLOR_ARRAY);
-
-			glClientActiveTexture(GL_TEXTURE0);
-			glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-			glClientActiveTexture(GL_TEXTURE1);
-			glTexCoordPointer(2, GL_FLOAT, sizeof(Vert), &primBuffer[0].u);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-			glDrawArrays(gPrimTypes[primType], 0, beginCount);
-
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_NORMAL_ARRAY);
-			glDisableClientState(GL_COLOR_ARRAY);
-
-			glClientActiveTexture(GL_TEXTURE0);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			glClientActiveTexture(GL_TEXTURE1);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-#endif
-		}
+		glClientActiveTexture(GL_TEXTURE0);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glClientActiveTexture(GL_TEXTURE1);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
-
-	MFCheckForOpenGLError(true);
+*/
 }
 
 

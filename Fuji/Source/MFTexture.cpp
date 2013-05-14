@@ -22,7 +22,6 @@
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
 // globals
-MFTexturePool gTextureBank;
 TextureBrowser texBrowser;
 
 char blankBuffer[8*8*4];
@@ -33,8 +32,6 @@ MFTexture *pWhiteTexture;
 // functions
 MFInitStatus MFTexture_InitModule()
 {
-	gTextureBank.Init(256, 64, 64);
-
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
 	MFTexture_InitModulePlatformSpecific();
@@ -56,7 +53,7 @@ void MFTexture_DeinitModule()
 	MFTexture_Destroy(pWhiteTexture);
 
 	// list all non-freed textures...
-	MFTexturePool::Iterator pI = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 	bool bShowHeader = true;
 
 	while(pI)
@@ -67,22 +64,22 @@ void MFTexture_DeinitModule()
 			MFDebug_Message("Un-freed textures:\n----------------------------------------------------------");
 		}
 
-		MFDebug_Message(MFStr("'%s' - x%d", pI->name, pI->refCount));
+		MFTexture *pT = (MFTexture*)MFResource_Get(pI);
 
-		pI->refCount = 1;
-		MFTexture_Destroy(pI);
+		MFDebug_Message(MFStr("'%s' - x%d", pT->name, pT->refCount));
 
-		pI = gTextureBank.Next(pI);
+		pT->refCount = 1;
+		MFTexture_Destroy(pT);
+
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
-
-	gTextureBank.Deinit();
 
 	MFTexture_DeinitModulePlatformSpecific();
 }
 
 MF_API MFTexture* MFTexture_FindTexture(const char *pName)
 {
-	return gTextureBank.Get(pName);
+	return (MFTexture*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0x7e407e40);
 }
 
 MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
@@ -141,13 +138,17 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
-		pTexture = &gTextureBank.Create(pName);
 
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
+
+		MFResource_AddResource(pTexture);
+
 		pTexture->pTemplateData = pTemplate;
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
-
 
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
 	}
@@ -172,8 +173,12 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
 
 	if(!pTexture)
 	{
-		pTexture = &gTextureBank.Create(pName);
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
+
+		MFResource_AddResource(pTexture);
 
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
@@ -300,8 +305,12 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 
 	if(!pTexture)
 	{
-		pTexture = &gTextureBank.Create(pName);
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
+		pTexture->type = MFRT_Texture;
+		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
 		pTexture->refCount = 0;
+
+		MFResource_AddResource(pTexture);
 
 		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
 		pTexture->name[sizeof(pTexture->name) - 1] = 0;
@@ -448,14 +457,16 @@ MF_API int MFTexture_Destroy(MFTexture *pTexture)
 		MFTexture_DestroyPlatformSpecific(pTexture);
 
 		MFHeap_Free(pTexture->pTemplateData);
-		gTextureBank.DestroyItem(*pTexture);
+
+		MFResource_RemoveResource(pTexture);
+		MFHeap_Free(pTexture);
 		return 0;
 	}
 
 	return pTexture->refCount;
 }
 
-MF_API void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight)
+MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight)
 {
 	if(pWidth)
 		*pWidth = pTexture->pTemplateData->pSurfaces[0].width;
@@ -486,10 +497,12 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 {
 	MFVector pos = _pos;
 
-	MFTexturePool::Iterator pTexture = gTextureBank.First();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
 
 	for(int a=0; a<selection; a++)
-		pTexture = gTextureBank.Next(pTexture);
+		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
+
+	MFTexture *pTexture = (MFTexture*)MFResource_Get(pI);
 
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->name));
@@ -596,7 +609,7 @@ void TextureBrowser::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		int texCount = gTextureBank.GetNumItems();
+		int texCount = MFResource_GetNumResources(MFRT_Texture);
 
 		if(MFInput_WasPressed(Button_DLeft, IDD_Gamepad))
 		{

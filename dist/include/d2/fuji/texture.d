@@ -38,7 +38,7 @@ enum TextureFlags
 * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
 * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
 */
-extern (C) MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
+extern (C) MFTexture* MFTexture_Create(const(char)* pName, bool generateMipChain = true);
 
 /**
 * Create a dynamic texture.
@@ -52,7 +52,7 @@ extern (C) MFTexture* MFTexture_Create(const char *pName, bool generateMipChain 
 * @remarks If the specified texture has already been created, MFTexture_CreateDynamic will fail.
 * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
 */
-extern (C) MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFImageFormat format, uint flags = 0);
+extern (C) MFTexture* MFTexture_CreateDynamic(const(char)* pName, int width, int height, MFImageFormat format, uint flags = 0);
 
 /**
 * Create a texture from raw data.
@@ -69,7 +69,7 @@ extern (C) MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int 
 * @remarks If MFImageFormat.A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
 * @see MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFImageFormat.IsAvailableOnPlatform()
 */
-extern (C) MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFImageFormat format, uint flags = 0, bool generateMipChain = true, uint *pPalette = null);
+extern (C) MFTexture* MFTexture_CreateFromRawData(const(char)* pName, void* pData, int width, int height, MFImageFormat format, uint flags = 0, bool generateMipChain = true, uint* pPalette = null);
 
 /**
 * Create a scaled texture from raw data.
@@ -88,7 +88,7 @@ extern (C) MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData
 * @remarks If MFImageFormat.A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
 * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFImageFormat.IsAvailableOnPlatform()
 */
-extern (C) MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFImageFormat format, MFScalingAlgorithm algorithm, uint flags = 0, uint *pPalette = null);
+extern (C) MFTexture* MFTexture_ScaleFromRawData(const(char)* pName, void* pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFImageFormat format, MFScalingAlgorithm algorithm, uint flags = 0, uint* pPalette = null);
 
 /**
 * Creates a render target texture.
@@ -99,7 +99,7 @@ extern (C) MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData,
 * @return Pointer to an MFTexture structure representing the newly created render target texture.
 * @see MFTexture_Create(), MFTexture_Destroy()
 */
-extern (C) MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = MFImageFormat.SelectNicest);
+extern (C) MFTexture* MFTexture_CreateRenderTarget(const(char)* pName, int width, int height, MFImageFormat targetFormat = MFImageFormat.SelectNicest);
 
 /**
 * Destroys a Texture.
@@ -108,7 +108,7 @@ extern (C) MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width,
 * @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
 * @see MFTexture_Create()
 */
-extern (C) int MFTexture_Destroy(MFTexture *pTexture);
+extern (C) int MFTexture_Destroy(MFTexture* pTexture);
 
 /**
 * Find an existing texture.
@@ -119,7 +119,7 @@ extern (C) int MFTexture_Destroy(MFTexture *pTexture);
 * @remarks MFTexture_Create does NOT increase the reference count of the texture so it is not required to destroy any texture returned by MFTexture_FindTexture().
 * @see MFTexture_Create()
 */
-extern (C) MFTexture* MFTexture_FindTexture(const char *pName);
+extern (C) MFTexture* MFTexture_FindTexture(const(char)* pName);
 
 /**
 * Create a blank plain coloured texture.
@@ -129,7 +129,7 @@ extern (C) MFTexture* MFTexture_FindTexture(const char *pName);
 * @return Returns a pointer to a newly created blank texture.
 * @see MFTexture_Create()
 */
-extern (C) MFTexture* MFTexture_CreateBlank(const char *pName, const ref MFVector colour);
+extern (C) MFTexture* MFTexture_CreateBlank(const(char)* pName, ref const(MFVector) colour);
 
 /**
 * Tests to see if a texture format is available on the current platform.
@@ -140,4 +140,4 @@ extern (C) MFTexture* MFTexture_CreateBlank(const char *pName, const ref MFVecto
 */
 extern (C) bool MFTexture_IsAvailable(int format);
 
-extern (C) void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight);
+extern (C) void MFTexture_GetTextureDimensions(const(MFTexture)* pTexture, int* pWidth, int* pHeight) pure;

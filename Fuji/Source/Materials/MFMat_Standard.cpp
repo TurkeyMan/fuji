@@ -2,7 +2,9 @@
 #include "MFSystem.h"
 #include "MFIni.h"
 
+#include "MFRenderState.h"
 #include "MFMaterial_Internal.h"
+#include "MFTexture_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
 
 static MFIniEnumKey sBlendKeys[] =
@@ -145,14 +147,56 @@ void MFMat_Standard_Register()
 	matStandardCallbacks.pUnregisterMaterial = MFMat_Standard_UnregisterMaterial;
 	matStandardCallbacks.pCreateInstance = MFMat_Standard_CreateInstance;
 	matStandardCallbacks.pDestroyInstance = MFMat_Standard_DestroyInstance;
-	matStandardCallbacks.pBegin = MFMat_Standard_Begin;
 	matStandardCallbacks.pUpdate = MFMat_Standard_Update;
+	matStandardCallbacks.pBuildStateBlock = MFMat_Standard_BuildStateBlock;
+	matStandardCallbacks.pBegin = MFMat_Standard_Begin;
 	matStandardCallbacks.pSetParameter = MFMat_Standard_SetParameter;
 	matStandardCallbacks.pGetParameter = MFMat_Standard_GetParameter;
 	matStandardCallbacks.pGetNumParams = MFMat_Standard_GetNumParams;
 	matStandardCallbacks.pGetParameterInfo = MFMat_Standard_GetParameterInfo;
 
-	MFMaterial_RegisterMaterialType("Standard", &matStandardCallbacks);
+	MFMaterial_RegisterMaterialType("Standard", &matStandardCallbacks, sizeof(MFMat_Standard_Data));
+}
+
+void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
+{
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	pData->ambient = MFVector::one;
+	pData->diffuse = MFVector::one;
+
+	pData->materialType = MF_AlphaBlend | 1<<6 /* back face culling */;
+	pData->opaque = true;
+
+	pData->textureMatrix = MFMatrix::identity;
+	pData->uFrames = 1;
+	pData->vFrames = 1;
+
+	pData->alphaRef = 1.0f;
+
+	MFMat_Standard_CreateInstancePlatformSpecific(pMaterial);
+}
+
+void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
+{
+	MFMat_Standard_DestroyInstancePlatformSpecific(pMaterial);
+
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	for(uint32 a=0; a<pData->textureCount; a++)
+		MFTexture_Destroy(pData->textures[a].pTexture);
+
+	if(pData->pRasteriserState)
+		MFRasteriserState_Destroy(pData->pRasteriserState);
+	if(pData->pDepthStencilState)
+		MFDepthStencilState_Destroy(pData->pDepthStencilState);
+	if(pData->pBlendState)
+		MFBlendState_Destroy(pData->pBlendState);
+	for(int a=0; a<8; ++a)
+	{
+		if(pData->pSamplerState[a])
+			MFSamplerState_Destroy(pData->pSamplerState[a]);
+	}
 }
 
 void MFMat_Standard_Update(MFMaterial *pMaterial)
@@ -175,6 +219,158 @@ void MFMat_Standard_Update(MFMaterial *pMaterial)
 	}
 }
 
+void MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial)
+{
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	MFStateBlock_Clear(pMaterial->pMaterialState);
+
+	if(pData->pRasteriserState)
+		MFRasteriserState_Destroy(pData->pRasteriserState);
+	if(pData->pDepthStencilState)
+		MFDepthStencilState_Destroy(pData->pDepthStencilState);
+	if(pData->pBlendState)
+		MFBlendState_Destroy(pData->pBlendState);
+	for(int a=0; a<8; ++a)
+	{
+		if(pData->pSamplerState[a])
+			MFSamplerState_Destroy(pData->pSamplerState[a]);
+	}
+
+	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_MaterialDiffuseColour, pData->diffuse);
+	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_AmbientColour, pData->ambient);
+	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_User0, MakeVector(1, 0, 1, 0));
+
+	MFStateBlock_SetMatrix(pMaterial->pMaterialState, MFSCM_UV0, pData->textureMatrix);
+
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_Opaque, pData->opaque != 0);
+
+	bool bAlphaTest = !!(pData->materialType & MF_Mask);
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_AlphaTest, bAlphaTest);
+	if(bAlphaTest)
+		MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_RenderState, MakeVector(pData->alphaRef, 0, 0, 0));
+
+	// rasteriser state
+	MFRasteriserStateDesc rasteriserDesc;
+
+	switch((pData->materialType & MF_CullMode) >> 6)
+	{
+		case 0: rasteriserDesc.cullMode = MFCullMode_None;	break;
+		case 1: rasteriserDesc.cullMode = MFCullMode_CCW;	break;
+		case 2: rasteriserDesc.cullMode = MFCullMode_CW;	break;
+		case 3: rasteriserDesc.cullMode = MFCullMode_CCW;	break; // 'default' = CCW
+	}
+
+	pData->pRasteriserState = MFRasteriserState_Create(&rasteriserDesc);
+	MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_RasteriserState, pData->pRasteriserState);
+
+	// blend state
+	MFBlendStateDesc blendDesc;
+	blendDesc.bIndependentBlendEnable = false;
+
+	bool bPremultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
+	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_User0, bPremultipliedAlpha);
+
+	switch(pData->materialType&MF_BlendMask)
+	{
+		case 0:
+			blendDesc.renderTarget[0].bEnable = false;
+			break;
+		case MF_AlphaBlend:
+			blendDesc.renderTarget[0].bEnable = true;
+			blendDesc.renderTarget[0].blendOp = MFBlendOp_Add;
+			blendDesc.renderTarget[0].srcBlend = bPremultipliedAlpha ? MFBlendArg_One : MFBlendArg_SrcAlpha;
+			blendDesc.renderTarget[0].destBlend = MFBlendArg_InvSrcAlpha;
+			break;
+		case MF_Additive:
+			blendDesc.renderTarget[0].bEnable = true;
+			blendDesc.renderTarget[0].blendOp = MFBlendOp_Add;
+			blendDesc.renderTarget[0].srcBlend = bPremultipliedAlpha ? MFBlendArg_One : MFBlendArg_SrcAlpha;
+			blendDesc.renderTarget[0].destBlend = MFBlendArg_One;
+			break;
+		case MF_Subtractive:
+			blendDesc.renderTarget[0].bEnable = true;
+			blendDesc.renderTarget[0].blendOp = MFBlendOp_RevSubtract;
+			blendDesc.renderTarget[0].srcBlend = bPremultipliedAlpha ? MFBlendArg_One : MFBlendArg_SrcAlpha;
+			blendDesc.renderTarget[0].destBlend = MFBlendArg_One;
+			break;
+	}
+
+	pData->pBlendState = MFBlendState_Create(&blendDesc);
+	MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_BlendState, pData->pBlendState);
+
+	// depth stencil state
+	MFDepthStencilStateDesc depthStencilDesc;
+
+	if(!(pData->materialType&MF_NoZRead) || !(pData->materialType&MF_NoZWrite))
+	{
+		depthStencilDesc.bDepthEnable = true;
+		depthStencilDesc.depthFunc = (pData->materialType&MF_NoZRead) ? MFComparisonFunc_Always : MFComparisonFunc_LessEqual;
+		depthStencilDesc.depthWriteMask = (pData->materialType&MF_NoZWrite) ? MFDepthWriteMask_Zero : MFDepthWriteMask_All;
+	}
+	else
+		depthStencilDesc.bDepthEnable = false;
+
+	pData->pDepthStencilState = MFDepthStencilState_Create(&depthStencilDesc);
+	MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_DepthStencilState, pData->pDepthStencilState);
+
+	// build samplers
+	for(uint32 a=0; a<pData->textureCount; ++a)
+	{
+		if(!pData->textures[a].pTexture)
+			continue;
+
+		MFSamplerStateDesc desc;
+		desc.minFilter = (MFTexFilter)pData->textures[a].minFilter;
+		desc.magFilter = (MFTexFilter)pData->textures[a].magFilter;
+		desc.mipFilter = (MFTexFilter)pData->textures[a].mipFilter;
+		desc.addressU = (MFTexAddressMode)pData->textures[a].addressU;
+		desc.addressV = (MFTexAddressMode)pData->textures[a].addressV;
+		desc.addressW = (MFTexAddressMode)pData->textures[a].addressW;
+		desc.borderColour.FromPackedColour(pData->textures[a].borderColour);
+
+		pData->pSamplerState[a] = MFSamplerState_Create(&desc);
+	}
+
+	// add textures to stateblock
+	MFDebug_Assert(pData->diffuseMapIndex == 0, "Diffuse map must be index 0!");
+	if(pData->textures[0].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_Diffuse, pData->textures[0].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_Diffuse), pData->pSamplerState[0]);
+	}
+	if(pData->normalMapIndex != 0 && pData->textures[pData->normalMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_NormalMap, pData->textures[pData->normalMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_NormalMap), pData->pSamplerState[pData->normalMapIndex]);
+	}
+	if(pData->specularMapIndex != 0 && pData->textures[pData->specularMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_SpecularMap, pData->textures[pData->specularMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_SpecularMap), pData->pSamplerState[pData->specularMapIndex]);
+	}
+	if(pData->detailMapIndex != 0 && pData->textures[pData->detailMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_DetailMap, pData->textures[pData->detailMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_DetailMap), pData->pSamplerState[pData->detailMapIndex]);
+	}
+	if(pData->envMapIndex != 0 && pData->textures[pData->envMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_EnvironmentMap, pData->textures[pData->envMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_EnvironmentMap), pData->pSamplerState[pData->envMapIndex]);
+	}
+	if(pData->lightMapIndex != 0 && pData->textures[pData->lightMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_LightMap, pData->textures[pData->lightMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_LightMap), pData->pSamplerState[pData->lightMapIndex]);
+	}
+	if(pData->displacementMapIndex != 0 && pData->textures[pData->displacementMapIndex].pTexture)
+	{
+		MFStateBlock_SetTexture(pMaterial->pMaterialState, MFSCT_Vertex0, pData->textures[pData->displacementMapIndex].pTexture);
+		MFStateBlock_SetRenderState(pMaterial->pMaterialState, MFSCRS_SamplerState(MFSCT_Vertex0), pData->pSamplerState[pData->displacementMapIndex]);
+	}
+}
+
 void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
@@ -189,6 +385,8 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 			break;
 		case MFMatStandard_DiffuseColour:
 			pData->diffuse = *(MFVector*)value;
+			pData->opaque = pData->diffuse.w >= 1.f && pData->textures[pData->diffuseMapIndex].pTexture &&
+				(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_AlphaMask) == 0;
 			break;
 		case MFMatStandard_AmbientColour:
 			pData->ambient = *(MFVector*)value;
@@ -230,6 +428,9 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
 					pData->diffuseMapIndex = pData->textureCount;
 					pData->textureCount++;
+
+					pData->opaque = pData->diffuse.w >= 1.f && pData->textures[pData->diffuseMapIndex].pTexture &&
+						(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_AlphaMask) == 0;
 					break;
 				case MFMatStandard_Tex_DiffuseMap2:
 					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);

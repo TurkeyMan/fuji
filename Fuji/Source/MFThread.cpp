@@ -18,7 +18,7 @@ MFInitStatus MFThread_InitModule()
 {
 	gMutexSize = MFThread_GetMutexSizePlatformSpecific();
 
-	gThreadInfo.Init(sizeof(MFThreadInfo), gDefaults.thread.maxThreads, gDefaults.thread.maxThreads);
+	gThreadInfo.Init(sizeof(MFThreadInfo), gDefaults.system.maxThreads, gDefaults.system.maxThreads);
 //	gThreadTls = MFThread_TlsAlloc();
 
 	return MFAIC_Succeeded;

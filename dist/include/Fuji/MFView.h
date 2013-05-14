@@ -9,6 +9,8 @@
 #if !defined(_MFVIEW_H)
 #define _MFVIEW_H
 
+struct MFStateBlock;
+
 #include "MFMatrix.h"
 
 /**
@@ -57,7 +59,7 @@ MF_API void MFView_ConfigureProjection(float fieldOfView, float nearPlane, float
  * @see MFView_SetProjection()
  * @see MFView_SetOrtho()
  */
-MF_API void MFView_SetCustomProjection(MFMatrix &projectionMatrix, bool bYIsUp);
+MF_API void MFView_SetCustomProjection(const MFMatrix &projectionMatrix, bool bYIsUp);
 
 /**
  * Set the aspect ratio.
@@ -83,7 +85,7 @@ MF_API void MFView_SetProjection();
  * @return None.
  * @see MFView_SetProjection()
  */
-MF_API void MFView_SetOrtho(MFRect *pOrthoRect = NULL);
+MF_API void MFView_SetOrtho(const MFRect *pOrthoRect = NULL);
 
 /**
  * Get the current ortho rect.
@@ -118,6 +120,14 @@ MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
  * @see MFView_SetCameraMatrix()
  */
 MF_API const MFMatrix& MFView_GetCameraMatrix();
+
+/**
+ * Gets a state block for the current view.
+ * Gets an MFStateBlock of the current view.
+ * @return An MFStateBlock representing the current view state.
+ * @see MFView_SetCameraMatrix()
+ */
+MF_API const MFStateBlock* MFView_GetViewState();
 
 /**
  * Gets the World to View matrix.

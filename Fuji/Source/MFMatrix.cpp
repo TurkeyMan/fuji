@@ -315,6 +315,60 @@ MFMatrix& MFMatrix::LookAt(const MFVector& pos, const MFVector& at, const MFVect
 	return *this;
 }
 
+MFMatrix& MFMatrix::SetPerspective(float fov, float near, float far, float aspectRatio)
+{
+	// construct perspective projection
+	float zn = near;
+	float zf = far;
+
+	float a = fov * 0.5f;
+
+	float h = MFCos(a) / MFSin(a);
+	float w = h / aspectRatio;
+
+	float zd = zf-zn;
+	float zs = zf/zd;
+
+#if defined(_OPENGL_CLIP_SPACE)
+	m[0] = w;		m[1] = 0.0f;	m[2] = 0.0f;			m[3] = 0.0f;
+	m[4] = 0.0f;	m[5] = h;		m[6] = 0.0f;			m[7] = 0.0f;
+	m[8] = 0.0f;	m[9] = 0.0f;	m[10] = 2.0f*zs;		m[11] = 1.0f;
+	m[12] = 0.0f;	m[13] = 0.0f;	m[14] = -2.0f*zn*zs-zf;	m[15] = 0.0f;
+#else
+	m[0] = w;		m[1] = 0.0f;	m[2] = 0.0f;			m[3] = 0.0f;
+	m[4] = 0.0f;	m[5] = h;		m[6] = 0.0f;			m[7] = 0.0f;
+	m[8] = 0.0f;	m[9] = 0.0f;	m[10] = zs;				m[11] = 1.0f;
+	m[12] = 0.0f;	m[13] = 0.0f;	m[14] = -zn*zs;			m[15] = 0.0f;
+#endif
+
+	return *this;
+}
+
+MFMatrix& MFMatrix::SetOrthographic(MFRect orthoRect, float near, float far)
+{
+	// construct ortho projection
+	float l = orthoRect.x;
+	float r = orthoRect.x + orthoRect.width;
+	float b = orthoRect.y + orthoRect.height;
+	float t = orthoRect.y;
+	float zn = near;
+	float zf = far;
+
+#if defined(_OPENGL_CLIP_SPACE)
+	m[0] = 2.0f/(r-l);		m[1] = 0.0f;			m[2] = 0.0f;			m[3] = 0.0f;
+	m[4] = 0.0f;			m[5] = 2.0f/(t-b);		m[6] = 0.0f;			m[7] = 0.0f;
+	m[8] = 0.0f;			m[9] = 0.0f;			m[10] = 1.0f/(zf-zn);	m[11] = 0.0f;
+	m[12] = (l+r)/(l-r);	m[13] = (t+b)/(b-t);	m[14] = zn/(zn-zf);		m[15] = 1.0f;
+#else
+	m[0] = 2.0f/(r-l);		m[1] = 0.0f;			m[2] = 0.0f;			m[3] = 0.0f;
+	m[4] = 0.0f;			m[5] = 2.0f/(t-b);		m[6] = 0.0f;			m[7] = 0.0f;
+	m[8] = 0.0f;			m[9] = 0.0f;			m[10] = 1.0f/(zf-zn);	m[11] = 0.0f;
+	m[12] = (l+r)/(l-r);	m[13] = (t+b)/(b-t);	m[14] = zn/(zn-zf);		m[15] = 1.0f;
+#endif
+
+	return *this;
+}
+
 MFMatrix& MFMatrix::Normalise()
 {
 	((MFVector*)&m[0])->Normalise3();

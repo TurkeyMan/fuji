@@ -11,6 +11,9 @@
 
 #include "MFBoundingVolume.h"
 
+struct MFRenderLayerSet;
+struct MFStateBlock;
+
 /**
  * @struct MFModel
  * Represents a Fuji model.
@@ -47,6 +50,8 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
  * @see MFModel_Create(), MFModel_Draw()
  */
 MF_API int MFModel_Destroy(MFModel *pModel);
+
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
 /**
  * Draw a model.

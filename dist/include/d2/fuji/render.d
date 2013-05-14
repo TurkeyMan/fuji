@@ -89,11 +89,12 @@ enum MFClearScreenFlags
 extern (C) void MFRenderer_SetClearColour(float r, float g, float b, float a);
 extern (C) void MFRenderer_ClearScreen(uint flags = MFClearScreenFlags.All);
 
-extern (C) void MFRenderer_GetViewport(MFRect* pRect);
 extern (C) void MFRenderer_SetViewport(MFRect* pRect);
 extern (C) void MFRenderer_ResetViewport();
 
-extern (C) void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget);
+extern (C) MFTexture* MFRenderer_GetDeviceRenderTarget();
+extern (C) MFTexture* MFRenderer_GetDeviceDepthStencil();
+extern (C) void MFRenderer_SetRenderTarget(MFTexture* pRenderTarget, MFTexture* pZTarget);
 extern (C) void MFRenderer_SetDeviceRenderTarget();
 
 extern (C) float MFRenderer_GetTexelCenterOffset();

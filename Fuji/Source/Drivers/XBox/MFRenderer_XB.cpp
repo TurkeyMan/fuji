@@ -15,8 +15,6 @@ IDirect3D8 *d3d8;
 IDirect3DDevice8 *pd3dDevice;
 D3DCAPS8 deviceCaps;
 
-MFVector gClearColour = MakeVector(0.f,0.f,0.22f,1.f);
-
 MFRect gCurrentViewport;
 
 extern bool gbLetterBox;
@@ -65,12 +63,12 @@ int MFRenderer_CreateDisplay()
 	// clear frame buffers to black
 	MFVector oldColour = gClearColour;
 	MFRenderer_SetClearColour(0,0,0,0);
-	MFRenderer_BeginFrame();
+	MFRenderer_BeginFramePlatformSpecific();
 	MFRenderer_ClearScreen(CS_All);
-	MFRenderer_EndFrame();
-	MFRenderer_BeginFrame();
+	MFRenderer_EndFramePlatformSpecific();
+	MFRenderer_BeginFramePlatformSpecific();
 	MFRenderer_ClearScreen(CS_All);
-	MFRenderer_EndFrame();
+	MFRenderer_EndFramePlatformSpecific();
 	MFRenderer_SetClearColour(oldColour.x, oldColour.y, oldColour.z, oldColour.w);
 
 	return 0;
@@ -90,7 +88,7 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-void MFRenderer_BeginFrame()
+void MFRenderer_BeginFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -103,7 +101,7 @@ void MFRenderer_BeginFrame()
 	pd3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
@@ -119,16 +117,11 @@ void MFRenderer_SetClearColour(float r, float g, float b, float a)
 	gClearColour.w = a;
 }
 
-void MFRenderer_ClearScreen(uint32 flags)
+void MFRenderer_ClearScreen(MFRenderClearFlags flags, MFVector colour, float z, int stencil)
 {
 	MFCALLSTACKc;
 
-	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), gClearColour.ToPackedColour(), 1.0f, 0);
-}
-
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
+	pd3dDevice->Clear(0, NULL, ((flags&CS_Colour) ? D3DCLEAR_TARGET : NULL)|((flags&CS_ZBuffer) ? D3DCLEAR_ZBUFFER : NULL)|((flags&CS_Stencil) ? D3DCLEAR_STENCIL : NULL), colour.ToPackedColour(), z, stencil);
 }
 
 void MFRenderer_SetViewport(MFRect *pRect)

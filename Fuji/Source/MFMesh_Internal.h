@@ -4,29 +4,7 @@
 #include "MFVertex.h"
 
 struct MFMaterial;
-
-enum MFMeshVertexDataType
-{
-	MFMVDT_Float1,
-	MFMVDT_Float2,
-	MFMVDT_Float3,
-	MFMVDT_Float4,
-	MFMVDT_ColourBGRA,
-	MFMVDT_UByte4,
-	MFMVDT_UByte4N,
-	MFMVDT_Short2,
-	MFMVDT_Short4,
-	MFMVDT_Short2N,
-	MFMVDT_Short4N,
-	MFMVDT_UShort2N,
-	MFMVDT_UShort4N,
-	MFMVDT_UDec3,
-	MFMVDT_Dec3N,
-	MFMVDT_Float16_2,
-	MFMVDT_Float16_4,
-
-	MFMVDT_Max,
-};
+struct MFStateBlock;
 
 enum MFMeshChunkType
 {
@@ -39,55 +17,39 @@ enum MFMeshChunkType
 	MFMCT_GC
 };
 
-
-struct MFMeshVertexElement
-{
-	MFVertexElementType usage;
-	int usageIndex;
-	MFMeshVertexDataType type;
-	int offset;
-};
-
-struct MFMeshVertexStream
-{
-	const char *pStreamName;
-	MFMeshVertexElement *pElements;
-	int numVertexElements;
-	int streamStride;
-};
-
-struct MFMeshVertexFormat
-{
-	MFMeshVertexStream *pStreams;
-	int numVertexStreams;
-};
-
-
 struct MFMeshChunk
 {
 	MFMeshChunkType type;
+
 	MFMaterial *pMaterial;
+
+	MFStateBlock *pGeomState;
+
+	MFVertexDeclaration *pDecl;
+	MFVertexBuffer *pVertexBuffers[8];
+	MFIndexBuffer *pIndexBuffer;
+
+	int numVertices;
+	int numIndices;
+
+	// number of blend weights present in the mesh
+	int maxBlendWeights;
+
+	// matrix batching data
+	int matrixBatchSize;
+	uint16 *pBatchIndices;
 };
 
 struct MFMeshChunk_Generic : public MFMeshChunk
 {
 	// vertex format description
-	MFMeshVertexFormat *pVertexFormat;
+	MFVertexElement *pElements;
 
-	// vertex data pointers;
 	void **ppVertexStreams;
-	int numVertices;
+	uint16 *pIndexData;
 
-	// index data
-	const uint16 *pIndexData;
-	int numIndices;
-
-	// matrix batching data
-	int matrixBatchSize;
-	uint16 *pBatchIndices;
-
-	// number of blend weights present in the mesh
-	int maxBlendWeights;
+	int elementCount;
+	int numVertexStreams;
 
 	// this 32 bytes can be used to store pointers or handles to platform specific things at runtime...
 	char runtimeData[32];

@@ -42,14 +42,6 @@ void Display_EndFrame()
 	CALLSTACK;
 }
 
-void Display_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
 void Display_ClearScreen(uint32 flags)
 {
 	CALLSTACKc;

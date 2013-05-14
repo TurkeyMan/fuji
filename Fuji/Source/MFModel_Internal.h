@@ -5,6 +5,7 @@
 #include "MFModel.h"
 #include "MFMaterial_Internal.h"
 #include "MFAnimation.h"
+#include "MFResource.h"
 
 struct MFModelTemplate;
 
@@ -57,22 +58,15 @@ struct MFModel
 	// * subobject colours
 };
 
-struct MFModelTemplate
+struct MFModelTemplate : MFResource
 {
-	union
-	{
-		uint32 IDtag;
-		const char *pFilename;
-	};
-
+	const char *pFilename;
 	const char *pName;
 
 	MFModelDataChunk *pDataChunks;
 	int numDataChunks;
 
 	MFBoundingVolume boundingVolume;
-
-	int refCount;
 };
 
 struct MFModelSubObject
@@ -111,10 +105,5 @@ struct BinaryFilesystemChunk
 	// this is a binary archive that can be mounted and accessed with the memory filesystem..
 	// it could contain texture data, or other relevant model related data..
 };
-
-// typedef the model pool
-#include "MFOpenHashTable.h"
-typedef MFOpenHashTable<MFModelTemplate*> MFModelPool;
-extern MFModelPool gModelBank;
 
 #endif

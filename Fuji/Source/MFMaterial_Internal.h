@@ -5,10 +5,12 @@
 #include "MFVector.h"
 #include "MFTexture.h"
 #include "MFMatrix.h"
+#include "MFResource.h"
 
 #include "DebugMenu_Internal.h"
 
 struct MFMaterialType;
+struct MFStateBlock;
 
 // material functions
 MFInitStatus MFMaterial_InitModule();
@@ -19,20 +21,15 @@ void MFMaterial_Update();
 MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName);
 
 // MFMaterial structure
-struct MFMaterialType
-{
-	MFMaterialCallbacks materialCallbacks;
-	char *pTypeName;
-};
-
-struct MFMaterial
+struct MFMaterial : public MFResource
 {
 	char *pName;
 
 	MFMaterialType *pType;
 	void *pInstanceData;
 
-	int refCount;
+	MFStateBlock *pMaterialState;
+	bool bStateDirty;
 };
 
 // a debug menu material information display object

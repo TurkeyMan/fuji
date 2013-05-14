@@ -5,7 +5,7 @@
 
 #include "MFMaterial_Internal.h"
 
-int MFMat_Effect_RegisterMaterial(void *pPlatformData)
+int MFMat_Effect_RegisterMaterial(MFMaterialType *pType)
 {
 	return 0;
 }
@@ -14,7 +14,7 @@ void MFMat_Effect_UnregisterMaterial()
 {
 }
 
-int MFMat_Effect_Begin(MFMaterial *pMaterial)
+int MFMat_Effect_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	return 0;
 }

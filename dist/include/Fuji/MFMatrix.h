@@ -2,7 +2,7 @@
  * @file MFMatrix.h
  * @brief Describes the Mount Fuji Engine matrix class.
  * @author Manu Evans
- * @defgroup MFMatrix Matrix math Class
+ * @defgroup MFMatrix Matrix Math Class
  * @{
  */
 
@@ -42,6 +42,9 @@ struct MF_EXPORT_VARIABLE MFMatrix
 	MFMatrix& SetRotationY(float angle);
 	MFMatrix& SetRotationZ(float angle);
 	MFMatrix& SetScale(const MFVector& scale);
+
+	MFMatrix& SetPerspective(float fov, float near, float far, float aspectRatio);
+	MFMatrix& SetOrthographic(MFRect orthoRect, float near, float far);
 
 	MFQuaternion GetRotationQ() const;
 

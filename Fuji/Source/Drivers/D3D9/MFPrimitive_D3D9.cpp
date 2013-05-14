@@ -20,24 +20,17 @@
 	#define MFPrimitive_EndBlitter MFPrimitive_EndBlitter_D3D9
 #endif
 
-#include "MFDisplay_Internal.h"
-#include "MFView.h"
-#include "MFVector.h"
-#include "MFMatrix.h"
-#include "MFPrimitive.h"
-#include "MFTexture_Internal.h"
 #include "MFRenderer.h"
+#include "MFRenderState.h"
 #include "MFRenderer_D3D9.h"
-#include "MFMaterial.h"
 #include "MFVertex.h"
+#include "MFPrimitive.h"
+#include "MFMaterial.h"
+#include "MFView.h"
+#include "MFDisplay.h"
 
+#include "MFTexture_Internal.h"
 #include "Materials/MFMat_Standard.h"
-
-#include <d3d9.h>
-
-static const int primBufferSize = 1536;
-
-static bool gRenderQuads = false;
 
 struct LitVertex
 {
@@ -56,44 +49,49 @@ struct LitVertex
 	float u,v;
 };
 
-static LitVertex primBuffer[primBufferSize];
-static LitVertex current;
-
-static uint32 primType;
-static uint32 beginCount;
-static uint32 currentVert;
-
-extern IDirect3DDevice9 *pd3dDevice;
 static MFVertexDeclaration *pDecl;
+
+static MFMaterial *pMaterial;
+
+static MFMesh currentPrim;
+static MFVertexBuffer *pVB;
+static LitVertex *pLocked;
+
+static LitVertex current;
+static int currentVert;
+
+static bool gImmitateQuads = false;
 
 /*** functions ***/
 
 MFInitStatus MFPrimitive_InitModule()
 {
-	MFCALLSTACK;
-
 	MFVertexElement elements[4];
 
 	// write declaration
 	elements[0].stream = 0;
-	elements[0].elementType = MFVET_Position;
-	elements[0].elementIndex = 0;
+	elements[0].type = MFVET_Position;
+	elements[0].index = 0;
 	elements[0].componentCount = 3;
+	elements[0].format = MFVDF_Float3;
 
 	elements[1].stream = 0;
-	elements[1].elementType = MFVET_Normal;
-	elements[1].elementIndex = 0;
+	elements[1].type = MFVET_Normal;
+	elements[1].index = 0;
 	elements[1].componentCount = 3;
+	elements[1].format = MFVDF_Float3;
 
 	elements[2].stream = 0;
-	elements[2].elementType = MFVET_Colour;
-	elements[2].elementIndex = 0;
+	elements[2].type = MFVET_Colour;
+	elements[2].index = 0;
 	elements[2].componentCount = 4;
+	elements[2].format = MFVDF_UByte4N_BGRA;
 
 	elements[3].stream = 0;
-	elements[3].elementType = MFVET_TexCoord;
-	elements[3].elementIndex = 0;
+	elements[3].type = MFVET_TexCoord;
+	elements[3].index = 0;
 	elements[3].componentCount = 2;
+	elements[3].format = MFVDF_Float2;
 
 	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
 	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
@@ -103,8 +101,6 @@ MFInitStatus MFPrimitive_InitModule()
 
 void MFPrimitive_DeinitModule()
 {
-	MFCALLSTACK;
-
 	MFVertex_DestroyVertexDeclaration(pDecl);
 }
 
@@ -115,46 +111,44 @@ void MFPrimitive_DrawStats()
 
 MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
-	MFCALLSTACK;
+	currentPrim.primType = (MFPrimType)(type & PT_PrimMask);
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(128);
+	currentPrim.indexOffset = 0;
+	currentPrim.vertexOffset = 0;
+	currentPrim.numIndices = 0;
 
-	primType = type & PT_PrimMask;
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, MFMatrix::identity);
 
-	if (primType == PT_QuadList)
+	if(type & PT_Untextured)
+		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
+	else
+		pMaterial = MFMaterial_GetCurrent();
+
+	if(currentPrim.primType == MFPT_QuadList)
 	{
-		primType = PT_TriList;
-		gRenderQuads = true;
+		// D3D9 doesn't support rendering quads...
+		currentPrim.primType = MFPT_TriangleList;
+		gImmitateQuads = true;
 	}
 	else
-	{
-		gRenderQuads = false;
-	}
-
-	MFMaterial *pMatOverride = (MFMaterial*)MFRenderer_GetRenderStateOverride(MFRS_MaterialOverride);
-	if(pMatOverride)
-		MFMaterial_SetMaterial(pMatOverride);
-	else if(type & PT_Untextured)
-		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
-
-	MFRenderer_SetMatrices(NULL, 0);
-	MFRendererPC_SetNumWeights(0);
-	MFRendererPC_SetWorldToScreenMatrix(MFView_GetWorldToScreenMatrix());
-	MFRendererPC_SetModelColour(MFVector::white);
-
-	MFVertex_SetVertexDeclaration(pDecl);
-
-	MFRenderer_Begin();
+		gImmitateQuads = false;
 }
 
 MF_API void MFBegin(uint32 vertexCount)
 {
-	MFCALLSTACK;
-
 	MFDebug_Assert(vertexCount > 0, "Invalid primitive count.");
 
-	if(gRenderQuads)
-		beginCount = vertexCount * 3;
-	else
-		beginCount = vertexCount;
+	currentPrim.numVertices = vertexCount;
+	if(gImmitateQuads)
+		currentPrim.numVertices *= 3;
+
+	// create an appropriate vertex buffer
+	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
+
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
+
+	MFVertex_LockVertexBuffer(pVB, (void**)&pLocked);
 
 	currentVert = 0;
 
@@ -166,11 +160,7 @@ MF_API void MFBegin(uint32 vertexCount)
 
 MF_API void MFSetMatrix(const MFMatrix &mat)
 {
-	MFCALLSTACK;
-
-	MFMatrix temp;
-	MFView_GetLocalToScreen(mat, &temp);
-	MFRendererPC_SetWorldToScreenMatrix(temp);
+	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, mat);
 }
 
 MF_API void MFSetColour(float r, float g, float b, float a)
@@ -193,78 +183,45 @@ MF_API void MFSetNormal(float x, float y, float z)
 
 MF_API void MFSetPosition(float x, float y, float z)
 {
-	MFCALLSTACK;
-
 	current.pos.x = x;
 	current.pos.y = y;
 	current.pos.z = z;
 
-	if(gRenderQuads && (currentVert & 1))
+	if(gImmitateQuads && (currentVert & 1))
 	{
-		LitVertex &prev = primBuffer[currentVert - 1];
+		LitVertex &prev = pLocked[currentVert - 1];
 
-		primBuffer[currentVert + 0] = prev;
-		primBuffer[currentVert + 1] = prev;
-		primBuffer[currentVert + 2] = current;
-		primBuffer[currentVert + 3] = current;
-		primBuffer[currentVert + 4] = current;
+		pLocked[currentVert + 0] = prev;
+		pLocked[currentVert + 1] = prev;
+		pLocked[currentVert + 2] = current;
+		pLocked[currentVert + 3] = current;
+		pLocked[currentVert + 4] = current;
 
-		primBuffer[currentVert + 0].pos.x = current.pos.x;
-		primBuffer[currentVert + 1].pos.y = current.pos.y;
-		primBuffer[currentVert + 2].pos.x = prev.pos.x;
-		primBuffer[currentVert + 3].pos.y = prev.pos.y;
+		pLocked[currentVert + 0].pos.x = current.pos.x;
+		pLocked[currentVert + 1].pos.y = current.pos.y;
+		pLocked[currentVert + 2].pos.x = prev.pos.x;
+		pLocked[currentVert + 3].pos.y = prev.pos.y;
 
-		primBuffer[currentVert + 0].u = current.u;
-		primBuffer[currentVert + 1].v = current.v;
-		primBuffer[currentVert + 2].u = prev.u;
-		primBuffer[currentVert + 3].v = prev.v;
+		pLocked[currentVert + 0].u = current.u;
+		pLocked[currentVert + 1].v = current.v;
+		pLocked[currentVert + 2].u = prev.u;
+		pLocked[currentVert + 3].v = prev.v;
 
 		currentVert += 4;
 	}
 	else
-		primBuffer[currentVert] = current;
+		pLocked[currentVert] = current;
 
 	++currentVert;
-
-	if(currentVert >= primBufferSize)
-	{
-		int newBeginCount = beginCount - currentVert;
-		beginCount = currentVert;
-
-		MFEnd();
-
-		beginCount = newBeginCount;
-		currentVert = 0;
-	}
 }
 
 MF_API void MFEnd()
 {
-	MFCALLSTACK;
+	MFVertex_UnlockVertexBuffer(pVB);
 
-	MFDebug_Assert(currentVert == beginCount, "Incorrect number of vertices.");
+	MFDebug_Assert(currentVert == currentPrim.numVertices, "Incorrect number of vertices.");
 
-	switch(primType)
-	{
-		case PT_PointList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_POINTLIST, beginCount, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINELIST, beginCount/2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_LineStrip:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_LINESTRIP, beginCount-1, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriList:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, beginCount/3, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriStrip:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
-		case PT_TriFan:
-			pd3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, beginCount-2, primBuffer, sizeof(LitVertex));
-			break;
-	}
+	MFRenderer_AddMesh(&currentPrim, pMaterial, NULL, NULL, MFView_GetViewState());
 }
 
 

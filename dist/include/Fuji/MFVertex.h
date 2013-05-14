@@ -9,6 +9,8 @@
 #if !defined(_MFVERTEX_H)
 #define _MFVERTEX_H
 
+struct MFStateBlock;
+
 /**
  * @struct MFVertexDeclaration
  * Represents the layout of a vertex buffer.
@@ -31,7 +33,9 @@ enum MFVertexDataFormat
 {
 	MFVDF_Unknown = -1,
 
-	MFVDF_Float4 = 0,
+	MFVDF_Auto = 0,
+
+	MFVDF_Float4,
 	MFVDF_Float3,
 	MFVDF_Float2,
 	MFVDF_Float1,
@@ -48,6 +52,8 @@ enum MFVertexDataFormat
 	MFVDF_UShort2N,
 	MFVDF_Float16_4,
 	MFVDF_Float16_2,
+	MFVDF_UDec3,
+	MFVDF_Dec3N,
 
 	MFVDF_Max,
 	MFVDF_ForceInt = 0x7FFFFFFF
@@ -78,33 +84,50 @@ enum MFVertexElementType
 	MFVET_ForceInt = 0x7FFFFFFF
 };
 
-enum MFVertexPrimType
+/**
+ * Primitive Types.
+ * Primitive types that can be submitted to the renderer.
+ */
+enum MFPrimType
 {
-	MFVPT_Points,
-	MFVPT_LineList,
-	MFVPT_LineStrip,
-	MFVPT_TriangleList,
-	MFVPT_TriangleStrip,
-	MFVPT_TriangleFan,
+	MFPT_Points,		/**< Point list */
+	MFPT_LineList,		/**< Line list */
+	MFPT_LineStrip,		/**< Line strip */
+	MFPT_TriangleList,	/**< Triangle list */
+	MFPT_TriangleStrip,	/**< Triangle strip */
+	MFPT_TriangleFan,	/**< Triangle fan */
+	MFPT_QuadList,		/**< Quad list */
 
-	MFVPT_Max,
-	MFVPT_ForceInt = 0x7FFFFFFF
+	MFPT_Max,			/**< Maximum prim type */
+	MFPT_ForceInt = 0x7FFFFFFF	/**< Force PrimType to an int type */
 };
 
 struct MFVertexElement
 {
 	int stream;
-	MFVertexElementType elementType;
-	int elementIndex;
+	MFVertexElementType type;
+	int index;
 	int componentCount;
+	MFVertexDataFormat format;
 };
 
-MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(MFVertexElement *pElementArray, int elementCount);
-MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration);
+struct MFMesh
+{
+	MFStateBlock *pMeshState;
+	MFPrimType primType;
+	int vertexOffset;
+	int numVertices;
+	int indexOffset;
+	int numIndices;
+};
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL);
+MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexElement *pElementArray, int elementCount);
+MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration);
+MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream);
+
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL, const char *pName = NULL);
 MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer);
-MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer);
+MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices);
 MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
 MF_API void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
 MF_API void MFVertex_ReadVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector *pData);
@@ -112,15 +135,16 @@ MF_API void MFVertex_SetVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexEle
 MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 *pData);
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer);
 
-MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory = NULL);
+MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory = NULL, const char *pName = NULL);
 MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer);
 MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices);
 MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer);
 
-MF_API void MFVertex_SetVertexDeclaration(MFVertexDeclaration *pVertexDeclaration);
-MF_API void MFVertex_SetVertexStreamSource(int stream, MFVertexBuffer *pVertexBuffer);
-MF_API void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices);
-MF_API void MFVertex_RenderIndexedVertices(MFVertexPrimType primType, int numVertices, int numIndices, MFIndexBuffer *pIndexBuffer);
+MF_API void MFVertex_SetVertexDeclaration(const MFVertexDeclaration *pVertexDeclaration);
+MF_API void MFVertex_SetVertexStreamSource(int stream, const MFVertexBuffer *pVertexBuffer);
+MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer);
+MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices);
+MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 
 #endif
 

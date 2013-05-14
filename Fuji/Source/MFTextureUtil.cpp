@@ -34,6 +34,10 @@ const char *gpMFImageFormatStrings[ImgFmt_Max] =
 	"I8",
 	"I4",
 
+	"D16",
+	"D24X8",
+	"D24S8",
+
 	"DXT1",
 	"DXT2",
 	"DXT3",
@@ -104,6 +108,10 @@ uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 
 	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),		// ImgFmt_I8
 	MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),											// ImgFmt_I4
+
+	MFBIT(MFRD_D3D9),															// ImgFmt_D16
+	MFBIT(MFRD_D3D9),															// ImgFmt_D24X8
+	MFBIT(MFRD_D3D9),															// ImgFmt_D24S8
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_DXT1 // 1 bit alpha
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_XBox),											// ImgFmt_DXT2
@@ -176,6 +184,10 @@ uint32 gMFImageBitsPerPixel[ImgFmt_Max] =
 	8,	// ImgFmt_I8
 	4,	// ImgFmt_I4
 
+	16,	// ImgFmt_D16
+	32,	// ImgFmt_D24X8
+	32,	// ImgFmt_D24S8
+
 	4,	// ImgFmt_DXT1
 	8,	// ImgFmt_DXT2
 	8,	// ImgFmt_DXT3
@@ -247,6 +259,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		41,	// D3DFMT_P8			// ImgFmt_I8
 		0,	//						// ImgFmt_I4
 
+		80,	// D3DFMT_D16			// ImgFmt_D16
+		77,	// D3DFMT_D24X8			// ImgFmt_D24X8
+		75,	// D3DFMT_D24S8			// ImgFmt_D24S8
+
 		MFMAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// ImgFmt_DXT1
 		MFMAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// ImgFmt_DXT2
 		MFMAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// ImgFmt_DXT3
@@ -316,6 +332,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		0,	//									// ImgFmt_I8
 		0,	//									// ImgFmt_I4
 
+		55,	// DXGI_FORMAT_D16_UNORM			// ImgFmt_D16
+		0,	//									// ImgFmt_D24X8
+		45,	// DXGI_FORMAT_D24_UNORM_S8_UINT	// ImgFmt_D24S8
+
 		71,	// DXGI_FORMAT_BC1_UNORM			// ImgFmt_DXT1
 		0,	//									// ImgFmt_DXT2
 		74,	// DXGI_FORMAT_BC2_UNORM			// ImgFmt_DXT3
@@ -384,6 +404,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 
 		0xB,	// ImgFmt_I8
 		0,		// ImgFmt_I4
+
+		0,		// ImgFmt_D16
+		0,		// ImgFmt_D24X8
+		0,		// ImgFmt_D24S8
 
 		0xC,	// ImgFmt_DXT1
 		0xE,	// ImgFmt_DXT2
@@ -456,6 +480,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		17,	// ImgFmt_I8
 		0,	// ImgFmt_I4
 
+		0,	// ImgFmt_D16
+		0,	// ImgFmt_D24X8
+		0,	// ImgFmt_D24S8
+
 		18,	// ImgFmt_DXT1
 		0,	// ImgFmt_DXT2
 		19,	// ImgFmt_DXT3
@@ -525,6 +553,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		5,	// SCEGU_PFIDX8, //	ImgFmt_I8
 		4,	// SCEGU_PFIDX4, //	ImgFmt_I4
 
+		0,	//				 // ImgFmt_D16
+		0,	//				 // ImgFmt_D24X8
+		0,	//				 // ImgFmt_D24S8
+
 		0,	//				 // ImgFmt_DXT1
 		0,	//				 // ImgFmt_DXT2
 		0,	//				 // ImgFmt_DXT3
@@ -593,6 +625,10 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 
 		99,	// ????????????, //	ImgFmt_I8
 		99,	// ????????????, //	ImgFmt_I4
+
+		0,	//				 // ImgFmt_D16
+		0,	//				 // ImgFmt_D24X8
+		0,	//				 // ImgFmt_D24S8
 
 		0,	//				 // ImgFmt_DXT1
 		0,	//				 // ImgFmt_DXT2

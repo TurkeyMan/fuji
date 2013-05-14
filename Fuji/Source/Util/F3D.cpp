@@ -441,77 +441,69 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			chunk.type = MFMCT_Generic;
 			chunk.pMaterial = (MFMaterial*)MFStringCache_Add(pStringCache, pModel->GetMaterialChunk()->materials[matsub.materialIndex].name);
 
+			int numVertexStreams = bAnimating ? 2 : 1;
+
+			chunk.numVertexStreams = numVertexStreams;
 			chunk.numVertices = numVertices;
 			chunk.numIndices = numIndices;
 			chunk.maxBlendWeights = bAnimating ? matsub.maxWeights : 0;
 			chunk.matrixBatchSize = batch.bones.size();
 
 			// setup vertex format structure
-			chunk.pVertexFormat = (MFMeshVertexFormat*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFMeshVertexFormat));
-			int numVertexStreams = bAnimating ? 2 : 1;
-			chunk.pVertexFormat->numVertexStreams = numVertexStreams;
-			chunk.pVertexFormat->pStreams = (MFMeshVertexStream*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFMeshVertexStream)*numVertexStreams);
-			chunk.pVertexFormat->pStreams[0].pElements = (MFMeshVertexElement*)pOffset;
-			pOffset += MFALIGN16(sizeof(MFMeshVertexElement)*4);
-			if(numVertexStreams > 1)
-			{
-				chunk.pVertexFormat->pStreams[1].pElements = (MFMeshVertexElement*)pOffset;
-				pOffset += MFALIGN16(sizeof(MFMeshVertexElement)*2);
-			}
+			chunk.pElements = (MFVertexElement*)pOffset;
+			chunk.elementCount = numVertexStreams > 1 ? 6 : 4;
+			pOffset += MFALIGN16(sizeof(MFVertexElement)*chunk.elementCount);
 
 			// write declaration
-			chunk.pVertexFormat->pStreams[0].pStreamName = NULL;
-			chunk.pVertexFormat->pStreams[0].numVertexElements = 4;
-			chunk.pVertexFormat->pStreams[0].streamStride = sizeof(Vert);
-			chunk.pVertexFormat->pStreams[0].pElements[0].offset = 0;
-			chunk.pVertexFormat->pStreams[0].pElements[0].type = MFMVDT_Float3;
-			chunk.pVertexFormat->pStreams[0].pElements[0].usage = MFVET_Position;
-			chunk.pVertexFormat->pStreams[0].pElements[0].usageIndex = 0;
-			chunk.pVertexFormat->pStreams[0].pElements[1].offset = 12;
-			chunk.pVertexFormat->pStreams[0].pElements[1].type = MFMVDT_Float3;
-			chunk.pVertexFormat->pStreams[0].pElements[1].usage = MFVET_Normal;
-			chunk.pVertexFormat->pStreams[0].pElements[1].usageIndex = 0;
-			chunk.pVertexFormat->pStreams[0].pElements[2].offset = 24;
-			chunk.pVertexFormat->pStreams[0].pElements[2].type = MFMVDT_ColourBGRA;
-			chunk.pVertexFormat->pStreams[0].pElements[2].usage = MFVET_Colour;
-			chunk.pVertexFormat->pStreams[0].pElements[2].usageIndex = 0;
-			chunk.pVertexFormat->pStreams[0].pElements[3].offset = 28;
-			chunk.pVertexFormat->pStreams[0].pElements[3].type = MFMVDT_Float2;
-			chunk.pVertexFormat->pStreams[0].pElements[3].usage = MFVET_TexCoord;
-			chunk.pVertexFormat->pStreams[0].pElements[3].usageIndex = 0;
+			chunk.pElements[0].stream = 0;
+			chunk.pElements[0].type = MFVET_Position;
+			chunk.pElements[0].index = 0;
+			chunk.pElements[0].componentCount = 3;
+			chunk.pElements[0].format = MFVDF_Float3;
+			chunk.pElements[1].stream = 0;
+			chunk.pElements[1].type = MFVET_Normal;
+			chunk.pElements[1].index = 0;
+			chunk.pElements[1].componentCount = 3;
+			chunk.pElements[1].format = MFVDF_Float3;
+			chunk.pElements[2].stream = 0;
+			chunk.pElements[2].type = MFVET_Colour;
+			chunk.pElements[2].index = 0;
+			chunk.pElements[2].componentCount = 4;
+			chunk.pElements[2].format = MFVDF_UByte4N_BGRA;
+			chunk.pElements[3].stream = 0;
+			chunk.pElements[3].type = MFVET_TexCoord;
+			chunk.pElements[3].index = 0;
+			chunk.pElements[3].componentCount = 2;
+			chunk.pElements[3].format = MFVDF_Float2;
 
 			if(bAnimating)
 			{
-				chunk.pVertexFormat->pStreams[1].pStreamName = NULL;
-				chunk.pVertexFormat->pStreams[1].numVertexElements = 2;
-				chunk.pVertexFormat->pStreams[1].streamStride = sizeof(AnimVert);
-
+				chunk.pElements[4].stream = 1;
+				chunk.pElements[4].type = MFVET_Indices;
+				chunk.pElements[4].index = 0;
+				chunk.pElements[4].componentCount = 4;
+				chunk.pElements[5].stream = 1;
+				chunk.pElements[5].type = MFVET_Weights;
+				chunk.pElements[5].index = 0;
+				chunk.pElements[5].componentCount = 4;
 #if defined(SUPPORT_D3D8)
-				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFMVDT_ColourBGRA;
-				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFMVDT_ColourBGRA;
+				chunk.pElements[4].format = MFVDF_UByte4N_BGRA;
+				chunk.pElements[5].format = MFVDF_UByte4N_BGRA;
 #else
-				chunk.pVertexFormat->pStreams[1].pElements[0].type = MFMVDT_UByte4;
-				chunk.pVertexFormat->pStreams[1].pElements[1].type = MFMVDT_UByte4N;
+				chunk.pElements[4].format = MFVDF_UByte4_RGBA;
+				chunk.pElements[5].format = MFVDF_UByte4N_RGBA;
 #endif
-				chunk.pVertexFormat->pStreams[1].pElements[0].offset = 0;
-				chunk.pVertexFormat->pStreams[1].pElements[0].usage = MFVET_Indices;
-				chunk.pVertexFormat->pStreams[1].pElements[0].usageIndex = 0;
-				chunk.pVertexFormat->pStreams[1].pElements[1].offset = 4;
-				chunk.pVertexFormat->pStreams[1].pElements[1].usage = MFVET_Weights;
-				chunk.pVertexFormat->pStreams[1].pElements[1].usageIndex = 0;
 			}
 
 			// setup the rest of the pointers
 			chunk.ppVertexStreams = (void**)pOffset;
 			pOffset += MFALIGN16(sizeof(void**)*numVertexStreams);
 			chunk.ppVertexStreams[0] = pOffset;
-			pOffset += MFALIGN16(chunk.pVertexFormat->pStreams[0].streamStride*numVertices);
+			pOffset += MFALIGN16(sizeof(Vert)*numVertices);
 			if(numVertexStreams > 1)
 			{
 				chunk.ppVertexStreams[1] = pOffset;
-				pOffset += MFALIGN16(chunk.pVertexFormat->pStreams[1].streamStride*numVertices);
+				pOffset += MFALIGN16(sizeof(AnimVert)*numVertices);
 			}
 
 			chunk.pIndexData = (uint16*)pOffset;
@@ -612,15 +604,9 @@ void FixUpMeshChunk_Generic(MFMeshChunk *pMeshChunks, int count, void *pBase, vo
 	for(int a=0; a<count; a++)
 	{
 		MFFixUp(pMC[a].pMaterial, pStringBase, 0);
-		for(int b=0; b<pMC[a].pVertexFormat->numVertexStreams; ++b)
-		{
-			if(pMC[a].pVertexFormat->pStreams[b].pStreamName)
-				MFFixUp(pMC[a].pVertexFormat->pStreams[b].pStreamName, pStringBase, 0);
-			MFFixUp(pMC[a].pVertexFormat->pStreams[b].pElements, pBase, 0);
+		for(int b=0; b<pMC[a].numVertexStreams; ++b)
 			MFFixUp(pMC[a].ppVertexStreams[b], pBase, 0);
-		}
-		MFFixUp(pMC[a].pVertexFormat->pStreams, pBase, 0);
-		MFFixUp(pMC[a].pVertexFormat, pBase, 0);
+		MFFixUp(pMC[a].pElements, pBase, 0);
 		MFFixUp(pMC[a].ppVertexStreams, pBase, 0);
 		MFFixUp(pMC[a].pIndexData, pBase, 0);
 		MFFixUp(pMC[a].pBatchIndices, pBase, 0);
@@ -986,7 +972,8 @@ void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 
 	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
-	pModelData->IDtag = MFMAKEFOURCC('M','D','L','2');
+	pModelData->hash = MFMAKEFOURCC('M','D','L','2');
+	pModelData->type = MFRT_Model;
 	pModelData->pName = MFStringCache_Add(pStringCache, name);
 
 	int numChunks = 0;
@@ -1361,7 +1348,8 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	MFZeroMemory(pFile, maxFileSize);
 	pAnimData = (MFAnimationTemplate*)pFile;
 
-	pAnimData->IDtag = MFMAKEFOURCC('A','N','M','2');
+	pAnimData->hash = MFMAKEFOURCC('A','N','M','2');
+	pAnimData->type = MFRT_Animation;
 	pAnimData->pName = MFStringCache_Add(pStringCache, name);
 
 	pOffset = (char*)pAnimData + MFALIGN16(sizeof(MFAnimationTemplate));

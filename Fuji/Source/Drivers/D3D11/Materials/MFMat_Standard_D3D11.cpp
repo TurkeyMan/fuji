@@ -6,10 +6,11 @@
 	#define MFMat_Standard_RegisterMaterial MFMat_Standard_RegisterMaterial_D3D11
 	#define MFMat_Standard_UnregisterMaterial MFMat_Standard_UnregisterMaterial_D3D11
 	#define MFMat_Standard_Begin MFMat_Standard_Begin_D3D11
-	#define MFMat_Standard_CreateInstance MFMat_Standard_CreateInstance_D3D11
-	#define MFMat_Standard_DestroyInstance MFMat_Standard_DestroyInstance_D3D11
+	#define MFMat_Standard_CreateInstancePlatformSpecific MFMat_Standard_CreateInstancePlatformSpecific_D3D11
+	#define MFMat_Standard_DestroyInstancePlatformSpecific MFMat_Standard_DestroyInstancePlatformSpecific_D3D11
 #endif
 
+#include "MFRenderState_Internal.h"
 #include "MFMaterial.h"
 #include "MFMaterial_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
@@ -36,11 +37,8 @@ struct CBMaterial
 
 struct MFMat_Standard_Data_D3D11 : public MFMat_Standard_Data
 {
-	ID3D11SamplerState* pSamplerState;
-	ID3D11RasterizerState* pRasterizerState;
-	ID3D11BlendState *pBlendState;
 	ID3D11Buffer *pConstantBuffer;
-	
+
 	CBMaterial cbMaterial;
 };
 
@@ -61,35 +59,228 @@ unsigned int g_vertexShaderSize  = sizeof(g_vs_main_s);
 const uint8 *g_pPixelShaderData = g_ps_main;
 unsigned int g_pixelShaderSize  = sizeof(g_ps_main);
 
-ID3D11VertexShader *pVertexShader = NULL;
-ID3D11PixelShader *pPixelShader = NULL;
+static ID3D11VertexShader *gpVertexShader = NULL;
+static ID3D11PixelShader *gpPixelShader = NULL;
 
 
 
-int MFMat_Standard_RegisterMaterial(void *pPlatformData)
+int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
-	MFCALLSTACK;
-	
-	g_pd3dDevice->CreateVertexShader(g_pVertexShaderData, g_vertexShaderSize, NULL, &pVertexShader);
-	g_pd3dDevice->CreatePixelShader(g_pPixelShaderData, g_pixelShaderSize, NULL, &pPixelShader);
+	pType->instanceDataSize = sizeof(MFMat_Standard_Data_D3D11);
+
+	g_pd3dDevice->CreateVertexShader(g_pVertexShaderData, g_vertexShaderSize, NULL, &gpVertexShader);
+	g_pd3dDevice->CreatePixelShader(g_pPixelShaderData, g_pixelShaderSize, NULL, &gpPixelShader);
 
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
-	MFCALLSTACK;
-	
-	if (pPixelShader) pPixelShader->Release();
-	if (pVertexShader) pVertexShader->Release();
+	if(gpPixelShader)
+		gpPixelShader->Release();
+	if(gpVertexShader)
+		gpVertexShader->Release();
 }
 
-int MFMat_Standard_Begin(MFMaterial *pMaterial)
+int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
-	MFCALLSTACK;
+//	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
 
-	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
-	
+	if(state.pMatrixStatesSet[MFSCM_WorldViewProjection] != state.pMatrixStates[MFSCM_WorldViewProjection])
+	{
+		MFMatrix *pWVP = state.getDerivedMatrix(MFSCM_WorldViewProjection);
+		state.pMatrixStates[MFSCM_WorldViewProjection] = pWVP;
+
+		// ???
+	}
+
+	if(state.pMatrixStatesSet[MFSCM_UV0] != state.pMatrixStates[MFSCM_UV0])
+	{
+		MFMatrix *pUV0 = state.pMatrixStates[MFSCM_UV0];
+		state.pMatrixStatesSet[MFSCM_UV0] = pUV0;
+
+		// ???
+	}
+
+	if(state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] != state.pVectorStates[MFSCV_MaterialDiffuseColour])
+	{
+		MFVector *pDiffuseColour = state.pVectorStates[MFSCV_MaterialDiffuseColour];
+		state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] = pDiffuseColour;
+
+		// ???
+	}
+
+	bool bDetailPresent = state.isSet(MFSB_CT_Bool, MFSCB_DetailMapSet);
+	bool bDiffusePresent = state.isSet(MFSB_CT_Bool, MFSCB_DiffuseSet);
+
+	if(bDetailPresent)
+	{
+		// set detail map
+		MFTexture *pDetail = state.pTextures[MFSCT_DetailMap];
+		if(state.pTexturesSet[MFSCT_DetailMap] != pDetail)
+		{
+			state.pTexturesSet[MFSCT_DetailMap] = pDetail;
+
+			// ???
+//			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
+//			g_pImmediateContext->PSSetShaderResources(0, 1, &pSRV);
+		}
+
+		// set detail map sampler
+		MFSamplerState *pDetailSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DetailMapSamplerState];
+		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
+		{
+			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
+
+			// ???
+//			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
+//			g_pImmediateContext->PSSetShaderResources(0, 1, &pSRV);
+		}
+	}
+	else
+	{
+		if(state.pTexturesSet[MFSCT_DetailMap] != NULL)
+		{
+			state.pTexturesSet[MFSCT_DetailMap] = NULL;
+
+			// ???
+//			pd3dDevice->SetTexture(1, NULL);
+		}
+	}
+
+	if(bDiffusePresent)
+	{
+		// set diffuse map
+		MFTexture *pDiffuse = state.pTextures[MFSCT_Diffuse];
+		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse)
+		{
+			state.pTexturesSet[MFSCT_Diffuse] = pDiffuse;
+
+			// ???
+//			ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pData->textures[pData->diffuseMapIndex].pTexture->pInternalData;
+//			g_pImmediateContext->PSSetShaderResources(0, 1, &pSRV);
+		}
+
+		// set diffuse map sampler
+		MFSamplerState *pDiffuseSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DiffuseSamplerState];
+		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp)
+		{
+			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
+
+			// ???
+//			MFMat_Standard_SetSamplerState(0, pDiffuseSamp);
+		}
+	}
+	else
+	{
+		if(state.pTexturesSet[MFSCT_Diffuse] != NULL)
+		{
+			state.pTexturesSet[MFSCT_Diffuse] = NULL;
+
+			// ???
+//			pd3dDevice->SetTexture(0, NULL);
+		}
+	}
+
+	// configure the texture combiner (can we cache this?)
+	if(state.boolChanged(MFSCB_DetailMapSet) || state.boolChanged(MFSCB_DiffuseSet) || state.boolChanged(MFSCB_User0))
+	{
+		const uint32 mask = MFBIT(MFSCB_DetailMapSet) | MFBIT(MFSCB_DiffuseSet) | MFBIT(MFSCB_User0);
+		state.boolsSet = (state.boolsSet & ~mask) | (state.bools & mask);
+
+		g_pImmediateContext->PSSetShader(gpPixelShader, NULL, 0);
+/*
+		if(bDetailPresent)
+		{
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_ADD);
+			pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+		}
+		else
+		{
+			pd3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+			pd3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);
+
+			if(state.getBool(MFSCB_User0))
+			{
+				// we need to scale the colour intensity by the vertex alpha since it wont happen during the blend.
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_BLENDDIFFUSEALPHA);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+
+//				pd3dDevice->SetTextureStageState(1, D3DTSS_CONSTANT, 0);
+
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG1, D3DTA_CURRENT);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLORARG2, D3DTA_TEMP);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAARG1, D3DTA_CURRENT);
+			}
+			else
+			{
+				pd3dDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+				pd3dDevice->SetTextureStageState(1, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			}
+		}
+*/
+	}
+
+	// blend state
+	MFBlendState *pBlendState = (MFBlendState*)state.pRenderStates[MFSCRS_BlendState];
+	if(state.pRenderStatesSet[MFSCRS_BlendState] != pBlendState)
+	{
+		state.pRenderStatesSet[MFSCRS_BlendState] = pBlendState;
+
+		float blend[4] = { 0, 0, 0, 0 };
+		ID3D11BlendState *pBS = (ID3D11BlendState*)pBlendState->pPlatformData;
+		g_pImmediateContext->OMSetBlendState(pBS, blend, 0xFFFFFFFF);
+	}
+
+	// rasteriser state
+	MFRasteriserState *pRasteriserState = (MFRasteriserState*)state.pRenderStates[MFSCRS_RasteriserState];
+	if(state.pRenderStatesSet[MFSCRS_RasteriserState] != pRasteriserState)
+	{
+		state.pRenderStatesSet[MFSCRS_RasteriserState] = pRasteriserState;
+
+		ID3D11RasterizerState *pRS = (ID3D11RasterizerState*)pRasteriserState->pPlatformData;
+		g_pImmediateContext->RSSetState(pRS);
+	}
+
+	// depth/stencil state
+	MFDepthStencilState *pDSState = (MFDepthStencilState*)state.pRenderStates[MFSCRS_DepthStencilState];
+	if(state.pRenderStatesSet[MFSCRS_DepthStencilState] != pDSState)
+	{
+		state.pRenderStatesSet[MFSCRS_DepthStencilState] = pDSState;
+
+		ID3D11DepthStencilState *pDSS = (ID3D11DepthStencilState*)pDSState->pPlatformData;
+		g_pImmediateContext->OMSetDepthStencilState(pDSS, 0);
+	}
+
+	// set animation matrices
+	if(state.getBool(MFSCB_Animated))
+	{
+		MFDebug_Assert(false, "Animation not yet supported! :(");
+
+//		for(int b=0; b<gNumBonesInBatch; b++)
+//			MFRendererPC_SetAnimationMatrix(b, pAnimMats[pCurrentBatch[b]]);
+
+//		pd3dDevice->SetVertexShader(pVS_a);
+	}
+	else
+		g_pImmediateContext->VSSetShader(gpVertexShader, NULL, 0);
+
+
+
+
+/*
 	g_pImmediateContext->VSSetShader(pVertexShader, NULL, 0);
 	g_pImmediateContext->PSSetShader(pPixelShader, NULL, 0);
 
@@ -265,139 +456,13 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial)
 	//	MFRendererPC_SetVertexShader(pVS_a);
 	//else
 	//	MFRendererPC_SetVertexShader(pVS_s);
-
+*/
 	return 0;
 }
 
-void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	MFCALLSTACK;
-
-	pMaterial->pInstanceData = MFHeap_Alloc(sizeof(MFMat_Standard_Data_D3D11));
 	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
-
-	MFZeroMemory(pData, sizeof(MFMat_Standard_Data_D3D11));
-	
-	pData->ambient = MFVector::one;
-	pData->diffuse = MFVector::one;
-
-	pData->materialType = MF_AlphaBlend | 1<<6 /* back face culling */;
-	pData->opaque = true;
-
-	pData->textureMatrix = MFMatrix::identity;
-	pData->uFrames = 1;
-	pData->vFrames = 1;
-
-	pData->alphaRef = 1.0f;
-	
-	//--
-	HRESULT hr;
-
-	D3D11_SAMPLER_DESC samplerDesc;
-	MFZeroMemory(&samplerDesc, sizeof(samplerDesc));
-
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	samplerDesc.MipLODBias = 0.0f;
-	samplerDesc.MaxAnisotropy = 16;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
-	samplerDesc.BorderColor[0] = 0.0f;
-	samplerDesc.BorderColor[1] = 0.0f;
-	samplerDesc.BorderColor[2] = 0.0f;
-	samplerDesc.BorderColor[3] = 0.0f;
-	samplerDesc.MinLOD = -D3D11_FLOAT32_MAX;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	hr = g_pd3dDevice->CreateSamplerState(&samplerDesc, &pData->pSamplerState);
-
-
-	MFRenderer_D3D11_SetDebugName(pData->pSamplerState, pMaterial->pName);
-
-	//--
-	
-	D3D11_RASTERIZER_DESC rasterizerDesc;
-	MFZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
-
-	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
-	rasterizerDesc.CullMode = D3D11_CULL_BACK;
-	rasterizerDesc.FrontCounterClockwise = false;
-	rasterizerDesc.DepthBias = 0;
-	rasterizerDesc.DepthBiasClamp = 0.0f;
-	rasterizerDesc.SlopeScaledDepthBias = 0.0f;
-	rasterizerDesc.DepthClipEnable = true;
-	rasterizerDesc.ScissorEnable = false;
-	rasterizerDesc.MultisampleEnable = false;
-	rasterizerDesc.AntialiasedLineEnable = false;
-
-	hr = g_pd3dDevice->CreateRasterizerState(&rasterizerDesc, &pData->pRasterizerState);
-
-	MFRenderer_D3D11_SetDebugName(pData->pRasterizerState, pMaterial->pName);
-
-	//--
-
-	MFTexture *pDiffuse = pData->textures[pData->diffuseMapIndex].pTexture;
-
-	const bool premultipliedAlpha = pDiffuse && ((pDiffuse->pTemplateData->flags & TEX_PreMultipliedAlpha) != 0);
-
-	D3D11_BLEND_DESC blendDesc;
-	MFZeroMemory(&blendDesc, sizeof(blendDesc));
-
-	blendDesc.AlphaToCoverageEnable = false;
-	blendDesc.IndependentBlendEnable = false;
-	blendDesc.RenderTarget[0].BlendEnable = true;
-	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-
-	switch (pData->materialType & MF_BlendMask)
-	{
-		case 0:
-			blendDesc.RenderTarget[0].BlendEnable = false;
-			break;
-
-		case MF_AlphaBlend:
-			blendDesc.RenderTarget[0].BlendEnable = true;
-			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			break;
-
-		case MF_Additive:
-			blendDesc.RenderTarget[0].BlendEnable = true;
-			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			break;
-
-		case MF_Subtractive:
-			blendDesc.RenderTarget[0].BlendEnable = true;
-			blendDesc.RenderTarget[0].SrcBlend = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-			blendDesc.RenderTarget[0].SrcBlendAlpha = premultipliedAlpha ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
-			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_REV_SUBTRACT;
-			break;
-	}
-
-	hr = g_pd3dDevice->CreateBlendState(&blendDesc, &pData->pBlendState);
-	
-	MFRenderer_D3D11_SetDebugName(pData->pBlendState, pMaterial->pName);
-
-	//--
 
 	MFMatrix mat = pData->textureMatrix;
 	mat.Transpose();
@@ -415,28 +480,16 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	//desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	hr = g_pd3dDevice->CreateBuffer(&desc, NULL, &pData->pConstantBuffer);
+	g_pd3dDevice->CreateBuffer(&desc, NULL, &pData->pConstantBuffer);
 
 	MFRenderer_D3D11_SetDebugName(pData->pConstantBuffer, pMaterial->pName);
 }
 
-void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	MFCALLSTACK;
-
 	MFMat_Standard_Data_D3D11 *pData = (MFMat_Standard_Data_D3D11*)pMaterial->pInstanceData;
 
-	for(uint32 a = 0; a < pData->textureCount; a++)
-	{
-		MFTexture_Destroy(pData->textures[a].pTexture);
-	}
-
-	if(pData->pSamplerState) pData->pSamplerState->Release();
-	if(pData->pRasterizerState) pData->pRasterizerState->Release();
-	if(pData->pBlendState) pData->pBlendState->Release();
 	if(pData->pConstantBuffer) pData->pConstantBuffer->Release();
-
-	MFHeap_Free(pMaterial->pInstanceData);
 }
 
 #endif // MF_RENDERER

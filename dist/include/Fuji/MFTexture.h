@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFTEXTURE_H)
 #define _MFTEXTURE_H
 
@@ -147,7 +148,7 @@ MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colou
  */
 MF_API bool MFTexture_IsFormatAvailable(int format);
 
-MF_API void MFTexture_GetTextureDimensions(MFTexture *pTexture, int *pWidth, int *pHeight);
+MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight);
 
 #endif // _MFTEXTURE_H
 

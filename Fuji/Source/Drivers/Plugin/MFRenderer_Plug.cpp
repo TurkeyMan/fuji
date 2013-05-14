@@ -4,6 +4,7 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFSystem_Internal.h"
+#include "MFRenderer.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
@@ -13,15 +14,14 @@
 	void MFRenderer_DestroyDisplay_##driver(); \
 	void MFRenderer_ResetDisplay_##driver(); \
 	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
-	bool MFRenderer_BeginFrame_##driver(); \
-	void MFRenderer_EndFrame_##driver(); \
-	MF_API void MFRenderer_SetClearColour_##driver(float r, float g, float b, float a); \
-	MF_API void MFRenderer_ClearScreen_##driver(uint32 flags); \
-	MF_API void MFRenderer_GetViewport_##driver(MFRect *pRect); \
+	bool MFRenderer_BeginFramePlatformSpecific_##driver(); \
+	void MFRenderer_EndFramePlatformSpecific_##driver(); \
+	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
 	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_ResetViewport_##driver(); \
+	MF_API MFTexture* MFRenderer_GetDeviceRenderTarget_##driver(); \
+	MF_API MFTexture* MFRenderer_GetDeviceDepthStencil_##driver(); \
 	MF_API void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
-	MF_API void MFRenderer_SetDeviceRenderTarget_##driver(); \
 	MF_API float MFRenderer_GetTexelCenterOffset_##driver();
 
 #define DEFINE_PLUGIN(driver) \
@@ -33,15 +33,14 @@
 		MFRenderer_DestroyDisplay_##driver, \
 		MFRenderer_ResetDisplay_##driver, \
 		MFRenderer_SetDisplayMode_##driver, \
-		MFRenderer_BeginFrame_##driver, \
-		MFRenderer_EndFrame_##driver, \
-		MFRenderer_SetClearColour_##driver, \
+		MFRenderer_BeginFramePlatformSpecific_##driver, \
+		MFRenderer_EndFramePlatformSpecific_##driver, \
 		MFRenderer_ClearScreen_##driver, \
-		MFRenderer_GetViewport_##driver, \
 		MFRenderer_SetViewport_##driver, \
 		MFRenderer_ResetViewport_##driver, \
+		MFRenderer_GetDeviceRenderTarget_##driver, \
+		MFRenderer_GetDeviceDepthStencil_##driver, \
 		MFRenderer_SetRenderTarget_##driver, \
-		MFRenderer_SetDeviceRenderTarget_##driver, \
 		MFRenderer_GetTexelCenterOffset_##driver \
 	},
 
@@ -66,15 +65,14 @@ struct MFRenderPluginCallbacks
 	void (*pDestroyDisplay)();
 	void (*pResetDisplay)();
 	bool (*pSetDisplayMode)(int width, int height, bool bFullscreen);
-	bool (*pBeginFrame)();
-	void (*pEndFrame)();
-	void (*pSetClearColour)(float r, float g, float b, float a);
-	void (*pClearScreen)(uint32 flags);
-	void (*pGetViewport)(MFRect *pRect);
+	bool (*pBeginFramePlatformSpecific)();
+	void (*pEndFramePlatformSpecific)();
+	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
 	void (*pSetViewport)(MFRect *pRect);
 	void (*pResetViewport)();
+	MFTexture* (*pGetDeviceRenderTarget)();
+	MFTexture* (*pGetDeviceDepthStencil)();
 	void (*pSetRenderTarget)(MFTexture *pRenderTarget, MFTexture *pZTarget);
-	void (*pSetDeviceRenderTarget)();
 	float (*pGetTexelCenterOffset)();
 };
 
@@ -143,29 +141,19 @@ bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
 	return gpCurrentRenderPlugin->pSetDisplayMode(width, height, bFullscreen);
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
-	return gpCurrentRenderPlugin->pBeginFrame();
+	return gpCurrentRenderPlugin->pBeginFramePlatformSpecific();
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
-	gpCurrentRenderPlugin->pEndFrame();
+	gpCurrentRenderPlugin->pEndFramePlatformSpecific();
 }
 
-MF_API void MFRenderer_SetClearColour(float r, float g, float b, float a)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
-	gpCurrentRenderPlugin->pSetClearColour(r, g, b, a);
-}
-
-MF_API void MFRenderer_ClearScreen(uint32 flags)
-{
-	gpCurrentRenderPlugin->pClearScreen(flags);
-}
-
-MF_API void MFRenderer_GetViewport(MFRect *pRect)
-{
-	gpCurrentRenderPlugin->pGetViewport(pRect);
+	gpCurrentRenderPlugin->pClearScreen(flags, colour, z, stencil);
 }
 
 MF_API void MFRenderer_SetViewport(MFRect *pRect)
@@ -178,14 +166,19 @@ MF_API void MFRenderer_ResetViewport()
 	gpCurrentRenderPlugin->pResetViewport();
 }
 
+MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+{
+	return gpCurrentRenderPlugin->pGetDeviceRenderTarget();
+}
+
+MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
+{
+	return gpCurrentRenderPlugin->pGetDeviceDepthStencil();
+}
+
 MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
 {
 	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget, pZTarget);
-}
-
-MF_API void MFRenderer_SetDeviceRenderTarget()
-{
-	gpCurrentRenderPlugin->pSetDeviceRenderTarget();
 }
 
 MF_API float MFRenderer_GetTexelCenterOffset()

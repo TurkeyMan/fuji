@@ -3,15 +3,16 @@
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
 #include "MFMaterial.h"
+#include "MFRenderer_Internal.h"
 #include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
-	int MFMat_Standard_RegisterMaterial_##driver(void *pPlatformData); \
+	int MFMat_Standard_RegisterMaterial_##driver(MFMaterialType *pType); \
 	void MFMat_Standard_UnregisterMaterial_##driver(); \
-	int MFMat_Standard_Begin_##driver(MFMaterial *pMaterial); \
-	void MFMat_Standard_CreateInstance_##driver(MFMaterial *pMaterial); \
-	void MFMat_Standard_DestroyInstance_##driver(MFMaterial *pMaterial);
+	int MFMat_Standard_Begin_##driver(MFMaterial *pMaterial, MFRendererState &state); \
+	void MFMat_Standard_CreateInstancePlatformSpecific_##driver(MFMaterial *pMaterial); \
+	void MFMat_Standard_DestroyInstancePlatformSpecific_##driver(MFMaterial *pMaterial);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -19,8 +20,8 @@
 		MFMat_Standard_RegisterMaterial_##driver, \
 		MFMat_Standard_UnregisterMaterial_##driver, \
 		MFMat_Standard_Begin_##driver, \
-		MFMat_Standard_CreateInstance_##driver, \
-		MFMat_Standard_DestroyInstance_##driver \
+		MFMat_Standard_CreateInstancePlatformSpecific_##driver, \
+		MFMat_Standard_DestroyInstancePlatformSpecific_##driver \
 	},
 
 // declare the available plugins
@@ -38,11 +39,11 @@
 struct MFMat_StandardPluginCallbacks
 {
 	const char *pDriverName;
-	int (*pRegisterMaterial)(void *pPlatformData);
+	int (*pRegisterMaterial)(MFMaterialType *pType);
 	void (*pUnregisterMaterial)();
-	int (*pBegin)(MFMaterial *pMaterial);
-	void (*pCreateInstance)(MFMaterial *pMaterial);
-	void (*pDestroyInstance)(MFMaterial *pMaterial);
+	int (*pBegin)(MFMaterial *pMaterial, MFRendererState &state);
+	void (*pCreateInstancePlatformSpecific)(MFMaterial *pMaterial);
+	void (*pDestroyInstancePlatformSpecific)(MFMaterial *pMaterial);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -65,12 +66,12 @@ MFMat_StandardPluginCallbacks *gpCurrentMatStandardPlugin = NULL;
 
 /*** Function Wrappers ***/
 
-int MFMat_Standard_RegisterMaterial(void *pPlatformData)
+int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
 	// choose the plugin from init settings
 	gpCurrentMatStandardPlugin = &gMatStandardPlugins[gDefaults.plugin.renderPlugin];
 
-	return gpCurrentMatStandardPlugin->pRegisterMaterial(pPlatformData);
+	return gpCurrentMatStandardPlugin->pRegisterMaterial(pType);
 }
 
 void MFMat_Standard_UnregisterMaterial()
@@ -78,19 +79,19 @@ void MFMat_Standard_UnregisterMaterial()
 	gpCurrentMatStandardPlugin->pUnregisterMaterial();
 }
 
-int MFMat_Standard_Begin(MFMaterial *pMaterial)
+int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
-	return gpCurrentMatStandardPlugin->pBegin(pMaterial);
+	return gpCurrentMatStandardPlugin->pBegin(pMaterial, state);
 }
 
-void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
+void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	gpCurrentMatStandardPlugin->pCreateInstance(pMaterial);
+	gpCurrentMatStandardPlugin->pCreateInstancePlatformSpecific(pMaterial);
 }
 
-void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
+void MFMat_Standard_DestroyInstancePlatformSpecific(MFMaterial *pMaterial)
 {
-	gpCurrentMatStandardPlugin->pDestroyInstance(pMaterial);
+	gpCurrentMatStandardPlugin->pDestroyInstancePlatformSpecific(pMaterial);
 }
 
 #endif // MF_RENDERER

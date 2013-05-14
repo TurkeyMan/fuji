@@ -31,33 +31,20 @@ void MFRenderer_ResetDisplay()
 	MFRenderer_ResetViewport();
 }
 
-bool MFRenderer_BeginFrame()
+bool MFRenderer_BeginFramePlatformSpecific()
 {
 	return true;
 }
 
-void MFRenderer_EndFrame()
+void MFRenderer_EndFramePlatformSpecific()
 {
 	MFCALLSTACK;
 
 }
 
-void MFRenderer_SetClearColour(float r, float g, float b, float a)
-{
-	gClearColour.x = r;
-	gClearColour.y = g;
-	gClearColour.z = b;
-	gClearColour.w = a;
-}
-
-void MFRenderer_ClearScreen(uint32 flags)
+MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	MFCALLSTACK;
-}
-
-void MFRenderer_GetViewport(MFRect *pRect)
-{
-	*pRect = gCurrentViewport;
 }
 
 void MFRenderer_SetViewport(MFRect *pRect)

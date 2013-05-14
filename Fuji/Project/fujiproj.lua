@@ -35,6 +35,7 @@ project (projName)
 	files { "../*.TXT" }
 
 	files { "../../dist/include/Fuji/**.h", "../../dist/include/Fuji/**.inl" }
+	files { "../../dist/include/d2/fuji/**.d" }
 	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
 

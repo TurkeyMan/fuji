@@ -2,47 +2,67 @@
 #define _MFVERTEX_INTERNAL_H
 
 #include "MFVertex.h"
-
-MFInitStatus MFVertex_InitModule();
-void MFVertex_DeinitModule();
-
-void MFVertex_InitModulePlatformSpecific();
-void MFVertex_DeinitModulePlatformSpecific();
+#include "MFResource.h"
 
 struct MFVertexElementData
 {
-	void *pData;
 	int offset;
 	int stride;
-	MFVertexDataFormat format;
 };
 
-struct MFVertexDeclaration
+struct MFVertexDeclaration : public MFResource
 {
 	MFVertexElement *pElements;
 	MFVertexElementData *pElementData;
 	int numElements;
+
+	uint32 streamsUsed;
+
+	MFVertexDeclaration *pStreamDecl[8];
+
 	void *pPlatformData;
 };
 
-struct MFVertexBuffer
+struct MFVertexBuffer : public MFResource
 {
-	MFVertexDeclaration *pVertexDeclatation;
+	const MFVertexDeclaration *pVertexDeclatation;
 	MFVertexBufferType bufferType;
 	int numVerts;
-	void *pPlatformData;
 
 	bool bLocked;
+	void *pLocked;
+
+	const char *pName;
+
+	void *pPlatformData;
+
+	MFVertexBuffer *pNextScratchBuffer;
 };
 
-struct MFIndexBuffer
+struct MFIndexBuffer : public MFResource
 {
-	uint16 *pIndices;
 	int numIndices;
-	void *pPlatformData;
 
 	bool bLocked;
+	void *pLocked;
+
+	void *pPlatformData;
 };
+
+MFInitStatus MFVertex_InitModule();
+void MFVertex_DeinitModule();
+
+void MFVertex_EndFrame();
+
+void MFVertex_InitModulePlatformSpecific();
+void MFVertex_DeinitModulePlatformSpecific();
+MFVertexDataFormat MFVertex_ChoooseVertexDataTypePlatformSpecific(MFVertexElementType elementType, int components);
+bool MFVertex_CreateVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
+void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDeclaration);
+bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory);
+void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer);
+bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory);
+void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer);
 
 inline void MFVertex_PackVertexData(MFVector &source, void *pTarget, MFVertexDataFormat format)
 {

@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFTEXTURE_INTERNAL_H)
 #define _MFTEXTURE_INTERNAL_H
 
@@ -8,35 +9,7 @@
 #endif
 
 #include "MFTexture.h"
-
-// forward declarations
-struct MFTexture;
-struct MFTextureSurfaceLevel;
-
-// functions
-MFInitStatus MFTexture_InitModule();
-void MFTexture_DeinitModule();
-
-void MFTexture_InitModulePlatformSpecific();
-void MFTexture_DeinitModulePlatformSpecific();
-
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
-void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture);
-
-// texture TemplateData
-struct MFTextureTemplateData
-{
-	uint32 magicNumber;
-	MFImageFormat imageFormat;
-	uint32 reserved;
-	int mipLevels;
-	uint32 flags;
-
-	// padding
-	uint32 res[2];
-
-	MFTextureSurfaceLevel *pSurfaces;
-};
+#include "MFResource.h"
 
 struct MFTextureSurfaceLevel
 {
@@ -55,8 +28,23 @@ struct MFTextureSurfaceLevel
 	uint32 res[2];
 };
 
+// texture TemplateData
+struct MFTextureTemplateData
+{
+	uint32 magicNumber;
+	MFImageFormat imageFormat;
+	uint32 reserved;
+	int mipLevels;
+	uint32 flags;
+
+	// padding
+	uint32 res[2];
+
+	MFTextureSurfaceLevel *pSurfaces;
+};
+
 // texture structure
-struct MFTexture
+struct MFTexture : public MFResource
 {
 	// data members
 	char name[64];
@@ -73,13 +61,17 @@ struct MFTexture
 #endif
 
 	MFTextureTemplateData *pTemplateData;
-	int refCount;
 };
 
-// typedef the texture pool
-#include "MFOpenHashTable.h"
-typedef MFOpenHashTable<MFTexture> MFTexturePool;
-extern MFTexturePool gTextureBank;
+// functions
+MFInitStatus MFTexture_InitModule();
+void MFTexture_DeinitModule();
+
+void MFTexture_InitModulePlatformSpecific();
+void MFTexture_DeinitModulePlatformSpecific();
+
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
+void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture);
 
 #if !defined(_FUJI_UTIL)
 // a debug menu texture information display object

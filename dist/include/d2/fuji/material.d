@@ -179,7 +179,7 @@ extern (C) MFMaterial* MFMaterial_GetCurrent();
 * Gets a materials name.
 * @return The name of the specified material.
 */
-extern (C) const(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial);
+extern (C) const(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial) pure;
 
 // material control
 
@@ -216,7 +216,7 @@ extern (C) int MFMaterial_GetParameterIndexFromName(MFMaterial* pMaterial, const
 * @param parameterIndex Parameter index.
 * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
-extern (C) MFMaterialParameterInfo* MFMaterial_GetParameterInfo(MFMaterial* pMaterial, int parameterIndex);
+extern (C) const(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(MFMaterial* pMaterial, int parameterIndex);
 
 /**
 * Get parameter info by name.
@@ -225,7 +225,7 @@ extern (C) MFMaterialParameterInfo* MFMaterial_GetParameterInfo(MFMaterial* pMat
 * @param pParameterName String representing a parameter name.
 * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
-extern (C) MFMaterialParameterInfo* MFMaterial_GetParameterInfoFromName(MFMaterial* pMaterial, const(char)* pParameterName);
+extern (C) const(MFMaterialParameterInfo)* MFMaterial_GetParameterInfoFromName(MFMaterial* pMaterial, const(char)* pParameterName);
 
 /**
 * Get the value of a parameter.
@@ -355,7 +355,7 @@ extern (C) void MFMaterial_SetParameter(MFMaterial* pMaterial, int parameterInde
 * @param vector Value of the vector parameter being set.
 * @return None.
 */
-/+inline+/ void MFMaterial_SetParameterV(MFMaterial* pMaterial, int parameterIndex, int argIndex, const ref MFVector vector)
+/+inline+/ void MFMaterial_SetParameterV(MFMaterial* pMaterial, int parameterIndex, int argIndex, ref const MFVector vector)
 {
 	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, cast(size_t)&vector);
 }
@@ -369,7 +369,7 @@ extern (C) void MFMaterial_SetParameter(MFMaterial* pMaterial, int parameterInde
 * @param matrix Value of the matrix parameter being set.
 * @return None.
 */
-/+inline+/ void MFMaterial_SetParameterM(MFMaterial* pMaterial, int parameterIndex, int argIndex, const ref MFMatrix matrix)
+/+inline+/ void MFMaterial_SetParameterM(MFMaterial* pMaterial, int parameterIndex, int argIndex, ref const MFMatrix matrix)
 {
 	MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, cast(size_t)&matrix);
 }
@@ -419,3 +419,73 @@ extern (C) void MFMaterial_RegisterMaterialType(const(char)* pName, const(MFMate
 */
 extern (C) void MFMaterial_UnregisterMaterialType(const(char)* pName);
 
+
+import std.c.string;
+
+final class Material
+{
+	static Material create(in string name)									{ return cast(Material)MFMaterial_Create(name.toStringz); }
+	static Material find(in string name)									{ return cast(Material)MFMaterial_Find(name.toStringz); }
+	static Material getStockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
+
+	int destroy()
+	{
+		return MFMaterial_Destroy(cast(MFMaterial*)this);
+	}
+
+	@property MFMaterial* handle() pure nothrow					{ return cast(MFMaterial*)this; }
+	@property const(MFMaterial)* handle() const pure nothrow	{ return cast(const(MFMaterial)*)this; }
+
+	@property string name() const pure
+	{
+		auto pName = MFMaterial_GetMaterialName(cast(MFMaterial*)this);
+		return cast(string)pName[0..strlen(pName)];
+	}
+
+	@property Parameters parameters()	{ return Parameters(cast(MFMaterial*)this, 0, MFMaterial_GetNumParameters(cast(MFMaterial*)this)); }
+
+	struct Parameter
+	{
+		bool opCast(T)() if(is(T == bool))	{ return index != -1; }
+
+		@property string name() const
+		{
+			auto pName = MFMaterial_GetParameterName(pMaterial, index);
+			return cast(string)pName[0..strlen(pName)];
+		}
+
+		@property ref const(MFMaterialParameterInfo) info() const
+		{
+			return *MFMaterial_GetParameterInfo(pMaterial, index);
+		}
+
+		// setters and getters...
+
+	private:
+		MFMaterial* pMaterial;
+		int index;
+	}
+
+	struct Parameters
+	{
+		static Parameter find(string name)							{ return Parameter(pMaterial, MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz)); }
+
+		@property bool empty() const pure nothrow					{ return offset == count; }
+		@property size_t length() const pure nothrow				{ return count - offset; }
+
+		@property Parameters save() pure nothrow					{ return this; }
+
+		@property Parameter front() pure nothrow					{ return Parameter(pMaterial, offset); }
+		@property Parameter back() pure nothrow						{ return Parameter(pMaterial, count-1); }
+
+		Parameter opIndex(size_t index) pure nothrow				{ return Parameter(pMaterial, offset + cast(int)index); }
+		Parameters opSlice(size_t x, size_t y) pure nothrow			{ return Parameters(pMaterial, offset + x, offset + y); }
+
+		void popFront() pure nothrow								{ ++offset; }
+		void popBack() pure nothrow									{ ++count; }
+
+	private:
+		MFMaterial* pMaterial;
+		int offset, count;
+	}
+}

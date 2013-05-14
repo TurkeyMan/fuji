@@ -11,6 +11,7 @@
 #include "MFIni.h"
 #include "MFPtrList.h"
 #include "MFSystem.h"
+#include "MFRenderState.h"
 
 #include "MFPrimitive.h"
 #include "MFFont.h"
@@ -52,7 +53,6 @@ void MFMaterial_DestroyDefinition(MaterialDefinition *pDefinition);
 MFPtrListDL<MaterialDefinition> gMaterialDefList;
 MaterialDefinition *pDefinitionRegistry = NULL;
 
-MFPtrList<MFMaterial> gMaterialList;
 MFPtrList<MFMaterialType> gMaterialRegistry;
 
 MFMaterial *pCurrentMaterial = NULL;
@@ -80,7 +80,6 @@ MFInitStatus MFMaterial_InitModule()
 
 	gMaterialRegistry.Init("Material Registry", gDefaults.material.maxMaterialTypes);
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
-	gMaterialList.Init("Material List", gDefaults.material.maxMaterials);
 
 	DebugMenu_AddItem("Material Browser", "Fuji Options", &matBrowser);
 
@@ -168,11 +167,11 @@ void MFMaterial_DeinitModule()
 		pDef = pNext;
 	}
 
-	// list all non-freed materials...
-	MFMaterial **ppI = gMaterialList.Begin();
 	bool bShowHeader = true;
 
-	while(*ppI)
+	// list all non-freed materials...
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Material);
+	while(pI)
 	{
 		if(bShowHeader)
 		{
@@ -180,18 +179,19 @@ void MFMaterial_DeinitModule()
 			MFDebug_Message("\nUn-freed materials:\n----------------------------------------------------------");
 		}
 
-		MFDebug_Message(MFStr("'%s' - x%d", (*ppI)->pName, (*ppI)->refCount));
+		MFMaterial *pMat = (MFMaterial*)MFResource_Get(pI);
 
-		(*ppI)->refCount = 1;
-		MFMaterial_Destroy(*ppI);
+		MFDebug_Message(MFStr("'%s' - x%d", pMat->pName, pMat->refCount));
 
-		ppI++;
+		pMat->refCount = 1;
+		MFMaterial_Destroy(pMat);
+
+		pI = MFResource_EnumerateNext(pI, MFRT_Material);
 	}
 
 	MFMaterial_UnregisterMaterialType("Standard");
 	MFMaterial_UnregisterMaterialType("Effect");
 
-	gMaterialList.Deinit();
 	gMaterialDefList.Deinit();
 	gMaterialRegistry.Deinit();
 }
@@ -200,14 +200,14 @@ void MFMaterial_Update()
 {
 	MFCALLSTACK;
 
-	MFMaterial **ppMatIterator = gMaterialList.Begin();
-
-	while(ppMatIterator && *ppMatIterator)
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Material);
+	while(pI)
 	{
-		if((*ppMatIterator)->pType->materialCallbacks.pUpdate)
-			(*ppMatIterator)->pType->materialCallbacks.pUpdate(*ppMatIterator);
+		MFMaterial *pMat = (MFMaterial*)MFResource_Get(pI);
+		if(pMat->pType->materialCallbacks.pUpdate)
+			pMat->pType->materialCallbacks.pUpdate(pMat);
 
-		ppMatIterator++;
+		pI = MFResource_EnumerateNext(pI, MFRT_Material);
 	}
 }
 
@@ -295,7 +295,7 @@ MF_API void MFMaterial_RemoveDefinitions(const char *pName)
 	}
 }
 
-MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks)
+MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialCallbacks *pCallbacks, size_t instanceDataSize)
 {
 	MFCALLSTACK;
 
@@ -309,9 +309,11 @@ MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialC
 
 	MFCopyMemory(&pMatType->materialCallbacks, pCallbacks, sizeof(MFMaterialCallbacks));
 
+	pMatType->instanceDataSize = instanceDataSize;
+
 	gMaterialRegistry.Create(pMatType);
 
-	pCallbacks->pRegisterMaterial(NULL);
+	pCallbacks->pRegisterMaterial(pMatType);
 }
 
 MF_API void MFMaterial_UnregisterMaterialType(const char *pName)
@@ -354,13 +356,20 @@ MF_API MFMaterial* MFMaterial_Create(const char *pName)
 
 	if(!pMat)
 	{
-		pMat = (MFMaterial*)MFHeap_Alloc(sizeof(MFMaterial) + MFString_Length(pName) + 1);
-		MFZeroMemory(pMat, sizeof(MFMaterial));
+		pMat = (MFMaterial*)MFHeap_AllocAndZero(sizeof(MFMaterial) + MFString_Length(pName) + 1);
 
 		pMat->pName = (char*)&pMat[1];
 		MFString_Copy(pMat->pName, pName);
 
-		gMaterialList.Create(pMat);
+		pMat->type = MFRT_Material;
+		pMat->hash = MFUtil_HashString(pName) ^ 0x0a7e01a1;
+		pMat->refCount = 0;
+
+		MFResource_AddResource(pMat);
+
+		// TODO: how to determine size?
+		pMat->pMaterialState = MFStateBlock_Create(256);
+		pMat->bStateDirty = true;
 
 		MaterialDefinition *pDef = pDefinitionRegistry;
 		while(pDef)
@@ -379,6 +388,8 @@ MF_API MFMaterial* MFMaterial_Create(const char *pName)
 		{
 			// assign material type
 			pMat->pType = MaterialInternal_GetMaterialType("Standard");
+
+			pMat->pInstanceData = MFHeap_AllocAndZero(pMat->pType->instanceDataSize);
 			pMat->pType->materialCallbacks.pCreateInstance(pMat);
 
 			// set diffuse map parameter
@@ -399,10 +410,14 @@ MF_API int MFMaterial_Destroy(MFMaterial *pMaterial)
 
 	if(!pMaterial->refCount)
 	{
+		MFStateBlock_Destroy(pMaterial->pMaterialState);
+
 		pMaterial->pType->materialCallbacks.pDestroyInstance(pMaterial);
 
-		gMaterialList.Destroy(pMaterial);
+		MFHeap_Free(pMaterial->pInstanceData);
 
+		MFResource_RemoveResource(pMaterial);
+		MFHeap_Free(pMaterial);
 		return 0;
 	}
 
@@ -411,18 +426,7 @@ MF_API int MFMaterial_Destroy(MFMaterial *pMaterial)
 
 MF_API MFMaterial* MFMaterial_Find(const char *pName)
 {
-	MFCALLSTACK;
-
-	MFMaterial **ppIterator = gMaterialList.Begin();
-
-	while(*ppIterator)
-	{
-		if(!MFString_CaseCmp(pName, (*ppIterator)->pName)) return *ppIterator;
-
-		ppIterator++;
-	}
-
-	return NULL;
+	return (MFMaterial*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0x0a7e01a1);
 }
 
 MF_API MFMaterial* MFMaterial_GetCurrent()
@@ -433,6 +437,17 @@ MF_API MFMaterial* MFMaterial_GetCurrent()
 MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
 {
 	return pMaterial->pName;
+}
+
+MF_API MFStateBlock* MFMaterial_GetMaterialStateBlock(MFMaterial *pMaterial)
+{
+	if(pMaterial->bStateDirty)
+	{
+		pMaterial->pType->materialCallbacks.pBuildStateBlock(pMaterial);
+		pMaterial->bStateDirty = false;
+	}
+
+	return pMaterial->pMaterialState;
 }
 
 MF_API void MFMaterial_SetMaterial(const MFMaterial *pMaterial)
@@ -518,6 +533,8 @@ void MaterialInternal_InitialiseFromDefinition(MFIni *pDefIni, MFMaterial *pMat,
 		{
 			pMat->pType = MaterialInternal_GetMaterialType("Standard");
 		}
+
+		pMat->pInstanceData = MFHeap_AllocAndZero(pMat->pType->instanceDataSize);
 
 		if(pMat->pType->materialCallbacks.pCreateInstance)
 			pMat->pType->materialCallbacks.pCreateInstance(pMat);
@@ -780,6 +797,10 @@ MF_API void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, i
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pSetParameter, "Material does not supply a SetParameter() function.");
 	pMaterial->pType->materialCallbacks.pSetParameter(pMaterial, parameterIndex, argIndex, value);
+
+	// dirty the stateblock
+	// TODO: this is pretty harsh, perhaps we can reduce the damage?
+	pMaterial->bStateDirty = true;
 }
 
 MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
@@ -812,12 +833,11 @@ float MaterialBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWi
 {
 	MFVector pos = _pos;
 
-	MFMaterial **i;
-	i = gMaterialList.Begin();
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Material);
+	for(int a=0; a<selection; a++)
+		pI = MFResource_EnumerateNext(pI, MFRT_Material);
 
-	for(int a=0; a<selection; a++) i++;
-
-	MFMaterial *pMaterial = *i;
+	MFMaterial *pMaterial = (MFMaterial*)MFResource_Get(pI);
 
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pMaterial->pName));
@@ -881,18 +901,18 @@ void MaterialBrowser::ListUpdate(bool selected)
 {
 	if(selected)
 	{
-		int texCount = gMaterialList.GetLength();
+		int matCount = MFResource_GetNumResources(MFRT_Material);
 
 		if(MFInput_WasPressed(Button_DLeft, IDD_Gamepad))
 		{
-			selection = selection <= 0 ? texCount-1 : selection-1;
+			selection = selection <= 0 ? matCount-1 : selection-1;
 
 			if(pCallback)
 				pCallback(this, pUserData);
 		}
 		else if(MFInput_WasPressed(Button_DRight, IDD_Gamepad))
 		{
-			selection = selection >= texCount-1 ? 0 : selection+1;
+			selection = selection >= matCount-1 ? 0 : selection+1;
 
 			if(pCallback)
 				pCallback(this, pUserData);

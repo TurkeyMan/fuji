@@ -19,9 +19,13 @@ enum MFBuiltinModule
 	MFBIM_MFCallstack,
 	MFBIM_Timer,
 	MFBIM_MFSystem,
+	MFBIM_MFResource,
 	MFBIM_MFView,
 	MFBIM_MFRenderer,
 	MFBIM_MFDisplay,
+	MFBIM_MFRenderState,
+	MFBIM_MFShader,
+	MFBIM_MFEffect,
 	MFBIM_MFInput,
 	MFBIM_MFSound,
 	MFBIM_MFTexture,
@@ -44,12 +48,12 @@ enum MFBuiltinModule
 
 extern char gBuiltinModuleIDs[MFBIM_Max];
 
-inline int MFModule_GetBuiltinModuleID(MFBuiltinModule module)
+__forceinline int MFModule_GetBuiltinModuleID(MFBuiltinModule module)
 {
 	return gBuiltinModuleIDs[module];
 }
 
-inline uint64 MFModule_GetBuiltinModuleMask(MFBuiltinModule module)
+__forceinline uint64 MFModule_GetBuiltinModuleMask(MFBuiltinModule module)
 {
 	if(gBuiltinModuleIDs[module] >= 0)
 		return 1ULL << gBuiltinModuleIDs[module];
