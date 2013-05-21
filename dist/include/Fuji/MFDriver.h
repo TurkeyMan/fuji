@@ -146,6 +146,9 @@ enum MFRendererDrivers
 	// add support for the G15 LCD screen
 	#define SUPPORT_G15
 
+	// use assimp to load 3d assets
+//	#define USE_ASSIMP
+
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32
 	#define MF_RENDERER			MF_DRIVER_PLUGIN

@@ -94,11 +94,13 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
-		libdirs { "../lib/x86/vorbis", "../lib/x86/lglcd" }
+		libdirs { "../lib/x86/vorbis", "../lib/x86/lglcd", "../lib/x86/assimp" }
+		linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
 
 	-- Windows 64 --
 	configuration { "windows", "x64", "not Xbox360", "not PS3" }
-		libdirs { "../lib/x64/vorbis", "../lib/x64/lglcd" }
+		libdirs { "../lib/x64/vorbis", "../lib/x64/lglcd", "../lib/x64/assimp" }
+		linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
 
 -- Android --
 configuration "Android"

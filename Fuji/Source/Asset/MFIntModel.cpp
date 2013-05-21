@@ -21,7 +21,23 @@ static const char *gFileExtensions[] =
 	".obj",
 	".md2",
 	".md3",
-	".memd2"
+	".memd2",
+
+	// assimp formats
+	".blend",
+	".3ds",
+	".dxf",
+	".lwo",
+	".lws",
+	".ms3d",
+	".mdl",
+	".pk3",
+	".mdc",
+	".md5",
+	".smd",
+	".vta",
+	".m3",
+	".3d"
 };
 
 
@@ -63,6 +79,8 @@ MF_API MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 	return pModel;
 }
 
+void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pModel);
+
 void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 void ParseXFileFromMemory(char *pFile, F3DFile *_pModel);
 void ParseASEFile(char *, F3DFile *);
@@ -74,6 +92,9 @@ MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t
 	F3DFile *pF3D = new F3DFile;
 	MFString_Copy(pF3D->name, pName);
 
+#if defined(USE_ASSIMP)
+	ParseAssimpMesh((char*)pMemory, size, gFileExtensions[format], pF3D);
+#else
 	switch(format)
 	{
 		case MFIMF_DAE:
@@ -94,6 +115,7 @@ MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t
 		default:
 			MFDebug_Assert(false, "Unsupported model format.");
 	}
+#endif
 
 	return (MFIntModel*)pF3D;
 }
