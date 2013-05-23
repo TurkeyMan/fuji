@@ -171,7 +171,7 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 	MFZeroMemory(pVB, sizeof(MFVertexBuffer));
 
 	pVB->type = MFRT_VertexBuffer;
-	pVB->hash = (uint32)pVB;
+	pVB->hash = (uint32)MFUtil_HashPointer(pVB);
 	pVB->refCount = 1;
 	if(pName)
 	{
@@ -313,7 +313,7 @@ MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexB
 	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_AllocAndZero(sizeof(MFIndexBuffer) + nameLen);
 	pIB->type = MFRT_IndexBuffer;
-	pIB->hash = (uint32)pIB;
+	pIB->hash = (uint32)MFUtil_HashPointer(pIB);
 	pIB->refCount = 1;
 	if(pName)
 	{
