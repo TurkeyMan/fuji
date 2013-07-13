@@ -431,6 +431,9 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 		// apply render state
 		element.pMaterial->pType->materialCallbacks.pBegin(element.pMaterial, state);
 
+		// update the bools 'set' state
+		state.boolsSet = state.bools & state.rsSet[MFSB_CT_Bool];
+
 		// set geometry buffers
 		MFVertexDeclaration *pDecl = (MFVertexDeclaration*)state.pRenderStates[MFSCRS_VertexDeclaration];
 		if(state.pRenderStatesSet[MFSCRS_VertexDeclaration] != pDecl)
@@ -480,8 +483,22 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 	{
 		MFRenderLayer &layer = pRenderer->pLayers[l];
 
+		int numElements = layer.elements.size();
+
+		// configure render target
+		if(numElements > 0 || layer.clearFlags != MFRCF_None)
+			MFRenderer_SetRenderTarget(layer.pRenderTarget[0], layer.pDepthStencil);
+
+		// clear render target
+		if(layer.clearFlags != MFRCF_None)
+			MFRenderer_ClearScreen(layer.clearFlags, layer.clearColour, layer.clearZ, layer.clearStencil);
+
+		if(numElements == 0)
+			continue;
+
 		// sort elements
-		MFRendererInternal_SortElements(layer);
+		if(layer.sortMode != MFRL_SM_None)
+			MFRendererInternal_SortElements(layer);
 
 		// init renderer state
 		MFRendererState state;
@@ -493,15 +510,8 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 		state.pStateBlocks[MFSBT_Layer] = layer.pLayer;
 		state.pStateBlocks[MFSBT_Override] = pRenderer->pOverride;
 
-		// configure render target
-		MFRenderer_SetRenderTarget(layer.pRenderTarget[0], layer.pDepthStencil);
-
-		// clear render target
-		if(layer.clearFlags != MFRCF_None)
-			MFRenderer_ClearScreen(layer.clearFlags, layer.clearColour, layer.clearZ, layer.clearStencil);
-
 		// render elements
-		MFRenderer_RenderElements(state, layer.elements.getpointer(), layer.elements.size());
+		MFRenderer_RenderElements(state, layer.elements.getPointer(), numElements);
 
 		// clear the layer
 		layer.elements.clear();

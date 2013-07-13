@@ -61,7 +61,7 @@ struct MFOpenDataHTTP : public MFOpenData
 	const char *pURL;					/**< URL to the file on a remote HTTP server. */
 	int port;							/**< Port to use for HTTP communication. */
 
-	MFFileHTTPRequestArg *pPostArgs;	/**< Array of arguments for POST rewuests. */
+	MFFileHTTPRequestArg *pPostArgs;	/**< Array of arguments for POST requests. */
 	int numPostArgs;					/**< Number of POST arguments. */
 };
 

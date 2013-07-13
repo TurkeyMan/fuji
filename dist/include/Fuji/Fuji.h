@@ -405,10 +405,10 @@ enum MFEndian
 
 #include "MFModule.h"
 
+#include "MFDebug.h"
 #include "MFString.h"
 #include "MFMath.h"
 #include "MFVector.h"
-#include "MFDebug.h"
 
 #include "Util.h"
 

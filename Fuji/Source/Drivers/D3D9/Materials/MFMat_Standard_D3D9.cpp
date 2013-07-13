@@ -116,29 +116,32 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	}
 
 	bool bDetailPresent = state.isSet(MFSB_CT_Bool, MFSCB_DetailMapSet);
+	bool bDetailChanged = state.boolChanged(MFSCB_DetailMapSet);
 	bool bDiffusePresent = state.isSet(MFSB_CT_Bool, MFSCB_DiffuseSet);
+	bool bDiffuseChanged = state.boolChanged(MFSCB_DiffuseSet);
+	int diffuseIndex = bDetailPresent ? 1 : 0;
 
 	if(bDetailPresent)
 	{
 		// set detail map
 		MFTexture *pDetail = state.pTextures[MFSCT_DetailMap];
-		if(state.pTexturesSet[MFSCT_DetailMap] != pDetail)
+		if(state.pTexturesSet[MFSCT_DetailMap] != pDetail || bDetailChanged)
 		{
 			state.pTexturesSet[MFSCT_DetailMap] = pDetail;
-			pd3dDevice->SetTexture(1, (IDirect3DTexture9*)pDetail->pInternalData);
+			pd3dDevice->SetTexture(0, (IDirect3DTexture9*)pDetail->pInternalData);
 		}
 
 		// set detail map sampler
 		MFSamplerState *pDetailSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DetailMapSamplerState];
-		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
+		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp || bDetailChanged)
 		{
 			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
-			MFMat_Standard_SetSamplerState(1, pDetailSamp);
+			MFMat_Standard_SetSamplerState(0, pDetailSamp);
 		}
 	}
 	else
 	{
-		if(state.pTexturesSet[MFSCT_DetailMap] != NULL)
+		if(state.pTexturesSet[MFSCT_DetailMap] != NULL || bDetailChanged)
 		{
 			state.pTexturesSet[MFSCT_DetailMap] = NULL;
 			pd3dDevice->SetTexture(1, NULL);
@@ -149,31 +152,31 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	{
 		// set diffuse map
 		MFTexture *pDiffuse = state.pTextures[MFSCT_Diffuse];
-		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse)
+		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse || bDetailChanged)
 		{
 			state.pTexturesSet[MFSCT_Diffuse] = pDiffuse;
-			pd3dDevice->SetTexture(0, (IDirect3DTexture9*)pDiffuse->pInternalData);
+			pd3dDevice->SetTexture(diffuseIndex, (IDirect3DTexture9*)pDiffuse->pInternalData);
 		}
 
 		// set diffuse map sampler
 		MFSamplerState *pDiffuseSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DiffuseSamplerState];
-		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp)
+		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp || bDetailChanged)
 		{
 			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
-			MFMat_Standard_SetSamplerState(0, pDiffuseSamp);
+			MFMat_Standard_SetSamplerState(diffuseIndex, pDiffuseSamp);
 		}
 	}
 	else
 	{
-		if(state.pTexturesSet[MFSCT_Diffuse] != NULL)
+		if(state.pTexturesSet[MFSCT_Diffuse] != NULL || bDetailChanged)
 		{
 			state.pTexturesSet[MFSCT_Diffuse] = NULL;
-			pd3dDevice->SetTexture(0, NULL);
+			pd3dDevice->SetTexture(diffuseIndex, NULL);
 		}
 	}
 
 	// configure the texture combiner (can we cache this?)
-	if(state.boolChanged(MFSCB_DetailMapSet) || state.boolChanged(MFSCB_DiffuseSet) || state.boolChanged(MFSCB_User0))
+	if(bDetailChanged || bDiffuseChanged || state.boolChanged(MFSCB_User0))
 	{
 		const uint32 mask = MFBIT(MFSCB_DetailMapSet) | MFBIT(MFSCB_DiffuseSet) | MFBIT(MFSCB_User0);
 		state.boolsSet = (state.boolsSet & ~mask) | (state.bools & mask);

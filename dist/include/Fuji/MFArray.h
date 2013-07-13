@@ -35,7 +35,13 @@ public:
 
 	void remove(int i);
 
-	T* getpointer() const;
+	T* getPointer() const;
+	T* getCopy() const;
+
+	T* find(const T &item);
+	const T* find(const T &item) const;
+
+	bool contains(const T &item) const;
 
 protected:
 	int alloc(int count);

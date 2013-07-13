@@ -177,6 +177,31 @@ MFString {
 	)
 }
 
+MFArray<*> {
+	preview (
+		#(
+			"[",
+			$e.count,
+			"](",
+			#array(
+				expr: $e.pData[$i],
+				size: $e.count
+			),
+			")"
+		)
+	)
+	children (
+		#(
+			#([size] : $e.count),
+			#([capacity] : $e.allocated),
+			#array(
+				expr: $e.pData[$i],
+				size: $e.count
+			)
+		)
+	)
+}
+
 ; This section contains visualizers for STL and ATL containers
 ; DO NOT MODIFY
 ATL::CStringT<char,*>|CSimpleStringT<char,*>|ATL::CSimpleStringT<char,*>{

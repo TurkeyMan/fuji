@@ -74,6 +74,34 @@ inline int MFToUpper(int c)
 	return MFIsLower(c) ? (c & ~0x20) : c;
 }
 
+inline char* MFSeekDelimiter(char *pC, const char *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				return pC;
+		}
+		++pC;
+	}
+	return pC;
+}
+
+inline const char* MFSeekDelimiter(const char *pC, const char *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				return pC;
+		}
+		++pC;
+	}
+	return pC;
+}
+
 inline char* MFSeekNewline(char *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;
@@ -105,6 +133,38 @@ inline const char* MFSeekNextWord(const char *pC)
 {
 	while(!MFIsWhite(*pC) && !MFIsNewline(*pC) && *pC != 0) pC++;
 	while(MFIsWhite(*pC) || MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline char* MFSkipDelimiters(char *pC, const char *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				goto keep_going;
+		}
+		return pC;
+	keep_going:
+		++pC;
+	}
+	return pC;
+}
+
+inline const char* MFSkipDelimiters(const char *pC, const char *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				goto keep_going;
+		}
+		return pC;
+	keep_going:
+		++pC;
+	}
 	return pC;
 }
 
@@ -200,6 +260,31 @@ inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pS
 	while((*pBuffer = *pString++)) { ++pBuffer; }
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
+}
+
+inline char* MFString_Chr(const char *pString, int c)
+{
+	do
+	{
+		if(*pString == (char)c)
+			return (char*)pString;
+	}
+	while(*pString++);
+
+	return (NULL);
+}
+
+inline char* MFString_RChr(const char *pSource, int c)
+{
+	char *pLast;
+
+	for(pLast = NULL; *pSource; pSource++)
+	{
+		if(c == *pSource)
+			pLast = (char*)pSource;
+	}
+
+	return pLast;
 }
 
 inline char* MFString_GetFileExtension(const char *pFilename)
@@ -305,7 +390,7 @@ inline int MFString_DecodeUTF8(const char *pMBChar, int *pC)
 	int t = *pMB;
 
 	if(t >= 128)
-	{    
+	{
 		if((t&0xE0) == 0xC0)
 		{
 			if(pC)
@@ -322,7 +407,7 @@ inline int MFString_DecodeUTF8(const char *pMBChar, int *pC)
 
 	if(pC)
 		*pC = t;
-	return 1;
+	return t == 0 ? 0 : 1;
 }
 
 inline char *MFString_NextChar(const char *pChar)
@@ -379,50 +464,92 @@ inline int MFString_GetNumChars(const char *pString)
 // unicode support
 //
 
-inline uint16* MFSeekNewlineW(uint16 *pC)
+inline wchar_t* MFSeekDelimiterW(wchar_t *pC, const wchar_t *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				return pC;
+		}
+		++pC;
+	}
+	return pC;
+}
+
+inline const wchar_t* MFSeekDelimiterW(const wchar_t *pC, const wchar_t *pDelimiters)
+{
+	while(*pC)
+	{
+		for(int i=0; pDelimiters[i]; ++i)
+		{
+			if(*pC == pDelimiters[i])
+				return pC;
+		}
+		++pC;
+	}
+	return pC;
+}
+
+inline wchar_t* MFSeekNewlineW(wchar_t *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;
 	while(MFIsNewline(*pC)) pC++;
 	return pC;
 }
 
-inline const uint16* MFSeekNewlineW(const uint16 *pC)
+inline const wchar_t* MFSeekNewlineW(const wchar_t *pC)
 {
 	while(!MFIsNewline(*pC) && *pC != 0) pC++;
 	while(MFIsNewline(*pC)) pC++;
 	return pC;
 }
 
-inline uint16* MFSkipWhiteW(uint16 *pC)
+inline wchar_t* MFSeekNextWordW(wchar_t *pC)
+{
+	while(!MFIsWhite(*pC) && !MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsWhite(*pC) || MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline const wchar_t* MFSeekNextWordW(const wchar_t *pC)
+{
+	while(!MFIsWhite(*pC) && !MFIsNewline(*pC) && *pC != 0) pC++;
+	while(MFIsWhite(*pC) || MFIsNewline(*pC)) pC++;
+	return pC;
+}
+
+inline wchar_t* MFSkipWhiteW(wchar_t *pC)
 {
 	while(MFIsWhite(*pC)) pC++;
 	return pC;
 }
 
-inline const uint16* MFSkipWhiteW(const uint16 *pC)
+inline const wchar_t* MFSkipWhiteW(const wchar_t *pC)
 {
 	while(MFIsWhite(*pC)) pC++;
 	return pC;
 }
 
-inline int MFWString_Length(const uint16 *pString)
+inline int MFWString_Length(const wchar_t *pString)
 {
-	const uint16 *pT = pString;
+	const wchar_t *pT = pString;
 	while(*pT) ++pT;
 	return (int)(((uintp)pT - (uintp)pString) >> 1);
 }
 
-inline uint16* MFWString_Copy(uint16 *pBuffer, const uint16 *pString)
+inline wchar_t* MFWString_Copy(wchar_t *pBuffer, const wchar_t *pString)
 {
-	uint16 *s = pBuffer;
+	wchar_t *s = pBuffer;
 	while((*pBuffer++ = *pString++)) { }
 	return s;
 }
 
-inline uint16* MFWString_CopyN(uint16 *pBuffer, const uint16 *pString, int maxChars)
+inline wchar_t* MFWString_CopyN(wchar_t *pBuffer, const wchar_t *pString, int maxChars)
 {
-	uint16 *dscan;
-	const uint16 *sscan;
+	wchar_t *dscan;
+	const wchar_t *sscan;
 
 	dscan = pBuffer;
 	sscan = pString;
@@ -438,17 +565,17 @@ inline uint16* MFWString_CopyN(uint16 *pBuffer, const uint16 *pString, int maxCh
 	return pBuffer;
 }
 
-inline uint16* MFWString_Cat(uint16 *pBuffer, const uint16 *pString)
+inline wchar_t* MFWString_Cat(wchar_t *pBuffer, const wchar_t *pString)
 {
-	uint16 *s = pBuffer;
+	wchar_t *s = pBuffer;
 	while(*pBuffer) pBuffer++;
 	while((*pBuffer++ = *pString++)) { }
 	return s;
 }
 
-inline uint16* MFWString_CopyCat(uint16 *pBuffer, const uint16 *pString, const uint16 *pString2)
+inline wchar_t* MFWString_CopyCat(wchar_t *pBuffer, const wchar_t *pString, const wchar_t *pString2)
 {
-	uint16 *s = pBuffer;
+	wchar_t *s = pBuffer;
 	while((*pBuffer++ = *pString++)) { }
 	while((*pBuffer++ = *pString2++)) { }
 	return s;
@@ -516,8 +643,6 @@ inline MFString::operator bool() const
 
 inline char MFString::operator[](int index)
 {
-	if(!pData)
-		return 0;
 	return pData->pMemory[index];
 }
 
@@ -724,4 +849,9 @@ inline uint32 MFString::GetHash() const
 inline MFString& MFString::Insert(int offset, MFString string)
 {
 	return Replace(offset, 0, string);
+}
+
+inline MFArray<MFString>& MFString::SplitLines(MFArray<MFString> &output)
+{
+	return this->Split(output, "\r\n");
 }

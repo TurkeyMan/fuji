@@ -40,7 +40,7 @@ void MFString_DeinitModule()
 	stringHeap.Deinit();
 }
 
-MFString MFString_GetStats()
+MF_API MFString MFString_GetStats()
 {
 	size_t overhead = stringPool.GetTotalMemory() + stringPool.GetOverheadMemory() + stringHeap.GetOverheadMemory();
 	size_t waste = 0, averageSize = 0;
@@ -76,7 +76,7 @@ MFString MFString_GetStats()
 	return desc;
 }
 
-void MFString_Dump()
+MF_API void MFString_Dump()
 {
 	MFString temp = MFString_GetStats();
 
@@ -114,7 +114,15 @@ MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)
 	return memcmp(pBuf1, pBuf2, size);
 }
 
-const char * MFString_ToLower(const char *pString)
+MF_API char* MFString_Dup(const char *pString)
+{
+	int len = MFString_Length(pString);
+	char *pNew = (char*)MFHeap_Alloc(len + 1);
+	MFString_Copy(pNew, pString);
+	return pNew;
+}
+
+MF_API const char * MFString_ToLower(const char *pString)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 	int len = MFString_Length(pString);
@@ -134,7 +142,7 @@ const char * MFString_ToLower(const char *pString)
 	return pBuffer;
 }
 
-const char * MFString_ToUpper(const char *pString)
+MF_API const char * MFString_ToUpper(const char *pString)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 	int len = MFString_Length(pString);
@@ -154,7 +162,7 @@ const char * MFString_ToUpper(const char *pString)
 	return pBuffer;
 }
 
-const char * MFStr(const char *format, ...)
+MF_API const char * MFStr(const char *format, ...)
 {
 	va_list arglist;
 	char *pBuffer = &gStringBuffer[gStringOffset];
@@ -172,7 +180,7 @@ const char * MFStr(const char *format, ...)
 	return pBuffer;
 }
 
-const char * MFStrN(const char *pSource, size_t n)
+MF_API const char * MFStrN(const char *pSource, size_t n)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
@@ -186,7 +194,7 @@ const char * MFStrN(const char *pSource, size_t n)
 	return pBuffer;
 }
 
-int MFString_Compare(const char *pString1, const char *pString2)
+MF_API int MFString_Compare(const char *pString1, const char *pString2)
 {
 	while(*pString1 == *pString2++)
 	{
@@ -197,7 +205,7 @@ int MFString_Compare(const char *pString1, const char *pString2)
 	return (*(const unsigned char *)pString1 - *(const unsigned char *)(pString2 - 1));
 }
 
-int MFString_CompareN(const char *pString1, const char *pString2, int n)
+MF_API int MFString_CompareN(const char *pString1, const char *pString2, int n)
 {
 	if(n == 0)
 		return 0;
@@ -215,7 +223,7 @@ int MFString_CompareN(const char *pString1, const char *pString2, int n)
 	return 0;
 }
 
-int MFString_CaseCmp(const char *pSource1, const char *pSource2)
+MF_API int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 {
 	register unsigned int c1, c2;
 
@@ -229,7 +237,7 @@ int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 	return c1 - c2;
 }
 
-int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
+MF_API int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 {
 	register int c = 0;
 
@@ -241,31 +249,6 @@ int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
 	}
 
 	return c;
-}
-
-char* MFString_Chr(const char *pString, int c)
-{
-	do
-	{
-		if(*pString == (char)c)
-			return (char*)pString;
-	}
-	while(*pString++);
-
-	return (NULL);
-}
-
-char* MFString_RChr(const char *pSource, int c)
-{
-	char *pLast;
-
-	for(pLast = NULL; *pSource; pSource++)
-	{
-		if(c == *pSource)
-			pLast = (char*)pSource;
-	}
-
-	return pLast;
 }
 
 MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory, bool bCaseSensitive)
@@ -417,7 +400,7 @@ MF_API bool MFString_IsNumber(const char *pString, bool bAllowHex)
 	return numDigits > 0 ? true : false;
 }
 
-MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base)
+MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int base, const char **ppNextChar)
 {
 	pString = MFSkipWhite(pString);
 
@@ -465,18 +448,20 @@ MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase, int ba
 		{
 			if(!MFIsNumeric(*pString))
 				return neg ? -number : number;
-			number *= 10;
-			number += (*pString++) - '0';
+			number = number*10 + (*pString++) - '0';
 		}
 
 		if(neg)
 			number = -number;
 	}
 
+	if(ppNextChar)
+		*ppNextChar = pString;
+
 	return number;
 }
 
-MF_API float MFString_AsciiToFloat(const char *pString)
+MF_API float MFString_AsciiToFloat(const char *pString, const char **ppNextChar)
 {
 	pString = MFSkipWhite(pString);
 
@@ -501,8 +486,7 @@ MF_API float MFString_AsciiToFloat(const char *pString)
 			bHasDot = true;
 		else
 		{
-			number *= 10;
-			number += digit - '0';
+			number = number*10 + digit - '0';
 			if(bHasDot)
 				frac *= 0.1f;
 		}
@@ -510,6 +494,9 @@ MF_API float MFString_AsciiToFloat(const char *pString)
 
 	if(neg)
 		number = -number;
+
+	if(ppNextChar)
+		*ppNextChar = pString;
 
 	return (float)number * frac;
 }
@@ -687,14 +674,14 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 // UTF8 support
 //
 
-int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString)
+MF_API int MFString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
 {
 	const char *pStart = pString;
 	int bytes;
 
 	while(*pString)
 	{
-		*pBuffer++ = (uint16)MFString_DecodeUTF8(pString, &bytes);
+		*pBuffer++ = (wchar_t)MFString_DecodeUTF8(pString, &bytes);
 		pString += bytes;
 	}
 	*pBuffer = 0;
@@ -702,9 +689,9 @@ int MFString_CopyUTF8ToUTF16(uint16 *pBuffer, const char *pString)
 	return (int)(pString - pStart);
 }
 
-int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString)
+MF_API int MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString)
 {
-	const uint16 *pStart = pString;
+	const wchar_t *pStart = pString;
 
 	while(*pString)
 		pBuffer += MFString_EncodeUTF8(*pString++, pBuffer);
@@ -713,7 +700,7 @@ int MFString_CopyUTF16ToUTF8(char *pBuffer, const uint16 *pString)
 	return (int)(pString - pStart);
 }
 
-uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
+MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 {
 	// count number of actual characters in the string
 	int numChars = MFString_GetNumChars(pUTF8String);
@@ -722,14 +709,14 @@ uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 	if(gStringOffset & 1)
 		++gStringOffset;
 
-	uint16 *pBuffer = (uint16*)&gStringBuffer[gStringOffset];
+	wchar_t *pBuffer = (wchar_t*)&gStringBuffer[gStringOffset];
 	gStringOffset += numChars*2 + 2;
 
 	// if we wrapped the string buffer
 	if(gStringOffset >= sizeof(gStringBuffer) - 1024)
 	{
 		gStringOffset = 0;
-		pBuffer = (uint16*)gStringBuffer;
+		pBuffer = (wchar_t*)gStringBuffer;
 	}
 
 	// copy the string
@@ -746,7 +733,7 @@ uint16* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 // unicode support
 //
 
-int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
+int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2)
 {
 	while(*pString1 == *pString2++)
 	{
@@ -757,7 +744,7 @@ int MFWString_Compare(const uint16 *pString1, const uint16 *pString2)
 	return (*(const uint16 *)pString1 - *(const uint16 *)(pString2 - 1));
 }
 
-int MFWString_CaseCmp(const uint16 *pSource1, const uint16 *pSource2)
+int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
 {
 	register unsigned int c1, c2;
 
@@ -862,28 +849,47 @@ MFString& MFString::operator=(const MFString &string)
 	return *this;
 }
 
+MFString& MFString::operator+=(char c)
+{
+	Reserve(NumBytes() + 2);
+	pData->pMemory[pData->bytes++] = c;
+	pData->pMemory[pData->bytes] = 0;
+	return *this;
+}
+
 MFString& MFString::operator+=(const char *pString)
 {
-	return *this += MFString::Static(pString);
+	if(!pString || *pString == 0)
+		return *this;
+
+	if(IsEmpty())
+	{
+		*this = pString;
+	}
+	else
+	{
+		size_t sumBytes = pData->bytes + MFString_Length(pString);
+		Reserve(sumBytes + 1);
+		MFString_Copy(pData->pMemory + pData->bytes, pString);
+		pData->bytes = sumBytes;
+	}
+
+	return *this;
 }
 
 MFString& MFString::operator+=(const MFString &string)
 {
-	if(!string)
+	if(string.IsEmpty())
 		return *this;
 
-	if(!pData)
+	if(IsEmpty())
 	{
-		string.pData->AddRef();
-		pData = string.pData;
+		*this = string;
 	}
 	else
 	{
 		size_t sumBytes = pData->bytes + string.pData->bytes;
-		size_t bytesNeeded = sumBytes + 1;
-
-		Reserve(bytesNeeded);
-
+		Reserve(sumBytes + 1);
 		MFString_Copy(pData->pMemory + pData->bytes, string.pData->pMemory);
 		pData->bytes = sumBytes;
 	}
@@ -891,32 +897,57 @@ MFString& MFString::operator+=(const MFString &string)
 	return *this;
 }
 
-MFString MFString::operator+(const MFString &string) const
+MFString MFString::operator+(char c) const
 {
-	if(!string)
+	MFString s = *this;
+	s += c;
+	return s;
+}
+
+MFString MFString::operator+(const char *pString) const
+{
+	if(!pString || *pString == 0)
 		return *this;
 
-	if(!pData)
+	if(IsEmpty())
+		return MFString(pString);
+
+	size_t bytes = pData->bytes + MFString_Length(pString);
+
+	MFString t;
+    t.Reserve(bytes + 1);
+	MFString_CopyCat(t.pData->pMemory, pData->pMemory, pString);
+	t.pData->bytes = bytes;
+
+	return t;
+}
+
+MFString MFString::operator+(const MFString &string) const
+{
+	if(string.IsEmpty())
+		return *this;
+
+	if(IsEmpty())
 		return string;
 
 	size_t bytes = pData->bytes + string.pData->bytes;
 
 	MFString t;
     t.Reserve(bytes + 1);
-	t.pData->bytes = bytes;
-
 	MFString_CopyCat(t.pData->pMemory, pData->pMemory, string.pData->pMemory);
+	t.pData->bytes = bytes;
 
 	return t;
 }
 
-MFString MFString::operator+(const char *pString) const
-{
-	return this->operator+(MFString::Static(pString));
-}
-
 MFString operator+(const char *pString, const MFString &string)
 {
+	if(string.IsEmpty())
+		return MFString(pString);
+
+	if(!pString || *pString == 0)
+		return string;
+
 	return MFString::Static(pString) + string;
 }
 
@@ -957,19 +988,19 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 		pData->bytes = len;
 
 		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
-		MFString_CopyUTF16ToUTF8(pData->pMemory, (const uint16*)pString);
+		MFString_CopyUTF16ToUTF8(pData->pMemory, (const wchar_t*)pString);
 	}
 
 	return *this;
 }
 
-MFString& MFString::Detach()
+MFString& MFString::Detach(size_t reserveBytes)
 {
 	if(pData && (pData->refCount > 1 || pData->allocated == 0))
 	{
 		MFStringData *pNew = MFStringData::Alloc();
 		pNew->bytes = pData->bytes;
-		pNew->pMemory = (char*)stringHeap.Alloc(pNew->bytes + 1, &pNew->allocated);
+		pNew->pMemory = (char*)stringHeap.Alloc(MFMax(pNew->bytes + 1, reserveBytes), &pNew->allocated);
 		MFString_Copy(pNew->pMemory, pData->pMemory);
 
 		pData->Release();
@@ -982,11 +1013,7 @@ MFString& MFString::Detach()
 MFString& MFString::Reserve(size_t bytes, bool bClearString)
 {
 	// detach instance
-	if(pData && pData->refCount > 1)
-	{
-		pData->Release();
-		pData = NULL;
-	}
+	Detach(bytes);
 
 	// allocate memory
 	if(!pData)
@@ -1390,4 +1417,306 @@ int MFString::FindCharReverse(int c) const
 	}
 
 	return -1;
+}
+
+MFString& MFString::Join(const MFArray<MFString> &strings, const char *pSeparator, const char *pTokenPrefix, const char *pTokenSuffix, const char *pBefore, const char *pAfter)
+{
+	MFString result;
+	int numTokens = strings.size();
+
+	// TODO: we should resize the string in advance...
+
+	if(pBefore)
+		result += pBefore;
+
+	// TODO: alternate loops with different availability of parameters?
+	for(int i=0; i<numTokens; ++i)
+	{
+		if(pSeparator && i>0)
+			result += pSeparator;
+
+		if(pTokenPrefix)
+			result += pTokenPrefix;
+
+		result += strings[i];
+
+		if(pTokenSuffix)
+			result += pTokenSuffix;
+	}
+
+	if(pAfter)
+		result += pAfter;
+
+	*this = result;
+	return *this;
+}
+
+MFArray<MFString>& MFString::Split(MFArray<MFString> &output, const char *pDelimiters)
+{
+	output.clear();
+
+	if(!pData)
+		return output;
+
+	const char *pText = pData->pMemory;
+	while(*pText)
+	{
+		const char *pEnd = MFSeekDelimiter(pText, pDelimiters);
+		output.push(MFString(pText, pEnd - pText));
+		pText = MFSkipDelimiters(pEnd, pDelimiters);
+	}
+
+	return output;
+}
+
+int MFString::Enumerate(const MFArray<MFString> keys, bool bCaseSensitive)
+{
+	for(int i=0; i<keys.size(); ++i)
+	{
+		if(bCaseSensitive ? Equals(keys[i]) : EqualsInsensitive(keys[i]))
+			return i;
+	}
+	return -1;
+}
+
+int MFString::Enumerate(const char *const *ppKeys, int numKeys, bool bCaseSensitive)
+{
+	for(int i=0; i<numKeys; ++i)
+	{
+		if(bCaseSensitive ? Equals(ppKeys[i]) : EqualsInsensitive(ppKeys[i]))
+			return i;
+	}
+	return -1;
+}
+
+MFString MFString::StripToken(const char *pDelimiters)
+{
+	if(!pData)
+		return NULL;
+
+	// find token
+	const char *pText = CStr();
+	const char *pToken = MFSkipDelimiters(pText, pDelimiters);
+	const char *pEnd = MFSeekDelimiter(pToken, pDelimiters);
+	const char *pTrim = MFSkipDelimiters(pEnd, pDelimiters);
+
+	// capture the token
+	MFString token(pToken, pEnd - pToken);
+
+	// strip from source string
+	size_t offset = pTrim - pText;
+	if(offset > 0)
+	{
+		Detach();
+
+		for(size_t i = offset; i <= pData->bytes; ++i)
+			pData->pMemory[i - offset] = pData->pMemory[i];
+		pData->bytes -= offset;
+	}
+
+	return token;
+}
+
+static MFString GetNextBit(const char *&pFormat)
+{
+	MFString format;
+
+	while(*pFormat)
+	{
+		if(*pFormat == '%')
+		{
+			if(pFormat[1] == '%')
+				++pFormat;
+			else
+				break;
+		}
+		else if(*pFormat == '\\')
+		{
+			if(pFormat[1] == 't')
+			{
+				format += '\t';
+				pFormat += 2;
+				continue;
+			}
+			else if(pFormat[1] == 'n')
+			{
+				format += '\n';
+				pFormat += 2;
+				continue;
+			}
+			else if(pFormat[1] == 'r')
+			{
+				format += '\r';
+				pFormat += 2;
+				continue;
+			}
+			else
+				++pFormat;
+		}
+
+		format += *pFormat++;
+	}
+
+	return format;
+}
+
+static int Match(const char *pString, const char *pFormat)
+{
+	if(!pFormat)
+		return 0;
+
+	const char *pStart = pString;
+	while(*pFormat)
+	{
+		if(*pFormat == '?')
+		{
+			if(*pString == 0)
+				return -1;
+		}
+/*
+		elseif(*pFormat == '*')
+		{
+			pString = MFString_Chr(pString, pFormat[1]);
+			++pFormat;
+			continue;
+		}
+*/
+		else if(*pString != *pFormat)
+			return -1;
+
+		++pString;
+		++pFormat;
+	}
+
+	return pString - pStart;
+}
+
+int MFString::Parse(const char *pFormat, ...)
+{
+	if(!pData || !pFormat)
+		return 0;
+
+	va_list arglist;
+	va_start(arglist, pFormat);
+
+	const char *pS = pData->pMemory;
+	int numArgs = 0;
+
+	MFString format = GetNextBit(pFormat);
+	int numChars = Match(pS, format.CStr());
+
+	while(*pFormat && numChars >= 0)
+	{
+		pS += numChars;
+		++pFormat;
+
+		int length = -1;
+
+		// gather format options...
+		while(*pFormat)
+		{
+			int c = MFToLower(*pFormat++);
+			if(c == 's')
+			{
+				MFString *pStr = va_arg(arglist, MFString*);
+				++numArgs;
+
+				format = GetNextBit(pFormat);
+
+				if(length >= 0)
+				{
+					MFString s(pS, length);
+					*pStr = s;
+
+					numChars = Match(pS, format.CStr());
+				}
+				else if(format.NumBytes() == 0)
+				{
+					*pStr = pS;
+				}
+				else
+				{
+					const char *pEnd = pS;
+					while(*pEnd && (numChars = Match(pEnd, format.CStr())) < 0)
+						++pEnd;
+
+					MFString s(pS, (int)(pEnd - pS));
+					*pStr = s;
+				}
+
+				pS += pStr->NumBytes();
+				break;
+			}
+			else if(c == 'd' || c == 'i')
+			{
+				int *pInt = va_arg(arglist, int*);
+				++numArgs;
+
+				bool bNeg = *pS == '-';
+				if(*pS == '-' || *pS == '+')
+					++pS;
+
+				*pInt = 0;
+				while(MFIsNumeric(*pS) && ((uint32&)length)-- > 0)
+					*pInt = *pInt*10 + *pS++ - '0';
+
+				if(bNeg)
+					*pInt = -*pInt;
+
+				format = GetNextBit(pFormat);
+				numChars = Match(pS, format.CStr());
+				break;
+			}
+			else if(c == 'x')
+			{
+				int *pInt = va_arg(arglist, int*);
+				++numArgs;
+
+				*pInt = 0;
+				while(MFIsHex(*pS) && ((uint32&)length)-- > 0)
+				{
+					int digit = *pS++;
+					*pInt = (*pInt << 4) + (MFIsNumeric(digit) ? digit - '0' : MFToLower(digit) - 'a' + 10);
+				}
+
+				format = GetNextBit(pFormat);
+				numChars = Match(pS, format.CStr());
+				break;
+			}
+			else if(c == 'f')
+			{
+				float *pFloat = va_arg(arglist, float*);
+				++numArgs;
+
+				*pFloat = MFString_AsciiToFloat(pS, &pS);
+
+				format = GetNextBit(pFormat);
+				numChars = Match(pS, format.CStr());
+				break;
+			}
+			else if(MFIsNumeric(c))
+			{
+				// read numeric length
+				length = 0;
+				while(true)
+				{
+					length = length*10 + c - '0';
+					c = *pFormat;
+					if(!MFIsNumeric(c))
+						break;
+					++pFormat;
+				}
+			}
+			else if(c == '*')
+			{
+				// read length from varargs
+				length = va_arg(arglist, int);
+				++numArgs;
+			}
+		}
+	}
+
+	va_end(arglist);
+
+	return numArgs;
 }

@@ -626,7 +626,7 @@ static MFRenderSortFunction gSortFunctions[MFRL_SM_Max] =
 
 void MFRendererInternal_SortElements(MFRenderLayer &layer)
 {
-	qsort(layer.elements.getpointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
+	qsort(layer.elements.getPointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
 }
 
 //void MFRendererInternal_RenderElement(MFRendererState &state, MFRenderElement &element)

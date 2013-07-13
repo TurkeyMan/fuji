@@ -67,9 +67,6 @@ struct CharHistory
 	uint16 offset;
 };
 
-// this is used to quickly calculate word wraping and stuff.
-static CharHistory gCharHistory[256];
-
 
 // forward declarations
 
@@ -317,7 +314,8 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 	if(pFont == NULL)
 		pFont = gpDebugFont;
 
-	CharHistory *pH = gCharHistory;
+	CharHistory ch[256];
+	CharHistory *pH = ch;
 	const char *pLineStart = pText;
 	float width = 0.0f;
 	float maxWidth = 0.0f;
@@ -343,7 +341,7 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 			width = 0.0f;
 			totalHeight += height;
 			pLineStart = pText + (bytes > 0 ? bytes : 1);
-			pH = gCharHistory - 1;
+			pH = ch - 1;
 		}
 		else
 		{
@@ -374,7 +372,7 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 			// here we need to recurse backward to find a valid wrap point and submit to DrawString
 			float wrapWidth = width;
 			CharHistory *pT = pH;
-			while(pT > gCharHistory)
+			while(pT > ch)
 			{
 				wrapWidth -= pT->width;
 
@@ -395,7 +393,7 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 				++maxLen;
 			}
 
-			if(pT == gCharHistory)
+			if(pT == ch)
 			{
 				// no valid wrap point was found so force wrap at current character
 				wrapWidth = width - pH->width;
@@ -410,7 +408,7 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 
 			// update character positions
 			pLineStart = pText;
-			pH = gCharHistory;
+			pH = ch;
 		}
 		else
 		{
@@ -508,7 +506,143 @@ MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour,
 	float texelCenter = MFRenderer_GetTexelCenterOffset();
 	return (int)MFFont_DrawText(pFont, MakeVector((float)x - texelCenter, (float)y - texelCenter), (float)pFont->height, colour, buffer);
 }
+/*
+struct Character
+{
+	int c;
+	float offset, width;
+};
 
+struct Line
+{
+	int firstChar, numChars;
+	float totalWidth;
+};
+
+struct Text
+{
+	Character *pChars;
+	Line *pLines;
+	int numChars;
+	int numLines;
+	int numVisible;
+};
+
+static Text *DecodeUTF8(const char *pString, uint32 maxChars)
+{
+	// count the number of characters and lines
+	int ch = 0, l = 0;
+	bool bSkipNextN;
+
+	const char *pT = pString;
+	while(*pT && (uint32)ch < maxChars)
+	{
+		bSkipNextN = false;
+
+		int c;
+	next_char:
+		pT += MFString_DecodeUTF8(pT, &c);
+
+		if(c == '\n')
+		{
+			if(!bSkipNextN)
+				++l;
+		}
+		else if(c == '\r')
+		{
+			++l;
+			bSkipNextN = true;
+			goto next_char;
+		}
+		else if(c != 0)
+			++ch;
+	}
+
+	int numLines = l + 1;
+
+	// allocate the text data buffer
+	size_t bytes = sizeof(Text) + sizeof(Character)*ch + sizeof(Line)*l;
+	Text *pText = (Text*)MFHeap_TAlloc(bytes);
+	pText->pChars = (Character*)&pText[1];
+	pText->pLines = (Line*)&pText->pChars[ch];
+	pText->numChars = ch;
+	pText->numLines = numLines;
+
+	// decode the characters and break into lines
+	Character *pC = pText->pChars;
+	Line *pL = pText->pLines;
+
+	ch = 0;
+	l = 0;
+
+	pL[l].firstChar = 0;
+
+	pT = pString;
+	while(*pT && (uint32)ch < maxChars)
+	{
+		bSkipNextN = false;
+
+		int c;
+	next_char2:
+		pT += MFString_DecodeUTF8(pT, &c);
+
+		if(c == '\n')
+		{
+			if(!bSkipNextN)
+			{
+				pL[l].numChars = ch - pL[l].firstChar;
+				++l;
+				pL[l].firstChar = ch;
+			}
+		}
+		else if(c == '\r')
+		{
+			pL[l].numChars = ch - pL[l].firstChar;
+			++l;
+			pL[l].firstChar = ch;
+
+			bSkipNextN = true;
+			goto next_char2;
+		}
+		else if(c != 0)
+		{
+			pC[ch++].c = c;
+		}
+	}
+
+	pL[l].numChars = ch - pL[l].firstChar;
+
+	return pText;
+}
+
+static int DecodeUTF16(const wchar_t *pText, int maxChars, Character *pChars)
+{
+	return 0;
+}
+
+MF_API float MFFont_RenderText(MFFont *pFont, float height, const MFVector &colour, const char *pText, int maxChars)
+{
+	Text *pT = DecodeUTF8(pText, maxChars);
+
+	// position characters
+	for(int a=0; a<pT->numLines; ++a)
+	{
+		Line &line = pT->pLines[a];
+		Character *pChars = pT->pChars + line.firstChar;
+
+		for(int b=0; b<pT->numChars; ++b)
+		{
+			Character &ch = pChars[b];
+
+//			pFont->
+		}
+	}
+
+	MFHeap_Free(pT);
+
+	return 0.f;
+}
+*/
 MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
 {
 	MFCALLSTACK;
@@ -672,7 +806,8 @@ MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, co
 
 int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, float height, int *pLastSignificantCharacter = NULL)
 {
-	CharHistory *pH = gCharHistory;
+	CharHistory ch[256];
+	CharHistory *pH = ch;
 	const char *pC = pText;
 	const char *pLineStart = pText;
 	float currentPos = 0.0f;
@@ -721,7 +856,7 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 			// here we need to recurse backward to find a valid wrap point and submit to DrawString
 			CharHistory *pT = pH;
-			while(pT > gCharHistory)
+			while(pT > ch)
 			{
 				if(MFFontInternal_IsValidWrapPoint(pT->c))
 				{
@@ -736,11 +871,11 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 			while(MFFontInternal_IsValidWrapPoint(*pC))
 				pC = MFString_NextChar(pC);
 
-			if(pT == gCharHistory)
+			if(pT == ch)
 			{
 				// no valid wrap point was found so force wrap at current character
 				pC = pLineStart + MFString_DecodeUTF8(pLineStart, NULL);
-				pT = gCharHistory + 1;
+				pT = ch + 1;
 			}
 
 			pH = pT;
@@ -762,12 +897,12 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 	if(pLastSignificantCharacter)
 	{
-		while(MFFontInternal_IsValidWrapPoint(pH->c) && pH > gCharHistory)
+		while(MFFontInternal_IsValidWrapPoint(pH->c) && pH > ch)
 		{
 			--pH;
 		}
 
-		*pLastSignificantCharacter = (int)((pH - gCharHistory) + 1);
+		*pLastSignificantCharacter = (int)((pH - ch) + 1);
 	}
 
 	return charOffset;

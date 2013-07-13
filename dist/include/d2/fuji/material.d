@@ -179,7 +179,7 @@ extern (C) MFMaterial* MFMaterial_GetCurrent();
 * Gets a materials name.
 * @return The name of the specified material.
 */
-extern (C) const(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial) pure;
+extern (C) immutable(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial) pure;
 
 // material control
 
@@ -198,7 +198,7 @@ extern (C) int MFMaterial_GetNumParameters(MFMaterial* pMaterial);
 * @param parameterIndex Parameter index.
 * @return Returns a string representing the parameter name.
 */
-extern (C) const(char)* MFMaterial_GetParameterName(MFMaterial* pMaterial, int parameterIndex);
+extern (C) immutable(char)* MFMaterial_GetParameterName(MFMaterial* pMaterial, int parameterIndex);
 
 /**
 * Get the index of a parameter from a parameter name.
@@ -225,7 +225,7 @@ extern (C) const(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(MFMateria
 * @param pParameterName String representing a parameter name.
 * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
-extern (C) const(MFMaterialParameterInfo)* MFMaterial_GetParameterInfoFromName(MFMaterial* pMaterial, const(char)* pParameterName);
+extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfoFromName(MFMaterial* pMaterial, const(char)* pParameterName);
 
 /**
 * Get the value of a parameter.
@@ -439,7 +439,7 @@ final class Material
 	@property string name() const pure
 	{
 		auto pName = MFMaterial_GetMaterialName(cast(MFMaterial*)this);
-		return cast(string)pName[0..strlen(pName)];
+		return pName[0..strlen(pName)];
 	}
 
 	@property Parameters parameters()	{ return Parameters(cast(MFMaterial*)this, 0, MFMaterial_GetNumParameters(cast(MFMaterial*)this)); }
@@ -451,7 +451,7 @@ final class Material
 		@property string name() const
 		{
 			auto pName = MFMaterial_GetParameterName(pMaterial, index);
-			return cast(string)pName[0..strlen(pName)];
+			return pName[0..strlen(pName)];
 		}
 
 		@property ref const(MFMaterialParameterInfo) info() const

@@ -83,6 +83,7 @@ enum MFRenderLayerSortMode
 	MFRL_SM_Default = 0,
 	MFRL_SM_FrontToBack,
 	MFRL_SM_BackToFront,
+	MFRL_SM_None,
 
 	MFRL_SM_Max,
 	MFRL_SM_ForceInt = 0x7FFFFFFF,

@@ -106,7 +106,7 @@ MF_API void MFWStringCache_Destroy(MFWStringCache *pCache);
  * @param pNewString String to add to the cache.
  * @return Returns a pointer to the string in the unicode string cache.
  */
-MF_API const uint16* MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString);
+MF_API const wchar_t* MFWStringCache_Add(MFWStringCache *pCache, const wchar_t *pNewString);
 
 /**
  * Get a pointer to the cache memory.
@@ -114,7 +114,7 @@ MF_API const uint16* MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pN
  * @param pCache Target unicode string cache.
  * @return Returns a pointer to the string in the unicode string cache.
  */
-MF_API uint16* MFWStringCache_GetCache(MFWStringCache *pCache);
+MF_API wchar_t* MFWStringCache_GetCache(MFWStringCache *pCache);
 
 /**
  * Get the actual used size of a unicode string cache.

@@ -144,9 +144,18 @@ inline const T& MFArray<T>::back() const
 }
 
 template<class T>
-inline T* MFArray<T>::getpointer() const
+inline T* MFArray<T>::getPointer() const
 {
 	return pData;
+}
+
+template<class T>
+T* MFArray<T>::getCopy() const
+{
+	T *pCopy = (T*)MFHeap_Alloc(count * sizeof(T));
+	for(int a=0; a<count; ++a)
+		new(pCopy + a) T(pData[a]);
+	return pCopy;
 }
 
 template<class T>
@@ -166,4 +175,37 @@ inline int MFArray<T>::alloc(int count)
 	}
 
 	return allocated;
+}
+
+template<class T>
+inline T* MFArray<T>::find(const T &item)
+{
+	for(int a=0; a<count; ++a)
+	{
+		if(pData[a] == item)
+			return &pData[a];
+	}
+	return NULL;
+}
+
+template<class T>
+inline const T* MFArray<T>::find(const T &item) const
+{
+	for(int a=0; a<count; ++a)
+	{
+		if(pData[a] == item)
+			return &pData[a];
+	}
+	return NULL;
+}
+
+template<class T>
+inline bool MFArray<T>::contains(const T &item) const
+{
+	for(int a=0; a<count; ++a)
+	{
+		if(pData[a] == item)
+			return true;
+	}
+	return false;
 }

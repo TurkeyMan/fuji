@@ -104,7 +104,7 @@ struct MFWStringCache
 {
 	size_t size;
 	size_t used;
-	uint16 *pMem;
+	wchar_t *pMem;
 };
 
 
@@ -116,7 +116,7 @@ MF_API MFWStringCache* MFWStringCache_Create(size_t maxSize)
 	pCache = (MFWStringCache*)MFHeap_Alloc(sizeof(MFWStringCache) + maxSize);
 
 	pCache->size = maxSize;
-	pCache->pMem = (uint16*)&pCache[1];
+	pCache->pMem = (wchar_t*)&pCache[1];
 	pCache->pMem[0] = 0;
 	pCache->used = 2;
 
@@ -130,7 +130,7 @@ MF_API void MFWStringCache_Destroy(MFWStringCache *pCache)
 	MFHeap_Free(pCache);
 }
 
-MF_API const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pNewString)
+MF_API const wchar_t *MFWStringCache_Add(MFWStringCache *pCache, const wchar_t *pNewString)
 {
 	MFCALLSTACK;
 
@@ -138,7 +138,7 @@ MF_API const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pN
 	MFDebug_Assert(pNewString, "Cannot add NULL string");
 
 	// find the string
-	uint16 *pCurr = pCache->pMem;
+	wchar_t *pCurr = pCache->pMem;
 	int newLength = MFWString_Length(pNewString)+1;
 
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
@@ -160,7 +160,7 @@ MF_API const uint16 *MFWStringCache_Add(MFWStringCache *pCache, const uint16 *pN
 }
 
 // get cache for direct read/write
-MF_API uint16* MFWStringCache_GetCache(MFWStringCache *pCache)
+MF_API wchar_t* MFWStringCache_GetCache(MFWStringCache *pCache)
 {
 	return pCache->pMem;
 }

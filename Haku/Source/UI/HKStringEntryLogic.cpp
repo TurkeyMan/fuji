@@ -311,7 +311,7 @@ void HKStringEntryLogic::Update()
 						int selMax = MFMax(selectionStart, selectionEnd);
 						int selRange = selMax - selMin;
 
-						const uint16 wstr[] = { (uint16)ascii, 0 };
+						const wchar_t wstr[] = { (wchar_t)ascii, 0 };
 						char insert[5];
 						MFString_CopyUTF16ToUTF8(insert, wstr);
 						buffer.Replace(selMin, selRange, insert);
