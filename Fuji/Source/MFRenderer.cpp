@@ -490,8 +490,9 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 			MFRenderer_SetRenderTarget(layer.pRenderTarget[0], layer.pDepthStencil);
 
 		// clear render target
+		MFRenderClearFlags cf = layer.pDepthStencil ? layer.clearFlags : (MFRenderClearFlags)(layer.clearFlags & ~MFRCF_DepthStencil);
 		if(layer.clearFlags != MFRCF_None)
-			MFRenderer_ClearScreen(layer.clearFlags, layer.clearColour, layer.clearZ, layer.clearStencil);
+			MFRenderer_ClearScreen(cf, layer.clearColour, layer.clearZ, layer.clearStencil);
 
 		if(numElements == 0)
 			continue;

@@ -381,11 +381,11 @@ void MFRenderer_ResetDisplay()
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
 
-	gDeviceZTarget.pInternalData = pZTarget;
 	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
 
 	if(SUCCEEDED(hr))
 	{
