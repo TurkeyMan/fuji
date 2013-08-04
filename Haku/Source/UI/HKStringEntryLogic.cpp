@@ -61,7 +61,7 @@ void HKStringEntryLogic::ClearSelection()
 	selectionStart = selectionEnd = cursorPos;
 
 	if(changeCallback)
-		changeCallback(buffer.CStr());
+		changeCallback(buffer);
 }
 
 void HKStringEntryLogic::Update()
@@ -153,7 +153,7 @@ void HKStringEntryLogic::Update()
 			CloseClipboard();
 
 			if((numChars || cursorPos != selMin) && changeCallback)
-				changeCallback(buffer.CStr());
+				changeCallback(buffer);
 		}
 	}
 	else
@@ -204,7 +204,7 @@ void HKStringEntryLogic::Update()
 							selectionStart = selectionEnd = cursorPos;
 
 							if(changeCallback)
-								changeCallback(buffer.CStr());
+								changeCallback(buffer);
 						}
 						else if(keyPressed == Key_Delete && cursorPos < buffer.NumBytes())
 						{
@@ -212,7 +212,7 @@ void HKStringEntryLogic::Update()
 							selectionStart = selectionEnd = cursorPos;
 
 							if(changeCallback)
-								changeCallback(buffer.CStr());
+								changeCallback(buffer);
 						}
 					}
 					break;
@@ -320,7 +320,7 @@ void HKStringEntryLogic::Update()
 						selectionStart = selectionEnd = cursorPos;
 
 						if(changeCallback)
-							changeCallback(buffer.CStr());
+							changeCallback(buffer);
 					}
 					break;
 				}
@@ -348,7 +348,7 @@ void HKStringEntryLogic::SetString(MFString string)
 	selectionStart = selectionEnd = cursorPos = buffer.NumBytes();
 
 	if(changeCallback)
-		changeCallback(buffer.CStr());
+		changeCallback(buffer);
 }
 
 void HKStringEntryLogic::SetCursorPos(int position, bool bUpdateSelection)

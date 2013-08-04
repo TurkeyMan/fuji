@@ -43,6 +43,8 @@ public:
 
 	bool contains(const T &item) const;
 
+	void qsort(int (*pPredicate)(const T *p1, const T *p2));
+
 protected:
 	int alloc(int count);
 

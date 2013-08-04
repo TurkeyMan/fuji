@@ -168,13 +168,13 @@ void HKWidgetTextbox::SetTextHeight(float height)
 	}
 }
 
-void HKWidgetTextbox::StringChangeCallback(const char *pString)
+void HKWidgetTextbox::StringChangeCallback(MFString string)
 {
 	blinkTime = 0.4f;
 
 	if(!OnChanged.IsEmpty())
 	{
-		HKWidgetTextEvent ev(this, pString);
+		HKWidgetTextEvent ev(this, string);
 		OnChanged(*this, ev);
 	}
 }

@@ -7,7 +7,7 @@
 class HKStringEntryLogic
 {
 public:
-	typedef fastdelegate::FastDelegate1<const char *> StringChangeCallback;
+	typedef fastdelegate::FastDelegate1<MFString> StringChangeCallback;
 
 	enum StringType
 	{

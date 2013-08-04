@@ -47,7 +47,7 @@ public:
 protected:
 	virtual void Update();
 	virtual bool InputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
-	void StringChangeCallback(const char *pString);
+	void StringChangeCallback(MFString string);
 	void UpdateCursorPos(float x, bool bUpdateSelection);
 
 	MFVector textColour;
