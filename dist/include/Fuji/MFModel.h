@@ -46,10 +46,10 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
  * Dstroy a model.
  * Destroys a model instance.
  * @param pModel Model instance to be destroyed.
- * @return Returns the new reference count of the model. If the returned reference count is 0, the model is destroyed.
+ * @return None.
  * @see MFModel_Create(), MFModel_Draw()
  */
-MF_API int MFModel_Destroy(MFModel *pModel);
+MF_API void MFModel_Destroy(MFModel *pModel);
 
 MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 

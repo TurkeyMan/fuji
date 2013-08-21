@@ -46,8 +46,7 @@ struct MFTextureTemplateData
 // texture structure
 struct MFTexture : public MFResource
 {
-	// data members
-	char name[64];
+	MFTextureTemplateData *pTemplateData;
 
 #if MF_RENDERER == MF_DRIVER_XBOX
 #if defined(XB_XGTEXTURES)
@@ -59,8 +58,6 @@ struct MFTexture : public MFResource
 #else
 	void *pInternalData;
 #endif
-
-	MFTextureTemplateData *pTemplateData;
 };
 
 // functions

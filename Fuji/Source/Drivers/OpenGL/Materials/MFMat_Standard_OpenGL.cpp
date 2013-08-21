@@ -160,50 +160,41 @@ static const GLenum glCompareFunc[MFComparisonFunc_Max] =
 
 int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
-	{
-		// probably compile the shaders now i guess...
-		gDefVertexShader = MFRenderer_OpenGL_CompileShader(gVertexShader, MFOGL_ShaderType_VertexShader);
-		gDefFragmentShaderUntextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderUntextured, MFOGL_ShaderType_FragmentShader);
-		gDefFragmentShaderTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderTextured, MFOGL_ShaderType_FragmentShader);
-		gDefFragmentShaderMultiTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderMultiTextured, MFOGL_ShaderType_FragmentShader);
+	// probably compile the shaders now i guess...
+	gDefVertexShader = MFRenderer_OpenGL_CompileShader(gVertexShader, MFOGL_ShaderType_VertexShader);
+	gDefFragmentShaderUntextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderUntextured, MFOGL_ShaderType_FragmentShader);
+	gDefFragmentShaderTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderTextured, MFOGL_ShaderType_FragmentShader);
+	gDefFragmentShaderMultiTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderMultiTextured, MFOGL_ShaderType_FragmentShader);
 
 #if defined(MF_OPENGL_ES)
-		glReleaseShaderCompiler();
+	glReleaseShaderCompiler();
 #endif
 
-		// create and link a program
-		gDefShaderProgramUntextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderUntextured);
-		gDefShaderProgramTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderTextured);
-		gDefShaderProgramMultiTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderMultiTextured);
-	}
-#endif
+	// create and link a program
+	gDefShaderProgramUntextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderUntextured);
+	gDefShaderProgramTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderTextured);
+	gDefShaderProgramMultiTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderMultiTextured);
 
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
-	{
-		glDeleteProgram(gDefShaderProgramUntextured);
-		glDeleteProgram(gDefShaderProgramTextured);
-		glDeleteProgram(gDefShaderProgramMultiTextured);
+	glDeleteProgram(gDefShaderProgramUntextured);
+	glDeleteProgram(gDefShaderProgramTextured);
+	glDeleteProgram(gDefShaderProgramMultiTextured);
 
-		glDeleteShader(gDefVertexShader);
-		glDeleteShader(gDefFragmentShaderUntextured);
-		glDeleteShader(gDefFragmentShaderTextured);
-		glDeleteShader(gDefFragmentShaderMultiTextured);
-	}
-#endif
+	glDeleteShader(gDefVertexShader);
+	glDeleteShader(gDefFragmentShaderUntextured);
+	glDeleteShader(gDefFragmentShaderTextured);
+	glDeleteShader(gDefFragmentShaderMultiTextured);
 }
 
 inline void MFMat_Standard_SetSamplerState(MFSamplerState *pSampler, int sampler, const char *pName)
 {
 	glActiveTexture(GL_TEXTURE0 + sampler);
 
+	// TODO: does this need to be here when using shaders?
 //	int minFilter = tex.pTexture->pTemplateData->mipLevels > 1 ? (tex.minFilter | (tex.mipFilter << 2)) : tex.minFilter;
 	int minFilter = (pSampler->stateDesc.mipFilter << 2) | pSampler->stateDesc.minFilter;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexFilters[minFilter]);
@@ -212,10 +203,7 @@ inline void MFMat_Standard_SetSamplerState(MFSamplerState *pSampler, int sampler
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glTexAddressing[pSampler->stateDesc.addressU]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glTexAddressing[pSampler->stateDesc.addressV]);
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
-		MFRenderer_OpenGL_SetUniformS(pName, sampler);
-#endif
+	MFRenderer_OpenGL_SetUniformS(pName, sampler);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
@@ -247,11 +235,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
 		{
 			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
-
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-			if(MFOpenGL_UseShaders())
-				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
-#endif
+			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
 			MFMat_Standard_SetSamplerState(pDetailSamp, 0, "detail");
 		}
 	}
@@ -286,11 +270,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp || state.boolChanged(MFSCB_DetailMapSet))
 		{
 			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
-
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-			if(!bDetailPresent && MFOpenGL_UseShaders())
-				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
-#endif
+			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
 			MFMat_Standard_SetSamplerState(pDiffuseSamp, diffuseSlot, "diffuse");
 		}
 	}
@@ -303,44 +283,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 			glActiveTexture(GL_TEXTURE0);
 			glDisable(GL_TEXTURE_2D);
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-			if(MFOpenGL_UseShaders())
-				MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
-#endif
+			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
 		}
 	}
-
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-	// configure the texture combiner (can we cache this?)
-	if(state.boolChanged(MFSCB_DetailMapSet) || state.boolChanged(MFSCB_DiffuseSet) || state.boolChanged(MFSCB_User0))
-	{
-		const uint32 mask = MFBIT(MFSCB_DetailMapSet) | MFBIT(MFSCB_DiffuseSet) | MFBIT(MFSCB_User0);
-		state.boolsSet = (state.boolsSet & ~mask) | (state.bools & mask);
-
-		if(bDetailPresent)
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-			glActiveTexture(GL_TEXTURE1);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-		}
-		else
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-			if(state.getBool(MFSCB_User0))
-			{
-				// premultiplied alpha?
-			}
-			else
-			{
-				// and not...
-			}
-		}
-	}
-#endif
 
 	if(state.pMatrixStatesSet[MFSCM_Projection] != state.pMatrixStates[MFSCM_Projection])
 	{

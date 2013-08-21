@@ -116,9 +116,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	}
 
 	bool bDetailPresent = state.isSet(MFSB_CT_Bool, MFSCB_DetailMapSet);
-	bool bDetailChanged = state.boolChanged(MFSCB_DetailMapSet);
+	bool bDetailChanged = !!state.boolChanged(MFSCB_DetailMapSet);
 	bool bDiffusePresent = state.isSet(MFSB_CT_Bool, MFSCB_DiffuseSet);
-	bool bDiffuseChanged = state.boolChanged(MFSCB_DiffuseSet);
+	bool bDiffuseChanged = !!state.boolChanged(MFSCB_DiffuseSet);
 	int diffuseIndex = bDetailPresent ? 1 : 0;
 
 	if(bDetailPresent)

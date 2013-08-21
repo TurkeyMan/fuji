@@ -23,7 +23,7 @@ HKWidgetLayout::~HKWidgetLayout()
 {
 	OnResize -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
-	for(int a=0; a<children.size(); ++a)
+	for(size_t a=0; a<children.size(); ++a)
 	{
 		if(children[a].bOwnChild)
 			delete children[a].pChild;
@@ -48,7 +48,7 @@ int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 void HKWidgetLayout::RemoveChild(HKWidget *pChild)
 {
 	int index = -1;
-	for(int a=0; a<children.size(); ++a)
+	for(size_t a=0; a<children.size(); ++a)
 	{
 		if(children[a].pChild == pChild)
 		{
@@ -66,7 +66,7 @@ void HKWidgetLayout::RemoveChild(HKWidget *pChild)
 	RemoveChild(index);
 }
 
-void HKWidgetLayout::RemoveChild(int index)
+void HKWidgetLayout::RemoveChild(size_t index)
 {
 	children[index].pChild->OnLayoutChanged -= fastdelegate::MakeDelegate(this, &HKWidgetLayout::OnLayoutDirty);
 
@@ -85,7 +85,7 @@ void HKWidgetLayout::RemoveChild(int index)
 
 void HKWidgetLayout::ClearChildren()
 {
-	for(int a=0; a<children.size(); ++a)
+	for(size_t a=0; a<children.size(); ++a)
 	{
 		if(children[a].bOwnChild)
 			delete children[a].pChild;

@@ -9,8 +9,16 @@
 // 128 temp matrices for intermediate calculation data
 MFMatrix gWorkingMats[128];
 
+static void MFAnimationTemplate_Destroy(MFResource *pRes)
+{
+	MFAnimationTemplate *pTemplate = (MFAnimationTemplate*)pRes;
+	MFHeap_Free(pTemplate);
+}
+
 MFInitStatus MFAnimation_InitModule()
 {
+	MFRT_AnimationTemplate = MFResource_Register("MFAnimationTemplate", &MFAnimationTemplate_Destroy);
+
 	return MFAIC_Succeeded;
 }
 
@@ -20,7 +28,7 @@ void MFAnimation_DeinitModule()
 
 MFAnimationTemplate* MFAnimation_FindTemplate(const char *pName)
 {
-	return (MFAnimationTemplate*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0xA010A010);
+	return (MFAnimationTemplate*)MFResource_Find(MFUtil_HashString(pName) ^ 0xA010A010);
 }
 
 void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
@@ -30,7 +38,7 @@ void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
 	if(load)
 	{
 		MFFixUp(pTemplate->pBones, pTemplate, 1);
-		MFFixUp(pTemplate->pName, pTemplate, 1);
+		MFFixUp(pTemplate->pAnimName, pTemplate, 1);
 	}
 
 	for(a=0; a<pTemplate->numBones; a++)
@@ -43,7 +51,7 @@ void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
 	if(!load)
 	{
 		MFFixUp(pTemplate->pBones, pTemplate, 0);
-		MFFixUp(pTemplate->pName, pTemplate, 0);
+		MFFixUp(pTemplate->pAnimName, pTemplate, 0);
 	}
 }
 
@@ -72,14 +80,11 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 				// check ID string
 				MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");
 
-				pTemplate->hash = MFUtil_HashString(pFilename) ^ 0xA010A010;
-
-				MFString_Copy(&pTemplateData[size], pFilename);
-				pTemplate->pFilename = &pTemplateData[size];
+				pFilename = MFString_Copy(&pTemplateData[size], pFilename);
 
 				MFAnimation_FixUp(pTemplate, true);
 
-				MFResource_AddResource(pTemplate);
+				MFResource_AddResource(pTemplate, MFRT_AnimationTemplate, MFUtil_HashString(pFilename) ^ 0xA010A010, pFilename);
 			}
 
 			MFFile_Close(hFile);
@@ -145,20 +150,13 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	return pAnimation;
 }
 
-MF_API int MFAnimation_Destroy(MFAnimation *pAnimation)
+MF_API void MFAnimation_Destroy(MFAnimation *pAnimation)
 {
-	--pAnimation->pTemplate->refCount;
-	int refCount = pAnimation->pTemplate->refCount;
+	// release the template
+	MFResource_Release(pAnimation->pTemplate);
 
-	if(!pAnimation->pTemplate->refCount)
-	{
-		MFResource_RemoveResource(pAnimation->pTemplate);
-		MFHeap_Free(pAnimation->pTemplate);
-	}
-
+	// free the instance
 	MFHeap_Free(pAnimation);
-
-	return refCount;
 }
 
 MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)

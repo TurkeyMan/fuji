@@ -314,66 +314,54 @@ MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int nu
 	MFVertexElement *pElements = gRenderBuffers.pVertexDeclaration->pElements;
 	MFVertexElementData *pElementData = gRenderBuffers.pVertexDeclaration->pElementData;
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
+	// bind the vertex streams...
+	GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
+	GLint attribs[16];
+	int stream = -1;
+
+	for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
 	{
-		// bind the vertex streams...
-		GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
-		GLint attribs[16];
-		int stream = -1;
+		int type = pElements[a].type;
 
-		for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
+		if(pElements[a].index == 0)
+			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
-			int type = pElements[a].type;
-
-			if(pElements[a].index == 0)
-				attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
-			if(pElements[a].index > 0 || attribs[a] == -1)
-			{
-				gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
-				attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
-				gAttribNames[type][gAttribNameLen[type]] = 0;
-			}
-
-			if(attribs[a] == -1)
-				continue;
-
-			MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
-
-			if(gbUseVBOs)
-			{
-				if(pElements[a].stream != stream)
-				{
-					stream = pElements[a].stream;
-					glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
-				}
-
-				glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
-			}
-			else
-			{
-				glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
-			}
-
-			glEnableVertexAttribArray(attribs[a]);
+			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
+			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
 
-		glDrawArrays(gPrimTypes[primType], firstVertex, numVertices);
+		if(attribs[a] == -1)
+			continue;
 
-		// unbind the streams
-		for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
+		MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
+
+		if(gbUseVBOs)
 		{
-			if(attribs[a] != -1)
-				glDisableVertexAttribArray(attribs[a]);
+			if(pElements[a].stream != stream)
+			{
+				stream = pElements[a].stream;
+				glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+			}
+
+			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
 		}
+		else
+		{
+			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
+		}
+
+		glEnableVertexAttribArray(attribs[a]);
 	}
-	else
-#endif
+
+	glDrawArrays(gPrimTypes[primType], firstVertex, numVertices);
+
+	// unbind the streams
+	for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
 	{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-		// pre-shader code...
-		MFDebug_Assert(false, "Write me!");
-#endif
+		if(attribs[a] != -1)
+			glDisableVertexAttribArray(attribs[a]);
 	}
 
 	MFCheckForOpenGLError(true);
@@ -386,75 +374,63 @@ MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset
 	MFVertexElement *pElements = gRenderBuffers.pVertexDeclaration->pElements;
 	MFVertexElementData *pElementData = gRenderBuffers.pVertexDeclaration->pElementData;
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
+	// bind the vertex streams...
+	GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
+	GLint attribs[16];
+	int stream = -1;
+
+	for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
 	{
-		// bind the vertex streams...
-		GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
-		GLint attribs[16];
-		int stream = -1;
+		int type = pElements[a].type;
 
-		for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
+		if(pElements[a].index == 0)
+			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
-			int type = pElements[a].type;
-
-			if(pElements[a].index == 0)
-				attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
-			if(pElements[a].index > 0 || attribs[a] == -1)
-			{
-				gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
-				attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
-				gAttribNames[type][gAttribNameLen[type]] = 0;
-			}
-
-			if(attribs[a] == -1)
-				continue;
-
-			MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
-
-			if(gbUseVBOs)
-			{
-				if(pElements[a].stream != stream)
-				{
-					stream = pElements[a].stream;
-					glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
-				}
-
-				glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
-			}
-			else
-			{
-				glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
-			}
-
-			glEnableVertexAttribArray(attribs[a]);
+			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
+			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
+
+		if(attribs[a] == -1)
+			continue;
+
+		MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
 
 		if(gbUseVBOs)
 		{
-			// bind the index buffer
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)gRenderBuffers.pIndexBuffer->pPlatformData);
-			glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, NULL);
+			if(pElements[a].stream != stream)
+			{
+				stream = pElements[a].stream;
+				glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+			}
+
+			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
 		}
 		else
 		{
-			glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, gRenderBuffers.pIndexBuffer->pPlatformData);
+			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
 		}
 
-		// unbind the streams
-		for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
-		{
-			if(attribs[a] != -1)
-				glDisableVertexAttribArray(attribs[a]);
-		}
+		glEnableVertexAttribArray(attribs[a]);
+	}
+
+	if(gbUseVBOs)
+	{
+		// bind the index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)gRenderBuffers.pIndexBuffer->pPlatformData);
+		glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, NULL);
 	}
 	else
-#endif
 	{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-		// pre-shader code
-		MFDebug_Assert(false, "Write me!");
-#endif
+		glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, gRenderBuffers.pIndexBuffer->pPlatformData);
+	}
+
+	// unbind the streams
+	for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)
+	{
+		if(attribs[a] != -1)
+			glDisableVertexAttribArray(attribs[a]);
 	}
 
 	MFCheckForOpenGLError(true);

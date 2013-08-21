@@ -218,7 +218,7 @@ public:
 class F3DAnimationChunk
 {
 public:
-	void Optimise(float tolerance) { for(int a=0; a<anims.size(); a++) anims[a].Optimise(tolerance); }
+	void Optimise(float tolerance) { for(size_t a=0; a<anims.size(); a++) anims[a].Optimise(tolerance); }
 
 	MFArray<F3DAnimation> anims;
 };

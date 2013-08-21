@@ -135,19 +135,19 @@ extern (C) void MFMaterial_RemoveDefinitions(const(char)* pName);
 extern (C) MFMaterial* MFMaterial_Create(const(char)* pName);
 
 /**
-* Destroy a material instance.
-* Destroys a material instance.
+* Release an MFMaterial instance.
+* Release a reference to an MFMaterial and destroy when the reference count reaches 0.
 * @param pMaterial Material instance to destroy.
 * @return Returns the new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
 */
-extern (C) int MFMaterial_Destroy(MFMaterial* pMaterial);
+extern (C) int MFMaterial_Release(MFMaterial* pMaterial);
 
 /**
 * Find a material.
 * Finds a material instance.
 * @param pName Name of the material to find.
 * @return Returns a pointer to the material. If the material was not found, NULL is returned.
-* @remarks Note that MFMaterial_Find does NOT increment the materials reference count so you do not need to destroy the pointer returned by MFMaterial_Find.
+* @remarks Note that MFMaterial_Find increments the materials reference count so you must release the reference when finished.
 */
 extern (C) MFMaterial* MFMaterial_Find(const(char)* pName);
 
@@ -216,7 +216,7 @@ extern (C) int MFMaterial_GetParameterIndexFromName(MFMaterial* pMaterial, const
 * @param parameterIndex Parameter index.
 * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
-extern (C) const(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(MFMaterial* pMaterial, int parameterIndex);
+extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(MFMaterial* pMaterial, int parameterIndex);
 
 /**
 * Get parameter info by name.
@@ -424,17 +424,14 @@ import std.c.string;
 
 final class Material
 {
-	static Material create(in string name)									{ return cast(Material)MFMaterial_Create(name.toStringz); }
-	static Material find(in string name)									{ return cast(Material)MFMaterial_Find(name.toStringz); }
-	static Material getStockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
+	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz); }
+	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz); }
+	static Material stockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
 
-	int destroy()
-	{
-		return MFMaterial_Destroy(cast(MFMaterial*)this);
-	}
+	int release()														{ return MFMaterial_Release(cast(MFMaterial*)this); }
 
-	@property MFMaterial* handle() pure nothrow					{ return cast(MFMaterial*)this; }
-	@property const(MFMaterial)* handle() const pure nothrow	{ return cast(const(MFMaterial)*)this; }
+	@property MFMaterial* handle() pure nothrow							{ return cast(MFMaterial*)this; }
+	@property const(MFMaterial)* handle() const pure nothrow			{ return cast(const(MFMaterial)*)this; }
 
 	@property string name() const pure
 	{
@@ -454,10 +451,13 @@ final class Material
 			return pName[0..strlen(pName)];
 		}
 
-		@property ref const(MFMaterialParameterInfo) info() const
+		@property ref immutable(MFMaterialParameterInfo) info() const
 		{
 			return *MFMaterial_GetParameterInfo(pMaterial, index);
 		}
+
+        // assignment operators
+        // cast operators
 
 		// setters and getters...
 
@@ -468,8 +468,6 @@ final class Material
 
 	struct Parameters
 	{
-		static Parameter find(string name)							{ return Parameter(pMaterial, MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz)); }
-
 		@property bool empty() const pure nothrow					{ return offset == count; }
 		@property size_t length() const pure nothrow				{ return count - offset; }
 
@@ -479,10 +477,19 @@ final class Material
 		@property Parameter back() pure nothrow						{ return Parameter(pMaterial, count-1); }
 
 		Parameter opIndex(size_t index) pure nothrow				{ return Parameter(pMaterial, offset + cast(int)index); }
+		Parameter opIndex(string name) pure nothrow				    { return find(name); }
 		Parameters opSlice(size_t x, size_t y) pure nothrow			{ return Parameters(pMaterial, offset + x, offset + y); }
 
 		void popFront() pure nothrow								{ ++offset; }
-		void popBack() pure nothrow									{ ++count; }
+		void popBack() pure nothrow									{ --count; }
+
+		Parameter find(string name)
+        {
+            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz);
+            if(index < offset || index >= count)
+                return Parameter(pMaterial, -1);
+            return Parameter(pMaterial, index);
+        }
 
 	private:
 		MFMaterial* pMaterial;

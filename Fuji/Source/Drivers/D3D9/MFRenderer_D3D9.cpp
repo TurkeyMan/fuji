@@ -91,13 +91,13 @@ void MFRenderer_InitModulePlatformSpecific()
 	MFZeroMemory(&gDeviceZTargetSurface, sizeof(gDeviceZTargetSurface));
 
 	gDeviceRenderTarget.pTemplateData = &gDeviceRenderTargetTemplate;
-	MFString_Copy(gDeviceRenderTarget.name, "Device Render Target");
+	gDeviceRenderTarget.pName = "Device Render Target";
 	gDeviceRenderTargetTemplate.pSurfaces = &gDeviceRenderTargetSurface;
 	gDeviceRenderTargetTemplate.flags = TEX_RenderTarget;
 	gDeviceRenderTargetTemplate.mipLevels = 1;
 
 	gDeviceZTarget.pTemplateData = &gDeviceZTargetTemplate;
-	MFString_Copy(gDeviceZTarget.name, "Device Depth Stencil");
+	gDeviceZTarget.pName = "Device Depth Stencil";
 	gDeviceZTargetTemplate.pSurfaces = &gDeviceZTargetSurface;
 	gDeviceZTargetTemplate.flags = TEX_RenderTarget;
 	gDeviceZTargetTemplate.mipLevels = 1;

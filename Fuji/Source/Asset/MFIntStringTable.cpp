@@ -232,7 +232,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 			MFArray<MFString> row;
 			while(ReadCSVLine(pText, remaining, row))
 			{
-				for(int a=0; a<languages.size(); ++a)
+				for(size_t a=0; a<languages.size(); ++a)
 				{
 					if(!languages[a].IsEmpty())
 						columns[a].strings.push(row[a]);
@@ -250,7 +250,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 
 	int numLanguages = 0;
 	int numStrings = 0;
-	for(int a=0; a<languages.size(); ++a)
+	for(size_t a=0; a<languages.size(); ++a)
 	{
 		if(languages[a].IsEmpty())
 			continue;
@@ -273,7 +273,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 
 	MFStringCache *pStringCache = MFStringCache_Create(1024*1024);
 
-	for(int a=0, l=0; a<languages.size(); ++a)
+	for(size_t a=0, l=0; a<languages.size(); ++a)
 	{
 		if(languages[a].IsEmpty())
 			continue;

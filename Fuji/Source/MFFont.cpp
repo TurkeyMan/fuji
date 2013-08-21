@@ -223,7 +223,7 @@ MF_API void MFFont_Destroy(MFFont *pFont)
 		// destroy materials
 		for(int a=0; a<pFont->numPages; a++)
 		{
-			MFMaterial_Destroy(pFont->ppPages[a]);
+			MFMaterial_Release(pFont->ppPages[a]);
 		}
 
 		// destroy font

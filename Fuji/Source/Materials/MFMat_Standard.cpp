@@ -184,18 +184,18 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
 	for(uint32 a=0; a<pData->textureCount; a++)
-		MFTexture_Destroy(pData->textures[a].pTexture);
+		MFTexture_Release(pData->textures[a].pTexture);
 
 	if(pData->pRasteriserState)
-		MFRasteriserState_Destroy(pData->pRasteriserState);
+		MFRasteriserState_Release(pData->pRasteriserState);
 	if(pData->pDepthStencilState)
-		MFDepthStencilState_Destroy(pData->pDepthStencilState);
+		MFDepthStencilState_Release(pData->pDepthStencilState);
 	if(pData->pBlendState)
-		MFBlendState_Destroy(pData->pBlendState);
+		MFBlendState_Release(pData->pBlendState);
 	for(int a=0; a<8; ++a)
 	{
 		if(pData->pSamplerState[a])
-			MFSamplerState_Destroy(pData->pSamplerState[a]);
+			MFSamplerState_Release(pData->pSamplerState[a]);
 	}
 }
 
@@ -226,15 +226,15 @@ void MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial)
 	MFStateBlock_Clear(pMaterial->pMaterialState);
 
 	if(pData->pRasteriserState)
-		MFRasteriserState_Destroy(pData->pRasteriserState);
+		MFRasteriserState_Release(pData->pRasteriserState);
 	if(pData->pDepthStencilState)
-		MFDepthStencilState_Destroy(pData->pDepthStencilState);
+		MFDepthStencilState_Release(pData->pDepthStencilState);
 	if(pData->pBlendState)
-		MFBlendState_Destroy(pData->pBlendState);
+		MFBlendState_Release(pData->pBlendState);
 	for(int a=0; a<8; ++a)
 	{
 		if(pData->pSamplerState[a])
-			MFSamplerState_Destroy(pData->pSamplerState[a]);
+			MFSamplerState_Release(pData->pSamplerState[a]);
 	}
 
 	MFStateBlock_SetVector(pMaterial->pMaterialState, MFSCV_MaterialDiffuseColour, pData->diffuse);

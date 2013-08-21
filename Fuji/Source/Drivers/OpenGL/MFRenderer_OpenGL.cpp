@@ -34,13 +34,6 @@
 
 int gOpenGLVersion = 0;
 
-#if defined(MF_OPENGL_ES) && MF_OPENGL_ES_VER == 1
-	bool gOpenGLUseShaders = false;
-#else
-	// maybe we want to detect old PC hardware somehow... this'll do for now.
-	bool gOpenGLUseShaders = true;
-#endif
-
 #if MF_DISPLAY == MF_DRIVER_X11
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>
@@ -540,9 +533,11 @@ GLuint MFRenderer_OpenGL_CompileShader(const char *pShader, MFOpenGL_ShaderType 
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
 	if(result == GL_FALSE)
 	{
+//		GLint maxLength = 0;
+//		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+ 
 		// get the shader info log
-//		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-		char log[1024];
+		GLchar log[1024];
 		glGetShaderInfoLog(shader, sizeof(log), &result, log);
 
 		// print an error message and the info log
@@ -634,47 +629,28 @@ bool MFRenderer_OpenGL_SetUniformS(const char *pName, int sampler)
 
 void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat)
 {
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	if(MFOpenGL_UseShaders())
+	static MFMatrix proj;
+	switch(type)
 	{
-		static MFMatrix proj;
-		switch(type)
+		case MFOGL_MatrixType_Projection:
 		{
-			case MFOGL_MatrixType_Projection:
-			{
-				proj = mat;
-				break;
-			}
-			case MFOGL_MatrixType_WorldView:
-			{
-				MFRenderer_OpenGL_SetUniformM("wvMatrix", &mat);
-
-				MFMatrix wvp;
-				wvp.Multiply4x4(mat, proj);
-				MFRenderer_OpenGL_SetUniformM("wvpMatrix", &wvp);
-				break;
-			}
-			case MFOGL_MatrixType_Texture:
-			{
-				MFRenderer_OpenGL_SetUniformM("texMatrix", &mat);
-				break;
-			}
+			proj = mat;
+			break;
 		}
-	}
-	else
-#endif
-	{
-#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER < 2
-		static const GLenum matTypes[] =
+		case MFOGL_MatrixType_WorldView:
 		{
-			GL_PROJECTION,	// MFOGL_ShaderType_Projection
-			GL_MODELVIEW,	// MFOGL_ShaderType_WorldView
-			GL_TEXTURE		// MFOGL_ShaderType_Texture
-		};
+			MFRenderer_OpenGL_SetUniformM("wvMatrix", &mat);
 
-		glMatrixMode(matTypes[type]);
-		glLoadMatrixf((GLfloat*)&mat);
-#endif
+			MFMatrix wvp;
+			wvp.Multiply4x4(mat, proj);
+			MFRenderer_OpenGL_SetUniformM("wvpMatrix", &wvp);
+			break;
+		}
+		case MFOGL_MatrixType_Texture:
+		{
+			MFRenderer_OpenGL_SetUniformM("texMatrix", &mat);
+			break;
+		}
 	}
 }
 

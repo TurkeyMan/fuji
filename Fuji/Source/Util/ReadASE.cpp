@@ -600,7 +600,7 @@ char* ReadMesh(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetInt(pFilePtr, &count);
 
-		if(count != pSub->matSubobjects[0].triangles.size())
+		if((size_t)count != pSub->matSubobjects[0].triangles.size())
 		{
 			MFDebug_Warn(3, "Error: Number of faces does not match number of texture faces.");
 		}

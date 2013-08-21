@@ -100,7 +100,7 @@ void MFPrimitive_DeinitModule()
 {
 	MFCALLSTACK;
 
-	MFVertex_DestroyVertexDeclaration(pDecl);
+	MFVertex_ReleaseVertexDeclaration(pDecl);
 }
 
 void MFPrimitive_DrawStats()

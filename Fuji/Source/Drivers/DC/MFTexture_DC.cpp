@@ -18,7 +18,7 @@ extern Texture *pNoneTexture;
 // interface functions
 Texture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{

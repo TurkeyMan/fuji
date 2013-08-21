@@ -74,9 +74,23 @@ MaterialBrowser matBrowser;
 
 /**** Functions ****/
 
+static void MFMaterial_Destroy(MFResource *pRes)
+{
+	MFMaterial *pMaterial = (MFMaterial*)pRes;
+
+	MFStateBlock_Destroy(pMaterial->pMaterialState);
+
+	pMaterial->pType->materialCallbacks.pDestroyInstance(pMaterial);
+
+	MFHeap_Free(pMaterial->pInstanceData);
+	MFHeap_Free(pMaterial);
+}
+
 MFInitStatus MFMaterial_InitModule()
 {
 	MFCALLSTACK;
+
+	MFRT_Material = MFResource_Register("MFMaterial", &MFMaterial_Destroy);
 
 	gMaterialRegistry.Init("Material Registry", gDefaults.material.maxMaterialTypes);
 	gMaterialDefList.Init("Material Definitions List", gDefaults.material.maxMaterialDefs);
@@ -112,8 +126,8 @@ MFInitStatus MFMaterial_InitModule()
 	MFMaterial_SetParameterI(pWhiteMaterial, MFMatStandard_CullMode, 0, MFMatStandard_Cull_None);
 
 	// release a reference to the logo textures
-	MFTexture_Destroy(pSysLogoLargeTexture);
-	MFTexture_Destroy(pSysLogoSmallTexture);
+	MFTexture_Release(pSysLogoLargeTexture);
+	MFTexture_Release(pSysLogoSmallTexture);
 
 #if defined(_PSP)
 	// create PSP specific stock materials
@@ -144,18 +158,18 @@ void MFMaterial_DeinitModule()
 	MFCALLSTACK;
 
 	// destroy stock materials
-	MFMaterial_Destroy(pNoneMaterial);
-	MFMaterial_Destroy(pWhiteMaterial);
-	MFMaterial_Destroy(pSysLogoLarge);
-	MFMaterial_Destroy(pSysLogoSmall);
+	MFMaterial_Release(pNoneMaterial);
+	MFMaterial_Release(pWhiteMaterial);
+	MFMaterial_Release(pSysLogoLarge);
+	MFMaterial_Release(pSysLogoSmall);
 
 #if defined(_PSP)
 	// destroy PSP specific stock materials
-	MFMaterial_Destroy(pConnected);
-	MFMaterial_Destroy(pDisconnected);
-	MFMaterial_Destroy(pPower);
-	MFMaterial_Destroy(pCharging);
-	MFMaterial_Destroy(pUSB);
+	MFMaterial_Release(pConnected);
+	MFMaterial_Release(pDisconnected);
+	MFMaterial_Release(pPower);
+	MFMaterial_Release(pCharging);
+	MFMaterial_Release(pUSB);
 #endif
 
 	MaterialDefinition *pDef = pDefinitionRegistry;
@@ -184,7 +198,7 @@ void MFMaterial_DeinitModule()
 		MFDebug_Message(MFStr("'%s' - x%d", pMat->pName, pMat->refCount));
 
 		pMat->refCount = 1;
-		MFMaterial_Destroy(pMat);
+		MFMaterial_Release(pMat);
 
 		pI = MFResource_EnumerateNext(pI, MFRT_Material);
 	}
@@ -358,14 +372,9 @@ MF_API MFMaterial* MFMaterial_Create(const char *pName)
 	{
 		pMat = (MFMaterial*)MFHeap_AllocAndZero(sizeof(MFMaterial) + MFString_Length(pName) + 1);
 
-		pMat->pName = (char*)&pMat[1];
-		MFString_Copy(pMat->pName, pName);
+		pName = MFString_Copy((char*)&pMat[1], pName);
 
-		pMat->type = MFRT_Material;
-		pMat->hash = MFUtil_HashString(pName) ^ 0x0a7e01a1;
-		pMat->refCount = 0;
-
-		MFResource_AddResource(pMat);
+		MFResource_AddResource(pMat, MFRT_Material, MFUtil_HashString(pName) ^ 0x0a7e01a1, pName);
 
 		// TODO: how to determine size?
 		pMat->pMaterialState = MFStateBlock_Create(256);
@@ -397,36 +406,17 @@ MF_API MFMaterial* MFMaterial_Create(const char *pName)
 		}
 	}
 
-	pMat->refCount++;
-
 	return pMat;
 }
 
-MF_API int MFMaterial_Destroy(MFMaterial *pMaterial)
+MF_API int MFMaterial_Release(MFMaterial *pMaterial)
 {
-	MFCALLSTACK;
-
-	--pMaterial->refCount;
-
-	if(!pMaterial->refCount)
-	{
-		MFStateBlock_Destroy(pMaterial->pMaterialState);
-
-		pMaterial->pType->materialCallbacks.pDestroyInstance(pMaterial);
-
-		MFHeap_Free(pMaterial->pInstanceData);
-
-		MFResource_RemoveResource(pMaterial);
-		MFHeap_Free(pMaterial);
-		return 0;
-	}
-
-	return pMaterial->refCount;
+	return MFResource_Release(pMaterial);
 }
 
 MF_API MFMaterial* MFMaterial_Find(const char *pName)
 {
-	return (MFMaterial*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0x0a7e01a1);
+	return (MFMaterial*)MFResource_Find(MFUtil_HashString(pName) ^ 0x0a7e01a1);
 }
 
 MF_API MFMaterial* MFMaterial_GetCurrent()
@@ -924,4 +914,3 @@ MFVector MaterialBrowser::GetDimensions(float maxWidth)
 {
 	return MakeVector(maxWidth, TEX_SIZE + 8.0f, 0.0f);
 }
-

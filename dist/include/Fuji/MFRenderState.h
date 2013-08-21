@@ -572,16 +572,16 @@ struct MFRasteriserStateDesc
 struct MFStateBlock;
 
 MF_API MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc);
-MF_API void MFBlendState_Destroy(MFBlendState *pBlendState);
+MF_API int MFBlendState_Release(MFBlendState *pBlendState);
 
 MF_API MFSamplerState* MFSamplerState_Create(MFSamplerStateDesc *pDesc);
-MF_API void MFSamplerState_Destroy(MFSamplerState *pSamplerState);
+MF_API int MFSamplerState_Release(MFSamplerState *pSamplerState);
 
 MF_API MFDepthStencilState* MFDepthStencilState_Create(MFDepthStencilStateDesc *pDesc);
-MF_API void MFDepthStencilState_Destroy(MFDepthStencilState *pDepthStencilState);
+MF_API int MFDepthStencilState_Release(MFDepthStencilState *pDepthStencilState);
 
 MF_API MFRasteriserState* MFRasteriserState_Create(MFRasteriserStateDesc *pDesc);
-MF_API void MFRasteriserState_Destroy(MFRasteriserState *pRasteriserState);
+MF_API int MFRasteriserState_Release(MFRasteriserState *pRasteriserState);
 
 MF_API MFStateBlock* MFStateBlock_Create(uint32 size);
 MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size);

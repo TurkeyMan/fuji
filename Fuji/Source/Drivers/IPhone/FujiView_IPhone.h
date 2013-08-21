@@ -1,6 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES2/gl.h>
+
+#error "Switch to GLES2!"
+
 /**
  * OpenGL ES View
  * This view has capacity to display OpenGL ES content.

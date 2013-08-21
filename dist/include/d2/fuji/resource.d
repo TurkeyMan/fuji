@@ -40,10 +40,10 @@ struct MFResource
 
 struct MFResourceIterator;
 
-extern (C) void MFResource_AddResource(MFResource* pResource);
+extern (C) void MFResource_AddResource(MFResource* pResource, int type, uint hash, const(char)* pName = null);
 extern (C) void MFResource_RemoveResource(MFResource* pResource);
 
-extern (C) MFResource* MFResource_FindResource(uint32 hash);
+extern (C) MFResource* MFResource_Find(uint32 hash);
 
 extern (C) MFResourceType MFResource_GetType(MFResource* pResource);
 extern (C) uint32 MFResource_GetHash(MFResource* pResource);

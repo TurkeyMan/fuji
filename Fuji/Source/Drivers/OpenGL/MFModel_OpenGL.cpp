@@ -211,7 +211,7 @@ void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk)
 #endif
 */
 
-	MFMaterial_Destroy(pMC->pMaterial);
+	MFMaterial_Release(pMC->pMaterial);
 }
 
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load)

@@ -101,7 +101,7 @@ MFInitStatus MFPrimitive_InitModule()
 
 void MFPrimitive_DeinitModule()
 {
-	MFVertex_DestroyVertexDeclaration(pDecl);
+	MFVertex_ReleaseVertexDeclaration(pDecl);
 }
 
 void MFPrimitive_DrawStats()

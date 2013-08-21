@@ -60,8 +60,7 @@ struct MFModel
 
 struct MFModelTemplate : MFResource
 {
-	const char *pFilename;
-	const char *pName;
+	const char *pModelName;
 
 	MFModelDataChunk *pDataChunks;
 	int numDataChunks;

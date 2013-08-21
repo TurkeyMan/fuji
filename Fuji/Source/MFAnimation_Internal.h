@@ -59,8 +59,7 @@ struct MFAnimationBone
 
 struct MFAnimationTemplate : MFResource
 {
-	const char *pFilename;
-	const char *pName;
+	const char *pAnimName;
 
 	MFAnimationBone *pBones;
 	int numBones;

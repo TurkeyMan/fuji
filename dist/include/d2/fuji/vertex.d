@@ -97,11 +97,11 @@ struct MFMesh
 };
 
 extern (C) MFVertexDeclaration* MFVertex_CreateVertexDeclaration(MFVertexElement* pElementArray, int elementCount);
-extern (C) void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration* pDeclaration);
+extern (C) int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration* pDeclaration);
 extern (C) const(MFVertexDeclaration)* MFVertex_GetStreamDeclaration(const(MFVertexDeclaration)* pDeclaration, int stream) pure;
 
 extern (C) MFVertexBuffer* MFVertex_CreateVertexBuffer(MFVertexDeclaration* pVertexFormat, int numVerts, MFVertexBufferType type, void* pVertexBufferMemory = null, const(char)* pName = null);
-extern (C) void MFVertex_DestroyVertexBuffer(MFVertexBuffer* pVertexBuffer);
+extern (C) int MFVertex_ReleaseVertexBuffer(MFVertexBuffer* pVertexBuffer);
 extern (C) void MFVertex_LockVertexBuffer(MFVertexBuffer* pVertexBuffer);
 extern (C) void MFVertex_CopyVertexData(MFVertexBuffer* pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const(void)* pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
 extern (C) void MFVertex_SetVertexData4v(MFVertexBuffer* pVertexBuffer, MFVertexElementType element, int elementIndex, ref const(MFVector) data);
@@ -111,7 +111,7 @@ extern (C) void MFVertex_ReadVertexData4ub(MFVertexBuffer* pVertexBuffer, MFVert
 extern (C) void MFVertex_UnlockVertexBuffer(MFVertexBuffer* pVertexBuffer);
 
 extern (C) MFIndexBuffer* MFVertex_CreateIndexBuffer(int numIndices, ushort* pIndexBufferMemory = null, const(char)* pName = null);
-extern (C) void MFVertex_DestroyIndexBuffer(MFIndexBuffer* pIndexBuffer);
+extern (C) int MFVertex_ReleaseIndexBuffer(MFIndexBuffer* pIndexBuffer);
 extern (C) void MFVertex_LockIndexBuffer(MFIndexBuffer* pIndexBuffer, ushort** ppIndices);
 extern (C) void MFVertex_UnlockIndexBuffer(MFIndexBuffer* pIndexBuffer);
 

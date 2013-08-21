@@ -331,9 +331,6 @@ enum MFRendererDrivers
 	#define USE_MFMIXER
 
 	#define MF_OPENGL_ES
-	#if !defined(MF_OPENGL_ES_VER)
-		#define MF_OPENGL_ES_VER 1
-	#endif
 
 #elif defined(MF_ANDROID)
 
@@ -357,9 +354,6 @@ enum MFRendererDrivers
 	#define USE_MFMIXER
 
 	#define MF_OPENGL_ES
-	#if !defined(MF_OPENGL_ES_VER)
-		#define MF_OPENGL_ES_VER 1
-	#endif
 
 #elif defined(MF_SYMBIAN)
 
@@ -391,9 +385,6 @@ enum MFRendererDrivers
 	#define USE_MFMIXER
 
 	#define MF_OPENGL_ES
-	#if !defined(MF_OPENGL_ES_VER)
-		#define MF_OPENGL_ES_VER 2
-	#endif
 
 #endif
 
@@ -443,8 +434,8 @@ enum MFRendererDrivers
 
 // if no OpenGL ES version was defined, set the default
 #if defined(MF_OPENGL_ES) && !defined(MF_OPENGL_ES_VER)
-	// set default OpenGL ES version to 1
-	#define MF_OPENGL_ES_VER 1
+	// set default OpenGL ES version to 2
+	#define MF_OPENGL_ES_VER 2
 #endif
 
 // if the plugin driver was selected, the available plugins need to be configured for various platforms

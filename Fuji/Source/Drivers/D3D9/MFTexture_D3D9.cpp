@@ -86,7 +86,7 @@ void MFTexture_Recreate()
 			pD3DTex->GetSurfaceLevel(0, &pSurface);
 			pTemplate->pSurfaces[0].pImageData = (char*)pSurface;
 
-			MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTex->pInternalData, pTex->name);
+			MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTex->pInternalData, pTex->pName);
 		}
 
 		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
@@ -110,10 +110,10 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 	MFDebug_Assert(hr != D3DXERR_INVALIDDATA, MFStr("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
-	MFDebug_Assert(hr == D3D_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
+	MFDebug_Assert(hr == D3D_OK, MFStr("Failed to create texture '%s'.", pTexture->pName));
 
 	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
-	MFRenderer_D3D9_SetDebugName(pTex, pTexture->name);
+	MFRenderer_D3D9_SetDebugName(pTex, pTexture->pName);
 
 	// copy image data
 	D3DLOCKED_RECT rect;
@@ -128,21 +128,26 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
-		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
-		pTexture->refCount = 1;
-
-		MFResource_AddResource(pTexture);
-
 		if(targetFormat & ImgFmt_SelectNicest)
-		{
 			targetFormat = ImgFmt_A8R8G8B8;
-		}
+
+		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFRD_D3D9);
+		IDirect3DTexture9 *pD3DTex;
+		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
+		if(hr != D3D_OK)
+			return NULL;
+
+		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
+
+		if(pName)
+			pName = MFString_Copy((char*)&pTexture[1], pName);
+
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
 		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
 		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
@@ -162,31 +167,13 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pTexture->pTemplateData->pSurfaces[0].pPaletteEntries = NULL;
 		pTexture->pTemplateData->pSurfaces[0].paletteBufferLength = 0;
 
-		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
-		pTexture->name[sizeof(pTexture->name) - 1] = 0;
-
-		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFRD_D3D9);
-		IDirect3DTexture9 *pD3DTex;
-		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
 		pTexture->pInternalData = pD3DTex;
-
-		if(hr != D3D_OK)
-		{
-			MFHeap_Free(pTexture->pTemplateData);
-			MFResource_RemoveResource(pTexture);
-			MFHeap_Free(pTexture);
-			return NULL;
-		}
 
 		IDirect3DSurface9 *pSurface;
 		pD3DTex->GetSurfaceLevel(0, &pSurface);
 		pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pSurface;
 
-		MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTexture->pInternalData, pTexture->name);
-	}
-	else
-	{
-		pTexture->refCount++;
+		MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTexture->pInternalData, pTexture->pName);
 	}
 
 	return pTexture;

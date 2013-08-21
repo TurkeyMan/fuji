@@ -72,7 +72,7 @@ int AddToMaterials(const char *pMatName)
 {
 	F3DMaterialChunk *pChunk = pModel->GetMaterialChunk();
 
-	for(int a=0; a<pChunk->materials.size(); a++)
+	for(size_t a=0; a<pChunk->materials.size(); a++)
 	{
 		if(!MFString_CaseCmp(pChunk->materials[a].name, pMatName))
 			return a;
@@ -112,9 +112,9 @@ void CopyDataIntoSubobject(int subobject)
 			sub.normals.push(normals[a]);
 	}
 
-	for(a=0; a<sub.matSubobjects.size(); a++)
+	for(a=0; a<(int)sub.matSubobjects.size(); a++)
 	{
-		for(int b=0; b<sub.matSubobjects[a].vertices.size(); b++)
+		for(size_t b=0; b<sub.matSubobjects[a].vertices.size(); b++)
 		{
 			F3DVertex &vert = sub.matSubobjects[a].vertices[b];
 
@@ -273,8 +273,6 @@ void ParseOBJFile(const char *pFilePtr)
 				// add a triangle if we are up to the third vert or beyond
 				if(f >= 2)
 				{
-					int curVert = sub.matSubobjects[matSub].vertices.size() - 1;
-
 					F3DTriangle &tri = sub.matSubobjects[matSub].triangles.push();
 
 					tri.v[0] = firstVert;

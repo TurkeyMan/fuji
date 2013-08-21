@@ -109,19 +109,13 @@ void MFRenderState_Release()
 	{
 		MFResource *pResource = MFResource_Get(pI);
 
-		switch(MFResource_GetType(pResource))
-		{
-			case MFRT_BlendState:
-				MFBlendState_DestroyPlatformSpecific((MFBlendState*)pResource);
-				break;
-			case MFRT_RasteriserState:
-				MFRasteriserState_DestroyPlatformSpecific((MFRasteriserState*)pResource);
-				break;
-			case MFRT_DepthStencilState:
-				MFDepthStencilState_DestroyPlatformSpecific((MFDepthStencilState*)pResource);
-			default:
-				break;
-		}
+		int rt = MFResource_GetType(pResource);
+		if(rt == MFRT_BlendState)
+			MFBlendState_DestroyPlatformSpecific((MFBlendState*)pResource);
+		else if(rt == MFRT_RasteriserState)
+			MFRasteriserState_DestroyPlatformSpecific((MFRasteriserState*)pResource);
+		else if(rt == MFRT_DepthStencilState)
+			MFDepthStencilState_DestroyPlatformSpecific((MFDepthStencilState*)pResource);
 
 		pI = MFResource_EnumerateNext(pI);
 	}
@@ -135,19 +129,13 @@ void MFRenderState_Recreate()
 	{
 		MFResource *pResource = MFResource_Get(pI);
 
-		switch(MFResource_GetType(pResource))
-		{
-			case MFRT_BlendState:
-				MFBlendState_CreatePlatformSpecific((MFBlendState*)pResource);
-				break;
-			case MFRT_RasteriserState:
-				MFRasteriserState_CreatePlatformSpecific((MFRasteriserState*)pResource);
-				break;
-			case MFRT_DepthStencilState:
-				MFDepthStencilState_CreatePlatformSpecific((MFDepthStencilState*)pResource);
-			default:
-				break;
-		}
+		int rt = MFResource_GetType(pResource);
+		if(rt == MFRT_BlendState)
+			MFBlendState_CreatePlatformSpecific((MFBlendState*)pResource);
+		else if(rt == MFRT_RasteriserState)
+			MFRasteriserState_CreatePlatformSpecific((MFRasteriserState*)pResource);
+		else if(rt == MFRT_DepthStencilState)
+			MFDepthStencilState_CreatePlatformSpecific((MFDepthStencilState*)pResource);
 
 		pI = MFResource_EnumerateNext(pI);
 	}

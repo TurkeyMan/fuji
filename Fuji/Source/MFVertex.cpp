@@ -30,8 +30,46 @@ int gVertexDataStride[MFVDF_Max] =
 
 static MFVertexBuffer *gpScratchBufferList = NULL;
 
+static void MFVertex_DestroyVertexDeclaration(MFResource *pRes)
+{
+	MFVertexDeclaration *pDeclaration = (MFVertexDeclaration*)pRes;
+
+	if(pDeclaration->streamsUsed != 1)
+	{
+		for(int a=0; a<8; ++a)
+			if(pDeclaration->pStreamDecl[a])
+				MFVertex_ReleaseVertexDeclaration(pDeclaration->pStreamDecl[a]);
+	}
+
+	MFVertex_DestroyVertexDeclarationPlatformSpecific(pDeclaration);
+	MFHeap_Free(pDeclaration);
+}
+
+static void MFVertex_DestroyVertexBuffer(MFResource *pRes)
+{
+	MFVertexBuffer *pVertexBuffer = (MFVertexBuffer*)pRes;
+
+	MFDebug_Assert(pVertexBuffer->bufferType != MFVBType_Scratch, "Scratch buffers should not be freed!");
+	if(pVertexBuffer->bufferType == MFVBType_Scratch)
+		return;
+
+	MFVertex_DestroyVertexBufferPlatformSpecific(pVertexBuffer);
+	MFHeap_Free(pVertexBuffer);
+}
+
+static void MFVertex_DestroyIndexBuffer(MFResource *pRes)
+{
+	MFIndexBuffer *pIndexBuffer = (MFIndexBuffer*)pRes;
+	MFVertex_DestroyIndexBufferPlatformSpecific(pIndexBuffer);
+	MFHeap_Free(pIndexBuffer);
+}
+
 MFInitStatus MFVertex_InitModule()
 {
+	MFRT_VertexDecl = MFResource_Register("MFVertexDeclaration", &MFVertex_DestroyVertexDeclaration);
+	MFRT_VertexBuffer = MFResource_Register("MFVertexBuffer", &MFVertex_DestroyVertexBuffer);
+	MFRT_IndexBuffer = MFResource_Register("MFIndexBuffer", &MFVertex_DestroyIndexBuffer);
+
 	MFVertex_InitModulePlatformSpecific();
 
 	return MFAIC_Succeeded;
@@ -66,12 +104,10 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 
 	uint32 hash = MFUtil_HashBuffer(elements, sizeof(MFVertexElement)*elementCount);
 
-	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_FindResource(hash);
+	MFVertexDeclaration *pDecl = (MFVertexDeclaration*)MFResource_Find(hash);
 	if(!pDecl)
 	{
 		pDecl = (MFVertexDeclaration*)MFHeap_AllocAndZero(sizeof(MFVertexDeclaration) + (sizeof(MFVertexElement) + sizeof(MFVertexElementData))*elementCount);
-		pDecl->type = MFRT_VertexDecl;
-		pDecl->hash = hash;
 
 		pDecl->numElements = elementCount;
 		pDecl->pElements = (MFVertexElement*)&pDecl[1];
@@ -102,7 +138,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 			return NULL;
 		}
 
-		MFResource_AddResource(pDecl);
+		MFResource_AddResource(pDecl, MFRT_VertexDecl, hash);
 
 		if(pDecl->streamsUsed != 1)
 		{
@@ -130,27 +166,12 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 		}
 	}
 
-	++pDecl->refCount;
-
 	return pDecl;
 }
 
-MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration)
+MF_API int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration *pDeclaration)
 {
-	if(--pDeclaration->refCount > 0)
-		return;
-
-	if(pDeclaration->streamsUsed != 1)
-	{
-		for(int a=0; a<8; ++a)
-			if(pDeclaration->pStreamDecl[a])
-				MFVertex_DestroyVertexDeclaration(pDeclaration->pStreamDecl[a]);
-	}
-
-	MFResource_RemoveResource(pDeclaration);
-
-	MFVertex_DestroyVertexDeclarationPlatformSpecific(pDeclaration);
-	MFHeap_Free(pDeclaration);
+	return MFResource_Release(pDeclaration);
 }
 
 MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream)
@@ -170,14 +191,8 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 		pVB = (MFVertexBuffer*)MFHeap_Alloc(sizeof(MFVertexBuffer) + nameLen);
 	MFZeroMemory(pVB, sizeof(MFVertexBuffer));
 
-	pVB->type = MFRT_VertexBuffer;
-	pVB->hash = (uint32)MFUtil_HashPointer(pVB);
-	pVB->refCount = 1;
 	if(pName)
-	{
-		pVB->pName = (const char*)pVB + sizeof(MFVertexBuffer);
-		MFString_Copy((char*)pVB->pName, pName);
-	}
+		pName = MFString_Copy((char*)&pVB[1], pName);
 
 	pVB->pVertexDeclatation = pVertexFormat;
 	pVB->bufferType = type;
@@ -197,24 +212,14 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 		gpScratchBufferList = pVB;
 	}
 	else
-		MFResource_AddResource(pVB);
+		MFResource_AddResource(pVB, MFRT_VertexBuffer, (uint32)MFUtil_HashPointer(pVB), pName);
 
 	return pVB;
 }
 
-MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer)
+MF_API int MFVertex_ReleaseVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
-	if(--pVertexBuffer->refCount > 0)
-		return;
-
-	MFDebug_Assert(pVertexBuffer->bufferType != MFVBType_Scratch, "Scratch buffers should not be freed!");
-	if(pVertexBuffer->bufferType == MFVBType_Scratch)
-		return;
-
-	MFResource_RemoveResource(pVertexBuffer);
-
-	MFVertex_DestroyVertexBufferPlatformSpecific(pVertexBuffer);
-	MFHeap_Free(pVertexBuffer);
+	return MFResource_Release(pVertexBuffer);
 }
 
 static int MFVertex_FindVertexElement(const MFVertexDeclaration *pDecl, MFVertexElementType targetElement, int targetElementIndex)
@@ -312,14 +317,9 @@ MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexB
 {
 	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_AllocAndZero(sizeof(MFIndexBuffer) + nameLen);
-	pIB->type = MFRT_IndexBuffer;
-	pIB->hash = (uint32)MFUtil_HashPointer(pIB);
-	pIB->refCount = 1;
+
 	if(pName)
-	{
-		pIB->pName = (const char*)pIB + sizeof(MFIndexBuffer);
-		MFString_Copy((char*)pIB->pName, pName);
-	}
+		pName = MFString_Copy((char*)&pIB[1], pName);
 
 	pIB->numIndices = numIndices;
 
@@ -329,18 +329,12 @@ MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexB
 		return NULL;
 	}
 
-	MFResource_AddResource(pIB);
+	MFResource_AddResource(pIB, MFRT_IndexBuffer, (uint32)MFUtil_HashPointer(pIB), pName);
 
 	return pIB;
 }
 
-MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer)
+MF_API int MFVertex_ReleaseIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
-	if(--pIndexBuffer->refCount > 0)
-		return;
-
-	MFResource_RemoveResource(pIndexBuffer);
-
-	MFVertex_DestroyIndexBufferPlatformSpecific(pIndexBuffer);
-	MFHeap_Free(pIndexBuffer);
+	return MFResource_Release(pIndexBuffer);
 }

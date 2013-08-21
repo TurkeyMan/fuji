@@ -419,7 +419,7 @@ const char *ParseTexCoords(const char *pText, F3DSubObject &sub, int numPosition
 	SkipToken(pText, ";");
 
 	// map to faces
-	for(int m=0; m<sub.matSubobjects.size(); m++)
+	for(size_t m=0; m<sub.matSubobjects.size(); m++)
 	{
 		int totalVerts = sub.matSubobjects[m].vertices.size();
 		for(int a=0; a<totalVerts; a++)
@@ -460,7 +460,7 @@ const char *ParseColours(const char *pText, F3DSubObject &sub, int numPositions)
 	SkipToken(pText, ";");
 
 	// map to faces
-	for(int m=0; m<sub.matSubobjects.size(); m++)
+	for(size_t m=0; m<sub.matSubobjects.size(); m++)
 	{
 		int totalVerts = sub.matSubobjects[m].vertices.size();
 		for(int a=0; a<totalVerts; a++)
@@ -513,11 +513,11 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 		for(int a=0; a<numWeights; a++)
 			MFDebug_Assert(a == pIndices[a], "Weight array is not sequential!");
 
-		for(int a=0; a<sub.matSubobjects.size(); a++)
+		for(size_t a=0; a<sub.matSubobjects.size(); a++)
 			++sub.matSubobjects[a].numBones;
 
 		// map to faces
-		for(int m=0; m<sub.matSubobjects.size(); m++)
+		for(size_t m=0; m<sub.matSubobjects.size(); m++)
 		{
 			int totalVerts = sub.matSubobjects[m].vertices.size();
 			for(int a=0; a<totalVerts; a++)
@@ -597,7 +597,8 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 	int *pMatFaces = ParseMaterialList(pText, sub, numFaces);
 
 	// read faces
-	int face[16], numVerts[16], numTris[16];
+	int face[16];
+	size_t numVerts[16], numTris[16];
 	MFZeroMemory(numVerts, sizeof(numVerts));
 	MFZeroMemory(numTris, sizeof(numTris));
 	for(int a=0; a<numFaces; a++)
@@ -983,7 +984,7 @@ void LoadTextXFile(const char *pText)
 		pTok = GetNextToken(pText, &pText);
 	}
 
-	int a;
+	size_t a;
 	for(a=0; a<gMeshChunks.size(); a++)
 	{
 		ParseMesh(gMeshChunks[a].pMesh, gMeshChunks[a].mat, gMeshChunks[a].frameName);

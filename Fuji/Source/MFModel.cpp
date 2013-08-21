@@ -15,8 +15,49 @@
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
+static void MFModelTemplate_Destroy(MFResource *pRes)
+{
+	MFModelTemplate *pTemplate = (MFModelTemplate*)pRes;
+
+	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
+	if(pChunk)
+	{
+		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
+
+		for(int a=0; a<pChunk->count; a++)
+		{
+//			MFMaterial_Release(pSubobjects[a].pMaterial);
+
+			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
+			{
+				MFMeshChunk *pMC = MFModel_GetMeshChunkInternal(pTemplate, a, b);
+
+				MFModel_DestroyMeshChunk(pMC);
+
+				MFStateBlock_Destroy(pMC->pGeomState);
+
+				if(pMC->pDecl)
+					MFVertex_ReleaseVertexDeclaration(pMC->pDecl);
+
+				for(int s=0; s<8; ++s)
+				{
+					if(pMC->pVertexBuffers[s])
+						MFVertex_ReleaseVertexBuffer(pMC->pVertexBuffers[s]);
+				}
+
+				if(pMC->pIndexBuffer)
+					MFVertex_ReleaseIndexBuffer(pMC->pIndexBuffer);
+			}
+		}
+	}
+
+	MFHeap_Free(pTemplate);
+}
+
 MFInitStatus MFModel_InitModule()
 {
+	MFRT_ModelTemplate = MFResource_Register("MFModelTemplate", &MFModelTemplate_Destroy);
+
 	MFModel_InitModulePlatformSpecific();
 
 	return MFAIC_Succeeded;
@@ -27,7 +68,7 @@ void MFModel_DeinitModule()
 	bool bShowHeader = true;
 
 	// list all non-freed textures...
-	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Model);
+	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_ModelTemplate);
 	while(pI)
 	{
 		if(bShowHeader)
@@ -41,7 +82,7 @@ void MFModel_DeinitModule()
 
 		// Destroy template...
 
-		MFResource_EnumerateNext(pI, MFRT_Model);
+		MFResource_EnumerateNext(pI, MFRT_ModelTemplate);
 	}
 
 	MFModel_DeinitModulePlatformSpecific();
@@ -67,7 +108,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 	if(load)
 	{
 		MFFixUp(pTemplate->pDataChunks, pTemplate, 1);
-		MFFixUp(pTemplate->pName, pTemplate, 1);
+		MFFixUp(pTemplate->pModelName, pTemplate, 1);
 	}
 
 	for(a=0; a<pTemplate->numDataChunks; a++)
@@ -165,7 +206,7 @@ void MFModel_FixUp(MFModelTemplate *pTemplate, bool load)
 	if(!load)
 	{
 		MFFixUp(pTemplate->pDataChunks, pTemplate, 0);
-		MFFixUp(pTemplate->pName, pTemplate, 0);
+		MFFixUp(pTemplate->pModelName, pTemplate, 0);
 	}
 }
 
@@ -191,7 +232,7 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 	const char* pOriginalFilename = pFilename;
 
 	// see if it's already loaded
-	MFModelTemplate *pTemplate = (MFModelTemplate*)MFResource_FindResource(MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1);
+	MFModelTemplate *pTemplate = (MFModelTemplate*)MFResource_Find(MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1);
 
 	if(!pTemplate)
 	{
@@ -259,14 +300,9 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 		// check ID string
 		MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
 
-		pTemplate->hash = MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1;
-
-		MFResource_AddResource(pTemplate);
-
-		// store filename for later reference
-		pTemplate->pFilename = pFilename;
-
 		MFModel_FixUp(pTemplate, true);
+
+		MFResource_AddResource(pTemplate, MFRT_ModelTemplate, MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1, pFilename);
 
 		MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
 
@@ -295,14 +331,14 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 							const MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
 							if(pVBDecl)
 							{
-								const char *pVBName = MFStr("%s|%s[%d:%d]", pTemplate->pFilename, pSubobjects[a].pSubObjectName, b, s);
+								const char *pVBName = MFStr("%s|%s[%d:%d]", pTemplate->pName, pSubobjects[a].pSubObjectName, b, s);
 								pMC->pVertexBuffers[s] = MFVertex_CreateVertexBuffer(pVBDecl, pMC->numVertices, MFVBType_Static, pMCG->ppVertexStreams[s], pVBName);
 
 								MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_VertexBuffer(s), pMC->pVertexBuffers[s]);
 							}
 						}
 
-						const char *pIBName = MFStr("%s|%s[%d]", pTemplate->pFilename, pSubobjects[a].pSubObjectName, b);
+						const char *pIBName = MFStr("%s|%s[%d]", pTemplate->pName, pSubobjects[a].pSubObjectName, b);
 						pMC->pIndexBuffer = MFVertex_CreateIndexBuffer(pMC->numIndices, pMCG->pIndexData, pIBName);
 
 						MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_IndexBuffer, pMC->pIndexBuffer);
@@ -322,8 +358,6 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 	pModel->pTemplate = pTemplate;
 	pModel->pAnimation = NULL;
 
-	++pTemplate->refCount;
-
 	return pModel;
 }
 
@@ -337,61 +371,17 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
 	return pModel;
 }
 
-MF_API int MFModel_Destroy(MFModel *pModel)
+MF_API void MFModel_Destroy(MFModel *pModel)
 {
 	// free instance data
 	if(pModel->pAnimation)
 		MFAnimation_Destroy(pModel->pAnimation);
 
-	// decrement and possibly free template
-	--pModel->pTemplate->refCount;
-	int refCount = pModel->pTemplate->refCount;
-
-	if(!pModel->pTemplate->refCount)
-	{
-		MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
-
-		if(pChunk)
-		{
-			MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
-
-			for(int a=0; a<pChunk->count; a++)
-			{
-//				MFMaterial_Destroy(pSubobjects[a].pMaterial);
-
-				for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
-				{
-					MFMeshChunk *pMC = MFModel_GetMeshChunkInternal(pModel->pTemplate, a, b);
-
-					MFModel_DestroyMeshChunk(pMC);
-
-					MFStateBlock_Destroy(pMC->pGeomState);
-
-					if(pMC->pDecl)
-						MFVertex_DestroyVertexDeclaration(pMC->pDecl);
-
-					for(int s=0; s<8; ++s)
-					{
-						if(pMC->pVertexBuffers[s])
-							MFVertex_DestroyVertexBuffer(pMC->pVertexBuffers[s]);
-					}
-
-					if(pMC->pIndexBuffer)
-						MFVertex_DestroyIndexBuffer(pMC->pIndexBuffer);
-				}
-			}
-		}
-
-		// remove it from the registry
-		MFResource_RemoveResource(pModel->pTemplate);
-
-		MFHeap_Free(pModel->pTemplate);
-	}
+	// release the template
+	MFResource_Release(pModel->pTemplate);
 
 	//free instance
 	MFHeap_Free(pModel);
-
-	return refCount;
 }
 
 
@@ -437,7 +427,7 @@ MF_API void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
 
 MF_API const char* MFModel_GetName(MFModel *pModel)
 {
-	return pModel->pTemplate->pName;
+	return pModel->pTemplate->pModelName;
 }
 
 MF_API int MFModel_GetNumSubObjects(MFModel *pModel)

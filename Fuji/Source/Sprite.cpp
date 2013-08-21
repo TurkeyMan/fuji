@@ -65,7 +65,7 @@ void Sprite::Draw()
 
 void Sprite::Release()
 {
-	MFMaterial_Destroy(pMaterial);
+	MFMaterial_Release(pMaterial);
 }
 
 void Sprite::SetFlag(uint32 flag, bool enable)

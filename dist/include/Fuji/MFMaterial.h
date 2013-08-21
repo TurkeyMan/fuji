@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFMATERIAL_H)
 #define _MFMATERIAL_H
 
@@ -163,19 +164,19 @@ MF_API void MFMaterial_RemoveDefinitions(const char *pName);
 MF_API MFMaterial*	MFMaterial_Create(const char *pName);
 
 /**
- * Destroy a material instance.
- * Destroys a material instance.
+ * Release an MFMaterial instance.
+ * Release a reference to an MFMaterial and destroy when the reference count reaches 0.
  * @param pMaterial Material instance to destroy.
  * @return Returns the new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
  */
-MF_API int MFMaterial_Destroy(MFMaterial *pMaterial);
+MF_API int MFMaterial_Release(MFMaterial *pMaterial);
 
 /**
  * Find a material.
  * Finds a material instance.
  * @param pName Name of the material to find.
  * @return Returns a pointer to the material. If the material was not found, NULL is returned.
- * @remarks Note that MFMaterial_Find does NOT increment the materials reference count so you do not need to destroy the pointer returned by MFMaterial_Find.
+ * @remarks Note that MFMaterial_Find increments the materials reference count so you must release the reference when finished.
  */
 MF_API MFMaterial*	MFMaterial_Find(const char *pName);
 
@@ -454,6 +455,59 @@ MF_API void MFMaterial_RegisterMaterialType(const char *pName, const MFMaterialC
  * @return None.
  */
 MF_API void MFMaterial_UnregisterMaterialType(const char *pName);
+
+
+// C++ API
+#include "Fuji/MFResource.h"
+
+namespace Fuji
+{
+	class Material : public Resource
+	{
+	public:
+		inline Material()																				{}
+		inline Material(const Material &from)															: Resource(from) {}
+		inline Material(MFMaterial *pFrom)																: Resource((MFResource*)pFrom) {}
+		inline Material(const char *pName)																{ pResource = (MFResource*)MFMaterial_Create(pName); }
+//		inline ~Material()																				{ if(pMaterial) MFMaterial_Release(pMaterial); }
+
+		inline Material& operator=(const Material& from)
+		{
+			Release();
+			pResource = from.pResource;
+			AddRef();
+		}
+
+		inline operator MFMaterial*()																	{ return (MFMaterial*)pResource; }
+
+		inline Material& Create(const char *pName)
+		{
+			Release();
+			pResource = (MFResource*)MFMaterial_Create(pName);
+			return *this;
+		}
+
+		inline const char *Name() const																	{ return MFMaterial_GetMaterialName((MFMaterial*)pResource); }
+		inline MFStateBlock* StateBlock()																{ return MFMaterial_GetMaterialStateBlock((MFMaterial*)pResource); }
+		inline const MFStateBlock* StateBlock() const													{ return MFMaterial_GetMaterialStateBlock((MFMaterial*)pResource); }
+
+		inline int NumParameters() const																{ return MFMaterial_GetNumParameters((MFMaterial*)pResource); }
+		inline const char* ParameterName(int parameterIndex) const										{ return MFMaterial_GetParameterName((MFMaterial*)pResource, parameterIndex); }
+		inline int ParameterIndexFromName(const char *pParameterName) const								{ return MFMaterial_GetParameterIndexFromName((MFMaterial*)pResource, pParameterName); }
+
+		inline const MFMaterialParameterInfo* ParameterInfo(int parameterIndex) const					{ return MFMaterial_GetParameterInfo((MFMaterial*)pResource, parameterIndex); }
+		inline const MFMaterialParameterInfo* ParameterInfoFromName(const char *pParameterName) const	{ return MFMaterial_GetParameterInfoFromName((MFMaterial*)pResource, pParameterName); }
+
+		inline uintp GetParameter(int parameterIndex, int argIndex, void *pValue = NULL) const			{ return MFMaterial_GetParameter((MFMaterial*)pResource, parameterIndex, argIndex, pValue); }
+
+		inline void SetParameter(int parameterIndex, int argIndex, uintp value)							{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, value); }
+		inline void SetParameter(int parameterIndex, int argIndex, float value)							{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, (uintp)&value); }
+		inline void SetParameter(int parameterIndex, int argIndex, const MFVector &vector)				{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, (uintp)&vector); }
+		inline void SetParameter(int parameterIndex, int argIndex, const MFMatrix &matrix)				{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, (uintp)&matrix); }
+		inline void SetParameter(int parameterIndex, int argIndex, const MFTexture *pTexture)			{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, (uintp)pTexture); }
+		inline void SetParameter(int parameterIndex, int argIndex, const char *pString)					{ MFMaterial_SetParameter((MFMaterial*)pResource, parameterIndex, argIndex, (uintp)pString); }
+	};
+}
 
 #endif // _MFMATERIAL_H
 

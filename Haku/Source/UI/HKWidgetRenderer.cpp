@@ -27,7 +27,7 @@ HKWidgetRenderer::HKWidgetRenderer()
 HKWidgetRenderer::~HKWidgetRenderer()
 {
 	if(pImage)
-		MFMaterial_Destroy(pImage);
+		MFMaterial_Release(pImage);
 }
 
 void HKWidgetRenderer::Render(const HKWidget &widget, const MFMatrix &worldTransform)
@@ -82,7 +82,7 @@ bool HKWidgetRenderer::SetProperty(const char *pProperty, const char *pValue, HK
 	if(!MFString_CaseCmp(pProperty, "background_image"))
 	{
 		if(pImage)
-			MFMaterial_Destroy(pImage);
+			MFMaterial_Release(pImage);
 		pImage = MFMaterial_Create(pValue);
 		if(pImage)
 		{

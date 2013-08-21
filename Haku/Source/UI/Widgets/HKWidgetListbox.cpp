@@ -204,7 +204,7 @@ float HKWidgetListbox::GetMaxSize() const
 
 void HKWidgetListbox::SetSelection(int item)
 {
-	if(item >= children.size())
+	if(item >= (int)children.size())
 		item = -1;
 
 	if(selection != item)
@@ -325,7 +325,7 @@ void HKWidgetListbox::OnItemOut(HKWidget &widget, const HKWidgetEventInfo &ev)
 
 int HKWidgetListbox::GetChildIndex(HKWidget *pWidget)
 {
-	for(int a=0; a<children.size(); ++a)
+	for(size_t a=0; a<children.size(); ++a)
 	{
 		if(children[a].pChild == pWidget)
 			return a;

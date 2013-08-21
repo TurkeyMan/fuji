@@ -44,7 +44,7 @@ enum TextureFlags
  * @param generateMipChain If true, a mip-chain will be generated for the texture.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
- * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
+ * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Release()
  */
 MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
 
@@ -58,7 +58,7 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = tr
  * @param flags Texture creation flags.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If the specified texture has already been created, MFTexture_CreateDynamic will fail.
- * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Destroy()
+ * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Release()
  */
 MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFImageFormat format, uint32 flags = 0);
 
@@ -75,7 +75,7 @@ MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int heig
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If ImgFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
- * @see MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
+ * @see MFTexture_Create(), MFTexture_Release(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
  */
 MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFImageFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
 
@@ -94,7 +94,7 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If ImgFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
- * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Destroy(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
+ * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Release(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
  */
 MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFImageFormat format, MFScalingAlgorithm algorithm, uint32 flags = 0, uint32 *pPalette = 0);
 
@@ -105,29 +105,28 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
  * @param width Width of render target.
  * @param height Height of render target.
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
- * @see MFTexture_Create(), MFTexture_Destroy()
+ * @see MFTexture_Create(), MFTexture_Release()
  */
 MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = ImgFmt_SelectNicest);
 
 /**
- * Destroys a Texture.
- * Release a reference to an MFTexture and destroy when the reference reaches 0.
+ * Release an MFTexture instance.
+ * Release a reference to an MFTexture and destroy when the reference count reaches 0.
  * @param pTexture Texture instance to be destroyed.
  * @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
  * @see MFTexture_Create()
  */
-MF_API int MFTexture_Destroy(MFTexture *pTexture);
+MF_API int MFTexture_Release(MFTexture *pTexture);
 
 /**
  * Find an existing texture.
  * Finds an existing instance of the specified texture and returns a pointer. If the texture is not found, NULL is returned.
- * Note: The reference count is NOT incremented by MFTexture_FindTexture().
  * @param pName Name of texture to find.
  * @return Returns a pointer to the texture if it is found, otherwise NULL is returned.
- * @remarks MFTexture_Create does NOT increase the reference count of the texture so it is not required to destroy any texture returned by MFTexture_FindTexture().
+ * @remarks Note that MFTexture_Find increments the textures reference count so you must release the reference when finished.
  * @see MFTexture_Create()
  */
-MF_API MFTexture* MFTexture_FindTexture(const char *pName);
+MF_API MFTexture* MFTexture_Find(const char *pName);
 
 /**
  * Create a blank plain coloured texture.
@@ -149,6 +148,45 @@ MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colou
 MF_API bool MFTexture_IsFormatAvailable(int format);
 
 MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight);
+
+
+// C++ API
+#include "Fuji/MFResource.h"
+
+namespace Fuji
+{
+	class Texture : public Resource
+	{
+	public:
+		struct Dimensions
+		{
+			int width, height;
+		};
+
+		inline Texture()											{}
+		inline Texture(const Texture &from)							: Resource(from) {}
+		inline Texture(MFTexture *pFrom)							: Resource((MFResource*)pFrom) {}
+		inline Texture(const char *pName)							{ pResource = (MFResource*)MFTexture_Create(pName); }
+
+		inline Texture& operator=(const Texture& from)
+		{
+			Release();
+			pResource = from.pResource;
+			AddRef();
+		}
+
+		inline operator MFTexture*()								{ return (MFTexture*)pResource; }
+
+		inline Texture& Create(const char *pName)
+		{
+			Release();
+			pResource = (MFResource*)MFTexture_Create(pName);
+			return *this;
+		}
+
+		inline Dimensions Size() const								{ Dimensions dim; MFTexture_GetTextureDimensions((MFTexture*)pResource, &dim.width, &dim.height); return dim; }
+	};
+}
 
 #endif // _MFTEXTURE_H
 

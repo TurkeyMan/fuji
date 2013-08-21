@@ -20,7 +20,7 @@ public:
 
 	int AddChild(HKWidget *pChild, bool bOwnChild = false);
 	void RemoveChild(HKWidget *pChild);
-	void RemoveChild(int index);
+	void RemoveChild(size_t index);
 
 	void ClearChildren();
 

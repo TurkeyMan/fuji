@@ -2,6 +2,13 @@
 #if !defined(_MFOPENGL_H)
 #define _MFOPENGL_H
 
+#if MF_OPENGL_ES_VER == 1
+	#error GLES 1.x no longer supported!
+#endif
+#if !defined(MF_OPENGL_ES) || MF_OPENGL_ES_VER >= 2
+	#define MF_OPENGL_SUPPORT_SHADERS
+#endif
+
 #if defined(MF_WINDOWS)
 	#include "glew/glew.h"
 	#include "glew/wglew.h"
@@ -37,10 +44,6 @@
 	#else
 		#error Unknown OpenGL ES include paths...
 	#endif
-
-	#if MF_OPENGL_ES_VER >= 2
-		#define MF_OPENGL_SUPPORT_SHADERS
-	#endif
 #else
 	#if defined(MF_LINUX) || defined(MF_OSX)
 		#include "glew/glxew.h"
@@ -51,29 +54,12 @@
 	#endif
 
 	#include <GL/gl.h>
-
-	#define MF_OPENGL_SUPPORT_SHADERS
 #endif
 
 //  OpenGL ES seems to have renamed a couple of functions
 #if defined(MF_OPENGL_ES)
 	#define glClearDepth glClearDepthf
 	#define glDepthRange glDepthRangef
-
-	#if MF_OPENGL_ES_VER == 1
-		#define glGenRenderbuffers glGenRenderbuffersOES
-		#define glDeleterenderbuffers glDeleteRenderbuffersOES
-		#define glBindRenderbuffer glBindRenderbufferOES
-		#define glRenderbufferStorage glRenderbufferStorageOES
-
-		#define glGenFramebuffers glGenFramebuffersOES
-		#define glDeleteFramebuffers glDeleteFramebuffersOES
-		#define glBindFramebuffer glBindFramebufferOES
-		#define glFramebufferTexture2D glFramebufferTexture2DOES
-		#define glFramebufferRenderbuffer glFramebufferRenderbufferOES
-
-		#define glCheckFramebufferStatus glCheckFramebufferStatusOES
-	#endif
 
 	#if !defined GL_CLAMP_TO_BORDER
 		#define GL_CLAMP_TO_BORDER 0x812D
@@ -119,8 +105,5 @@ extern GLuint gCurrentShaderProgram;
 inline GLuint MFRenderer_OpenGL_GetCurrentProgram() { return gCurrentShaderProgram; }
 
 bool MFCheckForOpenGLError(bool bBreakOnError = false);
-
-extern bool gOpenGLUseShaders;
-inline bool MFOpenGL_UseShaders() { return gOpenGLUseShaders; }
 
 #endif

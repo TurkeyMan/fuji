@@ -122,11 +122,11 @@ struct MFMesh
 };
 
 MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexElement *pElementArray, int elementCount);
-MF_API void MFVertex_DestroyVertexDeclaration(MFVertexDeclaration *pDeclaration);
+MF_API int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration *pDeclaration);
 MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream);
 
 MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL, const char *pName = NULL);
-MF_API void MFVertex_DestroyVertexBuffer(MFVertexBuffer *pVertexBuffer);
+MF_API int MFVertex_ReleaseVertexBuffer(MFVertexBuffer *pVertexBuffer);
 MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices);
 MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
 MF_API void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
@@ -136,7 +136,7 @@ MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexEl
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer);
 
 MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory = NULL, const char *pName = NULL);
-MF_API void MFVertex_DestroyIndexBuffer(MFIndexBuffer *pIndexBuffer);
+MF_API int MFVertex_ReleaseIndexBuffer(MFIndexBuffer *pIndexBuffer);
 MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices);
 MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer);
 

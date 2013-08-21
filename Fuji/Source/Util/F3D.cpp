@@ -91,7 +91,7 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 	F3DMesh *pMesh = (F3DMesh*)pData;
 	int size;
 
-	for(int a=0; a<meshChunk.subObjects.size(); a++)
+	for(size_t a=0; a<meshChunk.subObjects.size(); a++)
 	{
 		pMesh[a].size = sizeof(F3DMesh);
 		pData += pMesh[a].size;
@@ -108,7 +108,7 @@ void F3DFile::ExportMesh(char* &pData, char *pBase)
 		pMesh[a].illumCount = meshChunk.subObjects[a].illumination.size();
 	}
 
-	for(int a=0; a<meshChunk.subObjects.size(); a++)
+	for(size_t a=0; a<meshChunk.subObjects.size(); a++)
 	{
 		size = pMesh[a].matSubCount * sizeof(F3DMatSub);
 		F3DMatSub *pMatSubs = (F3DMatSub*)pData;
@@ -372,10 +372,10 @@ struct FileVertex
 void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
 	int numMeshChunks = 0;
-	int a, b, c, mc = 0;
+	int mc = 0;
 
 	// count valid mesh chunks
-	for(a=0; a<sub.matSubobjects.size(); a++)
+	for(size_t a=0; a<sub.matSubobjects.size(); a++)
 	{
 		if(sub.matSubobjects[a].triangles.size() != 0)
 			numMeshChunks += sub.matSubobjects[a].triangleBatches.size();
@@ -390,7 +390,7 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 	bool subobjectAnimation = (sub.IsSubobjectAnimation() != -1);
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<sub.matSubobjects.size(); a++)
+	for(size_t a=0; a<sub.matSubobjects.size(); a++)
 	{
 		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
 
@@ -428,13 +428,13 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 
 		bool bAnimating = (matsub.numBones && !subobjectAnimation);
 
-		for(b=0; b<matsub.triangleBatches.size(); b++)
+		for(size_t b=0; b<matsub.triangleBatches.size(); b++)
 		{
 			const F3DBatch &batch = matsub.triangleBatches[b];
 
-			int numTriangles = batch.tris.size();
-			int numIndices = numTriangles*3;
-			int numVertices = batch.vertices.size();
+			size_t numTriangles = batch.tris.size();
+			size_t numIndices = numTriangles*3;
+			size_t numVertices = batch.vertices.size();
 
 			MFMeshChunk_Generic &chunk = pMeshChunk[mc];
 
@@ -515,7 +515,7 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			Vert *pVert = (Vert*)chunk.ppVertexStreams[0];
 			AnimVert *pAnimVert = (AnimVert*)chunk.ppVertexStreams[1];
 
-			for(c=0; c<numVertices; c++)
+			for(size_t c=0; c<numVertices; c++)
 			{
 				int p = batch.vertices[c];
 
@@ -574,7 +574,7 @@ void WriteMeshChunk_Generic(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3D
 			// write indices
 			uint16 *pIndices = (uint16*)chunk.pIndexData;
 
-			for(c=0; c<numTriangles; c++)
+			for(size_t c=0; c<numTriangles; c++)
 			{
 				int t = batch.tris[c];
 
@@ -763,10 +763,10 @@ void FixUpMeshChunk_XB(MFMeshChunk *pMeshChunks, int count, void *pBase, void *p
 void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubObject &sub, char *&pOffset, MFStringCache *pStringCache, MFBoundingVolume *pVolume)
 {
 	int numMeshChunks = 0;
-	int a, b, c, mc = 0;
+	int mc = 0;
 
 	// count valid mesh chunks
-	for(a=0; a<sub.matSubobjects.size(); a++)
+	for(size_t a=0; a<sub.matSubobjects.size(); a++)
 	{
 		if(sub.matSubobjects[a].triangles.size() != 0)
 			++numMeshChunks;
@@ -797,7 +797,7 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 	};
 
 	// fill out mesh chunk, and build mesh...
-	for(a=0; a<sub.matSubobjects.size(); a++)
+	for(size_t a=0; a<sub.matSubobjects.size(); a++)
 	{
 		const F3DMaterialSubobject &matsub = sub.matSubobjects[a];
 
@@ -806,12 +806,12 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 
 		bool bAnimating = (matsub.numBones && !subobjectAnimation);
 
-		for(b=0; b<matsub.triangleBatches.size(); b++)
+		for(size_t tb=0; tb<matsub.triangleBatches.size(); tb++)
 		{
-			const F3DBatch &batch = matsub.triangleBatches[b];
+			const F3DBatch &batch = matsub.triangleBatches[tb];
 
-			int numTriangles = batch.tris.size();
-			int numVertices = numTriangles * 3;
+			size_t numTriangles = batch.tris.size();
+			size_t numVertices = numTriangles * 3;
 
 			pMeshChunk[mc].numVertices = numVertices;
 			pMeshChunk[mc].vertexStride = bAnimating ? sizeof(AnimVert) : sizeof(Vert);
@@ -833,9 +833,9 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 				// write triangles
 				Vert *pVert = (Vert*)pMeshChunk[mc].pVertexData;
 
-				for(b=0; b<numTriangles; b++)
+				for(size_t b=0; b<numTriangles; b++)
 				{
-					for(c=0; c<3; c++)
+					for(int c=0; c<3; c++)
 					{
 						int t = batch.tris[b];
 						int v = matsub.triangles[t].v[c];
@@ -875,9 +875,9 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 				// write animated triangles
 				AnimVert *pVert = (AnimVert*)pMeshChunk[mc].pVertexData;
 
-				for(b=0; b<numTriangles; b++)
+				for(size_t b=0; b<numTriangles; b++)
 				{
-					for(c=0; c<3; c++)
+					for(int c=0; c<3; c++)
 					{
 						int t = batch.tris[b];
 						int v = matsub.triangles[t].v[c];
@@ -954,8 +954,6 @@ void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, void *pBase, void *
 
 void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 {
-	int a, b = 0;
-
 	MFModelTemplate *pModelData;
 
 	MFStringCache *pStringCache;
@@ -973,7 +971,7 @@ void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 	MFModelDataChunk *pDataHeaders = (MFModelDataChunk*)(pFile+MFALIGN16(sizeof(MFModelTemplate)));
 
 	pModelData->hash = MFMAKEFOURCC('M','D','L','2');
-	pModelData->type = MFRT_Model;
+	pModelData->type = MFRT_ModelTemplate;
 	pModelData->pName = MFStringCache_Add(pStringCache, name);
 
 	int numChunks = 0;
@@ -986,7 +984,7 @@ void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 	int numOutputMeshChunks = 0;
 
 	// calculate how many subobjects we're actually going to write...
-	for(a=0; a<GetMeshChunk()->subObjects.size(); a++)
+	for(size_t a=0; a<GetMeshChunk()->subObjects.size(); a++)
 	{
 		if(!GetMeshChunk()->subObjects[a].dontExportThisSubobject)
 			++numOutputMeshChunks;
@@ -1034,6 +1032,7 @@ void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
 		F3DMeshChunk *pMC = GetMeshChunk();
 
 		// HACKY: gotta find the first matsub with mesh..
+		size_t a, b = 0;
 		for(a=0; a<pMC->subObjects.size(); a++)
 			for(b=0; b<pMC->subObjects[a].matSubobjects.size(); b++)
 				if(pMC->subObjects[a].matSubobjects[b].triangles.size())
@@ -1062,7 +1061,7 @@ found:
 			pSubobject[b].subobjectAnimMatrix = sub.IsSubobjectAnimation();
 
 			// count valid mesh chunks
-			for(int c=0; c<sub.matSubobjects.size(); c++)
+			for(size_t c=0; c<sub.matSubobjects.size(); c++)
 			{
 				if(sub.matSubobjects[c].triangles.size() != 0)
 					++pSubobject[b].numMeshChunks;
@@ -1101,7 +1100,7 @@ found:
 	{
 		MFModelBone *pBoneChunk = (MFModelBone*)pOffset;
 
-		int numBones = GetSkeletonChunk()->bones.size();
+		size_t numBones = GetSkeletonChunk()->bones.size();
 
 		pDataHeaders[skeletonChunkIndex].pData = pBoneChunk;
 		pDataHeaders[skeletonChunkIndex].count = GetSkeletonChunk()->GetNumReferencedBones();
@@ -1113,7 +1112,7 @@ found:
 		++pBoneRemappingTable;
 
 		int bc = 0;
-		for(a=0; a<numBones; a++)
+		for(size_t a=0; a<numBones; a++)
 		{
 			F3DBone &bone = GetSkeletonChunk()->bones[a];
 
@@ -1158,7 +1157,7 @@ found:
 
 		pOffset += MFALIGN16(sizeof(MFCollisionTemplate)*pDataHeaders[collisionChunkIndex].count);
 
-		for(a=0; a<pDataHeaders[collisionChunkIndex].count; a++)
+		for(int a=0; a<pDataHeaders[collisionChunkIndex].count; a++)
 		{
 			F3DCollisionObject *pColObj = GetCollisionChunk()->collisionObjects[a];
 
@@ -1222,7 +1221,7 @@ found:
 	// un-fix-up all the pointers...
 	MFFixUp(pModelData->pName, pStringBase, 0);
 
-	for(a=0; a<pModelData->numDataChunks; a++)
+	for(int a=0; a<pModelData->numDataChunks; a++)
 	{
 		switch(pModelData->pDataChunks[a].chunkType)
 		{
@@ -1230,7 +1229,7 @@ found:
 			{
 				MFModelSubObject *pSubobjectChunk = (MFModelSubObject*)pModelData->pDataChunks[a].pData;
 
-				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				for(int b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
 					MFFixUp(pSubobjectChunk[b].pSubObjectName, pStringBase, 0);
 //					MFFixUp(pSubobjectChunk[b].pMaterial, pStringBase, 0);
@@ -1264,7 +1263,7 @@ found:
 			{
 				MFModelBone *pBoneChunk = (MFModelBone*)pModelData->pDataChunks[a].pData;
 
-				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				for(int b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
 					MFFixUp(pBoneChunk[b].pBoneName, pStringBase, 0);
 					MFFixUp(pBoneChunk[b].pParentName, pStringBase, 0);
@@ -1277,7 +1276,7 @@ found:
 			{
 				MFCollisionTemplate *pCollisionChunk = (MFCollisionTemplate*)pModelData->pDataChunks[a].pData;
 
-				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				for(int b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
 					MFFixUp(pCollisionChunk[b].pName, pStringBase, 0);
 
@@ -1296,7 +1295,7 @@ found:
 			{
 				MFModelTag *pTags = (MFModelTag*)pModelData->pDataChunks[a].pData;
 
-				for(b=0; b<pModelData->pDataChunks[a].count; b++)
+				for(int b=0; b<pModelData->pDataChunks[a].count; b++)
 				{
 					MFFixUp(pTags[b].pTagName, pStringBase, 0);
 				}
@@ -1349,7 +1348,7 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	pAnimData = (MFAnimationTemplate*)pFile;
 
 	pAnimData->hash = MFMAKEFOURCC('A','N','M','2');
-	pAnimData->type = MFRT_Animation;
+	pAnimData->type = MFRT_AnimationTemplate;
 	pAnimData->pName = MFStringCache_Add(pStringCache, name);
 
 	pOffset = (char*)pAnimData + MFALIGN16(sizeof(MFAnimationTemplate));
@@ -1435,21 +1434,20 @@ void F3DFile::Optimise()
 	MFArray<int> normMapping;
 	MFArray<int> colUsage;
 	MFArray<int> colMapping;
-	int a, b, c, d, x;
 
 	// remove all verts not referenced by triangles
-	for(a=0; a<GetMeshChunk()->subObjects.size(); a++)
+	for(size_t a=0; a<GetMeshChunk()->subObjects.size(); a++)
 	{
 		F3DSubObject &sub = GetMeshChunk()->subObjects[a];
 
-		for(b=0; b<sub.matSubobjects.size(); b++)
+		for(size_t b=0; b<sub.matSubobjects.size(); b++)
 		{
 			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
 
 			vertexUsage.resize(matsub.vertices.size());
 			vertexMapping.resize(matsub.vertices.size());
 
-			for(c=0; c<matsub.triangles.size(); c++)
+			for(size_t c=0; c<matsub.triangles.size(); c++)
 			{
 				F3DTriangle &tri = matsub.triangles[c];
 				++vertexUsage[tri.v[0]];
@@ -1457,9 +1455,9 @@ void F3DFile::Optimise()
 				++vertexUsage[tri.v[2]];
 			}
 
-			x=0;
+			size_t x=0;
 
-			for(c=0; c<matsub.vertices.size(); c++)
+			for(size_t c=0; c<matsub.vertices.size(); c++)
 			{
 				if(vertexUsage[c])
 				{
@@ -1473,7 +1471,7 @@ void F3DFile::Optimise()
 
 			matsub.vertices.resize(x);
 
-			for(c=0; c<matsub.triangles.size(); c++)
+			for(size_t c=0; c<matsub.triangles.size(); c++)
 			{
 				F3DTriangle &tri = matsub.triangles[c];
 				tri.v[0] = vertexMapping[tri.v[0]];
@@ -1482,10 +1480,10 @@ void F3DFile::Optimise()
 			}
 		}
 
-		int posSize = sub.positions.size();
-		int uvSize = sub.uvs.size();
-		int normSize = sub.normals.size();
-		int colSize = sub.colours.size();
+		size_t posSize = sub.positions.size();
+		size_t uvSize = sub.uvs.size();
+		size_t normSize = sub.normals.size();
+		size_t colSize = sub.colours.size();
 
 		posUsage.resize(posSize);
 		posMapping.resize(posSize);
@@ -1497,11 +1495,11 @@ void F3DFile::Optimise()
 		colMapping.resize(colSize);
 
 		// remove vertex data not referenced by verts
-		for(b=0; b<sub.matSubobjects.size(); b++)
+		for(size_t b=0; b<sub.matSubobjects.size(); b++)
 		{
 			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
 
-			for(c=0; c<matsub.vertices.size(); c++)
+			for(size_t c=0; c<matsub.vertices.size(); c++)
 			{
 				F3DVertex &vert = matsub.vertices[c];
 
@@ -1516,8 +1514,8 @@ void F3DFile::Optimise()
 			}
 		}
 
-		x = 0;
-		for(b=0; b<posSize; b++)
+		size_t x = 0;
+		for(size_t b=0; b<posSize; b++)
 		{
 			if(posUsage[b])
 			{
@@ -1527,7 +1525,7 @@ void F3DFile::Optimise()
 				posMapping[b] = x;
 
 				// remove duplicate vertex data
-				for(c=b+1; c<posSize; c++)
+				for(size_t c=b+1; c<posSize; c++)
 				{
 					if(sub.positions[x] == sub.positions[c])
 					{
@@ -1542,7 +1540,7 @@ void F3DFile::Optimise()
 		sub.positions.resize(x);
 
 		x = 0;
-		for(b=0; b<uvSize; b++)
+		for(size_t b=0; b<uvSize; b++)
 		{
 			if(uvUsage[b])
 			{
@@ -1552,7 +1550,7 @@ void F3DFile::Optimise()
 				uvMapping[b] = x;
 
 				// remove duplicate vertex data
-				for(c=b+1; c<uvSize; c++)
+				for(size_t c=b+1; c<uvSize; c++)
 				{
 					if(sub.uvs[x] == sub.uvs[c])
 					{
@@ -1567,7 +1565,7 @@ void F3DFile::Optimise()
 		sub.uvs.resize(x);
 
 		x = 0;
-		for(b=0; b<normSize; b++)
+		for(size_t b=0; b<normSize; b++)
 		{
 			if(normUsage[b])
 			{
@@ -1577,7 +1575,7 @@ void F3DFile::Optimise()
 				normMapping[b] = x;
 
 				// remove duplicate vertex data
-				for(c=b+1; c<normSize; c++)
+				for(size_t c=b+1; c<normSize; c++)
 				{
 					if(sub.normals[x] == sub.normals[c])
 					{
@@ -1592,7 +1590,7 @@ void F3DFile::Optimise()
 		sub.normals.resize(x);
 
 		x = 0;
-		for(b=0; b<colSize; b++)
+		for(size_t b=0; b<colSize; b++)
 		{
 			if(colUsage[b])
 			{
@@ -1602,7 +1600,7 @@ void F3DFile::Optimise()
 				colMapping[b] = x;
 
 				// remove duplicate vertex data
-				for(c=b+1; c<colSize; c++)
+				for(size_t c=b+1; c<colSize; c++)
 				{
 					if(sub.colours[x] == sub.colours[c])
 					{
@@ -1616,11 +1614,11 @@ void F3DFile::Optimise()
 		}
 		sub.colours.resize(x);
 
-		for(b=0; b<sub.matSubobjects.size(); b++)
+		for(size_t b=0; b<sub.matSubobjects.size(); b++)
 		{
 			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
 
-			for(c=0; c<matsub.vertices.size(); c++)
+			for(size_t c=0; c<matsub.vertices.size(); c++)
 			{
 				F3DVertex &vert = matsub.vertices[c];
 
@@ -1636,20 +1634,20 @@ void F3DFile::Optimise()
 		}
 
 		// remove duplicate verts
-		for(b=0; b<sub.matSubobjects.size(); b++)
+		for(size_t b=0; b<sub.matSubobjects.size(); b++)
 		{
 			F3DMaterialSubobject &matsub = sub.matSubobjects[b];
 
 			vertexMapping.resize(matsub.vertices.size());
 
-			int vertSize = matsub.vertices.size();
+			size_t vertSize = matsub.vertices.size();
 			vertexUsage.resize(vertSize);
 
-			for(c=0; c<vertSize; c++)
+			for(size_t c=0; c<vertSize; c++)
 				vertexUsage[c] = 1;
 
-			x=0;
-			for(c=0; c<vertSize; c++)
+			size_t x=0;
+			for(size_t c=0; c<vertSize; c++)
 			{
 				if(vertexUsage[c])
 				{
@@ -1659,7 +1657,7 @@ void F3DFile::Optimise()
 					vertexMapping[c] = x;
 
 					// remove duplicate vertex data
-					for(d=c+1; d<vertSize; d++)
+					for(size_t d=c+1; d<vertSize; d++)
 					{
 						if(matsub.vertices[x] == matsub.vertices[d])
 						{
@@ -1673,7 +1671,7 @@ void F3DFile::Optimise()
 			}
 			matsub.vertices.resize(x);
 
-			for(c=0; c<matsub.triangles.size(); c++)
+			for(size_t c=0; c<matsub.triangles.size(); c++)
 			{
 				F3DTriangle &tri = matsub.triangles[c];
 				tri.v[0] = vertexMapping[tri.v[0]];
@@ -1688,7 +1686,7 @@ bool IsBoneInBatch(const MFArray<int> &batch, int bone)
 {
 	if(bone == -1) return true;
 
-	for(int a=0; a<batch.size(); a++)
+	for(size_t a=0; a<batch.size(); a++)
 	{
 		if(batch[a] == bone)
 			return true;
@@ -1798,11 +1796,10 @@ void F3DFile::BuildBatches(MFPlatform platform)
 	}
 
 	MFArray<int> trisAdded;
-	int numAdded;
 
-	for(int a=0; a<meshChunk.subObjects.size(); a++)
+	for(size_t a=0; a<meshChunk.subObjects.size(); a++)
 	{
-		for(int b=0; b<meshChunk.subObjects[a].matSubobjects.size(); b++)
+		for(size_t b=0; b<meshChunk.subObjects[a].matSubobjects.size(); b++)
 		{
 			F3DMaterialSubobject &matSub = meshChunk.subObjects[a].matSubobjects[b];
 /*
@@ -1816,11 +1813,11 @@ void F3DFile::BuildBatches(MFPlatform platform)
 			else
 */
 			{
-				int numTris = matSub.triangles.size();
+				size_t numTris = matSub.triangles.size();
 
 				trisAdded.resize(numTris);
 				MFZeroMemory(trisAdded.getPointer(), sizeof(int)*numTris);
-				numAdded = 0;
+				size_t numAdded = 0;
 
 				while(numAdded < numTris)
 				{
@@ -1836,14 +1833,14 @@ void F3DFile::BuildBatches(MFPlatform platform)
 					MFArray<int> gAdded(numBones);
 					int *pAdded = gAdded.getPointer();
 
-					for(int c=0; c<numTris; c++)
+					for(size_t c=0; c<numTris; c++)
 					{
 						if(trisAdded[c])
 							continue;
 
 						F3DTriangle &tri = matSub.triangles[c];
 						int numNotInBatch = GetNumBonesNotInBatch(batch, matSub, tri, numBones, pAdded);
-						if(numNotInBatch + batch.bones.size() > maxBones)
+						if(numNotInBatch + (int)batch.bones.size() > maxBones)
 							continue;
 
 						AddVertsToBatch(batch, matSub, tri);
@@ -1878,17 +1875,16 @@ void F3DFile::ProcessCollisionData()
 	if(options.noCollision)
 		return;
 
-	for(int i=0; i<GetMeshChunk()->subObjects.size(); i++)
+	for(size_t i=0; i<GetMeshChunk()->subObjects.size(); i++)
 	{
 		F3DSubObject &sub = GetMeshChunk()->subObjects[i];
 
 		if(!MFString_CaseCmpN(sub.name, "c_", 2))
 		{
-			int triCount = 0;
-			int a, b, t = 0;
+			size_t triCount = 0;
 
 			// count num triangles
-			for(a=0; a<sub.matSubobjects.size(); a++)
+			for(size_t a=0; a<sub.matSubobjects.size(); a++)
 			{
 				triCount += sub.matSubobjects[a].triangles.size();
 			}
@@ -1905,13 +1901,14 @@ void F3DFile::ProcessCollisionData()
 			pMesh->boundMin = pMesh->boundSphere;
 			pMesh->boundMax = pMesh->boundSphere;
 
-			for(a=0; a<sub.matSubobjects.size(); a++)
+			int t = 0;
+			for(size_t a=0; a<sub.matSubobjects.size(); a++)
 			{
 				F3DMaterialSubobject &matSub = sub.matSubobjects[a];
 
-				int numTris = matSub.triangles.size();
+				size_t numTris = matSub.triangles.size();
 
-				for(b=0; b<numTris; b++)
+				for(size_t b=0; b<numTris; b++)
 				{
 					F3DCollisionTri &tri = pMesh->tris[t];
 
@@ -1941,12 +1938,12 @@ void F3DFile::ProcessCollisionData()
 			}
 
 			// fill in all the adjacencies
-			for(a=0; a<triCount; a++)
+			for(size_t a=0; a<triCount; a++)
 			{
-				for(b=0; b<3; b++)
+				for(int b=0; b<3; b++)
 				{
 					// find its neighbour
-					for(int c=0; c<triCount; c++)
+					for(size_t c=0; c<triCount; c++)
 					{
 						if(a == c)
 							continue;
@@ -1993,7 +1990,7 @@ void F3DFile::ProcessCollisionData()
 
 int F3DMaterialChunk::GetMaterialIndexByName(const char *pName)
 {
-	for(int a=0; a<materials.size(); a++)
+	for(size_t a=0; a<materials.size(); a++)
 	{
 		if(!MFString_CaseCmp(pName, materials[a].name))
 			return a;
@@ -2026,7 +2023,7 @@ int F3DSubObject::IsSubobjectAnimation() const
 {
 	int subobject = -1;
 
-	for(int a=0; a<matSubobjects.size(); a++)
+	for(size_t a=0; a<matSubobjects.size(); a++)
 	{
 		if(matSubobjects[a].numBones != 1)
 			return -1;
@@ -2052,7 +2049,7 @@ int F3DSkeletonChunk::FindBone(const char *pName) const
 	if(!pName)
 		return 0;
 
-	for(int a=0; a<bones.size(); a++)
+	for(size_t a=0; a<bones.size(); a++)
 	{
 		if(!MFString_Compare(pName, bones[a].name))
 			return a;
@@ -2063,7 +2060,7 @@ int F3DSkeletonChunk::FindBone(const char *pName) const
 
 void F3DSkeletonChunk::BuildHierarchy()
 {
-	for(int a=0; a<bones.size(); a++)
+	for(size_t a=0; a<bones.size(); a++)
 	{
 		bones[a].parent = FindBone(bones[a].parentName);
 
@@ -2076,7 +2073,7 @@ void F3DSkeletonChunk::BuildHierarchy()
 
 void F3DSkeletonChunk::FlagReferenced(bool bAll)
 {
-	for(int a=0; a<bones.size(); a++)
+	for(size_t a=0; a<bones.size(); a++)
 	{
 		if((bones[a].bIsSkinned || bAll) && !bones[a].bIsReferenced)
 		{
@@ -2096,7 +2093,7 @@ int F3DSkeletonChunk::GetNumReferencedBones() const
 {
 	int numBones = 0;
 
-	for(int a=0; a<bones.size(); a++)
+	for(size_t a=0; a<bones.size(); a++)
 	{
 		if(bones[a].bIsReferenced)
 			++numBones;
@@ -2195,7 +2192,7 @@ F3DRefMesh::F3DRefMesh()
 
 F3DCollisionChunk::~F3DCollisionChunk()
 {
-	for(int a=0; a<collisionObjects.size(); a++)
+	for(size_t a=0; a<collisionObjects.size(); a++)
 	{
 		delete collisionObjects[a];
 	}

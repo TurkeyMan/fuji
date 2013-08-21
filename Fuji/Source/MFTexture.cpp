@@ -30,8 +30,20 @@ MFTexture *pNoneTexture;
 MFTexture *pWhiteTexture;
 
 // functions
+static void MFTexture_Destroy(MFResource *pRes)
+{
+	MFTexture *pTexture = (MFTexture*)pRes;
+
+	MFTexture_DestroyPlatformSpecific(pTexture);
+
+	MFHeap_Free(pTexture->pTemplateData);
+	MFHeap_Free(pTexture);
+}
+
 MFInitStatus MFTexture_InitModule()
 {
+	MFRT_Texture = MFResource_Register("MFTexture", &MFTexture_Destroy);
+
 	DebugMenu_AddItem("Texture Browser", "Fuji Options", &texBrowser);
 
 	MFTexture_InitModulePlatformSpecific();
@@ -49,8 +61,8 @@ MFInitStatus MFTexture_InitModule()
 
 void MFTexture_DeinitModule()
 {
-	MFTexture_Destroy(pNoneTexture);
-	MFTexture_Destroy(pWhiteTexture);
+	MFTexture_Release(pNoneTexture);
+	MFTexture_Release(pWhiteTexture);
 
 	// list all non-freed textures...
 	MFResourceIterator *pI = MFResource_EnumerateFirst(MFRT_Texture);
@@ -66,10 +78,10 @@ void MFTexture_DeinitModule()
 
 		MFTexture *pT = (MFTexture*)MFResource_Get(pI);
 
-		MFDebug_Message(MFStr("'%s' - x%d", pT->name, pT->refCount));
+		MFDebug_Message(MFStr("'%s' - x%d", pT->pName, pT->refCount));
 
 		pT->refCount = 1;
-		MFTexture_Destroy(pT);
+		MFTexture_Release(pT);
 
 		pI = MFResource_EnumerateNext(pI, MFRT_Texture);
 	}
@@ -77,14 +89,14 @@ void MFTexture_DeinitModule()
 	MFTexture_DeinitModulePlatformSpecific();
 }
 
-MF_API MFTexture* MFTexture_FindTexture(const char *pName)
+MF_API MFTexture* MFTexture_Find(const char *pName)
 {
-	return (MFTexture*)MFResource_FindResource(MFUtil_HashString(pName) ^ 0x7e407e40);
+	return (MFTexture*)MFResource_Find(MFUtil_HashString(pName) ^ 0x7e407e40);
 }
 
 MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
@@ -138,22 +150,18 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
+		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
-		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
-		pTexture->refCount = 0;
+		if(pName)
+			pName = MFString_Copy((char*)&pTexture[1], pName);
 
-		MFResource_AddResource(pTexture);
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
 		pTexture->pTemplateData = pTemplate;
-		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
-		pTexture->name[sizeof(pTexture->name) - 1] = 0;
 
 		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
 	}
-
-	pTexture->refCount++;
 
 	return pTexture;
 }
@@ -169,19 +177,17 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
 {
 	MFCALLSTACK;
 
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
-		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
-		pTexture->refCount = 0;
+		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
-		MFResource_AddResource(pTexture);
+		if(pName)
+			pName = MFString_Copy((char*)&pTexture[1], pName);
 
-		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
-		pTexture->name[sizeof(pTexture->name) - 1] = 0;
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
 		// set this to 1 for the moment until we deal with mipmaping..
 		uint32 levelCount = 1;
@@ -292,8 +298,6 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
 		MFDebug_Warn(3, MFStr("Texture '%s' already exists when creating from raw data.", pName));
 	}
 
-	pTexture->refCount++;
-
 	return pTexture;
 }
 
@@ -301,19 +305,17 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 {
 	MFCALLSTACK;
 
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
-		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
-		pTexture->refCount = 0;
+		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
-		MFResource_AddResource(pTexture);
+		if(pName)
+			pName = MFString_Copy((char*)&pTexture[1], pName);
 
-		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
-		pTexture->name[sizeof(pTexture->name) - 1] = 0;
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
 		// set this to 1 for the moment until we deal with mipmaping..
 		uint32 levelCount = 1;
@@ -429,8 +431,6 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 		MFDebug_Warn(3, MFStr("Texture '%s' already exists when creating from raw data.", pName));
 	}
 
-	pTexture->refCount++;
-
 	return pTexture;
 }
 
@@ -445,25 +445,9 @@ MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colou
 	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, ImgFmt_A8R8G8B8, TEX_CopyMemory, false);
 }
 
-MF_API int MFTexture_Destroy(MFTexture *pTexture)
+MF_API int MFTexture_Release(MFTexture *pTexture)
 {
-	MFCALLSTACK;
-
-	--pTexture->refCount;
-
-	// if no references left, destroy texture
-	if(!pTexture->refCount)
-	{
-		MFTexture_DestroyPlatformSpecific(pTexture);
-
-		MFHeap_Free(pTexture->pTemplateData);
-
-		MFResource_RemoveResource(pTexture);
-		MFHeap_Free(pTexture);
-		return 0;
-	}
-
-	return pTexture->refCount;
+	return MFResource_Release(pTexture);
 }
 
 MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight)
@@ -505,7 +489,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 	MFTexture *pTexture = (MFTexture*)MFResource_Get(pI);
 
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
-	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->name));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->pName));
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, MFImage_GetFormatString(pTexture->pTemplateData->imageFormat), pTexture->refCount));
 
 	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);

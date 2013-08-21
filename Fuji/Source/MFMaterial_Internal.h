@@ -23,8 +23,6 @@ MFMaterialType *MaterialInternal_GetMaterialType(const char *pTypeName);
 // MFMaterial structure
 struct MFMaterial : public MFResource
 {
-	char *pName;
-
 	MFMaterialType *pType;
 	void *pInstanceData;
 

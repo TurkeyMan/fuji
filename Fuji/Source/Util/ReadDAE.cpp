@@ -331,8 +331,6 @@ MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
 
 void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 {
-	int a,b;
-
 	const char *pName = pGeometryNode->Attribute("name");
 
 	if(!pName)
@@ -447,15 +445,14 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					pInputs = pInputs->NextSibling("input");
 				}
 
-				int numIndices = (int)components.size();
-				int c,d;
+				size_t numIndices = components.size();
 
 				// copy the data into the arrays
-				for(a=0; a<numIndices; a++)
+				for(size_t a=0; a<numIndices; a++)
 				{
 					DataSources sources = components[a];
 
-					for(b=0; b<(int)sources.size(); b++)
+					for(size_t b=0; b<sources.size(); b++)
 					{
 						switch(sources[b].first)
 						{
@@ -467,12 +464,12 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 								{
 									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
-									for(c=0; c<(int)pData->data.size(); c++)
+									for(size_t c=0; c<pData->data.size(); c++)
 									{
 										MFVector &v = dataArray.push();
 										MFArray<float> &row = pData->data[c];
 
-										for(d=0; d<MFMin(pData->validComponents, 4); d++)
+										for(int d=0; d<MFMin(pData->validComponents, 4); d++)
 										{
 											v[d] = d == 1 ? 1.0f - row[d] : row[d];
 										}
@@ -488,12 +485,12 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 								{
 									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
-									for(c=0; c<(int)pData->data.size(); c++)
+									for(size_t c=0; c<pData->data.size(); c++)
 									{
 										MFVector &v = dataArray.push();
 										MFArray<float> &row = pData->data[c];
 
-										for(d=0; d<MFMin(pData->validComponents, 4); d++)
+										for(int d=0; d<MFMin(pData->validComponents, 4); d++)
 											v[d] = row[d];
 										if(pData->validComponents < 4)
 											v[3] = 1.0f;
@@ -512,12 +509,12 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 								{
 									MFArray<MFVector> &dataArray = *GetSemanticArray(subObject, sources[b].first);
 
-									for(c=0; c<(int)pData->data.size(); c++)
+									for(size_t c=0; c<pData->data.size(); c++)
 									{
 										MFVector &v = dataArray.push();
 										MFArray<float> &row = pData->data[c];
 
-										for(d=0; d<MFMin(pData->validComponents, 4); d++)
+										for(int d=0; d<MFMin(pData->validComponents, 4); d++)
 											v[d] = row[d];
 									}
 								}
@@ -605,13 +602,13 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 					F3DVertex &v = matSub.vertices.push();
 
-					for(a=0; a<numIndices; a++)
+					for(size_t a=0; a<numIndices; a++)
 					{
 						int index = atoi(pText);
 
 						DataSources sources = components[a];
 
-						for(b=0; b<(int)sources.size(); b++)
+						for(size_t b=0; b<sources.size(); b++)
 						{
 							switch(sources[b].first)
 							{
@@ -633,7 +630,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 									if(pData)
 									{
-										for(c=0; c<MFMin(pData->validComponents, 4); c++)
+										for(int c=0; c<MFMin(pData->validComponents, 4); c++)
 										{
 											v.weight[c] = pData->data[index][c];
 										}
@@ -646,7 +643,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 									if(pData)
 									{
-										for(c=0; c<MFMin(pData->validComponents, 4); c++)
+										for(int c=0; c<MFMin(pData->validComponents, 4); c++)
 										{
 											v.bone[c] = (int)pData->data[index][c];
 										}
@@ -688,7 +685,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 		pMesh = pMesh->NextSibling("mesh");
 	}
 
-	for(a=0; a<subObject.positions.size(); a++)
+	for(size_t a=0; a<subObject.positions.size(); a++)
 	{
 		// apply coordinate system correction matrix
 		MFVector newPos = ApplyMatrixH(subObject.positions[a], transformMatrix);
@@ -700,9 +697,9 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 	// flip the triangle winding if coordinate systems have changed 'handedness'
 	if(flipWinding)
 	{
-		for(a=0; a<subObject.matSubobjects.size(); a++)
+		for(size_t a=0; a<subObject.matSubobjects.size(); a++)
 		{
-			for(b=0; b<subObject.matSubobjects[a].triangles.size(); b++)
+			for(size_t b=0; b<subObject.matSubobjects[a].triangles.size(); b++)
 			{
 				int i = subObject.matSubobjects[a].triangles[b].v[1];
 				subObject.matSubobjects[a].triangles[b].v[1] = subObject.matSubobjects[a].triangles[b].v[2];

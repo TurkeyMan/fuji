@@ -166,16 +166,17 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
-	MFTexture *pTexture = MFTexture_FindTexture(pName);
+	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture));
-		pTexture->type = MFRT_Texture;
-		pTexture->hash = MFUtil_HashString(pName) ^ 0x7e407e40;
-		pTexture->refCount = 0;
+		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
-		MFResource_AddResource(pTexture);
+		if(pName)
+			pName = MFString_Copy((char*)&pTexture[1], pName);
+
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
 		if(targetFormat & ImgFmt_SelectNicest)
 		{
@@ -225,9 +226,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pSurface->pPaletteEntries = NULL;
 		pSurface->paletteBufferLength = 0;
 
-		MFString_CopyN(pTexture->name, pName, sizeof(pTexture->name) - 1);
-		pTexture->name[sizeof(pTexture->name) - 1] = 0;
-
 		// create the targets
 		GLuint frameBufferID, textureID;
 
@@ -259,8 +257,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		if(!MFCheckForOpenGLError())
 			MFDebug_Log(0, "RenderTarget created successfully!");
 	}
-
-	pTexture->refCount++;
 
 	return pTexture;
 }

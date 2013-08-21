@@ -92,11 +92,11 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	//MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 	//MFDebug_Assert(hr != D3DXERR_INVALIDDATA, MFStr("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
 
-	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->name));
+	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->pName));
 
 	if (SUCCEEDED(hr))
 	{	
-		MFRenderer_D3D11_SetDebugName(pTex, pTexture->name);
+		MFRenderer_D3D11_SetDebugName(pTex, pTexture->pName);
 
 		//// filter mip levels
 		if (generateMipChain)
