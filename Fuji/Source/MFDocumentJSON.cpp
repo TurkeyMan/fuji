@@ -3,6 +3,11 @@
 #include "MFFileSystem.h"
 #include "MFDocumentJSON.h"
 
+#if defined(MF_COMPILER_CLANG)
+	// comparison always true
+	#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
+#endif
+
 #if defined(MF_ENDIAN_BIG)
 	#define RAPIDJSON_ENDIAN 1 // RAPIDJSON_BIGENDIAN
 #else

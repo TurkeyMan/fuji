@@ -59,7 +59,7 @@ void MFIntFont_CreateFromSourceData(const char *pFilename, void **ppOutput, size
 	MFFontChar *pC = (MFFontChar*)MFHeap_Alloc(sizeof(MFFontChar) * 65535);
 
 	char *pLine, *pText = pBuffer;
-	while(pLine = GetNextLine(pText))
+	while((pLine = GetNextLine(pText)) != NULL)
 	{
 		char *pT = strtok(pLine, " \t");
 

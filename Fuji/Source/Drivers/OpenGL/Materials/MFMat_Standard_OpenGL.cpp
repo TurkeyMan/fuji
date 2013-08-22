@@ -366,6 +366,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 				glFrontFace(GL_CCW);
 				glCullFace(GL_BACK);
 				break;
+			default:
+				MFUNREACHABLE;
 		}
 	}
 
@@ -392,6 +394,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		state.pVectorStatesSet[MFSCV_RenderState] = pRS;
 		state.boolsSet = (state.boolsSet & ~MFBIT(MFSCB_AlphaTest)) | (state.bools & MFBIT(MFSCB_AlphaTest));
 
+#if !defined(MF_OPENGL_ES)
 		if(state.getBool(MFSCB_AlphaTest))
 		{
 			glEnable(GL_ALPHA_TEST);
@@ -399,6 +402,10 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		}
 		else
 			glDisable(GL_ALPHA_TEST);
+#else
+		// TODO: do something here...
+		//I guess we need to implement the alpha test in the shader...
+#endif
 	}
 /*
 	// set clour/alpha scales

@@ -194,7 +194,7 @@ void ParseMEMD2File(char *pBuffer)
 				--pTex;
 			}
 
-			pTex[MFString_Length(pTex) - 4] = NULL;
+			pTex[MFString_Length(pTex) - 4] = 0;
 
 			MFString_Copy(mat.name, pTex);
 

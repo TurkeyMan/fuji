@@ -210,6 +210,8 @@ inline bool MFArray<T>::contains(const T &item) const
 	return false;
 }
 
+#include <cstdlib>
+
 template<class T>
 inline void MFArray<T>::qsort(int (*pPredicate)(const T *p1, const T *p2))
 {

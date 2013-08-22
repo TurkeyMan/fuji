@@ -106,6 +106,7 @@
 #define MF_DRIVER_BSDSOCKETS	35
 #define MF_DRIVER_ANDROID		36
 #define MF_DRIVER_NACL			37
+#define MF_DRIVER_WEB			38
 
 
 // we need a list of all available renderer drivers
@@ -380,6 +381,27 @@ enum MFRendererDrivers
 	#define MF_SOCKETS		MF_DRIVER_NULL
 	#define MF_SOUND		MF_DRIVER_NULL
 	#define MF_DEBUG		MF_DRIVER_NACL
+
+	#define USE_MFSOUNDBUFFER
+	#define USE_MFMIXER
+
+	#define MF_OPENGL_ES
+
+#elif defined(MF_WEB)
+
+	#define _OPENGL_CLIP_SPACE
+
+	// specify drivers
+	#define MF_DISPLAY		MF_DRIVER_WEB
+	#define MF_RENDERER		MF_DRIVER_OPENGL
+	#define MF_INPUT		MF_DRIVER_WEB
+	#define MF_SYSTEM		MF_DRIVER_WEB
+	#define MF_TRANSLATION	MF_DRIVER_LINUX
+	#define MF_THREAD		MF_DRIVER_LINUX
+	#define MF_FILESYSTEM	MF_DRIVER_WEB
+	#define MF_SOCKETS		MF_DRIVER_NULL
+	#define MF_SOUND		MF_DRIVER_NULL
+	#define MF_DEBUG		MF_DRIVER_WEB
 
 	#define USE_MFSOUNDBUFFER
 	#define USE_MFMIXER

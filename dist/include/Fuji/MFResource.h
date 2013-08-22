@@ -91,12 +91,13 @@ namespace Fuji
 			Release();
 			pResource = from.pResource;
 			AddRef();
+			return *this;
 		}
 
 		inline operator MFResource*()			{ return pResource; }
 
 		inline int RefCount() const				{ return pResource ? pResource->refCount : 0; }
-		inline int AddRef()						{ if(pResource) ++pResource->refCount; }
+		inline int AddRef()						{ if(pResource) { return ++pResource->refCount; } return 0; }
 		inline int Release()					{ int rc = 0; if(pResource) { rc = MFResource_Release(pResource); pResource = NULL; } return rc; }
 
 		inline int ResourceType() const			{ return (int)pResource->type; }

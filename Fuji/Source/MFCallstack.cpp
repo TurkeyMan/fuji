@@ -135,7 +135,7 @@ MFCall::MFCall(const char *pFunctionName, MFCallstack_Function *_pFunction)
 		}
 
 		++_pFunction->numCalls;
-		++_pFunction->bAdded;
+		_pFunction->bAdded = true;
 
 		startTime = MFSystem_ReadRTC();
 

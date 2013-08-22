@@ -130,7 +130,7 @@ MF_API void DebugMenu_AddItemTo(const char *name, Menu *pParent, MenuObject *pOb
 	MFDebug_Assert(pParent, "Invalid parent menu.");
 	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
 	MFDebug_Assert(MFString_Length(name) < 64, "Max of 64 characters in Menu Name.");
-	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '&s'", pParent->name)); 
+	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '%s'", pParent->name)); 
 
 	MFString_Copy(pObject->name, name);
 
@@ -154,7 +154,7 @@ MF_API void DebugMenu_AddMenuTo(const char *name, Menu *pParent, DebugCallback c
 	MFDebug_Assert(pParent, "Invalid parent menu.");
 	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
 	MFDebug_Assert(MFString_Length(name) < 64, "Max of 64 characters in Menu Name.");
-	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '&s'", pParent->name)); 
+	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '%s'", pParent->name));
 
 //	Menu *pMenu = Heap_New(Menu);
 	Menu *pMenu = new Menu;

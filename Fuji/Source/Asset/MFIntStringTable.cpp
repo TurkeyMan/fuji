@@ -328,9 +328,9 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 		table.language = language;
 
 		// set some useful details
-		if(enumList == a)
+		if(enumList == (int)a)
 			pStringTable->enumList = l;
-		if(englishList == a)
+		if(englishList == (int)a)
 			pStringTable->englishList = l;
 		++l;
 	}

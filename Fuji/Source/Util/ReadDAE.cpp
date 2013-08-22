@@ -324,6 +324,8 @@ MFArray<MFVector>* GetSemanticArray(F3DSubObject &sub, ComponentType ct)
 		case CT_Weights:
 		case CT_Indices:
 			return NULL;
+		default:
+			MFUNREACHABLE;
 	}
 
 	return NULL;

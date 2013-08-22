@@ -17,7 +17,7 @@ extern MFInitParams gInitParams;
 HINSTANCE apphInstance;
 extern int gQuit;
 
-MFPlatform gCurrentPlatform = FP_PC;
+MFPlatform gCurrentPlatform = FP_Windows;
 
 char *gpCommandLineBuffer = NULL;
 

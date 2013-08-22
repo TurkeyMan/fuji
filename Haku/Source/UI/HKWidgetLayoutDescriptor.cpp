@@ -25,7 +25,7 @@ bool HKWidgetLayoutDescriptor::LoadFromXML(const char *pFilename)
 	// attempt to load the xml document
 	MFDocumentXML *pDoc = MFParseXML_ParseFile(pFilename);
 	if(!pDoc)
-		return NULL;
+		return false;
 
 	// build the node tree
 	MFXMLNode *pElement = MFParseXML_RootNode(pDoc);

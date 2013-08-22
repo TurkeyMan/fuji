@@ -762,6 +762,8 @@ MF_API const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoTyp
 			if(pStream->streamInfo.genre[0])
 				return pStream->streamInfo.genre;
 			break;
+		default:
+			MFUNREACHABLE;
 	}
 
 	return NULL;

@@ -76,7 +76,7 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pMem->ownsMemory = pMemory->ownsMemory;
 
 #if defined(_DEBUG)
-	MFString_Copy(pFile->fileIdentifier, MFStr("Memory: 0x%08X", pMem->pMemoryPointer));
+	MFString_Copy(pFile->fileIdentifier, MFStr("Memory: 0x%p", pMem->pMemoryPointer));
 #endif
 
 	return 0;

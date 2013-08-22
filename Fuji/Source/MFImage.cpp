@@ -44,7 +44,7 @@ static void Filter_Box(Pixel *pSource, Pixel *pDest, int sourceWidth, int source
 	MFDebug_Assert(sizeof(Pixel)*8 == 128, "Only 128bit image formats are supported!");
 }
 template<>
-static void Filter_Box<MFVector>(MFVector *pSource, MFVector *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+void Filter_Box<MFVector>(MFVector *pSource, MFVector *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
 {
 	for(int y = 0; y < destHeight; ++y)
 	{
@@ -77,7 +77,7 @@ static void Filter_HQX(Pixel *pSource, Pixel *pDest, int sourceWidth, int source
 	MFDebug_Assert(sizeof(Pixel)*8 == 32, "Only 32bit image formats are supported!");
 }
 template<>
-static void Filter_HQX<uint32>(uint32 *pSource, uint32 *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+void Filter_HQX<uint32>(uint32 *pSource, uint32 *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
 {
 #if defined(HQX_SUPPORT)
 	float scale = (float)destWidth / (float)sourceWidth;
@@ -408,6 +408,8 @@ static void GetScaleFactors(MFScalingAlgorithm algorithm, int sourceWidth, int s
 			if(destWidth == sourceWidth*2 && destHeight == sourceHeight*2)
 				scalex = scaley = 2.f;
 			break;
+		default:
+			MFUNREACHABLE;
 	}
 
 	if(scalex == 0.f || scaley == 0.f)
@@ -466,6 +468,8 @@ static void MFImage_ScaleInternal(MFScaleImage *pScaleData)
 				break;
 			case SA_Super2xSaI:
 				break;
+			default:
+				MFUNREACHABLE;
 		}
 	}
 }

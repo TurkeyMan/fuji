@@ -130,7 +130,6 @@ struct HKWidgetTextEvent : public HKWidgetEventInfo
 	HKWidgetTextEvent(HKWidget *pSender, MFString string)
 		: HKWidgetEventInfo(pSender)
 	{
-		this->pSource = pSource;
 		this->string = string;
 	}
 

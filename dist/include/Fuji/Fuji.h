@@ -17,8 +17,10 @@
 	Compilers:
 		MF_COMPILER_VISUALC
 		MF_COMPILER_GCC
+		MF_COMPILER_CLANG
 		MF_COMPILER_SN
 		MF_COMPILER_CODEWARRIOR
+		MF_COMPILER_DMC
 
 	Assembler Syntax:
 		MF_ASM_INTEL
@@ -34,6 +36,7 @@
 		MF_ARCH_SPU
 		MF_ARCH_ARM
 		MF_ARCH_68K
+		MF_ARCH_LLVM_IR
 
 	Endian:
 		MF_ENDIAN_LITTLE
@@ -55,10 +58,12 @@
 		MF_GC
 		MF_WII
 		MF_DC
-		MF_AMIGA
-		MF_SYMBIAN
 		MF_IPHONE
 		MF_ANDROID
+		MF_NACL
+		MF_WEB
+		MF_SYMBIAN
+		MF_AMIGA
 */
 
 // detect compiler
@@ -187,6 +192,11 @@
 	#define MF_DC
 	#define MF_PLATFORM DC
 	#define MF_32BIT
+#elif defined(EMSCRIPTEN)
+	#define MF_WEB
+	#define MF_PLATFORM WEB
+	#define MF_ARCH_LLVM_IR
+	#define MF_32BIT
 #elif defined(_NACL)
 	#define MF_NACL
 	#define MF_PLATFORM NACL
@@ -255,9 +265,7 @@
 #endif
 
 #if defined(MF_COMPILER_VISUALC)
-	#pragma warning(disable: 4201)
-
-	// Stop it bitching about the string functions not being secure
+	// stop it bitching about the string functions not being secure
 	#if !defined(_CRT_SECURE_NO_DEPRECATE)
 		#define _CRT_SECURE_NO_DEPRECATE
 	#endif
@@ -265,11 +273,17 @@
 	// disable 'unreferenced formal parameter'
 	#pragma warning(disable:4100)
 
-	// Disable depreciated bullshit
+	// disable depreciated bullshit
 	#pragma warning(disable:4996)
 
-	// Disable C-linkage returning UDT (user data type)
+	// disable C-linkage returning UDT (user data type)
 	#pragma warning(disable:4190)
+#elif defined(MF_COMPILER_CLANG)
+	// disable C-linkage returning UDT (user data type)
+	#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+
+	// stop complaining about variable format strings
+	#pragma clang diagnostic ignored "-Wformat-security"
 #endif
 
 
@@ -298,7 +312,7 @@ enum MFPlatform
 {
 	FP_Unknown = -1, /**< Unknown platform */
 
-	FP_PC = 0,			/**< PC */
+	FP_Windows = 0,		/**< Windows */
 	FP_XBox,			/**< XBox */
 	FP_Linux,			/**< Linux */
 	FP_PSP,				/**< Playstation Portable */
@@ -315,6 +329,7 @@ enum MFPlatform
 	FP_Android,			/**< Android */
 	FP_WindowsMobile,	/**< Windows Mobile */
 	FP_NativeClient,	/**< Native Client (NaCL) */
+	FP_Web,				/**< Web JavaScript (Emscripten) */
 
 	FP_Max,		/**< Max platform */
 	FP_ForceInt = 0x7FFFFFFF /**< Force the enum to an int */
@@ -343,9 +358,9 @@ enum MFEndian
 // these defines alter the rhobustness vs speed trade off of the string functions.
 #if !defined(MFLOCALE_ENGLISH_ONLY) && !defined(MFLOCALE_BASIC_LATIN) && !defined(MFLOCALE_BASIC_LATIN_CRYLLIC)
 	// choose one below
-//	#define MFLOCALE_ENGLISH_ONLY
+	#define MFLOCALE_ENGLISH_ONLY
 //	#define MFLOCALE_BASIC_LATIN
-	#define MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC
+//	#define MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC
 #endif
 
 #define MFLOCALE_UTF8_SUPPORT
@@ -354,25 +369,60 @@ enum MFEndian
 
 /*** Compiler compatibility macros ***/
 
+#if defined(MF_DEBUG)
+	#define MFASSUME(condition) MFDebug_Assert((condition), "Bad assumption: "##condition);
+	#define MFUNREACHABLE MFDebug_Assert(false, "Shouldn't be here!");
+#endif
 #if defined(MF_COMPILER_VISUALC)
 	#define MFALIGN_BEGIN(n) __declspec(align(n))
 	#define MFALIGN_END(n)
+	#define MFDEPRECATED_BEGIN() __declspec(deprecated)
+	#define MFDEPRECATED_END(message)
+	#define MFCONST
+	#define MFPURE
 	#define MFPACKED
 	#define MFALWAYS_INLINE __forceinline
+	#define MFPRINTF_FUNC(formatarg, vararg)
+	#define MFPRINTF_METHOD(formatarg, vararg)
+	#if !defined(MF_DEBUG)
+		#define MFASSUME(condition) __assume(condition)
+		#define MFUNREACHABLE __assume(0)
+	#endif
 #elif defined(MF_COMPILER_GCC) || defined(MF_COMPILER_CLANG)
+	// TODO: use #if __has_builtin()/__has_attribute() to test if these are available?
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n) __attribute__((aligned(n)))
+	#define MFDEPRECATED_BEGIN()
+	#define MFDEPRECATED_END(message) __attribute__((deprecated(message)))
+	#define MFCONST __attribute__((const))
+	#define MFPURE __attribute__((pure))
 	#define MFPACKED __attribute__((packed))
-	#define __forceinline inline
-	#define MFALWAYS_INLINE __inline__ __attribute__((always_inline))
+	#define __forceinline inline __attribute__((always_inline))
+	#define MFALWAYS_INLINE inline __attribute__((always_inline))
+	#define MFPRINTF_FUNC(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
+	#define MFPRINTF_METHOD(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
+	#if !defined(MF_DEBUG)
+		// TODO: use #if __has_builtin(__builtin_unreachable) ??
+		#define MFASSUME(condition) if(!(condition)) { __builtin_unreachable(); }
+		#define MFUNREACHABLE __builtin_unreachable()
+	#endif
 #else
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n)
+	#define MFDEPRECATED_BEGIN()
+	#define MFDEPRECATED_END(message)
+	#define MFCONST
+	#define MFPURE
 	#define MFPACKED
 	#define __forceinline inline
 	#define MFALWAYS_INLINE inline
+	#define MFPRINTF_FUNC(formatarg, vararg)
+	#define MFPRINTF_METHOD(formatarg, vararg)
+	#if !defined(MF_DEBUG)
+		#define MFASSUME(condition)
+		#define MFUNREACHABLE
+	#endif
 #endif
-
 
 /*** Fuji Types ***/
 

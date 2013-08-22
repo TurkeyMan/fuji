@@ -476,6 +476,7 @@ namespace Fuji
 			Release();
 			pResource = from.pResource;
 			AddRef();
+			return *this;
 		}
 
 		inline operator MFMaterial*()																	{ return (MFMaterial*)pResource; }

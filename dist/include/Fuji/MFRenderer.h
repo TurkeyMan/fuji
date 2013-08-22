@@ -149,7 +149,7 @@ MF_API void MFRenderLayer_AddFence(MFRenderLayer *pLayer);
 
 
 // helpers...
-__forceinline MFRenderer* MFRenderer_SetLayerStateBlock(MFRenderer *pRenderer, int layer, MFStateBlock *pState)
+__forceinline void MFRenderer_SetLayerStateBlock(MFRenderer *pRenderer, int layer, MFStateBlock *pState)
 {
 	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, layer);
 	MFRenderLayer_SetLayerStateBlock(pLayer, pState);

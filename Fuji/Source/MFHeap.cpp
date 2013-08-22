@@ -248,7 +248,7 @@ MF_API void *MFHeap_AllocInternal(size_t bytes, MFHeap *pHeap)
 		pAllocHeap->totalWaste += extra;
 		++pAllocHeap->allocCount;
 
-//		MFDebug_Log(2, MFStr("Alloc: %08X(%08X), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
+//		MFDebug_Log(2, MFStr("Alloc: %p(%p), %d bytes - %s:(%d)", pMemory, pMemory - pHeader->alignment, bytes, gpMFHeap_TrackerFile, gMFHeap_TrackerLine));
 #endif
 	}
 
@@ -313,7 +313,7 @@ MF_API void MFHeap_Free(void *pMem)
 	pHeap->totalWaste -= extra;
 	--pHeap->allocCount;
 
-//	MFDebug_Log(2, MFStr("Free: %08X, %d bytes - %s:(%d)", pMem, pHeader->size, pHeader->pFile, (int)pHeader->line));
+//	MFDebug_Log(2, MFStr("Free: %p, %d bytes - %s:(%d)", pMem, pHeader->size, pHeader->pFile, (int)pHeader->line));
 #endif
 
 	MFCopyMemory((char*)pMem + pHeader->size, "freefreefreefree", MFHeap_MungwallBytes);
@@ -330,53 +330,6 @@ MF_API void MFHeap_Free(void *pMem)
 
 	MFThread_ReleaseMutex(gAllocMutex);
 }
-
-// #if !(defined(_FUJI_UTIL) && defined(_LINUX)) && !defined(MF_GC)
-// // new/delete operators
-// void* operator new(size_t size)
-// {
-// //	MFDebug_Message(MFStr("new %d bytes", size));
-//
-// 	return MFHeap_AllocInternal(size);
-// }
-//
-// void* operator new[](size_t size)
-// {
-// //	MFDebug_Message(MFStr("new %d bytes", size));
-//
-// 	return MFHeap_AllocInternal(size);
-// }
-//
-// void operator delete(void *pMemory)
-// {
-// 	MFHeap_Free(pMemory);
-// }
-//
-// void operator delete[](void *pMemory)
-// {
-// 	MFHeap_Free(pMemory);
-// }
-// #endif
-
-#if !(defined(MF_WINDOWS) || defined(MF_XBOX)) && !defined(_FUJI_UTIL)
-void* operator new(size_t size, void *pMem)
-{
-	return pMem;
-}
-
-void* operator new[](size_t size, void *pMem)
-{
-	return pMem;
-}
-
-void operator delete(void *pMemory, void *pMem)
-{
-}
-
-void operator delete[](void *pMemory, void *pMem)
-{
-}
-#endif
 
 MF_API size_t MFHeap_GetTotalAllocated(MFHeap *pHeap)
 {
@@ -503,7 +456,7 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 	MFAllocHeader *pHeader = GetAllocHeader(pMemory);
 	if(!pHeader)
 	{
-		MFDebug_Warn(0, MFStr("Missing allocation header for allocation 0x%08X.", pMemory));
+		MFDebug_Warn(0, MFStr("Missing allocation header for allocation 0x%p.", pMemory));
 		return false;
 	}
 
@@ -513,7 +466,7 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 	if(MFMemCompare((const char*)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0)
 		return true;
 
-	MFDebug_Log(0, MFStr("%s(%d) : Corrupted mungwall detected in allocation 0x%08X.", pHeader->pFile, pHeader->line, pMemory));
+	MFDebug_Log(0, MFStr("%s(%d) : Corrupted mungwall detected in allocation 0x%p.", pHeader->pFile, pHeader->line, pMemory));
 	return false;
 }
 

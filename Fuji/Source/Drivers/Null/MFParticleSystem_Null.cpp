@@ -218,6 +218,8 @@ MF_API void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
 
 				break;
 			}
+			default:
+				MFUNREACHABLE;
 		}
 
 		switch(pE->behaviour)
@@ -231,6 +233,8 @@ MF_API void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
 			case MFEB_TargetRepel:
 				pNew->velocity.Normalise3(pE->position.GetTrans() - pE->startVector);
 				break;
+			default:
+				MFUNREACHABLE;
 		}
 
 		pNew->velocity *= pE->velocity + MFRand_Range(-pE->velocityScatter, pE->velocityScatter);

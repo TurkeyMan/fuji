@@ -305,7 +305,7 @@ void MFSystem_Draw()
 
 		float rate = (float)gSystemTimer.GetRate();
 		if(rate != 1.0f)
-			MFFont_DrawText2f(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), "Rate: %s", MFStr(rate == 0.0f ? "Paused" : "%.2f", rate));
+			MFFont_DrawText2f(MFFont_GetDebugFont(), xaspect + 60, rect.height-50.0f, 20.0f, MakeVector(1,0,0,1), rate == 0.0f ? "Rate: Paused" : MFStr("Rate: %.2f", rate));
 
 		MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_SysLogoSmall));
 

@@ -207,13 +207,13 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 				}
 			}
 			else if(errorCode == 404)
-				MFDebug_Warn(2, MFStr("HTTP response code 404: Not Found", errorCode));
+				MFDebug_Warn(2, MFStr("HTTP response code %d: Not Found", errorCode));
 			else if(errorCode == 400)
-				MFDebug_Warn(2, MFStr("HTTP response code 400: Bad Request", errorCode));
+				MFDebug_Warn(2, MFStr("HTTP response code %d: Bad Request", errorCode));
 			else if(errorCode == 401)
-				MFDebug_Warn(2, MFStr("HTTP response code 401: Unauthorized", errorCode));
+				MFDebug_Warn(2, MFStr("HTTP response code %d: Unauthorized", errorCode));
 			else if(errorCode == 403)
-				MFDebug_Warn(2, MFStr("HTTP response code 403: Forbidden", errorCode));
+				MFDebug_Warn(2, MFStr("HTTP response code %d: Forbidden", errorCode));
 			else if(errorCode >= 100 && errorCode < 200)
 			{
 				// continue request
@@ -335,7 +335,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 	MFFileHTTPData *pHTTPData = (MFFileHTTPData*)fileHandle->pFilesysData;
 
-	const char *pHeaderRequest = MFStr("$s %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\nRange: bytes=%d-%d\nRequest-Range: bytes=%d-%d\n\n%s", pHTTPData->pArgString ? "POST" : "GET", pHTTPData->pPath, pHTTPData->pServer, pHTTPData->port, (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), pHTTPData->pArgString ? pHTTPData->pArgString : "");
+	const char *pHeaderRequest = MFStr("%s %s HTTP/1.1\nFrom: mtfuji@dotblip.com\nUser-Agent: Mount Fuji Engine/1.0\nHost: %s:%d\nRange: bytes=%d-%d\nRequest-Range: bytes=%d-%d\n\n%s", pHTTPData->pArgString ? "POST" : "GET", pHTTPData->pPath, pHTTPData->pServer, pHTTPData->port, (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), (uint32)fileHandle->offset, (uint32)(fileHandle->offset + bytes - 1), pHTTPData->pArgString ? pHTTPData->pArgString : "");
 
 	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 	if(MFSockets_Connect(socket, pHTTPData->address))

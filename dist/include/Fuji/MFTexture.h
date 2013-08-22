@@ -173,6 +173,7 @@ namespace Fuji
 			Release();
 			pResource = from.pResource;
 			AddRef();
+			return *this;
 		}
 
 		inline operator MFTexture*()								{ return (MFTexture*)pResource; }

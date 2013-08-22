@@ -38,10 +38,6 @@ struct MFVertex_RenderBuffers
 
 /*** Globals ****/
 
-#define USE_VBOS
-
-bool gbUseVBOs = false;
-
 static MFVertex_RenderBuffers gRenderBuffers;
 
 static int gPrimTypes[MFPT_Max] =
@@ -115,12 +111,6 @@ struct MFVertexDataFormatGL
 
 void MFVertex_InitModulePlatformSpecific()
 {
-#if defined(USE_VBOS)
-	if(glBindBuffer && glBufferData && glDeleteBuffers && glGenBuffers)
-		gbUseVBOs = true;
-	else
-		MFDebug_Warn(1, "MFModel: OpenGL Vertex Buffer Object extension not loaded, performance may suffer.");
-#endif
 }
 
 void MFVertex_DeinitModulePlatformSpecific()
@@ -156,48 +146,31 @@ void MFVertex_DestroyVertexDeclarationPlatformSpecific(MFVertexDeclaration *pDec
 
 bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, void *pVertexBufferMemory)
 {
-	if(gbUseVBOs)
-	{
-		GLuint buffer;
-		glGenBuffers(1, &buffer);
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	GLuint buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-		if(pVertexBufferMemory)
-			glBufferData(GL_ARRAY_BUFFER, pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride, pVertexBufferMemory, GL_STATIC_DRAW);
+	if(pVertexBufferMemory)
+		glBufferData(GL_ARRAY_BUFFER, pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride, pVertexBufferMemory, GL_STATIC_DRAW);
 
-		MFCheckForOpenGLError(true);
+	MFCheckForOpenGLError(true);
 
-		pVertexBuffer->pPlatformData = (void*)buffer;
-	}
-	else
-	{
-		pVertexBuffer->pPlatformData = MFHeap_Alloc(pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride);
-	}
+	pVertexBuffer->pPlatformData = (void*)buffer;
 
 	return true;
 }
 
 void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 {
-	if(gbUseVBOs)
-	{
-		GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
-		glDeleteBuffers(1, &buffer);
-	}
-	else
-	{
-		MFHeap_Free(pVertexBuffer->pPlatformData);
-	}
+	GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
+	glDeleteBuffers(1, &buffer);
 }
 
 MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVertices)
 {
 	MFDebug_Assert(!pVertexBuffer->bLocked, "Vertex buffer already locked!");
 
-	if(gbUseVBOs)
-		pVertexBuffer->pLocked = MFHeap_Alloc(pVertexBuffer->numVerts*pVertexBuffer->pVertexDeclatation->pElementData[0].stride, MFHeap_GetHeap(MFHT_ActiveTemporary));
-	else
-		pVertexBuffer->pLocked = pVertexBuffer->pPlatformData;
+	pVertexBuffer->pLocked = MFHeap_Alloc(pVertexBuffer->numVerts*pVertexBuffer->pVertexDeclatation->pElementData[0].stride, MFHeap_GetHeap(MFHT_ActiveTemporary));
 
 	if(ppVertices)
 		*ppVertices = pVertexBuffer->pLocked;
@@ -209,16 +182,13 @@ MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer->bLocked, "Vertex buffer not locked!");
 
-	if(gbUseVBOs)
-	{
-		GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride, pVertexBuffer->pLocked, GL_STATIC_DRAW);
+	GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride, pVertexBuffer->pLocked, GL_STATIC_DRAW);
 
-		MFCheckForOpenGLError(true);
+	MFCheckForOpenGLError(true);
 
-		MFHeap_Free(pVertexBuffer->pLocked);
-	}
+	MFHeap_Free(pVertexBuffer->pLocked);
 
 	pVertexBuffer->pLocked = NULL;
 	pVertexBuffer->bLocked = false;
@@ -226,48 +196,31 @@ MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 
 bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uint16 *pIndexBufferMemory)
 {
-	if(gbUseVBOs)
-	{
-		GLuint buffer;
-		glGenBuffers(1, &buffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+	GLuint buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 
-		if(pIndexBufferMemory)
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pIndexBuffer->numIndices, pIndexBufferMemory, GL_STATIC_DRAW);
+	if(pIndexBufferMemory)
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pIndexBuffer->numIndices, pIndexBufferMemory, GL_STATIC_DRAW);
 
-		MFCheckForOpenGLError(true);
+	MFCheckForOpenGLError(true);
 
-		pIndexBuffer->pPlatformData = (void*)buffer;
-	}
-	else
-	{
-		pIndexBuffer->pPlatformData = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices);
-	}
+	pIndexBuffer->pPlatformData = (void*)buffer;
 
 	return true;
 }
 
 void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer)
 {
-	if(gbUseVBOs)
-	{
-		GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
-		glDeleteBuffers(1, &buffer);
-	}
-	else
-	{
-		MFHeap_Free(pIndexBuffer->pPlatformData);
-	}
+	GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
+	glDeleteBuffers(1, &buffer);
 }
 
 MF_API void MFVertex_LockIndexBuffer(MFIndexBuffer *pIndexBuffer, uint16 **ppIndices)
 {
 	MFDebug_Assert(!pIndexBuffer->bLocked, "Vertex buffer already locked!");
 
-	if(gbUseVBOs)
-		pIndexBuffer->pLocked = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices, MFHeap_GetHeap(MFHT_ActiveTemporary));
-	else
-		pIndexBuffer->pLocked = pIndexBuffer->pPlatformData;
+	pIndexBuffer->pLocked = MFHeap_Alloc(sizeof(uint16)*pIndexBuffer->numIndices, MFHeap_GetHeap(MFHT_ActiveTemporary));
 
 	if(ppIndices)
 		*ppIndices = (uint16*)pIndexBuffer->pLocked;
@@ -279,16 +232,13 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer->bLocked, "Vertex buffer not locked!");
 
-	if(gbUseVBOs)
-	{
-		GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pIndexBuffer->numIndices, pIndexBuffer->pLocked, GL_STATIC_DRAW);
+	GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pIndexBuffer->numIndices, pIndexBuffer->pLocked, GL_STATIC_DRAW);
 
-		MFCheckForOpenGLError(true);
+	MFCheckForOpenGLError(true);
 
-		MFHeap_Free(pIndexBuffer->pLocked);
-	}
+	MFHeap_Free(pIndexBuffer->pLocked);
 
 	pIndexBuffer->pLocked = NULL;
 	pIndexBuffer->bLocked = false;
@@ -337,20 +287,13 @@ MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int nu
 
 		MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
 
-		if(gbUseVBOs)
+		if(pElements[a].stream != stream)
 		{
-			if(pElements[a].stream != stream)
-			{
-				stream = pElements[a].stream;
-				glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
-			}
+			stream = pElements[a].stream;
+			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+		}
 
-			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
-		}
-		else
-		{
-			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
-		}
+		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
 
 		glEnableVertexAttribArray(attribs[a]);
 	}
@@ -397,34 +340,20 @@ MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset
 
 		MFVertexDataFormatGL &f = gDataFormat[pElements[a].format];
 
-		if(gbUseVBOs)
+		if(pElements[a].stream != stream)
 		{
-			if(pElements[a].stream != stream)
-			{
-				stream = pElements[a].stream;
-				glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
-			}
+			stream = pElements[a].stream;
+			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+		}
 
-			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
-		}
-		else
-		{
-			glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (char*)gRenderBuffers.pVertexBuffer[stream]->pPlatformData + pElementData[a].offset);
-		}
+		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
 
 		glEnableVertexAttribArray(attribs[a]);
 	}
 
-	if(gbUseVBOs)
-	{
-		// bind the index buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)gRenderBuffers.pIndexBuffer->pPlatformData);
-		glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, NULL);
-	}
-	else
-	{
-		glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, gRenderBuffers.pIndexBuffer->pPlatformData);
-	}
+	// bind the index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)gRenderBuffers.pIndexBuffer->pPlatformData);
+	glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, NULL);
 
 	// unbind the streams
 	for(int a=0; a<gRenderBuffers.pVertexDeclaration->numElements; ++a)

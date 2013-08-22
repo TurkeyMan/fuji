@@ -156,6 +156,8 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 				pWidget->SetPosition(tPos);
 				newSize.y = tSize.y;
 				break;
+			default:
+				MFUNREACHABLE;
 			}
 		}
 		else
@@ -174,20 +176,22 @@ void HKWidgetLayoutLinear::ArrangeChildren()
 
 			switch(align)
 			{
-			case Align_None:
-			case Align_Left:
-				pWidget->SetPosition(tPos);
-				break;
-			case Align_Center:
-				pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f) * 0.5f, 0));
-				break;
-			case Align_Right:
-				pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f), 0));
-				break;
-			case Align_Fill:
-				pWidget->SetPosition(tPos);
-				newSize.x = tSize.x;
-				break;
+				case Align_None:
+				case Align_Left:
+					pWidget->SetPosition(tPos);
+					break;
+				case Align_Center:
+					pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f) * 0.5f, 0));
+					break;
+				case Align_Right:
+					pWidget->SetPosition(tPos + MakeVector(MFMax(tSize.x - cSize.x, 0.f), 0));
+					break;
+				case Align_Fill:
+					pWidget->SetPosition(tPos);
+					newSize.x = tSize.x;
+					break;
+				default:
+					MFUNREACHABLE;
 			}
 		}
 

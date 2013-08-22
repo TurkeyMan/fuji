@@ -1073,7 +1073,7 @@ found:
 			// build platform specific mesh chunk
 			switch(platform)
 			{
-				case FP_PC:
+				case FP_Windows:
 				case FP_Linux:
 				case FP_OSX:
 					WriteMeshChunk_Generic(this, pMeshChunks, sub, pOffset, pStringCache, &pModelData->boundingVolume);
@@ -1236,7 +1236,7 @@ found:
 
 					switch(platform)
 					{
-						case FP_PC:
+						case FP_Windows:
 						case FP_Linux:
 						case FP_OSX:
 							FixUpMeshChunk_Generic(pSubobjectChunk[b].pMeshChunks, pSubobjectChunk[b].numMeshChunks, pModelData, pStringBase);
@@ -1787,12 +1787,12 @@ void F3DFile::BuildBatches(MFPlatform platform)
 
 	switch(platform)
 	{
-		case FP_PC:		maxBones = 50;	break;
-		case FP_XBox:	maxBones = 20;	break;
-		case FP_PSP:	maxBones = 8;	break;
-		case FP_Linux:	maxBones = 50;	break;
-		case FP_OSX:	maxBones = 50;	break;
-		default:		maxBones = 256;	break;
+		case FP_Windows:	maxBones = 50;	break;
+		case FP_XBox:		maxBones = 20;	break;
+		case FP_PSP:		maxBones = 8;	break;
+		case FP_Linux:		maxBones = 50;	break;
+		case FP_OSX:		maxBones = 50;	break;
+		default:			maxBones = 256;	break;
 	}
 
 	MFArray<int> trisAdded;

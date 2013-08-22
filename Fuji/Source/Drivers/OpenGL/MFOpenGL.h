@@ -23,8 +23,7 @@
 			#include <OpenGLES/ES2/gl.h>
 			#include <OpenGLES/ES2/glext.h>
 		#endif
-	#elif defined(MF_ANDROID)
-		#define GL_GLEXT_PROTOTYPES
+	#elif defined(MF_ANDROID) || defined(MF_WEB)
 		#if MF_OPENGL_ES_VER == 1
 			#include <GLES/gl.h>
 			#include <GLES/glext.h>
@@ -33,7 +32,6 @@
 			#include <GLES2/gl2ext.h>
 		#endif
 	#elif defined(MF_NACL)
-//		#define GL_GLEXT_PROTOTYPES
 		#if MF_OPENGL_ES_VER == 1
 			#error GLES 1.x not supported in Native Client!
 		#elif MF_OPENGL_ES_VER == 2
@@ -61,19 +59,50 @@
 	#define glClearDepth glClearDepthf
 	#define glDepthRange glDepthRangef
 
-	#if !defined GL_CLAMP_TO_BORDER
+	#if !defined(GL_CLAMP_TO_BORDER)
 		#define GL_CLAMP_TO_BORDER 0x812D
 	#endif
-	#if !defined GL_MIRROR_CLAMP_TO_EDGE_EXT
+	#if !defined(GL_MIRROR_CLAMP_TO_EDGE_EXT)
 		#define GL_MIRROR_CLAMP_TO_EDGE_EXT 0x8743
 	#endif
-
-	#if !defined GL_GEOMETRY_SHADER
+	#if !defined(GL_GEOMETRY_SHADER)
 		#define GL_GEOMETRY_SHADER 0x8DD9
 	#endif
-
-	#if !defined GL_BGRA
+	#if !defined(GL_BGRA)
 		#define GL_BGRA 0x80E1
+	#endif
+	#if !defined(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+		#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83F2
+	#endif
+	#if !defined(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+		#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+	#endif
+	#if !defined(GL_HALF_FLOAT)
+		#define GL_HALF_FLOAT 0x140B
+	#endif
+	#if !defined(GL_UNSIGNED_INT_2_10_10_10_REV)
+		#define GL_UNSIGNED_INT_2_10_10_10_REV 0x8368
+	#endif
+	#if !defined(GL_INT_2_10_10_10_REV)
+		#define GL_INT_2_10_10_10_REV 0x8D9F
+	#endif
+	#if !defined(GL_MIN)
+		#define GL_MIN 0x8007
+	#endif
+	#if !defined(GL_MAX)
+		#define GL_MAX 0x8008
+	#endif
+	#if !defined(GL_SRC1_COLOR)
+		#define GL_SRC1_COLOR 0x88F9
+	#endif
+	#if !defined(GL_ONE_MINUS_SRC1_COLOR)
+		#define GL_ONE_MINUS_SRC1_COLOR 0x88FA
+	#endif
+	#if !defined(GL_SRC1_ALPHA)
+		#define GL_SRC1_ALPHA 0x8589
+	#endif
+	#if !defined(GL_ONE_MINUS_SRC1_ALPHA)
+		#define GL_ONE_MINUS_SRC1_ALPHA 0x88FB
 	#endif
 #endif
 

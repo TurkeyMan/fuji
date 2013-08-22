@@ -141,7 +141,7 @@ MF_API int MFFont_BlitText(MFFont *pFont, int x, int y, const MFVector &colour, 
  * @return Returns 0 if there were no errors.
  * @remarks The MFFont_BlitTextf format string conforms with all the standard printf format standards.
  */
-MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...);
+MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour, const char *pFormat, ...) MFPRINTF_FUNC(5, 6);
 
 /**
  * Render a string.
@@ -184,7 +184,7 @@ MF_API float MFFont_DrawText2(MFFont *pFont, float x, float y, float height, con
  * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...);
+MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...) MFPRINTF_FUNC(5, 6);
 
 /**
  * Render a formatted string.
@@ -199,7 +199,7 @@ MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, 
  * @return Returns the height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
-MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...);
+MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...) MFPRINTF_FUNC(6, 7);
 
 MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &colour, int numChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 

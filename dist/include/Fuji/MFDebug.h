@@ -21,8 +21,10 @@
  * Triggers a debugger breakpoint.
  * @return None.
  */
-#if defined(_NACL)
-	// int 3 is an illegal instruction in NaCl
+#if defined(MF_NACL)
+	#include <assert.h>
+	#define MFDebug_Breakpoint()		assert(false)
+#elif defined(MF_WEB)
 	#include <assert.h>
 	#define MFDebug_Breakpoint()		assert(false)
 #elif defined(MF_ARCH_X86) || defined(MF_ARCH_X64)
@@ -98,7 +100,7 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
  * @param alignment Bytes to align pointer to.
  * @return None.
  */
-#define MFDebug_AssertAlignment(pPointer, alignment) MFDebug_Assert(!((uint32)((void*)(pPointer))&((alignment)-1)), MFStr("Pointer not %d byte alligned: 0x%08X", (alignment), (void*)(x)))
+#define MFDebug_AssertAlignment(pPointer, alignment) MFDebug_Assert(((size_t)(void*)(pPointer)&((alignment)-1)) == 0, MFStr("Pointer not %d byte alligned: 0x%p", (alignment), (void*)(x)))
 
 /**
  * Logs a message to the debug output.
@@ -169,7 +171,7 @@ MF_API void MFDebug_SetMaximumLogLevel(int maxLevel);
 #else
 
 // debug functions define to nothing in retail builds.
-#define MFDebug_Assert(condition, pMessage)
+#define MFDebug_Assert(condition, pMessage) MFASSUME(condition)
 #define MFDebug_AssertAlignment(pPointer, alignment)
 #define MFDebug_Error(pErrorMessage)
 #define MFDebug_Warn(level, pWarningMessage)

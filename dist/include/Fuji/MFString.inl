@@ -23,13 +23,7 @@ inline bool MFIsNumeric(int c)
 
 inline bool MFIsAlphaNumeric(int c)
 {
-#if defined(MFLOCALE_ENGLISH_ONLY)
-	return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9') || (c=='_');
-#elif defined(MFLOCALE_BASIC_LATIN)
-	return (c>='a' && c<='z') || (c >= 'à' && c <= 'þ') || (c>='A' && c<='Z') || (c >= 'À' && c <= 'Þ') || (c>='0' && c<='9') || (c=='_');
-#elif defined(MFLOCALE_BASIC_LATIN_GREEK_CRYLLIC)
-	return (c>='a' && c<='z') || (c >= 'à' && c <= 'þ') || (c>='A' && c<='Z') || (c >= 'À' && c <= 'Þ') || (c >= 0x0391 && c <= 0x03AB) || (c >= 0x03B1 && c <= 0x03CB) || (c >= 0x0410 && c <= 0x044F) || (c>='0' && c<='9') || (c=='_');
-#endif
+	return MFIsAlpha(c) || MFIsNumeric(c);
 }
 
 inline bool MFIsHex(int c)

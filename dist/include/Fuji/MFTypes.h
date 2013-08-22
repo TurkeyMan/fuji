@@ -73,7 +73,7 @@ typedef size_t				uintp;
 		typedef int32		intp;
 	#endif
 #else
-typedef ssize_t				intp;
+	typedef ssize_t			intp;
 #endif
 
 #endif

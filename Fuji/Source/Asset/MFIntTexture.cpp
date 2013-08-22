@@ -1411,7 +1411,7 @@ MF_API MFImageFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platfor
 	// choose target format..
 	switch(platform)
 	{
-		case FP_PC:
+		case FP_Windows:
 		case FP_Linux:
 		case FP_OSX:
 /*

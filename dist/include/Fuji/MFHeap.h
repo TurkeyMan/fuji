@@ -101,22 +101,30 @@ void* MFHeap_TAlloc(size_t bytes);
  */
 MF_API void MFHeap_Free(void *pMem);
 
+#include <new>
+
+#if defined(MF_COMPILER_VISUALC) && !defined(_FUJI_UTIL)
+//	#define MF_NEW_OPERATORS
+#endif
 #if !defined(_FUJI_UTIL)
+//	#define MF_PLACEMENT_NEW_OPERATORS
+#endif
+
 // FIXME
-#if !defined(_LINUX) && !defined(_OSX) && !defined(_PSP) && !defined(_GC)
-void* operator new(size_t size);
-void* operator new[](size_t size);
-void operator delete(void *pMemory);
-void operator delete[](void *pMemory);
+#if defined(MF_NEW_OPERATORS)
+inline void* operator new(size_t size) { return MFHeap_AllocInternal(size); }
+inline void* operator new[](size_t size) { return MFHeap_AllocInternal(size); }
+inline void operator delete(void *pMemory) { MFHerap_Free(pMemory); }
+inline void operator delete[](void *pMemory) { MFHerap_Free(pMemory); }
 #endif
 
 // placement new operators
-void* operator new(size_t size, void *pMem);
-void* operator new[](size_t size, void *pMem);
-void operator delete(void *pMemory, void *pMem);
-void operator delete[](void *pMemory, void *pMem);
+#if defined(MF_PLACEMENT_NEW_OPERATORS)
+inline void* operator new(size_t size, void *pMem) { return pMem; }
+inline void* operator new[](size_t size, void *pMem) { return pMem; }
+inline void operator delete(void *pMemory, void *pMem) {}
+inline void operator delete[](void *pMemory, void *pMem) {}
 #endif
-
 
 // *** document me!! ***
 MF_API size_t MFHeap_GetTotalAllocated(MFHeap *pHeap);
