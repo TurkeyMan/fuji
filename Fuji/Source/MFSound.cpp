@@ -20,7 +20,7 @@
 
 /**** Forward Declarations ****/
 
-void MFSound_FillBuffer(MFAudioStream *pStream, int bytes);
+void MFSound_FillBuffer(MFAudioStream *pStream, size_t bytes);
 void MFSound_ServiceStreamBuffer(MFAudioStream *pStream);
 
 
@@ -341,7 +341,7 @@ MF_API MFSound *MFSound_CreateDynamic(const char *pName, int numSamples, int num
 
 		// clear the buffer
 		void *pBuffer;
-		uint32 len;
+		size_t len;
 
 		MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
 		MFZeroMemory(pBuffer, len);
@@ -472,7 +472,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	}
 }
 
-MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	MFCALLSTACK;
 
@@ -645,7 +645,7 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 	MFCALLSTACK;
 
 	uint32 playCursor;
-	int lockSize;
+	size_t lockSize;
 
 	// get cursor pos
 	playCursor = MFSound_GetPlayCursorInternal(pStream->pStreamVoice);
@@ -769,23 +769,23 @@ MF_API const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoTyp
 	return NULL;
 }
 
-void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
+void MFSound_FillBuffer(MFAudioStream *pStream, size_t bytes)
 {
 	MFCALLSTACKc;
 
 	void *pData1, *pData2;
-	uint32 bytes1, bytes2;
-	uint32 bufferFed = 0;
+	size_t bytes1, bytes2;
+	size_t bufferFed = 0;
 
 	// fill buffer
 	MFSound_Lock(pStream->pStreamBuffer, pStream->writePointer, bytes, &pData1, &bytes1, &pData2, &bytes2);
 
 	char *pData = (char*)pData1;
-	uint32 bytesToWrite = bytes1;
+	size_t bytesToWrite = bytes1;
 
 	while(bufferFed < bytesToWrite)
 	{
-		int r = pStream->pStreamHandler->callbacks.pGetSamples(pStream, pData, bytesToWrite-bufferFed);
+		size_t r = pStream->pStreamHandler->callbacks.pGetSamples(pStream, pData, bytesToWrite-bufferFed);
 
 		if(!r)
 		{
@@ -824,7 +824,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, int bytes)
 		pStream->currentTime = pStream->pStreamHandler->callbacks.pGetTime(pStream);
 }
 
-MF_API int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes)
+MF_API size_t MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 {
 	return pStream->pStreamHandler->callbacks.pGetSamples(pStream, pBuffer, bytes);
 }

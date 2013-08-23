@@ -620,7 +620,7 @@ public:
 	MFString();
 	MFString(const MFString &string);
 	MFString(const char *pString, bool bHoldStaticPointer = false);
-	MFString(const char *pString, int numChars);
+	MFString(const char *pString, size_t numChars);
 	~MFString();
 
 	bool operator!() const;									/**< Boolean 'not' operator. */

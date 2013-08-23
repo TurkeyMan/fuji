@@ -10,11 +10,11 @@
 #include "minifmod170/lib/minifmod.h"
 #include "minifmod170/lib/system_file.h"
 
-int GetMiniFMODSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
+size_t GetMiniFMODSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 {
 	FMUSIC_MODULE *pMod = (FMUSIC_MODULE*)pStream->pStreamData;
 
-	FMUSIC_GetSamples(pMod, (char*)pBuffer, bytes);
+	FMUSIC_GetSamples(pMod, (char*)pBuffer, (int)bytes);
 	return bytes;
 }
 

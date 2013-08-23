@@ -272,7 +272,7 @@ MF_API void *MFHeap_ReallocInternal(void *pMem, size_t bytes)
 	if(pMem)
 	{
 		MFAllocHeader *pHeader = GetAllocHeader(pMem);
-		MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
+		MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(" MFFMT_SIZE_T ")", pHeader->pFile, pHeader->line));
 
 		void *pNew = MFHeap_AllocInternal(bytes, pHeader->pHeap);
 		MFDebug_Assert(pNew, "Failed to allocate memory!");
@@ -302,7 +302,7 @@ MF_API void MFHeap_Free(void *pMem)
 	MFThread_LockMutex(gAllocMutex);
 
 	MFAllocHeader *pHeader = GetAllocHeader(pMem);
-	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(%d)", pHeader->pFile, pHeader->line));
+	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(" MFFMT_SIZE_T ")", pHeader->pFile, pHeader->line));
 
 	MFHeap *pHeap = pHeader->pHeap;
 #if !defined(_RETAIL)
@@ -466,7 +466,7 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 	if(MFMemCompare((const char*)pMemory + pHeader->size, gMungwall, MFHeap_MungwallBytes) == 0)
 		return true;
 
-	MFDebug_Log(0, MFStr("%s(%d) : Corrupted mungwall detected in allocation 0x%p.", pHeader->pFile, pHeader->line, pMemory));
+	MFDebug_Log(0, MFStr("%s(" MFFMT_SIZE_T ") : Corrupted mungwall detected in allocation 0x%p.", pHeader->pFile, pHeader->line, pMemory));
 	return false;
 }
 

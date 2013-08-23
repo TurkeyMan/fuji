@@ -37,10 +37,10 @@ struct MFWAVStream
 
 	MFFile *pStream;
 
-	uint32 dataOffset;
-	uint32 dataSize;
-	uint32 sampleOffset;
-	uint32 sampleSize;
+	size_t dataOffset;
+	size_t dataSize;
+	size_t sampleOffset;
+	size_t sampleSize;
 };
 
 void DestroyWAVStream(MFAudioStream *pStream)
@@ -107,7 +107,7 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 	while(read);
 
 	// return to the start of the audio data
-	MFFile_Seek(pWS->pStream, pWS->dataOffset, MFSeek_Begin);
+	MFFile_Seek(pWS->pStream, (int)pWS->dataOffset, MFSeek_Begin);
 
 	// calculate the track length
 	pWS->sampleSize = (pWS->format.nChannels * pWS->format.wBitsPerSample) >> 3;
@@ -120,7 +120,7 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 	pStream->streamInfo.bufferLength = pWS->format.nSamplesPerSec;
 }
 
-int GetWAVSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
+size_t GetWAVSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 {
 	MFWAVStream *pWS = (MFWAVStream*)pStream->pStreamData;
 	size_t read = MFFile_Read(pWS->pStream, pBuffer, MFMin(bytes, pWS->dataSize - pWS->sampleOffset));
@@ -132,7 +132,7 @@ void SeekWAVStream(MFAudioStream *pStream, float seconds)
 {
 	MFWAVStream *pWS = (MFWAVStream*)pStream->pStreamData;
 	pWS->sampleOffset = (uint32)(seconds * (float)pWS->format.nSamplesPerSec) * pWS->sampleSize;
-	MFFile_Seek(pWS->pStream, pWS->dataOffset + pWS->sampleOffset, MFSeek_Begin);
+	MFFile_Seek(pWS->pStream, (int)(pWS->dataOffset + pWS->sampleOffset), MFSeek_Begin);
 }
 
 float GetWAVTime(MFAudioStream *pStream)

@@ -120,7 +120,7 @@ MF_API MFSound *MFSound_FindSound(const char *pName);
  * @param size Size in bytes of the buffer pointed to by \a pData.
  * @return Returns number of bytes written.
  */
-MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size);
+MF_API size_t MFSound_SetBufferData(MFSound *pSound, const void *pData, size_t size);
 
 /**
  * Lock a sound buffer.
@@ -135,7 +135,7 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
  * @return Returns 0 on success.
  * @see MFSound_Unlock(), MFSound_CreateDynamic()
  */
-MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2 = NULL, uint32 *pSize2 = NULL);
+MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppData, size_t *pSize, void **ppData2 = NULL, size_t *pSize2 = NULL);
 
 /**
  * Unlock a sound buffer.
@@ -290,7 +290,7 @@ enum MFStreamInfoType
 struct MFStreamCallbacks
 {
 	void (*pCreateStream)(MFAudioStream*, const char *);	/**< Create stream callback. */
-	int (*pGetSamples)(MFAudioStream*, void *, uint32);		/**< Callback to get samples from the stream. */
+	size_t (*pGetSamples)(MFAudioStream*, void *, size_t);	/**< Callback to get samples from the stream. */
 	void (*pDestroyStream)(MFAudioStream*);					/**< Destroy stream callback. */
 	void (*pSeekStream)(MFAudioStream*, float);				/**< Seek stream callbacks. */
 	float (*pGetTime)(MFAudioStream*);						/**< Get the current stream time. */
@@ -375,7 +375,7 @@ MF_API const char *MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoTyp
  * @param bytes number of bytes to read from the stream.
  * @return Returns the number of bytes read.
  */
-MF_API int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes);
+MF_API size_t MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes);
 
 #endif // _MFSOUND_H
 

@@ -50,9 +50,9 @@ int F3DFile::ReadMEMD2(const char *pFilename)
 void UnpackVertex(MEMD2_VERTEX *in, MEMesh2 *msh, float scale, F3DSubObject &sub)
 {
 	F3DVertex &v = sub.matSubobjects[0].vertices.push();
-	v.position = sub.positions.size();
-	v.normal = sub.normals.size();
-	v.uv1 = sub.uvs.size();
+	v.position = (int)sub.positions.size();
+	v.normal = (int)sub.normals.size();
+	v.uv1 = (int)sub.uvs.size();
 
 	MFVector &pos = sub.positions.push();
 	MFVector &normal = sub.normals.push();

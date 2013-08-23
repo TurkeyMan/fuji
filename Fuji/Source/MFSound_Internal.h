@@ -85,9 +85,9 @@ struct MFSound
 	MFSoundDataInternal *pInternal;
 
 	// for locking dynamic buffers
-	int lockOffset, lockBytes;
+	size_t lockOffset, lockBytes;
 	void *pLock1, *pLock2;
-	uint32 lockSize1, lockSize2;
+	size_t lockSize1, lockSize2;
 };
 
 struct MFVoice
@@ -137,8 +137,8 @@ struct MFAudioStream
 	MFSound *pStreamBuffer;
 	MFVoice *pStreamVoice;
 
-	uint32 bufferSize;
-	uint32 writePointer;
+	size_t bufferSize;
+	size_t writePointer;
 
 	float trackLength;
 	float currentTime;

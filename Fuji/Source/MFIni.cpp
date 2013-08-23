@@ -124,13 +124,13 @@ MFMatrix MFIniLine::GetMatrix(int index)
 
 MFString MFIniLine::GetLine()
 {
-	MFString t(pIni->pMem + lineStart, lineLength);
+	MFString t(pIni->pMem + lineStart, (size_t)lineLength);
 	return t;
 }
 
 MFString MFIniLine::GetLineData()
 {
-	MFString t(pIni->pMem + lineStart + dataOffset, lineLength - dataOffset);
+	MFString t(pIni->pMem + lineStart + dataOffset, (size_t)(lineLength - dataOffset));
 	return t;
 }
 

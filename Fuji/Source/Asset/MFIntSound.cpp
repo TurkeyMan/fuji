@@ -49,13 +49,13 @@ MF_API void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, si
 	MFAudioStream *pStream = (MFAudioStream*)pSound->pInternal;
 
 	// decode audio into buffer
-	uint32 sampleSize = (pSound->soundTemplate.bitsPerSample * pSound->soundTemplate.numChannels) >> 3;
-	uint32 bytesAllocated = 44100 * sampleSize;
-	uint32 bytes = 0;
+	size_t sampleSize = (pSound->soundTemplate.bitsPerSample * pSound->soundTemplate.numChannels) >> 3;
+	size_t bytesAllocated = 44100 * sampleSize;
+	size_t bytes = 0;
 
 	char *pAudioData = (char*)MFHeap_Alloc(bytesAllocated);
 
-	int read;
+	size_t read;
 	do
 	{
 		// read samples from stream
@@ -72,7 +72,7 @@ MF_API void MFIntSound_CreateRuntimeData(MFIntSound *pSound, void **ppOutput, si
 	while(read);
 
 	// calculate the number of samples from the bytes read
-	int numSamples = bytes / sampleSize;
+	int numSamples = (int)(bytes / sampleSize);
 
 	// construct MFSoundTemplate
 	size_t templateBytes = sizeof(MFSoundTemplate) + sizeof(char*)*pSound->soundTemplate.numStreams + sampleSize*numSamples;

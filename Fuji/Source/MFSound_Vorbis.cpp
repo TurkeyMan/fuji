@@ -118,15 +118,15 @@ void CreateVorbisStream(MFAudioStream *pStream, const char *pFilename)
 	}
 }
 
-int GetVorbisSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
+size_t GetVorbisSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 {
 	MFVorbisStream *pVS = (MFVorbisStream*)pStream->pStreamData;
 
 	int currentBitstream;
 #if defined(VORBIS_TREMOR)
-	return ov_read(&pVS->vorbisFile, (char*)pBuffer, bytes, &currentBitstream);
+	return ov_read(&pVS->vorbisFile, (char*)pBuffer, (int)bytes, &currentBitstream);
 #else
-	return ov_read(&pVS->vorbisFile, (char*)pBuffer, bytes, 0, 2, 1, &currentBitstream);
+	return ov_read(&pVS->vorbisFile, (char*)pBuffer, (int)bytes, 0, 2, 1, &currentBitstream);
 #endif
 }
 

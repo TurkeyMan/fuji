@@ -72,8 +72,8 @@ struct MFMADDecoder
 	unsigned char *pGuardPtr;
 	uint32 currentFrame;
 	uint32 frameCount;
-	uint32 overflowOffset;
-	uint32 overflowBytes;
+	size_t overflowOffset;
+	size_t overflowBytes;
 };
 
 int GetSynchSafeInt(unsigned char *pStream)
@@ -264,16 +264,16 @@ int PreCacheFrameOffsets(MFMADDecoder *pDecoder)
 	return sampleRate;
 }
 
-int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
+size_t GetMADSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 {
 	MFMADDecoder *pDecoder = (MFMADDecoder*)pStream->pStreamData;
 
-	int written = 0;
+	size_t written = 0;
 
 	if(pDecoder->overflowBytes)
 	{
 		// grab from the overflow until we run out...
-		uint32 numBytes = MFMin(pDecoder->overflowBytes - pDecoder->overflowOffset, bytes);
+		size_t numBytes = MFMin(pDecoder->overflowBytes - pDecoder->overflowOffset, bytes);
 		MFCopyMemory(pBuffer, pDecoder->overflow + pDecoder->overflowOffset, numBytes);
 		pDecoder->overflowOffset += numBytes;
 		if(pDecoder->overflowOffset == pDecoder->overflowBytes)
@@ -281,7 +281,7 @@ int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 
 		// increment timer
 		mad_timer_t t = { 0, MAD_TIMER_RESOLUTION / pDecoder->firstHeader.samplerate };
-		mad_timer_multiply(&t, numBytes >> 2);
+		mad_timer_multiply(&t, (long)(numBytes >> 2));
 		mad_timer_add(&pDecoder->timer, t);
 
 		if(bytes == numBytes)
@@ -289,7 +289,7 @@ int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 
 		bytes -= numBytes;
 		(char*&)pBuffer += numBytes;
-		written = (int)numBytes;
+		written = numBytes;
 	}
 
 	do
@@ -398,7 +398,7 @@ int GetMADSamples(MFAudioStream *pStream, void *pBuffer, uint32 bytes)
 
 		// increment timer
 		mad_timer_t t = { 0, MAD_TIMER_RESOLUTION / pDecoder->firstHeader.samplerate };
-		mad_timer_multiply(&t, MFMin((uint32)pDecoder->synth.pcm.length, bytes >> 2));
+		mad_timer_multiply(&t, MFMin((long)pDecoder->synth.pcm.length, (long)(bytes >> 2)));
 		mad_timer_add(&pDecoder->timer, t);
 
 		bool bStereo = MAD_NCHANNELS(&pDecoder->frame.header) == 2;

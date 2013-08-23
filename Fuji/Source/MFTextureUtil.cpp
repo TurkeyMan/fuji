@@ -669,11 +669,11 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 };
 
 #if !defined(_FUJI_UTIL)
+int MFRenderer_GetCurrentRendererPlugin();
 MFRendererDrivers MFTexture_GetCurrentDisplayDriver()
 {
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 	// runtime check...
-	int MFRenderer_GetCurrentRendererPlugin();
 	int current = MFRenderer_GetCurrentRendererPlugin();
 	if(current == MF_DRIVER_D3D9)
 		return MFRD_D3D9;

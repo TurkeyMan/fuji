@@ -4,8 +4,10 @@
 // configure video plugins
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 	#if defined(MF_WINDOWS)
-		#define MF_RENDERPLUGIN_D3D9
-		#define MF_RENDERPLUGIN_D3D11
+		#if defined(MF_COMPILER_VISUALC)
+			#define MF_RENDERPLUGIN_D3D9
+			#define MF_RENDERPLUGIN_D3D11
+		#endif
 		#define MF_RENDERPLUGIN_OPENGL
 	#endif
 #endif

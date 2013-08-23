@@ -72,13 +72,13 @@ int AddToMaterials(const char *pMatName)
 {
 	F3DMaterialChunk *pChunk = pModel->GetMaterialChunk();
 
-	for(size_t a=0; a<pChunk->materials.size(); a++)
+	for(int a=0; a<(int)pChunk->materials.size(); a++)
 	{
 		if(!MFString_CaseCmp(pChunk->materials[a].name, pMatName))
 			return a;
 	}
 
-	int i = pChunk->materials.size();
+	int i = (int)pChunk->materials.size();
 
 	F3DMaterial &mat = pChunk->materials.push();
 	MFString_Copy(mat.name, pMatName);
@@ -226,7 +226,7 @@ void ParseOBJFile(const char *pFilePtr)
 
 			const char *pRestOfLine = GetRestOfLine(pFilePtr);
 
-			int firstVert = sub.matSubobjects[matSub].vertices.size();
+			int firstVert = (int)sub.matSubobjects[matSub].vertices.size();
 
 			pToken = GetNextToken(pRestOfLine);
 
@@ -241,17 +241,17 @@ void ParseOBJFile(const char *pFilePtr)
 				int normid = atoi(pNorm);
 
 				if(posid < 0)
-					posid = verts.size() - posid;
+					posid = (int)verts.size() - posid;
 				else
 					posid = posid - 1;
 
 				if(texid < 0)
-					texid = uvs.size() - texid;
+					texid = (int)uvs.size() - texid;
 				else
 					texid = texid - 1;
 
 				if(normid < 0)
-					normid = normals.size() - normid;
+					normid = (int)normals.size() - normid;
 				else
 					normid = normid - 1;
 
@@ -262,7 +262,7 @@ void ParseOBJFile(const char *pFilePtr)
 				maxUVIndex = maxUVIndex == -1 ? texid : MFMax(maxUVIndex, texid);
 				maxNormIndex = maxNormIndex == -1 ? normid : MFMax(maxNormIndex, normid);
 
-				int vi = sub.matSubobjects[matSub].vertices.size();
+				int vi = (int)sub.matSubobjects[matSub].vertices.size();
 				int f = vi - firstVert;
 
 				F3DVertex &vert = sub.matSubobjects[matSub].vertices[firstVert + f];

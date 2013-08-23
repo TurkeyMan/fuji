@@ -78,38 +78,44 @@
 #endif
 
 // detect architecture/platform
-#if defined(MF_COMPILER_VISUALC)
-	// if we're using an MS compiler, we must be building windows or xbox
-	#if defined(_XBOX)
-		// detect xbox version
-		#if _XBOX_VER < 200
-			#define MF_XBOX
-			#define MF_PLATFORM XBOX
-			#define MF_ARCH_X86
-			#define MF_32BIT
-		#elif _XBOX_VER >= 200
-			#define MF_X360
-			#define MF_PLATFORM X360
-			#define MF_ARCH_PPC
-			#define MF_64BIT
-		#else
-			#error XBox version undefined...
-		#endif
+#if defined(_XBOX)
+	// detect xbox version
+	#if _XBOX_VER < 200
+		#define MF_XBOX
+		#define MF_PLATFORM XBOX
+		#define MF_ARCH_X86
+		#define MF_32BIT
+	#elif _XBOX_VER >= 200
+		#define MF_X360
+		#define MF_PLATFORM X360
+		#define MF_ARCH_PPC
+		#define MF_64BIT
 	#else
-		#define MF_WINDOWS
-		#define MF_PLATFORM WINDOWS
+		#error XBox version undefined...
+	#endif
+#elif defined(WIN32)
+	#define MF_WINDOWS
+	#define MF_PLATFORM WINDOWS
 
-		// detect the architecture
-		#if defined(_M_IA64)
-			#define MF_64BIT
-			#define MF_ARCH_ITANIUM
-		#elif defined(_M_X64) || defined(_M_AMD64)
-			#define MF_64BIT
-			#define MF_ARCH_X64
-		#else
-			#define MF_32BIT
-			#define MF_ARCH_X86
-		#endif
+	// detect the architecture
+	#if _M_IA64 || __IA64__ || __ia64__
+		#define MF_64BIT
+		#define MF_ARCH_ITANIUM
+	#elif defined(_M_X64) || defined(_M_AMD64) || __X86_64__ || defined(__x86_64__)
+		#define MF_64BIT
+		#define MF_ARCH_X64
+	#elif defined(_M_IX86) || defined(__i386) || defined(__i386__)
+		#define MF_32BIT
+		#define MF_ARCH_X86
+	#else
+		#error "Couldn't detect target architecture!"
+	#endif
+
+	#if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x501
+		#undef _WIN32_WINNT
+	#endif
+	#if !defined(_WIN32_WINNT)
+		#define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
 	#endif
 #elif defined(PSP) || defined(__psp__) || defined(__PSP__) || defined(_PSP)
 	#define MF_PSP
@@ -168,7 +174,7 @@
 	#elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(__ppc64__)
 		#define MF_ARCH_PPC
 	#else
-		#error "Unsupported Mac OS X Architecture"
+		#error "Couldn't detect target architecture!"
 	#endif
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID
@@ -388,6 +394,9 @@ enum MFEndian
 		#define MFASSUME(condition) __assume(condition)
 		#define MFUNREACHABLE __assume(0)
 	#endif
+	#define MFFMT_SIZE_T "%Iu"
+	#define MFFMT_SSIZE_T "%Id"
+	#define MFFMT_PTRDIFF_T "%Id"
 #elif defined(MF_COMPILER_GCC) || defined(MF_COMPILER_CLANG)
 	// TODO: use #if __has_builtin()/__has_attribute() to test if these are available?
 	#define MFALIGN_BEGIN(n)
@@ -397,7 +406,6 @@ enum MFEndian
 	#define MFCONST __attribute__((const))
 	#define MFPURE __attribute__((pure))
 	#define MFPACKED __attribute__((packed))
-	#define __forceinline inline __attribute__((always_inline))
 	#define MFALWAYS_INLINE inline __attribute__((always_inline))
 	#define MFPRINTF_FUNC(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
 	#define MFPRINTF_METHOD(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
@@ -406,6 +414,9 @@ enum MFEndian
 		#define MFASSUME(condition) if(!(condition)) { __builtin_unreachable(); }
 		#define MFUNREACHABLE __builtin_unreachable()
 	#endif
+	#define MFFMT_SIZE_T "%zu"
+	#define MFFMT_SSIZE_T "%zd"
+	#define MFFMT_PTRDIFF_T "%zd"
 #else
 	#define MFALIGN_BEGIN(n)
 	#define MFALIGN_END(n)
@@ -414,7 +425,6 @@ enum MFEndian
 	#define MFCONST
 	#define MFPURE
 	#define MFPACKED
-	#define __forceinline inline
 	#define MFALWAYS_INLINE inline
 	#define MFPRINTF_FUNC(formatarg, vararg)
 	#define MFPRINTF_METHOD(formatarg, vararg)
@@ -422,6 +432,20 @@ enum MFEndian
 		#define MFASSUME(condition)
 		#define MFUNREACHABLE
 	#endif
+	#if defined(MF_64BIT)
+		#define MFFMT_SIZE_T "%llu"
+		#define MFFMT_SSIZE_T "%lld"
+		#define MFFMT_PTRDIFF_T "%lld"
+	#elif defined(MF_32BIT)
+		#define MFFMT_SIZE_T "%u"
+		#define MFFMT_SSIZE_T "%d"
+		#define MFFMT_PTRDIFF_T "%d"
+	#else
+		#error "Unknown word length!"
+	#endif
+#endif
+#if !defined(MF_COMPILER_VISUALC) && !defined(__forceinline)
+	#define __forceinline MFALWAYS_INLINE
 #endif
 
 /*** Fuji Types ***/

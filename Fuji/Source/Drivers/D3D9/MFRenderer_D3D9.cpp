@@ -563,15 +563,15 @@ static int SortDefault(const void *p1, const void *p2)
 
 	int pred = pE1->primarySortKey - pE2->primarySortKey;
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
 	if(pred) return pred;
-	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
 	if(pred) return pred;
-	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
 	return pred;
 }
 
@@ -584,15 +584,15 @@ static int SortBackToFront(const void *p1, const void *p2)
 	if(pred) return pred;
     pred = pE2->zSort - pE1->zSort;
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
 	if(pred) return pred;
-	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
 	if(pred) return pred;
-	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
 	return pred;
 }
 
@@ -605,15 +605,15 @@ static int SortFrontToBack(const void *p1, const void *p2)
 	if(pred) return pred;
     pred = pE1->zSort - pE2->zSort;
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterial - (char*)pE1->pMaterial;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
 	if(pred) return pred;
-	pred = (char*)pE2->pViewState - (char*)pE1->pViewState;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
 	if(pred) return pred;
-	pred = (char*)pE2->pEntityState - (char*)pE1->pEntityState;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
 	if(pred) return pred;
-	pred = (char*)pE2->pMaterialState - (char*)pE1->pMaterialState;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
 	return pred;
 }
 

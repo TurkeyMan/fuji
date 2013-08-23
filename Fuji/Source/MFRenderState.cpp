@@ -185,7 +185,7 @@ MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource)
 
 	// calculate the size
 	int shift = 0;
-	for(uint32 s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
+	for(size_t s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
 
 	pNew->allocated = shift;
 	return pNew;

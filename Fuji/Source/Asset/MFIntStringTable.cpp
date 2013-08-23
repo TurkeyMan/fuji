@@ -128,7 +128,7 @@ static bool ReadCSVLine(const char *&pFile, size_t &bytesRemaining, MFArray<MFSt
 				}
 
 				// add field to row
-				MFString field(pFieldStart, (int)(pFile - pFieldStart));
+				MFString field(pFieldStart, (size_t)(pFile - pFieldStart));
 				row.push(field);
 				bEmptyLine = false;
 
@@ -155,7 +155,7 @@ static bool ReadCSVLine(const char *&pFile, size_t &bytesRemaining, MFArray<MFSt
 				}
 
 				// gather the field, and strip any trailing white space
-				MFString field(pFieldStart, (int)(pFile - pFieldStart));
+				MFString field(pFieldStart, (size_t)(pFile - pFieldStart));
 				field.Trim(false, true);
 
 				// and add it to the row
@@ -250,13 +250,13 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 
 	int numLanguages = 0;
 	int numStrings = 0;
-	for(size_t a=0; a<languages.size(); ++a)
+	for(int a=0; a<(int)languages.size(); ++a)
 	{
 		if(languages[a].IsEmpty())
 			continue;
 
 		++numLanguages;
-		numStrings = columns[a].strings.size();
+		numStrings = (int)columns[a].strings.size();
 
 		if(languages[a].EqualsInsensitive("enum"))
 			enumList = a;
@@ -273,7 +273,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 
 	MFStringCache *pStringCache = MFStringCache_Create(1024*1024);
 
-	for(size_t a=0, l=0; a<languages.size(); ++a)
+	for(int a=0, l=0; a<(int)languages.size(); ++a)
 	{
 		if(languages[a].IsEmpty())
 			continue;
@@ -286,7 +286,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 		MFStringCache_Clear(pStringCache);
 
 		// allocate the string table
-		size_t headerSize = sizeof(MFStringTable) + sizeof(const char *)*(numStrings-1);
+		size_t headerSize = sizeof(MFStringTable) + sizeof(const char*)*(numStrings-1);
 		MFStringTable *pTable = (MFStringTable*)MFHeap_Alloc(headerSize);
 		pTable->magic = MFMAKEFOURCC('D','L','G','1');
 		pTable->numStrings = numStrings;
@@ -311,7 +311,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 
 		// copy the string cache into the table
 		const char *pOldBuffer = MFStringCache_GetCache(pStringCache);
-		char *pNewBuffer = (char *)&pTable->pStrings[pTable->numStrings];
+		char *pNewBuffer = (char*)&pTable->pStrings[pTable->numStrings];
 		MFCopyMemory(pNewBuffer, pOldBuffer, cacheSize);
 
 		// re-point the string to the new buffer
@@ -328,9 +328,9 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFileInMemory(const void *pMe
 		table.language = language;
 
 		// set some useful details
-		if(enumList == (int)a)
+		if(enumList == a)
 			pStringTable->enumList = l;
-		if(englishList == (int)a)
+		if(englishList == a)
 			pStringTable->englishList = l;
 		++l;
 	}

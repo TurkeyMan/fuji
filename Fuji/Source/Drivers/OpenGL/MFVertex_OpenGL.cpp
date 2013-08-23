@@ -155,14 +155,14 @@ bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, 
 
 	MFCheckForOpenGLError(true);
 
-	pVertexBuffer->pPlatformData = (void*)buffer;
+	pVertexBuffer->pPlatformData = (void*)(size_t)buffer;
 
 	return true;
 }
 
 void MFVertex_DestroyVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer)
 {
-	GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
+	GLuint buffer = (GLuint)(size_t)pVertexBuffer->pPlatformData;
 	glDeleteBuffers(1, &buffer);
 }
 
@@ -182,7 +182,7 @@ MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer)
 {
 	MFDebug_Assert(pVertexBuffer->bLocked, "Vertex buffer not locked!");
 
-	GLuint buffer = (GLuint)pVertexBuffer->pPlatformData;
+	GLuint buffer = (GLuint)(size_t)pVertexBuffer->pPlatformData;
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, pVertexBuffer->numVerts * pVertexBuffer->pVertexDeclatation->pElementData[0].stride, pVertexBuffer->pLocked, GL_STATIC_DRAW);
 
@@ -205,14 +205,14 @@ bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uin
 
 	MFCheckForOpenGLError(true);
 
-	pIndexBuffer->pPlatformData = (void*)buffer;
+	pIndexBuffer->pPlatformData = (void*)(size_t)buffer;
 
 	return true;
 }
 
 void MFVertex_DestroyIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer)
 {
-	GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
+	GLuint buffer = (GLuint)(size_t)pIndexBuffer->pPlatformData;
 	glDeleteBuffers(1, &buffer);
 }
 
@@ -232,7 +232,7 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer)
 {
 	MFDebug_Assert(pIndexBuffer->bLocked, "Vertex buffer not locked!");
 
-	GLuint buffer = (GLuint)pIndexBuffer->pPlatformData;
+	GLuint buffer = (GLuint)(size_t)pIndexBuffer->pPlatformData;
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint16)*pIndexBuffer->numIndices, pIndexBuffer->pLocked, GL_STATIC_DRAW);
 
@@ -290,10 +290,10 @@ MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int nu
 		if(pElements[a].stream != stream)
 		{
 			stream = pElements[a].stream;
-			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
 		}
 
-		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
+		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
 
 		glEnableVertexAttribArray(attribs[a]);
 	}
@@ -343,16 +343,16 @@ MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset
 		if(pElements[a].stream != stream)
 		{
 			stream = pElements[a].stream;
-			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
+			glBindBuffer(GL_ARRAY_BUFFER, (GLuint)(size_t)gRenderBuffers.pVertexBuffer[stream]->pPlatformData);
 		}
 
-		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)pElementData[a].offset);
+		glVertexAttribPointer(attribs[a], f.components, f.type, f.normalise, pElementData[a].stride, (GLvoid*)(size_t)pElementData[a].offset);
 
 		glEnableVertexAttribArray(attribs[a]);
 	}
 
 	// bind the index buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)gRenderBuffers.pIndexBuffer->pPlatformData);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)(size_t)gRenderBuffers.pIndexBuffer->pPlatformData);
 	glDrawElements(gPrimTypes[primType], numIndices, GL_UNSIGNED_SHORT, NULL);
 
 	// unbind the streams

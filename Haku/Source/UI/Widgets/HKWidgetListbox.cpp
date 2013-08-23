@@ -328,7 +328,7 @@ int HKWidgetListbox::GetChildIndex(HKWidget *pWidget)
 	for(size_t a=0; a<children.size(); ++a)
 	{
 		if(children[a].pChild == pWidget)
-			return a;
+			return (int)a;
 	}
 	return -1;
 }

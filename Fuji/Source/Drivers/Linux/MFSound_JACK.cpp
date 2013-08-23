@@ -98,7 +98,7 @@ void MFSound_DestroyInternal(MFSound *pSound)
 	}
 }
 
-MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
 {
 	MFCALLSTACK;
 

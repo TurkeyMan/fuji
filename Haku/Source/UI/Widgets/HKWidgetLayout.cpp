@@ -32,7 +32,7 @@ HKWidgetLayout::~HKWidgetLayout()
 
 int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 {
-	int id = children.size();
+	int id = (int)children.size();
 
 	Child child = { pChild, bOwnChild };
 	children.push(child);
@@ -48,7 +48,7 @@ int HKWidgetLayout::AddChild(HKWidget *pChild, bool bOwnChild)
 void HKWidgetLayout::RemoveChild(HKWidget *pChild)
 {
 	int index = -1;
-	for(size_t a=0; a<children.size(); ++a)
+	for(int a=0; a<(int)children.size(); ++a)
 	{
 		if(children[a].pChild == pChild)
 		{
@@ -96,7 +96,7 @@ void HKWidgetLayout::ClearChildren()
 
 int HKWidgetLayout::GetNumChildren() const
 {
-	return children.size();
+	return (int)children.size();
 }
 
 HKWidget *HKWidgetLayout::GetChild(int index) const

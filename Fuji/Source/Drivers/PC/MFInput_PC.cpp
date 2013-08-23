@@ -2,9 +2,6 @@
 
 #if MF_INPUT == MF_DRIVER_PC
 
-#define DIRECTINPUT_VERSION 0x0800
-#define _WIN32_WINNT 0x501   // This specifies WinXP or later - it is needed to access rawmouse from the user32.dll
-
 #define SAMPLE_BUFFER_SIZE 128//50000
 
 #define MFWHEEL_DELTA 120
@@ -17,11 +14,18 @@
 
 #include "MFInputMappings_PC.h"
 
-#include <dinput.h>
-#include <dbt.h>
+#if defined(SUPPORT_DINPUT)
+	#define DIRECTINPUT_VERSION 0x0800
 
-#pragma comment(lib, "dinput8")
-#pragma comment(lib, "dxguid")
+	#include <dinput.h>
+
+	#pragma comment(lib, "dinput8")
+	#pragma comment(lib, "dxguid")
+#endif
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <dbt.h>
 
 const GUID GUID_DEVINTERFACE_HID = { 0x4D1E55B2L, 0xF16F, 0x11CF, { 0x88, 0xCB, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30 } };
 
@@ -29,10 +33,10 @@ const GUID GUID_DEVINTERFACE_HID = { 0x4D1E55B2L, 0xF16F, 0x11CF, { 0x88, 0xCB, 
 	#define RAW_SYS_MOUSE 0      // The sys mouse combines all the other usb mice into one
 	#define MAX_RAW_MOUSE_BUTTONS 5
 
-	typedef WINUSERAPI INT (WINAPI *pGetRawInputDeviceList)(OUT PRAWINPUTDEVICELIST pRawInputDeviceList, IN OUT PINT puiNumDevices, IN UINT cbSize);
-	typedef WINUSERAPI INT (WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize, IN UINT cbSizeHeader);
-	typedef WINUSERAPI INT (WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize);
-	typedef WINUSERAPI BOOL (WINAPI *pRegisterRawInputDevices)(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
+	typedef INT (WINAPI *pGetRawInputDeviceList)(OUT PRAWINPUTDEVICELIST pRawInputDeviceList, IN OUT PINT puiNumDevices, IN UINT cbSize);
+	typedef INT (WINAPI *pGetRawInputData)(IN HRAWINPUT hRawInput, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize, IN UINT cbSizeHeader);
+	typedef INT (WINAPI *pGetRawInputDeviceInfoA)(IN HANDLE hDevice, IN UINT uiCommand, OUT LPVOID pData, IN OUT PINT pcbSize);
+	typedef BOOL (WINAPI *pRegisterRawInputDevices)(IN PCRAWINPUTDEVICE pRawInputDevices, IN UINT uiNumDevices, IN UINT cbSize);
 
 	int InitRawMouse(bool _includeRDPMouse);
 #endif
@@ -72,15 +76,18 @@ struct MFRawMouse
 
 struct MFGamepadPC
 {
+#if defined(SUPPORT_XINPUT)
 	// XInput
 	int XInputID;
-
+#endif
+#if defined(SUPPORT_DINPUT)
 	// DirctInput
 	IDirectInputDevice8	*pDevice;
 	IDirectInputEffect *pForceFeedback;
 
 	DIDEVCAPS caps;
 	GUID deviceInstance;
+#endif
 
 	// Gamepad Info
 	MFGamepadInfo *pGamepadInfo;
@@ -93,17 +100,23 @@ struct MFGamepadPC
 
 /*** Globals ***/
 
-static IDirectInput8 *pDirectInput = NULL;
-static IDirectInputDevice8 *pKeyboard = NULL;
-static IDirectInputDevice8 *pMouse = NULL;
+#if defined(SUPPORT_DINPUT)
+	static IDirectInput8 *pDirectInput = NULL;
+	static IDirectInputDevice8 *pKeyboard = NULL;
+	static IDirectInputDevice8 *pMouse = NULL;
+
+	extern uint8 KEYtoDIK[256];
+#endif
+
+#if defined(SUPPORT_XINPUT)
+	static bool gUseXInput = false;
+#endif
 
 static MFGamepadPC gPCJoysticks[MFInput_MaxInputID];
 
 static int gGamepadCount = 0;
 static int gKeyboardCount = 0;
 static int gMouseCount = 0;
-
-static bool gUseXInput = false;
 
 extern HINSTANCE apphInstance;
 extern HWND apphWnd;
@@ -136,11 +149,11 @@ bool gbAllowRawMouse = true;
 
 extern uint8 gWindowsKeys[256];
 
-extern uint8 KEYtoDIK[256];
 extern uint8 KEYtoVK[256];
 
 /**** Platform Specific Functions ****/
 
+#if defined(SUPPORT_DINPUT)
 BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
 
 BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
@@ -179,13 +192,6 @@ BOOL CALLBACK CheckConnectedCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	}
 
 	return DIENUM_CONTINUE;
-}
-
-void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect)
-{
-	MFCALLSTACK;
-
-	gUpdateDeviceList = true;
 }
 
 // DirectInput Enumeration Callback
@@ -317,6 +323,14 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 
 	return DIENUM_CONTINUE;
 }
+#endif
+
+void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect)
+{
+	MFCALLSTACK;
+
+	gUpdateDeviceList = true;
+}
 
 void MFInput_InitModulePlatformSpecific()
 {
@@ -326,12 +340,15 @@ void MFInput_InitModulePlatformSpecific()
 	MFZeroMemory(gKeyState,256);
 	MFZeroMemory(gPCJoysticks, sizeof(gPCJoysticks));
 
+#if defined(SUPPORT_XINPUT)
 	for(int i=0; i<MFInput_MaxInputID; i++)
 		gPCJoysticks[i].XInputID = -1;
+#endif
 
 	// load additional gamepad mappings...
 	MFInputPC_LoadGamepadMappings();
 
+#if defined(SUPPORT_DINPUT)
 	// create the direct inpur device
 	if(FAILED(DirectInput8Create(apphInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&pDirectInput, NULL))) return;
 
@@ -355,15 +372,15 @@ void MFInput_InitModulePlatformSpecific()
 			pKeyboard->Acquire();
 
 			MFDebug_Log(2, "Using DirectInput Keyboard.");
+
+			gKeyboardCount = 1;
 		}
 	}
-
-	gKeyboardCount = 1;
+#endif
 
 	// create mouse device/s
 #if defined(ALLOW_RAW_INPUT)
 	// check we're running Windows XP
-
 	OSVERSIONINFO ver;
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 	BOOL r = GetVersionEx(&ver);
@@ -377,7 +394,7 @@ void MFInput_InitModulePlatformSpecific()
 			gMouseCount = rawMouseCount;
 	}
 #endif
-#if defined(ALLOW_DI_MOUSE)
+#if defined(SUPPORT_DINPUT) && defined(ALLOW_DI_MOUSE)
 	if(gMouseCount == 0)
 	{
 		if(SUCCEEDED(pDirectInput->CreateDevice(GUID_SysMouse, &pMouse, NULL)))
@@ -397,8 +414,9 @@ void MFInput_InitModulePlatformSpecific()
 			pMouse->Acquire();
 
 			MFDebug_Log(2, "Using DirectInput Mouse.");
+
+			gMouseCount = 1;
 		}
-		gMouseCount = 1;
 	}
 #endif
 
@@ -450,8 +468,10 @@ void MFInput_InitModulePlatformSpecific()
 	}
 #endif
 
+#if defined(SUPPORT_DINPUT)
 	// enumerate gamepads
 	pDirectInput->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumJoysticksCallback, NULL, DIEDFL_ATTACHEDONLY);
+#endif
 
 	DEV_BROADCAST_DEVICEINTERFACE dev;
 	MFZeroMemory(&dev, sizeof(dev));
@@ -469,6 +489,7 @@ void MFInput_DeinitModulePlatformSpecific()
 
 	UnregisterDeviceNotification(hNotify);
 
+#if defined(SUPPORT_DINPUT)
 	for(a=0; a<MFInput_MaxInputID; a++)
 	{
 		if(gPCJoysticks[a].pDevice)
@@ -478,7 +499,6 @@ void MFInput_DeinitModulePlatformSpecific()
 			gPCJoysticks[a].pDevice = NULL;
 		}
 	}
-	gGamepadCount = 0;
 
 #if defined(ALLOW_DI_MOUSE)
 	if(pMouse)
@@ -487,7 +507,6 @@ void MFInput_DeinitModulePlatformSpecific()
 		pMouse->Release();
 		pMouse = NULL;
 	}
-	gMouseCount = 0;
 #endif
 
 	if(pKeyboard)
@@ -496,13 +515,17 @@ void MFInput_DeinitModulePlatformSpecific()
 		pKeyboard->Release();
 		pKeyboard = NULL;
 	}
-	gKeyboardCount = 0;
 
 	if(pDirectInput)
 	{
 		pDirectInput->Release();
 		pDirectInput = NULL;
 	}
+#endif
+
+	gGamepadCount = 0;
+	gMouseCount = 0;
+	gKeyboardCount = 0;
 }
 
 void MFInput_UpdatePlatformSpecific()
@@ -513,6 +536,7 @@ void MFInput_UpdatePlatformSpecific()
 	{
 		int a;
 
+#if defined(SUPPORT_DINPUT)
 		// mark devices as removed
 		for(a=0; a<gGamepadCount; a++)
 		{
@@ -541,6 +565,7 @@ void MFInput_UpdatePlatformSpecific()
 				gPCJoysticks[a].pDevice = NULL;
 			}
 		}
+#endif
 
 		gUpdateDeviceList = false;
 	}
@@ -571,6 +596,7 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 				else
 #endif
 				{
+#if defined(SUPPORT_DINPUT)
 					if(gPCJoysticks[id].pDevice)
 					{
 						DIDEVCAPS caps;
@@ -585,6 +611,7 @@ MFInputDeviceStatus MFInput_GetDeviceStatusInternal(int device, int id)
 							return IDS_Disconnected;
 					}
 					else
+#endif
 						return IDS_Disconnected;
 				}
 			}
@@ -679,6 +706,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 	else
 #endif
 	{
+#if defined(SUPPORT_DINPUT)
 		if(gPCJoysticks[id].pDevice)
 		{
 			// poll the gamepad
@@ -785,6 +813,7 @@ void MFInput_GetGamepadStateInternal(int id, MFGamepadState *pGamepadState)
 				}
 			}
 		}
+#endif
 	}
 }
 
@@ -801,6 +830,7 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 
 	uint8 *pKeys = pKeyState->keys;
 
+#if defined(SUPPORT_DINPUT)
 	if(gDefaults.input.useDirectInputKeyboard)
 	{
 		DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
@@ -829,6 +859,7 @@ void MFInput_GetKeyStateInternal(int id, MFKeyState *pKeyState)
 		}
 	}
 	else
+#endif
 	{
 		for(int a=0; a<256; a++)
 		{
@@ -858,7 +889,7 @@ void MFInput_GetMouseStateInternal(int id, MFMouseState *pMouseState)
 {
 	MFCALLSTACK;
 
-#if defined(ALLOW_DI_MOUSE)
+#if defined(SUPPORT_DINPUT) && defined(ALLOW_DI_MOUSE)
 	if(id == 0 && gMouseCount == 1)
 	{
 		DIDEVICEOBJECTDATA inputBuffer[SAMPLE_BUFFER_SIZE];
@@ -1038,6 +1069,7 @@ MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID)
 }
 
 // internal functions
+#if defined(SUPPORT_DINPUT)
 void MFInputPC_GetDIJoyStateInternal(int id, DIJOYSTATE2 *pJoyState)
 {
 	gPCJoysticks[id].pDevice->GetDeviceState(sizeof(DIJOYSTATE2), pJoyState);
@@ -1047,6 +1079,7 @@ IDirectInputDevice8 *MFInputPC_GetDIGamepadDevice(int id)
 {
 	return gPCJoysticks[id].pDevice;
 }
+#endif
 
 void MFInputPC_Acquire(bool acquire)
 {
@@ -1054,6 +1087,7 @@ void MFInputPC_Acquire(bool acquire)
 
 	int a;
 
+#if defined(SUPPORT_DINPUT)
 	if(pKeyboard)
 	{
 		if(acquire) pKeyboard->Acquire();
@@ -1080,6 +1114,7 @@ void MFInputPC_Acquire(bool acquire)
 			else gPCJoysticks[a].pDevice->Unacquire();
 		}
 	}
+#endif
 
 	if(acquire)
 	{
@@ -1678,6 +1713,7 @@ LCleanup:
 
 // key mapping tables..
 
+#if defined(SUPPORT_DINPUT)
 // KEY to DIK mapping table
 uint8 KEYtoDIK[256] =
 {
@@ -1832,6 +1868,7 @@ uint8 KEYtoDIK[256] =
 	DIK_NOCONVERT, // KEY_NOCONVERT,		// japanese keyboard
 	DIK_YEN  // KEY_YEN,			// japanese keyboard
 };
+#endif
 
 // KEY to windows VK mapping table
 uint8 KEYtoVK[256] =

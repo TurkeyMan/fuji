@@ -135,17 +135,22 @@ enum MFRendererDrivers
 	// DirectInput's accumulated input events
 	#define USE_WINDOWS_MOUSE_COORDS
 
+	#if defined(MF_COMPILER_VISUALC)
+		// add support for DirectInput
+		#define SUPPORT_DINPUT
+
+		// add support for XInput (will reserve the first 4 controller slots and support hotswapping if any XInput devices are connected at startup)
+		#define SUPPORT_XINPUT
+
+		// add support for the G15 LCD screen
+		#define SUPPORT_G15
+	#endif
+
 	// this allows DirectInupt to manage the system mouse
 	#define ALLOW_DI_MOUSE
 
 	// this defines that rawinput will be used to recognise more than one mouse connected to the PC
 	#define ALLOW_RAW_INPUT
-
-	// add support for XInput (will reserve the first 4 controller slots and support hotswapping if any XInput devices are connected at startup)
-	#define SUPPORT_XINPUT
-
-	// add support for the G15 LCD screen
-	#define SUPPORT_G15
 
 	// use assimp to load 3d assets
 //	#define USE_ASSIMP
@@ -163,7 +168,7 @@ enum MFRendererDrivers
 	#define MF_SYSTEM			MF_DRIVER_PC
 	#define MF_TRANSLATION		MF_DRIVER_PC
 	#define MF_DEBUG			MF_DRIVER_PC
-	//#define MF_COMPUTE			MF_DRIVER_OPENCL
+//	#define MF_COMPUTE			MF_DRIVER_OPENCL
 
 #elif defined(MF_XBOX)
 
@@ -478,7 +483,7 @@ enum MFRendererDrivers
 	// libMAD mp3 codec
 	#define	MAD_STREAM
 #endif
-#if defined(MF_WINDOWS) && !defined(MF_64BIT)
+#if defined(MF_WINDOWS) && defined(MF_32BIT) && defined(MF_COMPILER_VISUALC)
 	// MiniFMOD can decode old XM tracker format tunes
 	#define MINIFMOD_STREAM
 #endif

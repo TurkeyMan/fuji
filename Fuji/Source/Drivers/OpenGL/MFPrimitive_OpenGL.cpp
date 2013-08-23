@@ -214,7 +214,7 @@ MF_API void MFSetPosition(float x, float y, float z)
 		currentVert += 4;
 	}
 #else
-	if(currentPrim.primType == PT_QuadList && (currentVert & 1))
+	if(currentPrim.primType == MFPT_QuadList && (currentVert & 1))
 	{
 		Vert &prev = pLocked[currentVert - 1];
 

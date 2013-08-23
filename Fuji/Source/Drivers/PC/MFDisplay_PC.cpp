@@ -2,8 +2,9 @@
 
 #if MF_DISPLAY == MF_DRIVER_WIN32
 
-#define _WIN32_WINNT 0x501
-#define WM_INPUT 0x00FF
+#if !defined(WM_INPUT)
+	#define WM_INPUT 0x00FF
+#endif
 
 #include "MFDisplay_Internal.h"
 #include "MFRenderer_Internal.h"
@@ -42,8 +43,13 @@ bool initialised = false;
 
 // i will dynamically construct a list later from supported resolution
 // provided by directx, verified by the monitor driver
-const int resList[][2] = { {320, 240}, {400, 300}, {480, 272}, {640, 480}, {800, 600}, {1024, 768}, {1152, 864}, {1280, 720}, {1280,800}, {1280, 1024}, {1600, 1200}, {1920, 1080}, {1920, 1200}, {1920, 1440} };
-const int numModes = sizeof(resList) / (sizeof(int)*2);
+struct DisplayMode
+{
+	int width, height;
+	bool bWidescreen;
+};
+const DisplayMode modeList[] = { {320, 240, false}, {400, 300, false}, {480, 272, true}, {640, 480, false}, {800, 600, false}, {1024, 768, false}, {1152, 864, false}, {1280, 720, true}, {1280,800, true}, {1280, 1024, false}, {1600, 1200, false}, {1920, 1080, true}, {1920, 1200, true}, {1920, 1440, false} };
+const int numModes = sizeof(modeList) / (sizeof(modeList[0]));
 
 // debug menu resolution setting
 char pCurrentRes[16] = "####x####";
@@ -59,13 +65,9 @@ void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
 	MFCALLSTACK;
 
-	gDisplay.fullscreenWidth = resList[currentMode][0];
-	gDisplay.fullscreenHeight = resList[currentMode][1];
-
-	gDisplay.wide = false;
-
-	if(resList[currentMode][1] == 720 || resList[currentMode][1] == 800 || resList[currentMode][1] == 1080 && (resList[currentMode][0] == 1920 || resList[currentMode][1] == 1200))
-		gDisplay.wide = true;
+	gDisplay.fullscreenWidth = modeList[currentMode].width;
+	gDisplay.fullscreenHeight = modeList[currentMode].height;
+	gDisplay.wide = modeList[currentMode].bWidescreen;
 
 	gDisplay.width = gDisplay.fullscreenWidth;
 	gDisplay.height = gDisplay.fullscreenHeight;
@@ -103,12 +105,12 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 		currentMode = (currentMode == numModes-1) ? 0 : currentMode+1;
 	}
 
-	if(resList[currentMode][1] == 720)
-		sprintf(pCurrentRes, "720p", resList[currentMode][0], resList[currentMode][1]);
-	else if(resList[currentMode][1] == 1080)
-		sprintf(pCurrentRes, "1080p", resList[currentMode][0], resList[currentMode][1]);
+	if(modeList[currentMode].height == 720)
+		sprintf(pCurrentRes, "720p");
+	else if(modeList[currentMode].height == 1080)
+		sprintf(pCurrentRes, "1080p");
 	else
-		sprintf(pCurrentRes, "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+		sprintf(pCurrentRes, "%dx%d", modeList[currentMode].width, modeList[currentMode].height);
 	pRes->data = 1;
 }
 
@@ -358,7 +360,7 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 	DebugMenu_AddItem("Apply", "Display Options", &applyDisplayMode, ApplyDisplayModeCallback);
-	sprintf(pCurrentRes, "%dx%d", resList[currentMode][0], resList[currentMode][1]);
+	sprintf(pCurrentRes, "%dx%d", modeList[currentMode].width, modeList[currentMode].height);
 
 	MFZeroMemory(gWindowsKeys, sizeof(gWindowsKeys));
 

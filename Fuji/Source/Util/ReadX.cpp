@@ -264,7 +264,7 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 				}
 				else
 				{
-					matSub.materialIndex = pModel->GetMaterialChunk()->materials.size();
+					matSub.materialIndex = (int)pModel->GetMaterialChunk()->materials.size();
 					F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
 					MFString_CopyN(mat.name, pMatName, 64);
 
@@ -325,7 +325,7 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 				}
 				else
 				{
-					matSub.materialIndex = pModel->GetMaterialChunk()->materials.size();
+					matSub.materialIndex = (int)pModel->GetMaterialChunk()->materials.size();
 					F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
 					MFString_CopyN(mat.name, pMatName, 64);
 				}
@@ -421,7 +421,7 @@ const char *ParseTexCoords(const char *pText, F3DSubObject &sub, int numPosition
 	// map to faces
 	for(size_t m=0; m<sub.matSubobjects.size(); m++)
 	{
-		int totalVerts = sub.matSubobjects[m].vertices.size();
+		int totalVerts = (int)sub.matSubobjects[m].vertices.size();
 		for(int a=0; a<totalVerts; a++)
 		{
 			sub.matSubobjects[m].vertices[a].uv1 = sub.matSubobjects[m].vertices[a].position;
@@ -462,7 +462,7 @@ const char *ParseColours(const char *pText, F3DSubObject &sub, int numPositions)
 	// map to faces
 	for(size_t m=0; m<sub.matSubobjects.size(); m++)
 	{
-		int totalVerts = sub.matSubobjects[m].vertices.size();
+		int totalVerts = (int)sub.matSubobjects[m].vertices.size();
 		for(int a=0; a<totalVerts; a++)
 		{
 			sub.matSubobjects[m].vertices[a].colour = sub.matSubobjects[m].vertices[a].position;
@@ -519,7 +519,7 @@ const char *ParseSkinWeights(const char *pText, F3DSubObject &sub, int numPositi
 		// map to faces
 		for(size_t m=0; m<sub.matSubobjects.size(); m++)
 		{
-			int totalVerts = sub.matSubobjects[m].vertices.size();
+			int totalVerts = (int)sub.matSubobjects[m].vertices.size();
 			for(int a=0; a<totalVerts; a++)
 			{
 				F3DVertex &v = sub.matSubobjects[m].vertices[a];
@@ -598,7 +598,7 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 
 	// read faces
 	int face[16];
-	size_t numVerts[16], numTris[16];
+	int numVerts[16], numTris[16];
 	MFZeroMemory(numVerts, sizeof(numVerts));
 	MFZeroMemory(numTris, sizeof(numTris));
 	for(int a=0; a<numFaces; a++)
@@ -612,12 +612,12 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 
 		int firstVert = numVerts[matSub];
 		numVerts[matSub] += numPoints;
-		if(matsub.vertices.size() < numVerts[matSub])
+		if((int)matsub.vertices.size() < numVerts[matSub])
 			matsub.vertices.resize(numVerts[matSub]);
 
 		int firstTri = numTris[matSub];
 		numTris[matSub] += numPoints-2;
-		if(matsub.triangles.size() < numTris[matSub])
+		if((int)matsub.triangles.size() < numTris[matSub])
 			matsub.triangles.resize(numTris[matSub]);
 
 		for(int b=0; b<numPoints; b++)
@@ -876,7 +876,7 @@ const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
 
 	if(!MFString_CaseCmpN(pName, "bn_", 3) || !MFString_CaseCmpN(pName, "z_", 2))
 	{
-		int boneID = pModel->GetSkeletonChunk()->bones.size();
+		int boneID = (int)pModel->GetSkeletonChunk()->bones.size();
 		pBone = &pModel->GetSkeletonChunk()->bones[boneID];
 
 		F3DBone *pParent = parentID == -1 ? NULL : &pModel->GetSkeletonChunk()->bones[parentID];

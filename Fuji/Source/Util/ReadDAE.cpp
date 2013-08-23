@@ -166,7 +166,7 @@ int ParseDAEMaterial(MFXMLNode *pMaterialNode)
 
 	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
 
-	int matIndex = pMatChunk->materials.size();
+	int matIndex = (int)pMatChunk->materials.size();
 
 	F3DMaterial &mat = pMatChunk->materials.push();
 	MFString_Copy(mat.name, pName);
@@ -586,7 +586,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 				int poly = 0;
 
 				int vert = 0;
-				int firstVert = matSub.vertices.size();
+				int firstVert = (int)matSub.vertices.size();
 
 				while(*pText)
 				{
@@ -594,12 +594,12 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 					{
 						++tri;
 						matSub.triangles[tri].v[0] = firstVert;
-						matSub.triangles[tri].v[1] = matSub.vertices.size()-1;
-						matSub.triangles[tri].v[2] = matSub.vertices.size();
+						matSub.triangles[tri].v[1] = (int)matSub.vertices.size()-1;
+						matSub.triangles[tri].v[2] = (int)matSub.vertices.size();
 					}
 					else
 					{
-						matSub.triangles[tri].v[vert] = matSub.vertices.size();
+						matSub.triangles[tri].v[vert] = (int)matSub.vertices.size();
 					}
 
 					F3DVertex &v = matSub.vertices.push();
@@ -676,7 +676,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 						++poly;
 						++tri;
 						vert = 0;
-						firstVert = matSub.vertices.size();
+						firstVert = (int)matSub.vertices.size();
 					}
 				}
 			}

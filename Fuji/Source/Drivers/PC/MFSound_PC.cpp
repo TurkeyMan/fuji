@@ -188,11 +188,11 @@ void MFSound_DestroyInternal(MFSound *pSound)
 		pSound->pInternal->p3DBuffer->Release();
 }
 
-MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size)
+MF_API size_t MFSound_SetBufferData(MFSound *pSound, const void *pData, size_t size)
 {
 	// lock the buffers and copy in the data
 	void *pBuffer;
-	uint32 len;
+	size_t len;
 	
 	MFSound_Lock(pSound, 0, 0, &pBuffer, &len);
 	MFDebug_Assert(len == size, "Incorrect number of bytes in source buffer.");
@@ -204,11 +204,11 @@ MF_API int MFSound_SetBufferData(MFSound *pSound, const void *pData, uint32 size
 	return len;
 }
 
-MF_API int MFSound_Lock(MFSound *pSound, int offset, int bytes, void **ppData, uint32 *pSize, void **ppData2, uint32 *pSize2)
+MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppData, size_t *pSize, void **ppData2, size_t *pSize2)
 {
 	MFDebug_Assert(!(pSound->flags & MFPF_Locked), MFStr("Dynamic sound '%s' is already locked.", pSound->name));
 
-	pSound->pInternal->pBuffer->Lock(offset, bytes, &pSound->pLock1, (DWORD*)&pSound->lockSize1, &pSound->pLock2, (DWORD*)&pSound->lockSize2, bytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
+	pSound->pInternal->pBuffer->Lock((DWORD)offset, (DWORD)bytes, &pSound->pLock1, (DWORD*)&pSound->lockSize1, &pSound->pLock2, (DWORD*)&pSound->lockSize2, bytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
 
 	pSound->flags |= MFPF_Locked;
 	pSound->lockOffset = offset;
@@ -235,7 +235,7 @@ MF_API void MFSound_Unlock(MFSound *pSound)
 		VOID *pBuffer, *pB2;
 		DWORD bufferLen, l2;
 
-		pSound->pInternal->p3DBuffer->Lock(pSound->lockOffset, pSound->lockBytes, &pBuffer, &bufferLen, &pB2, &l2, pSound->lockBytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
+		pSound->pInternal->p3DBuffer->Lock((DWORD)pSound->lockOffset, (DWORD)pSound->lockBytes, &pBuffer, &bufferLen, &pB2, &l2, pSound->lockBytes == 0 ? DSBLOCK_ENTIREBUFFER : 0);
 		MFCopyMemory(pBuffer, pSound->pLock1, pSound->lockSize1);
 		if(pB2)
 			MFCopyMemory(pB2, pSound->pLock2, pSound->lockSize2);
@@ -243,7 +243,7 @@ MF_API void MFSound_Unlock(MFSound *pSound)
 	}
 
 	// and unlock the main buffer
-	pSound->pInternal->pBuffer->Unlock(pSound->pLock1, pSound->lockSize1, pSound->pLock2, pSound->lockSize2);
+	pSound->pInternal->pBuffer->Unlock(pSound->pLock1, (DWORD)pSound->lockSize1, pSound->pLock2, (DWORD)pSound->lockSize2);
 
 	pSound->pLock1 = NULL;
 	pSound->lockSize1 = 0;

@@ -483,7 +483,7 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 	{
 		MFRenderLayer &layer = pRenderer->pLayers[l];
 
-		int numElements = layer.elements.size();
+		int numElements = (int)layer.elements.size();
 
 		// configure render target
 		if(numElements > 0 || layer.clearFlags != MFRCF_None)

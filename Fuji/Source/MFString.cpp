@@ -64,13 +64,13 @@ MF_API MFString MFString_GetStats()
 
 	MFString desc;
     desc.Reserve(1024);
-	desc = MFStr("String heap memory: %d allocated/%d reserved + %d overhead  Waste: %d  Average length: %d\n\tPool: %d/%d", stringHeap.GetAllocatedMemory(), stringHeap.GetTotalMemory(), overhead, waste, averageSize, stringPool.GetNumAllocated(), stringPool.GetNumReserved());
+	desc = MFStr("String heap memory: " MFFMT_SIZE_T " allocated/" MFFMT_SIZE_T " reserved + " MFFMT_SIZE_T " overhead  Waste: " MFFMT_SIZE_T "  Average length: " MFFMT_SIZE_T "\n\tPool: %d/%d", stringHeap.GetAllocatedMemory(), stringHeap.GetTotalMemory(), overhead, waste, averageSize, stringPool.GetNumAllocated(), stringPool.GetNumReserved());
 
 	int numGroups = stringHeap.GetNumPools();
 	for(int a=0; a<numGroups; ++a)
 	{
 		MFObjectPool *pPool = stringHeap.GetPool(a);
-		desc += MFStr("\n\t\t%d byte: %d/%d", pPool->GetObjectSize(), pPool->GetNumAllocated(), pPool->GetNumReserved());
+		desc += MFStr("\n\t\t" MFFMT_SIZE_T " byte: %d/%d", pPool->GetObjectSize(), pPool->GetNumAllocated(), pPool->GetNumReserved());
 	}
 
 	return desc;
@@ -90,7 +90,7 @@ MF_API void MFString_Dump()
 	for(int a=0; a<numStrings; ++a)
 	{
 		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
-		MFDebug_Log(1, MFStr("%d refs, %db: \"%s\"", pString->GetRefCount(), pString->GetAllocated(), pString->GetMemory()));
+		MFDebug_Log(1, MFStr("%d refs, " MFFMT_SIZE_T "b: \"%s\"", pString->GetRefCount(), pString->GetAllocated(), pString->GetMemory()));
 	}
 }
 
@@ -799,7 +799,7 @@ MFString::MFString(const char *pString, bool bHoldStaticPointer)
 	}
 }
 
-MFString::MFString(const char *pString, int maxChars)
+MFString::MFString(const char *pString, size_t maxChars)
 {
 	if(!pString)
 	{
@@ -808,7 +808,7 @@ MFString::MFString(const char *pString, int maxChars)
 	else
 	{
 		pData = MFStringData::Alloc();
-		pData->bytes = MFString_LengthN(pString, maxChars);
+		pData->bytes = MFString_LengthN(pString, (int)maxChars);
 
 		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 
@@ -1422,7 +1422,7 @@ int MFString::FindCharReverse(int c) const
 MFString& MFString::Join(const MFArray<MFString> &strings, const char *pSeparator, const char *pTokenPrefix, const char *pTokenSuffix, const char *pBefore, const char *pAfter)
 {
 	MFString result;
-	int numTokens = strings.size();
+	size_t numTokens = strings.size();
 
 	// TODO: we should resize the string in advance...
 
@@ -1430,7 +1430,7 @@ MFString& MFString::Join(const MFArray<MFString> &strings, const char *pSeparato
 		result += pBefore;
 
 	// TODO: alternate loops with different availability of parameters?
-	for(int i=0; i<numTokens; ++i)
+	for(size_t i=0; i<numTokens; ++i)
 	{
 		if(pSeparator && i>0)
 			result += pSeparator;
@@ -1462,7 +1462,7 @@ MFArray<MFString>& MFString::Split(MFArray<MFString> &output, const char *pDelim
 	while(*pText)
 	{
 		const char *pEnd = MFSeekDelimiter(pText, pDelimiters);
-		output.push(MFString(pText, pEnd - pText));
+		output.push(MFString(pText, (size_t)(pEnd - pText)));
 		pText = MFSkipDelimiters(pEnd, pDelimiters);
 	}
 
@@ -1474,7 +1474,7 @@ int MFString::Enumerate(const MFArray<MFString> keys, bool bCaseSensitive)
 	for(size_t i=0; i<keys.size(); ++i)
 	{
 		if(bCaseSensitive ? Equals(keys[i]) : EqualsInsensitive(keys[i]))
-			return i;
+			return (int)i;
 	}
 	return -1;
 }
@@ -1501,7 +1501,7 @@ MFString MFString::StripToken(const char *pDelimiters)
 	const char *pTrim = MFSkipDelimiters(pEnd, pDelimiters);
 
 	// capture the token
-	MFString token(pToken, pEnd - pToken);
+	MFString token(pToken, (size_t)(pEnd - pToken));
 
 	// strip from source string
 	size_t offset = pTrim - pText;
@@ -1588,7 +1588,7 @@ static int Match(const char *pString, const char *pFormat)
 		++pFormat;
 	}
 
-	return pString - pStart;
+	return (int)(pString - pStart);
 }
 
 int MFString::Parse(const char *pFormat, ...)
@@ -1625,7 +1625,7 @@ int MFString::Parse(const char *pFormat, ...)
 
 				if(length >= 0)
 				{
-					MFString s(pS, length);
+					MFString s(pS, (size_t)length);
 					*pStr = s;
 
 					numChars = Match(pS, format.CStr());
@@ -1640,7 +1640,7 @@ int MFString::Parse(const char *pFormat, ...)
 					while(*pEnd && (numChars = Match(pEnd, format.CStr())) < 0)
 						++pEnd;
 
-					MFString s(pS, (int)(pEnd - pS));
+					MFString s(pS, (size_t)(pEnd - pS));
 					*pStr = s;
 				}
 
