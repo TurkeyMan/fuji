@@ -394,7 +394,7 @@ enum MFRendererDrivers
 
 #elif defined(MF_WEB)
 
-	#define _OPENGL_CLIP_SPACE
+//	#define _OPENGL_CLIP_SPACE
 
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_WEB

@@ -102,7 +102,7 @@ MF_API void MFSound_SetMasterVolume(float volume)
 {
 }
 
-MF_API uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
+size_t MFSound_GetPlayCursorInternal(MFVoice *pVoice, size_t *pWriteCursor)
 {
 	return 0;
 }

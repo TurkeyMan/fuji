@@ -74,7 +74,7 @@
 #elif defined(__GNUC__)
 	#define MF_COMPILER_GCC
 #else
-	#error Unrecognised compiler. Contact Fuji dev team or add an entry here...
+	#error "Unrecognised compiler. Contact Fuji dev team or add an entry here..."
 #endif
 
 // detect architecture/platform
@@ -83,15 +83,16 @@
 	#if _XBOX_VER < 200
 		#define MF_XBOX
 		#define MF_PLATFORM XBOX
+
 		#define MF_ARCH_X86
-		#define MF_32BIT
 	#elif _XBOX_VER >= 200
 		#define MF_X360
 		#define MF_PLATFORM X360
+
 		#define MF_ARCH_PPC
 		#define MF_64BIT
 	#else
-		#error XBox version undefined...
+		#error "XBox version undefined..."
 	#endif
 #elif defined(WIN32)
 	#define MF_WINDOWS
@@ -99,13 +100,10 @@
 
 	// detect the architecture
 	#if _M_IA64 || __IA64__ || __ia64__
-		#define MF_64BIT
 		#define MF_ARCH_ITANIUM
 	#elif defined(_M_X64) || defined(_M_AMD64) || __X86_64__ || defined(__x86_64__)
-		#define MF_64BIT
 		#define MF_ARCH_X64
 	#elif defined(_M_IX86) || defined(__i386) || defined(__i386__)
-		#define MF_32BIT
 		#define MF_ARCH_X86
 	#else
 		#error "Couldn't detect target architecture!"
@@ -120,42 +118,47 @@
 #elif defined(PSP) || defined(__psp__) || defined(__PSP__) || defined(_PSP)
 	#define MF_PSP
 	#define MF_PLATFORM PSP
+
 	#define MF_ARCH_MIPS
 	#define MF_32BIT
 #elif defined(_EE_) || defined(_EE) || defined(_R5900) || defined(__R5900)
 	#define MF_PS2
 	#define MF_PLATFORM PS2
+
 	#define MF_ARCH_MIPS
 	#define MF_32BIT
 #elif defined(_GC)
 	#define MF_GC
 	#define MF_PLATFORM GC
+
 	#define MF_ARCH_PPC
 #elif defined(__wii__) || defined(_WII)
 	#define MF_WII
 	#define MF_PLATFORM WII
+
 	#define MF_ARCH_PPC
 #elif defined(_DC)
 	#define MF_DC
 	#define MF_PLATFORM DC
+
 	#define MF_ARCH_SH4
 #elif defined(__PPU__)
 	#define MF_PS3
 	#define MF_PLATFORM PS3
+
 	#define MF_ARCH_PPC
 	#define MF_64BIT
 #elif defined(TARGET_OS_IPHONE)
 	#include <TargetConditionals.h>
 	#define MF_IPHONE
 	#define MF_PLATFORM IPHONE
+
 	#if TARGET_IPHONE_SIMULATOR == 1
 		#define MF_ARCH_X86
-		#define MF_ENDIAN_LITTLE
-		#define MF_32BIT
 	#else
 		#define MF_ARCH_ARM
-		#define MF_ENDIAN_LITTLE
 		#define MF_32BIT
+		#define MF_ENDIAN_LITTLE
 	#endif
 #elif defined(__APPLE__)
 	#define MF_OSX
@@ -179,42 +182,49 @@
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID
 	#define MF_PLATFORM ANDROID
+
 	#if defined(__arm__)
 		#define MF_ARCH_ARM
+		#define MF_32BIT
 		#define MF_ENDIAN_LITTLE
+	#elif defined(__i386) || defined(__i386__)
+		#define MF_ARCH_X86
+	#elif defined(_mips) || defined(__mips) || defined(__mips__)
+		#define MF_ARCH_MIPS
 		#define MF_32BIT
 	#else
-		#error "Unsupported Android Architecture!"
+		#error "Couldn't detect target architecture!"
 	#endif
 #elif defined(_SYMBIAN)
 	#define MF_SYMBIAN
 	#define MF_PLATFORM SYMBIAN
+
 	#define MF_ARCH_ARM
+	#define MF_32BIT
 	#define MF_ENDIAN_LITTLE
-	#define MF_32BIT
-#elif defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
-	#define MF_ARCH_SH4
-	// shall we assume DC here? yeah, why not... i've never heard of an SH4 in anything else..
-	#define MF_DC
-	#define MF_PLATFORM DC
-	#define MF_32BIT
 #elif defined(EMSCRIPTEN)
 	#define MF_WEB
 	#define MF_PLATFORM WEB
+
 	#define MF_ARCH_LLVM_IR
 	#define MF_32BIT
+	#define MF_ENDIAN_LITTLE
 #elif defined(_NACL)
 	#define MF_NACL
 	#define MF_PLATFORM NACL
 	#if defined(__x86_64__)
 		#define MF_ARCH_X64
-		#define MF_64BIT
 	#elif defined(__i386__)
 		#define MF_ARCH_X86
-		#define MF_32BIT
 	#else
 		#error "Unknown architecture?!"
 	#endif
+#elif defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
+	#define MF_ARCH_SH4
+
+// shall we assume DC here? yeah, why not... i've never heard of an SH4 in anything else..
+	#define MF_DC
+	#define MF_PLATFORM DC
 #elif defined(__arm__)
 	#define MF_ARCH_ARM
 #elif defined(_MIPS_ARCH) || defined(_mips) || defined(__mips) || defined(__mips__) || defined(__MIPSEL__) || defined(_MIPSEL) || defined(__MIPSEL)
@@ -226,34 +236,40 @@
 	#define MF_ARCH_PPC
 #elif defined(__x86_64__)
 	#define MF_ARCH_X64
-	#define MF_64BIT
 #elif defined(__i386__) || defined(_M_IX86)
 	#define MF_ARCH_X86
 #else
-	// assume x86 if we couldnt identify an architecture, since its the most likely
-	#define MF_ARCH_X86
+	#error "Couldn't detect target architecture!"
 #endif
 
 // if the architecture or platform didn't specify a data word size, try and detect one
 #if !defined(MF_32BIT) && !defined(MF_64BIT)
-	// detect 64bit
-	#define MF_32BIT
-#endif
-
-// if the architecture didn't specify a platform, try and detect one
-#if !defined(MF_PLATFORM)
-	// check OSX, assume linux for now
-	#define MF_LINUX
-	#define MF_PLATFORM LINUX
+	#if defined(MF_ARCH_X86) || defined(MF_ARCH_SH4)
+		#define MF_32BIT
+	#elif defined(MF_ARCH_X64) || defined(MF_ARCH_ITANIUM)
+		#define MF_64BIT
+	#else
+		#error "Unknown word length!"
+	#endif
 #endif
 
 // select architecture endian
 #if !defined(MF_ENDIAN_BIG) && !defined(MF_ENDIAN_LITTLE)
 	#if defined(MF_ARCH_PPC) || defined(MF_ARCH_SPU) || defined(MF_ARCH_68K)
 		#define MF_ENDIAN_BIG
-	#else
+	#elif defined(MF_ARCH_X86) || defined(MF_ARCH_X64) || defined(MF_ARCH_ITANIUM) || defined(MF_ARCH_SH4)
 		#define MF_ENDIAN_LITTLE
+	#else
+		#error "Unable to detect target endian!"
 	#endif
+#endif
+
+// if the architecture didn't specify a platform, try and detect one
+#if !defined(MF_PLATFORM)
+	// check OSX, assume linux for now
+//	#define MF_LINUX
+//	#define MF_PLATFORM LINUX
+	#error "Unknown platform!"
 #endif
 
 // select asm format
@@ -436,12 +452,10 @@ enum MFEndian
 		#define MFFMT_SIZE_T "%llu"
 		#define MFFMT_SSIZE_T "%lld"
 		#define MFFMT_PTRDIFF_T "%lld"
-	#elif defined(MF_32BIT)
+	#else
 		#define MFFMT_SIZE_T "%u"
 		#define MFFMT_SSIZE_T "%d"
 		#define MFFMT_PTRDIFF_T "%d"
-	#else
-		#error "Unknown word length!"
 	#endif
 #endif
 #if !defined(MF_COMPILER_VISUALC) && !defined(__forceinline)

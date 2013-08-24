@@ -23,7 +23,7 @@ void MFSound_DestroyInternal(MFSound *pSound);
 
 void MFSound_PlayInternal(MFVoice *pVoice);
 
-uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor = NULL);
+size_t MFSound_GetPlayCursorInternal(MFVoice *pVoice, size_t *pWriteCursor = NULL);
 
 #if defined(USE_MFMIXER)
 void MFSoundMixer_Init(int *pVoiceDataSize);

@@ -169,7 +169,7 @@ void MFSound_SetPlaybackOffset(MFVoice *pVoice, float seconds)
 	MFSoundMixer_SetPlaybackOffset(pVoice, seconds);
 }
 
-uint32 MFSound_GetPlayCursorInternal(MFVoice *pVoice, uint32 *pWriteCursor)
+size_t MFSound_GetPlayCursorInternal(MFVoice *pVoice, size_t *pWriteCursor)
 {
 	return 	MFSoundMixer_GetPlayCursor(pVoice, pWriteCursor);
 }

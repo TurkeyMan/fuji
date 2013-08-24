@@ -417,7 +417,8 @@ MF_API uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 {
 	MFSound_LockMutex(true);
 
-	uint32 play = MFSound_GetPlayCursorInternal(pVoice, pWriteCursor);
+	size_t write = 0;
+	size_t play = MFSound_GetPlayCursorInternal(pVoice, pWriteCursor ? &write : NULL);
 
 	MFSoundTemplate *pT = pVoice->pSound->pTemplate;
 	int bytesPerSample = (pT->bitsPerSample * pT->numChannels) >> 3;
@@ -425,9 +426,9 @@ MF_API uint32 MFSound_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor)
 	MFSound_LockMutex(false);
 
 	if(pWriteCursor)
-		*pWriteCursor /= bytesPerSample;
+		*pWriteCursor = (uint32)(write / bytesPerSample);
 
-	return play / bytesPerSample;
+	return (uint32)(play / bytesPerSample);
 }
 
 MF_API MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice)
@@ -644,7 +645,7 @@ void MFSound_ServiceStreamBuffer(MFAudioStream *pStream)
 {
 	MFCALLSTACK;
 
-	uint32 playCursor;
+	size_t playCursor;
 	size_t lockSize;
 
 	// get cursor pos
@@ -900,7 +901,7 @@ void MFSound_Draw()
 			MFSetPosition(100.0f, y+20.0f, 0.0f);
 			MFSetPosition(500.0f, y+20.0f, 0.0f);
 
-			uint32 playCursor, writeCursor;
+			size_t playCursor, writeCursor;
 			playCursor = MFSound_GetPlayCursorInternal(gMusicTracks[a].pStreamVoice, &writeCursor);
 
 			float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)bufferSize);
@@ -1032,7 +1033,7 @@ void MFSound_Draw()
 		MFSetPosition(100.0f, y+20.0f, 0.0f);
 		MFSetPosition(500.0f, y+20.0f, 0.0f);
 
-		uint32 playCursor, writeCursor;
+		size_t playCursor, writeCursor;
 		playCursor = MFSound_GetPlayCursorInternal(pV, &writeCursor);
 
 		float xPlayCursor = 100.0f + (500.0f-100.0f) * ((float)playCursor / (float)bufferSize);
