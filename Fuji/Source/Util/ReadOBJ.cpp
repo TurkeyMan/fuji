@@ -74,14 +74,14 @@ int AddToMaterials(const char *pMatName)
 
 	for(int a=0; a<(int)pChunk->materials.size(); a++)
 	{
-		if(!MFString_CaseCmp(pChunk->materials[a].name, pMatName))
+		if(pChunk->materials[a].name.EqualsInsensitive(pMatName))
 			return a;
 	}
 
 	int i = (int)pChunk->materials.size();
 
 	F3DMaterial &mat = pChunk->materials.push();
-	MFString_Copy(mat.name, pMatName);
+	mat.name = pMatName;
 
 	return i;
 }
@@ -120,7 +120,7 @@ void CopyDataIntoSubobject(int subobject)
 
 			vert.position -= minVertIndex;
 			if(minUVIndex > 0)
-				vert.uv1 -= minUVIndex;
+				vert.uv[0] -= minUVIndex;
 			if(minNormIndex > 0)
 				vert.normal -= minNormIndex;
 		}
@@ -137,7 +137,7 @@ void ParseOBJFile(const char *pFilePtr)
 		{
 			const char *pName = GetRestOfLine(pFilePtr);
 
-			MFString_Copy(pModel->name, pName);
+			pModel->name = pName;
 		}
 		else if(!MFString_CaseCmp(pToken, "g"))
 		{
@@ -147,7 +147,7 @@ void ParseOBJFile(const char *pFilePtr)
 			{
 				// we'll just rename the current subobject, since theres nothing in it..
 				F3DSubObject &sub = pModel->GetMeshChunk()->subObjects[subObject];
-				MFString_Copy(sub.name, pName);
+				sub.name = pName;
 			}
 			else
 			{
@@ -170,7 +170,7 @@ void ParseOBJFile(const char *pFilePtr)
 				vertsInMatSub = false;
 
 				F3DSubObject &sub = pModel->GetMeshChunk()->subObjects[subObject];
-				MFString_Copy(sub.name, pName);
+				sub.name = pName;
 			}
 		}
 		else if(!MFString_CaseCmp(pToken, "v"))
@@ -267,7 +267,7 @@ void ParseOBJFile(const char *pFilePtr)
 
 				F3DVertex &vert = sub.matSubobjects[matSub].vertices[firstVert + f];
 				vert.position = posid;
-				vert.uv1 = texid;
+				vert.uv[0] = texid;
 				vert.normal = normid;
 
 				// add a triangle if we are up to the third vert or beyond

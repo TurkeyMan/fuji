@@ -164,8 +164,8 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 			{
 				F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
 
-				MFString_Copy(mat.name, pT);
-				MFString_Copy(mat.maps[0], pT);
+				mat.name = pT;
+				mat.maps[0] = pT;
 			}
 
 			pTok = MFString_Chr(pTok, ',');
@@ -177,7 +177,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 	{
 		F3DBone &bone = pSC->bones.push();
 
-		MFString_Copy(bone.name, pHeader->pTags[a].tagName);
+		bone.name = pHeader->pTags[a].tagName;
 
 		bone.worldMatrix.SetXAxis3(MakeVector(pHeader->pTags[a].rotationMatrix[0][0], pHeader->pTags[a].rotationMatrix[0][1], pHeader->pTags[a].rotationMatrix[0][2]));
 		bone.worldMatrix.SetYAxis3(MakeVector(pHeader->pTags[a].rotationMatrix[1][0], pHeader->pTags[a].rotationMatrix[1][1], pHeader->pTags[a].rotationMatrix[1][2]));
@@ -198,10 +198,10 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 		F3DMaterialSubobject &matSub = sub.matSubobjects[0];
 
 		// read subobject name
-		MFString_Copy(sub.name, pHeader->pSurfaces->surfaceName);
+		sub.name = pHeader->pSurfaces->surfaceName;
 
 		// find material info
-		matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(GetMaterialName(pSkin, sub.name));
+		matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(GetMaterialName(pSkin, sub.name.CStr()));
 
 		// create one colour (white)
 		sub.colours.resize(1);
@@ -224,7 +224,7 @@ void ParseMD3File(char *pBuffer, uint32 bufferSize, const char *pFilename, const
 
 			matSub.vertices[b].colour = 0;
 			matSub.vertices[b].normal = b;
-			matSub.vertices[b].uv1 = b;
+			matSub.vertices[b].uv[0] = b;
 			matSub.vertices[b].position = b;
 		}
 
@@ -259,14 +259,12 @@ int F3DFile::ReadMD3(const char *pFilename)
 	{
 		MFDebug_Assert(zipFileIndex == UNZ_OK, "Error in .zip file.");
 
-		char fileName[256];
-
+		char fileNameBuf[256];
 		unz_file_info fileInfo;
-		unzGetCurrentFileInfo(zipFile, &fileInfo, fileName, 256, NULL, 0, NULL, 0);
+		unzGetCurrentFileInfo(zipFile, &fileInfo, fileNameBuf, sizeof(fileNameBuf), NULL, 0, NULL, 0);
+		MFString fileName = fileNameBuf;
 
-		int filenameLen = MFString_Length(fileName);
-
-		if(!MFString_CaseCmp(".md3", &fileName[MFMax(filenameLen - 4, 0)]))
+		if(fileName.EndsWith(".md3"))
 		{
 			// read fle from zip
 			pBuffer = (char*)malloc(fileInfo.uncompressed_size);
@@ -278,36 +276,24 @@ int F3DFile::ReadMD3(const char *pFilename)
 			MFDebug_Assert(bytesRead == fileInfo.uncompressed_size, "Incorrect number of bytes read..");
 
 			// get subobject and model name..
-			int a, b;
-			for(a = filenameLen - 4; a >= 0; a--)
-			{
-				if(fileName[a] == '/' || fileName[a] == '\\')
-					break;
-			}
+			int slash = MFMax(fileName.FindCharReverse('/'), fileName.FindCharReverse('\\'));
+			MFString subobjectName = fileName.SubStr(slash + 1);
 
-			char *pSubobjectName = &fileName[a+1];
-
-			for(b = a-1; b >= 0; b--)
-			{
-				if(fileName[b] == '/' || fileName[b] == '\\')
-					break;
-			}
-
-			MFString_Copy(pModel->name, &fileName[b+1]);
-			pModel->name[a-b-1] = 0;
+			MFString modelName = fileName.SubStr(0, slash);
+			slash = MFMax(modelName.FindCharReverse('/'), modelName.FindCharReverse('\\'));
+			pModel->name = modelName.SubStr(slash + 1);
 
 			// search for skin file
-			char skinFilename[256];
-			MFString_Copy(skinFilename, fileName);
-			skinFilename[MFString_Length(skinFilename) - 4] = 0;
-			MFString_Cat(skinFilename, "_");
-			MFString_Cat(skinFilename, pModel->name);
-			MFString_Cat(skinFilename, ".skin");
+			MFString skinFilename = fileName;
+			skinFilename.TruncateExtension();
+			skinFilename += "_";
+			skinFilename += pModel->name;
+			skinFilename += ".skin";
 
 			// attempt to read skin..
 			char *pSkinFile = NULL;
 
-			zipFileIndex = unzLocateFile(zipFile, skinFilename, 0);
+			zipFileIndex = unzLocateFile(zipFile, skinFilename.CStr(), 0);
 
 			if(zipFileIndex != UNZ_END_OF_LIST_OF_FILE)
 			{
@@ -317,7 +303,7 @@ int F3DFile::ReadMD3(const char *pFilename)
 
 				unzGetCurrentFileInfo(zipFile, &skinInfo, skinName, 256, NULL, 0, NULL, 0);
 
-				pSkinFile = (char*)malloc(skinInfo.uncompressed_size + 1);
+				pSkinFile = (char*)MFHeap_TAlloc(skinInfo.uncompressed_size + 1);
 				pSkinFile[skinInfo.uncompressed_size] = 0;
 
 				unzOpenCurrentFile(zipFile);
@@ -327,13 +313,13 @@ int F3DFile::ReadMD3(const char *pFilename)
 				MFDebug_Assert(skinBytesRead == skinInfo.uncompressed_size, "Incorrect number of bytes read..");
 			}
 
-			zipFileIndex = unzLocateFile(zipFile, fileName, 0);
+			zipFileIndex = unzLocateFile(zipFile, fileName.CStr(), 0);
 
 			// parse MD3
-			ParseMD3File(pBuffer, fileInfo.uncompressed_size, pSubobjectName, pSkinFile);
+			ParseMD3File(pBuffer, fileInfo.uncompressed_size, subobjectName.CStr(), pSkinFile);
 
 			// free file
-			free(pBuffer);
+			MFHeap_Free(pBuffer);
 			pBuffer = NULL;
 		}
 /*

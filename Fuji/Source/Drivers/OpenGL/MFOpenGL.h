@@ -9,12 +9,7 @@
 	#define MF_OPENGL_SUPPORT_SHADERS
 #endif
 
-#if defined(MF_WINDOWS)
-	#include "glew/glew.h"
-	#include "glew/wglew.h"
-
-	#define MF_OPENGL_SUPPORT_SHADERS
-#elif defined(MF_OPENGL_ES)
+#if defined(MF_OPENGL_ES)
 	#if defined(MF_IPHONE)
 		#if MF_OPENGL_ES_VER == 1
 			#include <OpenGLES/ES1/gl.h>
@@ -23,7 +18,7 @@
 			#include <OpenGLES/ES2/gl.h>
 			#include <OpenGLES/ES2/glext.h>
 		#endif
-	#elif defined(MF_ANDROID) || defined(MF_WEB)
+	#else
 		#if MF_OPENGL_ES_VER == 1
 			#include <GLES/gl.h>
 			#include <GLES/glext.h>
@@ -31,17 +26,13 @@
 			#include <GLES2/gl2.h>
 			#include <GLES2/gl2ext.h>
 		#endif
-	#elif defined(MF_NACL)
-		#if MF_OPENGL_ES_VER == 1
-			#error GLES 1.x not supported in Native Client!
-		#elif MF_OPENGL_ES_VER == 2
-			#include <GLES2/gl2.h>
-			#include <GLES2/gl2ext.h>
-			#include <ppapi/gles2/gl2ext_ppapi.h>
-		#endif
-	#else
-		#error Unknown OpenGL ES include paths...
 	#endif
+	#if defined(MF_NACL)
+		#include <ppapi/gles2/gl2ext_ppapi.h>
+	#endif
+#elif defined(MF_WINDOWS)
+	#include "glew/glew.h"
+	#include "glew/wglew.h"
 #else
 	#if defined(MF_LINUX) || defined(MF_OSX)
 		#include "glew/glxew.h"

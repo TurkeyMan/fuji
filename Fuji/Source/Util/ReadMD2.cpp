@@ -101,15 +101,15 @@ void ParseMD2File(char *pFile, size_t length)
 	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
 
 	F3DMaterial &mat = pMatChunk->materials.push();
-	MFString_Copy(mat.name, pModel->name);
-	MFString_Copy(mat.maps[0], pModel->name);
+	mat.name = pModel->name;
+	mat.maps[0] = pModel->name;
 
 	// mesh data
 	F3DMeshChunk *pMC = pModel->GetMeshChunk();
 	F3DSubObject &sub = pMC->subObjects.push();
 
 	// copy name (TODO: remove file extension)
-	MFString_Copy(sub.name, pModel->name);
+	sub.name = pModel->name;
 
 	// colours
 	sub.colours.resize(1);
@@ -172,15 +172,15 @@ void ParseMD2File(char *pFile, size_t length)
 		matSub.vertices[a*3 + 2].colour = 0;
 
 		matSub.vertices[a*3 + 0].position = tris[a].vertex[0];
-		matSub.vertices[a*3 + 0].uv1 = tris[a].st[0];
+		matSub.vertices[a*3 + 0].uv[0] = tris[a].st[0];
 		matSub.vertices[a*3 + 0].normal = frames->verts[tris[a].vertex[0]].normalIndex;
 
 		matSub.vertices[a*3 + 1].position = tris[a].vertex[1];
-		matSub.vertices[a*3 + 1].uv1 = tris[a].st[1];
+		matSub.vertices[a*3 + 1].uv[0] = tris[a].st[1];
 		matSub.vertices[a*3 + 1].normal = frames->verts[tris[a].vertex[1]].normalIndex;
 
 		matSub.vertices[a*3 + 2].position = tris[a].vertex[2];
-		matSub.vertices[a*3 + 2].uv1 = tris[a].st[2];
+		matSub.vertices[a*3 + 2].uv[0] = tris[a].st[2];
 		matSub.vertices[a*3 + 2].normal = frames->verts[tris[a].vertex[2]].normalIndex;
 	}
 
@@ -223,8 +223,8 @@ int F3DFile::ReadMD2(const char *pFilename)
 		}
 	}
 
-	MFString_Copy(pModel->name, &pFilename[a+1]);
-	pModel->name[MFString_Length(pModel->name) - 4] = 0;
+	pModel->name = pFilename + a+1;
+	pModel->name.TruncateExtension();
 
 	ParseMD2File(pFile, size);
 	MFHeap_Free(pFile);

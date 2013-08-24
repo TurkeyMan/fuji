@@ -147,7 +147,7 @@ char* ReadSceneChunk(char *pFilePtr, char *pToken)
 			return pFilePtr;
 		}
 
-		MFString_Copy(pModel->name, pName);
+		pModel->name = pName;
 
 		MFDebug_Log(4, MFStr("Model: %s", pName));
 	}
@@ -197,7 +197,7 @@ char* ReadMaterial(char *pFilePtr, char *pToken)
 			return pFilePtr;
 		}
 
-		MFString_Copy(pMaterial->name, pName);
+		pMaterial->name = pName;
 
 		MFDebug_Log(4, MFStr("Found material: \"%s\"", pName));
 	}
@@ -319,7 +319,7 @@ char* ReadBone(char *pFilePtr, char *pToken)
 			return pFilePtr;
 		}
 
-		MFString_Copy(pBone->name, pName);
+		pBone->name = pName;
 	}
 	else if(!MFString_CaseCmp(pToken, "*INHERIT_POS"))
 	{
@@ -500,9 +500,9 @@ char* ReadTFaceList(char *pFilePtr, char *pToken)
 
 		pFilePtr = GetInt(pFilePtr, &index);
 
-		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 0].uv1);
-		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 1].uv1);
-		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 2].uv1);
+		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 0].uv[0]);
+		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 1].uv[0]);
+		pFilePtr = GetInt(pFilePtr, (int*)&pSub->matSubobjects[0].vertices[index*3 + 2].uv[0]);
 	}
 	else
 	{
@@ -663,7 +663,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 				MFDebug_Warn(3, MFStr("Error: More than 64 characters in mesh name, \"%s\"", pNodeName));
 			}
 			else
-				MFString_Copy(pSub->name, pNodeName);
+				pSub->name = pNodeName;
 		}
 
 		// if exporting a bone, add a bone
@@ -682,7 +682,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 				MFDebug_Warn(3, MFStr("Error: More than 64 characters in refPoint name, \"%s\"", pNodeName));
 			}
 			else
-                MFString_Copy(pRefPoint->name, pNodeName);
+                pRefPoint->name = pNodeName;
 		}
 	}
 	else if(!MFString_CaseCmp(pToken, "*NODE_PARENT"))
@@ -699,7 +699,7 @@ char* ReadGeomChunk(char *pFilePtr, char *pToken)
 				return pFilePtr;
 			}
 
-			MFString_Copy(pBone->parentName, pParentName);
+			pBone->parentName = pParentName;
 		}
 	}
 	else if(!MFString_CaseCmp(pToken, "*NODE_TM"))

@@ -4,6 +4,7 @@
 #include "MFArray.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
+#include "MFString.h"
 
 #if defined(_LINUX) 
 #include <string.h> 
@@ -53,7 +54,7 @@ public:
 	int normal;
 	int biNormal;
 	int tangent;
-	int uv1, uv2, uv3, uv4, uv5, uv6, uv7, uv8;
+	int uv[8];
 	int colour;
 	int illum;
 	int bone[8];
@@ -80,7 +81,7 @@ struct F3DMatSub
 
 struct F3DMesh
 {
-	char name[64];
+	MFString name;
 
 //	uint32 materialIndex;
 	uint32 size;
@@ -137,7 +138,7 @@ public:
 
 	int IsSubobjectAnimation() const;
 
-	char name[64];
+	MFString name;
 
 //	int materialIndex;
 
@@ -167,10 +168,10 @@ public:
 
 	MFMatrix boneMatrix;
 	MFMatrix worldMatrix;
-	char name[64];
-	char parentName[64];
+	MFString name;
+	MFString parentName;
 
-	char options[1024];
+	MFString options;
 
 	int parent;
 	bool bIsSkinned;
@@ -233,7 +234,7 @@ public:
 
 	uint32 objectType;
 
-	char name[64];
+	MFString name;
 };
 
 class F3DCollisionSphere : public F3DCollisionObject
@@ -278,8 +279,8 @@ public:
 	float specularLevel;
 	float glossiness;
 
-	char name[64];
-	char maps[8][64];
+	MFString name;
+	MFString maps[8];
 };
 
 class F3DMaterialChunk
@@ -299,8 +300,8 @@ public:
 	MFMatrix localMatrix;
 	uint16 bone[4];
 	float weight[4];
-	char name[64];
-	char options[1024];
+	MFString name;
+	MFString options;
 };
 
 class F3DRefPointChunk
@@ -316,9 +317,9 @@ public:
 
 	MFMatrix worldMatrix;
 	MFMatrix localMatrix;
-	char name[64];
-	char target[64];
-	char options[1024];
+	MFString name;
+	MFString target;
+	MFString options;
 };
 
 class F3DRefMeshChunk
@@ -369,10 +370,10 @@ public:
 	F3DAnimationChunk *GetAnimationChunk() { return &animationChunk; }
 	F3DCollisionChunk *GetCollisionChunk() { return &collisionChunk; }
 
-	char name[256];
-	char author[256];
-	char authoringTool[256];
-	char copyrightString[256];
+	MFString name;
+	MFString author;
+	MFString authoringTool;
+	MFString copyrightString;
 
 	F3DOptions options;
 

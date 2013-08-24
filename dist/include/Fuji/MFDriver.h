@@ -153,7 +153,7 @@ enum MFRendererDrivers
 	#define ALLOW_RAW_INPUT
 
 	// use assimp to load 3d assets
-//	#define USE_ASSIMP
+	#define USE_ASSIMP
 
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32

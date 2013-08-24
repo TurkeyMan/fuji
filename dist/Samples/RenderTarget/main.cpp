@@ -68,7 +68,7 @@ void Game_Init()
 	MFTexture *pRenderTarget = MFTexture_CreateRenderTarget("Prism", 256, 256);
 	pPrismRenderTarget = MFMaterial_Create("Prism");
 	MFRenderLayer_SetLayerRenderTarget(pLayer, 0, pRenderTarget);
-	MFTexture_Destroy(pRenderTarget); // release our local reference; materials holds the reference now
+	MFTexture_Release(pRenderTarget); // release our local reference; materials holds the reference now
 
 	// configure box layer
 	pLayer = MFRenderer_GetLayer(pRenderer, 1);
@@ -126,15 +126,15 @@ void Game_Deinit()
 {
 	MFStateBlock_Destroy(pPrismStateBlock);
 	MFStateBlock_Destroy(pPrismMeshStateBlock);
-	MFVertex_DestroyVertexBuffer(pPrismVertexBuffer);
+	MFVertex_ReleaseVertexBuffer(pPrismVertexBuffer);
 
 	MFStateBlock_Destroy(pBoxStateBlock);
 	MFStateBlock_Destroy(pBoxMeshStateBlock);
-	MFVertex_DestroyVertexBuffer(pBoxVertexBuffer);
+	MFVertex_ReleaseVertexBuffer(pBoxVertexBuffer);
 
-	MFVertex_DestroyVertexDeclaration(pVertexDecl);
+	MFVertex_ReleaseVertexDeclaration(pVertexDecl);
 
-	MFMaterial_Destroy(pPrismRenderTarget);
+	MFMaterial_Release(pPrismRenderTarget);
 
 	MFRenderer_Destroy(pRenderer);
 }

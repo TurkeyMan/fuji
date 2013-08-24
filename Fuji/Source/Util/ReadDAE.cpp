@@ -137,21 +137,21 @@ void ParseDAEAsset(MFXMLNode *pAsset)
 	{
 		// get the author (for kicks)
 		const char *pAuth = pAuthor->Value();
-		MFString_Copy(pModel->author, pAuth);
+		pModel->author = pAuth;
 	}
 
 	if(pCopyright)
 	{
 		// get the author (for kicks)
 		const char *pCopyrightString = pCopyright->Value();
-		MFString_Copy(pModel->copyrightString, pCopyrightString);
+		pModel->copyrightString = pCopyrightString;
 	}
 
 	if(pAuthoringTool)
 	{
 		// get the authoring tool (for kicks)
 		const char *pAuthTool = pAuthoringTool->Value();
-		MFString_Copy(pModel->authoringTool, pAuthTool);
+		pModel->authoringTool = pAuthTool;
 	}
 
 	invTransformMatrix.Inverse(transformMatrix);
@@ -169,7 +169,7 @@ int ParseDAEMaterial(MFXMLNode *pMaterialNode)
 	int matIndex = (int)pMatChunk->materials.size();
 
 	F3DMaterial &mat = pMatChunk->materials.push();
-	MFString_Copy(mat.name, pName);
+	mat.name = pName;
 
 	// TODO: parse additional data from material?
 
@@ -344,7 +344,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 	F3DMeshChunk *pMeshChunk = pModel->GetMeshChunk();
 	F3DSubObject &subObject = pMeshChunk->subObjects.push();
 
-	MFString_Copy(subObject.name, pName);
+	subObject.name = pName;
 
 	MFXMLNode *pMesh = pGeometryNode->FirstChild("mesh");
 
@@ -621,7 +621,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 									v.normal = index;
 									break;
 								case CT_UV1:
-									v.uv1 = index;
+									v.uv[0] = index;
 									break;
 								case CT_Colour:
 									v.colour = index;
@@ -846,7 +846,7 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 	{
 		F3DRefPoint &ref = pModel->GetRefPointChunk()->refPoints.push();
 
-		MFString_Copy(ref.name, pNodeName);
+		ref.name = pNodeName;
 		ref.worldMatrix = worldMat;
 		ref.localMatrix = localMat;
 		ref.bone[0] = (uint16)-1;
@@ -855,8 +855,8 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 	{
 		F3DBone &bone = pModel->GetSkeletonChunk()->bones.push();
 
-		MFString_Copy(bone.name, pNodeName);
-		MFString_Copy(bone.parentName, pParentName);
+		bone.name = pNodeName;
+		bone.parentName = pParentName;
 		bone.boneMatrix = localMat;
 		bone.worldMatrix = worldMat;
 	}
@@ -877,8 +877,8 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 				// this is instancing an external mesh..
 				F3DRefMesh &ref = pModel->GetRefMeshChunk()->refMeshes.push();
 
-				MFString_Copy(ref.name, pNodeName);
-				MFString_Copy(ref.target, pFilename);
+				ref.name = pNodeName;
+				ref.target = pFilename;
 				ref.worldMatrix = worldMat;
 				ref.localMatrix = localMat;
 			}
@@ -923,7 +923,7 @@ void ParseDAEScene(MFXMLNode *pSceneNode)
 			if(pSceneRoot)
 			{
 				const char *pName = pSceneRoot->Attribute("name");
-				MFString_Copy(pModel->name, pName);
+				pModel->name = pName;
 
 				ParseSceneNode(pSceneRoot, MFMatrix::identity, "");
 			}
@@ -990,7 +990,7 @@ int F3DFile::ReadDAE(const char *pFilename)
 		return 1;
 	}
 
-	MFString_Copy(pModel->name, "Untitled collada file");
+	pModel->name = "Untitled collada file";
 
 	ParseDAERoot(pRoot);
 
@@ -1020,7 +1020,7 @@ void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 		return;
 	}
 
-	MFString_Copy(pModel->name, "Untitled collada file");
+	pModel->name = "Untitled collada file";
 
 	ParseDAERoot(pRoot);
 

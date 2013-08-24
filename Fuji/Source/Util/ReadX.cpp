@@ -266,7 +266,7 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 				{
 					matSub.materialIndex = (int)pModel->GetMaterialChunk()->materials.size();
 					F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
-					MFString_CopyN(mat.name, pMatName, 64);
+					mat.name = pMatName;
 
 					SkipToken(pMatList, "{");
 
@@ -298,7 +298,7 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 						if(!MFString_Compare(pToken, "TextureFilename"))
 						{
 							SkipToken(pMatList, "{");
-							MFString_Copy(mat.maps[0], GetString(pMatList, &pMatList));
+							mat.maps[0] = GetString(pMatList, &pMatList);
 							SkipToken(pMatList, "}");
 						}
 						else
@@ -327,7 +327,7 @@ int* ParseMaterialList(const char *pText, F3DSubObject &sub, int numFaces)
 				{
 					matSub.materialIndex = (int)pModel->GetMaterialChunk()->materials.size();
 					F3DMaterial &mat = pModel->GetMaterialChunk()->materials.push();
-					MFString_CopyN(mat.name, pMatName, 64);
+					mat.name = pMatName;
 				}
 
 				pToken = GetNextToken(pMatList, &pMatList);
@@ -424,7 +424,7 @@ const char *ParseTexCoords(const char *pText, F3DSubObject &sub, int numPosition
 		int totalVerts = (int)sub.matSubobjects[m].vertices.size();
 		for(int a=0; a<totalVerts; a++)
 		{
-			sub.matSubobjects[m].vertices[a].uv1 = sub.matSubobjects[m].vertices[a].position;
+			sub.matSubobjects[m].vertices[a].uv[0] = sub.matSubobjects[m].vertices[a].position;
 		}
 	}
 
@@ -569,7 +569,7 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 	F3DMeshChunk *pMesh = pModel->GetMeshChunk();
 	F3DSubObject &sub = pMesh->subObjects.push();
 
-	MFString_Copy(sub.name, pMeshName);
+	sub.name = pMeshName;
 
 	// get num positions
 	int numPositions = GetInt(pText, &pText);
@@ -660,9 +660,9 @@ const char *ParseMesh(const char *pText, const MFMatrix &mat, const char *pFrame
 			SkipToken(pText, "{");
 
 			// get num positions
-			int nMaxSkinWeightsPerVertex = GetInt(pText, &pText);
-			int nMaxSkinWeightsPerFace = GetInt(pText, &pText);
-			int nBones = GetInt(pText, &pText);
+//			int nMaxSkinWeightsPerVertex = GetInt(pText, &pText);
+//			int nMaxSkinWeightsPerFace = GetInt(pText, &pText);
+//			int nBones = GetInt(pText, &pText);
 
 			// not yet sure how this helps...
 /*
@@ -882,8 +882,8 @@ const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
 		F3DBone *pParent = parentID == -1 ? NULL : &pModel->GetSkeletonChunk()->bones[parentID];
 		parentID = boneID;
 
-		MFString_Copy(pBone->name, pName);
-		MFString_Copy(pBone->parentName, pParent ? pParent->name : "");
+		pBone->name = pName;
+		pBone->parentName = pParent ? pParent->name : NULL;
 
 		pBone->worldMatrix = mat;
 	}
@@ -944,9 +944,9 @@ void LoadTextXFile(const char *pText)
 		{
 			SkipToken(pText, "{");
 
-			int maj = GetInt(pText, &pText);
-			int min = GetInt(pText, &pText);
-			int flag = GetInt(pText, &pText);
+//			int maj = GetInt(pText, &pText);
+//			int min = GetInt(pText, &pText);
+//			int flag = GetInt(pText, &pText);
 
 //			printf("XFile V%d.%d, 0x%X\n", maj, min, flag);
 

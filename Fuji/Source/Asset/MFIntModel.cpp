@@ -90,7 +90,7 @@ void ParseMD2FileFromMemory(char *pFile, size_t size, F3DFile *_pModel);
 MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t size, MFIntModelFormat format, const char *pName)
 {
 	F3DFile *pF3D = new F3DFile;
-	MFString_Copy(pF3D->name, pName);
+	pF3D->name = pName;
 
 #if defined(USE_ASSIMP)
 	ParseAssimpMesh((char*)pMemory, size, gFileExtensions[format], pF3D);

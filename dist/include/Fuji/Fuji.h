@@ -212,6 +212,7 @@
 #elif defined(_NACL)
 	#define MF_NACL
 	#define MF_PLATFORM NACL
+
 	#if defined(__x86_64__)
 		#define MF_ARCH_X64
 	#elif defined(__i386__)

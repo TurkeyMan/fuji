@@ -103,10 +103,10 @@ void Game_Deinit()
 	MFStateBlock_Destroy(pEntityStateBlock);
 
 	MFStateBlock_Destroy(pMeshStateBlock);
-	MFVertex_DestroyVertexBuffer(pVertexBuffer);
-	MFVertex_DestroyVertexDeclaration(pVertexDecl);
+	MFVertex_ReleaseVertexBuffer(pVertexBuffer);
+	MFVertex_ReleaseVertexDeclaration(pVertexDecl);
 
-	MFMaterial_Destroy(pMaterial);
+	MFMaterial_Release(pMaterial);
 
 	MFRenderer_Destroy(pRenderer);
 }
