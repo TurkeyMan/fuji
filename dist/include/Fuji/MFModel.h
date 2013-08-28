@@ -28,7 +28,7 @@ struct MFAnimation;
  * Creates a model from the filesystem.
  * @param pFilename Filename of model to load.
  * @return Returns a new instance of the specified model.
- * @see MFModel_Destroy(), MFModel_Draw()
+ * @see MFModel_Destroy()
  */
 MF_API MFModel* MFModel_Create(const char *pFilename);
 
@@ -36,31 +36,23 @@ MF_API MFModel* MFModel_Create(const char *pFilename);
  * Creates a model from the filesystem.
  * Creates a model from the filesystem.
  * @param pFilename Filename of model to load.
- * @param pAnimationFilename Filename of an animation to load and bind to the model instance.
+ * @param pAnimationFilename Filename of an animation to load and bind to the model instance. If \a pAnimationFilename is NULL, \a pFilename will be used instead.
  * @return Returns a new instance of the specified model with animation already loaded and bound.
- * @see MFModel_Create(), MFModel_BindAnimation()
+ * @see MFModel_Create()
  */
-MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename);
+MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename = NULL);
 
 /**
  * Dstroy a model.
  * Destroys a model instance.
  * @param pModel Model instance to be destroyed.
  * @return None.
- * @see MFModel_Create(), MFModel_Draw()
+ * @see MFModel_Create()
  */
 MF_API void MFModel_Destroy(MFModel *pModel);
 
-MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
-/**
- * Draw a model.
- * Renders a model using the current scene configuration.
- * @param pModel Model instance to render.
- * @return None.
- * @see MFModel_Create()
- */
-MF_API void MFModel_Draw(MFModel *pModel);
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
 /**
  * Set the model world matrix.
@@ -68,19 +60,8 @@ MF_API void MFModel_Draw(MFModel *pModel);
  * @param pModel Model instance.
  * @param worldMatrix World matrix to assign to the model.
  * @return None.
- * @see MFModel_Draw()
  */
 MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix);
-
-/**
- * Set the model colour.
- * Sets the models colour.
- * @param pModel Model instance.
- * @param colour Colour to assign to the model instance.
- * @return None.
- * @see MFModel_Create()
- */
-MF_API void MFModel_SetColour(MFModel *pModel, const MFVector &colour);
 
 /**
  * Get a models name.

@@ -126,7 +126,7 @@ MF_API MFRenderer* MFRenderer_SetCurrent(MFRenderer *pRenderer);
 MF_API MFRenderer* MFRenderer_GetCurrent();
 
 MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 MF_API void MFRenderer_AddVertices(MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 MF_API void MFRenderer_AddIndexedVertices(MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
@@ -143,7 +143,7 @@ MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags cle
 MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
 MF_API void MFRenderLayer_AddFence(MFRenderLayer *pLayer);
 

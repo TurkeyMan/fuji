@@ -49,9 +49,6 @@ struct MFRenderElement // 42 bytes atm... compress state block handles?
 	//        - pMaterial, pShader, pView, pEntity ???
 
 //	MFRenderElementData *pData;
-	uint8 type;
-	uint8 primarySortKey;
-	uint16 zSort;
 
 	MFMaterial *pMaterial;
 //	MFRenderTechnique *pRenderTechnique;
@@ -73,7 +70,14 @@ struct MFRenderElement // 42 bytes atm... compress state block handles?
 
 	uint8 animBatch;
 
-	uint16 unused[3];
+	uint8 type;
+	uint8 primarySortKey;
+	uint16 zSort;
+
+	uint16 unused;
+#if !defined(MF_64BIT)
+	uint16 padding[2];
+#endif
 
 //	MFRenderElementDebug *pDbg; // name/model/event/etc...
 }
@@ -143,6 +147,9 @@ struct MFRendererState
 	MFTexture *pTexturesSet[MFSCT_Max];
 	void *pRenderStates[MFSCRS_Max];
 	void *pRenderStatesSet[MFSCRS_Max];
+
+	MFStateConstant_AnimationMatrices animation;
+	MFStateConstant_MatrixBatch matrixBatch;
 
 	uint32 rsSet[MFSB_CT_TypeCount];
 	uint32 rsMask[MFSB_CT_TypeCount];

@@ -3,6 +3,7 @@
 #include "Fuji/MFRenderer.h"
 #include "Fuji/MFRenderState.h"
 #include "Fuji/MFModel.h"
+#include "Fuji/MFAnimation.h"
 #include "Fuji/MFView.h"
 #include "Fuji/MFSystem.h"
 #include "Fuji/MFFileSystem.h"
@@ -55,7 +56,8 @@ void Game_Init()
 	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
 
 	// load model
-	pModel = MFModel_Create("astro");
+	pModel = MFModel_CreateWithAnimation("astro");
+	MFDebug_Assert(pModel, "Couldn't load mesh!");
 }
 
 void Game_Update()
@@ -70,6 +72,20 @@ void Game_Update()
 
 	// set world matrix to the model
 	MFModel_SetWorldMatrix(pModel, world);
+
+	// advance the animation
+	MFAnimation *pAnim = MFModel_GetAnimation(pModel);
+	if(pAnim)
+	{
+		float start, end;
+		MFAnimation_GetFrameRange(pAnim, &start, &end);
+	
+		static float time = 0.f;
+		time += MFSystem_TimeDelta();// * 500;
+		while(time >= end)
+			time -= end;
+		MFAnimation_SetFrame(pAnim, time);
+	}
 }
 
 void Game_Draw()
@@ -79,7 +95,7 @@ void Game_Draw()
 	MFView_SetProjection();
 
 	// render the mesh
-	MFRenderer_AddModel(pModel, NULL, NULL, MFView_GetViewState());
+	MFRenderer_AddModel(pModel, NULL, MFView_GetViewState());
 }
 
 void Game_Deinit()
@@ -104,7 +120,7 @@ int GameMain(MFInitParams *pInitParams)
 	return MFMain(pInitParams);
 }
 
-#if defined(MF_WINDOWS) || defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <windows.h>
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
@@ -117,7 +133,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 	return GameMain(&initParams);
 }
 
-#elif defined(MF_PSP) || defined(_PSP)
+#elif defined(MF_PSP)
 #include <pspkernel.h>
 
 int main(int argc, const char *argv[])

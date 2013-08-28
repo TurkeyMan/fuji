@@ -30,7 +30,7 @@ struct MFAnimation
 
 	MFModel *pModel;
 	MFModelBone *pBones;
-	int numBones;
+	uint32 numBones;
 
 	int *pBoneMap;
 
@@ -54,7 +54,7 @@ struct MFAnimationBone
 
 	float *pTime;
 	MFAnimationFrame *pFrames;
-	int numFrames;
+	uint32 numFrames;
 };
 
 struct MFAnimationTemplate : MFResource
@@ -62,11 +62,9 @@ struct MFAnimationTemplate : MFResource
 	const char *pAnimName;
 
 	MFAnimationBone *pBones;
-	int numBones;
+	uint32 numBones;
 
 	float startTime, endTime;
-
-	int refCount;
 };
 
 #endif

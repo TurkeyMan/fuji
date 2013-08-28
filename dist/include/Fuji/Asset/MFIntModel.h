@@ -71,7 +71,8 @@ MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t
 
 MF_API void MFIntModel_Optimise(MFIntModel *pModel);
 
-MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform);
+MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform, size_t extraBytes = 0);
+MF_API void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform, size_t extraBytes = 0);
 
 MF_API void MFIntModel_Destroy(MFIntModel *pModel);
 

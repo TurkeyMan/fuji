@@ -9,7 +9,6 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFModel_InitModulePlatformSpecific_##driver(); \
 	void MFModel_DeinitModulePlatformSpecific_##driver(); \
-	MF_API void MFModel_Draw_##driver(MFModel *pModel); \
 	void MFModel_CreateMeshChunk_##driver(MFMeshChunk *pMeshChunk); \
 	void MFModel_DestroyMeshChunk_##driver(MFMeshChunk *pMeshChunk); \
 	void MFModel_FixUpMeshChunk_##driver(MFMeshChunk *pMC, void *pBase, bool load);
@@ -19,7 +18,6 @@
 		#driver, \
 		MFModel_InitModulePlatformSpecific_##driver, \
 		MFModel_DeinitModulePlatformSpecific_##driver, \
-		MFModel_Draw_##driver, \
 		MFModel_CreateMeshChunk_##driver, \
 		MFModel_DestroyMeshChunk_##driver, \
 		MFModel_FixUpMeshChunk_##driver, \
@@ -42,7 +40,6 @@ struct MFModelPluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
-	void (*pDraw)(MFModel *pModel);
 	void (*pCreateMeshChunk)(MFMeshChunk *pMeshChunk);
 	void (*pDestroyMeshChunk)(MFMeshChunk *pMeshChunk);
 	void (*pFixUpMeshChunk)(MFMeshChunk *pMC, void *pBase, bool load);
@@ -80,11 +77,6 @@ void MFModel_InitModulePlatformSpecific()
 void MFModel_DeinitModulePlatformSpecific()
 {
 	gpCurrentModelPlugin->pDeinitModulePlatformSpecific();
-}
-
-MF_API void MFModel_Draw(MFModel *pModel)
-{
-	gpCurrentModelPlugin->pDraw(pModel);
 }
 
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)

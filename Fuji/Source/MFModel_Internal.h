@@ -19,6 +19,8 @@ void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_DestroyMeshChunk(MFMeshChunk *pMeshChunk);
 void MFModel_FixUpMeshChunk(MFMeshChunk *pMeshChunk, void *pBase, bool load);
 
+void* MFModelInternal_PendingAnimationTemplate(size_t *pSize);
+
 enum MFModelDataChunkType
 {
 	MFChunkType_Unknown = -1,
@@ -42,16 +44,17 @@ struct MFModelDataChunk
 	uint32 reserved;
 };
 
-MFModelDataChunk *MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID);
+MFModelDataChunk* MFModel_GetDataChunk(MFModelTemplate *pModelTemplate, MFModelDataChunkType chunkID);
 MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int subobjectIndex, int meshChunkIndex);
 
 struct MFModel
 {
 	MFMatrix worldMatrix;
-	MFVector modelColour;
 
 	MFModelTemplate *pTemplate;
 	MFAnimation *pAnimation;
+
+	MFStateBlock *pEntityState;
 
 	// subobject flags
 	// * enabled flags

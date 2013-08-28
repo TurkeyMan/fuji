@@ -39,25 +39,23 @@ struct MFStateBlock
 {
 	static const int MINIMUM_SIZE = 64;
 
-	enum MFStateBlockConstantSize
-	{
-		MFSB_CS_Word,
-		MFSB_CS_Vector,
-		MFSB_CS_Matrix,
-		MFSB_CS_Large,
-	};
-
 	struct MFStateBlockStateChange
 	{
 		uint32 stateSet     : 1;	// is the state set?
-		uint32 constantSize : 2;	// MFStateBlockConstantSize
-		uint32 constantType : 7;	// MFStateBlockConstantType
-		uint32 constant     : 8;
+		uint32 constantType : 3;	// MFStateBlockConstantType
+		uint32 constant     : 6;	// currently there are at most 32 constants, but we give an extra bit
+		uint32 vectors      : 1;	// size is measured in: 0 - words, 1 - vectors
+		uint32 size         : 7;	// size of state data
 		uint32 offset       : 14;	// in words: offsetInBytes = offset * 4;
+
+		size_t StateSize() const { return vectors ? size*16 : size*4; }
 	};
 
 	uint32 bools;
 	uint32 boolsSet;
+
+	uint16 unused;
+
 	uint16 allocated	: 4;	// sizeInBytes = MINIMUM_SIZE << allocated
 	uint16 used			: 12;	// multiple of 16 bytes
 	uint8 numStateChanges;
@@ -66,16 +64,18 @@ struct MFStateBlock
 	uint8 spotLightCount;
 	uint8 omniLightCount;
 
-	uint16 unused;
-
 	__forceinline MFStateBlockStateChange* GetStateChanges() { return (MFStateBlockStateChange*)((char*)this + sizeof(MFStateBlock)); }
 	__forceinline const MFStateBlockStateChange* GetStateChanges() const { return (const MFStateBlockStateChange*)((const char*)this + sizeof(MFStateBlock)); }
 	__forceinline void* GetStateData(size_t offset = 0) { return (void*)(MFALIGN16(GetStateChanges() + numStateChanges) + offset); }
 	__forceinline const void* GetStateData(size_t offset = 0) const { return (const void*)(MFALIGN16(GetStateChanges() + numStateChanges) + offset); }
 
 	__forceinline size_t GetSize() const { return MINIMUM_SIZE << allocated; }
-	__forceinline size_t GetUsed() const { return 16 * used + ((char*)GetStateData() - (char*)this); }
+	__forceinline size_t GetUsed() const { return ((char*)GetStateData(16*used) - (char*)this); }
 	__forceinline size_t GetFree() const { return GetSize() - GetUsed(); }
+
+	MFStateBlockStateChange* FindState(uint32 type, uint32 constant);
+	MFStateBlockStateChange* AllocState(uint32 type, uint32 constant, size_t bytes);
+	MFStateBlockStateChange* AllocStateChange(size_t stateBytes = 0);
 }
 MFALIGN_END(16);
 

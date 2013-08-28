@@ -107,6 +107,7 @@ static const GLenum glCompareFunc[MFComparisonFunc_Max] =
 
 	static const GLchar gVertexShader[] = "					\n\
 		uniform mat4 wvMatrix;								\n\
+		uniform mat4 vpMatrix;								\n\
 		uniform mat4 wvpMatrix;								\n\
 		uniform mat4 texMatrix;								\n\
 															\n\

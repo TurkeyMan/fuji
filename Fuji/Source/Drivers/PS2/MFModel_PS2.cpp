@@ -6,11 +6,6 @@
 #include "MFView.h"
 #include "MFRenderer.h"
 
-MF_API void MFModel_Draw(MFModel *pModel)
-{
-	MFCALLSTACK;
-}
-
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 	MFCALLSTACK;

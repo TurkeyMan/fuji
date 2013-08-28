@@ -143,25 +143,25 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 		if(pDecl->streamsUsed != 1)
 		{
 			// create the stream declarations...
-			MFVertexElement elements[64];
+			MFVertexElement streamElements[64];
 			for(int s=0; s<16; ++s)
 			{
 				if(!(pDecl->streamsUsed & (1 << s)))
 					continue;
 
-				int streamElements = 0;
+				int numStreamElements = 0;
 				for(int e=0; e<elementCount; ++e)
 				{
 					if(elements[e].stream == s)
 					{
-						elements[streamElements] = elements[e];
-						elements[streamElements].stream = 0;
-						++streamElements;
+						streamElements[numStreamElements] = elements[e];
+						streamElements[numStreamElements].stream = 0;
+						++numStreamElements;
 					}
 				}
 
-				if(streamElements)
-					pDecl->pStreamDecl[s] = MFVertex_CreateVertexDeclaration(elements, streamElements);
+				if(numStreamElements)
+					pDecl->pStreamDecl[s] = MFVertex_CreateVertexDeclaration(streamElements, numStreamElements);
 			}
 		}
 	}

@@ -92,6 +92,9 @@ MF_API MFIntModel *MFIntModel_CreateFromFileInMemory(const void *pMemory, size_t
 	F3DFile *pF3D = new F3DFile;
 	pF3D->name = pName;
 
+	MFDebug_Log(0, MFStr("%s: %s", pName, gFileExtensions[format]));
+
+
 #if defined(USE_ASSIMP)
 	ParseAssimpMesh((char*)pMemory, size, gFileExtensions[format], pF3D);
 #else
@@ -127,7 +130,7 @@ MF_API void MFIntModel_Optimise(MFIntModel *pModel)
 	pF3D->Optimise();
 }
 
-MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform, size_t extraBytes)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
@@ -144,11 +147,11 @@ MF_API void MFIntModel_CreateRuntimeData(MFIntModel *pModel, void **ppOutput, si
 		pF3D->GetCollisionChunk()->collisionObjects.size() ||
 		pF3D->GetRefPointChunk()->refPoints.size())
 	{
-		*ppOutput = pF3D->CreateMDL(pSize, platform);
+		*ppOutput = pF3D->CreateMDL(pSize, platform, extraBytes);
 	}
 }
 
-MF_API void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, size_t *pSize, MFPlatform platform, size_t extraBytes)
 {
 	F3DFile *pF3D = (F3DFile*)pModel;
 
@@ -159,7 +162,7 @@ MF_API void MFIntModel_CreateAnimationData(MFIntModel *pModel, void **ppOutput, 
 
 	if(pF3D->GetAnimationChunk()->anims.size())
 	{
-		*ppOutput = pF3D->CreateANM(pSize, platform);
+		*ppOutput = pF3D->CreateANM(pSize, platform, extraBytes);
 	}
 }
 

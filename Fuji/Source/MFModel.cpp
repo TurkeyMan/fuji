@@ -2,6 +2,7 @@
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFModel_Internal.h"
+#include "MFAnimation_Internal.h"
 #include "MFFileSystem.h"
 #include "MFView.h"
 #include "MFCollision_Internal.h"
@@ -14,6 +15,22 @@
 #include "Asset/MFIntModel.h"
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
+
+static bool bKeepAnimation = false;
+static void *pAnimationTemplate = NULL;
+static size_t animSize = 0;
+
+void* MFModelInternal_PendingAnimationTemplate(size_t *pSize)
+{
+	if(bKeepAnimation)
+	{
+		bKeepAnimation = false;
+		if(pSize)
+			*pSize = animSize;
+		return pAnimationTemplate;
+	}
+	return NULL;
+}
 
 static void MFModelTemplate_Destroy(MFResource *pRes)
 {
@@ -227,82 +244,131 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 	return NULL;
 }
 
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+static MFModelTemplate* MFModel_CreateFromSourceData(const char *pFilename, size_t *pSize)
+{
+	void *pTemplate = NULL;
+
+	// try to load from source data
+	const char * const pExt[] = {
+		/* buiultin formats */	".f3d", ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".memd2",
+		/* AssImp formats */	".blend", ".3ds", ".dxf", ".lwo", ".lws", ".ms3d", ".mdl", ".pk3", ".mdc", ".md5", ".smd", ".vta", ".m3", ".3d",
+		NULL };
+
+	// first try and see if the filename has an extension to begin with...
+	MFString fileName = pFilename;
+	fileName = fileName.Lower();
+
+	MFIntModel *pIM = NULL;
+
+	const char * const *ppExt = pExt;
+	bool bExplicit = false;
+	for(; *ppExt != NULL; ++ppExt)
+	{
+		if(fileName.EndsWith(*ppExt))
+		{
+			pIM = MFIntModel_CreateFromFile(fileName.CStr());
+			bExplicit = true;
+			break;
+		}
+	}
+	if(!bExplicit)
+	{
+		ppExt = pExt;
+		while(!pIM && *ppExt)
+		{
+			fileName = MFString::Format("%s%s", pFilename, *ppExt);
+			pIM = MFIntModel_CreateFromFile(fileName.CStr());
+			if(pIM)
+				break;
+			++ppExt;
+		}
+	}
+
+	if(pIM)
+	{
+		MFIntModel_Optimise(pIM);
+
+		size_t size = 0;
+		MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFString_Length(pFilename) + 1);
+
+		if(pTemplate)
+		{
+			if(pSize)
+				*pSize = size;
+
+			MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.mdl", pFilename), MFOF_Write | MFOF_Binary);
+			if(pFile)
+			{
+				MFFile_Write(pFile, pTemplate, size, false);
+				MFFile_Close(pFile);
+			}
+		}
+
+		if(bKeepAnimation)
+		{
+			MFIntModel_CreateAnimationData(pIM, &pAnimationTemplate, &animSize, MFSystem_GetCurrentPlatform(), MFString_Length(pFilename) + 1);
+
+			if(pAnimationTemplate)
+			{
+				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.anm", pFilename), MFOF_Write | MFOF_Binary);
+				if(pFile)
+				{
+					MFFile_Write(pFile, pAnimationTemplate, animSize, false);
+					MFFile_Close(pFile);
+				}
+			}
+		}
+
+		MFIntModel_Destroy(pIM);
+	}
+
+	return (MFModelTemplate*)pTemplate;
+}
+#endif
+
 MF_API MFModel* MFModel_Create(const char *pFilename)
 {
-	const char* pOriginalFilename = pFilename;
-
 	// see if it's already loaded
-	MFModelTemplate *pTemplate = (MFModelTemplate*)MFResource_Find(MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1);
+	MFModelTemplate *pTemplate = (MFModelTemplate*)MFResource_Find(MFUtil_HashString(pFilename) ^ 0x0DE10DE1);
 
 	if(!pTemplate)
 	{
-		char *pTemplateData = NULL;
+		size_t size;
 
 		MFFile *hFile = MFFileSystem_Open(MFStr("%s.mdl", pFilename), MFOF_Read|MFOF_Binary);
 		if(hFile)
 		{
-			int64 size = MFFile_GetSize(hFile);
+			size = (size_t)MFFile_GetSize(hFile);
 
 			if(size > 0)
 			{
 				// allocate memory and load file
-				pTemplateData = (char*)MFHeap_Alloc((size_t)size + MFString_Length(pFilename) + 1);
-				MFFile_Read(hFile, pTemplateData, (size_t)size);
+				char *pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
+				MFFile_Read(hFile, pTemplateData, size);
 				MFFile_Close(hFile);
 
-				MFString_Copy(&pTemplateData[size], pFilename);
-				pFilename = &pTemplateData[size];
+				pTemplate = (MFModelTemplate*)pTemplateData;
 			}
 		}
 		else
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
-			// try to load from source data
-			const char * const pExt[] = { ".f3d", ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".me2", NULL };
-			const char * const *ppExt = pExt;
-			MFIntModel *pIM = NULL;
-			while(!pIM && *ppExt)
-			{
-				MFString tempFilename = MFString::Format("%s%s", pFilename, *ppExt);
-				pIM = MFIntModel_CreateFromFile(tempFilename.CStr());
-				if(pIM)
-				{
-					pFilename = MFString_Copy((char*)MFHeap_Alloc(tempFilename.NumBytes()+1), tempFilename.CStr());
-					break;
-				}
-				++ppExt;
-			}
-
-			if(pIM)
-			{
-				MFIntModel_Optimise(pIM);
-
-				size_t size;
-				MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplateData, &size, MFSystem_GetCurrentPlatform());
-
-				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.mdl", pOriginalFilename), MFOF_Write | MFOF_Binary);
-				if(pFile)
-				{
-					MFFile_Write(pFile, pTemplateData, size, false);
-					MFFile_Close(pFile);
-				}
-
-				MFIntModel_Destroy(pIM);
-			}
+			pTemplate = MFModel_CreateFromSourceData(pFilename, &size);
 #endif
 		}
 
-		if(!pTemplateData)
+		if(!pTemplate)
 			return NULL;
 
-		pTemplate = (MFModelTemplate*)pTemplateData;
+		pFilename = MFString_Copy((char*)pTemplate + size, pFilename);
 
 		// check ID string
 		MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('M', 'D', 'L', '2'), "Incorrect MFModel version.");
 
 		MFModel_FixUp(pTemplate, true);
 
-		MFResource_AddResource(pTemplate, MFRT_ModelTemplate, MFUtil_HashString(pOriginalFilename) ^ 0x0DE10DE1, pFilename);
+		MFResource_AddResource(pTemplate, MFRT_ModelTemplate, MFUtil_HashString(pFilename) ^ 0x0DE10DE1, pFilename);
 
 		MFModelDataChunk *pChunk = MFModel_GetDataChunk(pTemplate, MFChunkType_SubObjects);
 
@@ -342,6 +408,17 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 						pMC->pIndexBuffer = MFVertex_CreateIndexBuffer(pMC->numIndices, pMCG->pIndexData, pIBName);
 
 						MFStateBlock_SetRenderState(pMC->pGeomState, MFSCRS_IndexBuffer, pMC->pIndexBuffer);
+
+						if(pMC->pBatchIndices && pMC->matrixBatchSize > 0)
+						{
+							MFStateConstant_MatrixBatch batch;
+							batch.pIndices = pMC->pBatchIndices;
+							batch.numMatrices = pMC->matrixBatchSize;
+							MFStateBlock_SetMatrixBatch(pMC->pGeomState, batch);
+
+							// we must be animated, so we'll set the animated bit too...
+							MFStateBlock_SetBool(pMC->pGeomState, MFSCB_Animated, true);
+						}
 					}
 
 					MFModel_CreateMeshChunk(pMC);
@@ -354,25 +431,36 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 	pModel = (MFModel*)MFHeap_Alloc(sizeof(MFModel));
 
 	pModel->worldMatrix = MFMatrix::identity;
-	pModel->modelColour = MFVector::one;
 	pModel->pTemplate = pTemplate;
 	pModel->pAnimation = NULL;
+
+	pModel->pEntityState = MFStateBlock_Create(128);
+	MFStateBlock_SetMatrix(pModel->pEntityState, MFSCM_World, MFMatrix::identity);
 
 	return pModel;
 }
 
 MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *pAnimationFilename)
 {
-	MFModel *pModel = MFModel_Create(pFilename);
+	bKeepAnimation = true;
 
-	if(pAnimationFilename)
-		MFAnimation_Create(pAnimationFilename, pModel);
+	MFModel *pModel = MFModel_Create(pFilename);
+	MFAnimation_Create(pAnimationFilename ? pAnimationFilename : pFilename, pModel);
+
+	if(bKeepAnimation)
+	{
+		MFHeap_Free(pAnimationTemplate);
+		bKeepAnimation = false;
+	}
 
 	return pModel;
 }
 
 MF_API void MFModel_Destroy(MFModel *pModel)
 {
+	// destroy stateblock
+	MFStateBlock_Destroy(pModel->pEntityState);
+
 	// free instance data
 	if(pModel->pAnimation)
 		MFAnimation_Destroy(pModel->pAnimation);
@@ -380,16 +468,24 @@ MF_API void MFModel_Destroy(MFModel *pModel)
 	// release the template
 	MFResource_Release(pModel->pTemplate);
 
-	//free instance
+	// free instance
 	MFHeap_Free(pModel);
 }
 
 
-MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 	if(!pChunk)
 		return;
+
+	if(pModel->pAnimation)
+		MFAnimation_CalculateMatrices(pModel->pAnimation, &pModel->worldMatrix);
+
+	MFStateBlock_SetMatrix(pModel->pEntityState, MFSCM_World, pModel->worldMatrix);
+
+//	MFStateBlock_SetVector(pModel->pEntityState, MFSCV_DiffuseColour, pModel->modelColour);
+	MFStateBlock_SetVector(pModel->pEntityState, MFSCV_DiffuseColour, MFVector::one);
 
 	MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 	for(int s = 0; s < pChunk->count; s++)
@@ -400,17 +496,10 @@ MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet,
 		{
 			MFMeshChunk &mc = sub.pMeshChunks[m];
 
-			// set world matrix and colour
-//			if(sub.subobjectAnimMatrix != -1 && pModel->pAnimation)
-//				//TODO!
-//			else
-				MFStateBlock_SetMatrix(mc.pGeomState, MFSCM_World, pModel->worldMatrix);
-//			MFStateBlock_SetVector(mc.pGeomState, MFSCV_DiffuseColour, pModel->modelColour);
-
 			if(mc.pIndexBuffer)
-				MFRenderLayer_AddIndexedVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numIndices, MFPT_TriangleList, mc.pMaterial, pEntity, pMaterialOverride, pView);
+				MFRenderLayer_AddIndexedVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numIndices, MFPT_TriangleList, mc.pMaterial, pModel->pEntityState, pMaterialOverride, pView);
 			else
-				MFRenderLayer_AddVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numVertices, MFPT_TriangleList, mc.pMaterial, pEntity, pMaterialOverride, pView);
+				MFRenderLayer_AddVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numVertices, MFPT_TriangleList, mc.pMaterial, pModel->pEntityState, pMaterialOverride, pView);
 		}
 	}
 }
@@ -418,11 +507,6 @@ MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet,
 MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 {
 	pModel->worldMatrix = worldMatrix;
-}
-
-MF_API void MFModel_SetColour(MFModel *pModel, const MFVector &colour)
-{
-	pModel->modelColour = colour;
 }
 
 MF_API const char* MFModel_GetName(MFModel *pModel)

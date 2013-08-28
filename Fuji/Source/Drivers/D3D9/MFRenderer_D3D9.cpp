@@ -34,8 +34,6 @@
 #include "MFRenderer_Internal.h"
 #include "MFRenderer_D3D9.h"
 
-#include "Shaders/Registers.h"
-
 #include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
@@ -60,7 +58,6 @@ D3DCAPS9 gD3D9DeviceCaps;
 
 extern HWND apphWnd;
 
-static int gNumWeights = 0;
 static MFRect gCurrentViewport;
 
 void MFRenderer_D3D9_SetDebugName(IDirect3DResource9* pResource, const char* pName)
@@ -630,48 +627,5 @@ void MFRendererInternal_SortElements(MFRenderLayer &layer)
 }
 
 //void MFRendererInternal_RenderElement(MFRendererState &state, MFRenderElement &element)
-
-
-// direct3d management fucntions
-void MFRendererPC_SetAnimationMatrix(int boneID, const MFMatrix &animationMatrix)
-{
-	MFMatrix mat = animationMatrix;
-	mat.Transpose();
-	pd3dDevice->SetVertexShaderConstantF(r_animMats + boneID*3, (float*)&mat, 3);
-}
-
-void MFRendererPC_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)
-{
-	MFMatrix mat = worldToScreen;
-	mat.Transpose();
-	pd3dDevice->SetVertexShaderConstantF(r_wvp, (float*)&mat, 4);
-}
-
-void MFRendererPC_SetTextureMatrix(const MFMatrix &textureMatrix)
-{
-	MFMatrix mat = textureMatrix;
-	mat.Transpose();
-	pd3dDevice->SetVertexShaderConstantF(r_tex, (float*)&mat, 2);
-}
-
-void MFRendererPC_SetModelColour(const MFVector &colour)
-{
-	pd3dDevice->SetVertexShaderConstantF(r_modelColour, colour, 1);
-}
-
-void MFRendererPC_SetNumWeights(int numWeights)
-{
-	gNumWeights = numWeights;
-
-//	int i[4] = { numWeights, numWeights, numWeights, numWeights };
-//	pd3dDevice->SetVertexShaderConstantI(r_numWeights, i, 1);
-	pd3dDevice->SetVertexShaderConstantF(r_animating, numWeights ? MFVector::identity : MFVector::one, 1);
-	pd3dDevice->SetVertexShaderConstantF(r_animating + 1, numWeights ? MFVector::one : MFVector::identity, 1);
-}
-
-int MFRendererPC_GetNumWeights()
-{
-	return gNumWeights;
-}
 
 #endif // MF_RENDERER

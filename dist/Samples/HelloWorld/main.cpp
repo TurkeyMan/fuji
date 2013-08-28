@@ -114,7 +114,7 @@ int GameMain(MFInitParams *pInitParams)
 	return MFMain(pInitParams);
 }
 
-#if defined(MF_WINDOWS) || defined(_WINDOWS)
+#if defined(MF_WINDOWS)
 #include <windows.h>
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
@@ -127,7 +127,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 	return GameMain(&initParams);
 }
 
-#elif defined(MF_PSP) || defined(_PSP)
+#elif defined(MF_PSP)
 #include <pspkernel.h>
 
 int main(int argc, const char *argv[])

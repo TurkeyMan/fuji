@@ -322,10 +322,8 @@ float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &
 	// register MFModel functions
 	r = pEngine->RegisterGlobalFunction("MFModel @MFModel_Create(cstring modelName)", asFUNCTION(MFModel_Create), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterGlobalFunction("MFModel @MFModel_CreateWithAnimation(cstring model, cstring animation)", asFUNCTION(MFModel_CreateWithAnimation), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
-	r = pEngine->RegisterObjectMethod("MFModel", "void Draw()", asFUNCTION(MFModel_Draw), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFModel", "void Destroy()", asFUNCTION(MFModel_Destroy), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFModel", "void SetWorldMatrix(const matrix &in)", asFUNCTION(MFModel_SetWorldMatrix), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
-	r = pEngine->RegisterObjectMethod("MFModel", "void SetColour(const vector &in)", asFUNCTION(MFModel_SetColour), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFModel", "cstring GetName()", asFUNCTION(MFModel_GetName), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFModel", "int GetNumSubObjects()", asFUNCTION(MFModel_GetNumSubObjects), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFModel", "int GetSubObjectIndex(cstring)", asFUNCTION(MFModel_GetSubObjectIndex), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");

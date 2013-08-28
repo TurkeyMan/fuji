@@ -133,12 +133,12 @@ void MFUtil_CrcInit()
 }
 
 // generate a unique Crc value for this buffer
-MF_API uint32 MFUtil_Crc(const char *pBuffer, int length)
+MF_API uint32 MFUtil_Crc(const char *pBuffer, size_t length)
 {
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
 	for(; length > 0; ++pBuffer, --length)
-		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ *pBuffer];
+		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ *(const uint8*)pBuffer];
 
 	return ~crc;			// transmit complement, per CRC-32 spec
 }
@@ -149,7 +149,7 @@ MF_API uint32 MFUtil_CrcString(const char *pString)
 	uint32 crc = 0xffffffff;		// preload shift register, per CRC-32 spec
 
 	for(; *pString; ++pString)
-		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ (*pString | 0x20)];
+		crc = (crc << 8) ^ gCrc32Table[(crc >> 24) ^ (*(const uint8*)pString | 0x20)];
 
 	return ~crc;			// transmit complement, per CRC-32 spec
 }

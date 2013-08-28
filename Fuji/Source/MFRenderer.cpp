@@ -218,9 +218,9 @@ MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, MFStateBloc
 	MFRenderLayer_AddMesh(gCurrentLayers.pSolidLayer, pMesh, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+MF_API void MFRenderer_AddModel(MFModel *pModel, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
-	MFRenderLayer_AddModel(&gCurrentLayers, pModel, pEntity, pMaterialOverride, pView);
+	MFRenderLayer_AddModel(&gCurrentLayers, pModel, pMaterialOverride, pView);
 }
 
 MFMatrix *MFRendererState::getDerivedMatrix(MFStateConstant_Matrix matrix)
@@ -330,6 +330,9 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, const MFStateBl
 									state.pMatrixStates[MFSCM_WorldViewProjection] = NULL;
 									state.pMatrixStates[MFSCM_InverseViewProjection] = NULL;
 									break;
+								default:
+									MFUNREACHABLE;
+									break;
 							}
 						}
 					}
@@ -343,15 +346,52 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, const MFStateBl
 						state.pRenderStates[sc.constant] = *(void**)pData;
 					break;
 				case MFSB_CT_Misc:
-					MFDebug_Assert(false, "!");
-//						if(state[sc.constant] != *(void**)pData && !(state.renderStateMask & 1 << sc.constant))
-//							state.pRenderStates[sc.constant] = *(void**)pData;
+					switch(sc.constant)
+					{
+						case MFSCMisc_AnimationMatrices:
+							state.animation = *(MFStateConstant_AnimationMatrices*)pData;
+							break;
+						case MFSCMisc_MatrixBatch:
+							state.matrixBatch = *(MFStateConstant_MatrixBatch*)pData;
+							break;
+						default:
+							MFUNREACHABLE;
+							break;
+					}
 					break;
 				default:
 					continue;
 			}
 		}
 	}
+}
+
+static void MissingStates(MFStateBlockConstantType type, uint32 missing)
+{
+	static const char * const sStateType[MFSB_CT_TypeCount] =
+	{
+		"Bool",
+		"Vector",
+		"Matrix",
+		"Texture",
+		"RenderState",
+		"Misc",
+		"",
+		"Unknown"
+	};
+
+	MFString states;
+	for(int a=0; a<32; ++a)
+	{
+		if(missing & (1<<a))
+		{
+			if(!states.IsNull())
+				states += ", ";
+			states += MFStateBlock_GetStateName(type, a);
+		}
+	}
+
+	MFDebug_Assert(missing == 0, MFStr("Missing %s states: %s", sStateType[type], states.CStr()));
 }
 
 static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement &element)
@@ -377,7 +417,7 @@ static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement
 
 	// add misc requirements
 	if(state.getBool(MFSCB_Animated))
-		required[MFSB_CT_Misc] |= MFBIT(MFSCMisc_AnimationMatrices);
+		required[MFSB_CT_Misc] |= MFBIT(MFSCMisc_AnimationMatrices) | MFBIT(MFSCMisc_MatrixBatch);
 	if(state.getBool(MFSCB_AlphaTest))
 		required[MFSB_CT_Vector] |= MFBIT(MFSCV_RenderState);
 
@@ -390,7 +430,8 @@ static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement
 	for(int a = 0; a < MFSB_CT_TypeCount; ++a)
 	{
 		uint32 missing = required[a] & ~state.rsSet[a];
-		MFDebug_Assert(missing == 0, "Missing states! {info...}");
+		if(missing != 0)
+			MissingStates((MFStateBlockConstantType)a, missing);
 	}
 }
 
@@ -588,9 +629,9 @@ MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMateri
 		MFRenderLayer_AddVertices(pLayer, pMesh->pMeshState, pMesh->vertexOffset, pMesh->numVertices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
-MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
-	MFModel_SubmitGeometry(pModel, pLayerSet, pEntity, pMaterialOverride, pView);
+	MFModel_SubmitGeometry(pModel, pLayerSet, pMaterialOverride, pView);
 }
 
 MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, MFStateBlock *pEntity, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)

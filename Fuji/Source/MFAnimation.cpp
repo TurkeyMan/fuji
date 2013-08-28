@@ -5,6 +5,8 @@
 #include "MFSystem.h"
 #include "MFHeap.h"
 #include "MFResource.h"
+#include "MFRenderState.h"
+
 
 // 128 temp matrices for intermediate calculation data
 MFMatrix gWorkingMats[128];
@@ -33,15 +35,13 @@ MFAnimationTemplate* MFAnimation_FindTemplate(const char *pName)
 
 void MFAnimation_FixUp(MFAnimationTemplate *pTemplate, bool load)
 {
-	int a;
-
 	if(load)
 	{
 		MFFixUp(pTemplate->pBones, pTemplate, 1);
 		MFFixUp(pTemplate->pAnimName, pTemplate, 1);
 	}
 
-	for(a=0; a<pTemplate->numBones; a++)
+	for(uint32 a=0; a<pTemplate->numBones; a++)
 	{
 		MFFixUp(pTemplate->pBones[a].pBoneName, pTemplate, load);
 		MFFixUp(pTemplate->pBones[a].pTime, pTemplate, load);
@@ -61,40 +61,43 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 	if(!pTemplate)
 	{
-		MFFile *hFile = MFFileSystem_Open(MFStr("%s.anm", pFilename), MFOF_Read|MFOF_Binary);
+		size_t size = 0;
+		pTemplate = (MFAnimationTemplate*)MFModelInternal_PendingAnimationTemplate(&size);
 
-		if(hFile)
+		if(!pTemplate)
 		{
-			int64 size = MFFile_GetSize(hFile);
+			MFFile *hFile = MFFileSystem_Open(MFStr("%s.anm", pFilename), MFOF_Read|MFOF_Binary);
 
-			if(size > 0)
+			if(hFile)
 			{
-				char *pTemplateData;
+				size = (size_t)MFFile_GetSize(hFile);
 
-				// allocate memory and load file
-				pTemplateData = (char*)MFHeap_Alloc((size_t)size + MFString_Length(pFilename) + 1);
-				MFFile_Read(hFile, pTemplateData, (size_t)size);
+				if(size > 0)
+				{
+					char *pTemplateData;
 
-				pTemplate = (MFAnimationTemplate*)pTemplateData;
+					// allocate memory and load file
+					pTemplateData = (char*)MFHeap_Alloc(size + MFString_Length(pFilename) + 1);
+					MFFile_Read(hFile, pTemplateData, size);
 
-				// check ID string
-				MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");
+					pTemplate = (MFAnimationTemplate*)pTemplateData;
 
-				pFilename = MFString_Copy(&pTemplateData[size], pFilename);
+					// check ID string
+					MFDebug_Assert(pTemplate->hash == MFMAKEFOURCC('A', 'N', 'M', '2'), "Incorrect MFAnimation version.");
+				}
 
-				MFAnimation_FixUp(pTemplate, true);
-
-				MFResource_AddResource(pTemplate, MFRT_AnimationTemplate, MFUtil_HashString(pFilename) ^ 0xA010A010, pFilename);
+				MFFile_Close(hFile);
 			}
-
-			MFFile_Close(hFile);
 		}
+
+		if(!pTemplate)
+			return NULL;
+
+		pFilename = MFString_Copy((char*)pTemplate + size, pFilename);
+
+		MFAnimation_FixUp(pTemplate, true);
+		MFResource_AddResource(pTemplate, MFRT_AnimationTemplate, MFUtil_HashString(pFilename) ^ 0xA010A010, pFilename);
 	}
-
-	if(!pTemplate)
-		return NULL;
-
-	++pTemplate->refCount;
 
 	// get the model bone chunk
 	MFModelDataChunk *pBoneChunk = MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
@@ -102,8 +105,8 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 
 	// create and init instance
 	MFAnimation *pAnimation;
-	size_t bytes = MFALIGN16(sizeof(MFAnimation)) + MFALIGN16(sizeof(MFMatrix) * pBoneChunk->count) + sizeof(int)*pBoneChunk->count + sizeof(MFAnimationCurrentFrame)*pBoneChunk->count;
-	pAnimation = (MFAnimation*)MFHeap_Alloc((uint32)bytes);
+	size_t bytes = MFALIGN16(sizeof(MFAnimation)) + sizeof(MFMatrix)*pBoneChunk->count + sizeof(int)*pBoneChunk->count + sizeof(MFAnimationCurrentFrame)*pBoneChunk->count;
+	pAnimation = (MFAnimation*)MFHeap_Alloc(bytes);
 	pAnimation->pModel = pModel;
 	pAnimation->pTemplate = pTemplate;
 
@@ -121,6 +124,11 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 		pAnimation->pMatrices[a] = MFMatrix::identity;
 	}
 
+	MFStateConstant_AnimationMatrices animMats;
+	animMats.pMatrices = pAnimation->pMatrices;
+	animMats.numMatrices = pAnimation->numBones;
+	MFStateBlock_SetAnimMatrices(pModel->pEntityState, animMats);
+
 	// build bone to animation stream mapping
 	pAnimation->pBoneMap = (int*)MFALIGN16(&pAnimation->pMatrices[pBoneChunk->count]);
 	for(int a=0; a<pBoneChunk->count; a++)
@@ -128,7 +136,8 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 		const char *pBoneName = MFModel_GetBoneName(pModel, a);
 
 		// find bone in animation
-		for(int b=0; b<pTemplate->numBones; b++)
+		pAnimation->pBoneMap[a] = -1;
+		for(uint32 b=0; b<pTemplate->numBones; b++)
 		{
 			if(!MFString_CaseCmp(pBoneName, pTemplate->pBones[b].pBoneName))
 			{
@@ -136,9 +145,6 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 				break;
 			}
 		}
-
-		if(a == pTemplate->numBones)
-			pAnimation->pBoneMap[a] = -1;
 	}
 
 	pAnimation->pCustomMatrices = NULL;
@@ -169,7 +175,7 @@ MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix
 	MFDebug_Assert(t >= pAnimation->pTemplate->startTime && t <= pAnimation->pTemplate->endTime, "Frame time outside animation range...");
 
 	// find the frame number for each bone
-	for(int a=0; a<pAnimation->numBones; a++)
+	for(uint32 a=0; a<pAnimation->numBones; a++)
 	{
 		int map = pAnimation->pBoneMap[a];
 
@@ -205,7 +211,7 @@ MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix
 	}
 
 	// calculate the matrix for each bone
-	for(int a=0; a<pAnimation->numBones; a++)
+	for(uint32 a=0; a<pAnimation->numBones; a++)
 	{
 		int map = pAnimation->pBoneMap[a];
 
@@ -224,11 +230,11 @@ MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix
 
 	// build the animation matrix for each bone...
 	// TODO: this could be much faster
-	for(int a=0; a<pAnimation->numBones; a++)
+	for(uint32 a=0; a<pAnimation->numBones; a++)
 	{
 		MFMatrix boneMat = MFMatrix::identity;
 
-		int b = a;
+		int b = (int)a;
 		do
 		{
 			boneMat.Multiply(gWorkingMats[b]);

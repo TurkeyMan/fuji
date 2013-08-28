@@ -197,9 +197,9 @@ public:
 	F3DKeyFrame();
 
 	MFMatrix key;
-	MFQuaternion rotation;
-	MFVector scale;
-	MFVector translation;
+//	MFQuaternion rotation;
+//	MFVector scale;
+//	MFVector translation;
 
 	float time;
 };
@@ -353,8 +353,8 @@ public:
 	int ReadMEMD2(const char *pFilename);
 
 	void WriteF3D(const char *pFilename);
-	void *CreateMDL(size_t *pSize, MFPlatform platform);
-	void *CreateANM(size_t *pSize, MFPlatform platform);
+	void *CreateMDL(size_t *pSize, MFPlatform platform, size_t extraBytes = 0);
+	void *CreateANM(size_t *pSize, MFPlatform platform, size_t extraBytes = 0);
 
 	void ProcessSkeletonData();
 	void ProcessCollisionData();

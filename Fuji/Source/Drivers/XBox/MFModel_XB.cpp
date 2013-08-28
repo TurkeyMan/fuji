@@ -12,10 +12,6 @@ void MFModel_DeinitModulePlatformSpecific()
 {
 }
 
-MF_API void MFModel_Draw(MFModel *pModel)
-{
-}
-
 void MFModel_CreateMeshChunk(MFMeshChunk *pMeshChunk)
 {
 }

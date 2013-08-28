@@ -23,7 +23,8 @@ extern (C) MFIntModel* MFIntModel_CreateFromFileInMemory(const(void*) pMemory, s
 
 extern (C) void MFIntModel_Optimise(MFIntModel* pModel);
 
-extern (C) void MFIntModel_CreateRuntimeData(MFIntModel* pModel, void** ppOutput, size_t* pSize, MFPlatform platform);
+extern (C) void MFIntModel_CreateRuntimeData(MFIntModel* pModel, void** ppOutput, size_t* pSize, MFPlatform platform, size_t extraBytes = 0);
+extern (C) void MFIntModel_CreateAnimationData(MFIntModel *pModel, void** ppOutput, size_t* pSize, MFPlatform platform, size_t extraBytes = 0);
 
 extern (C) void MFIntModel_Destroy(MFIntModel* pModel);
 

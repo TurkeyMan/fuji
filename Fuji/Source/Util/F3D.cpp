@@ -952,12 +952,11 @@ void FixUpMeshChunk_PSP(MFMeshChunk *pMeshChunks, int count, void *pBase, void *
 	}
 }
 
-void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform)
+void *F3DFile::CreateMDL(size_t *pSize, MFPlatform platform, size_t extraBytes)
 {
 	MFModelTemplate *pModelData;
 
-	MFStringCache *pStringCache;
-	pStringCache = MFStringCache_Create(1024*1024);
+	MFStringCache *pStringCache = MFStringCache_Create(1024*1024);
 
 	char *pFile;
 	char *pOffset;
@@ -1121,11 +1120,11 @@ found:
 				pBoneRemappingTable[a] = bc;
 
 				pBoneChunk[bc].pBoneName = MFStringCache_Add(pStringCache, bone.name.CStr());
-				pBoneChunk[bc].pParentName = MFStringCache_Add(pStringCache, bone.parentName.CStr());
+				pBoneChunk[bc].pParentName = bone.parent > -1 ? MFStringCache_Add(pStringCache, bone.parentName.CStr()) : NULL;
 				pBoneChunk[bc].boneMatrix = bone.boneMatrix;
 				pBoneChunk[bc].worldMatrix = bone.worldMatrix;
 				pBoneChunk[bc].invWorldMatrix.Inverse(bone.worldMatrix);
-				pBoneChunk[bc].parent = (int16)pBoneRemappingTable[bone.parent];
+				pBoneChunk[bc].parent = bone.parent > -1 ? (int16)pBoneRemappingTable[bone.parent] : -1;
 
 				pBoneChunk[bc].numChildren = (int16)bone.children.size();
 				pBoneChunk[bc].pChildren = (int16*)pOffset;
@@ -1312,18 +1311,19 @@ found:
 	MFFixUp(pModelData->pDataChunks, pModelData, 0);
 
 	size_t fileSize = pOffset - pFile;
-	void *pMDL = MFHeap_Alloc(fileSize);
+	void *pMDL = MFHeap_Alloc(fileSize + extraBytes);
 	MFCopyMemory(pMDL, pFile, fileSize);
 
 	// we're done!!!! clean up..
 	MFHeap_Free(pFile);
+	MFStringCache_Destroy(pStringCache);
 
 	if(pSize)
 		*pSize = (uint32)fileSize;
 	return pMDL;
 }
 
-void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
+void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform, size_t extraBytes)
 {
 	if(!animationChunk.anims.size())
 	{
@@ -1332,10 +1332,8 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	}
 
 	MFAnimationTemplate *pAnimData;
-	int a, b;
 
-	MFStringCache *pStringCache;
-	pStringCache = MFStringCache_Create(1024*1024);
+	MFStringCache *pStringCache = MFStringCache_Create(1024*1024);
 
 	char *pFile;
 	char *pOffset;
@@ -1363,7 +1361,7 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	pAnimData->pBones = (MFAnimationBone*)pOffset;
 	pOffset += MFALIGN16(sizeof(MFAnimationBone)*pAnimData->numBones);
 
-	for(a=0; a<pAnimData->numBones; a++)
+	for(uint32 a=0; a<pAnimData->numBones; a++)
 	{
 		MFAnimationBone &bone = pAnimData->pBones[a];
 
@@ -1371,7 +1369,7 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 		bone.numFrames = (int)animationChunk.anims[a].keyframes.size();
 
 		bone.pTime = (float*)pOffset;
-		pOffset += MFALIGN16(sizeof(MFAnimationFrame)*bone.numFrames);
+		pOffset += MFALIGN16(sizeof(float)*bone.numFrames);
 
 		bone.pFrames = (MFAnimationFrame*)pOffset;
 		pOffset += MFALIGN16(sizeof(MFAnimationFrame)*bone.numFrames);
@@ -1380,7 +1378,7 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 		maxTime = MFMax(maxTime, animationChunk.anims[a].maxTime);
 
 		// fill kay array
-		for(b=0; b<pAnimData->pBones[a].numFrames; b++)
+		for(uint32 b=0; b<pAnimData->pBones[a].numFrames; b++)
 		{
 			F3DKeyFrame &key = animationChunk.anims[a].keyframes[b];
 
@@ -1400,7 +1398,7 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	pOffset += MFStringCache_GetSize(pStringCache); // pOffset now equals the file size..
 
 	// un-fix-up all the pointers...
-	for(int a=0; a<pAnimData->numBones; a++)
+	for(uint32 a=0; a<pAnimData->numBones; a++)
 	{
 		MFFixUp(pAnimData->pBones[a].pBoneName, (void*)stringBase, 0);
 		MFFixUp(pAnimData->pBones[a].pTime, pAnimData, 0);
@@ -1411,11 +1409,12 @@ void *F3DFile::CreateANM(size_t *pSize, MFPlatform platform)
 	MFFixUp(pAnimData->pBones, pAnimData, 0);
 
 	uintp fileSize = (uintp)pOffset - (uintp)pAnimData;
-	void *pANM = MFHeap_Alloc(fileSize);
+	void *pANM = MFHeap_Alloc(fileSize + extraBytes);
 	MFCopyMemory(pANM, pFile, fileSize);
 
 	// we're done!!!! clean up..
 	MFHeap_Free(pFile);
+	MFStringCache_Destroy(pStringCache);
 
 	if(pSize)
 		*pSize = (uint32)fileSize;
@@ -1762,17 +1761,17 @@ void AddTriToBatch(F3DBatch &batch, const F3DMaterialSubobject &matSub, const F3
 		int b1 = matSub.vertices[v1].bone[a];
 		int b2 = matSub.vertices[v2].bone[a];
 
-		if(batch.boneMapping[b0] == -1)
+		if(b0 > -1 && batch.boneMapping[b0] == -1)
 		{
 			batch.boneMapping[b0] = (int)batch.bones.size();
 			batch.bones.push(b0);
 		}
-		if(batch.boneMapping[b1] == -1)
+		if(b1 > -1 && batch.boneMapping[b1] == -1)
 		{
 			batch.boneMapping[b1] = (int)batch.bones.size();
 			batch.bones.push(b1);
 		}
-		if(batch.boneMapping[b2] == -1)
+		if(b2 > -1 && batch.boneMapping[b2] == -1)
 		{
 			batch.boneMapping[b2] = (int)batch.bones.size();
 			batch.bones.push(b2);
@@ -2046,7 +2045,7 @@ int F3DSubObject::IsSubobjectAnimation() const
 int F3DSkeletonChunk::FindBone(const char *pName) const
 {
 	if(!pName)
-		return 0;
+		return -1;
 
 	for(int a=0; a<(int)bones.size(); a++)
 	{
@@ -2127,9 +2126,9 @@ F3DKeyFrame::F3DKeyFrame()
 {
 	time = 0.0f;
 	key = MFMatrix::identity;
-	rotation = MFQuaternion::identity;
-	scale = MFVector::one;
-	translation = MFVector::identity;
+//	rotation = MFQuaternion::identity;
+//	scale = MFVector::one;
+//	translation = MFVector::identity;
 }
 
 F3DVertex::F3DVertex()

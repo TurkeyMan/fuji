@@ -17,7 +17,7 @@ struct MFBoundingVolume;
 * Creates a model from the filesystem.
 * @param pFilename Filename of model to load.
 * @return Returns a new instance of the specified model.
-* @see MFModel_Destroy(), MFModel_Draw()
+* @see MFModel_Destroy()
 */
 extern (C) MFModel* MFModel_Create(const(char*) pFilename);
 
@@ -27,7 +27,7 @@ extern (C) MFModel* MFModel_Create(const(char*) pFilename);
 * @param pFilename Filename of model to load.
 * @param pAnimationFilename Filename of an animation to load and bind to the model instance.
 * @return Returns a new instance of the specified model with animation already loaded and bound.
-* @see MFModel_Create(), MFModel_BindAnimation()
+* @see MFModel_Create()
 */
 extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(char*) pAnimationFilename);
 
@@ -36,18 +36,9 @@ extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(ch
 * Destroys a model instance.
 * @param pModel Model instance to be destroyed.
 * @return Returns the new reference count of the model. If the returned reference count is 0, the model is destroyed.
-* @see MFModel_Create(), MFModel_Draw()
-*/
-extern (C) int MFModel_Destroy(MFModel* pModel);
-
-/**
-* Draw a model.
-* Renders a model using the current scene configuration.
-* @param pModel Model instance to render.
-* @return None.
 * @see MFModel_Create()
 */
-extern (C) void MFModel_Draw(MFModel* pModel);
+extern (C) int MFModel_Destroy(MFModel* pModel);
 
 /**
 * Set the model world matrix.
@@ -55,19 +46,8 @@ extern (C) void MFModel_Draw(MFModel* pModel);
 * @param pModel Model instance.
 * @param worldMatrix World matrix to assign to the model.
 * @return None.
-* @see MFModel_Draw()
 */
 extern (C) void MFModel_SetWorldMatrix(MFModel* pModel, ref const(MFMatrix) worldMatrix);
-
-/**
-* Set the model colour.
-* Sets the models colour.
-* @param pModel Model instance.
-* @param colour Colour to assign to the model instance.
-* @return None.
-* @see MFModel_Create()
-*/
-extern (C) void MFModel_SetColour(MFModel* pModel, ref const(MFVector) colour);
 
 /**
 * Get a models name.

@@ -4,6 +4,176 @@
 #include "MFHeap.h"
 #include "MFModule.h"
 
+static const char * const gpRenderStateNames_Matrix[] =
+{
+	"World",
+	"Camera",
+	"Projection",
+	"ShadowMap",
+	"Fuji0",
+	"Fuji1",
+	"User0",
+	"User1",
+	"User2",
+	"User3",
+	"UV0",
+	"UV1",
+	"UV2",
+	"UV3",
+	"View",
+	"WorldView",
+	"ViewProjection",
+	"WorldViewProjection",
+	"InverseWorld",
+	"InverseViewProjection"
+};
+static const char * const gpRenderStateNames_Vector[] =
+{
+	"Time",
+	"FogColour",
+	"FogParams1",
+	"FogParams2",
+	"RenderState",
+	"MaterialDiffuseColour",
+	"DiffuseColour",
+	"AmbientColour",
+	"Fuji0", "Fuji1", "Fuji2", "Fuji3", "Fuji4", "Fuji5", "Fuji6",
+	"LightCounts",
+	"User0", "User1", "User2", "User3", "User4", "User5", "User6", "User7",
+	"User8", "User9", "User10","User11", "User12", "User13", "User14", "User15"
+};
+static const char * const gpRenderStateNames_Texture[] =
+{
+	"Diffuse",
+	"NormalMap",
+	"SpecularMap",
+	"DetailMap",
+	"OpacityMap",
+	"EnvironmentMap",
+	"SpecularPowerMap",
+	"EmissiveMap",
+	"LightMap",
+	"ShadowBuffer",
+	"Projector",
+	"User0",
+	"User1",
+	"User2",
+	"User3",
+	"User4",
+	"Vertex0",
+	"Vertex1",
+	"Vertex2"
+};
+static const char * const gpRenderStateNames_Bool[] =
+{
+	"Animated",
+	"ZPrime",
+	"ShadowGeneration",
+	"ShadowReceiving",
+	"Opaque",
+	"AlphaTest",
+	"Fuji0",
+	"Fuji1",
+	"Fuji2",
+	"User0",
+	"User1",
+	"User2",
+	"User3",
+	"DiffuseSet",
+	"NormalMapSet",
+	"SpecularMapSet",
+	"DetailMapSet",
+	"OpacityMapSet",
+	"EnvironmentMapSet",
+	"SpecularPowerMapSet",
+	"EmissiveMapSet",
+	"LightMapSet",
+	"ShadowBufferSet",
+	"ProjectorSet",
+	"UserTex0Set",
+	"UserTex1Set",
+	"UserTex2Set",
+	"UserTex3Set",
+	"UserTex4Set",
+	"VertexTex0Set",
+	"VertexTex1Set",
+	"VertexTex2Set"
+};
+static const char * const gpRenderStateNames_RenderState[] =
+{
+	"BlendState",
+	"DepthStencilState",
+	"RasteriserState",
+	"DiffuseSamplerState",
+	"NormalMapSamplerState",
+	"SpecularMapSamplerState",
+	"DetailMapSamplerState",
+	"OpacityMapSamplerState",
+	"EnvironmentMapSamplerState",
+	"SpecularPowerMapSamplerState",
+	"EmissiveMapSamplerState",
+	"LightMapSamplerState",
+	"ShadowBufferSamplerState",
+	"ProjectorSamplerState",
+	"UserTex0SamplerState",
+	"UserTex1SamplerState",
+	"UserTex2SamplerState",
+	"UserTex3SamplerState",
+	"UserTex4SamplerState",
+	"VertexTex0SamplerState",
+	"VertexTex1SamplerState",
+	"VertexTex2SamplerState",
+	"VertexDeclaration",
+	"VertexBuffer0",
+	"VertexBuffer1",
+	"VertexBuffer2",
+	"VertexBuffer3",
+	"VertexBuffer4",
+	"VertexBuffer5",
+	"VertexBuffer6",
+	"VertexBuffer7",
+	"IndexBuffer"
+};
+static const char * const gpRenderStateNames_Misc[] =
+{
+	"AnimationMatrices",
+	"Light0",
+	"Light1",
+	"Light2",
+	"Light3",
+	"Light4",
+	"Light5",
+	"Light6",
+	"Light7",
+	"Light8",
+	"Light9",
+	"Light10",
+	"Light11",
+	"Light12",
+	"Light13",
+	"Light14",
+	"Light15",
+	"Light16",
+	"GPUEvent"
+};
+
+static const char * const *gppRenderStateNames[MFSB_CT_TypeCount] =
+{
+	gpRenderStateNames_Bool,
+	gpRenderStateNames_Vector,
+	gpRenderStateNames_Matrix,
+	gpRenderStateNames_Texture,
+	gpRenderStateNames_RenderState,
+	gpRenderStateNames_Misc,
+	NULL,
+	NULL
+};
+
+MF_API const char* MFStateBlock_GetStateName(MFStateBlockConstantType ct, int constant)
+{
+	return gppRenderStateNames[ct][constant];
+}
+
 
 static void MFBlendState_Destroy(MFResource *pRes)
 {
@@ -230,50 +400,106 @@ MF_API size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock)
 	return pStateBlock->GetFree();
 }
 
-static MFStateBlock::MFStateBlockStateChange* FindState(MFStateBlock *pStateBlock, uint32 type, uint32 constant, bool bFindEmpty = false, int *pLastWord = NULL)
+MFStateBlock::MFStateBlockStateChange* MFStateBlock::FindState(uint32 type, uint32 constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pStates = pStateBlock->GetStateChanges();
-	MFStateBlock::MFStateBlockStateChange *pVacant = NULL;
-
-	for(int a = 0; a < pStateBlock->numStateChanges; ++a)
+	MFStateBlock::MFStateBlockStateChange *pStates = GetStateChanges();
+	for(int a = 0; a < numStateChanges; ++a)
 	{
-		if(pStates[a].stateSet != 0 && pStates[a].constantType == type && pStates[a].constant == constant)
+		if(pStates[a].constant == constant && pStates[a].constantType == type && pStates[a].stateSet != 0)
 			return &pStates[a];
-		if(bFindEmpty)
-		{
-			if(!pVacant && pStates[a].stateSet == 0 && pStates[a].constantType == type)
-				pVacant = &pStates[a];
-			if(pLastWord && pStates[a].constantSize == MFStateBlock::MFSB_CS_Word)
-				*pLastWord = pStates[a].offset;
-		}
 	}
-
-	return pVacant;
+	return NULL;
 }
 
-static MFStateBlock::MFStateBlockStateChange* AllocState(MFStateBlock *pStateBlock, int numVectors)
+MFStateBlock::MFStateBlockStateChange* MFStateBlock::AllocState(uint32 type, uint32 constant, size_t bytes)
 {
-	MFStateBlock::MFStateBlockStateChange *pStates = pStateBlock->GetStateChanges();
+	bytes = MFALIGN(bytes, 4);
+	bool bAlign16 = (bytes & 0xC) == 0;
 
-	bool bGrowStateList = (pStateBlock->numStateChanges & 3) == 0;
+	MFStateBlock::MFStateBlockStateChange *pStates = GetStateChanges();
 
-	size_t memNeeded = numVectors*16 + (bGrowStateList ? 16 : 0);
-	if(pStateBlock->GetFree() < memNeeded)
+	MFStateBlock::MFStateBlockStateChange *pState = NULL;
+	MFStateBlock::MFStateBlockStateChange *pLastSmall = NULL;
+	size_t bestSize = 0x10000;
+
+	// linear scan of the state list; clear existing state, find space to overwrite
+	for(int a = 0; a < numStateChanges; ++a)
+	{
+		// if the state already exists, we'll invalidate it
+		// if the state is the same size, we'll overwrite it with new data in the next paragraph
+		if(pStates[a].constant == constant && pStates[a].constantType == type)
+			pStates[a].stateSet = 0;
+
+		if(pStates[a].stateSet == 0)
+		{
+			size_t stateSize = pStates[a].StateSize();
+			if(stateSize >= bytes && stateSize < bestSize)
+			{
+				pState = pStates + a;
+				bestSize = stateSize;
+
+				// NOTE: if bestSize == bytes, we could break here...
+				// except we need to invalidate any existing instance of this state, so we continue
+			}
+		}
+
+		if(!bAlign16 && pStates[a].vectors == 0)
+			pLastSmall = pStates + a;
+	}
+
+	if(!pState)
+	{
+		// if we didn't find an vacant slot
+		if(pLastSmall && bytes <= (4 - (pLastSmall->offset & 3) - pLastSmall->size)*4)
+		{
+			pState = AllocStateChange(0);
+			pState->offset = pLastSmall->offset + pLastSmall->size;
+			pState->vectors = 0;
+			pState->size = bytes / 4;
+		}
+		else
+		{
+			pState = AllocStateChange(bytes);
+		}
+	}
+	else if(bestSize > bytes)
+	{
+		// if we don't entirely fill the state we're overwriting,
+		// write a new state to the end of it's memory, and shrink the existing one
+
+		// TODO: We'll just waste the space for the time being (by doing nothing here)...
+	}
+
+	pState->constantType = type;
+	pState->constant = constant;
+	pState->stateSet = 1;
+
+	return pState;
+}
+
+MFStateBlock::MFStateBlockStateChange* MFStateBlock::AllocStateChange(size_t stateBytes)
+{
+	bool bAlign16 = (stateBytes & 0xC) == 0;
+	bool bGrowStateList = (numStateChanges & 3) == 0;
+
+	size_t alignedBytes = MFALIGN16(stateBytes);
+	size_t memNeeded = (bGrowStateList ? 16 : 0) + alignedBytes;
+	if(GetFree() < memNeeded)
 		return NULL;
 
 	if(bGrowStateList)
 	{
 		// TODO: use SIMD regs to do this...
 #if defined(MF_64BIT)
-		uint64 *pData = (uint64*)pStateBlock->GetStateData();
-		for(int a = pStateBlock->used; a > 0; --a)
+		uint64 *pData = (uint64*)GetStateData();
+		for(int a = used; a > 0; --a)
 		{
 			pData[a*2    ] = pData[(a-1)*2    ];
 			pData[a*2 + 1] = pData[(a-1)*2 + 1];
 		}
 #else
-		uint32 *pData = (uint32*)pStateBlock->GetStateData();
-		for(int a = pStateBlock->used; a > 0; --a)
+		uint32 *pData = (uint32*)GetStateData();
+		for(int a = used; a > 0; --a)
 		{
 			pData[a*4    ] = pData[(a-1)*4    ];
 			pData[a*4 + 1] = pData[(a-1)*4 + 1];
@@ -283,11 +509,25 @@ static MFStateBlock::MFStateBlockStateChange* AllocState(MFStateBlock *pStateBlo
 #endif
 	}
 
-	MFStateBlock::MFStateBlockStateChange *pState = &pStates[pStateBlock->numStateChanges++];
-	pState->offset = pStateBlock->used * 4;
-	pStateBlock->used += (uint16)numVectors;
+	MFStateBlockStateChange *pState = &GetStateChanges()[numStateChanges++];
+	if(stateBytes)
+	{
+		pState->offset = used*4;
+		if(bAlign16)
+		{
+			pState->vectors = 1;
+			pState->size = stateBytes / 16;
+		}
+		else
+		{
+			pState->vectors = 0;
+			pState->size = stateBytes / 4;
+		}
+		used += (uint16)(alignedBytes / 16);
+	}
 	return pState;
 }
+
 
 MF_API bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state)
 {
@@ -299,21 +539,10 @@ MF_API bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool
 
 MF_API bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, const MFVector &state)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Vector, constant, true);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->AllocState(MFSB_CT_Vector, constant, sizeof(MFVector));
+	MFDebug_Assert(pSC, "Stateblock is full!");
 	if(!pSC)
-	{
-		pSC = AllocState(pStateBlock, 1);
-
-		MFDebug_Assert(pSC, "Stateblock is full!");
-		if(!pSC)
-			return false;
-
-		pSC->constantType = MFSB_CT_Vector;
-		pSC->constantSize = MFStateBlock::MFSB_CS_Vector;
-	}
-
-	pSC->constant = constant;
-	pSC->stateSet = 1;
+		return false;
 
 	MFVector *pVector = (MFVector*)pStateBlock->GetStateData(pSC->offset * 4);
 	*pVector = state;
@@ -323,18 +552,10 @@ MF_API bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Ve
 
 MF_API bool MFStateBlock_SetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, const MFMatrix &state)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Matrix, constant, true);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->AllocState(MFSB_CT_Matrix, constant, sizeof(MFMatrix));
+	MFDebug_Assert(pSC, "Stateblock is full!");
 	if(!pSC)
-	{
-		pSC = AllocState(pStateBlock, 4);
-
-		MFDebug_Assert(pSC, "Stateblock is full!");
-		if(!pSC)
-			return false;
-
-		pSC->constantType = MFSB_CT_Matrix;
-		pSC->constantSize = MFStateBlock::MFSB_CS_Matrix;
-	}
+		return false;
 
 	pSC->constant = constant;
 	pSC->stateSet = 1;
@@ -347,26 +568,10 @@ MF_API bool MFStateBlock_SetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Ma
 
 MF_API bool MFStateBlock_SetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture *pTexture)
 {
-	int lastWord = -1;
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Texture, constant, true, &lastWord);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->AllocState(MFSB_CT_Texture, constant, sizeof(MFTexture*));
+	MFDebug_Assert(pSC, "Stateblock is full!");
 	if(!pSC)
-	{
-		bool bCanSqueeze = lastWord >= 0 && (lastWord & 3) != 3;
-
-		pSC = AllocState(pStateBlock, bCanSqueeze ? 0 : 1);
-
-		MFDebug_Assert(pSC, "Stateblock is full!");
-		if(!pSC)
-			return false;
-
-		if(bCanSqueeze)
-			pSC->offset = lastWord + 1;
-	}
-
-	pSC->constantType = MFSB_CT_Texture;
-	pSC->constantSize = MFStateBlock::MFSB_CS_Word;
-	pSC->constant = constant;
-	pSC->stateSet = 1;
+		return false;
 
 	MFTexture **ppTex = (MFTexture**)pStateBlock->GetStateData(pSC->offset * 4);
 	*ppTex = pTexture;
@@ -378,26 +583,10 @@ MF_API bool MFStateBlock_SetTexture(MFStateBlock *pStateBlock, MFStateConstant_T
 
 MF_API bool MFStateBlock_SetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void *pState)
 {
-	int lastWord = -1;
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_RenderState, renderState, true, &lastWord);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->AllocState(MFSB_CT_RenderState, renderState, sizeof(void*));
+	MFDebug_Assert(pSC, "Stateblock is full!");
 	if(!pSC)
-	{
-		bool bCanSqueeze = lastWord >= 0 && (lastWord & 3) != 3;
-
-		pSC = AllocState(pStateBlock, bCanSqueeze ? 0 : 1);
-
-		MFDebug_Assert(pSC, "Stateblock is full!");
-		if(!pSC)
-			return false;
-
-		if(bCanSqueeze)
-			pSC->offset = lastWord + 1;
-	}
-
-	pSC->constantType = MFSB_CT_RenderState;
-	pSC->constantSize = MFStateBlock::MFSB_CS_Word;
-	pSC->constant = renderState;
-	pSC->stateSet = 1;
+		return false;
 
 	void **ppState = (void**)pStateBlock->GetStateData(pSC->offset * 4);
 	*ppState = pState;
@@ -405,13 +594,17 @@ MF_API bool MFStateBlock_SetRenderState(MFStateBlock *pStateBlock, MFStateConsta
 	return true;
 }
 
-MF_API bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, const void *pStateData, int dataSize)
+MF_API bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, const void *pStateData, size_t dataSize)
 {
-	MFDebug_Assert(false, "TODO!");
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->AllocState(MFSB_CT_Misc, miscState, dataSize);
+	MFDebug_Assert(pSC, "Stateblock is full!");
+	if(!pSC)
+		return false;
+
+	MFCopyMemory(pStateBlock->GetStateData(pSC->offset * 4), pStateData, dataSize);
+
 	return false;
 }
-
-//MF_API void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MKLight *pLight)
 
 MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState)
 {
@@ -424,7 +617,7 @@ MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool
 
 MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Vector, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Vector, constant);
 	if(!pSC)
 		return false;
 	if(pState)
@@ -434,7 +627,7 @@ MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Ve
 
 MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Matrix, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Matrix, constant);
 	if(!pSC)
 		return false;
 	if(pState)
@@ -447,7 +640,7 @@ MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_T
 	if(!ppTexture)
 		return MFStateBlock_GetBool(pStateBlock, MFSCB_TexSet(constant), NULL);
 
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Texture, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Texture, constant);
 	if(!pSC)
 		return false;
 	*ppTexture = *(MFTexture**)pStateBlock->GetStateData(pSC->offset * 4);
@@ -456,7 +649,7 @@ MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_T
 
 MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_RenderState, renderState);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_RenderState, renderState);
 	if(!pSC)
 		return false;
 	if(ppState)
@@ -466,8 +659,12 @@ MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConsta
 
 MF_API bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData)
 {
-	MFDebug_Assert(false, "TODO!");
-	return false;
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Misc, miscState);
+	if(!pSC)
+		return false;
+	if(ppStateData)
+		*ppStateData = *(void**)pStateBlock->GetStateData(pSC->offset * 4);
+	return true;
 }
 
 //MF_API void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MKLight **ppLight)
@@ -481,21 +678,21 @@ MF_API void MFStateBlock_ClearBool(MFStateBlock *pStateBlock, MFStateConstant_Bo
 
 MF_API void MFStateBlock_ClearVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Vector, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Vector, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Matrix, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Matrix, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Texture, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Texture, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 
@@ -504,14 +701,14 @@ MF_API void MFStateBlock_ClearTexture(MFStateBlock *pStateBlock, MFStateConstant
 
 MF_API void MFStateBlock_ClearRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_RenderState, renderState);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_RenderState, renderState);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = FindState(pStateBlock, MFSB_CT_Misc, miscState);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Misc, miscState);
 	if(pSC)
 		pSC->stateSet = 0;
 }

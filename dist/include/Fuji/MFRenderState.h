@@ -10,7 +10,7 @@
 #if !defined(_MFRENDERSTATE_H)
 #define _MFRENDERSTATE_H
 
-#include "MFVector.h"
+#include "MFMatrix.h"
 #include <float.h>
 
 struct MFTexture;
@@ -231,6 +231,7 @@ enum MFStateConstant_RenderState
 enum MFStateConstant_Miscellaneous
 {
 	MFSCMisc_AnimationMatrices,
+	MFSCMisc_MatrixBatch,
 	MFSCMisc_Light0,
 	MFSCMisc_Light1,
 	MFSCMisc_Light2,
@@ -258,6 +259,18 @@ enum MFStateConstant_Miscellaneous
 };
 
 #define MFSCMisc_Light(i) (MFStateConstant_Miscellaneous)(MFSCMisc_Light0 + i)
+
+struct MFStateConstant_AnimationMatrices
+{
+	MFMatrix *pMatrices;
+	size_t numMatrices;
+};
+
+struct MFStateConstant_MatrixBatch
+{
+	uint16 *pIndices;
+	uint32 numMatrices;
+};
 
 enum MFBlendOp
 {
@@ -595,13 +608,26 @@ MF_API size_t MFStateBlock_GetAllocatedBytes(MFStateBlock *pStateBlock);
 MF_API size_t MFStateBlock_GetUsedBytes(MFStateBlock *pStateBlock);
 MF_API size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
 
+MF_API const char* MFStateBlock_GetStateName(MFStateBlockConstantType ct, int constant);
+
 MF_API bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state);
 MF_API bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, const MFVector &state);
 MF_API bool MFStateBlock_SetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, const MFMatrix &state);
 MF_API bool MFStateBlock_SetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture *pTexture);
 MF_API bool MFStateBlock_SetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void *pState);
-MF_API bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, const void *pStateData, int dataSize);
-//MF_API void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MKLight *pLight);
+MF_API bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, const void *pStateData, size_t dataSize);
+
+inline bool MFStateBlock_SetAnimMatrices(MFStateBlock *pStateBlock, const MFStateConstant_AnimationMatrices &matrices)
+{
+	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_AnimationMatrices, &matrices, sizeof(matrices));
+}
+
+inline bool MFStateBlock_SetMatrixBatch(MFStateBlock *pStateBlock, const MFStateConstant_MatrixBatch &batch)
+{
+	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_MatrixBatch, &batch, sizeof(batch));
+}
+
+//MF_API void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MFLight *pLight);
 
 MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState);
 MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState);
@@ -609,7 +635,7 @@ MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Ma
 MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture);
 MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState);
 MF_API bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData);
-//MF_API void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MKLight **ppLight);
+//MF_API void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MFLight **ppLight);
 
 //MF_API void MFStateBlock_GetLightCounts(MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount);
 
