@@ -119,7 +119,7 @@ enum MFStateConstant_Texture
 	MFSCT_Max,
 
 	MFSCV_FujiTextureCount = 0,
-	MFSCV_UserTextureCount = MFSCT_Vertex0 - MFSCV_User0,
+	MFSCV_UserTextureCount = MFSCT_Vertex0 - MFSCT_User0,
 	MFSCV_VertexTextureCount = MFSCT_Max - MFSCT_Vertex0,
 
 	MFSCT_ForceInt = 0x7FFFFFFF

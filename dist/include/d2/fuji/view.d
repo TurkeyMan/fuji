@@ -2,6 +2,7 @@ module fuji.view;
 
 public import fuji.fuji;
 import fuji.matrix;
+import fuji.renderstate;
 
 /**
 * Push the current view state.
@@ -102,6 +103,9 @@ extern (C) bool MFView_IsOrtho();
 * @see MFView_GetCameraMatrix()
 */
 extern (C) void MFView_SetCameraMatrix(ref const(MFMatrix) cameraMatrix);
+
+
+extern (C) const MFStateBlock* MFView_GetViewState();
 
 /**
 * Gets the camera matrix.
