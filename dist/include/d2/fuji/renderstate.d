@@ -500,12 +500,12 @@ extern (C) bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateCons
 
 bool MFStateBlock_SetAnimMatrices(MFStateBlock *pStateBlock, ref const MFStateConstant_AnimationMatrices matrices)
 {
-	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_AnimationMatrices, &matrices, sizeof(matrices));
+	return MFStateBlock_SetMiscState(pStateBlock, MFStateConstant_Miscellaneous.AnimationMatrices, &matrices, matrices.sizeof);
 }
 
 bool MFStateBlock_SetMatrixBatch(MFStateBlock *pStateBlock, ref const MFStateConstant_MatrixBatch batch)
 {
-	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_MatrixBatch, &batch, sizeof(batch));
+	return MFStateBlock_SetMiscState(pStateBlock, MFStateConstant_Miscellaneous.MatrixBatch, &batch, batch.sizeof);
 }
 
 //extern (C) void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MFLight *pLight);

@@ -14,14 +14,14 @@ struct MFMatrix
 			0, 0, 0, 1
 
 		];
-		struct
-		{
-			MFVector x;
-			MFVector y;
-			MFVector z;
-			MFVector t;
-		}
-		MFVector[4] row;
+//		struct
+//		{
+//			MFVector x;
+//			MFVector y;
+//			MFVector z;
+//			MFVector t;
+//		}
+//		MFVector[4] row;
 	}
 /+
 	string toString() const /*pure nothrow*/
