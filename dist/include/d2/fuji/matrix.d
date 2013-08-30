@@ -6,22 +6,15 @@ struct MFMatrix
 {
 	union
 	{
-		float[16] m =
-		[
-			1, 0, 0, 0, 
-			0, 1, 0, 0, 
-			0, 0, 1, 0, 
-			0, 0, 0, 1
-
-		];
-//		struct
-//		{
-//			MFVector x;
-//			MFVector y;
-//			MFVector z;
-//			MFVector t;
-//		}
-//		MFVector[4] row;
+		struct
+		{
+			MFVector x = MFVector(1, 0, 0, 0);
+			MFVector y = MFVector(0, 1, 0, 0);
+			MFVector z = MFVector(0, 0, 1, 0);
+			MFVector t = MFVector(0, 0, 0, 1);
+		}
+		float[16] m;
+		MFVector[4] row = void;
 	}
 /+
 	string toString() const /*pure nothrow*/
