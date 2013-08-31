@@ -152,7 +152,24 @@ template IsMatrix( M )
 // *** HLSL style interface, future SIMD vector library will be more like this too ***
 
 // all the combinations of matrix multiplies... i think this could be written with a LOT less code.
-auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix!T0 || IsMatrix!T1 )
+auto mul( T0, T1 )( ref const(T0) m, const(T1) v ) pure nothrow if( IsMatrix!T0 && IsVector!T1 )
+{
+	static if( is( std.traits.Unqual!(typeof(m)) == MFMatrix ) && is( std.traits.Unqual!(typeof(v)) == MFVector ) )
+	{
+		MFVector r;
+		r.x = m.x.x*v.x + m.y.x*v.y + m.z.x*v.z + m.t.x*v.w;
+		r.y = m.x.y*v.x + m.y.y*v.y + m.z.y*v.z + m.t.y*v.w;
+		r.z = m.x.z*v.x + m.y.z*v.y + m.z.z*v.z + m.t.z*v.w;
+		r.w = m.x.w*v.x + m.y.w*v.y + m.z.w*v.z + m.t.w*v.w;
+		return r;
+	}
+	else
+	{
+		static assert(0);
+	}
+}
+
+auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix!T0 && IsMatrix!T1 )
 {
 	static if( is( std.traits.Unqual!(typeof(a)) == MFMatrix ) && is( std.traits.Unqual!(typeof(b)) == MFMatrix ) )
 	{
