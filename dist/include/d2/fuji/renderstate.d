@@ -1,5 +1,6 @@
 module fuji.renderstate;
 
+public import fuji.fuji;
 import fuji.texture;
 import fuji.matrix;
 import fuji.vertex;
@@ -44,9 +45,9 @@ enum MFStateConstant_Matrix : int
 	UVMatrixCount = View - UV0
 }
 
-//#define MFSCM_FujiMat(i) (MFStateConstant_Matrix)(MFSCM_FujiMat0 + i)
-//#define MFSCM_UserMat(i) (MFStateConstant_Matrix)(MFSCM_UserMat0 + i)
-//#define MFSCM_UV(i) (MFStateConstant_Matrix)(MFSCM_UV0 + i)
+template MFSCM_FujiMat(size_t i) { enum MFStateConstant_Matrix MFSCM_FujiMat = MFStateConstant_Matrix.FujiMat0 + i; }
+template MFSCM_UserMat(size_t i) { enum MFStateConstant_Matrix MFSCM_UserMat = MFStateConstant_Matrix.UserMat0 + i; }
+template MFSCM_UV(size_t i)      { enum MFStateConstant_Matrix MFSCM_UV = MFStateConstant_Matrix.UV0 + i; }
 
 enum MFStateConstant_Vector : int
 {

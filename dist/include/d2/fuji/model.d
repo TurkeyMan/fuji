@@ -1,16 +1,19 @@
 module fuji.model;
 
-public import fuji.matrix;
 public import fuji.fuji;
+import fuji.matrix;
+import fuji.animation;
+import fuji.render;
+import fuji.renderstate;
+import fuji.boundingvolume;
 
 /**
 * @struct MFModel
 * Represents a Fuji model.
 */
 struct MFModel;
+
 struct MFMeshChunk;
-struct MFAnimation;
-struct MFBoundingVolume;
 
 /**
 * Creates a model from the filesystem.
@@ -29,7 +32,7 @@ extern (C) MFModel* MFModel_Create(const(char*) pFilename);
 * @return Returns a new instance of the specified model with animation already loaded and bound.
 * @see MFModel_Create()
 */
-extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(char*) pAnimationFilename);
+extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(char*) pAnimationFilename = null);
 
 /**
 * Dstroy a model.
@@ -39,6 +42,8 @@ extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(ch
 * @see MFModel_Create()
 */
 extern (C) int MFModel_Destroy(MFModel* pModel);
+
+extern (C) void MFModel_SubmitGeometry(MFModel* pModel, MFRenderLayerSet* pLayerSet, MFStateBlock* pMaterialOverride, const(MFStateBlock)* pView);
 
 /**
 * Set the model world matrix.

@@ -1,11 +1,12 @@
 module fuji.matrix;
 
 public import fuji.vector;
+import std.math;
 
 struct MFMatrix
 {
-	union
-	{
+//	union
+//	{
 		struct
 		{
 			MFVector x = MFVector(1, 0, 0, 0);
@@ -13,9 +14,9 @@ struct MFMatrix
 			MFVector z = MFVector(0, 0, 1, 0);
 			MFVector t = MFVector(0, 0, 0, 1);
 		}
-		float[16] m;
-		MFVector[4] row = void;
-	}
+//		float[16] m;
+//		MFVector[4] row = void;
+//	}
 /+
 	string toString() const /*pure nothrow*/
 	{
@@ -26,20 +27,20 @@ struct MFMatrix
 	}
 +/
 
-	MFMatrix opBinary( string op )( float s ) const pure 			if( op == "*" )
+	MFMatrix opBinary( string op )( float s ) const pure			if( op == "*" )
 	{
 		MFMatrix m = this;
 		m.m[] *= s;
 		return m;
 	}
-	MFMatrix opBinaryRight( string op )( float s ) const pure 	if( op == "*" )
+	MFMatrix opBinaryRight( string op )( float s ) const pure		if( op == "*" )
 	{
 		MFMatrix m = this;
 		m.m[] *= s;
 		return m;
 	}
 
-	MFVector opBinary( string op )( MFVector v ) const pure nothrow		if( op == "*" )
+	MFVector opBinary( string op )( MFVector v ) const pure nothrow	if( op == "*" )
 	{
 		MFVector r = void;
 		r.x = v.x*m[0] + v.y*m[4] + v.z*m[8]  + v.w*m[12];
@@ -59,7 +60,84 @@ struct MFMatrix
 		this = mul( this, m );
 		return this;
 	}
+/*
+	MFMatrix SetTranslation(ref const MFVector trans)
+	{
+		m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = 0;
+		m[0] = m[5] = m[10] = m[15] = 1;
+		m[12] = trans.x;
+		m[13] = trans.y;
+		m[14] = trans.z;
+		return this;
+	}
 
+	MFMatrix SetRotationX(float angle)
+	{
+		m[0] = 1;
+		m[1] = 0;
+		m[2] = 0;
+		m[4] = 0;
+		m[5] = cos(angle);
+		m[6] = sin(angle);
+		m[8] = 0;
+		m[9] = -sin(angle);
+		m[10] = cos(angle);
+		m[12] = m[13] = m[14] = 0;
+		m[15] = 1;
+		return this;
+	}
+
+	MFMatrix SetRotationY(float angle)
+	{
+		m[0] = cos(angle);
+		m[1] = 0;
+		m[2] = -sin(angle);
+		m[4] = 0;
+		m[5] = 1;
+		m[6] = 0;
+		m[8] = sin(angle);
+		m[9] = 0;
+		m[10] = cos(angle);
+		m[12] = m[13] = m[14] = 0;
+		m[15] = 1;
+		return this;
+	}
+
+	MFMatrix SetRotationZ(float angle)
+	{
+		m[0] = cos(angle);
+		m[1] = sin(angle);
+		m[2] = 0;
+		m[4] = -sin(angle);
+		m[5] = cos(angle);
+		m[6] = 0;
+		m[8] = 0;
+		m[9] = 0;
+		m[10] = 1;
+		m[12] = m[13] = m[14] = 0;
+		m[15] = 1;
+		return this;
+	}
+
+	MFMatrix SetScale(ref const MFVector scale)
+	{
+		m[0] = scale.x;
+		m[1] = m[2] = m[3] = m[4] = 0.0f;
+		m[5] = scale.y;
+		m[6] = m[7] = m[8] = m[9] = 0.0f;
+		m[10] = scale.z;
+		m[11] = m[12] = m[13] = m[14] = 0.0f;
+		m[15] = 1.0f;
+		return this;
+	}
+
+	MFMatrix RotateY(float angle)
+	{
+		MFMatrix rot;
+		rot.SetRotationY(angle);
+		return this.mul(rot);
+	}
+*/
 	static immutable MFMatrix identity = MFMatrix.init;
 }
 
@@ -76,7 +154,7 @@ template IsMatrix( M )
 // all the combinations of matrix multiplies... i think this could be written with a LOT less code.
 auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix!T0 || IsMatrix!T1 )
 {
-	static if( is( a == MFMatrix ) && is( b == MFMatrix ) )
+	static if( is( std.traits.Unqual!(typeof(a)) == MFMatrix ) && is( std.traits.Unqual!(typeof(b)) == MFMatrix ) )
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0]  + a.m[1]*b.m[4]  + a.m[2]*b.m[8]   + a.m[3]*b.m[12];
@@ -248,4 +326,8 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		return m;
 	}
 +/
+	else
+	{
+		static assert(0);
+	}
 }

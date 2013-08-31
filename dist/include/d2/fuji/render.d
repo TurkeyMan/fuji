@@ -85,7 +85,7 @@ struct MFRenderLayer;
 
 struct MFRenderLayerDescription
 {
-	const char *pName;
+	const(char)* pName;
 };
 
 struct MFRenderLayerSet
