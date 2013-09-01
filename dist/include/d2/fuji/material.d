@@ -425,8 +425,8 @@ import std.string;
 
 final class Material
 {
-	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz); }
-	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz); }
+	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz()); }
+	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz()); }
 	static Material stockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
 
 	int release()														{ return MFMaterial_Release(cast(MFMaterial*)this); }
@@ -486,7 +486,7 @@ final class Material
 
 		Parameter find(string name)
         {
-            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz);
+            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz());
             if(index < offset || index >= count)
                 return Parameter(pMaterial, -1);
             return Parameter(pMaterial, index);

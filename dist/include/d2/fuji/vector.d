@@ -214,7 +214,7 @@ MFVector rsqrt(int width = 4)(MFVector v) pure nothrow
 
 float lengthSq(int width = 3)(MFVector v1, MFVector v2) pure nothrow
 {
-	return dot!width(v, v);
+	return dot!width(v1, v2);
 }
 
 float length(int width = 3)(MFVector v) pure nothrow
