@@ -212,7 +212,7 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 		gpScratchBufferList = pVB;
 	}
 	else
-		MFResource_AddResource(pVB, MFRT_VertexBuffer, (uint32)MFUtil_HashPointer(pVB), pName);
+		MFResource_AddResource(pVB, MFRT_VertexBuffer, (uint32)(MFUtil_HashPointer(pVB) & 0xFFFFFFFF), pName);
 
 	return pVB;
 }
@@ -329,7 +329,7 @@ MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexB
 		return NULL;
 	}
 
-	MFResource_AddResource(pIB, MFRT_IndexBuffer, (uint32)MFUtil_HashPointer(pIB), pName);
+	MFResource_AddResource(pIB, MFRT_IndexBuffer, (uint32)(MFUtil_HashPointer(pIB) & 0xFFFFFFFF), pName);
 
 	return pIB;
 }
