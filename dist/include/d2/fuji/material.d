@@ -198,7 +198,7 @@ extern (C) int MFMaterial_GetNumParameters(MFMaterial* pMaterial);
 * @param parameterIndex Parameter index.
 * @return Returns a string representing the parameter name.
 */
-extern (C) immutable(char)* MFMaterial_GetParameterName(MFMaterial* pMaterial, int parameterIndex);
+extern (C) immutable(char)* MFMaterial_GetParameterName(const(MFMaterial)* pMaterial, int parameterIndex);
 
 /**
 * Get the index of a parameter from a parameter name.
@@ -216,7 +216,7 @@ extern (C) int MFMaterial_GetParameterIndexFromName(MFMaterial* pMaterial, const
 * @param parameterIndex Parameter index.
 * @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
-extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(MFMaterial* pMaterial, int parameterIndex);
+extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(const(MFMaterial)* pMaterial, int parameterIndex);
 
 /**
 * Get parameter info by name.
@@ -421,11 +421,12 @@ extern (C) void MFMaterial_UnregisterMaterialType(const(char)* pName);
 
 
 import std.c.string;
+import std.string;
 
 final class Material
 {
-	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz); }
-	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz); }
+	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz()); }
+	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz()); }
 	static Material stockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
 
 	int release()														{ return MFMaterial_Release(cast(MFMaterial*)this); }
@@ -447,13 +448,13 @@ final class Material
 
 		@property string name() const
 		{
-			auto pName = MFMaterial_GetParameterName(pMaterial, index);
+			auto pName = MFMaterial_GetParameterName(pMaterial, cast(int)index);
 			return pName[0..strlen(pName)];
 		}
 
 		@property ref immutable(MFMaterialParameterInfo) info() const
 		{
-			return *MFMaterial_GetParameterInfo(pMaterial, index);
+			return *MFMaterial_GetParameterInfo(pMaterial, cast(int)index);
 		}
 
         // assignment operators
@@ -463,7 +464,7 @@ final class Material
 
 	private:
 		MFMaterial* pMaterial;
-		int index;
+		size_t index;
 	}
 
 	struct Parameters
@@ -477,7 +478,7 @@ final class Material
 		@property Parameter back() pure nothrow						{ return Parameter(pMaterial, count-1); }
 
 		Parameter opIndex(size_t index) pure nothrow				{ return Parameter(pMaterial, offset + cast(int)index); }
-		Parameter opIndex(string name) pure nothrow				    { return find(name); }
+		Parameter opIndex(string name)      				        { return find(name); }
 		Parameters opSlice(size_t x, size_t y) pure nothrow			{ return Parameters(pMaterial, offset + x, offset + y); }
 
 		void popFront() pure nothrow								{ ++offset; }
@@ -485,7 +486,7 @@ final class Material
 
 		Parameter find(string name)
         {
-            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz);
+            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz());
             if(index < offset || index >= count)
                 return Parameter(pMaterial, -1);
             return Parameter(pMaterial, index);
@@ -493,6 +494,6 @@ final class Material
 
 	private:
 		MFMaterial* pMaterial;
-		int offset, count;
+		size_t offset, count;
 	}
 }

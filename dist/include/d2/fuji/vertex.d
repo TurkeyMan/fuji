@@ -1,6 +1,7 @@
 module fuji.vertex;
 
 import fuji.vector;
+import fuji.renderstate;
 
 /**
  * @struct MFVertexDeclaration
@@ -66,7 +67,7 @@ enum MFVertexElementType
 	Weights
 }
 
-enum MFVertexPrimType
+enum MFPrimType
 {
 	Points,
 	LineList,
@@ -118,6 +119,6 @@ extern (C) void MFVertex_UnlockIndexBuffer(MFIndexBuffer* pIndexBuffer);
 extern (C) void MFVertex_SetVertexDeclaration(const(MFVertexDeclaration)* pVertexDeclaration);
 extern (C) void MFVertex_SetVertexStreamSource(int stream, const(MFVertexBuffer)* pVertexBuffer);
 extern (C) void MFVertex_SetIndexBuffer(const(MFIndexBuffer)* pIndexBuffer);
-extern (C) void MFVertex_RenderVertices(MFVertexPrimType primType, int firstVertex, int numVertices);
+extern (C) void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices);
 extern (C) void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 

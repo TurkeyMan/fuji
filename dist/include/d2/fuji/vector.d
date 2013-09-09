@@ -212,7 +212,7 @@ MFVector rsqrt(int width = 4)(MFVector v) pure nothrow
 	return r;
 }
 
-float lengthSq(int width = 3)(MFVector v1, MFVector v2) pure nothrow
+float lengthSq(int width = 3)(MFVector v) pure nothrow
 {
 	return dot!width(v, v);
 }
@@ -220,6 +220,11 @@ float lengthSq(int width = 3)(MFVector v1, MFVector v2) pure nothrow
 float length(int width = 3)(MFVector v) pure nothrow
 {
 	return std.math.sqrt(dot!width(v, v));
+}
+
+float distanceSq(int width = 3)(MFVector a, MFVector b) pure nothrow
+{
+	return lengthSq!width(b-a);
 }
 
 float distance(int width = 3)(MFVector a, MFVector b) pure nothrow
