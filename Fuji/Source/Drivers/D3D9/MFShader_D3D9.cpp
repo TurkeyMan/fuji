@@ -51,12 +51,26 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 	if(pFilename)
 	{
 		HRESULT hr = D3DXCompileShaderFromFile(MFFile_SystemPath(pFilename), pMacros ? macros : NULL, NULL, "main", "vs_2_0", flags, &pProgram, &pErrors, &pConstantTable);
+
+		if(pErrors)
+		{
+			MFDebug_Warn(1, (char*)pErrors->GetBufferPointer());
+			pErrors->Release();
+		}
+
 		if(hr != D3D_OK)
 			return false;
 	}
 	else if(pSource)
 	{
 		HRESULT hr = D3DXCompileShader(pSource, MFString_Length(pSource), pMacros ? macros : NULL, NULL, "main", "vs_2_0", flags, &pProgram, &pErrors, &pConstantTable);
+
+		if(pErrors)
+		{
+			MFDebug_Warn(1, (char*)pErrors->GetBufferPointer());
+			pErrors->Release();
+		}
+
 		if(hr != D3D_OK)
 			return false;
 	}
@@ -100,10 +114,87 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 		}
 	}
 
-	if(pErrors)
-		pErrors->Release();
 	if(pConstantTable)
+	{
+		D3DXCONSTANTTABLE_DESC desc;
+		pConstantTable->GetDesc(&desc);
+
+		MFShaderInput inputs[256];
+
+		size_t nameBytes = 0;
+		for(UINT a=0; a<desc.Constants; ++a)
+		{
+			D3DXCONSTANT_DESC constant[4];
+			UINT count = 4;
+
+			D3DXHANDLE hConstant = pConstantTable->GetConstant(NULL, a);
+			pConstantTable->GetConstantDesc(hConstant, constant, &count);
+			MFDebug_Assert(count == 1, "??");
+
+			if(count)
+			{
+				inputs[a].pName = constant[0].Name;
+				inputs[a].type = MFShader_IT_Unknown;
+				inputs[a].constantRegister = constant[0].RegisterIndex;
+				inputs[a].numRegisters = constant[0].RegisterCount;
+
+				inputs[a].numRows = 1;
+				inputs[a].columnMajor = 0;
+				inputs[a].numElements = constant[0].Elements;
+
+				switch(constant[0].Class)
+				{
+					case D3DXPC_SCALAR:
+						switch(constant[0].Type)
+						{
+							case D3DXPT_FLOAT:
+								inputs[a].type = MFShader_IT_Float;
+								break;
+							case D3DXPT_INT:
+								inputs[a].type = MFShader_IT_Int;
+								break;
+							case D3DXPT_BOOL:
+								inputs[a].type = MFShader_IT_Bool;
+								break;
+							default:
+								MFDebug_Assert(false, "??");
+						}
+						break;
+					case D3DXPC_VECTOR:
+						MFDebug_Assert(constant[0].Type == D3DXPT_FLOAT, "!!");
+						inputs[a].type = MFShader_IT_Vector;
+						break;
+					case D3DXPC_MATRIX_COLUMNS:
+						inputs[a].columnMajor = 1;
+					case D3DXPC_MATRIX_ROWS:
+						MFDebug_Assert(constant[0].Type == D3DXPT_FLOAT, "!!");
+						inputs[a].type = MFShader_IT_Matrix;
+						inputs[a].numRows = constant[0].Rows;
+						break;
+					case D3DXPC_OBJECT:
+					case D3DXPC_STRUCT:
+						MFDebug_Assert(false, "??");
+						break;
+				}
+
+				nameBytes += MFString_Length(constant[0].Name) + 1;
+			}
+		}
+
+		pShader->pInputs = (MFShaderInput*)MFHeap_Alloc(desc.Constants*sizeof(MFShaderInput) + nameBytes);
+		pShader->numInputs = desc.Constants;
+
+		MFCopyMemory(pShader->pInputs, inputs, desc.Constants*sizeof(MFShaderInput));
+
+		char *pName = (char*)(pShader->pInputs + desc.Constants);
+		for(UINT a=0; a<desc.Constants; ++a)
+		{
+			pShader->pInputs[a].pName = MFString_Copy(pName, pShader->pInputs[a].pName);
+			pName += MFString_Length(pName) + 1;
+		}
+
 		pConstantTable->Release();
+	}
 
 	return true;
 }

@@ -30,7 +30,8 @@ struct MFShader : MFResource
 	void (*pExecute)(void *pWorkload);
 
 	// inputs
-	//...
+	MFShaderInput *pInputs;
+	int numInputs;
 
 	void *pPlatformData;
 };

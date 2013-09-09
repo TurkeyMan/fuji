@@ -23,7 +23,6 @@
 
 
 extern IDirect3DDevice9 *pd3dDevice;
-extern D3DCAPS9 gD3D9DeviceCaps;
 
 MFShader *pVS_s = NULL;
 MFShader *pVS_a = NULL;

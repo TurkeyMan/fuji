@@ -28,10 +28,36 @@ enum MFShaderType
 	MFST_ForceInt = 0x7FFFFFFF
 };
 
+enum MFShaderInputType
+{
+	MFShader_IT_Unknown = -1,
+
+	MFShader_IT_Vector = 0,
+	MFShader_IT_Matrix,
+	MFShader_IT_Float,
+	MFShader_IT_Int,
+	MFShader_IT_Bool,
+	MFShader_IT_Sampler,
+
+	MFShader_IT_Max,
+	MFShader_IT_ForceInt = 0x7FFFFFFF
+};
+
 struct MFShaderMacro
 {
 	const char *pDefine;
 	const char *pValue;
+};
+
+struct MFShaderInput
+{
+	const char *pName;
+	MFShaderInputType type;
+	uint32 numRows			: 3;
+	uint32 columnMajor		: 1;
+	uint32 numElements		: 12;
+	uint32 constantRegister	: 8;
+	uint32 numRegisters		: 8;
 };
 
 MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros = NULL);

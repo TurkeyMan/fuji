@@ -9,7 +9,10 @@ static void MFShader_Destroy(MFResource *pRes)
 
 	MFShader_DestroyPlatformSpecific(pShader);
 
-	MFHeap_Free(pShader->pProgram);
+	if(pShader->pProgram)
+		MFHeap_Free(pShader->pProgram);
+	if(pShader->pInputs)
+		MFHeap_Free(pShader->pInputs);
 	MFHeap_Free(pShader);
 }
 
