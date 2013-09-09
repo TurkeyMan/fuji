@@ -1,0 +1,1113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugOpt|x64">
+      <Configuration>DebugOpt</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Retail|x64">
+      <Configuration>Retail</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8D99D67D-9A97-034D-8380-36F46E993277}</ProjectGuid>
+    <RootNamespace>Fuji</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Retail|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries>false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Retail|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\dist\lib\x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\Build\x64\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Fuji_$(Configuration)</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">..\..\dist\lib\x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">..\Build\x64\DebugOpt\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">Fuji_$(Configuration)</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\dist\lib\x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\Build\x64\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Fuji_$(Configuration)</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">..\..\dist\lib\x64\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">..\Build\x64\Retail\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">Fuji_$(Configuration)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)Fuji_$(Configuration).pdb</ProgramDataBaseFileName>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)Fuji_$(Configuration).lib</OutputFile>
+      <AdditionalOptions>/Delay:unload /DelayLoad:d3d11.dll /DelayLoad:d3dx11_42.dll /DelayLoad:d3d9.dll /DelayLoad:D3DX9_42.dll /DelayLoad:opengl32.dll /DelayLoad:dsound.dll /DelayLoad:xinput1_3.dll /DelayLoad:dinput8.dll /DelayLoad:ws2_32.dll /DelayLoad:Assimp64.dll %(AdditionalOptions)</AdditionalOptions>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>vorbisfile_static.lib;vorbis_static.lib;ogg_static.lib;assimp.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\dist\lib\x64\vorbis;..\..\dist\lib\x64\assimp</AdditionalLibraryDirectories>
+    </Lib>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)Fuji_$(Configuration).pdb</ProgramDataBaseFileName>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)Fuji_$(Configuration).lib</OutputFile>
+      <AdditionalOptions>/Delay:unload /DelayLoad:d3d11.dll /DelayLoad:d3dx11_42.dll /DelayLoad:d3d9.dll /DelayLoad:D3DX9_42.dll /DelayLoad:opengl32.dll /DelayLoad:dsound.dll /DelayLoad:xinput1_3.dll /DelayLoad:dinput8.dll /DelayLoad:ws2_32.dll /DelayLoad:Assimp64.dll %(AdditionalOptions)</AdditionalOptions>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\dist\lib\x64\vorbis;..\..\dist\lib\x64\assimp</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vorbisfile_static.lib;vorbis_static.lib;ogg_static.lib;assimp.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_RELEASE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_RELEASE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)Fuji_$(Configuration).lib</OutputFile>
+      <AdditionalOptions>/Delay:unload /DelayLoad:d3d11.dll /DelayLoad:d3dx11_42.dll /DelayLoad:d3d9.dll /DelayLoad:D3DX9_42.dll /DelayLoad:opengl32.dll /DelayLoad:dsound.dll /DelayLoad:xinput1_3.dll /DelayLoad:dinput8.dll /DelayLoad:ws2_32.dll /DelayLoad:Assimp64.dll %(AdditionalOptions)</AdditionalOptions>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\dist\lib\x64\vorbis;..\..\dist\lib\x64\assimp</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vorbisfile_static.lib;vorbis_static.lib;ogg_static.lib;assimp.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_RETAIL;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <OmitDefaultLibName>true</OmitDefaultLibName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_RETAIL;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\Source;..\..\dist\include\Fuji;..\Middleware\zlib;..\Middleware\vorbis\include;..\Middleware\libmad;..\Middleware\libpng-1.5.0;..\Middleware;..\..\dist\include;..\Source\Images\WINDOWS;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)Fuji_$(Configuration).lib</OutputFile>
+      <AdditionalOptions>/Delay:unload /DelayLoad:d3d11.dll /DelayLoad:d3dx11_42.dll /DelayLoad:d3d9.dll /DelayLoad:D3DX9_42.dll /DelayLoad:opengl32.dll /DelayLoad:dsound.dll /DelayLoad:xinput1_3.dll /DelayLoad:dinput8.dll /DelayLoad:ws2_32.dll /DelayLoad:Assimp64.dll %(AdditionalOptions)</AdditionalOptions>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalLibraryDirectories>..\..\dist\lib\x64\vorbis;..\..\dist\lib\x64\assimp</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vorbisfile_static.lib;vorbis_static.lib;ogg_static.lib;assimp.lib</AdditionalDependencies>
+    </Lib>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\dist\include\Fuji\DebugMenu.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Fuji.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Image.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFAllocator.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFAnimation.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFAnimScript.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFArray.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFAuxillaryDisplay.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFBoundingVolume.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFCallstack.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFCollision.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFCommandLine.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFCompute.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDebug.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDisplay.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDocumentJSON.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDocumentXML.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDriver.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFDriver_Plugin.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFEffect.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFFileSystem.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFFont.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFHashList.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFHeap.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFImage.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFIni.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFInput.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFList.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFMaterial.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFMath.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFMatrix.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFModel.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFModule.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFNetwork.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFObjectPool.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFOpenHashTable.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFParticleSystem.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFPrimitive.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFProfile.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFPtrList.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFQuaternion.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFRenderer.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFRenderState.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFResource.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFScript.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFShader.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFSockets.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFSound.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFString.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFStringCache.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFSystem.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFTexture.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFThread.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFTranslation.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFTypes.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFVector.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFVertex.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\MFView.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Sprite.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Timer.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Util.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Video.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Asset\MFIntFont.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Asset\MFIntModel.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Asset\MFIntSound.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Asset\MFIntStringTable.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Asset\MFIntTexture.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\FileSystem\MFFileSystemCachedFile.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\FileSystem\MFFileSystemHTTP.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\FileSystem\MFFileSystemMemory.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\FileSystem\MFFileSystemNative.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\FileSystem\MFFileSystemZipFile.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Materials\MFMat_Standard.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\FastDelegate.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\document.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\filestream.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\prettywriter.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\rapidjson.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\reader.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\stringbuffer.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\writer.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\internal\pow10.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\internal\stack.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Middleware\rapidjson-0.1\internal\strfunc.h" />
+    <ClInclude Include="..\..\dist\include\Fuji\Util\F3D.h" />
+    <ClInclude Include="..\Source\DebugMenu_Internal.h" />
+    <ClInclude Include="..\Source\MFAnimation_Internal.h" />
+    <ClInclude Include="..\Source\MFAnimScript_Internal.h" />
+    <ClInclude Include="..\Source\MFCallstack_Internal.h" />
+    <ClInclude Include="..\Source\MFCollision_Internal.h" />
+    <ClInclude Include="..\Source\MFCompute_Internal.h" />
+    <ClInclude Include="..\Source\MFDisplay_Internal.h" />
+    <ClInclude Include="..\Source\MFEffect_Internal.h" />
+    <ClInclude Include="..\Source\MFFileSystem_Internal.h" />
+    <ClInclude Include="..\Source\MFFont_Internal.h" />
+    <ClInclude Include="..\Source\MFHeap_Internal.h" />
+    <ClInclude Include="..\Source\MFInput_Internal.h" />
+    <ClInclude Include="..\Source\MFMaterial_Internal.h" />
+    <ClInclude Include="..\Source\MFMesh_Internal.h" />
+    <ClInclude Include="..\Source\MFModel_Internal.h" />
+    <ClInclude Include="..\Source\MFModule_Internal.h" />
+    <ClInclude Include="..\Source\MFNetwork_Internal.h" />
+    <ClInclude Include="..\Source\MFParticleSystem_Internal.h" />
+    <ClInclude Include="..\Source\MFPrimitive_Internal.h" />
+    <ClInclude Include="..\Source\MFRenderer_Internal.h" />
+    <ClInclude Include="..\Source\MFRenderState_Internal.h" />
+    <ClInclude Include="..\Source\MFResource_Internal.h" />
+    <ClInclude Include="..\Source\MFScript_Internal.h" />
+    <ClInclude Include="..\Source\MFShader_Internal.h" />
+    <ClInclude Include="..\Source\MFSockets_Internal.h" />
+    <ClInclude Include="..\Source\MFSound_Internal.h" />
+    <ClInclude Include="..\Source\MFSystem_Internal.h" />
+    <ClInclude Include="..\Source\MFTexture_Internal.h" />
+    <ClInclude Include="..\Source\MFThread_Internal.h" />
+    <ClInclude Include="..\Source\MFTranslation_Internal.h" />
+    <ClInclude Include="..\Source\MFVertex_Internal.h" />
+    <ClInclude Include="..\Source\MFView_Internal.h" />
+    <ClInclude Include="..\Source\Drivers\Android\android_native_app_glue.h" />
+    <ClInclude Include="..\Source\Drivers\D3D11\MFRenderer_D3D11.h" />
+    <ClInclude Include="..\Source\Drivers\D3D11\Shaders\MatStandard_a.h" />
+    <ClInclude Include="..\Source\Drivers\D3D11\Shaders\MatStandard_ps.h" />
+    <ClInclude Include="..\Source\Drivers\D3D11\Shaders\MatStandard_s.h" />
+    <ClInclude Include="..\Source\Drivers\D3D11\Shaders\Registers.h" />
+    <ClInclude Include="..\Source\Drivers\D3D9\MFRenderer_D3D9.h" />
+    <ClInclude Include="..\Source\Drivers\D3D9\Shaders\MatStandard_a.h" />
+    <ClInclude Include="..\Source\Drivers\D3D9\Shaders\MatStandard_s.h" />
+    <ClInclude Include="..\Source\Drivers\D3D9\Shaders\Registers.h" />
+    <ClInclude Include="..\Source\Drivers\IPhone\FujiAppDelegate_IPhone.h" />
+    <ClInclude Include="..\Source\Drivers\IPhone\FujiView_IPhone.h" />
+    <ClInclude Include="..\Source\Drivers\IPhone\MFFileSystemNative_IPhone.h" />
+    <ClInclude Include="..\Source\Drivers\IPhone\MFInput_IPhone.h" />
+    <ClInclude Include="..\Source\Drivers\NaCl\MFSystem_NaCl.h" />
+    <ClInclude Include="..\Source\Drivers\OpenGL\MFOpenGL.h" />
+    <ClInclude Include="..\Source\Drivers\OpenGL\glew\glew.h" />
+    <ClInclude Include="..\Source\Drivers\OpenGL\glew\glxew.h" />
+    <ClInclude Include="..\Source\Drivers\OpenGL\glew\wglew.h" />
+    <ClInclude Include="..\Source\Drivers\PC\MFInputMappings_PC.h" />
+    <ClInclude Include="..\Source\Drivers\X11\X11_linux.h" />
+    <ClInclude Include="..\Source\Drivers\XBox\MFRenderer_XB.h" />
+    <ClInclude Include="..\Source\Drivers\XBox\VertexShaders\ModelRenderer.h" />
+    <ClInclude Include="..\Source\Drivers\XBox\VertexShaders\Registers.h" />
+    <ClInclude Include="..\Source\FileSystem\MFFileSystemCachedFile_Internal.h" />
+    <ClInclude Include="..\Source\FileSystem\MFFileSystemHTTP_Internal.h" />
+    <ClInclude Include="..\Source\FileSystem\MFFileSystemMemory_Internal.h" />
+    <ClInclude Include="..\Source\FileSystem\MFFileSystemNative_Internal.h" />
+    <ClInclude Include="..\Source\FileSystem\MFFileSystemZipFile_Internal.h" />
+    <ClInclude Include="..\Source\Materials\MFMat_Effect.h" />
+    <ClInclude Include="..\Source\Materials\MFMat_Standard_Internal.h" />
+    <ClInclude Include="..\Source\Util\MD2Normals.h" />
+    <ClInclude Include="..\Source\Util\ReadMEMD2.h" />
+    <ClInclude Include="..\Middleware\zlib\minizip\crypt.h" />
+    <ClInclude Include="..\Middleware\zlib\minizip\ioapi.h" />
+    <ClInclude Include="..\Middleware\zlib\minizip\mztools.h" />
+    <ClInclude Include="..\Middleware\zlib\minizip\unzip.h" />
+    <ClInclude Include="..\Middleware\zlib\minizip\zip.h" />
+    <ClInclude Include="..\Middleware\zlib\crc32.h" />
+    <ClInclude Include="..\Middleware\zlib\deflate.h" />
+    <ClInclude Include="..\Middleware\zlib\inffast.h" />
+    <ClInclude Include="..\Middleware\zlib\inffixed.h" />
+    <ClInclude Include="..\Middleware\zlib\inflate.h" />
+    <ClInclude Include="..\Middleware\zlib\inftrees.h" />
+    <ClInclude Include="..\Middleware\zlib\trees.h" />
+    <ClInclude Include="..\Middleware\zlib\zconf.h" />
+    <ClInclude Include="..\Middleware\zlib\zconf.in.h" />
+    <ClInclude Include="..\Middleware\zlib\zlib.h" />
+    <ClInclude Include="..\Middleware\zlib\zutil.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\png.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pngconf.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pngdebug.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pnginfo.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pnglibconf.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pngpriv.h" />
+    <ClInclude Include="..\Middleware\libpng-1.5.0\pngstruct.h" />
+    <ClInclude Include="..\Middleware\minifmod170\lib\minifmod.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\Mixer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\mixer_clipcopy.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\mixer_fpu_ramp.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\Music.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\music_formatxm.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\Sound.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\system_file.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\system_memory.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\Middleware\minifmod170\lib\xmeffects.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Source\Drivers\OpenGL\glew\glew.c">
+    </ClCompile>
+    <ClCompile Include="..\Source\DebugMenu.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Image.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFAnimation.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFAnimScript.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFBoundingVolume.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFCallstack.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFCollision.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFCommandLine.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFDebug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFDisplay.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFDocumentJSON.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFDocumentXML.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFEffect.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFFileSystem.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFFont.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFHeap.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFImage.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFIni.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFInput.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFMain.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFMaterial.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFMath.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFMatrix.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFMesh.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFModel.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFModule.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFNetwork.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFObjectPool.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFPrimitive.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFQuaternion.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFRenderer.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFRenderState.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFResource.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFScript.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFScript_Pawn.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFScript_Registration.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFShader.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSockets.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_MAD.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_MiniFMOD.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_Mixer.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_PSPAudioCodec.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_Vorbis.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSound_WAV.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFString.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFStringCache.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFSystem.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFTexture.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFTextureUtil.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFThread.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFTranslation.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFVector.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFVertex.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\MFView.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Sprite.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Timer.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MFIntFont.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MFIntModel.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MFIntSound.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MFIntStringTable.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Asset\MFIntTexture.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Android\android_native_app_glue.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Android\MFDebug_Android.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Android\MFDisplay_Android.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Android\MFInput_Android.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Android\MFSystem_Android.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFMaterial_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFModel_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFPrimitive_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFRenderer_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFRenderState_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFShader_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFTexture_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\MFVertex_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\Materials\MFMat_Effect_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D11\Materials\MFMat_Standard_D3D11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFMaterial_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFModel_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFPrimitive_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFRenderer_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFRenderState_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFShader_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFTexture_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\MFVertex_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\Materials\MFMat_Effect_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\D3D9\Materials\MFMat_Standard_D3D9.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFDisplay_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFFileSystemNative_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFInput_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFMaterial_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFPrimitive_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFRenderer_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFSound_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFSystem_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\MFTexture_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\DC\Materials\MFMat_Standard_DC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFDisplay_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFFileSystemNative_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFInput_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFMaterial_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFModel_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFPrimitive_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFRenderer_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFSound_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFSystem_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\MFTexture_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\GC\Materials\MFMat_Standard_GC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\IPhone\MFDisplay_IPhone.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\IPhone\MFInput_IPhone.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\IPhone\MFSound_IPhone.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFFileSystemNative_Linux.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFInput_Linux.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSockets_BSDSockets.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSound_ALSA.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSound_JACK.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSound_Port.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSound_PulseAudio.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFSystem_Linux.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFThread_Linux.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Linux\MFTranslation_Linux.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\NaCl\MFDebug_NaCl.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\NaCl\MFDisplay_NaCl.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\NaCl\MFFileSystemNative_NaCl.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\NaCl\MFInput_NaCl.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\NaCl\MFSystem_NaCl.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFAuxillaryDisplay_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFCompute_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFDebug_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFDisplay_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFFileSystemNative_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFHeap_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFInput_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFMaterial_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFModel_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFParticleSystem_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFPrimitive_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFRenderState_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFShader_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFSockets_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFSound_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFSystem_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFTexture_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFThread_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\MFTranslation_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\Materials\MFMat_Effect_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Null\Materials\MFMat_Standard_Null.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenCL\MFCompute_OpenCL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFMaterial_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFModel_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFPrimitive_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFRenderer_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFRenderState_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFShader_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFTexture_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\MFVertex_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\OpenGL\Materials\MFMat_Standard_OpenGL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFAuxillaryDisplay_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFDebug_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFDisplay_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFInputMappings_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFInput_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFSound_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFSystem_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PC\MFTranslation_PC.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFModel_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFPrimitive_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFRenderer_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFRenderState_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFShader_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFSound_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFTexture_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\MFVertex_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Plugin\Materials\MFMat_Standard_Plug.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFDebug_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFDisplay_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFFileSystemNative_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFHeap_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFInput_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFMaterial_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFModel_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFPrimitive_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFRenderer_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFSockets_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFSound_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFSystem_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFTexture_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFThread_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\MFTranslation_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PS2\Materials\MFMat_Standard_PS2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFDebug_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFDisplay_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFFileSystemNative_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFHeap_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFInput_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFMaterial_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFModel_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFPrimitive_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFRenderer_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFSockets_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFSound_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFSystem_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFTexture_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFThread_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\MFTranslation_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\PSP\Materials\MFMat_Standard_PSP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Sound\MFSound_OpenAL.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Web\MFDebug_Web.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Web\MFDisplay_Web.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Web\MFFileSystemNative_Web.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Web\MFInput_Web.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Web\MFSystem_Web.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\Wii\MFInput_Wii.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\WIN32\MFFileSystemNative_WIN32.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\WIN32\MFHeap_WIN32.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\WIN32\MFSockets_WINSOCK.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\WIN32\MFThread_WIN32.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\X11\MFDisplay_X11.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFDisplay_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFHeap_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFInput_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFMaterial_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFModel_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFPrimitive_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFRenderer_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFSystem_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFTexture_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\MFTranslation_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Drivers\XBox\Materials\MFMat_Standard_XB.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\FileSystem\MFFileSystemCachedFile.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\FileSystem\MFFileSystemHTTP.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\FileSystem\MFFileSystemMemory.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\FileSystem\MFFileSystemNative.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\FileSystem\MFFileSystemZipFile.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Materials\MFMat_Effect.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Materials\MFMat_Standard.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\F3D.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadASE.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadAssImp.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadDAE.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadMD2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadMD3.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadMEMD2.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadOBJ.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Source\Util\ReadX.cpp">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\minizip\ioapi.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\minizip\mztools.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\minizip\unzip.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\minizip\zip.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\adler32.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\compress.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\crc32.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\deflate.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\gzio.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\infback.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\inffast.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\inflate.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\inftrees.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\trees.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\uncompr.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\zlib\zutil.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\png.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngerror.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngget.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngmem.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngpread.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngread.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngrio.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngrtran.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngrutil.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngset.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngtrans.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngwio.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngwrite.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngwtran.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\libpng-1.5.0\pngwutil.c">
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\Fmusic.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\mixer_clipcopy.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\mixer_fpu_ramp.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\music_formatxm.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\system_file.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Middleware\minifmod170\lib\system_memory.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugOpt|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Retail|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\dist\include\d2\fuji\renderstate.d" />
+    <None Include="..\..\dist\include\Fuji\MFArray.inl" />
+    <None Include="..\..\dist\include\Fuji\MFCollision.inl" />
+    <None Include="..\..\dist\include\Fuji\MFHashList.inl" />
+    <None Include="..\..\dist\include\Fuji\MFList.inl" />
+    <None Include="..\..\dist\include\Fuji\MFMath.inl" />
+    <None Include="..\..\dist\include\Fuji\MFMatrix.inl" />
+    <None Include="..\..\dist\include\Fuji\MFPtrList.inl" />
+    <None Include="..\..\dist\include\Fuji\MFQuaternion.inl" />
+    <None Include="..\..\dist\include\Fuji\MFString.inl" />
+    <None Include="..\..\dist\include\Fuji\MFSystem.inl" />
+    <None Include="..\..\dist\include\Fuji\MFVector.inl" />
+    <None Include="..\..\dist\include\d2\fuji\animation.d" />
+    <None Include="..\..\dist\include\d2\fuji\animscript.d" />
+    <None Include="..\..\dist\include\d2\fuji\auxiliarydisplay.d" />
+    <None Include="..\..\dist\include\d2\fuji\boundingvolume.d" />
+    <None Include="..\..\dist\include\d2\fuji\callstack.d" />
+    <None Include="..\..\dist\include\d2\fuji\collision.d" />
+    <None Include="..\..\dist\include\d2\fuji\commandline.d" />
+    <None Include="..\..\dist\include\d2\fuji\compute.d" />
+    <None Include="..\..\dist\include\d2\fuji\dbg.d" />
+    <None Include="..\..\dist\include\d2\fuji\display.d" />
+    <None Include="..\..\dist\include\d2\fuji\driver.d" />
+    <None Include="..\..\dist\include\d2\fuji\filesystem.d" />
+    <None Include="..\..\dist\include\d2\fuji\font.d" />
+    <None Include="..\..\dist\include\d2\fuji\fuji.d" />
+    <None Include="..\..\dist\include\d2\fuji\heap.d" />
+    <None Include="..\..\dist\include\d2\fuji\image.d" />
+    <None Include="..\..\dist\include\d2\fuji\input.d" />
+    <None Include="..\..\dist\include\d2\fuji\material.d" />
+    <None Include="..\..\dist\include\d2\fuji\matrix.d" />
+    <None Include="..\..\dist\include\d2\fuji\model.d" />
+    <None Include="..\..\dist\include\d2\fuji\modules.d" />
+    <None Include="..\..\dist\include\d2\fuji\network.d" />
+    <None Include="..\..\dist\include\d2\fuji\particlesystem.d" />
+    <None Include="..\..\dist\include\d2\fuji\primitive.d" />
+    <None Include="..\..\dist\include\d2\fuji\quaternion.d" />
+    <None Include="..\..\dist\include\d2\fuji\render.d" />
+    <None Include="..\..\dist\include\d2\fuji\resource.d" />
+    <None Include="..\..\dist\include\d2\fuji\sockets.d" />
+    <None Include="..\..\dist\include\d2\fuji\sound.d" />
+    <None Include="..\..\dist\include\d2\fuji\system.d" />
+    <None Include="..\..\dist\include\d2\fuji\texture.d" />
+    <None Include="..\..\dist\include\d2\fuji\translation.d" />
+    <None Include="..\..\dist\include\d2\fuji\types.d" />
+    <None Include="..\..\dist\include\d2\fuji\vector.d" />
+    <None Include="..\..\dist\include\d2\fuji\vertex.d" />
+    <None Include="..\..\dist\include\d2\fuji\view.d" />
+    <None Include="..\..\dist\include\d2\fuji\asset\intmodel.d" />
+    <None Include="..\..\dist\include\d2\fuji\asset\intsound.d" />
+    <None Include="..\..\dist\include\d2\fuji\asset\intstringtable.d" />
+    <None Include="..\..\dist\include\d2\fuji\asset\inttexture.d" />
+    <None Include="..\..\dist\include\d2\fuji\fs\cached.d" />
+    <None Include="..\..\dist\include\d2\fuji\fs\http.d" />
+    <None Include="..\..\dist\include\d2\fuji\fs\memory.d" />
+    <None Include="..\..\dist\include\d2\fuji\fs\native.d" />
+    <None Include="..\..\dist\include\d2\fuji\fs\zip.d" />
+    <None Include="..\..\dist\include\d2\fuji\materials\standard.d" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

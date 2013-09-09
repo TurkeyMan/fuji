@@ -43,10 +43,10 @@ struct MFResourceIterator;
 extern (C) void MFResource_AddResource(MFResource* pResource, int type, uint hash, const(char)* pName = null);
 extern (C) void MFResource_RemoveResource(MFResource* pResource);
 
-extern (C) MFResource* MFResource_Find(uint32 hash);
+extern (C) MFResource* MFResource_Find(uint hash);
 
 extern (C) MFResourceType MFResource_GetType(MFResource* pResource);
-extern (C) uint32 MFResource_GetHash(MFResource* pResource);
+extern (C) uint MFResource_GetHash(MFResource* pResource);
 extern (C) int MFResource_GetRefCount(MFResource* pResource);
 extern (C) const(char)* MFResource_GetName(MFResource* pResource);
 
@@ -67,7 +67,7 @@ import std.c.string;
 final class Resource
 {
 	@property MFResourceType type() const pure nothrow			{ return cast(MFResourceType)(cast(MFResource*)this).type; }
-	@property uint hash() const pure nothrow					{ return (cast(MFResource*)this).hast; }
+	@property uint hash() const pure nothrow					{ return (cast(MFResource*)this).hash; }
 	@property int refCount() const pure nothrow					{ return (cast(MFResource*)this).refCount; }
 	@property string name() const pure nothrow
 	{

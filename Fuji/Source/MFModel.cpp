@@ -27,7 +27,9 @@ void* MFModelInternal_PendingAnimationTemplate(size_t *pSize)
 		bKeepAnimation = false;
 		if(pSize)
 			*pSize = animSize;
-		return pAnimationTemplate;
+		void *pAnim = pAnimationTemplate;
+		pAnimationTemplate = NULL;
+		return pAnim;
 	}
 	return NULL;
 }
@@ -449,7 +451,8 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
 
 	if(bKeepAnimation)
 	{
-		MFHeap_Free(pAnimationTemplate);
+		if(pAnimationTemplate)
+			MFHeap_Free(pAnimationTemplate);
 		bKeepAnimation = false;
 	}
 

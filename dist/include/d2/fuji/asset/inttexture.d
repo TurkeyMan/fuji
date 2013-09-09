@@ -46,7 +46,7 @@ extern (C) MFIntTexture* MFIntTexture_CreateFromFileInMemory(const(void*) pMemor
 
 extern (C) void MFIntTexture_Destroy(MFIntTexture* pTexture);
 
-extern (C) void MFIntTexture_CreateRuntimeData(MFIntTexture* pTexture, MFTextureTemplateData** ppTemplateData, size_t* pSize, MFPlatform platform, uint flags = 0, MFTextureFormat targetFormat = MFTextureFormat.Unknown);
+extern (C) void MFIntTexture_CreateRuntimeData(MFIntTexture* pTexture, MFTextureTemplateData** ppTemplateData, size_t* pSize, MFPlatform platform, uint flags = 0, MFImageFormat targetFormat = MFImageFormat.Unknown);
 
 extern (C) void MFIntTexture_WriteToHeaderFile(MFIntTexture* pTexture, const(char*) pFilename);
 

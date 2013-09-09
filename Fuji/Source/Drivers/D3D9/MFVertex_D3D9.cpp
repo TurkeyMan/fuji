@@ -146,6 +146,7 @@ bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, 
 {
 	DWORD usage;
 	D3DPOOL pool;
+	DWORD lockFlags = 0;
 	switch(pVertexBuffer->bufferType)
 	{
 		case MFVBType_Static:
@@ -156,6 +157,7 @@ bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, 
 			pool = D3DPOOL_DEFAULT;
 			usage = D3DUSAGE_WRITEONLY;
 			usage = D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY;
+			lockFlags = D3DLOCK_DISCARD;
 			break;
 		case MFVBType_Scratch:
 			// Maybe it's better to use UP draw calls for scratch buffers?
@@ -183,7 +185,7 @@ bool MFVertex_CreateVertexBufferPlatformSpecific(MFVertexBuffer *pVertexBuffer, 
 	if(pVertexBufferMemory)
 	{
 		void *pData;
-		pVertBuffer->Lock(0, 0, &pData, D3DLOCK_DISCARD);
+		pVertBuffer->Lock(0, 0, &pData, lockFlags);
 		MFCopyMemory(pData, pVertexBufferMemory, stride*pVertexBuffer->numVerts);
 		pVertBuffer->Unlock();
 	}
@@ -237,7 +239,7 @@ bool MFVertex_CreateIndexBufferPlatformSpecific(MFIndexBuffer *pIndexBuffer, uin
 	if(pIndexBufferMemory)
 	{
 		void *pData;
-		pIB->Lock(0, 0, &pData, D3DLOCK_DISCARD);
+		pIB->Lock(0, 0, &pData, 0);
 		MFCopyMemory(pData, pIndexBufferMemory, sizeof(uint16)*pIndexBuffer->numIndices);
 		pIB->Unlock();
 	}

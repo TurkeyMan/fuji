@@ -479,7 +479,7 @@ enum MFRendererDrivers
 	// vorbis codec
 	#define	VORBIS_STREAM
 #endif
-#if defined(MF_WINDOWS) || defined(MF_LINUX) || defined(MF_OSX) || defined(MF_ANDROID)
+#if (defined(MF_WINDOWS) && defined(MF_32BIT)) || defined(MF_LINUX) || defined(MF_OSX) || defined(MF_ANDROID)
 	// libMAD mp3 codec
 	#define	MAD_STREAM
 #endif

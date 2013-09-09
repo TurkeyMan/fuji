@@ -9,7 +9,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-#pragma comment(lib, "assimp")
+//#pragma comment(lib, "assimp")
 
 void CopyMatrix(MFMatrix *a, const aiMatrix4x4 &b)
 {
@@ -144,28 +144,31 @@ void ParseMesh(const aiScene *pScene, aiNode &node, F3DFile &f3d, const aiMatrix
 				aiBone &bone = *mesh.mBones[j];
 
 				int boneIndex = sc.FindBone(bone.mName.C_Str());
-				sc.bones[boneIndex].bIsSkinned = true;
-
-				MFDebug_Log(0, MFStr("%*s  Bone %d: %d (%s)", depth, " ", j, boneIndex, bone.mName.C_Str()));
-
-//				bone.mOffsetMatrix; // bone's matrix
-
-				for(uint32 k=0; k<bone.mNumWeights; ++k)
+				if(boneIndex >= 0)
 				{
-					aiVertexWeight &w = bone.mWeights[k];
+					sc.bones[boneIndex].bIsSkinned = true;
 
-					F3DVertex &v = verts[w.mVertexId];
+					MFDebug_Log(0, MFStr("%*s  Bone %d: %d (%s)", depth, " ", j, boneIndex, bone.mName.C_Str()));
 
-					const int maxWeights = sizeof(v.bone)/sizeof(v.bone[0]);
-					for(int b=0; b<maxWeights; ++b)
+//					bone.mOffsetMatrix; // bone's matrix
+
+					for(uint32 k=0; k<bone.mNumWeights; ++k)
 					{
-						if(v.bone[b] == -1)
-						{
-							v.bone[b] = boneIndex;
-							v.weight[b] = w.mWeight;
+						aiVertexWeight &w = bone.mWeights[k];
 
-							matSub.maxWeights = MFMax(matSub.maxWeights, b+1);
-							break;
+						F3DVertex &v = verts[w.mVertexId];
+
+						const int maxWeights = sizeof(v.bone)/sizeof(v.bone[0]);
+						for(int b=0; b<maxWeights; ++b)
+						{
+							if(v.bone[b] == -1)
+							{
+								v.bone[b] = boneIndex;
+								v.weight[b] = w.mWeight;
+
+								matSub.maxWeights = MFMax(matSub.maxWeights, b+1);
+								break;
+							}
 						}
 					}
 				}
