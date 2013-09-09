@@ -361,7 +361,7 @@ extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MF
 * Load a file from the filesystem.
 * Load a file from the filesystem.
 * @param pFilename The name of the file to load.
-* @param pBytesRead Optional pointer to a uint32 that will receive the size of the file loaded.
+* @param pBytesRead Optional pointer to a size_t that will receive the size of the file loaded.
 * @param bAppendnullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
 * @return Returns a pointer to a new buffer containing the file that was loaded.
 */

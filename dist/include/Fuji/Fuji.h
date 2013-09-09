@@ -121,7 +121,7 @@
 
 	#define MF_ARCH_MIPS
 	#define MF_32BIT
-#elif defined(_EE_) || defined(_EE) || defined(_R5900) || defined(__R5900)
+#elif defined(_EE_) || defined(_EE) || defined(R5900) || defined(_R5900) || defined(__R5900)
 	#define MF_PS2
 	#define MF_PLATFORM PS2
 
@@ -148,36 +148,40 @@
 
 	#define MF_ARCH_PPC
 	#define MF_64BIT
-#elif defined(TARGET_OS_IPHONE)
-	#include <TargetConditionals.h>
-	#define MF_IPHONE
-	#define MF_PLATFORM IPHONE
-
-	#if TARGET_IPHONE_SIMULATOR == 1
-		#define MF_ARCH_X86
-	#else
-		#define MF_ARCH_ARM
-		#define MF_32BIT
-		#define MF_ENDIAN_LITTLE
-	#endif
 #elif defined(__APPLE__)
-	#define MF_OSX
-	#define MF_PLATFORM OSX
+	#include <TargetConditionals.h>
+	#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+		#define MF_IPHONE
+		#define MF_PLATFORM IPHONE
 
-	#if defined(__LP64__) || defined(_LP64)
-		#define MF_64BIT
-	#else
-		#define MF_32BIT
-	#endif
+		#if TARGET_IPHONE_SIMULATOR
+			#define MF_ARCH_X86
+		#else
+			#define MF_ARCH_ARM
+			#define MF_32BIT
+			#define MF_ENDIAN_LITTLE
+		#endif
+	#elif TARGET_OS_MAC
+		#define MF_OSX
+		#define MF_PLATFORM OSX
 
-	#if defined(__x86_64__)
-		#define MF_ARCH_X64
-	#elif defined(__i386__)
-		#define MF_ARCH_X86
-	#elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(__ppc64__)
-		#define MF_ARCH_PPC
+		#if defined(__LP64__) || defined(_LP64)
+			#define MF_64BIT
+		#else
+			#define MF_32BIT
+		#endif
+
+		#if defined(__x86_64__)
+			#define MF_ARCH_X64
+		#elif defined(__i386__)
+			#define MF_ARCH_X86
+		#elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__) || defined(__ppc64__)
+			#define MF_ARCH_PPC
+		#else
+			#error "Couldn't detect target architecture!"
+		#endif
 	#else
-		#error "Couldn't detect target architecture!"
+		#error "Unknown Apple product?"
 	#endif
 #elif defined(ANDROID_NDK) || defined(__ANDROID__) || defined(ANDROID)
 	#define MF_ANDROID

@@ -107,13 +107,13 @@ extern (C) MFSound* MFSound_FindSound(const char *pName);
 * @param offset Offset into the sound buffer, in bytes.
 * @param bytes Number of bytes to lock. If bytes is 0, the entire buffer is locked.
 * @param ppData Pointer to a pointer that receives the address of the locked buffer portion.
-* @param pSize Pointer to an int the receives the size of the locked buffer portion.
+* @param pSize Pointer to a size_tthe receives the size of the locked buffer portion.
 * @param ppData2 Pointer to a pointer that receives the second locked portion, or null. This is only used when locking a circular buffer and the lock length exceeds the buffers length. This parameter may be null.
-* @param pSize2 Pointer to an int the receives the size of the locked buffer portion. This parameter may be null.
+* @param pSize2 Pointer to a size_t the receives the size of the locked buffer portion. This parameter may be null.
 * @return Returns 0 on success.
 * @see MFSound_Unlock(), MFSound_CreateDynamic()
 */
-extern (C) int MFSound_Lock(MFSound* pSound, int offset, int bytes, void **ppData, uint *pSize, void **ppData2 = null, uint *pSize2 = null);
+extern (C) int MFSound_Lock(MFSound* pSound, size_t offset, size_t bytes, void **ppData, size_t *pSize, void **ppData2 = null, size_t *pSize2 = null);
 
 /**
 * Unlock a sound buffer.
@@ -210,10 +210,10 @@ extern (C) void MFSound_SetMasterVolume(float volume);
 * Get the current play cursor, in samples.
 * Gets the current play cursor and write cursor, in samples.
 * @param pVoice Pointer to a playing voice.
-* @param pWriteCursor Optional pointer to a uint that received the position of the write cursor.
+* @param pWriteCursor Optional pointer to a size_t that received the position of the write cursor.
 * @return Returns the play cursor's position, in samples.
 */
-extern (C) uint MFSound_GetPlayCursor(MFVoice* pVoice, uint *pWriteCursor = null);
+extern (C) uint MFSound_GetPlayCursor(MFVoice* pVoice, size_t *pWriteCursor = null);
 
 /**
 * Get the sound buffer from a voice.
@@ -265,7 +265,7 @@ enum MFStreamInfoType
 struct MFStreamCallbacks
 {
 	void function(MFAudioStream*, const(char*)) pCreateStream;	/**< Create stream callback. */
-	int function(MFAudioStream*, void*, uint) pGetSamples;		/**< Callback to get samples from the stream. */
+	size_t function(MFAudioStream*, void*, size_t) pGetSamples;	/**< Callback to get samples from the stream. */
 	void function(MFAudioStream*) pDestroyStream;				/**< Destroy stream callback. */
 	void function(MFAudioStream*, float) pSeekStream;			/**< Seek stream callbacks. */
 	float function(MFAudioStream*) pGetTime;					/**< Get the current stream time. */

@@ -98,7 +98,7 @@ extern (C) int MFHeap_GetNumAllocations(MFHeap* pHeap);
  * @see MFHeap_Alloc()
  * @see MFHeap_GetAllocHeap()
  */
-extern (C) uint MFHeap_GetAllocSize(const(void*) pMemory);
+extern (C) size_t MFHeap_GetAllocSize(const(void*) pMemory);
 
 /**
  * Get the heap of an allocation.
