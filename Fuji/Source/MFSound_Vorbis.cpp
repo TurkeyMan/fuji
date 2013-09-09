@@ -9,9 +9,9 @@
 
 // vorbis stream handler
 #if defined(MF_WINDOWS) || defined(MF_XBOX)
-	#pragma comment(lib, "ogg_static")
-	#pragma comment(lib, "vorbis_static")
-	#pragma comment(lib, "vorbisfile_static")
+//	#pragma comment(lib, "ogg_static")
+//	#pragma comment(lib, "vorbis_static")
+//	#pragma comment(lib, "vorbisfile_static")
 #endif
 
 #if defined(VORBIS_TREMOR)

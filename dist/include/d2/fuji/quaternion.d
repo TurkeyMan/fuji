@@ -9,7 +9,7 @@ struct MFQuaternion
 	float z = 0;
 	float w = 1;
 
-	immutable MFQuaternion identity = MFQuaternion.init;
+	__gshared immutable MFQuaternion identity = MFQuaternion.init;
 
 /+
 	// general purpose quaternion operators
