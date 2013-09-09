@@ -93,7 +93,7 @@ MFInitStatus MFPrimitive_InitModule()
 	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
 	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFPrimitive_DeinitModule()

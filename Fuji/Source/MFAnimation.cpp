@@ -21,7 +21,7 @@ MFInitStatus MFAnimation_InitModule()
 {
 	MFRT_AnimationTemplate = MFResource_Register("MFAnimationTemplate", &MFAnimationTemplate_Destroy);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFAnimation_DeinitModule()

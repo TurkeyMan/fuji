@@ -150,7 +150,7 @@ MFInitStatus MFMaterial_InitModule()
 	MFTexture_Destroy(pUSBTexture);
 #endif
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFMaterial_DeinitModule()

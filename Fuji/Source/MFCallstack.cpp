@@ -76,7 +76,7 @@ MFInitStatus MFCallstack_InitModule()
 	DebugMenu_AddItem("Draw Profile Meter", "Fuji Options", &drawCallstackMeter);
 #endif
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFCallstack_DeinitModule()

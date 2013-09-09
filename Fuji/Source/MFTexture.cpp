@@ -56,7 +56,7 @@ MFInitStatus MFTexture_InitModule()
 
 	pWhiteTexture = MFTexture_CreateBlank("_White", MFVector::one);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFTexture_DeinitModule()

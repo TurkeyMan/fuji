@@ -409,7 +409,7 @@ MFInitStatus MFNetwork_InitModule()
 	MFZeroMemory(gNetworkGamepads, sizeof(gNetworkGamepads));
 	MFZeroMemory(gSharedDevices, sizeof(gSharedDevices));
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFNetwork_DeinitModule()

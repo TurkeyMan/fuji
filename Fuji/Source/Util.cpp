@@ -111,7 +111,7 @@ MFInitStatus MFUtil_InitModule()
 {
 	MFUtil_CrcInit();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 // CRC functions

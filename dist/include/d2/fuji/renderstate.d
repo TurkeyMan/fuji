@@ -44,10 +44,23 @@ enum MFStateConstant_Matrix : int
 	UserMatrixCount = UV0 - User0,
 	UVMatrixCount = View - UV0
 }
+static assert(MFStateConstant_Matrix.Max <= 32);
 
-template MFSCM_FujiMat(size_t i) { enum MFStateConstant_Matrix MFSCM_FujiMat = MFStateConstant_Matrix.FujiMat0 + i; }
-template MFSCM_UserMat(size_t i) { enum MFStateConstant_Matrix MFSCM_UserMat = MFStateConstant_Matrix.UserMat0 + i; }
-template MFSCM_UV(size_t i)      { enum MFStateConstant_Matrix MFSCM_UV = MFStateConstant_Matrix.UV0 + i; }
+template MFSCM_FujiMat(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Matrix.FujiMatrixCount);
+	enum MFStateConstant_Matrix MFSCM_FujiMat = MFStateConstant_Matrix.FujiMat0 + i;
+}
+template MFSCM_UserMat(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Matrix.UserMatrixCount);
+	enum MFStateConstant_Matrix MFSCM_UserMat = MFStateConstant_Matrix.UserMat0 + i;
+}
+template MFSCM_UV(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Matrix.UVMatrixCount);
+	enum MFStateConstant_Matrix MFSCM_UV = MFStateConstant_Matrix.UV0 + i;
+}
 
 enum MFStateConstant_Vector : int
 {
@@ -74,9 +87,18 @@ enum MFStateConstant_Vector : int
 	FujiVectorCount = LightCounts - Fuji0,
 	UserectorCount = Max - User0
 }
+static assert(MFStateConstant_Vector.Max <= 32);
 
-//#define MFSCV_Fuji(i) (MFStateConstant_Vector)(MFSCV_Fuji0 + i)
-//#define MFSCV_User(i) (MFStateConstant_Vector)(MFSCV_User0 + i)
+template MFSCV_Fuji(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Vector.FujiVectorCount);
+	enum MFStateConstant_Vector MFSCV_Fuji = MFStateConstant_Vector.Fuji0 + i;
+}
+template MFSCV_User(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Vector.UserectorCount);
+	enum MFStateConstant_Vector MFSCV_User = MFStateConstant_Vector.User0 + i;
+}
 
 enum MFStateConstant_Texture : int
 {
@@ -108,10 +130,23 @@ enum MFStateConstant_Texture : int
 	UserTextureCount = Vertex0 - User0,
 	VertexTextureCount = Max - Vertex0,
 }
+static assert(MFStateConstant_Texture.Max <= 32);
 
-//#define MFSCT_Fuji(i) (MFStateConstant_Texture)(MFSCT_Max + i)
-//#define MFSCT_User(i) (MFStateConstant_Texture)(MFSCT_User0 + i)
-//#define MFSCT_Vertex(i) (MFStateConstant_Texture)(MFSCT_Vertex0 + i)
+template MFSCT_Fuji(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Texture.FujiTextureCount);
+	enum MFStateConstant_Texture MFSCT_Fuji = MFStateConstant_Texture.Max + i;
+}
+template MFSCT_User(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Texture.UserTextureCount);
+	enum MFStateConstant_Texture MFSCT_User = MFStateConstant_Texture.User0 + i;
+}
+template MFSCT_Vertex(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Texture.VertexTextureCount);
+	enum MFStateConstant_Texture MFSCT_Vertex = MFStateConstant_Texture.Vertex0 + i;
+}
 
 enum MFStateConstant_Bool
 {
@@ -156,10 +191,23 @@ enum MFStateConstant_Bool
 	FujiBoolCount = User0 - Fuji0,
 	UserBoolCount = DiffuseSet - User0
 }
+static assert(MFStateConstant_Bool.Max <= 32);
 
-//#define MFSCB_Fuji(i) (MFStateConstant_Bool)(MFSCB_Fuji0 + i)
-//#define MFSCB_User(i) (MFStateConstant_Bool)(MFSCB_User0 + i)
-//#define MFSCB_TexSet(i) (MFStateConstant_Bool)(MFSCB_DiffuseSet + i)
+template MFSCB_Fuji(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Bool.FujiBoolCount);
+	enum MFStateConstant_Bool MFSCB_Fuji = MFStateConstant_Bool.Fuji0 + i;
+}
+template MFSCB_User(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Bool.UserBoolCount);
+	enum MFStateConstant_Bool MFSCB_User = MFStateConstant_Bool.User0 + i;
+}
+template MFSCB_TexSet(MFStateConstant_Texture i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Texture.Max);
+	enum MFStateConstant_Bool MFSCB_TexSet = MFStateConstant_Bool.DiffuseSet + i;
+}
 
 enum MFStateConstant_RenderState
 {
@@ -204,9 +252,18 @@ enum MFStateConstant_RenderState
 
 	VertexBufferCount = VertexBuffer0 - IndexBuffer
 }
+static assert(MFStateConstant_RenderState.Max <= 32);
 
-//#define MFSCRS_SamplerState(tex) (MFStateConstant_RenderState)(MFSCRS_DiffuseSamplerState + tex)
-//#define MFSCRS_VertexBuffer(i) (MFStateConstant_RenderState)(MFSCRS_VertexBuffer0 + i)
+template MFSCRS_SamplerState(MFStateConstant_Texture i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Texture.Max);
+	enum MFStateConstant_RenderState MFSCRS_SamplerState = MFStateConstant_RenderState.DiffuseSamplerState + i;
+}
+template MFSCRS_VertexBuffer(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_RenderState.VertexBufferCount);
+	enum MFStateConstant_RenderState MFSCRS_VertexBuffer = MFStateConstant_RenderState.VertexBuffer0 + i;
+}
 
 enum MFStateConstant_Miscellaneous
 {
@@ -235,8 +292,13 @@ enum MFStateConstant_Miscellaneous
 
 	LightCount = GPUEvent - Light0
 }
+static assert(MFStateConstant_Miscellaneous.Max <= 32);
 
-//#define MFSCMisc_Light(i) (MFStateConstant_Miscellaneous)(MFSCMisc_Light0 + i)
+template MFSCMisc_Light(int i)
+{
+	static assert(i >= 0 && i < MFStateConstant_Miscellaneous.LightCount);
+	enum MFStateConstant_Miscellaneous MFSCMisc_Light = MFStateConstant_Miscellaneous.Light0 + i;
+}
 
 struct MFStateConstant_AnimationMatrices
 {

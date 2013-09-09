@@ -28,7 +28,7 @@ MFInitStatus MFFileSystemMemory_InitModule()
 
 	hMemoryFileSystem = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemMemory_DeinitModule()

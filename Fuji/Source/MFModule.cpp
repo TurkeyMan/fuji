@@ -266,7 +266,7 @@ bool MFModule_InitModules()
 
 		if(!(gModuleInitComplete & bit) && (gModuleInitComplete & gModules[a].prerequisites) == gModules[a].prerequisites)
 		{
-			MFInitStatus complete = MFAIC_Failed;
+			MFInitStatus complete = MFIS_Failed;
 			if((gModules[a].prerequisites & gModuleInitFailed) == 0)
 			{
 				MFDebug_Message(MFStr("Init %s...", gModules[a].pModuleName));
@@ -283,7 +283,7 @@ bool MFModule_InitModules()
 				}
 			}
 
-			if(complete == MFAIC_Succeeded)
+			if(complete == MFIS_Succeeded)
 			{
 				uint64 initTime = (MFSystem_ReadRTC() - timer) * 1000 / MFSystem_GetRTCFrequency();
 
@@ -292,7 +292,7 @@ bool MFModule_InitModules()
 				// if logging is initialised
 				MFDebug_Message(MFStr("Init %s complete in %dms", gModules[a].pModuleName, (int)initTime));
 			}
-			else if(complete == MFAIC_Failed)
+			else if(complete == MFIS_Failed)
 			{
 				uint64 initTime = (MFSystem_ReadRTC() - timer) * 1000 / MFSystem_GetRTCFrequency();
 

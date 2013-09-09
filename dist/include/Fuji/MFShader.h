@@ -28,11 +28,17 @@ enum MFShaderType
 	MFST_ForceInt = 0x7FFFFFFF
 };
 
-MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename);
-MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, const char *pName = NULL);
-MFShader* MFShader_CreateFromBinary(MFShaderType type, const void *pShader, size_t bytes, const char *pName = NULL);
-MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, const char *pName = NULL);
-void MFShader_Destroy(MFShader *pShader);
+struct MFShaderMacro
+{
+	const char *pDefine;
+	const char *pValue;
+};
+
+MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros = NULL);
+MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, MFShaderMacro *pMacros = NULL, const char *pName = NULL);
+MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShader, size_t bytes, MFShaderMacro *pMacros = NULL, const char *pName = NULL);
+MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, MFShaderMacro *pMacros = NULL, const char *pName = NULL);
+MF_API int MFShader_Release(MFShader *pShader);
 
 #endif // _MFSHADER_H
 

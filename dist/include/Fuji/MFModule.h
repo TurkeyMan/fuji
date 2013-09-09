@@ -15,11 +15,11 @@
  */
 enum MFInitStatus
 {
-	MFAIC_Failed = -1,			/**< Module initialisation failed. */
-	MFAIC_Pending = 0,			/**< Module initialisation pending. */
-	MFAIC_Succeeded = 1,		/**< Module initialisation completed successfully. */
+	MFIS_Failed = -1,			/**< Module initialisation failed. */
+	MFIS_Pending = 0,			/**< Module initialisation pending. */
+	MFIS_Succeeded = 1,			/**< Module initialisation completed successfully. */
 
-	MFAIC_ForceInt = 0x7FFFFFFF	/**< Force enum to int type. */
+	MFIS_ForceInt = 0x7FFFFFFF	/**< Force enum to int type. */
 };
 
 /**

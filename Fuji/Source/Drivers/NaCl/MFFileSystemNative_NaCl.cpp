@@ -78,7 +78,7 @@ MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
 	if(gOpenComplete == -1)
 		return MFAIC_Failed;
 
-	return gOpenComplete == 7 ? MFAIC_Succeeded : MFAIC_Pending;
+	return gOpenComplete == 7 ? MFIS_Succeeded : MFAIC_Pending;
 }
 
 void MFFileSystemNative_Register()

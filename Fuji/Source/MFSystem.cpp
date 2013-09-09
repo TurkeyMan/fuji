@@ -176,7 +176,7 @@ MFInitStatus MFSystem_InitModule()
 	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
 	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFSystem_DeinitModule()

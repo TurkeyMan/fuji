@@ -79,7 +79,7 @@ MFInitStatus MFModel_InitModule()
 
 	MFModel_InitModulePlatformSpecific();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFModel_DeinitModule()

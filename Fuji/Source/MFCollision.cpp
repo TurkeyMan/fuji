@@ -18,7 +18,7 @@ MFInitStatus MFCollision_InitModule()
 
 	DebugMenu_AddItem("Show Collision", "Fuji Options", &gShowCollision, NULL, NULL);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFCollision_DeinitModule()

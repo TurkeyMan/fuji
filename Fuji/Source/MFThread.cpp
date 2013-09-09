@@ -21,7 +21,7 @@ MFInitStatus MFThread_InitModule()
 	gThreadInfo.Init(sizeof(MFThreadInfo), gDefaults.system.maxThreads, gDefaults.system.maxThreads);
 //	gThreadTls = MFThread_TlsAlloc();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFThread_DeinitModule()

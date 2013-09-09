@@ -7,7 +7,7 @@ MFInitStatus MFSockets_InitModule()
 {
 	gIsInitialised = MFSockets_InitModulePlatformSpecific();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFSockets_DeinitModule()

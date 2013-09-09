@@ -102,7 +102,7 @@ MFInitStatus MFPrimitive_InitModule()
 	// init the plugin
 	gpCurrentPrimitivePlugin->pInitModule();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFPrimitive_DeinitModule()

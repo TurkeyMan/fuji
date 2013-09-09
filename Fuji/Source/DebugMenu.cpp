@@ -68,7 +68,7 @@ MFInitStatus DebugMenu_InitModule()
 	DebugMenu_AddItem("Menu Colour", "Debug Menu Options", &menuCol);
 	DebugMenu_AddItem("Menu Item Colour", "Debug Menu Options", &menuItemCom);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void DebugMenu_DeinitModule()

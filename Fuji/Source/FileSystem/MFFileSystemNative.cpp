@@ -7,7 +7,7 @@ MFInitStatus MFFileSystemNative_InitModule()
 {
 	MFInitStatus status = MFFileSystemNative_InitModulePlatformSpecific();
 
-	if(status == MFAIC_Succeeded)
+	if(status == MFIS_Succeeded)
 	{
 		MFFileSystemCallbacks fsCallbacks;
 
@@ -25,7 +25,7 @@ MFInitStatus MFFileSystemNative_InitModule()
 		fsCallbacks.FindNext = MFFileNative_FindNext;
 		fsCallbacks.FindClose = MFFileNative_FindClose;
 
-		hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);\
+		hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
 	}
 
 	return status;

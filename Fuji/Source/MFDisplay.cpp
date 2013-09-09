@@ -23,8 +23,8 @@ MFInitStatus MFDisplay_InitModule()
 
 	error = MFDisplay_CreateDisplay((int)gInitParams.display.displayRect.width, (int)gInitParams.display.displayRect.height, 32, 60, true, false, false, false);
 	if(error)
-		return MFAIC_Failed;
-	return MFAIC_Succeeded;
+		return MFIS_Failed;
+	return MFIS_Succeeded;
 }
 
 void MFDisplay_DeinitModule()

@@ -8,7 +8,7 @@
 
 MFInitStatus MFCompute_InitModule()
 {
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFCompute_DeinitModule()

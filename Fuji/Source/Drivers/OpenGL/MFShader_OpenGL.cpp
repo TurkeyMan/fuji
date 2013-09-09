@@ -10,7 +10,8 @@
 #endif
 
 #include "MFShader_Internal.h"
-
+#include "MFOpenGL.h"
+#include "MFFileSystem.h"
 
 void MFShader_InitModulePlatformSpecific()
 {
@@ -20,13 +21,47 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource)
 {
+	char *pCode = NULL;
+	size_t size = 0;
+
+	if(pFilename)
+	{
+		pCode = MFFileSystem_Load(pFilename, &size, true);
+	}
+	else if(pSource)
+	{
+		size = MFString_Length(pSource);
+		pCode = (char*)MFCopyMemory(MFHeap_Alloc(size), pSource, size + 1);
+	}
+
+	if(pCode)
+	{
+		// TODO: OpenGL only compiles shaders from source...
+		pShader->bytes = size;
+		pShader->pProgram = pCode;
+
+		MFDebug_Assert(pShader->shaderType < MFST_DomainShader, "Shader type not supported in OpenGL");
+
+		static const MFOpenGL_ShaderType type[] =
+		{
+			MFOGL_ShaderType_VertexShader,
+			MFOGL_ShaderType_FragmentShader,
+			MFOGL_ShaderType_GeometryShader
+		};
+
+		GLuint shader = MFRenderer_OpenGL_CompileShader(pCode, type[pShader->shaderType]);
+		pShader->pPlatformData = (void*)(size_t)shader;
+	}
+
 	return true;
 }
 
 void MFShader_DestroyPlatformSpecific(MFShader *pShader)
 {
+	GLuint shader = (GLuint)(size_t)pShader->pPlatformData;
+	glDeleteShader(shader);
 }
 
 #endif // MF_RENDERER

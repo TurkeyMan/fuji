@@ -27,7 +27,7 @@ MFInitStatus Timer_InitModule()
 {
 	DebugMenu_AddItem("Game Playback Rate", "Fuji Options", &playRate, UpdateRate);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void Timer_DeinitModule()

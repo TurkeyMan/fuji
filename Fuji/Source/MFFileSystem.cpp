@@ -247,7 +247,7 @@ MFInitStatus MFFileSystem_InitFileSystems()
 	if(pFilesystemInitCallback)
 		pFilesystemInitCallback();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 uint64 MFFileSystem_RegisterFilesystemModules(int filesystemModule)
@@ -280,7 +280,7 @@ MFInitStatus MFFileSystem_InitModule()
 
 	gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystem_DeinitModule()

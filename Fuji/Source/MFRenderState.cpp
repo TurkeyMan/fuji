@@ -212,7 +212,7 @@ MFInitStatus MFRenderState_InitModule()
 
 	MFRenderState_InitModulePlatformSpecific();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFRenderState_DeinitModule()

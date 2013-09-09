@@ -129,7 +129,7 @@ MFInitStatus MFFont_InitModule()
 
 	gpDebugFont = MFFont_Create("Arial");
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFont_DeinitModule()

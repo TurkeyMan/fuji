@@ -4,7 +4,7 @@
 
 MFInitStatus MFEffect_InitModule()
 {
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFEffect_DeinitModule()

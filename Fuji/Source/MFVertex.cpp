@@ -72,7 +72,7 @@ MFInitStatus MFVertex_InitModule()
 
 	MFVertex_InitModulePlatformSpecific();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFVertex_DeinitModule()

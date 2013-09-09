@@ -19,7 +19,7 @@
 
 MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
 {
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemNative_Register()

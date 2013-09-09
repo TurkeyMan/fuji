@@ -246,7 +246,7 @@ MFInitStatus MFInput_InitModule()
 	MFInput_InitModulePlatformSpecific();
 	MFInput_Update();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFInput_DeinitModule()

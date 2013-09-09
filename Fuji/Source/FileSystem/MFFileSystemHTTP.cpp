@@ -37,7 +37,7 @@ MFInitStatus MFFileSystemHTTP_InitModule()
 		gHTTPFiles.Init("HTTP Files", gDefaults.filesys.maxHTTPFiles, gHTTPFileSize);
 	}
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemHTTP_DeinitModule()

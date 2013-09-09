@@ -157,7 +157,7 @@ MFInitStatus MFSound_InitModule()
 	gAudioThread = MFThread_CreateThread("MFSound Thread", MFSound_UpdateThread, NULL, MFPriority_AboveNormal);
 #endif
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFSound_DeinitModule()

@@ -40,7 +40,7 @@ MFInitStatus MFView_InitModule()
 	pCurrentView = gpViewStack;
 	MFView_SetDefault();
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFView_DeinitModule()

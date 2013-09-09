@@ -31,7 +31,7 @@ MFInitStatus MFFileSystemCachedFile_InitModule()
 
 	hCachedFileSystem = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemCachedFile_DeinitModule()

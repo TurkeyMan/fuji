@@ -15,10 +15,7 @@
 #include "MFMaterial_Internal.h"
 #include "../MFRenderer_D3D9.h"
 #include "Materials/MFMat_Standard_Internal.h"
-
-#include <d3dx9.h>
-
-#include "MFFileSystem.h"
+#include "MFShader_Internal.h"
 
 //#include "../Shaders/Registers.h"
 //#include "../Shaders/MatStandard_s.h"
@@ -28,8 +25,8 @@
 extern IDirect3DDevice9 *pd3dDevice;
 extern D3DCAPS9 gD3D9DeviceCaps;
 
-IDirect3DVertexShader9 *pVS_s = NULL;
-IDirect3DVertexShader9 *pVS_a = NULL;
+MFShader *pVS_s = NULL;
+MFShader *pVS_a = NULL;
 
 static const DWORD sFilterModes[MFTexFilter_Max] =
 {
@@ -61,28 +58,17 @@ static const DWORD sAddressModes[MFTexAddressMode_Max] =
 #define r_animMats 46
 
 static const char gVertexShader[] = "														\n\
-#define c_wvpm c0																			\n\
-#define c_wm c4																				\n\
-#define c_wvm c8																			\n\
-#define c_vpm c12																			\n\
-#define c_tex c16																			\n\
-#define c_modelColour c18																	\n\
-#define c_colourMask c19																	\n\
-#define c_animating c20																		\n\
-#define c_numWeights i0																		\n\
-#define c_animMats c46																		\n\
+float4x4 mLocalToScreen : register(c0);														\n\
+float4x4 mLocalToWorld : register(c4);														\n\
+float4x4 mLocalToView : register(c8);														\n\
+float4x4 mWorldToScreen : register(c12);													\n\
+float4 mAnimMats[70*3] : register(c46);														\n\
+float4 mTexMatrix[2] : register(c16);														\n\
 																							\n\
-float4x4 mLocalToScreen : register(c_wvpm);													\n\
-float4x4 mLocalToWorld : register(c_wm);													\n\
-float4x4 mLocalToView : register(c_wvm);													\n\
-float4x4 mWorldToScreen : register(c_vpm);													\n\
-float4 mAnimMats[70*3] : register(c_animMats);												\n\
-float4 mTexMatrix[2] : register(c_tex);														\n\
+float4 gModelColour : register(c18);														\n\
+float4 gColourMask : register(c19);															\n\
 																							\n\
-float4 gModelColour : register(c_modelColour);												\n\
-float4 gColourMask : register(c_colourMask);												\n\
-																							\n\
-//int gNumWeights : register(c_numWeights);													\n\
+//int gNumWeights : register(i0);															\n\
 																							\n\
 struct VS_INPUT																				\n\
 {																							\n\
@@ -102,7 +88,7 @@ struct VS_OUTPUT																			\n\
 	float4 colour	: COLOR0;																\n\
     																						\n\
 	float4 uv		: TEXCOORD0;															\n\
-float4 uv2		: TEXCOORD1;																\n\
+	float4 uv2		: TEXCOORD1;															\n\
 };																							\n\
 																							\n\
 VS_OUTPUT main(in VS_INPUT input)															\n\
@@ -187,40 +173,10 @@ int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
 	MFCALLSTACK;
 
-	ID3DXBuffer *pShader;
-	ID3DXBuffer *pErrors;
-	ID3DXConstantTable *pConstantTable;
+	pVS_s = MFShader_CreateFromString(MFST_VertexShader, gVertexShader, NULL, "MFMat_Standard_VS_static");
 
-	HRESULT hr = D3DXCompileShader(gVertexShader, sizeof(gVertexShader), NULL, NULL, "main", "vs_2_0", 0, &pShader, &pErrors, &pConstantTable);
-//	HRESULT hr = D3DXCompileShaderFromFile(MFFile_SystemPath("../Sample_Data/mat.vsh"), NULL, NULL, "main", "vs_2_0", D3DXSHADER_DEBUG | D3DXSHADER_OPTIMIZATION_LEVEL0, &pShader, &pErrors, &pConstantTable);
-	if(hr != D3D_OK)
-	{
-		const char *pErrorMessage = (const char*)pErrors->GetBufferPointer();
-
-		// print errors
-		MFDebug_Log(1, pErrorMessage);
-	}
-	else
-	{
-		hr = pd3dDevice->CreateVertexShader((const DWORD*)pShader->GetBufferPointer(), &pVS_s);
-		MFDebug_Assert(hr == D3D_OK, "Couldn't create shader!");
-	}
-
-	D3DXMACRO macros[] = { { "_ANIMATION", "1" }, { NULL, NULL } };
-	hr = D3DXCompileShader(gVertexShader, sizeof(gVertexShader), macros, NULL, "main", "vs_2_0", 0, &pShader, &pErrors, &pConstantTable);
-//	hr = D3DXCompileShaderFromFile(MFFile_SystemPath("../Sample_Data/mat.vsh"), macros, NULL, "main", "vs_2_0", D3DXSHADER_DEBUG | D3DXSHADER_OPTIMIZATION_LEVEL0, &pShader, &pErrors, &pConstantTable);
-	if(hr != D3D_OK)
-	{
-		const char *pErrorMessage = (const char*)pErrors->GetBufferPointer();
-
-		// print errors
-		MFDebug_Log(1, pErrorMessage);
-	}
-	else
-	{
-		hr = pd3dDevice->CreateVertexShader((const DWORD*)pShader->GetBufferPointer(), &pVS_a);
-		MFDebug_Assert(hr == D3D_OK, "Couldn't create shader!");
-	}
+	MFShaderMacro macros[] = { { "_ANIMATION", "1" }, { NULL, NULL } };
+	pVS_a = MFShader_CreateFromString(MFST_VertexShader, gVertexShader, macros, "MFMat_Standard_VS_animated");
 
 	return 0;
 }
@@ -229,8 +185,8 @@ void MFMat_Standard_UnregisterMaterial()
 {
 	MFCALLSTACK;
 
-	pVS_s->Release();
-	pVS_a->Release();
+	MFShader_Release(pVS_s);
+	MFShader_Release(pVS_a);
 }
 
 static void MFMat_Standard_SetSamplerState(int sampler, MFSamplerState *pSamp)
@@ -470,10 +426,10 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		for(uint32 b=0; b<state.matrixBatch.numMatrices; b++)
 			MFRendererPC_SetAnimationMatrix(b, state.animation.pMatrices[state.matrixBatch.pIndices[b]]);
 
-		pd3dDevice->SetVertexShader(pVS_a);
+		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_a->pPlatformData);
 	}
 	else
-		pd3dDevice->SetVertexShader(pVS_s);
+		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_s->pPlatformData);
 
 	return 0;
 }

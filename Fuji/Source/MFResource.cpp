@@ -39,7 +39,7 @@ MFInitStatus MFResource_InitModule()
 
 	gResourceTable.Init(1024, 1024, 1024);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFResource_DeinitModule()

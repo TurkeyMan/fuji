@@ -12,7 +12,7 @@ const char *gPS2SystemPath __attribute__((weak)) = "host:";
 
 MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
 {
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemNative_Register()

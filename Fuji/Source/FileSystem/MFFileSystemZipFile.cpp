@@ -30,7 +30,7 @@ MFInitStatus MFFileSystemZipFile_InitModule()
 
 	hZipFileSystem = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFFileSystemZipFile_DeinitModule()

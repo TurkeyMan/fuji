@@ -12,8 +12,10 @@ void MFShader_DeinitModule();
 void MFShader_InitModulePlatformSpecific();
 void MFShader_DeinitModulePlatformSpecific();
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader);
-void MFShader_DestroyPlatformSpecific();
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource);
+void MFShader_DestroyPlatformSpecific(MFShader *pShader);
+
+void MFShader_Apply(MFShader *pShader);
 
 struct MFShader : MFResource
 {
@@ -21,6 +23,7 @@ struct MFShader : MFResource
 
 	// GPU shaders
 	void *pProgram;
+	size_t bytes;
 
 	// CPU shaders
 	void (*pConfigure)();

@@ -31,7 +31,7 @@ MFInitStatus MFString_InitModule()
 	stringHeap.Init(gStringGroups, sizeof(gStringGroups) / sizeof(gStringGroups[0]));
 	stringPool.Init(sizeof(MFStringData), 128, 128);
 
-	return MFAIC_Succeeded;
+	return MFIS_Succeeded;
 }
 
 void MFString_DeinitModule()
