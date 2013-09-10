@@ -4,14 +4,19 @@
 
 #include "MFEffect.h"
 #include "MFRenderState.h"
-#include "MFShader.h"
+#include "MFShader_Internal.h"
 #include "MFResource.h"
-
-struct MFShader;
 
 // functions
 MFInitStatus MFEffect_InitModule();
 void MFEffect_DeinitModule();
+
+void MFEffect_InitModulePlatformSpecific();
+void MFEffect_DeinitModulePlatformSpecific();
+
+bool MFEffect_CreatePlatformSpecific(MFEffect *pEffect);
+void MFEffect_DestroyPlatformSpecific(MFEffect *pEffect);
+
 
 struct MFEffectTechnique
 {

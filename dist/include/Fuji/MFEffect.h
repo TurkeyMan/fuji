@@ -12,8 +12,8 @@
 
 struct MFEffect;
 
-MFEffect* MFEffect_Create();
-void MFEffect_Destroy(MFEffect *pEffect);
+MF_API MFEffect* MFEffect_Create(const char *pFilename);
+MF_API void MFEffect_Destroy(MFEffect *pEffect);
 
 #endif // _MFEFFECT_H
 
