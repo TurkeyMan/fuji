@@ -513,6 +513,79 @@ MF_API float MFRenderer_GetTexelCenterOffset()
 	return 0.f;
 }
 
+static int SortDefault(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+	
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static int SortBackToFront(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+	
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = pE2->zSort - pE1->zSort;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static int SortFrontToBack(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+	
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = pE1->zSort - pE2->zSort;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static MFRenderSortFunction gSortFunctions[MFRL_SM_Max] =
+{
+	SortDefault,
+	SortFrontToBack,
+	SortBackToFront
+};
+
+void MFRendererInternal_SortElements(MFRenderLayer &layer)
+{
+	qsort(layer.elements.getPointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
+}
+
 #if defined(MF_OPENGL_SUPPORT_SHADERS)
 GLuint MFRenderer_OpenGL_CompileShader(const char *pShader, MFOpenGL_ShaderType shaderType)
 {

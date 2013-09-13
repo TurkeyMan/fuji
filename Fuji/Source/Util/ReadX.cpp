@@ -883,7 +883,7 @@ const char *ParseFrame(const char *pText, const MFMatrix &mat, int parentID)
 		parentID = boneID;
 
 		pBone->name = pName;
-		pBone->parentName = pParent ? pParent->name : NULL;
+		pBone->parentName = pParent ? pParent->name : MFString();
 
 		pBone->worldMatrix = mat;
 	}
