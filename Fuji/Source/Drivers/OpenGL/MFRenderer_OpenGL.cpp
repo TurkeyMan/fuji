@@ -551,9 +551,12 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 		else
 		{
 			MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-			MFDebug_Assert(pZTarget->pTemplateData->pSurfaces[0].pImageData != NULL, "Can't associate default depth buffer with foreign render target!");
+			MFDebug_Assert(pZTarget->pInternalData != NULL, "Can't associate default depth buffer with foreign render target!");
 
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+//			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, (GLuint)(uintp)pZTarget->pInternalData, 0);
+
+			MFDebug_Assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
 		}
 
 		glEnable(GL_DEPTH_TEST);

@@ -41,6 +41,8 @@ GLFormat gGLFormats[] =
 	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },							// ImgFmt_A8B8G8R8
 	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8 },							// ImgFmt_B8G8R8A8
 	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8 },								// ImgFmt_R8G8B8A8
+																				// ImgFmt_R8G8B8
+																				// ImgFmt_B8G8R8
 	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// ImgFmt_A2R10G10B10
 	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// ImgFmt_A2B10G10R10
 	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_A16B16G16R16
@@ -57,6 +59,9 @@ GLFormat gGLFormats[] =
 	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// ImgFmt_ABGR_F32
 	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_I8
 																				// ImgFmt_I4
+	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
+																				// ImgFmt_D24X8
+	{ GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24S8
 	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
 																				// ImgFmt_DXT2
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
@@ -72,6 +77,8 @@ GLFormat gGLFormats[] =
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },										// ImgFmt_A8B8G8R8
 	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_B8G8R8A8
 	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_R8G8B8A8
+																				// ImgFmt_R8G8B8
+																				// ImgFmt_B8G8R8
 	{ 0, GL_BGRA, 0 },															// ImgFmt_A2R10G10B10   **
 	{ 0, GL_RGBA, 0 },															// ImgFmt_A2B10G10R10   **
 	{ 0, GL_RGBA, 0 },															// ImgFmt_A16B16G16R16  **
@@ -88,6 +95,9 @@ GLFormat gGLFormats[] =
 	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F32
 	{ 0, 0, GL_UNSIGNED_BYTE },													// ImgFmt_I8
 																				// ImgFmt_I4
+	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
+																				// ImgFmt_D24X8
+	{ GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24S8
 	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
 																				// ImgFmt_DXT2
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
@@ -243,16 +253,18 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		GLFormat &format = gGLFormats[platformFormat];
 		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
 
-		// create the frame buffer
-		glGenFramebuffers(1, &frameBufferID);
-		glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-		pSurface->pImageData = (char*)(uintp)frameBufferID;
+		if(targetFormat < ImgFmt_D16 || targetFormat > ImgFmt_D24S8)
+		{
+			// create the frame buffer
+			glGenFramebuffers(1, &frameBufferID);
+			glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
+			pSurface->pImageData = (char*)(uintp)frameBufferID;
 
-		// and it to the framebuffer
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
+			// and it to the framebuffer
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
 
-		uint32 status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-		MFDebug_Assert(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
+			MFDebug_Assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
+		}
 
 		if(!MFCheckForOpenGLError())
 			MFDebug_Log(0, "RenderTarget created successfully!");
@@ -264,9 +276,15 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
+	
+	if((pTexture->pTemplateData->flags & TEX_RenderTarget) && pTexture->pTemplateData->pSurfaces[0].pImageData)
+	{
+		GLuint fb = (GLuint)(size_t)pTexture->pInternalData;
+		glDeleteFramebuffers(1, &fb);
+	}
 
-	GLuint *pTextures = (GLuint*)&pTexture->pInternalData;
-	glDeleteTextures(1, pTextures);
+	GLuint texture = (GLuint)(size_t)pTexture->pInternalData;
+	glDeleteTextures(1, &texture);
 }
 
 #endif

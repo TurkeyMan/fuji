@@ -109,9 +109,9 @@ uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),		// ImgFmt_I8
 	MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),											// ImgFmt_I4
 
-	MFBIT(MFRD_D3D9),															// ImgFmt_D16
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D16
 	MFBIT(MFRD_D3D9),															// ImgFmt_D24X8
-	MFBIT(MFRD_D3D9),															// ImgFmt_D24S8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D24S8
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_DXT1 // 1 bit alpha
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_XBox),											// ImgFmt_DXT2
@@ -480,15 +480,15 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		17,	// ImgFmt_I8
 		0,	// ImgFmt_I4
 
-		0,	// ImgFmt_D16
+		18,	// ImgFmt_D16
 		0,	// ImgFmt_D24X8
-		0,	// ImgFmt_D24S8
+		19,	// ImgFmt_D24S8
 
-		18,	// ImgFmt_DXT1
+		20,	// ImgFmt_DXT1
 		0,	// ImgFmt_DXT2
-		19,	// ImgFmt_DXT3
+		21,	// ImgFmt_DXT3
 		0,	// ImgFmt_DXT4
-		20,	// ImgFmt_DXT5
+		22,	// ImgFmt_DXT5
 
 		0,	// ImgFmt_PSP_DXT1
 		0,	// ImgFmt_PSP_DXT3
