@@ -79,6 +79,28 @@ typedef size_t				uintp;
 #endif
 
 /**
+ * Implements a D language 'slice' structure.
+ */
+template<typename T>
+struct DSlice
+{
+	T *ptr;
+	size_t length;
+
+	DSlice() : ptr(NULL), length(0) {}
+	DSlice(const DSlice<T>& from) : ptr(const_cast<T*>(from.ptr)), length(from.length) {}
+	DSlice(const T *ptr, size_t length) : ptr(const_cast<T*>(ptr)) , length(length) {}
+
+	DSlice<T>& operator=(const DSlice<T> &from) { ptr = const_cast<T*>(from.ptr); length = from.length; return *this; }
+
+	T& operator[](size_t index) { return ptr[index]; }
+
+	DSlice<T> slice(size_t start, size_t end) { return DSlice(ptr + start, end - start); }
+	DSlice<T> popFront(size_t count = 1) { return DSlice(ptr + count, length - count); }
+	DSlice<T> popBack(size_t count = 1) { return DSlice(ptr, length - count); }
+};
+
+/**
  * Represents a spatial rectangle.
  */
 struct MFRect

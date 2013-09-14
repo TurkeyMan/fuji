@@ -965,7 +965,7 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 }
 
 // read/write a file to a filesystem
-MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool bAppendNullByte)
+MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t extraBytes)
 {
 	MFCALLSTACK;
 
@@ -979,11 +979,11 @@ MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, bool b
 
 		if(size > 0)
 		{
-			pBuffer = (char*)MFHeap_Alloc((size_t)size + (bAppendNullByte ? 1 : 0));
+			pBuffer = (char*)MFHeap_Alloc((size_t)size + extraBytes);
 
 			int bytesRead = MFFile_Read(hFile, pBuffer, (size_t)size);
 
-			if(bAppendNullByte)
+			if(extraBytes > 0)
 				pBuffer[size] = 0;
 
 			if(pBytesRead)
@@ -1047,6 +1047,24 @@ MF_API bool MFFileSystem_Exists(const char *pFilename)
 	}
 
 	return exists;
+}
+
+MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bAbsolute)
+{
+	MFFile *pFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
+
+	const char *pPath = NULL;
+	if(pFile)
+	{
+		// TODO: support other filesystems that forward to the native filesystem (like cache filesystem?)
+		if(pFile->filesystem == hNativeFileSystem)
+			pPath = MFStr(pFile->fileIdentifier);
+		MFFile_Close(pFile);
+	}
+
+	// TODO: convert to absolute...
+
+	return pPath;
 }
 
 MF_API int MFFileSystem_GetNumVolumes()

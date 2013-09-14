@@ -1,6 +1,11 @@
 #include "Fuji.h"
 #include "MFEffect_Internal.h"
+#include "Asset/MFIntEffect.h"
 #include "MFModule.h"
+#include "MFFileSystem.h"
+#include "MFSystem.h"
+
+#define ALLOW_LOAD_FROM_SOURCE_DATA
 
 static void MFEffect_Destroy(MFResource *pRes)
 {
@@ -37,6 +42,37 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 	if(!pEffect)
 	{
 		int nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
+
+		size_t fileSize;
+		pEffect = (MFEffect*)MFFileSystem_Load(MFStr("%s.bfx", pFilename), &fileSize);
+		if(!pEffect)
+		{
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+			// try to load from source data
+			MFIntEffect *pIE = MFIntEffect_CreateFromSourceData(pFilename);
+			if(pIE)
+			{
+				size_t size;
+				MFIntEffect_CreateRuntimeData(pIE, &pEffect, &size, MFSystem_GetCurrentPlatform());
+
+				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.bfx", pFilename), MFOF_Write | MFOF_Binary);
+				if(pFile)
+				{
+					MFFile_Write(pFile, pEffect, size, false);
+					MFFile_Close(pFile);
+				}
+
+				MFIntEffect_Destroy(pIE);
+			}
+#endif
+
+			if(!pEffect)
+			{
+				MFDebug_Warn(2, MFStr("Effect '%s' does not exist.", pFilename));
+				return NULL;
+			}
+		}
+
 		pEffect = (MFEffect*)MFHeap_AllocAndZero(sizeof(MFEffect) + nameLen);
 
 		if(pFilename)

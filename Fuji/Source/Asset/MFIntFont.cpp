@@ -41,7 +41,7 @@ void MFIntFont_CreateFromSourceData(const char *pFilename, void **ppOutput, size
 		*pSize = 0;
 
 	size_t bytes = 0;
-	char *pBuffer = MFFileSystem_Load(pFilename, &bytes, true);
+	char *pBuffer = MFFileSystem_Load(pFilename, &bytes, 1);
 
 	if(!pBuffer)
 		return;

@@ -844,7 +844,7 @@ void ParseASEFile(char *pFilePtr, F3DFile *_pModel)
 
 int F3DFile::ReadASE(const char *pFilename)
 {
-	char *pMem = MFFileSystem_Load(pFilename, NULL, true);
+	char *pMem = MFFileSystem_Load(pFilename, NULL, 1);
 
 	ParseASEFile(pMem, this);
 	MFHeap_Free(pMem);

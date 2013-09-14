@@ -64,7 +64,7 @@ MF_API MFIntModel *MFIntModel_CreateFromFile(const char *pFilename)
 
 	// load file
 	size_t size;
-	char *pData = MFFileSystem_Load(pFilename, &size, bAppendNull);
+	char *pData = MFFileSystem_Load(pFilename, &size, bAppendNull ? 1 : 0);
 	if(!pData)
 		return NULL;
 

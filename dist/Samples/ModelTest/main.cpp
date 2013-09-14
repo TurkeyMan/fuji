@@ -9,6 +9,8 @@
 #include "Fuji/MFFileSystem.h"
 #include "Fuji/FileSystem/MFFileSystemNative.h"
 
+#include "Fuji/MFEffect.h"
+
 /**** Globals ****/
 
 MFSystemCallbackFunction pInitFujiFS = NULL;
@@ -58,6 +60,8 @@ void Game_Init()
 	// load model
 	pModel = MFModel_CreateWithAnimation("astro");
 	MFDebug_Assert(pModel, "Couldn't load mesh!");
+
+	MFEffect *pEffect = MFEffect_Create("test.mfx");
 }
 
 void Game_Update()

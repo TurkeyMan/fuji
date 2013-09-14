@@ -28,7 +28,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 
 	if(pFilename)
 	{
-		pCode = MFFileSystem_Load(pFilename, &size, true);
+		pCode = MFFileSystem_Load(pFilename, &size, 1);
 	}
 	else if(pSource)
 	{

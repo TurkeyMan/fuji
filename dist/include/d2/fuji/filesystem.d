@@ -362,10 +362,10 @@ extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MF
 * Load a file from the filesystem.
 * @param pFilename The name of the file to load.
 * @param pBytesRead Optional pointer to a size_t that will receive the size of the file loaded.
-* @param bAppendnullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
+* @param @param extraBytes Number of extra bytes to allocate at the end of the buffer. Initialises the first extra byte to 0 (useful for appending a NULL byte to the end of text files).
 * @return Returns a pointer to a new buffer containing the file that was loaded.
 */
-extern (C) char* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, bool bAppendnullByte = false);
+extern (C) char* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, size_t extraBytes = 0);
 
 /**
 * Write a file to a filesystem.

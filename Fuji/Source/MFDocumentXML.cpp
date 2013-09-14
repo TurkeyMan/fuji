@@ -34,7 +34,7 @@ struct MFDocumentXML
 
 MFDocumentXML *MFParseXML_ParseFile(const char *pFilename)
 {
-	char *pBuffer = MFFileSystem_Load(pFilename, NULL, true);
+	char *pBuffer = MFFileSystem_Load(pFilename, NULL, 1);
 	if(!pBuffer)
 		return NULL;
 

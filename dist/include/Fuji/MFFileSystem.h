@@ -381,10 +381,10 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags = MFOF_
  * Load a file from the filesystem.
  * @param pFilename The name of the file to load.
  * @param pBytesRead Optional pointer to a uint32 that will receive the size of the file loaded.
- * @param bAppendNullByte Append a null byte to the end of the file. (Useful when loading text files for parsing)
+ * @param extraBytes Number of extra bytes to allocate at the end of the buffer. Initialises the first extra byte to 0 (useful for appending a NULL byte to the end of text files).
  * @return Returns a pointer to a new buffer containing the file that was loaded.
  */
-MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, bool bAppendNullByte = false);
+MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead = NULL, size_t extraBytes = 0);
 
 /**
  * Write a file to a filesystem.
@@ -412,6 +412,15 @@ MF_API int64 MFFileSystem_GetSize(const char *pFilename);
  * @return Returns true if the file can be found within the mounted filesystem stack.
  */
 MF_API bool MFFileSystem_Exists(const char *pFilename);
+
+/**
+ * Resolve the system path to a file.
+ * Attempts to resolve the path to a given file on the native filesystem.
+ * @param pFilename The filename to resolve.
+ * @param bAbsolute Convert to an absolute path.
+ * @return Returns the system path to the given file, or NULL if the file doesn't reside on the native filesystem.
+ */
+MF_API const char* MFFileSystem_ResolveSystemPath(const char *pFilename, bool bAbsolute = false);
 
 /**
  * Get number of available volumes.

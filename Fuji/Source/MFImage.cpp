@@ -7,8 +7,6 @@
 	#include "hqx.h"
 #endif
 
-#define ALLOW_LOAD_FROM_SOURCE_DATA
-
 extern const char *gpMFImageFormatStrings[ImgFmt_Max];
 extern uint32 gMFImagePlatformAvailability[ImgFmt_Max];
 extern uint32 gMFImageBitsPerPixel[ImgFmt_Max];

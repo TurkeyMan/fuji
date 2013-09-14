@@ -719,6 +719,26 @@ private:
  */
 MFString operator+(const char *pString, const MFString &string);
 
+/**
+ * Implements a D language string.
+ */
+struct DString : public DSlice<char>
+{
+	DString() {}
+	DString(const DSlice<char> &from) : DSlice(from) {}
+	DString(const char *pCString) : DSlice(const_cast<char*>(pCString), MFString_Length(pCString)) { }
+	DString(const MFString &str) : DSlice(const_cast<char*>(str.CStr()), str.NumBytes()) { }
+	DString(const char *pCString, size_t length) : DSlice(const_cast<char*>(pCString), length) { }
+
+	DString& operator=(const DSlice<char> &from) { ptr = const_cast<char*>(from.ptr); length = from.length; return *this; }
+	DString& operator=(const char *pFrom) { ptr = const_cast<char*>(pFrom); length = MFString_Length(pFrom); return *this; }
+	DString& operator=(const MFString &str) { ptr = const_cast<char*>(str.CStr()); length = str.NumBytes(); return *this; }
+
+	bool operator==(const char *pString) { return !MFString_CaseCmpN(ptr, pString, length); }
+
+	operator MFString() { return MFString(ptr, length); }
+};
+
 #include "MFString.inl"
 
 /**

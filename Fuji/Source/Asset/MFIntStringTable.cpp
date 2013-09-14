@@ -56,7 +56,7 @@ MF_API MFIntStringTable *MFIntStringTable_CreateFromFile(const char *pFilename)
 
 	// load file
 	size_t size;
-	char *pData = MFFileSystem_Load(pFilename, &size, true);
+	char *pData = MFFileSystem_Load(pFilename, &size, 1);
 	if(!pData)
 		return NULL;
 

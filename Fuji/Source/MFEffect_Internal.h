@@ -31,7 +31,7 @@ struct MFEffectTechnique
 	uint32 renderStateRequirements[MFSB_CT_TypeCount];
 
 	// compile macros
-	const char **ppMacros;
+	MFShaderMacro *pMacros;
 	int numMacros;
 
 	void *pPlatformData;
