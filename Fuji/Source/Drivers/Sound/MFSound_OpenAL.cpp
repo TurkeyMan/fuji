@@ -6,9 +6,14 @@
 #include "MFSound_Internal.h"
 #include "MFHeap.h"
 
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alext.h>
+#ifdef __APPLE__
+	#include <OpenAL/al.h>
+	#include <OpenAL/alc.h>
+#else
+	#include <AL/al.h>
+	#include <AL/alc.h>
+	#include <AL/alext.h>
+#endif
 
 
 /**** Structures ****/
@@ -175,7 +180,9 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 			pDevices += MFString_Length(pDevices) + 1;
 		}
 
-		MFDebug_Assert(gDefaultOutputDevice >= 0, "OpenAL: No default output device?");
+//		MFDebug_Assert(gDefaultOutputDevice >= 0, "OpenAL: No default output device?");
+		if(gDefaultOutputDevice >= 0)
+			MFDebug_Warn(2, "OpenAL: No default output device?");
 		
 		if(bHasCapture)
 		{

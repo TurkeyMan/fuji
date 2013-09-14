@@ -72,6 +72,7 @@ configuration { "linux" }
 --	links { "portaudio" }
 --	links { "pulse" }
 	links { "openal" }
+	links { "assimp" }
 
 -- OSX --
 configuration { "macosx" }

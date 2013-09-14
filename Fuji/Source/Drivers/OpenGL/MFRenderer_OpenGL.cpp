@@ -122,6 +122,7 @@ int gOpenGLVersion = 0;
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
+static GLint gDefaultRenderTarget = 0;
 static MFTexture gDeviceRenderTarget;
 static MFTextureTemplateData gDeviceRenderTargetTemplate;
 static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
@@ -330,11 +331,13 @@ int MFRenderer_CreateDisplay()
 #endif
 #endif
 
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &gDefaultRenderTarget);
+
 	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
 
 	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
@@ -389,7 +392,7 @@ void MFRenderer_ResetDisplay()
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
 
 	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
@@ -532,7 +535,7 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 
 	GLuint buffer = (GLuint)(uintp)pRenderTarget->pTemplateData->pSurfaces[0].pImageData;
 #if defined(MF_IPHONE)
-	if(buffer == 0)
+	if(buffer == gDefaultRenderTarget)
 		MFRendererIPhone_SetBackBuffer();
 	else
 #endif
@@ -540,16 +543,24 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 
 	if(pZTarget)
 	{
-		MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+		if(buffer == gDefaultRenderTarget)
+		{
+			MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+			MFDebug_Assert(pZTarget->pTemplateData->pSurfaces[0].pImageData == NULL, "Can't associate foreign depth buffer with default render target!");
+		}
+		else
+		{
+			MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+			MFDebug_Assert(pZTarget->pTemplateData->pSurfaces[0].pImageData != NULL, "Can't associate default depth buffer with foreign render target!");
+
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
+		}
 
 		glEnable(GL_DEPTH_TEST);
 	}
 	else
 	{
 		glDisable(GL_DEPTH_TEST);
-
-//		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 	}
 
 	MFCheckForOpenGLError();
