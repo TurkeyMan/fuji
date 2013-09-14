@@ -31,7 +31,7 @@ MF_API void MFDebug_Message(const char *pMessage)
 #endif
 }
 
-#if defined(_FUJI_UTIL)
+#if 1//defined(_FUJI_UTIL)
 
 MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const char *pFile, int line)
 {
