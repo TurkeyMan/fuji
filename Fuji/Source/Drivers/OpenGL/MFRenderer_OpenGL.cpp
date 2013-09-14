@@ -122,6 +122,13 @@ int gOpenGLVersion = 0;
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
+static MFTexture gDeviceRenderTarget;
+static MFTextureTemplateData gDeviceRenderTargetTemplate;
+static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
+static MFTexture gDeviceZTarget;
+static MFTextureTemplateData gDeviceZTargetTemplate;
+static MFTextureSurfaceLevel gDeviceZTargetSurface;
+
 static MFRect gCurrentViewport;
 
 void MFRenderer_InitModulePlatformSpecific()
@@ -133,6 +140,25 @@ void MFRenderer_InitModulePlatformSpecific()
 	glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glXGetProcAddress((const GLubyte*)"glXCreateNewContext");
 	glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glXGetProcAddress((const GLubyte*)"glXMakeContextCurrent");
 #endif
+
+	MFZeroMemory(&gDeviceRenderTarget, sizeof(gDeviceRenderTarget));
+	MFZeroMemory(&gDeviceRenderTargetTemplate, sizeof(gDeviceRenderTargetTemplate));
+	MFZeroMemory(&gDeviceRenderTargetSurface, sizeof(gDeviceRenderTargetSurface));
+	MFZeroMemory(&gDeviceZTarget, sizeof(gDeviceZTarget));
+	MFZeroMemory(&gDeviceZTargetTemplate, sizeof(gDeviceZTargetTemplate));
+	MFZeroMemory(&gDeviceZTargetSurface, sizeof(gDeviceZTargetSurface));
+
+	gDeviceRenderTarget.pTemplateData = &gDeviceRenderTargetTemplate;
+	gDeviceRenderTarget.pName = "Device Render Target";
+	gDeviceRenderTargetTemplate.pSurfaces = &gDeviceRenderTargetSurface;
+	gDeviceRenderTargetTemplate.flags = TEX_RenderTarget;
+	gDeviceRenderTargetTemplate.mipLevels = 1;
+
+	gDeviceZTarget.pTemplateData = &gDeviceZTargetTemplate;
+	gDeviceZTarget.pName = "Device Depth Stencil";
+	gDeviceZTargetTemplate.pSurfaces = &gDeviceZTargetSurface;
+	gDeviceZTargetTemplate.flags = TEX_RenderTarget;
+	gDeviceZTargetTemplate.mipLevels = 1;
 }
 
 void MFRenderer_DeinitModulePlatformSpecific()
@@ -304,6 +330,18 @@ int MFRenderer_CreateDisplay()
 #endif
 #endif
 
+	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+
+	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+
 	return 0;
 }
 
@@ -347,6 +385,18 @@ void MFRenderer_DestroyDisplay()
 
 void MFRenderer_ResetDisplay()
 {
+	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+
+	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+	
 	MFRenderer_ResetViewport();
 }
 
@@ -466,12 +516,12 @@ MF_API void MFRenderer_ResetViewport()
 
 MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
 {
-	return NULL;
+	return &gDeviceRenderTarget;
 }
 
 MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
 {
-	return NULL;
+	return &gDeviceZTarget;
 }
 
 MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
