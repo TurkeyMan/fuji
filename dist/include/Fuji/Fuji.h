@@ -224,6 +224,17 @@
 	#else
 		#error "Unknown architecture?!"
 	#endif
+#elif defined(__linux) || defined(__linux__) || defined(__gnu_linux__) || linux == 1
+	#define MF_LINUX
+	#define MF_PLATFORM LINUX
+
+	#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
+		#define MF_ARCH_X64
+	#elif defined(__i386__) || defined(__i386) || defined(_M_IX86)
+		#define MF_ARCH_X86
+	#else
+		#error "Couldn't detect target architecture!"
+	#endif
 #elif defined(__SH4__) || defined(__SH4_SINGLE_ONLY__)
 	#define MF_ARCH_SH4
 
@@ -239,9 +250,9 @@
 	#define MF_64BIT
 #elif defined(__ppc) || defined(__powerpc__) || defined(__PowerPC__) || defined(__PPC__) || defined(__ppc__)
 	#define MF_ARCH_PPC
-#elif defined(__x86_64__)
+#elif defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
 	#define MF_ARCH_X64
-#elif defined(__i386__) || defined(_M_IX86)
+#elif defined(__i386__) || defined(__i386) || defined(_M_IX86)
 	#define MF_ARCH_X86
 #else
 	#error "Couldn't detect target architecture!"
@@ -271,9 +282,6 @@
 
 // if the architecture didn't specify a platform, try and detect one
 #if !defined(MF_PLATFORM)
-	// check OSX, assume linux for now
-//	#define MF_LINUX
-//	#define MF_PLATFORM LINUX
 	#error "Unknown platform!"
 #endif
 
@@ -305,6 +313,12 @@
 
 	// disable C-linkage returning UDT (user data type)
 	#pragma warning(disable:4190)
+#elif defined(MF_COMPILER_GCC)
+	// disable strict-aliasing complaint
+	#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+	
+	// stop complaining about variable format strings
+	#pragma GCC diagnostic ignored "-Wformat-security"
 #elif defined(MF_COMPILER_CLANG)
 	// disable C-linkage returning UDT (user data type)
 	#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"

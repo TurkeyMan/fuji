@@ -1,1 +1,1 @@
-dist/bin/premake4 gmake
+premake4 gmake

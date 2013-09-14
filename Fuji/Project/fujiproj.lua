@@ -40,20 +40,20 @@ project (projName)
 	excludes { "../Source/Images/**" }
 
 	-- include some middleware directly --
-	files { "../Middleware/zlib/minizip/**.h", "../Middleware/zlib/minizip/**.c" }
-	includedirs { "../Middleware/zlib" }
+	includedirs { "../Middleware/" }
+	files { "../Middleware/minizip/**.h", "../Middleware/minizip/**.c" }
 	configuration { "not linux" }
 		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
 	if os.get() ~= "linux" then
-	configuration { "not linux", "not macosx", "not Android" }
-		files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
-		includedirs { "../Middleware/zlib" }
-		files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
-		includedirs { "../Middleware/libpng-1.5.0/" }
-		files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
+		configuration { "not linux", "not macosx", "not Android" }
+			files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
+			includedirs { "../Middleware/zlib" }
+			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+			includedirs { "../Middleware/libpng-1.5.0/" }
+			files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
 	end
-	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
-		includedirs { "../Middleware/" }
+--	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
+--		includedirs { "../Middleware/" }
 	configuration { }
 
 	-- project configuration --
