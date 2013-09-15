@@ -18,9 +18,10 @@
 	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_D3D11
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D11
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D11
+	#define MFRendererInternal_SortElements MFRendererInternal_SortElements_D3D11
 #endif
 
-#include "MFRenderer.h"
+#include "MFRenderer_Internal.h"
 #include "MFRenderer_D3D11.h"
 #include "MFTexture_Internal.h"
 #include "MFDisplay_Internal.h"
@@ -332,6 +333,79 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return 0.5f;
+}
+
+static int SortDefault(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static int SortBackToFront(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE2->zSort - pE1->zSort;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static int SortFrontToBack(const void *p1, const void *p2)
+{
+	MFRenderElement *pE1 = (MFRenderElement*)p1;
+	MFRenderElement *pE2 = (MFRenderElement*)p2;
+
+	int pred = pE1->primarySortKey - pE2->primarySortKey;
+	if(pred) return pred;
+    pred = pE1->zSort - pE2->zSort;
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pViewState - (char*)pE1->pViewState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pEntityState - (char*)pE1->pEntityState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialOverrideState - (char*)pE1->pMaterialOverrideState);
+	if(pred) return pred;
+	pred = (int)((char*)pE2->pMaterialState - (char*)pE1->pMaterialState);
+	return pred;
+}
+
+static MFRenderSortFunction gSortFunctions[MFRL_SM_Max] =
+{
+  SortDefault,
+  SortFrontToBack,
+  SortBackToFront
+};
+
+void MFRendererInternal_SortElements(MFRenderLayer &layer)
+{
+	qsort(layer.elements.getPointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
 }
 
 void MFRenderer_D3D11_SetWorldToScreenMatrix(const MFMatrix &worldToScreen)

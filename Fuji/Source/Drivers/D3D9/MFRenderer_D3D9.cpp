@@ -18,6 +18,7 @@
 	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_D3D9
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D9
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D9
+	#define MFRendererInternal_SortElements MFRendererInternal_SortElements_D3D9
 
 	//MFTexture
 	#define MFTexture_Release MFTexture_Release_D3D9

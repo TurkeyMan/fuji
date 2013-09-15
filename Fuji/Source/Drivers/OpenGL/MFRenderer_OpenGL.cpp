@@ -18,6 +18,7 @@
 	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_OpenGL
 	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_OpenGL
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_OpenGL
+	#define MFRendererInternal_SortElements MFRendererInternal_SortElements_OpenGL
 #endif
 
 #include "MFSystem_Internal.h"
@@ -122,7 +123,7 @@ int gOpenGLVersion = 0;
 	extern "C" int MFRendererIPhone_SwapBuffers();
 #endif
 
-static GLint gDefaultRenderTarget = 0;
+static GLuint gDefaultRenderTarget = 0;
 static MFTexture gDeviceRenderTarget;
 static MFTextureTemplateData gDeviceRenderTargetTemplate;
 static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
@@ -331,7 +332,7 @@ int MFRenderer_CreateDisplay()
 #endif
 #endif
 
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &gDefaultRenderTarget);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&gDefaultRenderTarget);
 
 	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;

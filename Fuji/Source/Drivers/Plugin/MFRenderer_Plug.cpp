@@ -22,7 +22,8 @@
 	MF_API MFTexture* MFRenderer_GetDeviceRenderTarget_##driver(); \
 	MF_API MFTexture* MFRenderer_GetDeviceDepthStencil_##driver(); \
 	MF_API void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
-	MF_API float MFRenderer_GetTexelCenterOffset_##driver();
+	MF_API float MFRenderer_GetTexelCenterOffset_##driver(); \
+	void MFRendererInternal_SortElements_##driver(MFRenderLayer &layer);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -41,7 +42,8 @@
 		MFRenderer_GetDeviceRenderTarget_##driver, \
 		MFRenderer_GetDeviceDepthStencil_##driver, \
 		MFRenderer_SetRenderTarget_##driver, \
-		MFRenderer_GetTexelCenterOffset_##driver \
+		MFRenderer_GetTexelCenterOffset_##driver, \
+		MFRendererInternal_SortElements_##driver \
 	},
 
 // declare the available plugins
@@ -74,6 +76,7 @@ struct MFRenderPluginCallbacks
 	MFTexture* (*pGetDeviceDepthStencil)();
 	void (*pSetRenderTarget)(MFTexture *pRenderTarget, MFTexture *pZTarget);
 	float (*pGetTexelCenterOffset)();
+	void (*pSortElements)(MFRenderLayer &layer);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -184,6 +187,11 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 MF_API float MFRenderer_GetTexelCenterOffset()
 {
 	return gpCurrentRenderPlugin->pGetTexelCenterOffset();
+}
+
+void MFRendererInternal_SortElements(MFRenderLayer &layer)
+{
+	return gpCurrentRenderPlugin->pSortElements(layer);
 }
 
 #endif // MF_RENDERER
