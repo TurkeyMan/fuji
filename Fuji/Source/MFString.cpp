@@ -1271,6 +1271,14 @@ MFString& MFString::Truncate(int length)
 	return *this;
 }
 
+MFString MFString::GetExtension() const
+{
+	int dot = FindCharReverse('.');
+	if(dot > FindCharReverse('/') && dot > FindCharReverse('\\'))
+		return SubStr(dot);
+	return MFString();
+}
+
 MFString& MFString::TruncateExtension()
 {
 	int dot = FindCharReverse('.');

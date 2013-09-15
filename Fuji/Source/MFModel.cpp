@@ -238,7 +238,7 @@ MFMeshChunk* MFModel_GetMeshChunkInternal(MFModelTemplate *pModelTemplate, int s
 		MFDebug_Assert(subobjectIndex < pChunk->count, "Subobject index out of bounds.");
 		MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 
-		MFDebug_Assert(meshChunkIndex < pSubobjects->numMeshChunks, "Mesh chunk index out of bounds.");
+		MFDebug_Assert(meshChunkIndex < pSubobjects[subobjectIndex].numMeshChunks, "Mesh chunk index out of bounds.");
 		MFMeshChunk_Current *pMC = (MFMeshChunk_Current*)pSubobjects[subobjectIndex].pMeshChunks;
 		return &pMC[meshChunkIndex];
 	}
@@ -497,12 +497,12 @@ MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet,
 
 		for(int m = 0; m < sub.numMeshChunks; ++m)
 		{
-			MFMeshChunk &mc = sub.pMeshChunks[m];
+			MFMeshChunk *pMC = MFModel_GetMeshChunkInternal(pModel->pTemplate, s, m);
 
-			if(mc.pIndexBuffer)
-				MFRenderLayer_AddIndexedVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numIndices, MFPT_TriangleList, mc.pMaterial, pModel->pEntityState, pMaterialOverride, pView);
+			if(pMC->pIndexBuffer)
+				MFRenderLayer_AddIndexedVertices(pLayerSet->pSolidLayer, pMC->pGeomState, 0, pMC->numIndices, MFPT_TriangleList, pMC->pMaterial, pModel->pEntityState, pMaterialOverride, pView);
 			else
-				MFRenderLayer_AddVertices(pLayerSet->pSolidLayer, mc.pGeomState, 0, mc.numVertices, MFPT_TriangleList, mc.pMaterial, pModel->pEntityState, pMaterialOverride, pView);
+				MFRenderLayer_AddVertices(pLayerSet->pSolidLayer, pMC->pGeomState, 0, pMC->numVertices, MFPT_TriangleList, pMC->pMaterial, pModel->pEntityState, pMaterialOverride, pView);
 		}
 	}
 }

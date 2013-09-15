@@ -1191,10 +1191,10 @@ MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 			MFString_Copy(pFindData->pFilename, pFind->pMount->pEntries[id].pName);
 			MFString_Copy(pFindData->pSystemPath, (char*)pFind->pMount->pEntries[id].pFilesysData);
 
-			pFindData->fileSize = ((pFind->pMount->pEntries[id].flags & MFTF_Directory) ? MFFA_Directory : 0) |
+			pFindData->attributes = ((pFind->pMount->pEntries[id].flags & MFTF_Directory) ? MFFA_Directory : 0) |
 									((pFind->pMount->pEntries[id].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
 									((pFind->pMount->pEntries[id].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
-			pFindData->attributes = pFind->pMount->pEntries[id].size;
+			pFindData->fileSize = pFind->pMount->pEntries[id].size;
 
 			pFind->pFilesystemData = (void*)id;
 		}

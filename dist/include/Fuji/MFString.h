@@ -695,6 +695,7 @@ public:
 
 	MFString SubStr(int offset, int count = -1) const;
 	MFString& Truncate(int length);
+	MFString GetExtension() const;
 	MFString& TruncateExtension();
 	MFString& ClearRange(int offset, int length);
 

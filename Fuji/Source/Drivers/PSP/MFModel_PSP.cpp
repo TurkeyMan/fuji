@@ -44,7 +44,7 @@ MF_API void MFModel_Draw(MFModel *pModel)
 		{
 			for(int b=0; b<pSubobjects[a].numMeshChunks; b++)
 			{
-				MFMeshChunk_PSP *pMC = (MFMeshChunk_PSP*)&pSubobjects[a].pMeshChunks[b];
+				MFMeshChunk_PSP *pMC = (MFMeshChunk_PSP*)MFModel_GetMeshChunkInternal(pModel->pTemplate, a, b);
 
 				if(!pMatOverride)
 					MFMaterial_SetMaterial(pMC->pMaterial);
