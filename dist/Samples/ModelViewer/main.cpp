@@ -21,37 +21,13 @@ MFRenderer *pRenderer = NULL;
 
 MFModel *pModel;
 
-
-/**** Functions ****/
-
-void Game_InitFilesystem()
-{
-	// mount the sample assets directory
-	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
-	MFMountDataNative mountData;
-	mountData.cbSize = sizeof(MFMountDataNative);
-	mountData.priority = MFMP_Normal;
-	mountData.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
-	mountData.pMountpoint = "game";
-#if defined(MF_IPHONE)
-	mountData.pPath = MFFile_SystemPath();
-#else
-	mountData.pPath = MFFile_SystemPath("../Sample_Data/");
-#endif
-	MFFileSystem_Mount(hNative, &mountData);
-
-	mountData.flags = MFMF_DontCacheTOC;
-	mountData.pMountpoint = "data";
-	mountData.pPath = MFFile_SystemPath();
-	MFFileSystem_Mount(hNative, &mountData);
-
-	if(pInitFujiFS)
-		pInitFujiFS();
-}
-
 MFArray<MFString> models;
 int menuIndex = 0;
 bool bShowModel = false;
+
+float yaw = 0.f;
+float pitch = 0.f;
+float zoom = 5.f;
 
 const char* ppFormats[] =
 {
@@ -80,6 +56,34 @@ const char* ppFormats[] =
 	".m3",
 	".3d"
 };
+
+
+/**** Functions ****/
+
+void Game_InitFilesystem()
+{
+	// mount the sample assets directory
+	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
+	MFMountDataNative mountData;
+	mountData.cbSize = sizeof(MFMountDataNative);
+	mountData.priority = MFMP_Normal;
+	mountData.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
+	mountData.pMountpoint = "game";
+#if defined(MF_IPHONE)
+	mountData.pPath = MFFile_SystemPath();
+#else
+	mountData.pPath = MFFile_SystemPath("../Sample_Data/");
+#endif
+	MFFileSystem_Mount(hNative, &mountData);
+
+	mountData.flags = MFMF_DontCacheTOC;
+	mountData.pMountpoint = "data";
+	mountData.pPath = MFFile_SystemPath();
+	MFFileSystem_Mount(hNative, &mountData);
+
+	if(pInitFujiFS)
+		pInitFujiFS();
+}
 
 void Scan(MFString path)
 {
@@ -158,13 +162,21 @@ void Game_Update()
 			return;
 		}
 
+		if(MFInput_Read(Mouse_LeftButton, IDD_Mouse) > 0.f)
+		{
+			yaw += -MFInput_Read(Mouse_XDelta, IDD_Mouse) * 0.02f;
+			pitch += -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.015f;
+		}
+		if(MFInput_Read(Mouse_MiddleButton, IDD_Mouse) > 0.f)
+		{
+			zoom *= 1.f + -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.02f;
+		}
+
 		// calculate a spinning world matrix
 		MFMatrix world;
-		world.SetTranslation(MakeVector(0, -5, 50));
-
-		static float rotation = 0.0f;
-		rotation += MFSystem_TimeDelta();
-		world.RotateY(rotation);
+		world.SetTranslation(MakeVector(0, -0.25f, 1) * zoom);
+		world.RotateY(yaw);
+		world.RotateX(pitch);
 
 		// set world matrix to the model
 		MFModel_SetWorldMatrix(pModel, world);
