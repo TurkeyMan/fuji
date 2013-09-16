@@ -190,31 +190,190 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
  */
 MF_API void MFRenderer_Destroy(MFRenderer *pRenderer);
 
+/**
+ * Set a global stateblock.
+ * Assign a global stateblock to a renderer.
+ * @param pRenderer MFRenderer instance.
+ * @param pGlobal A stateblock to be assigned as the global stateblock.
+ * @return The previously set global stateblock.
+ * @see MFRenderer_SetOverrideStateBlock()
+ */
 MF_API const MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer *pRenderer, const MFStateBlock *pGlobal);
+
+/**
+ * Set an override stateblock.
+ * Assign an override stateblock to a renderer.
+ * @param pRenderer MFRenderer instance.
+ * @param pOverride A stateblock to be assigned as the override stateblock.
+ * @return The previously set override stateblock.
+ * @see MFRenderer_SetGlobalStateBlock()
+ */
 MF_API const MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer *pRenderer, const MFStateBlock *pOverride);
 
+/**
+ * Assign a render layer set.
+ * Assigns a render layer set to a renderer.
+ * @param pRenderer MFRenderer instance.
+ * @param pLayerSet The layer set to use in following rendering calls.
+ * @return None.
+ */
 MF_API void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet *pLayerSet);
 
+/**
+ * Get a render layer.
+ * Gets a render layer.
+ * @param pRenderer MFRenderer instance.
+ * @param layer Index of the render layer.
+ * @return The requested render layer.
+ */
 MF_API MFRenderLayer* MFRenderer_GetLayer(MFRenderer *pRenderer, int layer);
+
+/**
+ * Get the debug render layer.
+ * Gets the debug render layer.
+ * @param pRenderer MFRenderer instance.
+ * @return The debug render layer.
+ * @remarks The debug layer is the final render layer, which may be used to render any debug information to the screen.
+ */
 MF_API MFRenderLayer* MFRenderer_GetDebugLayer(MFRenderer *pRenderer);
 
+/**
+ * Clone a render layer.
+ * Clones a render layer into another render layer. This operation includes all render elements submitted for rendering.
+ * @param pRenderer MFRenderer instance.
+ * @param sourceLayer Index of the layer to copy from.
+ * @param destLayer Index of the layer to write to. Existing contents will be lost.
+ * @return None.
+ */
 MF_API void MFRenderer_CloneLayer(MFRenderer *pRenderer, int sourceLayer, int destLayer);
 
+/**
+ * Build the GPU command buffers.
+ * Builds the GPU command buffers from the current renderer state.
+ * @param pRenderer MFRenderer instance.
+ * @return None.
+ */
 MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer);
+
+/**
+ * Submit renderer to the GPU for rendering.
+ * Submits the renderer's command buffers to the GPU for rendering.
+ * @param pRenderer MFRenderer instance.
+ * @return None.
+ */
 MF_API void MFRenderer_Kick(MFRenderer *pRenderer);
 
+/**
+ * Make a renderer current.
+ * Makes a renderer 'current'. It will be used in any following render calls.
+ * @param pRenderer MFRenderer instance.
+ * @return The previous 'current' renderer.
+ */
 MF_API MFRenderer* MFRenderer_SetCurrent(MFRenderer *pRenderer);
+
+/**
+ * Get the current renderer.
+ * Returns the current renderer.
+ * @return The current renderer.
+ */
 MF_API MFRenderer* MFRenderer_GetCurrent();
 
+/**
+ * Submit a mesh for rendering.
+ * Submits a mesh for rendering.
+ * @param pMesh Pointer to an \a MFMesh to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
+ * @ see MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
+ */
 MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit a model for rendering.
+ * Submits a model for rendering.
+ * @param pModel Model to render.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @remarks The current layer set will be used to choose render layers for each subobject depending on mesh and material properties.
+ * @ see MFRenderer_AddMesh(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
+ */
 MF_API void MFRenderer_AddModel(MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit vertices for rendering.
+ * Submits vertices for rendering.
+ * @param pMeshStateBlock Pointer to a mesh stateblock. This should contain at least a VertexDeclaration and VertexBuffer states.
+ * @param firstVertex Offset of the first vertex to render.
+ * @param numVertices Number of vertices to render.
+ * @param primType Type of primitives to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
+ * @ see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
+ */
 MF_API void MFRenderer_AddVertices(const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit indexed vertices for rendering.
+ * Submits indexed vertices for rendering.
+ * @param pMeshStateBlock Pointer to a mesh stateblock. This should contain at least a VertexDeclaration, an IndexBuffer, and VertexBuffer states.
+ * @param firstIndex Offset of the first index to render.
+ * @param numVertices Number of vertices to render.
+ * @param primType Type of primitives to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
+ * @ see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
+ */
 MF_API void MFRenderer_AddIndexedVertices(const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
+/**
+ * Set a render layer stateblock.
+ * Assign a render layer stateblock.
+ * @param pLayer An MFRenderLayer.
+ * @param pState A stateblock to be assigned as the layer stateblock.
+ * @return None.
+ */
 MF_API void MFRenderLayer_SetLayerStateBlock(MFRenderLayer *pLayer, const MFStateBlock *pState);
+
+/**
+ * Set the render layer sort mode.
+ * Sets the render layer sort mode, which controls sorting of render elements within the layer.
+ * @param pLayer An MFRenderLayer.
+ * @param sortMode The sort more for the layer.
+ * @return None.
+ */
 MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
 
+/**
+ * Set a render layer's render target.
+ * Sets a render layer's render target.
+ * @param pLayer An MFRenderLayer.
+ * @param targetIndex Render target index.
+ * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the render target.
+ * @return None.
+ */
 MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+
+/**
+ * Set a render layer's depth target.
+ * Sets a render layer's depth target.
+ * @param pLayer An MFRenderLayer.
+ * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the depth target.
+ * @return None.
+ * @remarks \a pTexture should be a compatible z-buffer format. Use 
+ */
 MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
 MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
 MF_API void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);

@@ -15,52 +15,60 @@
  */
 enum MFImageFormat
 {
-	ImgFmt_Unknown = -1, /**< Unknown image format */
+	ImgFmt_Unknown = -1,	/**< Unknown image format */
 
-	ImgFmt_A8R8G8B8,	/**< 32bit BGRA format */
-	ImgFmt_A8B8G8R8,	/**< 32bit RGBA format */
-	ImgFmt_B8G8R8A8,	/**< 32bit ARGB format */
-	ImgFmt_R8G8B8A8,	/**< 32bit ABGR format */
+	ImgFmt_A8R8G8B8,		/**< 32bit BGRA format */
+	ImgFmt_A8B8G8R8,		/**< 32bit RGBA format */
+	ImgFmt_B8G8R8A8,		/**< 32bit ARGB format */
+	ImgFmt_R8G8B8A8,		/**< 32bit ABGR format */
 
-	ImgFmt_R8G8B8,	/**< 24bit BGR format */
-	ImgFmt_B8G8R8,	/**< 24bit RGB format */
+	ImgFmt_R8G8B8,			/**< 24bit BGR format */
+	ImgFmt_B8G8R8,			/**< 24bit RGB format */
 
-	ImgFmt_A2R10G10B10,	/**< 32bit BGRA format with 10 bits per colour channel */
-	ImgFmt_A2B10G10R10,	/**< 32bit RGBA format with 10 bits per colour channel */
+	ImgFmt_A2R10G10B10,		/**< 32bit BGRA format with 10 bits per colour channel */
+	ImgFmt_A2B10G10R10,		/**< 32bit RGBA format with 10 bits per colour channel */
 
-	ImgFmt_A16B16G16R16, /**< 64bit RGBA format with 16 bits per colour channel */
+	ImgFmt_A16B16G16R16,	/**< 64bit RGBA format with 16 bits per colour channel */
 
-	ImgFmt_R5G6B5,		/**< 16bit BGR format with no alpha */
-	ImgFmt_R6G5B5,		/**< 16bit BGR format with no alpha and 6 bits for red */
-	ImgFmt_B5G6R5,		/**< 16bit RGB format with no alpha */
+	ImgFmt_R5G6B5,			/**< 16bit BGR format with no alpha */
+	ImgFmt_R6G5B5,			/**< 16bit BGR format with no alpha and 6 bits for red */
+	ImgFmt_B5G6R5,			/**< 16bit RGB format with no alpha */
 
-	ImgFmt_A1R5G5B5,	/**< 16bit BGRA format with 1 bit alpha */
-	ImgFmt_R5G5B5A1,	/**< 16bit ABGR format with 1 bit alpha */
-	ImgFmt_A1B5G5R5,	/**< 16bit RGBA format with 1 bit alpha */
+	ImgFmt_A1R5G5B5,		/**< 16bit BGRA format with 1 bit alpha */
+	ImgFmt_R5G5B5A1,		/**< 16bit ABGR format with 1 bit alpha */
+	ImgFmt_A1B5G5R5,		/**< 16bit RGBA format with 1 bit alpha */
 
-	ImgFmt_A4R4G4B4,	/**< 16bit BGRA format with 4 bits per colour channel */
-	ImgFmt_A4B4G4R4,	/**< 16bit RGBA format with 4 bits per colour channel */
-	ImgFmt_R4G4B4A4,	/**< 16bit ABGR format with 4 bits per colour channel */
+	ImgFmt_A4R4G4B4,		/**< 16bit BGRA format with 4 bits per colour channel */
+	ImgFmt_A4B4G4R4,		/**< 16bit RGBA format with 4 bits per colour channel */
+	ImgFmt_R4G4B4A4,		/**< 16bit ABGR format with 4 bits per colour channel */
 
-	ImgFmt_ABGR_F16,	/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
-	ImgFmt_ABGR_F32,	/**< 128bit RGBA floating point format */
+	ImgFmt_ABGR_F16,		/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
+	ImgFmt_ABGR_F32,		/**< 128bit RGBA floating point format */
 
-	ImgFmt_I8,			/**< 8bit paletted format */
-	ImgFmt_I4,			/**< 4bit paletted format */
+	ImgFmt_R11G11B10_F,		/**< 32bit RGB floating point format - each component has 5bit exponent, no sign */
+	ImgFmt_R9G9B9_E5,		/**< 32bit RGB floating point format with shared exponent, no sign */
 
-	ImgFmt_D16,			/**< 16bit depth format */
-	ImgFmt_D24X8,		/**< 24bit depth format */
-	ImgFmt_D24S8,		/**< 24bit depth format with 8bit stencil */
+	ImgFmt_I8,				/**< 8bit paletted format */
+	ImgFmt_I4,				/**< 4bit paletted format */
 
-	ImgFmt_DXT1,		/**< Compressed DXT1 image */
-	ImgFmt_DXT2,		/**< Compressed DXT2 image */
-	ImgFmt_DXT3,		/**< Compressed DXT3 image */
-	ImgFmt_DXT4,		/**< Compressed DXT4 image */
-	ImgFmt_DXT5,		/**< Compressed DXT5 image */
+	ImgFmt_D16,				/**< 16bit depth format */
+	ImgFmt_D15S1,			/**< 15bit depth format with 1bit stencil */
+	ImgFmt_D24X8,			/**< 24bit depth format */
+	ImgFmt_D24S8,			/**< 24bit depth format with 8bit stencil */
+	ImgFmt_D24FS8,			/**< 24bit floating point depth format with 8bit stencil */
+	ImgFmt_D32,				/**< 32bit depth format */
+	ImgFmt_D32F,			/**< 32bit floating point depth format */
+	ImgFmt_D32FS8X24,		/**< 32bit floating point depth format with 8bit stencil */
 
-	ImgFmt_PSP_DXT1,	/**< Special DXT1 for PSP */
-	ImgFmt_PSP_DXT3,	/**< Special DXT3 for PSP */
-	ImgFmt_PSP_DXT5,	/**< Special DXT5 for PSP */
+	ImgFmt_DXT1,			/**< Compressed DXT1 image */
+	ImgFmt_DXT2,			/**< Compressed DXT2 image */
+	ImgFmt_DXT3,			/**< Compressed DXT3 image */
+	ImgFmt_DXT4,			/**< Compressed DXT4 image */
+	ImgFmt_DXT5,			/**< Compressed DXT5 image */
+
+	ImgFmt_PSP_DXT1,		/**< Special DXT1 for PSP */
+	ImgFmt_PSP_DXT3,		/**< Special DXT3 for PSP */
+	ImgFmt_PSP_DXT5,		/**< Special DXT5 for PSP */
 
 	// platform specific swizzled formats
 	ImgFmt_XB_A8R8G8B8s,	/**< 32bit BGRA format, swizzled for XBox */
@@ -91,13 +99,19 @@ enum MFImageFormat
 
 	ImgFmt_Max,				/**< Max image format */
 
-	ImgFmt_SelectNicest = 0x1000,			/**< Select the nicest format. */
-	ImgFmt_SelectNicest_NoAlpha = 0x1001,	/**< Select the nicest format with no alpha channel. */
-	ImgFmt_SelectFastest = 0x1002,			/**< Select the fastest format. */
-	ImgFmt_SelectFastest_Masked = 0x1003,	/**< Select the fastest format requiring only a single bit of alpha. */
-	ImgFmt_SelectFastest_NoAlpha = 0x1004,	/**< Select the fastest format with no alpha channel. */
+	ImgFmt_SelectDefault = 0x1000,		/**< Select the default format. It will be a format that performs well without sacrificing quality, and contains alpha. */
+	ImgFmt_SelectNicest = 0x1001,		/**< Select the nicest format. */
+	ImgFmt_SelectFastest = 0x1002,		/**< Select the fastest format. */
+	ImgFmt_SelectHDR = 0x1003,			/**< Select a HDR format. */
 
-	ImgFmt_ForceInt = 0x7FFFFFFF			/**< Force image format to int type */
+	ImgFmt_SelectNoAlpha = 0x1004,		/**< Select a format with no alpha. */
+	ImgFmt_Select1BitAlpha = 0x1008,	/**< Select a format optimised for 1-bit alpha. */
+
+	ImgFmt_SelectRenderTarget = 0x1010,	/**< Select a format that can be used as a render target. */
+	ImgFmt_SelectDepth = 0x1020,		/**< Select a format that can be used as a depth target. */
+	ImgFmt_SelectDepthStencil = 0x1030,	/**< Select a format that can be used as a depth and stencil target. */
+
+	ImgFmt_ForceInt = 0x7FFFFFFF		/**< Force image format to int type */
 };
 
 /**

@@ -31,12 +31,20 @@ const char *gpMFImageFormatStrings[ImgFmt_Max] =
 	"ABGR_F16",
 	"ABGR_F32",
 
+	"R11G11B10_F",
+	"R9G9B9_E5",
+
 	"I8",
 	"I4",
 
 	"D16",
+	"D15S1",
 	"D24X8",
 	"D24S8",
+	"D24FS8",
+	"D32",
+	"D32F",
+	"D32FS8X24",
 
 	"DXT1",
 	"DXT2",
@@ -78,46 +86,54 @@ const char *gpMFImageFormatStrings[ImgFmt_Max] =
 
 uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 {
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_A8R8G8B8
-	MFBIT(MFRD_PSP)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PS2),	// ImgFmt_A8B8G8R8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_XBox),		// ImgFmt_A8R8G8B8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox)|MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),	// ImgFmt_A8B8G8R8
 	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),										// ImgFmt_B8G8R8A8
 	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),										// ImgFmt_R8G8B8A8
 
 	MFBIT(MFRD_D3D9),															// ImgFmt_R8G8B8
 	0,																			// ImgFmt_B8G8R8
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_A2R10G10B10
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_A2B10G10R10
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_A2R10G10B10
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_A2B10G10R10
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_A16B16G16R16
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_A16B16G16R16
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_R5G6B5
-	MFBIT(MFRD_XBox),															// ImgFmt_R6G5B5
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_R5G6B5
+	MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),											// ImgFmt_R6G5B5
 	MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP),											// ImgFmt_B5G6R5
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_A1R5G5B5
-	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),										// ImgFmt_R5G5B5A1
-	MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2)|MFBIT(MFRD_OpenGL),							// ImgFmt_A1B5G5R5
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_A1R5G5B5
+	MFBIT(MFRD_OpenGL)|MFBIT(MFRD_XBox),										// ImgFmt_R5G5B5A1
+	MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),							// ImgFmt_A1B5G5R5
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),						// ImgFmt_A4R4G4B4
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),		// ImgFmt_A4R4G4B4
 	MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP),											// ImgFmt_A4B4G4R4
-	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),										// ImgFmt_R4G4B4A4
+	MFBIT(MFRD_OpenGL)|MFBIT(MFRD_XBox),										// ImgFmt_R4G4B4A4
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_ABGR_F16
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_ABGR_F32
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_ABGR_F16
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_ABGR_F32
+
+	MFBIT(MFRD_D3D11),															// ImgFmt_R11G11B10_F
+	MFBIT(MFRD_D3D11),															// ImgFmt_R9G9B9_E5
 
 	MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),		// ImgFmt_I8
 	MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),											// ImgFmt_I4
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D16
-	MFBIT(MFRD_D3D9),															// ImgFmt_D24X8
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D24S8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_D16
+	MFBIT(MFRD_D3D9),															// ImgFmt_D15S1
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_X360),											// ImgFmt_D24X8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24S8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D24FS8
+	MFBIT(MFRD_D3D9),															// ImgFmt_D32
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D32F
+	MFBIT(MFRD_D3D11),															// ImgFmt_D32FS8X24
 
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_DXT1 // 1 bit alpha
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_XBox),											// ImgFmt_DXT2
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_DXT3 // 3 bit discreet alpha
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_XBox),											// ImgFmt_DXT4
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_XBox)|MFBIT(MFRD_OpenGL),		// ImgFmt_DXT5 // 8 bit interpolated alpha
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT1 // 1 bit alpha
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),						// ImgFmt_DXT2
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT3 // 3 bit discreet alpha
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),						// ImgFmt_DXT4
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT5 // 8 bit interpolated alpha
 
 	MFBIT(MFRD_PSP),	// ImgFmt_PSP_DXT1
 	MFBIT(MFRD_PSP),	// ImgFmt_PSP_DXT3
@@ -181,12 +197,20 @@ uint32 gMFImageBitsPerPixel[ImgFmt_Max] =
 	64,	// ImgFmt_ABGR_F16
 	128,// ImgFmt_ABGR_F32
 
+	32, // ImgFmt_R11G11B10_F
+	32, // ImgFmt_R9G9B9_E5
+
 	8,	// ImgFmt_I8
 	4,	// ImgFmt_I4
 
-	16,	// ImgFmt_D16
-	32,	// ImgFmt_D24X8
-	32,	// ImgFmt_D24S8
+	16, // ImgFmt_D16
+	16, // ImgFmt_D15S1
+	32, // ImgFmt_D24X8
+	32, // ImgFmt_D24S8
+	32, // ImgFmt_D24FS8
+	32, // ImgFmt_D32
+	32, // ImgFmt_D32F
+	64, // ImgFmt_D32FS8X24
 
 	4,	// ImgFmt_DXT1
 	8,	// ImgFmt_DXT2
@@ -256,12 +280,20 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		113,// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
 		116,// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
 
+		0,	//						// ImgFmt_R11G11B10_F
+		0,	//						// ImgFmt_R9G9B9_E5
+
 		41,	// D3DFMT_P8			// ImgFmt_I8
 		0,	//						// ImgFmt_I4
 
 		80,	// D3DFMT_D16			// ImgFmt_D16
+		73,	// D3DFMT_D15S1			// ImgFmt_D15S1
 		77,	// D3DFMT_D24X8			// ImgFmt_D24X8
 		75,	// D3DFMT_D24S8			// ImgFmt_D24S8
+		83,	// D3DFMT_D24FS8		// ImgFmt_D24FS8
+		71,	// D3DFMT_D32			// ImgFmt_D32
+		82,	// D3DFMT_D32F_LOCKABLE	// ImgFmt_D32F
+		0,	//						// ImgFmt_D32FS8X24
 
 		MFMAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// ImgFmt_DXT1
 		MFMAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// ImgFmt_DXT2
@@ -329,18 +361,190 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		10,	// DXGI_FORMAT_R16G16B16A16_FLOAT	// ImgFmt_ABGR_F16
 		2,	// DXGI_FORMAT_R32G32B32A32_FLOAT	// ImgFmt_ABGR_F32
 
+		26,	// DXGI_FORMAT_R11G11B10_FLOAT		// ImgFmt_R11G11B10_F
+		67,	// DXGI_FORMAT_R9G9B9E5_SHAREDEXP	// ImgFmt_R9G9B9_E5
+
 		0,	//									// ImgFmt_I8
 		0,	//									// ImgFmt_I4
 
 		55,	// DXGI_FORMAT_D16_UNORM			// ImgFmt_D16
+		0,	//									// ImgFmt_D15S1
 		0,	//									// ImgFmt_D24X8
 		45,	// DXGI_FORMAT_D24_UNORM_S8_UINT	// ImgFmt_D24S8
+		0,	//									// ImgFmt_D24FS8
+		0,	//									// ImgFmt_D32
+		40,	// DXGI_FORMAT_D32_FLOAT			// ImgFmt_D32F
+		20,	// DXGI_FORMAT_D32_FLOAT_S8X24_UINT	// ImgFmt_D32FS8X24
 
 		71,	// DXGI_FORMAT_BC1_UNORM			// ImgFmt_DXT1
 		0,	//									// ImgFmt_DXT2
 		74,	// DXGI_FORMAT_BC2_UNORM			// ImgFmt_DXT3
 		0,	//									// ImgFmt_DXT4
 		77,	// DXGI_FORMAT_BC3_UNORM			// ImgFmt_DXT5
+
+		0,	// ImgFmt_PSP_DXT1
+		0,	// ImgFmt_PSP_DXT3
+		0,	// ImgFmt_PSP_DXT5
+
+		0,	// ImgFmt_XB_A8R8G8B8
+		0,	// ImgFmt_XB_A8B8G8R8
+		0,	// ImgFmt_XB_B8G8R8A8
+		0,	// ImgFmt_XB_R8G8B8A8
+
+		0,	// ImgFmt_XB_R5G6B5
+		0,	// ImgFmt_XB_R6G5B5
+
+		0,	// ImgFmt_XB_A1R5G5B5
+		0,	// ImgFmt_XB_R5G5B5A1
+
+		0,	// ImgFmt_XB_A4R4G4B4
+		0,	// ImgFmt_XB_R4G4B4A4
+
+		0,	// ImgFmt_PSP_A8B8G8R8s
+		0,	// ImgFmt_PSP_B5G6R5s
+		0,	// ImgFmt_PSP_A1B5G5R5s
+		0,	// ImgFmt_PSP_A4B4G4R4s
+
+		0,	// ImgFmt_PSP_I8s
+		0,	// ImgFmt_PSP_I4s
+
+		0,	// ImgFmt_PSP_DXT1s
+		0,	// ImgFmt_PSP_DXT3s
+		0,	// ImgFmt_PSP_DXT5s
+	},
+
+	// These are indexes into an array of platform format data to be used at runtime
+	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
+	{ // OpenGL
+		0,	// ImgFmt_A8R8G8B8
+		1,	// ImgFmt_A8B8G8R8
+		2,	// ImgFmt_B8G8R8A8
+		3,	// ImgFmt_R8G8B8A8
+
+		0,	// ImgFmt_R8G8B8
+		0,	// ImgFmt_B8G8R8
+
+		4,	// ImgFmt_A2R10G10B10
+		5,	// ImgFmt_A2B10G10R10
+
+		6,	// ImgFmt_A16B16G16R16
+
+		7,	// ImgFmt_R5G6B5
+		0,	// ImgFmt_R6G5B5
+		8,	// ImgFmt_B5G6R5
+
+		9,	// ImgFmt_A1R5G5B5
+		10,	// ImgFmt_R5G5B5A1
+		11,	// ImgFmt_A1B5G5R5
+
+		12,	// ImgFmt_A4R4G4B4
+		13,	// ImgFmt_A4B4G4R4
+		14,	// ImgFmt_R4G4B4A4
+
+		15,	// ImgFmt_ABGR_F16
+		16,	// ImgFmt_ABGR_F32
+
+		0,	// ImgFmt_R11G11B10_F
+		0,	// ImgFmt_R9G9B9_E5
+
+		17,	// ImgFmt_I8
+		0,	// ImgFmt_I4
+
+		18,	// ImgFmt_D16
+		0,	// ImgFmt_D15S1
+		0,	// ImgFmt_D24X8
+		19,	// ImgFmt_D24S8
+		0,	// ImgFmt_D24FS8
+		0,	// ImgFmt_D32
+		0,	// ImgFmt_D32F
+		0,	// ImgFmt_D32FS8X24
+
+		20,	// ImgFmt_DXT1
+		0,	// ImgFmt_DXT2
+		21,	// ImgFmt_DXT3
+		0,	// ImgFmt_DXT4
+		22,	// ImgFmt_DXT5
+
+		0,	// ImgFmt_PSP_DXT1
+		0,	// ImgFmt_PSP_DXT3
+		0,	// ImgFmt_PSP_DXT5
+
+		0,	// ImgFmt_XB_A8R8G8B8
+		0,	// ImgFmt_XB_A8B8G8R8
+		0,	// ImgFmt_XB_B8G8R8A8
+		0,	// ImgFmt_XB_R8G8B8A8
+
+		0,	// ImgFmt_XB_R5G6B5
+		0,	// ImgFmt_XB_R6G5B5
+
+		0,	// ImgFmt_XB_A1R5G5B5
+		0,	// ImgFmt_XB_R5G5B5A1
+
+		0,	// ImgFmt_XB_A4R4G4B4
+		0,	// ImgFmt_XB_R4G4B4A4
+
+		0,	// ImgFmt_PSP_A8B8G8R8s
+		0,	// ImgFmt_PSP_B5G6R5s
+		0,	// ImgFmt_PSP_A1B5G5R5s
+		0,	// ImgFmt_PSP_A4B4G4R4s
+
+		0,	// ImgFmt_PSP_I8s
+		0,	// ImgFmt_PSP_I4s
+
+		0,	// ImgFmt_PSP_DXT1s
+		0,	// ImgFmt_PSP_DXT3s
+		0,	// ImgFmt_PSP_DXT5s
+	},
+
+	{ // Xbox 360
+		0,	//						// ImgFmt_A8R8G8B8
+		0,	// D3DFMT_A8B8G8R8		// ImgFmt_A8B8G8R8
+		0,	//						// ImgFmt_B8G8R8A8
+		0,	//						// ImgFmt_R8G8B8A8
+
+		0,	//						// ImgFmt_R8G8B8
+		0,	//						// ImgFmt_B8G8R8
+
+		0,	// D3DFMT_A2R10G10B10	// ImgFmt_A2R10G10B10
+		0,	// D3DFMT_A2B10G10R10	// ImgFmt_A2B10G10R10
+
+		0,	// D3DFMT_A16B16G16R16	// ImgFmt_A16B16G16R16
+
+		0,	// D3DFMT_R5G6B5		// ImgFmt_R5G6B5
+		0,	// D3DFMT_R6G5B5		// ImgFmt_R6G5B5
+		0,	//						// ImgFmt_B5G6R5
+
+		0,	// D3DFMT_A1R5G5B5		// ImgFmt_A1R5G5B5
+		0,	//						// ImgFmt_R5G5B5A1
+		0,	//						// ImgFmt_A1B5G5R5
+
+		0,	// D3DFMT_A4R4G4B4		// ImgFmt_A4R4G4B4
+		0,	//						// ImgFmt_A4B4G4R4
+		0,	//						// ImgFmt_R4G4B4A4
+
+		0,	// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
+		0,	// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
+
+		0,	//						// ImgFmt_R11G11B10_F
+		0,	//						// ImgFmt_R9G9B9_E5
+
+		0,	//						// ImgFmt_I8
+		0,	//						// ImgFmt_I4
+
+		0,	// D3DFMT_D16			// ImgFmt_D16
+		0,	//						// ImgFmt_D15S1
+		0,	// D3DFMT_D24X8			// ImgFmt_D24X8
+		0,	// D3DFMT_D24S8			// ImgFmt_D24S8
+		0,	//						// ImgFmt_D24FS8
+		0,	//						// ImgFmt_D32
+		0,	//						// ImgFmt_D32F
+		0,	//						// ImgFmt_D32FS8X24
+
+		0,	// D3DFMT_DXT1			// ImgFmt_DXT1
+		0,	// D3DFMT_DXT2			// ImgFmt_DXT2
+		0,	// D3DFMT_DXT3			// ImgFmt_DXT3
+		0,	// D3DFMT_DXT4			// ImgFmt_DXT4
+		0,	// D3DFMT_DXT5			// ImgFmt_DXT5
 
 		0,	// ImgFmt_PSP_DXT1
 		0,	// ImgFmt_PSP_DXT3
@@ -402,12 +606,20 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		0,		// ImgFmt_ABGR_F16
 		0,		// ImgFmt_ABGR_F32
 
+		0,		// ImgFmt_R11G11B10_F
+		0,		// ImgFmt_R9G9B9_E5
+
 		0xB,	// ImgFmt_I8
 		0,		// ImgFmt_I4
 
 		0,		// ImgFmt_D16
+		0,		// ImgFmt_D15S1
 		0,		// ImgFmt_D24X8
 		0,		// ImgFmt_D24S8
+		0,		// ImgFmt_D24FS8
+		0,		// ImgFmt_D32
+		0,		// ImgFmt_D32F
+		0,		// ImgFmt_D32FS8X24
 
 		0xC,	// ImgFmt_DXT1
 		0xE,	// ImgFmt_DXT2
@@ -446,225 +658,166 @@ uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 		0,		// ImgFmt_PSP_DXT5s
 	},
 
-	// These are indexes into an array of platform format data to be used at runtime
-	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
-	{ // OpenGL
-		0,	// ImgFmt_A8R8G8B8
-		1,	// ImgFmt_A8B8G8R8
-		2,	// ImgFmt_B8G8R8A8
-		3,	// ImgFmt_R8G8B8A8
-
-		0,	// ImgFmt_R8G8B8
-		0,	// ImgFmt_B8G8R8
-
-		4,	// ImgFmt_A2R10G10B10
-		5,	// ImgFmt_A2B10G10R10
-
-		6,	// ImgFmt_A16B16G16R16
-
-		7,	// ImgFmt_R5G6B5
-		0,	// ImgFmt_R6G5B5
-		8,	// ImgFmt_B5G6R5
-
-		9,	// ImgFmt_A1R5G5B5
-		10,	// ImgFmt_R5G5B5A1
-		11,	// ImgFmt_A1B5G5R5
-
-		12,	// ImgFmt_A4R4G4B4
-		13,	// ImgFmt_A4B4G4R4
-		14,	// ImgFmt_R4G4B4A4
-
-		15,	// ImgFmt_ABGR_F16
-		16,	// ImgFmt_ABGR_F32
-
-		17,	// ImgFmt_I8
-		0,	// ImgFmt_I4
-
-		18,	// ImgFmt_D16
-		0,	// ImgFmt_D24X8
-		19,	// ImgFmt_D24S8
-
-		20,	// ImgFmt_DXT1
-		0,	// ImgFmt_DXT2
-		21,	// ImgFmt_DXT3
-		0,	// ImgFmt_DXT4
-		22,	// ImgFmt_DXT5
-
-		0,	// ImgFmt_PSP_DXT1
-		0,	// ImgFmt_PSP_DXT3
-		0,	// ImgFmt_PSP_DXT5
-
-		0,	// ImgFmt_XB_A8R8G8B8
-		0,	// ImgFmt_XB_A8B8G8R8
-		0,	// ImgFmt_XB_B8G8R8A8
-		0,	// ImgFmt_XB_R8G8B8A8
-
-		0,	// ImgFmt_XB_R5G6B5
-		0,	// ImgFmt_XB_R6G5B5
-
-		0,	// ImgFmt_XB_A1R5G5B5
-		0,	// ImgFmt_XB_R5G5B5A1
-
-		0,	// ImgFmt_XB_A4R4G4B4
-		0,	// ImgFmt_XB_R4G4B4A4
-
-		0,	// ImgFmt_PSP_A8B8G8R8s
-		0,	// ImgFmt_PSP_B5G6R5s
-		0,	// ImgFmt_PSP_A1B5G5R5s
-		0,	// ImgFmt_PSP_A4B4G4R4s
-
-		0,	// ImgFmt_PSP_I8s
-		0,	// ImgFmt_PSP_I4s
-
-		0,	// ImgFmt_PSP_DXT1s
-		0,	// ImgFmt_PSP_DXT3s
-		0,	// ImgFmt_PSP_DXT5s
-	},
-
 	{ // PSP
-		0,	//				 // ImgFmt_A8R8G8B8
-		3,	// SCEGU_PF8888, //	ImgFmt_A8B8G8R8
-		0,	//				 // ImgFmt_B8G8R8A8
-		0,	//				 // ImgFmt_R8G8B8A8
+		0,	//				// ImgFmt_A8R8G8B8
+		3,	// SCEGU_PF8888	// ImgFmt_A8B8G8R8
+		0,	//				// ImgFmt_B8G8R8A8
+		0,	//				// ImgFmt_R8G8B8A8
 
-		0,	//				 //	ImgFmt_R8G8B8
-		0,	//				 // ImgFmt_B8G8R8
+		0,	//				// ImgFmt_R8G8B8
+		0,	//				// ImgFmt_B8G8R8
 
-		0,	//				 // ImgFmt_A2R10G10B10
-		0,	//				 // ImgFmt_A2B10G10R10
+		0,	//				// ImgFmt_A2R10G10B10
+		0,	//				// ImgFmt_A2B10G10R10
 
-		0,	//				 // ImgFmt_A16B16G16R16
+		0,	//				// ImgFmt_A16B16G16R16
 
-		0,	//				 //	ImgFmt_R5G6B5
-		0,	//				 // ImgFmt_R6G5B5
-		0,	// SCEGU_PF5650, // ImgFmt_B5G6R5
+		0,	//				// ImgFmt_R5G6B5
+		0,	//				// ImgFmt_R6G5B5
+		0,	// SCEGU_PF5650	// ImgFmt_B5G6R5
 
-		0,	//               //	ImgFmt_A1R5G5B5
-		0,	//				 // ImgFmt_R5G5B5A1
-		1,	// SCEGU_PF5551, //	ImgFmt_A1B5G5R5
+		0,	//				// ImgFmt_A1R5G5B5
+		0,	//				// ImgFmt_R5G5B5A1
+		1,	// SCEGU_PF5551	// ImgFmt_A1B5G5R5
 
-		0,	//				 // ImgFmt_A4R4G4B4
-		2,	// SCEGU_PF4444, //	ImgFmt_A4B4G4R4
-		0,	//				 // ImgFmt_R4G4B4A4
+		0,	//				// ImgFmt_A4R4G4B4
+		2,	// SCEGU_PF4444	// ImgFmt_A4B4G4R4
+		0,	//				// ImgFmt_R4G4B4A4
 
-		0,	//				 // ImgFmt_ABGR_F16
-		0,	//				 // ImgFmt_ABGR_F32
+		0,	//				// ImgFmt_ABGR_F16
+		0,	//				// ImgFmt_ABGR_F32
 
-		5,	// SCEGU_PFIDX8, //	ImgFmt_I8
-		4,	// SCEGU_PFIDX4, //	ImgFmt_I4
+		0,	//				// ImgFmt_R11G11B10_F
+		0,	//				// ImgFmt_R9G9B9_E5
 
-		0,	//				 // ImgFmt_D16
-		0,	//				 // ImgFmt_D24X8
-		0,	//				 // ImgFmt_D24S8
+		5,	// SCEGU_PFIDX8	// ImgFmt_I8
+		4,	// SCEGU_PFIDX4	// ImgFmt_I4
 
-		0,	//				 // ImgFmt_DXT1
-		0,	//				 // ImgFmt_DXT2
-		0,	//				 // ImgFmt_DXT3
-		0,	//				 // ImgFmt_DXT4
-		0,	//				 // ImgFmt_DXT5
+		0,	//				// ImgFmt_D16
+		0,	//				// ImgFmt_D15S1
+		0,	//				// ImgFmt_D24X8
+		0,	//				// ImgFmt_D24S8
+		0,	//				// ImgFmt_D24FS8
+		0,	//				// ImgFmt_D32
+		0,	//				// ImgFmt_D32F
+		0,	//				// ImgFmt_D32FS8X24
 
-		8,	// SCEGU_PFDXT1, //	ImgFmt_PSP_DXT1
-		9,	// SCEGU_PFDXT3, //	ImgFmt_PSP_DXT3
-		10,	// SCEGU_PFDXT5, //	ImgFmt_PSP_DXT5
+		0,	//				// ImgFmt_DXT1
+		0,	//				// ImgFmt_DXT2
+		0,	//				// ImgFmt_DXT3
+		0,	//				// ImgFmt_DXT4
+		0,	//				// ImgFmt_DXT5
 
-		0,	//				 // ImgFmt_XB_A8R8G8B8
-		0,	//				 // ImgFmt_XB_A8B8G8R8
-		0,	//				 // ImgFmt_XB_B8G8R8A8
-		0,	//				 // ImgFmt_XB_R8G8B8A8
+		8,	// SCEGU_PFDXT1	// ImgFmt_PSP_DXT1
+		9,	// SCEGU_PFDXT3	// ImgFmt_PSP_DXT3
+		10,	// SCEGU_PFDXT5	// ImgFmt_PSP_DXT5
 
-		0,	//				 // ImgFmt_XB_R5G6B5
-		0,	//				 // ImgFmt_XB_R6G5B5
+		0,	//				// ImgFmt_XB_A8R8G8B8
+		0,	//				// ImgFmt_XB_A8B8G8R8
+		0,	//				// ImgFmt_XB_B8G8R8A8
+		0,	//				// ImgFmt_XB_R8G8B8A8
 
-		0,	//				 // ImgFmt_XB_A1R5G5B5
-		0,	//				 // ImgFmt_XB_R5G5B5A1
+		0,	//				// ImgFmt_XB_R5G6B5
+		0,	//				// ImgFmt_XB_R6G5B5
 
-		0,	//				 // ImgFmt_XB_A4R4G4B4
-		0,	//				 // ImgFmt_XB_R4G4B4A4
+		0,	//				// ImgFmt_XB_A1R5G5B5
+		0,	//				// ImgFmt_XB_R5G5B5A1
 
-		3,	// SCEGU_PF8888, //	ImgFmt_PSP_A8B8G8R8s
-		0,	// SCEGU_PF5650, // ImgFmt_PSP_B5G6R5s
-		1,	// SCEGU_PF5551, //	ImgFmt_PSP_A1B5G5R5s
-		2,	// SCEGU_PF4444, //	ImgFmt_PSP_A4B4G4R4s
+		0,	//				// ImgFmt_XB_A4R4G4B4
+		0,	//				// ImgFmt_XB_R4G4B4A4
 
-		5,	// SCEGU_PFIDX8, //	ImgFmt_PSP_I8s
-		4,	// SCEGU_PFIDX4, //	ImgFmt_PSP_I4s
+		3,	// SCEGU_PF8888	// ImgFmt_PSP_A8B8G8R8s
+		0,	// SCEGU_PF5650	// ImgFmt_PSP_B5G6R5s
+		1,	// SCEGU_PF5551	// ImgFmt_PSP_A1B5G5R5s
+		2,	// SCEGU_PF4444	// ImgFmt_PSP_A4B4G4R4s
 
-		8,	// SCEGU_PFDXT1, //	ImgFmt_PSP_DXT1s
-		9,	// SCEGU_PFDXT3, //	ImgFmt_PSP_DXT3s
-		10,	// SCEGU_PFDXT5, //	ImgFmt_PSP_DXT5s
+		5,	// SCEGU_PFIDX8	// ImgFmt_PSP_I8s
+		4,	// SCEGU_PFIDX4	// ImgFmt_PSP_I4s
+
+		8,	// SCEGU_PFDXT1	// ImgFmt_PSP_DXT1s
+		9,	// SCEGU_PFDXT3	// ImgFmt_PSP_DXT3s
+		10,	// SCEGU_PFDXT5	// ImgFmt_PSP_DXT5s
 	},
 
 	{ // PS2
-		0,	//				 // ImgFmt_A8R8G8B8
-		99,	// ????????????, //	ImgFmt_A8B8G8R8
-		0,	//				 // ImgFmt_B8G8R8A8
-		0,	//				 // ImgFmt_R8G8B8A8
+		0,	//				// ImgFmt_A8R8G8B8
+		99,	// ???????????? // ImgFmt_A8B8G8R8
+		0,	//				// ImgFmt_B8G8R8A8
+		0,	//				// ImgFmt_R8G8B8A8
 
-		0,	//				 // ImgFmt_R8G8B8
-		0,	//				 // ImgFmt_B8G8R8
+		0,	//				// ImgFmt_R8G8B8
+		0,	//				// ImgFmt_B8G8R8
 
-		0,	//				 // ImgFmt_A2R10G10B10
-		0,	//				 // ImgFmt_A2B10G10R10
+		0,	//				// ImgFmt_A2R10G10B10
+		0,	//				// ImgFmt_A2B10G10R10
 
-		0,	//				 // ImgFmt_A16B16G16R16
+		0,	//				// ImgFmt_A16B16G16R16
 
-		0,	//				 //	ImgFmt_R5G6B5
-		0,	//				 // ImgFmt_R6G5B5
-		0,	//				 // ImgFmt_B5G6R5
+		0,	//				// ImgFmt_R5G6B5
+		0,	//				// ImgFmt_R6G5B5
+		0,	//				// ImgFmt_B5G6R5
 
-		0,	//				 //	ImgFmt_A1R5G5B5
-		0,	//				 // ImgFmt_R5G5B5A1
-		99,	// ????????????, //	ImgFmt_A1B5G5R5
+		0,	//				// ImgFmt_A1R5G5B5
+		0,	//				// ImgFmt_R5G5B5A1
+		99,	// ????????????	// ImgFmt_A1B5G5R5
 
-		0,	//				 // ImgFmt_A4R4G4B4
-		0,	//				 //	ImgFmt_A4B4G4R4
-		0,	//				 // ImgFmt_R4G4B4A4
+		0,	//				// ImgFmt_A4R4G4B4
+		0,	//				// ImgFmt_A4B4G4R4
+		0,	//				// ImgFmt_R4G4B4A4
 
-		0,	//				 // ImgFmt_ABGR_F16
-		0,	//				 // ImgFmt_ABGR_F32
+		0,	//				// ImgFmt_ABGR_F16
+		0,	//				// ImgFmt_ABGR_F32
 
-		99,	// ????????????, //	ImgFmt_I8
-		99,	// ????????????, //	ImgFmt_I4
+		0,	//				// ImgFmt_R11G11B10_F
+		0,	//				// ImgFmt_R9G9B9_E5
 
-		0,	//				 // ImgFmt_D16
-		0,	//				 // ImgFmt_D24X8
-		0,	//				 // ImgFmt_D24S8
+		99,	// ????????????	// ImgFmt_I8
+		99,	// ????????????	// ImgFmt_I4
 
-		0,	//				 // ImgFmt_DXT1
-		0,	//				 // ImgFmt_DXT2
-		0,	//				 // ImgFmt_DXT3
-		0,	//				 // ImgFmt_DXT4
-		0,	//				 // ImgFmt_DXT5
+		0,	//				// ImgFmt_D16
+		0,	//				// ImgFmt_D15S1
+		0,	//				// ImgFmt_D24X8
+		0,	//				// ImgFmt_D24S8
+		0,	//				// ImgFmt_D24FS8
+		0,	//				// ImgFmt_D32
+		0,	//				// ImgFmt_D32F
+		0,	//				// ImgFmt_D32FS8X24
 
-		0,	//				 //	ImgFmt_PSP_DXT1
-		0,	//				 //	ImgFmt_PSP_DXT3
-		0,	//				 //	ImgFmt_PSP_DXT5
+		0,	//				// ImgFmt_DXT1
+		0,	//				// ImgFmt_DXT2
+		0,	//				// ImgFmt_DXT3
+		0,	//				// ImgFmt_DXT4
+		0,	//				// ImgFmt_DXT5
 
-		0,	//				 // ImgFmt_XB_A8R8G8B8
-		0,	//				 // ImgFmt_XB_A8B8G8R8
-		0,	//				 // ImgFmt_XB_B8G8R8A8
-		0,	//				 // ImgFmt_XB_R8G8B8A8
+		0,	//				// ImgFmt_PSP_DXT1
+		0,	//				// ImgFmt_PSP_DXT3
+		0,	//				// ImgFmt_PSP_DXT5
 
-		0,	//				 // ImgFmt_XB_R5G6B5
-		0,	//				 // ImgFmt_XB_R6G5B5
+		0,	//				// ImgFmt_XB_A8R8G8B8
+		0,	//				// ImgFmt_XB_A8B8G8R8
+		0,	//				// ImgFmt_XB_B8G8R8A8
+		0,	//				// ImgFmt_XB_R8G8B8A8
 
-		0,	//				 // ImgFmt_XB_A1R5G5B5
-		0,	//				 // ImgFmt_XB_R5G5B5A1
+		0,	//				// ImgFmt_XB_R5G6B5
+		0,	//				// ImgFmt_XB_R6G5B5
 
-		0,	//				 // ImgFmt_XB_A4R4G4B4
-		0,	//				 // ImgFmt_XB_R4G4B4A4
+		0,	//				// ImgFmt_XB_A1R5G5B5
+		0,	//				// ImgFmt_XB_R5G5B5A1
 
-		0,	//				 //	ImgFmt_PSP_A8B8G8R8s
-		0,	//				 // ImgFmt_PSP_B5G6R5s
-		0,	//				 //	ImgFmt_PSP_A1B5G5R5s
-		0,	//				 //	ImgFmt_PSP_A4B4G4R4s
+		0,	//				// ImgFmt_XB_A4R4G4B4
+		0,	//				// ImgFmt_XB_R4G4B4A4
 
-		0,	//				 //	ImgFmt_PSP_I8s
-		0,	//				 //	ImgFmt_PSP_I4s
+		0,	//				// ImgFmt_PSP_A8B8G8R8s
+		0,	//				// ImgFmt_PSP_B5G6R5s
+		0,	//				// ImgFmt_PSP_A1B5G5R5s
+		0,	//				// ImgFmt_PSP_A4B4G4R4s
 
-		0,	//				 //	ImgFmt_PSP_DXT1s
-		0,	//				 //	ImgFmt_PSP_DXT3s
-		0,	//				 //	ImgFmt_PSP_DXT5s
+		0,	//				// ImgFmt_PSP_I8s
+		0,	//				// ImgFmt_PSP_I4s
+
+		0,	//				// ImgFmt_PSP_DXT1s
+		0,	//				// ImgFmt_PSP_DXT3s
+		0,	//				// ImgFmt_PSP_DXT5s
 	}
 };
 
@@ -686,10 +839,12 @@ MFRendererDrivers MFTexture_GetCurrentDisplayDriver()
 	return MFRD_D3D9;
 #elif MF_RENDERER == MF_DRIVER_D3D11
 	return MFRD_D3D11;
-#elif MF_RENDERER == MF_DRIVER_XBOX
-	return MFRD_XBox;
 #elif MF_RENDERER == MF_DRIVER_OPENGL
 	return MFRD_OpenGL;
+#elif MF_RENDERER == MF_DRIVER_X360
+	return MFRD_X360;
+#elif MF_RENDERER == MF_DRIVER_XBOX
+	return MFRD_XBox;
 #elif MF_RENDERER == MF_DRIVER_PSP
 	return MFRD_PSP;
 #elif MF_RENDERER == MF_DRIVER_PS2

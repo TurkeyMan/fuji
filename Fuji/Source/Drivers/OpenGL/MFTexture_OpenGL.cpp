@@ -188,25 +188,34 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
-		if(targetFormat & ImgFmt_SelectNicest)
+		if(targetFormat & ImgFmt_SelectDefault)
 		{
 #if defined(MF_IPHONE)
-			switch(targetFormat)
+			switch((targetFormat >> 4) & 3)
 			{
-				case ImgFmt_SelectNicest:
-					targetFormat = ImgFmt_A8R8G8B8;
+				case 0:
+					MFDebug_Assert(false, "Format auto-selection should specify a render target or depth/stencil type.");
+				case 1:
+					if(targetFormat & ImgFmt_SelectFastest)
+					{
+						if(targetFormat & ImgFmt_SelectNoAlpha)
+							targetFormat = ImgFmt_R5G6B5;
+						else if(targetFormat & ImgFmt_Select1BitAlpha)
+							targetFormat = ImgFmt_R5G5B5A1;
+						else
+							targetFormat = ImgFmt_R4G4B4A4;
+					}
+					else
+					{
+						if(targetFormat & ImgFmt_SelectNoAlpha)
+							targetFormat = ImgFmt_R8G8B8;
+						else
+							targetFormat = ImgFmt_A8R8G8B8;
+					}
 					break;
-				case ImgFmt_SelectNicest_NoAlpha:
-					targetFormat = ImgFmt_R8G8B8;
-					break;
-				case ImgFmt_SelectFastest:
-					targetFormat = ImgFmt_R4G4B4A4;
-					break;
-				case ImgFmt_SelectFastest_Masked:
-					targetFormat = ImgFmt_R5G5B5A1;
-					break;
-				case ImgFmt_SelectFastest_NoAlpha:
-					targetFormat = ImgFmt_R5G6B5;
+				case 2:
+				case 3:
+					MFDebug_Assert(false, "TODO: Don't support depth targets yet...");
 					break;
 			}
 #else

@@ -126,14 +126,85 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 		D3DXFilterTexture(pTex, NULL, 0, D3DX_DEFAULT);
 }
 
+int8 gAutoFormats[0x40] =
+{
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectDefault
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectNicest
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_SelectHDR
+	ImgFmt_R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+	ImgFmt_A2R10G10B10, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+	ImgFmt_R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+	ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+	ImgFmt_A2R10G10B10, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+	ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+	-1,
+	-1,
+	-1,
+	-1,
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+	ImgFmt_A2R10G10B10, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+	ImgFmt_A2R10G10B10, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+	ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+	ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+	-1,
+	-1,
+	-1,
+	-1,
+	ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+	ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+	ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+	ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+	ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+	ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+	ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+	-1,
+	-1,
+	-1,
+	-1,
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+	ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+	ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+	ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+	ImgFmt_D15S1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+	ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+	-1,
+	-1,
+	-1,
+	-1
+};
+
 MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
 {
 	MFTexture *pTexture = MFTexture_Find(pName);
 
 	if(!pTexture)
 	{
-		if(targetFormat & ImgFmt_SelectNicest)
-			targetFormat = ImgFmt_A8R8G8B8;
+		if(targetFormat & ImgFmt_SelectDefault)
+		{
+			targetFormat = (MFImageFormat)gAutoFormats[targetFormat & 0x3F];
+			MFDebug_Assert(targetFormat != -1, "Invalid texture format!");
+		}
 
 		D3DFORMAT platformFormat = (D3DFORMAT)MFTexture_GetPlatformFormatID(targetFormat, MFRD_D3D9);
 		IDirect3DTexture9 *pD3DTex;

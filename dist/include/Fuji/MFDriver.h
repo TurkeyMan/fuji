@@ -116,8 +116,9 @@ enum MFRendererDrivers
 
 	MFRD_D3D9 = 0,
 	MFRD_D3D11,
-	MFRD_XBox,
 	MFRD_OpenGL,
+	MFRD_X360,
+	MFRD_XBox,
 	MFRD_PSP,
 	MFRD_PS2,
 

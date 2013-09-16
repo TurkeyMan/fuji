@@ -107,7 +107,7 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
  * @see MFTexture_Create(), MFTexture_Release()
  */
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = ImgFmt_SelectNicest);
+MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = ImgFmt_SelectRenderTarget);
 
 /**
  * Release an MFTexture instance.

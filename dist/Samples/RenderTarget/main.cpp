@@ -70,7 +70,7 @@ void Game_Init()
 	MFRenderLayer_SetLayerRenderTarget(pLayer, 0, pRenderTarget);
 	MFTexture_Release(pRenderTarget); // release our local reference; materials holds the reference now
 
-	MFTexture *pZTarget = MFTexture_CreateRenderTarget("Prism-Z", 256, 256, ImgFmt_D24S8);
+	MFTexture *pZTarget = MFTexture_CreateRenderTarget("Prism-Z", 256, 256, ImgFmt_SelectDepth);
 	MFRenderLayer_SetLayerDepthTarget(pLayer, pZTarget);
 
 	// configure box layer
