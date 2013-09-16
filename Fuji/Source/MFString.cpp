@@ -205,7 +205,7 @@ MF_API int MFString_Compare(const char *pString1, const char *pString2)
 	return (*(const unsigned char *)pString1 - *(const unsigned char *)(pString2 - 1));
 }
 
-MF_API int MFString_CompareN(const char *pString1, const char *pString2, int n)
+MF_API int MFString_CompareN(const char *pString1, const char *pString2, size_t n)
 {
 	if(n == 0)
 		return 0;
@@ -237,7 +237,7 @@ MF_API int MFString_CaseCmp(const char *pSource1, const char *pSource2)
 	return c1 - c2;
 }
 
-MF_API int MFString_CaseCmpN(const char *pSource1, const char *pSource2, uint32 n)
+MF_API int MFString_CaseCmpN(const char *pSource1, const char *pSource2, size_t n)
 {
 	register int c = 0;
 
@@ -268,11 +268,13 @@ MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, c
 			++pPattern;
 
 			bool match = false;
-			while(!(match = MFString_PatternMatch(pPattern, pFilename, ppMatchDirectory)) && *pFilename)
+			while(*pFilename)
 			{
+				match = MFString_PatternMatch(pPattern, pFilename, ppMatchDirectory);
+				if(match)
+					break;
 				if(*pFilename == '/' || *pFilename == '\\')
 					break;
-
 				++pFilename;
 			}
 
@@ -324,12 +326,12 @@ MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExclu
 	return pBuffer;
 }
 
-MF_API int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars)
+MF_API size_t MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars)
 {
-	int sourceLen = MFString_Length(pString);
-	int destLen = 0;
+	size_t sourceLen = MFString_Length(pString);
+	size_t destLen = 0;
 
-	for(int a=0; a<sourceLen; ++a)
+	for(size_t a=0; a<sourceLen; ++a)
 	{
 		int c = (uint8)pString[a];
 		if(MFIsAlphaNumeric(c) || MFString_Chr("-_.!~*'()", c) || (pExcludeChars && MFString_Chr(pExcludeChars, c)))
@@ -674,9 +676,9 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 // UTF8 support
 //
 
-MF_API int MFString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
+MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
 {
-	const char *pStart = pString;
+	const wchar_t *pStart = pBuffer;
 	int bytes;
 
 	while(*pString)
@@ -686,10 +688,10 @@ MF_API int MFString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
 	}
 	*pBuffer = 0;
 
-	return (int)(pString - pStart);
+	return pBuffer - pStart;
 }
 
-MF_API int MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString)
+MF_API size_t MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString)
 {
 	const wchar_t *pStart = pString;
 
@@ -697,13 +699,13 @@ MF_API int MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString)
 		pBuffer += MFString_EncodeUTF8(*pString++, pBuffer);
 	*pBuffer = 0;
 
-	return (int)(pString - pStart);
+	return pString - pStart;
 }
 
-MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
+MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars)
 {
 	// count number of actual characters in the string
-	int numChars = MFString_GetNumChars(pUTF8String);
+	size_t numChars = MFString_GetNumChars(pUTF8String);
 
 	// get some space in the MFStr buffer
 	if(gStringOffset & 1)
@@ -720,7 +722,7 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars)
 	}
 
 	// copy the string
-	MFString_CopyUTF8ToUTF16(pBuffer, pUTF8String);
+	MFWString_CopyUTF8ToUTF16(pBuffer, pUTF8String);
 
 	if(pNumChars)
 		*pNumChars = numChars;
@@ -981,7 +983,7 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 	{
 		pData = MFStringData::Alloc();
 
-		int len = 0;
+		size_t len = 0;
 		const wchar_t *pS = pString;
 		while(*pS)
 			len += MFString_EncodeUTF8(*pS++, NULL);
@@ -1487,9 +1489,9 @@ int MFString::Enumerate(const MFArray<MFString> keys, bool bCaseSensitive)
 	return -1;
 }
 
-int MFString::Enumerate(const char *const *ppKeys, int numKeys, bool bCaseSensitive)
+int MFString::Enumerate(const char *const *ppKeys, size_t numKeys, bool bCaseSensitive)
 {
-	for(int i=0; i<numKeys; ++i)
+	for(size_t i=0; i<numKeys; ++i)
 	{
 		if(bCaseSensitive ? Equals(ppKeys[i]) : EqualsInsensitive(ppKeys[i]))
 			return i;

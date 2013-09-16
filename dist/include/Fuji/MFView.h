@@ -122,10 +122,10 @@ MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
 MF_API const MFMatrix& MFView_GetCameraMatrix();
 
 /**
- * Gets a state block for the current view.
- * Gets an MFStateBlock of the current view.
- * @return An MFStateBlock representing the current view state.
- * @see MFView_SetCameraMatrix()
+ * Get a stateblock for the current view.
+ * Produce an \a MFStateBlock for the current view state.
+ * @return An \a MFStateBlock representing the current view state.
+ * @see MFStateBlock_Create()
  */
 MF_API const MFStateBlock* MFView_GetViewState();
 

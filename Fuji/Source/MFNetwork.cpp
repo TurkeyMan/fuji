@@ -448,7 +448,7 @@ int MFNetwork_SendEmail(const char *pEmailText, const char *pSender, const char 
 	if(MFSockets_GetAddressInfo(pEmailHandlerURL, MFStr("%d", port), NULL, &pAddrInfo) == 0)
 	{
 		char buffer[2048];
-		sprintf(buffer, "POST /fuji/reportgamepad.php HTTP/1.1\nHost: %s:%d\nFrom: %s\nUser-Agent: Mount Fuji Engine/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: %d\n\n%s", pEmailHandlerURL, port, pSender, MFString_Length(pEmailText), pEmailText);
+		sprintf(buffer, "POST /fuji/reportgamepad.php HTTP/1.1\nHost: %s:%d\nFrom: %s\nUser-Agent: Mount Fuji Engine/1.0\nContent-Type: application/x-www-form-urlencoded\nContent-Length: " MFFMT_SIZE_T "\n\n%s", pEmailHandlerURL, port, pSender, MFString_Length(pEmailText), pEmailText);
 
 		MFSocket s = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 		MFSockets_Connect(s, *pAddrInfo->pAddress);

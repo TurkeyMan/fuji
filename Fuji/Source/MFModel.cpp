@@ -476,7 +476,7 @@ MF_API void MFModel_Destroy(MFModel *pModel)
 }
 
 
-MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 	if(!pChunk)

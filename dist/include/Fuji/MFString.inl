@@ -192,18 +192,18 @@ inline char* MFTokeniseLine(char *pString, char **ppNext)
 	return pString;
 }
 
-inline int MFString_Length(const char *pString)
+inline size_t MFString_Length(const char *pString)
 {
 	const char *pT = pString;
 	while(*pT) ++pT;
-	return (int)((uintp)pT - (uintp)pString);
+	return pT - pString;
 }
 
-inline int MFString_LengthN(const char *pString, int maxChars)
+inline size_t MFString_LengthN(const char *pString, size_t maxChars)
 {
 	const char *pT = pString;
 	while(*pT && maxChars--) ++pT;
-	return (int)((uintp)pT - (uintp)pString);
+	return pT - pString;
 }
 
 inline char* MFString_Copy(char *pBuffer, const char *pString)
@@ -213,7 +213,7 @@ inline char* MFString_Copy(char *pBuffer, const char *pString)
 	return s;
 }
 
-inline char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars)
+inline char* MFString_CopyN(char *pBuffer, const char *pString, size_t maxChars)
 {
 	char *dscan;
 	const char *sscan;
@@ -526,11 +526,11 @@ inline const wchar_t* MFSkipWhiteW(const wchar_t *pC)
 	return pC;
 }
 
-inline int MFWString_Length(const wchar_t *pString)
+inline size_t MFWString_Length(const wchar_t *pString)
 {
 	const wchar_t *pT = pString;
 	while(*pT) ++pT;
-	return (int)(((uintp)pT - (uintp)pString) >> 1);
+	return pT - pString;
 }
 
 inline wchar_t* MFWString_Copy(wchar_t *pBuffer, const wchar_t *pString)
@@ -540,7 +540,7 @@ inline wchar_t* MFWString_Copy(wchar_t *pBuffer, const wchar_t *pString)
 	return s;
 }
 
-inline wchar_t* MFWString_CopyN(wchar_t *pBuffer, const wchar_t *pString, int maxChars)
+inline wchar_t* MFWString_CopyN(wchar_t *pBuffer, const wchar_t *pString, size_t maxChars)
 {
 	wchar_t *dscan;
 	const wchar_t *sscan;
@@ -635,7 +635,7 @@ inline MFString::operator bool() const
 	return pData != NULL;
 }
 
-inline char MFString::operator[](int index)
+inline char MFString::operator[](size_t index)
 {
 	return pData->pMemory[index];
 }

@@ -104,7 +104,12 @@ extern (C) bool MFView_IsOrtho();
 */
 extern (C) void MFView_SetCameraMatrix(ref const(MFMatrix) cameraMatrix);
 
-
+/**
+* Get the view stateblock.
+* Produce an MFStateBlock for the current view state.
+* @return Returns an MFStateBlock which represents the current view state.
+* @see MFStateBlock_Create()
+*/
 extern (C) const MFStateBlock* MFView_GetViewState();
 
 /**

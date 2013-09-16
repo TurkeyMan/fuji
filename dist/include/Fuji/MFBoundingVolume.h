@@ -28,7 +28,7 @@ public:
  * Tests 2 MFBoundingVolumes for intersection.
  * @param v1 The first bounding volume.
  * @param v2 The second bounding volume.
- * @return Returns /a true if the bounding volumes intersect.
+ * @return Returns \a true if the bounding volumes intersect.
  */
 bool MFBoundingVolume_Test(const MFBoundingVolume &v1, const MFBoundingVolume &v2);
 

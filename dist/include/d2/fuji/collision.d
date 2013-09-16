@@ -191,7 +191,7 @@ extern (C) void MFCollision_MakeCollisionTriangleFromPoints(ref const(MFVector) 
 * @param max1 Max position of the first box.
 * @param min2 Min position of the second box.
 * @param max2 Max position of the second box.
-* @return Returns /a true if the boxes intersect.
+* @return Returns \a true if the boxes intersect.
 */
 bool MFCollision_TestAABB(ref const(MFVector) min1, ref const(MFVector) max1, ref const(MFVector) min2, ref const(MFVector) max2)
 {

@@ -43,7 +43,17 @@ extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(ch
 */
 extern (C) int MFModel_Destroy(MFModel* pModel);
 
-extern (C) void MFModel_SubmitGeometry(MFModel* pModel, MFRenderLayerSet* pLayerSet, MFStateBlock* pMaterialOverride, const(MFStateBlock)* pView);
+/**
+* Submit a model for rendering.
+* Submits a model to the renderer. Geometry will be sorted among the layers provided by \a pLayerSet.
+* @param pModel Model instance to render.
+* @param pLayerSet An MFRenderLayerSet that will be used to render the geometry.
+* @param pMaterialOverride Optional stateblock which can be used to override material settings.
+* @param pView Optional stateblock which can be used to provide view/camera configuration.
+* @return None.
+* @see MFModel_Create()
+*/
+extern (C) void MFModel_SubmitGeometry(MFModel* pModel, MFRenderLayerSet* pLayerSet, const(MFStateBlock)* pMaterialOverride, const(MFStateBlock)* pView);
 
 /**
 * Set the model world matrix.

@@ -577,7 +577,4 @@ enum MFEndian
  * @section credits_sec Special Thanks
  *
  * Special thanks go to all the console homebrew communities who have produced fantastic tools for many platforms and found numerous exploits to make any of it even possible!\n
- * The zlib and libPNG teams, yes i use zlib :)\n
- * Andreas Jonsson from AngelCode (http://www.angelcode.com) for providing AngelScript, an awesome cross platform scripting language and his BMFont tool which is used to generate Fuji Fonts.
- *
  */

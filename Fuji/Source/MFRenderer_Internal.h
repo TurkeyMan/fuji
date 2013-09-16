@@ -54,10 +54,10 @@ struct MFRenderElement // 42 bytes atm... compress state block handles?
 //	MFRenderTechnique *pRenderTechnique;
 
 	const MFStateBlock *pViewState;
-	MFStateBlock *pGeometryState;
-	MFStateBlock *pEntityState;
-	MFStateBlock *pMaterialState;
-	MFStateBlock *pMaterialOverrideState;
+	const MFStateBlock *pGeometryState;
+	const MFStateBlock *pEntityState;
+	const MFStateBlock *pMaterialState;
+	const MFStateBlock *pMaterialOverrideState;
 
 	uint64 vertexBufferOffset : 20;
 	uint64 indexBufferOffset : 20;
@@ -94,7 +94,7 @@ struct MFRenderLayer
 	MFTexture *pDepthStencil;
 
 	MFRenderLayerSortMode sortMode;
-	MFStateBlock *pLayer;
+	const MFStateBlock *pLayer;
 
 	MFArray<MFRenderElement> elements;
 
@@ -109,8 +109,8 @@ struct MFRenderer
 	MFRenderLayer *pLayers;
 	int numLayers;
 
-	MFStateBlock *pGlobal;
-	MFStateBlock *pOverride;
+	const MFStateBlock *pGlobal;
+	const MFStateBlock *pOverride;
 };
 
 struct MFRendererState

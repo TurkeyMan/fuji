@@ -304,7 +304,7 @@ enum MFFileSystemHandles
 	MFFSH_FTPFileSystem,		/**< FTP file FileSystem */
 
 	MFFSH_Max,					/**< Maximum FileSystem */
-	MFFSH_ForceInt = 0x7FFFFFFF	/**< Force FileSystem to an int type */
+	MFFSH_ForceInt = 0x7FFFFFFF	/**< Force MFFileSystemHandles to an int type */
 };
 
 /**

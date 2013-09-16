@@ -59,7 +59,7 @@ MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size);
  * @see MFString_Copy()
  * @see MFString_CaseCmp()
  */
-int MFString_Length(const char *pString);
+size_t MFString_Length(const char *pString);
 
 /**
  * Get the length of a string clamping to a given maximum.
@@ -69,7 +69,7 @@ int MFString_Length(const char *pString);
  * @return Returns the length of the string, in bytes, excluding the terminating NULL character.
  * @see MFString_Length()
  */
-int MFString_LengthN(const char *pString, int maxChars);
+size_t MFString_LengthN(const char *pString, size_t maxChars);
 
 /**
  * Copy a string.
@@ -90,7 +90,7 @@ char* MFString_Copy(char *pBuffer, const char *pString);
  * @return \a pBuffer which can be used as a paramater to other functions.
  * @see MFString_Copy()
  */
-char* MFString_CopyN(char *pBuffer, const char *pString, int maxChars);
+char* MFString_CopyN(char *pBuffer, const char *pString, size_t maxChars);
 
 /**
  * Copy a string with custom terminator.
@@ -170,7 +170,7 @@ MF_API int MFString_Compare(const char *pString1, const char *pString2);
  * @return Returns the difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_Compare()
  */
-MF_API int MFString_CompareN(const char *pString1, const char *pString2, int n);
+MF_API int MFString_CompareN(const char *pString1, const char *pString2, size_t n);
 
 /**
  * Compares 2 strings with case insensitivity.
@@ -191,7 +191,7 @@ MF_API int MFString_CaseCmp(const char *pString1, const char *pString2);
  * @return Returns the difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_CaseCmp()
  */
-MF_API int MFString_CaseCmpN(const char *pString1, const char *pString2, uint32 n);
+MF_API int MFString_CaseCmpN(const char *pString1, const char *pString2, size_t n);
 
 /**
  * Searches through a string for the specified character.
@@ -288,7 +288,7 @@ MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExclu
  * @return Return the length of the output string, excluding the terminating NULL.
  * @remarks If pDest is NULL, the output length will be calculated but no output will be written.
  */
-MF_API int MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars = NULL);
+MF_API size_t MFString_URLEncode(char *pDest, const char *pString, const char *pExcludeChars = NULL);
 
 /**
  * Get a formatted a string.
@@ -464,17 +464,66 @@ int MFString_GetNumChars(const char *pString);
  * @remarks Takes into account UTF8 multibyte encoding when calculating the character offset.
  * @see MFString_GetNumChars()
  */
-int MFString_GetCharacterOffset(const char *pString, int character);
+size_t MFString_GetCharacterOffset(const char *pString, int character);
 
+/**
+ * Encode a unicode character to a UTF-8 sequence.
+ * Encodes the give unicode character to it's respective UTF-8 sequence.
+ * @param c Unicode character to encode.
+ * @param pMBChar Pointer to an output buffer to receive the encoded bytes.
+ * @return Returns the number of bytes used by the UTF-8 encoding.
+ * @see MFString_DecodeUTF8()
+ */
 int MFString_EncodeUTF8(int c, char *pMBChar);
+
+/**
+ * Decode a UTF-8 sequence.
+ * Decodes a UTF-8 sequence.
+ * @param pMBChar Pointer to a UTF-8 sequence.
+ * @param pNumBytes Pointer to an int that receives the number of bytes in the sequence.
+ * @return Returns the decoded unicode character.
+ * @see MFString_EncodeUTF8()
+ */
 int MFString_DecodeUTF8(const char *pMBChar, int *pNumBytes);
 
+/**
+ * Move to the next character in a UTF-8 encoded string.
+ * Moves to the next character in a UTF-8 encoded string.
+ * @param pChar Pointer to a UTF-8 string.
+ * @return Returns a pointer to the next character in the UTF-8 string.
+ * @see MFString_PrevChar()
+ */
 char *MFString_NextChar(const char *pChar);
+
+/**
+ * Move to the previous character in a UTF-8 encoded string.
+ * Moves to the previous character in a UTF-8 encoded string.
+ * @param pChar Pointer to a UTF-8 string.
+ * @return Returns a pointer to the previous character in the UTF-8 string.
+ * @see MFString_NextChar()
+ */
 char *MFString_PrevChar(const char *pChar);
 
-MF_API int MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString);
+/**
+ * Copy a UTF-8 string to a UTF-16 string.
+ * Copies a UTF-8 string to a UTF-16 output buffer.
+ * @param pBuffer Pointer to a UTF-8 string to copy.
+ * @param pString Pointer to the UTF-16 output buffer.
+ * @return Returns the number of wchar_t's written to the output buffer.
+ */
+MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString);
 
-MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
+/**
+ * Convert a UTF-8 string to a temporary UTF-16 string.
+ * Converts a UTF-8 string to a temporary UTF-16 string, using the MFStr() buffer.
+ * @param pUTF8String Pointer to a UTF-8 string to copy.
+ * @param pNumChars Optional pointer to a size_t that receives the number of wchar_t's in the output buffer.
+ * @return Returns a pointer to the converted UTF-16 string in a temporary buffer.
+ * @remarks MFString_UFT8AsWChar() uses the MFStr() temporary buffer for storing the output. Refer to MFStr() for usage details.
+ * @see MFWString_CopyUTF8ToUTF16(), MFStr(), MFStrN()
+ */
+MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars = NULL);
+
 
 //
 // unicode support
@@ -489,7 +538,7 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, int *pNumChars);
  * @see MFString_UFT8ToWChar()
  * @see MFString_UFT8AsWChar()
  */
-MF_API int MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString);
+MF_API size_t MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString);
 
 /**
  * Get the length of a unicode string.
@@ -499,7 +548,7 @@ MF_API int MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString);
  * @see MFWString_Copy()
  * @see MFWString_CaseCmp()
  */
-int MFWString_Length(const wchar_t *pString);
+size_t MFWString_Length(const wchar_t *pString);
 
 /**
  * Copy a unicode string.
@@ -520,7 +569,7 @@ wchar_t* MFWString_Copy(wchar_t *pBuffer, const wchar_t *pString);
  * @return \a pBuffer which can be used as a paramater to other functions.
  * @see MFWString_Copy()
  */
-wchar_t* MFWString_CopyN(wchar_t *pBuffer, const wchar_t *pString, int maxChars);
+wchar_t* MFWString_CopyN(wchar_t *pBuffer, const wchar_t *pString, size_t maxChars);
 
 /**
  * Concatinate a unicode string.
@@ -626,7 +675,7 @@ public:
 	bool operator!() const;									/**< Boolean 'not' operator. */
 	operator bool() const;									/**< bool typecast operator. */
 
-	char operator[](int index);
+	char operator[](size_t index);
 
 	MFString& operator=(const char *pString);				/**< Assignment operator. */
 	MFString& operator=(const MFString &string);			/**< Assignment operator. */
@@ -707,7 +756,7 @@ public:
 	MFArray<MFString>& SplitLines(MFArray<MFString> &output);
 
 	int Enumerate(const MFArray<MFString> keys, bool bCaseSensitive = false);
-	int Enumerate(const char *const *ppKeys, int numKeys, bool bCaseSensitive = false);
+	int Enumerate(const char *const *ppKeys, size_t numKeys, bool bCaseSensitive = false);
 
 	MFString StripToken(const char *pDelimiters = " \t\r\n");
 
