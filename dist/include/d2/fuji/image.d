@@ -41,6 +41,10 @@ enum MFImageFormat
 	I8,			/**< 8bit paletted format */
 	I4,			/**< 4bit paletted format */
 
+	D16,		/**< 16bit depth format */
+	D24X8,		/**< 24bit depth format */
+	D24S8,		/**< 24bit depth format with 8bit stencil */
+
 	DXT1,		/**< Compressed DXT1 texture */
 	DXT2,		/**< Compressed DXT2 texture */
 	DXT3,		/**< Compressed DXT3 texture */

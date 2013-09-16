@@ -220,13 +220,17 @@ inline char* MFString_CopyN(char *pBuffer, const char *pString, size_t maxChars)
 
 	dscan = pBuffer;
 	sscan = pString;
-	while(maxChars-- > 0)
+	while(maxChars > 0)
 	{
 		if((*dscan++ = *sscan++) == '\0')
 			break;
+		--maxChars;
 	}
-	while(maxChars-- > 0)
+	while(maxChars > 0)
+	{
 		*dscan++ = '\0';
+		--maxChars;
+	}
 
 	return pBuffer;
 }
