@@ -16,7 +16,7 @@
  * Tests is an input device is available.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns true if the device is available.
+ * @return True if the device is available.
  * @see MFInput_IsConnected(), MFInput_IsReady()
  */
 MF_API bool MFInput_IsAvailable(int device, int deviceID);
@@ -26,7 +26,7 @@ MF_API bool MFInput_IsAvailable(int device, int deviceID);
  * Tests is an input device is connected.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns true if the device is connected.
+ * @return True if the device is connected.
  * @see MFInput_IsAvailable(), MFInput_IsReady()
  */
 MF_API bool MFInput_IsConnected(int device, int deviceID);
@@ -36,7 +36,7 @@ MF_API bool MFInput_IsConnected(int device, int deviceID);
  * Tests is an input device is ready.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns true if the device is ready.
+ * @return True if the device is ready.
  * @see MFInput_IsAvailable(), MFInput_IsConnected()
  */
 MF_API bool MFInput_IsReady(int device, int deviceID);
@@ -48,7 +48,7 @@ MF_API bool MFInput_IsReady(int device, int deviceID);
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
  * @param pPrevState Optional pointer to receive the previous button state. Pass NULL if the previous state is not required.
- * @return Returns a float representing the input state.
+ * @return A float representing the input state.
  * @see MFInput_WasPressed(), MFInput_WasReleased()
  */
 MF_API float MFInput_Read(int button, int device, int deviceID = 0, float *pPrevState = NULL);
@@ -59,7 +59,7 @@ MF_API float MFInput_Read(int button, int device, int deviceID = 0, float *pPrev
  * @param button The button or control on the device to test. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns true if the button was pressed this frame.
+ * @return True if the button was pressed this frame.
  * @see MFInput_Read(), MFInput_WasReleased()
  */
 MF_API bool MFInput_WasPressed(int button, int device, int deviceID = 0);
@@ -70,7 +70,7 @@ MF_API bool MFInput_WasPressed(int button, int device, int deviceID = 0);
  * @param button The button or control on the device to test. Must be a member of the #MFGamepadButton, #MFMouseButton or #MFKeyboardButton enumerated types.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns true if the button was released this frame.
+ * @return True if the button was released this frame.
  * @see MFInput_Read(), MFInput_WasPressed()
  */
 MF_API bool MFInput_WasReleased(int button, int device, int deviceID = 0);
@@ -80,14 +80,14 @@ MF_API bool MFInput_WasReleased(int button, int device, int deviceID = 0);
  * Gets the device flags from an input device.
  * @param device The source device. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The source device index.
- * @return Returns a bitfield containing the input device flags.
+ * @return A bitfield containing the input device flags.
  */
 MF_API uint32 MFInput_GetDeviceFlags(int device, int deviceID = 0);
 
 /**
  * Get the number of available gamepads.
  * Get the number of available gamepads.
- * @return Returns the number of gamepads available to the system.
+ * @return The number of gamepads available to the system.
  * @see MFInput_GetNumKeyboards(), MFInput_GetNumPointers()
  */
 MF_API int MFInput_GetNumGamepads();
@@ -95,7 +95,7 @@ MF_API int MFInput_GetNumGamepads();
 /**
  * Get the number of available keyboards.
  * Get the number of available keyboards.
- * @return Returns the number of keyboards available to the system.
+ * @return The number of keyboards available to the system.
  * @see MFInput_GetNumGamepads(), MFInput_GetNumPointers()
  */
 MF_API int MFInput_GetNumKeyboards();
@@ -103,7 +103,7 @@ MF_API int MFInput_GetNumKeyboards();
 /**
  * Get the number of available pointers.
  * Get the number of available pointers.
- * @return Returns the number of pointers available to the system.
+ * @return The number of pointers available to the system.
  * @see MFInput_GetNumGamepads(), MFInput_GetNumKeyboards()
  */
 MF_API int MFInput_GetNumPointers();
@@ -122,7 +122,7 @@ MF_API int MFInput_GetNumTouchPanels();
  * Read the absolute position of the mouse pointer.
  * Read the absolute position of the mouse pointer.
  * @param mouseID Index of the mouse to read.
- * @return Returns a vector representing the absolute position of the mouse.
+ * @return A vector representing the absolute position of the mouse.
  */
 MF_API MFVector MFInput_ReadMousePos(int mouseID = -1);
 
@@ -130,7 +130,7 @@ MF_API MFVector MFInput_ReadMousePos(int mouseID = -1);
  * Read the mouse movement delta for this frame.
  * Read the mouse movement delta for this frame.
  * @param mouseID Index of the mouse to read.
- * @return Returns a vector representing the mouse movement delta for this frame.
+ * @return A vector representing the mouse movement delta for this frame.
  */
 MF_API MFVector MFInput_ReadMouseDelta(int mouseID = -1);
 
@@ -167,7 +167,7 @@ MF_API void MFInput_SetMouseClippingRect(int mouseID, MFRect *pRect);
  * @param deviceID The device index.
  * @param includeDevice If true, the device name is included in the generated string.
  * @param includeDeviceID If true, the device index is included in the generated string.
- * @return Returns a string representing the button name and optionally the device name and index.
+ * @return A string representing the button name and optionally the device name and index.
  */
 MF_API const char* MFInput_EnumerateString(int button, int device, int deviceID = 0, bool includeDevice = false, bool includeDeviceID = false);
 
@@ -182,7 +182,7 @@ MF_API void MFInput_SetDeadZone(float deadZone);
 /**
  * Get the analog dead zone.
  * Get the analog dead zone.
- * @return Returns the current analog dead zone.
+ * @return The current analog dead zone.
  */
 MF_API float MFInput_GetDeadZone();
 
@@ -191,7 +191,7 @@ MF_API float MFInput_GetDeadZone();
  * Get a device name.
  * @param device The device to fetch the name of. Must be a member of the #MFInputDevice enumerated type.
  * @param deviceID The device index.
- * @return Returns the name of the target device.
+ * @return The name of the target device.
  */
 MF_API const char*	MFInput_GetDeviceName(int device, int deviceID);
 
@@ -200,7 +200,7 @@ MF_API const char*	MFInput_GetDeviceName(int device, int deviceID);
  * Get the button name from a gamepad.
  * @param button Gamepad button ID. Must be a member of the #MFGamepadButton enumerated type.
  * @param deviceID Gamepad index.
- * @return Returns the name of the specified button of the specified device.
+ * @return The name of the specified button of the specified device.
  */
 MF_API const char* MFInput_GetGamepadButtonName(int button, int deviceID);
 
@@ -209,7 +209,7 @@ MF_API const char* MFInput_GetGamepadButtonName(int button, int deviceID);
  * Get the state of the keyboard status flags.
  * @param keyboardState Value from the #MFKeyboardStatusState enumerated type.
  * @param keyboardID Keyboard index.
- * @return Returns the state of the keyboards status bit.
+ * @return The state of the keyboards status bit.
  */
 MF_API bool MFInput_GetKeyboardStatusState(int keyboardState, int keyboardID = -1);
 

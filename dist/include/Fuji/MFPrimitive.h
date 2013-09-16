@@ -215,6 +215,7 @@ MF_API void MFPrimitive_EndBlitter();
  * @param sv Source V coordinate.
  * @param du Destination U coordinate.
  * @param dv Destination V coordinate.
+ * @param mat World matrix to be used.
  * @return None.
  */
 MF_API void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f, const MFMatrix &mat = MFMatrix::identity);
@@ -229,6 +230,7 @@ MF_API void MFPrimitive_DrawQuad(float x, float y, float w, float h, const MFVec
  * @param sv Source V coordinate.
  * @param du Destination U coordinate.
  * @param dv Destination V coordinate.
+ * @param mat World matrix to be used.
  * @return None.
  */
 MF_API void MFPrimitive_DrawQuadV(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, float su=0.0f, float sv=0.0f, float du=1.0f, float dv=1.0f, const MFMatrix &mat = MFMatrix::identity);
@@ -241,6 +243,7 @@ MF_API void MFPrimitive_DrawQuadV(const MFVector &min, const MFVector &max, cons
  * @param w Width of square.
  * @param h Height of square.
  * @param colour Colour of square.
+ * @param mat World matrix to be used.
  * @return None.
  */
 MF_API void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity);
@@ -251,6 +254,7 @@ MF_API void MFPrimitive_DrawUntexturedQuad(float x, float y, float w, float h, c
  * @param min Min coordinate of the square.
  * @param max Max coordinate of the square.
  * @param colour Colour of square.
+ * @param mat World matrix to be used.
  * @return None.
  */
 MF_API void MFPrimitive_DrawUntexturedQuadV(const MFVector &min, const MFVector &max, const MFVector &colour = MFVector::one, const MFMatrix &mat = MFMatrix::identity);

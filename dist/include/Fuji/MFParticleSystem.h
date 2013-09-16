@@ -96,7 +96,7 @@ struct MFParticleEmitterParameters
  * Creates a particle system.
  * Creates a particle system from a set of creation parameters.
  * @param pParticleParams Pointer to an MFParticleParameters describing the particle system.
- * @return Returns an instance of the defined particle system.
+ * @return An instance of the defined particle system.
  * @see MFParticleSystem_Destroy()
  * @see MFParticleSystem_Draw()
  */

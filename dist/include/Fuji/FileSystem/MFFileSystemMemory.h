@@ -6,7 +6,7 @@
 #if !defined(_MFFILESYSTEM_MEMORY_H)
 #define _MFFILESYSTEM_MEMORY_H
 
-#include "MFFileSystem.h"
+#include "Fuji/MFFileSystem.h"
 
 /**
  * Open memory file structure.

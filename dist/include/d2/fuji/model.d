@@ -19,7 +19,7 @@ struct MFMeshChunk;
 * Creates a model from the filesystem.
 * Creates a model from the filesystem.
 * @param pFilename Filename of model to load.
-* @return Returns a new instance of the specified model.
+* @return A new instance of the specified model.
 * @see MFModel_Destroy()
 */
 extern (C) MFModel* MFModel_Create(const(char*) pFilename);
@@ -29,7 +29,7 @@ extern (C) MFModel* MFModel_Create(const(char*) pFilename);
 * Creates a model from the filesystem.
 * @param pFilename Filename of model to load.
 * @param pAnimationFilename Filename of an animation to load and bind to the model instance.
-* @return Returns a new instance of the specified model with animation already loaded and bound.
+* @return A new instance of the specified model with animation already loaded and bound.
 * @see MFModel_Create()
 */
 extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(char*) pAnimationFilename = null);
@@ -38,7 +38,7 @@ extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(ch
 * Dstroy a model.
 * Destroys a model instance.
 * @param pModel Model instance to be destroyed.
-* @return Returns the new reference count of the model. If the returned reference count is 0, the model is destroyed.
+* @return The new reference count of the model. If the returned reference count is 0, the model is destroyed.
 * @see MFModel_Create()
 */
 extern (C) int MFModel_Destroy(MFModel* pModel);
@@ -118,7 +118,7 @@ extern (C) void MFModel_EnableSubobject(MFModel* pModel, int index, bool enable)
 * Finds if a specified subobject is enabled or disabled.
 * @param pModel Model instance.
 * @param index Subobject index.
-* @return Returns true if the subobject is enabled.
+* @return True if the subobject is enabled.
 * @see MFModel_GetNumSubObjects(), MFModel_EnableSubobject()
 */
 extern (C) bool MFModel_IsSubobjectEnabed(MFModel* pModel, int index);

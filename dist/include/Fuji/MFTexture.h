@@ -101,9 +101,10 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 /**
  * Creates a render target texture.
  * Creates a render target texture.
- * @param pName Name of the texture being created.
+ * @param pName Name for the render target being created.
  * @param width Width of render target.
  * @param height Height of render target.
+ * @param targetFormat Render target format.
  * @return Pointer to an MFTexture structure representing the newly created render target texture.
  * @see MFTexture_Create(), MFTexture_Release()
  */
@@ -113,7 +114,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
  * Release an MFTexture instance.
  * Release a reference to an MFTexture and destroy when the reference count reaches 0.
  * @param pTexture Texture instance to be destroyed.
- * @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
+ * @return The new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
  * @see MFTexture_Create()
  */
 MF_API int MFTexture_Release(MFTexture *pTexture);
@@ -122,7 +123,7 @@ MF_API int MFTexture_Release(MFTexture *pTexture);
  * Find an existing texture.
  * Finds an existing instance of the specified texture and returns a pointer. If the texture is not found, NULL is returned.
  * @param pName Name of texture to find.
- * @return Returns a pointer to the texture if it is found, otherwise NULL is returned.
+ * @return A pointer to the texture if it is found, otherwise NULL is returned.
  * @remarks Note that MFTexture_Find increments the textures reference count so you must release the reference when finished.
  * @see MFTexture_Create()
  */
@@ -133,20 +134,28 @@ MF_API MFTexture* MFTexture_Find(const char *pName);
  * Create a new texture that is a solid colour.
  * @param pName Name for the texture being created.
  * @param colour Colour to fill the texture when it is created.
- * @return Returns a pointer to a newly created blank texture.
+ * @return A pointer to a newly created blank texture.
  * @see MFTexture_Create()
  */
 MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
 
 /**
- * Tests to see if a image format is available on the current platform.
+ * Tests to see if an image format is available on the current platform.
  * Tests if a image format is supported in hardware on the current platform.
  * @param format Image format to be tested.
- * @return Returns true if specified format is supported in hardware.
+ * @return True if specified format is supported in hardware.
  * @see MFImage_GetPlatformAvailability()
  */
 MF_API bool MFTexture_IsFormatAvailable(int format);
 
+/**
+ * Get the dimensions of a texture.
+ * Gets the dimensions of a texture.
+ * @param pTexture Pointer to a texture.
+ * @param pWidth Optional pointer to an in that receives the width.
+ * @param pHeight Optional pointer to an in that receives the height.
+ * @return None.
+ */
 MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight);
 
 

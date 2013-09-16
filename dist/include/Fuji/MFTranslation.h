@@ -59,7 +59,7 @@ enum MFLanguage
  * Get the name of the specified language as spoken either natively or in english.
  * @param language Language to get the name of.
  * @param native If true, name in the native language is returned otherwise the language name in English. (ie, "Francies" vs "French")
- * @return Returns a string containing the name of the language.
+ * @return A string containing the name of the language.
  * @remarks If \a native is true, the returned string may require characters from an extended font page.
  */
 MF_API const char* MFTranslation_GetLanguageName(MFLanguage language, bool native = false);
@@ -67,7 +67,7 @@ MF_API const char* MFTranslation_GetLanguageName(MFLanguage language, bool nativ
 /**
  * Get the system default language.
  * Gets the systems default language (Usually the language set in the system BIOS).
- * @return Returns the system default language.
+ * @return The system default language.
  */
 MF_API MFLanguage MFTranslation_GetDefaultLanguage();
 
@@ -75,7 +75,7 @@ MF_API MFLanguage MFTranslation_GetDefaultLanguage();
  * Get the id for a language.
  * Gets the language id of a given language.
  * @param pLanguageName The name of the language requested.
- * @return Returns the specified language.
+ * @return The specified language.
  */
 MF_API MFLanguage MFTranslation_GetLanguageByName(const char *pLanguageName);
 
@@ -109,7 +109,7 @@ MF_API void MFTranslation_DestroyStringTable(MFStringTable *pTable);
  * Get the number of strings in the table.
  * Gets the number of strings in the string table.
  * @param pTable Pointer to a string table.
- * @return Returns the number of strings in the table.
+ * @return The number of strings in the table.
  */
 MF_API int MFTranslation_GetNumStrings(MFStringTable *pTable);
 
@@ -118,7 +118,7 @@ MF_API int MFTranslation_GetNumStrings(MFStringTable *pTable);
  * Finds a string in the table.
  * @param pTable Pointer to a string table.
  * @param pString The string to find in the table.
- * @return Returns the id of the requested string.
+ * @return The id of the requested string.
  */
 MF_API int MFTranslation_FindString(MFStringTable *pTable, const char *pString);
 
@@ -127,7 +127,7 @@ MF_API int MFTranslation_FindString(MFStringTable *pTable, const char *pString);
  * Gets a string Table to get string from.
  * @param pTable Pointer to a string table.
  * @param stringID ID if the string to get.
- * @return Returns the string specified by \a stringID from the specified string table.
+ * @return The string specified by \a stringID from the specified string table.
  */
 MF_API const char* MFTranslation_GetString(MFStringTable *pTable, int stringID);
 

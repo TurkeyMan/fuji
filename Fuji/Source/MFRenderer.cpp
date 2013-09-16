@@ -205,16 +205,22 @@ MF_API void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet
 
 MF_API void MFRenderer_AddVertices(const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
+	// TODO: choose appropriate layer from layer set...
+
 	MFRenderLayer_AddVertices(gCurrentLayers.pSolidLayer, pMeshStateBlock, firstVertex, numVertices, primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
 MF_API void MFRenderer_AddIndexedVertices(const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
+	// TODO: choose appropriate layer from layer set...
+
 	MFRenderLayer_AddIndexedVertices(gCurrentLayers.pSolidLayer, pMeshStateBlock, firstIndex, numVertices, primType, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
 MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
+	// TODO: choose appropriate layer from layer set...
+
 	MFRenderLayer_AddMesh(gCurrentLayers.pSolidLayer, pMesh, pMaterial, pEntity, pMaterialOverride, pView);
 }
 
@@ -621,19 +627,6 @@ MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags cle
 	pLayer->clearStencil = stencil;
 }
 
-MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
-{
-	if(pMesh->numIndices)
-		MFRenderLayer_AddIndexedVertices(pLayer, pMesh->pMeshState, pMesh->indexOffset, pMesh->numIndices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
-	else
-		MFRenderLayer_AddVertices(pLayer, pMesh->pMeshState, pMesh->vertexOffset, pMesh->numVertices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
-}
-
-MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
-{
-	MFModel_SubmitGeometry(pModel, pLayerSet, pMaterialOverride, pView);
-}
-
 MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
 {
 	MFRenderElement &e = pLayer->elements.push();
@@ -688,6 +681,19 @@ MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, const MFStat
 //	e.pInstances = NULL;
 //	e.numInstances = 0;
 //	e.animBatch = 0;
+}
+
+MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+{
+	if(pMesh->numIndices)
+		MFRenderLayer_AddIndexedVertices(pLayer, pMesh->pMeshState, pMesh->indexOffset, pMesh->numIndices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
+	else
+		MFRenderLayer_AddVertices(pLayer, pMesh->pMeshState, pMesh->vertexOffset, pMesh->numVertices, pMesh->primType, pMaterial, pEntity, pMaterialOverride, pView);
+}
+
+MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView)
+{
+	MFModel_SubmitGeometry(pModel, pLayerSet, pMaterialOverride, pView);
 }
 
 MF_API void MFRenderLayer_AddFence(MFRenderLayer *pLayer)

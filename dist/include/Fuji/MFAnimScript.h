@@ -22,7 +22,7 @@ struct MFAnimScript;
  * Creates an animscript from the filesystem.
  * @param pFilename Filename of the animscript to load.
  * @param pModel MFModel instance the animscript instance will refer to.
- * @return Returns a new instance of the specified animscript.
+ * @return A new instance of the specified animscript.
  * @see MFAnimScript_Destroy()
  */
 MF_API MFAnimScript* MFAnimScript_Create(const char *pFilename, MFModel *pModel);

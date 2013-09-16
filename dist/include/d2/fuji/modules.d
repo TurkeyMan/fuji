@@ -28,7 +28,7 @@ alias void function() MFDeinitCallback;
  * @param pInitFunction Module init function callback.
  * @param pDeinitFunction Module init function callback.
  * @param prerequisites A bitfield of modules that must be loaded prior to this module.
- * @return Returns an ID identifying the module.
+ * @return An ID identifying the module.
  */
 extern (C) int MFModule_RegisterModule(const(char*) pModuleName, MFInitCallback* pInitFunction, MFDeinitCallback* pDeinitFunction, ulong prerequisites = 0);
 

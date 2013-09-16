@@ -6,7 +6,7 @@
 #if !defined(_MFFILESYSTEM_CACHEDFILE_H)
 #define _MFFILESYSTEM_CACHEDFILE_H
 
-#include "MFFileSystem.h"
+#include "Fuji/MFFileSystem.h"
 
 /**
  * Open cached file structure.

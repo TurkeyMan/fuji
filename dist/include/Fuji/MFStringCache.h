@@ -19,7 +19,7 @@ struct MFStringCache;
  * Create a string cache.
  * Creates a string cache.
  * @param maxSize First byte.
- * @return Returns a handle to the newly created string cache.
+ * @return A handle to the newly created string cache.
  */
 MF_API MFStringCache* MFStringCache_Create(size_t maxSize);
 
@@ -44,7 +44,7 @@ MF_API void MFStringCache_Clear(MFStringCache *pCache);
  * Adds a string to a string cache.
  * @param pCache Target string cache.
  * @param pNewString String to add to the cache.
- * @return Returns a pointer to the string in the string cache.
+ * @return A pointer to the string in the string cache.
  */
 MF_API const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
 
@@ -52,7 +52,7 @@ MF_API const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewStri
  * Get a pointer to the cache memory.
  * Get a pointer to cache memory for direct read/write.
  * @param pCache Target string cache.
- * @return Returns a pointer to the string in the string cache.
+ * @return A pointer to the string in the string cache.
  */
 MF_API char* MFStringCache_GetCache(MFStringCache *pCache);
 
@@ -60,7 +60,7 @@ MF_API char* MFStringCache_GetCache(MFStringCache *pCache);
  * Get the actual used size of a string cache.
  * Gets the actual used size of a string cache.
  * @param pCache Target string cache.
- * @return Returns the number of bytes currently used.
+ * @return The number of bytes currently used.
  */
 MF_API size_t MFStringCache_GetSize(MFStringCache *pCache);
 
@@ -87,7 +87,7 @@ struct MFWStringCache;
  * Create a unicode string cache.
  * Creates a unicode string cache.
  * @param maxSize First byte.
- * @return Returns a handle to the newly created unicode string cache.
+ * @return A handle to the newly created unicode string cache.
  */
 MF_API MFWStringCache* MFWStringCache_Create(size_t maxSize);
 
@@ -104,7 +104,7 @@ MF_API void MFWStringCache_Destroy(MFWStringCache *pCache);
  * Adds a unicode string to a unicode string cache.
  * @param pCache Target unicode string cache.
  * @param pNewString String to add to the cache.
- * @return Returns a pointer to the string in the unicode string cache.
+ * @return A pointer to the string in the unicode string cache.
  */
 MF_API const wchar_t* MFWStringCache_Add(MFWStringCache *pCache, const wchar_t *pNewString);
 
@@ -112,7 +112,7 @@ MF_API const wchar_t* MFWStringCache_Add(MFWStringCache *pCache, const wchar_t *
  * Get a pointer to the cache memory.
  * Get a pointer to cache memory for direct read/write.
  * @param pCache Target unicode string cache.
- * @return Returns a pointer to the string in the unicode string cache.
+ * @return A pointer to the string in the unicode string cache.
  */
 MF_API wchar_t* MFWStringCache_GetCache(MFWStringCache *pCache);
 
@@ -120,7 +120,7 @@ MF_API wchar_t* MFWStringCache_GetCache(MFWStringCache *pCache);
  * Get the actual used size of a unicode string cache.
  * Gets the actual used size of a unicode string cache.
  * @param pCache Target unicode string cache.
- * @return Returns the number of bytes currently used.
+ * @return The number of bytes currently used.
  */
 MF_API size_t MFWStringCache_GetSize(MFWStringCache *pCache);
 

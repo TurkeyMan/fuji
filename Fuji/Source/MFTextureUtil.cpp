@@ -167,7 +167,7 @@ uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 	MFBIT(MFRD_PSP),	// ImgFmt_PSP_DXT5s
 };
 
-uint32 gMFImageBitsPerPixel[ImgFmt_Max] =
+uint8 gMFImageBitsPerPixel[ImgFmt_Max] =
 {
 	32,	// ImgFmt_A8R8G8B8
 	32,	// ImgFmt_A8B8G8R8
@@ -249,57 +249,57 @@ uint32 gMFImageBitsPerPixel[ImgFmt_Max] =
 	8,	// ImgFmt_PSP_DXT5s
 };
 
-uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
+uint8 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
 {
 	{ // D3D9
-		21,	// D3DFMT_A8R8G8B8		// ImgFmt_A8R8G8B8
-		32,	// D3DFMT_A8B8G8R8		// ImgFmt_A8B8G8R8
+		1,	// D3DFMT_A8R8G8B8		// ImgFmt_A8R8G8B8
+		2,	// D3DFMT_A8B8G8R8		// ImgFmt_A8B8G8R8
 		0,	//						// ImgFmt_B8G8R8A8
 		0,	//						// ImgFmt_R8G8B8A8
 
-		20,	// D3DFMT_R8G8B8		// ImgFmt_R8G8B8
+		3,	// D3DFMT_R8G8B8		// ImgFmt_R8G8B8
 		0,	//						// ImgFmt_B8G8R8
 
-		35,	// D3DFMT_A2R10G10B10	// ImgFmt_A2R10G10B10
-		31,	// D3DFMT_A2B10G10R10	// ImgFmt_A2B10G10R10
+		4,	// D3DFMT_A2R10G10B10	// ImgFmt_A2R10G10B10
+		5,	// D3DFMT_A2B10G10R10	// ImgFmt_A2B10G10R10
 
-		36,	// D3DFMT_A16B16G16R16	// ImgFmt_A16B16G16R16
+		6,	// D3DFMT_A16B16G16R16	// ImgFmt_A16B16G16R16
 
-		23,	// D3DFMT_R5G6B5		// ImgFmt_R5G6B5
+		7,	// D3DFMT_R5G6B5		// ImgFmt_R5G6B5
 		0,	//						// ImgFmt_R6G5B5
 		0,	//						// ImgFmt_B5G6R5
 
-		25,	// D3DFMT_A1R5G5B5		// ImgFmt_A1R5G5B5
+		8,	// D3DFMT_A1R5G5B5		// ImgFmt_A1R5G5B5
 		0,	//						// ImgFmt_R5G5B5A1
 		0,	//						// ImgFmt_A1B5G5R5
 
-		26,	// D3DFMT_A4R4G4B4		// ImgFmt_A4R4G4B4
+		9,	// D3DFMT_A4R4G4B4		// ImgFmt_A4R4G4B4
 		0,	//						// ImgFmt_A4B4G4R4
 		0,	//						// ImgFmt_R4G4B4A4
 
-		113,// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
-		116,// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
+		10,// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
+		11,// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
 
 		0,	//						// ImgFmt_R11G11B10_F
 		0,	//						// ImgFmt_R9G9B9_E5
 
-		41,	// D3DFMT_P8			// ImgFmt_I8
+		12,	// D3DFMT_P8			// ImgFmt_I8
 		0,	//						// ImgFmt_I4
 
-		80,	// D3DFMT_D16			// ImgFmt_D16
-		73,	// D3DFMT_D15S1			// ImgFmt_D15S1
-		77,	// D3DFMT_D24X8			// ImgFmt_D24X8
-		75,	// D3DFMT_D24S8			// ImgFmt_D24S8
-		83,	// D3DFMT_D24FS8		// ImgFmt_D24FS8
-		71,	// D3DFMT_D32			// ImgFmt_D32
-		82,	// D3DFMT_D32F_LOCKABLE	// ImgFmt_D32F
+		13,	// D3DFMT_D16			// ImgFmt_D16
+		14,	// D3DFMT_D15S1			// ImgFmt_D15S1
+		15,	// D3DFMT_D24X8			// ImgFmt_D24X8
+		16,	// D3DFMT_D24S8			// ImgFmt_D24S8
+		17,	// D3DFMT_D24FS8		// ImgFmt_D24FS8
+		18,	// D3DFMT_D32			// ImgFmt_D32
+		19,	// D3DFMT_D32F_LOCKABLE	// ImgFmt_D32F
 		0,	//						// ImgFmt_D32FS8X24
 
-		MFMAKEFOURCC('D', 'X', 'T', '1'),	// D3DFMT_DXT1	// ImgFmt_DXT1
-		MFMAKEFOURCC('D', 'X', 'T', '2'),	// D3DFMT_DXT2	// ImgFmt_DXT2
-		MFMAKEFOURCC('D', 'X', 'T', '3'),	// D3DFMT_DXT3	// ImgFmt_DXT3
-		MFMAKEFOURCC('D', 'X', 'T', '4'),	// D3DFMT_DXT4	// ImgFmt_DXT4
-		MFMAKEFOURCC('D', 'X', 'T', '5'),	// D3DFMT_DXT5	// ImgFmt_DXT5
+		20,	// D3DFMT_DXT1			// ImgFmt_DXT1
+		21,	// D3DFMT_DXT2			// ImgFmt_DXT2
+		22,	// D3DFMT_DXT3			// ImgFmt_DXT3
+		23,	// D3DFMT_DXT4			// ImgFmt_DXT4
+		24,	// D3DFMT_DXT5			// ImgFmt_DXT5
 
 		0,	// ImgFmt_PSP_DXT1
 		0,	// ImgFmt_PSP_DXT3

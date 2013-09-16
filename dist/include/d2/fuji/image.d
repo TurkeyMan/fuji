@@ -38,12 +38,20 @@ enum MFImageFormat
 	ABGR_F16,	/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
 	ABGR_F32,	/**< 128bit RGBA floating point format */
 
+	R11G11B10_F,/**< 32bit RGB floating point format - each component has 5bit exponent, no sign */
+	R9G9B9_E5,	/**< 32bit RGB floating point format with shared exponent, no sign */
+
 	I8,			/**< 8bit paletted format */
 	I4,			/**< 4bit paletted format */
 
 	D16,		/**< 16bit depth format */
+	D15S1,		/**< 15bit depth format with 1bit stencil */
 	D24X8,		/**< 24bit depth format */
 	D24S8,		/**< 24bit depth format with 8bit stencil */
+	D24FS8,		/**< 24bit floating point depth format with 8bit stencil */
+	D32,		/**< 32bit depth format */
+	D32F		/**< 32bit floating point depth format */
+	D32FS8X24,	/**< 32bit floating point depth format with 8bit stencil */
 
 	DXT1,		/**< Compressed DXT1 texture */
 	DXT2,		/**< Compressed DXT2 texture */
@@ -156,7 +164,7 @@ extern (C) uint MFImage_GetPlatformAvailability(int format);
 * Tests if a texture format is supported in hardware on a specified platform.
 * @param format Texture format to be tested.
 * @param platform Platform to test for hardware support.
-* @return Returns true if specified format is supported in hardware.
+* @return True if specified format is supported in hardware.
 * @see MFTexture_GetPlatformAvailability()
 */
 extern (C) bool MFImage_IsAvailableOnPlatform(int format, int platform);
@@ -165,7 +173,7 @@ extern (C) bool MFImage_IsAvailableOnPlatform(int format, int platform);
 * Get the average number of bits per pixel for a specified format.
 * Get the average number of bits per pixel for the specified format.
 * @param format Name for the texture being created.
-* @return Returns the number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
+* @return The number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
 * @see MFTexture_GetPlatformAvailability(), MFImage_GetFormatString()
 */
 extern (C) int MFImage_GetBitsPerPixel(int format);

@@ -90,7 +90,7 @@ extern (C) void MFView_GetOrthoRect(MFRect *pOrthoRect);
 /**
 * Test for ortho state.
 * Gets the current views ortho state.
-* @return Returns true if ortho mode is enabled.
+* @return True if ortho mode is enabled.
 * @see MFView_SetOrtho()
 */
 extern (C) bool MFView_IsOrtho();
@@ -107,7 +107,7 @@ extern (C) void MFView_SetCameraMatrix(ref const(MFMatrix) cameraMatrix);
 /**
 * Get the view stateblock.
 * Produce an MFStateBlock for the current view state.
-* @return Returns an MFStateBlock which represents the current view state.
+* @return An MFStateBlock which represents the current view state.
 * @see MFStateBlock_Create()
 */
 extern (C) const MFStateBlock* MFView_GetViewState();

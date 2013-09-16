@@ -55,7 +55,7 @@ public:
 	 * @param pItem Pointer to an item to be added to the list.
 	 * @param pHashBuffer Buffer to be hashed.
 	 * @param len Length of the buffer. If len is set to -1, \a pHashBuffer is treated as a string and len is determined by the terminating NULL character.
-	 * @return Returns the pointer passed by \a pItem.
+	 * @return The pointer passed by \a pItem.
 	 */
 	T* Create(T* pItem, const char *pHashBuffer, int len = -1);
 
@@ -90,7 +90,7 @@ public:
 	 * Gets an item in the list by hash value.
 	 * @param pHashBuffer Buffer to be hashed.
 	 * @param len Length of the buffer. If len is set to -1, \a pHashBuffer is treated as a string and len is determined by the terminating NULL character.
-	 * @return Returns a pointer to the item, or NULL if it was not found in the list.
+	 * @return A pointer to the item, or NULL if it was not found in the list.
 	 */
 	T* Find(const char *pHashBuffer, int len = -1);
 
@@ -104,28 +104,28 @@ public:
 	/**
 	 * Get the number of items in the list.
 	 * Gets the number of items in the list.
-	 * @return Returns the number of items in the list.
+	 * @return The number of items in the list.
 	 */
 	int GetNumItems();
 
 	/**
 	 * Get the maximum length of the list.
 	 * Gets the maximum length of the list.
-	 * @return Returns the maximum number of items the list can contain.
+	 * @return The maximum number of items the list can contain.
 	 */
 	int GetMaxItems();
 
 	/**
 	 * Check if the list is full.
 	 * Checks if the list is full.
-	 * @return Returns true if the list is full.
+	 * @return True if the list is full.
 	 */
 	bool IsFull();
 
 	/**
 	 * Check if the list is empty.
 	 * Checks if the list is empty.
-	 * @return Returns true if the list is empty.
+	 * @return True if the list is empty.
 	 */
 	bool IsEmpty();
 

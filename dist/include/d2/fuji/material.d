@@ -130,7 +130,7 @@ extern (C) void MFMaterial_RemoveDefinitions(const(char)* pName);
 * Create a material instance.
 * Creates an instance of a material.
 * @param pName Name of material to create.
-* @return Returns a new instance of the target material.
+* @return A new instance of the target material.
 */
 extern (C) MFMaterial* MFMaterial_Create(const(char)* pName);
 
@@ -138,7 +138,7 @@ extern (C) MFMaterial* MFMaterial_Create(const(char)* pName);
 * Release an MFMaterial instance.
 * Release a reference to an MFMaterial and destroy when the reference count reaches 0.
 * @param pMaterial Material instance to destroy.
-* @return Returns the new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
+* @return The new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
 */
 extern (C) int MFMaterial_Release(MFMaterial* pMaterial);
 
@@ -146,7 +146,7 @@ extern (C) int MFMaterial_Release(MFMaterial* pMaterial);
 * Find a material.
 * Finds a material instance.
 * @param pName Name of the material to find.
-* @return Returns a pointer to the material. If the material was not found, NULL is returned.
+* @return A pointer to the material. If the material was not found, NULL is returned.
 * @remarks Note that MFMaterial_Find increments the materials reference count so you must release the reference when finished.
 */
 extern (C) MFMaterial* MFMaterial_Find(const(char)* pName);
@@ -155,7 +155,7 @@ extern (C) MFMaterial* MFMaterial_Find(const(char)* pName);
 * Get a pointer to a stock material.
 * Gets a pointer to one of the built in 'stock' materials.
 * @param materialIdentifier Identifier of the stock material.
-* @return Returns a pointer to the specified stock material.
+* @return A pointer to the specified stock material.
 */
 extern (C) MFMaterial* MFMaterial_GetStockMaterial(MFStockMaterials materialIdentifier);
 
@@ -187,7 +187,7 @@ extern (C) immutable(char)* MFMaterial_GetMaterialName(MFMaterial* pMaterial) pu
 * Get the number of parameters the material exposes.
 * Gets the number of parameters the material exposes.
 * @param pMaterial Pointer to a material instance.
-* @return Returns the number of parameters exposed by the material.
+* @return The number of parameters exposed by the material.
 */
 extern (C) int MFMaterial_GetNumParameters(MFMaterial* pMaterial);
 
@@ -196,7 +196,7 @@ extern (C) int MFMaterial_GetNumParameters(MFMaterial* pMaterial);
 * Gets the name of a material parameter.
 * @param pMaterial Pointer to a material instance.
 * @param parameterIndex Parameter index.
-* @return Returns a string representing the parameter name.
+* @return A string representing the parameter name.
 */
 extern (C) immutable(char)* MFMaterial_GetParameterName(const(MFMaterial)* pMaterial, int parameterIndex);
 
@@ -205,7 +205,7 @@ extern (C) immutable(char)* MFMaterial_GetParameterName(const(MFMaterial)* pMate
 * Gets the index of a parameter from a parameter name.
 * @param pMaterial Pointer to a material instance.
 * @param pParameterName String representing a parameter name.
-* @return Returns the index of the parameter. -1 if the parameter does not exist.
+* @return The index of the parameter. -1 if the parameter does not exist.
 */
 extern (C) int MFMaterial_GetParameterIndexFromName(MFMaterial* pMaterial, const(char)* pParameterName);
 
@@ -214,7 +214,7 @@ extern (C) int MFMaterial_GetParameterIndexFromName(MFMaterial* pMaterial, const
 * Gets information about the specified material parameter.
 * @param pMaterial Pointer to a material instance.
 * @param parameterIndex Parameter index.
-* @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
+* @return A pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
 extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(const(MFMaterial)* pMaterial, int parameterIndex);
 
@@ -223,7 +223,7 @@ extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfo(const
 * Gets information about the specified material parameter.
 * @param pMaterial Pointer to a material instance.
 * @param pParameterName String representing a parameter name.
-* @return Returns a pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
+* @return A pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
 */
 extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfoFromName(MFMaterial* pMaterial, const(char)* pParameterName);
 
@@ -234,7 +234,7 @@ extern (C) immutable(MFMaterialParameterInfo)* MFMaterial_GetParameterInfoFromNa
 * @param parameterIndex Index of the parameter
 * @param argIndex Argument index of the parameter.
 * @param pValue Pointer to a buffer to receive non-integer parameter data.
-* @return Returns the value of integer or poitner parameters, otherwise returns 0 on success.
+* @return The value of integer or poitner parameters, otherwise returns 0 on success.
 */
 extern (C) size_t MFMaterial_GetParameter(MFMaterial* pMaterial, int parameterIndex, int argIndex, void* pValue = null);
 
@@ -244,7 +244,7 @@ extern (C) size_t MFMaterial_GetParameter(MFMaterial* pMaterial, int parameterIn
 * @param pMaterial Pointer to a material instance.
 * @param parameterIndex Index of the parameter
 * @param argIndex Argument index of the parameter.
-* @return Returns the value contained in the integer parameter.
+* @return The value contained in the integer parameter.
 */
 /+inline+/ size_t MFMaterial_GetParameterI(MFMaterial* pMaterial, int parameterIndex, int argIndex)
 {
@@ -257,7 +257,7 @@ extern (C) size_t MFMaterial_GetParameter(MFMaterial* pMaterial, int parameterIn
 * @param pMaterial Pointer to a material instance.
 * @param parameterIndex Index of the parameter
 * @param argIndex Argument index of the parameter.
-* @return Returns the value contained in the float parameter.
+* @return The value contained in the float parameter.
 */
 /+inline+/ float MFMaterial_GetParameterF(MFMaterial* pMaterial, int parameterIndex, int argIndex)
 {
@@ -300,7 +300,7 @@ extern (C) size_t MFMaterial_GetParameter(MFMaterial* pMaterial, int parameterIn
 * @param pMaterial Pointer to a material instance.
 * @param parameterIndex Index of the parameter
 * @param argIndex Argument index of the parameter.
-* @return Returns the MFTexture set to the parameter requested.
+* @return The MFTexture set to the parameter requested.
 */
 /+inline+/ MFTexture* MFMaterial_GetParameterT(MFMaterial* pMaterial, int parameterIndex, int argIndex)
 {

@@ -68,7 +68,7 @@ extern (C) void MFAuxDisplay_Update();
 /**
  * Get the number of auxillary display devices.
  * Gets the number of auxillary display devices.
- * @return Returns the number of available auxillary display devices.
+ * @return The number of available auxillary display devices.
  */
 extern (C) int MFAuxDisplay_GetNumberOfDisplays();
 
@@ -105,7 +105,7 @@ extern (C) void MFAuxDisplay_UploadImage(int device, const(char*) pImageBuffer, 
  * Reads the button state of an auxillary display device key.
  * @param device The target device.
  * @param button The button ID to read.
- * @return Returns the state of the button.
+ * @return The state of the button.
  */
 extern (C) int MFAuxDisplay_ReadButton(int device, int button);
 
@@ -114,7 +114,7 @@ extern (C) int MFAuxDisplay_ReadButton(int device, int button);
  * Reads the button pressed state from the auxillary display device.
  * @param device The target device.
  * @param button The button ID to read.
- * @return Returns true if the button was pressed this frame.
+ * @return True if the button was pressed this frame.
  */
 extern (C) bool MFAuxDisplay_WasPressed(int device, int button);
 
@@ -123,7 +123,7 @@ extern (C) bool MFAuxDisplay_WasPressed(int device, int button);
  * Reads the button released state from the auxillary display device.
  * @param device The target device.
  * @param button The button ID to read.
- * @return Returns true if the button was released this frame.
+ * @return True if the button was released this frame.
  */
 extern (C) bool MFAuxDisplay_WasReleased(int device, int button);
 

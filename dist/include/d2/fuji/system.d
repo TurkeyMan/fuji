@@ -88,7 +88,7 @@ extern (C) void MFSystem_Quit();
 * Sets a Fuji system callback function.
 * @param callback The callback to set from the MFCallback enum.
 * @param pCallbackFunction Pointer to the callback function.
-* @return Returns a pointer to the old callback function which MUST be called in the new registered callback.
+* @return A pointer to the old callback function which MUST be called in the new registered callback.
 */
 extern (C) MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
 
@@ -96,7 +96,7 @@ extern (C) MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback c
 * Get a Fuji system callback function.
 * Gets a registered Fuji system callback function pointer.
 * @param callback The callback to get from the MFCallback enum.
-* @return Returns the currently registered callback function for the requested callback.
+* @return The currently registered callback function for the requested callback.
 */
 extern (C) MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
@@ -104,7 +104,7 @@ extern (C) MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callba
 * Generate engine initialisation data.
 * Generates a string containing the current engine initialisation options.
 * @param tabDepth Initial tab depth for ini generation.
-* @return Returns a string containing initialisation parameters for the engine in MFIni '.ini' format.
+* @return A string containing initialisation parameters for the engine in MFIni '.ini' format.
 */
 extern (C) const(char)* MFSystem_GetSettingString(int tabDepth);
 
@@ -119,7 +119,7 @@ extern (C) void MFSystem_InitFromSettings(const MFIniLine *pSettings);
 /**
 * Gets the current platform.
 * Gets the current running platform.
-* @return Returns the current running platform.
+* @return The current running platform.
 * @see MFSystem_GetPlatformString()
 * @see MFSystem_GetPlatformName()
 */
@@ -129,7 +129,7 @@ extern (C) MFPlatform MFSystem_GetCurrentPlatform();
 * Gets a platform identifier string.
 * Gets an identifier string for a specified platform.
 * @param platform Platform to get the identifier string for.
-* @return Returns the platform identifier string.
+* @return The platform identifier string.
 * @see MFSystem_GetCurrentPlatform()
 * @see MFSystem_GetPlatformName()
 */
@@ -139,7 +139,7 @@ extern (C) const(char)* MFSystem_GetPlatformString(int platform);
 * Gets a platform name.
 * Gets the name string for a specified platform.
 * @param platform Platform identifier to get the name of.
-* @return Returns the platform name string.
+* @return The platform name string.
 * @see MFSystem_GetCurrentPlatform()
 * @see MFSystem_GetPlatformString()
 */
@@ -148,7 +148,7 @@ extern (C) const(char)* MFSystem_GetPlatformName(int platform);
 /**
 * Gets the name of this system.
 * Gets a user friendly name for this system. Typically a network identification name.
-* @return Returns the system name string.
+* @return The system name string.
 */
 extern (C) const(char)* MFSystem_GetSystemName();
 

@@ -288,7 +288,7 @@ MF_API MFRenderer* MFRenderer_GetCurrent();
  * @param pView Optional pointer to a view stateblock.
  * @return None.
  * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
- * @ see MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
+ * @see MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
  */
 MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
@@ -300,7 +300,7 @@ MF_API void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, const MFSta
  * @param pView Optional pointer to a view stateblock.
  * @return None.
  * @remarks The current layer set will be used to choose render layers for each subobject depending on mesh and material properties.
- * @ see MFRenderer_AddMesh(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
+ * @see MFRenderer_AddMesh(), MFRenderer_AddVertices(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet()
  */
 MF_API void MFRenderer_AddModel(MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
@@ -317,7 +317,7 @@ MF_API void MFRenderer_AddModel(MFModel *pModel, const MFStateBlock *pMaterialOv
  * @param pView Optional pointer to a view stateblock.
  * @return None.
  * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
- * @ see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
+ * @see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddIndexedVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
  */
 MF_API void MFRenderer_AddVertices(const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
@@ -334,7 +334,7 @@ MF_API void MFRenderer_AddVertices(const MFStateBlock *pMeshStateBlock, int firs
  * @param pView Optional pointer to a view stateblock.
  * @return None.
  * @remarks The current layer set will be used to choose a render layer depending on mesh and material properties.
- * @ see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
+ * @see MFRenderer_AddMesh(), MFRenderer_AddModel(), MFRenderer_AddVertices(), MFRenderer_SetRenderLayerSet(), MFStateBlock_SetMiscState()
  */
 MF_API void MFRenderer_AddIndexedVertices(const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
@@ -372,23 +372,121 @@ MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int target
  * @param pLayer An MFRenderLayer.
  * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the depth target.
  * @return None.
- * @remarks \a pTexture should be a compatible z-buffer format. Use 
+ * @remarks \a pTexture should be a compatible z-buffer format. Use ImgFmt_SelectDepth or ImgFmt_SelectDepthStencil to select a format automatically.
  */
 MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
+
+/**
+ * Set a render layer's render target capture surface.
+ * Sets a texture that will receive a copy of the render target when the layer has finished rendering.
+ * @param pLayer An MFRenderLayer.
+ * @param targetIndex Render target index.
+ * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the capture target.
+ * @return None.
+ */
 MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+
+/**
+ * Set a render layer's depth target capture surface.
+ * Sets a texture that will receive a copy of the depth target when the layer has finished rendering.
+ * @param pLayer An MFRenderLayer.
+ * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the capture target.
+ * @return None.
+ */
 MF_API void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);
 
+/**
+ * Set the clear mode for the layer.
+ * Sets the clear mode for a render layer.
+ * @param pLayer An MFRenderLayer.
+ * @param clearFlags A combination of flags from the \a MFRenderClearFlags enumerated type specifying which buffers to clear.
+ * @param colour Colour to be written.
+ * @param z Z value to be written.
+ * @param stencil Stencil value to be written.
+ * @return None.
+ * @remarks Render layers are cleared according to the clear mode immediately before rendering.
+ */
 MF_API void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags, const MFVector &colour = MFVector::zero, float z = 1.f, int stencil = 0);
 
+/**
+ * Submit vertices for rendering.
+ * Submits vertices to a layer for rendering.
+ * @param pLayer Layer to receive the geometry.
+ * @param pMeshStateBlock Pointer to a mesh stateblock. This should contain at least a VertexDeclaration and VertexBuffer states.
+ * @param firstVertex Offset of the first vertex to render.
+ * @param numVertices Number of vertices to render.
+ * @param primType Type of primitives to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @see MFRenderLayer_AddIndexedVertices(), MFRenderLayer_AddMesh(), MFRenderLayer_AddModel(), MFStateBlock_SetMiscState()
+ */
 MF_API void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit indexed vertices for rendering.
+ * Submits indexed vertices to a layer for rendering.
+ * @param pLayer Layer to receive the geometry.
+ * @param pMeshStateBlock Pointer to a mesh stateblock. This should contain at least a VertexDeclaration, an IndexBuffer, and VertexBuffer states.
+ * @param firstIndex Offset of the first index to render.
+ * @param numVertices Number of vertices to render.
+ * @param primType Type of primitives to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @see MFRenderLayer_AddVertices(), MFRenderLayer_AddMesh(), MFRenderLayer_AddModel(), MFStateBlock_SetMiscState()
+ */
 MF_API void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit a mesh for rendering.
+ * Submits a mesh to a layer for rendering.
+ * @param pLayer Layer to receive the geometry.
+ * @param pMesh Pointer to an \a MFMesh to render.
+ * @param pMaterial Material to use when rendering the mesh.
+ * @param pEntity Optional pointer to an entity stateblock.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @see MFRendererLayer_AddVertices(), MFRendererLayer_AddIndexedVertices(), MFRenderLayer_AddModel()
+ */
 MF_API void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+
+/**
+ * Submit a model for rendering.
+ * Submits a model to the specified layers for rendering.
+ * @param pLayerSet Layer set specifying which layers should receive the geometry.
+ * @param pModel Model to render.
+ * @param pMaterialOverride Optional pointer to a material override stateblock.
+ * @param pView Optional pointer to a view stateblock.
+ * @return None.
+ * @remarks Render layers will be chosen from \a pLayerSet for each subobject depending on mesh and material properties.
+ * @see MFRendererLayer_AddVertices(), MFRendererLayer_AddIndexedVertices(), MFRenderLayer_AddMesh()
+ */
 MF_API void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
 
+/**
+ * Add a fence to the render layer
+ * Adds a fence to the render layer.
+ * @param pLayer Layer to receive the fence.
+ * @return None.
+ * @remarks Adding a fence to a render layer will force all geometry submitted prior to the fence be rendered before any geometry after.
+ */
 MF_API void MFRenderLayer_AddFence(MFRenderLayer *pLayer);
 
 
-// helpers...
+/**
+ * Set a render layer stateblock.
+ * Assign a render layer stateblock.
+ * @param pRenderer MFRenderer instance.
+ * @param layer Layer index.
+ * @param pState A stateblock to be assigned as the layer stateblock.
+ * @return None.
+ */
 __forceinline void MFRenderer_SetLayerStateBlock(MFRenderer *pRenderer, int layer, const MFStateBlock *pState)
 {
 	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, layer);

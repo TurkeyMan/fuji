@@ -153,7 +153,7 @@ MF_API int MFFont_BlitTextf(MFFont *pFont, int x, int y, const MFVector &colour,
  * @param pText Pointer to a string containing the text to render.
  * @param maxChars Maximum number of chars to render from the source string.
  * @param ltw Local to world matrix used to render the string.
- * @return Returns the height of the text rendered.
+ * @return The height of the text rendered.
  */
 MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
@@ -168,7 +168,7 @@ MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, c
  * @param pText Pointer to a string containing the text to render.
  * @param maxChars Maximum number of chars to render from the source string.
  * @param ltw Local to world matrix used to render the string.
- * @return Returns the height of the text rendered.
+ * @return The height of the text rendered.
  */
 MF_API float MFFont_DrawText2(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pText, int maxChars = -1, const MFMatrix &ltw = MFMatrix::identity);
 
@@ -181,7 +181,7 @@ MF_API float MFFont_DrawText2(MFFont *pFont, float x, float y, float height, con
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
  * @param ... Additional parameters used according to the format specifier.
- * @return Returns the height of the text rendered.
+ * @return The height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
 MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pFormat, ...) MFPRINTF_FUNC(5, 6);
@@ -196,7 +196,7 @@ MF_API float MFFont_DrawTextf(MFFont *pFont, const MFVector &pos, float height, 
  * @param colour Colour of the text.
  * @param pFormat Pointer to the format string. This complies with all the regular printf format standards.
  * @param ... Additional parameters used according to the format specifier.
- * @return Returns the height of the text rendered.
+ * @return The height of the text rendered.
  * @remarks The MFFont_DrawTextf format string conforms with all the standard printf format standards.
  */
 MF_API float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const MFVector &colour, const char *pFormat, ...) MFPRINTF_FUNC(6, 7);
@@ -209,7 +209,7 @@ MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFV
 /**
  * Get the debug font.
  * Gets a pointer to the debug font.
- * @return Returns a pointer to the debug font.
+ * @return A pointer to the debug font.
  */
 MF_API MFFont* MFFont_GetDebugFont();
 

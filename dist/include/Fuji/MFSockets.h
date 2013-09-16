@@ -212,7 +212,7 @@ struct MFAddressInfo
  * @param b2 Second byte.
  * @param b3 Third byte.
  * @param b4 Fourth byte.
- * @return Returns an MFInetAddress structure representing the IP address specified by the 4 bytes.
+ * @return An MFInetAddress structure representing the IP address specified by the 4 bytes.
  */
 MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4);
 
@@ -220,7 +220,7 @@ MFInetAddress MFSockets_MakeInetAddress(uint8 b1, uint8 b2, uint8 b3, uint8 b4);
  * Build an MFInetAddress structure from a string.
  * Build an MFInetAddress structure from a string.
  * @param pIPString String representing the IP address in "0.0.0.0" format.
- * @return Returns an MFInetAddress structure representing the IP address specified by the string.
+ * @return An MFInetAddress structure representing the IP address specified by the string.
  */
 MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString);
 
@@ -235,7 +235,7 @@ MFInetAddress MFSockets_MakeInetAddressFromString(const char *pIPString);
  * @param s6 Sixth short.
  * @param s7 Seventh short.
  * @param s8 Eighth short.
- * @return Returns an MFInet6Address structure representing the IP6 address specified by the 8 shorts.
+ * @return An MFInet6Address structure representing the IP6 address specified by the 8 shorts.
  */
 MFInet6Address MFSockets_MakeInet6Address(uint16 s1, uint16 s2, uint16 s3, uint16 s4, uint16 s5, uint16 s6, uint16 s7, uint16 s8);
 
@@ -243,7 +243,7 @@ MFInet6Address MFSockets_MakeInet6Address(uint16 s1, uint16 s2, uint16 s3, uint1
  * Build an MFInet6Address structure from a string.
  * Build an MFInet6Address structure from a string.
  * @param pIP6String String representing the IP6 address in "0000:0000:0000:0000:0000:0000:0000:0000" format.
- * @return Returns an MFInet6Address structure representing the IP6 address specified by the string.
+ * @return An MFInet6Address structure representing the IP6 address specified by the string.
  */
 MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String);
 
@@ -251,7 +251,7 @@ MFInet6Address MFSockets_MakeInet6AddressFromString(const char *pIP6String);
  * Generate a string representing the specified network address.
  * Generate a string representing the specified network address.
  * @param address An MFSocketAddress structure specifying a network address. This address may be from any supported address family.
- * @return Returns a string representing the specified network address.
+ * @return A string representing the specified network address.
  */
 const char* MFSockets_GetAddressString(const MFSocketAddress &address);
 
@@ -260,7 +260,7 @@ const char* MFSockets_GetAddressString(const MFSocketAddress &address);
 /**
  * Check if the Fuji socket layer is active.
  * Check if the Fuji socket layer is active.
- * @return Returns true if the Fuji socket layer is active and ready for use.
+ * @return True if the Fuji socket layer is active and ready for use.
  */
 bool MFSockets_IsActive();
 
@@ -270,7 +270,7 @@ bool MFSockets_IsActive();
  * @param addressFamily Address family specification.
  * @param type Type specification for the new socket. This should be a member of the MFSocketType enumerated type.
  * @param protocol Protocol to be used with the socket that is specific to the indicated address family.
- * @return Returns a reference to the newly created socket. If CreateSocket failed, the return value is -1.
+ * @return A reference to the newly created socket. If CreateSocket failed, the return value is -1.
  */
 MFSocket MFSockets_CreateSocket(MFAddressFamily addressFamily, MFSocketType type, int protocol);
 
@@ -325,7 +325,7 @@ MFSocket MFSockets_Accept(MFSocket socket, MFSocketAddress *pConnectingSocketAdd
  * @param pBuffer Buffer containing the data to be transmitted.
  * @param bufferLength Length of the data in \a pBuffer, in bytes.
  * @param flags Indicator specifying the way in which the call is made.
- * @return Returns the total number of bytes sent, which can be less than the number indicated by \a bufferLength.
+ * @return The total number of bytes sent, which can be less than the number indicated by \a bufferLength.
  */
 int MFSockets_Send(MFSocket socket, const char *pBuffer, int bufferLength, uint32 flags);
 
@@ -337,7 +337,7 @@ int MFSockets_Send(MFSocket socket, const char *pBuffer, int bufferLength, uint3
  * @param bufferLength Length of the data in \a pBuffer, in bytes.
  * @param flags Indicator specifying the way in which the call is made.
  * @param pAddress Optional pointer to a MFSocketAddress structure that contains the address of the target socket.
- * @return Returns the total number of bytes sent, which can be less than the number indicated by \a bufferLength.
+ * @return The total number of bytes sent, which can be less than the number indicated by \a bufferLength.
  */
 int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uint32 flags, const MFSocketAddress *pAddress);
 
@@ -348,7 +348,7 @@ int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uin
  * @param pBuffer Buffer for the incoming data.
  * @param bufferSize Length of \a pBuffer, in bytes.
  * @param flags Flag specifying the way in which the call is made.
- * @return Returns the number of bytes received. If the connection has been gracefully closed, the return value is zero.
+ * @return The number of bytes received. If the connection has been gracefully closed, the return value is zero.
  */
 int MFSockets_Recv(MFSocket socket, char *pBuffer, int bufferSize, uint32 flags);
 
@@ -360,7 +360,7 @@ int MFSockets_Recv(MFSocket socket, char *pBuffer, int bufferSize, uint32 flags)
  * @param bufferSize Length of \a pBuffer, in bytes.
  * @param flags Flag specifying the way in which the call is made.
  * @param pSenderAddress Optional pointer to a buffer in a MFSocketAddress structure that will hold the source address upon return.
- * @return Returns the number of bytes received. If the connection has been gracefully closed, the return value is zero.
+ * @return The number of bytes received. If the connection has been gracefully closed, the return value is zero.
  */
 int MFSockets_RecvFrom(MFSocket socket, char *pBuffer, int bufferSize, uint32 flags, MFSocketAddress *pSenderAddress);
 
@@ -389,7 +389,7 @@ int MFSockets_SetSocketOptions(MFSocket socket, MFSocketOptions option, const vo
 /**
  * Get the last socket error.
  * Gets the last socket error.
- * @return Returns the last socket error.
+ * @return The last socket error.
  */
 MFSocketError MFSockets_GetLastError();
 

@@ -105,7 +105,7 @@ extern (C) MFTexture* MFTexture_CreateRenderTarget(const(char)* pName, int width
 * Release an MFTexture instance.
 * Release a reference to an MFTexture and destroy when the reference reaches 0.
 * @param pTexture Texture instance to be destroyed.
-* @return Returns the new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
+* @return The new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
 * @see MFTexture_Create()
 */
 extern (C) int MFTexture_Release(MFTexture* pTexture);
@@ -114,7 +114,7 @@ extern (C) int MFTexture_Release(MFTexture* pTexture);
 * Find an existing texture.
 * Finds an existing instance of the specified texture and returns a pointer. If the texture is not found, NULL is returned.
 * @param pName Name of texture to find.
-* @return Returns a pointer to the texture if it is found, otherwise NULL is returned.
+* @return A pointer to the texture if it is found, otherwise NULL is returned.
 * @remarks Note that MFTexture_Find increments the textures reference count so you must release the reference when finished.
 * @see MFTexture_Create()
 */
@@ -125,7 +125,7 @@ extern (C) MFTexture* MFTexture_Find(const(char)* pName);
 * Create a new texture that is a solid colour.
 * @param pName Name for the texture being created.
 * @param colour Colour to fill the texture when it is created.
-* @return Returns a pointer to a newly created blank texture.
+* @return A pointer to a newly created blank texture.
 * @see MFTexture_Create()
 */
 extern (C) MFTexture* MFTexture_CreateBlank(const(char)* pName, ref const(MFVector) colour);
@@ -134,7 +134,7 @@ extern (C) MFTexture* MFTexture_CreateBlank(const(char)* pName, ref const(MFVect
 * Tests to see if a texture format is available on the current platform.
 * Tests if a texture format is supported in hardware on the current platform.
 * @param format Texture format to be tested.
-* @return Returns true if specified format is supported in hardware.
+* @return True if specified format is supported in hardware.
 * @see MFTexture_GetPlatformAvailability()
 */
 extern (C) bool MFTexture_IsAvailable(int format);

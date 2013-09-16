@@ -34,7 +34,7 @@ void MFNetwork_BeginInputServer();
 /**
  * Check if the remote input server is running.
  * Checks if the remote input server is running.
- * @return Returns true if the remote input server is running.
+ * @return True if the remote input server is running.
  */
 bool MFNetwork_IsRemoteInputServerRunning();
 
@@ -49,7 +49,7 @@ int MFNetwork_MaxRemoteDevices();
  * Get the state of a remote input device.
  * Gets the state of a remote input device.
  * @param remoteDeviceID The remote device ID.
- * @return Returns the remote device state.
+ * @return The remote device state.
  */
 int MFNetwork_GetRemoteDeviceStatus(int remoteDeviceID);
 

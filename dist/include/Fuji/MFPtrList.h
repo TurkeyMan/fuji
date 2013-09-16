@@ -37,7 +37,7 @@ public:
 	 * Add an item to the list.
 	 * Adds an item to the list.
 	 * @param p Pointer to an item to be added to the list.
-	 * @return Returns the pointer passed by \a p.
+	 * @return The pointer passed by \a p.
 	 */
 	T* Create(T* p);
 
@@ -60,7 +60,7 @@ public:
 	/**
 	 * Get an iterator pointing to the start of the list.
 	 * Returns an iterator pointing to the start of the list.
-	 * @return Returns a pointer pointing to the first pointer in the list.
+	 * @return A pointer pointing to the first pointer in the list.
 	 */
 	T** Begin();
 
@@ -68,7 +68,7 @@ public:
 	 * Find an item in the list.
 	 * Returns an iterator pointing to the specified item in the list.
 	 * @param p Pointer to an item to find.
-	 * @return Returns an iterator pointing to the item that was found.
+	 * @return An iterator pointing to the item that was found.
 	 */
 	T** Find(T* p);
 
@@ -82,28 +82,28 @@ public:
 	/**
 	 * Get the length of the list.
 	 * Gets the length of the list.
-	 * @return Returns the number of items in the list.
+	 * @return The number of items in the list.
 	 */
 	int GetLength();
 
 	/**
 	 * Get the maximum length of the list.
 	 * Gets the maximum length of the list.
-	 * @return Returns the maximum number of items the list can contain.
+	 * @return The maximum number of items the list can contain.
 	 */
 	int GetMaxElements();
 
 	/**
 	 * Check if the list is full.
 	 * Checks if the list is full.
-	 * @return Returns true if the list is full.
+	 * @return True if the list is full.
 	 */
 	bool IsFull();
 
 	/**
 	 * Check if the list is empty.
 	 * Checks if the list is empty.
-	 * @return Returns true if the list is empty.
+	 * @return True if the list is empty.
 	 */
 	bool IsEmpty();
 
@@ -146,7 +146,7 @@ public:
 	/**
 	 * Create a new item.
 	 * Creates a new item in the list.
-	 * @return Returns a pointer to a newly created item of type T.
+	 * @return A pointer to a newly created item of type T.
 	 */
 	T* Create();
 
@@ -169,7 +169,7 @@ public:
 	/**
 	 * Get an iterator pointing to the start of the list.
 	 * Returns an iterator pointing to the start of the list.
-	 * @return Returns a pointer pointing to the first pointer in the list.
+	 * @return A pointer pointing to the first pointer in the list.
 	 */
 	T** Begin();
 
@@ -177,7 +177,7 @@ public:
 	 * Find an item in the list.
 	 * Returns an iterator pointing to the specified item in the list.
 	 * @param p Pointer to an item to find.
-	 * @return Returns an iterator pointing to the item that was found.
+	 * @return An iterator pointing to the item that was found.
 	 */
 	T** Find(T* p);
 
@@ -200,35 +200,35 @@ public:
 	/**
 	 * Get the length of the list.
 	 * Gets the length of the list.
-	 * @return Returns the number of items in the list.
+	 * @return The number of items in the list.
 	 */
 	int GetLength();
 
 	/**
 	 * Get the maximum length of the list.
 	 * Gets the maximum length of the list.
-	 * @return Returns the maximum number of items the list can contain.
+	 * @return The maximum number of items the list can contain.
 	 */
 	int GetMaxElements();
 
 	/**
 	 * Check if the list is full.
 	 * Checks if the list is full.
-	 * @return Returns true if the list is full.
+	 * @return True if the list is full.
 	 */
 	bool IsFull();
 
 	/**
 	 * Check if the list is empty.
 	 * Checks if the list is empty.
-	 * @return Returns true if the list is empty.
+	 * @return True if the list is empty.
 	 */
 	bool IsEmpty();
 
 	/**
 	 * Get the start of the dead item list.
 	 * Gets the start of the dead item list.
-	 * @return Returns an iterator pointing to the first item in the dead item list.
+	 * @return An iterator pointing to the first item in the dead item list.
 	 * @remarks The dead item list is where all the non-active items reside.
 	 */
 	T** BeginDead();

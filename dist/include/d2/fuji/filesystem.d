@@ -57,7 +57,7 @@ enum MFJobState
 * Gets the system file path.
 * Gets the default game data path and optionally appends a filename.
 * @param filename Filename to append to the path. This may be set to null.
-* @return Returns the path to the game data directory.
+* @return The path to the game data directory.
 */
 extern (C) const(char)* MFFile_SystemPath(const(char)* filename = null);
 
@@ -65,7 +65,7 @@ extern (C) const(char)* MFFile_SystemPath(const(char)* filename = null);
 * Gets the system home path.
 * Gets the default game home path and optionally appends a filename.
 * @param filename Filename to append to the path. This may be set to null.
-* @return Returns the path to the game home directory.
+* @return The path to the game home directory.
 * @remarks The home path is typically used for debugging and development purposes (writing logs, screenshots, etc). The game should not require access to the home path.
 */
 extern (C) const(char)* MFFile_HomePath(const(char)* filename = null);
@@ -89,7 +89,7 @@ struct MFOpenData
 * Opens a file.
 * @param fileSystem Filesystem which provides the file.
 * @param pOpenData Pointer to an MFOpenData structure describing the file to open.
-* @return Returns a pointer to the newly opened file, returns null if the file open failed.
+* @return A pointer to the newly opened file, returns null if the file open failed.
 */
 extern (C) MFFile* MFFile_Open(MFFileSystemHandle fileSystem, const ref MFOpenData openData);
 
@@ -108,7 +108,7 @@ extern (C) int MFFile_Close(MFFile *pFile);
 * @param pBuffer Pointer to a buffer where the read data will be stored.
 * @param bytes Number of bytes to read.
 * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
-* @return Returns the number of bytes read.
+* @return The number of bytes read.
 */
 extern (C) int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
 
@@ -119,7 +119,7 @@ extern (C) int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool asyn
 * @param pBuffer Pointer to the data to be written.
 * @param bytes Number of bytes to write.
 * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
-* @return Returns the number of bytes written.
+* @return The number of bytes written.
 */
 extern (C) int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
 
@@ -129,7 +129,7 @@ extern (C) int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bo
 * @param pFile Pointer to an open file.
 * @param bytes Number of bytes to seek.
 * @param relativity Member of the MFFileSeek enumerated type where to begin the seek.
-* @return Returns the new file offset in bytes.
+* @return The new file offset in bytes.
 */
 extern (C) int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 
@@ -137,7 +137,7 @@ extern (C) int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 * Tell the file position.
 * Tells the current file position.
 * @param pFile Pointer to an open file.
-* @return Returns the file pointer offset in bytes.
+* @return The file pointer offset in bytes.
 */
 extern (C) int MFFile_Tell(MFFile *pFile);
 
@@ -145,7 +145,7 @@ extern (C) int MFFile_Tell(MFFile *pFile);
 * Get the size of a file.
 * Gets the size of a file.
 * @param pFile Pointer to an open file.
-* @return Returns the size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
+* @return The size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
 */
 extern (C) long MFFile_GetSize(MFFile *pFile);
 
@@ -153,7 +153,7 @@ extern (C) long MFFile_GetSize(MFFile *pFile);
 * Check for end of file.
 * Check to see if the file has reached its end.
 * @param pFile Pointer to an open file.
-* @return Returns true if the file pointer has reached the end of the file, otherwise false.
+* @return True if the file pointer has reached the end of the file, otherwise false.
 */
 extern (C) bool MFFile_IsEOF(MFFile *pFile);
 
@@ -175,7 +175,7 @@ extern (C) int MFFile_StdClose(void* stream);
 * @param size Number of bytes in a block.
 * @param count Number of blocks to read.
 * @param stream Handle to an open file.
-* @return Returns the number of bytes read.
+* @return The number of bytes read.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
 extern (C) size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* stream);
@@ -187,7 +187,7 @@ extern (C) size_t MFFile_StdRead(void *buffer, size_t size, size_t count, void* 
 * @param size Number of bytes in a block.
 * @param count Number of blocks to write.
 * @param stream Handle to an open file.
-* @return Returns the number of bytes written.
+* @return The number of bytes written.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
 extern (C) size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count, void* stream);
@@ -198,7 +198,7 @@ extern (C) size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count,
 * @param stream Handle to an open file.
 * @param offset Number of bytes to seek.
 * @param whence Member of the MFFileSeek enumerated type where to begin the seek.
-* @return Returns the new file offset in bytes.
+* @return The new file offset in bytes.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
 extern (C) long MFFile_StdSeek(void* stream, long offset, int whence);
@@ -207,7 +207,7 @@ extern (C) long MFFile_StdSeek(void* stream, long offset, int whence);
 * Tell the file position.
 * Tells the current file position.
 * @param stream Handle to an open file.
-* @return Returns the file pointer offset in bytes.
+* @return The file pointer offset in bytes.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
 extern (C) long MFFile_StdTell(void* stream);
@@ -316,7 +316,7 @@ struct MFVolumeInfo
 * Get a handle to a specific filesystem.
 * Gets a handle to a specific filesystem.
 * @param fileSystemHandle Enum of the filesystem to retrieve.
-* @return Returns the FileSystemHandle for the specified filesystem.
+* @return The FileSystemHandle for the specified filesystem.
 */
 extern (C) MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle);
 
@@ -353,7 +353,7 @@ extern (C) int MFFileSystem_Dismount(const(char)* pMountpoint);
 * Open a file from the mounted filesystem stack.
 * @param pFilename The name of the file to open.
 * @param openFlags Open file flags.
-* @return Returns a pointer to the opened file. Returns null if open failed.
+* @return A pointer to the opened file. Returns null if open failed.
 */
 extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MFOpenFlags.Read | MFOpenFlags.Binary);
 
@@ -363,7 +363,7 @@ extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MF
 * @param pFilename The name of the file to load.
 * @param pBytesRead Optional pointer to a size_t that will receive the size of the file loaded.
 * @param @param extraBytes Number of extra bytes to allocate at the end of the buffer. Initialises the first extra byte to 0 (useful for appending a NULL byte to the end of text files).
-* @return Returns a pointer to a new buffer containing the file that was loaded.
+* @return A pointer to a new buffer containing the file that was loaded.
 */
 extern (C) char* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, size_t extraBytes = 0);
 
@@ -381,7 +381,7 @@ extern (C) int MFFileSystem_Save(const(char)* pFilename, const(char)* pBuffer, s
 * Get the size of a file.
 * Gets the size of a file.
 * @param pFilename The name of the file to find the size.
-* @return Returns the size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0.
+* @return The size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0.
 * @remarks If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists. MFFileSystem_GetSize may also return -1 if the files length is not known, for instance, an endless or unknown length network stream.
 */
 extern (C) long MFFileSystem_GetSize(const(char)* pFilename);
@@ -390,7 +390,7 @@ extern (C) long MFFileSystem_GetSize(const(char)* pFilename);
 * See if a file is available to the filesystem.
 * Attempts to locate a file in the mounted filesystem stack.
 * @param pFilename The filename to search the filesystem for.
-* @return Returns true if the file can be found within the mounted filesystem stack.
+* @return True if the file can be found within the mounted filesystem stack.
 */
 extern (C) bool MFFileSystem_Exists(const(char)* pFilename);
 
@@ -426,7 +426,7 @@ extern (C) MFFind* MFFileSystem_FindFirst(const(char)* pSearchPattern, MFFindDat
 * Finds the next file in the directory matching the search pattern specified in MFFileSystem_FindFirst().
 * @param pFind MFFind handle returned from a previous call to MFFileSystem_FindFirst().
 * @param pFindData Pointer to an MFFindData structure which receives details about the file.
-* @return Returns true on success or false if there are no more files in the directory.
+* @return True on success or false if there are no more files in the directory.
 * @see MFFileSystem_FindFirst(), MFFileSystem_FindClose()
 */
 extern (C) bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);

@@ -9,8 +9,8 @@
 
 extern const char *gpMFImageFormatStrings[ImgFmt_Max];
 extern uint32 gMFImagePlatformAvailability[ImgFmt_Max];
-extern uint32 gMFImageBitsPerPixel[ImgFmt_Max];
-extern uint32 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max];
+extern uint8 gMFImageBitsPerPixel[ImgFmt_Max];
+extern uint8 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max];
 
 
 MF_API const char * const MFImage_GetFormatString(int format)
@@ -30,7 +30,7 @@ MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform)
 
 MF_API int MFImage_GetBitsPerPixel(int format)
 {
-	return gMFImageBitsPerPixel[format];
+	return (int)gMFImageBitsPerPixel[format];
 }
 
 

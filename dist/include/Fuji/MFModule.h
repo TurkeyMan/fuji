@@ -35,11 +35,11 @@ typedef void (MFDeinitCallback)();
 /**
  * Register a Fuji module.
  * Registers a Fuji module.
- * @param pSystemName The name of the module.
+ * @param pModuleName The name of the module.
  * @param pInitFunction Module init function callback.
  * @param pDeinitFunction Module init function callback.
  * @param prerequisites A bitfield of modules that must be loaded prior to this module.
- * @return Returns an ID identifying the module.
+ * @return An ID identifying the module.
  */
 MF_API int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites = 0);
 

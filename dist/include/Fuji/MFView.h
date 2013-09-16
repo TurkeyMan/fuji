@@ -99,7 +99,7 @@ MF_API void MFView_GetOrthoRect(MFRect *pOrthoRect);
 /**
  * Test for ortho state.
  * Gets the current views ortho state.
- * @return Returns true if ortho mode is enabled.
+ * @return True if ortho mode is enabled.
  * @see MFView_SetOrtho()
  */
 MF_API bool MFView_IsOrtho();

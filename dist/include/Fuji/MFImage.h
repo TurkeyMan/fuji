@@ -183,7 +183,7 @@ MF_API uint32 MFImage_GetPlatformAvailability(int format);
  * Tests if a image format is supported in hardware on a specified platform.
  * @param format Image format to be tested.
  * @param platform Platform to test for hardware support.
- * @return Returns true if specified format is supported in hardware.
+ * @return True if specified format is supported in hardware.
  * @see MFImage_GetPlatformAvailability()
  */
 MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform);
@@ -192,7 +192,7 @@ MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform);
  * Get the average number of bits per pixel for a specified format.
  * Get the average number of bits per pixel for the specified format.
  * @param format Image format to query.
- * @return Returns the number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
+ * @return The number of bits per pixel for the specified format. If a compressed format is specified, the average number of bits per pixel is returned.
  * @see MFImage_GetPlatformAvailability(), MFImage_GetFormatString()
  */
 MF_API int MFImage_GetBitsPerPixel(int format);

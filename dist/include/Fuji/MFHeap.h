@@ -241,18 +241,22 @@ MF_API void MFHeap_SetHeapOverride(MFHeap *pHeap);
  * Validate a block of memory.
  * Checks to see if an allocated block of memory has been corrupted. This will test for buffer overflows and underflows.
  * @param pMemory Pointer to a block of memory to validate.
- * @return Returns TRUE is memory is in a valid, FALSE otherwise.
+ * @return \a true if memory is in a valid, \a false otherwise.
  */
 MF_API bool MFHeap_ValidateMemory(const void *pMemory);
 
-// TODO...
+/**
+ * Validate the heap.
+ * Checks to see if any allocations have been corrupted. This will test for buffer overflows and underflows.
+ * @return \a true is memory is in a valid, \a false otherwise.
+ */
 MF_API bool MFHeap_ValidateHeap();
 
 /**
  * Get an uncached pointer to a block of memory.
  * Returns a pointer that provides uncached access to a specified block of memory.
  * @param pPointer Pointer to a block of memory.
- * @return Returns Pointer to the same block of memory with uncached read and write access.
+ * @return Pointer to the same block of memory with uncached read and write access.
  * @remarks This function is not guaranteed to return a genuine uncached pointer. Some platforms dont have an uncached addressing mode. This should be used for performance optimisation only.
  */
 MF_API void* MFHeap_GetUncachedPointer(void *pPointer);

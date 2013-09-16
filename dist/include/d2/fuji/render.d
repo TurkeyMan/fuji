@@ -98,8 +98,8 @@ struct MFRenderLayerSet
 extern (C) MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numLayers, MFStateBlock *pGlobal, MFStateBlock *pOverride);
 extern (C) void MFRenderer_Destroy(MFRenderer *pRenderer);
 
-extern (C) MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer *pRenderer, MFStateBlock *pGlobal);
-extern (C) MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer *pRenderer, MFStateBlock *pOverride);
+extern (C) MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer *pRenderer, const MFStateBlock *pGlobal);
+extern (C) MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer *pRenderer, const MFStateBlock *pOverride);
 
 extern (C) void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet *pLayerSet);
 

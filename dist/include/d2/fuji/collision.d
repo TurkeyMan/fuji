@@ -107,7 +107,7 @@ extern (C) void MFCollision_DebugDraw();
 * @param lineEnd End of line segmnt.
 * @param point Point of reference to find the closest point on the line.
 * @param pOutput Pointer to an MFVector that received the output.
-* @return Returns the nearest point on the ray to the specified point.
+* @return The nearest point on the ray to the specified point.
 */
 ref MFVector MFCollision_NearestPointOnLine(ref const(MFVector) lineStart, ref const(MFVector) lineEnd, ref const(MFVector) point, MFVector* pOutput)
 {
@@ -141,7 +141,7 @@ ref MFVector MFCollision_NearestPointOnLine(ref const(MFVector) lineStart, ref c
 * @param p0 First point.
 * @param p1 Second point.
 * @param p2 Third point.
-* @return Returns an MFVector containing the plane represented by the 3 given points.
+* @return An MFVector containing the plane represented by the 3 given points.
 */
 MFVector MFCollision_MakePlaneFromPoints(ref const(MFVector) p0, ref const(MFVector) p1, ref const(MFVector) p2)
 {
@@ -157,7 +157,7 @@ MFVector MFCollision_MakePlaneFromPoints(ref const(MFVector) p0, ref const(MFVec
 * Generates a plane from a point and a normal.
 * @param point Point on the plane.
 * @param normal The plane's normal.
-* @return Returns an MFVector containing the plane represented by the given point and normal.
+* @return An MFVector containing the plane represented by the given point and normal.
 */
 MFVector MFCollision_MakePlaneFromPointAndNormal(ref const(MFVector) point, ref const(MFVector) normal)
 {
@@ -212,7 +212,7 @@ bool MFCollision_TestAABB(ref const(MFVector) min1, ref const(MFVector) max1, re
 * @param rayDir Ray direction.
 * @param pItem Pointer to the item to test for intersection by the ray.
 * @param pResult Optional pointer to an MFRayIntersectionResult structire to receive details about the intersection.
-* @return Returns a pointer to the nearest CollisionItem intersected by the ray. Return value is null if no intersection occurred.
+* @return A pointer to the nearest CollisionItem intersected by the ray. Return value is null if no intersection occurred.
 */
 extern (C) MFCollisionItem* MFCollision_RayTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, MFCollisionItem* pItem, MFRayIntersectionResult* pResult);
 
@@ -223,7 +223,7 @@ extern (C) MFCollisionItem* MFCollision_RayTest(ref const(MFVector) rayPos, ref 
 * @param radius Radius of the sphere.
 * @param pItem Pointer to the item to test for intersection by the sphere.
 * @param pResult Optional pointer to an MFCollisionResult which will receive information about the intersection.
-* @return Returns a pointer to the nearest CollisionItem intersected by the sphere. Return value is null if no intersection occurred.
+* @return A pointer to the nearest CollisionItem intersected by the sphere. Return value is null if no intersection occurred.
 */
 extern (C) MFCollisionItem* MFCollision_SphereTest(ref const(MFVector) spherePos, float radius, MFCollisionItem* pItem, MFCollisionResult* pResult);
 
@@ -235,7 +235,7 @@ extern (C) MFCollisionItem* MFCollision_SphereTest(ref const(MFVector) spherePos
 * @param sweepSphereRadius Radius of the sweeping sphere.
 * @param pItem Pointer to the item to test for intersection by the sweeping sphere.
 * @param pResult Optional pointer to an MFSweepSphereResult which will receive information about the intersection.
-* @return Returns a pointer to the nearest CollisionItem intersected by the sweeping sphere. Return value is null if no intersection occurred.
+* @return A pointer to the nearest CollisionItem intersected by the sweeping sphere. Return value is null if no intersection occurred.
 */
 extern (C) MFCollisionItem* MFCollision_SweepSphereTest(ref const(MFVector) sweepSpherePos, ref const(MFVector) sweepSphereVelocity, float sweepSphereRadius, MFCollisionItem* pItem, MFSweepSphereResult* pResult);
 
@@ -251,7 +251,7 @@ extern (C) MFCollisionItem* MFCollision_SweepSphereTest(ref const(MFVector) swee
 * @param rayDir Ray direction.
 * @param plane Vector representing the plane to intersect.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
-* @return Returns true if the ray intersects the plane.
+* @return True if the ray intersects the plane.
 */
 bool MFCollision_RayPlaneTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) plane, MFRayIntersectionResult* pResult = null)
 {
@@ -283,7 +283,7 @@ bool MFCollision_RayPlaneTest(ref const(MFVector) rayPos, ref const(MFVector) ra
 * @param plane Vector representing the plane to intersect.
 * @param slabHalfWidth Half the width of the slab, or rather, the distance from the plane to the surface.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
-* @return Returns true if the ray intersects the slab.
+* @return True if the ray intersects the slab.
 */
 extern (C) bool MFCollision_RaySlabTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) plane, float slabHalfWidth, MFRayIntersectionResult* pResult = null);
 
@@ -295,7 +295,7 @@ extern (C) bool MFCollision_RaySlabTest(ref const(MFVector) rayPos, ref const(MF
 * @param spherePos Sphere position.
 * @param radius Sphere radius.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
-* @return Returns true if the ray intersects the sphere.
+* @return True if the ray intersects the sphere.
 */
 extern (C) bool MFCollision_RaySphereTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) spherePos, float radius, MFRayIntersectionResult* pResult = null);
 
@@ -310,7 +310,7 @@ extern (C) bool MFCollision_RaySphereTest(ref const(MFVector) rayPos, ref const(
 * @param capped Specifies weather to test the cylinders caps or not. If false, it is treated as an infinite cylinder.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
 * @param pCylinderTime Optional pointer to a float that receives the time of intersection along the cylinders ray.
-* @return Returns true if the ray intersects the cylinder.
+* @return True if the ray intersects the cylinder.
 */
 extern (C) bool MFCollision_RayCylinderTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) cylinderPos, ref const(MFVector) cylinderDir, float cylinderRadius, bool capped, MFRayIntersectionResult* pResult = null, float* pCylinderTime = null);
 
@@ -323,7 +323,7 @@ extern (C) bool MFCollision_RayCylinderTest(ref const(MFVector) rayPos, ref cons
 * @param capsuleDir Vector along which the capsule extends.
 * @param capsuleRadius Capsule radius.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
-* @return Returns true if the ray intersects the capsule.
+* @return True if the ray intersects the capsule.
 */
 extern (C) bool MFCollision_RayCapsuleTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) capsulePos, ref const(MFVector) capsuleDir, float capsuleRadius, MFRayIntersectionResult* pResult = null);
 
@@ -335,7 +335,7 @@ extern (C) bool MFCollision_RayCapsuleTest(ref const(MFVector) rayPos, ref const
 * @param boxPos Position of the center of the box.
 * @param boxRadius Boxes radius along each axis.
 * @param pResult Optional pointer to an MFRayIntersectionResult structure that receives details about the intersection.
-* @return Returns true if the ray intersects the box.
+* @return True if the ray intersects the box.
 */
 extern (C) bool MFCollision_RayBoxTest(ref const(MFVector) rayPos, ref const(MFVector) rayDir, ref const(MFVector) boxPos, ref const(MFVector) boxRadius, MFRayIntersectionResult* pResult = null);
 
@@ -349,7 +349,7 @@ extern (C) bool MFCollision_RayBoxTest(ref const(MFVector) rayPos, ref const(MFV
 * @param radius Radius of sphere.
 * @param plane Vector representing the plane for intersection.
 * @param pResult Optional pointer to an MFCollisionResult structire to receive details about the intersection.
-* @return Returns true if the sphere and plane intersect.
+* @return True if the sphere and plane intersect.
 */
 extern (C) bool MFCollision_SpherePlaneTest(ref const(MFVector) spherePos, float radius, ref const(MFVector) plane, MFCollisionResult* pResult);
 
@@ -361,7 +361,7 @@ extern (C) bool MFCollision_SpherePlaneTest(ref const(MFVector) spherePos, float
 * @param pos2 Position of second sphere.
 * @param radius2 Radius of second sphere.
 * @param pResult Optional pointer to an MFCollisionResult structire to receive details about the intersection.
-* @return Returns true if the spheres intersect.
+* @return True if the spheres intersect.
 */
 extern (C) bool MFCollision_SphereSphereTest(ref const(MFVector) pos1, float radius1, ref const(MFVector) pos2, float radius2, MFCollisionResult* pResult);
 
@@ -377,7 +377,7 @@ extern (C) bool MFCollision_SphereSphereTest(ref const(MFVector) pos1, float rad
 * @param sphere Position of sphere to test against.
 * @param sphereRadius Radius of sphere to test against.
 * @param pResult Optional pointer to an MFSweepSphereResult structure to receive details about the collision.
-* @return Returns true if the spheres intersect.
+* @return True if the spheres intersect.
 */
 extern (C) bool MFCollision_SweepSphereSphereTest(ref const(MFVector) sweepSpherePos, ref const(MFVector) sweepSphereVelocity, float sweepSphereRadius, ref const(MFVector) sphere, float sphereRadius, MFSweepSphereResult* pResult);
 
@@ -390,7 +390,7 @@ extern (C) bool MFCollision_SweepSphereSphereTest(ref const(MFVector) sweepSpher
 * @param sweepSphereRadius Radius of the sphere.
 * @param tri Triangle to test for collision.
 * @param pResult Optional pointer to an MFSweepSphereResult structure to receive details about the collision.
-* @return Returns true if the sweeping sphere and triangle intersect.
+* @return True if the sweeping sphere and triangle intersect.
 */
 extern (C) bool MFCollision_SweepSphereTriTest(ref const(MFVector) sweepSpherePos, ref const(MFVector) sweepSphereVelocity, float sweepSphereRadius, ref const(MFCollisionTriangle) tri, MFSweepSphereResult* pResult);
 
@@ -402,7 +402,7 @@ extern (C) bool MFCollision_SweepSphereTriTest(ref const(MFVector) sweepSpherePo
 * Creates a dynamic mesh collision item (polygon soup).
 * @param pItemName Name of the collision mesh.
 * @param numTris Number of tris in the mesh.
-* @return Returns a pointer to the newly created dynamic collision mesh.
+* @return A pointer to the newly created dynamic collision mesh.
 */
 extern (C) MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char* pItemName, int numTris);
 
@@ -410,7 +410,7 @@ extern (C) MFCollisionItem* MFCollision_CreateDynamicCollisionMesh(const char* p
 * Lock a dynamic collision mesh triangle buffer.
 * Locks and returns a pointer to a dynamic collision mesh triangle buffer.
 * @param pDynamicCollisionMesh The dynamic mesh collision item to lock.
-* @return Returns a pointer to an area in memory where the triangle buffer should be written.
+* @return A pointer to an area in memory where the triangle buffer should be written.
 */
 extern (C) MFCollisionTriangle* MFCollision_LockDynamicCollisionMeshTriangleBuffer(MFCollisionItem* pDynamicCollisionMesh);
 
@@ -440,7 +440,7 @@ extern (C) void MFCollision_DestroyDynamicCollisionItem(MFCollisionItem* pItem);
 * @param pFieldName Name of the collision field.
 * @param maximumItemCount Maximum number of items that can exist in the field.
 * @param cellSize The size of the cells in the x, y and z axiis.
-* @return Returns a pointer to the newly created collision field.
+* @return A pointer to the newly created collision field.
 */
 extern (C) MFCollisionItem* MFCollision_CreateField(const char* pFieldName, int maximumItemCount, ref const(MFVector) cellSize);
 

@@ -59,7 +59,7 @@ enum MFPlayFlags
 * Load a sound.
 * Loads a sound.
 * @param pName Name of the sound to load.
-* @return Returns s pointer to the newly created sound, or null on failure.
+* @return A pointer to the newly created sound, or null on failure.
 * @see MFSound_Destroy(), MFSound_Play()
 */
 extern (C) MFSound* MFSound_Create(const char *pName);
@@ -77,7 +77,7 @@ extern (C) MFSound* MFSound_Create(const char *pName);
 * @param bitsPerSample Bits per sample.
 * @param samplerate Playback rate in samples per second.
 * @param flags A combination of zero or more flags from the MFSoundFlags enum to control the behaviour of the sound buffer.
-* @return Returns s pointer to the newly created sound buffer, or null on failure.
+* @return A pointer to the newly created sound buffer, or null on failure.
 * @see MFSound_Destroy(), MFSound_Play(), MFSound_LockDynamic(), MFSound_UnlockDynamic()
 */
 extern (C) MFSound* MFSound_CreateDynamic(const char *pName, int numSamples, int numChannels, int bitsPerSample, int samplerate, uint flags);
@@ -86,7 +86,7 @@ extern (C) MFSound* MFSound_CreateDynamic(const char *pName, int numSamples, int
 * Destroy a sound.
 * Destroys a sound.
 * @param pSound Sound to destroy.
-* @return Returns the new reference count of the sound. If the returned reference count is 0, the sound is destroyed.
+* @return The new reference count of the sound. If the returned reference count is 0, the sound is destroyed.
 * @see MFSound_Create()
 */
 extern (C) int MFSound_Destroy(MFSound* pSound);
@@ -95,7 +95,7 @@ extern (C) int MFSound_Destroy(MFSound* pSound);
 * Find a sound.
 * Finds a specified sound.
 * @param pName Name of sound to locate.
-* @return Returns a pointer to the sound or null if the sound was not found.
+* @return A pointer to the sound or null if the sound was not found.
 * @remarks MFSound_FindSound() does NOT increment the internal reference count of the object.
 */
 extern (C) MFSound* MFSound_FindSound(const char *pName);
@@ -128,7 +128,7 @@ extern (C) void MFSound_Unlock(MFSound* pSound);
 * Begin playback of a sound.
 * @param pSound Pointer to the sound to play.
 * @param playFlags A combination of zero or moew flags from the MFPlayFlags to control the way the sound is played.
-* @return Returns the voice ID.
+* @return The voice ID.
 * @see MFSound_Stop(), MFSound_Create()
 */
 extern (C) MFVoice* MFSound_Play(MFSound* pSound, uint playFlags = 0);
@@ -138,7 +138,7 @@ extern (C) MFVoice* MFSound_Play(MFSound* pSound, uint playFlags = 0);
 * Pause or resume playback of a sound.
 * @param pVoice The voice to pause/resume.
 * @param pause Specifies weather to pause or resume playback. If \a pause is \c true, the sound will be paused, otherwise it will be resumed.
-* @return Returns None.
+* @return None.
 * @see MFSound_Play()
 */
 extern (C) void MFSound_Pause(MFVoice* pVoice, bool pause = true);
@@ -211,7 +211,7 @@ extern (C) void MFSound_SetMasterVolume(float volume);
 * Gets the current play cursor and write cursor, in samples.
 * @param pVoice Pointer to a playing voice.
 * @param pWriteCursor Optional pointer to a size_t that received the position of the write cursor.
-* @return Returns the play cursor's position, in samples.
+* @return The play cursor's position, in samples.
 */
 extern (C) uint MFSound_GetPlayCursor(MFVoice* pVoice, size_t *pWriteCursor = null);
 
@@ -219,7 +219,7 @@ extern (C) uint MFSound_GetPlayCursor(MFVoice* pVoice, size_t *pWriteCursor = nu
 * Get the sound buffer from a voice.
 * Gets the sound buffer from a playing voice.
 * @param pVoice Pointer to a playing voice.
-* @return Returns the voices associated sound buffer.
+* @return The voices associated sound buffer.
 */
 extern (C) MFSound* MFSound_GetSoundFromVoice(MFVoice* pVoice);
 
@@ -286,7 +286,7 @@ extern (C) void MFSound_RegisterStreamHandler(const char *pStreamType, const cha
 * Create an audio stream.
 * @param pFilename Filename of music track.
 * @param flags Optional combination of flags from the MFAudioStreamFlags enum defining various stream options.
-* @return Returns a pointer to the created MFAudioStream or null on failure.
+* @return A pointer to the created MFAudioStream or null on failure.
 */
 extern (C) MFAudioStream* MFSound_CreateStream(const char *pFilename, uint flags = 0);
 
@@ -295,7 +295,7 @@ extern (C) MFAudioStream* MFSound_CreateStream(const char *pFilename, uint flags
 * Begin playback of an audio stream.
 * @param pStream Pointer to an MFAudioStream.
 * @param playFlags Optional combination of flags from the MFPlayFlags enum defining playback state.
-* @return Returns a pointer to the created MFAudioStream or null on failure.
+* @return A pointer to the created MFAudioStream or null on failure.
 */
 extern (C) void MFSound_PlayStream(MFAudioStream *pStream, uint playFlags = 0);
 
@@ -329,7 +329,7 @@ extern (C) void MFSound_PauseStream(MFAudioStream *pStream, bool pause);
 * Get the voice associated with an MFAudioStream.
 * Gets the voice associated with an MFAudioStream.
 * @param pStream Pointer to an MFAudioStream.
-* @return Returns a pointer to the MFVoice associated with the stream.
+* @return A pointer to the MFVoice associated with the stream.
 */
 extern (C) MFVoice* MFSound_GetStreamVoice(MFAudioStream *pStream);
 
@@ -338,7 +338,7 @@ extern (C) MFVoice* MFSound_GetStreamVoice(MFAudioStream *pStream);
 * Gets various information that maybe associated with an audio stream.
 * @param pStream Pointer to an MFAudioStream.
 * @param infoType The type of information to fetch.
-* @return Returns a string containing the requested infomation.
+* @return A string containing the requested infomation.
 */
 extern (C) const(char*) MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamInfoType infoType);
 
@@ -348,7 +348,7 @@ extern (C) const(char*) MFSound_GetStreamInfo(MFAudioStream *pStream, MFStreamIn
 * @param pStream Pointer to an MFAudioStream.
 * @param pBuffer Pointer to a buffer that will receive the sample data.
 * @param bytes number of bytes to read from the stream.
-* @return Returns the number of bytes read.
+* @return The number of bytes read.
 */
 extern (C) int MFSound_ReadStreamSamples(MFAudioStream *pStream, void *pBuffer, int bytes);
 

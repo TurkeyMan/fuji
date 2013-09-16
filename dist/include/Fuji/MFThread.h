@@ -78,7 +78,7 @@ typedef int (*MFThreadEntryPoint)(void *);
  * @param priority The threads execution priority.
  * @param flags Optional creation flags from \a MFThreadFlags.
  * @param stackSize Size of the new threads stack.
- * @return Returns a handle to the new thread.
+ * @return A handle to the new thread.
  * @see MFThread_TerminateThread(), MFThread_ExitThread(), MFThread_GetExitCode(), MFThread_DestroyThread()
  */
 MF_API MFThread MFThread_CreateThread(const char *pName, MFThreadEntryPoint pEntryPoint, void *pUserData, int priority = MFPriority_Normal, uint32 flags = 0, uint32 stackSize = 0);
@@ -104,7 +104,7 @@ MF_API void MFThread_TerminateThread(MFThread thread);
  * Get a threads exit code.
  * Get the exit code for a finished thread.
  * @param thread Handle to a finished thread.
- * @return Returns the threads exit code.
+ * @return The threads exit code.
  */
 MF_API int MFThread_GetExitCode(MFThread thread);
 
@@ -128,7 +128,7 @@ MF_API void MFThread_Join(MFThread thread);
  * Create a mutex object.
  * Creates a mutex object that can be used to block a thread from accessing mutually exclusive data while another thread is already accessing it.
  * @param pName Name to identify the mutex.
- * @return Returns a handle to the created mutex.
+ * @return A handle to the created mutex.
  */
 MF_API MFMutex MFThread_CreateMutex(const char *pName);
 
@@ -162,7 +162,7 @@ MF_API void MFThread_ReleaseMutex(MFMutex mutex);
  * @param pName Name to identify the semaphore.
  * @param maxCount Maximum count for the semaphore.
  * @param startCount Starting count for the semaphore.
- * @return Returns a handle to the created semaphore.
+ * @return A handle to the created semaphore.
  */
 MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount);
 
@@ -195,7 +195,7 @@ MF_API void MFThread_SignalSemaphore(MFSemaphore semaphore);
 /**
  * Allocate a TLS slot.
  * Allocates a thread local storage slot.
- * @return Returns a handle to the allocated local store slot, or NULL if MFThread_TlsAlloc() failed.
+ * @return A handle to the allocated local store slot, or NULL if MFThread_TlsAlloc() failed.
  */
 MF_API MFTls MFThread_TlsAlloc();
 
@@ -220,7 +220,7 @@ MF_API void *MFThread_GetTls(MFTls tls);
  * Sets the value stored in a thread local store slot.
  * @param tls Handle to a TLS.
  * @param pValue Value to set.
- * @return Returns the old value stored in the TLS slot.
+ * @return The old value stored in the TLS slot.
  */
 MF_API void *MFThread_SetTls(MFTls tls, void *pValue);
 

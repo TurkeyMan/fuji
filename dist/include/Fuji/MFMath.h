@@ -121,7 +121,7 @@ float MFPow(float x, float y);
  * Returns the next integer greater than or equal to \a x.
  * Returns the next integer greater than or equal to \a x.
  * @param x Value to find the ceil.
- * @return Returns the next integer greater than or equal to \a x.
+ * @return The next integer greater than or equal to \a x.
  * @see MFFloor()
  */
 float MFCeil(float x);
@@ -130,7 +130,7 @@ float MFCeil(float x);
  * Returns the next integer less than or equal to \a x.
  * Returns the next integer less than or equal to \a x.
  * @param x Value to find the floor.
- * @return Returns the next integer less than or equal to \a x.
+ * @return The next integer less than or equal to \a x.
  * @see MFCeil()
  */
 float MFFloor(float x);
@@ -178,7 +178,7 @@ MF_API void MFRand_Seed(uint32 seed);
 /**
  * Get a pseudo-random number.
  * Get a pseudo-random number.
- * @return Returns a pseudo random number in the range of 0 to 2^32-1 (4294967295).
+ * @return A pseudo random number in the range of 0 to 2^32-1 (4294967295).
  * @see MFRand_Unit(), MFRand_Range()
  */
 MF_API uint32 MFRand();
@@ -186,7 +186,7 @@ MF_API uint32 MFRand();
 /**
  * Get a pseudo-random number between 0.0f and 1.0f.
  * Get a pseudo-random number between 0.0f and 1.0f.
- * @return Returns a pseudo-random number betwen 0.0f and 1.0f.
+ * @return A pseudo-random number betwen 0.0f and 1.0f.
  * @see MFRand(), MFRand_Range()
  */
 float MFRand_Unit();
@@ -194,7 +194,7 @@ float MFRand_Unit();
 /**
  * Get a pseudo-random double precision number between 0.0f and 1.0f.
  * Get a pseudo-random double precision number between 0.0f and 1.0f.
- * @return Returns a double precision pseudo-random number betwen 0.0f and 1.0f.
+ * @return A double precision pseudo-random number betwen 0.0f and 1.0f.
  * @see MFRand(), MFRand_Unit()
  */
 double MFRand_Double();
@@ -204,7 +204,7 @@ double MFRand_Double();
  * Get a pseudo-random number within a specified range.
  * @param min Minimum value.
  * @param max Maximum value.
- * @return Returns a pseudo-random number between \a min and \a max.
+ * @return A pseudo-random number between \a min and \a max.
  * @see MFRand(), MFRand_Unit()
  */
 float MFRand_Range(float min, float max);

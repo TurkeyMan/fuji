@@ -6,7 +6,7 @@
 #if !defined(_MFFILESYSTEM_NATIVE_H)
 #define _MFFILESYSTEM_NATIVE_H
 
-#include "../MFFileSystem.h"
+#include "Fuji/MFFileSystem.h"
 
 /**
  * Open native file structure.

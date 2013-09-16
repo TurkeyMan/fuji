@@ -55,7 +55,7 @@ MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size);
  * Get the length of a string.
  * Get the length of a string, in bytes.
  * @param pString String to find the length of.
- * @return Returns the length of the string, in bytes, excluding the terminating NULL character.
+ * @return The length of the string, in bytes, excluding the terminating NULL character.
  * @see MFString_Copy()
  * @see MFString_CaseCmp()
  */
@@ -66,7 +66,7 @@ size_t MFString_Length(const char *pString);
  * Count the number of bytes in a string, clamping to a given maximum.
  * @param pString String to find the length of.
  * @param maxChars Maximum number of chars to count.
- * @return Returns the length of the string, in bytes, excluding the terminating NULL character.
+ * @return The length of the string, in bytes, excluding the terminating NULL character.
  * @see MFString_Length()
  */
 size_t MFString_LengthN(const char *pString, size_t maxChars);
@@ -137,7 +137,7 @@ MF_API char* MFString_Dup(const char *pString);
  * Convert a string to lower case.
  * Generates a copy of a string converted to lower case in the MFStr buffer.
  * @param pString String to convert.
- * @return Returns a pointer to a string in the MFStr buffer converted to lower case.
+ * @return A pointer to a string in the MFStr buffer converted to lower case.
  * @see MFString_ToUpper()
  */
 MF_API const char * MFString_ToLower(const char *pString);
@@ -146,7 +146,7 @@ MF_API const char * MFString_ToLower(const char *pString);
  * Convert a string to upper case.
  * Generates a copy of a string converted to upper case in the MFStr buffer.
  * @param pString String to convert.
- * @return Returns a pointer to a string in the MFStr buffer converted to upper case.
+ * @return A pointer to a string in the MFStr buffer converted to upper case.
  * @see MFString_ToLower()
  */
 MF_API const char * MFString_ToUpper(const char *pString);
@@ -156,7 +156,7 @@ MF_API const char * MFString_ToUpper(const char *pString);
  * Compares 2 strings and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
- * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_CompareN()
  */
 MF_API int MFString_Compare(const char *pString1, const char *pString2);
@@ -167,7 +167,7 @@ MF_API int MFString_Compare(const char *pString1, const char *pString2);
  * @param pString1 First source string.
  * @param pString2 Second source string.
  * @param n Maximum number of characters to compare.
- * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_Compare()
  */
 MF_API int MFString_CompareN(const char *pString1, const char *pString2, size_t n);
@@ -177,7 +177,7 @@ MF_API int MFString_CompareN(const char *pString1, const char *pString2, size_t 
  * Compares 2 strings with case insensitivity and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
- * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_CaseCmpN()
  */
 MF_API int MFString_CaseCmp(const char *pString1, const char *pString2);
@@ -188,7 +188,7 @@ MF_API int MFString_CaseCmp(const char *pString1, const char *pString2);
  * @param pString1 First source string.
  * @param pString2 Second source string.
  * @param n Maximum number of characters to compare.
- * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFString_CaseCmp()
  */
 MF_API int MFString_CaseCmpN(const char *pString1, const char *pString2, size_t n);
@@ -198,7 +198,7 @@ MF_API int MFString_CaseCmpN(const char *pString1, const char *pString2, size_t 
  * Searches through a string for the specified character.
  * @param pString String to search.
  * @param c Character to search for.
- * @return Returns a pointer to the first instance of the character \a c in \a pString.
+ * @return A pointer to the first instance of the character \a c in \a pString.
  * @see MFString_RChr()
  */
 char* MFString_Chr(const char *pString, int c);
@@ -208,7 +208,7 @@ char* MFString_Chr(const char *pString, int c);
  * Searches backwards through a string for the specified character.
  * @param pString String to search.
  * @param c Character to search for.
- * @return Returns a pointer to the last instance of the character \a c in \a pString.
+ * @return A pointer to the last instance of the character \a c in \a pString.
  * @see MFString_Chr()
  */
 char* MFString_RChr(const char *pString, int c);
@@ -217,7 +217,7 @@ char* MFString_RChr(const char *pString, int c);
  * Get file extension from filename.
  * Get the file extension part from a filename.
  * @param pFilename String containing the filename.
- * @return Returns a pointer to the file extension (the part after the final '.' in the filename).
+ * @return A pointer to the file extension (the part after the final '.' in the filename).
  * @remarks The pointer returned points into the source string. It is only valid while the source string remains unchanged.
  */
 char* MFString_GetFileExtension(const char *pFilename);
@@ -226,7 +226,7 @@ char* MFString_GetFileExtension(const char *pFilename);
  * Get the filename from a path.
  * Gets the filename part from a path.
  * @param pFilename String containing a file path.
- * @return Returns a string containing just the filename taken from the path.
+ * @return A string containing just the filename taken from the path.
  * @remarks The pointer returned points into the source string. It is only valid while the source string remains unchanged.
  */
 const char* MFStr_GetFileName(const char *pFilename);
@@ -235,7 +235,7 @@ const char* MFStr_GetFileName(const char *pFilename);
  * Get the filename without its extension from a path.
  * Gets the filename without its extension from a path.
  * @param pFilename String containing a file path.
- * @return Returns a string containing just the filename taken from the path with the file extension removed.
+ * @return A string containing just the filename taken from the path with the file extension removed.
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
 const char* MFStr_GetFileNameWithoutExtension(const char *pFilename);
@@ -244,7 +244,7 @@ const char* MFStr_GetFileNameWithoutExtension(const char *pFilename);
  * Get the file path from a path string.
  * Gets the file path with the filename removed from a path string.
  * @param pFilename String containing a file path.
- * @return Returns a string containing just the file path (everything preceeding the final '/').
+ * @return A string containing just the file path (everything preceeding the final '/').
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
 const char* MFStr_GetFilePath(const char *pFilename);
@@ -253,7 +253,7 @@ const char* MFStr_GetFilePath(const char *pFilename);
  * Truncate the file extension.
  * Truncates the file extension from a filename.
  * @param pFilename String containing a filename.
- * @return Returns a string containing the filename with the final file extension truncated.
+ * @return A string containing the filename with the final file extension truncated.
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
 const char* MFStr_TruncateExtension(const char *pFilename);
@@ -265,7 +265,7 @@ const char* MFStr_TruncateExtension(const char *pFilename);
  * @param pFilename String containing the filename to compare against.
  * @param ppMatchDirectory Cant remember what this is used for. Dont use it...
  * @param bCaseSensitive Perform the pattern match with case sensitivity.
- * @return Returns true if the pattern matches the filename.
+ * @return True if the pattern matches the filename.
  */
 MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, const char **ppMatchDirectory = NULL, bool bCaseSensitive = false);
 
@@ -274,7 +274,7 @@ MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, c
  * Encodes a string for use in a URL or HTTP 'POST' content.
  * @param pString String to encode.
  * @param pExcludeChars A string containing characters to be excluded from URL encoding.
- * @return Returns the URL encoded string.
+ * @return The URL encoded string.
  * @remarks The pointer returned is in the MFStr buffer. If persistence is desired, the client should take a copy.
  */
 MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExcludeChars = NULL);
@@ -317,7 +317,7 @@ MF_API const char* MFStrN(const char *source, size_t n);
  * Tests to see if a given string contains a decimal or hexadecimal number (using '0x' hex notation).
  * @param pString String to test.
  * @param bAllowHex Test also if the string is a hexadecimal number.
- * @return Returns true if the string was a valid number.
+ * @return True if the string was a valid number.
  */
 MF_API bool MFString_IsNumber(const char *pString, bool bAllowHex = true);
 
@@ -449,7 +449,7 @@ const char* MFSkipWhite(const char *pC);
  * Get the number of actual characters in a string.
  * Gets the number of actual characters in a string, with consideration to UTF8 multibyte encoding.
  * @param pString String to find the number of characters.
- * @return Returns the number of actual characters in the string, excluding the terminating NULL character.
+ * @return The number of actual characters in the string, excluding the terminating NULL character.
  * @remarks Takes into account UTF8 multibyte encoding when calculating the number of characters.
  * @see MFString_GetCharacterOffset()
  */
@@ -460,7 +460,7 @@ int MFString_GetNumChars(const char *pString);
  * Gets the character offset in bytes from the start of a string, with consideration to UTF8 multibyte encoding.
  * @param pString String to find the character offset.
  * @param character Character index to find the offset of.
- * @return Returns the character offset in bytes of the specified character index.
+ * @return The character offset in bytes of the specified character index.
  * @remarks Takes into account UTF8 multibyte encoding when calculating the character offset.
  * @see MFString_GetNumChars()
  */
@@ -471,7 +471,7 @@ size_t MFString_GetCharacterOffset(const char *pString, int character);
  * Encodes the give unicode character to it's respective UTF-8 sequence.
  * @param c Unicode character to encode.
  * @param pMBChar Pointer to an output buffer to receive the encoded bytes.
- * @return Returns the number of bytes used by the UTF-8 encoding.
+ * @return The number of bytes used by the UTF-8 encoding.
  * @see MFString_DecodeUTF8()
  */
 int MFString_EncodeUTF8(int c, char *pMBChar);
@@ -481,7 +481,7 @@ int MFString_EncodeUTF8(int c, char *pMBChar);
  * Decodes a UTF-8 sequence.
  * @param pMBChar Pointer to a UTF-8 sequence.
  * @param pNumBytes Pointer to an int that receives the number of bytes in the sequence.
- * @return Returns the decoded unicode character.
+ * @return The decoded unicode character.
  * @see MFString_EncodeUTF8()
  */
 int MFString_DecodeUTF8(const char *pMBChar, int *pNumBytes);
@@ -490,7 +490,7 @@ int MFString_DecodeUTF8(const char *pMBChar, int *pNumBytes);
  * Move to the next character in a UTF-8 encoded string.
  * Moves to the next character in a UTF-8 encoded string.
  * @param pChar Pointer to a UTF-8 string.
- * @return Returns a pointer to the next character in the UTF-8 string.
+ * @return A pointer to the next character in the UTF-8 string.
  * @see MFString_PrevChar()
  */
 char *MFString_NextChar(const char *pChar);
@@ -499,7 +499,7 @@ char *MFString_NextChar(const char *pChar);
  * Move to the previous character in a UTF-8 encoded string.
  * Moves to the previous character in a UTF-8 encoded string.
  * @param pChar Pointer to a UTF-8 string.
- * @return Returns a pointer to the previous character in the UTF-8 string.
+ * @return A pointer to the previous character in the UTF-8 string.
  * @see MFString_NextChar()
  */
 char *MFString_PrevChar(const char *pChar);
@@ -509,7 +509,7 @@ char *MFString_PrevChar(const char *pChar);
  * Copies a UTF-8 string to a UTF-16 output buffer.
  * @param pBuffer Pointer to a UTF-8 string to copy.
  * @param pString Pointer to the UTF-16 output buffer.
- * @return Returns the number of wchar_t's written to the output buffer.
+ * @return The number of wchar_t's written to the output buffer.
  */
 MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString);
 
@@ -518,7 +518,7 @@ MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString);
  * Converts a UTF-8 string to a temporary UTF-16 string, using the MFStr() buffer.
  * @param pUTF8String Pointer to a UTF-8 string to copy.
  * @param pNumChars Optional pointer to a size_t that receives the number of wchar_t's in the output buffer.
- * @return Returns a pointer to the converted UTF-16 string in a temporary buffer.
+ * @return A pointer to the converted UTF-16 string in a temporary buffer.
  * @remarks MFString_UFT8AsWChar() uses the MFStr() temporary buffer for storing the output. Refer to MFStr() for usage details.
  * @see MFWString_CopyUTF8ToUTF16(), MFStr(), MFStrN()
  */
@@ -534,7 +534,7 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars 
  * Converts a UTF16 string to a UTF8 string placing the result in the target buffer.
  * @param pBuffer Target buffer to output the resulting string.
  * @param pString UTF16 string to convert.
- * @return Returns the length of the result string in bytes.
+ * @return The length of the result string in bytes.
  * @see MFString_UFT8ToWChar()
  * @see MFString_UFT8AsWChar()
  */
@@ -544,7 +544,7 @@ MF_API size_t MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString);
  * Get the length of a unicode string.
  * Get the length of a unicode string, in wide chars.
  * @param pString String to find the length of.
- * @return Returns the length of the unicode string, in wide chars, excluding the terminating NULL character.
+ * @return The length of the unicode string, in wide chars, excluding the terminating NULL character.
  * @see MFWString_Copy()
  * @see MFWString_CaseCmp()
  */
@@ -597,7 +597,7 @@ wchar_t* MFWString_CopyCat(wchar_t *pBuffer, const wchar_t *pString, const wchar
  * Compares 2 unicode strings and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
- * @return Returns the difference between the 2 strings. 0 if the strings are identical.
+ * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFWString_CompareN()
  */
 int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
@@ -607,7 +607,7 @@ int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
  * Compares 2 unicode strings with case insensitivity and returns the difference between them.
  * @param pString1 First source string.
  * @param pString2 Second source string.
- * @return Returns the difference between the 2 unicode strings. 0 if the strings are identical.
+ * @return The difference between the 2 unicode strings. 0 if the strings are identical.
  * @see MFWString_CaseCmpN()
  */
 int MFWString_CaseCmp(const wchar_t *pString1, const wchar_t *pString2);
