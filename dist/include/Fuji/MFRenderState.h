@@ -76,7 +76,7 @@ enum MFStateConstant_Vector
 
 	MFSCV_Fuji0, MFSCV_Fuji1, MFSCV_Fuji2, MFSCV_Fuji3, MFSCV_Fuji4, MFSCV_Fuji5, MFSCV_Fuji6,
 
-	MFSCV_LightCounts,			/**< x = directional, y = omni count, z = spot count */
+	MFSCV_LightCounts,			/**< x = directional count, y = omni count, z = spot count */
 
 	MFSCV_User0, MFSCV_User1, MFSCV_User2, MFSCV_User3, MFSCV_User4, MFSCV_User5, MFSCV_User6, MFSCV_User7,
 	MFSCV_User8, MFSCV_User9, MFSCV_User10, MFSCV_User11, MFSCV_User12, MFSCV_User13, MFSCV_User14, MFSCV_User15,

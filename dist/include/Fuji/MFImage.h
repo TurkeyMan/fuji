@@ -120,20 +120,20 @@ enum MFImageFormat
  */
 enum MFScalingAlgorithm
 {
-	SA_Unknown = -1,
-	SA_None = 0,	// no scaling
-	SA_Nearest,		// nearest filtering: any size
-	SA_Bilinear,	// bilinear filtering: any size
-	SA_Box,			// box filtering: 1/2x (common for mip generation)
-	SA_HQX,			// 'High Quality nX' algorithm: 2x, 3x, 4x
-	SA_AdvMAME,		// 'Advance MAME' algorithm: 2x, 3x, 4x
-	SA_Eagle,		// 'Eagle' algorithm: 2x
-	SA_SuperEagle,	// 'Super Eagle' algorithm: 2x
-	SA_2xSaI,		// '2x Scale and Interpolate' algorithm: 2x
-	SA_Super2xSaI,	// 'Super 2x Scale and Interpolate' algorithm: 2x
+	SA_Unknown = -1,			/**< Unknown algorithm */
+	SA_None = 0,				/**< No scaling */
+	SA_Nearest,					/**< Nearest filtering: any size */
+	SA_Bilinear,				/**< Bilinear filtering: any size */
+	SA_Box,						/**< Box filtering: 1/2x (common for mip generation) */
+	SA_HQX,						/**< 'High Quality nX' algorithm: 2x, 3x, 4x */
+	SA_AdvMAME,					/**< 'Advance MAME' algorithm: 2x, 3x, 4x */
+	SA_Eagle,					/**< 'Eagle' algorithm: 2x */
+	SA_SuperEagle,				/**< 'Super Eagle' algorithm: 2x */
+	SA_2xSaI,					/**< '2x Scale and Interpolate' algorithm: 2x */
+	SA_Super2xSaI,				/**< 'Super 2x Scale and Interpolate' algorithm: 2x */
 
-	SA_Max,
-	SA_ForceInt = 0x7FFFFFFF
+	SA_Max,						/**< Maximum scaling algorithm */
+	SA_ForceInt = 0x7FFFFFFF	/**< Force MFScalingAlgorithm to an int type */
 };
 
 /**
@@ -142,22 +142,28 @@ enum MFScalingAlgorithm
  */
 struct MFScaleImage
 {
-	void *pSourceImage;
-	int sourceWidth;
-	int sourceHeight;
-	int sourceStride;
+	void *pSourceImage;				/**< Pointer to the source image data */
+	int sourceWidth;				/**< Width of source image */
+	int sourceHeight;				/**< Height of source image */
+	int sourceStride;				/**< Stride of source image in pixels */
 
-	void *pTargetBuffer;
-	int targetWidth;
-	int targetHeight;
-	int targetStride;
+	void *pTargetBuffer;			/**< Pointer to a target buffer */
+	int targetWidth;				/**< Width of target image */
+	int targetHeight;				/**< Height of target image */
+	int targetStride;				/**< Stride of target image in pixels */
 
-	MFImageFormat format;
-	MFScalingAlgorithm algorithm;
+	MFImageFormat format;			/**< The format of the source image */
+	MFScalingAlgorithm algorithm;	/**< The scaling algorithm to use */
 };
 
 // interface functions
 
+/**
+ * Scale an image using a non-trivial scaling algorithm.
+ * Scales an image using a non-trivial scaling algorithm.
+ * @param pScaleData An MFScaleImage struct to describe the scale operation.
+ * @return None.
+ */
 MF_API void MFImage_Scale(MFScaleImage *pScaleData);
 
 /**

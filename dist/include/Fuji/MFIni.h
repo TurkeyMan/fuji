@@ -23,7 +23,7 @@
 struct MFStringCache;
 class MFIni;
 
-struct MFIniEnumKey
+struct MFEnumKey
 {
 	const char *pKey;
 	int value;
@@ -45,7 +45,7 @@ public:
 	const char *GetString(int index);
 	float GetFloat(int index);
 	int GetInt(int index, int base = 10);
-	int GetEnum(int index, MFIniEnumKey *pKeys);
+	int GetEnum(int index, MFEnumKey *pKeys);
 	bool GetBool(int index);
 	MFVector GetVector2(int index);
 	MFVector GetVector3(int index);

@@ -131,7 +131,7 @@ MFDefaults gDefaults =
 
 	// PluginSelectionDefaults
 	{
-		2,	// renderPlugin
+		0,	// renderPlugin
 		0,	// soundPlugin
 		0	// inputPlugin
 	}

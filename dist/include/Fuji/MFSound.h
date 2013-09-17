@@ -140,6 +140,7 @@ MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppD
 /**
  * Unlock a sound buffer.
  * Unlocks a previously locked sound buffer.
+ * @param pSound Pointer to the sound to unlock.
  * @return None.
  * @see MFSound_Lock()
  */

@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "MountFuji Engine"
+PROJECT_NAME           = "Mount Fuji Engine"
 PROJECT_NUMBER         = 0.8b
 OUTPUT_DIRECTORY       = ./
 CREATE_SUBDIRS         = NO

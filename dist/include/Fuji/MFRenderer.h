@@ -156,7 +156,7 @@ struct MFRenderLayer;
  */
 struct MFRenderLayerDescription
 {
-	const char *pName;	//**< Name of the render layer. */
+	const char *pName;	/**< Name of the render layer. */
 };
 
 /**
@@ -165,10 +165,10 @@ struct MFRenderLayerDescription
  */
 struct MFRenderLayerSet
 {
-	MFRenderLayer *pSolidLayer;		//**< Layer for solid geometry. */
-	MFRenderLayer *pAlphaLayer;		//**< Optional layer for transparent geometry. If NULL, transparent meshes are submitted to the solid layer. */
-	MFRenderLayer *pZPrimeLayer;	//**< Optional layer for z-prime geometry. */
-	MFRenderLayer *pShadowLayer;	//**< Optional layer for shadow casting geometry. */
+	MFRenderLayer *pSolidLayer;		/**< Layer for solid geometry. */
+	MFRenderLayer *pAlphaLayer;		/**< Optional layer for transparent geometry. If NULL, transparent meshes are submitted to the solid layer. */
+	MFRenderLayer *pZPrimeLayer;	/**< Optional layer for z-prime geometry. */
+	MFRenderLayer *pShadowLayer;	/**< Optional layer for shadow casting geometry. */
 };
 
 /**

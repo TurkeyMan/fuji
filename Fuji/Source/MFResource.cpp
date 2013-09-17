@@ -7,7 +7,7 @@
 struct ResourceType
 {
 	const char *pName;
-	DestroyResourceFunc *pDestroyFunc;
+	DestroyResourceFunction *pDestroyFunc;
 };
 
 typedef MFOpenHashTable<MFResource*> MFResourceHashTable;
@@ -50,7 +50,7 @@ void MFResource_DeinitModule()
 	gResourceTable.Deinit();
 }
 
-MF_API int MFResource_Register(const char *pResourceName, DestroyResourceFunc *pDestroyFunc)
+MF_API int MFResource_Register(const char *pResourceName, DestroyResourceFunction *pDestroyFunc)
 {
 	int id = gNumResourceTypes++;
 	gResourceTypes[id].pName = pResourceName;

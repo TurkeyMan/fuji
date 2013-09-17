@@ -11,7 +11,7 @@
 #define _MFMATERIAL_H
 
 class MFIni;
-struct MFIniEnumKey;
+struct MFEnumKey;
 struct MFTexture;
 struct MFStateBlock;
 struct MFRendererState;
@@ -29,18 +29,18 @@ struct MFMaterial;
  */
 enum MFStockMaterials
 {
-	MFMat_White,		/**< White material (This is a flat white material for untextured simulation) */
-	MFMat_Unavailable,	/**< Unavailable material (Used when a desired material is unavailable) */
-	MFMat_SysLogoSmall,	/**< Small System Logo */
-	MFMat_SysLogoLarge,	/**< Large System Logo */
+	MFMat_White,				/**< White material (This is a flat white material for untextured simulation) */
+	MFMat_Unavailable,			/**< Unavailable material (Used when a desired material is unavailable) */
+	MFMat_SysLogoSmall,			/**< Small System Logo */
+	MFMat_SysLogoLarge,			/**< Large System Logo */
 
-	MFMat_USB,			/**< USB Icon material */
-	MFMat_Connected,	/**< Connected Icon material */
-	MFMat_Disconnected,	/**< Disconnected Icon material */
-	MFMat_Power,		/**< Power Icon material */
-	MFMat_Charging,		/**< Charging Icon material */
+	MFMat_USB,					/**< USB Icon material */
+	MFMat_Connected,			/**< Connected Icon material */
+	MFMat_Disconnected,			/**< Disconnected Icon material */
+	MFMat_Power,				/**< Power Icon material */
+	MFMat_Charging,				/**< Charging Icon material */
 
-	MFMat_Max,			/**< Maximum stock material */
+	MFMat_Max,					/**< Maximum stock material */
 	MFMat_ForceInt = 0x7FFFFFFF	/**< Force StockMaterials to an int type */
 };
 
@@ -50,20 +50,20 @@ enum MFStockMaterials
  */
 enum MFParamType
 {
-	MFParamType_None,		/**< No parameter */
+	MFParamType_None,					/**< No parameter */
 
-	MFParamType_Constant,	/**< Constant parameter type */
-	MFParamType_String,		/**< String parameter type */
-	MFParamType_Float,		/**< Floating point parameter type */
-	MFParamType_Int,		/**< Integer parameter type */
-	MFParamType_Enum,		/**< Parameter is an enumeration */
-	MFParamType_Bool,		/**< Boolean parameter type */
-	MFParamType_Vector3,	/**< 3D vector parameter type */
-	MFParamType_Vector4,	/**< 4D vector parameter type */
-	MFParamType_Colour,		/**< Colour parameter type */
-	MFParamType_Matrix,		/**< Matrix parameter type */
+	MFParamType_Constant,				/**< Constant parameter type */
+	MFParamType_String,					/**< String parameter type */
+	MFParamType_Float,					/**< Floating point parameter type */
+	MFParamType_Int,					/**< Integer parameter type */
+	MFParamType_Enum,					/**< Parameter is an enumeration */
+	MFParamType_Bool,					/**< Boolean parameter type */
+	MFParamType_Vector3,				/**< 3D vector parameter type */
+	MFParamType_Vector4,				/**< 4D vector parameter type */
+	MFParamType_Colour,					/**< Colour parameter type */
+	MFParamType_Matrix,					/**< Matrix parameter type */
 
-	MFParamType_Max,		/**< Maximum parameter type */
+	MFParamType_Max,					/**< Maximum parameter type */
 	MFParamType_ForceInt = 0x7FFFFFFF	/**< Force ParamType to an int type */
 };
 
@@ -73,22 +73,25 @@ enum MFParamType
  */
 struct MFMaterialParameterInfo
 {
+	/**
+	 * Details an MFMaterial parameter.
+	 */
 	struct ParameterDetails
 	{
-		MFParamType type;
-		int defaultValue;
-		MFIniEnumKey *pEnumKeys;
+		MFParamType type;			/**< The parameter type. */
+		int defaultValue;			/**< The parameter's default value. */
+		MFEnumKey *pEnumKeys;		/**< If the parameter is an enum type, this points to a NULL-terminated array of keys. */
 	};
 
-	const char *pParameterName;		/**< Name of the parameter */
+	const char *pParameterName;		/**< Name of the parameter. */
 
-	int parameterIndex;				/**< Index of the parameter */
+	int parameterIndex;				/**< Index of the parameter. */
 
-	ParameterDetails argIndexHigh;	/**< (Optional) Arg index HiWord details */
-	ParameterDetails argIndex;		/**< (Optional) Arg index details */
+	ParameterDetails argIndexHigh;	/**< (Optional) Arg index HiWord details. */
+	ParameterDetails argIndex;		/**< (Optional) Arg index details. */
 
-	ParameterDetails *pValues;		/**< Pointer to an array of parameter details describing the value struct */
-	int numValues;					/**< Number of elements in the argument struct */
+	ParameterDetails *pValues;		/**< Pointer to an array of parameter details describing the value struct. */
+	int numValues;					/**< Number of elements in the argument struct. */
 };
 
 /**
@@ -97,22 +100,22 @@ struct MFMaterialParameterInfo
  */
 struct MFMaterialCallbacks
 {
-	int       (*pRegisterMaterial)(MFMaterialType *pType);				/**< Pointer to the RegisterMaterial function */
-	void      (*pUnregisterMaterial)();									/**< Pointer to the UnregisterMaterial function */
+	int       (*pRegisterMaterial)(MFMaterialType *pType);				/**< Pointer to the RegisterMaterial function. */
+	void      (*pUnregisterMaterial)();									/**< Pointer to the UnregisterMaterial function. */
 
-	void      (*pCreateInstance)(MFMaterial *pMaterial);				/**< Pointer to the CreateInstance function */
-	void      (*pDestroyInstance)(MFMaterial *pMaterial);				/**< Pointer to the DestroyInstance function */
+	void      (*pCreateInstance)(MFMaterial *pMaterial);				/**< Pointer to the CreateInstance function. */
+	void      (*pDestroyInstance)(MFMaterial *pMaterial);				/**< Pointer to the DestroyInstance function. */
 
-	void      (*pUpdate)(MFMaterial *pMaterial);						/**< Pointer to the Update function */
+	void      (*pUpdate)(MFMaterial *pMaterial);						/**< Pointer to the Update function. */
 
-	void      (*pBuildStateBlock)(MFMaterial *pMaterial);				/**< Pointer to the BuildStateBlock function */
+	void      (*pBuildStateBlock)(MFMaterial *pMaterial);				/**< Pointer to the BuildStateBlock function. */
 
-	int       (*pBegin)(MFMaterial *pMaterial, MFRendererState &state);	/**< Pointer to the Begin function */
+	int       (*pBegin)(MFMaterial *pMaterial, MFRendererState &state);	/**< Pointer to the Begin function. */
 
-	int       (*pGetNumParams)();										/**< Pointer to the GetNumParams function */
-	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function */
-	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);	/**< Pointer to a SetParameter function */
-	uintp     (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function */
+	int       (*pGetNumParams)();										/**< Pointer to the GetNumParams function. */
+	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function. */
+	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);	/**< Pointer to a SetParameter function. */
+	uintp     (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function. */
 };
 
 /**
@@ -121,9 +124,9 @@ struct MFMaterialCallbacks
  */
 struct MFMaterialType
 {
-	MFMaterialCallbacks materialCallbacks;	/**< Material type callbacks */
-	char *pTypeName;						/**< Material type name */
-	size_t instanceDataSize;				/**< Size of the instance data in bytes */
+	MFMaterialCallbacks materialCallbacks;	/**< Material type callbacks. */
+	char *pTypeName;						/**< Material type name. */
+	size_t instanceDataSize;				/**< Size of the instance data in bytes. */
 };
 
 

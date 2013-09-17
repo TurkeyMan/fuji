@@ -293,8 +293,6 @@ public:
 	MFHeap *pOld;
 };
 
-/**
- */
 #define MFHEAP_SCOPE(type) MFHeapScope scopeHeap(type)
 
 /*** internal ***/

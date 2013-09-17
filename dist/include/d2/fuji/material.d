@@ -5,7 +5,7 @@ import fuji.texture;
 import fuji.matrix;
 
 struct MFIni;
-struct MFIniEnumKey;
+struct MFEnumKey;
 
 /**
 * @struct MFMaterial
@@ -61,7 +61,7 @@ struct MFMaterialParameterInfo
 	{
 		MFParamType type;
 		int defaultValue;
-		MFIniEnumKey* pEnumKeys;
+		MFEnumKey* pEnumKeys;
 	}
 
 	const(char)* pParameterName;	/**< Name of the parameter */

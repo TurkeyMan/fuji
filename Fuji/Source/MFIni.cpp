@@ -34,7 +34,7 @@ int MFIniLine::GetInt(int index, int base)
 	return MFString_AsciiToInteger(GetString(index), false, base);
 }
 
-int MFIniLine::GetEnum(int index, MFIniEnumKey *pKeys)
+int MFIniLine::GetEnum(int index, MFEnumKey *pKeys)
 {
 	const char *pString = GetString(index);
 

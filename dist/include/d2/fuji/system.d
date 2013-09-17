@@ -49,23 +49,23 @@ struct MFInitParams
 	*/
 	struct DisplayMode
 	{
-		MFRect displayRect = MFRect(0, 0, 1280, 720);	//*< Display rect. If not set, the value returned from MFDisplay_GetDefaultRes() is used. */
-		bool bFullscreen = false;						//*< Fullscreen flag. */
+		MFRect displayRect = MFRect(0, 0, 1280, 720);	/**< Display rect. If not set, the value returned from MFDisplay_GetDefaultRes() is used. */
+		bool bFullscreen = false;						/**< Fullscreen flag. */
 	}
 
-	const(char)* pAppTitle = "Fuji Window".ptr;			//*< A title used to represent the application */
+	const(char)* pAppTitle = "Fuji Window".ptr;			/**< A title used to represent the application */
 
-	void* hInstance;									//*< The WIN32 hInstance paramater supplied to WinMain() */
-	void* hWnd;											//*< An optional hWnd to a WIN32 window that will contain the viewport */
+	void* hInstance;									/**< The WIN32 hInstance paramater supplied to WinMain() */
+	void* hWnd;											/**< An optional hWnd to a WIN32 window that will contain the viewport */
 
-	const(char)* pCommandLine;							//*< Pointer to the command line string */
+	const(char)* pCommandLine;							/**< Pointer to the command line string */
 
-	int argc;											//*< The argc parameter supplied to main() */
-	const(char*)*argv;									//*< The argv paramater supplied to main() */
+	int argc;											/**< The argc parameter supplied to main() */
+	const(char*)*argv;									/**< The argv paramater supplied to main() */
 
-	DisplayMode display;								//*< Display settings. */
+	DisplayMode display;								/**< Display settings. */
 
-	bool hideSystemInfo;								//*< Hide the frame rate and system logo() */
+	bool hideSystemInfo;								/**< Hide the frame rate and system logo() */
 }
 
 

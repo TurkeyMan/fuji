@@ -102,7 +102,7 @@ MF_API int MFModule_GetModuleID(const char *pName)
 
 MF_API bool MFModule_IsModuleInitialised(int id)
 {
-	return (gModuleInitComplete & (1ULL << id)) != 0;
+	return (gModuleInitComplete & ~gModuleInitFailed & (1ULL << id)) != 0;
 }
 
 MF_API bool MFModule_DidModuleInitialisationFail(int id)
@@ -276,7 +276,7 @@ bool MFModule_InitModules()
 			}
 			else
 			{
-				// list pre-requisite failures
+				// TODO: list pre-requisite failures
 				if(MFModule_IsModuleInitialised(MFModule_GetBuiltinModuleID(MFBIM_MFString)))
 				{
 					MFDebug_Message(MFStr("Prerequisite failure"));
@@ -313,7 +313,7 @@ bool MFModule_InitModules()
 		{
 			MFDebug_Message("Fuji initialisation completed with errors...");
 
-			// list the failed modules
+			// TODO: list the failed modules
 			//...
 		}
 		else

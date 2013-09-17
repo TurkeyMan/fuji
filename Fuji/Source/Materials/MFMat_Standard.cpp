@@ -7,7 +7,7 @@
 #include "MFTexture_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
 
-static MFIniEnumKey sBlendKeys[] =
+static MFEnumKey sBlendKeys[] =
 {
 	{ "none",			MFMatStandard_Blend_None },
 	{ "alpha",			MFMatStandard_Blend_Alpha },
@@ -16,7 +16,7 @@ static MFIniEnumKey sBlendKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sCullKeys[] =
+static MFEnumKey sCullKeys[] =
 {
 	{ "none",		MFMatStandard_Cull_None },
 	{ "ccw",		MFMatStandard_Cull_CCW },
@@ -25,7 +25,7 @@ static MFIniEnumKey sCullKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sTextureKeys[] =
+static MFEnumKey sTextureKeys[] =
 {
 	{ "diffuse",	MFMatStandard_Tex_DifuseMap },
 	{ "diffuse2",	MFMatStandard_Tex_DiffuseMap2 },
@@ -39,7 +39,7 @@ static MFIniEnumKey sTextureKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sTextureAddreessKeys[] =
+static MFEnumKey sTextureAddreessKeys[] =
 {
 	{ "addressu",		MFMatStandard_TexFlag_AddressU },
 	{ "addressv",		MFMatStandard_TexFlag_AddressV },
@@ -47,7 +47,7 @@ static MFIniEnumKey sTextureAddreessKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sTextureFilterKeys[] =
+static MFEnumKey sTextureFilterKeys[] =
 {
 	{ "magfilter",		MFMatStandard_TexFlag_MagFilter },
 	{ "minfilter",		MFMatStandard_TexFlag_MinFilter },
@@ -55,7 +55,7 @@ static MFIniEnumKey sTextureFilterKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sTextureAddressValueKeys[] =
+static MFEnumKey sTextureAddressValueKeys[] =
 {
 	{ "wrap",			MFMatStandard_TexAddress_Wrap },
 	{ "mirror",			MFMatStandard_TexAddress_Mirror },
@@ -65,7 +65,7 @@ static MFIniEnumKey sTextureAddressValueKeys[] =
 	{ NULL, 0 }
 };
 
-static MFIniEnumKey sTextureFilterValueKeys[] =
+static MFEnumKey sTextureFilterValueKeys[] =
 {
 	{ "none",			MFMatStandard_TexFilter_None },
 	{ "nearest",		MFMatStandard_TexFilter_Point },
