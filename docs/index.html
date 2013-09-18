@@ -52,9 +52,9 @@ For related questions or discussion, please refer to the Mount Fuji Forum.</p>
 FAQ</h1>
 <h2><a class="anchor" id="question1"></a>
 What platforms are currently supported by the Mount Fuji Engine?</h2>
-<p>The Mount Fuji Engine has been successfully compiled and tested on the following platforms: Windows, Linux, PSP and XBox.<br/>
-Other platforms in the works at various degrees of functionality include OSX, PS2, Gamecube and Dreamcast. (I'd appreciate more people to help me test these system)<br/>
-System planned for support include PS3 (when it releases in australia using the OpenPlatform technology) and Wii (also via gamecube support).</p>
+<p>The Mount Fuji Engine has been successfully deployed on the following platforms: Windows, Linux, iOS, PSP and XBox.<br/>
+Other platforms with various degrees of functionality include Android, OSX, PS2, Gamecube, Dreamcast, NaCl, Emscripten (web/javascript). (I'd appreciate more people to help me test these system)<br/>
+Fuji is very portable, and I could easily produce a working build for modern console systems within short time given a need.</p>
 <h2><a class="anchor" id="question2"></a>
 What support is offered for internationalisation?</h2>
 <p>The Mount Fuji Engine provides extensive support for internationalisation. The font functions are UTF8 and Unicode aware, and the engine has internal support for Unicode string, or more conveniently UTF8 encoding when using the standard string functions.<br/>
@@ -63,18 +63,14 @@ Tools are provided for managing translations and string tables.</p>
 What asset formats are supported?</h2>
 <p>Asset files in typical formats are not directly loaded by the engine.<br/>
 The engine is designed to load raw optimised platform specific asset formats. This is for efficiency and performance.<br/>
-Tools are provided to convert many common asset formats into 'data archives' for consumption by the engine.<br/>
-Supported formats include:<br/>
-DAE (Collada), X, ASE, OBJ, MD2, MD3. Note: Animation is currently only supported through the DAE and X formats.<br/>
-PNG, TGA, BMP.<br/>
-WAV, OGG.</p>
+Runtime conversion of 'source assets' is possible for most asset types.<br/>
+For mesh and animation, Fuji uses the AssImp library: <a href="http://assimp.sourceforge.net/main_features_formats.html">http://assimp.sourceforge.net/main_features_formats.html</a><br/>
+Images can be loaded from PNG, TGA, BMP.<br/>
+Sounds can be loaded/played from WAV, OGG, MP3.</p>
 <h2><a class="anchor" id="question4"></a>
 Are sample applications provided?</h2>
 <p>Yes, samples are provided for some typical tasks.<br/>
-Further questions/support can be brought to me directly.</p>
-<h2><a class="anchor" id="question5"></a>
-Is this gonna be able to make pron games on PSP?</h2>
-<p>Sure, if thats what does it for you ;)</p>
+Further questions/support can be raised on GitHub, or brought to me directly.</p>
 <h1><a class="anchor" id="credits_sec"></a>
 Special Thanks</h1>
 <p>Special thanks go to all the console homebrew communities who have produced fantastic tools for many platforms and found numerous exploits to make any of it even possible!<br/>
@@ -82,7 +78,7 @@ Special Thanks</h1>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Sep 19 2013 00:34:57 for Mount Fuji Engine by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Sep 19 2013 00:49:48 for Mount Fuji Engine by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.5
 </small></address>
