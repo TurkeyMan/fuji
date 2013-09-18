@@ -2,7 +2,7 @@
  * @file MFEffect.h
  * @brief Manage rendering effects.
  * @author Manu Evans
- * @defgroup MFEffect Rendering Effects
+ * @defgroup MFEffect Effect rendering
  * @{
  */
 

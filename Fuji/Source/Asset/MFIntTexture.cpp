@@ -86,7 +86,7 @@ struct BMPInfoHeader
 };
 #pragma pack ()
 
-struct BMPPaletteEntry /**** Colormap entry structure ****/
+struct BMPPaletteEntry /**** Colourmap entry structure ****/
 {
 	unsigned char  rgbBlue;          /* Blue value */
 	unsigned char  rgbGreen;         /* Green value */

@@ -124,7 +124,7 @@ extern (C) void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLa
 
 extern (C) void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
 extern (C) void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
-extern (C) void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+extern (C) void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
 extern (C) void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);
 
 extern (C) void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags, ref const MFVector colour = MFVector.zero, float z = 1, int stencil = 0);

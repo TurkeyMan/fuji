@@ -30,7 +30,7 @@
 struct CBMaterial
 {
 	MFVector mTexMatrix[2];
-    MFVector vMeshColor;
+    MFVector vMeshColour;
 	MFVector gModelColour;
 	MFVector gColourMask;
 };
@@ -469,7 +469,7 @@ void MFMat_Standard_CreateInstancePlatformSpecific(MFMaterial *pMaterial)
 
 	pData->cbMaterial.mTexMatrix[0] = mat.GetXAxis();
 	pData->cbMaterial.mTexMatrix[1] = mat.GetYAxis();
-	pData->cbMaterial.vMeshColor = MFVector::white;
+	pData->cbMaterial.vMeshColour = MFVector::white;
 	pData->cbMaterial.gModelColour = MFVector::white;
 	pData->cbMaterial.gColourMask = MakeVector(1.0f, 0.0f, 1.0f, 0.0f);
 

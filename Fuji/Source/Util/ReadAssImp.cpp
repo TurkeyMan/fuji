@@ -246,21 +246,21 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 
 		MFDebug_Log(0, MFStr("Material %d: %s", i, name.C_Str()));
 
-		aiColor4D color(1.f, 1.f, 1.f, 1.f);
-		aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-		mat.diffuse = MakeVector(color.r, color.g, color.b, color.a);
+		aiColor4D colour(1.f, 1.f, 1.f, 1.f);
+		aiMat.Get(AI_MATKEY_COLOR_DIFFUSE, colour);
+		mat.diffuse = MakeVector(colour.r, colour.g, colour.b, colour.a);
 
-		color = aiColor4D(1.f, 1.f, 1.f, 1.f);
-		aiMat.Get(AI_MATKEY_COLOR_AMBIENT, color);
-		mat.ambient = MakeVector(color.r, color.g, color.b, color.a);
+		colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
+		aiMat.Get(AI_MATKEY_COLOR_AMBIENT, colour);
+		mat.ambient = MakeVector(colour.r, colour.g, colour.b, colour.a);
 
-		color = aiColor4D(1.f, 1.f, 1.f, 1.f);
-		aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, color);
-		mat.emissive = MakeVector(color.r, color.g, color.b, color.a);
+		colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
+		aiMat.Get(AI_MATKEY_COLOR_EMISSIVE, colour);
+		mat.emissive = MakeVector(colour.r, colour.g, colour.b, colour.a);
 
-		color = aiColor4D(1.f, 1.f, 1.f, 1.f);
-		aiMat.Get(AI_MATKEY_COLOR_SPECULAR, color);
-		mat.specular = MakeVector(color.r, color.g, color.b, color.a);
+		colour = aiColor4D(1.f, 1.f, 1.f, 1.f);
+		aiMat.Get(AI_MATKEY_COLOR_SPECULAR, colour);
+		mat.specular = MakeVector(colour.r, colour.g, colour.b, colour.a);
 
 		aiString diffuse;
 		aiMat.Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), diffuse);

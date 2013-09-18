@@ -393,7 +393,7 @@ static void MissingStates(MFStateBlockConstantType type, uint32 missing)
 		{
 			if(!states.IsNull())
 				states += ", ";
-			states += MFStateBlock_GetStateName(type, a);
+			states += MFStateBlock_GetRenderStateName(type, a);
 		}
 	}
 
@@ -609,7 +609,7 @@ MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *
 	pLayer->pDepthStencil = pTexture;
 }
 
-MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
+MF_API void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
 {
 
 }

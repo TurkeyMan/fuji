@@ -169,9 +169,9 @@ static const char * const *gppRenderStateNames[MFSB_CT_TypeCount] =
 	NULL
 };
 
-MF_API const char* MFStateBlock_GetStateName(MFStateBlockConstantType ct, int constant)
+MF_API const char* MFStateBlock_GetRenderStateName(MFStateBlockConstantType constantType, int constant)
 {
-	return gppRenderStateNames[ct][constant];
+	return gppRenderStateNames[constantType][constant];
 }
 
 
@@ -363,9 +363,11 @@ MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource)
 
 MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest)
 {
-	MFDebug_Assert(pSource->allocated <= pDest->allocated, "pDest is smaller than pSource!");
+	size_t sourceSize = pSource->GetUsed();
+	MFDebug_Assert(sourceSize <= pDest->GetSize(), "pDest is too small!");
+
 	uint8 oldSize = pDest->allocated;
-	MFCopyMemory(pDest, pSource, MFStateBlock::MINIMUM_SIZE << pSource->allocated);
+	MFCopyMemory(pDest, pSource, sourceSize);
 	pDest->allocated = oldSize;
 }
 

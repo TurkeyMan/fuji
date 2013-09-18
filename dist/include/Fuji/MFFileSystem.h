@@ -18,7 +18,6 @@ struct MFFile;
 
 /**
  * Represents a Fuji FileSystem.
- * Represents a Fuji FileSystem.
  */
 typedef int MFFileSystemHandle;
 

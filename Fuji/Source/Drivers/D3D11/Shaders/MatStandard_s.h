@@ -21,7 +21,7 @@
 // {
 //
 //   float4 mTexMatrix[2];              // Offset:    0 Size:    32
-//   float4 vMeshColor;                 // Offset:   32 Size:    16 [unused]
+//   float4 vMeshColour;                 // Offset:   32 Size:    16 [unused]
 //   float4 gModelColour;               // Offset:   48 Size:    16
 //   float4 gColourMask;                // Offset:   64 Size:    16
 //

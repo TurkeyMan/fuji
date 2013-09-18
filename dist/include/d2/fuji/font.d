@@ -181,9 +181,9 @@ extern (C) float MFFont_DrawTextf(MFFont *pFont, const ref MFVector pos, float h
 */
 extern (C) float MFFont_DrawText2f(MFFont *pFont, float x, float y, float height, const ref MFVector colour, const char *pFormat, ...);
 
-extern (C) float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const ref MFVector pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const ref MFVector color, int numChars = -1, const ref MFMatrix ltw = MFMatrix.identity);
+extern (C) float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const ref MFVector pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const ref MFVector colour, int numChars = -1, const ref MFMatrix ltw = MFMatrix.identity);
 
-extern (C) float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const ref MFVector pos, MFFontJustify justification, float lineWidth, float textHeight, const ref MFVector color, int numChars = -1, const ref MFMatrix ltw = MFMatrix.identity);
+extern (C) float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const ref MFVector pos, MFFontJustify justification, float lineWidth, float textHeight, const ref MFVector colour, int numChars = -1, const ref MFMatrix ltw = MFMatrix.identity);
 
 
 /**

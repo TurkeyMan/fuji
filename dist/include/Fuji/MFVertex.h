@@ -153,7 +153,7 @@ MF_API MFVertexDeclaration *MFVertex_CreateVertexDeclaration(const MFVertexEleme
 /**
  * Release a vertex declaration.
  * Release a reference to a vertex declaration.
- * @param pDeclaration Vertex declaration to released.
+ * @param pDeclaration Vertex declaration to release.
  * @return The new reference count of the vertex declaration.
  */
 MF_API int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration *pDeclaration);
@@ -183,7 +183,7 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 /**
  * Release a vertex buffer.
  * Releases a reference to a vertex buffer.
- * @param pVertexBuffer Vertex buffer to released.
+ * @param pVertexBuffer Vertex buffer to release.
  * @return The new reference count of the vertex buffer.
  * @see MFVertex_CreateVertexBuffer()
  */
@@ -208,7 +208,22 @@ MF_API void MFVertex_LockVertexBuffer(MFVertexBuffer *pVertexBuffer, void **ppVe
  */
 MF_API void MFVertex_UnlockVertexBuffer(MFVertexBuffer *pVertexBuffer);
 
+/**
+ * Copy a vertex element stream into a vertex buffer.
+ * Copies a stream of data for a single vertex element into a locked vertex buffer.
+ * @param pVertexBuffer Vertex buffer to write to.
+ * @param targetElement Target element within the vertex buffer.
+ * @param targetElementIndex Target element index.
+ * @param pSourceData Pointer to the source data.
+ * @param sourceDataFormat Format of the source data.
+ * @param sourceDataStride Stride of the source data, in bytes.
+ * @param numVertices Number of vertices to write.
+ * @return None.
+ * @see MFVertex_LockVertexBuffer()
+ */
 MF_API void MFVertex_CopyVertexData(MFVertexBuffer *pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const void *pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
+
+// TODO:
 MF_API void MFVertex_SetVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, const MFVector &data);
 MF_API void MFVertex_ReadVertexData4v(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector *pData);
 MF_API void MFVertex_SetVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexElementType element, int elementIndex, uint32 data);
@@ -228,7 +243,7 @@ MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexB
 /**
  * Release an index buffer.
  * Releases a reference to an index buffer.
- * @param pIndexBuffer Index buffer to released.
+ * @param pIndexBuffer Index buffer to release.
  * @return The new reference count of the index buffer.
  * @see MFVertex_CreateIndexBuffer()
  */

@@ -12,6 +12,7 @@
 
 #include "MFVertex.h"
 #include "MFMatrix.h"
+#include "MFRenderState.h"
 
 struct MFTexture;
 struct MFMaterial;
@@ -39,6 +40,10 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags = MFRCF_All, const M
 MF_API void MFRenderer_SetViewport(MFRect *pRect);
 MF_API void MFRenderer_ResetViewport();
 
+MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pDepthStencil);
+MF_API void MFRenderer_SetDeviceRenderTarget();
+
+
 /**
  * Get the device render target.
  * Get's the device render target. This is usually the display's back buffer.
@@ -55,9 +60,11 @@ MF_API MFTexture* MFRenderer_GetDeviceRenderTarget();
  */
 MF_API MFTexture* MFRenderer_GetDeviceDepthStencil();
 
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pDepthStencil);
-MF_API void MFRenderer_SetDeviceRenderTarget();
-
+/**
+ * Get the current texel center offset.
+ * Gets the offset to the center of a texel.
+ * @return The texel center offset.
+ */
 MF_API float MFRenderer_GetTexelCenterOffset();
 
 /**
@@ -384,7 +391,7 @@ MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *
  * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the capture target.
  * @return None.
  */
-MF_API void MFRenderLayer_SetLayerColorCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
+MF_API void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
 
 /**
  * Set a render layer's depth target capture surface.

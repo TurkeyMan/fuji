@@ -32,17 +32,17 @@ enum MFStateConstant_Matrix : int
 
 	Max,
 
+	FujiMatrixCount = User0 - Fuji0,
+	UserMatrixCount = UV0 - User0,
+	UVMatrixCount = View - UV0,
+
 	ManagedStart = World,
 	NumManaged = ShadowMap - ManagedStart,
 
 	DerivedStart = View,
 	NumDerived = Max - DerivedStart,
 
-	NumSetable = DerivedStart,
-
-	FujiMatrixCount = User0 - Fuji0,
-	UserMatrixCount = UV0 - User0,
-	UVMatrixCount = View - UV0
+	NumSetable = DerivedStart
 }
 static assert(MFStateConstant_Matrix.Max <= 32);
 
@@ -552,7 +552,7 @@ extern (C) size_t MFStateBlock_GetAllocatedBytes(MFStateBlock *pStateBlock);
 extern (C) size_t MFStateBlock_GetUsedBytes(MFStateBlock *pStateBlock);
 extern (C) size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
 
-extern (C) const char* MFStateBlock_GetStateName(MFStateBlockConstantType ct, int constant);
+extern (C) const char* MFStateBlock_GetRenderStateName(MFStateBlockConstantType ct, int constant);
 
 extern (C) bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state);
 extern (C) bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, ref const MFVector state);

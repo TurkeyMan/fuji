@@ -294,8 +294,8 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 
 	if (bClearColour)
 	{
-		float clearColor[4] = { colour.x, colour.y, colour.z, colour.w }; // RGBA
-		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, clearColor);
+		float clearColour[4] = { colour.x, colour.y, colour.z, colour.w }; // RGBA
+		g_pImmediateContext->ClearRenderTargetView(g_pRenderTargetView, clearColour);
 	}
 
     if (bClearDepth | bClearStencil)

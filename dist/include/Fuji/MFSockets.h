@@ -24,18 +24,18 @@ typedef void* MFSocket;
  */
 enum MFAddressFamily
 {
-	MFAF_Unknown = -1,	/**< Unknown Address Family */
+	MFAF_Unknown = -1,			/**< Unknown Address Family */
 
-	MFAF_Unspecified = 0, /**< Unspecified Address Family */
+	MFAF_Unspecified = 0,		/**< Unspecified Address Family */
 
-	MFAF_Unix = 1,		/**< Local to host (pipes, portals) */
-	MFAF_Inet = 2,		/**< Internetwork: UDP, TCP, etc. // **** Fuji only supports Inet currently */
-	MFAF_IPX = 6,		/**< IPX protocols: IPX, SPX, etc. */
-	MFAF_NetBios = 17,	/**< NetBios-style addresses */
-	MFAF_Inet6 = 23,	/**< Internetwork Version 6 */
-	MFAF_IRDA = 26,		/**< IrDA */
+	MFAF_Unix = 1,				/**< Local to host (pipes, portals) */
+	MFAF_Inet = 2,				/**< Internetwork: UDP, TCP, etc. // **** Fuji only supports Inet currently */
+	MFAF_IPX = 6,				/**< IPX protocols: IPX, SPX, etc. */
+	MFAF_NetBios = 17,			/**< NetBios-style addresses */
+	MFAF_Inet6 = 23,			/**< Internetwork Version 6 */
+	MFAF_IRDA = 26,				/**< IrDA */
 
-	MFAF_Max = 32,		/**< Maximum Address Family */
+	MFAF_Max = 32,				/**< Maximum Address Family */
 	MFAF_ForceInt = 0x7FFFFFFF	/**< Force AddressFamily to an int type */
 };
 
@@ -45,15 +45,15 @@ enum MFAddressFamily
  */
 enum MFSocketType
 {
-	MFSockType_Unknown = -1,/**< Unknown socket type */
+	MFSockType_Unknown = -1,			/**< Unknown socket type */
 
-	MFSockType_Stream = 1,	/**< Stream socket */
-	MFSockType_Datagram,	/**< Datagram socket */
-	MFSockType_Raw,			/**< Raw-protocol interface */
-	MFSockType_RDMessage,	/**< Reliably-delivered message */
-	MFSockType_SeqPacket,	/**< Sequenced packet stream */
+	MFSockType_Stream = 1,				/**< Stream socket */
+	MFSockType_Datagram,				/**< Datagram socket */
+	MFSockType_Raw,						/**< Raw-protocol interface */
+	MFSockType_RDMessage,				/**< Reliably-delivered message */
+	MFSockType_SeqPacket,				/**< Sequenced packet stream */
 
-	MFSockType_Max,			/**< Max socket type */
+	MFSockType_Max,						/**< Max socket type */
 	MFSockType_ForceInt = 0x7FFFFFFF	/**< Force SocketType to int type */
 };
 
@@ -63,29 +63,29 @@ enum MFSocketType
  */
 enum MFSocketProtocol
 {
-	MFProtocol_Unknown = -1,	/**< Unknown socket protocol */
+	MFProtocol_Unknown = -1,			/**< Unknown socket protocol */
 
-	MFProtocol_IP = 0,			/**< Dummy for IP / IPv6 hop-by-hop options */
+	MFProtocol_IP = 0,					/**< Dummy for IP / IPv6 hop-by-hop options */
 
-	MFProtocol_ICMP = 1,		/**< Control message protocol */
-	MFProtocol_IGMP = 2,		/**< Internet group management protocol */
-	MFProtocol_IPV4 = 4,		/**< IPv4 */
-	MFProtocol_TCP = 6,			/**< TCP */
-	MFProtocol_PUP = 12,		/**< PUP */
-	MFProtocol_UDP = 17,		/**< User datagram protocol */
-	MFProtocol_IDP = 22,		/**< XNS IDP */
-	MFProtocol_IPV6 = 41,		/**< IPv6 */
-	MFProtocol_ROUTING = 43,	/**< IPv6 routing header */
-	MFProtocol_FRAGMENT = 44,	/**< IPv6 fragmentation header */
-	MFProtocol_ESP = 50,		/**< IPsec ESP header */
-	MFProtocol_AH = 51,			/**< IPsec AH */
-	MFProtocol_ICMPV6 = 58,		/**< ICMPv6 */
-	MFProtocol_NONE = 59,		/**< IPv6 no next header */
-	MFProtocol_DSTOPTS = 60,	/**< IPv6 destination options */
+	MFProtocol_ICMP = 1,				/**< Control message protocol */
+	MFProtocol_IGMP = 2,				/**< Internet group management protocol */
+	MFProtocol_IPV4 = 4,				/**< IPv4 */
+	MFProtocol_TCP = 6,					/**< TCP */
+	MFProtocol_PUP = 12,				/**< PUP */
+	MFProtocol_UDP = 17,				/**< User datagram protocol */
+	MFProtocol_IDP = 22,				/**< XNS IDP */
+	MFProtocol_IPV6 = 41,				/**< IPv6 */
+	MFProtocol_ROUTING = 43,			/**< IPv6 routing header */
+	MFProtocol_FRAGMENT = 44,			/**< IPv6 fragmentation header */
+	MFProtocol_ESP = 50,				/**< IPsec ESP header */
+	MFProtocol_AH = 51,					/**< IPsec AH */
+	MFProtocol_ICMPV6 = 58,				/**< ICMPv6 */
+	MFProtocol_NONE = 59,				/**< IPv6 no next header */
+	MFProtocol_DSTOPTS = 60,			/**< IPv6 destination options */
 
-	MFProtocol_Raw = 255,		/**< Raw IP packet */
+	MFProtocol_Raw = 255,				/**< Raw IP packet */
 
-	MFProtocol_Max = 256,		/**< Maximum socket protocol */
+	MFProtocol_Max = 256,				/**< Maximum socket protocol */
 	MFProtocol_ForceInt = 0x7FFFFFFF	/**< Force SocketProtocol to an int type */
 };
 
@@ -95,9 +95,9 @@ enum MFSocketProtocol
  */
 enum MFSocketOptions
 {
-	MFSO_NonBlocking,	/**< Socket is non-blocking */
+	MFSO_NonBlocking,			/**< Socket is non-blocking */
 
-	MFSO_Max,			/**< Maximum socket option */
+	MFSO_Max,					/**< Maximum socket option */
 	MFSO_ForceInt = 0x7FFFFFFF	/**< Force SocketOptions to int type */
 };
 
@@ -150,8 +150,8 @@ struct MFInet6Address
 {
 	union
 	{
-		uint16  s[8];	/**< 8 uint16 address components */
-		uint128 address;/**< Address as a 128bit value */
+		uint16  s[8];		/**< 8 uint16 address components */
+		uint128 address;	/**< Address as a 128bit value */
 	};
 };
 
@@ -193,14 +193,14 @@ struct MFSocketAddressInet6 : public MFSocketAddress
  */
 struct MFAddressInfo
 {
-	uint32 flags;				/**< Flags that indicate options used in the getaddrinfo function. See AI_PASSIVE, AI_CANONNAME, and AI_NUMERICHOST. */
-	MFAddressFamily family;		/**< Protocol family, such as MFAF_Inet. */
-	MFSocketType type;			/**< Socket type, such as MFSockType_Raw, MFSockType_Stream, or MFSockType_Datagram. */
-	MFSocketProtocol protocol;	/**< Protocol, such as MFProtocol_TCP or MFProtocol_UDP. For protocols other than IPv4 and IPv6, set ai_protocol to zero. */
-	const char *pCanonName;		/**< Canonical name for the host. */
+	uint32 flags;						/**< Flags that indicate options used in the getaddrinfo function. See AI_PASSIVE, AI_CANONNAME, and AI_NUMERICHOST. */
+	MFAddressFamily family;				/**< Protocol family, such as MFAF_Inet. */
+	MFSocketType type;					/**< Socket type, such as MFSockType_Raw, MFSockType_Stream, or MFSockType_Datagram. */
+	MFSocketProtocol protocol;			/**< Protocol, such as MFProtocol_TCP or MFProtocol_UDP. For protocols other than IPv4 and IPv6, set ai_protocol to zero. */
+	const char *pCanonName;				/**< Canonical name for the host. */
 	const MFSocketAddress *pAddress;	/**< Pointer to an MFSocketAddress structure. */
 
-	MFAddressInfo *pNext;		/**< Pointer to the next structure in a linked list. This parameter is set to NULL in the last MFAddressInfo structure of a linked list. */
+	MFAddressInfo *pNext;				/**< Pointer to the next structure in a linked list. This parameter is set to NULL in the last MFAddressInfo structure of a linked list. */
 };
 
 // helper functions
