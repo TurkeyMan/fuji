@@ -546,9 +546,9 @@ enum MFEndian
  *
  * @subsection question1 What platforms are currently supported by the Mount Fuji Engine?
  *
- * The Mount Fuji Engine has been successfully compiled and tested on the following platforms: Windows, Linux, PSP and XBox.\n
- * Other platforms in the works at various degrees of functionality include OSX, PS2, Gamecube and Dreamcast. (I'd appreciate more people to help me test these system)\n
- * System planned for support include PS3 (when it releases in australia using the OpenPlatform technology) and Wii (also via gamecube support).
+ * The Mount Fuji Engine has been successfully deployed on the following platforms: Windows, Linux, iOS, PSP and XBox.\n
+ * Other platforms with various degrees of functionality include Android, OSX, PS2, Gamecube, Dreamcast, NaCl, Emscripten (web/javascript). (I'd appreciate more people to help me test these system)\n
+ * Fuji is very portable, and I could easily produce a working build for modern console systems within short time given a need.
  *
  * @subsection question2 What support is offered for internationalisation?
  *
@@ -559,20 +559,15 @@ enum MFEndian
  *
  * Asset files in typical formats are not directly loaded by the engine.\n
  * The engine is designed to load raw optimised platform specific asset formats. This is for efficiency and performance.\n
- * Tools are provided to convert many common asset formats into 'data archives' for consumption by the engine.\n
- * Supported formats include:\n
- * DAE (Collada), X, ASE, OBJ, MD2, MD3. Note: Animation is currently only supported through the DAE and X formats.\n
- * PNG, TGA, BMP.\n
- * WAV, OGG.
+ * Runtime conversion of 'source assets' is possible for most asset types.\n
+ * For mesh and animation, Fuji uses the AssImp library: http://assimp.sourceforge.net/main_features_formats.html\n
+ * Images can be loaded from PNG, TGA, BMP.\n
+ * Sounds can be loaded/played from WAV, OGG, MP3.
  *
  * @subsection question4 Are sample applications provided?
  *
  * Yes, samples are provided for some typical tasks.\n
- * Further questions/support can be brought to me directly.
- *
- * @subsection question5 Is this gonna be able to make pron games on PSP?
- *
- * Sure, if thats what does it for you ;)
+ * Further questions/support can be raised on GitHub, or brought to me directly.
  *
  * @section credits_sec Special Thanks
  *
