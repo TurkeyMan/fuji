@@ -249,9 +249,9 @@ static const Symbol gSymbols[] =
 struct Token
 {
 	Token() : type(ET_Unknown), line(0), column(0) {}
-	Token(MFString token, ExpressionType type, int line, int column, int precedence = -1) : token(token), type(type), line(line), column(column), precedence(precedence) {}
+	Token(DString token, ExpressionType type, int line, int column, int precedence = -1) : token(token), type(type), line(line), column(column), precedence(precedence) {}
 
-	MFString token;
+	DString token;
 	ExpressionType type;
 	int line, column;
 	int precedence;
@@ -596,9 +596,9 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 		{
 			case ET_Identifier:
 			{
-				e.pName = MFStringCache_Add(pEffect->pStringCache, pExp->pToken->token.CStr());
+				e.pName = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
 
-				int c = pExp->pToken->token.Enumerate(gpConstIdentifiers, sizeof(gpConstIdentifiers) / sizeof(gpConstIdentifiers[0]), true);
+				int c = MFString_Enumerate(MFStrN(pExp->pToken->token.ptr, pExp->pToken->token.length), gpConstIdentifiers, sizeof(gpConstIdentifiers) / sizeof(gpConstIdentifiers[0]), true);
 				if(c >= 0)
 				{
 					e.expression = (MFExpressionType)gIdentifierDesc[c].et;
@@ -680,19 +680,17 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 			}
 			case ET_Integer:
 				e.expression = MFExp_Immediate; e.type = MFEDT_Int;
-				e.value.i = pExp->pToken->token.ToInt();
+				e.value.i = MFString_AsciiToInteger(MFStr(pExp->pToken->token.ptr, pExp->pToken->token.length));
 				break;
 			case ET_Float:
 				e.expression = MFExp_Immediate; e.type = MFEDT_Float;
-				e.value.f = pExp->pToken->token.ToFloat();
+				e.value.f = MFString_AsciiToFloat(MFStr(pExp->pToken->token.ptr, pExp->pToken->token.length));
 				break;
 			case ET_String:
-				e.expression = MFExp_Immediate; e.type = MFEDT_String;
-				e.value.s = MFStringCache_Add(pEffect->pStringCache, pExp->pToken->token.CStr());
-				break;
 			case ET_SourceCode:
-				e.expression = MFExp_Immediate; e.type = MFEDT_Code;
-				e.value.s = MFStringCache_Add(pEffect->pStringCache, pExp->pToken->token.CStr());
+				e.expression = MFExp_Immediate;
+				e.type = pExp->type == ET_String ? MFEDT_String : MFEDT_Code;
+				e.value.s = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
 				break;
 		}
 	}
@@ -850,7 +848,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 				{
 					if(gSymbols[a].len <= buffer.length && !MFString_CompareN(buffer.ptr, gSymbols[a].pSymbol, gSymbols[a].len))
 					{
-						tokens.push(Token(MFString(buffer.ptr, gSymbols[a].len), gSymbols[a].type, line, col, gSymbols[a].precedence));
+						tokens.push(Token(buffer.slice(0, gSymbols[a].len), gSymbols[a].type, line, col, gSymbols[a].precedence));
 						buffer = buffer.popFront(gSymbols[a].len);
 						bFound = true;
 						break;
@@ -875,7 +873,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 		pEffect->expressions.reserve(CountExpressions(pRoot));
 		pEffect->pStringCache = MFStringCache_Create(bytes);
 
-		pEffect->pName = pRoot->pToken ? MFStringCache_Add(pEffect->pStringCache, pRoot->pToken->token.CStr()) : NULL;
+		pEffect->pName = pRoot->pToken ? MFStringCache_AddN(pEffect->pStringCache, pRoot->pToken->token.ptr, pRoot->pToken->token.length) : NULL;
 
 		Expression *pEffectScope = pRoot->pRight;
 		while(pEffectScope)
@@ -887,7 +885,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 				MFIntEffect::Technique &t = pEffect->techniques.push();
 				MFZeroMemory(&t, sizeof(t));
 
-				t.pName = pStatement->pToken ? MFStringCache_Add(pEffect->pStringCache, pStatement->pToken->token.CStr()) : NULL;
+				t.pName = pStatement->pToken ? MFStringCache_AddN(pEffect->pStringCache, pStatement->pToken->token.ptr, pStatement->pToken->token.length) : NULL;
 				t.pSelection = pStatement->pLeft ? CopyTree(pStatement->pLeft, pEffect, NULL) : NULL;
 
 				Expression *pTechniqueScope = pStatement->pRight;
@@ -908,7 +906,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 						};
 
 						MFDebug_Assert(pS->pLeft->type == ET_Identifier, "Left of assignment must be identifier");
-						int shaderType = pS->pLeft->pToken->token.Enumerate(gpShaders, sizeof(gpShaders) / sizeof(gpShaders[0]), true);
+						int shaderType = MFString_Enumerate(MFStrN(pS->pLeft->pToken->token.ptr, pS->pLeft->pToken->token.length), gpShaders, sizeof(gpShaders) / sizeof(gpShaders[0]), true);
 						if(shaderType > -1)
 						{
 							t.shaders[shaderType] = CopyTree(pS->pRight, pEffect, &t);
@@ -916,7 +914,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 						else
 						{
 							MFIntEffect::Variable v;
-							v.pName = MFStringCache_Add(pEffect->pStringCache, pS->pLeft->pToken->token.CStr());
+							v.pName = MFStringCache_AddN(pEffect->pStringCache, pS->pLeft->pToken->token.ptr, pS->pLeft->pToken->token.length);
 							v.pValue = CopyTree(pS->pRight, pEffect, &t);
 							t.variables.push(v);
 						}
@@ -931,7 +929,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 				MFDebug_Assert(pStatement->pLeft->type == ET_Identifier, "Left of assignment must be identifier");
 
 				MFIntEffect::Variable v;
-				v.pName = MFStringCache_Add(pEffect->pStringCache, pStatement->pLeft->pToken->token.CStr());
+				v.pName = MFStringCache_AddN(pEffect->pStringCache, pStatement->pLeft->pToken->token.ptr, pStatement->pLeft->pToken->token.length);
 				v.pValue = CopyTree(pStatement->pRight, pEffect, NULL);
 				pEffect->variables.push(v);
 			}

@@ -49,6 +49,16 @@ MF_API void MFStringCache_Clear(MFStringCache *pCache);
 MF_API const char* MFStringCache_Add(MFStringCache *pCache, const char *pNewString);
 
 /**
+ * Add a string with a maximum length to a string cache.
+ * Adds a string with a maximum length to a string cache.
+ * @param pCache Target string cache.
+ * @param pNewString String to add to the cache.
+ * @param length Maximum length of \a pNewString.
+ * @return A pointer to the string in the string cache.
+ */
+MF_API const char *MFStringCache_AddN(MFStringCache *pCache, const char *pNewString, size_t length);
+
+/**
  * Get a pointer to the cache memory.
  * Get a pointer to cache memory for direct read/write.
  * @param pCache Target string cache.

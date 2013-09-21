@@ -58,7 +58,7 @@ MF_API const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewStri
 	char *pCurr = pCache->pMem + 1;
 	int newLength = MFString_Length(pNewString)+1;
 
-	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
+	while (pCurr[0] && pCurr < pCache->pMem + pCache->size)
 	{
 		if (!MFString_Compare(pCurr, pNewString))
 		{
@@ -72,6 +72,49 @@ MF_API const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewStri
 		return NULL;
 
 	MFString_Copy(pCurr, pNewString);
+	pCurr[newLength]=0;
+	pCache->used = ((uintp)pCurr + newLength) - (uintp)pCache->pMem + 1;
+	return pCurr;
+}
+
+MF_API const char *MFStringCache_AddN(MFStringCache *pCache, const char *pNewString, size_t length)
+{
+	MFCALLSTACK;
+
+	MFDebug_Assert(pCache, "NULL String cache!");
+	MFDebug_Assert(pNewString, "Cannot add NULL string");
+
+	if(!*pNewString)
+		return pCache->pMem;
+
+	for(size_t i=0; i<length; ++i)
+	{
+		if(pNewString[i] == 0)
+		{
+			length = i;
+			break;
+		}
+	}
+
+	// find the string
+	char *pCurr = pCache->pMem + 1;
+	int newLength = length+1;
+
+	while (pCurr[0] && pCurr < pCache->pMem + pCache->size)
+	{
+		if (!MFString_CompareN(pCurr, pNewString, length) && pCurr[length] == 0)
+		{
+			// found string
+			return pCurr;
+		}
+		pCurr += MFString_Length(pCurr)+1;
+	}
+
+	if(pCurr+newLength+1 > pCache->pMem+pCache->size)
+		return NULL;
+
+	MFString_CopyN(pCurr, pNewString, length);
+	pCurr[length]=0;
 	pCurr[newLength]=0;
 	pCache->used = ((uintp)pCurr + newLength) - (uintp)pCache->pMem + 1;
 	return pCurr;
