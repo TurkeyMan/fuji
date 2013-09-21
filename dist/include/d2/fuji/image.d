@@ -50,7 +50,7 @@ enum MFImageFormat
 	D24S8,		/**< 24bit depth format with 8bit stencil */
 	D24FS8,		/**< 24bit floating point depth format with 8bit stencil */
 	D32,		/**< 32bit depth format */
-	D32F		/**< 32bit floating point depth format */
+	D32F,		/**< 32bit floating point depth format */
 	D32FS8X24,	/**< 32bit floating point depth format with 8bit stencil */
 
 	DXT1,		/**< Compressed DXT1 texture */
