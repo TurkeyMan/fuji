@@ -11,9 +11,17 @@ import fuji.boundingvolume;
 * @struct MFModel
 * Represents a Fuji model.
 */
-struct MFModel;
+struct MFModel
+{
+	@disable this();
+	@disable this(this);
+}
 
-struct MFMeshChunk;
+struct MFMeshChunk
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * Creates a model from the filesystem.

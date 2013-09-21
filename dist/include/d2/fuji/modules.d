@@ -14,12 +14,12 @@ enum MFInitStatus
 /**
  * Fuji module initialisation callback prototype.
  */
-alias MFInitStatus function() MFInitCallback;
+alias extern (C) MFInitStatus function() MFInitCallback;
 
 /**
  * Fuji module destruction callback prototype.
  */
-alias void function() MFDeinitCallback;
+alias extern (C) void function() MFDeinitCallback;
 
 /**
  * Register a Fuji module.

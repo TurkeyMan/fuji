@@ -27,8 +27,8 @@ enum MFHeapType
  */
 struct MFMemoryCallbacks
 {
-	void* function(size_t bytes, void* pUserData) pMalloc;	/**< Pointer to function used to allocate memory. */
-	void  function(void* pMemory, void* pUserData) pFree;		/**< Pointer to function used to free memory. */
+	extern (C) void* function(size_t bytes, void* pUserData) pMalloc;	/**< Pointer to function used to allocate memory. */
+	extern (C) void  function(void* pMemory, void* pUserData) pFree;	/**< Pointer to function used to free memory. */
 }
 
 /**

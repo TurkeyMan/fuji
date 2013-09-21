@@ -342,6 +342,17 @@ MF_API int MFString_AsciiToInteger(const char *pString, bool bDetectBase = true,
 MF_API float MFString_AsciiToFloat(const char *pString, const char **ppNextChar = NULL);
 
 /**
+ * Find a string within a list of strings.
+ * Finds a string within a list of strings and return the item index.
+ * @param pString String to find.
+ * @param ppKeys Array of keys to search.
+ * @param numKeys Number of items in the array.
+ * @param bCaseSensitive Perform case sensitive string comparisons.
+ * @return The index of \a pString if it was present in the list, or -1 if it was not present.
+ */
+MF_API int MFString_Enumerate(const char *pString, const char *const *ppKeys, size_t numKeys, bool bCaseSensitive = false);
+
+/**
  * Test if the specified character is a while space character.
  */
 bool MFIsWhite(int c);

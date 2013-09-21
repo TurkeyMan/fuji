@@ -17,41 +17,6 @@
 
 #include "../MFOpenGL.h"
 
-static const GLint glTexFilters[] =
-{
-	// mip none
-	GL_NEAREST,					// MFMatStandard_TexFilter_None
-	GL_NEAREST,					// MFMatStandard_TexFilter_Point
-	GL_LINEAR,					// MFMatStandard_TexFilter_Linear
-	GL_LINEAR,					// MFMatStandard_TexFilter_Anisotropic
-
-	// mip nearest
-	GL_NEAREST_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_None
-	GL_NEAREST_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Point
-	GL_LINEAR_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Linear
-	GL_LINEAR_MIPMAP_NEAREST,	// MFMatStandard_TexFilter_Anisotropic
-
-	// mip linear
-	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_None
-	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Point
-	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Linear
-	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Anisotropic
-
-	// mip anisotropic
-	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_None
-	GL_NEAREST_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Point
-	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Linear
-	GL_LINEAR_MIPMAP_LINEAR,	// MFMatStandard_TexFilter_Anisotropic
-};
-
-static const GLint glTexAddressing[MFTexAddressMode_Max] =
-{
-	GL_REPEAT,					// MFMatStandard_TexAddress_Wrap
-	GL_MIRRORED_REPEAT,			// MFMatStandard_TexAddress_Mirror
-	GL_CLAMP_TO_EDGE,			// MFMatStandard_TexAddress_Clamp
-	GL_CLAMP_TO_BORDER,			// MFMatStandard_TexAddress_Border
-	GL_MIRROR_CLAMP_TO_EDGE_EXT // MFMatStandard_TexAddress_MirrorOnce
-};
 
 static const GLenum glBlendOp[MFBlendOp_BlendOpCount] =
 {
@@ -191,20 +156,11 @@ void MFMat_Standard_UnregisterMaterial()
 	glDeleteShader(gDefFragmentShaderMultiTextured);
 }
 
-inline void MFMat_Standard_SetSamplerState(MFSamplerState *pSampler, int sampler, const char *pName)
+inline void MFMat_Standard_SetSamplerState(int texture, MFSamplerState *pSampler, const char *pName)
 {
-	glActiveTexture(GL_TEXTURE0 + sampler);
-
-	// TODO: does this need to be here when using shaders?
-//	int minFilter = tex.pTexture->pTemplateData->mipLevels > 1 ? (tex.minFilter | (tex.mipFilter << 2)) : tex.minFilter;
-	int minFilter = (pSampler->stateDesc.mipFilter << 2) | pSampler->stateDesc.minFilter;
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexFilters[minFilter]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glTexFilters[pSampler->stateDesc.magFilter]);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glTexAddressing[pSampler->stateDesc.addressU]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glTexAddressing[pSampler->stateDesc.addressV]);
-
-	MFRenderer_OpenGL_SetUniformS(pName, sampler);
+	MFRenderer_OpenGL_SetUniformS(pName, texture);
+	GLint sampler = (GLint)(size_t)pSampler->pPlatformData;
+	glBindSampler(texture, sampler);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
@@ -226,7 +182,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		{
 			state.pTexturesSet[MFSCT_DetailMap] = pDetail;
 
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0 + MFSCT_DetailMap);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDetail->pInternalData);
 		}
@@ -236,8 +192,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
 		{
 			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
+
 			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
-			MFMat_Standard_SetSamplerState(pDetailSamp, 0, "detail");
+			MFMat_Standard_SetSamplerState(MFSCT_DetailMap, pDetailSamp, "detail");
 		}
 	}
 	else
@@ -246,22 +203,20 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		{
 			state.pTexturesSet[MFSCT_DetailMap] = NULL;
 
-			glActiveTexture(GL_TEXTURE1);
+			glActiveTexture(GL_TEXTURE0 + MFSCT_DetailMap);
 			glDisable(GL_TEXTURE_2D);
 		}
 	}
 
 	if(bDiffusePresent)
 	{
-		int diffuseSlot = bDetailPresent ? 1 : 0;
-
 		// set diffuse map
 		MFTexture *pDiffuse = state.pTextures[MFSCT_Diffuse];
 		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse || state.boolChanged(MFSCB_DetailMapSet))
 		{
 			state.pTexturesSet[MFSCT_Diffuse] = pDiffuse;
 
-			glActiveTexture(GL_TEXTURE0 + diffuseSlot);
+			glActiveTexture(GL_TEXTURE0 + MFSCT_Diffuse);
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDiffuse->pInternalData);
 		}
@@ -272,7 +227,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		{
 			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
 			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
-			MFMat_Standard_SetSamplerState(pDiffuseSamp, diffuseSlot, "diffuse");
+			MFMat_Standard_SetSamplerState(MFSCT_Diffuse, pDiffuseSamp, "diffuse");
 		}
 	}
 	else
@@ -281,7 +236,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		{
 			state.pTexturesSet[MFSCT_Diffuse] = NULL;
 
-			glActiveTexture(GL_TEXTURE0);
+			glActiveTexture(GL_TEXTURE0 + MFSCT_Diffuse);
 			glDisable(GL_TEXTURE_2D);
 
 			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
@@ -309,12 +264,6 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		MFMatrix *pUV0 = state.pMatrixStates[MFSCM_UV0];
 		state.pMatrixStatesSet[MFSCM_UV0] = pUV0;
 
-		if(bDetailPresent)
-		{
-			glActiveTexture(GL_TEXTURE1);
-			MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Texture, *pUV0);
-		}
-		glActiveTexture(GL_TEXTURE0);
 		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Texture, *pUV0);
 	}
 /*
@@ -333,17 +282,35 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	{
 		state.pRenderStatesSet[MFSCRS_BlendState] = pBlendState;
 
-		MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[0];
-		if(target.bEnable)
+		if(pBlendState->stateDesc.bIndependentBlendEnable)
 		{
-			glEnable(GL_BLEND);
-
-			glBlendEquation(glBlendOp[target.blendOp]);
-			glBlendFuncSeparate(glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
-//			glBlendFunc(glBlendArg[target.srcBlend], glBlendArg[target.destBlend]);
+			for(int i=0; i<8; ++i)
+			{
+				MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[i];
+				if(target.bEnable)
+				{
+					glEnable(GL_BLEND);
+					glBlendEquationSeparatei(i, glBlendOp[target.blendOp], glBlendOp[target.blendOpAlpha]);
+					glBlendFuncSeparatei(i, glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
+				}
+				else
+					glDisable(GL_BLEND);
+				glColorMaski(i, target.writeMask & MFColourWriteEnable_Red, target.writeMask & MFColourWriteEnable_Green, target.writeMask & MFColourWriteEnable_Blue, target.writeMask & MFColourWriteEnable_Alpha);
+			}
 		}
 		else
-			glDisable(GL_BLEND);
+		{
+			MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[0];
+			if(target.bEnable)
+			{
+				glEnable(GL_BLEND);
+				glBlendEquationSeparate(glBlendOp[target.blendOp], glBlendOp[target.blendOpAlpha]);
+				glBlendFuncSeparate(glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
+			}
+			else
+				glDisable(GL_BLEND);
+			glColorMask(target.writeMask & MFColourWriteEnable_Red, target.writeMask & MFColourWriteEnable_Green, target.writeMask & MFColourWriteEnable_Blue, target.writeMask & MFColourWriteEnable_Alpha);
+		}
 	}
 
 	// rasteriser state

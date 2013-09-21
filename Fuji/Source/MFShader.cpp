@@ -103,7 +103,7 @@ MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgr
 	return pShader;
 }
 
-MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, MFShaderMacro *pMacros, const char *pName)
+MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, const char *pName)
 {
 	MFShader *pShader = MFShader_Find(pName);
 
@@ -121,7 +121,7 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, NULL);
+		MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL);
 	}
 
 	return pShader;

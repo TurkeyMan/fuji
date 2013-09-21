@@ -37,7 +37,7 @@ enum MFCallback
 /**
 * Fuji system callback function prototype.
 */
-alias void function() MFSystemCallbackFunction;
+alias extern (C) void function() MFSystemCallbackFunction;
 
 /**
 * Parameters supplied when initialising Fuji.

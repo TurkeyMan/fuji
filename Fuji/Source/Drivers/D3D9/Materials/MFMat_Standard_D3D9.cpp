@@ -203,8 +203,8 @@ static void MFMat_Standard_SetSamplerState(int sampler, MFSamplerState *pSamp)
 	if(pSamp->stateDesc.addressU == MFTexAddressMode_Border || pSamp->stateDesc.addressV == MFTexAddressMode_Border || pSamp->stateDesc.addressW == MFTexAddressMode_Border)
 		pd3dDevice->SetSamplerState(sampler, D3DSAMP_BORDERCOLOR, pSamp->stateDesc.borderColour.ToPackedColour());
 
-	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MAXMIPLEVEL, (DWORD)pSamp->stateDesc.maxLOD);
-	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MIPMAPLODBIAS , (DWORD)pSamp->stateDesc.mipLODBias);
+//	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MAXMIPLEVEL, (DWORD)pSamp->stateDesc.maxLOD);
+	pd3dDevice->SetSamplerState(sampler, D3DSAMP_MIPMAPLODBIAS , *(DWORD*)&pSamp->stateDesc.mipLODBias);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)

@@ -665,7 +665,7 @@ struct MFBlendStateDesc
 		MFBlendOp blendOpAlpha;			/**< This blend operation defines how to combine the alpha data sources. */
 		MFBlendArg srcBlendAlpha;		/**< This blend option specifies the first alpha data source and includes an optional pre-blend operation. Blend options that end in 'Colour' are not allowed. */
 		MFBlendArg destBlendAlpha;		/**< This blend option specifies the second alpha data source and includes an optional pre-blend operation. Blend options that end in 'Colour' are not allowed. */
-		uint8 writeMask;				/**< A write mask. */
+		uint8 writeMask;				/**< A write mask created by combining fields in \a MFColourWriteEnable. */
 		bool bEnable;					/**< Enable (or disable) blending. */
 
 		RenderTargetBlendDesc()

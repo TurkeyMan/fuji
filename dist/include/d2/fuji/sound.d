@@ -7,19 +7,31 @@ import fuji.matrix;
 * @struct MFSound
 * Represents a Fuji sound.
 */
-struct MFSound;
+struct MFSound
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * @struct MFVoice
 * Represents a playing sound.
 */
-struct MFVoice;
+struct MFVoice
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * @struct MFAudioStream
 * Represents a Fuji audio/music stream.
 */
-struct MFAudioStream;
+struct MFAudioStream
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * Describes an MFSound buffer.
@@ -264,11 +276,11 @@ enum MFStreamInfoType
 */
 struct MFStreamCallbacks
 {
-	void function(MFAudioStream*, const(char*)) pCreateStream;	/**< Create stream callback. */
-	size_t function(MFAudioStream*, void*, size_t) pGetSamples;	/**< Callback to get samples from the stream. */
-	void function(MFAudioStream*) pDestroyStream;				/**< Destroy stream callback. */
-	void function(MFAudioStream*, float) pSeekStream;			/**< Seek stream callbacks. */
-	float function(MFAudioStream*) pGetTime;					/**< Get the current stream time. */
+	extern (C) void function(MFAudioStream*, const(char*)) pCreateStream;	/**< Create stream callback. */
+	extern (C) size_t function(MFAudioStream*, void*, size_t) pGetSamples;	/**< Callback to get samples from the stream. */
+	extern (C) void function(MFAudioStream*) pDestroyStream;				/**< Destroy stream callback. */
+	extern (C) void function(MFAudioStream*, float) pSeekStream;			/**< Seek stream callbacks. */
+	extern (C) float function(MFAudioStream*) pGetTime;					/**< Get the current stream time. */
 }
 
 /**

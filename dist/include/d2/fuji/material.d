@@ -11,7 +11,11 @@ struct MFEnumKey;
 * @struct MFMaterial
 * Represents a Fuji Material.
 */
-struct MFMaterial;
+struct MFMaterial
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * Stock materials.
@@ -81,20 +85,20 @@ struct MFMaterialParameterInfo
 */
 struct MFMaterialCallbacks
 {
-	int       function(void* pPlatformData) pRegisterMaterial;	/**< Pointer to the RegisterMaterial function */
-	void      function() pUnregisterMaterial;					/**< Pointer to the UnregisterMaterial function */
+	extern (C) int       function(void* pPlatformData) pRegisterMaterial;	/**< Pointer to the RegisterMaterial function */
+	extern (C) void      function() pUnregisterMaterial;					/**< Pointer to the UnregisterMaterial function */
 
-	void      function(MFMaterial* pMaterial) pCreateInstance;	/**< Pointer to the CreateInstance function */
-	void      function(MFMaterial* pMaterial) pDestroyInstance;	/**< Pointer to the DestroyInstance function */
+	extern (C) void      function(MFMaterial* pMaterial) pCreateInstance;	/**< Pointer to the CreateInstance function */
+	extern (C) void      function(MFMaterial* pMaterial) pDestroyInstance;	/**< Pointer to the DestroyInstance function */
 
-	int       function(MFMaterial* pMaterial) pBegin;			/**< Pointer to the Begin function */
+	extern (C) int       function(MFMaterial* pMaterial) pBegin;			/**< Pointer to the Begin function */
 
-	void      function(MFMaterial* pMaterial) pUpdate;			/**< Pointer to the Update function */
+	extern (C) void      function(MFMaterial* pMaterial) pUpdate;			/**< Pointer to the Update function */
 
-	int       function() pGetNumParams;							/**< Pointer to the GetNumParams function */
-	MFMaterialParameterInfo* function(int parameterIndex) pGetParameterInfo;	/**< Pointer to the GetParameterInfo function */
-	void      function(MFMaterial* pMaterial, int parameterIndex, int argIndex, size_t value) pSetParameter;		/**< Pointer to a SetParameter function */
-	size_t    function(MFMaterial* pMaterial, int parameterIndex, int argIndex, void* pValue) pGetParameter;	/**< Pointer to the GetParameter function */
+	extern (C) int       function() pGetNumParams;							/**< Pointer to the GetNumParams function */
+	extern (C) MFMaterialParameterInfo* function(int parameterIndex) pGetParameterInfo;	/**< Pointer to the GetParameterInfo function */
+	extern (C) void      function(MFMaterial* pMaterial, int parameterIndex, int argIndex, size_t value) pSetParameter;	/**< Pointer to a SetParameter function */
+	extern (C) size_t    function(MFMaterial* pMaterial, int parameterIndex, int argIndex, void* pValue) pGetParameter;	/**< Pointer to the GetParameter function */
 }
 
 

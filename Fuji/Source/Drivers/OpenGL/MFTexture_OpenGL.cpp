@@ -57,11 +57,18 @@ GLFormat gGLFormats[] =
 	{ GL_RGBA4, GL_ABGR_EXT, GL_UNSIGNED_SHORT_4_4_4_4 },						// ImgFmt_R4G4B4A4
 	{ GL_RGBA16F_ARB, GL_RGBA, GL_HALF_FLOAT_ARB },								// ImgFmt_ABGR_F16
 	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// ImgFmt_ABGR_F32
+	// GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV				// ImgFmt_R11G11B10_F
+	// GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV							// ImgFmt_R9G9B9_E5
 	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_I8
 																				// ImgFmt_I4
 	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
+																				// ImgFmt_D15S1
 																				// ImgFmt_D24X8
 	{ GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24S8
+																				// ImgFmt_D24FS8
+	// GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT									// ImgFmt_D32
+	// GL_DEPTH_COMPONENT_32F, GL_DEPTH_COMPONENT								// ImgFmt_D32F
+	// GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL									// ImgFmt_D32FS8X24
 	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
 																				// ImgFmt_DXT2
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
@@ -160,7 +167,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	else
 	{
 #if !defined(MF_OPENGL_ES)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, pTemplate->mipLevels);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, pTemplate->mipLevels - 1);
 #endif
 
 		for(int a=0; a<pTemplate->mipLevels; a++)
@@ -255,7 +262,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 #if !defined(MF_OPENGL_ES)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 #endif
 
 		uint32 platformFormat = MFTexture_GetPlatformFormatID(targetFormat, MFRD_OpenGL);

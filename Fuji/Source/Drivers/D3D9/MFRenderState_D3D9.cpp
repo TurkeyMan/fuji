@@ -173,6 +173,9 @@ void MFBlendState_DestroyPlatformSpecific(MFBlendState *pBS)
 
 bool MFSamplerState_CreatePlatformSpecific(MFSamplerState *pSS)
 {
+	// we can't record a stateblock for the sampler state...
+	// the stateblock would also record the texture unit index with sampler states :/
+
 	return true;
 }
 

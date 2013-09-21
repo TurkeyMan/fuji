@@ -244,6 +244,8 @@ MF_API int MFBlendState_Release(MFBlendState *pBlendState)
 
 MF_API MFSamplerState* MFSamplerState_Create(MFSamplerStateDesc *pDesc)
 {
+	MFDebug_Assert(pDesc->mipFilter != MFTexFilter_Anisotropic, "Anisotropic filtering is not a valid mip filter!");
+
 	uint32 hash = MFUtil_HashBuffer(pDesc, sizeof(MFSamplerStateDesc));
 
 	MFSamplerState *pSS = (MFSamplerState*)MFResource_Find(hash);

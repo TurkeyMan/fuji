@@ -503,6 +503,16 @@ MF_API float MFString_AsciiToFloat(const char *pString, const char **ppNextChar)
 	return (float)number * frac;
 }
 
+MF_API int MFString_Enumerate(const char *pString, const char *const *ppKeys, size_t numKeys, bool bCaseSensitive)
+{
+	for(size_t i=0; i<numKeys; ++i)
+	{
+		if(bCaseSensitive ? !MFString_Compare(pString, ppKeys[i]) : MFString_BeginsWith(pString, ppKeys[i]))
+			return i;
+	}
+	return -1;
+}
+
 #if 0
 
 char* MFString_Copy(char *pDest, const char *pSrc)
@@ -1481,20 +1491,12 @@ MFArray<MFString>& MFString::Split(MFArray<MFString> &output, const char *pDelim
 
 int MFString::Enumerate(const MFArray<MFString> keys, bool bCaseSensitive)
 {
+	if(IsEmpty())
+		return -1;
 	for(size_t i=0; i<keys.size(); ++i)
 	{
 		if(bCaseSensitive ? Equals(keys[i]) : EqualsInsensitive(keys[i]))
 			return (int)i;
-	}
-	return -1;
-}
-
-int MFString::Enumerate(const char *const *ppKeys, size_t numKeys, bool bCaseSensitive)
-{
-	for(size_t i=0; i<numKeys; ++i)
-	{
-		if(bCaseSensitive ? Equals(ppKeys[i]) : EqualsInsensitive(ppKeys[i]))
-			return i;
 	}
 	return -1;
 }
