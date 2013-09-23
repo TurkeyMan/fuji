@@ -37,8 +37,6 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 {
 	MFDebug_Message(MFStr("%s(%d) : Assertion Failure.",pFile,line));
 	MFDebug_Message(MFStr("Failed Condition: (%s)\n%s", pReason, pMessage));
-
-	MFDebug_Breakpoint();
 }
 
 #else

@@ -63,7 +63,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 		return -1;
 	}
 
-	pFile->pFilesysData = (void*)file;
+	pFile->pFilesysData = (void*)(size_t)file;
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
@@ -220,13 +220,18 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 	pFind->pFilesystemData = (void*)hFind;
 
-	return MFFileNative_FindNext(pFind, pFindData);
+	bool bFound = MFFileNative_FindNext(pFind, pFindData);
+	if(!bFound)
+		MFFileNative_FindClose(pFind);
+	return bFound;
 }
 
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
 	dirent *pFD = readdir((DIR*)pFind->pFilesystemData);
 
+	while(pFD && (!MFString_Compare(pFD->d_name, ".") || !MFString_Compare(pFD->d_name, "..")))
+		pFD = readdir((DIR*)pFind->pFilesystemData);
 	if(!pFD)
 		return false;
 
@@ -237,7 +242,8 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
-							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0);
+							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0) |
+							(pFD->d_name[0] == '.' ? MFFA_Hidden : 0);
 	pFindData->fileSize = statbuf.st_size;
 	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
 
