@@ -15,6 +15,7 @@
 #include "MFRenderState.h"
 
 struct MFTexture;
+struct MFRenderTarget;
 struct MFMaterial;
 struct MFModel;
 
@@ -40,25 +41,16 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags = MFRCF_All, const M
 MF_API void MFRenderer_SetViewport(MFRect *pRect);
 MF_API void MFRenderer_ResetViewport();
 
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pDepthStencil);
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget);
 MF_API void MFRenderer_SetDeviceRenderTarget();
 
 
 /**
  * Get the device render target.
  * Get's the device render target. This is usually the display's back buffer.
- * @return An \a MFTexture representing the device render target.
- * @see MFRenderer_GetDeviceDepthStencil()
+ * @return An \a MFRenderTarget representing the device render target.
  */
-MF_API MFTexture* MFRenderer_GetDeviceRenderTarget();
-
-/**
- * Get the device depth+stencil target.
- * Get's the device depth+stencil target.
- * @return An \a MFTexture representing the device depth+stencil target.
- * @see MFRenderer_GetDeviceRenderTarget()
- */
-MF_API MFTexture* MFRenderer_GetDeviceDepthStencil();
+MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget();
 
 /**
  * Get the current texel center offset.
@@ -367,21 +359,10 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
  * Set a render layer's render target.
  * Sets a render layer's render target.
  * @param pLayer An MFRenderLayer.
- * @param targetIndex Render target index.
- * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the render target.
+ * @param pRenderTarget A render target to receive rendering output.
  * @return None.
  */
-MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
-
-/**
- * Set a render layer's depth target.
- * Sets a render layer's depth target.
- * @param pLayer An MFRenderLayer.
- * @param pTexture A texture created with the \a TEX_RenderTarget flag to be assigned as the depth target.
- * @return None.
- * @remarks \a pTexture should be a compatible z-buffer format. Use ImgFmt_SelectDepth or ImgFmt_SelectDepthStencil to select a format automatically.
- */
-MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
+MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderTarget *pRenderTarget);
 
 /**
  * Set a render layer's render target capture surface.

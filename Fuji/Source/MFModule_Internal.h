@@ -30,6 +30,7 @@ enum MFBuiltinModule
 	MFBIM_MFSound,
 	MFBIM_MFTexture,
 	MFBIM_MFMaterial,
+	MFBIM_MFRenderTarget,
 	MFBIM_MFVertex,
 	MFBIM_MFModel,
 	MFBIM_MFAnimation,
@@ -41,8 +42,7 @@ enum MFBuiltinModule
 	MFBIM_MFNetwork,
 	MFBIM_MFScript,
 
-	MFBIM_Max,					/**< Force enum to int type. */
-	MFBIM_ForceInt = 0x7FFFFFFF	/**< Force enum to int type. */
+	MFBIM_Max
 };
 
 

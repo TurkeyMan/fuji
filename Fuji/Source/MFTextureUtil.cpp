@@ -122,17 +122,17 @@ uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_D16
 	MFBIT(MFRD_D3D9),															// ImgFmt_D15S1
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_X360),											// ImgFmt_D24X8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24X8
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24S8
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D24FS8
-	MFBIT(MFRD_D3D9),															// ImgFmt_D32
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D32F
-	MFBIT(MFRD_D3D11),															// ImgFmt_D32FS8X24
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D32
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_D32F
+	MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),										// ImgFmt_D32FS8X24
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT1 // 1 bit alpha
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),						// ImgFmt_DXT2
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),							// ImgFmt_DXT2
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT3 // 3 bit discreet alpha
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),						// ImgFmt_DXT4
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),							// ImgFmt_DXT4
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT5 // 8 bit interpolated alpha
 
 	MFBIT(MFRD_PSP),	// ImgFmt_PSP_DXT1
@@ -249,575 +249,469 @@ uint8 gMFImageBitsPerPixel[ImgFmt_Max] =
 	8,	// ImgFmt_PSP_DXT5s
 };
 
-uint8 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max] =
+int8 gMFImageAutoFormat[MFRD_Max][0x40] =
 {
 	{ // D3D9
-		1,	// D3DFMT_A8R8G8B8		// ImgFmt_A8R8G8B8
-		2,	// D3DFMT_A8B8G8R8		// ImgFmt_A8B8G8R8
-		0,	//						// ImgFmt_B8G8R8A8
-		0,	//						// ImgFmt_R8G8B8A8
-
-		3,	// D3DFMT_R8G8B8		// ImgFmt_R8G8B8
-		0,	//						// ImgFmt_B8G8R8
-
-		4,	// D3DFMT_A2R10G10B10	// ImgFmt_A2R10G10B10
-		5,	// D3DFMT_A2B10G10R10	// ImgFmt_A2B10G10R10
-
-		6,	// D3DFMT_A16B16G16R16	// ImgFmt_A16B16G16R16
-
-		7,	// D3DFMT_R5G6B5		// ImgFmt_R5G6B5
-		0,	//						// ImgFmt_R6G5B5
-		0,	//						// ImgFmt_B5G6R5
-
-		8,	// D3DFMT_A1R5G5B5		// ImgFmt_A1R5G5B5
-		0,	//						// ImgFmt_R5G5B5A1
-		0,	//						// ImgFmt_A1B5G5R5
-
-		9,	// D3DFMT_A4R4G4B4		// ImgFmt_A4R4G4B4
-		0,	//						// ImgFmt_A4B4G4R4
-		0,	//						// ImgFmt_R4G4B4A4
-
-		10,// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
-		11,// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
-
-		0,	//						// ImgFmt_R11G11B10_F
-		0,	//						// ImgFmt_R9G9B9_E5
-
-		12,	// D3DFMT_P8			// ImgFmt_I8
-		0,	//						// ImgFmt_I4
-
-		13,	// D3DFMT_D16			// ImgFmt_D16
-		14,	// D3DFMT_D15S1			// ImgFmt_D15S1
-		15,	// D3DFMT_D24X8			// ImgFmt_D24X8
-		16,	// D3DFMT_D24S8			// ImgFmt_D24S8
-		17,	// D3DFMT_D24FS8		// ImgFmt_D24FS8
-		18,	// D3DFMT_D32			// ImgFmt_D32
-		19,	// D3DFMT_D32F_LOCKABLE	// ImgFmt_D32F
-		0,	//						// ImgFmt_D32FS8X24
-
-		20,	// D3DFMT_DXT1			// ImgFmt_DXT1
-		21,	// D3DFMT_DXT2			// ImgFmt_DXT2
-		22,	// D3DFMT_DXT3			// ImgFmt_DXT3
-		23,	// D3DFMT_DXT4			// ImgFmt_DXT4
-		24,	// D3DFMT_DXT5			// ImgFmt_DXT5
-
-		0,	// ImgFmt_PSP_DXT1
-		0,	// ImgFmt_PSP_DXT3
-		0,	// ImgFmt_PSP_DXT5
-
-		0,	// ImgFmt_XB_A8R8G8B8
-		0,	// ImgFmt_XB_A8B8G8R8
-		0,	// ImgFmt_XB_B8G8R8A8
-		0,	// ImgFmt_XB_R8G8B8A8
-
-		0,	// ImgFmt_XB_R5G6B5
-		0,	// ImgFmt_XB_R6G5B5
-
-		0,	// ImgFmt_XB_A1R5G5B5
-		0,	// ImgFmt_XB_R5G5B5A1
-
-		0,	// ImgFmt_XB_A4R4G4B4
-		0,	// ImgFmt_XB_R4G4B4A4
-
-		0,	// ImgFmt_PSP_A8B8G8R8s
-		0,	// ImgFmt_PSP_B5G6R5s
-		0,	// ImgFmt_PSP_A1B5G5R5s
-		0,	// ImgFmt_PSP_A4B4G4R4s
-
-		0,	// ImgFmt_PSP_I8s
-		0,	// ImgFmt_PSP_I4s
-
-		0,	// ImgFmt_PSP_DXT1s
-		0,	// ImgFmt_PSP_DXT3s
-		0,	// ImgFmt_PSP_DXT5s
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectHDR
+		ImgFmt_R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2R10G10B10, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2R10G10B10, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2R10G10B10, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2R10G10B10, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D15S1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D24FS8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
 	{ // D3D11
-		87,	// DXGI_FORMAT_B8G8R8A8_UNORM		// ImgFmt_A8R8G8B8
-		28,	// DXGI_FORMAT_R8G8B8A8_UNORM		// ImgFmt_A8B8G8R8
-		0,	//									// ImgFmt_B8G8R8A8
-		0,	//									// ImgFmt_R8G8B8A8
-
-		0,	//									// ImgFmt_R8G8B8
-		0,	//									// ImgFmt_B8G8R8
-
-		0,	//									// ImgFmt_A2R10G10B10
-		24,	// DXGI_FORMAT_R10G10B10A2_UNORM	// ImgFmt_A2B10G10R10
-
-		11,	// DXGI_FORMAT_R16G16B16A16_UNORM	// ImgFmt_A16B16G16R16
-
-		85,	// DXGI_FORMAT_B5G6R5_UNORM			// ImgFmt_R5G6B5
-		0,	//									// ImgFmt_R6G5B5
-		0,	//									// ImgFmt_B5G6R5
-
-		86,	// DXGI_FORMAT_B5G5R5A1_UNORM		// ImgFmt_A1R5G5B5
-		0,	//									// ImgFmt_R5G5B5A1
-		0,	//									// ImgFmt_A1B5G5R5
-
-		0,	//									// ImgFmt_A4R4G4B4
-		0,	//									// ImgFmt_A4B4G4R4
-		0,	//									// ImgFmt_R4G4B4A4
-
-		10,	// DXGI_FORMAT_R16G16B16A16_FLOAT	// ImgFmt_ABGR_F16
-		2,	// DXGI_FORMAT_R32G32B32A32_FLOAT	// ImgFmt_ABGR_F32
-
-		26,	// DXGI_FORMAT_R11G11B10_FLOAT		// ImgFmt_R11G11B10_F
-		67,	// DXGI_FORMAT_R9G9B9E5_SHAREDEXP	// ImgFmt_R9G9B9_E5
-
-		0,	//									// ImgFmt_I8
-		0,	//									// ImgFmt_I4
-
-		55,	// DXGI_FORMAT_D16_UNORM			// ImgFmt_D16
-		0,	//									// ImgFmt_D15S1
-		0,	//									// ImgFmt_D24X8
-		45,	// DXGI_FORMAT_D24_UNORM_S8_UINT	// ImgFmt_D24S8
-		0,	//									// ImgFmt_D24FS8
-		0,	//									// ImgFmt_D32
-		40,	// DXGI_FORMAT_D32_FLOAT			// ImgFmt_D32F
-		20,	// DXGI_FORMAT_D32_FLOAT_S8X24_UINT	// ImgFmt_D32FS8X24
-
-		71,	// DXGI_FORMAT_BC1_UNORM			// ImgFmt_DXT1
-		0,	//									// ImgFmt_DXT2
-		74,	// DXGI_FORMAT_BC2_UNORM			// ImgFmt_DXT3
-		0,	//									// ImgFmt_DXT4
-		77,	// DXGI_FORMAT_BC3_UNORM			// ImgFmt_DXT5
-
-		0,	// ImgFmt_PSP_DXT1
-		0,	// ImgFmt_PSP_DXT3
-		0,	// ImgFmt_PSP_DXT5
-
-		0,	// ImgFmt_XB_A8R8G8B8
-		0,	// ImgFmt_XB_A8B8G8R8
-		0,	// ImgFmt_XB_B8G8R8A8
-		0,	// ImgFmt_XB_R8G8B8A8
-
-		0,	// ImgFmt_XB_R5G6B5
-		0,	// ImgFmt_XB_R6G5B5
-
-		0,	// ImgFmt_XB_A1R5G5B5
-		0,	// ImgFmt_XB_R5G5B5A1
-
-		0,	// ImgFmt_XB_A4R4G4B4
-		0,	// ImgFmt_XB_R4G4B4A4
-
-		0,	// ImgFmt_PSP_A8B8G8R8s
-		0,	// ImgFmt_PSP_B5G6R5s
-		0,	// ImgFmt_PSP_A1B5G5R5s
-		0,	// ImgFmt_PSP_A4B4G4R4s
-
-		0,	// ImgFmt_PSP_I8s
-		0,	// ImgFmt_PSP_I4s
-
-		0,	// ImgFmt_PSP_DXT1s
-		0,	// ImgFmt_PSP_DXT3s
-		0,	// ImgFmt_PSP_DXT5s
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_R9G9B9_E5, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_R11G11B10_F, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
-	// These are indexes into an array of platform format data to be used at runtime
-	// As more formats are supported, the runtime internal format array needs to be filled out aswell..
 	{ // OpenGL
-		0,	// ImgFmt_A8R8G8B8
-		1,	// ImgFmt_A8B8G8R8
-		2,	// ImgFmt_B8G8R8A8
-		3,	// ImgFmt_R8G8B8A8
-
-		0,	// ImgFmt_R8G8B8
-		0,	// ImgFmt_B8G8R8
-
-		4,	// ImgFmt_A2R10G10B10
-		5,	// ImgFmt_A2B10G10R10
-
-		6,	// ImgFmt_A16B16G16R16
-
-		7,	// ImgFmt_R5G6B5
-		0,	// ImgFmt_R6G5B5
-		8,	// ImgFmt_B5G6R5
-
-		9,	// ImgFmt_A1R5G5B5
-		10,	// ImgFmt_R5G5B5A1
-		11,	// ImgFmt_A1B5G5R5
-
-		12,	// ImgFmt_A4R4G4B4
-		13,	// ImgFmt_A4B4G4R4
-		14,	// ImgFmt_R4G4B4A4
-
-		15,	// ImgFmt_ABGR_F16
-		16,	// ImgFmt_ABGR_F32
-
-		0,	// ImgFmt_R11G11B10_F
-		0,	// ImgFmt_R9G9B9_E5
-
-		17,	// ImgFmt_I8
-		0,	// ImgFmt_I4
-
-		18,	// ImgFmt_D16
-		0,	// ImgFmt_D15S1
-		0,	// ImgFmt_D24X8
-		19,	// ImgFmt_D24S8
-		0,	// ImgFmt_D24FS8
-		0,	// ImgFmt_D32
-		0,	// ImgFmt_D32F
-		0,	// ImgFmt_D32FS8X24
-
-		20,	// ImgFmt_DXT1
-		0,	// ImgFmt_DXT2
-		21,	// ImgFmt_DXT3
-		0,	// ImgFmt_DXT4
-		22,	// ImgFmt_DXT5
-
-		0,	// ImgFmt_PSP_DXT1
-		0,	// ImgFmt_PSP_DXT3
-		0,	// ImgFmt_PSP_DXT5
-
-		0,	// ImgFmt_XB_A8R8G8B8
-		0,	// ImgFmt_XB_A8B8G8R8
-		0,	// ImgFmt_XB_B8G8R8A8
-		0,	// ImgFmt_XB_R8G8B8A8
-
-		0,	// ImgFmt_XB_R5G6B5
-		0,	// ImgFmt_XB_R6G5B5
-
-		0,	// ImgFmt_XB_A1R5G5B5
-		0,	// ImgFmt_XB_R5G5B5A1
-
-		0,	// ImgFmt_XB_A4R4G4B4
-		0,	// ImgFmt_XB_R4G4B4A4
-
-		0,	// ImgFmt_PSP_A8B8G8R8s
-		0,	// ImgFmt_PSP_B5G6R5s
-		0,	// ImgFmt_PSP_A1B5G5R5s
-		0,	// ImgFmt_PSP_A4B4G4R4s
-
-		0,	// ImgFmt_PSP_I8s
-		0,	// ImgFmt_PSP_I4s
-
-		0,	// ImgFmt_PSP_DXT1s
-		0,	// ImgFmt_PSP_DXT3s
-		0,	// ImgFmt_PSP_DXT5s
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNicest
+		ImgFmt_R4G4B4A4, // ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_R5G6B5, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_R9G9B9_E5, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_R5G5B5A1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		ImgFmt_R4G4B4A4, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_R5G6B5, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_A8R8G8B8, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_A2B10G10R10, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_R5G5B5A1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_ABGR_F16, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D24X8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D32FS8X24, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
-	{ // Xbox 360
-		0,	//						// ImgFmt_A8R8G8B8
-		0,	// D3DFMT_A8B8G8R8		// ImgFmt_A8B8G8R8
-		0,	//						// ImgFmt_B8G8R8A8
-		0,	//						// ImgFmt_R8G8B8A8
-
-		0,	//						// ImgFmt_R8G8B8
-		0,	//						// ImgFmt_B8G8R8
-
-		0,	// D3DFMT_A2R10G10B10	// ImgFmt_A2R10G10B10
-		0,	// D3DFMT_A2B10G10R10	// ImgFmt_A2B10G10R10
-
-		0,	// D3DFMT_A16B16G16R16	// ImgFmt_A16B16G16R16
-
-		0,	// D3DFMT_R5G6B5		// ImgFmt_R5G6B5
-		0,	// D3DFMT_R6G5B5		// ImgFmt_R6G5B5
-		0,	//						// ImgFmt_B5G6R5
-
-		0,	// D3DFMT_A1R5G5B5		// ImgFmt_A1R5G5B5
-		0,	//						// ImgFmt_R5G5B5A1
-		0,	//						// ImgFmt_A1B5G5R5
-
-		0,	// D3DFMT_A4R4G4B4		// ImgFmt_A4R4G4B4
-		0,	//						// ImgFmt_A4B4G4R4
-		0,	//						// ImgFmt_R4G4B4A4
-
-		0,	// D3DFMT_A16B16G16R16F	// ImgFmt_ABGR_F16
-		0,	// D3DFMT_A32B32G32R32F	// ImgFmt_ABGR_F32
-
-		0,	//						// ImgFmt_R11G11B10_F
-		0,	//						// ImgFmt_R9G9B9_E5
-
-		0,	//						// ImgFmt_I8
-		0,	//						// ImgFmt_I4
-
-		0,	// D3DFMT_D16			// ImgFmt_D16
-		0,	//						// ImgFmt_D15S1
-		0,	// D3DFMT_D24X8			// ImgFmt_D24X8
-		0,	// D3DFMT_D24S8			// ImgFmt_D24S8
-		0,	//						// ImgFmt_D24FS8
-		0,	//						// ImgFmt_D32
-		0,	//						// ImgFmt_D32F
-		0,	//						// ImgFmt_D32FS8X24
-
-		0,	// D3DFMT_DXT1			// ImgFmt_DXT1
-		0,	// D3DFMT_DXT2			// ImgFmt_DXT2
-		0,	// D3DFMT_DXT3			// ImgFmt_DXT3
-		0,	// D3DFMT_DXT4			// ImgFmt_DXT4
-		0,	// D3DFMT_DXT5			// ImgFmt_DXT5
-
-		0,	// ImgFmt_PSP_DXT1
-		0,	// ImgFmt_PSP_DXT3
-		0,	// ImgFmt_PSP_DXT5
-
-		0,	// ImgFmt_XB_A8R8G8B8
-		0,	// ImgFmt_XB_A8B8G8R8
-		0,	// ImgFmt_XB_B8G8R8A8
-		0,	// ImgFmt_XB_R8G8B8A8
-
-		0,	// ImgFmt_XB_R5G6B5
-		0,	// ImgFmt_XB_R6G5B5
-
-		0,	// ImgFmt_XB_A1R5G5B5
-		0,	// ImgFmt_XB_R5G5B5A1
-
-		0,	// ImgFmt_XB_A4R4G4B4
-		0,	// ImgFmt_XB_R4G4B4A4
-
-		0,	// ImgFmt_PSP_A8B8G8R8s
-		0,	// ImgFmt_PSP_B5G6R5s
-		0,	// ImgFmt_PSP_A1B5G5R5s
-		0,	// ImgFmt_PSP_A4B4G4R4s
-
-		0,	// ImgFmt_PSP_I8s
-		0,	// ImgFmt_PSP_I4s
-
-		0,	// ImgFmt_PSP_DXT1s
-		0,	// ImgFmt_PSP_DXT3s
-		0,	// ImgFmt_PSP_DXT5s
+	{ // XBox 360
+		-1, // ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
 	{ // XBox
-		0x12,	// ImgFmt_A8R8G8B8
-		0x3F,	// ImgFmt_A8B8G8R8
-		0x40,	// ImgFmt_B8G8R8A8
-		0x41,	// ImgFmt_R8G8B8A8
-
-		0,		// ImgFmt_R8G8B8
-		0,		// ImgFmt_B8G8R8
-
-		0,		// ImgFmt_A2R10G10B10
-		0,		// ImgFmt_A2B10G10R10
-
-		0,		// ImgFmt_A16B16G16R16
-
-		0x11,	// ImgFmt_R5G6B5
-		0x37,	// ImgFmt_R6G5B5
-		0,		// ImgFmt_B5G6R5
-
-		0x10,	// ImgFmt_A1R5G5B5
-		0x3D,	// ImgFmt_R5G5B5A1
-		0,		// ImgFmt_A1B5G5R5
-
-		0x1D,	// ImgFmt_A4R4G4B4
-		0,		// ImgFmt_A4B4G4R4
-		0x3E,	// ImgFmt_R4G4B4A4
-
-		0,		// ImgFmt_ABGR_F16
-		0,		// ImgFmt_ABGR_F32
-
-		0,		// ImgFmt_R11G11B10_F
-		0,		// ImgFmt_R9G9B9_E5
-
-		0xB,	// ImgFmt_I8
-		0,		// ImgFmt_I4
-
-		0,		// ImgFmt_D16
-		0,		// ImgFmt_D15S1
-		0,		// ImgFmt_D24X8
-		0,		// ImgFmt_D24S8
-		0,		// ImgFmt_D24FS8
-		0,		// ImgFmt_D32
-		0,		// ImgFmt_D32F
-		0,		// ImgFmt_D32FS8X24
-
-		0xC,	// ImgFmt_DXT1
-		0xE,	// ImgFmt_DXT2
-		0xE,	// ImgFmt_DXT3
-		0xF,	// ImgFmt_DXT4
-		0xF,	// ImgFmt_DXT5
-
-		0,		// ImgFmt_PSP_DXT1
-		0,		// ImgFmt_PSP_DXT3
-		0,		// ImgFmt_PSP_DXT5
-
-		0x6,	// ImgFmt_XB_A8R8G8B8
-		0x3A,	// ImgFmt_XB_A8B8G8R8
-		0x3B,	// ImgFmt_XB_B8G8R8A8
-		0x3C,	// ImgFmt_XB_R8G8B8A8
-
-		0x5,	// ImgFmt_XB_R5G6B5
-		0x27,	// ImgFmt_XB_R6G5B5
-
-		0x2,	// ImgFmt_XB_A1R5G5B5
-		0x38,	// ImgFmt_XB_R5G5B5A1
-
-		0x4,	// ImgFmt_XB_A4R4G4B4
-		0x39,	// ImgFmt_XB_R4G4B4A4
-
-		0,		// ImgFmt_PSP_A8B8G8R8s
-		0,		// ImgFmt_PSP_B5G6R5s
-		0,		// ImgFmt_PSP_A1B5G5R5s
-		0,		// ImgFmt_PSP_A4B4G4R4s
-
-		0,		// ImgFmt_PSP_I8s
-		0,		// ImgFmt_PSP_I4s
-
-		0,		// ImgFmt_PSP_DXT1s
-		0,		// ImgFmt_PSP_DXT3s
-		0,		// ImgFmt_PSP_DXT5s
+		-1, // ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
 	{ // PSP
-		0,	//				// ImgFmt_A8R8G8B8
-		3,	// SCEGU_PF8888	// ImgFmt_A8B8G8R8
-		0,	//				// ImgFmt_B8G8R8A8
-		0,	//				// ImgFmt_R8G8B8A8
-
-		0,	//				// ImgFmt_R8G8B8
-		0,	//				// ImgFmt_B8G8R8
-
-		0,	//				// ImgFmt_A2R10G10B10
-		0,	//				// ImgFmt_A2B10G10R10
-
-		0,	//				// ImgFmt_A16B16G16R16
-
-		0,	//				// ImgFmt_R5G6B5
-		0,	//				// ImgFmt_R6G5B5
-		0,	// SCEGU_PF5650	// ImgFmt_B5G6R5
-
-		0,	//				// ImgFmt_A1R5G5B5
-		0,	//				// ImgFmt_R5G5B5A1
-		1,	// SCEGU_PF5551	// ImgFmt_A1B5G5R5
-
-		0,	//				// ImgFmt_A4R4G4B4
-		2,	// SCEGU_PF4444	// ImgFmt_A4B4G4R4
-		0,	//				// ImgFmt_R4G4B4A4
-
-		0,	//				// ImgFmt_ABGR_F16
-		0,	//				// ImgFmt_ABGR_F32
-
-		0,	//				// ImgFmt_R11G11B10_F
-		0,	//				// ImgFmt_R9G9B9_E5
-
-		5,	// SCEGU_PFIDX8	// ImgFmt_I8
-		4,	// SCEGU_PFIDX4	// ImgFmt_I4
-
-		0,	//				// ImgFmt_D16
-		0,	//				// ImgFmt_D15S1
-		0,	//				// ImgFmt_D24X8
-		0,	//				// ImgFmt_D24S8
-		0,	//				// ImgFmt_D24FS8
-		0,	//				// ImgFmt_D32
-		0,	//				// ImgFmt_D32F
-		0,	//				// ImgFmt_D32FS8X24
-
-		0,	//				// ImgFmt_DXT1
-		0,	//				// ImgFmt_DXT2
-		0,	//				// ImgFmt_DXT3
-		0,	//				// ImgFmt_DXT4
-		0,	//				// ImgFmt_DXT5
-
-		8,	// SCEGU_PFDXT1	// ImgFmt_PSP_DXT1
-		9,	// SCEGU_PFDXT3	// ImgFmt_PSP_DXT3
-		10,	// SCEGU_PFDXT5	// ImgFmt_PSP_DXT5
-
-		0,	//				// ImgFmt_XB_A8R8G8B8
-		0,	//				// ImgFmt_XB_A8B8G8R8
-		0,	//				// ImgFmt_XB_B8G8R8A8
-		0,	//				// ImgFmt_XB_R8G8B8A8
-
-		0,	//				// ImgFmt_XB_R5G6B5
-		0,	//				// ImgFmt_XB_R6G5B5
-
-		0,	//				// ImgFmt_XB_A1R5G5B5
-		0,	//				// ImgFmt_XB_R5G5B5A1
-
-		0,	//				// ImgFmt_XB_A4R4G4B4
-		0,	//				// ImgFmt_XB_R4G4B4A4
-
-		3,	// SCEGU_PF8888	// ImgFmt_PSP_A8B8G8R8s
-		0,	// SCEGU_PF5650	// ImgFmt_PSP_B5G6R5s
-		1,	// SCEGU_PF5551	// ImgFmt_PSP_A1B5G5R5s
-		2,	// SCEGU_PF4444	// ImgFmt_PSP_A4B4G4R4s
-
-		5,	// SCEGU_PFIDX8	// ImgFmt_PSP_I8s
-		4,	// SCEGU_PFIDX4	// ImgFmt_PSP_I4s
-
-		8,	// SCEGU_PFDXT1	// ImgFmt_PSP_DXT1s
-		9,	// SCEGU_PFDXT3	// ImgFmt_PSP_DXT3s
-		10,	// SCEGU_PFDXT5	// ImgFmt_PSP_DXT5s
+		-1, // ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	},
-
 	{ // PS2
-		0,	//				// ImgFmt_A8R8G8B8
-		99,	// ???????????? // ImgFmt_A8B8G8R8
-		0,	//				// ImgFmt_B8G8R8A8
-		0,	//				// ImgFmt_R8G8B8A8
-
-		0,	//				// ImgFmt_R8G8B8
-		0,	//				// ImgFmt_B8G8R8
-
-		0,	//				// ImgFmt_A2R10G10B10
-		0,	//				// ImgFmt_A2B10G10R10
-
-		0,	//				// ImgFmt_A16B16G16R16
-
-		0,	//				// ImgFmt_R5G6B5
-		0,	//				// ImgFmt_R6G5B5
-		0,	//				// ImgFmt_B5G6R5
-
-		0,	//				// ImgFmt_A1R5G5B5
-		0,	//				// ImgFmt_R5G5B5A1
-		99,	// ????????????	// ImgFmt_A1B5G5R5
-
-		0,	//				// ImgFmt_A4R4G4B4
-		0,	//				// ImgFmt_A4B4G4R4
-		0,	//				// ImgFmt_R4G4B4A4
-
-		0,	//				// ImgFmt_ABGR_F16
-		0,	//				// ImgFmt_ABGR_F32
-
-		0,	//				// ImgFmt_R11G11B10_F
-		0,	//				// ImgFmt_R9G9B9_E5
-
-		99,	// ????????????	// ImgFmt_I8
-		99,	// ????????????	// ImgFmt_I4
-
-		0,	//				// ImgFmt_D16
-		0,	//				// ImgFmt_D15S1
-		0,	//				// ImgFmt_D24X8
-		0,	//				// ImgFmt_D24S8
-		0,	//				// ImgFmt_D24FS8
-		0,	//				// ImgFmt_D32
-		0,	//				// ImgFmt_D32F
-		0,	//				// ImgFmt_D32FS8X24
-
-		0,	//				// ImgFmt_DXT1
-		0,	//				// ImgFmt_DXT2
-		0,	//				// ImgFmt_DXT3
-		0,	//				// ImgFmt_DXT4
-		0,	//				// ImgFmt_DXT5
-
-		0,	//				// ImgFmt_PSP_DXT1
-		0,	//				// ImgFmt_PSP_DXT3
-		0,	//				// ImgFmt_PSP_DXT5
-
-		0,	//				// ImgFmt_XB_A8R8G8B8
-		0,	//				// ImgFmt_XB_A8B8G8R8
-		0,	//				// ImgFmt_XB_B8G8R8A8
-		0,	//				// ImgFmt_XB_R8G8B8A8
-
-		0,	//				// ImgFmt_XB_R5G6B5
-		0,	//				// ImgFmt_XB_R6G5B5
-
-		0,	//				// ImgFmt_XB_A1R5G5B5
-		0,	//				// ImgFmt_XB_R5G5B5A1
-
-		0,	//				// ImgFmt_XB_A4R4G4B4
-		0,	//				// ImgFmt_XB_R4G4B4A4
-
-		0,	//				// ImgFmt_PSP_A8B8G8R8s
-		0,	//				// ImgFmt_PSP_B5G6R5s
-		0,	//				// ImgFmt_PSP_A1B5G5R5s
-		0,	//				// ImgFmt_PSP_A4B4G4R4s
-
-		0,	//				// ImgFmt_PSP_I8s
-		0,	//				// ImgFmt_PSP_I4s
-
-		0,	//				// ImgFmt_PSP_DXT1s
-		0,	//				// ImgFmt_PSP_DXT3s
-		0,	//				// ImgFmt_PSP_DXT5s
+		-1, // ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectRenderTarget | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1,
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		-1, // ImgFmt_SelectDepthStencil | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
+		-1,
+		-1,
+		-1,
+		-1
 	}
 };
 

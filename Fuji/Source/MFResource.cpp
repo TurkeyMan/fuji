@@ -19,6 +19,7 @@ static int gNumResourceTypes = 0;
 
 int MFRT_Texture = -1;
 int MFRT_Material = -1;
+int MFRT_RenderTarget = -1;
 int MFRT_VertexDecl = -1;
 int MFRT_VertexBuffer = -1;
 int MFRT_IndexBuffer = -1;

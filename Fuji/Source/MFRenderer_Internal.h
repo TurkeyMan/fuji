@@ -90,8 +90,7 @@ struct MFRenderLayer
 	int clearStencil;
 	MFRenderClearFlags clearFlags;
 
-	MFTexture *pRenderTarget[4];
-	MFTexture *pDepthStencil;
+	MFRenderTarget *pRenderTarget;
 
 	MFRenderLayerSortMode sortMode;
 	const MFStateBlock *pLayer;

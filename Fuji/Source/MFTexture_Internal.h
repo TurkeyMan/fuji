@@ -90,11 +90,4 @@ public:
 };
 #endif
 
-extern uint8 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max];
-
-inline uint32 MFTexture_GetPlatformFormatID(MFImageFormat format, MFRendererDrivers rendererDriver)
-{
-	return (uint32)gMFImagePlatformFormat[rendererDriver][format];
-}
-
 #endif

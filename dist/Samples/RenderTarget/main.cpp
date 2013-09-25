@@ -2,7 +2,7 @@
 #include "Fuji/MFDisplay.h"
 #include "Fuji/MFRenderer.h"
 #include "Fuji/MFRenderState.h"
-#include "Fuji/MFTexture.h"
+#include "Fuji/MFRenderTarget.h"
 #include "Fuji/MFMaterial.h"
 #include "Fuji/MFVertex.h"
 #include "Fuji/MFView.h"
@@ -65,13 +65,9 @@ void Game_Init()
 	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.0f, 1.f));
 
 	// create a render target for the layer
-	MFTexture *pRenderTarget = MFTexture_CreateRenderTarget("Prism", 256, 256);
-	pPrismRenderTarget = MFMaterial_Create("Prism");
-	MFRenderLayer_SetLayerRenderTarget(pLayer, 0, pRenderTarget);
-	MFTexture_Release(pRenderTarget); // release our local reference; materials holds the reference now
-
-	MFTexture *pZTarget = MFTexture_CreateRenderTarget("Prism-Z", 256, 256, ImgFmt_SelectDepth);
-	MFRenderLayer_SetLayerDepthTarget(pLayer, pZTarget);
+	MFRenderTarget *pRenderTarget = MFRenderTarget_CreateSimple("Prism", 256, 256, ImgFmt_SelectRenderTarget, ImgFmt_D24X8);
+	pPrismRenderTarget = MFMaterial_Create("Prism_RenderTarget0");
+	MFRenderLayer_SetLayerRenderTarget(pLayer, pRenderTarget);
 
 	// configure box layer
 	pLayer = MFRenderer_GetLayer(pRenderer, 1);

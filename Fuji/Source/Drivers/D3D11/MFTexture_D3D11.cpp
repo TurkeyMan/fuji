@@ -31,6 +31,88 @@ extern MFTexture *pNoneTexture;
 extern ID3D11Device* g_pd3dDevice;
 extern ID3D11DeviceContext* g_pImmediateContext;
 
+static DXGI_FORMAT gD3D11Format[ImgFmt_Max] =
+{
+	DXGI_FORMAT_B8G8R8A8_UNORM,			// ImgFmt_A8R8G8B8
+	DXGI_FORMAT_R8G8B8A8_UNORM,			// ImgFmt_A8B8G8R8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_B8G8R8A8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_R8G8B8A8
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_R8G8B8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_B8G8R8
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_A2R10G10B10
+	DXGI_FORMAT_R10G10B10A2_UNORM,		// ImgFmt_A2B10G10R10
+
+	DXGI_FORMAT_R16G16B16A16_UNORM,		// ImgFmt_A16B16G16R16
+
+	DXGI_FORMAT_B5G6R5_UNORM,			// ImgFmt_R5G6B5
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_R6G5B5
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_B5G6R5
+
+	DXGI_FORMAT_B5G5R5A1_UNORM,			// ImgFmt_A1R5G5B5
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_R5G5B5A1
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_A1B5G5R5
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_A4R4G4B4
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_A4B4G4R4
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_R4G4B4A4
+
+	DXGI_FORMAT_R16G16B16A16_FLOAT,		// ImgFmt_ABGR_F16
+	DXGI_FORMAT_R32G32B32A32_FLOAT,		// ImgFmt_ABGR_F32
+
+	DXGI_FORMAT_R11G11B10_FLOAT,		// ImgFmt_R11G11B10_F
+	DXGI_FORMAT_R9G9B9E5_SHAREDEXP,		// ImgFmt_R9G9B9_E5
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_I8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_I4
+
+	DXGI_FORMAT_D16_UNORM,				// ImgFmt_D16
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_D15S1
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_D24X8
+	DXGI_FORMAT_D24_UNORM_S8_UINT,		// ImgFmt_D24S8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_D24FS8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_D32
+	DXGI_FORMAT_D32_FLOAT,				// ImgFmt_D32F
+	DXGI_FORMAT_D32_FLOAT_S8X24_UINT,	// ImgFmt_D32FS8X24
+
+	DXGI_FORMAT_BC1_UNORM,				// ImgFmt_DXT1
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_DXT2
+	DXGI_FORMAT_BC2_UNORM,				// ImgFmt_DXT3
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_DXT4
+	DXGI_FORMAT_BC3_UNORM,				// ImgFmt_DXT5
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_DXT1
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_DXT3
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_DXT5
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_A8R8G8B8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_A8B8G8R8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_B8G8R8A8
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_R8G8B8A8
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_R5G6B5
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_R6G5B5
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_A1R5G5B5
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_R5G5B5A1
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_A4R4G4B4
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_XB_R4G4B4A4
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_A8B8G8R8s
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_B5G6R5s
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_A1B5G5R5s
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_A4B4G4R4s
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_I8s
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_I4s
+
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_DXT1s
+	DXGI_FORMAT_UNKNOWN,				// ImgFmt_PSP_DXT3s
+	DXGI_FORMAT_UNKNOWN					// ImgFmt_PSP_DXT5s
+};
+
 /**** Functions ****/
 
 void MFTexture_InitModulePlatformSpecific()
@@ -59,7 +141,10 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	pTexture->pInternalData = NULL;
 
 	// create texture
-	DXGI_FORMAT platformFormat = (DXGI_FORMAT)MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_D3D11);
+	pTemplate->imageFormat = MFImage_ResolveFormat(pTemplate->imageFormat, MFRD_D3D11);
+	MFDebug_Assert(pTemplate->imageFormat != ImgFmt_Unknown, "Invalid texture format!");
+
+	DXGI_FORMAT platformFormat = gD3D11Format[pTemplate->imageFormat];
 	//hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
 	int pitch = (MFImage_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;

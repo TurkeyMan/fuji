@@ -1,6 +1,7 @@
 #include "Fuji.h"
 #include "MFRenderer_Internal.h"
 #include "MFRenderState_Internal.h"
+#include "MFRenderTarget_Internal.h"
 #include "MFVertex_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "MFModel.h"
@@ -75,7 +76,7 @@ MF_API int MFRenderer_Begin()
 
 MF_API void MFRenderer_SetDeviceRenderTarget()
 {
-	MFRenderer_SetRenderTarget(MFRenderer_GetDeviceRenderTarget(), MFRenderer_GetDeviceDepthStencil());
+	MFRenderer_SetRenderTarget(MFRenderer_GetDeviceRenderTarget());
 }
 
 MF_API void MFRenderer_SetMatrices(const MFMatrix *pMatrices, int numMatrices)
@@ -148,8 +149,7 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 	pRenderer->pGlobal = pGlobal;
 	pRenderer->pOverride = pOverride;
 
-	MFTexture *pRenderTarget = MFRenderer_GetDeviceRenderTarget();
-	MFTexture *pDepthStencil = MFRenderer_GetDeviceDepthStencil();
+	MFRenderTarget *pRenderTarget = MFRenderer_GetDeviceRenderTarget();
 
 	for(int a=0; a<numLayers; ++a)
 	{
@@ -160,8 +160,7 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 		}
 #endif
 		pRenderer->pLayers[a].pName = pLayers[a].pName;
-		pRenderer->pLayers[a].pRenderTarget[0] = pRenderTarget;
-		pRenderer->pLayers[a].pDepthStencil = pDepthStencil;
+		pRenderer->pLayers[a].pRenderTarget = pRenderTarget;
 	}
 
 	return pRenderer;
@@ -534,10 +533,11 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 
 		// configure render target
 		if(numElements > 0 || layer.clearFlags != MFRCF_None)
-			MFRenderer_SetRenderTarget(layer.pRenderTarget[0], layer.pDepthStencil);
+			MFRenderer_SetRenderTarget(layer.pRenderTarget);
 
 		// clear render target
-		MFRenderClearFlags cf = layer.pDepthStencil ? layer.clearFlags : (MFRenderClearFlags)(layer.clearFlags & ~MFRCF_DepthStencil);
+		MFRenderClearFlags cf = (MFRenderClearFlags)((layer.pRenderTarget->availableColourTargets ? layer.clearFlags & MFRCF_Colour : 0) |
+													(layer.pRenderTarget->pDepthStencil ? layer.clearFlags & MFRCF_DepthStencil : 0));
 		if(layer.clearFlags != MFRCF_None)
 			MFRenderer_ClearScreen(cf, layer.clearColour, layer.clearZ, layer.clearStencil);
 
@@ -599,14 +599,9 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 	pLayer->sortMode = sortMode;
 }
 
-MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)
+MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderTarget *pRenderTarget)
 {
-	pLayer->pRenderTarget[targetIndex] = pTexture;
-}
-
-MF_API void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture)
-{
-	pLayer->pDepthStencil = pTexture;
+	pLayer->pRenderTarget = pRenderTarget;
 }
 
 MF_API void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture)

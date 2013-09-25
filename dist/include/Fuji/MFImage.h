@@ -195,6 +195,16 @@ MF_API uint32 MFImage_GetPlatformAvailability(int format);
 MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform);
 
 /**
+ * Resolve an image format for a given platform.
+ * Resolves an auto-selected (ImgFmt_Select*) image format for the given platform.
+ * @param format Image format to resolve.
+ * @param driver Rendering driver to resolve for.
+ * @return An \a MFImageFormat that matches the criteria.
+ * @see MFImage_GetPlatformAvailability()
+ */
+MF_API MFImageFormat MFImage_ResolveFormat(int format, MFRendererDrivers driver);
+
+/**
  * Get the average number of bits per pixel for a specified format.
  * Get the average number of bits per pixel for the specified format.
  * @param format Image format to query.

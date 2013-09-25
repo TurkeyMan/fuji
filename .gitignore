@@ -3,11 +3,17 @@
 */Build
 */Project
 /Fuji/Middleware/*/obj
+/dist/Samples/*/Build
+/dist/Samples/ipch
 *.sln
+*.sdf
+*.suo
 *.vcproj
 *.vcxproj
 *.obj
 *.idb
+*.ilk
+*.pdb
 *.user
 Makefile
 *.make
@@ -16,4 +22,5 @@ Makefile
 *.workspace*
 *.userprefs
 *.tags
-
+/Fuji/Doc/html
+*.chw

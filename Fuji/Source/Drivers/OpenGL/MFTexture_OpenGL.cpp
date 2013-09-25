@@ -32,88 +32,173 @@ struct GLFormat
 	GLenum type;
 };
 
-#if !defined(MF_OPENGL_ES)
 // opengl format table.. man, opengl's texture format management is a complete shambles!!!!
 // i havent verified that all of these formats are correct, some might be wrong...
-GLFormat gGLFormats[] =
+#if !defined(MF_OPENGL_ES)
+GLFormat gGLFormats[ImgFmt_Max] =
 {
 	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV },						// ImgFmt_A8R8G8B8
 	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV },							// ImgFmt_A8B8G8R8
 	{ GL_RGBA8, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8 },							// ImgFmt_B8G8R8A8
 	{ GL_RGBA8, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8 },								// ImgFmt_R8G8B8A8
-																				// ImgFmt_R8G8B8
-																				// ImgFmt_B8G8R8
+
+	{ 0, 0, 0 },																// ImgFmt_R8G8B8
+	{ 0, 0, 0 },																// ImgFmt_B8G8R8
+
 	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// ImgFmt_A2R10G10B10
 	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// ImgFmt_A2B10G10R10
+
 	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_A16B16G16R16
+
 	{ GL_RGB5, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
-																				// ImgFmt_R6G5B5
+	{ 0, 0, 0 },																// ImgFmt_R6G5B5
 	{ GL_RGB5, GL_BGR_EXT, GL_UNSIGNED_SHORT_5_6_5_REV },						// ImgFmt_B5G6R5
+
 	{ GL_RGB5_A1, GL_BGRA_EXT, GL_UNSIGNED_SHORT_1_5_5_5_REV },					// ImgFmt_A1R5G5B5
 	{ GL_RGB5_A1, GL_ABGR_EXT, GL_UNSIGNED_SHORT_5_5_5_1 },						// ImgFmt_R5G5B5A1
 	{ GL_RGB5_A1, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// ImgFmt_A1B5G5R5
+
 	{ GL_RGBA4, GL_BGRA_EXT, GL_UNSIGNED_SHORT_4_4_4_4_REV },					// ImgFmt_A4R4G4B4
 	{ GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_A4B4G4R4
 	{ GL_RGBA4, GL_ABGR_EXT, GL_UNSIGNED_SHORT_4_4_4_4 },						// ImgFmt_R4G4B4A4
+
 	{ GL_RGBA16F_ARB, GL_RGBA, GL_HALF_FLOAT_ARB },								// ImgFmt_ABGR_F16
 	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// ImgFmt_ABGR_F32
-	// GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV				// ImgFmt_R11G11B10_F
-	// GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV							// ImgFmt_R9G9B9_E5
+
+	{ GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV },				// ImgFmt_R11G11B10_F
+	{ GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV },						// ImgFmt_R9G9B9_E5
+
 	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_I8
-																				// ImgFmt_I4
+	{ 0, 0, 0 },																// ImgFmt_I4
+
 	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
-																				// ImgFmt_D15S1
-																				// ImgFmt_D24X8
+	{ 0, 0, 0 },																// ImgFmt_D15S1
+	{ GL_DEPTH_COMPONENT24, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24X8
 	{ GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24S8
-																				// ImgFmt_D24FS8
-	// GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT									// ImgFmt_D32
-	// GL_DEPTH_COMPONENT_32F, GL_DEPTH_COMPONENT								// ImgFmt_D32F
-	// GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL									// ImgFmt_D32FS8X24
+	{ 0, 0, 0 },																// ImgFmt_D24FS8
+	{ GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT },				// ImgFmt_D32
+	{ GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT },					// ImgFmt_D32F
+	{ GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV },	// ImgFmt_D32FS8X24
+
 	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
-																				// ImgFmt_DXT2
+	{ 0, 0, 0 },																// ImgFmt_DXT2
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
-																				// ImgFmt_DXT4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// ImgFmt_DXT5
+	{ 0, 0, 0 },																// ImgFmt_DXT4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 },	// ImgFmt_DXT5
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A8R8G8B8
+	{ 0, 0, 0 },																// ImgFmt_XB_A8B8G8R8
+	{ 0, 0, 0 },																// ImgFmt_XB_B8G8R8A8
+	{ 0, 0, 0 },																// ImgFmt_XB_R8G8B8A8
+
+	{ 0, 0, 0 },																// ImgFmt_XB_R5G6B5
+	{ 0, 0, 0 },																// ImgFmt_XB_R6G5B5
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A1R5G5B5
+	{ 0, 0, 0 },																// ImgFmt_XB_R5G5B5A1
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A4R4G4B4
+	{ 0, 0, 0 },																// ImgFmt_XB_R4G4B4A4
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_A8B8G8R8s
+	{ 0, 0, 0 },																// ImgFmt_PSP_B5G6R5s
+	{ 0, 0, 0 },																// ImgFmt_PSP_A1B5G5R5s
+	{ 0, 0, 0 },																// ImgFmt_PSP_A4B4G4R4s
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_I8s
+	{ 0, 0, 0 },																// ImgFmt_PSP_I4s
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1s
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3s
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5s
 };
 #else
-// opengl format table.. man, opengl's texture format management is a complete shambles!!!!
-// i havent verified that all of these formats are correct, some might be wrong...
 GLFormat gGLFormats[] =
 {
 	{ GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE },										// ImgFmt_A8R8G8B8
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE },										// ImgFmt_A8B8G8R8
 	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_B8G8R8A8
 	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_R8G8B8A8
-																				// ImgFmt_R8G8B8
-																				// ImgFmt_B8G8R8
+
+	{ 0, 0, 0 },																// ImgFmt_R8G8B8
+	{ 0, 0, 0 },																// ImgFmt_B8G8R8
+
 	{ 0, GL_BGRA, 0 },															// ImgFmt_A2R10G10B10   **
 	{ 0, GL_RGBA, 0 },															// ImgFmt_A2B10G10R10   **
+
 	{ 0, GL_RGBA, 0 },															// ImgFmt_A16B16G16R16  **
+
 	{ GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
-																				// ImgFmt_R6G5B5
+	{ 0, 0, 0 },																// ImgFmt_R6G5B5
 	{ GL_RGB, GL_RGB, 0 },														// ImgFmt_B5G6R5
+
 	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_A1R5G5B5
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1 },							// ImgFmt_R5G5B5A1
 	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_A1B5G5R5
+
 	{ GL_RGBA, GL_BGRA, 0 },													// ImgFmt_A4R4G4B4
 	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_A4B4G4R4
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_R4G4B4A4
+
 	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F16
 	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F32
+
+	{ 0, 0, 0 },// GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV				// ImgFmt_R11G11B10_F
+	{ 0, 0, 0 },// GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV							// ImgFmt_R9G9B9_E5
+
 	{ 0, 0, GL_UNSIGNED_BYTE },													// ImgFmt_I8
-																				// ImgFmt_I4
+	{ 0, 0, 0 },																// ImgFmt_I4
+
 	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
-																				// ImgFmt_D24X8
+	{ 0, 0, 0 },																// ImgFmt_D15S1
+	{ GL_DEPTH_COMPONENT24, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24X8
 	{ GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24S8
+	{ 0, 0, 0 },																// ImgFmt_D24FS8
+	{ GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT },				// ImgFmt_D32
+	{ GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT },					// ImgFmt_D32F
+	{ GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV },	// ImgFmt_D32FS8X24
+
 	{ GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 0 },	// ImgFmt_DXT1
-																				// ImgFmt_DXT2
+	{ 0, 0, 0 },																// ImgFmt_DXT2
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
-																				// ImgFmt_DXT4
-	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 }	// ImgFmt_DXT5
+	{ 0, 0, 0 },																// ImgFmt_DXT4
+	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 },	// ImgFmt_DXT5
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A8R8G8B8
+	{ 0, 0, 0 },																// ImgFmt_XB_A8B8G8R8
+	{ 0, 0, 0 },																// ImgFmt_XB_B8G8R8A8
+	{ 0, 0, 0 },																// ImgFmt_XB_R8G8B8A8
+
+	{ 0, 0, 0 },																// ImgFmt_XB_R5G6B5
+	{ 0, 0, 0 },																// ImgFmt_XB_R6G5B5
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A1R5G5B5
+	{ 0, 0, 0 },																// ImgFmt_XB_R5G5B5A1
+
+	{ 0, 0, 0 },																// ImgFmt_XB_A4R4G4B4
+	{ 0, 0, 0 },																// ImgFmt_XB_R4G4B4A4
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_A8B8G8R8s
+	{ 0, 0, 0 },																// ImgFmt_PSP_B5G6R5s
+	{ 0, 0, 0 },																// ImgFmt_PSP_A1B5G5R5s
+	{ 0, 0, 0 },																// ImgFmt_PSP_A4B4G4R4s
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_I8s
+	{ 0, 0, 0 },																// ImgFmt_PSP_I4s
+
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1s
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3s
+	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5s
 };
 #endif
-
-static const int gMaxGLFormats = sizeof(gGLFormats) / sizeof(GLFormat);
 
 /**** Functions ****/
 
@@ -141,10 +226,11 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	pTexture->pInternalData = (void*)(uintp)textureID;
 
-	uint32 platformFormat = MFTexture_GetPlatformFormatID(pTemplate->imageFormat, MFRD_OpenGL);
-	MFDebug_Assert(platformFormat < (uint32)gMaxGLFormats, "Platform format is undefined...");
+	pTemplate->imageFormat = MFImage_ResolveFormat(pTemplate->imageFormat, MFRD_OpenGL);
+	MFDebug_Assert(pTemplate->imageFormat != ImgFmt_Unknown, "Invalid texture format!");
 
-	GLFormat &format = gGLFormats[platformFormat];
+	GLFormat &format = gGLFormats[pTemplate->imageFormat];
+	MFDebug_Assert(format.internalFormat != 0, "Unsupported image format!");
 
 	if(generateMipChain && pTemplate->mipLevels == 1)
 	{
@@ -195,40 +281,8 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 
 		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 
-		if(targetFormat & ImgFmt_SelectDefault)
-		{
-#if defined(MF_IPHONE)
-			switch((targetFormat >> 4) & 3)
-			{
-				case 0:
-					MFDebug_Assert(false, "Format auto-selection should specify a render target or depth/stencil type.");
-				case 1:
-					if(targetFormat & ImgFmt_SelectFastest)
-					{
-						if(targetFormat & ImgFmt_SelectNoAlpha)
-							targetFormat = ImgFmt_R5G6B5;
-						else if(targetFormat & ImgFmt_Select1BitAlpha)
-							targetFormat = ImgFmt_R5G5B5A1;
-						else
-							targetFormat = ImgFmt_R4G4B4A4;
-					}
-					else
-					{
-						if(targetFormat & ImgFmt_SelectNoAlpha)
-							targetFormat = ImgFmt_R8G8B8;
-						else
-							targetFormat = ImgFmt_A8R8G8B8;
-					}
-					break;
-				case 2:
-				case 3:
-					MFDebug_Assert(false, "TODO: Don't support depth targets yet...");
-					break;
-			}
-#else
-			targetFormat = ImgFmt_A8R8G8B8;
-#endif
-		}
+		targetFormat = MFImage_ResolveFormat(targetFormat, MFRD_OpenGL);
+		MFDebug_Assert(targetFormat != ImgFmt_Unknown, "Invalid texture format!");
 
 		// allocate an MFTexture template
 		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
@@ -253,7 +307,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pSurface->paletteBufferLength = 0;
 
 		// create the targets
-		GLuint frameBufferID, textureID;
+		GLuint textureID;
 
 		// create the texture
 		glEnable(GL_TEXTURE_2D);
@@ -265,22 +319,10 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 #endif
 
-		uint32 platformFormat = MFTexture_GetPlatformFormatID(targetFormat, MFRD_OpenGL);
-		GLFormat &format = gGLFormats[platformFormat];
+		GLFormat &format = gGLFormats[targetFormat];
+		MFDebug_Assert(format.internalFormat != 0, "Unsupported image format!");
+
 		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
-
-		if(targetFormat < ImgFmt_D16 || targetFormat > ImgFmt_D24S8)
-		{
-			// create the frame buffer
-			glGenFramebuffers(1, &frameBufferID);
-			glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-			pSurface->pImageData = (char*)(uintp)frameBufferID;
-
-			// and it to the framebuffer
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-
-			MFDebug_Assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
-		}
 
 		if(!MFCheckForOpenGLError())
 			MFDebug_Log(0, "RenderTarget created successfully!");
@@ -292,12 +334,6 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
-	
-	if((pTexture->pTemplateData->flags & TEX_RenderTarget) && pTexture->pTemplateData->pSurfaces[0].pImageData)
-	{
-		GLuint fb = (GLuint)(size_t)pTexture->pInternalData;
-		glDeleteFramebuffers(1, &fb);
-	}
 
 	GLuint texture = (GLuint)(size_t)pTexture->pInternalData;
 	glDeleteTextures(1, &texture);

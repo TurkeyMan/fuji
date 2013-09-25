@@ -19,9 +19,8 @@
 	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
 	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_ResetViewport_##driver(); \
-	MF_API MFTexture* MFRenderer_GetDeviceRenderTarget_##driver(); \
-	MF_API MFTexture* MFRenderer_GetDeviceDepthStencil_##driver(); \
-	MF_API void MFRenderer_SetRenderTarget_##driver(MFTexture *pRenderTarget, MFTexture *pZTarget); \
+	MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget_##driver(); \
+	MF_API void MFRenderer_SetRenderTarget_##driver(MFRenderTarget *pRenderTarget); \
 	MF_API float MFRenderer_GetTexelCenterOffset_##driver(); \
 	void MFRendererInternal_SortElements_##driver(MFRenderLayer &layer);
 
@@ -40,7 +39,6 @@
 		MFRenderer_SetViewport_##driver, \
 		MFRenderer_ResetViewport_##driver, \
 		MFRenderer_GetDeviceRenderTarget_##driver, \
-		MFRenderer_GetDeviceDepthStencil_##driver, \
 		MFRenderer_SetRenderTarget_##driver, \
 		MFRenderer_GetTexelCenterOffset_##driver, \
 		MFRendererInternal_SortElements_##driver \
@@ -72,9 +70,8 @@ struct MFRenderPluginCallbacks
 	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
 	void (*pSetViewport)(MFRect *pRect);
 	void (*pResetViewport)();
-	MFTexture* (*pGetDeviceRenderTarget)();
-	MFTexture* (*pGetDeviceDepthStencil)();
-	void (*pSetRenderTarget)(MFTexture *pRenderTarget, MFTexture *pZTarget);
+	MFRenderTarget* (*pGetDeviceRenderTarget)();
+	void (*pSetRenderTarget)(MFRenderTarget *pRenderTarget);
 	float (*pGetTexelCenterOffset)();
 	void (*pSortElements)(MFRenderLayer &layer);
 };
@@ -169,19 +166,14 @@ MF_API void MFRenderer_ResetViewport()
 	gpCurrentRenderPlugin->pResetViewport();
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 {
 	return gpCurrentRenderPlugin->pGetDeviceRenderTarget();
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
 {
-	return gpCurrentRenderPlugin->pGetDeviceDepthStencil();
-}
-
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
-{
-	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget, pZTarget);
+	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget);
 }
 
 MF_API float MFRenderer_GetTexelCenterOffset()

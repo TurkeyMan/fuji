@@ -31,6 +31,7 @@
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "MFSystem_Internal.h"
+#include "MFRenderTarget_Internal.h"
 
 #include "MFRenderer_Internal.h"
 #include "MFRenderer_D3D9.h"
@@ -48,6 +49,7 @@ IDirect3DDevice9 *pd3dDevice;
 static IDirect3DSurface9 *pRenderTarget = NULL;
 static IDirect3DSurface9 *pZTarget = NULL;
 
+static MFRenderTarget *gpDeviceRenderTarget = NULL;
 static MFTexture gDeviceRenderTarget;
 static MFTextureTemplateData gDeviceRenderTargetTemplate;
 static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
@@ -232,21 +234,6 @@ int MFRenderer_CreateDisplay()
 		}
 	}
 
-	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
-	pd3dDevice->GetDepthStencilSurface(&pZTarget);
-
-	gDeviceRenderTarget.pTemplateData->imageFormat = (PixelFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
-
-	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
-
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	pd3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
 	pd3dDevice->SetRenderState(D3DRS_TWOSIDEDSTENCILMODE, (gD3D9DeviceCaps.StencilCaps & D3DSTENCILCAPS_TWOSIDED) ? TRUE : FALSE);
@@ -261,11 +248,36 @@ int MFRenderer_CreateDisplay()
 	gCurrentViewport.width = (float)vp.Width;
 	gCurrentViewport.height = (float)vp.Height;
 
+	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
+	pd3dDevice->GetDepthStencilSurface(&pZTarget);
+
+	gDeviceRenderTarget.pTemplateData->imageFormat = (PixelFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
+
+	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
+
+	MFRenderTargetDesc desc;
+	desc.pName = "Device Render Target";
+	desc.width = (int)present.BackBufferWidth;
+	desc.height = (int)present.BackBufferHeight;
+	desc.colourTargets[0].pSurface = &gDeviceRenderTarget;
+	desc.depthStencil.pSurface = &gDeviceZTarget;
+	gpDeviceRenderTarget = MFRenderTarget_Create(&desc);
+
 	return 0;
 }
 
 void MFRenderer_DestroyDisplay()
 {
+	MFRenderTarget_Release(gpDeviceRenderTarget);
+
 	if(pRenderTarget)
 	{
 		pRenderTarget->Release();
@@ -374,16 +386,19 @@ void MFRenderer_ResetDisplay()
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
 	gDeviceRenderTarget.pTemplateData->imageFormat = (present.BackBufferFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
 
 	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = present.BackBufferWidth;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = present.BackBufferHeight;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
+
+	gpDeviceRenderTarget->width = (int)present.BackBufferWidth;
+	gpDeviceRenderTarget->height = (int)present.BackBufferHeight;
 
 	if(SUCCEEDED(hr))
 	{
@@ -518,29 +533,29 @@ MF_API void MFRenderer_ResetViewport()
 	pd3dDevice->SetViewport(&vp);
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 {
-	return &gDeviceRenderTarget;
+	return gpDeviceRenderTarget;
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
 {
-	return &gDeviceZTarget;
-}
-
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
-{
-	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-
-	if(pRenderTarget)
+	for(int a=0; a<8; ++a)
 	{
-		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pRenderTarget->pTemplateData->pSurfaces[0].pImageData;
-		pd3dDevice->SetRenderTarget(0, pSurface);
+		if(pRenderTarget->pColourTargets[a])
+		{
+			IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pRenderTarget->pColourTargets[a]->pTemplateData->pSurfaces[0].pImageData;
+			pd3dDevice->SetRenderTarget(a, pSurface);
+		}
+		else
+		{
+			pd3dDevice->SetRenderTarget(a, NULL);
+		}
 	}
 
-	if(pZTarget)
+	if(pRenderTarget->pDepthStencil)
 	{
-		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pZTarget->pTemplateData->pSurfaces[0].pImageData;
+		IDirect3DSurface9 *pSurface = (IDirect3DSurface9*)pRenderTarget->pDepthStencil->pTemplateData->pSurfaces[0].pImageData;
 		pd3dDevice->SetDepthStencilSurface(pSurface);
 	}
 	else

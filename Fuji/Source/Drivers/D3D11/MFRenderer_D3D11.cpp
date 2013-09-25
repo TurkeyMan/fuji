@@ -315,17 +315,12 @@ MF_API void MFRenderer_ResetViewport()
 
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 {
 	return NULL;
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
-{
-	return NULL;
-}
-
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
 {
 //    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }

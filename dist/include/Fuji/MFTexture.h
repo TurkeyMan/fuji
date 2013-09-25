@@ -113,7 +113,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 /**
  * Release an MFTexture instance.
  * Release a reference to an MFTexture and destroy when the reference count reaches 0.
- * @param pTexture Texture instance to be destroyed.
+ * @param pTexture Texture instance to release.
  * @return The new reference count of the texture. If the returned reference count is 0, the texture is destroyed.
  * @see MFTexture_Create()
  */

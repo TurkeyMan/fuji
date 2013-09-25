@@ -26,7 +26,7 @@ extern (C) void MFRenderer_ResetViewport();
 
 extern (C) MFTexture* MFRenderer_GetDeviceRenderTarget();
 extern (C) MFTexture* MFRenderer_GetDeviceDepthStencil();
-extern (C) void MFRenderer_SetRenderTarget(MFTexture* pRenderTarget, MFTexture* pZTarget);
+extern (C) void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget);
 extern (C) void MFRenderer_SetDeviceRenderTarget();
 
 extern (C) float MFRenderer_GetTexelCenterOffset();
@@ -122,8 +122,7 @@ extern (C) void MFRenderer_AddIndexedVertices(const MFStateBlock *pMeshStateBloc
 extern (C) void MFRenderLayer_SetLayerStateBlock(MFRenderLayer *pLayer, const MFStateBlock *pState);
 extern (C) void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
 
-extern (C) void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
-extern (C) void MFRenderLayer_SetLayerDepthTarget(MFRenderLayer *pLayer, MFTexture *pTexture);
+extern (C) void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderTarget *pRenderTarget);
 extern (C) void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
 extern (C) void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);
 

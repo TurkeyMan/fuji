@@ -10,8 +10,7 @@
 extern const char *gpMFImageFormatStrings[ImgFmt_Max];
 extern uint32 gMFImagePlatformAvailability[ImgFmt_Max];
 extern uint8 gMFImageBitsPerPixel[ImgFmt_Max];
-extern uint8 gMFImagePlatformFormat[MFRD_Max][ImgFmt_Max];
-
+extern int8 gMFImageAutoFormat[MFRD_Max][0x40];
 
 MF_API const char * const MFImage_GetFormatString(int format)
 {
@@ -26,6 +25,13 @@ MF_API uint32 MFTexture_GetPlatformAvailability(int format)
 MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform)
 {
 	return (gMFImagePlatformAvailability[format] & MFBIT(platform)) != 0;
+}
+
+MF_API MFImageFormat MFImage_ResolveFormat(int format, MFRendererDrivers driver)
+{
+	if(format & ImgFmt_SelectDefault)
+		return (MFImageFormat)gMFImageAutoFormat[driver][format & 0x3f];
+	return (MFImageFormat)format;
 }
 
 MF_API int MFImage_GetBitsPerPixel(int format)

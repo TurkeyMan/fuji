@@ -11,6 +11,7 @@
 #include "MFResource_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
+#include "MFRenderTarget_Internal.h"
 #include "MFModel_Internal.h"
 #include "MFAnimation_Internal.h"
 #include "MFInput_Internal.h"
@@ -189,7 +190,10 @@ uint64 MFModule_RegisterEngineModules()
 	gBuiltinModuleIDs[MFBIM_MFView] = (char)MFModule_RegisterModule("MFView", MFView_InitModule, MFView_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFView);
 
-	gBuiltinModuleIDs[MFBIM_MFRenderer] = (char)MFModule_RegisterModule("MFRenderer", MFRenderer_InitModule, MFRenderer_DeinitModule, basicModules);
+	gBuiltinModuleIDs[MFBIM_MFRenderTarget] = (char)MFModule_RegisterModule("MFRenderTarget", MFRenderTarget_InitModule, MFRenderTarget_DeinitModule, basicModules);
+	uint64 renderTarget = MFModule_GetBuiltinModuleMask(MFBIM_MFRenderTarget);
+	modules |= renderTarget;
+	gBuiltinModuleIDs[MFBIM_MFRenderer] = (char)MFModule_RegisterModule("MFRenderer", MFRenderer_InitModule, MFRenderer_DeinitModule, renderTarget);
 	uint64 renderer = MFModule_GetBuiltinModuleMask(MFBIM_MFRenderer);
 	modules |= renderer;
 	gBuiltinModuleIDs[MFBIM_MFDisplay] = (char)MFModule_RegisterModule("MFDisplay", MFDisplay_InitModule, MFDisplay_DeinitModule, renderer);

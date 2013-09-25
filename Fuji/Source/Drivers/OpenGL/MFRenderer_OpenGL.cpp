@@ -27,6 +27,7 @@
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
 #include "MFRenderer_Internal.h"
+#include "MFRenderTarget_Internal.h"
 
 #include "MFOpenGL.h"
 
@@ -124,6 +125,8 @@ int gOpenGLVersion = 0;
 #endif
 
 static GLuint gDefaultRenderTarget = 0;
+static MFRenderTarget *gpDeviceRenderTarget = NULL;
+
 static MFTexture gDeviceRenderTarget;
 static MFTextureTemplateData gDeviceRenderTargetTemplate;
 static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
@@ -346,11 +349,21 @@ int MFRenderer_CreateDisplay()
 	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
 
+	MFRenderTargetDesc desc;
+	desc.pName = "Device Render Target";
+	desc.width = gDisplay.width;
+	desc.height = gDisplay.height;
+	desc.colourTargets[0].pSurface = &gDeviceRenderTarget;
+	desc.depthStencil.pSurface = &gDeviceZTarget;
+	gpDeviceRenderTarget = MFRenderTarget_Create(&desc);
+
 	return 0;
 }
 
 void MFRenderer_DestroyDisplay()
 {
+	MFRenderTarget_Release(gpDeviceRenderTarget);
+
 #if MF_DISPLAY == MF_DRIVER_X11
 	if(fbConfigs != NULL)
 	{
@@ -400,6 +413,9 @@ void MFRenderer_ResetDisplay()
 	gDeviceZTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+
+	gpDeviceRenderTarget->width = gDisplay.width;
+	gpDeviceRenderTarget->height = gDisplay.height;
 	
 	MFRenderer_ResetViewport();
 }
@@ -518,23 +534,16 @@ MF_API void MFRenderer_ResetViewport()
 	MFCheckForOpenGLError();
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceRenderTarget()
+MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 {
-	return &gDeviceRenderTarget;
+	return gpDeviceRenderTarget;
 }
 
-MF_API MFTexture* MFRenderer_GetDeviceDepthStencil()
-{
-	return &gDeviceZTarget;
-}
-
-MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTarget)
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
 {
 	MFCheckForOpenGLError();
 
-	MFDebug_Assert(pRenderTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-
-	GLuint buffer = (GLuint)(uintp)pRenderTarget->pTemplateData->pSurfaces[0].pImageData;
+	GLuint buffer = (GLuint)(uintp)pRenderTarget->pPlatformData;
 #if defined(MF_IPHONE)
 	if(buffer == gDefaultRenderTarget)
 		MFRendererIPhone_SetBackBuffer();
@@ -542,34 +551,14 @@ MF_API void MFRenderer_SetRenderTarget(MFTexture *pRenderTarget, MFTexture *pZTa
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 
-	if(pZTarget)
-	{
-		if(buffer == gDefaultRenderTarget)
-		{
-			MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-			MFDebug_Assert(pZTarget->pTemplateData->pSurfaces[0].pImageData == NULL, "Can't associate foreign depth buffer with default render target!");
-		}
-		else
-		{
-			MFDebug_Assert(pZTarget->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
-			MFDebug_Assert(pZTarget->pInternalData != NULL, "Can't associate default depth buffer with foreign render target!");
-
-//			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, (GLuint)(uintp)pZTarget->pTemplateData->pSurfaces[0].pImageData);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, (GLuint)(uintp)pZTarget->pInternalData, 0);
-
-			MFDebug_Assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Incomplete frame buffer!");
-		}
-
+	if(pRenderTarget->pDepthStencil)
 		glEnable(GL_DEPTH_TEST);
-	}
 	else
-	{
 		glDisable(GL_DEPTH_TEST);
-	}
 
 	MFCheckForOpenGLError();
 
-	MFRect viewport = { 0.f, 0.f, (float)pRenderTarget->pTemplateData->pSurfaces[0].width, (float)pRenderTarget->pTemplateData->pSurfaces[0].height };
+	MFRect viewport = { 0.f, 0.f, (float)pRenderTarget->width, (float)pRenderTarget->height };
 	MFRenderer_SetViewport(&viewport);
 }
 

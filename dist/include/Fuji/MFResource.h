@@ -16,6 +16,7 @@ const int MFRT_Max = 32;
 
 extern int MFRT_Texture;
 extern int MFRT_Material;
+extern int MFRT_RenderTarget;
 extern int MFRT_VertexDecl;
 extern int MFRT_VertexBuffer;
 extern int MFRT_IndexBuffer;
