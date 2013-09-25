@@ -501,7 +501,7 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 	MFCALLSTACK;
 
 	int mask = ((flags & MFRCF_Colour) ? GL_COLOR_BUFFER_BIT : 0) |
-				((flags & MFRCF_ZBuffer) ? GL_DEPTH_BUFFER_BIT : 0) |
+				((flags & MFRCF_Depth) ? GL_DEPTH_BUFFER_BIT : 0) |
 				((flags & MFRCF_Stencil) ? GL_STENCIL_BUFFER_BIT : 0);
 
 	glClearColor(colour.x, colour.y, colour.z, colour.w);

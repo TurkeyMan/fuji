@@ -49,12 +49,13 @@ uint8 gPS2Format[ImgFmt_Max] =
 	99,	// ????????????	// ImgFmt_I4
 
 	0,	//				// ImgFmt_D16
-	0,	//				// ImgFmt_D15S1
 	0,	//				// ImgFmt_D24X8
-	0,	//				// ImgFmt_D24S8
-	0,	//				// ImgFmt_D24FS8
 	0,	//				// ImgFmt_D32
 	0,	//				// ImgFmt_D32F
+
+	0,	//				// ImgFmt_D15S1
+	0,	//				// ImgFmt_D24S8
+	0,	//				// ImgFmt_D24FS8
 	0,	//				// ImgFmt_D32FS8X24
 
 	0,	//				// ImgFmt_DXT1

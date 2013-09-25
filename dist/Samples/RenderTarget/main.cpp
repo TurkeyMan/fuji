@@ -65,9 +65,10 @@ void Game_Init()
 	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.0f, 1.f));
 
 	// create a render target for the layer
-	MFRenderTarget *pRenderTarget = MFRenderTarget_CreateSimple("Prism", 256, 256, ImgFmt_SelectRenderTarget, ImgFmt_D24X8);
+	MFRenderTarget *pRenderTarget = MFRenderTarget_CreateSimple("Prism", 256, 256);
 	pPrismRenderTarget = MFMaterial_Create("Prism_RenderTarget0");
 	MFRenderLayer_SetLayerRenderTarget(pLayer, pRenderTarget);
+	MFRenderTarget_Release(pRenderTarget); // the render layer now has a reference, it will be destroyed with the renderer
 
 	// configure box layer
 	pLayer = MFRenderer_GetLayer(pRenderer, 1);

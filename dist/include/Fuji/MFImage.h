@@ -52,19 +52,34 @@ enum MFImageFormat
 	ImgFmt_I4,				/**< 4bit paletted format */
 
 	ImgFmt_D16,				/**< 16bit depth format */
-	ImgFmt_D15S1,			/**< 15bit depth format with 1bit stencil */
 	ImgFmt_D24X8,			/**< 24bit depth format */
-	ImgFmt_D24S8,			/**< 24bit depth format with 8bit stencil */
-	ImgFmt_D24FS8,			/**< 24bit floating point depth format with 8bit stencil */
 	ImgFmt_D32,				/**< 32bit depth format */
 	ImgFmt_D32F,			/**< 32bit floating point depth format */
+
+	ImgFmt_D15S1,			/**< 15bit depth format with 1bit stencil */
+	ImgFmt_D24S8,			/**< 24bit depth format with 8bit stencil */
+	ImgFmt_D24FS8,			/**< 24bit floating point depth format with 8bit stencil */
 	ImgFmt_D32FS8X24,		/**< 32bit floating point depth format with 8bit stencil */
 
-	ImgFmt_DXT1,			/**< Compressed DXT1 image */
-	ImgFmt_DXT2,			/**< Compressed DXT2 image */
-	ImgFmt_DXT3,			/**< Compressed DXT3 image */
-	ImgFmt_DXT4,			/**< Compressed DXT4 image */
-	ImgFmt_DXT5,			/**< Compressed DXT5 image */
+	ImgFmt_DXT1,			/**< Compressed DXT1/BC1 format */
+	ImgFmt_DXT2,			/**< Compressed DXT2 format */
+	ImgFmt_DXT3,			/**< Compressed DXT3/BC2 format */
+	ImgFmt_DXT4,			/**< Compressed DXT4 format */
+	ImgFmt_DXT5,			/**< Compressed DXT5/BC3 format */
+//	ImgFmt_ATI1,			/**< Compressed 3Dc+/BC4 format */
+//	ImgFmt_ATI2,			/**< Compressed 3Dc/DXN/BC5 format */
+//	ImgFmt_BPTC_F,			/**< Compressed BPTC_FLOAT/BC6H floating point format */
+//	ImgFmt_BPTC,			/**< Compressed BPTC/BC7 format */
+//	ImgFmt_CTX1,			/**< Compressed CTX1 format */
+//	ImgFmt_ETC1,			/**< Compressed ETC1 format */
+//	ImgFmt_ETC2,			/**< Compressed ETC2 format */
+//	ImgFmt_EAC,				/**< Compressed EAC format */
+//	ImgFmt_PVRTC,			/**< Compressed PVRTC format */
+//	ImgFmt_PVRTC2,			/**< Compressed PVRTC2 format */
+//	ImgFmt_ATCRGB,			/**< Compressed ATITC RGB format */
+//	ImgFmt_ATCRGBA_EXPLICIT,/**< Compressed ATITC RGBA format with explicit alpha */
+//	ImgFmt_ATCRGBA,			/**< Compressed ATITC RGBA format */
+//	ImgFmt_ASTC,			/**< Compressed ASTC format */
 
 	ImgFmt_PSP_DXT1,		/**< Special DXT1 for PSP */
 	ImgFmt_PSP_DXT3,		/**< Special DXT3 for PSP */

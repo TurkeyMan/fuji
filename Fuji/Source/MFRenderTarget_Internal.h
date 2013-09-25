@@ -14,6 +14,8 @@ struct MFRenderTarget : public MFResource
 	MFTexture *pColourTargets[8];
 	MFTexture *pDepthStencil;
 	uint8 availableColourTargets;
+	bool bHasDepth;
+	bool bHasStencil;
 
 	void *pPlatformData;
 };

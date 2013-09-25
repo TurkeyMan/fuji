@@ -69,12 +69,13 @@ static D3DFORMAT gD3D9Format[ImgFmt_Max] =
 	D3DFMT_UNKNOWN,			// ImgFmt_I4
 
 	D3DFMT_D16,				// ImgFmt_D16
-	D3DFMT_D15S1,			// ImgFmt_D15S1
 	D3DFMT_D24X8,			// ImgFmt_D24X8
-	D3DFMT_D24S8,			// ImgFmt_D24S8
-	D3DFMT_D24FS8,			// ImgFmt_D24FS8
 	D3DFMT_D32,				// ImgFmt_D32
 	D3DFMT_D32F_LOCKABLE,	// ImgFmt_D32F
+
+	D3DFMT_D15S1,			// ImgFmt_D15S1
+	D3DFMT_D24S8,			// ImgFmt_D24S8
+	D3DFMT_D24FS8,			// ImgFmt_D24FS8
 	D3DFMT_UNKNOWN,			// ImgFmt_D32FS8X24
 
 	D3DFMT_DXT1,			// ImgFmt_DXT1
@@ -223,10 +224,27 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		MFDebug_Assert(targetFormat != ImgFmt_Unknown, "Invalid texture format!");
 
 		D3DFORMAT platformFormat = gD3D9Format[targetFormat];
-		IDirect3DTexture9 *pD3DTex;
-		HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
-		if(hr != D3D_OK)
-			return NULL;
+
+		IDirect3DTexture9 *pD3DTex = NULL;
+		IDirect3DSurface9 *pD3DSurface;
+		if(targetFormat >= ImgFmt_D16 && targetFormat <= ImgFmt_D32FS8X24)
+		{
+			HRESULT hr = pd3dDevice->CreateDepthStencilSurface(width, height, platformFormat, D3DMULTISAMPLE_NONE, 0, FALSE, &pD3DSurface, NULL);
+			if(hr != D3D_OK)
+				return NULL;
+
+			MFRenderer_D3D9_SetDebugName(pD3DSurface, pName);
+		}
+		else
+		{
+			HRESULT hr = pd3dDevice->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, platformFormat, D3DPOOL_DEFAULT, &pD3DTex, NULL);
+			if(hr != D3D_OK)
+				return NULL;
+
+			pD3DTex->GetSurfaceLevel(0, &pD3DSurface);
+
+			MFRenderer_D3D9_SetDebugName(pD3DTex, pName);
+		}
 
 		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
@@ -255,12 +273,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 		pTexture->pTemplateData->pSurfaces[0].paletteBufferLength = 0;
 
 		pTexture->pInternalData = pD3DTex;
-
-		IDirect3DSurface9 *pSurface;
-		pD3DTex->GetSurfaceLevel(0, &pSurface);
-		pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pSurface;
-
-		MFRenderer_D3D9_SetDebugName((IDirect3DTexture9*)pTexture->pInternalData, pTexture->pName);
+		pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pD3DSurface;
 	}
 
 	return pTexture;
@@ -276,8 +289,11 @@ void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 		pSurface->Release();
 	}
 
-	IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
-	pTex->Release();
+	if(pTexture->pInternalData)
+	{
+		IDirect3DTexture9 *pTex = (IDirect3DTexture9*)pTexture->pInternalData;
+		pTex->Release();
+	}
 }
 
 #endif // MF_RENDERER

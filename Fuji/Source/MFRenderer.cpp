@@ -149,8 +149,7 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 	pRenderer->pGlobal = pGlobal;
 	pRenderer->pOverride = pOverride;
 
-	MFRenderTarget *pRenderTarget = MFRenderer_GetDeviceRenderTarget();
-
+	MFRenderTarget *pRT = MFRenderer_GetDeviceRenderTarget();
 	for(int a=0; a<numLayers; ++a)
 	{
 #if !defined(MF_RETAIL)
@@ -160,7 +159,8 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 		}
 #endif
 		pRenderer->pLayers[a].pName = pLayers[a].pName;
-		pRenderer->pLayers[a].pRenderTarget = pRenderTarget;
+		pRenderer->pLayers[a].pRenderTarget = pRT;
+		MFResource_AddRef(pRT);
 	}
 
 	return pRenderer;
@@ -168,6 +168,12 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 
 MF_API void MFRenderer_Destroy(MFRenderer *pRenderer)
 {
+	for(int a=0; a<pRenderer->numLayers; ++a)
+	{
+		if(pRenderer->pLayers[a].pRenderTarget)
+			MFRenderTarget_Release(pRenderer->pLayers[a].pRenderTarget);
+	}
+
 	MFHeap_Free(pRenderer);
 }
 
@@ -536,8 +542,7 @@ MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 			MFRenderer_SetRenderTarget(layer.pRenderTarget);
 
 		// clear render target
-		MFRenderClearFlags cf = (MFRenderClearFlags)((layer.pRenderTarget->availableColourTargets ? layer.clearFlags & MFRCF_Colour : 0) |
-													(layer.pRenderTarget->pDepthStencil ? layer.clearFlags & MFRCF_DepthStencil : 0));
+		MFRenderClearFlags cf = (MFRenderClearFlags)((layer.pRenderTarget->availableColourTargets ? layer.clearFlags & MFRCF_Colour : 0) | (layer.pRenderTarget->bHasDepth ? layer.clearFlags & MFRCF_Depth : 0) | (layer.pRenderTarget->bHasStencil ? layer.clearFlags & MFRCF_Stencil : 0));
 		if(layer.clearFlags != MFRCF_None)
 			MFRenderer_ClearScreen(cf, layer.clearColour, layer.clearZ, layer.clearStencil);
 
@@ -601,6 +606,10 @@ MF_API void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerS
 
 MF_API void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderTarget *pRenderTarget)
 {
+	if(pLayer->pRenderTarget)
+		MFRenderTarget_Release(pLayer->pRenderTarget);
+
+	MFResource_AddRef(pRenderTarget);
 	pLayer->pRenderTarget = pRenderTarget;
 }
 

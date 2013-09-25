@@ -26,12 +26,12 @@ struct MFModel;
 enum MFRenderClearFlags
 {
 	MFRCF_Colour		= 1,											/**< Clear the colour buffer */
-	MFRCF_ZBuffer		= 2,											/**< Clear the depth buffer */
+	MFRCF_Depth			= 2,											/**< Clear the depth buffer */
 	MFRCF_Stencil		= 4,											/**< Clear the stencil buffer */
 
 	MFRCF_None			= 0,											/**< Don't clear any buffers */
-	MFRCF_All			= MFRCF_Colour | MFRCF_ZBuffer | MFRCF_Stencil,	/**< Clear the colour, depth and stencil buffers */
-	MFRCF_DepthStencil	= MFRCF_ZBuffer | MFRCF_Stencil,				/**< Clear the depth and stencil buffers */
+	MFRCF_All			= MFRCF_Colour | MFRCF_Depth | MFRCF_Stencil,	/**< Clear the colour, depth and stencil buffers */
+	MFRCF_DepthStencil	= MFRCF_Depth | MFRCF_Stencil,					/**< Clear the depth and stencil buffers */
 
 	MFRCF_ForceInt		= 0x7FFFFFFF									/**< Force MFRenderClearFlags to a uint type */
 };

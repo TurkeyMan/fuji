@@ -288,7 +288,7 @@ MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &col
 {
 	MFCALLSTACKc;
 	
-	const bool bClearDepth = (flags & MFRCF_ZBuffer) != 0;
+	const bool bClearDepth = (flags & MFRCF_Depth) != 0;
 	const bool bClearStencil = (flags & MFRCF_Stencil) != 0;
 	const bool bClearColour = (flags & MFRCF_Colour) != 0;
 

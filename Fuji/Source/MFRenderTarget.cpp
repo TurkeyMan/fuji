@@ -66,6 +66,8 @@ MF_API MFRenderTarget* MFRenderTarget_Create(MFRenderTargetDesc *pDesc)
 			pRT->availableColourTargets = 1 << a;
 	}
 	pRT->pDepthStencil = pDesc->depthStencil.pSurface;
+	pRT->bHasDepth = pRT->pDepthStencil != NULL;
+	pRT->bHasStencil = pRT->pDepthStencil && (pRT->pDepthStencil->pTemplateData->imageFormat >= ImgFmt_D15S1 && pRT->pDepthStencil->pTemplateData->imageFormat <= ImgFmt_D32FS8X24);
 
 	MFRenderTarget_CreatePlatformSpecific(pRT);
 

@@ -38,12 +38,13 @@ const char *gpMFImageFormatStrings[ImgFmt_Max] =
 	"I4",
 
 	"D16",
-	"D15S1",
 	"D24X8",
-	"D24S8",
-	"D24FS8",
 	"D32",
 	"D32F",
+
+	"D15S1",
+	"D24S8",
+	"D24FS8",
 	"D32FS8X24",
 
 	"DXT1",
@@ -121,12 +122,13 @@ uint32 gMFImagePlatformAvailability[ImgFmt_Max] =
 	MFBIT(MFRD_PSP)|MFBIT(MFRD_PS2),											// ImgFmt_I4
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),		// ImgFmt_D16
-	MFBIT(MFRD_D3D9),															// ImgFmt_D15S1
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24X8
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24S8
-	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D24FS8
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL),										// ImgFmt_D32
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),						// ImgFmt_D32F
+
+	MFBIT(MFRD_D3D9),															// ImgFmt_D15S1
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360),						// ImgFmt_D24S8
+	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11),											// ImgFmt_D24FS8
 	MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL),										// ImgFmt_D32FS8X24
 
 	MFBIT(MFRD_D3D9)|MFBIT(MFRD_D3D11)|MFBIT(MFRD_OpenGL)|MFBIT(MFRD_X360)|MFBIT(MFRD_XBox),	// ImgFmt_DXT1 // 1 bit alpha
@@ -204,12 +206,13 @@ uint8 gMFImageBitsPerPixel[ImgFmt_Max] =
 	4,	// ImgFmt_I4
 
 	16, // ImgFmt_D16
-	16, // ImgFmt_D15S1
 	32, // ImgFmt_D24X8
-	32, // ImgFmt_D24S8
-	32, // ImgFmt_D24FS8
 	32, // ImgFmt_D32
 	32, // ImgFmt_D32F
+
+	16, // ImgFmt_D15S1
+	32, // ImgFmt_D24S8
+	32, // ImgFmt_D24FS8
 	64, // ImgFmt_D32FS8X24
 
 	4,	// ImgFmt_DXT1
@@ -350,17 +353,17 @@ int8 gMFImageAutoFormat[MFRD_Max][0x40] =
 		-1,
 		-1,
 		-1,
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
-		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectFastest
 		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectHDR
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
-		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectFastest
 		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_SelectNoAlpha | ImgFmt_SelectHDR
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
-		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
-		ImgFmt_D16, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectDefault
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectNicest
+		ImgFmt_D24S8, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectFastest
 		ImgFmt_D32F, // ImgFmt_SelectDepth | ImgFmt_Select1BitAlpha | ImgFmt_SelectHDR
 		-1,
 		-1,
