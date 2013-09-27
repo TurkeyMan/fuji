@@ -1,24 +1,23 @@
 #include "Fuji.h"
 
-#if MF_RENDERER == MF_DRIVER_D3D11 || defined(MF_RENDERPLUGIN_D3D11)
+#if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
 
-#if defined(MF_RENDERPLUGIN_D3D11)
-	#define MFMat_Effect_RegisterMaterial MFMat_Effect_RegisterMaterial_D3D11
-	#define MFMat_Effect_UnregisterMaterial MFMat_Effect_UnregisterMaterial_D3D11
-	#define MFMat_Effect_Begin MFMat_Effect_Begin_D3D11
-	#define MFMat_Effect_CreateInstancePlatformSpecific MFMat_Effect_CreateInstancePlatformSpecific_D3D11
-	#define MFMat_Effect_DestroyInstancePlatformSpecific MFMat_Effect_DestroyInstancePlatformSpecific_D3D11
+#if defined(MF_RENDERPLUGIN_OPENGL)
+	#define MFMat_Effect_RegisterMaterial MFMat_Effect_RegisterMaterial_OpenGL
+	#define MFMat_Effect_UnregisterMaterial MFMat_Effect_UnregisterMaterial_OpenGL
+	#define MFMat_Effect_Begin MFMat_Effect_Begin_OpenGL
+	#define MFMat_Effect_CreateInstancePlatformSpecific MFMat_Effect_CreateInstancePlatformSpecific_OpenGL
+	#define MFMat_Effect_DestroyInstancePlatformSpecific MFMat_Effect_DestroyInstancePlatformSpecific_OpenGL
 #endif
 
 #include "MFRenderState_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
-#include "../MFRenderer_D3D11.h"
 #include "Materials/MFMat_Effect.h"
-#include "MFEffect_Internal.h"
+#include "MFShader_Internal.h"
 
-extern ID3D11Device* g_pd3dDevice;
-extern ID3D11DeviceContext* g_pImmediateContext;
+#include "../MFOpenGL.h"
+
 
 int MFMat_Effect_RegisterMaterial(MFMaterialType *pType)
 {

@@ -1,23 +1,20 @@
+#pragma once
 #if !defined(_MFMAT_EFFECT_H)
 #define _MFMAT_EFFECT_H
 
-#if defined(MF_WINDOWS)
-#include <d3dx9.h>
-#endif
+#include "MFEffect.h"
 
 struct MFMat_Effect_Data
 {
-#if defined(MF_WINDOWS)
-	ID3DXEffect *pEffect;
-#else
-	void *pEffect;
-#endif
+	MFEffect *pEffect;
 };
 
 int       MFMat_Effect_RegisterMaterial(MFMaterialType *pType);
 void      MFMat_Effect_UnregisterMaterial();
 void      MFMat_Effect_CreateInstance(MFMaterial *pMaterial);
 void      MFMat_Effect_DestroyInstance(MFMaterial *pMaterial);
+void      MFMat_Effect_CreateInstancePlatformSpecific(MFMaterial *pMaterial);
+void      MFMat_Effect_DestroyInstancePlatformSpecific(MFMaterial *pMaterial);
 void      MFMat_Effect_Update(MFMaterial *pMaterial);
 void      MFMat_Effect_BuildStateBlock(MFMaterial *pMaterial);
 int       MFMat_Effect_Begin(MFMaterial *pMaterial, MFRendererState &state);
