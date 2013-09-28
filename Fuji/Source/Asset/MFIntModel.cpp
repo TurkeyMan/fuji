@@ -24,6 +24,7 @@ static const char *gFileExtensions[] =
 	".memd2",
 
 	// assimp formats
+	".fbx",
 	".blend",
 	".3ds",
 	".dxf",

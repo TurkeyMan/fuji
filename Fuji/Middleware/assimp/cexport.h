@@ -95,15 +95,21 @@ ASSIMP_API const C_STRUCT aiExportFormatDesc* aiGetExportFormatDescription( size
 
 
 // --------------------------------------------------------------------------------
-/** Create a modifyable copy of a scene.
+/** Create a modifiable copy of a scene.
  *  This is useful to import files via Assimp, change their topology and 
  *  export them again. Since the scene returned by the various importer functions
- *  is const, a modifyable copy is needed.
+ *  is const, a modifiable copy is needed.
  *  @param pIn Valid scene to be copied
- *  @param pOut Receives a modifyable copy of the scene.
+ *  @param pOut Receives a modifyable copy of the scene. Use aiFreeScene() to
+ *    delete it again.
  */
 ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn, 
 	C_STRUCT aiScene** pOut);
+
+
+// --------------------------------------------------------------------------------
+/** Frees a scene copy created using aiCopyScene() */
+ASSIMP_API void aiFreeScene(const C_STRUCT aiScene* pIn);
 
 // --------------------------------------------------------------------------------
 /** Exports the given scene to a chosen file format and writes the result file(s) to disk.
@@ -138,6 +144,8 @@ ASSIMP_API void aiCopyScene(const C_STRUCT aiScene* pIn,
 *   the #aiProcess_Triangulate flag, most export formats support only
 *   triangulate data so they would run the step anyway.
 * @return a status code indicating the result of the export
+* @note Use aiCopyScene() to get a modifiable copy of a previously
+*   imported scene.
 */
 ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 
@@ -157,6 +165,8 @@ ASSIMP_API aiReturn aiExportScene( const C_STRUCT aiScene* pScene,
 * @param pPreprocessing Please see the documentation for #aiExportScene
 * @return a status code indicating the result of the export
 * @note Include <aiFileIO.h> for the definition of #aiFileIO.
+* @note Use aiCopyScene() to get a modifiable copy of a previously
+*   imported scene.
 */
 ASSIMP_API aiReturn aiExportSceneEx( const C_STRUCT aiScene* pScene, 
 	const char* pFormatId, 

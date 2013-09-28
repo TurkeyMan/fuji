@@ -209,7 +209,7 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 
 	unsigned int options = aiProcess_ConvertToLeftHanded		|
 							aiProcess_FlipWindingOrder			|
-//							aiProcess_CalcTangentSpace			| 
+//							aiProcess_CalcTangentSpace			|
 							aiProcess_Triangulate				|
 							aiProcess_GenUVCoords				|
 							aiProcess_JoinIdenticalVertices		|

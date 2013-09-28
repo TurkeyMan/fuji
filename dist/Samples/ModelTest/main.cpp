@@ -60,8 +60,6 @@ void Game_Init()
 	// load model
 	pModel = MFModel_CreateWithAnimation("astro");
 	MFDebug_Assert(pModel, "Couldn't load mesh!");
-
-	MFEffect *pEffect = MFEffect_Create("test.mfx");
 }
 
 void Game_Update()

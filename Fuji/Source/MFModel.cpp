@@ -254,7 +254,7 @@ static MFModelTemplate* MFModel_CreateFromSourceData(const char *pFilename, size
 	// try to load from source data
 	const char * const pExt[] = {
 		/* buiultin formats */	".f3d", ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".memd2",
-		/* AssImp formats */	".blend", ".3ds", ".dxf", ".lwo", ".lws", ".ms3d", ".mdl", ".pk3", ".mdc", ".md5", ".smd", ".vta", ".m3", ".3d",
+		/* AssImp formats */	".fbx", ".blend", ".3ds", ".dxf", ".lwo", ".lws", ".ms3d", ".mdl", ".pk3", ".mdc", ".md5", ".smd", ".vta", ".m3", ".3d",
 		NULL };
 
 	// first try and see if the filename has an extension to begin with...

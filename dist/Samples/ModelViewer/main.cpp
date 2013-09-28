@@ -19,7 +19,7 @@ MFSystemCallbackFunction pInitFujiFS = NULL;
 
 MFRenderer *pRenderer = NULL;
 
-MFModel *pModel;
+MFModel *pModel = NULL;
 
 MFArray<MFString> models;
 int menuIndex = 0;
@@ -41,6 +41,7 @@ const char* ppFormats[] =
 	".memd2",
 
 	// assimp formats
+	".fbx",
 	".blend",
 	".3ds",
 	".dxf",
@@ -126,8 +127,6 @@ void Game_Init()
 	MFRenderer_SetRenderLayerSet(pRenderer, &layerSet);
 
 	Scan("data:");
-
-//	MFEffect *pEffect = MFEffect_Create("test.mfx");
 }
 
 void Game_Update()
@@ -151,7 +150,10 @@ void Game_Update()
 		if(MFInput_WasPressed(Key_Escape, IDD_Keyboard))
 		{
 			if(pModel)
+			{
 				MFModel_Destroy(pModel);
+				pModel = NULL;
+			}
 
 			models.clear();
 			Scan("data:");
@@ -162,37 +164,40 @@ void Game_Update()
 			return;
 		}
 
-		if(MFInput_Read(Mouse_LeftButton, IDD_Mouse) > 0.f)
+		if(pModel)
 		{
-			yaw += -MFInput_Read(Mouse_XDelta, IDD_Mouse) * 0.02f;
-			pitch += -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.015f;
-		}
-		if(MFInput_Read(Mouse_MiddleButton, IDD_Mouse) > 0.f)
-		{
-			zoom *= 1.f + -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.02f;
-		}
+			if(MFInput_Read(Mouse_LeftButton, IDD_Mouse) > 0.f)
+			{
+				yaw += -MFInput_Read(Mouse_XDelta, IDD_Mouse) * 0.02f;
+				pitch += -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.015f;
+			}
+			if(MFInput_Read(Mouse_MiddleButton, IDD_Mouse) > 0.f)
+			{
+				zoom *= 1.f + -MFInput_Read(Mouse_YDelta, IDD_Mouse) * 0.02f;
+			}
 
-		// calculate a spinning world matrix
-		MFMatrix world;
-		world.SetTranslation(MakeVector(0, -0.25f, 1) * zoom);
-		world.RotateY(yaw);
-		world.RotateX(pitch);
+			// calculate a spinning world matrix
+			MFMatrix world;
+			world.SetTranslation(MakeVector(0, -0.25f, 1) * zoom);
+			world.RotateY(yaw);
+			world.RotateX(pitch);
 
-		// set world matrix to the model
-		MFModel_SetWorldMatrix(pModel, world);
+			// set world matrix to the model
+			MFModel_SetWorldMatrix(pModel, world);
 
-		// advance the animation
-		MFAnimation *pAnim = MFModel_GetAnimation(pModel);
-		if(pAnim)
-		{
-			float start, end;
-			MFAnimation_GetFrameRange(pAnim, &start, &end);
+			// advance the animation
+			MFAnimation *pAnim = MFModel_GetAnimation(pModel);
+			if(pAnim)
+			{
+				float start, end;
+				MFAnimation_GetFrameRange(pAnim, &start, &end);
 	
-			static float time = 0.f;
-			time += MFSystem_TimeDelta();// * 500;
-			while(time >= end)
-				time -= end;
-			MFAnimation_SetFrame(pAnim, time);
+				static float time = 0.f;
+				time += MFSystem_TimeDelta();// * 500;
+				while(time >= end)
+					time -= end;
+				MFAnimation_SetFrame(pAnim, time);
+			}
 		}
 	}
 }
@@ -237,7 +242,8 @@ void Game_Draw()
 
 void Game_Deinit()
 {
-	MFModel_Destroy(pModel);
+	if(pModel)
+		MFModel_Destroy(pModel);
 
 	MFRenderer_Destroy(pRenderer);
 }

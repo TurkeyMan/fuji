@@ -15,6 +15,7 @@ enum MFIntModelFormat
 	MFIMF_MEMD2,	// ManuEngine Model 2
 
 	// via assimp
+	MFIMF_FBX,		// FBX
 	MFIMF_BLEND,	// Blender
 	MFIMF_3DS,		// 3DSMax
 	MFIMF_DXF,		// AutoCAD DXF
