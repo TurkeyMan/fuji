@@ -8,60 +8,75 @@ public import fuji.fuji;
 */
 enum MFImageFormat
 {
-	Unknown = -1, /**< Unknown texture format */
+	Unknown = -1,	/**< Unknown image format */
 
-	A8R8G8B8,	/**< 32bit BGRA format */
-	A8B8G8R8,	/**< 32bit RGBA format */
-	B8G8R8A8,	/**< 32bit ARGB format */
-	R8G8B8A8,	/**< 32bit ABGR format */
+	A8R8G8B8,		/**< 32bit BGRA format */
+	A8B8G8R8,		/**< 32bit RGBA format */
+	B8G8R8A8,		/**< 32bit ARGB format */
+	R8G8B8A8,		/**< 32bit ABGR format */
 
-	R8G8B8,	/**< 24bit BGR format */
-	B8G8R8,	/**< 24bit RGB format */
+	R8G8B8,			/**< 24bit BGR format */
+	B8G8R8,			/**< 24bit RGB format */
 
-	A2R10G10B10,	/**< 32bit BGRA format with 10 bits per colour channel */
-	A2B10G10R10,	/**< 32bit RGBA format with 10 bits per colour channel */
+	A2R10G10B10,		/**< 32bit BGRA format with 10 bits per colour channel */
+	A2B10G10R10,		/**< 32bit RGBA format with 10 bits per colour channel */
 
-	A16B16G16R16, /**< 64bit RGBA format with 16 bits per colour channel */
+	A16B16G16R16,	/**< 64bit RGBA format with 16 bits per colour channel */
 
-	R5G6B5,		/**< 16bit BGR format with no alpha */
-	R6G5B5,		/**< 16bit BGR format with no alpha and 6 bits for red */
-	B5G6R5,		/**< 16bit RGB format with no alpha */
+	R5G6B5,			/**< 16bit BGR format with no alpha */
+	R6G5B5,			/**< 16bit BGR format with no alpha and 6 bits for red */
+	B5G6R5,			/**< 16bit RGB format with no alpha */
 
-	A1R5G5B5,	/**< 16bit BGRA format with 1 bit alpha */
-	R5G5B5A1,	/**< 16bit ABGR format with 1 bit alpha */
-	A1B5G5R5,	/**< 16bit RGBA format with 1 bit alpha */
+	A1R5G5B5,		/**< 16bit BGRA format with 1 bit alpha */
+	R5G5B5A1,		/**< 16bit ABGR format with 1 bit alpha */
+	A1B5G5R5,		/**< 16bit RGBA format with 1 bit alpha */
 
-	A4R4G4B4,	/**< 16bit BGRA format with 4 bits per colour channel */
-	A4B4G4R4,	/**< 16bit RGBA format with 4 bits per colour channel */
-	R4G4B4A4,	/**< 16bit ABGR format with 4 bits per colour channel */
+	A4R4G4B4,		/**< 16bit BGRA format with 4 bits per colour channel */
+	A4B4G4R4,		/**< 16bit RGBA format with 4 bits per colour channel */
+	R4G4B4A4,		/**< 16bit ABGR format with 4 bits per colour channel */
 
-	ABGR_F16,	/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
-	ABGR_F32,	/**< 128bit RGBA floating point format */
+	ABGR_F16,		/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
+	ABGR_F32,		/**< 128bit RGBA floating point format */
 
-	R11G11B10_F,/**< 32bit RGB floating point format - each component has 5bit exponent, no sign */
-	R9G9B9_E5,	/**< 32bit RGB floating point format with shared exponent, no sign */
+	R11G11B10_F,		/**< 32bit RGB floating point format - each component has 5bit exponent, no sign */
+	R9G9B9_E5,		/**< 32bit RGB floating point format with shared exponent, no sign */
 
-	I8,			/**< 8bit paletted format */
-	I4,			/**< 4bit paletted format */
+	I8,				/**< 8bit paletted format */
+	I4,				/**< 4bit paletted format */
 
-	D16,		/**< 16bit depth format */
-	D15S1,		/**< 15bit depth format with 1bit stencil */
-	D24X8,		/**< 24bit depth format */
-	D24S8,		/**< 24bit depth format with 8bit stencil */
-	D24FS8,		/**< 24bit floating point depth format with 8bit stencil */
-	D32,		/**< 32bit depth format */
-	D32F,		/**< 32bit floating point depth format */
-	D32FS8X24,	/**< 32bit floating point depth format with 8bit stencil */
+	D16,				/**< 16bit depth format */
+	D24X8,			/**< 24bit depth format */
+	D32,				/**< 32bit depth format */
+	D32F,			/**< 32bit floating point depth format */
 
-	DXT1,		/**< Compressed DXT1 texture */
-	DXT2,		/**< Compressed DXT2 texture */
-	DXT3,		/**< Compressed DXT3 texture */
-	DXT4,		/**< Compressed DXT4 texture */
-	DXT5,		/**< Compressed DXT5 texture */
+	D15S1,			/**< 15bit depth format with 1bit stencil */
+	D24S8,			/**< 24bit depth format with 8bit stencil */
+	D24FS8,			/**< 24bit floating point depth format with 8bit stencil */
+	D32FS8X24,		/**< 32bit floating point depth format with 8bit stencil */
 
-	PSP_DXT1,	/**< Special DXT1 for PSP */
-	PSP_DXT3,	/**< Special DXT3 for PSP */
-	PSP_DXT5,	/**< Special DXT5 for PSP */
+	DXT1,			/**< Compressed DXT1/BC1 format */
+	DXT2,			/**< Compressed DXT2 format */
+	DXT3,			/**< Compressed DXT3/BC2 format */
+	DXT4,			/**< Compressed DXT4 format */
+	DXT5,			/**< Compressed DXT5/BC3 format */
+//	ATI1,			/**< Compressed 3Dc+/BC4 format */
+//	ATI2,			/**< Compressed 3Dc/DXN/BC5 format */
+//	BPTC_F,			/**< Compressed BPTC_FLOAT/BC6H floating point format */
+//	BPTC,			/**< Compressed BPTC/BC7 format */
+//	CTX1,			/**< Compressed CTX1 format */
+//	ETC1,			/**< Compressed ETC1 format */
+//	ETC2,			/**< Compressed ETC2 format */
+//	EAC,				/**< Compressed EAC format */
+//	PVRTC,			/**< Compressed PVRTC format */
+//	PVRTC2,			/**< Compressed PVRTC2 format */
+//	ATCRGB,			/**< Compressed ATITC RGB format */
+//	ATCRGBA_EXPLICIT,/**< Compressed ATITC RGBA format with explicit alpha */
+//	ATCRGBA,			/**< Compressed ATITC RGBA format */
+//	ASTC,			/**< Compressed ASTC format */
+
+	PSP_DXT1,		/**< Special DXT1 for PSP */
+	PSP_DXT3,		/**< Special DXT3 for PSP */
+	PSP_DXT5,		/**< Special DXT5 for PSP */
 
 	// platform specific swizzled formats
 	XB_A8R8G8B8s,	/**< 32bit BGRA format, swizzled for XBox */
@@ -83,20 +98,27 @@ enum MFImageFormat
 	PSP_A1B5G5R5s,	/**< 16bit RGBA format, swizzled for PSP */
 	PSP_A4B4G4R4s,	/**< 16bit RGBA format, swizzled for PSP */
 
-	PSP_I8s,		/**< 8bit paletted format, swizzled for PSP */
-	PSP_I4s,		/**< 4bit paletted format, swizzled for PSP */
+	PSP_I8s,			/**< 8bit paletted format, swizzled for PSP */
+	PSP_I4s,			/**< 4bit paletted format, swizzled for PSP */
 
 	PSP_DXT1s,		/**< DXT1, swizzled for PSP */
 	PSP_DXT3s,		/**< DXT3, swizzled for PSP */
 	PSP_DXT5s,		/**< DXT5, swizzled for PSP */
 
-	Max,			/**< Max texture format */
+	Max,				/**< Max image format */
 
-	SelectNicest = 0x1000,			/**< Select the nicest format. */
-	SelectNicest_NoAlpha = 0x1001,	/**< Select the nicest format with no alpha channel. */
-	SelectFastest = 0x1002,			/**< Select the fastest format. */
-	SelectFastest_Masked = 0x1003,	/**< Select the fastest format requiring only a single bit of alpha. */
-	SelectFastest_NoAlpha = 0x1004	/**< Select the fastest format with no alpha channel. */
+	SelectDefault = 0x1000,		/**< Select the default format. It will be a format that performs well without sacrificing quality, and contains alpha. */
+	SelectNicest = 0x1001,		/**< Select the nicest format. */
+	SelectFastest = 0x1002,		/**< Select the fastest format. */
+	SelectHDR = 0x1003,			/**< Select a HDR format. */
+
+	SelectNoAlpha = 0x1004,		/**< Select a format with no alpha. */
+	Select1BitAlpha = 0x1008,	/**< Select a format optimised for 1-bit alpha. */
+
+	SelectRenderTarget = 0x1010,	/**< Select a format that can be used as a render target. */
+	SelectDepth = 0x1020,		/**< Select a format that can be used as a depth target. */
+	SelectDepthStencil = 0x1030,	/**< Select a format that can be used as a depth and stencil target. */
+
 }
 
 /**
