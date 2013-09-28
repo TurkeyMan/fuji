@@ -84,7 +84,7 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 	return pShader;
 }
 
-MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShaderSource, MFShaderMacro *pMacros, const char *pName)
+MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShaderSource, MFShaderMacro *pMacros, const char *pName, const char *pFilename, int startingLine)
 {
 	MFShader *pShader = MFShader_Find(pName);
 
@@ -100,7 +100,7 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, pShaderSource))
+		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pFilename, pShaderSource))
 		{
 			MFHeap_Free(pShader);
 			return NULL;

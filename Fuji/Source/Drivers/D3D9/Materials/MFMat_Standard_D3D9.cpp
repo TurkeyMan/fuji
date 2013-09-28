@@ -208,15 +208,16 @@ static void MFMat_Standard_SetSamplerState(int sampler, MFSamplerState *pSamp)
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
-/*
+
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
-	MFEffectTechnique *pTechnique = MFEffect_GetTechnique(pData->pEffect, state);
-	if(pTechnique)
+	MFEffectTechnique *pTechnique = NULL;
+	if(pData->pEffect)
+		pTechnique = MFEffect_GetTechnique(pData->pEffect, state);
+	if(pTechnique && pTechnique->pShaders[MFST_VertexShader])
 	{
 		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pTechnique->pShaders[MFST_VertexShader]->pPlatformData);
 	}
 	else
-*/
 	{
 		if(state.getBool(MFSCB_Animated))
 			pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_a->pPlatformData);
@@ -251,7 +252,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 
 		MFMatrix mat;
 		mat.Transpose(*pUV0);
-		pd3dDevice->SetVertexShaderConstantF(r_tex, (float*)&mat, 2);
+		pd3dDevice->SetVertexShaderConstantF(r_tex, (float*)&mat, 4);
 	}
 
 	if(state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] != state.pVectorStates[MFSCV_MaterialDiffuseColour])

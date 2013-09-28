@@ -125,7 +125,7 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 							"ComputeShader"
 						};
 						const char *pName = MFStr("%s:%s_%s", pEffect->pEffectName ? pEffect->pEffectName : "Unnamed", t.pName ? t.pName : MFStr("Technique%d", a), sShaderNames[j]);
-						t.pShaders[j] = MFShader_CreateFromString((MFShaderType)j, t.pShaderSource[j], NULL, pName);
+						t.pShaders[j] = MFShader_CreateFromString((MFShaderType)j, t.pShaderSource[j], NULL, pName, pFilename);
 					}
 
 					if(!t.pShaders[j])

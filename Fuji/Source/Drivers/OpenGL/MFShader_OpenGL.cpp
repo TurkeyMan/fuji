@@ -26,14 +26,14 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 	char *pCode = NULL;
 	size_t size = 0;
 
-	if(pFilename)
-	{
-		pCode = MFFileSystem_Load(pFilename, &size, 1);
-	}
-	else if(pSource)
+	if(pSource)
 	{
 		size = MFString_Length(pSource);
 		pCode = (char*)MFCopyMemory(MFHeap_Alloc(size), pSource, size + 1);
+	}
+	else if(pFilename)
+	{
+		pCode = MFFileSystem_Load(pFilename, &size, 1);
 	}
 
 	if(pCode)

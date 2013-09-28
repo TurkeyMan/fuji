@@ -176,7 +176,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	pData->alphaRef = 1.0f;
 
-//	pData->pEffect = MFEffect_Create("standard.mfx");
+	pData->pEffect = MFEffect_Create("Mat_Standard.mfx");
 
 	MFMat_Standard_CreateInstancePlatformSpecific(pMaterial);
 }

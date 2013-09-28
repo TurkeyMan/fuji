@@ -61,7 +61,7 @@ struct MFShaderInput
 };
 
 MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros = NULL);
-MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, MFShaderMacro *pMacros = NULL, const char *pName = NULL);
+MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, MFShaderMacro *pMacros = NULL, const char *pName = NULL, const char *pFilename = NULL, int startingLine = 0);
 MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShader, size_t bytes, const char *pName = NULL);
 MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, const char *pName = NULL);
 MF_API int MFShader_Release(MFShader *pShader);

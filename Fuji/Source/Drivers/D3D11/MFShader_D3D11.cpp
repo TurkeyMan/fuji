@@ -60,15 +60,15 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 #else
 	UINT flags = D3D10_SHADER_OPTIMIZATION_LEVEL3;
 #endif
-	if(pFilename)
+	if(pSource)
 	{
-		HRESULT hr = D3DX11CompileFromFile(pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, NULL, &pProgram, &pErrors, NULL);
+		HRESULT hr = D3DX11CompileFromMemory(pSource, MFString_Length(pSource), pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, NULL, &pProgram, &pErrors, NULL);
 		if(hr != S_OK)
 			return false;
 	}
-	else if(pSource)
+	else if(pFilename)
 	{
-		HRESULT hr = D3DX11CompileFromMemory(pSource, MFString_Length(pSource), pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, NULL, &pProgram, &pErrors, NULL);
+		HRESULT hr = D3DX11CompileFromFile(pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, NULL, &pProgram, &pErrors, NULL);
 		if(hr != S_OK)
 			return false;
 	}
@@ -81,17 +81,17 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 #else
 	UINT flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-	if(pFilename)
-	{
-//		HRESULT hr = D3DCompileFromFile(pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, &pProgram, &pErrors);
-//		if(hr != S_OK)
-			return false;
-	}
-	else if(pSource)
+	if(pSource)
 	{
 		HRESULT hr = D3DCompile(pSource, MFString_Length(pSource), pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, &pProgram, &pErrors);
 //		HRESULT hr = D3DCompile2(pSource, MFString_Length(pSource), pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, &pProgram, &pErrors, NULL);
 		if(hr != S_OK)
+			return false;
+	}
+	else if(pFilename)
+	{
+//		HRESULT hr = D3DCompileFromFile(pFilename, NULL, NULL, "main", "vs_3_0", flags, 0, &pProgram, &pErrors);
+//		if(hr != S_OK)
 			return false;
 	}
 #endif
