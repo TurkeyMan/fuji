@@ -35,6 +35,27 @@ static MFShader* MFShader_Find(const char *pName)
 	return (MFShader*)MFResource_Find(MFUtil_HashString(pName) ^ 0x5ade5ade);
 }
 
+static void MFShader_FindConstants(MFShader *pShader)
+{
+	for(int a=0; a<pShader->numInputs; ++a)
+	{
+		for(int b=0; b<MFSB_CT_TypeCount; ++b)
+		{
+			int rsCount = MFStateBlock_GetNumRenderStates((MFStateBlockConstantType)b);
+			for(int c=0; c<rsCount; ++c)
+			{
+				const char *pName = MFStateBlock_GetRenderStateName((MFStateBlockConstantType)b, c);
+				if(!MFString_Compare(pShader->pInputs[a].pName, pName))
+				{
+					pShader->renderStateRequirements[b] |= 1 << c;
+					c = rsCount;
+					b = MFSB_CT_TypeCount;
+				}
+			}
+		}
+	}
+}
+
 MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros)
 {
 	MFShader *pShader = MFShader_Find(pFilename);
@@ -51,7 +72,13 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pFilename) ^ 0x5ade5ade, pFilename);
 
-		MFShader_CreatePlatformSpecific(pShader, pMacros, pFilename, NULL);
+		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pFilename, NULL))
+		{
+			MFHeap_Free(pShader);
+			return NULL;
+		}
+
+		MFShader_FindConstants(pShader);
 	}
 
 	return pShader;
@@ -73,13 +100,19 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, pShaderSource);
+		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, pShaderSource))
+		{
+			MFHeap_Free(pShader);
+			return NULL;
+		}
+
+		MFShader_FindConstants(pShader);
 	}
 
 	return pShader;
 }
 
-MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgram, size_t bytes, MFShaderMacro *pMacros, const char *pName)
+MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgram, size_t bytes, const char *pName)
 {
 	MFShader *pShader = MFShader_Find(pName);
 
@@ -97,7 +130,13 @@ MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgr
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, NULL);
+		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL))
+		{
+			MFHeap_Free(pShader);
+			return NULL;
+		}
+
+		MFShader_FindConstants(pShader);
 	}
 
 	return pShader;
@@ -121,7 +160,13 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL);
+		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL))
+		{
+			MFHeap_Free(pShader);
+			return NULL;
+		}
+
+		MFShader_FindConstants(pShader);
 	}
 
 	return pShader;

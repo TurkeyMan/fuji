@@ -125,7 +125,7 @@ bool MFSamplerState_CreatePlatformSpecific(MFSamplerState *pSS)
 	glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, glTexFilters[pSS->stateDesc.magFilter]);
 
 	bool bUseAnisotropic = pSS->stateDesc.minFilter == MFTexFilter_Anisotropic || pSS->stateDesc.magFilter == MFTexFilter_Anisotropic;
-	glSamplerParameteri(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, bUseAnisotropic ? pSS->stateDesc.maxAnisotropy : 1.f);
+	glSamplerParameteri(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, bUseAnisotropic ? pSS->stateDesc.maxAnisotropy : 1);
 
 	glSamplerParameterf(sampler, GL_TEXTURE_MIN_LOD, pSS->stateDesc.minLOD);
 	glSamplerParameterf(sampler, GL_TEXTURE_MAX_LOD, pSS->stateDesc.maxLOD);

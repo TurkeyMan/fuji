@@ -3,6 +3,7 @@
 #define _MFSHADER_INTERNAL_H
 
 #include "MFShader.h"
+#include "MFRenderState.h"
 #include "MFResource.h"
 
 // functions
@@ -30,6 +31,7 @@ struct MFShader : MFResource
 	void (*pExecute)(void *pWorkload);
 
 	// inputs
+	uint32 renderStateRequirements[MFSB_CT_TypeCount];
 	MFShaderInput *pInputs;
 	int numInputs;
 

@@ -20,7 +20,7 @@ void *gEmptyPtrListDL[2];
 // platform strings/names
 static const char * const gPlatformStrings[FP_Max] =
 {
-	"PC",
+	"WIN", 
 	"XB",
 	"LNX",
 	"PSP",
@@ -36,7 +36,8 @@ static const char * const gPlatformStrings[FP_Max] =
 	"IPH",
 	"AND",
 	"WM",
-	"NACL"
+	"NACL",
+	"WEB"
 };
 
 static const char * const gPlatformNames[FP_Max] =
@@ -57,7 +58,8 @@ static const char * const gPlatformNames[FP_Max] =
 	"iPhone",
 	"Android",
 	"Windows Mobile",
-	"Native Client"
+	"Native Client",
+	"Web JS"
 };
 
 static MFEndian gPlatformEndian[FP_Max] =

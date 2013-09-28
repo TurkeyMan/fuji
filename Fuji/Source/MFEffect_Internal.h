@@ -3,8 +3,8 @@
 #define _MFEFFECT_INTERNAL_H
 
 #include "MFEffect.h"
-#include "MFRenderState.h"
 #include "MFShader_Internal.h"
+#include "MFRenderer_Internal.h"
 #include "MFResource.h"
 
 // functions
@@ -17,20 +17,24 @@ void MFEffect_DeinitModulePlatformSpecific();
 bool MFEffect_CreatePlatformSpecific(MFEffect *pEffect);
 void MFEffect_DestroyPlatformSpecific(MFEffect *pEffect);
 
-
 struct MFEffectTechnique
 {
-	MFShader *pShaders[MFST_Max];
+	const char *pName;
 
 	// conditions...
 	uint32 bools;
+	uint32 boolValue;
 	int numVertexWeights;
 	int numLights;
 
-	// render state requirements
+	// shaders
+	MFShader *pShaders[MFST_Max];
 	uint32 renderStateRequirements[MFSB_CT_TypeCount];
 
 	// compile macros
+	const char *pShaderSource[MFST_Max];
+	bool bFromFile[MFST_Max];
+
 	MFShaderMacro *pMacros;
 	int numMacros;
 
@@ -39,10 +43,14 @@ struct MFEffectTechnique
 
 struct MFEffect : MFResource
 {
+	const char *pEffectName;
+
 	MFEffectTechnique *pTechniques;
 	int numTechniques;
 
 	void *pPlatformData;
 };
+
+MFEffectTechnique *MFEffect_GetTechnique(MFEffect *pEffect, MFRendererState &state);
 
 #endif

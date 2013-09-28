@@ -111,6 +111,8 @@ MFMaterialParameterInfo parameterInformation[] =
 	{ "celshading",		MFMatStandard_CelShading,		{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
 	{ "phong",			MFMatStandard_Phong,			{ MFParamType_None },					{ MFParamType_None },										boolValue, 1 },
 
+	{ "effect",			MFMatStandard_Effect,			{ MFParamType_None },					{ MFParamType_None },										stringValue, 1 },
+
 	{ "texture",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Enum, 0, sTextureKeys },						stringValue, 1 },
 	{ "textureaddress",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureAddreessKeys },				textureaddress, 1 },
 	{ "texturefilter",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureFilterKeys },				texturefilter, 1 },
@@ -174,6 +176,8 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 
 	pData->alphaRef = 1.0f;
 
+//	pData->pEffect = MFEffect_Create("standard.mfx");
+
 	MFMat_Standard_CreateInstancePlatformSpecific(pMaterial);
 }
 
@@ -182,6 +186,9 @@ void MFMat_Standard_DestroyInstance(MFMaterial *pMaterial)
 	MFMat_Standard_DestroyInstancePlatformSpecific(pMaterial);
 
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+
+	if(pData->pEffect)
+		MFEffect_Release(pData->pEffect);
 
 	for(uint32 a=0; a<pData->textureCount; a++)
 		MFTexture_Release(pData->textures[a].pTexture);
@@ -418,6 +425,11 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 		case MFMatStandard_Blend:
 			pData->materialType = (pData->materialType & ~MF_BlendMask) | ((int)(value) << 1);
 			break;
+		case MFMatStandard_Effect:
+			if(pData->pEffect)
+				MFEffect_Release(pData->pEffect);
+			pData->pEffect = MFEffect_Create((const char *)value);
+			break;
 		case MFMatStandard_Texture:
 			pData->textures[pData->textureCount].mipFilter = MFMatStandard_TexFilter_Linear;
 			pData->textures[pData->textureCount].minFilter = MFMatStandard_TexFilter_Linear;
@@ -573,6 +585,8 @@ uintp MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int
 			return (pData->materialType & MF_NoZRead) ? 0 : 1;
 		case MFMatStandard_ZWrite:
 			return (pData->materialType & MF_NoZWrite) ? 0 : 1;
+		case MFMatStandard_Effect:
+			return (uintp)pData->pEffect;
 		case MFMatStandard_Texture:
 			switch(argIndex)
 			{

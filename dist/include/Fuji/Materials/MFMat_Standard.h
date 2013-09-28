@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFMAT_STANDARD_H)
 #define _MFMAT_STANDARD_H
 
@@ -18,6 +19,7 @@ enum MFMat_Standard_Parameters
 	MFMatStandard_ZRead,
 	MFMatStandard_ZWrite,
 	MFMatStandard_Blend,
+	MFMatStandard_Effect,
 	MFMatStandard_Texture,
 	MFMatStandard_TextureFlags,
 	MFMatStandard_CelShading,

@@ -4,6 +4,7 @@
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFEffect_Internal.h"
+#include "MFShader_Internal.h"
 #include "Asset/MFIntEffect.h"
 #include "MFShader.h"
 
@@ -86,15 +87,20 @@ const uint8 gDataTypeProperties[MFEDT_NumDataTypes] =
 	DTP_HasMembers | DTP_Compare
 };
 
-struct MFExpression
+struct MFIntExpression
 {
+	MFIntExpression()
+	{
+		MFZeroMemory(this, sizeof(*this));
+	}
+
 	MFExpressionType expression;
 	MFExpressionDataType type;
 
 	const char *pName;
 	union
 	{
-		union
+		struct
 		{
 			bool b;
 			int i;
@@ -105,28 +111,17 @@ struct MFExpression
 		{
 			union
 			{
-				int *iv;
-				float *fv;
-				MFExpression *a;
+				int iv[16];
+				float fv[16];
+				MFIntExpression *a;
 			};
 			size_t len;
 		} array;
 		struct
 		{
-			MFExpression *pLeft, *pRight;
+			MFIntExpression *pLeft, *pRight;
 		} op;
 	};
-};
-
-struct MFIntExpression : public MFExpression
-{
-	MFIntExpression()
-	{
-		MFZeroMemory(this, sizeof(*this));
-	}
-
-	// enough for a matrix
-	char buffer[64];
 };
 
 struct MFIntEffect
@@ -134,16 +129,23 @@ struct MFIntEffect
 	struct Variable
 	{
 		const char *pName;
-		MFExpression *pValue;
+		MFIntExpression *pValue;
+
+		MFIntExpression *pSimplified; // temporary
 	};
 
 	struct Technique
 	{
 		const char *pName;
-		MFExpression *pSelection;
+		MFIntExpression *pSelection;
 
-		MFExpression *shaders[MFST_Max];
+		MFIntExpression *shaders[MFST_Max];
 		MFArray<Variable> variables;
+
+		// temporary...
+		MFIntExpression *pSimplified;
+		MFIntExpression *simplifiedShaders[MFST_Max];
+		bool bIncluded;
 	};
 
 	const char *pName;
@@ -315,12 +317,11 @@ struct IdentifierDesc
 
 Expression *GetExpression(int precedence, DSlice<Token> &tokens);
 
-static MFIntEffect *Error(const char *pMessage, const char *pFilename, int line, int col, char *pBuffer)
+static void Error(const char *pMessage, const char *pFilename, int line, int col, char *pBuffer)
 {
 	const char *pFilePath = MFFileSystem_ResolveSystemPath(pFilename);
 	MFDebug_Log(1, MFStr("%s(%d,%d): %s", pFilePath, line, col, pMessage));
 	MFHeap_Free(pBuffer);
-	return NULL;
 }
 
 Token* Expect(DSlice<Token> &tokens, ExpressionType type)
@@ -653,9 +654,10 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 
 				if(e.expression == MFExp_Function)
 				{
+					size_t numExpresions = pEffect->expressions.size();
+					e.array.a = pEffect->expressions.getPointer() + numExpresions;
 					e.array.len = gIdentifierDesc[c].numArgs;
-					e.array.a = pEffect->expressions.getPointer();
-					pEffect->expressions.resize(pEffect->expressions.size() + e.array.len);
+					pEffect->expressions.resize(numExpresions + e.array.len);
 					int i = 0;
 					Expression *pE = pExp->pRight;
 					while(pE)
@@ -700,16 +702,16 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 
 // ********************************************************************
 
-MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
+static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 {
 	size_t bytes = 0;
 	char *pBuffer = MFFileSystem_Load(pFilename, &bytes);
 
 	if(!pBuffer)
 		return NULL;
+	if(pBytes)
+		*pBytes = bytes;
 
-	// tokenise the effect file
-	MFArray<Token> tokens;
 	size_t line = 0;
 	char *pLineStart = pBuffer;
 
@@ -758,11 +760,14 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 					continue;
 				}
 				else if(c == '.' || c == '_' || MFIsAlpha(c))
-					return Error("error: Invalid number.", pFilename, line, col, pBuffer);
+				{
+					Error("error: Invalid number.", pFilename, line, col, pBuffer);
+					return NULL;
+				}
 				break;
 			}
 
-			tokens.push(Token(MFString(buffer.ptr, len), et, line, col));
+			tokens.push(Token(buffer.slice(0, len), et, line, col));
 			buffer = buffer.popFront(len);
 		}
 		else if(MFIsAlpha(c) || c == '_')
@@ -780,7 +785,7 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 				break;
 			}
 
-			Token &t = tokens.push(Token(MFString(buffer.ptr, len), ET_Identifier, line, col));
+			Token &t = tokens.push(Token(buffer.slice(0, len), ET_Identifier, line, col));
 			buffer = buffer.popFront(len);
 
 			if(t.token == "src")
@@ -797,14 +802,20 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 			for(; len<buffer.length && buffer[len] != '"'; ++len)
 			{
 				if(buffer[len] == '\n')
-					return Error("error: String not terminated.", pFilename, line, col, pBuffer);
+				{
+					Error("error: String not terminated.", pFilename, line, col, pBuffer);
+					return NULL;
+				}
 			}
 
-			tokens.push(Token(MFString(buffer.ptr, len), ET_String, line, col));
+			tokens.push(Token(buffer.slice(0, len), ET_String, line, col));
 			buffer = buffer.popFront(len);
 
 			if(buffer.length == 0)
-				return Error("error: String not terminated.", pFilename, line, col, pBuffer);
+			{
+				Error("error: String not terminated.", pFilename, line, col, pBuffer);
+				return NULL;
+			}
 			buffer = buffer.popFront();
 		}
 		else
@@ -834,11 +845,14 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 						--depth;
 				}
 
-				tokens.push(Token(MFString(buffer.ptr, len), ET_SourceCode, line, col));
+				tokens.push(Token(buffer.slice(0, len), ET_SourceCode, line, col));
 				buffer = buffer.popFront(len);
 
 				if(buffer.length == 0)
-					return Error("error: Mismatching braces?", pFilename, line, col, pBuffer);
+				{
+					Error("error: Mismatching braces?", pFilename, line, col, pBuffer);
+					return NULL;
+				}
 				buffer = buffer.popFront();
 			}
 			else
@@ -856,10 +870,26 @@ MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
 				}
 
 				if(!bFound)
-					return Error(MFStr("error: Unexpected symbol '%c'", buffer[0]), pFilename, line, col, pBuffer);
+				{
+					Error(MFStr("error: Unexpected symbol '%c'", buffer[0]), pFilename, line, col, pBuffer);
+					return NULL;
+				}
 			}
 		}
 	}
+
+	return pBuffer;
+}
+
+MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename)
+{
+	// tokenise the effect file
+	MFArray<Token> tokens;
+	size_t bytes;
+	char *pBuffer = Lex(pFilename, tokens, &bytes);
+
+	if(!pBuffer)
+		return NULL;
 
 	// parse the effect
 	DSlice<Token> tok(tokens.getPointer(), tokens.size());
@@ -950,9 +980,572 @@ MF_API void MFIntEffect_Destroy(MFIntEffect *pEffect)
 	delete pEffect;
 }
 
+static const char *pPlatforms[FP_Max] =
+{
+	"windows",
+	"xbox",
+	"linux",
+	"psp",
+	"ps2",
+	"dc",
+	"gc",
+	"osx",
+	"amiga",
+	"x360",
+	"ps3",
+	"wii",
+	"symbian",
+	"ios",
+	"android",
+	"windowsmobile",
+	"nacl",
+	"web"
+};
+
+MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MFIntEffect::Technique *pTechnique, MFArray<MFIntExpression> &expressions, MFPlatform platform)
+{
+	MFIntExpression e;
+
+	switch(exp.expression)
+	{
+		case MFExp_Immediate:
+			return exp;
+		case MFExp_Identifier:
+			if(!MFString_Compare(exp.pName, "platform"))
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_String;
+				e.value.s = pPlatforms[platform];
+			}
+			else
+			{
+				for(size_t i=0; i<effect.variables.size(); ++i)
+				{
+					if(!MFString_Compare(exp.pName, effect.variables[i].pName))
+						return *effect.variables[i].pSimplified;
+				}
+				if(pTechnique)
+				{
+					for(size_t i=0; i<pTechnique->variables.size(); ++i)
+					{
+						if(!MFString_Compare(exp.pName, pTechnique->variables[i].pName))
+							return *pTechnique->variables[i].pSimplified;
+					}
+				}
+				return exp;
+			}
+			break;
+		case MFExp_Function:
+		{
+			e = exp;
+
+			size_t numExpresions = expressions.size();
+			e.array.a = expressions.getPointer() + numExpresions;
+			expressions.resize(numExpresions + e.array.len);
+
+			for(size_t i=0; i<exp.array.len; ++i)
+				e.array.a[i] = SimplifyExpression(exp.array.a[i], effect, pTechnique, expressions, platform);
+
+			int c = MFString_Enumerate(e.pName, gpConstIdentifiers, sizeof(gpConstIdentifiers) / sizeof(gpConstIdentifiers[0]), true);
+			if(c >= 0)
+			{
+				if(gIdentifierDesc[c].et == MFExp_Function)
+				{
+					MFDebug_Assert(exp.array.len == gIdentifierDesc[c].numArgs, "Incorrect number of arguments");
+
+					bool bAllLiteral = true;
+					for(size_t i=0; i<exp.array.len; ++i)
+					{
+						if(e.array.a[i].expression != MFExp_Immediate)
+						{
+							bAllLiteral = false;
+							break;
+						}
+					}
+					if(bAllLiteral)
+					{
+						if(gIdentifierDesc[c].type == MFEDT_IntVector)
+						{
+							MFIntExpression *pA = e.array.a;
+							for(size_t i=0; i<exp.array.len; ++i)
+							{
+								if(pA[i].type == MFEDT_Int)
+									e.array.iv[i] = pA[i].value.i;
+								else
+									MFDebug_Assert(false, "Incorrect data type!");
+							}
+							e.expression = MFExp_Immediate;
+							e.type = MFEDT_IntVector;
+						}
+						else if(gIdentifierDesc[c].type == MFEDT_FloatVector)
+						{
+							MFIntExpression *pA = e.array.a;
+							for(size_t i=0; i<exp.array.len; ++i)
+							{
+								if(pA[i].type == MFEDT_Float)
+									e.array.fv[i] = pA[i].value.f;
+								else if(pA[i].type == MFEDT_Int)
+									e.array.fv[i] = (float)pA[i].value.i;
+								else
+									MFDebug_Assert(false, "Incorrect data type!");
+							}
+							e.expression = MFExp_Immediate;
+							e.type = MFEDT_FloatVector;
+						}
+					}
+				}
+			}
+			break;
+		}
+		case MFExp_LogicalNot:
+		{
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			if(r.expression == MFExp_Immediate)
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				switch(r.type)
+				{
+					case MFEDT_Int:		e.value.b = !r.value.i;						break;
+					case MFEDT_Float:	e.value.b = !r.value.f;						break;
+					case MFEDT_String:	e.value.b = !r.value.s || !r.value.s[0];	break;
+					case MFEDT_Bool:	e.value.b = !r.value.b;						break;
+					default:			MFDebug_Assert(false, "Invalid type");		break;
+				}
+			}
+			else
+			{
+				e = exp;
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_Pos:
+		{
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			MFDebug_Assert(r.type <= MFEDT_FloatVector, "Can't operate on type");
+			return r;
+		}
+		case MFExp_Neg:
+		{
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			if(r.expression == MFExp_Immediate)
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				switch(r.type)
+				{
+					case MFEDT_Int:			e.value.i = -r.value.i;					break;
+					case MFEDT_Float:		e.value.f = -r.value.f;					break;
+					case MFEDT_IntVector:	for(size_t i=0; i<e.array.len; ++i) e.array.iv[i] = -r.array.iv[i];	break;
+					case MFEDT_FloatVector:	for(size_t i=0; i<e.array.len; ++i) e.array.fv[i] = -r.array.fv[i];	break;
+					default:				MFDebug_Assert(false, "Invalid type");	break;
+				}
+			}
+			else
+			{
+				e = exp;
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_Member:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			MFDebug_Assert(r.type == MFExp_Identifier, "Expected identifier");
+			if(l.expression == MFExp_Immediate)
+			{
+				int index = -1;
+				if(!MFString_Compare(r.pName, "x")) index = 0;
+				else if(!MFString_Compare(r.pName, "y")) index = 1;
+				else if(!MFString_Compare(r.pName, "z")) index = 2;
+				else if(!MFString_Compare(r.pName, "w")) index = 3;
+
+				if(index > -1)
+				{
+					e.expression = MFExp_Immediate;
+					switch(r.type)
+					{
+						case MFEDT_IntVector:	e.type = MFEDT_Int;		e.value.i = l.array.iv[index];	break;
+						case MFEDT_FloatVector:	e.type = MFEDT_Float;	e.value.f = l.array.fv[index];	break;
+						default:				MFDebug_Assert(false, "Is not vector type");		break;
+					}
+				}
+				else if(!MFString_Compare(r.pName, "length"))
+				{
+					MFDebug_Assert(gDataTypeProperties[e.type] & DTP_HasMembers, "Does not have length property");
+					e.expression = MFExp_Immediate;
+					e.type = MFEDT_Int;
+					e.value.i = e.array.len;
+				}
+				else
+					MFDebug_Assert(false, "Unknown property");
+			}
+			else
+			{
+				e = exp;
+				e.op.pLeft = &expressions.push(l);
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_LogicalAnd:
+		case MFExp_LogicalOr:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			int lb = -1, rb = -1;
+			if(l.expression == MFExp_Immediate)
+			{
+				switch(l.type)
+				{
+					case MFEDT_Int:		lb = l.value.i != 0;					break;
+					case MFEDT_Float:	lb = l.value.f != 0.f;					break;
+					case MFEDT_String:	lb = l.value.s && l.value.s[0];			break;
+					case MFEDT_Bool:	lb = l.value.b;							break;
+					default:			MFDebug_Assert(false, "Invalid type");	break;
+				}
+			}
+			if(r.expression == MFExp_Immediate)
+			{
+				switch(r.type)
+				{
+					case MFEDT_Int:		rb = r.value.i != 0;					break;
+					case MFEDT_Float:	rb = r.value.f != 0.f;					break;
+					case MFEDT_String:	rb = r.value.s && r.value.s[0];			break;
+					case MFEDT_Bool:	rb = r.value.b;							break;
+					default:			MFDebug_Assert(false, "Invalid type");	break;
+				}
+			}
+
+			if(lb != -1 && rb != -1)
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				e.value.b = exp.expression == MFExp_LogicalAnd ? (lb && rb) : (lb || rb);
+			}
+			else if(exp.expression == MFExp_LogicalAnd && (lb == 0 || rb == 0))
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				e.value.b = false;
+			}
+			else if(exp.expression == MFExp_LogicalOr && (lb == 1 || rb == 1))
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				e.value.b = true;
+			}
+			else if(exp.expression == MFExp_LogicalAnd && (lb == 1 || rb == 1))
+			{
+				e = lb == 1 ? r : l;
+			}
+			else if(exp.expression == MFExp_LogicalOr && (lb == 0 || rb == 0))
+			{
+				e = lb == 0 ? r : l;
+			}
+			else
+			{
+				e = exp;
+				e.op.pLeft = &expressions.push(l);
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_NotEquiv:
+		case MFExp_Equiv:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			MFDebug_Assert(l.type == r.type || (l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2), "Incorrect type")
+			if(l.expression == MFExp_Immediate && r.expression == MFExp_Immediate)
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				switch(l.type)
+				{
+					case MFEDT_Int:
+						e.value.b = r.type == MFEDT_Int ? (l.value.i == r.value.i) : ((float)l.value.i == r.value.f);
+						break;
+					case MFEDT_Float:
+						e.value.b = r.type == MFEDT_Int ? (l.value.f == (float)r.value.i) : (l.value.f == r.value.f);
+						break;
+					case MFEDT_IntVector:
+					case MFEDT_FloatVector:
+						MFDebug_Assert(false, "Todo");
+						break;
+					case MFEDT_String:
+						e.value.b = !MFString_CaseCmp(l.value.s, r.value.s);
+						break;
+					case MFEDT_Bool:
+						e.value.b = l.value.b == r.value.b;
+						break;
+					default:
+						MFDebug_Assert(false, "Incorrect type");
+						break;
+				}
+			}
+			else
+			{
+				e = exp;
+				e.op.pLeft = &expressions.push(l);
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_LessEquiv:
+		case MFExp_GreaterEquiv:
+		case MFExp_Less:
+		case MFExp_Greater:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			MFDebug_Assert(l.type < MFEDT_IntVector && r.type < MFEDT_IntVector, "Incorrect type")
+			if(l.expression == MFExp_Immediate && r.expression == MFExp_Immediate)
+			{
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_Bool;
+				switch(l.type)
+				{
+					case MFEDT_Int:
+						e.value.b = r.type == MFEDT_Int ? (l.value.i < r.value.i) : ((float)l.value.i < r.value.f);
+						break;
+					case MFEDT_Float:
+						e.value.b = r.type == MFEDT_Int ? (l.value.f < (float)r.value.i) : (l.value.f < r.value.f);
+						break;
+					default:
+						MFDebug_Assert(false, "Incorrect type");
+						break;
+				}
+			}
+			else
+			{
+				e = exp;
+				e.op.pLeft = &expressions.push(l);
+				e.op.pRight = &expressions.push(r);
+			}
+			break;
+		}
+		case MFExp_Assignment:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			e = exp;
+			e.op.pLeft = &expressions.push(l);
+			e.op.pRight = &expressions.push(r);
+			break;
+		}
+		case MFExp_Add:
+		case MFExp_Sub:
+		case MFExp_Mul:
+		case MFExp_Div:
+		{
+			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
+			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
+			MFDebug_Assert(l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2, "Incorrect type")
+			MFDebug_Assert(false, "Todo");
+			break;
+		}
+	}
+
+	return e;
+}
+
+static bool GetBoolExpression(MFIntExpression &e, int *pBool, bool *pVal)
+{
+	if(e.expression == MFExp_Identifier)
+	{
+		for(int i=0; i<MFSCB_Max; ++i)
+		{
+			const char *pName = MFStateBlock_GetRenderStateName(MFSB_CT_Bool, i);
+			if(!MFString_Compare(e.pName, pName))
+			{
+				*pBool = i;
+				*pVal = true;
+				return true;
+			}
+		}
+	}
+	else if(e.expression == MFExp_LogicalNot)
+	{
+		bool isBool = GetBoolExpression(*e.op.pRight, pBool, pVal);
+		if(isBool)
+			*pVal = !*pVal;
+		return isBool;
+	}
+	else if(e.expression == MFExp_Equiv || e.expression == MFExp_NotEquiv)
+	{
+		bool isBool = GetBoolExpression(*e.op.pLeft, pBool, pVal);
+		if(isBool)
+		{
+			if(e.op.pRight->expression == MFExp_Immediate && e.op.pRight->type == MFEDT_Bool)
+			{
+				*pVal = e.op.pRight->value.b == (e.expression == MFExp_Equiv ? *pVal : !*pVal);
+				return true;
+			}
+		}
+		else
+		{
+			isBool = GetBoolExpression(*e.op.pRight, pBool, pVal);
+			if(isBool)
+			{
+				if(e.op.pLeft->expression == MFExp_Immediate && e.op.pLeft->type == MFEDT_Bool)
+				{
+					*pVal = e.op.pLeft->value.b == (e.expression == MFExp_Equiv ? *pVal : !*pVal);
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+static void FlattenSelection(MFIntExpression &e, MFEffectTechnique &t)
+{
+	// TODO: cull the flattened terms from the expression...
+
+	if(e.expression == MFExp_LogicalAnd)
+	{
+		FlattenSelection(*e.op.pLeft, t);
+		FlattenSelection(*e.op.pRight, t);
+	}
+	else
+	{
+		int boolIndex;
+		bool val;
+		if(GetBoolExpression(e, &boolIndex, &val))
+		{
+			int bit = 1 << boolIndex;
+			t.bools |= bit;
+			t.boolValue = (val ? 1 : 0) << boolIndex | (t.boolValue & ~bit);
+		}
+	}
+}
+
 MF_API void MFIntEffect_CreateRuntimeData(MFIntEffect *pEffect, MFEffect **ppOutputEffect, size_t *pSize, MFPlatform platform, size_t extraBytes)
 {
-	// flatten constants
+	MFArray<MFIntExpression> expressions;
+	expressions.reserve(pEffect->expressions.size());
 
-	// copy into final structure...
+	for(size_t i=0; i<pEffect->variables.size(); ++i)
+	{
+		MFIntExpression s = SimplifyExpression(*pEffect->variables[i].pValue, *pEffect, NULL, expressions, platform);
+		pEffect->variables[i].pSimplified = &expressions.push(s);
+	}
+
+	int numTechniques = 0;
+	for(size_t i=0; i<pEffect->techniques.size(); ++i)
+	{
+		MFIntEffect::Technique &t = pEffect->techniques[i];
+		t.bIncluded = true;
+
+		for(size_t j=0; j<t.variables.size(); ++j)
+		{
+			MFIntExpression s = SimplifyExpression(*t.variables[j].pValue, *pEffect, &t, expressions, platform);
+			t.variables[j].pSimplified = &expressions.push(s);
+		}
+
+		if(t.pSelection)
+		{
+			MFIntExpression s = SimplifyExpression(*pEffect->techniques[i].pSelection, *pEffect, &t, expressions, platform);
+			if(s.expression == MFExp_Immediate && s.type == MFEDT_Bool && !s.value.b)
+			{
+				t.bIncluded = false;
+				continue;
+			}
+
+			t.pSimplified = &expressions.push(s);
+		}
+
+		++numTechniques;
+
+		for(int j=0; j<MFST_Max; ++j)
+		{
+			if(t.shaders[j] != NULL)
+			{
+				MFIntExpression s = SimplifyExpression(*t.shaders[j], *pEffect, &t, expressions, platform);
+				t.simplifiedShaders[j] = &expressions.push(s);
+			}
+		}
+	}
+
+	size_t stringSize = MFStringCache_GetSize(pEffect->pStringCache);
+	size_t size = sizeof(MFEffect) + numTechniques*sizeof(MFEffectTechnique);
+	MFEffect *pFx = (MFEffect*)MFHeap_AllocAndZero(size + stringSize + extraBytes);
+	pFx->pTechniques = (MFEffectTechnique*)&pFx[1];
+
+	MFStringCache *pSC = MFStringCache_Create(stringSize);
+
+	// build output effect
+	if(pEffect->pName)
+		pFx->pEffectName = MFStringCache_Add(pSC, pEffect->pName);
+
+	numTechniques = 0;
+	for(size_t i=0; i<pEffect->techniques.size(); ++i)
+	{
+		MFIntEffect::Technique &t = pEffect->techniques[i];
+		if(!t.bIncluded)
+			continue;
+
+		MFEffectTechnique &et = pFx->pTechniques[numTechniques++];
+
+		if(t.pName)
+			et.pName = MFStringCache_Add(pSC, t.pName);
+
+		if(t.pSimplified)
+			FlattenSelection(*t.pSimplified, et);
+
+		for(int j=0; j<MFST_Max; ++j)
+		{
+			MFIntExpression *pE = t.simplifiedShaders[j];
+			if(!pE)
+				continue;
+
+			if(pE->expression == MFExp_Immediate && (pE->type == MFEDT_String || pE->type == MFEDT_Code))
+			{
+				et.pShaderSource[j] = MFStringCache_Add(pSC, pE->value.s);
+				et.bFromFile[j] = pE->type == MFEDT_String;
+			}
+			else
+			{
+				MFDebug_Assert(false, "Expected shader source, or filename");
+			}
+		}
+	}
+	pFx->numTechniques = numTechniques;
+
+	char *pStrings = (char*)&pFx->pTechniques[numTechniques];
+	const char *pStringCache = MFStringCache_GetCache(pSC);
+	stringSize = MFStringCache_GetSize(pSC);
+	MFCopyMemory(pStrings, pStringCache, stringSize);
+	size += stringSize;
+
+	// fix-down all the pointers...
+	uintp base = (uintp)pFx;
+	uintp stringBase = (uintp)pStringCache - ((uintp)pStrings - (uintp)pFx);
+
+	if(pFx->pEffectName)
+		(char*&)pFx->pEffectName -= stringBase;
+	for(int i=0; i<pFx->numTechniques; ++i)
+	{
+		MFEffectTechnique &et = pFx->pTechniques[i];
+		if(et.pName)
+			(char*&)et.pName -= stringBase;
+		for(int j=0; j<MFST_Max; ++j)
+		{
+			if(et.pShaderSource[j])
+				(char*&)et.pShaderSource[j] -= stringBase;
+		}
+		if(et.pMacros)
+			(char*&)et.pMacros -= base;
+	}
+	(char*&)pFx->pTechniques -= base;
+
+	MFStringCache_Destroy(pSC);
+
+	// return it to the caller
+	*ppOutputEffect = pFx;
+	*pSize = size;
 }

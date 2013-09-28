@@ -1,8 +1,10 @@
+#pragma once
 #if !defined(_MFMAT_STANDARD_INTERNAL_H)
 #define _MFMAT_STANDARD_INTERNAL_H
 
 #include "Materials/MFMat_Standard.h"
 #include "MFRenderer_Internal.h"
+#include "MFEffect.h"
 
 enum MaterialFlags
 {
@@ -90,6 +92,8 @@ struct MFMat_Standard_Data
 
 	uint16		opaque	: 1;
 	uint16		flags	: 15;
+
+	MFEffect *pEffect;
 
 	MFRasteriserState *pRasteriserState;
 	MFDepthStencilState *pDepthStencilState;

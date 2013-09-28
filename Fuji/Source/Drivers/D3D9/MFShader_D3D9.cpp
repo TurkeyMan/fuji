@@ -43,6 +43,8 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 		while(pMacros[a++].pDefine != NULL);
 	}
 
+	const char *pShaderModel = pShader->shaderType == MFST_VertexShader ? "vs_3_0" : "ps_3_0";
+
 #if defined(MF_DEBUG)
 	DWORD flags = D3DXSHADER_DEBUG | D3DXSHADER_OPTIMIZATION_LEVEL0;
 #else
@@ -50,7 +52,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 #endif
 	if(pFilename)
 	{
-		HRESULT hr = D3DXCompileShaderFromFile(MFFile_SystemPath(pFilename), pMacros ? macros : NULL, NULL, "main", "vs_2_0", flags, &pProgram, &pErrors, &pConstantTable);
+		HRESULT hr = D3DXCompileShaderFromFile(MFFileSystem_ResolveSystemPath(pFilename), pMacros ? macros : NULL, NULL, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
 
 		if(pErrors)
 		{
@@ -63,7 +65,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 	}
 	else if(pSource)
 	{
-		HRESULT hr = D3DXCompileShader(pSource, MFString_Length(pSource), pMacros ? macros : NULL, NULL, "main", "vs_2_0", flags, &pProgram, &pErrors, &pConstantTable);
+		HRESULT hr = D3DXCompileShader(pSource, MFString_Length(pSource), pMacros ? macros : NULL, NULL, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
 
 		if(pErrors)
 		{
@@ -134,6 +136,8 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 			if(count)
 			{
 				inputs[a].pName = constant[0].Name;
+				nameBytes += MFString_Length(constant[0].Name) + 1;
+
 				inputs[a].type = MFShader_IT_Unknown;
 				inputs[a].constantRegister = constant[0].RegisterIndex;
 				inputs[a].numRegisters = constant[0].RegisterCount;
@@ -172,12 +176,13 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 						inputs[a].numRows = constant[0].Rows;
 						break;
 					case D3DXPC_OBJECT:
+						MFDebug_Assert(constant[0].Type == D3DXPT_SAMPLER2D, "!!");
+						inputs[a].type = MFShader_IT_Sampler;
+						break;
 					case D3DXPC_STRUCT:
 						MFDebug_Assert(false, "??");
 						break;
 				}
-
-				nameBytes += MFString_Length(constant[0].Name) + 1;
 			}
 		}
 

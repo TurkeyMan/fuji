@@ -997,6 +997,8 @@ MF_API size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
  */
 MF_API const char* MFStateBlock_GetRenderStateName(MFStateBlockConstantType constantType, int constant);
 
+MF_API int MFStateBlock_GetNumRenderStates(MFStateBlockConstantType constantType);
+
 /**
  * Set a bool render state.
  * Sets a boolean render state.

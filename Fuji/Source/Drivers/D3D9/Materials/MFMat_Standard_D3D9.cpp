@@ -15,7 +15,7 @@
 #include "MFMaterial_Internal.h"
 #include "../MFRenderer_D3D9.h"
 #include "Materials/MFMat_Standard_Internal.h"
-#include "MFShader_Internal.h"
+#include "MFEffect_Internal.h"
 
 //#include "../Shaders/Registers.h"
 //#include "../Shaders/MatStandard_s.h"
@@ -45,27 +45,25 @@ static const DWORD sAddressModes[MFTexAddressMode_Max] =
     D3DTADDRESS_MIRRORONCE
 };
 
-#define r_wvpm 0
-#define r_wm 4
-#define r_wvm 8
-#define r_vpm 12
-#define r_tex 16
-#define r_modelColour 18
-#define r_colourMask 19
-#define r_animating 20
-#define r_numWeights 0
-#define r_animMats 46
+#define r_wm 0
+#define r_tex 40
+#define r_wvm 60
+#define r_vpm 64
+#define r_wvpm 68
+#define r_modelColour 86
+#define r_colourMask 111
+#define r_animMats 112
 
 static const char gVertexShader[] = "														\n\
-float4x4 mLocalToScreen : register(c0);														\n\
-float4x4 mLocalToWorld : register(c4);														\n\
-float4x4 mLocalToView : register(c8);														\n\
-float4x4 mWorldToScreen : register(c12);													\n\
-float4 mAnimMats[70*3] : register(c46);														\n\
-float4 mTexMatrix[2] : register(c16);														\n\
+float4x4 mLocalToWorld : register(c0);														\n\
+float4x4 mLocalToView : register(c60);														\n\
+float4x4 mWorldToScreen : register(c64);													\n\
+float4x4 mLocalToScreen : register(c68);													\n\
+float4 mAnimMats[48*3] : register(c112);													\n\
+float4 mTexMatrix[2] : register(c40);														\n\
 																							\n\
-float4 gModelColour : register(c18);														\n\
-float4 gColourMask : register(c19);															\n\
+float4 gModelColour : register(c86);														\n\
+float4 gColourMask : register(c111);														\n\
 																							\n\
 //int gNumWeights : register(i0);															\n\
 																							\n\
@@ -210,6 +208,21 @@ static void MFMat_Standard_SetSamplerState(int sampler, MFSamplerState *pSamp)
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
 	MFCALLSTACK;
+/*
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
+	MFEffectTechnique *pTechnique = MFEffect_GetTechnique(pData->pEffect, state);
+	if(pTechnique)
+	{
+		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pTechnique->pShaders[MFST_VertexShader]->pPlatformData);
+	}
+	else
+*/
+	{
+		if(state.getBool(MFSCB_Animated))
+			pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_a->pPlatformData);
+		else
+			pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_s->pPlatformData);
+	}
 
 	if(state.pMatrixStatesSet[MFSCM_WorldViewProjection] != state.pMatrixStates[MFSCM_WorldViewProjection])
 	{
@@ -424,11 +437,7 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	{
 		for(uint32 b=0; b<state.matrixBatch.numMatrices; b++)
 			MFRendererPC_SetAnimationMatrix(b, state.animation.pMatrices[state.matrixBatch.pIndices[b]]);
-
-		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_a->pPlatformData);
 	}
-	else
-		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS_s->pPlatformData);
 
 	return 0;
 }

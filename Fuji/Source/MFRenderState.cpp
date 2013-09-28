@@ -6,41 +6,41 @@
 
 static const char * const gpRenderStateNames_Matrix[] =
 {
-	"World",
-	"Camera",
-	"Projection",
-	"ShadowMap",
-	"Fuji0",
-	"Fuji1",
-	"User0",
-	"User1",
-	"User2",
-	"User3",
-	"UV0",
-	"UV1",
-	"UV2",
-	"UV3",
-	"View",
-	"WorldView",
-	"ViewProjection",
-	"WorldViewProjection",
-	"InverseWorld",
-	"InverseViewProjection"
+	"mWorld",
+	"mCamera",
+	"mProjection",
+	"mShadowMap",
+	"mFuji0",
+	"mFuji1",
+	"mUser0",
+	"mUser1",
+	"mUser2",
+	"mUser3",
+	"mUV0",
+	"mUV1",
+	"mUV2",
+	"mUV3",
+	"mView",
+	"mWorldView",
+	"mViewProjection",
+	"mWorldViewProjection",
+	"mInverseWorld",
+	"mInverseViewProjection"
 };
 static const char * const gpRenderStateNames_Vector[] =
 {
-	"Time",
-	"FogColour",
-	"FogParams1",
-	"FogParams2",
-	"RenderState",
-	"MaterialDiffuseColour",
-	"DiffuseColour",
-	"AmbientColour",
-	"Fuji0", "Fuji1", "Fuji2", "Fuji3", "Fuji4", "Fuji5", "Fuji6",
-	"LightCounts",
-	"User0", "User1", "User2", "User3", "User4", "User5", "User6", "User7",
-	"User8", "User9", "User10","User11", "User12", "User13", "User14", "User15"
+	"vTime",
+	"vFogColour",
+	"vFogParams1",
+	"vFogParams2",
+	"vRenderState",
+	"vMaterialDiffuseColour",
+	"vDiffuseColour",
+	"vAmbientColour",
+	"vFuji0", "vFuji1", "vFuji2", "vFuji3", "vFuji4", "vFuji5", "vFuji6",
+	"vLightCounts",
+	"vUser0", "vUser1", "vUser2", "vUser3", "vUser4", "vUser5", "vUser6", "vUser7",
+	"vUser8", "vUser9", "vUser10","vUser11", "vUser12", "vUser13", "vUser14", "vUser15"
 };
 static const char * const gpRenderStateNames_Texture[] =
 {
@@ -66,63 +66,63 @@ static const char * const gpRenderStateNames_Texture[] =
 };
 static const char * const gpRenderStateNames_Bool[] =
 {
-	"Animated",
-	"ZPrime",
-	"ShadowGeneration",
-	"ShadowReceiving",
-	"Opaque",
-	"AlphaTest",
-	"Fuji0",
-	"Fuji1",
-	"Fuji2",
-	"User0",
-	"User1",
-	"User2",
-	"User3",
-	"DiffuseSet",
-	"NormalMapSet",
-	"SpecularMapSet",
-	"DetailMapSet",
-	"OpacityMapSet",
-	"EnvironmentMapSet",
-	"SpecularPowerMapSet",
-	"EmissiveMapSet",
-	"LightMapSet",
-	"ShadowBufferSet",
-	"ProjectorSet",
-	"UserTex0Set",
-	"UserTex1Set",
-	"UserTex2Set",
-	"UserTex3Set",
-	"UserTex4Set",
-	"VertexTex0Set",
-	"VertexTex1Set",
-	"VertexTex2Set"
+	"bAnimated",
+	"bZPrime",
+	"bShadowGeneration",
+	"bShadowReceiving",
+	"bOpaque",
+	"bAlphaTest",
+	"bFuji0",
+	"bFuji1",
+	"bFuji2",
+	"bUser0",
+	"bUser1",
+	"bUser2",
+	"bUser3",
+	"bDiffuseSet",
+	"bNormalMapSet",
+	"bSpecularMapSet",
+	"bDetailMapSet",
+	"bOpacityMapSet",
+	"bEnvironmentMapSet",
+	"bSpecularPowerMapSet",
+	"bEmissiveMapSet",
+	"bLightMapSet",
+	"bShadowBufferSet",
+	"bProjectorSet",
+	"bUserTex0Set",
+	"bUserTex1Set",
+	"bUserTex2Set",
+	"bUserTex3Set",
+	"bUserTex4Set",
+	"bVertexTex0Set",
+	"bVertexTex1Set",
+	"bVertexTex2Set"
 };
 static const char * const gpRenderStateNames_RenderState[] =
 {
 	"BlendState",
 	"DepthStencilState",
 	"RasteriserState",
-	"DiffuseSamplerState",
-	"NormalMapSamplerState",
-	"SpecularMapSamplerState",
-	"DetailMapSamplerState",
-	"OpacityMapSamplerState",
-	"EnvironmentMapSamplerState",
-	"SpecularPowerMapSamplerState",
-	"EmissiveMapSamplerState",
-	"LightMapSamplerState",
-	"ShadowBufferSamplerState",
-	"ProjectorSamplerState",
-	"UserTex0SamplerState",
-	"UserTex1SamplerState",
-	"UserTex2SamplerState",
-	"UserTex3SamplerState",
-	"UserTex4SamplerState",
-	"VertexTex0SamplerState",
-	"VertexTex1SamplerState",
-	"VertexTex2SamplerState",
+	"sDiffuseSampler",
+	"sNormalMapSampler",
+	"sSpecularMapSampler",
+	"sDetailMapSampler",
+	"sOpacityMapSampler",
+	"sEnvironmentMapSampler",
+	"sSpecularPowerMapSampler",
+	"sEmissiveMapSampler",
+	"sLightMapSampler",
+	"sShadowBufferSampler",
+	"sProjectorSampler",
+	"sUser0Sampler",
+	"sUser1Sampler",
+	"sUser2Sampler",
+	"sUser3Sampler",
+	"sUser4Sampler",
+	"sVertex0Sampler",
+	"sVertex1Sampler",
+	"sVertex2Sampler",
 	"VertexDeclaration",
 	"VertexBuffer0",
 	"VertexBuffer1",
@@ -136,7 +136,8 @@ static const char * const gpRenderStateNames_RenderState[] =
 };
 static const char * const gpRenderStateNames_Misc[] =
 {
-	"AnimationMatrices",
+	"mAnimationMatrices",
+	"MatrixBatch",
 	"Light0",
 	"Light1",
 	"Light2",
@@ -169,11 +170,27 @@ static const char * const *gppRenderStateNames[MFSB_CT_TypeCount] =
 	NULL
 };
 
+static const uint8 gConstantCount[MFSB_CT_TypeCount] =
+{
+	MFSCB_Max,
+	MFSCV_Max,
+	MFSCM_Max,
+	MFSCT_Max,
+	MFSCRS_Max,
+	MFSCM_Max,
+	0,
+	0
+};
+
 MF_API const char* MFStateBlock_GetRenderStateName(MFStateBlockConstantType constantType, int constant)
 {
 	return gppRenderStateNames[constantType][constant];
 }
 
+MF_API int MFStateBlock_GetNumRenderStates(MFStateBlockConstantType constantType)
+{
+	return gConstantCount[constantType];
+}
 
 static void MFBlendState_Destroy(MFResource *pRes)
 {
