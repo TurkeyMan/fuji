@@ -932,6 +932,30 @@ static const int gXDrumsButtonID[GamepadType_Max] =
 	-1		// Button_Home
 };
 
+static const int gOUYAButtonID[GamepadType_Max] =
+{
+	0,	// Button_A
+	3,	// Button_B
+	1,	// Button_X
+	2,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	AID_Z | AID_Full,	// Button_LeftTrigger
+	AID_Rz | AID_Full,	// Button_RightTrigger
+	-1,	// Button_Start
+	-1,	// Button_Back
+	6,	// Button_LeftThumb
+	7,	// Button_RightThumb
+	8,	// Button_DUp
+	9,	// Button_DDown
+	10,	// Button_DLeft
+	11,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rx, // Button_ThumbRX
+	AID_Ry | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
+};
 
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
@@ -1448,6 +1472,31 @@ static const char * gAirFlo[GamepadType_Max] =
 	"9",            // Button_Back
 	"L-Thumb",      // Button_LeftThumb
 	"R-Thumb",      // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
+};
+
+static const char * gOUYAButtonNames[GamepadType_Max] =
+{
+	"O",            // Button_A
+	"A",            // Button_B
+	"U",            // Button_X
+	"Y",            // Button_Y
+	"L1",           // Button_White
+	"R2",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Unavailable",  // Button_Start
+	"Unavailable",  // Button_Back
+	"L3",           // Button_LeftThumb
+	"R3",           // Button_RightThumb
 	"DPad Up",      // Button_DUp
 	"DPad Down",    // Button_DDown
 	"DPad Left",    // Button_DLeft
@@ -2229,6 +2278,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gGH4PS3DrumsButtonID,
 		gPS3GH4DrumsButtonNames,
 		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
+		&gGamepadDescriptors[65]
+	},
+
+	// OUYA controller
+	{
+		"OUYA Gamepad",
+		"OUYA Game Controller",
+		0x2836, 0x0001,
+		gOUYAButtonID,
+		gOUYAButtonNames,
+		0,
 		NULL
 	}
 
