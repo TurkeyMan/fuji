@@ -301,8 +301,8 @@ inline char* MFString_GetFileExtension(const char *pFilename)
 
 inline bool MFString_EndsWith(const char *pString, const char *pEnd)
 {
-	int stringLen = MFString_Length(pString);
-	int endLen = MFString_Length(pEnd);
+	size_t stringLen = MFString_Length(pString);
+	size_t endLen = MFString_Length(pEnd);
 
 	if(endLen > stringLen)
 		return false;

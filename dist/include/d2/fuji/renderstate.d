@@ -552,7 +552,7 @@ extern (C) size_t MFStateBlock_GetAllocatedBytes(MFStateBlock *pStateBlock);
 extern (C) size_t MFStateBlock_GetUsedBytes(MFStateBlock *pStateBlock);
 extern (C) size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
 
-extern (C) const char* MFStateBlock_GetRenderStateName(MFStateBlockConstantType ct, int constant);
+extern (C) const(char)* MFStateBlock_GetRenderStateName(MFStateBlockConstantType ct, int constant);
 
 extern (C) bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state);
 extern (C) bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, ref const MFVector state);

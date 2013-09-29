@@ -38,7 +38,7 @@ MF_API const char* MFCommandLine_GetString(const char *pParameter)
 		return NULL;
 
 	const char *pT = gpCommandLineBuffer;
-	int len = MFString_Length(pParameter);
+	size_t len = MFString_Length(pParameter);
 
 	const char *pArgStart = NULL;
 	int argLen = 0;

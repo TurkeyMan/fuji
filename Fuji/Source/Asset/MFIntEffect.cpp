@@ -712,7 +712,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 	if(pBytes)
 		*pBytes = bytes;
 
-	size_t line = 0;
+	int line = 0;
 	char *pLineStart = pBuffer;
 
 	DString buffer(pBuffer, bytes);
@@ -1177,7 +1177,7 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 					MFDebug_Assert(gDataTypeProperties[e.type] & DTP_HasMembers, "Does not have length property");
 					e.expression = MFExp_Immediate;
 					e.type = MFEDT_Int;
-					e.value.i = e.array.len;
+					e.value.i = (int)e.array.len;
 				}
 				else
 					MFDebug_Assert(false, "Unknown property");

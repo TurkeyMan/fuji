@@ -110,7 +110,7 @@ extern (C) void MFView_SetCameraMatrix(ref const(MFMatrix) cameraMatrix);
 * @return An MFStateBlock which represents the current view state.
 * @see MFStateBlock_Create()
 */
-extern (C) const MFStateBlock* MFView_GetViewState();
+extern (C) const(MFStateBlock)* MFView_GetViewState();
 
 /**
 * Gets the camera matrix.
