@@ -284,6 +284,10 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 	{
 		aiAnimation &animation = *pScene->mAnimations[i];
 
+		double frameDelta = 1.0;
+		if(animation.mTicksPerSecond != 0.0)
+			frameDelta = 1.0 / animation.mTicksPerSecond;
+
 		MFDebug_Log(0, MFStr("Animation %d: %s", i, animation.mName.C_Str()));
 
 		for(uint32 j=0; j<animation.mNumChannels; ++j)
@@ -299,7 +303,7 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 			F3DAnimation &anim = animc.anims.push();
 			anim.boneID = id;
 			anim.minTime = 0.f;
-			anim.maxTime = (float)animation.mDuration;
+			anim.maxTime = (float)(animation.mDuration*frameDelta);
 
 			for(uint32 p=0,r=0,s=0; p<channel.mNumPositionKeys || r<channel.mNumRotationKeys || s<channel.mNumScalingKeys; )
 			{
@@ -317,7 +321,7 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 				if(bKeyRot)
 				{
 					mat = aiMatrix4x4(rk.mValue.GetMatrix());
-					frame.time = (float)rk.mTime;
+					frame.time = (float)(rk.mTime*frameDelta);
 					++r;
 				}
 				if(bKeyScale)
@@ -331,7 +335,7 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 					mat.a3 *= sk.mValue.z;
 					mat.b3 *= sk.mValue.z;
 					mat.c3 *= sk.mValue.z;
-					frame.time = (float)sk.mTime;
+					frame.time = (float)(sk.mTime*frameDelta);
 					++s;
 				}
 				if(bKeyPos)
@@ -339,7 +343,7 @@ void ParseAssimpMesh(char *pFile, size_t size, const char *pExt, F3DFile *_pMode
 					mat.a4 = pk.mValue.x;
 					mat.b4 = pk.mValue.y;
 					mat.c4 = pk.mValue.z;
-					frame.time = (float)pk.mTime;
+					frame.time = (float)(pk.mTime*frameDelta);
 					++p;
 				}
 

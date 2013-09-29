@@ -447,7 +447,8 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
 	bKeepAnimation = true;
 
 	MFModel *pModel = MFModel_Create(pFilename);
-	MFAnimation_Create(pAnimationFilename ? pAnimationFilename : pFilename, pModel);
+	if(pModel)
+		MFAnimation_Create(pAnimationFilename ? pAnimationFilename : pFilename, pModel);
 
 	if(bKeepAnimation)
 	{
