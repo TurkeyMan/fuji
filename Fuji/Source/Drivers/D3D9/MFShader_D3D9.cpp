@@ -92,7 +92,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 			pSource = pNewSource;
 		}
 
-		HRESULT hr = D3DXCompileShader(pSource, sourceLen, pMacros ? macros : NULL, &includeHandler, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
+		HRESULT hr = D3DXCompileShader(pSource, (UINT)sourceLen, pMacros ? macros : NULL, &includeHandler, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
 
 		if(pErrors)
 		{

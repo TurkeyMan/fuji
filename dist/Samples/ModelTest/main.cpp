@@ -83,7 +83,7 @@ void Game_Update()
 		MFAnimation_GetFrameRange(pAnim, &start, &end);
 	
 		static float time = 0.f;
-		time += MFSystem_TimeDelta();// * 500;
+		time += MFSystem_TimeDelta();
 		while(time >= end)
 			time -= end;
 		MFAnimation_SetFrame(pAnim, time);

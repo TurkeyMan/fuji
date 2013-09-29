@@ -246,7 +246,7 @@ MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int
 			MFRenderer_D3D9_SetDebugName(pD3DTex, pName);
 		}
 
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
 		if(pName)

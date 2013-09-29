@@ -1,8 +1,3 @@
--- add dependent projects
-if _OS ~= "linux" then
-	include "../Middleware/libmad/"
-end
-
 fujiVersion = "0.7.1"
 
 projName = "Fuji"
@@ -27,9 +22,7 @@ project (projName)
 
 	-- setup paths --
 	includedirs { "../Source", "../../dist/include/Fuji" }
---	libdirs { "../../dist/lib" }
 	objdir "../Build"
-	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }

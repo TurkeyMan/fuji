@@ -51,7 +51,7 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 
 	if(!pEffect)
 	{
-		int nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
+		size_t nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
 
 		size_t fileSize;
 		pEffect = (MFEffect*)MFFileSystem_Load(MFStr("%s.bfx", pFilename), &fileSize, nameLen);

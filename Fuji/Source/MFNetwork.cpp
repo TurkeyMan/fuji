@@ -274,7 +274,7 @@ int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int
 	pDevice->deviceID = deviceID;
 
 	const char *pDeviceName = MFInput_GetDeviceName(device, deviceID);
-	int len = MFString_Length(pDeviceName);
+	size_t len = MFString_Length(pDeviceName);
 	MFDebug_Assert(len < 128, "Device name too long...");
 
 	InitEvent *pInit = (InitEvent*)buffer;
@@ -452,7 +452,7 @@ int MFNetwork_SendEmail(const char *pEmailText, const char *pSender, const char 
 
 		MFSocket s = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 		MFSockets_Connect(s, *pAddrInfo->pAddress);
-		MFSockets_Send(s, buffer, MFString_Length(buffer), 0);
+		MFSockets_Send(s, buffer, (int)MFString_Length(buffer), 0);
 		MFSockets_Recv(s, buffer, sizeof(buffer), 0);
 		MFSockets_CloseSocket(s);
 	}

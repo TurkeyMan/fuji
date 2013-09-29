@@ -559,7 +559,7 @@ MFMount* MFFileSystem_FindVolume(const char *pVolumeName)
 	return NULL;
 }
 
-int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, int *pStringLengths)
+static int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, bool flatten, size_t *pStringLengths)
 {
 	MFFindData findData;
 	MFFind *hFind;
@@ -640,7 +640,7 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 					{
 						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.pFilename);
 
-						int stringCacheSize = 0;
+						size_t stringCacheSize = 0;
 						pToc->size = MFFileSystem_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
 
 						if(pToc->size)
@@ -654,7 +654,7 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 							pToc->pParent = pParent;
 							pToc->size = 0;
 
-							int sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
+							size_t sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
 							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
 
 							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
@@ -757,7 +757,7 @@ int MFFileSystem_AddVolume(MFMount *pMount)
 		MFFileSystem_FindClose(hFind);
 
 		// build the TOC
-		int stringCacheSize = 0;
+		size_t stringCacheSize = 0;
 		pMount->numFiles = MFFileSystem_GetNumEntries(pFindPath, recursive, flatten, &stringCacheSize);
 
 		int sizeOfToc = sizeof(MFTOCEntry)*pMount->numFiles;
@@ -863,11 +863,10 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 	MFCALLSTACK;
 
 	const char *pSearchString = pFilename;
-	int nameLen = MFString_Length(pFilename);
-	int a;
+	size_t nameLen = MFString_Length(pFilename);
 
 	bool isDirectory = false;
-	for(a=0; a<nameLen; a++)
+	for(size_t a=0; a<nameLen; a++)
 	{
 		if(pFilename[a] == '/')
 		{
@@ -878,7 +877,7 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 		}
 	}
 
-	for(a=0; a<numEntries; a++)
+	for(int a=0; a<numEntries; a++)
 	{
 		if(!MFString_CaseCmp(pSearchString, pEntry[a].pName))
 		{
@@ -926,8 +925,8 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 	const char *pMountpoint = NULL;
 
 	// search for a mountpoint
-	int len = MFString_Length(pFilename);
-	for(int a=0; a<len; a++)
+	size_t len = MFString_Length(pFilename);
+	for(size_t a=0; a<len; a++)
 	{
 		if(pFilename[a] == ':')
 		{

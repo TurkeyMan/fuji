@@ -67,7 +67,7 @@ void MFRenderer_D3D9_SetDebugName(IDirect3DResource9* pResource, const char* pNa
 {
 #if !defined(MF_RETAIL)
 	if (pResource)
-		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, pName, MFString_Length(pName), 0);
+		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, pName, (DWORD)MFString_Length(pName), 0);
 #endif
 }
 

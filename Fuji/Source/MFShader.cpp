@@ -62,7 +62,7 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 
 	if(!pShader)
 	{
-		int nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
+		size_t nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
 
 		pShader->shaderType = type;
@@ -90,7 +90,7 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 
 	if(!pShader)
 	{
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
 
 		pShader->shaderType = type;
@@ -118,7 +118,7 @@ MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgr
 
 	if(!pShader)
 	{
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
 
 		pShader->shaderType = type;
@@ -148,7 +148,7 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 
 	if(!pShader)
 	{
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
 
 		pShader->shaderType = type;

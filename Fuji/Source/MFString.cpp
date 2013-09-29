@@ -13,7 +13,7 @@ MFALIGN_BEGIN(16)
 static char gStringBuffer[1024*128]
 MFALIGN_END(16);
 
-static uint32 gStringOffset;
+static size_t gStringOffset;
 
 static MFObjectPool stringPool;
 static MFObjectPoolGroup stringHeap;
@@ -116,7 +116,7 @@ MF_API int MFMemCompare(const void *pBuf1, const void *pBuf2, size_t size)
 
 MF_API char* MFString_Dup(const char *pString)
 {
-	int len = MFString_Length(pString);
+	size_t len = MFString_Length(pString);
 	char *pNew = (char*)MFHeap_Alloc(len + 1);
 	MFString_Copy(pNew, pString);
 	return pNew;
@@ -125,7 +125,7 @@ MF_API char* MFString_Dup(const char *pString)
 MF_API const char * MFString_ToLower(const char *pString)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
-	int len = MFString_Length(pString);
+	size_t len = MFString_Length(pString);
 
 	gStringOffset += len+1;
 
@@ -145,7 +145,7 @@ MF_API const char * MFString_ToLower(const char *pString)
 MF_API const char * MFString_ToUpper(const char *pString)
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
-	int len = MFString_Length(pString);
+	size_t len = MFString_Length(pString);
 
 	gStringOffset += len+1;
 
@@ -303,10 +303,10 @@ MF_API const char* MFStr_URLEncodeString(const char *pString, const char *pExclu
 {
 	char *pBuffer = &gStringBuffer[gStringOffset];
 
-	int sourceLen = MFString_Length(pString);
-	int destLen = 0;
+	size_t sourceLen = MFString_Length(pString);
+	size_t destLen = 0;
 
-	for(int a=0; a<sourceLen; ++a)
+	for(size_t a=0; a<sourceLen; ++a)
 	{
 		int c = (uint8)pString[a];
 		if(MFIsAlphaNumeric(c) || MFString_Chr("-_.!~*'()", c) || (pExcludeChars && MFString_Chr(pExcludeChars, c)))
@@ -508,7 +508,7 @@ MF_API int MFString_Enumerate(const char *pString, const char *const *ppKeys, si
 	for(size_t i=0; i<numKeys; ++i)
 	{
 		if(bCaseSensitive ? !MFString_Compare(pString, ppKeys[i]) : !MFString_CaseCmp(pString, ppKeys[i]))
-			return i;
+			return (int)i;
 	}
 	return -1;
 }
@@ -833,7 +833,7 @@ MFString& MFString::operator=(const char *pString)
 {
 	if(pString)
 	{
-		int bytes = MFString_Length(pString);
+		size_t bytes = MFString_Length(pString);
 
 		Reserve(bytes + 1, true);
 
@@ -1202,13 +1202,13 @@ MFString& MFString::PadLeft(int minLength, const char *pPadding)
 	pData->bytes = minLength;
 
 	// move string
-	int preBytes = minLength - len;
+	size_t preBytes = minLength - len;
 	for(int a=len; a>=0; --a)
 		pData->pMemory[a + preBytes] = pData->pMemory[a];
 
 	// pre-pad the string
-	int padLen = MFString_Length(pPadding);
-	for(int a=0, b=0; a<preBytes; ++a, ++b)
+	size_t padLen = MFString_Length(pPadding);
+	for(size_t a=0, b=0; a<preBytes; ++a, ++b)
 	{
 		if(b >= padLen)
 			b = 0;
@@ -1232,8 +1232,8 @@ MFString& MFString::PadRight(int minLength, const char *pPadding, bool bAlignPad
 	pData->pMemory[minLength] = 0;
 
 	// pad the string
-	int padLen = MFString_Length(pPadding);
-	int b = bAlignPadding ? len%padLen : 0;
+	size_t padLen = MFString_Length(pPadding);
+	size_t b = bAlignPadding ? len%padLen : 0;
 	for(int a=len; a<minLength; ++a, ++b)
 	{
 		if(b >= padLen)

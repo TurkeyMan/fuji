@@ -93,14 +93,14 @@ MF_API const char* MFCallstack_GetCallstackString()
 {
 #if defined(_MFCALLSTACK)
 	char callstack[2048] = "";
-	int bufferUsed = 0;
+	size_t bufferUsed = 0;
 
 	for(int a = gCallDepth-1; a >= 0; a--)
 	{
 		const char *pTemp = MFStr("  %-32s\n",pCallstack[a]);
-		int tempLen = MFString_Length(pTemp);
+		size_t tempLen = MFString_Length(pTemp);
 //		char *pTemp = MFStr("  %-32s\t(%s)%s\n",Callstack[a].c_str(),ModuleName(pFunc->pStats->pModuleName),pFunc->pComment ? MFStr(" [%s]",pFunc->pComment) : "");
-		if(bufferUsed + tempLen < (int)sizeof(callstack) - 1)
+		if(bufferUsed + tempLen < sizeof(callstack) - 1)
 		{
 			MFString_Cat(callstack, pTemp);
 			bufferUsed += tempLen;

@@ -150,7 +150,7 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
 		if(pName)
@@ -181,7 +181,7 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
 
 	if(!pTexture)
 	{
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
 		if(pName)
@@ -309,7 +309,7 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 
 	if(!pTexture)
 	{
-		int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
 		if(pName)

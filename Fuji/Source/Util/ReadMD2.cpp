@@ -215,7 +215,7 @@ int F3DFile::ReadMD2(const char *pFilename)
 	}
 
 	int a;
-	for(a=MFString_Length(pFilename)-1; a>=0; --a)
+	for(a=(int)MFString_Length(pFilename)-1; a>=0; --a)
 	{
 		if(pFilename[a] == '/' || pFilename[a] == '\\')
 		{

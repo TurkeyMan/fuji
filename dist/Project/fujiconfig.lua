@@ -38,7 +38,6 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 -- configurations --
 
 includedirs { "../include/" }
-libdirs { "../lib/" }
 
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
@@ -83,7 +82,6 @@ configuration { "macosx" }
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
-	links { "mad" }
 	linkoptions { "/Delay:unload" }
 
 	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11
@@ -95,12 +93,12 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
-		libdirs { "../lib/x86/vorbis", "../lib/x86/lglcd", "../lib/x86/assimp" }
+		libdirs { "../lib/x86" }
 		linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
 
 	-- Windows 64 --
 	configuration { "windows", "x64", "not Xbox360", "not PS3" }
-		libdirs { "../lib/x64/vorbis", "../lib/x64/lglcd", "../lib/x64/assimp" }
+		libdirs { "../lib/x64" }
 		linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
 
 -- Android --
@@ -115,20 +113,22 @@ configuration "Android"
 -- XBox --
 configuration "Xbox"
 	defines { "WIN32", "_XBOX" }
-	libdirs { "../lib/xbox/vorbis" }
+	libdirs { "../lib/xbox" }
 
 -- XBox 360 --
 configuration "Xbox360"
 	defines { "WIN32", "_XBOX" }
+	libdirs { "../lib/x360" }
 
 -- Playstation 3 --
 configuration "PS3"
 	defines { "_PS3" }
-	links { "mad" }
+	libdirs { "../lib/ps3" }
 
 -- Dreamcast __
 configuration "Dreamcast"
 	defines { "_DC" }
+	libdirs { "../lib/dc" }
 	-- http://yam.20to4.net/dreamcast/hints/index.html <- some performance thoughts
 --	compileoptions { "-m4-single", "-ml", "-mfused-madd", "-mfsca", "-mfsrra", "-mdalign" } -- "--ffast-math", "-mfmovd" ??
 

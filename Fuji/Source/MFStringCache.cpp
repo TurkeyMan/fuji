@@ -56,7 +56,7 @@ MF_API const char *MFStringCache_Add(MFStringCache *pCache, const char *pNewStri
 
 	// find the string
 	char *pCurr = pCache->pMem + 1;
-	int newLength = MFString_Length(pNewString)+1;
+	size_t newLength = MFString_Length(pNewString)+1;
 
 	while (pCurr[0] && pCurr < pCache->pMem + pCache->size)
 	{
@@ -98,7 +98,7 @@ MF_API const char *MFStringCache_AddN(MFStringCache *pCache, const char *pNewStr
 
 	// find the string
 	char *pCurr = pCache->pMem + 1;
-	int newLength = length+1;
+	size_t newLength = length+1;
 
 	while (pCurr[0] && pCurr < pCache->pMem + pCache->size)
 	{
@@ -182,7 +182,7 @@ MF_API const wchar_t *MFWStringCache_Add(MFWStringCache *pCache, const wchar_t *
 
 	// find the string
 	wchar_t *pCurr = pCache->pMem;
-	int newLength = MFWString_Length(pNewString)+1;
+	size_t newLength = MFWString_Length(pNewString)+1;
 
 	while (pCurr[0] && pCurr < &pCache->pMem[pCache->size])
 	{

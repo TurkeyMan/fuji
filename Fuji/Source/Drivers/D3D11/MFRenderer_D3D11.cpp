@@ -62,7 +62,7 @@ void MFRenderer_D3D11_SetDebugName(ID3D11DeviceChild* pResource, const char* pNa
 {
 #if !defined(MF_RETAIL)
 	if (pResource)
-		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, MFString_Length(pName), pName);
+		pResource->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT)MFString_Length(pName), pName);
 #endif
 }
 

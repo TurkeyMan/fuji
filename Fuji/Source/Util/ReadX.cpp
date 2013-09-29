@@ -141,7 +141,7 @@ const char *GetString(const char *pText, const char **ppTokenEnd = NULL)
 
 	MFDebug_Assert(*pString == '"', "Not a string.");
 
-	int len = MFString_Length(pString);
+	size_t len = MFString_Length(pString);
 
 	if(len > 1 && pString[len - 1] == '"')
 	{

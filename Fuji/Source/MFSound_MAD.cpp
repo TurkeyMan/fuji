@@ -9,6 +9,9 @@
 #include "MFHeap.h"
 
 // MAD stream handler
+#if defined(MF_WINDOWS)
+	#pragma comment(lib, "mad")
+#endif
 
 #define SAMPLES_PER_MP3_FRAME 1152
 

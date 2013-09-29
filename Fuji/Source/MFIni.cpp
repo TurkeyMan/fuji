@@ -268,7 +268,7 @@ const char *MFIni::ScanRecursive(const char *pSrc, const char *pSrcEnd, int &lin
 	MFCALLSTACK;
 
 	bool bNewLine = true;
-	int tokenLength = 0;
+	size_t tokenLength = 0;
 	char tokenBuffer[2048];
 
 	int currLine = lineCount;

@@ -183,7 +183,7 @@ MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDe
 
 MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
 {
-	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFVertexBuffer *pVB;
 	if(type == MFVBType_Scratch)
 		pVB = (MFVertexBuffer*)MFRenderer_AllocateScratchMemory(sizeof(MFVertexBuffer) + nameLen);
@@ -315,7 +315,7 @@ MF_API void MFVertex_ReadVertexData4ub(MFVertexBuffer *pVertexBuffer, MFVertexEl
 
 MF_API MFIndexBuffer *MFVertex_CreateIndexBuffer(int numIndices, uint16 *pIndexBufferMemory, const char *pName)
 {
-	int nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFIndexBuffer *pIB = (MFIndexBuffer*)MFHeap_AllocAndZero(sizeof(MFIndexBuffer) + nameLen);
 
 	if(pName)
