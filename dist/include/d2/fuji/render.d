@@ -7,6 +7,7 @@ import fuji.renderstate;
 import fuji.vertex;
 import fuji.material;
 import fuji.model;
+import fuji.rendertarget;
 
 enum MFRenderClearFlags : int
 {
