@@ -507,7 +507,7 @@ MF_API int MFString_Enumerate(const char *pString, const char *const *ppKeys, si
 {
 	for(size_t i=0; i<numKeys; ++i)
 	{
-		if(bCaseSensitive ? !MFString_Compare(pString, ppKeys[i]) : MFString_BeginsWith(pString, ppKeys[i]))
+		if(bCaseSensitive ? !MFString_Compare(pString, ppKeys[i]) : !MFString_CaseCmp(pString, ppKeys[i]))
 			return i;
 	}
 	return -1;

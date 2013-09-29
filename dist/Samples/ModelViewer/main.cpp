@@ -69,7 +69,7 @@ void Game_InitFilesystem()
 	mountData.cbSize = sizeof(MFMountDataNative);
 	mountData.priority = MFMP_Normal;
 	mountData.flags = MFMF_FlattenDirectoryStructure | MFMF_Recursive;
-	mountData.pMountpoint = "game";
+	mountData.pMountpoint = "sample";
 #if defined(MF_IPHONE)
 	mountData.pPath = MFFile_SystemPath();
 #else
@@ -77,9 +77,12 @@ void Game_InitFilesystem()
 #endif
 	MFFileSystem_Mount(hNative, &mountData);
 
+	mountData.pMountpoint = "game";
+	mountData.pPath = MFFile_SystemPath();
+	MFFileSystem_Mount(hNative, &mountData);
+
 	mountData.flags = MFMF_DontCacheTOC;
 	mountData.pMountpoint = "data";
-	mountData.pPath = MFFile_SystemPath();
 	MFFileSystem_Mount(hNative, &mountData);
 
 	if(pInitFujiFS)
@@ -226,6 +229,7 @@ void Game_Draw()
 		if(pModel)
 		{
 			// set projection
+			MFView_ConfigureProjection(MFDEGREES(60.f), 0.1f, 10000.f);
 			MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
 			MFView_SetProjection();
 
