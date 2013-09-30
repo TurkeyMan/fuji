@@ -1,12 +1,13 @@
 module fuji.matrix;
 
 public import fuji.vector;
+import fuji.quaternion;
 import std.math;
 
 struct MFMatrix
 {
-//	union
-//	{
+	union
+	{
 		struct
 		{
 			MFVector x = MFVector(1, 0, 0, 0);
@@ -14,64 +15,32 @@ struct MFMatrix
 			MFVector z = MFVector(0, 0, 1, 0);
 			MFVector t = MFVector(0, 0, 0, 1);
 		}
-//		float[16] m;
-//		MFVector[4] row = void;
-//	}
-/+
-	string toString() const /*pure nothrow*/
-	{
-		return text( "[ ", m[0],  ",", m[1],  ",", m[2],  ",", m[3],  ", ",
-					m[4],  ",", m[5],  ",", m[6],  ",", m[7],  ", ",
-					m[8],  ",", m[9],  ",", m[10], ",", m[11], ", ",
-					m[12], ",", m[13], ",", m[14], ",", m[15], " ]" );
-	}
-+/
-
-	MFMatrix opBinary( string op )( float s ) const pure			if( op == "*" )
-	{
-		MFMatrix m = this;
-		m.m[] *= s;
-		return m;
-	}
-	MFMatrix opBinaryRight( string op )( float s ) const pure		if( op == "*" )
-	{
-		MFMatrix m = this;
-		m.m[] *= s;
-		return m;
+		float[16] m = void;
+		MFVector[4] row = void;
 	}
 
-	MFVector opBinary( string op )( MFVector v ) const pure nothrow	if( op == "*" )
+	string toString() const
 	{
-		MFVector r = void;
-		r.x = v.x*m[0] + v.y*m[4] + v.z*m[8]  + v.w*m[12];
-		r.y = v.x*m[1] + v.y*m[5] + v.z*m[9]  + v.w*m[13];
-		r.z = v.x*m[2] + v.y*m[6] + v.z*m[10] + v.w*m[14];
-		r.w = v.x*m[3] + v.y*m[7] + v.z*m[11] + v.w*m[15];
-		return r;
+		return std.conv.text("[ ", x.toString(),  ", ", y.toString(),  ", ", z.toString(),  ", ", t.toString(),  " ]");
 	}
 
-	MFMatrix opBinary( string op )( ref const(MFMatrix) m ) const pure nothrow	if( op == "*" )
-	{
-		return mul( this, m );
-	}
+	MFMatrix opBinary(string op)(float s) const pure					if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
+	MFMatrix opBinaryRight(string op)(float s) const pure				if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
+	MFMatrix opBinary(string op)(const MFMatrix m) const pure nothrow	if(op == "*")	{ return mul(this, m); }
+	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "*")	{ return mul(this, v); }
+	MFMatrix opOpAssign(string op)(const MFMatrix m) pure nothrow		if(op == "*=")	{ return this = mul(this, m); }
+	MFMatrix opOpAssign(string op)(float s) pure nothrow				if(op == "*=")	{ return this = this * s; }
 
-	MFMatrix opOpAssign( string op )( ref const(MFMatrix) m ) pure nothrow		if( op == "*=" )
+	MFMatrix setTranslation(const MFVector trans) pure nothrow
 	{
-		this = mul( this, m );
-		return this;
-	}
-/*
-	MFMatrix SetTranslation(ref const MFVector trans)
-	{
-		m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = 0;
-		m[0] = m[5] = m[10] = m[15] = 1;
 		m[12] = trans.x;
 		m[13] = trans.y;
 		m[14] = trans.z;
+		m[15] = trans.w;
 		return this;
 	}
 
-	MFMatrix SetRotationX(float angle)
+	MFMatrix setRotationX(float angle) pure nothrow
 	{
 		m[0] = 1;
 		m[1] = 0;
@@ -82,12 +51,11 @@ struct MFMatrix
 		m[8] = 0;
 		m[9] = -sin(angle);
 		m[10] = cos(angle);
-		m[12] = m[13] = m[14] = 0;
-		m[15] = 1;
+		m[3] = m[7] = m[11] = 0.0f;
 		return this;
 	}
 
-	MFMatrix SetRotationY(float angle)
+	MFMatrix setRotationY(float angle) pure nothrow
 	{
 		m[0] = cos(angle);
 		m[1] = 0;
@@ -98,12 +66,11 @@ struct MFMatrix
 		m[8] = sin(angle);
 		m[9] = 0;
 		m[10] = cos(angle);
-		m[12] = m[13] = m[14] = 0;
-		m[15] = 1;
+		m[3] = m[7] = m[11] = 0.0f;
 		return this;
 	}
 
-	MFMatrix SetRotationZ(float angle)
+	MFMatrix setRotationZ(float angle) pure nothrow
 	{
 		m[0] = cos(angle);
 		m[1] = sin(angle);
@@ -114,64 +81,354 @@ struct MFMatrix
 		m[8] = 0;
 		m[9] = 0;
 		m[10] = 1;
-		m[12] = m[13] = m[14] = 0;
-		m[15] = 1;
+		m[3] = m[7] = m[11] = 0.0f;
 		return this;
 	}
 
-	MFMatrix SetScale(ref const MFVector scale)
+	MFMatrix setRotationYPR(float yaw, float pitch, float roll) pure nothrow
+	{
+		float cosy = cos(yaw);
+		float siny = sin(yaw);
+		float cosp = cos(pitch);
+		float sinp = sin(pitch);
+		float cosr = cos(roll);
+		float sinr = sin(roll);
+
+		m[0] =  cosr * cosy + sinp * sinr * siny;
+		m[1] =  cosp * sinr;
+		m[2] =  cosy * sinp * sinr - cosr * siny;
+
+		m[4] = -cosy * sinr + cosr * sinp * siny;
+		m[5] =  cosp * cosr;
+		m[6] =  cosr * cosy * sinp + sinr * siny;
+
+		m[8] =  cosp * siny;
+		m[9] = -sinp;
+		m[10] =  cosp * cosy;
+
+		m[3] = m[7] = m[11] = 0.0f;
+		return this;
+	}
+
+	MFMatrix setRotation(const MFVector axis, float angle) pure nothrow
+	{
+		// do the trig
+		float s = sin(angle);
+		float c = cos(angle);
+		float t = 1.0f-c;
+
+		// build the rotation matrix
+		m[0] = t*axis.x*axis.x + c;
+		m[4] = t*axis.x*axis.y - s*axis.z;
+		m[8] = t*axis.x*axis.z + s*axis.y;
+
+		m[1] = t*axis.x*axis.y + s*axis.z;
+		m[5] = t*axis.y*axis.y + c;
+		m[9] = t*axis.y*axis.z - s*axis.x;
+
+		m[2] = t*axis.x*axis.z - s*axis.y;
+		m[6] = t*axis.y*axis.z + s*axis.x;
+		m[10] = t*axis.z*axis.z + c;
+
+		m[3]= m[7] = m[11] = 0.0f;
+		return this;
+	}
+
+	MFMatrix setRotationQ(const MFQuaternion q) pure nothrow
+	{
+		float xx = q.x*q.x;
+		float xy = q.x*q.y;
+		float xz = q.x*q.z;
+		float xw = q.x*q.w;
+		float yy = q.y*q.y;
+		float yz = q.y*q.z;
+		float yw = q.y*q.w;
+		float zz = q.z*q.z;
+		float zw = q.z*q.w;
+
+		m[0] = 1.0f - 2.0f*(yy+zz);
+		m[1] = 2.0f*(xy-zw);
+		m[2] = 2.0f*(xz+yw);
+		m[4] = 2.0f*(xy+zw);
+		m[5] = 1.0f - 2.0f*(xx+zz);
+		m[6] = 2.0f*(yz-xw);
+		m[8] = 2.0f*(xz-yw);
+		m[9] = 2.0f*(yz+xw);
+		m[10] = 1.0f - 2.0f*(xx+yy);
+
+		m[3] = m[7] = m[11] = 0.0f;
+		return this;
+	}
+
+	MFQuaternion getRotationQ() const pure nothrow
+	{
+		MFQuaternion q;
+		float trace = m[0] + m[5] + m[10] + 1.0f;
+
+		if(trace > 0.0f)
+		{
+			float s = sqrt(trace);
+			float invS = 0.5f / s;
+			q.w = 0.5f * s;
+			q.x = (m[9] - m[6]) * invS;
+			q.y = (m[2] - m[8]) * invS;
+			q.z = (m[4] - m[1]) * invS;
+		}
+		else
+		{
+			if(m[0] > m[5] && m[0] > m[10])
+			{
+				float s = sqrt(1.0f + m[0] - m[5] - m[10]);
+				float invS = 0.5f / s;
+				q.x = 0.5f * s;
+				q.y = (m[1] + m[4]) * invS;
+				q.z = (m[2] + m[8]) * invS;
+				q.w = (m[6] - m[9]) * invS;
+			}
+			else if(m[5] > m[10])
+			{
+				float s = sqrt(1.0f + m[5] - m[0] - m[10]);
+				float invS = 0.5f / s;
+				q.x = (m[1] + m[4]) * invS;
+				q.y = 0.5f * s;
+				q.z = (m[6] + m[9]) * invS;
+				q.w = (m[2] - m[8]) * invS;
+			}
+			else
+			{
+				float s = sqrt(1.0f + m[10] - m[0] - m[5]);
+				float invS = 0.5f / s;
+				q.x = (m[2] + m[8] ) * invS;
+				q.y = (m[6] + m[9] ) * invS;
+				q.z = 0.5f * s;
+				q.w = (m[1] - m[4] ) * invS;
+			}
+		}
+
+		return q;
+	}
+
+	MFMatrix setScale(MFVector scale) pure nothrow
 	{
 		m[0] = scale.x;
 		m[1] = m[2] = m[3] = m[4] = 0.0f;
 		m[5] = scale.y;
 		m[6] = m[7] = m[8] = m[9] = 0.0f;
 		m[10] = scale.z;
-		m[11] = m[12] = m[13] = m[14] = 0.0f;
-		m[15] = 1.0f;
+		m[11] = 0.0f;
 		return this;
 	}
 
-	MFMatrix RotateY(float angle)
+	MFMatrix translate(MFVector trans) pure nothrow
+	{
+		t += trans;
+		return this;
+	}
+
+	MFMatrix rotateX(float angle) pure nothrow
 	{
 		MFMatrix rot;
-		rot.SetRotationY(angle);
-		return this.mul(rot);
+		rot.setRotationX(angle);
+		return this = mul(this, rot);
 	}
-*/
+
+	MFMatrix rotateY(float angle) pure nothrow
+	{
+		MFMatrix rot;
+		rot.setRotationY(angle);
+		return this = mul(this, rot);
+	}
+
+	MFMatrix rotateZ(float angle) pure nothrow
+	{
+		MFMatrix rot;
+		rot.setRotationZ(angle);
+		return this = mul(this, rot);
+	}
+
+	MFMatrix scale(MFVector scale) pure nothrow
+	{
+		x *= scale.x;
+		y *= scale.y;
+		z *= scale.z;
+		return this;
+	}
+
+	MFMatrix lookAt(MFVector pos, MFVector at, MFVector up = MFVector.up) pure nothrow
+	{
+		z = (at-pos).normalise();		// calculate forwards
+		x = cross3(up, z).normalise();	// calculate right
+		y = cross3(z, x);				// calculate up (z and x are already normalised)
+		t = pos;						// set translation
+		return this;
+	}
+
+	MFMatrix setPerspective(float fov, float near, float far, float aspectRatio) pure nothrow
+	{
+		// construct perspective projection
+		float zn = near;
+		float zf = far;
+
+		float a = fov * 0.5f;
+
+		float h = cos(a) / sin(a);
+		float w = h / aspectRatio;
+
+		float zd = zf-zn;
+		float zs = zf/zd;
+
+		version(_OPENGL_CLIP_SPACE)
+		{
+			m[0] = w;		m[1] = 0.0f;	m[2] = 0.0f;			m[3] = 0.0f;
+			m[4] = 0.0f;	m[5] = h;		m[6] = 0.0f;			m[7] = 0.0f;
+			m[8] = 0.0f;	m[9] = 0.0f;	m[10] = 2.0f*zs;		m[11] = 1.0f;
+			m[12] = 0.0f;	m[13] = 0.0f;	m[14] = -2.0f*zn*zs-zf;	m[15] = 0.0f;
+		}
+		else
+		{
+			m[0] = w;		m[1] = 0.0f;	m[2] = 0.0f;			m[3] = 0.0f;
+			m[4] = 0.0f;	m[5] = h;		m[6] = 0.0f;			m[7] = 0.0f;
+			m[8] = 0.0f;	m[9] = 0.0f;	m[10] = zs;				m[11] = 1.0f;
+			m[12] = 0.0f;	m[13] = 0.0f;	m[14] = -zn*zs;			m[15] = 0.0f;
+		}
+
+		return this;
+	}
+
+	MFMatrix setOrthographic(float top, float left, float bottom, float right, float near = 0, float far = 1) pure nothrow
+	{
+		m[0] = 2.0f/(right-left);			m[1] = 0.0f;						m[2] = 0.0f;				m[3] = 0.0f;
+		m[4] = 0.0f;						m[5] = 2.0f/(top-bottom);			m[6] = 0.0f;				m[7] = 0.0f;
+		m[8] = 0.0f;						m[9] = 0.0f;						m[10] = 1.0f/(far-near);	m[11] = 0.0f;
+		m[12] = (left+right)/(left-right);	m[13] = (top+bottom)/(bottom-top);	m[14] = near/(near-far);	m[15] = 1.0f;
+		return this;
+	}
+
+	MFMatrix normalise() pure nothrow
+	{
+		x = x.normalise();
+		y = y.normalise();
+		z = z.normalise();
+		return this;
+	}
+
+	MFMatrix transpose() pure nothrow
+	{
+		float t;
+		t=m[4]; m[4]=m[1]; m[1]=t;
+		t=m[8]; m[8]=m[2]; m[2]=t;
+		t=m[9]; m[9]=m[6]; m[6]=t;
+		t=m[12]; m[12]=m[3]; m[3]=t;
+		t=m[13]; m[13]=m[7]; m[7]=t;
+		t=m[14]; m[14]=m[11]; m[11]=t;
+		return this;
+	}
+
+	MFMatrix transpose3x3() pure nothrow
+	{
+		float t;
+		t=m[4]; m[4]=m[1]; m[1]=t;
+		t=m[8]; m[8]=m[2]; m[2]=t;
+		t=m[9]; m[9]=m[6]; m[6]=t;
+		return this;
+	}
+
 	static immutable MFMatrix identity = MFMatrix.init;
 }
 
+MFMatrix lerp(const MFMatrix start, const MFMatrix end, float time) pure nothrow
+{
+	MFMatrix t = void;
+	t.x = fuji.vector.lerp(start.x, end.x, time);
+	t.y = fuji.vector.lerp(start.y, end.y, time);
+	t.z = fuji.vector.lerp(start.z, end.z, time);
+	t.t = fuji.vector.lerp(start.t, end.t, time);
+	return t;
+}
+
+MFMatrix inverse(const MFMatrix matrix) pure nothrow
+{
+	enum float PRECISION_LIMIT = 1.0e-10;
+
+	MFMatrix inv;
+	float det_1;
+	float pos, neg, temp;
+
+	//	* Calculate the determinant of submatrix A and determine if the
+	//	* the matrix is singular as limited by the single precision
+	//	* floating-point data representation.
+	pos = neg = 0.0;
+	temp =  matrix.m[0]*matrix.m[5]*matrix.m[10];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	temp =  matrix.m[1]*matrix.m[6]*matrix.m[8];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	temp =  matrix.m[2]*matrix.m[4]*matrix.m[9];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	temp = -matrix.m[2]*matrix.m[5]*matrix.m[8];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	temp = -matrix.m[1]*matrix.m[4]*matrix.m[10];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	temp = -matrix.m[0]*matrix.m[6]*matrix.m[9];
+	if(temp >= 0.0) pos += temp; else neg += temp;
+	det_1 = pos + neg;
+
+	// Is the submatrix A singular?
+	if((det_1 == 0) || (abs(det_1 / (pos - neg)) < PRECISION_LIMIT))
+	{
+		// MFMatrix M has no inverse
+//		debug fuji.dbg.MFDebug_Warn(3, "MFMatrix::Inverse: Singular matrix (Matrix has no inverse)...\n");
+		return matrix;
+	}
+
+	// Calculate inverse(A) = adj(A) / det(A)
+	det_1 = 1.0f / det_1;
+	inv.m[0]  =  (matrix.m[5]*matrix.m[10] - matrix.m[6]*matrix.m[9]) * det_1;
+	inv.m[4]  = -(matrix.m[4]*matrix.m[10] - matrix.m[6]*matrix.m[8]) * det_1;
+	inv.m[8]  =  (matrix.m[4]*matrix.m[9]  - matrix.m[5]*matrix.m[8]) * det_1;
+	inv.m[1]  = -(matrix.m[1]*matrix.m[10] - matrix.m[2]*matrix.m[9]) * det_1;
+	inv.m[5]  =  (matrix.m[0]*matrix.m[10] - matrix.m[2]*matrix.m[8]) * det_1;
+	inv.m[9]  = -(matrix.m[0]*matrix.m[9]  - matrix.m[1]*matrix.m[8]) * det_1;
+	inv.m[2]  =  (matrix.m[1]*matrix.m[6]  - matrix.m[2]*matrix.m[5]) * det_1;
+	inv.m[6]  = -(matrix.m[0]*matrix.m[6]  - matrix.m[2]*matrix.m[4]) * det_1;
+	inv.m[10] =  (matrix.m[0]*matrix.m[5]  - matrix.m[1]*matrix.m[4]) * det_1;
+
+	// Calculate -C * inverse(A)
+	inv.m[12] = -(matrix.m[12]*inv.m[0] + matrix.m[13]*inv.m[4] + matrix.m[14]*inv.m[8]);
+	inv.m[13] = -(matrix.m[12]*inv.m[1] + matrix.m[13]*inv.m[5] + matrix.m[14]*inv.m[9]);
+	inv.m[14] = -(matrix.m[12]*inv.m[2] + matrix.m[13]*inv.m[6] + matrix.m[14]*inv.m[10]);
+
+	// Fill in last column
+	inv.m[3]  = inv.m[7] = inv.m[11] = 0.0f;
+	inv.m[15] = 1.0f;
+
+	return inv;
+}
+
+
 // handy templates
 
-template IsMatrix( M )
+template IsMatrix(M)
 {
-	enum bool IsMatrix = is( M == MFMatrix );
+	enum bool IsMatrix = is(std.traits.Unqual!M == MFMatrix);
 }
 
 
 // *** HLSL style interface, future SIMD vector library will be more like this too ***
 
 // all the combinations of matrix multiplies... i think this could be written with a LOT less code.
-auto mul( T0, T1 )( ref const(T0) m, const(T1) v ) pure nothrow if( IsMatrix!T0 && IsVector!T1 )
+auto mul(T0, T1)(const T0 m, const T1 v) pure nothrow if(IsMatrix!T0 && IsVector!T1)
 {
-	static if( is( std.traits.Unqual!(typeof(m)) == MFMatrix ) && is( std.traits.Unqual!(typeof(v)) == MFVector ) )
-	{
-		MFVector r;
-		r.x = m.x.x*v.x + m.y.x*v.y + m.z.x*v.z + m.t.x*v.w;
-		r.y = m.x.y*v.x + m.y.y*v.y + m.z.y*v.z + m.t.y*v.w;
-		r.z = m.x.z*v.x + m.y.z*v.y + m.z.z*v.z + m.t.z*v.w;
-		r.w = m.x.w*v.x + m.y.w*v.y + m.z.w*v.z + m.t.w*v.w;
-		return r;
-	}
-	else
-	{
-		static assert(0);
-	}
+	MFVector r;
+	r.x = m.x.x*v.x + m.y.x*v.y + m.z.x*v.z + m.t.x*v.w;
+	r.y = m.x.y*v.x + m.y.y*v.y + m.z.y*v.z + m.t.y*v.w;
+	r.z = m.x.z*v.x + m.y.z*v.y + m.z.z*v.z + m.t.z*v.w;
+	r.w = m.x.w*v.x + m.y.w*v.y + m.z.w*v.z + m.t.w*v.w;
+	return r;
 }
 
-auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix!T0 && IsMatrix!T1 )
+auto mul(T0, T1)(const T0 a, const T1 b) pure nothrow if(IsMatrix!T0 && IsMatrix!T1)
 {
-	static if( is( std.traits.Unqual!(typeof(a)) == MFMatrix ) && is( std.traits.Unqual!(typeof(b)) == MFMatrix ) )
+	static if(is(std.traits.Unqual!(typeof(a)) == MFMatrix) && is(std.traits.Unqual!(typeof(b)) == MFMatrix))
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0]  + a.m[1]*b.m[4]  + a.m[2]*b.m[8]   + a.m[3]*b.m[12];
@@ -193,7 +450,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		return m;
 	}
 /+
-	else static if( is( a == MFMatrix ) && is( b == MFMatrixx3 ) )
+	else static if(is(a == MFMatrix) && is(b == MFMatrixx3))
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0]  + a.m[1]*b.m[3]  + a.m[2]*b.m[6]  + a.m[3]*b.m[9];
@@ -214,7 +471,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[15] = a.m[15];
 		return m;
 	}
-	else static if( is( a == MFMatrixx3 ) && is( b == MFMatrix ) )
+	else static if(is(a == MFMatrixx3) && is(b == MFMatrix))
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[4]  + a.m[2]*b.m[8];
@@ -235,7 +492,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[15] = a.m[9]*b.m[3] + a.m[10]*b.m[7] + a.m[11]*b.m[11] + b.m[15];
 		return m;
 	}
-	else static if( is( a == MFMatrix ) && is( b == Matrix3 ) )
+	else static if(is(a == MFMatrix) && is(b == Matrix3))
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0]  + a.m[1]*b.m[3]  + a.m[2]*b.m[6];
@@ -256,7 +513,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[15] = a.m[15];
 		return m;
 	}
-	else static if( is( a == Matrix3 ) && is( b == MFMatrix ) )
+	else static if(is(a == Matrix3) && is(b == MFMatrix))
 	{
 		MFMatrix m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[4]  + a.m[2]*b.m[8];
@@ -277,7 +534,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[15] = b.m[15];
 		return m;
 	}
-	else static if( is( a == MFMatrixx3 ) && is( b == MFMatrixx3 ) )
+	else static if(is(a == MFMatrixx3) && is(b == MFMatrixx3))
 	{
 		MFMatrixx3 m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[3]  + a.m[2]*b.m[6];
@@ -294,7 +551,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[11] = a.m[9]*b.m[2] + a.m[10]*b.m[5] + a.m[11]*b.m[8] + b.m[11];
 		return m;
 	}
-	else static if( is( a == MFMatrixx3 ) && is( b == Matrix3 ) )
+	else static if(is(a == MFMatrixx3) && is(b == Matrix3))
 	{
 		MFMatrixx3 m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[3]  + a.m[2]*b.m[6];
@@ -311,7 +568,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[11] = a.m[9]*b.m[2] + a.m[10]*b.m[5] + a.m[11]*b.m[8];
 		return m;
 	}
-	else static if( is( a == Matrix3 ) && is( b == MFMatrixx3 ) )
+	else static if(is(a == Matrix3) && is(b == MFMatrixx3))
 	{
 		MFMatrixx3 m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[3]  + a.m[2]*b.m[6];
@@ -328,7 +585,7 @@ auto mul( T0, T1 )( ref const(T0) a, ref const(T1) b ) pure nothrow if( IsMatrix
 		m.m[11] = b.m[11];
 		return m;
 	}
-	else static if( is( a == Matrix3 ) && is( b == Matrix3 ) )
+	else static if(is(a == Matrix3) && is(b == Matrix3))
 	{
 		Matrix3 m = void;
 		m.m[0]  = a.m[0]*b.m[0] + a.m[1]*b.m[3]  + a.m[2]*b.m[6];
