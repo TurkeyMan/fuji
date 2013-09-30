@@ -2,6 +2,39 @@ module fuji.vector;
 
 import std.math;
 
+template isValidSwizzleString(string s, int numComponents)
+{
+	template charInString(char c, string s)
+	{
+		static if(s.length == 0)
+			enum charInString = false;
+		else
+			enum charInString = c == s[0] || charInString!(c, s[1..$]);
+	}
+
+	template charsInString(string s, string t)
+	{
+		static if(s.length == 0)
+			enum charsInString = true;
+		else
+			enum charsInString = charInString!(s[0], t) && charsInString!(s[1..$], t);
+	}
+
+	enum isValidSwizzleString = s.length == numComponents && charsInString!(s, "xyzw012");
+}
+
+private template getComponent(char c, alias v)
+{
+	static if(c == 'x')			alias getComponent = v.x;
+	else static if(c == 'y')	alias getComponent = v.y;
+	else static if(c == 'z')	alias getComponent = v.z;
+	else static if(c == 'w')	alias getComponent = v.w;
+	else static if(c == '0')	enum float getComponent = 0;
+	else static if(c == '1')	enum float getComponent = 1;
+	else static if(c == '2')	enum float getComponent = 2;
+	else static assert(false, "Invalid swizzle component: '" ~ c ~ "'");
+}
+
 struct MFVector
 {
 	float x = 0;
@@ -9,7 +42,6 @@ struct MFVector
 	float z = 0;
 	float w = 0;
 
-//	mixin SwizzleFeature;
 	string toString() const												{ return std.conv.text("[ ", x, ", ", y, ", ", z, ", ", w, " ]"); }
 
 	bool opEquals(const MFVector v) const pure nothrow					{ return x == v.x && y == v.y && z == v.z && w == v.w; }
@@ -38,6 +70,12 @@ struct MFVector
 	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "*") { return this = this * f; }
 	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "/") { return this = this / f; }
 	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "%") { return this = this % f; }
+
+	// handy mixin to support arbitrary vector swizzling
+	auto opDispatch(string s)() const pure nothrow if(isValidSwizzleString!(s, 4))
+	{
+		return MFVector(getComponent!(s[0], this), getComponent!(s[1], this), getComponent!(s[2], this), getComponent!(s[3], this));
+	}
 
 	float magSq2() const pure nothrow	{ return x * x + y * y; }
 	float magSq3() const pure nothrow	{ return x * x + y * y + z * z; }
@@ -274,53 +312,3 @@ auto mul(T0, T1)(const T0 a, const T1 b) pure nothrow if((is(T0 == float) || IsV
 {
 	return a * b;
 }
-
-
-private:
-/+
-// handy mixin to support arbitrary vector swizzling
-mixin template SwizzleFeature()
-{
-	auto opDispatch(string s)() const pure nothrow if(isValidSwizzleString!(s, numComponents))
-	{
-		return MFVector(getComponent!(s[0], this), getComponent!(s[1], this), getComponent!(s[2], this), getComponent!(s[3], this));
-	}
-}
-
-template getComponent(char c, alias v)
-{
-	static if(c == 'x')		enum float getComponent = v.x;
-	else static if(c == 'y')	enum float getComponent = v.y;
-	else static if(c == 'z')	enum float getComponent = v.z;
-	else static if(c == 'w')	enum float getComponent = v.w;
-	else static if(c == '0')	enum float getComponent = 0.0;
-	else static if(c == '1')	enum float getComponent = 1.0;
-	else static if(c == '2')	enum float getComponent = 2.0;
-	else static assert(false, "Invalid swizzle component: '" ~ c ~ "'");
-}
-
-template isValidSwizzleString(string s, int numComponents)
-{
-	enum bool isValidSwizzleString = charsInString(s, "xyzw012");
-}
-
-bool charsInString(string s, string t)
-{
-	static bool charInString(char c, string s)
-	{
-		foreach(_c; s)
-		{
-			if(c == _c)
-				return true;
-		}
-		return false;
-	}
-
-	foreach(c; s)
-	{
-		if(!charInString(c, t))
-			return false;
-	}
-	return true;
-}
-+/
