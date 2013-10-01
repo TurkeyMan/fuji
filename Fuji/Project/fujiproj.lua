@@ -53,6 +53,10 @@ project (projName)
 
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
 
+	if string.startswith(_ACTION, "vs") then
+		linkoptions { "/ignore:4221" }
+	end
+
 --	pchheader "Fuji.h"
 --	pchsource "MFMain.cpp"
 

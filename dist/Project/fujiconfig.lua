@@ -82,24 +82,31 @@ configuration { "macosx" }
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	defines { "WIN32", "_WINDOWS" }
-	linkoptions { "/Delay:unload" }
-
-	linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_42.dll" }		-- D3D11
-	linkoptions { "/DelayLoad:d3d9.dll", "/DelayLoad:D3DX9_42.dll" }		-- D3D9
-	linkoptions { "/DelayLoad:opengl32.dll" }								-- OpenGL
-	linkoptions { "/DelayLoad:dsound.dll" }									-- Sound
-	linkoptions { "/DelayLoad:xinput1_3.dll", "/DelayLoad:dinput8.dll" }	-- Input
-	linkoptions { "/DelayLoad:ws2_32.dll" }									-- Winsock
 
 	-- Windows 32 --
-	configuration { "windows", "x32 or native", "not Xbox360", "not PS3" }
+	configuration { "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
 		libdirs { "../lib/x86" }
-		linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
 
 	-- Windows 64 --
-	configuration { "windows", "x64", "not Xbox360", "not PS3" }
+	configuration { "windows", "x64", "not Xbox360", "not PS3", "not Android" }
 		libdirs { "../lib/x64" }
-		linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
+
+	if string.startswith(_ACTION, "vs") then
+		configuration { "not StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
+			linkoptions { "/Delay:unload" }
+			linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_43.dll" }		-- D3D11
+			linkoptions { "/DelayLoad:d3d9.dll", "/DelayLoad:D3DX9_43.dll" }		-- D3D9
+			linkoptions { "/DelayLoad:opengl32.dll" }								-- OpenGL
+			linkoptions { "/DelayLoad:dsound.dll" }									-- Sound
+			linkoptions { "/DelayLoad:xinput1_3.dll", "/DelayLoad:dinput8.dll" }	-- Input
+			linkoptions { "/DelayLoad:ws2_32.dll" }									-- Winsock
+
+			configuration { "not StaticLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
+				linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
+
+			configuration { "not StaticLib", "windows", "x64", "not Xbox360", "not PS3", "not Android" }
+				linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
+	end
 
 -- Android --
 configuration "Android"
