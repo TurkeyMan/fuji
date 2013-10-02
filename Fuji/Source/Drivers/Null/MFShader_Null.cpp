@@ -12,7 +12,7 @@ void MFRenderState_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, const char *pFilename, const char *pSource)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
 {
 	return true;
 }

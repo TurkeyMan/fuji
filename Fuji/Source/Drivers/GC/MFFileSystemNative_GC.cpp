@@ -117,4 +117,10 @@ bool MFFileNative_Exists(const char* pFilename)
 	return false;
 }
 
+const char* MFFileNative_MakeAbsolute(const char* pFilename)
+{
+	MFDebug_Assert(false, "!");
+	return pPath;
+}
+
 #endif

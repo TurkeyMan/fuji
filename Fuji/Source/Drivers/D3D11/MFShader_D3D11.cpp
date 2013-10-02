@@ -33,7 +33,7 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
 {
 #if defined(USE_D3DX11)
 	D3D10_SHADER_MACRO macros[256];

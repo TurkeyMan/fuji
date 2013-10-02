@@ -457,6 +457,10 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 	//else
 	//	MFRendererPC_SetVertexShader(pVS_s);
 */
+
+	// update the bools 'set' state
+	state.boolsSet = state.bools & state.rsSet[MFSB_CT_Bool];
+
 	return 0;
 }
 

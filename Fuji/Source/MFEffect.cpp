@@ -18,8 +18,8 @@ static void MFEffect_Destroy(MFResource *pRes)
 		MFEffectTechnique &t = pEffect->pTechniques[a];
 		for(int j=0; j<MFST_Max; ++j)
 		{
-			if(t.pShaders[j])
-				MFShader_Release(t.pShaders[j]);
+			if(t.shaders[j].pShader)
+				MFShader_Release(t.shaders[j].pShader);
 		}
 	}
 
@@ -96,8 +96,8 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 				(char*&)t.pName += (size_t)pEffect;
 			for(int j=0; j<MFST_Max; ++j)
 			{
-				if(t.pShaderSource[j])
-					(char*&)t.pShaderSource[j] += (size_t)pEffect;
+				if(t.shaders[j].pShaderSource)
+					(char*&)t.shaders[j].pShaderSource += (size_t)pEffect;
 			}
 			if(t.pMacros)
 				(char*&)t.pMacros += (size_t)pEffect;
@@ -109,10 +109,10 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 			MFEffectTechnique &t = pEffect->pTechniques[a];
 			for(int j=0; j<MFST_Max; ++j)
 			{
-				if(t.pShaderSource[j])
+				if(t.shaders[j].pShaderSource)
 				{
-					if(t.bFromFile[j])
-						t.pShaders[j] = MFShader_CreateFromFile((MFShaderType)j, t.pShaderSource[j], NULL);
+					if(t.shaders[j].bFromFile)
+						t.shaders[j].pShader = MFShader_CreateFromFile((MFShaderType)j, t.shaders[j].pShaderSource, NULL);
 					else
 					{
 						static const char *sShaderNames[MFST_Max] =
@@ -125,17 +125,17 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 							"ComputeShader"
 						};
 						const char *pName = MFStr("%s:%s_%s", pEffect->pEffectName ? pEffect->pEffectName : "Unnamed", t.pName ? t.pName : MFStr("Technique%d", a), sShaderNames[j]);
-						t.pShaders[j] = MFShader_CreateFromString((MFShaderType)j, t.pShaderSource[j], NULL, pName, pFilename);
+						t.shaders[j].pShader = MFShader_CreateFromString((MFShaderType)j, t.shaders[j].pShaderSource, NULL, pName, pFilename, t.shaders[j].startLine);
 					}
 
-					if(!t.pShaders[j])
+					if(!t.shaders[j].pShader)
 					{
 						// default shader?
 					}
-					if(t.pShaders[j])
+					if(t.shaders[j].pShader)
 					{
 						for(int rs=0; rs<MFSB_CT_TypeCount; ++rs)
-							t.renderStateRequirements[rs] |= t.pShaders[j]->renderStateRequirements[rs];
+							t.renderStateRequirements[rs] |= t.shaders[j].pShader->renderStateRequirements[rs];
 					}
 				}
 			}
@@ -153,8 +153,8 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 				MFEffectTechnique &t = pEffect->pTechniques[a];
 				for(int j=0; j<MFST_Max; ++j)
 				{
-					if(t.pShaders[j])
-						MFShader_Release(t.pShaders[j]);
+					if(t.shaders[j].pShader)
+						MFShader_Release(t.shaders[j].pShader);
 				}
 			}
 

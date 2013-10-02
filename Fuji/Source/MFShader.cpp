@@ -54,6 +54,8 @@ static void MFShader_FindConstants(MFShader *pShader)
 			}
 		}
 	}
+
+	pShader->renderStateRequirements[MFSB_CT_Texture] = (pShader->renderStateRequirements[MFSB_CT_RenderState] >> MFSCRS_DiffuseSamplerState) & (MFBIT(MFSCT_Max)-1);
 }
 
 MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros)
@@ -72,7 +74,7 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pFilename) ^ 0x5ade5ade, pFilename);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pFilename, NULL))
+		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, pFilename, 0))
 		{
 			MFHeap_Free(pShader);
 			return NULL;
@@ -100,7 +102,7 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pFilename, pShaderSource))
+		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pShaderSource, pFilename, startingLine))
 		{
 			MFHeap_Free(pShader);
 			return NULL;
@@ -130,7 +132,7 @@ MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgr
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL))
+		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL, 0))
 		{
 			MFHeap_Free(pShader);
 			return NULL;
@@ -160,7 +162,7 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL))
+		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL, 0))
 		{
 			MFHeap_Free(pShader);
 			return NULL;

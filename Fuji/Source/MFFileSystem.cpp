@@ -1061,7 +1061,9 @@ MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bA
 		MFFile_Close(pFile);
 	}
 
-	// TODO: convert to absolute...
+	// convert to absolute...
+	if(bAbsolute)
+		pPath = MFFileNative_MakeAbsolute(pPath);
 
 	return pPath;
 }

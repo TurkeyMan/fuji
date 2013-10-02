@@ -30,7 +30,7 @@
 
 // if SSE optimisations are enabled, include SSE intrinsics header
 #if defined(_FUJI_SSE)
-	#include "xmmintrin.h"
+	#include <xmmintrin.h>
 #endif
 
 // Data Type Definition

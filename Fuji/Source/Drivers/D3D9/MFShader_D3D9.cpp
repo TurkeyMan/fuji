@@ -25,7 +25,17 @@ class FujiIncludeHandler : public ID3DXInclude
 		if(!pFile)
 			return E_FAIL;
 
-		*ppData = pFile;
+		pFileName = MFFileSystem_ResolveSystemPath(pFileName, true);
+		char lineDirective[256];
+		int lineBytes = sprintf(lineDirective, "#line 1 \"%s\"\r\n", pFileName);
+
+		char *pInclude = (char*)MFHeap_Alloc(lineBytes + bytes);
+		MFCopyMemory(pInclude, lineDirective, lineBytes);
+		MFCopyMemory(pInclude + lineBytes, pFile, bytes);
+		bytes += lineBytes;
+		MFHeap_Free(pFile);
+
+		*ppData = pInclude;
 		*pBytes = (UINT)bytes;
 
 		return S_OK;
@@ -49,7 +59,7 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
 {
 	ID3DXBuffer *pProgram = NULL;
 	ID3DXBuffer *pErrors = NULL;
@@ -81,9 +91,9 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 		size_t sourceLen = MFString_Length(pSource);
 		if(pFilename)
 		{
-			pFilename = MFFileSystem_ResolveSystemPath(pFilename);
+			pFilename = MFFileSystem_ResolveSystemPath(pFilename, true);
 			char lineDirective[256];
-			int lineBytes = sprintf(lineDirective, "#line %d \"%s\"\r\n", 0, pFilename);
+			int lineBytes = sprintf(lineDirective, "#line %d \"%s\"\r\n", line, pFilename);
 
 			char *pNewSource = (char*)MFHeap_Alloc(lineBytes + sourceLen);
 			MFCopyMemory(pNewSource, lineDirective, lineBytes);
@@ -96,7 +106,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 
 		if(pErrors)
 		{
-			MFDebug_Warn(1, (char*)pErrors->GetBufferPointer());
+			MFDebug_Message((char*)pErrors->GetBufferPointer());
 			pErrors->Release();
 		}
 
@@ -108,11 +118,11 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 	}
 	else if(pFilename)
 	{
-		HRESULT hr = D3DXCompileShaderFromFile(MFFileSystem_ResolveSystemPath(pFilename), pMacros ? macros : NULL, NULL, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
+		HRESULT hr = D3DXCompileShaderFromFile(MFFileSystem_ResolveSystemPath(pFilename, true), pMacros ? macros : NULL, NULL, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
 
 		if(pErrors)
 		{
-			MFDebug_Warn(1, (char*)pErrors->GetBufferPointer());
+			MFDebug_Message((char*)pErrors->GetBufferPointer());
 			pErrors->Release();
 		}
 

@@ -483,9 +483,6 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 		// apply render state
 		element.pMaterial->pType->materialCallbacks.pBegin(element.pMaterial, state);
 
-		// update the bools 'set' state
-		state.boolsSet = state.bools & state.rsSet[MFSB_CT_Bool];
-
 		// set geometry buffers
 		MFVertexDeclaration *pDecl = (MFVertexDeclaration*)state.pRenderStates[MFSCRS_VertexDeclaration];
 		if(state.pRenderStatesSet[MFSCRS_VertexDeclaration] != pDecl)

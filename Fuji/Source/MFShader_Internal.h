@@ -13,7 +13,7 @@ void MFShader_DeinitModule();
 void MFShader_InitModulePlatformSpecific();
 void MFShader_DeinitModulePlatformSpecific();
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource);
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line);
 void MFShader_DestroyPlatformSpecific(MFShader *pShader);
 
 void MFShader_Apply(MFShader *pShader);

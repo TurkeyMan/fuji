@@ -96,6 +96,7 @@ struct MFIntExpression
 
 	MFExpressionType expression;
 	MFExpressionDataType type;
+	int line, column;
 
 	const char *pName;
 	union
@@ -517,6 +518,8 @@ void FreeExpressionTree(Expression *e)
 MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::Technique *pTechnique, MFIntExpression *pE = NULL)
 {
 	MFIntExpression &e = pE ? *pE : pEffect->expressions.push();
+	e.line = pExp->pToken->line;
+	e.column = pExp->pToken->column;
 
 	if(pExp->type >= ET_UnaryExpression && pExp->type <= ET_BinaryExpressionEnd)
 	{
@@ -712,7 +715,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 	if(pBytes)
 		*pBytes = bytes;
 
-	int line = 0;
+	int line = 1;
 	char *pLineStart = pBuffer;
 
 	DString buffer(pBuffer, bytes);
@@ -826,6 +829,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 			if(bExpectCode && buffer[0] == '{')
 			{
 				bExpectCode = false;
+				int startLine = line;
 
 				buffer = buffer.popFront();
 
@@ -845,7 +849,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 						--depth;
 				}
 
-				tokens.push(Token(buffer.slice(0, len), ET_SourceCode, line, col));
+				tokens.push(Token(buffer.slice(0, len), ET_SourceCode, startLine, col));
 				buffer = buffer.popFront(len);
 
 				if(buffer.length == 0)
@@ -1505,8 +1509,9 @@ MF_API void MFIntEffect_CreateRuntimeData(MFIntEffect *pEffect, MFEffect **ppOut
 
 			if(pE->expression == MFExp_Immediate && (pE->type == MFEDT_String || pE->type == MFEDT_Code))
 			{
-				et.pShaderSource[j] = MFStringCache_Add(pSC, pE->value.s);
-				et.bFromFile[j] = pE->type == MFEDT_String;
+				et.shaders[j].pShaderSource = MFStringCache_Add(pSC, pE->value.s);
+				et.shaders[j].bFromFile = pE->type == MFEDT_String;
+				et.shaders[j].startLine = pE->line;
 			}
 			else
 			{
@@ -1535,8 +1540,8 @@ MF_API void MFIntEffect_CreateRuntimeData(MFIntEffect *pEffect, MFEffect **ppOut
 			(char*&)et.pName -= stringBase;
 		for(int j=0; j<MFST_Max; ++j)
 		{
-			if(et.pShaderSource[j])
-				(char*&)et.pShaderSource[j] -= stringBase;
+			if(et.shaders[j].pShaderSource)
+				(char*&)et.shaders[j].pShaderSource -= stringBase;
 		}
 		if(et.pMacros)
 			(char*&)et.pMacros -= base;

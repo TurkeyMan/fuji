@@ -28,12 +28,18 @@ struct MFEffectTechnique
 	int numLights;
 
 	// shaders
-	MFShader *pShaders[MFST_Max];
+	struct Shader
+	{
+		MFShader *pShader;
+		const char *pShaderSource;
+		bool bFromFile;
+		int startLine;
+	};
+
+	Shader shaders[MFST_Max];
 	uint32 renderStateRequirements[MFSB_CT_TypeCount];
 
 	// compile macros
-	const char *pShaderSource[MFST_Max];
-	bool bFromFile[MFST_Max];
 
 	MFShaderMacro *pMacros;
 	int numMacros;

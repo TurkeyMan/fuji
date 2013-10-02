@@ -193,6 +193,12 @@ bool MFFileNative_Exists(const char* pFilename)
 #endif
 }
 
+const char* MFFileNative_MakeAbsolute(const char* pFilename)
+{
+	MFDebug_Assert(false, "!");
+	return pPath;
+}
+
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 #if defined(_USE_CRT_FOR_NULL_DRIVERS) && defined(CRT_SUPPORTS_FIND)

@@ -21,7 +21,7 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pFilename, const char *pSource)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
 {
 	char *pCode = NULL;
 	size_t size = 0;

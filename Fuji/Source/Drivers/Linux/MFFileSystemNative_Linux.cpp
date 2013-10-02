@@ -184,6 +184,13 @@ bool MFFileNative_Exists(const char* pFilename)
 	return true;
 }
 
+const char* MFFileNative_MakeAbsolute(const char* pFilename)
+{
+    char path[100];
+    realpath(pFilename, path);
+	return MFStr(path);
+}
+
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 	// separate path and search pattern..

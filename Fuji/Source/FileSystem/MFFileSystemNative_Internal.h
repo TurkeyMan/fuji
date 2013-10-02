@@ -30,6 +30,7 @@ void MFFileNative_FindClose(MFFind *pFind);
 // this is just for convenience sake, and not part of the main filesystem interface
 uint32 MFFileNative_GetSize(const char* pFilename);
 bool MFFileNative_Exists(const char* pFilename);
+const char* MFFileNative_MakeAbsolute(const char* pFilename);
 
 // handle to the native filesystem
 extern MFFileSystemHandle hNativeFileSystem;

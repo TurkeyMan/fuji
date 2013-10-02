@@ -201,6 +201,13 @@ bool MFFileNative_Exists(const char* pFilename)
 	return exists;
 }
 
+const char* MFFileNative_MakeAbsolute(const char* pFilename)
+{
+	char path[256];
+	GetFullPathName(pFilename, sizeof(path), path, NULL);
+	return MFStr(path);
+}
+
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 	WIN32_FIND_DATA fd;

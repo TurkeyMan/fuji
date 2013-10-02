@@ -163,6 +163,12 @@ bool MFFileNative_Exists(const char* pFilename)
 	return exists;
 }
 
+const char* MFFileNative_MakeAbsolute(const char* pFilename)
+{
+	MFDebug_Assert(false, "!");
+	return pPath;
+}
+
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 	SceIoDirent findData;

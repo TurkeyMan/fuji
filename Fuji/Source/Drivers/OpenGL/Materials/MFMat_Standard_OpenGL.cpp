@@ -388,6 +388,9 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 
 	MFCheckForOpenGLError(true);
 
+	// update the bools 'set' state
+	state.boolsSet = state.bools & state.rsSet[MFSB_CT_Bool];
+
 	return 0;
 }
 

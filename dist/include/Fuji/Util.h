@@ -46,6 +46,68 @@ inline T MFUtil_NextPowerOf2(T x)
 	return ++x;
 }
 
+#if defined(MF_COMPILER_VISUALC)
+	#include <intrin.h>
+	__forceinline bool MFUtil_BitScanReverse(uint32 value, uint32 *pIndex)
+	{
+		return _BitScanReverse((unsigned long*)pIndex, value) != 0;
+	}
+	__forceinline bool MFUtil_BitScanReverse64(uint64 value, uint32 *pIndex)
+	{
+#if defined(MF_64BIT)
+		return _BitScanReverse64((unsigned long*)pIndex, value) != 0;
+#else
+		if(_BitScanReverse((unsigned long*)pIndex, value >> 32))
+		{
+			*pIndex += 32;
+			return true;
+		}
+		else
+			return _BitScanReverse((unsigned long*)pIndex, (unsigned long)value) != 0;
+#endif
+	}
+#elif defined(MF_COMPILER_GCC) || defined(MF_COMPILER_CLANG)
+	__forceinline bool MFUtil_BitScanReverse(uint32 value, uint32 *pIndex)
+	{
+		*pIndex = 31 - (uint32)__builtin_clz(value);
+		return value != 0;
+	}
+	__forceinline bool MFUtil_BitScanReverse64(uint64 value, uint32 *pIndex)
+	{
+		*pIndex = 63 - (uint32)__builtin_clzll(value);
+		return value != 0;
+	}
+#else
+	#pragma message "I'm sure the machine has an opcode for this!"
+	bool MFUtil_BitScanReverse(uint32 value, uint32 *pIndex)
+	{
+		if(x == 0)
+			return false;
+		int n = 0;
+		if ((x & 0xFFFF0000) == 0) { n += 16; x <<= 16; }
+		if ((x & 0xFF000000) == 0) { n += 8; x <<= 8; }
+		if ((x & 0xF0000000) == 0) { n += 4; x <<= 4; }
+		if ((x & 0xC0000000) == 0) { n += 2, x <<= 2; }
+		if ((x & 0x80000000) == 0) { n += 1, x <<= 1; }
+		*pIndex = 31 - n;
+		return true;
+	}
+	bool MFUtil_BitScanReverse64(uint64 value, uint32 *pIndex)
+	{
+		if(x == 0)
+			return false;
+		uint32 n = 0;
+		if ((x & 0xFFFFFFFF00000000ULL) == 0) { n += 32; x <<= 32; }
+		if ((x & 0xFFFF000000000000ULL) == 0) { n += 16; x <<= 16; }
+		if ((x & 0xFF00000000000000ULL) == 0) { n += 8; x <<= 8; }
+		if ((x & 0xF000000000000000ULL) == 0) { n += 4; x <<= 4; }
+		if ((x & 0xC000000000000000ULL) == 0) { n += 2, x <<= 2; }
+		if ((x & 0x8000000000000000ULL) == 0) { n += 1, x <<= 1; }
+		*pIndex = 63 - n;
+		return true;
+	}
+#endif
+
 // endian flipping
 #if defined(MFBIG_ENDIAN)
 #define MFEndian_HostToBig(x)
