@@ -193,23 +193,23 @@ float2 transformUV(float4 uv, int uvMatrix)
 	float2 t;
 	if(uvMatrix == 0)
 	{
-		t.x = dot(uv, mUV0[0]);
-		t.y = dot(uv, mUV0[1]);
+		t.x = dot(uv, mUV0._m00_m10_m20_m30); // TODO: look into why the matrices are sideways...
+		t.y = dot(uv, mUV0._m01_m11_m21_m31);
 	}
 	else if(uvMatrix == 1)
 	{
-		t.x = dot(uv, mUV1[0]);
-		t.y = dot(uv, mUV1[1]);
+		t.x = dot(uv, mUV1._m00_m10_m20_m30);
+		t.y = dot(uv, mUV1._m01_m11_m21_m31);
 	}
 	else if(uvMatrix == 2)
 	{
-		t.x = dot(uv, mUV2[0]);
-		t.y = dot(uv, mUV2[1]);
+		t.x = dot(uv, mUV2._m00_m10_m20_m30);
+		t.y = dot(uv, mUV2._m01_m11_m21_m31);
 	}
 	else if(uvMatrix == 3)
 	{
-		t.x = dot(uv, mUV3[0]);
-		t.y = dot(uv, mUV3[1]);
+		t.x = dot(uv, mUV3._m00_m10_m20_m30);
+		t.y = dot(uv, mUV3._m01_m11_m21_m31);
 	}
 	return t;
 }

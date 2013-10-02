@@ -327,7 +327,7 @@ MF_API int MFRasteriserState_Release(MFRasteriserState *pRasteriserState)
 	return MFResource_Release(pRasteriserState);
 }
 
-MF_API MFStateBlock* MFStateBlock_Create(uint32 size)
+MF_API MFStateBlock* MFStateBlock_Create(size_t size)
 {
 	MFDebug_Assert(size >= MFStateBlock::MINIMUM_SIZE && MFUtil_NextPowerOf2(size) == size, "Invalid size. Must be a power of 2, and >= MFStateBlock::MINIMUM_SIZE bytes");
 
@@ -342,7 +342,7 @@ MF_API MFStateBlock* MFStateBlock_Create(uint32 size)
 	return pSB;
 }
 
-MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size)
+MF_API MFStateBlock* MFStateBlock_CreateTemporary(size_t size)
 {
 	MFDebug_Assert(size >= MFStateBlock::MINIMUM_SIZE && MFUtil_NextPowerOf2(size) == size, "Invalid size. Must be a power of 2, and >= MFStateBlock::MINIMUM_SIZE bytes");
 
@@ -356,6 +356,24 @@ MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size)
 	pSB->allocated = shift;
 
 	return pSB;
+}
+
+MF_API MFStateBlock* MFStateBlock_CreateDefault(size_t size)
+{
+	MFStateBlock *pDefaults = MFStateBlock_Create(size < 512 ? 512 : size);
+
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_World, MFMatrix::identity);
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_Camera, MFMatrix::identity);
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_UV0, MFMatrix::identity);
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_UV1, MFMatrix::identity);
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_UV2, MFMatrix::identity);
+	MFStateBlock_SetMatrix(pDefaults, MFSCM_UV3, MFMatrix::identity);
+
+	MFStateBlock_SetVector(pDefaults, MFSCV_MaterialDiffuseColour, MFVector::one);
+	MFStateBlock_SetVector(pDefaults, MFSCV_DiffuseColour, MFVector::one);
+	MFStateBlock_SetVector(pDefaults, MFSCV_AmbientColour, MFVector::one);
+
+	return pDefaults;
 }
 
 MF_API void MFStateBlock_Destroy(MFStateBlock *pStateBlock)

@@ -18,6 +18,7 @@
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
 MFRenderer *pRenderer = NULL;
+MFStateBlock *pDefaultStates = NULL;
 
 MFModel *pModel = NULL;
 
@@ -120,6 +121,9 @@ void Game_Init()
 	MFRenderLayerDescription layers[] = { { "Scene" } };
 	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
 	MFRenderer_SetCurrent(pRenderer);
+
+	pDefaultStates = MFStateBlock_CreateDefault();
+	MFRenderer_SetGlobalStateBlock(pRenderer, pDefaultStates);
 
 	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
 	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
@@ -248,6 +252,8 @@ void Game_Deinit()
 {
 	if(pModel)
 		MFModel_Destroy(pModel);
+
+	MFStateBlock_Destroy(pDefaultStates);
 
 	MFRenderer_Destroy(pRenderer);
 }

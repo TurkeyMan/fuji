@@ -910,7 +910,7 @@ MF_API int MFRasteriserState_Release(MFRasteriserState *pRasteriserState);
  * @param size Minimum size for the state block.
  * @return A new state block.
  */
-MF_API MFStateBlock* MFStateBlock_Create(uint32 size);
+MF_API MFStateBlock* MFStateBlock_Create(size_t size);
 
 /**
  * Create a temporary state block.
@@ -918,7 +918,16 @@ MF_API MFStateBlock* MFStateBlock_Create(uint32 size);
  * @param size Minimum size for the state block.
  * @return A new temporary state block.
  */
-MF_API MFStateBlock* MFStateBlock_CreateTemporary(uint32 size);
+MF_API MFStateBlock* MFStateBlock_CreateTemporary(size_t size);
+
+/**
+ * Create a default state block.
+ * Create a new state block filled with a base set of conventional global default states.
+ * @param size Minimum size for the state block. Defaults to 512, which is big enough to told the default states.
+ * @return A new state block filled with some default render states.
+ * @see MFRenderer_SetGlobalStateBlock()
+ */
+MF_API MFStateBlock* MFStateBlock_CreateDefault(size_t size = 512);
 
 /**
  * Destroy a state block.
