@@ -1,0 +1,82 @@
+effect Standard
+{
+	vs_static = src() {
+		#include "fuji.hlsl"
+
+		VSOutput main(in StaticInput input)
+		{
+			VSOutput output;
+			output.pos = mul(input.pos, mWorldViewProjection);
+			output.uv = transformUV(input.uv, 0);
+			output.colour = input.colour*vDiffuseColour;//*vMaterialDiffuseColour;
+			return output;
+		}
+	}
+
+	vs_animated = src() {
+		#include "fuji.hlsl"
+
+		VSOutput main(in AnimatedInput input)
+		{
+			int4 indices = input.indices * 255 + float4(0.5, 0.5, 0.5, 0.5);
+			float4 pos = animate(input.pos, indices, input.weights, 4);
+
+			VSOutput output;
+			output.pos = mul(pos, mViewProjection);
+			output.uv = transformUV(input.uv, 0);
+			output.colour = input.colour*vDiffuseColour;//*vMaterialDiffuseColour;
+			return output;
+		}
+	}
+
+	ps_colourise = src(hlsl) {
+		#include "fuji.hlsl"
+
+		float4 main(in VSOutput input) : COLOR
+		{
+			return float4(tex2D(sDiffuseSampler, input.uv).xyz, 0) + tex2D(sDetailSampler, input.uv) * input.colour;
+		}
+	}
+
+	ps_textured = src(hlsl) {
+		#include "fuji.hlsl"
+
+		float4 main(in VSOutput input) : COLOR
+		{
+			return tex2D(sDiffuseSampler, input.uv) * input.colour;
+		}
+	}
+
+	ps_untextured = src(hlsl) {
+		#include "fuji.hlsl"
+
+		float4 main(in VSOutput input) : COLOR
+		{
+			return input.colour;
+		}
+	}
+
+	technique "Animated" (bAnimated && bDiffuseSet)
+	{
+		VertexShader = vs_animated
+		PixelShader = ps_textured
+	}
+
+	technique "Static+ColourMap" (bDiffuseSet && bDetailMapSet)
+	{
+		VertexShader = vs_static
+		PixelShader = ps_colourise
+	}
+
+	technique "Static+Untextured" (bDiffuseSet)
+	{
+		VertexShader = vs_static
+		PixelShader = ps_textured
+	}
+
+	technique "Static"
+	{
+		VertexShader = vs_static
+		PixelShader = ps_untextured
+	}
+}
