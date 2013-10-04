@@ -165,7 +165,7 @@ MF_API int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration *pDeclaration);
  * @param stream Vertex stream index.
  * @return A vertex declaration for the specified vertex stream.
  */
-MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream);
+MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *pDeclaration, int stream);
 
 /**
  * Create a vertex buffer.
@@ -178,7 +178,7 @@ MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDe
  * @return The created vertrex buffer.
  * @see MFVertex_ReleaseVertexBuffer()
  */
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL, const char *pName = NULL);
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory = NULL, const char *pName = NULL);
 
 /**
  * Release a vertex buffer.

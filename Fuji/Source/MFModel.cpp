@@ -396,7 +396,7 @@ MF_API MFModel* MFModel_Create(const char *pFilename)
 
 						for(int s=0; s<pMCG->numVertexStreams; ++s)
 						{
-							const MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
+							MFVertexDeclaration *pVBDecl = MFVertex_GetStreamDeclaration(pMC->pDecl, s);
 							if(pVBDecl)
 							{
 								const char *pVBName = MFStr("%s|%s[%d:%d]", pTemplate->pName, pSubobjects[a].pSubObjectName, b, s);
@@ -487,9 +487,6 @@ MF_API void MFModel_SubmitGeometry(MFModel *pModel, MFRenderLayerSet *pLayerSet,
 		MFAnimation_CalculateMatrices(pModel->pAnimation, &pModel->worldMatrix);
 
 	MFStateBlock_SetMatrix(pModel->pEntityState, MFSCM_World, pModel->worldMatrix);
-
-//	MFStateBlock_SetVector(pModel->pEntityState, MFSCV_DiffuseColour, pModel->modelColour);
-	MFStateBlock_SetVector(pModel->pEntityState, MFSCV_DiffuseColour, MFVector::one);
 
 	MFModelSubObject *pSubobjects = (MFModelSubObject*)pChunk->pData;
 	for(int s = 0; s < pChunk->count; s++)

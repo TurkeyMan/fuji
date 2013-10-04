@@ -239,9 +239,9 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFFileHTTPData *pHTTPData = gHTTPFiles.Create();
 	pFile->pFilesysData = pHTTPData;
 
-	int serverLen = MFString_Length(pServer) + 1;
-	int pathLen = MFString_Length(pPath) + 1;
-	int argLen = 0;
+	size_t serverLen = MFString_Length(pServer) + 1;
+	size_t pathLen = MFString_Length(pPath) + 1;
+	size_t argLen = 0;
 
 	MFCopyMemory(&pHTTPData->address, pAddrInfo->pAddress, sizeof(MFSocketAddressInet));
 	pHTTPData->pServer = (char*)&pHTTPData[1];

@@ -110,7 +110,7 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			// try to load from source data
-			const char * const pExt[] = { ".tga", ".png", ".bmp", NULL };
+			const char * const pExt[] = { ".tga", ".png", ".bmp", ".dds", NULL };
 			const char * const *ppExt = pExt;
 			MFIntTexture *pIT = NULL;
 			while(!pIT && *ppExt)

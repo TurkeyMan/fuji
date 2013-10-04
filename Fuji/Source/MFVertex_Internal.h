@@ -25,7 +25,7 @@ struct MFVertexDeclaration : public MFResource
 
 struct MFVertexBuffer : public MFResource
 {
-	const MFVertexDeclaration *pVertexDeclatation;
+	MFVertexDeclaration *pVertexDeclatation;
 	MFVertexBufferType bufferType;
 	int numVerts;
 

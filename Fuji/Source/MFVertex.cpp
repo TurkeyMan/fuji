@@ -54,6 +54,9 @@ static void MFVertex_DestroyVertexBuffer(MFResource *pRes)
 		return;
 
 	MFVertex_DestroyVertexBufferPlatformSpecific(pVertexBuffer);
+
+	MFVertex_ReleaseVertexDeclaration(pVertexBuffer->pVertexDeclatation);
+
 	MFHeap_Free(pVertexBuffer);
 }
 
@@ -174,14 +177,14 @@ MF_API int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration *pDeclaration)
 	return MFResource_Release(pDeclaration);
 }
 
-MF_API const MFVertexDeclaration *MFVertex_GetStreamDeclaration(const MFVertexDeclaration *pDeclaration, int stream)
+MF_API MFVertexDeclaration *MFVertex_GetStreamDeclaration(MFVertexDeclaration *pDeclaration, int stream)
 {
 	if(pDeclaration->streamsUsed == 1)
 		return pDeclaration;
 	return pDeclaration->pStreamDecl[stream];
 }
 
-MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
+MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexFormat, int numVerts, MFVertexBufferType type, void *pVertexBufferMemory, const char *pName)
 {
 	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 	MFVertexBuffer *pVB;
@@ -212,7 +215,12 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(const MFVertexDeclaration *pV
 		gpScratchBufferList = pVB;
 	}
 	else
+	{
+		// TODO: the declaration should probably be incremented for scratch buffers too...
+		MFResource_AddRef(pVertexFormat);
+
 		MFResource_AddResource(pVB, MFRT_VertexBuffer, (uint32)(MFUtil_HashPointer(pVB) & 0xFFFFFFFF), pName);
+	}
 
 	return pVB;
 }

@@ -335,7 +335,7 @@ MF_API MFStateBlock* MFStateBlock_Create(size_t size)
 
 	// calculate the size
 	int shift = 0;
-	for(uint32 s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
+	for(size_t s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
 
 	pSB->allocated = shift;
 
@@ -351,7 +351,7 @@ MF_API MFStateBlock* MFStateBlock_CreateTemporary(size_t size)
 
 	// calculate the size
 	int shift = 0;
-	for(uint32 s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
+	for(size_t s = size >> 6; !(s & 1); s >>= 1, ++shift) {}
 
 	pSB->allocated = shift;
 

@@ -9,6 +9,7 @@ enum MFIntTextureFormat
 	MFITF_TGA = 0,
 	MFITF_BMP,
 	MFITF_PNG,
+	MFITF_DDS,
 
 	MFITF_Max,
 	MFITF_ForceInt = 0x7FFFFFFF
