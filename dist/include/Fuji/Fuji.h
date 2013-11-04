@@ -78,7 +78,7 @@
 #endif
 
 // detect architecture/platform
-#if defined(_XBOX)
+#if defined(_XBOX_VER) || defined(_XBOX)
 	// detect xbox version
 	#if _XBOX_VER < 200
 		#define MF_XBOX

@@ -72,9 +72,7 @@ solution "Fuji"
 	end
 
 	if os.get() == "windows" then
-		platforms { "Native", "x32", "x64" }
-	else
-		platforms { "Native" }
+		platforms { "x32", "x64" }
 	end
 
 	-- Static lib project

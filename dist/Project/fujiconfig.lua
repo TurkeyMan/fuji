@@ -1,12 +1,11 @@
 -- some code to take advantage of visual studios project macros
 
 function isVS()
-	return _ACTION == "vs2010" or _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002"
+	return _ACTION == "vs2013" or _ACTION == "vs2012" or _ACTION == "vs2010" or _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002"
 end
 
 local function getConfigName(configName)
-	-- how annoying that vs2010 decided to change the name of this macro! >_<
-	if _ACTION == "vs2010" then
+	if _ACTION == "vs2010" or _ACTION == "vs2012" or _ACTION == "vs2013" then
 		return "$(Configuration)"
 	elseif _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002" then
 		return "$(ConfigurationName)"
@@ -42,21 +41,23 @@ includedirs { "../include/" }
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
+	optimize "Debug"
 	targetsuffix ("_" .. configNames.Debug)
 
 configuration "DebugOpt"
 	defines { "DEBUG", "_DEBUG" }
-	flags { "Symbols", "Optimize" }
+	flags { "Symbols" }
+	optimize "On"
 	targetsuffix ("_" .. configNames.DebugOpt)
 
 configuration "Release"
 	defines { "NDEBUG", "_RELEASE" }
-	flags { "OptimizeSpeed" }
+	optimize "Full"
 	targetsuffix ("_" .. configNames.Release)
 
 configuration "Retail"
 	defines { "NDEBUG", "_RETAIL" }
-	flags { "OptimizeSpeed" }
+	optimize "Full"
 	targetsuffix ("_" .. configNames.Retail)
 
 
@@ -64,7 +65,6 @@ configuration "Retail"
 
 -- Linux --
 configuration { "linux" }
-	defines { "_LINUX" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
 	links { "z", "png", "mad" }
 --	links { "asound" }
@@ -75,13 +75,12 @@ configuration { "linux" }
 
 -- OSX --
 configuration { "macosx" }
-	defines { "_OSX" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
 	links { "z", "png", "mad" }
 
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }
-	defines { "WIN32", "_WINDOWS" }
+	defines { "WIN32" }
 
 	-- Windows 32 --
 	configuration { "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
@@ -129,12 +128,10 @@ configuration "Xbox360"
 
 -- Playstation 3 --
 configuration "PS3"
-	defines { "_PS3" }
 	libdirs { "../lib/ps3" }
 
 -- Dreamcast __
 configuration "Dreamcast"
-	defines { "_DC" }
 	libdirs { "../lib/dc" }
 	-- http://yam.20to4.net/dreamcast/hints/index.html <- some performance thoughts
 --	compileoptions { "-m4-single", "-ml", "-mfused-madd", "-mfsca", "-mfsrra", "-mdalign" } -- "--ffast-math", "-mfmovd" ??

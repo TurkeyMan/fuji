@@ -7,7 +7,8 @@ project "Compute"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "WinMain", "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
+	flags { "WinMain", "StaticRuntime", "NoExceptions", "NoRTTI" }
+	warnings "Extra"
 
 	links { "Fuji" }
 

@@ -30,7 +30,8 @@ project (projName)
 
 	-- project configuration --
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	warnings "Extra"
 
 --	pchheader "Haku.h"
 --	pchsource "HKMain.cpp"

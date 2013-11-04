@@ -51,7 +51,8 @@ project (projName)
 
 	-- project configuration --
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI", "ExtraWarnings" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	warnings "Extra"
 
 	if string.startswith(_ACTION, "vs") then
 		linkoptions { "/ignore:4221" }
