@@ -470,7 +470,7 @@ enum MFRendererDrivers
 #endif
 
 // if the plugin driver was selected, the available plugins need to be configured for various platforms
-#include "MFDriver_Plugin.h"
+#include "Fuji/MFDriver_Plugin.h"
 
 // enable this define to allow the NULL drivers to operate using the standard CRT where appropriate
 #if !defined(MF_NO_CRT)
@@ -489,7 +489,7 @@ enum MFRendererDrivers
 #endif
 #if defined(MF_WINDOWS) && defined(MF_32BIT) && defined(MF_COMPILER_VISUALC)
 	// MiniFMOD can decode old XM tracker format tunes
-	#define MINIFMOD_STREAM
+//	#define MINIFMOD_STREAM
 #endif
 #if defined(MF_PSP)
 	// PSP hardware mp3 decoder

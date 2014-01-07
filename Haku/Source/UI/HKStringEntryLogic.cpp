@@ -37,7 +37,7 @@ void HKStringEntryLogic::StringCopyOverlap(char *pDest, const char *pSrc)
 	}
 	else
 	{
-		int len = MFString_Length(pSrc);
+		int len = (int)MFString_Length(pSrc);
 
 		while(len >= 0)
 		{

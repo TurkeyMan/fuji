@@ -27,7 +27,7 @@ extern (C) void MFRenderer_ResetViewport();
 
 extern (C) MFTexture* MFRenderer_GetDeviceRenderTarget();
 extern (C) MFTexture* MFRenderer_GetDeviceDepthStencil();
-extern (C) void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget);
+extern (C) void MFRenderer_SetRenderTarget(MFRenderTarget* pRenderTarget);
 extern (C) void MFRenderer_SetDeviceRenderTarget();
 
 extern (C) float MFRenderer_GetTexelCenterOffset();
@@ -62,7 +62,7 @@ extern (C) void* MFRenderer_AllocateCommandBufferMemory(size_t bytes, size_t ali
 
 extern (C) void* MFRenderer_AllocateScratchMemory(size_t bytes, size_t alignment = 16);
 
-extern (C) void MFRenderer_GetMemoryStats(size_t *pCommandBuffer, size_t *pCommandBufferPeak, size_t *pScratch, size_t *pScratchPeak);
+extern (C) void MFRenderer_GetMemoryStats(size_t* pCommandBuffer, size_t* pCommandBufferPeak, size_t* pScratch, size_t* pScratchPeak);
 
 // new renderer interface...
 
@@ -91,55 +91,60 @@ struct MFRenderLayerDescription
 
 struct MFRenderLayerSet
 {
-	MFRenderLayer *pSolidLayer;
-	MFRenderLayer *pAlphaLayer;
-	MFRenderLayer *pZPrimeLayer;
+	MFRenderLayer* pSolidLayer;
+	MFRenderLayer* pAlphaLayer;
+	MFRenderLayer* pZPrimeLayer;
 };
 
-extern (C) MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numLayers, MFStateBlock *pGlobal, MFStateBlock *pOverride);
-extern (C) void MFRenderer_Destroy(MFRenderer *pRenderer);
+extern (C) MFRenderer* MFRenderer_Create(MFRenderLayerDescription* pLayers, int numLayers, MFStateBlock* pGlobal, MFStateBlock* pOverride);
+MFRenderer* MFRenderer_Create(MFRenderLayerDescription[] layers, MFStateBlock* pGlobal, MFStateBlock* pOverride)
+{
+	return MFRenderer_Create(layers.ptr, cast(int)layers.length, pGlobal, pOverride);
+}
 
-extern (C) MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer *pRenderer, const MFStateBlock *pGlobal);
-extern (C) MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer *pRenderer, const MFStateBlock *pOverride);
+extern (C) void MFRenderer_Destroy(MFRenderer* pRenderer);
 
-extern (C) void MFRenderer_SetRenderLayerSet(MFRenderer *pRenderer, MFRenderLayerSet *pLayerSet);
+extern (C) MFStateBlock* MFRenderer_SetGlobalStateBlock(MFRenderer* pRenderer, const MFStateBlock* pGlobal);
+extern (C) MFStateBlock* MFRenderer_SetOverrideStateBlock(MFRenderer* pRenderer, const MFStateBlock* pOverride);
 
-extern (C) MFRenderLayer* MFRenderer_GetLayer(MFRenderer *pRenderer, int layer);
-extern (C) MFRenderLayer* MFRenderer_GetDebugLayer(MFRenderer *pRenderer);
+extern (C) void MFRenderer_SetRenderLayerSet(MFRenderer* pRenderer, MFRenderLayerSet* pLayerSet);
 
-extern (C) void MFRenderer_CloneLayer(MFRenderer *pRenderer, int sourceLayer, int destLayer);
+extern (C) MFRenderLayer* MFRenderer_GetLayer(MFRenderer* pRenderer, int layer);
+extern (C) MFRenderLayer* MFRenderer_GetDebugLayer(MFRenderer* pRenderer);
 
-extern (C) void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer);
-extern (C) void MFRenderer_Kick(MFRenderer *pRenderer);
+extern (C) void MFRenderer_CloneLayer(MFRenderer* pRenderer, int sourceLayer, int destLayer);
 
-extern (C) MFRenderer* MFRenderer_SetCurrent(MFRenderer *pRenderer);
+extern (C) void MFRenderer_BuildCommandBuffers(MFRenderer* pRenderer);
+extern (C) void MFRenderer_Kick(MFRenderer* pRenderer);
+
+extern (C) MFRenderer* MFRenderer_SetCurrent(MFRenderer* pRenderer);
 extern (C) MFRenderer* MFRenderer_GetCurrent();
 
-extern (C) void MFRenderer_AddMesh(MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderer_AddModel(MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderer_AddVertices(const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderer_AddIndexedVertices(const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+extern (C) void MFRenderer_AddMesh(MFMesh* pMesh, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderer_AddModel(MFModel* pModel, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderer_AddVertices(const MFStateBlock* pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderer_AddIndexedVertices(const MFStateBlock* pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
 
-extern (C) void MFRenderLayer_SetLayerStateBlock(MFRenderLayer *pLayer, const MFStateBlock *pState);
-extern (C) void MFRenderLayer_SetLayerSortMode(MFRenderLayer *pLayer, MFRenderLayerSortMode sortMode);
+extern (C) void MFRenderLayer_SetLayerStateBlock(MFRenderLayer* pLayer, const MFStateBlock* pState);
+extern (C) void MFRenderLayer_SetLayerSortMode(MFRenderLayer* pLayer, MFRenderLayerSortMode sortMode);
 
-extern (C) void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer *pLayer, MFRenderTarget *pRenderTarget);
-extern (C) void MFRenderLayer_SetLayerColourCapture(MFRenderLayer *pLayer, int targetIndex, MFTexture *pTexture);
-extern (C) void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer *pLayer, MFTexture *pTexture);
+extern (C) void MFRenderLayer_SetLayerRenderTarget(MFRenderLayer* pLayer, MFRenderTarget* pRenderTarget);
+extern (C) void MFRenderLayer_SetLayerColourCapture(MFRenderLayer* pLayer, int targetIndex, MFTexture* pTexture);
+extern (C) void MFRenderLayer_SetLayerDepthCapture(MFRenderLayer* pLayer, MFTexture* pTexture);
 
-extern (C) void MFRenderLayer_SetClear(MFRenderLayer *pLayer, MFRenderClearFlags clearFlags, ref const MFVector colour = MFVector.zero, float z = 1, int stencil = 0);
+extern (C) void MFRenderLayer_SetClear(MFRenderLayer* pLayer, MFRenderClearFlags clearFlags, ref const MFVector colour = MFVector.zero, float z = 1, int stencil = 0);
 
-extern (C) void MFRenderLayer_AddVertices(MFRenderLayer *pLayer, const MFStateBlock *pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderLayer_AddIndexedVertices(MFRenderLayer *pLayer, const MFStateBlock *pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderLayer_AddMesh(MFRenderLayer *pLayer, MFMesh *pMesh, MFMaterial *pMaterial, const MFStateBlock *pEntity, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
-extern (C) void MFRenderLayer_AddModel(MFRenderLayerSet *pLayerSet, MFModel *pModel, const MFStateBlock *pMaterialOverride, const MFStateBlock *pView);
+extern (C) void MFRenderLayer_AddVertices(MFRenderLayer* pLayer, const MFStateBlock* pMeshStateBlock, int firstVertex, int numVertices, MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderLayer_AddIndexedVertices(MFRenderLayer* pLayer, const MFStateBlock* pMeshStateBlock, int firstIndex, int numVertices, MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderLayer_AddMesh(MFRenderLayer* pLayer, MFMesh* pMesh, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
+extern (C) void MFRenderLayer_AddModel(MFRenderLayerSet* pLayerSet, MFModel* pModel, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView);
 
-extern (C) void MFRenderLayer_AddFence(MFRenderLayer *pLayer);
+extern (C) void MFRenderLayer_AddFence(MFRenderLayer* pLayer);
 
 
 // helpers...
-void MFRenderer_SetLayerStateBlock(MFRenderer *pRenderer, int layer, MFStateBlock *pState)
+void MFRenderer_SetLayerStateBlock(MFRenderer* pRenderer, int layer, MFStateBlock* pState)
 {
-	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, layer);
+	MFRenderLayer* pLayer = MFRenderer_GetLayer(pRenderer, layer);
 	MFRenderLayer_SetLayerStateBlock(pLayer, pState);
 }

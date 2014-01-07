@@ -18,6 +18,7 @@ project (projName)
 		end
 	else
 		kind "StaticLib"
+		flags { "OmitDefaultLibrary" }
 	end
 
 	-- setup paths --
@@ -43,7 +44,6 @@ project (projName)
 			includedirs { "../Middleware/zlib" }
 			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 			includedirs { "../Middleware/libpng-1.5.0/" }
-			files { "../Middleware/minifmod170/lib/**.h", "../Middleware/minifmod170/lib/**.c" }
 	end
 --	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 --		includedirs { "../Middleware/" }

@@ -540,8 +540,9 @@ extern (C) int MFDepthStencilState_Release(MFDepthStencilState *pDepthStencilSta
 extern (C) MFRasteriserState* MFRasteriserState_Create(MFRasteriserStateDesc *pDesc);
 extern (C) int MFRasteriserState_Release(MFRasteriserState *pRasteriserState);
 
-extern (C) MFStateBlock* MFStateBlock_Create(uint size);
-extern (C) MFStateBlock* MFStateBlock_CreateTemporary(uint size);
+extern (C) MFStateBlock* MFStateBlock_Create(size_t size);
+extern (C) MFStateBlock* MFStateBlock_CreateTemporary(size_t size);
+extern (C) MFStateBlock* MFStateBlock_CreateDefault(size_t size = 512);
 extern (C) void MFStateBlock_Destroy(MFStateBlock *pStateBlock);
 extern (C) MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource);
 extern (C) void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest);
