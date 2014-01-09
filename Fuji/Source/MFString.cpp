@@ -267,6 +267,10 @@ MF_API bool MFString_PatternMatch(const char *pPattern, const char *pFilename, c
 		{
 			++pPattern;
 
+			// if an asterisk is the last character in the pattern, it's a match!
+			if(*pPattern == 0)
+				return true;
+
 			bool match = false;
 			while(*pFilename)
 			{
