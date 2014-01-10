@@ -60,6 +60,10 @@ enum MFJobState
 * @return The path to the game data directory.
 */
 extern (C) const(char)* MFFile_SystemPath(const(char)* filename = null);
+const(char)[] MFFile_SystemPath(const(char)[] filename = null)
+{
+	return MFFile_SystemPath(filename ? filename.toStringz : null).toDStr;
+}
 
 /**
 * Gets the system home path.
@@ -69,6 +73,10 @@ extern (C) const(char)* MFFile_SystemPath(const(char)* filename = null);
 * @remarks The home path is typically used for debugging and development purposes (writing logs, screenshots, etc). The game should not require access to the home path.
 */
 extern (C) const(char)* MFFile_HomePath(const(char)* filename = null);
+const(char)[] MFFile_HomePath(const(char)[] filename = null)
+{
+	return MFFile_HomePath(filename ? filename.toStringz : null).toDStr;
+}
 
 
 ///////////////////////////
@@ -370,7 +378,13 @@ extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MF
 * @param @param extraBytes Number of extra bytes to allocate at the end of the buffer. Initialises the first extra byte to 0 (useful for appending a NULL byte to the end of text files).
 * @return A pointer to a new buffer containing the file that was loaded.
 */
-extern (C) char* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, size_t extraBytes = 0);
+extern (C) ubyte* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, size_t extraBytes = 0);
+ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0)
+{
+	size_t size;
+	ubyte* file = MFFileSystem_Load(filename.toStringz, &size, extraBytes);
+	return file[0..size];
+}
 
 /**
 * Write a file to a filesystem.
@@ -380,7 +394,11 @@ extern (C) char* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = 
 * @param size Size of the buffer to write.
 * @return Returns 0 if the file was succesfully written.
 */
-extern (C) int MFFileSystem_Save(const(char)* pFilename, const(char)* pBuffer, size_t size);
+extern (C) int MFFileSystem_Save(const(char)* pFilename, const(ubyte)* pBuffer, size_t size);
+int MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer)
+{
+	return MFFileSystem_Save(filename.toStringz, buffer.ptr, buffer.length);
+}
 
 /**
 * Get the size of a file.
@@ -390,6 +408,10 @@ extern (C) int MFFileSystem_Save(const(char)* pFilename, const(char)* pBuffer, s
 * @remarks If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists. MFFileSystem_GetSize may also return -1 if the files length is not known, for instance, an endless or unknown length network stream.
 */
 extern (C) long MFFileSystem_GetSize(const(char)* pFilename);
+long MFFileSystem_GetSize(const(char)[] filename)
+{
+	return MFFileSystem_GetSize(filename.toStringz);
+}
 
 /**
 * See if a file is available to the filesystem.
@@ -398,6 +420,10 @@ extern (C) long MFFileSystem_GetSize(const(char)* pFilename);
 * @return True if the file can be found within the mounted filesystem stack.
 */
 extern (C) bool MFFileSystem_Exists(const(char)* pFilename);
+bool MFFileSystem_Exists(const(char)[] filename)
+{
+	return MFFileSystem_Exists(filename.toStringz);
+}
 
 /**
 * Get number of available volumes.
@@ -425,6 +451,10 @@ extern (C) void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeIn
 * @see MFFileSystem_FindNext(), MFFileSystem_FindClose()
 */
 extern (C) MFFind* MFFileSystem_FindFirst(const(char)* pSearchPattern, MFFindData *pFindData);
+MFFind* MFFileSystem_FindFirst(const(char)[] searchPattern, MFFindData *pFindData)
+{
+	return MFFileSystem_FindFirst(searchPattern.toStringz, pFindData);
+}
 
 /**
 * Find the next file.
@@ -480,12 +510,19 @@ private string joinPath(const(char)[] s1, const(char)[] s2)
 struct DirEntry
 {
 public:
-	alias name this;
+	alias filepath this;
 
 	private this(string path, in MFFindData* fd)
 	{
-		name = joinPath(path, fd.filename);
+		filepath = joinPath(path, fd.filename);
+
 		systemPath = fd.systemPath;
+
+		filename = fd.filename;
+		directory = path;
+		if(directory.length > 0 && directory[$-1] == '/')
+			directory = directory[0..$-1];
+
 		size = fd.fileSize;
 		attributes = fd.attributes;
 	}
@@ -494,8 +531,10 @@ public:
 	@property bool isFile() const pure nothrow { return !isDir; }
 	@property bool isSymlink() const pure nothrow { return (attributes & MFFileAttributes.SymLink) != 0; }
 
-	string name;		// the file or directory represented by this DirEntry
+	string filepath;	// the file or directory represented by this DirEntry
 	string systemPath;	// the system path to this file.
+	string filename;	// the filename part
+	string directory;	// the directory part
 	ulong size;			// file size in bytes
 	uint  attributes;	// file attributes
 }
@@ -529,7 +568,7 @@ private struct DirIteratorImpl
 	{
 		string search_pattern = joinPath(directory, "*");
 		MFFindData findinfo = void;
-		MFFind* h = MFFileSystem_FindFirst(search_pattern.toStringz, &findinfo);
+		MFFind* h = MFFileSystem_FindFirst(search_pattern, &findinfo);
 		if (!h)
 			throw new FileException(search_pattern, "Invalid find path");
 		_stack.put(DirHandle(directory, h));
@@ -602,7 +641,7 @@ private struct DirIteratorImpl
 				while(mayStepIn())
 				{
 					auto thisDir = _cur;
-					if(stepIn(_cur.name))
+					if(stepIn(_cur.filepath))
 					{
 						pushExtra(thisDir);
 					}
@@ -623,7 +662,7 @@ private struct DirIteratorImpl
 					while(mayStepIn())
 					{
 						auto thisDir = _cur;
-						if(stepIn(_cur.name))
+						if(stepIn(_cur.filepath))
 						{
 							pushExtra(thisDir);
 						}
@@ -637,7 +676,7 @@ private struct DirIteratorImpl
 			case SpanMode.breadth:
 				if(mayStepIn())
 				{
-					if(!stepIn(_cur.name))
+					if(!stepIn(_cur.filepath))
 						while(!empty && !next()){}
 				}
 				else

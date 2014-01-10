@@ -42,9 +42,10 @@ struct MFMemoryCallbacks
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_Alloc(size_t bytes, MFHeap* pHeap = null)
+void[] MFHeap_Alloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
 {
-	return MFHeap_AllocInternal(bytes, pHeap);
+	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	return MFHeap_AllocInternal(bytes, pHeap)[0..bytes];
 }
 
 /**
@@ -58,9 +59,10 @@ void* MFHeap_Alloc(size_t bytes, MFHeap* pHeap = null)
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_AllocAndZero(size_t bytes, MFHeap* pHeap = null)
+void[] MFHeap_AllocAndZero(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
 {
-	return MFHeap_AllocAndZeroInternal(bytes, pHeap);
+	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	return MFHeap_AllocAndZeroInternal(bytes, pHeap)[0..bytes];
 }
 
 /**
@@ -75,14 +77,32 @@ void* MFHeap_AllocAndZero(size_t bytes, MFHeap* pHeap = null)
  * @see MFHeap_Alloc()
  * @see MFHeap_Free()
  */
-void* MFHeap_Realloc(void* pMem, size_t bytes)
+void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void* pMem, size_t bytes)
 {
-	return MFHeap_ReallocInternal(pMem, bytes);
+	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	return MFHeap_ReallocInternal(pMem, bytes)[0..bytes];
 }
 
-void* MFHeap_TAlloc(size_t bytes, MFHeap* pHeap = null)
+/**
+* Frees a block of memory.
+* Frees an allocated block of memory.
+* @param pMem Pointer to memory to be freed.
+* @return None.
+* @see MFHeap_Alloc()
+* @see MFHeap_Realloc()
+*/
+extern (C) void MFHeap_Free(void *pMem);
+void MFHeap_Free(void[] mem)
 {
-	return MFHeap_AllocInternal(bytes, MFHeap_GetHeap(MFHeapType.ActiveTemporary));
+	debug assert(MFHeap_GetAllocSize(mem.ptr) == mem.length, "Buffer being freed has different size than the allocation!");
+	MFHeap_Free(mem.ptr);
+}
+
+
+void[] MFHeap_TAlloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
+{
+	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	return MFHeap_AllocInternal(bytes, MFHeap_GetHeap(MFHeapType.ActiveTemporary))[0..bytes];
 }
 
 // *** document me!! ***
@@ -258,7 +278,6 @@ private
 	extern (C) void* MFHeap_ReallocInternal(void* pMem, size_t bytes);
 	extern (C) void* MFHeap_AllocInternal(size_t bytes, MFHeap* pHeap = null);
 	extern (C) void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap* pHeap = null);
-
 	extern (C) void MFHeap_SetLineAndFile(int line, const(char*) pFile);
 }
 

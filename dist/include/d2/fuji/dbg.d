@@ -2,12 +2,15 @@ module fuji.dbg;
 
 import fuji.fuji;
 
+import std.string;
+
 
 extern (C) void MFDebug_DebugAssert(const(char)* pReason, const(char)* pMessage, const(char)* pFile = __FILE__.ptr, int line = __LINE__);
 
-void MFDebug_Assert(in char[] reason, in char[] message, string file = __FILE__, int line = __LINE__)
+void MFDebug_Assert(alias reason = false)(in char[] message, string file = __FILE__, int line = __LINE__)
 {
-	MFDebug_DebugAssert(reason.ptr, message.ptr, file.ptr, line);
+	if(!reason)
+		MFDebug_DebugAssert(reason.stringof.ptr, message.ptr, file.ptr, line);
 }
 
 /**
@@ -17,6 +20,10 @@ void MFDebug_Assert(in char[] reason, in char[] message, string file = __FILE__,
 * @return None.
 */
 extern (C) void MFDebug_Message(const(char)* pMessage);
+void MFDebug_Message(const(char)[] message)
+{
+	MFDebug_Message(message.toStringz);
+}
 
 /**
 * Notifies the user of a critical error.
@@ -25,6 +32,10 @@ extern (C) void MFDebug_Message(const(char)* pMessage);
 * @return None.
 */
 extern (C) void MFDebug_Error(const(char)* pErrorMessage);
+void MFDebug_Error(const(char)[] errorMessage)
+{
+	MFDebug_Error(errorMessage.toStringz);
+}
 
 /**
 * Notifies the user of a runtime warning.
@@ -42,6 +53,10 @@ extern (C) void MFDebug_Error(const(char)* pErrorMessage);
 * - 4 - Low Warning. For small generally unimportant details.
 */
 extern (C) void MFDebug_Warn(int level, const(char)* pWarningMessage);
+void MFDebug_Warn(int level, const(char)[] warningMessage)
+{
+	MFDebug_Warn(level, warningMessage.toStringz);
+}
 
 /**
 * Log a message to the debug output.
@@ -59,6 +74,10 @@ extern (C) void MFDebug_Warn(int level, const(char)* pWarningMessage);
 * - 4 - Very trivial and probably frequent spammy message.
 */
 extern (C) void MFDebug_Log(int level, const(char)* pMessage);
+void MFDebug_Log(int level, const(char)[] message)
+{
+	MFDebug_Log(level, message.toStringz);
+}
 
 /**
 * Sets the maximum warning level.
