@@ -509,19 +509,18 @@ private string joinPath(const(char)[] s1, const(char)[] s2)
 
 struct DirEntry
 {
-public:
 	alias filepath this;
 
 	private this(string path, in MFFindData* fd)
 	{
-		filepath = joinPath(path, fd.filename);
-
-		systemPath = fd.systemPath;
-
-		filename = fd.filename;
+		filename = fd.filename.idup;
 		directory = path;
 		if(directory.length > 0 && directory[$-1] == '/')
 			directory = directory[0..$-1];
+
+		filepath = joinPath(path, filename);
+
+		systemPath = fd.systemPath;
 
 		size = fd.fileSize;
 		attributes = fd.attributes;
