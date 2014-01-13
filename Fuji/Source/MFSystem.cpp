@@ -111,7 +111,7 @@ MFDefaults gDefaults =
 	{
 		256,			// maxSounds
 		32,				// maxVoices
-		4,				// maxMusicTracks
+		16,				// maxMusicTracks
 		true			// useGlobalFocus
 	},
 
@@ -452,6 +452,11 @@ MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
 	return pSystemCallbacks[callback];
+}
+
+MF_API MFDefaults* MFSystem_GetDefaults()
+{
+	return &gDefaults;
 }
 
 MF_API const char * MFSystem_GetSettingString(int tabDepth)

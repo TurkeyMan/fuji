@@ -507,7 +507,7 @@ static const int gXGuitarButtonID[GamepadType_Max] =
 	-1		// Button_Home
 };
 
-static const int gRB360GuitarButtonID[GamepadType_Max] =
+static const int g360RBGuitarButtonID[GamepadType_Max] =
 {
 	2,	// Button_GH_Blue
 	1,	// Button_GH_Red
@@ -557,7 +557,7 @@ static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
 	12  // Button_Home
 };
 
-static const int gRBPS3GuitarButtonID[GamepadType_Max] =
+static const int gPS3RBGuitarButtonID[GamepadType_Max] =
 {
 	0,	// Button_GH_Blue
 	2,	// Button_GH_Red
@@ -582,7 +582,7 @@ static const int gRBPS3GuitarButtonID[GamepadType_Max] =
 	12  // Button_Home
 };
 
-static const int gGH4PS3GuitarButtonID[GamepadType_Max] =
+static const int gPS3GH4GuitarButtonID[GamepadType_Max] =
 {
 	3,	// Button_GH_Blue
 	2,	// Button_GH_Red
@@ -857,7 +857,7 @@ static const int gRandomAdapterButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
-static const int gRB360DrumsButtonID[GamepadType_Max] =
+static const int g360RBDrumsButtonID[GamepadType_Max] =
 {
 	0,	// Button_Drum_Green
 	1,	// Button_Drum_Red
@@ -882,7 +882,7 @@ static const int gRB360DrumsButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
-static const int gGH4PS3DrumsButtonID[GamepadType_Max] =
+static const int gPS3GH4DrumsButtonID[GamepadType_Max] =
 {
 	1,	// Button_Drum_Tom2
 	2,	// Button_Drum_Snare
@@ -905,6 +905,31 @@ static const int gGH4PS3DrumsButtonID[GamepadType_Max] =
 	-1, // Unused
 	-1,	// Unused
 	12  // Button_Home
+};
+
+static const int g360GH4DrumsButtonID[GamepadType_Max] =
+{
+	0,	// Button_Drum_Tom2
+	1,	// Button_Drum_Snare
+	2,	// Button_Drum_Tom1
+	3,	// Button_Drum_Hat
+	4,	// Button_Drum_Kick
+	5,	// Button_Drum_Cymbal
+	-1,	// Unused
+	-1,	// Unused
+	7,	// Button_Start
+	6,	// Button_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	-1, // Unused
+	-1,	// Unused
+	-1, // Unused
+	-1,	// Unused
+	-1  // Unused
 };
 
 static const int gXDrumsButtonID[GamepadType_Max] =
@@ -1508,7 +1533,7 @@ static const char * gOUYAButtonNames[GamepadType_Max] =
 	"Unavailable"	// Button_Home
 };
 
-static const char * gPS3DrumsButtonNames[GamepadType_Max] =
+static const char * gPS3RBDrumsButtonNames[GamepadType_Max] =
 {
 	"Green",        // Button_Drum_Green / Button_DM_Cymbal
 	"Red",          // Button_Drum_Red / Button_DM_Snare
@@ -1558,7 +1583,7 @@ static const char * gPS3GH4DrumsButtonNames[GamepadType_Max] =
 	"PS Home"	// Button_Home
 };
 
-static const char * g360DrumsButtonNames[GamepadType_Max] =
+static const char * g360RBDrumsButtonNames[GamepadType_Max] =
 {
 	"Green",        // Button_Drum_Green / Button_DM_Cymbal
 	"Red",          // Button_Drum_Red / Button_DM_Snare
@@ -1570,6 +1595,31 @@ static const char * g360DrumsButtonNames[GamepadType_Max] =
 	"Unavailable",  // Unused
 	"Start",        // Button_Drum_Start
 	"Back",         // Button_Drum_Select
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Unavailable"	// Button_Home
+};
+
+static const char * g360GH4DrumsButtonNames[GamepadType_Max] =
+{
+	"Green",        // Button_Drum_Green / Button_Drum_Tom2
+	"Red",          // Button_Drum_Red / Button_Drum_Snare
+	"Blue",         // Button_Drum_Blue / Button_Drum_Tom1
+	"Yellow",       // Button_Drum_Yellow / Button_Drum_Hat
+	"Kick",         // Button_Drum_Kick
+	"Orange",		// Button_Drum_Cymbal
+	"Unavailable",  // Unused
+	"Unavailable",  // Unused
+	"Start",        // Button_Drum_Start
+	"Back",         // Button_Drum_Back
 	"Unavailable",  // Unused
 	"Unavailable",  // Unused
 	"DPad Up",      // Button_DUp
@@ -2209,7 +2259,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"RockBand Guitar",
 		"Controller (Harmonix Guitar for Xbox 360)", // Also: "Harmonix Guitar for Xbox 360 (Controller)"
 		0x1BAD, 0x0002,
-		gRB360GuitarButtonID,
+		g360RBGuitarButtonID,
 		g360RBGuitarButtonNames,
 		MFGF_IsGuitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[59]
@@ -2220,8 +2270,8 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"RockBand Drums",
 		"Controller (Harmonix Drum Kit for Xbox 360)",
 		0x1BAD, 0x0003,
-		gRB360DrumsButtonID,
-		g360DrumsButtonNames,
+		g360RBDrumsButtonID,
+		g360RBDrumsButtonNames,
 		MFGF_IsDrums,
 		&gGamepadDescriptors[60]
 	},
@@ -2232,7 +2282,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"Drum Kit Controller",
 		0, 0,
 		gXDrumsButtonID,
-		g360DrumsButtonNames,
+		g360RBDrumsButtonNames,
 		MFGF_IsDrums,
 		&gGamepadDescriptors[61]
 	},
@@ -2264,7 +2314,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"GH4 Guitar",
 		"Guitar Hero4 for PlayStation (R) 3",
 		0x12BA, 0x0100,
-		gGH4PS3GuitarButtonID,
+		gPS3GH4GuitarButtonID,
 		gPS3GH4GuitarButtonNames,
 		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[64]
@@ -2275,8 +2325,19 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		"GH4 Drums",
 		"GuitarHero for Playstation (R) 3",
 		0x12BA, 0x0120,
-		gGH4PS3DrumsButtonID,
+		gPS3GH4DrumsButtonID,
 		gPS3GH4DrumsButtonNames,
+		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
+		&gGamepadDescriptors[65]
+	},
+
+	// GH5 Xbox 360 Drums
+	{
+		"GH5 Drums",
+		"Drum Kit (Xbox 360 Wireless Receiver for Windows)",
+		0x1430, 0x0719,
+		g360GH4DrumsButtonID,
+		g360GH4DrumsButtonNames,
 		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
 		&gGamepadDescriptors[65]
 	},

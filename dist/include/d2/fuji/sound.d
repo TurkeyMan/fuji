@@ -280,7 +280,7 @@ struct MFStreamCallbacks
 	extern (C) size_t function(MFAudioStream*, void*, size_t) pGetSamples;	/**< Callback to get samples from the stream. */
 	extern (C) void function(MFAudioStream*) pDestroyStream;				/**< Destroy stream callback. */
 	extern (C) void function(MFAudioStream*, float) pSeekStream;			/**< Seek stream callbacks. */
-	extern (C) float function(MFAudioStream*) pGetTime;					/**< Get the current stream time. */
+	extern (C) float function(MFAudioStream*) pGetTime;						/**< Get the current stream time. */
 }
 
 /**

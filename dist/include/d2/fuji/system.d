@@ -70,6 +70,141 @@ struct MFInitParams
 
 
 /**
+* Fuji Defaults structure.
+* Stores default values for most aspects of the engine.
+*/
+extern (C) struct MFDefaults
+{
+	/** Heap Defaults. */
+	extern (C) struct HeapDefaults
+	{
+		uint maxAllocations;			/**< Maximum allocations */
+		uint maxStaticHeapMarkers;	/**< Maximum static heap markers */
+	}
+
+	/** System Defaults. */
+	extern (C) struct SystemDefaults
+	{
+		int threadPriority;				/**< Main thread priority */
+		uint maxThreads;				/**< Maximum number of threads */
+		uint maxTlsSlots;				/**< Maximum number of MFTls slots */
+	}
+
+	/** Display Defaults. */
+	extern (C) struct DisplayDefaults
+	{
+		const(char)* pWindowTitle;		/**< Game window title */
+		const(char)* pIcon;				/**< Resource name of the window icon */
+		bool hideMouseCursor;			/**< Hide the mouse cursor when it hovers over the application window */
+	}
+
+	/** Render Defaults. */
+	extern (C) struct RenderDefaults
+	{
+		size_t renderHeapSize;			/**< Size of the renderer temp heap */
+	}
+
+	/** View Defaults. */
+	extern (C) struct ViewDefaults
+	{
+		int maxViewsOnStack;			/**< Maximum view stack height */
+		float defaultFOV;				/**< Default field of view */
+		float defaultAspect;			/**< Default aspect ratio */
+		float defaultNearPlane;			/**< Default near plane */
+		float defaultFarPlane;			/**< Default far plane */
+		float orthoMinX;				/**< Ortho min X */
+		float orthoMinY;				/**< Ortho min Y */
+		float orthoMaxX;				/**< Ortho max X */
+		float orthoMaxY;				/**< Ortho max Y */
+	}
+
+	/** Material Defaults. */
+	extern (C) struct MaterialDefaults
+	{
+		uint maxMaterialTypes;			/**< Maximum material types */
+		uint maxMaterialDefs;			/**< Maximum material definitions */
+		uint maxMaterials;				/**< Maximum materials */
+	}
+
+	/** Model Defaults. */
+	extern (C) struct ModelDefaults
+	{
+		uint maxModels;					/**< Maximum models */
+	}
+
+	/** Animation Defaults. */
+	extern (C) struct AnimationDefaults
+	{
+		uint maxAnimations;				/**< Maximum animations */
+	}
+
+	/** FileSystem Defaults. */
+	extern (C) struct FileSystemDefaults
+	{
+		uint maxOpenFiles;				/**< Maximum open files */
+		uint maxFinds;					/**< Maximum finds */
+		uint maxFileSystems;			/**< Maximum file systems */
+		uint maxFileSystemStackSize;	/**< Maximum file system stack size */
+		uint maxHTTPFiles;				/**< Maximum number of concurrent HTTP files */
+		uint maxHTTPFileCache;			/**< Maximum size of HTTP file cache */
+	}
+
+	/** Sound Defaults. */
+	extern (C) struct SoundDefaults
+	{
+		int maxSounds;					/**< Maximum sounds */
+		int maxVoices;					/**< Maximum voices */
+		int maxMusicTracks;				/**< Maximum music tracks */
+		bool useGlobalFocus;			/**< Use global focus on PC */
+	}
+
+	/** Input Defaults. */
+	extern (C) struct InputDefaults
+	{
+		bool allowMultipleMice;				/**< Allow multiple mice? */
+		bool mouseZeroIsSystemMouse;		/**< Mouse 0 is System mouse? */
+		bool systemMouseUseWindowsCursor;	/**< System mouse uses windows cursor? */
+		bool useDirectInputKeyboard;		/**< Use DirectInput to read the keyboard */
+		bool useXInput;						/**< Use XInput when available on PC */
+	}
+
+	/** Miscellaneous Defaults. */
+	extern (C) struct MiscellaneousDefaults
+	{
+		bool enableUSBOnStartup;		/**< Unable USB on startup (for PSP) */
+	}
+
+	/** Plugin Selection Defaults. */
+	extern (C) struct PluginDefaults
+	{
+		int renderPlugin;
+		int soundPlugin;
+		int inputPlugin;
+	}
+
+	HeapDefaults heap;
+	SystemDefaults system;
+	DisplayDefaults display;
+	RenderDefaults render;
+	ViewDefaults view;
+	MaterialDefaults material;
+	ModelDefaults model;
+	AnimationDefaults animation;
+	FileSystemDefaults filesys;
+	SoundDefaults sound;
+	InputDefaults input;
+	MiscellaneousDefaults misc;
+	PluginDefaults plugin;
+};
+
+/**
+* Fuji Defaults.
+* Extern to Fuji default values registry.
+*/
+extern (C) __gshared MFDefaults gDefaults;
+
+
+/**
 * Begin the fuji main loop.
 * Begin initialisation of Fuji, and continue with the Fuji main loop.
 * @return An error code that can be returned to the OS.
@@ -99,6 +234,13 @@ extern (C) MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback c
 * @return The currently registered callback function for the requested callback.
 */
 extern (C) MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
+
+/**
+* Get the engine defaults.
+* Gets a pointer to the global engine default settings.
+* @return Pointer to the global MFDefaults structure.
+*/
+extern (C) MFDefaults* MFSystem_GetDefaults();
 
 /**
 * Generate engine initialisation data.

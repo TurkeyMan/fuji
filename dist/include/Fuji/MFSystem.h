@@ -229,6 +229,13 @@ MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callb
 MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
 
 /**
+ * Get the engine defaults.
+ * Gets a pointer to the global engine default settings.
+ * @return Pointer to the global MFDefaults structure.
+ */
+MF_API MFDefaults* MFSystem_GetDefaults();
+
+/**
  * Generate engine initialisation data.
  * Generates a string containing the current engine initialisation options.
  * @param tabDepth Initial tab depth for ini generation.
