@@ -278,9 +278,10 @@ enum MFInputDeviceStatus
 enum MFGamepadFlags
 {
 	MFGF_UserFlags					= 0xFFFF,
-	MFGF_IsPS2Adapter				= 0x1,
-	MFGF_IsGuitar					= 0x2,
-	MFGF_IsDrums					= 0x4,
+	MFGF_IsProxy					= 0x1,	// is some sort of proxy driver (like xbox1 drivers)
+	MFGF_IsAdapter					= 0x2,	// controller is some sort of adapter
+	MFGF_IsGuitar					= 0x4,
+	MFGF_IsDrums					= 0x8,
 
 	// Guitar specific flags
 	MFGF_Guitar_HasTilt				= 0x100,
@@ -291,8 +292,19 @@ enum MFGamepadFlags
 	// Drum specific flags
 	MFGF_Drums_Has5Drums			= 0x100,
 
-	MFGF_SystemFlags				= 0xFFFF0000,
-	MFGF_DontUseSphericalDeadzone	= 0x10000,
+	// Adapters for other systems
+	MFGF_AdapterMask				= 0xF0000,		// 4 bits for target system
+	MFGF_PS2Adapter					= 1 << 16,
+	MFGF_GCAdapter					= 2 << 16,
+	MFGF_DCAdapter					= 3 << 16,
+	MFGF_N64Adapter					= 4 << 16,
+	MFGF_SnesAdapter				= 5 << 16,
+	MFGF_NesAdapter					= 6 << 16,
+	MFGF_GenesisAdapter				= 7 << 16,
+
+	// System flags
+	MFGF_SystemFlags				= 0xFFF00000,
+	MFGF_DontUseSphericalDeadzone	= 0x100000
 };
 
 /**
