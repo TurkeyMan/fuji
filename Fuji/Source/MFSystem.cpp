@@ -40,7 +40,7 @@ void MFSystem_HandleEventsPlatformSpecific();
 extern MFPlatform gCurrentPlatform;
 
 // local variables
-MFDefaults gDefaults =
+extern "C" MFDefaults gDefaults =
 {
 	// HeapDefaults
 	{

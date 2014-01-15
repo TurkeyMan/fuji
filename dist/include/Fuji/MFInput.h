@@ -292,15 +292,15 @@ enum MFGamepadFlags
 	// Drum specific flags
 	MFGF_Drums_Has5Drums			= 0x100,
 
-	// Adapters for other systems
-	MFGF_AdapterMask				= 0xF0000,		// 4 bits for target system
-	MFGF_PS2Adapter					= 1 << 16,
-	MFGF_GCAdapter					= 2 << 16,
-	MFGF_DCAdapter					= 3 << 16,
-	MFGF_N64Adapter					= 4 << 16,
-	MFGF_SnesAdapter				= 5 << 16,
-	MFGF_NesAdapter					= 6 << 16,
-	MFGF_GenesisAdapter				= 7 << 16,
+	// Controllers for other systems
+	MFGF_SystemMask					= 0xF0000,		// 4 bits for target system
+	MFGF_PS2						= 1 << 16,
+	MFGF_GC							= 2 << 16,
+	MFGF_DC							= 3 << 16,
+	MFGF_N64						= 4 << 16,
+	MFGF_Snes						= 5 << 16,
+	MFGF_Nes						= 6 << 16,
+	MFGF_Genesis					= 7 << 16,
 
 	// System flags
 	MFGF_SystemFlags				= 0xFFF00000,

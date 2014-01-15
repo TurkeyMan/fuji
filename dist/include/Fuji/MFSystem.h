@@ -131,7 +131,7 @@ struct MFDefaults
  * Fuji Defaults.
  * Extern to Fuji default values registry.
  */
-extern MFDefaults gDefaults;
+extern "C" MFDefaults gDefaults;
 
 /**
  * System callbacks.

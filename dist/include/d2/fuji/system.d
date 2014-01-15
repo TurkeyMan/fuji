@@ -201,7 +201,7 @@ extern (C) struct MFDefaults
 * Fuji Defaults.
 * Extern to Fuji default values registry.
 */
-extern (C) __gshared MFDefaults gDefaults;
+extern (C) extern __gshared MFDefaults gDefaults;
 
 
 /**

@@ -1687,7 +1687,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0B43, 0x0003,
 		gEMSButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[5]
 	},
 
@@ -1698,7 +1698,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[6]
 	},
 
@@ -1708,7 +1708,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[7]
 	},
 
@@ -1718,7 +1718,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[8]
 	},
 
@@ -1728,7 +1728,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[9]
 	},
 
@@ -1738,7 +1738,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[10]
 	},
 
@@ -1837,7 +1837,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[19]
 	},
 
@@ -1859,7 +1859,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x0667,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[21]
 	},
 
@@ -1869,7 +1869,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x3427, 0x1190,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[22]
 	},
 
@@ -1879,7 +1879,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6677, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[23]
 	},
 
@@ -1889,7 +1889,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0810, 0x0001,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[24]
 	},
 
@@ -1899,7 +1899,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F30, 0x010A,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[25]
 	},
 
@@ -1909,7 +1909,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0925, 0x8866,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[26]
 	},
 
@@ -1942,7 +1942,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D01,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[29]
 	},
 
@@ -1974,7 +1974,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8801,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[32]
 	},
 
@@ -1985,7 +1985,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x8631, 0x1128,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[33]
 	},
 
@@ -2029,7 +2029,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x103F,
 		gUNIVERSALRumbleWheelButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[37]
 	},
 
@@ -2072,7 +2072,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[41]
 	},
 
@@ -2082,7 +2082,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8804,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[42]
 	},
 
@@ -2093,7 +2093,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x045E, 0x1100,
 		gUnusualPS2AdapterButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[43]
 	},
 
@@ -2103,7 +2103,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0079, 0x0006,
 		gGGE909ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[44]
 	},
 
@@ -2113,7 +2113,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D91,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[45]
 	},
 
@@ -2123,7 +2123,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1345, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[46]
 	},
 
@@ -2133,7 +2133,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x04B4, 0xC681,
 		gGGE909ButtonID,	// BEST GUESS: this should possibly use the gGGE909VariantButtonID instead (can't check)
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[47]
 	},
 
@@ -2186,7 +2186,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x146B, 0x0306,
 		gPowerWaveButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[52]
 	},
 
@@ -2207,7 +2207,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BD, 0xC001,
 		gRandomAdapterButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[54]
 	},
 
@@ -2228,7 +2228,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0C12, 0x0005,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[56]
 	},
 
@@ -2239,7 +2239,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x1006,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2Adapter,
+		MFGF_IsAdapter | MFGF_PS2,
 		&gGamepadDescriptors[57]
 	},
 
