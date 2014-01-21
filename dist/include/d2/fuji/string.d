@@ -1,5 +1,7 @@
 module fuji.string;
 
+public import std.string: toStringz;
+
 
 extern (C) bool MFString_PatternMatch(const(char)* pPattern, const(char)* pFilename, const(char)** ppMatchDirectory = null, bool bCaseSensitive = false);
 
@@ -14,10 +16,13 @@ private struct MFStringData
 
 struct MFString
 {
-	@property const(char)[] asDString() { return pData ? pData.pMemory[0 .. pData.bytes] : (cast(char*)null)[0..0]; }
 	alias asDString this;
 
-	string idup() { return asDString.idup; }
+	@property size_t length() const pure nothrow { return pData ? pData.bytes : 0; }
+	@property string idup() const pure { return asDString.idup; }
+	const(char*) toStringz() const pure nothrow { return pData ? pData.pMemory : null; }
+
+	@property const(char)[] asDString() const pure nothrow { return pData ? pData.pMemory[0 .. pData.bytes] : null; }
 
 	private	MFStringData *pData;
 }

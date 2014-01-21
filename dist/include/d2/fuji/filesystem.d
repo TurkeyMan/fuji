@@ -307,8 +307,8 @@ struct MFFindData
 	ulong fileSize;					/**< The files size */
 	uint attributes;				/**< The files attributes */
 
-	@property const(char)[] filename() const pure nothrow	{ return fuji.string.toDStr(pFilename.ptr); }
-	@property const(char)[] systemPath() const pure nothrow	{ return fuji.string.toDStr(pSystemPath.ptr); }
+	@property const(char)[] filename() const pure nothrow	{ return pFilename.ptr.toDStr; }
+	@property const(char)[] systemPath() const pure nothrow	{ return pSystemPath.ptr.toDStr; }
 }
 
 /**
@@ -322,7 +322,7 @@ struct MFVolumeInfo
 	uint flags;						/**< Volume flags */
 	int priority;					/**< Mount priority */
 
-	@property const(char)[] volumeName() const pure nothrow { return fuji.string.toDStr(pVolumeName); }
+	@property const(char)[] volumeName() const pure nothrow { return pVolumeName.toDStr; }
 }
 
 /**
@@ -488,7 +488,6 @@ import fuji.string;
 
 import std.file;
 import std.typecons;
-import std.string;
 import std.array;
 import std.range;
 import std.algorithm;

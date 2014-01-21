@@ -365,6 +365,9 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, const MFStateBl
 						case MFSCMisc_MatrixBatch:
 							state.matrixBatch = *(MFStateConstant_MatrixBatch*)pData;
 							break;
+						case MFSCMisc_Viewport:
+							state.pViewport = (MFRect*)pData;
+							break;
 						default:
 							MFUNREACHABLE;
 							break;

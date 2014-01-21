@@ -1,11 +1,16 @@
 module fuji.material;
 
 public import fuji.fuji;
+import fuji.resource;
 import fuji.texture;
 import fuji.matrix;
 
 struct MFIni;
-struct MFEnumKey;
+struct MFEnumKey
+{
+	const(char)* pKey;
+	int value;
+};
 
 /**
 * @struct MFMaterial
@@ -424,69 +429,330 @@ extern (C) void MFMaterial_RegisterMaterialType(const(char)* pName, const(MFMate
 extern (C) void MFMaterial_UnregisterMaterialType(const(char)* pName);
 
 
-import std.c.string;
-import std.string;
+// wrappers for D...
 
-final class Material
+struct Material
 {
-	static Material create(in string name)								{ return cast(Material)MFMaterial_Create(name.toStringz()); }
-	static Material find(in string name)								{ return cast(Material)MFMaterial_Find(name.toStringz()); }
-	static Material stockMaterial(MFStockMaterials materialIdentifier)	{ return cast(Material)MFMaterial_GetStockMaterial(materialIdentifier); }
+	alias pMaterial this;
 
-	int release()														{ return MFMaterial_Release(cast(MFMaterial*)this); }
+	this(this)
+	{
+		MFResource_AddRef(cast(fuji.resource.MFResource*)pMaterial);
+	}
 
-	@property MFMaterial* handle() pure nothrow							{ return cast(MFMaterial*)this; }
-	@property const(MFMaterial)* handle() const pure nothrow			{ return cast(const(MFMaterial)*)this; }
+	this(Resource resource)
+	{
+		// TODO: should this throw instead?
+		if(resource.type == MFResourceType.Material)
+		{
+			resource.AddRef();
+			pMaterial = cast(MFMaterial*)resource.handle;
+		}
+	}
+
+	this(in string name)
+	{
+		create(name);
+	}
+
+	this(MFStockMaterials materialIdentifier)
+	{
+		createStockMaterial(materialIdentifier);
+	}
+
+	~this()
+	{
+		release();
+	}
+
+	void create(in string name)
+	{
+		release();
+		pMaterial = MFMaterial_Create(name.toStringz());
+	}
+
+	void createExisting(in string name)
+	{
+		release();
+		pMaterial = MFMaterial_Find(name.toStringz());
+	}
+
+	void createStockMaterial(MFStockMaterials materialIdentifier)
+	{
+		release();
+		pMaterial = MFMaterial_GetStockMaterial(materialIdentifier);
+	}
+
+	int release()
+	{
+		int rc = 0;
+		if(pMaterial)
+		{
+			rc = MFMaterial_Release(pMaterial);
+			pMaterial = null;
+		}
+		return rc;
+	}
+
+	@property inout(MFMaterial)* handle() inout pure nothrow { return pMaterial; }
 
 	@property string name() const pure
 	{
 		auto pName = MFMaterial_GetMaterialName(cast(MFMaterial*)this);
-		return pName[0..strlen(pName)];
+		return pName.toDStr;
 	}
 
 	@property Parameters parameters()	{ return Parameters(cast(MFMaterial*)this, 0, MFMaterial_GetNumParameters(cast(MFMaterial*)this)); }
 
 	struct Parameter
 	{
-		bool opCast(T)() if(is(T == bool))	{ return index != -1; }
+//		alias asInt this;
+//		alias asFloat this;
 
-		@property string name() const
+		this(MFMaterial* pMaterial, size_t index)
 		{
-			auto pName = MFMaterial_GetParameterName(pMaterial, cast(int)index);
-			return pName[0..strlen(pName)];
+			this.pMaterial = pMaterial;
+			pParameterInfo = index != -1 ? MFMaterial_GetParameterInfo(pMaterial, cast(int)index) : null;
+			if(pParameterInfo)
+			{
+				if(pParameterInfo.argIndex.type == MFParamType.Constant)
+				{
+					parameterArg = pParameterInfo.argIndex.defaultValue;
+					bLowordSet = true;
+				}
+				if(pParameterInfo.argIndexHigh.type == MFParamType.Constant)
+				{
+					parameterArg |= pParameterInfo.argIndexHigh.defaultValue << 16;
+					bHiwordSet = true;
+				}
+			}
 		}
 
-		@property ref immutable(MFMaterialParameterInfo) info() const
+		bool opCast(T)() if(is(T == bool))	{ return pParameterInfo != null; }
+
+		@property const(char)[] name() const
 		{
-			return *MFMaterial_GetParameterInfo(pMaterial, cast(int)index);
+			return pParameterInfo.pParameterName.toDStr;
+
 		}
 
-        // assignment operators
-        // cast operators
+		@property ref const(MFMaterialParameterInfo) info() const
+		{
+			return *pParameterInfo;
+		}
 
-		// setters and getters...
+		Parameter opIndex(int i)
+		{
+			if(pParameterInfo.argIndexHigh.type == MFParamType.Enum || pParameterInfo.argIndexHigh.type == MFParamType.Int)
+			{
+				assert(pParameterInfo.argIndex.type != MFParamType.Enum && pParameterInfo.argIndex.type != MFParamType.Int, "Parameters with 2 arguments are not (yet) supported >_<");
+				
+				parameterArg = (parameterArg & 0xFFFF) | (i << 16);
+				bHiwordSet = true;
+			}
+			else if(pParameterInfo.argIndex.type == MFParamType.Enum)
+			{
+				parameterArg = (parameterArg & 0xFFFF0000) | i;
+				bLowordSet = true;
+			}
+			else
+				assert(false, "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is not indexable.");
+			return this;
+		}
+
+		Parameter opIndex(string s)
+		{
+			bool bHigh;
+			const(MFEnumKey)* pKey;
+			if(pParameterInfo.argIndexHigh.type == MFParamType.Enum)
+			{
+				assert(pParameterInfo.argIndex.type != MFParamType.Enum, "Parameters with 2 arguments are not (yet) supported >_<");
+				pKey = pParameterInfo.argIndexHigh.pEnumKeys;
+				bHigh = true;
+			}
+			else if(pParameterInfo.argIndex.type == MFParamType.Enum)
+			{
+				pKey = pParameterInfo.argIndex.pEnumKeys;
+			}
+			else
+				assert(false, "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' does not have an enum index.");
+			while(pKey && pKey.pKey)
+			{
+				// TODO: should this be case insensitive?
+				if(pKey.pKey[0..s.length] == s[] && pKey.pKey[s.length] == 0)
+				{
+					parameterArg = bHigh ? (parameterArg & 0xFFFF) | (pKey.value << 16) : (parameterArg & 0xFFFF0000) | pKey.value;
+					if(bHigh)
+						bHiwordSet = true;
+					else
+						bLowordSet = true;
+					return this;
+				}
+				++pKey;
+			}
+			assert(false, "Invalid enum key '" ~ s ~ "' for material parameter: " ~ pParameterInfo.pParameterName.toDStr);
+		}
+
+		bool ValidateArg(MFParamType[] types ...)
+		{
+			assert(pParameterInfo.numValues == 1, "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: struct");
+			assert(std.algorithm.canFind(types, pParameterInfo.pValues[0].type), "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: " ~ std.conv.to!string(pParameterInfo.pValues[0].type));
+			return true;
+		}
+
+		// getters...
+		@property int asInt()
+		{
+			debug ValidateArg(MFParamType.Int, MFParamType.Enum, MFParamType.Bool);
+			return cast(int)GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, null);
+		}
+		@property float asFloat()
+		{
+			debug ValidateArg(MFParamType.Float);
+			float value;
+			GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, &value);
+			return value;
+		}
+		@property const(char)[] asString()
+		{
+			debug ValidateArg(MFParamType.String, MFParamType.Enum);
+			if(pParameterInfo.pValues[0].type == MFParamType.String)
+			{
+				const(char)* value;
+				value = cast(const(char)*)GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, null);
+				return value.toDStr;
+			}
+			else// if(pParameterInfo.pValues[0].type == MFParamType.Enum)
+			{
+				// TODO: return enum key for value...
+				assert(false, "TODO");
+			}
+		}
+		@property bool asBool()
+		{
+			debug ValidateArg(MFParamType.Bool);
+			return GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, null) != 0;
+		}
+		@property MFVector asVector()
+		{
+			debug ValidateArg(MFParamType.Vector3, MFParamType.Vector4);
+			MFVector v;
+			GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, &v);
+			return v;
+		}
+		@property MFMatrix asMatrix()
+		{
+			debug ValidateArg(MFParamType.Matrix);
+			MFMatrix m;
+			GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, &m);
+			return m;
+		}
+		@property Texture asTexture()
+		{
+			// HACK: fuji material system needs to be tidied up!
+			debug ValidateArg(MFParamType.String); // **String?**
+			size_t t = GetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, null);
+			Texture tex;
+			tex.pTexture = cast(MFTexture*)t;
+			MFResource_AddRef(cast(fuji.resource.MFResource*)tex.pTexture);
+			return tex;
+		}
+
+		// setters...
+		void opAssign(int i)
+		{
+			debug ValidateArg(MFParamType.Int, MFParamType.Enum);
+			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, i);
+		}
+		void opAssign(float f)
+		{
+			debug ValidateArg(MFParamType.Float);
+			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, cast(size_t)&f);
+		}
+		void opAssign(string s)
+		{
+			debug ValidateArg(MFParamType.String, MFParamType.Enum);
+			if(pParameterInfo.pValues[0].type == MFParamType.String)
+			{
+				SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, cast(size_t)s.toStringz);
+			}
+			else// if(pParameterInfo.pValues[0].type == MFParamType.Enum)
+			{
+				const(MFEnumKey)* pKey = pParameterInfo.pValues[0].pEnumKeys;
+				while(pKey && pKey.pKey)
+				{
+					// TODO: should this be case insensitive?
+					if(pKey.pKey[0..s.length] == s[] && pKey.pKey[s.length] == 0)
+					{
+						SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, pKey.value);
+						return;
+					}
+					++pKey;
+				}
+				assert(false, "Invalid enum key '" ~ s ~ "' for material parameter: " ~ pParameterInfo.pParameterName.toDStr);
+			}
+		}
+		void opAssign(bool b)
+		{
+			debug ValidateArg(MFParamType.Bool);
+			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, b ? 1 : 0);
+		}
+		void opAssign(ref in MFVector v)
+		{
+			debug ValidateArg(MFParamType.Vector3, MFParamType.Vector4);
+			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, cast(size_t)&v);
+		}
+		void opAssign(ref in MFMatrix m)
+		{
+			debug ValidateArg(MFParamType.Matrix);
+			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, cast(size_t)&m);
+		}
+		void opAssign(const Texture t)
+		{
+			// HACK: fuji material system needs to be tidied up!
+			assert(false, "TODO: fuji needs a texture type...");
+//			SetParameter(pMaterial, pParameterInfo.parameterIndex, parameterArg, cast(size_t)t.pTexture);
+		}
 
 	private:
+		size_t GetParameter(MFMaterial* pMaterial, int parameterIndex, int argIndex, void* pValue = null)
+		{
+			assert(pParameterInfo.argIndex.type == MFParamType.None || bLowordSet, "Argument index not specified!");
+			assert(pParameterInfo.argIndexHigh.type == MFParamType.None || bHiwordSet, "Argument index not specified!");
+			return MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, pValue);
+		}
+		void SetParameter(MFMaterial* pMaterial, int parameterIndex, int argIndex, size_t value)
+		{
+			assert(pParameterInfo.argIndex.type == MFParamType.None || bLowordSet, "Argument index not specified!");
+			assert(pParameterInfo.argIndexHigh.type == MFParamType.None || bHiwordSet, "Argument index not specified!");
+			MFMaterial_SetParameter(pMaterial, parameterIndex, argIndex, value);
+		}
+
 		MFMaterial* pMaterial;
-		size_t index;
+		const(MFMaterialParameterInfo)* pParameterInfo;
+		int parameterArg;
+		bool bLowordSet, bHiwordSet;
 	}
 
 	struct Parameters
 	{
-		@property bool empty() const pure nothrow					{ return offset == count; }
-		@property size_t length() const pure nothrow				{ return count - offset; }
+		@property bool empty() const pure nothrow			{ return offset == count; }
+		@property size_t length() const pure nothrow		{ return count - offset; }
 
-		@property Parameters save() pure nothrow					{ return this; }
+		@property Parameters save() pure nothrow			{ return this; }
 
-		@property Parameter front() pure nothrow					{ return Parameter(pMaterial, offset); }
-		@property Parameter back() pure nothrow						{ return Parameter(pMaterial, count-1); }
+		@property Parameter front()							{ return Parameter(pMaterial, offset); }
+		@property Parameter back()							{ return Parameter(pMaterial, count-1); }
 
-		Parameter opIndex(size_t index) pure nothrow				{ return Parameter(pMaterial, offset + cast(int)index); }
-		Parameter opIndex(string name)      				        { return find(name); }
-		Parameters opSlice(size_t x, size_t y) pure nothrow			{ return Parameters(pMaterial, offset + x, offset + y); }
+		Parameter opIndex(size_t index)						{ return Parameter(pMaterial, offset + cast(int)index); }
+		Parameter opIndex(string name)						{ return find(name); }
+		Parameters opSlice(size_t x, size_t y) pure nothrow	{ return Parameters(pMaterial, offset + x, offset + y); }
 
-		void popFront() pure nothrow								{ ++offset; }
-		void popBack() pure nothrow									{ --count; }
+		@property Parameter opDispatch(string name)()		{ return find(name); }
+		@property Parameter opDispatch(string name, T)(T t)	{ Parameter p = find(name); p = t; return p; }
+
+		void popFront() pure nothrow						{ ++offset; }
+		void popBack() pure nothrow							{ --count; }
 
 		Parameter find(string name)
         {
@@ -500,4 +766,6 @@ final class Material
 		MFMaterial* pMaterial;
 		size_t offset, count;
 	}
+
+	MFMaterial *pMaterial;
 }

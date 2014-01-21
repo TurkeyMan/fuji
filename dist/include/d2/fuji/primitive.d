@@ -8,7 +8,7 @@ import fuji.matrix;
 * Primitive Type for an immediate render block.
 * Primitive Type for an immediate render block.
 */
-enum PrimType
+enum PrimType : uint
 {
 	PointList,			/**< Point List */
 	LineList,			/**< Line List */
@@ -30,7 +30,7 @@ enum PrimType
 * @param hint Hints to pass to the immediate renderer.
 * @return None.
 */
-extern (C) void MFPrimitive(uint primType, uint hint = 0);
+extern (C) void MFPrimitive(PrimType primType, uint hint = 0);
 
 /**
 * Begin a vertex submition block.

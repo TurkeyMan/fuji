@@ -73,7 +73,9 @@ struct MFStateBlock
 	__forceinline size_t GetUsed() const { return ((char*)GetStateData(16*used) - (char*)this); }
 	__forceinline size_t GetFree() const { return GetSize() - GetUsed(); }
 
-	MFStateBlockStateChange* FindState(uint32 type, uint32 constant);
+	__forceinline MFStateBlockStateChange* GetState(uint32 type, uint32 constant) { return (MFStateBlockStateChange*)FindState(type, constant); }
+	const MFStateBlockStateChange* FindState(uint32 type, uint32 constant) const;
+
 	MFStateBlockStateChange* AllocState(uint32 type, uint32 constant, size_t bytes);
 	MFStateBlockStateChange* AllocStateChange(size_t stateBytes = 0);
 }

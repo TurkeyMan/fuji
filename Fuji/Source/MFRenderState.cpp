@@ -89,7 +89,7 @@ static const char * const gpRenderStateNames_Bool[] =
 	"bEmissiveMapSet",
 	"bLightMapSet",
 	"bShadowBufferSet",
-	"bProjectorSet",
+	"bProjectionSet",
 	"bUserTex0Set",
 	"bUserTex1Set",
 	"bUserTex2Set",
@@ -105,16 +105,16 @@ static const char * const gpRenderStateNames_RenderState[] =
 	"DepthStencilState",
 	"RasteriserState",
 	"sDiffuseSampler",
-	"sNormalMapSampler",
-	"sSpecularMapSampler",
-	"sDetailMapSampler",
-	"sOpacityMapSampler",
-	"sEnvironmentMapSampler",
-	"sSpecularPowerMapSampler",
-	"sEmissiveMapSampler",
-	"sLightMapSampler",
+	"sNormalSampler",
+	"sSpecularSampler",
+	"sDetailSampler",
+	"sOpacitySampler",
+	"sEnvironmentSampler",
+	"sSpecularPowerSampler",
+	"sEmissiveSampler",
+	"sLightSampler",
 	"sShadowBufferSampler",
-	"sProjectorSampler",
+	"sProjectionSampler",
 	"sUser0Sampler",
 	"sUser1Sampler",
 	"sUser2Sampler",
@@ -381,7 +381,7 @@ MF_API void MFStateBlock_Destroy(MFStateBlock *pStateBlock)
 	MFHeap_Free(pStateBlock);
 }
 
-MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource)
+MF_API MFStateBlock* MFStateBlock_Clone(const MFStateBlock *pSource)
 {
 	// find size for copy
 	size_t size = MFUtil_NextPowerOf2(pSource->GetUsed());
@@ -398,7 +398,7 @@ MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource)
 	return pNew;
 }
 
-MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest)
+MF_API void MFStateBlock_Copy(const MFStateBlock *pSource, MFStateBlock *pDest)
 {
 	size_t sourceSize = pSource->GetUsed();
 	MFDebug_Assert(sourceSize <= pDest->GetSize(), "pDest is too small!");
@@ -408,7 +408,7 @@ MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest)
 	pDest->allocated = oldSize;
 }
 
-MF_API MFStateBlock* MFStateBlock_Merge(MFStateBlock *pSource1, MFStateBlock *pSource2)
+MF_API MFStateBlock* MFStateBlock_Merge(const MFStateBlock *pSource1, const MFStateBlock *pSource2)
 {
 	MFDebug_Assert(false, "TODO!");
 	return NULL;
@@ -439,9 +439,9 @@ MF_API size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock)
 	return pStateBlock->GetFree();
 }
 
-MFStateBlock::MFStateBlockStateChange* MFStateBlock::FindState(uint32 type, uint32 constant)
+const MFStateBlock::MFStateBlockStateChange* MFStateBlock::FindState(uint32 type, uint32 constant) const
 {
-	MFStateBlock::MFStateBlockStateChange *pStates = GetStateChanges();
+	const MFStateBlock::MFStateBlockStateChange *pStates = GetStateChanges();
 	for(int a = 0; a < numStateChanges; ++a)
 	{
 		if(pStates[a].constant == constant && pStates[a].constantType == type && pStates[a].stateSet != 0)
@@ -645,7 +645,7 @@ MF_API bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant
 	return false;
 }
 
-MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState)
+MF_API bool MFStateBlock_GetBool(const MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState)
 {
 	uint32 bit = 1 << constant;
 	bool isSet = !!(pStateBlock->boolsSet & bit);
@@ -654,9 +654,9 @@ MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool
 	return isSet;
 }
 
-MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState)
+MF_API bool MFStateBlock_GetVector(const MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Vector, constant);
+	const MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Vector, constant);
 	if(!pSC)
 		return false;
 	if(pState)
@@ -664,9 +664,9 @@ MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Ve
 	return true;
 }
 
-MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState)
+MF_API bool MFStateBlock_GetMatrix(const MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Matrix, constant);
+	const MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Matrix, constant);
 	if(!pSC)
 		return false;
 	if(pState)
@@ -674,21 +674,21 @@ MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Ma
 	return true;
 }
 
-MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture)
+MF_API bool MFStateBlock_GetTexture(const MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture)
 {
 	if(!ppTexture)
 		return MFStateBlock_GetBool(pStateBlock, MFSCB_TexSet(constant), NULL);
 
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Texture, constant);
+	const MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Texture, constant);
 	if(!pSC)
 		return false;
 	*ppTexture = *(MFTexture**)pStateBlock->GetStateData(pSC->offset * 4);
 	return true;
 }
 
-MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState)
+MF_API bool MFStateBlock_GetRenderState(const MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_RenderState, renderState);
+	const MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_RenderState, renderState);
 	if(!pSC)
 		return false;
 	if(ppState)
@@ -696,9 +696,9 @@ MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConsta
 	return true;
 }
 
-MF_API bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData)
+MF_API bool MFStateBlock_GetMiscState(const MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Misc, miscState);
+	const MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Misc, miscState);
 	if(!pSC)
 		return false;
 	if(ppStateData)
@@ -706,9 +706,9 @@ MF_API bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant
 	return true;
 }
 
-//MF_API void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MKLight **ppLight)
+//MF_API void MFStateBlock_GetLight(const MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MKLight **ppLight)
 
-//MF_API void MFStateBlock_GetLightCounts(MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount)
+//MF_API void MFStateBlock_GetLightCounts(const MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount)
 
 MF_API void MFStateBlock_ClearBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant)
 {
@@ -717,21 +717,21 @@ MF_API void MFStateBlock_ClearBool(MFStateBlock *pStateBlock, MFStateConstant_Bo
 
 MF_API void MFStateBlock_ClearVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Vector, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->GetState(MFSB_CT_Vector, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Matrix, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->GetState(MFSB_CT_Matrix, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Texture, constant);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->GetState(MFSB_CT_Texture, constant);
 	if(pSC)
 		pSC->stateSet = 0;
 
@@ -740,14 +740,14 @@ MF_API void MFStateBlock_ClearTexture(MFStateBlock *pStateBlock, MFStateConstant
 
 MF_API void MFStateBlock_ClearRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_RenderState, renderState);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->GetState(MFSB_CT_RenderState, renderState);
 	if(pSC)
 		pSC->stateSet = 0;
 }
 
 MF_API void MFStateBlock_ClearMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState)
 {
-	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->FindState(MFSB_CT_Misc, miscState);
+	MFStateBlock::MFStateBlockStateChange *pSC = pStateBlock->GetState(MFSB_CT_Misc, miscState);
 	if(pSC)
 		pSC->stateSet = 0;
 }

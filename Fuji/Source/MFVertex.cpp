@@ -195,7 +195,10 @@ MF_API MFVertexBuffer *MFVertex_CreateVertexBuffer(MFVertexDeclaration *pVertexF
 	MFZeroMemory(pVB, sizeof(MFVertexBuffer));
 
 	if(pName)
+	{
 		pName = MFString_Copy((char*)&pVB[1], pName);
+		pVB->pName = pName; // TODO: should this be here? it is aliased by MFResource... remove it?
+	}
 
 	pVB->pVertexDeclatation = pVertexFormat;
 	pVB->bufferType = type;

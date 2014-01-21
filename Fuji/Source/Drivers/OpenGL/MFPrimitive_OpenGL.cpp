@@ -44,10 +44,12 @@ struct Vert
 };
 
 static MFVertexDeclaration *pDecl;
+static MFStateBlock *pIdentity;
 
 static MFMaterial *pMaterial;
 
 static MFMesh currentPrim;
+static MFStateBlock *pEntity;
 static MFVertexBuffer *pVB;
 static Vert *pLocked;
 
@@ -61,8 +63,6 @@ static bool gImmitateQuads = false;
 
 MFInitStatus MFPrimitive_InitModule()
 {
-	MFCALLSTACK;
-
 	MFVertexElement elements[4];
 
 	// write declaration
@@ -93,12 +93,15 @@ MFInitStatus MFPrimitive_InitModule()
 	pDecl = MFVertex_CreateVertexDeclaration(elements, 4);
 	MFDebug_Assert(pDecl, "Failed to create vertex declaration..");
 
+	pIdentity = MFStateBlock_Create(128);
+	MFStateBlock_SetMatrix(pIdentity, MFSCM_World, MFMatrix::identity);
+
 	return MFIS_Succeeded;
 }
 
 void MFPrimitive_DeinitModule()
 {
-	MFCALLSTACK;
+	MFStateBlock_Destroy(pIdentity);
 
 	MFVertex_ReleaseVertexDeclaration(pDecl);
 }
@@ -110,13 +113,11 @@ void MFPrimitive_DrawStats()
 MF_API void MFPrimitive(uint32 type, uint32 hint)
 {
 	currentPrim.primType = (MFPrimType)(type & PT_PrimMask);
-	currentPrim.pMeshState = MFStateBlock_CreateTemporary(128);
+	currentPrim.pMeshState = NULL;
 	currentPrim.indexOffset = 0;
 	currentPrim.vertexOffset = 0;
 	currentPrim.numIndices = 0;
-
-	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
-	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, MFMatrix::identity);
+	pEntity = pIdentity;
 
 	if(type & PT_Untextured)
 		pMaterial = MFMaterial_GetStockMaterial(MFMat_White);
@@ -147,6 +148,8 @@ MF_API void MFBegin(uint32 vertexCount)
 	// create an appropriate vertex buffer
 	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
 
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(64);
+	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
 	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
 
 	MFVertex_LockVertexBuffer(pVB, (void**)&pLocked);
@@ -161,7 +164,9 @@ MF_API void MFBegin(uint32 vertexCount)
 
 MF_API void MFSetMatrix(const MFMatrix &mat)
 {
-	MFStateBlock_SetMatrix(currentPrim.pMeshState, MFSCM_World, mat);
+	if(pEntity == pIdentity)
+		pEntity = MFStateBlock_CreateTemporary(128);
+	MFStateBlock_SetMatrix(pEntity, MFSCM_World, mat);
 }
 
 MF_API void MFSetColour(float r, float g, float b, float a)
@@ -243,7 +248,7 @@ MF_API void MFEnd()
 
 	MFDebug_Assert(currentVert == currentPrim.numVertices, "Incorrect number of vertices.");
 
-	MFRenderer_AddMesh(&currentPrim, pMaterial, NULL, NULL, MFView_GetViewState());
+	MFRenderer_AddMesh(&currentPrim, pMaterial, pEntity, NULL, MFView_GetViewState());
 
 /*
 	// *** pre-shader render code! ***

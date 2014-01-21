@@ -33,9 +33,14 @@ enum MFResourceType
 struct MFResource
 {
 	uint hash;
-	short type;
-	short refCount;
+	int type_refCount;
 	const(char)* pName;
+
+	@property MFResourceType type() const pure nothrow { return cast(MFResourceType)(type_refCount & 0xFF); }
+	@property int refCount() const pure nothrow { return type_refCount >> 8; }
+
+	int AddRef() pure nothrow { type_refCount += 1 << 8; return type_refCount >> 8; }
+	int Release() { return MFResource_Release(&this); }
 };
 
 struct MFResourceIterator;
@@ -50,6 +55,9 @@ extern (C) uint MFResource_GetHash(MFResource* pResource);
 extern (C) int MFResource_GetRefCount(MFResource* pResource);
 extern (C) const(char)* MFResource_GetName(MFResource* pResource);
 
+int MFResource_AddRef(MFResource *pResource) { pResource.type_refCount += 1 << 8; return pResource.type_refCount >> 8; }
+extern (C) int MFResource_Release(MFResource *pResource);
+
 extern (C) int MFResource_GetNumResources(MFResourceType type = MFResourceType.All);
 
 extern (C) MFResourceIterator* MFResource_EnumerateFirst(MFResourceType type = MFResourceType.All);
@@ -62,23 +70,35 @@ bool MFResource_IsType(MFResource* pResource, MFResourceType type)
 }
 
 
-import std.c.string;
-
-final class Resource
+struct Resource
 {
-	@property MFResourceType type() const pure nothrow			{ return cast(MFResourceType)(cast(MFResource*)this).type; }
-	@property uint hash() const pure nothrow					{ return (cast(MFResource*)this).hash; }
-	@property int refCount() const pure nothrow					{ return (cast(MFResource*)this).refCount; }
-	@property string name() const pure nothrow
+	alias pResource this;
+
+	this(this)		{ pResource.AddRef(); }
+	~this()			{ Release(); }
+
+	int AddRef()	{ return pResource.AddRef(); }
+	int Release()
 	{
-		auto pName = (cast(MFResource*)this).pName;
-		return pName ? cast(string)pName[0..strlen(pName)] : null;
+		int rc = 0;
+		if(pResource)
+		{
+			rc = MFResource_Release(pResource);
+			pResource = null;
+		}
+		return rc;
 	}
 
-	@property MFResource* handle() pure nothrow					{ return cast(MFResource*)this; }
-	@property const(MFResource)* handle() const pure nothrow	{ return cast(const(MFResource)*)this; }
+	@property inout(MFResource)* handle() inout pure nothrow	{ return pResource; }
 
-	bool isType(MFResourceType type) const pure nothrow			{ return this.type == type; }
+	@property MFResourceType type() const pure nothrow			{ return cast(MFResourceType)pResource.type; }
+	@property uint hash() const pure nothrow					{ return pResource.hash; }
+	@property int refCount() const pure nothrow					{ return pResource.refCount; }
+	@property const(char)[] name() const pure					{ return pResource.pName.toDStr; }
+
+	bool IsType(MFResourceType type) const pure nothrow			{ return this.type == type; }
+
+	MFResource *pResource;
 }
 
 

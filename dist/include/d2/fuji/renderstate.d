@@ -269,6 +269,7 @@ enum MFStateConstant_Miscellaneous
 {
 	AnimationMatrices,
 	MatrixBatch,
+	Viewport,
 	Light0,
 	Light1,
 	Light2,
@@ -528,65 +529,70 @@ struct MFRasteriserStateDesc
 
 struct MFStateBlock;
 
-extern (C) MFBlendState* MFBlendState_Create(MFBlendStateDesc *pDesc);
-extern (C) int MFBlendState_Release(MFBlendState *pBlendState);
+extern (C) MFBlendState* MFBlendState_Create(MFBlendStateDesc* pDesc);
+extern (C) int MFBlendState_Release(MFBlendState* pBlendState);
 
-extern (C) MFSamplerState* MFSamplerState_Create(MFSamplerStateDesc *pDesc);
-extern (C) int MFSamplerState_Release(MFSamplerState *pSamplerState);
+extern (C) MFSamplerState* MFSamplerState_Create(MFSamplerStateDesc* pDesc);
+extern (C) int MFSamplerState_Release(MFSamplerState* pSamplerState);
 
-extern (C) MFDepthStencilState* MFDepthStencilState_Create(MFDepthStencilStateDesc *pDesc);
-extern (C) int MFDepthStencilState_Release(MFDepthStencilState *pDepthStencilState);
+extern (C) MFDepthStencilState* MFDepthStencilState_Create(MFDepthStencilStateDesc* pDesc);
+extern (C) int MFDepthStencilState_Release(MFDepthStencilState* pDepthStencilState);
 
-extern (C) MFRasteriserState* MFRasteriserState_Create(MFRasteriserStateDesc *pDesc);
-extern (C) int MFRasteriserState_Release(MFRasteriserState *pRasteriserState);
+extern (C) MFRasteriserState* MFRasteriserState_Create(MFRasteriserStateDesc* pDesc);
+extern (C) int MFRasteriserState_Release(MFRasteriserState* pRasteriserState);
 
 extern (C) MFStateBlock* MFStateBlock_Create(size_t size);
 extern (C) MFStateBlock* MFStateBlock_CreateTemporary(size_t size);
 extern (C) MFStateBlock* MFStateBlock_CreateDefault(size_t size = 512);
-extern (C) void MFStateBlock_Destroy(MFStateBlock *pStateBlock);
-extern (C) MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource);
-extern (C) void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest);
-extern (C) MFStateBlock* MFStateBlock_Merge(MFStateBlock *pSource1, MFStateBlock *pSource2);
-extern (C) void MFStateBlock_Clear(MFStateBlock *pStateBlock);
+extern (C) void MFStateBlock_Destroy(MFStateBlock* pStateBlock);
+extern (C) MFStateBlock* MFStateBlock_Clone(const(MFStateBlock)* pSource);
+extern (C) void MFStateBlock_Copy(const(MFStateBlock)* pSource, MFStateBlock* pDest);
+extern (C) MFStateBlock* MFStateBlock_Merge(const(MFStateBlock)* pSource1, const(MFStateBlock)* pSource2);
+extern (C) void MFStateBlock_Clear(MFStateBlock* pStateBlock);
 
-extern (C) size_t MFStateBlock_GetAllocatedBytes(MFStateBlock *pStateBlock);
-extern (C) size_t MFStateBlock_GetUsedBytes(MFStateBlock *pStateBlock);
-extern (C) size_t MFStateBlock_GetFreeBytes(MFStateBlock *pStateBlock);
+extern (C) size_t MFStateBlock_GetAllocatedBytes(MFStateBlock* pStateBlock);
+extern (C) size_t MFStateBlock_GetUsedBytes(MFStateBlock* pStateBlock);
+extern (C) size_t MFStateBlock_GetFreeBytes(MFStateBlock* pStateBlock);
 
 extern (C) const(char)* MFStateBlock_GetRenderStateName(MFStateBlockConstantType ct, int constant);
 
-extern (C) bool MFStateBlock_SetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool state);
-extern (C) bool MFStateBlock_SetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, ref const MFVector state);
-extern (C) bool MFStateBlock_SetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, ref const MFMatrix state);
-extern (C) bool MFStateBlock_SetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture *pTexture);
-extern (C) bool MFStateBlock_SetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void *pState);
-extern (C) bool MFStateBlock_SetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, const void *pStateData, size_t dataSize);
+extern (C) bool MFStateBlock_SetBool(MFStateBlock* pStateBlock, MFStateConstant_Bool constant, bool state);
+extern (C) bool MFStateBlock_SetVector(MFStateBlock* pStateBlock, MFStateConstant_Vector constant, ref const MFVector state);
+extern (C) bool MFStateBlock_SetMatrix(MFStateBlock* pStateBlock, MFStateConstant_Matrix constant, ref const MFMatrix state);
+extern (C) bool MFStateBlock_SetTexture(MFStateBlock* pStateBlock, MFStateConstant_Texture constant, MFTexture* pTexture);
+extern (C) bool MFStateBlock_SetRenderState(MFStateBlock* pStateBlock, MFStateConstant_RenderState renderState, void* pState);
+extern (C) bool MFStateBlock_SetMiscState(MFStateBlock* pStateBlock, MFStateConstant_Miscellaneous miscState, const void* pStateData, size_t dataSize);
 
-bool MFStateBlock_SetAnimMatrices(MFStateBlock *pStateBlock, ref const MFStateConstant_AnimationMatrices matrices)
+bool MFStateBlock_SetAnimMatrices(MFStateBlock* pStateBlock, ref const MFStateConstant_AnimationMatrices matrices)
 {
 	return MFStateBlock_SetMiscState(pStateBlock, MFStateConstant_Miscellaneous.AnimationMatrices, &matrices, matrices.sizeof);
 }
 
-bool MFStateBlock_SetMatrixBatch(MFStateBlock *pStateBlock, ref const MFStateConstant_MatrixBatch batch)
+bool MFStateBlock_SetMatrixBatch(MFStateBlock* pStateBlock, ref const MFStateConstant_MatrixBatch batch)
 {
 	return MFStateBlock_SetMiscState(pStateBlock, MFStateConstant_Miscellaneous.MatrixBatch, &batch, batch.sizeof);
 }
 
-//extern (C) void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MFLight *pLight);
+bool MFStateBlock_SetViewport(MFStateBlock* pStateBlock, ref const MFRect rect)
+{
+	return MFStateBlock_SetMiscState(pStateBlock, MFStateConstant_Miscellaneous.Viewport, &rect, rect.sizeof);
+}
 
-extern (C) bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState);
-extern (C) bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState);
-extern (C) bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState);
-extern (C) bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture);
-extern (C) bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState);
-extern (C) bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData);
-//extern (C) void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MFLight **ppLight);
+//extern (C) void MFStateBlock_SetLight(MFStateBlock* pStateBlock, MFStateConstant_Miscellaneous light, const MFLight* pLight);
 
-//extern (C) void MFStateBlock_GetLightCounts(MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount);
+extern (C) bool MFStateBlock_GetBool(const(MFStateBlock)* pStateBlock, MFStateConstant_Bool constant, bool* pState);
+extern (C) bool MFStateBlock_GetVector(const(MFStateBlock)* pStateBlock, MFStateConstant_Vector constant, MFVector* pState);
+extern (C) bool MFStateBlock_GetMatrix(const(MFStateBlock)* pStateBlock, MFStateConstant_Matrix constant, MFMatrix* pState);
+extern (C) bool MFStateBlock_GetTexture(const(MFStateBlock)* pStateBlock, MFStateConstant_Texture constant, MFTexture* *ppTexture);
+extern (C) bool MFStateBlock_GetRenderState(const(MFStateBlock)* pStateBlock, MFStateConstant_RenderState renderState, void* *ppState);
+extern (C) bool MFStateBlock_GetMiscState(const(MFStateBlock)* pStateBlock, MFStateConstant_Miscellaneous miscState, void* *ppStateData);
+//extern (C) void MFStateBlock_GetLight(const(MFStateBlock)* pStateBlock, MFStateConstant_Miscellaneous light, MFLight* *ppLight);
 
-extern (C) void MFStateBlock_ClearBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant);
-extern (C) void MFStateBlock_ClearVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant);
-extern (C) void MFStateBlock_ClearMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant);
-extern (C) void MFStateBlock_ClearTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant);
-extern (C) void MFStateBlock_ClearRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState);
-extern (C) void MFStateBlock_ClearMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState);
+//extern (C) void MFStateBlock_GetLightCounts(const(MFStateBlock)* pStateBlock, int* pOmniLightCount, int* pSpotLightCount, int* pDirectionalLightCount);
+
+extern (C) void MFStateBlock_ClearBool(MFStateBlock* pStateBlock, MFStateConstant_Bool constant);
+extern (C) void MFStateBlock_ClearVector(MFStateBlock* pStateBlock, MFStateConstant_Vector constant);
+extern (C) void MFStateBlock_ClearMatrix(MFStateBlock* pStateBlock, MFStateConstant_Matrix constant);
+extern (C) void MFStateBlock_ClearTexture(MFStateBlock* pStateBlock, MFStateConstant_Texture constant);
+extern (C) void MFStateBlock_ClearRenderState(MFStateBlock* pStateBlock, MFStateConstant_RenderState renderState);
+extern (C) void MFStateBlock_ClearMiscState(MFStateBlock* pStateBlock, MFStateConstant_Miscellaneous miscState);

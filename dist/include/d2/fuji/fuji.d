@@ -1,6 +1,7 @@
 module fuji.fuji;
 
 public import fuji.types;
+public import fuji.string;
 public import fuji.dbg;
 
 template MFDeg2Rad(alias a) { enum MFDeg2Rad = 0.017453292519943295769236907684886 * a; }

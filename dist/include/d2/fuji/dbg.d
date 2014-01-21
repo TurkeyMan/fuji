@@ -2,8 +2,6 @@ module fuji.dbg;
 
 import fuji.fuji;
 
-import std.string;
-
 
 extern (C) void MFDebug_DebugAssert(const(char)* pReason, const(char)* pMessage, const(char)* pFile = __FILE__.ptr, int line = __LINE__);
 

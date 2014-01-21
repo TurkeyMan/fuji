@@ -150,6 +150,9 @@ struct MFRendererState
 	MFStateConstant_AnimationMatrices animation;
 	MFStateConstant_MatrixBatch matrixBatch;
 
+	MFRect *pViewport;
+	MFRect *pViewportSet;
+
 	uint32 rsSet[MFSB_CT_TypeCount];
 	uint32 rsMask[MFSB_CT_TypeCount];
 };

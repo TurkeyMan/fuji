@@ -228,6 +228,16 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 			MFRendererPC_SetAnimationMatrix(b, state.animation.pMatrices[state.matrixBatch.pIndices[b]]);
 	}
 
+	// set viewport
+	if(state.pViewportSet != state.pViewport)
+	{
+		if(!state.pViewport)
+			MFRenderer_ResetViewport();
+		else
+			MFRenderer_SetViewport(state.pViewport);
+		state.pViewportSet = state.pViewport;
+	}
+
 	state.boolsSet = boolState;
 
 	return 0;

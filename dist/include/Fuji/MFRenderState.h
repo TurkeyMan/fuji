@@ -377,6 +377,7 @@ enum MFStateConstant_Miscellaneous
 
 	MFSCMisc_AnimationMatrices,			/**< Animation matrices. Value of \a MFStateConstant_AnimationMatrices. */
 	MFSCMisc_MatrixBatch,				/**< Animation matrix batch. Value of \a MFStateConstant_MatrixBatch. */
+	MFSCMisc_Viewport,					/**< Rendering viewport. Value of \a MFRect. */
 	MFSCMisc_Light0,					/**< Light 0 description. */
 	MFSCMisc_Light1,					/**< Light 1 description. */
 	MFSCMisc_Light2,					/**< Light 2 description. */
@@ -944,7 +945,7 @@ MF_API void MFStateBlock_Destroy(MFStateBlock *pStateBlock);
  * @param pSource State block to clone.
  * @return A clone of \a pSource.
  */
-MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource);
+MF_API MFStateBlock* MFStateBlock_Clone(const MFStateBlock *pSource);
 
 /**
  * Copy a state block.
@@ -953,7 +954,7 @@ MF_API MFStateBlock* MFStateBlock_Clone(MFStateBlock *pSource);
  * @param pDest Target state block.
  * @return None.
  */
-MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest);
+MF_API void MFStateBlock_Copy(const MFStateBlock *pSource, MFStateBlock *pDest);
 
 /**
  * Merge 2 state blocks.
@@ -963,7 +964,7 @@ MF_API void MFStateBlock_Copy(MFStateBlock *pSource, MFStateBlock *pDest);
  * @return A new state block containing the states from both source state blocks.
  * @remarks If a state is set in both source state blocks, the new state block will receive the value from \a pSource1.
  */
-MF_API MFStateBlock* MFStateBlock_Merge(MFStateBlock *pSource1, MFStateBlock *pSource2);
+MF_API MFStateBlock* MFStateBlock_Merge(const MFStateBlock *pSource1, const MFStateBlock *pSource2);
 
 /**
  * Clear a state block.
@@ -1093,6 +1094,18 @@ inline bool MFStateBlock_SetMatrixBatch(MFStateBlock *pStateBlock, const MFState
 	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_MatrixBatch, &batch, sizeof(batch));
 }
 
+/**
+ * Set the viewport.
+ * Sets the viewport render state.
+ * @param pStateBlock A state block.
+ * @param rect The viewport to set.
+ * @return \a true if the state was set successfully.
+ */
+inline bool MFStateBlock_SetViewport(MFStateBlock *pStateBlock, const MFRect &rect)
+{
+	return MFStateBlock_SetMiscState(pStateBlock, MFSCMisc_Viewport, &rect, sizeof(rect));
+}
+
 //MF_API void MFStateBlock_SetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, const MFLight *pLight);
 
 /**
@@ -1103,7 +1116,7 @@ inline bool MFStateBlock_SetMatrixBatch(MFStateBlock *pStateBlock, const MFState
  * @param pState Pointer to a bool that receives the render state.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState);
+MF_API bool MFStateBlock_GetBool(const MFStateBlock *pStateBlock, MFStateConstant_Bool constant, bool *pState);
 
 /**
  * Get a vector render state.
@@ -1113,7 +1126,7 @@ MF_API bool MFStateBlock_GetBool(MFStateBlock *pStateBlock, MFStateConstant_Bool
  * @param pState Pointer to an \a MFVector that receives the render state.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState);
+MF_API bool MFStateBlock_GetVector(const MFStateBlock *pStateBlock, MFStateConstant_Vector constant, MFVector *pState);
 
 /**
  * Get a matrix render state.
@@ -1123,7 +1136,7 @@ MF_API bool MFStateBlock_GetVector(MFStateBlock *pStateBlock, MFStateConstant_Ve
  * @param pState Pointer to an \a MFMatrix that receives the render state.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState);
+MF_API bool MFStateBlock_GetMatrix(const MFStateBlock *pStateBlock, MFStateConstant_Matrix constant, MFMatrix *pState);
 
 /**
  * Get a texture render state.
@@ -1133,7 +1146,7 @@ MF_API bool MFStateBlock_GetMatrix(MFStateBlock *pStateBlock, MFStateConstant_Ma
  * @param ppTexture Pointer to an \a MFTexture* that receives the texture.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture);
+MF_API bool MFStateBlock_GetTexture(const MFStateBlock *pStateBlock, MFStateConstant_Texture constant, MFTexture **ppTexture);
 
 /**
  * Get a render state.
@@ -1143,7 +1156,7 @@ MF_API bool MFStateBlock_GetTexture(MFStateBlock *pStateBlock, MFStateConstant_T
  * @param ppState Pointer to a \a void* that receives the render state.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState);
+MF_API bool MFStateBlock_GetRenderState(const MFStateBlock *pStateBlock, MFStateConstant_RenderState renderState, void **ppState);
 
 /**
  * Get a miscellaneous render state.
@@ -1153,11 +1166,11 @@ MF_API bool MFStateBlock_GetRenderState(MFStateBlock *pStateBlock, MFStateConsta
  * @param ppStateData Pointer to a \a void* that receives the render state.
  * @return \a true if the state was read successfully.
  */
-MF_API bool MFStateBlock_GetMiscState(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData);
+MF_API bool MFStateBlock_GetMiscState(const MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous miscState, void **ppStateData);
 
-//MF_API void MFStateBlock_GetLight(MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MFLight **ppLight);
+//MF_API void MFStateBlock_GetLight(const MFStateBlock *pStateBlock, MFStateConstant_Miscellaneous light, MFLight **ppLight);
 
-//MF_API void MFStateBlock_GetLightCounts(MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount);
+//MF_API void MFStateBlock_GetLightCounts(const MFStateBlock *pStateBlock, int *pOmniLightCount, int *pSpotLightCount, int *pDirectionalLightCount);
 
 /**
  * Clear a bool render state.

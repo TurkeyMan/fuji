@@ -2,6 +2,7 @@ module fuji.texture;
 
 public import fuji.fuji;
 public import fuji.image;
+import fuji.resource;
 import fuji.vector;
 
 /**
@@ -140,3 +141,78 @@ extern (C) MFTexture* MFTexture_CreateBlank(const(char)* pName, ref const(MFVect
 extern (C) bool MFTexture_IsAvailable(int format);
 
 extern (C) void MFTexture_GetTextureDimensions(const(MFTexture)* pTexture, int* pWidth, int* pHeight) pure;
+
+
+// wrappers for D...
+
+struct MFTextureDimensions
+{
+	int width, height;
+}
+
+struct Texture
+{
+	alias pTexture this;
+
+	this(this)
+	{
+		MFResource_AddRef(cast(fuji.resource.MFResource*)pTexture);
+	}
+
+	this(Resource resource)
+	{
+		// TODO: should this throw instead?
+		if(resource.type == MFResourceType.Texture)
+		{
+			resource.AddRef();
+			pTexture = cast(MFTexture*)resource.handle;
+		}
+	}
+
+	this(in string name)
+	{
+		create(name);
+	}
+
+	~this()
+	{
+		release();
+	}
+
+	void create(in string name, bool generateMipChain = true)
+	{
+		release();
+		pTexture = MFTexture_Create(name.toStringz(), generateMipChain);
+	}
+
+	void createExisting(in string name)
+	{
+		release();
+		pTexture = MFTexture_Find(name.toStringz());
+	}
+
+	int release()
+	{
+		int rc = 0;
+		if(pTexture)
+		{
+			rc = MFTexture_Release(pTexture);
+			pTexture = null;
+		}
+		return rc;
+	}
+
+	@property inout(MFTexture)* handle() inout pure nothrow { return pTexture; }
+
+	@property MFTextureDimensions size() const pure
+	{
+		MFTextureDimensions d;
+		MFTexture_GetTextureDimensions(pTexture, &d.width, &d.height);
+		return d;
+	}
+
+	@property int width() const pure { return size.width; }
+	@property int height() const pure { return size.height; }
+
+	MFTexture *pTexture;
+}

@@ -116,7 +116,7 @@ MFMaterialParameterInfo parameterInformation[] =
 	{ "texture",		MFMatStandard_Texture,			{ MFParamType_None },					{ MFParamType_Enum, 0, sTextureKeys },						stringValue, 1 },
 	{ "textureaddress",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureAddreessKeys },				textureaddress, 1 },
 	{ "texturefilter",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Enum, 0, sTextureFilterKeys },				texturefilter, 1 },
-	{ "bordercolour",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_None, MFMatStandard_TexFlag_BorderColour },	colourValue, 1 },
+	{ "bordercolour",	MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_BorderColour },	colourValue, 1 },
 	{ "texturematrix",	MFMatStandard_TextureMatrix,	{ MFParamType_None },					{ MFParamType_None },										matrixValue, 1 },
 
 	{ "animated",		MFMatStandard_Animated,			{ MFParamType_None },					{ MFParamType_None },										animated, sizeof(animated)/sizeof(MFMaterialParameterInfo::ParameterDetails) },
@@ -129,6 +129,7 @@ MFMaterialParameterInfo parameterInformation[] =
 
 	{ "addressu",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_AddressU },	textureaddress, 1 },
 	{ "addressv",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_AddressV },	textureaddress, 1 },
+	{ "addressw",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_AddressW },	textureaddress, 1 },
 	{ "minfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MinFilter },	texturefilter, 1 },
 	{ "magfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MagFilter },	texturefilter, 1 },
 	{ "mipfilter",		MFMatStandard_TextureFlags,		{ MFParamType_Enum, 0, sTextureKeys },	{ MFParamType_Constant, MFMatStandard_TexFlag_MipFilter },	texturefilter, 1 },
@@ -177,6 +178,7 @@ void MFMat_Standard_CreateInstance(MFMaterial *pMaterial)
 	pData->alphaRef = 1.0f;
 
 	pData->pEffect = MFEffect_Create("Mat_Standard.mfx");
+	MFDebug_Assert(pData->pEffect, "Failed to load Mat_Standard.mfx");
 
 	MFMat_Standard_CreateInstancePlatformSpecific(pMaterial);
 }

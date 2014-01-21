@@ -743,16 +743,16 @@ MFDebug_Assert(false, "Fix Me!!!");
 
 MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial)
 {
-	return pMaterial->pType->materialCallbacks.pGetNumParams ? pMaterial->pType->materialCallbacks.pGetNumParams() : 0;
+	if(!pMaterial->pType->materialCallbacks.pGetNumParams)
+		return 0;
+	return pMaterial->pType->materialCallbacks.pGetNumParams();
 }
 
 MF_API const char* MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 
-	MFMaterialParameterInfo *pInfo;
-	pInfo = (MFMaterialParameterInfo*)pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
-
+	MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
 	return pInfo->pParameterName;
 }
 
