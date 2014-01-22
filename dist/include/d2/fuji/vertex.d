@@ -229,6 +229,9 @@ MFVertexBuffer* MFVertex_CreateVertexBufferFromData(VertexStruct)(MFVertexBuffer
 
 // wrap the vertex buffer nicely
 
+import fuji.render;
+import fuji.material;
+
 struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsValidVertexStructure!VertexDataType)
 {
 	alias pVB this;
@@ -316,13 +319,13 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		return Mesh(pVB, primType);
 	}
 
-	void Draw(MFPrimType primType, fuji.material.MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
+	void Draw(MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
 	{
 		MFStateBlock *pSB = MFStateBlock_CreateTemporary(64);
 		MFStateBlock_SetRenderState(pSB, MFStateConstant_RenderState.VertexDeclaration, pVB.pVertexDeclatation);
 		MFStateBlock_SetRenderState(pSB, MFStateConstant_RenderState.VertexBuffer0, pVB);
 
-		fuji.render.MFRenderer_AddVertices(pSB, 0, cast(int)pVB.numVerts, primType, pMaterial, pEntity, pMaterialOverride, pView);
+		MFRenderer_AddVertices(pSB, 0, cast(int)pVB.numVerts, primType, pMaterial, pEntity, pMaterialOverride, pView);
 	}
 
 	@property size_t length() const { return pVB ? pVB.numVerts : 0; }
@@ -378,9 +381,9 @@ struct Mesh
 		}
 	}
 
-	void Draw(fuji.material.MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
+	void Draw(MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
 	{
-		fuji.render.MFRenderer_AddMesh(&mesh, pMaterial, pEntity, pMaterialOverride, pView);
+		MFRenderer_AddMesh(&mesh, pMaterial, pEntity, pMaterialOverride, pView);
 	}
 
 	MFMesh mesh;
