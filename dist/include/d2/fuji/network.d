@@ -1,6 +1,6 @@
 module fuji.network;
 
-import fuji.socket;
+import fuji.sockets;
 
 /**
  * Fuji network sockets.

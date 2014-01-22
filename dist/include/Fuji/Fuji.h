@@ -319,6 +319,9 @@
 	
 	// stop complaining about variable format strings
 	#pragma GCC diagnostic ignored "-Wformat-security"
+
+	// stop complaining about unused parameters
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
 #elif defined(MF_COMPILER_CLANG)
 	// disable C-linkage returning UDT (user data type)
 	#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"

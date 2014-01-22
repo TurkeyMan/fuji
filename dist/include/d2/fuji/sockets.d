@@ -1,4 +1,4 @@
-module fuji.socket;
+module fuji.sockets;
 
 enum MFSOCKET_ERROR = -1;
 
