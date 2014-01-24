@@ -457,156 +457,6 @@ static const int gSixaxisButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
-static const int gXPlorerButtonID[GamepadType_Max] =
-{
-	2,	// Button_GH_Blue
-	1,	// Button_GH_Red
-	4,	// Button_GH_Orange
-	3,	// Button_GH_Yellow
-	-1,	// Button_GH_Solo
-	-1,	// Unused
-	AID_Ry | AID_Clamp | AID_Negative,	// Button_GH_TiltTrigger
-	0,	// Button_GH_Green
-	7,	// Button_GH_Start
-	6,	// Button_GH_Select
-	-1,	// Unused
-	-1,	// Unused
-	POV_Up,		// Button_GH_StrumUp
-	POV_Down,	// Button_GH_StrumDown
-	POV_Left,	// Button_DLeft
-	POV_Right,	// Button_DRight
-	AID_Rx | AID_Full,		// Button_GH_Whammy
-	AID_Z,					// Jump/Roll sensor
-	-1,						// Button_GH_PickupSwitch
-	AID_Ry | AID_Negative,	// Button_GH_Tilt
-	-1  // Button_Home
-};
-
-static const int gXGuitarButtonID[GamepadType_Max] =
-{
-	14,		// Button_GH_Blue
-	13,		// Button_GH_Red
-	8,		// Button_GH_Orange
-	15,		// Button_GH_Yellow
-	9,		// Button_GH_Solo
-	-1,		// Unused
-	AID_Ry | AID_Clamp,	// Button_GH_TiltTrigger
-	12,		// Button_GH_Green
-	4,		// Button_GH_Start
-	5,		// Button_GH_Select
-	6,		// Unused
-	7,		// Unused
-	0,		// Button_GH_StrumUp
-	1,		// Button_GH_StrumDown
-	2,		// Button_DLeft
-	3,		// Button_DRight
-	AID_Rx | AID_Full,	// Button_GH_Whammy
-	AID_Z,	// Jump/Roll sensor
-	AID_Rz,	// Button_GH_PickupSwitch
-	AID_Ry,	// Button_GH_Tilt
-	-1		// Button_Home
-};
-
-static const int g360RBGuitarButtonID[GamepadType_Max] =
-{
-	2,	// Button_GH_Blue
-	1,	// Button_GH_Red
-	4,	// Button_GH_Orange
-	3,	// Button_GH_Yellow
-	8,	// Button_GH_Solo
-	-1,	// Unused
-	AID_Ry | AID_Clamp | AID_Negative,	// Button_GH_TiltTrigger
-	0,	// Button_GH_Green
-	7,	// Button_GH_Start
-	6,	// Button_GH_Select
-	-1,	// Unused
-	-1,	// Unused
-	POV_Up,		// Button_GH_StrumUp
-	POV_Down,	// Button_GH_StrumDown
-	POV_Left,	// Button_DLeft
-	POV_Right,	// Button_DRight
-	AID_Rx | AID_Full,	// Button_GH_Whammy
-	-1,					// Jump/Roll sensor
-	AID_Z,				// Button_GH_PickupSwitch
-	-1,					// Button_GH_Tilt
-	-1  // Button_Home
-};
-
-static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
-{
-	3,	// Button_GH_Blue
-	2,	// Button_GH_Red
-	4,	// Button_GH_Orange
-	0,	// Button_GH_Yellow
-	-1,	// Button_GH_Solo
-	-1,	// Unused
-	-1,	// Button_GH_TiltTrigger
-	1,	// Button_GH_Green
-	9,	// Button_GH_Start
-	8,	// Button_GH_Select
-	-1,	// Unused
-	-1,	// Unused
-	POV_Up,		  // Button_GH_StrumUp
-	POV_Down,	  // Button_GH_StrumDown
-	POV_Left,	  // Button_DLeft
-	POV_Right,	// Button_DRight
-	AID_Z | AID_Full | AID_Negative,		// Button_GH_Whammy
-	-1,					// Jump/Roll sensor
-	-1,         // Button_GH_PickupSwitch
-	-1,	        // Button_GH_Tilt
-	12  // Button_Home
-};
-
-static const int gPS3RBGuitarButtonID[GamepadType_Max] =
-{
-	0,	// Button_GH_Blue
-	2,	// Button_GH_Red
-	4,	// Button_GH_Orange
-	3,	// Button_GH_Yellow
-	6,	// Button_GH_Solo
-	-1,	// Unused
-	5,	// Button_GH_TiltTrigger
-	1,	// Button_GH_Green
-	9,	// Button_GH_Start
-	8,	// Button_GH_Select
-	-1,	// Unused
-	-1,	// Unused
-	POV_Up,		  // Button_GH_StrumUp
-	POV_Down,	  // Button_GH_StrumDown
-	POV_Left,	  // Button_DLeft
-	POV_Right,	// Button_DRight
-	AID_Z | AID_Negative,	// Button_GH_Whammy
-	-1,       // Jump/Roll sensor
-	-1,       // Button_GH_PickupSwitch
-	-1,       // Button_GH_Tilt
-	12  // Button_Home
-};
-
-static const int gPS3GH4GuitarButtonID[GamepadType_Max] =
-{
-	3,	// Button_GH_Blue
-	2,	// Button_GH_Red
-	4,	// Button_GH_Orange
-	0,	// Button_GH_Yellow
-	6,	// Button_GH_Solo
-	-1,	// Unused
-	5,	// Button_GH_TiltTrigger
-	1,	// Button_GH_Green
-	9,	// Button_GH_Start
-	8,	// Button_GH_Select
-	-1,	// Unused
-	-1,	// Unused
-	POV_Up,		  // Button_GH_StrumUp
-	POV_Down,	  // Button_GH_StrumDown
-	POV_Left,	  // Button_DLeft
-	POV_Right,	// Button_DRight
-	AID_Z,	// Button_GH_Whammy
-	-1,       // Jump/Roll sensor
-	AID_Rz | AID_Full, // Button_GH_Slider
-	-1,       // Button_GH_Tilt
-	12  // Button_Home
-};
-
 static const int gUSBGamepadButtonID[GamepadType_Max] =
 {
 	2,	// Button_A
@@ -857,6 +707,156 @@ static const int gRandomAdapterButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
+static const int gXPlorerButtonID[GamepadType_Max] =
+{
+	2,	// Button_GH_Blue
+	1,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	3,	// Button_GH_Yellow
+	-1,	// Button_GH_Solo
+	-1,	// Unused
+	AID_Ry | AID_Clamp | AID_Negative,	// Button_GH_TiltTrigger
+	0,	// Button_GH_Green
+	7,	// Button_GH_Start
+	6,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		// Button_GH_StrumUp
+	POV_Down,	// Button_GH_StrumDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Rx | AID_Full,		// Button_GH_Whammy
+	AID_Z,					// Jump/Roll sensor
+	-1,						// Button_GH_PickupSwitch
+	AID_Ry | AID_Negative,	// Button_GH_Tilt
+	-1  // Button_Home
+};
+
+static const int g360RBGuitarButtonID[GamepadType_Max] =
+{
+	2,	// Button_GH_Blue
+	1,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	3,	// Button_GH_Yellow
+	8,	// Button_GH_Solo
+	-1,	// Unused
+	AID_Ry | AID_Clamp | AID_Negative,	// Button_GH_TiltTrigger
+	0,	// Button_GH_Green
+	7,	// Button_GH_Start
+	6,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		// Button_GH_StrumUp
+	POV_Down,	// Button_GH_StrumDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Rx | AID_Full,	// Button_GH_Whammy
+	-1,					// Jump/Roll sensor
+	AID_Z,				// Button_GH_PickupSwitch
+	-1,					// Button_GH_Tilt
+	-1  // Button_Home
+};
+
+static const int gPS3RBGuitarButtonID[GamepadType_Max] =
+{
+	0,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	3,	// Button_GH_Yellow
+	6,	// Button_GH_Solo
+	-1,	// Unused
+	5,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z | AID_Negative,	// Button_GH_Whammy
+	-1,       // Jump/Roll sensor
+	-1,       // Button_GH_PickupSwitch
+	-1,       // Button_GH_Tilt
+	12  // Button_Home
+};
+
+static const int gGH3PS3GuitarButtonID[GamepadType_Max] =
+{
+	3,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	0,	// Button_GH_Yellow
+	-1,	// Button_GH_Solo
+	-1,	// Unused
+	-1,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z | AID_Full | AID_Negative,		// Button_GH_Whammy
+	-1,					// Jump/Roll sensor
+	-1,         // Button_GH_PickupSwitch
+	-1,	        // Button_GH_Tilt
+	12  // Button_Home
+};
+
+static const int g360GH5GuitarButtonID[GamepadType_Max] =
+{
+	2,	// Button_GH_Blue
+	1,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	3,	// Button_GH_Yellow
+	-1,	// Button_GH_Solo
+	-1,	// Unused
+	AID_Ry | AID_Clamp | AID_Negative,	// Button_GH_TiltTrigger
+	0,	// Button_GH_Green
+	7,	// Button_GH_Start
+	6,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		// Button_GH_StrumUp
+	POV_Down,	// Button_GH_StrumDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	-1,						// Button_GH_Whammy
+	-1,						// Jump/Roll sensor
+	-1,						// Button_GH_PickupSwitch
+	AID_Ry | AID_Negative,	// Button_GH_Tilt
+	-1  // Button_Home
+};
+
+static const int gPS3GH4GuitarButtonID[GamepadType_Max] =
+{
+	3,	// Button_GH_Blue
+	2,	// Button_GH_Red
+	4,	// Button_GH_Orange
+	0,	// Button_GH_Yellow
+	6,	// Button_GH_Solo
+	-1,	// Unused
+	5,	// Button_GH_TiltTrigger
+	1,	// Button_GH_Green
+	9,	// Button_GH_Start
+	8,	// Button_GH_Select
+	-1,	// Unused
+	-1,	// Unused
+	POV_Up,		  // Button_GH_StrumUp
+	POV_Down,	  // Button_GH_StrumDown
+	POV_Left,	  // Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_Z,	// Button_GH_Whammy
+	-1,       // Jump/Roll sensor
+	AID_Rz | AID_Full, // Button_GH_Slider
+	-1,       // Button_GH_Tilt
+	12  // Button_Home
+};
+
 static const int g360RBDrumsButtonID[GamepadType_Max] =
 {
 	0,	// Button_Drum_Green
@@ -930,6 +930,31 @@ static const int g360GH4DrumsButtonID[GamepadType_Max] =
 	-1, // Unused
 	-1,	// Unused
 	-1  // Unused
+};
+
+static const int gXGuitarButtonID[GamepadType_Max] =
+{
+	14,		// Button_GH_Blue
+	13,		// Button_GH_Red
+	8,		// Button_GH_Orange
+	15,		// Button_GH_Yellow
+	9,		// Button_GH_Solo
+	-1,		// Unused
+	AID_Ry | AID_Clamp,	// Button_GH_TiltTrigger
+	12,		// Button_GH_Green
+	4,		// Button_GH_Start
+	5,		// Button_GH_Select
+	6,		// Unused
+	7,		// Unused
+	0,		// Button_GH_StrumUp
+	1,		// Button_GH_StrumDown
+	2,		// Button_DLeft
+	3,		// Button_DRight
+	AID_Rx | AID_Full,	// Button_GH_Whammy
+	AID_Z,	// Jump/Roll sensor
+	AID_Rz,	// Button_GH_PickupSwitch
+	AID_Ry,	// Button_GH_Tilt
+	-1		// Button_Home
 };
 
 static const int gXDrumsButtonID[GamepadType_Max] =
@@ -1643,8 +1668,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gStandardButtonID,
 		gStandardButtonNames,
-		0,
-		&gGamepadDescriptors[1]
+		0
 	},
 
 	// XBox 360 wired gamepad
@@ -1654,8 +1678,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x045E, 0x028E,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[2]
+		0
+	},
+
+	// XBox 360 wireless gamepad
+	{
+		"XBox 360 Gamepad",
+		"Controller (Xbox 360 Wireless Receiver for Windows)",
+		0x045E, 0x02A1,
+		gXBox360ButtonID,
+		gXBox360ButtonNames,
+		0
 	},
 
 	// XBox 360 wireless gamepad
@@ -1665,8 +1698,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x045E, 0x0719,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[3]
+		0
 	},
 
 	// XBox 360 DOA Arcade Stick
@@ -1676,8 +1708,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F0D, 0x000A,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[4]
+		0
 	},
 
 	// EMS USB2 adapter
@@ -1687,8 +1718,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0B43, 0x0003,
 		gEMSButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[5]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// Different identities of the titanium adapters
@@ -1698,8 +1728,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[6]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1708,8 +1737,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[7]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1718,8 +1746,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[8]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1728,8 +1755,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[9]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1738,8 +1764,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gSuperDualBoxButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[10]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// XBox gamepad
@@ -1749,8 +1774,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0, // 0x0738, 0x4516, // i think the S-Pad and 3rd party pads are different..
 		gXBCDButtonID,
 		gXBoxButtonNames,
-		0,
-		&gGamepadDescriptors[11]
+		0
 	},
 
 	// Logitech dual action
@@ -1760,8 +1784,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		0,
-		&gGamepadDescriptors[12]
+		0
 	},
 
 	// Logitech dual action
@@ -1771,8 +1794,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		0,
-		&gGamepadDescriptors[13]
+		0
 	},
 
 	// Xterminator Digital Gamepad
@@ -1782,8 +1804,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXterminatorButtonID,
 		gXterminatorButtonNames,
-		0,
-		&gGamepadDescriptors[14]
+		0
 	},
 
 	// Logitech Wingman Gamepad Extreme (Gameport)
@@ -1793,8 +1814,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		0,
-		&gGamepadDescriptors[15]
+		0
 	},
 
 	// Logitech Wingman Gamepad Extreme (USB)
@@ -1804,8 +1824,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechWingmanGamepadExtremeID,
 		gLogitechWingmanGamepadExtremeNames,
-		0,
-		&gGamepadDescriptors[16]
+		0
 	},
 
 	// Logitech RumblePad 2
@@ -1815,8 +1834,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		0,
-		&gGamepadDescriptors[17]
+		0
 	},
 
 	// 'USB Joystick' basic PS2 style USB gamepad
@@ -1826,8 +1844,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0002,
 		gGreenAsiaButtonID,
 		gGreenAsiaButtonNames,
-		0,
-		&gGamepadDescriptors[18]
+		0
 	},
 
 	// Radioshack 'USB Dual Vibration Joystick' another PS2 gamepad adapter,
@@ -1837,8 +1854,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[19]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// POWER))WAVE PS2 style gamepad
@@ -1848,8 +1864,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gPowerWaveButtonID,
 		gPowerWaveButtonNames,
-		0,
-		&gGamepadDescriptors[20]
+		0
 	},
 
 	// Some more PS2 adapters
@@ -1859,8 +1874,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x0667,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[21]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1869,8 +1883,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x3427, 0x1190,
 		gGenericPS2ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[22]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1879,8 +1892,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6677, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[23]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1889,8 +1901,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0810, 0x0001,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[24]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1899,8 +1910,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F30, 0x010A,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[25]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -1909,8 +1919,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0925, 0x8866,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[26]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// Logitech Cordless RumblePad 2
@@ -1920,8 +1929,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046d, 0xc219,
 		gLogitechDualActionButtonID,
 		gLogitechDualActionButtonNames,
-		0,
-		&gGamepadDescriptors[27]
+		0
 	},
 
 	// Guitar Hero X-Plorer
@@ -1931,8 +1939,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x4748,
 		gXPlorerButtonID,
 		gXPlorerButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[28]
+		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
 	},
 
 	// PS TO PC CONVERTOR
@@ -1942,8 +1949,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D01,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[29]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// GGE90x PC Recoil Pad
@@ -1953,8 +1959,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F30, 0x0107,
 		gGGE909ButtonID,
 		gGGE909ButtonNames,
-		0,
-		&gGamepadDescriptors[30]
+		0
 	},
 
 	{
@@ -1963,8 +1968,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0F30, 0x010B,
 		gGGE909ButtonID,
 		gGGE909ButtonNames,
-		0,
-		&gGamepadDescriptors[31]
+		0
 	},
 
 	// Super Joy Box 3 Pro
@@ -1974,8 +1978,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8801,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[32]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// PSX/USB Pad
@@ -1985,8 +1988,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x8631, 0x1128,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[33]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// PS3 SIXAXIS Controller
@@ -1996,8 +1998,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x054C, 0x0268,
 		gSixaxisButtonID,
 		gPS2ButtonNames,
-		0,
-		&gGamepadDescriptors[34]
+		0
 	},
 
 	// Random PC Gamepad (this one needs fleshing out... and i dont know the button names)
@@ -2007,8 +2008,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x3013,
 		gUSBGamepadButtonID,
 		gPS2ButtonNames,
-		0,
-		&gGamepadDescriptors[35]
+		0
 	},
 
 	// Twin Shock
@@ -2018,8 +2018,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1241, 0x5004,
 		gTwinShockButtonID,
 		gTwinShockButtonNames,
-		0,
-		&gGamepadDescriptors[36]
+		0
 	},
 
 	// UNIVERSAL Rumble Wheel
@@ -2029,8 +2028,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x103F,
 		gUNIVERSALRumbleWheelButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[37]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// Mad Catz Gamepad
@@ -2040,8 +2038,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0738, 0x4716,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[38]
+		0
 	},
 
 	// Saitek Gamepads
@@ -2051,8 +2048,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x06A3, 0x040B,
 		gSaitek990ButtonID,
 		gSaitek990ButtonNames,
-		0,
-		&gGamepadDescriptors[39]
+		0
 	},
 
 	{
@@ -2061,8 +2057,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x07B5, 0x0312,
 		gSaitek880ButtonID,
 		gSaitek880ButtonNames,
-		0,
-		&gGamepadDescriptors[40]
+		0
 	},
 
 	// TigerGame PS2 Gamepad Adapters
@@ -2072,8 +2067,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8802,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[41]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2082,8 +2076,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x6666, 0x8804,
 		gTitaniumButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[42]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// PS2 Adapter
@@ -2093,8 +2086,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x045E, 0x1100,
 		gUnusualPS2AdapterButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[43]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2103,8 +2095,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0079, 0x0006,
 		gGGE909ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[44]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2113,8 +2104,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x19FA, 0x8D91,
 		gJoyBox3ButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[45]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2123,8 +2113,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1345, 0x0003,
 		gRadioshackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[46]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2133,8 +2122,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x04B4, 0xC681,
 		gGGE909ButtonID,	// BEST GUESS: this should possibly use the gGGE909VariantButtonID instead (can't check)
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[47]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// Gravis GamePad Pro USB
@@ -2144,8 +2132,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0428, 0x4001,
 		gGamePadProButtonID,
 		gGamePadProButtonNames,
-		0,
-		&gGamepadDescriptors[48]
+		0
 	},
 
 	// XInput Guitar
@@ -2155,8 +2142,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXGuitarButtonID,
 		gXGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[49]
+		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
 	},
 
 	// PS3/USB Corded Gamepad
@@ -2166,8 +2152,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046D, 0xCAD1,
 		gLogitechDualActionButtonID,
 		gPS2ButtonNames,
-		0,
-		&gGamepadDescriptors[50]
+		0
 	},
 
 	{
@@ -2176,8 +2161,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x124B, 0x4D01,
 		gAirFloButtonID,
 		gAirFlo,
-		0,
-		&gGamepadDescriptors[51]
+		0
 	},
 
 	{
@@ -2186,8 +2170,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x146B, 0x0306,
 		gPowerWaveButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[52]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 
@@ -2197,8 +2180,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046D, 0xC242,
 		gXBox360ButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[53]
+		0
 	},
 
 	{
@@ -2207,8 +2189,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BD, 0xC001,
 		gRandomAdapterButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[54]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	{
@@ -2217,8 +2198,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x046D, 0xCAD2,
 		gLogitechDualActionButtonID,
 		gPS2ButtonNames,
-		0,
-		&gGamepadDescriptors[55]
+		0
 	},
 
 	// PS Vibration Feedback Converter
@@ -2228,8 +2208,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0C12, 0x0005,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[56]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// PS to USB (2P) Convert Cable
@@ -2239,8 +2218,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x1006,
 		gPSVibrationFeedbackButtonID,
 		gPS2ButtonNames,
-		MFGF_IsAdapter | MFGF_PS2,
-		&gGamepadDescriptors[57]
+		MFGF_IsAdapter | MFGF_PS2
 	},
 
 	// Speed-Link SL-6535 USB Pad
@@ -2250,8 +2228,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0012,
 		gGGE909VariantButtonID,
 		gGGE909ButtonNames,
-		0,
-		&gGamepadDescriptors[58]
+		0
 	},
 
 	// RB 360 Guitar
@@ -2261,8 +2238,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1BAD, 0x0002,
 		g360RBGuitarButtonID,
 		g360RBGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[59]
+		MFGF_IsGuitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone
 	},
 
 	// RB 360 Drums
@@ -2272,8 +2248,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1BAD, 0x0003,
 		g360RBDrumsButtonID,
 		g360RBDrumsButtonNames,
-		MFGF_IsDrums,
-		&gGamepadDescriptors[60]
+		MFGF_IsDrums
 	},
 
 	// Xinput Drums
@@ -2283,8 +2258,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXDrumsButtonID,
 		g360RBDrumsButtonNames,
-		MFGF_IsDrums,
-		&gGamepadDescriptors[61]
+		MFGF_IsDrums
 	},
 
 	// XInput gamepad
@@ -2294,8 +2268,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXGamepadButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[62]
+		0
 	},
 
 	// XInput Arcade Stick
@@ -2305,8 +2278,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXGamepadButtonID,
 		gXBox360ButtonNames,
-		0,
-		&gGamepadDescriptors[63]
+		0
 	},
 
 	// GH:WT PS3 Guitar
@@ -2316,8 +2288,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BA, 0x0100,
 		gPS3GH4GuitarButtonID,
 		gPS3GH4GuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[64]
+		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
 	},
 
 	// GH:WT PS3 Drums
@@ -2327,8 +2298,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BA, 0x0120,
 		gPS3GH4DrumsButtonID,
 		gPS3GH4DrumsButtonNames,
-		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[65]
+		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
 	},
 
 	// GH5 Xbox 360 Drums
@@ -2338,8 +2308,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x0719,
 		g360GH4DrumsButtonID,
 		g360GH4DrumsButtonNames,
-		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone,
-		&gGamepadDescriptors[65]
+		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
+	},
+
+	// GH5 Xbox 360 Guitar ** HACK: this shares the same USB id's with the drums! there is a hack in MFInput_PC.cpp to skip to the next one if axiis are present **
+	{
+		"GH5 Guitar",
+		"Drum Kit (Xbox 360 Wireless Receiver for Windows)",
+		0x1430, 0x0719,
+		g360GH5GuitarButtonID,
+		gXPlorerButtonNames,
+		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
 	},
 
 	// OUYA controller
@@ -2349,8 +2328,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x2836, 0x0001,
 		gOUYAButtonID,
 		gOUYAButtonNames,
-		0,
-		NULL
+		0
 	}
 
 /*
@@ -2386,5 +2364,17 @@ static MFGamepadInfo gGamepadDescriptors[] =
 };
 
 MFGamepadInfo *pGamepadMappingRegistry = gGamepadDescriptors;
+
+void MFInputPC_LinkGamepadRegistry()
+{
+	int numDescriptors = sizeof(gGamepadDescriptors)/sizeof(gGamepadDescriptors[0]);
+	for(int a=0; a<numDescriptors; ++a)
+	{
+		if(a < numDescriptors-1)
+			gGamepadDescriptors[a].pNext = &gGamepadDescriptors[a+1];
+		else
+			gGamepadDescriptors[a].pNext = NULL;
+	}
+}
 
 #endif

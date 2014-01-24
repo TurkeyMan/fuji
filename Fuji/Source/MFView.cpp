@@ -265,7 +265,7 @@ MF_API void MFView_TransformPoint3DTo2D(const MFVector& point, MFVector *pResult
 
 	// apply the projection and perform the perspective divide
 	MFVector transformed;
-	transformed = ApplyMatrix(point, viewProj);
+	transformed = ApplyMatrix(MakeVector(point, 1), viewProj);
 	transformed *= MFRcp(transformed.w);
 
 	// and shift the result into the ortho rect

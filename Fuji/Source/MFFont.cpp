@@ -92,7 +92,7 @@ inline int GetVerticalJustification(MFFontJustify justification)
 }
 
 // calculates the height and scale from source data
-float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pScale)
+float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pXScale, float *pYScale)
 {
   if (pFont == NULL)
     pFont = gpDebugFont;
@@ -103,15 +103,20 @@ float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pSca
   if(height == 0.0f) // use native font height
   {
     height = fontHeight;
-    *pScale = 1.0f;
+    *pXScale = 1.0f;
   }
   else
   {
-    *pScale = height / fontHeight;
+    *pXScale = height / fontHeight;
   }
 
   if(!MFView_IsOrtho())
-    height = -height;
+  {
+	height = -height;
+    *pYScale = -*pXScale;
+  }
+  else
+    *pYScale = *pXScale;
 
   return height;
 }
@@ -256,10 +261,10 @@ MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charInde
 	if(pFont == NULL) pFont = gpDebugFont;
 
 	MFVector currentPos = MFVector::zero;
-	float scale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	float scale, yScale;
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
@@ -320,10 +325,10 @@ MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float heigh
 	float width = 0.0f;
 	float maxWidth = 0.0f;
 	float totalHeight = 0.0f;
-	float scale;
+	float scale, yScale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
@@ -668,10 +673,10 @@ MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, c
 
 	float uScale = pFont->xScale;
 	float vScale = pFont->yScale;
-	float scale;
+	float scale, yScale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
@@ -736,12 +741,12 @@ MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, c
 					y2 = y + (float)(ch.height) * vScale;
 
 					px = pos_x + (float)ch.xoffset*scale;
-					py = pos_y + (float)ch.yoffset*scale;
+					py = pos_y + (float)ch.yoffset*yScale;
 
 					MFSetTexCoord1(x, y);
 					MFSetPosition(px, py, pos_z);
 					MFSetTexCoord1(x2, y2);
-					MFSetPosition(px + (float)ch.width*scale, py + (float)ch.height*scale, pos_z);
+					MFSetPosition(px + (float)ch.width*scale, py + (float)ch.height*yScale, pos_z);
 				}
 
 				pos_x += (float)ch.xadvance * scale;
@@ -811,10 +816,10 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 	const char *pC = pText;
 	const char *pLineStart = pText;
 	float currentPos = 0.0f;
-	float scale;
+	float scale, yScale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
@@ -913,11 +918,11 @@ MFVector MFFont_GetCharPosJustified(MFFont *pFont, const char *pText, float text
   const char *pCurrentLine = pText;
 
   MFVector currentPos = MFVector::zero;
-  float scale;
+  float scale, yScale;
   int lineEnd, lastSignificantChar;
 
   // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale);
+  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
   // justify vertically (this is slow)
   if(justification > MFFontJustify_Top_Full)
@@ -1004,11 +1009,11 @@ MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MF
   const char *pCurrentLine = pText;
 
   MFVector currentPos = MFVector::zero;
-  float scale;
+  float scale, yScale;
   int lineEnd, lastSignificantChar;
 
   // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale);
+  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
   // justify vertically (this is slow)
   if(justification > MFFontJustify_Top_Full)
@@ -1090,12 +1095,12 @@ MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFV
   const char *pCurrentLine = pText;
 
   MFVector currentPos = MFVector::zero;
-  float scale;
+  float scale, yScale;
   int lineEnd, lastSignificantChar;
   float startY;
 
   // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale);
+  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
   // justify vertically (this is slow)
   if(GetVerticalJustification(justification) > 0)
@@ -1192,10 +1197,10 @@ float MFFont_GetStringWidthW(MFFont *pFont, const uint16 *pText, float height, f
 	float width = 0.0f;
 	float maxWidth = 0.0f;
 	float totalHeight = 0.0f;
-	float scale;
+	float scale, yScale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float spaceWidth = pFont->spaceWidth * scale;
 
@@ -1343,10 +1348,10 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 
 	float uScale = pFont->xScale;
 	float vScale = pFont->yScale;
-	float scale;
+	float scale, yScale;
 
 	// calculate height and scale
-	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale);
+	height = MFFontInternal_CalcHeightAndScale(pFont, height, &scale, &yScale);
 
 	float pos_x;
 	float pos_y = pos.y;
@@ -1400,12 +1405,12 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 					y2 = y + (float)(ch.height) * vScale;
 
 					px = pos_x + (float)ch.xoffset*scale;
-					py = pos_y + (float)ch.yoffset*scale;
+					py = pos_y + (float)ch.yoffset*yScale;
 
 					MFSetTexCoord1(x, y);
 					MFSetPosition(px, py, pos_z);
 					MFSetTexCoord1(x2, y2);
-					MFSetPosition(px + (float)ch.width*scale, py + (float)ch.height*scale, pos_z);
+					MFSetPosition(px + (float)ch.width*scale, py + (float)ch.height*yScale, pos_z);
 				}
 
 				pos_x += (float)ch.xadvance * scale;

@@ -253,16 +253,20 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 	{
 		// use default descriptor
 		gPCJoysticks[gamepadID].pGamepadInfo = pGamepadMappingRegistry;
-		MFDebug_Warn(1, MFStr("Found an unknown gamepad '%s', using default mappings.", lpddi->tszProductName));
+		MFDebug_Warn(1, MFStr("Found an unknown gamepad %04X:%04X: '%s', using default mappings.", lpddi->guidProduct.Data1 & 0xFFFF, lpddi->guidProduct.Data1 >> 16, lpddi->tszProductName));
 
 		// offer to send email detailing controller info..
 //		MessageBox(NULL, "An unknown gamepad has been detected.\r\nWe strive to support every gamepad natively, please report your gamepad to Manu at turkeyman@gmail.com.\r\nI will contact you and request a few details about the gamepad so it can be added to the registry for the next release.", "Unknown gamepad detected...", MB_OK);
 	}
 	else
 	{
+		// HACK: 1430:0719 seems to be used by both the GH5 guitar and drums! if we detect axiis present, then we are looking at the guitar...
+		if(pInfo->vendorID == 0x1430 && pInfo->productID == 0x0719 && gPCJoysticks[gamepadID].caps.dwAxes > 0)
+			pInfo = pInfo->pNext;
+
 		// use applicable descriptor
 		gPCJoysticks[gamepadID].pGamepadInfo = pInfo;
-		MFDebug_Log(2, MFStr("Found gamepad: %s '%s'.", pInfo->pName, pInfo->pIdentifier));
+		MFDebug_Log(2, MFStr("Found gamepad %04X:%04X: %s '%s'.", lpddi->guidProduct.Data1 & 0xFFFF, lpddi->guidProduct.Data1 >> 16, pInfo->pName, pInfo->pIdentifier));
 	}
 
 	// test if device uses a POV for the digital directions
@@ -335,6 +339,9 @@ void DeviceChange(DEV_BROADCAST_DEVICEINTERFACE *pDevInf, bool connect)
 void MFInput_InitModulePlatformSpecific()
 {
 	MFCALLSTACK;
+
+	void MFInputPC_LinkGamepadRegistry();
+	MFInputPC_LinkGamepadRegistry();
 
 	// initialise runtime data
 	MFZeroMemory(gKeyState,256);
