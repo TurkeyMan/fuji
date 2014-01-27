@@ -57,6 +57,7 @@
 	MF_SYSTEM:
 	MF_TRANSLATION:
 	MF_DEBUG:
+	MF_MIDI:
 	MF_PARTICLESYSTEM:
 		NULL
 		MF_PLATFORM
@@ -169,6 +170,7 @@ enum MFRendererDrivers
 	#define MF_SYSTEM			MF_DRIVER_PC
 	#define MF_TRANSLATION		MF_DRIVER_PC
 	#define MF_DEBUG			MF_DRIVER_PC
+	#define MF_MIDI				MF_DRIVER_PC
 //	#define MF_COMPUTE			MF_DRIVER_OPENCL
 
 #elif defined(MF_XBOX)
@@ -458,6 +460,9 @@ enum MFRendererDrivers
 #endif
 #if !defined(MF_PARTICLESYSTEM)
 	#define MF_PARTICLESYSTEM NULL
+#endif
+#if !defined(MF_MIDI)
+	#define MF_MIDI NULL
 #endif
 #if !defined(MF_COMPUTE)
 	#define MF_COMPUTE NULL

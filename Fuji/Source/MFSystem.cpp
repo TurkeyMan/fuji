@@ -17,6 +17,7 @@
 #include "MFFont.h"
 #include "MFRenderer_Internal.h"
 #include "MFSound_Internal.h"
+#include "MFMidi_Internal.h"
 #include "MFSockets_Internal.h"
 #include "MFNetwork_Internal.h"
 #include "MFScript_Internal.h"
@@ -122,6 +123,11 @@ extern "C" MFDefaults gDefaults =
 		true,			// systemMouseUseWindowsCursor
 		true,			// useDirectInputKeyboard
 		true			// useXInput
+	},
+
+	// MidiDefaults
+	{
+		false,			// useMidi
 	},
 
 	// MiscellaneousDefaults

@@ -24,6 +24,7 @@
 #include "MFShader_Internal.h"
 #include "MFEffect_Internal.h"
 #include "MFSound_Internal.h"
+#include "MFMidi_Internal.h"
 #include "MFSockets_Internal.h"
 #include "MFNetwork_Internal.h"
 #include "MFScript_Internal.h"
@@ -62,7 +63,7 @@ static uint64 gCoreModules = 0;
 
 bool gFujiInitialised = false;
 
-char gBuiltinModuleIDs[MFBIM_Max] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
+char gBuiltinModuleIDs[MFBIM_Max] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1 };
 
 extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 
@@ -201,6 +202,9 @@ uint64 MFModule_RegisterEngineModules()
 
 	gBuiltinModuleIDs[MFBIM_MFInput] = (char)MFModule_RegisterModule("MFInput", MFInput_InitModule, MFInput_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFInput);
+
+	gBuiltinModuleIDs[MFBIM_MFMidi] = (char)MFModule_RegisterModule("MFMidi", MFMidi_InitModule, MFMidi_DeinitModule, basicModules);
+	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFMidi);
 
 	gBuiltinModuleIDs[MFBIM_MFSound] = (char)MFModule_RegisterModule("MFSound", MFSound_InitModule, MFSound_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSound);

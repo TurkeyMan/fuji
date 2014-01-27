@@ -168,6 +168,12 @@ extern (C) struct MFDefaults
 		bool useXInput;						/**< Use XInput when available on PC */
 	}
 
+	/** Midi Defaults. */
+	extern (C) struct MidiDefaults
+	{
+		bool useMidi;						/**< Use MIDI devices */
+	}
+
 	/** Miscellaneous Defaults. */
 	extern (C) struct MiscellaneousDefaults
 	{
@@ -193,6 +199,7 @@ extern (C) struct MFDefaults
 	FileSystemDefaults filesys;
 	SoundDefaults sound;
 	InputDefaults input;
+	MidiDefaults midi;
 	MiscellaneousDefaults misc;
 	PluginDefaults plugin;
 };

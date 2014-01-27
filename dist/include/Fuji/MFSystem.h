@@ -112,6 +112,12 @@ struct MFDefaults
 		bool useXInput;						/**< Use XInput when available on PC */
 	} input;
 
+	/** Midi Defaults. */
+	struct MidiDefaults
+	{
+		bool useMidi;						/**< Use MIDI devices */
+	} midi;
+
 	/** Miscellaneous Defaults. */
 	struct MiscellaneousDefaults
 	{

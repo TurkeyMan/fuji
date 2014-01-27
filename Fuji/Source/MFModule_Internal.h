@@ -27,6 +27,7 @@ enum MFBuiltinModule
 	MFBIM_MFShader,
 	MFBIM_MFEffect,
 	MFBIM_MFInput,
+	MFBIM_MFMidi,
 	MFBIM_MFSound,
 	MFBIM_MFTexture,
 	MFBIM_MFMaterial,
