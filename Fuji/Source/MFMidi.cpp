@@ -30,3 +30,8 @@ void MFMidi_DeinitModule()
 
 	MFMidi_DeinitModulePlatformSpecific();
 }
+
+void MFMidi_Update()
+{
+	MFMidi_UpdateInternal();
+}
