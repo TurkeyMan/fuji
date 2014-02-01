@@ -44,6 +44,7 @@ MF_API void MFRenderer_ResetViewport();
 MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget);
 MF_API void MFRenderer_SetDeviceRenderTarget();
 
+MF_API MFRendererDrivers MFRenderer_GetCurrentRenderDriver();
 
 /**
  * Get the device render target.

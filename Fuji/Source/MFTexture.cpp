@@ -4,7 +4,7 @@
 #include "MFInput.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
-#include "MFFileSystem_Internal.h"
+#include "MFFileSystem.h"
 #include "MFSystem.h"
 #include "Asset/MFIntTexture.h"
 
@@ -150,11 +150,10 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
 		}
 
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
+		size_t nameLen = MFString_Length(pName) + 1;
 		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
 
-		if(pName)
-			pName = MFString_Copy((char*)&pTexture[1], pName);
+		pName = MFString_Copy((char*)&pTexture[1], pName);
 
 		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
 

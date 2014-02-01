@@ -21,28 +21,12 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader)
 {
-	char *pCode = NULL;
-	size_t size = 0;
-
-	if(pSource)
+	MFShaderTemplate *pTemplate = pShader->pTemplate;
+	if(pTemplate->pProgram)
 	{
-		size = MFString_Length(pSource);
-		pCode = (char*)MFCopyMemory(MFHeap_Alloc(size), pSource, size + 1);
-	}
-	else if(pFilename)
-	{
-		pCode = MFFileSystem_Load(pFilename, &size, 1);
-	}
-
-	if(pCode)
-	{
-		// TODO: OpenGL only compiles shaders from source...
-		pShader->bytes = size;
-		pShader->pProgram = pCode;
-
-		MFDebug_Assert(pShader->shaderType < MFST_DomainShader, "Shader type not supported in OpenGL");
+		MFDebug_Assert(pTemplate->shaderType < MFST_DomainShader, "Shader type not supported in OpenGL");
 
 		static const MFOpenGL_ShaderType type[] =
 		{
@@ -51,7 +35,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 			MFOGL_ShaderType_GeometryShader
 		};
 
-		GLuint shader = MFRenderer_OpenGL_CompileShader(pCode, type[pShader->shaderType]);
+		GLuint shader = MFRenderer_OpenGL_CompileShader((const char*)pTemplate->pProgram, type[pTemplate->shaderType]);
 		pShader->pPlatformData = (void*)(size_t)shader;
 	}
 

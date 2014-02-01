@@ -13,18 +13,26 @@ void MFShader_DeinitModule();
 void MFShader_InitModulePlatformSpecific();
 void MFShader_DeinitModulePlatformSpecific();
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line);
+bool MFShader_CreatePlatformSpecific(MFShader *pShader);
 void MFShader_DestroyPlatformSpecific(MFShader *pShader);
 
 void MFShader_Apply(MFShader *pShader);
 
-struct MFShader : MFResource
+struct MFShaderTemplate
 {
 	MFShaderType shaderType;
 
-	// GPU shaders
-	void *pProgram;
+	int numInputs;
+	MFShaderInput *pInputs;
+
 	size_t bytes;
+	void *pProgram;
+};
+
+struct MFShader : MFResource
+{
+	// shader template
+	MFShaderTemplate *pTemplate;
 
 	// CPU shaders
 	void (*pConfigure)();
@@ -32,8 +40,6 @@ struct MFShader : MFResource
 
 	// inputs
 	uint32 renderStateRequirements[MFSB_CT_TypeCount];
-	MFShaderInput *pInputs;
-	int numInputs;
 
 	void *pPlatformData;
 };

@@ -11,42 +11,8 @@
 
 #include "MFShader_Internal.h"
 #include "MFFileSystem.h"
+#include "MFRenderer_D3D9.h"
 
-#include <stdio.h>
-#include <d3dx9.h>
-
-class FujiIncludeHandler : public ID3DXInclude
-{
-	STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
-	{
-//		IncludeType == D3DXINC_LOCAL, D3DXINC_SYSTEM
-		size_t bytes;
-		char *pFile = MFFileSystem_Load(pFileName, &bytes);
-		if(!pFile)
-			return E_FAIL;
-
-		pFileName = MFFileSystem_ResolveSystemPath(pFileName, true);
-		char lineDirective[256];
-		int lineBytes = sprintf(lineDirective, "#line 1 \"%s\"\r\n", pFileName);
-
-		char *pInclude = (char*)MFHeap_Alloc(lineBytes + bytes);
-		MFCopyMemory(pInclude, lineDirective, lineBytes);
-		MFCopyMemory(pInclude + lineBytes, pFile, bytes);
-		bytes += lineBytes;
-		MFHeap_Free(pFile);
-
-		*ppData = pInclude;
-		*pBytes = (UINT)bytes;
-
-		return S_OK;
-	}
-
-	STDMETHOD(Close)(LPCVOID pData)
-	{
-		MFHeap_Free((void*)pData);
-		return S_OK;
-	}
-};
 
 extern IDirect3DDevice9 *pd3dDevice;
 
@@ -59,93 +25,17 @@ void MFShader_DeinitModulePlatformSpecific()
 {
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader)
 {
-	ID3DXBuffer *pProgram = NULL;
-	ID3DXBuffer *pErrors = NULL;
-	ID3DXConstantTable *pConstantTable = NULL;
-
-	FujiIncludeHandler includeHandler;
-
-	D3DXMACRO macros[256];
-	if(pMacros)
+	MFShaderTemplate *pTemplate = pShader->pTemplate;
+	if(pTemplate->pProgram)
 	{
-		int a = 0;
-		do
-		{
-			macros[a].Name = pMacros[a].pDefine;
-			macros[a].Definition = pMacros[a].pValue;
-		}
-		while(pMacros[a++].pDefine != NULL);
-	}
-
-	const char *pShaderModel = pShader->shaderType == MFST_VertexShader ? "vs_3_0" : "ps_3_0";
-
-#if defined(MF_DEBUG)
-	DWORD flags = D3DXSHADER_DEBUG | D3DXSHADER_OPTIMIZATION_LEVEL0;
-#else
-	DWORD flags = D3DXSHADER_OPTIMIZATION_LEVEL3;
-#endif
-	if(pSource)
-	{
-		size_t sourceLen = MFString_Length(pSource);
-		if(pFilename)
-		{
-			pFilename = MFFileSystem_ResolveSystemPath(pFilename, true);
-			char lineDirective[256];
-			int lineBytes = sprintf(lineDirective, "#line %d \"%s\"\r\n", line, pFilename);
-
-			char *pNewSource = (char*)MFHeap_Alloc(lineBytes + sourceLen);
-			MFCopyMemory(pNewSource, lineDirective, lineBytes);
-			MFCopyMemory(pNewSource + lineBytes, pSource, sourceLen);
-			sourceLen += lineBytes;
-			pSource = pNewSource;
-		}
-
-		HRESULT hr = D3DXCompileShader(pSource, (UINT)sourceLen, pMacros ? macros : NULL, &includeHandler, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
-
-		if(pErrors)
-		{
-			MFDebug_Message((char*)pErrors->GetBufferPointer());
-			pErrors->Release();
-		}
-
-		if(pFilename)
-			MFHeap_Free((char*)pSource);
-
-		if(hr != D3D_OK)
-			return false;
-	}
-	else if(pFilename)
-	{
-		HRESULT hr = D3DXCompileShaderFromFile(MFFileSystem_ResolveSystemPath(pFilename, true), pMacros ? macros : NULL, NULL, "main", pShaderModel, flags, &pProgram, &pErrors, &pConstantTable);
-
-		if(pErrors)
-		{
-			MFDebug_Message((char*)pErrors->GetBufferPointer());
-			pErrors->Release();
-		}
-
-		if(hr != D3D_OK)
-			return false;
-	}
-
-	if(pProgram)
-	{
-		pShader->bytes = pProgram->GetBufferSize();
-		pShader->pProgram = MFHeap_Alloc(pShader->bytes);
-		MFCopyMemory(pShader->pProgram, pProgram->GetBufferPointer(), pShader->bytes);
-		pProgram->Release();
-	}
-
-	if(pShader->pProgram)
-	{
-		switch(pShader->shaderType)
+		switch(pTemplate->shaderType)
 		{
 			case MFST_VertexShader:
 			{
 				IDirect3DVertexShader9 *pVS;
-				HRESULT hr = pd3dDevice->CreateVertexShader((const DWORD*)pShader->pProgram, &pVS);
+				HRESULT hr = pd3dDevice->CreateVertexShader((const DWORD*)pTemplate->pProgram, &pVS);
 				if(hr == D3D_OK)
 					pShader->pPlatformData = pVS;
 				break;
@@ -153,7 +43,7 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 			case MFST_PixelShader:
 			{
 				IDirect3DPixelShader9 *pPS;
-				HRESULT hr = pd3dDevice->CreatePixelShader((const DWORD*)pShader->pProgram, &pPS);
+				HRESULT hr = pd3dDevice->CreatePixelShader((const DWORD*)pTemplate->pProgram, &pPS);
 				if(hr == D3D_OK)
 					pShader->pPlatformData = pPS;
 				break;
@@ -169,97 +59,12 @@ bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, 
 		}
 	}
 
-	if(pConstantTable)
-	{
-		D3DXCONSTANTTABLE_DESC desc;
-		pConstantTable->GetDesc(&desc);
-
-		MFShaderInput inputs[256];
-
-		size_t nameBytes = 0;
-		for(UINT a=0; a<desc.Constants; ++a)
-		{
-			D3DXCONSTANT_DESC constant[4];
-			UINT count = 4;
-
-			D3DXHANDLE hConstant = pConstantTable->GetConstant(NULL, a);
-			pConstantTable->GetConstantDesc(hConstant, constant, &count);
-			MFDebug_Assert(count == 1, "??");
-
-			if(count)
-			{
-				inputs[a].pName = constant[0].Name;
-				nameBytes += MFString_Length(constant[0].Name) + 1;
-
-				inputs[a].type = MFShader_IT_Unknown;
-				inputs[a].constantRegister = constant[0].RegisterIndex;
-				inputs[a].numRegisters = constant[0].RegisterCount;
-
-				inputs[a].numRows = 1;
-				inputs[a].columnMajor = 0;
-				inputs[a].numElements = constant[0].Elements;
-
-				switch(constant[0].Class)
-				{
-					case D3DXPC_SCALAR:
-						switch(constant[0].Type)
-						{
-							case D3DXPT_FLOAT:
-								inputs[a].type = MFShader_IT_Float;
-								break;
-							case D3DXPT_INT:
-								inputs[a].type = MFShader_IT_Int;
-								break;
-							case D3DXPT_BOOL:
-								inputs[a].type = MFShader_IT_Bool;
-								break;
-							default:
-								MFDebug_Assert(false, "??");
-						}
-						break;
-					case D3DXPC_VECTOR:
-						MFDebug_Assert(constant[0].Type == D3DXPT_FLOAT, "!!");
-						inputs[a].type = MFShader_IT_Vector;
-						break;
-					case D3DXPC_MATRIX_COLUMNS:
-						inputs[a].columnMajor = 1;
-					case D3DXPC_MATRIX_ROWS:
-						MFDebug_Assert(constant[0].Type == D3DXPT_FLOAT, "!!");
-						inputs[a].type = MFShader_IT_Matrix;
-						inputs[a].numRows = constant[0].Rows;
-						break;
-					case D3DXPC_OBJECT:
-						MFDebug_Assert(constant[0].Type == D3DXPT_SAMPLER2D, "!!");
-						inputs[a].type = MFShader_IT_Sampler;
-						break;
-					case D3DXPC_STRUCT:
-						MFDebug_Assert(false, "??");
-						break;
-				}
-			}
-		}
-
-		pShader->pInputs = (MFShaderInput*)MFHeap_Alloc(desc.Constants*sizeof(MFShaderInput) + nameBytes);
-		pShader->numInputs = desc.Constants;
-
-		MFCopyMemory(pShader->pInputs, inputs, desc.Constants*sizeof(MFShaderInput));
-
-		char *pName = (char*)(pShader->pInputs + desc.Constants);
-		for(UINT a=0; a<desc.Constants; ++a)
-		{
-			pShader->pInputs[a].pName = MFString_Copy(pName, pShader->pInputs[a].pName);
-			pName += MFString_Length(pName) + 1;
-		}
-
-		pConstantTable->Release();
-	}
-
 	return true;
 }
 
 void MFShader_DestroyPlatformSpecific(MFShader *pShader)
 {
-	switch(pShader->shaderType)
+	switch(pShader->pTemplate->shaderType)
 	{
 		case MFST_VertexShader:
 		{

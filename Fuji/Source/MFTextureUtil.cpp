@@ -719,41 +719,11 @@ int8 gMFImageAutoFormat[MFRD_Max][0x40] =
 };
 
 #if !defined(_FUJI_UTIL)
-int MFRenderer_GetCurrentRendererPlugin();
-MFRendererDrivers MFTexture_GetCurrentDisplayDriver()
-{
-#if MF_RENDERER == MF_DRIVER_PLUGIN
-	// runtime check...
-	int current = MFRenderer_GetCurrentRendererPlugin();
-	if(current == MF_DRIVER_D3D9)
-		return MFRD_D3D9;
-	else if(current == MF_DRIVER_D3D11)
-		return MFRD_D3D11;
-	else if(current == MF_DRIVER_OPENGL)
-		return MFRD_OpenGL;
-	return MFRD_Unknown;
-#elif MF_RENDERER == MF_DRIVER_D3D9
-	return MFRD_D3D9;
-#elif MF_RENDERER == MF_DRIVER_D3D11
-	return MFRD_D3D11;
-#elif MF_RENDERER == MF_DRIVER_OPENGL
-	return MFRD_OpenGL;
-#elif MF_RENDERER == MF_DRIVER_X360
-	return MFRD_X360;
-#elif MF_RENDERER == MF_DRIVER_XBOX
-	return MFRD_XBox;
-#elif MF_RENDERER == MF_DRIVER_PSP
-	return MFRD_PSP;
-#elif MF_RENDERER == MF_DRIVER_PS2
-	return MFRD_PS2;
-#else
-	return MFRD_Unknown;
-#endif
-}
+#include "MFRenderer.h"
 
 MF_API bool MFTexture_IsFormatAvailable(int format)
 {
-	MFRendererDrivers driver = MFTexture_GetCurrentDisplayDriver();
+	MFRendererDrivers driver = MFRenderer_GetCurrentRenderDriver();
 	if(driver == MFRD_Unknown)
 		return format == ImgFmt_A8R8G8B8;
 	return (gMFImagePlatformAvailability[format] & MFBIT(driver)) != 0;

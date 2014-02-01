@@ -32,7 +32,6 @@
 #include <d3d11.h>
 
 #pragma comment(lib, "d3d11")
-#pragma comment(lib, "d3dx11")
 
 
 struct CBWorld

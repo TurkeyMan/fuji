@@ -22,7 +22,7 @@
 #include "MFPtrList.h"
 
 #include "MFRenderer_D3D11.h"
-#include <d3dx11.h>
+
 
 /**** Globals ****/
 
@@ -146,7 +146,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(pTemplate->imageFormat != ImgFmt_Unknown, "Invalid texture format!");
 
 	DXGI_FORMAT platformFormat = gD3D11Format[pTemplate->imageFormat];
-	//hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
+//	hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
 	int pitch = (MFImage_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;
 
@@ -173,10 +173,9 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 
 	hr = g_pd3dDevice->CreateTexture2D(&desc, data, &pTex);
 
-	//MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
-	//MFDebug_Assert(hr != D3DERR_OUTOFVIDEOMEMORY, MFStr("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
-	//MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
-	//MFDebug_Assert(hr != D3DXERR_INVALIDDATA, MFStr("LoadTexture failed: D3DXERR_INVALIDDATA, 0x%08X", hr));
+//	MFDebug_Assert(hr != D3DERR_NOTAVAILABLE, MFStr("LoadTexture failed: D3DERR_NOTAVAILABLE, 0x%08X", hr));
+//	MFDebug_Assert(hr != D3DERR_OUTOFVIDEOMEMORY, MFStr("LoadTexture failed: D3DERR_OUTOFVIDEOMEMORY, 0x%08X", hr));
+//	MFDebug_Assert(hr != D3DERR_INVALIDCALL, MFStr("LoadTexture failed: D3DERR_INVALIDCALL, 0x%08X", hr));
 
 	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->pName));
 
@@ -184,9 +183,9 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	{	
 		MFRenderer_D3D11_SetDebugName(pTex, pTexture->pName);
 
-		//// filter mip levels
-		if (generateMipChain)
-			D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
+		// filter mip levels
+//		if (generateMipChain)
+//			D3DX11FilterTexture(NULL, pTex, 0, D3DX11_FILTER_BOX);
 
 		ID3D11ShaderResourceView *pSRV = NULL;
 

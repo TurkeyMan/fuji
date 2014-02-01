@@ -9,7 +9,7 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFShader_InitModulePlatformSpecific_##driver(); \
 	void MFShader_DeinitModulePlatformSpecific_##driver(); \
-	bool MFShader_CreatePlatformSpecific_##driver(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line); \
+	bool MFShader_CreatePlatformSpecific_##driver(MFShader *pShader); \
 	void MFShader_DestroyPlatformSpecific_##driver(MFShader *pShader);
 
 #define DEFINE_PLUGIN(driver) \
@@ -38,7 +38,7 @@ struct MFShaderPluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
-	bool (*pCreatePlatformSpecific)(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line);
+	bool (*pCreatePlatformSpecific)(MFShader *pShader);
 	void (*pDestroyPlatformSpecific)(MFShader *pShader);
 };
 
@@ -76,9 +76,9 @@ void MFShader_DeinitModulePlatformSpecific()
 	gpCurrentShaderPlugin->pDeinitModulePlatformSpecific();
 }
 
-bool MFShader_CreatePlatformSpecific(MFShader *pShader, MFShaderMacro *pMacros, const char *pSource, const char *pFilename, int line)
+bool MFShader_CreatePlatformSpecific(MFShader *pShader)
 {
-	return gpCurrentShaderPlugin->pCreatePlatformSpecific(pShader, pMacros, pSource, pFilename, line);
+	return gpCurrentShaderPlugin->pCreatePlatformSpecific(pShader);
 }
 
 void MFShader_DestroyPlatformSpecific(MFShader *pShader)

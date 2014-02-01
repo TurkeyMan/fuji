@@ -1,7 +1,13 @@
 #include "Fuji.h"
 #include "MFShader_Internal.h"
+#include "Asset/MFIntShader.h"
 #include "MFModule.h"
 #include "MFResource.h"
+#include "MFFileSystem.h"
+#include "MFRenderer.h"
+#include "MFSystem.h"
+
+#define ALLOW_LOAD_FROM_SOURCE_DATA
 
 static void MFShader_Destroy(MFResource *pRes)
 {
@@ -9,10 +15,7 @@ static void MFShader_Destroy(MFResource *pRes)
 
 	MFShader_DestroyPlatformSpecific(pShader);
 
-	if(pShader->pProgram)
-		MFHeap_Free(pShader->pProgram);
-	if(pShader->pInputs)
-		MFHeap_Free(pShader->pInputs);
+	MFHeap_Free(pShader->pTemplate);
 	MFHeap_Free(pShader);
 }
 
@@ -37,7 +40,8 @@ static MFShader* MFShader_Find(const char *pName)
 
 static void MFShader_FindConstants(MFShader *pShader)
 {
-	for(int a=0; a<pShader->numInputs; ++a)
+	MFShaderTemplate *pTemplate = pShader->pTemplate;
+	for(int a = 0; a<pTemplate->numInputs; ++a)
 	{
 		for(int b=0; b<MFSB_CT_TypeCount; ++b)
 		{
@@ -45,7 +49,7 @@ static void MFShader_FindConstants(MFShader *pShader)
 			for(int c=0; c<rsCount; ++c)
 			{
 				const char *pName = MFStateBlock_GetRenderStateName((MFStateBlockConstantType)b, c);
-				if(!MFString_Compare(pShader->pInputs[a].pName, pName))
+				if(!MFString_Compare(pTemplate->pInputs[a].pName, pName))
 				{
 					pShader->renderStateRequirements[b] |= 1 << c;
 					c = rsCount;
@@ -64,22 +68,57 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 
 	if(!pShader)
 	{
-		size_t nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
+		size_t fileSize;
+
+		const char *pFileName = MFStr("%s.fsh", pFilename);
+
+		MFShaderTemplate *pTemplate = (MFShaderTemplate*)MFFileSystem_Load(pFileName, &fileSize);
+
+		if(!pTemplate)
+		{
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+			// try to load from source data
+			const char * const pExt[] = { ".hlsl", ".glsl", ".vsh", ".psh", NULL };
+			const char * const *ppExt = pExt;
+			while(*ppExt)
+			{
+				size_t size;
+				if(MFIntShader_CreateFromFile(type, MFStr("%s%s", pFilename, *ppExt), pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver()))
+				{
+					// cache the shader template
+					MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.fsh", pFilename), MFOF_Write | MFOF_Binary);
+					if(pFile)
+					{
+						MFFile_Write(pFile, pTemplate, size, false);
+						MFFile_Close(pFile);
+					}
+
+					break;
+				}
+				++ppExt;
+			}
+#endif
+
+			if(!pTemplate)
+			{
+				MFDebug_Warn(2, MFStr("Couldn't create shader '%s'", pFileName));
+				return NULL;
+			}
+		}
+
+		MFFixUp(pTemplate->pProgram, pTemplate, 1);
+		MFFixUp(pTemplate->pInputs, pTemplate, 1);
+
+		size_t nameLen = MFString_Length(pFilename) + 1;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
 
-		pShader->shaderType = type;
-
-		if(pFilename)
-			pFilename = MFString_Copy((char*)&pShader[1], pFilename);
+		pFilename = MFString_Copy((char*)&pShader[1], pFilename);
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pFilename) ^ 0x5ade5ade, pFilename);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, NULL, pFilename, 0))
-		{
-			MFHeap_Free(pShader);
-			return NULL;
-		}
+		pShader->pTemplate = pTemplate;
 
+		MFShader_CreatePlatformSpecific(pShader);
 		MFShader_FindConstants(pShader);
 	}
 
@@ -92,52 +131,46 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 
 	if(!pShader)
 	{
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
-		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
+		MFShaderTemplate *pTemplate = (MFShaderTemplate*)MFFileSystem_Load(MFStr("%s.fsh", pName));
+		if(!pTemplate)
+		{
+#if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
+			// try and compile the shader
+			size_t size;
+			if(!MFIntShader_CreateFromString(type, pShaderSource, pFilename, startingLine, pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver()))
+			{
+				MFDebug_Warn(2, MFStr("Couldn't compile shader '%s'", pName));
+				return NULL;
+			}
 
-		pShader->shaderType = type;
+			// cache the shader template
+			MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.fsh", pName), MFOF_Write | MFOF_Binary);
+			if(pFile)
+			{
+				MFFile_Write(pFile, pTemplate, size, false);
+				MFFile_Close(pFile);
+			}
+#else
+			MFDebug_Assert(false, "Can't compile shaders at runtime!");
+			return NULL;
+#endif
+		}
 
-		if(pName)
-			pName = MFString_Copy((char*)&pShader[1], pName);
+		MFFixUp(pTemplate->pProgram, pTemplate, 1);
+		MFFixUp(pTemplate->pInputs, pTemplate, 1);
+		for(int i = 0; i < pTemplate->numInputs; ++i)
+			MFFixUp(pTemplate->pInputs[i].pName, pTemplate, 1);
+
+		size_t nameLen = MFString_Length(pName) + 1;
+		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader)+nameLen);
+
+		pName = MFString_Copy((char*)&pShader[1], pName);
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, pMacros, pShaderSource, pFilename, startingLine))
-		{
-			MFHeap_Free(pShader);
-			return NULL;
-		}
+		pShader->pTemplate = pTemplate;
 
-		MFShader_FindConstants(pShader);
-	}
-
-	return pShader;
-}
-
-MF_API MFShader* MFShader_CreateFromBinary(MFShaderType type, void *pShaderProgram, size_t bytes, const char *pName)
-{
-	MFShader *pShader = MFShader_Find(pName);
-
-	if(!pShader)
-	{
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
-		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
-
-		pShader->shaderType = type;
-		pShader->pProgram = pShaderProgram;
-		pShader->bytes = bytes;
-
-		if(pName)
-			pName = MFString_Copy((char*)&pShader[1], pName);
-
-		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
-
-		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL, 0))
-		{
-			MFHeap_Free(pShader);
-			return NULL;
-		}
-
+		MFShader_CreatePlatformSpecific(pShader);
 		MFShader_FindConstants(pShader);
 	}
 
@@ -152,8 +185,9 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 	{
 		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
 		pShader = (MFShader*)MFHeap_AllocAndZero(sizeof(MFShader) + nameLen);
+		pShader->pTemplate = (MFShaderTemplate*)MFHeap_AllocAndZero(sizeof(MFShaderTemplate));
 
-		pShader->shaderType = type;
+		pShader->pTemplate->shaderType = type;
 		pShader->pConfigure = pConfigureFunc;
 		pShader->pExecute = pExecuteFunc;
 
@@ -162,12 +196,7 @@ MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_Config
 
 		MFResource_AddResource(pShader, MFRT_Shader, MFUtil_HashString(pName) ^ 0x5ade5ade, pName);
 
-		if(!MFShader_CreatePlatformSpecific(pShader, NULL, NULL, NULL, 0))
-		{
-			MFHeap_Free(pShader);
-			return NULL;
-		}
-
+		MFShader_CreatePlatformSpecific(pShader);
 		MFShader_FindConstants(pShader);
 	}
 

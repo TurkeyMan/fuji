@@ -66,6 +66,38 @@ void MFRenderer_EndFrame()
 	gScratchMemoryMark = gScratchMemoryOffset;
 }
 
+int MFRenderer_GetCurrentRendererPlugin();
+MF_API MFRendererDrivers MFRenderer_GetCurrentRenderDriver()
+{
+#if MF_RENDERER == MF_DRIVER_PLUGIN
+	// runtime check...
+	int current = MFRenderer_GetCurrentRendererPlugin();
+	if(current == MF_DRIVER_D3D9)
+		return MFRD_D3D9;
+	else if(current == MF_DRIVER_D3D11)
+		return MFRD_D3D11;
+	else if(current == MF_DRIVER_OPENGL)
+		return MFRD_OpenGL;
+	return MFRD_Unknown;
+#elif MF_RENDERER == MF_DRIVER_D3D9
+	return MFRD_D3D9;
+#elif MF_RENDERER == MF_DRIVER_D3D11
+	return MFRD_D3D11;
+#elif MF_RENDERER == MF_DRIVER_OPENGL
+	return MFRD_OpenGL;
+#elif MF_RENDERER == MF_DRIVER_X360
+	return MFRD_X360;
+#elif MF_RENDERER == MF_DRIVER_XBOX
+	return MFRD_XBox;
+#elif MF_RENDERER == MF_DRIVER_PSP
+	return MFRD_PSP;
+#elif MF_RENDERER == MF_DRIVER_PS2
+	return MFRD_PS2;
+#else
+	return MFRD_Unknown;
+#endif
+}
+
 MF_API int MFRenderer_Begin()
 {
 	MFCALLSTACK;

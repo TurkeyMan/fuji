@@ -42,6 +42,11 @@ const GUID GUID_DEVINTERFACE_HID = { 0x4D1E55B2L, 0xF16F, 0x11CF, { 0x88, 0xCB, 
 #endif
 
 #if defined(SUPPORT_XINPUT)
+	#if defined(_WIN32_WINNT)
+		#undef _WIN32_WINNT
+	#endif
+	#define _WIN32_WINNT _WIN32_WINNT_WIN8
+
 	#include <XInput.h>
 	#include <wbemidl.h>
 	#include <stdio.h>

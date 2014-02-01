@@ -39,7 +39,6 @@
 #include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
-#pragma comment(lib, "d3dx9")
 
 extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 

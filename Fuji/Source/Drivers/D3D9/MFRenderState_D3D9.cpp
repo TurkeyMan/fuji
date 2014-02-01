@@ -16,8 +16,7 @@
 #endif
 
 #include "MFRenderState_Internal.h"
-
-#include <d3dx9.h>
+#include "MFRenderer_D3D9.h"
 
 
 static const DWORD sBlendOp[MFBlendOp_BlendOpCount] =
