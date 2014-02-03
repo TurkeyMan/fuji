@@ -56,14 +56,14 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 	{
 		case MFRD_D3D9:
 #if defined(USE_D3DX)
-			bSucceeded = MFIntShader_CompileShaderD3D9(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+			bSucceeded = MFIntShader_CompileShaderD3DX9(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
 #else
 			bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
 #endif
 			break;
 		case MFRD_D3D11:
 #if defined(USE_D3DX)
-			bSucceeded = MFIntShader_CompileShaderD3D11(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+			bSucceeded = MFIntShader_CompileShaderD3DX11(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
 #else
 			bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
 #endif
@@ -300,7 +300,7 @@ bool MFIntShader_CompileShaderD3DX9(MFShaderTemplate *pTemplate, MFShaderMacro *
 						pTemplate->pInputs[a].type = MFShader_IT_Vector;
 						break;
 					case D3DXPC_MATRIX_COLUMNS:
-						inputs[a].columnMajor = 1;
+						pTemplate->pInputs[a].columnMajor = 1;
 					case D3DXPC_MATRIX_ROWS:
 						MFDebug_Assert(constant[0].Type == D3DXPT_FLOAT, "!!");
 						pTemplate->pInputs[a].type = MFShader_IT_Matrix;
@@ -564,9 +564,21 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 
 	UINT flags = bDebug ? D3DCOMPILE_DEBUG | D3DCOMPILE_OPTIMIZATION_LEVEL0 : D3DCOMPILE_OPTIMIZATION_LEVEL3;
 
+	size_t sourceLen;
+	bool bFromFile = false;
+	if(!pShaderSource)
+	{
+		// load the shader from file...
+		pShaderSource = MFFileSystem_Load(pFilename, &sourceLen);
+		bFromFile = true;
+	}
+	else
+	{
+		sourceLen = MFString_Length(pShaderSource);
+	}
+
 	if(pShaderSource)
 	{
-		size_t sourceLen = MFString_Length(pShaderSource);
 		if(pFilename)
 		{
 			pFilename = MFFileSystem_ResolveSystemPath(pFilename, true);
@@ -577,6 +589,10 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 			MFCopyMemory(pNewSource, lineDirective, lineBytes);
 			MFCopyMemory(pNewSource + lineBytes, pShaderSource, sourceLen);
 			sourceLen += lineBytes;
+
+			if(bFromFile)
+				MFHeap_Free((char*)pShaderSource);
+
 			pShaderSource = pNewSource;
 		}
 
@@ -595,18 +611,10 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 		if(hr != S_OK)
 			return false;
 	}
-	else if(pFilename)
+	else
 	{
-		HRESULT hr = D3DCompileFromFile(MFString_UFT8AsWChar(pFilename), pMacros ? macros : NULL, &includeHandler, "main", pShaderModel, flags, 0, &pProgram, &pErrors);
-
-		if(pErrors)
-		{
-			MFDebug_Message((char*)pErrors->GetBufferPointer());
-			pErrors->Release();
-		}
-
-		if(hr != S_OK)
-			return false;
+		MFDebug_Warn(2, MFStr("Couldn't load shader: %s", pFilename));
+		return false;
 	}
 
 	if(pProgram)
