@@ -55,7 +55,7 @@ MF_API uint32 MFMidi_WasReleased(MFMidiInput *pMidiInput, int channel, int note)
 
 MF_API bool MFMidi_Start(MFMidiInput *pMidiInput);
 MF_API void MFMidi_Stop(MFMidiInput *pMidiInput);
-MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t numEvents, bool bPeek = false);
+MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek = false);
 
 enum MFMidiNote
 {

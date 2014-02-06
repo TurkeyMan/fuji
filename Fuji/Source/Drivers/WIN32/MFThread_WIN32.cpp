@@ -72,6 +72,11 @@ void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 	pThreadInfoPC->hThread = NULL;
 }
 
+MF_API void MFThread_Sleep(uint32 milliseconds)
+{
+	Sleep(milliseconds);
+}
+
 size_t MFThread_GetMutexSizePlatformSpecific()
 {
 	return sizeof(MFMutexPC);

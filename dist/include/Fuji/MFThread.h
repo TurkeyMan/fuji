@@ -125,6 +125,14 @@ MF_API void MFThread_DestroyThread(MFThread thread);
 MF_API void MFThread_Join(MFThread thread);
 
 /**
+ * Sleep the thread.
+ * Puts the active thread to sleep for a given period.
+ * @param milliseconds Minimum number of milliseconds to sleep.
+ * @return None.
+ */
+MF_API void MFThread_Sleep(uint32 milliseconds);
+
+/**
  * Create a mutex object.
  * Creates a mutex object that can be used to block a thread from accessing mutually exclusive data while another thread is already accessing it.
  * @param pName Name to identify the mutex.

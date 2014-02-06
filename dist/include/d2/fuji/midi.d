@@ -49,7 +49,7 @@ extern (C) uint MFMidi_WasReleased(MFMidiInput* pMidiInput, int channel, int not
 
 extern (C) bool MFMidi_Start(MFMidiInput* pMidiInput);
 extern (C) void MFMidi_Stop(MFMidiInput* pMidiInput);
-extern (C) size_t MFMidi_GetEvents(MFMidiInput* pMidiInput, MFMidiEvent* pEvents, size_t numEvents, bool bPeek = false);
+extern (C) size_t MFMidi_GetEvents(MFMidiInput* pMidiInput, MFMidiEvent* pEvents, size_t maxEvents, bool bPeek = false);
 MFMidiEvent[] MFMidi_GetEvents(MFMidiInput* pMidiInput, MFMidiEvent[] events, bool bPeek = false)
 {
 	size_t count = MFMidi_GetEvents(pMidiInput, events.ptr, events.length, bPeek);

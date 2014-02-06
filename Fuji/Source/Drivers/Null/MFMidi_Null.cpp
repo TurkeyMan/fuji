@@ -64,7 +64,7 @@ MF_API void MFMidi_Stop(MFMidiInput *pMidiInput)
 {
 }
 
-MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t numEvents, bool bPeek)
+MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
 {
 	return 0;
 }

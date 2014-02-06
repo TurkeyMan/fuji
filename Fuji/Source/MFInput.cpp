@@ -2,6 +2,8 @@
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 #include "MFNetwork_Internal.h"
+#include "MFThread.h"
+#include "MFSystem.h"
 
 // store device status for all devices
 static MFInputDeviceStatus	gDeviceStatus[IDD_Max][MFInput_MaxInputID];
@@ -30,6 +32,17 @@ static int gNumTouchPanels = 0;
 static int gNetGamepadStart = MFInput_MaxInputID;
 static int gNetPointerStart = MFInput_MaxInputID;
 static int gNetKeyboardStart = MFInput_MaxInputID;
+
+static int gInputFrequency = 200;
+static MFThread gInputThread = NULL;
+static MFMutex gInputMutex;
+static volatile bool bInputTerminate = false;
+static bool bThreadUpdate;
+
+static uint32 MaxEvents = 256;
+static MFInputEvent *gInputEvents[IDD_Max][MFInput_MaxInputID];
+static uint32 gNumEvents[IDD_Max][MFInput_MaxInputID];
+static uint32 gNumEventsRead[IDD_Max][MFInput_MaxInputID];
 
 // DIK to ASCII mappings with shift, caps, and shift-caps tables
 static const char KEYtoASCII[256]			= {0,0,0,0,0,0,0,0,'\b','\t',0,0,0,'\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' ',0,0,0,0,0,0,'\'',0,0,'*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',',',';','=','=',0,0,0,'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','_','[','\\',']',0,0,'`',0,0,0,0,0,0,0,0,0,0,'/','-','.','0','1','2','3','4','5','6','7','8','9','\n',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,':',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -271,6 +284,9 @@ void MFInputInternal_ApplySphericalDeadZone(float *pX, float *pY)
 
 void MFInput_Update()
 {
+	if(gInputThread && !bThreadUpdate)
+		return;
+
 	int a, b;
 
 	// platform specific update
@@ -413,6 +429,94 @@ void MFInput_Update()
 		}
 
 		MFNetwork_ReleaseInputMutex();
+	}
+}
+
+int MFInput_Thread(void *)
+{
+	// poll input at high frequency...
+	uint64 freq = MFSystem_GetRTCFrequency();
+	uint64 interval = freq / gInputFrequency;
+
+	uint64 now = MFSystem_ReadRTC();
+	uint64 nextSample = now + interval;
+
+	while(!bInputTerminate)
+	{
+		MFThread_LockMutex(gInputMutex);
+		bThreadUpdate = true;
+		MFInput_Update();
+		bThreadUpdate = false;
+
+		// build events
+		for(uint32 i=0; i<MFInput_MaxInputID; ++i)
+		{
+			if(!gDeviceStatus[IDD_Gamepad][i] == IDS_Ready)
+				continue;
+
+			for(uint32 j=0; j<GamepadType_Max; ++j)
+			{
+				if(gNumEvents[IDD_Gamepad][i] >= MaxEvents)
+					break;
+
+				MFGamepadState &state = gGamepadStates[i];
+				MFGamepadState &prev = gPrevGamepadStates[i];
+				if(state.values[j] == prev.values[j])
+					continue;
+
+				MFInputEvent &e = gInputEvents[IDD_Gamepad][i][gNumEvents[IDD_Gamepad][i]++];
+				e.timestamp = now;
+				e.event = MFIE_Change;
+				e.input = j;
+				e.state = state.values[j];
+				e.prevState = prev.values[j];
+			}
+		}
+
+		MFThread_ReleaseMutex(gInputMutex);
+
+		uint64 updateTime = MFSystem_ReadRTC();
+		MFDebug_Log(0, MFStr("Input update: %dus", (uint32)((updateTime - now) * 1000000LL / MFSystem_GetRTCFrequency())));
+
+		uint32 ms = (uint32)((nextSample - now) * 1000LL / freq);
+		MFThread_Sleep(ms);
+
+		now = MFSystem_ReadRTC();
+		do
+			nextSample += interval;
+		while(now >= nextSample);
+	}
+
+	bInputTerminate = false;
+	return 0;
+}
+
+MF_API void MFInput_EnableBufferedInput(bool bEnable, int frequency)
+{
+	gInputFrequency = frequency;
+
+	if(!gInputThread)
+	{
+		for(int i=0; i<MFInput_MaxInputID; ++i)
+		{
+			gInputEvents[IDD_Gamepad][i] = (MFInputEvent*)MFHeap_Alloc(sizeof(MFInputEvent)*MaxEvents);
+			gNumEvents[IDD_Gamepad][i] = 0;
+		}
+
+		gInputMutex = MFThread_CreateMutex("MFInput Mutex");
+		gInputThread = MFThread_CreateThread("MFInput Thread", &MFInput_Thread, NULL);
+	}
+	else
+	{
+		bInputTerminate = true;
+		MFThread_Join(gInputThread);
+		gInputThread = NULL;
+		MFThread_DestroyMutex(gInputMutex);
+
+		for(int i=0; i<MFInput_MaxInputID; ++i)
+		{
+			MFHeap_Free(gInputEvents[IDD_Gamepad][i]);
+		}
 	}
 }
 
@@ -639,6 +743,29 @@ MF_API bool MFInput_WasReleased(int button, int device, int deviceID)
 			break;
 	}
 	return false;
+}
+
+MF_API size_t MFInput_GetEvents(int device, int deviceID, MFInputEvent *pEvents, size_t maxEvents, bool bPeek)
+{
+	MFThread_LockMutex(gInputMutex);
+
+	uint32 toRead = 0;
+	if(gNumEvents[device][deviceID] != 0)
+	{
+		toRead = MFMin((uint32)maxEvents, gNumEvents[device][deviceID] - gNumEventsRead[device][deviceID]);
+		MFCopyMemory(pEvents, gInputEvents[device][deviceID] + gNumEventsRead[device][deviceID], sizeof(MFInputEvent)*toRead);
+
+		if(!bPeek)
+		{
+			gNumEventsRead[device][deviceID] += toRead;
+			if(gNumEventsRead[device][deviceID] == gNumEvents[device][deviceID])
+				gNumEvents[device][deviceID] = gNumEventsRead[device][deviceID] = 0;
+		}
+	}
+
+	MFThread_ReleaseMutex(gInputMutex);
+
+	return toRead;
 }
 
 MF_API int MFInput_GetNumGamepads()

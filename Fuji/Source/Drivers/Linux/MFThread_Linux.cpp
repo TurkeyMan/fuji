@@ -6,6 +6,7 @@
 #include "MFHeap.h"
 
 #include <pthread.h>
+#include <unistd.h>
 
 struct MFThreadInfoLinux
 {
@@ -52,6 +53,11 @@ MF_API void MFThread_TerminateThread(MFThread thread)
 
 void MFThread_DestroyThreadPlatformSpecific(MFThread thread)
 {
+}
+
+MF_API void MFThread_Sleep(uint32 milliseconds)
+{
+	usleep(milliseconds * 1000);
 }
 
 

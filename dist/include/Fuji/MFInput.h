@@ -11,6 +11,27 @@
 
 #include "MFVector.h"
 
+enum MFInputEventType
+{
+	MFIE_Unknown = -1,
+
+	MFIE_Connect = 0,
+	MFIE_Disconnect,
+	MFIE_Change,
+};
+
+struct MFInputEvent
+{
+	uint64 timestamp;
+	MFInputEventType event;
+	int input;
+	float state, prevState;
+};
+
+MF_API void MFInput_EnableBufferedInput(bool bEnable, int frequency = 200);
+
+MF_API size_t MFInput_GetEvents(int device, int deviceID, MFInputEvent *pEvents, size_t maxEvents, bool bPeek = false);
+
 /**
  * Tests is an input device is available.
  * Tests is an input device is available.
@@ -443,9 +464,9 @@ enum MFGamepadButton
 
 // Rock Band Drums enums
 	Button_Drum_Red		= Button_P2_Circle,		/**< Red drum on Drum controller */
-	Button_Drum_Yellow	= Button_P2_Triangle,	/**< Red drum on Drum controller */
-	Button_Drum_Blue	= Button_P2_Box,		/**< Yellow drum on Drum controller */
-	Button_Drum_Green	= Button_P2_Cross,		/**< Blue drum on Drum controller */
+	Button_Drum_Yellow	= Button_P2_Triangle,	/**< Yellow drum on Drum controller */
+	Button_Drum_Blue	= Button_P2_Box,		/**< Blue drum on Drum controller */
+	Button_Drum_Green	= Button_P2_Cross,		/**< Green drum on Drum controller */
 	Button_Drum_Kick	= Button_P2_L1,			/**< Kick pedal on Drum controller */
 
 // Guitar Hero: World Tour enums

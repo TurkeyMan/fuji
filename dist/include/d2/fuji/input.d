@@ -4,6 +4,32 @@ public import fuji.fuji;
 public import fuji.vector;
 public import fuji.types;
 
+enum MFInputEventType
+{
+	Unknown = -1,
+
+	Connect = 0,
+	Disconnect,
+	Change,
+}
+
+extern (C) struct MFInputEvent
+{
+	ulong timestamp;
+	MFInputEventType event;
+	int input;
+	float state, prevState;
+}
+
+extern (C) void MFInput_EnableBufferedInput(bool bEnable, int frequency = 200);
+
+extern (C) size_t MFInput_GetEvents(int device, int deviceID, MFInputEvent* pEvents, size_t maxEvents, bool bPeek = false);
+MFInputEvent[] MFInput_GetEvents(int device, int deviceID, MFInputEvent[] events, bool bPeek = false)
+{
+	size_t count = MFInput_GetEvents(device, deviceID, events.ptr, events.length, bPeek);
+	return events[0 .. count];
+}
+
 /**
 * Tests is an input device is available.
 * Tests is an input device is available.

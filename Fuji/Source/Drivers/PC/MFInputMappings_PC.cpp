@@ -2231,6 +2231,16 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0
 	},
 
+	// OUYA controller
+	{
+		"OUYA Gamepad",
+		"OUYA Game Controller",
+		0x2836, 0x0001,
+		gOUYAButtonID,
+		gOUYAButtonNames,
+		0
+	},
+
 	// RB 360 Guitar
 	{
 		"RockBand Guitar",
@@ -2320,16 +2330,6 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		gXPlorerButtonNames,
 		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
 	},
-
-	// OUYA controller
-	{
-		"OUYA Gamepad",
-		"OUYA Game Controller",
-		0x2836, 0x0001,
-		gOUYAButtonID,
-		gOUYAButtonNames,
-		0
-	}
 
 /*
 	RB PS3:

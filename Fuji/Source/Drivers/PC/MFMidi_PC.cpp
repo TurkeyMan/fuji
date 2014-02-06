@@ -286,14 +286,14 @@ MF_API void MFMidi_Stop(MFMidiInput *pMidiInput)
 	pDevice->info.status = MFMS_Ready;
 }
 
-MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t numEvents, bool bPeek)
+MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
 {
 	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
 
 	if(pDevice->numEvents == 0)
 		return 0;
 
-	uint32 toRead = MFMin((uint32)numEvents, pDevice->numEvents - pDevice->numEventsRead);
+	uint32 toRead = MFMin((uint32)maxEvents, pDevice->numEvents - pDevice->numEventsRead);
 	MFCopyMemory(pEvents, pDevice->pEvents + pDevice->numEventsRead, sizeof(MFMidiEvent)*toRead);
 
 	if(!bPeek)
