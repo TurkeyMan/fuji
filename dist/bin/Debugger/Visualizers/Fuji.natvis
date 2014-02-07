@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="MFVector">
+    <DisplayString>{{x={x} y={y} z={z} w={w}}}</DisplayString>
+  </Type>
+  <Type Name="MFRect">
+    <DisplayString>{{x={x} y={y} width={width} height={height}}}</DisplayString>
+  </Type>
+
+  <Type Name="MFStateBlock::MFStateBlockStateChange">
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].stateSet==0">empty</DisplayString>
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Vector">{{constant={(MFStateConstant_Vector)((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant}}}</DisplayString>
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Matrix">{{constant={(MFStateConstant_Matrix)((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant}}}</DisplayString>
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Texture">{{constant={(MFStateConstant_Texture)((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant}}}</DisplayString>
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState">{{constant={(MFStateConstant_RenderState)((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant}}}</DisplayString>
+    <DisplayString Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Misc">{{constant={(MFStateConstant_Miscellaneous)((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant}}}</DisplayString>
+    <Expand>
+      <Item Name="vector" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Vector">(MFVector*)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="matrix" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Matrix">(MFMatrix*)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="texture" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_Texture">*(MFTexture**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_BlendState">*(MFBlendState**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_DepthStencilState">*(MFDepthStencilState**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_RasteriserState">*(MFRasteriserState**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_VertexDeclaration">*(MFVertexDeclaration**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_IndexBuffer">*(MFIndexBuffer**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_DiffuseSamplerState">*(MFSamplerState**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+      <Item Name="renderstate" Condition="((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constantType==MFSB_CT_RenderState &amp;&amp; ((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].constant==MFSCRS_VertexBuffer0">*(MFVertexBuffer**)(((size_t)this&amp;~15)+(((*(MFStateBlock*)(((size_t)this&amp;~15)-sizeof(MFStateBlock))).numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+((MFStateBlock::MFStateBlockStateChange*)((size_t)this&amp;~15))[(size_t)this&amp;15].offset*4)</Item>
+    </Expand>
+  </Type>
+  <Type Name="MFStateBlock">
+    <DisplayString>{{size={sizeof(MFStateBlock)+((numStateChanges+3)&amp;~3)*sizeof(MFStateBlock::MFStateBlockStateChange)+used*16}({64&lt;&lt;allocated}) numStates={numStateChanges}}}</DisplayString>
+    <Expand> 
+      <Item Name="bools">bools</Item>
+      <Item Name="boolsSet">boolsSet</Item>
+      <Item Name="dirLightCount">dirLightCount</Item>
+      <Item Name="spotLightCount">spotLightCount</Item>
+      <Item Name="omniLightCount">omniLightCount</Item>
+      <Item Name="numStateChanges">numStateChanges</Item>
+      <IndexListItems>
+        <Size>numStateChanges</Size>
+        <ValueNode>*(MFStateBlock::MFStateBlockStateChange*)((char*)this+sizeof(MFStateBlock)+$i)</ValueNode>
+      </IndexListItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>
