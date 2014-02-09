@@ -107,6 +107,11 @@ struct MFIntExpression
 			int i;
 			float f;
 			const char *s;
+			struct
+			{
+				const char *pCode;
+				const char *pLanguage;
+			} code;
 		} value;
 		struct
 		{
@@ -692,10 +697,14 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 				e.value.f = MFString_AsciiToFloat(MFStr(pExp->pToken->token.ptr, pExp->pToken->token.length));
 				break;
 			case ET_String:
+				e.expression = MFExp_Immediate;
+				e.type = MFEDT_String;
+				e.value.s = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
 			case ET_SourceCode:
 				e.expression = MFExp_Immediate;
-				e.type = pExp->type == ET_String ? MFEDT_String : MFEDT_Code;
-				e.value.s = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
+				e.type = MFEDT_Code;
+				e.value.code.pCode = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
+				e.value.code.pLanguage = pExp->pRight ? MFStringCache_AddN(pEffect->pStringCache, pExp->pRight->pLeft->pToken->token.ptr, pExp->pRight->pLeft->pToken->token.length) : NULL;
 				break;
 		}
 	}
@@ -1509,7 +1518,8 @@ MF_API void MFIntEffect_CreateRuntimeData(MFIntEffect *pEffect, MFEffect **ppOut
 
 			if(pE->expression == MFExp_Immediate && (pE->type == MFEDT_String || pE->type == MFEDT_Code))
 			{
-				et.shaders[j].pShaderSource = MFStringCache_Add(pSC, pE->value.s);
+				et.shaders[j].pShaderSource = MFStringCache_Add(pSC, pE->value.code.pCode);
+				et.shaders[j].pShaderLanguage = pE->value.code.pLanguage ? MFStringCache_Add(pSC, pE->value.code.pLanguage) : NULL;
 				et.shaders[j].bFromFile = pE->type == MFEDT_String;
 				et.shaders[j].startLine = pE->line;
 			}
@@ -1542,6 +1552,8 @@ MF_API void MFIntEffect_CreateRuntimeData(MFIntEffect *pEffect, MFEffect **ppOut
 		{
 			if(et.shaders[j].pShaderSource)
 				(char*&)et.shaders[j].pShaderSource -= stringBase;
+			if(et.shaders[j].pShaderLanguage)
+				(char*&)et.shaders[j].pShaderLanguage -= stringBase;
 		}
 		if(et.pMacros)
 			(char*&)et.pMacros -= base;

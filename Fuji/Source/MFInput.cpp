@@ -475,8 +475,8 @@ int MFInput_Thread(void *)
 
 		MFThread_ReleaseMutex(gInputMutex);
 
-		uint64 updateTime = MFSystem_ReadRTC();
-		MFDebug_Log(0, MFStr("Input update: %dus", (uint32)((updateTime - now) * 1000000LL / MFSystem_GetRTCFrequency())));
+//		uint64 updateTime = MFSystem_ReadRTC();
+//		MFDebug_Log(0, MFStr("Input update: %dus", (uint32)((updateTime - now) * 1000000LL / MFSystem_GetRTCFrequency())));
 
 		uint32 ms = (uint32)((nextSample - now) * 1000LL / freq);
 		MFThread_Sleep(ms);

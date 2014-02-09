@@ -32,6 +32,7 @@ struct MFEffectTechnique
 	{
 		MFShader *pShader;
 		const char *pShaderSource;
+		const char *pShaderLanguage;
 		bool bFromFile;
 		int startLine;
 	};

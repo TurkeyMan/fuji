@@ -15,6 +15,20 @@ struct MFShader;
 typedef void (MFShader_ConfigureCallback)();
 typedef void (MFShader_ExecuteCallback)(void *pWorkload);
 
+enum MFShaderLanguage
+{
+	MFSL_Unknown = -1,
+
+	MFSL_HLSL = 0,
+	MFSL_GLSL,
+	MFSL_Cg,
+	MFSL_VSAsm,
+	MFSL_PSAsm,
+
+	MFSL_Max,
+	MFSL_ForceInt = 0x7FFFFFFF
+};
+
 enum MFShaderType
 {
 	MFST_VertexShader,
@@ -60,8 +74,8 @@ struct MFShaderInput
 	uint32 numRegisters		: 8;
 };
 
-MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros = NULL);
-MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, MFShaderMacro *pMacros = NULL, const char *pName = NULL, const char *pFilename = NULL, int startingLine = 0);
+MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros = NULL, MFShaderLanguage language = MFSL_Unknown);
+MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShader, MFShaderMacro *pMacros = NULL, const char *pName = NULL, const char *pFilename = NULL, int startingLine = 0, MFShaderLanguage language = MFSL_Unknown);
 MF_API MFShader* MFShader_CreateFromCallbacks(MFShaderType type, MFShader_ConfigureCallback *pConfigureFunc, MFShader_ExecuteCallback *pExecuteFunc, const char *pName = NULL);
 MF_API int MFShader_Release(MFShader *pShader);
 

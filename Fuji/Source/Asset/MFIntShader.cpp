@@ -99,6 +99,10 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 		return false;
 #endif
 
+	MFDebug_Assert(language != MFSL_Unknown, "Unknown shader language!");
+	if(language == MFSL_Unknown)
+		return false;
+
 	MFShaderTemplate shaderTemplate;
 	MFShaderInput inputs[256];
 	MFZeroMemory(&shaderTemplate, sizeof(shaderTemplate));
@@ -231,13 +235,33 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 	return true;
 }
 
+static MFShaderLanguage MFIntShader_GetLanguageFromFilename(const char *pFilename)
+{
+		const char *pExt = MFString_GetFileExtension(pFilename);
+		if(!MFString_CaseCmp(pExt, ".hlsl"))
+			return MFSL_HLSL;
+		else if(!MFString_CaseCmp(pExt, ".glsl"))
+			return MFSL_HLSL;
+		else if(!MFString_CaseCmp(pExt, ".cg"))
+			return MFSL_Cg;
+		else if(!MFString_CaseCmp(pExt, ".vsh"))
+			return MFSL_VSAsm;
+		else if(!MFString_CaseCmp(pExt, ".psh"))
+			return MFSL_PSAsm;
+		return MFSL_Unknown;
+}
+
 MF_API bool MFIntShader_CreateFromString(MFShaderType shaderType, const char *pShaderSource, const char *pFile, int line, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language)
 {
+	if(language == MFSL_Unknown && pFile)
+		language = MFIntShader_GetLanguageFromFilename(pFile);
 	return MFIntShader_CreateShader(shaderType, pMacros, pFile, pShaderSource, line, ppOutput, pSize, platform, renderDriver, language);
 }
 
 MF_API bool MFIntShader_CreateFromFile(MFShaderType shaderType, const char *pFilename, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language)
 {
+	if(language == MFSL_Unknown)
+		language = MFIntShader_GetLanguageFromFilename(pFilename);
 	return MFIntShader_CreateShader(shaderType, pMacros, pFilename, NULL, 0, ppOutput, pSize, platform, renderDriver, language);
 }
 

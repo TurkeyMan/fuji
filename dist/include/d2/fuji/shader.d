@@ -11,6 +11,17 @@ struct MFShader
 alias extern (C) void function() MFShader_ConfigureCallback;
 alias extern (C) void function(void* pWorkload) MFShader_ExecuteCallback;
 
+enum MFShaderLanguage
+{
+	Unknown = -1,
+
+	HLSL = 0,
+	GLSL,
+	Cg,
+	VSAsm,
+	PSAsm
+}
+
 enum MFShaderType
 {
 	VertexShader,

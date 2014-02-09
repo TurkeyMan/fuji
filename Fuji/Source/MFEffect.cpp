@@ -98,6 +98,8 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 			{
 				if(t.shaders[j].pShaderSource)
 					(char*&)t.shaders[j].pShaderSource += (size_t)pEffect;
+				if(t.shaders[j].pShaderLanguage)
+					(char*&)t.shaders[j].pShaderLanguage += (size_t)pEffect;
 			}
 			if(t.pMacros)
 				(char*&)t.pMacros += (size_t)pEffect;
@@ -115,6 +117,21 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 						t.shaders[j].pShader = MFShader_CreateFromFile((MFShaderType)j, t.shaders[j].pShaderSource, NULL);
 					else
 					{
+						MFShaderLanguage language = MFSL_Unknown;
+						if(t.shaders[j].pShaderLanguage)
+						{
+							if(!MFString_CaseCmp(t.shaders[j].pShaderLanguage, "hlsl"))
+								language = MFSL_HLSL;
+							else if(!MFString_CaseCmp(t.shaders[j].pShaderLanguage, "glsl"))
+								language = MFSL_GLSL;
+							else if(!MFString_CaseCmp(t.shaders[j].pShaderLanguage, "cg"))
+								language = MFSL_Cg;
+							else if(!MFString_CaseCmp(t.shaders[j].pShaderLanguage, "vsh"))
+								language = MFSL_VSAsm;
+							else if(!MFString_CaseCmp(t.shaders[j].pShaderLanguage, "psh"))
+								language = MFSL_PSAsm;
+						}
+
 						static const char *sShaderNames[MFST_Max] =
 						{
 							"VertexShader",
@@ -125,7 +142,7 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 							"ComputeShader"
 						};
 						const char *pName = MFStr("%s:%s_%s", pEffect->pEffectName ? pEffect->pEffectName : "Unnamed", t.pName ? t.pName : MFStr("Technique%d", a), sShaderNames[j]);
-						t.shaders[j].pShader = MFShader_CreateFromString((MFShaderType)j, t.shaders[j].pShaderSource, NULL, pName, pFilename, t.shaders[j].startLine);
+						t.shaders[j].pShader = MFShader_CreateFromString((MFShaderType)j, t.shaders[j].pShaderSource, NULL, pName, pFilename, t.shaders[j].startLine, language);
 					}
 
 					if(!t.shaders[j].pShader)

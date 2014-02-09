@@ -62,7 +62,7 @@ static void MFShader_FindConstants(MFShader *pShader)
 	pShader->renderStateRequirements[MFSB_CT_Texture] = (pShader->renderStateRequirements[MFSB_CT_RenderState] >> MFSCRS_DiffuseSamplerState) & (MFBIT(MFSCT_Max)-1);
 }
 
-MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros)
+MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilename, MFShaderMacro *pMacros, MFShaderLanguage language)
 {
 	MFShader *pShader = MFShader_Find(pFilename);
 
@@ -83,7 +83,7 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 			while(*ppExt)
 			{
 				size_t size;
-				if(MFIntShader_CreateFromFile(type, MFStr("%s%s", pFilename, *ppExt), pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver()))
+				if(MFIntShader_CreateFromFile(type, MFStr("%s%s", pFilename, *ppExt), pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver(), language))
 				{
 					// cache the shader template
 					MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.fsh", pFilename), MFOF_Write | MFOF_Binary);
@@ -125,7 +125,7 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 	return pShader;
 }
 
-MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShaderSource, MFShaderMacro *pMacros, const char *pName, const char *pFilename, int startingLine)
+MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShaderSource, MFShaderMacro *pMacros, const char *pName, const char *pFilename, int startingLine, MFShaderLanguage language)
 {
 	MFShader *pShader = MFShader_Find(pName);
 
@@ -137,7 +137,7 @@ MF_API MFShader* MFShader_CreateFromString(MFShaderType type, const char *pShade
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			// try and compile the shader
 			size_t size;
-			if(!MFIntShader_CreateFromString(type, pShaderSource, pFilename, startingLine, pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver()))
+			if(!MFIntShader_CreateFromString(type, pShaderSource, pFilename, startingLine, pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver(), language))
 			{
 				MFDebug_Warn(2, MFStr("Couldn't compile shader '%s'", pName));
 				return NULL;

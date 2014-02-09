@@ -1,6 +1,6 @@
 effect Standard
 {
-	vs_static = src() {
+	vs_static = src(hlsl) {
 		#include "fuji.hlsl"
 
 		VSOutput main(in StaticInput input)
@@ -13,7 +13,7 @@ effect Standard
 		}
 	}
 
-	vs_animated = src() {
+	vs_animated = src(hlsl) {
 		#include "fuji.hlsl"
 
 		VSOutput main(in AnimatedInput input)
