@@ -6,36 +6,98 @@
 #include "MFHeap.h"
 #include "MFStringCache.h"
 
-// VS2012 introduces the new Windows SDK, which includes DirectX
-#if _MSC_VER < 1700
-	#define USE_D3DX
+#if defined(MF_WINDOWS) // TODO: build hlsl2glsl and glsl_optimizer libs for linux/mac
+#define SUPPORT_HLSL
+#endif
+#define SUPPORT_GLSL
+#if defined(MF_WINDOWS) // TODO: support Cg compiler on linux/mac?
+#define SUPPORT_CG
 #endif
 
-#if defined(USE_D3DX)
-	#include <d3dx9.h>
-	#pragma comment(lib, "d3dx9")
+#if defined(MF_WINDOWS)
+	#define SUPPORT_D3D
+#endif
+#if defined(MF_WINDOWS) || defined(MF_LINUX) || defined(MF_OSX) || defined(MF_ANDROID) || defined(MF_IPHONE)
+	#define SUPPORT_OPENGL
 
-	#include <D3DX11async.h>
-	#pragma comment(lib, "d3dx11")
-#else
-	#include <D3Dcompiler.h>
-	#pragma comment(lib, "D3dcompiler")
+	#if defined(SUPPORT_HLSL)
+		#include "hlsl2glslfork/hlsl2glsl.h"
+		#pragma comment(lib, "hlsl2glsl")
+
+		#include "glsl_optimizer/glsl_optimizer.h"
+		#pragma comment(lib, "glsl_optimizer")
+	#endif
+#endif
+#if defined(SUPPORT_CG) && (defined(SUPPORT_D3D) || defined(SUPPORT_OPENGL))
+	#include "Cg/cg.h"
+	#pragma comment(lib, "cg")
+
+	#if defined(SUPPORT_D3D)
+		#include "Cg/cgD3D9.h"
+		#pragma comment(lib, "cgD3D9")
+
+		#include "Cg/cgD3D11.h"
+		#pragma comment(lib, "cgD3D11")
+	#endif
+	#if defined(SUPPORT_OPENGL)
+		#include "Cg/cgGL.h"
+		#pragma comment(lib, "cgGL")
+	#endif
 #endif
 
-#if defined(USE_D3DX)
-	bool MFIntShader_CompileShaderD3DX9(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
-	bool MFIntShader_CompileShaderD3DX11(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
-#else
-	bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
+#if defined(SUPPORT_D3D)
+	// VS2012 introduces the new Windows SDK, which includes DirectX
+	#if defined(_MSC_VER) && _MSC_VER < 1700
+		#define USE_D3DX
+	#endif
+
+	#if defined(SUPPORT_HLSL)
+		#if defined(USE_D3DX)
+			#include <d3dx9.h>
+			#pragma comment(lib, "d3dx9")
+
+			#include <D3DX11async.h>
+			#pragma comment(lib, "d3dx11")
+
+			bool MFIntShader_CompileShaderD3DX9(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
+			bool MFIntShader_CompileShaderD3DX11(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
+		#else
+			#include <D3Dcompiler.h>
+			#pragma comment(lib, "D3dcompiler")
+
+			bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
+		#endif
+	#endif
 #endif
-bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings);
+#if defined(SUPPORT_OPENGL)
+	bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language);
+#endif
+#if defined(SUPPORT_CG)
+	bool MFIntShader_CompileShaderCg(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, MFRendererDrivers renderDriver);
+#endif
 
 
-bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, const char *pFilename, const char *pShaderSource, int line, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver)
+bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, const char *pFilename, const char *pShaderSource, int line, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language)
 {
 	*ppOutput = NULL;
 	if(pSize)
 		*pSize = 0;
+
+#if !defined(SUPPORT_HLSL)
+	MFDebug_Assert(language != MFSL_HLSL, "Unable to build HLSL shaders!");
+	if(language == MFSL_HLSL)
+		return false;
+#endif
+#if !defined(SUPPORT_GLSL)
+	MFDebug_Assert(language != MFSL_GLSL, "Unable to build GLSL shaders!");
+	if(language == MFSL_GLSL)
+		return false;
+#endif
+#if !defined(SUPPORT_CG)
+	MFDebug_Assert(language != MFSL_Cg, "Unable to build Cg shaders!");
+	if(language == MFSL_Cg)
+		return false;
+#endif
 
 	MFShaderTemplate shaderTemplate;
 	MFShaderInput inputs[256];
@@ -55,21 +117,68 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 	switch(renderDriver)
 	{
 		case MFRD_D3D9:
-#if defined(USE_D3DX)
-			bSucceeded = MFIntShader_CompileShaderD3DX9(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+			if(language == MFSL_HLSL)
+			{
+#if defined(SUPPORT_D3D) && defined(SUPPORT_HLSL)
+	#if defined(USE_D3DX)
+				bSucceeded = MFIntShader_CompileShaderD3DX9(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+	#else
+				bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+	#endif
 #else
-			bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+				MFDebug_Assert(false, "D3D9 not supported!");
 #endif
+			}
+			else if(language == MFSL_GLSL)
+			{
+				MFDebug_Assert(false, "Unable to build GLSL shaders for D3D9!");
+			}
+			else if(language == MFSL_Cg)
+			{
+#if defined(SUPPORT_CG)
+				bSucceeded = MFIntShader_CompileShaderCg(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language, renderDriver);
+#endif
+			}
 			break;
 		case MFRD_D3D11:
-#if defined(USE_D3DX)
-			bSucceeded = MFIntShader_CompileShaderD3DX11(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+			if(language == MFSL_HLSL)
+			{
+#if defined(SUPPORT_D3D) && defined(SUPPORT_HLSL)
+	#if defined(USE_D3DX)
+				bSucceeded = MFIntShader_CompileShaderD3DX11(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+	#else
+				bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+	#endif
 #else
-			bSucceeded = MFIntShader_CompileShaderWinSDK(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+				MFDebug_Assert(false, "D3D11 not supported!");
 #endif
+			}
+			else if(language == MFSL_GLSL)
+			{
+				MFDebug_Assert(false, "Unable to build GLSL shaders for D3D11!");
+			}
+			else if(language == MFSL_Cg)
+			{
+#if defined(SUPPORT_CG)
+				bSucceeded = MFIntShader_CompileShaderCg(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language, renderDriver);
+#endif
+			}
 			break;
 		case MFRD_OpenGL:
-			bSucceeded = MFIntShader_CompileShaderOpenGL(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings);
+			if(language == MFSL_HLSL || language == MFSL_GLSL)
+			{
+#if defined(SUPPORT_OPENGL)
+				bSucceeded = MFIntShader_CompileShaderOpenGL(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language);
+#else
+				MFDebug_Assert(false, "OpenGL not supported!");
+#endif
+			}
+			else if(language == MFSL_Cg)
+			{
+#if defined(SUPPORT_CG)
+				bSucceeded = MFIntShader_CompileShaderCg(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language, renderDriver);
+#endif
+			}
 			break;
 		default:
 			switch(platform)
@@ -122,24 +231,24 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 	return true;
 }
 
-MF_API bool MFIntShader_CreateFromString(MFShaderType shaderType, const char *pShaderSource, const char *pFile, int line, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver)
+MF_API bool MFIntShader_CreateFromString(MFShaderType shaderType, const char *pShaderSource, const char *pFile, int line, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language)
 {
-	return MFIntShader_CreateShader(shaderType, pMacros, pFile, pShaderSource, line, ppOutput, pSize, platform, renderDriver);
+	return MFIntShader_CreateShader(shaderType, pMacros, pFile, pShaderSource, line, ppOutput, pSize, platform, renderDriver, language);
 }
 
-MF_API bool MFIntShader_CreateFromFile(MFShaderType shaderType, const char *pFilename, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver)
+MF_API bool MFIntShader_CreateFromFile(MFShaderType shaderType, const char *pFilename, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language)
 {
-	return MFIntShader_CreateShader(shaderType, pMacros, pFilename, NULL, 0, ppOutput, pSize, platform, renderDriver);
+	return MFIntShader_CreateShader(shaderType, pMacros, pFilename, NULL, 0, ppOutput, pSize, platform, renderDriver, language);
 }
 
 
 #include <stdio.h>
-static HRESULT OpenInclude(bool bSystemInclude, const char *pFileName, const void *pParentData, const void **ppData, uint32 *pBytes)
+static bool OpenInclude(bool bSystemInclude, const char *pFileName, const void *pParentData, const void **ppData, uint32 *pBytes)
 {
 	size_t bytes;
 	char *pFile = MFFileSystem_Load(pFileName, &bytes);
 	if(!pFile)
-		return E_FAIL;
+		return false;
 
 	pFileName = MFFileSystem_ResolveSystemPath(pFileName, true);
 	char lineDirective[256];
@@ -152,17 +261,18 @@ static HRESULT OpenInclude(bool bSystemInclude, const char *pFileName, const voi
 	MFHeap_Free(pFile);
 
 	*ppData = pInclude;
-	*pBytes = (UINT)bytes;
+	*pBytes = (uint32)bytes;
 
-	return S_OK;
+	return true;
 }
 
+#if defined(SUPPORT_D3D) && defined(SUPPORT_HLSL)
 #if defined(USE_D3DX)
 class FujiIncludeHandler : public ID3DXInclude
 {
 	STDMETHOD(Open)(D3DXINCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 	{
-		return OpenInclude(IncludeType == D3DXINC_SYSTEM, pFileName, pParentData, ppData, pBytes);
+		return OpenInclude(IncludeType == D3DXINC_SYSTEM, pFileName, pParentData, ppData, pBytes) ? S_OK : E_FAIL;
 	}
 
 	STDMETHOD(Close)(LPCVOID pData)
@@ -531,7 +641,7 @@ class FujiIncludeHandler : public ID3DInclude
 {
 	HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 	{
-		return OpenInclude(IncludeType == D3D_INCLUDE_SYSTEM, pFileName, pParentData, ppData, pBytes);
+		return OpenInclude(IncludeType == D3D_INCLUDE_SYSTEM, pFileName, pParentData, ppData, pBytes) ? S_OK : E_FAIL;
 	}
 
 	HRESULT Close(LPCVOID pData)
@@ -678,10 +788,21 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 	return true;
 }
 #endif
+#endif
 
+#if defined(SUPPORT_OPENGL)
 // TODO: this is a lot of work... ideally, we would support those libs that convert HLSL -> GLSL
-bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings)
+bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language)
 {
+	if(language == MFSL_HLSL)
+	{
+		// TODO: hlsl2glsl
+
+		MFDebug_Assert(false, "TODO");
+	}
+
+	// TODO: glsl_optimizer...
+
 	if(pShaderSource)
 	{
 		pTemplate->bytes = MFString_Length(pShaderSource) + 1;
@@ -695,3 +816,16 @@ bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro 
 
 	return true;
 }
+#endif
+
+#if defined(SUPPORT_CG)
+bool MFIntShader_CompileShaderCg(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, MFRendererDrivers renderDriver)
+{
+	// TODO: compile Cg shader...
+	// target D3D9/D3D11/OpenGL
+
+	MFDebug_Assert(false, "TODO");
+
+	return false;
+}
+#endif
