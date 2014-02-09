@@ -13,6 +13,9 @@ enum MFShaderLanguage
 	MFSL_Cg,
 	MFSL_VSAsm,
 	MFSL_PSAsm,
+
+	MFSL_Max,
+	MFSL_ForceInt = 0x7FFFFFFF
 };
 
 MF_API bool MFIntShader_CreateFromString(MFShaderType shaderType, const char *pShaderSource, const char *pFile, int line, MFShaderMacro *pMacros, void **ppOutput, size_t *pSize, MFPlatform platform, MFRendererDrivers renderDriver, MFShaderLanguage language = MFSL_Unknown);
