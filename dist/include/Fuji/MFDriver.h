@@ -108,6 +108,11 @@
 #define MF_DRIVER_ANDROID		36
 #define MF_DRIVER_NACL			37
 #define MF_DRIVER_WEB			38
+#define MF_DRIVER_XAUDIO2		39
+#define MF_DRIVER_ASIO			40
+#define MF_DRIVER_XB1			41
+#define MF_DRIVER_PS4			42
+#define MF_DRIVER_WIIU			43
 
 
 // we need a list of all available renderer drivers

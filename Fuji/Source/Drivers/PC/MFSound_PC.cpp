@@ -1,6 +1,6 @@
 #include "Fuji.h"
 
-#if MF_SOUND == MF_DRIVER_DSOUND
+#if MF_SOUND == MF_DRIVER_DSOUND || defined(MF_SOUNDPLUGIN_DSOUND)
 
 #include "MFSystem.h"
 #include "MFSound_Internal.h"
