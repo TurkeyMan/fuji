@@ -42,12 +42,14 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 	MFMountDataNative *pMountNative = (MFMountDataNative*)pMountData;
 
+	size_t pathLen = MFString_Length(pMountNative->pPath);
+
 	// we need to append a slash if its not already there...
 	int addSlash = 0;
-	if(pMountNative->pPath[MFString_Length(pMountNative->pPath)-1] != '/')
+	if(pMountNative->pPath[pathLen-1] != '/')
 		addSlash = 1;
 
-	pMount->pFilesysData = (char*)MFHeap_Alloc(MFString_Length(pMountNative->pPath) + addSlash + 1);
+	pMount->pFilesysData = (char*)MFHeap_Alloc(pathLen + addSlash + 1);
 	MFString_CopyCat((char*)pMount->pFilesysData, pMountNative->pPath, addSlash ? "/" : "");
 
 	return 0;

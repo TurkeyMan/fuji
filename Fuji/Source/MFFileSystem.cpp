@@ -566,7 +566,7 @@ static int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, 
 
 	int numFiles = 0;
 
-	hFind = MFFileSystem_FindFirst(MFStr("%s*", pFindPattern), &findData);
+	hFind = MFFileSystem_FindFirst(MFString::Format("%s*", pFindPattern).CStr(), &findData);
 
 	if(hFind)
 	{
@@ -583,7 +583,8 @@ static int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, 
 				{
 					if(flatten)
 					{
-						numFiles += MFFileSystem_GetNumEntries(MFStr("%s%s/", pFindPattern, findData.pFilename), recursive, flatten, pStringLengths);
+						MFString newPath = MFString::Format("%s%s/", pFindPattern, findData.pFilename);
+						numFiles += MFFileSystem_GetNumEntries(newPath.CStr(), recursive, flatten, pStringLengths);
 					}
 					else
 					{
@@ -614,7 +615,7 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 	MFFindData findData;
 	MFFind *hFind;
 
-	hFind = MFFileSystem_FindFirst(MFStr("%s*", pFindPattern), &findData);
+	hFind = MFFileSystem_FindFirst(MFString::Format("%s*", pFindPattern).CStr(), &findData);
 
 	char *pCurrentDir = pStringCache;
 
@@ -632,16 +633,15 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 			{
 				if(recursive)
 				{
+					MFString newPath = MFString::Format("%s%s/", pFindPattern, findData.pFilename);
 					if(flatten)
 					{
-						pToc = MFFileSystem_BuildToc(MFStr("%s%s/", pFindPattern, findData.pFilename), pToc, pParent, pStringCache, recursive, flatten);
+						pToc = MFFileSystem_BuildToc(newPath.CStr(), pToc, pParent, pStringCache, recursive, flatten);
 					}
 					else
 					{
-						const char *pNewPath = MFStr("%s%s/", pFindPattern, findData.pFilename);
-
 						size_t stringCacheSize = 0;
-						pToc->size = MFFileSystem_GetNumEntries(pNewPath, recursive, flatten, &stringCacheSize);
+						pToc->size = MFFileSystem_GetNumEntries(newPath.CStr(), recursive, flatten, &stringCacheSize);
 
 						if(pToc->size)
 						{
@@ -658,7 +658,7 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
 
 							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
-							MFFileSystem_BuildToc(pNewPath, pToc->pChild, pToc, pNewStringCache, recursive, flatten);
+							MFFileSystem_BuildToc(newPath.CStr(), pToc->pChild, pToc, pNewStringCache, recursive, flatten);
 
 							++pToc;
 						}

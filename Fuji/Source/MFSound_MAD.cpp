@@ -32,6 +32,17 @@ struct MFID3
 	uint8 reserved;
 };
 
+struct MFID3v1
+{
+	char TAG[3];
+	char title[30];
+	char artist[30];
+	char album[30];
+	char year[4];
+	char comment[30];
+	unsigned char genre;
+};
+
 struct ID3Chunk
 {
 	uint32 id;
@@ -117,6 +128,9 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
 			ID3Chunk *pChunkHeader = (ID3Chunk*)pData;
 			int size = GetSynchSafeInt(pData + 4);
 
+			if(size == 0)
+				break;
+
 			if(*pData == 'T')
 			{
 				//uint8 encoding = pData[10];
@@ -187,7 +201,7 @@ int ReadMP3Header(MP3Header *pHeader, const unsigned char *pHeaderBuffer)
 	// extract details from frame header
 	pHeader->audioVersion = (header & 0x180000) >> 19;
 	pHeader->layer = (header & 0x60000) >> 17;
-	pHeader->protectionBit = !!((header & 0x10000) >> 16);
+	pHeader->protectionBit = !!(header & 0x10000);
 	pHeader->padding = (header & 0x200) >> 9;
 
 	int bitrate = (header & 0xF000) >> 12;
@@ -211,57 +225,126 @@ int ReadMP3Header(MP3Header *pHeader, const unsigned char *pHeaderBuffer)
 	return 0;
 }
 
-int PreCacheFrameOffsets(MFMADDecoder *pDecoder)
+int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirst)
 {
 	MP3Header header;
-	unsigned char headerBuffer[10];
+	unsigned char buffer[256];
 	int sampleRate = 0;
 
 	uint32 filePos = MFFile_Tell(pDecoder->pFile);
-	while(MFFile_Read(pDecoder->pFile, headerBuffer, 4))
-	{
-		int validHeader = ReadMP3Header(&header, headerBuffer);
-		sampleRate = header.samplerate;
+	int bytes = MFFile_Read(pDecoder->pFile, buffer, bOnlyFirst ? 4 : sizeof(buffer));
 
-		if(validHeader != 1)
+	int offset = 0;
+
+	while(1)
+	{
+		int remaining = bytes - offset;
+		if(remaining < 4)
 		{
+			filePos += offset;
+			if(offset > bytes)
+			{
+				MFFile_Seek(pDecoder->pFile, filePos, MFSeek_Begin);
+				offset = 0;
+			}
+			else
+			{
+				int i = 0;
+				for(; offset < bytes; ++i, ++offset)
+					buffer[i] = buffer[offset];
+				offset = i;
+			}
+
+			// read more data...
+			remaining = bytes = MFFile_Read(pDecoder->pFile, buffer + offset, sizeof(buffer) - offset) + offset;
+			offset = 0;
+
+			if(bytes < 4)
+				break; // not enough data!
+		}
+
+		bool bValidHeader = buffer[offset] == 0xFF && (buffer[offset+1] & 0xE0) == 0xE0 && ReadMP3Header(&header, buffer + offset) == 0;
+
+		if(bValidHeader)
+		{
+			// should we stash the decoded header somewhere?
+
+			sampleRate = header.samplerate;
+
 			if(pDecoder->frameCount >= pDecoder->numFrameOffsetsAllocated)
 			{
 				pDecoder->numFrameOffsetsAllocated *= 2;
 				pDecoder->pFrameOffsets = (uint32*)MFHeap_Realloc(pDecoder->pFrameOffsets, sizeof(uint32) * pDecoder->numFrameOffsetsAllocated);
 			}
-			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount++] = filePos;
+			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount++] = filePos + offset;
 			++pDecoder->frameCount;
 
-			MFFile_Seek(pDecoder->pFile, header.frameSize-4, MFSeek_Current);
+			if(bOnlyFirst)
+				break;
+
+			offset += header.frameSize;
+		}
+		else if(buffer[offset] == 'T' && buffer[offset+1] == 'A' && buffer[offset+2] == 'G')
+		{
+			MFID3v1 ID3v1;
+			MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, 128));
+			if(remaining < 128)
+				MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, 128 - remaining, false);
+			offset += 128;
+
+			if(pStream->streamInfo.artistName[0] == 0)
+				MFString_CopyN(pStream->streamInfo.artistName, ID3v1.artist, sizeof(ID3v1.artist));
+			if(pStream->streamInfo.albumName[0] == 0)
+				MFString_CopyN(pStream->streamInfo.albumName, ID3v1.album, sizeof(ID3v1.album));
+			if(pStream->streamInfo.songName[0] == 0)
+				MFString_CopyN(pStream->streamInfo.songName, ID3v1.title, sizeof(ID3v1.title));
+
+			if(pStream->streamInfo.trackNumber == 0)
+				pStream->streamInfo.trackNumber = ID3v1.comment[28] == 0 ? ID3v1.comment[29] : 0;
+
+			if(pStream->streamInfo.year == 0)
+			{
+				// TODO: parse 4 bytes into numbers
+			}
+
+			// TODO: genre is looked up from a big table of possible genres...
+		}
+		else if(buffer[offset] == 'I' && buffer[offset+1] == 'D' && buffer[offset+2] == '3')
+		{
+			unsigned char id3Header[10];
+
+			MFCopyMemory(id3Header, buffer + offset, MFMin(remaining, 10));
+			if(remaining < 10)
+				MFFile_Read(pDecoder->pFile, id3Header + remaining, 10 - remaining, false);
+			offset += 10;
+
+			// ID3 v2...
+			int size = GetSynchSafeInt(id3Header + 6);
+
+			if(!pDecoder->pID3)
+			{
+				pDecoder->pID3 = (MFID3*)MFHeap_Alloc(sizeof(MFID3) + size);
+				pDecoder->pID3->pID3Data = (unsigned char*)(pDecoder->pID3 + 1);
+				pDecoder->pID3->size = size;
+				pDecoder->pID3->major = buffer[3];
+				pDecoder->pID3->minor = buffer[4];
+				pDecoder->pID3->flags = buffer[5];
+
+				int tagBytes = 0;
+				if(offset < bytes)
+				{
+					tagBytes = MFMin(size, bytes - offset);
+					MFCopyMemory(pDecoder->pID3->pID3Data, buffer + offset, tagBytes);
+				}
+				if(tagBytes < size)
+					MFFile_Read(pDecoder->pFile, pDecoder->pID3->pID3Data + tagBytes, size - tagBytes, false);
+				offset += size;
+
+				ParseID3(pStream, pDecoder->pID3, size);
+			}
 		}
 		else
-		{
-			// check if we have some other header.. ID3?
-			if(!MFString_CaseCmpN((char*)headerBuffer, "TAG", 3))
-			{
-				// read ID3 v1? ...
-
-				// skip past it for now...
-				MFFile_Seek(pDecoder->pFile, 128-4, MFSeek_Current);
-			}
-			else if(!MFString_CaseCmpN((char*)headerBuffer, "ID3", 3))
-			{
-				// ID3 v2...
-				MFFile_Read(pDecoder->pFile, headerBuffer + 4, 6);
-				uint32 size = GetSynchSafeInt(headerBuffer + 6);
-
-				// skip ID3 v2 data
-				MFFile_Seek(pDecoder->pFile, size, MFSeek_Current);
-			}
-			else
-			{
-				// lost sync? :/
-				return 0;
-			}
-		}
-
-		filePos = MFFile_Tell(pDecoder->pFile);
+			++offset;
 	}
 
 	return sampleRate;
@@ -284,7 +367,7 @@ size_t GetMADSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 
 		// increment timer
 		mad_timer_t t = { 0, MAD_TIMER_RESOLUTION / pDecoder->firstHeader.samplerate };
-		mad_timer_multiply(&t, (long)(numBytes >> 2));
+		mad_timer_multiply(&t, (long)(numBytes >> 2) );
 		mad_timer_add(&pDecoder->timer, t);
 
 		if(bytes == numBytes)
@@ -340,21 +423,28 @@ size_t GetMADSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 
 		if(mad_frame_decode(&pDecoder->frame, &pDecoder->stream))
 		{
- 			if(MAD_RECOVERABLE(pDecoder->stream.error))
+			if(!(pDecoder->stream.error & 0x200))
 			{
-				if(pDecoder->stream.error != MAD_ERROR_LOSTSYNC || pDecoder->stream.this_frame != pDecoder->pGuardPtr)
-					MFDebug_Warn(3, MFStr("Recoverable frame level error (%s)\n", mad_stream_errorstr(&pDecoder->stream)));
-				continue;
+				if(MAD_RECOVERABLE(pDecoder->stream.error))
+				{
+					if(pDecoder->stream.error != MAD_ERROR_LOSTSYNC || pDecoder->stream.this_frame != pDecoder->pGuardPtr)
+						MFDebug_Warn(3, MFStr("Recoverable frame level error (%s)\n", mad_stream_errorstr(&pDecoder->stream)));
+					continue;
+				}
+				else
+				{
+					if(pDecoder->stream.error == MAD_ERROR_BUFLEN)
+						continue;
+					else
+					{
+						MFDebug_Warn(3, MFStr("Unrecoverable frame level error (%s)\n", mad_stream_errorstr(&pDecoder->stream)));
+						break;
+					}
+				}
 			}
 			else
 			{
-				if(pDecoder->stream.error == MAD_ERROR_BUFLEN)
-					continue;
-				else
-				{
-					MFDebug_Warn(3, MFStr("Unrecoverable frame level error (%s)\n", mad_stream_errorstr(&pDecoder->stream)));
-					break;
-				}
+				MFDebug_Warn(3, MFStr("Recoverable frame level error (%s)\n", mad_stream_errorstr(&pDecoder->stream)));
 			}
 		}
 
@@ -527,44 +617,15 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 	mad_header_init(&pDecoder->firstHeader);
 	mad_timer_reset(&pDecoder->timer);
 
-	// read the ID3 tag, if present...
-	unsigned char buffer[10];
-	int read = MFFile_Read(hFile, buffer, 10);
-	if(read == 10 && !MFString_CompareN((char*)buffer, "ID3", 3))
-	{
-		uint32 size = GetSynchSafeInt(buffer + 6);
-		pDecoder->pID3 = (MFID3*)MFHeap_Alloc(sizeof(MFID3) + size);
-		pDecoder->pID3->pID3Data = (unsigned char*)(pDecoder->pID3 + 1);
-		pDecoder->pID3->size = size;
-		pDecoder->pID3->major = buffer[3];
-		pDecoder->pID3->minor = buffer[4];
-		pDecoder->pID3->flags = buffer[5];
-		MFFile_Read(hFile, pDecoder->pID3->pID3Data, size, false);
-		ParseID3(pStream, pDecoder->pID3, size);
-		pDecoder->pFrameOffsets[0] = read + size;
-	}
-	else
-	{
-		// no ID3, start from the start...
-		MFFile_Seek(hFile, 0, MFSeek_Begin);
-	}
+	// scan for frame offset(/s)
+	bool bScanForHeaders = (pStream->createFlags & (MFASF_QueryLength | MFASF_AllowSeeking)) != 0;
+	int sampleRate = ScanForFrames(pStream, pDecoder, !bScanForHeaders);
+	pStream->trackLength = bScanForHeaders ? (float)(pDecoder->frameCount * SAMPLES_PER_MP3_FRAME) / (float)sampleRate : 0.0f;
 
-	// depending on the play flags, we might do a pre-scan of the audio stream to build seek tables and stuff
-	if((pStream->createFlags & MFASF_QueryLength) || (pStream->createFlags & MFASF_AllowSeeking))
-	{
-		// get the offset to the start of the mp3 data
-		int sampleRate = PreCacheFrameOffsets(pDecoder);
-		MFFile_Seek(hFile, pDecoder->pFrameOffsets[0], MFSeek_Begin);
-		pStream->trackLength = (float)(pDecoder->frameCount * SAMPLES_PER_MP3_FRAME) / (float)sampleRate;
-	}
-	else
-	{
-		pDecoder->pFrameOffsets[0] = MFFile_Tell(hFile);
-		pStream->trackLength = 0.0f;	// mp3 sucks! we have no idea without skipping through the whole thing... :/
-	}
 
 	// prime the input buffer
-	read = MFFile_Read(hFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
+	MFFile_Seek(hFile, pDecoder->pFrameOffsets[0], MFSeek_Begin);
+	int read = MFFile_Read(hFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
 	mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, read);
 	pDecoder->stream.error = MAD_ERROR_NONE;
 

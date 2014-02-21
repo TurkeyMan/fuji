@@ -119,6 +119,8 @@ struct MFAudioStreamInfo
 	char albumName[256];
 	char artistName[256];
 	char genre[256];
+	int trackNumber;
+	int year;
 
 	int sampleRate;
 	int bitsPerSample;
