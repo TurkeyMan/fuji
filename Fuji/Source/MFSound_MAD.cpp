@@ -43,6 +43,27 @@ struct MFID3v1
 	unsigned char genre;
 };
 
+enum ID3v1_Enhanced_Speed
+{
+	ID3v1_Speed_Unset,
+	ID3v1_Speed_Slow,
+	ID3v1_Speed_Medium,
+	ID3v1_Speed_Fast,
+	ID3v1_Speed_Hardcore
+};
+
+struct MFID3v1_Enhanced
+{
+	char TAG[4];
+	char title[60];
+	char artist[60];
+	char album[60];
+	unsigned int speed; // From enum ID3v1_Enhanced_Speed
+	char genre[30];
+	char start_time[6];
+	char end_time[6];
+};
+
 struct ID3Chunk
 {
 	uint32 id;
@@ -286,28 +307,49 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 		}
 		else if(buffer[offset] == 'T' && buffer[offset+1] == 'A' && buffer[offset+2] == 'G')
 		{
-			MFID3v1 ID3v1;
-			MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, 128));
-			if(remaining < 128)
-				MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, 128 - remaining, false);
-			offset += 128;
-
-			if(pStream->streamInfo.artistName[0] == 0)
-				MFString_CopyN(pStream->streamInfo.artistName, ID3v1.artist, sizeof(ID3v1.artist));
-			if(pStream->streamInfo.albumName[0] == 0)
-				MFString_CopyN(pStream->streamInfo.albumName, ID3v1.album, sizeof(ID3v1.album));
-			if(pStream->streamInfo.songName[0] == 0)
-				MFString_CopyN(pStream->streamInfo.songName, ID3v1.title, sizeof(ID3v1.title));
-
-			if(pStream->streamInfo.trackNumber == 0)
-				pStream->streamInfo.trackNumber = ID3v1.comment[28] == 0 ? ID3v1.comment[29] : 0;
-
-			if(pStream->streamInfo.year == 0)
+			if(buffer[offset+3] == '+')
 			{
-				// TODO: parse 4 bytes into numbers
-			}
+				MFID3v1_Enhanced ID3v1;
+				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, (int)sizeof(MFID3v1_Enhanced)));
+				if(remaining < 128)
+					MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, sizeof(MFID3v1_Enhanced) - remaining, false);
+				offset += sizeof(MFID3v1_Enhanced);
 
-			// TODO: genre is looked up from a big table of possible genres...
+				if(pStream->streamInfo.artistName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.artistName, ID3v1.artist, sizeof(ID3v1.artist));
+				if(pStream->streamInfo.albumName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.albumName, ID3v1.album, sizeof(ID3v1.album));
+				if(pStream->streamInfo.songName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.songName, ID3v1.title, sizeof(ID3v1.title));
+				if(pStream->streamInfo.genre[0] == 0)
+					MFString_CopyN(pStream->streamInfo.songName, ID3v1.genre, sizeof(ID3v1.genre));
+				// TODO: something with speed/start_time/end_time?
+			}
+			else
+			{
+				MFID3v1 ID3v1;
+				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, (int)sizeof(MFID3v1)));
+				if(remaining < 128)
+					MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, sizeof(MFID3v1) - remaining, false);
+				offset += sizeof(MFID3v1);
+
+				if(pStream->streamInfo.artistName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.artistName, ID3v1.artist, sizeof(ID3v1.artist));
+				if(pStream->streamInfo.albumName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.albumName, ID3v1.album, sizeof(ID3v1.album));
+				if(pStream->streamInfo.songName[0] == 0)
+					MFString_CopyN(pStream->streamInfo.songName, ID3v1.title, sizeof(ID3v1.title));
+				if(pStream->streamInfo.trackNumber == 0)
+					pStream->streamInfo.trackNumber = ID3v1.comment[28] == 0 ? ID3v1.comment[29] : 0;
+				if(pStream->streamInfo.year == 0)
+				{
+					// TODO: parse 4 bytes into numbers
+				}
+				if(pStream->streamInfo.genre[0] == 0)
+				{
+					// TODO: genre is looked up from a big table of possible genres...
+				}
+			}
 		}
 		else if(buffer[offset] == 'I' && buffer[offset+1] == 'D' && buffer[offset+2] == '3')
 		{
