@@ -8,6 +8,7 @@
 
 #if defined(MF_WINDOWS) // TODO: build hlsl2glsl and glsl_optimizer libs for linux/mac
 #define SUPPORT_HLSL
+#define SUPPORT_GLSL_OPTIMIZER
 #endif
 #define SUPPORT_GLSL
 #if defined(MF_WINDOWS) // TODO: support Cg compiler on linux/mac?
@@ -22,10 +23,20 @@
 
 	#if defined(SUPPORT_HLSL)
 		#include "hlsl2glslfork/hlsl2glsl.h"
-		#pragma comment(lib, "hlsl2glsl")
+		#if defined(NDEBUG)
+				#pragma comment(lib, "hlsl2glsl")
+		#else
+				#pragma comment(lib, "hlsl2glsl_d")
+		#endif
 
-		#include "glsl_optimizer/glsl_optimizer.h"
-		#pragma comment(lib, "glsl_optimizer")
+		#if defined(SUPPORT_GLSL_OPTIMIZER)
+			#include "glsl_optimizer/glsl_optimizer.h"
+			#if defined(NDEBUG)
+				#pragma comment(lib, "glsl_optimizer")
+			#else
+				#pragma comment(lib, "glsl_optimizer_d")
+			#endif
+		#endif
 	#endif
 #endif
 #if defined(SUPPORT_CG) && (defined(SUPPORT_D3D) || defined(SUPPORT_OPENGL))
@@ -70,7 +81,7 @@
 	#endif
 #endif
 #if defined(SUPPORT_OPENGL)
-	bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language);
+	bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, bool bGLES);
 #endif
 #if defined(SUPPORT_CG)
 	bool MFIntShader_CompileShaderCg(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, MFRendererDrivers renderDriver);
@@ -172,7 +183,7 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 			if(language == MFSL_HLSL || language == MFSL_GLSL)
 			{
 #if defined(SUPPORT_OPENGL)
-				bSucceeded = MFIntShader_CompileShaderOpenGL(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language);
+				bSucceeded = MFIntShader_CompileShaderOpenGL(&shaderTemplate, pMacros, bDebug, pFilename, pShaderSource, line, pStrings, language, false);
 #else
 				MFDebug_Assert(false, "OpenGL not supported!");
 #endif
@@ -213,7 +224,7 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 
 	pTemplate->pProgram = (void*)&pTemplate->pInputs[shaderTemplate.numInputs];
 	pTemplate->bytes = shaderTemplate.bytes;
-	MFCopyMemory(pTemplate->pProgram, shaderTemplate.pProgram, shaderTemplate.bytes);
+	MFCopyMemory((void*)pTemplate->pProgram, shaderTemplate.pProgram, shaderTemplate.bytes);
 
 	char *pTemplateStrings = (char*)pTemplate->pProgram + shaderTemplate.bytes;
 	MFCopyMemory(pTemplateStrings, pStringData, stringsSize);
@@ -226,7 +237,7 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 	MFFixUp(pTemplate->pProgram, pTemplate, 0);
 
 	// free working data
-	MFHeap_Free(shaderTemplate.pProgram);
+	MFHeap_Free((void*)shaderTemplate.pProgram);
 	MFStringCache_Destroy(pStrings);
 
 	*ppOutput = pTemplate;
@@ -278,10 +289,11 @@ static bool OpenInclude(bool bSystemInclude, const char *pFileName, const void *
 	char lineDirective[256];
 	int lineBytes = sprintf(lineDirective, "#line 1 \"%s\"\r\n", pFileName);
 
-	char *pInclude = (char*)MFHeap_Alloc(lineBytes + bytes);
+	char *pInclude = (char*)MFHeap_Alloc(lineBytes + bytes + 1);
 	MFCopyMemory(pInclude, lineDirective, lineBytes);
 	MFCopyMemory(pInclude + lineBytes, pFile, bytes);
 	bytes += lineBytes;
+	pInclude[bytes] = 0;
 	MFHeap_Free(pFile);
 
 	*ppData = pInclude;
@@ -379,7 +391,7 @@ bool MFIntShader_CompileShaderD3DX9(MFShaderTemplate *pTemplate, MFShaderMacro *
 	{
 		pTemplate->bytes = pProgram->GetBufferSize();
 		pTemplate->pProgram = MFHeap_Alloc(pTemplate->bytes);
-		MFCopyMemory(pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
+		MFCopyMemory((void*)pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
 		pProgram->Release();
 	}
 
@@ -495,7 +507,7 @@ bool MFIntShader_CompileShaderD3DX11(MFShaderTemplate *pTemplate, MFShaderMacro 
 	{
 		pTemplate->bytes = pProgram->GetBufferSize();
 		pTemplate->pProgram = MFHeap_Alloc(pTemplate->bytes);
-		MFCopyMemory(pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
+		MFCopyMemory((void*)pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
 		pProgram->Release();
 	}
 
@@ -815,27 +827,341 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 #endif
 
 #if defined(SUPPORT_OPENGL)
-// TODO: this is a lot of work... ideally, we would support those libs that convert HLSL -> GLSL
-bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language)
-{
-	if(language == MFSL_HLSL)
-	{
-		// TODO: hlsl2glsl
 
-		MFDebug_Assert(false, "TODO");
+static char *MFIntShader_Preprocess(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line)
+{
+	char *pSource = (char*)pShaderSource;
+	bool bSourceAllocated = false;
+
+	const char *pScan = pSource;
+	const char *pOffset;
+	while((pOffset = MFString_Chr(pScan, '#')) != NULL)
+	{
+		if(!MFString_CompareN(pOffset, "#include", 8))
+		{
+			// find end of line, and end of include path
+			const char *pEndLine = MFString_Chr(pOffset + 8, '\n');
+			while(MFIsNewline(pEndLine[-1]))
+				--pEndLine;
+			const char *pEndInclude = pEndLine;
+			while(pEndInclude > pOffset + 8 && MFIsWhite(pEndInclude[-1]))
+				--pEndInclude;
+			const char *pInclude = MFStrN(pOffset + 8, pEndInclude - pOffset - 8);
+			while(MFIsWhite(*pInclude))
+				++pInclude;
+
+			// pInclude should be our include string
+			size_t len = MFString_Length(pInclude);
+			if(len == 0)
+				return NULL;
+
+			// see if it is a system include
+			bool bSystem = false;
+			if(*pInclude == '<' && pInclude[len-1] == '>')
+				bSystem = true;
+			else if(*pInclude != '"' || pInclude[len-1] != '"')
+				return NULL;
+			pInclude = MFStrN(pInclude + 1, len - 2);
+
+			// load the include file
+			const char *pIncludeFile;
+			uint32 includeLen;
+			if(!OpenInclude(bSystem, pInclude, NULL, (const void**)&pIncludeFile, &includeLen))
+				return NULL;
+
+			const char *pPreprocessedInclude = MFIntShader_Preprocess(pTemplate, pMacros, bDebug, pInclude, pIncludeFile, 0);
+			if(pIncludeFile != pPreprocessedInclude)
+				MFHeap_Free((char*)pIncludeFile);
+
+			// concatenate the current file on either side
+			size_t newSize = pOffset - pSource + includeLen + MFString_Length(pEndLine) + 1;
+			char *pNewSource = (char*)MFHeap_Alloc(newSize);
+			MFCopyMemory(pNewSource, pSource, pOffset - pScan);
+			MFCopyMemory(pNewSource + (pOffset - pScan), pPreprocessedInclude, includeLen);
+			MFString_Copy(pNewSource + (pOffset - pScan) + includeLen, pEndLine);
+
+			// release intermediates
+			MFHeap_Free((void*)pPreprocessedInclude);
+			if(bSourceAllocated)
+				MFHeap_Free((char*)pSource);
+
+			// we're done!
+			pSource = pNewSource;
+			pOffset = pSource + (pOffset - pScan) + includeLen;
+		}
+		else if(!MFString_CompareN(pOffset, "#define", 7))
+		{
+			MFDebug_Assert(false, "Unsupported preprocessor directive: #define");
+		}
+		else if(!MFString_CompareN(pOffset, "#if", 3))
+		{
+			MFDebug_Assert(false, "Unsupported preprocessor directive: #if");
+		}
+		else if(!MFString_CompareN(pOffset, "#elif", 5))
+		{
+			MFDebug_Assert(false, "Unsupported preprocessor directive: #elif");
+		}
+		else if(!MFString_CompareN(pOffset, "#else", 5))
+		{
+			MFDebug_Assert(false, "Unsupported preprocessor directive: #else");
+		}
+
+		pScan = pOffset + 1;
 	}
 
-	// TODO: glsl_optimizer...
+	return pSource;
+}
 
+#if defined(SUPPORT_HLSL)
+static EAttribSemantic sSemantics[] = {
+	EAttrSemPosition,
+	EAttrSemPosition1,
+	EAttrSemPosition2,
+	EAttrSemPosition3,
+	EAttrSemNormal,
+	EAttrSemNormal1,
+	EAttrSemNormal2,
+	EAttrSemNormal3,
+	EAttrSemColor0,
+	EAttrSemColor1,
+	EAttrSemColor2,
+	EAttrSemColor3,
+	EAttrSemTex0,
+	EAttrSemTex1,
+	EAttrSemTex2,
+	EAttrSemTex3,
+	EAttrSemTex4,
+	EAttrSemTex5,
+	EAttrSemTex6,
+	EAttrSemTex7,
+	EAttrSemTex8,
+	EAttrSemTex9,
+	EAttrSemTangent,
+	EAttrSemTangent1,
+	EAttrSemTangent2,
+	EAttrSemTangent3,
+	EAttrSemBinormal,
+	EAttrSemBinormal1,
+	EAttrSemBinormal2,
+	EAttrSemBinormal3,
+	EAttrSemBlendWeight,
+	EAttrSemBlendWeight1,
+	EAttrSemBlendWeight2,
+	EAttrSemBlendWeight3,
+	EAttrSemBlendIndices,
+	EAttrSemBlendIndices1,
+	EAttrSemBlendIndices2,
+	EAttrSemBlendIndices3
+};
+
+static const char *sSemanticNames[] = {
+	"vPos",
+	"vPos1",
+	"vPos2",
+	"vPos3",
+	"vNormal",
+	"vNormal1",
+	"vNormal2",
+	"vNormal3",
+	"vColour0",
+	"vColour1",
+	"vColour2",
+	"vColour3",
+	"vUV0",
+	"vUV1",
+	"vUV2",
+	"vUV3",
+	"vUV4",
+	"vUV5",
+	"vUV6",
+	"vUV7",
+	"vUV8",
+	"vUV9",
+	"vTangent",
+	"vTangent1",
+	"vTangent2",
+	"vTangent3",
+	"vBiNormal",
+	"vBiNormal1",
+	"vBiNormal2",
+	"vBiNormal3",
+	"vWeights",
+	"vWeights1",
+	"vWeights2",
+	"vWeights3",
+	"vIndices",
+	"vIndices1",
+	"vIndices2",
+	"vIndices3"
+};
+
+const char *MFIntShader_TranslateShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename)
+{
+	static bool bIsInitialised = false;
+	if(!bIsInitialised)
+	{
+		Hlsl2Glsl_Initialize();
+		bIsInitialised = true;
+	}
+
+	// Work out which language we should use...
+	EShLanguage language;
+	switch(type)
+	{
+		case MFST_VertexShader:	language = EShLangVertex;	break;
+		case MFST_PixelShader:	language = EShLangFragment;	break;
+		default:
+			MFDebug_Assert(false, "hlsl2glsl can only convert vertex and pixel shaders.");
+			return NULL;
+	}
+
+	ETargetVersion version = bGLES ? ETargetGLSL_ES_100 : ETargetGLSL_120;
+
+	// create a compiler
+	ShHandle compiler = Hlsl2Glsl_ConstructCompiler(language);
+
+	// parse the code
+	int success = Hlsl2Glsl_Parse(compiler, pShaderSource, version, 0);
+
+	// set translation options
+	MFDebug_Assert(sizeof(sSemantics)/sizeof(sSemantics[0]) == sizeof(sSemanticNames)/sizeof(sSemanticNames[0]), "Mismatching attribute declaration arrays!");
+	Hlsl2Glsl_SetUserAttributeNames(compiler, sSemantics, sSemanticNames, sizeof(sSemantics)/sizeof(sSemantics[0]));
+//	Hlsl2Glsl_UseUserVaryings(compiler, true);
+
+	// translate to GLSL
+	if(success)
+		success = Hlsl2Glsl_Translate(compiler, "main", version, 0);
+
+	// were there errors?
+	if(!success)
+	{
+		const char *pLog = Hlsl2Glsl_GetInfoLog(compiler);
+		MFDebug_Warn(1, pLog);
+		Hlsl2Glsl_DestructCompiler(compiler);
+		return NULL;
+	}
+
+	// and see what we got...
+	pShaderSource = MFString_Dup(Hlsl2Glsl_GetShader(compiler));
+
+//	int numUniforms = Hlsl2Glsl_GetUniformCount(compiler);
+//	const ShUniformInfo *pUniforms = Hlsl2Glsl_GetUniformInfo(compiler);
+
+	// we're done
+	Hlsl2Glsl_DestructCompiler(compiler);
+
+	return pShaderSource;
+}
+#endif
+
+#if defined(SUPPORT_GLSL_OPTIMIZER)
+const char *MFIntShader_OptimiseShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename)
+{
+	static bool bIsOptimiserInitialised = false;
+	static glslopt_ctx *pCtx = NULL;
+	if(!bIsOptimiserInitialised)
+	{
+		pCtx = glslopt_initialize(bGLES ? kGlslTargetOpenGLES20 : kGlslTargetOpenGL);
+		bIsOptimiserInitialised = true;
+	}
+
+	glslopt_shader_type shaderType;
+	switch(type)
+	{
+		case MFST_VertexShader:	shaderType = kGlslOptShaderVertex;	break;
+		case MFST_PixelShader:	shaderType = kGlslOptShaderFragment;	break;
+		default:
+			MFDebug_Assert(false, "glsl_optimizer can only optimise vertex and pixel shaders.");
+			return pShaderSource;
+	}
+
+	unsigned int options = kGlslOptionSkipPreprocessor; // <- Is this valid?
+	glslopt_shader *pShader = glslopt_optimize(pCtx, shaderType, pShaderSource, options);
+
+	if(glslopt_get_status(pShader))
+	{
+		pShaderSource = MFString_Dup(glslopt_get_output(pShader));
+	}
+	else
+	{
+		const char *pLog = glslopt_get_log(pShader);
+		MFDebug_Warn(1, pLog);
+		glslopt_shader_delete(pShader);
+		return pShaderSource;
+	}
+
+	int math, tex, flow;
+	glslopt_shader_get_stats(pShader, &math, &tex, &flow);
+	MFDebug_Warn(2, MFStr("GLSL shader%s optimised successfully. Math ops: %d  Tex ops: %d  Flow ops: %d", pFilename ? MFStr(" '%s'", pFilename) : "", math, tex, flow));
+
+	glslopt_shader_delete(pShader);
+
+//	glslopt_cleanup(pCtx);	// TODO: Should we clean this up one day?
+
+	return pShaderSource;
+}
+#endif
+
+bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, bool bGLES)
+{
+	bool bAllocated = false;
+
+	if(!pShaderSource && pFilename)
+	{
+		pShaderSource = MFFileSystem_Load(pFilename, &pTemplate->bytes, 1);
+		bAllocated = true;
+	}
+
+	// run the preprocessor
+	char *pPreProcessed = MFIntShader_Preprocess(pTemplate, pMacros, bDebug, pFilename, pShaderSource, line);
+	if(pPreProcessed != pShaderSource)
+	{
+		if(bAllocated)
+			MFHeap_Free((char*)pShaderSource);
+
+		pShaderSource = pPreProcessed;
+		bAllocated = true;
+	}
+
+	// translate HLSL to GLSL if available
+#if defined(SUPPORT_HLSL)
+	if(language == MFSL_HLSL)
+	{
+		const char *pTranslatedShader = MFIntShader_TranslateShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename);
+		if(pTranslatedShader != pShaderSource)
+		{
+			if(bAllocated)
+				MFHeap_Free((char*)pShaderSource);
+			if(!pTranslatedShader)
+				return false;
+			pShaderSource = pTranslatedShader;
+			bAllocated = true;
+		}
+	}
+#else
+	MFDebug_Assert(language != MFSL_HLSL, "hlsl2glsl library unavailable!");
+#endif
+
+	// optimise the shader if available
+#if defined(SUPPORT_GLSL_OPTIMIZER)
+	const char *pOptimisedShader = MFIntShader_OptimiseShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename);
+	if(pOptimisedShader != pShaderSource)
+	{
+		if(bAllocated)
+			MFHeap_Free((char*)pShaderSource);
+		pShaderSource = pOptimisedShader;
+		bAllocated = true;
+	}
+#endif
+
+	// stash the glsl source as the shader program data
 	if(pShaderSource)
 	{
 		pTemplate->bytes = MFString_Length(pShaderSource) + 1;
-		pTemplate->pProgram = (char*)MFCopyMemory(MFHeap_Alloc(pTemplate->bytes), pShaderSource, pTemplate->bytes);
-	}
-	else if(pFilename)
-	{
-		pTemplate->pProgram = MFFileSystem_Load(pFilename, &pTemplate->bytes, 1);
-		pTemplate->bytes += 1;
+		if(bAllocated)
+			pTemplate->pProgram = pShaderSource;
+		else
+			pTemplate->pProgram = (char*)MFCopyMemory(MFHeap_Alloc(pTemplate->bytes), pShaderSource, pTemplate->bytes);
 	}
 
 	return true;

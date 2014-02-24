@@ -632,8 +632,8 @@ enum MFStateBlockConstantType
 	MFSB_CT_Bool = 0,					/**< Boolean constant. */
 	MFSB_CT_Vector,						/**< Vector constant. */
 	MFSB_CT_Matrix,						/**< Matrix constant. */
-	MFSB_CT_Texture,					/**< Texture constatnt. */
 	MFSB_CT_RenderState,				/**< Render state constant. */
+	MFSB_CT_Texture,					/**< Texture constant. */
 	MFSB_CT_Misc,						/**< Miscellaneous constant. */
 
 	MFSB_CT_Unknown = 7,				/**< Unknown state block constant type. */

@@ -322,12 +322,12 @@ static int MFVertex_GetNumPrims(MFPrimType primType, int numVertices)
 	return 0;
 }
 
-MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices)
 {
 	pd3dDevice->DrawPrimitive(gPrimTypes[primType], firstVertex, MFVertex_GetNumPrims(primType, numVertices));
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
+MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
 	pd3dDevice->DrawIndexedPrimitive(gPrimTypes[primType], 0, 0, numVertices, 0, MFVertex_GetNumPrims(primType, numIndices));
 }

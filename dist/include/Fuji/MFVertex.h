@@ -10,6 +10,7 @@
 #define _MFVERTEX_H
 
 struct MFStateBlock;
+struct MFEffectTechnique;
 
 /**
  * @struct MFVertexDeclaration
@@ -271,8 +272,8 @@ MF_API void MFVertex_UnlockIndexBuffer(MFIndexBuffer *pIndexBuffer);
 MF_API void MFVertex_SetVertexDeclaration(const MFVertexDeclaration *pVertexDeclaration);
 MF_API void MFVertex_SetVertexStreamSource(int stream, const MFVertexBuffer *pVertexBuffer);
 MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer);
-MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices);
-MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
+MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices);
+MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 
 #endif
 

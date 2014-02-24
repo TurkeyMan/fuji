@@ -16,6 +16,7 @@ void MFEffect_DeinitModulePlatformSpecific();
 
 bool MFEffect_CreatePlatformSpecific(MFEffect *pEffect);
 void MFEffect_DestroyPlatformSpecific(MFEffect *pEffect);
+size_t MFEffect_PlatformDataSize();
 
 struct MFEffectTechnique
 {

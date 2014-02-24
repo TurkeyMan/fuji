@@ -23,8 +23,8 @@
 	MF_API void MFVertex_SetVertexDeclaration_##driver(const MFVertexDeclaration *pVertexDeclaration); \
 	MF_API void MFVertex_SetVertexStreamSource_##driver(int stream, const MFVertexBuffer *pVertexBuffer); \
 	MF_API void MFVertex_SetIndexBuffer_##driver(const MFIndexBuffer *pIndexBuffer); \
-	MF_API void MFVertex_RenderVertices_##driver(MFPrimType primType, int firstVertex, int numVertices); \
-	MF_API void MFVertex_RenderIndexedVertices_##driver(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
+	MF_API void MFVertex_RenderVertices_##driver(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices); \
+	MF_API void MFVertex_RenderIndexedVertices_##driver(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -80,8 +80,8 @@ struct MFVertexPluginCallbacks
 	void (*pSetVertexDeclaration)(const MFVertexDeclaration *pVertexDeclaration);
 	void (*pSetVertexStreamSource)(int stream, const MFVertexBuffer *pVertexBuffer);
 	void (*pSetIndexBuffer)(const MFIndexBuffer *pIndexBuffer);
-	void (*pRenderVertices)(MFPrimType primType, int firstVertex, int numVertices);
-	void (*pRenderIndexedVertices)(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
+	void (*pRenderVertices)(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices);
+	void (*pRenderIndexedVertices)(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -188,14 +188,14 @@ MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 	gpCurrentVertexPlugin->pSetIndexBuffer(pIndexBuffer);
 }
 
-MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices)
 {
-	gpCurrentVertexPlugin->pRenderVertices(primType, firstVertex, numVertices);
+	gpCurrentVertexPlugin->pRenderVertices(pTechnique, primType, firstVertex, numVertices);
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
+MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
-	gpCurrentVertexPlugin->pRenderIndexedVertices(primType, vertexOffset, indexOffset, numVertices, numIndices);
+	gpCurrentVertexPlugin->pRenderIndexedVertices(pTechnique, primType, vertexOffset, indexOffset, numVertices, numIndices);
 }
 
 #endif // MF_RENDERER

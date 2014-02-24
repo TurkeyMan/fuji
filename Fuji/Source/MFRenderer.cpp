@@ -419,8 +419,8 @@ static void MissingStates(MFStateBlockConstantType type, uint32 missing)
 		"Bool",
 		"Vector",
 		"Matrix",
-		"Texture",
 		"RenderState",
+		"Texture",
 		"Misc",
 		"",
 		"Unknown"
@@ -447,8 +447,8 @@ static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement
 		0, //MFSB_CT_Bool = 0,
 		0, //MFSB_CT_Vector,
 		0, //MFSB_CT_Matrix,
-		0, //MFSB_CT_Texture,
 		MFBIT(MFSCRS_VertexDeclaration) | MFBIT(MFSCRS_BlendState) | MFBIT(MFSCRS_DepthStencilState) | MFBIT(MFSCRS_RasteriserState),
+		0, //MFSB_CT_Texture,
 		0, //MFSB_CT_Misc,
 		0,
 	};
@@ -552,11 +552,11 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 			MFVertexBuffer *pVB = (MFVertexBuffer*)state.pRenderStates[MFSCRS_VertexBuffer0];
 			int numVertices = pVB->numVerts - (int)element.vertexBufferOffset;
 
-			MFVertex_RenderIndexedVertices((MFPrimType)element.primType, element.vertexBufferOffset, element.indexBufferOffset, numVertices, element.vertexCount);
+			MFVertex_RenderIndexedVertices(state.pTechniqueSet, (MFPrimType)element.primType, element.vertexBufferOffset, element.indexBufferOffset, numVertices, element.vertexCount);
 		}
 		else
 		{
-			MFVertex_RenderVertices((MFPrimType)element.primType, element.vertexBufferOffset, element.vertexCount);
+			MFVertex_RenderVertices(state.pTechniqueSet, (MFPrimType)element.primType, element.vertexBufferOffset, element.vertexCount);
 		}
 	}
 }

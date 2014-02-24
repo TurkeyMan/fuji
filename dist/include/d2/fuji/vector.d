@@ -98,6 +98,10 @@ struct MFVector
 	static immutable MFVector red = MFVector(1,0,0,1);
 	static immutable MFVector green = MFVector(0,1,0,1);
 	static immutable MFVector blue = MFVector(0,0,1,1);
+	static immutable MFVector cyan = MFVector(0,1,1,1);
+	static immutable MFVector magenta = MFVector(1,0,1,1);
+	static immutable MFVector yellow = MFVector(1,1,0,1);
+	static immutable MFVector orange = MFVector(1,0.5,0,1);
 }
 
 

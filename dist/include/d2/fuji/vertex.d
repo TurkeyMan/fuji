@@ -5,6 +5,8 @@ import fuji.resource;
 import fuji.vector;
 import fuji.renderstate;
 
+struct MFEffectTechnique; // TODO: effect.d will appear and remove this
+
 /**
  * @struct MFVertexDeclaration
  * Represents the layout of a vertex buffer.
@@ -142,8 +144,8 @@ extern (C) void MFVertex_UnlockIndexBuffer(MFIndexBuffer* pIndexBuffer);
 extern (C) void MFVertex_SetVertexDeclaration(const(MFVertexDeclaration)* pVertexDeclaration);
 extern (C) void MFVertex_SetVertexStreamSource(int stream, const(MFVertexBuffer)* pVertexBuffer);
 extern (C) void MFVertex_SetIndexBuffer(const(MFIndexBuffer)* pIndexBuffer);
-extern (C) void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices);
-extern (C) void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
+extern (C) void MFVertex_RenderVertices(MFEffectTechnique* pTechnique, MFPrimType primType, int firstVertex, int numVertices);
+extern (C) void MFVertex_RenderIndexedVertices(MFEffectTechnique* pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
 
 
 // helpers for D...

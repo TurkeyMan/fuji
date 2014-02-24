@@ -209,7 +209,7 @@ inline size_t MFString_LengthN(const char *pString, size_t maxChars)
 inline char* MFString_Copy(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;
-	while((*pBuffer++ = *pString++)) { }
+	while((*pBuffer++ = *pString++) != 0) { }
 	return s;
 }
 
@@ -248,15 +248,15 @@ inline char* MFString_Cat(char *pBuffer, const char *pString)
 {
 	char *s = pBuffer;
 	while(*pBuffer) pBuffer++;
-	while((*pBuffer++ = *pString++)) { }
+	while((*pBuffer++ = *pString++) != 0) { }
 	return s;
 }
 
 inline char* MFString_CopyCat(char *pBuffer, const char *pString, const char *pString2)
 {
 	char *s = pBuffer;
-	while((*pBuffer = *pString++)) { ++pBuffer; }
-	while((*pBuffer++ = *pString2++)) { }
+	while((*pBuffer = *pString++) != 0) { ++pBuffer; }
+	while((*pBuffer++ = *pString2++) != 0) { }
 	return s;
 }
 
@@ -540,7 +540,7 @@ inline size_t MFWString_Length(const wchar_t *pString)
 inline wchar_t* MFWString_Copy(wchar_t *pBuffer, const wchar_t *pString)
 {
 	wchar_t *s = pBuffer;
-	while((*pBuffer++ = *pString++)) { }
+	while((*pBuffer++ = *pString++) != 0) { }
 	return s;
 }
 

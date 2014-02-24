@@ -87,10 +87,15 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 
 	MFShader *pVS = pTechnique->shaders[MFST_VertexShader].pShader;
 	MFShader *pPS = pTechnique->shaders[MFST_PixelShader].pShader;
-	MFDebug_Assert(pVS && pPS, "Missing shader!");
 
-	pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS->pPlatformData);
-	pd3dDevice->SetPixelShader((IDirect3DPixelShader9*)pPS->pPlatformData);
+	if(pTechnique != state.pTechniqueSet)
+	{
+		state.pTechniqueSet = pTechnique;
+
+		MFDebug_Assert(pVS && pPS, "Missing shader!");
+		pd3dDevice->SetVertexShader((IDirect3DVertexShader9*)pVS->pPlatformData);
+		pd3dDevice->SetPixelShader((IDirect3DPixelShader9*)pPS->pPlatformData);
+	}
 
 	// bools
 	uint32 boolState = state.bools & state.rsSet[MFSB_CT_Bool];
@@ -170,8 +175,6 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 		}
 	}
 
-	// renderstates
-
 	// textures
 	req = pTechnique->renderStateRequirements[MFSB_CT_Texture];
 	uint32 i;
@@ -193,6 +196,8 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 			MFMat_Standard_SetSamplerState(i, pS);
 		}
 	}
+
+	// renderstates
 
 	// blend state
 	MFBlendState *pBlendState = (MFBlendState*)state.pRenderStates[MFSCRS_BlendState];

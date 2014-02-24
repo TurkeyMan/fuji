@@ -9,6 +9,7 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFEffect_InitModulePlatformSpecific_##driver(); \
 	void MFEffect_DeinitModulePlatformSpecific_##driver(); \
+	size_t MFEffect_PlatformDataSize_##driver(); \
 	bool MFEffect_CreatePlatformSpecific_##driver(MFEffect *pEffect); \
 	void MFEffect_DestroyPlatformSpecific_##driver(MFEffect *pEffect);
 
@@ -17,6 +18,7 @@
 		#driver, \
 		MFEffect_InitModulePlatformSpecific_##driver, \
 		MFEffect_DeinitModulePlatformSpecific_##driver, \
+		MFEffect_PlatformDataSize_##driver, \
 		MFEffect_CreatePlatformSpecific_##driver, \
 		MFEffect_DestroyPlatformSpecific_##driver \
 	},
@@ -38,6 +40,7 @@ struct MFEffectPluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
+	size_t (*pPlatformDataSize)();
 	bool (*pCreatePlatformSpecific)(MFEffect *pEffect);
 	void (*pDestroyPlatformSpecific)(MFEffect *pEffect);
 };
@@ -74,6 +77,11 @@ void MFEffect_InitModulePlatformSpecific()
 void MFEffect_DeinitModulePlatformSpecific()
 {
 	gpCurrentShaderPlugin->pDeinitModulePlatformSpecific();
+}
+
+size_t MFEffect_PlatformDataSize()
+{
+	return gpCurrentShaderPlugin->pPlatformDataSize();
 }
 
 bool MFEffect_CreatePlatformSpecific(MFEffect *pEffect)

@@ -5,6 +5,7 @@
 #include "MFRenderer.h"
 #include "MFRenderState.h"
 #include "MFArray.h"
+#include "MFShader.h"
 
 // init/deinit
 MFInitStatus MFRenderer_InitModule();
@@ -23,6 +24,8 @@ void MFRenderer_ResetDisplay();
 bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen);
 
 typedef int (*MFRenderSortFunction)(const void*, const void*);
+
+struct MFEffectTechnique;
 
 enum MFStateBlockType
 {
@@ -155,6 +158,9 @@ struct MFRendererState
 
 	uint32 rsSet[MFSB_CT_TypeCount];
 	uint32 rsMask[MFSB_CT_TypeCount];
+
+	MFEffectTechnique *pTechniqueSet;
+	MFShader *pShadersSet[MFST_Max];
 };
 
 // internal functions

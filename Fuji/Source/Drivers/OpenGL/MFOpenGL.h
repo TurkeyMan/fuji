@@ -97,32 +97,11 @@
 	#endif
 #endif
 
-enum MFOpenGL_ShaderType
+struct MFEffectData_OpenGL
 {
-	MFOGL_ShaderType_VertexShader = 0,
-	MFOGL_ShaderType_FragmentShader,
-	MFOGL_ShaderType_GeometryShader
+	GLint program;
+	uint8 uniformLocation[4][32];
 };
-
-enum MFOpenGL_MatrixType
-{
-	MFOGL_MatrixType_Projection = 0,
-	MFOGL_MatrixType_WorldView,
-	MFOGL_MatrixType_Texture
-};
-
-GLuint MFRenderer_OpenGL_CompileShader(const char *pShader, MFOpenGL_ShaderType shaderType);
-GLuint MFRenderer_OpenGL_CreateProgram(GLuint vertexShader, GLuint fragmentShader, GLuint geometryShader = 0);
-
-void MFRenderer_OpenGL_SetMatrix(MFOpenGL_MatrixType type, const MFMatrix &mat);
-
-bool MFRenderer_OpenGL_SetShaderProgram(GLuint program);
-bool MFRenderer_OpenGL_SetUniformV(const char *pName, const MFVector *pV, int numVectors = 1);
-bool MFRenderer_OpenGL_SetUniformM(const char *pName, const MFMatrix *pM, int numMatrices = 1);
-bool MFRenderer_OpenGL_SetUniformS(const char *pName, int sampler);
-
-extern GLuint gCurrentShaderProgram;
-inline GLuint MFRenderer_OpenGL_GetCurrentProgram() { return gCurrentShaderProgram; }
 
 bool MFCheckForOpenGLError(bool bBreakOnError = false);
 

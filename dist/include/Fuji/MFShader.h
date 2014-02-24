@@ -32,13 +32,18 @@ enum MFShaderLanguage
 enum MFShaderType
 {
 	MFST_VertexShader,
-	MFST_PixelShader,
+	MFST_PixelShader,		// GLSL: Fragment shader
 	MFST_GeometryShader,
-	MFST_DomainShader,
-	MFST_HullShader,
+	MFST_DomainShader,		// GLSL: Evaluation shader
+	MFST_HullShader,		// GLSL: Control shader
 	MFST_ComputeShader,
 
 	MFST_Max,
+
+	MFST_FragmentShader = MFST_PixelShader,
+	MFST_EvaluationShader = MFST_DomainShader,
+	MFST_ControlShader = MFST_HullShader,
+
 	MFST_ForceInt = 0x7FFFFFFF
 };
 

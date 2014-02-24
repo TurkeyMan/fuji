@@ -29,7 +29,11 @@ enum MFShaderType
 	GeometryShader,
 	DomainShader,
 	HullShader,
-	ComputeShader
+	ComputeShader,
+
+	FragmentShader = PixelShader,
+	EvaluationShader = DomainShader,
+	ControlShader = HullShader
 }
 
 enum MFShaderInputType

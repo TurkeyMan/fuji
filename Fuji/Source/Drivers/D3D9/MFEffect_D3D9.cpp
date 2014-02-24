@@ -5,6 +5,7 @@
 #if defined(MF_RENDERPLUGIN_D3D9)
 	#define MFEffect_InitModulePlatformSpecific MFEffect_InitModulePlatformSpecific_D3D9
 	#define MFEffect_DeinitModulePlatformSpecific MFEffect_DeinitModulePlatformSpecific_D3D9
+	#define MFEffect_PlatformDataSize MFEffect_PlatformDataSize_D3D9
 	#define MFEffect_CreatePlatformSpecific MFEffect_CreatePlatformSpecific_D3D9
 	#define MFEffect_DestroyPlatformSpecific MFEffect_DestroyPlatformSpecific_D3D9
 #endif
@@ -20,6 +21,11 @@ void MFEffect_InitModulePlatformSpecific()
 
 void MFEffect_DeinitModulePlatformSpecific()
 {
+}
+
+size_t MFEffect_PlatformDataSize()
+{
+	return 0;
 }
 
 bool MFEffect_CreatePlatformSpecific(MFEffect *pEffect)

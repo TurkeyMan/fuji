@@ -383,13 +383,13 @@ MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 	g_pImmediateContext->IASetIndexBuffer(pIB, DXGI_FORMAT_R16_UINT, 0);
 }
 
-MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
 	g_pImmediateContext->Draw(numVertices, firstVertex);
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
+MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
     g_pImmediateContext->IASetPrimitiveTopology(gPrimTopology[primType]);
     g_pImmediateContext->DrawIndexed(numIndices, indexOffset, vertexOffset);

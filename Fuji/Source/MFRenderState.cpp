@@ -163,8 +163,8 @@ static const char * const *gppRenderStateNames[MFSB_CT_TypeCount] =
 	gpRenderStateNames_Bool,
 	gpRenderStateNames_Vector,
 	gpRenderStateNames_Matrix,
-	gpRenderStateNames_Texture,
 	gpRenderStateNames_RenderState,
+	gpRenderStateNames_Texture,
 	gpRenderStateNames_Misc,
 	NULL,
 	NULL
@@ -175,8 +175,8 @@ static const uint8 gConstantCount[MFSB_CT_TypeCount] =
 	MFSCB_Max,
 	MFSCV_Max,
 	MFSCM_Max,
-	MFSCT_Max,
 	MFSCRS_Max,
+	MFSCT_Max,
 	MFSCM_Max,
 	0,
 	0

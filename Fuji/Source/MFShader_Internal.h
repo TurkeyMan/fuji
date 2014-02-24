@@ -26,7 +26,7 @@ struct MFShaderTemplate
 	MFShaderInput *pInputs;
 
 	size_t bytes;
-	void *pProgram;
+	const void *pProgram;
 };
 
 struct MFShader : MFResource

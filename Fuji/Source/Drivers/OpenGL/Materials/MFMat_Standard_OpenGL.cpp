@@ -14,6 +14,7 @@
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
+#include "MFEffect_Internal.h"
 
 #include "../MFOpenGL.h"
 
@@ -60,221 +61,130 @@ static const GLenum glCompareFunc[MFComparisonFunc_Max] =
 	GL_ALWAYS
 };
 
-#if defined(MF_OPENGL_SUPPORT_SHADERS)
-	static GLuint gDefVertexShader = 0;
-	static GLuint gDefFragmentShaderUntextured = 0;
-	static GLuint gDefFragmentShaderTextured = 0;
-	static GLuint gDefFragmentShaderMultiTextured = 0;
-
-	static GLuint gDefShaderProgramUntextured = 0;
-	static GLuint gDefShaderProgramTextured = 0;
-	static GLuint gDefShaderProgramMultiTextured = 0;
-
-	static const GLchar gVertexShader[] = "					\n\
-		uniform mat4 wvMatrix;								\n\
-		uniform mat4 vpMatrix;								\n\
-		uniform mat4 wvpMatrix;								\n\
-		uniform mat4 texMatrix;								\n\
-															\n\
-		attribute vec3 vPos;								\n\
-		attribute vec3 vNormal;								\n\
-		attribute vec4 vColour;								\n\
-		attribute vec2 vUV0;								\n\
-		attribute vec2 vUV1;								\n\
-															\n\
-		varying vec4 oColour;								\n\
-		varying vec2 oUV0;									\n\
-		varying vec2 oUV1;									\n\
-															\n\
-		void main()											\n\
-		{													\n\
-			oColour = vColour;								\n\
-			oUV0 = vUV0;									\n\
-			oUV1 = vUV1;									\n\
-			gl_Position = wvpMatrix * vec4(vPos, 1.0);		\n\
-		}													";
-
-	static const GLchar gFragmentShaderUntextured[] = "			\n\
-		varying vec4 oColour;									\n\
-		void main(void)											\n\
-		{														\n\
-			gl_FragColor = oColour;								\n\
-		}														";
-
-	static const GLchar gFragmentShaderTextured[] = "			\n\
-		uniform sampler2D diffuse;								\n\
-		varying vec4 oColour;									\n\
-		varying vec2 oUV0;										\n\
-		void main(void)											\n\
-		{														\n\
-			gl_FragColor = texture2D(diffuse, oUV0) * oColour;	\n\
-		}														";
-
-	static const GLchar gFragmentShaderMultiTextured[] = "		\n\
-		uniform sampler2D diffuse;								\n\
-		uniform sampler2D detail;								\n\
-		varying vec4 oColour;									\n\
-		varying vec2 oUV0;										\n\
-		varying vec2 oUV1;										\n\
-		void main(void)											\n\
-		{														\n\
-			vec4 image = texture2D(diffuse, oUV0);				\n\
-			vec4 colour = texture2D(detail, oUV0) * oColour;	\n\
-			gl_FragColor = vec4(image.xyz, 0) + colour;			\n\
-		}														";
-#endif
 
 int MFMat_Standard_RegisterMaterial(MFMaterialType *pType)
 {
-	// probably compile the shaders now i guess...
-	gDefVertexShader = MFRenderer_OpenGL_CompileShader(gVertexShader, MFOGL_ShaderType_VertexShader);
-	gDefFragmentShaderUntextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderUntextured, MFOGL_ShaderType_FragmentShader);
-	gDefFragmentShaderTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderTextured, MFOGL_ShaderType_FragmentShader);
-	gDefFragmentShaderMultiTextured = MFRenderer_OpenGL_CompileShader(gFragmentShaderMultiTextured, MFOGL_ShaderType_FragmentShader);
-
-#if defined(MF_OPENGL_ES)
-	glReleaseShaderCompiler();
-#endif
-
-	// create and link a program
-	gDefShaderProgramUntextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderUntextured);
-	gDefShaderProgramTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderTextured);
-	gDefShaderProgramMultiTextured = MFRenderer_OpenGL_CreateProgram(gDefVertexShader, gDefFragmentShaderMultiTextured);
-
 	return 0;
 }
 
 void MFMat_Standard_UnregisterMaterial()
 {
-	glDeleteProgram(gDefShaderProgramUntextured);
-	glDeleteProgram(gDefShaderProgramTextured);
-	glDeleteProgram(gDefShaderProgramMultiTextured);
-
-	glDeleteShader(gDefVertexShader);
-	glDeleteShader(gDefFragmentShaderUntextured);
-	glDeleteShader(gDefFragmentShaderTextured);
-	glDeleteShader(gDefFragmentShaderMultiTextured);
-}
-
-inline void MFMat_Standard_SetSamplerState(int texture, MFSamplerState *pSampler, const char *pName)
-{
-	MFRenderer_OpenGL_SetUniformS(pName, texture);
-	GLint sampler = (GLint)(size_t)pSampler->pPlatformData;
-	glBindSampler(texture, sampler);
 }
 
 int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 {
-	MFCALLSTACK;
+	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
-#if MFMatStandard_TexFilter_Max > 4
-	#error "glTexFilters only supports 4 mip filters..."
-#endif
+	MFEffectTechnique *pTechnique = NULL;
+	if(pData->pEffect)
+		pTechnique = MFEffect_GetTechnique(pData->pEffect, state);
+	MFDebug_Assert(pTechnique, "No technique!");
 
-	bool bDetailPresent = state.isSet(MFSB_CT_Bool, MFSCB_DetailMapSet);
-	bool bDiffusePresent = state.isSet(MFSB_CT_Bool, MFSCB_DiffuseSet);
+	MFEffectData_OpenGL &techniqueData = *(MFEffectData_OpenGL*)pTechnique->pPlatformData;
 
-	if(bDetailPresent)
+	if(pTechnique != state.pTechniqueSet)
 	{
-		// set detail map
-		MFTexture *pDetail = state.pTextures[MFSCT_DetailMap];
-		if(state.pTexturesSet[MFSCT_DetailMap] != pDetail)
+		state.pTechniqueSet = pTechnique;
+		glUseProgram(techniqueData.program);
+
+		// need to clear all the cache states
+		//... or ignore the state caching for now
+	}
+
+	// bools
+/*	do a bitscan loop over the bool states
+	uint32 boolState = state.bools & state.rsSet[MFSB_CT_Bool];
+
+	uint32 req = pTechnique->renderStateRequirements[MFSB_CT_Bool];
+	if(req)
+	{
+		uint32 vsReq = pVS->renderStateRequirements[MFSB_CT_Bool];
+		uint32 psReq = pPS->renderStateRequirements[MFSB_CT_Bool];
+		if((state.boolsSet & req) != (boolState & req))
 		{
-			state.pTexturesSet[MFSCT_DetailMap] = pDetail;
+			BOOL bools[32];
+			for(uint32 i=0, b=1; i<MFSCB_Max; ++i, b<<=1)
+				bools[i] = (boolState & b) != 0;
 
-			glActiveTexture(GL_TEXTURE0 + MFSCT_DetailMap);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDetail->pInternalData);
+			if((state.boolsSet & vsReq) != (boolState & vsReq))
+				pd3dDevice->SetVertexShaderConstantB(0, bools,  32);
+			if((state.boolsSet & psReq) != (boolState & psReq))
+				pd3dDevice->SetPixelShaderConstantB(0, bools,  32);
 		}
-
-		// set detail map sampler
-		MFSamplerState *pDetailSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DetailMapSamplerState];
-		if(state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] != pDetailSamp)
-		{
-			state.pRenderStatesSet[MFSCRS_DetailMapSamplerState] = pDetailSamp;
-
-			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramMultiTextured);
-			MFMat_Standard_SetSamplerState(MFSCT_DetailMap, pDetailSamp, "detail");
-		}
-	}
-	else
-	{
-		if(state.pTexturesSet[MFSCT_DetailMap] != NULL)
-		{
-			state.pTexturesSet[MFSCT_DetailMap] = NULL;
-
-			glActiveTexture(GL_TEXTURE0 + MFSCT_DetailMap);
-			glDisable(GL_TEXTURE_2D);
-		}
-	}
-
-	if(bDiffusePresent)
-	{
-		// set diffuse map
-		MFTexture *pDiffuse = state.pTextures[MFSCT_Diffuse];
-		if(state.pTexturesSet[MFSCT_Diffuse] != pDiffuse || state.boolChanged(MFSCB_DetailMapSet))
-		{
-			state.pTexturesSet[MFSCT_Diffuse] = pDiffuse;
-
-			glActiveTexture(GL_TEXTURE0 + MFSCT_Diffuse);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pDiffuse->pInternalData);
-		}
-
-		// set diffuse map sampler
-		MFSamplerState *pDiffuseSamp = (MFSamplerState*)state.pRenderStates[MFSCRS_DiffuseSamplerState];
-		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] != pDiffuseSamp || state.boolChanged(MFSCB_DetailMapSet))
-		{
-			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState] = pDiffuseSamp;
-			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramTextured);
-			MFMat_Standard_SetSamplerState(MFSCT_Diffuse, pDiffuseSamp, "diffuse");
-		}
-	}
-	else
-	{
-		if(state.pTexturesSet[MFSCT_Diffuse] != NULL)
-		{
-			state.pTexturesSet[MFSCT_Diffuse] = NULL;
-
-			glActiveTexture(GL_TEXTURE0 + MFSCT_Diffuse);
-			glDisable(GL_TEXTURE_2D);
-
-			MFRenderer_OpenGL_SetShaderProgram(gDefShaderProgramUntextured);
-		}
-	}
-
-	if(state.pMatrixStatesSet[MFSCM_Projection] != state.pMatrixStates[MFSCM_Projection])
-	{
-		MFMatrix *pProj = state.pMatrixStates[MFSCM_Projection];
-		state.pMatrixStatesSet[MFSCM_Projection] = pProj;
-
-		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Projection, *pProj);
-	}
-
-	if(state.pMatrixStatesSet[MFSCM_WorldView] != state.pMatrixStates[MFSCM_WorldView])
-	{
-		MFMatrix *pWV = state.getDerivedMatrix(MFSCM_WorldView);
-		state.pMatrixStates[MFSCM_WorldView] = pWV;
-
-		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_WorldView, *pWV);
-	}
-
-	if(state.pMatrixStatesSet[MFSCM_UV0] != state.pMatrixStates[MFSCM_UV0])
-	{
-		MFMatrix *pUV0 = state.pMatrixStates[MFSCM_UV0];
-		state.pMatrixStatesSet[MFSCM_UV0] = pUV0;
-
-		MFRenderer_OpenGL_SetMatrix(MFOGL_MatrixType_Texture, *pUV0);
-	}
-/*
-	if(state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] != state.pVectorStates[MFSCV_MaterialDiffuseColour])
-	{
-		MFVector *pDiffuseColour = state.pVectorStates[MFSCV_MaterialDiffuseColour];
-		state.pVectorStatesSet[MFSCV_MaterialDiffuseColour] = pDiffuseColour;
-
-//		pd3dDevice->SetVertexShaderConstantF(r_modelColour, (float*)pDiffuseColour, 1);
 	}
 */
+
+	// matrices
+	uint32 req = pTechnique->renderStateRequirements[MFSB_CT_Matrix];
+	uint32 i;
+	while(MFUtil_BitScanReverse(req, &i))
+	{
+		uint32 b = MFBIT(i);
+		req ^= b;
+
+//		if(state.pMatrixStatesSet[i] != state.pMatrixStates[i])
+		{
+			MFMatrix *pM;
+			if(i > MFSCM_DerivedStart)
+				pM = state.getDerivedMatrix((MFStateConstant_Matrix)i);
+			else
+				pM = state.pMatrixStates[i];
+//			state.pMatrixStatesSet[i] = pM;
+
+			GLint uniform = techniqueData.uniformLocation[MFSB_CT_Matrix][i];
+			glUniformMatrix4fv(uniform, 1, GL_TRUE, (float*)pM);
+		}
+	}
+
+	// vectors
+	req = pTechnique->renderStateRequirements[MFSB_CT_Vector];
+	while(MFUtil_BitScanReverse(req, &i))
+	{
+		uint32 b = MFBIT(i);
+		req ^= b;
+
+//		if(state.pVectorStatesSet[i] != state.pVectorStates[i])
+		{
+			MFVector *pV = state.pVectorStates[i];
+//			state.pVectorStatesSet[i] = pV;
+
+			GLint uniform = techniqueData.uniformLocation[MFSB_CT_Vector][i];
+			glUniform4fv(uniform, 1, (float*)pV);
+		}
+	}
+
+	// textures
+	req = pTechnique->renderStateRequirements[MFSB_CT_Texture];
+	while(MFUtil_BitScanReverse(req, &i))
+	{
+		req ^= MFBIT(i);
+
+		MFTexture *pT = state.pTextures[i];
+		if(state.pTexturesSet[i] != pT)
+		{
+			state.pTexturesSet[i] = pT;
+			glActiveTexture(GL_TEXTURE0 + i);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)pT->pInternalData);
+		}
+/*
+		else
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glDisable(GL_TEXTURE_2D);
+		}
+*/
+
+		MFSamplerState *pS = (MFSamplerState*)state.pRenderStates[MFSCRS_DiffuseSamplerState + i];
+//		if(state.pRenderStatesSet[MFSCRS_DiffuseSamplerState + i] != pS)
+		{
+//			state.pRenderStatesSet[MFSCRS_DiffuseSamplerState + i] = pS;
+			GLint uniform = techniqueData.uniformLocation[MFSB_CT_RenderState][MFSCRS_DiffuseSamplerState + i];
+			GLint sampler = (GLint)(size_t)pS->pPlatformData;
+			glUniform1i(uniform, i);
+			glBindSampler(i, sampler);
+		}
+	}
 
 	// blend state
 	MFBlendState *pBlendState = (MFBlendState*)state.pRenderStates[MFSCRS_BlendState];
@@ -385,6 +295,24 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 //		pd3dDevice->SetVertexShaderConstantF(r_colourMask, (float*)pMask, 1);
 	}
 */
+
+	// set animation matrices
+	if(state.getBool(MFSCB_Animated))
+	{
+		MFDebug_Assert(false, "TODO!");
+//		for(uint32 b=0; b<state.matrixBatch.numMatrices; b++)
+//			MFRendererPC_SetAnimationMatrix(b, state.animation.pMatrices[state.matrixBatch.pIndices[b]]);
+	}
+
+	// set viewport
+	if(state.pViewportSet != state.pViewport)
+	{
+		if(!state.pViewport)
+			MFRenderer_ResetViewport();
+		else
+			MFRenderer_SetViewport(state.pViewport);
+		state.pViewportSet = state.pViewport;
+	}
 
 	MFCheckForOpenGLError(true);
 

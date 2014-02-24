@@ -25,6 +25,7 @@
 
 #include "MFVector.h"
 #include "MFVertex_Internal.h"
+#include "MFEffect_Internal.h"
 #include "MFHeap.h"
 
 #include "MFOpenGL.h"
@@ -259,13 +260,13 @@ MF_API void MFVertex_SetIndexBuffer(const MFIndexBuffer *pIndexBuffer)
 	gRenderBuffers.pIndexBuffer = pIndexBuffer;
 }
 
-MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int numVertices)
+MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int firstVertex, int numVertices)
 {
 	MFVertexElement *pElements = gRenderBuffers.pVertexDeclaration->pElements;
 	MFVertexElementData *pElementData = gRenderBuffers.pVertexDeclaration->pElementData;
+	MFEffectData_OpenGL &techniqueData = *(MFEffectData_OpenGL*)pTechnique->pPlatformData;
 
 	// bind the vertex streams...
-	GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
 	GLint attribs[16];
 	int stream = -1;
 
@@ -274,11 +275,11 @@ MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int nu
 		int type = pElements[a].type;
 
 		if(pElements[a].index == 0)
-			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
 			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
-			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
 
@@ -310,15 +311,15 @@ MF_API void MFVertex_RenderVertices(MFPrimType primType, int firstVertex, int nu
 	MFCheckForOpenGLError(true);
 }
 
-MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
+MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices)
 {
 	// TODO: how to we set VB/IB offsets in OpenGL?
 
 	MFVertexElement *pElements = gRenderBuffers.pVertexDeclaration->pElements;
 	MFVertexElementData *pElementData = gRenderBuffers.pVertexDeclaration->pElementData;
+	MFEffectData_OpenGL &techniqueData = *(MFEffectData_OpenGL*)pTechnique->pPlatformData;
 
 	// bind the vertex streams...
-	GLuint program = MFRenderer_OpenGL_GetCurrentProgram();
 	GLint attribs[16];
 	int stream = -1;
 
@@ -326,12 +327,14 @@ MF_API void MFVertex_RenderIndexedVertices(MFPrimType primType, int vertexOffset
 	{
 		int type = pElements[a].type;
 
+		// TODO: we shouldn't be looking up attribute locations at runtime!
+		// pre-lookup to an array in techniqueData
 		if(pElements[a].index == 0)
-			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
 			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
-			attribs[a] = glGetAttribLocation(program, gAttribNames[type]);
+			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
 

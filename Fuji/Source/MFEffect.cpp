@@ -52,9 +52,10 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 	if(!pEffect)
 	{
 		size_t nameLen = pFilename ? MFString_Length(pFilename) + 1 : 0;
+		size_t platformDataSize = MFEffect_PlatformDataSize();
 
 		size_t fileSize;
-		pEffect = (MFEffect*)MFFileSystem_Load(MFStr("%s.bfx", pFilename), &fileSize, nameLen);
+		pEffect = (MFEffect*)MFFileSystem_Load(MFStr("%s.bfx", pFilename), &fileSize, platformDataSize + nameLen);
 		if(!pEffect)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
@@ -62,7 +63,7 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 			MFIntEffect *pIE = MFIntEffect_CreateFromSourceData(pFilename);
 			if(pIE)
 			{
-				MFIntEffect_CreateRuntimeData(pIE, &pEffect, &fileSize, MFSystem_GetCurrentPlatform());
+				MFIntEffect_CreateRuntimeData(pIE, &pEffect, &fileSize, MFSystem_GetCurrentPlatform(), platformDataSize + nameLen);
 
 				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.bfx", pFilename), MFOF_Write | MFOF_Binary);
 				if(pFile)
@@ -82,8 +83,9 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 			}
 		}
 
+		pEffect->pPlatformData = platformDataSize ? (char*)pEffect + fileSize : NULL;
 		if(pFilename)
-			pFilename = MFString_Copy((char*)pEffect + fileSize, pFilename);
+			pFilename = MFString_Copy((char*)pEffect + fileSize + platformDataSize, pFilename);
 
 		// fix up...
 		if(pEffect->pEffectName)
@@ -135,10 +137,10 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 						static const char *sShaderNames[MFST_Max] =
 						{
 							"VertexShader",
-							"PixelShader",
+							"PixelShader",		// Fragment shader
 							"GeometryShader",
-							"DomainShader",
-							"HullShader",
+							"DomainShader",		// Evaluation shader
+							"HullShader",		// Control shader
 							"ComputeShader"
 						};
 						const char *pName = MFStr("%s:%s_%s", pEffect->pEffectName ? pEffect->pEffectName : "Unnamed", t.pName ? t.pName : MFStr("Technique%d", a), sShaderNames[j]);
