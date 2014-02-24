@@ -1,5 +1,7 @@
 module fuji.driver;
 
+/*** Driver list ***/
+
 enum MFDriver
 {
 	NULL			= 0,
@@ -39,7 +41,27 @@ enum MFDriver
 	OPENCL			= 34,
 	BSDSOCKETS		= 35,
 	ANDROID			= 36,
-	NACL			= 37
+	NACL			= 37,
+	WEB				= 38,
+	XAUDIO2			= 39,
+	ASIO			= 40,
+	XB1				= 41,
+	PS4				= 42,
+	WIIU			= 43
+}
+
+// list of available renderer drivers
+enum MFRendererDrivers
+{
+	Unknown = -1,
+
+	D3D9 = 0,
+	D3D11,
+	OpenGL,
+	X360,
+	XBox,
+	PSP,
+	PS2,
 }
 
 /*** Platform specific defines, includes and driver selection ***/
