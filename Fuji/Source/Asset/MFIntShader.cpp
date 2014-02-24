@@ -24,9 +24,9 @@
 	#if defined(SUPPORT_HLSL)
 		#include "hlsl2glslfork/hlsl2glsl.h"
 		#if defined(NDEBUG)
-				#pragma comment(lib, "hlsl2glsl")
+			#pragma comment(lib, "hlsl2glsl")
 		#else
-				#pragma comment(lib, "hlsl2glsl_d")
+			#pragma comment(lib, "hlsl2glsl_d")
 		#endif
 
 		#if defined(SUPPORT_GLSL_OPTIMIZER)
