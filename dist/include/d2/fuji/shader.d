@@ -1,4 +1,4 @@
-module fuji.sound;
+module fuji.shader;
 
 public import fuji.fuji;
 

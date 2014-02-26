@@ -8,11 +8,12 @@
 
 #if defined(MF_WINDOWS) // TODO: build hlsl2glsl and glsl_optimizer libs for linux/mac
 #define SUPPORT_HLSL
-#define SUPPORT_GLSL_OPTIMIZER
+//#define SUPPORT_HLSL2GLSL
+//#define SUPPORT_GLSL_OPTIMIZER
 #endif
 #define SUPPORT_GLSL
 #if defined(MF_WINDOWS) // TODO: support Cg compiler on linux/mac?
-#define SUPPORT_CG
+//#define SUPPORT_CG
 #endif
 
 #if defined(MF_WINDOWS)
@@ -22,11 +23,13 @@
 	#define SUPPORT_OPENGL
 
 	#if defined(SUPPORT_HLSL)
-		#include "hlsl2glslfork/hlsl2glsl.h"
-		#if defined(NDEBUG)
-			#pragma comment(lib, "hlsl2glsl")
-		#else
-			#pragma comment(lib, "hlsl2glsl_d")
+		#if defined(SUPPORT_HLSL2GLSL)
+			#include "hlsl2glslfork/hlsl2glsl.h"
+			#if defined(NDEBUG)
+				#pragma comment(lib, "hlsl2glsl")
+			#else
+				#pragma comment(lib, "hlsl2glsl_d")
+			#endif
 		#endif
 
 		#if defined(SUPPORT_GLSL_OPTIMIZER)
@@ -767,7 +770,7 @@ bool MFIntShader_CompileShaderWinSDK(MFShaderTemplate *pTemplate, MFShaderMacro 
 	{
 		pTemplate->bytes = pProgram->GetBufferSize();
 		pTemplate->pProgram = MFHeap_Alloc(pTemplate->bytes);
-		MFCopyMemory(pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
+		MFCopyMemory((void*)pTemplate->pProgram, pProgram->GetBufferPointer(), pTemplate->bytes);
 		pProgram->Release();
 	}
 
@@ -912,7 +915,7 @@ static char *MFIntShader_Preprocess(MFShaderTemplate *pTemplate, MFShaderMacro *
 	return pSource;
 }
 
-#if defined(SUPPORT_HLSL)
+#if defined(SUPPORT_HLSL) && defined(SUPPORT_HLSL2GLSL)
 static EAttribSemantic sSemantics[] = {
 	EAttrSemPosition,
 	EAttrSemPosition1,
@@ -1124,7 +1127,7 @@ bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro 
 	}
 
 	// translate HLSL to GLSL if available
-#if defined(SUPPORT_HLSL)
+#if defined(SUPPORT_HLSL) && defined(SUPPORT_HLSL2GLSL)
 	if(language == MFSL_HLSL)
 	{
 		const char *pTranslatedShader = MFIntShader_TranslateShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename);
