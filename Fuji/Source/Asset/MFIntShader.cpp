@@ -8,8 +8,8 @@
 
 #if defined(MF_WINDOWS) // TODO: build hlsl2glsl and glsl_optimizer libs for linux/mac
 #define SUPPORT_HLSL
-//#define SUPPORT_HLSL2GLSL
-//#define SUPPORT_GLSL_OPTIMIZER
+#define SUPPORT_HLSL2GLSL
+#define SUPPORT_GLSL_OPTIMIZER
 #endif
 #define SUPPORT_GLSL
 #if defined(MF_WINDOWS) // TODO: support Cg compiler on linux/mac?
@@ -125,7 +125,7 @@ bool MFIntShader_CreateShader(MFShaderType shaderType, MFShaderMacro *pMacros, c
 
 	MFStringCache *pStrings = MFStringCache_Create(64 * 1024);
 
-#if defined(MF_DEBUG)
+#if defined(DEBUG)
 	bool bDebug = true;
 #else
 	bool bDebug = false;

@@ -14,10 +14,10 @@ local function getConfigName(configName)
 end
 
 configNames = {}
-configNames.Debug = getConfigName("Debug")
-configNames.DebugOpt = getConfigName("DebugOpt")
-configNames.Release = getConfigName("Release")
-configNames.Retail = getConfigName("Retail")
+configNames.Debug = getConfigName("debug")
+configNames.DebugOpt = getConfigName("debugopt")
+configNames.Release = getConfigName("release")
+configNames.Retail = getConfigName("retail")
 
 platformNames = {}
 --platformNames.Native = iif(isVS(), "$(Platform)", "")
@@ -36,29 +36,35 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
-includedirs { "../include/", "../fuji/dist/include/d2/" }
+includedirs { "../include/", "../include/d2/" }
+
+if os.get() == "windows" then
+	separator = "_"
+else
+	separator = "-"
+end
 
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
 	optimize "Debug"
-	targetsuffix ("_" .. configNames.Debug)
+	targetsuffix (separator .. configNames.Debug)
 
 configuration "DebugOpt"
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
 	optimize "On"
-	targetsuffix ("_" .. configNames.DebugOpt)
+	targetsuffix (separator .. configNames.DebugOpt)
 
 configuration "Release"
 	defines { "NDEBUG", "_RELEASE" }
 	optimize "Full"
-	targetsuffix ("_" .. configNames.Release)
+	targetsuffix (separator .. configNames.Release)
 
 configuration "Retail"
 	defines { "NDEBUG", "_RETAIL" }
 	optimize "Full"
-	targetsuffix ("_" .. configNames.Retail)
+	targetsuffix (separator .. configNames.Retail)
 
 
 -- platform specific config --
@@ -66,12 +72,11 @@ configuration "Retail"
 -- Linux --
 configuration { "linux" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
-	links { "z", "png", "mad" }
+	links { "z", "mad" }
 --	links { "asound" }
 --	links { "portaudio" }
 --	links { "pulse" }
 	links { "openal" }
-	links { "assimp" }
 
 -- OSX --
 configuration { "macosx" }
@@ -93,18 +98,12 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	if string.startswith(_ACTION, "vs") then
 		configuration { "not StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
 			linkoptions { "/Delay:unload" }
-			linkoptions { "/DelayLoad:d3d11.dll", "/DelayLoad:d3dx11_43.dll" }		-- D3D11
-			linkoptions { "/DelayLoad:d3d9.dll", "/DelayLoad:D3DX9_43.dll" }		-- D3D9
+			linkoptions { "/DelayLoad:d3d11.dll" }									-- D3D11
+			linkoptions { "/DelayLoad:d3d9.dll" }									-- D3D9
 			linkoptions { "/DelayLoad:opengl32.dll" }								-- OpenGL
 			linkoptions { "/DelayLoad:dsound.dll" }									-- Sound
 			linkoptions { "/DelayLoad:xinput1_3.dll", "/DelayLoad:dinput8.dll" }	-- Input
 			linkoptions { "/DelayLoad:ws2_32.dll" }									-- Winsock
-
-			configuration { "not StaticLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
-				linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
-
-			configuration { "not StaticLib", "windows", "x64", "not Xbox360", "not PS3", "not Android" }
-				linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
 	end
 
 -- Android --

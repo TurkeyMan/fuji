@@ -16,6 +16,10 @@ project (projName)
 			-- linux shared libs append the version number AFTER the extension
 			targetextension(".so." .. fujiVersion)
 		end
+
+		-- link to the asset processing DLL
+		links { "FujiAsset" }
+		linkoptions { "/DelayLoad:FujiAsset.dll" }
 	else
 		kind "StaticLib"
 		flags { "OmitDefaultLibrary" }
@@ -32,6 +36,7 @@ project (projName)
 	files { "../../dist/include/Fuji/**.h", "../../dist/include/Fuji/**.inl" }
 	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
 	excludes { "../Source/Images/**" }
+	excludes { "../Source/Asset/**", "../Source/Util/**" }
 
 	-- include some middleware directly --
 	includedirs { "../Middleware/" }
@@ -42,15 +47,14 @@ project (projName)
 		configuration { "not linux", "not macosx", "not Android" }
 			files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 			includedirs { "../Middleware/zlib" }
-			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
-			includedirs { "../Middleware/libpng-1.5.0/" }
+--			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+--			includedirs { "../Middleware/libpng-1.5.0/" }
 	end
 --	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 --		includedirs { "../Middleware/" }
 	configuration { }
 
 	-- project configuration --
-
 	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
 	warnings "Extra"
 
@@ -70,36 +74,9 @@ project (projName)
 			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
 	end
 
-	configuration "Debug"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Debug)
-		else
-			targetsuffix ("-debug")
-		end
-
-	configuration "DebugOpt"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.DebugOpt)
-		else
-			targetsuffix ("-debugopt")
-		end
-
-	configuration "Release"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Release)
-		else
-			targetsuffix ("")
-		end
-
-	configuration "Retail"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Retail)
-		else
-			targetsuffix ("")
-		end
-
-
 	-- platform specific config --
+	configuration { "StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
+		targetname "Fuji_static"
 
 	-- Linux --
 	configuration { "linux" }
@@ -118,15 +95,15 @@ project (projName)
 		includedirs { "../Source/Images/ANDROID/" }
 
 	-- XBox --
-	configuration "Xbox"
+	configuration { "Xbox" }
 		includedirs { "../Source/Images/XBOX/" }
 
 	-- XBox 360 --
-	configuration "Xbox360"
+	configuration { "Xbox360" }
 		includedirs { "../Source/Images/X360/" }
 
 	-- Playstation 3 --
-	configuration "PS3"
+	configuration { "PS3" }
 		includedirs { "../Source/Images/PS3/" }
 
 	configuration { }

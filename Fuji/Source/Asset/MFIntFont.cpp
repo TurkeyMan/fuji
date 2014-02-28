@@ -34,7 +34,7 @@ static char *GetNextLine(char *&pText)
 	return pLineStart;
 }
 
-void MFIntFont_CreateFromSourceData(const char *pFilename, void **ppOutput, size_t *pSize, MFPlatform platform)
+MF_API void MFIntFont_CreateFromSourceData(const char *pFilename, void **ppOutput, size_t *pSize, MFPlatform platform)
 {
 	*ppOutput = NULL;
 	if(pSize)

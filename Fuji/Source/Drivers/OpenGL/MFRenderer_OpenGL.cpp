@@ -567,6 +567,19 @@ MF_API float MFRenderer_GetTexelCenterOffset()
 	return 0.f;
 }
 
+
+/*
+opengl state change costs (descending cost):
+  render target
+  program
+  rop
+  texture binding
+  vertex format
+  UBO binding
+  vertex binding
+  uniform update
+*/
+
 static int SortDefault(const void *p1, const void *p2)
 {
 	MFRenderElement *pE1 = (MFRenderElement*)p1;

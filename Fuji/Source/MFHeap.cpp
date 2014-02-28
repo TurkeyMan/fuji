@@ -84,7 +84,7 @@ static MFHeap gCustomHeap =
 	#define USE_PRE_MUNGWALL
 	static const char *gLlawgnum = "llawgnum";
 #else
-	static const int MFHeap_MungwallBytes 0
+	static const int MFHeap_MungwallBytes = 0;
 #endif
 
 // allocation structure. stored immediately before any fuji allocation to identify the heap it was allocated with, and verify memory integrity.
@@ -460,6 +460,7 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 		return false;
 	}
 
+#if !defined(_RETAIL)
 #if defined(USE_PRE_MUNGWALL)
 	if(MFMemCompare((const char*)pMemory - MFHeap_MungwallBytes, gLlawgnum, MFHeap_MungwallBytes) == 0)
 #endif
@@ -468,6 +469,9 @@ MF_API bool MFHeap_ValidateMemory(const void *pMemory)
 
 	MFDebug_Log(0, MFStr("%s(" MFFMT_SIZE_T ") : Corrupted mungwall detected in allocation 0x%p.", pHeader->pFile, pHeader->line, pMemory));
 	return false;
+#else
+	return true;
+#endif
 }
 
 // memory allocation groups for profiling

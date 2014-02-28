@@ -413,7 +413,7 @@ enum MFEndian
 
 /*** Compiler compatibility macros ***/
 
-#if defined(MF_DEBUG)
+#if defined(DEBUG)
 	#define MFASSUME(condition) MFDebug_Assert((condition), "Bad assumption: "##condition);
 	#define MFUNREACHABLE MFDebug_Assert(false, "Shouldn't be here!");
 #endif
@@ -428,7 +428,7 @@ enum MFEndian
 	#define MFALWAYS_INLINE __forceinline
 	#define MFPRINTF_FUNC(formatarg, vararg)
 	#define MFPRINTF_METHOD(formatarg, vararg)
-	#if !defined(MF_DEBUG)
+	#if !defined(DEBUG)
 		#define MFASSUME(condition) __assume(condition)
 		#define MFUNREACHABLE __assume(0)
 	#endif
@@ -447,7 +447,7 @@ enum MFEndian
 	#define MFALWAYS_INLINE inline __attribute__((always_inline))
 	#define MFPRINTF_FUNC(formatarg, vararg) __attribute__((format(printf, formatarg, vararg)))
 	#define MFPRINTF_METHOD(formatarg, vararg) __attribute__((format(printf, formatarg + 1, vararg + 1)))
-	#if !defined(MF_DEBUG)
+	#if !defined(DEBUG)
 		// TODO: use #if __has_builtin(__builtin_unreachable) ??
 		#define MFASSUME(condition) if(!(condition)) { __builtin_unreachable(); }
 		#define MFUNREACHABLE __builtin_unreachable()
@@ -466,7 +466,7 @@ enum MFEndian
 	#define MFALWAYS_INLINE inline
 	#define MFPRINTF_FUNC(formatarg, vararg)
 	#define MFPRINTF_METHOD(formatarg, vararg)
-	#if !defined(MF_DEBUG)
+	#if !defined(DEBUG)
 		#define MFASSUME(condition)
 		#define MFUNREACHABLE
 	#endif

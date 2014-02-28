@@ -1271,7 +1271,7 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 		{
 			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
 			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
-			MFDebug_Assert(l.type == r.type || (l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2), "Incorrect type")
+			MFDebug_Assert(l.type == r.type || (l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2), "Incorrect type");
 			if(l.expression == MFExp_Immediate && r.expression == MFExp_Immediate)
 			{
 				e.expression = MFExp_Immediate;
@@ -1314,7 +1314,7 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 		{
 			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
 			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
-			MFDebug_Assert(l.type < MFEDT_IntVector && r.type < MFEDT_IntVector, "Incorrect type")
+			MFDebug_Assert(l.type < MFEDT_IntVector && r.type < MFEDT_IntVector, "Incorrect type");
 			if(l.expression == MFExp_Immediate && r.expression == MFExp_Immediate)
 			{
 				e.expression = MFExp_Immediate;
@@ -1356,7 +1356,7 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 		{
 			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
 			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
-			MFDebug_Assert(l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2, "Incorrect type")
+			MFDebug_Assert(l.type < MFEDT_String && r.type < MFEDT_String && (l.type ^ r.type) != 2, "Incorrect type");
 			MFDebug_Assert(false, "Todo");
 			break;
 		}

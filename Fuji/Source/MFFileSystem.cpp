@@ -1057,7 +1057,7 @@ MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bA
 	{
 		// TODO: support other filesystems that forward to the native filesystem (like cache filesystem?)
 		if(pFile->filesystem == hNativeFileSystem)
-			pPath = MFStr(pFile->fileIdentifier);
+			pPath = MFStr((const char*)pFile->pFilesysData);
 		MFFile_Close(pFile);
 	}
 

@@ -88,3 +88,5 @@ solution "Fuji"
 	-- D bindings
 	dofile "Fuji/Project/fujidproj.lua"
 
+	-- Asset compiler
+	dofile "Fuji/Project/fujiasset.lua"

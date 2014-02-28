@@ -14,6 +14,7 @@ project ("FujiD")
 	targetdir "../../dist/lib"
 
 	files { "../../dist/include/d2/**.d" }
+	excludes { "../../dist/include/d2/haku/**.d" }
 
 	-- project configuration --
 
@@ -29,33 +30,4 @@ project ("FujiD")
 			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
 	end
 
-	configuration "Debug"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Debug)
-		else
-			targetsuffix ("-debug")
-		end
-
-	configuration "DebugOpt"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.DebugOpt)
-		else
-			targetsuffix ("-debugopt")
-		end
-
-	configuration "Release"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Release)
-		else
-			targetsuffix ("")
-		end
-
-	configuration "Retail"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Retail)
-		else
-			targetsuffix ("")
-		end
-
 	configuration { }
-

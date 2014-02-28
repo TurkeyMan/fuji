@@ -510,7 +510,7 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 		//  - constants present
 		//  - values of constants?
 
-#if defined(MF_DEBUG)
+#if defined(DEBUG)
 		// check that all required states are set
 		MFRenderer_CheckRequirements(state, element);
 #endif
