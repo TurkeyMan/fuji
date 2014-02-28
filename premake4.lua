@@ -85,3 +85,6 @@ solution "Fuji"
 	-- Haku project
 	dofile "Haku/Project/hakuproj.lua"
 
+	-- D bindings
+	dofile "Fuji/Project/fujidproj.lua"
+

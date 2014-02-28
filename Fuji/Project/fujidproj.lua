@@ -1,40 +1,24 @@
-hakuVersion = "0.1.1"
+require "monodevelop"
+require "d"
 
-projName = "Haku"
+fujiVersion = "0.7.1"
 
-if hakuDll == true then
-	projName = "HakuDLL"
-end
-
-project (projName)
-	language "C++"
-	if hakuDll == true then
-		kind "SharedLib"
-		targetname "Haku"
-		defines { "MF_SHAREDLIB" }
-	else
-		kind "StaticLib"
-		flags { "OmitDefaultLibrary" }
-	end
+project ("FujiD")
+	language "D"
+	kind "StaticLib"
+	flags { "OmitDefaultLibrary" }
 
 	-- setup paths --
-	includedirs { "../../dist/include", "../../dist/include/Haku" }
+	includedirs { "../../dist/include/d2" }
 	objdir "../Build"
 	targetdir "../../dist/lib"
 
-	-- add the source code --
-	files { "../*.TXT" }
-
-	files { "../../dist/include/Haku/**.h", "../../dist/include/Haku/**.inl" }
-	files { "../Source/**.h", "../Source/**.cpp" }
+	files { "../../dist/include/d2/**.d" }
 
 	-- project configuration --
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime" }
 	warnings "Extra"
-
---	pchheader "Haku.h"
---	pchsource "HKMain.cpp"
 
 	-- configure standard fuji stuff --
 	dofile "../../dist/Project/fujiconfig.lua"
@@ -74,3 +58,4 @@ project (projName)
 		end
 
 	configuration { }
+

@@ -36,7 +36,7 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
-includedirs { "../include/" }
+includedirs { "../include/", "../fuji/dist/include/d2/" }
 
 configuration "Debug"
 	defines { "DEBUG", "_DEBUG" }
