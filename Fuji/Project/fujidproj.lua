@@ -17,8 +17,6 @@ project ("FujiD")
 	excludes { "../../dist/include/d2/haku/**.d" }
 
 	-- project configuration --
-
-	flags { "StaticRuntime" }
 	warnings "Extra"
 
 	-- configure standard fuji stuff --

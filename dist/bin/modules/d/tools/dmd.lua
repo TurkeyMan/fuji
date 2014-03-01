@@ -157,8 +157,8 @@
 	function tdmd.gcc.getlibdirflags(cfg)
 		local result = {}
 
-		for _, value in ipairs(premake.getlinks(cfg, "all", "directory")) do
-			table.insert(result, '-L-L' .. _MAKE.esc(value))
+		for _, dir in ipairs(config.getlinks(cfg, "all", "directory")) do
+			table.insert(flags, '-L-L' .. project.getrelative(cfg.project, dir))
 		end
 
 		return result
@@ -310,6 +310,12 @@
 	function tdmd.optlink.getlibdirflags(cfg)
 		local result = {}
 
+		-- the MSC way...
+--		for _, libdir in ipairs(project.getrelative(cfg.project, cfg.libdirs)) do
+--			table.insert(flags, '-Llib "' .. libdir .. '"')
+--		end
+
+		-- the 'old?' way
 --		for _, value in ipairs(premake.getlinks(cfg, "all", "directory")) do
 --			table.insert(result, '-L-L' .. _MAKE.esc(value))
 --		end
@@ -366,6 +372,7 @@
 	-- if we are compiling on windows, we need to specialise to OPTLINK as the linker
 -- OR!!!			if cfg.system ~= premake.WINDOWS then
 	if string.match( os.getversion().description, "Windows" ) ~= nil then
+		-- TODO: on windows, we may use OPTLINK or MSLINK (for Win64)...
 		premake.tools.dmd = tdmd.optlink
 		premake.tools.dmd.sysflags = tdmd.optlink.sysflags
 	else

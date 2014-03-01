@@ -241,6 +241,12 @@
 
 			_p(2,'<useStdLibPath>1</useStdLibPath>')
 
+			local runtime = iif(cfg.flags.StaticRuntime, "1", "3")
+			if config.isDebugBuild(cfg) then
+				runtime = iif(cfg.flags.StaticRuntime, "2", "4")
+			end
+			visuald.element(2, "cRuntime", runtime)
+
 			local additionalOptions
 			if #cfg.buildoptions > 0 then
 				additionalOptions = table.concat(cfg.buildoptions, " ")

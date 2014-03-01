@@ -17,6 +17,8 @@ project (projName)
 			targetextension(".so." .. fujiVersion)
 		end
 
+		flags { "StaticRuntime" }
+
 		-- link to the asset processing DLL
 		links { "FujiAsset" }
 		linkoptions { "/DelayLoad:FujiAsset.dll" }
@@ -55,7 +57,7 @@ project (projName)
 	configuration { }
 
 	-- project configuration --
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "NoExceptions", "NoRTTI" }
 	warnings "Extra"
 
 	if string.startswith(_ACTION, "vs") then
