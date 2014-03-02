@@ -28,4 +28,9 @@ project ("FujiD")
 			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
 	end
 
+configuration "Release"
+	flags { "NoBoundsCheck" }
+configuration "Retail"
+	flags { "NoBoundsCheck" }
+
 	configuration { }

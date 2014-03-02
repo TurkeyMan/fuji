@@ -9,10 +9,8 @@ project ("FujiAsset")
 		targetextension(".so." .. fujiVersion)
 	end
 
-	configuration { "not StaticLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
-		targetname "FujiAsset32"
-	configuration { "not StaticLib", "windows", "x64", "not Xbox360", "not PS3", "not Android" }
-		targetname "FujiAsset64"
+	-- setup linker --
+	links { "Fuji" }
 
 	-- setup paths --
 	includedirs { "../Source", "../../dist/include/Fuji" }
@@ -24,9 +22,6 @@ project ("FujiAsset")
 
 	files { "../../dist/include/Fuji/**.h", "../../dist/include/Fuji/**.inl" }
 	files { "../Source/Asset/**", "../Source/Util/**" }
-
-	-- setup linker --
-	links { "Fuji" }
 
 	-- include some middleware directly --
 	includedirs { "../Middleware/" }
@@ -64,14 +59,16 @@ project ("FujiAsset")
 
 	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		if string.startswith(_ACTION, "vs") then
-			configuration { "not StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
+			configuration { "SharedLib", "windows", "not Xbox360", "not PS3", "not Android" }
 				linkoptions { "/DelayLoad:d3dx11_43.dll" }		-- D3D11
 				linkoptions { "/DelayLoad:D3DX9_43.dll" }		-- D3D9
 
-				configuration { "not StaticLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
+				configuration { "SharedLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }
+					targetname "FujiAsset32"
 					linkoptions { "/DelayLoad:Assimp32.dll" }							-- Assimp
 
-				configuration { "not StaticLib", "windows", "x64", "not Xbox360", "not PS3", "not Android" }
+				configuration { "SharedLib", "windows", "x64", "not Xbox360", "not PS3", "not Android" }
+					targetname "FujiAsset64"
 					linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
 		end
 

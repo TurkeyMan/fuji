@@ -70,7 +70,7 @@ configuration "Retail"
 -- platform specific config --
 
 -- Linux --
-configuration { "linux" }
+configuration { "not StaticLib", "linux" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
 	links { "z", "mad" }
 --	links { "asound" }
@@ -79,7 +79,7 @@ configuration { "linux" }
 	links { "openal" }
 
 -- OSX --
-configuration { "macosx" }
+configuration { "not StaticLib", "macosx" }
 	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
 	links { "z", "png", "mad" }
 
@@ -107,33 +107,33 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 	end
 
 -- Android --
-configuration "Android"
+configuration { "Android" }
 	if not isVS() then
 		-- vs-android defines these automatically
 		defines { "ANDROID_NDK", "ANDROID", "__ANDROID__" }
 	end
+configuration { "not StaticLib", "Android" }
 	links { "z", "log", "android", "GLESv1_CM", "jnigraphics" }
 	links { "mad" }
 
 -- XBox --
-configuration "Xbox"
+configuration { "Xbox" }
 	defines { "WIN32", "_XBOX" }
 	libdirs { "../lib/xbox" }
 
 -- XBox 360 --
-configuration "Xbox360"
+configuration { "Xbox360" }
 	defines { "WIN32", "_XBOX" }
 	libdirs { "../lib/x360" }
 
 -- Playstation 3 --
-configuration "PS3"
+configuration { "not StaticLib", "PS3" }
 	libdirs { "../lib/ps3" }
 
 -- Dreamcast __
-configuration "Dreamcast"
+configuration { "not StaticLib", "Dreamcast" }
 	libdirs { "../lib/dc" }
 	-- http://yam.20to4.net/dreamcast/hints/index.html <- some performance thoughts
 --	compileoptions { "-m4-single", "-ml", "-mfused-madd", "-mfsca", "-mfsrra", "-mdalign" } -- "--ffast-math", "-mfmovd" ??
-
 
 configuration { }

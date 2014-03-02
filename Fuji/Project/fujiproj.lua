@@ -21,7 +21,6 @@ project (projName)
 
 		-- link to the asset processing DLL
 		links { "FujiAsset" }
-		linkoptions { "/DelayLoad:FujiAsset.dll" }
 	else
 		kind "StaticLib"
 		flags { "OmitDefaultLibrary" }
@@ -77,6 +76,8 @@ project (projName)
 	end
 
 	-- platform specific config --
+	configuration { "SharedLib", "windows", "not Xbox360", "not PS3", "not Android" }
+		linkoptions { "/DelayLoad:FujiAsset.dll" }
 	configuration { "StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
 		targetname "Fuji_static"
 
