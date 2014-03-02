@@ -11,7 +11,6 @@ project ("FujiD")
 	-- setup paths --
 	includedirs { "../../dist/include/d2" }
 	objdir "../Build"
-	targetdir "../../dist/lib"
 
 	files { "../../dist/include/d2/**.d" }
 	excludes { "../../dist/include/d2/haku/**.d" }
@@ -23,14 +22,11 @@ project ("FujiD")
 	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
-	for i, p in pairs(platformNames) do
-		configuration { i }
-			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
-	end
+	dofile "outputdir.lua"
 
-configuration "Release"
-	flags { "NoBoundsCheck" }
-configuration "Retail"
-	flags { "NoBoundsCheck" }
+	configuration "Release"
+		flags { "NoBoundsCheck" }
+	configuration "Retail"
+		flags { "NoBoundsCheck" }
 
 	configuration { }

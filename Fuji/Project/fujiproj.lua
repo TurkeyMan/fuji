@@ -12,15 +12,11 @@ project (projName)
 		kind "SharedLib"
 		targetname "Fuji"
 		defines { "MF_SHAREDLIB" }
-		if os.get() == "linux" then
+		if os.is("linux") then
 			-- linux shared libs append the version number AFTER the extension
 			targetextension(".so." .. fujiVersion)
 		end
-
 		flags { "StaticRuntime" }
-
-		-- link to the asset processing DLL
-		links { "FujiAsset" }
 	else
 		kind "StaticLib"
 		flags { "OmitDefaultLibrary" }
@@ -29,30 +25,27 @@ project (projName)
 	-- setup paths --
 	includedirs { "../Source", "../../dist/include/Fuji" }
 	objdir "../Build"
-	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }
 
 	files { "../../dist/include/Fuji/**.h", "../../dist/include/Fuji/**.inl" }
 	files { "../Source/**.h", "../Source/**.c", "../Source/**.cpp", "../Source/**.inc" }
-	excludes { "../Source/Images/**" }
-	excludes { "../Source/Asset/**", "../Source/Util/**" }
 
 	-- include some middleware directly --
 	includedirs { "../Middleware/" }
 	files { "../Middleware/minizip/**.h", "../Middleware/minizip/**.c" }
 	configuration { "not linux" }
 		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
+
 	if os.get() ~= "linux" then
 		configuration { "not linux", "not macosx", "not Android" }
 			files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 			includedirs { "../Middleware/zlib" }
---			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
---			includedirs { "../Middleware/libpng-1.5.0/" }
+			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+			includedirs { "../Middleware/libpng-1.5.0/" }
 	end
---	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
---		includedirs { "../Middleware/" }
+
 	configuration { }
 
 	-- project configuration --
@@ -63,49 +56,34 @@ project (projName)
 		linkoptions { "/ignore:4221" }
 	end
 
---	pchheader "Fuji.h"
---	pchsource "MFMain.cpp"
-
 	-- configure standard fuji stuff --
 	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
-	for i, p in pairs(platformNames) do
-		configuration { i }
-			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
-	end
+	dofile "outputdir.lua"
 
 	-- platform specific config --
+	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
+		excludes { "../Source/Images/**" }
+		excludes { "../Source/Asset/**", "../Source/Util/**" }
 	configuration { "SharedLib", "windows", "not Xbox360", "not PS3", "not Android" }
+		links { "FujiAsset" }
 		linkoptions { "/DelayLoad:FujiAsset.dll" }
 	configuration { "StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
 		targetname "Fuji_static"
 
-	-- Linux --
 	configuration { "linux" }
 		includedirs { "../Source/Images/LINUX/" }
-
-	-- OSX --
 	configuration { "macosx" }
 		includedirs { "../Source/Images/OSX/" }
-
-	-- Windows --
 	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		includedirs { "../Source/Images/WINDOWS/" }
-
-	-- Android --
 	configuration { "Android" }
 		includedirs { "../Source/Images/ANDROID/" }
-
-	-- XBox --
 	configuration { "Xbox" }
 		includedirs { "../Source/Images/XBOX/" }
-
-	-- XBox 360 --
 	configuration { "Xbox360" }
 		includedirs { "../Source/Images/X360/" }
-
-	-- Playstation 3 --
 	configuration { "PS3" }
 		includedirs { "../Source/Images/PS3/" }
 

@@ -210,7 +210,7 @@
 						-- Don't use "-l" flag when linking static libraries; instead use
 						-- path/libname.a to avoid linking a shared library of the same
 						-- name if one is present
-						table.insert(result, project.getrelative(cfg.project, link.linktarget.abspath))
+						table.insert(result, "-L=" .. project.getrelative(cfg.project, link.linktarget.abspath))
 					else
 						table.insert(result, "-L=-l" .. link.linktarget.basename)
 					end
@@ -224,7 +224,7 @@
 			if path.isframework(link) then
 				table.insert(result, "-framework " .. path.getbasename(link))
 			elseif path.isobjectfile(link) then
-				table.insert(result, "" .. link)
+				table.insert(result, "-L=" .. link)
 			else
 				table.insert(result, "-L=-l" .. path.getbasename(link))
 			end

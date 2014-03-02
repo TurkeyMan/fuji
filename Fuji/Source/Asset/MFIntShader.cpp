@@ -6,7 +6,7 @@
 #include "MFHeap.h"
 #include "MFStringCache.h"
 
-#if defined(MF_WINDOWS) // TODO: build hlsl2glsl and glsl_optimizer libs for linux/mac
+#if defined(MF_WINDOWS) || defined(MF_LINUX)
 #define SUPPORT_HLSL
 #define SUPPORT_HLSL2GLSL
 #define SUPPORT_GLSL_OPTIMIZER
@@ -25,19 +25,25 @@
 	#if defined(SUPPORT_HLSL)
 		#if defined(SUPPORT_HLSL2GLSL)
 			#include "hlsl2glslfork/hlsl2glsl.h"
-			#if defined(NDEBUG)
-				#pragma comment(lib, "hlsl2glsl")
-			#else
-				#pragma comment(lib, "hlsl2glsl_d")
-			#endif
+
+            #if defined(MF_COMPILER_VISUALC)
+                #if defined(NDEBUG)
+                    #pragma comment(lib, "hlsl2glsl")
+                #else
+                    #pragma comment(lib, "hlsl2glsl_d")
+                #endif
+            #endif
 		#endif
 
 		#if defined(SUPPORT_GLSL_OPTIMIZER)
 			#include "glsl_optimizer/glsl_optimizer.h"
-			#if defined(NDEBUG)
-				#pragma comment(lib, "glsl_optimizer")
-			#else
-				#pragma comment(lib, "glsl_optimizer_d")
+
+            #if defined(MF_COMPILER_VISUALC)
+                #if defined(NDEBUG)
+                    #pragma comment(lib, "glsl_optimizer")
+                #else
+                    #pragma comment(lib, "glsl_optimizer_d")
+                #endif
 			#endif
 		#endif
 	#endif

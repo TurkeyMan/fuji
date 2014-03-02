@@ -36,6 +36,8 @@ platformNames.Xbox360 = iif(isVS(), "$(Platform)", "XBox360")
 
 -- configurations --
 
+configuration { }
+
 includedirs { "../include/", "../include/d2/" }
 
 if os.get() == "windows" then
@@ -44,24 +46,25 @@ else
 	separator = "-"
 end
 
-configuration "Debug"
+configuration { "Debug" }
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
 	optimize "Debug"
 	targetsuffix (separator .. configNames.Debug)
 
-configuration "DebugOpt"
+configuration { "DebugOpt" }
 	defines { "DEBUG", "_DEBUG" }
 	flags { "Symbols" }
 	optimize "On"
 	targetsuffix (separator .. configNames.DebugOpt)
 
-configuration "Release"
+configuration { "Release" }
 	defines { "NDEBUG", "_RELEASE" }
 	optimize "Full"
-	targetsuffix (separator .. configNames.Release)
+	configuration { "Release", "not linux" }
+		targetsuffix (separator .. configNames.Release)	-- Note: Maybe this should be Retail instead?
 
-configuration "Retail"
+configuration { "Retail" }
 	defines { "NDEBUG", "_RETAIL" }
 	optimize "Full"
 	targetsuffix (separator .. configNames.Retail)
@@ -71,17 +74,37 @@ configuration "Retail"
 
 -- Linux --
 configuration { "not StaticLib", "linux" }
-	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
-	links { "z", "mad" }
---	links { "asound" }
---	links { "portaudio" }
---	links { "pulse" }
+	links { "c", "m", "stdc++", "pthread", "z" }
+	links { "mad", "ogg", "vorbis", "vorbisfile" }
+
+	-- driver libs
+	links { "Xxf86vm", "X11", "GL", "GLU" }
 	links { "openal" }
+
+	-- asset libs
+	links { "png" }
+	links { "assimp", "hlsl2glsl", "glsl_optimizer", "glcpp-library", "mesa" }
+
+	if os.is64bit() then
+		libdirs { "../lib/linux-x86_64" }
+	else
+		libdirs { "../lib/linux-i386" }
+	end
 
 -- OSX --
 configuration { "not StaticLib", "macosx" }
-	links { "c", "m", "stdc++", "pthread", "GL", "GLU", "Xxf86vm", "X11", "ogg", "vorbis", "vorbisfile" }
-	links { "z", "png", "mad" }
+	links { "c", "m", "stdc++", "pthread", "z" }
+	links { "mad", "ogg", "vorbis", "vorbisfile" }
+
+	-- driver libs
+	links { "Xxf86vm", "X11", "GL", "GLU" }
+	links { "openal" }
+
+	-- asset libs
+	links { "png" }
+	links { "assimp", "hlsl2glsl", "glsl_optimizer" }
+
+	libdirs { "../lib/osx" }
 
 -- Windows --
 configuration { "windows", "not Xbox360", "not PS3", "not Android" }

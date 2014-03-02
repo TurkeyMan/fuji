@@ -71,7 +71,7 @@
 						-- Don't use "-l" flag when linking static libraries; instead use
 						-- path/libname.a to avoid linking a shared library of the same
 						-- name if one is present
-						table.insert(result, project.getrelative(cfg.project, link.linktarget.abspath))
+						table.insert(result, "-L" .. project.getrelative(cfg.project, link.linktarget.abspath))
 					else
 						table.insert(result, "-L-l" .. link.linktarget.basename)
 					end

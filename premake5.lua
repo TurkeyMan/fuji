@@ -8,6 +8,27 @@ newaction {
 	trigger = "install",
 	description = "Install the software",
 	execute = function ()
+		local function copyFile(srcFile, destPath)
+			local destFile = destPath .. '/' .. path.getname(srcFile)
+			os.mkdir(destPath)
+			os.copyfile(srcFile, destFile)
+
+			if os.is("linux") then
+				-- hook up version-less symbolic links for libs
+				local extPos = string.findlast(destFile, ".so")
+				if extPos then
+					local ext = destFile:sub(extPos)
+					if ext:len() > 5 then
+--						print("Creating links to shared libs...")
+						print("  " .. destFile:sub(1,extPos + 2 + 2))
+						os.execute("ln -snf " .. destFile .. " " .. destFile:sub(1,extPos + 2 + 2))
+						print("  " .. destFile:sub(1,extPos + 2))
+						os.execute("ln -snf " .. destFile .. " " .. destFile:sub(1,extPos + 2))
+					end
+				end
+			end
+		end
+
 		local function copyFiles(srcPath, destPath, ...)
 			-- append srcPath to the patterns --
 			local patterns = { }
@@ -20,8 +41,7 @@ newaction {
 			for _, f in ipairs(files) do
 				dest = destPath .. "/" .. path.getrelative(srcPath, f)
 				print("  " .. dest)
-				os.mkdir(path.getdirectory(dest))
-				os.copyfile(f, dest)
+				copyFile(f, path.getdirectory(dest))
 			end
 		end
 
@@ -38,24 +58,10 @@ newaction {
 
 		-- copy libs --
 		print("Copying libs to: " .. libPath)
-		copyFiles("dist/lib", libPath, "*.a", "*.so*")
---		copyFiles("dist/lib/i386-linux-gnu", libPath .. "/i386-linux-gnu", "*.a", "*.so*")
---		copyFiles("dist/lib/x86_64-linux-gnu", libPath .. "/x86_64-linux-gnu", "*.a", "*.so*")
-
-		if os.get() == "linux" then
-			-- hook up version-less symbolic links for libs
-			files = os.matchfiles(libPath .. "/*.so*")
-			print("Creating links to shared libs...")
-			for _, f in ipairs(files) do
-				local extPos = string.findlast(f, ".so")
-				local ext = f:sub(extPos)
-				if ext:len() > 5 then
-					print("  " .. f:sub(1,extPos + 2 + 2))
-					os.execute("ln -snf " .. f .. " " .. f:sub(1,extPos + 2 + 2))
-					print("  " .. f:sub(1,extPos + 2))
-					os.execute("ln -snf " .. f .. " " .. f:sub(1,extPos + 2))
-				end
-			end
+		if os.is64bit() then
+			copyFiles("dist/lib/linux-x86_64", libPath, "libFuji*", "libHaku*")
+		else
+			copyFiles("dist/lib/linux-i386", libPath, "libFuji*", "libHaku*")
 		end
 
 		-- install documentation --
@@ -89,4 +95,6 @@ solution "Fuji"
 	dofile "Fuji/Project/fujidproj.lua"
 
 	-- Asset compiler
-	dofile "Fuji/Project/fujiasset.lua"
+	if os.is("windows") then
+		dofile "Fuji/Project/fujiasset.lua"
+	end

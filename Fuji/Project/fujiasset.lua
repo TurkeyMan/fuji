@@ -15,7 +15,6 @@ project ("FujiAsset")
 	-- setup paths --
 	includedirs { "../Source", "../../dist/include/Fuji" }
 	objdir "../Build"
-	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }
@@ -33,8 +32,6 @@ project ("FujiAsset")
 			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 			includedirs { "../Middleware/libpng-1.5.0/" }
 	end
---	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
---		includedirs { "../Middleware/" }
 	configuration { }
 
 	-- project configuration --
@@ -49,13 +46,10 @@ project ("FujiAsset")
 --	pchheader "Fuji.h"
 --	pchsource "MFMain.cpp"
 
-	-- configure standard fuji stuff --
-	dofile "../../dist/Project/fujiconfig.lua"
-
 	-- some additional stuff for asset conversion
 	configuration { "linux" }
 		links { "z", "png" }
-		links { "assimp" }
+		links { "assimp", "hlsl2glsl", "glsl_optimizer" }
 
 	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		if string.startswith(_ACTION, "vs") then
@@ -72,16 +66,8 @@ project ("FujiAsset")
 					linkoptions { "/DelayLoad:Assimp64.dll" }							-- Assimp
 		end
 
-	configuration { }
-
+	-- configure standard fuji stuff --
+	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
-	for i, p in pairs(platformNames) do
-		configuration { i }
-			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
-	end
-
-	configuration "Release"
-		targetsuffix ("")
-
-	configuration { }
+	dofile "outputdir.lua"

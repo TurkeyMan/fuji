@@ -12,6 +12,11 @@ project (projName)
 		kind "SharedLib"
 		targetname "Haku"
 		defines { "MF_SHAREDLIB" }
+		if os.is("linux") then
+			-- linux shared libs append the version number AFTER the extension
+			targetextension(".so." .. fujiVersion)
+		end
+		flags { "StaticRuntime" }
 	else
 		kind "StaticLib"
 		flags { "OmitDefaultLibrary" }
@@ -20,7 +25,6 @@ project (projName)
 	-- setup paths --
 	includedirs { "../../dist/include", "../../dist/include/Haku" }
 	objdir "../Build"
-	targetdir "../../dist/lib"
 
 	-- add the source code --
 	files { "../*.TXT" }
@@ -30,7 +34,7 @@ project (projName)
 
 	-- project configuration --
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "NoExceptions", "NoRTTI" }
 	warnings "Extra"
 
 --	pchheader "Haku.h"
@@ -40,37 +44,4 @@ project (projName)
 	dofile "../../dist/Project/fujiconfig.lua"
 
 	-- setup output directories --
-	for i, p in pairs(platformNames) do
-		configuration { i }
-			targetdir("../../dist/lib/" .. iif(p, p .. "/", ""))
-	end
-
-	configuration "Debug"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Debug)
-		else
-			targetsuffix ("-debug")
-		end
-
-	configuration "DebugOpt"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.DebugOpt)
-		else
-			targetsuffix ("-debugopt")
-		end
-
-	configuration "Release"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Release)
-		else
-			targetsuffix ("")
-		end
-
-	configuration "Retail"
-		if os.get() == "windows" then
-			targetsuffix ("_" .. configNames.Retail)
-		else
-			targetsuffix ("")
-		end
-
-	configuration { }
+	dofile "../../Fuji/Project/outputdir.lua"
