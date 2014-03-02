@@ -322,6 +322,9 @@
 
 	// stop complaining about unused parameters
 	#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+	// stop complaining about missing field initialisers
+	#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #elif defined(MF_COMPILER_CLANG)
 	// disable C-linkage returning UDT (user data type)
 	#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"

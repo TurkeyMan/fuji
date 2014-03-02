@@ -414,7 +414,7 @@ MF_API int MFSound_Lock(MFSound *pSound, size_t offset, size_t bytes, void **ppD
 
 	MFSoundTemplate *pTemplate = pSound->pTemplate;
 
-	long bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
+	size_t bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
 	MFDebug_Assert(offset < bufferSize, "MFSound_Lock: Invalid buffer offset.");
 
 	if(bytes > bufferSize)
@@ -481,8 +481,8 @@ MF_API void MFSound_Unlock(MFSound *pSound)
 	if(gpCurrentContext->ext.buffer_sub_data)
 	{
 		// write data to the buffer
-		long bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
-		int untilEnd = bufferSize - pSound->lockOffset;
+		size_t bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
+		size_t untilEnd = bufferSize - pSound->lockOffset;
 		
 		if(pSound->lockBytes > untilEnd)
 		{

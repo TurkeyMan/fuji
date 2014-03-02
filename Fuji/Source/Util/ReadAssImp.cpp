@@ -9,7 +9,9 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-#pragma comment(lib, "assimp")
+#if defined(MF_COMPILER_VISUALC)
+    #pragma comment(lib, "assimp")
+#endif
 
 void CopyMatrix(MFMatrix *a, const aiMatrix4x4 &b)
 {

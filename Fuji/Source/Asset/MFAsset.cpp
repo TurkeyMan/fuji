@@ -9,7 +9,7 @@ MF_API bool *MFAsset_ConvertAsset(const char *pFilename, void **ppOutput, size_t
 	return false;
 }
 
-#if defined(MF_SHAREDLIB)
+#if defined(MF_WINDOWS) && defined(MF_SHAREDLIB)
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

@@ -188,7 +188,7 @@ MF_API void MFImage_Scale(MFScaleImage *pScaleData);
  * @return Pointer to a string representing the image format.
  * @see MFImage_GetPlatformAvailability(), MFImage_GetBitsPerPixel()
  */
-MF_API const char * const MFImage_GetFormatString(int format);
+MF_API const char * MFImage_GetFormatString(int format);
 
 /**
  * Gets all platforms that support the specified image format in hardware.

@@ -12,7 +12,7 @@ extern uint32 gMFImagePlatformAvailability[ImgFmt_Max];
 extern uint8 gMFImageBitsPerPixel[ImgFmt_Max];
 extern int8 gMFImageAutoFormat[MFRD_Max][0x40];
 
-MF_API const char * const MFImage_GetFormatString(int format)
+MF_API const char * MFImage_GetFormatString(int format)
 {
 	return gpMFImageFormatStrings[format];
 }
