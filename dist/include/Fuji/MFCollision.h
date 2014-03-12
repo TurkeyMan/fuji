@@ -9,8 +9,6 @@
 #if !defined(_COLLISION_H)
 #define _COLLISION_H
 
-#include "MFVector.h"
-#include "MFMatrix.h"
 #include "MFBoundingVolume.h"
 
 struct MFModel;

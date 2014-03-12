@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_PSP
 
@@ -38,11 +38,6 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
 #endif
 
 extern const char *gPSPSystemPath;
-
-extern int gQuit;
-extern int gRestart;
-
-MFPlatform gCurrentPlatform = FP_PSP;
 
 static char systemName[64] = "PSP";
 
@@ -118,8 +113,8 @@ void loaderInit()
 int ExitCallback(int count, int arg, void *common)
 {
 	// terminate the app
-	gQuit = 1;
-	gRestart = 0;
+	gpEngineInstance->bQuit = 1;
+	gpEngineInstance->bRestart = 0;
 
 	return 0;
 }
@@ -255,6 +250,8 @@ void GetCWDFromPath(const char *pArgv)
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_PSP;
+
 	SetupCallbacks();
 
 	// disable floating point exceptions

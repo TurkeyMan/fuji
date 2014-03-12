@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_DISPLAY == MF_DRIVER_WIN32
 
@@ -23,15 +23,12 @@ void MFInputPC_Acquire(bool acquire);
 int HandleRawMouseMessage(HANDLE hDevice);
 #endif
 
-extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
-
 uint8 gWindowsKeys[256];
 
 bool isortho = false;
 float fieldOfView;
 
 extern MFInitParams gInitParams;
-extern bool gFujiInitialised;
 
 extern bool gAppHasFocus;
 
@@ -116,7 +113,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 
 int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if(!gFujiInitialised)
+	if(!gpEngineInstance->bIsInitialised)
 		return 1;
 
 	switch(message)
@@ -140,15 +137,17 @@ int MFDisplayPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPA
 
 				gAppHasFocus = true;
 
-				if(pSystemCallbacks[MFCB_GainedFocus])
-					pSystemCallbacks[MFCB_GainedFocus]();
+				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_GainedFocus);
+				if(pCallback)
+					pCallback();
 			}
 			else
 			{
 				gAppHasFocus = false;
 
-				if(pSystemCallbacks[MFCB_LostFocus])
-					pSystemCallbacks[MFCB_LostFocus]();
+				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_LostFocus);
+				if(pCallback)
+					pCallback();
 			}
 			break;
 		}

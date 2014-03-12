@@ -60,7 +60,7 @@ typedef char				int8;
 
 // pointer sized ints
 typedef size_t				uintp;
-#if defined(WIN32)
+#if defined(_WIN32)
 	#if defined(_WIN64)
 		typedef __int64		intp;
 	#else

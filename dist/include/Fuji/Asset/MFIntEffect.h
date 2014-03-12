@@ -3,6 +3,7 @@
 #define _MFINTEFFECT_H
 
 struct MFIntEffect;
+struct MFEffect;
 
 MF_API MFIntEffect *MFIntEffect_CreateFromSourceData(const char *pFilename);
 

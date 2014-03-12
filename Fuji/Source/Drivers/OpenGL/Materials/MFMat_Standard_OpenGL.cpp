@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_OPENGL || defined(MF_RENDERPLUGIN_OPENGL)
 
@@ -15,6 +15,7 @@
 #include "MFMaterial_Internal.h"
 #include "Materials/MFMat_Standard_Internal.h"
 #include "MFEffect_Internal.h"
+#include "Util.h"
 
 #include "../MFOpenGL.h"
 

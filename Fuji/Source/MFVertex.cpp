@@ -1,8 +1,9 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFVertex_Internal.h"
 #include "MFRenderer.h"
 #include "MFHeap.h"
 #include "MFVector.h"
+#include "Util.h"
 
 int gVertexDataStride[MFVDF_Max] =
 {
@@ -67,7 +68,7 @@ static void MFVertex_DestroyIndexBuffer(MFResource *pRes)
 	MFHeap_Free(pIndexBuffer);
 }
 
-MFInitStatus MFVertex_InitModule()
+MFInitStatus MFVertex_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_VertexDecl = MFResource_Register("MFVertexDeclaration", &MFVertex_DestroyVertexDeclaration);
 	MFRT_VertexBuffer = MFResource_Register("MFVertexBuffer", &MFVertex_DestroyVertexBuffer);

@@ -1,12 +1,13 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_PLUGIN
 
+#include "MFPrimitive.h"
 #include "MFSystem_Internal.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
-	MFInitStatus MFPrimitive_InitModule_##driver(); \
+	MFInitStatus MFPrimitive_InitModule_##driver(int moduleId, bool bPerformInitialisation); \
 	void MFPrimitive_DeinitModule_##driver(); \
 	void MFPrimitive_DrawStats_##driver(); \
 	MF_API void MFPrimitive_##driver(uint32 type, uint32 hint); \
@@ -57,7 +58,7 @@
 struct MFPrimitivePluginCallbacks
 {
 	const char *pDriverName;
-	MFInitStatus (*pInitModule)();
+	MFInitStatus (*pInitModule)(int moduleId, bool bPerformInitialisation);
 	void (*pDeinitModule)();
 	void (*pDrawStats)();
 	void (*pMFPrimitive)(uint32 type, uint32 hint);
@@ -94,13 +95,13 @@ MFPrimitivePluginCallbacks *gpCurrentPrimitivePlugin = NULL;
 
 /*** Function Wrappers ***/
 
-MFInitStatus MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	// choose the plugin from init settings
 	gpCurrentPrimitivePlugin = &gPrimitivePlugins[gDefaults.plugin.renderPlugin];
 
 	// init the plugin
-	gpCurrentPrimitivePlugin->pInitModule();
+	gpCurrentPrimitivePlugin->pInitModule(moduleId, bPerformInitialisation);
 
 	return MFIS_Succeeded;
 }

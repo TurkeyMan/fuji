@@ -2,7 +2,7 @@
 
 /**** Includes ****/
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFDisplay.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -86,7 +86,7 @@ static void MFMaterial_Destroy(MFResource *pRes)
 	MFHeap_Free(pMaterial);
 }
 
-MFInitStatus MFMaterial_InitModule()
+MFInitStatus MFMaterial_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 
@@ -104,7 +104,7 @@ MFInitStatus MFMaterial_InitModule()
 	{
 		MFDebug_Warn(3, "Failed to load Materials.ini");
 	}
-	
+
 #if MF_RENDERER == MF_DRIVER_D3D11 || defined(MF_RENDERPLUGIN_D3D11)
 	// HACK?
 	MFTexture *pSysLogoLargeTexture = MFTexture_Create("_None");

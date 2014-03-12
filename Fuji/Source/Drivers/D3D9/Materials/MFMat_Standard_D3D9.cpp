@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
 
@@ -16,9 +16,7 @@
 #include "../MFRenderer_D3D9.h"
 #include "Materials/MFMat_Standard_Internal.h"
 #include "MFEffect_Internal.h"
-
-//#include "Mat_Standard_mfx.h"
-//#include "Fuji_h.h"
+#include "Util.h"
 
 extern IDirect3DDevice9 *pd3dDevice;
 

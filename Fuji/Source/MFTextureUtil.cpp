@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFTexture_Internal.h"
 
 const char *gpMFImageFormatStrings[ImgFmt_Max] =

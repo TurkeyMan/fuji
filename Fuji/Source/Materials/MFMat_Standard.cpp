@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem.h"
 #include "MFIni.h"
 
@@ -214,7 +214,7 @@ void MFMat_Standard_Update(MFMaterial *pMaterial)
 
 	if(pData->materialType & MF_Animating)
 	{
-		pData->curTime += MFSystem_TimeDelta();
+		pData->curTime += MFTimeDelta();
 
 		while(pData->curTime >= pData->frameTime)
 		{

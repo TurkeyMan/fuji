@@ -6,7 +6,7 @@ fujiVersion = "0.7.1"
 project ("FujiD")
 	language "D"
 	kind "StaticLib"
-	flags { "OmitDefaultLibrary" }
+	flags { "StaticRuntime", "OmitDefaultLibrary" }
 
 	-- setup paths --
 	includedirs { "../../dist/include/d2" }

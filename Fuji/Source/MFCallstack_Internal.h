@@ -3,7 +3,7 @@
 
 #include "MFCallstack.h"
 
-MFInitStatus MFCallstack_InitModule();
+MFInitStatus MFCallstack_InitModule(int moduleId, bool bPerformInitialisation);
 void MFCallstack_DeinitModule();
 
 #if defined(_MFCALLSTACK_PROFILING)

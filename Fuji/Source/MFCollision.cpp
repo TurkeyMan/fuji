@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFVector.h"
 #include "MFMatrix.h"
 #include "MFCollision_Internal.h"
@@ -12,7 +12,7 @@ static MenuItemBool gShowCollision;
 
 /**** Internal Functions ****/
 
-MFInitStatus MFCollision_InitModule()
+MFInitStatus MFCollision_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	gItemList.Init("Collision Items", 256);
 

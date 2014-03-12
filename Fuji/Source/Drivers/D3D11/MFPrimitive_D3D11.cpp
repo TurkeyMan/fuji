@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_D3D11 || defined(MF_RENDERPLUGIN_D3D11)
 
@@ -67,7 +67,7 @@ static bool gImmitateQuads = false;
 static int32 phase = 0;
 
 //---------------------------------------------------------------------------------------------------------------------
-MFInitStatus MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFVertexElement elements[4];
 

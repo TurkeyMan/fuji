@@ -5,7 +5,7 @@
 
 #define Timer_Paused	0x0001
 
-MFInitStatus Timer_InitModule();
+MFInitStatus Timer_InitModule(int moduleId, bool bPerformInitialisation);
 void Timer_DeinitModule(); 
 
 class Timer;

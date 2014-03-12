@@ -5,7 +5,7 @@
 
 /**** Includes ****/
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem.h"
 #include "Timer.h"
 #include "DebugMenu.h"
@@ -23,7 +23,7 @@ void UpdateRate(MenuObject *pObject, void *pData)
 	gSystemTimer.SetRate(((MenuItemFloat*)pObject)->data);
 }
 
-MFInitStatus Timer_InitModule()
+MFInitStatus Timer_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	DebugMenu_AddItem("Game Playback Rate", "Fuji Options", &playRate, UpdateRate);
 

@@ -1,8 +1,9 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFRenderState_Internal.h"
 #include "MFRenderer.h"
 #include "MFHeap.h"
 #include "MFModule.h"
+#include "Util.h"
 
 static const char * const gpRenderStateNames_Matrix[] =
 {
@@ -220,7 +221,7 @@ static void MFRasteriserState_Destroy(MFResource *pRes)
 	MFHeap_Free(pRasteriserState);
 }
 
-MFInitStatus MFRenderState_InitModule()
+MFInitStatus MFRenderState_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_BlendState = MFResource_Register("MFBlendState", &MFBlendState_Destroy);
 	MFRT_SamplerState = MFResource_Register("MFSamplerState", &MFSamplerState_Destroy);

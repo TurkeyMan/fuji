@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_DEBUG == MF_DRIVER_NULL
 
@@ -12,18 +12,16 @@
 #include "MFPrimitive.h"
 #include "MFMaterial.h"
 
-#if !defined(WIN32)
+#if !defined(MF_WINDOWS)
 	#include <stdio.h>
 #endif
 
 void MFSystem_HandleEventsPlatformSpecific();
 
-extern int gQuit;
-
 // Output a string to the debugger.
 MF_API void MFDebug_Message(const char *pMessage)
 {
-#if defined(WIN32)
+#if defined(MF_WINDOWS)
 	OutputDebugString((LPCTSTR)pMessage);
 	OutputDebugString("\n");
 #else
@@ -56,12 +54,12 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 	if(!MFFont_GetDebugFont())
 		return;
 
-	while(!gQuit)
+	while(!gpEngineInstance->bQuit)
 	{
 		MFSystem_HandleEventsPlatformSpecific();
 
 		MFSystem_UpdateTimeDelta();
-		gFrameCount++;
+		frameCount++;
 
 		MFSystem_Update();
 		MFSystem_PostUpdate();

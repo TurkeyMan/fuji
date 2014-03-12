@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFHeap.h"
 #include "MFDisplay_Internal.h"
 #include "MFView_Internal.h"
@@ -13,7 +13,7 @@ MFRect MFView::defaultOrthoRect;
 MFView *gpViewStack = NULL;
 MFView *pCurrentView = NULL;
 
-MFInitStatus MFView_InitModule()
+MFInitStatus MFView_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	// allocate view stack
 	gpViewStack = (MFView*)MFHeap_Alloc(sizeof(MFView) * gDefaults.view.maxViewsOnStack);

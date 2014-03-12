@@ -21,7 +21,7 @@ struct MFRenderTarget : public MFResource
 };
 
 // functions
-MFInitStatus MFRenderTarget_InitModule();
+MFInitStatus MFRenderTarget_InitModule(int moduleId, bool bPerformInitialisation);
 void MFRenderTarget_DeinitModule();
 
 bool MFRenderTarget_InitModulePlatformSpecific();

@@ -9,7 +9,6 @@
 #if !defined(_MFPRIMITIVE_H)
 #define _MFPRIMITIVE_H
 
-#include "MFVector.h"
 #include "MFMatrix.h"
 
 /**

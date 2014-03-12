@@ -1,4 +1,5 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFSystem.h"
 #include "MFSockets.h"
 #include "MFFileSystem_Internal.h"
@@ -7,10 +8,22 @@
 
 #include <stdio.h>
 
-static MFPtrListDL<MFFileHTTPData> gHTTPFiles;
- 
-MFInitStatus MFFileSystemHTTP_InitModule()
+struct MFFileSystemHTTPState : public MFFileSystemGlobalState
 {
+	MFPtrListDL<MFFileHTTPData> gHTTPFiles;
+};
+
+int gFileSystemHTTPId = -1;
+
+MFInitStatus MFFileSystemHTTP_InitModule(int moduleId, bool bPerformInitialisation)
+{
+	gFileSystemHTTPId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFFileSystemHTTPState);
+
 	if(MFSockets_IsActive())
 	{
 		MFFileSystemCallbacks fsCallbacks;
@@ -29,12 +42,12 @@ MFInitStatus MFFileSystemHTTP_InitModule()
 		fsCallbacks.FindNext = NULL;
 		fsCallbacks.FindClose = NULL;
 
-		hHTTPFileSystem = MFFileSystem_RegisterFileSystem("HTTP Filesystem", &fsCallbacks);
+		pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("HTTP Filesystem", &fsCallbacks);
 
 		// make a bunch of file buffers
 		int gHTTPFileSize = sizeof(MFFileHTTPData)+gDefaults.filesys.maxHTTPFileCache;
 
-		gHTTPFiles.Init("HTTP Files", gDefaults.filesys.maxHTTPFiles, gHTTPFileSize);
+		pModuleData->gHTTPFiles.Init("HTTP Files", gDefaults.filesys.maxHTTPFiles, gHTTPFileSize);
 	}
 
 	return MFIS_Succeeded;
@@ -42,10 +55,12 @@ MFInitStatus MFFileSystemHTTP_InitModule()
 
 void MFFileSystemHTTP_DeinitModule()
 {
-	gHTTPFiles.Deinit();
+	GET_MODULE_DATA_ID(MFFileSystemHTTPState, gFileSystemHTTPId);
 
-	if(hHTTPFileSystem != -1)
-		MFFileSystem_UnregisterFileSystem(hHTTPFileSystem);
+	pModuleData->gHTTPFiles.Deinit();
+
+	if(pModuleData->hFileSystemHandle != -1)
+		MFFileSystem_UnregisterFileSystem(pModuleData->hFileSystemHandle);
 }
 // filesystem callbacks
 int MFFileSystemHTTP_Mount(MFMount *pMount, MFMountData *pMountData)
@@ -68,6 +83,8 @@ int MFFileSystemHTTP_Dismount(MFMount *pMount)
 
 MFFile* MFFileSystemHTTP_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
+	GET_MODULE_DATA_ID(MFFileSystemHTTPState, gFileSystemHTTPId);
+
 	MFFile *hFile = NULL;
 
 	MFOpenDataHTTP openData;
@@ -83,7 +100,7 @@ MFFile* MFFileSystemHTTP_Open(MFMount *pMount, const char *pFilename, uint32 ope
 	openData.pURL = pFilename;
 	openData.port = 80;
 
-	hFile = MFFile_Open(hHTTPFileSystem, &openData);
+	hFile = MFFile_Open(pModuleData->hFileSystemHandle, &openData);
 
 	return hFile;
 }
@@ -236,7 +253,9 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 		return 1;
 	}
 
-	MFFileHTTPData *pHTTPData = gHTTPFiles.Create();
+	GET_MODULE_DATA_ID(MFFileSystemHTTPState, gFileSystemHTTPId);
+
+	MFFileHTTPData *pHTTPData = pModuleData->gHTTPFiles.Create();
 	pFile->pFilesysData = pHTTPData;
 
 	size_t serverLen = MFString_Length(pServer) + 1;
@@ -313,18 +332,16 @@ int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pHTTP->pURL);
-#endif
 
 	return 0;
 }
 
 int MFFileHTTP_Close(MFFile* fileHandle)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemHTTPState, gFileSystemHTTPId);
 
-	gHTTPFiles.Destroy((MFFileHTTPData*)fileHandle->pFilesysData);
+	pModuleData->gHTTPFiles.Destroy((MFFileHTTPData*)fileHandle->pFilesysData);
 
 	return 0;
 }

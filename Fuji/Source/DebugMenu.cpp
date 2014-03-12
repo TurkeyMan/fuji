@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFView.h"
 #include "DebugMenu_Internal.h"
@@ -49,7 +49,7 @@ uint32 MenuItemColour::presets[COLOUR_PRESETS] =
 	0xFF000000	// black
 };
 
-MFInitStatus DebugMenu_InitModule()
+MFInitStatus DebugMenu_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	// create root menu
 	MFString_Copy(rootMenu.name, "root");
@@ -442,7 +442,7 @@ void Menu::Update()
 
 	if(gMenuHeld)
 	{
-		gHoldTimeout -= MFSystem_TimeDelta();
+		gHoldTimeout -= MFTimeDelta();
 
 		if(!MFInput_Read(gMenuHeld, IDD_Gamepad))
 		{
@@ -551,7 +551,7 @@ void MenuItemFloat::ListUpdate(bool selected)
 		if((input=MFInput_Read(Axis_RX, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
-			*pData += input*increment*MFSystem_TimeDelta();
+			*pData += input*increment*MFTimeDelta();
 		}
 
 		if(*pData < minimumValue) *pData = maximumValue+(*pData-minimumValue);
@@ -734,13 +734,13 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 		if((input=MFInput_Read(Axis_RX, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
-			pData->x += input*increment*MFSystem_TimeDelta();
+			pData->x += input*increment*MFTimeDelta();
 		}
 
 		if((input=MFInput_Read(Axis_RY, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
-			pData->y -= input*increment*MFSystem_TimeDelta();
+			pData->y -= input*increment*MFTimeDelta();
 		}
 
 		if(pCallback && t != *pData)

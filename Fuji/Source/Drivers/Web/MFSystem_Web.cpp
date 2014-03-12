@@ -1,20 +1,17 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_WEB
 
-#include "MFModule_Internal.h"
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFThread.h"
 
 extern MFInitParams gInitParams;
-extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
-
-MFPlatform gCurrentPlatform = FP_Web;
 
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_Web;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

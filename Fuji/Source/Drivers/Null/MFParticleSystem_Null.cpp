@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_PARTICLESYSTEM == MF_DRIVER_NULL
 
@@ -55,7 +55,7 @@ void MFParticleSystem_DrawRotating(MFParticleSystem *pParticleSystem, const MFMa
 	{
 		MFParticle *pParticle = *ppI;
 
-		float dt = MFSystem_TimeDelta();
+		float dt = MFTimeDelta();
 
 		pParticle->rot += pParticleSystem->params.rotationRate * dt;
 		pParticle->size += pParticleSystem->params.scaleRate * dt;
@@ -127,7 +127,7 @@ MF_API void MFParticleSystem_Draw(MFParticleSystem *pParticleSystem)
 	{
 		MFParticle *pParticle = *ppI;
 
-		float dt = MFSystem_TimeDelta();
+		float dt = MFTimeDelta();
 
 		pParticle->size += pParticleSystem->params.scaleRate * dt;
 		pParticle->velocity += pParticleSystem->params.force * dt;
@@ -265,7 +265,7 @@ MF_API void MFParticleSystem_AddParticle(MFParticleEmitter *pEmitter)
 MF_API void MFParticleSystem_UpdateEmitter(MFParticleEmitter *pEmitter)
 {
 	// emit new particles
-	pEmitter->emitTimeout += MFSystem_TimeDelta();
+	pEmitter->emitTimeout += MFTimeDelta();
 
 	while(pEmitter->emitTimeout > pEmitter->emitPeriod)
 	{

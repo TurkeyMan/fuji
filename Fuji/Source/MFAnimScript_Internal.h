@@ -4,7 +4,7 @@
 #include "MFAnimScript.h"
 #include "MFIni.h"
 
-MFInitStatus MFAnimScript_InitModule();
+MFInitStatus MFAnimScript_InitModule(int moduleId, bool bPerformInitialisation);
 void MFAnimScript_DeinitModule();
 
 struct MFAnimScriptSequence

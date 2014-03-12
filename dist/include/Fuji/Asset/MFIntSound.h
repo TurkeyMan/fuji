@@ -1,6 +1,8 @@
 #if !defined(_MFINTSOUND_H)
 #define _MFINTSOUND_H
 
+#include "MFSound_Internal.h"
+
 struct MFIntSound
 {
 	MFSoundTemplate soundTemplate;

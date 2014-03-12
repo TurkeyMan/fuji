@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFMODULE_H)
 #define _MFMODULE_H
 
@@ -25,7 +26,7 @@ enum MFInitStatus
 /**
  * Fuji module initialisation callback prototype.
  */
-typedef MFInitStatus (MFInitCallback)();
+typedef MFInitStatus (MFInitCallback)(int moduleId, bool bPerformInitialisation);
 
 /**
  * Fuji module destruction callback prototype.
@@ -44,8 +45,11 @@ typedef void (MFDeinitCallback)();
 MF_API int MFModule_RegisterModule(const char *pModuleName, MFInitCallback *pInitFunction, MFDeinitCallback *pDeinitFunction, uint64 prerequisites = 0);
 
 MF_API uint64 MFModule_RegisterCoreModules();
-
 MF_API uint64 MFModule_RegisterEngineModules();
+
+MF_API bool MFModule_InitModules();
+MF_API void MFModule_DeinitModules();
+MF_API bool MFModule_BindModules();
 
 /**
  * Get the number of registered modules.

@@ -3,7 +3,7 @@
 
 #include "MFScript.h"
 
-MFInitStatus MFScript_InitModule();
+MFInitStatus MFScript_InitModule(int moduleId, bool bPerformInitialisation);
 void MFScript_DeinitModule();
 
 void RegisterInternalTypes();

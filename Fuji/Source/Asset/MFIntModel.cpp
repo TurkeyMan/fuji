@@ -1,11 +1,13 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFString.h"
 #include "MFModel_Internal.h"
+#include "Util.h"
 #include "Asset/MFIntModel.h"
-#include "Util/F3D.h"
+#include "Asset/Util/F3D.h"
+
 
 /**** Structures ****/
 

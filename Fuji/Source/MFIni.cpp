@@ -2,7 +2,7 @@
 // MFIni.cpp
 //
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFHeap.h"
 #include "MFFileSystem.h"
 #include "MFIni.h"

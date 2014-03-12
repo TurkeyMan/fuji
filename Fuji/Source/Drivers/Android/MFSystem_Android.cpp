@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_ANDROID
 
@@ -15,10 +15,6 @@
 
 extern MFInitParams gInitParams;
 
-extern int gQuit;
-
-MFPlatform gCurrentPlatform = FP_Android;
-
 static android_app* gpApplication;
 
 char *gpCommandLineBuffer = NULL;
@@ -26,6 +22,7 @@ char *gpCommandLineBuffer = NULL;
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_Android;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

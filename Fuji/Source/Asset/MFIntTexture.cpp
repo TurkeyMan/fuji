@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #define MF_ENABLE_PNG
 
@@ -18,6 +18,7 @@
 #include "MFString.h"
 #include "MFImage.h"
 #include "MFTexture_Internal.h"
+#include "Util.h"
 #include "Asset/MFIntTexture.h"
 
 #if defined(MF_WINDOWS)
@@ -279,12 +280,28 @@ struct DDS_IMAGE
 
 /**** Globals ****/
 
-static const char *gFileExtensions[MFITF_Max] =
+static const char *gFileExtensions[] =
 {
 	".tga",
 	".bmp",
 	".png",
-	".dds"
+	".dds",
+	".jpg",
+	".jpeg",
+	".webp"
+};
+
+static const int gNumFileExtensions = sizeof(gFileExtensions) / sizeof(gFileExtensions[0]);
+
+MFIntTextureFormat gFileTypeMap[gNumFileExtensions] =
+{
+	MFITF_TGA,
+	MFITF_BMP,
+	MFITF_PNG,
+	MFITF_DDS,
+	MFITF_JPEG,
+	MFITF_JPEG,
+	MFITF_WEBP
 };
 
 
@@ -1572,11 +1589,14 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 	// find format
 	const char *pExt = MFString_GetFileExtension(pFilename);
 
-	int format;
-	for(format=0; format<MFITF_Max; ++format)
+	MFIntTextureFormat format = MFITF_Max;
+	for(int a=0; a<gNumFileExtensions; ++a)
 	{
-		if(!MFString_Compare(pExt, gFileExtensions[format]))
+		if(!MFString_Compare(pExt, gFileExtensions[a]))
+		{
+			format = gFileTypeMap[a];
 			break;
+		}
 	}
 	if(format == MFITF_Max)
 		return NULL;
@@ -1588,7 +1608,7 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFile(const char *pFilename)
 		return NULL;
 
 	// load the image
-	MFIntTexture *pImage = MFIntTexture_CreateFromFileInMemory(pData, size, (MFIntTextureFormat)format);
+	MFIntTexture *pImage = MFIntTexture_CreateFromFileInMemory(pData, size, format);
 
 	// free file
 	MFHeap_Free(pData);

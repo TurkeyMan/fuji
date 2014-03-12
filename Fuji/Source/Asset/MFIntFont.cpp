@@ -1,9 +1,9 @@
-#include "Fuji.h"
-
+#include "Fuji_Internal.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFFont_Internal.h"
+#include "Util.h"
 #include "Asset/MFIntFont.h"
 
 #include <string.h>

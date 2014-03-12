@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFSYSTEM_INTERNAL_H)
 #define _MFSYSTEM_INTERNAL_H
 
@@ -9,7 +10,7 @@ void MFSystem_RunFrame();
 
 void MFSystem_UpdateTimeDelta();
 
-MFInitStatus MFSystem_InitModule();
+MFInitStatus MFSystem_InitModule(int moduleId, bool bPerformInitialisation);
 void MFSystem_DeinitModule();
 
 void MFSystem_Update();

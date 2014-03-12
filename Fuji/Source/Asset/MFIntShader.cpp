@@ -1,20 +1,10 @@
-#include "Fuji.h"
-
-#include "Asset/MFIntShader.h"
+#include "Fuji_Internal.h"
 #include "MFShader_Internal.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
-
-#if defined(MF_WINDOWS) || defined(MF_LINUX)
-#define SUPPORT_HLSL
-#define SUPPORT_HLSL2GLSL
-#define SUPPORT_GLSL_OPTIMIZER
-#endif
-#define SUPPORT_GLSL
-#if defined(MF_WINDOWS) // TODO: support Cg compiler on linux/mac?
-//#define SUPPORT_CG
-#endif
+#include "Util.h"
+#include "Asset/MFIntShader.h"
 
 #if defined(MF_WINDOWS)
 	#define SUPPORT_D3D
@@ -22,31 +12,7 @@
 #if defined(MF_WINDOWS) || defined(MF_LINUX) || defined(MF_OSX) || defined(MF_ANDROID) || defined(MF_IPHONE)
 	#define SUPPORT_OPENGL
 
-	#if defined(SUPPORT_HLSL)
-		#if defined(SUPPORT_HLSL2GLSL)
-			#include "hlsl2glslfork/hlsl2glsl.h"
-
-            #if defined(MF_COMPILER_VISUALC)
-                #if defined(NDEBUG)
-                    #pragma comment(lib, "hlsl2glsl")
-                #else
-                    #pragma comment(lib, "hlsl2glsl_d")
-                #endif
-            #endif
-		#endif
-
-		#if defined(SUPPORT_GLSL_OPTIMIZER)
-			#include "glsl_optimizer/glsl_optimizer.h"
-
-            #if defined(MF_COMPILER_VISUALC)
-                #if defined(NDEBUG)
-                    #pragma comment(lib, "glsl_optimizer")
-                #else
-                    #pragma comment(lib, "glsl_optimizer_d")
-                #endif
-			#endif
-		#endif
-	#endif
+	#include "Asset/Util/HLSL2GLSL.h"
 #endif
 #if defined(SUPPORT_CG) && (defined(SUPPORT_D3D) || defined(SUPPORT_OPENGL))
 	#include "Cg/cg.h"
@@ -921,196 +887,6 @@ static char *MFIntShader_Preprocess(MFShaderTemplate *pTemplate, MFShaderMacro *
 	return pSource;
 }
 
-#if defined(SUPPORT_HLSL) && defined(SUPPORT_HLSL2GLSL)
-static EAttribSemantic sSemantics[] = {
-	EAttrSemPosition,
-	EAttrSemPosition1,
-	EAttrSemPosition2,
-	EAttrSemPosition3,
-	EAttrSemNormal,
-	EAttrSemNormal1,
-	EAttrSemNormal2,
-	EAttrSemNormal3,
-	EAttrSemColor0,
-	EAttrSemColor1,
-	EAttrSemColor2,
-	EAttrSemColor3,
-	EAttrSemTex0,
-	EAttrSemTex1,
-	EAttrSemTex2,
-	EAttrSemTex3,
-	EAttrSemTex4,
-	EAttrSemTex5,
-	EAttrSemTex6,
-	EAttrSemTex7,
-	EAttrSemTex8,
-	EAttrSemTex9,
-	EAttrSemTangent,
-	EAttrSemTangent1,
-	EAttrSemTangent2,
-	EAttrSemTangent3,
-	EAttrSemBinormal,
-	EAttrSemBinormal1,
-	EAttrSemBinormal2,
-	EAttrSemBinormal3,
-	EAttrSemBlendWeight,
-	EAttrSemBlendWeight1,
-	EAttrSemBlendWeight2,
-	EAttrSemBlendWeight3,
-	EAttrSemBlendIndices,
-	EAttrSemBlendIndices1,
-	EAttrSemBlendIndices2,
-	EAttrSemBlendIndices3
-};
-
-static const char *sSemanticNames[] = {
-	"vPos",
-	"vPos1",
-	"vPos2",
-	"vPos3",
-	"vNormal",
-	"vNormal1",
-	"vNormal2",
-	"vNormal3",
-	"vColour0",
-	"vColour1",
-	"vColour2",
-	"vColour3",
-	"vUV0",
-	"vUV1",
-	"vUV2",
-	"vUV3",
-	"vUV4",
-	"vUV5",
-	"vUV6",
-	"vUV7",
-	"vUV8",
-	"vUV9",
-	"vTangent",
-	"vTangent1",
-	"vTangent2",
-	"vTangent3",
-	"vBiNormal",
-	"vBiNormal1",
-	"vBiNormal2",
-	"vBiNormal3",
-	"vWeights",
-	"vWeights1",
-	"vWeights2",
-	"vWeights3",
-	"vIndices",
-	"vIndices1",
-	"vIndices2",
-	"vIndices3"
-};
-
-const char *MFIntShader_TranslateShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename)
-{
-	static bool bIsInitialised = false;
-	if(!bIsInitialised)
-	{
-		Hlsl2Glsl_Initialize();
-		bIsInitialised = true;
-	}
-
-	// Work out which language we should use...
-	EShLanguage language;
-	switch(type)
-	{
-		case MFST_VertexShader:	language = EShLangVertex;	break;
-		case MFST_PixelShader:	language = EShLangFragment;	break;
-		default:
-			MFDebug_Assert(false, "hlsl2glsl can only convert vertex and pixel shaders.");
-			return NULL;
-	}
-
-	ETargetVersion version = bGLES ? ETargetGLSL_ES_100 : ETargetGLSL_120;
-
-	// create a compiler
-	ShHandle compiler = Hlsl2Glsl_ConstructCompiler(language);
-
-	// parse the code
-	int success = Hlsl2Glsl_Parse(compiler, pShaderSource, version, 0);
-
-	// set translation options
-	MFDebug_Assert(sizeof(sSemantics)/sizeof(sSemantics[0]) == sizeof(sSemanticNames)/sizeof(sSemanticNames[0]), "Mismatching attribute declaration arrays!");
-	Hlsl2Glsl_SetUserAttributeNames(compiler, sSemantics, sSemanticNames, sizeof(sSemantics)/sizeof(sSemantics[0]));
-//	Hlsl2Glsl_UseUserVaryings(compiler, true);
-
-	// translate to GLSL
-	if(success)
-		success = Hlsl2Glsl_Translate(compiler, "main", version, 0);
-
-	// were there errors?
-	if(!success)
-	{
-		const char *pLog = Hlsl2Glsl_GetInfoLog(compiler);
-		MFDebug_Warn(1, pLog);
-		Hlsl2Glsl_DestructCompiler(compiler);
-		return NULL;
-	}
-
-	// and see what we got...
-	pShaderSource = MFString_Dup(Hlsl2Glsl_GetShader(compiler));
-
-//	int numUniforms = Hlsl2Glsl_GetUniformCount(compiler);
-//	const ShUniformInfo *pUniforms = Hlsl2Glsl_GetUniformInfo(compiler);
-
-	// we're done
-	Hlsl2Glsl_DestructCompiler(compiler);
-
-	return pShaderSource;
-}
-#endif
-
-#if defined(SUPPORT_GLSL_OPTIMIZER)
-const char *MFIntShader_OptimiseShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename)
-{
-	static bool bIsOptimiserInitialised = false;
-	static glslopt_ctx *pCtx = NULL;
-	if(!bIsOptimiserInitialised)
-	{
-		pCtx = glslopt_initialize(bGLES ? kGlslTargetOpenGLES20 : kGlslTargetOpenGL);
-		bIsOptimiserInitialised = true;
-	}
-
-	glslopt_shader_type shaderType;
-	switch(type)
-	{
-		case MFST_VertexShader:	shaderType = kGlslOptShaderVertex;	break;
-		case MFST_PixelShader:	shaderType = kGlslOptShaderFragment;	break;
-		default:
-			MFDebug_Assert(false, "glsl_optimizer can only optimise vertex and pixel shaders.");
-			return pShaderSource;
-	}
-
-	unsigned int options = kGlslOptionSkipPreprocessor; // <- Is this valid?
-	glslopt_shader *pShader = glslopt_optimize(pCtx, shaderType, pShaderSource, options);
-
-	if(glslopt_get_status(pShader))
-	{
-		pShaderSource = MFString_Dup(glslopt_get_output(pShader));
-	}
-	else
-	{
-		const char *pLog = glslopt_get_log(pShader);
-		MFDebug_Warn(1, pLog);
-		glslopt_shader_delete(pShader);
-		return pShaderSource;
-	}
-
-	int math, tex, flow;
-	glslopt_shader_get_stats(pShader, &math, &tex, &flow);
-	MFDebug_Warn(2, MFStr("GLSL shader%s optimised successfully. Math ops: %d  Tex ops: %d  Flow ops: %d", pFilename ? MFStr(" '%s'", pFilename) : "", math, tex, flow));
-
-	glslopt_shader_delete(pShader);
-
-//	glslopt_cleanup(pCtx);	// TODO: Should we clean this up one day?
-
-	return pShaderSource;
-}
-#endif
-
 bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro *pMacros, bool bDebug, const char *pFilename, const char *pShaderSource, int line, MFStringCache *pStrings, MFShaderLanguage language, bool bGLES)
 {
 	bool bAllocated = false;
@@ -1136,16 +912,17 @@ bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro 
 #if defined(SUPPORT_HLSL) && defined(SUPPORT_HLSL2GLSL)
 	if(language == MFSL_HLSL)
 	{
-		const char *pTranslatedShader = MFIntShader_TranslateShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename);
-		if(pTranslatedShader != pShaderSource)
-		{
-			if(bAllocated)
-				MFHeap_Free((char*)pShaderSource);
-			if(!pTranslatedShader)
-				return false;
-			pShaderSource = pTranslatedShader;
-			bAllocated = true;
-		}
+		const char *pError = NULL;
+		const char *pTranslatedShader = HLSL2GLSL_TranslateShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename, &pError);
+		if(pError)
+			MFDebug_Warn(2, pError);
+		if(bAllocated)
+			MFHeap_Free((char*)pShaderSource);
+		if(!pTranslatedShader)
+			return false;
+		pShaderSource = MFString_Dup(pTranslatedShader);
+		bAllocated = true;
+		HLSL2GLSL_FreeShader(pTranslatedShader);
 	}
 #else
 	MFDebug_Assert(language != MFSL_HLSL, "hlsl2glsl library unavailable!");
@@ -1153,13 +930,17 @@ bool MFIntShader_CompileShaderOpenGL(MFShaderTemplate *pTemplate, MFShaderMacro 
 
 	// optimise the shader if available
 #if defined(SUPPORT_GLSL_OPTIMIZER)
-	const char *pOptimisedShader = MFIntShader_OptimiseShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename);
-	if(pOptimisedShader != pShaderSource)
+	const char *pOutput = NULL;
+	const char *pOptimisedShader = HLSL2GLSL_OptimiseShader(pShaderSource, pTemplate->shaderType, bGLES, pFilename, &pOutput);
+	if(pOutput)
+		MFDebug_Warn(2, pOutput);
+	if(pOptimisedShader)
 	{
 		if(bAllocated)
 			MFHeap_Free((char*)pShaderSource);
-		pShaderSource = pOptimisedShader;
+		pShaderSource = MFString_Dup(pOptimisedShader);
 		bAllocated = true;
+		HLSL2GLSL_FreeShader(pOptimisedShader);
 	}
 #endif
 

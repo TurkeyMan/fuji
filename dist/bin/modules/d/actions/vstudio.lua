@@ -241,9 +241,13 @@
 
 			_p(2,'<useStdLibPath>1</useStdLibPath>')
 
-			local runtime = iif(cfg.flags.StaticRuntime, "1", "3")
-			if config.isDebugBuild(cfg) then
-				runtime = iif(cfg.flags.StaticRuntime, "2", "4")
+			local runtime = 0
+			if not cfg.flags.OmitDefaultLibrary then
+				if config.isDebugBuild(cfg) then
+					runtime = iif(cfg.flags.StaticRuntime, "2", "4")
+				else
+					runtime = iif(cfg.flags.StaticRuntime, "1", "3")
+				end
 			end
 			visuald.element(2, "cRuntime", runtime)
 

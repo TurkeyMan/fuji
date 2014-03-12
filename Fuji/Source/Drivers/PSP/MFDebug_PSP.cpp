@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_DEBUG == MF_DRIVER_PSP
 
@@ -7,8 +7,6 @@
 #include <pspkernel.h>
 #include <pspdebug.h>
 #include <stdio.h>
-
-extern int gQuit;
 
 MF_API void MFDebug_Message(const char *pMessage)
 {
@@ -41,7 +39,7 @@ MF_API void MFDebug_DebugAssert(const char *pReason, const char *pMessage, const
 	{
 		MFInput_Update();
 
-		if(gQuit || MFInput_WasPressed(Button_P2_Select, IDD_Gamepad, 0))
+		if(gpEngineInstance->bQuit || MFInput_WasPressed(Button_P2_Select, IDD_Gamepad, 0))
 			sceKernelExitGame();
 	}
 }

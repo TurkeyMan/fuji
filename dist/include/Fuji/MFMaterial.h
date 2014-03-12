@@ -10,6 +10,8 @@
 #if !defined(_MFMATERIAL_H)
 #define _MFMATERIAL_H
 
+#include "MFMatrix.h"
+
 class MFIni;
 struct MFEnumKey;
 struct MFTexture;

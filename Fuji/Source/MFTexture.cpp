@@ -1,12 +1,13 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFDisplay_Internal.h"
+#include "MFAsset.h"
 #include "MFInput.h"
 #include "MFFont.h"
 #include "MFPrimitive.h"
 #include "MFFileSystem.h"
 #include "MFSystem.h"
-#include "Asset/MFIntTexture.h"
+#include "Util.h"
 
 //#define HQX_SUPPORT
 
@@ -40,7 +41,7 @@ static void MFTexture_Destroy(MFResource *pRes)
 	MFHeap_Free(pTexture);
 }
 
-MFInitStatus MFTexture_InitModule()
+MFInitStatus MFTexture_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_Texture = MFResource_Register("MFTexture", &MFTexture_Destroy);
 
@@ -109,29 +110,20 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 		if(!pTemplate)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
-			// try to load from source data
-			const char * const pExt[] = { ".tga", ".png", ".bmp", ".dds", NULL };
-			const char * const *ppExt = pExt;
-			MFIntTexture *pIT = NULL;
-			while(!pIT && *ppExt)
+			const char *pExt = MFString_GetFileExtension(pName);
+			if(pExt && MFAsset_IsGeometryFile(pExt))
 			{
-				pIT = MFIntTexture_CreateFromFile(MFStr("%s%s", pName, *ppExt));
-				++ppExt;
+				MFAsset_ConvertTextureFromFile(pName, (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform());
 			}
-
-			if(pIT)
+			else
 			{
-				size_t size;
-				MFIntTexture_CreateRuntimeData(pIT, &pTemplate, &size, MFSystem_GetCurrentPlatform());
-
-				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.tex", pName), MFOF_Write | MFOF_Binary);
-				if(pFile)
+				// try each extension...
+				for(const char **ppExt = MFAsset_GetImageFileTypes(); *ppExt != NULL; ++ppExt)
 				{
-					MFFile_Write(pFile, pTemplate, size, false);
-					MFFile_Close(pFile);
+					MFString fileName = MFString::Format("%s%s", pName, *ppExt);
+					if(MFAsset_ConvertTextureFromFile(fileName.CStr(), (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform()))
+						break;
 				}
-
-				MFIntTexture_Destroy(pIT);
 			}
 #endif
 

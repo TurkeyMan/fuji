@@ -1,10 +1,10 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SOUND == MF_DRIVER_PS2
 
 #include "MFVector.h"
 
-MFInitStatus MFSound_InitModule()
+MFInitStatus MFSound_InitModule(int moduleId, bool bPerformInitialisation)
 {
 }
 

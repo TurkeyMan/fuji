@@ -6,7 +6,7 @@
 #include "MFResource.h"
 
 // functions
-MFInitStatus MFRenderState_InitModule();
+MFInitStatus MFRenderState_InitModule(int moduleId, bool bPerformInitialisation);
 void MFRenderState_DeinitModule();
 
 

@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFQUATERNION_H)
 #define _MFQUATERNION_H
 

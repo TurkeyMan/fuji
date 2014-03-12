@@ -1,12 +1,12 @@
-#include "Fuji.h"
-
+#include "Fuji_Internal.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFEffect_Internal.h"
 #include "MFShader_Internal.h"
-#include "Asset/MFIntEffect.h"
 #include "MFShader.h"
+#include "Util.h"
+#include "Asset/MFIntEffect.h"
 
 #include <string.h>
 

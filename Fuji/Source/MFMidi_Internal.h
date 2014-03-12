@@ -3,7 +3,7 @@
 
 #include "MFMidi.h"
 
-MFInitStatus MFMidi_InitModule();
+MFInitStatus MFMidi_InitModule(int moduleId, bool bPerformInitialisation);
 void MFMidi_InitModulePlatformSpecific();
 void MFMidi_DeinitModule();
 void MFMidi_DeinitModulePlatformSpecific();

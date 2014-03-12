@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_PS2
 
@@ -33,7 +33,7 @@ int  r, g, b, a;
 #define NUM_VERTS	(4096*4)
 #define GIF_AD		0x0E
 
-MFInitStatus MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 	if(packet_allocate(&packet, 1024) < 0)

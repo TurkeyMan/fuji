@@ -1,3 +1,4 @@
+#pragma once
 #if !defined(_MFMODULE_INTERNAL_H)
 #define _MFMODULE_INTERNAL_H
 
@@ -46,19 +47,7 @@ enum MFBuiltinModule
 	MFBIM_Max
 };
 
-
-extern char gBuiltinModuleIDs[MFBIM_Max];
-
-__forceinline int MFModule_GetBuiltinModuleID(MFBuiltinModule module)
-{
-	return gBuiltinModuleIDs[module];
-}
-
-__forceinline uint64 MFModule_GetBuiltinModuleMask(MFBuiltinModule module)
-{
-	if(gBuiltinModuleIDs[module] >= 0)
-		return 1ULL << gBuiltinModuleIDs[module];
-	return 0;
-}
+int MFModule_GetBuiltinModuleID(MFBuiltinModule module);
+uint64 MFModule_GetBuiltinModuleMask(MFBuiltinModule module);
 
 #endif

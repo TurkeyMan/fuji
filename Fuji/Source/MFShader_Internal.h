@@ -3,11 +3,10 @@
 #define _MFSHADER_INTERNAL_H
 
 #include "MFShader.h"
-#include "MFRenderState.h"
 #include "MFResource.h"
 
 // functions
-MFInitStatus MFShader_InitModule();
+MFInitStatus MFShader_InitModule(int moduleId, bool bPerformInitialisation);
 void MFShader_DeinitModule();
 
 void MFShader_InitModulePlatformSpecific();
@@ -39,7 +38,7 @@ struct MFShader : MFResource
 	void (*pExecute)(void *pWorkload);
 
 	// inputs
-	uint32 renderStateRequirements[MFSB_CT_TypeCount];
+	uint32 renderStateRequirements[8];
 
 	void *pPlatformData;
 };

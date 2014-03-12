@@ -8,7 +8,7 @@
 #include "MFResource.h"
 
 // functions
-MFInitStatus MFEffect_InitModule();
+MFInitStatus MFEffect_InitModule(int moduleId, bool bPerformInitialisation);
 void MFEffect_DeinitModule();
 
 void MFEffect_InitModulePlatformSpecific();

@@ -2,7 +2,7 @@
 
 /**** Includes ****/
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFDisplay.h"
 #include "MFView.h"
 #include "MFPrimitive.h"

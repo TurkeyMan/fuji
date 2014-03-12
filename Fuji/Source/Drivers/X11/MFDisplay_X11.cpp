@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_DISPLAY == MF_DRIVER_X11
 
@@ -62,8 +62,6 @@ Atom wm_delete_window;
 
 uint8 gXKeys[65535];
 XMouseState gXMouse;
-
-extern int gQuit;
 
 static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);
@@ -542,7 +540,7 @@ void MFDisplay_HandleEventsX11()
 
 				if(atom == wm_delete_window)
 				{
-					gQuit = 1;
+					gpEngineInstance->bQuit = 1;
 				}
 				break;
 			}

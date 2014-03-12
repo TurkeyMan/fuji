@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFVector.h"
 #include "MFInput_Internal.h"
 #include "MFNetwork_Internal.h"
@@ -248,7 +248,7 @@ static const char * const gKeyNames[] =
 };
 
 // Functions
-MFInitStatus MFInput_InitModule()
+MFInitStatus MFInput_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFZeroMemory(gGamepadStates, sizeof(gGamepadStates[0])*MFInput_MaxInputID);
 	MFZeroMemory(gKeyStates, sizeof(gKeyStates[0])*MFInput_MaxInputID);

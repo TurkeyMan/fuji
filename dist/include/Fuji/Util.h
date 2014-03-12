@@ -1,8 +1,6 @@
 #if !defined(_UTIL_H)
 #define _UTIL_H
 
-MFInitStatus MFUtil_InitModule();
-
 // CRC functions
 void MFUtil_CrcInit(); // generates some crc tables - system should call this once
 MF_API uint32 MFUtil_Crc(const char *pBuffer, size_t length); // generate a unique Crc number for this buffer

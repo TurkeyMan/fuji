@@ -9,7 +9,7 @@ struct MFTOCEntry;
 struct MFMount;
 
 // internal functions
-MFInitStatus MFFileSystem_InitModule();
+MFInitStatus MFFileSystem_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystem_DeinitModule();
 
 MFMount *MFFileSystem_FindVolume(const char *pVolumeName);
@@ -28,9 +28,7 @@ struct MFFile
 	MFFileSystemHandle filesystem;	// filesystem that created the file
 	void *pFilesysData;				// extra data related to the file
 
-#if !defined(_RETAIL)
-	char fileIdentifier[256];
-#endif
+	char fileIdentifier[260];
 };
 
 enum MFFileOp
@@ -176,5 +174,10 @@ struct MFFileSystem
 
 MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, MFFileSystemCallbacks *pCallbacks);
 void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle);
+
+struct MFFileSystemGlobalState
+{
+	MFFileSystemHandle hFileSystemHandle;
+};
 
 #endif

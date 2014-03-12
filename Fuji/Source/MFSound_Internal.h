@@ -2,12 +2,13 @@
 #define _MFSOUND_INTERNAL_H
 
 #include "MFSound.h"
+#include "MFModule.h"
 
 struct MFSoundDataInternal;
 struct MFVoiceDataInternal;
 struct MFStreamCallbacks;
 
-MFInitStatus MFSound_InitModule();
+MFInitStatus MFSound_InitModule(int moduleId, bool bPerformInitialisation);
 void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize);
 void MFSound_DeinitModule();
 void MFSound_DeinitModulePlatformSpecific();

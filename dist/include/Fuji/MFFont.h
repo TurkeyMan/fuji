@@ -10,10 +10,11 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFFONT_H)
 #define _MFFONT_H
 
-#include "MFVector.h"
+#include "MFMatrix.h"
 
 // windows decides to steal these names for its self..
 #if defined(DrawText)

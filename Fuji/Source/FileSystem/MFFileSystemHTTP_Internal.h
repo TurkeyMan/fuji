@@ -18,7 +18,7 @@ struct MFFileHTTPData
 };
 
 // internal functions
-MFInitStatus MFFileSystemHTTP_InitModule();
+MFInitStatus MFFileSystemHTTP_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystemHTTP_DeinitModule();
 
 // filesystem callbacks
@@ -36,8 +36,5 @@ int MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 // this is just for convenience sake, and not part of the main filesystem interface
 uint32 MFFileHTTP_GetSize(const char* pFilename);
 bool MFFileHTTP_Exists(const char* pFilename);
-
-// handle to the HTTP filesystem
-extern MFFileSystemHandle hHTTPFileSystem;
 
 #endif

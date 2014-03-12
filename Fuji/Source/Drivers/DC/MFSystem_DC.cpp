@@ -1,13 +1,13 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_DC
 
 #include "System_Internal.h"
 
-MFPlatform gCurrentPlatform = FP_DC;
-
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_DC;
+
 	kos_init_all(ALL_ENABLE, ROMDISK_NONE);
 //	kos_init_all(THD_ENABLE | IRQ_ENABLE | TA_ENABLE, ROMDISK_NONE);
 }

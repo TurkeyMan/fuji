@@ -69,16 +69,16 @@ void HKWidgetListbox::Update()
 		if(velocity != 0.f)
 		{
 			// apply scroll velocity
-			velocity *= 1.f - MFSystem_TimeDelta()*10.f;
+			velocity *= 1.f - MFTimeDelta()*10.f;
 			if(velocity < 0.01f)
 				velocity = 0.f;
 
-			scrollOffset += velocity * MFSystem_TimeDelta();
+			scrollOffset += velocity * MFTimeDelta();
 		}
 
 		if(scrollOffset > 0.f)
 		{
-			scrollOffset = MFMax(scrollOffset - MFMax(scrollOffset * 10.f * MFSystem_TimeDelta(), 1.f), 0.f);
+			scrollOffset = MFMax(scrollOffset - MFMax(scrollOffset * 10.f * MFTimeDelta(), 1.f), 0.f);
 		}
 		else
 		{
@@ -86,7 +86,7 @@ void HKWidgetListbox::Update()
 			float overflow = MFMin(listSize - (contentSize + scrollOffset), -scrollOffset);
 			if(overflow > 0.f)
 			{
-				scrollOffset = MFMin(scrollOffset + MFMax(overflow * 10.f * MFSystem_TimeDelta(), 1.f), scrollOffset + overflow);
+				scrollOffset = MFMin(scrollOffset + MFMax(overflow * 10.f * MFTimeDelta(), 1.f), scrollOffset + overflow);
 			}
 		}
 	}
@@ -135,7 +135,7 @@ bool HKWidgetListbox::InputEvent(HKInputManager &manager, const HKInputManager::
 			scrollOffset += delta;
 
 			const float smooth = 0.5f;
-			velocity = velocity*smooth + (delta / MFSystem_TimeDelta())*(1.f-smooth);
+			velocity = velocity*smooth + (delta / MFTimeDelta())*(1.f-smooth);
 
 			if(!bDragging)
 			{

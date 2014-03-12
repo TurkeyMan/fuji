@@ -94,7 +94,7 @@ solution "Fuji"
 	-- D bindings
 	dofile "Fuji/Project/fujidproj.lua"
 
-	-- Asset compiler
+	-- Middleware
 	if os.is("windows") then
-		dofile "Fuji/Project/fujiasset.lua"
+		dofile "Fuji/Project/fujimiddleware.lua"
 	end

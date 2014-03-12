@@ -1,17 +1,27 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFSystem.h"
-#include "MFHeap.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemCachedFile_Internal.h"
 
-MFPtrListDL<MFFileCachedData> gCachedFiles;
-
-MFInitStatus MFFileSystemCachedFile_InitModule()
+struct MFFileSystemCachedFileState : public MFFileSystemGlobalState
 {
-	MFCALLSTACK;
+	MFPtrListDL<MFFileCachedData> gCachedFiles;
+};
 
-	gCachedFiles.Init("Cached Files", gDefaults.filesys.maxOpenFiles);
+int gFileSystemCachedFileId = -1;
+
+MFInitStatus MFFileSystemCachedFile_InitModule(int moduleId, bool bPerformInitialisation)
+{
+	gFileSystemCachedFileId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFFileSystemCachedFileState);
+
+	pModuleData->gCachedFiles.Init("Cached Files", gDefaults.filesys.maxOpenFiles);
 
 	MFFileSystemCallbacks fsCallbacks;
 
@@ -29,23 +39,23 @@ MFInitStatus MFFileSystemCachedFile_InitModule()
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
 
-	hCachedFileSystem = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
+	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
 
 	return MFIS_Succeeded;
 }
 
 void MFFileSystemCachedFile_DeinitModule()
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemCachedFileState, gFileSystemCachedFileId);
 
-	MFFileSystem_UnregisterFileSystem(hCachedFileSystem);
+	MFFileSystem_UnregisterFileSystem(pModuleData->hFileSystemHandle);
 
-	gCachedFiles.Deinit();
+	pModuleData->gCachedFiles.Deinit();
 }
 
 int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemCachedFileState, gFileSystemCachedFileId);
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataCachedFile), "Incorrect size for MFOpenDataCachedFile structure. Invalid pOpenData.");
 	MFOpenDataCachedFile *pCachedFile = (MFOpenDataCachedFile*)pOpenData;
@@ -54,7 +64,7 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->offset = 0;
 	pFile->length = pCachedFile->pBaseFile->length;
 
-	pFile->pFilesysData = gCachedFiles.Create();
+	pFile->pFilesysData = pModuleData->gCachedFiles.Create();
 	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
 	MFZeroMemory(pCacheData, sizeof(MFFileCachedData));
 
@@ -87,9 +97,7 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 		}
 	}
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pCachedFile->pBaseFile->fileIdentifier);
-#endif
 
 	return 0;
 }

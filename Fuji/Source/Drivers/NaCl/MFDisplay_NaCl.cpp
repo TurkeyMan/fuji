@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_DISPLAY == MF_DRIVER_NACL
 
@@ -10,8 +10,6 @@
 #include "MFSystem_NaCl.h"
 
 void MFDisplay_ResetDisplay();
-
-extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 
 bool isortho = false;
 float fieldOfView;

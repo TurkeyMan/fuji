@@ -61,7 +61,7 @@ struct MFTexture : public MFResource
 };
 
 // functions
-MFInitStatus MFTexture_InitModule();
+MFInitStatus MFTexture_InitModule(int moduleId, bool bPerformInitialisation);
 void MFTexture_DeinitModule();
 
 void MFTexture_InitModulePlatformSpecific();

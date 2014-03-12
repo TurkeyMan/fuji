@@ -1,6 +1,6 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFEffect_Internal.h"
-#include "Asset/MFIntEffect.h"
+#include "MFAsset.h"
 #include "MFModule.h"
 #include "MFFileSystem.h"
 #include "MFSystem.h"
@@ -26,7 +26,7 @@ static void MFEffect_Destroy(MFResource *pRes)
 	MFHeap_Free(pEffect);
 }
 
-MFInitStatus MFEffect_InitModule()
+MFInitStatus MFEffect_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_Effect = MFResource_Register("MFEffect", &MFEffect_Destroy);
 
@@ -60,20 +60,7 @@ MF_API MFEffect* MFEffect_Create(const char *pFilename)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			// try to load from source data
-			MFIntEffect *pIE = MFIntEffect_CreateFromSourceData(pFilename);
-			if(pIE)
-			{
-				MFIntEffect_CreateRuntimeData(pIE, &pEffect, &fileSize, MFSystem_GetCurrentPlatform(), platformDataSize + nameLen);
-
-				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.bfx", pFilename), MFOF_Write | MFOF_Binary);
-				if(pFile)
-				{
-					MFFile_Write(pFile, pEffect, fileSize, false);
-					MFFile_Close(pFile);
-				}
-
-				MFIntEffect_Destroy(pIE);
-			}
+			MFAsset_ConvertAssetFromFile(pFilename, (void**)&pEffect, &fileSize, MFSystem_GetCurrentPlatform(), platformDataSize + nameLen);
 #endif
 
 			if(!pEffect)

@@ -1,5 +1,6 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFImage.h"
+#include "MFVector.h"
 
 //#define HQX_SUPPORT
 

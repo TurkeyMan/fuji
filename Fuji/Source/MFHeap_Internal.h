@@ -4,7 +4,7 @@
 #include "MFHeap.h"
 
 // heap module init/deinit
-MFInitStatus MFHeap_InitModule();
+MFInitStatus MFHeap_InitModule(int moduleId, bool bPerformInitialisation);
 void MFHeap_DeinitModule();
 
 void MFHeap_InitModulePlatformSpecific();

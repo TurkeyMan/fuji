@@ -1,11 +1,9 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_XBOX
 
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
-
-MFPlatform gCurrentPlatform = FP_XBox;
 
 char *gpCommandLineBuffer = NULL;
 
@@ -35,6 +33,7 @@ char* FixXBoxFilename(const char *pFilename)
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_XBox;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

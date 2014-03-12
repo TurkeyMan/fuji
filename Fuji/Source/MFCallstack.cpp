@@ -1,6 +1,6 @@
 /**** Includes ****/
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFCallstack_Internal.h"
 #include "DebugMenu.h"
 #include "MFSystem.h"
@@ -69,7 +69,7 @@
 
 #endif // _MFCALLSTACK
 
-MFInitStatus MFCallstack_InitModule()
+MFInitStatus MFCallstack_InitModule(int moduleId, bool bPerformInitialisation)
 {
 #if defined(_MFCALLSTACK_PROFILING)
 	DebugMenu_AddItem("Draw Callstack Profile", "Fuji Options", &drawCallstack);

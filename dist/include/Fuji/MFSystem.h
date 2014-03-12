@@ -6,10 +6,9 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFSYSTEM_H)
 #define _MFSYSTEM_H
-
-#include "Timer.h"
 
 class MFIniLine;
 
@@ -324,7 +323,7 @@ MF_API uint64 MFSystem_GetRTCFrequency();
  * @return The current time delta.
  * @see MFSystem_GetFPS()
  */
-float MFSystem_TimeDelta();
+float MFTimeDelta();
 
 /**
  * Gets the current time delta.
@@ -338,7 +337,7 @@ MF_API float MFSystem_GetTimeDelta();
  * Gets the current frame rate.
  * Gets the current frame rate.
  * @return The current frame rate.
- * @see MFSystem_TimeDelta()
+ * @see MFTimeDelta()
  */
 MF_API float MFSystem_GetFPS();
 
@@ -348,7 +347,7 @@ MF_API float MFSystem_GetFPS();
  * @return The current frame count.
  * @see MFSystem_GetFPS()
  */
-uint32 MFSystem_FrameCounter();
+uint32 MFFrameCounter();
 
 /**
  * Gets the current frame.
@@ -357,8 +356,6 @@ uint32 MFSystem_FrameCounter();
  * @see MFSystem_GetFPS()
  */
 MF_API uint32 MFSystem_GetFrameCounter();
-
-#include "MFSystem.inl"
 
 #endif // _MFSYSTEM_H
 

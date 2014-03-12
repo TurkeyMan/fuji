@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFMATRIX_H)
 #define _MFMATRIX_H
 

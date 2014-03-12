@@ -10,9 +10,9 @@
 #if !defined(_MFRENDERER_H)
 #define _MFRENDERER_H
 
-#include "MFVertex.h"
 #include "MFMatrix.h"
 #include "MFRenderState.h"
+#include "MFVertex.h"
 
 struct MFTexture;
 struct MFRenderTarget;

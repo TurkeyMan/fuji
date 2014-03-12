@@ -854,7 +854,7 @@ inline MFArray<MFString>& MFString::SplitLines(MFArray<MFString> &output)
 	return this->Split(output, "\r\n");
 }
 
-inline int MFString::Enumerate(const char *const *ppKeys, size_t numKeys, bool bCaseSensitive)
+inline int MFString::Enumerate(const char **ppKeys, size_t numKeys, bool bCaseSensitive)
 {
 	if(IsEmpty())
 		return -1;

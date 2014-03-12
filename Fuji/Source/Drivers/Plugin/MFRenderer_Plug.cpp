@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFTexture.h"
 
 #if MF_RENDERER == MF_DRIVER_PLUGIN

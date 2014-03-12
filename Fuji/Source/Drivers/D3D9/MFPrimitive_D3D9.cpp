@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
 
@@ -66,7 +66,7 @@ static bool gImmitateQuads = false;
 
 /*** functions ***/
 
-MFInitStatus MFPrimitive_InitModule()
+MFInitStatus MFPrimitive_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFVertexElement elements[4];
 

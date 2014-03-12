@@ -4,6 +4,14 @@ public import fuji.types;
 public import fuji.string;
 public import fuji.dbg;
 
+struct MFEngineInstance;
+
+extern (C) MFEngineInstance* Fuji_CreateEngineInstance();
+extern (C) void Fuji_DestroyEngineInstance(MFEngineInstance* pEngineInstance = null);
+
+extern (C) MFEngineInstance* Fuji_GetCurrentEngineInstance();
+extern (C) MFEngineInstance* Fuji_SetCurrentEngineInstance(MFEngineInstance* pEngineInstance);
+
 template MFDeg2Rad(alias a) { enum MFDeg2Rad = 0.017453292519943295769236907684886 * a; }
 template MFRad2Deg(alias a) { enum MFRad2Deg = 57.295779513082320876798154814105 * a; }
 template MFAlign(alias x, alias bytes) { enum MFAlign = (x + (bytes-1)) & ~(bytes-1); }

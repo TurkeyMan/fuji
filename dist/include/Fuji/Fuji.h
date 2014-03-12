@@ -8,6 +8,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_FUJI_H)
 #define _FUJI_H
 
@@ -94,7 +95,7 @@
 	#else
 		#error "XBox version undefined..."
 	#endif
-#elif defined(WIN32)
+#elif defined(_WIN32)
 	#define MF_WINDOWS
 	#define MF_PLATFORM WINDOWS
 
@@ -513,17 +514,22 @@ enum MFEndian
 #define MFMAKEFOURCC(ch0, ch1, ch2, ch3) ((uint32)(uint8)(ch0) | ((uint32)(uint8)(ch1) << 8) | ((uint32)(uint8)(ch2) << 16) | ((uint32)(uint8)(ch3) << 24 ))
 #endif
 
+/*** Engine insstance management ***/
+
+struct MFEngineInstance;
+
+MF_API MFEngineInstance * Fuji_CreateEngineInstance();
+MF_API void Fuji_DestroyEngineInstance(MFEngineInstance *pEngineInstance = NULL);
+
+MF_API MFEngineInstance * Fuji_GetCurrentEngineInstance();
+MF_API MFEngineInstance * Fuji_SetCurrentEngineInstance(MFEngineInstance *pEngineInstance);
+
 
 /*** Additional includes ***/
-
-#include "MFModule.h"
 
 #include "MFDebug.h"
 #include "MFString.h"
 #include "MFMath.h"
-#include "MFVector.h"
-
-#include "Util.h"
 
 
 /*** Callstack profiling ***/

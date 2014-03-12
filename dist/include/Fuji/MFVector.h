@@ -6,6 +6,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFVECTOR_H)
 #define _MFVECTOR_H
 

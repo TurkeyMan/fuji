@@ -49,7 +49,7 @@ struct MFIndexBuffer : public MFResource
 	void *pPlatformData;
 };
 
-MFInitStatus MFVertex_InitModule();
+MFInitStatus MFVertex_InitModule(int moduleId, bool bPerformInitialisation);
 void MFVertex_DeinitModule();
 
 void MFVertex_EndFrame();

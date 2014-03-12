@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SOUND == MF_DRIVER_GC
 
@@ -10,7 +10,7 @@
 #include "MFPrimitive.h"
 #include "DebugMenu_Internal.h"
 
-MFInitStatus MFSound_InitModule()
+MFInitStatus MFSound_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 }

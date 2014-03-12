@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_FILESYSTEM == MF_DRIVER_NULL
 
@@ -78,9 +78,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->length = ftell(pF);
 	fseek(pF, 0, SEEK_SET);
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
-#endif
 
 	return 0;
 #else

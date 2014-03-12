@@ -16,7 +16,6 @@ project (projName)
 			-- linux shared libs append the version number AFTER the extension
 			targetextension(".so." .. fujiVersion)
 		end
-		flags { "StaticRuntime" }
 	else
 		kind "StaticLib"
 		flags { "OmitDefaultLibrary" }
@@ -44,12 +43,15 @@ project (projName)
 			includedirs { "../Middleware/zlib" }
 			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
 			includedirs { "../Middleware/libpng-1.5.0/" }
+		configuration { "not linux", "not macosx", "not Android", "not windows" }
+			files { "../Middleware/libpng-1.5.0/**.h", "../Middleware/libpng-1.5.0/**.c" }
+			includedirs { "../Middleware/libpng-1.5.0/" }
 	end
 
 	configuration { }
 
 	-- project configuration --
-	flags { "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
 	warnings "Extra"
 
 	if string.startswith(_ACTION, "vs") then
@@ -65,10 +67,8 @@ project (projName)
 	-- platform specific config --
 	configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 		excludes { "../Source/Images/**" }
-		excludes { "../Source/Asset/**", "../Source/Util/**" }
 	configuration { "SharedLib", "windows", "not Xbox360", "not PS3", "not Android" }
-		links { "FujiAsset" }
-		linkoptions { "/DelayLoad:FujiAsset.dll" }
+		links { "FujiMiddleware" }
 	configuration { "StaticLib", "windows", "not Xbox360", "not PS3", "not Android" }
 		targetname "Fuji_static"
 

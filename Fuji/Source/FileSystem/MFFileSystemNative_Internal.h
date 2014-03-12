@@ -4,7 +4,7 @@
 #include "FileSystem/MFFileSystemNative.h"
 
 // internal functions
-MFInitStatus MFFileSystemNative_InitModule();
+MFInitStatus MFFileSystemNative_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystemNative_DeinitModule();
 
 MFInitStatus MFFileSystemNative_InitModulePlatformSpecific();
@@ -31,8 +31,5 @@ void MFFileNative_FindClose(MFFind *pFind);
 uint32 MFFileNative_GetSize(const char* pFilename);
 bool MFFileNative_Exists(const char* pFilename);
 const char* MFFileNative_MakeAbsolute(const char* pFilename);
-
-// handle to the native filesystem
-extern MFFileSystemHandle hNativeFileSystem;
 
 #endif

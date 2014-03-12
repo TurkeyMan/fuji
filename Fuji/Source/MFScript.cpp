@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if defined(_ENABLE_SCRIPTING)
 
@@ -48,7 +48,7 @@ void MessageCallback(const asSMessageInfo *msg, void *param)
 	MFDebug_Message(MFStr("%s.as(%d, %d) : %s%s\n", msg->section, msg->row, msg->col, type, msg->message));
 }
 
-MFInitStatus MFScript_InitModule()
+MFInitStatus MFScript_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 

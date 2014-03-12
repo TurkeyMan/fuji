@@ -338,7 +338,7 @@ extern (C) float MFSystem_GetTimeDelta();
 * Gets the current frame rate.
 * Gets the current frame rate.
 * @return The current frame rate.
-* @see MFSystem_TimeDelta()
+* @see MFSystem_GetTimeDelta()
 */
 extern (C) float MFSystem_GetFPS();
 

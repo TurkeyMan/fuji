@@ -1,5 +1,5 @@
-#include "Fuji.h"
-#include "MFHeap.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemZipFile_Internal.h"
 
@@ -8,9 +8,16 @@
 #include "minizip/unzip.h"
 #include "minizip/ioapi.h"
 
-MFInitStatus MFFileSystemZipFile_InitModule()
+int gFileSystemZipFileId = -1;
+
+MFInitStatus MFFileSystemZipFile_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	MFCALLSTACK;
+	gFileSystemZipFileId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFFileSystemGlobalState);
 
 	MFFileSystemCallbacks fsCallbacks;
 
@@ -28,16 +35,16 @@ MFInitStatus MFFileSystemZipFile_InitModule()
 	fsCallbacks.FindNext = MFFileZipFile_FindNext;
 	fsCallbacks.FindClose = MFFileZipFile_FindClose;
 
-	hZipFileSystem = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
+	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
 
 	return MFIS_Succeeded;
 }
 
 void MFFileSystemZipFile_DeinitModule()
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemGlobalState, gFileSystemZipFileId);
 
-	MFFileSystem_UnregisterFileSystem(hZipFileSystem);
+	MFFileSystem_UnregisterFileSystem(pModuleData->hFileSystemHandle);
 }
 
 // filesystem callbacks
@@ -146,6 +153,8 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 
 	if(pTOCEntry)
 	{
+		GET_MODULE_DATA_ID(MFFileSystemGlobalState, gFileSystemZipFileId);
+
 		MFOpenDataZipFile openData;
 
 		openData.cbSize = sizeof(MFOpenDataZipFile);
@@ -153,7 +162,7 @@ MFFile* MFFileSystemZipFile_Open(MFMount *pMount, const char *pFilename, uint32 
 		openData.pZipArchive = (MFFile*)pMount->pFilesysData;
 		openData.pFilename = MFStr("%s%s", pTOCEntry->pFilesysData ? (char*)pTOCEntry->pFilesysData : "", pTOCEntry->pName);
 
-		hFile = MFFile_Open(hZipFileSystem, &openData);
+		hFile = MFFile_Open(pModuleData->hFileSystemHandle, &openData);
 	}
 
 	return hFile;
@@ -218,9 +227,7 @@ int MFFileZipFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	pFile->length = fileInfo.uncompressed_size;
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pZipFile->pFilename);
-#endif
 
 	return 0;
 }

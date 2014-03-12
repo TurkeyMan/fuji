@@ -346,11 +346,11 @@ MF_API float MFString_AsciiToFloat(const char *pString, const char **ppNextChar 
  * Finds a string within a list of strings and return the item index.
  * @param pString String to find.
  * @param ppKeys Array of keys to search.
- * @param numKeys Number of items in the array.
+ * @param numKeys Number of items in the array. If -1 is given, ppKeys is assumed to be a NULL terminated array.
  * @param bCaseSensitive Perform case sensitive string comparisons.
  * @return The index of \a pString if it was present in the list, or -1 if it was not present.
  */
-MF_API int MFString_Enumerate(const char *pString, const char *const *ppKeys, size_t numKeys, bool bCaseSensitive = false);
+MF_API int MFString_Enumerate(const char *pString, const char **ppKeys, size_t numKeys = -1, bool bCaseSensitive = false);
 
 /**
  * Test if the specified character is a while space character.
@@ -767,7 +767,7 @@ public:
 	MFArray<MFString>& SplitLines(MFArray<MFString> &output);
 
 	int Enumerate(const MFArray<MFString> keys, bool bCaseSensitive = false);
-	int Enumerate(const char *const *ppKeys, size_t numKeys, bool bCaseSensitive = false);
+	int Enumerate(const char **ppKeys, size_t numKeys = -1, bool bCaseSensitive = false);
 
 	MFString StripToken(const char *pDelimiters = " \t\r\n");
 

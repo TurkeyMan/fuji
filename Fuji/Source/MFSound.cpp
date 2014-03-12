@@ -1,5 +1,6 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSound_Internal.h"
+#include "MFAsset.h"
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFFileSystem.h"
@@ -8,7 +9,7 @@
 #include "MFPrimitive.h"
 #include "MFThread.h"
 #include "DebugMenu.h"
-#include "Asset/MFIntSound.h"
+#include "Util.h"
 
 //#define USE_THREADED_AUDIO
 
@@ -107,7 +108,7 @@ int MFSound_UpdateThread(void *pUserData)
 }
 #endif
 
-MFInitStatus MFSound_InitModule()
+MFInitStatus MFSound_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 
@@ -250,29 +251,20 @@ MF_API MFSound *MFSound_Create(const char *pName)
 		if(!pTemplate)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
-			// try to load from source data
-			MFIntSound *pIS = NULL;
-
-			MFStreamHandler **ppI = gStreamHandlers.Begin();
-			while(!pIS && *ppI)
+			const char *pExt = MFString_GetFileExtension(pName);
+			if(pExt && MFAsset_IsSoundFile(pExt))
 			{
-				pIS = MFIntSound_CreateFromFile(MFStr("%s%s", pName, (*ppI)->streamExtension));
-				++ppI;
+				MFAsset_ConvertAssetFromFile(pName, (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform());
 			}
-
-			if(pIS)
+			else
 			{
-				size_t size;
-				MFIntSound_CreateRuntimeData(pIS, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform());
-
-				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.snd", pName), MFOF_Write | MFOF_Binary);
-				if(pFile)
+				// try each extension...
+				for(MFStreamHandler **ppI = gStreamHandlers.Begin(); *ppI != NULL; ++ppI)
 				{
-					MFFile_Write(pFile, pTemplate, size, false);
-					MFFile_Close(pFile);
+					MFString fileName = MFString::Format("%s%s", pName, (*ppI)->streamExtension);
+					if(MFAsset_ConvertAssetFromFile(fileName.CStr(), (void**)&pTemplate, NULL, MFSystem_GetCurrentPlatform()))
+						break;
 				}
-
-				MFIntSound_Destroy(pIS);
 			}
 #endif
 

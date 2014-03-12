@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFResource_Internal.h"
 
 #include "MFModule.h"
@@ -34,7 +34,7 @@ int MFRT_AnimationTemplate = -1;
 int MFRT_Sound = -1;
 int MFRT_Font = -1;
 
-MFInitStatus MFResource_InitModule()
+MFInitStatus MFResource_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFZeroMemory(gResourceCounts, sizeof(gResourceCounts));
 

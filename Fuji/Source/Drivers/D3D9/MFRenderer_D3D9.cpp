@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_D3D9 || defined(MF_RENDERPLUGIN_D3D9)
 
@@ -39,8 +39,6 @@
 #include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
-
-extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 
 static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -406,8 +404,9 @@ void MFRenderer_ResetDisplay()
 		void MFRenderState_Recreate();
 		MFRenderState_Recreate();
 
-		if(pSystemCallbacks[MFCB_DisplayReset])
-			pSystemCallbacks[MFCB_DisplayReset]();
+		MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_DisplayReset);
+		if(pCallback)
+			pCallback();
 	}
 }
 

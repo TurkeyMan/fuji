@@ -11,7 +11,7 @@ struct MFFileMemoryData
 };
 
 // internal functions
-MFInitStatus MFFileSystemMemory_InitModule();
+MFInitStatus MFFileSystemMemory_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystemMemory_DeinitModule();
 
 // filesystem callbacks
@@ -25,8 +25,5 @@ int MFFileMemory_Close(MFFile* fileHandle);
 int MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, int64 bytes);
 int MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes);
 int MFFileMemory_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
-
-// handle to the Memory filesystem
-extern MFFileSystemHandle hMemoryFileSystem;
 
 #endif

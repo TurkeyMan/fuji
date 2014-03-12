@@ -4,7 +4,7 @@
 #include "MFCompute.h"
 
 //---------------------------------------------------------------------------------------------------------------------
-MFInitStatus MFCompute_InitModule();
+MFInitStatus MFCompute_InitModule(int moduleId, bool bPerformInitialisation);
 
 //---------------------------------------------------------------------------------------------------------------------
 void MFCompute_DeinitModule();

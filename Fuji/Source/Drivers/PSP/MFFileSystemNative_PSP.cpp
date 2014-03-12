@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_FILESYSTEM == MF_DRIVER_PSP
 
@@ -59,9 +59,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	// return to start of file
 	sceIoLseek32(hFile, 0, SEEK_SET);
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pFilename);
-#endif
 
 	return 0;
 }

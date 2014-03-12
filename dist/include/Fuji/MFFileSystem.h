@@ -7,6 +7,7 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFFILESYSTEM_H)
 #define _MFFILESYSTEM_H
 

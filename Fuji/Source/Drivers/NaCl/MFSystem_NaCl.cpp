@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_NACL
 
@@ -6,15 +6,11 @@
 
 #include <sys/time.h>
 
-#include "MFModule_Internal.h"
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFThread.h"
 
 extern MFInitParams gInitParams;
-extern MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
-
-MFPlatform gCurrentPlatform = FP_NativeClient;
 
 Fuji *FujiModule::pInstance = NULL;
 
@@ -23,6 +19,7 @@ const int32_t kUpdateInterval = 17;  // milliseconds
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_NativeClient;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
@@ -109,8 +106,9 @@ Fuji::Fuji(PP_Instance instance)
 Fuji::~Fuji()
 {
 	// Deinit the game
-	if(pSystemCallbacks[MFCB_Deinit])
-		pSystemCallbacks[MFCB_Deinit]();
+	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_Deinit);
+	if(pCallback)
+		pCallback();
 
 	// Deinit fuji
 //	MFSystem_Deinit();

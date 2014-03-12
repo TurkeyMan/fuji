@@ -1,9 +1,10 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFPtrList.h"
 #include "MFSystem.h"
 #include "MFModel_Internal.h"
 #include "MFAnimation_Internal.h"
 #include "MFFileSystem.h"
+#include "MFAsset.h"
 #include "MFView.h"
 #include "MFCollision_Internal.h"
 #include "MFAnimation.h"
@@ -12,7 +13,7 @@
 #include "MFRenderer.h"
 #include "MFRenderState.h"
 #include "MFVertex.h"
-#include "Asset/MFIntModel.h"
+#include "Util.h"
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
@@ -73,7 +74,7 @@ static void MFModelTemplate_Destroy(MFResource *pRes)
 	MFHeap_Free(pTemplate);
 }
 
-MFInitStatus MFModel_InitModule()
+MFInitStatus MFModel_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_ModelTemplate = MFResource_Register("MFModelTemplate", &MFModelTemplate_Destroy);
 
@@ -251,81 +252,24 @@ static MFModelTemplate* MFModel_CreateFromSourceData(const char *pFilename, size
 {
 	void *pTemplate = NULL;
 
-	// try to load from source data
-	const char * const pExt[] = {
-		/* buiultin formats */	".f3d", ".dae", ".x", ".ase", ".obj", ".md2", ".md3", ".memd2",
-		/* AssImp formats */	".fbx", ".blend", ".3ds", ".dxf", ".lwo", ".lws", ".ms3d", ".mdl", ".pk3", ".mdc", ".md5", ".smd", ".vta", ".m3", ".3d",
-		NULL };
-
-	// first try and see if the filename has an extension to begin with...
-	MFString fileName = pFilename;
-	fileName = fileName.Lower();
-
-	MFIntModel *pIM = NULL;
-
-	const char * const *ppExt = pExt;
-	bool bExplicit = false;
-	for(; *ppExt != NULL; ++ppExt)
+	const char *pExt = MFString_GetFileExtension(pFilename);
+	if(pExt && MFAsset_IsGeometryFile(pExt))
 	{
-		if(fileName.EndsWith(*ppExt))
-		{
-			pIM = MFIntModel_CreateFromFile(fileName.CStr());
-			bExplicit = true;
-			break;
-		}
+		if(MFAsset_ConvertModelAndAnimationFromFile(pFilename, &pTemplate, pSize, bKeepAnimation ? &pAnimationTemplate : NULL, &animSize, MFSystem_GetCurrentPlatform()))
+			return (MFModelTemplate*)pTemplate;
 	}
-	if(!bExplicit)
+	else
 	{
-		ppExt = pExt;
-		while(!pIM && *ppExt)
+		// try each extension...
+		for(const char **ppExt = MFAsset_GetGeometryFileTypes(); *ppExt != NULL; ++ppExt)
 		{
-			fileName = MFString::Format("%s%s", pFilename, *ppExt);
-			pIM = MFIntModel_CreateFromFile(fileName.CStr());
-			if(pIM)
-				break;
-			++ppExt;
+			MFString fileName = MFString::Format("%s%s", pFilename, *ppExt);
+			if(MFAsset_ConvertModelAndAnimationFromFile(fileName.CStr(), &pTemplate, pSize, bKeepAnimation ? &pAnimationTemplate : NULL, &animSize, MFSystem_GetCurrentPlatform()))
+				return (MFModelTemplate*)pTemplate;
 		}
 	}
 
-	if(pIM)
-	{
-		MFIntModel_Optimise(pIM);
-
-		size_t size = 0;
-		MFIntModel_CreateRuntimeData(pIM, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFString_Length(pFilename) + 1);
-
-		if(pTemplate)
-		{
-			if(pSize)
-				*pSize = size;
-
-			MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.mdl", pFilename), MFOF_Write | MFOF_Binary);
-			if(pFile)
-			{
-				MFFile_Write(pFile, pTemplate, size, false);
-				MFFile_Close(pFile);
-			}
-		}
-
-		if(bKeepAnimation)
-		{
-			MFIntModel_CreateAnimationData(pIM, &pAnimationTemplate, &animSize, MFSystem_GetCurrentPlatform(), MFString_Length(pFilename) + 1);
-
-			if(pAnimationTemplate)
-			{
-				MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.anm", pFilename), MFOF_Write | MFOF_Binary);
-				if(pFile)
-				{
-					MFFile_Write(pFile, pAnimationTemplate, animSize, false);
-					MFFile_Close(pFile);
-				}
-			}
-		}
-
-		MFIntModel_Destroy(pIM);
-	}
-
-	return (MFModelTemplate*)pTemplate;
+	return NULL;
 }
 #endif
 

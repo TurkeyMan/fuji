@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_FILESYSTEM == MF_DRIVER_PS2
 
@@ -221,9 +221,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	pFile->length = fileSize;
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pFilename);
-#endif
 
 	return 0;
 }

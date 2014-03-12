@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_PC
 
@@ -15,15 +15,14 @@
 extern MFInitParams gInitParams;
 
 HINSTANCE apphInstance;
-extern int gQuit;
-
-MFPlatform gCurrentPlatform = FP_Windows;
 
 char *gpCommandLineBuffer = NULL;
 
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_Windows;
+
 	apphInstance = (HINSTANCE)gInitParams.hInstance;
 	gpCommandLineBuffer = (char*)gInitParams.pCommandLine;
 
@@ -64,7 +63,8 @@ void MFSystem_HandleEventsPlatformSpecific()
 
 	while(PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 	{
-		if(!GetMessage(&msg, NULL, 0, 0)) gQuit=true;
+		if(!GetMessage(&msg, NULL, 0, 0))
+			gpEngineInstance->bQuit = true;
 		else
 		{
 			TranslateMessage(&msg); 

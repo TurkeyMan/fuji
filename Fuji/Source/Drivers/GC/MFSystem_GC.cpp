@@ -1,13 +1,12 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_GC
 
 #include "MFSystem.h"
 
-MFPlatform gCurrentPlatform = FP_GC;
-
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_GC;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

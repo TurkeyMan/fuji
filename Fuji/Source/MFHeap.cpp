@@ -1,6 +1,7 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFThread_Internal.h"
+#include "Util.h"
 
 #define _USE_TRACKING_HASH_TABLE
 
@@ -122,9 +123,11 @@ MF_API void MFHeap_SetLineAndFile(int line, const char *pFile)
 
 /*** functions ***/
 
-MFInitStatus MFHeap_InitModule()
+MFInitStatus MFHeap_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	MFCALLSTACK;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
 
 	MFDebug_Assert(MFThread_GetMutexSizePlatformSpecific() <= sizeof(gMutexBuffer), "Mutex buffer too small!");
 	MFThread_InitMutexPlatformSpecific((MFMutex)gMutexBuffer, "MFHeap alloc mutex");

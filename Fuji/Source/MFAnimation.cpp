@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFAnimation_Internal.h"
 #include "MFModel_Internal.h"
 #include "MFFileSystem.h"
@@ -6,6 +6,7 @@
 #include "MFHeap.h"
 #include "MFResource.h"
 #include "MFRenderState.h"
+#include "Util.h"
 
 
 // 128 temp matrices for intermediate calculation data
@@ -17,7 +18,7 @@ static void MFAnimationTemplate_Destroy(MFResource *pRes)
 	MFHeap_Free(pTemplate);
 }
 
-MFInitStatus MFAnimation_InitModule()
+MFInitStatus MFAnimation_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_AnimationTemplate = MFResource_Register("MFAnimationTemplate", &MFAnimationTemplate_Destroy);
 

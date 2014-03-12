@@ -1,10 +1,11 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFArray.h"
-#include "Util/F3D.h"
+#include "Asset/Util/F3D.h"
 #include "MFHeap.h"
 #include "MFStringCache.h"
 #include "MFString.h"
 #include "MFCollision_Internal.h"
+#include "Util.h"
 
 #include "MFMesh_Internal.h"
 #include "MFModel_Internal.h"

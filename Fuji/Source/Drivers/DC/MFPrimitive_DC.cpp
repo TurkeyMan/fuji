@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_RENDERER == MF_DRIVER_DC
 
@@ -15,7 +15,7 @@ uint32 primType;
 uint32 beginCount;
 uint32 currentVert;
 
-MFInitStatus Primitive_InitModule()
+MFInitStatus Primitive_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	CALLSTACK;
 }

@@ -1,9 +1,10 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem.h"
 #include "MFFileSystem.h"
 #include "MFHeap.h"
 #include "MFString.h"
 #include "MFSound_Internal.h"
+#include "Util.h"
 #include "Asset/MFIntSound.h"
 
 /**** Structures ****/

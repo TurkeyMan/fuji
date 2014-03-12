@@ -6,8 +6,11 @@
  * @{
  */
 
+#pragma once
 #if !defined(_MFVERTEX_H)
 #define _MFVERTEX_H
+
+#include "MFVector.h"
 
 struct MFStateBlock;
 struct MFEffectTechnique;

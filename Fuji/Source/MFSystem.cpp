@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFCallstack_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
@@ -32,13 +32,8 @@
 	#include <windows.h>
 #endif
 
-bool MFModule_InitModules();
-
 // externs
 void MFSystem_HandleEventsPlatformSpecific();
-
-// extern to platform
-extern MFPlatform gCurrentPlatform;
 
 // local variables
 extern "C" MFDefaults gDefaults =
@@ -100,7 +95,7 @@ extern "C" MFDefaults gDefaults =
 
 	// FileSystemDefaults
 	{
-		128,			// maxOpenFiles
+		16,				// maxOpenFiles
 		16,				// maxFinds
 		16,				// maxFileSystems
 		16,				// maxFileSystemStackSize
@@ -143,44 +138,55 @@ extern "C" MFDefaults gDefaults =
 	}
 };
 
-// TODO: This is crude, fix this...
-void MFFileSystem_RegisterDefaultArchives();
-MFSystemCallbackFunction pSystemCallbacks[MFCB_Max] = { NULL, MFFileSystem_RegisterDefaultArchives, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+struct MFSystemState
+{
+#if !defined(_FUJI_UTIL)
+	MenuItemStatic quitOption;
+	MenuItemStatic restartOption;
+#endif
+};
 
-bool gDrawSystemInfo = true;
-int gQuit = 0;
-int gRestart = 1;
-uint32 gFrameCount = 0;
-float gSystemTimeDelta;
-
-extern bool gFujiInitialised;
+static int gModuleId = -1;
 
 #if !defined(_FUJI_UTIL)
-MenuItemStatic quitOption;
-MenuItemStatic restartOption;
 
 void QuitCallback(MenuObject *pMenu, void *pData)
 {
-	gQuit = 1;
+	gpEngineInstance->bQuit = 1;
 }
 
 void RestartCallback(MenuObject *pMenu, void *pData)
 {
-	gQuit = 1;
-	gRestart = 1;
+	gpEngineInstance->bQuit = 1;
+	gpEngineInstance->bRestart = 1;
 }
 
 MF_API void MFSystem_Quit()
 {
-	gQuit = 1;
+	gpEngineInstance->bQuit = 1;
 }
 
-MFInitStatus MFSystem_InitModule()
+MFInitStatus MFSystem_InitModule(int moduleId, bool bPerformInitialisation)
 {
+	gModuleId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFSystemState);
+
+	void MFFileSystem_RegisterDefaultArchives();
+	gpEngineInstance->pSystemCallbacks[MFCB_FileSystemInit] = MFFileSystem_RegisterDefaultArchives;
+
+	gpEngineInstance->bDrawSystemInfo = true;
+	gpEngineInstance->bQuit = 0;
+	gpEngineInstance->bRestart = 1;
+	gpEngineInstance->frameCount = 0;
+
 	MFSystem_InitModulePlatformSpecific();
 
-	DebugMenu_AddItem("Restart", "Fuji Options", &restartOption, RestartCallback, NULL);
-	DebugMenu_AddItem("Quit", "Fuji Options", &quitOption, QuitCallback, NULL);
+	DebugMenu_AddItem("Restart", "Fuji Options", &pModuleData->restartOption, RestartCallback, NULL);
+	DebugMenu_AddItem("Quit", "Fuji Options", &pModuleData->quitOption, QuitCallback, NULL);
 
 	return MFIS_Succeeded;
 }
@@ -211,10 +217,10 @@ void MFSystem_Update()
 
 #if defined(_PSP)
 	if(MFInput_Read(Button_DLeft, IDD_Gamepad) && MFInput_Read(Button_PP_L, IDD_Gamepad) && MFInput_WasPressed(Button_PP_Start, IDD_Gamepad))
-		gDrawSystemInfo = !gDrawSystemInfo;
+		gpEngineInstance->bDrawSystemInfo = !gpEngineInstance->bDrawSystemInfo;
 #else
 	if(MFInput_Read(Button_P2_L1, IDD_Gamepad) && MFInput_Read(Button_P2_L2, IDD_Gamepad) && MFInput_WasPressed(Button_P2_L3, IDD_Gamepad))
-		gDrawSystemInfo = !gDrawSystemInfo;
+		gpEngineInstance->bDrawSystemInfo = !gpEngineInstance->bDrawSystemInfo;
 #endif
 
 #if !defined(_RETAIL)
@@ -267,7 +273,7 @@ void MFSystem_Draw()
 
 	MFCallstack_Draw();
 
-	if(gDrawSystemInfo)
+	if(gpEngineInstance->bDrawSystemInfo)
 	{
 		//FPS Display
 #if defined(_PSP)
@@ -353,28 +359,28 @@ int MFSystem_GameLoop()
 	// initialise the system and create displays etc..
 	MFModule_RegisterEngineModules();
 
-	while(gRestart)
+	while(gpEngineInstance->bRestart)
 	{
-		gRestart = 0;
-		gQuit = 0;
+		gpEngineInstance->bRestart = 0;
+		gpEngineInstance->bQuit = 0;
 
-		while(!gQuit)
+		while(!gpEngineInstance->bQuit)
 			MFSystem_RunFrame();
 
-		if(pSystemCallbacks[MFCB_Deinit])
-			pSystemCallbacks[MFCB_Deinit]();
+		if(gpEngineInstance->pSystemCallbacks[MFCB_Deinit])
+			gpEngineInstance->pSystemCallbacks[MFCB_Deinit]();
+
+		// deinit modules
+		MFModule_DeinitModules();
 	}
 
-	// TODO: deinit all modules
-	//...
-
-	return gQuit;
+	return gpEngineInstance->bQuit;
 }
 
 void MFSystem_RunFrame()
 {
 	// allow fuji to complete initialisation
-	if(!gFujiInitialised)
+	if(!gpEngineInstance->bIsInitialised)
 	{
 		if(!MFModule_InitModules())
 			return;
@@ -383,19 +389,19 @@ void MFSystem_RunFrame()
 	// run 1 frame
 	MFCallstack_BeginFrame();
 
-	if(pSystemCallbacks[MFCB_HandleSystemMessages])
-		pSystemCallbacks[MFCB_HandleSystemMessages]();
+	if(gpEngineInstance->pSystemCallbacks[MFCB_HandleSystemMessages])
+		gpEngineInstance->pSystemCallbacks[MFCB_HandleSystemMessages]();
 	else
 		MFSystem_HandleEventsPlatformSpecific();
 
 	MFSystem_UpdateTimeDelta();
-	gFrameCount++;
+	gpEngineInstance->frameCount++;
 
 	MFSystem_Update();
 	if(!DebugMenu_IsEnabled())
 	{
-		if(pSystemCallbacks[MFCB_Update])
-			pSystemCallbacks[MFCB_Update]();
+		if(gpEngineInstance->pSystemCallbacks[MFCB_Update])
+			gpEngineInstance->pSystemCallbacks[MFCB_Update]();
 	}
 	MFSystem_PostUpdate();
 
@@ -404,8 +410,8 @@ void MFSystem_RunFrame()
 		MFRenderer *pRenderer = MFRenderer_GetCurrent();
 
 		MFView_SetDefault();
-		if(pSystemCallbacks[MFCB_Draw])
-			pSystemCallbacks[MFCB_Draw]();
+		if(gpEngineInstance->pSystemCallbacks[MFCB_Draw])
+			gpEngineInstance->pSystemCallbacks[MFCB_Draw]();
 		MFSystem_Draw();
 
 		// build and kick the GPU command buffers
@@ -435,7 +441,7 @@ void MFSystem_UpdateTimeDelta()
 #endif
 
 	gSystemTimer.Update();
-	gSystemTimeDelta = gSystemTimer.TimeDeltaF();
+	gpEngineInstance->timeDelta = gSystemTimer.TimeDeltaF();
 }
 
 MF_API float MFSystem_GetFPS()
@@ -448,8 +454,8 @@ MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callb
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
-	MFSystemCallbackFunction pOldCallback = pSystemCallbacks[callback];
-	pSystemCallbacks[callback] = pCallbackFunction;
+	MFSystemCallbackFunction pOldCallback = gpEngineInstance->pSystemCallbacks[callback];
+	gpEngineInstance->pSystemCallbacks[callback] = pCallbackFunction;
 	return pOldCallback;
 }
 
@@ -457,7 +463,7 @@ MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
-	return pSystemCallbacks[callback];
+	return gpEngineInstance->pSystemCallbacks[callback];
 }
 
 MF_API MFDefaults* MFSystem_GetDefaults()
@@ -481,15 +487,15 @@ MF_API void MFSystem_InitFromSettings(const MFIniLine *pSettings)
 
 MF_API MFPlatform MFSystem_GetCurrentPlatform()
 {
-	return gCurrentPlatform;
+	return gpEngineInstance->currentPlatform;
 }
 
 MF_API float MFSystem_GetTimeDelta()
 {
-	return gSystemTimeDelta;
+	return gpEngineInstance->timeDelta;
 }
 
 MF_API uint32 MFSystem_GetFrameCounter()
 {
-	return gFrameCount;
+	return gpEngineInstance->frameCount;
 }

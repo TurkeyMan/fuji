@@ -2,6 +2,8 @@
 #if !defined(_MFINTTEXTURE_H)
 #define _MFINTTEXTURE_H
 
+#include "MFImage.h"
+
 enum MFIntTextureFormat
 {
 	MFITF_Unknown = -1,
@@ -10,6 +12,8 @@ enum MFIntTextureFormat
 	MFITF_BMP,
 	MFITF_PNG,
 	MFITF_DDS,
+	MFITF_JPEG,
+	MFITF_WEBP,
 
 	MFITF_Max,
 	MFITF_ForceInt = 0x7FFFFFFF

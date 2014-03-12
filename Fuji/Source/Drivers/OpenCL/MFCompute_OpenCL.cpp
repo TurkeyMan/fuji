@@ -1,5 +1,5 @@
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 
 #if MF_COMPUTE == MF_DRIVER_OPENCL
@@ -76,7 +76,7 @@ static size_t shrRoundUp(size_t local_work_size, size_t size)
 }
 //---------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
-MFInitStatus MFCompute_InitModule()
+MFInitStatus MFCompute_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	const int MAX_PLATFORMS = 32;
 	cl_platform_id platforms[MAX_PLATFORMS];

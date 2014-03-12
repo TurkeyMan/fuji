@@ -9,6 +9,7 @@
 #if !defined(_MFMODEL_H)
 #define _MFMODEL_H
 
+#include "MFMatrix.h"
 #include "MFBoundingVolume.h"
 
 struct MFRenderLayerSet;

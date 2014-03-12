@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem_Internal.h"
 #include "Util.h"
 #include "MFVector.h"
@@ -109,8 +109,12 @@ char *ModuleName(char *pSourceFileName)
 	return x == -1 ? pSourceFileName : &pSourceFileName[x+1];
 }
 
-MFInitStatus MFUtil_InitModule()
+MFInitStatus MFUtil_InitModule(int moduleId, bool bPerformInitialisation)
 {
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
 	MFUtil_CrcInit();
 
 	return MFIS_Succeeded;

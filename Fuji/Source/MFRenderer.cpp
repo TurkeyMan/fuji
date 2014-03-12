@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFRenderer_Internal.h"
 #include "MFRenderState_Internal.h"
 #include "MFRenderTarget_Internal.h"
@@ -26,7 +26,7 @@ static size_t gScratchMemoryOffset = 0;
 static size_t gScratchMemoryMark = 0;
 static size_t gScratchMemoryPeak = 0;
 
-MFInitStatus MFRenderer_InitModule()
+MFInitStatus MFRenderer_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	gScratchMemorySize = gDefaults.render.renderHeapSize;
 

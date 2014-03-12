@@ -8,7 +8,7 @@
 #include "MFShader.h"
 
 // init/deinit
-MFInitStatus MFRenderer_InitModule();
+MFInitStatus MFRenderer_InitModule(int moduleId, bool bPerformInitialisation);
 void MFRenderer_DeinitModule();
 bool MFRenderer_BeginFrame();
 void MFRenderer_EndFrame();

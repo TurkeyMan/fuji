@@ -3,6 +3,7 @@
 #define _HKWIDGETEVENT_H
 
 #include "../HKEvent.h"
+#include "Fuji/MFVector.h"
 
 struct HKInputSource;
 class HKWidget;

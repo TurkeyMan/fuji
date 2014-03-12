@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if defined(_USE_PAWN_SCRIPT)
 
@@ -26,7 +26,7 @@ static int gNativeFunctionCount = 0;
 
 /*** Functions ***/
 
-MFInitStatus MFScript_InitModule()
+MFInitStatus MFScript_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	
 }

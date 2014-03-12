@@ -51,7 +51,7 @@ struct MFCollisionField
 	MFCollisionItem ***pppItems;
 };
 
-MFInitStatus MFCollision_InitModule();
+MFInitStatus MFCollision_InitModule(int moduleId, bool bPerformInitialisation);
 void MFCollision_DeinitModule();
 void MFCollision_DrawItem(MFCollisionItem *pItem);
 

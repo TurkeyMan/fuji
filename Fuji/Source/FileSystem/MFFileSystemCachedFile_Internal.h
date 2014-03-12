@@ -4,7 +4,7 @@
 #include "FileSystem/MFFileSystemCachedFile.h"
 
 // internal functions
-MFInitStatus MFFileSystemCachedFile_InitModule();
+MFInitStatus MFFileSystemCachedFile_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystemCachedFile_DeinitModule();
 
 // filesystem callbacks
@@ -38,8 +38,5 @@ struct MFFileCachedData
 
 	MFFile *pBaseFile;
 };
-
-// handle to the CachedFile filesystem
-extern MFFileSystemHandle hCachedFileSystem;
 
 #endif

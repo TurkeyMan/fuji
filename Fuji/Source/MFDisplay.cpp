@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "DebugMenu.h"
 #include "MFView.h"
@@ -9,7 +9,7 @@ extern MFInitParams gInitParams;
 
 bool gAppHasFocus = true;
 
-MFInitStatus MFDisplay_InitModule()
+MFInitStatus MFDisplay_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 

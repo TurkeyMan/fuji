@@ -4,7 +4,7 @@
 #include "FileSystem/MFFileSystemZipFile.h"
 
 // internal functions
-MFInitStatus MFFileSystemZipFile_InitModule();
+MFInitStatus MFFileSystemZipFile_InitModule(int moduleId, bool bPerformInitialisation);
 void MFFileSystemZipFile_DeinitModule();
 
 // filesystem callbacks
@@ -25,8 +25,5 @@ void MFFileZipFile_FindClose(MFFind *pFind);
 // this is just for convenience sake, and not part of the main filesystem interface
 uint32 MFFileZipFile_GetSize(const char* pFilename);
 bool MFFileZipFile_Exists(const char* pFilename);
-
-// handle to the ZipFile filesystem
-extern MFFileSystemHandle hZipFileSystem;
 
 #endif

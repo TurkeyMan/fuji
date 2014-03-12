@@ -1,6 +1,7 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFRenderTarget_Internal.h"
 #include "MFTexture_Internal.h"
+#include "Util.h"
 
 static void MFRenderTarget_Destroy(MFResource *pRes)
 {
@@ -19,7 +20,7 @@ static void MFRenderTarget_Destroy(MFResource *pRes)
 	MFHeap_Free(pRenderTarget);
 }
 
-MFInitStatus MFRenderTarget_InitModule()
+MFInitStatus MFRenderTarget_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_RenderTarget = MFResource_Register("MFRenderTarget", &MFRenderTarget_Destroy);
 

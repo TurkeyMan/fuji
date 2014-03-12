@@ -1,11 +1,11 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFAnimScript_Internal.h"
 #include "MFPtrList.h"
 #include "MFHeap.h"
 
 MFPtrList<MFAnimScriptTemplate> gAnimScripts;
 
-MFInitStatus MFAnimScript_InitModule()
+MFInitStatus MFAnimScript_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	gAnimScripts.Init("Anim Script Templates", 256);
 

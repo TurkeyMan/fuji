@@ -162,6 +162,13 @@ enum MFRendererDrivers
 	// use assimp to load 3d assets
 	#define USE_ASSIMP
 
+	// shader features
+	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+	#define SUPPORT_HLSL2GLSL
+	#define SUPPORT_GLSL_OPTIMIZER
+
 	// specify drivers
 	#define MF_DISPLAY			MF_DRIVER_WIN32
 	#define MF_RENDERER			MF_DRIVER_PLUGIN
@@ -204,9 +211,6 @@ enum MFRendererDrivers
 //	#error Not Supported...
 	#include <xtl.h>
 
-	#define MFBIG_ENDIAN
-	#define MF64BIT
-
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_X360
 	#define MF_RENDERER		MF_DRIVER_X360
@@ -229,6 +233,13 @@ enum MFRendererDrivers
 	// use assimp to load 3d assets
 	#define USE_ASSIMP
 
+	// shader features
+	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+	#define SUPPORT_HLSL2GLSL
+	#define SUPPORT_GLSL_OPTIMIZER
+
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_X11
 	#define MF_RENDERER		MF_DRIVER_OPENGL
@@ -249,6 +260,16 @@ enum MFRendererDrivers
 	#include <stdlib.h> // For realloc, malloc
 
 //	#define _OPENGL_CLIP_SPACE
+
+	// use assimp to load 3d assets
+//	#define USE_ASSIMP
+
+	// shader features
+//	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+//	#define SUPPORT_HLSL2GLSL
+//	#define SUPPORT_GLSL_OPTIMIZER
 
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_OSX
@@ -334,6 +355,13 @@ enum MFRendererDrivers
 
 //	#define _OPENGL_CLIP_SPACE
 
+	// shader features
+//	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+//	#define SUPPORT_HLSL2GLSL
+//	#define SUPPORT_GLSL_OPTIMIZER
+
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_IPHONE
 	#define MF_RENDERER		MF_DRIVER_OPENGL
@@ -355,6 +383,13 @@ enum MFRendererDrivers
 	#include <stdlib.h> // For realloc, malloc
 
 //	#define _OPENGL_CLIP_SPACE
+
+	// shader features
+//	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+//	#define SUPPORT_HLSL2GLSL
+//	#define SUPPORT_GLSL_OPTIMIZER
 
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_ANDROID
@@ -386,6 +421,13 @@ enum MFRendererDrivers
 
 //	#define _OPENGL_CLIP_SPACE
 
+	// shader features
+//	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+//	#define SUPPORT_HLSL2GLSL
+//	#define SUPPORT_GLSL_OPTIMIZER
+
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_NACL
 	#define MF_RENDERER		MF_DRIVER_OPENGL
@@ -406,6 +448,13 @@ enum MFRendererDrivers
 #elif defined(MF_WEB)
 
 //	#define _OPENGL_CLIP_SPACE
+
+	// shader features
+//	#define SUPPORT_HLSL
+	#define SUPPORT_GLSL
+//	#define SUPPORT_CG
+//	#define SUPPORT_HLSL2GLSL
+//	#define SUPPORT_GLSL_OPTIMIZER
 
 	// specify drivers
 	#define MF_DISPLAY		MF_DRIVER_WEB

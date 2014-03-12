@@ -1,10 +1,19 @@
-#include "Fuji.h"
-#include "MFHeap.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 
-MFInitStatus MFFileSystemNative_InitModule()
+int gFileSystemNativeId = -1;
+
+MFInitStatus MFFileSystemNative_InitModule(int moduleId, bool bPerformInitialisation)
 {
+	gFileSystemNativeId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFFileSystemGlobalState);
+
 	MFInitStatus status = MFFileSystemNative_InitModulePlatformSpecific();
 
 	if(status == MFIS_Succeeded)
@@ -25,7 +34,7 @@ MFInitStatus MFFileSystemNative_InitModule()
 		fsCallbacks.FindNext = MFFileNative_FindNext;
 		fsCallbacks.FindClose = MFFileNative_FindClose;
 
-		hNativeFileSystem = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
+		pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
 	}
 
 	return status;
@@ -33,7 +42,9 @@ MFInitStatus MFFileSystemNative_InitModule()
 
 void MFFileSystemNative_DeinitModule()
 {
-	MFFileSystem_UnregisterFileSystem(hNativeFileSystem);
+	GET_MODULE_DATA_ID(MFFileSystemGlobalState, gFileSystemNativeId);
+
+	MFFileSystem_UnregisterFileSystem(pModuleData->hFileSystemHandle);
 }
 
 int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
@@ -64,6 +75,8 @@ int MFFileSystemNative_Dismount(MFMount *pMount)
 
 MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 openFlags)
 {
+	GET_MODULE_DATA_ID(MFFileSystemGlobalState, gFileSystemNativeId);
+
 	MFFile *hFile = NULL;
 
 	// recurse toc
@@ -79,7 +92,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 			openData.openFlags = openFlags;
 			openData.pFilename = MFStr("%s%s", (char*)pTOCEntry->pFilesysData, pTOCEntry->pName);
 
-			hFile = MFFile_Open(hNativeFileSystem, &openData);
+			hFile = MFFile_Open(pModuleData->hFileSystemHandle, &openData);
 		}
 	}
 	else
@@ -90,7 +103,7 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 		openData.openFlags = openFlags;
 		openData.pFilename = MFStr("%s%s", (char*)pMount->pFilesysData, pFilename);
 
-		hFile = MFFile_Open(hNativeFileSystem, &openData);
+		hFile = MFFile_Open(pModuleData->hFileSystemHandle, &openData);
 	}
 
 	return hFile;

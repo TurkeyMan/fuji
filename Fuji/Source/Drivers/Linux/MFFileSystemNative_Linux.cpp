@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_FILESYSTEM == MF_DRIVER_LINUX
 
@@ -77,9 +77,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	pFile->length = fileStats.st_size;
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
-#endif
 
 	return 0;
 }

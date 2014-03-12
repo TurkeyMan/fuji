@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_PS2
 
@@ -38,8 +38,6 @@ enum
 	kINTC_TIMER1
 };
 
-MFPlatform gCurrentPlatform = FP_PS2;
-
 // Timer statics
 static int s_tnInterruptID = -1;
 static u64 s_tnInterruptCount = 0;
@@ -56,6 +54,8 @@ int tnTimeInterrupt(int ca)
 
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_PS2;
+
 	// Init the timer and register the interrupt handler
 	*T1_MODE = 0x0000;
 

@@ -1,11 +1,14 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFShader_Internal.h"
-#include "Asset/MFIntShader.h"
 #include "MFModule.h"
+#include "MFAsset.h"
 #include "MFResource.h"
 #include "MFFileSystem.h"
 #include "MFRenderer.h"
 #include "MFSystem.h"
+#include "Util.h"
+
+#include "Asset/MFIntShader.h"
 
 #define ALLOW_LOAD_FROM_SOURCE_DATA
 
@@ -19,7 +22,7 @@ static void MFShader_Destroy(MFResource *pRes)
 	MFHeap_Free(pShader);
 }
 
-MFInitStatus MFShader_InitModule()
+MFInitStatus MFShader_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFRT_Shader = MFResource_Register("MFShader", &MFShader_Destroy);
 
@@ -77,25 +80,20 @@ MF_API MFShader* MFShader_CreateFromFile(MFShaderType type, const char *pFilenam
 		if(!pTemplate)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
-			// try to load from source data
-			const char * const pExt[] = { ".hlsl", ".glsl", ".vsh", ".psh", NULL };
-			const char * const *ppExt = pExt;
-			while(*ppExt)
+			const char *pExt = MFString_GetFileExtension(pFilename);
+			if(pExt && MFAsset_IsShaderFile(pExt))
 			{
-				size_t size;
-				if(MFIntShader_CreateFromFile(type, MFStr("%s%s", pFilename, *ppExt), pMacros, (void**)&pTemplate, &size, MFSystem_GetCurrentPlatform(), MFRenderer_GetCurrentRenderDriver(), language))
+				MFAsset_ConvertShaderFromFile(pFilename, (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform(), type, pMacros, MFRenderer_GetCurrentRenderDriver(), language);
+			}
+			else
+			{
+				// try each extension...
+				for(const char **ppExt = MFAsset_GetShaderFileTypes(); *ppExt != NULL; ++ppExt)
 				{
-					// cache the shader template
-					MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.fsh", pFilename), MFOF_Write | MFOF_Binary);
-					if(pFile)
-					{
-						MFFile_Write(pFile, pTemplate, size, false);
-						MFFile_Close(pFile);
-					}
-
-					break;
+					MFString fileName = MFString::Format("%s%s", pFilename, *ppExt);
+					if(MFAsset_ConvertShaderFromFile(fileName.CStr(), (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform(), type, pMacros, MFRenderer_GetCurrentRenderDriver(), language))
+						break;
 				}
-				++ppExt;
 			}
 #endif
 

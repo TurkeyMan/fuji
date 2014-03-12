@@ -2,7 +2,7 @@
 
 #if defined(USE_ASSIMP)
 
-#include "Util/F3D.h"
+#include "Asset/Util/F3D.h"
 #include "MFFileSystem.h"
 
 #include "assimp/Importer.hpp"

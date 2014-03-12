@@ -1,9 +1,9 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSockets_Internal.h"
 
 static int gIsInitialised = 0;
 
-MFInitStatus MFSockets_InitModule()
+MFInitStatus MFSockets_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	gIsInitialised = MFSockets_InitModulePlatformSpecific();
 

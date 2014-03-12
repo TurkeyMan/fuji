@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSockets.h"
 #include "MFThread.h"
 #include "MFNetwork_Internal.h"
@@ -404,7 +404,7 @@ void MFNetwork_BeginScriptDebugServer()
 
 
 
-MFInitStatus MFNetwork_InitModule()
+MFInitStatus MFNetwork_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFZeroMemory(gNetworkGamepads, sizeof(gNetworkGamepads));
 	MFZeroMemory(gSharedDevices, sizeof(gSharedDevices));

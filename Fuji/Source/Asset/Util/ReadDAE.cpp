@@ -3,7 +3,7 @@
 #endif
 
 #include "Fuji.h"
-#include "Util/F3D.h"
+#include "Asset/Util/F3D.h"
 #include "MFMatrix.h"
 #include "MFDocumentXML.h"
 

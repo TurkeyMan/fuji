@@ -1,15 +1,15 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFSystem.h"
 #include "MFModule.h"
 #include "MFSockets.h"
-#include "MFModule_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemNative_Internal.h"
 #include "FileSystem/MFFileSystemMemory_Internal.h"
 #include "FileSystem/MFFileSystemCachedFile_Internal.h"
 #include "FileSystem/MFFileSystemZipFile_Internal.h"
 #include "FileSystem/MFFileSystemHTTP_Internal.h"
-#include "MFPtrList.h"
+#include "MFObjectPool.h"
 
 #if defined(FindClose)
 	#undef FindClose
@@ -17,26 +17,38 @@
 
 #define MAX_JOBS 16
 
-MFPtrListDL<MFFile> gOpenFiles;
+struct MFFileSystemState
+{
+	MFObjectPool gOpenFiles;
 
-MFMount *pMountList = NULL;
-MFMount *pMountListEnd = NULL;
+	MFMount *pMountList;
+	MFMount *pMountListEnd;
 
-MFPtrListDL<MFFileSystem> gFileSystems;
-MFFileSystem **ppFileSystemList;
+	MFPtrListDL<MFFileSystem> gFileSystems;
+	MFFileSystem **ppFileSystemList;
 
-MFPtrListDL<MFFind> gFinds;
+	MFPtrListDL<MFFind> gFinds;
 
-// internal filesystems
-MFFileSystemHandle hNativeFileSystem = -1;
-MFFileSystemHandle hMemoryFileSystem = -1;
-MFFileSystemHandle hCachedFileSystem = -1;
-MFFileSystemHandle hZipFileSystem = -1;
-MFFileSystemHandle hHTTPFileSystem = -1;
-MFFileSystemHandle hFTPFileSystem = -1;
+	// internal filesystems
+	MFFileSystemHandle hNativeFileSystem;
+	MFFileSystemHandle hMemoryFileSystem;
+	MFFileSystemHandle hCachedFileSystem;
+	MFFileSystemHandle hZipFileSystem;
+	MFFileSystemHandle hHTTPFileSystem;
+	MFFileSystemHandle hFTPFileSystem;
 
-MFFile *hDataArchive = NULL;
-MFFile *hPatchArchive = NULL;
+	MFFile *hDataArchive;
+	MFFile *hPatchArchive;
+};
+
+static int gModuleId = -1;
+
+// HACK: extern to the module id's of the filesystems so we can fetch their fs handles...
+extern int gFileSystemCachedFileId;
+extern int gFileSystemHTTPId;
+extern int gFileSystemMemoryId;
+extern int gFileSystemNativeId;
+extern int gFileSystemZipFileId;
 
 
 /**** Functions ****/
@@ -149,6 +161,11 @@ exit:
 
 void MFFileSystem_RegisterDefaultArchives()
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
+	MFFile *&hDataArchive = pModuleData->hDataArchive;
+	MFFile *&hPatchArchive = pModuleData->hPatchArchive;
+
 	// try and mount the 'standard' archives...
 	// TODO: ponder removing this code and forcing the use of a filesystem init callback? :/
 	MFOpenDataNative dataArchive;
@@ -159,7 +176,7 @@ void MFFileSystem_RegisterDefaultArchives()
 	while(!hDataArchive && *pArc)
 	{
 		dataArchive.pFilename =  MFFile_SystemPath(MFStr(*pArc, MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
-		hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+		hDataArchive = MFFile_Open(pModuleData->hNativeFileSystem, &dataArchive);
 		++pArc;
 	}
 
@@ -187,13 +204,13 @@ void MFFileSystem_RegisterDefaultArchives()
 		zipMountData.priority = MFMP_Normal;
 		zipMountData.pMountpoint = "data";
 		zipMountData.pZipArchive = hDataArchive;
-		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
+		MFFileSystem_Mount(pModuleData->hZipFileSystem, &zipMountData);
 	}
 
 	mountData.flags = MFMF_DontCacheTOC;
 	mountData.pMountpoint = "home";
 	mountData.pPath = MFFile_HomePath();
-	MFFileSystem_Mount(hNativeFileSystem, &mountData);
+	MFFileSystem_Mount(pModuleData->hNativeFileSystem, &mountData);
 
 	// see if we can mount the patch archive..
 	hPatchArchive = 0;
@@ -201,7 +218,7 @@ void MFFileSystem_RegisterDefaultArchives()
 	while(!hPatchArchive && *pArc)
 	{
 		dataArchive.pFilename =  MFFile_SystemPath(MFStr(*pArc, MFSystem_GetPlatformString(MFSystem_GetCurrentPlatform())));
-		hDataArchive = MFFile_Open(hNativeFileSystem, &dataArchive);
+		hDataArchive = MFFile_Open(pModuleData->hNativeFileSystem, &dataArchive);
 		++pArc;
 	}
 
@@ -225,10 +242,10 @@ void MFFileSystem_RegisterDefaultArchives()
 		zipMountData.priority = MFMP_VeryHigh;
 		zipMountData.pMountpoint = "patch";
 		zipMountData.pZipArchive = hPatchArchive;
-		MFFileSystem_Mount(hZipFileSystem, &zipMountData);
+		MFFileSystem_Mount(pModuleData->hZipFileSystem, &zipMountData);
 	}
 
-	if(hHTTPFileSystem != -1)
+	if(pModuleData->hHTTPFileSystem != -1)
 	{
 		// register the network filesystems
 		MFMountDataHTTP mountDataHTTP;
@@ -236,12 +253,20 @@ void MFFileSystem_RegisterDefaultArchives()
 		mountDataHTTP.pMountpoint = "http";
 		mountDataHTTP.priority = MFMP_Normal + 1;
 		mountDataHTTP.flags = MFMF_OnlyAllowExclusiveAccess;
-		MFFileSystem_Mount(hHTTPFileSystem, &mountDataHTTP);
+		MFFileSystem_Mount(pModuleData->hHTTPFileSystem, &mountDataHTTP);
 	}
 }
 
-MFInitStatus MFFileSystem_InitFileSystems()
+MFInitStatus MFFileSystem_InitFileSystems(int moduleId, bool bPerformInitialisation)
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
+	pModuleData->hNativeFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemNativeId].pModuleData)->hFileSystemHandle;
+	pModuleData->hMemoryFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemMemoryId].pModuleData)->hFileSystemHandle;
+	pModuleData->hCachedFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemCachedFileId].pModuleData)->hFileSystemHandle;
+	pModuleData->hZipFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemZipFileId].pModuleData)->hFileSystemHandle;
+	pModuleData->hHTTPFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemHTTPId].pModuleData)->hFileSystemHandle;
+
 	// call the filesystem init callback
 	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
 	if(pFilesystemInitCallback)
@@ -255,39 +280,61 @@ uint64 MFFileSystem_RegisterFilesystemModules(int filesystemModule)
 	uint64 fsBit = 1ULL << filesystemModule;
 
 	// mount filesystems
-	uint64 filesystems = 0;
-	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemNative", MFFileSystemNative_InitModule, MFFileSystemNative_DeinitModule, fsBit);
-	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemMemory", MFFileSystemMemory_InitModule, MFFileSystemMemory_DeinitModule, fsBit);
-	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemCachedFile", MFFileSystemCachedFile_InitModule, MFFileSystemCachedFile_DeinitModule, fsBit);
-	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemZipFile", MFFileSystemZipFile_InitModule, MFFileSystemZipFile_DeinitModule, fsBit);
+	MFFileSystemHandle hNativeFileSystem = MFModule_RegisterModule("MFFileSystemNative", MFFileSystemNative_InitModule, MFFileSystemNative_DeinitModule, fsBit);
+	MFFileSystemHandle hMemoryFileSystem = MFModule_RegisterModule("MFFileSystemMemory", MFFileSystemMemory_InitModule, MFFileSystemMemory_DeinitModule, fsBit);
+	MFFileSystemHandle hCachedFileSystem = MFModule_RegisterModule("MFFileSystemCachedFile", MFFileSystemCachedFile_InitModule, MFFileSystemCachedFile_DeinitModule, fsBit);
+	MFFileSystemHandle hZipFileSystem = MFModule_RegisterModule("MFFileSystemZipFile", MFFileSystemZipFile_InitModule, MFFileSystemZipFile_DeinitModule, fsBit);
 
 	uint64 socketsBit = MFModule_GetBuiltinModuleMask(MFBIM_MFSockets);
-	filesystems |= 1ULL << MFModule_RegisterModule("MFFileSystemHTTP", MFFileSystemHTTP_InitModule, MFFileSystemHTTP_DeinitModule, fsBit | socketsBit);
+	MFFileSystemHandle hHTTPFileSystem = MFModule_RegisterModule("MFFileSystemHTTP", MFFileSystemHTTP_InitModule, MFFileSystemHTTP_DeinitModule, fsBit | socketsBit);
 
-	gBuiltinModuleIDs[MFBIM_MFFileSystem] = (char)MFModule_RegisterModule("MFFileSystem", MFFileSystem_InitFileSystems, NULL, filesystems);
+	uint64 filesystems = 0;
+	filesystems |= 1ULL << hNativeFileSystem;
+	filesystems |= 1ULL << hMemoryFileSystem;
+	filesystems |= 1ULL << hCachedFileSystem;
+	filesystems |= 1ULL << hZipFileSystem;
+	filesystems |= 1ULL << hHTTPFileSystem;
+
+	gpEngineInstance->builtinModuleIDs[MFBIM_MFFileSystem] = (char)MFModule_RegisterModule("MFFileSystem", MFFileSystem_InitFileSystems, NULL, filesystems);
 	filesystems |= MFModule_GetBuiltinModuleMask(MFBIM_MFFileSystem);
 
 	return filesystems;
 }
 
-MFInitStatus MFFileSystem_InitModule()
+MFInitStatus MFFileSystem_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	gOpenFiles.Init("Open Files", gDefaults.filesys.maxOpenFiles);
+	gModuleId = moduleId;
 
-	gFileSystems.Init("File Systems", gDefaults.filesys.maxFileSystems);
-	ppFileSystemList = (MFFileSystem**)MFHeap_Alloc(sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
-	MFZeroMemory(ppFileSystemList, sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
 
-	gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
+	ALLOC_MODULE_DATA(MFFileSystemState);
+
+	pModuleData->hNativeFileSystem = -1;
+	pModuleData->hMemoryFileSystem = -1;
+	pModuleData->hCachedFileSystem = -1;
+	pModuleData->hZipFileSystem = -1;
+	pModuleData->hHTTPFileSystem = -1;
+	pModuleData->hFTPFileSystem = -1;
+
+	pModuleData->gOpenFiles.Init(sizeof(MFFile), gDefaults.filesys.maxOpenFiles, gDefaults.filesys.maxOpenFiles);
+
+	pModuleData->gFileSystems.Init("File Systems", gDefaults.filesys.maxFileSystems);
+	pModuleData->ppFileSystemList = (MFFileSystem**)MFHeap_Alloc(sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
+	MFZeroMemory(pModuleData->ppFileSystemList, sizeof(MFFileSystem*) * gDefaults.filesys.maxFileSystems);
+
+	pModuleData->gFinds.Init("File System Find Instances", gDefaults.filesys.maxFinds);
 
 	return MFIS_Succeeded;
 }
 
 void MFFileSystem_DeinitModule()
 {
-	if(hDataArchive)
+	GET_MODULE_DATA(MFFileSystemState);
+
+	if(pModuleData->hDataArchive)
 	{
-		MFFile_Close(hDataArchive);
+		MFFile_Close(pModuleData->hDataArchive);
 	}
 
 	MFFileSystemHTTP_DeinitModule();
@@ -296,18 +343,20 @@ void MFFileSystem_DeinitModule()
 	MFFileSystemMemory_DeinitModule();
 	MFFileSystemNative_DeinitModule();
 
-	MFHeap_Free(ppFileSystemList);
+	MFHeap_Free(pModuleData->ppFileSystemList);
 
-	gFileSystems.Deinit();
-	gOpenFiles.Deinit();
-	gFinds.Deinit();
+	pModuleData->gFileSystems.Deinit();
+	pModuleData->gOpenFiles.Deinit();
+	pModuleData->gFinds.Deinit();
 }
 
 MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, MFFileSystemCallbacks *pCallbacks)
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
 	for(uint32 a=0; a<gDefaults.filesys.maxFileSystems; a++)
 	{
-		if(ppFileSystemList[a] == NULL)
+		if(pModuleData->ppFileSystemList[a] == NULL)
 		{
 			MFDebug_Assert(pCallbacks->Open, "No Open function supplied.");
 			MFDebug_Assert(pCallbacks->Close, "No Close function supplied.");
@@ -315,11 +364,11 @@ MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, 
 			MFDebug_Assert(pCallbacks->Write, "No Write function supplied.");
 			MFDebug_Assert(pCallbacks->Seek, "No Seek function supplied.");
 
-			MFFileSystem *pFS = gFileSystems.Create();
+			MFFileSystem *pFS = pModuleData->gFileSystems.Create();
 			MFZeroMemory(pFS, sizeof(MFFileSystem));
 			MFString_Copy(pFS->name, pFilesystemName);
 			MFCopyMemory(&pFS->callbacks, pCallbacks, sizeof(MFFileSystemCallbacks));
-			ppFileSystemList[a] = pFS;
+			pModuleData->ppFileSystemList[a] = pFS;
 
 #if defined(USE_JOB_THREAD)
 			pFS->ppJobQueue = (MFJob**)MFHeap_Alloc(sizeof(MFJob*)*MAX_JOBS);
@@ -347,7 +396,9 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 {
 	MFDebug_Assert((uint32)filesystemHandle < gDefaults.filesys.maxFileSystems, "Invalid filesystem");
 
-	MFFileSystem *pFS = ppFileSystemList[filesystemHandle];
+	GET_MODULE_DATA(MFFileSystemState);
+
+	MFFileSystem *pFS = pModuleData->ppFileSystemList[filesystemHandle];
 	MFDebug_Assert(pFS, "Filesystem not mounted");
 
 	if(pFS->callbacks.UnregisterFS)
@@ -368,8 +419,8 @@ void MFFileSystem_UnregisterFileSystem(MFFileSystemHandle filesystemHandle)
 		MFHeap_Free(pFS->ppJobQueue);
 	}
 
-	gFileSystems.Destroy(pFS);
-	ppFileSystemList[filesystemHandle] = NULL;
+	pModuleData->gFileSystems.Destroy(pFS);
+	pModuleData->ppFileSystemList[filesystemHandle] = NULL;
 }
 
 // interface functions
@@ -409,18 +460,16 @@ MF_API const char* MFFile_HomePath(const char *pFilename)
 // file access functions
 MF_API MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	MFFile *pFile = gOpenFiles.Create();
-
-	MFZeroMemory(pFile, sizeof(MFFile));
+	MFFile *pFile = (MFFile*)pModuleData->gOpenFiles.AllocAndZero();
 	pFile->filesystem = fileSystem;
 
-	int result = ppFileSystemList[fileSystem]->callbacks.Open(pFile, pOpenData);
+	int result = pModuleData->ppFileSystemList[fileSystem]->callbacks.Open(pFile, pOpenData);
 
 	if(result < 0)
 	{
-		gOpenFiles.Destroy(pFile);
+		pModuleData->gOpenFiles.Free(pFile);
 		return NULL;
 	}
 
@@ -429,10 +478,10 @@ MF_API MFFile* MFFile_Open(MFFileSystemHandle fileSystem, MFOpenData *pOpenData)
 
 MF_API int MFFile_Close(MFFile* fileHandle)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	ppFileSystemList[fileHandle->filesystem]->callbacks.Close(fileHandle);
-	gOpenFiles.Destroy(fileHandle);
+	pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Close(fileHandle);
+	pModuleData->gOpenFiles.Free(fileHandle);
 
 	return 0;
 }
@@ -440,24 +489,24 @@ MF_API int MFFile_Close(MFFile* fileHandle)
 // read/write functions
 MF_API int MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	return ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
+	return pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
 }
 
 MF_API int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	return ppFileSystemList[fileHandle->filesystem]->callbacks.Write(fileHandle, pBuffer, bytes);
+	return pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Write(fileHandle, pBuffer, bytes);
 }
 
 // offset management (these are stdio function signature compliant)
 MF_API int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	return ppFileSystemList[fileHandle->filesystem]->callbacks.Seek(fileHandle, bytes, relativity);
+	return pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Seek(fileHandle, bytes, relativity);
 }
 
 MF_API int MFFile_Tell(MFFile* fileHandle)
@@ -508,40 +557,40 @@ MF_API long MFFile_StdTell(void* fileHandle)
 // return a handle to a specific filesystem
 MF_API MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemHandles fileSystemHandle)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
 	switch(fileSystemHandle)
 	{
 		case MFFSH_NativeFileSystem:
-			MFDebug_Assert(hNativeFileSystem > -1, "Native filesystem is not available...");
-			if(hNativeFileSystem < 0)
+			MFDebug_Assert(pModuleData->hNativeFileSystem > -1, "Native filesystem is not available...");
+			if(pModuleData->hNativeFileSystem < 0)
 				MFDebug_Error("Native filesystem is not available...");
-			return hNativeFileSystem;
+			return pModuleData->hNativeFileSystem;
 		case MFFSH_MemoryFileSystem:
-			MFDebug_Assert(hMemoryFileSystem > -1, "Memory file filesystem is not available...");
-			if(hMemoryFileSystem < 0)
+			MFDebug_Assert(pModuleData->hMemoryFileSystem > -1, "Memory file filesystem is not available...");
+			if(pModuleData->hMemoryFileSystem < 0)
 				MFDebug_Error("Memory file filesystem is not available...");
-			return hMemoryFileSystem;
+			return pModuleData->hMemoryFileSystem;
 		case MFFSH_CachedFileSystem:
-			MFDebug_Assert(hCachedFileSystem > -1, "Memory file filesystem is not available...");
-			if(hCachedFileSystem < 0)
+			MFDebug_Assert(pModuleData->hCachedFileSystem > -1, "Memory file filesystem is not available...");
+			if(pModuleData->hCachedFileSystem < 0)
 				MFDebug_Error("Cached file filesystem is not available...");
-			return hCachedFileSystem;
+			return pModuleData->hCachedFileSystem;
 		case MFFSH_ZipFileSystem:
-			MFDebug_Assert(hZipFileSystem > -1, "Zip file filesystem is not available...");
-			if(hZipFileSystem < 0)
+			MFDebug_Assert(pModuleData->hZipFileSystem > -1, "Zip file filesystem is not available...");
+			if(pModuleData->hZipFileSystem < 0)
 				MFDebug_Error("Zip file filesystem is not available...");
-			return hZipFileSystem;
+			return pModuleData->hZipFileSystem;
 		case MFFSH_HTTPFileSystem:
-			MFDebug_Assert(hHTTPFileSystem > -1, "HTTP file filesystem is not available...");
-			if(hHTTPFileSystem < 0)
+			MFDebug_Assert(pModuleData->hHTTPFileSystem > -1, "HTTP file filesystem is not available...");
+			if(pModuleData->hHTTPFileSystem < 0)
 				MFDebug_Error("HTTP file filesystem is not available...");
-			return hHTTPFileSystem;
+			return pModuleData->hHTTPFileSystem;
 		case MFFSH_FTPFileSystem:
-			MFDebug_Assert(hFTPFileSystem > -1, "FTP file filesystem is not available...");
-			if(hFTPFileSystem < 0)
+			MFDebug_Assert(pModuleData->hFTPFileSystem > -1, "FTP file filesystem is not available...");
+			if(pModuleData->hFTPFileSystem < 0)
 				MFDebug_Error("FTP file filesystem is not available...");
-			return hFTPFileSystem;
+			return pModuleData->hFTPFileSystem;
 		default:
 			MFDebug_Error(MFStr("Invalid filesystem handle: %d", fileSystemHandle));
 			return -1;
@@ -550,7 +599,9 @@ MF_API MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSystemH
 
 MFMount* MFFileSystem_FindVolume(const char *pVolumeName)
 {
-	for(MFMount *pT = pMountList; pT; pT = pT->pNext)
+	GET_MODULE_DATA(MFFileSystemState);
+
+	for(MFMount *pT = pModuleData->pMountList; pT; pT = pT->pNext)
 	{
 		if(!MFString_CaseCmp(pT->volumeInfo.pVolumeName, pVolumeName))
 			return pT;
@@ -696,23 +747,25 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 
 int MFFileSystem_AddVolume(MFMount *pMount)
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
 	// hook it up..
-	if(!pMountList)
+	if(!pModuleData->pMountList)
 	{
-		pMountList = pMountListEnd = pMount;
+		pModuleData->pMountList = pModuleData->pMountListEnd = pMount;
 		pMount->pPrev = pMount->pNext = NULL;
 	}
 	else
 	{
-		MFMount *pT = pMountList;
+		MFMount *pT = pModuleData->pMountList;
 
 		while(pT && pT->volumeInfo.priority < pMount->volumeInfo.priority)
 			pT = pT->pNext;
 
 		if(pT)
 		{
-			if(pT == pMountList)
-				pMountList = pMount;
+			if(pT == pModuleData->pMountList)
+				pModuleData->pMountList = pMount;
 
 			pMount->pPrev = pT->pPrev;
 			pMount->pNext = pT;
@@ -723,16 +776,16 @@ int MFFileSystem_AddVolume(MFMount *pMount)
 		}
 		else
 		{
-			pMount->pPrev = pMountListEnd;
-			pMountListEnd->pNext = pMount;
-			pMountListEnd = pMount;
+			pMount->pPrev = pModuleData->pMountListEnd;
+			pModuleData->pMountListEnd->pNext = pMount;
+			pModuleData->pMountListEnd = pMount;
 		}
 	}
 
 	// build toc
 	if(!(pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
-		MFDebug_Assert(ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
+		MFDebug_Assert(pModuleData->ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst, "Filesystem must provide a set of find functions to cache the TOC");
 
 		MFFindData findData;
 		MFFind *hFind;
@@ -777,7 +830,7 @@ int MFFileSystem_AddVolume(MFMount *pMount)
 // mount a filesystem
 MF_API int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMountData)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
 	MFMount *pMount;
 	pMount = (MFMount*)MFHeap_AllocAndZero(sizeof(MFMount) + MFString_Length(pMountData->pMountpoint) + 1);
@@ -789,7 +842,7 @@ MF_API int MFFileSystem_Mount(MFFileSystemHandle fileSystem, MFMountData *pMount
 	MFString_Copy((char*)&pMount[1], pMountData->pMountpoint);
 
 	// call the mount callback
-	int result = ppFileSystemList[fileSystem]->callbacks.FSMount(pMount, pMountData);
+	int result = pModuleData->ppFileSystemList[fileSystem]->callbacks.FSMount(pMount, pMountData);
 
 	if(result < 0)
 	{
@@ -829,20 +882,20 @@ MF_API int MFFileSystem_MountFujiPath(const char *pMountpoint, const char *pFuji
 
 MF_API int MFFileSystem_Dismount(const char *pMountpoint)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
 	MFMount *pT = MFFileSystem_FindVolume(pMountpoint);
 
 	if(pT)
 	{
 		// dismount
-		ppFileSystemList[pT->volumeInfo.fileSystem]->callbacks.FSDismount(pT);
+		pModuleData->ppFileSystemList[pT->volumeInfo.fileSystem]->callbacks.FSDismount(pT);
 
 		// remove mount
-		if(pMountList == pT)
-			pMountList = pT->pNext;
-		if(pMountListEnd == pT)
-			pMountListEnd = pT->pPrev;
+		if(pModuleData->pMountList == pT)
+			pModuleData->pMountList = pT->pNext;
+		if(pModuleData->pMountListEnd == pT)
+			pModuleData->pMountListEnd = pT->pPrev;
 
 		if(pT->pNext)
 			pT->pNext->pPrev = pT->pPrev;
@@ -919,9 +972,9 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 // open a file from the mounted filesystem stack
 MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA(MFFileSystemState);
 
-	MFMount *pMount = pMountList;
+	MFMount *pMount = pModuleData->pMountList;
 	const char *pMountpoint = NULL;
 
 	// search for a mountpoint
@@ -951,7 +1004,7 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		if((!pMountpoint && !onlyexclusive) || (pMountpoint && !MFString_CaseCmp(pMountpoint, pMount->volumeInfo.pVolumeName)))
 		{
 			// open the file from a mount
-			MFFile *hFile = ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FSOpen(pMount, pFilename, openFlags);
+			MFFile *hFile = pModuleData->ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FSOpen(pMount, pFilename, openFlags);
 
 			if(hFile)
 				return hFile;
@@ -1055,9 +1108,11 @@ MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bA
 	const char *pPath = NULL;
 	if(pFile)
 	{
+		GET_MODULE_DATA(MFFileSystemState);
+
 		// TODO: support other filesystems that forward to the native filesystem (like cache filesystem?)
-		if(pFile->filesystem == hNativeFileSystem)
-			pPath = MFStr((const char*)pFile->pFilesysData);
+		if(pFile->filesystem == pModuleData->hNativeFileSystem)
+			pPath = MFStr(pFile->fileIdentifier);
 		MFFile_Close(pFile);
 	}
 
@@ -1070,9 +1125,11 @@ MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bA
 
 MF_API int MFFileSystem_GetNumVolumes()
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
 	int numVolumes = 0;
 
-	MFMount *pMount = pMountList;
+	MFMount *pMount = pModuleData->pMountList;
 
 	while(pMount)
 	{
@@ -1085,7 +1142,9 @@ MF_API int MFFileSystem_GetNumVolumes()
 
 MF_API void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
 {
-	MFMount *pMount = pMountList;
+	GET_MODULE_DATA(MFFileSystemState);
+
+	MFMount *pMount = pModuleData->pMountList;
 
 	while(pMount && volumeID)
 	{
@@ -1100,6 +1159,8 @@ MF_API void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo)
 
 MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pFindData)
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
 	const char *pMountpoint = NULL;
 	MFFind *pFind = NULL;
 
@@ -1126,7 +1187,7 @@ MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pF
 	{
 		if(pMount->numFiles)
 		{
-			pFind = gFinds.Create();
+			pFind = pModuleData->gFinds.Create();
 
 			pFind->pMount = pMount;
 			MFString_Copy(pFind->searchPattern, pSearchPattern);
@@ -1140,7 +1201,7 @@ MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pF
 
 			if(file == pFind->pMount->numFiles)
 			{
-				gFinds.Destroy(pFind);
+				pModuleData->gFinds.Destroy(pFind);
 				pFind = NULL;
 			}
 			else
@@ -1159,15 +1220,15 @@ MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pF
 	}
 	else
 	{
-		pFind = gFinds.Create();
+		pFind = pModuleData->gFinds.Create();
 
 		pFind->pMount = pMount;
 		pFind->pFilesystemData = NULL;
 		MFString_Copy(pFind->searchPattern, pSearchPattern);
 
-		if(!ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
+		if(!pModuleData->ppFileSystemList[pMount->volumeInfo.fileSystem]->callbacks.FindFirst(pFind, pSearchPattern, pFindData))
 		{
-			gFinds.Destroy(pFind);
+			pModuleData->gFinds.Destroy(pFind);
 			pFind = NULL;
 		}
 	}
@@ -1177,6 +1238,8 @@ MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pF
 
 MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
+	GET_MODULE_DATA(MFFileSystemState);
+
 	if(!(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC))
 	{
 		size_t id = (size_t)pFind->pFilesystemData + 1;
@@ -1203,17 +1266,19 @@ MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 			return false;
 	}
 	else
-		return ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindNext(pFind, pFindData);
+		return pModuleData->ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindNext(pFind, pFindData);
 
 	return true;
 }
 
 MF_API void MFFileSystem_FindClose(MFFind *pFind)
 {
-	if(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC)
-		ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindClose(pFind);
+	GET_MODULE_DATA(MFFileSystemState);
 
-	gFinds.Destroy(pFind);
+	if(pFind->pMount->volumeInfo.flags & MFMF_DontCacheTOC)
+		pModuleData->ppFileSystemList[pFind->pMount->volumeInfo.fileSystem]->callbacks.FindClose(pFind);
+
+	pModuleData->gFinds.Destroy(pFind);
 }
 
 MF_API MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable, bool ownMemory)

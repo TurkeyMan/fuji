@@ -1,14 +1,27 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
+#include "MFHeap_Internal.h"
 #include "MFSystem.h"
 #include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemMemory_Internal.h"
 
-MFPtrListDL<MFFileMemoryData> gMemoryFiles;
-
-MFInitStatus MFFileSystemMemory_InitModule()
+struct MFFileSystemMemoryState : public MFFileSystemGlobalState
 {
-	gMemoryFiles.Init("Memory Files", gDefaults.filesys.maxOpenFiles);
+	MFPtrListDL<MFFileMemoryData> gMemoryFiles;
+};
+
+int gFileSystemMemoryId = -1;
+
+MFInitStatus MFFileSystemMemory_InitModule(int moduleId, bool bPerformInitialisation)
+{
+	gFileSystemMemoryId = moduleId;
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
+	ALLOC_MODULE_DATA(MFFileSystemMemoryState);
+
+	pModuleData->gMemoryFiles.Init("Memory Files", gDefaults.filesys.maxOpenFiles);
 
 	MFFileSystemCallbacks fsCallbacks;
 
@@ -26,16 +39,18 @@ MFInitStatus MFFileSystemMemory_InitModule()
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
 
-	hMemoryFileSystem = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
+	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
 
 	return MFIS_Succeeded;
 }
 
 void MFFileSystemMemory_DeinitModule()
 {
-	MFFileSystem_UnregisterFileSystem(hMemoryFileSystem);
+	GET_MODULE_DATA_ID(MFFileSystemMemoryState, gFileSystemMemoryId);
 
-	gMemoryFiles.Deinit();
+	MFFileSystem_UnregisterFileSystem(pModuleData->hFileSystemHandle);
+
+	pModuleData->gMemoryFiles.Deinit();
 }
 
 // filesystem callbacks
@@ -59,12 +74,12 @@ MFFile* MFFileSystemMemory_Open(MFMount *pMount, const char *pFilename, uint32 o
 
 int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemMemoryState, gFileSystemMemoryId);
 
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataMemory), "Incorrect size for MFOpenDataMemory structure. Invalid pOpenData.");
 	MFOpenDataMemory *pMemory = (MFOpenDataMemory*)pOpenData;
 
-	pFile->pFilesysData = gMemoryFiles.Create();
+	pFile->pFilesysData = pModuleData->gMemoryFiles.Create();
 	MFFileMemoryData *pMem = (MFFileMemoryData*)pFile->pFilesysData;
 
 	pFile->createFlags = pOpenData->openFlags;
@@ -75,23 +90,21 @@ int MFFileMemory_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pMem->allocated = pMemory->allocated;
 	pMem->ownsMemory = pMemory->ownsMemory;
 
-#if defined(_DEBUG)
 	MFString_Copy(pFile->fileIdentifier, MFStr("Memory: 0x%p", pMem->pMemoryPointer));
-#endif
 
 	return 0;
 }
 
 int MFFileMemory_Close(MFFile* fileHandle)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemMemoryState, gFileSystemMemoryId);
 
 	MFFileMemoryData *pMem = (MFFileMemoryData*)fileHandle->pFilesysData;
 
 	if(pMem->ownsMemory)
 		MFHeap_Free(pMem->pMemoryPointer);
 
-	gMemoryFiles.Destroy(pMem);
+	pModuleData->gMemoryFiles.Destroy(pMem);
 
 	return 0;
 }

@@ -1,9 +1,16 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFHeap.h"
 #include "MFFileSystem.h"
 #include "MFDocumentJSON.h"
 
-#if defined(MF_COMPILER_CLANG)
+// shut up a bunch of warnings...
+#if defined(MF_COMPILER_VISUALC)
+	#pragma warning(disable:4244)
+	#pragma warning(disable:4201)
+	#pragma warning(disable:4611)
+	#pragma warning(disable:4702)
+	#pragma warning(disable:4701)
+#elif defined(MF_COMPILER_CLANG)
 	// comparison always true
 	#pragma clang diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #endif

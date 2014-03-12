@@ -1,7 +1,7 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFMesh_Internal.h"
-
 #include "MFVertex.h"
+#include "Util.h"
 
 void MFMesh_FixUpMeshChunkGeneric(MFMeshChunk *pMeshChunk, void *pBase, bool load)
 {

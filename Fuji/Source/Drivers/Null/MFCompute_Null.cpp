@@ -1,12 +1,12 @@
 
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 
 #if MF_COMPUTE == MF_DRIVER_NULL
 
 #include "MFCompute_Internal.h"
 
-MFInitStatus MFCompute_InitModule()
+MFInitStatus MFCompute_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	return MFIS_Succeeded;
 }

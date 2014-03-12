@@ -13,7 +13,7 @@ struct MFMaterialType;
 struct MFStateBlock;
 
 // material functions
-MFInitStatus MFMaterial_InitModule();
+MFInitStatus MFMaterial_InitModule(int moduleId, bool bPerformInitialisation);
 void MFMaterial_DeinitModule();
 
 void MFMaterial_Update();

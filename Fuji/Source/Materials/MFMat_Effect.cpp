@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFSystem.h"
 
 #include "MFRenderState.h"

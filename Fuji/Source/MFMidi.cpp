@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFMidi_Internal.h"
 #include "MFSystem.h"
 
@@ -13,7 +13,7 @@
 
 /**** Functions ****/
 
-MFInitStatus MFMidi_InitModule()
+MFInitStatus MFMidi_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	if(!gDefaults.midi.useMidi)
 		return MFIS_Succeeded;

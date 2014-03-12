@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SYSTEM == MF_DRIVER_LINUX
 
@@ -13,11 +13,10 @@
 
 char *gpCommandLineBuffer = NULL;
 
-MFPlatform gCurrentPlatform = FP_Linux;
-
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
+	gpEngineInstance->currentPlatform = FP_Linux;
 }
 
 void MFSystem_DeinitModulePlatformSpecific()

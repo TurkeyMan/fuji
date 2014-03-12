@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 #include "MFHeap.h"
 #include "MFDisplay.h"
 #include "MFFileSystem.h"
@@ -11,8 +11,9 @@
 #include "MFView.h"
 #include "MFStringCache.h"
 #include "MFSystem.h"
-#include "Asset/MFIntFont.h"
+#include "MFAsset.h"
 #include "Materials/MFMat_Standard.h"
+#include "Util.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -124,7 +125,7 @@ float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pXSc
 
 // font functions
 
-MFInitStatus MFFont_InitModule()
+MFInitStatus MFFont_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 
@@ -160,21 +161,13 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 	}
 
 	// load font file
-	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fft", pFilename));
+	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fnt.fft", pFilename));
 
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 	if(!pFont)
 	{
 		// try and load from source data
-		size_t size;
-		MFIntFont_CreateFromSourceData(MFStr("%s.fnt", pFilename), (void**)&pFont, &size, MFSystem_GetCurrentPlatform());
-
-		MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.fft", pFilename), MFOF_Write | MFOF_Binary);
-		if(pFile)
-		{
-			MFFile_Write(pFile, pFont, size, false);
-			MFFile_Close(pFile);
-		}
+		MFAsset_ConvertAssetFromFile(MFStr("%s.fnt", pFilename), (void**)&pFont, NULL, MFSystem_GetCurrentPlatform());
 	}
 #endif
 

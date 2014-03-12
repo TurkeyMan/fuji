@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #if MF_SOCKETS == MF_DRIVER_BSDSOCKETS
 

@@ -1,4 +1,4 @@
-#include "Fuji.h"
+#include "Fuji_Internal.h"
 
 #include "MFThread_Internal.h"
 #include "MFSystem_Internal.h"
@@ -14,8 +14,12 @@ static MFObjectPool gThreadInfo;
 
 // functions
 
-MFInitStatus MFThread_InitModule()
+MFInitStatus MFThread_InitModule(int moduleId, bool bPerformInitialisation)
 {
+
+	if(!bPerformInitialisation)
+		return MFIS_Succeeded;
+
 	gMutexSize = MFThread_GetMutexSizePlatformSpecific();
 
 	gThreadInfo.Init(sizeof(MFThreadInfo), gDefaults.system.maxThreads, gDefaults.system.maxThreads);

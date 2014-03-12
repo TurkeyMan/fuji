@@ -323,7 +323,7 @@ void HKInputManager::Update()
 				}
 				else
 				{
-					contacts[a].downTime += MFSystem_TimeDelta();
+					contacts[a].downTime += MFTimeDelta();
 				}
 			}
 		}
