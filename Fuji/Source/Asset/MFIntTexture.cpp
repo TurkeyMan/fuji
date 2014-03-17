@@ -1,6 +1,7 @@
 #include "Fuji_Internal.h"
 
 #define MF_ENABLE_PNG
+#define MF_ENABLE_JPEG
 
 #if defined(MF_ENABLE_PNG)
 	#if defined(MF_LINUX) || defined(MF_OSX)
@@ -9,6 +10,19 @@
 		#include "png.h"
 		#include "pngstruct.h"
 		#include "pnginfo.h"
+	#endif
+#endif
+
+#if defined(MF_ENABLE_JPEG)
+	#if defined(MF_WINDOWS)
+		#include "libjpeg-turbo/jpeglib.h"
+		#pragma comment(lib, "jpeg-static")
+
+		#define SUPPORTS_JPEG
+	#elif defined(MF_LINUX) || defined(MF_OSX)
+//		#include <jpeg.h>
+
+//		#define SUPPORTS_JPEG
 	#endif
 #endif
 
@@ -1137,6 +1151,62 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 	return pImage;
 }
 
+#if defined(SUPPORTS_JPEG)
+MFIntTexture* LoadJPEG(const void *pMemory, size_t imageSize)
+{
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr jerr;
+
+	// We set up the normal JPEG error routines, then override error_exit.
+	cinfo.err = jpeg_std_error(&jerr);
+
+	jpeg_create_decompress(&cinfo);
+	jpeg_mem_src(&cinfo, (unsigned char *)pMemory, (unsigned long)imageSize);
+
+	jpeg_read_header(&cinfo, TRUE);
+
+	// Step 4: set parameters for decompression...
+	// In this example, we don't need to change any of the defaults set by jpeg_read_header(), so we do nothing here.
+
+	jpeg_start_decompress(&cinfo);
+
+	// allocate internal image structures
+	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
+
+	pImage->numSurfaces = 1;
+	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
+
+	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*cinfo.image_width*cinfo.image_height);
+	pImage->pSurfaces[0].width = cinfo.image_width;
+	pImage->pSurfaces[0].height = cinfo.image_height;
+
+	// do this thing one row at a time; use a lot less memory!
+	int row_stride = cinfo.output_width * cinfo.output_components;
+	JSAMPARRAY buffer = cinfo.mem->alloc_sarray((j_common_ptr)&cinfo, JPOOL_IMAGE, row_stride, 1);
+
+	MFIntTexturePixel *pPixel = pImage->pSurfaces[0].pData;
+	while(cinfo.output_scanline < cinfo.output_height)
+	{
+		jpeg_read_scanlines(&cinfo, buffer, 1);
+
+		MFImage_Convert(cinfo.image_width, 1, buffer[0], ImgFmt_B8G8R8, pPixel, ImgFmt_ABGR_F32);
+		pPixel += cinfo.image_width;
+	}
+
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+
+	if(jerr.num_warnings != 0)
+	{
+		// warnings occurred?
+	}
+
+	return pImage;
+}
+#endif
+
+//-------------------------------------------------------------------
+
 bool IsPowerOf2(int x)
 {
 	while(x)
@@ -1296,6 +1366,9 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, si
 		case MFITF_BMP:
 			pImage = LoadBMP(pMemory, size);
 			break;
+		case MFITF_DDS:
+			pImage = LoadDDS(pMemory, size);
+			break;
 		case MFITF_PNG:
 #if defined(MF_ENABLE_PNG)
 			pImage = LoadPNG(pMemory, size);
@@ -1303,8 +1376,12 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, si
 			MFDebug_Assert(false, "PNG support is not enabled in this build.");
 #endif
 			break;
-		case MFITF_DDS:
-			pImage = LoadDDS(pMemory, size);
+		case MFITF_JPEG:
+#if defined(SUPPORTS_JPEG)
+			pImage = LoadJPEG(pMemory, size);
+#else
+			MFDebug_Assert(false, "JPEG support is not enabled in this build.");
+#endif
 			break;
 		default:
 			MFDebug_Assert(false, "Unsupported image format.");
