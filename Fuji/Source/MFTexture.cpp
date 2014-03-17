@@ -111,7 +111,7 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			const char *pExt = MFString_GetFileExtension(pName);
-			if(pExt && MFAsset_IsGeometryFile(pExt))
+			if(pExt && MFAsset_IsImageFile(pExt))
 			{
 				MFAsset_ConvertTextureFromFile(pName, (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform());
 			}

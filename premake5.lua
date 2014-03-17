@@ -94,7 +94,14 @@ solution "Fuji"
 	-- D bindings
 	dofile "Fuji/Project/fujidproj.lua"
 
-	-- Middleware
-	if os.is("windows") then
+if os.is("windows") then
+	solution "FujiMiddleware"
+		platforms { "x32", "x64" }
+		if _ACTION == "gmake" then
+			configurations { "Release", "Debug" }
+		else
+			configurations { "Debug", "Release" }
+		end
+
 		dofile "Fuji/Project/fujimiddleware.lua"
-	end
+end

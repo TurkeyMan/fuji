@@ -76,9 +76,9 @@ enum MFImageFormat
 //	ImgFmt_EAC,				/**< Compressed EAC format */
 //	ImgFmt_PVRTC,			/**< Compressed PVRTC format */
 //	ImgFmt_PVRTC2,			/**< Compressed PVRTC2 format */
-//	ImgFmt_ATCRGB,			/**< Compressed ATITC RGB format */
-//	ImgFmt_ATCRGBA_EXPLICIT,/**< Compressed ATITC RGBA format with explicit alpha */
-//	ImgFmt_ATCRGBA,			/**< Compressed ATITC RGBA format */
+//	ImgFmt_ATCRGB,			/**< Compressed ATC1/ATITC RGB format */
+//	ImgFmt_ATCRGBA_EXPLICIT,/**< Compressed ATC3/ATITC RGBA format with explicit alpha */
+//	ImgFmt_ATCRGBA,			/**< Compressed ATC5/ATITC RGBA format */
 //	ImgFmt_ASTC,			/**< Compressed ASTC format */
 
 	ImgFmt_PSP_DXT1,		/**< Special DXT1 for PSP */
@@ -172,6 +172,19 @@ struct MFScaleImage
 };
 
 // interface functions
+
+/**
+ * Convert between image formats.
+ * Converts an image from one format to another.
+ * @param width Image width.
+ * @param height Image height.
+ * @param pInput Pointer to the source image.
+ * @param inputFormat Format of source image.
+ * @param pOutput Pointer to a buffer that receives the converted image.
+ * @param outputFormat Format to convert inage to.
+ * @return None.
+ */
+MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFImageFormat inputFormat, void *pOutput, MFImageFormat outputFormat);
 
 /**
  * Scale an image using a non-trivial scaling algorithm.

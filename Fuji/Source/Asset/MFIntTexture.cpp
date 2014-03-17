@@ -21,18 +21,6 @@
 #include "Util.h"
 #include "Asset/MFIntTexture.h"
 
-#if defined(MF_WINDOWS)
-//	#define MF_ENABLE_ATI_COMPRESSOR
-#endif
-#if defined(MF_WINDOWS) || defined(MF_XBOX)
-	#define MF_ENABLE_MS_COMPRESSOR
-#endif
-
-#if defined(MF_ENABLE_ATI_COMPRESSOR)
-	#include <windows.h>
-	#include "ATI_Compress/ATI_Compress.h"
-	#pragma comment(lib, "ATI_Compress/ATI_Compress.lib")
-#endif
 
 /**** Structures ****/
 
@@ -255,6 +243,26 @@ typedef enum D3D10_RESOURCE_DIMENSION {
   D3D10_RESOURCE_DIMENSION_TEXTURE3D  = 4
 } D3D10_RESOURCE_DIMENSION;
 
+typedef enum DDSCAPS2 {
+  DDSCAPS2_CUBEMAP = 0x200,
+  DDSCAPS2_CUBEMAP_POSITIVEX = 0x400,
+  DDSCAPS2_CUBEMAP_NEGATIVEX = 0x800,
+  DDSCAPS2_CUBEMAP_POSITIVEY = 0x1000,
+  DDSCAPS2_CUBEMAP_NEGATIVEY = 0x2000,
+  DDSCAPS2_CUBEMAP_POSITIVEZ = 0x4000,
+  DDSCAPS2_CUBEMAP_NEGATIVEZ = 0x8000,
+  DDSCAPS2_VOLUME = 0x200000
+} DDSCAPS2;
+
+typedef enum DDPIXELFORMAT {
+  DDPF_ALPHAPIXELS = 0x1,
+  DDPF_ALPHA = 0x2,
+  DDPF_FOURCC = 0x4,
+  DDPF_RGB = 0x40,
+  DDPF_YUV = 0x200,
+  DDPF_LUMINANCE = 0x20000
+} DDPIXELFORMAT;
+
 typedef struct {
   DXGI_FORMAT              dxgiFormat;
   D3D10_RESOURCE_DIMENSION resourceDimension;
@@ -427,18 +435,8 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 			{
 				if(bit_depth == 8)
 				{
-					uint8 *p = row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)p[0] * (1.0f/255.0f);
-						pPixel->g = (float)p[1] * (1.0f/255.0f);
-						pPixel->b = (float)p[2] * (1.0f/255.0f);
-						pPixel->a = 1.0f;
-
-						p += 3;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_B8G8R8, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else if(bit_depth == 16)
 				{
@@ -466,33 +464,13 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 			{
 				if(bit_depth == 8)
 				{
-					uint8 *p = row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)p[0] * (1.0f/255.0f);
-						pPixel->g = (float)p[1] * (1.0f/255.0f);
-						pPixel->b = (float)p[2] * (1.0f/255.0f);
-						pPixel->a = (float)p[3] * (1.0f/255.0f);
-
-						p += 4;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_A8B8G8R8, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else if(bit_depth == 16)
 				{
-					uint16 *p = (uint16*)row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)p[0] * (1.0f/65535.0f);
-						pPixel->g = (float)p[1] * (1.0f/65535.0f);
-						pPixel->b = (float)p[2] * (1.0f/65535.0f);
-						pPixel->a = (float)p[3] * (1.0f/65535.0f);
-
-						p += 4;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_A16B16G16R16, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else
 				{
@@ -731,27 +709,11 @@ MFIntTexture* LoadTGA(const void *pMemory, size_t imageSize)
 		}
 		else if(pHeader->bpp == 24)
 		{
-			for(int a=0; a<pHeader->width*pHeader->height; a++)
-			{
-				pPixel->r = (float)pImageData[2] * (1.0f/255.0f);
-				pPixel->g = (float)pImageData[1] * (1.0f/255.0f);
-				pPixel->b = (float)pImageData[0] * (1.0f/255.0f);
-				pPixel->a = 1.0f;
-				pImageData += bytesPerPixel;
-				++pPixel;
-			}
+			MFImage_Convert(pHeader->width, pHeader->height, pImageData, ImgFmt_R8G8B8, pPixel, ImgFmt_ABGR_F32);
 		}
 		else if(pHeader->bpp == 32)
 		{
-			for(int a=0; a<pHeader->width*pHeader->height; a++)
-			{
-				pPixel->r = (float)pImageData[2] * (1.0f/255.0f);
-				pPixel->g = (float)pImageData[1] * (1.0f/255.0f);
-				pPixel->b = (float)pImageData[0] * (1.0f/255.0f);
-				pPixel->a = (float)pImageData[3] * (1.0f/255.0f);
-				pImageData += bytesPerPixel;
-				++pPixel;
-			}
+			MFImage_Convert(pHeader->width, pHeader->height, pImageData, ImgFmt_A8R8G8B8, pPixel, ImgFmt_ABGR_F32);
 		}
 	}
 	else if(pHeader->imageType == 1) // paletted
@@ -803,49 +765,11 @@ MFIntTexture* LoadBMP(const void *pMemory, size_t imageSize)
 		case BMCT_RGB:
 			if(pInfoHeader->bits == 24)
 			{
-				struct Pixel24
-				{
-					unsigned char b, g, r;
-				};
-
-				Pixel24 *p = (Pixel24*)pImageData;
-
-				for(int y=0; y<pInfoHeader->height; y++)
-				{
-					for(int x=0; x<pInfoHeader->width; x++)
-					{
-						pPixel->r = (float)p->r * (1.0f/255.0f);
-						pPixel->g = (float)p->g * (1.0f/255.0f);
-						pPixel->b = (float)p->b * (1.0f/255.0f);
-						pPixel->a = 1.0f;
-
-						++pPixel;
-						++p;
-					}
-				}
+				MFImage_Convert(pInfoHeader->width, pInfoHeader->height, pImageData, ImgFmt_R8G8B8, pPixel, ImgFmt_ABGR_F32);
 			}
 			else if(pInfoHeader->bits == 32)
 			{
-				struct Pixel32
-				{
-					unsigned char b, g, r, a;
-				};
-
-				Pixel32 *p = (Pixel32*)pImageData;
-
-				for(int y=0; y<pInfoHeader->height; y++)
-				{
-					for(int x=0; x<pInfoHeader->width; x++)
-					{
-						pPixel->r = (float)p->r * (1.0f/255.0f);
-						pPixel->g = (float)p->g * (1.0f/255.0f);
-						pPixel->b = (float)p->b * (1.0f/255.0f);
-						pPixel->a = (float)p->a * (1.0f/255.0f);
-
-						++pPixel;
-						++p;
-					}
-				}
+				MFImage_Convert(pInfoHeader->width, pInfoHeader->height, pImageData, ImgFmt_A8R8G8B8, pPixel, ImgFmt_ABGR_F32);
 			}
 			else if(pInfoHeader->bits == 8)
 			{
@@ -928,35 +852,242 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 	}
 
 	bool bHasDX10Header = pDDS->header.ddspf.dwFourCC == MFMAKEFOURCC('D', 'X', '1', '0');
-	char *pData = bHasDX10Header ? (char*)&pDDS->imageData : (char*)&pDDS->imageData10;
+	char *pData = bHasDX10Header ? (char*)&pDDS->imageData10 : (char*)&pDDS->imageData;
 
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
-	MFDebug_Assert(false, "Load DDS...");
-
-//	pImage->numSurfaces = 1;
-//	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
-
-//	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*pInfoHeader->width*pInfoHeader->height);
-//	pImage->pSurfaces[0].width = pInfoHeader->width;
-//	pImage->pSurfaces[0].height = pInfoHeader->height;
-
-//	MFIntTexturePixel *pPixel = pImage->pSurfaces[0].pData;
-
+	// gather image info
 	uint32 width = pDDS->header.dwWidth;
 	uint32 height = pDDS->header.dwHeight;
 
-	uint32 numArrayElements = bHasDX10Header ? pDDS->dx10Header.arraySize : 1;
+	uint32 numMips = pDDS->header.dwMipMapCount ? pDDS->header.dwMipMapCount : 1;
 
-	bool bCubeMap = false;
-	uint32 numSurfaces = (bCubeMap ? 6 : 1) * numArrayElements;
+	uint32 numArrayElements = bHasDX10Header ? pDDS->dx10Header.arraySize : 1;
+	MFDebug_Assert(numArrayElements == 1, "Array textures not (yet) supported!");
 
 	uint32 depthLayerCount = pDDS->header.dwDepth;
+	MFDebug_Assert(depthLayerCount == 0, "Depth textures not (yet) supported!");
+
+	bool bCubeMap = !!(pDDS->header.dwCaps2 & DDSCAPS2_CUBEMAP);
+	MFDebug_Assert(bCubeMap == false, "Cube maps not (yet) supported!");
+
+	uint32 numSurfaces = (bCubeMap ? 6 : 1) * numArrayElements;
+
+	bool bHasAlpha = !!(pDDS->header.ddspf.dwFlags & DDPF_ALPHAPIXELS);
+
+	// DDS can express MANY formats...
+	MFImageFormat ddsFormat = ImgFmt_Unknown;
+	if(bHasDX10Header)
+	{
+		// format is explicit:
+		switch(pDDS->dx10Header.dxgiFormat)
+		{
+			case DXGI_FORMAT_R8G8B8A8_UNORM:		ddsFormat = ImgFmt_A8B8G8R8; break;
+			case DXGI_FORMAT_B8G8R8A8_UNORM:		ddsFormat = ImgFmt_A8R8G8B8; break;
+			case DXGI_FORMAT_B8G8R8X8_UNORM:		ddsFormat = ImgFmt_A8R8G8B8; bHasAlpha = false; break;
+			case DXGI_FORMAT_B5G6R5_UNORM:			ddsFormat = ImgFmt_R5G6B5; break;
+			case DXGI_FORMAT_B5G5R5A1_UNORM:		ddsFormat = ImgFmt_A1R5G5B5; break;
+			case DXGI_FORMAT_B4G4R4A4_UNORM:		ddsFormat = ImgFmt_A4R4G4B4; break;
+			case DXGI_FORMAT_R10G10B10A2_UNORM:		ddsFormat = ImgFmt_A2B10G10R10; break;
+			case DXGI_FORMAT_R16G16B16A16_UNORM:	ddsFormat = ImgFmt_A16B16G16R16; break;
+			case DXGI_FORMAT_R16G16B16A16_FLOAT:	ddsFormat = ImgFmt_ABGR_F16; break;
+			case DXGI_FORMAT_R32G32B32A32_FLOAT:	ddsFormat = ImgFmt_ABGR_F32; break;
+			case DXGI_FORMAT_R11G11B10_FLOAT:		ddsFormat = ImgFmt_R11G11B10_F; break;
+			case DXGI_FORMAT_R9G9B9E5_SHAREDEXP:	ddsFormat = ImgFmt_R9G9B9_E5; break;
+			case DXGI_FORMAT_BC1_UNORM:				ddsFormat = ImgFmt_DXT1; break;
+			case DXGI_FORMAT_BC2_UNORM:				ddsFormat = ImgFmt_DXT3; break;
+			case DXGI_FORMAT_BC3_UNORM:				ddsFormat = ImgFmt_DXT5; break;
+//			case DXGI_FORMAT_BC4_UNORM:				ddsFormat = ImgFmt_ATI1; break;
+//			case DXGI_FORMAT_BC5_UNORM:				ddsFormat = ImgFmt_ATI2; break;
+//			case DXGI_FORMAT_BC6H_SF16:				ddsFormat = ImgFmt_BPTC_F; break;
+//			case DXGI_FORMAT_BC7_UNORM:				ddsFormat = ImgFmt_BPTC; break;
+			case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:	ddsFormat = ImgFmt_D32FS8X24; break;
+			case DXGI_FORMAT_D32_FLOAT:				ddsFormat = ImgFmt_D32F; break;
+			case DXGI_FORMAT_D24_UNORM_S8_UINT:		ddsFormat = ImgFmt_D24S8; break;
+			case DXGI_FORMAT_D16_UNORM:				ddsFormat = ImgFmt_D16; break;
+
+			case DXGI_FORMAT_R32G32B32A32_UINT:
+			case DXGI_FORMAT_R32G32B32A32_SINT:
+			case DXGI_FORMAT_R32G32B32_FLOAT:
+			case DXGI_FORMAT_R32G32B32_UINT:
+			case DXGI_FORMAT_R32G32B32_SINT:
+			case DXGI_FORMAT_R16G16B16A16_UINT:
+			case DXGI_FORMAT_R16G16B16A16_SNORM:
+			case DXGI_FORMAT_R16G16B16A16_SINT:
+			case DXGI_FORMAT_R32G32_FLOAT:
+			case DXGI_FORMAT_R32G32_UINT:
+			case DXGI_FORMAT_R32G32_SINT:
+			case DXGI_FORMAT_R10G10B10A2_UINT:
+			case DXGI_FORMAT_R8G8B8A8_UINT:
+			case DXGI_FORMAT_R8G8B8A8_SNORM:
+			case DXGI_FORMAT_R8G8B8A8_SINT:
+			case DXGI_FORMAT_R16G16_FLOAT:
+			case DXGI_FORMAT_R16G16_UNORM:
+			case DXGI_FORMAT_R16G16_UINT:
+			case DXGI_FORMAT_R16G16_SNORM:
+			case DXGI_FORMAT_R16G16_SINT:
+			case DXGI_FORMAT_R32_FLOAT:
+			case DXGI_FORMAT_R32_UINT:
+			case DXGI_FORMAT_R32_SINT:
+			case DXGI_FORMAT_R8G8_UNORM:
+			case DXGI_FORMAT_R8G8_UINT:
+			case DXGI_FORMAT_R8G8_SNORM:
+			case DXGI_FORMAT_R8G8_SINT:
+			case DXGI_FORMAT_R16_FLOAT:
+			case DXGI_FORMAT_R16_UNORM:
+			case DXGI_FORMAT_R16_UINT:
+			case DXGI_FORMAT_R16_SNORM:
+			case DXGI_FORMAT_R16_SINT:
+			case DXGI_FORMAT_R8_UNORM:
+			case DXGI_FORMAT_R8_UINT:
+			case DXGI_FORMAT_R8_SNORM:
+			case DXGI_FORMAT_R8_SINT:
+			case DXGI_FORMAT_A8_UNORM:
+			case DXGI_FORMAT_R1_UNORM:
+			case DXGI_FORMAT_R8G8_B8G8_UNORM:
+			case DXGI_FORMAT_G8R8_G8B8_UNORM:
+			case DXGI_FORMAT_BC4_SNORM:
+			case DXGI_FORMAT_BC5_SNORM:
+			case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
+			case DXGI_FORMAT_BC6H_UF16:
+			case DXGI_FORMAT_AYUV:
+			case DXGI_FORMAT_Y410:
+			case DXGI_FORMAT_Y416:
+			case DXGI_FORMAT_NV12:
+			case DXGI_FORMAT_P010:
+			case DXGI_FORMAT_P016:
+			case DXGI_FORMAT_420_OPAQUE:
+			case DXGI_FORMAT_YUY2:
+			case DXGI_FORMAT_Y210:
+			case DXGI_FORMAT_Y216:
+			case DXGI_FORMAT_NV11:
+			case DXGI_FORMAT_AI44:
+			case DXGI_FORMAT_IA44:
+			case DXGI_FORMAT_P8:
+			case DXGI_FORMAT_A8P8:
+
+			case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+			case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+			case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+			case DXGI_FORMAT_BC1_UNORM_SRGB:
+			case DXGI_FORMAT_BC2_UNORM_SRGB:
+			case DXGI_FORMAT_BC3_UNORM_SRGB:
+			case DXGI_FORMAT_BC7_UNORM_SRGB:
+			default:
+				break;
+		}
+	}
+	else if(pDDS->header.ddspf.dwFlags & DDPF_FOURCC)
+	{
+		// compressed image
+		switch(pDDS->header.ddspf.dwFourCC)
+		{
+			case MFMAKEFOURCC('D', 'X', 'T', '1'):	ddsFormat = ImgFmt_DXT1; break;
+			case MFMAKEFOURCC('D', 'X', 'T', '2'):	ddsFormat = ImgFmt_DXT2; break;
+			case MFMAKEFOURCC('D', 'X', 'T', '3'):	ddsFormat = ImgFmt_DXT3; break;
+			case MFMAKEFOURCC('D', 'X', 'T', '4'):	ddsFormat = ImgFmt_DXT4; break;
+			case MFMAKEFOURCC('D', 'X', 'T', '5'):	ddsFormat = ImgFmt_DXT5; break;
+//			case MFMAKEFOURCC('A', 'T', 'I', '1'):
+//			case MFMAKEFOURCC('B', 'C', '4', 'U'):	ddsFormat = ImgFmt_ATI1; break;
+//			case MFMAKEFOURCC('A', 'T', 'I', '2'):
+//			case MFMAKEFOURCC('B', 'C', '5', 'U'):	ddsFormat = ImgFmt_ATI2; break;
+//			case MFMAKEFOURCC('E', 'T', 'C', '1'):	ddsFormat = ImgFmt_ETC1; break;
+//			case MFMAKEFOURCC('A', 'T', 'C', '1'):	ddsFormat = ImgFmt_ATCRGB; break;
+//			case MFMAKEFOURCC('A', 'T', 'C', '3'):	ddsFormat = ImgFmt_ATCRGBA_EXPLICIT; break;
+//			case MFMAKEFOURCC('A', 'T', 'C', '5'):	ddsFormat = ImgFmt_ATCRGBA; break;
+			case 36:								ddsFormat = ImgFmt_A16B16G16R16; break;
+			case 113:								ddsFormat = ImgFmt_ABGR_F16; break;
+			case 116:								ddsFormat = ImgFmt_ABGR_F32; break;
+
+			// Unsupported...
+			case MFMAKEFOURCC('B', 'C', '4', 'S'):	// BC4 signed
+			case MFMAKEFOURCC('B', 'C', '5', 'S'):	// BC5 signed
+			case MFMAKEFOURCC('R', 'G', 'B', 'G'):	// D3DFMT_R8G8_B8G8
+			case MFMAKEFOURCC('G', 'R', 'G', 'B'):	// D3DFMT_G8R8_G8B8
+			case MFMAKEFOURCC('U', 'Y', 'V', 'Y'):	// D3DFMT_UYVY
+			case MFMAKEFOURCC('Y', 'U', 'Y', '2'):	// D3DFMT_YUY2
+			case 117:								// D3DFMT_CxV8U8
+			case 110:								// signed: ImgFmt_A16B16G16R16
+			case 111:								// signed: R_16F
+			case 112:								// signed: GR_16F
+			case 114:								// signed: R_32F
+			case 115:								// signed: GR_32F
+				break;
+		}
+	}
+	else if((pDDS->header.ddspf.dwFlags & DDPF_ALPHA) || (pDDS->header.ddspf.dwFlags & DDPF_LUMINANCE))
+	{
+		// 8 bit alpha/luminance data
+
+		// ALPHA should create white texture with alpha channel set to image data
+		// LUMINANCE should create greyscale image with all channels set to image data
+	}
+	else if(pDDS->header.ddspf.dwFlags & DDPF_RGB)
+	{
+		if(pDDS->header.ddspf.dwRGBBitCount == 32)
+		{
+			if(pDDS->header.ddspf.dwRBitMask == 0xFF0000 && pDDS->header.ddspf.dwGBitMask == 0xFF00 && pDDS->header.ddspf.dwBBitMask == 0xFF)
+				ddsFormat = ImgFmt_A8R8G8B8;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xFF && pDDS->header.ddspf.dwGBitMask == 0xFF00 && pDDS->header.ddspf.dwBBitMask == 0xFF0000)
+				ddsFormat = ImgFmt_A8B8G8R8;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xFF00 && pDDS->header.ddspf.dwGBitMask == 0xFF0000 && pDDS->header.ddspf.dwBBitMask == 0xFF000000)
+				ddsFormat = ImgFmt_B8G8R8A8;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xFF000000 && pDDS->header.ddspf.dwGBitMask == 0xFF0000 && pDDS->header.ddspf.dwBBitMask == 0xFF00)
+				ddsFormat = ImgFmt_R8G8B8A8;
+			else if(pDDS->header.ddspf.dwRBitMask == 0x3FF00000 && pDDS->header.ddspf.dwGBitMask == 0xFFC00 && pDDS->header.ddspf.dwBBitMask == 0x3FF)
+				ddsFormat = ImgFmt_A2R10G10B10;
+			else if(pDDS->header.ddspf.dwRBitMask == 0x3FF && pDDS->header.ddspf.dwGBitMask == 0xFFC00 && pDDS->header.ddspf.dwBBitMask == 0x3FF00000)
+				ddsFormat = ImgFmt_A2B10G10R10;
+		}
+		if(pDDS->header.ddspf.dwRGBBitCount == 24)
+		{
+			if(pDDS->header.ddspf.dwRBitMask == 0xFF0000 && pDDS->header.ddspf.dwGBitMask == 0xFF00 && pDDS->header.ddspf.dwBBitMask == 0xFF)
+				ddsFormat = ImgFmt_R8G8B8;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xFF && pDDS->header.ddspf.dwGBitMask == 0xFF00 && pDDS->header.ddspf.dwBBitMask == 0xFF0000)
+				ddsFormat = ImgFmt_B8G8R8;
+		}
+		else if(pDDS->header.ddspf.dwRGBBitCount == 16)
+		{
+			if(pDDS->header.ddspf.dwRBitMask == 0xf800 && pDDS->header.ddspf.dwGBitMask == 0x7e0 && pDDS->header.ddspf.dwBBitMask == 0x1f)
+				ddsFormat = ImgFmt_R5G6B5;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xfc00 && pDDS->header.ddspf.dwGBitMask == 0x3e0 && pDDS->header.ddspf.dwBBitMask == 0x1f)
+				ddsFormat = ImgFmt_R6G5B5;
+			else if(pDDS->header.ddspf.dwRBitMask == 0x1f && pDDS->header.ddspf.dwGBitMask == 0x7e0 && pDDS->header.ddspf.dwBBitMask == 0xf800)
+				ddsFormat = ImgFmt_B5G6R5;
+			else if(pDDS->header.ddspf.dwRBitMask == 0x7c00 && pDDS->header.ddspf.dwGBitMask == 0x3e0 && pDDS->header.ddspf.dwBBitMask == 0x1f)
+				ddsFormat = ImgFmt_A1R5G5B5;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xf800 && pDDS->header.ddspf.dwGBitMask == 0x7c0 && pDDS->header.ddspf.dwBBitMask == 0x3e)
+				ddsFormat = ImgFmt_R5G5B5A1;
+			else if(pDDS->header.ddspf.dwRBitMask == 0x1f && pDDS->header.ddspf.dwGBitMask == 0x3e0 && pDDS->header.ddspf.dwBBitMask == 0x7c00)
+				ddsFormat = ImgFmt_A1B5G5R5;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xf00 && pDDS->header.ddspf.dwGBitMask == 0xf0 && pDDS->header.ddspf.dwBBitMask == 0xf)
+				ddsFormat = ImgFmt_A4R4G4B4;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xf && pDDS->header.ddspf.dwGBitMask == 0xf0 && pDDS->header.ddspf.dwBBitMask == 0xf00)
+				ddsFormat = ImgFmt_A4B4G4R4;
+			else if(pDDS->header.ddspf.dwRBitMask == 0xf000 && pDDS->header.ddspf.dwGBitMask == 0xf00 && pDDS->header.ddspf.dwBBitMask == 0xf0)
+				ddsFormat = ImgFmt_R4G4B4A4;
+		}
+	}
+
+	MFDebug_Assert(ddsFormat != ImgFmt_Unknown, "Couldn't detect image format...");
+
+	// load the image...
+	pImage->numSurfaces = (int)numSurfaces;
+	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface) * numSurfaces);
 
 	for(uint32 i=0; i<numSurfaces; ++i)
 	{
-		for(uint32 mip=0; mip<pDDS->header.dwMipMapCount; ++mip)
+		pImage->pSurfaces[i].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*width*height);
+		pImage->pSurfaces[i].width = width;
+		pImage->pSurfaces[i].height = height;
+
+		MFIntTexturePixel *pPixel = pImage->pSurfaces[i].pData;
+
+		for(uint32 mip=0; mip<numMips; ++mip)
 		{
+			if(mip > 0)
+				continue; // HACK: we want to load the mips!
+
 			uint32 mipWidth = width >> mip;
 			uint32 mipHeight = height >> mip;
 			mipWidth = mipWidth ? mipWidth : 1;
@@ -966,9 +1097,39 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 			uint32 depthLayers = depthLayerCount >> mip;
 			depthLayers = depthLayers ? depthLayers : 1;
 
-			for(uint32 depth=0; depth<1; ++depth)
+			for(uint32 depth=0; depth<depthLayers; ++depth)
 			{
 				// load image data...
+				if(ddsFormat >= ImgFmt_DXT1 && ddsFormat <= ImgFmt_PSP_DXT5)
+				{
+					// load compressed image
+					MFDebug_Assert(false, "Not done...");
+
+					// pitch is the size of the entire compressed image
+					pData += pDDS->header.dwPitchOrLinearSize;
+				}
+				else
+				{
+					// load raw image by scanline
+					for(uint32 y=0; y<height; ++y)
+					{
+						MFImage_Convert(width, 1, pData, ddsFormat, pPixel, ImgFmt_ABGR_F32);
+
+						if(pDDS->header.ddspf.dwRGBBitCount != 24 && !bHasAlpha)
+						{
+							// zero out the alpha pixels
+							for(uint32 x=0; x<width; ++x)
+							{
+								//...
+							}
+						}
+
+						// TODO: detect opaque/mask/alpha
+
+						pData += pDDS->header.dwPitchOrLinearSize;
+						pPixel += width;
+					}
+				}
 			}
 		}
 	}
@@ -991,69 +1152,6 @@ bool IsPowerOf2(int x)
 	}
 
 	return true;
-}
-
-void ATICompress(MFIntTexturePixel *pSourceBuffer, int width, int height, MFImageFormat targetFormat, void *pOutputBuffer)
-{
-#if defined(MF_ENABLE_ATI_COMPRESSOR)
-	ATI_TC_FORMAT atiFormat;
-	switch(targetFormat)
-	{
-		case ImgFmt_DXT1:
-		case ImgFmt_PSP_DXT1:
-		case ImgFmt_PSP_DXT1s:
-			atiFormat = ATI_TC_FORMAT_DXT1;
-			break;
-		case ImgFmt_DXT2:
-		case ImgFmt_DXT3:
-		case ImgFmt_PSP_DXT3:
-		case ImgFmt_PSP_DXT3s:
-			atiFormat = ATI_TC_FORMAT_DXT3;
-			break;
-		case ImgFmt_DXT4:
-		case ImgFmt_DXT5:
-		case ImgFmt_PSP_DXT5:
-		case ImgFmt_PSP_DXT5s:
-			atiFormat = ATI_TC_FORMAT_DXT5;
-			break;
-	}
-
-	// Init source texture
-	ATI_TC_Texture srcTexture;
-	srcTexture.dwSize = sizeof(srcTexture);
-	srcTexture.dwWidth = width;
-	srcTexture.dwHeight = height;
-	srcTexture.dwPitch = width*sizeof(float);
-	srcTexture.format = ATI_TC_FORMAT_ARGB_32F;
-	srcTexture.dwDataSize = ATI_TC_CalculateBufferSize(&srcTexture);
-	srcTexture.pData = (ATI_TC_BYTE*)pSourceBuffer;
-
-	// Init dest texture
-	ATI_TC_Texture destTexture;
-	destTexture.dwSize = sizeof(destTexture);
-	destTexture.dwWidth = width;
-	destTexture.dwHeight = height;
-	destTexture.dwPitch = 0;
-	destTexture.format = atiFormat;
-	destTexture.dwDataSize = ATI_TC_CalculateBufferSize(&destTexture);
-	destTexture.pData = (ATI_TC_BYTE*)pOutputBuffer;
-
-	ATI_TC_CompressOptions options;
-	options.dwSize = sizeof(options);
-	options.bUseChannelWeighting = FALSE;
-	options.fWeightingRed = 1.0;			/* Weighting of the Red or X Channel */
-	options.fWeightingGreen = 1.0;		/* Weighting of the Green or Y Channel */
-	options.fWeightingBlue = 1.0;			/* Weighting of the Blue or Z Channel */
-	options.bUseAdaptiveWeighting = TRUE;	/* Adapt weighting on a per-block basis */
-	options.bDXT1UseAlpha = TRUE;
-	options.nAlphaThreshold = 128;
-
-	// Compress
-	ATI_TC_ConvertTexture(&srcTexture, &destTexture, &options, NULL, NULL, NULL);
-#else
-	// not supported
-	MFDebug_Assert(false, "ATI's S3 Texture Compressor not available in this build..");
-#endif
 }
 
 void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFImageFormat format)
@@ -1095,443 +1193,13 @@ void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFImage
 
 int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFImageFormat targetFormat, MFPlatform platform)
 {
+	MFDebug_Assert(targetFormat < ImgFmt_XB_A8R8G8B8s, "TODO: Fix up swizzled format support!");
+
 	// convert image...
 	int width = pSourceSurface->width;
 	int height = pSourceSurface->height;
 
-	int x, y;
-	MFIntTexturePixel *pSource = pSourceSurface->pData;
-
-	switch(targetFormat)
-	{
-		case ImgFmt_A8R8G8B8:
-		case ImgFmt_XB_A8R8G8B8s:
-		{
-			struct PixelBGRA { uint8 b, g, r, a; } *pTarget = (PixelBGRA*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
-					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A8B8G8R8:
-		case ImgFmt_XB_A8B8G8R8s:
-		case ImgFmt_PSP_A8B8G8R8s:
-		{
-			float alphaScale = platform == FP_PS2 ? 128.0f : 255.0f;
-
-			struct PixelRGBA { uint8 r, g, b, a; } *pTarget = (PixelRGBA*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->a = (uint8)((int)(pSource->a*alphaScale) & 0xFF);
-					pTarget->r = (uint8)((int)(pSource->r*255.0f) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*255.0f) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*255.0f) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_B8G8R8A8:
-		case ImgFmt_XB_B8G8R8A8s:
-		{
-			struct PixelARGB { uint8 a, r, g, b; } *pTarget = (PixelARGB*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
-					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R8G8B8A8:
-		case ImgFmt_XB_R8G8B8A8s:
-		{
-			struct PixelABGR { uint8 a, b, g, r; } *pTarget = (PixelABGR*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->a = (uint8)((int)(pSource->a*255.f) & 0xFF);
-					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R8G8B8:
-		{
-			struct PixelBGR { uint8 b, g, r; } *pTarget = (PixelBGR*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->r = (uint8)((int)(pSource->r*255.f) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g*255.f) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b*255.f) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_B8G8R8:
-		{
-			struct PixelRGB { uint8 r, g, b; } *pTarget = (PixelRGB*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					pTarget->r = (uint8)((int)(pSource->r) & 0xFF);
-					pTarget->g = (uint8)((int)(pSource->g) & 0xFF);
-					pTarget->b = (uint8)((int)(pSource->b) & 0xFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A2R10G10B10:
-		{
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint32)(pSource->a*3.0f) & 0x3) << 30 |
-								((uint32)(pSource->r*1023.0f) & 0x3FF) << 20 |
-								((uint32)(pSource->g*1023.0f) & 0x3FF) << 10 |
-								((uint32)(pSource->b*1023.0f) & 0x3FF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A2B10G10R10:
-		{
-			uint32 *pTarget = (uint32*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint32)(pSource->a*3.0f) & 0x3) << 30 |
-								((uint32)(pSource->b*1023.0f) & 0x3FF) << 20 |
-								((uint32)(pSource->g*1023.0f) & 0x3FF) << 10 |
-								((uint32)(pSource->r*1023.0f) & 0x3FF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A16B16G16R16:
-		{
-			uint64 *pTarget = (uint64*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint64)(pSource->a*65535.0f) & 0xFFFF) << 48 |
-								((uint64)(pSource->b*65535.0f) & 0xFFFF) << 32 |
-								((uint64)(pSource->g*65535.0f) & 0xFFFF) << 16 |
-								((uint64)(pSource->r*65535.0f) & 0xFFFF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R5G6B5:
-		case ImgFmt_XB_R5G6B5s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->r*31.0f) & 0x1F) << 11 |
-								((uint16)(pSource->g*63.0f) & 0x3F) << 5 |
-								((uint16)(pSource->b*31.0f) & 0x1F);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R6G5B5:
-		case ImgFmt_XB_R6G5B5s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->r*63.0f) & 0x3F) << 10 |
-								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
-								((uint16)(pSource->b*31.0f) & 0x1F);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_B5G6R5:
-		case ImgFmt_PSP_B5G6R5s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->b*31.0f) & 0x1F) << 11 |
-								((uint16)(pSource->g*63.0f) & 0x3F) << 5 |
-								((uint16)(pSource->r*31.0f) & 0x1F);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A1R5G5B5:
-		case ImgFmt_XB_A1R5G5B5s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) << 15 |
-								((uint16)(pSource->r*31.0f) & 0x1F) << 10 |
-								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
-								((uint16)(pSource->b*31.0f) & 0x1F);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R5G5B5A1:
-		case ImgFmt_XB_R5G5B5A1s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) |
-								((uint16)(pSource->r*31.0f) & 0x1F) << 11 |
-								((uint16)(pSource->g*31.0f) & 0x1F) << 6 |
-								((uint16)(pSource->b*31.0f) & 0x1F) << 1;
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A1B5G5R5:
-		case ImgFmt_PSP_A1B5G5R5s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->a*1.0f) & 0x1) << 15 |
-								((uint16)(pSource->b*31.0f) & 0x1F) << 10 |
-								((uint16)(pSource->g*31.0f) & 0x1F) << 5 |
-								((uint16)(pSource->r*31.0f) & 0x1F);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A4R4G4B4:
-		case ImgFmt_XB_A4R4G4B4s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->a*15.0f) & 0xF) << 12 |
-								((uint16)(pSource->r*15.0f) & 0xF) << 8 |
-								((uint16)(pSource->g*15.0f) & 0xF) << 4 |
-								((uint16)(pSource->b*15.0f) & 0xF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_A4B4G4R4:
-		case ImgFmt_PSP_A4B4G4R4s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->a*15.0f) & 0xF) << 12 |
-								((uint16)(pSource->b*15.0f) & 0xF) << 8 |
-								((uint16)(pSource->g*15.0f) & 0xF) << 4 |
-								((uint16)(pSource->r*15.0f) & 0xF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_R4G4B4A4:
-		case ImgFmt_XB_R4G4B4A4s:
-		{
-			uint16 *pTarget = (uint16*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = ((uint16)(pSource->r*15.0f) & 0xF) << 12 |
-								((uint16)(pSource->g*15.0f) & 0xF) << 8 |
-								((uint16)(pSource->b*15.0f) & 0xF) << 4 |
-								((uint16)(pSource->a*15.0f) & 0xF);
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_ABGR_F16:
-		{
-			uint64 *pTarget = (uint64*)pOutputSurface->pImageData;
-			uint32 c;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					c = (uint32&)pSource->a;
-					*pTarget = (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 48;
-					c = (uint32&)pSource->b;
-					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13) << 32;
-					c = (uint32&)pSource->g;
-					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13) << 16;
-					c = (uint32&)pSource->r;
-					*pTarget |= (uint64)((c & 0xFC000000) >> 16 | (c & 0x007FC000) >> 13);
-
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_ABGR_F32:
-		{
-			float *pTarget = (float*)pOutputSurface->pImageData;
-
-			for(y=0; y<height; y++)
-			{
-				for(x=0; x<width; x++)
-				{
-					*pTarget = pSource->r;
-					++pTarget;
-					*pTarget = pSource->g;
-					++pTarget;
-					*pTarget = pSource->b;
-					++pTarget;
-					*pTarget = pSource->a;
-					++pTarget;
-					++pSource;
-				}
-			}
-			break;
-		}
-
-		case ImgFmt_DXT1:
-		case ImgFmt_DXT2:
-		case ImgFmt_DXT3:
-		case ImgFmt_DXT4:
-		case ImgFmt_DXT5:
-		case ImgFmt_PSP_DXT1:
-		case ImgFmt_PSP_DXT3:
-		case ImgFmt_PSP_DXT5:
-		case ImgFmt_PSP_DXT1s:
-		case ImgFmt_PSP_DXT3s:
-		case ImgFmt_PSP_DXT5s:
-		{
-			ATICompress(pSource, width, height, targetFormat, pOutputSurface->pImageData);
-
-			if(targetFormat == ImgFmt_PSP_DXT1 || targetFormat == ImgFmt_PSP_DXT3 ||  targetFormat == ImgFmt_PSP_DXT5 ||
-				targetFormat == ImgFmt_PSP_DXT1s || targetFormat == ImgFmt_PSP_DXT3s ||  targetFormat == ImgFmt_PSP_DXT5s)
-			{
-				// we need to swizzle the PSP buffer about a bit...
-			}
-			break;
-		}
-
-		default:
-		{
-			MFDebug_Assert(false, MFStr("Conversion for target format '%s' not yet supported...\n", MFImage_GetFormatString(targetFormat)));
-			return 1;
-		}
-	}
+	MFImage_Convert(width, height, pSourceSurface->pData, ImgFmt_ABGR_F32, pOutputSurface->pImageData, targetFormat);
 
 	// test for swizzled format..
 	if(targetFormat >= ImgFmt_XB_A8R8G8B8s)

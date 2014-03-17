@@ -4,6 +4,10 @@ function isVS()
 	return _ACTION == "vs2013" or _ACTION == "vs2012" or _ACTION == "vs2010" or _ACTION == "vs2008" or _ACTION == "vs2005" or _ACTION == "vs2003" or _ACTION == "vs2002"
 end
 
+local function isModernVS()
+	return _ACTION == "vs2012" or _ACTION == "vs2013"
+end
+
 local function getConfigName(configName)
 	if _ACTION == "vs2010" or _ACTION == "vs2012" or _ACTION == "vs2013" then
 		return "$(Configuration)"
@@ -130,9 +134,10 @@ configuration { "windows", "not Xbox360", "not PS3", "not Android" }
 			linkoptions { "/DelayLoad:ws2_32.dll" }			-- Winsock
 
 			-- asset libs
-			linkoptions { "/DelayLoad:d3dx11_43.dll" }		-- D3D11
-			linkoptions { "/DelayLoad:D3DX9_43.dll" }		-- D3D9
-
+			if not isModernVS() then
+				linkoptions { "/DelayLoad:d3dx11_43.dll" }		-- D3D11
+				linkoptions { "/DelayLoad:D3DX9_43.dll" }		-- D3D9
+			end
 			linkoptions { "/DelayLoad:FujiMiddleware.dll" }
 
 			configuration { "not StaticLib", "windows", "x32 or native", "not Xbox360", "not PS3", "not Android" }

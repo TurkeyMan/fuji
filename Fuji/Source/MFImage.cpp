@@ -2,6 +2,16 @@
 #include "MFImage.h"
 #include "MFVector.h"
 
+#if defined(MF_WINDOWS)
+//	#define MF_ENABLE_ATI_COMPRESSOR
+#endif
+#if defined(MF_ENABLE_ATI_COMPRESSOR)
+	#include <windows.h>
+	#include "ATI_Compress/ATI_Compress.h"
+	#pragma comment(lib, "ATI_Compress/ATI_Compress.lib")
+#endif
+
+
 //#define HQX_SUPPORT
 
 #if defined(HQX_SUPPORT)
@@ -38,6 +48,587 @@ MF_API MFImageFormat MFImage_ResolveFormat(int format, MFRendererDrivers driver)
 MF_API int MFImage_GetBitsPerPixel(int format)
 {
 	return (int)gMFImageBitsPerPixel[format];
+}
+
+static void ATICompress(const void *pSourceBuffer, int width, int height, MFImageFormat targetFormat, void *pOutputBuffer)
+{
+#if defined(MF_ENABLE_ATI_COMPRESSOR)
+	ATI_TC_FORMAT atiFormat;
+	switch(targetFormat)
+	{
+		case ImgFmt_DXT1:
+		case ImgFmt_PSP_DXT1:
+			atiFormat = ATI_TC_FORMAT_DXT1;
+			break;
+		case ImgFmt_DXT2:
+		case ImgFmt_DXT3:
+		case ImgFmt_PSP_DXT3:
+			atiFormat = ATI_TC_FORMAT_DXT3;
+			break;
+		case ImgFmt_DXT4:
+		case ImgFmt_DXT5:
+		case ImgFmt_PSP_DXT5:
+			atiFormat = ATI_TC_FORMAT_DXT5;
+			break;
+	}
+
+	// Init source texture
+	ATI_TC_Texture srcTexture;
+	srcTexture.dwSize = sizeof(srcTexture);
+	srcTexture.dwWidth = width;
+	srcTexture.dwHeight = height;
+	srcTexture.dwPitch = width*sizeof(float);
+	srcTexture.format = ATI_TC_FORMAT_ARGB_32F;
+	srcTexture.dwDataSize = ATI_TC_CalculateBufferSize(&srcTexture);
+	srcTexture.pData = (ATI_TC_BYTE*)pSourceBuffer;
+
+	// Init dest texture
+	ATI_TC_Texture destTexture;
+	destTexture.dwSize = sizeof(destTexture);
+	destTexture.dwWidth = width;
+	destTexture.dwHeight = height;
+	destTexture.dwPitch = 0;
+	destTexture.format = atiFormat;
+	destTexture.dwDataSize = ATI_TC_CalculateBufferSize(&destTexture);
+	destTexture.pData = (ATI_TC_BYTE*)pOutputBuffer;
+
+	ATI_TC_CompressOptions options;
+	options.dwSize = sizeof(options);
+	options.bUseChannelWeighting = FALSE;
+	options.fWeightingRed = 1.0;			/* Weighting of the Red or X Channel */
+	options.fWeightingGreen = 1.0;			/* Weighting of the Green or Y Channel */
+	options.fWeightingBlue = 1.0;			/* Weighting of the Blue or Z Channel */
+	options.bUseAdaptiveWeighting = TRUE;	/* Adapt weighting on a per-block basis */
+	options.bDXT1UseAlpha = TRUE;
+	options.nAlphaThreshold = 128;
+
+	// Compress
+	ATI_TC_ConvertTexture(&srcTexture, &destTexture, &options, NULL, NULL, NULL);
+#else
+	// not supported
+	MFDebug_Assert(false, "ATI's S3 Texture Compressor not available in this build..");
+#endif
+}
+
+MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFImageFormat inputFormat, void *pOutput, MFImageFormat outputFormat)
+{
+	const uint8 *pIn = (const uint8*)pInput;
+	uint8 *pOut = (uint8*)pOutput;
+
+	if(inputFormat >= ImgFmt_XB_A8R8G8B8s || outputFormat >= ImgFmt_XB_A8R8G8B8s)
+	{
+		MFDebug_Assert(false, "Swizzled formats not (yet) supported!");
+
+		// get un-swizzled format...
+//		inputFormat = ??
+//		outputFormat = ??
+	}
+	if(inputFormat >= ImgFmt_DXT1 && inputFormat <= ImgFmt_PSP_DXT5)
+	{
+		MFDebug_Assert(false, "Conversion FROM compressed formats not (yet) supported!");
+	}
+
+	if(outputFormat >= ImgFmt_DXT1 && outputFormat <= ImgFmt_PSP_DXT5)
+	{
+		MFDebug_Assert(inputFormat == ImgFmt_ABGR_F32, "Only compression from ImgFmt_ABGR_F32 is (currently) supported!");
+
+		// compress image...
+		switch(outputFormat)
+		{
+			case ImgFmt_DXT1:
+			case ImgFmt_DXT2:
+			case ImgFmt_DXT3:
+			case ImgFmt_DXT4:
+			case ImgFmt_DXT5:
+			case ImgFmt_PSP_DXT1:
+			case ImgFmt_PSP_DXT3:
+			case ImgFmt_PSP_DXT5:
+			{
+				ATICompress(pIn, width, height, outputFormat, pOut);
+
+				if(outputFormat >= ImgFmt_PSP_DXT1 && outputFormat <= ImgFmt_PSP_DXT5)
+				{
+					// we need to swizzle the PSP buffer about a bit...
+				}
+				break;
+			}
+			default:
+			{
+				MFDebug_Assert(false, MFStr("Compression format '%s' not yet supported...\n", MFImage_GetFormatString(outputFormat)));
+			}
+		}
+	}
+	else if(outputFormat >= ImgFmt_ABGR_F16 && outputFormat <= ImgFmt_R9G9B9_E5)
+	{
+		// float format
+		float r=0, g=0, b=0, a=0;
+		for(uint32 y=0; y<height; ++y)
+		{
+			for(uint32 x=0; x<width; ++x)
+			{
+				switch(inputFormat)
+				{
+					case ImgFmt_A8R8G8B8:
+						b = (float)pIn[0] * (1.f/255.f);
+						g = (float)pIn[1] * (1.f/255.f);
+						r = (float)pIn[2] * (1.f/255.f);
+						a = (float)pIn[3] * (1.f/255.f);
+						pIn += 4;
+						break;
+					case ImgFmt_A8B8G8R8:
+						r = (float)pIn[0] * (1.f/255.f);
+						g = (float)pIn[1] * (1.f/255.f);
+						b = (float)pIn[2] * (1.f/255.f);
+						a = (float)pIn[3] * (1.f/255.f);
+						pIn += 4;
+						break;
+					case ImgFmt_B8G8R8A8:
+						a = (float)pIn[0] * (1.f/255.f);
+						r = (float)pIn[1] * (1.f/255.f);
+						g = (float)pIn[2] * (1.f/255.f);
+						b = (float)pIn[3] * (1.f/255.f);
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8A8:
+						a = (float)pIn[0] * (1.f/255.f);
+						b = (float)pIn[1] * (1.f/255.f);
+						g = (float)pIn[2] * (1.f/255.f);
+						r = (float)pIn[3] * (1.f/255.f);
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8:
+						b = (float)pIn[0] * (1.f/255.f);
+						g = (float)pIn[1] * (1.f/255.f);
+						r = (float)pIn[2] * (1.f/255.f);
+						a = 1.f;
+						pIn += 3;
+						break;
+					case ImgFmt_B8G8R8:
+						r = (float)pIn[0] * (1.f/255.f);
+						g = (float)pIn[1] * (1.f/255.f);
+						b = (float)pIn[2] * (1.f/255.f);
+						a = 1.f;
+						pIn += 3;
+						break;
+					case ImgFmt_A2R10G10B10:
+					case ImgFmt_A2B10G10R10:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_A16B16G16R16:
+					{
+						const uint16 *pIn16 = (const uint16*)pIn;
+						r = (float)pIn16[0] * (1.f/65535.f);
+						g = (float)pIn16[1] * (1.f/65535.f);
+						b = (float)pIn16[2] * (1.f/65535.f);
+						a = (float)pIn16[3] * (1.f/65535.f);
+						pIn += 8;
+						break;
+					}
+					case ImgFmt_R5G6B5:
+					case ImgFmt_R6G5B5:
+					case ImgFmt_B5G6R5:
+					case ImgFmt_A1R5G5B5:
+					case ImgFmt_R5G5B5A1:
+					case ImgFmt_A1B5G5R5:
+					case ImgFmt_A4R4G4B4:
+					case ImgFmt_A4B4G4R4:
+					case ImgFmt_R4G4B4A4:
+					case ImgFmt_ABGR_F16:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_ABGR_F32:
+					{
+						const float *pInF = (const float*)pIn;
+						r = pInF[0];
+						g = pInF[1];
+						b = pInF[2];
+						a = pInF[3];
+						pIn += 16;
+						break;
+					}
+					case ImgFmt_R11G11B10_F:
+					case ImgFmt_R9G9B9_E5:
+						MFDebug_Assert(false, "Not done!");
+						break;
+				}
+				switch(outputFormat)
+				{
+					case ImgFmt_ABGR_F16:
+					{
+						MFDebug_Assert(false, "This is wrong!");
+						uint16 *pOut16 = (uint16*)pOut;
+						uint32 c = (uint32&)r;
+						pOut16[0] = (uint16)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13);
+						c = (uint32&)g;
+						pOut16[1] = (uint16)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13);
+						c = (uint32&)b;
+						pOut16[2] = (uint16)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13);
+						c = (uint32&)a;
+						pOut16[3] = (uint16)((c & 0xFC000000) >> 16 | (c & 0x007FE000) >> 13);
+						pOut += 8;
+						break;
+					}
+					case ImgFmt_ABGR_F32:
+					{
+						float *pOutF = (float*)pOut;
+						pOutF[0] = r;
+						pOutF[1] = g;
+						pOutF[2] = b;
+						pOutF[3] = a;
+						pOut += 16;
+						break;
+					}
+					case ImgFmt_R11G11B10_F:
+					case ImgFmt_R9G9B9_E5:
+						MFDebug_Assert(false, "Not done!");
+						break;
+				}
+			}
+		}
+	}
+	else if(outputFormat >= ImgFmt_A2R10G10B10 && outputFormat <= ImgFmt_A16B16G16R16)
+	{
+		// higher fidelity
+		uint16 r=0, g=0, b=0, a=0;
+		for(uint32 y=0; y<height; ++y)
+		{
+			for(uint32 x=0; x<width; ++x)
+			{
+				switch(inputFormat)
+				{
+					case ImgFmt_A8R8G8B8:
+						b = pIn[0]; b |= b << 8;
+						g = pIn[1]; g |= g << 8;
+						r = pIn[2]; r |= r << 8;
+						a = pIn[3]; a |= a << 8;
+						pIn += 4;
+						break;
+					case ImgFmt_A8B8G8R8:
+						r = pIn[0]; r |= r << 8;
+						g = pIn[1]; g |= g << 8;
+						b = pIn[2]; b |= b << 8;
+						a = pIn[3]; a |= a << 8;
+						pIn += 4;
+						break;
+					case ImgFmt_B8G8R8A8:
+						a = pIn[0]; a |= a << 8;
+						r = pIn[1]; r |= r << 8;
+						g = pIn[2]; g |= g << 8;
+						b = pIn[3]; b |= b << 8;
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8A8:
+						a = pIn[0]; a |= a << 8;
+						b = pIn[1]; b |= b << 8;
+						g = pIn[2]; g |= g << 8;
+						r = pIn[3]; r |= r << 8;
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8:
+						b = pIn[0]; b |= b << 8;
+						g = pIn[1]; g |= g << 8;
+						r = pIn[2]; r |= r << 8;
+						a = 0xFFFF;
+						pIn += 3;
+						break;
+					case ImgFmt_B8G8R8:
+						r = pIn[0]; r |= r << 8;
+						g = pIn[1]; g |= g << 8;
+						b = pIn[2]; b |= b << 8;
+						a = 0xFFFF;
+						pIn += 3;
+						break;
+					case ImgFmt_A2R10G10B10:
+					case ImgFmt_A2B10G10R10:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_A16B16G16R16:
+					{
+						const uint16 *pIn16 = (const uint16*)pIn;
+						r = pIn16[0];
+						g = pIn16[1];
+						b = pIn16[2];
+						a = pIn16[3];
+						pIn += 8;
+						break;
+					}
+					case ImgFmt_R5G6B5:
+					case ImgFmt_R6G5B5:
+					case ImgFmt_B5G6R5:
+					case ImgFmt_A1R5G5B5:
+					case ImgFmt_R5G5B5A1:
+					case ImgFmt_A1B5G5R5:
+					case ImgFmt_A4R4G4B4:
+					case ImgFmt_A4B4G4R4:
+					case ImgFmt_R4G4B4A4:
+					case ImgFmt_ABGR_F16:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_ABGR_F32:
+					{
+						const float *pInF = (const float*)pIn;
+						r = (uint16)(pInF[0] * 65535.f);
+						g = (uint16)(pInF[1] * 65535.f);
+						b = (uint16)(pInF[2] * 65535.f);
+						a = (uint16)(pInF[3] * 65535.f);
+						pIn += 16;
+						break;
+					}
+					case ImgFmt_R11G11B10_F:
+					case ImgFmt_R9G9B9_E5:
+						MFDebug_Assert(false, "Not done!");
+						break;
+				}
+				switch(outputFormat)
+				{
+					case ImgFmt_A2R10G10B10:
+					{
+						*(uint32*)pOut = ((uint32)(a & 0xC000) << 16) |
+										 ((uint32)(r & 0xFFC0) << 14) |
+										 ((uint32)(g & 0xFFC0) << 4) |
+										 ((uint32)(b & 0xFFC0) >> 6);
+						pOut += 4;
+						break;
+					}
+					case ImgFmt_A2B10G10R10:
+					{
+						*(uint32*)pOut = ((uint32)(a & 0xC000) << 16) |
+										 ((uint32)(b & 0xFFC0) << 14) |
+										 ((uint32)(g & 0xFFC0) << 4) |
+										 ((uint32)(r & 0xFFC0) >> 6);
+						pOut += 4;
+						break;
+					}
+					case ImgFmt_A16B16G16R16:
+					{
+						uint16 *pOut16 = (uint16*)pOut;
+						pOut16[0] = r;
+						pOut16[1] = g;
+						pOut16[2] = b;
+						pOut16[3] = a;
+						pOut += 8;
+						break;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		uint8 r=0, g=0, b=0, a=0;
+		for(uint32 y=0; y<height; ++y)
+		{
+			for(uint32 x=0; x<width; ++x)
+			{
+				switch(inputFormat)
+				{
+					case ImgFmt_A8R8G8B8:
+						b = pIn[0];
+						g = pIn[1];
+						r = pIn[2];
+						a = pIn[3];
+						pIn += 4;
+						break;
+					case ImgFmt_A8B8G8R8:
+						r = pIn[0];
+						g = pIn[1];
+						b = pIn[2];
+						a = pIn[3];
+						pIn += 4;
+						break;
+					case ImgFmt_B8G8R8A8:
+						a = pIn[0];
+						r = pIn[1];
+						g = pIn[2];
+						b = pIn[3];
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8A8:
+						a = pIn[0];
+						b = pIn[1];
+						g = pIn[2];
+						r = pIn[3];
+						pIn += 4;
+						break;
+					case ImgFmt_R8G8B8:
+						b = pIn[0];
+						g = pIn[1];
+						r = pIn[2];
+						a = 0xFF;
+						pIn += 3;
+						break;
+					case ImgFmt_B8G8R8:
+						r = pIn[0];
+						g = pIn[1];
+						b = pIn[2];
+						a = 0xFF;
+						pIn += 3;
+						break;
+					case ImgFmt_A2R10G10B10:
+					case ImgFmt_A2B10G10R10:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_A16B16G16R16:
+					{
+						const uint16 *pIn16 = (const uint16*)pIn;
+						r = (uint8)(pIn16[0] >> 8);
+						g = (uint8)(pIn16[1] >> 8);
+						b = (uint8)(pIn16[2] >> 8);
+						a = (uint8)(pIn16[3] >> 8);
+						pIn += 8;
+						break;
+					}
+					case ImgFmt_R5G6B5:
+					case ImgFmt_R6G5B5:
+					case ImgFmt_B5G6R5:
+					case ImgFmt_A1R5G5B5:
+					case ImgFmt_R5G5B5A1:
+					case ImgFmt_A1B5G5R5:
+					case ImgFmt_A4R4G4B4:
+					case ImgFmt_A4B4G4R4:
+					case ImgFmt_R4G4B4A4:
+					case ImgFmt_ABGR_F16:
+						MFDebug_Assert(false, "Not done!");
+						break;
+					case ImgFmt_ABGR_F32:
+					{
+						const float *pInF = (const float*)pIn;
+						r = (uint8)(pInF[0] * 255.f);
+						g = (uint8)(pInF[1] * 255.f);
+						b = (uint8)(pInF[2] * 255.f);
+						a = (uint8)(pInF[3] * 255.f);
+						pIn += 16;
+						break;
+					}
+					case ImgFmt_R11G11B10_F:
+					case ImgFmt_R9G9B9_E5:
+						MFDebug_Assert(false, "Not done!");
+						break;
+				}
+				switch(outputFormat)
+				{
+					case ImgFmt_A8R8G8B8:
+						pOut[0] = b;
+						pOut[1] = g;
+						pOut[2] = r;
+						pOut[3] = a;
+						pOut += 4;
+						break;
+					case ImgFmt_A8B8G8R8:
+						pOut[0] = r;
+						pOut[1] = g;
+						pOut[2] = b;
+						pOut[3] = a;
+						pOut += 4;
+						break;
+					case ImgFmt_B8G8R8A8:
+						pOut[0] = a;
+						pOut[1] = r;
+						pOut[2] = g;
+						pOut[3] = b;
+						pOut += 4;
+						break;
+					case ImgFmt_R8G8B8A8:
+						pOut[0] = a;
+						pOut[1] = b;
+						pOut[2] = g;
+						pOut[3] = r;
+						pOut += 4;
+						break;
+					case ImgFmt_R8G8B8:
+						pOut[0] = b;
+						pOut[1] = g;
+						pOut[2] = r;
+						pOut += 3;
+						break;
+					case ImgFmt_B8G8R8:
+						pOut[0] = r;
+						pOut[1] = g;
+						pOut[2] = b;
+						pOut += 3;
+						break;
+					case ImgFmt_R5G6B5:
+					{
+						*(uint16*)pOut = ((uint16)(r & 0xF8) << 8) |
+										 ((uint16)(g & 0xFC) << 3) |
+										 ((uint16)(b & 0xF8) >> 3);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_R6G5B5:
+					{
+						*(uint16*)pOut = ((uint16)(r & 0xFC) << 8) |
+										 ((uint16)(g & 0xF8) << 2) |
+										 ((uint16)(b & 0xF8) >> 3);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_B5G6R5:
+					{
+						*(uint16*)pOut = ((uint16)(b & 0xF8) << 8) |
+										 ((uint16)(g & 0xFC) << 3) |
+										 ((uint16)(r & 0xF8) >> 3);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_A1R5G5B5:
+					{
+						*(uint16*)pOut = ((uint16)(a & 0x80) << 8) |
+										 ((uint16)(r & 0xF8) << 7) |
+										 ((uint16)(g & 0xF8) << 2) |
+										 ((uint16)(b & 0xF8) >> 3);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_R5G5B5A1:
+					{
+						*(uint16*)pOut = ((uint16)(r & 0xF8) << 8) |
+										 ((uint16)(g & 0xF8) << 3) |
+										 ((uint16)(b & 0xF8) >> 2) |
+										 ((uint16)(a & 0x80) >> 7);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_A1B5G5R5:
+					{
+						*(uint16*)pOut = ((uint16)(a & 0x80) << 8) |
+										 ((uint16)(b & 0xF8) << 7) |
+										 ((uint16)(g & 0xF8) << 2) |
+										 ((uint16)(r & 0xF8) >> 3);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_A4R4G4B4:
+					{
+						*(uint16*)pOut = ((uint16)(a & 0xF0) << 8) |
+										 ((uint16)(r & 0xF0) << 4) |
+										 ((uint16)(g & 0xF0)) |
+										 ((uint16)(b & 0xF0) >> 4);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_A4B4G4R4:
+					{
+						*(uint16*)pOut = ((uint16)(a & 0xF0) << 8) |
+										 ((uint16)(b & 0xF0) << 4) |
+										 ((uint16)(g & 0xF0)) |
+										 ((uint16)(r & 0xF0) >> 4);
+						pOut += 2;
+						break;
+					}
+					case ImgFmt_R4G4B4A4:
+					{
+						*(uint16*)pOut = ((uint16)(r & 0xF0) << 8) |
+										 ((uint16)(g & 0xF0) << 4) |
+										 ((uint16)(b & 0xF0)) |
+										 ((uint16)(a & 0xF0) >> 4);
+						pOut += 2;
+						break;
+					}
+				}
+			}
+		}
+	}
 }
 
 
