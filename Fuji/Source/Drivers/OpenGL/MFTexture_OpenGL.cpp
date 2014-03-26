@@ -45,10 +45,11 @@ GLFormat gGLFormats[ImgFmt_Max] =
 	{ 0, 0, 0 },																// ImgFmt_R8G8B8
 	{ 0, 0, 0 },																// ImgFmt_B8G8R8
 
-	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// ImgFmt_A2R10G10B10
-	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// ImgFmt_A2B10G10R10
+	{ 0, 0, 0 },																// ImgFmt_G8R8
 
-	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_A16B16G16R16
+	{ 0, 0, 0 },																// ImgFmt_L8
+	{ 0, 0, 0 },																// ImgFmt_A8
+	{ 0, 0, 0 },																// ImgFmt_A8L8
 
 	{ GL_RGB5, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
 	{ 0, 0, 0 },																// ImgFmt_R6G5B5
@@ -62,14 +63,32 @@ GLFormat gGLFormats[ImgFmt_Max] =
 	{ GL_RGBA4, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_A4B4G4R4
 	{ GL_RGBA4, GL_ABGR_EXT, GL_UNSIGNED_SHORT_4_4_4_4 },						// ImgFmt_R4G4B4A4
 
+	{ GL_RGBA16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_A16B16G16R16
+
+	{ GL_RG16, GL_RGBA, GL_UNSIGNED_SHORT },									// ImgFmt_G16R16
+
+	{ 0, 0, 0 },																// ImgFmt_L16
+	{ 0, 0, 0 },																// ImgFmt_A16
+	{ 0, 0, 0 },																// ImgFmt_A16L16
+
+	{ GL_RGB10_A2, GL_BGRA_EXT, GL_UNSIGNED_INT_2_10_10_10_REV },				// ImgFmt_A2R10G10B10
+	{ GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV },					// ImgFmt_A2B10G10R10
+
+	{ 0, 0, 0 },																// ImgFmt_R10G11B11
+	{ 0, 0, 0 },																// ImgFmt_R11G11B10
+
 	{ GL_RGBA16F_ARB, GL_RGBA, GL_HALF_FLOAT_ARB },								// ImgFmt_ABGR_F16
 	{ GL_RGBA32F_ARB, GL_RGBA, GL_FLOAT },										// ImgFmt_ABGR_F32
+	{ GL_RG16F, GL_RGBA, GL_HALF_FLOAT_ARB },									// ImgFmt_GR_F16
+	{ GL_RG32F, GL_RGBA, GL_FLOAT },											// ImgFmt_GR_F32
+	{ GL_R16F, GL_RGBA, GL_HALF_FLOAT_ARB },									// ImgFmt_R_F16
+	{ GL_R32F, GL_RGBA, GL_FLOAT },												// ImgFmt_R_F32
 
 	{ GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV },				// ImgFmt_R11G11B10_F
 	{ GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV },						// ImgFmt_R9G9B9_E5
 
-	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_I8
-	{ 0, 0, 0 },																// ImgFmt_I4
+	{ GL_COLOR_INDEX8_EXT, GL_COLOR_INDEX, GL_UNSIGNED_BYTE },					// ImgFmt_P8
+	{ 0, 0, 0 },																// ImgFmt_P4
 
 	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
 	{ GL_DEPTH_COMPONENT24, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8 },			// ImgFmt_D24X8
@@ -86,36 +105,38 @@ GLFormat gGLFormats[ImgFmt_Max] =
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
 	{ 0, 0, 0 },																// ImgFmt_DXT4
 	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 },	// ImgFmt_DXT5
+	{ 0, 0, 0 },																// ImgFmt_ATI1
+	{ GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI, GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI, 0 },			// ImgFmt_ATI2
+	{ GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB, GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB, 0 },	// ImgFmt_BPTC_F
+	{ GL_COMPRESSED_RGBA_BPTC_UNORM_ARB, GL_COMPRESSED_RGBA_BPTC_UNORM_ARB, 0 },					// ImgFmt_BPTC
+//		COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB
+//		COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB
+	{ 0, 0, 0 },																// ImgFmt_CTX1
+	{ 0, 0, 0 },	// ETC1_RGB8_OES											// ImgFmt_ETC1
+	{ 0, 0, 0 },	// COMPRESSED_RGB8_ETC2										// ImgFmt_ETC2
+//		COMPRESSED_SRGB8_ETC2
+//		COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+//		COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+	{ 0, 0, 0 },	// COMPRESSED_R11_EAC										// ImgFmt_EAC
+//		COMPRESSED_SIGNED_R11_EAC
+	{ 0, 0, 0 },	// COMPRESSED_RGBA8_ETC2_EAC								// ImgFmt_ETC2_EAC
+//		COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+	{ 0, 0, 0 },	// COMPRESSED_RG11_EAC										// ImgFmt_EACx2
+//		COMPRESSED_SIGNED_RG11_EAC
+	{ 0, 0, 0 },	// COMPRESSED_RGB_PVRTC_2BPPV1_IMG							// ImgFmt_PVRTC_RGB_2bpp
+	{ 0, 0, 0 },	// COMPRESSED_RGB_PVRTC_4BPPV1_IMG							// ImgFmt_PVRTC_RGB_4bpp
+	{ 0, 0, 0 },	// COMPRESSED_RGBA_PVRTC_2BPPV1_IMG							// ImgFmt_PVRTC_RGBA_2bpp
+	{ 0, 0, 0 },	// COMPRESSED_RGBA_PVRTC_4BPPV1_IMG							// ImgFmt_PVRTC_RGBA_4bpp
+	{ 0, 0, 0 },	// COMPRESSED_RGBA_PVRTC_2BPPV2_IMG							// ImgFmt_PVRTC2_2bpp
+	{ 0, 0, 0 },	// COMPRESSED_RGBA_PVRTC_4BPPV2_IMG							// ImgFmt_PVRTC2_4bpp
+	{ 0, 0, 0 },	// ATC_RGB_AMD												// ImgFmt_ATCRGB
+	{ 0, 0, 0 },	// ATC_RGBA_EXPLICIT_ALPHA_AMD								// ImgFmt_ATCRGBA_EXPLICIT
+	{ 0, 0, 0 },	// ATC_RGBA_INTERPOLATED_ALPHA_AMD							// ImgFmt_ATCRGBA
+	{ 0, 0, 0 },	// TODO: there are lots of these...							// ImgFmt_ASTC
 
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A8R8G8B8
-	{ 0, 0, 0 },																// ImgFmt_XB_A8B8G8R8
-	{ 0, 0, 0 },																// ImgFmt_XB_B8G8R8A8
-	{ 0, 0, 0 },																// ImgFmt_XB_R8G8B8A8
-
-	{ 0, 0, 0 },																// ImgFmt_XB_R5G6B5
-	{ 0, 0, 0 },																// ImgFmt_XB_R6G5B5
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A1R5G5B5
-	{ 0, 0, 0 },																// ImgFmt_XB_R5G5B5A1
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A4R4G4B4
-	{ 0, 0, 0 },																// ImgFmt_XB_R4G4B4A4
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_A8B8G8R8s
-	{ 0, 0, 0 },																// ImgFmt_PSP_B5G6R5s
-	{ 0, 0, 0 },																// ImgFmt_PSP_A1B5G5R5s
-	{ 0, 0, 0 },																// ImgFmt_PSP_A4B4G4R4s
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_I8s
-	{ 0, 0, 0 },																// ImgFmt_PSP_I4s
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1s
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3s
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5s
 };
 #else
 GLFormat gGLFormats[] =
@@ -128,10 +149,11 @@ GLFormat gGLFormats[] =
 	{ 0, 0, 0 },																// ImgFmt_R8G8B8
 	{ 0, 0, 0 },																// ImgFmt_B8G8R8
 
-	{ 0, GL_BGRA, 0 },															// ImgFmt_A2R10G10B10   **
-	{ 0, GL_RGBA, 0 },															// ImgFmt_A2B10G10R10   **
+	{ 0, 0, 0 },																// ImgFmt_G8R8
 
-	{ 0, GL_RGBA, 0 },															// ImgFmt_A16B16G16R16  **
+	{ 0, 0, 0 },																// ImgFmt_L8
+	{ 0, 0, 0 },																// ImgFmt_A8
+	{ 0, 0, 0 },																// ImgFmt_A8L8
 
 	{ GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5 },								// ImgFmt_R5G6B5
 	{ 0, 0, 0 },																// ImgFmt_R6G5B5
@@ -145,14 +167,32 @@ GLFormat gGLFormats[] =
 	{ GL_RGBA, GL_RGBA, 0 },													// ImgFmt_A4B4G4R4
 	{ GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4 },							// ImgFmt_R4G4B4A4
 
+	{ 0, GL_RGBA, 0 },															// ImgFmt_A16B16G16R16  **
+
+	{ 0, GL_RGBA, 0 },															// ImgFmt_G16R16  **
+
+	{ 0, 0, 0 },																// ImgFmt_L16
+	{ 0, 0, 0 },																// ImgFmt_A16
+	{ 0, 0, 0 },																// ImgFmt_A16L16
+
+	{ 0, GL_BGRA, 0 },															// ImgFmt_A2R10G10B10   **
+	{ 0, GL_RGBA, 0 },															// ImgFmt_A2B10G10R10   **
+
+	{ 0, 0, 0 },																// ImgFmt_R10G11B11
+	{ 0, 0, 0 },																// ImgFmt_R11G11B10
+
 	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F16
 	{ 0, GL_RGBA, 0 },															// ImgFmt_ABGR_F32
+	{ 0, GL_RGBA, 0 },															// ImgFmt_GR_F16
+	{ 0, GL_RGBA, 0 },															// ImgFmt_GR_F32
+	{ 0, GL_RGBA, 0 },															// ImgFmt_R_F16
+	{ 0, GL_RGBA, 0 },															// ImgFmt_R_F32
 
 	{ 0, 0, 0 },// GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV				// ImgFmt_R11G11B10_F
 	{ 0, 0, 0 },// GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV							// ImgFmt_R9G9B9_E5
 
-	{ 0, 0, GL_UNSIGNED_BYTE },													// ImgFmt_I8
-	{ 0, 0, 0 },																// ImgFmt_I4
+	{ 0, 0, GL_UNSIGNED_BYTE },													// ImgFmt_P8
+	{ 0, 0, 0 },																// ImgFmt_P4
 
 	{ GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT },			// ImgFmt_D16
 	{ 0, 0, 0 },																// ImgFmt_D15S1
@@ -168,36 +208,30 @@ GLFormat gGLFormats[] =
 	{ GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0 },	// ImgFmt_DXT3
 	{ 0, 0, 0 },																// ImgFmt_DXT4
 	{ GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 0 },	// ImgFmt_DXT5
+	{ 0, 0, 0 },																// ImgFmt_ATI1
+	{ 0, 0, 0 },																// ImgFmt_ATI2
+	{ 0, 0, 0 },																// ImgFmt_BPTC_F
+	{ 0, 0, 0 },																// ImgFmt_BPTC
+	{ 0, 0, 0 },																// ImgFmt_CTX1
+	{ 0, 0, 0 },																// ImgFmt_ETC1
+	{ 0, 0, 0 },																// ImgFmt_ETC2
+	{ 0, 0, 0 },																// ImgFmt_EAC
+	{ 0, 0, 0 },																// ImgFmt_ETC2_EAC
+	{ 0, 0, 0 },																// ImgFmt_EACx2
+	{ 0, 0, 0 },																// ImgFmt_PVRTC_RGB_2bpp
+	{ 0, 0, 0 },																// ImgFmt_PVRTC_RGB_4bpp
+	{ 0, 0, 0 },																// ImgFmt_PVRTC_RGBA_2bpp
+	{ 0, 0, 0 },																// ImgFmt_PVRTC_RGBA_4bpp
+	{ 0, 0, 0 },																// ImgFmt_PVRTC2_2bpp
+	{ 0, 0, 0 },																// ImgFmt_PVRTC2_4bpp
+	{ 0, 0, 0 },																// ImgFmt_ATCRGB
+	{ 0, 0, 0 },																// ImgFmt_ATCRGBA_EXPLICIT
+	{ 0, 0, 0 },																// ImgFmt_ATCRGBA
+	{ 0, 0, 0 },																// ImgFmt_ASTC
 
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3
 	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A8R8G8B8
-	{ 0, 0, 0 },																// ImgFmt_XB_A8B8G8R8
-	{ 0, 0, 0 },																// ImgFmt_XB_B8G8R8A8
-	{ 0, 0, 0 },																// ImgFmt_XB_R8G8B8A8
-
-	{ 0, 0, 0 },																// ImgFmt_XB_R5G6B5
-	{ 0, 0, 0 },																// ImgFmt_XB_R6G5B5
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A1R5G5B5
-	{ 0, 0, 0 },																// ImgFmt_XB_R5G5B5A1
-
-	{ 0, 0, 0 },																// ImgFmt_XB_A4R4G4B4
-	{ 0, 0, 0 },																// ImgFmt_XB_R4G4B4A4
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_A8B8G8R8s
-	{ 0, 0, 0 },																// ImgFmt_PSP_B5G6R5s
-	{ 0, 0, 0 },																// ImgFmt_PSP_A1B5G5R5s
-	{ 0, 0, 0 },																// ImgFmt_PSP_A4B4G4R4s
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_I8s
-	{ 0, 0, 0 },																// ImgFmt_PSP_I4s
-
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT1s
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT3s
-	{ 0, 0, 0 },																// ImgFmt_PSP_DXT5s
 };
 #endif
 

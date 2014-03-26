@@ -10,6 +10,7 @@ enum MFImageFormat
 {
 	Unknown = -1,		/**< Unknown image format */
 
+	// standard precision formats
 	A8R8G8B8,			/**< 32bit BGRA format */
 	A8B8G8R8,			/**< 32bit RGBA format */
 	B8G8R8A8,			/**< 32bit ARGB format */
@@ -18,11 +19,13 @@ enum MFImageFormat
 	R8G8B8,				/**< 24bit BGR format */
 	B8G8R8,				/**< 24bit RGB format */
 
-	A2R10G10B10,		/**< 32bit BGRA format with 10 bits per colour channel */
-	A2B10G10R10,		/**< 32bit RGBA format with 10 bits per colour channel */
+	G8R8,				/**< 16bit RG format */
 
-	A16B16G16R16,		/**< 64bit RGBA format with 16 bits per colour channel */
+	L8,					/**< 8bit liminance format: RGBA = LLL1 */
+	A8,					/**< 8bit alpha only format: RGBA = 111A */
+	A8L8,				/**< 16bit liminance+alpha format: RGBA = LLLA */
 
+	// low precision formats
 	R5G6B5,				/**< 16bit BGR format with no alpha */
 	R6G5B5,				/**< 16bit BGR format with no alpha and 6 bits for red */
 	B5G6R5,				/**< 16bit RGB format with no alpha */
@@ -35,15 +38,39 @@ enum MFImageFormat
 	A4B4G4R4,			/**< 16bit RGBA format with 4 bits per colour channel */
 	R4G4B4A4,			/**< 16bit ABGR format with 4 bits per colour channel */
 
+	// high precision formats
+	A16B16G16R16,		/**< 64bit RGBA format with 16 bits per colour channel */
+
+	G16R16,				/**< 32bit RG format with 16 bits per colour channel */
+
+	L16,				/**< 16bit liminance format: RGBA = LLL1 */
+	A16,				/**< 16bit alpha only format: RGBA = 111A */
+	A16L16,				/**< 32bit liminance+alpha format with 16 bits per channel: RGBA = LLLA */
+
+	// packed high precision formats
+	A2R10G10B10,		/**< 32bit BGRA format with 10 bits per colour channel */
+	A2B10G10R10,		/**< 32bit RGBA format with 10 bits per colour channel */
+
+	R10G11B11,			/**< 32bit BGR format with 10 bits for red and 11 bits for green and blue */
+	R11G11B10,			/**< 32bit BGR format with 11 bits for red and green and 10 bits for blue */
+
+	// float formats
 	ABGR_F16,			/**< 64bit RGBA floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
 	ABGR_F32,			/**< 128bit RGBA floating point format */
+	GR_F16,				/**< 32bit RG floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
+	GR_F32,				/**< 64bit RG floating point format */
+	R_F16,				/**< 16bit R floating point format - 16bit floats are described as follows, sign1-exp5-mantissa10 - seeeeemmmmmmmmmm */
+	R_F32,				/**< 32bit R floating point format */
 
+	// packed float formats
 	R11G11B10_F,		/**< 32bit RGB floating point format - each component has 5bit exponent, no sign */
 	R9G9B9_E5,			/**< 32bit RGB floating point format with shared exponent, no sign */
 
-	I8,					/**< 8bit paletted format */
-	I4,					/**< 4bit paletted format */
+	// palette formats
+	P8,					/**< 8bit paletted format */
+	P4,					/**< 4bit paletted format */
 
+	// depth/stencil formats
 	D16,				/**< 16bit depth format */
 	D24X8,				/**< 24bit depth format */
 	D32,				/**< 32bit depth format */
@@ -54,59 +81,46 @@ enum MFImageFormat
 	D24FS8,				/**< 24bit floating point depth format with 8bit stencil */
 	D32FS8X24,			/**< 32bit floating point depth format with 8bit stencil */
 
+	// compressed formats
 	DXT1,				/**< Compressed DXT1/BC1 format */
 	DXT2,				/**< Compressed DXT2 format */
 	DXT3,				/**< Compressed DXT3/BC2 format */
 	DXT4,				/**< Compressed DXT4 format */
 	DXT5,				/**< Compressed DXT5/BC3 format */
-//	ATI1,				/**< Compressed 3Dc+/BC4 format */
-//	ATI2,				/**< Compressed 3Dc/DXN/BC5 format */
-//	BPTC_F,				/**< Compressed BPTC_FLOAT/BC6H floating point format */
-//	BPTC,				/**< Compressed BPTC/BC7 format */
-//	CTX1,				/**< Compressed CTX1 format */
-//	ETC1,				/**< Compressed ETC1 format */
-//	ETC2,				/**< Compressed ETC2 format */
-//	EAC,				/**< Compressed EAC format */
-//	PVRTC,				/**< Compressed PVRTC format */
-//	PVRTC2,				/**< Compressed PVRTC2 format */
-//	ATCRGB,				/**< Compressed ATITC RGB format */
-//	ATCRGBA_EXPLICIT,	/**< Compressed ATITC RGBA format with explicit alpha */
-//	ATCRGBA,			/**< Compressed ATITC RGBA format */
-//	ASTC,				/**< Compressed ASTC format */
+	ATI1,				/**< Compressed 3Dc+/BC4 alpha format */
+	ATI2,				/**< Compressed 3Dc/DXN/BC5/LATC/RGTC RG/UV format */
+	BPTC_F,				/**< Compressed BPTC_FLOAT/BC6H HDR floating point RGB format */
+	BPTC,				/**< Compressed BPTC/BC7 RGBA format */
+	CTX1,				/**< Compressed CTX1 RG/UV format */
+	ETC1,				/**< Compressed ETC1 RGB format */
+	ETC2,				/**< Compressed ETC2 RGB format */
+	EAC,				/**< Compressed EAC alpha format */
+	ETC2_EAC,			/**< Compressed ETC2+EAC RGBA format */
+	EACx2,				/**< Compressed EACx2 RG/UV format */
+	PVRTC_RGB_2bpp,		/**< Compressed PVRTC 2bpp RGB format */
+	PVRTC_RGB_4bpp,		/**< Compressed PVRTC 4bpp RGB format */
+	PVRTC_RGBA_2bpp,	/**< Compressed PVRTC 2bpp RGBA format */
+	PVRTC_RGBA_4bpp,	/**< Compressed PVRTC 4bpp RGBA format */
+	PVRTC2_2bpp,		/**< Compressed PVRTC2 2bpp RGBA format */
+	PVRTC2_4bpp,		/**< Compressed PVRTC2 4bpp RGBA format */
+	ATCRGB,				/**< Compressed ATC1/ATITC RGB format */
+	ATCRGBA_EXPLICIT,	/**< Compressed ATC3/ATITC RGBA format with explicit alpha */
+	ATCRGBA,			/**< Compressed ATC5/ATITC RGBA format */
+	ASTC,				/**< Compressed ASTC format */
 
 	PSP_DXT1,			/**< Special DXT1 for PSP */
 	PSP_DXT3,			/**< Special DXT3 for PSP */
 	PSP_DXT5,			/**< Special DXT5 for PSP */
 
-	// platform specific swizzled formats
-	XB_A8R8G8B8s,		/**< 32bit BGRA format, swizzled for XBox */
-	XB_A8B8G8R8s,		/**< 32bit RGBA format, swizzled for XBox */
-	XB_B8G8R8A8s,		/**< 32bit ARGB format, swizzled for XBox */
-	XB_R8G8B8A8s,		/**< 32bit ABGR format, swizzled for XBox */
-
-	XB_R5G6B5s,			/**< 16bit BGR format, swizzled for XBox */
-	XB_R6G5B5s,			/**< 16bit BGR format, swizzled for XBox */
-
-	XB_A1R5G5B5s,		/**< 16bit BGRA format, swizzled for XBox */
-	XB_R5G5B5A1s,		/**< 16bit ABGR format, swizzled for XBox */
-
-	XB_A4R4G4B4s,		/**< 16bit BGRA format, swizzled for XBox */
-	XB_R4G4B4A4s,		/**< 16bit ABGR format, swizzled for XBox */
-
-	PSP_A8B8G8R8s,		/**< 32bit RGBA format, swizzled for PSP */
-	PSP_B5G6R5s,		/**< 16bit RGB format, swizzled for PSP */
-	PSP_A1B5G5R5s,		/**< 16bit RGBA format, swizzled for PSP */
-	PSP_A4B4G4R4s,		/**< 16bit RGBA format, swizzled for PSP */
-
-	PSP_I8s,			/**< 8bit paletted format, swizzled for PSP */
-	PSP_I4s,			/**< 4bit paletted format, swizzled for PSP */
-
-	PSP_DXT1s,			/**< DXT1, swizzled for PSP */
-	PSP_DXT3s,			/**< DXT3, swizzled for PSP */
-	PSP_DXT5s,			/**< DXT5, swizzled for PSP */
-
 	Max,				/**< Max image format */
 
+	// format flags
+	Signed = 0x100,		/**< Components are signed. */
+	Integer = 0x200,	/**< Components are non-normalised integers. */
+	Linear = 0x400,		/**< Image uses linear colour space. (sRGB is the assumed default) */
+	Swizzle = 0x800,	/**< Image is swizzled. (for some target platform given when swizzling) */
+
+	// auto-select formats
 	SelectDefault = 0x1000,			/**< Select the default format. It will be a format that performs well without sacrificing quality, and contains alpha. */
 	SelectNicest = 0x1001,			/**< Select the nicest format. */
 	SelectFastest = 0x1002,			/**< Select the fastest format. */
@@ -119,6 +133,12 @@ enum MFImageFormat
 	SelectDepth = 0x1020,			/**< Select a format that can be used as a depth target. */
 	SelectDepthStencil = 0x1030,	/**< Select a format that can be used as a depth and stencil target. */
 }
+
+enum MFImageFormat_Signed(MFImageFormat format) = format | MFImageFormat.Signed;
+enum MFImageFormat_Integer(MFImageFormat format) = format | MFImageFormat.Integer;
+enum MFImageFormat_SignedInteger(MFImageFormat format) = format | MFImageFormat.Signed | MFImageFormat.Integer;
+enum MFImageFormat_Linear(MFImageFormat format) = format | MFImageFormat.Linear;
+enum MFImageFormat_Swizzle(MFImageFormat format) = format | MFImageFormat.Swizzle;
 
 /**
 * Scaling algorithm.
@@ -160,7 +180,35 @@ struct MFScaleImage
 }
 
 
-extern (C) void MFImage_Scale(MFScaleImage *pScaleData);
+/**
+* Convert between image formats.
+* Converts an image from one format to another.
+* @param width Image width.
+* @param height Image height.
+* @param pInput Pointer to the source image.
+* @param inputFormat Format of source image.
+* @param pOutput Pointer to a buffer that receives the converted image.
+* @param outputFormat Format to convert inage to.
+* @return None.
+*/
+extern (C) void MFImage_Convert(uint width, uint height, const(void)* pInput, MFImageFormat inputFormat, void* pOutput, MFImageFormat outputFormat);
+
+void MFImage_Convert(uint width, uint height, const(void[]) input, MFImageFormat inputFormat, void[] output, MFImageFormat outputFormat)
+{
+	// Note: Should we assert that the sizes MATCH, rather than just check that they are sufficient?
+	assert((width*height*MFImage_GetBitsPerPixel(inputFormat))/8 <= input.length, "Not enough data in input buffer!");
+	assert((width*height*MFImage_GetBitsPerPixel(outputFormat))/8 <= output.length, "Output buffer is too small!");
+
+	MFImage_Convert(width, height, input.ptr, inputFormat, output.ptr, outputFormat);
+}
+
+/**
+* Scale an image using a non-trivial scaling algorithm.
+* Scales an image using a non-trivial scaling algorithm.
+* @param pScaleData An MFScaleImage struct to describe the scale operation.
+* @return None.
+*/
+extern (C) void MFImage_Scale(MFScaleImage* pScaleData);
 
 /**
 * Get a string representing the texture format.
@@ -198,3 +246,30 @@ extern (C) bool MFImage_IsAvailableOnPlatform(int format, int platform);
 * @see MFTexture_GetPlatformAvailability(), MFImage_GetFormatString()
 */
 extern (C) int MFImage_GetBitsPerPixel(int format);
+
+
+float MFImage_sRGBToLinear(float s)
+{
+	if(s <= 0.04045f)
+		return s / 12.92f;
+	else
+		return ((s + 0.055f) / 1.055f)^^2.4f;
+}
+
+float MFImage_LinearTosRGB(float s)
+{
+	if(s <= 0.0031308f)
+		return 12.92f * s;
+	else
+		return 1.055f * s^^(1.0f/2.4f) - 0.055f;
+}
+
+float MFImage_GammaToLinear(float s)
+{
+	return s^^2.2f;
+}
+
+float MFImage_LinearToGamma(float s)
+{
+	return s^^(1.0f/2.2f);
+}

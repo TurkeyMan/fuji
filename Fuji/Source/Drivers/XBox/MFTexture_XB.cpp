@@ -31,10 +31,11 @@ uint8 gXBoxFormat[ImgFmt_Max] =
 	0,		// ImgFmt_R8G8B8
 	0,		// ImgFmt_B8G8R8
 
-	0,		// ImgFmt_A2R10G10B10
-	0,		// ImgFmt_A2B10G10R10
+	0,		// ImgFmt_G8R8
 
-	0,		// ImgFmt_A16B16G16R16
+	0,		// ImgFmt_L8
+	0,		// ImgFmt_A8
+	0,		// ImgFmt_A8L8
 
 	0x11,	// ImgFmt_R5G6B5
 	0x37,	// ImgFmt_R6G5B5
@@ -48,14 +49,32 @@ uint8 gXBoxFormat[ImgFmt_Max] =
 	0,		// ImgFmt_A4B4G4R4
 	0x3E,	// ImgFmt_R4G4B4A4
 
+	0,		// ImgFmt_A16B16G16R16
+
+	0,		// ImgFmt_G16R16
+
+	0,		// ImgFmt_L16
+	0,		// ImgFmt_A16
+	0,		// ImgFmt_A16L16
+
+	0,		// ImgFmt_A2R10G10B10
+	0,		// ImgFmt_A2B10G10R10
+
+	0,		// ImgFmt_R10G11B11
+	0,		// ImgFmt_R11G11B10
+
 	0,		// ImgFmt_ABGR_F16
 	0,		// ImgFmt_ABGR_F32
+	0,		// ImgFmt_GR_F16
+	0,		// ImgFmt_GR_F32
+	0,		// ImgFmt_R_F16
+	0,		// ImgFmt_R_F32
 
 	0,		// ImgFmt_R11G11B10_F
 	0,		// ImgFmt_R9G9B9_E5
 
-	0xB,	// ImgFmt_I8
-	0,		// ImgFmt_I4
+	0xB,	// ImgFmt_P8
+	0,		// ImgFmt_P4
 
 	0,		// ImgFmt_D16
 	0,		// ImgFmt_D24X8
@@ -72,6 +91,26 @@ uint8 gXBoxFormat[ImgFmt_Max] =
 	0xE,	// ImgFmt_DXT3
 	0xF,	// ImgFmt_DXT4
 	0xF,	// ImgFmt_DXT5
+	0,		// ImgFmt_ATI1
+	0,		// ImgFmt_ATI2
+	0,		// ImgFmt_BPTC_F
+	0,		// ImgFmt_BPTC
+	0,		// ImgFmt_CTX1
+	0,		// ImgFmt_ETC1
+	0,		// ImgFmt_ETC2
+	0,		// ImgFmt_EAC
+	0,		// ImgFmt_ETC2_EAC
+	0,		// ImgFmt_EACx2
+	0,		// ImgFmt_PVRTC_RGB_2bpp
+	0,		// ImgFmt_PVRTC_RGB_4bpp
+	0,		// ImgFmt_PVRTC_RGBA_2bpp
+	0,		// ImgFmt_PVRTC_RGBA_4bpp
+	0,		// ImgFmt_PVRTC2_2bpp
+	0,		// ImgFmt_PVRTC2_4bpp
+	0,		// ImgFmt_ATCRGB
+	0,		// ImgFmt_ATCRGBA_EXPLICIT
+	0,		// ImgFmt_ATCRGBA
+	0,		// ImgFmt_ASTC
 
 	0,		// ImgFmt_PSP_DXT1
 	0,		// ImgFmt_PSP_DXT3

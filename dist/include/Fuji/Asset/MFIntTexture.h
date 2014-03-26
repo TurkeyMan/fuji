@@ -35,14 +35,15 @@ struct MFIntTexturePixel
 
 struct MFIntTextureSurface
 {
-	int width, height;
+	int width, height, depth;
 	MFIntTexturePixel *pData;
 };
 
 struct MFIntTexture
 {
-	MFIntTextureSurface *pSurfaces;
+	MFIntTextureSurface *pSurfaces; // surface = surface*numMips + mip
 	int numSurfaces;
+	int numMips;
 
 	bool opaque;
 	bool oneBitAlpha;

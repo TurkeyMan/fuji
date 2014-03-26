@@ -393,11 +393,13 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
 	pImage->numSurfaces = 1;
+	pImage->numMips = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*width*height);
 	pImage->pSurfaces[0].width = width;
 	pImage->pSurfaces[0].height = height;
+	pImage->pSurfaces[0].depth = 1;
 
 	MFIntTexturePixel *pPixel = pImage->pSurfaces[0].pData;
 
@@ -408,33 +410,13 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 			{
 				if(bit_depth == 8)
 				{
-					uint8 *p = row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)*p * (1.0f/255.0f);
-						pPixel->g = (float)*p * (1.0f/255.0f);
-						pPixel->b = (float)*p * (1.0f/255.0f);
-						pPixel->a = 1.0f;
-
-						++p;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_L8, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else if(bit_depth == 16)
 				{
-					uint16 *p = (uint16*)row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)*p * (1.0f/65535.0f);
-						pPixel->g = (float)*p * (1.0f/65535.0f);
-						pPixel->b = (float)*p * (1.0f/65535.0f);
-						pPixel->a = 1.0f;
-
-						++p;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_L16, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else
 				{
@@ -497,33 +479,13 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 			{
 				if(bit_depth == 8)
 				{
-					uint8 *p = row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)p[0] * (1.0f/255.0f);
-						pPixel->g = (float)p[0] * (1.0f/255.0f);
-						pPixel->b = (float)p[0] * (1.0f/255.0f);
-						pPixel->a = (float)p[1] * (1.0f/255.0f);
-
-						p += 2;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_A8L8, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else if(bit_depth == 16)
 				{
-					uint16 *p = (uint16*)row_pointers[y];
-
-					for(int x=0; x<width; ++x)
-					{
-						pPixel->r = (float)p[0] * (1.0f/65535.0f);
-						pPixel->g = (float)p[0] * (1.0f/65535.0f);
-						pPixel->b = (float)p[0] * (1.0f/65535.0f);
-						pPixel->a = (float)p[1] * (1.0f/65535.0f);
-
-						p += 2;
-						++pPixel;
-					}
+					MFImage_Convert(width, 1, row_pointers[y], ImgFmt_A16L16, pPixel, ImgFmt_ABGR_F32);
+					pPixel += width;
 				}
 				else
 				{
@@ -553,11 +515,13 @@ MFIntTexture* LoadTGA(const void *pMemory, size_t imageSize)
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
 	pImage->numSurfaces = 1;
+	pImage->numMips = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*pHeader->width*pHeader->height);
 	pImage->pSurfaces[0].width = pHeader->width;
 	pImage->pSurfaces[0].height = pHeader->height;
+	pImage->pSurfaces[0].depth = 1;
 
 	MFIntTexturePixel *pPixel = pImage->pSurfaces[0].pData;
 
@@ -764,11 +728,13 @@ MFIntTexture* LoadBMP(const void *pMemory, size_t imageSize)
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
 	pImage->numSurfaces = 1;
+	pImage->numMips = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*pInfoHeader->width*pInfoHeader->height);
 	pImage->pSurfaces[0].width = pInfoHeader->width;
 	pImage->pSurfaces[0].height = pInfoHeader->height;
+	pImage->pSurfaces[0].depth = 1;
 
 	MFIntTexturePixel *pPixel = pImage->pSurfaces[0].pData;
 
@@ -911,59 +877,60 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 			case DXGI_FORMAT_BC1_UNORM:				ddsFormat = ImgFmt_DXT1; break;
 			case DXGI_FORMAT_BC2_UNORM:				ddsFormat = ImgFmt_DXT3; break;
 			case DXGI_FORMAT_BC3_UNORM:				ddsFormat = ImgFmt_DXT5; break;
-//			case DXGI_FORMAT_BC4_UNORM:				ddsFormat = ImgFmt_ATI1; break;
-//			case DXGI_FORMAT_BC5_UNORM:				ddsFormat = ImgFmt_ATI2; break;
-//			case DXGI_FORMAT_BC6H_SF16:				ddsFormat = ImgFmt_BPTC_F; break;
-//			case DXGI_FORMAT_BC7_UNORM:				ddsFormat = ImgFmt_BPTC; break;
+			case DXGI_FORMAT_BC4_UNORM:				ddsFormat = ImgFmt_ATI1; break;
+			case DXGI_FORMAT_BC4_SNORM:				ddsFormat = ImgFmt_Signed(ImgFmt_ATI1); break;
+			case DXGI_FORMAT_BC5_UNORM:				ddsFormat = ImgFmt_ATI2; break;
+			case DXGI_FORMAT_BC5_SNORM:				ddsFormat = ImgFmt_Signed(ImgFmt_ATI2); break;
+			case DXGI_FORMAT_BC6H_UF16:				ddsFormat = ImgFmt_BPTC_F; break;
+			case DXGI_FORMAT_BC6H_SF16:				ddsFormat = ImgFmt_Signed(ImgFmt_BPTC_F); break;
+			case DXGI_FORMAT_BC7_UNORM:				ddsFormat = ImgFmt_BPTC; break;
 			case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:	ddsFormat = ImgFmt_D32FS8X24; break;
 			case DXGI_FORMAT_D32_FLOAT:				ddsFormat = ImgFmt_D32F; break;
 			case DXGI_FORMAT_D24_UNORM_S8_UINT:		ddsFormat = ImgFmt_D24S8; break;
 			case DXGI_FORMAT_D16_UNORM:				ddsFormat = ImgFmt_D16; break;
+			case DXGI_FORMAT_R16G16B16A16_UINT:		ddsFormat = ImgFmt_Integer(ImgFmt_A16B16G16R16); break;
+			case DXGI_FORMAT_R16G16B16A16_SNORM:	ddsFormat = ImgFmt_Signed(ImgFmt_A16B16G16R16); break;
+			case DXGI_FORMAT_R16G16B16A16_SINT:		ddsFormat = ImgFmt_SignedInteger(ImgFmt_A16B16G16R16); break;
+			case DXGI_FORMAT_R32G32_FLOAT:			ddsFormat = ImgFmt_GR_F32; break;
+			case DXGI_FORMAT_R10G10B10A2_UINT:		ddsFormat = ImgFmt_Integer(ImgFmt_A2B10G10R10); break;
+			case DXGI_FORMAT_R8G8B8A8_UINT:			ddsFormat = ImgFmt_Integer(ImgFmt_A8B8G8R8); break;
+			case DXGI_FORMAT_R8G8B8A8_SNORM:		ddsFormat = ImgFmt_Signed(ImgFmt_A8B8G8R8); break;
+			case DXGI_FORMAT_R8G8B8A8_SINT:			ddsFormat = ImgFmt_SignedInteger(ImgFmt_A8B8G8R8); break;
+			case DXGI_FORMAT_R16G16_FLOAT:			ddsFormat = ImgFmt_GR_F16; break;
+			case DXGI_FORMAT_R16G16_UNORM:			ddsFormat = ImgFmt_G16R16; break;
+			case DXGI_FORMAT_R16G16_UINT:			ddsFormat = ImgFmt_Integer(ImgFmt_G16R16); break;
+			case DXGI_FORMAT_R16G16_SNORM:			ddsFormat = ImgFmt_Signed(ImgFmt_G16R16); break;
+			case DXGI_FORMAT_R16G16_SINT:			ddsFormat = ImgFmt_SignedInteger(ImgFmt_G16R16); break;
+			case DXGI_FORMAT_R32_FLOAT:				ddsFormat = ImgFmt_R_F32; break;
+			case DXGI_FORMAT_R8G8_UNORM:			ddsFormat = ImgFmt_G8R8; break;
+			case DXGI_FORMAT_R8G8_UINT:				ddsFormat = ImgFmt_Integer(ImgFmt_G8R8); break;
+			case DXGI_FORMAT_R8G8_SNORM:			ddsFormat = ImgFmt_Signed(ImgFmt_G8R8); break;
+			case DXGI_FORMAT_R8G8_SINT:				ddsFormat = ImgFmt_SignedInteger(ImgFmt_G8R8); break;
+			case DXGI_FORMAT_R16_FLOAT:				ddsFormat = ImgFmt_R_F16; break;
+			case DXGI_FORMAT_R16_UNORM:				ddsFormat = ImgFmt_L16; break;
+			case DXGI_FORMAT_R16_UINT:				ddsFormat = ImgFmt_Integer(ImgFmt_L16); break;
+			case DXGI_FORMAT_R16_SNORM:				ddsFormat = ImgFmt_Signed(ImgFmt_L16); break;
+			case DXGI_FORMAT_R16_SINT:				ddsFormat = ImgFmt_SignedInteger(ImgFmt_L16); break;
+			case DXGI_FORMAT_R8_UNORM:				ddsFormat = ImgFmt_L8; break;
+			case DXGI_FORMAT_R8_UINT:				ddsFormat = ImgFmt_Integer(ImgFmt_L8); break;
+			case DXGI_FORMAT_R8_SNORM:				ddsFormat = ImgFmt_Signed(ImgFmt_L8); break;
+			case DXGI_FORMAT_R8_SINT:				ddsFormat = ImgFmt_SignedInteger(ImgFmt_L8); break;
+			case DXGI_FORMAT_A8_UNORM:				ddsFormat = ImgFmt_A8; break;
 
 			case DXGI_FORMAT_R32G32B32A32_UINT:
 			case DXGI_FORMAT_R32G32B32A32_SINT:
 			case DXGI_FORMAT_R32G32B32_FLOAT:
 			case DXGI_FORMAT_R32G32B32_UINT:
 			case DXGI_FORMAT_R32G32B32_SINT:
-			case DXGI_FORMAT_R16G16B16A16_UINT:
-			case DXGI_FORMAT_R16G16B16A16_SNORM:
-			case DXGI_FORMAT_R16G16B16A16_SINT:
-			case DXGI_FORMAT_R32G32_FLOAT:
 			case DXGI_FORMAT_R32G32_UINT:
 			case DXGI_FORMAT_R32G32_SINT:
-			case DXGI_FORMAT_R10G10B10A2_UINT:
-			case DXGI_FORMAT_R8G8B8A8_UINT:
-			case DXGI_FORMAT_R8G8B8A8_SNORM:
-			case DXGI_FORMAT_R8G8B8A8_SINT:
-			case DXGI_FORMAT_R16G16_FLOAT:
-			case DXGI_FORMAT_R16G16_UNORM:
-			case DXGI_FORMAT_R16G16_UINT:
-			case DXGI_FORMAT_R16G16_SNORM:
-			case DXGI_FORMAT_R16G16_SINT:
-			case DXGI_FORMAT_R32_FLOAT:
 			case DXGI_FORMAT_R32_UINT:
 			case DXGI_FORMAT_R32_SINT:
-			case DXGI_FORMAT_R8G8_UNORM:
-			case DXGI_FORMAT_R8G8_UINT:
-			case DXGI_FORMAT_R8G8_SNORM:
-			case DXGI_FORMAT_R8G8_SINT:
-			case DXGI_FORMAT_R16_FLOAT:
-			case DXGI_FORMAT_R16_UNORM:
-			case DXGI_FORMAT_R16_UINT:
-			case DXGI_FORMAT_R16_SNORM:
-			case DXGI_FORMAT_R16_SINT:
-			case DXGI_FORMAT_R8_UNORM:
-			case DXGI_FORMAT_R8_UINT:
-			case DXGI_FORMAT_R8_SNORM:
-			case DXGI_FORMAT_R8_SINT:
-			case DXGI_FORMAT_A8_UNORM:
 			case DXGI_FORMAT_R1_UNORM:
+
 			case DXGI_FORMAT_R8G8_B8G8_UNORM:
 			case DXGI_FORMAT_G8R8_G8B8_UNORM:
-			case DXGI_FORMAT_BC4_SNORM:
-			case DXGI_FORMAT_BC5_SNORM:
 			case DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM:
-			case DXGI_FORMAT_BC6H_UF16:
 			case DXGI_FORMAT_AYUV:
 			case DXGI_FORMAT_Y410:
 			case DXGI_FORMAT_Y416:
@@ -1001,40 +968,43 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 			case MFMAKEFOURCC('D', 'X', 'T', '3'):	ddsFormat = ImgFmt_DXT3; break;
 			case MFMAKEFOURCC('D', 'X', 'T', '4'):	ddsFormat = ImgFmt_DXT4; break;
 			case MFMAKEFOURCC('D', 'X', 'T', '5'):	ddsFormat = ImgFmt_DXT5; break;
-//			case MFMAKEFOURCC('A', 'T', 'I', '1'):
-//			case MFMAKEFOURCC('B', 'C', '4', 'U'):	ddsFormat = ImgFmt_ATI1; break;
-//			case MFMAKEFOURCC('A', 'T', 'I', '2'):
-//			case MFMAKEFOURCC('B', 'C', '5', 'U'):	ddsFormat = ImgFmt_ATI2; break;
-//			case MFMAKEFOURCC('E', 'T', 'C', '1'):	ddsFormat = ImgFmt_ETC1; break;
-//			case MFMAKEFOURCC('A', 'T', 'C', '1'):	ddsFormat = ImgFmt_ATCRGB; break;
-//			case MFMAKEFOURCC('A', 'T', 'C', '3'):	ddsFormat = ImgFmt_ATCRGBA_EXPLICIT; break;
-//			case MFMAKEFOURCC('A', 'T', 'C', '5'):	ddsFormat = ImgFmt_ATCRGBA; break;
+			case MFMAKEFOURCC('A', 'T', 'I', '1'):
+			case MFMAKEFOURCC('B', 'C', '4', 'U'):	ddsFormat = ImgFmt_ATI1; break;
+			case MFMAKEFOURCC('B', 'C', '4', 'S'):	ddsFormat = ImgFmt_Signed(ImgFmt_ATI1); break;
+			case MFMAKEFOURCC('A', 'T', 'I', '2'):
+			case MFMAKEFOURCC('B', 'C', '5', 'U'):	ddsFormat = ImgFmt_ATI2; break;
+			case MFMAKEFOURCC('B', 'C', '5', 'S'):	ddsFormat = ImgFmt_Signed(ImgFmt_ATI2); break;
+			case MFMAKEFOURCC('E', 'T', 'C', '1'):	ddsFormat = ImgFmt_ETC1; break;
+			case MFMAKEFOURCC('A', 'T', 'C', '1'):	ddsFormat = ImgFmt_ATCRGB; break;
+			case MFMAKEFOURCC('A', 'T', 'C', '3'):	ddsFormat = ImgFmt_ATCRGBA_EXPLICIT; break;
+			case MFMAKEFOURCC('A', 'T', 'C', '5'):	ddsFormat = ImgFmt_ATCRGBA; break;
 			case 36:								ddsFormat = ImgFmt_A16B16G16R16; break;
+			case 110:								ddsFormat = ImgFmt_Signed(ImgFmt_A16B16G16R16); break;
 			case 113:								ddsFormat = ImgFmt_ABGR_F16; break;
+			case 112:								ddsFormat = ImgFmt_GR_F16; break;
+			case 111:								ddsFormat = ImgFmt_R_F16; break;
 			case 116:								ddsFormat = ImgFmt_ABGR_F32; break;
+			case 115:								ddsFormat = ImgFmt_GR_F32; break;
+			case 114:								ddsFormat = ImgFmt_R_F32; break;
 
 			// Unsupported...
-			case MFMAKEFOURCC('B', 'C', '4', 'S'):	// BC4 signed
-			case MFMAKEFOURCC('B', 'C', '5', 'S'):	// BC5 signed
 			case MFMAKEFOURCC('R', 'G', 'B', 'G'):	// D3DFMT_R8G8_B8G8
 			case MFMAKEFOURCC('G', 'R', 'G', 'B'):	// D3DFMT_G8R8_G8B8
 			case MFMAKEFOURCC('U', 'Y', 'V', 'Y'):	// D3DFMT_UYVY
 			case MFMAKEFOURCC('Y', 'U', 'Y', '2'):	// D3DFMT_YUY2
 			case 117:								// D3DFMT_CxV8U8
-			case 110:								// signed: ImgFmt_A16B16G16R16
-			case 111:								// signed: R_16F
-			case 112:								// signed: GR_16F
-			case 114:								// signed: R_32F
-			case 115:								// signed: GR_32F
 				break;
 		}
 	}
 	else if((pDDS->header.ddspf.dwFlags & DDPF_ALPHA) || (pDDS->header.ddspf.dwFlags & DDPF_LUMINANCE))
 	{
 		// 8 bit alpha/luminance data
-
-		// ALPHA should create white texture with alpha channel set to image data
-		// LUMINANCE should create greyscale image with all channels set to image data
+		if((pDDS->header.ddspf.dwFlags & DDPF_ALPHA) && (pDDS->header.ddspf.dwFlags & DDPF_LUMINANCE))
+			ddsFormat = ImgFmt_A8L8;
+		else if(pDDS->header.ddspf.dwFlags & DDPF_ALPHA)
+			ddsFormat = ImgFmt_A8;
+		else
+			ddsFormat = ImgFmt_L8;
 	}
 	else if(pDDS->header.ddspf.dwFlags & DDPF_RGB)
 	{
@@ -1087,16 +1057,11 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 
 	// load the image...
 	pImage->numSurfaces = (int)numSurfaces;
-	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface) * numSurfaces);
+	pImage->numMips = (int)numMips;
+	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface) * numSurfaces*numMips);
 
 	for(uint32 i=0; i<numSurfaces; ++i)
 	{
-		pImage->pSurfaces[i].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*width*height);
-		pImage->pSurfaces[i].width = width;
-		pImage->pSurfaces[i].height = height;
-
-		MFIntTexturePixel *pPixel = pImage->pSurfaces[i].pData;
-
 		for(uint32 mip=0; mip<numMips; ++mip)
 		{
 			if(mip > 0)
@@ -1110,6 +1075,14 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 			// the number of depth layers mip too...
 			uint32 depthLayers = depthLayerCount >> mip;
 			depthLayers = depthLayers ? depthLayers : 1;
+
+			int s = i*numMips+mip;
+			pImage->pSurfaces[s].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*mipWidth*mipHeight*depthLayers);
+			pImage->pSurfaces[s].width = mipWidth;
+			pImage->pSurfaces[s].height = mipHeight;
+			pImage->pSurfaces[s].depth = depthLayers;
+
+			MFIntTexturePixel *pPixel = pImage->pSurfaces[s].pData;
 
 			for(uint32 depth=0; depth<depthLayers; ++depth)
 			{
@@ -1131,14 +1104,10 @@ MFIntTexture* LoadDDS(const void *pMemory, size_t imageSize)
 
 						if(pDDS->header.ddspf.dwRGBBitCount != 24 && !bHasAlpha)
 						{
-							// zero out the alpha pixels
+							// set alpha to 1
 							for(uint32 x=0; x<width; ++x)
-							{
-								//...
-							}
+								pPixel[x].a = 1.f;
 						}
-
-						// TODO: detect opaque/mask/alpha
 
 						pData += pDDS->header.dwPitchOrLinearSize;
 						pPixel += width;
@@ -1174,11 +1143,13 @@ MFIntTexture* LoadJPEG(const void *pMemory, size_t imageSize)
 	MFIntTexture *pImage = (MFIntTexture*)MFHeap_Alloc(sizeof(MFIntTexture));
 
 	pImage->numSurfaces = 1;
+	pImage->numMips = 1;
 	pImage->pSurfaces = (MFIntTextureSurface*)MFHeap_Alloc(sizeof(MFIntTextureSurface));
 
 	pImage->pSurfaces[0].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*cinfo.image_width*cinfo.image_height);
 	pImage->pSurfaces[0].width = cinfo.image_width;
 	pImage->pSurfaces[0].height = cinfo.image_height;
+	pImage->pSurfaces[0].depth = 1;
 
 	// do this thing one row at a time; use a lot less memory!
 	int row_stride = cinfo.output_width * cinfo.output_components;
@@ -1263,16 +1234,17 @@ void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFImage
 
 int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFImageFormat targetFormat, MFPlatform platform)
 {
-	MFDebug_Assert(targetFormat < ImgFmt_XB_A8R8G8B8s, "TODO: Fix up swizzled format support!");
+	MFDebug_Assert(!(targetFormat & ImgFmt_Swizzle), "TODO: Fix up swizzled format support!");
 
 	// convert image...
 	int width = pSourceSurface->width;
 	int height = pSourceSurface->height;
+//	int depth = pSourceSurface->depth;
 
 	MFImage_Convert(width, height, pSourceSurface->pData, ImgFmt_ABGR_F32, pOutputSurface->pImageData, targetFormat);
 
 	// test for swizzled format..
-	if(targetFormat >= ImgFmt_XB_A8R8G8B8s)
+	if(targetFormat & ImgFmt_Swizzle)
 	{
 		uint32 imageBytes = (width * height * MFImage_GetBitsPerPixel(targetFormat)) / 8;
 
@@ -1281,7 +1253,7 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 #if 0
 		uint32 bytesperpixel = MFImage_GetBitsPerPixel(targetFormat) / 8;
 
-		if(targetFormat >= ImgFmt_XB_A8R8G8B8s && targetFormat <= ImgFmt_XB_R4G4B4A4s)
+		if(platform == FP_XBox)
 		{
 			// swizzle for xbox
 			// TODO: Swizzle here.. But we'll swizzle at runtime for the time being....
@@ -1290,7 +1262,7 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 		}
 		else
 #endif
-		if(targetFormat >= ImgFmt_PSP_A8B8G8R8s && targetFormat <= ImgFmt_PSP_DXT5s)
+		if(platform == FP_PSP)
 		{
 			// swizzle for PSP
 			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);
@@ -1393,8 +1365,8 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, si
 		MFIntTexture_ScanImage(pImage);
 
 		// build the mip chain
-//		if(pImage->numSurfaces == 1)
-//			MFIntTexture_FilterMipMaps(pImage, 0, 0);
+		if(pImage->numMips == 1)
+			MFIntTexture_FilterMipMaps(pImage, 0, 0);
 	}
 
 	return pImage;
@@ -1450,20 +1422,20 @@ MF_API MFImageFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platfor
 
 		case FP_XBox:
 			if(pTexture->opaque)
-				targetFormat = ImgFmt_XB_R5G6B5s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_R5G6B5);
 			else if(pTexture->oneBitAlpha)
-				targetFormat = ImgFmt_XB_A1R5G5B5s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_A1R5G5B5);
 			else
-				targetFormat = ImgFmt_XB_A8R8G8B8s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_A8R8G8B8);
 			break;
 
 		case FP_PSP:
 			if(pTexture->opaque)
-				targetFormat = ImgFmt_PSP_B5G6R5s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_B5G6R5);
 			else if(pTexture->oneBitAlpha)
-				targetFormat = ImgFmt_PSP_A1B5G5R5s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_A1B5G5R5);
 			else
-				targetFormat = ImgFmt_PSP_A4B4G4R4s;
+				targetFormat = ImgFmt_Swizzle(ImgFmt_A4B4G4R4);
 			break;
 
 		case FP_PS2:
@@ -1486,6 +1458,8 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 	if(pSize)
 		*pSize = 0;
 
+	MFDebug_Assert(pTexture->numSurfaces == 1, "Multi-surface textures not (yet) supported!");
+
 	// choose target image format
 	if(targetFormat == ImgFmt_Unknown)
 		targetFormat = ChooseBestFormat(pTexture, platform);
@@ -1497,25 +1471,28 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 //	MFDebug_Assert(IsPowerOf2(pTexture->pSurfaces[0].width) && IsPowerOf2(pTexture->pSurfaces[0].height), "Texture dimensions are not a power of 2.");
 
 	// check dimensions are a multiple of 4
-	MFDebug_Assert((pTexture->pSurfaces[0].width & 0x3) == 0 && (pTexture->pSurfaces[0].height & 3) == 0, "Texture dimensions are not multiples of 4.");
+//	MFDebug_Assert((pTexture->pSurfaces[0].width & 0x3) == 0 && (pTexture->pSurfaces[0].height & 3) == 0, "Texture dimensions are not multiples of 4.");
 
 	// begin processing...
 	if(flags & MFITF_PreMultipliedAlpha)
 		PremultiplyAlpha(pTexture);
 
 	// calculate texture data size..
-	size_t imageBytes = MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
+	size_t headerBytes = MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces*pTexture->numMips, 0x100);
+	size_t imageBytes = headerBytes;
 
-	for(int a=0; a<pTexture->numSurfaces; a++)
+	for(int a=0; a<pTexture->numMips; a++)
 	{
+		MFDebug_Assert(pTexture->pSurfaces[a].depth == 1, "Volume textures not (yet) supported!");
+
 		imageBytes += (pTexture->pSurfaces[a].width * pTexture->pSurfaces[a].height * MFImage_GetBitsPerPixel(targetFormat)) / 8;
 
 		// add palette
 		uint32 paletteBytes = 0;
 
-		if(targetFormat == ImgFmt_I8)
+		if(targetFormat == ImgFmt_P8)
 			paletteBytes = 4*256;
-		if(targetFormat == ImgFmt_I4)
+		if(targetFormat == ImgFmt_P4)
 			paletteBytes = 4*16;
 
 		imageBytes += paletteBytes;
@@ -1532,7 +1509,7 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 
 	pTemplate->imageFormat = targetFormat;
 
-	if(targetFormat >= ImgFmt_XB_A8R8G8B8s)
+	if(targetFormat & ImgFmt_Swizzle)
 		pTemplate->flags |= TEX_Swizzled;
 
 	if(!pTexture->opaque)
@@ -1546,14 +1523,14 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 	if(flags & MFITF_PreMultipliedAlpha)
 		pTemplate->flags |= TEX_PreMultipliedAlpha;
 
-	pTemplate->mipLevels = pTexture->numSurfaces;
+	pTemplate->mipLevels = pTexture->numMips;
 	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
 
 	MFTextureSurfaceLevel *pSurfaceLevels = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
 
-	char *pDataPointer = pOutputBuffer + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces, 0x100);
+	char *pDataPointer = pOutputBuffer + headerBytes;
 
-	for(int a=0; a<pTexture->numSurfaces; a++)
+	for(int a=0; a<pTexture->numMips; a++)
 	{
 		MFZeroMemory(&pSurfaceLevels[a], sizeof(MFTextureSurfaceLevel));
 
@@ -1571,9 +1548,9 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 
 		uint32 paletteBytes = 0;
 
-		if(targetFormat == ImgFmt_I8)
+		if(targetFormat == ImgFmt_P8)
 			paletteBytes = 4*256;
-		if(targetFormat == ImgFmt_I4)
+		if(targetFormat == ImgFmt_P4)
 			paletteBytes = 4*16;
 
 		if(paletteBytes)
@@ -1609,21 +1586,25 @@ MF_API void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels,
 {
 	struct MipLevels
 	{
-		int width, height;
+		int width, height, depth;
 	} levels[128];
 	int numLevels = 1;
 
 	levels[0].width = pTexture->pSurfaces[0].width;
 	levels[0].height = pTexture->pSurfaces[0].height;
+	levels[0].depth = pTexture->pSurfaces[0].depth;
 
-	while(levels[numLevels-1].width > 1 && levels[numLevels-1].height > 1)
+	while(levels[numLevels-1].width > 1 || levels[numLevels-1].height > 1 || levels[numLevels-1].depth > 1)
 	{
 		levels[numLevels].width = levels[numLevels-1].width;
 		levels[numLevels].height = levels[numLevels-1].height;
+		levels[numLevels].depth = levels[numLevels-1].depth;
 		if(levels[numLevels].width > 1)
 			levels[numLevels].width >>= 1;
 		if(levels[numLevels].height > 1)
 			levels[numLevels].height >>= 1;
+		if(levels[numLevels].depth > 1)
+			levels[numLevels].depth >>= 1;
 		++numLevels;
 	}
 
@@ -1633,28 +1614,38 @@ MF_API void MFIntTexture_FilterMipMaps(MFIntTexture *pTexture, int numMipLevels,
 	if(numLevels == 1)
 		return;
 
-	pTexture->pSurfaces = (MFIntTextureSurface*)MFHeap_Realloc(pTexture->pSurfaces, sizeof(MFIntTextureSurface)*numLevels);
-	pTexture->numSurfaces = numLevels;
+	pTexture->numMips = numLevels;
+	pTexture->pSurfaces = (MFIntTextureSurface*)MFHeap_Realloc(pTexture->pSurfaces, sizeof(MFIntTextureSurface)*pTexture->numSurfaces*numLevels);
 
-	for(int l = 1; l < numLevels; ++l)
+	for(int s = pTexture->numSurfaces-1; s >= 0; --s)
 	{
-		pTexture->pSurfaces[l].width = levels[l].width;
-		pTexture->pSurfaces[l].height = levels[l].height;
-		pTexture->pSurfaces[l].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*levels[l].width*levels[l].height);
+		pTexture->pSurfaces[s*numLevels] = pTexture->pSurfaces[s];
 
-		MFScaleImage scaleData;
-		scaleData.algorithm = SA_Box;
-		scaleData.format = ImgFmt_ABGR_F32;
-		scaleData.pSourceImage = pTexture->pSurfaces[l-1].pData;
-		scaleData.sourceWidth = pTexture->pSurfaces[l-1].width;
-		scaleData.sourceHeight = pTexture->pSurfaces[l-1].height;
-		scaleData.sourceStride = pTexture->pSurfaces[l-1].width;
-		scaleData.pTargetBuffer = pTexture->pSurfaces[l].pData;
-		scaleData.targetWidth = pTexture->pSurfaces[l].width;
-		scaleData.targetHeight = pTexture->pSurfaces[l].height;
-		scaleData.targetStride = pTexture->pSurfaces[l].width;
+		for(int l = 1; l < numLevels; ++l)
+		{
+			int m = s*numLevels+l;
 
-		MFImage_Scale(&scaleData);
+			pTexture->pSurfaces[m].width = levels[l].width;
+			pTexture->pSurfaces[m].height = levels[l].height;
+			pTexture->pSurfaces[m].depth = levels[l].depth;
+			pTexture->pSurfaces[m].pData = (MFIntTexturePixel*)MFHeap_Alloc(sizeof(MFIntTexturePixel)*levels[l].width*levels[l].height*levels[l].depth);
+
+			MFDebug_Assert(pTexture->pSurfaces[l-1].depth == 1, "Can't generate volume texture mips (yet)!");
+
+			MFScaleImage scaleData;
+			scaleData.algorithm = SA_Box;
+			scaleData.format = ImgFmt_ABGR_F32;
+			scaleData.pSourceImage = pTexture->pSurfaces[l-1].pData;
+			scaleData.sourceWidth = pTexture->pSurfaces[l-1].width;
+			scaleData.sourceHeight = pTexture->pSurfaces[l-1].height;
+			scaleData.sourceStride = pTexture->pSurfaces[l-1].width;
+			scaleData.pTargetBuffer = pTexture->pSurfaces[l].pData;
+			scaleData.targetWidth = pTexture->pSurfaces[l].width;
+			scaleData.targetHeight = pTexture->pSurfaces[l].height;
+			scaleData.targetStride = pTexture->pSurfaces[l].width;
+
+			MFImage_Scale(&scaleData);
+		}
 	}
 }
 

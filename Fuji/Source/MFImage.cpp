@@ -19,7 +19,7 @@
 #endif
 
 extern const char *gpMFImageFormatStrings[ImgFmt_Max];
-extern uint32 gMFImagePlatformAvailability[ImgFmt_Max];
+extern uint8 gMFImagePlatformAvailability[4][ImgFmt_Max];
 extern uint8 gMFImageBitsPerPixel[ImgFmt_Max];
 extern int8 gMFImageAutoFormat[MFRD_Max][0x40];
 
@@ -30,12 +30,12 @@ MF_API const char * MFImage_GetFormatString(int format)
 
 MF_API uint32 MFTexture_GetPlatformAvailability(int format)
 {
-	return gMFImagePlatformAvailability[format];
+	return gMFImagePlatformAvailability[(format>>8)&3][format];
 }
 
 MF_API bool MFImage_IsAvailableOnPlatform(int format, int platform)
 {
-	return (gMFImagePlatformAvailability[format] & MFBIT(platform)) != 0;
+	return (gMFImagePlatformAvailability[(format>>8)&3][format] & MFBIT(platform)) != 0;
 }
 
 MF_API MFImageFormat MFImage_ResolveFormat(int format, MFRendererDrivers driver)
@@ -115,7 +115,10 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 	const uint8 *pIn = (const uint8*)pInput;
 	uint8 *pOut = (uint8*)pOutput;
 
-	if(inputFormat >= ImgFmt_XB_A8R8G8B8s || outputFormat >= ImgFmt_XB_A8R8G8B8s)
+	bool bTosRGB = (inputFormat&ImgFmt_Linear) && !(outputFormat&ImgFmt_Linear);
+	bool bToLinear = !(inputFormat&ImgFmt_Linear) && (outputFormat&ImgFmt_Linear);
+
+	if((inputFormat | outputFormat) & ImgFmt_Swizzle)
 	{
 		MFDebug_Assert(false, "Swizzled formats not (yet) supported!");
 
@@ -123,6 +126,16 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 //		inputFormat = ??
 //		outputFormat = ??
 	}
+
+	if((inputFormat == ImgFmt_DXT1 && inputFormat <= ImgFmt_ATCRGB) ||
+		(inputFormat == ImgFmt_DXT3 && inputFormat <= ImgFmt_ATCRGBA_EXPLICIT) ||
+		(inputFormat == ImgFmt_DXT5 && inputFormat <= ImgFmt_ATCRGBA))
+	{
+		// TODO: it is possible to convert S3TC -> ATITC directly with satisfactory quality
+
+		MFDebug_Assert(false, "DXT -> ATITC transcode not done!");
+	}
+
 	if(inputFormat >= ImgFmt_DXT1 && inputFormat <= ImgFmt_PSP_DXT5)
 	{
 		MFDebug_Assert(false, "Conversion FROM compressed formats not (yet) supported!");
@@ -131,6 +144,7 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 	if(outputFormat >= ImgFmt_DXT1 && outputFormat <= ImgFmt_PSP_DXT5)
 	{
 		MFDebug_Assert(inputFormat == ImgFmt_ABGR_F32, "Only compression from ImgFmt_ABGR_F32 is (currently) supported!");
+		MFDebug_Assert(!bTosRGB && !bToLinear, "Colour space conversion not (yet) supported during compression!");
 
 		// compress image...
 		switch(outputFormat)
@@ -140,18 +154,65 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 			case ImgFmt_DXT3:
 			case ImgFmt_DXT4:
 			case ImgFmt_DXT5:
+			case ImgFmt_ATI1:
+			case ImgFmt_ATI2:
 			case ImgFmt_PSP_DXT1:
 			case ImgFmt_PSP_DXT3:
 			case ImgFmt_PSP_DXT5:
 			{
+				// TODO: squish https://code.google.com/p/libsquish/
+				//       Fuji\Fuji\Middleware\texcompress\squish
+				// TODO: Fuji\Fuji\Middleware\texcompress\stb_dxt
+				// TODO: Fuji\Fuji\Middleware\texcompress\ImageLib
+
 				ATICompress(pIn, width, height, outputFormat, pOut);
 
 				if(outputFormat >= ImgFmt_PSP_DXT1 && outputFormat <= ImgFmt_PSP_DXT5)
 				{
 					// we need to swizzle the PSP buffer about a bit...
+					MFDebug_Assert(false, "TODO: Swizzle for PSP...\n");
 				}
 				break;
 			}
+
+			case ImgFmt_BPTC_F:
+			case ImgFmt_BPTC:
+
+			case ImgFmt_CTX1:
+			{
+				// Note: X360 lib to pack this?
+			}
+
+			case ImgFmt_ETC1:
+			{
+				// TODO: https://code.google.com/p/rg-etc1/
+				//       Fuji\Fuji\Middleware\texcompress\rg_etc1
+			}
+
+			case ImgFmt_ETC2:
+			case ImgFmt_EAC:
+			case ImgFmt_ETC2_EAC:
+			case ImgFmt_EACx2:
+
+			case ImgFmt_PVRTC_RGB_2bpp:
+			case ImgFmt_PVRTC_RGB_4bpp:
+			case ImgFmt_PVRTC_RGBA_2bpp:
+			case ImgFmt_PVRTC_RGBA_4bpp:
+			case ImgFmt_PVRTC2_2bpp:
+			case ImgFmt_PVRTC2_4bpp:
+
+			case ImgFmt_ATCRGB:
+			case ImgFmt_ATCRGBA_EXPLICIT:
+			case ImgFmt_ATCRGBA:
+			{
+				// Note: Theoretically we could use a DXT packer and transcode...
+			}
+
+			case ImgFmt_ASTC:
+			{
+				// TODO: Fuji\Fuji\Middleware\texcompress\astc-evaluation-codec
+			}
+
 			default:
 			{
 				MFDebug_Assert(false, MFStr("Compression format '%s' not yet supported...\n", MFImage_GetFormatString(outputFormat)));
@@ -251,6 +312,20 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 						MFDebug_Assert(false, "Not done!");
 						break;
 				}
+
+				if(bTosRGB)
+				{
+					r = MFImage_LinearTosRGB(r);
+					g = MFImage_LinearTosRGB(g);
+					b = MFImage_LinearTosRGB(b);
+				}
+				else if(bToLinear)
+				{
+					r = MFImage_sRGBToLinear(r);
+					g = MFImage_sRGBToLinear(g);
+					b = MFImage_sRGBToLinear(b);
+				}
+
 				switch(outputFormat)
 				{
 					case ImgFmt_ABGR_F16:
@@ -367,10 +442,10 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_ABGR_F32:
 					{
 						const float *pInF = (const float*)pIn;
-						r = (uint16)(pInF[0] * 65535.f);
-						g = (uint16)(pInF[1] * 65535.f);
-						b = (uint16)(pInF[2] * 65535.f);
-						a = (uint16)(pInF[3] * 65535.f);
+						r = (uint16)(pInF[0]*65535.f + 0.5f);
+						g = (uint16)(pInF[1]*65535.f + 0.5f);
+						b = (uint16)(pInF[2]*65535.f + 0.5f);
+						a = (uint16)(pInF[3]*65535.f + 0.5f);
 						pIn += 16;
 						break;
 					}
@@ -379,6 +454,20 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 						MFDebug_Assert(false, "Not done!");
 						break;
 				}
+
+				if(bTosRGB)
+				{
+					r = (uint16)(MFImage_LinearTosRGB(r * (1.f/65535.f))*65535.f + 0.5f);
+					g = (uint16)(MFImage_LinearTosRGB(g * (1.f/65535.f))*65535.f + 0.5f);
+					b = (uint16)(MFImage_LinearTosRGB(b * (1.f/65535.f))*65535.f + 0.5f);
+				}
+				else if(bToLinear)
+				{
+					r = (uint16)(MFImage_sRGBToLinear(r * (1.f/65535.f))*65535.f + 0.5f);
+					g = (uint16)(MFImage_sRGBToLinear(g * (1.f/65535.f))*65535.f + 0.5f);
+					b = (uint16)(MFImage_sRGBToLinear(b * (1.f/65535.f))*65535.f + 0.5f);
+				}
+
 				switch(outputFormat)
 				{
 					case ImgFmt_A2R10G10B10:
@@ -493,10 +582,10 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_ABGR_F32:
 					{
 						const float *pInF = (const float*)pIn;
-						r = (uint8)(pInF[0] * 255.f);
-						g = (uint8)(pInF[1] * 255.f);
-						b = (uint8)(pInF[2] * 255.f);
-						a = (uint8)(pInF[3] * 255.f);
+						r = (uint8)(pInF[0]*255.f + 0.5f);
+						g = (uint8)(pInF[1]*255.f + 0.5f);
+						b = (uint8)(pInF[2]*255.f + 0.5f);
+						a = (uint8)(pInF[3]*255.f + 0.5f);
 						pIn += 16;
 						break;
 					}
@@ -505,6 +594,20 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 						MFDebug_Assert(false, "Not done!");
 						break;
 				}
+
+				if(bTosRGB)
+				{
+					r = (uint8)(MFImage_LinearTosRGB(r * (1.f/255.f))*255.f + 0.5f);
+					g = (uint8)(MFImage_LinearTosRGB(g * (1.f/255.f))*255.f + 0.5f);
+					b = (uint8)(MFImage_LinearTosRGB(b * (1.f/255.f))*255.f + 0.5f);
+				}
+				else if(bToLinear)
+				{
+					r = (uint8)(MFImage_sRGBToLinear(r * (1.f/255.f))*255.f + 0.5f);
+					g = (uint8)(MFImage_sRGBToLinear(g * (1.f/255.f))*255.f + 0.5f);
+					b = (uint8)(MFImage_sRGBToLinear(b * (1.f/255.f))*255.f + 0.5f);
+				}
+
 				switch(outputFormat)
 				{
 					case ImgFmt_A8R8G8B8:
@@ -635,29 +738,86 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 /*** Box filter ***/
 
 template<typename Pixel>
-static void Filter_Box(Pixel *pSource, Pixel *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+static void Filter_Box(MFScaleImage *pScaleData)
 {
 	MFDebug_Assert(sizeof(Pixel)*8 == 128, "Only 128bit image formats are supported!");
 }
 template<>
-void Filter_Box<MFVector>(MFVector *pSource, MFVector *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+void Filter_Box<MFVector>(MFScaleImage *pScaleData)
 {
-	for(int y = 0; y < destHeight; ++y)
+	MFVector *pSource = (MFVector*)pScaleData->pSourceImage;
+	MFVector *pDest = (MFVector*)pScaleData->pTargetBuffer;
+	int sourceWidth = pScaleData->sourceWidth;
+	int sourceHeight = pScaleData->sourceHeight;
+	int sourceStride = pScaleData->sourceStride;
+	int destWidth = pScaleData->targetWidth;
+	int destHeight = pScaleData->targetHeight;
+	int destStride = pScaleData->targetStride;
+
+	// we may only be scaling in one axis...
+	int hStep = sourceWidth == destWidth ? 0 : 1;
+	int vStep = sourceHeight == destHeight ? 0 : sourceStride;
+
+	if(pScaleData->format & ImgFmt_Linear)
 	{
-		for(int x = 0; x < destWidth; ++x)
+		for(int y = 0; y < destHeight; ++y)
 		{
-			int sourceOffset = x*2;
+			for(int x = 0; x < destWidth; ++x)
+			{
+				int sourceOffset = x*(1+hStep);
 
-			MFVector &tl = pSource[sourceOffset];
-			MFVector &tr = pSource[sourceOffset + 1];
-			MFVector &bl = pSource[sourceOffset + sourceStride];
-			MFVector &br = pSource[sourceOffset + 1 + sourceStride];
+				MFVector &tl = pSource[sourceOffset];
+				MFVector &tr = pSource[sourceOffset + hStep];
+				MFVector &bl = pSource[sourceOffset + vStep];
+				MFVector &br = pSource[sourceOffset + hStep + vStep];
 
-			pDest[x] = (tl + tr + bl + br) * MakeVector(0.25f);
+				pDest[x] = (tl + tr + bl + br) * MakeVector(0.25f);
+			}
+
+			pSource += sourceStride+vStep;
+			pDest += destStride;
 		}
+	}
+	else
+	{
+		for(int y = 0; y < destHeight; ++y)
+		{
+			for(int x = 0; x < destWidth; ++x)
+			{
+				int sourceOffset = x*(1+hStep);
 
-		pSource += sourceStride*2;
-		pDest += destStride;
+				MFVector tl = pSource[sourceOffset];
+				MFVector tr = pSource[sourceOffset + hStep];
+				MFVector bl = pSource[sourceOffset + vStep];
+				MFVector br = pSource[sourceOffset + hStep + vStep];
+
+				// convert to linear light space
+				tl.x = MFImage_sRGBToLinear(tl.x);
+				tl.y = MFImage_sRGBToLinear(tl.y);
+				tl.z = MFImage_sRGBToLinear(tl.z);
+				tr.x = MFImage_sRGBToLinear(tr.x);
+				tr.y = MFImage_sRGBToLinear(tr.y);
+				tr.z = MFImage_sRGBToLinear(tr.z);
+				bl.x = MFImage_sRGBToLinear(bl.x);
+				bl.y = MFImage_sRGBToLinear(bl.y);
+				bl.z = MFImage_sRGBToLinear(bl.z);
+				br.x = MFImage_sRGBToLinear(br.x);
+				br.y = MFImage_sRGBToLinear(br.y);
+				br.z = MFImage_sRGBToLinear(br.z);
+
+				MFVector t = (tl + tr + bl + br) * MakeVector(0.25f);
+
+				// convert back to sRGB
+				t.x = MFImage_LinearTosRGB(t.x);
+				t.y = MFImage_LinearTosRGB(t.y);
+				t.z = MFImage_LinearTosRGB(t.z);
+
+				pDest[x] = t;
+			}
+
+			pSource += sourceStride+vStep;
+			pDest += destStride;
+		}
 	}
 }
 
@@ -668,14 +828,23 @@ void Filter_Box<MFVector>(MFVector *pSource, MFVector *pDest, int sourceWidth, i
 static bool hqxInitialised = false;
 #endif
 template<typename Pixel>
-static void Filter_HQX(Pixel *pSource, Pixel *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+static void Filter_HQX(MFScaleImage *pScaleData)
 {
 	MFDebug_Assert(sizeof(Pixel)*8 == 32, "Only 32bit image formats are supported!");
 }
 template<>
-void Filter_HQX<uint32>(uint32 *pSource, uint32 *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+void Filter_HQX<uint32>(MFScaleImage *pScaleData)
 {
 #if defined(HQX_SUPPORT)
+	uint32 *pSource = (uint32*)pScaleData->pSourceImage;
+	uint32 *pDest = (uint32*)pScaleData->pTargetBuffer;
+	int sourceWidth = pScaleData->sourceWidth;
+	int sourceHeight = pScaleData->sourceHeight;
+	int sourceStride = pScaleData->sourceStride;
+	int destWidth = pScaleData->targetWidth;
+	int destHeight = pScaleData->targetHeight;
+	int destStride = pScaleData->targetStride;
+
 	float scale = (float)destWidth / (float)sourceWidth;
 
 	if(scale == 2.f)
@@ -717,8 +886,16 @@ void Filter_HQX<uint32>(uint32 *pSource, uint32 *pDest, int sourceWidth, int sou
 /*** Advance Mame 2x,3x,4x algorithm ***/
 
 template<typename T>
-static void Filter_AdvMAME(T *pSource, T *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+static void Filter_AdvMAME(MFScaleImage *pScaleData)
 {
+	T *pSource = (T*)pScaleData->pSourceImage;
+	T *pDest = (T*)pScaleData->pTargetBuffer;
+	int sourceWidth = pScaleData->sourceWidth;
+	int sourceHeight = pScaleData->sourceHeight;
+	int sourceStride = pScaleData->sourceStride;
+	int destWidth = pScaleData->targetWidth;
+	int destStride = pScaleData->targetStride;
+
 	float scale = (float)destWidth / (float)sourceWidth;
 
 	if(scale == 2.f)
@@ -910,8 +1087,15 @@ static void Filter_AdvMAME(T *pSource, T *pDest, int sourceWidth, int sourceHeig
 /*** Eagle 2x algorithm ***/
 
 template<typename Pixel>
-static void Filter_Eagle(Pixel *pSource, Pixel *pDest, int sourceWidth, int sourceHeight, int sourceStride, int destWidth, int destHeight, int destStride)
+static void Filter_Eagle(MFScaleImage *pScaleData)
 {
+	Pixel *pSource = (Pixel*)pScaleData->pSourceImage;
+	Pixel *pDest = (Pixel*)pScaleData->pTargetBuffer;
+	int sourceWidth = pScaleData->sourceWidth;
+	int sourceHeight = pScaleData->sourceHeight;
+	int sourceStride = pScaleData->sourceStride;
+	int destStride = pScaleData->targetStride;
+
 	// http://en.wikipedia.org/wiki/Pixel_art_scaling_algorithms
 	// First:        |Then 
 	// . . . --\ CC  |S T U  --\ 1 2
@@ -983,8 +1167,14 @@ static void GetScaleFactors(MFScalingAlgorithm algorithm, int sourceWidth, int s
 			break;
 		case SA_Box:
 			// texture should be half the size of the source
-			if(destWidth*2 == sourceWidth && destHeight*2 == sourceHeight)
-				scalex = scaley = 0.5f;
+			if(sourceWidth/2 == destWidth)
+				scalex = 0.5f;
+			else if(sourceWidth == destWidth)
+				scalex = 1.f;
+			if(sourceHeight/2 == destHeight)
+				scaley = 0.5f;
+			else if(sourceHeight == destHeight)
+				scaley = 1.f;
 			break;
 		case SA_HQX:
 		case SA_AdvMAME:
@@ -1018,18 +1208,9 @@ static void GetScaleFactors(MFScalingAlgorithm algorithm, int sourceWidth, int s
 template<typename Pixel>
 static void MFImage_ScaleInternal(MFScaleImage *pScaleData)
 {
-	Pixel *pSource = (Pixel*)pScaleData->pSourceImage;
-	Pixel *pDest = (Pixel*)pScaleData->pTargetBuffer;
-	int sourceWidth = pScaleData->sourceWidth;
-	int sourceHeight = pScaleData->sourceHeight;
-	int sourceStride = pScaleData->sourceStride;
-	int destWidth = pScaleData->targetWidth;
-	int destHeight = pScaleData->targetHeight;
-	int destStride = pScaleData->targetStride;
-
 	// check that the sizes are supported by the scaling algorithm
 	float scalex, scaley;
-	GetScaleFactors(pScaleData->algorithm, sourceWidth, sourceHeight, destWidth, destHeight, scalex, scaley);
+	GetScaleFactors(pScaleData->algorithm, pScaleData->sourceWidth, pScaleData->sourceHeight, pScaleData->targetWidth, pScaleData->targetHeight, scalex, scaley);
 
 	// scale the image into the target buffer...
 	if(scalex == 1.f && scaley == 1.f)
@@ -1047,16 +1228,16 @@ static void MFImage_ScaleInternal(MFScaleImage *pScaleData)
 				MFDebug_Assert(false, "Not implemented!");
 				break;
 			case SA_Box:
-				Filter_Box(pSource, pDest, sourceWidth, sourceHeight, sourceStride, destWidth, destHeight, destStride);
+				Filter_Box<Pixel>(pScaleData);
 				break;
 			case SA_HQX:
-				Filter_HQX(pSource, pDest, sourceWidth, sourceHeight, sourceStride, destWidth, destHeight, destStride);
+				Filter_HQX<Pixel>(pScaleData);
 				break;
 			case SA_AdvMAME:
-				Filter_AdvMAME(pSource, pDest, sourceWidth, sourceHeight, sourceStride, destWidth, destHeight, destStride);
+				Filter_AdvMAME<Pixel>(pScaleData);
 				break;
 			case SA_Eagle:
-				Filter_Eagle(pSource, pDest, sourceWidth, sourceHeight, sourceStride, destWidth, destHeight, destStride);
+				Filter_Eagle<Pixel>(pScaleData);
 				break;
 			case SA_SuperEagle:
 				break;
