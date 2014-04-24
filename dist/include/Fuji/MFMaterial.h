@@ -115,9 +115,9 @@ struct MFMaterialCallbacks
 	int       (*pBegin)(MFMaterial *pMaterial, MFRendererState &state);	/**< Pointer to the Begin function. */
 
 	int       (*pGetNumParams)();										/**< Pointer to the GetNumParams function. */
-	MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);	/**< Pointer to the GetParameterInfo function. */
-	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);	/**< Pointer to a SetParameter function. */
-	uintp     (*pGetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function. */
+	const MFMaterialParameterInfo* (*pGetParameterInfo)(int parameterIndex);									/**< Pointer to the GetParameterInfo function. */
+	void      (*pSetParameter)(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);			/**< Pointer to a SetParameter function. */
+	uintp     (*pGetParameter)(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);	/**< Pointer to the GetParameter function. */
 };
 
 /**
@@ -213,7 +213,7 @@ MF_API MFMaterial*	MFMaterial_GetCurrent();
  * Gets a materials name.
  * @return The name of the specified material.
  */
-MF_API const char* MFMaterial_GetMaterialName(MFMaterial *pMaterial);
+MF_API const char* MFMaterial_GetMaterialName(const MFMaterial *pMaterial);
 
 /**
  * Get a materials state block.
@@ -230,7 +230,7 @@ MF_API MFStateBlock* MFMaterial_GetMaterialStateBlock(MFMaterial *pMaterial);
  * @param pMaterial Pointer to a material instance.
  * @return The number of parameters exposed by the material.
  */
-MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
+MF_API int MFMaterial_GetNumParameters(const MFMaterial *pMaterial);
 
 /**
  * Get the name of a parameter.
@@ -239,7 +239,7 @@ MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial);
  * @param parameterIndex Parameter index.
  * @return A string representing the parameter name.
  */
-MF_API const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex);
+MF_API const char*	MFMaterial_GetParameterName(const MFMaterial *pMaterial, int parameterIndex);
 
 /**
  * Get the index of a parameter from a parameter name.
@@ -248,7 +248,7 @@ MF_API const char*	MFMaterial_GetParameterName(MFMaterial *pMaterial, int parame
  * @param pParameterName String representing a parameter name.
  * @return The index of the parameter. -1 if the parameter does not exist.
  */
-MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName);
+MF_API int MFMaterial_GetParameterIndexFromName(const MFMaterial *pMaterial, const char *pParameterName);
 
 /**
  * Get parameter info by name.
@@ -257,7 +257,7 @@ MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const cha
  * @param parameterIndex Parameter index.
  * @return A pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex);
+MF_API const MFMaterialParameterInfo *MFMaterial_GetParameterInfo(const MFMaterial *pMaterial, int parameterIndex);
 
 /**
  * Get parameter info by name.
@@ -266,7 +266,7 @@ MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMateria
  * @param pParameterName String representing a parameter name.
  * @return A pointer to a struct containing the associated parameter info or NULL if parameter does not exist.
  */
-MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName);
+MF_API const MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(const MFMaterial *pMaterial, const char *pParameterName);
 
 /**
  * Get the value of a parameter.
@@ -277,7 +277,7 @@ MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *
  * @param pValue Pointer to a buffer to receive non-integer parameter data.
  * @return The value of integer or poitner parameters, otherwise returns 0 on success.
  */
-MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue = NULL);
+MF_API uintp MFMaterial_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue = NULL);
 
 /**
  * Get the value of an integer parameter.
@@ -287,7 +287,7 @@ MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, 
  * @param argIndex Argument index of the parameter.
  * @return The value contained in the integer parameter.
  */
-inline uintp MFMaterial_GetParameterI(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+inline uintp MFMaterial_GetParameterI(const MFMaterial *pMaterial, int parameterIndex, int argIndex)
 {
 	return MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex);
 }
@@ -300,7 +300,7 @@ inline uintp MFMaterial_GetParameterI(MFMaterial *pMaterial, int parameterIndex,
  * @param argIndex Argument index of the parameter.
  * @return The value contained in the float parameter.
  */
-inline float MFMaterial_GetParameterF(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+inline float MFMaterial_GetParameterF(const MFMaterial *pMaterial, int parameterIndex, int argIndex)
 {
 	float value;
 	MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, &value);
@@ -316,7 +316,7 @@ inline float MFMaterial_GetParameterF(MFMaterial *pMaterial, int parameterIndex,
  * @param pVector Pointer to a vector to receive the parameter data.
  * @return Returns 0 on success.
  */
-inline int MFMaterial_GetParameterV(MFMaterial *pMaterial, int parameterIndex, int argIndex, MFVector *pVector)
+inline int MFMaterial_GetParameterV(const MFMaterial *pMaterial, int parameterIndex, int argIndex, MFVector *pVector)
 {
 	return (int)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, pVector);
 }
@@ -330,7 +330,7 @@ inline int MFMaterial_GetParameterV(MFMaterial *pMaterial, int parameterIndex, i
  * @param pMatrix Pointer to a matrix to receive the parameter data.
  * @return Returns 0 on success.
  */
-inline int MFMaterial_GetParameterM(MFMaterial *pMaterial, int parameterIndex, int argIndex, MFMatrix *pMatrix)
+inline int MFMaterial_GetParameterM(const MFMaterial *pMaterial, int parameterIndex, int argIndex, MFMatrix *pMatrix)
 {
 	return (int)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex, pMatrix);
 }
@@ -343,7 +343,7 @@ inline int MFMaterial_GetParameterM(MFMaterial *pMaterial, int parameterIndex, i
  * @param argIndex Argument index of the parameter.
  * @return The MFTexture set to the parameter requested.
  */
-inline MFTexture *MFMaterial_GetParameterT(MFMaterial *pMaterial, int parameterIndex, int argIndex)
+inline MFTexture *MFMaterial_GetParameterT(const MFMaterial *pMaterial, int parameterIndex, int argIndex)
 {
 	return (MFTexture*)MFMaterial_GetParameter(pMaterial, parameterIndex, argIndex);
 }

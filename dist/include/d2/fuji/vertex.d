@@ -1,154 +1,13 @@
 module fuji.vertex;
 
-public import fuji.fuji;
+public import fuji.c.MFVertex;
+
 import fuji.resource;
 import fuji.vector;
+import fuji.render;
 import fuji.renderstate;
+import fuji.material;
 
-struct MFEffectTechnique; // TODO: effect.d will appear and remove this
-
-/**
- * @struct MFVertexDeclaration
- * Represents the layout of a vertex buffer.
- */
-struct MFVertexDeclaration;
-
-/**
- * @struct MFVertexBuffer
- * Represents a Fuji vertex buffer.
- */
-struct MFVertexBuffer
-{
-private:
-	// Note: This is a mirror of the internal Fuji structure, don't touch!
-	MFResource resource;
-	alias resource this;
-
-	MFVertexDeclaration* pVertexDeclatation;
-	MFVertexBufferType bufferType;
-	int numVerts;
-
-	bool bLocked;
-	void* pLocked;
-
-	const(char)* pName;
-}
-
-/**
- * @struct MFIndexBuffer
- * Represents a Fuji index buffer.
- */
-struct MFIndexBuffer;
-
-enum MFVertexDataFormat
-{
-	Unknown = -1,
-
-	Auto = 0,
-
-	Float4,
-	Float3,
-	Float2,
-	Float1,
-	UByte4_RGBA,
-	UByte4N_RGBA,
-	UByte4N_BGRA,
-	SShort4,
-	SShort2,
-	SShort4N,
-	SShort2N,
-	UShort4,
-	UShort2,
-	UShort4N,
-	UShort2N,
-	Float16_4,
-	Float16_2,
-	UDec3,
-	Dec3N,
-
-	Max
-};
-
-enum MFVertexBufferType
-{
-	Static,
-	Dynamic,
-	Scratch
-};
-
-enum MFVertexElementType
-{
-	Unknown = -1,
-
-	Position,
-	Normal,
-	Colour,
-	TexCoord,
-	Binormal,
-	Tangent,
-	Indices,
-	Weights,
-
-	Max
-}
-
-enum MFPrimType
-{
-	Points,
-	LineList,
-	LineStrip,
-	TriangleList,
-	TriangleStrip,
-	TriangleFan,
-	QuadList
-}
-
-struct MFVertexElement
-{
-	int stream;
-	MFVertexElementType elementType;
-	int elementIndex;
-	int componentCount;
-	MFVertexDataFormat format;
-}
-
-struct MFMesh
-{
-	MFStateBlock *pMeshState;
-	MFPrimType primType;
-	int vertexOffset;
-	int numVertices;
-	int indexOffset;
-	int numIndices;
-};
-
-extern (C) MFVertexDeclaration* MFVertex_CreateVertexDeclaration(MFVertexElement* pElementArray, int elementCount);
-extern (C) int MFVertex_ReleaseVertexDeclaration(MFVertexDeclaration* pDeclaration);
-extern (C) MFVertexDeclaration* MFVertex_GetStreamDeclaration(MFVertexDeclaration* pDeclaration, int stream) pure;
-
-extern (C) MFVertexBuffer* MFVertex_CreateVertexBuffer(MFVertexDeclaration* pVertexFormat, int numVerts, MFVertexBufferType type, void* pVertexBufferMemory = null, const(char)* pName = null);
-extern (C) int MFVertex_ReleaseVertexBuffer(MFVertexBuffer* pVertexBuffer);
-extern (C) void MFVertex_LockVertexBuffer(MFVertexBuffer* pVertexBuffer, void **ppVertices);
-extern (C) void MFVertex_CopyVertexData(MFVertexBuffer* pVertexBuffer, MFVertexElementType targetElement, int targetElementIndex, const(void)* pSourceData, MFVertexDataFormat sourceDataFormat, int sourceDataStride, int numVertices);
-extern (C) void MFVertex_SetVertexData4v(MFVertexBuffer* pVertexBuffer, MFVertexElementType element, int elementIndex, ref const(MFVector) data);
-extern (C) void MFVertex_ReadVertexData4v(MFVertexBuffer* pVertexBuffer, MFVertexElementType element, int elementIndex, MFVector* pData);
-extern (C) void MFVertex_SetVertexData4ub(MFVertexBuffer* pVertexBuffer, MFVertexElementType element, int elementIndex, uint data);
-extern (C) void MFVertex_ReadVertexData4ub(MFVertexBuffer* pVertexBuffer, MFVertexElementType element, int elementIndex, uint* pData);
-extern (C) void MFVertex_UnlockVertexBuffer(MFVertexBuffer* pVertexBuffer);
-
-extern (C) MFIndexBuffer* MFVertex_CreateIndexBuffer(int numIndices, ushort* pIndexBufferMemory = null, const(char)* pName = null);
-extern (C) int MFVertex_ReleaseIndexBuffer(MFIndexBuffer* pIndexBuffer);
-extern (C) void MFVertex_LockIndexBuffer(MFIndexBuffer* pIndexBuffer, ushort** ppIndices);
-extern (C) void MFVertex_UnlockIndexBuffer(MFIndexBuffer* pIndexBuffer);
-
-extern (C) void MFVertex_SetVertexDeclaration(const(MFVertexDeclaration)* pVertexDeclaration);
-extern (C) void MFVertex_SetVertexStreamSource(int stream, const(MFVertexBuffer)* pVertexBuffer);
-extern (C) void MFVertex_SetIndexBuffer(const(MFIndexBuffer)* pIndexBuffer);
-extern (C) void MFVertex_RenderVertices(MFEffectTechnique* pTechnique, MFPrimType primType, int firstVertex, int numVertices);
-extern (C) void MFVertex_RenderIndexedVertices(MFEffectTechnique* pTechnique, MFPrimType primType, int vertexOffset, int indexOffset, int numVertices, int numIndices);
-
-
-// helpers for D...
 
 // 'standard' vertex structures
 struct MFSimpleVertex
@@ -188,7 +47,7 @@ struct MFLitVertex
 }
 
 // helpers to make vertex buffers
-MFVertexDeclaration* MFVertex_CreateVertexDeclarationForStruct(VertexStruct)() if(is(VertexStruct == struct))
+MFVertexDeclaration* MFVertex_CreateVertexDeclarationForStruct(VertexStruct)() nothrow if(is(VertexStruct == struct))
 {
 	MFVertexElement[VertexStruct.tupleof.length] elements = void;
 	int[MFVertexElementType.Max] elementIndex;
@@ -212,7 +71,7 @@ MFVertexDeclaration* MFVertex_CreateVertexDeclarationForStruct(VertexStruct)() i
 	return MFVertex_CreateVertexDeclaration(elements.ptr, elements.length);
 }
 
-MFVertexBuffer* MFVertex_CreateVertexBufferForStruct(VertexStruct)(MFVertexBufferType type, size_t numVertices, string name = null)
+MFVertexBuffer* MFVertex_CreateVertexBufferForStruct(VertexStruct)(MFVertexBufferType type, size_t numVertices, string name = null) nothrow
 {
 	MFVertexDeclaration* pDecl = MFVertex_CreateVertexDeclarationForStruct!VertexStruct();
 	MFVertexBuffer* pVB = MFVertex_CreateVertexBuffer(pDecl, cast(int)numVertices, type, null, name ? name.toStringz : null);
@@ -220,7 +79,7 @@ MFVertexBuffer* MFVertex_CreateVertexBufferForStruct(VertexStruct)(MFVertexBuffe
 	return pVB;
 }
 
-MFVertexBuffer* MFVertex_CreateVertexBufferFromData(VertexStruct)(MFVertexBufferType type, VertexStruct[] vertices, string name = null)
+MFVertexBuffer* MFVertex_CreateVertexBufferFromData(VertexStruct)(MFVertexBufferType type, VertexStruct[] vertices, string name = null) nothrow
 {
 	MFVertexDeclaration* pDecl = MFVertex_CreateVertexDeclarationForStruct!VertexStruct();
 	MFVertexBuffer* pVB = MFVertex_CreateVertexBuffer(pDecl, cast(int)vertices.length, type, vertices.ptr, name ? name.toStringz : null);
@@ -229,21 +88,16 @@ MFVertexBuffer* MFVertex_CreateVertexBufferFromData(VertexStruct)(MFVertexBuffer
 }
 
 
-// wrap the vertex buffer nicely
-
-import fuji.render;
-import fuji.material;
-
 struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsValidVertexStructure!VertexDataType)
 {
-	alias pVB this;
+	MFVertexBuffer* pVB;
 
-	this(this)
+	this(this) pure nothrow
 	{
 		pVB.resource.AddRef();
 	}
 
-	this(Resource resource)
+	this(ref Resource resource) pure nothrow
 	{
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.VertexBuffer)
@@ -253,28 +107,28 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		}
 	}
 
-	this(MFVertexDeclaration* pVertexFormat, int numVerts, MFVertexBufferType type, string name = null)
+	this(MFVertexDeclaration* pVertexFormat, int numVerts, MFVertexBufferType type, string name = null) nothrow
 	{
 		Create(pVertexFormat, numVerts, type, name);
 	}
 
-	this(int numVerts, MFVertexBufferType type, string name = null)
+	this(int numVerts, MFVertexBufferType type, string name = null) nothrow
 	{
 		Create(numVerts, type, name);
 	}
 
-	~this()
+	~this() nothrow
 	{
 		Release();
 	}
 
-	void Create(MFVertexDeclaration* pVertexFormat, size_t numVertices, MFVertexBufferType type, string name = null)
+	void create(MFVertexDeclaration* pVertexFormat, size_t numVertices, MFVertexBufferType type, string name = null) nothrow
 	{
 		Release();
 		pVB = MFVertex_CreateVertexBuffer(pVertexFormat, cast(int)numVertices, type, null, name ? name.toStringz : null);
 	}
 
-	void Create(VertexStruct = VertexDataType)(size_t numVertices, MFVertexBufferType type, string name = null)
+	void create(VertexStruct = VertexDataType)(size_t numVertices, MFVertexBufferType type, string name = null) nothrow
 	{
 		Release();
 
@@ -284,7 +138,7 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 			pVB = MFVertex_CreateVertexBufferForStruct!VertexStruct(type, numVertices, name);
 	}
 
-	int Release()
+	int release() nothrow
 	{
 		int rc = 0;
 		if(pVB)
@@ -295,7 +149,7 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		return rc;
 	}
 
-	VertexDataType[] Lock()
+	VertexDataType[] lock() nothrow
 	{
 		void* pLock;
 		MFVertex_LockVertexBuffer(pVB, &pLock);
@@ -311,17 +165,17 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		}
 	}
 
-	void Unlock()
+	void unlock() nothrow
 	{
 		MFVertex_UnlockVertexBuffer(pVB);
 	}
 
-	Mesh GetMesh(MFPrimType primType)
+	Mesh getMesh(MFPrimType primType) pure nothrow
 	{
 		return Mesh(pVB, primType);
 	}
 
-	void Draw(MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
+	void draw(MFPrimType primType, MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView) nothrow
 	{
 		MFStateBlock *pSB = MFStateBlock_CreateTemporary(64);
 		MFStateBlock_SetRenderState(pSB, MFStateConstant_RenderState.VertexDeclaration, pVB.pVertexDeclatation);
@@ -330,8 +184,11 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		MFRenderer_AddVertices(pSB, 0, cast(int)pVB.numVerts, primType, pMaterial, pEntity, pMaterialOverride, pView);
 	}
 
-	@property size_t length() const { return pVB ? pVB.numVerts : 0; }
-	@property size_t size() const
+	@property inout(MFVertexBuffer)* handle() inout pure nothrow	{ return pVB; }
+	@property ref inout(Resource) resource() inout pure nothrow		{ return *cast(inout(Resource)*)&this; }
+
+	@property size_t length() const pure nothrow	{ return pVB ? pVB.numVerts : 0; }
+	@property size_t size() const pure nothrow
 	{
 		static if(is(VertexDataType == void))
 		{
@@ -341,23 +198,24 @@ struct VertexBuffer(VertexDataType = void) if(is(VertexDataType == void) || IsVa
 		else
 			return pVB.numVerts * VertexDataType.sizeof;
 	}
-
-	MFVertexBuffer* pVB;
 }
 
 struct Mesh
 {
-	this(MFVertexBuffer *pVB, MFPrimType primType)
+	MFMesh mesh;
+	alias mesh this;
+
+	this(MFVertexBuffer *pVB, MFPrimType primType) nothrow
 	{
 		Create(pVB, primType);
 	}
 
-	~this()
+	~this() nothrow
 	{
 		Release();
 	}
 
-	void Create(MFVertexBuffer *pVB, MFPrimType primType)
+	void Create(MFVertexBuffer *pVB, MFPrimType primType) nothrow
 	{
 		Release();
 
@@ -373,7 +231,7 @@ struct Mesh
 		mesh.numIndices = 0;
 	}
 
-	void Release()
+	void Release() nothrow
 	{
 		// TODO: if it's a temp stateblock, it shouldn't be destroyed!
 		if(mesh.pMeshState)
@@ -383,13 +241,10 @@ struct Mesh
 		}
 	}
 
-	void Draw(MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView)
+	void Draw(MFMaterial* pMaterial, const MFStateBlock* pEntity, const MFStateBlock* pMaterialOverride, const MFStateBlock* pView) nothrow
 	{
 		MFRenderer_AddMesh(&mesh, pMaterial, pEntity, pMaterialOverride, pView);
 	}
-
-	MFMesh mesh;
-	alias mesh this;
 }
 
 // make a bunch of types for different common vertex formats
@@ -518,8 +373,9 @@ struct MFVertexUShort4N
 
 
 // private stuff...
+private:
 
-private enum int[MFVertexDataFormat.Max] numElements =
+enum int[MFVertexDataFormat.Max] numElements =
 [
 	0, // Auto
 	4, // Float4
@@ -543,7 +399,7 @@ private enum int[MFVertexDataFormat.Max] numElements =
 	3 // Dec3N
 ];
 
-private template GetAttribute(alias T, Attr)
+template GetAttribute(alias T, Attr)
 {
 	template Impl(T...)
 	{
@@ -556,12 +412,12 @@ private template GetAttribute(alias T, Attr)
 	enum GetAttribute = Impl!(__traits(getAttributes, T));
 }
 
-private template HasVertexAttributes(alias M)
+template HasVertexAttributes(alias M)
 {
 	enum HasVertexAttributes = GetAttribute!(M, MFVertexElementType) != MFVertexElementType.Unknown && GetAttribute!(typeof(M), MFVertexDataFormat) != MFVertexDataFormat.Unknown;
 }
 
-private template IsValidVertexStructure(alias T)
+template IsValidVertexStructure(alias T)
 {
 	template AllMembersHaveVertexAttributes(alias T, Members...)
 	{

@@ -1,7 +1,7 @@
 --
--- ldc.lua
+-- d/tools/ldc.lua
 -- Provides LDC-specific configuration strings.
--- Copyright (c) 2002-2011 Jason Perkins and the Premake project
+-- Copyright (c) 2013-2014 Andrew Gough, Manu Evans, and the Premake project
 --
 
 	premake.tools.ldc = { }
@@ -38,7 +38,7 @@
 		flags = {
 			Deprecated		= "-d",
 			Documentation	= "-D",
-			FatalWarnings	= "-fatal-assembler-warnings",
+			FatalWarnings	= "-w", -- Use LLVM flag? : "-fatal-assembler-warnings",
 			GenerateHeader	= "-H",
 			GenerateJSON	= "-X",
 			NoBoundsCheck	= "-disable-boundscheck",
@@ -71,7 +71,7 @@
 			SSE2 = "-mattr=+sse2",
 		},
 		warnings = {
-			Default = "-w",
+			Default = "-wi",
 			Extra = "-wi",	-- TODO: is there a way to get extra warnings?
 		}
 	}

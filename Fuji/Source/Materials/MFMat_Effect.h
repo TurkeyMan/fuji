@@ -19,8 +19,8 @@ void      MFMat_Effect_Update(MFMaterial *pMaterial);
 void      MFMat_Effect_BuildStateBlock(MFMaterial *pMaterial);
 int       MFMat_Effect_Begin(MFMaterial *pMaterial, MFRendererState &state);
 void      MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, size_t value);
-uintp     MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
+uintp     MFMat_Effect_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Effect_GetNumParams();
-MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex);
+const MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex);
 
 #endif // _MFMAT_EFFECT_H

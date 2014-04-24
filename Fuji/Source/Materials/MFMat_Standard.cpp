@@ -554,7 +554,7 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 	}
 }
 
-uintp MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+uintp MFMat_Standard_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	MFMat_Standard_Data *pData = (MFMat_Standard_Data*)pMaterial->pInstanceData;
 
@@ -649,7 +649,7 @@ int MFMat_Standard_GetNumParams()
 	return sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo);
 }
 
-MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex)
+const MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex)
 {
 	MFDebug_Assert((uint32)parameterIndex < sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo), MFStr("Invalid parameter id %d.", parameterIndex));
 

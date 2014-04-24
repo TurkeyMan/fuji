@@ -1,4 +1,3 @@
-
 --
 -- d/actions/gmake.lua
 -- Define the D makefile action(s).

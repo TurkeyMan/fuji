@@ -111,8 +111,8 @@ void      MFMat_Standard_Update(MFMaterial *pMaterial);
 void      MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial);
 int       MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state);
 void      MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, uintp value);
-uintp     MFMat_Standard_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
+uintp     MFMat_Standard_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue);
 int       MFMat_Standard_GetNumParams();
-MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex);
+const MFMaterialParameterInfo* MFMat_Standard_GetParameterInfo(int parameterIndex);
 
 #endif

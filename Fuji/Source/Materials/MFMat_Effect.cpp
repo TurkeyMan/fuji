@@ -60,7 +60,7 @@ void MFMat_Effect_SetParameter(MFMaterial *pMaterial, int parameterIndex, int ar
 
 }
 
-uintp MFMat_Effect_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+uintp MFMat_Effect_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 //	MFMat_Effect_Data *pData = (MFMat_Effect_Data*)pMaterial->pInstanceData;
 
@@ -74,7 +74,7 @@ int MFMat_Effect_GetNumParams()
 	return 0;
 }
 
-MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex)
+const MFMaterialParameterInfo* MFMat_Effect_GetParameterInfo(int parameterIndex)
 {
 //	MFDebug_Assert((uint32)parameterIndex < sizeof(parameterInformation)/sizeof(MFMaterialParameterInfo), MFStr("Invalid parameter id %d.", parameterIndex));
 

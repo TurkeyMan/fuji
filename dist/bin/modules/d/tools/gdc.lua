@@ -1,8 +1,8 @@
-	--
-	-- gdc.lua
-	-- Provides GDC-specific configuration strings.
-	-- Copyright (c) 2002-2011 Jason Perkins and the Premake project
-	--
+--
+-- d/tools/gdc.lua
+-- Provides GDC-specific configuration strings.
+-- Copyright (c) 2013-2014 Andrew Gough, Manu Evans, and the Premake project
+--
 
 	premake.tools.gdc = { }
 

@@ -1,7 +1,7 @@
-
 --
--- dmd.lua
+-- d/tools/dmd.lua
 -- Provides dmd-specific configuration strings.
+-- Copyright (c) 2013-2014 Andrew Gough, Manu Evans, and the Premake project
 --
 
 	local tdmd = {}
@@ -191,6 +191,7 @@
 			CodeCoverage	= "-cov",
 			Deprecated		= "-d",
 			Documentation	= "-D",
+			FatalWarnings	= "-w",
 			GenerateHeader	= "-H",
 			GenerateJSON	= "-X",
 			GenerateMap		= "-map",
@@ -219,7 +220,7 @@
 			Speed = "-O -inline",
 		},
 		warnings = {
-			Default = "-w",
+			Default = "-wi",
 			Extra = "-wi",
 		}
 	}

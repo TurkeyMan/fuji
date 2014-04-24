@@ -325,7 +325,7 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 		if(texFormat == ImgFmt_A8R8G8B8)
 		{
 #if defined(MF_XBOX)
-			texFormat = ImgFmt_XB_A8R8G8B8s;
+			texFormat = ImgFmt_Swizzle(ImgFmt_A8R8G8B8);
 #endif
 
 			if(!MFTexture_IsFormatAvailable(texFormat))

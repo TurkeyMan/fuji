@@ -98,21 +98,26 @@ enum MFImageFormat
 	ImgFmt_ATI2,			/**< Compressed 3Dc/DXN/BC5/LATC/RGTC RG/UV format */
 	ImgFmt_BPTC_F,			/**< Compressed BPTC_FLOAT/BC6H HDR floating point RGB format */
 	ImgFmt_BPTC,			/**< Compressed BPTC/BC7 RGBA format */
+
 	ImgFmt_CTX1,			/**< Compressed CTX1 RG/UV format */
+
 	ImgFmt_ETC1,			/**< Compressed ETC1 RGB format */
 	ImgFmt_ETC2,			/**< Compressed ETC2 RGB format */
 	ImgFmt_EAC,				/**< Compressed EAC alpha format */
 	ImgFmt_ETC2_EAC,		/**< Compressed ETC2+EAC RGBA format */
 	ImgFmt_EACx2,			/**< Compressed EACx2 RG/UV format */
+
 	ImgFmt_PVRTC_RGB_2bpp,	/**< Compressed PVRTC 2bpp RGB format */
 	ImgFmt_PVRTC_RGB_4bpp,	/**< Compressed PVRTC 4bpp RGB format */
 	ImgFmt_PVRTC_RGBA_2bpp,	/**< Compressed PVRTC 2bpp RGBA format */
 	ImgFmt_PVRTC_RGBA_4bpp,	/**< Compressed PVRTC 4bpp RGBA format */
 	ImgFmt_PVRTC2_2bpp,		/**< Compressed PVRTC2 2bpp RGBA format */
 	ImgFmt_PVRTC2_4bpp,		/**< Compressed PVRTC2 4bpp RGBA format */
+
 	ImgFmt_ATCRGB,			/**< Compressed ATC1/ATITC RGB format */
 	ImgFmt_ATCRGBA_EXPLICIT,/**< Compressed ATC3/ATITC RGBA format with explicit alpha */
 	ImgFmt_ATCRGBA,			/**< Compressed ATC5/ATITC RGBA format */
+
 	ImgFmt_ASTC,			/**< Compressed ASTC format */
 
 	ImgFmt_PSP_DXT1,		/**< Special DXT1 for PSP */

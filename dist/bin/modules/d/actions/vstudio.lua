@@ -1,7 +1,7 @@
 --
--- vstudio.lua
+-- d/actions/vstudio.lua
 -- Generate a VisualD .visualdproj project.
--- Copyright (c) 2012 Manu Evans and the Premake project
+-- Copyright (c) 2012-2014 Manu Evans and the Premake project
 --
 
 	premake.extensions.d.visuald = { }
@@ -154,9 +154,8 @@
 			_p(2,'<release>%s</release>', iif(cfg.flags.Release or not isDebug, '1', '0'))
 			_p(2,'<preservePaths>0</preservePaths>')
 
-			-- cfg.flags.FatalWarnings <- what do do about this?
-			_p(2,'<warnings>%s</warnings>', iif(cfg.warnings and cfg.warnings == "Off", '0', '1'))
-			_p(2,'<infowarnings>%s</infowarnings>', iif(cfg.warnings and cfg.warnings == "Extra", '1', '0'))
+			_p(2,'<warnings>%s</warnings>', iif(cfg.flags.FatalWarnings, '1', '0'))
+			_p(2,'<infowarnings>%s</infowarnings>', iif(cfg.warnings and cfg.warnings ~= "Off", '1', '0'))
 
 			_p(2,'<checkProperty>0</checkProperty>')
 			_p(2,'<genStackFrame>0</genStackFrame>')

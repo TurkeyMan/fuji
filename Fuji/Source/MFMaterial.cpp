@@ -424,7 +424,7 @@ MF_API MFMaterial* MFMaterial_GetCurrent()
 	return pCurrentMaterial;
 }
 
-MF_API const char *MFMaterial_GetMaterialName(MFMaterial *pMaterial)
+MF_API const char *MFMaterial_GetMaterialName(const MFMaterial *pMaterial)
 {
 	return pMaterial->pName;
 }
@@ -546,7 +546,7 @@ MFDebug_Assert(false, "Fix Me!!!");
 			else
 			{
 				const char *pParam = pLine->GetString(0);
-				MFMaterialParameterInfo *pInfo = MFMaterial_GetParameterInfoFromName(pMat, pParam);
+				const MFMaterialParameterInfo *pInfo = MFMaterial_GetParameterInfoFromName(pMat, pParam);
 
 				int lineArg = 1;
 				int param = pInfo->parameterIndex;
@@ -741,29 +741,29 @@ MFDebug_Assert(false, "Fix Me!!!");
 	}
 }
 
-MF_API int MFMaterial_GetNumParameters(MFMaterial *pMaterial)
+MF_API int MFMaterial_GetNumParameters(const MFMaterial *pMaterial)
 {
 	if(!pMaterial->pType->materialCallbacks.pGetNumParams)
 		return 0;
 	return pMaterial->pType->materialCallbacks.pGetNumParams();
 }
 
-MF_API const char* MFMaterial_GetParameterName(MFMaterial *pMaterial, int parameterIndex)
+MF_API const char* MFMaterial_GetParameterName(const MFMaterial *pMaterial, int parameterIndex)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 
-	MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
+	const MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
 	return pInfo->pParameterName;
 }
 
-MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const char *pParameterName)
+MF_API int MFMaterial_GetParameterIndexFromName(const MFMaterial *pMaterial, const char *pParameterName)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 
 	int numParams = MFMaterial_GetNumParameters(pMaterial);
 	for(int a=0; a<numParams; a++)
 	{
-		MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(a);
+		const MFMaterialParameterInfo *pInfo = pMaterial->pType->materialCallbacks.pGetParameterInfo(a);
 		if(!MFString_CaseCmp(pInfo->pParameterName, pParameterName))
 			return a;
 	}
@@ -771,13 +771,13 @@ MF_API int MFMaterial_GetParameterIndexFromName(MFMaterial *pMaterial, const cha
 	return -1;
 }
 
-MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfo(MFMaterial *pMaterial, int parameterIndex)
+MF_API const MFMaterialParameterInfo *MFMaterial_GetParameterInfo(const MFMaterial *pMaterial, int parameterIndex)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameterInfo, "Material does not supply a GetParameterInfo() function.");
 	return pMaterial->pType->materialCallbacks.pGetParameterInfo(parameterIndex);
 }
 
-MF_API MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(MFMaterial *pMaterial, const char *pParameterName)
+MF_API const MFMaterialParameterInfo *MFMaterial_GetParameterInfoFromName(const MFMaterial *pMaterial, const char *pParameterName)
 {
 	int param = MFMaterial_GetParameterIndexFromName(pMaterial, pParameterName);
 	return MFMaterial_GetParameterInfo(pMaterial, param);
@@ -793,7 +793,7 @@ MF_API void MFMaterial_SetParameter(MFMaterial *pMaterial, int parameterIndex, i
 	pMaterial->bStateDirty = true;
 }
 
-MF_API uintp MFMaterial_GetParameter(MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
+MF_API uintp MFMaterial_GetParameter(const MFMaterial *pMaterial, int parameterIndex, int argIndex, void *pValue)
 {
 	MFDebug_Assert(pMaterial->pType->materialCallbacks.pGetParameter, "Material does not supply a GetParameter() function.");
 	return pMaterial->pType->materialCallbacks.pGetParameter(pMaterial, parameterIndex, argIndex, pValue);
