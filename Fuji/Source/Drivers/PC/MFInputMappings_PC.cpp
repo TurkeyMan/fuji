@@ -607,6 +607,31 @@ static const int gSaitek880ButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
+static const int gSaitekDualAnalogButtonID[GamepadType_Max] =
+{
+	2,	// Button_A
+	3,	// Button_B
+	0,	// Button_X
+	1,	// Button_Y
+	4,	// Button_White
+	6,	// Button_Black
+	5,	// Button_LeftTrigger
+	7,	// Button_RightTrigger
+	9,	// Button_Start
+	8,	// Button_Back
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,	// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Rz, // Button_ThumbRX
+	AID_Z | AID_Negative,	// Button_ThumbRY
+	-1  // Button_Home
+};
+
 static const int gUnusualPS2AdapterButtonID[GamepadType_Max] =
 {
 	2,	// Button_A
@@ -1007,6 +1032,56 @@ static const int gOUYAButtonID[GamepadType_Max] =
 	-1  // Button_Home
 };
 
+static const int gDualshock4ButtonID[GamepadType_Max] =
+{
+	1,	// Button_A
+	2,	// Button_B
+	0,	// Button_X
+	3,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	AID_Rx | AID_Full,	// Button_LeftTrigger
+	AID_Ry | AID_Full,	// Button_RightTrigger
+	9,	// Button_Options
+	8,	// Button_Share
+	10,	// Button_LeftThumb
+	11,	// Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	AID_X, // Button_ThumbLX
+	AID_Y | AID_Negative,	// Button_ThumbLY
+	AID_Z, // Button_ThumbRX
+	AID_Rz | AID_Negative,	// Button_ThumbRY
+	12  // Button_Home
+};
+
+static const int gSF4ArcadeStickButtonID[GamepadType_Max] =
+{
+	0,	// Button_A
+	1,	// Button_B
+	2,	// Button_X
+	3,	// Button_Y
+	4,	// Button_White
+	5,	// Button_Black
+	8,	// Button_LeftTrigger
+	9,	// Button_RightTrigger
+	7,	// Button_Start
+	6,	// Button_Back
+	-1,	// Button_LeftThumb
+	-1,	// Button_RightThumb
+	POV_Up,		// Button_DUp
+	POV_Down,	// Button_DDown
+	POV_Left,	// Button_DLeft
+	POV_Right,	// Button_DRight
+	-1, // Button_ThumbLX
+	-1,	// Button_ThumbLY
+	-1, // Button_ThumbRX
+	-1,	// Button_ThumbRY
+	-1  // Button_Home
+};
+
 // Button Names
 static const char * gStandardButtonNames[GamepadType_Max] =
 {
@@ -1345,6 +1420,31 @@ static const char * gSaitek880ButtonNames[GamepadType_Max] =
 	"R",            // Button_RightTrigger
 	"10",           // Button_Start
 	"9",            // Button_Back
+	"L3",           // Button_LeftThumb
+	"R3",           // Button_RightThumb
+	"DPad Up",      // Button_DUp
+	"DPad Down",    // Button_DDown
+	"DPad Left",    // Button_DLeft
+	"DPad Right",   // Button_DRight
+	"Left X-Axis",  // Button_ThumbLX
+	"Left Y-Axis",  // Button_ThumbLY
+	"Right X-Axis", // Button_ThumbRX
+	"Right Y-Axis", // Button_ThumbRY
+	"Unavailable"	// Button_Home
+};
+
+static const char * gSaitekDualAnalogButtonNames[GamepadType_Max] =
+{
+	"3",			// Button_A
+	"4",			// Button_B
+	"1",			// Button_X
+	"2",			// Button_Y
+	"L1",           // Button_White
+	"R1",           // Button_Black
+	"L2",           // Button_LeftTrigger
+	"R2",           // Button_RightTrigger
+	"Start",        // Button_Start
+	"Back",         // Button_Back
 	"L3",           // Button_LeftThumb
 	"R3",           // Button_RightThumb
 	"DPad Up",      // Button_DUp
@@ -2060,6 +2160,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0
 	},
 
+	{
+		"Saitek Dual Analog",
+		"Dual Analog",
+		0x0F30, 0x0112,
+		gSaitekDualAnalogButtonID,
+		gSaitekDualAnalogButtonNames,
+		0
+	},
+
 	// TigerGame PS2 Gamepad Adapters
 	{
 		"PS2 Gamepad",
@@ -2145,6 +2254,15 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
 	},
 
+	{
+		"PS4 Gamepad",
+		"Wireless Controller",
+		0x054C, 0x05C4,
+		gDualshock4ButtonID,
+		gPS2ButtonNames,
+		0
+	},
+
 	// PS3/USB Corded Gamepad
 	{
 		"PS3 Gamepad",
@@ -2228,6 +2346,28 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x0E8F, 0x0012,
 		gGGE909VariantButtonID,
 		gGGE909ButtonNames,
+		0
+	},
+
+	// Arcade Sticks
+	{
+		"Street Fighter IV Arcade Stick",
+		"Arcade Stick (Street Fighter IV FightStick TE)",
+		0x0738, 0x4738,
+		gSF4ArcadeStickButtonID,
+		// X, Y, RB, LB
+		// A, B, RT, LT
+		gXBox360ButtonNames,
+		0
+	},
+	{
+		"Street Fighter IV Arcade Stick",
+		"Arcade Stick (MadCatz FightStick TE)",
+		0x1BAD, 0xF039,
+		gSF4ArcadeStickButtonID,
+		// X, Y, LB, LT
+		// A, B, RB, RT
+		gXBox360ButtonNames,
 		0
 	},
 
