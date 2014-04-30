@@ -17,8 +17,6 @@ extern MFInitParams gInitParams;
 
 static android_app* gpApplication;
 
-char *gpCommandLineBuffer = NULL;
-
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
@@ -243,7 +241,7 @@ static int32_t android_handle_input(struct android_app* app, AInputEvent* pEvent
 
 // This is the function that application code must implement, representing
 // the main entry to the app.
-void android_main(struct android_app* pApplication) 
+void android_main(struct android_app* pApplication)
 {
 	gpApplication = pApplication;
 

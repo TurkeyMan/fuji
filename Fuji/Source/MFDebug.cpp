@@ -27,14 +27,18 @@ MF_API void MFDebug_Log(int level, const char *pMessage)
 	}
 }
 
-MF_API void MFDebug_SetMaximumWarningLevel(int maxLevel)
+MF_API int MFDebug_SetMaximumWarningLevel(int maxLevel)
 {
+	int old = gWarningLevel;
 	gWarningLevel = maxLevel;
+	return old;
 }
 
-MF_API void MFDebug_SetMaximumLogLevel(int maxLevel)
+MF_API int MFDebug_SetMaximumLogLevel(int maxLevel)
 {
+	int old = gLogLevel;
 	gLogLevel = maxLevel;
+	return old;
 }
 
 #endif // !defined(_RETAIL)

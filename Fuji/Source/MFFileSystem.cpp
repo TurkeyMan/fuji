@@ -352,6 +352,8 @@ void MFFileSystem_DeinitModule()
 
 MFFileSystemHandle MFFileSystem_RegisterFileSystem(const char *pFilesystemName, MFFileSystemCallbacks *pCallbacks)
 {
+	MFDebug_Log(5, MFStr("Call: MFFileSystem_RegisterFileSystem(\"%s\")", pFilesystemName));
+
 	GET_MODULE_DATA(MFFileSystemState);
 
 	for(uint32 a=0; a<gDefaults.filesys.maxFileSystems; a++)
@@ -972,6 +974,8 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 // open a file from the mounted filesystem stack
 MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 {
+	MFDebug_Log(5, MFStr("Call: MFFileSystem_Open(\"%s\", 0x%x)", pFilename, openFlags));
+
 	GET_MODULE_DATA(MFFileSystemState);
 
 	MFMount *pMount = pModuleData->pMountList;
@@ -1019,8 +1023,6 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 // read/write a file to a filesystem
 MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t extraBytes)
 {
-	MFCALLSTACK;
-
 	char *pBuffer = NULL;
 
 	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
@@ -1050,7 +1052,7 @@ MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t
 
 MF_API int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
 {
-	MFCALLSTACK;
+	MFDebug_Log(5, MFStr("Call: MFFileSystem_Save(\"%s\")", pFilename));
 
 	int bytesWritten = 0;
 

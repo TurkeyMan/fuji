@@ -2,15 +2,12 @@
 #include "MFModule.h"
 #include "Asset/Util/HLSL2GLSL.h"
 
-#if !defined(MF_MIDDLEWARE)
-
-#if defined(MF_COMPILER_VISUALC)
+#if !defined(MF_MIDDLEWARE) &&  defined(MF_COMPILER_VISUALC)
 	#pragma comment(lib, "FujiMiddleware")
-#endif
-
 #else
 
 #include <stdio.h>
+#include <string.h>
 char gErrorBuffer[1024];
 
 #if defined(SUPPORT_HLSL)
@@ -122,7 +119,9 @@ static const char *sSemanticNames[] = {
 	"vIndices3"
 };
 
+#if (__cplusplus > 199711L) || defined(__GXX_EXPERIMENTAL_CXX0X__)
 static_assert(sizeof(sSemantics)/sizeof(sSemantics[0]) == sizeof(sSemanticNames)/sizeof(sSemanticNames[0]), "Mismatching attribute declaration arrays!");
+#endif
 
 MF_API const char *HLSL2GLSL_TranslateShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename, const char **pError)
 {

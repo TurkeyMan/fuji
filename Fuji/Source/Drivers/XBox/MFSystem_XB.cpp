@@ -5,8 +5,6 @@
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 
-char *gpCommandLineBuffer = NULL;
-
 char* FixXBoxFilename(const char *pFilename)
 {
 	if(!pFilename) return NULL;

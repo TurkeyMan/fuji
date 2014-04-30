@@ -16,15 +16,12 @@ extern MFInitParams gInitParams;
 
 HINSTANCE apphInstance;
 
-char *gpCommandLineBuffer = NULL;
-
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
 	gpEngineInstance->currentPlatform = FP_Windows;
 
 	apphInstance = (HINSTANCE)gInitParams.hInstance;
-	gpCommandLineBuffer = (char*)gInitParams.pCommandLine;
 
 	// HACK: this is to force dual-core or multi-processor systems to use the first cpu for timing.
 //	DWORD proc, system;
@@ -67,7 +64,7 @@ void MFSystem_HandleEventsPlatformSpecific()
 			gpEngineInstance->bQuit = true;
 		else
 		{
-			TranslateMessage(&msg); 
+			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}

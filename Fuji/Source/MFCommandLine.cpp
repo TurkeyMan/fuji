@@ -1,11 +1,12 @@
 #include "Fuji_Internal.h"
 #include "MFCommandLine.h"
 
-extern char *gpCommandLineBuffer;
+extern MFInitParams gInitParams;
+
 
 MF_API const char * MFCommandLine_GetCommandLineString()
 {
-	return gpCommandLineBuffer;
+	return gInitParams.pCommandLine;
 }
 
 MF_API bool MFCommandLine_GetBool(const char *pParameter, bool defaultValue)
@@ -34,10 +35,10 @@ MF_API float MFCommandLine_GetFloat(const char *pParameter, float defaultValue)
 
 MF_API const char* MFCommandLine_GetString(const char *pParameter)
 {
-	if(!gpCommandLineBuffer)
+	if(!gInitParams.pCommandLine)
 		return NULL;
 
-	const char *pT = gpCommandLineBuffer;
+	const char *pT = gInitParams.pCommandLine;
 	size_t len = MFString_Length(pParameter);
 
 	const char *pArgStart = NULL;

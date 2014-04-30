@@ -100,6 +100,10 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	int flags = 0;
 	const char *pAccess = "";
 
+	MFDebug_Assert(pOpenData->openFlags & (MFOF_Read|MFOF_Write), "Neither MFOF_Read nor MFOF_Write specified.");
+	MFDebug_Assert((pNative->openFlags & (MFOF_Append|MFOF_Truncate)) != (MFOF_Append|MFOF_Truncate), "MFOF_Append and MFOF_Truncate are mutually exclusive.");
+	MFDebug_Assert((pNative->openFlags & (MFOF_Text|MFOF_Binary)) != (MFOF_Text|MFOF_Binary), "MFOF_Text and MFOF_Binary are mutually exclusive.");
+
 	if(pOpenData->openFlags & MFOF_Read)
 	{
 		if(pNative->openFlags & MFOF_Write)
@@ -114,10 +118,6 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	else if(pOpenData->openFlags & MFOF_Write)
 	{
 		pAccess = "wb";
-	}
-	else
-	{
-		MFDebug_Assert(0, "Neither MFOF_Read nor MFOF_Write specified.");
 	}
 
 	FILE *pF = fopen(pNative->pFilename, pAccess);

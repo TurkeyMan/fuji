@@ -23,6 +23,8 @@ extern int screen;
 extern Window rootWindow;
 extern Atom wm_delete_window;
 
+XVisualInfo *MFRenderer_GetVisualInfo();
+
 
 static Bool WaitForNotify(Display *d, XEvent *e, char *arg)
 {
@@ -41,7 +43,6 @@ void MFWindow_DeinitModulePlatformSpecific()
 MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 {
 	// TODO: move this call into here...
-	XVisualInfo *MFRenderer_GetVisualInfo();
 	XVisualInfo *visualInfo = MFRenderer_GetVisualInfo();
 	if(!visualInfo)
 		return NULL;
@@ -165,7 +166,7 @@ MF_API void MFWindow_Destroy(MFWindow *_pWindow)
 
 MF_API void MFWindow_Update(MFWindow *_pWindow, const MFWindowParams *pParams)
 {
-	MFWindow_X11 *pWindow = (MFWindow_X11*)_pWindow;
+//	MFWindow_X11 *pWindow = (MFWindow_X11*)_pWindow;
 /*
 	if(MFString_Compare(pWindow->params.pWindowTitle, pParams->pWindowTitle) != 0)
 		SetWindowText(pWindow->hWnd, pParams->pWindowTitle);

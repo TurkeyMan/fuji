@@ -434,7 +434,7 @@ MF_API MFDisplay *MFDisplay_Create(const char *pName, const MFDisplaySettings *p
 		XFlush(xdisplay);
 	}
 */
-	return 0;
+	return pDisplay;
 }
 
 MF_API bool MFDisplay_Reset(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)

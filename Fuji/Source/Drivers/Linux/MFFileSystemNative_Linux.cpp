@@ -35,27 +35,31 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 	int flags = 0;
 
+	MFDebug_Assert(pOpenData->openFlags & (MFOF_Read|MFOF_Write), "Neither MFOF_Read nor MFOF_Write specified.");
+	MFDebug_Assert((pNative->openFlags & (MFOF_Append|MFOF_Truncate)) != (MFOF_Append|MFOF_Truncate), "MFOF_Append and MFOF_Truncate are mutually exclusive.");
+	MFDebug_Assert((pNative->openFlags & (MFOF_Text|MFOF_Binary)) != (MFOF_Text|MFOF_Binary), "MFOF_Text and MFOF_Binary are mutually exclusive.");
+
 	if(pOpenData->openFlags & MFOF_Read)
 	{
 		if(pNative->openFlags & MFOF_Write)
-		{
 			flags = O_RDWR | O_CREAT;
-		}
 		else
-		{
 			flags = O_RDONLY;
-		}
 	}
 	else if(pOpenData->openFlags & MFOF_Write)
 	{
 		flags = O_WRONLY | O_CREAT;
 	}
-	else
+
+	if(pOpenData->openFlags & MFOF_Write)
 	{
-		MFDebug_Assert(0, "Neither MFOF_Read nor MFOF_Write specified.");
+		if(pNative->openFlags & MFOF_Append)
+			flags |= O_APPEND;
+		else if(pNative->openFlags & MFOF_Truncate)
+			flags |= O_TRUNC;
 	}
 
-	int file = open(pNative->pFilename, flags);
+	int file = open(pNative->pFilename, flags, S_IRWXU|S_IRWXG|S_IRWXO);
 	if(file == -1)
 	{
 //		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
@@ -184,7 +188,7 @@ bool MFFileNative_Exists(const char* pFilename)
 
 const char* MFFileNative_MakeAbsolute(const char* pFilename)
 {
-	char path[100];
+	char path[PATH_MAX];
 	if(realpath(pFilename, path))
 		return MFStr(path);
 	return NULL;

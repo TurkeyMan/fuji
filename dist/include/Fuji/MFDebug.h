@@ -149,6 +149,7 @@ MF_API void MFDebug_Warn(int level, const char *pWarningMessage);
  * - 2 - Not so important message.
  * - 3 - Typically unwanted message.
  * - 4 - Very trivial and probably frequent spammy message.
+ * - 5 - Output function calls to log program flow.
  */
 MF_API void MFDebug_Log(int level, const char *pMessage);
 
@@ -156,17 +157,17 @@ MF_API void MFDebug_Log(int level, const char *pMessage);
  * Sets the maximum warning level.
  * Sets the maximum warning level to be written to the debug output.
  * @param maxLevel Maximum warning level (0-4).
- * @return None.
+ * @return The previous warning level.
  */
-MF_API void MFDebug_SetMaximumWarningLevel(int maxLevel);
+MF_API int MFDebug_SetMaximumWarningLevel(int maxLevel);
 
 /**
  * Sets the maximum log level.
  * Sets the maximum log level to be written to the debug output.
- * @param maxLevel Maximum log level (0-4).
- * @return None.
+ * @param maxLevel Maximum log level (0-5).
+ * @return The previous log level.
  */
-MF_API void MFDebug_SetMaximumLogLevel(int maxLevel);
+MF_API int MFDebug_SetMaximumLogLevel(int maxLevel);
 
 #else
 

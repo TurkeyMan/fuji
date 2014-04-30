@@ -28,16 +28,18 @@ typedef int MFFileSystemHandle;
  */
 enum MFOpenFlags
 {
-	MFOF_Read	= 1,	/**< File has read access */
-	MFOF_Write	= 2,	/**< File has write access */
-	MFOF_Text	= 4,	/**< Open file in text mode */
-	MFOF_Binary	= 8,	/**< Open file in binary mode */
+	MFOF_Read		= 0x1,			/**< File has read access */
+	MFOF_Write		= 0x2,			/**< File has write access */
+	MFOF_Truncate	= 0x4,			/**< Truncate existing file */
+	MFOF_Append		= 0x8,			/**< Append to existing file */
+	MFOF_Text		= 0x10,			/**< Open file in text mode */
+	MFOF_Binary		= 0x20,			/**< Open file in binary mode */
 
-	MFOF_CreateDirectory = 16,	/**< Create the directory if it doesn't already exist */
+	MFOF_CreateDirectory = 0x40,	/**< Create the directory if it doesn't already exist */
 
-	MFOF_User	= 256,	/**< User flags begin here (for use by other file systems) */
+	MFOF_User = 0x100,				/**< User flags begin here (for use by other file systems) */
 
-	MFOF_ForceInt = 0x7FFFFFFF /**< Force open flags to an int type */
+	MFOF_ForceInt = 0x7FFFFFFF		/**< Force open flags to an int type */
 };
 
 /**

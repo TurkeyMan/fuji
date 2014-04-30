@@ -11,8 +11,6 @@
 
 #include <stdio.h>
 
-char *gpCommandLineBuffer = NULL;
-
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
