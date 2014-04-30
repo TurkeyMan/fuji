@@ -8,7 +8,8 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_OpenGL
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_OpenGL
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_OpenGL
-	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_OpenGL
+	#define MFRenderer_LostFocus MFRenderer_LostFocus_OpenGL
+	#define MFRenderer_GainedFocus MFRenderer_GainedFocus_OpenGL
 	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_OpenGL
 	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_OpenGL
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_OpenGL
@@ -28,6 +29,7 @@
 #include "MFView_Internal.h"
 #include "MFRenderer_Internal.h"
 #include "MFRenderTarget_Internal.h"
+#include "MFWindow.h"
 
 #include "MFOpenGL.h"
 
@@ -115,7 +117,6 @@ int gOpenGLVersion = 0;
 	#pragma comment(lib, "Glu32")
 
 	extern HINSTANCE apphInstance;
-	extern HWND apphWnd;
 	HGLRC hRC = NULL; // Permanent Rendering Context
 	HDC hDC = NULL; // Private GDI Device Context
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
@@ -170,7 +171,7 @@ void MFRenderer_DeinitModulePlatformSpecific()
 {
 }
 
-int MFRenderer_CreateDisplay()
+int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 {
 #if MF_DISPLAY == MF_DRIVER_X11
 	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
@@ -218,13 +219,15 @@ int MFRenderer_CreateDisplay()
 		return 1;
 	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
+	HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow);
+
 	GLuint pixelFormat;
 
 	PIXELFORMATDESCRIPTOR pfd =
 	{
 		sizeof(PIXELFORMATDESCRIPTOR),
 		1,
-		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
 		PFD_TYPE_RGBA,
 		32, // colour depth
 		0, 0, 0, 0, 0, 0,
@@ -240,10 +243,12 @@ int MFRenderer_CreateDisplay()
 		0, 0, 0 // Layer Masks Ignored
 	};
 
-	hDC = GetDC(apphWnd);
+	pfd.dwFlags |= pDisplay->settings.numBuffers > 1 ? PFD_DOUBLEBUFFER : 0;
+
+	hDC = GetDC(hWnd);
 	if(!hDC)
 	{
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		MessageBox(NULL, "Can't Create A GL Device Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 1;
 	}
@@ -251,14 +256,14 @@ int MFRenderer_CreateDisplay()
 	pixelFormat = ChoosePixelFormat(hDC, &pfd);
 	if(!pixelFormat)
 	{
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		MessageBox(NULL, "Can't Find A Suitable PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 2;
 	}
 
 	if(!SetPixelFormat(hDC, pixelFormat, &pfd))
 	{
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		MessageBox(NULL, "Can't Set The PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 3;
 	}
@@ -276,13 +281,13 @@ int MFRenderer_CreateDisplay()
 	{
 		MessageBox(NULL, MFStr("Failed to create OpenGL context: %s", MFSystemPC_GetLastError()), "ERROR", MB_OK|MB_ICONEXCLAMATION);
 
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		return 4;
 	}
 
 	if(!wglMakeCurrent(hDC, hRC))
 	{
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
@@ -338,29 +343,35 @@ int MFRenderer_CreateDisplay()
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&gDefaultRenderTarget);
 
 	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = pDisplay->settings.width;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = pDisplay->settings.height;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
 
 	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = pDisplay->settings.width;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = pDisplay->settings.height;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
 
 	MFRenderTargetDesc desc;
 	desc.pName = "Device Render Target";
-	desc.width = gDisplay.width;
-	desc.height = gDisplay.height;
+	desc.width = pDisplay->settings.width;
+	desc.height = pDisplay->settings.height;
 	desc.colourTargets[0].pSurface = &gDeviceRenderTarget;
 	desc.depthStencil.pSurface = &gDeviceZTarget;
 	gpDeviceRenderTarget = MFRenderTarget_Create(&desc);
 
+	gCurrentViewport.x = 0.0f;
+	gCurrentViewport.y = 0.0f;
+	gCurrentViewport.width = (float)pDisplay->settings.width;
+	gCurrentViewport.height = (float)pDisplay->settings.height;
+	glViewport(0, 0, pDisplay->settings.width, pDisplay->settings.height);
+
 	return 0;
 }
 
-void MFRenderer_DestroyDisplay()
+void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
 	MFRenderTarget_Release(gpDeviceRenderTarget);
 
@@ -383,6 +394,8 @@ void MFRenderer_DestroyDisplay()
 		glXWindow = 0;
 	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
+	HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow);
+
 	if(hRC)
 	{
 		if(wglMakeCurrent(NULL, NULL))
@@ -394,74 +407,103 @@ void MFRenderer_DestroyDisplay()
 
 	if(hDC)
 	{
-		ReleaseDC(apphWnd, hDC);
+		ReleaseDC(hWnd, hDC);
 		hDC = NULL;
 	}
 #endif
 }
 
-void MFRenderer_ResetDisplay()
+bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)
 {
+	MFDebug_Warn(4, MFStr("MFRenderer_ResetDisplay(%d, %d, %s)", pSettings->width, pSettings->height, pSettings->bFullscreen ? "true" : "false"));
+
+	bool bFullscreenChanged = pDisplay->settings.bFullscreen != pSettings->bFullscreen;
+
+	// change display mode...
+	if(bFullscreenChanged || (pSettings->bFullscreen && (pDisplay->settings.width != pSettings->width || pDisplay->settings.height != pSettings->height)))
+	{
+#if MF_DISPLAY == MF_DRIVER_WIN32
+		if(pSettings->bFullscreen)
+		{
+			DEVMODE dmScreenSettings;
+			memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+			dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+			dmScreenSettings.dmPelsWidth = pSettings->width;
+			dmScreenSettings.dmPelsHeight = pSettings->height;
+			dmScreenSettings.dmBitsPerPel = 32;
+			dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+			if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+			{
+				MFDebug_Warn(2, "The requested fullscreen mode is not supported by your video card.");
+				return false;
+			}
+
+			if(bFullscreenChanged)
+				ShowCursor(FALSE);
+		}
+		else
+		{
+			if(ChangeDisplaySettings(NULL, 0) != DISP_CHANGE_SUCCESSFUL)
+			{
+				MFDebug_Warn(2, "Unable to return to windowed mode!");
+				return false;
+			}
+
+			if(bFullscreenChanged)
+				ShowCursor(TRUE);
+		}
+#endif
+	}
+
 	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = pSettings->width;
+	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = pSettings->height;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
 
 	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = gDisplay.width;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = gDisplay.height;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].width = pSettings->width;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].height = pSettings->height;
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
 
-	gpDeviceRenderTarget->width = gDisplay.width;
-	gpDeviceRenderTarget->height = gDisplay.height;
-	
+	gpDeviceRenderTarget->width = pSettings->width;
+	gpDeviceRenderTarget->height = pSettings->height;
+
 	MFRenderer_ResetViewport();
+
+	return true;
 }
 
-bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+void MFRenderer_LostFocus(MFDisplay *pDisplay)
 {
-	if(bFullscreen)
+	if(pDisplay->settings.bFullscreen)
 	{
-#if MF_DISPLAY == MF_DRIVER_WIN32
-		ShowCursor(FALSE);
+		if(ChangeDisplaySettings(NULL, 0) == DISP_CHANGE_SUCCESSFUL)
+			ShowCursor(TRUE);
+		else
+			MFDebug_Warn(2, "Unable to return to windowed mode!");
+	}
+}
 
+void MFRenderer_GainedFocus(MFDisplay *pDisplay)
+{
+	if(pDisplay->settings.bFullscreen)
+	{
 		DEVMODE dmScreenSettings;
 		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
 		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = width;
-		dmScreenSettings.dmPelsHeight = height;
+		dmScreenSettings.dmPelsWidth = pDisplay->settings.width;
+		dmScreenSettings.dmPelsHeight = pDisplay->settings.height;
 		dmScreenSettings.dmBitsPerPel = 32;
 		dmScreenSettings.dmFields = DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
-		if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-		{
-			if(MessageBox(NULL, "The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?", "Error!", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-			{
-				gDisplay.windowed = true;
-			}
-			else
-			{
-				MessageBox(NULL, "Program Will Now Close.", "Error!", MB_OK|MB_ICONSTOP);
-				return false;
-			}
-		}
+		if(ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
+			ShowCursor(FALSE);
 		else
-		{
-			gDisplay.windowed = false;
-		}
-#endif
+			MFDebug_Warn(2, "Couldn't change display mode!");
 	}
-	else
-	{
-		// reset display mode...
-		//...
-
-		gDisplay.windowed = true;
-	}
-
-	return true;
 }
 
 bool MFRenderer_BeginFramePlatformSpecific()
@@ -525,12 +567,14 @@ MF_API void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
+	MFDisplay *pDisplay = MFDisplay_GetCurrent();
+
 	gCurrentViewport.x = 0.0f;
 	gCurrentViewport.y = 0.0f;
-	gCurrentViewport.width = (float)gDisplay.width;
-	gCurrentViewport.height = (float)gDisplay.height;
+	gCurrentViewport.width = (float)pDisplay->settings.width;
+	gCurrentViewport.height = (float)pDisplay->settings.height;
 
-	glViewport(0, 0, gDisplay.width, gDisplay.height);
+	glViewport(0, 0, pDisplay->settings.width, pDisplay->settings.height);
 	MFCheckForOpenGLError();
 }
 

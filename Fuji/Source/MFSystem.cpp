@@ -255,14 +255,8 @@ void MFSystem_Draw()
 	MFView_SetDefault();
 
 	MFRect rect;
-	MFRect display;
-
-	MFDisplay_GetDisplayRect(&display);
-
-	rect.x = 0.0f;
-	rect.y = 0.0f;
-	rect.height = display.height;
-	rect.width = rect.height * MFDisplay_GetNativeAspectRatio();
+	MFDisplay_GetDisplayRect(&rect);
+	rect.width = rect.height * MFDisplay_GetAspectRatio();
 
 	MFView_SetOrtho(&rect);
 
@@ -311,7 +305,7 @@ void MFSystem_Draw()
 		float x = rect.width-140.0f;
 		float y = 30.0f;
 
-		float xaspect = 25 * MFDisplay_GetNativeAspectRatio();
+		float xaspect = 25 * MFDisplay_GetAspectRatio();
 
 		MFFont_DrawText2f(MFFont_GetDebugFont(), x, y, 20.0f, MakeVector(1,1,0,1), "FPS: %.2f", MFSystem_GetFPS());
 
@@ -345,7 +339,7 @@ void MFSystem_Draw()
 	}
 
 	rect.height = 480;
-	rect.width = rect.height * MFDisplay_GetNativeAspectRatio();
+	rect.width = rect.height * MFDisplay_GetAspectRatio();
 	MFView_SetOrtho(&rect);
 
 	DebugMenu_Draw();

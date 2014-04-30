@@ -4,7 +4,7 @@
 
 #include "MFTranslation.h"
 
-MF_API MFLanguage MFTranslation_GetDefaultLanguage()
+MF_API MFLanguage MFTranslation_GetSystemLanguage()
 {
 	char *pLang = getenv("LANG");
 

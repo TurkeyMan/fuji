@@ -228,7 +228,7 @@ void MFCallstackInternal_DrawMeterLabel(const MFVector &listPos, const MFVector 
 
 	if(pStats)
 	{
-		float width = (float)gDisplay.width;
+		float width = (float)MFDisplay_GetDisplaySettings()->width;
 		MFFont_DrawTextf(MFFont_GetDebugFont(), listPos + MakeVector((width - listPos.x) - 250.0f, 0.0f, 0.0f), 16.0f, MFVector::one, pStats);
 	}
 }
@@ -239,8 +239,9 @@ void MFCallstack_Draw()
 
 	if(drawCallstack)
 	{
-		float width = (float)gDisplay.width;
-		float height = (float)gDisplay.height;
+		const MFDisplaySettings *pDisplaySettings = MFDisplay_GetDisplaySettings();
+		float width = (float)pDisplaySettings->width;
+		float height = (float)pDisplaySettings->height;
 		float xoffset = width / 10.0f;
 		float yoffset = height / 6.0f;
 

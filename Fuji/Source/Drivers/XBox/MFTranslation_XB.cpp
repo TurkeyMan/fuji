@@ -6,7 +6,7 @@
 
 #include <xtl.h>
 
-MF_API MFLanguage MFTranslation_GetDefaultLanguage()
+MF_API MFLanguage MFTranslation_GetSystemLanguage()
 {
 	MFLanguage language;
 

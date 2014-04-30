@@ -20,7 +20,7 @@ MF_API MFIntSound *MFIntSound_CreateFromFile(const char *pFilename)
 	pSound->pInternal = pStream;
 
 	pSound->soundTemplate.magic = MFMAKEFOURCC('S', 'N', 'D', '1');
-	pSound->soundTemplate.format = pStream->streamInfo.bitsPerSample == 8 ? MFWF_PCM_u8 : (pStream->streamInfo.bitsPerSample == 24 ? MFWF_PCM_s24 : MFWF_PCM_s16);
+	pSound->soundTemplate.format = pStream->streamInfo.bitsPerSample == 8 ? MFWaveFmt_PCM_u8 : (pStream->streamInfo.bitsPerSample == 24 ? MFWaveFmt_PCM_s24 : MFWaveFmt_PCM_s16);
 	pSound->soundTemplate.flags = 0;
 	pSound->soundTemplate.sampleRate = pStream->streamInfo.sampleRate;
 	pSound->soundTemplate.numSamples = 0;

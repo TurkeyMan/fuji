@@ -100,22 +100,22 @@ MF_API MFResource* MFResource_Find(uint32 hash)
 	return NULL;
 }
 
-MF_API int MFResource_GetType(MFResource *pResource)
+MF_API int MFResource_GetType(const MFResource *pResource)
 {
 	return (int)pResource->type;
 }
 
-MF_API uint32 MFResource_GetHash(MFResource *pResource)
+MF_API uint32 MFResource_GetHash(const MFResource *pResource)
 {
 	return pResource->hash;
 }
 
-MF_API int MFResource_GetRefCount(MFResource *pResource)
+MF_API int MFResource_GetRefCount(const MFResource *pResource)
 {
 	return pResource->refCount;
 }
 
-MF_API const char* MFResource_GetName(MFResource *pResource)
+MF_API const char* MFResource_GetName(const MFResource *pResource)
 {
 	return pResource->pName;
 }

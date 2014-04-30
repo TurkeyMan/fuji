@@ -1,7 +1,12 @@
 #if !defined(_MFDISPLAY_H)
 #define _MFDISPLAY_H
 
-//#define _NEW_DISPLAY
+#include "MFImage.h"
+
+struct MFWindow;
+struct MFSwapChain;
+
+struct MFDisplay;
 
 enum MFDisplayOrientation
 {
@@ -16,75 +21,154 @@ enum MFDisplayOrientation
 	MFDO_ForceInt = 0x7FFFFFFF
 };
 
-#if defined(_NEW_DISPLAY)
-
-#define MFASPECT_1x1	(1.f)
-#define MFASPECT_4x3	(4.f/3.f)
-#define MFASPECT_16x9	(16.f/9.f)
-#define MFASPECT_16x10	(16.f/10.f)
-
-enum MFDisplayModeFlags
+enum MFDisplayCable
 {
-	MFDM_Fullscreen = MFBIT(0)
+	MFDC_Unknown = -1,
+
+	// TV standards
+	MFDC_RF,
+	MFDC_Composite,
+	MFDC_SVideo,
+
+	// RGB standards
+	MFDC_SCART,
+	MFDC_Component,
+	MFDC_VGA,
+	MFDC_DVI,
+	MFDC_HDMI,
+	MFDC_DisplayPort,
+
+	MFDC_Max,
+	MFDC_ForceInt = 0x7FFFFFFF
 };
 
-struct MFDisplay;
+enum MFDisplayMode
+{
+	MFDM_Unknown = -1,
 
-struct MFDisplayMode
+	MFDM_Progressive,
+	MFDM_Interlace,
+	MFDM_NTSC,
+	MFDM_PAL,
+
+	MFDM_Max,
+	MFDM_ForceInt = 0x7FFFFFFF
+};
+
+enum MFDisplayAspect
+{
+	MFDA_Unknown = -1,
+
+	MFDA_Default,
+	MFDA_Widescreen,
+	MFDA_Letterbox,
+
+	MFDA_Max,
+	MFDA_ForceInt = 0x7FFFFFFF
+};
+
+enum MFDisplayFlags
+{
+	MFDF_HideMenuBar = MFBIT(0),
+	MFDF_HideStatusBar = MFBIT(1),
+	MFDF_DisableRotation = MFBIT(2),
+	MFDF_EnableRotation = MFBIT(3),
+	MFDF_CanResizeWindow = MFBIT(4)
+};
+
+struct MFMonitorDesc
+{
+	const char *pName;
+
+	int displayAdaptor;
+
+	MFDisplayMode defaultMode;
+	MFDisplayAspect defaultAspect;
+	MFDisplayCable cable;
+
+	MFRect defaultResolution;
+	MFRect nativeResolution;	// may not be set for variable-rate monitors (TV's)
+
+	float nativeAspectRatio;
+};
+
+struct MFDisplayAdaptorDesc
+{
+	const char *pDeviceId;
+	const char *pName;
+
+	bool bSupportsFullscreen;
+	bool bSupportsWindowed;
+};
+
+struct MFDisplayModeDesc
 {
 	int width;
 	int height;
-	float aspectRatio;
-	uint32 createFlags;
+	int refreshRate;
+	MFDisplayMode mode;
+	uint32 cableBits;	// set a bit for each supported cable type
 };
 
-MF_API MFDisplay *MFDisplay_Create(const char *pName, MFDisplayMode *pDisplayMode);
-MF_API void MFDisplay_Destroy(MFDisplay *pDisplay);
-
-MF_API int MFDisplay_GetDisplayModeCount();
-MF_API void MFDisplay_GetDisplayMode(MFDisplayMode *pDisplayMode);
-
-MF_API float MFDisplay_GetNativeAspectRatio();
-MF_API bool MFDisplay_IsWidescreen();
-
-MF_API void MFDisplay_HandleSystemMessages();
-
-MF_API MFDisplayOrientation MFDisplay_GetDisplayOrientation();
-
-// these functions are reserved for use by the renderer, and may not be called if the renderer chooses to implement them its self
-MF_API void *MFDisplay_GetRenderBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
-MF_API void *MFDisplay_GetDisplayBuffer(MFDisplay *pDisplay, int *pWidth, int *pHeight);
-MF_API void MFDisplay_BlitToScreen(MFDisplay *pDisplay);
-
-/////////////////////////////////////////////////////////////////////////////////
-#else
-/////////////////////////////////////////////////////////////////////////////////
-
-const float MFAspect_1x1 = 1.f;
-const float MFAspect_4x3 = 4.f/3.f;
-const float MFAspect_16x9 = 16.f/9.f;
-const float MFAspect_16x10 = 16.f/10.f;
-
-// interface functions
-MF_API bool MFDisplay_SupportsFullscreen();
-MF_API void MFDisplay_GetNumDisplayModes(bool window = false, float aspectConstraint = 0.f);
-MF_API void MFDisplay_GetDisplayMode(int index, bool window = false, float aspectConstraint = 0.f);
-
-MF_API void MFDisplay_GetNativeRes(MFRect *pRect);
-MF_API void MFDisplay_GetDefaultRes(MFRect *pRect);
-
-MF_API void MFDisplay_GetDisplayRect(MFRect *pRect);
-
-MF_API float MFDisplay_GetNativeAspectRatio();
-MF_API bool MFDisplay_IsWidescreen();
-
-MF_API bool MFDisplay_HasFocus();
-
-MF_API inline MFDisplayOrientation MFDisplay_GetDisplayOrientation()
+struct MFDisplaySettings
 {
-	return MFDO_Normal;
-}
+	int monitor;
+	int displayAdaptor;
 
-#endif
+	int width;
+	int height;
+	int refreshRate;
+
+	bool bFullscreen;
+	bool bVSync;
+
+	int numBuffers;		// 1/2/3 (single, double, triple buffering
+
+	MFImageFormat backBufferFormat;
+	MFImageFormat depthStencilFormat;
+
+	MFDisplayMode mode;
+	MFDisplayAspect aspect;
+	MFDisplayCable cable;
+
+	MFWindow *pWindow;
+
+	uint32 flags;	// MFDisplayFlags
+};
+
+
+// query hardware
+MF_API int MFDisplay_GetNumMonitors();
+MF_API const MFMonitorDesc* MFDisplay_GetMonitorDesc(int monitor);
+
+MF_API int MFDisplay_GetNumDisplayAdaptors();
+MF_API const MFDisplayAdaptorDesc *MFDisplay_GetDisplayAdaptorDesc(int adaptor);
+
+MF_API int MFDisplay_GetDisplayModeCount(int monitor);
+MF_API const MFDisplayModeDesc *MFDisplay_GetDisplayMode(int monitor, int index);
+
+MF_API void MFDisplay_GetDefaults(MFDisplaySettings *pDisplaySettings);
+
+// manage displays
+MF_API MFDisplay* MFDisplay_Create(const char *pName, const MFDisplaySettings *pDisplaySettings);
+MF_API MFDisplay* MFDisplay_CreateDefault(const char *pName);
+
+MF_API bool MFDisplay_Reset(MFDisplay *pDisplay = NULL, const MFDisplaySettings *pSettings = NULL);
+
+MF_API MFDisplay* MFDisplay_SetCurrent(MFDisplay *pDisplay);
+MF_API MFDisplay* MFDisplay_GetCurrent();
+
+MF_API void MFDisplay_Destroy(MFDisplay *pDisplay = NULL);
+
+// query current settings
+MF_API const MFDisplaySettings* MFDisplay_GetDisplaySettings(const MFDisplay *pDisplay = NULL);
+MF_API MFDisplayOrientation MFDisplay_GetDisplayOrientation(const MFDisplay *pDisplay = NULL);
+
+MF_API void MFDisplay_GetDisplayRect(MFRect *pRect, const MFDisplay *pDisplay = NULL);
+
+MF_API float MFDisplay_GetAspectRatio(const MFDisplay *pDisplay = NULL);
+
+MF_API bool MFDisplay_IsVisible(const MFDisplay *pDisplay = NULL);
+MF_API bool MFDisplay_HasFocus(const MFDisplay *pDisplay = NULL);
 
 #endif // _MFDISPLAY_H

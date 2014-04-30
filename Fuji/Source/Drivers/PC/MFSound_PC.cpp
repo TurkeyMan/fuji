@@ -2,6 +2,8 @@
 
 #if MF_SOUND == MF_DRIVER_DSOUND || defined(MF_SOUNDPLUGIN_DSOUND)
 
+#include "MFDisplay_Internal.h"
+#include "MFWindow.h"
 #include "MFSystem.h"
 #include "MFSound_Internal.h"
 
@@ -36,8 +38,6 @@ struct MFVoiceDataInternal
 
 
 /**** Globals ****/
-
-extern HWND apphWnd;
 
 IDirectSound8 *pDirectSound;
 static IDirectSoundBuffer *pDSPrimaryBuffer;
@@ -78,7 +78,8 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 	hr = pDirectSound->CreateSoundBuffer(&desc, &pDSPrimaryBuffer, NULL);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to create the Primary Sound Buffer");
 
-	hr = pDirectSound->SetCooperativeLevel(apphWnd, DSSCL_PRIORITY);
+	HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(MFDisplay_GetCurrent()->settings.pWindow);
+	hr = pDirectSound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
 	MFDebug_Assert(SUCCEEDED(hr), "Failed to set the DirectSound cooperative level");
 #endif
 

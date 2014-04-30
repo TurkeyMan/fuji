@@ -344,7 +344,7 @@ float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &
 
 	// Translation Functions
 	r = pEngine->RegisterGlobalFunction("int MFTranslation_GetLanguageName(int, bool)", asFUNCTION(MFTranslation_GetLanguageName), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
-	r = pEngine->RegisterGlobalFunction("cstring MFTranslation_GetDefaultLanguage()", asFUNCTION(MFTranslation_GetDefaultLanguage), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
+	r = pEngine->RegisterGlobalFunction("cstring MFTranslation_GetSystemLanguage()", asFUNCTION(MFTranslation_GetSystemLanguage), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterGlobalFunction("MFStringTable @MFTranslation_LoadStringTable(cstring, int, int)", asFUNCTION(MFTranslation_LoadStringTable), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterGlobalFunction("MFStringTable @MFTranslation_LoadEnumStringTable(cstring)", asFUNCTION(MFTranslation_LoadEnumStringTable), asCALL_CDECL); MFDebug_Assert(r >= 0, "Failed!");
 	r = pEngine->RegisterObjectMethod("MFStringTable", "void DestroyStringTable()", asFUNCTION(MFTranslation_DestroyStringTable), asCALL_CDECL_OBJFIRST); MFDebug_Assert(r >= 0, "Failed!");

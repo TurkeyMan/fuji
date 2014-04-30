@@ -8,7 +8,8 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_D3D9
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D9
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D9
-	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D9
+	#define MFRenderer_LostFocus MFRenderer_LostFocus_D3D9
+	#define MFRenderer_GainedFocus MFRenderer_GainedFocus_D3D9
 	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_D3D9
 	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_D3D9
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D9
@@ -25,6 +26,7 @@
 	#define MFTexture_Recreate MFTexture_Recreate_D3D9
 #endif
 
+#include "MFWindow_Internal.h"
 #include "MFVertex_Internal.h"
 #include "MFTexture_Internal.h"
 #include "MFMaterial_Internal.h"
@@ -39,6 +41,8 @@
 #include <D3Dcommon.h>
 
 #pragma comment(lib, "d3d9")
+
+extern D3DFORMAT gD3D9Format[ImgFmt_Max];
 
 static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
@@ -55,8 +59,6 @@ static MFTextureTemplateData gDeviceZTargetTemplate;
 static MFTextureSurfaceLevel gDeviceZTargetSurface;
 
 D3DCAPS9 gD3D9DeviceCaps;
-
-extern HWND apphWnd;
 
 static MFRect gCurrentViewport;
 
@@ -108,52 +110,142 @@ void MFRenderer_DeinitModulePlatformSpecific()
 	}
 }
 
-int MFRenderer_CreateDisplay()
+static bool ChooseFormats(MFImageFormat &backBuffer, MFImageFormat &depthStencil, bool bFullscreen)
+{
+	bool bAutoBackBuffer = (backBuffer & ImgFmt_SelectDefault) != 0;
+	bool bAutoDepth = (depthStencil & ImgFmt_SelectDefault) != 0;
+	bool bDepthWithStencil = (depthStencil & ImgFmt_SelectDepthStencil) == ImgFmt_SelectDepthStencil;
+
+	// find a suitable back buffer format
+	if(bAutoBackBuffer)
+	{
+		backBuffer = ImgFmt_A8R8G8B8;
+	}
+
+	// find a suitable zbuffer format
+	if(bAutoDepth)
+	{
+		MFDebug_Assert((depthStencil & ImgFmt_SelectDepthStencil) >= ImgFmt_SelectDepth, "Invalid depth/stencil buffer format!");
+
+		if(bDepthWithStencil)
+		{
+			// with stencil
+			depthStencil = ImgFmt_D24S8;
+		}
+		else
+		{
+			// without stencil
+			if((depthStencil & 0x3) == 1)	// SelectNicest
+				depthStencil = ImgFmt_D32F;
+			else
+				depthStencil = ImgFmt_D24X8;
+		}
+	}
+
+	D3DFORMAT adapterFormat = backBuffer == ImgFmt_A8R8G8B8 ? D3DFMT_X8R8G8B8 : D3DFMT_A8R8G8B8;
+	if(d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, adapterFormat, gD3D9Format[backBuffer], gD3D9Format[depthStencil]) != D3D_OK)
+	{
+		// try and find formats that work...
+		struct AutoFormat
+		{
+			MFImageFormat bb, ds;
+		};
+		AutoFormat autoFormatsStencil[] =
+		{
+			{ ImgFmt_A8R8G8B8, ImgFmt_D24S8 },
+			{ ImgFmt_R5G6B5, ImgFmt_D24S8 },
+			{ ImgFmt_Unknown, ImgFmt_Unknown }
+		};
+		AutoFormat autoFormatsNoStencil[] =
+		{
+			{ ImgFmt_A8R8G8B8, ImgFmt_D24X8 },
+			{ ImgFmt_A8R8G8B8, ImgFmt_D16 },
+			{ ImgFmt_R5G6B5, ImgFmt_D24X8 },
+			{ ImgFmt_R5G6B5, ImgFmt_D16 },
+			{ ImgFmt_Unknown, ImgFmt_Unknown }
+		};
+
+		AutoFormat *pAutoFormats = bDepthWithStencil ? autoFormatsStencil : autoFormatsNoStencil;
+
+		int i=0;
+		while(pAutoFormats[i].bb != D3DFMT_UNKNOWN)
+		{
+			backBuffer = bAutoBackBuffer ? pAutoFormats[i].bb : backBuffer;
+			depthStencil = bAutoDepth ? pAutoFormats[i].ds : depthStencil;
+
+			adapterFormat = backBuffer == ImgFmt_A8R8G8B8 ? D3DFMT_X8R8G8B8 : D3DFMT_A8R8G8B8;
+			if(d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, adapterFormat, gD3D9Format[backBuffer], gD3D9Format[depthStencil]) == D3D_OK &&
+				d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, adapterFormat, gD3D9Format[backBuffer], FALSE) == D3D_OK)
+				break;
+		}
+		if(pAutoFormats[i].bb == ImgFmt_Unknown)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static MFImageFormat GetDesktopFormat(UINT adapter, D3DFORMAT *pFormat)
+{
+	// get active display mode
+	D3DDISPLAYMODE d3ddm;
+	d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+	if(pFormat)
+		*pFormat = d3ddm.Format;
+	switch(d3ddm.Format)
+	{
+		case D3DFMT_A8R8G8B8:
+		case D3DFMT_X8R8G8B8: return ImgFmt_A8R8G8B8;
+		case D3DFMT_R5G6B5: return ImgFmt_R5G6B5;
+		default:
+			MFDebug_Assert(false, "Unexpected back buffer format!");
+			return ImgFmt_Unknown;
+	}
+}
+
+int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 {
 	D3DPRESENT_PARAMETERS present;
 	MFZeroMemory(&present, sizeof(present));
 
-	if(!gDisplay.windowed)
+	MFImageFormat backBufferFormat = pDisplay->settings.backBufferFormat;
+	MFImageFormat depthStencilFormat = pDisplay->settings.depthStencilFormat;
+
+	if((backBufferFormat & ImgFmt_SelectDefault) | (depthStencilFormat & ImgFmt_SelectDefault))
+	{
+		if(!ChooseFormats(backBufferFormat, depthStencilFormat, pDisplay->settings.bFullscreen))
+		{
+			MFDebug_Warn(2, "Incompatible render/depth formats.");
+			return 1;
+		}
+	}
+
+	if(pDisplay->settings.bFullscreen)
 	{
 		present.SwapEffect					= D3DSWAPEFFECT_FLIP;
 		present.Windowed					= FALSE;
-		present.BackBufferFormat			= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth				= gDisplay.width;
-		present.BackBufferHeight			= gDisplay.height;
-		present.BackBufferCount				= 2;
-		present.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;
+		present.BackBufferFormat			= gD3D9Format[backBufferFormat];
+		present.BackBufferWidth				= pDisplay->settings.width;
+		present.BackBufferHeight			= pDisplay->settings.height;
+		present.BackBufferCount				= pDisplay->settings.numBuffers;
+		present.FullScreen_RefreshRateInHz	= pDisplay->settings.refreshRate;
 	}
 	else
 	{
-		D3DDISPLAYMODE d3ddm;
-		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
+		present.SwapEffect	= D3DSWAPEFFECT_COPY;
+		present.Windowed	= TRUE;
 
-		// check if this format is supported as a back buffer
-		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
-		{
-			d3ddm.Format = D3DFMT_X8R8G8B8;
-			if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
-				d3ddm.Format = D3DFMT_R5G6B5;
-		}
-
-		present.SwapEffect			= D3DSWAPEFFECT_COPY;
-		present.Windowed			= TRUE;
-		present.BackBufferFormat	= d3ddm.Format;
+		backBufferFormat = GetDesktopFormat(D3DADAPTER_DEFAULT, &present.BackBufferFormat);
 	}
 
-	D3DFORMAT PixelFormat = present.BackBufferFormat;
-	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, D3DFMT_D24S8) != D3D_OK;
-
 	present.EnableAutoDepthStencil	= TRUE;
-//	present.AutoDepthStencilFormat	= (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-	present.AutoDepthStencilFormat	= z16 ? D3DFMT_D16 : D3DFMT_D24S8;
-//	present.PresentationInterval	= display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-	present.PresentationInterval	= D3DPRESENT_INTERVAL_ONE;
-	present.hDeviceWindow			= apphWnd;
+	present.AutoDepthStencilFormat	= gD3D9Format[depthStencilFormat];
+	present.PresentationInterval	= pDisplay->settings.bVSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	present.hDeviceWindow			= (HWND)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow);
 
-	int b=0;
 	DWORD processing = D3DCREATE_MULTITHREADED;
-
 	if(gD3D9DeviceCaps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT && ((gD3D9DeviceCaps.VertexShaderVersion >> 8) & 0xFF) >= 2)
 	{
 		processing |= D3DCREATE_HARDWARE_VERTEXPROCESSING;
@@ -164,72 +256,33 @@ int MFRenderer_CreateDisplay()
 		processing |= D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 	}
 
-	for(int a=0; a<3&&!b; a++)
+	HRESULT hr = d3d9->CreateDevice(0, D3DDEVTYPE_HAL, present.hDeviceWindow, processing, &present, &pd3dDevice);
+	if(FAILED(hr))
 	{
-		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, PixelFormat, PixelFormat, gDisplay.windowed)==D3D_OK)
+		const char *pMessage = "UNKNOWN ERROR";
+		switch(hr)
 		{
-			HRESULT hr = d3d9->CreateDevice(0, D3DDEVTYPE_HAL, apphWnd, processing, &present, &pd3dDevice);
-			if(FAILED(hr))
-			{
-				if(a == 0)
-				{
-					MessageBox(NULL,"Failed to create Direct3D device.\nAttempting default display settings.","Error!",MB_OK|MB_ICONERROR);
-					present.BackBufferFormat = PixelFormat = D3DFMT_X8R8G8B8;
-					present.AutoDepthStencilFormat = D3DFMT_D24S8;
-				}
-				if(a == 1)
-				{
-					present.BackBufferFormat = PixelFormat = D3DFMT_R5G6B5;
-					present.AutoDepthStencilFormat = D3DFMT_D16;
-				}
-				else
-				{
-					const char *pMessage = "UNKNOWN ERROR";
-					switch(hr)
-					{
-						case D3DERR_DEVICELOST:
-							pMessage = "D3DERR_DEVICELOST";
-							break;
-						case D3DERR_INVALIDCALL:
-							pMessage = "D3DERR_INVALIDCALL";
-							break;
-						case D3DERR_NOTAVAILABLE:
-							pMessage = "D3DERR_NOTAVAILABLE";
-							break;
-						case D3DERR_OUTOFVIDEOMEMORY:
-							pMessage = "D3DERR_OUTOFVIDEOMEMORY";
-							break;
-					}
-					pMessage = MFStr("Failed to create Direct3D device with error: %s.\nCant create game window.", pMessage);
-					MFDebug_Error(pMessage);
-					MFRenderer_DestroyDisplay();
-					MessageBox(NULL, pMessage, "Error!", MB_OK|MB_ICONERROR);
-					return 4;
-				}
-			}
-			else b=1;
+			case D3DERR_DEVICELOST:
+				pMessage = "D3DERR_DEVICELOST";
+				break;
+			case D3DERR_INVALIDCALL:
+				pMessage = "D3DERR_INVALIDCALL";
+				break;
+			case D3DERR_NOTAVAILABLE:
+				pMessage = "D3DERR_NOTAVAILABLE";
+				break;
+			case D3DERR_OUTOFVIDEOMEMORY:
+				pMessage = "D3DERR_OUTOFVIDEOMEMORY";
+				break;
 		}
-		else
-		{
-			if(a == 0)
-			{
-				MessageBox(NULL,"Unsuitable display mode.\nAttempting default.","Error!",MB_OK|MB_ICONERROR);
-				present.BackBufferFormat = PixelFormat = D3DFMT_X8R8G8B8;
-				present.AutoDepthStencilFormat = D3DFMT_D24S8;
-			}
-			if(a == 1)
-			{
-				present.BackBufferFormat = PixelFormat = D3DFMT_R5G6B5;
-				present.AutoDepthStencilFormat = D3DFMT_D16;
-			}
-			else
-			{
-				MessageBox(NULL,"No suitable hardware supported Display Mode could be found.\nCant create game window.","Error!",MB_OK|MB_ICONERROR);
-				MFRenderer_DestroyDisplay();
-				return 5;
-			}
-		}
+		pMessage = MFStr("Failed to create Direct3D device with error: %s.\nCant create display!", pMessage);
+		MFDebug_Error(pMessage);
+		MessageBox(NULL, pMessage, "Error!", MB_OK|MB_ICONERROR);
+		return 2;
 	}
+
+	pDisplay->settings.backBufferFormat = backBufferFormat;
+	pDisplay->settings.depthStencilFormat = depthStencilFormat;
 
 	pd3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 	pd3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
@@ -248,16 +301,16 @@ int MFRenderer_CreateDisplay()
 	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
-	gDeviceRenderTarget.pTemplateData->imageFormat = (PixelFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->imageFormat = backBufferFormat;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
 
-	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->imageFormat = depthStencilFormat;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
 
 	MFRenderTargetDesc desc;
@@ -271,7 +324,7 @@ int MFRenderer_CreateDisplay()
 	return 0;
 }
 
-void MFRenderer_DestroyDisplay()
+void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
 	MFRenderTarget_Release(gpDeviceRenderTarget);
 
@@ -294,7 +347,7 @@ void MFRenderer_DestroyDisplay()
 	}
 }
 
-void MFRenderer_ResetDisplay()
+bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)
 {
 	// free resources
 	void MFTexture_Release();
@@ -313,51 +366,49 @@ void MFRenderer_ResetDisplay()
 		pZTarget = NULL;
 	}
 
+	if(!pd3dDevice)
+		return false;
+
 	// setup present params
 	D3DPRESENT_PARAMETERS present;
 	MFZeroMemory(&present, sizeof(present));
 
-	if(!gDisplay.windowed)
+	MFImageFormat backBufferFormat = pSettings->backBufferFormat;
+	MFImageFormat depthStencilFormat = pSettings->depthStencilFormat;
+
+	if((backBufferFormat & ImgFmt_SelectDefault) | (depthStencilFormat & ImgFmt_SelectDefault))
+	{
+		if(!ChooseFormats(backBufferFormat, depthStencilFormat, pSettings->bFullscreen))
+		{
+			MFDebug_Warn(2, "Incompatible render/depth formats.");
+			return 1;
+		}
+	}
+
+	if(pSettings->bFullscreen)
 	{
 		present.SwapEffect						= D3DSWAPEFFECT_FLIP;
 		present.Windowed						= FALSE;
-		present.BackBufferFormat				= (gDisplay.colourDepth == 32) ? D3DFMT_X8R8G8B8 : D3DFMT_R5G6B5;
-		present.BackBufferWidth					= gDisplay.fullscreenWidth;
-		present.BackBufferHeight				= gDisplay.fullscreenHeight;
+		present.BackBufferFormat				= gD3D9Format[backBufferFormat];
+		present.BackBufferWidth					= pSettings->width;
+		present.BackBufferHeight				= pSettings->height;
 		present.FullScreen_RefreshRateInHz      = D3DPRESENT_RATE_DEFAULT;
 	}
 	else
 	{
-		D3DDISPLAYMODE d3ddm;
-		d3d9->GetAdapterDisplayMode(D3DADAPTER_DEFAULT, &d3ddm);
-
-		// check if this format is supported as a back buffer
-		if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
-		{
-			d3ddm.Format = D3DFMT_X8R8G8B8;
-			if(d3d9->CheckDeviceType(0, D3DDEVTYPE_HAL, d3ddm.Format, d3ddm.Format, TRUE) != D3D_OK)
-				d3ddm.Format = D3DFMT_R5G6B5;
-		}
-
 		present.SwapEffect              = D3DSWAPEFFECT_COPY;
 		present.Windowed                = TRUE;
-		present.BackBufferFormat        = d3ddm.Format;
-		present.BackBufferWidth			= gDisplay.width;
-		present.BackBufferHeight		= gDisplay.height;
+		present.BackBufferWidth			= pSettings->width;
+		present.BackBufferHeight		= pSettings->height;
+
+		// TODO: This is broken! If swapping away from fullscreen, this will capture the fullscreen mode rather than the desktop mode... >_<
+		backBufferFormat = GetDesktopFormat(D3DADAPTER_DEFAULT, &present.BackBufferFormat);
 	}
 
-	// set the zbuffer format
-	bool z16 = d3d9->CheckDepthStencilMatch(0, D3DDEVTYPE_HAL, present.BackBufferFormat, present.BackBufferFormat, D3DFMT_D24S8) != D3D_OK;
-	present.EnableAutoDepthStencil = TRUE;
-//	present.AutoDepthStencilFormat = (display.zBufferBits == 32) ? D3DFMT_D24S8 : D3DFMT_D16;
-	present.AutoDepthStencilFormat = z16 ? D3DFMT_D16 : D3DFMT_D24S8;
-	present.BackBufferCount        = 1;
-	present.PresentationInterval   = D3DPRESENT_INTERVAL_ONE;
-//	present.PresentationInterval   = display.vsync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-	present.hDeviceWindow          = apphWnd;
-
-	if (!pd3dDevice)
-		return;
+	present.EnableAutoDepthStencil	= TRUE;
+	present.AutoDepthStencilFormat	= gD3D9Format[depthStencilFormat];
+	present.PresentationInterval	= pSettings->bVSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
+	present.hDeviceWindow			= (HWND)MFWindow_GetSystemWindowHandle(pSettings->pWindow);
 
 	// reset the device
 	HRESULT hr;
@@ -378,56 +429,48 @@ void MFRenderer_ResetDisplay()
 			MFRenderer_ResetViewport();
 	}
 
+	if(FAILED(hr))
+		return false;
+
 	// recreate resources
 	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
 	pd3dDevice->GetDepthStencilSurface(&pZTarget);
 
-	gDeviceRenderTarget.pTemplateData->imageFormat = (present.BackBufferFormat == D3DFMT_R5G6B5) ? ImgFmt_R5G6B5 : ImgFmt_A8R8G8B8;
+	gDeviceRenderTarget.pTemplateData->imageFormat = backBufferFormat;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
 	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pRenderTarget;
 
-	gDeviceZTarget.pTemplateData->imageFormat = (present.AutoDepthStencilFormat == D3DFMT_D16) ? ImgFmt_D16 : ImgFmt_D24S8;
+	gDeviceZTarget.pTemplateData->imageFormat = depthStencilFormat;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gDeviceZTarget.pTemplateData->pSurfaces[0].height = (int)present.BackBufferHeight;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
+	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
 	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = (char*)pZTarget;
 
 	gpDeviceRenderTarget->width = (int)present.BackBufferWidth;
 	gpDeviceRenderTarget->height = (int)present.BackBufferHeight;
 
-	if(SUCCEEDED(hr))
-	{
-		void MFTexture_Recreate();
-		MFTexture_Recreate();
-		void MFRenderState_Recreate();
-		MFRenderState_Recreate();
+	void MFTexture_Recreate();
+	MFTexture_Recreate();
+	void MFRenderState_Recreate();
+	MFRenderState_Recreate();
 
-		MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_DisplayReset);
-		if(pCallback)
-			pCallback();
-	}
+	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_DisplayReset);
+	if(pCallback)
+		pCallback();
+
+	return true;
 }
 
-bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+void MFRenderer_LostFocus(MFDisplay *pDisplay)
 {
-	// D3D handles this automatically in Reset()
-	gDisplay.windowed = !bFullscreen;
-	if(bFullscreen)
-	{
-		gDisplay.fullscreenWidth = width;
-		gDisplay.fullscreenHeight = height;
-	}
-	else
-	{
-		gDisplay.width = width;
-		gDisplay.height = height;
-	}
+}
 
-	if(pd3dDevice)
-		MFRenderer_ResetDisplay();
-	return true;
+void MFRenderer_GainedFocus(MFDisplay *pDisplay)
+{
+	if(pDisplay->settings.bFullscreen)
+		MFRenderer_ResetDisplay(pDisplay, &pDisplay->settings);
 }
 
 bool MFRenderer_BeginFramePlatformSpecific()
@@ -460,9 +503,12 @@ void MFRenderer_EndFramePlatformSpecific()
 				switch(hr)
 				{
 					case D3DERR_DEVICENOTRESET:
+					{
 						// try and reset the display...
-						MFRenderer_ResetDisplay();
+						MFDisplay *pDisplay = MFDisplay_GetCurrent();
+						MFRenderer_ResetDisplay(pDisplay, &pDisplay->settings);
 						break;
+					}
 					case D3DERR_DEVICELOST:
 						// this is usual when the window is hidden
 						break;
@@ -507,19 +553,13 @@ MF_API void MFRenderer_ResetViewport()
 {
 	MFCALLSTACK;
 
+	MFDisplay *pDisplay = MFDisplay_GetCurrent();
+
 	D3DVIEWPORT9 vp;
 	vp.X = 0;
 	vp.Y = 0;
-	if(gDisplay.windowed)
-	{
-		vp.Width = gDisplay.width;
-		vp.Height = gDisplay.height;
-	}
-	else
-	{
-		vp.Width = gDisplay.fullscreenWidth;
-		vp.Height = gDisplay.fullscreenHeight;
-	}
+	vp.Width = pDisplay->settings.width;
+	vp.Height = pDisplay->settings.height;
 	vp.MinZ = 0.0f;
 	vp.MaxZ = 1.0f;
 

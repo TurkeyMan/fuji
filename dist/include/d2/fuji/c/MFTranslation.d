@@ -57,7 +57,7 @@ extern (C) const(char*) MFTranslation_GetLanguageName(MFLanguage language, bool 
  * Gets the systems default language (Usually the language set in the system BIOS).
  * @return The system default language.
  */
-extern (C) MFLanguage MFTranslation_GetDefaultLanguage();
+extern (C) MFLanguage MFTranslation_GetSystemLanguage();
 
 /**
  * Get the id for a language.

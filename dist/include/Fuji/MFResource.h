@@ -97,7 +97,7 @@ MF_API MFResource* MFResource_Find(uint32 hash);
  * @param pResource Pointer to a resource.
  * @return The type id of the resource.
  */
-MF_API int MFResource_GetType(MFResource *pResource);
+MF_API int MFResource_GetType(const MFResource *pResource);
 
 /**
  * Get the hash of a resource.
@@ -105,7 +105,7 @@ MF_API int MFResource_GetType(MFResource *pResource);
  * @param pResource Pointer to a resource.
  * @return The resources hash.
  */
-MF_API uint32 MFResource_GetHash(MFResource *pResource);
+MF_API uint32 MFResource_GetHash(const MFResource *pResource);
 
 /**
  * Get the resource reference count.
@@ -113,7 +113,7 @@ MF_API uint32 MFResource_GetHash(MFResource *pResource);
  * @param pResource Pointer to a resource.
  * @return The reference count.
  */
-MF_API int MFResource_GetRefCount(MFResource *pResource);
+MF_API int MFResource_GetRefCount(const MFResource *pResource);
 
 /**
  * Get the resource name.
@@ -121,7 +121,7 @@ MF_API int MFResource_GetRefCount(MFResource *pResource);
  * @param pResource Pointer to a resource.
  * @return The resources name, or NULL if no name was given.
  */
-MF_API const char* MFResource_GetName(MFResource *pResource);
+MF_API const char* MFResource_GetName(const MFResource *pResource);
 
 /**
  * Add a reference to a resource.

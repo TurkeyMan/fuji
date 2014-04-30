@@ -5,15 +5,17 @@
 
 #include "MFSystem_Internal.h"
 #include "MFRenderer.h"
+#include "MFDisplay.h"
 
 // macro to declare plugin callbacks
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFRenderer_InitModulePlatformSpecific_##driver(); \
 	void MFRenderer_DeinitModulePlatformSpecific_##driver(); \
-	int MFRenderer_CreateDisplay_##driver(); \
-	void MFRenderer_DestroyDisplay_##driver(); \
-	void MFRenderer_ResetDisplay_##driver(); \
-	bool MFRenderer_SetDisplayMode_##driver(int width, int height, bool bFullscreen); \
+	int MFRenderer_CreateDisplay_##driver(MFDisplay *pDisplay); \
+	void MFRenderer_DestroyDisplay_##driver(MFDisplay *pDisplay); \
+	bool MFRenderer_ResetDisplay_##driver(MFDisplay *pDisplay, const MFDisplaySettings *pSettings); \
+	void MFRenderer_LostFocus_##driver(MFDisplay *pDisplay); \
+	void MFRenderer_GainedFocus_##driver(MFDisplay *pDisplay); \
 	bool MFRenderer_BeginFramePlatformSpecific_##driver(); \
 	void MFRenderer_EndFramePlatformSpecific_##driver(); \
 	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
@@ -32,7 +34,8 @@
 		MFRenderer_CreateDisplay_##driver, \
 		MFRenderer_DestroyDisplay_##driver, \
 		MFRenderer_ResetDisplay_##driver, \
-		MFRenderer_SetDisplayMode_##driver, \
+		MFRenderer_LostFocus_##driver, \
+		MFRenderer_GainedFocus_##driver, \
 		MFRenderer_BeginFramePlatformSpecific_##driver, \
 		MFRenderer_EndFramePlatformSpecific_##driver, \
 		MFRenderer_ClearScreen_##driver, \
@@ -61,10 +64,11 @@ struct MFRenderPluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
-	int (*pCreateDisplay)();
-	void (*pDestroyDisplay)();
-	void (*pResetDisplay)();
-	bool (*pSetDisplayMode)(int width, int height, bool bFullscreen);
+	int (*pCreateDisplay)(MFDisplay *pDisplay);
+	void (*pDestroyDisplay)(MFDisplay *pDisplay);
+	bool (*pResetDisplay)(MFDisplay *pDisplay, const MFDisplaySettings *pSettings);
+	void (*pLostFocus)(MFDisplay *pDisplay);
+	void (*pGainedFocus)(MFDisplay *pDisplay);
 	bool (*pBeginFramePlatformSpecific)();
 	void (*pEndFramePlatformSpecific)();
 	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
@@ -121,24 +125,29 @@ void MFRenderer_DeinitModulePlatformSpecific()
 	gpCurrentRenderPlugin->pDeinitModulePlatformSpecific();
 }
 
-int MFRenderer_CreateDisplay()
+int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 {
-	return gpCurrentRenderPlugin->pCreateDisplay();
+	return gpCurrentRenderPlugin->pCreateDisplay(pDisplay);
 }
 
-void MFRenderer_DestroyDisplay()
+void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
-	gpCurrentRenderPlugin->pDestroyDisplay();
+	gpCurrentRenderPlugin->pDestroyDisplay(pDisplay);
 }
 
-void MFRenderer_ResetDisplay()
+bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)
 {
-	gpCurrentRenderPlugin->pResetDisplay();
+	return gpCurrentRenderPlugin->pResetDisplay(pDisplay, pSettings);
 }
 
-bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+void MFRenderer_LostFocus(MFDisplay *pDisplay)
 {
-	return gpCurrentRenderPlugin->pSetDisplayMode(width, height, bFullscreen);
+	gpCurrentRenderPlugin->pLostFocus(pDisplay);
+}
+
+void MFRenderer_GainedFocus(MFDisplay *pDisplay)
+{
+	gpCurrentRenderPlugin->pGainedFocus(pDisplay);
 }
 
 bool MFRenderer_BeginFramePlatformSpecific()

@@ -4,7 +4,7 @@
 
 #include "MFTranslation.h"
 
-MF_API MFLanguage MFTranslation_GetDefaultLanguage()
+MF_API MFLanguage MFTranslation_GetSystemLanguage()
 {
 	// the Null device doesnt know anything about languages ;)
 	return MFLang_English;

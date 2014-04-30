@@ -7,6 +7,9 @@
 #include "MFArray.h"
 #include "MFShader.h"
 
+struct MFDisplay;
+struct MFDisplaySettings;
+
 // init/deinit
 MFInitStatus MFRenderer_InitModule(int moduleId, bool bPerformInitialisation);
 void MFRenderer_DeinitModule();
@@ -18,10 +21,12 @@ void MFRenderer_DeinitModulePlatformSpecific();
 bool MFRenderer_BeginFramePlatformSpecific();
 void MFRenderer_EndFramePlatformSpecific();
 
-int MFRenderer_CreateDisplay();
-void MFRenderer_DestroyDisplay();
-void MFRenderer_ResetDisplay();
-bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen);
+int MFRenderer_CreateDisplay(MFDisplay *pDisplay);
+void MFRenderer_DestroyDisplay(MFDisplay *pDisplay);
+bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSettings);
+
+void MFRenderer_LostFocus(MFDisplay *pDisplay);
+void MFRenderer_GainedFocus(MFDisplay *pDisplay);
 
 typedef int (*MFRenderSortFunction)(const void*, const void*);
 

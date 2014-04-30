@@ -5,6 +5,7 @@
 #include "MFCallstack_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFSystem_Internal.h"
+#include "MFWindow_Internal.h"
 #include "MFDisplay_Internal.h"
 #include "MFResource_Internal.h"
 #include "MFTexture_Internal.h"
@@ -157,6 +158,9 @@ uint64 MFModule_RegisterEngineModules()
 
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFSystem] = (char)MFModule_RegisterModule("MFSystem", MFSystem_InitModule, MFSystem_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSystem);
+
+	gpEngineInstance->builtinModuleIDs[MFBIM_MFWindow] = (char)MFModule_RegisterModule("MFWindow", MFWindow_InitModule, MFWindow_DeinitModule, basicModules);
+	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFWindow);
 
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFResource] = (char)MFModule_RegisterModule("MFResource", MFResource_InitModule, MFResource_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFResource);

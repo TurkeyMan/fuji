@@ -22,6 +22,7 @@ enum MFBuiltinModule
 	MFBIM_MFSystem,
 	MFBIM_MFResource,
 	MFBIM_MFView,
+	MFBIM_MFWindow,
 	MFBIM_MFRenderer,
 	MFBIM_MFDisplay,
 	MFBIM_MFRenderState,

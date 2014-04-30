@@ -77,12 +77,13 @@ enum MFImageFormat
 	ImgFmt_P8,				/**< 8bit paletted format */
 	ImgFmt_P4,				/**< 4bit paletted format */
 
-	// depth/stencil formats
+	// depth formats
 	ImgFmt_D16,				/**< 16bit depth format */
 	ImgFmt_D24X8,			/**< 24bit depth format */
 	ImgFmt_D32,				/**< 32bit depth format */
 	ImgFmt_D32F,			/**< 32bit floating point depth format */
 
+	// depth/stencil formats
 	ImgFmt_D15S1,			/**< 15bit depth format with 1bit stencil */
 	ImgFmt_D24S8,			/**< 24bit depth format with 8bit stencil */
 	ImgFmt_D24FS8,			/**< 24bit floating point depth format with 8bit stencil */

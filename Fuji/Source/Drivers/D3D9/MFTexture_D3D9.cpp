@@ -30,7 +30,7 @@ extern MFTexture *pNoneTexture;
 
 extern IDirect3DDevice9 *pd3dDevice;
 
-static D3DFORMAT gD3D9Format[ImgFmt_Max] =
+D3DFORMAT gD3D9Format[ImgFmt_Max] =
 {
 	D3DFMT_A8R8G8B8,		// ImgFmt_A8R8G8B8
 	D3DFMT_A8B8G8R8,		// ImgFmt_A8B8G8R8

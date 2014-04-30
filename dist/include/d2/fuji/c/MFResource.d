@@ -66,10 +66,10 @@ extern (C) void MFResource_RemoveResource(MFResource* pResource);
 
 extern (C) MFResource* MFResource_Find(uint hash);
 
-extern (C) MFResourceType MFResource_GetType(MFResource* pResource);
-extern (C) uint MFResource_GetHash(MFResource* pResource);
-extern (C) int MFResource_GetRefCount(MFResource* pResource);
-extern (C) const(char)* MFResource_GetName(MFResource* pResource);
+extern (C) MFResourceType MFResource_GetType(const(MFResource)* pResource) pure;
+extern (C) uint MFResource_GetHash(const(MFResource)* pResource) pure;
+extern (C) int MFResource_GetRefCount(const(MFResource)* pResource) pure;
+extern (C) const(char)* MFResource_GetName(const(MFResource)* pResource) pure;
 
 int MFResource_AddRef(MFResource *pResource) pure
 {

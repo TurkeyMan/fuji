@@ -49,15 +49,15 @@ uint32 MFSoundMixer_GetPlayCursor(MFVoice *pVoice, uint32 *pWriteCursor);
 
 enum MFWaveFormat
 {
-	MFWF_Unknown = -1,
+	MFWaveFmt_Unknown = -1,
 
-	MFWF_PCM_u8,
-	MFWF_PCM_s16,
-	MFWF_PCM_s24,
-	MFWF_PCM_f32,
+	MFWaveFmt_PCM_u8,
+	MFWaveFmt_PCM_s16,
+	MFWaveFmt_PCM_s24,
+	MFWaveFmt_PCM_f32,
 
-	MFWF_Max,
-	MFWF_ForceInt = 0x7FFFFFFF
+	MFWaveFmt_Max,
+	MFWaveFmt_ForceInt = 0x7FFFFFFF
 };
 
 struct MFSoundTemplate

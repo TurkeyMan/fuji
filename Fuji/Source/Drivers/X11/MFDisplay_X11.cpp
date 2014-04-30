@@ -466,14 +466,6 @@ void MFDisplay_DestroyDisplay()
 	FreeModes();
 }
 
-bool MFDisplay_SetDisplayMode(int width, int height, bool bFullscreen)
-{
-	// do any stuff the window manager needs to do to swap display modes or swap between window and fullscreen
-	//...
-
-	return MFRenderer_SetDisplayMode(width, height, bFullscreen);
-}
-
 void MFDisplay_GetNativeRes(MFRect *pRect)
 {
 	// TODO: need to find the current desktop res in linux

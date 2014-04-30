@@ -8,7 +8,8 @@
 	#define MFRenderer_CreateDisplay MFRenderer_CreateDisplay_D3D11
 	#define MFRenderer_DestroyDisplay MFRenderer_DestroyDisplay_D3D11
 	#define MFRenderer_ResetDisplay MFRenderer_ResetDisplay_D3D11
-	#define MFRenderer_SetDisplayMode MFRenderer_SetDisplayMode_D3D11
+	#define MFRenderer_LostFocus MFRenderer_LostFocus_D3D11
+	#define MFRenderer_GainedFocus MFRenderer_GainedFocus_D3D11
 	#define MFRenderer_BeginFramePlatformSpecific MFRenderer_BeginFramePlatformSpecific_D3D11
 	#define MFRenderer_EndFramePlatformSpecific MFRenderer_EndFramePlatformSpecific_D3D11
 	#define MFRenderer_ClearScreen MFRenderer_ClearScreen_D3D11
@@ -28,6 +29,7 @@
 #include "Shaders/Registers.h"
 #include "MFVertex.h"
 #include "MFMesh_Internal.h"
+#include "MFWindow.h"
 
 #include <d3d11.h>
 
@@ -39,8 +41,6 @@ struct CBWorld
 	MFMatrix mWorldToScreen;
 	MFMatrix mLocalToWorld;
 };
-
-extern HWND apphWnd;
 
 D3D_DRIVER_TYPE         g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL       g_featureLevel = D3D_FEATURE_LEVEL_11_0;
@@ -73,12 +73,14 @@ void MFRenderer_DeinitModulePlatformSpecific()
 {
 }
 
-int MFRenderer_CreateDisplay()
+int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 {
+	HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow);
+
 	HRESULT hr = S_OK;
 
     RECT rc;
-    GetClientRect( apphWnd, &rc );
+    GetClientRect( hWnd, &rc );
     UINT width = rc.right - rc.left;
     UINT height = rc.bottom - rc.top;
 
@@ -115,7 +117,7 @@ int MFRenderer_CreateDisplay()
     sd.BufferDesc.RefreshRate.Numerator = 60;
     sd.BufferDesc.RefreshRate.Denominator = 1;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = apphWnd;
+    sd.OutputWindow = hWnd;
     sd.SampleDesc.Count = 1;
     sd.SampleDesc.Quality = 0;
     sd.Windowed = TRUE;
@@ -218,7 +220,7 @@ int MFRenderer_CreateDisplay()
 	return 0;
 }
 
-void MFRenderer_DestroyDisplay()
+void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
     if (g_pImmediateContext) g_pImmediateContext->ClearState();
 
@@ -243,31 +245,17 @@ void MFRenderer_DestroyDisplay()
     if (g_pd3dDevice) g_pd3dDevice->Release();
 }
 
-void MFRenderer_ResetDisplay()
+bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)
+{
+	return true;
+}
+
+void MFRenderer_LostFocus(MFDisplay *pDisplay)
 {
 }
 
-bool MFRenderer_SetDisplayMode(int width, int height, bool bFullscreen)
+void MFRenderer_GainedFocus(MFDisplay *pDisplay)
 {
-	// D3D handles this automatically in Reset()
-	gDisplay.windowed = !bFullscreen;
-	if(bFullscreen)
-	{
-		gDisplay.fullscreenWidth = width;
-		gDisplay.fullscreenHeight = height;
-	}
-	else
-	{
-		gDisplay.width = width;
-		gDisplay.height = height;
-	}
-
-	if(g_pd3dDevice)
-	{
-		// change display mode
-		//...
-	}
-	return true;
 }
 
 bool MFRenderer_BeginFramePlatformSpecific()

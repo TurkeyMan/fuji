@@ -11,6 +11,8 @@
 #include "MFHeap.h"
 #include "MFIni.h"
 #include "MFSystem_Internal.h"
+#include "MFDisplay_Internal.h"
+#include "MFWindow.h"
 
 #include "MFInputMappings_PC.h"
 
@@ -124,7 +126,7 @@ static int gKeyboardCount = 0;
 static int gMouseCount = 0;
 
 extern HINSTANCE apphInstance;
-extern HWND apphWnd;
+static HWND apphWnd;
 
 static char gKeyState[256];
 
@@ -133,7 +135,6 @@ static float mouseMultiplier = 1.0f;
 
 extern MFGamepadInfo *pGamepadMappingRegistry;
 
-extern HWND apphWnd;
 static HDEVNOTIFY hNotify;
 
 static bool gUpdateDeviceList = false;
@@ -359,6 +360,8 @@ void MFInput_InitModulePlatformSpecific()
 
 	// load additional gamepad mappings...
 	MFInputPC_LoadGamepadMappings();
+
+	apphWnd = (HWND)MFWindow_GetSystemWindowHandle(MFDisplay_GetCurrent()->settings.pWindow);
 
 #if defined(SUPPORT_DINPUT)
 	// create the direct inpur device

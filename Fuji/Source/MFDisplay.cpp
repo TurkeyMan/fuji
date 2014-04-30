@@ -4,53 +4,97 @@
 #include "MFView.h"
 #include "MFSystem.h"
 
-MFDisplaySettings gDisplay;
+MFDisplay *gpCurrentDisplay = NULL;
 extern MFInitParams gInitParams;
 
 bool gAppHasFocus = true;
 
 MFInitStatus MFDisplay_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	MFCALLSTACK;
-
-	int error;
-
 	DebugMenu_AddMenu("Display Options", "Fuji Options");
 
-	// create the display
-	if(gInitParams.display.displayRect.width == 0 || gInitParams.display.displayRect.height == 0)
-		MFDisplay_GetDefaultRes(&gInitParams.display.displayRect);
+	MFDisplay_InitModulePlatformSpecific();
 
-	error = MFDisplay_CreateDisplay((int)gInitParams.display.displayRect.width, (int)gInitParams.display.displayRect.height, 32, 60, true, false, false, false);
-	if(error)
-		return MFIS_Failed;
+	if(!gpCurrentDisplay)
+	{
+		gpCurrentDisplay = MFDisplay_CreateDefault("Fuji Display");
+		if(!gpCurrentDisplay)
+			return MFIS_Failed;
+	}
+
 	return MFIS_Succeeded;
 }
 
 void MFDisplay_DeinitModule()
 {
-	MFCALLSTACK;
-
-	MFDisplay_DestroyDisplay();
+	MFDisplay_DeinitModulePlatformSpecific();
 }
 
-MF_API void MFDisplay_GetDisplayRect(MFRect *pRect)
+MF_API MFDisplay *MFDisplay_CreateDefault(const char *pName)
 {
-	pRect->x = 0.0f;
-	pRect->y = 0.0f;
-	if(gDisplay.windowed)
-	{
-		pRect->width = (float)gDisplay.width;
-		pRect->height = (float)gDisplay.height;
-	}
-	else
-	{
-		pRect->width = (float)gDisplay.fullscreenWidth;
-		pRect->height = (float)gDisplay.fullscreenHeight;
-	}
+	MFDisplaySettings displaySettings;
+	MFDisplay_GetDefaults(&displaySettings);
+	return MFDisplay_Create(pName, &displaySettings);
 }
 
-MF_API bool MFDisplay_HasFocus()
+MF_API MFDisplay *MFDisplay_SetCurrent(MFDisplay *pDisplay)
 {
-	return gAppHasFocus;
+	MFDisplay *pOld = gpCurrentDisplay;
+	gpCurrentDisplay = pDisplay;
+	return pOld;
+}
+
+MF_API MFDisplay *MFDisplay_GetCurrent()
+{
+	return gpCurrentDisplay;
+}
+
+MF_API const MFDisplaySettings *MFDisplay_GetDisplaySettings(const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	return &pDisplay->settings;
+}
+
+MF_API MFDisplayOrientation MFDisplay_GetDisplayOrientation(const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	return pDisplay->orientation;
+}
+
+MF_API void MFDisplay_GetDisplayRect(MFRect *pRect, const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	pRect->x = pRect->y = 0;
+	pRect->width = (float)pDisplay->settings.width;
+	pRect->height = (float)pDisplay->settings.height;
+}
+
+MF_API float MFDisplay_GetAspectRatio(const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	return pDisplay->aspectRatio;
+}
+
+MF_API bool MFDisplay_IsVisible(const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	return pDisplay->bIsVisible;
+}
+
+MF_API bool MFDisplay_HasFocus(const MFDisplay *pDisplay)
+{
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	return pDisplay->bHasFocus;
 }

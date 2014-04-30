@@ -163,12 +163,6 @@ void MFDisplay_DestroyDisplay()
 	pNaClGLContext = NULL;
 }
 
-bool MFDisplay_SetDisplayMode(int width, int height, bool bFullscreen)
-{
-
-	return MFRenderer_SetDisplayMode(width, height, bFullscreen);
-}
-
 void MFDisplay_GetNativeRes(MFRect *pRect)
 {
 	pRect->x = pRect->y = 0.f;
