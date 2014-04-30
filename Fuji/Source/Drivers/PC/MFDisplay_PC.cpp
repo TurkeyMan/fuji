@@ -274,9 +274,6 @@ MF_API bool MFDisplay_Reset(MFDisplay *pDisplay, const MFDisplaySettings *pSetti
 	if(!pDisplay)
 		pDisplay = gpCurrentDisplay;
 
-	const MFDisplaySettings *pS = pSettings ? pSettings : &pDisplay->settings;
-	MFDebug_Warn(4, MFStr("MFDisplay_Reset(%d, %d, %s)", pS->width, pS->height, pS->bFullscreen ? "true" : "false"));
-
 	if(pSettings)
 	{
 		MFWindowParams params = *MFWindow_GetWindowParameters(pSettings->pWindow);

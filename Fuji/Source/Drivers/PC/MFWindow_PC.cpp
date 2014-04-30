@@ -322,8 +322,6 @@ MF_API void MFWindow_Destroy(MFWindow *_pWindow)
 
 MF_API void MFWindow_Update(MFWindow *_pWindow, const MFWindowParams *pParams)
 {
-	MFDebug_Warn(4, MFStr("MFWindow_Update(%d, %d, %d, %d)", pParams->x, pParams->y, pParams->width, pParams->height));
-
 	MFWindow_PC *pWindow = (MFWindow_PC*)_pWindow;
 
 	if(MFString_Compare(pWindow->params.pWindowTitle, pParams->pWindowTitle) != 0)
