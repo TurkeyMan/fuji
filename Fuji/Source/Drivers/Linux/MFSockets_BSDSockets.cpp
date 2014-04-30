@@ -3,6 +3,7 @@
 #if MF_SOCKETS == MF_DRIVER_BSDSOCKETS
 
 #include "MFSockets.h"
+#include "Util.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -21,7 +22,7 @@ void MFSockets_DeinitModulePlatformSpecific()
 
 MFSocket MFSockets_CreateSocket(MFAddressFamily addressFamily, MFSocketType type, int protocol)
 {
-	return (MFSocket)socket((int)addressFamily, (int)type, protocol);
+	return (MFSocket)(intp)socket((int)addressFamily, (int)type, protocol);
 }
 
 int MFSockets_CloseSocket(MFSocket socket)
@@ -182,7 +183,7 @@ MFSocket MFSockets_Accept(MFSocket socket, MFSocketAddress *pConnectingSocketAdd
 	char address[sizeof(sockaddr_in)*10];
 	socklen_t size = sizeof(sockaddr_in)*10;
 
-	MFSocket result = (MFSocket)accept((int)(intp)socket, (sockaddr*)&address, &size);
+	MFSocket result = (MFSocket)(intp)accept((int)(intp)socket, (sockaddr*)&address, &size);
 
 	if(pConnectingSocketAddress)
 	{

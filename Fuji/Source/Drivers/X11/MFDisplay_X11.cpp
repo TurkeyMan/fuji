@@ -3,16 +3,36 @@
 #if MF_DISPLAY == MF_DRIVER_X11
 
 #include "MFDisplay_Internal.h"
+#include "MFWindow_Internal.h"
 #include "MFRenderer_Internal.h"
 #include "MFView.h"
 #include "MFSystem.h"
 #include "DebugMenu.h"
 #include "MFHeap.h"
+
 #include "X11_linux.h"
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
 #include <stdio.h>
 
+
+extern MFDisplay *gpCurrentDisplay;
+
+static int gNumDisplayDevices = 0;
+static MFDisplayAdaptorDesc *gpDisplayAdaptors = NULL;
+
+extern MFInitParams gInitParams;
+
+
+Display *xdisplay = NULL;
+int screen = 0;
+Window rootWindow;
+Atom wm_delete_window;
+
+
+uint8 gXKeys[65535];
+XMouseState gXMouse;
+
+
+//-------------------------------------------------------------------
 // Typedefs
 struct Resolution
 {
@@ -50,29 +70,14 @@ MenuItemIntString *modesMenu;
 int32 currentMode = -1, selectedMode = -1;
 int32 numModes;
 
-Display *xdisplay = NULL;
-int screen = 0;
-Window window = 0;
-Window rootWindow;
 XF86VidModeModeInfo *originalVidMode = NULL;
 XF86VidModeModeInfo **vidModes = NULL;
-XSizeHints *sizeHints = NULL;
-Colormap colorMap = 0;
-Atom wm_delete_window;
 
-uint8 gXKeys[65535];
-XMouseState gXMouse;
-
+/*
 static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);
 static void FreeModes();
 static bool FindMode(Resolution *modes, int width, int height);
-static void MFDisplay_ResetDisplay();
-
-static Bool WaitForNotify(Display *d, XEvent *e, char *arg)
-{
-	return (e->type == MapNotify) && (e->xmap.window == (Window)arg);
-}
 
 static bool GetModes(Resolution **_modes, bool fullscreen)
 {
@@ -80,45 +85,34 @@ static bool GetModes(Resolution **_modes, bool fullscreen)
 
 	int numModeLines;
 
-	if(!fullscreen)
+	// scan hardware display modes
+	int throwaway;
+	if(!XF86VidModeQueryExtension(xdisplay, &throwaway, &throwaway))
 	{
-		modes = defaultModes;
-
-		for(uint32 i = 0; modes[i].width != 0; ++i)
-		{
-			++numModes;
-		}
+		SetSingleMode(_modes);
+		return true;
 	}
-	else
+
+	if((!XF86VidModeGetAllModeLines(xdisplay, screen, &numModeLines, &vidModes)) || numModeLines < 2)
 	{
-		int throwaway;
-		if(!XF86VidModeQueryExtension(xdisplay, &throwaway, &throwaway))
-		{
-			SetSingleMode(_modes);
-			return true;
-		}
-
-		if((!XF86VidModeGetAllModeLines(xdisplay, screen, &numModeLines, &vidModes)) || numModeLines < 2)
-		{
-			SetSingleMode(_modes);
-			return true;
-		}
-
-		originalVidMode = vidModes[0];
-		numModes = (uint32)numModeLines;
-
-		modes = (Resolution *)MFHeap_Alloc(sizeof(Resolution) * (numModes + 1));
-
-		for(int32 i = 0; i < numModes; i++)
-		{
-			modes[i].width = vidModes[i]->hdisplay;
-			modes[i].height = vidModes[i]->vdisplay;
-			modes[i].refresh = ((float)vidModes[i]->dotclock / (float)vidModes[i]->htotal) / (float)vidModes[i]->htotal;
-		}
-
-		modes[numModes].width = 0;
-		modes[numModes].height = 0;
+		SetSingleMode(_modes);
+		return true;
 	}
+
+	originalVidMode = vidModes[0];
+	numModes = (uint32)numModeLines;
+
+	modes = (Resolution *)MFHeap_Alloc(sizeof(Resolution) * (numModes + 1));
+
+	for(int32 i = 0; i < numModes; i++)
+	{
+		modes[i].width = vidModes[i]->hdisplay;
+		modes[i].height = vidModes[i]->vdisplay;
+		modes[i].refresh = ((float)vidModes[i]->dotclock / (float)vidModes[i]->htotal) / (float)vidModes[i]->htotal;
+	}
+
+	modes[numModes].width = 0;
+	modes[numModes].height = 0;
 
 	if(_modes != NULL)
 		*_modes = modes;
@@ -178,6 +172,7 @@ static bool FindMode(Resolution *modes, int width, int height)
 
 	return currentMode != -1;
 }
+*/
 
 void ChangeResCallback(MenuObject *pMenu, void *pData)
 {
@@ -207,48 +202,40 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 void ApplyDisplayModeCallback(MenuObject *pMenu, void *pData)
 {
 	currentMode = selectedMode;
-	gDisplay.width = modes[currentMode].width;
-	gDisplay.height = modes[currentMode].height;
 
-	gDisplay.fullscreenWidth = gDisplay.width;
-	gDisplay.fullscreenHeight = gDisplay.height;
+	MFDisplaySettings settings = gpCurrentDisplay->settings;
+	settings.width = modes[currentMode].width;
+	settings.height = modes[currentMode].height;
 
-	MFDisplay_ResetDisplay();
+	MFDisplay_Reset(gpCurrentDisplay, &settings);
 }
+//-------------------------------------------------------------------
 
-void MFDisplay_DestroyWindow()
+
+void MFDisplay_InitModulePlatformSpecific()
 {
-	MFCALLSTACK;
-}
-
-int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync, bool triplebuffer, bool wide, bool progressive)
-{
-	MFCALLSTACK;
-
 	MFZeroMemory(gXKeys, sizeof(gXKeys));
 	MFZeroMemory(&gXMouse, sizeof(gXMouse));
 	gXMouse.x = -1;
 
-	gDisplay.fullscreenWidth = gDisplay.width = width;
-	gDisplay.fullscreenHeight = gDisplay.height = height;
-	gDisplay.refreshRate = 0;
-	gDisplay.colourDepth = 0; /* Use default.  Chances are, it's something sane */
-	gDisplay.windowed = true;
-	gDisplay.wide = false;
-	gDisplay.progressive = true;
+//	gNumDisplayDevices = 0;
+//	gpDisplayAdaptors = (MFDisplayAdaptorDesc*)MFHeap_Alloc(sizeof(MFDisplayAdaptorDesc)*0);
 
-	if(!(xdisplay = XOpenDisplay(NULL)))
+	xdisplay = XOpenDisplay(NULL);
+	if(!xdisplay)
 	{
 		MFDebug_Error("Unable to open display");
-		MFDisplay_DestroyDisplay();
-		return 1;
+		return;
 	}
 
 	screen = DefaultScreen(xdisplay);
 	rootWindow = RootWindow(xdisplay, screen);
 
+	wm_delete_window = XInternAtom(xdisplay, "WM_DELETE_WINDOW", false);
+
 	// build our internal list of available video modes
-	GetModes(&modes, !gDisplay.windowed);
+/*
+	GetModes(&modes, false);//!gDisplay.windowed);
 	while(!FindMode(modes, width, height))
 	{
 		if(!gDisplay.windowed)
@@ -272,10 +259,105 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			break;
 		}
 	}
+*/
 
 	DebugMenu_AddItem("Resolution", "Display Options", &resSelect, ChangeResCallback);
 	DebugMenu_AddItem("Apply", "Display Options", &applyDisplayMode, ApplyDisplayModeCallback);
+}
 
+void MFDisplay_DeinitModulePlatformSpecific()
+{
+	if(gpDisplayAdaptors)
+		MFHeap_Free(gpDisplayAdaptors);
+
+//	FreeModes();
+
+	XCloseDisplay(xdisplay);
+}
+
+void MFDisplay_LostFocus(MFDisplay *pDisplay)
+{
+	pDisplay->bHasFocus = false;
+
+	MFRenderer_LostFocus(pDisplay);
+}
+
+void MFDisplay_GainedFocus(MFDisplay *pDisplay)
+{
+	pDisplay->bHasFocus = true;
+
+	MFRenderer_GainedFocus(pDisplay);
+}
+
+MF_API int MFDisplay_GetNumMonitors()
+{
+	return 0;
+}
+
+MF_API const MFMonitorDesc *MFDisplay_GetMonitorDesc(int monitor)
+{
+	return NULL;
+}
+
+MF_API int MFDisplay_GetNumDisplayAdaptors()
+{
+	return gNumDisplayDevices;
+}
+
+MF_API const MFDisplayAdaptorDesc *MFDisplay_GetDisplayAdaptorDesc(int adaptor)
+{
+	if(adaptor >= 0 && adaptor < gNumDisplayDevices)
+	{
+		MFDebug_Warn(2, "Invalid adaptor!");
+		return NULL;
+	}
+	return &gpDisplayAdaptors[adaptor];
+}
+
+MF_API int MFDisplay_GetDisplayModeCount(int monitor)
+{
+	return 0;
+}
+
+MF_API const MFDisplayModeDesc * MFDisplay_GetDisplayMode(int monitor, int index)
+{
+	return NULL;
+}
+
+MF_API void MFDisplay_GetDefaults(MFDisplaySettings *pDisplaySettings)
+{
+	MFZeroMemory(pDisplaySettings, sizeof(*pDisplaySettings));
+	pDisplaySettings->displayAdaptor = 0;
+	pDisplaySettings->monitor = 0;
+	pDisplaySettings->mode = MFDM_Progressive;
+	pDisplaySettings->aspect = MFDA_Default;
+	pDisplaySettings->cable = MFDC_Unknown;
+	pDisplaySettings->bVSync = true;
+	pDisplaySettings->numBuffers = 2;
+	pDisplaySettings->flags = 0;//MFDF_CanResizeWindow;
+	pDisplaySettings->pWindow = NULL;
+
+	pDisplaySettings->backBufferFormat = ImgFmt_SelectDefault;
+	pDisplaySettings->depthStencilFormat = ImgFmt_SelectDepth;
+
+#if defined(MF_RETAIL)
+	// TODO: should use the native or desktop res?
+	pDisplaySettings->bFullscreen = true;
+	pDisplaySettings->width = (int)gInitParams.display.displayRect.width;
+	pDisplaySettings->height = (int)gInitParams.display.displayRect.height;
+	pDisplaySettings->refreshRate = 0;
+#else
+	pDisplaySettings->bFullscreen = false;
+	pDisplaySettings->width = (int)gInitParams.display.displayRect.width;
+	pDisplaySettings->height = (int)gInitParams.display.displayRect.height;
+	pDisplaySettings->refreshRate = 0;
+#endif
+}
+
+MF_API MFDisplay *MFDisplay_Create(const char *pName, const MFDisplaySettings *pDisplaySettings)
+{
+	bool bDidCreateWindow = false;
+/*
 	// Set full screen mode, if necessary
 	if(!gDisplay.windowed && numModes > 1)
 	{
@@ -286,100 +368,54 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 			return 1;
 		}
 	}
-
-	XVisualInfo *MFRenderer_GetVisualInfo();
-	XVisualInfo *visualInfo = MFRenderer_GetVisualInfo();
-	if(!visualInfo)
-		return 1;
-
-	if(!(colorMap = XCreateColormap(xdisplay, rootWindow, visualInfo->visual, AllocNone)))
+*/
+	MFWindow *pWindow = pDisplaySettings->pWindow;
+	if(!pWindow)
 	{
-		MFDebug_Error("Unable to create colourmap");
-		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();
-		return 1;
+		MFWindowParams params;
+		params.x = (int)gInitParams.display.displayRect.x;
+		params.y = (int)gInitParams.display.displayRect.y;
+		params.width = pDisplaySettings->width;
+		params.height = pDisplaySettings->height;
+		params.pWindowTitle = gInitParams.pAppTitle;
+		params.monitor = pDisplaySettings->monitor;
+		params.bFullscreen = pDisplaySettings->bFullscreen;
+		params.flags = MFWF_WindowFrame | ((pDisplaySettings->flags & MFDF_CanResizeWindow) ? MFWF_CanResize : 0);
+
+		pWindow = MFWindow_Create(&params);
+
+		if(!pWindow)
+		{
+			MFDebug_Warn(1, "Couldn't create default Fuji window!");
+			return NULL;
+		}
+
+		bDidCreateWindow = true;
 	}
 
-	XSetWindowAttributes windowAttrs;
-	windowAttrs.colormap = colorMap;
-	windowAttrs.cursor = None;
-	windowAttrs.event_mask = StructureNotifyMask;
-	windowAttrs.border_pixel = BlackPixel(xdisplay, screen);
-	windowAttrs.background_pixel = BlackPixel(xdisplay, screen);
+	MFDisplay *pDisplay = (MFDisplay*)MFHeap_Alloc(sizeof(MFDisplay));
+	pDisplay->settings = *pDisplaySettings;
+	pDisplay->settings.pWindow = pWindow;
 
-	if(!(window = XCreateWindow(xdisplay, rootWindow, 0, 0, width, height, 0, visualInfo->depth, InputOutput, visualInfo->visual, CWBackPixel | CWBorderPixel | CWCursor | CWColormap | CWEventMask, &windowAttrs)))
+	pDisplay->fullscreenWidth = pDisplay->windowWidth = pDisplay->settings.width;
+	pDisplay->fullscreenHeight = pDisplay->windowHeight = pDisplay->settings.height;
+	pDisplay->aspectRatio = (float)pDisplay->settings.width / (float)pDisplay->settings.height;
+	pDisplay->bHasFocus = pWindow->bHasFocus;
+	pDisplay->bIsVisible = true;
+	pDisplay->orientation = MFDO_Normal;
+
+	if(MFRenderer_CreateDisplay(pDisplay))
 	{
-		MFDebug_Error("Unable to create X Window");
-		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();
-		return 1;
+		MFDebug_Warn(2, "Couldn't create display!");
+		MFHeap_Free(pDisplay);
+		if(bDidCreateWindow)
+			MFWindow_Destroy(pWindow);
+		return NULL;
 	}
 
-	// Tell the window manager not to allow our window to be resized.  But some window managers can ignore me and do it anyway.  Typical X-Windows.
-	if((sizeHints = XAllocSizeHints()) == NULL)
-	{
-		MFDebug_Error("Unable to alloc XSizeHints structure, out of memory?");
-		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();
-		return 1;
-	}
+	MFWindow_AssociateDisplay(pWindow, pDisplay);
 
-	sizeHints->flags = PSize | PMinSize | PMaxSize;
-    sizeHints->min_width = sizeHints->max_width = sizeHints->base_width = width;
-    sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = height;
-
-	XSetWMNormalHints(xdisplay, window, sizeHints);
-
-	// Window title
-	XStoreName(xdisplay, window, gDefaults.display.pWindowTitle);
-
-	XWMHints *wmHints;
-	if((wmHints = XAllocWMHints()) == NULL)
-	{
-		MFDebug_Error("Unable to alloc XWMHints structure, out of memory?");
-		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();
-		return 1;
-	}
-
-	wmHints->flags = InputHint | StateHint;
-	wmHints->input = true;
-	wmHints->initial_state = NormalState;
-	if(!XSetWMHints(xdisplay, window, wmHints))
-	{
-		MFDebug_Error("Unable to set WM hints for window");
-		XFree(visualInfo);
-		MFDisplay_DestroyDisplay();
-		return 1;
-	}
-
-	XFree(wmHints);
-	XFree(visualInfo);
-
-	// Tell the window manager that I want to be notified if the window's closed
-	wm_delete_window = XInternAtom(xdisplay, "WM_DELETE_WINDOW", false);
-	if(!XSetWMProtocols(xdisplay, window, &wm_delete_window, 1))
-	{
-		MFDebug_Error("Unable to set Window Manager protocols");
-		MFDisplay_DestroyDisplay();
-		return 1;
-	}
-
-	XSelectInput(xdisplay, window, KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask | ExposureMask);
-
-	if(!XMapRaised(xdisplay, window))
-	{
-		MFDebug_Error("Unable to map new window");
-		MFDisplay_DestroyDisplay();
-		return 1;
-	}
-
-	// Wait for the window to be mapped, etc. The documentation doesn't indicate that this is necessary, but every GLX program I've ever seen does it, so I assume it is.
-	XEvent event;
-	XIfEvent(xdisplay, &event, WaitForNotify, (char *)window);
-
-	MFRenderer_CreateDisplay();
-
+/*
 	if(!gDisplay.windowed && numModes > 1)
 	{
 		if(!XF86VidModeSwitchToMode(xdisplay, screen, vidModes[currentMode]))
@@ -397,14 +433,13 @@ int MFDisplay_CreateDisplay(int width, int height, int bpp, int rate, bool vsync
 		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, 0, 0);
 		XFlush(xdisplay);
 	}
-
+*/
 	return 0;
 }
 
-void MFDisplay_ResetDisplay()
+MF_API bool MFDisplay_Reset(MFDisplay *pDisplay, const MFDisplaySettings *pSettings)
 {
-	MFCALLSTACK;
-
+/*
 	sizeHints->flags = PSize | PMinSize | PMaxSize;
 	sizeHints->min_width = sizeHints->max_width = sizeHints->base_width = gDisplay.width;
 	sizeHints->min_height = sizeHints->max_height = sizeHints->base_height = gDisplay.height;
@@ -424,78 +459,67 @@ void MFDisplay_ResetDisplay()
 		XWarpPointer(xdisplay, None, window, 0, 0, 0, 0, 0, 0);
 		XFlush(xdisplay);
 	}
+*/
 
-	MFRenderer_ResetDisplay();
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
+
+	if(pSettings)
+	{
+		MFWindowParams params = *MFWindow_GetWindowParameters(pSettings->pWindow);
+
+		params.bFullscreen = pSettings->bFullscreen;
+		params.width = pSettings->width;
+		params.height = pSettings->height;
+		params.flags = (params.flags & ~MFWF_CanResize) | ((pSettings->flags & MFDF_CanResizeWindow) ? MFWF_CanResize : 0);
+
+		MFWindow_Update(pSettings->pWindow, &params);
+	}
+
+	if(!pSettings)
+		pSettings = &pDisplay->settings;
+
+	if(!MFRenderer_ResetDisplay(pDisplay, pSettings))
+	{
+		// TODO: Oh no! shall we revert to previous settings?
+		return false;
+	}
+
+	pDisplay->settings = *pSettings;
+	if(pDisplay->settings.bFullscreen)
+	{
+		pDisplay->fullscreenWidth = pDisplay->settings.width;
+		pDisplay->fullscreenHeight = pDisplay->settings.height;
+	}
+	else
+	{
+		pDisplay->windowWidth = pDisplay->settings.width;
+		pDisplay->windowHeight = pDisplay->settings.height;
+	}
+
+	pDisplay->aspectRatio = (float)pDisplay->settings.width / (float)pDisplay->settings.height;
+
+	return true;
 }
 
-void MFDisplay_DestroyDisplay()
+MF_API void MFDisplay_Destroy(MFDisplay *pDisplay)
 {
-	MFCALLSTACK;
+	if(!pDisplay)
+		pDisplay = gpCurrentDisplay;
 
+	if(gpCurrentDisplay == pDisplay)
+		gpCurrentDisplay = NULL;
+
+/*
 	if((!gDisplay.windowed) && (originalVidMode != NULL) && xdisplay != NULL && numModes > 1)
 	{
 		XF86VidModeSwitchToMode(xdisplay, screen, originalVidMode);
 	}
+*/
 
-	MFRenderer_DestroyDisplay();
+	MFRenderer_DestroyDisplay(pDisplay);
 
-	if(sizeHints != NULL)
-	{
-		XFree(sizeHints);
-		sizeHints = NULL;
-	}
-
-	if(window != 0)
-	{
-		XDestroyWindow(xdisplay, window);
-		window = 0;
-	}
-
-	if(colorMap != 0)
-	{
-		XFreeColormap(xdisplay, colorMap);
-		colorMap = 0L;
-	}
-
-	if(xdisplay != NULL)
-	{
-		XCloseDisplay(xdisplay);
-		xdisplay = NULL;
-	}
-
-	FreeModes();
-}
-
-void MFDisplay_GetNativeRes(MFRect *pRect)
-{
-	// TODO: need to find the current desktop res in linux
-
-	pRect->x = pRect->y = 0.f;
-	pRect->width = 1280.f;
-	pRect->height = 720.f;
-}
-
-void MFDisplay_GetDefaultRes(MFRect *pRect)
-{
-	pRect->x = pRect->y = 0.f;
-	pRect->width = 1280.f;
-	pRect->height = 720.f;
-}
-
-float MFDisplay_GetNativeAspectRatio()
-{
-	MFRect rect;
-	MFDisplay_GetDisplayRect(&rect);
-
-	return rect.width / rect.height;
-}
-
-bool MFDisplay_IsWidescreen()
-{
-	MFRect rect;
-	MFDisplay_GetDisplayRect(&rect);
-
-	return rect.width / rect.height >= 1.6f;
+	// TODO: destroy window...??
 }
 
 void MFDisplay_HandleEventsX11()

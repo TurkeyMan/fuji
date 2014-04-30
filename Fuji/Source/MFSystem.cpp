@@ -36,7 +36,8 @@
 void MFSystem_HandleEventsPlatformSpecific();
 
 // local variables
-extern "C" MFDefaults gDefaults =
+extern "C" {
+MFDefaults gDefaults =
 {
 	// HeapDefaults
 	{
@@ -137,6 +138,7 @@ extern "C" MFDefaults gDefaults =
 		0	// inputPlugin
 	}
 };
+}
 
 struct MFSystemState
 {

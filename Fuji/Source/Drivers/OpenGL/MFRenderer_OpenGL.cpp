@@ -70,7 +70,6 @@ int gOpenGLVersion = 0;
 		if(!glXQueryExtension(xdisplay, NULL, NULL))
 		{
 			MFDebug_Error("GLX extension not available");
-			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -78,7 +77,6 @@ int gOpenGLVersion = 0;
 		if(!glXQueryVersion(xdisplay, &glXMajor, &glXMinor) || (glXMajor == 1 && glXMinor < 3))
 		{
 			MFDebug_Error(MFStr("Unable to open display, need GLX V1, and at least version 1.3 (Have version %d.%d)", glXMajor, glXMinor));
-			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -91,7 +89,6 @@ int gOpenGLVersion = 0;
 			if(numConfigs == 0)
 			{
 				MFDebug_Error("Unable to obtain a suitable glX FBConfig");
-				MFRenderer_DestroyDisplay();
 				return NULL;
 			}
 		}
@@ -99,14 +96,12 @@ int gOpenGLVersion = 0;
 		if((visualInfo = glXGetVisualFromFBConfig(xdisplay, fbConfigs[0])) == NULL)
 		{
 			MFDebug_Error("Unable to obtain a visualInfo structure for the associated FBConfig");
-			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
 		if(visualInfo->depth < 16)
 		{
 			MFDebug_Error("Need at least a 16 bit screen!");
-			MFRenderer_DestroyDisplay();
 			return NULL;
 		}
 
@@ -174,17 +169,21 @@ void MFRenderer_DeinitModulePlatformSpecific()
 int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 {
 #if MF_DISPLAY == MF_DRIVER_X11
-	if(!(glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL)))
+	Window window = (Window)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow);
+
+	glXWindow = glXCreateWindow(xdisplay, fbConfigs[0], window, NULL);
+	if(!glXWindow)
 	{
 		MFDebug_Error("Unable to associate window with a GLXWindow");
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		return 1;
 	}
 
-	if(!(glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true)))
+	glXContext = glXCreateNewContext(xdisplay, fbConfigs[0], GLX_RGBA_TYPE, NULL, true);
+	if(!glXContext)
 	{
 		MFDebug_Error("Unable to create GLXContext");
-		MFRenderer_DestroyDisplay();
+		MFRenderer_DestroyDisplay(pDisplay);
 		return 1;
 	}
 
@@ -193,29 +192,8 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 
 	if(!glXMakeContextCurrent(xdisplay, glXWindow, glXWindow, glXContext))
 	{
-		MFDebug_Error("Unable to bind GLXContext");
-		MFRenderer_DestroyDisplay();
-		return 1;
-	}
-
-	// Check OpenGL version
-	const char *glVersionStr = (const char *)glGetString(GL_VERSION);
-	int32 majorGLVersion, minorGLVersion;
-
-	if(sscanf(glVersionStr, "%d.%d.%*d", &majorGLVersion, &minorGLVersion) != 2)
-	{
-		if(sscanf(glVersionStr, "%d.%d", &majorGLVersion, &minorGLVersion) != 2)
-		{
-			MFDebug_Error("Unable to determine OpenGl version");
-			MFRenderer_DestroyDisplay();
-			return 1;
-		}
-	}
-
-	if(majorGLVersion == 1 && minorGLVersion < 4)
-	{
-		MFDebug_Error("Need at least OpenGL version 1.4");
-		MFRenderer_DestroyDisplay();
+		MFDebug_Error("glXMakeContextCurrent failed");
+		MFRenderer_DestroyDisplay(pDisplay);
 		return 1;
 	}
 #elif MF_DISPLAY == MF_DRIVER_WIN32
@@ -373,7 +351,8 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 
 void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
-	MFRenderTarget_Release(gpDeviceRenderTarget);
+	if(gpDeviceRenderTarget)
+		MFRenderTarget_Release(gpDeviceRenderTarget);
 
 #if MF_DISPLAY == MF_DRIVER_X11
 	if(fbConfigs != NULL)
@@ -478,6 +457,7 @@ bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSett
 
 void MFRenderer_LostFocus(MFDisplay *pDisplay)
 {
+#if MF_DISPLAY == MF_DRIVER_WIN32
 	if(pDisplay->settings.bFullscreen)
 	{
 		if(ChangeDisplaySettings(NULL, 0) == DISP_CHANGE_SUCCESSFUL)
@@ -485,10 +465,12 @@ void MFRenderer_LostFocus(MFDisplay *pDisplay)
 		else
 			MFDebug_Warn(2, "Unable to return to windowed mode!");
 	}
+#endif
 }
 
 void MFRenderer_GainedFocus(MFDisplay *pDisplay)
 {
+#if MF_DISPLAY == MF_DRIVER_WIN32
 	if(pDisplay->settings.bFullscreen)
 	{
 		DEVMODE dmScreenSettings;
@@ -504,6 +486,7 @@ void MFRenderer_GainedFocus(MFDisplay *pDisplay)
 		else
 			MFDebug_Warn(2, "Couldn't change display mode!");
 	}
+#endif
 }
 
 bool MFRenderer_BeginFramePlatformSpecific()
@@ -628,7 +611,7 @@ static int SortDefault(const void *p1, const void *p2)
 {
 	MFRenderElement *pE1 = (MFRenderElement*)p1;
 	MFRenderElement *pE2 = (MFRenderElement*)p2;
-	
+
 	int pred = pE1->primarySortKey - pE2->primarySortKey;
 	if(pred) return pred;
 	pred = (int)((char*)pE2->pMaterial - (char*)pE1->pMaterial);
@@ -647,7 +630,7 @@ static int SortBackToFront(const void *p1, const void *p2)
 {
 	MFRenderElement *pE1 = (MFRenderElement*)p1;
 	MFRenderElement *pE2 = (MFRenderElement*)p2;
-	
+
 	int pred = pE1->primarySortKey - pE2->primarySortKey;
 	if(pred) return pred;
 	pred = pE2->zSort - pE1->zSort;
@@ -668,7 +651,7 @@ static int SortFrontToBack(const void *p1, const void *p2)
 {
 	MFRenderElement *pE1 = (MFRenderElement*)p1;
 	MFRenderElement *pE2 = (MFRenderElement*)p2;
-	
+
 	int pred = pE1->primarySortKey - pE2->primarySortKey;
 	if(pred) return pred;
 	pred = pE1->zSort - pE2->zSort;

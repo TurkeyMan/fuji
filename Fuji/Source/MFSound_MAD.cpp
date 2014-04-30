@@ -527,7 +527,7 @@ size_t GetMADSamples(MFAudioStream *pStream, void *pBuffer, size_t bytes)
 		if(DoFilter)
 			ApplyFilter(&pDecoder->frame);
 */
-		const int bytesPerFrame = SAMPLES_PER_MP3_FRAME*4;
+		const size_t bytesPerFrame = SAMPLES_PER_MP3_FRAME*4;
 		if(pBuffer || bytes < bytesPerFrame)
 			mad_synth_frame(&pDecoder->synth, &pDecoder->frame);
 

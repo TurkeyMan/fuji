@@ -1,7 +1,10 @@
 #include "Fuji_Internal.h"
 #include "MFHeap_Internal.h"
 
-extern "C" MFEngineInstance *gpEngineInstance = NULL;
+extern "C"
+{
+	MFEngineInstance *gpEngineInstance = NULL;
+}
 
 MF_API MFEngineInstance * Fuji_CreateEngineInstance()
 {

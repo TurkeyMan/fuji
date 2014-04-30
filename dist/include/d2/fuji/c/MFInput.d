@@ -284,36 +284,70 @@ enum MFInputDeviceStatus
 * Gamepad Flags.
 * Various flags available to certain types of gamepads.
 */
-enum MFGamepadFlags
+enum MFGamepadFlags : uint
 {
-	UserFlags					= 0xFFFF,
-	IsProxy						= 0x1,	// is some sort of proxy driver (like xbox1 drivers)
-	IsAdapter					= 0x2,	// controller is some sort of adapter
-	IsGuitar					= 0x4,
-	IsDrums						= 0x8,
-
+	// Controller type
+	TypeMask					= 0xF,
+	Type_Gamepad				= 0x0,
+	Type_Mouse					= 0x1,
+	Type_Keyboard				= 0x2,
+	Type_TouchScreen			= 0x3,
+	Type_Joystick				= 0x4,
+	Type_ArcadeStick			= 0x5,
+	Type_Guitar					= 0x6,
+	Type_Drums					= 0x7,
+	
+	// Controller flags
+	FlagsMask					= 0xFFFF0,
+	IsProxy						= 0x10,	// is some sort of proxy driver (like xbox1 drivers)
+	IsAdapter					= 0x20,	// controller is some sort of adapter
+	HasAudio					= 0x40,	// controller has an audio device
+	HasDisplay					= 0x80,	// controller has an integrated display
+	
+	// Gamepad flags
+	Gamepad_Has6FaceButtons		= 0x100,
+	Gamepad_HasTriggers			= 0x200,
+	Gamepad_Has2Triggers		= 0x400,
+	Gamepad_HasAnalogStick		= 0x800,
+	Gamepad_Has2AnalogSticks	= 0x1000,
+	Gamepad_HasDPad				= 0x2000,
+	Gamepad_HasVibration		= 0x4000,
+	
+	// Arcade stick flags
+	Arcade_Has6FaceButtons		= 0x100,
+	Arcade_Has8FaceButtons		= 0x200,
+	
 	// Guitar specific flags
 	Guitar_HasTilt				= 0x100,
 	Guitar_HasSolo				= 0x200,
 	Guitar_HasPickupSwitch		= 0x400,
 	Guitar_HasSlider			= 0x800,
-
+	
 	// Drum specific flags
 	Drums_Has5Drums				= 0x100,
-
+	
 	// Controllers for other systems
-	SystemMask					= 0xF0000,		// 4 bits for target system
-	PS2							= 1 << 16,
-	GC							= 2 << 16,
-	DC							= 3 << 16,
-	N64							= 4 << 16,
-	Snes						= 5 << 16,
-	Nes							= 6 << 16,
-	Genesis						= 7 << 16,
-
+	SystemMask					= 0x3F00000,		// 6 bits for target system
+	Unknown						= 0 << 20,
+	PS2							= 1 << 20,
+	PS3							= 2 << 20,
+	PS4							= 3 << 20,
+	XBox						= 4 << 20,
+	X360						= 5 << 20,
+	XBOne						= 6 << 20,
+	Nes							= 7 << 20,
+	Snes						= 8 << 20,
+	N64							= 9 << 20,
+	GC							= 10 << 20,
+	Wii							= 11 << 20,
+	WiiU						= 12 << 20,
+	Genesis						= 13 << 20,
+	Saturn						= 14 << 20,
+	DC							= 15 << 20,
+	
 	// System flags
-	SystemFlags					= 0xFFF00000,
-	DontUseSphericalDeadzone	= 0x100000
+	SystemFlagsMask				= 0xFC000000,
+	DontUseSphericalDeadzone	= 0x4000000
 }
 
 /**

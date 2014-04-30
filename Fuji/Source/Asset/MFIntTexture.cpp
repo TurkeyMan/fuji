@@ -357,7 +357,7 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 
 	png_structp png_ptr;
 	png_infop info_ptr;
-	int number_of_passes;
+//	int number_of_passes;
 	png_bytep * row_pointers;
 
 	// initialize stuff
@@ -375,7 +375,7 @@ MFIntTexture* LoadPNG(const void *pMemory, size_t size)
 	color_type = info_ptr->color_type;
 	bit_depth = info_ptr->bit_depth;
 
-	number_of_passes = png_set_interlace_handling(png_ptr);
+	/*number_of_passes =*/ png_set_interlace_handling(png_ptr);
 	png_read_update_info(png_ptr, info_ptr);
 
 	// read file

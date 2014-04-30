@@ -59,7 +59,10 @@ struct MFEngineInstance
 	MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
 };
 
-extern "C" extern MFEngineInstance *gpEngineInstance;
+extern "C"
+{
+	extern MFEngineInstance *gpEngineInstance;
+}
 
 
 __forceinline float MFTimeDelta()

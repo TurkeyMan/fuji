@@ -298,11 +298,36 @@ enum MFInputDeviceStatus
  */
 enum MFGamepadFlags
 {
-	MFGF_UserFlags					= 0xFFFF,
-	MFGF_IsProxy					= 0x1,	// is some sort of proxy driver (like xbox1 drivers)
-	MFGF_IsAdapter					= 0x2,	// controller is some sort of adapter
-	MFGF_IsGuitar					= 0x4,
-	MFGF_IsDrums					= 0x8,
+	// Controller type
+	MFGF_TypeMask					= 0xF,
+	MFGF_Type_Gamepad				= 0x0,
+	MFGF_Type_Mouse					= 0x1,
+	MFGF_Type_Keyboard				= 0x2,
+	MFGF_Type_TouchScreen			= 0x3,
+	MFGF_Type_Joystick				= 0x4,
+	MFGF_Type_ArcadeStick			= 0x5,
+	MFGF_Type_Guitar				= 0x6,
+	MFGF_Type_Drums					= 0x7,
+
+	// Controller flags
+	MFGF_FlagsMask					= 0xFFFF0,
+	MFGF_IsProxy					= 0x10,	// is some sort of proxy driver (like xbox1 drivers)
+	MFGF_IsAdapter					= 0x20,	// controller is some sort of adapter
+	MFGF_HasAudio					= 0x40,	// controller has an audio device
+	MFGF_HasDisplay					= 0x80,	// controller has an integrated display
+
+	// Gamepad flags
+	MFGF_Gamepad_Has6FaceButtons	= 0x100,
+	MFGF_Gamepad_HasTriggers		= 0x200,
+	MFGF_Gamepad_Has2Triggers		= 0x400,
+	MFGF_Gamepad_HasAnalogStick		= 0x800,
+	MFGF_Gamepad_Has2AnalogSticks	= 0x1000,
+	MFGF_Gamepad_HasDPad			= 0x2000,
+	MFGF_Gamepad_HasVibration		= 0x4000,
+
+	// Arcade stick flags
+	MFGF_Arcade_Has6FaceButtons		= 0x100,
+	MFGF_Arcade_Has8FaceButtons		= 0x200,
 
 	// Guitar specific flags
 	MFGF_Guitar_HasTilt				= 0x100,
@@ -314,18 +339,27 @@ enum MFGamepadFlags
 	MFGF_Drums_Has5Drums			= 0x100,
 
 	// Controllers for other systems
-	MFGF_SystemMask					= 0xF0000,		// 4 bits for target system
-	MFGF_PS2						= 1 << 16,
-	MFGF_GC							= 2 << 16,
-	MFGF_DC							= 3 << 16,
-	MFGF_N64						= 4 << 16,
-	MFGF_Snes						= 5 << 16,
-	MFGF_Nes						= 6 << 16,
-	MFGF_Genesis					= 7 << 16,
+	MFGF_SystemMask					= 0x3F00000,		// 6 bits for target system
+	MFGF_Unknown					= 0 << 20,
+	MFGF_PS2						= 1 << 20,
+	MFGF_PS3						= 2 << 20,
+	MFGF_PS4						= 3 << 20,
+	MFGF_XBox						= 4 << 20,
+	MFGF_X360						= 5 << 20,
+	MFGF_XBOne						= 6 << 20,
+	MFGF_Nes						= 7 << 20,
+	MFGF_Snes						= 8 << 20,
+	MFGF_N64						= 9 << 20,
+	MFGF_GC							= 10 << 20,
+	MFGF_Wii						= 11 << 20,
+	MFGF_WiiU						= 12 << 20,
+	MFGF_Genesis					= 13 << 20,
+	MFGF_Saturn						= 14 << 20,
+	MFGF_DC							= 15 << 20,
 
 	// System flags
-	MFGF_SystemFlags				= 0xFFF00000,
-	MFGF_DontUseSphericalDeadzone	= 0x100000
+	MFGF_SystemFlagsMask			= 0xFC000000,
+	MFGF_DontUseSphericalDeadzone	= 0x4000000
 };
 
 /**

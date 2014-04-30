@@ -22,6 +22,8 @@ static MFDisplayAdaptorDesc *gpDisplayAdaptors = NULL;
 
 extern MFInitParams gInitParams;
 
+
+//-------------------------------------------------------------------
 // i will dynamically construct a list later from supported resolution
 // provided by directx, verified by the monitor driver
 struct DisplayMode
@@ -86,6 +88,7 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 		sprintf(pCurrentRes, "%dx%d", modeList[currentMode].width, modeList[currentMode].height);
 	pRes->data = 1;
 }
+//-------------------------------------------------------------------
 
 
 void MFDisplay_InitModulePlatformSpecific()
@@ -190,7 +193,7 @@ MF_API void MFDisplay_GetDefaults(MFDisplaySettings *pDisplaySettings)
 	pDisplaySettings->cable = MFDC_Unknown;
 	pDisplaySettings->bVSync = true;
 	pDisplaySettings->numBuffers = 2;
-	pDisplaySettings->flags = MFDF_CanResizeWindow;
+	pDisplaySettings->flags = 0;
 	pDisplaySettings->pWindow = NULL;
 
 	pDisplaySettings->backBufferFormat = ImgFmt_SelectDefault;
@@ -321,6 +324,9 @@ MF_API void MFDisplay_Destroy(MFDisplay *pDisplay)
 
 	if(gpCurrentDisplay == pDisplay)
 		gpCurrentDisplay = NULL;
+
+	// TODO: destroy destroy renderer...??
+	// TODO: destroy window...??
 }
 
 #endif // MF_DISPLAY

@@ -2039,7 +2039,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x4748,
 		gXPlorerButtonID,
 		gXPlorerButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Guitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
 	},
 
 	// PS TO PC CONVERTOR
@@ -2251,7 +2251,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXGuitarButtonID,
 		gXGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Guitar | MFGF_Guitar_HasTilt | MFGF_DontUseSphericalDeadzone
 	},
 
 	{
@@ -2388,7 +2388,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1BAD, 0x0002,
 		g360RBGuitarButtonID,
 		g360RBGuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Guitar | MFGF_Guitar_HasSolo | MFGF_Guitar_HasPickupSwitch | MFGF_DontUseSphericalDeadzone
 	},
 
 	// RB 360 Drums
@@ -2398,7 +2398,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1BAD, 0x0003,
 		g360RBDrumsButtonID,
 		g360RBDrumsButtonNames,
-		MFGF_IsDrums
+		MFGF_Type_Drums
 	},
 
 	// Xinput Drums
@@ -2408,7 +2408,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0, 0,
 		gXDrumsButtonID,
 		g360RBDrumsButtonNames,
-		MFGF_IsDrums
+		MFGF_Type_Drums
 	},
 
 	// XInput gamepad
@@ -2438,7 +2438,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BA, 0x0100,
 		gPS3GH4GuitarButtonID,
 		gPS3GH4GuitarButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Guitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
 	},
 
 	// GH:WT PS3 Drums
@@ -2448,7 +2448,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x12BA, 0x0120,
 		gPS3GH4DrumsButtonID,
 		gPS3GH4DrumsButtonNames,
-		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Drums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
 	},
 
 	// GH5 Xbox 360 Drums
@@ -2458,7 +2458,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x0719,
 		g360GH4DrumsButtonID,
 		g360GH4DrumsButtonNames,
-		MFGF_IsDrums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Drums | MFGF_Drums_Has5Drums | MFGF_DontUseSphericalDeadzone
 	},
 
 	// GH5 Xbox 360 Guitar ** HACK: this shares the same USB id's with the drums! there is a hack in MFInput_PC.cpp to skip to the next one if axiis are present **
@@ -2468,7 +2468,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 		0x1430, 0x0719,
 		g360GH5GuitarButtonID,
 		gXPlorerButtonNames,
-		MFGF_IsGuitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
+		MFGF_Type_Guitar | MFGF_Guitar_HasSlider | MFGF_DontUseSphericalDeadzone
 	},
 
 /*
@@ -2495,7 +2495,7 @@ static MFGamepadInfo gGamepadDescriptors[] =
 
 */
 
-	// "Harmonix Guitar for PlayStation®3" 12BA:0200
+	// "Harmonix Guitar for PlayStationÂ®3" 12BA:0200
 	// "Guitar Hero3 for PlayStation (R) 3" 12BA:0100
 	// "Harmonix Drum Kit for PlayStation(R)3" 12BA:0210
 

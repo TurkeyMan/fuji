@@ -597,6 +597,9 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 				MFDebug_Assert((gDataTypeProperties[lt] & DTP_MathOps) && (gDataTypeProperties[rt] & DTP_MathOps), "Error!");
 				e.type = (MFExpressionDataType)(lt | rt | MFEDT_Float);
 				break;
+			default:
+				MFUNREACHABLE;
+				break;
 		}
 	}
 	else
@@ -705,6 +708,9 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 				e.type = MFEDT_Code;
 				e.value.code.pCode = MFStringCache_AddN(pEffect->pStringCache, pExp->pToken->token.ptr, pExp->pToken->token.length);
 				e.value.code.pLanguage = pExp->pRight ? MFStringCache_AddN(pEffect->pStringCache, pExp->pRight->pLeft->pToken->token.ptr, pExp->pRight->pLeft->pToken->token.length) : NULL;
+				break;
+			default:
+				MFUNREACHABLE;
 				break;
 		}
 	}
@@ -871,7 +877,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 			else
 			{
 				bool bFound = false;
-				for(int a=0; a<sizeof(gSymbols)/sizeof(gSymbols[0]); ++a)
+				for(size_t a=0; a<sizeof(gSymbols)/sizeof(gSymbols[0]); ++a)
 				{
 					if(gSymbols[a].len <= buffer.length && !MFString_CompareN(buffer.ptr, gSymbols[a].pSymbol, gSymbols[a].len))
 					{
@@ -1166,7 +1172,7 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 		{
 			MFIntExpression l = SimplifyExpression(*(MFIntExpression*)exp.op.pLeft, effect, pTechnique, expressions, platform);
 			MFIntExpression r = SimplifyExpression(*(MFIntExpression*)exp.op.pRight, effect, pTechnique, expressions, platform);
-			MFDebug_Assert(r.type == MFExp_Identifier, "Expected identifier");
+			MFDebug_Assert(r.expression == MFExp_Identifier, "Expected identifier");
 			if(l.expression == MFExp_Immediate)
 			{
 				int index = -1;
@@ -1360,6 +1366,9 @@ MFIntExpression SimplifyExpression(MFIntExpression &exp, MFIntEffect &effect, MF
 			MFDebug_Assert(false, "Todo");
 			break;
 		}
+		default:
+			MFUNREACHABLE;
+			break;
 	}
 
 	return e;

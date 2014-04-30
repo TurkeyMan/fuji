@@ -66,7 +66,7 @@ char gAttribNames[MFVET_Max][16] =
 	"vWeights\0\0"
 };
 
-char gAttribNameLen[MFVET_Max] =
+uint8 gAttribNameLen[MFVET_Max] =
 {
 	4,
 	7,
@@ -278,7 +278,7 @@ MF_API void MFVertex_RenderVertices(MFEffectTechnique *pTechnique, MFPrimType pr
 			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
-			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
+			gAttribNames[type][gAttribNameLen[type]] = (char)('0' + pElements[a].index);
 			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
@@ -333,7 +333,7 @@ MF_API void MFVertex_RenderIndexedVertices(MFEffectTechnique *pTechnique, MFPrim
 			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 		if(pElements[a].index > 0 || attribs[a] == -1)
 		{
-			gAttribNames[type][gAttribNameLen[type]] = '0' + (char)pElements[a].index;
+			gAttribNames[type][gAttribNameLen[type]] = (char)('0' + pElements[a].index);
 			attribs[a] = glGetAttribLocation(techniqueData.program, gAttribNames[type]);
 			gAttribNames[type][gAttribNameLen[type]] = 0;
 		}
