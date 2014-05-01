@@ -15,7 +15,7 @@
 struct MFOpenDataCachedFile : public MFOpenData
 {
 	MFFile *pBaseFile;		/**< The MFFile handle to an open file. This handle can exist in any other filesystem. */
-	int maxCacheSize;		/**< Maximum size of the file cache. */
+	size_t maxCacheSize;	/**< Maximum size of the file cache. */
 };
 
 /**

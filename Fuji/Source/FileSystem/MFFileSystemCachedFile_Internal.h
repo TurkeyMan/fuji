@@ -10,12 +10,12 @@ void MFFileSystemCachedFile_DeinitModule();
 // filesystem callbacks
 int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileCachedFile_Close(MFFile* fileHandle);
-int MFFileCachedFile_Read(MFFile* fileHandle, void *pBuffer, int64 bytes);
-int MFFileCachedFile_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes);
-int MFFileCachedFile_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
+size_t MFFileCachedFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
+size_t MFFileCachedFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
+uint64 MFFileCachedFile_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
 // this is just for convenience sake, and not part of the main filesystem interface
-uint32 MFFileCachedFile_GetSize(const char* pFilename);
+uint64 MFFileCachedFile_GetSize(const char* pFilename);
 bool MFFileCachedFile_Exists(const char* pFilename);
 
 #define MFFILESYSTEM_NUMCACHEDBUCKETS 4
@@ -24,15 +24,15 @@ bool MFFileCachedFile_Exists(const char* pFilename);
 struct MFFileCachedBucket
 {
 	char *pData;
-	int size;
-	int64 fileOffset;
-	int64 lastTouched;
+	size_t size;
+	uint64 fileOffset;
+	uint64 lastTouched;
 };
 
 struct MFFileCachedData
 {
 	char *pCache;
-	int cacheSize;
+	size_t cacheSize;
 
 	MFFileCachedBucket buckets[MFFILESYSTEM_NUMCACHEDBUCKETS];
 

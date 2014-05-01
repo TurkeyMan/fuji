@@ -346,7 +346,7 @@ int MFFileHTTP_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
+size_t MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -360,21 +360,23 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 	MFSockets_Send(socket, pHeaderRequest, MFString_Length(pHeaderRequest) + 1, 0);
 
-	const int bufferLen = 256;
+	const size_t bufferLen = 2048;
 	char temp[bufferLen+1];
-	int read = MFSockets_Recv(socket, temp, bufferLen, 0);
+	size_t read = MFSockets_Recv(socket, temp, bufferLen, 0);
 	temp[bufferLen] = 0;
 
 	// validate HTTP response
 	if(MFString_CompareN("HTTP/", temp, 5))
-		return -1;
+		return 0;
 
 	// get response code
 	const char *pResponse = MFString_Chr(temp, ' ');
-	if(!pResponse) return -1;
+	if(!pResponse)
+		return 0;
 	++pResponse;
 	const char *pT = MFString_Chr(pResponse, ' ');
-	if(!pT) return -1;
+	if(!pT)
+		return 0;
 
 //	int response = atoi(MFStrN(pResponse, pT-pResponse));
 	int dataStart = 0;
@@ -390,8 +392,8 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 		if(!*pT)
 		{
-			int numBytes = (int)(pT - pLineStart);
-			for(int i=0; i<numBytes; ++i)
+			size_t numBytes = pT - pLineStart;
+			for(size_t i=0; i<numBytes; ++i)
 				temp[i] = pLineStart[i];
 			read = MFSockets_Recv(socket, temp + numBytes, bufferLen - numBytes, 0);
 			pLineStart = temp;
@@ -429,7 +431,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 	MFDebug_Assert(dataStart == fileHandle->offset, "Offset is wrong..");
 	MFDebug_Assert(contentLength == bytes, "Length is wrong..");
 
-	int numBytes = MFMin(bufferLen - (int)(size_t)(pT - temp), (int)bytes);
+	size_t numBytes = MFMin(bufferLen - (pT - temp), bytes);
 	if(numBytes)
 	{
 		MFCopyMemory(pBuffer, pT, numBytes);
@@ -439,7 +441,7 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 
 	while(bytes)
 	{
-		int read = MFSockets_Recv(socket, (char*)pBuffer, (int)bytes, 0);
+		size_t read = MFSockets_Recv(socket, (char*)pBuffer, bytes, 0);
 		if(!read)
 			break;
 		(char*&)pBuffer += read;
@@ -452,34 +454,36 @@ int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
 	return numBytes;
 }
 
-int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
+size_t MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
+
+	MFDebug_Assert(false, "TODO!");
 
 	return 0;
 }
 
-int MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
+uint64 MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int64 newPos = 0;
+	uint64 newPos = 0;
 
 	switch(relativity)
 	{
 		case MFSeek_Begin:
-			newPos = MFMin(bytes, fileHandle->length);
+			newPos = MFMin((uint64)bytes, fileHandle->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax((int64)0, fileHandle->length - bytes);
+			newPos = MFMax(0ULL, fileHandle->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp((int64)0, fileHandle->offset + bytes, fileHandle->length);
+			newPos = MFClamp(0ULL, fileHandle->offset + bytes, fileHandle->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	fileHandle->offset = newPos;
-	return (int)newPos;
+	return newPos;
 }

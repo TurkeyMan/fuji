@@ -335,10 +335,10 @@ int F3DFile::ReadOBJ(const char *pFilename)
 		return 1;
 	}
 
-	int size = MFFile_Seek(pFile, 0, MFSeek_End);
+	uint64 size = MFFile_Seek(pFile, 0, MFSeek_End);
 	MFFile_Seek(pFile, 0, MFSeek_Begin);
 
-	char *pMem = (char*)MFHeap_Alloc(size+1);
+	char *pMem = (char*)MFHeap_Alloc((size_t)size+1);
 	MFFile_Read(pFile, pMem, size);
 	pMem[size] = 0;
 

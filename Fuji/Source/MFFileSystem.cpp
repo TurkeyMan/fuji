@@ -489,14 +489,14 @@ MF_API int MFFile_Close(MFFile* fileHandle)
 }
 
 // read/write functions
-MF_API int MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
+MF_API size_t MFFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes, bool async)
 {
 	GET_MODULE_DATA(MFFileSystemState);
 
 	return pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Read(fileHandle, pBuffer, bytes);
 }
 
-MF_API int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
+MF_API size_t MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, bool async)
 {
 	GET_MODULE_DATA(MFFileSystemState);
 
@@ -504,20 +504,20 @@ MF_API int MFFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes, b
 }
 
 // offset management (these are stdio function signature compliant)
-MF_API int MFFile_Seek(MFFile* fileHandle, int bytes, MFFileSeek relativity)
+MF_API uint64 MFFile_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	GET_MODULE_DATA(MFFileSystemState);
 
 	return pModuleData->ppFileSystemList[fileHandle->filesystem]->callbacks.Seek(fileHandle, bytes, relativity);
 }
 
-MF_API int MFFile_Tell(MFFile* fileHandle)
+MF_API uint64 MFFile_Tell(MFFile* fileHandle)
 {
-	return (int)fileHandle->offset;
+	return fileHandle->offset;
 }
 
 // get file stream length (retuurs -1 for an undefined stream length)
-MF_API int64 MFFile_GetSize(MFFile* fileHandle)
+MF_API uint64 MFFile_GetSize(MFFile* fileHandle)
 {
 	return fileHandle->length;
 }
@@ -530,12 +530,12 @@ MF_API bool MFFile_IsEOF(MFFile* fileHandle)
 // stdio signiture functions (these can be used as a callback to many libs and API's)
 MF_API size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (size_t)MFFile_Read((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
+	return MFFile_Read((MFFile*)fileHandle, pBuffer, size*count, false);
 }
 
 MF_API size_t MFFile_StdWrite(const void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
-	return (size_t)MFFile_Write((MFFile*)fileHandle, pBuffer, (uint32)(size*count), false);
+	return MFFile_Write((MFFile*)fileHandle, pBuffer, size*count, false);
 }
 MF_API int MFFile_StdClose(void* fileHandle)
 {
@@ -544,8 +544,8 @@ MF_API int MFFile_StdClose(void* fileHandle)
 
 MF_API long MFFile_StdSeek(void* fileHandle, long bytes, int relativity)
 {
-	long seek = (long)MFFile_Seek((MFFile*)fileHandle, (int)bytes, (MFFileSeek)relativity);
-	return seek < 0 ? seek : 0;
+	int64 seek = (int64)MFFile_Seek((MFFile*)fileHandle, bytes, (MFFileSeek)relativity);
+	return seek < 0 ? (long)seek : 0;
 }
 
 MF_API long MFFile_StdTell(void* fileHandle)
@@ -1017,6 +1017,8 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		pMount = pMount->pNext;
 	}
 
+	MFDebug_Warn(4, MFStr("MFFile_Open(\"%s\", 0x%x) - Failed to open file", pFilename, openFlags));
+
 	return NULL;
 }
 
@@ -1029,19 +1031,27 @@ MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t
 
 	if(hFile)
 	{
-		int64 size = MFFile_GetSize(hFile);
+		uint64 size = MFFile_GetSize(hFile);
 
 		if(size > 0)
 		{
+#if defined(MF_32BIT)
+			if(size >= 1LL << 32)
+			{
+				MFDebug_Warn(1, MFStr("File is larger than the available address space!", pFilename));
+				return NULL;
+			}
+#endif
+
 			pBuffer = (char*)MFHeap_Alloc((size_t)size + extraBytes);
 
-			int bytesRead = MFFile_Read(hFile, pBuffer, (size_t)size);
+			size_t bytesRead = MFFile_Read(hFile, pBuffer, (size_t)size);
 
 			if(extraBytes > 0)
 				pBuffer[size] = 0;
 
 			if(pBytesRead)
-				*pBytesRead = (size_t)bytesRead;
+				*pBytesRead = bytesRead;
 		}
 
 		MFFile_Close(hFile);
@@ -1050,11 +1060,11 @@ MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t
 	return pBuffer;
 }
 
-MF_API int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
+MF_API size_t MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t size)
 {
 	MFDebug_Log(5, MFStr("Call: MFFileSystem_Save(\"%s\")", pFilename));
 
-	int bytesWritten = 0;
+	size_t bytesWritten = 0;
 
 	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Write|MFOF_Binary|MFOF_CreateDirectory);
 	if(hFile)
@@ -1068,14 +1078,13 @@ MF_API int MFFileSystem_Save(const char *pFilename, const char *pBuffer, size_t 
 }
 
 // if file does not exist, GetSize returns 0, however, a zero length file can also return 0 use 'Exists' to confirm
-MF_API int64 MFFileSystem_GetSize(const char *pFilename)
+MF_API uint64 MFFileSystem_GetSize(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	int64 size = 0;
+	uint64 size = 0;
 
 	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
-
 	if(hFile)
 	{
 		size = MFFile_GetSize(hFile);

@@ -55,22 +55,22 @@ voidpf zopen_file_func(voidpf opaque, const char* filename, int mode)
 
 uLong zread_file_func(voidpf opaque, voidpf stream, void* buf, uLong size)
 {
-	return MFFile_Read((MFFile*)stream, buf, size, false);
+	return (uLong)MFFile_Read((MFFile*)stream, buf, (size_t)size, false);
 }
 
 uLong zwrite_file_func(voidpf opaque, voidpf stream, const void* buf, uLong size)
 {
-	return MFFile_Write((MFFile*)stream, buf, size, false);
+	return (uLong)MFFile_Write((MFFile*)stream, buf, (size_t)size, false);
 }
 
 long ztell_file_func(voidpf opaque, voidpf stream)
 {
-	return MFFile_Tell((MFFile*)stream);
+	return (long)MFFile_Tell((MFFile*)stream);
 }
 
 long zseek_file_func(voidpf opaque, voidpf stream, uLong offset, int origin)
 {
-	return MFFile_StdSeek((MFFile*)stream, offset, (MFFileSeek)origin);
+	return MFFile_StdSeek((MFFile*)stream, (long)offset, (MFFileSeek)origin);
 }
 
 int zclose_file_func(voidpf opaque, voidpf stream)
@@ -248,42 +248,42 @@ int MFFileZipFile_Close(MFFile* pFile)
 	return 0;//unzClose((unzFile)pFile->pFilesysData);
 }
 
-int MFFileZipFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
+size_t MFFileZipFile_Read(MFFile* pFile, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	uint32 bytesRead;
-	bytesRead = unzReadCurrentFile((unzFile)pFile->pFilesysData, pBuffer, (uint32)bytes);
+	size_t bytesRead;
+	bytesRead = (size_t)unzReadCurrentFile((unzFile)pFile->pFilesysData, pBuffer, (unsigned int)bytes);
 	pFile->offset += bytesRead;
 
 	return bytesRead;
 }
 
-int MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, int64 bytes)
+size_t MFFileZipFile_Write(MFFile* pFile, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	// write
+	MFDebug_Assert(false, "TODO!");
 
 	return 0;
 }
 
-int MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
+uint64 MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int64 newPos = 0;
+	uint64 newPos = 0;
 
 	switch(relativity)
 	{
 		case MFSeek_Begin:
-			newPos = MFMin(bytes, pFile->length);
+			newPos = MFMin((uint64)bytes, pFile->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax((int64)0, pFile->length - bytes);
+			newPos = MFMax(0ULL, pFile->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp((int64)0, pFile->offset + bytes, pFile->length);
+			newPos = MFClamp(0ULL, pFile->offset + bytes, pFile->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
@@ -297,12 +297,12 @@ int MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 	pFile->offset = newPos;
 
 	// read to the desired position.
-	char buffer[256];
+	char buffer[2048];
 
 	while(newPos)
 	{
-		int64 bytes = newPos < 256 ? newPos : 256;
-		unzReadCurrentFile(f, buffer, (uint32)bytes);
+		uint64 bytes = newPos < sizeof(buffer) ? newPos : sizeof(buffer);
+		unzReadCurrentFile(f, buffer, (unsigned int)bytes);
 		newPos -= bytes;
 	}
 

@@ -127,11 +127,11 @@ MF_API void MFDebug_Error(const char *pErrorMessage);
  * @remarks The warning level output can be controlled at runtime.
  *
  * Valid Warning levels:
- * - 0 - Warning will be always be displayed. For critical warnings.
+ * - 0 - Warning will be always be displayed. For cases that are very likely errors.
  * - 1 - Critical Warning. Application will probably not run correctly.
  * - 2 - Non-Critical Warning. Application will run, but may perform incorrectly.
- * - 3 - General Warning. For general information feedback.
- * - 4 - Low Warning. For small generally unimportant details.
+ * - 3 - General Warning. For information feedback.
+ * - 4 - Low Warning. For trivial, generally unimportant details.
  */
 MF_API void MFDebug_Warn(int level, const char *pWarningMessage);
 

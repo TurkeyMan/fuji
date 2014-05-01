@@ -29,7 +29,8 @@ struct MFVorbisStream
 
 int MFSound_VorbisSeek(void *datasource, ogg_int64_t offset, int whence)
 {
-	return MFFile_Seek((MFFile*)datasource, (int)offset, (MFFileSeek)whence);
+	MFFile_Seek((MFFile*)datasource, offset, (MFFileSeek)whence);
+	return 0;
 }
 
 void DestroyVorbisStream(MFAudioStream *pStream)

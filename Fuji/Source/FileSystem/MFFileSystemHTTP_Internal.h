@@ -13,8 +13,8 @@ struct MFFileHTTPData
 	char *pArgString;
 
 	char *pCache;
-	uint32 cacheSize;
-	uint32 cacheStart;
+	size_t cacheSize;
+	size_t cacheStart;
 };
 
 // internal functions
@@ -29,12 +29,12 @@ MFFile* MFFileSystemHTTP_Open(MFMount *pMount, const char *pFilename, uint32 ope
 
 int MFFileHTTP_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileHTTP_Close(MFFile* fileHandle);
-int MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, int64 bytes);
-int MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes);
-int MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
+size_t MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
+size_t MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
+uint64 MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
 // this is just for convenience sake, and not part of the main filesystem interface
-uint32 MFFileHTTP_GetSize(const char* pFilename);
+uint64 MFFileHTTP_GetSize(const char* pFilename);
 bool MFFileHTTP_Exists(const char* pFilename);
 
 #endif

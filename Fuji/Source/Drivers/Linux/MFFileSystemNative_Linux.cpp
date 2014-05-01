@@ -26,6 +26,26 @@ void MFFileSystemNative_Unregister()
 {
 }
 
+static void CreateDir(const char *pPath)
+{
+	if(!pPath || *pPath == 0)
+		return;
+
+	// strip trailing '/'
+	((char*)pPath)[MFString_Length(pPath)-1] = 0;
+
+	// the path is empty
+	if(*pPath == 0)
+		return;
+
+	MFDebug_Assert(false, "TODO!");
+/*
+	CreateDir(MFStr_GetFilePath(pPath));
+
+	CreateDirectory(pPath, NULL);
+*/
+}
+
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
@@ -33,11 +53,14 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFDebug_Assert(pOpenData->cbSize == sizeof(MFOpenDataNative), "Incorrect size for MFOpenDataNative structure. Invalid pOpenData.");
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
 
-	int flags = 0;
-
 	MFDebug_Assert(pOpenData->openFlags & (MFOF_Read|MFOF_Write), "Neither MFOF_Read nor MFOF_Write specified.");
 	MFDebug_Assert((pNative->openFlags & (MFOF_Append|MFOF_Truncate)) != (MFOF_Append|MFOF_Truncate), "MFOF_Append and MFOF_Truncate are mutually exclusive.");
 	MFDebug_Assert((pNative->openFlags & (MFOF_Text|MFOF_Binary)) != (MFOF_Text|MFOF_Binary), "MFOF_Text and MFOF_Binary are mutually exclusive.");
+
+	if(pOpenData->openFlags & MFOF_CreateDirectory)
+		CreateDir(MFStr_GetFilePath(pFilename));
+
+	int flags = 0;
 
 	if(pOpenData->openFlags & MFOF_Read)
 	{
@@ -55,31 +78,39 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	{
 		if(pNative->openFlags & MFOF_Append)
 			flags |= O_APPEND;
-		else if(pNative->openFlags & MFOF_Truncate)
+		if(pNative->openFlags & MFOF_Truncate)
 			flags |= O_TRUNC;
 	}
 
 	int file = open(pNative->pFilename, flags, S_IRWXU|S_IRWXG|S_IRWXO);
 	if(file == -1)
 	{
-//		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
 		pFile->pFilesysData = 0;
 		return -1;
+	}
+
+	off_t size = 0;
+	if(pNative->openFlags & MFOF_Append)
+	{
+		position = lseek(file, 0, SEEK_CUR);
+	}
+	else
+	{
+		struct stat fileStats;
+		if(fstat(file, &fileStats) == -1)
+		{
+			MFDebug_Warn(2, MFStr("Call: MFFileNative_Open() - Error: fstat() failed, couldn't get size for file '%s'.", pNative->pFilename));
+			close(file);
+			pFile->pFilesysData = 0;
+			return -1;
+		}
+		size = fileStats.st_size;
 	}
 
 	pFile->pFilesysData = (void*)(size_t)file;
 	pFile->createFlags = pOpenData->openFlags;
-	pFile->offset = 0;
-
-	struct stat fileStats;
-	if(fstat(file, &fileStats) == -1)
-	{
-		close(file);
-		pFile->pFilesysData = 0;
-		return -1;
-	}
-
-	pFile->length = fileStats.st_size;
+	pFile->offset = (pNative->openFlags & MFOF_Append) ? size : 0;
+	pFile->length = size;
 
 	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
 
@@ -96,43 +127,42 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
+size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	int bytesRead = 0;
+	ssize_t bytesRead = 0;
 
-	bytesRead = read((size_t)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
-	if(bytesRead < 0) // read() returns -1 on error
-		bytesRead = 0;
+	bytesRead = read((size_t)fileHandle->pFilesysData, pBuffer, bytes);
+	if(bytesRead == -1) // read() returns -1 on error
+		return 0;
 
 	fileHandle->offset += bytesRead;
 
-	return (int)bytesRead;
+	return bytesRead;
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
+size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	int bytesWritten = 0;
+	ssize_t bytesWritten = 0;
 
-	bytesWritten = write((size_t)fileHandle->pFilesysData, pBuffer, (unsigned int)bytes);
-	if(bytesWritten < 0) // write() returns -1 on error
-		bytesWritten = 0;
+	bytesWritten = write((size_t)fileHandle->pFilesysData, pBuffer, bytes);
+	if(bytesWritten == -1) // write() returns -1 on error
+		return 0;
 
 	fileHandle->offset += bytesWritten;
 	fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
 
-	return (int)bytesWritten;
+	return bytesWritten;
 }
 
-int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
+uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	if(!fileHandle->pFilesysData)
-		return -1;
+	MFDebug_Assert(fileHandle->pFilesysData, "MFFileNative_Seek() - Invalid file!");
 
 	int whence = 0;
 	switch(relativity)
@@ -147,23 +177,20 @@ int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 			whence = SEEK_CUR;
 			break;
 		default:
-			MFDebug_Assert(false, "Invalid 'whence'.");
+			MFDebug_Assert(false, "MFFileNative_Seek() - Invalid 'relativity'.");
 			break;
 	}
 
-	off_t newOffset = lseek((size_t)fileHandle->pFilesysData, (long)bytes, whence);
-//	lseek((int)fileHandle->pFilesysData, bytes, whence);
-//	newOffset = tell((int)fileHandle->pFilesysData);
-
-	if(newOffset != -1)
-	{
+	off_t newOffset = lseek((size_t)fileHandle->pFilesysData, bytes, whence);
+	if(newOffset == -1)
+		MFDebug_Warn(1, "MFFileNative_Seek() - lseek() failed!");
+	else
 		fileHandle->offset = newOffset;
-	}
 
-	return (int)fileHandle->offset;
+	return fileHandle->offset;
 }
 
-uint32 MFFileNative_GetSize(const char* pFilename)
+uint64 MFFileNative_GetSize(const char* pFilename)
 {
 	MFCALLSTACK;
 

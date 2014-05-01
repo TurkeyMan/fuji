@@ -15,7 +15,7 @@ MF_API void MFDebug_Warn(int level, const char *pWarningMessage)
 {
 	if(level <= gWarningLevel)
 	{
-		MFDebug_Message(MFStr("Warning: %s", pWarningMessage));
+		MFDebug_Message(MFStr("Warning(%d): %s", level, pWarningMessage));
 	}
 }
 

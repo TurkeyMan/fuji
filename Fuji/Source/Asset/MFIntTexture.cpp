@@ -332,7 +332,7 @@ MFIntTextureFormat gFileTypeMap[gNumFileExtensions] =
 #if defined(MF_ENABLE_PNG)
 void PNGAPI png_file_read(png_structp png, png_bytep pBuffer, png_size_t bytes)
 {
-	MFFile_Read((MFFile*)png->io_ptr, pBuffer, (uint32)bytes, false);
+	MFFile_Read((MFFile*)png->io_ptr, pBuffer, (size_t)bytes, false);
 }
 
 MFIntTexture* LoadPNG(const void *pMemory, size_t size)

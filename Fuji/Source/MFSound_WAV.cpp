@@ -81,8 +81,8 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 	pStream->pStreamData = pWS;
 	pWS->pStream = hFile;
 
-	int read;
-	int fptr = sizeof(header);
+	size_t read;
+	size_t fptr = sizeof(header);
 	do
 	{
 		MFFile_Seek(hFile, fptr, MFSeek_Begin);
@@ -96,11 +96,11 @@ void CreateWAVStream(MFAudioStream *pStream, const char *pFilename)
 		{
 			read = MFFile_Read(hFile, &pWS->format, dataChunk.size);
 			if(pWS->format.cbSize)
-				read = MFFile_Seek(hFile, pWS->format.cbSize, MFSeek_Current);
+				read = (size_t)MFFile_Seek(hFile, pWS->format.cbSize, MFSeek_Current);
 		}
 		else if(dataChunk.id == MFMAKEFOURCC('d', 'a', 't', 'a'))
 		{
-			pWS->dataOffset = MFFile_Tell(hFile);
+			pWS->dataOffset = (size_t)MFFile_Tell(hFile);
 			pWS->dataSize = dataChunk.size;
 		}
 	}

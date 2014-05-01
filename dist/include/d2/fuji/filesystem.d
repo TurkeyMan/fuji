@@ -31,13 +31,13 @@ ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0) nothrow
 }
 
 alias MFFileSystem_Save = fuji.c.MFFileSystem.MFFileSystem_Save;
-int MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer) nothrow
+size_t MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer) nothrow
 {
 	return MFFileSystem_Save(filename.toStringz, buffer.ptr, buffer.length);
 }
 
 alias MFFileSystem_GetSize = fuji.c.MFFileSystem.MFFileSystem_GetSize;
-long MFFileSystem_GetSize(const(char)[] filename) nothrow
+ulong MFFileSystem_GetSize(const(char)[] filename) nothrow
 {
 	return MFFileSystem_GetSize(filename.toStringz);
 }

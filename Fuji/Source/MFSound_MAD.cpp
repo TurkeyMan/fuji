@@ -129,11 +129,11 @@ static inline signed short MadFixedToSshort(mad_fixed_t fixed)
 	return (signed short)fixed;
 }
 
-void ParseID3(MFAudioStream *pStream, MFID3 *pID3, int dataSize)
+void ParseID3(MFAudioStream *pStream, MFID3 *pID3, size_t dataSize)
 {
 	unsigned char *pData = pID3->pID3Data;
 
-	while(pData - pID3->pID3Data <= dataSize)
+	while(pData - pID3->pID3Data <= (ptrdiff_t)dataSize)
 	{
 		if(pID3->major == 2)
 		{
@@ -252,14 +252,13 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 	unsigned char buffer[256];
 	int sampleRate = 0;
 
-	uint32 filePos = MFFile_Tell(pDecoder->pFile);
-	int bytes = MFFile_Read(pDecoder->pFile, buffer, bOnlyFirst ? 4 : sizeof(buffer));
-
-	int offset = 0;
+	uint64 filePos = MFFile_Tell(pDecoder->pFile);
+	size_t bytes = MFFile_Read(pDecoder->pFile, buffer, bOnlyFirst ? 4 : sizeof(buffer));
+	size_t offset = 0;
 
 	while(1)
 	{
-		int remaining = bytes - offset;
+		size_t remaining = bytes - offset;
 		if(remaining < 4)
 		{
 			filePos += offset;
@@ -297,7 +296,7 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 				pDecoder->numFrameOffsetsAllocated *= 2;
 				pDecoder->pFrameOffsets = (uint32*)MFHeap_Realloc(pDecoder->pFrameOffsets, sizeof(uint32) * pDecoder->numFrameOffsetsAllocated);
 			}
-			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount++] = filePos + offset;
+			pDecoder->pFrameOffsets[pDecoder->frameOffsetCount++] = (uint32)(filePos + offset);
 			++pDecoder->frameCount;
 
 			if(bOnlyFirst)
@@ -310,7 +309,7 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 			if(buffer[offset+3] == '+')
 			{
 				MFID3v1_Enhanced ID3v1;
-				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, (int)sizeof(MFID3v1_Enhanced)));
+				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, sizeof(MFID3v1_Enhanced)));
 				if(remaining < 128)
 					MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, sizeof(MFID3v1_Enhanced) - remaining, false);
 				offset += sizeof(MFID3v1_Enhanced);
@@ -328,7 +327,7 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 			else
 			{
 				MFID3v1 ID3v1;
-				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, (int)sizeof(MFID3v1)));
+				MFCopyMemory(&ID3v1, buffer + offset, MFMin(remaining, sizeof(MFID3v1)));
 				if(remaining < 128)
 					MFFile_Read(pDecoder->pFile, (char*)&ID3v1 + remaining, sizeof(MFID3v1) - remaining, false);
 				offset += sizeof(MFID3v1);
@@ -355,24 +354,24 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 		{
 			unsigned char id3Header[10];
 
-			MFCopyMemory(id3Header, buffer + offset, MFMin(remaining, 10));
+			MFCopyMemory(id3Header, buffer + offset, MFMin(remaining, (size_t)10));
 			if(remaining < 10)
 				MFFile_Read(pDecoder->pFile, id3Header + remaining, 10 - remaining, false);
 			offset += 10;
 
 			// ID3 v2...
-			int size = GetSynchSafeInt(id3Header + 6);
+			size_t size = GetSynchSafeInt(id3Header + 6);
 
 			if(!pDecoder->pID3)
 			{
 				pDecoder->pID3 = (MFID3*)MFHeap_Alloc(sizeof(MFID3) + size);
 				pDecoder->pID3->pID3Data = (unsigned char*)(pDecoder->pID3 + 1);
-				pDecoder->pID3->size = size;
+				pDecoder->pID3->size = (uint32)size;
 				pDecoder->pID3->major = buffer[3];
 				pDecoder->pID3->minor = buffer[4];
 				pDecoder->pID3->flags = buffer[5];
 
-				int tagBytes = 0;
+				size_t tagBytes = 0;
 				if(offset < bytes)
 				{
 					tagBytes = MFMin(size, bytes - offset);
@@ -604,7 +603,7 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 	bool cacheFile = true;
 	if(pStream->createFlags & MFASF_AllowBuffering)
 	{
-		int64 fileSize = MFFile_GetSize(hFile);
+		uint64 fileSize = MFFile_GetSize(hFile);
 		MFDebug_Assert(fileSize > 0, "File is empty, or length is unknown.");
 
 		void *pMP3File = MFHeap_Alloc((size_t)fileSize);
@@ -667,8 +666,8 @@ void CreateMADStream(MFAudioStream *pStream, const char *pFilename)
 
 	// prime the input buffer
 	MFFile_Seek(hFile, pDecoder->pFrameOffsets[0], MFSeek_Begin);
-	int read = MFFile_Read(hFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
-	mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, read);
+	size_t read = MFFile_Read(hFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
+	mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, (unsigned long)read);
 	pDecoder->stream.error = MAD_ERROR_NONE;
 
 	// decode the first frame so we can get the frame header
@@ -702,8 +701,8 @@ void SeekMADStream(MFAudioStream *pStream, float seconds)
 	MFFile_Seek(pDecoder->pFile, frameOffset, MFSeek_Begin);
 
 	// prime input buffer
-	int bytes = MFFile_Read(pDecoder->pFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
-	mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, bytes);
+	size_t bytes = MFFile_Read(pDecoder->pFile, pDecoder->inputBuffer, INPUT_BUFFER_SIZE, false);
+	mad_stream_buffer(&pDecoder->stream, pDecoder->inputBuffer, (unsigned long)bytes);
 	pDecoder->stream.error = MAD_ERROR_NONE;
 	pDecoder->overflowBytes = 0;
 

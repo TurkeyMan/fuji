@@ -20,8 +20,8 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries);
 // open file structure
 struct MFFile
 {
-	int64 offset;
-	int64 length;
+	uint64 offset;
+	uint64 length;
 
 	uint32 createFlags;				// creat flags
 
@@ -67,12 +67,12 @@ struct MFJob
 		} read;
 		struct Write
 		{
-			int64 bytes;
+			size_t bytes;
 			const void *pBuffer;
 		} write;
 		struct Seek
 		{
-			int64 bytes;
+			size_t bytes;
 			MFFileSeek whence;
 		} seek;
 		struct Stat
@@ -87,7 +87,7 @@ struct MFJob
 		{
 			const char *pFilename;
 			void *pBuffer;
-			int64 size;
+			size_t size;
 		} save;
 	} data;
 	volatile MFJobState status;
@@ -150,9 +150,9 @@ struct MFFileSystemCallbacks
 
 	int (*Open)(MFFile*, MFOpenData*);
 	int (*Close)(MFFile*);
-	int (*Read)(MFFile*, void*, int64);
-	int (*Write)(MFFile*, const void*, int64);
-	int (*Seek)(MFFile*, int64, MFFileSeek);
+	size_t (*Read)(MFFile*, void*, size_t);
+	size_t (*Write)(MFFile*, const void*, size_t);
+	uint64 (*Seek)(MFFile*, int64, MFFileSeek);
 
 	bool (*FindFirst)(MFFind*, const char*, MFFindData*);
 	bool (*FindNext)(MFFind*, MFFindData*);

@@ -1,6 +1,7 @@
 module fuji.c.MFFileSystem;
 
 import fuji.c.Fuji;
+import core.stdc.config;
 
 nothrow:
 
@@ -112,7 +113,7 @@ extern (C) int MFFile_Close(MFFile *pFile);
 * @param async If true, the read will be performed asyncrenously, putting the file into a 'busy' state.
 * @return The number of bytes read.
 */
-extern (C) int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
+extern (C) size_t MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool async = false);
 
 /**
 * Write to a file.
@@ -123,7 +124,7 @@ extern (C) int MFFile_Read(MFFile *pFile, void *pBuffer, size_t bytes, bool asyn
 * @param async If true, the write will be performed asyncrenously, putting the file into a 'busy' state.
 * @return The number of bytes written.
 */
-extern (C) int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
+extern (C) size_t MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bool async = false);
 
 /**
 * Seek the file.
@@ -133,7 +134,7 @@ extern (C) int MFFile_Write(MFFile *pFile, const void *pBuffer, size_t bytes, bo
 * @param relativity Member of the MFFileSeek enumerated type where to begin the seek.
 * @return The new file offset in bytes.
 */
-extern (C) int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
+extern (C) ulong MFFile_Seek(MFFile *pFile, long bytes, MFFileSeek relativity);
 
 /**
 * Tell the file position.
@@ -141,7 +142,7 @@ extern (C) int MFFile_Seek(MFFile *pFile, int bytes, MFFileSeek relativity);
 * @param pFile Pointer to an open file.
 * @return The file pointer offset in bytes.
 */
-extern (C) int MFFile_Tell(MFFile *pFile);
+extern (C) ulong MFFile_Tell(MFFile *pFile);
 
 /**
 * Get the size of a file.
@@ -149,7 +150,7 @@ extern (C) int MFFile_Tell(MFFile *pFile);
 * @param pFile Pointer to an open file.
 * @return The size of the file in bytes. Returns -1 for a file stream with an undefined length. Returns 0 if the file does not exist.
 */
-extern (C) long MFFile_GetSize(MFFile *pFile);
+extern (C) ulong MFFile_GetSize(MFFile *pFile);
 
 /**
 * Check for end of file.
@@ -203,7 +204,7 @@ extern (C) size_t MFFile_StdWrite(const void *buffer, size_t size, size_t count,
 * @return The new file offset in bytes.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
-extern (C) long MFFile_StdSeek(void* stream, long offset, int whence);
+extern (C) c_long MFFile_StdSeek(void* stream, c_long offset, int whence);
 
 /**
 * Tell the file position.
@@ -212,7 +213,7 @@ extern (C) long MFFile_StdSeek(void* stream, long offset, int whence);
 * @return The file pointer offset in bytes.
 * @remarks This function complies with the stdio function signature (can be used as callbacks to many libs and API's).
 */
-extern (C) long MFFile_StdTell(void* stream);
+extern (C) c_long MFFile_StdTell(void* stream);
 
 
 //////////////////////////////
@@ -380,9 +381,9 @@ extern (C) ubyte* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead =
 * @param pFilename The name of the file to write. If the target file does not already exist, the filename must include the mountpoint to identify the target filesystem.
 * @param pBuffer Buffer to write to the file.
 * @param size Size of the buffer to write.
-* @return Returns 0 if the file was succesfully written.
+* @return Returns the number of bytes written.
 */
-extern (C) int MFFileSystem_Save(const(char)* pFilename, const(ubyte)* pBuffer, size_t size);
+extern (C) size_t MFFileSystem_Save(const(char)* pFilename, const(ubyte)* pBuffer, size_t size);
 
 /**
 * Get the size of a file.
@@ -391,7 +392,7 @@ extern (C) int MFFileSystem_Save(const(char)* pFilename, const(ubyte)* pBuffer, 
 * @return The size of the file in bytes. If the file does not exist, MFFileSystem_GetSize returns 0.
 * @remarks If the file does not exist, MFFileSystem_GetSize returns 0, however, a zero length file will also return 0. Use MFFileSystem_Exists to correctly test if a file exists. MFFileSystem_GetSize may also return -1 if the files length is not known, for instance, an endless or unknown length network stream.
 */
-extern (C) long MFFileSystem_GetSize(const(char)* pFilename);
+extern (C) ulong MFFileSystem_GetSize(const(char)* pFilename);
 
 /**
 * See if a file is available to the filesystem.

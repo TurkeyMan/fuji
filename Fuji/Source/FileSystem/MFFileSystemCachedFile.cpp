@@ -71,23 +71,26 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	int64 baseFileSize = pFile->length;
 
 	if(pCachedFile->maxCacheSize > 0)
-		pCacheData->cacheSize = (int)MFMin(baseFileSize, (int64)pCachedFile->maxCacheSize);
+		pCacheData->cacheSize = (size_t)MFMin(baseFileSize, (int64)pCachedFile->maxCacheSize);
 	else
-		pCacheData->cacheSize = (int)baseFileSize;
+	{
+		MFDebug_Assert(baseFileSize < (1LL<<sizeof(size_t))-1, "File is too big for cache!");
+		pCacheData->cacheSize = (size_t)baseFileSize;
+	}
 
 	pCacheData->pCache = (char*)MFHeap_Alloc(pCacheData->cacheSize);
 	pCacheData->pBaseFile = pCachedFile->pBaseFile;
 
 	// calculate bucket sizes
-	if(baseFileSize == pCacheData->cacheSize)
+	if(baseFileSize == (int64)pCacheData->cacheSize)
 	{
 		pCacheData->buckets[0].pData = pCacheData->pCache;
-		pCacheData->buckets[0].size = (int)baseFileSize;
+		pCacheData->buckets[0].size = (size_t)baseFileSize;
 		pCacheData->buckets[0].fileOffset = 0x7FFFFFFFFFFFFFFFLL;
 	}
 	else
 	{
-		int bucketSize = pCacheData->cacheSize/MFFILESYSTEM_NUMCACHEDBUCKETS;
+		size_t bucketSize = pCacheData->cacheSize/MFFILESYSTEM_NUMCACHEDBUCKETS;
 
 		for(int a=0; a<MFFILESYSTEM_NUMCACHEDBUCKETS; a++)
 		{
@@ -114,15 +117,15 @@ int MFFileCachedFile_Close(MFFile* pFile)
 	return 0;
 }
 
-int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
+size_t MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
 	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
 
-    int64 bytesRead = 0;
+    size_t bytesRead = 0;
 
-	while(bytes && (int)pFile->offset < pFile->length)
+	while(bytes && pFile->offset < pFile->length)
 	{
 		// find bucket
 		MFFileCachedBucket *pBucket = NULL;
@@ -143,7 +146,7 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 			{
 				pBucket = &pCacheData->buckets[0];
 				pBucket->fileOffset = 0;
-				pBucket->size = (int)pFile->length;
+				pBucket->size = (size_t)pFile->length;
 			}
 			else
 			{
@@ -158,18 +161,18 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 				pBucket->fileOffset = MFMin(pFile->offset, pFile->length - pBucket->size);
 			}
 
-			MFFile_Seek(pCacheData->pBaseFile, (int)pBucket->fileOffset, MFSeek_Begin);
-			uint32 read = MFFile_Read(pCacheData->pBaseFile, pBucket->pData, pBucket->size);
-			MFDebug_Assert(read == (uint32)pBucket->size, "Error reading base file...");
+			MFFile_Seek(pCacheData->pBaseFile, pBucket->fileOffset, MFSeek_Begin);
+			size_t read = MFFile_Read(pCacheData->pBaseFile, pBucket->pData, pBucket->size);
+			MFDebug_Assert(read == pBucket->size, "Error reading base file...");
 		}
 
 		pBucket->lastTouched = MFSystem_ReadRTC();
 
-		int64 bucketOffset = pFile->offset - pBucket->fileOffset;
-		int64 bytesRemaining = pBucket->size - bucketOffset;
-		int64 bytesToCopy = MFMin(bytes, bytesRemaining);
+		uint64 bucketOffset = pFile->offset - pBucket->fileOffset;
+		size_t bytesRemaining = pBucket->size - (size_t)bucketOffset;
+		size_t bytesToCopy = MFMin(bytes, bytesRemaining);
 
-		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, (size_t)bytesToCopy);
+		MFCopyMemory(pBuffer, pBucket->pData + bucketOffset, bytesToCopy);
 
 		bytes -= bytesToCopy;
 		(char*&)pBuffer += bytesToCopy;
@@ -178,40 +181,39 @@ int MFFileCachedFile_Read(MFFile* pFile, void *pBuffer, int64 bytes)
 		bytesRead += bytesToCopy;
 	}
 
-	return (int)bytesRead;
+	return bytesRead;
 }
 
-int MFFileCachedFile_Write(MFFile* pFile, const void *pBuffer, int64 bytes)
+size_t MFFileCachedFile_Write(MFFile* pFile, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	// write
+	MFDebug_Assert(false, "TODO!");
 
 	return 0;
 }
 
-int MFFileCachedFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
+uint64 MFFileCachedFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
-	int64 newPos = 0;
+	uint64 newPos = 0;
 
 	switch(relativity)
 	{
 		case MFSeek_Begin:
-			newPos = MFMin(bytes, pFile->length);
+			newPos = MFMin((uint64)bytes, pFile->length);
 			break;
 		case MFSeek_End:
-			newPos = MFMax((int64)0, pFile->length - bytes);
+			newPos = MFMax(0ULL, pFile->length - bytes);
 			break;
 		case MFSeek_Current:
-			newPos = MFClamp((int64)0, pFile->offset + bytes, pFile->length);
+			newPos = MFClamp(0ULL, pFile->offset + bytes, pFile->length);
 			break;
 		default:
 			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
 	}
 
 	pFile->offset = newPos;
-
-	return (int)pFile->offset;
+	return pFile->offset;
 }

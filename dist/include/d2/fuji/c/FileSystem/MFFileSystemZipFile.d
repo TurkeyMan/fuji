@@ -33,7 +33,7 @@ struct MFMountDataZipFile
  * Open zip file flags enum.
  * Open file flags relating to zip files.
  */
-enum MFOpenZipFlags : uint
+enum MFOpenZipFlags
 {
 	AlreadyMounted = MFOpenFlags.User	/**< Tells the MFFileZipFile_Open() function that the zip filesystem has already been mounted. */
 }

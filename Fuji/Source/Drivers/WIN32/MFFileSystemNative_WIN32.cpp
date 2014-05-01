@@ -55,10 +55,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	MFOpenDataNative *pNative = (MFOpenDataNative*)pOpenData;
 
 	MFDebug_Assert(pOpenData->openFlags & (MFOF_Read|MFOF_Write), "Neither MFOF_Read nor MFOF_Write specified.");
-	MFDebug_Assert((pNative->openFlags & (MFOF_Append|MFOF_Truncate)) != (MFOF_Append|MFOF_Truncate), "MFOF_Append and MFOF_Truncate are mutually exclusive.");
 	MFDebug_Assert((pNative->openFlags & (MFOF_Text|MFOF_Binary)) != (MFOF_Text|MFOF_Binary), "MFOF_Text and MFOF_Binary are mutually exclusive.");
-
-	DWORD access = ((pOpenData->openFlags&MFOF_Read) ? GENERIC_READ : NULL) | ((pOpenData->openFlags&MFOF_Write) ? GENERIC_WRITE : NULL);
 
 	const char *pFilename = pNative->pFilename;
 #if defined(MF_XBOX) || defined(MF_X360)
@@ -68,26 +65,46 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	if(pOpenData->openFlags & MFOF_CreateDirectory)
 		CreateDir(MFStr_GetFilePath(pFilename));
 
-	DWORD create = (pOpenData->openFlags & MFOF_Read) ? ((pOpenData->openFlags & MFOF_Write) ? OPEN_ALWAYS : OPEN_EXISTING) : CREATE_ALWAYS;
+	DWORD access = 0, create = 0;
 
-	pFile->pFilesysData = CreateFile(pFilename, access, FILE_SHARE_READ, NULL, create, NULL, NULL);
+	// set the access flags and create mode
+	if(pOpenData->openFlags & MFOF_Read)
+		access |= GENERIC_READ;
+	if(pOpenData->openFlags & (MFOF_Write|MFOF_Append))
+	{
+		if(pNative->openFlags & MFOF_Append)
+			access |= FILE_APPEND_DATA;
+		else
+			access |= GENERIC_WRITE;
+
+		if(pNative->openFlags & MFOF_Truncate)
+			create = CREATE_ALWAYS;
+		else
+			create = OPEN_ALWAYS;
+	}
+	else
+		create = OPEN_EXISTING;
+
+	pFile->pFilesysData = CreateFile(pFilename, access, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if(pFile->pFilesysData == INVALID_HANDLE_VALUE)
 	{
-//		MFDebug_Warn(3, MFStr("Failed to open file '%s'.", pNative->pFilename));
+		pFile->pFilesysData = 0;
+		return -1;
+	}
+
+	LARGE_INTEGER size;
+	if(!GetFileSizeEx(pFile->pFilesysData, &size))
+	{
+		MFDebug_Warn(2, MFStr("Call: MFFileNative_Open() - Error: Couldn't get size for file '%s'.", pNative->pFilename));
+		CloseHandle(pFile->pFilesysData);
 		pFile->pFilesysData = 0;
 		return -1;
 	}
 
 	pFile->createFlags = pOpenData->openFlags;
 	pFile->offset = 0;
-
-	DWORD excess;
-	uint32 fileSize = GetFileSize(pFile->pFilesysData, &excess);
-
-	MFDebug_Assert(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
-
-	pFile->length = fileSize;
+	pFile->length = size.QuadPart;
 
 	MFString_Copy(pFile->fileIdentifier, pNative->pFilename);
 
@@ -103,32 +120,74 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes)
+size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	uint32 bytesRead;
-	ReadFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (DWORD*)&bytesRead, NULL);
+#if defined(MF_64BIT)
+	// loop since read only supports 32 bits
+	size_t totalRead = 0;
+	while(bytes)
+	{
+		DWORD bytesRead, toRead = (DWORD)bytes;
+		ReadFile(fileHandle->pFilesysData, (char*)pBuffer + totalRead, toRead, &bytesRead, NULL);
+		fileHandle->offset += bytesRead;
+		totalRead += bytesRead;
+
+		// if we can't read any more data, bail out of loop
+		if(bytesRead < toRead)
+			break;
+
+		bytes -= bytesRead;
+	}
+
+	return totalRead;
+#else
+	DWORD bytesRead;
+	ReadFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, &bytesRead, NULL);
 	fileHandle->offset += bytesRead;
-
-	return bytesRead;
+	return (size_t)bytesRead;
+#endif
 }
 
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes)
+size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
-	uint32 bytesWritten;
-	WriteFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (LPDWORD)&bytesWritten, NULL);
-	fileHandle->offset += bytesWritten;
-	fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
+	// TODO: support 64bit properly!
+	// if size_t is 64bit, and a large value is passed to 'bytes', this will fail...
 
-	return bytesWritten;
+	DWORD bytesWritten;
+
+	if(fileHandle->createFlags & MFOF_Append)
+	{
+		// seek to end
+		LARGE_INTEGER rel;
+		rel.QuadPart = 0;
+		SetFilePointerEx(fileHandle->pFilesysData, rel, NULL, FILE_END);
+
+		WriteFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (LPDWORD)&bytesWritten, NULL);
+		fileHandle->length += bytesWritten;
+
+		// return to current position
+		rel.QuadPart = fileHandle->offset;
+		SetFilePointerEx(fileHandle->pFilesysData, rel, NULL, FILE_BEGIN);
+	}
+	else
+	{
+		WriteFile(fileHandle->pFilesysData, pBuffer, (DWORD)bytes, (LPDWORD)&bytesWritten, NULL);
+		fileHandle->offset += bytesWritten;
+		fileHandle->length = MFMax(fileHandle->offset, fileHandle->length);
+	}
+
+	return (size_t)bytesWritten;
 }
 
-int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
+uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
+
+	MFDebug_Assert(fileHandle->pFilesysData, "MFFileNative_Seek() - Invalid file!");
 
 	DWORD method = 0;
 
@@ -144,41 +203,48 @@ int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 			method = FILE_CURRENT;
 			break;
 		default:
-			MFDebug_Assert(false, "Invalid 'relativity' for file seeking.");
+			MFDebug_Assert(false, "MFFileNative_Seek() - Invalid 'relativity' for file seeking.");
 	}
 
-	DWORD newPos = SetFilePointer(fileHandle->pFilesysData, (LONG)bytes, (LONG*)&bytes + 1, method);
-	if(newPos == INVALID_SET_FILE_POINTER)
-		return -1;
+	LARGE_INTEGER rel, pos;
+	rel.QuadPart = bytes;
+	if(!SetFilePointerEx(fileHandle->pFilesysData, rel, &pos, method))
+	{
+		MFDebug_Warn(1, "MFFileNative_Seek() - SetFilePointerEx() failed!");
 
-	bytes = (bytes & 0xFFFFFFFF00000000LL) | (int64)newPos;
-	fileHandle->offset = bytes;
-	return (int)bytes;
+		rel.QuadPart = 0;
+		if(!SetFilePointerEx(fileHandle->pFilesysData, rel, &pos, FILE_CURRENT))
+		{
+			MFDebug_Assert(false, "Failed to set file position!");
+			return fileHandle->offset;
+		}
+	}
+
+	fileHandle->offset = pos.QuadPart;
+	return (uint64)pos.QuadPart;
 }
 
-uint32 MFFileNative_GetSize(const char* pFilename)
+uint64 MFFileNative_GetSize(const char* pFilename)
 {
 	MFCALLSTACK;
 
-	int64 fileSize = 0;
+	uint64 fileSize = 0;
 
 #if defined(MF_XBOX) || defined(MF_X360)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
 	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
-
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
-		DWORD excess;
-		fileSize = GetFileSize(hFile, &excess);
+		LARGE_INTEGER size;
+		GetFileSizeEx(hFile, &size);
 		CloseHandle(hFile);
-		fileSize |= (int64)excess << 32;
 
-		MFDebug_Assert(excess == 0, "Fuji does not support files larger than 4,294,967,295 bytes.");
+		fileSize = size.QuadPart;
 	}
 
-	return (uint32)fileSize;
+	return fileSize;
 }
 
 bool MFFileNative_Exists(const char* pFilename)

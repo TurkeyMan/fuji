@@ -20,15 +20,15 @@ MFFile* MFFileSystemNative_Open(MFMount *pMount, const char *pFilename, uint32 o
 
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData);
 int MFFileNative_Close(MFFile* fileHandle);
-int MFFileNative_Read(MFFile* fileHandle, void *pBuffer, int64 bytes);
-int MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, int64 bytes);
-int MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
+size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
+size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
+uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData);
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData);
 void MFFileNative_FindClose(MFFind *pFind);
 
 // this is just for convenience sake, and not part of the main filesystem interface
-uint32 MFFileNative_GetSize(const char* pFilename);
+uint64 MFFileNative_GetSize(const char* pFilename);
 bool MFFileNative_Exists(const char* pFilename);
 const char* MFFileNative_MakeAbsolute(const char* pFilename);
 
