@@ -1543,6 +1543,7 @@ int MFString::Enumerate(const MFArray<MFString> keys, bool bCaseSensitive)
 	return -1;
 }
 
+
 MFString MFString::StripToken(const char *pDelimiters)
 {
 	if(!pData)

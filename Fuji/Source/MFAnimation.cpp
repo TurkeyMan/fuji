@@ -157,7 +157,7 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	return pAnimation;
 }
 
-MF_API void MFAnimation_Destroy(MFAnimation *pAnimation)
+MF_API void MFAnimation_Release(MFAnimation *pAnimation)
 {
 	// release the template
 	MFResource_Release(pAnimation->pTemplate);
@@ -253,7 +253,7 @@ MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix
 	return pAnimation->pMatrices;
 }
 
-MF_API void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime)
+MF_API void MFAnimation_GetFrameRange(const MFAnimation *pAnimation, float *pStartTime, float *pEndTime)
 {
 	if(pStartTime)
 		*pStartTime = pAnimation->pTemplate->startTime;

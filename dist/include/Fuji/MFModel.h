@@ -29,7 +29,7 @@ struct MFAnimation;
  * Creates a model from the filesystem.
  * @param pFilename Filename of model to load.
  * @return A new instance of the specified model.
- * @see MFModel_Destroy()
+ * @see MFModel_Release()
  */
 MF_API MFModel* MFModel_Create(const char *pFilename);
 
@@ -50,7 +50,7 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
  * @return None.
  * @see MFModel_Create()
  */
-MF_API void MFModel_Destroy(MFModel *pModel);
+MF_API void MFModel_Release(MFModel *pModel);
 
 /**
  * Submit a model for rendering.
@@ -80,7 +80,7 @@ MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
  * @return The models name.
  * @see MFModel_Create()
  */
-MF_API const char* MFModel_GetName(MFModel *pModel);
+MF_API const char* MFModel_GetName(const MFModel *pModel);
 
 /**
  * Get the number of subobjects.
@@ -89,7 +89,7 @@ MF_API const char* MFModel_GetName(MFModel *pModel);
  * @return The number of subobjects in \a pModel.
  * @see MFModel_Create()
  */
-MF_API int MFModel_GetNumSubObjects(MFModel *pModel);
+MF_API int MFModel_GetNumSubObjects(const MFModel *pModel);
 
 /**
  * Get the index of a named subobject.
@@ -99,7 +99,7 @@ MF_API int MFModel_GetNumSubObjects(MFModel *pModel);
  * @return The index of the named subobject. If the subobject doesn't exist, -1 is returned.
  * @see MFModel_GetSubObjectName()
  */
-MF_API int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName);
+MF_API int MFModel_GetSubObjectIndex(const MFModel *pModel, const char *pSubobjectName);
 
 /**
  * Get the name of a specified subobject.
@@ -109,7 +109,7 @@ MF_API int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName
  * @return The subobjects name.
  * @see MFModel_GetNumSubObjects()
  */
-MF_API const char* MFModel_GetSubObjectName(MFModel *pModel, int index);
+MF_API const char* MFModel_GetSubObjectName(const MFModel *pModel, int index);
 
 /**
  * Enabe or disable a subobject.
@@ -130,7 +130,7 @@ MF_API void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable);
  * @return True if the subobject is enabled.
  * @see MFModel_GetNumSubObjects(), MFModel_EnableSubobject()
  */
-MF_API bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index);
+MF_API bool MFModel_IsSubobjectEnabed(const MFModel *pModel, int index);
 
 /**
  * Get the models bounding volume.
@@ -138,7 +138,7 @@ MF_API bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index);
  * @param pModel Model instance.
  * @return Pointer to the models bounding volume.
  */
-MF_API MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel);
+MF_API const MFBoundingVolume* MFModel_GetBoundingVolume(const MFModel *pModel);
 
 /**
  * Get an MFModel mesh chunk.
@@ -164,7 +164,7 @@ MF_API MFAnimation *MFModel_GetAnimation(MFModel *pModel);
  * @param pModel Model instance.
  * @return The number of bones in the model.
  */
-MF_API int MFModel_GetNumBones(MFModel *pModel);
+MF_API int MFModel_GetNumBones(const MFModel *pModel);
 
 /**
  * Get the name of a bone.
@@ -173,7 +173,7 @@ MF_API int MFModel_GetNumBones(MFModel *pModel);
  * @param boneIndex Target bone index.
  * @return The name of the specified bone.
  */
-MF_API const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
+MF_API const char* MFModel_GetBoneName(const MFModel *pModel, int boneIndex);
 
 /**
  * Get a bones origin matrix.
@@ -182,7 +182,7 @@ MF_API const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex);
  * @param boneIndex Target bone index.
  * @return The bones origin matrix.
  */
-MF_API const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
+MF_API const MFMatrix& MFModel_GetBoneOrigin(const MFModel *pModel, int boneIndex);
 
 /**
  * Get the index of a bone by name.
@@ -191,7 +191,7 @@ MF_API const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex);
  * @param pName The target bones name.
  * @return The index of the named bone, or -1 if the bone does not exist.
  */
-MF_API int MFModel_GetBoneIndex(MFModel *pModel, const char *pName);
+MF_API int MFModel_GetBoneIndex(const MFModel *pModel, const char *pName);
 
 /**
  * Get the number of tags in the model.
@@ -199,7 +199,7 @@ MF_API int MFModel_GetBoneIndex(MFModel *pModel, const char *pName);
  * @param pModel Model instance.
  * @return The number of tags in the model.
  */
-MF_API int MFModel_GetNumTags(MFModel *pModel);
+MF_API int MFModel_GetNumTags(const MFModel *pModel);
 
 /**
  * Get the name of a tag.
@@ -208,7 +208,7 @@ MF_API int MFModel_GetNumTags(MFModel *pModel);
  * @param tagIndex Target tag index.
  * @return The name of the specified tag.
  */
-MF_API const char* MFModel_GetTagName(MFModel *pModel, int tagIndex);
+MF_API const char* MFModel_GetTagName(const MFModel *pModel, int tagIndex);
 
 /**
  * Get a tag matrix.
@@ -217,7 +217,7 @@ MF_API const char* MFModel_GetTagName(MFModel *pModel, int tagIndex);
  * @param tagIndex Target tag index.
  * @return The tag matrix in the models local space.
  */
-MF_API const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex);
+MF_API const MFMatrix& MFModel_GetTagMatrix(const MFModel *pModel, int tagIndex);
 
 /**
  * Get the index of a tag by name.
@@ -226,7 +226,7 @@ MF_API const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex);
  * @param pName The target tags name.
  * @return The index of the named tag, or -1 if the tag does not exist.
  */
-MF_API int MFModel_GetTagIndex(MFModel *pModel, const char *pName);
+MF_API int MFModel_GetTagIndex(const MFModel *pModel, const char *pName);
 
 #endif
 

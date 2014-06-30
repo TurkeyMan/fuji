@@ -117,3 +117,43 @@ unittest
 		// test...?
 	}
 }
+
+package struct ResourceRange(ResourceType, ItemType, alias findFunc, bool bItemsHaveNames = true, bool bDispatchAssign = false)
+{
+	@property bool empty() const pure nothrow							{ return offset == count; }
+	@property size_t length() const pure nothrow						{ return count - offset; }
+
+	@property typeof(this) save() pure nothrow							{ return this; }
+
+	@property ItemType front() nothrow									{ return ItemType(pRes, offset); }
+	@property ItemType back() nothrow									{ return ItemType(pRes, count-1); }
+
+	ItemType opIndex(size_t index) nothrow								{ return ItemType(pRes, offset + index); }
+	typeof(this) opSlice(size_t x, size_t y) pure nothrow				{ return typeof(this)(pRes, offset + x, offset + y); }
+
+	void popFront() pure nothrow										{ ++offset; }
+	void popBack() pure nothrow											{ --count; }
+
+	static if(bItemsHaveNames)
+	{
+		ItemType opIndex(const(char)[] name) nothrow					{ return find(name); }
+
+		@property ItemType opDispatch(const(char)[] name)()				{ return find(name); }
+		static if(bDispatchAssign)
+		{
+			@property ItemType opDispatch(const(char)[] name, T)(T t)	{ ItemType p = find(name); p = t; return p; }
+		}
+
+		ItemType find(const(char)[] name) nothrow
+		{
+			int index = findFunc(pRes, name.toStringz());
+			if(index < offset || index >= count)
+				return ItemType(pRes, -1);
+			return ItemType(pRes, index);
+		}
+	}
+
+private:
+	ResourceType* pRes;
+	size_t offset, count;
+}

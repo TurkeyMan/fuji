@@ -29,34 +29,34 @@ MFFontPool* gpFontBank = NULL;
 
 struct TextLine
 {
-  uint8 *pStartChar, *pEndChar;     // first and last chars (inclusive)
-  float length;                     // width in virtual screen coords
+	uint8 *pStartChar, *pEndChar;     // first and last chars (inclusive)
+	float length;                     // width in virtual screen coords
 };
 
 struct TextLineData
 {
-  TextLine lines[MAX_TEXT_LINES];
-  int nmbrOfLines;
-  float fontScale;
-  float totalHeight;
+	TextLine lines[MAX_TEXT_LINES];
+	int nmbrOfLines;
+	float fontScale;
+	float totalHeight;
 };
 
 static uint8 gFontJustify[MFFontJustify_Max] =
 {
-  0x00, // MFFontJustify_Top_Left,
-  0x01, // MFFontJustify_Top_Center,
-  0x02, // MFFontJustify_Top_Right,
-  0x03, // MFFontJustify_Top_Full,
+	0x00, // MFFontJustify_Top_Left,
+	0x01, // MFFontJustify_Top_Center,
+	0x02, // MFFontJustify_Top_Right,
+	0x03, // MFFontJustify_Top_Full,
 
-  0x10, // MFFontJustify_Center_Left,
-  0x11, // MFFontJustify_Center,
-  0x12, // MFFontJustify_Center_Right,
-  0x13, // MFFontJustify_Center_Full,
+	0x10, // MFFontJustify_Center_Left,
+	0x11, // MFFontJustify_Center,
+	0x12, // MFFontJustify_Center_Right,
+	0x13, // MFFontJustify_Center_Full,
 
-  0x20, // MFFontJustify_Bottom_Left,
-  0x21, // MFFontJustify_Bottom_Center,
-  0x22, // MFFontJustify_Bottom_Right,
-  0x23, // MFFontJustify_Bottom_Full,
+	0x20, // MFFontJustify_Bottom_Left,
+	0x21, // MFFontJustify_Bottom_Center,
+	0x22, // MFFontJustify_Bottom_Right,
+	0x23, // MFFontJustify_Bottom_Full,
 };
 
 static MFFont *gpDebugFont;
@@ -79,47 +79,47 @@ float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const M
 
 inline bool MFFontInternal_IsValidWrapPoint(int c)
 {
-  return MFIsWhite(c) || MFIsNewline(c);
+	return MFIsWhite(c) || MFIsNewline(c);
 }
 
 inline int GetHorizontalJustification(MFFontJustify justification)
 {
-  return gFontJustify[justification] & 0xF;
+	return gFontJustify[justification] & 0xF;
 }
 
 inline int GetVerticalJustification(MFFontJustify justification)
 {
-  return gFontJustify[justification] >> 4;
+	return gFontJustify[justification] >> 4;
 }
 
 // calculates the height and scale from source data
 float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pXScale, float *pYScale)
 {
-  if (pFont == NULL)
-    pFont = gpDebugFont;
+	if (pFont == NULL)
+		pFont = gpDebugFont;
 
-  // calculate font height and scale from desired height
-  float fontHeight = (float)pFont->height;
+	// calculate font height and scale from desired height
+	float fontHeight = (float)pFont->height;
 
-  if(height == 0.0f) // use native font height
-  {
-    height = fontHeight;
-    *pXScale = 1.0f;
-  }
-  else
-  {
-    *pXScale = height / fontHeight;
-  }
+	if(height == 0.0f) // use native font height
+	{
+		height = fontHeight;
+		*pXScale = 1.0f;
+	}
+	else
+	{
+		*pXScale = height / fontHeight;
+	}
 
-  if(!MFView_IsOrtho())
-  {
-	height = -height;
-    *pYScale = -*pXScale;
-  }
-  else
-    *pYScale = *pXScale;
+	if(!MFView_IsOrtho())
+	{
+		height = -height;
+		*pYScale = -*pXScale;
+	}
+	else
+		*pYScale = *pXScale;
 
-  return height;
+	return height;
 }
 
 
@@ -142,7 +142,7 @@ void MFFont_DeinitModule()
 {
 	MFCALLSTACK;
 
-	MFFont_Destroy(gpDebugFont);
+	MFFont_Release(gpDebugFont);
 
 	delete gpFontBank;
 	gpFontBank = NULL;
@@ -206,7 +206,7 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 	return pFont;
 }
 
-MF_API void MFFont_Destroy(MFFont *pFont)
+MF_API void MFFont_Release(MFFont *pFont)
 {
 	MFCALLSTACK;
 
@@ -643,7 +643,7 @@ MF_API float MFFont_RenderText(MFFont *pFont, float height, const MFVector &colo
 */
 MF_API float MFFont_DrawText(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const char *pText, int maxChars, const MFMatrix &ltw)
 {
-	MFCALLSTACK;
+	MFCALLSTACKc;
 
 	if(((uint8*)pText)[0] == 0xFF && ((uint8*)pText)[1] == 0xFE)
 		return MFFont_DrawTextW(pFont, pos, height, colour, (const uint16*)pText, maxChars, ltw);
@@ -908,269 +908,275 @@ int MFFont_GetNextWrapPoint(MFFont *pFont, const char *pText, float lineWidth, f
 
 MFVector MFFont_GetCharPosJustified(MFFont *pFont, const char *pText, float textHeight, int charIndex, float boxWidth, float boxHeight, MFFontJustify justification)
 {
-  const char *pCurrentLine = pText;
+	MFCALLSTACKc;
 
-  MFVector currentPos = MFVector::zero;
-  float scale, yScale;
-  int lineEnd, lastSignificantChar;
+	const char *pCurrentLine = pText;
 
-  // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
+	MFVector currentPos = MFVector::zero;
+	float scale, yScale;
+	int lineEnd, lastSignificantChar;
 
-  // justify vertically (this is slow)
-  if(justification > MFFontJustify_Top_Full)
-  {
-    // find the initial y offset
-    float totalHeight = 0.0f;
+	// calculate height and scale
+	float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
-    // calculate total height
-    while(*pCurrentLine)
-    {
-      lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+	// justify vertically (this is slow)
+	if(justification > MFFontJustify_Top_Full)
+	{
+		// find the initial y offset
+		float totalHeight = 0.0f;
 
-      totalHeight += height;
-      pCurrentLine += lineEnd;
-    }
+		// calculate total height
+		while(*pCurrentLine)
+		{
+			lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
 
-    // justify according to justification mode
-    if(justification != MFFontJustify_Center_Left && justification != MFFontJustify_Center && justification != MFFontJustify_Center_Right)
-    {
-      // bottom justified
-      currentPos.y = boxHeight - totalHeight;
-    }
-    else
-    {
-      // center justified
-      currentPos.y = boxHeight*0.5f - totalHeight*0.5f;
-    }
+			totalHeight += height;
+			pCurrentLine += lineEnd;
+		}
 
-    pCurrentLine = pText;
-  }
+		// justify according to justification mode
+		if(justification != MFFontJustify_Center_Left && justification != MFFontJustify_Center && justification != MFFontJustify_Center_Right)
+		{
+			// bottom justified
+			currentPos.y = boxHeight - totalHeight;
+		}
+		else
+		{
+			// center justified
+			currentPos.y = boxHeight*0.5f - totalHeight*0.5f;
+		}
 
-  // process each line
-  while(*pCurrentLine)
-  {
-    // get next line
-    lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+		pCurrentLine = pText;
+	}
 
-    if(charIndex < lineEnd || !pCurrentLine[lineEnd])
-    {
-      // if we are not left justified, we need to calculate the x offset
-      if(justification != MFFontJustify_Top_Left && justification != MFFontJustify_Center_Left && justification != MFFontJustify_Bottom_Left)
-      {
+	// process each line
+	while(*pCurrentLine)
+	{
+		// get next line
+		lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+
+		if(charIndex < lineEnd || !pCurrentLine[lineEnd])
+		{
+			// if we are not left justified, we need to calculate the x offset
+			if(justification != MFFontJustify_Top_Left && justification != MFFontJustify_Center_Left && justification != MFFontJustify_Bottom_Left)
+			{
 #if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
-        float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lastSignificantChar);
+				float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lastSignificantChar);
 #else
-        float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lineEnd);
+				float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lineEnd);
 #endif
 
-        if(justification != MFFontJustify_Top_Center && justification != MFFontJustify_Center && justification != MFFontJustify_Bottom_Center)
-        {
-          // right justified
-          currentPos.x = boxWidth - width;
-        }
-        else
-        {
-          // center justified
-          currentPos.x = boxWidth*0.5f - width*0.5f;
-        }
-      }
+				if(justification != MFFontJustify_Top_Center && justification != MFFontJustify_Center && justification != MFFontJustify_Bottom_Center)
+				{
+					// right justified
+					currentPos.x = boxWidth - width;
+				}
+				else
+				{
+					// center justified
+					currentPos.x = boxWidth*0.5f - width*0.5f;
+				}
+			}
 
 #if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
-      currentPos += MFFont_GetCharPos(pFont, pCurrentLine, MFMin(lastSignificantChar, charIndex), textHeight);
+			currentPos += MFFont_GetCharPos(pFont, pCurrentLine, MFMin(lastSignificantChar, charIndex), textHeight);
 #else
-      currentPos += MFFont_GetCharPos(pFont, pCurrentLine, charIndex, textHeight);
+			currentPos += MFFont_GetCharPos(pFont, pCurrentLine, charIndex, textHeight);
 #endif
 
-      break;
-    }
+			break;
+		}
 
-    // increment height
-    currentPos.y += height;
+		// increment height
+		currentPos.y += height;
 
-    // and increment string
-    pCurrentLine += lineEnd;
-    charIndex -= lineEnd;
-  }
+		// and increment string
+		pCurrentLine += lineEnd;
+		charIndex -= lineEnd;
+	}
 
-  return currentPos;
+	return currentPos;
 }
 
 
 MF_API float MFFont_DrawTextJustified(MFFont *pFont, const char *pText, const MFVector &pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, const MFVector &colour, int numChars, const MFMatrix &ltw)
 {
-  const char *pCurrentLine = pText;
+	MFCALLSTACKc;
 
-  MFVector currentPos = MFVector::zero;
-  float scale, yScale;
-  int lineEnd, lastSignificantChar;
+	const char *pCurrentLine = pText;
 
-  // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
+	MFVector currentPos = MFVector::zero;
+	float scale, yScale;
+	int lineEnd, lastSignificantChar;
 
-  // justify vertically (this is slow)
-  if(justification > MFFontJustify_Top_Full)
-  {
-    // find the initial y offset
-    float totalHeight = 0.0f;
+	// calculate height and scale
+	float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
-    // calculate total height
-    while(*pCurrentLine)
-    {
-      lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight);
+	// justify vertically (this is slow)
+	if(justification > MFFontJustify_Top_Full)
+	{
+		// find the initial y offset
+		float totalHeight = 0.0f;
 
-      totalHeight += height;
-      pCurrentLine += lineEnd;
-    }
+		// calculate total height
+		while(*pCurrentLine)
+		{
+			lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight);
 
-    // justify according to justification mode
-    if(justification != MFFontJustify_Center_Left && justification != MFFontJustify_Center && justification != MFFontJustify_Center_Right)
-    {
-      // bottom justified
-      currentPos.y = boxHeight - totalHeight;
-    }
-    else
-    {
-      // center justified
-      currentPos.y = boxHeight*0.5f - totalHeight*0.5f;
-    }
+			totalHeight += height;
+			pCurrentLine += lineEnd;
+		}
 
-    pCurrentLine = pText;
-  }
+		// justify according to justification mode
+		if(justification != MFFontJustify_Center_Left && justification != MFFontJustify_Center && justification != MFFontJustify_Center_Right)
+		{
+			// bottom justified
+			currentPos.y = boxHeight - totalHeight;
+		}
+		else
+		{
+			// center justified
+			currentPos.y = boxHeight*0.5f - totalHeight*0.5f;
+		}
 
-  // process each line
-  while(*pCurrentLine)
-  {
-    // get next line
-    lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
-	int endChar = MFString_GetNumChars(MFStrN(pCurrentLine, lineEnd));
+		pCurrentLine = pText;
+	}
 
-    // if we are not left justified, we need to calculate the x offset
-    if(justification != MFFontJustify_Top_Left && justification != MFFontJustify_Center_Left && justification != MFFontJustify_Bottom_Left)
-    {
+	// process each line
+	while(*pCurrentLine)
+	{
+		// get next line
+		lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, boxWidth, textHeight, &lastSignificantChar);
+		int endChar = MFString_GetNumChars(MFStrN(pCurrentLine, lineEnd));
+
+		// if we are not left justified, we need to calculate the x offset
+		if(justification != MFFontJustify_Top_Left && justification != MFFontJustify_Center_Left && justification != MFFontJustify_Bottom_Left)
+		{
 #if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
-      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lastSignificantChar);
+			float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, lastSignificantChar);
 #else
-      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, endChar);
+			float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, boxWidth, endChar);
 #endif
 
-      if(justification != MFFontJustify_Top_Center && justification != MFFontJustify_Center && justification != MFFontJustify_Bottom_Center)
-      {
-        // right justified
-        currentPos.x = boxWidth - width;
-      }
-      else
-      {
-        // center justified
-        currentPos.x = boxWidth*0.5f - width*0.5f;
-      }
-    }
+			if(justification != MFFontJustify_Top_Center && justification != MFFontJustify_Center && justification != MFFontJustify_Bottom_Center)
+			{
+				// right justified
+				currentPos.x = boxWidth - width;
+			}
+			else
+			{
+				// center justified
+				currentPos.x = boxWidth*0.5f - width*0.5f;
+			}
+		}
 
-    MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, (int)MFMin((uint32)lastSignificantChar, (uint32)numChars), ltw);
+		MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, (int)MFMin((uint32)lastSignificantChar, (uint32)numChars), ltw);
 
-    // increment height
-    currentPos.y += height;
+		// increment height
+		currentPos.y += height;
 
-	// if we exceeded the number of characters to render
-	if((uint32)numChars < (uint32)endChar)
-		break;
-	numChars -= endChar;
+		// if we exceeded the number of characters to render
+		if((uint32)numChars < (uint32)endChar)
+			break;
+		numChars -= endChar;
 
-    // and increment string
-    pCurrentLine += lineEnd;
-  }
+		// and increment string
+		pCurrentLine += lineEnd;
+	}
 
-  return currentPos.y;
+	return currentPos.y;
 }
 
 MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFVector &pos, MFFontJustify justification, float lineWidth, float textHeight, const MFVector &colour, int numChars, const MFMatrix &ltw)
 {
-  const char *pCurrentLine = pText;
+	MFCALLSTACKc;
 
-  MFVector currentPos = MFVector::zero;
-  float scale, yScale;
-  int lineEnd, lastSignificantChar;
-  float startY;
+	const char *pCurrentLine = pText;
 
-  // calculate height and scale
-  float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
+	MFVector currentPos = MFVector::zero;
+	float scale, yScale;
+	int lineEnd, lastSignificantChar;
+	float startY;
 
-  // justify vertically (this is slow)
-  if(GetVerticalJustification(justification) > 0)
-  {
-    // find the initial y offset
-    float totalHeight = 0.0f;
+	// calculate height and scale
+	float height = MFFontInternal_CalcHeightAndScale(pFont, textHeight, &scale, &yScale);
 
-    // calculate total height
-    while(*pCurrentLine)
-    {
-      lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, lineWidth, textHeight, &lastSignificantChar);
+	// justify vertically (this is slow)
+	if(GetVerticalJustification(justification) > 0)
+	{
+		// find the initial y offset
+		float totalHeight = 0.0f;
 
-      totalHeight += height;
-      pCurrentLine += lineEnd;
-    }
+		// calculate total height
+		while(*pCurrentLine)
+		{
+			lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, lineWidth, textHeight, &lastSignificantChar);
 
-    // justify according to justification mode
-    if(GetVerticalJustification(justification) > 1)
-    {
-      // bottom justified
-      currentPos.y = -totalHeight;
-    }
-    else
-    {
-      // center justified
-      currentPos.y = -totalHeight*0.5f;
-    }
+			totalHeight += height;
+			pCurrentLine += lineEnd;
+		}
 
-    pCurrentLine = pText;
-  }
+		// justify according to justification mode
+		if(GetVerticalJustification(justification) > 1)
+		{
+			// bottom justified
+			currentPos.y = -totalHeight;
+		}
+		else
+		{
+			// center justified
+			currentPos.y = -totalHeight*0.5f;
+		}
 
-  startY = currentPos.y;
+		pCurrentLine = pText;
+	}
 
-  // process each line
-  while(*pCurrentLine)
-  {
-    // get next line
-    lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, lineWidth, textHeight, &lastSignificantChar);
+	startY = currentPos.y;
 
-	int charsToDraw = (int)MFMin((uint32)lastSignificantChar, (uint32)numChars);
+	// process each line
+	while(*pCurrentLine)
+	{
+		// get next line
+		lineEnd = MFFont_GetNextWrapPoint(pFont, pCurrentLine, lineWidth, textHeight, &lastSignificantChar);
 
-    // if we are not left justified, we need to calculate the x offset
-    if(GetHorizontalJustification(justification) > 0)
-    {
+		int charsToDraw = (int)MFMin((uint32)lastSignificantChar, (uint32)numChars);
+
+		// if we are not left justified, we need to calculate the x offset
+		if(GetHorizontalJustification(justification) > 0)
+		{
 //#if defined(_WRAP_EXCLUDES_TRAILING_WHITESPACE)
-      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, charsToDraw);
+			float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, charsToDraw);
 //#else
-//      float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, lineEnd);
+//			float width = MFFont_GetStringWidth(pFont, pCurrentLine, textHeight, lineWidth, lineEnd);
 //#endif
 
-      if(GetHorizontalJustification(justification) > 1)
-      {
-        // right justified
-        currentPos.x = -width;
-      }
-      else
-      {
-        // center justified
-        currentPos.x = -width*0.5f;
-      }
-    }
+			if(GetHorizontalJustification(justification) > 1)
+			{
+				// right justified
+				currentPos.x = -width;
+			}
+			else
+			{
+				// center justified
+				currentPos.x = -width*0.5f;
+			}
+		}
 
-    MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, charsToDraw, ltw);
+		MFFont_DrawText(pFont, currentPos+pos, textHeight, colour, pCurrentLine, charsToDraw, ltw);
 
-    // increment height
-    currentPos.y += height;
+		// increment height
+		currentPos.y += height;
 
-	// if we exceeded the number of characters to render
-	if((uint32)numChars < (uint32)lineEnd)
-		break;
-	numChars -= lineEnd;
+		// if we exceeded the number of characters to render
+		if((uint32)numChars < (uint32)lineEnd)
+			break;
+		numChars -= lineEnd;
 
-    // and increment string
-    pCurrentLine += lineEnd;
-  }
+		// and increment string
+		pCurrentLine += lineEnd;
+	}
 
-  return currentPos.y - startY;
+	return currentPos.y - startY;
 }
 
 

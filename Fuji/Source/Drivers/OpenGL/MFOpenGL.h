@@ -103,6 +103,10 @@ struct MFEffectData_OpenGL
 	uint8 uniformLocation[4][32];
 };
 
+#if defined(_DEBUG)
 bool MFCheckForOpenGLError(bool bBreakOnError = false);
+#else
+#define MFCheckForOpenGLError(...) false
+#endif
 
 #endif

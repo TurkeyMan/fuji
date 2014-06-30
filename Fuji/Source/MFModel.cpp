@@ -404,14 +404,14 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
 	return pModel;
 }
 
-MF_API void MFModel_Destroy(MFModel *pModel)
+MF_API void MFModel_Release(MFModel *pModel)
 {
 	// destroy stateblock
 	MFStateBlock_Destroy(pModel->pEntityState);
 
 	// free instance data
 	if(pModel->pAnimation)
-		MFAnimation_Destroy(pModel->pAnimation);
+		MFAnimation_Release(pModel->pAnimation);
 
 	// release the template
 	MFResource_Release(pModel->pTemplate);
@@ -454,12 +454,12 @@ MF_API void MFModel_SetWorldMatrix(MFModel *pModel, const MFMatrix &worldMatrix)
 	pModel->worldMatrix = worldMatrix;
 }
 
-MF_API const char* MFModel_GetName(MFModel *pModel)
+MF_API const char* MFModel_GetName(const MFModel *pModel)
 {
 	return pModel->pTemplate->pModelName;
 }
 
-MF_API int MFModel_GetNumSubObjects(MFModel *pModel)
+MF_API int MFModel_GetNumSubObjects(const MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -469,7 +469,7 @@ MF_API int MFModel_GetNumSubObjects(MFModel *pModel)
 	return 0;
 }
 
-MF_API int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName)
+MF_API int MFModel_GetSubObjectIndex(const MFModel *pModel, const char *pSubobjectName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -487,7 +487,7 @@ MF_API int MFModel_GetSubObjectIndex(MFModel *pModel, const char *pSubobjectName
 	return -1;
 }
 
-MF_API const char* MFModel_GetSubObjectName(MFModel *pModel, int index)
+MF_API const char* MFModel_GetSubObjectName(const MFModel *pModel, int index)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_SubObjects);
 
@@ -507,12 +507,12 @@ MF_API void MFModel_EnableSubobject(MFModel *pModel, int index, bool enable)
 	MFDebug_Assert(false, "Not written...");
 }
 
-MF_API bool MFModel_IsSubobjectEnabed(MFModel *pModel, int index)
+MF_API bool MFModel_IsSubobjectEnabed(const MFModel *pModel, int index)
 {
 	return true;
 }
 
-MF_API MFBoundingVolume* MFModel_GetBoundingVolume(MFModel *pModel)
+MF_API const MFBoundingVolume* MFModel_GetBoundingVolume(const MFModel *pModel)
 {
 	return &pModel->pTemplate->boundingVolume;
 }
@@ -527,7 +527,7 @@ MF_API MFAnimation *MFModel_GetAnimation(MFModel *pModel)
 	return pModel->pAnimation;
 }
 
-MF_API int MFModel_GetNumBones(MFModel *pModel)
+MF_API int MFModel_GetNumBones(const MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -537,7 +537,7 @@ MF_API int MFModel_GetNumBones(MFModel *pModel)
 	return 0;
 }
 
-MF_API const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
+MF_API const char* MFModel_GetBoneName(const MFModel *pModel, int boneIndex)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -552,7 +552,7 @@ MF_API const char* MFModel_GetBoneName(MFModel *pModel, int boneIndex)
 	return 0;
 }
 
-MF_API const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
+MF_API const MFMatrix& MFModel_GetBoneOrigin(const MFModel *pModel, int boneIndex)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -567,7 +567,7 @@ MF_API const MFMatrix& MFModel_GetBoneOrigin(MFModel *pModel, int boneIndex)
 	return MFMatrix::identity;
 }
 
-MF_API int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
+MF_API int MFModel_GetBoneIndex(const MFModel *pModel, const char *pName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Bones);
 
@@ -585,7 +585,7 @@ MF_API int MFModel_GetBoneIndex(MFModel *pModel, const char *pName)
 	return -1;
 }
 
-MF_API int MFModel_GetNumTags(MFModel *pModel)
+MF_API int MFModel_GetNumTags(const MFModel *pModel)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
 
@@ -595,7 +595,7 @@ MF_API int MFModel_GetNumTags(MFModel *pModel)
 	return 0;
 }
 
-MF_API const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
+MF_API const char* MFModel_GetTagName(const MFModel *pModel, int tagIndex)
 {
 	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
 
@@ -611,7 +611,7 @@ MF_API const char* MFModel_GetTagName(MFModel *pModel, int tagIndex)
 	return NULL;
 }
 
-MF_API const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
+MF_API const MFMatrix& MFModel_GetTagMatrix(const MFModel *pModel, int tagIndex)
 {
 	MFDebug_Assert(tagIndex >= 0, "Invalid Tag index");
 
@@ -627,7 +627,7 @@ MF_API const MFMatrix& MFModel_GetTagMatrix(MFModel *pModel, int tagIndex)
 	return MFMatrix::identity;
 }
 
-MF_API int MFModel_GetTagIndex(MFModel *pModel, const char *pName)
+MF_API int MFModel_GetTagIndex(const MFModel *pModel, const char *pName)
 {
 	MFModelDataChunk *pChunk =	MFModel_GetDataChunk(pModel->pTemplate, MFChunkType_Tags);
 

@@ -18,11 +18,11 @@
 	void MFRenderer_GainedFocus_##driver(MFDisplay *pDisplay); \
 	bool MFRenderer_BeginFramePlatformSpecific_##driver(); \
 	void MFRenderer_EndFramePlatformSpecific_##driver(); \
+	void MFRenderer_SetRenderTargetPlatformSpecific_##driver(MFRenderTarget *pRenderTarget); \
 	MF_API void MFRenderer_ClearScreen_##driver(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil); \
 	MF_API void MFRenderer_SetViewport_##driver(MFRect *pRect); \
 	MF_API void MFRenderer_ResetViewport_##driver(); \
 	MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget_##driver(); \
-	MF_API void MFRenderer_SetRenderTarget_##driver(MFRenderTarget *pRenderTarget); \
 	MF_API float MFRenderer_GetTexelCenterOffset_##driver(); \
 	void MFRendererInternal_SortElements_##driver(MFRenderLayer &layer);
 
@@ -38,11 +38,11 @@
 		MFRenderer_GainedFocus_##driver, \
 		MFRenderer_BeginFramePlatformSpecific_##driver, \
 		MFRenderer_EndFramePlatformSpecific_##driver, \
+		MFRenderer_SetRenderTargetPlatformSpecific_##driver, \
 		MFRenderer_ClearScreen_##driver, \
 		MFRenderer_SetViewport_##driver, \
 		MFRenderer_ResetViewport_##driver, \
 		MFRenderer_GetDeviceRenderTarget_##driver, \
-		MFRenderer_SetRenderTarget_##driver, \
 		MFRenderer_GetTexelCenterOffset_##driver, \
 		MFRendererInternal_SortElements_##driver \
 	},
@@ -71,11 +71,11 @@ struct MFRenderPluginCallbacks
 	void (*pGainedFocus)(MFDisplay *pDisplay);
 	bool (*pBeginFramePlatformSpecific)();
 	void (*pEndFramePlatformSpecific)();
+	void (*pSetRenderTargetPlatformSpecific)(MFRenderTarget *pRenderTarget);
 	void (*pClearScreen)(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil);
 	void (*pSetViewport)(MFRect *pRect);
 	void (*pResetViewport)();
 	MFRenderTarget* (*pGetDeviceRenderTarget)();
-	void (*pSetRenderTarget)(MFRenderTarget *pRenderTarget);
 	float (*pGetTexelCenterOffset)();
 	void (*pSortElements)(MFRenderLayer &layer);
 };
@@ -160,6 +160,11 @@ void MFRenderer_EndFramePlatformSpecific()
 	gpCurrentRenderPlugin->pEndFramePlatformSpecific();
 }
 
+void MFRenderer_SetRenderTargetPlatformSpecific(MFRenderTarget *pRenderTarget)
+{
+	gpCurrentRenderPlugin->pSetRenderTargetPlatformSpecific(pRenderTarget);
+}
+
 MF_API void MFRenderer_ClearScreen(MFRenderClearFlags flags, const MFVector &colour, float z, int stencil)
 {
 	gpCurrentRenderPlugin->pClearScreen(flags, colour, z, stencil);
@@ -178,11 +183,6 @@ MF_API void MFRenderer_ResetViewport()
 MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 {
 	return gpCurrentRenderPlugin->pGetDeviceRenderTarget();
-}
-
-MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
-{
-	gpCurrentRenderPlugin->pSetRenderTarget(pRenderTarget);
 }
 
 MF_API float MFRenderer_GetTexelCenterOffset()

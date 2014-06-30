@@ -29,9 +29,9 @@ struct MFMeshChunk
 * Creates a model from the filesystem.
 * @param pFilename Filename of model to load.
 * @return A new instance of the specified model.
-* @see MFModel_Destroy()
+* @see MFModel_Release()
 */
-extern (C) MFModel* MFModel_Create(const(char*) pFilename);
+extern (C) MFModel* MFModel_Create(const(char)* pFilename);
 
 /**
 * Creates a model from the filesystem.
@@ -41,7 +41,7 @@ extern (C) MFModel* MFModel_Create(const(char*) pFilename);
 * @return A new instance of the specified model with animation already loaded and bound.
 * @see MFModel_Create()
 */
-extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(char*) pAnimationFilename = null);
+extern (C) MFModel* MFModel_CreateWithAnimation(const(char)* pFilename, const(char)* pAnimationFilename = null);
 
 /**
 * Dstroy a model.
@@ -50,7 +50,7 @@ extern (C) MFModel* MFModel_CreateWithAnimation(const(char*) pFilename, const(ch
 * @return The new reference count of the model. If the returned reference count is 0, the model is destroyed.
 * @see MFModel_Create()
 */
-extern (C) int MFModel_Destroy(MFModel* pModel);
+extern (C) int MFModel_Release(MFModel* pModel);
 
 /**
 * Submit a model for rendering.
@@ -80,7 +80,7 @@ extern (C) void MFModel_SetWorldMatrix(MFModel* pModel, ref const(MFMatrix) worl
 * @return The models name.
 * @see MFModel_Create()
 */
-extern (C) const(char*) MFModel_GetName(MFModel* pModel);
+extern (C) const(char)* MFModel_GetName(const(MFModel)* pModel);
 
 /**
 * Get the number of subobjects.
@@ -89,7 +89,7 @@ extern (C) const(char*) MFModel_GetName(MFModel* pModel);
 * @return The number of subobjects in \a pModel.
 * @see MFModel_Create()
 */
-extern (C) int MFModel_GetNumSubObjects(MFModel* pModel);
+extern (C) int MFModel_GetNumSubObjects(const(MFModel)* pModel);
 
 /**
 * Get the index of a named subobject.
@@ -99,7 +99,7 @@ extern (C) int MFModel_GetNumSubObjects(MFModel* pModel);
 * @return The index of the named subobject. If the subobject doesn't exist, -1 is returned.
 * @see MFModel_GetSubObjectName()
 */
-extern (C) int MFModel_GetSubObjectIndex(MFModel* pModel, const char* pSubobjectName);
+extern (C) int MFModel_GetSubObjectIndex(const(MFModel)* pModel, const(char)* pSubobjectName);
 
 /**
 * Get the name of a specified subobject.
@@ -109,7 +109,7 @@ extern (C) int MFModel_GetSubObjectIndex(MFModel* pModel, const char* pSubobject
 * @return The subobjects name.
 * @see MFModel_GetNumSubObjects()
 */
-extern (C) const (char*) MFModel_GetSubObjectName(MFModel* pModel, int index);
+extern (C) const(char)* MFModel_GetSubObjectName(const(MFModel)* pModel, int index);
 
 /**
 * Enabe or disable a subobject.
@@ -130,7 +130,7 @@ extern (C) void MFModel_EnableSubobject(MFModel* pModel, int index, bool enable)
 * @return True if the subobject is enabled.
 * @see MFModel_GetNumSubObjects(), MFModel_EnableSubobject()
 */
-extern (C) bool MFModel_IsSubobjectEnabed(MFModel* pModel, int index);
+extern (C) bool MFModel_IsSubobjectEnabed(const(MFModel)* pModel, int index);
 
 /**
 * Get the models bounding volume.
@@ -138,7 +138,7 @@ extern (C) bool MFModel_IsSubobjectEnabed(MFModel* pModel, int index);
 * @param pModel Model instance.
 * @return Pointer to the models bounding volume.
 */
-extern (C) MFBoundingVolume* MFModel_GetBoundingVolume(MFModel* pModel);
+extern (C) const(MFBoundingVolume)* MFModel_GetBoundingVolume(const(MFModel)* pModel);
 
 /**
 * Get an MFModel mesh chunk.
@@ -148,7 +148,7 @@ extern (C) MFBoundingVolume* MFModel_GetBoundingVolume(MFModel* pModel);
 * @param meshChunkIndex Mesh chunk index.
 * @return Pointer to the specified mesh chunk.
 */
-extern (C) MFMeshChunk* MFModel_GetMeshChunk(MFModel* pModel, int subobjectIndex, int meshChunkIndex);
+extern (C) inout(MFMeshChunk)* MFModel_GetMeshChunk(inout(MFModel)* pModel, int subobjectIndex, int meshChunkIndex);
 
 /**
 * Get a pointer to an MFAnimation associated with the model.
@@ -156,7 +156,7 @@ extern (C) MFMeshChunk* MFModel_GetMeshChunk(MFModel* pModel, int subobjectIndex
 * @param pModel Model instance.
 * @return Pointer to the MFAnimation associated with this model. If no animation is loaded, MFModel_GetAnimation returns NULL.
 */
-extern (C) MFAnimation* MFModel_GetAnimation(MFModel* pModel);
+extern (C) inout(MFAnimation)* MFModel_GetAnimation(inout(MFModel)* pModel);
 
 /**
 * Get the number of bones in the model.
@@ -164,7 +164,7 @@ extern (C) MFAnimation* MFModel_GetAnimation(MFModel* pModel);
 * @param pModel Model instance.
 * @return The number of bones in the model.
 */
-extern (C) int MFModel_GetNumBones(MFModel* pModel);
+extern (C) int MFModel_GetNumBones(const(MFModel)* pModel);
 
 /**
 * Get the name of a bone.
@@ -173,7 +173,7 @@ extern (C) int MFModel_GetNumBones(MFModel* pModel);
 * @param boneIndex Target bone index.
 * @return The name of the specified bone.
 */
-extern (C) const(char*) MFModel_GetBoneName(MFModel* pModel, int boneIndex);
+extern (C) const(char)* MFModel_GetBoneName(const(MFModel)* pModel, int boneIndex);
 
 /**
 * Get a bones origin matrix.
@@ -182,7 +182,7 @@ extern (C) const(char*) MFModel_GetBoneName(MFModel* pModel, int boneIndex);
 * @param boneIndex Target bone index.
 * @return The bones origin matrix.
 */
-extern (C) const(MFMatrix*) MFModel_GetBoneOrigin(MFModel* pModel, int boneIndex);
+extern (C) ref const(MFMatrix) MFModel_GetBoneOrigin(const(MFModel)* pModel, int boneIndex);
 
 /**
 * Get the index of a bone by name.
@@ -191,7 +191,7 @@ extern (C) const(MFMatrix*) MFModel_GetBoneOrigin(MFModel* pModel, int boneIndex
 * @param pName The target bones name.
 * @return The index of the named bone, or -1 if the bone does not exist.
 */
-extern (C) int MFModel_GetBoneIndex(MFModel* pModel, const(char*) pName);
+extern (C) int MFModel_GetBoneIndex(const(MFModel)* pModel, const(char*) pName);
 
 /**
 * Get the number of tags in the model.
@@ -199,7 +199,7 @@ extern (C) int MFModel_GetBoneIndex(MFModel* pModel, const(char*) pName);
 * @param pModel Model instance.
 * @return The number of tags in the model.
 */
-extern (C) int MFModel_GetNumTags(MFModel* pModel);
+extern (C) int MFModel_GetNumTags(const(MFModel)* pModel);
 
 /**
 * Get the name of a tag.
@@ -208,7 +208,7 @@ extern (C) int MFModel_GetNumTags(MFModel* pModel);
 * @param tagIndex Target tag index.
 * @return The name of the specified tag.
 */
-extern (C) const(char*) MFModel_GetTagName(MFModel* pModel, int tagIndex);
+extern (C) const(char)* MFModel_GetTagName(const(MFModel)* pModel, int tagIndex);
 
 /**
 * Get a tag matrix.
@@ -217,7 +217,7 @@ extern (C) const(char*) MFModel_GetTagName(MFModel* pModel, int tagIndex);
 * @param tagIndex Target tag index.
 * @return The tag matrix in the models local space.
 */
-extern (C) const(MFMatrix*) MFModel_GetTagMatrix(MFModel* pModel, int tagIndex);
+extern (C) ref const(MFMatrix) MFModel_GetTagMatrix(const(MFModel)* pModel, int tagIndex);
 
 /**
 * Get the index of a tag by name.
@@ -226,5 +226,5 @@ extern (C) const(MFMatrix*) MFModel_GetTagMatrix(MFModel* pModel, int tagIndex);
 * @param pName The target tags name.
 * @return The index of the named tag, or -1 if the tag does not exist.
 */
-extern (C) int MFModel_GetTagIndex(MFModel* pModel, const(char*) pName);
+extern (C) int MFModel_GetTagIndex(const(MFModel)* pModel, const(char*) pName);
 

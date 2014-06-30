@@ -22,6 +22,7 @@ enum MFAlign16(alias x) = MFAlign!(x, 16);
 enum MFUnflag(alias x, alias y) = x & ~y;
 enum MFFlag(alias x, alias y) = x | y;
 enum MFBit(alias x) = 1 << x;
+auto MFBit(size_t x) @safe pure nothrow { return 1 << x; }
 version(LittleEndian)
 	enum MFMakeFourCC(alias ch0, alias ch1, alias ch2, alias ch3) = (cast(uint)cast(ubyte)ch0 | (cast(uint)cast(ubyte)ch1 << 8) | (cast(uint)cast(ubyte)ch2 << 16) | (cast(uint)cast(ubyte)ch3 << 24 ));
 else version(BigEndian)

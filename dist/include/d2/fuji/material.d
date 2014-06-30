@@ -82,9 +82,9 @@ struct Material
 		return MFMaterial_GetMaterialName(pMaterial).toDStr;
 	}
 
-	@property Parameters parameters() nothrow
+	@property inout(Parameters) parameters() inout nothrow
 	{
-		return Parameters(pMaterial, 0, MFMaterial_GetNumParameters(pMaterial));
+		return inout(Parameters)(pMaterial, 0, MFMaterial_GetNumParameters(pMaterial));
 	}
 
 	struct Parameter
@@ -325,36 +325,5 @@ struct Material
 		bool bLowordSet, bHiwordSet;
 	}
 
-	struct Parameters
-	{
-		@property bool empty() const pure nothrow			{ return offset == count; }
-		@property size_t length() const pure nothrow		{ return count - offset; }
-
-		@property Parameters save() pure nothrow			{ return this; }
-
-		@property Parameter front() nothrow					{ return Parameter(pMaterial, offset); }
-		@property Parameter back() nothrow					{ return Parameter(pMaterial, count-1); }
-
-		Parameter opIndex(size_t index) nothrow				{ return Parameter(pMaterial, offset + cast(int)index); }
-		Parameter opIndex(const(char)[] name) nothrow		{ return find(name); }
-		Parameters opSlice(size_t x, size_t y) pure nothrow	{ return Parameters(pMaterial, offset + x, offset + y); }
-
-		@property Parameter opDispatch(const(char)[] name)()		{ return find(name); }
-		@property Parameter opDispatch(const(char)[] name, T)(T t)	{ Parameter p = find(name); p = t; return p; }
-
-		void popFront() pure nothrow						{ ++offset; }
-		void popBack() pure nothrow							{ --count; }
-
-		Parameter find(const(char)[] name) nothrow
-        {
-            int index = MFMaterial_GetParameterIndexFromName(pMaterial, name.toStringz());
-            if(index < offset || index >= count)
-                return Parameter(pMaterial, -1);
-            return Parameter(pMaterial, index);
-        }
-
-	private:
-		MFMaterial* pMaterial;
-		size_t offset, count;
-	}
+	alias Parameters = ResourceRange!(MFMaterial, Parameter, MFMaterial_GetParameterIndexFromName, true, true);
 }

@@ -9,7 +9,11 @@ nothrow:
 * @struct MFAnimation
 * Represents a Fuji animation.
 */
-struct MFAnimation;
+struct MFAnimation
+{
+	@disable this();
+	@disable this(this);
+}
 
 /**
 * Create an animation from the filesystem.
@@ -17,9 +21,9 @@ struct MFAnimation;
 * @param pFilename Filename of the animation to load.
 * @param pModel MFModel instance the animation will be bound to.
 * @return A new instance of the specified animation.
-* @see MFAnimation_Destroy(), MFAnimation_CalculateMatrices()
+* @see MFAnimation_Release(), MFAnimation_CalculateMatrices()
 */
-extern (C) MFAnimation* MFAnimation_Create(const(char*) pFilename, MFModel* pModel);
+extern (C) MFAnimation* MFAnimation_Create(const(char)* pFilename, MFModel* pModel);
 
 /**
 * Destroy an animation.
@@ -28,7 +32,7 @@ extern (C) MFAnimation* MFAnimation_Create(const(char*) pFilename, MFModel* pMod
 * @return The new reference count of the animation. If the returned reference count is 0, the animation is model.
 * @see MFAnimation_Create()
 */
-extern (C) int MFAnimation_Destroy(MFAnimation* pAnimation);
+extern (C) int MFAnimation_Release(MFAnimation* pAnimation);
 
 /**
 * Calculate the animation matrices.
@@ -49,7 +53,7 @@ extern (C) MFMatrix* MFAnimation_CalculateMatrices(MFAnimation* pAnimation, MFMa
 * @return None.
 * @see MFAnimation_SetFrame()
 */
-extern (C) void MFAnimation_GetFrameRange(MFAnimation* pAnimation, float* pStartTime, float* pEndTime);
+extern (C) void MFAnimation_GetFrameRange(const(MFAnimation)* pAnimation, float* pStartTime, float* pEndTime);
 
 /**
 * Set the current frame.

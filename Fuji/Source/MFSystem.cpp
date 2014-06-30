@@ -375,6 +375,8 @@ int MFSystem_GameLoop()
 
 void MFSystem_RunFrame()
 {
+	MFCALLSTACKc;
+
 	// allow fuji to complete initialisation
 	if(!gpEngineInstance->bIsInitialised)
 	{
@@ -396,6 +398,8 @@ void MFSystem_RunFrame()
 	MFSystem_Update();
 	if(!DebugMenu_IsEnabled())
 	{
+		MFCALLSTACKcs("MFSystem_RunFrame : Update");
+
 		if(gpEngineInstance->pSystemCallbacks[MFCB_Update])
 			gpEngineInstance->pSystemCallbacks[MFCB_Update]();
 	}
@@ -403,6 +407,8 @@ void MFSystem_RunFrame()
 
 	if(MFRenderer_BeginFrame())
 	{
+		MFCALLSTACKcs("MFSystem_RunFrame : Render");
+
 		MFRenderer *pRenderer = MFRenderer_GetCurrent();
 
 		MFView_SetDefault();

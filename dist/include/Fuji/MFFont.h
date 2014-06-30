@@ -59,7 +59,7 @@ enum MFFontJustify
  * Creates a font from the filesystem.
  * @param pFilename Filename of the font to load.
  * @return Pointer to an MFFont structure representing the newly created font.
- * @see MFFont_Destroy()
+ * @see MFFont_Release()
  */
 MF_API MFFont* MFFont_Create(const char *pFilename);
 
@@ -70,7 +70,7 @@ MF_API MFFont* MFFont_Create(const char *pFilename);
  * @return None.
  * @see MFFont_Create()
  */
-MF_API void MFFont_Destroy(MFFont *pFont);
+MF_API void MFFont_Release(MFFont *pFont);
 
 /**
  * Get the height of a font.

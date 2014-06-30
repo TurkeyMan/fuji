@@ -20,6 +20,8 @@ int gNumBonesInBatch = 0;
 static MFRenderer *gpCurrentRenderer = NULL;
 static MFRenderLayerSet gCurrentLayers;
 
+static MFRenderTarget *gpCurrentRenderTarget = NULL;
+
 static char *pScratchMemory = NULL;
 static size_t gScratchMemorySize = 0;
 static size_t gScratchMemoryOffset = 0;
@@ -106,6 +108,15 @@ MF_API int MFRenderer_Begin()
 	return pCurrentMaterial->pType->materialCallbacks.pBegin(pCurrentMaterial, *(MFRendererState*)NULL);
 }
 
+MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
+{
+	if(pRenderTarget != gpCurrentRenderTarget)
+	{
+		MFRenderer_SetRenderTargetPlatformSpecific(pRenderTarget);
+		gpCurrentRenderTarget = pRenderTarget;
+	}
+}
+
 MF_API void MFRenderer_SetDeviceRenderTarget()
 {
 	MFRenderer_SetRenderTarget(MFRenderer_GetDeviceRenderTarget());
@@ -169,6 +180,7 @@ MF_API void MFRenderer_GetMemoryStats(size_t *pCommandBuffer, size_t *pCommandBu
 
 MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numLayers, MFStateBlock *pGlobal, MFStateBlock *pOverride)
 {
+	int debugLayer = numLayers;
 #if !defined(MF_RETAIL)
 	// add a layer for the system/debug stuff
 	numLayers += 1;
@@ -184,16 +196,14 @@ MF_API MFRenderer* MFRenderer_Create(MFRenderLayerDescription *pLayers, int numL
 	MFRenderTarget *pRT = MFRenderer_GetDeviceRenderTarget();
 	for(int a=0; a<numLayers; ++a)
 	{
-#if !defined(MF_RETAIL)
-		if(a == numLayers - 1)
-		{
-			pRenderer->pLayers[a].pName = "Debug";
-		}
-#endif
-		pRenderer->pLayers[a].pName = pLayers[a].pName;
+		pRenderer->pLayers[a].pName = a < debugLayer ? pLayers[a].pName : "Debug";
 		pRenderer->pLayers[a].pRenderTarget = pRT;
 		MFResource_AddRef(pRT);
 	}
+
+#if !defined(MF_RETAIL)
+	MFRenderLayer_SetLayerSortMode(&pRenderer->pLayers[debugLayer], MFRL_SM_None);
+#endif
 
 	return pRenderer;
 }
@@ -563,6 +573,8 @@ static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *p
 
 MF_API void MFRenderer_BuildCommandBuffers(MFRenderer *pRenderer)
 {
+	MFCALLSTACKc;
+
 	for(int l = 0; l < pRenderer->numLayers; ++l)
 	{
 		MFRenderLayer &layer = pRenderer->pLayers[l];

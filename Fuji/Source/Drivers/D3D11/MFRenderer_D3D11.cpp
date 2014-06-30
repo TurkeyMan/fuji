@@ -17,7 +17,7 @@
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_D3D11
 	#define MFRenderer_GetDeviceRenderTarget MFRenderer_GetDeviceRenderTarget_D3D11
 	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_D3D11
-	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_D3D11
+	#define MFRenderer_SetRenderTargetPlatformSpecific MFRenderer_SetRenderTargetPlatformSpecific_D3D11
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_D3D11
 	#define MFRendererInternal_SortElements MFRendererInternal_SortElements_D3D11
 #endif
@@ -307,7 +307,7 @@ MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 	return NULL;
 }
 
-MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
+void MFRenderer_SetRenderTargetPlatformSpecific(MFRenderTarget *pRenderTarget)
 {
 //    g_pImmediateContext->OMSetRenderTargets( 1, &g_pRenderTargetView, g_pDepthStencilView );
 }

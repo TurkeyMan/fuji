@@ -20,6 +20,7 @@ void MFRenderer_InitModulePlatformSpecific();
 void MFRenderer_DeinitModulePlatformSpecific();
 bool MFRenderer_BeginFramePlatformSpecific();
 void MFRenderer_EndFramePlatformSpecific();
+void MFRenderer_SetRenderTargetPlatformSpecific(MFRenderTarget *pRenderTarget);
 
 int MFRenderer_CreateDisplay(MFDisplay *pDisplay);
 void MFRenderer_DestroyDisplay(MFDisplay *pDisplay);

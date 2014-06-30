@@ -24,7 +24,7 @@ struct MFAnimation;
  * @param pFilename Filename of the animation to load.
  * @param pModel MFModel instance the animation will be bound to.
  * @return A new instance of the specified animation.
- * @see MFAnimation_Destroy(), MFAnimation_CalculateMatrices()
+ * @see MFAnimation_Release(), MFAnimation_CalculateMatrices()
  */
 MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
 
@@ -35,7 +35,7 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
  * @return None.
  * @see MFAnimation_Create()
  */
-MF_API void MFAnimation_Destroy(MFAnimation *pAnimation);
+MF_API void MFAnimation_Release(MFAnimation *pAnimation);
 
 /**
  * Calculate the animation matrices.
@@ -56,7 +56,7 @@ MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix
  * @return None.
  * @see MFAnimation_SetFrame()
  */
-MF_API void MFAnimation_GetFrameRange(MFAnimation *pAnimation, float *pStartTime, float *pEndTime);
+MF_API void MFAnimation_GetFrameRange(const MFAnimation *pAnimation, float *pStartTime, float *pEndTime);
 
 /**
  * Set the current frame.

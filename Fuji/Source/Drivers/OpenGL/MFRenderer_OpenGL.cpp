@@ -17,7 +17,7 @@
 	#define MFRenderer_ResetViewport MFRenderer_ResetViewport_OpenGL
 	#define MFRenderer_GetDeviceRenderTarget MFRenderer_GetDeviceRenderTarget_OpenGL
 	#define MFRenderer_GetDeviceDepthStencil MFRenderer_GetDeviceDepthStencil_OpenGL
-	#define MFRenderer_SetRenderTarget MFRenderer_SetRenderTarget_OpenGL
+	#define MFRenderer_SetRenderTargetPlatformSpecific MFRenderer_SetRenderTargetPlatformSpecific_OpenGL
 	#define MFRenderer_GetTexelCenterOffset MFRenderer_GetTexelCenterOffset_OpenGL
 	#define MFRendererInternal_SortElements MFRendererInternal_SortElements_OpenGL
 #endif
@@ -566,7 +566,7 @@ MF_API MFRenderTarget* MFRenderer_GetDeviceRenderTarget()
 	return gpDeviceRenderTarget;
 }
 
-MF_API void MFRenderer_SetRenderTarget(MFRenderTarget *pRenderTarget)
+void MFRenderer_SetRenderTargetPlatformSpecific(MFRenderTarget *pRenderTarget)
 {
 	MFCheckForOpenGLError();
 
@@ -680,6 +680,7 @@ void MFRendererInternal_SortElements(MFRenderLayer &layer)
 	qsort(layer.elements.getPointer(), layer.elements.size(), sizeof(MFRenderElement), gSortFunctions[layer.sortMode]);
 }
 
+#if defined(_DEBUG)
 bool MFCheckForOpenGLError(bool bBreakOnError)
 {
 	GLenum err = glGetError();
@@ -709,5 +710,6 @@ bool MFCheckForOpenGLError(bool bBreakOnError)
 	}
 	return false;
 }
+#endif
 
 #endif
