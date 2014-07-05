@@ -46,7 +46,7 @@ HKWidgetTextbox::HKWidgetTextbox(HKWidgetType *pType)
 HKWidgetTextbox::~HKWidgetTextbox()
 {
 	if(bOwnFont)
-		MFFont_Destroy(pFont);
+		MFFont_Release(pFont);
 }
 
 void HKWidgetTextbox::Update()
@@ -108,7 +108,7 @@ void HKWidgetTextbox::SetProperty(const char *pProperty, const char *pValue)
 	else if(!MFString_CaseCmp(pProperty, "text_font"))
 	{
 		if(bOwnFont)
-			MFFont_Destroy(pFont);
+			MFFont_Release(pFont);
 		pFont = MFFont_Create(pValue);
 		bOwnFont = true;
 

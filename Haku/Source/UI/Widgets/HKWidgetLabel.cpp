@@ -31,7 +31,7 @@ HKWidgetLabel::HKWidgetLabel(HKWidgetType *pType)
 HKWidgetLabel::~HKWidgetLabel()
 {
 	if(bOwnFont)
-		MFFont_Destroy(pFont);
+		MFFont_Release(pFont);
 }
 
 void HKWidgetLabel::SetProperty(const char *pProperty, const char *pValue)
@@ -47,7 +47,7 @@ void HKWidgetLabel::SetProperty(const char *pProperty, const char *pValue)
 	else if(!MFString_CaseCmp(pProperty, "text_font"))
 	{
 		if(bOwnFont)
-			MFFont_Destroy(pFont);
+			MFFont_Release(pFont);
 		pFont = MFFont_Create(pValue);
 		bOwnFont = true;
 

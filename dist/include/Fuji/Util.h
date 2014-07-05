@@ -122,7 +122,7 @@ inline T MFUtil_NextPowerOf2(T x)
 template <typename T>
 inline void MFEndian_Flip(T *pData)
 {
-	register char t[sizeof(T)];
+	MFALIGN_BEGIN(16) char t[sizeof(T)] MFALIGN_END(16);
 	const char *pBytes = (const char*)pData;
 
 	for(uint32 a=0; a<sizeof(T); a++)
