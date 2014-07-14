@@ -154,24 +154,55 @@ void ParseID3(MFAudioStream *pStream, MFID3 *pID3, size_t dataSize)
 
 			if(*pData == 'T')
 			{
-				//uint8 encoding = pData[10];
-				const char *pString = (const char*)pData + 11;
-
+				char *pOutput  = NULL;
 				switch(pChunkHeader->id)
 				{
 					case MFMAKEFOURCC('T', 'I', 'T', '2'):
-						MFString_CopyN(pStream->streamInfo.songName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.songName)-1));
+						pOutput = pStream->streamInfo.songName;
 						break;
 					case MFMAKEFOURCC('T', 'A', 'L', 'B'):
-						MFString_CopyN(pStream->streamInfo.albumName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.albumName)-1));
+						pOutput = pStream->streamInfo.albumName;
 						break;
 					case MFMAKEFOURCC('T', 'P', 'E', '1'):
 					case MFMAKEFOURCC('T', 'P', 'E', '2'):
-						MFString_CopyN(pStream->streamInfo.artistName, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.artistName)-1));
+						pOutput = pStream->streamInfo.artistName;
 						break;
 					case MFMAKEFOURCC('T', 'C', 'O', 'N'):
-						MFString_CopyN(pStream->streamInfo.genre, pString, MFMin(size-1, (int)sizeof(pStream->streamInfo.genre)-1));
+						pOutput = pStream->streamInfo.genre;
 						break;
+				}
+
+				if(pOutput)
+				{
+					//uint8 encoding = pData[10];
+					const uint8 *pString = (const uint8*)pData + 11;
+					int stringLen = size - 1;
+
+					if(pString[0] == 0xFF && pString[1] == 0xFE)
+					{
+						// UTF16
+						pString += 2;
+						stringLen = (size-2) / 2;
+
+						MFString_CopyUTF16ToUTF8(pOutput, (wchar_t*)pString);
+					}
+					else if(pString[0] == 0xFE && pString[1] == 0xFF)
+					{
+						// UTF16_BE!
+						MFDebug_Assert(false, "Byte-reverse string!");
+					}
+					else if(pString[0] == 0xEF && pString[1] == 0xBB && pString[2] == 0xBF)
+					{
+						// skip UTF8 BOM
+						pString += 3;
+						stringLen -= 3;
+
+						MFString_CopyN(pOutput, (char*)pString, MFMin(stringLen, 255));
+					}
+					else
+					{
+						MFString_CopyN(pOutput, (char*)pString, MFMin(stringLen, 255));
+					}
 				}
 			}
 
@@ -259,7 +290,7 @@ int ScanForFrames(MFAudioStream *pStream, MFMADDecoder *pDecoder, bool bOnlyFirs
 	while(1)
 	{
 		size_t remaining = bytes - offset;
-		if(remaining < 4)
+		if((ptrdiff_t)remaining < 4)
 		{
 			filePos += offset;
 			if(offset > bytes)
