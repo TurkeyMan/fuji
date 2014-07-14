@@ -10,6 +10,7 @@ import fuji.c.MFModel;
 import fuji.c.MFRenderTarget;
 
 nothrow:
+@nogc:
 
 enum MFRenderClearFlags : int
 {

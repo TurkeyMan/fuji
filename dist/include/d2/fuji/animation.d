@@ -6,8 +6,10 @@ import fuji.resource;
 import fuji.animation;
 import fuji.model;
 import fuji.matrix;
+import fuji.string;
 
-import std.string;
+nothrow:
+@nogc:
 
 struct MFFrameRange
 {
@@ -19,12 +21,14 @@ struct Animation
 	MFAnimation *pAnimation;
 	alias pAnimation this;
 
-	this(this) pure nothrow
+nothrow:
+@nogc:
+	this(this) pure
 	{
 		MFResource_AddRef(cast(fuji.resource.MFResource*)pAnimation);
 	}
 
-	this(ref Resource resource) pure nothrow
+	this(ref Resource resource) pure
 	{
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Animation)
@@ -34,23 +38,24 @@ struct Animation
 		}
 	}
 
-	this(const(char)[] name, Model model) nothrow
+	this(const(char)[] name, Model model)
 	{
 		create(name, model);
 	}
 
-	~this() nothrow
+	~this()
 	{
 		release();
 	}
 
-	void create(const(char)[] name, Model model) nothrow
+	void create(const(char)[] name, Model model)
 	{
 		release();
-		pAnimation = MFAnimation_Create(name.toStringz(), model.handle);
+		auto n = Stringz!(64)(name);
+		pAnimation = MFAnimation_Create(n, model.handle);
 	}
 
-	int release() nothrow
+	int release()
 	{
 		int rc = 0;
 		if(pAnimation)
@@ -61,20 +66,20 @@ struct Animation
 		return rc;
 	}
 
-	@property inout(MFAnimation)* handle() inout pure nothrow				{ return pAnimation; }
-	@property ref inout(Resource) resource() inout pure nothrow				{ return *cast(inout(Resource)*)&this; }
+	@property inout(MFAnimation)* handle() inout pure				{ return pAnimation; }
+	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }
 
-	@property void frame(float time) nothrow								{ MFAnimation_SetFrame(pAnimation, time); }
+	@property void frame(float time)								{ MFAnimation_SetFrame(pAnimation, time); }
 
-	@property float startTime() const nothrow								{ return frameRange.start; }
-	@property float endTime() const nothrow									{ return frameRange.end; }
+	@property float startTime() const								{ return frameRange.start; }
+	@property float endTime() const									{ return frameRange.end; }
 
-	@property MFFrameRange frameRange() const nothrow
+	@property MFFrameRange frameRange() const
 	{
 		MFFrameRange r;
 		MFAnimation_GetFrameRange(pAnimation, &r.start, &r.end);
 		return r;
 	}
 
-	MFMatrix* calculateMatrices(MFMatrix* pLocalToWorld) nothrow			{ return MFAnimation_CalculateMatrices(pAnimation, pLocalToWorld); }
+	MFMatrix* calculateMatrices(MFMatrix* pLocalToWorld)			{ return MFAnimation_CalculateMatrices(pAnimation, pLocalToWorld); }
 }

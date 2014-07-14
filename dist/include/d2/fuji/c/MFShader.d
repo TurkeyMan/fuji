@@ -2,14 +2,16 @@ module fuji.c.MFShader;
 
 nothrow:
 
+alias extern (C) void function() MFShader_ConfigureCallback;
+alias extern (C) void function(void* pWorkload) MFShader_ExecuteCallback;
+
+@nogc:
+
 struct MFShader
 {
 	@disable this();
 	@disable this(this);
 }
-
-alias extern (C) void function() MFShader_ConfigureCallback;
-alias extern (C) void function(void* pWorkload) MFShader_ExecuteCallback;
 
 enum MFShaderLanguage
 {

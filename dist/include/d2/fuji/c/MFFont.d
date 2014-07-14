@@ -3,6 +3,7 @@ module fuji.c.MFFont;
 import fuji.c.MFMatrix;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFFont

@@ -2,6 +2,9 @@ module fuji.heap;
 
 public import fuji.c.MFHeap;
 
+nothrow:
+@nogc:
+
 /**
  * @fn void* MFHeap_Alloc(size_t bytes, MFHeap *pHeap)
  * Allocates a block of memory.
@@ -48,9 +51,13 @@ void[] MFHeap_AllocAndZero(int Line = __LINE__, string File = __FILE__)(size_t b
  * @see MFHeap_Alloc()
  * @see MFHeap_Free()
  */
-void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void* pMem, size_t bytes) nothrow
+void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void[] mem, size_t bytes) nothrow
 {
-	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	debug
+	{
+		assert(MFHeap_GetAllocSize(mem.ptr) == mem.length, "Buffer being reallocated has different size than the original allocation!");
+		MFHeap_SetLineAndFile(Line, File.ptr);
+	}
 	return MFHeap_ReallocInternal(pMem, bytes)[0..bytes];
 }
 

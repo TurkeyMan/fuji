@@ -7,6 +7,9 @@ public import fuji.dbg;
 
 import std.traits;
 
+nothrow:
+@nogc:
+
 void MFEndian_Flip(T)(T* pData)
 {
 	static if(is(T == struct))

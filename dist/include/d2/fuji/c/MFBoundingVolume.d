@@ -3,6 +3,7 @@ module fuji.c.MFBoundingVolume;
 import fuji.c.MFVector;
 
 nothrow:
+@nogc:
 
 /**
 * Bounding volume.

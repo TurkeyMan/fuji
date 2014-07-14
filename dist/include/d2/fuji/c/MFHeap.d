@@ -1,6 +1,7 @@
 module fuji.c.MFHeap;
 
 nothrow:
+@nogc:
 
 /**
  * @struct MFHeap

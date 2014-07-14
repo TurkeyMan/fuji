@@ -1,6 +1,7 @@
 module fuji.c.MFMidi;
 
 nothrow:
+@nogc:
 
 struct MFMidiInput;
 
@@ -35,7 +36,7 @@ alias MFMidiEventCallback = void function(MFMidiInput* pMidiInput, const MFMidiE
 
 
 extern (C) int MFMidi_GetNumDevices();
-extern (C) const char* MFMidi_GetDeviceName(int deviceId);
+extern (C) const(char)* MFMidi_GetDeviceName(int deviceId);
 
 extern (C) MFMidiDeviceStatus MFMidi_GetStatus(int deviceId);
 

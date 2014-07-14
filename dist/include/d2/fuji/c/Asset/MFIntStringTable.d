@@ -4,6 +4,7 @@ import fuji.c.Fuji;
 import fuji.c.MFTranslation;
 
 nothrow:
+@nogc:
 
 enum MFIntStringTableFormat
 {

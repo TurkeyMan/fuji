@@ -6,6 +6,7 @@ import fuji.c.MFResource;
 import fuji.c.MFVector;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFTexture

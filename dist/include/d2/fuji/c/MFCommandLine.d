@@ -1,6 +1,7 @@
 module fuji.c.MFCommandLine;
 
 nothrow:
+@nogc:
 
 /**
  * Get the command line buffer.

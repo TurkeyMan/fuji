@@ -4,6 +4,9 @@ public import fuji.c.MFRenderer;
 
 import fuji.renderstate;
 
+nothrow:
+@nogc:
+
 alias MFRenderer_Create = fuji.c.MFRenderer.MFRenderer_Create;
 MFRenderer* MFRenderer_Create(MFRenderLayerDescription[] layers, MFStateBlock* pGlobal, MFStateBlock* pOverride) nothrow
 {

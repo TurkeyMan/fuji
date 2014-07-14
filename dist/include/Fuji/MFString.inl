@@ -582,29 +582,6 @@ inline wchar_t* MFWString_CopyCat(wchar_t *pBuffer, const wchar_t *pString, cons
 
 ///// MFString Functions /////
 
-struct MFStringData
-{
-	friend class MFString;
-public:
-	int GetRefCount() const { return refCount; }
-	size_t GetBytes() const { return bytes + 1; }
-	size_t GetAllocated() const { return allocated; }
-	const char *GetMemory() const { return pMemory; }
-
-private:
-	static MFStringData *Alloc();
-	void Destroy();
-
-	int AddRef() { ++refCount;  return refCount; }
-	int Release() { if(--refCount == 0) { Destroy(); return 0; } return refCount; }
-
-	// members
-	char *pMemory;
-	size_t bytes;
-	size_t allocated;
-	int refCount;
-};
-
 inline MFString::MFString()
 {
 	pData = NULL;
@@ -614,13 +591,18 @@ inline MFString::MFString(const MFString &string)
 {
 	pData = string.pData;
 	if(pData)
-		pData->AddRef();
+		++pData->refCount;
 }
+
+MF_API void MFStringData_Destroy(MFStringData *pStringData);
 
 inline MFString::~MFString()
 {
 	if(pData)
-		pData->Release();
+	{
+		if(--pData->refCount == 0)
+			MFStringData_Destroy(pData);
+	}
 }
 
 inline MFString MFString::Static(const char *pStatic)

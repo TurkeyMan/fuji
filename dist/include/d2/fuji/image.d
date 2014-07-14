@@ -4,6 +4,9 @@ public import fuji.c.MFImage;
 
 public import fuji.fuji;
 
+nothrow:
+@nogc:
+
 alias MFImage_Convert = fuji.c.MFImage.MFImage_Convert;
 void MFImage_Convert(uint width, uint height, const(void[]) input, MFImageFormat inputFormat, void[] output, MFImageFormat outputFormat) nothrow
 {

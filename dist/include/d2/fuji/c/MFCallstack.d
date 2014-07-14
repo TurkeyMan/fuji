@@ -1,11 +1,12 @@
 module fuji.c.MFCallstack;
 
 nothrow:
+@nogc:
 
 /**
  * Log the callback to the console.
  * Logs the callback to the console.
- * @return None. 
+ * @return None.
  */
 extern (C) void MFCallstack_Log();
 

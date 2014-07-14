@@ -1,6 +1,7 @@
 module fuji.c.MFTypes;
 
 nothrow:
+@nogc:
 
 // alias fuji types
 alias byte int8;
@@ -22,10 +23,12 @@ struct MFRect
 	float width = 0; /**< Width of rectangle */
 	float height = 0; /**< Height of rectangle */
 
-	@property float top() const pure nothrow { return x; }
-	@property float left() const pure nothrow { return y; }
-	@property float right() const pure nothrow { return x + width; }
-	@property float bottom() const pure nothrow { return y + height; }
+nothrow:
+@nogc:
+	@property float top() const pure { return x; }
+	@property float left() const pure { return y; }
+	@property float right() const pure { return x + width; }
+	@property float bottom() const pure { return y + height; }
 }
 
 bool MFTypes_PointInRect(float x, float y, const ref MFRect rect) pure

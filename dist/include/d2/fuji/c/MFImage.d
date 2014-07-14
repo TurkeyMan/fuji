@@ -1,6 +1,7 @@
 module fuji.c.MFImage;
 
 nothrow:
+@nogc:
 
 /**
 * Texture format.

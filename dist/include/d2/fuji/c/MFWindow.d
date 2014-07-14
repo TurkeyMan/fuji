@@ -4,6 +4,7 @@ import fuji.c.Fuji;
 import fuji.c.MFDisplay;
 
 nothrow:
+@nogc:
 
 struct MFWindow;
 
@@ -31,7 +32,7 @@ struct MFWindowParams
 
 	bool bFullscreen;
 
-	@property const(char)[] windowTitle() const pure nothrow { return pWindowTitle.toDStr; }
+	@property const(char)[] windowTitle() const pure nothrow @nogc { return pWindowTitle.toDStr; }
 };
 
 extern (C) MFWindow* MFWindow_Create(MFWindowParams* pParams);

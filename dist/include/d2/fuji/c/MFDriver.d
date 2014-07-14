@@ -1,6 +1,7 @@
 module fuji.c.MFDriver;
 
 nothrow:
+@nogc:
 
 /*** Driver list ***/
 

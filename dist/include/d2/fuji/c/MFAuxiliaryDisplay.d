@@ -3,6 +3,7 @@ module fuji.c.MFAuxiliaryDisplay;
 import fuji.c.MFInput;
 
 nothrow:
+@nogc:
 
 /**
  * Auxillary display type.

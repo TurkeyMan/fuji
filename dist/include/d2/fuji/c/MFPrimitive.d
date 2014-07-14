@@ -5,6 +5,7 @@ import fuji.c.MFMaterial;
 import fuji.c.MFMatrix;
 
 nothrow:
+@nogc:
 
 /**
 * Primitive Type for an immediate render block.

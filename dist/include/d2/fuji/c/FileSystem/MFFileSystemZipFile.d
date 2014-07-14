@@ -3,6 +3,7 @@ module fuji.c.FileSystem.MFFileSystemZipFile;
 public import fuji.c.MFFileSystem;
 
 nothrow:
+@nogc:
 
 /**
  * Open a zip archive file structure.

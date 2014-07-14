@@ -3,17 +3,6 @@ module fuji.c.MFModule;
 nothrow:
 
 /**
- * Module init completion status.
- * Module initialisation completion status.
- */
-enum MFInitStatus
-{
-	Failed = -1,	/**< Module initialisation failed. */
-	Pending = 0,	/**< Module initialisation pending. */
-	Succeeded = 1	/**< Module initialisation completed successfully. */
-}
-
-/**
  * Fuji module initialisation callback prototype.
  */
 alias extern (C) MFInitStatus function() MFInitCallback;
@@ -22,6 +11,19 @@ alias extern (C) MFInitStatus function() MFInitCallback;
  * Fuji module destruction callback prototype.
  */
 alias extern (C) void function() MFDeinitCallback;
+
+/**
+* Module init completion status.
+* Module initialisation completion status.
+*/
+enum MFInitStatus
+{
+	Failed = -1,	/**< Module initialisation failed. */
+	Pending = 0,	/**< Module initialisation pending. */
+	Succeeded = 1	/**< Module initialisation completed successfully. */
+}
+
+@nogc:
 
 /**
  * Register a Fuji module.

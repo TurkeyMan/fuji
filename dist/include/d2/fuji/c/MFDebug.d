@@ -3,6 +3,7 @@ module fuji.c.MFDebug;
 import fuji.c.Fuji;
 
 nothrow:
+@nogc:
 
 extern (C) void MFDebug_DebugAssert(const(char)* pReason, const(char)* pMessage, const(char)* pFile = __FILE__.ptr, int line = __LINE__);
 

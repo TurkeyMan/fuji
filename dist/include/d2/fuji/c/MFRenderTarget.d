@@ -4,6 +4,7 @@ import fuji.c.MFTexture;
 import fuji.c.MFResource;
 
 nothrow:
+@nogc:
 
 /**
  * @struct MFRenderTarget

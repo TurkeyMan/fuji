@@ -5,6 +5,9 @@ import fuji.c.MFQuaternion;
 
 import std.math;
 
+nothrow:
+@nogc:
+
 struct MFMatrix
 {
 	union

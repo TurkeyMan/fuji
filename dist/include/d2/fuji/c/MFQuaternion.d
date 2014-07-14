@@ -5,6 +5,9 @@ import fuji.c.MFMatrix;
 
 import std.math;
 
+nothrow:
+@nogc:
+
 struct MFQuaternion
 {
 	float x = 0;
@@ -60,7 +63,7 @@ MFQuaternion slerp(const MFQuaternion q1, const MFQuaternion q2, float t)
 	float scale;
 	float invscale;
 
-	if((a + 1.0f) > 0.05f) 
+	if((a + 1.0f) > 0.05f)
 	{
 		if ((1.0f - a) >= 0.05f)  // spherical interpolation
 		{

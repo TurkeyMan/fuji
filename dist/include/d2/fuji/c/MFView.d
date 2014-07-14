@@ -5,6 +5,7 @@ import fuji.c.MFMatrix;
 import fuji.c.MFRenderState;
 
 nothrow:
+@nogc:
 
 /**
 * Push the current view state.

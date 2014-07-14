@@ -1,6 +1,7 @@
 module fuji.c.MFCompute;
 
 nothrow:
+@nogc:
 
 enum MFCompute_BufferType
 {

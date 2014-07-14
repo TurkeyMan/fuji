@@ -2,6 +2,9 @@ module fuji.c.MFVector;
 
 import std.math;
 
+nothrow:
+@nogc:
+
 template isValidSwizzleString(string s, int numComponents)
 {
 	template charInString(char c, string s)
@@ -42,48 +45,50 @@ struct MFVector
 	float z = 0;
 	float w = 0;
 
-	string toString() const												{ return std.conv.text("[ ", x, ", ", y, ", ", z, ", ", w, " ]"); }
+	string toString() const										{ return std.conv.text("[ ", x, ", ", y, ", ", z, ", ", w, " ]"); }
 
-	bool opEquals(const MFVector v) const pure nothrow					{ return x == v.x && y == v.y && z == v.z && w == v.w; }
+nothrow:
+@nogc:
+	bool opEquals(const MFVector v) const pure					{ return x == v.x && y == v.y && z == v.z && w == v.w; }
 
-	MFVector opUnary(string op)() const pure nothrow if(op == "+")		{ return *this; /* this is a noop */ }
-	MFVector opUnary(string op)() const pure nothrow if(op == "-")		{ return MFVector(-x, -y, -z, -w); }
+	MFVector opUnary(string op)() const pure					if(op == "+") { return *this; /* this is a noop */ }
+	MFVector opUnary(string op)() const pure					if(op == "-") { return MFVector(-x, -y, -z, -w); }
 
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "+") { return MFVector(x + v.x, y + v.y, z + v.z, w + v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "-") { return MFVector(x - v.x, y - v.y, z - v.z, w - v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "*") { return MFVector(x * v.x, y * v.y, z * v.z, w * v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "/") { return MFVector(x / v.x, y / v.y, z / v.z, w / v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "%") { return MFVector(x % v.x, y % v.y, z % v.z, w % v.w); }
-	MFVector opBinary(string op)(float f) const pure nothrow			if(op == "*") { return MFVector(x * f, y * f, z * f, w * f); }
-	MFVector opBinary(string op)(float f) const pure nothrow			if(op == "/") { return MFVector(x / f, y / f, z / f, w / f); }
-	MFVector opBinary(string op)(float f) const pure nothrow			if(op == "%") { return MFVector(x % f, y % f, z % f, w % f); }
+	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "+") { return MFVector(x + v.x, y + v.y, z + v.z, w + v.w); }
+	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "-") { return MFVector(x - v.x, y - v.y, z - v.z, w - v.w); }
+	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "*") { return MFVector(x * v.x, y * v.y, z * v.z, w * v.w); }
+	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "/") { return MFVector(x / v.x, y / v.y, z / v.z, w / v.w); }
+	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "%") { return MFVector(x % v.x, y % v.y, z % v.z, w % v.w); }
+	MFVector opBinary(string op)(float f) const pure			if(op == "*") { return MFVector(x * f, y * f, z * f, w * f); }
+	MFVector opBinary(string op)(float f) const pure			if(op == "/") { return MFVector(x / f, y / f, z / f, w / f); }
+	MFVector opBinary(string op)(float f) const pure			if(op == "%") { return MFVector(x % f, y % f, z % f, w % f); }
 
-	MFVector opBinaryRight(string op)(float f) const pure nothrow		if(op == "*") { return MFVector(f * x, f * y, f * z, f * w); }
-	MFVector opBinaryRight(string op)(float f) const pure nothrow		if(op == "/") { return MFVector(f / x, f / y, f / z, f / w); }
-	MFVector opBinaryRight(string op)(float f) const pure nothrow		if(op == "%") { return MFVector(f % x, f % y, f % z, f % w); }
+	MFVector opBinaryRight(string op)(float f) const pure		if(op == "*") { return MFVector(f * x, f * y, f * z, f * w); }
+	MFVector opBinaryRight(string op)(float f) const pure		if(op == "/") { return MFVector(f / x, f / y, f / z, f / w); }
+	MFVector opBinaryRight(string op)(float f) const pure		if(op == "%") { return MFVector(f % x, f % y, f % z, f % w); }
 
-	MFVector opOpAssign(string op)(const MFVector v) pure nothrow		if(op == "+") { return this = this + v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure nothrow		if(op == "-") { return this = this - v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure nothrow		if(op == "*") { return this = this * v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure nothrow		if(op == "/") { return this = this / v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure nothrow		if(op == "%") { return this = this % v; }
-	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "*") { return this = this * f; }
-	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "/") { return this = this / f; }
-	MFVector opOpAssign(string op)(float f) pure nothrow				if(op == "%") { return this = this % f; }
+	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "+") { return this = this + v; }
+	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "-") { return this = this - v; }
+	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "*") { return this = this * v; }
+	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "/") { return this = this / v; }
+	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "%") { return this = this % v; }
+	MFVector opOpAssign(string op)(float f) pure				if(op == "*") { return this = this * f; }
+	MFVector opOpAssign(string op)(float f) pure				if(op == "/") { return this = this / f; }
+	MFVector opOpAssign(string op)(float f) pure				if(op == "%") { return this = this % f; }
 
 	// handy mixin to support arbitrary vector swizzling
-	auto opDispatch(string s)() const pure nothrow if(isValidSwizzleString!(s, 4))
+	auto opDispatch(string s)() const pure if(isValidSwizzleString!(s, 4))
 	{
 		return MFVector(getComponent!(s[0], this), getComponent!(s[1], this), getComponent!(s[2], this), getComponent!(s[3], this));
 	}
 
-	float magSq2() const pure nothrow	{ return x * x + y * y; }
-	float magSq3() const pure nothrow	{ return x * x + y * y + z * z; }
-	float magSq4() const pure nothrow	{ return x * x + y * y + z * z + w * w; }
+	float magSq2() const pure	{ return x * x + y * y; }
+	float magSq3() const pure	{ return x * x + y * y + z * z; }
+	float magSq4() const pure	{ return x * x + y * y + z * z + w * w; }
 
-	float mag2() const pure nothrow		{ return std.math.sqrt(x * x + y * y); }
-	float mag3() const pure nothrow		{ return std.math.sqrt(x * x + y * y + z * z); }
-	float mag4() const pure nothrow		{ return std.math.sqrt(x * x + y * y + z * z + w * w); }
+	float mag2() const pure		{ return std.math.sqrt(x * x + y * y); }
+	float mag3() const pure		{ return std.math.sqrt(x * x + y * y + z * z); }
+	float mag4() const pure		{ return std.math.sqrt(x * x + y * y + z * z + w * w); }
 
 	static immutable MFVector zero = MFVector(0,0,0,0);
 	static immutable MFVector one = MFVector(1,1,1,1);
@@ -95,6 +100,7 @@ struct MFVector
 
 	static immutable MFVector black = MFVector(0,0,0,1);
 	static immutable MFVector white = MFVector(1,1,1,1);
+	static immutable MFVector grey = MFVector(0.5,0.5,0.5,1);
 	static immutable MFVector red = MFVector(1,0,0,1);
 	static immutable MFVector green = MFVector(0,1,0,1);
 	static immutable MFVector blue = MFVector(0,0,1,1);

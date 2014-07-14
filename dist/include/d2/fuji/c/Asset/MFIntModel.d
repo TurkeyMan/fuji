@@ -3,6 +3,7 @@ module fuji.c.Asset.MFIntModel;
 import fuji.c.Fuji;
 
 nothrow:
+@nogc:
 
 enum MFIntModelFormat
 {

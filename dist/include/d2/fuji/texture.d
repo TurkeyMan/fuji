@@ -6,6 +6,8 @@ public import fuji.image;
 import fuji.resource;
 import fuji.vector;
 
+nothrow:
+@nogc:
 
 struct MFTextureDimensions
 {
@@ -17,12 +19,33 @@ struct Texture
 	MFTexture *pTexture;
 	alias pTexture this;
 
-	this(this) pure nothrow
+nothrow:
+@nogc:
+	this(const(char)[] name)
+	{
+		create(name);
+	}
+
+	void create(const(char)[] name, bool generateMipChain = true)
+	{
+		release();
+		auto s = Stringz!(64)(name);
+		pTexture = MFTexture_Create(s, generateMipChain);
+	}
+
+	void createExisting(const(char)[] name)
+	{
+		release();
+		auto s = Stringz!(64)(name);
+		pTexture = MFTexture_Find(s);
+	}
+
+	this(this) pure
 	{
 		MFResource_AddRef(cast(fuji.resource.MFResource*)pTexture);
 	}
 
-	this(ref Resource resource) pure nothrow
+	this(ref Resource resource) pure
 	{
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Texture)
@@ -32,29 +55,12 @@ struct Texture
 		}
 	}
 
-	this(const(char)[] name) nothrow
-	{
-		create(name);
-	}
-
-	~this() nothrow
+	~this()
 	{
 		release();
 	}
 
-	void create(const(char)[] name, bool generateMipChain = true) nothrow
-	{
-		release();
-		pTexture = MFTexture_Create(name.toStringz(), generateMipChain);
-	}
-
-	void createExisting(const(char)[] name) nothrow
-	{
-		release();
-		pTexture = MFTexture_Find(name.toStringz());
-	}
-
-	int release() nothrow
+	int release()
 	{
 		int rc = 0;
 		if(pTexture)
@@ -65,16 +71,16 @@ struct Texture
 		return rc;
 	}
 
-	@property inout(MFTexture)* handle() inout pure nothrow		{ return pTexture; }
-	@property ref inout(Resource) resource() inout pure nothrow	{ return *cast(inout(Resource)*)&this; }
+	@property inout(MFTexture)* handle() inout pure		{ return pTexture; }
+	@property ref inout(Resource) resource() inout pure	{ return *cast(inout(Resource)*)&this; }
 
-	@property MFTextureDimensions size() const pure nothrow
+	@property MFTextureDimensions size() const pure
 	{
 		MFTextureDimensions d;
 		MFTexture_GetTextureDimensions(pTexture, &d.width, &d.height);
 		return d;
 	}
 
-	@property int width() const pure nothrow	{ return size.width; }
-	@property int height() const pure nothrow	{ return size.height; }
+	@property int width() const pure	{ return size.width; }
+	@property int height() const pure	{ return size.height; }
 }

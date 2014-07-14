@@ -4,6 +4,7 @@ import fuji.c.Fuji;
 import fuji.c.MFMatrix;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFSound

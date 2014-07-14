@@ -4,6 +4,7 @@ import fuji.c.Fuji;
 import core.stdc.config;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFFile

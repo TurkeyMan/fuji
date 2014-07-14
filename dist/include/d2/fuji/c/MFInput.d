@@ -4,6 +4,7 @@ public import fuji.c.MFVector;
 public import fuji.c.MFTypes;
 
 nothrow:
+@nogc:
 
 enum MFInputEventType
 {

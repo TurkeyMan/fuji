@@ -3,6 +3,7 @@ module fuji.c.FileSystem.MFFileSystemNative;
 import fuji.c.MFFileSystem;
 
 nothrow:
+@nogc:
 
 /**
  * Open native file structure.

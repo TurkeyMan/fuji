@@ -6,6 +6,7 @@ public import fuji.c.MFString;
 //public import fuji.c.MFDebug;
 
 nothrow:
+@nogc:
 
 struct MFEngineInstance;
 

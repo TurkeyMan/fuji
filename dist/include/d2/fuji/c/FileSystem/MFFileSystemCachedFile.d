@@ -3,6 +3,7 @@ module fuji.c.FileSystem.MFFileSystemCachedFile;
 public import fuji.c.MFFileSystem;
 
 nothrow:
+@nogc:
 
 /**
  * Open cached file structure.

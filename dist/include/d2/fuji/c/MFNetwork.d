@@ -3,6 +3,7 @@ module fuji.c.MFNetwork;
 import fuji.c.MFSockets;
 
 nothrow:
+@nogc:
 
 /**
  * Fuji network sockets.

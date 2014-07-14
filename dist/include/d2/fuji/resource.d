@@ -4,23 +4,28 @@ public import fuji.c.MFResource;
 
 import fuji.string;
 
+nothrow:
+@nogc:
+
 struct Resource
 {
 	MFResource *pResource;
 	alias pResource this;
 
-	this(this) pure nothrow	{ pResource.AddRef(); }
-	~this() nothrow			{ Release(); }
+nothrow:
+@nogc:
+	this(this) pure	{ pResource.AddRef(); }
+	~this()			{ Release(); }
 
-	@property inout(MFResource)* handle() inout pure nothrow	{ return pResource; }
+	@property inout(MFResource)* handle() inout pure	{ return pResource; }
 
-	@property MFResourceType type() const pure nothrow			{ return cast(MFResourceType)pResource.type; }
-	@property uint hash() const pure nothrow					{ return pResource.hash; }
-	@property int refCount() const pure nothrow					{ return pResource.refCount; }
-	@property const(char)[] name() const pure nothrow			{ return pResource.name; }
+	@property MFResourceType type() const pure			{ return cast(MFResourceType)pResource.type; }
+	@property uint hash() const pure					{ return pResource.hash; }
+	@property int refCount() const pure					{ return pResource.refCount; }
+	@property const(char)[] name() const pure			{ return pResource.name; }
 
-	int AddRef() pure nothrow	{ return pResource.AddRef(); }
-	int Release() nothrow
+	int AddRef() pure	{ return pResource.AddRef(); }
+	int Release()
 	{
 		int rc = 0;
 		if(pResource)
@@ -31,11 +36,11 @@ struct Resource
 		return rc;
 	}
 
-	bool IsType(MFResourceType type) const pure nothrow			{ return this.type == type; }
+	bool IsType(MFResourceType type) const pure			{ return this.type == type; }
 }
 
 
-ResourceIterator!Type enumerateResources(MFResourceType Type)() nothrow
+ResourceIterator!Type enumerateResources(MFResourceType Type)()
 {
 	int numResources = MFResource_GetNumResources(Type);
 	if(numResources == 0)
@@ -49,17 +54,19 @@ ResourceIterator!Type enumerateResources(MFResourceType Type)() nothrow
 
 struct ResourceIterator(MFResourceType type)
 {
-	@property bool empty() const pure nothrow					{ return pResource != null; }
-	@property size_t length() const pure nothrow				{ return count; }
+nothrow:
+@nogc:
+	@property bool empty() const pure					{ return pResource != null; }
+	@property size_t length() const pure				{ return count; }
 
-	@property ResourceIterator save() pure nothrow				{ return this; }
+	@property ResourceIterator save() pure				{ return this; }
 
-	@property TypeForResource!type front() nothrow
+	@property TypeForResource!type front()
 	{
 		return cast(TypeForResource!type)MFResource_Get(pResource);
 	}
 
-	void popFront() nothrow
+	void popFront()
 	{
 		pResource = pNext;
 		--count;
@@ -120,23 +127,10 @@ unittest
 
 package struct ResourceRange(ResourceType, ItemType, alias findFunc, bool bItemsHaveNames = true, bool bDispatchAssign = false)
 {
-	@property bool empty() const pure nothrow							{ return offset == count; }
-	@property size_t length() const pure nothrow						{ return count - offset; }
-
-	@property typeof(this) save() pure nothrow							{ return this; }
-
-	@property ItemType front() nothrow									{ return ItemType(pRes, offset); }
-	@property ItemType back() nothrow									{ return ItemType(pRes, count-1); }
-
-	ItemType opIndex(size_t index) nothrow								{ return ItemType(pRes, offset + index); }
-	typeof(this) opSlice(size_t x, size_t y) pure nothrow				{ return typeof(this)(pRes, offset + x, offset + y); }
-
-	void popFront() pure nothrow										{ ++offset; }
-	void popBack() pure nothrow											{ --count; }
-
+nothrow:
 	static if(bItemsHaveNames)
 	{
-		ItemType opIndex(const(char)[] name) nothrow					{ return find(name); }
+		ItemType opIndex(const(char)[] name) @nogc						{ return find(name); }
 
 		@property ItemType opDispatch(const(char)[] name)()				{ return find(name); }
 		static if(bDispatchAssign)
@@ -144,14 +138,30 @@ package struct ResourceRange(ResourceType, ItemType, alias findFunc, bool bItems
 			@property ItemType opDispatch(const(char)[] name, T)(T t)	{ ItemType p = find(name); p = t; return p; }
 		}
 
-		ItemType find(const(char)[] name) nothrow
+		ItemType find(const(char)[] name) @nogc
 		{
-			int index = findFunc(pRes, name.toStringz());
+			auto s = Stringz!(64)(name);
+			int index = findFunc(pRes, s);
 			if(index < offset || index >= count)
 				return ItemType(pRes, -1);
 			return ItemType(pRes, index);
 		}
 	}
+
+@nogc:
+	@property bool empty() const pure							{ return offset == count; }
+	@property size_t length() const pure						{ return count - offset; }
+
+	@property typeof(this) save() pure							{ return this; }
+
+	@property ItemType front()									{ return ItemType(pRes, offset); }
+	@property ItemType back()									{ return ItemType(pRes, count-1); }
+
+	ItemType opIndex(size_t index)								{ return ItemType(pRes, offset + index); }
+	typeof(this) opSlice(size_t x, size_t y) pure				{ return typeof(this)(pRes, offset + x, offset + y); }
+
+	void popFront() pure										{ ++offset; }
+	void popBack() pure											{ --count; }
 
 private:
 	ResourceType* pRes;

@@ -5,6 +5,7 @@ import fuji.c.MFTexture;
 import fuji.c.MFMatrix;
 
 nothrow:
+@nogc:
 
 struct MFIni;
 struct MFEnumKey

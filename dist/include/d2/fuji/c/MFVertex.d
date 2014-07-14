@@ -5,6 +5,7 @@ import fuji.c.MFVector;
 import fuji.c.MFRenderState;
 
 nothrow:
+@nogc:
 
 struct MFEffectTechnique; // TODO: effect.d will appear and remove this
 

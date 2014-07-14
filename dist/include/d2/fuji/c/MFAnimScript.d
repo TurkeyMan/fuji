@@ -4,6 +4,7 @@ import fuji.c.MFMatrix;
 import fuji.c.MFModel;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFAnimScript

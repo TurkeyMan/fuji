@@ -1,8 +1,10 @@
 module fuji.dbg;
 
 public import fuji.c.MFDebug;
+import fuji.string;
 
-import std.string;
+nothrow:
+@nogc:
 
 void MFDebug_Assert(alias reason = false)(in char[] message, string file = __FILE__, int line = __LINE__) nothrow
 {
@@ -11,25 +13,29 @@ void MFDebug_Assert(alias reason = false)(in char[] message, string file = __FIL
 }
 
 alias MFDebug_Message = fuji.c.MFDebug.MFDebug_Message;
-void MFDebug_Message(const(char)[] message) nothrow
+void MFDebug_Message(const(char)[] message)
 {
-	MFDebug_Message(message.toStringz);
+	auto s = Stringz!()(message);
+	MFDebug_Message(s);
 }
 
 alias MFDebug_Error = fuji.c.MFDebug.MFDebug_Error;
-void MFDebug_Error(const(char)[] errorMessage) nothrow
+void MFDebug_Error(const(char)[] errorMessage)
 {
-	MFDebug_Error(errorMessage.toStringz);
+	auto s = Stringz!()(errorMessage);
+	MFDebug_Error(s);
 }
 
 alias MFDebug_Warn = fuji.c.MFDebug.MFDebug_Warn;
-void MFDebug_Warn(int level, const(char)[] warningMessage) nothrow
+void MFDebug_Warn(int level, const(char)[] warningMessage)
 {
-	MFDebug_Warn(level, warningMessage.toStringz);
+	auto s = Stringz!()(warningMessage);
+	MFDebug_Warn(level, s);
 }
 
 alias MFDebug_Log = fuji.c.MFDebug.MFDebug_Log;
-void MFDebug_Log(int level, const(char)[] message) nothrow
+void MFDebug_Log(int level, const(char)[] message)
 {
-	MFDebug_Log(level, message.toStringz);
+	auto s = Stringz!()(message);
+	MFDebug_Log(level, s);
 }

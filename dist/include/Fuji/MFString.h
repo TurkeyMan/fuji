@@ -665,7 +665,14 @@ const wchar_t* MFSkipWhiteW(const wchar_t *pC);
 
 ////// String Class //////
 
-struct MFStringData;
+struct MFStringData
+{
+	char *pMemory;
+	size_t bytes;
+	size_t allocated;
+	int refCount;
+};
+
 
 /**
  * Fuji String class.

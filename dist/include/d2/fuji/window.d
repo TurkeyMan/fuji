@@ -4,6 +4,9 @@ public import fuji.c.MFWindow;
 import fuji.c.MFTypes;
 import fuji.c.MFDisplay;
 
+nothrow:
+@nogc:
+
 struct Window
 {
 	MFWindow *pWindow;
@@ -11,13 +14,15 @@ struct Window
 
 	// TODO: methods, assignment, setter's.
 
-	@property ref const(MFWindowParams) params() const pure nothrow { return *MFWindow_GetWindowParameters(pWindow); }
+nothrow:
+@nogc:
+	@property ref const(MFWindowParams) params() const pure { return *MFWindow_GetWindowParameters(pWindow); }
 
-	@property MFRect rect() const pure nothrow { return MFRect(params.x, params.y, params.width, params.height); }
+	@property MFRect rect() const pure { return MFRect(params.x, params.y, params.width, params.height); }
 
-	@property const(char)[] title() const pure nothrow { return params.windowTitle; }
-	@property bool isFullscreen() const pure nothrow { return params.bFullscreen; }
+	@property const(char)[] title() const pure { return params.windowTitle; }
+	@property bool isFullscreen() const pure { return params.bFullscreen; }
 
-	@property MFDisplay* display() pure nothrow { return MFWindow_GetDisplay(pWindow); }
-	@property void* systemHandle() pure nothrow { return MFWindow_GetSystemWindowHandle(pWindow); }
+	@property MFDisplay* display() pure { return MFWindow_GetDisplay(pWindow); }
+	@property void* systemHandle() pure { return MFWindow_GetSystemWindowHandle(pWindow); }
 }

@@ -3,6 +3,7 @@ module fuji.c.Asset.MFIntSound;
 import fuji.c.Fuji;
 
 nothrow:
+@nogc:
 
 enum MFWaveFormat
 {

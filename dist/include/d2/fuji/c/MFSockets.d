@@ -1,6 +1,7 @@
 module fuji.c.MFSockets;
 
 nothrow:
+@nogc:
 
 enum MFSOCKET_ERROR = -1;
 

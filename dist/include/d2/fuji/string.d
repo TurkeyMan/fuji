@@ -1,28 +1,66 @@
 module fuji.string;
 
 public import fuji.c.MFString;
+import fuji.dbg;
 
-public import std.string: toStringz;
+nothrow:
+@nogc:
 
-
-// TODO: MFString compatibility needs major work...
-private struct MFStringData
+struct Stringz(size_t stackSize = 256)
 {
-	char* pMemory;
-	size_t bytes;
-	size_t allocated;
-	int refCount;
-};
+	alias cstr this;
 
-struct MFString
-{
-	alias asDString this;
+nothrow:
+@nogc:
+	this(const(char)[] s)
+	{
+		if(!s)
+			return;
 
-	@property size_t length() const pure nothrow { return pData ? pData.bytes : 0; }
-	@property string idup() const pure { return asDString.idup; }
-	inout(char*) toStringz() inout pure nothrow { return pData ? pData.pMemory : null; }
+		if(s.ptr[s.length] == 0)
+		{
+			str = s;
+			stackStr[0] = 0;
+		}
+		else
+		{
+			char[] t;
+			if(s.length < stackSize-1)
+			{
+				t = stackStr[0..s.length];
+				stackStr[s.length] = 0;
+			}
+			else
+			{
+				debug MFDebug_Warn(4, "String is larger than stack buffer.".ptr);
+				char* alloc = MFStringHeap_Alloc(s.length + 1);
+				t = alloc[0..s.length];
+				alloc[s.length] = 0;
+				stackStr[0] = 1;
+			}
 
-	@property inout(char)[] asDString() inout pure nothrow { return pData ? pData.pMemory[0 .. pData.bytes] : null; }
+			t[] = s[];
+			str = t;
+		}
+	}
 
-	private	MFStringData *pData;
+	~this()
+	{
+		if(str.ptr != stackStr.ptr && stackStr[0] == 1)
+			MFStringHeap_Free(cast(char*)str.ptr);
+		str = null;
+	}
+
+	@property const(char)* cstr() { return str.ptr; }
+	@property const(char)[] dstr() { return str; }
+
+private:
+	const(char)[] str;
+	char[stackSize] stackStr = void;
 }
+
+
+private:
+
+extern (C) char* MFStringHeap_Alloc(size_t bytes, size_t* pAllocated = null);
+extern (C) void MFStringHeap_Free(char* pString);

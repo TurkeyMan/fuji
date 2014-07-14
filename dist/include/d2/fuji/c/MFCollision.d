@@ -4,6 +4,7 @@ import fuji.c.MFMatrix;
 import fuji.c.MFModel;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFCollisionItem
@@ -164,8 +165,7 @@ MFVector MFCollision_MakePlaneFromPointAndNormal(ref const(MFVector) point, ref 
 {
 	MFVector p;
 
-	p = normal;
-	p.normalise!3();
+	p = normal.normalise!3();
 	p.w = -dot3(point, p);
 
 	return p;

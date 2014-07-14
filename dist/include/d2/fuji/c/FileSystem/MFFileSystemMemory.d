@@ -3,6 +3,7 @@ module fuji.c.FileSystem.MFFileSystemMemory;
 public import fuji.c.MFFileSystem;
 
 nothrow:
+@nogc:
 
 /**
  * Open memory file structure.

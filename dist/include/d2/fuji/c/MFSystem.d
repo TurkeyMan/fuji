@@ -8,6 +8,13 @@ nothrow:
 struct MFIniLine;
 
 /**
+* Fuji system callback function prototype.
+*/
+alias extern (C) void function() MFSystemCallbackFunction;
+
+@nogc:
+
+/**
 * System callbacks.
 * System callback function idenifiers.
 */
@@ -35,11 +42,6 @@ enum MFCallback
 
 	VerticalBlank			/**< Vertical Blank callback. */
 }
-
-/**
-* Fuji system callback function prototype.
-*/
-alias extern (C) void function() MFSystemCallbackFunction;
 
 /**
 * Parameters supplied when initialising Fuji.

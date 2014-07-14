@@ -6,6 +6,7 @@ import fuji.c.MFMatrix;
 import fuji.c.MFVertex;
 
 nothrow:
+@nogc:
 
 enum MFStateConstant_Matrix : int
 {

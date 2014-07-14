@@ -1,6 +1,7 @@
 module fuji.c.MFTranslation;
 
 nothrow:
+@nogc:
 
 /**
  * @struct MFStringTable

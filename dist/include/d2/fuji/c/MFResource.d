@@ -3,6 +3,7 @@ module fuji.c.MFResource;
 import fuji.c.MFString : toDStr;
 
 nothrow:
+@nogc:
 
 enum MFResourceType
 {
@@ -38,17 +39,19 @@ struct MFResource
 	int type_refCount;
 	const(char)* pName;
 
-	@property MFResourceType type() const pure nothrow { return cast(MFResourceType)(type_refCount & 0xFF); }
-	@property int refCount() const pure nothrow { return type_refCount >> 8; }
-	@property const(char)[] name() const pure nothrow { return pName.toDStr; }
+nothrow:
+@nogc:
+	@property MFResourceType type() const pure { return cast(MFResourceType)(type_refCount & 0xFF); }
+	@property int refCount() const pure { return type_refCount >> 8; }
+	@property const(char)[] name() const pure { return pName.toDStr; }
 
-	int AddRef() pure nothrow
+	int AddRef() pure
 	{
 		type_refCount += 1 << 8;
 		return type_refCount >> 8;
 	}
 
-	int Release() nothrow
+	int Release()
 	{
 		int rc = type_refCount >> 8;
 		if(rc == 1)
@@ -84,7 +87,7 @@ extern (C) MFResourceIterator* MFResource_EnumerateFirst(MFResourceType type = M
 extern (C) MFResourceIterator* MFResource_EnumerateNext(MFResourceIterator* pIterator, MFResourceType type = MFResourceType.All);
 extern (C) MFResource* MFResource_Get(MFResourceIterator* pIterator);
 
-bool MFResource_IsType(MFResource* pResource, MFResourceType type)
+bool MFResource_IsType(MFResource* pResource, MFResourceType type) pure
 {
 	return MFResource_GetType(pResource) == type;
 }

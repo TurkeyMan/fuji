@@ -9,13 +9,10 @@
 
 #include <string.h>
 
-struct MFStringState
-{
-	MFObjectPool stringPool;
-	MFObjectPoolGroup stringHeap;
-};
+MFObjectPool stringPool;
+MFObjectPoolGroup stringHeap;
 
-static int gModuleId = -1;
+int gModuleInitCount = 0;
 
 // this is okay as global; it can be shared or duplicated freely
 MFALIGN_BEGIN(16)
@@ -33,43 +30,43 @@ static const MFObjectPoolGroupConfig gStringGroups[] =
 
 MFInitStatus MFString_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	gModuleId = moduleId;
-
 	if(!bPerformInitialisation)
 		return MFIS_Succeeded;
 
-	ALLOC_MODULE_DATA(MFStringState);
+	if(gModuleInitCount == 0)
+	{
+		++gModuleInitCount;
 
-	pModuleData->stringHeap.Init(gStringGroups, sizeof(gStringGroups) / sizeof(gStringGroups[0]));
-	pModuleData->stringPool.Init(sizeof(MFStringData), 128, 128);
+		stringHeap.Init(gStringGroups, sizeof(gStringGroups) / sizeof(gStringGroups[0]));
+		stringPool.Init(sizeof(MFStringData), 128, 128);
+	}
 
 	return MFIS_Succeeded;
 }
 
 void MFString_DeinitModule()
 {
-	GET_MODULE_DATA(MFStringState);
-
-	pModuleData->stringPool.Deinit();
-	pModuleData->stringHeap.Deinit();
+	if(--gModuleInitCount == 0)
+	{
+		stringPool.Deinit();
+		stringHeap.Deinit();
+	}
 }
 
 MF_API MFString MFString_GetStats()
 {
-	GET_MODULE_DATA(MFStringState);
-
-	size_t overhead = pModuleData->stringPool.GetTotalMemory() + pModuleData->stringPool.GetOverheadMemory() + pModuleData->stringHeap.GetOverheadMemory();
+	size_t overhead = stringPool.GetTotalMemory() + stringPool.GetOverheadMemory() + stringHeap.GetOverheadMemory();
 	size_t waste = 0, averageSize = 0;
 
 	// calculate waste
-	int numStrings = pModuleData->stringPool.GetNumAllocated();
+	int numStrings = stringPool.GetNumAllocated();
 	for(int a=0; a<numStrings; ++a)
 	{
-		MFStringData *pString = (MFStringData*)pModuleData->stringPool.GetItem(a);
-		size_t allocated = pString->GetAllocated();
+		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
+		size_t allocated = pString->allocated;
 		if(allocated)
 		{
-			size_t bytes = pString->GetBytes();
+			size_t bytes = pString->bytes+1;
 			averageSize += bytes;
 			waste += allocated - bytes;
 		}
@@ -80,12 +77,12 @@ MF_API MFString MFString_GetStats()
 
 	MFString desc;
     desc.Reserve(1024);
-	desc = MFStr("String heap memory: " MFFMT_SIZE_T " allocated/" MFFMT_SIZE_T " reserved + " MFFMT_SIZE_T " overhead  Waste: " MFFMT_SIZE_T "  Average length: " MFFMT_SIZE_T "\n\tPool: %d/%d", pModuleData->stringHeap.GetAllocatedMemory(), pModuleData->stringHeap.GetTotalMemory(), overhead, waste, averageSize, pModuleData->stringPool.GetNumAllocated(), pModuleData->stringPool.GetNumReserved());
+	desc = MFStr("String heap memory: " MFFMT_SIZE_T " allocated/" MFFMT_SIZE_T " reserved + " MFFMT_SIZE_T " overhead  Waste: " MFFMT_SIZE_T "  Average length: " MFFMT_SIZE_T "\n\tPool: %d/%d", stringHeap.GetAllocatedMemory(), stringHeap.GetTotalMemory(), overhead, waste, averageSize, stringPool.GetNumAllocated(), stringPool.GetNumReserved());
 
-	int numGroups = pModuleData->stringHeap.GetNumPools();
+	int numGroups = stringHeap.GetNumPools();
 	for(int a=0; a<numGroups; ++a)
 	{
-		MFObjectPool *pPool = pModuleData->stringHeap.GetPool(a);
+		MFObjectPool *pPool = stringHeap.GetPool(a);
 		desc += MFStr("\n\t\t" MFFMT_SIZE_T " byte: %d/%d", pPool->GetObjectSize(), pPool->GetNumAllocated(), pPool->GetNumReserved());
 	}
 
@@ -94,8 +91,6 @@ MF_API MFString MFString_GetStats()
 
 MF_API void MFString_Dump()
 {
-	GET_MODULE_DATA(MFStringState);
-
 	MFString temp = MFString_GetStats();
 
 	MFDebug_Log(1, "\n-------------------------------------------------------------------------------------------------------");
@@ -104,11 +99,11 @@ MF_API void MFString_Dump()
 	// dump all strings...
 	MFDebug_Log(1, "");
 
-	int numStrings = pModuleData->stringPool.GetNumAllocated();
+	int numStrings = stringPool.GetNumAllocated();
 	for(int a=0; a<numStrings; ++a)
 	{
-		MFStringData *pString = (MFStringData*)pModuleData->stringPool.GetItem(a);
-		MFDebug_Log(1, MFStr("%d refs, " MFFMT_SIZE_T "b: \"%s\"", pString->GetRefCount(), pString->GetAllocated(), pString->GetMemory()));
+		MFStringData *pString = (MFStringData*)stringPool.GetItem(a);
+		MFDebug_Log(1, MFStr("%d refs, " MFFMT_SIZE_T "b: \"%s\"", pString->refCount, pString->allocated, pString->pMemory));
 	}
 }
 
@@ -795,24 +790,36 @@ int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
 
 /**** MFString Functions ****/
 
-MFStringData *MFStringData::Alloc()
+MF_API MFStringData *MFStringData_Alloc()
 {
-	GET_MODULE_DATA(MFStringState);
-
-	MFStringData *pData = (MFStringData*)pModuleData->stringPool.Alloc();
+	MFStringData *pData = (MFStringData*)stringPool.Alloc();
 	pData->refCount = 1;
 	pData->pMemory = NULL;
 	pData->allocated = pData->bytes = 0;
 	return pData;
 }
 
-void MFStringData::Destroy()
+MF_API void MFStringData_Destroy(MFStringData *pStringData)
 {
-	GET_MODULE_DATA(MFStringState);
+	if(pStringData->allocated)
+		stringHeap.Free(pStringData->pMemory);
+	stringPool.Free(pStringData);
+}
 
-	if(allocated)
-		pModuleData->stringHeap.Free(pMemory);
-	pModuleData->stringPool.Free(this);
+MF_API char *MFStringHeap_Alloc(size_t bytes, size_t *pAllocated)
+{
+	return (char*)stringHeap.Alloc(bytes, pAllocated);
+}
+
+MF_API void MFStringHeap_Free(char *pString)
+{
+	stringHeap.Free(pString);
+}
+
+__forceinline void MFStringData_Release(MFStringData *pStringData)
+{
+	if(--pStringData->refCount == 0)
+		MFStringData_Destroy(pStringData);
 }
 
 MFString::MFString(const char *pString, bool bHoldStaticPointer)
@@ -823,7 +830,7 @@ MFString::MFString(const char *pString, bool bHoldStaticPointer)
 	}
 	else
 	{
-		pData = MFStringData::Alloc();
+		pData = MFStringData_Alloc();
 		pData->bytes = MFString_Length(pString);
 		if(bHoldStaticPointer)
 		{
@@ -831,9 +838,7 @@ MFString::MFString(const char *pString, bool bHoldStaticPointer)
 		}
 		else
 		{
-			GET_MODULE_DATA(MFStringState);
-
-			pData->pMemory = (char*)pModuleData->stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+			pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 			MFString_Copy(pData->pMemory, pString);
 		}
 	}
@@ -847,12 +852,10 @@ MFString::MFString(const char *pString, size_t maxChars)
 	}
 	else
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		pData = MFStringData::Alloc();
+		pData = MFStringData_Alloc();
 		pData->bytes = MFString_LengthN(pString, (int)maxChars);
 
-		pData->pMemory = (char*)pModuleData->stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 
 		MFString_CopyN(pData->pMemory, pString, (int)pData->bytes);
 		pData->pMemory[pData->bytes] = 0;
@@ -872,7 +875,7 @@ MFString& MFString::operator=(const char *pString)
 	}
 	else if(pData)
 	{
-		pData->Release();
+		MFStringData_Release(pData);
 		pData = NULL;
 	}
 
@@ -882,11 +885,11 @@ MFString& MFString::operator=(const char *pString)
 MFString& MFString::operator=(const MFString &string)
 {
 	if(pData)
-		pData->Release();
+		MFStringData_Release(pData);
 
 	pData = string.pData;
 	if(pData)
-		pData->AddRef();
+		++pData->refCount;
 
 	return *this;
 }
@@ -997,13 +1000,13 @@ MFString& MFString::SetStaticString(const char *pStaticString)
 {
 	if(pData)
 	{
-		pData->Release();
+		MFStringData_Release(pData);
 		pData = NULL;
 	}
 
 	if(pStaticString)
 	{
-		pData = MFStringData::Alloc();
+		pData = MFStringData_Alloc();
 		pData->bytes = MFString_Length(pStaticString);
 		pData->pMemory = (char*)pStaticString;
 	}
@@ -1015,15 +1018,13 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 {
 	if(pData)
 	{
-		pData->Release();
+		MFStringData_Release(pData);
 		pData = NULL;
 	}
 
 	if(pString)
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		pData = MFStringData::Alloc();
+		pData = MFStringData_Alloc();
 
 		size_t len = 0;
 		const wchar_t *pS = pString;
@@ -1031,7 +1032,7 @@ MFString& MFString::FromUTF16(const wchar_t *pString)
 			len += MFString_EncodeUTF8(*pS++, NULL);
 		pData->bytes = len;
 
-		pData->pMemory = (char*)pModuleData->stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 		MFString_CopyUTF16ToUTF8(pData->pMemory, (const wchar_t*)pString);
 	}
 
@@ -1042,14 +1043,12 @@ MFString& MFString::Detach(size_t reserveBytes)
 {
 	if(pData && (pData->refCount > 1 || pData->allocated == 0))
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		MFStringData *pNew = MFStringData::Alloc();
+		MFStringData *pNew = MFStringData_Alloc();
 		pNew->bytes = pData->bytes;
-		pNew->pMemory = (char*)pModuleData->stringHeap.Alloc(MFMax(pNew->bytes + 1, reserveBytes), &pNew->allocated);
+		pNew->pMemory = (char*)stringHeap.Alloc(MFMax(pNew->bytes + 1, reserveBytes), &pNew->allocated);
 		MFString_Copy(pNew->pMemory, pData->pMemory);
 
-		pData->Release();
+		MFStringData_Release(pData);
 		pData = pNew;
 	}
 
@@ -1064,10 +1063,8 @@ MFString& MFString::Reserve(size_t bytes, bool bClearString)
 	// allocate memory
 	if(!pData)
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		pData = MFStringData::Alloc();
-		pData->pMemory = (char*)pModuleData->stringHeap.Alloc(bytes, &pData->allocated);
+		pData = MFStringData_Alloc();
+		pData->pMemory = (char*)stringHeap.Alloc(bytes, &pData->allocated);
 		pData->pMemory[0] = 0;
 		pData->bytes = 0;
 	}
@@ -1075,17 +1072,15 @@ MFString& MFString::Reserve(size_t bytes, bool bClearString)
 	{
 		if(bytes > pData->allocated)
 		{
-			GET_MODULE_DATA(MFStringState);
-
 			bool bNeedFree = pData->allocated != 0;
 
-			char *pNew = (char*)pModuleData->stringHeap.Alloc(bytes, &pData->allocated);
+			char *pNew = (char*)stringHeap.Alloc(bytes, &pData->allocated);
 
 			if(!bClearString)
 				MFString_Copy(pNew, pData->pMemory);
 
 			if(bNeedFree)
-				pModuleData->stringHeap.Free(pData->pMemory);
+				stringHeap.Free(pData->pMemory);
 			pData->pMemory = pNew;
 		}
 
@@ -1103,7 +1098,7 @@ MFString& MFString::Sprintf(const char *pFormat, ...)
 {
 	if(pData)
 	{
-		pData->Release();
+		MFStringData_Release(pData);
 		pData = NULL;
 	}
 
@@ -1115,11 +1110,9 @@ MFString& MFString::Sprintf(const char *pFormat, ...)
 
 	if(nRes >= 0)
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		pData = MFStringData::Alloc();
+		pData = MFStringData_Alloc();
 		pData->bytes = nRes;
-		pData->pMemory = (char*)pModuleData->stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
+		pData->pMemory = (char*)stringHeap.Alloc(pData->bytes + 1, &pData->allocated);
 		vsprintf(pData->pMemory, pFormat, arglist);
 	}
 
@@ -1140,11 +1133,9 @@ MFString MFString::Format(const char *pFormat, ...)
 
 	if(nRes >= 0)
 	{
-		GET_MODULE_DATA(MFStringState);
-
-		t.pData = MFStringData::Alloc();
+		t.pData = MFStringData_Alloc();
 		t.pData->bytes = nRes;
-		t.pData->pMemory = (char*)pModuleData->stringHeap.Alloc(t.pData->bytes + 1, &t.pData->allocated);
+		t.pData->pMemory = (char*)stringHeap.Alloc(t.pData->bytes + 1, &t.pData->allocated);
 		vsprintf(t.pData->pMemory, pFormat, arglist);
 	}
 
@@ -1380,7 +1371,7 @@ MFString& MFString::Replace(int offset, int range, MFString string)
 	{
 		pData = string.pData;
 		if(pData)
-			pData->AddRef();
+			++pData->refCount;
 		return *this;
 	}
 

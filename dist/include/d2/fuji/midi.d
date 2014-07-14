@@ -2,6 +2,9 @@ module fuji.midi;
 
 public import fuji.c.MFMidi;
 
+nothrow:
+@nogc:
+
 alias MFMidi_GetEvents = fuji.c.MFMidi.MFMidi_GetEvents;
 MFMidiEvent[] MFMidi_GetEvents(MFMidiInput* pMidiInput, MFMidiEvent[] events, bool bPeek = false) nothrow
 {

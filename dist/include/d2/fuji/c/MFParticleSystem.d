@@ -3,6 +3,7 @@ module fuji.c.MFParticleSystem;
 import fuji.c.MFMatrix;
 
 nothrow:
+@nogc:
 
 /**
  * @struct MFParticleSystem

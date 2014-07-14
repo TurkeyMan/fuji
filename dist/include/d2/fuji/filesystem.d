@@ -10,50 +10,6 @@ import std.array;
 import std.range;
 import std.algorithm;
 
-alias MFFile_SystemPath = fuji.c.MFFileSystem.MFFile_SystemPath;
-const(char)[] MFFile_SystemPath(const(char)[] filename = null) nothrow
-{
-	return MFFile_SystemPath(filename ? filename.toStringz : null).toDStr;
-}
-
-alias MFFile_HomePath = fuji.c.MFFileSystem.MFFile_HomePath;
-const(char)[] MFFile_HomePath(const(char)[] filename = null) nothrow
-{
-	return MFFile_HomePath(filename ? filename.toStringz : null).toDStr;
-}
-
-alias MFFileSystem_Load = fuji.c.MFFileSystem.MFFileSystem_Load;
-ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0) nothrow
-{
-	size_t size;
-	ubyte* file = MFFileSystem_Load(filename.toStringz, &size, extraBytes);
-	return file[0..size];
-}
-
-alias MFFileSystem_Save = fuji.c.MFFileSystem.MFFileSystem_Save;
-size_t MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer) nothrow
-{
-	return MFFileSystem_Save(filename.toStringz, buffer.ptr, buffer.length);
-}
-
-alias MFFileSystem_GetSize = fuji.c.MFFileSystem.MFFileSystem_GetSize;
-ulong MFFileSystem_GetSize(const(char)[] filename) nothrow
-{
-	return MFFileSystem_GetSize(filename.toStringz);
-}
-
-alias MFFileSystem_Exists = fuji.c.MFFileSystem.MFFileSystem_Exists;
-bool MFFileSystem_Exists(const(char)[] filename) nothrow
-{
-	return MFFileSystem_Exists(filename.toStringz);
-}
-
-alias MFFileSystem_FindFirst = fuji.c.MFFileSystem.MFFileSystem_FindFirst;
-MFFind* MFFileSystem_FindFirst(const(char)[] searchPattern, MFFindData *pFindData) nothrow
-{
-	return MFFileSystem_FindFirst(searchPattern.toStringz, pFindData);
-}
-
 
 // offer a directory iterator similar to the one in std.file
 
@@ -64,7 +20,7 @@ enum SpanMode
 	breadth,	// Bredth first.
 }
 
-private string joinPath(const(char)[] s1, const(char)[] s2)
+private string joinPath(const(char)[] s1, const(char)[] s2) nothrow
 {
 	return (s1[$-1] == ':' || s1[$-1] == '/' ? s1 ~ s2 : s1 ~ "/" ~ s2).idup;
 }
@@ -72,6 +28,13 @@ private string joinPath(const(char)[] s1, const(char)[] s2)
 struct DirEntry
 {
 	alias filepath this;
+
+	string filepath;	// the file or directory represented by this DirEntry
+	string systemPath;	// the system path to this file.
+	string filename;	// the filename part
+	string directory;	// the directory part
+	ulong size;			// file size in bytes
+	uint  attributes;	// file attributes
 
 	private this(string path, in MFFindData* fd)
 	{
@@ -82,22 +45,17 @@ struct DirEntry
 
 		filepath = joinPath(path, filename);
 
-		systemPath = fd.systemPath;
+		systemPath = fd.systemPath.idup;
 
 		size = fd.fileSize;
 		attributes = fd.attributes;
 	}
 
-	@property bool isDir() const pure nothrow { return (attributes & MFFileAttributes.Directory) != 0; }
-	@property bool isFile() const pure nothrow { return !isDir; }
-	@property bool isSymlink() const pure nothrow { return (attributes & MFFileAttributes.SymLink) != 0; }
-
-	string filepath;	// the file or directory represented by this DirEntry
-	string systemPath;	// the system path to this file.
-	string filename;	// the filename part
-	string directory;	// the directory part
-	ulong size;			// file size in bytes
-	uint  attributes;	// file attributes
+nothrow:
+@nogc:
+	@property bool isDir() const pure { return (attributes & MFFileAttributes.Directory) != 0; }
+	@property bool isFile() const pure { return !isDir; }
+	@property bool isSymlink() const pure { return (attributes & MFFileAttributes.SymLink) != 0; }
 }
 
 private struct DirIteratorImpl
@@ -155,7 +113,7 @@ private struct DirIteratorImpl
 			}
 		}
 		while(std.string.cmp(findinfo.filename, ".") == 0 || std.string.cmp(findinfo.filename, "..") == 0)
-//			  || (!(findinfo.attributes & MFFileAttributes.Directory) && !MFString_PatternMatch(_pattern.ptr, findinfo.filename.ptr)))
+			//			  || (!(findinfo.attributes & MFFileAttributes.Directory) && !MFString_PatternMatch(_pattern.ptr, findinfo.filename.ptr)))
 		{
 			if(MFFileSystem_FindNext(_stack.data[$-1].h, findinfo) == false)
 			{
@@ -211,8 +169,8 @@ private struct DirIteratorImpl
 				}
 		}
 	}
-	@property bool empty() { return _stashed.data.empty && _stack.data.empty; }
-	@property DirEntry front() { return _cur; }
+	@property bool empty() nothrow @nogc { return _stashed.data.empty && _stack.data.empty; }
+	@property DirEntry front() nothrow @nogc { return _cur; }
 	void popFront()
 	{
 		switch(_mode)
@@ -264,12 +222,67 @@ private:
 	}
 
 public:
-	@property bool empty()		{ return impl.empty; }
-	@property DirEntry front()	{ return impl.front; }
-	void popFront()				{ impl.popFront(); }
+	@property bool empty() nothrow @nogc		{ return impl.empty; }
+	@property DirEntry front() nothrow @nogc	{ return impl.front; }
+	void popFront()								{ impl.popFront(); }
 }
 
 auto dirEntries(string path, SpanMode mode, bool followSymlink = true)
 {
 	return DirIterator(path, mode, followSymlink);
+}
+
+
+nothrow:
+@nogc:
+
+alias MFFile_SystemPath = fuji.c.MFFileSystem.MFFile_SystemPath;
+const(char)[] MFFile_SystemPath(const(char)[] filename = null)
+{
+	auto s = Stringz!()(filename);
+	return MFFile_SystemPath(s).toDStr;
+}
+
+alias MFFile_HomePath = fuji.c.MFFileSystem.MFFile_HomePath;
+const(char)[] MFFile_HomePath(const(char)[] filename = null)
+{
+	auto s = Stringz!()(filename);
+	return MFFile_HomePath(s).toDStr;
+}
+
+alias MFFileSystem_Load = fuji.c.MFFileSystem.MFFileSystem_Load;
+ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0)
+{
+	size_t size;
+	auto s = Stringz!()(filename);
+	ubyte* file = MFFileSystem_Load(s, &size, extraBytes);
+	return file[0..size];
+}
+
+alias MFFileSystem_Save = fuji.c.MFFileSystem.MFFileSystem_Save;
+size_t MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer)
+{
+	auto s = Stringz!()(filename);
+	return MFFileSystem_Save(s, buffer.ptr, buffer.length);
+}
+
+alias MFFileSystem_GetSize = fuji.c.MFFileSystem.MFFileSystem_GetSize;
+ulong MFFileSystem_GetSize(const(char)[] filename)
+{
+	auto s = Stringz!()(filename);
+	return MFFileSystem_GetSize(s);
+}
+
+alias MFFileSystem_Exists = fuji.c.MFFileSystem.MFFileSystem_Exists;
+bool MFFileSystem_Exists(const(char)[] filename)
+{
+	auto s = Stringz!()(filename);
+	return MFFileSystem_Exists(s);
+}
+
+alias MFFileSystem_FindFirst = fuji.c.MFFileSystem.MFFileSystem_FindFirst;
+MFFind* MFFileSystem_FindFirst(const(char)[] searchPattern, MFFindData *pFindData)
+{
+	auto s = Stringz!()(searchPattern);
+	return MFFileSystem_FindFirst(s, pFindData);
 }

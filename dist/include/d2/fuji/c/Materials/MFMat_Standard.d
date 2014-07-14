@@ -3,6 +3,7 @@ module fuji.c.Materials.MFMat_Standard;
 public import fuji.c.MFMaterial;
 
 nothrow:
+@nogc:
 
 enum MFMatStandardParameters
 {

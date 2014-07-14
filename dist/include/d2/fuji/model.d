@@ -6,20 +6,37 @@ import fuji.resource;
 import fuji.boundingvolume;
 import fuji.matrix;
 import fuji.animation;
+import fuji.string;
 
-import std.string;
+nothrow:
+@nogc:
 
 struct Model
 {
 	MFModel *pModel;
 	alias pModel this;
 
-	this(this) pure nothrow
+nothrow:
+@nogc:
+	this(const(char)[] name)
+	{
+		create(name);
+	}
+
+	void create(const(char)[] name, const(char)[] animation = null)
+	{
+		release();
+		auto n = Stringz!(64)(name);
+		auto a = Stringz!(64)(animation);
+		pModel = MFModel_CreateWithAnimation(n, animation ? a : null);
+	}
+
+	this(this) pure
 	{
 		MFResource_AddRef(cast(fuji.resource.MFResource*)pModel);
 	}
 
-	this(ref Resource resource) pure nothrow
+	this(ref Resource resource) pure
 	{
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Model)
@@ -29,23 +46,12 @@ struct Model
 		}
 	}
 
-	this(const(char)[] name) nothrow
-	{
-		create(name);
-	}
-
-	~this() nothrow
+	~this()
 	{
 		release();
 	}
 
-	void create(const(char)[] name, const(char)[] animation = null) nothrow
-	{
-		release();
-		pModel = MFModel_CreateWithAnimation(name.toStringz(), animation ? animation.toStringz() : null);
-	}
-
-	int release() nothrow
+	int release()
 	{
 		int rc = 0;
 		if(pModel)
@@ -56,38 +62,40 @@ struct Model
 		return rc;
 	}
 
-	@property inout(MFModel)* handle() inout pure nothrow					{ return pModel; }
-	@property ref inout(Resource) resource() inout pure nothrow				{ return *cast(inout(Resource)*)&this; }
+	@property inout(MFModel)* handle() inout pure					{ return pModel; }
+	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }
 
-	@property const(char)[] name() const nothrow							{ return MFModel_GetName(pModel).toDStr; }
+	@property const(char)[] name() const							{ return MFModel_GetName(pModel).toDStr; }
 
-	@property void worldMatrix(ref const(MFMatrix) world) nothrow			{ MFModel_SetWorldMatrix(pModel, world); }
+	@property void worldMatrix(ref const(MFMatrix) world)			{ MFModel_SetWorldMatrix(pModel, world); }
 
-	@property ref const(MFBoundingVolume) boundingVolume() const nothrow	{ return *MFModel_GetBoundingVolume(pModel); }
+	@property ref const(MFBoundingVolume) boundingVolume() const	{ return *MFModel_GetBoundingVolume(pModel); }
 
-	@property inout(MFAnimation)* animation() inout nothrow					{ return MFModel_GetAnimation(pModel); }
+	@property inout(MFAnimation)* animation() inout					{ return MFModel_GetAnimation(pModel); }
 
-	@property inout(Subobjects) subobjects() inout nothrow					{ return inout(Subobjects)(pModel, 0, MFModel_GetNumSubObjects(pModel)); }
-	@property inout(Bones) bones() inout nothrow							{ return inout(Bones)(pModel, 0, MFModel_GetNumBones(pModel)); }
-	@property inout(Tags) tags() inout nothrow								{ return inout(Tags)(pModel, 0, MFModel_GetNumTags(pModel)); }
+	@property inout(Subobjects) subobjects() inout					{ return inout(Subobjects)(pModel, 0, MFModel_GetNumSubObjects(pModel)); }
+	@property inout(Bones) bones() inout							{ return inout(Bones)(pModel, 0, MFModel_GetNumBones(pModel)); }
+	@property inout(Tags) tags() inout								{ return inout(Tags)(pModel, 0, MFModel_GetNumTags(pModel)); }
 
 	struct Subobject
 	{
-		this(MFModel* pModel, size_t index) nothrow
+	nothrow:
+	@nogc:
+		this(MFModel* pModel, size_t index)
 		{
 			this.pModel = pModel;
 			subobject = cast(int)index;
 		}
 
-		bool opCast(T)() const pure nothrow if(is(T == bool))				{ return subobject != -1; }
+		bool opCast(T)() const pure if(is(T == bool))				{ return subobject != -1; }
 
-		@property int index() const pure nothrow							{ return subobject; }
-		@property const(char)[] name() const nothrow						{ return MFModel_GetSubObjectName(pModel, subobject).toDStr; }
+		@property int index() const pure							{ return subobject; }
+		@property const(char)[] name() const						{ return MFModel_GetSubObjectName(pModel, subobject).toDStr; }
 
-		@property bool enabled() const nothrow								{ return MFModel_IsSubobjectEnabed(pModel, subobject); }
-		@property void enabled(bool bEnable) nothrow						{ return MFModel_EnableSubobject(pModel, subobject, bEnable); }
+		@property bool enabled() const								{ return MFModel_IsSubobjectEnabed(pModel, subobject); }
+		@property void enabled(bool bEnable)						{ return MFModel_EnableSubobject(pModel, subobject, bEnable); }
 
-		@property inout(MFMeshChunk)* meshChunk(size_t index) inout nothrow	{ return MFModel_GetMeshChunk(pModel, subobject, cast(int)index); }
+		@property inout(MFMeshChunk)* meshChunk(size_t index) inout	{ return MFModel_GetMeshChunk(pModel, subobject, cast(int)index); }
 
 	private:
 		MFModel* pModel;
@@ -96,18 +104,20 @@ struct Model
 
 	struct Bone
 	{
-		this(MFModel* pModel, size_t index) nothrow
+	nothrow:
+	@nogc:
+		this(MFModel* pModel, size_t index)
 		{
 			this.pModel = pModel;
 			bone = cast(int)index;
 		}
 
-		bool opCast(T)() const pure nothrow if(is(T == bool))				{ return bone != -1; }
+		bool opCast(T)() const pure if(is(T == bool))				{ return bone != -1; }
 
-		@property int index() const pure nothrow							{ return bone; }
-		@property const(char)[] name() const nothrow						{ return MFModel_GetBoneName(pModel, bone).toDStr; }
+		@property int index() const pure							{ return bone; }
+		@property const(char)[] name() const						{ return MFModel_GetBoneName(pModel, bone).toDStr; }
 
-		@property ref const(MFMatrix) origin() const nothrow				{ return MFModel_GetBoneOrigin(pModel, bone); }
+		@property ref const(MFMatrix) origin() const				{ return MFModel_GetBoneOrigin(pModel, bone); }
 
 	private:
 		MFModel* pModel;
@@ -116,18 +126,20 @@ struct Model
 
 	struct Tag
 	{
-		this(MFModel* pModel, size_t index) nothrow
+	nothrow:
+	@nogc:
+		this(MFModel* pModel, size_t index)
 		{
 			this.pModel = pModel;
 			tag = cast(int)index;
 		}
 
-		bool opCast(T)() const pure nothrow if(is(T == bool))				{ return tag != -1; }
+		bool opCast(T)() const pure if(is(T == bool))				{ return tag != -1; }
 
-		@property int index() const pure nothrow							{ return tag; }
-		@property const(char)[] name() const nothrow						{ return MFModel_GetTagName(pModel, tag).toDStr; }
+		@property int index() const pure							{ return tag; }
+		@property const(char)[] name() const						{ return MFModel_GetTagName(pModel, tag).toDStr; }
 
-		@property ref const(MFMatrix) matrix() const nothrow				{ return MFModel_GetTagMatrix(pModel, tag); }
+		@property ref const(MFMatrix) matrix() const				{ return MFModel_GetTagMatrix(pModel, tag); }
 
 	private:
 		MFModel* pModel;

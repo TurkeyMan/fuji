@@ -7,6 +7,7 @@ import fuji.c.MFRenderState;
 import fuji.c.MFBoundingVolume;
 
 nothrow:
+@nogc:
 
 /**
 * @struct MFModel

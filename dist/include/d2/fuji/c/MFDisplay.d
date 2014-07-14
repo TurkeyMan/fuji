@@ -5,6 +5,7 @@ import fuji.c.MFWindow;
 import fuji.c.MFImage;
 
 nothrow:
+@nogc:
 
 struct MFDisplay;
 
