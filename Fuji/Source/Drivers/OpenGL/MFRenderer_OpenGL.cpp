@@ -39,6 +39,7 @@
 int gOpenGLVersion = 0;
 
 #if MF_DISPLAY == MF_DRIVER_X11
+
 	#include "../X11/X11_linux.h"
 	#include <stdio.h>
 
@@ -107,17 +108,28 @@ int gOpenGLVersion = 0;
 
 		return visualInfo;
 	}
+
 #elif MF_DISPLAY == MF_DRIVER_WIN32
+
 	#pragma comment(lib, "Opengl32")
 	#pragma comment(lib, "Glu32")
 
 	extern HINSTANCE apphInstance;
 	HGLRC hRC = NULL; // Permanent Rendering Context
 	HDC hDC = NULL; // Private GDI Device Context
+
+#elif MF_DISPLAY == MF_DRIVER_SDL2
+
+	#include "SDL2/SDL.h"
+
+	SDL_GLContext glContext;
+
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
+
 	extern "C" int MFRendererIPhone_MakeCurrent();
 	extern "C" void MFRendererIPhone_SetBackBuffer();
 	extern "C" int MFRendererIPhone_SwapBuffers();
+
 #endif
 
 static GLuint gDefaultRenderTarget = 0;
@@ -269,6 +281,8 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 		MessageBox(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
+#elif MF_DISPLAY == MF_DRIVER_SDL2
+	glContext = SDL_GL_CreateContext((SDL_Window*)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow));
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
 	MFRendererIPhone_MakeCurrent();
 #elif MF_DISPLAY == MF_DRIVER_NACL
@@ -389,6 +403,8 @@ void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 		ReleaseDC(hWnd, hDC);
 		hDC = NULL;
 	}
+#elif MF_DISPLAY == MF_DRIVER_SDL2
+	SDL_GL_DeleteContext(glContext);
 #endif
 }
 
@@ -514,6 +530,10 @@ void MFRenderer_EndFramePlatformSpecific()
 	glXSwapBuffers(xdisplay, glXWindow);
 #elif MF_DISPLAY == MF_DRIVER_WIN32
 	SwapBuffers(hDC);
+#elif MF_DISPLAY == MF_DRIVER_SDL2
+	MFDisplay *pDisplay = MFDisplay_GetCurrent();
+	if(pDisplay)
+		SDL_GL_SwapWindow((SDL_Window*)MFWindow_GetSystemWindowHandle(pDisplay->settings.pWindow));
 #elif MF_DISPLAY == MF_DRIVER_IPHONE
 	MFRendererIPhone_SwapBuffers();
 #endif

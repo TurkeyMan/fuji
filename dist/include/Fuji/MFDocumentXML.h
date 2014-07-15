@@ -28,20 +28,20 @@ public:
 	inline MFXMLAttribute *Next(const char *pName = NULL);
 };
 
-MFDocumentXML *MFParseXML_Parse(char *pDocument, bool bCopyBuffer = true);
-MFDocumentXML *MFParseXML_ParseFile(const char *pFilename);
-void MFParseXML_DestroyDocument(MFDocumentXML *pDocument);
+MF_API MFDocumentXML *MFParseXML_Parse(char *pDocument, bool bCopyBuffer = true);
+MF_API MFDocumentXML *MFParseXML_ParseFile(const char *pFilename);
+MF_API void MFParseXML_DestroyDocument(MFDocumentXML *pDocument);
 
-MFXMLNode *MFParseXML_RootNode(MFDocumentXML *pDocument, const char *pName = NULL);
-MFXMLNode *MFParseXML_FirstChild(MFXMLNode *pNode, const char *pName = NULL);
-MFXMLNode *MFParseXML_NextSibling(MFXMLNode *pNode, const char *pName = NULL);
-const char *MFParseXML_NodeName(MFXMLNode *pNode);
-const char *MFParseXML_NodeValue(MFXMLNode *pNode);
+MF_API MFXMLNode *MFParseXML_RootNode(MFDocumentXML *pDocument, const char *pName = NULL);
+MF_API MFXMLNode *MFParseXML_FirstChild(MFXMLNode *pNode, const char *pName = NULL);
+MF_API MFXMLNode *MFParseXML_NextSibling(MFXMLNode *pNode, const char *pName = NULL);
+MF_API const char *MFParseXML_NodeName(MFXMLNode *pNode);
+MF_API const char *MFParseXML_NodeValue(MFXMLNode *pNode);
 
-MFXMLAttribute *MFParseXML_FirstAttribute(MFXMLNode *pNode, const char *pName = NULL);
-MFXMLAttribute *MFParseXML_NextAttribute(MFXMLAttribute *pNode, const char *pName = NULL);
-const char *MFParseXML_AttributeName(MFXMLAttribute *pNode);
-const char *MFParseXML_AttributeValue(MFXMLAttribute *pNode);
+MF_API MFXMLAttribute *MFParseXML_FirstAttribute(MFXMLNode *pNode, const char *pName = NULL);
+MF_API MFXMLAttribute *MFParseXML_NextAttribute(MFXMLAttribute *pNode, const char *pName = NULL);
+MF_API const char *MFParseXML_AttributeName(MFXMLAttribute *pNode);
+MF_API const char *MFParseXML_AttributeValue(MFXMLAttribute *pNode);
 
 
 // C++ interface (for convenience)

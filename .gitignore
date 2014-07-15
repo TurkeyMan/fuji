@@ -1,4 +1,11 @@
-/fuji.kdev4
+
+*.kdev4
+kdev4/
+
+*.cproj
+*.dproj
+
+
 .clang
 /dist/lib
 */Build
@@ -33,3 +40,4 @@ Makefile
 *.tags
 /Fuji/Doc/html
 *.chw
+

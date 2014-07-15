@@ -68,7 +68,7 @@ void Game_Init()
 	//bool set = false;
 
 	size_t size = BUFFER_SIZE;
-	
+
 	MFCompute_SetKernelArgBuffer(pKernel, 0, pBufferA);
 	MFCompute_SetKernelArgBuffer(pKernel, 1, pBufferB);
 	MFCompute_SetKernelArgBuffer(pKernel, 2, pBufferR);
@@ -84,9 +84,9 @@ void Game_Deinit()
 	MFCALLSTACK;
 
 	MFCompute_DestroyKernel(pKernel); pKernel = NULL;
-	
+
 	MFCompute_DestroyProgram(pProgram); pProgram = NULL;
-	
+
 	MFCompute_DestroyBuffer(pBufferR); pBufferR = NULL;
 	MFCompute_DestroyBuffer(pBufferB); pBufferB = NULL;
 	MFCompute_DestroyBuffer(pBufferA); pBufferA = NULL;
@@ -113,12 +113,18 @@ int GameMain(MFInitParams *pInitParams)
 {
 	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
+	Fuji_CreateEngineInstance();
+
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
 	MFSystem_RegisterSystemCallback(MFCB_Deinit, Game_Deinit);
 
-	return MFMain(pInitParams);
+	int r = MFMain(pInitParams);
+
+	Fuji_DestroyEngineInstance();
+
+	return r;
 }
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -130,7 +136,6 @@ int GameMain(MFInitParams *pInitParams)
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.hInstance = hInstance;
 	initParams.pCommandLine = lpCmdLine;
 
@@ -145,7 +150,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 
@@ -162,7 +166,6 @@ int main(int argc, const char *argv[])
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 

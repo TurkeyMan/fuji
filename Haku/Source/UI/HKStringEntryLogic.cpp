@@ -174,7 +174,7 @@ void HKStringEntryLogic::Update()
 		// handle repeat keys
 		if(holdKey && MFInput_Read(holdKey, IDD_Keyboard))
 		{
-			repeatDelay -= MFTimeDelta();
+			repeatDelay -= MFSystem_GetTimeDelta();
 			if(repeatDelay <= 0.f)
 			{
 				keyPressed = holdKey;

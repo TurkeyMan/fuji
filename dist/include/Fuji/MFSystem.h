@@ -200,6 +200,24 @@ struct MFInitParams
 	} display;					/**< Display settings. */
 
 	bool hideSystemInfo;		/**< Hide the frame rate and system logo() */
+
+
+	// initialise with some defaults
+	MFInitParams()
+	{
+		pAppTitle = "Fuji Window";
+		hInstance = NULL;
+		hWnd = NULL;
+		pCommandLine = NULL;
+		argc = 0;
+		argv = NULL;
+		display.displayRect.x = 0;
+		display.displayRect.y = 0;
+		display.displayRect.width = 1280;
+		display.displayRect.height = 720;
+		display.bFullscreen = false;
+		hideSystemInfo = false;
+	}
 };
 
 /**
@@ -323,14 +341,6 @@ MF_API uint64 MFSystem_GetRTCFrequency();
  * @return The current time delta.
  * @see MFSystem_GetFPS()
  */
-float MFTimeDelta();
-
-/**
- * Gets the current time delta.
- * Gets the current time delta.
- * @return The current time delta.
- * @see MFSystem_GetFPS()
- */
 MF_API float MFSystem_GetTimeDelta();
 
 /**
@@ -340,14 +350,6 @@ MF_API float MFSystem_GetTimeDelta();
  * @see MFTimeDelta()
  */
 MF_API float MFSystem_GetFPS();
-
-/**
- * Gets the current frame.
- * Gets the current frame count.
- * @return The current frame count.
- * @see MFSystem_GetFPS()
- */
-uint32 MFFrameCounter();
 
 /**
  * Gets the current frame.

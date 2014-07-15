@@ -32,7 +32,7 @@ struct MFDocumentXML
 	xml_document<> doc;
 };
 
-MFDocumentXML *MFParseXML_ParseFile(const char *pFilename)
+MF_API MFDocumentXML *MFParseXML_ParseFile(const char *pFilename)
 {
 	char *pBuffer = MFFileSystem_Load(pFilename, NULL, 1);
 	if(!pBuffer)
@@ -44,7 +44,7 @@ MFDocumentXML *MFParseXML_ParseFile(const char *pFilename)
 	return pDoc;
 }
 
-MFDocumentXML *MFParseXML_Parse(char *pDocument, bool bCopyBuffer)
+MF_API MFDocumentXML *MFParseXML_Parse(char *pDocument, bool bCopyBuffer)
 {
 	MFDocumentXML *pDoc = (MFDocumentXML*)MFHeap_Alloc(sizeof(MFDocumentXML));
 
@@ -67,7 +67,7 @@ MFDocumentXML *MFParseXML_Parse(char *pDocument, bool bCopyBuffer)
 	return pDoc;
 }
 
-void MFParseXML_DestroyDocument(MFDocumentXML *pDocument)
+MF_API void MFParseXML_DestroyDocument(MFDocumentXML *pDocument)
 {
 	// delete buffer
 	if(pDocument)
@@ -82,55 +82,55 @@ void MFParseXML_DestroyDocument(MFDocumentXML *pDocument)
 	}
 }
 
-MFXMLNode *MFParseXML_RootNode(MFDocumentXML *pDocument, const char *pName)
+MF_API MFXMLNode *MFParseXML_RootNode(MFDocumentXML *pDocument, const char *pName)
 {
 	xml_node<> *pNode = pDocument->doc.first_node(pName, 0, false);
 	return (MFXMLNode*)pNode;
 }
 
-MFXMLNode *MFParseXML_FirstChild(MFXMLNode *_pNode, const char *pName)
+MF_API MFXMLNode *MFParseXML_FirstChild(MFXMLNode *_pNode, const char *pName)
 {
 	xml_node<> *pNode = (xml_node<>*)_pNode;
 	return (MFXMLNode*)pNode->first_node(pName, 0, false);
 }
 
-MFXMLNode *MFParseXML_NextSibling(MFXMLNode *_pNode, const char *pName)
+MF_API MFXMLNode *MFParseXML_NextSibling(MFXMLNode *_pNode, const char *pName)
 {
 	xml_node<> *pNode = (xml_node<>*)_pNode;
 	return (MFXMLNode*)pNode->next_sibling(pName, 0, false);
 }
 
-const char *MFParseXML_NodeName(MFXMLNode *_pNode)
+MF_API const char *MFParseXML_NodeName(MFXMLNode *_pNode)
 {
 	xml_node<> *pNode = (xml_node<>*)_pNode;
 	return pNode->name();
 }
 
-const char *MFParseXML_NodeValue(MFXMLNode *_pNode)
+MF_API const char *MFParseXML_NodeValue(MFXMLNode *_pNode)
 {
 	xml_node<> *pNode = (xml_node<>*)_pNode;
 	return pNode->value();
 }
 
-MFXMLAttribute *MFParseXML_FirstAttribute(MFXMLNode *_pNode, const char *pName)
+MF_API MFXMLAttribute *MFParseXML_FirstAttribute(MFXMLNode *_pNode, const char *pName)
 {
 	xml_node<> *pNode = (xml_node<>*)_pNode;
 	return (MFXMLAttribute*)pNode->first_attribute(pName, 0, false);
 }
 
-MFXMLAttribute *MFParseXML_NextAttribute(MFXMLAttribute *_pAttribute, const char *pName)
+MF_API MFXMLAttribute *MFParseXML_NextAttribute(MFXMLAttribute *_pAttribute, const char *pName)
 {
 	xml_attribute<> *pAttribute = (xml_attribute<>*)_pAttribute;
 	return (MFXMLAttribute*)pAttribute->next_attribute(pName, 0, false);
 }
 
-const char *MFParseXML_AttributeName(MFXMLAttribute *_pAttribute)
+MF_API const char *MFParseXML_AttributeName(MFXMLAttribute *_pAttribute)
 {
 	xml_attribute<> *pAttribute = (xml_attribute<>*)_pAttribute;
 	return pAttribute->name();
 }
 
-const char *MFParseXML_AttributeValue(MFXMLAttribute *_pAttribute)
+MF_API const char *MFParseXML_AttributeValue(MFXMLAttribute *_pAttribute)
 {
 	xml_attribute<> *pAttribute = (xml_attribute<>*)_pAttribute;
 	return pAttribute->value();

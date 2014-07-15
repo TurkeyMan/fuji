@@ -257,7 +257,7 @@ void HKWidgetRendererTextbox::Render(const HKWidget &widget, const MFMatrix &wor
 	if(bHasFocus)
 	{
 		// blink cursor
-		tb.blinkTime -= MFTimeDelta();
+		tb.blinkTime -= MFSystem_GetTimeDelta();
 		if(tb.blinkTime < -0.4f) tb.blinkTime += 0.8f;
 		bool bCursor = tb.blinkTime > 0.0f;
 

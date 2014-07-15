@@ -158,7 +158,7 @@ void Game_Update()
 		{
 			if(pModel)
 			{
-				MFModel_Destroy(pModel);
+				MFModel_Release(pModel);
 				pModel = NULL;
 			}
 
@@ -198,9 +198,9 @@ void Game_Update()
 			{
 				float start, end;
 				MFAnimation_GetFrameRange(pAnim, &start, &end);
-	
+
 				static float time = 0.f;
-				time += MFSystem_TimeDelta();// * 500;
+				time += MFSystem_GetTimeDelta();// * 500;
 				while(time >= end)
 					time -= end;
 				MFAnimation_SetFrame(pAnim, time);
@@ -234,7 +234,7 @@ void Game_Draw()
 		{
 			// set projection
 			MFView_ConfigureProjection(MFDEGREES(60.f), 0.1f, 10000.f);
-			MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
+			MFView_SetAspectRatio(MFDisplay_GetAspectRatio());
 			MFView_SetProjection();
 
 			// render the mesh
@@ -251,7 +251,7 @@ void Game_Draw()
 void Game_Deinit()
 {
 	if(pModel)
-		MFModel_Destroy(pModel);
+		MFModel_Release(pModel);
 
 	MFStateBlock_Destroy(pDefaultStates);
 
@@ -263,6 +263,8 @@ int GameMain(MFInitParams *pInitParams)
 {
 	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
+	Fuji_CreateEngineInstance();
+
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
@@ -270,7 +272,11 @@ int GameMain(MFInitParams *pInitParams)
 
 	pInitFujiFS = MFSystem_RegisterSystemCallback(MFCB_FileSystemInit, Game_InitFilesystem);
 
-	return MFMain(pInitParams);
+	int r = MFMain(pInitParams);
+
+	Fuji_DestroyEngineInstance();
+
+	return r;
 }
 
 #if defined(MF_WINDOWS)
@@ -279,7 +285,6 @@ int GameMain(MFInitParams *pInitParams)
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.hInstance = hInstance;
 	initParams.pCommandLine = lpCmdLine;
 
@@ -292,7 +297,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 
@@ -307,7 +311,6 @@ int main(int argc, const char *argv[])
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 

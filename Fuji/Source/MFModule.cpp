@@ -35,6 +35,10 @@
 #include "DebugMenu.h"
 #include "Timer.h"
 
+//HACK:
+MFInitStatus Timer_InitModule(int moduleId, bool bPerformInitialisation);
+void Timer_DeinitModule();
+
 
 MFInitStatus MFUtil_InitModule(int moduleId, bool bPerformInitialisation);
 

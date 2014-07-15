@@ -18,6 +18,7 @@ void BuildVertexBuffers();
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
 MFRenderer *pRenderer = NULL;
+MFStateBlock *pDefaultStates = NULL;
 
 MFVertexDeclaration *pVertexDecl = NULL;
 
@@ -60,6 +61,9 @@ void Game_Init()
 	pRenderer = MFRenderer_Create(layers, 2, NULL, NULL);
 	MFRenderer_SetCurrent(pRenderer);
 
+	pDefaultStates = MFStateBlock_CreateDefault();
+	MFRenderer_SetGlobalStateBlock(pRenderer, pDefaultStates);
+
 	// configure prism layer
 	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
 	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.0f, 1.f));
@@ -91,7 +95,7 @@ void Game_Init()
 void Game_Update()
 {
 	static float rotation = 0.0f;
-	rotation += MFSystem_TimeDelta();
+	rotation += MFSystem_GetTimeDelta();
 
 	// spin the prism
 	MFMatrix world;
@@ -115,7 +119,7 @@ void Game_Draw()
 	MFRenderLayer_AddVertices(pLayer, pPrismMeshStateBlock, 0, 3*12, MFPT_TriangleList, MFMaterial_GetStockMaterial(MFMat_White), pPrismStateBlock, NULL, MFView_GetViewState());
 
 	// render the box
-	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
+	MFView_SetAspectRatio(MFDisplay_GetAspectRatio());
 	MFView_SetProjection();
 
 	pLayer = MFRenderer_GetLayer(pRenderer, 1);
@@ -247,6 +251,8 @@ int GameMain(MFInitParams *pInitParams)
 {
 	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
+	Fuji_CreateEngineInstance();
+
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
@@ -254,7 +260,11 @@ int GameMain(MFInitParams *pInitParams)
 
 	pInitFujiFS = MFSystem_RegisterSystemCallback(MFCB_FileSystemInit, Game_InitFilesystem);
 
-	return MFMain(pInitParams);
+	int r = MFMain(pInitParams);
+
+	Fuji_DestroyEngineInstance();
+
+	return r;
 }
 
 #if defined(MF_WINDOWS)
@@ -263,7 +273,6 @@ int GameMain(MFInitParams *pInitParams)
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.hInstance = hInstance;
 	initParams.pCommandLine = lpCmdLine;
 
@@ -276,7 +285,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 
@@ -291,7 +299,6 @@ int main(int argc, const char *argv[])
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 

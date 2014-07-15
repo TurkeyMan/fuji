@@ -82,7 +82,9 @@ configuration { "not StaticLib", "linux" }
 	links { "mad", "ogg", "vorbis", "vorbisfile" }
 
 	-- driver libs
-	links { "Xxf86vm", "X11", "GL", "GLU" }
+	links { "Xxf86vm", "X11" }
+--	links { "SDL2", "SDL2_gfx" }
+	links { "GL", "GLU" }
 	links { "openal" }
 
 	-- asset libs

@@ -11,14 +11,25 @@
 
 #include <stdio.h>
 
+#if MF_DISPLAY == MF_DRIVER_SDL2 || MF_INPUT == MF_DRIVER_SDL2 || MF_SOUND == MF_DRIVER_SDL2
+	#include <SDL2/SDL.h>
+#endif
+
 #if !defined(_FUJI_UTIL)
 void MFSystem_InitModulePlatformSpecific()
 {
 	gpEngineInstance->currentPlatform = FP_Linux;
+
+#if MF_DISPLAY == MF_DRIVER_SDL2 || MF_INPUT == MF_DRIVER_SDL2 || MF_SOUND == MF_DRIVER_SDL2
+	SDL_Init(0);
+#endif
 }
 
 void MFSystem_DeinitModulePlatformSpecific()
 {
+#if MF_DISPLAY == MF_DRIVER_SDL2 || MF_INPUT == MF_DRIVER_SDL2 || MF_SOUND == MF_DRIVER_SDL2
+	SDL_Quit();
+#endif
 }
 
 void MFSystem_HandleEventsPlatformSpecific()

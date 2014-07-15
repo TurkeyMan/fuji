@@ -113,6 +113,7 @@
 #define MF_DRIVER_XB1			41
 #define MF_DRIVER_PS4			42
 #define MF_DRIVER_WIIU			43
+#define MF_DRIVER_SDL2			44
 
 
 // we need a list of all available renderer drivers

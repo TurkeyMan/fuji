@@ -16,6 +16,7 @@
 MFSystemCallbackFunction pInitFujiFS = NULL;
 
 MFRenderer *pRenderer = NULL;
+MFStateBlock *pDefaultStates = NULL;
 
 HKUserInterface *pUI;
 
@@ -48,6 +49,9 @@ void Game_Init()
 	pRenderer = MFRenderer_Create(layers, 1, NULL, NULL);
 	MFRenderer_SetCurrent(pRenderer);
 
+	pDefaultStates = MFStateBlock_CreateDefault();
+	MFRenderer_SetGlobalStateBlock(pRenderer, pDefaultStates);
+
 	MFRenderLayer *pLayer = MFRenderer_GetLayer(pRenderer, 0);
 	MFRenderLayer_SetClear(pLayer, MFRCF_All, MakeVector(0.f, 0.f, 0.2f, 1.f));
 
@@ -77,7 +81,7 @@ void Game_Update()
 void Game_Draw()
 {
 	// Set identity camera (no camera)
-	MFView_SetAspectRatio(MFDisplay_GetNativeAspectRatio());
+	MFView_SetAspectRatio(MFDisplay_GetAspectRatio());
 	MFView_SetProjection();
 
 	MFMaterial_SetMaterial(MFMaterial_GetStockMaterial(MFMat_White));
@@ -90,7 +94,7 @@ void Game_Draw()
 
 	// increment rotation
 	static float rotation = 0.0f;
-	rotation += MFSystem_TimeDelta();
+	rotation += MFSystem_GetTimeDelta();
 
 	// rotate the box
 	world.RotateYPR(rotation, rotation * 2.0f, rotation * 0.5f);
@@ -171,6 +175,8 @@ int GameMain(MFInitParams *pInitParams)
 {
 	MFRand_Seed((uint32)(MFSystem_ReadRTC() & 0xFFFFFFFF));
 
+	Fuji_CreateEngineInstance();
+
 	MFSystem_RegisterSystemCallback(MFCB_InitDone, Game_Init);
 	MFSystem_RegisterSystemCallback(MFCB_Update, Game_Update);
 	MFSystem_RegisterSystemCallback(MFCB_Draw, Game_Draw);
@@ -178,7 +184,11 @@ int GameMain(MFInitParams *pInitParams)
 
 	pInitFujiFS = MFSystem_RegisterSystemCallback(MFCB_FileSystemInit, Game_InitFilesystem);
 
-	return MFMain(pInitParams);
+	int r = MFMain(pInitParams);
+
+	Fuji_DestroyEngineInstance();
+
+	return r;
 }
 
 #if defined(MF_WINDOWS)
@@ -187,7 +197,6 @@ int GameMain(MFInitParams *pInitParams)
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int nCmdShow)
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.hInstance = hInstance;
 	initParams.pCommandLine = lpCmdLine;
 
@@ -200,7 +209,6 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 
@@ -215,7 +223,6 @@ int main(int argc, const char *argv[])
 int main(int argc, const char *argv[])
 {
 	MFInitParams initParams;
-	MFZeroMemory(&initParams, sizeof(MFInitParams));
 	initParams.argc = argc;
 	initParams.argv = argv;
 
