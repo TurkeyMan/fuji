@@ -95,7 +95,7 @@ void Game_Init()
 void Game_Update()
 {
 	static float rotation = 0.0f;
-	rotation += MFSystem_GetTimeDelta();
+	rotation += MFTimeDelta();
 
 	// spin the prism
 	MFMatrix world;

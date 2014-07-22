@@ -73,7 +73,7 @@ void Game_Update()
 	world.SetTranslation(MakeVector(0, -5, 50));
 
 	static float rotation = 0.0f;
-	rotation += MFSystem_GetTimeDelta();
+	rotation += MFTimeDelta();
 	world.RotateY(rotation);
 
 	// set world matrix to the model
@@ -87,7 +87,7 @@ void Game_Update()
 		MFAnimation_GetFrameRange(pAnim, &start, &end);
 
 		static float time = 0.f;
-		time += MFSystem_GetTimeDelta();
+		time += MFTimeDelta();
 		while(time >= end)
 			time -= end;
 		MFAnimation_SetFrame(pAnim, time);

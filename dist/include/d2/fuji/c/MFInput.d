@@ -712,7 +712,9 @@ enum MFKey
 	Kana,			// japanese keyboard
 	Kanji,			// japanese keyboard
 	NoConvert,		// japanese keyboard
-	Yen				// japanese keyboard
+	Yen,			// japanese keyboard
+
+	Max
 }
 
 /**
@@ -765,8 +767,13 @@ enum MFTouchPanelInput
 	Shake
 }
 
-enum Touch_XPos(alias contact) = MFTouchPanelInput.Touch_Contact0_XPos + (MFTouchPanelInput.Touch_Contact1_XPos - MFTouchPanelInput.Touch_Contact0_XPos)*contact;
-enum Touch_YPos(alias contact) = MFTouchPanelInput.Touch_Contact0_YPos + (MFTouchPanelInput.Touch_Contact1_YPos - MFTouchPanelInput.Touch_Contact0_YPos)*contact;
-enum Touch_XDelta(alias contact) = MFTouchPanelInput.Touch_Contact0_XDelta + (MFTouchPanelInput.Touch_Contact1_XDelta - MFTouchPanelInput.Touch_Contact0_XDelta)*contact;
-enum Touch_YDelta(alias contact) = MFTouchPanelInput.Touch_Contact0_YDelta + (MFTouchPanelInput.Touch_Contact1_YDelta - MFTouchPanelInput.Touch_Contact0_YDelta)*contact;
+enum MFTouch_XPos(alias contact) = MFTouchPanelInput.Contact0_XPos + (MFTouchPanelInput.Contact1_XPos - MFTouchPanelInput.Contact0_XPos)*contact;
+enum MFTouch_YPos(alias contact) = MFTouchPanelInput.Contact0_YPos + (MFTouchPanelInput.Contact1_YPos - MFTouchPanelInput.Contact0_YPos)*contact;
+enum MFTouch_XDelta(alias contact) = MFTouchPanelInput.Contact0_XDelta + (MFTouchPanelInput.Contact1_XDelta - MFTouchPanelInput.Contact0_XDelta)*contact;
+enum MFTouch_YDelta(alias contact) = MFTouchPanelInput.Contact0_YDelta + (MFTouchPanelInput.Contact1_YDelta - MFTouchPanelInput.Contact0_YDelta)*contact;
+
+MFTouchPanelInput MFTouch_XPos(int contact) { return cast(MFTouchPanelInput)(MFTouchPanelInput.Contact0_XPos + (MFTouchPanelInput.Contact1_XPos - MFTouchPanelInput.Contact0_XPos)*contact); }
+MFTouchPanelInput MFTouch_YPos(int contact) { return cast(MFTouchPanelInput)(MFTouchPanelInput.Contact0_YPos + (MFTouchPanelInput.Contact1_YPos - MFTouchPanelInput.Contact0_YPos)*contact); }
+MFTouchPanelInput MFTouch_XDelta(int contact) { return cast(MFTouchPanelInput)(MFTouchPanelInput.Contact0_XDelta + (MFTouchPanelInput.Contact1_XDelta - MFTouchPanelInput.Contact0_XDelta)*contact); }
+MFTouchPanelInput MFTouch_YDelta(int contact) { return cast(MFTouchPanelInput)(MFTouchPanelInput.Contact0_YDelta + (MFTouchPanelInput.Contact1_YDelta - MFTouchPanelInput.Contact0_YDelta)*contact); }
 

@@ -26,7 +26,7 @@ struct MFBoundingVolume
 bool MFBoundingVolume_Test(ref const(MFBoundingVolume) v1, ref const(MFBoundingVolume) v2)
 {
 	MFVector diff = v2.boundingSphere - v1.boundingSphere;
-	if(diff.magSq3() >= v1.boundingSphere.w*v1.boundingSphere.w + v2.boundingSphere.w*v2.boundingSphere.w)
+	if(diff.lengthSq!3() >= v1.boundingSphere.w*v1.boundingSphere.w + v2.boundingSphere.w*v2.boundingSphere.w)
 		return false;
 
 	if(v1.max.x > v2.min.x && v1.min.x < v2.max.x &&

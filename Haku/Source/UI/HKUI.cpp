@@ -274,14 +274,14 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager
 void HKUserInterface::ResizeCallback()
 {
 	HKUserInterface &ui = HKUserInterface::Get();
-	if(!&ui)
-		return;
+	if(&ui)
+	{
+		MFRect rect;
+		MFDisplay_GetDisplayRect(&rect);
 
-	MFRect rect;
-	MFDisplay_GetDisplayRect(&rect);
-
-	ui.pRoot->SetPosition(MakeVector(rect.x, rect.y));
-	ui.pRoot->SetSize(MakeVector(rect.width, rect.height));
+		ui.pRoot->SetPosition(MakeVector(rect.x, rect.y));
+		ui.pRoot->SetSize(MakeVector(rect.width, rect.height));
+	}
 
 	if(pChainResizeCallback)
 		pChainResizeCallback();

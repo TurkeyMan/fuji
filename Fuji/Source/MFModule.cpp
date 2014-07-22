@@ -45,6 +45,9 @@ MFInitStatus MFUtil_InitModule(int moduleId, bool bPerformInitialisation);
 MFInitStatus MFString_InitModule(int moduleId, bool bPerformInitialisation);
 void MFString_DeinitModule();
 
+MFInitStatus Timer_InitModule(int moduleId, bool bPerformInitialisation);
+void Timer_DeinitModule();
+
 uint64 MFFileSystem_RegisterFilesystemModules(int filesystemModule);
 
 

@@ -8,8 +8,10 @@
 
 #if defined(MF_WINDOWS)
 	// support the windows clip board
+	#include "Fuji/MFWindow.h"
+	#include "Fuji/MFDisplay.h"
+
 	#include <Windows.h>
-	extern HWND apphWnd;
 #endif
 
 float HKStringEntryLogic::gRepeatDelay = 0.3f;
@@ -79,7 +81,9 @@ void HKStringEntryLogic::Update()
 #if defined(MF_WINDOWS)
 	if(ctrl && MFInput_WasPressed(Key_C, IDD_Keyboard) && selectionStart != selectionEnd)
 	{
-		BOOL opened = OpenClipboard(apphWnd);
+		MFDisplay *pDisplay = MFDisplay_GetCurrent();
+		HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(MFDisplay_GetDisplaySettings(pDisplay)->pWindow);
+		BOOL opened = OpenClipboard(hWnd);
 
 		if(opened)
 		{
@@ -103,7 +107,9 @@ void HKStringEntryLogic::Update()
 	}
 	else if(ctrl && MFInput_WasPressed(Key_X, IDD_Keyboard) && selectionStart != selectionEnd)
 	{
-		BOOL opened = OpenClipboard(apphWnd);
+		MFDisplay *pDisplay = MFDisplay_GetCurrent();
+		HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(MFDisplay_GetDisplaySettings(pDisplay)->pWindow);
+		BOOL opened = OpenClipboard(hWnd);
 
 		if(opened)
 		{
@@ -129,7 +135,9 @@ void HKStringEntryLogic::Update()
 	}
 	else if(ctrl && MFInput_WasPressed(Key_V, IDD_Keyboard))
 	{
-		BOOL opened = OpenClipboard(apphWnd);
+		MFDisplay *pDisplay = MFDisplay_GetCurrent();
+		HWND hWnd = (HWND)MFWindow_GetSystemWindowHandle(MFDisplay_GetDisplaySettings(pDisplay)->pWindow);
+		BOOL opened = OpenClipboard(hWnd);
 
 		if(opened)
 		{

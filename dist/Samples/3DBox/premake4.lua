@@ -13,3 +13,6 @@ project "3DBox"
 	links { "Fuji" }
 
 	dofile "../../Project/fujiconfig.lua"
+
+	configuration { "windows" }
+		links { "FujiMiddleware.lib" }

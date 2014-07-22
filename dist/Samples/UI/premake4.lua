@@ -14,3 +14,6 @@ project "UI"
 
 	dofile "../../Project/fujiconfig.lua"
 	dofile "../../Project/hakuconfig.lua"
+
+	configuration { "windows" }
+		links { "FujiMiddleware.lib" }

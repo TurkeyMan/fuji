@@ -77,3 +77,18 @@ void MFFixUp(ref void* pPointer, void* pBase, int fix)
 		pPointer = cast(void*)(cast(ubyte*)pPointer + offset);
 	}
 }
+
+T MFMin(T)(T a, T b)
+{
+	return a < b ? a : b;
+}
+
+T MFMax(T)(T a, T b)
+{
+	return a > b ? a : b;
+}
+
+T MFClamp(T)(T x, T y, T z)
+{
+	return MFMax(x, MFMin(y, z));
+}

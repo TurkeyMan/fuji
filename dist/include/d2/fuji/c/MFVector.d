@@ -49,16 +49,40 @@ struct MFVector
 
 nothrow:
 @nogc:
-	bool opEquals(const MFVector v) const pure					{ return x == v.x && y == v.y && z == v.z && w == v.w; }
+	this(float f = 0) pure
+	{
+		this.x = f;
+		this.y = f;
+		this.z = f;
+		this.w = f;
+	}
+
+	this(float x, float y, float z = 0, float w = 0) pure
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+	}
+
+	this(const(MFVector) xyz, float w) pure
+	{
+		x = xyz.x;
+		y = xyz.y;
+		z = xyz.z;
+		this.w = w;
+	}
+
+	bool opEquals(const(MFVector) v) const pure					{ return x == v.x && y == v.y && z == v.z && w == v.w; }
 
 	MFVector opUnary(string op)() const pure					if(op == "+") { return *this; /* this is a noop */ }
 	MFVector opUnary(string op)() const pure					if(op == "-") { return MFVector(-x, -y, -z, -w); }
 
-	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "+") { return MFVector(x + v.x, y + v.y, z + v.z, w + v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "-") { return MFVector(x - v.x, y - v.y, z - v.z, w - v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "*") { return MFVector(x * v.x, y * v.y, z * v.z, w * v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "/") { return MFVector(x / v.x, y / v.y, z / v.z, w / v.w); }
-	MFVector opBinary(string op)(const MFVector v) const pure	if(op == "%") { return MFVector(x % v.x, y % v.y, z % v.z, w % v.w); }
+	MFVector opBinary(string op)(const(MFVector) v) const pure	if(op == "+") { return MFVector(x + v.x, y + v.y, z + v.z, w + v.w); }
+	MFVector opBinary(string op)(const(MFVector) v) const pure	if(op == "-") { return MFVector(x - v.x, y - v.y, z - v.z, w - v.w); }
+	MFVector opBinary(string op)(const(MFVector) v) const pure	if(op == "*") { return MFVector(x * v.x, y * v.y, z * v.z, w * v.w); }
+	MFVector opBinary(string op)(const(MFVector) v) const pure	if(op == "/") { return MFVector(x / v.x, y / v.y, z / v.z, w / v.w); }
+	MFVector opBinary(string op)(const(MFVector) v) const pure	if(op == "%") { return MFVector(x % v.x, y % v.y, z % v.z, w % v.w); }
 	MFVector opBinary(string op)(float f) const pure			if(op == "*") { return MFVector(x * f, y * f, z * f, w * f); }
 	MFVector opBinary(string op)(float f) const pure			if(op == "/") { return MFVector(x / f, y / f, z / f, w / f); }
 	MFVector opBinary(string op)(float f) const pure			if(op == "%") { return MFVector(x % f, y % f, z % f, w % f); }
@@ -67,11 +91,11 @@ nothrow:
 	MFVector opBinaryRight(string op)(float f) const pure		if(op == "/") { return MFVector(f / x, f / y, f / z, f / w); }
 	MFVector opBinaryRight(string op)(float f) const pure		if(op == "%") { return MFVector(f % x, f % y, f % z, f % w); }
 
-	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "+") { return this = this + v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "-") { return this = this - v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "*") { return this = this * v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "/") { return this = this / v; }
-	MFVector opOpAssign(string op)(const MFVector v) pure		if(op == "%") { return this = this % v; }
+	MFVector opOpAssign(string op)(const(MFVector) v) pure		if(op == "+") { return this = this + v; }
+	MFVector opOpAssign(string op)(const(MFVector) v) pure		if(op == "-") { return this = this - v; }
+	MFVector opOpAssign(string op)(const(MFVector) v) pure		if(op == "*") { return this = this * v; }
+	MFVector opOpAssign(string op)(const(MFVector) v) pure		if(op == "/") { return this = this / v; }
+	MFVector opOpAssign(string op)(const(MFVector) v) pure		if(op == "%") { return this = this % v; }
 	MFVector opOpAssign(string op)(float f) pure				if(op == "*") { return this = this * f; }
 	MFVector opOpAssign(string op)(float f) pure				if(op == "/") { return this = this / f; }
 	MFVector opOpAssign(string op)(float f) pure				if(op == "%") { return this = this % f; }
@@ -81,14 +105,6 @@ nothrow:
 	{
 		return MFVector(getComponent!(s[0], this), getComponent!(s[1], this), getComponent!(s[2], this), getComponent!(s[3], this));
 	}
-
-	float magSq2() const pure	{ return x * x + y * y; }
-	float magSq3() const pure	{ return x * x + y * y + z * z; }
-	float magSq4() const pure	{ return x * x + y * y + z * z + w * w; }
-
-	float mag2() const pure		{ return std.math.sqrt(x * x + y * y); }
-	float mag3() const pure		{ return std.math.sqrt(x * x + y * y + z * z); }
-	float mag4() const pure		{ return std.math.sqrt(x * x + y * y + z * z + w * w); }
 
 	static immutable MFVector zero = MFVector(0,0,0,0);
 	static immutable MFVector one = MFVector(1,1,1,1);
@@ -101,6 +117,8 @@ nothrow:
 	static immutable MFVector black = MFVector(0,0,0,1);
 	static immutable MFVector white = MFVector(1,1,1,1);
 	static immutable MFVector grey = MFVector(0.5,0.5,0.5,1);
+	static immutable MFVector lightgrey = MFVector(0.8,0.8,0.8,1);
+	static immutable MFVector darkgrey = MFVector(0.3,0.3,0.3,1);
 	static immutable MFVector red = MFVector(1,0,0,1);
 	static immutable MFVector green = MFVector(0,1,0,1);
 	static immutable MFVector blue = MFVector(0,0,1,1);
@@ -113,14 +131,12 @@ nothrow:
 
 // handy templates
 
-template IsVector(V)
-{
-	enum bool IsVector = is(std.traits.Unqual!V == MFVector);
-}
+enum IsVector(T) = is(std.traits.Unqual!T == MFVector);
+
 
 // *** HLSL style interface, future SIMD vector library will be more like this too ***
 
-MFVector abs(const MFVector v) pure nothrow
+MFVector abs(const(MFVector) v) pure nothrow
 {
 	MFVector r = void;
 	r.x = v.x < 0 ? -v.x : v.x;
@@ -130,7 +146,7 @@ MFVector abs(const MFVector v) pure nothrow
 	return r;
 }
 
-MFVector min(const MFVector v1, const MFVector v2) pure nothrow
+MFVector min(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	MFVector r = void;
 	r.x = v1.x < v2.x ? v1.x : v2.x;
@@ -140,7 +156,7 @@ MFVector min(const MFVector v1, const MFVector v2) pure nothrow
 	return r;
 }
 
-MFVector max(const MFVector v1, const MFVector v2) pure nothrow
+MFVector max(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	MFVector r = void;
 	r.x = v1.x > v2.x ? v1.x : v2.x;
@@ -150,7 +166,7 @@ MFVector max(const MFVector v1, const MFVector v2) pure nothrow
 	return r;
 }
 
-MFVector clamp(int width = 4)(const MFVector v, const MFVector low, const MFVector high) pure nothrow
+MFVector clamp(int width = 4)(const(MFVector) v, const(MFVector) low, const(MFVector) high) pure nothrow
 {
 	MFVector r = v;
 	static if(width >= 2)
@@ -165,17 +181,18 @@ MFVector clamp(int width = 4)(const MFVector v, const MFVector low, const MFVect
 	return r;
 }
 
-MFVector saturate(int width = 4)(const MFVector v) pure nothrow
+MFVector saturate(int width = 4)(const(MFVector) v) pure nothrow
 {
 	return clamp!width(v, MFVector.zero, MFVector.one);
 }
 
-MFVector madd(const MFVector v1, const MFVector v2, const MFVector v3) pure nothrow
+MFVector madd(int width = 4)(const(MFVector) v1, const(MFVector) v2, const(MFVector) v3) pure nothrow
 {
+	//TODO: support 2d/3d vectors
 	return v1*v2 + v3;
 }
 
-MFVector lerp(int width = 4)(const MFVector v1, const MFVector v2, float t) pure nothrow
+MFVector lerp(int width = 4)(const(MFVector) v1, const(MFVector) v2, float t) pure nothrow
 {
 	MFVector r = v1;
 	static if(width >= 2)
@@ -190,7 +207,7 @@ MFVector lerp(int width = 4)(const MFVector v1, const MFVector v2, float t) pure
 	return r;
 }
 
-MFVector lerp(int width = 4)(const MFVector v1, const MFVector v2, const MFVector t) pure nothrow
+MFVector lerp(int width = 4)(const(MFVector) v1, const(MFVector) v2, const(MFVector) t) pure nothrow
 {
 	MFVector r = v1;
 	static if(width >= 2)
@@ -205,7 +222,7 @@ MFVector lerp(int width = 4)(const MFVector v1, const MFVector v2, const MFVecto
 	return r;
 }
 
-MFVector rcp(int width = 4)(const MFVector v) pure nothrow
+MFVector rcp(int width = 4)(const(MFVector) v) pure nothrow
 {
 	MFVector r = v;
 	static if(width >= 2)
@@ -220,7 +237,7 @@ MFVector rcp(int width = 4)(const MFVector v) pure nothrow
 	return r;
 }
 
-MFVector sqrt(int width = 4)(const MFVector v) pure nothrow
+MFVector sqrt(int width = 4)(const(MFVector) v) pure nothrow
 {
 	MFVector r = v;
 	static if(width >= 2)
@@ -235,7 +252,7 @@ MFVector sqrt(int width = 4)(const MFVector v) pure nothrow
 	return r;
 }
 
-MFVector rsqrt(int width = 4)(const MFVector v) pure nothrow
+MFVector rsqrt(int width = 4)(const(MFVector) v) pure nothrow
 {
 	MFVector r = v;
 	static if(width >= 2)
@@ -250,32 +267,32 @@ MFVector rsqrt(int width = 4)(const MFVector v) pure nothrow
 	return r;
 }
 
-float lengthSq(int width = 3)(const MFVector v) pure nothrow
+float lengthSq(int width = 3)(const(MFVector) v) pure nothrow
 {
 	return dot!width(v, v);
 }
 
-float length(int width = 3)(const MFVector v) pure nothrow
+float length(int width = 3)(const(MFVector) v) pure nothrow
 {
 	return std.math.sqrt(dot!width(v, v));
 }
 
-float distanceSq(int width = 3)(const MFVector a, const MFVector b) pure nothrow
+float distanceSq(int width = 3)(const(MFVector) a, const(MFVector) b) pure nothrow
 {
-	return lengthSq!width(b-a);
+	return (b-a).lengthSq!width;
 }
 
-float distance(int width = 3)(const MFVector a, const MFVector b) pure nothrow
+float distance(int width = 3)(const(MFVector) a, const(MFVector) b) pure nothrow
 {
-	return length!width(b-a);
+	return (b-a).length!width;
 }
 
-MFVector normalise(int width = 3)(const MFVector v) pure nothrow
+MFVector normalise(int width = 3)(const(MFVector) v) pure nothrow
 {
-	return v * (1.0 / length!width(v));
+	return v * (1.0 / v.length!width);
 }
 
-float dot(int width = 3)(const MFVector v1, const MFVector v2) pure nothrow
+float dot(int width = 3)(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	static if(width == 2)
 		return v1.x*v2.x + v1.y*v2.y;
@@ -287,27 +304,27 @@ float dot(int width = 3)(const MFVector v1, const MFVector v2) pure nothrow
 		static assert(0, "Invalid number of dimensions!");
 }
 
-float dot2(const MFVector v1, const MFVector v2) pure nothrow
+float dot2(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	return v1.x*v2.x + v1.y*v2.y;
 }
 
-float dot3(const MFVector v1, const MFVector v2) pure nothrow
+float dot3(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
 
-float dot4(const MFVector v1, const MFVector v2) pure nothrow
+float dot4(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v1.w*v2.w;
 }
 
-float doth(const MFVector v1, const MFVector v2) pure nothrow
+float doth(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z + v2.w;
 }
 
-MFVector cross3(const MFVector v1, const MFVector v2) pure nothrow
+MFVector cross3(const(MFVector) v1, const(MFVector) v2) pure nothrow
 {
 	MFVector r = void;
     r.x = v1.y * v2.z - v1.z * v2.y;
@@ -317,8 +334,20 @@ MFVector cross3(const MFVector v1, const MFVector v2) pure nothrow
 	return r;
 }
 
+float cross2(const(MFVector) v1, const(MFVector) v2) pure nothrow
+{
+	return v1.x*v2.y - v1.y*v2.x;
+}
+
+float getAngle(const(MFVector) v, const(MFVector) reference) pure nothrow
+{
+	float d = std.math.acos(dot3(v, reference));
+	return (cross2(v, reference) >= 0.0f) ? d : 2*PI - d;
+}
+
+
 // scalar-scalar, scalar-vector, vector-scalar, vector-vector (matrix versions in matrix.d)
-auto mul(T0, T1)(const T0 a, const T1 b) pure nothrow if((is(T0 == float) || IsVector!T0) && (is(T1 == float) || IsVector!T1))
+auto mul(int width = 4, T0, T1)(const T0 a, const T1 b) pure nothrow if((is(T0 == float) || IsVector!T0) && (is(T1 == float) || IsVector!T1))
 {
 	return a * b;
 }

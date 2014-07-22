@@ -8,14 +8,6 @@ public import fuji.c.MFString;
 nothrow:
 @nogc:
 
-struct MFEngineInstance;
-
-extern (C) MFEngineInstance* Fuji_CreateEngineInstance();
-extern (C) void Fuji_DestroyEngineInstance(MFEngineInstance* pEngineInstance = null);
-
-extern (C) MFEngineInstance* Fuji_GetCurrentEngineInstance();
-extern (C) MFEngineInstance* Fuji_SetCurrentEngineInstance(MFEngineInstance* pEngineInstance);
-
 enum MFDeg2Rad(alias a) = 0.017453292519943295769236907684886 * a;
 enum MFRad2Deg(alias a) = 57.295779513082320876798154814105 * a;
 enum MFAlign(alias x, alias bytes) = (x + (bytes-1)) & ~(bytes-1);
@@ -68,4 +60,41 @@ enum MFEndian
 
 	LittleEndian = 0,	/**< Little Endian */
 	BigEndian			/**< Big Endian */
+}
+
+// engine instance...
+struct MFEngineInstance
+{
+package:
+	bool bIsInitialised;
+
+	MFPlatform currentPlatform;
+
+	int bQuit;
+	int bRestart;
+
+	uint32 frameCount;
+	float timeDelta;
+
+	bool bDrawSystemInfo;
+}
+
+extern (C) MFEngineInstance* Fuji_CreateEngineInstance();
+extern (C) void Fuji_DestroyEngineInstance(MFEngineInstance* pEngineInstance = null);
+
+extern (C) MFEngineInstance* Fuji_GetCurrentEngineInstance();
+extern (C) MFEngineInstance* Fuji_SetCurrentEngineInstance(MFEngineInstance* pEngineInstance);
+
+
+// HACK to get at internals quickly!
+private extern (C) extern __gshared MFEngineInstance* gpEngineInstance;
+
+float MFTimeDelta()
+{
+	return gpEngineInstance.timeDelta;
+}
+
+uint MFFrameCounter()
+{
+	return gpEngineInstance.frameCount;
 }

@@ -13,3 +13,6 @@ project "RenderTarget"
 	links { "Fuji" }
 
 	dofile "../../Project/fujiconfig.lua"
+
+	configuration { "windows" }
+		links { "FujiMiddleware.lib" }

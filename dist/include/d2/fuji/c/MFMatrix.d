@@ -30,9 +30,9 @@ struct MFMatrix
 
 	MFMatrix opBinary(string op)(float s) const pure					if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
 	MFMatrix opBinaryRight(string op)(float s) const pure				if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
-	MFMatrix opBinary(string op)(const MFMatrix m) const pure nothrow	if(op == "*")	{ return mul(this, m); }
+	MFMatrix opBinary(string op)(const(MFMatrix) m) const pure nothrow	if(op == "*")	{ return mul(this, m); }
 	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "*")	{ return mul(this, v); }
-	MFMatrix opOpAssign(string op)(const MFMatrix m) pure nothrow		if(op == "*=")	{ return this = mul(this, m); }
+	MFMatrix opOpAssign(string op)(const(MFMatrix) m) pure nothrow		if(op == "*=")	{ return this = mul(this, m); }
 	MFMatrix opOpAssign(string op)(float s) pure nothrow				if(op == "*=")	{ return this = this * s; }
 
 	MFMatrix setTranslation(const MFVector trans) pure nothrow
@@ -340,7 +340,7 @@ struct MFMatrix
 	static immutable MFMatrix identity = MFMatrix.init;
 }
 
-MFMatrix lerp(const MFMatrix start, const MFMatrix end, float time) pure nothrow
+MFMatrix lerp(const(MFMatrix) start, const(MFMatrix) end, float time) pure nothrow
 {
 	MFMatrix t = void;
 	t.x = fuji.vector.lerp(start.x, end.x, time);
@@ -350,7 +350,7 @@ MFMatrix lerp(const MFMatrix start, const MFMatrix end, float time) pure nothrow
 	return t;
 }
 
-MFMatrix inverse(const MFMatrix matrix) pure nothrow
+MFMatrix inverse(const(MFMatrix) matrix) pure nothrow
 {
 	enum float PRECISION_LIMIT = 1.0e-10;
 
@@ -408,13 +408,44 @@ MFMatrix inverse(const MFMatrix matrix) pure nothrow
 	return inv;
 }
 
+MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector)
+{
+	MFVector t;
+	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8] + vector.w*matrix.m[12];
+	t.y = vector.x*matrix.m[1] + vector.y*matrix.m[5] + vector.z*matrix.m[9] + vector.w*matrix.m[13];
+	t.z = vector.x*matrix.m[2] + vector.y*matrix.m[6] + vector.z*matrix.m[10] + vector.w*matrix.m[14];
+	t.w = vector.x*matrix.m[3] + vector.y*matrix.m[7] + vector.z*matrix.m[11] + vector.w*matrix.m[15];
+	return t;
+}
+
+MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector)
+{
+	MFVector t;
+/+
+	t = madd3(matrix.x, vector.x, matrix.t);
+	t = madd3(matrix.y, vector.y, t);
+	t = madd3(matrix.z, vector.z, t);
++/
+	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8] + matrix.m[12];
+	t.y = vector.x*matrix.m[1] + vector.y*matrix.m[5] + vector.z*matrix.m[9] + matrix.m[13];
+	t.z = vector.x*matrix.m[2] + vector.y*matrix.m[6] + vector.z*matrix.m[10] + matrix.m[14];
+	return t;
+}
+
+MFVector transformVector3(const(MFMatrix) matrix, const(MFVector) vector)
+{
+	MFVector t;
+	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8];
+	t.y = vector.x*matrix.m[1] + vector.y*matrix.m[5] + vector.z*matrix.m[9];
+	t.z = vector.x*matrix.m[2] + vector.y*matrix.m[6] + vector.z*matrix.m[10];
+	return t;
+}
+
+
 
 // handy templates
 
-template IsMatrix(M)
-{
-	enum bool IsMatrix = is(std.traits.Unqual!M == MFMatrix);
-}
+enum IsMatrix(T) = is(std.traits.Unqual!T == MFMatrix);
 
 
 // *** HLSL style interface, future SIMD vector library will be more like this too ***

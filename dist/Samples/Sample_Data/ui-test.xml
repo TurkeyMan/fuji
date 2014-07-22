@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HKWidgetLayoutFrame position="100,100" size="200,200" layout_padding="5" background_colour="1,1,0">
-	<HKWidgetButton text="Wide Load!" text_height="10" layout_align="BottomFill" layout_margin="2" />
-	<HKWidgetLabel text="Label!" layout_align="TopRight" />
-	<HKWidgetLayoutLinear width="100" layout_flags="FitContentVertical" layout_align="Center">
-		<HKWidgetButton text="Button1" text_height="10" layout_align="CenterFill" layout_weight="2" />
-		<HKWidgetButton text="Button2" text_height="10" layout_align="CenterFill" />
+<HKWidgetLayoutFrame position="100,100" size="200,200" padding="5" background_colour="1,1,0">
+	<HKWidgetButton text="Wide Load!" text_height="10" align="BottomFill" margin="2" />
+	<HKWidgetLabel text="Label!" align="TopRight" />
+	<HKWidgetLayoutLinear width="100" layout_flags="FitContentVertical" align="Center">
+		<HKWidgetButton text="Button1" text_height="10" align="CenterFill" weight="2" />
+		<HKWidgetButton text="Button2" text_height="10" align="CenterFill" />
 	</HKWidgetLayoutLinear>
 </HKWidgetLayoutFrame>
