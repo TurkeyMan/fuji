@@ -71,7 +71,7 @@ struct CharHistory
 
 // forward declarations
 
-float MFFont_GetStringWidthW(MFFont *pFont, const uint16 *pText, float height, float lineWidth, int maxLen, float *pTotalHeight);
+float MFFont_GetStringWidthW(const MFFont *pFont, const uint16 *pText, float height, float lineWidth, int maxLen, float *pTotalHeight);
 float MFFont_DrawTextW(MFFont *pFont, const MFVector &pos, float height, const MFVector &colour, const uint16 *pText, int maxChars, const MFMatrix &ltw);
 
 
@@ -93,7 +93,7 @@ inline int GetVerticalJustification(MFFontJustify justification)
 }
 
 // calculates the height and scale from source data
-float MFFontInternal_CalcHeightAndScale(MFFont *pFont, float height, float *pXScale, float *pYScale)
+float MFFontInternal_CalcHeightAndScale(const MFFont *pFont, float height, float *pXScale, float *pYScale)
 {
 	if (pFont == NULL)
 		pFont = gpDebugFont;
@@ -206,27 +206,25 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 	return pFont;
 }
 
-MF_API void MFFont_Release(MFFont *pFont)
+MF_API int MFFont_Release(MFFont *pFont)
 {
 	MFCALLSTACK;
 
-	--pFont->refCount;
+	if(--pFont->refCount > 0)
+		return pFont->refCount;
 
-	if(pFont->refCount == 0)
-	{
-		// remove it from the registry
-		// TODO: this is a scanning destroy, do this by hash...?
-		gpFontBank->Destroy(pFont);
+	// remove it from the registry
+	// TODO: this is a scanning destroy, do this by hash...?
+	gpFontBank->Destroy(pFont);
 
-		// destroy materials
-		for(int a=0; a<pFont->numPages; a++)
-		{
-			MFMaterial_Release(pFont->ppPages[a]);
-		}
+	// destroy materials
+	for(int a=0; a<pFont->numPages; a++)
+		MFMaterial_Release(pFont->ppPages[a]);
 
-		// destroy font
-		MFHeap_Free(pFont);
-	}
+	// destroy font
+	MFHeap_Free(pFont);
+
+	return 0;
 }
 
 MF_API MFFont* MFFont_GetDebugFont()
@@ -234,14 +232,14 @@ MF_API MFFont* MFFont_GetDebugFont()
 	return gpDebugFont;
 }
 
-MF_API float MFFont_GetFontHeight(MFFont *pFont)
+MF_API float MFFont_GetFontHeight(const MFFont *pFont)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
 	return (float)pFont->height;
 }
 
-MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character)
+MF_API float MFFont_GetCharacterWidth(const MFFont *pFont, int character)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
@@ -249,7 +247,7 @@ MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character)
 	return (float)pFont->pChars[id].xadvance;
 }
 
-MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height)
+MF_API MFVector MFFont_GetCharPos(const MFFont *pFont, const char *pText, int charIndex, float height)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 
@@ -301,7 +299,7 @@ MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charInde
 	return currentPos;
 }
 
-MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
+MF_API float MFFont_GetStringWidth(const MFFont *pFont, const char *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
 	if(!pText)
 		return 0.f;
@@ -1184,7 +1182,7 @@ MF_API float MFFont_DrawTextAnchored(MFFont *pFont, const char *pText, const MFV
 /////////////////////////////////
 // unicode variants
 
-float MFFont_GetStringWidthW(MFFont *pFont, const uint16 *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
+float MFFont_GetStringWidthW(const MFFont *pFont, const uint16 *pText, float height, float lineWidth, int maxLen, float *pTotalHeight)
 {
 	if(pFont == NULL) pFont = gpDebugFont;
 

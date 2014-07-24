@@ -17,6 +17,8 @@ nothrow:
 	this(this) pure	{ pResource.AddRef(); }
 	~this()			{ Release(); }
 
+	bool opCast(T)() if(is(T == bool))					{ return pResource != null; }
+
 	@property inout(MFResource)* handle() inout pure	{ return pResource; }
 
 	@property MFResourceType type() const pure			{ return cast(MFResourceType)pResource.type; }

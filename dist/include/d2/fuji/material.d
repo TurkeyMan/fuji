@@ -45,6 +45,8 @@ nothrow:
 		release();
 	}
 
+	bool opCast(T)() if(is(T == bool)) { return pMaterial != null; }
+
 	void create(const(char)[] name)
 	{
 		release();

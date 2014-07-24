@@ -62,6 +62,8 @@ nothrow:
 		return rc;
 	}
 
+	bool opCast(T)() if(is(T == bool))								{ return pModel != null; }
+
 	@property inout(MFModel)* handle() inout pure					{ return pModel; }
 	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }
 

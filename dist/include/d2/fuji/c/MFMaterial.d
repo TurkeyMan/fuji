@@ -149,7 +149,7 @@ extern (C) MFMaterial* MFMaterial_Create(const(char)* pName);
 * Release an MFMaterial instance.
 * Release a reference to an MFMaterial and destroy when the reference count reaches 0.
 * @param pMaterial Material instance to destroy.
-* @return The new number of references to the material. If 0 is returned, there are no more instances and the material will be destroyed.
+* @return The new reference count of the material. If the returned reference count is 0, the material is destroyed.
 */
 extern (C) int MFMaterial_Release(MFMaterial* pMaterial);
 

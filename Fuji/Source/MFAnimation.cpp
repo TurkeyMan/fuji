@@ -157,13 +157,15 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel)
 	return pAnimation;
 }
 
-MF_API void MFAnimation_Release(MFAnimation *pAnimation)
+MF_API int MFAnimation_Release(MFAnimation *pAnimation)
 {
 	// release the template
-	MFResource_Release(pAnimation->pTemplate);
+	int rc = MFResource_Release(pAnimation->pTemplate);
 
 	// free the instance
 	MFHeap_Free(pAnimation);
+
+	return rc;
 }
 
 MF_API MFMatrix *MFAnimation_CalculateMatrices(MFAnimation *pAnimation, MFMatrix *pLocalToWorld)

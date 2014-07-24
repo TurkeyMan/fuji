@@ -408,7 +408,7 @@ MFMatrix inverse(const(MFMatrix) matrix) pure nothrow
 	return inv;
 }
 
-MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector)
+MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
 {
 	MFVector t;
 	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8] + vector.w*matrix.m[12];
@@ -418,7 +418,7 @@ MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector)
 	return t;
 }
 
-MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector)
+MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
 {
 	MFVector t;
 /+
@@ -432,7 +432,7 @@ MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector)
 	return t;
 }
 
-MFVector transformVector3(const(MFMatrix) matrix, const(MFVector) vector)
+MFVector transformVector3(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
 {
 	MFVector t;
 	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8];

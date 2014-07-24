@@ -66,6 +66,8 @@ nothrow:
 		return rc;
 	}
 
+	bool opCast(T)() if(is(T == bool))								{ return pAnimation != null; }
+
 	@property inout(MFAnimation)* handle() inout pure				{ return pAnimation; }
 	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }
 

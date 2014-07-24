@@ -71,6 +71,8 @@ nothrow:
 		return rc;
 	}
 
+	bool opCast(T)() if(is(T == bool))					{ return pTexture != null; }
+
 	@property inout(MFTexture)* handle() inout pure		{ return pTexture; }
 	@property ref inout(Resource) resource() inout pure	{ return *cast(inout(Resource)*)&this; }
 

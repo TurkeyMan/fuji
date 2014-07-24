@@ -67,10 +67,10 @@ MF_API MFFont* MFFont_Create(const char *pFilename);
  * Destroy a font.
  * Destroys a font from the filesystem.
  * @param pFont Pointer to a font to destroy.
- * @return None.
+ * @return The new reference count of the font. If the returned reference count is 0, the font is destroyed.
  * @see MFFont_Create()
  */
-MF_API void MFFont_Release(MFFont *pFont);
+MF_API int MFFont_Release(MFFont *pFont);
 
 /**
  * Get the height of a font.
@@ -79,7 +79,7 @@ MF_API void MFFont_Release(MFFont *pFont);
  * @return The native height (in texels) of the specified font.
  * @see MFFont_Create()
  */
-MF_API float MFFont_GetFontHeight(MFFont *pFont);
+MF_API float MFFont_GetFontHeight(const MFFont *pFont);
 
 /**
  * Get the width of a character.
@@ -89,7 +89,7 @@ MF_API float MFFont_GetFontHeight(MFFont *pFont);
  * @return The native width (in texels) of the specified character.
  * @see MFFont_Create()
  */
-MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character);
+MF_API float MFFont_GetCharacterWidth(const MFFont *pFont, int character);
 
 /**
  * Get the character offset into a string.
@@ -101,7 +101,7 @@ MF_API float MFFont_GetCharacterWidth(MFFont *pFont, int character);
  * @return The physical offset of the specified character in the string from the string starting position.
  * @see MFFont_GetStringWidth()
  */
-MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charIndex, float height);
+MF_API MFVector MFFont_GetCharPos(const MFFont *pFont, const char *pText, int charIndex, float height);
 
 /**
  * Get the physical width of a string.
@@ -115,7 +115,7 @@ MF_API MFVector MFFont_GetCharPos(MFFont *pFont, const char *pText, int charInde
  * @return The physical width of the specified string rendered by the specified font.
  * @see MFFont_Create()
  */
-MF_API float MFFont_GetStringWidth(MFFont *pFont, const char *pText, float height, float lineWidth = 0.0f, int maxLen = -1, float *pTotalHeight = NULL);
+MF_API float MFFont_GetStringWidth(const MFFont *pFont, const char *pText, float height, float lineWidth = 0.0f, int maxLen = -1, float *pTotalHeight = NULL);
 
 /**
  * Blit a string to the screen.

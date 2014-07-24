@@ -207,8 +207,8 @@ int MFScript_AddRef(MFScriptObject *pObject);
  * Decrease the reference count of a script object.
  * Decrease the reference count of a script object.
  * @param pObject An object belonging to the script to have its ref count decreased.
- * @return The internal reference count.
- * @remarks If the internal reference count is reduced to zero, the object becomes a candidate for garbage collection.
+ * @return The new reference count of the script.
+ * @remarks If the reference count is reduced to zero, the object becomes a candidate for garbage collection.
  */
 int MFScript_Release(MFScriptObject *pObject);
 

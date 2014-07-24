@@ -404,7 +404,7 @@ MF_API MFModel* MFModel_CreateWithAnimation(const char *pFilename, const char *p
 	return pModel;
 }
 
-MF_API void MFModel_Release(MFModel *pModel)
+MF_API int MFModel_Release(MFModel *pModel)
 {
 	// destroy stateblock
 	MFStateBlock_Destroy(pModel->pEntityState);
@@ -414,10 +414,12 @@ MF_API void MFModel_Release(MFModel *pModel)
 		MFAnimation_Release(pModel->pAnimation);
 
 	// release the template
-	MFResource_Release(pModel->pTemplate);
+	int rc = MFResource_Release(pModel->pTemplate);
 
 	// free instance
 	MFHeap_Free(pModel);
+
+	return rc;
 }
 
 

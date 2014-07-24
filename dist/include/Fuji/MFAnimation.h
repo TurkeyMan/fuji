@@ -32,10 +32,10 @@ MF_API MFAnimation* MFAnimation_Create(const char *pFilename, MFModel *pModel);
  * Destroy an animation.
  * Destroys an animation instance.
  * @param pAnimation Animation instance to be destroyed.
- * @return None.
+ * @return The new reference count of the animation. If the returned reference count is 0, the animation is destroyed.
  * @see MFAnimation_Create()
  */
-MF_API void MFAnimation_Release(MFAnimation *pAnimation);
+MF_API int MFAnimation_Release(MFAnimation *pAnimation);
 
 /**
  * Calculate the animation matrices.
