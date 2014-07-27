@@ -1,6 +1,6 @@
 module fuji.c.FileSystem.MFFileSystemMemory;
 
-public import fuji.c.MFFileSystem;
+import fuji.c.MFFileSystem;
 
 nothrow:
 @nogc:

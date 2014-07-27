@@ -95,7 +95,7 @@ struct MFOpenData
 * @param pOpenData Pointer to an MFOpenData structure describing the file to open.
 * @return A pointer to the newly opened file, returns null if the file open failed.
 */
-extern (C) MFFile* MFFile_Open(MFFileSystemHandle fileSystem, const ref MFOpenData openData);
+extern (C) MFFile* MFFile_Open(MFFileSystemHandle fileSystem, ref const(MFOpenData) openData);
 
 /**
 * Close a file.
@@ -336,7 +336,7 @@ extern (C) MFFileSystemHandle MFFileSystem_GetInternalFileSystemHandle(MFFileSys
 * @param pMountData Pointer to a MFMountData structure filled with all the mount parameters.
 * @return Returns 0 if filesystem was successfully mounted.
 */
-extern (C) int MFFileSystem_Mount(MFFileSystemHandle fileSystem, const ref MFMountData mountData);
+extern (C) int MFFileSystem_Mount(MFFileSystemHandle fileSystem, ref const(MFMountData) mountData);
 
 /**
 * Mounts a filesystem from a fuji path.
@@ -374,7 +374,7 @@ extern (C) MFFile* MFFileSystem_Open(const(char)* pFilename, uint openFlags = MF
 * @param @param extraBytes Number of extra bytes to allocate at the end of the buffer. Initialises the first extra byte to 0 (useful for appending a NULL byte to the end of text files).
 * @return A pointer to a new buffer containing the file that was loaded.
 */
-extern (C) ubyte* MFFileSystem_Load(const(char)* pFilename, size_t *pBytesRead = null, size_t extraBytes = 0);
+extern (C) ubyte* MFFileSystem_Load(const(char)* pFilename, size_t* pBytesRead = null, size_t extraBytes = 0);
 
 /**
 * Write a file to a filesystem.
@@ -417,7 +417,7 @@ extern (C) int MFFileSystem_GetNumVolumes();
 * @param pVolumeInfo Pointer to an MFVolumeInfo structre that receives the volumes mount details.
 * @return None.
 */
-extern (C) void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeInfo);
+extern (C) void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo* pVolumeInfo);
 
 /**
 * Begin a find for files.
@@ -428,7 +428,7 @@ extern (C) void MFFileSystem_GetVolumeInfo(int volumeID, MFVolumeInfo *pVolumeIn
 * @remarks Currently the only valid filename pattern is '*'. For example: "data:subdir/ *" is a valid search pattern.
 * @see MFFileSystem_FindNext(), MFFileSystem_FindClose()
 */
-extern (C) MFFind* MFFileSystem_FindFirst(const(char)* pSearchPattern, MFFindData *pFindData);
+extern (C) MFFind* MFFileSystem_FindFirst(const(char)* pSearchPattern, MFFindData* pFindData);
 
 /**
 * Find the next file.
@@ -438,7 +438,7 @@ extern (C) MFFind* MFFileSystem_FindFirst(const(char)* pSearchPattern, MFFindDat
 * @return True on success or false if there are no more files in the directory.
 * @see MFFileSystem_FindFirst(), MFFileSystem_FindClose()
 */
-extern (C) bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData);
+extern (C) bool MFFileSystem_FindNext(MFFind* pFind, MFFindData* pFindData);
 
 /**
 * Close an open find.
@@ -453,4 +453,4 @@ extern (C) void MFFileSystem_FindClose(MFFind *pFind);
 /////////////////////////////////////
 // helper functions, to make life easier
 
-extern (C) MFFile* MFFile_CreateMemoryFile(const void *pMemory, size_t size, bool writable = false, bool ownMemory = false);
+extern (C) MFFile* MFFile_CreateMemoryFile(const(void)* pMemory, size_t size, bool writable = false, bool ownMemory = false);

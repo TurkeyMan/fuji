@@ -236,18 +236,32 @@ auto dirEntries(string path, SpanMode mode, bool followSymlink = true)
 nothrow:
 @nogc:
 
+alias MFFile_Open = fuji.c.MFFileSystem.MFFile_Open;
+MFFile* MFFile_Open(MFFileSystemHandles fs, ref const(MFOpenData) openData)
+{
+	MFFileSystemHandle h = MFFileSystem_GetInternalFileSystemHandle(fs);
+	return fuji.c.MFFileSystem.MFFile_Open(h, openData);
+}
+
 alias MFFile_SystemPath = fuji.c.MFFileSystem.MFFile_SystemPath;
-const(char)[] MFFile_SystemPath(const(char)[] filename = null)
+const(char)[] MFFile_SystemPath(const(char)[] filename)
 {
 	auto s = Stringz!()(filename);
 	return MFFile_SystemPath(s).toDStr;
 }
 
 alias MFFile_HomePath = fuji.c.MFFileSystem.MFFile_HomePath;
-const(char)[] MFFile_HomePath(const(char)[] filename = null)
+const(char)[] MFFile_HomePath(const(char)[] filename)
 {
 	auto s = Stringz!()(filename);
 	return MFFile_HomePath(s).toDStr;
+}
+
+alias MFFileSystem_Open = fuji.c.MFFileSystem.MFFileSystem_Open;
+MFFile* MFFileSystem_Open(const(char)[] filename, uint openFlags = MFOpenFlags.Read | MFOpenFlags.Binary)
+{
+	auto s = Stringz!()(filename);
+	return MFFileSystem_Open(s, openFlags);
 }
 
 alias MFFileSystem_Load = fuji.c.MFFileSystem.MFFileSystem_Load;

@@ -1,6 +1,6 @@
 module fuji.c.FileSystem.MFFileSystemHTTP;
 
-public import fuji.c.MFFileSystem;
+import fuji.c.MFFileSystem;
 
 nothrow:
 @nogc:

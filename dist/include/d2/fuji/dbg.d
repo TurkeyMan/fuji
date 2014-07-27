@@ -3,6 +3,22 @@ module fuji.dbg;
 public import fuji.c.MFDebug;
 import fuji.string;
 
+
+// register fuji assert handler...
+static this()
+{
+	import core.exception;
+
+	static void fujiAssert(string file, ulong line, string msg) nothrow
+	{
+		import std.string : toStringz;
+		MFDebug_DebugAssert("assert()", msg.toStringz, file.toStringz, cast(int)line);
+	}
+
+	assertHandler = &fujiAssert;
+}
+
+
 nothrow:
 @nogc:
 

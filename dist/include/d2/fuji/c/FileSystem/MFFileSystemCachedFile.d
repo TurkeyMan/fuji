@@ -1,6 +1,6 @@
 module fuji.c.FileSystem.MFFileSystemCachedFile;
 
-public import fuji.c.MFFileSystem;
+import fuji.c.MFFileSystem;
 
 nothrow:
 @nogc:

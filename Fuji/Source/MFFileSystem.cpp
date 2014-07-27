@@ -1066,7 +1066,7 @@ MF_API size_t MFFileSystem_Save(const char *pFilename, const char *pBuffer, size
 
 	size_t bytesWritten = 0;
 
-	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Write|MFOF_Binary|MFOF_CreateDirectory);
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Write|MFOF_Truncate|MFOF_Binary|MFOF_CreateDirectory);
 	if(hFile)
 	{
 		bytesWritten = MFFile_Write(hFile, pBuffer, size, false);
