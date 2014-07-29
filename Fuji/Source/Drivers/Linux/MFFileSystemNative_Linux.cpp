@@ -26,26 +26,6 @@ void MFFileSystemNative_Unregister()
 {
 }
 
-static void CreateDir(const char *pPath)
-{
-	if(!pPath || *pPath == 0)
-		return;
-
-	// strip trailing '/'
-	((char*)pPath)[MFString_Length(pPath)-1] = 0;
-
-	// the path is empty
-	if(*pPath == 0)
-		return;
-
-	MFDebug_Assert(false, "TODO!");
-/*
-	CreateDir(MFStr_GetFilePath(pPath));
-
-	CreateDirectory(pPath, NULL);
-*/
-}
-
 int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 {
 	MFCALLSTACK;
@@ -60,7 +40,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	const char *pFilename = pNative->pFilename;
 
 	if(pOpenData->openFlags & MFOF_CreateDirectory)
-		CreateDir(MFStr_GetFilePath(pFilename));
+		MFFileNative_CreateDirectory(MFStr_GetFilePath(pFilename));
 
 	int flags = 0;
 
@@ -223,8 +203,20 @@ bool MFFileNative_Stat(const char *pPath, MFFileInfo *pFileInfo)
 
 bool MFFileNative_CreateDirectory(const char *pPath)
 {
-	MFDebug_Assert(false, "TODO");
-	return false;
+	if(!pPath || *pPath == 0)
+		return false;
+
+	// strip trailing '/'
+	((char*)pPath)[MFString_Length(pPath)-1] = 0;
+
+	// the path is empty
+	if(*pPath == 0)
+		return false;
+
+	MFFileNative_CreateDirectory(MFStr_GetFilePath(pPath));
+
+	int r = mkdir(pPath, 0777);
+	return r == 0;
 }
 
 bool MFFileNative_Delete(const char *pPath, bool bRecursive)
@@ -294,7 +286,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	const char *pFilePath = MFStr("%s%s", pFindData->pSystemPath, pFD->d_name);
 
-	stat statbuf;
+	struct stat statbuf;
 	if(stat(pFilePath, &statbuf) < 0)
 		return false;
 

@@ -9,6 +9,7 @@
 
 #include <sys/time.h>
 #include <sys/utsname.h>
+#include <time.h>
 
 #include <stdio.h>
 
@@ -54,27 +55,92 @@ void MFSystem_DrawPlatformSpecific()
 
 MF_API void MFSystem_SystemTime(MFSystemTime* pSystemTime)
 {
-	MFDebug_Assert(false, "todo");
+	time_t now;
+	time(&now);
+	tm *utc = gmtime(&now);
+
+	pSystemTime->year = 1900 + utc->tm_year;
+	pSystemTime->month = utc->tm_mon + 1;
+	pSystemTime->dayOfWeek = utc->tm_wday;
+	pSystemTime->day = utc->tm_mday;
+	pSystemTime->hour = utc->tm_hour;
+	pSystemTime->minute = utc->tm_min;
+	pSystemTime->second = utc->tm_sec;
+	pSystemTime->tenthMillisecond = 0;
 }
 
 MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime)
 {
-	MFDebug_Assert(false, "todo");
+	tm utc;
+	utc.tm_year = pSystemTime->year - 1900;
+	utc.tm_mon = pSystemTime->month - 1;
+	utc.tm_mday = pSystemTime->day;
+	utc.tm_hour = pSystemTime->hour;
+	utc.tm_min = pSystemTime->minute;
+	utc.tm_sec = pSystemTime->second;
+	time_t t = timegm(&utc);
+	pFileTime->ticks = (uint64)t;
 }
 
 MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime)
 {
-	MFDebug_Assert(false, "todo");
+	time_t t = (time_t)pFileTime->ticks;
+	tm *utc = gmtime(&t);
+
+	pSystemTime->year = 1900 + utc->tm_year;
+	pSystemTime->month = utc->tm_mon + 1;
+	pSystemTime->dayOfWeek = utc->tm_wday;
+	pSystemTime->day = utc->tm_mday;
+	pSystemTime->hour = utc->tm_hour;
+	pSystemTime->minute = utc->tm_min;
+	pSystemTime->second = utc->tm_sec;
+	pSystemTime->tenthMillisecond = 0;
 }
 
 MF_API void MFSystem_SystemTimeToLocalTime(const MFSystemTime *pSystemTime, MFSystemTime *pLocalTime)
 {
-	MFDebug_Assert(false, "todo");
+	tm utc;
+	utc.tm_year = pSystemTime->year - 1900;
+	utc.tm_mon = pSystemTime->month - 1;
+	utc.tm_mday = pSystemTime->day;
+	utc.tm_hour = pSystemTime->hour;
+	utc.tm_min = pSystemTime->minute;
+	utc.tm_sec = pSystemTime->second;
+
+	time_t t = timegm(&utc);
+	tm *lt = localtime(&t);
+
+	pLocalTime->year = 1900 + lt->tm_year;
+	pLocalTime->month = lt->tm_mon + 1;
+	pLocalTime->dayOfWeek = lt->tm_wday;
+	pLocalTime->day = lt->tm_mday;
+	pLocalTime->hour = lt->tm_hour;
+	pLocalTime->minute = lt->tm_min;
+	pLocalTime->second = lt->tm_sec;
+	pLocalTime->tenthMillisecond = 0;
 }
 
 MF_API void MFSystem_LocalTimeToSystemTime(const MFSystemTime *pLocalTime, MFSystemTime *pSystemTime)
 {
-	MFDebug_Assert(false, "todo");
+	tm lt;
+	lt.tm_year = pLocalTime->year - 1900;
+	lt.tm_mon = pLocalTime->month - 1;
+	lt.tm_mday = pLocalTime->day;
+	lt.tm_hour = pLocalTime->hour;
+	lt.tm_min = pLocalTime->minute;
+	lt.tm_sec = pLocalTime->second;
+
+	time_t t = timelocal(&lt);
+	tm *utc = gmtime(&t);
+
+	pSystemTime->year = 1900 + utc->tm_year;
+	pSystemTime->month = utc->tm_mon + 1;
+	pSystemTime->dayOfWeek = utc->tm_wday;
+	pSystemTime->day = utc->tm_mday;
+	pSystemTime->hour = utc->tm_hour;
+	pSystemTime->minute = utc->tm_min;
+	pSystemTime->second = utc->tm_sec;
+	pSystemTime->tenthMillisecond = 0;
 }
 
 MF_API uint64 MFSystem_ReadRTC()
