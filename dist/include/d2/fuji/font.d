@@ -7,8 +7,9 @@ import fuji.string;
 
 struct Font
 {
+	alias resource this;
+
 	MFFont *pFont;
-	alias pFont this;
 
 nothrow:
 @nogc:
@@ -16,13 +17,13 @@ nothrow:
 	{
 		Font f;
 		f.pFont = MFFont_GetDebugFont();
-		MFResource_AddRef(cast(fuji.resource.MFResource*)f.pFont);
+		f.addRef();
 		return f;
 	}
 
 	this(this) pure
 	{
-		MFResource_AddRef(cast(fuji.resource.MFResource*)pFont);
+		addRef();
 	}
 
 	this(ref Resource resource) pure
@@ -30,8 +31,8 @@ nothrow:
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Font)
 		{
-			resource.AddRef();
 			pFont = cast(MFFont*)resource.handle;
+			addRef();
 		}
 	}
 
@@ -43,6 +44,20 @@ nothrow:
 	~this()
 	{
 		release();
+	}
+
+	void opAssign(MFFont *pFont)
+	{
+		release();
+		this.pFont = pFont;
+		addRef();
+	}
+
+	void opAssign(Font font)
+	{
+		release();
+		pFont = font.pFont;
+		addRef();
 	}
 
 	void create(const(char)[] name)
@@ -62,8 +77,6 @@ nothrow:
 		}
 		return rc;
 	}
-
-	bool opCast(T)() if(is(T == bool))								{ return pFont != null; }
 
 	@property inout(MFFont)* handle() inout pure					{ return pFont; }
 	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }

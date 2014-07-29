@@ -18,14 +18,15 @@ struct MFFrameRange
 
 struct Animation
 {
+	alias resource this;
+
 	MFAnimation *pAnimation;
-	alias pAnimation this;
 
 nothrow:
 @nogc:
 	this(this) pure
 	{
-		MFResource_AddRef(cast(fuji.resource.MFResource*)pAnimation);
+		addRef();
 	}
 
 	this(ref Resource resource) pure
@@ -33,8 +34,8 @@ nothrow:
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Animation)
 		{
-			resource.AddRef();
 			pAnimation = cast(MFAnimation*)resource.handle;
+			addRef();
 		}
 	}
 
@@ -46,6 +47,20 @@ nothrow:
 	~this()
 	{
 		release();
+	}
+
+	void opAssign(MFAnimation *pAnimation)
+	{
+		release();
+		this.pAnimation = pAnimation;
+		addRef();
+	}
+
+	void opAssign(Animation animation)
+	{
+		release();
+		pAnimation = animation.pAnimation;
+		addRef();
 	}
 
 	void create(const(char)[] name, Model model)
@@ -65,8 +80,6 @@ nothrow:
 		}
 		return rc;
 	}
-
-	bool opCast(T)() if(is(T == bool))								{ return pAnimation != null; }
 
 	@property inout(MFAnimation)* handle() inout pure				{ return pAnimation; }
 	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }

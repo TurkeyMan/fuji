@@ -45,13 +45,13 @@ nothrow:
 	@property int refCount() const pure { return type_refCount >> 8; }
 	@property const(char)[] name() const pure { return pName.toDStr; }
 
-	int AddRef() pure
+	int addRef() pure
 	{
 		type_refCount += 1 << 8;
 		return type_refCount >> 8;
 	}
 
-	int Release()
+	int release()
 	{
 		int rc = type_refCount >> 8;
 		if(rc == 1)

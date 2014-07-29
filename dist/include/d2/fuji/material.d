@@ -11,13 +11,15 @@ nothrow:
 
 struct Material
 {
+	alias resource this;
+
 	MFMaterial *pMaterial;
 
 nothrow:
 @nogc:
 	this(this) pure
 	{
-		MFResource_AddRef(cast(fuji.resource.MFResource*)pMaterial);
+		addRef();
 	}
 
 	this(ref Resource resource) pure
@@ -25,8 +27,8 @@ nothrow:
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Material)
 		{
-			resource.AddRef();
 			pMaterial = cast(MFMaterial*)resource.handle;
+			addRef();
 		}
 	}
 
@@ -45,7 +47,19 @@ nothrow:
 		release();
 	}
 
-	bool opCast(T)() if(is(T == bool)) { return pMaterial != null; }
+	void opAssign(MFMaterial *pMaterial)
+	{
+		release();
+		this.pMaterial = pMaterial;
+		addRef();
+	}
+
+	void opAssign(Material material)
+	{
+		release();
+		pMaterial = material.pMaterial;
+		addRef();
+	}
 
 	void create(const(char)[] name)
 	{
@@ -256,7 +270,7 @@ nothrow:
 			size_t t = GetParameter(null);
 			Texture tex;
 			tex.pTexture = cast(MFTexture*)t;
-			MFResource_AddRef(cast(fuji.resource.MFResource*)tex.pTexture);
+			tex.addRef();
 			return tex;
 		}
 

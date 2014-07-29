@@ -16,8 +16,9 @@ struct MFTextureDimensions
 
 struct Texture
 {
+	alias resource this;
+
 	MFTexture *pTexture;
-	alias pTexture this;
 
 nothrow:
 @nogc:
@@ -42,7 +43,7 @@ nothrow:
 
 	this(this) pure
 	{
-		MFResource_AddRef(cast(fuji.resource.MFResource*)pTexture);
+		addRef();
 	}
 
 	this(ref Resource resource) pure
@@ -50,14 +51,28 @@ nothrow:
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Texture)
 		{
-			resource.AddRef();
 			pTexture = cast(MFTexture*)resource.handle;
+			addRef();
 		}
 	}
 
 	~this()
 	{
 		release();
+	}
+
+	void opAssign(MFTexture *pTexture)
+	{
+		release();
+		this.pTexture = pTexture;
+		addRef();
+	}
+
+	void opAssign(Texture texture)
+	{
+		release();
+		pTexture = texture.pTexture;
+		addRef();
 	}
 
 	int release()
@@ -70,8 +85,6 @@ nothrow:
 		}
 		return rc;
 	}
-
-	bool opCast(T)() if(is(T == bool))					{ return pTexture != null; }
 
 	@property inout(MFTexture)* handle() inout pure		{ return pTexture; }
 	@property ref inout(Resource) resource() inout pure	{ return *cast(inout(Resource)*)&this; }

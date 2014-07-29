@@ -13,8 +13,9 @@ nothrow:
 
 struct Model
 {
+	alias resource this;
+
 	MFModel *pModel;
-	alias pModel this;
 
 nothrow:
 @nogc:
@@ -33,7 +34,7 @@ nothrow:
 
 	this(this) pure
 	{
-		MFResource_AddRef(cast(fuji.resource.MFResource*)pModel);
+		addRef();
 	}
 
 	this(ref Resource resource) pure
@@ -41,14 +42,28 @@ nothrow:
 		// TODO: should this throw instead?
 		if(resource.type == MFResourceType.Model)
 		{
-			resource.AddRef();
 			pModel = cast(MFModel*)resource.handle;
+			addRef();
 		}
 	}
 
 	~this()
 	{
 		release();
+	}
+
+	void opAssign(MFModel *pModel)
+	{
+		release();
+		this.pModel = pModel;
+		addRef();
+	}
+
+	void opAssign(Model model)
+	{
+		release();
+		pModel = model.pModel;
+		addRef();
 	}
 
 	int release()
@@ -61,8 +76,6 @@ nothrow:
 		}
 		return rc;
 	}
-
-	bool opCast(T)() if(is(T == bool))								{ return pModel != null; }
 
 	@property inout(MFModel)* handle() inout pure					{ return pModel; }
 	@property ref inout(Resource) resource() inout pure				{ return *cast(inout(Resource)*)&this; }

@@ -9,15 +9,28 @@ nothrow:
 
 struct Resource
 {
-	MFResource *pResource;
 	alias pResource this;
+
+	MFResource *pResource;
 
 nothrow:
 @nogc:
-	this(this) pure	{ pResource.AddRef(); }
-	~this()			{ Release(); }
+	this(this) pure	{ addRef(); }
+	~this()			{ release(); }
 
-	bool opCast(T)() if(is(T == bool))					{ return pResource != null; }
+	void opAssign(MFResource *pResource)
+	{
+		release();
+		this.pResource = pResource;
+		addRef();
+	}
+
+	void opAssign(Resource r)
+	{
+		release();
+		pResource = r.pResource;
+		addRef();
+	}
 
 	@property inout(MFResource)* handle() inout pure	{ return pResource; }
 
@@ -26,19 +39,24 @@ nothrow:
 	@property int refCount() const pure					{ return pResource.refCount; }
 	@property const(char)[] name() const pure			{ return pResource.name; }
 
-	int AddRef() pure	{ return pResource.AddRef(); }
-	int Release()
+	int addRef() pure
+	{
+		if(pResource)
+			return pResource.addRef();
+		return 0;
+	}
+	int release()
 	{
 		int rc = 0;
 		if(pResource)
 		{
-			rc = pResource.Release();
+			rc = pResource.release();
 			pResource = null;
 		}
 		return rc;
 	}
 
-	bool IsType(MFResourceType type) const pure			{ return this.type == type; }
+	bool isType(MFResourceType type) const pure			{ return this.type == type; }
 }
 
 
