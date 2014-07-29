@@ -41,6 +41,9 @@ MFInitStatus MFFileSystemHTTP_InitModule(int moduleId, bool bPerformInitialisati
 		fsCallbacks.FindFirst = NULL;
 		fsCallbacks.FindNext = NULL;
 		fsCallbacks.FindClose = NULL;
+		fsCallbacks.Stat = MFFileHTTP_Stat;
+		fsCallbacks.CreateDir = NULL;
+		fsCallbacks.Delete = NULL;
 
 		pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("HTTP Filesystem", &fsCallbacks);
 
@@ -486,4 +489,10 @@ uint64 MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 
 	fileHandle->offset = newPos;
 	return newPos;
+}
+
+bool MFFileHTTP_Stat(const char *pPath, MFFileInfo *pFileInfo)
+{
+	MFDebug_Assert(false, "HTTP stats?");
+	return false;
 }

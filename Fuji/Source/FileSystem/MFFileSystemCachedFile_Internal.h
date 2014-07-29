@@ -14,6 +14,9 @@ size_t MFFileCachedFile_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
 size_t MFFileCachedFile_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
 uint64 MFFileCachedFile_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
+bool MFFileCachedFile_Stat(const char *pPath, MFFileInfo *pFileInfo);
+bool MFFileCachedFile_Delete(const char *pPath, bool bRecursive);
+
 // this is just for convenience sake, and not part of the main filesystem interface
 uint64 MFFileCachedFile_GetSize(const char* pFilename);
 bool MFFileCachedFile_Exists(const char* pFilename);

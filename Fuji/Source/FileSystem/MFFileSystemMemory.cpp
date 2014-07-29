@@ -38,6 +38,9 @@ MFInitStatus MFFileSystemMemory_InitModule(int moduleId, bool bPerformInitialisa
 	fsCallbacks.FindFirst = NULL;
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
+	fsCallbacks.Stat = NULL;
+	fsCallbacks.CreateDir = NULL;
+	fsCallbacks.Delete = MFFileMemory_Delete;
 
 	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Memory Filesystem", &fsCallbacks);
 
@@ -162,4 +165,10 @@ uint64 MFFileMemory_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 
 	fileHandle->offset = newPos;
 	return newPos;
+}
+
+bool MFFileMemory_Delete(const char *pPath, bool bRecursive)
+{
+	MFDebug_Assert(false, "Free file");
+	return false;
 }

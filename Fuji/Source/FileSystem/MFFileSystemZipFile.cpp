@@ -34,6 +34,9 @@ MFInitStatus MFFileSystemZipFile_InitModule(int moduleId, bool bPerformInitialis
 	fsCallbacks.FindFirst = MFFileZipFile_FindFirst;
 	fsCallbacks.FindNext = MFFileZipFile_FindNext;
 	fsCallbacks.FindClose = MFFileZipFile_FindClose;
+	fsCallbacks.Stat = MFFileZipFile_Stat;
+	fsCallbacks.CreateDir = NULL;
+	fsCallbacks.Delete = NULL;
 
 	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Zip File Filesystem", &fsCallbacks);
 
@@ -346,4 +349,10 @@ bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 void MFFileZipFile_FindClose(MFFind *pFind)
 {
+}
+
+bool MFFileZipFile_Stat(const char *pPath, MFFileInfo *pFileInfo)
+{
+	MFDebug_Assert(false, "Stat file?");
+	return false;
 }

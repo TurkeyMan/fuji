@@ -180,7 +180,9 @@ struct MFStringData
 	size_t allocated;
 	int refCount;
 
-	void destroy() nothrow @nogc
+nothrow:
+@nogc:
+	void destroy()
 	{
 		if(--refCount == 0)
 			MFStringData_Destroy(&this);

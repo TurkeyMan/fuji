@@ -94,7 +94,7 @@ void Game_Draw()
 
 	// increment rotation
 	static float rotation = 0.0f;
-	rotation += MFTimeDelta();
+	rotation += MFSystem_GetTimeDelta();
 
 	// rotate the box
 	world.RotateYPR(rotation, rotation * 2.0f, rotation * 0.5f);

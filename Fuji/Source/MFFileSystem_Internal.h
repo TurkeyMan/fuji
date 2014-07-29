@@ -157,6 +157,10 @@ struct MFFileSystemCallbacks
 	bool (*FindFirst)(MFFind*, const char*, MFFindData*);
 	bool (*FindNext)(MFFind*, MFFindData*);
 	void (*FindClose)(MFFind*);
+
+	bool (*Stat)(const char*, MFFileInfo*);
+	bool (*CreateDir)(const char*);
+	bool (*Delete)(const char*, bool bRecursive);
 };
 
 struct MFFileSystem

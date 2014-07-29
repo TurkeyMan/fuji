@@ -33,6 +33,8 @@ size_t MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
 size_t MFFileHTTP_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
 uint64 MFFileHTTP_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
+bool MFFileHTTP_Stat(const char *pPath, MFFileInfo *pFileInfo);
+
 // this is just for convenience sake, and not part of the main filesystem interface
 uint64 MFFileHTTP_GetSize(const char* pFilename);
 bool MFFileHTTP_Exists(const char* pFilename);

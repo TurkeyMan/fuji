@@ -33,6 +33,9 @@ MFInitStatus MFFileSystemNative_InitModule(int moduleId, bool bPerformInitialisa
 		fsCallbacks.FindFirst = MFFileNative_FindFirst;
 		fsCallbacks.FindNext = MFFileNative_FindNext;
 		fsCallbacks.FindClose = MFFileNative_FindClose;
+		fsCallbacks.Stat = MFFileNative_Stat;
+		fsCallbacks.CreateDir = MFFileNative_CreateDirectory;
+		fsCallbacks.Delete = MFFileNative_Delete;
 
 		pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Native Filesystem", &fsCallbacks);
 	}

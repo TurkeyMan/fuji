@@ -5,6 +5,7 @@
 #include "MFSystem_Internal.h"
 #include "MFHeap.h"
 #include "MFThread.h"
+#include "MFFileSystem.h"
 
 extern MFInitParams gInitParams;
 
@@ -30,6 +31,31 @@ void MFSystem_DrawPlatformSpecific()
 {
 }
 #endif
+
+MF_API void MFSystem_SystemTime(MFSystemTime* pSystemTime)
+{
+	MFDebug_Assert(false, "todo");
+}
+
+MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime)
+{
+	MFDebug_Assert(false, "todo");
+}
+
+MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime)
+{
+	MFDebug_Assert(false, "todo");
+}
+
+MF_API void MFSystem_SystemTimeToLocalTime(const MFSystemTime *pSystemTime, MFSystemTime *pLocalTime)
+{
+	MFDebug_Assert(false, "todo");
+}
+
+MF_API void MFSystem_LocalTimeToSystemTime(const MFSystemTime *pLocalTime, MFSystemTime *pSystemTime)
+{
+	MFDebug_Assert(false, "todo");
+}
 
 MF_API uint64 MFSystem_ReadRTC()
 {

@@ -1,6 +1,7 @@
 module fuji.c.MFSystem;
 
 import fuji.c.Fuji;
+import fuji.c.MFFileSystem;
 
 nothrow:
 
@@ -13,6 +14,67 @@ struct MFIniLine;
 alias extern (C) void function() MFSystemCallbackFunction;
 
 @nogc:
+
+enum MFMonth : ushort
+{
+	January = 1,
+	February,
+	March,
+	April,
+	May,
+	June,
+	July,
+	August,
+	September,
+	October,
+	November,
+	December
+}
+
+enum MFDayOfWeek : ushort
+{
+	Sunday,
+	Monday,
+	Tuesday,
+	Wednesday,
+	Thursday,
+	Friday,
+	Saturday
+}
+
+struct MFSystemTime
+{
+	ushort year;
+	MFMonth month;
+	MFDayOfWeek dayOfWeek;
+	ushort day;
+	ushort hour;
+	ushort minute;
+	ushort second;
+	ushort tenthMillisecond; // ie, 100 microseconds
+
+nothrow:
+@nogc:
+	bool opEquals(MFSystemTime other) const pure	{ return tenthMillisecond == other.tenthMillisecond && second == other.second && minute == other.minute && hour == other.hour && day == other.day && month == other.month && year == other.year; }
+	int opCmp(MFSystemTime other) const pure
+	{
+		// TODO: should we combine these and compare as long's?
+		// ...loading misaligned ulong's is probably worse than field comparison.
+		int diff = year - other.year;
+		if(diff) return diff;
+		diff = month - other.month;
+		if(diff) return diff;
+		diff = day - other.day;
+		if(diff) return diff;
+		diff = hour - other.hour;
+		if(diff) return diff;
+		diff = minute - other.minute;
+		if(diff) return diff;
+		diff = second - other.second;
+		if(diff) return diff;
+		return tenthMillisecond - other.tenthMillisecond;
+	}
+}
 
 /**
 * System callbacks.
@@ -313,6 +375,12 @@ extern (C) const(char)* MFSystem_GetSystemName();
 * @see MFSystem_GetCurrentPlatform()
 */
 extern (C) MFEndian MFSystem_GetPlatformEndian(int platform);
+
+extern (C) void MFSystem_SystemTime(MFSystemTime* pSystemTime);
+extern (C) void MFSystem_SystemTimeToFileTime(const(MFSystemTime)* pSystemTime, MFFileTime* pFileTime);
+extern (C) void MFSystem_FileTimeToSystemTime(const(MFFileTime)* pFileTime, MFSystemTime* pSystemTime);
+extern (C) void MFSystem_SystemTimeToLocalTime(const(MFSystemTime)* pSystemTime, MFSystemTime* pLocalTime);
+extern (C) void MFSystem_LocalTimeToSystemTime(const(MFSystemTime)* pLocalTime, MFSystemTime* pSystemTime);
 
 /**
 * Read the time stamp counter.

@@ -38,6 +38,8 @@ MFInitStatus MFFileSystemCachedFile_InitModule(int moduleId, bool bPerformInitia
 	fsCallbacks.FindFirst = NULL;
 	fsCallbacks.FindNext = NULL;
 	fsCallbacks.FindClose = NULL;
+	fsCallbacks.Stat = MFFileCachedFile_Stat;
+	fsCallbacks.Delete = MFFileCachedFile_Delete;
 
 	pModuleData->hFileSystemHandle = MFFileSystem_RegisterFileSystem("Cached Filesystem", &fsCallbacks);
 
@@ -216,4 +218,16 @@ uint64 MFFileCachedFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 
 	pFile->offset = newPos;
 	return pFile->offset;
+}
+
+bool MFFileCachedFile_Stat(const char *pPath, MFFileInfo *pFileInfo)
+{
+	MFDebug_Assert(false, "Stat underlying file");
+	return false;
+}
+
+bool MFFileCachedFile_Delete(const char *pPath, bool bRecursive)
+{
+	MFDebug_Assert(false, "Delete underlying file");
+	return false;
 }

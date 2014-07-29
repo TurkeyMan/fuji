@@ -23,9 +23,14 @@ int MFFileNative_Close(MFFile* fileHandle);
 size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
 size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
 uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
+
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData);
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData);
 void MFFileNative_FindClose(MFFind *pFind);
+
+bool MFFileNative_Stat(const char *pPath, MFFileInfo *pFileInfo);
+bool MFFileNative_CreateDirectory(const char *pPath);
+bool MFFileNative_Delete(const char *pPath, bool bRecursive);
 
 // this is just for convenience sake, and not part of the main filesystem interface
 uint64 MFFileNative_GetSize(const char* pFilename);

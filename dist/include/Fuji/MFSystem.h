@@ -11,6 +11,46 @@
 #define _MFSYSTEM_H
 
 class MFIniLine;
+struct MFFileTime;
+
+enum MFMonth
+{
+	January = 1,
+	February,
+	March,
+	April,
+	May,
+	June,
+	July,
+	August,
+	September,
+	October,
+	November,
+	December
+};
+
+enum MFDayOfWeek
+{
+	Sunday,
+	Monday,
+	Tuesday,
+	Wednesday,
+	Thursday,
+	Friday,
+	Saturday
+};
+
+struct MFSystemTime
+{
+	uint16 year;
+	uint16 month;
+	uint16 dayOfWeek;
+	uint16 day;
+	uint16 hour;
+	uint16 minute;
+	uint16 second;
+	uint16 tenthMillisecond; // ie, 100 microseconds
+};
 
 /**
  * Fuji Defaults structure.
@@ -318,6 +358,12 @@ MF_API const char * MFSystem_GetSystemName();
  * @see MFSystem_GetCurrentPlatform()
  */
 MF_API MFEndian MFSystem_GetPlatformEndian(int platform);
+
+MF_API void MFSystem_SystemTime(MFSystemTime *pSystemTime);
+MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime);
+MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime);
+MF_API void MFSystem_SystemTimeToLocalTime(const MFSystemTime *pSystemTime, MFSystemTime *pLocalTime);
+MF_API void MFSystem_LocalTimeToSystemTime(const MFSystemTime *pLocalTime, MFSystemTime *pSystemTime);
 
 /**
  * Read the time stamp counter.

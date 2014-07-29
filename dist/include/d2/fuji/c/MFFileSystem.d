@@ -88,6 +88,24 @@ struct MFOpenData
 	uint openFlags;						/**< Open file flags, this can be values from the MFOpenFlags enum */
 }
 
+struct MFFileTime
+{
+	ulong ticks;
+
+nothrow:
+@nogc:
+	bool opEquals(MFFileTime other) const pure	{ return ticks == other.ticks; }
+	long opCmp(MFFileTime other) const pure		{ return cast(long)ticks - cast(long)other.ticks; }
+}
+
+struct MFFileInfo
+{
+	ulong size;
+	uint attributes;
+	MFFileTime writeTime;
+	MFFileTime accessTime;
+}
+
 /**
 * Open a file.
 * Opens a file.
@@ -160,6 +178,11 @@ extern (C) ulong MFFile_GetSize(MFFile *pFile);
 * @return True if the file pointer has reached the end of the file, otherwise false.
 */
 extern (C) bool MFFile_IsEOF(MFFile *pFile);
+
+extern (C) bool MFFile_Stat(MFFileSystemHandle fileSystem, const(char)* pPath, MFFileInfo* pFileInfo);
+extern (C) bool MFFile_CreateDirectory(MFFileSystemHandle fileSystem, const(char)* pPath);
+extern (C) bool MFFile_Delete(MFFileSystemHandle fileSystem, const(char)* pPath, bool bRecursive);
+
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
 
@@ -302,9 +325,12 @@ struct MFFindData
 	char pSystemPath[256] = void;	/**< The system path to the file */
 	ulong fileSize;					/**< The files size */
 	uint attributes;				/**< The files attributes */
+	MFFileTime writeTime;			/**< Last time the file was written */
+	MFFileTime accessTime;			/**< Last time the file was accessed */
 
-	@property const(char)[] filename() const pure nothrow	{ return pFilename.ptr.toDStr; }
-	@property const(char)[] systemPath() const pure nothrow	{ return pSystemPath.ptr.toDStr; }
+nothrow: @nogc:
+	@property const(char)[] filename() const pure	{ return pFilename.ptr.toDStr; }
+	@property const(char)[] systemPath() const pure	{ return pSystemPath.ptr.toDStr; }
 }
 
 /**
@@ -402,6 +428,10 @@ extern (C) ulong MFFileSystem_GetSize(const(char)* pFilename);
 * @return True if the file can be found within the mounted filesystem stack.
 */
 extern (C) bool MFFileSystem_Exists(const(char)* pFilename);
+
+extern (C) bool MFFileSystem_Stat(const(char)* pPath, MFFileInfo* pFileInfo);
+extern (C) bool MFFileSystem_CreateDirectory(const(char)* pPath);
+extern (C) bool MFFileSystem_Delete(const(char)* pPath, bool bRecursive);
 
 /**
 * Get number of available volumes.

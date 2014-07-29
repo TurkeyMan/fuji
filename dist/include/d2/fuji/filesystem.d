@@ -29,12 +29,14 @@ struct DirEntry
 {
 	alias filepath this;
 
-	string filepath;	// the file or directory represented by this DirEntry
-	string systemPath;	// the system path to this file.
-	string filename;	// the filename part
-	string directory;	// the directory part
-	ulong size;			// file size in bytes
-	uint  attributes;	// file attributes
+	string filepath;		// the file or directory represented by this DirEntry
+	string systemPath;		// the system path to this file.
+	string filename;		// the filename part
+	string directory;		// the directory part
+	ulong size;				// file size in bytes
+	uint  attributes;		// file attributes
+	MFFileTime writeTime;	// last write time
+	MFFileTime accessTime;	// last access time
 
 	private this(string path, in MFFindData* fd)
 	{
@@ -49,6 +51,9 @@ struct DirEntry
 
 		size = fd.fileSize;
 		attributes = fd.attributes;
+
+		writeTime = fd.writeTime;
+		accessTime = fd.accessTime;
 	}
 
 nothrow:

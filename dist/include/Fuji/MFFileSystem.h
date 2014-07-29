@@ -96,6 +96,19 @@ struct MFOpenData
 	uint32 openFlags;	/**< Open file flags, this can be values from the MFOpenFlags enum */
 };
 
+struct MFFileTime
+{
+	uint64 ticks;
+};
+
+struct MFFileInfo
+{
+	uint64 size;
+	uint32 attributes;
+	MFFileTime writeTime;
+	MFFileTime accessTime;
+};
+
 /**
  * Open a file.
  * Opens a file.
@@ -168,6 +181,10 @@ MF_API uint64 MFFile_GetSize(MFFile *pFile);
  * @return True if the file pointer has reached the end of the file, otherwise false.
  */
 MF_API bool MFFile_IsEOF(MFFile *pFile);
+
+MF_API bool MFFile_Stat(MFFileSystemHandle fileSystem, const char *pPath, MFFileInfo *pFileInfo);
+MF_API bool MFFile_CreateDirectory(MFFileSystemHandle fileSystem, const char *pPath);
+MF_API bool MFFile_Delete(MFFileSystemHandle fileSystem, const char *pPath, bool bRecursive);
 
 // stdio signiture functions (these can be used as callbacks to many libs and API's)
 
@@ -319,6 +336,8 @@ struct MFFindData
 	char pSystemPath[256];	/**< The system path to the file */
 	uint64 fileSize;		/**< The files size */
 	uint32 attributes;		/**< The files attributes */
+	MFFileTime writeTime;	/**< Last time the file was written */
+	MFFileTime accessTime;	/**< Last time the file was accessed */
 };
 
 /**
@@ -414,6 +433,10 @@ MF_API uint64 MFFileSystem_GetSize(const char *pFilename);
  * @return True if the file can be found within the mounted filesystem stack.
  */
 MF_API bool MFFileSystem_Exists(const char *pFilename);
+
+MF_API bool MFFileSystem_Stat(const char *pPath, MFFileInfo *pFileInfo);
+MF_API bool MFFileSystem_CreateDirectory(const char *pPath);
+MF_API bool MFFileSystem_Delete(const char *pPath, bool bRecursive);
 
 /**
  * Resolve the system path to a file.

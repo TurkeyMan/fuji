@@ -22,6 +22,8 @@ bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDa
 bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData);
 void MFFileZipFile_FindClose(MFFind *pFind);
 
+bool MFFileZipFile_Stat(const char *pPath, MFFileInfo *pFileInfo);
+
 // this is just for convenience sake, and not part of the main filesystem interface
 uint64 MFFileZipFile_GetSize(const char* pFilename);
 bool MFFileZipFile_Exists(const char* pFilename);

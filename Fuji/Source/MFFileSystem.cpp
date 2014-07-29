@@ -527,6 +527,27 @@ MF_API bool MFFile_IsEOF(MFFile* fileHandle)
 	return fileHandle->offset == fileHandle->length;
 }
 
+MF_API bool MFFile_Stat(MFFileSystemHandle fileSystem, const char *pPath, MFFileInfo *pFileInfo)
+{
+	GET_MODULE_DATA(MFFileSystemState);
+
+	return pModuleData->ppFileSystemList[fileSystem]->callbacks.Stat(pPath, pFileInfo);
+}
+
+MF_API bool MFFile_CreateDirectory(MFFileSystemHandle fileSystem, const char *pPath)
+{
+	GET_MODULE_DATA(MFFileSystemState);
+
+	return pModuleData->ppFileSystemList[fileSystem]->callbacks.CreateDir(pPath);
+}
+
+MF_API bool MFFile_Delete(MFFileSystemHandle fileSystem, const char *pPath, bool bRecursive)
+{
+	GET_MODULE_DATA(MFFileSystemState);
+
+	return pModuleData->ppFileSystemList[fileSystem]->callbacks.Delete(pPath, bRecursive);
+}
+
 // stdio signiture functions (these can be used as a callback to many libs and API's)
 MF_API size_t MFFile_StdRead(void *pBuffer, size_t size, size_t count, void* fileHandle)
 {
@@ -1110,6 +1131,24 @@ MF_API bool MFFileSystem_Exists(const char *pFilename)
 	}
 
 	return exists;
+}
+
+MF_API bool MFFileSystem_Stat(const char *pPath, MFFileInfo *pFileInfo)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
+}
+
+MF_API bool MFFileSystem_CreateDirectory(const char *pPath)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
+}
+
+MF_API bool MFFileSystem_Delete(const char *pPath, bool bRecursive)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
 }
 
 MF_API const char *MFFileSystem_ResolveSystemPath(const char *pFilename, bool bAbsolute)

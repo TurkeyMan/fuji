@@ -191,6 +191,24 @@ bool MFFileNative_Exists(const char* pFilename)
 #endif
 }
 
+bool MFFileNative_Stat(const char *pPath, MFFileInfo *pFileInfo)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
+}
+
+bool MFFileNative_CreateDirectory(const char *pPath)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
+}
+
+bool MFFileNative_Delete(const char *pPath, bool bRecursive)
+{
+	MFDebug_Assert(false, "TODO");
+	return false;
+}
+
 const char* MFFileNative_MakeAbsolute(const char* pFilename)
 {
 	MFDebug_Assert(false, "!");
@@ -213,6 +231,8 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
+	pFindData->writeTime.ticks = (uint64)fd.time_write;
+	pFindData->accessTime.ticks = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);
 
 	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
@@ -246,6 +266,8 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
+	pFindData->writeTime.ticks = (uint64)fd.time_write;
+	pFindData->accessTime.ticks = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);
 
 	return true;

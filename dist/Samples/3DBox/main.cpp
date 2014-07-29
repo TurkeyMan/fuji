@@ -85,7 +85,7 @@ void Game_Update()
 	world.SetTranslation(MakeVector(0, 0, 5));
 
 	static float rotation = 0.0f;
-	rotation += MFTimeDelta();
+	rotation += MFSystem_GetTimeDelta();
 	world.RotateYPR(rotation, rotation * 2.0f, rotation * 0.5f);
 
 	// set world matrix to the entity stateblock

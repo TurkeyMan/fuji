@@ -26,4 +26,6 @@ size_t MFFileMemory_Read(MFFile* fileHandle, void *pBuffer, size_t bytes);
 size_t MFFileMemory_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes);
 uint64 MFFileMemory_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity);
 
+bool MFFileMemory_Delete(const char *pPath, bool bRecursive);
+
 #endif
