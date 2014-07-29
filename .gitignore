@@ -17,6 +17,10 @@ kdev4/
 /dist/Samples/*/*_DebugOpt
 /dist/Samples/*/*_Release
 /dist/Samples/*/*_Retail
+/dist/Samples/*/*-debug
+/dist/Samples/*/*-debugopt
+/dist/Samples/*/*-release
+/dist/Samples/*/*-retail
 *.sln
 *.sdf
 *.suo
@@ -41,3 +45,4 @@ Makefile
 /Fuji/Doc/html
 *.chw
 
+.fuse_*
