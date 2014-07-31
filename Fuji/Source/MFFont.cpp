@@ -22,8 +22,6 @@
 
 // globals
 
-MFFontPool* gpFontBank = NULL;
-
 #define MAX_TEXT_LINES 30					// maximum number of lines we can handle in one draw text
 #define _WRAP_EXCLUDES_TRAILING_WHITESPACE	// weather text justification considers trailing whitespace after the final wrap char when considering justification.
 
@@ -125,13 +123,23 @@ float MFFontInternal_CalcHeightAndScale(const MFFont *pFont, float height, float
 
 // font functions
 
+static void MFFont_Destroy(MFResource *pRes)
+{
+	MFFont *pFont = (MFFont*)pRes;
+
+	// destroy materials
+	for(int a=0; a<pFont->numPages; a++)
+		MFMaterial_Release(pFont->ppPages[a]);
+
+	// destroy font
+	MFHeap_Free(pFont);
+}
+
 MFInitStatus MFFont_InitModule(int moduleId, bool bPerformInitialisation)
 {
 	MFCALLSTACK;
 
-	gpFontBank = new MFFontPool();
-
-	gpFontBank->Init(256, 16, 16);
+	MFRT_Font = MFResource_Register("MFFont", &MFFont_Destroy);
 
 	gpDebugFont = MFFont_Create("Arial");
 
@@ -143,25 +151,18 @@ void MFFont_DeinitModule()
 	MFCALLSTACK;
 
 	MFFont_Release(gpDebugFont);
-
-	delete gpFontBank;
-	gpFontBank = NULL;
 }
 
 MF_API MFFont* MFFont_Create(const char *pFilename)
 {
 	MFCALLSTACK;
 
-	// see if it's already loaded
-	MFFontPool::Iterator it = gpFontBank->Get(pFilename);
-	if(it)
-	{
-		++(*it)->refCount;
-		return *it;
-	}
+	MFFont *pFont = (MFFont*)MFResource_Find(MFUtil_HashString(pFilename) ^ 0xF047F047);
+	if(pFont)
+		return pFont;
 
 	// load font file
-	MFFont *pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fnt.fft", pFilename));
+	pFont = (MFFont*)MFFileSystem_Load(MFStr("%s.fnt.fft", pFilename));
 
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 	if(!pFont)
@@ -173,9 +174,6 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 
 	if(!pFont)
 		return NULL;
-
-	pFont->refCount = 1;
-	gpFontBank->Add(pFilename, pFont);
 
 	// fixup pointers
 	MFFixUp(pFont->pName, pFont, 1);
@@ -203,28 +201,15 @@ MF_API MFFont* MFFont_Create(const char *pFilename)
 	int id = pFont->pCharacterMapping[' '];
 	pFont->spaceWidth = pFont->pChars[id].xadvance;
 
+	// add the resource
+	MFResource_AddResource(pFont, MFRT_Font, MFUtil_HashString(pFilename) ^ 0xF047F047, pFont->pName);
+
 	return pFont;
 }
 
 MF_API int MFFont_Release(MFFont *pFont)
 {
-	MFCALLSTACK;
-
-	if(--pFont->refCount > 0)
-		return pFont->refCount;
-
-	// remove it from the registry
-	// TODO: this is a scanning destroy, do this by hash...?
-	gpFontBank->Destroy(pFont);
-
-	// destroy materials
-	for(int a=0; a<pFont->numPages; a++)
-		MFMaterial_Release(pFont->ppPages[a]);
-
-	// destroy font
-	MFHeap_Free(pFont);
-
-	return 0;
+	return MFResource_Release(pFont);
 }
 
 MF_API MFFont* MFFont_GetDebugFont()

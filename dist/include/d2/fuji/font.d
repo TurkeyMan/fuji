@@ -4,6 +4,8 @@ public import fuji.c.MFFont;
 
 import fuji.resource;
 import fuji.string;
+import fuji.vector;
+import fuji.matrix;
 
 struct Font
 {
@@ -84,4 +86,46 @@ nothrow:
 	@property float height() const									{ return MFFont_GetFontHeight(pFont); }
 
 	float characterWidth(dchar character) const						{ return MFFont_GetCharacterWidth(pFont, cast(int)character); }
+
+	MFVector getCharPos(const(char)[] text, int charIndex, float height)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_GetCharPos(pFont, s, charIndex, height);
+	}
+
+	float getStringWidth(const(char)[] text, float height, float lineWidth = 0.0f, int maxLen = -1, float* pTotalHeight = null)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_GetStringWidth(pFont, s, height, lineWidth, maxLen, pTotalHeight);
+	}
+
+	int blit(const(char)[] text, int x, int y, ref const(MFVector) colour = MFVector.white)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_BlitText(pFont, x, y, colour, s, -1);
+	}
+
+	float draw(const(char)[] text, ref const(MFVector) pos, float height, ref const(MFVector) colour = MFVector.white, ref const(MFMatrix) ltw = MFMatrix.identity)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_DrawText(pFont, pos, height, colour, s, -1, ltw);
+	}
+
+	float draw(const(char)[] text, float x, float y, float height, ref const(MFVector) colour = MFVector.white, ref const(MFMatrix) ltw = MFMatrix.identity)
+	{
+		MFVector pos = MFVector(x, y);
+		return draw(text, pos, height, colour, ltw);
+	}
+
+	float drawJustified(const(char)[] text, ref const(MFVector) pos, float boxWidth, float boxHeight, MFFontJustify justification, float textHeight, ref const(MFVector) colour = MFVector.white, ref const(MFMatrix) ltw = MFMatrix.identity)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_DrawTextJustified(pFont, s, pos, boxWidth, boxHeight, justification, textHeight, colour, -1, ltw);
+	}
+
+	float drawAnchored(const(char)[] text, ref const(MFVector) pos, MFFontJustify justification, float lineWidth, float textHeight, ref const(MFVector) colour = MFVector.white, ref const(MFMatrix) ltw = MFMatrix.identity)
+	{
+		auto s = Stringz!256(text);
+		return MFFont_DrawTextAnchored(pFont, s, pos, justification, lineWidth, textHeight, colour, -1, ltw);
+	}
 }

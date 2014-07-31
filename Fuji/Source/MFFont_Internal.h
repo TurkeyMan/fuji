@@ -2,6 +2,7 @@
 #define _MFFONT_INTERNAL_H
 
 #include "MFFont.h"
+#include "MFResource.h"
 #include "MFMaterial.h"
 
 enum MFFontFlags
@@ -23,10 +24,8 @@ struct MFFontChar
 	uint8 channel;
 };
 
-struct MFFont
+struct MFFont : public MFResource
 {
-	const char *pName;
-
 	int size;
 	int height;
 	int base;
@@ -42,8 +41,6 @@ struct MFFont
 
 	MFMaterial **ppPages;
 	int numPages;
-
-	int refCount;
 };
 
 MFInitStatus MFFont_InitModule(int moduleId, bool bPerformInitialisation);
