@@ -12,6 +12,12 @@
 #include <unistd.h>
 #include <dirent.h>
 
+struct MFFind_Linux
+{
+	char systemPath[4096];
+	DIR *pDirectory;
+};
+
 MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
 {
 	return MFIS_Succeeded;
@@ -252,22 +258,26 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	}
 
 	// open the directory
-	DIR *hFind = opendir(pPath);
+	DIR *pDir = opendir(pPath);
 
-	if(!hFind)
+	if(!pDir)
 	{
 		MFDebug_Warn(2, MFStr("Couldnt open directory '%s' with search pattern '%s'", pPath, pPattern));
 		return false;
 	}
 
-	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
-	pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	MFFind_Linux *pFD = (MFFind_Linux*)MFHeap_Alloc(sizeof(MFFind_Linux));
+
+	pFD->pDirectory = pDir;
+
+	MFString_CopyCat(pFD->systemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	pLast = MFString_RChr(pFD->systemPath, '/');
 	if(pLast)
 		pLast[1] = 0;
 	else
-		pFindData->pSystemPath[0] = 0;
+		pFD->systemPath[0] = 0;
 
-	pFind->pFilesystemData = (void*)hFind;
+	pFind->pFilesystemData = (void*)pFD;
 
 	bool bFound = MFFileNative_FindNext(pFind, pFindData);
 	if(!bFound)
@@ -277,14 +287,15 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
-	dirent *pFD = readdir((DIR*)pFind->pFilesystemData);
+	MFFind_Linux *pFD = (MFFind_Linux*)pFind->pFilesystemData;
+	dirent *pDir = readdir(pFD->pDirectory);
 
-	while(pFD && (!MFString_Compare(pFD->d_name, ".") || !MFString_Compare(pFD->d_name, "..")))
-		pFD = readdir((DIR*)pFind->pFilesystemData);
-	if(!pFD)
+	while(pDir && (!MFString_Compare(pDir->d_name, ".") || !MFString_Compare(pDir->d_name, "..")))
+		pDir = readdir(pFD->pDirectory);
+	if(!pDir)
 		return false;
 
-	const char *pFilePath = MFStr("%s%s", pFindData->pSystemPath, pFD->d_name);
+	const char *pFilePath = MFStr("%s%s", pFD->systemPath, pDir->d_name);
 
 	struct stat statbuf;
 	if(stat(pFilePath, &statbuf) < 0)
@@ -292,18 +303,23 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
 							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0) |
-							(pFD->d_name[0] == '.' ? MFFA_Hidden : 0);
+							(pDir->d_name[0] == '.' ? MFFA_Hidden : 0);
+							// TODO: Set MFFA_ReadOnly from write privileges
 	pFindData->fileSize = statbuf.st_size;
 	pFindData->writeTime.ticks = (uint64)statbuf.st_mtime;
 	pFindData->accessTime.ticks = (uint64)statbuf.st_atime;
-	MFString_Copy((char*)pFindData->pFilename, pFD->d_name);
+	MFString_Copy((char*)pFindData->pFilename, pDir->d_name);
+	MFString_Copy((char*)pFindData->pSystemPath, pFD->systemPath);
 
 	return true;
 }
 
 void MFFileNative_FindClose(MFFind *pFind)
 {
-	closedir((DIR*)pFind->pFilesystemData);
+	MFFind_Linux *pFD = (MFFind_Linux*)pFind->pFilesystemData;
+	closedir(pFD->pDirectory);
+	MFHeap_Free(pFind->pFilesystemData);
+	pFind->pFilesystemData = NULL;
 }
 
 #endif // MF_DRIVER_LINUX
