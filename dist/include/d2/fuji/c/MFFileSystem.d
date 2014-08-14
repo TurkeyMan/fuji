@@ -24,14 +24,18 @@ alias int MFFileSystemHandle;
 */
 enum MFOpenFlags : uint
 {
-	Read	= 1,	/**< File has read access */
-	Write	= 2,	/**< File has write access */
-	Text	= 4,	/**< Open file in text mode */
-	Binary	= 8,	/**< Open file in binary mode */
+	Read		= 0x1,	/**< File has read access */
+	Write		= 0x2,	/**< File has write access */
+	Truncate	= 0x4,	/**< Truncate existing file */
+	Append		= 0x8,	/**< Append to existing file */
+	Text		= 0x10,	/**< Open file in text mode */
+	Binary		= 0x20,	/**< Open file in binary mode */
 
-	CreateDirectory = 16,	/**< Create the directory if it doesn't already exist */
+	CreateDirectory = 0x40,	/**< Create the directory if it doesn't already exist */
 
-	User	= 256	/**< User flags begin here (for use by other file systems) */
+	TryOpen		= 0x80,	/**< Try and open the file, but doesn't complain if the open operation fails */
+
+	User		= 0x100	/**< User flags begin here (for use by other file systems) */
 }
 
 /**
@@ -321,10 +325,10 @@ enum MFFileSystemHandles
 */
 struct MFFindData
 {
-	char pFilename[256] = void;		/**< The files filename */
-	char pSystemPath[256] = void;	/**< The system path to the file */
-	ulong fileSize;					/**< The files size */
+	char pFilename[224] = void;		/**< The files filename */
+	char pSystemPath[260] = void;	/**< The system path to the file */
 	uint attributes;				/**< The files attributes */
+	ulong fileSize;					/**< The files size */
 	MFFileTime writeTime;			/**< Last time the file was written */
 	MFFileTime accessTime;			/**< Last time the file was accessed */
 

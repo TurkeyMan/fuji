@@ -37,6 +37,8 @@ enum MFOpenFlags
 
 	MFOF_CreateDirectory = 0x40,	/**< Create the directory if it doesn't already exist */
 
+	MFOF_TryOpen = 0x80,			/**< Try and open the file, but doesn't complain if the open operation fails */
+
 	MFOF_User = 0x100,				/**< User flags begin here (for use by other file systems) */
 
 	MFOF_ForceInt = 0x7FFFFFFF		/**< Force open flags to an int type */
@@ -332,10 +334,10 @@ enum MFFileSystemHandles
  */
 struct MFFindData
 {
-	char pFilename[256];	/**< The files filename */
-	char pSystemPath[256];	/**< The system path to the file */
-	uint64 fileSize;		/**< The files size */
+	char pFilename[224];	/**< The files filename */
+	char pSystemPath[260];	/**< The system path to the file */
 	uint32 attributes;		/**< The files attributes */
+	uint64 fileSize;		/**< The files size */
 	MFFileTime writeTime;	/**< Last time the file was written */
 	MFFileTime accessTime;	/**< Last time the file was accessed */
 };

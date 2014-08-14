@@ -1038,7 +1038,8 @@ MF_API MFFile* MFFileSystem_Open(const char *pFilename, uint32 openFlags)
 		pMount = pMount->pNext;
 	}
 
-	MFDebug_Warn(4, MFStr("MFFile_Open(\"%s\", 0x%x) - Failed to open file", pFilename, openFlags));
+	if(!(openFlags & MFOF_TryOpen))
+		MFDebug_Warn(4, MFStr("MFFile_Open(\"%s\", 0x%x) - Failed to open file", pFilename, openFlags));
 
 	return NULL;
 }
@@ -1049,7 +1050,6 @@ MF_API char* MFFileSystem_Load(const char *pFilename, size_t *pBytesRead, size_t
 	char *pBuffer = NULL;
 
 	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
-
 	if(hFile)
 	{
 		uint64 size = MFFile_GetSize(hFile);
@@ -1122,8 +1122,7 @@ MF_API bool MFFileSystem_Exists(const char *pFilename)
 
 	bool exists = false;
 
-	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary);
-
+	MFFile *hFile = MFFileSystem_Open(pFilename, MFOF_Read|MFOF_Binary|MFOF_TryOpen);
 	if(hFile)
 	{
 		exists = true;

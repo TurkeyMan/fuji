@@ -788,6 +788,44 @@ private:
 MFString operator+(const char *pString, const MFString &string);
 
 /**
+ * Static string class.
+ * Creates a pre-allocated string buffer, which automatically overflows into an allocation in the case of long strings.
+ */
+template<size_t Bytes>
+class MFStaticString
+{
+public:
+	MFStaticString(const char *pString = NULL);
+	~MFStaticString();
+
+	bool operator!() const;								/**< Boolean 'not' operator. */
+	operator bool() const;								/**< bool typecast operator. */
+
+	MFStaticString& operator=(const char *pString);		/**< Assignment operator. */
+	MFStaticString& operator+=(char c);					/**< Append operator. */
+	MFStaticString& operator+=(const char *pString);		/**< Append operator. */
+
+	const char *CStr() const;
+
+	int NumBytes() const;
+	int NumChars() const;
+
+private:
+	uint32 length;
+
+	static const size_t BufferLen = Bytes - sizeof(length);
+	union
+	{
+		char buffer[BufferLen];
+		struct
+		{
+			char *pBuffer;
+			size_t allocated;
+		} alloc;
+	} u;
+};
+
+/**
  * Implements a D language string.
  */
 struct DString : public DSlice<char>

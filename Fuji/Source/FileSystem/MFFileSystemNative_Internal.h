@@ -33,8 +33,8 @@ bool MFFileNative_CreateDirectory(const char *pPath);
 bool MFFileNative_Delete(const char *pPath, bool bRecursive);
 
 // this is just for convenience sake, and not part of the main filesystem interface
-uint64 MFFileNative_GetSize(const char* pFilename);
-bool MFFileNative_Exists(const char* pFilename);
-const char* MFFileNative_MakeAbsolute(const char* pFilename);
+uint64 MFFileNative_GetSize(const char *pFilename);
+bool MFFileNative_Exists(const char *pFilename);
+const char* MFFileNative_MakeAbsolute(const char *pFilename);
 
 #endif

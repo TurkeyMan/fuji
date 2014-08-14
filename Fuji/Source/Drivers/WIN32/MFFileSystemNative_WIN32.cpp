@@ -207,7 +207,7 @@ uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 	return (uint64)pos.QuadPart;
 }
 
-uint64 MFFileNative_GetSize(const char* pFilename)
+uint64 MFFileNative_GetSize(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -230,7 +230,7 @@ uint64 MFFileNative_GetSize(const char* pFilename)
 	return fileSize;
 }
 
-bool MFFileNative_Exists(const char* pFilename)
+bool MFFileNative_Exists(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -303,7 +303,7 @@ bool MFFileNative_Delete(const char *pPath, bool bRecursive)
 	return DeleteFile(pPath) != 0;
 }
 
-const char* MFFileNative_MakeAbsolute(const char* pFilename)
+const char* MFFileNative_MakeAbsolute(const char *pFilename)
 {
 	char path[256];
 	GetFullPathName(pFilename, sizeof(path), path, NULL);
@@ -328,15 +328,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 		return false;
 	}
 
-	pFindData->attributes = ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0) |
-							((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
-							((fd.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? MFFA_ReadOnly : 0);
-	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
-	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
-	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
-	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
-
-	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
+	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pFind->searchPattern);
 	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
 	if(pLast)
 		pLast[1] = 0;
@@ -344,6 +336,14 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 		pFindData->pSystemPath[0] = NULL;
 
 	pFind->pFilesystemData = (void*)hFind;
+
+	pFindData->attributes = ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0) |
+							((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
+							((fd.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? MFFA_ReadOnly : 0);
+	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
+	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
+	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
+	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
 
 	return true;
 }
@@ -356,6 +356,13 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	if(!more)
 		return false;
+
+	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pFind->searchPattern);
+	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	if(pLast)
+		pLast[1] = 0;
+	else
+		pFindData->pSystemPath[0] = 0;
 
 	pFindData->attributes = ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0) |
 							((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
@@ -373,4 +380,4 @@ void MFFileNative_FindClose(MFFind *pFind)
 	FindClose((HANDLE)pFind->pFilesystemData);
 }
 
-#endif // MF_FILESYSTEM
+#endif // MF_DRIVER_WIN32

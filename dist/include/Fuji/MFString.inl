@@ -842,3 +842,156 @@ inline int MFString::Enumerate(const char **ppKeys, size_t numKeys, bool bCaseSe
 		return -1;
 	return MFString_Enumerate(pData->pMemory, ppKeys, numKeys, bCaseSensitive);
 }
+
+template<size_t Bytes>
+MFStaticString<Bytes>::MFStaticString(const char *pString)
+{
+	if(!pString)
+	{
+		length = 0;
+		u.buffer[0] = 0;
+	}
+	else
+	{
+		length = (uint32)MFString_Length(pString);
+		char *pBuffer;
+		if(length >= BufferLen)
+		{
+			u.alloc.allocated = length+1;
+			u.alloc.pBuffer = MFHeap_Alloc(u.alloc.allocated);
+			pBuffer = u.alloc.pBuffer;
+		}
+		else
+			pBuffer = u.buffer;
+		MFString_Copy(pBuffer, pString);
+	}
+}
+
+template<size_t Bytes>
+MFStaticString<Bytes>::~MFStaticString()
+{
+	if(length >= BufferLen)
+		MFHeap_Free(u.alloc.pBuffer);
+}
+
+template<size_t Bytes>
+bool MFStaticString<Bytes>::operator!() const
+{
+	return length == 0;
+}
+template<size_t Bytes>
+MFStaticString<Bytes>::operator bool() const
+{
+	return length != 0;
+}
+
+template<size_t Bytes>
+MFStaticString<Bytes>& MFStaticString<Bytes>::operator=(const char *pString)
+{
+	if(!pString)
+	{
+		~MFStaticString<Bytes>();
+		length = 0;
+		u.buffer[0] = 0;
+	}
+	else
+	{
+		uint32 len = (uint32)MFString_Length(pString);
+		char *pBuffer = u.buffer;
+		if(len >= BufferLen)
+		{
+			if(length < BufferLen)
+			{
+				u.alloc.allocated = len+1;
+				u.alloc.pBuffer = MFHeap_Alloc(u.alloc.allocated);
+			}
+			else if(len >= u.alloc.allocated)
+			{
+				u.alloc.allocated = len+1;
+				u.alloc.pBuffer = MFHeap_Realloc(u.alloc.pBuffer, u.alloc.allocated);
+			}
+			pBuffer = u.alloc.pBuffer;
+		}
+		else
+		{
+			if(length >= BufferLen)
+				MFHeap_Free(pBuffer);
+		}
+		MFString_Copy(pBuffer, pString);
+		length = len;
+	}
+
+	return *this;
+}
+
+template<size_t Bytes>
+MFStaticString<Bytes>& MFStaticString<Bytes>::operator+=(char c)
+{
+	uint32 len = length + 1;
+	char *pBuffer = u.buffer;
+	if(len >= BufferLen)
+	{
+		if(length < BufferLen)
+		{
+			u.alloc.allocated = len*2;
+			u.alloc.pBuffer = MFHeap_Alloc(u.alloc.allocated);
+		}
+		else if(len >= u.alloc.allocated)
+		{
+			u.alloc.allocated = len*2;
+			u.alloc.pBuffer = MFHeap_Realloc(u.alloc.pBuffer, u.alloc.allocated);
+		}
+		u.alloc.pBuffer[length] = c;
+		u.alloc.pBuffer[len] = 0;
+		pBuffer = u.alloc.pBuffer;
+	}
+	pBuffer[length] = c;
+	pBuffer[len] = 0;
+	length = len;
+	return *this;
+}
+
+template<size_t Bytes>
+MFStaticString<Bytes>& MFStaticString<Bytes>::operator+=(const char *pString)
+{
+	if(!pString)
+		return *this;
+
+	uint32 len = length + MFString_Length(pString);
+	char *pBuffer = u.buffer;
+	if(len >= BufferLen)
+	{
+		if(length < BufferLen)
+		{
+			u.alloc.allocated = len*2;
+			u.alloc.pBuffer = MFHeap_Alloc(u.alloc.allocated);
+		}
+		else if(len >= u.alloc.allocated)
+		{
+			u.alloc.allocated = len*2;
+			u.alloc.pBuffer = MFHeap_Realloc(u.alloc.pBuffer, u.alloc.allocated);
+		}
+		pBuffer = u.alloc.pBuffer;
+	}
+	MFString_Copy(pBuffer + length, pString);
+	length = len;
+	return *this;
+}
+
+template<size_t Bytes>
+const char *MFStaticString<Bytes>::CStr() const
+{
+	return length >= BufferLen ? u.alloc.pBuffer : u.buffer;
+}
+
+template<size_t Bytes>
+int MFStaticString<Bytes>::NumBytes() const
+{
+	return length;
+}
+
+template<size_t Bytes>
+int MFStaticString<Bytes>::NumChars() const
+{
+	return length > 0 ? MFString_GetNumChars(CStr()) : 0;
+}

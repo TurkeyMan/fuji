@@ -3,6 +3,7 @@ module fuji.filesystem;
 public import fuji.c.MFFileSystem;
 
 import fuji.string;
+import fuji.dbg;
 
 import std.file;
 import std.typecons;
@@ -10,6 +11,7 @@ import std.array;
 import std.range;
 import std.algorithm;
 
+public import std.exception : assumeUnique;
 
 // offer a directory iterator similar to the one in std.file
 
@@ -20,7 +22,7 @@ enum SpanMode
 	breadth,	// Bredth first.
 }
 
-private string joinPath(const(char)[] s1, const(char)[] s2) nothrow
+private string joinPath(const(char)[] s1, const(char)[] s2) pure nothrow
 {
 	return (s1[$-1] == ':' || s1[$-1] == '/' ? s1 ~ s2 : s1 ~ "/" ~ s2).idup;
 }
@@ -38,7 +40,9 @@ struct DirEntry
 	MFFileTime writeTime;	// last write time
 	MFFileTime accessTime;	// last access time
 
-	private this(string path, in MFFindData* fd)
+pure:
+nothrow:
+	private this(string path, ref in MFFindData fd)
 	{
 		filename = fd.filename.idup;
 		directory = path;
@@ -56,11 +60,10 @@ struct DirEntry
 		accessTime = fd.accessTime;
 	}
 
-nothrow:
 @nogc:
-	@property bool isDir() const pure { return (attributes & MFFileAttributes.Directory) != 0; }
-	@property bool isFile() const pure { return !isDir; }
-	@property bool isSymlink() const pure { return (attributes & MFFileAttributes.SymLink) != 0; }
+	@property bool isDir() const { return (attributes & MFFileAttributes.Directory) != 0; }
+	@property bool isFile() const { return !isDir; }
+	@property bool isSymlink() const { return (attributes & MFFileAttributes.SymLink) != 0; }
 }
 
 private struct DirIteratorImpl
@@ -78,8 +81,8 @@ private struct DirIteratorImpl
 	Appender!(DirHandle[]) _stack;
 	Appender!(DirEntry[]) _stashed; //used in depth first mode
 
-	void pushExtra(DirEntry de){ _stashed.put(de); }
-	bool hasExtra(){ return !_stashed.data.empty; }
+	void pushExtra(DirEntry de) nothrow { _stashed.put(de); }
+	bool hasExtra() nothrow @nogc { return !_stashed.data.empty; }
 	DirEntry popExtra()
 	{
 		DirEntry de;
@@ -92,22 +95,22 @@ private struct DirIteratorImpl
 	{
 		string search_pattern = joinPath(directory, "*");
 		MFFindData findinfo = void;
-		MFFind* h = MFFileSystem_FindFirst(search_pattern, &findinfo);
-		if (!h)
+		MFFind* h = MFFileSystem_FindFirst(search_pattern, findinfo);
+		if(!h)
 			throw new FileException(search_pattern, "Invalid find path");
 		_stack.put(DirHandle(directory, h));
-		return toNext(false, &findinfo);
+		return toNext(false, findinfo);
 	}
 
 	bool next()
 	{
 		if(_stack.data.empty)
 			return false;
-		MFFindData findinfo;
-		return toNext(true, &findinfo);
+		MFFindData findinfo = void;
+		return toNext(true, findinfo);
 	}
 
-	bool toNext(bool fetch, MFFindData* findinfo)
+	bool toNext(bool fetch, ref MFFindData findinfo)
 	{
 		if(fetch)
 		{
@@ -118,7 +121,7 @@ private struct DirIteratorImpl
 			}
 		}
 		while(std.string.cmp(findinfo.filename, ".") == 0 || std.string.cmp(findinfo.filename, "..") == 0)
-			//			  || (!(findinfo.attributes & MFFileAttributes.Directory) && !MFString_PatternMatch(_pattern.ptr, findinfo.filename.ptr)))
+//			  || (!(findinfo.attributes & MFFileAttributes.Directory) && !MFString_PatternMatch(_pattern.ptr, findinfo.filename.ptr)))
 		{
 			if(MFFileSystem_FindNext(_stack.data[$-1].h, findinfo) == false)
 			{
@@ -137,13 +140,13 @@ private struct DirIteratorImpl
 		_stack.shrinkTo(_stack.data.length-1);
 	}
 
-	void releaseDirStack()
+	void releaseDirStack() nothrow @nogc
 	{
 		foreach(d; _stack.data)
 			MFFileSystem_FindClose(d.h);
 	}
 
-	bool mayStepIn()
+	bool mayStepIn() const pure nothrow @nogc
 	{
 		return _cur.isDir && (_followSymlink || !_cur.isSymlink);
 	}
@@ -174,8 +177,8 @@ private struct DirIteratorImpl
 				}
 		}
 	}
-	@property bool empty() nothrow @nogc { return _stashed.data.empty && _stack.data.empty; }
-	@property DirEntry front() nothrow @nogc { return _cur; }
+	@property bool empty() const pure nothrow @nogc { return _stashed.data.empty && _stack.data.empty; }
+	@property DirEntry front() const pure nothrow @nogc { return _cur; }
 	void popFront()
 	{
 		switch(_mode)
@@ -211,7 +214,7 @@ private struct DirIteratorImpl
 		}
 	}
 
-	~this()
+	~this() nothrow @nogc
 	{
 		releaseDirStack();
 	}
@@ -227,9 +230,9 @@ private:
 	}
 
 public:
-	@property bool empty() nothrow @nogc		{ return impl.empty; }
-	@property DirEntry front() nothrow @nogc	{ return impl.front; }
-	void popFront()								{ impl.popFront(); }
+	@property bool empty() const pure nothrow @nogc		{ return impl.empty; }
+	@property DirEntry front() const pure nothrow @nogc	{ return impl.front; }
+	void popFront()										{ impl.popFront(); }
 }
 
 auto dirEntries(string path, SpanMode mode, bool followSymlink = true)
@@ -239,6 +242,64 @@ auto dirEntries(string path, SpanMode mode, bool followSymlink = true)
 
 
 nothrow:
+
+ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0)
+{
+	auto s = Stringz!()(filename);
+	MFFile *file = MFFileSystem_Open(s, MFOpenFlags.Read | MFOpenFlags.Binary);
+	if(file)
+	{
+		scope(exit) MFFile_Close(file);
+
+		ulong size = MFFile_GetSize(file);
+		if(size > 0)
+		{
+			static if(size_t.sizeof == 4)
+			{
+				if(size >= 1 << 32)
+				{
+					MFDebug_Warn(1, "File is larger than the available address space: " ~ filename);
+					return null;
+				}
+			}
+
+			ubyte[] buffer = new ubyte[size + extraBytes];
+			size_t bytesRead = MFFile_Read(file, buffer.ptr, cast(size_t)size);
+			assert(bytesRead == size, "bytesRead different from file size!(?)");
+
+			if(extraBytes > 0)
+				buffer[size] = 0;
+
+			return buffer;
+		}
+	}
+	return null;
+}
+
+char[] MFFileSystem_LoadText(const(char)[] filename, size_t extraBytes = 0)
+{
+	return cast(char[])MFFileSystem_Load(filename, extraBytes);
+}
+
+size_t MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer)
+{
+	MFDebug_Log(5, "Call: MFFileSystem_Save(\"" ~ filename ~ "\")");
+
+	auto s = Stringz!()(filename);
+	MFFile *file = MFFileSystem_Open(s, MFOpenFlags.Write | MFOpenFlags.Truncate | MFOpenFlags.Binary | MFOpenFlags.CreateDirectory);
+	if(file)
+	{
+		scope(exit) MFFile_Close(file);
+		return MFFile_Write(file, buffer.ptr, buffer.length, false);
+	}
+	return 0;
+}
+
+size_t MFFileSystem_SaveText(const(char)[] filename, const(char)[] buffer)
+{
+	return MFFileSystem_Save(filename, cast(const(ubyte)[])buffer);
+}
+
 @nogc:
 
 alias MFFile_Open = fuji.c.MFFileSystem.MFFile_Open;
@@ -270,20 +331,7 @@ MFFile* MFFileSystem_Open(const(char)[] filename, uint openFlags = MFOpenFlags.R
 }
 
 alias MFFileSystem_Load = fuji.c.MFFileSystem.MFFileSystem_Load;
-ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0)
-{
-	size_t size;
-	auto s = Stringz!()(filename);
-	ubyte* file = MFFileSystem_Load(s, &size, extraBytes);
-	return file[0..size];
-}
-
 alias MFFileSystem_Save = fuji.c.MFFileSystem.MFFileSystem_Save;
-size_t MFFileSystem_Save(const(char)[] filename, const(ubyte)[] buffer)
-{
-	auto s = Stringz!()(filename);
-	return MFFileSystem_Save(s, buffer.ptr, buffer.length);
-}
 
 alias MFFileSystem_GetSize = fuji.c.MFFileSystem.MFFileSystem_GetSize;
 ulong MFFileSystem_GetSize(const(char)[] filename)
@@ -300,8 +348,14 @@ bool MFFileSystem_Exists(const(char)[] filename)
 }
 
 alias MFFileSystem_FindFirst = fuji.c.MFFileSystem.MFFileSystem_FindFirst;
-MFFind* MFFileSystem_FindFirst(const(char)[] searchPattern, MFFindData *pFindData)
+MFFind* MFFileSystem_FindFirst(const(char)[] searchPattern, out MFFindData findData)
 {
 	auto s = Stringz!()(searchPattern);
-	return MFFileSystem_FindFirst(s, pFindData);
+	return MFFileSystem_FindFirst(s, &findData);
+}
+
+alias MFFileSystem_FindNext = fuji.c.MFFileSystem.MFFileSystem_FindNext;
+bool MFFileSystem_FindNext(MFFind* pFind, out MFFindData findData)
+{
+	return MFFileSystem_FindNext(pFind, &findData);
 }

@@ -12,12 +12,6 @@
 #include <unistd.h>
 #include <dirent.h>
 
-struct MFFind_Linux
-{
-	char systemPath[4096];
-	DIR *pDirectory;
-};
-
 MFInitStatus MFFileSystemNative_InitModulePlatformSpecific()
 {
 	return MFIS_Succeeded;
@@ -115,7 +109,7 @@ int MFFileNative_Close(MFFile* fileHandle)
 	return 0;
 }
 
-size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
+size_t MFFileNative_Read(MFFile *fileHandle, void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -130,7 +124,7 @@ size_t MFFileNative_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 	return bytesRead;
 }
 
-size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes)
+size_t MFFileNative_Write(MFFile *fileHandle, const void *pBuffer, size_t bytes)
 {
 	MFCALLSTACK;
 
@@ -146,7 +140,7 @@ size_t MFFileNative_Write(MFFile* fileHandle, const void *pBuffer, size_t bytes)
 	return bytesWritten;
 }
 
-uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
+uint64 MFFileNative_Seek(MFFile *fileHandle, int64 bytes, MFFileSeek relativity)
 {
 	MFCALLSTACK;
 
@@ -178,7 +172,7 @@ uint64 MFFileNative_Seek(MFFile* fileHandle, int64 bytes, MFFileSeek relativity)
 	return fileHandle->offset;
 }
 
-uint64 MFFileNative_GetSize(const char* pFilename)
+uint64 MFFileNative_GetSize(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -189,7 +183,7 @@ uint64 MFFileNative_GetSize(const char* pFilename)
 	return fileStats.st_size;
 }
 
-bool MFFileNative_Exists(const char* pFilename)
+bool MFFileNative_Exists(const char *pFilename)
 {
 	MFCALLSTACK;
 
@@ -231,7 +225,7 @@ bool MFFileNative_Delete(const char *pPath, bool bRecursive)
 	return false;
 }
 
-const char* MFFileNative_MakeAbsolute(const char* pFilename)
+const char* MFFileNative_MakeAbsolute(const char *pFilename)
 {
 	char path[PATH_MAX];
 	if(realpath(pFilename, path))
@@ -266,18 +260,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 		return false;
 	}
 
-	MFFind_Linux *pFD = (MFFind_Linux*)MFHeap_Alloc(sizeof(MFFind_Linux));
-
-	pFD->pDirectory = pDir;
-
-	MFString_CopyCat(pFD->systemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
-	pLast = MFString_RChr(pFD->systemPath, '/');
-	if(pLast)
-		pLast[1] = 0;
-	else
-		pFD->systemPath[0] = 0;
-
-	pFind->pFilesystemData = (void*)pFD;
+	pFind->pFilesystemData = (void*)pDir;
 
 	bool bFound = MFFileNative_FindNext(pFind, pFindData);
 	if(!bFound)
@@ -287,15 +270,21 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 
 bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 {
-	MFFind_Linux *pFD = (MFFind_Linux*)pFind->pFilesystemData;
-	dirent *pDir = readdir(pFD->pDirectory);
+	dirent *pDir = readdir((DIR*)pFind->pFilesystemData);
 
 	while(pDir && (!MFString_Compare(pDir->d_name, ".") || !MFString_Compare(pDir->d_name, "..")))
-		pDir = readdir(pFD->pDirectory);
+		pDir = readdir((DIR*)pFind->pFilesystemData);
 	if(!pDir)
 		return false;
 
-	const char *pFilePath = MFStr("%s%s", pFD->systemPath, pDir->d_name);
+	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pFind->searchPattern);
+	char *pLast = MFString_RChr(pFindData->pSystemPath, '/');
+	if(pLast)
+		pLast[1] = 0;
+	else
+		pFindData->pSystemPath[0] = 0;
+
+	const char *pFilePath = MFStr("%s%s", pFindData->pSystemPath, pDir->d_name);
 
 	struct stat statbuf;
 	if(stat(pFilePath, &statbuf) < 0)
@@ -309,17 +298,13 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	pFindData->writeTime.ticks = (uint64)statbuf.st_mtime;
 	pFindData->accessTime.ticks = (uint64)statbuf.st_atime;
 	MFString_Copy((char*)pFindData->pFilename, pDir->d_name);
-	MFString_Copy((char*)pFindData->pSystemPath, pFD->systemPath);
 
 	return true;
 }
 
 void MFFileNative_FindClose(MFFind *pFind)
 {
-	MFFind_Linux *pFD = (MFFind_Linux*)pFind->pFilesystemData;
-	closedir(pFD->pDirectory);
-	MFHeap_Free(pFind->pFilesystemData);
-	pFind->pFilesystemData = NULL;
+	closedir((DIR*)pFind->pFilesystemData);
 }
 
 #endif // MF_DRIVER_LINUX
