@@ -5,6 +5,7 @@ import fuji.c.MFQuaternion;
 
 import std.math;
 
+pure:
 nothrow:
 @nogc:
 
@@ -28,14 +29,15 @@ struct MFMatrix
 		return std.conv.text("[ ", x.toString(),  ", ", y.toString(),  ", ", z.toString(),  ", ", t.toString(),  " ]");
 	}
 
-	MFMatrix opBinary(string op)(float s) const pure					if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
-	MFMatrix opBinaryRight(string op)(float s) const pure				if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
-	MFMatrix opBinary(string op)(const(MFMatrix) m) const pure nothrow	if(op == "*")	{ return mul(this, m); }
-	MFVector opBinary(string op)(const MFVector v) const pure nothrow	if(op == "*")	{ return mul(this, v); }
-	MFMatrix opOpAssign(string op)(const(MFMatrix) m) pure nothrow		if(op == "*=")	{ return this = mul(this, m); }
-	MFMatrix opOpAssign(string op)(float s) pure nothrow				if(op == "*=")	{ return this = this * s; }
+pure: nothrow: @nogc:
+	MFMatrix opBinary(string op)(float s) const							if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
+	MFMatrix opBinaryRight(string op)(float s) const					if(op == "*")	{ MFMatrix r = void; r.m[] = m[] * s; return r; }
+	MFMatrix opBinary(string op)(const(MFMatrix) m) const				if(op == "*")	{ return mul(this, m); }
+	MFVector opBinary(string op)(const MFVector v) const				if(op == "*")	{ return mul(this, v); }
+	MFMatrix opOpAssign(string op)(const(MFMatrix) m)					if(op == "*=")	{ return this = mul(this, m); }
+	MFMatrix opOpAssign(string op)(float s)								if(op == "*=")	{ return this = this * s; }
 
-	MFMatrix setTranslation(const MFVector trans) pure nothrow
+	ref MFMatrix setTranslation(const MFVector trans)
 	{
 		m[12] = trans.x;
 		m[13] = trans.y;
@@ -44,7 +46,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotationX(float angle) pure nothrow
+	ref MFMatrix setRotationX(float angle)
 	{
 		m[0] = 1;
 		m[1] = 0;
@@ -59,7 +61,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotationY(float angle) pure nothrow
+	ref MFMatrix setRotationY(float angle)
 	{
 		m[0] = cos(angle);
 		m[1] = 0;
@@ -74,7 +76,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotationZ(float angle) pure nothrow
+	ref MFMatrix setRotationZ(float angle)
 	{
 		m[0] = cos(angle);
 		m[1] = sin(angle);
@@ -89,7 +91,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotationYPR(float yaw, float pitch, float roll) pure nothrow
+	ref MFMatrix setRotationYPR(float yaw, float pitch, float roll)
 	{
 		float cosy = cos(yaw);
 		float siny = sin(yaw);
@@ -114,7 +116,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotation(const MFVector axis, float angle) pure nothrow
+	ref MFMatrix setRotation(const MFVector axis, float angle)
 	{
 		// do the trig
 		float s = sin(angle);
@@ -138,7 +140,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setRotationQ(const MFQuaternion q) pure nothrow
+	ref MFMatrix setRotationQ(const MFQuaternion q)
 	{
 		float xx = q.x*q.x;
 		float xy = q.x*q.y;
@@ -164,7 +166,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFQuaternion getRotationQ() const pure nothrow
+	MFQuaternion getRotationQ() const
 	{
 		MFQuaternion q;
 		float trace = m[0] + m[5] + m[10] + 1.0f;
@@ -212,7 +214,7 @@ struct MFMatrix
 		return q;
 	}
 
-	MFMatrix setScale(MFVector scale) pure nothrow
+	ref MFMatrix setScale(MFVector scale)
 	{
 		m[0] = scale.x;
 		m[1] = m[2] = m[3] = m[4] = 0.0f;
@@ -223,34 +225,34 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix translate(MFVector trans) pure nothrow
+	ref MFMatrix translate(MFVector trans)
 	{
 		t += trans;
 		return this;
 	}
 
-	MFMatrix rotateX(float angle) pure nothrow
+	ref MFMatrix rotateX(float angle)
 	{
 		MFMatrix rot;
 		rot.setRotationX(angle);
 		return this = mul(this, rot);
 	}
 
-	MFMatrix rotateY(float angle) pure nothrow
+	ref MFMatrix rotateY(float angle)
 	{
 		MFMatrix rot;
 		rot.setRotationY(angle);
 		return this = mul(this, rot);
 	}
 
-	MFMatrix rotateZ(float angle) pure nothrow
+	ref MFMatrix rotateZ(float angle)
 	{
 		MFMatrix rot;
 		rot.setRotationZ(angle);
 		return this = mul(this, rot);
 	}
 
-	MFMatrix scale(MFVector scale) pure nothrow
+	ref MFMatrix scale(MFVector scale)
 	{
 		x *= scale.x;
 		y *= scale.y;
@@ -258,7 +260,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix lookAt(MFVector pos, MFVector at, MFVector up = MFVector.up) pure nothrow
+	ref MFMatrix lookAt(MFVector pos, MFVector at, MFVector up = MFVector.up)
 	{
 		z = (at-pos).normalise();		// calculate forwards
 		x = cross3(up, z).normalise();	// calculate right
@@ -267,7 +269,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setPerspective(float fov, float near, float far, float aspectRatio) pure nothrow
+	ref MFMatrix setPerspective(float fov, float near, float far, float aspectRatio)
 	{
 		// construct perspective projection
 		float zn = near;
@@ -299,7 +301,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix setOrthographic(float top, float left, float bottom, float right, float near = 0, float far = 1) pure nothrow
+	ref MFMatrix setOrthographic(float top, float left, float bottom, float right, float near = 0, float far = 1)
 	{
 		m[0] = 2.0f/(right-left);			m[1] = 0.0f;						m[2] = 0.0f;				m[3] = 0.0f;
 		m[4] = 0.0f;						m[5] = 2.0f/(top-bottom);			m[6] = 0.0f;				m[7] = 0.0f;
@@ -308,7 +310,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix normalise() pure nothrow
+	ref MFMatrix normalise()
 	{
 		x = x.normalise();
 		y = y.normalise();
@@ -316,7 +318,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix transpose() pure nothrow
+	ref MFMatrix transpose()
 	{
 		float t;
 		t=m[4]; m[4]=m[1]; m[1]=t;
@@ -328,7 +330,7 @@ struct MFMatrix
 		return this;
 	}
 
-	MFMatrix transpose3x3() pure nothrow
+	ref MFMatrix transpose3x3()
 	{
 		float t;
 		t=m[4]; m[4]=m[1]; m[1]=t;
@@ -340,7 +342,7 @@ struct MFMatrix
 	static immutable MFMatrix identity = MFMatrix.init;
 }
 
-MFMatrix lerp(const(MFMatrix) start, const(MFMatrix) end, float time) pure nothrow
+MFMatrix lerp(const(MFMatrix) start, const(MFMatrix) end, float time)
 {
 	MFMatrix t = void;
 	t.x = fuji.vector.lerp(start.x, end.x, time);
@@ -350,7 +352,7 @@ MFMatrix lerp(const(MFMatrix) start, const(MFMatrix) end, float time) pure nothr
 	return t;
 }
 
-MFMatrix inverse(const(MFMatrix) matrix) pure nothrow
+MFMatrix inverse(const(MFMatrix) matrix)
 {
 	enum float PRECISION_LIMIT = 1.0e-10;
 
@@ -408,7 +410,7 @@ MFMatrix inverse(const(MFMatrix) matrix) pure nothrow
 	return inv;
 }
 
-MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
+MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector)
 {
 	MFVector t;
 	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8] + vector.w*matrix.m[12];
@@ -418,7 +420,7 @@ MFVector transformVector(const(MFMatrix) matrix, const(MFVector) vector) pure no
 	return t;
 }
 
-MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
+MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector)
 {
 	MFVector t;
 /+
@@ -432,7 +434,7 @@ MFVector transformVectorH(const(MFMatrix) matrix, const(MFVector) vector) pure n
 	return t;
 }
 
-MFVector transformVector3(const(MFMatrix) matrix, const(MFVector) vector) pure nothrow
+MFVector transformVector3(const(MFMatrix) matrix, const(MFVector) vector)
 {
 	MFVector t;
 	t.x = vector.x*matrix.m[0] + vector.y*matrix.m[4] + vector.z*matrix.m[8];
@@ -451,7 +453,7 @@ enum IsMatrix(T) = is(std.traits.Unqual!T == MFMatrix);
 // *** HLSL style interface, future SIMD vector library will be more like this too ***
 
 // all the combinations of matrix multiplies... i think this could be written with a LOT less code.
-auto mul(T0, T1)(const T0 m, const T1 v) pure nothrow if(IsMatrix!T0 && IsVector!T1)
+auto mul(T0, T1)(const T0 m, const T1 v) if(IsMatrix!T0 && IsVector!T1)
 {
 	MFVector r;
 	r.x = m.x.x*v.x + m.y.x*v.y + m.z.x*v.z + m.t.x*v.w;
@@ -461,7 +463,7 @@ auto mul(T0, T1)(const T0 m, const T1 v) pure nothrow if(IsMatrix!T0 && IsVector
 	return r;
 }
 
-auto mul(T0, T1)(const T0 a, const T1 b) pure nothrow if(IsMatrix!T0 && IsMatrix!T1)
+auto mul(T0, T1)(const T0 a, const T1 b) if(IsMatrix!T0 && IsMatrix!T1)
 {
 	static if(is(std.traits.Unqual!(typeof(a)) == MFMatrix) && is(std.traits.Unqual!(typeof(b)) == MFMatrix))
 	{
