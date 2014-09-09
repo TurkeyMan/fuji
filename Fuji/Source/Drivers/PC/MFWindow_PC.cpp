@@ -291,6 +291,8 @@ MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 	SetForegroundWindow(pWindow->hWnd);
 	SetFocus(pWindow->hWnd);
 
+	pWindow->bHasFocus = true;
+
 	return pWindow;
 }
 
@@ -301,7 +303,7 @@ MF_API MFWindow *MFWindow_BindExisting(void *pWindowHandle)
 
 	MFDebug_Assert(false, "TODO!");
 	// TODO: fill out params from window data...
-//	pWindow->params.x = 
+//	pWindow->params.x =
 
 	SetWindowLongPtr(pWindow->hWnd, GWLP_USERDATA, (LONG_PTR)pWindow);
 

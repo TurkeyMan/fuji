@@ -136,6 +136,7 @@ MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 	pWindow->window = window;
 	pWindow->colorMap = colorMap;
 	pWindow->sizeHints = sizeHints;
+	pWindow->bHasFocus = true;
 
 	return pWindow;
 }

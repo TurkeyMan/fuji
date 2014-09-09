@@ -50,6 +50,7 @@ MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 	MFWindow_SDL2 *pWindow = (MFWindow_SDL2*)MFHeap_AllocAndZero(sizeof(MFWindow_SDL2));
 	pWindow->params = *pParams;
 	pWindow->window = window;
+	pWindow->bHasFocus = true;
 
 	return pWindow;
 }

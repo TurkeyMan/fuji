@@ -9,16 +9,22 @@
 static MFInputDeviceStatus	gDeviceStatus[IDD_Max][MFInput_MaxInputID];
 
 // store states for each input device..
-static MFGamepadState		gGamepadStates[MFInput_MaxInputID];
-static MFGamepadState		gPrevGamepadStates[MFInput_MaxInputID];
-static MFKeyState			gKeyStates[MFInput_MaxInputID];
-static MFKeyState			gPrevKeyStates[MFInput_MaxInputID];
-static MFMouseState			gMouseStates[MFInput_MaxInputID];
-static MFMouseState			gPrevMouseStates[MFInput_MaxInputID];
-static MFAccelerometerState	gAccelerometerStates[MFInput_MaxInputID];
-static MFAccelerometerState	gPrevAccelerometerStates[MFInput_MaxInputID];
-static MFTouchPanelState	gTouchPanelStates[MFInput_MaxInputID];
-static MFTouchPanelState	gPrevTouchPanelStates[MFInput_MaxInputID];
+struct InputState
+{
+	MFGamepadState			gamepadStates[MFInput_MaxInputID];
+	MFGamepadState			prevGamepadStates[MFInput_MaxInputID];
+	MFKeyState				keyStates[MFInput_MaxInputID];
+	MFKeyState				prevKeyStates[MFInput_MaxInputID];
+	MFMouseState			mouseStates[MFInput_MaxInputID];
+	MFMouseState			prevMouseStates[MFInput_MaxInputID];
+	MFAccelerometerState	accelerometerStates[MFInput_MaxInputID];
+	MFAccelerometerState	prevAccelerometerStates[MFInput_MaxInputID];
+	MFTouchPanelState		touchPanelStates[MFInput_MaxInputID];
+	MFTouchPanelState		prevTouchPanelStates[MFInput_MaxInputID];
+};
+
+static InputState gInputState;
+static InputState *gpThreadState = NULL;
 
 static float gGamepadDeadZone = 0.3f;
 static float gMouseAccelleration = 1.0f;
@@ -37,7 +43,7 @@ static int gInputFrequency = 200;
 static MFThread gInputThread = NULL;
 static MFMutex gInputMutex;
 static volatile bool bInputTerminate = false;
-static bool bThreadUpdate;
+static bool bThreadUpdate = false;
 
 static uint32 MaxEvents = 256;
 static MFInputEvent *gInputEvents[IDD_Max][MFInput_MaxInputID];
@@ -250,11 +256,9 @@ static const char * const gKeyNames[] =
 // Functions
 MFInitStatus MFInput_InitModule(int moduleId, bool bPerformInitialisation)
 {
-	MFZeroMemory(gGamepadStates, sizeof(gGamepadStates[0])*MFInput_MaxInputID);
-	MFZeroMemory(gKeyStates, sizeof(gKeyStates[0])*MFInput_MaxInputID);
-	MFZeroMemory(gMouseStates, sizeof(gMouseStates[0])*MFInput_MaxInputID);
-	MFZeroMemory(gAccelerometerStates, sizeof(gAccelerometerStates[0])*MFInput_MaxInputID);
-	MFZeroMemory(gTouchPanelStates, sizeof(gTouchPanelStates[0])*MFInput_MaxInputID);
+	MFZeroMemory(&gInputState, sizeof(gInputState));
+
+	gInputMutex = MFThread_CreateMutex("MFInput Mutex");
 
 	MFInput_InitModulePlatformSpecific();
 	MFInput_Update();
@@ -265,6 +269,8 @@ MFInitStatus MFInput_InitModule(int moduleId, bool bPerformInitialisation)
 void MFInput_DeinitModule()
 {
 	MFInput_DeinitModulePlatformSpecific();
+
+	MFThread_DestroyMutex(gInputMutex);
 }
 
 void MFInputInternal_ApplySphericalDeadZone(float *pX, float *pY)
@@ -282,15 +288,95 @@ void MFInputInternal_ApplySphericalDeadZone(float *pX, float *pY)
 	}
 }
 
-void MFInput_Update()
+void MFInput_UpdateState(InputState *pState)
 {
-	if(gInputThread && !bThreadUpdate)
-		return;
-
-	int a, b;
+	int a;
 
 	// platform specific update
 	MFInput_UpdatePlatformSpecific();
+
+	// update keyboard state
+	for(a=0; a<gNumKeyboards; a++)
+	{
+		if(MFInput_IsAvailable(IDD_Keyboard, a))
+			MFInput_GetKeyStateInternal(a, &pState->keyStates[a]);
+	}
+
+	// update gamepad state
+	for(a=0; a<gNumGamepads; a++)
+	{
+		if(MFInput_IsAvailable(IDD_Gamepad, a))
+		{
+			// update gamepad state
+#if !defined(_RETAIL)
+			if(gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
+				MFInputInternal_GetGamepadStateFromKeyMap(&pState->gamepadStates[a], &pState->keyStates[0]);
+			else
+#endif
+			MFInput_GetGamepadStateInternal(a, &pState->gamepadStates[a]);
+
+			// apply analog deadzone to axiis
+			uint32 deviceFlags = MFInput_GetDeviceFlags(IDD_Gamepad, a);
+			if(!(deviceFlags & MFGF_DontUseSphericalDeadzone))
+			{
+				MFInputInternal_ApplySphericalDeadZone(&pState->gamepadStates[a].values[Axis_LX], &pState->gamepadStates[a].values[Axis_LY]);
+				MFInputInternal_ApplySphericalDeadZone(&pState->gamepadStates[a].values[Axis_RX], &pState->gamepadStates[a].values[Axis_RY]);
+			}
+		}
+	}
+
+	// update mouse state
+	for(a=0; a<gNumPointers; a++)
+	{
+		if(MFInput_IsAvailable(IDD_Mouse, a))
+			MFInput_GetMouseStateInternal(a, &pState->mouseStates[a]);
+	}
+
+	// update accelerometer state
+	for(a=0; a<gNumAccelerometers; a++)
+	{
+		if(MFInput_IsAvailable(IDD_Accelerometer, a))
+			MFInput_GetAccelerometerStateInternal(a, &pState->accelerometerStates[a]);
+	}
+
+	// update touch panel state
+	for(a=0; a<gNumTouchPanels; a++)
+	{
+		if(MFInput_IsAvailable(IDD_TouchPanel, a))
+			MFInput_GetTouchPanelStateInternal(a, &pState->touchPanelStates[a]);
+	}
+	
+	// add network devices
+	if(MFNetwork_IsRemoteInputServerRunning())
+	{
+		gNetGamepadStart = gNumGamepads;
+		gNetKeyboardStart = gNumKeyboards;
+		gNetPointerStart = gNumPointers;
+
+		MFNetwork_LockInputMutex();
+
+		// add additional gamepads
+		for(a=0; a<MFNetwork_MaxRemoteDevices(); a++)
+		{
+			MFInputDeviceStatus status = (MFInputDeviceStatus)MFNetwork_GetRemoteDeviceStatus(a);
+
+			if(status > IDS_Unavailable)
+			{
+				gDeviceStatus[IDD_Gamepad][gNetGamepadStart + a] = status;
+
+				MFNetwork_GetRemoteGamepadState(a, &pState->gamepadStates[gNetGamepadStart + a]);
+
+				gNumGamepads = gNetGamepadStart + a + 1;
+			}
+		}
+
+		MFNetwork_ReleaseInputMutex();
+	}
+}
+
+void MFInput_Update()
+{
+	int a, b;
 
 	// update state for each device
 	for(a=0; a<IDD_Max; a++)
@@ -345,90 +431,31 @@ void MFInput_Update()
 			maxTouchPanel = a;
 	}
 	gNumTouchPanels = maxTouchPanel+1;
-	
+
 	// copy current states into last states
-	MFCopyMemory(gPrevGamepadStates, gGamepadStates, sizeof(gPrevGamepadStates));
-	MFCopyMemory(gPrevKeyStates, gKeyStates, sizeof(gPrevKeyStates));
-	MFCopyMemory(gPrevMouseStates, gMouseStates, sizeof(gPrevMouseStates));
-	MFCopyMemory(gPrevAccelerometerStates, gAccelerometerStates, sizeof(gPrevAccelerometerStates));
-	MFCopyMemory(gPrevTouchPanelStates, gTouchPanelStates, sizeof(gPrevTouchPanelStates));
+	MFCopyMemory(gInputState.prevGamepadStates, gInputState.gamepadStates, sizeof(gInputState.prevGamepadStates));
+	MFCopyMemory(gInputState.prevKeyStates, gInputState.keyStates, sizeof(gInputState.prevKeyStates));
+	MFCopyMemory(gInputState.prevMouseStates, gInputState.mouseStates, sizeof(gInputState.prevMouseStates));
+	MFCopyMemory(gInputState.prevAccelerometerStates, gInputState.accelerometerStates, sizeof(gInputState.prevAccelerometerStates));
+	MFCopyMemory(gInputState.prevTouchPanelStates, gInputState.touchPanelStates, sizeof(gInputState.prevTouchPanelStates));
 
-	// update keyboard state
-	for(a=0; a<gNumKeyboards; a++)
+	// update the frame input state
+	if(!gInputThread)
 	{
-		if(MFInput_IsAvailable(IDD_Keyboard, a))
-			MFInput_GetKeyStateInternal(a, &gKeyStates[a]);
+		MFInput_UpdateState(&gInputState);
 	}
-
-	// update gamepad state
-	for(a=0; a<gNumGamepads; a++)
+	else
 	{
-		if(MFInput_IsAvailable(IDD_Gamepad, a))
-		{
-			// update gamepad state
-#if !defined(_RETAIL)
-			if(gDeviceStatus[IDD_Gamepad][0] == IDS_Unavailable)
-				MFInputInternal_GetGamepadStateFromKeyMap(&gGamepadStates[a], &gKeyStates[0]);
-			else
-#endif
-			MFInput_GetGamepadStateInternal(a, &gGamepadStates[a]);
+		MFThread_LockMutex(gInputMutex);
 
-			// apply analog deadzone to axiis
-			uint32 deviceFlags = MFInput_GetDeviceFlags(IDD_Gamepad, a);
-			if(!(deviceFlags & MFGF_DontUseSphericalDeadzone))
-			{
-				MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_LX], &gGamepadStates[a].values[Axis_LY]);
-				MFInputInternal_ApplySphericalDeadZone(&gGamepadStates[a].values[Axis_RX], &gGamepadStates[a].values[Axis_RY]);
-			}
-		}
-	}
+		// copy thread state to new state
+		MFCopyMemory(gInputState.gamepadStates, gpThreadState->gamepadStates, sizeof(gInputState.gamepadStates));
+		MFCopyMemory(gInputState.keyStates, gpThreadState->keyStates, sizeof(gInputState.keyStates));
+		MFCopyMemory(gInputState.mouseStates, gpThreadState->mouseStates, sizeof(gInputState.mouseStates));
+		MFCopyMemory(gInputState.accelerometerStates, gpThreadState->accelerometerStates, sizeof(gInputState.accelerometerStates));
+		MFCopyMemory(gInputState.touchPanelStates, gpThreadState->touchPanelStates, sizeof(gInputState.touchPanelStates));
 
-	// update mouse state
-	for(a=0; a<gNumPointers; a++)
-	{
-		if(MFInput_IsAvailable(IDD_Mouse, a))
-			MFInput_GetMouseStateInternal(a, &gMouseStates[a]);
-	}
-
-	// update accelerometer state
-	for(a=0; a<gNumAccelerometers; a++)
-	{
-		if(MFInput_IsAvailable(IDD_Accelerometer, a))
-			MFInput_GetAccelerometerStateInternal(a, &gAccelerometerStates[a]);
-	}
-
-	// update touch panel state
-	for(a=0; a<gNumTouchPanels; a++)
-	{
-		if(MFInput_IsAvailable(IDD_TouchPanel, a))
-			MFInput_GetTouchPanelStateInternal(a, &gTouchPanelStates[a]);
-	}
-	
-	// add network devices
-	if(MFNetwork_IsRemoteInputServerRunning())
-	{
-		gNetGamepadStart = gNumGamepads;
-		gNetKeyboardStart = gNumKeyboards;
-		gNetPointerStart = gNumPointers;
-
-		MFNetwork_LockInputMutex();
-
-		// add additional gamepads
-		for(a=0; a<MFNetwork_MaxRemoteDevices(); a++)
-		{
-			MFInputDeviceStatus status = (MFInputDeviceStatus)MFNetwork_GetRemoteDeviceStatus(a);
-
-			if(status > IDS_Unavailable)
-			{
-				gDeviceStatus[IDD_Gamepad][gNetGamepadStart + a] = status;
-
-				MFNetwork_GetRemoteGamepadState(a, &gGamepadStates[gNetGamepadStart + a]);
-
-				gNumGamepads = gNetGamepadStart + a + 1;
-			}
-		}
-
-		MFNetwork_ReleaseInputMutex();
+		MFThread_ReleaseMutex(gInputMutex);
 	}
 }
 
@@ -444,32 +471,65 @@ int MFInput_Thread(void *)
 	while(!bInputTerminate)
 	{
 		MFThread_LockMutex(gInputMutex);
+
 		bThreadUpdate = true;
-		MFInput_Update();
+		MFInput_UpdateState(gpThreadState);
 		bThreadUpdate = false;
 
 		// build events
-		for(uint32 i=0; i<MFInput_MaxInputID; ++i)
+		for(uint32 dev=0; dev<IDD_Max; ++dev)
 		{
-			if(!gDeviceStatus[IDD_Gamepad][i] == IDS_Ready)
-				continue;
-
-			for(uint32 j=0; j<GamepadType_Max; ++j)
+			for(uint32 i=0; i<MFInput_MaxInputID; ++i)
 			{
-				if(gNumEvents[IDD_Gamepad][i] >= MaxEvents)
-					break;
-
-				MFGamepadState &state = gGamepadStates[i];
-				MFGamepadState &prev = gPrevGamepadStates[i];
-				if(state.values[j] == prev.values[j])
+				if(!gDeviceStatus[dev][i] == IDS_Ready)
 					continue;
 
-				MFInputEvent &e = gInputEvents[IDD_Gamepad][i][gNumEvents[IDD_Gamepad][i]++];
-				e.timestamp = now;
-				e.event = MFIE_Change;
-				e.input = j;
-				e.state = state.values[j];
-				e.prevState = prev.values[j];
+				switch(dev)
+				{
+					case IDD_Gamepad:
+						for(uint32 j=0; j<GamepadType_Max; ++j)
+						{
+							if(gNumEvents[dev][i] >= MaxEvents)
+								break;
+
+							MFGamepadState &state = gpThreadState->gamepadStates[i];
+							MFGamepadState &prev = gpThreadState->prevGamepadStates[i];
+							if(state.values[j] == prev.values[j])
+								continue;
+
+							MFInputEvent &e = gInputEvents[dev][i][gNumEvents[dev][i]++];
+							e.timestamp = now;
+							e.event = MFIE_Change;
+							e.input = j;
+							e.state = state.values[j];
+							e.prevState = prev.values[j];
+						}
+						break;
+
+					case IDD_Keyboard:
+						for(uint32 j=0; j<Key_Max; ++j)
+						{
+							if(gNumEvents[dev][i] >= MaxEvents)
+								break;
+
+							MFKeyState &state = gpThreadState->keyStates[i];
+							MFKeyState &prev = gpThreadState->prevKeyStates[i];
+							if(state.keys[j] == prev.keys[j])
+								continue;
+
+							MFInputEvent &e = gInputEvents[dev][i][gNumEvents[dev][i]++];
+							e.timestamp = now;
+							e.event = MFIE_Change;
+							e.input = j;
+							e.state = state.keys[j] ? 1.f : 0.f;
+							e.prevState = prev.keys[j] ? 1.f : 0.f;
+						}
+						break;
+
+					default:
+						// TODO: parse other input devices into events...
+						break;
+				}
 			}
 		}
 
@@ -495,28 +555,35 @@ MF_API void MFInput_EnableBufferedInput(bool bEnable, int frequency)
 {
 	gInputFrequency = frequency;
 
-	if(!gInputThread)
+	if(bEnable && !gInputThread)
 	{
-		for(int i=0; i<MFInput_MaxInputID; ++i)
+		gpThreadState = (InputState*)MFHeap_AllocAndZero(sizeof(InputState));
+
+		for(uint32 dev=0; dev<IDD_Max; ++dev)
 		{
-			gInputEvents[IDD_Gamepad][i] = (MFInputEvent*)MFHeap_Alloc(sizeof(MFInputEvent)*MaxEvents);
-			gNumEvents[IDD_Gamepad][i] = 0;
+			for(int i=0; i<MFInput_MaxInputID; ++i)
+			{
+				gInputEvents[dev][i] = (MFInputEvent*)MFHeap_Alloc(sizeof(MFInputEvent)*MaxEvents);
+				gNumEvents[dev][i] = 0;
+			}
 		}
 
-		gInputMutex = MFThread_CreateMutex("MFInput Mutex");
 		gInputThread = MFThread_CreateThread("MFInput Thread", &MFInput_Thread, NULL);
 	}
-	else
+	else if(!bEnable && gInputThread)
 	{
 		bInputTerminate = true;
 		MFThread_Join(gInputThread);
 		gInputThread = NULL;
-		MFThread_DestroyMutex(gInputMutex);
 
-		for(int i=0; i<MFInput_MaxInputID; ++i)
+		for(uint32 dev=0; dev<IDD_Max; ++dev)
 		{
-			MFHeap_Free(gInputEvents[IDD_Gamepad][i]);
+			for(int i=0; i<MFInput_MaxInputID; ++i)
+				MFHeap_Free(gInputEvents[dev][i]);
 		}
+
+		MFHeap_Free(gpThreadState);
+		gpThreadState = NULL;
 	}
 }
 
@@ -594,40 +661,40 @@ MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevStat
 		case IDD_Gamepad:
 		{
 			if(pPrevState)
-				*pPrevState = gPrevGamepadStates[deviceID].values[button];
+				*pPrevState = gInputState.prevGamepadStates[deviceID].values[button];
 
-			return gGamepadStates[deviceID].values[button];
+			return gInputState.gamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
 				if(pPrevState)
-					*pPrevState = gPrevMouseStates[deviceID].values[button];
+					*pPrevState = gInputState.prevMouseStates[deviceID].values[button];
 
-				return gMouseStates[deviceID].values[button];
+				return gInputState.mouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
 				if(pPrevState)
-					*pPrevState = gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
+					*pPrevState = gInputState.prevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
 
-				return gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
+				return gInputState.mouseStates[deviceID].buttonState[button - Mouse_MaxAxis] ? 1.0f : 0.0f;
 			}
 			break;
 		case IDD_Keyboard:
 			if(pPrevState)
-				*pPrevState = gPrevKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
+				*pPrevState = gInputState.prevKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
 
-			return gKeyStates[deviceID].keys[button] ? 1.0f : 0.0f;
+			return gInputState.keyStates[deviceID].keys[button] ? 1.0f : 0.0f;
 		case IDD_Accelerometer:
 			if(button < Acc_XDelta)
 			{
 				if(pPrevState)
-					*pPrevState = gPrevAccelerometerStates[deviceID].values[button];
+					*pPrevState = gInputState.prevAccelerometerStates[deviceID].values[button];
 			
-				return gAccelerometerStates[deviceID].values[button];
+				return gInputState.accelerometerStates[deviceID].values[button];
 			}
-			return gAccelerometerStates[deviceID].values[button] - gAccelerometerStates[deviceID].values[button - Acc_XDelta];
+			return gInputState.accelerometerStates[deviceID].values[button] - gInputState.accelerometerStates[deviceID].values[button - Acc_XDelta];
 		case IDD_TouchPanel:
 		{
 			if(button >= Touch_Shake)
@@ -635,7 +702,7 @@ MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevStat
 				switch(button)
 				{
 					case Touch_Shake:
-						return gTouchPanelStates[deviceID].bDidShake ? 1.f : 0.f;
+						return gInputState.touchPanelStates[deviceID].bDidShake ? 1.f : 0.f;
 				}
 			}
 
@@ -644,13 +711,13 @@ MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevStat
 			switch(control)
 			{
 				case Touch_Contact0_XPos:
-					return (float)gTouchPanelStates[deviceID].contacts[contact].x;
+					return (float)gInputState.touchPanelStates[deviceID].contacts[contact].x;
 				case Touch_Contact0_YPos:
-					return (float)gTouchPanelStates[deviceID].contacts[contact].y;
+					return (float)gInputState.touchPanelStates[deviceID].contacts[contact].y;
 				case Touch_Contact0_XDelta:
-					return (float)(gTouchPanelStates[deviceID].contacts[contact].x - gPrevTouchPanelStates[deviceID].contacts[contact].x);
+					return (float)(gInputState.touchPanelStates[deviceID].contacts[contact].x - gInputState.prevTouchPanelStates[deviceID].contacts[contact].x);
 				case Touch_Contact0_YDelta:
-					return (float)(gTouchPanelStates[deviceID].contacts[contact].y - gPrevTouchPanelStates[deviceID].contacts[contact].y);
+					return (float)(gInputState.touchPanelStates[deviceID].contacts[contact].y - gInputState.prevTouchPanelStates[deviceID].contacts[contact].y);
 			}
 		}
 		default:
@@ -662,6 +729,7 @@ MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevStat
 
 	return 0.0f;
 }
+
 
 MF_API bool MFInput_WasPressed(int button, int device, int deviceID)
 {
@@ -684,20 +752,20 @@ MF_API bool MFInput_WasPressed(int button, int device, int deviceID)
 	{
 		case IDD_Gamepad:
 		{
-			return gGamepadStates[deviceID].values[button] && !gPrevGamepadStates[deviceID].values[button];
+			return gInputState.gamepadStates[deviceID].values[button] && !gInputState.prevGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
-				return gMouseStates[deviceID].values[button] && !gPrevMouseStates[deviceID].values[button];
+				return gInputState.mouseStates[deviceID].values[button] && !gInputState.prevMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
-				return gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && !gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
+				return gInputState.mouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && !gInputState.prevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
 			}
 			break;
 		case IDD_Keyboard:
-			return gKeyStates[deviceID].keys[button] && !gPrevKeyStates[deviceID].keys[button];
+			return gInputState.keyStates[deviceID].keys[button] && !gInputState.prevKeyStates[deviceID].keys[button];
 		default:
 			break;
 	}
@@ -725,20 +793,20 @@ MF_API bool MFInput_WasReleased(int button, int device, int deviceID)
 	{
 		case IDD_Gamepad:
 		{
-			return !gGamepadStates[deviceID].values[button] && gPrevGamepadStates[deviceID].values[button];
+			return !gInputState.gamepadStates[deviceID].values[button] && gInputState.prevGamepadStates[deviceID].values[button];
 		}
 		case IDD_Mouse:
 			if(button < Mouse_MaxAxis)
 			{
-				return !gMouseStates[deviceID].values[button] && gPrevMouseStates[deviceID].values[button];
+				return !gInputState.mouseStates[deviceID].values[button] && gInputState.prevMouseStates[deviceID].values[button];
 			}
 			else if(button < Mouse_Max)
 			{
-				return !gMouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && gPrevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
+				return !gInputState.mouseStates[deviceID].buttonState[button - Mouse_MaxAxis] && gInputState.prevMouseStates[deviceID].buttonState[button - Mouse_MaxAxis];
 			}
 			break;
 		case IDD_Keyboard:
-			return !gKeyStates[deviceID].keys[button] && gPrevKeyStates[deviceID].keys[button];
+			return !gInputState.keyStates[deviceID].keys[button] && gInputState.prevKeyStates[deviceID].keys[button];
 		default:
 			break;
 	}
@@ -847,7 +915,7 @@ MF_API void MFInput_SetMouseAcceleration(float multiplier)
 
 MF_API MFTouchPanelState *MFInput_GetContactInfo(int touchPanel)
 {
-	return &gTouchPanelStates[touchPanel];
+	return &gInputState.touchPanelStates[touchPanel];
 }
 
 MF_API const char* MFInput_GetDeviceName(int device, int deviceID)
