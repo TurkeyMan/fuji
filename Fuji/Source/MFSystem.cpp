@@ -8,6 +8,7 @@
 #include "MFModel_Internal.h"
 #include "MFAnimation_Internal.h"
 #include "MFInput_Internal.h"
+#include "MFMidi_Internal.h"
 #include "MFView_Internal.h"
 #include "MFFileSystem_Internal.h"
 #include "MFFont_Internal.h"
@@ -205,6 +206,7 @@ void MFSystem_Update()
 	MFSystem_UpdatePlatformSpecific();
 
 	MFInput_Update();
+	MFMidi_Update();
 
 #if defined(MF_XBOX)
 	if(MFInput_Read(Button_XB_Start, IDD_Gamepad) && MFInput_Read(Button_XB_White, IDD_Gamepad) && MFInput_Read(Button_XB_LTrig, IDD_Gamepad) && MFInput_Read(Button_XB_RTrig, IDD_Gamepad))

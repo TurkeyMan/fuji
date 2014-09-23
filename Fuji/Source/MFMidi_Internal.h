@@ -8,6 +8,7 @@ void MFMidi_InitModulePlatformSpecific();
 void MFMidi_DeinitModule();
 void MFMidi_DeinitModulePlatformSpecific();
 void MFMidi_UpdateInternal();
+void MFMidi_Update();
 
 struct MFMidiDeviceInfo
 {
