@@ -86,6 +86,7 @@ configuration { "not StaticLib", "linux" }
 --	links { "SDL2", "SDL2_gfx" }
 	links { "GL", "GLU" }
 	links { "openal" }
+	links { "asound" }
 
 	-- asset libs
 	links { "png" }
