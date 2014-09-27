@@ -87,13 +87,13 @@ nothrow:
 
 	float characterWidth(dchar character) const						{ return MFFont_GetCharacterWidth(pFont, cast(int)character); }
 
-	MFVector getCharPos(const(char)[] text, int charIndex, float height)
+	MFVector getCharPos(const(char)[] text, int charIndex, float height) const
 	{
 		auto s = Stringz!256(text);
 		return MFFont_GetCharPos(pFont, s, charIndex, height);
 	}
 
-	float getStringWidth(const(char)[] text, float height, float lineWidth = 0.0f, int maxLen = -1, float* pTotalHeight = null)
+	float getStringWidth(const(char)[] text, float height, float lineWidth = 0.0f, int maxLen = -1, float* pTotalHeight = null) const
 	{
 		auto s = Stringz!256(text);
 		return MFFont_GetStringWidth(pFont, s, height, lineWidth, maxLen, pTotalHeight);
