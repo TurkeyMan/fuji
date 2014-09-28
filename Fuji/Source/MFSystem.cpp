@@ -182,7 +182,7 @@ MFInitStatus MFSystem_InitModule(int moduleId, bool bPerformInitialisation)
 
 	gpEngineInstance->bDrawSystemInfo = true;
 	gpEngineInstance->bQuit = 0;
-	gpEngineInstance->bRestart = 1;
+	gpEngineInstance->bRestart = 0;
 	gpEngineInstance->frameCount = 0;
 
 	MFSystem_InitModulePlatformSpecific();
@@ -370,7 +370,7 @@ int MFSystem_GameLoop()
 		MFModule_DeinitModules();
 	}
 
-	return gpEngineInstance->bQuit;
+	return 0;
 }
 
 void MFSystem_RunFrame()
