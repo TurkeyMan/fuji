@@ -459,8 +459,7 @@ enum MFGamepadButton
 	// Extra buttons
 	Button_Home = 20,
 
-	GamepadType_Max,						/**< Maximum gamepad button id */
-	GamepadType_ForceInt	= 0x7FFFFFFF,	/**< Force button ID to an int type */
+	Max,					/**< Maximum gamepad button id */
 
 	// Guitar controller enums
 	GH_Green		= P2_R2,		/**< Green key on Guitar controller */

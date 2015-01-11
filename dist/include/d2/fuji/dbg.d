@@ -11,8 +11,9 @@ static this()
 
 	static void fujiAssert(string file, ulong line, string msg) nothrow
 	{
-		import std.string : toStringz;
-		MFDebug_DebugAssert("assert()", msg.toStringz, file.toStringz, cast(int)line);
+		auto _msg = Stringz!()(msg);
+		auto _file = Stringz!()(file);
+		MFDebug_DebugAssert("assert()", _msg, _file, cast(int)line);
 	}
 
 	assertHandler = &fujiAssert;

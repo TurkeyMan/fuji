@@ -11,54 +11,65 @@
 #include "MFTexture.h"
 #include "MFResource.h"
 
-struct MFTextureSurfaceLevel
+struct MFTextureSurface
 {
-	int width, height;
-	int bitsPerPixel;
-
+	int width, height, depth;
 	int xBlocks, yBlocks;
-	int bitsPerBlock;
 
-	char *pImageData;
-	int bufferLength;
+	uint32 imageDataOffset;
+	uint32 bufferLength;
+	uint32 lineStride;
 
-	char *pPaletteEntries;
-	int paletteBufferLength;
+	uint32 paletteEntriesOffset;
+	uint16 paletteBufferLength;
 
-	uint32 res[2];
+	uint8 bitsPerPixel;
+	uint8 bitsPerBlock;
+
+	uint64 platformData;
 };
 
-// texture TemplateData
-struct MFTextureTemplateData
-{
-	uint32 magicNumber;
-	MFImageFormat imageFormat;
-	uint32 reserved;
-	int mipLevels;
-	uint32 flags;
-
-	// padding
-	uint32 res[2];
-
-	MFTextureSurfaceLevel *pSurfaces;
-};
-
-// texture structure
 struct MFTexture : public MFResource
 {
-	MFTextureTemplateData *pTemplateData;
+	MFTextureType type;
+	MFImageFormat imageFormat;
+	int width, height, depth;
+	int numElements;
+	int numMips;
+	uint32 createFlags;
+	uint32 flags;
 
+	uint32 reserved;
+
+	union
+	{
+		MFTextureSurface *pSurfaces;
+		uint64 surfacesOffset;
+	};
+	union
+	{
+		char *pImageData;
+		uint64 imageDataOffset;
+	};
+
+	union
+	{
+		uint64 platformData;
+
+		// fields used by platforms
 #if MF_RENDERER == MF_DRIVER_XBOX
 #if defined(XB_XGTEXTURES)
-	IDirect3DTexture8 texture;
+		IDirect3DTexture8 texture;
 #endif
-	IDirect3DTexture8 *pTexture;
+		IDirect3DTexture8 *pTexture;
 #elif MF_RENDERER == MF_DRIVER_PS2
-	unsigned int vramAddr;
+		unsigned int vramAddr;
 #else
-	void *pInternalData;
+		void *pInternalData;
 #endif
+	};
 };
+
 
 // functions
 MFInitStatus MFTexture_InitModule(int moduleId, bool bPerformInitialisation);
@@ -67,8 +78,10 @@ void MFTexture_DeinitModule();
 void MFTexture_InitModulePlatformSpecific();
 void MFTexture_DeinitModulePlatformSpecific();
 
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain);
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture);
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture);
+
+MFTexture* MFTexture_InitTexture(const MFTextureDesc *pDesc, MFRendererDrivers renderer, size_t *pExtraBytes);
 
 #if !defined(_FUJI_UTIL)
 // a debug menu texture information display object

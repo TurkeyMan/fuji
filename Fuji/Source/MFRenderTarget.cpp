@@ -40,7 +40,7 @@ MF_API MFRenderTarget* MFRenderTarget_Create(MFRenderTargetDesc *pDesc)
 	{
 		if(pDesc->colourTargets[a].pSurface)
 		{
-			MFDebug_Assert(pDesc->colourTargets[a].pSurface->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+			MFDebug_Assert(pDesc->colourTargets[a].pSurface->flags & TEX_RenderTarget, "Texture is not a render target!");
 			MFResource_AddRef((MFResource*)pDesc->colourTargets[a].pSurface);
 		}
 		else if(pDesc->colourTargets[a].format != ImgFmt_Unknown)
@@ -49,7 +49,7 @@ MF_API MFRenderTarget* MFRenderTarget_Create(MFRenderTargetDesc *pDesc)
 
 	if(pDesc->depthStencil.pSurface)
 	{
-		MFDebug_Assert(pDesc->depthStencil.pSurface->pTemplateData->flags & TEX_RenderTarget, "Texture is not a render target!");
+		MFDebug_Assert(pDesc->depthStencil.pSurface->flags & TEX_RenderTarget, "Texture is not a render target!");
 		MFResource_AddRef((MFResource*)pDesc->depthStencil.pSurface);
 	}
 	else if(pDesc->depthStencil.format != ImgFmt_Unknown)
@@ -68,7 +68,7 @@ MF_API MFRenderTarget* MFRenderTarget_Create(MFRenderTargetDesc *pDesc)
 	}
 	pRT->pDepthStencil = pDesc->depthStencil.pSurface;
 	pRT->bHasDepth = pRT->pDepthStencil != NULL;
-	pRT->bHasStencil = pRT->pDepthStencil && (pRT->pDepthStencil->pTemplateData->imageFormat >= ImgFmt_D15S1 && pRT->pDepthStencil->pTemplateData->imageFormat <= ImgFmt_D32FS8X24);
+	pRT->bHasStencil = pRT->pDepthStencil && (pRT->pDepthStencil->imageFormat >= ImgFmt_D15S1 && pRT->pDepthStencil->imageFormat <= ImgFmt_D32FS8X24);
 
 	MFRenderTarget_CreatePlatformSpecific(pRT);
 

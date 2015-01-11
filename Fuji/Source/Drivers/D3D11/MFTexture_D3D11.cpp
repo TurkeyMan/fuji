@@ -10,6 +10,9 @@
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_D3D11
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_D3D11
 	#define MFTexture_DestroyPlatformSpecific MFTexture_DestroyPlatformSpecific_D3D11
+	#define MFTexture_Update MFTexture_Update_D3D11
+	#define MFTexture_Map MFTexture_Map_D3D11
+	#define MFTexture_Unmap MFTexture_Unmap_D3D11
 #endif
 
 /**** Defines ****/
@@ -437,27 +440,23 @@ void MFTexture_Recreate()
 }
 
 // interface functions
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
 	HRESULT hr;
-	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
 	pTexture->pInternalData = NULL;
 
 	// create texture
-	pTemplate->imageFormat = MFImage_ResolveFormat(pTemplate->imageFormat, MFRD_D3D11);
-	MFDebug_Assert(pTemplate->imageFormat != ImgFmt_Unknown, "Invalid texture format!");
+	DXGI_FORMAT platformFormat = gD3D11Format[(pTexture->imageFormat>>8)&3][pTexture->imageFormat];
+//	hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTexture->pSurfaces[0].width, pTexture->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
 
-	DXGI_FORMAT platformFormat = gD3D11Format[(pTemplate->imageFormat>>8)&3][pTemplate->imageFormat];
-//	hr = D3DX11CreateTextureFromMemory(pd3dDevice, pTemplate->pSurfaces[0].width, pTemplate->pSurfaces[0].height, generateMipChain ? 0 : 1, 0, platformFormat, D3DPOOL_MANAGED, (IDirect3DTexture9**)&pTexture->pInternalData);
-
-	int pitch = (MFImage_GetBitsPerPixel(pTemplate->imageFormat) / 8) * pTemplate->pSurfaces[0].width;
+	int pitch = (MFImage_GetBitsPerPixel(pTexture->imageFormat) / 8) * pTexture->pSurfaces[0].width;
 
 	D3D11_TEXTURE2D_DESC desc;
 	MFZeroMemory(&desc, sizeof(desc));
-	desc.Width = pTemplate->pSurfaces[0].width;
-	desc.Height = pTemplate->pSurfaces[0].height;
+	desc.Width = pTexture->pSurfaces[0].width;
+	desc.Height = pTexture->pSurfaces[0].height;
 	desc.MipLevels = 1; //generateMipChain ? 0 : 1;
 	desc.ArraySize = 1;
 	desc.Format = platformFormat;
@@ -466,11 +465,11 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	desc.Usage = D3D11_USAGE_DEFAULT; // = D3D11_USAGE_IMMUTABLE;
 	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = generateMipChain ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+	desc.MiscFlags = (pTexture->createFlags & MFTCF_GenerateMips) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
 
 	D3D11_SUBRESOURCE_DATA data[16];
 	MFZeroMemory(&data, sizeof(data));
-	data[0].pSysMem = pTemplate->pSurfaces[0].pImageData;
+	data[0].pSysMem = (void*)(size_t)pTexture->pSurfaces[0].platformData;
 	data[0].SysMemPitch = pitch;
 
 	ID3D11Texture2D* pTex = NULL;
@@ -484,7 +483,7 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	MFDebug_Assert(hr == S_OK, MFStr("Failed to create texture '%s'.", pTexture->pName));
 
 	if (SUCCEEDED(hr))
-	{	
+	{
 		MFRenderer_D3D11_SetDebugName(pTex, pTexture->pName);
 
 		// filter mip levels
@@ -507,11 +506,6 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain
 	}
 }
 
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
-{
-	return NULL;
-}
-
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
@@ -521,6 +515,20 @@ void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 		ID3D11ShaderResourceView *pSRV = (ID3D11ShaderResourceView*)pTexture->pInternalData;
 		pSRV->Release();
 	}
+}
+
+MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride, size_t sliceStride)
+{
+	return false;
+}
+
+MF_API bool MFTexture_Map(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock)
+{
+	return false;
+}
+
+MF_API void MFTexture_Unmap(MFTexture *pTexture, int element, int mipLevel)
+{
 }
 
 #endif // MF_RENDERER

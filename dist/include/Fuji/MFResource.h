@@ -41,7 +41,11 @@ struct MFResource
 	uint32 hash;			/**< Resource hash. */
 	uint32 type		: 8;	/**< Type id. */
 	uint32 refCount	: 24;	/**< Reference count. */
-	const char *pName;		/**< Resource name. */
+	union
+	{
+		const char *pName;	/**< Resource name. */
+		uint64 padding;		// pointers may be 32 or 64 bits
+	};
 };
 
 /**

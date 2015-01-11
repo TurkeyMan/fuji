@@ -27,14 +27,27 @@ nothrow:
 		create(name);
 	}
 
-	void create(const(char)[] name, bool generateMipChain = true)
+	void create(const(char)[] name, const(MFTextureDesc)* pDesc)
 	{
 		release();
 		auto s = Stringz!(64)(name);
-		pTexture = MFTexture_Create(s, generateMipChain);
+		pTexture = MFTexture_Create(s, pDesc);
 	}
 
-	void createExisting(const(char)[] name)
+	void create(const(char)[] name, uint flags = MFTextureCreateFlags.GenerateMips)
+	{
+		release();
+		auto s = Stringz!(64)(name);
+		pTexture = MFTexture_CreateFromFile(s, flags);
+	}
+
+	void create2D(const(char)[] name, int width, int height, MFImageFormat format, uint flags = 0)
+	{
+		auto s = Stringz!(64)(name);
+		pTexture = MFTexture_Create2D(s, width, height, format, flags);
+	}
+
+	void find(const(char)[] name)
 	{
 		release();
 		auto s = Stringz!(64)(name);
@@ -84,6 +97,11 @@ nothrow:
 			pTexture = null;
 		}
 		return rc;
+	}
+
+	bool update(const(void)* pData, int mipLevel = 0, int element = 0)
+	{
+		return MFTexture_Update(pTexture, element, mipLevel, pData);
 	}
 
 	@property inout(MFTexture)* handle() inout pure		{ return pTexture; }

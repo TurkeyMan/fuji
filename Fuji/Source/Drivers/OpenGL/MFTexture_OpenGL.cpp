@@ -8,6 +8,9 @@
 	#define MFTexture_CreatePlatformSpecific MFTexture_CreatePlatformSpecific_OpenGL
 	#define MFTexture_CreateRenderTarget MFTexture_CreateRenderTarget_OpenGL
 	#define MFTexture_DestroyPlatformSpecific MFTexture_DestroyPlatformSpecific_OpenGL
+	#define MFTexture_Update MFTexture_Update_OpenGL
+	#define MFTexture_Map MFTexture_Map_OpenGL
+	#define MFTexture_Unmap MFTexture_Unmap_OpenGL
 #endif
 
 /**** Includes ****/
@@ -235,6 +238,33 @@ GLFormat gGLFormats[] =
 };
 #endif
 
+static GLuint gTexTypes[MFTexType_Max] =
+{
+	GL_TEXTURE_1D,
+	GL_TEXTURE_2D,
+	GL_TEXTURE_3D,
+	GL_TEXTURE_CUBE_MAP
+};
+
+static GLuint gTexArrayTypes[MFTexType_Max] =
+{
+	GL_TEXTURE_1D_ARRAY,
+	GL_TEXTURE_2D_ARRAY,
+	0,
+	GL_TEXTURE_CUBE_MAP_ARRAY
+};
+
+static GLuint gCubeFace[6] =
+{
+	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+	GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+	GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+	GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+	GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+	GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+};
+
+
 /**** Functions ****/
 
 void MFTexture_InitModulePlatformSpecific()
@@ -246,124 +276,61 @@ void MFTexture_DeinitModulePlatformSpecific()
 }
 
 // interface functions
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 {
 	MFCALLSTACK;
 
-	MFTextureTemplateData *pTemplate = pTexture->pTemplateData;
-
-	GLuint textureID;
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	pTexture->pInternalData = (void*)(uintp)textureID;
-
-	pTemplate->imageFormat = MFImage_ResolveFormat(pTemplate->imageFormat, MFRD_OpenGL);
-	MFDebug_Assert(pTemplate->imageFormat != ImgFmt_Unknown, "Invalid texture format!");
-
-	GLFormat &format = gGLFormats[pTemplate->imageFormat];
+	GLFormat &format = gGLFormats[pTexture->imageFormat];
 	MFDebug_Assert(format.internalFormat != 0, "Unsupported image format!");
 
-	if(generateMipChain && pTemplate->mipLevels == 1)
+	int numFaces = pTexture->type == MFTexType_Cubemap ? 6 : 1;
+	GLuint type = pTexture->numElements > numFaces ? gTexArrayTypes[pTexture->type] : gTexTypes[pTexture->type];
+
+	GLuint textureID;
+
+	glEnable(type);
+	glGenTextures(1, &textureID);
+	glBindTexture(type, textureID);
+	pTexture->pInternalData = (void*)(uintp)textureID;
+
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	if(pTexture->type == MFTexType_3D)
+		glTexParameteri(type, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// populate the image
+	bool bAutoGenMips = pTexture->numMips == 1 ? !!(pTexture->createFlags & MFTCF_GenerateMips) : false;
+	if(!bAutoGenMips)
 	{
+#if !defined(MF_OPENGL_ES)
+		glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, pTexture->numMips - 1);
+#endif
+
+		for(int l=0; l<pTexture->numMips; ++l)
+		{
+			int s = l*pTexture->numElements;
+			MFTexture_Update(pTexture, -1, l, pTexture->pImageData + pTexture->pSurfaces[s].imageDataOffset);
+		}
+	}
+	else
+	{
+		// TODO: do something about auto-mip-generation...
+
 		int numMips = 0;
 		// build mips from the top surface
 		//...
 
 		// set this to however many mips we just constructed
 #if !defined(MF_OPENGL_ES)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, numMips);
+		glTexParameteri(type, GL_TEXTURE_MAX_LEVEL, numMips);
 #endif
 
-		MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[0];
-		MFCheckForOpenGLError();
-		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurf->width, pSurf->height, 0, format.format, format.type, pSurf->pImageData);
-
-		// set the mips
-		//...
-	}
-	else
-	{
-#if !defined(MF_OPENGL_ES)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, pTemplate->mipLevels - 1);
-#endif
-
-		for(int a=0; a<pTemplate->mipLevels; a++)
-		{
-			MFTextureSurfaceLevel *pSurf = &pTemplate->pSurfaces[a];
-			MFCheckForOpenGLError();
-			glTexImage2D(GL_TEXTURE_2D, a, format.internalFormat, pSurf->width, pSurf->height, 0, format.format, format.type, pSurf->pImageData);
-		}
+		MFTexture_Update(pTexture, -1, 0, pTexture->pImageData + pTexture->pSurfaces[0].imageDataOffset);
 	}
 
 	MFCheckForOpenGLError();
-}
-
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
-{
-	MFTexture *pTexture = MFTexture_Find(pName);
-
-	if(!pTexture)
-	{
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
-
-		if(pName)
-			pName = MFString_Copy((char*)&pTexture[1], pName);
-
-		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
-
-		targetFormat = MFImage_ResolveFormat(targetFormat, MFRD_OpenGL);
-		MFDebug_Assert(targetFormat != ImgFmt_Unknown, "Invalid texture format!");
-
-		// allocate an MFTexture template
-		pTexture->pTemplateData = (MFTextureTemplateData*)MFHeap_AllocAndZero(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel));
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)&pTexture->pTemplateData[1];
-		pTexture->pTemplateData->magicNumber = MFMAKEFOURCC('F','T','E','X');
-		pTexture->pTemplateData->imageFormat = targetFormat;
-		pTexture->pTemplateData->mipLevels = 1;
-		pTexture->pTemplateData->flags = TEX_RenderTarget;
-
-		int bitsPerPixel = MFImage_GetBitsPerPixel(pTexture->pTemplateData->imageFormat);
-		//int imageSize = (width * height * bitsPerPixel) >> 3;
-		MFTextureSurfaceLevel *pSurface = &pTexture->pTemplateData->pSurfaces[0];
-		pSurface->width = width;
-		pSurface->height = height;
-		pSurface->bitsPerPixel = bitsPerPixel;
-		pSurface->xBlocks = width;
-		pSurface->yBlocks = height;
-		pSurface->bitsPerBlock = bitsPerPixel;
-		pSurface->pImageData = NULL;
-		pSurface->bufferLength = 0;
-		pSurface->pPaletteEntries = NULL;
-		pSurface->paletteBufferLength = 0;
-
-		// create the targets
-		GLuint textureID;
-
-		// create the texture
-		glEnable(GL_TEXTURE_2D);
-		glGenTextures(1, &textureID);
-		pTexture->pInternalData = (void*)(uintp)textureID;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-#if !defined(MF_OPENGL_ES)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-#endif
-
-		GLFormat &format = gGLFormats[targetFormat];
-		MFDebug_Assert(format.internalFormat != 0, "Unsupported image format!");
-
-		glTexImage2D(GL_TEXTURE_2D, 0, format.internalFormat, pSurface->width, pSurface->height, 0, format.format, format.type, NULL);
-
-		if(!MFCheckForOpenGLError())
-			MFDebug_Log(0, "RenderTarget created successfully!");
-	}
-
-	return pTexture;
 }
 
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
@@ -372,6 +339,72 @@ void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 
 	GLuint texture = (GLuint)(size_t)pTexture->pInternalData;
 	glDeleteTextures(1, &texture);
+}
+
+MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride, size_t sliceStride)
+{
+	int numFaces = pTexture->type == MFTexType_Cubemap ? 6 : 1;
+	GLuint type = pTexture->numElements > numFaces ? gTexArrayTypes[pTexture->type] : gTexTypes[pTexture->type];
+	GLFormat &format = gGLFormats[pTexture->imageFormat];
+
+	int s = mipLevel*pTexture->numElements + (element > -1 ? element : 0);
+	MFTextureSurface &surface = pTexture->pSurfaces[s];
+
+	if(pTexture->numElements > numFaces)
+	{
+		// texture arrays
+		switch(pTexture->type)
+		{
+			case MFTexType_1D:
+				if(element == -1)
+					glTexImage2D(type, mipLevel, format.internalFormat, surface.width, pTexture->numElements, 0, format.format, format.type, pData);
+				else
+					glTexSubImage2D(type, mipLevel, 0, element, surface.width, 1, format.format, format.type, pData);
+				break;
+			case MFTexType_2D:
+				if(element == -1)
+					glTexImage3D(type, mipLevel, format.internalFormat, surface.width, surface.height, pTexture->numElements, 0, format.format, format.type, pData);
+				else
+					glTexSubImage3D(type, mipLevel, 0, 0, element, surface.width, surface.height, 1, format.format, format.type, pData);
+				break;
+			case MFTexType_3D:
+				MFDebug_Assert(false, "3D textures may not be arrays!");
+				break;
+			case MFTexType_Cubemap:
+				MFDebug_Assert(false, "TODO: cubemap arrays!");
+				break;
+		}
+	}
+	else
+	{
+		// single textures
+		switch(pTexture->type)
+		{
+			case MFTexType_1D:
+				glTexImage1D(type, mipLevel, format.internalFormat, surface.width, 0, format.format, format.type, pData);
+				break;
+			case MFTexType_2D:
+				glTexImage2D(type, mipLevel, format.internalFormat, surface.width, surface.height, 0, format.format, format.type, pData);
+				break;
+			case MFTexType_3D:
+				glTexImage3D(type, mipLevel, format.internalFormat, surface.width, surface.height, surface.depth, 0, format.format, format.type, pData);
+				break;
+			case MFTexType_Cubemap:
+				glTexImage2D(gCubeFace[element], mipLevel, format.internalFormat, surface.width, surface.height, 0, format.format, format.type, pData);
+				break;
+		}
+	}
+
+	return !MFCheckForOpenGLError();
+}
+
+MF_API bool MFTexture_Map(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock)
+{
+	return false;
+}
+
+MF_API void MFTexture_Unmap(MFTexture *pTexture, int element, int mipLevel)
+{
 }
 
 #endif

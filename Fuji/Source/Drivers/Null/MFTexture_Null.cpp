@@ -19,7 +19,7 @@ extern MFTexture *pNoneTexture;
 /**** Functions ****/
 
 // interface functions
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 {
 }
 

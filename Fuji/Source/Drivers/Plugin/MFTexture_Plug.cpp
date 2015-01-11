@@ -9,9 +9,11 @@
 #define DECLARE_PLUGIN_CALLBACKS(driver) \
 	void MFTexture_InitModulePlatformSpecific_##driver(); \
 	void MFTexture_DeinitModulePlatformSpecific_##driver(); \
-	void MFTexture_CreatePlatformSpecific_##driver(MFTexture *pTexture, bool generateMipChain); \
-	MF_API MFTexture* MFTexture_CreateRenderTarget_##driver(const char *pName, int width, int height, MFImageFormat targetFormat); \
-	void MFTexture_DestroyPlatformSpecific_##driver(MFTexture *pTexture);
+	void MFTexture_CreatePlatformSpecific_##driver(MFTexture *pTexture); \
+	void MFTexture_DestroyPlatformSpecific_##driver(MFTexture *pTexture); \
+	MF_API bool MFTexture_Update_##driver(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride, size_t sliceStride); \
+	MF_API bool MFTexture_Map_##driver(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock); \
+	MF_API void MFTexture_Unmap_##driver(MFTexture *pTexture, int element, int mipLevel);
 
 #define DEFINE_PLUGIN(driver) \
 	{ \
@@ -19,8 +21,10 @@
 		MFTexture_InitModulePlatformSpecific_##driver, \
 		MFTexture_DeinitModulePlatformSpecific_##driver, \
 		MFTexture_CreatePlatformSpecific_##driver, \
-		MFTexture_CreateRenderTarget_##driver, \
 		MFTexture_DestroyPlatformSpecific_##driver, \
+		MFTexture_Update_##driver, \
+		MFTexture_Map_##driver, \
+		MFTexture_Unmap_##driver \
 	},
 
 // declare the available plugins
@@ -40,9 +44,11 @@ struct MFTexturePluginCallbacks
 	const char *pDriverName;
 	void (*pInitModulePlatformSpecific)();
 	void (*pDeinitModulePlatformSpecific)();
-	void (*pCreatePlatformSpecific)(MFTexture *pTexture, bool generateMipChain);
-	MFTexture* (*pCreateRenderTarget)(const char *pName, int width, int height, MFImageFormat targetFormat);
+	void (*pCreatePlatformSpecific)(MFTexture *pTexture);
 	void (*pDestroyPlatformSpecific)(MFTexture *pTexture);
+	bool (*pUpdate)(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride, size_t sliceStride);
+	bool (*pMap)(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock);
+	void (*pUnmap)(MFTexture *pTexture, int element, int mipLevel);
 };
 
 // create an array of actual callbacks to the various enabled plugins
@@ -79,19 +85,29 @@ void MFTexture_DeinitModulePlatformSpecific()
 	gpCurrentTexturePlugin->pDeinitModulePlatformSpecific();
 }
 
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 {
-	gpCurrentTexturePlugin->pCreatePlatformSpecific(pTexture, generateMipChain);
-}
-
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat)
-{
-	return gpCurrentTexturePlugin->pCreateRenderTarget(pName, width, height, targetFormat);
+	gpCurrentTexturePlugin->pCreatePlatformSpecific(pTexture);
 }
 
 void MFTexture_DestroyPlatformSpecific(MFTexture *pTexture)
 {
 	gpCurrentTexturePlugin->pDestroyPlatformSpecific(pTexture);
+}
+
+MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride, size_t sliceStride)
+{
+	return gpCurrentTexturePlugin->pUpdate(pTexture, element, mipLevel, pData, lineStride, sliceStride);
+}
+
+MF_API bool MFTexture_Map(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock)
+{
+	return gpCurrentTexturePlugin->pMap(pTexture, element, mipLevel, pLock);
+}
+
+MF_API void MFTexture_Unmap(MFTexture *pTexture, int element, int mipLevel)
+{
+	gpCurrentTexturePlugin->pUnmap(pTexture, element, mipLevel);
 }
 
 #endif // MF_RENDERER

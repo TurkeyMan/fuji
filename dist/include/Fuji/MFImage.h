@@ -127,6 +127,14 @@ enum MFImageFormat
 
 	ImgFmt_Max,				/**< Max image format */
 
+	// define some ranges in the enum table
+	ImgFmt_FirstCompressed = ImgFmt_DXT1,
+	ImgFmt_LastCompressed = ImgFmt_PSP_DXT5,
+	ImgFmt_FirstDepth = ImgFmt_D16,
+	ImgFmt_LastDepth = ImgFmt_D32F,
+	ImgFmt_FirstDepthStencil = ImgFmt_D15S1,
+	ImgFmt_LastDepthStencil = ImgFmt_D32FS8X24,
+
 	// format flags
 	ImgFmt_Signed = 0x100,	/**< Components are signed. */
 	ImgFmt_Integer = 0x200,	/**< Components are non-normalised integers. */

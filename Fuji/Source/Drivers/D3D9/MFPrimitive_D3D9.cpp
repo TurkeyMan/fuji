@@ -248,8 +248,8 @@ MF_API void MFPrimitive_BeginBlitter(int numBlits)
 
 	MFMaterial *pMat = MFMaterial_GetCurrent();
 	MFTexture *pTex = MFMaterial_GetParameterT(pMat, MFMatStandard_Texture, MFMatStandard_Tex_DifuseMap);
-	textureWidth = pTex->pTemplateData->pSurfaces[0].width;
-	textureHeight = pTex->pTemplateData->pSurfaces[0].height;
+	textureWidth = pTex->width;
+	textureHeight = pTex->height;
 
 	uScale = 1.0f / (float)textureWidth;
 	vScale = 1.0f / (float)textureHeight;
@@ -267,9 +267,9 @@ MF_API void MFPrimitive_Blit(int x, int y, int tx, int ty, int tw, int th)
 
 MF_API void MFPrimitive_StretchBlit(int x, int y, int w, int h, int tx, int ty, int tw, int th)
 {
-	MFSetTexCoord1((float)tx * uScale - halfTexelU, (float)ty * vScale - halfTexelV);
+	MFSetTexCoord1((float)tx * uScale + halfTexelU, (float)ty * vScale + halfTexelV);
 	MFSetPosition((float)x, (float)y, 0.0f);
-	MFSetTexCoord1((float)(tx + tw) * uScale - halfTexelU, (float)(ty + th) * vScale - halfTexelV);
+	MFSetTexCoord1((float)(tx + tw) * uScale + halfTexelU, (float)(ty + th) * vScale + halfTexelV);
 	MFSetPosition((float)(x + w), (float)(y + h), 0.0f);
 }
 

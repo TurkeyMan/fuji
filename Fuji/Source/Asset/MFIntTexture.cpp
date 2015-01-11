@@ -129,7 +129,7 @@ typedef struct {
   uint32          dwReserved2;
 } DDS_HEADER;
 
-typedef enum DXGI_FORMAT { 
+typedef enum DXGI_FORMAT {
   DXGI_FORMAT_UNKNOWN                     = 0,
   DXGI_FORMAT_R32G32B32A32_TYPELESS       = 1,
   DXGI_FORMAT_R32G32B32A32_FLOAT          = 2,
@@ -249,7 +249,7 @@ typedef enum DXGI_FORMAT {
   DXGI_FORMAT_FORCE_UINT                  = 0xffffffffUL
 } DXGI_FORMAT;
 
-typedef enum D3D10_RESOURCE_DIMENSION { 
+typedef enum D3D10_RESOURCE_DIMENSION {
   D3D10_RESOURCE_DIMENSION_UNKNOWN    = 0,
   D3D10_RESOURCE_DIMENSION_BUFFER     = 1,
   D3D10_RESOURCE_DIMENSION_TEXTURE1D  = 2,
@@ -1232,7 +1232,7 @@ void Swizzle_PSP(char* out, const char* in, uint32 width, uint32 height, MFImage
 	}
 }
 
-int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *pOutputSurface, MFImageFormat targetFormat, MFPlatform platform)
+int ConvertSurface(char *pImageData, MFIntTextureSurface *pSourceSurface, MFTextureSurface *pOutputSurface, MFImageFormat targetFormat, MFPlatform platform)
 {
 	MFDebug_Assert(!(targetFormat & ImgFmt_Swizzle), "TODO: Fix up swizzled format support!");
 
@@ -1241,7 +1241,9 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 	int height = pSourceSurface->height;
 //	int depth = pSourceSurface->depth;
 
-	MFImage_Convert(width, height, pSourceSurface->pData, ImgFmt_ABGR_F32, pOutputSurface->pImageData, targetFormat);
+	char *pOutputData = pImageData + pOutputSurface->imageDataOffset;
+
+	MFImage_Convert(width, height, pSourceSurface->pData, ImgFmt_ABGR_F32, pOutputData, targetFormat);
 
 	// test for swizzled format..
 	if(targetFormat & ImgFmt_Swizzle)
@@ -1265,10 +1267,10 @@ int ConvertSurface(MFIntTextureSurface *pSourceSurface, MFTextureSurfaceLevel *p
 		if(platform == FP_PSP)
 		{
 			// swizzle for PSP
-			Swizzle_PSP(pBuffer, pOutputSurface->pImageData, width, height, targetFormat);
+			Swizzle_PSP(pBuffer, pOutputData, width, height, targetFormat);
 		}
 
-		MFCopyMemory(pOutputSurface->pImageData, pBuffer, imageBytes);
+		MFCopyMemory(pOutputData, pBuffer, imageBytes);
 		MFHeap_Free(pBuffer);
 	}
 
@@ -1452,9 +1454,9 @@ MF_API MFImageFormat ChooseBestFormat(MFIntTexture *pTexture, MFPlatform platfor
 	return targetFormat;
 }
 
-MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags, MFImageFormat targetFormat)
+MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTexture **ppTexture, size_t *pSize, MFPlatform platform, uint32 flags, MFImageFormat targetFormat)
 {
-	*ppTemplateData = NULL;
+	*ppTexture = NULL;
 	if(pSize)
 		*pSize = 0;
 
@@ -1478,7 +1480,8 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 		PremultiplyAlpha(pTexture);
 
 	// calculate texture data size..
-	size_t headerBytes = MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*pTexture->numSurfaces*pTexture->numMips, 0x100);
+	int numSurfaces = pTexture->numSurfaces*pTexture->numMips;
+	size_t headerBytes = MFALIGN(sizeof(MFTexture) + sizeof(MFTextureSurface)*numSurfaces, 0x100);
 	size_t imageBytes = headerBytes;
 
 	for(int a=0; a<pTexture->numMips; a++)
@@ -1502,51 +1505,61 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 //	MFHeap_SetAllocAlignment(4096);
 	char *pOutputBuffer = (char*)MFHeap_Alloc(imageBytes);
 
-	MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)pOutputBuffer;
-	MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData));
+	MFTexture *pTex = (MFTexture*)pOutputBuffer;
+	MFZeroMemory(pTex , sizeof(MFTexture) + sizeof(MFTextureSurface)*numSurfaces);
 
-	pTemplate->magicNumber = MFMAKEFOURCC('F','T','E','X');
+	pTex->hash = MFMAKEFOURCC('F','T','E','X');
 
-	pTemplate->imageFormat = targetFormat;
+	pTex->type = MFTexType_2D;
+	pTex->imageFormat = targetFormat;
 
 	if(targetFormat & ImgFmt_Swizzle)
-		pTemplate->flags |= TEX_Swizzled;
+		pTex->flags |= TEX_Swizzled;
 
 	if(!pTexture->opaque)
 	{
 		if(pTexture->oneBitAlpha)
-			pTemplate->flags |= 3;
+			pTex->flags |= 3;
 		else
-			pTemplate->flags |= 1;
+			pTex->flags |= 1;
 	}
 
 	if(flags & MFITF_PreMultipliedAlpha)
-		pTemplate->flags |= TEX_PreMultipliedAlpha;
+		pTex->flags |= TEX_PreMultipliedAlpha;
 
-	pTemplate->mipLevels = pTexture->numMips;
-	pTemplate->pSurfaces = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
+	pTex->createFlags = 0;
 
-	MFTextureSurfaceLevel *pSurfaceLevels = (MFTextureSurfaceLevel*)(pOutputBuffer + sizeof(MFTextureTemplateData));
+	pTex->width = pTexture->pSurfaces[0].width;
+	pTex->height = pTexture->pSurfaces[0].height;
+	pTex->depth = 0;
 
+	pTex->numElements = 1;
+	pTex->numMips = pTexture->numMips;
+
+	pTex->surfacesOffset = sizeof(MFTexture);
+	pTex->imageDataOffset = headerBytes;
+
+	MFTextureSurface *pSurfaces = (MFTextureSurface*)&pTex[1];
 	char *pDataPointer = pOutputBuffer + headerBytes;
+	size_t dataOffset = 0;
 
+	uint8 bpp = (uint8)MFImage_GetBitsPerPixel(targetFormat);
 	for(int a=0; a<pTexture->numMips; a++)
 	{
-		MFZeroMemory(&pSurfaceLevels[a], sizeof(MFTextureSurfaceLevel));
+		pSurfaces[a].width = pTexture->pSurfaces[a].width;
+		pSurfaces[a].height = pTexture->pSurfaces[a].height;
+		pSurfaces[a].depth = pTexture->pSurfaces[a].depth;
+		pSurfaces[a].bitsPerPixel = bpp;
 
-		pSurfaceLevels[a].width = pTexture->pSurfaces[a].width;
-		pSurfaceLevels[a].height = pTexture->pSurfaces[a].height;
-		pSurfaceLevels[a].bitsPerPixel = MFImage_GetBitsPerPixel(targetFormat);
+		pSurfaces[a].xBlocks = pSurfaces[a].width;
+		pSurfaces[a].yBlocks = pSurfaces[a].height;
+		pSurfaces[a].bitsPerBlock = pSurfaces[a].bitsPerPixel;
 
-		pSurfaceLevels[a].xBlocks = -1;
-		pSurfaceLevels[a].yBlocks = -1;
-		pSurfaceLevels[a].bitsPerBlock = -1;
+		pSurfaces[a].imageDataOffset = (uint32)dataOffset;
+		pSurfaces[a].bufferLength = (pTexture->pSurfaces[a].width*pTexture->pSurfaces[a].height * MFImage_GetBitsPerPixel(targetFormat)) / 8;
+		dataOffset += pSurfaces[a].bufferLength;
 
-		pSurfaceLevels[a].pImageData = pDataPointer;
-		pSurfaceLevels[a].bufferLength = (pTexture->pSurfaces[a].width*pTexture->pSurfaces[a].height * MFImage_GetBitsPerPixel(targetFormat)) / 8;
-		pDataPointer += pSurfaceLevels[a].bufferLength;
-
-		uint32 paletteBytes = 0;
+		uint16 paletteBytes = 0;
 
 		if(targetFormat == ImgFmt_P8)
 			paletteBytes = 4*256;
@@ -1555,24 +1568,16 @@ MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemp
 
 		if(paletteBytes)
 		{
-			pSurfaceLevels[a].pImageData = pDataPointer;
-			pSurfaceLevels[a].paletteBufferLength = paletteBytes;
-			pDataPointer += paletteBytes;
+			pSurfaces[a].paletteEntriesOffset = (uint32)dataOffset;
+			pSurfaces[a].paletteBufferLength = paletteBytes;
+			dataOffset += paletteBytes;
 		}
 
 		// convert surface
-		ConvertSurface(&pTexture->pSurfaces[a], &pSurfaceLevels[a], targetFormat, platform);
+		ConvertSurface(pDataPointer, &pTexture->pSurfaces[a], &pSurfaces[a], targetFormat, platform);
 	}
 
-	// fix up pointers
-	for(int a=0; a<pTemplate->mipLevels; a++)
-	{
-		MFFixUp(pTemplate->pSurfaces[a].pImageData, pOutputBuffer, 0);
-		MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pOutputBuffer, 0);
-	}
-	MFFixUp(pTemplate->pSurfaces, pOutputBuffer, 0);
-
-	*ppTemplateData = (MFTextureTemplateData*)pOutputBuffer;
+	*ppTexture = pTex;
 	if(pSize)
 		*pSize = imageBytes;
 }

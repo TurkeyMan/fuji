@@ -277,7 +277,7 @@ void MFMat_Standard_BuildStateBlock(MFMaterial *pMaterial)
 	MFBlendStateDesc blendDesc;
 	blendDesc.bIndependentBlendEnable = false;
 
-	bool bPremultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_PreMultipliedAlpha);
+	bool bPremultipliedAlpha = !!(pData->textures[pData->diffuseMapIndex].pTexture->flags & TEX_PreMultipliedAlpha);
 	MFStateBlock_SetBool(pMaterial->pMaterialState, MFSCB_User0, bPremultipliedAlpha);
 
 	switch(pData->materialType&MF_BlendMask)
@@ -395,7 +395,7 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 		case MFMatStandard_DiffuseColour:
 			pData->diffuse = *(MFVector*)value;
 			pData->opaque = pData->diffuse.w >= 1.f && pData->textures[pData->diffuseMapIndex].pTexture &&
-				(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_AlphaMask) == 0;
+				(pData->textures[pData->diffuseMapIndex].pTexture->flags & TEX_AlphaMask) == 0;
 			break;
 		case MFMatStandard_AmbientColour:
 			pData->ambient = *(MFVector*)value;
@@ -439,55 +439,55 @@ void MFMat_Standard_SetParameter(MFMaterial *pMaterial, int parameterIndex, int 
 			switch(argIndex)
 			{
 				case MFMatStandard_Tex_DifuseMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->diffuseMapIndex = pData->textureCount;
 					pData->textureCount++;
 
 					pData->opaque = pData->diffuse.w >= 1.f && pData->textures[pData->diffuseMapIndex].pTexture &&
-						(pData->textures[pData->diffuseMapIndex].pTexture->pTemplateData->flags & TEX_AlphaMask) == 0;
+						(pData->textures[pData->diffuseMapIndex].pTexture->flags & TEX_AlphaMask) == 0;
 					break;
 				case MFMatStandard_Tex_DiffuseMap2:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->diffuseMap2Index = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_NormalMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->normalMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_DetailMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->detailMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_EnvMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->envMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_LightMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->lightMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_BumpMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->bumpMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_ReflectionMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->reflectionMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_SpecularMap:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->specularMapIndex = pData->textureCount;
 					pData->textureCount++;
 					break;
 				case MFMatStandard_Tex_Texture:
-					pData->textures[pData->textureCount].pTexture = MFTexture_Create((const char *)value);
+					pData->textures[pData->textureCount].pTexture = MFTexture_CreateFromFile((const char *)value);
 					pData->textureCount++;
 					break;
 			}

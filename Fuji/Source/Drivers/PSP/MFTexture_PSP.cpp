@@ -144,7 +144,7 @@ uint8 gPSPFormat[ImgFmt_Max] =
 /**** Functions ****/
 
 // interface functions
-void MFTexture_CreatePlatformSpecific(MFTexture *pTexture, bool generateMipChain)
+void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 {
 	// no processing required on PSP..
 }

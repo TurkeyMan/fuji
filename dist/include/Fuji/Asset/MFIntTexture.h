@@ -25,7 +25,7 @@ enum MFIntTextureFlags
 	MFITF_FadeAlpha = 2				// fade the alpha to transparent across mip levels
 };
 
-struct MFTextureTemplateData;
+struct MFTexture;
 
 // very high precision intermediate image format
 struct MFIntTexturePixel
@@ -54,7 +54,7 @@ MF_API MFIntTexture *MFIntTexture_CreateFromFileInMemory(const void *pMemory, si
 
 MF_API void MFIntTexture_Destroy(MFIntTexture *pTexture);
 
-MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTextureTemplateData **ppTemplateData, size_t *pSize, MFPlatform platform, uint32 flags = 0, MFImageFormat targetFormat = ImgFmt_Unknown);
+MF_API void MFIntTexture_CreateRuntimeData(MFIntTexture *pTexture, MFTexture **ppTexture, size_t *pSize, MFPlatform platform, uint32 flags = 0, MFImageFormat targetFormat = ImgFmt_Unknown);
 
 MF_API void MFIntTexture_WriteToHeaderFile(MFIntTexture *pTexture, const char *pFilename);
 

@@ -26,41 +26,215 @@ struct MFTexture;
 enum TextureFlags
 {
 	// Internal Flags
+	TEX_Opaque = 0,						/**< Opaque texture */
+	TEX_FullAlpha = 1,					/**< Texture contains full alpha */
+	TEX_1BitAlpha = 2,					/**< Texture contains 1-bit transparency */
 	TEX_AlphaMask = 0x3,				/**< Alpha mask. 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha */
+
 	TEX_PreMultipliedAlpha = MFBIT(2),	/**< Pre-multiplied alpha */
 	TEX_Swizzled = MFBIT(3),			/**< Texture data is swizzled for the platform */
 	TEX_RenderTarget = MFBIT(4),		/**< Texture is a render target */
+};
 
-	// User Flags
-	TEX_CopyMemory = MFBIT(8)			/**< Takes a copy of the image buffer when calling MFTexture_CreateFromRawData() */
+
+enum MFTextureType
+{
+	MFTexType_Unknown = -1,
+
+	MFTexType_1D = 0,
+	MFTexType_2D,
+	MFTexType_3D,
+	MFTexType_Cubemap,
+
+	MFTexType_Max,
+	MFTexType_ForceInt = 0x7FFFFFFF
+};
+
+enum MFTextureCreateFlags
+{
+	MFTCF_Static = 0,
+	MFTCF_Dynamic = 1,
+	MFTCF_Scratch = 2,
+	MFTCF_RenderTarget = 3,
+	MFTCF_TypeMask = 0x3,
+
+	MFTCF_GenerateMips = MFBIT(2),
+	MFTCF_PremultipliedAlpha = MFBIT(3)
+};
+
+struct MFTextureDesc
+{
+	MFTextureType type;
+	MFImageFormat format;
+	int width;
+	int height;
+	int depth;
+	int arrayElements;
+	int mipLevels;
+	uint32 flags;
+};
+
+struct MFLockedTexture
+{
+	void *pData;
+	size_t width, height, depth;
+	size_t strideInBytes, sliceInBytes;
 };
 
 // interface functions
 
 /**
  * Create a texture.
- * Creates a texture from the filesystem.
- * @param pName Name of texture to read from the filesystem.
- * @param generateMipChain If true, a mip-chain will be generated for the texture.
- * @return Pointer to an MFTexture structure representing the newly created texture.
- * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
- * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Release()
+ * Creates a texture.
+ * @param pName Name of the texture being created.
+ * @param pDesc Description of the texture to create.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create will fail.
+ * @see MFTexture_Create2D(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
  */
-MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain = true);
+MF_API MFTexture* MFTexture_Create(const char *pName, const MFTextureDesc *pDesc);
 
 /**
- * Create a dynamic texture.
- * Creates a dynamic texture.
+ * Create a 1D texture.
+ * Creates a 1D texture.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create2D will fail.
+ * @see MFTexture_Create(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_Create1D(const char *pName, int width, MFImageFormat format, uint32 flags = 0)
+{
+	MFTextureDesc desc = { MFTexType_1D, format, width, 0, 0, 0, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a 2D texture.
+ * Creates a 2D texture.
  * @param pName Name of the texture being created.
  * @param width Image width.
  * @param height Image height.
  * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
- * @param flags Texture creation flags.
- * @return Pointer to an MFTexture structure representing the newly created texture.
- * @remarks If the specified texture has already been created, MFTexture_CreateDynamic will fail.
- * @see MFTexture_Create(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Release()
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create2D will fail.
+ * @see MFTexture_Create(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
  */
-MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFImageFormat format, uint32 flags = 0);
+inline MFTexture* MFTexture_Create2D(const char *pName, int width, int height, MFImageFormat format, uint32 flags = 0)
+{
+	MFTextureDesc desc = { MFTexType_2D, format, width, height, 0, 0, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a 3D texture.
+ * Creates a 3D texture.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param height Image height.
+ * @param depth Image depth.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create3D will fail.
+ * @see MFTexture_Create(), MFTexture_Create2D(), MFTexture_CreateCubemap(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_Create3D(const char *pName, int width, int height, int depth, MFImageFormat format, uint32 flags = 0)
+{
+	MFTextureDesc desc = { MFTexType_3D, format, width, height, depth, 0, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a cubemap.
+ * Creates a cubemap.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param height Image height.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_CreateCubemap will fail.
+ * @see MFTexture_Create(), MFTexture_Create2D(), MFTexture_Create3D(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_CreateCubemap(const char *pName, int width, int height, MFImageFormat format, uint32 flags = 0)
+{
+	MFTextureDesc desc = { MFTexType_Cubemap, format, width, height, 0, 0, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a 1D texture array.
+ * Creates a 1D texture array.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param elements Number of array elements.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create2DArray will fail.
+ * @see MFTexture_Create(), MFTexture_Create2D(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_Create1DArray(const char *pName, int width, int elements, MFImageFormat format, uint32 flags = 0)
+{
+	MFDebug_Assert(elements > 0, "Array texture must have more than 0 elements!");
+	MFTextureDesc desc = { MFTexType_1D, format, width, 0, 0, elements, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a 2D texture array.
+ * Creates a 2D texture array.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param height Image height.
+ * @param elements Number of array elements.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_Create2DArray will fail.
+ * @see MFTexture_Create(), MFTexture_Create2D(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create3DArray(), MFTexture_CreateCubemapArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_Create2DArray(const char *pName, int width, int height, int elements, MFImageFormat format, uint32 flags = 0)
+{
+	MFDebug_Assert(elements > 0, "Array texture must have more than 0 elements!");
+	MFTextureDesc desc = { MFTexType_2D, format, width, height, 0, elements, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a cubemap texture array.
+ * Creates a cubemap texture array.
+ * @param pName Name of the texture being created.
+ * @param width Image width.
+ * @param height Image height.
+ * @param elements Number of array elements.
+ * @param format Format of the image data. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture representing the newly created texture, or NULL if creation fails.
+ * @remarks If the named texture has already been created, MFTexture_CreateCubemapArray will fail.
+ * @see MFTexture_Create(), MFTexture_Create2D(), MFTexture_Create3D(), MFTexture_CreateCubemap(), MFTexture_Create2DArray(), MFTexture_Create3DArray(), MFTexture_CreateFromFile(), MFTexture_CreateFromRawData(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_CreateCubemapArray(const char *pName, int width, int height, int elements, MFImageFormat format, uint32 flags = 0)
+{
+	MFDebug_Assert(elements > 0, "Array texture must have more than 0 elements!");
+	MFTextureDesc desc = { MFTexType_Cubemap, format, width, height, 0, elements, ((flags & MFTCF_GenerateMips) ? 0 : 1), flags };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a texture.
+ * Creates a texture from the filesystem.
+ * @param pName Name of texture to read from the filesystem.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
+ * @return Pointer to an MFTexture structure representing the newly created texture.
+ * @remarks If the specified texture has already been created, MFTexture_Create will return a new reference to the already created texture.
+ * @see MFTexture_CreateDynamic(), MFTexture_CreateFromRawData(), MFTexture_CreateRenderTarget(), MFTexture_Release()
+ */
+MF_API MFTexture* MFTexture_CreateFromFile(const char *pName, uint32 flags = MFTCF_GenerateMips);
 
 /**
  * Create a texture from raw data.
@@ -70,14 +244,39 @@ MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int heig
  * @param width Image width.
  * @param height Image height.
  * @param format Format of the image data being read. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
- * @param flags Texture creation flags.
- * @param generateMipChain If true, a mip-chain will be generated for the texture.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
- * @return Pointer to an MFTexture structure representing the newly created texture.
+ * @return Pointer to an MFTexture structure representing the newly created texture, or NULL if creation fails.
  * @remarks If ImgFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
  * @see MFTexture_Create(), MFTexture_Release(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
  */
-MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFImageFormat format, uint32 flags = 0, bool generateMipChain = true, uint32 *pPalette = 0);
+MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, const void *pData, int width, int height, MFImageFormat format, uint32 flags = MFTCF_GenerateMips, const uint32 *pPalette = 0);
+
+/**
+ * Creates a render target texture.
+ * Creates a render target texture.
+ * @param pName Name for the render target being created.
+ * @param width Width of render target.
+ * @param height Height of render target.
+ * @param targetFormat Render target format.
+ * @return Pointer to an MFTexture structure representing the newly created render target texture, or NULL if creation fails.
+ * @see MFTexture_Create(), MFTexture_Release()
+ */
+inline MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = ImgFmt_SelectRenderTarget)
+{
+	MFTextureDesc desc = { MFTexType_2D, targetFormat, width, height, 0, 0, 1, MFTCF_RenderTarget };
+	return MFTexture_Create(pName, &desc);
+}
+
+/**
+ * Create a blank plain coloured texture.
+ * Create a new texture that is a solid colour.
+ * @param pName Name for the texture being created.
+ * @param colour Colour to fill the texture when it is created.
+ * @return A pointer to a newly created blank texture.
+ * @see MFTexture_Create()
+ */
+MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
 
 /**
  * Create a scaled texture from raw data.
@@ -90,25 +289,13 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, in
  * @param texHeight Texture height.
  * @param format Format of the image data being read. Only formats supported by the platform and ImgFmt_A8R8G8B8 can be used.
  * @param algorithm Scaling algorithm to be used.
- * @param flags Texture creation flags.
+ * @param flags Combination of creation flags from the MFTextureCreateFlags enumerated type.
  * @param pPalette Pointer to palette data. Use NULL for non-paletted image formats.
  * @return Pointer to an MFTexture structure representing the newly created texture.
  * @remarks If ImgFmt_A8R8G8B8 is used, and it is not supported by the platform natively, a copy of the image is taken and the data is swizzled to the best available 32bit format on the target platform. Use MFTexture_GetPlatformAvailability() or MFImage_IsAvailableOnPlatform() to determine what formats are supported on a particular platform.
  * @see MFTexture_CreateFromRawData(), MFTexture_Create(), MFTexture_Release(), MFTexture_GetPlatformAvailability(), MFImage_IsAvailableOnPlatform()
  */
 MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int sourceWidth, int sourceHeight, int texWidth, int texHeight, MFImageFormat format, MFScalingAlgorithm algorithm, uint32 flags = 0, uint32 *pPalette = 0);
-
-/**
- * Creates a render target texture.
- * Creates a render target texture.
- * @param pName Name for the render target being created.
- * @param width Width of render target.
- * @param height Height of render target.
- * @param targetFormat Render target format.
- * @return Pointer to an MFTexture structure representing the newly created render target texture.
- * @see MFTexture_Create(), MFTexture_Release()
- */
-MF_API MFTexture* MFTexture_CreateRenderTarget(const char *pName, int width, int height, MFImageFormat targetFormat = ImgFmt_SelectRenderTarget);
 
 /**
  * Release an MFTexture instance.
@@ -129,15 +316,10 @@ MF_API int MFTexture_Release(MFTexture *pTexture);
  */
 MF_API MFTexture* MFTexture_Find(const char *pName);
 
-/**
- * Create a blank plain coloured texture.
- * Create a new texture that is a solid colour.
- * @param pName Name for the texture being created.
- * @param colour Colour to fill the texture when it is created.
- * @return A pointer to a newly created blank texture.
- * @see MFTexture_Create()
- */
-MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colour);
+
+MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, const void *pData, size_t lineStride = 0, size_t sliceStride = 0);
+MF_API bool MFTexture_Map(MFTexture *pTexture, int element, int mipLevel, MFLockedTexture *pLock);
+MF_API void MFTexture_Unmap(MFTexture *pTexture, int element, int mipLevel);
 
 /**
  * Tests to see if an image format is available on the current platform.
@@ -156,7 +338,7 @@ MF_API bool MFTexture_IsFormatAvailable(int format);
  * @param pHeight Optional pointer to an in that receives the height.
  * @return None.
  */
-MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight);
+MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight, int *pDepth = NULL);
 
 
 // C++ API
@@ -175,7 +357,7 @@ namespace Fuji
 		inline Texture()											{}
 		inline Texture(const Texture &from)							: Resource(from) {}
 		inline Texture(MFTexture *pFrom)							: Resource((MFResource*)pFrom) {}
-		inline Texture(const char *pName)							{ pResource = (MFResource*)MFTexture_Create(pName); }
+		inline Texture(const char *pName)							{ pResource = (MFResource*)MFTexture_CreateFromFile(pName); }
 
 		inline Texture& operator=(const Texture& from)
 		{
@@ -190,7 +372,7 @@ namespace Fuji
 		inline Texture& Create(const char *pName)
 		{
 			Release();
-			pResource = (MFResource*)MFTexture_Create(pName);
+			pResource = (MFResource*)MFTexture_CreateFromFile(pName);
 			return *this;
 		}
 

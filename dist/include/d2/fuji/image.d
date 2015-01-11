@@ -8,7 +8,7 @@ nothrow:
 @nogc:
 
 alias MFImage_Convert = fuji.c.MFImage.MFImage_Convert;
-void MFImage_Convert(uint width, uint height, const(void[]) input, MFImageFormat inputFormat, void[] output, MFImageFormat outputFormat) nothrow
+void MFImage_Convert(uint width, uint height, const(void[]) input, MFImageFormat inputFormat, void[] output, MFImageFormat outputFormat)
 {
 	// Note: Should we assert that the sizes MATCH, rather than just check that they are sufficient?
 	assert((width*height*MFImage_GetBitsPerPixel(inputFormat))/8 <= input.length, "Not enough data in input buffer!");
@@ -18,7 +18,7 @@ void MFImage_Convert(uint width, uint height, const(void[]) input, MFImageFormat
 }
 
 
-float MFImage_sRGBToLinear(float s) pure nothrow
+float MFImage_sRGBToLinear(float s) pure
 {
 	if(s <= 0.04045f)
 		return s / 12.92f;
@@ -26,7 +26,7 @@ float MFImage_sRGBToLinear(float s) pure nothrow
 		return ((s + 0.055f) / 1.055f)^^2.4f;
 }
 
-float MFImage_LinearTosRGB(float s) pure nothrow
+float MFImage_LinearTosRGB(float s) pure
 {
 	if(s <= 0.0031308f)
 		return 12.92f * s;
@@ -34,12 +34,12 @@ float MFImage_LinearTosRGB(float s) pure nothrow
 		return 1.055f * s^^(1.0f/2.4f) - 0.055f;
 }
 
-float MFImage_GammaToLinear(float s) pure nothrow
+float MFImage_GammaToLinear(float s) pure
 {
 	return s^^2.2f;
 }
 
-float MFImage_LinearToGamma(float s) pure nothrow
+float MFImage_LinearToGamma(float s) pure
 {
 	return s^^(1.0f/2.2f);
 }

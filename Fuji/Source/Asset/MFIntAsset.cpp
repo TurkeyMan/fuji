@@ -40,7 +40,7 @@ MF_API bool MFIntAsset_ConvertAssetFromFile(const char *pFilename, void **ppOutp
 		MFIntTexture *pTex = MFIntTexture_CreateFromFile(pFilename);
 		if(!pTex)
 			return false;
-		MFIntTexture_CreateRuntimeData(pTex, (MFTextureTemplateData**)ppOutput, pSize, platform);
+		MFIntTexture_CreateRuntimeData(pTex, (MFTexture**)ppOutput, pSize, platform);
 		MFIntTexture_Destroy(pTex);
 		return true;
 	}
@@ -93,7 +93,7 @@ MF_API bool MFIntAsset_ConvertTextureFromFile(const char *pFilename, void **ppOu
 	if(!pTex)
 		return false;
 
-	MFIntTexture_CreateRuntimeData(pTex, (MFTextureTemplateData**)ppOutput, pSize, platform, flags, targetFormat);
+	MFIntTexture_CreateRuntimeData(pTex, (MFTexture**)ppOutput, pSize, platform, flags, targetFormat);
 	MFIntTexture_Destroy(pTex);
 	return true;
 }

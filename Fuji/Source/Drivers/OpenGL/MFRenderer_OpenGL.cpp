@@ -135,12 +135,8 @@ int gOpenGLVersion = 0;
 static GLuint gDefaultRenderTarget = 0;
 static MFRenderTarget *gpDeviceRenderTarget = NULL;
 
-static MFTexture gDeviceRenderTarget;
-static MFTextureTemplateData gDeviceRenderTargetTemplate;
-static MFTextureSurfaceLevel gDeviceRenderTargetSurface;
-static MFTexture gDeviceZTarget;
-static MFTextureTemplateData gDeviceZTargetTemplate;
-static MFTextureSurfaceLevel gDeviceZTargetSurface;
+static MFTexture *gpDeviceColourTarget = NULL;
+static MFTexture *gpDeviceZTarget = NULL;
 
 static MFRect gCurrentViewport;
 
@@ -153,25 +149,6 @@ void MFRenderer_InitModulePlatformSpecific()
 	glXCreateNewContext = (PFNGLXCREATENEWCONTEXTPROC)glXGetProcAddress((const GLubyte*)"glXCreateNewContext");
 	glXMakeContextCurrent = (PFNGLXMAKECONTEXTCURRENTPROC)glXGetProcAddress((const GLubyte*)"glXMakeContextCurrent");
 #endif
-
-	MFZeroMemory(&gDeviceRenderTarget, sizeof(gDeviceRenderTarget));
-	MFZeroMemory(&gDeviceRenderTargetTemplate, sizeof(gDeviceRenderTargetTemplate));
-	MFZeroMemory(&gDeviceRenderTargetSurface, sizeof(gDeviceRenderTargetSurface));
-	MFZeroMemory(&gDeviceZTarget, sizeof(gDeviceZTarget));
-	MFZeroMemory(&gDeviceZTargetTemplate, sizeof(gDeviceZTargetTemplate));
-	MFZeroMemory(&gDeviceZTargetSurface, sizeof(gDeviceZTargetSurface));
-
-	gDeviceRenderTarget.pTemplateData = &gDeviceRenderTargetTemplate;
-	gDeviceRenderTarget.pName = "Device Render Target";
-	gDeviceRenderTargetTemplate.pSurfaces = &gDeviceRenderTargetSurface;
-	gDeviceRenderTargetTemplate.flags = TEX_RenderTarget;
-	gDeviceRenderTargetTemplate.mipLevels = 1;
-
-	gDeviceZTarget.pTemplateData = &gDeviceZTargetTemplate;
-	gDeviceZTarget.pName = "Device Depth Stencil";
-	gDeviceZTargetTemplate.pSurfaces = &gDeviceZTargetSurface;
-	gDeviceZTargetTemplate.flags = TEX_RenderTarget;
-	gDeviceZTargetTemplate.mipLevels = 1;
 }
 
 void MFRenderer_DeinitModulePlatformSpecific()
@@ -334,24 +311,22 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&gDefaultRenderTarget);
 
-	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = pDisplay->settings.width;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = pDisplay->settings.height;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
+	MFTextureDesc texDesc = { MFTexType_2D, ImgFmt_A8R8G8B8, pDisplay->settings.width, pDisplay->settings.height, 0, 0, 1, MFTCF_RenderTarget };
+	gpDeviceColourTarget = MFTexture_InitTexture(&texDesc, MFRD_OpenGL, 0);
+	gpDeviceColourTarget->pName = "Device Colour Target";
+	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)gDefaultRenderTarget;
 
-	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = pDisplay->settings.width;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = pDisplay->settings.height;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
-	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+	texDesc.format = ImgFmt_D24S8;
+	gpDeviceZTarget = MFTexture_InitTexture(&texDesc, MFRD_OpenGL, 0);
+	gpDeviceZTarget->pName = "Device Depth Stencil";
+	gpDeviceZTarget->pSurfaces[0].platformData = 0;
 
 	MFRenderTargetDesc desc;
 	desc.pName = "Device Render Target";
 	desc.width = pDisplay->settings.width;
 	desc.height = pDisplay->settings.height;
-	desc.colourTargets[0].pSurface = &gDeviceRenderTarget;
-	desc.depthStencil.pSurface = &gDeviceZTarget;
+	desc.colourTargets[0].pSurface = gpDeviceColourTarget;
+	desc.depthStencil.pSurface = gpDeviceZTarget;
 	gpDeviceRenderTarget = MFRenderTarget_Create(&desc);
 
 	gCurrentViewport.x = 0.0f;
@@ -451,17 +426,15 @@ bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSett
 #endif
 	}
 
-	gDeviceRenderTarget.pTemplateData->imageFormat = ImgFmt_A8R8G8B8;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].width = pSettings->width;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].height = pSettings->height;
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceRenderTarget.pTemplateData->imageFormat);
-	gDeviceRenderTarget.pTemplateData->pSurfaces[0].pImageData = (char*)(size_t)gDefaultRenderTarget;
+	gpDeviceColourTarget->imageFormat = ImgFmt_A8R8G8B8;
+	gpDeviceColourTarget->pSurfaces[0].width = pSettings->width;
+	gpDeviceColourTarget->pSurfaces[0].height = pSettings->height;
+	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)gDefaultRenderTarget;
 
-	gDeviceZTarget.pTemplateData->imageFormat = ImgFmt_D24S8;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].width = pSettings->width;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].height = pSettings->height;
-	gDeviceZTarget.pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(gDeviceZTarget.pTemplateData->imageFormat);
-	gDeviceZTarget.pTemplateData->pSurfaces[0].pImageData = NULL;
+	gpDeviceZTarget->imageFormat = ImgFmt_D24S8;
+	gpDeviceZTarget->pSurfaces[0].width = pSettings->width;
+	gpDeviceZTarget->pSurfaces[0].height = pSettings->height;
+	gpDeviceZTarget->pSurfaces[0].platformData = 0;
 
 	gpDeviceRenderTarget->width = pSettings->width;
 	gpDeviceRenderTarget->height = pSettings->height;

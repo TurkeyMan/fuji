@@ -8,6 +8,7 @@
 #include "MFFileSystem.h"
 #include "MFSystem.h"
 #include "Util.h"
+#include "MFRenderer.h"
 
 //#define HQX_SUPPORT
 
@@ -36,8 +37,8 @@ static void MFTexture_Destroy(MFResource *pRes)
 	MFTexture *pTexture = (MFTexture*)pRes;
 
 	MFTexture_DestroyPlatformSpecific(pTexture);
-
-	MFHeap_Free(pTexture->pTemplateData);
+	if(pTexture->pImageData)
+		MFHeap_Free(pTexture->pImageData);
 	MFHeap_Free(pTexture);
 }
 
@@ -49,10 +50,9 @@ MFInitStatus MFTexture_InitModule(int moduleId, bool bPerformInitialisation)
 
 	MFTexture_InitModulePlatformSpecific();
 
-	// create white texture (used by white material)
-	if(MFFileSystem_Exists("_None.tex"))
-		pNoneTexture = MFTexture_Create("_None", true);
-	else
+	// create default textures
+	pNoneTexture = MFTexture_CreateFromFile("_None");
+	if(!pNoneTexture)
 		pNoneTexture = MFTexture_CreateBlank("_None", MakeVector(1.0f, 0.0f, 0.5, 1.0f));
 
 	pWhiteTexture = MFTexture_CreateBlank("_White", MFVector::one);
@@ -95,7 +95,134 @@ MF_API MFTexture* MFTexture_Find(const char *pName)
 	return (MFTexture*)MFResource_Find(MFUtil_HashString(pName) ^ 0x7e407e40);
 }
 
-MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
+static int GetNumMipLevels(int width, int height, int depth, int targetSize = 1)
+{
+	int numMips = 1;
+	while(width > targetSize || height > targetSize || depth > targetSize)
+	{
+		width >>= 1;
+		height >>= 1;
+		depth >>= 1;
+		++numMips;
+	}
+	return numMips;
+}
+
+MFTexture* MFTexture_InitTexture(const MFTextureDesc *pDesc, MFRendererDrivers renderer, size_t *pExtraBytes)
+{
+	switch(pDesc->type)
+	{
+		case MFTexType_1D:		MFDebug_Assert(pDesc->width > 0 && pDesc->height == 0 && pDesc->depth == 0, "1D textures must have: width > 0 && height == 0 && depth == 0");
+								MFDebug_Assert((pDesc->flags & MFTCF_TypeMask) != MFTCF_RenderTarget, "1D textures may not be render targets"); break;
+		case MFTexType_2D:		MFDebug_Assert(pDesc->width > 0 && pDesc->height > 0 && pDesc->depth == 0, "2D textures must have: width > 0 && height > 0 && depth == 0"); break;
+		case MFTexType_Cubemap:	MFDebug_Assert(pDesc->width > 0 && pDesc->height == pDesc->width && pDesc->depth == 0, "Cubemap textures must have: width > 0 && height == width && depth == 0"); break;
+		case MFTexType_3D:		MFDebug_Assert(pDesc->width > 0 && pDesc->height > 0 && pDesc->depth > 0, "1D textures must have: width > 0 && height > 0 && depth > 0");
+								MFDebug_Assert(pDesc->arrayElements == 0, "Arrays of 3D textures are not supported");
+								MFDebug_Assert((pDesc->flags & MFTCF_TypeMask) != MFTCF_RenderTarget, "3D textures may not be render targets"); break;
+	}
+
+	MFImageFormat format = MFImage_ResolveFormat(pDesc->format, renderer);
+	MFDebug_Assert(format != ImgFmt_Unknown, "Invalid texture format!");
+	MFDebug_Assert(MFTexture_IsFormatAvailable(format), MFStr("Texture format %s not supported", MFImage_GetFormatString(pDesc->format)));
+
+	int maxMipDepth = GetNumMipLevels(pDesc->width, pDesc->height, pDesc->depth);
+	MFDebug_Assert(!pDesc->mipLevels || pDesc->mipLevels <= maxMipDepth, MFStr("Too many mip levels for texture. %d levels requested, but 1x1 mip is level %d", pDesc->mipLevels, maxMipDepth));
+
+	int numFaces = pDesc->type == MFTexType_Cubemap ? 6 : 1;
+	int numMips = pDesc->mipLevels ? pDesc->mipLevels : maxMipDepth;
+	int numElements = (pDesc->arrayElements ? pDesc->arrayElements : 1) * numFaces;
+	int numSurfaces = numElements * numMips;
+
+	MFTexture *pTemplate;
+	size_t size = sizeof(MFTexture) + sizeof(MFTextureSurface)*numSurfaces + (pExtraBytes ? *pExtraBytes : 0);
+	if(pExtraBytes)
+		*pExtraBytes = sizeof(MFTexture) + sizeof(MFTextureSurface)*numSurfaces;
+	pTemplate = (MFTexture*)MFHeap_AllocAndZero(size);
+	pTemplate->pSurfaces = (MFTextureSurface*)&pTemplate[1];
+
+	pTemplate->hash = MFMAKEFOURCC('F','T','E','X');
+	pTemplate->type = pDesc->type;
+	pTemplate->imageFormat = pDesc->format;
+	pTemplate->createFlags = pDesc->flags;
+
+	pTemplate->width = pDesc->width;
+	pTemplate->height = pDesc->height;
+	pTemplate->depth = pDesc->depth;
+	pTemplate->numElements = numElements;
+	pTemplate->numMips = numMips;
+
+	if(pDesc->flags & MFTCF_PremultipliedAlpha)
+		pTemplate->flags |= TEX_PreMultipliedAlpha;
+	if((pDesc->flags & MFTCF_TypeMask) == MFTCF_RenderTarget)
+		pTemplate->flags |= TEX_RenderTarget;
+
+	// populate the surfaces
+	MFTextureSurface *pSurface = pTemplate->pSurfaces;
+	for(int mip=0; mip<numMips; ++mip)
+	{
+		int width = pDesc->width >> mip;
+		int height = pDesc->height >> mip;
+		int depth = pDesc->depth >> mip;
+		width = width ? width : 1;
+		height = height ? height : 1;
+		depth = depth ? depth : 1;
+
+		for(int e=0; e<numElements; ++e)
+		{
+//			int i = e / numFaces; // array element
+//			int f = e % numFaces; // cube face
+
+			for(int d=0; d<depth; ++d)
+			{
+				pSurface->width = width;
+				pSurface->height = height;
+				pSurface->depth = depth;
+				pSurface->bitsPerPixel = (uint8)MFImage_GetBitsPerPixel(pDesc->format);
+
+				if(pTemplate->imageFormat & 0xFF)
+				{
+					// TODO: calculate from compression format...
+					//...
+				}
+				else
+				{
+					pSurface->xBlocks = pSurface->width;
+					pSurface->yBlocks = pSurface->height;
+					pSurface->bitsPerBlock = pSurface->bitsPerPixel;
+				}
+
+				pSurface++;
+			}
+		}
+	}
+
+	return pTemplate;
+}
+
+MF_API MFTexture* MFTexture_Create(const char *pName, const MFTextureDesc *pDesc)
+{
+	MFTexture *pTexture = MFTexture_Find(pName);
+	if(pTexture)
+	{
+		MFDebug_Warn(3, MFStr("Texture '%s' already exists.", pName));
+		MFTexture_Release(pTexture);
+		return NULL;
+	}
+
+	// create the texture template data
+	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	pTexture = MFTexture_InitTexture(pDesc, MFRenderer_GetCurrentRenderDriver(), &nameLen);
+	pName = MFString_Copy((char*)pTexture + nameLen, pName);
+
+	MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
+
+	// allocate the texture memory...
+	MFTexture_CreatePlatformSpecific(pTexture);
+
+	return pTexture;
+}
+
+MF_API MFTexture* MFTexture_CreateFromFile(const char *pName, uint32 flags)
 {
 	MFTexture *pTexture = MFTexture_Find(pName);
 
@@ -105,15 +232,15 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 
 		const char *pFileName = MFStr("%s.tex", pName);
 
-		MFTextureTemplateData *pTemplate = (MFTextureTemplateData*)MFFileSystem_Load(pFileName, &fileSize);
+		pTexture = (MFTexture*)MFFileSystem_Load(pFileName, &fileSize);
 
-		if(!pTemplate)
+		if(!pTexture)
 		{
 #if defined(ALLOW_LOAD_FROM_SOURCE_DATA)
 			const char *pExt = MFString_GetFileExtension(pName);
 			if(pExt && MFAsset_IsImageFile(pExt))
 			{
-				MFAsset_ConvertTextureFromFile(pName, (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform());
+				MFAsset_ConvertTextureFromFile(pName, (void**)&pTexture, &fileSize, MFSystem_GetCurrentPlatform());
 			}
 			else
 			{
@@ -121,173 +248,130 @@ MF_API MFTexture* MFTexture_Create(const char *pName, bool generateMipChain)
 				for(const char **ppExt = MFAsset_GetImageFileTypes(); *ppExt != NULL; ++ppExt)
 				{
 					MFString fileName = MFString::Format("%s%s", pName, *ppExt);
-					if(MFAsset_ConvertTextureFromFile(fileName.CStr(), (void**)&pTemplate, &fileSize, MFSystem_GetCurrentPlatform()))
+					if(MFAsset_ConvertTextureFromFile(fileName.CStr(), (void**)&pTexture, &fileSize, MFSystem_GetCurrentPlatform()))
 						break;
 				}
 			}
 #endif
 
-			if(!pTemplate)
+			if(!pTexture)
 			{
 				MFDebug_Warn(2, MFStr("Texture '%s' does not exist. Using '_None'.\n", pFileName));
-				return MFTexture_Create("_None");
+				return MFTexture_Find("_None");
 			}
 		}
 
-		MFFixUp(pTemplate->pSurfaces, pTemplate, 1);
+		// fixup raw data
+		pTexture->pSurfaces = (MFTextureSurface*)(pTexture->surfacesOffset + (size_t)pTexture);
+		pTexture->pImageData = (char*)(pTexture->imageDataOffset + (size_t)pTexture);
+		pTexture->pName = MFString_Dup(pName);
 
-		for(int a=0; a<pTemplate->mipLevels; a++)
-		{
-			MFFixUp(pTemplate->pSurfaces[a].pImageData, pTemplate, 1);
-			MFFixUp(pTemplate->pSurfaces[a].pPaletteEntries, pTemplate, 1);
-		}
+		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pTexture->pName);
 
-		size_t nameLen = MFString_Length(pName) + 1;
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
-
-		pName = MFString_Copy((char*)&pTexture[1], pName);
-
-		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
-
-		pTexture->pTemplateData = pTemplate;
-
-		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
+		MFTexture_CreatePlatformSpecific(pTexture);
 	}
 
 	return pTexture;
 }
 
-MF_API MFTexture* MFTexture_CreateDynamic(const char *pName, int width, int height, MFImageFormat format, uint32 flags)
-{
-	MFDebug_Assert(false, "Not written!");
-
-	return NULL;
-}
-
-MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, void *pData, int width, int height, MFImageFormat format, uint32 flags, bool generateMipChain, uint32 *pPalette)
+MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, const void *pData, int width, int height, MFImageFormat format, uint32 flags, const uint32 *pPalette)
 {
 	MFCALLSTACK;
 
 	MFTexture *pTexture = MFTexture_Find(pName);
-
-	if(!pTexture)
+	if(pTexture)
 	{
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
+		MFDebug_Warn(3, MFStr("Texture '%s' already exists.", pName));
+		MFTexture_Release(pTexture);
+		return NULL;
+	}
 
-		if(pName)
-			pName = MFString_Copy((char*)&pTexture[1], pName);
-
-		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
-
-		// set this to 1 for the moment until we deal with mipmaping..
-		uint32 levelCount = 1;
-
-		int imageSize = (width * height * MFImage_GetBitsPerPixel(format)) / 8;
-#if defined(XB_XGTEXTURES)
-		bool ownCopy = true;
-#else
-		bool ownCopy = !!(flags & TEX_CopyMemory);
-#endif
-		bool convertARGB = false;
-
-		// we guarantee ARGB on all platforms, but it is not supported natively
-		if(format == ImgFmt_A8R8G8B8)
-		{
+	// we guarantee ARGB on all platforms, but it is not supported natively
+	bool bConvertARGB = false;
+	if(format == ImgFmt_A8R8G8B8)
+	{
 #if defined(MF_XBOX)
-			format = ImgFmt_XB_A8R8G8B8s;
+		format = ImgFmt_XB_A8R8G8B8s;
 #endif
 
-			if(!MFTexture_IsFormatAvailable(format))
-			{
-				// we need to take a copy and convert the image to a native 32bit format
-				ownCopy = true;
-				convertARGB = true;
-
-				if(MFTexture_IsFormatAvailable(ImgFmt_A8B8G8R8))
-					format = ImgFmt_A8B8G8R8;
-				else if(MFTexture_IsFormatAvailable(ImgFmt_B8G8R8A8))
-					format = ImgFmt_B8G8R8A8;
-				else if(MFTexture_IsFormatAvailable(ImgFmt_R8G8B8A8))
-					format = ImgFmt_R8G8B8A8;
-				else
-					MFDebug_Assert(false, "No 32bit texture format seems to be available on the current platform.");
-			}
-		}
-
-		MFDebug_Assert(MFTexture_IsFormatAvailable(format), MFStr("Texture format %s not supported", MFImage_GetFormatString(format)));
-
-		// create template data
-		char *pTemplate;
-		size_t size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
-		if(ownCopy)
-			size = MFALIGN(size, 0x100) + imageSize;
-		pTemplate = (char*)MFHeap_Alloc(size);
-		MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-		pTexture->pTemplateData->imageFormat = format;
-		pTexture->pTemplateData->flags = flags;
-
-		pTexture->pTemplateData->mipLevels = levelCount;
-
-		// we need to take a copy of this memory if flagged to do so...
-		if(ownCopy)
+		if(!MFTexture_IsFormatAvailable(format))
 		{
-			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pTexture->pTemplateData + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount, 0x100);
-			MFCopyMemory(pTexture->pTemplateData->pSurfaces[0].pImageData, pData, imageSize);
+			// we need to take a copy and convert the image to a native 32bit format
+			bConvertARGB = true;
+
+			if(MFTexture_IsFormatAvailable(ImgFmt_A8B8G8R8))
+				format = ImgFmt_A8B8G8R8;
+			else if(MFTexture_IsFormatAvailable(ImgFmt_B8G8R8A8))
+				format = ImgFmt_B8G8R8A8;
+			else if(MFTexture_IsFormatAvailable(ImgFmt_R8G8B8A8))
+				format = ImgFmt_R8G8B8A8;
+			else
+				MFDebug_Assert(false, "No 32bit texture format seems to be available on the current platform.");
 		}
-		else
+	}
+
+	MFDebug_Assert(MFTexture_IsFormatAvailable(format), MFStr("Texture format %s not supported", MFImage_GetFormatString(format)));
+
+	// set this to 1 for the moment until we deal with mipmaping..
+	int mipLevels = 1;//((flags & MFTCF_GenerateMips) ? 0 : 1)
+
+	// initialise the texture structure
+	MFTextureDesc desc = { MFTexType_2D, format, width, height, 0, 0, mipLevels, flags };
+
+	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	pTexture = MFTexture_InitTexture(&desc, MFRenderer_GetCurrentRenderDriver(), &nameLen);
+	if(pName)
+		pName = MFString_Copy((char*)pTexture + nameLen, pName);
+
+	int imageSize = (pTexture->pSurfaces[0].width * pTexture->pSurfaces[0].height * pTexture->pSurfaces[0].bitsPerPixel) / 8;
+	pTexture->pImageData = (char*)MFHeap_Alloc(imageSize);
+
+	// copy or transform
+	if(bConvertARGB)
+	{
+		int numPixels = width*height;
+		uint32 *pSrc = (uint32*)pData;
+		uint32 *pDest = (uint32*)pTexture->pImageData;
+
+		if(format == ImgFmt_A8B8G8R8)
 		{
-			pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pData;
+			for(int a=0; a<numPixels; ++a)
+			{
+				*pDest = (*pSrc & 0xFF00FF00) | ((*pSrc >> 16) & 0xFF) | ((*pSrc << 16) & 0xFF0000);
+				++pSrc;
+				++pDest;
+			}
 		}
-
-		// convert to another format if the platform requires it...
-		if(convertARGB)
+		else if(format == ImgFmt_B8G8R8A8)
 		{
-			int numPixels = width*height;
-			uint32 *pPixel = (uint32*)pTexture->pTemplateData->pSurfaces[0].pImageData;
-
-			if(format == ImgFmt_A8B8G8R8)
+			for(int a=0; a<numPixels; ++a)
 			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = (*pPixel & 0xFF00FF00) | ((*pPixel >> 16) & 0xFF) | ((*pPixel << 16) & 0xFF0000);
-					++pPixel;
-				}
-			}
-			else if(format == ImgFmt_B8G8R8A8)
-			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = ((*pPixel << 24) & 0xFF000000) | ((*pPixel << 8) & 0xFF0000) | ((*pPixel >> 8) & 0xFF00) | ((*pPixel >> 24) & 0xFF);
-					++pPixel;
-				}
-			}
-			else if(format == ImgFmt_R8G8B8A8)
-			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = ((*pPixel << 8) & 0xFFFFFF00) | ((*pPixel >> 24) & 0xFF);
-					++pPixel;
-				}
+				*pDest = ((*pSrc << 24) & 0xFF000000) | ((*pSrc << 8) & 0xFF0000) | ((*pSrc >> 8) & 0xFF00) | ((*pSrc >> 24) & 0xFF);
+				++pSrc;
+				++pDest;
 			}
 		}
-
-		pTexture->pTemplateData->pSurfaces[0].bufferLength = imageSize;
-		pTexture->pTemplateData->pSurfaces[0].width = width;
-		pTexture->pTemplateData->pSurfaces[0].height = height;
-		pTexture->pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(format);
-
-		// and call the platform specific create.
-		MFTexture_CreatePlatformSpecific(pTexture, generateMipChain);
+		else if(format == ImgFmt_R8G8B8A8)
+		{
+			for(int a=0; a<numPixels; ++a)
+			{
+				*pDest = ((*pSrc << 8) & 0xFFFFFF00) | ((*pSrc >> 24) & 0xFF);
+				++pSrc;
+				++pDest;
+			}
+		}
 	}
 	else
 	{
-		MFDebug_Warn(3, MFStr("Texture '%s' already exists when creating from raw data.", pName));
+		MFCopyMemory(pTexture->pImageData, pData, imageSize);
 	}
+
+	pTexture->pSurfaces[0].bufferLength = imageSize;
+
+	MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
+
+	// and call the platform specific create.
+	MFTexture_CreatePlatformSpecific(pTexture);
 
 	return pTexture;
 }
@@ -297,130 +381,109 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 	MFCALLSTACK;
 
 	MFTexture *pTexture = MFTexture_Find(pName);
-
-	if(!pTexture)
+	if(pTexture)
 	{
-		size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
-		pTexture = (MFTexture*)MFHeap_Alloc(sizeof(MFTexture) + nameLen);
+		MFDebug_Warn(3, MFStr("Texture '%s' already exists.", pName));
+		MFTexture_Release(pTexture);
+		return NULL;
+	}
 
-		if(pName)
-			pName = MFString_Copy((char*)&pTexture[1], pName);
-
-		MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
-
-		// set this to 1 for the moment until we deal with mipmaping..
-		uint32 levelCount = 1;
-
-		int bitsPerPixel = MFImage_GetBitsPerPixel(format);
-		MFDebug_Assert(bitsPerPixel == 32, "Only 32bit image formats are supported!");
-
-		int texWidth = MFUtil_NextPowerOf2(destWidth);
-		int texHeight = MFUtil_NextPowerOf2(destHeight);
-		int imageSize = (texWidth * texHeight * bitsPerPixel) / 8;
-
-		// we guarantee ARGB on all platforms, but it is not supported natively
-		MFImageFormat texFormat = format;
-
-		bool convertARGB = false;
-		if(texFormat == ImgFmt_A8R8G8B8)
-		{
+	// we guarantee ARGB on all platforms, but it is not supported natively
+	MFImageFormat srcFormat = format;
+	bool bConvertARGB = false;
+	if(format == ImgFmt_A8R8G8B8)
+	{
 #if defined(MF_XBOX)
-			texFormat = ImgFmt_Swizzle(ImgFmt_A8R8G8B8);
+		format = ImgFmt_XB_A8R8G8B8s;
 #endif
 
-			if(!MFTexture_IsFormatAvailable(texFormat))
-			{
-				// we need to convert the image to a native 32bit format
-				convertARGB = true;
-
-				if(MFTexture_IsFormatAvailable(ImgFmt_A8B8G8R8))
-					texFormat = ImgFmt_A8B8G8R8;
-				else if(MFTexture_IsFormatAvailable(ImgFmt_B8G8R8A8))
-					texFormat = ImgFmt_B8G8R8A8;
-				else if(MFTexture_IsFormatAvailable(ImgFmt_R8G8B8A8))
-					texFormat = ImgFmt_R8G8B8A8;
-				else
-					MFDebug_Assert(false, "No 32bit texture format seems to be available on the current platform.");
-			}
-		}
-
-		MFDebug_Assert(MFTexture_IsFormatAvailable(texFormat), MFStr("Texture format %s not supported", MFImage_GetFormatString(texFormat)));
-
-		// create template data
-		char *pTemplate;
-		size_t size = sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount;
-		size = MFALIGN(size, 0x100) + imageSize;
-		pTemplate = (char*)MFHeap_Alloc(size);
-		MFZeroMemory(pTemplate, sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount);
-
-		pTexture->pTemplateData = (MFTextureTemplateData*)pTemplate;
-		pTexture->pTemplateData->pSurfaces = (MFTextureSurfaceLevel*)(pTemplate + sizeof(MFTextureTemplateData));
-
-		pTexture->pTemplateData->imageFormat = texFormat;
-		pTexture->pTemplateData->flags = flags;
-
-		pTexture->pTemplateData->mipLevels = levelCount;
-
-		pTexture->pTemplateData->pSurfaces[0].pImageData = (char*)pTexture->pTemplateData + MFALIGN(sizeof(MFTextureTemplateData) + sizeof(MFTextureSurfaceLevel)*levelCount, 0x100);
-
-		// scale the image
-		MFScaleImage scale;
-		scale.pSourceImage = pData;
-		scale.sourceWidth = sourceWidth;
-		scale.sourceHeight = sourceHeight;
-		scale.sourceStride = sourceWidth;
-		scale.pTargetBuffer = pTexture->pTemplateData->pSurfaces[0].pImageData;
-		scale.targetWidth = destWidth;
-		scale.targetHeight = destHeight;
-		scale.targetStride = texWidth;
-		scale.format = format;
-		scale.algorithm = algorithm;
-		MFImage_Scale(&scale);
-
-		// convert to another format if the platform requires it...
-		if(convertARGB)
+		if(!MFTexture_IsFormatAvailable(format))
 		{
-			int numPixels = texWidth*texHeight;
-			uint32 *pPixel = (uint32*)pTexture->pTemplateData->pSurfaces[0].pImageData;
+			// we need to take a copy and convert the image to a native 32bit format
+			bConvertARGB = true;
 
-			if(texFormat == ImgFmt_A8B8G8R8)
+			if(MFTexture_IsFormatAvailable(ImgFmt_A8B8G8R8))
+				format = ImgFmt_A8B8G8R8;
+			else if(MFTexture_IsFormatAvailable(ImgFmt_B8G8R8A8))
+				format = ImgFmt_B8G8R8A8;
+			else if(MFTexture_IsFormatAvailable(ImgFmt_R8G8B8A8))
+				format = ImgFmt_R8G8B8A8;
+			else
+				MFDebug_Assert(false, "No 32bit texture format seems to be available on the current platform.");
+		}
+	}
+
+	MFDebug_Assert(MFTexture_IsFormatAvailable(format), MFStr("Texture format %s not supported", MFImage_GetFormatString(format)));
+
+	int bitsPerPixel = MFImage_GetBitsPerPixel(format);
+	MFDebug_Assert(bitsPerPixel == 32, "Only 32bit image formats are supported!");
+
+	// set this to 1 for the moment until we deal with mipmaping..
+	int mipLevels = 1;//((flags & MFTCF_GenerateMips) ? 0 : 1)
+
+	// initialise the texture structure
+	MFTextureDesc desc = { MFTexType_2D, format, destWidth, destHeight, 0, 0, mipLevels, flags };
+
+	size_t nameLen = pName ? MFString_Length(pName) + 1 : 0;
+	pTexture = MFTexture_InitTexture(&desc, MFRenderer_GetCurrentRenderDriver(), &nameLen);
+	if(pName)
+		pName = MFString_Copy((char*)pTexture + nameLen, pName);
+
+	// TODO: shall we scale the dest width/height to pow-of-2 for platforms that require it?
+
+	int imageSize = (destWidth * destHeight * bitsPerPixel) / 8;
+	pTexture->pImageData = (char*)MFHeap_Alloc(imageSize);
+
+	// scale the image
+	MFScaleImage scale;
+	scale.pSourceImage = pData;
+	scale.sourceWidth = sourceWidth;
+	scale.sourceHeight = sourceHeight;
+	scale.sourceStride = sourceWidth;
+	scale.pTargetBuffer = pTexture->pImageData;
+	scale.targetWidth = destWidth;
+	scale.targetHeight = destHeight;
+	scale.targetStride = destWidth;
+	scale.format = srcFormat;
+	scale.algorithm = algorithm;
+	MFImage_Scale(&scale);
+
+	// convert to another format if the platform requires it...
+	if(bConvertARGB)
+	{
+		int numPixels = destWidth*destHeight;
+		uint32 *pPixel = (uint32*)pTexture->pImageData;
+
+		if(format == ImgFmt_A8B8G8R8)
+		{
+			for(int a=0; a<numPixels; ++a)
 			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = (*pPixel & 0xFF00FF00) | ((*pPixel >> 16) & 0xFF) | ((*pPixel << 16) & 0xFF0000);
-					++pPixel;
-				}
-			}
-			else if(texFormat == ImgFmt_B8G8R8A8)
-			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = ((*pPixel << 24) & 0xFF000000) | ((*pPixel << 8) & 0xFF0000) | ((*pPixel >> 8) & 0xFF00) | ((*pPixel >> 24) & 0xFF);
-					++pPixel;
-				}
-			}
-			else if(texFormat == ImgFmt_R8G8B8A8)
-			{
-				for(int a=0; a<numPixels; ++a)
-				{
-					*pPixel = ((*pPixel << 8) & 0xFFFFFF00) | ((*pPixel >> 24) & 0xFF);
-					++pPixel;
-				}
+				*pPixel = (*pPixel & 0xFF00FF00) | ((*pPixel >> 16) & 0xFF) | ((*pPixel << 16) & 0xFF0000);
+				++pPixel;
 			}
 		}
-
-		pTexture->pTemplateData->pSurfaces[0].bufferLength = imageSize;
-		pTexture->pTemplateData->pSurfaces[0].width = texWidth;
-		pTexture->pTemplateData->pSurfaces[0].height = texHeight;
-		pTexture->pTemplateData->pSurfaces[0].bitsPerPixel = MFImage_GetBitsPerPixel(texFormat);
-
-		// and call the platform specific create.
-		MFTexture_CreatePlatformSpecific(pTexture, false);
+		else if(format == ImgFmt_B8G8R8A8)
+		{
+			for(int a=0; a<numPixels; ++a)
+			{
+				*pPixel = ((*pPixel << 24) & 0xFF000000) | ((*pPixel << 8) & 0xFF0000) | ((*pPixel >> 8) & 0xFF00) | ((*pPixel >> 24) & 0xFF);
+				++pPixel;
+			}
+		}
+		else if(format == ImgFmt_R8G8B8A8)
+		{
+			for(int a=0; a<numPixels; ++a)
+			{
+				*pPixel = ((*pPixel << 8) & 0xFFFFFF00) | ((*pPixel >> 24) & 0xFF);
+				++pPixel;
+			}
+		}
 	}
-	else
-	{
-		MFDebug_Warn(3, MFStr("Texture '%s' already exists when creating from raw data.", pName));
-	}
+
+	MFResource_AddResource(pTexture, MFRT_Texture, MFUtil_HashString(pName) ^ 0x7e407e40, pName);
+
+	// and call the platform specific create.
+	MFTexture_CreatePlatformSpecific(pTexture);
 
 	return pTexture;
 }
@@ -433,7 +496,7 @@ MF_API MFTexture* MFTexture_CreateBlank(const char *pName, const MFVector &colou
 	for(int a=0; a<8*8; a++)
 		pPixels[a] = packed;
 
-	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, ImgFmt_A8R8G8B8, TEX_CopyMemory, false);
+	return MFTexture_CreateFromRawData(pName, pPixels, 8, 8, ImgFmt_A8R8G8B8);
 }
 
 MF_API int MFTexture_Release(MFTexture *pTexture)
@@ -441,12 +504,14 @@ MF_API int MFTexture_Release(MFTexture *pTexture)
 	return MFResource_Release(pTexture);
 }
 
-MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight)
+MF_API void MFTexture_GetTextureDimensions(const MFTexture *pTexture, int *pWidth, int *pHeight, int *pDepth)
 {
 	if(pWidth)
-		*pWidth = pTexture->pTemplateData->pSurfaces[0].width;
+		*pWidth = pTexture->width;
 	if(pHeight)
-		*pHeight = pTexture->pTemplateData->pSurfaces[0].height;
+		*pHeight = pTexture->height;
+	if(pDepth)
+		*pDepth = pTexture->depth;
 }
 
 // texture browser
@@ -481,7 +546,7 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(0.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)-MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s:", name));
 	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f), 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%s", pTexture->pName));
-	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%dx%d, %s Refs: %d", pTexture->pTemplateData->pSurfaces[0].width, pTexture->pTemplateData->pSurfaces[0].height, MFImage_GetFormatString(pTexture->pTemplateData->imageFormat), pTexture->refCount));
+	MFFont_DrawText(MFFont_GetDebugFont(), pos+MakeVector(10.0f, ((TEX_SIZE+8.0f)*0.5f)-(MENU_FONT_HEIGHT*0.5f)+MENU_FONT_HEIGHT, 0.0f), MENU_FONT_HEIGHT, selected ? MakeVector(1,1,0,1) : MFVector::one, MFStr("%dx%d, %s Refs: %d", pTexture->width, pTexture->height, MFImage_GetFormatString(pTexture->imageFormat), pTexture->refCount));
 
 	pos += MakeVector(maxWidth - (TEX_SIZE + 4.0f + 5.0f), 2.0f, 0.0f);
 
@@ -520,15 +585,15 @@ float TextureBrowser::ListDraw(bool selected, const MFVector &_pos, float maxWid
 
 	float xaspect, yaspect;
 
-	if(pTexture->pTemplateData->pSurfaces[0].width > pTexture->pTemplateData->pSurfaces[0].height)
+	if(pTexture->width > pTexture->height)
 	{
 		xaspect = 0.5f;
-		yaspect = ((float)pTexture->pTemplateData->pSurfaces[0].height/(float)pTexture->pTemplateData->pSurfaces[0].width) * 0.5f;
+		yaspect = ((float)pTexture->height/(float)pTexture->width) * 0.5f;
 	}
 	else
 	{
 		yaspect = 0.5f;
-		xaspect = ((float)pTexture->pTemplateData->pSurfaces[0].width/(float)pTexture->pTemplateData->pSurfaces[0].height) * 0.5f;
+		xaspect = ((float)pTexture->width/(float)pTexture->height) * 0.5f;
 	}
 
 #if MF_RENDERER == MF_DRIVER_D3D9
