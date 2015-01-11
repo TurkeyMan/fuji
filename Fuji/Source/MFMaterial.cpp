@@ -111,8 +111,8 @@ MFInitStatus MFMaterial_InitModule(int moduleId, bool bPerformInitialisation)
 	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromFile("_None");
 #else
 	// create the logo textures from raw data
-	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_width, SysLogo256_height, (MFImageFormat)SysLogo256_format, SysLogo256_flags, SysLogo256_data);
-	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_width, SysLogo64_height, (MFImageFormat)SysLogo64_format, SysLogo64_flags, SysLogo64_data);
+	MFTexture *pSysLogoLargeTexture = MFTexture_CreateFromRawData("SysLogoLarge", SysLogo256_data, SysLogo256_width, SysLogo256_height, (MFImageFormat)SysLogo256_format, SysLogo256_flags);
+	MFTexture *pSysLogoSmallTexture = MFTexture_CreateFromRawData("SysLogoSmall", SysLogo64_data, SysLogo64_width, SysLogo64_height, (MFImageFormat)SysLogo64_format, SysLogo64_flags);
 #endif
 
 	// create standard materials
