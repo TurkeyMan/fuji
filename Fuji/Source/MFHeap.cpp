@@ -305,6 +305,7 @@ MF_API void MFHeap_Free(void *pMem)
 	MFThread_LockMutex(gAllocMutex);
 
 	MFAllocHeader *pHeader = GetAllocHeader(pMem);
+	MFDebug_Assert(pHeader, MFStr("Couldn't find allocation header. Already freed?"));
 	MFDebug_Assert(MFHeap_ValidateMemory(pMem), MFStr("Memory corruption detected!!\n%s(" MFFMT_SIZE_T ")", pHeader->pFile, pHeader->line));
 
 	MFHeap *pHeap = pHeader->pHeap;

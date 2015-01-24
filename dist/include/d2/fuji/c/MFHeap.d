@@ -212,12 +212,3 @@ public:
  */
 #define MFHEAP_SCOPE(type) MFHeapScope scopeHeap(type)
 +/
-
-private
-{
-	extern (C) void* MFHeap_ReallocInternal(void* pMem, size_t bytes);
-	extern (C) void* MFHeap_AllocInternal(size_t bytes, MFHeap* pHeap = null);
-	extern (C) void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap* pHeap = null);
-	extern (C) void MFHeap_SetLineAndFile(int line, const(char*) pFile);
-}
-

@@ -37,7 +37,7 @@ static void MFTexture_Destroy(MFResource *pRes)
 	MFTexture *pTexture = (MFTexture*)pRes;
 
 	MFTexture_DestroyPlatformSpecific(pTexture);
-	if(pTexture->pImageData)
+	if(pTexture->pImageData && (pTexture->flags & TEX_FreeImageData))
 		MFHeap_Free(pTexture->pImageData);
 	MFHeap_Free(pTexture);
 }
@@ -325,6 +325,7 @@ MF_API MFTexture* MFTexture_CreateFromRawData(const char *pName, const void *pDa
 
 	int imageSize = (pTexture->pSurfaces[0].width * pTexture->pSurfaces[0].height * pTexture->pSurfaces[0].bitsPerPixel) / 8;
 	pTexture->pImageData = (char*)MFHeap_Alloc(imageSize);
+	pTexture->flags |= TEX_FreeImageData;
 
 	// copy or transform
 	if(bConvertARGB)
@@ -433,6 +434,7 @@ MF_API MFTexture* MFTexture_ScaleFromRawData(const char *pName, void *pData, int
 
 	int imageSize = (destWidth * destHeight * bitsPerPixel) / 8;
 	pTexture->pImageData = (char*)MFHeap_Alloc(imageSize);
+	pTexture->flags |= TEX_FreeImageData;
 
 	// scale the image
 	MFScaleImage scale;

@@ -19,24 +19,6 @@
  */
 struct MFTexture;
 
-/**
- * Texture flags.
- * Flags to control the way textures are created.
- */
-enum TextureFlags
-{
-	// Internal Flags
-	TEX_Opaque = 0,						/**< Opaque texture */
-	TEX_FullAlpha = 1,					/**< Texture contains full alpha */
-	TEX_1BitAlpha = 2,					/**< Texture contains 1-bit transparency */
-	TEX_AlphaMask = 0x3,				/**< Alpha mask. 0 = Opaque, 1 = Full Alpha, 3 = 1bit Alpha */
-
-	TEX_PreMultipliedAlpha = MFBIT(2),	/**< Pre-multiplied alpha */
-	TEX_Swizzled = MFBIT(3),			/**< Texture data is swizzled for the platform */
-	TEX_RenderTarget = MFBIT(4),		/**< Texture is a render target */
-};
-
-
 enum MFTextureType
 {
 	MFTexType_Unknown = -1,

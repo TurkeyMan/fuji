@@ -55,10 +55,10 @@ void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void[] mem, s
 {
 	debug
 	{
-		assert(MFHeap_GetAllocSize(mem.ptr) == mem.length, "Buffer being reallocated has different size than the original allocation!");
+		assert(!mem || MFHeap_GetAllocSize(mem.ptr) == mem.length, "Buffer being reallocated has different size than the original allocation!");
 		MFHeap_SetLineAndFile(Line, File.ptr);
 	}
-	return MFHeap_ReallocInternal(pMem, bytes)[0..bytes];
+	return MFHeap_ReallocInternal(mem.ptr, bytes)[0..bytes];
 }
 
 alias MFHeap_Free = fuji.c.MFHeap.MFHeap_Free;
@@ -72,4 +72,13 @@ void[] MFHeap_TAlloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, 
 {
 	debug MFHeap_SetLineAndFile(Line, File.ptr);
 	return MFHeap_AllocInternal(bytes, MFHeap_GetHeap(MFHeapType.ActiveTemporary))[0..bytes];
+}
+
+
+private
+{
+	extern (C) void* MFHeap_ReallocInternal(void* pMem, size_t bytes);
+	extern (C) void* MFHeap_AllocInternal(size_t bytes, MFHeap* pHeap = null);
+	extern (C) void* MFHeap_AllocAndZeroInternal(size_t bytes, MFHeap* pHeap = null);
+	extern (C) void MFHeap_SetLineAndFile(int line, const(char*) pFile);
 }

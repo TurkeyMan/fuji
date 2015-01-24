@@ -9,7 +9,7 @@
 #include "../X11/X11_linux.h"
 
 #include <X11/keysym.h>
-#include <X11/extensions/XInput.h>
+#include <X11/extensions/XI.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>

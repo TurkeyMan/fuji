@@ -1,13 +1,13 @@
 #include "Fuji_Internal.h"
 #include "MFHeap_Internal.h"
 #include "MFSystem.h"
-#include "MFPtrList.h"
 #include "MFFileSystem_Internal.h"
 #include "FileSystem/MFFileSystemCachedFile_Internal.h"
+#include "MFObjectPool.h"
 
 struct MFFileSystemCachedFileState : public MFFileSystemGlobalState
 {
-	MFPtrListDL<MFFileCachedData> gCachedFiles;
+	MFObjectPool gCachedFiles;
 };
 
 int gFileSystemCachedFileId = -1;
@@ -21,7 +21,7 @@ MFInitStatus MFFileSystemCachedFile_InitModule(int moduleId, bool bPerformInitia
 
 	ALLOC_MODULE_DATA(MFFileSystemCachedFileState);
 
-	pModuleData->gCachedFiles.Init("Cached Files", gDefaults.filesys.maxOpenFiles);
+	pModuleData->gCachedFiles.Init(sizeof(MFFileCachedData), gDefaults.filesys.maxOpenFiles, gDefaults.filesys.maxOpenFiles);
 
 	MFFileSystemCallbacks fsCallbacks;
 
@@ -66,9 +66,8 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 	pFile->offset = 0;
 	pFile->length = pCachedFile->pBaseFile->length;
 
-	pFile->pFilesysData = pModuleData->gCachedFiles.Create();
-	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
-	MFZeroMemory(pCacheData, sizeof(MFFileCachedData));
+	MFFileCachedData *pCacheData = (MFFileCachedData*)pModuleData->gCachedFiles.AllocAndZero();
+	pFile->pFilesysData = pCacheData;
 
 	int64 baseFileSize = pFile->length;
 
@@ -109,12 +108,16 @@ int MFFileCachedFile_Open(MFFile *pFile, MFOpenData *pOpenData)
 
 int MFFileCachedFile_Close(MFFile* pFile)
 {
-	MFCALLSTACK;
+	GET_MODULE_DATA_ID(MFFileSystemCachedFileState, gFileSystemCachedFileId);
 
 	MFFileCachedData *pCacheData = (MFFileCachedData*)pFile->pFilesysData;
 
 	if(pFile->createFlags & MFOF_Cached_CleanupBaseFile)
 		MFFile_Close(pCacheData->pBaseFile);
+
+	MFHeap_Free(pCacheData->pCache);
+
+	pModuleData->gCachedFiles.Free(pCacheData);
 
 	return 0;
 }
