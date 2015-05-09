@@ -104,6 +104,16 @@ nothrow:
 		return MFTexture_Update(pTexture, element, mipLevel, pData);
 	}
 
+	bool map(out MFLockedTexture surface, int mipLevel = 0, int element = 0)
+	{
+		return MFTexture_Map(pTexture, element, mipLevel, &surface);
+	}
+
+	void unmap(int mipLevel = 0, int element = 0)
+	{
+		MFTexture_Unmap(pTexture, element, mipLevel);
+	}
+
 	@property inout(MFTexture)* handle() inout pure		{ return pTexture; }
 	@property ref inout(Resource) resource() inout pure	{ return *cast(inout(Resource)*)&this; }
 

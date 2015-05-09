@@ -18,6 +18,7 @@
 	MF_API void MFSetNormal_##driver(float x, float y, float z); \
 	MF_API void MFSetPosition_##driver(float x, float y, float z); \
 	MF_API void MFEnd_##driver(); \
+	MF_API MFStateBlock* MFPrimitive_GetPrimStateBlock_##driver(); \
 	MF_API void MFPrimitive_BeginBlitter_##driver(int numBlits); \
 	MF_API void MFPrimitive_Blit_##driver(int x, int y, int tx, int ty, int tw, int th); \
 	MF_API void MFPrimitive_StretchBlit_##driver(int x, int y, int w, int h, int tx, int ty, int tw, int th); \
@@ -37,6 +38,7 @@
 		MFSetNormal_##driver, \
 		MFSetPosition_##driver, \
 		MFEnd_##driver, \
+		MFPrimitive_GetPrimStateBlock_##driver, \
 		MFPrimitive_BeginBlitter_##driver, \
 		MFPrimitive_Blit_##driver, \
 		MFPrimitive_StretchBlit_##driver, \
@@ -69,6 +71,7 @@ struct MFPrimitivePluginCallbacks
 	void (*pMFSetNormal)(float x, float y, float z);
 	void (*pMFSetPosition)(float x, float y, float z);
 	void (*pMFEnd)();
+	MFStateBlock* (*pMFGetPrimStateBlock)();
 	void (*pBeginBlitter)(int numBlits);
 	void (*pBlit)(int x, int y, int tx, int ty, int tw, int th);
 	void (*pStretchBlit)(int x, int y, int w, int h, int tx, int ty, int tw, int th);
@@ -154,6 +157,11 @@ MF_API void MFSetPosition(float x, float y, float z)
 MF_API void MFEnd()
 {
 	gpCurrentPrimitivePlugin->pMFEnd();
+}
+
+MF_API MFStateBlock* MFPrimitive_GetPrimStateBlock()
+{
+	return gpCurrentPrimitivePlugin->pMFGetPrimStateBlock();
 }
 
 MF_API void MFPrimitive_BeginBlitter(int numBlits)

@@ -510,9 +510,12 @@ MFStateBlock::MFStateBlockStateChange* MFStateBlock::AllocState(uint32 type, uin
 		// TODO: We'll just waste the space for the time being (by doing nothing here)...
 	}
 
-	pState->constantType = type;
-	pState->constant = constant;
-	pState->stateSet = 1;
+	if(pState)
+	{
+		pState->constantType = type;
+		pState->constant = constant;
+		pState->stateSet = 1;
+	}
 
 	return pState;
 }

@@ -87,17 +87,68 @@ struct DSlice
 	T *ptr;
 	size_t length;
 
-	DSlice() : ptr(NULL), length(0) {}
-	DSlice(const DSlice<T>& from) : ptr(const_cast<T*>(from.ptr)), length(from.length) {}
-	DSlice(const T *ptr, size_t length) : ptr(const_cast<T*>(ptr)) , length(length) {}
+	// constructors
+	DSlice<T>() : ptr(nullptr), length(0) {}
+	DSlice<T>(T* ptr, size_t length) : ptr(ptr), length(length) {}
+	template <typename U>
+	DSlice<T>(DSlice<U> rh) : ptr(rh.ptr), length(rh.length) {}
 
-	DSlice<T>& operator=(const DSlice<T> &from) { ptr = const_cast<T*>(from.ptr); length = from.length; return *this; }
+	// assignment
+	template <typename U>
+	DSlice<T>& operator =(DSlice<U> rh) { length = rh.length; ptr = rh.ptr; return *this; }
 
-	T& operator[](size_t index) { return ptr[index]; }
+	// contents
+	T& operator[](size_t i)
+	{
+		MFDebug_Assert(i < length, "Index out of range!");
+		return ptr[i];
+	}
+	const T& operator[](size_t i) const
+	{
+		MFDebug_Assert(i < length, "Index out of range!");
+		return ptr[i];
+	}
 
-	DSlice<T> slice(size_t start, size_t end) { return DSlice(ptr + start, end - start); }
-	DSlice<T> popFront(size_t count = 1) { return DSlice(ptr + count, length - count); }
-	DSlice<T> popBack(size_t count = 1) { return DSlice(ptr, length - count); }
+	DSlice<T> slice(size_t first, size_t last) const
+	{
+		MFDebug_Assert(first <= last && last <= length, "Index out of range!");
+		return DSlice<T>(ptr + first, last - first);
+	}
+
+	DSlice<T> popFront(size_t count = 1)
+	{
+		return DSlice(ptr + count, length - count);
+	}
+	DSlice<T> popBack(size_t count = 1)
+	{
+		return DSlice(ptr, length - count);
+	}
+
+	bool empty() const
+	{
+		return length == 0;
+	}
+
+	// comparison
+	bool operator ==(DSlice<const T> rh) const
+	{
+		return ptr == rh.ptr && length == rh.length;
+	}
+	bool operator !=(DSlice<const T> rh) const
+	{
+		return ptr != rh.ptr || length != rh.length;
+	}
+
+	template <typename U>
+	bool eq(DSlice<U> rh) const
+	{
+		if(length != rh.length)
+			return false;
+		for(size_t i=0; i<length; ++i)
+			if(ptr[i] != rh.ptr[i])
+				return false;
+		return true;
+	}
 };
 
 /**

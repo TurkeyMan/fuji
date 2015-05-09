@@ -488,11 +488,6 @@ enum MFEndian
 	#define __forceinline MFALWAYS_INLINE
 #endif
 
-/*** Fuji Types ***/
-
-#include "MFTypes.h"
-
-
 /*** Defines and macros ***/
 
 #if !defined(NULL) /* In case stdlib.h hasn't been included */
@@ -528,6 +523,7 @@ MF_API MFEngineInstance * Fuji_SetCurrentEngineInstance(MFEngineInstance *pEngin
 /*** Additional includes ***/
 
 #include "MFDebug.h"
+#include "MFTypes.h"
 #include "MFString.h"
 #include "MFMath.h"
 

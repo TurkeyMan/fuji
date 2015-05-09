@@ -33,7 +33,7 @@ struct MFRenderTargetDesc
 	int width;						/**< Width of the render target. */
 	int height;						/**< Height of the render target. */
 
-	TargetDesc colourTargets[8];	/**< Colour targets. */
+	TargetDesc[8] colourTargets;	/**< Colour targets. */
 	TargetDesc depthStencil;		/**< Depth/stencil target. */
 }
 

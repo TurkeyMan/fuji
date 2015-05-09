@@ -371,7 +371,7 @@ Expression *GetTerm(DSlice<Token> &tokens)
 	Token &next = tokens[0];
 	tokens = tokens.popFront();
 
-	if(next.type == ET_Identifier && next.token == "effect")
+	if(next.type == ET_Identifier && next.token.eq("effect"))
 	{
 		Token *pIdentifier = Expect(tokens, ET_Identifier);
 
@@ -381,7 +381,7 @@ Expression *GetTerm(DSlice<Token> &tokens)
 		e->pRight = GetScope(tokens);
 		return e;
 	}
-	else if(next.type == ET_Identifier && next.token == "technique")
+	else if(next.type == ET_Identifier && next.token.eq("technique"))
 	{
 		Token *pIdentifier = NULL;
 		if(tokens.length > 0 && tokens[0].type == ET_String)
@@ -452,7 +452,7 @@ Expression *GetTerm(DSlice<Token> &tokens)
 				Expect(tokens, ET_GroupEnd);
 			}
 
-			if(next.token == "src")
+			if(next.token.eq("src"))
 			{
 				Token *pCode = Expect(tokens, ET_SourceCode);
 				e->pToken = pCode;
@@ -622,7 +622,7 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 					for(int i=0; i<MFSCB_Max; ++i)
 					{
 						const char *pName = MFStateBlock_GetRenderStateName(MFSB_CT_Bool, i);
-						if(pExp->pToken->token == pName)
+						if(pExp->pToken->token.eq(pName))
 						{
 							e.expression = MFExp_Identifier;
 							e.type = MFEDT_Bool;
@@ -635,7 +635,7 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 					{
 						for(size_t i=0; i<pTechnique->variables.size(); ++i)
 						{
-							if(pExp->pToken->token == pTechnique->variables[i].pName)
+							if(pExp->pToken->token.eq(pTechnique->variables[i].pName))
 							{
 								e.expression = MFExp_Identifier;
 								e.type = pTechnique->variables[i].pValue->type;
@@ -649,7 +649,7 @@ MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::T
 					{
 						for(size_t i=0; i<pEffect->variables.size(); ++i)
 						{
-							if(pExp->pToken->token == pEffect->variables[i].pName)
+							if(pExp->pToken->token.eq(pEffect->variables[i].pName))
 							{
 								e.expression = MFExp_Identifier;
 								e.type = pEffect->variables[i].pValue->type;
@@ -731,7 +731,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 		*pBytes = bytes;
 
 	int line = 1;
-	char *pLineStart = pBuffer;
+	const char *pLineStart = pBuffer;
 
 	DString buffer(pBuffer, bytes);
 	bool bExpectCode = false;
@@ -806,7 +806,7 @@ static char *Lex(const char *pFilename, MFArray<Token> &tokens, size_t *pBytes)
 			Token &t = tokens.push(Token(buffer.slice(0, len), ET_Identifier, line, col));
 			buffer = buffer.popFront(len);
 
-			if(t.token == "src")
+			if(t.token.eq("src"))
 				bExpectCode = true;
 		}
 		else if(c == '"')

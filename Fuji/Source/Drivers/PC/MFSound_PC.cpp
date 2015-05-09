@@ -55,6 +55,9 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 {
 	MFCALLSTACK;
 
+	void MFSound_InitWASAPI();
+	MFSound_InitWASAPI();
+
 #if defined(MF_XBOX)
 	DirectSoundCreate(NULL, &pDirectSound, NULL);
 #else
@@ -97,10 +100,15 @@ void MFSound_DeinitModulePlatformSpecific()
 		pDSPrimaryBuffer->Release();
 	if(pDirectSound)
 		pDirectSound->Release();
+
+	void MFSound_DeinitWASAPI();
+	MFSound_DeinitWASAPI();
 }
 
 void MFSound_UpdateInternal()
 {
+	void MFSound_UpdateWASAPI();
+	MFSound_UpdateWASAPI();
 }
 
 bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)

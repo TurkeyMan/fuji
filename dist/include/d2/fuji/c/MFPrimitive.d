@@ -3,6 +3,7 @@ module fuji.c.MFPrimitive;
 import fuji.c.MFTypes;
 import fuji.c.MFMaterial;
 import fuji.c.MFMatrix;
+import fuji.c.MFRenderer: MFStateBlock;
 
 nothrow:
 @nogc:
@@ -22,8 +23,9 @@ enum PrimType : uint
 	QuadList,			/**< Quad List */
 	PrimMask = 0x07,	/**< Primitive type mask */
 
-	Prelit = 64,		/**< Instructs the renderer to disable lighting */
-	Untextured = 128	/**< Instructs the renderer to disable texturing */
+	Prelit = 64,			/**< Instructs the renderer to disable lighting */
+	Untextured = 128,		/**< Instructs the renderer to disable texturing */
+	LargeStateBlock = 256	/**< Allocate a large mesh stateblock, sufficient to store user data */
 }
 
 /**
@@ -132,6 +134,14 @@ extern (C) void MFSetPosition(float x, float y, float z);
 * @return None.
 */
 extern (C) void MFEnd();
+
+/**
+* Get the primitive stateblock.
+* Gets the mesh stateblock for the current MFPrimitive scope.
+* @return Pointer to a MFStateBlock used by the current primitive block's mesh.
+* @see MFStateBlock, MFStateBlock_Create()
+*/
+extern (C) MFStateBlock* MFPrimitive_GetPrimStateBlock();
 
 /**
 * Begin a blitter block.

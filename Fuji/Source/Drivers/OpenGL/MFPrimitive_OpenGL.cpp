@@ -14,6 +14,7 @@
 	#define MFSetNormal MFSetNormal_OpenGL
 	#define MFSetPosition MFSetPosition_OpenGL
 	#define MFEnd MFEnd_OpenGL
+	#define MFPrimitive_GetPrimStateBlock MFPrimitive_GetPrimStateBlock_OpenGL
 	#define MFPrimitive_BeginBlitter MFPrimitive_BeginBlitter_OpenGL
 	#define MFPrimitive_Blit MFPrimitive_Blit_OpenGL
 	#define MFPrimitive_StretchBlit MFPrimitive_StretchBlit_OpenGL
@@ -59,6 +60,7 @@ static int currentVert;
 #if defined(MF_OPENGL_ES)
 static bool gImmitateQuads = false;
 #endif
+static bool gLargeStateblock = false;
 
 
 MFInitStatus MFPrimitive_InitModule(int moduleId, bool bPerformInitialisation)
@@ -133,6 +135,8 @@ MF_API void MFPrimitive(uint32 type, uint32 hint)
 	else
 		gImmitateQuads = false;
 #endif
+
+	gLargeStateblock = !!(type & PT_LargeStateBlock);
 }
 
 MF_API void MFBegin(uint32 vertexCount)
@@ -148,7 +152,7 @@ MF_API void MFBegin(uint32 vertexCount)
 	// create an appropriate vertex buffer
 	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
 
-	currentPrim.pMeshState = MFStateBlock_CreateTemporary(64);
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(gLargeStateblock ? 256 : 64);
 	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
 	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
 
@@ -289,6 +293,11 @@ MF_API void MFEnd()
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 */
+}
+
+MF_API MFStateBlock* MFPrimitive_GetPrimStateBlock()
+{
+	return currentPrim.pMeshState;
 }
 
 

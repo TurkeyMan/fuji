@@ -471,7 +471,7 @@ struct MFBlendStateDesc
 
 	bool bAlphaToCoverageEnable = false;    			/**< Use alpha-to-coverage as a multisampling technique when setting a pixel to a rendertarget. */
 	bool bIndependentBlendEnable = false;	    		/**< Enables independent blending to simultaneous render targets. If false, only the renderTarget[0] members are used. RenderTarget[1..7] are ignored. */
-	RenderTargetBlendDesc renderTarget[8];	            /**< Array of RenderTargetBlendDesc; corresponding to the eight rendertargets that can be set to the output-merger stage at one time. */
+	RenderTargetBlendDesc[8] renderTarget;	            /**< Array of RenderTargetBlendDesc; corresponding to the eight rendertargets that can be set to the output-merger stage at one time. */
 }
 
 struct MFSamplerState;

@@ -706,15 +706,13 @@ char* MFString_CopyCat(char *pDest, const char *pSrc, const char *pSrc2)
 MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
 {
 	const wchar_t *pStart = pBuffer;
-	int bytes;
-
 	while(*pString)
 	{
-		*pBuffer++ = (wchar_t)MFString_DecodeUTF8(pString, &bytes);
-		pString += bytes;
+		int c;
+		pString += MFString_DecodeUTF8(pString, &c);
+		*pBuffer++ = (wchar_t)c;
 	}
 	*pBuffer = 0;
-
 	return pBuffer - pStart;
 }
 
@@ -785,6 +783,22 @@ int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
 	while(c1 && (c1 == c2));
 
 	return c1 - c2;
+}
+
+int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2)
+{
+	int c;
+	int len = MFString_DecodeUTF8(pString2, &c);
+	pString2 += len;
+	while(*pString1 == c)
+	{
+		if(*pString1++ == 0)
+			return 0;
+		len = MFString_DecodeUTF8(pString2, &c);
+		pString2 += len;
+	}
+
+	return *(const uint16 *)pString1 - c;
 }
 
 

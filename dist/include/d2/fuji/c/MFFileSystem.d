@@ -325,8 +325,8 @@ enum MFFileSystemHandles
 */
 struct MFFindData
 {
-	char pFilename[224] = void;		/**< The files filename */
-	char pSystemPath[260] = void;	/**< The system path to the file */
+	char[224] pFilename = void;		/**< The files filename */
+	char[260] pSystemPath = void;	/**< The system path to the file */
 	uint attributes;				/**< The files attributes */
 	ulong fileSize;					/**< The files size */
 	MFFileTime writeTime;			/**< Last time the file was written */

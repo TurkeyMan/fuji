@@ -11,6 +11,8 @@
 
 #include "MFMatrix.h"
 
+struct MFStateBlock;
+
 /**
  * Primitive Type for an immediate render block.
  * Primitive Type for an immediate render block.
@@ -26,8 +28,9 @@ enum PrimType
 	PT_QuadList,		/**< Quad List */
 	PT_PrimMask = 0x07,	/**< Primitive type mask */
 
-	PT_Prelit = 64,		/**< Instructs the renderer to disable lighting */
-	PT_Untextured = 128	/**< Instructs the renderer to disable texturing */
+	PT_Prelit = 64,				/**< Instructs the renderer to disable lighting */
+	PT_Untextured = 128,		/**< Instructs the renderer to disable texturing */
+	PT_LargeStateBlock = 256	/**< Allocate a large mesh stateblock, sufficient to store user data */
 };
 
 /**
@@ -136,6 +139,14 @@ inline void MFSetPositionV(const MFVector &pos)
  * @return None.
  */
 MF_API void MFEnd();
+
+/**
+ * Get the primitive stateblock.
+ * Gets the mesh stateblock for the current MFPrimitive scope.
+ * @return Pointer to a MFStateBlock used by the current primitive block's mesh.
+ * @see MFStateBlock, MFStateBlock_Create()
+ */
+MF_API MFStateBlock* MFPrimitive_GetPrimStateBlock();
 
 /**
  * Begin a blitter block.

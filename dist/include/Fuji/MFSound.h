@@ -11,6 +11,16 @@
 
 #include "MFMatrix.h"
 
+enum MFSoundDeviceString
+{
+	MFSDS_ID,
+	MFSDS_InterfaceName,
+	MFSDS_DeviceName,
+	MFSDS_Description,
+	MFSDS_Manufacturer
+};
+
+
 /**
  * @struct MFSound
  * Represents a Fuji sound.
@@ -254,6 +264,24 @@ MF_API MFSound *MFSound_GetSoundFromVoice(MFVoice *pVoice);
  * @return None.
  */
 MF_API void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
+
+
+/*** Audio capture ***/
+
+struct MFAudioDevice;
+struct MFAudioCaptureDevice;
+
+typedef void (MFAudioCaptureCallback)(float *pSamples, size_t numSamples, int numChannels, void *pUserData);
+
+MF_API size_t MFSound_GetNumCaptureDevices();
+MF_API const char *MFSound_GetCaptureDeviceId(size_t index);
+
+MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(const char *pDeviceName);
+MF_API void MFSound_CloseCaptureDevice(MFAudioCaptureDevice *pDevice);
+MF_API void MFSound_StartCapture(MFAudioCaptureDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData);
+MF_API void MFSound_StopCapture(MFAudioCaptureDevice *pDevice);
+MF_API const char *MFSound_GetCaptureDeviceString(const MFAudioCaptureDevice *pDevice, MFSoundDeviceString string);
+
 
 /*** Music playback ***/
 

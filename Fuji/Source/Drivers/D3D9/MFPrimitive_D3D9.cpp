@@ -14,6 +14,7 @@
 	#define MFSetNormal MFSetNormal_D3D9
 	#define MFSetPosition MFSetPosition_D3D9
 	#define MFEnd MFEnd_D3D9
+	#define MFPrimitive_GetPrimStateBlock MFPrimitive_GetPrimStateBlock_D3D9
 	#define MFPrimitive_BeginBlitter MFPrimitive_BeginBlitter_D3D9
 	#define MFPrimitive_Blit MFPrimitive_Blit_D3D9
 	#define MFPrimitive_StretchBlit MFPrimitive_StretchBlit_D3D9
@@ -63,6 +64,7 @@ static LitVertex current;
 static int currentVert;
 
 static bool gImmitateQuads = false;
+static bool gLargeStateblock = false;
 
 /*** functions ***/
 
@@ -138,6 +140,8 @@ MF_API void MFPrimitive(uint32 type, uint32 hint)
 	}
 	else
 		gImmitateQuads = false;
+
+	gLargeStateblock = !!(type & PT_LargeStateBlock);
 }
 
 MF_API void MFBegin(uint32 vertexCount)
@@ -151,7 +155,7 @@ MF_API void MFBegin(uint32 vertexCount)
 	// create an appropriate vertex buffer
 	pVB = MFVertex_CreateVertexBuffer(pDecl, currentPrim.numVertices, MFVBType_Scratch);
 
-	currentPrim.pMeshState = MFStateBlock_CreateTemporary(64);
+	currentPrim.pMeshState = MFStateBlock_CreateTemporary(gLargeStateblock ? 256 : 64);
 	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexDeclaration, pDecl);
 	MFStateBlock_SetRenderState(currentPrim.pMeshState, MFSCRS_VertexBuffer0, pVB);
 
@@ -231,6 +235,11 @@ MF_API void MFEnd()
 	MFDebug_Assert(currentVert == currentPrim.numVertices, "Incorrect number of vertices.");
 
 	MFRenderer_AddMesh(&currentPrim, pMaterial, pEntity, NULL, MFView_GetViewState());
+}
+
+MF_API MFStateBlock* MFPrimitive_GetPrimStateBlock()
+{
+	return currentPrim.pMeshState;
 }
 
 

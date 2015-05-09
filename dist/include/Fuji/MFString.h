@@ -623,6 +623,8 @@ int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
  */
 int MFWString_CaseCmp(const wchar_t *pString1, const wchar_t *pString2);
 
+int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2);
+
 /**
  * Returns a pointer to the first instance of a specified delimeter.
  */
@@ -828,21 +830,60 @@ private:
 /**
  * Implements a D language string.
  */
-struct DString : public DSlice<char>
+struct DString : public DSlice<const char>
 {
+	// constructors
 	DString() {}
-	DString(const DSlice<char> &from) : DSlice(from) {}
-	DString(const char *pCString) : DSlice(const_cast<char*>(pCString), MFString_Length(pCString)) { }
-	DString(const MFString &str) : DSlice(const_cast<char*>(str.CStr()), str.NumBytes()) { }
-	DString(const char *pCString, size_t length) : DSlice(const_cast<char*>(pCString), length) { }
+	DString(const char *ptr, size_t length) : DSlice<const char>(ptr, length) {}
+	DString(DSlice<const char> rh) : DSlice<const char>(rh) {}
+	DString(const char *pString) : DSlice<const char>(pString, pString ? strlen(pString) : 0) {}
 
-	DString& operator=(const DSlice<char> &from) { ptr = const_cast<char*>(from.ptr); length = from.length; return *this; }
-	DString& operator=(const char *pFrom) { ptr = const_cast<char*>(pFrom); length = MFString_Length(pFrom); return *this; }
-	DString& operator=(const MFString &str) { ptr = const_cast<char*>(str.CStr()); length = str.NumBytes(); return *this; }
+	// assignment
+	DString& operator =(DSlice<const char> rh) { length = rh.length; ptr = rh.ptr; return *this; }
+	DString& operator =(const char *pString) { ptr = pString; length = pString ? strlen(pString) : (size_t)0; return *this; }
 
-	bool operator==(const char *pString) { return !MFString_CaseCmpN(ptr, pString, length); }
+	operator MFString() const { return MFString(ptr, length); }
 
-	operator MFString() { return MFString(ptr, length); }
+	// contents
+	DString slice(size_t first, size_t last) const
+	{
+		MFDebug_Assert(first <= last && last <= length, "Index out of range!");
+		return DString(ptr + first, last - first);
+	}
+
+	// comparison
+	template <typename U>
+	bool eq(DSlice<U> rh) const  // ***!!!*** do not understand, why need this here? it should call through to the base class just fine!? **TEST ON GCC**
+	{
+		return DSlice<const char>::eq(rh);
+	}
+	bool eq(const char *pString) const
+	{
+		if(ptr && pString)
+			return strncmp(ptr, pString, length) == 0;
+		return false;
+	}
+	bool eqi(DSlice<const char> rh) const
+	{
+		if(length != rh.length)
+			return false;
+		return _strnicmp(ptr, rh.ptr, length) == 0;
+	}
+	bool eqi(const char *pString) const
+	{
+		if(ptr && pString)
+			return _strnicmp(ptr, pString, length) == 0;
+		return false;
+	}
+
+	// c-string compatibility
+	char* toStringz(char *pBuffer, size_t bufferLen) const
+	{
+		size_t len = length < bufferLen-1 ? length : bufferLen-1;
+		memcpy(pBuffer, ptr, len);
+		pBuffer[len] = 0;
+		return pBuffer;
+	}
 };
 
 #include "MFString.inl"

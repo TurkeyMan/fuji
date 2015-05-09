@@ -245,7 +245,7 @@ struct MFTouchPanelState
 		int flags;		
 	}
 
-	Contact contacts[20];
+	Contact[20] contacts;
 	int numContacts;
 
 	bool bDidShake;

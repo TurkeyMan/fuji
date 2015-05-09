@@ -129,7 +129,7 @@ struct MFInetAddress
  */
 struct MFInet6Address
 {
-	ushort s[8];	/**< 8 uint16 address components */
+	ushort[8] s;	/**< 8 uint16 address components */
 }
 
 /**
