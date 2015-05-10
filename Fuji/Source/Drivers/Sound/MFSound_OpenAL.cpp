@@ -4,6 +4,8 @@
 
 #include "MFSystem.h"
 #include "MFSound_Internal.h"
+#include "MFDevice_Internal.h"
+#include "MFObjectPool.h"
 #include "MFHeap.h"
 
 #ifdef __APPLE__
@@ -29,16 +31,14 @@ struct MFVoiceDataInternal
 	ALuint source;
 };
 
-struct OutputDevice
+struct AudioDevice
 {
-	char name[64];
 	ALCdevice *pDevice;
-};
 
-struct CaptureDevice
-{
-	char name[64];
-	ALCdevice *pDevice;
+	bool bActive;
+
+	MFAudioCaptureCallback *pSampleCallback;
+	void *pUserData;
 };
 
 struct Context
@@ -54,16 +54,12 @@ struct Context
 	};
 
 	ALCcontext *pContext;
-	OutputDevice *pDevice;
+	MFDevice *pDevice;
+	AudioDevice *pRender;
 	OpenALExtensions ext;
 };
 
-static OutputDevice gOutputDevices[16];
-static CaptureDevice gCaptureDevices[16];
-static int gNumOutputDevices = 0;
-static int gNumCaptureDevices = 0;
-static int gDefaultOutputDevice = -1;
-static int gDefaultCaptureDevice = -1;
+MFObjectPool gDevices;
 
 
 /**** Globals ****/
@@ -78,16 +74,6 @@ static PFNALBUFFERSUBDATASOFTPROC alBufferSubDataSOFT = NULL;
 
 /**** Functions ****/
 
-static OutputDevice *CreateDevice(int deviceId)
-{
-	OutputDevice &device = gOutputDevices[deviceId];
-
-	if(!device.pDevice)
-		device.pDevice = alcOpenDevice(gOutputDevices[deviceId].name);
-
-	return &device;
-}
-
 static Context *MakeCurrent(Context *pContext)
 {
 	Context *pOld = gpCurrentContext;
@@ -96,15 +82,19 @@ static Context *MakeCurrent(Context *pContext)
 	return pOld;
 }
 
-static Context *CreateContext(int deviceId)
+static Context *CreateContext(MFDevice *pDevice)
 {
-	OutputDevice *pDevice = CreateDevice(deviceId);
-	if(!pDevice)
+	AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+	if(!device.pDevice)
+		device.pDevice = alcOpenDevice(pDevice->strings[MFDS_ID]);
+	if(!device.pDevice)
 		return NULL;
 
 	Context *pContext = (Context*)MFHeap_Alloc(sizeof(Context));
-	pContext->pContext = alcCreateContext(pDevice->pDevice, NULL);
+	pContext->pContext = alcCreateContext(device.pDevice, NULL);
 	pContext->pDevice = pDevice;
+	pContext->pRender = &device;
 
 	Context *pOld = MakeCurrent(pContext);
 
@@ -114,7 +104,7 @@ static Context *CreateContext(int deviceId)
 	MFDebug_Log(0, MFStr("OpenAL Extensions: %s", pExtensions));
 
 	pContext->ext.static_buffer = alIsExtensionPresent("ALC_EXT_STATIC_BUFFER") == AL_TRUE;
-	pContext->ext.offset = alIsExtensionPresent("AL_EXT_OFFSET") == AL_TRUE;	
+	pContext->ext.offset = alIsExtensionPresent("AL_EXT_OFFSET") == AL_TRUE;
 	pContext->ext.float32 = alIsExtensionPresent("AL_EXT_float32") == AL_TRUE;
 	pContext->ext.source_radius = alIsExtensionPresent("AL_EXT_SOURCE_RADIUS") == AL_TRUE;
 	pContext->ext.buffer_sub_data = alIsExtensionPresent("AL_SOFT_buffer_sub_data") == AL_TRUE;
@@ -140,10 +130,20 @@ static void DestroyContext(Context *pContext)
 	MFHeap_Free(pContext);
 }
 
+static void DestroyDevice(MFDevice *pDevice)
+{
+	AudioDevice *pDev = (AudioDevice*)pDevice->pInternal;
+	if(pDev->pDevice)
+		alcCloseDevice(pDev->pDevice);
+	gDevices.Free(pDev);
+}
+
 void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize)
 {
 	MFCALLSTACK;
-	
+
+	gDevices.Init(sizeof(AudioDevice), 8, 8);
+
 	ALCint minor, major;
 	alcGetIntegerv(NULL, ALC_MAJOR_VERSION, 1, &major);
 	alcGetIntegerv(NULL, ALC_MINOR_VERSION, 1, &minor);
@@ -153,7 +153,7 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 	if(gAPIVersion >= 101)
 	{
 		bCanEnumerate = true;
-		bHasCapture = true;		
+		bHasCapture = true;
 	}
 	else
 	{
@@ -167,48 +167,64 @@ void MFSound_InitModulePlatformSpecific(int *pSoundDataSize, int *pVoiceDataSize
 		const char *pDefault = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
 		while(pDevices && *pDevices)
 		{
-			if(!MFString_Compare(pDevices, pDefault))
-				gDefaultOutputDevice = gNumOutputDevices;
+			bool bIsDefault = !MFString_Compare(pDevices, pDefault);
+			MFDebug_Log(2, MFStr("OpenAL: found output device '%s'%s", pDevices, bIsDefault ? " (default)" : ""));
 
-			MFDebug_Log(2, MFStr("OpenAL: found output device '%s'%s", pDevices, gDefaultOutputDevice == gNumOutputDevices ? " (default)" : ""));
+			MFDevice *pDevice = MFDevice_AllocDevice(MFDT_AudioRender, &DestroyDevice);
+			pDevice->pInternal = gDevices.AllocAndZero();
+			pDevice->state = MFDevState_Ready;
 
-			OutputDevice &device = gOutputDevices[gNumOutputDevices++];
-			MFString_CopyN(device.name, pDevices, sizeof(device.name)-1);
-			device.name[sizeof(device.name)-1] = 0;
+			AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+			MFString_CopyN(pDevice->strings[MFDS_ID], pDevices, sizeof(pDevice->strings[MFDS_ID])-1);
+			pDevice->strings[MFDS_ID][sizeof(pDevice->strings[MFDS_ID])-1] = 0;
 			device.pDevice = NULL;
+
+			if(bIsDefault)
+					MFDevice_SetDefaultDevice(MFDT_AudioRender, MFDDT_All, pDevice);
 
 			pDevices += MFString_Length(pDevices) + 1;
 		}
 
-//		MFDebug_Assert(gDefaultOutputDevice >= 0, "OpenAL: No default output device?");
-		if(gDefaultOutputDevice >= 0)
+		if(!MFDevice_GetDefaultDevice(MFDT_AudioRender, MFDDT_Default))
+		{
 			MFDebug_Warn(2, "OpenAL: No default output device?");
-		
+
+			// HACK: set it to the first one...
+			MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_AudioRender, 0);
+			MFDevice_SetDefaultDevice(MFDT_AudioRender, MFDDT_All, pDevice);
+		}
+
 		if(bHasCapture)
 		{
 			pDevices = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
 			pDefault = alcGetString(NULL, ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
 			while(pDevices && *pDevices)
 			{
-				if(!MFString_Compare(pDevices, pDefault))
-					gDefaultCaptureDevice = gNumCaptureDevices;
+				bool bIsDefault = !MFString_Compare(pDevices, pDefault);
+				MFDebug_Log(2, MFStr("OpenAL: found capture device '%s'%s", pDevices, bIsDefault ? " (default)" : ""));
 
-				MFDebug_Log(2, MFStr("OpenAL: found capture device '%s'%s", pDevices, gDefaultCaptureDevice == gNumCaptureDevices ? " (default)" : ""));
+				MFDevice *pDevice = MFDevice_AllocDevice(MFDT_AudioCapture, &DestroyDevice);
+				pDevice->pInternal = gDevices.AllocAndZero();
+				pDevice->state = MFDevState_Ready;
 
-				CaptureDevice &device = gCaptureDevices[gNumCaptureDevices++];
-				MFString_CopyN(device.name, pDevices, sizeof(device.name)-1);
-				device.name[sizeof(device.name)-1] = 0;
+				AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+				MFString_CopyN(pDevice->strings[MFDS_ID], pDevices, sizeof(pDevice->strings[MFDS_ID])-1);
+				pDevice->strings[MFDS_ID][sizeof(pDevice->strings[MFDS_ID])-1] = 0;
 				device.pDevice = NULL;
+
+				if(bIsDefault)
+					MFDevice_SetDefaultDevice(MFDT_AudioCapture, MFDDT_All, pDevice);
 
 				pDevices += MFString_Length(pDevices) + 1;
 			}
 
-			MFDebug_Assert(gDefaultCaptureDevice >= 0, "OpenAL: No default capture device?");
+			if(!MFDevice_GetDefaultDevice(MFDT_AudioCapture, MFDDT_Default))
+				MFDebug_Warn(2, "OpenAL: No default capture device?");
 		}
 	}
 
 	// create a context
-	Context *pContext = CreateContext(gDefaultOutputDevice);
+	Context *pContext = CreateContext(MFDevice_GetDefaultDevice(MFDT_AudioRender, MFDDT_Default));
 	MakeCurrent(pContext);
 
 	// we need to return the size of the internal structures so the platform independant
@@ -223,22 +239,38 @@ void MFSound_DeinitModulePlatformSpecific()
 
 	// TODO: remove this, user will control contexts
 	DestroyContext(gpCurrentContext);
-
-	for(int i=0; i<gNumCaptureDevices; ++i)
-	{
-		if(gCaptureDevices[i].pDevice)
-			alcCloseDevice(gCaptureDevices[i].pDevice);
-	}
-
-	for(int i=0; i<gNumOutputDevices; ++i)
-	{
-		if(gOutputDevices[i].pDevice)
-			alcCloseDevice(gOutputDevices[i].pDevice);
-	}
 }
 
 void MFSound_UpdateInternal()
 {
+	const int NumSamples = 4096;
+	float buffer[NumSamples];
+
+	size_t numCaptureDevices = MFDevice_GetNumDevices(MFDT_AudioCapture);
+	for(size_t i=0; i<numCaptureDevices; ++i)
+	{
+		MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_AudioCapture, i);
+		AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+		if(device.pDevice && device.bActive)
+		{
+			// get samples, and feed to callback
+			ALint numSamples;
+			alcGetIntegerv(device.pDevice, ALC_CAPTURE_SAMPLES, (ALCsizei)sizeof(ALint), &numSamples);
+
+			MFDebug_Assert(false, "TODO: check if numSamples is in samples or bytes...");
+
+			while(numSamples > 0)
+			{
+				ALint samples = MFMin(1024, numSamples);
+				alcCaptureSamples(device.pDevice, (ALCvoid *)buffer, samples);
+				numSamples -= samples;
+
+				// feed samples to the callback
+				device.pSampleCallback((float*)buffer, samples, 1, device.pUserData);
+			}
+		}
+	}
 }
 
 bool MFSound_UpdateVoiceInternal(MFVoice *pVoice)
@@ -309,7 +341,7 @@ void MFSound_CreateInternal(MFSound *pSound)
 void MFSound_DestroyInternal(MFSound *pSound)
 {
 	alDeleteBuffers(1, &pSound->pInternal->buffer);
-	
+
 	// if dynamic, free buffer
 	if(pSound->pTemplate->flags & MFSF_Dynamic)
 	{
@@ -483,7 +515,7 @@ MF_API void MFSound_Unlock(MFSound *pSound)
 		// write data to the buffer
 		size_t bufferSize = ((pTemplate->numChannels * pTemplate->bitsPerSample) >> 3) * pTemplate->numSamples;
 		size_t untilEnd = bufferSize - pSound->lockOffset;
-		
+
 		if(pSound->lockBytes > untilEnd)
 		{
 			alBufferSubDataSOFT(pInternal->buffer, pInternal->format, pSound->pLock1, pSound->lockOffset, untilEnd);
@@ -616,6 +648,53 @@ size_t MFSound_GetPlayCursorInternal(MFVoice *pVoice, size_t *pWriteCursor)
 		*pWriteCursor = (uint32)offset[1];
 
 	return (uint32)offset[0];
+}
+
+MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
+{
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+	device.pDevice = alcCaptureOpenDevice(pDevice->strings[MFDS_ID], 44100, AL_FORMAT_MONO_FLOAT32, 44100*sizeof(float));
+	return device.pDevice != NULL;
+}
+
+MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice)
+{
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+	MFSound_StopCapture(pDevice);
+
+	alcCaptureCloseDevice(device.pDevice);
+}
+
+MF_API void MFSound_StartCapture(MFDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData)
+{
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+	if(!device.bActive)
+	{
+		alcCaptureStart(device.pDevice);
+
+		device.pSampleCallback = pCallback;
+		device.pUserData = pUserData;
+
+		device.bActive = true;
+	}
+}
+
+MF_API void MFSound_StopCapture(MFDevice *pDevice)
+{
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	AudioDevice &device = *(AudioDevice*)pDevice->pInternal;
+
+	if(device.bActive)
+	{
+		alcCaptureStop(device.pDevice);
+		device.bActive = false;
+	}
 }
 
 #endif // MF_SOUND

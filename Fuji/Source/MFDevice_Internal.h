@@ -26,6 +26,6 @@ MFInitStatus MFDevice_InitModule(int moduleId, bool bPerformInitialisation);
 void MFDevice_DeinitModule();
 
 MFDevice* MFDevice_AllocDevice(MFDeviceType type, MFDevice_DestroyFunc *pDestroyFunc);
-void MFDevice_SetDefaultDevice(MFDefaultDeviceType type, MFDevice *pDevice);
+void MFDevice_SetDefaultDevice(MFDeviceType type, MFDefaultDeviceType defaultType, MFDevice *pDevice);
 
 #endif

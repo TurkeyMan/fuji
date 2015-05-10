@@ -373,6 +373,8 @@ MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, con
 			case MFTexType_Cubemap:
 				MFDebug_Assert(false, "TODO: cubemap arrays!");
 				break;
+			default:
+				MFDebug_Assert(false, "Shouldn't be here!");
 		}
 	}
 	else
@@ -392,6 +394,8 @@ MF_API bool MFTexture_Update(MFTexture *pTexture, int element, int mipLevel, con
 			case MFTexType_Cubemap:
 				glTexImage2D(gCubeFace[element], mipLevel, format.internalFormat, surface.width, surface.height, 0, format.format, format.type, pData);
 				break;
+			default:
+				MFDebug_Assert(false, "Shouldn't be here!");
 		}
 	}
 

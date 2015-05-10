@@ -119,6 +119,8 @@ MFTexture* MFTexture_InitTexture(const MFTextureDesc *pDesc, MFRendererDrivers r
 		case MFTexType_3D:		MFDebug_Assert(pDesc->width > 0 && pDesc->height > 0 && pDesc->depth > 0, "1D textures must have: width > 0 && height > 0 && depth > 0");
 								MFDebug_Assert(pDesc->arrayElements == 0, "Arrays of 3D textures are not supported");
 								MFDebug_Assert((pDesc->flags & MFTCF_TypeMask) != MFTCF_RenderTarget, "3D textures may not be render targets"); break;
+		default:
+			break;
 	}
 
 	MFImageFormat format = MFImage_ResolveFormat(pDesc->format, renderer);

@@ -45,6 +45,17 @@ MFDevice* MFDevice_AllocDevice(MFDeviceType type, MFDevice_DestroyFunc *pDestroy
 	return pDevice;
 }
 
+void MFDevice_SetDefaultDevice(MFDeviceType type, MFDefaultDeviceType defaultType, MFDevice *pDevice)
+{
+	if(defaultType == MFDDT_All)
+	{
+		for(int i=0; i<MFDT_Max; ++i)
+			gpDefaultDevices[type][i] = pDevice;
+	}
+	else
+		gpDefaultDevices[type][defaultType] = pDevice;
+}
+
 MF_API size_t MFDevice_GetNumDevices(MFDeviceType type)
 {
 	return gNumDevices[type];

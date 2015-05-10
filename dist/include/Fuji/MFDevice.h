@@ -40,7 +40,9 @@ enum MFDeviceType
 
 enum MFDefaultDeviceType
 {
-	MFDDT_Default,
+	MFDDT_All = -1,
+
+	MFDDT_Default = 0,
 	MFDDT_Communication,
 	MFDDT_Multimedia,
 

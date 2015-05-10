@@ -41,6 +41,22 @@ struct Resolution
 };
 
 // Data definition
+char modeString[24] = "";
+const char *resMenuItems[] = {"-", modeString, "+", NULL};
+
+MenuItemIntString resSelect(resMenuItems, 1);
+MenuItemStatic applyDisplayMode;
+
+// Variables
+Resolution *modes = NULL;
+MenuItemIntString *modesMenu;
+int32 currentMode = -1, selectedMode = -1;
+int32 numModes;
+
+XF86VidModeModeInfo *originalVidMode = NULL;
+XF86VidModeModeInfo **vidModes = NULL;
+
+/*
 static Resolution defaultModes[] =
 {
 	{320, 240, 0.0f},
@@ -58,22 +74,6 @@ static Resolution defaultModes[] =
 	{0, 0, 0.0f}
 };
 
-char modeString[24] = "";
-const char *resMenuItems[] = {"-", modeString, "+", NULL};
-
-MenuItemIntString resSelect(resMenuItems, 1);
-MenuItemStatic applyDisplayMode;
-
-// Variables
-Resolution *modes = NULL;
-MenuItemIntString *modesMenu;
-int32 currentMode = -1, selectedMode = -1;
-int32 numModes;
-
-XF86VidModeModeInfo *originalVidMode = NULL;
-XF86VidModeModeInfo **vidModes = NULL;
-
-/*
 static bool GetModes(Resolution **_modes, bool fullscreen);
 static void SetSingleMode(Resolution **modes);
 static void FreeModes();

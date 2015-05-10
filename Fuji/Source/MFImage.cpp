@@ -311,6 +311,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_R9G9B9_E5:
 						MFDebug_Assert(false, "Not done!");
 						break;
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 
 				if(bTosRGB)
@@ -357,6 +359,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_R9G9B9_E5:
 						MFDebug_Assert(false, "Not done!");
 						break;
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 			}
 		}
@@ -453,6 +457,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_R9G9B9_E5:
 						MFDebug_Assert(false, "Not done!");
 						break;
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 
 				if(bTosRGB)
@@ -498,6 +504,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 						pOut += 8;
 						break;
 					}
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 			}
 		}
@@ -593,6 +601,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 					case ImgFmt_R9G9B9_E5:
 						MFDebug_Assert(false, "Not done!");
 						break;
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 
 				if(bTosRGB)
@@ -728,6 +738,8 @@ MF_API void MFImage_Convert(uint32 width, uint32 height, const void *pInput, MFI
 						pOut += 2;
 						break;
 					}
+					default:
+						MFDebug_Assert(false, "Shouldn't be here!");
 				}
 			}
 		}
@@ -903,7 +915,7 @@ static void Filter_AdvMAME(MFScaleImage *pScaleData)
 		// http://en.wikipedia.org/wiki/Pixel_art_scaling_algorithms
 		//   A    --\ 1 2
 		// C P B  --/ 3 4
-		//   D 
+		//   D
 		//  1=P; 2=P; 3=P; 4=P;
 		//  IF C==A AND C!=D AND A!=B => 1=A
 		//  IF A==B AND A!=C AND B!=D => 2=B
@@ -1097,7 +1109,7 @@ static void Filter_Eagle(MFScaleImage *pScaleData)
 	int destStride = pScaleData->targetStride;
 
 	// http://en.wikipedia.org/wiki/Pixel_art_scaling_algorithms
-	// First:        |Then 
+	// First:        |Then
 	// . . . --\ CC  |S T U  --\ 1 2
 	// . C . --/ CC  |V C W  --/ 3 4
 	// . . .         |X Y Z

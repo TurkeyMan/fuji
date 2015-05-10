@@ -264,13 +264,10 @@ extern (C) void MFSound_GetSoundInfo(MFSound* pSound, MFSoundInfo *pInfo);
 
 /*** Audio capture ***/
 
-struct MFAudioDevice;
-struct MFAudioCaptureDevice;
-
-extern (C) MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice* pDevice);
-extern (C) void MFSound_CloseCaptureDevice(MFAudioCaptureDevice* pDevice);
-extern (C) void MFSound_StartCapture(MFAudioCaptureDevice* pDevice, MFAudioCaptureCallback callback, void* pUserData);
-extern (C) void MFSound_StopCapture(MFAudioCaptureDevice* pDevice);
+extern (C) bool MFSound_OpenCaptureDevice(MFDevice* pDevice);
+extern (C) void MFSound_CloseCaptureDevice(MFDevice* pDevice);
+extern (C) void MFSound_StartCapture(MFDevice* pDevice, MFAudioCaptureCallback callback, void* pUserData);
+extern (C) void MFSound_StopCapture(MFDevice* pDevice);
 
 
 /*** Music playback ***/

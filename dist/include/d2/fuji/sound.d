@@ -8,7 +8,6 @@ nothrow: @nogc:
 struct AudioCaptureDevice
 {
 	Device device;
-	MFAudioCaptureDevice *pCapture;
 
 	alias device this;
 
@@ -20,23 +19,21 @@ struct AudioCaptureDevice
 nothrow: @nogc:
 	bool open()
 	{
-		pCapture = MFSound_OpenCaptureDevice(device.pDevice);
-		return pCapture != null;
+		return MFSound_OpenCaptureDevice(device.pDevice);
 	}
 
 	void close()
 	{
-		MFSound_CloseCaptureDevice(pCapture);
-		pCapture = null;
+		MFSound_CloseCaptureDevice(device.pDevice);
 	}
 
 	void start(MFAudioCaptureCallback callback, void* pUserData = null)
 	{
-		MFSound_StartCapture(pCapture, callback, pUserData);
+		MFSound_StartCapture(device.pDevice, callback, pUserData);
 	}
 
 	void stop()
 	{
-		MFSound_StopCapture(pCapture);
+		MFSound_StopCapture(device.pDevice);
 	}
 }

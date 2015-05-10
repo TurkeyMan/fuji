@@ -300,7 +300,7 @@ void MFSound_UpdateWASAPI()
 	}
 }
 
-MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice *pDevice)
+MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
 {
 	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
 	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
@@ -379,37 +379,46 @@ MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice *pDevice)
 		REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
 
 		device.bActive = false;
-		return &device;
+		return true;
 	}
 
-	return NULL;
+	return false;
 }
 
-MF_API void MFSound_CloseCaptureDevice(MFAudioCaptureDevice *pDevice)
+MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice)
 {
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
+
 	MFSound_StopCapture(pDevice);
 
-	pDevice->pCaptureClient->Release();
-	pDevice->pAudioClient->Release();
-	pDevice->pDevice->Release();
+	device.pCaptureClient->Release();
+	device.pAudioClient->Release();
+	device.pDevice->Release();
 }
 
-MF_API void MFSound_StartCapture(MFAudioCaptureDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData)
+MF_API void MFSound_StartCapture(MFDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData)
 {
-	pDevice->pSampleCallback = pCallback;
-	pDevice->pUserData = pUserData;
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
-	HRESULT hr = pDevice->pAudioClient->Start();  // Start recording.
+	device.pSampleCallback = pCallback;
+	device.pUserData = pUserData;
+
+	HRESULT hr = device.pAudioClient->Start();  // Start recording.
 	if(FAILED(hr))
 		MFDebug_Warn(2, "Couldn't start capture");
 
-	pDevice->bActive = true;
+	device.bActive = true;
 }
 
-MF_API void MFSound_StopCapture(MFAudioCaptureDevice *pDevice)
+MF_API void MFSound_StopCapture(MFDevice *pDevice)
 {
-	HRESULT hr = pDevice->pAudioClient->Stop();  // Stop recording.
-	pDevice->bActive = false;
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
+
+	HRESULT hr = device.pAudioClient->Stop();  // Stop recording.
+	device.bActive = false;
 }
 
 #endif

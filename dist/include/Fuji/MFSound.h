@@ -283,15 +283,12 @@ MF_API void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
 
 /*** Audio capture ***/
 
-struct MFAudioDevice;
-struct MFAudioCaptureDevice;
-
 typedef void (MFAudioCaptureCallback)(float *pSamples, size_t numSamples, int numChannels, void *pUserData);
 
-MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice *pDevice);
-MF_API void MFSound_CloseCaptureDevice(MFAudioCaptureDevice *pDevice);
-MF_API void MFSound_StartCapture(MFAudioCaptureDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData);
-MF_API void MFSound_StopCapture(MFAudioCaptureDevice *pDevice);
+MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice);
+MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice);
+MF_API void MFSound_StartCapture(MFDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData);
+MF_API void MFSound_StopCapture(MFDevice *pDevice);
 
 
 /*** Music playback ***/
