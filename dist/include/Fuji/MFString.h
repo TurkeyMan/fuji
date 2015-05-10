@@ -836,11 +836,11 @@ struct DString : public DSlice<const char>
 	DString() {}
 	DString(const char *ptr, size_t length) : DSlice<const char>(ptr, length) {}
 	DString(DSlice<const char> rh) : DSlice<const char>(rh) {}
-	DString(const char *pString) : DSlice<const char>(pString, pString ? strlen(pString) : 0) {}
+	DString(const char *pString) : DSlice<const char>(pString, pString ? MFString_Length(pString) : 0) {}
 
 	// assignment
 	DString& operator =(DSlice<const char> rh) { length = rh.length; ptr = rh.ptr; return *this; }
-	DString& operator =(const char *pString) { ptr = pString; length = pString ? strlen(pString) : (size_t)0; return *this; }
+	DString& operator =(const char *pString) { ptr = pString; length = pString ? MFString_Length(pString) : (size_t)0; return *this; }
 
 	operator MFString() const { return MFString(ptr, length); }
 
@@ -860,19 +860,19 @@ struct DString : public DSlice<const char>
 	bool eq(const char *pString) const
 	{
 		if(ptr && pString)
-			return strncmp(ptr, pString, length) == 0;
+			return MFString_CompareN(ptr, pString, length) == 0;
 		return false;
 	}
 	bool eqi(DSlice<const char> rh) const
 	{
 		if(length != rh.length)
 			return false;
-		return _strnicmp(ptr, rh.ptr, length) == 0;
+		return MFString_CaseCmpN(ptr, rh.ptr, length) == 0;
 	}
 	bool eqi(const char *pString) const
 	{
 		if(ptr && pString)
-			return _strnicmp(ptr, pString, length) == 0;
+			return MFString_CaseCmpN(ptr, pString, length) == 0;
 		return false;
 	}
 
@@ -880,7 +880,7 @@ struct DString : public DSlice<const char>
 	char* toStringz(char *pBuffer, size_t bufferLen) const
 	{
 		size_t len = length < bufferLen-1 ? length : bufferLen-1;
-		memcpy(pBuffer, ptr, len);
+		MFCopyMemory(pBuffer, ptr, len);
 		pBuffer[len] = 0;
 		return pBuffer;
 	}

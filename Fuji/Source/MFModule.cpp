@@ -32,6 +32,7 @@
 #include "MFVertex_Internal.h"
 #include "MFThread_Internal.h"
 #include "MFCompute_Internal.h"
+#include "MFDevice_Internal.h"
 #include "DebugMenu.h"
 #include "Timer.h"
 
@@ -153,7 +154,10 @@ uint64 MFModule_RegisterEngineModules()
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFCallstack] = (char)MFModule_RegisterModule("MFCallstack", MFCallstack_InitModule, MFCallstack_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFCallstack);
 
-	basicModules |= MFModule_GetBuiltinModuleMask(MFBIM_DebugMenu) | MFModule_GetBuiltinModuleMask(MFBIM_MFCallstack);
+	gpEngineInstance->builtinModuleIDs[MFBIM_MFDevice] = (char)MFModule_RegisterModule("MFDevice", MFDevice_InitModule, MFDevice_DeinitModule, basicModules);
+	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFDevice);
+
+	basicModules |= MFModule_GetBuiltinModuleMask(MFBIM_DebugMenu) | MFModule_GetBuiltinModuleMask(MFBIM_MFCallstack) | MFModule_GetBuiltinModuleMask(MFBIM_MFDevice);
 	uint64 fs = MFModule_GetBuiltinModuleMask(MFBIM_MFFileSystem);
 	uint64 net = MFModule_GetBuiltinModuleMask(MFBIM_MFSockets);
 

@@ -88,7 +88,7 @@ struct DSlice
 	size_t length;
 
 	// constructors
-	DSlice<T>() : ptr(nullptr), length(0) {}
+	DSlice<T>() : ptr(NULL), length(0) {}
 	DSlice<T>(T* ptr, size_t length) : ptr(ptr), length(length) {}
 	template <typename U>
 	DSlice<T>(DSlice<U> rh) : ptr(rh.ptr), length(rh.length) {}

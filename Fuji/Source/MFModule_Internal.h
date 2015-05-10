@@ -18,6 +18,7 @@ enum MFBuiltinModule
 	MFBIM_MFFileSystem,
 	MFBIM_DebugMenu,
 	MFBIM_MFCallstack,
+	MFBIM_MFDevice,
 	MFBIM_Timer,
 	MFBIM_MFSystem,
 	MFBIM_MFResource,
