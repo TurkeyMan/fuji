@@ -11,13 +11,28 @@
 
 #include "MFMatrix.h"
 
+struct MFDevice;
+
 enum MFSoundDeviceString
 {
 	MFSDS_ID,
 	MFSDS_InterfaceName,
 	MFSDS_DeviceName,
 	MFSDS_Description,
-	MFSDS_Manufacturer
+	MFSDS_Manufacturer,
+
+	MFSDS_Max,
+	MFSDS_ForceInt = 0x7FFFFFFF,
+};
+
+enum MFSoundDefaultDevice
+{
+	MFSDD_Default,
+	MFSDD_Communication,
+	MFSDD_Multimedia,
+
+	MFSDD_Max,
+	MFSDD_ForceInt = 0x7FFFFFFF,
 };
 
 
@@ -273,14 +288,10 @@ struct MFAudioCaptureDevice;
 
 typedef void (MFAudioCaptureCallback)(float *pSamples, size_t numSamples, int numChannels, void *pUserData);
 
-MF_API size_t MFSound_GetNumCaptureDevices();
-MF_API const char *MFSound_GetCaptureDeviceId(size_t index);
-
-MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(const char *pDeviceName);
+MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice *pDevice);
 MF_API void MFSound_CloseCaptureDevice(MFAudioCaptureDevice *pDevice);
 MF_API void MFSound_StartCapture(MFAudioCaptureDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData);
 MF_API void MFSound_StopCapture(MFAudioCaptureDevice *pDevice);
-MF_API const char *MFSound_GetCaptureDeviceString(const MFAudioCaptureDevice *pDevice, MFSoundDeviceString string);
 
 
 /*** Music playback ***/

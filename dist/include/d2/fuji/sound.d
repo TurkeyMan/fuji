@@ -1,62 +1,42 @@
 module fuji.sound;
 
 public import fuji.c.MFSound;
+import fuji.device;
 
 nothrow: @nogc:
-
-const(char)[] MFSound_GetCaptureDeviceId(size_t index)
-{
-	import fuji.c.MFString: toDStr;
-	return fuji.c.MFSound.MFSound_GetCaptureDeviceId(index).toDStr;
-}
-
-const(char)[] MFSound_GetCaptureDeviceString(const(MFAudioCaptureDevice)* pDevice, MFSoundDeviceString stringType) pure
-{
-	import fuji.c.MFString: toDStr;
-	return fuji.c.MFSound.MFSound_GetCaptureDeviceString(pDevice, stringType).toDStr;
-}
 
 struct AudioCaptureDevice
 {
-	MFAudioCaptureDevice *pDevice;
+	Device device;
+	MFAudioCaptureDevice *pCapture;
+
+	alias device this;
+
+	this(Device device)
+	{
+		this.device = device;
+	}
 
 nothrow: @nogc:
-	bool open(size_t index)
+	bool open()
 	{
-		const(char)* pId = fuji.c.MFSound.MFSound_GetCaptureDeviceId(index);
-		if(pId)
-			pDevice = MFSound_OpenCaptureDevice(pId);
-
-		return pDevice != null;
-	}
-	bool open(const(char)[] id)
-	{
-		import fuji.string: Stringz;
-		auto s = Stringz!128(id);
-
-		pDevice = MFSound_OpenCaptureDevice(s);
-		return pDevice != null;
+		pCapture = MFSound_OpenCaptureDevice(device.pDevice);
+		return pCapture != null;
 	}
 
 	void close()
 	{
-		MFSound_CloseCaptureDevice(pDevice);
+		MFSound_CloseCaptureDevice(pCapture);
+		pCapture = null;
 	}
 
 	void start(MFAudioCaptureCallback callback, void* pUserData = null)
 	{
-		MFSound_StartCapture(pDevice, callback, pUserData);
+		MFSound_StartCapture(pCapture, callback, pUserData);
 	}
 
 	void stop()
 	{
-		MFSound_StopCapture(pDevice);
+		MFSound_StopCapture(pCapture);
 	}
-
-pure:
-	@property const(char)[] id() const { return MFSound_GetCaptureDeviceString(pDevice, MFSoundDeviceString.ID); }
-	@property const(char)[] name() const { return MFSound_GetCaptureDeviceString(pDevice, MFSoundDeviceString.DeviceName); }
-	@property const(char)[] interfaceName() const { return MFSound_GetCaptureDeviceString(pDevice, MFSoundDeviceString.InterfaceName); }
-	@property const(char)[] description() const { return MFSound_GetCaptureDeviceString(pDevice, MFSoundDeviceString.Description); }
-	@property const(char)[] manufacturer() const { return MFSound_GetCaptureDeviceString(pDevice, MFSoundDeviceString.Manufacturer); }
 }

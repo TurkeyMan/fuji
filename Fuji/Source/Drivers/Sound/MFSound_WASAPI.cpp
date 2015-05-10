@@ -3,6 +3,8 @@
 #if MF_SOUND == MF_DRIVER_DSOUND || defined(MF_SOUNDPLUGIN_DSOUND)
 
 #include "MFSound_Internal.h"
+#include "MFDevice_Internal.h"
+#include "MFObjectPool.h"
 
 #if defined(MF_WINDOWS)
 	#include <Mmdeviceapi.h>
@@ -72,49 +74,74 @@ struct MFAudioDevice
 	uint32 channels;
 	uint32 channelMask;
 
-	char id[64];
-	char deviceInterface_FriendlyName[128];
-	char device_Desc[128];
-	char device_FriendlyName[128];
-	char device_Manufacturer[128];
-
 	IMMDevice *pDevice;
 	IAudioClient *pAudioClient;
 };
 
-struct MFAudioCaptureDevice
+struct MFAudioCaptureDevice : MFAudioDevice
 {
-	DWORD state;
-	bool bActive;
-
-	MFWaveFormat format;
-	uint32 bitsPerSample;
-	uint32 channels;
-	uint32 channelMask;
-
-	char id[64];
-	char deviceInterface_FriendlyName[128];
-	char device_Desc[128];
-	char device_FriendlyName[128];
-	char device_Manufacturer[128];
+    IAudioCaptureClient *pCaptureClient;
 
 	MFAudioCaptureCallback *pSampleCallback;
 	void *pUserData;
-
-	IMMDevice *pDevice;
-	IAudioClient *pAudioClient;
-    IAudioCaptureClient *pCaptureClient;
 };
 
-static MFAudioDevice *gpDevices;
-static MFAudioCaptureDevice *gpCaptureDevices;
-static size_t gNumDevices, gNumCaptureDevices;
+
+MFObjectPool gDevices;
+MFObjectPool gCaptureDevices;
 
 static IMMDeviceEnumerator *gpEnumerator;
 static MFAudioDeviceNotification *gpNotification;
 
+
+void GetDefault()
+{
+}
+
+DWORD GetDeviceInfo(IMMDevice *pDevice, MFDevice *pDev)
+{
+	wchar_t *pWC;
+	pDevice->GetId(&pWC);
+	MFString_CopyUTF16ToUTF8(pDev->strings[MFDS_ID], pWC);
+	CoTaskMemFree(pWC);
+
+	DWORD state;
+	pDevice->GetState(&state);
+
+	IPropertyStore *pProps;
+	pDevice->OpenPropertyStore(STGM_READ, &pProps);
+
+	PROPVARIANT v;
+	PropVariantInit(&v);
+	pProps->GetValue(PKEY_DeviceInterface_FriendlyName, &v);
+	MFString_CopyUTF16ToUTF8(pDev->strings[MFDS_InterfaceName], v.pwszVal);
+	PropVariantClear(&v);
+
+	PropVariantInit(&v);
+	pProps->GetValue(PKEY_Device_DeviceDesc, &v);
+	MFString_CopyUTF16ToUTF8(pDev->strings[MFDS_Description], v.pwszVal);
+	PropVariantClear(&v);
+
+	PropVariantInit(&v);
+	pProps->GetValue(PKEY_Device_FriendlyName, &v);
+	MFString_CopyUTF16ToUTF8(pDev->strings[MFDS_DeviceName], v.pwszVal);
+	PropVariantClear(&v);
+
+	PropVariantInit(&v);
+	pProps->GetValue(PKEY_Device_Manufacturer, &v);
+	MFString_CopyUTF16ToUTF8(pDev->strings[MFDS_Manufacturer], v.pwszVal ? v.pwszVal : L"");
+	PropVariantClear(&v);
+
+	pProps->Release();
+
+	return state;
+}
+
 void MFSound_InitWASAPI()
 {
+	gDevices.Init(sizeof(MFAudioDevice), 8, 8);
+	gCaptureDevices.Init(sizeof(MFAudioCaptureDevice), 8, 8);
+
 	HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&gpEnumerator);
 	if(FAILED(hr))
 	{
@@ -127,9 +154,6 @@ void MFSound_InitWASAPI()
 	gpEnumerator->RegisterEndpointNotificationCallback(gpNotification);
 
 	// enumerate render devices
-	//...
-
-	// enumerate capture devices
 	IMMDeviceCollection *pDevices;
 	gpEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE | DEVICE_STATE_UNPLUGGED, &pDevices);
 	if(pDevices)
@@ -137,51 +161,20 @@ void MFSound_InitWASAPI()
 		UINT count;
 		pDevices->GetCount(&count);
 
-		gpDevices = (MFAudioDevice*)MFHeap_AllocAndZero(sizeof(MFAudioDevice)*count);
-		gNumDevices = count;
-
 		for(UINT i=0; i<count; ++i)
 		{
 			IMMDevice *pDevice;
 			pDevices->Item(i, &pDevice);
 
-			MFAudioDevice &device = gpDevices[i];
+			MFDevice *pDev = MFDevice_AllocDevice(MFDT_AudioRender, NULL);
+			pDev->pInternal = gDevices.AllocAndZero();
+			MFAudioDevice &device = *(MFAudioDevice*)pDev->pInternal;
 
-			wchar_t *pWC;
-			pDevice->GetId(&pWC);
-			MFString_CopyUTF16ToUTF8(device.id, pWC);
-			CoTaskMemFree(pWC);
+			device.state = GetDeviceInfo(pDevice, pDev);
 
-			pDevice->GetState(&device.state);
-
-			IPropertyStore *pProps;
-			pDevice->OpenPropertyStore(STGM_READ, &pProps);
-
-			PROPVARIANT v;
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_DeviceInterface_FriendlyName, &v);
-			MFString_CopyUTF16ToUTF8(device.deviceInterface_FriendlyName, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_DeviceDesc, &v);
-			MFString_CopyUTF16ToUTF8(device.device_Desc, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_FriendlyName, &v);
-			MFString_CopyUTF16ToUTF8(device.device_FriendlyName, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_Manufacturer, &v);
-			MFString_CopyUTF16ToUTF8(device.device_Manufacturer, v.pwszVal ? v.pwszVal : L"");
-			PropVariantClear(&v);
-
-			MFDebug_Log(0, MFStr("Found audio device: %s, %s - state: %d (%s)", device.device_FriendlyName, device.device_Manufacturer, device.state, device.id));
-
-			pProps->Release();
 			pDevice->Release();
+
+			MFDebug_Log(0, MFStr("Found audio device: %s, %s - state: %d (%s)", pDev->strings[MFDS_DeviceName], pDev->strings[MFDS_Manufacturer], device.state, pDev->strings[MFDS_ID]));
 		}
 		pDevices->Release();
 	}
@@ -206,57 +199,27 @@ void MFSound_InitWASAPI()
 		pDevice->Release();
 	}
 
+	// enumerate capture devices
 	gpEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE | DEVICE_STATE_UNPLUGGED, &pDevices);
 	if(pDevices)
 	{
 		UINT count;
 		pDevices->GetCount(&count);
 
-		gpCaptureDevices = (MFAudioCaptureDevice*)MFHeap_AllocAndZero(sizeof(MFAudioCaptureDevice)*count);
-		gNumCaptureDevices = count;
-
 		for(UINT i=0; i<count; ++i)
 		{
 			IMMDevice *pDevice;
 			pDevices->Item(i, &pDevice);
 
-			MFAudioCaptureDevice &device = gpCaptureDevices[i];
+			MFDevice *pDev = MFDevice_AllocDevice(MFDT_AudioCapture, NULL);
+			pDev->pInternal = gCaptureDevices.AllocAndZero();
+			MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDev->pInternal;
 
-			wchar_t *pWC;
-			pDevice->GetId(&pWC);
-			MFString_CopyUTF16ToUTF8(device.id, pWC);
-			CoTaskMemFree(pWC);
+			device.state = GetDeviceInfo(pDevice, pDev);
 
-			pDevice->GetState(&device.state);
-
-			IPropertyStore *pProps;
-			pDevice->OpenPropertyStore(STGM_READ, &pProps);
-
-			PROPVARIANT v;
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_DeviceInterface_FriendlyName, &v);
-			MFString_CopyUTF16ToUTF8(device.deviceInterface_FriendlyName, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_DeviceDesc, &v);
-			MFString_CopyUTF16ToUTF8(device.device_Desc, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_FriendlyName, &v);
-			MFString_CopyUTF16ToUTF8(device.device_FriendlyName, v.pwszVal);
-			PropVariantClear(&v);
-
-			PropVariantInit(&v);
-			pProps->GetValue(PKEY_Device_Manufacturer, &v);
-			MFString_CopyUTF16ToUTF8(device.device_Manufacturer, v.pwszVal ? v.pwszVal : L"");
-			PropVariantClear(&v);
-
-			MFDebug_Log(0, MFStr("Found audio capture device: %s, %s - state: %d (%s)", device.device_FriendlyName, device.device_Manufacturer, device.state, device.id));
-
-			pProps->Release();
 			pDevice->Release();
+
+			MFDebug_Log(0, MFStr("Found audio capture device: %s, %s - state: %d (%s)", pDev->strings[MFDS_DeviceName], pDev->strings[MFDS_Manufacturer], device.state, pDev->strings[MFDS_ID]));
 		}
 		pDevices->Release();
 	}
@@ -272,10 +235,11 @@ void MFSound_InitWASAPI()
 
 void MFSound_DeinitWASAPI()
 {
-	MFHeap_Free(gpCaptureDevices);
-
 	gpEnumerator->Release();
 	delete gpNotification;
+
+	gDevices.Deinit();
+	gCaptureDevices.Deinit();
 }
 
 void MFSound_UpdateWASAPI()
@@ -283,12 +247,14 @@ void MFSound_UpdateWASAPI()
 	const int NumSamples = 4096;
 	float buffer[NumSamples];
 
-	for(size_t i=0; i<gNumCaptureDevices; ++i)
+	size_t numCaptureDevices = MFDevice_GetNumDevices(MFDT_AudioCapture);
+	for(size_t i=0; i<numCaptureDevices; ++i)
 	{
-		if(gpCaptureDevices[i].pDevice && gpCaptureDevices[i].bActive)
-		{
-			MFAudioCaptureDevice &device = gpCaptureDevices[i];
+		MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_AudioCapture, i);
+		MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
+		if(device.pDevice && device.bActive)
+		{
 			// get samples, and feed to callback
 			UINT32 packetLength = 0;
 			HRESULT hr = device.pCaptureClient->GetNextPacketSize(&packetLength);
@@ -334,106 +300,89 @@ void MFSound_UpdateWASAPI()
 	}
 }
 
-MF_API size_t MFSound_GetNumCaptureDevices()
+MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice *pDevice)
 {
-	return gNumCaptureDevices;
-}
+	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
-MF_API const char *MFSound_GetCaptureDeviceId(size_t index)
-{
-	MFDebug_Assert(index < gNumCaptureDevices, "Invalid device index!");
-	return gpCaptureDevices[index].id;
-}
-
-MF_API MFAudioCaptureDevice* MFSound_OpenCaptureDevice(const char *pDeviceName)
-{
-	for(size_t i=0; i<gNumCaptureDevices; ++i)
+	if(device.state == 1)
 	{
-		if(MFString_Compare(gpCaptureDevices[i].id, pDeviceName) == 0)
+		// get a handle to the device
+		wchar_t id[256];
+		MFWString_CopyUTF8ToUTF16(id, pDevice->strings[MFDS_ID]);
+		HRESULT hr = gpEnumerator->GetDevice(id, &device.pDevice);
+
+		// activate the capture device
+		hr = device.pDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&device.pAudioClient);
+
+		// get format from input device
+		WAVEFORMATEX *pwfx = NULL;
+		hr = device.pAudioClient->GetMixFormat(&pwfx);
+
+		device.format = MFWaveFmt_Unknown;
+		device.bitsPerSample = pwfx->wBitsPerSample;
+		device.channels = pwfx->nChannels;
+		device.channelMask = 4;
+
+		WORD wFormatTag = pwfx->wFormatTag;
+		if(wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 		{
-			MFAudioCaptureDevice &device = gpCaptureDevices[i];
-
-			if(device.state == 1)
+			WAVEFORMATEXTENSIBLE *pwfex = (WAVEFORMATEXTENSIBLE*)pwfx;
+			device.channelMask = pwfex->dwChannelMask;
+			if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_PCM)
+				wFormatTag = WAVE_FORMAT_PCM;
+			else if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
+				wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+		}
+		switch(wFormatTag)
+		{
+			case WAVE_FORMAT_PCM:
 			{
-				// get a handle to the device
-				wchar_t id[256];
-				MFWString_CopyUTF8ToUTF16(id, device.id);
-				HRESULT hr = gpEnumerator->GetDevice(id, &device.pDevice);
-
-				// activate the capture device
-				hr = device.pDevice->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, (void**)&device.pAudioClient);
-
-				// get format from input device
-				WAVEFORMATEX *pwfx = NULL;
-				hr = device.pAudioClient->GetMixFormat(&pwfx);
-
-				device.format = MFWaveFmt_Unknown;
-				device.bitsPerSample = pwfx->wBitsPerSample;
-				device.channels = pwfx->nChannels;
-				device.channelMask = 4;
-
-				WORD wFormatTag = pwfx->wFormatTag;
-				if(wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+				switch(pwfx->wBitsPerSample)
 				{
-					WAVEFORMATEXTENSIBLE *pwfex = (WAVEFORMATEXTENSIBLE*)pwfx;
-					device.channelMask = pwfex->dwChannelMask;
-					if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_PCM)
-						wFormatTag = WAVE_FORMAT_PCM;
-					else if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
-						wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
-				}
-				switch(wFormatTag)
-				{
-					case WAVE_FORMAT_PCM:
-					{
-						switch(pwfx->wBitsPerSample)
-						{
-							case 8:
-								device.format = MFWaveFmt_PCM_u8;
-								break;
-							case 16:
-								device.format = MFWaveFmt_PCM_s16;
-								break;
-							case 24:
-								device.format = MFWaveFmt_PCM_s24;
-								break;
-							default:
-								MFDebug_Assert(false, "Invalid wave format!");
-						}
+					case 8:
+						device.format = MFWaveFmt_PCM_u8;
 						break;
-					}
-					case WAVE_FORMAT_IEEE_FLOAT:
-					{
-						MFDebug_Assert(pwfx->wBitsPerSample == 32, "Unknown float format!");
-						device.format = MFWaveFmt_PCM_f32;
+					case 16:
+						device.format = MFWaveFmt_PCM_s16;
 						break;
-					}
+					case 24:
+						device.format = MFWaveFmt_PCM_s24;
+						break;
 					default:
-						MFDebug_Warn(2, "Unsupported wave format!");
-						break;
+						MFDebug_Assert(false, "Invalid wave format!");
 				}
-
-				// initialise capture device
-				REFERENCE_TIME hnsRequestedDuration = 10000000;
-				hr = device.pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, 0, hnsRequestedDuration, 0, pwfx, NULL);
-
-				// get the size of the allocated buffer.
-				UINT32 bufferFrameCount;
-				hr = device.pAudioClient->GetBufferSize(&bufferFrameCount);
-
-				hr = device.pAudioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&device.pCaptureClient);
-
-				// calculate the actual duration of the allocated buffer.
-				REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
-
-				device.bActive = false;
-				return &device;
+				break;
 			}
-			else
+			case WAVE_FORMAT_IEEE_FLOAT:
+			{
+				MFDebug_Assert(pwfx->wBitsPerSample == 32, "Unknown float format!");
+				device.format = MFWaveFmt_PCM_f32;
+				break;
+			}
+			default:
+				MFDebug_Warn(2, "Unsupported wave format!");
 				break;
 		}
+
+		// initialise capture device
+		REFERENCE_TIME hnsRequestedDuration = 10000000;
+		hr = device.pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, 0, hnsRequestedDuration, 0, pwfx, NULL);
+
+		// get the size of the allocated buffer.
+		UINT32 bufferFrameCount;
+		hr = device.pAudioClient->GetBufferSize(&bufferFrameCount);
+
+		hr = device.pAudioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&device.pCaptureClient);
+
+		// calculate the actual duration of the allocated buffer.
+		REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
+
+		device.bActive = false;
+		return &device;
 	}
-	return nullptr;
+
+	return NULL;
 }
 
 MF_API void MFSound_CloseCaptureDevice(MFAudioCaptureDevice *pDevice)
@@ -461,24 +410,6 @@ MF_API void MFSound_StopCapture(MFAudioCaptureDevice *pDevice)
 {
 	HRESULT hr = pDevice->pAudioClient->Stop();  // Stop recording.
 	pDevice->bActive = false;
-}
-
-MF_API const char *MFSound_GetCaptureDeviceString(const MFAudioCaptureDevice *pDevice, MFSoundDeviceString string)
-{
-	switch(string)
-	{
-		case MFSDS_ID:
-			return pDevice->id;
-		case MFSDS_InterfaceName:
-			return pDevice->deviceInterface_FriendlyName;
-		case MFSDS_DeviceName:
-			return pDevice->device_FriendlyName;
-		case MFSDS_Description:
-			return pDevice->device_Desc;
-		case MFSDS_Manufacturer:
-			return pDevice->device_Manufacturer;
-	}
-	return NULL;
 }
 
 #endif

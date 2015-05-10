@@ -2,6 +2,7 @@ module fuji.c.MFSound;
 
 import fuji.c.Fuji;
 import fuji.c.MFMatrix;
+import fuji.c.MFDevice: MFDevice;
 
 nothrow:
 
@@ -266,14 +267,10 @@ extern (C) void MFSound_GetSoundInfo(MFSound* pSound, MFSoundInfo *pInfo);
 struct MFAudioDevice;
 struct MFAudioCaptureDevice;
 
-extern (C) size_t MFSound_GetNumCaptureDevices();
-extern (C) const(char)* MFSound_GetCaptureDeviceId(size_t index);
-
-extern (C) MFAudioCaptureDevice* MFSound_OpenCaptureDevice(const(char)* pDeviceName);
+extern (C) MFAudioCaptureDevice* MFSound_OpenCaptureDevice(MFDevice* pDevice);
 extern (C) void MFSound_CloseCaptureDevice(MFAudioCaptureDevice* pDevice);
 extern (C) void MFSound_StartCapture(MFAudioCaptureDevice* pDevice, MFAudioCaptureCallback callback, void* pUserData);
 extern (C) void MFSound_StopCapture(MFAudioCaptureDevice* pDevice);
-extern (C) const(char)* MFSound_GetCaptureDeviceString(const(MFAudioCaptureDevice)* pDevice, MFSoundDeviceString stringType) pure;
 
 
 /*** Music playback ***/
