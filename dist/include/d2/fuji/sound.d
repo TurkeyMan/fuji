@@ -8,15 +8,14 @@ nothrow: @nogc:
 struct AudioCaptureDevice
 {
 	Device device;
-
 	alias device this;
 
+nothrow: @nogc:
 	this(Device device)
 	{
 		this.device = device;
 	}
 
-nothrow: @nogc:
 	bool open()
 	{
 		return MFSound_OpenCaptureDevice(device.pDevice);
@@ -35,5 +34,12 @@ nothrow: @nogc:
 	void stop()
 	{
 		MFSound_StopCapture(device.pDevice);
+	}
+
+	@property MFSoundDeviceInfo info() const pure
+	{
+		MFSoundDeviceInfo info;
+		MFSound_GetDeviceInfo(device.pDevice, &info);
+		return info;
 	}
 }

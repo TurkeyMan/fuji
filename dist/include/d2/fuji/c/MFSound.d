@@ -9,15 +9,6 @@ nothrow:
 
 alias MFAudioCaptureCallback = extern (C) void function(const(float)* pSamples, size_t numSamples, int numChannels, void* pUserData);
 
-enum MFSoundDeviceString
-{
-	ID,
-	InterfaceName,
-	DeviceName,
-	Description,
-	Manufacturer
-}
-
 
 /**
 * @struct MFSound
@@ -262,6 +253,40 @@ extern (C) void MFSound_GetSoundInfo(MFSound* pSound, MFSoundInfo *pInfo);
 
 
 /*** Audio capture ***/
+
+enum MFSoundChannelMask : uint
+{
+	FrontLeft = 0x1,
+	FrontRight = 0x2,
+	FrontCenter = 0x4,
+	LowFrequency = 0x8,
+	BackLeft = 0x10,
+	BackRight = 0x20,
+	FrontLeftOfCenter = 0x40,
+	FrontRightOfCenter = 0x80,
+	BackCenter = 0x100,
+	SideLeft = 0x200,
+	SideRight = 0x400,
+	TopCenter = 0x800,
+	TopFrontLeft = 0x1000,
+	TopFrontCenter = 0x2000,
+	TopFrontRight = 0x4000,
+	TopBackLeft = 0x8000,
+	TopBackCenter = 0x10000,
+	TopBackRight = 0x20000
+}
+
+struct MFSoundDeviceInfo
+{
+	int sampleRate;			/**< Sample playback rate. */
+	short bitsPerSample;	/**< Number of bits per sample. */
+	short numChannels;		/**< Number of channels. */
+	uint channelMask;
+	int bufferLength;		/**< Number of samples in the buffer. */
+	float bufferTime;
+}
+
+extern (C) bool MFSound_GetDeviceInfo(const(MFDevice)* pDevice, MFSoundDeviceInfo* pInfo) pure;
 
 extern (C) bool MFSound_OpenCaptureDevice(MFDevice* pDevice);
 extern (C) void MFSound_CloseCaptureDevice(MFDevice* pDevice);

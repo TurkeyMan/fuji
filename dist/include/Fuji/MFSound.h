@@ -13,18 +13,6 @@
 
 struct MFDevice;
 
-enum MFSoundDeviceString
-{
-	MFSDS_ID,
-	MFSDS_InterfaceName,
-	MFSDS_DeviceName,
-	MFSDS_Description,
-	MFSDS_Manufacturer,
-
-	MFSDS_Max,
-	MFSDS_ForceInt = 0x7FFFFFFF,
-};
-
 
 /**
  * @struct MFSound
@@ -273,7 +261,41 @@ MF_API void MFSound_GetSoundInfo(MFSound *pSound, MFSoundInfo *pInfo);
 
 /*** Audio capture ***/
 
+enum MFSoundChannelMask
+{
+	MFSCM_FrontLeft = 0x1,
+	MFSCM_FrontRight = 0x2,
+	MFSCM_FrontCenter = 0x4,
+	MFSCM_LowFrequency = 0x8,
+	MFSCM_BackLeft = 0x10,
+	MFSCM_BackRight = 0x20,
+	MFSCM_FrontLeftOfCenter = 0x40,
+	MFSCM_FrontRightOfCenter = 0x80,
+	MFSCM_BackCenter = 0x100,
+	MFSCM_SideLeft = 0x200,
+	MFSCM_SideRight = 0x400,
+	MFSCM_TopCenter = 0x800,
+	MFSCM_TopFrontLeft = 0x1000,
+	MFSCM_TopFrontCenter = 0x2000,
+	MFSCM_TopFrontRight = 0x4000,
+	MFSCM_TopBackLeft = 0x8000,
+	MFSCM_TopBackCenter = 0x10000,
+	MFSCM_TopBackRight = 0x20000
+};
+
+struct MFSoundDeviceInfo
+{
+	int sampleRate;			/**< Sample playback rate. */
+	int16 bitsPerSample;	/**< Number of bits per sample. */
+	int16 numChannels;		/**< Number of channels. */
+	uint32 channelMask;
+	int bufferLength;		/**< Number of samples in the buffer. */
+	float bufferTime;
+};
+
 typedef void (MFAudioCaptureCallback)(float *pSamples, size_t numSamples, int numChannels, void *pUserData);
+
+MF_API bool MFSound_GetDeviceInfo(const MFDevice *pDevice, MFSoundDeviceInfo *pInfo);
 
 MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice);
 MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice);

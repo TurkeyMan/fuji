@@ -22,9 +22,7 @@ struct MFAudioDevice
 	DWORD state;
 
 	MFWaveFormat format;
-	uint32 bitsPerSample;
-	uint32 channels;
-	uint32 channelMask;
+	MFSoundDeviceInfo info;
 
 	IMMDevice *pDevice;
 	IAudioClient *pAudioClient;
@@ -382,7 +380,7 @@ static int CaptureThread(void *pData)
 						}
 
 						// feed samples to the callback
-						device.pSampleCallback(pSamples, samplesToDeliver, device.channels, device.pUserData);
+						device.pSampleCallback(pSamples, samplesToDeliver, device.info.numChannels, device.pUserData);
 						numRemaining -= samplesToDeliver;
 					}
 
@@ -393,7 +391,7 @@ static int CaptureThread(void *pData)
 				MFThread_Sleep(5);
 			}
 
-			HRESULT hr = device.pAudioClient->Stop();  // Stop recording.
+			device.pAudioClient->Stop();  // Stop recording.
 		}
 
 		if(device.bTerminate)
@@ -402,6 +400,19 @@ static int CaptureThread(void *pData)
 		MFThread_Sleep(64);
 	}
 	return 0;
+}
+
+MF_API bool MFSound_GetDeviceInfo(const MFDevice *pDevice, MFSoundDeviceInfo *pInfo)
+{
+	MFDebug_Assert(pDevice->type == MFDT_AudioRender || pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
+	MFAudioDevice &device = *(MFAudioDevice*)pDevice->pInternal;
+
+	if(device.pAudioClient)
+	{
+		*pInfo = device.info;
+		return true;
+	}
+	return false;
 }
 
 MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
@@ -424,15 +435,16 @@ MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
 		hr = device.pAudioClient->GetMixFormat(&pwfx);
 
 		device.format = MFWaveFmt_Unknown;
-		device.bitsPerSample = pwfx->wBitsPerSample;
-		device.channels = pwfx->nChannels;
-		device.channelMask = 4;
+		device.info.sampleRate = pwfx->nSamplesPerSec;
+		device.info.bitsPerSample = pwfx->wBitsPerSample;
+		device.info.numChannels = pwfx->nChannels;
+		device.info.channelMask = pwfx->nChannels == 1 ? MFSCM_FrontCenter : (MFSCM_FrontLeft | MFSCM_FrontRight);
 
 		WORD wFormatTag = pwfx->wFormatTag;
 		if(wFormatTag == WAVE_FORMAT_EXTENSIBLE)
 		{
 			WAVEFORMATEXTENSIBLE *pwfex = (WAVEFORMATEXTENSIBLE*)pwfx;
-			device.channelMask = pwfex->dwChannelMask;
+			device.info.channelMask = pwfex->dwChannelMask;
 			if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_PCM)
 				wFormatTag = WAVE_FORMAT_PCM;
 			else if(pwfex->SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)
@@ -476,11 +488,13 @@ MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
 		// get the size of the allocated buffer.
 		UINT32 bufferFrameCount;
 		hr = device.pAudioClient->GetBufferSize(&bufferFrameCount);
+		device.info.bufferLength = bufferFrameCount;
 
 		hr = device.pAudioClient->GetService(__uuidof(IAudioCaptureClient), (void**)&device.pCaptureClient);
 
 		// calculate the actual duration of the allocated buffer.
-		REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
+		device.info.bufferTime = (float)((double)bufferFrameCount / pwfx->nSamplesPerSec);
+//		REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
 
 		device.bActive = false;
 		device.thread = MFThread_CreateThread(pDevice->strings[MFDS_ID], CaptureThread, &device, MFPriority_AboveNormal, MFTF_Joinable);
@@ -496,14 +510,21 @@ MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice)
 	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
 	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
-	MFSound_StopCapture(pDevice);
+	if(device.pAudioClient)
+	{
+		MFSound_StopCapture(pDevice);
 
-	device.bTerminate;
-	MFThread_Join(device.thread);
+		device.bTerminate = true;
+		MFThread_Join(device.thread);
+		MFThread_DestroyThread(device.thread);
 
-	device.pCaptureClient->Release();
-	device.pAudioClient->Release();
-	device.pDevice->Release();
+		device.pCaptureClient->Release();
+		device.pCaptureClient = NULL;
+		device.pAudioClient->Release();
+		device.pAudioClient = NULL;
+		device.pDevice->Release();
+		device.pDevice = NULL;
+	}
 }
 
 MF_API void MFSound_StartCapture(MFDevice *pDevice, MFAudioCaptureCallback *pCallback, void *pUserData)
