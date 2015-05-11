@@ -47,6 +47,8 @@ MF_API void MFThread_ExitThread(int exitCode)
 	// TODO: get pThreadInfo from TLS...
 //	pThreadInfo->exitCode = exitCode;
 
+	// TODO: signal join semaphore
+
 	ExitThread((DWORD)exitCode);
 }
 

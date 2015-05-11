@@ -66,9 +66,9 @@ enum MFDeviceState
 {
 	MFDevState_Unknown = -1,
 
-	MFDevState_Unavailable = 0,
-	MFDevState_Ready,
+	MFDevState_Ready = 0,
 	MFDevState_Disconnected,
+	MFDevState_Unavailable,
 
 	MFDevState_Max,
 	MFDevState_ForceInt = 0x7FFFFFFF

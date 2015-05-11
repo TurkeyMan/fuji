@@ -43,6 +43,11 @@ void MFThread_CreatePlatformSpecific(MFThreadInfo *pThreadInfo)
 
 MF_API void MFThread_ExitThread(int exitCode)
 {
+	// TODO: get pThreadInfo from TLS...
+//	pThreadInfo->exitCode = exitCode;
+
+	// TODO: signal join semaphore
+
 	pthread_exit((void*&)exitCode);
 }
 

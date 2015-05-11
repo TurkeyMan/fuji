@@ -5,10 +5,9 @@ import fuji.c.MFMatrix;
 import fuji.c.MFDevice: MFDevice;
 
 nothrow:
-
-alias MFAudioCaptureCallback = extern (C) void function(const(float)* pSamples, size_t numSamples, int numChannels, void* pUserData) nothrow;
-
 @nogc:
+
+alias MFAudioCaptureCallback = extern (C) void function(const(float)* pSamples, size_t numSamples, int numChannels, void* pUserData);
 
 enum MFSoundDeviceString
 {

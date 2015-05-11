@@ -46,6 +46,9 @@ int MFThread_ThreadProc(MFThreadInfo *pThreadInfo)
 
 	pThreadInfo->exitCode = pThreadInfo->pEntryPoint(pThreadInfo->pUserData);
 
+	if(pThreadInfo->joinSemaphore)
+		MFThread_SignalSemaphore(pThreadInfo->joinSemaphore);
+
 	return pThreadInfo->exitCode;
 }
 

@@ -25,16 +25,6 @@ enum MFSoundDeviceString
 	MFSDS_ForceInt = 0x7FFFFFFF,
 };
 
-enum MFSoundDefaultDevice
-{
-	MFSDD_Default,
-	MFSDD_Communication,
-	MFSDD_Multimedia,
-
-	MFSDD_Max,
-	MFSDD_ForceInt = 0x7FFFFFFF,
-};
-
 
 /**
  * @struct MFSound

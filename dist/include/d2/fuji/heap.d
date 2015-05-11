@@ -1,6 +1,15 @@
 module fuji.heap;
 
 public import fuji.c.MFHeap;
+import std.conv;
+
+auto MFHeap_Alloc(T, int Line = __LINE__, string File = __FILE__, Args...)(Args args)
+{
+	static if(is(T == class))
+		return emplace!T(MFHeap_Alloc!(Line, File)(__traits(classInstanceSize, T), pHeap), args);
+	else
+		return emplace!T(MFHeap_Alloc!(Line, File)(T.sizeof, pHeap), args);
+}
 
 nothrow:
 @nogc:
@@ -16,7 +25,7 @@ nothrow:
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void[] MFHeap_Alloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null) nothrow
+void[] MFHeap_Alloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
 {
 	debug MFHeap_SetLineAndFile(Line, File.ptr);
 	return MFHeap_AllocInternal(bytes, pHeap)[0..bytes];
@@ -33,10 +42,17 @@ void[] MFHeap_Alloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, M
  * @see MFHeap_Realloc()
  * @see MFHeap_Free()
  */
-void[] MFHeap_AllocAndZero(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null) nothrow
+void[] MFHeap_AllocAndZero(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
 {
 	debug MFHeap_SetLineAndFile(Line, File.ptr);
 	return MFHeap_AllocAndZeroInternal(bytes, pHeap)[0..bytes];
+}
+
+
+auto MFHeap_Alloc(T, int Line = __LINE__, string File = __FILE__)(MFHeap* pHeap = null) if(is(T == struct))
+{
+	debug MFHeap_SetLineAndFile(Line, File.ptr);
+	return cast(T*)MFHeap_AllocInternal(T.sizeof, pHeap);
 }
 
 /**
@@ -51,7 +67,7 @@ void[] MFHeap_AllocAndZero(int Line = __LINE__, string File = __FILE__)(size_t b
  * @see MFHeap_Alloc()
  * @see MFHeap_Free()
  */
-void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void[] mem, size_t bytes) nothrow
+void[] MFHeap_Realloc(int Line = __LINE__, string File = __FILE__)(void[] mem, size_t bytes)
 {
 	debug
 	{
@@ -68,7 +84,7 @@ void MFHeap_Free(void[] mem) nothrow
 	MFHeap_Free(mem.ptr);
 }
 
-void[] MFHeap_TAlloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null) nothrow
+void[] MFHeap_TAlloc(int Line = __LINE__, string File = __FILE__)(size_t bytes, MFHeap* pHeap = null)
 {
 	debug MFHeap_SetLineAndFile(Line, File.ptr);
 	return MFHeap_AllocInternal(bytes, MFHeap_GetHeap(MFHeapType.ActiveTemporary))[0..bytes];

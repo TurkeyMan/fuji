@@ -5,6 +5,7 @@
 #include "MFSound_Internal.h"
 #include "MFDevice_Internal.h"
 #include "MFObjectPool.h"
+#include "MFThread.h"
 
 #if defined(MF_WINDOWS)
 	#include <Mmdeviceapi.h>
@@ -13,61 +14,12 @@
 	#include <Functiondiscoverykeys_devpkey.h>
 #endif
 
-// TODO:...
-class MFAudioDeviceNotification : public IMMNotificationClient
-{
-	ULONG rc;
 
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject)
-	{
-		return S_OK;
-	}
-
-	virtual ULONG STDMETHODCALLTYPE AddRef()
-	{
-		return ++rc;
-	}
-
-	virtual ULONG STDMETHODCALLTYPE Release()
-	{
-		return --rc;
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD dwNewState)
-	{
-		MFDebug_Log(0, MFStr("MM State changed: %d (%S)", dwNewState, pwstrDeviceId));
-		return S_OK;
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE OnDeviceAdded(LPCWSTR pwstrDeviceId)
-	{
-		MFDebug_Log(0, MFStr("MM device added: %S", pwstrDeviceId));
-		return S_OK;
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE OnDeviceRemoved(LPCWSTR pwstrDeviceId)
-	{
-		MFDebug_Log(0, MFStr("MM device removed: %S", pwstrDeviceId));
-		return S_OK;
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged(EDataFlow flow, ERole role, LPCWSTR pwstrDefaultDeviceId)
-	{
-		MFDebug_Log(0, MFStr("MM default device changed: %S", pwstrDefaultDeviceId));
-		return S_OK;
-	}
-
-	virtual HRESULT STDMETHODCALLTYPE OnPropertyValueChanged(LPCWSTR pwstrDeviceId, const PROPERTYKEY key)
-	{
-//		MFDebug_Log(0, MFStr("MM Prop changed: %S", pwstrDeviceId));
-		return S_OK;
-	}
-};
+static MFDevice *NewDevice(LPCWSTR pwstrDeviceId);
 
 struct MFAudioDevice
 {
 	DWORD state;
-	bool bActive;
 
 	MFWaveFormat format;
 	uint32 bitsPerSample;
@@ -84,6 +36,11 @@ struct MFAudioCaptureDevice : MFAudioDevice
 
 	MFAudioCaptureCallback *pSampleCallback;
 	void *pUserData;
+
+	MFThread thread;
+
+	volatile bool bActive;
+	volatile bool bTerminate;
 };
 
 
@@ -91,14 +48,128 @@ MFObjectPool gDevices;
 MFObjectPool gCaptureDevices;
 
 static IMMDeviceEnumerator *gpEnumerator;
-static MFAudioDeviceNotification *gpNotification;
+static class MFAudioDeviceNotification *gpNotification;
 
+static EDataFlow direction[2] = { eRender, eCapture };
+static MFDeviceType dt[2] = { MFDT_AudioRender, MFDT_AudioCapture };
+static ERole role[3] = { eConsole, eMultimedia, eCommunications };
+static MFDefaultDeviceType def[3] = { MFDDT_Default, MFDDT_Multimedia, MFDDT_Communication };
 
-void GetDefault()
+void UpdateState(MFDevice *pDevice, DWORD state)
 {
+	MFAudioDevice &device = *(MFAudioDevice*)pDevice->pInternal;
+	device.state = state;
+	if(state == DEVICE_STATE_UNPLUGGED)
+		pDevice->state = MFDevState_Disconnected;
+	else if(state == DEVICE_STATE_NOTPRESENT)
+		pDevice->state = MFDevState_Disconnected;
+	else if(state == DEVICE_STATE_DISABLED)
+		pDevice->state = MFDevState_Unavailable;
+	else if(state == DEVICE_STATE_ACTIVE)
+		pDevice->state = MFDevState_Ready;
+	else
+		pDevice->state = MFDevState_Unknown;
 }
 
-DWORD GetDeviceInfo(IMMDevice *pDevice, MFDevice *pDev)
+
+class MFAudioDeviceNotification : public IMMNotificationClient
+{
+	LONG rc;
+
+public:
+	MFAudioDeviceNotification() : rc(1) {}
+
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject)
+	{
+		if(riid == IID_IUnknown)
+		{
+			AddRef();
+			*ppvObject = (IUnknown*)this;
+		}
+		else if(riid == __uuidof(IMMNotificationClient))
+		{
+			AddRef();
+			*ppvObject = (IMMNotificationClient*)this;
+		}
+		else
+		{
+			*ppvObject = NULL;
+			return E_NOINTERFACE;
+		}
+		return S_OK;
+	}
+
+	virtual ULONG STDMETHODCALLTYPE AddRef()
+	{
+		return InterlockedIncrement(&rc);
+	}
+
+	virtual ULONG STDMETHODCALLTYPE Release()
+	{
+		ULONG ulRef = InterlockedDecrement(&rc);
+		if(ulRef == 0)
+			delete this;
+		return ulRef;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD dwNewState)
+	{
+		MFDebug_Log(2, MFStr("WASAPI: State changed: %d (%S)", dwNewState, pwstrDeviceId));
+		char temp[128];
+		MFString_CopyUTF16ToUTF8(temp, pwstrDeviceId);
+		MFDevice *pDev = MFDevice_GetDeviceById(temp);
+		if(!pDev)
+			pDev = NewDevice(pwstrDeviceId);
+		if(pDev)
+			UpdateState(pDev, dwNewState);
+		return S_OK;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE OnDeviceAdded(LPCWSTR pwstrDeviceId)
+	{
+		MFDebug_Log(2, MFStr("WASAPI: Device added: %S", pwstrDeviceId));
+		char temp[128];
+		MFString_CopyUTF16ToUTF8(temp, pwstrDeviceId);
+		MFDevice *pDev = MFDevice_GetDeviceById(temp);
+		if(!pDev)
+			pDev = NewDevice(pwstrDeviceId);
+		return S_OK;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE OnDeviceRemoved(LPCWSTR pwstrDeviceId)
+	{
+		MFDebug_Log(2, MFStr("WASAPI: Device removed: %S", pwstrDeviceId));
+		char temp[128];
+		MFString_CopyUTF16ToUTF8(temp, pwstrDeviceId);
+		MFDevice *pDev = MFDevice_GetDeviceById(temp);
+		if(!pDev)
+			pDev = NewDevice(pwstrDeviceId);
+		if(pDev)
+			UpdateState(pDev, DEVICE_STATE_UNPLUGGED);
+		return S_OK;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged(EDataFlow flow, ERole role, LPCWSTR pwstrDefaultDeviceId)
+	{
+		MFDebug_Log(2, MFStr("WASAPI: Default device changed: %S", pwstrDefaultDeviceId));
+		char temp[128];
+		MFString_CopyUTF16ToUTF8(temp, pwstrDefaultDeviceId);
+		MFDevice *pDev = MFDevice_GetDeviceById(temp);
+		if(!pDev)
+			pDev = NewDevice(pwstrDefaultDeviceId);
+		if(pDev)
+			MFDevice_SetDefaultDevice(dt[flow], def[role], pDev);
+		return S_OK;
+	}
+
+	virtual HRESULT STDMETHODCALLTYPE OnPropertyValueChanged(LPCWSTR pwstrDeviceId, const PROPERTYKEY key)
+	{
+		MFDebug_Log(3, MFStr("WASAPI: Property changed: %S", pwstrDeviceId));
+		return S_OK;
+	}
+};
+
+static void GetDeviceInfo(IMMDevice *pDevice, MFDevice *pDev)
 {
 	wchar_t *pWC;
 	pDevice->GetId(&pWC);
@@ -107,6 +178,7 @@ DWORD GetDeviceInfo(IMMDevice *pDevice, MFDevice *pDev)
 
 	DWORD state;
 	pDevice->GetState(&state);
+	UpdateState(pDev, state);
 
 	IPropertyStore *pProps;
 	pDevice->OpenPropertyStore(STGM_READ, &pProps);
@@ -133,9 +205,33 @@ DWORD GetDeviceInfo(IMMDevice *pDevice, MFDevice *pDev)
 	PropVariantClear(&v);
 
 	pProps->Release();
-
-	return state;
 }
+
+static MFDevice *NewDevice(LPCWSTR pwstrDeviceId)
+{
+	MFDevice *pDev = NULL;
+	IMMDevice *pDevice;
+	gpEnumerator->GetDevice(pwstrDeviceId, &pDevice);
+	if(pDevice)
+	{
+		// TODO: don't know if it's a capture device or not!
+		if(1)
+		{
+			pDev = MFDevice_AllocDevice(MFDT_AudioRender, NULL);
+			pDev->pInternal = gDevices.AllocAndZero();
+			GetDeviceInfo(pDevice, pDev);
+		}
+		else
+		{
+			pDev = MFDevice_AllocDevice(MFDT_AudioCapture, NULL);
+			pDev->pInternal = gCaptureDevices.AllocAndZero();
+			GetDeviceInfo(pDevice, pDev);
+		}
+		pDevice->Release();
+	}
+	return pDev;
+}
+
 
 void MFSound_InitWASAPI()
 {
@@ -170,33 +266,13 @@ void MFSound_InitWASAPI()
 			pDev->pInternal = gDevices.AllocAndZero();
 			MFAudioDevice &device = *(MFAudioDevice*)pDev->pInternal;
 
-			device.state = GetDeviceInfo(pDevice, pDev);
+			GetDeviceInfo(pDevice, pDev);
 
 			pDevice->Release();
 
 			MFDebug_Log(0, MFStr("Found audio device: %s, %s - state: %d (%s)", pDev->strings[MFDS_DeviceName], pDev->strings[MFDS_Manufacturer], device.state, pDev->strings[MFDS_ID]));
 		}
 		pDevices->Release();
-	}
-
-	IMMDevice *pDevice;
-	gpEnumerator->GetDefaultAudioEndpoint(eRender, eConsole, &pDevice);
-	if(pDevice)
-	{
-		wchar_t *pDefaultId;
-		pDevice->GetId(&pDefaultId);
-		CoTaskMemFree(pDefaultId);
-		pDevice->Release();
-	}
-	gpEnumerator->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDevice);
-	if(pDevice)
-	{
-		pDevice->Release();
-	}
-	gpEnumerator->GetDefaultAudioEndpoint(eRender, eCommunications, &pDevice);
-	if(pDevice)
-	{
-		pDevice->Release();
 	}
 
 	// enumerate capture devices
@@ -215,7 +291,7 @@ void MFSound_InitWASAPI()
 			pDev->pInternal = gCaptureDevices.AllocAndZero();
 			MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDev->pInternal;
 
-			device.state = GetDeviceInfo(pDevice, pDev);
+			GetDeviceInfo(pDevice, pDev);
 
 			pDevice->Release();
 
@@ -224,13 +300,26 @@ void MFSound_InitWASAPI()
 		pDevices->Release();
 	}
 
-	gpEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDevice);
-	if(pDevice) pDevice->Release();
-	gpEnumerator->GetDefaultAudioEndpoint(eCapture, eMultimedia, &pDevice);
-	if(pDevice) pDevice->Release();
-	gpEnumerator->GetDefaultAudioEndpoint(eCapture, eCommunications, &pDevice);
-	if(pDevice) pDevice->Release();
-
+	// set defaults (this is some awkward windows code!)
+	for(int i=0; i<2; ++i)
+	{
+		for(int j=0; j<3; ++j)
+		{
+			IMMDevice *pDevice;
+			gpEnumerator->GetDefaultAudioEndpoint(direction[i], role[j], &pDevice);
+			if(pDevice)
+			{
+				wchar_t *pDefaultId;
+				pDevice->GetId(&pDefaultId);
+				char temp[128];
+				MFString_CopyUTF16ToUTF8(temp, pDefaultId);
+				MFDevice *pDev = MFDevice_GetDeviceById(temp);
+				MFDevice_SetDefaultDevice(dt[i], def[j], pDev);
+				CoTaskMemFree(pDefaultId);
+				pDevice->Release();
+			}
+		}
+	}
 }
 
 void MFSound_DeinitWASAPI()
@@ -244,60 +333,75 @@ void MFSound_DeinitWASAPI()
 
 void MFSound_UpdateWASAPI()
 {
+}
+
+static int CaptureThread(void *pData)
+{
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pData;
+
 	const int NumSamples = 4096;
 	float buffer[NumSamples];
 
-	size_t numCaptureDevices = MFDevice_GetNumDevices(MFDT_AudioCapture);
-	for(size_t i=0; i<numCaptureDevices; ++i)
+	while(1)
 	{
-		MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_AudioCapture, i);
-		MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
-
-		if(device.pDevice && device.bActive)
+		if(device.bActive)
 		{
-			// get samples, and feed to callback
-			UINT32 packetLength = 0;
-			HRESULT hr = device.pCaptureClient->GetNextPacketSize(&packetLength);
-
-			while(packetLength != 0)
+			while(device.bActive)
 			{
-				// get the available data in the shared buffer.
-				UINT32 numFramesAvailable;
-				BYTE *pData;
-				DWORD flags;
-				UINT64 position, performanceCounter;
-				hr = device.pCaptureClient->GetBuffer(&pData, &numFramesAvailable, &flags, &position, &performanceCounter);
+				// get samples, and feed to callback
+				UINT32 packetLength = 0;
+				HRESULT hr = device.pCaptureClient->GetNextPacketSize(&packetLength);
 
-				if(flags & AUDCLNT_BUFFERFLAGS_SILENT)
-					pData = NULL;
-
-				UINT32 numRemaining = numFramesAvailable;
-				while(numRemaining)
+				while(packetLength != 0)
 				{
-					UINT32 samplesToDeliver;
-					float *pSamples;
-					switch(device.format)
+					// get the available data in the shared buffer.
+					UINT32 numFramesAvailable;
+					BYTE *pData;
+					DWORD flags;
+					UINT64 position, performanceCounter;
+					hr = device.pCaptureClient->GetBuffer(&pData, &numFramesAvailable, &flags, &position, &performanceCounter);
+
+					if(flags & AUDCLNT_BUFFERFLAGS_SILENT)
+						pData = NULL;
+
+					UINT32 numRemaining = numFramesAvailable;
+					while(numRemaining)
 					{
-						case MFWaveFmt_PCM_f32:
-							pSamples = (float*)pData;
-							samplesToDeliver = numRemaining;
-							break;
-						default:
-							pSamples = buffer;
-							samplesToDeliver = numRemaining;
-							MFDebug_Assert(false, "TODO: Samples require conversion");
+						UINT32 samplesToDeliver;
+						float *pSamples;
+						switch(device.format)
+						{
+							case MFWaveFmt_PCM_f32:
+								pSamples = (float*)pData;
+								samplesToDeliver = numRemaining;
+								break;
+							default:
+								pSamples = buffer;
+								samplesToDeliver = numRemaining;
+								MFDebug_Assert(false, "TODO: Samples require conversion");
+						}
+
+						// feed samples to the callback
+						device.pSampleCallback(pSamples, samplesToDeliver, device.channels, device.pUserData);
+						numRemaining -= samplesToDeliver;
 					}
 
-					// feed samples to the callback
-					device.pSampleCallback(pSamples, samplesToDeliver, device.channels, device.pUserData);
-					numRemaining -= samplesToDeliver;
+					hr = device.pCaptureClient->ReleaseBuffer(numFramesAvailable);
+					hr = device.pCaptureClient->GetNextPacketSize(&packetLength);
 				}
 
-				hr = device.pCaptureClient->ReleaseBuffer(numFramesAvailable);
-				hr = device.pCaptureClient->GetNextPacketSize(&packetLength);
+				MFThread_Sleep(5);
 			}
+
+			HRESULT hr = device.pAudioClient->Stop();  // Stop recording.
 		}
+
+		if(device.bTerminate)
+			break;
+
+		MFThread_Sleep(64);
 	}
+	return 0;
 }
 
 MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
@@ -379,6 +483,8 @@ MF_API bool MFSound_OpenCaptureDevice(MFDevice *pDevice)
 		REFERENCE_TIME hnsActualDuration = (REFERENCE_TIME)((double)10000000 * bufferFrameCount / pwfx->nSamplesPerSec);
 
 		device.bActive = false;
+		device.thread = MFThread_CreateThread(pDevice->strings[MFDS_ID], CaptureThread, &device, MFPriority_AboveNormal, MFTF_Joinable);
+
 		return true;
 	}
 
@@ -391,6 +497,9 @@ MF_API void MFSound_CloseCaptureDevice(MFDevice *pDevice)
 	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
 	MFSound_StopCapture(pDevice);
+
+	device.bTerminate;
+	MFThread_Join(device.thread);
 
 	device.pCaptureClient->Release();
 	device.pAudioClient->Release();
@@ -417,7 +526,6 @@ MF_API void MFSound_StopCapture(MFDevice *pDevice)
 	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
 	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
-	HRESULT hr = device.pAudioClient->Stop();  // Stop recording.
 	device.bActive = false;
 }
 
