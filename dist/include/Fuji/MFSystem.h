@@ -393,7 +393,7 @@ MF_API float MFSystem_GetTimeDelta();
  * Gets the current frame rate.
  * Gets the current frame rate.
  * @return The current frame rate.
- * @see MFTimeDelta()
+ * @see MFSystem_GetTimeDelta()
  */
 MF_API float MFSystem_GetFPS();
 

@@ -1,14 +1,14 @@
 #if !defined(_F3D_H)
 #define _F3D_H
 
-#include "MFArray.h"
-#include "MFVector.h"
-#include "MFMatrix.h"
-#include "MFString.h"
+#include "Fuji/MFArray.h"
+#include "Fuji/MFVector.h"
+#include "Fuji/MFMatrix.h"
+#include "Fuji/MFString.h"
 
-#if defined(_LINUX) 
-#include <string.h> 
-#endif 
+#if defined(_LINUX)
+#include <string.h>
+#endif
 
 enum F3DChunkType
 {

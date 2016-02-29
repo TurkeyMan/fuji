@@ -650,12 +650,12 @@ const ConstantDesc* ConstantTable::GetConstantByName(const std::string& name) co
 
 class FujiIncludeHandler : public ID3DInclude
 {
-	HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
+	STDMETHOD(Open)(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
 	{
 		return OpenInclude(IncludeType == D3D_INCLUDE_SYSTEM, pFileName, pParentData, ppData, pBytes) ? S_OK : E_FAIL;
 	}
 
-	HRESULT Close(LPCVOID pData)
+	STDMETHOD(Close)(LPCVOID pData)
 	{
 		MFHeap_Free((void*)pData);
 		return S_OK;

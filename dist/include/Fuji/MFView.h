@@ -122,6 +122,24 @@ MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix);
 MF_API const MFMatrix& MFView_GetCameraMatrix();
 
 /**
+ * Set the viewport.
+ * Sets the viewport.
+ * @param pViewport Pointer to a viewport rect. If NULL, the viewport will be reset to represent the full display.
+ * @return None.
+ * @see MFView_GetViewport()
+ */
+MF_API void MFView_SetViewport(const MFRect *pViewport = NULL);
+
+/**
+ * Get the current viewport.
+ * Gets the current viewport rect.
+ * @param pViewport Pointer to an MFRect structure that receives the current viewport.
+ * @return None.
+ * @see MFView_SetViewport()
+ */
+MF_API void MFView_GetViewport(MFRect *pViewport);
+
+/**
  * Get a stateblock for the current view.
  * Produce an \a MFStateBlock for the current view state.
  * @return An \a MFStateBlock representing the current view state.

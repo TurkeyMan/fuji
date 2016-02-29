@@ -160,6 +160,25 @@ MF_API bool MFView_IsOrtho()
 	return pCurrentView->isOrtho;
 }
 
+MF_API void MFView_SetViewport(const MFRect *pViewport)
+{
+	if (pViewport)
+	{
+		pCurrentView->viewport = *pViewport;
+		pCurrentView->viewportSet = true;
+	}
+	else
+		pCurrentView->viewportSet = false;
+}
+
+MF_API void MFView_GetViewport(MFRect *pViewport)
+{
+	if (pCurrentView->viewportSet)
+		*pViewport = pCurrentView->viewport;
+	else
+		MFDisplay_GetDisplayRect(pViewport);
+}
+
 MF_API void MFView_SetCameraMatrix(const MFMatrix &cameraMatrix)
 {
 	pCurrentView->cameraMatrix = cameraMatrix;
@@ -182,6 +201,8 @@ MF_API const MFStateBlock* MFView_GetViewState()
 		pCurrentView->pStateBlock = MFStateBlock_CreateTemporary(256);
 		MFStateBlock_SetMatrix(pCurrentView->pStateBlock, MFSCM_Projection, MFView_GetViewToScreenMatrix());
 		MFStateBlock_SetMatrix(pCurrentView->pStateBlock, MFSCM_Camera, pCurrentView->isOrtho ? MFMatrix::identity : pCurrentView->cameraMatrix);
+		if (pCurrentView->viewportSet)
+			MFStateBlock_SetViewport(pCurrentView->pStateBlock, pCurrentView->viewport);
 	}
 
 	return pCurrentView->pStateBlock;

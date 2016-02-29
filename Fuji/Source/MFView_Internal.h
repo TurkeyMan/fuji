@@ -19,6 +19,7 @@ struct MFView
 	MFMatrix viewProj;
 
 	MFRect orthoRect;
+	MFRect viewport;
 
 	float fov;
 	float nearPlane, farPlane;
@@ -29,6 +30,7 @@ struct MFView
 	bool projDirty;
 	bool isOrtho;
 	bool customProjection;
+	bool viewportSet;
 
 	MFStateBlock *pStateBlock;
 };

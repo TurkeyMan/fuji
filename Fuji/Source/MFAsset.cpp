@@ -155,7 +155,7 @@ MF_API bool MFAsset_ConvertModelAndAnimationFromFile(const char *pFilename, void
 	if(!MFIntAsset_ConvertModelAndAnimationFromFile(pFilename, ppMesh, pMeshSize, ppAnimation, pAnimationSize, platform, extraBytes))
 		return false;
 
-	if(*ppMesh)
+	if(ppMesh && *ppMesh)
 	{
 		MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.mdl", pFilename), MFOF_Write | MFOF_Binary);
 		if(pFile)
@@ -164,7 +164,7 @@ MF_API bool MFAsset_ConvertModelAndAnimationFromFile(const char *pFilename, void
 			MFFile_Close(pFile);
 		}
 	}
-	if(*ppAnimation)
+	if(ppAnimation && *ppAnimation)
 	{
 		MFFile *pFile = MFFileSystem_Open(MFStr("cache:%s.anm", pFilename), MFOF_Write | MFOF_Binary);
 		if(pFile)

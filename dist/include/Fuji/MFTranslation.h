@@ -66,7 +66,7 @@ MF_API const char* MFTranslation_GetLanguageName(MFLanguage language, bool nativ
 
 /**
  * Get the system default language.
- * Gets the systems default language (Usually the language set in the system BIOS).
+ * Gets the systems default language (usually the language set in the system OS).
  * @return The system default language.
  */
 MF_API MFLanguage MFTranslation_GetSystemLanguage();
