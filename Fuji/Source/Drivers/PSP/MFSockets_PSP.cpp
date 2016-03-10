@@ -225,12 +225,12 @@ MFSocket MFSockets_Accept(MFSocket socket, MFSocketAddress *pConnectingSocketAdd
 	return result;
 }
 
-int MFSockets_Send(MFSocket socket, const char *pBuffer, int bufferLength, uint32 flags)
+int MFSockets_Send(MFSocket socket, const char *pBuffer, size_t bufferLength, uint32 flags)
 {
 	return sceNetInetSend((int)socket, pBuffer, bufferLength, flags);
 }
 
-int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uint32 flags, const MFSocketAddress *pAddress)
+int MFSockets_SendTo(MFSocket socket, const char *pBuffer, size_t bufferLength, uint32 flags, const MFSocketAddress *pAddress)
 {
 	int addrLen = 0;
 	sockaddr *pSockAddr = NULL;
@@ -244,12 +244,12 @@ int MFSockets_SendTo(MFSocket socket, const char *pBuffer, int bufferLength, uin
 	return sceNetInetSendto((int)socket, pBuffer, bufferLength, flags, pSockAddr, addrLen);
 }
 
-int MFSockets_Recv(MFSocket socket, char *pBuffer, int bufferSize, uint32 flags)
+int MFSockets_Recv(MFSocket socket, char *pBuffer, size_t bufferSize, uint32 flags)
 {
 	return sceNetInetRecv((int)socket, pBuffer, bufferSize, flags);
 }
 
-int MFSockets_RecvFrom(MFSocket socket, char *pBuffer, int bufferSize, uint32 flags, MFSocketAddress *pSenderAddress)
+int MFSockets_RecvFrom(MFSocket socket, char *pBuffer, size_t bufferSize, uint32 flags, MFSocketAddress *pSenderAddress)
 {
 	char address[sizeof(sockaddr_in)*4];
 	socklen_t size = sizeof(sockaddr_in)*4;

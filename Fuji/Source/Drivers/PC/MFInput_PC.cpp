@@ -250,7 +250,7 @@ BOOL CALLBACK EnumJoysticksCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 		}
 		else
 		{
-			if(!MFString_Compare(pInfo->pIdentifier, lpddi->tszProductName))
+			if(!MFWString_CompareUTF8(lpddi->tszProductName, pInfo->pIdentifier))
 				break;
 		}
 	}
@@ -1100,8 +1100,6 @@ void MFInputPC_Acquire(bool acquire)
 {
 	MFCALLSTACK;
 
-	int a;
-
 #if defined(SUPPORT_DINPUT)
 	if(pKeyboard)
 	{
@@ -1115,7 +1113,7 @@ void MFInputPC_Acquire(bool acquire)
 		else pMouse->Unacquire();
 	}
 
-	for(a=0; a<gGamepadCount; a++)
+	for(int a=0; a<gGamepadCount; a++)
 	{
 		if(gPCJoysticks[a].pDevice)
 		{
@@ -1336,7 +1334,7 @@ int InitRawMouse(bool _includeRDPMouse)
 	char pName[256];
 
 	// Return 0 if rawinput is not available
-	HMODULE user32 = LoadLibrary("user32.dll");
+	HMODULE user32 = LoadLibrary(L"user32.dll");
 	if (!user32)
 	{
 		MFDebug_Warn(1, "Cant open user32.dll");

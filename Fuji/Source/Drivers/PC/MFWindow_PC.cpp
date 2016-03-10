@@ -228,20 +228,20 @@ void MFWindow_InitModulePlatformSpecific()
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = hInstance;
-	windowClass.hIcon = gDefaults.display.pIcon ? LoadIcon(hInstance, gDefaults.display.pIcon) : NULL;
+	windowClass.hIcon = gDefaults.display.pIcon ? LoadIcon(hInstance, MFString_UFT8AsWChar(gDefaults.display.pIcon)) : NULL;
 	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	windowClass.hbrBackground = NULL;
 	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = "FujiWin";
+	windowClass.lpszClassName = L"FujiWin";
 	windowClass.hIconSm = NULL;
 
 	if(!RegisterClassEx(&windowClass))
-		MessageBox(NULL, "Failed To Register The Window Class.","Error!", MB_OK|MB_ICONERROR);
+		MessageBox(NULL, L"Failed To Register The Window Class.", L"Error!", MB_OK|MB_ICONERROR);
 }
 
 void MFWindow_DeinitModulePlatformSpecific()
 {
-	UnregisterClass("FujiWin", hInstance);
+	UnregisterClass(L"FujiWin", hInstance);
 }
 
 MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
@@ -277,10 +277,10 @@ MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 		rect.top = (long)pParams->y;
 	}
 
-	pWindow->hWnd = CreateWindowEx(dwExStyle, "FujiWin", gDefaults.display.pWindowTitle, WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, hInstance, NULL);
+	pWindow->hWnd = CreateWindowEx(dwExStyle, L"FujiWin", MFString_UFT8AsWChar(gDefaults.display.pWindowTitle), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, hInstance, NULL);
 	if(!pWindow->hWnd)
 	{
-		MessageBox(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
+		MessageBox(NULL, L"Failed To Create Window.", L"Error!", MB_OK|MB_ICONERROR);
 		MFHeap_Free(pWindow);
 		return NULL;
 	}
@@ -327,7 +327,7 @@ MF_API void MFWindow_Update(MFWindow *_pWindow, const MFWindowParams *pParams)
 	MFWindow_PC *pWindow = (MFWindow_PC*)_pWindow;
 
 	if(MFString_Compare(pWindow->params.pWindowTitle, pParams->pWindowTitle) != 0)
-		SetWindowText(pWindow->hWnd, pParams->pWindowTitle);
+		SetWindowText(pWindow->hWnd, MFString_UFT8AsWChar(pParams->pWindowTitle));
 
 	RECT rect;
 	rect.left = 0;

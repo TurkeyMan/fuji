@@ -24,9 +24,9 @@ inline const char* DAESkipWhite(const char *pC)
 	return pC;
 }
 
-static F3DFile *pModel;
+static F3DFile *gpModel;
 
-MFXMLNode* pRoot;
+MFXMLNode* gpRoot;
 
 MFMatrix transformMatrix;
 MFMatrix invTransformMatrix;
@@ -45,7 +45,7 @@ MFXMLNode* FindObjectInLibrary(const char *pLibName, const char *pLibrary, const
 	if(pLibName[0] == '#')
 		++pLibName;
 
-	MFXMLNode *pLib = pRoot->FirstChild(pLibrary);
+	MFXMLNode *pLib = gpRoot->FirstChild(pLibrary);
 
 	while(pLib)
 	{
@@ -137,21 +137,21 @@ void ParseDAEAsset(MFXMLNode *pAsset)
 	{
 		// get the author (for kicks)
 		const char *pAuth = pAuthor->Value();
-		pModel->author = pAuth;
+		gpModel->author = pAuth;
 	}
 
 	if(pCopyright)
 	{
 		// get the author (for kicks)
 		const char *pCopyrightString = pCopyright->Value();
-		pModel->copyrightString = pCopyrightString;
+		gpModel->copyrightString = pCopyrightString;
 	}
 
 	if(pAuthoringTool)
 	{
 		// get the authoring tool (for kicks)
 		const char *pAuthTool = pAuthoringTool->Value();
-		pModel->authoringTool = pAuthTool;
+		gpModel->authoringTool = pAuthTool;
 	}
 
 	invTransformMatrix.Inverse(transformMatrix);
@@ -164,7 +164,7 @@ int ParseDAEMaterial(MFXMLNode *pMaterialNode)
 	if(!pName)
 		pName = "Untitled collada material";
 
-	F3DMaterialChunk *pMatChunk = pModel->GetMaterialChunk();
+	F3DMaterialChunk *pMatChunk = gpModel->GetMaterialChunk();
 
 	int matIndex = (int)pMatChunk->materials.size();
 
@@ -341,7 +341,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 		MFDebug_Warn(2, MFStr("Geometry object '%s' has no name.", pName));
 	}
 
-	F3DMeshChunk *pMeshChunk = pModel->GetMeshChunk();
+	F3DMeshChunk *pMeshChunk = gpModel->GetMeshChunk();
 	F3DSubObject &subObject = pMeshChunk->subObjects.push();
 
 	subObject.name = pName;
@@ -363,12 +363,12 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 
 			if(!MFString_CaseCmp(pValue, "source"))
 			{
-				const char *pName = pMeshElement->Attribute("id");
+				const char *pAttrName = pMeshElement->Attribute("id");
 
 				SourceData x;
 				sourceData.push(x);
 				SourceData &data = sourceData.back();
-				data.id = pName;
+				data.id = pAttrName;
 
 				ReadSourceData(pMeshElement, data);
 			}
@@ -416,7 +416,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 							pMaterialName = pMat->Attribute("id");
 
 						// get the F3D material index
-						matSub.materialIndex = pModel->GetMaterialChunk()->GetMaterialIndexByName(pMaterialName);
+						matSub.materialIndex = gpModel->GetMaterialChunk()->GetMaterialIndexByName(pMaterialName);
 
 						// if the material doesnt exist in the F3D yet
 						if(matSub.materialIndex == -1)
@@ -438,7 +438,7 @@ void ParseDAEGeometry(MFXMLNode *pGeometryNode, const MFMatrix &worldTransform)
 				while(pInputs)
 				{
 					// need to skip the first item...
-					const char *pSemantic = pInputs->Attribute("semantic");
+					pSemantic = pInputs->Attribute("semantic");
 					const char *pSource = pInputs->Attribute("source");
 
 					DataSources &t = components.push();
@@ -844,7 +844,7 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 
 	if(!MFString_CaseCmpN(pNodeName, "r_", 2))
 	{
-		F3DRefPoint &ref = pModel->GetRefPointChunk()->refPoints.push();
+		F3DRefPoint &ref = gpModel->GetRefPointChunk()->refPoints.push();
 
 		ref.name = pNodeName;
 		ref.worldMatrix = worldMat;
@@ -853,7 +853,7 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 	}
 	else if(!MFString_CaseCmpN(pNodeName, "z_", 2) || !MFString_CaseCmpN(pNodeName, "bn_", 3))
 	{
-		F3DBone &bone = pModel->GetSkeletonChunk()->bones.push();
+		F3DBone &bone = gpModel->GetSkeletonChunk()->bones.push();
 
 		bone.name = pNodeName;
 		bone.parentName = pParentName;
@@ -875,7 +875,7 @@ void ParseSceneNode(MFXMLNode *pSceneNode, const MFMatrix &parentMatrix, const c
 				const char *pFilename = MFStr_GetFileNameWithoutExtension(pHash ? MFStrN(pObjectName, pHash - pObjectName) : pObjectName);
 
 				// this is instancing an external mesh..
-				F3DRefMesh &ref = pModel->GetRefMeshChunk()->refMeshes.push();
+				F3DRefMesh &ref = gpModel->GetRefMeshChunk()->refMeshes.push();
 
 				ref.name = pNodeName;
 				ref.target = pFilename;
@@ -923,7 +923,7 @@ void ParseDAEScene(MFXMLNode *pSceneNode)
 			if(pSceneRoot)
 			{
 				const char *pName = pSceneRoot->Attribute("name");
-				pModel->name = pName;
+				gpModel->name = pName;
 
 				ParseSceneNode(pSceneRoot, MFMatrix::identity, "");
 			}
@@ -970,7 +970,7 @@ void ParseDAERoot(MFXMLNode *pRoot)
 
 int F3DFile::ReadDAE(const char *pFilename)
 {
-	pModel = this;
+	gpModel = this;
 
 	transformMatrix = MFMatrix::identity;
 
@@ -982,17 +982,17 @@ int F3DFile::ReadDAE(const char *pFilename)
 		return -1;
 	}
 
-	pRoot = MFParseXML_RootNode(pDoc, "COLLADA");
-	if(!pRoot)
+	gpRoot = MFParseXML_RootNode(pDoc, "COLLADA");
+	if(!gpRoot)
 	{
 		MFDebug_Warn(2, "Document has no root node..\n");
 		MFParseXML_DestroyDocument(pDoc);
 		return 1;
 	}
 
-	pModel->name = "Untitled collada file";
+	gpModel->name = "Untitled collada file";
 
-	ParseDAERoot(pRoot);
+	ParseDAERoot(gpRoot);
 
 	MFParseXML_DestroyDocument(pDoc);
 	return 0;
@@ -1000,7 +1000,7 @@ int F3DFile::ReadDAE(const char *pFilename)
 
 void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 {
-	pModel = _pModel;
+	gpModel = _pModel;
 
 	transformMatrix = MFMatrix::identity;
 
@@ -1012,17 +1012,17 @@ void ParseDAEFileFromMemory(char *pFile, size_t size, F3DFile *_pModel)
 		return;
 	}
 
-	pRoot = MFParseXML_RootNode(pDoc, "COLLADA");
-	if(!pRoot)
+	gpRoot = MFParseXML_RootNode(pDoc, "COLLADA");
+	if(!gpRoot)
 	{
 		MFDebug_Warn(2, "Document has no root node..\n");
 		MFParseXML_DestroyDocument(pDoc);
 		return;
 	}
 
-	pModel->name = "Untitled collada file";
+	gpModel->name = "Untitled collada file";
 
-	ParseDAERoot(pRoot);
+	ParseDAERoot(gpRoot);
 
 	MFParseXML_DestroyDocument(pDoc);
 }

@@ -492,14 +492,14 @@ void MFTexture_CreatePlatformSpecific(MFTexture *pTexture)
 
 		ID3D11ShaderResourceView *pSRV = NULL;
 
-		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-		MFZeroMemory(&desc, sizeof(desc));
-		desc.Format = platformFormat;
-		desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		desc.Texture2D.MostDetailedMip = 0;
-		desc.Texture2D.MipLevels = (uint32)-1;
+		D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+		MFZeroMemory(&viewDesc, sizeof(viewDesc));
+		viewDesc.Format = platformFormat;
+		viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		viewDesc.Texture2D.MostDetailedMip = 0;
+		viewDesc.Texture2D.MipLevels = (uint32)-1;
 
-		hr = g_pd3dDevice->CreateShaderResourceView(pTex, &desc, &pSRV);
+		hr = g_pd3dDevice->CreateShaderResourceView(pTex, &viewDesc, &pSRV);
 		pTex->Release();
 
 		pTexture->pInternalData = pSRV;

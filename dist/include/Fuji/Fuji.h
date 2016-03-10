@@ -314,10 +314,13 @@
 
 	// disable C-linkage returning UDT (user data type)
 	#pragma warning(disable:4190)
+
+	// 'noexcept' used with no exception handling mode specified; termination on exception is not guaranteed
+	#pragma warning(disable:4577)
 #elif defined(MF_COMPILER_GCC)
 	// disable strict-aliasing complaint
 	#pragma GCC diagnostic ignored "-Wstrict-aliasing"
-	
+
 	// stop complaining about variable format strings
 	#pragma GCC diagnostic ignored "-Wformat-security"
 

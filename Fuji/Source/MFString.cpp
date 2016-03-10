@@ -718,13 +718,13 @@ MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString)
 
 MF_API size_t MFString_CopyUTF16ToUTF8(char *pBuffer, const wchar_t *pString)
 {
-	const wchar_t *pStart = pString;
+	const char *pStart = pBuffer;
 
 	while(*pString)
 		pBuffer += MFString_EncodeUTF8(*pString++, pBuffer);
 	*pBuffer = 0;
 
-	return pString - pStart;
+	return pBuffer - pStart;
 }
 
 MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars)
@@ -742,7 +742,7 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars)
 	// if we wrapped the string buffer
 	if(gStringOffset >= sizeof(gStringBuffer) - 1024)
 	{
-		gStringOffset = 0;
+		gStringOffset = numChars*2 + 2;
 		pBuffer = (wchar_t*)gStringBuffer;
 	}
 
@@ -753,6 +753,34 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars)
 		*pNumChars = numChars;
 
 	return pBuffer;
+}
+
+MF_API char* MFString_WCharAsUTF8(const wchar_t *pWString, size_t *pNumBytes)
+{
+  // count number of actual characters in the string
+  size_t numBytes = 0;
+  const wchar_t *pWStringCounter = pWString;
+  while (*pWStringCounter != 0)
+    numBytes += MFString_EncodeUTF8(*pWStringCounter++, nullptr);
+
+  // get some space in the MFStr buffer
+  char *pBuffer = &gStringBuffer[gStringOffset];
+  gStringOffset += numBytes + 1;
+
+  // if we wrapped the string buffer
+  if (gStringOffset >= sizeof(gStringBuffer) - 1024)
+  {
+    gStringOffset = numBytes + 1;
+    pBuffer = gStringBuffer;
+  }
+
+  // copy the string
+  MFString_CopyUTF16ToUTF8(pBuffer, pWString);
+
+  if (pNumBytes)
+    *pNumBytes = numBytes;
+
+  return pBuffer;
 }
 
 

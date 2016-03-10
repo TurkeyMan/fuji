@@ -47,8 +47,8 @@ extern D3DFORMAT gD3D9Format[ImgFmt_Max];
 static IDirect3D9 *d3d9;
 IDirect3DDevice9 *pd3dDevice;
 
-static IDirect3DSurface9 *pRenderTarget = NULL;
-static IDirect3DSurface9 *pZTarget = NULL;
+static IDirect3DSurface9 *gpRenderTarget = NULL;
+static IDirect3DSurface9 *gpZTarget = NULL;
 
 static MFRenderTarget *gpDeviceRenderTarget = NULL;
 static MFTexture *gpDeviceColourTarget = NULL;
@@ -72,7 +72,7 @@ void MFRenderer_InitModulePlatformSpecific()
 
 	if(!d3d9)
 	{
-		MessageBox(NULL,"Unable to Create the D3D Device. You probably need to update DirectX.","Error!",MB_OK|MB_ICONERROR);
+		MessageBox(NULL, L"Unable to Create the D3D Device. You probably need to update DirectX.", L"Error!", MB_OK|MB_ICONERROR);
 		return;
 	}
 
@@ -254,7 +254,7 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 		}
 		pMessage = MFStr("Failed to create Direct3D device with error: %s.\nCant create display!", pMessage);
 		MFDebug_Error(pMessage);
-		MessageBox(NULL, pMessage, "Error!", MB_OK|MB_ICONERROR);
+		MessageBox(NULL, MFString_UFT8AsWChar(pMessage), L"Error!", MB_OK|MB_ICONERROR);
 		return 2;
 	}
 
@@ -275,18 +275,18 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 	gCurrentViewport.width = (float)vp.Width;
 	gCurrentViewport.height = (float)vp.Height;
 
-	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
-	pd3dDevice->GetDepthStencilSurface(&pZTarget);
+	pd3dDevice->GetRenderTarget(0, &gpRenderTarget);
+	pd3dDevice->GetDepthStencilSurface(&gpZTarget);
 
 	MFTextureDesc texDesc = { MFTexType_2D, backBufferFormat, (int)present.BackBufferWidth, (int)present.BackBufferHeight, 0, 0, 1, MFTCF_RenderTarget };
 	gpDeviceColourTarget = MFTexture_InitTexture(&texDesc, MFRD_OpenGL, 0);
 	gpDeviceColourTarget->pName = "Device Colour Target";
-	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)(size_t)pRenderTarget;
+	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)(size_t)gpRenderTarget;
 
 	texDesc.format = depthStencilFormat;
 	gpDeviceZTarget = MFTexture_InitTexture(&texDesc, MFRD_OpenGL, 0);
 	gpDeviceZTarget->pName = "Device Depth Stencil";
-	gpDeviceZTarget->pSurfaces[0].platformData = (uint64)(size_t)pZTarget;
+	gpDeviceZTarget->pSurfaces[0].platformData = (uint64)(size_t)gpZTarget;
 
 	MFRenderTargetDesc desc;
 	desc.pName = "Device Render Target";
@@ -303,16 +303,16 @@ void MFRenderer_DestroyDisplay(MFDisplay *pDisplay)
 {
 	MFRenderTarget_Release(gpDeviceRenderTarget);
 
-	if(pRenderTarget)
+	if(gpRenderTarget)
 	{
-		pRenderTarget->Release();
-		pRenderTarget = NULL;
+		gpRenderTarget->Release();
+		gpRenderTarget = NULL;
 	}
 
-	if(pZTarget)
+	if(gpZTarget)
 	{
-		pZTarget->Release();
-		pZTarget = NULL;
+		gpZTarget->Release();
+		gpZTarget = NULL;
 	}
 
 	if(pd3dDevice)
@@ -330,15 +330,15 @@ bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSett
 	void MFRenderState_Release();
 	MFRenderState_Release();
 
-	if(pRenderTarget)
+	if(gpRenderTarget)
 	{
-		pRenderTarget->Release();
-		pRenderTarget = NULL;
+		gpRenderTarget->Release();
+		gpRenderTarget = NULL;
 	}
-	if(pZTarget)
+	if(gpZTarget)
 	{
-		pZTarget->Release();
-		pZTarget = NULL;
+		gpZTarget->Release();
+		gpZTarget = NULL;
 	}
 
 	if(!pd3dDevice)
@@ -408,20 +408,20 @@ bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSett
 		return false;
 
 	// recreate resources
-	pd3dDevice->GetRenderTarget(0, &pRenderTarget);
-	pd3dDevice->GetDepthStencilSurface(&pZTarget);
+	pd3dDevice->GetRenderTarget(0, &gpRenderTarget);
+	pd3dDevice->GetDepthStencilSurface(&gpZTarget);
 
 	gpDeviceColourTarget->imageFormat = backBufferFormat;
 	gpDeviceColourTarget->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gpDeviceColourTarget->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gpDeviceColourTarget->pSurfaces[0].bitsPerPixel = (uint8)MFImage_GetBitsPerPixel(backBufferFormat);
-	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)(size_t)pRenderTarget;
+	gpDeviceColourTarget->pSurfaces[0].platformData = (uint64)(size_t)gpRenderTarget;
 
 	gpDeviceZTarget->imageFormat = depthStencilFormat;
 	gpDeviceZTarget->pSurfaces[0].width = (int)present.BackBufferWidth;
 	gpDeviceZTarget->pSurfaces[0].height = (int)present.BackBufferHeight;
 	gpDeviceZTarget->pSurfaces[0].bitsPerPixel = (uint8)MFImage_GetBitsPerPixel(depthStencilFormat);
-	gpDeviceZTarget->pSurfaces[0].platformData = (uint64)(size_t)pZTarget;
+	gpDeviceZTarget->pSurfaces[0].platformData = (uint64)(size_t)gpZTarget;
 
 	gpDeviceRenderTarget->width = (int)present.BackBufferWidth;
 	gpDeviceRenderTarget->height = (int)present.BackBufferHeight;

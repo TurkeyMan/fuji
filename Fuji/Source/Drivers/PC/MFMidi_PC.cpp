@@ -123,7 +123,7 @@ void MFMidi_InitModulePlatformSpecific()
 	{
 		MIDIINCAPS caps;
 		midiInGetDevCaps(i, &caps, sizeof(caps));
-		MFString_Copy(pDevices[i].info.name, caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevices[i].info.name, caps.szPname);
 		pDevices[i].info.mid = caps.wMid;
 		pDevices[i].info.pid = caps.wPid;
 		pDevices[i].info.status = MFMS_Available;
@@ -189,9 +189,9 @@ MF_API MFMidiInput *MFMidi_OpenInput(int deviceId, bool bBuffered, MFMidiEventCa
 		pDevice->hMidiIn = NULL;
 		pDevice->info.status = MFMS_Unknown;
 
-		char errorBuffer[256];
+		wchar_t errorBuffer[256];
 		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
-		MFDebug_Warn(1, MFStr("Failed to open MIDI device: %s", errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to open MIDI device: %s", MFString_WCharAsUTF8(errorBuffer)));
 
 		return NULL;
 	}
@@ -267,9 +267,9 @@ MF_API bool MFMidi_Start(MFMidiInput *pMidiInput)
 	{
 		pDevice->info.status = MFMS_Unknown;
 
-		char errorBuffer[256];
+		wchar_t errorBuffer[256];
 		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
-		MFDebug_Warn(1, MFStr("Couldn't start MIDI device: %s", errorBuffer));
+		MFDebug_Warn(1, MFStr("Couldn't start MIDI device: %s", MFString_WCharAsUTF8(errorBuffer)));
 		return false;
 	}
 

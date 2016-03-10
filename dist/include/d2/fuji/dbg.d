@@ -9,7 +9,7 @@ static this()
 {
 	import core.exception;
 
-	static void fujiAssert(string file, ulong line, string msg) nothrow
+	static void fujiAssert(string file, size_t line, string msg) nothrow
 	{
 		auto _msg = Stringz!()(msg);
 		auto _file = Stringz!()(file);

@@ -535,6 +535,17 @@ MF_API size_t MFWString_CopyUTF8ToUTF16(wchar_t *pBuffer, const char *pString);
  */
 MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars = NULL);
 
+/**
+ * Convert a UTF-16 string to a temporary UTF-8 string.
+ * Converts a UTF-16 string to a temporary UTF-8 string, using the MFStr() buffer.
+ * @param pWString Pointer to a UTF-16 string to copy.
+ * @param pNumBytes Optional pointer to a size_t that receives the number of char's in the output buffer.
+ * @return A pointer to the converted UTF-8 string in a temporary buffer.
+ * @remarks MFString_WCharAsUTF8() uses the MFStr() temporary buffer for storing the output. Refer to MFStr() for usage details.
+ * @see MFString_CopyUTF16ToUTF8(), MFStr(), MFStrN()
+ */
+MF_API char* MFString_WCharAsUTF8(const wchar_t *pWString, size_t *pNumBytes = NULL);
+
 
 //
 // unicode support

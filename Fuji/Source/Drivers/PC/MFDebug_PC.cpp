@@ -10,14 +10,14 @@
 // Output a string to the debugger.
 MF_API void MFDebug_Message(const char *pMessage)
 {
-	OutputDebugString((LPCTSTR)MFStr("%s\n", pMessage));
+	OutputDebugString(MFString_UFT8AsWChar(MFStr("%s\n", pMessage)));
 }
 
 bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)
 {
 	bool bResult = false;
 
-	if(IDYES == MessageBox(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
+	if(IDYES == MessageBox(NULL, MFString_UFT8AsWChar(pMessageText), MFString_UFT8AsWChar(pTitle), MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
 	{
 		bResult = true;
 	}

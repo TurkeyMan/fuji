@@ -310,7 +310,7 @@ extern (C) MFSocket MFSockets_Accept(MFSocket socket, MFSocketAddress* pConnecti
  * @param flags Indicator specifying the way in which the call is made.
  * @return The total number of bytes sent, which can be less than the number indicated by \a bufferLength.
  */
-extern (C) int MFSockets_Send(MFSocket socket, const(char*) pBuffer, int bufferLength, uint flags);
+extern (C) int MFSockets_Send(MFSocket socket, const(char*) pBuffer, size_t bufferLength, uint flags);
 
 /**
  * Send data to a specific destination.
@@ -322,7 +322,7 @@ extern (C) int MFSockets_Send(MFSocket socket, const(char*) pBuffer, int bufferL
  * @param pAddress Optional pointer to a MFSocketAddress structure that contains the address of the target socket.
  * @return The total number of bytes sent, which can be less than the number indicated by \a bufferLength.
  */
-extern (C) int MFSockets_SendTo(MFSocket socket, const(char*) pBuffer, int bufferLength, uint flags, const(MFSocketAddress*) pAddress);
+extern (C) int MFSockets_SendTo(MFSocket socket, const(char*) pBuffer, size_t bufferLength, uint flags, const(MFSocketAddress*) pAddress);
 
 /**
  * Receive data from a connected or bound socket.
@@ -333,7 +333,7 @@ extern (C) int MFSockets_SendTo(MFSocket socket, const(char*) pBuffer, int buffe
  * @param flags Flag specifying the way in which the call is made.
  * @return The number of bytes received. If the connection has been gracefully closed, the return value is zero.
  */
-extern (C) int MFSockets_Recv(MFSocket socket, char* pBuffer, int bufferSize, uint flags);
+extern (C) int MFSockets_Recv(MFSocket socket, char* pBuffer, size_t bufferSize, uint flags);
 
 /**
  * Receive a datagram and stores the source address.
@@ -345,7 +345,7 @@ extern (C) int MFSockets_Recv(MFSocket socket, char* pBuffer, int bufferSize, ui
  * @param pSenderAddress Optional pointer to a buffer in a MFSocketAddress structure that will hold the source address upon return.
  * @return The number of bytes received. If the connection has been gracefully closed, the return value is zero.
  */
-extern (C) int MFSockets_RecvFrom(MFSocket socket, char* pBuffer, int bufferSize, uint flags, MFSocketAddress* pSenderAddress);
+extern (C) int MFSockets_RecvFrom(MFSocket socket, char* pBuffer, size_t bufferSize, uint flags, MFSocketAddress* pSenderAddress);
 
 /**
  * Get the address info for a network address.

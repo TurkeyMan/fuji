@@ -905,11 +905,11 @@ void WriteMeshChunk_PSP(F3DFile *pModel, MFMeshChunk *pMeshChunks, const F3DSubO
 						pVert->pos[1] = pos.y;
 						pVert->pos[2] = pos.z;
 
-						for(int a=0; a<8; ++a)
+						for(int d=0; d<8; ++d)
 						{
-							int bid = vert.bone[a] != -1 ? batch.boneMapping[vert.bone[a]] : -1;
+							int bid = vert.bone[d] != -1 ? batch.boneMapping[vert.bone[d]] : -1;
 							if(bid > -1)
-								pVert->weights[bid] = (uint8)(vert.weight[a] * 255.0f);
+								pVert->weights[bid] = (uint8)(vert.weight[d] * 255.0f);
 						}
 
 						// we need to make sure the weights sum to 255
@@ -1646,7 +1646,7 @@ void F3DFile::Optimise()
 			for(size_t c=0; c<vertSize; c++)
 				vertexUsage[c] = 1;
 
-			int x=0;
+			x=0;
 			for(int c=0; c<(int)vertSize; c++)
 			{
 				if(vertexUsage[c])
@@ -1963,11 +1963,11 @@ void F3DFile::ProcessCollisionData()
 
 						if(foundOne)
 						{
-							int i = (b+1)%3;
+							int j = (b+1)%3;
 
 							for(d=0; d<3; d++)
 							{
-								if(pMesh->tris[a].point[i] == pMesh->tris[c].point[d])
+								if(pMesh->tris[a].point[j] == pMesh->tris[c].point[d])
 								{
 									pMesh->tris[a].adjacent[b] = c;
 									goto cont;

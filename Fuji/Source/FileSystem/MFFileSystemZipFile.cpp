@@ -304,7 +304,7 @@ uint64 MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 
 	while(newPos)
 	{
-		uint64 bytes = newPos < sizeof(buffer) ? newPos : sizeof(buffer);
+		bytes = newPos < sizeof(buffer) ? newPos : sizeof(buffer);
 		unzReadCurrentFile(f, buffer, (unsigned int)bytes);
 		newPos -= bytes;
 	}

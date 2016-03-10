@@ -520,9 +520,9 @@ void FreeExpressionTree(Expression *e)
 	delete e;
 }
 
-MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::Technique *pTechnique, MFIntExpression *pE = NULL)
+MFIntExpression *CopyTree(Expression *pExp, MFIntEffect *pEffect, MFIntEffect::Technique *pTechnique, MFIntExpression *_pE = NULL)
 {
-	MFIntExpression &e = pE ? *pE : pEffect->expressions.push();
+	MFIntExpression &e = _pE ? *_pE : pEffect->expressions.push();
 	e.line = pExp->pToken->line;
 	e.column = pExp->pToken->column;
 

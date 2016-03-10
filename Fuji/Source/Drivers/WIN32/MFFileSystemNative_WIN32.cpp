@@ -68,7 +68,7 @@ int MFFileNative_Open(MFFile *pFile, MFOpenData *pOpenData)
 	else
 		create = OPEN_EXISTING;
 
-	pFile->pFilesysData = CreateFile(pFilename, access, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
+	pFile->pFilesysData = CreateFile(MFString_UFT8AsWChar(pFilename), access, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
 
 	if(pFile->pFilesysData == INVALID_HANDLE_VALUE)
 	{
@@ -217,7 +217,7 @@ uint64 MFFileNative_GetSize(const char *pFilename)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
-	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE hFile = CreateFile(MFString_UFT8AsWChar(pFilename), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
 		LARGE_INTEGER size;
@@ -240,7 +240,7 @@ bool MFFileNative_Exists(const char *pFilename)
 	pFilename = FixXBoxFilename(pFilename);
 #endif
 
-	HANDLE hFile = CreateFile(pFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+	HANDLE hFile = CreateFile(MFString_UFT8AsWChar(pFilename), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 
 	if(hFile != INVALID_HANDLE_VALUE)
 	{
@@ -254,7 +254,7 @@ bool MFFileNative_Exists(const char *pFilename)
 bool MFFileNative_Stat(const char *pPath, MFFileInfo *pFileInfo)
 {
 	WIN32_FILE_ATTRIBUTE_DATA attr;
-	if(GetFileAttributesEx(pPath, GetFileExInfoStandard, &attr) == 0)
+	if(GetFileAttributesEx(MFString_UFT8AsWChar(pPath), GetFileExInfoStandard, &attr) == 0)
 		return false;
 
 	pFileInfo->size = (uint64)attr.nFileSizeHigh << 32 | (uint64)attr.nFileSizeLow;
@@ -281,12 +281,12 @@ bool MFFileNative_CreateDirectory(const char *pPath)
 
 	MFFileNative_CreateDirectory(MFStr_GetFilePath(pPath));
 
-	return CreateDirectory(pPath, NULL) != 0;
+	return CreateDirectory(MFString_UFT8AsWChar(pPath), NULL) != 0;
 }
 
 bool MFFileNative_Delete(const char *pPath, bool bRecursive)
 {
-	DWORD attr = GetFileAttributes(pPath);
+	DWORD attr = GetFileAttributes(MFString_UFT8AsWChar(pPath));
 	if(attr == INVALID_FILE_ATTRIBUTES)
 		return false;
 
@@ -297,30 +297,30 @@ bool MFFileNative_Delete(const char *pPath, bool bRecursive)
 			MFDebug_Assert(false, "TODO");
 		}
 
-		return RemoveDirectory(pPath) != 0;
+		return RemoveDirectory(MFString_UFT8AsWChar(pPath)) != 0;
 	}
 
-	return DeleteFile(pPath) != 0;
+	return DeleteFile(MFString_UFT8AsWChar(pPath)) != 0;
 }
 
 const char* MFFileNative_MakeAbsolute(const char *pFilename)
 {
-	char path[256];
-	GetFullPathName(pFilename, sizeof(path), path, NULL);
-	return MFStr(path);
+	wchar_t path[256];
+	GetFullPathName(MFString_UFT8AsWChar(pFilename), sizeof(path)/sizeof(path[0]), path, NULL);
+	return MFString_WCharAsUTF8(path);
 }
 
 bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 	WIN32_FIND_DATA fd;
 
-	HANDLE hFind = FindFirstFile(MFStr("%s%s", (char*)pFind->pMount->pFilesysData, pSearchPattern), &fd);
+	HANDLE hFind = FindFirstFile(MFString_UFT8AsWChar(MFStr("%s%s", (char*)pFind->pMount->pFilesysData, pSearchPattern)), &fd);
 
 	if(hFind == INVALID_HANDLE_VALUE)
 		return false;
 
 	BOOL more = TRUE;
-	while(!MFString_Compare(fd.cFileName, ".") || !MFString_Compare(fd.cFileName, "..") && more)
+	while(!MFWString_Compare(fd.cFileName, L".") || !MFWString_Compare(fd.cFileName, L"..") && more)
 		more = FindNextFile(hFind, &fd);
 	if(!more)
 	{
@@ -343,7 +343,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
 	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
 	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
-	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
+	MFString_CopyUTF16ToUTF8((char*)pFindData->pFilename, fd.cFileName);
 
 	return true;
 }
@@ -370,7 +370,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
 	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
-	MFString_Copy((char*)pFindData->pFilename, fd.cFileName);
+	MFString_CopyUTF16ToUTF8((char*)pFindData->pFilename, fd.cFileName);
 
 	return true;
 }

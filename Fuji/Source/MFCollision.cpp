@@ -752,7 +752,7 @@ bool MFCollision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const 
 
 /* this edge to edge test is based on Franlin Antonio's gem:
    "Faster Line Segment Intersection", in Graphics Gems III,
-   pp. 199-202 */ 
+   pp. 199-202 */
 #define EDGE_EDGE_TEST(V0,U0,U1)                      \
   Bx=U0[i0]-U1[i0];                                   \
   By=U0[i1]-U1[i1];                                   \
@@ -824,7 +824,7 @@ bool coplanar_tri_tri(const MFVector& N, const MFVector& V0, const MFVector& V1,
 
 	if(A.x>A.y)
 	{
-		if(A.x>A.z)  
+		if(A.x>A.z)
 		{
 			i0=1;      /* A[0] is greatest */
 			i1=2;
@@ -1417,11 +1417,11 @@ MF_API void MFCollision_BuildField(MFCollisionItem *pField)
 				MFVector thisCell = fieldMin + pFieldData->cellSize * MakeVector((float)x, (float)y, (float)z);
 				MFVector thisCellEnd = thisCell + pFieldData->cellSize;
 
-				MFCollisionItem **ppI = pFieldData->itemList.Begin();
+				MFCollisionItem **ppCI = pFieldData->itemList.Begin();
 
-				while(*ppI)
+				while(*ppCI)
 				{
-					MFCollisionItem *pI = *ppI;
+					MFCollisionItem *pI = *ppCI;
 					MFCollisionTemplate *pT = pI->pTemplate;
 
 					// if this item fits in this cell, insert it into this cells list.
@@ -1435,7 +1435,7 @@ MF_API void MFCollision_BuildField(MFCollisionItem *pField)
 						++ppItems;
 					}
 
-					ppI++;
+					ppCI++;
 				}
 
 				*ppItems = NULL;

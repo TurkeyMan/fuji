@@ -130,7 +130,7 @@ MF_API void DebugMenu_AddItemTo(const char *name, Menu *pParent, MenuObject *pOb
 	MFDebug_Assert(pParent, "Invalid parent menu.");
 	MFDebug_Assert(pParent->type == MenuType_Menu, MFStr("Cant add menu '%s', Parent is not of Menu type.", name));
 	MFDebug_Assert(MFString_Length(name) < 64, "Max of 64 characters in Menu Name.");
-	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '%s'", pParent->name)); 
+	MFDebug_Assert(pParent->numChildren < MENU_MAX_CHILDREN, MFStr("Maximum number of items in menu: '%s'", pParent->name));
 
 	MFString_Copy(pObject->name, name);
 
@@ -548,7 +548,7 @@ void MenuItemFloat::ListUpdate(bool selected)
 			*pData += increment;
 		}
 
-		if((input=MFInput_Read(Axis_RX, IDD_Gamepad)))
+		if((input = MFInput_Read(Axis_RX, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			*pData += input*increment*MFTimeDelta();
@@ -731,13 +731,13 @@ void MenuItemPosition2D::ListUpdate(bool selected)
 		if(MFInput_WasPressed(Button_XB_B, IDD_Gamepad)) *pData = defaultValue;
 		if(MFInput_WasPressed(Button_XB_X, IDD_Gamepad)) *pData = MakeVector(0.0f, 0.0f, 0.0f);
 
-		if((input=MFInput_Read(Axis_RX, IDD_Gamepad)))
+		if((input = MFInput_Read(Axis_RX, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			pData->x += input*increment*MFTimeDelta();
 		}
 
-		if((input=MFInput_Read(Axis_RY, IDD_Gamepad)))
+		if((input = MFInput_Read(Axis_RY, IDD_Gamepad)))
 		{
 			input = input < 0.0f ? -(input*input) : input*input;
 			pData->y -= input*increment*MFTimeDelta();

@@ -195,18 +195,18 @@ int MFMat_Standard_Begin(MFMaterial *pMaterial, MFRendererState &state)
 
 		if(pBlendState->stateDesc.bIndependentBlendEnable)
 		{
-			for(int i=0; i<8; ++i)
+			for(int j=0; j<8; ++j)
 			{
-				MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[i];
+				MFBlendStateDesc::RenderTargetBlendDesc &target = pBlendState->stateDesc.renderTarget[j];
 				if(target.bEnable)
 				{
 					glEnable(GL_BLEND);
-					glBlendEquationSeparatei(i, glBlendOp[target.blendOp], glBlendOp[target.blendOpAlpha]);
-					glBlendFuncSeparatei(i, glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
+					glBlendEquationSeparatei(j, glBlendOp[target.blendOp], glBlendOp[target.blendOpAlpha]);
+					glBlendFuncSeparatei(j, glBlendArg[target.srcBlend], glBlendArg[target.destBlend], glBlendArg[target.srcBlendAlpha], glBlendArg[target.destBlendAlpha]);
 				}
 				else
 					glDisable(GL_BLEND);
-				glColorMaski(i, target.writeMask & MFColourWriteEnable_Red, target.writeMask & MFColourWriteEnable_Green, target.writeMask & MFColourWriteEnable_Blue, target.writeMask & MFColourWriteEnable_Alpha);
+				glColorMaski(j, target.writeMask & MFColourWriteEnable_Red, target.writeMask & MFColourWriteEnable_Green, target.writeMask & MFColourWriteEnable_Blue, target.writeMask & MFColourWriteEnable_Alpha);
 			}
 		}
 		else

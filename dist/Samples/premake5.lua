@@ -9,6 +9,7 @@ solution "Samples"
 
 	-- include each of the samples --
 	include "3DBox"
+	include "AudioCapture"
 	include "Compute"
 	include "HelloWorld"
 	include "InputTest"

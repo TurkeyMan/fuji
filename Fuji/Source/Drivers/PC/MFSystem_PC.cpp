@@ -208,18 +208,20 @@ MF_API uint64 MFSystem_GetRTCFrequency()
 
 MF_API const char * MFSystem_GetSystemName()
 {
+	wchar_t wbuffer[128];
 	static char buffer[128];
 	DWORD bufferSize = sizeof(buffer);
-	GetComputerName(buffer, &bufferSize);
+	GetComputerName(wbuffer, &bufferSize);
+	MFString_CopyUTF16ToUTF8(buffer, wbuffer);
 	return buffer;
 }
 
 const char * MFSystemPC_GetLastError()
 {
-	char errorMessage[256];
+	wchar_t errorMessage[256];
 //	int len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), LANG_USER_DEFAULT, errorMessage, sizeof(errorMessage), NULL);
 	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), LANG_USER_DEFAULT, errorMessage, sizeof(errorMessage), NULL);
-	return MFStr(errorMessage);
+	return MFString_WCharAsUTF8(errorMessage);
 }
 
 #if _MSC_VER == 1700

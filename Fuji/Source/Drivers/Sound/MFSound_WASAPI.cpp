@@ -48,10 +48,10 @@ MFObjectPool gCaptureDevices;
 static IMMDeviceEnumerator *gpEnumerator;
 static class MFAudioDeviceNotification *gpNotification;
 
-static EDataFlow direction[2] = { eRender, eCapture };
-static MFDeviceType dt[2] = { MFDT_AudioRender, MFDT_AudioCapture };
-static ERole role[3] = { eConsole, eMultimedia, eCommunications };
-static MFDefaultDeviceType def[3] = { MFDDT_Default, MFDDT_Multimedia, MFDDT_Communication };
+static EDataFlow gDirection[2] = { eRender, eCapture };
+static MFDeviceType gDt[2] = { MFDT_AudioRender, MFDT_AudioCapture };
+static ERole gRole[3] = { eConsole, eMultimedia, eCommunications };
+static MFDefaultDeviceType gDef[3] = { MFDDT_Default, MFDDT_Multimedia, MFDDT_Communication };
 
 void UpdateState(MFDevice *pDevice, DWORD state)
 {
@@ -156,7 +156,7 @@ public:
 		if(!pDev)
 			pDev = NewDevice(pwstrDefaultDeviceId);
 		if(pDev)
-			MFDevice_SetDefaultDevice(dt[flow], def[role], pDev);
+			MFDevice_SetDefaultDevice(gDt[flow], gDef[role], pDev);
 		return S_OK;
 	}
 
@@ -304,7 +304,7 @@ void MFSound_InitWASAPI()
 		for(int j=0; j<3; ++j)
 		{
 			IMMDevice *pDevice;
-			gpEnumerator->GetDefaultAudioEndpoint(direction[i], role[j], &pDevice);
+			gpEnumerator->GetDefaultAudioEndpoint(gDirection[i], gRole[j], &pDevice);
 			if(pDevice)
 			{
 				wchar_t *pDefaultId;
@@ -312,7 +312,7 @@ void MFSound_InitWASAPI()
 				char temp[128];
 				MFString_CopyUTF16ToUTF8(temp, pDefaultId);
 				MFDevice *pDev = MFDevice_GetDeviceById(temp);
-				MFDevice_SetDefaultDevice(dt[i], def[j], pDev);
+				MFDevice_SetDefaultDevice(gDt[i], gDef[j], pDev);
 				CoTaskMemFree(pDefaultId);
 				pDevice->Release();
 			}
@@ -323,7 +323,7 @@ void MFSound_InitWASAPI()
 void MFSound_DeinitWASAPI()
 {
 	gpEnumerator->Release();
-	delete gpNotification;
+	gpNotification->Release();
 
 	gDevices.Deinit();
 	gCaptureDevices.Deinit();
@@ -333,9 +333,9 @@ void MFSound_UpdateWASAPI()
 {
 }
 
-static int CaptureThread(void *pData)
+static int CaptureThread(void *_pData)
 {
-	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pData;
+	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)_pData;
 
 	const int NumSamples = 4096;
 	float buffer[NumSamples];
@@ -532,14 +532,19 @@ MF_API void MFSound_StartCapture(MFDevice *pDevice, MFAudioCaptureCallback *pCal
 	MFDebug_Assert(pDevice->type == MFDT_AudioCapture, "Incorrect device type!");
 	MFAudioCaptureDevice &device = *(MFAudioCaptureDevice*)pDevice->pInternal;
 
-	device.pSampleCallback = pCallback;
-	device.pUserData = pUserData;
+	if(device.pAudioClient)
+	{
+		device.pSampleCallback = pCallback;
+		device.pUserData = pUserData;
 
-	HRESULT hr = device.pAudioClient->Start();  // Start recording.
-	if(FAILED(hr))
-		MFDebug_Warn(2, "Couldn't start capture");
+		HRESULT hr = device.pAudioClient->Start();  // Start recording.
+		if(FAILED(hr))
+			MFDebug_Warn(2, "Couldn't start capture");
 
-	device.bActive = true;
+		device.bActive = true;
+	}
+	else
+		MFDebug_Warn(2, "Couldn't start capture (audio client not available)");
 }
 
 MF_API void MFSound_StopCapture(MFDevice *pDevice)

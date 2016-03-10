@@ -444,7 +444,7 @@ size_t MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 
 	while(bytes)
 	{
-		size_t read = MFSockets_Recv(socket, (char*)pBuffer, bytes, 0);
+		read = MFSockets_Recv(socket, (char*)pBuffer, bytes, 0);
 		if(!read)
 			break;
 		(char*&)pBuffer += read;

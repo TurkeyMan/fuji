@@ -27,7 +27,7 @@ pure: nothrow: @nogc:
 		this.w = w;
 	}
 
-	this(float f = 0)
+	this(float f)
 	{
 		this.x = f;
 		this.y = f;
@@ -98,7 +98,7 @@ pure: nothrow: @nogc:
 	static immutable MFVector orange = MFVector(1,0.5,0,1);
 }
 
-alias MFMabs = fuji.c.MFVector.abs;
+alias MFAbs = fuji.c.MFVector.abs;
 alias MFMin = fuji.c.MFVector.min;
 alias MFMax = fuji.c.MFVector.max;
 alias MFClamp = fuji.c.MFVector.clamp;

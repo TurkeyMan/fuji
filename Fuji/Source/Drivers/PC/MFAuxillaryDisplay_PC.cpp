@@ -45,7 +45,7 @@ MF_API void MFAuxDisplay_Init(const char *pAppName)
 		lgLcdConnectContext context;
 		lgLcdDeviceDesc desc;
 
-		context.appFriendlyName = pAppName;
+		context.appFriendlyName = MFString_UFT8AsWChar(pAppName);
 		context.isPersistent = TRUE;
 		context.isAutostartable = FALSE;
 		context.onConfigure.configCallback = NULL;
@@ -55,8 +55,6 @@ MF_API void MFAuxDisplay_Init(const char *pAppName)
 		lgLcdConnect(&context);
 
 		gConnection = context.connection;
-
-		DWORD r;
 
 		do
 		{

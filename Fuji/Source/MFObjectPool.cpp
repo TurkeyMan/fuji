@@ -103,9 +103,9 @@ int MFObjectPool::Free(void *pItem)
 		{
 			if(ppItems[a] == pItem)
 			{
-				void *pItem = ppItems[a];
+				void *pI = ppItems[a];
 				ppItems[a] = ppItems[--allocated];
-				ppItems[allocated] = pItem;
+				ppItems[allocated] = pI;
 
 				bFreed = 1;
 				break;

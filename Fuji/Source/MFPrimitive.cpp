@@ -314,7 +314,7 @@ MF_API void MFPrimitive_DrawSphere(const MFVector &position, float radius, int s
 		MFBegin(segments+1);
 		MFSetColourV(colour);
 
-		for(int j=0; j<segments+1; j++)
+		for(j=0; j<segments+1; j++)
 		{
 			MFSetPosition(position.x + (MFSin(around)*radius)*siny, position.y + cosy, position.z + (MFCos(around)*radius)*siny);
 			around += aroundInc;
@@ -436,7 +436,7 @@ MF_API void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &
 		MFBegin(segments+1);
 		MFSetColourV(colour);
 
-		for(int j=0; j<segments+1; j++)
+		for(j=0; j<segments+1; j++)
 		{
 			MFSetPosition(MFSin(around)*radius*siny, cosy + yAdd, MFCos(around)*radius*siny);
 			around += aroundInc;
@@ -457,7 +457,7 @@ MF_API void MFPrimitive_DrawCapsule(const MFVector &startPoint, const MFVector &
 		MFBegin(segments+1);
 		MFSetColourV(colour);
 
-		for(int j=0; j<segments+1; j++)
+		for(j=0; j<segments+1; j++)
 		{
 			MFSetPosition(MFSin(around)*radius, yAdd, MFCos(around)*radius);
 			around += aroundInc;
@@ -558,7 +558,7 @@ MF_API void MFPrimitive_DrawCylinder(const MFVector &startPoint, const MFVector 
 			MFBegin(segments+1);
 			MFSetColourV(colour);
 
-			for(int j=0; j<segments+1; j++)
+			for(j=0; j<segments+1; j++)
 			{
 				MFSetPosition(MFSin(around)*radius, yOffset, MFCos(around)*radius);
 				around += aroundInc;

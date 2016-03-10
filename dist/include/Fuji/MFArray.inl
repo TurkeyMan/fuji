@@ -159,13 +159,13 @@ T* MFArray<T>::getCopy() const
 }
 
 template<class T>
-inline size_t MFArray<T>::alloc(size_t count)
+inline size_t MFArray<T>::alloc(size_t _count)
 {
-	if(count <= allocated)
+	if(_count <= allocated)
 		return allocated;
 
 	size_t toAlloc = pData ? allocated : 8;
-	while(toAlloc < count)
+	while(toAlloc < _count)
 		toAlloc *= 2;
 
 	if(toAlloc > allocated)

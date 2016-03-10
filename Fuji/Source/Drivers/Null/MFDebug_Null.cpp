@@ -22,8 +22,8 @@ void MFSystem_HandleEventsPlatformSpecific();
 MF_API void MFDebug_Message(const char *pMessage)
 {
 #if defined(MF_WINDOWS)
-	OutputDebugString((LPCTSTR)pMessage);
-	OutputDebugString("\n");
+	OutputDebugString(MFString_UFT8AsWChar(pMessage));
+	OutputDebugString(L"\n");
 #else
 	fprintf(stderr, "%s\n", pMessage);
 #endif

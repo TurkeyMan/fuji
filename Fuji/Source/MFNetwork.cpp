@@ -31,8 +31,8 @@ struct InputEvent : public RemoteInputPacket
 	float state;
 };
 
-static MFThread inputServer;
-static MFMutex inputServerMutex;
+static MFThread gInputServer;
+static MFMutex gInputServerMutex;
 
 // shared local devices
 struct SharedDevice
@@ -64,7 +64,7 @@ RemoteGamepad* MFNetwork_GetNewNetworkGamepadPointer()
 {
 	RemoteGamepad *pGamepad = NULL;
 
-	MFThread_LockMutex(inputServerMutex);
+	MFThread_LockMutex(gInputServerMutex);
 
 	for(int a=0; a<gMaxNetworkGamepads; a++)
 	{
@@ -77,7 +77,7 @@ RemoteGamepad* MFNetwork_GetNewNetworkGamepadPointer()
 		}
 	}
 
-	MFThread_ReleaseMutex(inputServerMutex);
+	MFThread_ReleaseMutex(gInputServerMutex);
 
 	return pGamepad;
 }
@@ -146,21 +146,21 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 				// if we have received the last button name, make the gamepad active and clear the state..
 				if(pNameEvent->buttonID == GamepadType_Max-1)
 				{
-					MFThread_LockMutex(inputServerMutex);
+					MFThread_LockMutex(gInputServerMutex);
 
 					MFZeroMemory(pGamepad->buttonState, sizeof(pGamepad->buttonState));
 					pGamepad->status = IDS_Ready;
 
-					MFThread_ReleaseMutex(inputServerMutex);
+					MFThread_ReleaseMutex(gInputServerMutex);
 				}
 			}
 			else if(pPacket->id == MFMAKEFOURCC('S','T','A','T'))
 			{
 				InputEvent *pInputEvent = (InputEvent*)pBuffer;
 
-				MFThread_LockMutex(inputServerMutex);
+				MFThread_LockMutex(gInputServerMutex);
 				pGamepad->buttonState[pInputEvent->buton] = pInputEvent->state;
-				MFThread_ReleaseMutex(inputServerMutex);
+				MFThread_ReleaseMutex(gInputServerMutex);
 			}
 			else
 			{
@@ -173,9 +173,9 @@ int MFNetwork_InputServerConnectionTread(void *pUserData)
 		}
 	}
 
-	MFThread_LockMutex(inputServerMutex);
+	MFThread_LockMutex(gInputServerMutex);
 	pGamepad->status = (MFInputDeviceStatus)-1;
-	MFThread_ReleaseMutex(inputServerMutex);
+	MFThread_ReleaseMutex(gInputServerMutex);
 
 	MFSockets_CloseSocket(connection);
 
@@ -225,8 +225,8 @@ void MFNetwork_BeginInputServer()
 
 	MFDebug_Log(2, "Starting Fuji Remote Input Server...");
 
-	inputServerMutex = MFThread_CreateMutex("Network Gamepad List");
-	inputServer	= MFThread_CreateThread("Fuji Input Server", MFNetwork_InputServerListenTread, NULL, MFPriority_AboveNormal, 1024);
+	gInputServerMutex = MFThread_CreateMutex("Network Gamepad List");
+	gInputServer	= MFThread_CreateThread("Fuji Input Server", MFNetwork_InputServerListenTread, NULL, MFPriority_AboveNormal, 1024);
 }
 
 int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int device, int deviceID)
@@ -256,7 +256,7 @@ int MFNetwork_ConnectInputDeviceToRemoteHost(MFSocketAddress &remoteAddress, int
 		return 2;
 	}
 
-	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);	
+	MFSocket socket = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 
 	int r = MFSockets_Connect(socket, remoteAddress);
 
@@ -331,7 +331,7 @@ void MFNetwork_SendInputStateUpdate(SharedDevice *pDevice)
 
 bool MFNetwork_IsRemoteInputServerRunning()
 {
-	return inputServer != NULL;
+	return gInputServer != NULL;
 }
 
 int MFNetwork_MaxRemoteDevices()
@@ -343,11 +343,11 @@ int MFNetwork_GetRemoteDeviceStatus(int remoteDeviceID)
 {
 	MFInputDeviceStatus status;
 
-	MFThread_LockMutex(inputServerMutex);
+	MFThread_LockMutex(gInputServerMutex);
 
 	status = gNetworkGamepads[remoteDeviceID].status;
 
-	MFThread_ReleaseMutex(inputServerMutex);
+	MFThread_ReleaseMutex(gInputServerMutex);
 
 	return status;
 }
@@ -378,12 +378,12 @@ const char* MFNetwork_GetRemoteGamepadButtonName(int id, int button)
 
 void MFNetwork_LockInputMutex()
 {
-	MFThread_LockMutex(inputServerMutex);
+	MFThread_LockMutex(gInputServerMutex);
 }
 
 void MFNetwork_ReleaseInputMutex()
 {
-	MFThread_ReleaseMutex(inputServerMutex);
+	MFThread_ReleaseMutex(gInputServerMutex);
 }
 
 void MFNetwork_BeginLoggingServer()
@@ -393,7 +393,7 @@ void MFNetwork_BeginLoggingServer()
 
 void MFNetwork_BeginFilesystemServer()
 {
-	
+
 }
 
 void MFNetwork_BeginScriptDebugServer()
@@ -428,7 +428,7 @@ void MFNetwork_Update()
 			MFNetwork_SendInputStateUpdate(&gSharedDevices[a]);
 	}
 
-	MFThread_LockMutex(inputServerMutex);
+	MFThread_LockMutex(gInputServerMutex);
 
 	for(int a=0; a<gMaxNetworkGamepads; a++)
 	{
@@ -436,7 +436,7 @@ void MFNetwork_Update()
 			gNetworkGamepads[a].status = IDS_Unavailable;
 	}
 
-	MFThread_ReleaseMutex(inputServerMutex);
+	MFThread_ReleaseMutex(gInputServerMutex);
 }
 
 int MFNetwork_SendEmail(const char *pEmailText, const char *pSender, const char *pEmailHandlerURL, int port)
@@ -452,7 +452,7 @@ int MFNetwork_SendEmail(const char *pEmailText, const char *pSender, const char 
 
 		MFSocket s = MFSockets_CreateSocket(MFAF_Inet, MFSockType_Stream, MFProtocol_TCP);
 		MFSockets_Connect(s, *pAddrInfo->pAddress);
-		MFSockets_Send(s, buffer, (int)MFString_Length(buffer), 0);
+		MFSockets_Send(s, buffer, MFString_Length(buffer), 0);
 		MFSockets_Recv(s, buffer, sizeof(buffer), 0);
 		MFSockets_CloseSocket(s);
 	}

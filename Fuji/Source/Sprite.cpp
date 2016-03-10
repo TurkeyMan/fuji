@@ -8,7 +8,7 @@
 
 #include "Materials/MFMat_Standard.h"
 
-void Sprite::Create(const char *pFilename, int xFrame, int yFrames, uint32 colourKey)
+void Sprite::Create(const char *pFilename, int xFrame, int _yFrames, uint32 _colourKey)
 {
 	pMaterial = MFMaterial_Create(pFilename);
 

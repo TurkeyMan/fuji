@@ -256,19 +256,19 @@ ubyte[] MFFileSystem_Load(const(char)[] filename, size_t extraBytes = 0)
 		{
 			static if(size_t.sizeof == 4)
 			{
-				if(size >= 1 << 32)
+				if(size >= 1UL << 32)
 				{
 					MFDebug_Warn(1, "File is larger than the available address space: " ~ filename);
 					return null;
 				}
 			}
 
-			ubyte[] buffer = new ubyte[size + extraBytes];
+			ubyte[] buffer = new ubyte[cast(size_t)size + extraBytes];
 			size_t bytesRead = MFFile_Read(file, buffer.ptr, cast(size_t)size);
 			assert(bytesRead == size, "bytesRead different from file size!(?)");
 
 			if(extraBytes > 0)
-				buffer[size] = 0;
+				buffer[cast(size_t)size] = 0;
 
 			return buffer;
 		}

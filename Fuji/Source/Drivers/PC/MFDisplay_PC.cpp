@@ -32,7 +32,7 @@ struct DisplayMode
 	bool bWidescreen;
 };
 const DisplayMode modeList[] = { {320, 240, false}, {400, 300, false}, {480, 272, true}, {640, 480, false}, {800, 600, false}, {1024, 768, false}, {1152, 864, false}, {1280, 720, true}, {1280,800, true}, {1280, 1024, false}, {1600, 1200, false}, {1920, 1080, true}, {1920, 1200, true}, {1920, 1440, false} };
-const int numModes = sizeof(modeList) / (sizeof(modeList[0]));
+const int NumModes = sizeof(modeList) / (sizeof(modeList[0]));
 
 // debug menu resolution setting
 char pCurrentRes[16] = "####x####";
@@ -73,11 +73,11 @@ void ChangeResCallback(MenuObject *pMenu, void *pData)
 	}
 	else if(pRes->data == 0)
 	{
-		currentMode = (currentMode == 0) ? numModes-1 : currentMode-1;
+		currentMode = (currentMode == 0) ? NumModes-1 : currentMode-1;
 	}
 	else if(pRes->data == 2)
 	{
-		currentMode = (currentMode == numModes-1) ? 0 : currentMode+1;
+		currentMode = (currentMode == NumModes-1) ? 0 : currentMode+1;
 	}
 
 	if(modeList[currentMode].height == 720)
@@ -105,8 +105,8 @@ void MFDisplay_InitModulePlatformSpecific()
 	{
 		EnumDisplayDevices(NULL, i, &device, 0);
 
-		gpDisplayAdaptors[i].pDeviceId = MFString_Dup(device.DeviceName);
-		gpDisplayAdaptors[i].pName = MFString_Dup(device.DeviceString);
+		gpDisplayAdaptors[i].pDeviceId = MFString_Dup(MFString_WCharAsUTF8(device.DeviceName));
+		gpDisplayAdaptors[i].pName = MFString_Dup(MFString_WCharAsUTF8(device.DeviceString));
 		gpDisplayAdaptors[i].bSupportsFullscreen = true;
 		gpDisplayAdaptors[i].bSupportsWindowed = (device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) ? true : false;
 

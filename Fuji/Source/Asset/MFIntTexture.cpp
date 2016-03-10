@@ -1285,7 +1285,7 @@ void PremultiplyAlpha(MFIntTexture *pImage)
 	{
 		for(int a=0; a<pImage->pSurfaces[s].width; a++)
 		{
-			for(int a=0; a<pImage->pSurfaces[s].height; a++)
+			for(int b=0; b<pImage->pSurfaces[s].height; b++)
 			{
 				pPx->r *= pPx->a;
 				pPx->g *= pPx->a;
