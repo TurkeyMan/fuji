@@ -7,7 +7,9 @@ project "mad"
 	includedirs { "msvc++" }
 	targetdir "../../../dist/lib/libmad/"
 
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime" }
+	exceptionhandling "Off"
+	rtti "Off"
 
 	defines { "_LIB", "HAVE_CONFIG_H", "ASO_ZEROCHECK", "_CRT_SECURE_NO_DEPRECATE" }
 

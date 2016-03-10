@@ -7,8 +7,10 @@ project "HelloWorld"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "WinMain", "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "WinMain", "StaticRuntime" }
 	warnings "Extra"
+	exceptionhandling "Off"
+	rtti "Off"
 
 	links { "Fuji" }
 

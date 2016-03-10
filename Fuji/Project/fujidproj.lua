@@ -1,12 +1,10 @@
-require "monodevelop"
-require "d"
-
 fujiVersion = "0.7.1"
 
 project ("FujiD")
 	language "D"
 	kind "StaticLib"
-	flags { "StaticRuntime", "OmitDefaultLibrary" }
+	flags { "StaticRuntime" }
+--	flags { "OmitDefaultLibrary" }
 
 	-- setup paths --
 	includedirs { "../../dist/include/d2" }

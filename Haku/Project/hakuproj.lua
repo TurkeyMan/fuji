@@ -33,9 +33,9 @@ project (projName)
 	files { "../Source/**.h", "../Source/**.cpp" }
 
 	-- project configuration --
-
-	flags { "NoExceptions", "NoRTTI" }
 	warnings "Extra"
+	exceptionhandling "Off"
+	rtti "Off"
 
 --	pchheader "Haku.h"
 --	pchsource "HKMain.cpp"

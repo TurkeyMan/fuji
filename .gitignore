@@ -21,11 +21,15 @@ kdev4/
 /dist/Samples/*/*-debugopt
 /dist/Samples/*/*-release
 /dist/Samples/*/*-retail
+
 *.sln
 *.sdf
 *.suo
 *.vcproj
 *.vcxproj
+*.visualdproj
+*.filters
+*.opendb
 
 *.cproj
 *.pc

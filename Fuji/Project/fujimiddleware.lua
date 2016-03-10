@@ -19,8 +19,10 @@ project ("FujiMiddleware")
 	includedirs { "../Middleware/" }
 
 	-- project configuration --
-	flags { "StaticRuntime", "NoExceptions", "NoRTTI" }
+	flags { "StaticRuntime" }
 	warnings "Extra"
+	exceptionhandling "Off"
+	rtti "Off"
 
 	-- configure standard fuji stuff --
 	configuration { "Debug" }
