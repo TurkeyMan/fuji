@@ -120,7 +120,7 @@ MF_API void MFThread_ReleaseMutex(MFMutex mutex)
 
 MF_API MFSemaphore MFThread_CreateSemaphore(const char *pName, int maxCount, int startCount)
 {
-	return CreateSemaphore(NULL, startCount, maxCount, MFString_UFT8AsWChar(pName));
+	return CreateSemaphoreA(NULL, startCount, maxCount, pName);
 }
 
 MF_API void MFThread_DestroySemaphore(MFSemaphore semaphore)

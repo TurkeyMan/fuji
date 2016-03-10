@@ -615,6 +615,15 @@ wchar_t* MFWString_Cat(wchar_t *pBuffer, const wchar_t *pString);
 wchar_t* MFWString_CopyCat(wchar_t *pBuffer, const wchar_t *pString, const wchar_t *pString2);
 
 /**
+* Duplicate a wchar string.
+* Duplicates the source wchar string into a newly allocated buffer.
+* @param pString Source string.
+* @return A newly allocated buffer copied from \a pString.
+* @see MFWString_Copy()
+*/
+MF_API wchar_t* MFWString_Dup(const wchar_t *pString);
+
+/**
  * Compares 2 unicode strings.
  * Compares 2 unicode strings and returns the difference between them.
  * @param pString1 First source string.
@@ -634,7 +643,15 @@ int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
  */
 int MFWString_CaseCmp(const wchar_t *pString1, const wchar_t *pString2);
 
-int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2);
+/**
+* Compares a wchar string against a UTF8 string.
+* Compares a wchar string against a UTF8 string and returns the difference between them.
+* @param pString1 First source string.
+* @param pString2 Second source string.
+* @return The difference between the 2 strings. 0 if the strings are identical.
+* @see MFWString_CompareN()
+*/
+MF_API int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2);
 
 /**
  * Returns a pointer to the first instance of a specified delimeter.

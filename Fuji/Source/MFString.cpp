@@ -757,30 +757,30 @@ MF_API wchar_t* MFString_UFT8AsWChar(const char *pUTF8String, size_t *pNumChars)
 
 MF_API char* MFString_WCharAsUTF8(const wchar_t *pWString, size_t *pNumBytes)
 {
-  // count number of actual characters in the string
-  size_t numBytes = 0;
-  const wchar_t *pWStringCounter = pWString;
-  while (*pWStringCounter != 0)
-    numBytes += MFString_EncodeUTF8(*pWStringCounter++, nullptr);
+	// count number of actual characters in the string
+	size_t numBytes = 0;
+	const wchar_t *pCount = pWString;
+	while (*pCount)
+		numBytes += MFString_EncodeUTF8(*pCount++, NULL);
 
-  // get some space in the MFStr buffer
-  char *pBuffer = &gStringBuffer[gStringOffset];
-  gStringOffset += numBytes + 1;
+	// get some space in the MFStr buffer
+	char *pBuffer = &gStringBuffer[gStringOffset];
+	gStringOffset += numBytes + 1;
 
-  // if we wrapped the string buffer
-  if (gStringOffset >= sizeof(gStringBuffer) - 1024)
-  {
-    gStringOffset = numBytes + 1;
-    pBuffer = gStringBuffer;
-  }
+	// if we wrapped the string buffer
+	if (gStringOffset >= sizeof(gStringBuffer) - 1024)
+	{
+		gStringOffset = numBytes + 1;
+		pBuffer = gStringBuffer;
+	}
 
-  // copy the string
-  MFString_CopyUTF16ToUTF8(pBuffer, pWString);
+	// copy the string
+	MFString_CopyUTF16ToUTF8(pBuffer, pWString);
 
-  if (pNumBytes)
-    *pNumBytes = numBytes;
+	if (pNumBytes)
+		*pNumBytes = numBytes;
 
-  return pBuffer;
+	return pBuffer;
 }
 
 
@@ -788,7 +788,49 @@ MF_API char* MFString_WCharAsUTF8(const wchar_t *pWString, size_t *pNumBytes)
 // unicode support
 //
 
-int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2)
+MF_API wchar_t* MFWString_Dup(const wchar_t *pString)
+{
+	size_t len = MFWString_Length(pString);
+	wchar_t *pNew = (wchar_t*)MFHeap_Alloc((len + 1)*sizeof(wchar_t));
+	MFWString_Copy(pNew, pString);
+	return pNew;
+}
+
+MF_API const wchar_t * MFWStr(const wchar_t *format, ...)
+{
+	va_list arglist;
+	gStringOffset += gStringOffset & 1;
+	wchar_t *pBuffer = (wchar_t*)&gStringBuffer[gStringOffset];
+	int nRes = 0;
+
+	va_start(arglist, format);
+
+	nRes = vswprintf(pBuffer, format, arglist);
+	gStringOffset += (nRes + 1)*sizeof(wchar_t);
+
+	if (gStringOffset >= sizeof(gStringBuffer) - 1024) gStringOffset = 0;
+
+	va_end(arglist);
+
+	return pBuffer;
+}
+
+MF_API const wchar_t * MFWStrN(const wchar_t *pSource, size_t n)
+{
+	gStringOffset += gStringOffset & 1;
+	wchar_t *pBuffer = (wchar_t*)&gStringBuffer[gStringOffset];
+
+	MFWString_CopyN(pBuffer, pSource, n);
+	pBuffer[n] = 0;
+
+	gStringOffset += (n + 1)*sizeof(wchar_t);
+
+	if (gStringOffset >= sizeof(gStringBuffer) - 1024) gStringOffset = 0;
+
+	return pBuffer;
+}
+
+MF_API int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2)
 {
 	while(*pString1 == *pString2++)
 	{
@@ -799,7 +841,7 @@ int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2)
 	return (*(const uint16 *)pString1 - *(const uint16 *)(pString2 - 1));
 }
 
-int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
+MF_API int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
 {
 	register unsigned int c1, c2;
 
@@ -813,7 +855,7 @@ int MFWString_CaseCmp(const wchar_t *pSource1, const wchar_t *pSource2)
 	return c1 - c2;
 }
 
-int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2)
+MF_API int MFWString_CompareUTF8(const wchar_t *pString1, const char *pString2)
 {
 	int c;
 	int len = MFString_DecodeUTF8(pString2, &c);

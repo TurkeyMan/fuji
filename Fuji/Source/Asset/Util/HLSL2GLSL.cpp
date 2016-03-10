@@ -242,7 +242,7 @@ MF_API const char *HLSL2GLSL_OptimiseShader(const char *pShaderSource, MFShaderT
 #else
 MF_API const char *HLSL2GLSL_OptimiseShader(const char *pShaderSource, MFShaderType type, bool bGLES, const char *pFilename, const char **ppOutput)
 {
-	*pError = "glsl_optimizer not available!";
+	*ppOutput = "glsl_optimizer not available!";
 	return NULL;
 }
 #endif

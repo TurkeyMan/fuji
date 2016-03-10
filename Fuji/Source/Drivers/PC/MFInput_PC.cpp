@@ -1334,7 +1334,7 @@ int InitRawMouse(bool _includeRDPMouse)
 	char pName[256];
 
 	// Return 0 if rawinput is not available
-	HMODULE user32 = LoadLibrary(L"user32.dll");
+	HMODULE user32 = LoadLibraryA("user32.dll");
 	if (!user32)
 	{
 		MFDebug_Warn(1, "Cant open user32.dll");

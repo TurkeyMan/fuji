@@ -72,7 +72,7 @@ void MFRenderer_InitModulePlatformSpecific()
 
 	if(!d3d9)
 	{
-		MessageBox(NULL, L"Unable to Create the D3D Device. You probably need to update DirectX.", L"Error!", MB_OK|MB_ICONERROR);
+		MessageBoxA(NULL,"Unable to Create the D3D Device. You probably need to update DirectX.","Error!",MB_OK|MB_ICONERROR);
 		return;
 	}
 
@@ -254,7 +254,7 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 		}
 		pMessage = MFStr("Failed to create Direct3D device with error: %s.\nCant create display!", pMessage);
 		MFDebug_Error(pMessage);
-		MessageBox(NULL, MFString_UFT8AsWChar(pMessage), L"Error!", MB_OK|MB_ICONERROR);
+		MessageBoxA(NULL, pMessage, "Error!", MB_OK|MB_ICONERROR);
 		return 2;
 	}
 

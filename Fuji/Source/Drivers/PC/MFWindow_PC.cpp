@@ -228,7 +228,7 @@ void MFWindow_InitModulePlatformSpecific()
 	windowClass.cbClsExtra = 0;
 	windowClass.cbWndExtra = 0;
 	windowClass.hInstance = hInstance;
-	windowClass.hIcon = gDefaults.display.pIcon ? LoadIcon(hInstance, MFString_UFT8AsWChar(gDefaults.display.pIcon)) : NULL;
+	windowClass.hIcon = gDefaults.display.pIcon ? LoadIconA(hInstance, gDefaults.display.pIcon) : NULL;
 	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	windowClass.hbrBackground = NULL;
 	windowClass.lpszMenuName = NULL;
@@ -236,12 +236,12 @@ void MFWindow_InitModulePlatformSpecific()
 	windowClass.hIconSm = NULL;
 
 	if(!RegisterClassEx(&windowClass))
-		MessageBox(NULL, L"Failed To Register The Window Class.", L"Error!", MB_OK|MB_ICONERROR);
+		MessageBoxA(NULL, "Failed To Register The Window Class.","Error!", MB_OK|MB_ICONERROR);
 }
 
 void MFWindow_DeinitModulePlatformSpecific()
 {
-	UnregisterClass(L"FujiWin", hInstance);
+	UnregisterClassA("FujiWin", hInstance);
 }
 
 MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
@@ -280,7 +280,7 @@ MF_API MFWindow *MFWindow_Create(MFWindowParams *pParams)
 	pWindow->hWnd = CreateWindowEx(dwExStyle, L"FujiWin", MFString_UFT8AsWChar(gDefaults.display.pWindowTitle), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | dwStyle, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, NULL, NULL, hInstance, NULL);
 	if(!pWindow->hWnd)
 	{
-		MessageBox(NULL, L"Failed To Create Window.", L"Error!", MB_OK|MB_ICONERROR);
+		MessageBoxA(NULL,"Failed To Create Window.","Error!",MB_OK|MB_ICONERROR);
 		MFHeap_Free(pWindow);
 		return NULL;
 	}

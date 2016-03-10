@@ -216,7 +216,7 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 	if(!hDC)
 	{
 		MFRenderer_DestroyDisplay(pDisplay);
-		MessageBox(NULL, L"Can't Create A GL Device Context.", L"ERROR", MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxA(NULL, "Can't Create A GL Device Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 1;
 	}
 
@@ -224,14 +224,14 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 	if(!pixelFormat)
 	{
 		MFRenderer_DestroyDisplay(pDisplay);
-		MessageBox(NULL, L"Can't Find A Suitable PixelFormat.", L"ERROR", MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxA(NULL, "Can't Find A Suitable PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 2;
 	}
 
 	if(!SetPixelFormat(hDC, pixelFormat, &pfd))
 	{
 		MFRenderer_DestroyDisplay(pDisplay);
-		MessageBox(NULL, L"Can't Set The PixelFormat.", L"ERROR", MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxA(NULL, "Can't Set The PixelFormat.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 3;
 	}
 
@@ -246,7 +246,7 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 
 	if(!hRC)
 	{
-		MessageBox(NULL, MFString_UFT8AsWChar(MFStr("Failed to create OpenGL context: %s", MFSystemPC_GetLastError())), L"ERROR", MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxA(NULL, MFStr("Failed to create OpenGL context: %s", MFSystemPC_GetLastError()), "ERROR", MB_OK|MB_ICONEXCLAMATION);
 
 		MFRenderer_DestroyDisplay(pDisplay);
 		return 4;
@@ -255,7 +255,7 @@ int MFRenderer_CreateDisplay(MFDisplay *pDisplay)
 	if(!wglMakeCurrent(hDC, hRC))
 	{
 		MFRenderer_DestroyDisplay(pDisplay);
-		MessageBox(NULL, L"Can't Activate The GL Rendering Context.", L"ERROR", MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxA(NULL, "Can't Activate The GL Rendering Context.", "ERROR", MB_OK|MB_ICONEXCLAMATION);
 		return 5;
 	}
 #elif MF_DISPLAY == MF_DRIVER_SDL2

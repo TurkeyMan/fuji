@@ -17,7 +17,7 @@ bool MFDebugPC_MsgBox(const char *pMessageText, const char *pTitle)
 {
 	bool bResult = false;
 
-	if(IDYES == MessageBox(NULL, MFString_UFT8AsWChar(pMessageText), MFString_UFT8AsWChar(pTitle), MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
+	if(IDYES == MessageBoxA(NULL, pMessageText, pTitle, MB_YESNO | MB_ICONSTOP | MB_TOPMOST))
 	{
 		bResult = true;
 	}
