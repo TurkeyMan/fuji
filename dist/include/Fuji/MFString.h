@@ -631,7 +631,7 @@ MF_API wchar_t* MFWString_Dup(const wchar_t *pString);
  * @return The difference between the 2 strings. 0 if the strings are identical.
  * @see MFWString_CompareN()
  */
-int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
+MF_API int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
 
 /**
  * Compares 2 unicode strings with case insensitivity.
@@ -641,7 +641,7 @@ int MFWString_Compare(const wchar_t *pString1, const wchar_t *pString2);
  * @return The difference between the 2 unicode strings. 0 if the strings are identical.
  * @see MFWString_CaseCmpN()
  */
-int MFWString_CaseCmp(const wchar_t *pString1, const wchar_t *pString2);
+MF_API int MFWString_CaseCmp(const wchar_t *pString1, const wchar_t *pString2);
 
 /**
 * Compares a wchar string against a UTF8 string.

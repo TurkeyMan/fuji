@@ -19,6 +19,14 @@
 		#pragma comment(lib, "jpeg-static")
 
 		#define SUPPORTS_JPEG
+
+		#if _MSC_VER >= 1900
+			extern "C" FILE* __iob_func()
+			{
+				static FILE files[3] = { *stdin, *stdout, *stderr };
+				return files;
+			}
+		#endif
 	#elif defined(MF_LINUX) || defined(MF_OSX)
 //		#include <jpeg.h>
 

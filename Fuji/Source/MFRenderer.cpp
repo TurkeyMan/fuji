@@ -422,6 +422,7 @@ static void MFRenderer_ApplyRenderStates(MFRendererState &state, const MFStateBl
 	}
 }
 
+#if defined(DEBUG)
 static void MissingStates(MFStateBlockConstantType type, uint32 missing)
 {
 	static const char * const sStateType[MFSB_CT_TypeCount] =
@@ -490,6 +491,7 @@ static void MFRenderer_CheckRequirements(MFRendererState &state, MFRenderElement
 			MissingStates((MFStateBlockConstantType)a, missing);
 	}
 }
+#endif
 
 static void MFRenderer_RenderElements(MFRendererState &state, MFRenderElement *pElements, int numElements)
 {
