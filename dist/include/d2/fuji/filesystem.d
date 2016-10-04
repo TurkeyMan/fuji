@@ -10,6 +10,7 @@ import std.typecons;
 import std.array;
 import std.range;
 import std.algorithm;
+import std.string : cmp;
 
 public import std.exception : assumeUnique;
 
@@ -120,7 +121,7 @@ private struct DirIteratorImpl
 				return false;
 			}
 		}
-		while(std.string.cmp(findinfo.filename, ".") == 0 || std.string.cmp(findinfo.filename, "..") == 0)
+		while(cmp(findinfo.filename, ".") == 0 || cmp(findinfo.filename, "..") == 0)
 //			  || (!(findinfo.attributes & MFFileAttributes.Directory) && !MFString_PatternMatch(_pattern.ptr, findinfo.filename.ptr)))
 		{
 			if(MFFileSystem_FindNext(_stack.data[$-1].h, findinfo) == false)

@@ -1,6 +1,7 @@
 module fuji.c.MFVector;
 
 import std.math;
+import std.conv : text;
 
 pure:
 nothrow:
@@ -15,7 +16,7 @@ align(16) struct MFVector
 
 	string toString() const
 	{
-		return std.conv.text("[ ", x, ", ", y, ", ", z, ", ", w, " ]");
+		return text("[ ", x, ", ", y, ", ", z, ", ", w, " ]");
 	}
 
 pure: nothrow: @nogc:

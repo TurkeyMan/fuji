@@ -2,8 +2,10 @@ module fuji.c.MFMatrix;
 
 public import fuji.c.MFVector;
 import fuji.c.MFQuaternion;
+static import fuji.vector;
 
 import std.math;
+import std.conv : text;
 
 pure:
 nothrow:
@@ -26,7 +28,7 @@ struct MFMatrix
 
 	string toString() const
 	{
-		return std.conv.text("[ ", x.toString(),  ", ", y.toString(),  ", ", z.toString(),  ", ", t.toString(),  " ]");
+		return text("[ ", x.toString(),  ", ", y.toString(),  ", ", z.toString(),  ", ", t.toString(),  " ]");
 	}
 
 pure: nothrow: @nogc:

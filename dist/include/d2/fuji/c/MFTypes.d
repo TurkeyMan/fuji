@@ -23,12 +23,11 @@ struct MFRect
 	float width = 0; /**< Width of rectangle */
 	float height = 0; /**< Height of rectangle */
 
-nothrow:
-@nogc:
-	@property float top() const pure { return x; }
-	@property float left() const pure { return y; }
-	@property float right() const pure { return x + width; }
-	@property float bottom() const pure { return y + height; }
+pure nothrow @nogc @safe:
+	@property float top() const { return x; }
+	@property float left() const { return y; }
+	@property float right() const { return x + width; }
+	@property float bottom() const { return y + height; }
 }
 
 bool MFTypes_PointInRect(float x, float y, ref const(MFRect) rect) pure

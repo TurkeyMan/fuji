@@ -6,6 +6,9 @@ import fuji.resource;
 import fuji.texture;
 import fuji.matrix;
 
+import std.algorithm : canFind;
+import std.conv : to;
+
 nothrow:
 @nogc:
 
@@ -159,7 +162,7 @@ nothrow:
 			if(pParameterInfo.argIndexHigh.type == MFParamType.Enum || pParameterInfo.argIndexHigh.type == MFParamType.Int)
 			{
 				assert(pParameterInfo.argIndex.type != MFParamType.Enum && pParameterInfo.argIndex.type != MFParamType.Int, "Parameters with 2 arguments are not (yet) supported >_<");
-				
+
 				p.parameterArg = (parameterArg & 0xFFFF) | (i << 16);
 				p.bHiwordSet = true;
 			}
@@ -212,8 +215,8 @@ nothrow:
 		bool ValidateArg(MFParamType[] types ...) const pure //@nogc
 		{
 			assert(pParameterInfo.numValues == 1, "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: struct");
-// FIXME	assert(std.algorithm.canFind(types, pParameterInfo.pValues[0].type), "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: " ~ std.conv.to!string(pParameterInfo.pValues[0].type));
-			assert(std.algorithm.canFind(types, pParameterInfo.pValues[0].type), "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: " ~ std.conv.to!string(cast(int)pParameterInfo.pValues[0].type));
+// FIXME	assert(canFind(types, pParameterInfo.pValues[0].type), "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: " ~ to!string(pParameterInfo.pValues[0].type));
+			assert(canFind(types, pParameterInfo.pValues[0].type), "Material parameter '" ~ pParameterInfo.pParameterName.toDStr ~ "' is incorrect type: " ~ to!string(cast(int)pParameterInfo.pValues[0].type));
 			return true;
 		}
 

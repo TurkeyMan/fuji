@@ -1,13 +1,12 @@
 fujiVersion = "0.7.1"
 
 project ("FujiD")
-	language "D"
+	language "C++"
 	kind "StaticLib"
 	flags { "StaticRuntime" }
 --	flags { "OmitDefaultLibrary" }
 
 	-- setup paths --
-	includedirs { "../../dist/include/d2" }
 	objdir "../Build"
 
 	files { "../../dist/include/d2/**.d" }
@@ -21,10 +20,3 @@ project ("FujiD")
 
 	-- setup output directories --
 	dofile "outputdir.lua"
-
-	configuration "Release"
-		flags { "NoBoundsCheck" }
-	configuration "Retail"
-		flags { "NoBoundsCheck" }
-
-	configuration { }
