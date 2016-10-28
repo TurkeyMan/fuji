@@ -16,57 +16,56 @@ void MFMidi_UpdateInternal()
 {
 }
 
-MF_API int MFMidi_GetNumDevices()
+MF_API int MFMidi_GetTimestampFrequency()
 {
 	return 0;
 }
 
-MF_API const char *MFMidi_GetDeviceName(int deviceId)
-{
-	return "Unavailable";
-}
-
-MF_API MFMidiDeviceStatus MFMidi_GetStatus(int deviceId)
-{
-	return MFMS_Disconnected;
-}
-
-MF_API MFMidiInput *MFMidi_OpenInput(int deviceId, bool bBuffered, MFMidiEventCallback *pEventCallback)
-{
-	return NULL;
-}
-
-MF_API void MFMidi_CloseInput(MFMidiInput *pMidiInput)
-{
-}
-
-MF_API uint32 MFMidi_GetState(MFMidiInput *pMidiInput, MFMidiDataType type, int channel, int note)
-{
-	return 0;
-}
-
-MF_API uint32 MFMidi_WasPressed(MFMidiInput *pMidiInput, int channel, int note)
-{
-	return 0;
-}
-
-MF_API uint32 MFMidi_WasReleased(MFMidiInput *pMidiInput, int channel, int note)
-{
-	return 0;
-}
-
-MF_API bool MFMidi_Start(MFMidiInput *pMidiInput)
+MF_API bool MFMidi_OpenInput(MFDevice *pDevice, bool bBuffered, MFMidiEventCallback *pEventCallback)
 {
 	return false;
 }
 
-MF_API void MFMidi_Stop(MFMidiInput *pMidiInput)
+MF_API void MFMidi_CloseInput(MFDevice *pDevice)
 {
 }
 
-MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
+MF_API uint32 MFMidi_GetState(MFDevice *pDevice, MFMidiDataType type, int channel, int note)
 {
 	return 0;
+}
+
+MF_API bool MFMidi_WasPressed(MFDevice *pDevice, int channel, int note)
+{
+	return 0;
+}
+
+MF_API bool MFMidi_WasReleased(MFDevice *pDevice, int channel, int note)
+{
+	return 0;
+}
+
+MF_API bool MFMidi_Start(MFDevice *pDevice)
+{
+	return false;
+}
+
+MF_API void MFMidi_Stop(MFDevice *pDevice)
+{
+}
+
+MF_API size_t MFMidi_GetEvents(MFDevice *pDevice, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
+{
+	return 0;
+}
+
+MF_API bool MFMidi_OpenOutput(MFDevice *pDevice)
+{
+	return false;
+}
+
+MF_API void MFMidi_CloseOutput(MFDevice *pDevice)
+{
 }
 
 #endif // MF_MIDI

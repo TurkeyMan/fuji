@@ -193,11 +193,10 @@ uint64 MFModule_RegisterEngineModules()
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFInput] = (char)MFModule_RegisterModule("MFInput", MFInput_InitModule, MFInput_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFInput);
 
-	gpEngineInstance->builtinModuleIDs[MFBIM_MFMidi] = (char)MFModule_RegisterModule("MFMidi", MFMidi_InitModule, MFMidi_DeinitModule, basicModules);
-	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFMidi);
-
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFSound] = (char)MFModule_RegisterModule("MFSound", MFSound_InitModule, MFSound_DeinitModule, basicModules);
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFSound);
+	gpEngineInstance->builtinModuleIDs[MFBIM_MFMidi] = (char)MFModule_RegisterModule("MFMidi", MFMidi_InitModule, MFMidi_DeinitModule, basicModules);
+	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFMidi);
 
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFRenderState] = (char)MFModule_RegisterModule("MFRenderState", MFRenderState_InitModule, MFRenderState_DeinitModule, renderer);
 	uint64 renderState = MFModule_GetBuiltinModuleMask(MFBIM_MFRenderState);

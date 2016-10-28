@@ -22,10 +22,7 @@ alias getNumDevices = MFDevice_GetNumDevices;
 
 struct Device
 {
-nothrow:
-@nogc:
-	MFDevice* pDevice;
-
+nothrow @nogc:
 	this(MFDeviceType type, size_t index)
 	{
 		pDevice = MFDevice_GetDeviceByIndex(type, index);
@@ -45,6 +42,8 @@ pure:
 		this.pDevice = pDevice;
 	}
 
+	@property inout(MFDevice)* handle() inout { return pDevice; }
+
 	@property MFDeviceType type() { return MFDevice_GetDeviceType(pDevice); }
 	@property MFDeviceState state() { return MFDevice_GetDeviceState(pDevice); }
 
@@ -58,6 +57,8 @@ pure:
 	@property inout(Children) children() inout { return inout(Children)(MFDevice_GetNumChildren(pDevice), pDevice, 0); }
 
 private:
+	MFDevice* pDevice;
+
 	// implement a range to access children
 	struct Children
 	{
@@ -73,7 +74,7 @@ private:
 		@property auto save() { return this; }
 		inout(Device) opIndex(size_t n) inout { return inout(Device)(MFDevice_GetChild(pDevice, index+n)); }
 		auto opSlice() inout { return this; }
-		inout(Children) opSlice(size_t lower, size_t upper) inout { assert(upper-lower <= length, "Invalid range"); return inout(Children)(upper-lower, pDevice, index+lower); }
+		inout(Children) opSlice(size_t lower, size_t upper) inout { assert(lower <= upper && upper <= length, "Invalid range"); return inout(Children)(upper-lower, pDevice, index+lower); }
 		alias opDollar = length;
 	private:
 		MFDevice* pDevice;

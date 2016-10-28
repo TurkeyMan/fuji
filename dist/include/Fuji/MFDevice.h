@@ -23,7 +23,8 @@ enum MFDeviceType
 	// Audio devices
 	MFDT_AudioRender,
 	MFDT_AudioCapture,
-	MFDT_MIDI,
+	MFDT_MidiInput,
+	MFDT_MidiOutput,
 
 	// Input devices
 	MFDT_Keyboard,
@@ -66,9 +67,11 @@ enum MFDeviceState
 {
 	MFDevState_Unknown = -1,
 
-	MFDevState_Ready = 0,
-	MFDevState_Disconnected,
-	MFDevState_Unavailable,
+	MFDevState_Available = 0,	/**< Device is available. */
+	MFDevState_Unavailable,		/**< Device is unavailable. */
+	MFDevState_Disconnected,	/**< Device is disconnected. */
+	MFDevState_Ready,			/**< Device is ready for use. */
+	MFDevState_Active,			/**< Device is in use. */
 
 	MFDevState_Max,
 	MFDevState_ForceInt = 0x7FFFFFFF

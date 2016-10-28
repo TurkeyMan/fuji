@@ -17,7 +17,8 @@ enum MFDeviceType
 	// Audio devices
 	AudioRender,
 	AudioCapture,
-	MIDI,
+	MidiInput,
+	MidiOutput,
 
 	// Input devices
 	Keyboard,
@@ -55,9 +56,11 @@ enum MFDeviceState
 {
 	Unknown = -1,
 
-	Unavailable = 0,
-	Ready,
+	Available = 0,
+	Unavailable,
 	Disconnected,
+	Ready,
+	Active,
 
 	Max
 }

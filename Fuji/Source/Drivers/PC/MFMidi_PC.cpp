@@ -3,14 +3,15 @@
 #if MF_MIDI == MF_DRIVER_PC
 
 #include "MFMidi_Internal.h"
+#include "MFDevice_Internal.h"
 
 #include <windows.h>
 
 #pragma comment(lib, "winmm")
 
-struct MFMidiPC_MidiDevice
+struct MFMidiPC_MidiInputDevice
 {
-	MFMidiDeviceInfo info;
+	short mid, pid; // TODO: confirm, is a 'manufacturer identifier' the same as a 'vendor identifier'?
 
 	HMIDIIN hMidiIn;
 	bool bBuffered;
@@ -30,242 +31,430 @@ struct MFMidiPC_MidiDevice
 		uint8 program;
 		uint16 pitch;
 	} channels[16];
+
+	uint8 sysexRecvBuffer[1024];
+	MIDIHDR sysexRecv;
 };
 
-static int numDevices = 0;
-static MFMidiPC_MidiDevice *pDevices = NULL;
-
-void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+struct MFMidiPC_MidiOutputDevice
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)dwInstance;
+	short mid, pid; // TODO: confirm, is a 'manufacturer identifier' the same as a 'vendor identifier'?
+
+	HMIDIOUT hMidiOut;
+};
+
+static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+{
+	MFDevice *pDevice = (MFDevice*)dwInstance;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
 	switch(wMsg)
 	{
 		case MIM_OPEN:
+			MFDebug_Log(0, MFStr("Opened midi input device: %s", pDevice->strings[MFDS_ID]));
 			break;
 		case MIM_CLOSE:
+			MFDebug_Log(0, MFStr("Closed midi input device: %s", pDevice->strings[MFDS_ID]));
+			break;
+		case MIM_MOREDATA:
+			MFDebug_Log(0, "Midi message: MIM_MOREDATA");
 			break;
 		case MIM_DATA:
 		{
-			uint8 channel = dwParam1 & 0xF;
-			uint8 byte0 = (dwParam1 >> 8) & 0xFF;
-			uint8 byte1 = (dwParam1 >> 16) & 0xFF;
+			MFMidiEvent ev;
+			MFMidi_DecodeShortMessage((uint32)dwParam1, &ev, (uint32)dwParam2);
 
-			switch((dwParam1 >> 4) & 0x7)
+			switch(ev.ev)
 			{
-				case 0:
-					pDevice->channels[channel].notes[byte0] = 0;
+				case MFMET_NoteOff:
+					pMidi->channels[ev.channel].notes[ev.noteOff.note] = 0;
 					break;
-				case 1:
-				case 2:
-					pDevice->channels[channel].notes[byte0] = byte1;
+				case MFMET_NoteOn:
+				case MFMET_NoteAftertouch:
+					pMidi->channels[ev.channel].notes[ev.noteOn.note] = ev.noteOn.velocity;
 					break;
-				case 3:
-					pDevice->channels[channel].control[byte0] = byte1;
+				case MFMET_ControlChange:
+					pMidi->channels[ev.channel].control[ev.controlChange.control] = ev.controlChange.value;
 					break;
-				case 4:
-					pDevice->channels[channel].program = byte0;
+				case MFMET_ProgramChange:
+					pMidi->channels[ev.channel].program = ev.programChange.program;
 					break;
-				case 5:
+				case MFMET_ChannelAftertouch:
 					// TODO: ... what is this?
 					break;
-				case 6:
-					pDevice->channels[channel].pitch = byte0 | (byte1 << 7);
+				case MFMET_PitchBend:
+					pMidi->channels[ev.channel].pitch = ev.pitchBend.value;
 					break;
 				default:
 					MFDebug_Assert(false, "Why are we getting sys events?");
 					break;
 			}
 
-			if(pDevice->bBuffered || pDevice->pEventCallback)
+			if (pMidi->bBuffered || pMidi->pEventCallback)
 			{
-				MFMidiEvent ev;
-				ev.timestamp = (uint32)dwParam2;
-				ev.command = dwParam1 & 0xF0;
-				ev.channel = channel;
-				ev.data0 = byte0;
-				ev.data1 = byte1;
-
-				if(pDevice->bBuffered)
+				if (pMidi->bBuffered)
 				{
-					if(pDevice->numEvents >= pDevice->numAllocated)
+					if (pMidi->numEvents >= pMidi->numAllocated)
 					{
-						pDevice->numAllocated *= 2;
-						pDevice->pEvents = (MFMidiEvent*)MFHeap_Realloc(pDevice->pEvents, sizeof(MFMidiEvent)*pDevice->numAllocated);
+						pMidi->numAllocated *= 2;
+						pMidi->pEvents = (MFMidiEvent*)MFHeap_Realloc(pMidi->pEvents, sizeof(MFMidiEvent)*pMidi->numAllocated);
 					}
 
-					pDevice->pEvents[pDevice->numEvents++] = ev;
+					pMidi->pEvents[pMidi->numEvents++] = ev;
 				}
-				if(pDevice->pEventCallback)
+				if (pMidi->pEventCallback)
 				{
-					pDevice->pEventCallback((MFMidiInput*)dwInstance, &ev);
+					pMidi->pEventCallback(pDevice, &ev);
 				}
 			}
 			break;
 		}
-		case MIM_ERROR:
 		case MIM_LONGDATA:
+		{
+			MIDIHDR *pHdr = (MIDIHDR*)dwParam1;
+
+			MFMidiEvent ev;
+			MFMidi_DecodePacket((const uint8*)pHdr->lpData, pHdr->dwBytesRecorded, &ev, (uint32)dwParam2);
+
+			if (pMidi->bBuffered || pMidi->pEventCallback)
+			{
+				if (pMidi->bBuffered)
+				{
+					if (pMidi->numEvents >= pMidi->numAllocated)
+					{
+						pMidi->numAllocated *= 2;
+						pMidi->pEvents = (MFMidiEvent*)MFHeap_Realloc(pMidi->pEvents, sizeof(MFMidiEvent)*pMidi->numAllocated);
+					}
+
+					pMidi->pEvents[pMidi->numEvents++] = ev;
+				}
+				if (pMidi->pEventCallback)
+				{
+					pMidi->pEventCallback(pDevice, &ev);
+				}
+			}
+
+			MMRESULT r = midiInAddBuffer(pMidi->hMidiIn, pHdr, sizeof(*pHdr));
+			if (r != MMSYSERR_NOERROR)
+			{
+				wchar_t errorBuffer[256];
+				midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+				MFDebug_Warn(1, MFStr("Failed to open MIDI input device: %s", MFString_WCharAsUTF8(errorBuffer)));
+			}
+			break;
+		}
+		case MIM_ERROR:
 		case MIM_LONGERROR:
 		{
-			// TODO: what shall we do with this?
+			MFDebug_Log(0, MFStr("Midi input error: %d, 0x%08X : 0x%08X", wMsg, dwParam1, dwParam2));
 			break;
 		}
 	}
 }
 
+static void CALLBACK MidiOutProc(HMIDIOUT hMidiOut, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+{
+	MFDevice *pDevice = (MFDevice*)dwInstance;
+	MFMidiPC_MidiOutputDevice *pMidi = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+
+	switch (wMsg)
+	{
+		case MOM_OPEN:
+			MFDebug_Log(0, MFStr("Opened midi output device: %s", pDevice->strings[MFDS_ID]));
+			break;
+		case MOM_CLOSE:
+			MFDebug_Log(0, MFStr("Opened midi output device: %s", pDevice->strings[MFDS_ID]));
+			break;
+		case MOM_DONE:
+		{
+			MIDIHDR *pHdr = (MIDIHDR*)dwParam1;
+			MMRESULT r = midiOutUnprepareHeader(pMidi->hMidiOut, pHdr, sizeof(*pHdr));
+			if (r != MMSYSERR_NOERROR)
+			{
+				wchar_t errorBuffer[256];
+				midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+				MFDebug_Warn(1, MFStr("Failed to cleanup MIDI message: %s", MFString_WCharAsUTF8(errorBuffer)));
+			}
+			// TODO: return to pool...
+			break;
+		}
+		case MOM_POSITIONCB:
+			MFDebug_Log(0, "Midi output device: Position CB");
+			break;
+	}
+}
+
+static void DestroyInputDevice(MFDevice *pDevice)
+{
+	MFMidiPC_MidiInputDevice *pDev = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
+	if (pDev->hMidiIn)
+	{
+		MFDebug_Warn(1, MFStr("Midi output device not closed: %s", pDevice->strings[MFDS_ID]));
+
+		midiInReset(pDev->hMidiIn);
+		midiInClose(pDev->hMidiIn);
+	}
+	MFHeap_Free(pDev);
+}
+static void DestroyOutputDevice(MFDevice *pDevice)
+{
+	MFMidiPC_MidiOutputDevice *pDev = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+	if (pDev->hMidiOut)
+	{
+		MFDebug_Warn(1, MFStr("Midi output device not closed: %s", pDevice->strings[MFDS_ID]));
+
+		midiOutReset(pDev->hMidiOut);
+		midiOutClose(pDev->hMidiOut);
+	}
+	MFHeap_Free(pDev);
+}
+
 void MFMidi_InitModulePlatformSpecific()
 {
-	numDevices = midiInGetNumDevs();
-	if(numDevices)
-		pDevices = (MFMidiPC_MidiDevice*)MFHeap_Alloc(sizeof(MFMidiPC_MidiDevice)*numDevices);
-
-	for(int i = 0; i < numDevices; ++i)
+	UINT numInputDevices = midiInGetNumDevs();
+	for (UINT i = 0; i < numInputDevices; ++i)
 	{
 		MIDIINCAPS caps;
-		midiInGetDevCaps(i, &caps, sizeof(caps));
-		MFString_CopyUTF16ToUTF8(pDevices[i].info.name, caps.szPname);
-		pDevices[i].info.mid = caps.wMid;
-		pDevices[i].info.pid = caps.wPid;
-		pDevices[i].info.status = MFMS_Available;
+		MMRESULT r = midiInGetDevCaps(i, &caps, sizeof(caps));
+		if (r != MMSYSERR_NOERROR)
+		{
+			wchar_t errorBuffer[256];
+			midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+			MFDebug_Warn(1, MFStr("Failed to query midi input device: %s", MFString_WCharAsUTF8(errorBuffer)));
+			continue;
+		}
+
+		MFDevice *pDevice = MFDevice_AllocDevice(MFDT_MidiInput, &DestroyInputDevice);
+		pDevice->pInternal = MFHeap_AllocAndZero(sizeof(MFMidiPC_MidiInputDevice));
+		pDevice->state = MFDevState_Available;
+
+		MFMidiPC_MidiOutputDevice *pDev = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+		pDev->mid = caps.wMid;
+		pDev->pid = caps.wPid;
+
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_ID], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_DeviceName], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_Description], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_InterfaceName], caps.szPname);
+//		MFDS_Manufacturer
+
+		MFDebug_Log(0, MFStr("Found midi input device: %s (%04X:%04X) - state: %d", pDevice->strings[MFDS_ID], caps.wMid, caps.wPid, pDevice->state));
+	}
+
+	UINT numOutputDevices = midiOutGetNumDevs();
+	for (UINT i = 0; i < numOutputDevices; ++i)
+	{
+		MIDIOUTCAPS caps;
+		MMRESULT r = midiOutGetDevCaps(i, &caps, sizeof(caps));
+		if (r != MMSYSERR_NOERROR)
+		{
+			wchar_t errorBuffer[256];
+			midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+			MFDebug_Warn(1, MFStr("Failed to query midi output device: %s", MFString_WCharAsUTF8(errorBuffer)));
+			continue;
+		}
+
+		MFDevice *pDevice = MFDevice_AllocDevice(MFDT_MidiOutput, &DestroyOutputDevice);
+		pDevice->pInternal = MFHeap_AllocAndZero(sizeof(MFMidiPC_MidiOutputDevice));
+		pDevice->state = MFDevState_Available;
+
+		MFMidiPC_MidiOutputDevice *pDev = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+		pDev->mid = caps.wMid;
+		pDev->pid = caps.wPid;
+
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_ID], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_DeviceName], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_Description], caps.szPname);
+		MFString_CopyUTF16ToUTF8(pDevice->strings[MFDS_InterfaceName], caps.szPname);
+//		MFDS_Manufacturer
+
+		MFDebug_Log(0, MFStr("Found midi output device: %s (%04X:%04X) - state: %d", pDevice->strings[MFDS_ID], caps.wMid, caps.wPid, pDevice->state));
 	}
 }
 
 void MFMidi_DeinitModulePlatformSpecific()
 {
-	for(int i = 0; i < numDevices; ++i)
-	{
-		if(pDevices[i].info.status > MFMS_Available)
-		{
-			MFDebug_Warn(1, MFStr("Midi device not closed: %s", pDevices[i].info.name));
-
-			midiInReset(pDevices[i].hMidiIn);
-			midiInClose(pDevices[i].hMidiIn);
-		}
-	}
-
-	if(pDevices)
-		MFHeap_Free(pDevices);
 }
 
 void MFMidi_UpdateInternal()
 {
 	// copy notes into lastNotes
-	for(int i = 0; i < numDevices; ++i)
+	size_t numInputDevices = MFDevice_GetNumDevices(MFDT_MidiInput);
+	for (int i = 0; i < numInputDevices; ++i)
 	{
-		if(pDevices[i].info.status == MFMS_Active)
+		MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_MidiInput, i);
+		if (pDevice->state == MFDevState_Active)
 		{
-			for(int j = 0; j < 16; ++j)
-				MFCopyMemory(pDevices[i].channels[j].lastNotes, pDevices[i].channels[j].notes, sizeof(pDevices[i].channels[j].lastNotes));
+			MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
+			for (int j = 0; j < 16; ++j)
+				MFCopyMemory(pMidi->channels[j].lastNotes, pMidi->channels[j].notes, sizeof(pMidi->channels[j].lastNotes));
 		}
 	}
 }
 
-MF_API int MFMidi_GetNumDevices()
+MF_API int MFMidi_GetTimestampFrequency()
 {
-	return numDevices;
+	return 1000;
 }
 
-MF_API const char *MFMidi_GetDeviceName(int deviceId)
+MF_API bool MFMidi_OpenInput(MFDevice *pDevice, bool bBuffered, MFMidiEventCallback *pEventCallback)
 {
-	MFDebug_Assert(deviceId < numDevices, "Invalid device ID!");
-	return pDevices[deviceId].info.name;
-}
+	MFDebug_Assert(pDevice->type == MFDT_MidiInput, "Not a MIDI device!");
 
-MF_API MFMidiDeviceStatus MFMidi_GetStatus(int deviceId)
-{
-	MFDebug_Assert(deviceId < numDevices, "Invalid device ID!");
-	return pDevices[deviceId].info.status;
-}
-
-MF_API MFMidiInput *MFMidi_OpenInput(int deviceId, bool bBuffered, MFMidiEventCallback *pEventCallback)
-{
-	MFDebug_Assert(deviceId < numDevices, "Invalid device ID!");
-
-	MFMidiPC_MidiDevice *pDevice = &pDevices[deviceId];
-
-	MMRESULT r = midiInOpen(&pDevice->hMidiIn, deviceId, (DWORD_PTR)MidiInProc, (DWORD_PTR)pDevice, CALLBACK_FUNCTION | MIDI_IO_STATUS);
-	if(r != MMSYSERR_NOERROR)
+	if (pDevice->state == MFDevState_Ready || pDevice->state == MFDevState_Active)
 	{
-		pDevice->hMidiIn = NULL;
-		pDevice->info.status = MFMS_Unknown;
+		MFDebug_Warn(1, "Midi input device already opened!");
+		return false;
+	}
+	if (pDevice->state != MFDevState_Available)
+	{
+		MFDebug_Warn(1, "Unable to open midi input device!");
+		return false;
+	}
+
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
+
+	// find and open the device
+	// TODO: FIXME! this won't work if there are 2 instances of the same device attached to the PC!!!
+	UINT numInputDevices = midiInGetNumDevs();
+	UINT i = 0;
+	for (; i < numInputDevices; ++i)
+	{
+		MIDIINCAPS caps;
+		MMRESULT r = midiInGetDevCaps(i, &caps, sizeof(caps));
+		if (r != MMSYSERR_NOERROR)
+			continue;
+
+		if (caps.wMid == pMidi->mid && caps.wPid == pMidi->pid)
+			break;
+	}
+	if (i == numInputDevices)
+	{
+		MFDebug_Warn(1, MFStr("Midi output device '%s' not found!", pDevice->strings[MFDS_ID]));
+		pDevice->state = MFDevState_Unknown; // set this flag?
+		return false;
+	}
+
+	MMRESULT r = midiInOpen(&pMidi->hMidiIn, i, (DWORD_PTR)MidiInProc, (DWORD_PTR)pDevice, CALLBACK_FUNCTION | MIDI_IO_STATUS);
+	if (r != MMSYSERR_NOERROR)
+	{
+		pMidi->hMidiIn = NULL;
+		pDevice->state = MFDevState_Unknown;
 
 		wchar_t errorBuffer[256];
 		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
-		MFDebug_Warn(1, MFStr("Failed to open MIDI device: %s", MFString_WCharAsUTF8(errorBuffer)));
+		MFDebug_Warn(1, MFStr("Failed to open MIDI input device: %s", MFString_WCharAsUTF8(errorBuffer)));
 
-		return NULL;
+		return false;
 	}
 
-	pDevice->bBuffered = bBuffered;
-	pDevice->pEventCallback = pEventCallback;
+	MFZeroMemory(&pMidi->sysexRecv, sizeof(pMidi->sysexRecv));
+	pMidi->sysexRecv.lpData = (LPSTR)pMidi->sysexRecvBuffer;
+	pMidi->sysexRecv.dwBufferLength = sizeof(pMidi->sysexRecvBuffer);
+	r = midiInPrepareHeader(pMidi->hMidiIn, &pMidi->sysexRecv, sizeof(pMidi->sysexRecv));
+	if (r != MMSYSERR_NOERROR)
+	{
+		wchar_t errorBuffer[256];
+		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to open MIDI input device: %s", MFString_WCharAsUTF8(errorBuffer)));
+	}
+	r = midiInAddBuffer(pMidi->hMidiIn, &pMidi->sysexRecv, sizeof(pMidi->sysexRecv));
+	if (r != MMSYSERR_NOERROR)
+	{
+		wchar_t errorBuffer[256];
+		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to open MIDI input device: %s", MFString_WCharAsUTF8(errorBuffer)));
+	}
 
-	pDevice->numAllocated = 256;
-	pDevice->pEvents = (MFMidiEvent*)MFHeap_Alloc(sizeof(MFMidiEvent) * pDevice->numAllocated);
+	pMidi->bBuffered = bBuffered;
+	pMidi->pEventCallback = pEventCallback;
 
-	pDevice->info.status = MFMS_Ready;
+	pMidi->numAllocated = 256;
+	pMidi->pEvents = (MFMidiEvent*)MFHeap_Alloc(sizeof(MFMidiEvent) * pMidi->numAllocated);
 
-	if(!bBuffered && !pEventCallback)
-		MFMidi_Start((MFMidiInput*)pDevice);
+	pDevice->state = MFDevState_Ready;
 
-	return (MFMidiInput*)pDevice;
+	if (!bBuffered && !pEventCallback)
+		MFMidi_Start(pDevice);
+
+	return true;
 }
 
-MF_API void MFMidi_CloseInput(MFMidiInput *pMidiInput)
+MF_API void MFMidi_CloseInput(MFDevice *pDevice)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	midiInReset(pDevice->hMidiIn);
-	midiInClose(pDevice->hMidiIn);
+	if (!pMidi->hMidiIn)
+	{
+		MFDebug_Warn(1, "Midi input device not opened!");
+		return;
+	}
 
-	MFHeap_Free(pDevice->pEvents);
+	midiInReset(pMidi->hMidiIn);
 
-	pDevice->info.status = MFMS_Available;
+	midiInUnprepareHeader(pMidi->hMidiIn, &pMidi->sysexRecv, sizeof(pMidi->sysexRecv));
+
+	midiInClose(pMidi->hMidiIn);
+	pMidi->hMidiIn = NULL;
+
+	MFHeap_Free(pMidi->pEvents);
+
+	pDevice->state = MFDevState_Available;
 }
 
-MF_API uint32 MFMidi_GetState(MFMidiInput *pMidiInput, MFMidiDataType type, int channel, int note)
+MF_API uint32 MFMidi_GetState(MFDevice *pDevice, MFMidiDataType type, int channel, int note)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
 	switch(type)
 	{
 		case MFMD_Note:
-			return pDevice->channels[channel].notes[note];
+			return pMidi->channels[channel].notes[note];
 		case MFMD_Controller:
-			return pDevice->channels[channel].control[note];
+			return pMidi->channels[channel].control[note];
 		case MFMD_Program:
-			return pDevice->channels[channel].program;
+			return pMidi->channels[channel].program;
 		case MFMD_PitchWheel:
-			return pDevice->channels[channel].pitch;
+			return pMidi->channels[channel].pitch;
 	}
 	return 0;
 }
 
-MF_API uint32 MFMidi_WasPressed(MFMidiInput *pMidiInput, int channel, int note)
+MF_API bool MFMidi_WasPressed(MFDevice *pDevice, int channel, int note)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	return pDevice->channels[channel].notes[note] && !pDevice->channels[channel].lastNotes[note];
+	return pMidi->channels[channel].notes[note] && !pMidi->channels[channel].lastNotes[note];
 }
 
-MF_API uint32 MFMidi_WasReleased(MFMidiInput *pMidiInput, int channel, int note)
+MF_API bool MFMidi_WasReleased(MFDevice *pDevice, int channel, int note)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	return !pDevice->channels[channel].notes[note] && pDevice->channels[channel].lastNotes[note];
+	return !pMidi->channels[channel].notes[note] && pMidi->channels[channel].lastNotes[note];
 }
 
-MF_API bool MFMidi_Start(MFMidiInput *pMidiInput)
+MF_API bool MFMidi_Start(MFDevice *pDevice)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	MFDebug_Assert(pDevice->info.status == MFMS_Ready, MFStr("Midi device not ready: %s", pDevice->info.name));
-
-	pDevice->numEvents = pDevice->numEventsRead = 0;
-
-	MMRESULT r = midiInStart(pDevices->hMidiIn);
-	if(r != MMSYSERR_NOERROR)
+	if (pDevice->state == MFDevState_Active)
 	{
-		pDevice->info.status = MFMS_Unknown;
+		MFDebug_Warn(1, "Midi input device already started!");
+		return false;
+	}
+	if (pDevice->state != MFDevState_Ready)
+	{
+		MFDebug_Warn(1, "Midi input device not ready!");
+		return false;
+	}
+
+	pMidi->numEvents = pMidi->numEventsRead = 0;
+
+	MMRESULT r = midiInStart(pMidi->hMidiIn);
+	if (r != MMSYSERR_NOERROR)
+	{
+		pDevice->state = MFDevState_Unknown;
 
 		wchar_t errorBuffer[256];
 		midiInGetErrorText(r, errorBuffer, sizeof(errorBuffer));
@@ -273,37 +462,161 @@ MF_API bool MFMidi_Start(MFMidiInput *pMidiInput)
 		return false;
 	}
 
-	pDevice->info.status = MFMS_Active;
+	pDevice->state = MFDevState_Active;
 	return true;
 }
 
-MF_API void MFMidi_Stop(MFMidiInput *pMidiInput)
+MF_API void MFMidi_Stop(MFDevice *pDevice)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	midiInReset(pDevice->hMidiIn);
+	if (pDevice->state != MFDevState_Active)
+	{
+		MFDebug_Warn(1, "Midi input device not started!");
+		return;
+	}
 
-	pDevice->info.status = MFMS_Ready;
+	midiInReset(pMidi->hMidiIn);
+
+	pDevice->state = MFDevState_Ready;
 }
 
-MF_API size_t MFMidi_GetEvents(MFMidiInput *pMidiInput, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
+MF_API size_t MFMidi_GetEvents(MFDevice *pDevice, MFMidiEvent *pEvents, size_t maxEvents, bool bPeek)
 {
-	MFMidiPC_MidiDevice *pDevice = (MFMidiPC_MidiDevice*)pMidiInput;
+	MFMidiPC_MidiInputDevice *pMidi = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 
-	if(pDevice->numEvents == 0)
+	if (pMidi->numEvents == 0)
 		return 0;
+	if (!pEvents)
+		return pMidi->numEvents - pMidi->numEventsRead;
 
-	uint32 toRead = MFMin((uint32)maxEvents, pDevice->numEvents - pDevice->numEventsRead);
-	MFCopyMemory(pEvents, pDevice->pEvents + pDevice->numEventsRead, sizeof(MFMidiEvent)*toRead);
+	uint32 toRead = MFMin((uint32)maxEvents, pMidi->numEvents - pMidi->numEventsRead);
+	MFCopyMemory(pEvents, pMidi->pEvents + pMidi->numEventsRead, sizeof(MFMidiEvent)*toRead);
 
-	if(!bPeek)
+	if (!bPeek)
 	{
-		pDevice->numEventsRead += toRead;
-		if(pDevice->numEventsRead == pDevice->numEvents)
-			pDevice->numEvents = pDevice->numEventsRead = 0;
+		pMidi->numEventsRead += toRead;
+		if (pMidi->numEventsRead == pMidi->numEvents)
+			pMidi->numEvents = pMidi->numEventsRead = 0;
 	}
 
 	return toRead;
+}
+
+MF_API bool MFMidi_OpenOutput(MFDevice *pDevice)
+{
+	MFDebug_Assert(pDevice->type == MFDT_MidiOutput, "Not a MIDI device!");
+
+	if (pDevice->state == MFDevState_Ready)
+	{
+		MFDebug_Warn(1, "Midi output device already opened!");
+		return false;
+	}
+	if (pDevice->state != MFDevState_Available)
+	{
+		MFDebug_Warn(1, "Unable to open midi output device!");
+		return false;
+	}
+
+	MFMidiPC_MidiOutputDevice *pMidi = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+
+	// find and open the device
+	// TODO: FIXME! this won't work if there are 2 instances of the same device attached to the PC!!!
+	UINT numOutputDevices = midiOutGetNumDevs();
+	UINT i = 0;
+	for (; i < numOutputDevices; ++i)
+	{
+		MIDIOUTCAPS caps;
+		MMRESULT r = midiOutGetDevCaps(i, &caps, sizeof(caps));
+		if (r != MMSYSERR_NOERROR)
+			continue;
+
+		if (caps.wMid == pMidi->mid && caps.wPid == pMidi->pid)
+			break;
+	}
+	if (i == numOutputDevices)
+	{
+		MFDebug_Log(0, MFStr("Midi output device '%s' not found!", pDevice->strings[MFDS_ID]));
+		pDevice->state = MFDevState_Unknown; // set this flag?
+		return false;
+	}
+
+	MMRESULT r = midiOutOpen(&pMidi->hMidiOut, i, (DWORD_PTR)MidiOutProc, (DWORD_PTR)pDevice, CALLBACK_FUNCTION);
+	if (r != MMSYSERR_NOERROR)
+	{
+		pMidi->hMidiOut = NULL;
+		pDevice->state = MFDevState_Unknown;
+
+		wchar_t errorBuffer[256];
+		midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to open MIDI output device: %s", MFString_WCharAsUTF8(errorBuffer)));
+
+		return false;
+	}
+
+	pDevice->state = MFDevState_Ready;
+
+	return true;
+}
+
+MF_API void MFMidi_CloseOutput(MFDevice *pDevice)
+{
+	MFMidiPC_MidiOutputDevice *pMidi = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+
+	if (!pMidi->hMidiOut)
+	{
+		MFDebug_Warn(1, "Midi output device not opened!");
+		return;
+	}
+
+	midiOutReset(pMidi->hMidiOut);
+	midiOutClose(pMidi->hMidiOut);
+	pMidi->hMidiOut = NULL;
+
+	pDevice->state = MFDevState_Available;
+}
+
+MF_API void MFMidi_SendPacket(MFDevice *pDevice, const uint8 *pBytes, size_t len)
+{
+	MFMidiPC_MidiOutputDevice *pMidi = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+
+	// TODO: get hdr from pool...
+	MIDIHDR hdr;
+	MFZeroMemory(&hdr, sizeof(hdr));
+	hdr.lpData = (LPSTR)pBytes;
+	hdr.dwBufferLength = (DWORD)len;
+	hdr.dwBytesRecorded = (DWORD)len;
+	hdr.dwUser = (DWORD_PTR)pDevice;
+
+	MMRESULT r = midiOutPrepareHeader(pMidi->hMidiOut, &hdr, sizeof(hdr));
+	if (r != MMSYSERR_NOERROR)
+	{
+		wchar_t errorBuffer[256];
+		midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to send MIDI message: %s", MFString_WCharAsUTF8(errorBuffer)));
+		return;
+	}
+
+	r = midiOutLongMsg(pMidi->hMidiOut, &hdr, sizeof(hdr));
+	if (r != MMSYSERR_NOERROR)
+	{
+		wchar_t errorBuffer[256];
+		midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to send MIDI message: %s", MFString_WCharAsUTF8(errorBuffer)));
+	}
+}
+
+MF_API void MFMidi_SendShortMessage(MFDevice *pDevice, uint32 message)
+{
+	MFMidiPC_MidiOutputDevice *pMidi = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
+
+	MMRESULT r = midiOutShortMsg(pMidi->hMidiOut, (DWORD)message);
+	if (r != MMSYSERR_NOERROR)
+	{
+		wchar_t errorBuffer[256];
+		midiOutGetErrorText(r, errorBuffer, sizeof(errorBuffer));
+		MFDebug_Warn(1, MFStr("Failed to send MIDI message: %s", MFString_WCharAsUTF8(errorBuffer)));
+	}
 }
 
 #endif // MF_MIDI

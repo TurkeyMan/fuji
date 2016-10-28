@@ -9,12 +9,4 @@ void MFMidi_DeinitModule();
 void MFMidi_DeinitModulePlatformSpecific();
 void MFMidi_UpdateInternal();
 
-struct MFMidiDeviceInfo
-{
-	char name[256];
-	short mid, pid; // is a 'manufacturer identifier' the same as a 'vendor identifier'?
-
-	MFMidiDeviceStatus status;
-};
-
 #endif
