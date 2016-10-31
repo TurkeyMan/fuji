@@ -51,13 +51,13 @@ static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance
 	switch(wMsg)
 	{
 		case MIM_OPEN:
-			MFDebug_Log(0, MFStr("Opened midi input device: %s", pDevice->strings[MFDS_ID]));
+			MFDebug_Log(0, MFStr("Opened MIDI input device: %s", pDevice->strings[MFDS_ID]));
 			break;
 		case MIM_CLOSE:
-			MFDebug_Log(0, MFStr("Closed midi input device: %s", pDevice->strings[MFDS_ID]));
+			MFDebug_Log(0, MFStr("Closed MIDI input device: %s", pDevice->strings[MFDS_ID]));
 			break;
 		case MIM_MOREDATA:
-			MFDebug_Log(0, "Midi message: MIM_MOREDATA");
+			MFDebug_Log(0, "MIDI message: MIM_MOREDATA");
 			break;
 		case MIM_DATA:
 		{
@@ -146,7 +146,7 @@ static void CALLBACK MidiInProc(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance
 		case MIM_ERROR:
 		case MIM_LONGERROR:
 		{
-			MFDebug_Log(0, MFStr("Midi input error: %d, 0x%08X : 0x%08X", wMsg, dwParam1, dwParam2));
+			MFDebug_Log(0, MFStr("MIDI input error: %d, 0x%08X : 0x%08X", wMsg, dwParam1, dwParam2));
 			break;
 		}
 	}
@@ -160,10 +160,10 @@ static void CALLBACK MidiOutProc(HMIDIOUT hMidiOut, UINT wMsg, DWORD_PTR dwInsta
 	switch (wMsg)
 	{
 		case MOM_OPEN:
-			MFDebug_Log(0, MFStr("Opened midi output device: %s", pDevice->strings[MFDS_ID]));
+			MFDebug_Log(0, MFStr("Opened MIDI output device: %s", pDevice->strings[MFDS_ID]));
 			break;
 		case MOM_CLOSE:
-			MFDebug_Log(0, MFStr("Opened midi output device: %s", pDevice->strings[MFDS_ID]));
+			MFDebug_Log(0, MFStr("Opened MIDI output device: %s", pDevice->strings[MFDS_ID]));
 			break;
 		case MOM_DONE:
 		{
@@ -179,7 +179,7 @@ static void CALLBACK MidiOutProc(HMIDIOUT hMidiOut, UINT wMsg, DWORD_PTR dwInsta
 			break;
 		}
 		case MOM_POSITIONCB:
-			MFDebug_Log(0, "Midi output device: Position CB");
+			MFDebug_Log(0, "MIDI output device: Position CB");
 			break;
 	}
 }
@@ -189,7 +189,7 @@ static void DestroyInputDevice(MFDevice *pDevice)
 	MFMidiPC_MidiInputDevice *pDev = (MFMidiPC_MidiInputDevice*)pDevice->pInternal;
 	if (pDev->hMidiIn)
 	{
-		MFDebug_Warn(1, MFStr("Midi output device not closed: %s", pDevice->strings[MFDS_ID]));
+		MFDebug_Warn(1, MFStr("MIDI output device not closed: %s", pDevice->strings[MFDS_ID]));
 
 		midiInReset(pDev->hMidiIn);
 		midiInClose(pDev->hMidiIn);
@@ -201,7 +201,7 @@ static void DestroyOutputDevice(MFDevice *pDevice)
 	MFMidiPC_MidiOutputDevice *pDev = (MFMidiPC_MidiOutputDevice*)pDevice->pInternal;
 	if (pDev->hMidiOut)
 	{
-		MFDebug_Warn(1, MFStr("Midi output device not closed: %s", pDevice->strings[MFDS_ID]));
+		MFDebug_Warn(1, MFStr("MIDI output device not closed: %s", pDevice->strings[MFDS_ID]));
 
 		midiOutReset(pDev->hMidiOut);
 		midiOutClose(pDev->hMidiOut);

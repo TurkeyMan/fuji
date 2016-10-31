@@ -44,14 +44,14 @@ pure:
 
 	@property inout(MFDevice)* handle() inout { return pDevice; }
 
-	@property MFDeviceType type() { return MFDevice_GetDeviceType(pDevice); }
-	@property MFDeviceState state() { return MFDevice_GetDeviceState(pDevice); }
+	@property MFDeviceType type() const { return MFDevice_GetDeviceType(pDevice); }
+	@property MFDeviceState state() const { return MFDevice_GetDeviceState(pDevice); }
 
-	@property const(char)[] id() { return MFDevice_GetDeviceString(pDevice, MFDeviceString.ID); }
-	@property const(char)[] name() { return MFDevice_GetDeviceString(pDevice, MFDeviceString.DeviceName); }
-	@property const(char)[] description() { return MFDevice_GetDeviceString(pDevice, MFDeviceString.Description); }
-	@property const(char)[] interfaceName() { return MFDevice_GetDeviceString(pDevice, MFDeviceString.InterfaceName); }
-	@property const(char)[] manufacturer() { return MFDevice_GetDeviceString(pDevice, MFDeviceString.Manufacturer); }
+	@property const(char)[] id() const { return MFDevice_GetDeviceString(pDevice, MFDeviceString.ID); }
+	@property const(char)[] name() const { return MFDevice_GetDeviceString(pDevice, MFDeviceString.DeviceName); }
+	@property const(char)[] description() const { return MFDevice_GetDeviceString(pDevice, MFDeviceString.Description); }
+	@property const(char)[] interfaceName() const { return MFDevice_GetDeviceString(pDevice, MFDeviceString.InterfaceName); }
+	@property const(char)[] manufacturer() const { return MFDevice_GetDeviceString(pDevice, MFDeviceString.Manufacturer); }
 
 	@property inout(Device) parent() inout { return inout(Device)(MFDevice_GetParent(pDevice)); }
 	@property inout(Children) children() inout { return inout(Children)(MFDevice_GetNumChildren(pDevice), pDevice, 0); }

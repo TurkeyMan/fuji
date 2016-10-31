@@ -19,6 +19,29 @@ static this()
 	assertHandler = &fujiAssert;
 }
 
+void logError(Args...)(const(char)[] message, Args args)
+{
+	import std.format : format;
+	MFDebug_Error(format(message, args));
+}
+
+void logWarning(Args...)(int level, const(char)[] message, Args args)
+{
+	import std.format : format;
+	MFDebug_Warn(level, format(message, args));
+}
+
+void logMessage(Args...)(const(char)[] message, Args args)
+{
+	import std.format : format;
+	MFDebug_Message(format(message, args));
+}
+
+void debugLog(Args...)(int level, const(char)[] message, Args args)
+{
+	import std.format : format;
+	MFDebug_Log(level, format(message, args));
+}
 
 nothrow:
 @nogc:
