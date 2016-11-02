@@ -101,7 +101,8 @@ struct MFVoice
 enum MFPlayFlagsInternal
 {
 	MFPF_Paused = MFBIT(28),
-	MFPF_Locked = MFBIT(29)
+	MFPF_Locked = MFBIT(29),
+	MFPF_Finished = MFBIT(30)
 };
 
 

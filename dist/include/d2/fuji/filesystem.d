@@ -38,6 +38,7 @@ struct DirEntry
 	string directory;		// the directory part
 	ulong size;				// file size in bytes
 	uint  attributes;		// file attributes
+	MFFileTime createTime;	// creation time
 	MFFileTime writeTime;	// last write time
 	MFFileTime accessTime;	// last access time
 
@@ -57,6 +58,7 @@ nothrow:
 		size = fd.fileSize;
 		attributes = fd.attributes;
 
+		createTime = fd.createTime;
 		writeTime = fd.writeTime;
 		accessTime = fd.accessTime;
 	}

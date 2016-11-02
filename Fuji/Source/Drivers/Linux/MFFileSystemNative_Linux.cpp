@@ -295,6 +295,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 							(pDir->d_name[0] == '.' ? MFFA_Hidden : 0);
 							// TODO: Set MFFA_ReadOnly from write privileges
 	pFindData->fileSize = statbuf.st_size;
+	pFindData->createTime.ticks = (uint64)statbuf.st_mtime;
 	pFindData->writeTime.ticks = (uint64)statbuf.st_mtime;
 	pFindData->accessTime.ticks = (uint64)statbuf.st_atime;
 	MFString_Copy((char*)pFindData->pFilename, pDir->d_name);

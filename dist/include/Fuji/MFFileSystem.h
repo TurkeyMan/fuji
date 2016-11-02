@@ -107,6 +107,7 @@ struct MFFileInfo
 {
 	uint64 size;
 	uint32 attributes;
+	MFFileTime createTime;
 	MFFileTime writeTime;
 	MFFileTime accessTime;
 };
@@ -338,6 +339,7 @@ struct MFFindData
 	char pSystemPath[260];	/**< The system path to the file */
 	uint32 attributes;		/**< The files attributes */
 	uint64 fileSize;		/**< The files size */
+	MFFileTime createTime;	/**< Time the file was created */
 	MFFileTime writeTime;	/**< Last time the file was written */
 	MFFileTime accessTime;	/**< Last time the file was accessed */
 };

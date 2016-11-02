@@ -299,6 +299,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
+	pFindData->createTime.ticks = (uint64)fd.time_write;
 	pFindData->writeTime.ticks = (uint64)fd.time_write;
 	pFindData->accessTime.ticks = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);
@@ -334,6 +335,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
+	pFindData->createTime.ticks = (uint64)fd.time_write;
 	pFindData->writeTime.ticks = (uint64)fd.time_write;
 	pFindData->accessTime.ticks = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);

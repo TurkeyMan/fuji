@@ -79,10 +79,18 @@ void MFSound_UpdateSound()
 
 	for(int a=0; a<gDefaults.sound.maxMusicTracks; a++)
 	{
-		bool playing = !(gMusicTracks[a].playFlags & MFPF_Paused);
-		if(gMusicTracks[a].pStreamBuffer && playing)
+		if(gMusicTracks[a].playFlags & MFPF_Finished)
 		{
-			MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
+			MFSound_Pause(gMusicTracks[a].pStreamVoice);
+			gMusicTracks[a].playFlags ^= MFPF_Finished;
+		}
+		else
+		{
+			bool playing = !(gMusicTracks[a].playFlags & MFPF_Paused);
+			if(gMusicTracks[a].pStreamBuffer && playing)
+			{
+				MFSound_ServiceStreamBuffer(&gMusicTracks[a]);
+			}
 		}
 	}
 
@@ -786,7 +794,7 @@ void MFSound_FillBuffer(MFAudioStream *pStream, size_t bytes)
 				pStream->pStreamHandler->callbacks.pSeekStream(pStream, 0.0f);
 			else
 			{
-				// TODO: end of the track.. should we stop playback somehow?
+				pStream->playFlags |= MFPF_Finished;
 
 				// write silence for the time being...
 				r = bytesToWrite-bufferFed;

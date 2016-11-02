@@ -261,6 +261,7 @@ bool MFFileNative_Stat(const char *pPath, MFFileInfo *pFileInfo)
 	pFileInfo->attributes = ((attr.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0) |
 							((attr.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
 							((attr.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? MFFA_ReadOnly : 0);
+	pFileInfo->createTime.ticks = (uint64)attr.ftCreationTime.dwHighDateTime << 32 | (uint64)attr.ftCreationTime.dwLowDateTime;
 	pFileInfo->writeTime.ticks = (uint64)attr.ftLastWriteTime.dwHighDateTime << 32 | (uint64)attr.ftLastWriteTime.dwLowDateTime;
 	pFileInfo->accessTime.ticks = (uint64)attr.ftLastAccessTime.dwHighDateTime << 32 | (uint64)attr.ftLastAccessTime.dwLowDateTime;
 
@@ -341,6 +342,7 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 							((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);
+	pFindData->createTime.ticks = (uint64)fd.ftCreationTime.dwHighDateTime << 32 | (uint64)fd.ftCreationTime.dwLowDateTime;
 	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
 	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
 	MFString_CopyUTF16ToUTF8((char*)pFindData->pFilename, fd.cFileName);
@@ -367,6 +369,7 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	pFindData->attributes = ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? MFFA_Directory : 0) |
 							((fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) ? MFFA_Hidden : 0) |
 							((fd.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? MFFA_ReadOnly : 0);
+	pFindData->createTime.ticks = (uint64)fd.ftCreationTime.dwHighDateTime << 32 | (uint64)fd.ftCreationTime.dwLowDateTime;
 	pFindData->writeTime.ticks = (uint64)fd.ftLastWriteTime.dwHighDateTime << 32 | (uint64)fd.ftLastWriteTime.dwLowDateTime;
 	pFindData->accessTime.ticks = (uint64)fd.ftLastAccessTime.dwHighDateTime << 32 | (uint64)fd.ftLastAccessTime.dwLowDateTime;
 	pFindData->fileSize = (uint64)fd.nFileSizeLow | (((uint64)fd.nFileSizeHigh) << 32);

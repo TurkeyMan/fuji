@@ -345,7 +345,7 @@ void MFInput_UpdateState(InputState *pState)
 		if(MFInput_IsAvailable(IDD_TouchPanel, a))
 			MFInput_GetTouchPanelStateInternal(a, &pState->touchPanelStates[a]);
 	}
-	
+
 	// add network devices
 	if(MFNetwork_IsRemoteInputServerRunning())
 	{
@@ -691,7 +691,7 @@ MF_API float MFInput_Read(int button, int device, int deviceID, float *pPrevStat
 			{
 				if(pPrevState)
 					*pPrevState = gInputState.prevAccelerometerStates[deviceID].values[button];
-			
+
 				return gInputState.accelerometerStates[deviceID].values[button];
 			}
 			return gInputState.accelerometerStates[deviceID].values[button] - gInputState.accelerometerStates[deviceID].values[button - Acc_XDelta];
@@ -820,14 +820,21 @@ MF_API size_t MFInput_GetEvents(int device, int deviceID, MFInputEvent *pEvents,
 	uint32 toRead = 0;
 	if(gNumEvents[device][deviceID] != 0)
 	{
-		toRead = MFMin((uint32)maxEvents, gNumEvents[device][deviceID] - gNumEventsRead[device][deviceID]);
-		MFCopyMemory(pEvents, gInputEvents[device][deviceID] + gNumEventsRead[device][deviceID], sizeof(MFInputEvent)*toRead);
-
-		if(!bPeek)
+		if(!pEvents)
 		{
-			gNumEventsRead[device][deviceID] += toRead;
-			if(gNumEventsRead[device][deviceID] == gNumEvents[device][deviceID])
-				gNumEvents[device][deviceID] = gNumEventsRead[device][deviceID] = 0;
+			toRead = gNumEvents[device][deviceID] - gNumEventsRead[device][deviceID];
+		}
+		else
+		{
+			toRead = MFMin((uint32)maxEvents, gNumEvents[device][deviceID] - gNumEventsRead[device][deviceID]);
+			MFCopyMemory(pEvents, gInputEvents[device][deviceID] + gNumEventsRead[device][deviceID], sizeof(MFInputEvent)*toRead);
+
+			if(!bPeek)
+			{
+				gNumEventsRead[device][deviceID] += toRead;
+				if(gNumEventsRead[device][deviceID] == gNumEvents[device][deviceID])
+					gNumEvents[device][deviceID] = gNumEventsRead[device][deviceID] = 0;
+			}
 		}
 	}
 
