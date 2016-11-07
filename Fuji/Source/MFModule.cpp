@@ -247,9 +247,10 @@ uint64 MFModule_RegisterEngineModules()
 	modules |= MFModule_GetBuiltinModuleMask(MFBIM_MFScript);
 #endif
 
-	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_RegisterModules);
+	void *pUserData;
+	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_RegisterModules, &pUserData);
 	if(pCallback)
-		pCallback();
+		pCallback(pUserData);
 
 	return modules;
 }
@@ -322,9 +323,10 @@ MF_API bool MFModule_InitModules()
 		MFHeap_Mark();
 
 		// let the game perform any post-init work
-		MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_InitDone);
+		void *pUserData;
+		MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_InitDone, &pUserData);
 		if(pCallback)
-			pCallback();
+			pCallback(pUserData);
 
 		// init the timedelta to the moment after initialisation completes
 		MFSystem_UpdateTimeDelta();

@@ -213,7 +213,7 @@ enum MFCallback
 /**
  * Fuji system callback function prototype.
  */
-typedef void (*MFSystemCallbackFunction)(void);
+typedef void (*MFSystemCallbackFunction)(void *pUserData);
 
 /**
  * Parameters supplied when initialising Fuji.
@@ -279,17 +279,20 @@ MF_API void MFSystem_Quit();
  * Sets a Fuji system callback function.
  * @param callback The callback to set from the MFCallback enum.
  * @param pCallbackFunction Pointer to the callback function.
+ * @param pUserData Optional user-data pointer that will be passed to the handler each call.
+ * @param ppOldUserData Optional pointer that received the specified callback's old user-data.
  * @return A pointer to the old callback function which MUST be called in the new registered callback.
  */
-MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
+MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction, void *pUserData = NULL, void **ppOldUserData = NULL);
 
 /**
  * Get a Fuji system callback function.
  * Gets a registered Fuji system callback function pointer.
  * @param callback The callback to get from the MFCallback enum.
+ * @param ppUserData Optional pointer that receives the specified callback's user-data.
  * @return The currently registered callback function for the requested callback.
  */
-MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
+MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback, void **ppUserData = NULL);
 
 /**
  * Get the engine defaults.

@@ -57,6 +57,7 @@ struct MFEngineInstance
 	char builtinModuleIDs[MFBIM_Max];
 
 	MFSystemCallbackFunction pSystemCallbacks[MFCB_Max];
+	void *pSystemCallbackData[MFCB_Max];
 };
 
 extern "C"

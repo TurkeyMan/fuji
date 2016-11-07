@@ -431,9 +431,10 @@ bool MFRenderer_ResetDisplay(MFDisplay *pDisplay, const MFDisplaySettings *pSett
 	void MFRenderState_Recreate();
 	MFRenderState_Recreate();
 
-	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_DisplayReset);
+	void *pUserData;
+	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_DisplayReset, &pUserData);
 	if(pCallback)
-		pCallback();
+		pCallback(pUserData);
 
 	return true;
 }

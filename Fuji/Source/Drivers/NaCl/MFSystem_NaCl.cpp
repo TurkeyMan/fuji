@@ -132,9 +132,10 @@ Fuji::Fuji(PP_Instance instance)
 Fuji::~Fuji()
 {
 	// Deinit the game
-	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_Deinit);
+	void *pUserData;
+	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_Deinit, &pUserData);
 	if(pCallback)
-		pCallback();
+		pCallback(pUserData);
 
 	// Deinit fuji
 //	MFSystem_Deinit();

@@ -11,7 +11,7 @@ struct MFIniLine;
 /**
 * Fuji system callback function prototype.
 */
-alias extern (C) void function() MFSystemCallbackFunction;
+alias extern (C) void function(void*) MFSystemCallbackFunction;
 
 @nogc:
 
@@ -296,17 +296,20 @@ extern (C) void MFSystem_Quit();
 * Sets a Fuji system callback function.
 * @param callback The callback to set from the MFCallback enum.
 * @param pCallbackFunction Pointer to the callback function.
+* @param pUserData Optional user-data pointer that will be passed to the handler each call.
+* @param ppOldUserData Optional pointer that received the specified callback's old user-data.
 * @return A pointer to the old callback function which MUST be called in the new registered callback.
 */
-extern (C) MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction);
+extern (C) MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction, void* pUserData = null, void** ppOldUserData = null);
 
 /**
 * Get a Fuji system callback function.
 * Gets a registered Fuji system callback function pointer.
 * @param callback The callback to get from the MFCallback enum.
+* @param ppUserData Optional pointer that receives the specified callback's user-data.
 * @return The currently registered callback function for the requested callback.
 */
-extern (C) MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback);
+extern (C) MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback, void **ppUserData = null);
 
 /**
 * Get the engine defaults.

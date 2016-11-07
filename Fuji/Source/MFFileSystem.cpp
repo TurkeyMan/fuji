@@ -159,7 +159,7 @@ exit:
 	return 0;
 }
 
-void MFFileSystem_RegisterDefaultArchives()
+void MFFileSystem_RegisterDefaultArchives(void *)
 {
 	GET_MODULE_DATA(MFFileSystemState);
 
@@ -268,9 +268,10 @@ MFInitStatus MFFileSystem_InitFileSystems(int moduleId, bool bPerformInitialisat
 	pModuleData->hHTTPFileSystem = ((MFFileSystemGlobalState*)gpEngineInstance->modules[gFileSystemHTTPId].pModuleData)->hFileSystemHandle;
 
 	// call the filesystem init callback
-	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit);
+	void *pUserData;
+	MFSystemCallbackFunction pFilesystemInitCallback = MFSystem_GetSystemCallback(MFCB_FileSystemInit, &pUserData);
 	if(pFilesystemInitCallback)
-		pFilesystemInitCallback();
+		pFilesystemInitCallback(pUserData);
 
 	return MFIS_Succeeded;
 }

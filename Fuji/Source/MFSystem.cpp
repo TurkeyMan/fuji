@@ -177,7 +177,7 @@ MFInitStatus MFSystem_InitModule(int moduleId, bool bPerformInitialisation)
 
 	ALLOC_MODULE_DATA(MFSystemState);
 
-	void MFFileSystem_RegisterDefaultArchives();
+	void MFFileSystem_RegisterDefaultArchives(void *);
 	gpEngineInstance->pSystemCallbacks[MFCB_FileSystemInit] = MFFileSystem_RegisterDefaultArchives;
 
 	gpEngineInstance->bDrawSystemInfo = true;
@@ -364,7 +364,7 @@ int MFSystem_GameLoop()
 			MFSystem_RunFrame();
 
 		if(gpEngineInstance->pSystemCallbacks[MFCB_Deinit])
-			gpEngineInstance->pSystemCallbacks[MFCB_Deinit]();
+			gpEngineInstance->pSystemCallbacks[MFCB_Deinit](gpEngineInstance->pSystemCallbackData[MFCB_Deinit]);
 
 		// deinit modules
 		MFModule_DeinitModules();
@@ -388,7 +388,7 @@ void MFSystem_RunFrame()
 	MFCallstack_BeginFrame();
 
 	if(gpEngineInstance->pSystemCallbacks[MFCB_HandleSystemMessages])
-		gpEngineInstance->pSystemCallbacks[MFCB_HandleSystemMessages]();
+		gpEngineInstance->pSystemCallbacks[MFCB_HandleSystemMessages](gpEngineInstance->pSystemCallbackData[MFCB_HandleSystemMessages]);
 	else
 		MFSystem_HandleEventsPlatformSpecific();
 
@@ -401,7 +401,7 @@ void MFSystem_RunFrame()
 		MFCALLSTACKcs("MFSystem_RunFrame : Update");
 
 		if(gpEngineInstance->pSystemCallbacks[MFCB_Update])
-			gpEngineInstance->pSystemCallbacks[MFCB_Update]();
+			gpEngineInstance->pSystemCallbacks[MFCB_Update](gpEngineInstance->pSystemCallbackData[MFCB_Update]);
 	}
 	MFSystem_PostUpdate();
 
@@ -413,7 +413,7 @@ void MFSystem_RunFrame()
 
 		MFView_SetDefault();
 		if(gpEngineInstance->pSystemCallbacks[MFCB_Draw])
-			gpEngineInstance->pSystemCallbacks[MFCB_Draw]();
+			gpEngineInstance->pSystemCallbacks[MFCB_Draw](gpEngineInstance->pSystemCallbackData[MFCB_Draw]);
 		MFSystem_Draw();
 
 		// build and kick the GPU command buffers
@@ -452,19 +452,24 @@ MF_API float MFSystem_GetFPS()
 }
 #endif // !defined(_FUJI_UTIL)
 
-MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction)
+MF_API MFSystemCallbackFunction MFSystem_RegisterSystemCallback(MFCallback callback, MFSystemCallbackFunction pCallbackFunction, void *pUserData, void **ppOldUserData)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
 	MFSystemCallbackFunction pOldCallback = gpEngineInstance->pSystemCallbacks[callback];
 	gpEngineInstance->pSystemCallbacks[callback] = pCallbackFunction;
+	if(ppOldUserData)
+		*ppOldUserData = gpEngineInstance->pSystemCallbackData[callback];
+	gpEngineInstance->pSystemCallbackData[callback] = pUserData;
 	return pOldCallback;
 }
 
-MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback)
+MF_API MFSystemCallbackFunction MFSystem_GetSystemCallback(MFCallback callback, void **ppUserData)
 {
 	MFDebug_Assert(callback >= 0 && callback < MFCB_Max, "Unknown system callback.");
 
+	if(ppUserData)
+		*ppUserData = gpEngineInstance->pSystemCallbackData[callback];
 	return gpEngineInstance->pSystemCallbacks[callback];
 }
 

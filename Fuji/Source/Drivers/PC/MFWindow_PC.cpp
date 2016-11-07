@@ -59,9 +59,10 @@ int MFWindowPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
 				MFDisplay_GainedFocus(pWindow->pDisplay);
 
-				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_GainedFocus);
+				void *pUserData;
+				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_GainedFocus, &pUserData);
 				if(pCallback)
-					pCallback();
+					pCallback(pUserData);
 			}
 			else
 			{
@@ -69,9 +70,10 @@ int MFWindowPC_HandleWindowMessages(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
 				MFDisplay_LostFocus(pWindow->pDisplay);
 
-				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_LostFocus);
+				void *pUserData;
+				MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_LostFocus, &pUserData);
 				if(pCallback)
-					pCallback();
+					pCallback(pUserData);
 			}
 			break;
 		}
