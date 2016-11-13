@@ -26,6 +26,13 @@ string makePath(const(char)[][] parts ...)
 
 @nogc:
 
+bool patternMatch(const(char)[] pattern, const(char)[] filename, bool bCaseSensitive = false)
+{
+	auto p = Stringz!()(pattern);
+	auto f = Stringz!()(filename);
+	return MFString_PatternMatch(p, f, null, bCaseSensitive);
+}
+
 bool isPathSeparator(dchar c)
 {
 	return c == '/' || c == '\\';
