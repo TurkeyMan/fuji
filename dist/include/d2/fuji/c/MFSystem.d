@@ -15,7 +15,7 @@ alias extern (C) void function(void*) MFSystemCallbackFunction;
 
 @nogc:
 
-enum MFMonth : ushort
+enum MFMonth : uint
 {
 	January = 1,
 	February,
@@ -31,9 +31,9 @@ enum MFMonth : ushort
 	December
 }
 
-enum MFDayOfWeek : ushort
+enum MFDayOfWeek : uint
 {
-	Sunday,
+	Sunday = 0,
 	Monday,
 	Tuesday,
 	Wednesday,
@@ -44,18 +44,24 @@ enum MFDayOfWeek : ushort
 
 struct MFSystemTime
 {
-	ushort year;
-	MFMonth month;
-	MFDayOfWeek dayOfWeek;
-	ushort day;
-	ushort hour;
-	ushort minute;
-	ushort second;
-	ushort tenthMillisecond; // ie, 100 microseconds
+	import std.bitmanip : bitfields;
+
+	mixin(bitfields!(
+		ushort,		"year",			15,
+		MFMonth,	"month",		4,
+		MFDayOfWeek,"dayOfWeek",	3,
+		ubyte,		"day",			5,
+		ubyte,		"hour",			5
+	));
+	mixin(bitfields!(
+		ubyte,		"minute",		6,
+		ubyte,		"second",		6,
+		uint,		"microsecond",	20
+	));
 
 nothrow:
 @nogc:
-	bool opEquals(MFSystemTime other) const pure	{ return tenthMillisecond == other.tenthMillisecond && second == other.second && minute == other.minute && hour == other.hour && day == other.day && month == other.month && year == other.year; }
+	bool opEquals(MFSystemTime other) const pure	{ return microsecond == other.microsecond && second == other.second && minute == other.minute && hour == other.hour && day == other.day && month == other.month && year == other.year; }
 	int opCmp(MFSystemTime other) const pure
 	{
 		// TODO: should we combine these and compare as long's?
@@ -72,9 +78,14 @@ nothrow:
 		if(diff) return diff;
 		diff = second - other.second;
 		if(diff) return diff;
-		return tenthMillisecond - other.tenthMillisecond;
+		return microsecond - other.microsecond;
 	}
 }
+
+/**
+* MFFileTime stores a time stamp in a way that can be ordered and compared.
+*/
+alias MFFileTime = ulong;
 
 /**
 * System callbacks.
@@ -380,10 +391,17 @@ extern (C) const(char)* MFSystem_GetSystemName();
 extern (C) MFEndian MFSystem_GetPlatformEndian(int platform);
 
 extern (C) void MFSystem_SystemTime(MFSystemTime* pSystemTime);
-extern (C) void MFSystem_SystemTimeToFileTime(const(MFSystemTime)* pSystemTime, MFFileTime* pFileTime);
-extern (C) void MFSystem_FileTimeToSystemTime(const(MFFileTime)* pFileTime, MFSystemTime* pSystemTime);
+extern (C) void MFSystem_LocalTime(MFSystemTime* pLocalTime);
+extern (C) void MFSystem_FileTime(MFFileTime* pFileTime);
+
 extern (C) void MFSystem_SystemTimeToLocalTime(const(MFSystemTime)* pSystemTime, MFSystemTime* pLocalTime);
+extern (C) void MFSystem_SystemTimeToFileTime(const(MFSystemTime)* pSystemTime, MFFileTime* pFileTime);
+
 extern (C) void MFSystem_LocalTimeToSystemTime(const(MFSystemTime)* pLocalTime, MFSystemTime* pSystemTime);
+extern (C) void MFSystem_LocalTimeToFileTime(const(MFSystemTime)* pLocalTime, MFFileTime* pFileTime);
+
+extern (C) void MFSystem_FileTimeToSystemTime(const(MFFileTime)* pFileTime, MFSystemTime* pSystemTime);
+extern (C) void MFSystem_FileTimeToLocalTime(const(MFFileTime)* pFileTime, MFSystemTime* pLocalTime);
 
 /**
 * Read the time stamp counter.

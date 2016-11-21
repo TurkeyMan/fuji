@@ -652,7 +652,7 @@ static int MFFileSystem_GetNumEntries(const char *pFindPattern, bool recursive, 
 	{
 		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
 		{
-			if(findData.attributes & MFFA_Directory)
+			if(findData.info.attributes & MFFA_Directory)
 			{
 				if(recursive)
 				{
@@ -704,7 +704,7 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 	{
 		if(MFString_Compare(findData.pFilename, ".") && MFString_Compare(findData.pFilename, "..") && MFString_Compare(findData.pFilename, ".svn"))
 		{
-			if(findData.attributes & MFFA_Directory)
+			if(findData.info.attributes & MFFA_Directory)
 			{
 				if(recursive)
 				{
@@ -716,27 +716,28 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 					else
 					{
 						size_t stringCacheSize = 0;
-						pToc->size = MFFileSystem_GetNumEntries(newPath.CStr(), recursive, flatten, &stringCacheSize);
+						pToc->numChildren = MFFileSystem_GetNumEntries(newPath.CStr(), recursive, flatten, &stringCacheSize);
 
-						if(pToc->size)
+						MFString_Copy(pStringCache, findData.pFilename);
+						pToc->pName = pStringCache;
+						pStringCache += MFString_Length(findData.pFilename)+1;
+
+						pToc->info = findData.info;
+						pToc->pFilesysData = pCurrentDir;
+						pToc->pParent = pParent;
+
+						if (pToc->numChildren)
 						{
-							MFString_Copy(pStringCache, findData.pFilename);
-							pToc->pName = pStringCache;
-							pStringCache += MFString_Length(findData.pFilename)+1;
+							size_t sizeOfToc = sizeof(MFTOCEntry)*pToc->numChildren;
+							pToc->pChildren = (MFTOCEntry*)MFHeap_Alloc(sizeOfToc + stringCacheSize);
 
-							pToc->flags = MFTF_Directory;
-							pToc->pFilesysData = pCurrentDir;
-							pToc->pParent = pParent;
-							pToc->size = 0;
-
-							size_t sizeOfToc = sizeof(MFTOCEntry)*pToc->size;
-							pToc->pChild = (MFTOCEntry*)MFHeap_Alloc(sizeof(MFTOCEntry)*sizeOfToc + stringCacheSize);
-
-							char *pNewStringCache = ((char*)pToc->pChild)+sizeOfToc;
-							MFFileSystem_BuildToc(newPath.CStr(), pToc->pChild, pToc, pNewStringCache, recursive, flatten);
-
-							++pToc;
+							char *pNewStringCache = (char*)pToc->pChildren + sizeOfToc;
+							MFFileSystem_BuildToc(newPath.CStr(), pToc->pChildren, pToc, pNewStringCache, recursive, flatten);
 						}
+						else
+							pToc->pChildren = NULL;
+
+						++pToc;
 					}
 				}
 			}
@@ -749,11 +750,10 @@ MFTOCEntry* MFFileSystem_BuildToc(const char *pFindPattern, MFTOCEntry *pToc, MF
 				pToc->pFilesysData = pCurrentDir;
 
 				pToc->pParent = pParent;
-				pToc->pChild = NULL;
+				pToc->pChildren = NULL;
+				pToc->numChildren = 0;
 
-				MFDebug_Assert(findData.fileSize < 0x100000000LL, "Files larger than 4gb not yet supported...");
-				pToc->size = (uint32)findData.fileSize;
-				pToc->flags = 0;
+				pToc->info = findData.info;
 
 				++pToc;
 			}
@@ -960,14 +960,14 @@ MFTOCEntry *MFFileSystem_GetTocEntry(const char *pFilename, MFTOCEntry *pEntry, 
 		{
 			if(isDirectory)
 			{
-				if(pEntry[a].flags & MFTF_Directory)
+				if(pEntry[a].info.attributes & MFFA_Directory)
 				{
-					return MFFileSystem_GetTocEntry(pFilename, pEntry[a].pChild, pEntry[a].size);
+					return MFFileSystem_GetTocEntry(pFilename, pEntry[a].pChildren, pEntry[a].numChildren);
 				}
 			}
 			else
 			{
-				if(!(pEntry[a].flags & MFTF_Directory))
+				if(!(pEntry[a].info.attributes & MFFA_Directory))
 				{
 					return &pEntry[a];
 				}
@@ -984,9 +984,9 @@ void MFFileSystem_ReleaseToc(MFTOCEntry *pEntry, int numEntries)
 
 	for(int a=0; a<numEntries; a++)
 	{
-		if(pEntry[a].flags & MFTF_Directory)
+		if(pEntry[a].info.attributes & MFFA_Directory)
 		{
-			MFFileSystem_ReleaseToc(pEntry[a].pChild, pEntry[a].size);
+			MFFileSystem_ReleaseToc(pEntry[a].pChildren, pEntry[a].numChildren);
 		}
 	}
 
@@ -1261,10 +1261,7 @@ MF_API MFFind* MFFileSystem_FindFirst(const char *pSearchPattern, MFFindData *pF
 				MFString_Copy(pFindData->pFilename, pMount->pEntries[file].pName);
 				MFString_Copy(pFindData->pSystemPath, (char*)pMount->pEntries[file].pFilesysData);
 
-				pFindData->attributes = ((pMount->pEntries[file].flags & MFTF_Directory) ? MFFA_Directory : 0) |
-										((pMount->pEntries[file].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
-										((pMount->pEntries[file].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
-				pFindData->fileSize = pMount->pEntries[file].size;
+				pFindData->info = pMount->pEntries[file].info;
 			}
 		}
 	}
@@ -1305,10 +1302,7 @@ MF_API bool MFFileSystem_FindNext(MFFind *pFind, MFFindData *pFindData)
 			MFString_Copy(pFindData->pFilename, pFind->pMount->pEntries[id].pName);
 			MFString_Copy(pFindData->pSystemPath, (char*)pFind->pMount->pEntries[id].pFilesysData);
 
-			pFindData->attributes = ((pFind->pMount->pEntries[id].flags & MFTF_Directory) ? MFFA_Directory : 0) |
-									((pFind->pMount->pEntries[id].flags & MFTF_SymbolicLink) ? MFFA_SymLink : 0) |
-									((pFind->pMount->pEntries[id].flags & MFTF_Hidden) ? MFFA_Hidden : 0);
-			pFindData->fileSize = pFind->pMount->pEntries[id].size;
+			pFindData->info = pFind->pMount->pEntries[id].info;
 
 			pFind->pFilesystemData = (void*)id;
 		}

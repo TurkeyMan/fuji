@@ -53,94 +53,74 @@ void MFSystem_DrawPlatformSpecific()
 }
 #endif // !defined(_FUJI_UTIL)
 
+inline tm MFTimeToTm(const MFSystemTime &t)
+{
+	tm r;
+	t.tm_year = t.year - 1900;
+	t.tm_mon = t.month - 1;
+	t.tm_wday = t.dayOfWeek;
+	t.tm_mday = t.day;
+	t.tm_hour = t.hour;
+	t.tm_min = t.minute;
+	t.tm_sec = t.second;
+	t.tm_yday = 0;
+	t.tm_isdst = 0;
+	return r;
+}
+inline MFSystemTime TmToMFTime(const tm *t)
+{
+	MFSystemTime r;
+	r.year = 1900 + t->tm_year;
+	r.month = t->tm_mon + 1;
+	r.dayOfWeek = t->tm_wday;
+	r.day = t->tm_mday;
+	r.hour = t->tm_hour;
+	r.minute = t->tm_min;
+	r.second = t->tm_sec;
+	r.microsecond = 0;
+	return r;
+}
+
 MF_API void MFSystem_SystemTime(MFSystemTime* pSystemTime)
 {
-	time_t now;
-	time(&now);
-	tm *utc = gmtime(&now);
-
-	pSystemTime->year = 1900 + utc->tm_year;
-	pSystemTime->month = utc->tm_mon + 1;
-	pSystemTime->dayOfWeek = utc->tm_wday;
-	pSystemTime->day = utc->tm_mday;
-	pSystemTime->hour = utc->tm_hour;
-	pSystemTime->minute = utc->tm_min;
-	pSystemTime->second = utc->tm_sec;
-	pSystemTime->tenthMillisecond = 0;
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	tm *utc = gmtime(&now.tv_sec);
+	*pSystemTime = TmToMFTime(utc);
+	pSystemTime->microsecond = now.tv_usec;
 }
 
 MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime)
 {
-	tm utc;
-	utc.tm_year = pSystemTime->year - 1900;
-	utc.tm_mon = pSystemTime->month - 1;
-	utc.tm_mday = pSystemTime->day;
-	utc.tm_hour = pSystemTime->hour;
-	utc.tm_min = pSystemTime->minute;
-	utc.tm_sec = pSystemTime->second;
+	tm utc = MFTimeToTm(*pSystemTime);
 	time_t t = timegm(&utc);
-	pFileTime->ticks = (uint64)t;
+	*pFileTime = ((uint64)t << 32) | pSystemTime->microsecond;
 }
 
 MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime)
 {
-	time_t t = (time_t)pFileTime->ticks;
+	time_t t = (time_t)(*pFileTime >> 32);
 	tm *utc = gmtime(&t);
-
-	pSystemTime->year = 1900 + utc->tm_year;
-	pSystemTime->month = utc->tm_mon + 1;
-	pSystemTime->dayOfWeek = utc->tm_wday;
-	pSystemTime->day = utc->tm_mday;
-	pSystemTime->hour = utc->tm_hour;
-	pSystemTime->minute = utc->tm_min;
-	pSystemTime->second = utc->tm_sec;
-	pSystemTime->tenthMillisecond = 0;
+	*pSystemTime = TmToMFTime(utc);
+	pSystemTime->microsecond = *pFileTime & 0xFFFFF;
 }
 
 MF_API void MFSystem_SystemTimeToLocalTime(const MFSystemTime *pSystemTime, MFSystemTime *pLocalTime)
 {
-	tm utc;
-	utc.tm_year = pSystemTime->year - 1900;
-	utc.tm_mon = pSystemTime->month - 1;
-	utc.tm_mday = pSystemTime->day;
-	utc.tm_hour = pSystemTime->hour;
-	utc.tm_min = pSystemTime->minute;
-	utc.tm_sec = pSystemTime->second;
-
+	tm utc = MFTimeToTm(*pSystemTime);
 	time_t t = timegm(&utc);
 	tm *lt = localtime(&t);
-
-	pLocalTime->year = 1900 + lt->tm_year;
-	pLocalTime->month = lt->tm_mon + 1;
-	pLocalTime->dayOfWeek = lt->tm_wday;
-	pLocalTime->day = lt->tm_mday;
-	pLocalTime->hour = lt->tm_hour;
-	pLocalTime->minute = lt->tm_min;
-	pLocalTime->second = lt->tm_sec;
-	pLocalTime->tenthMillisecond = 0;
+	*pLocalTime = TmToMFTime(lt);
+	pLocalTime->microsecond = pSystemTime->microsecond;
 }
 
 MF_API void MFSystem_LocalTimeToSystemTime(const MFSystemTime *pLocalTime, MFSystemTime *pSystemTime)
 {
-	tm lt;
-	lt.tm_year = pLocalTime->year - 1900;
-	lt.tm_mon = pLocalTime->month - 1;
-	lt.tm_mday = pLocalTime->day;
-	lt.tm_hour = pLocalTime->hour;
-	lt.tm_min = pLocalTime->minute;
-	lt.tm_sec = pLocalTime->second;
-
+	tm lt = MFTimeToTm(*pLocalTime);
 	time_t t = timelocal(&lt);
 	tm *utc = gmtime(&t);
-
-	pSystemTime->year = 1900 + utc->tm_year;
-	pSystemTime->month = utc->tm_mon + 1;
-	pSystemTime->dayOfWeek = utc->tm_wday;
-	pSystemTime->day = utc->tm_mday;
-	pSystemTime->hour = utc->tm_hour;
-	pSystemTime->minute = utc->tm_min;
-	pSystemTime->second = utc->tm_sec;
-	pSystemTime->tenthMillisecond = 0;
+	*pSystemTime = TmToMFTime(utc);
+	pSystemTime->microsecond = pLocalTime->microsecond;
 }
 
 MF_API uint64 MFSystem_ReadRTC()

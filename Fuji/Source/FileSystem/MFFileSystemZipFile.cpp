@@ -312,6 +312,34 @@ uint64 MFFileZipFile_Seek(MFFile* pFile, int64 bytes, MFFileSeek relativity)
 	return (int)pFile->offset;
 }
 
+inline MFFileTime MFFileZipFile_DosTimeToFileTime(uLong dosTime)
+{
+	// woah! dos dates are lame!
+	union DosDate {
+		uLong dosDate;
+		struct {
+			uint16 fatTime;
+			uint16 fatDate;
+		};
+	} date;
+	date.dosDate = dosTime;
+
+	// DOS times are local times... >_<
+	MFSystemTime localTime;
+	localTime.year = 1980 + (date.fatDate >> 9);
+	localTime.month = ((date.fatDate >> 5) & 0xF);
+	localTime.day = (date.fatDate & 0x1F);
+	localTime.hour = date.fatTime >> 11;
+	localTime.minute = (date.fatTime >> 5) & 0x3F;
+	localTime.second = (date.fatTime & 0x1F) * 2;
+	localTime.microsecond = 0;
+	localTime.dayOfWeek = 0;
+
+	MFFileTime r;
+	MFSystem_LocalTimeToFileTime(&localTime, &r);
+	return r;
+}
+
 bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindData *pFindData)
 {
 	unzFile zipFile = (unzFile)pFind->pMount->pFilesysData;
@@ -323,8 +351,13 @@ bool MFFileZipFile_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDa
 
 	unz_file_info fileInfo;
 	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
-	pFindData->attributes = 0;
-	pFindData->fileSize = fileInfo.uncompressed_size;
+	pFindData->info.attributes = 0;
+	pFindData->info.size = fileInfo.uncompressed_size;
+
+	pFindData->info.writeTime = MFFileZipFile_DosTimeToFileTime(fileInfo.dosDate);
+	pFindData->info.createTime = pFindData->info.writeTime; // TODO: can we recover these timestamps?
+	pFindData->info.accessTime = pFindData->info.writeTime;
+
 	pFindData->pSystemPath[0] = 0;
 
 	return true;
@@ -341,8 +374,12 @@ bool MFFileZipFile_FindNext(MFFind *pFind, MFFindData *pFindData)
 
 	unz_file_info fileInfo;
 	unzGetCurrentFileInfo(zipFile, &fileInfo, pFindData->pFilename, sizeof(pFindData->pFilename), NULL, 0, NULL, 0);
-	pFindData->attributes = 0;
-	pFindData->fileSize = fileInfo.uncompressed_size;
+	pFindData->info.attributes = 0;
+	pFindData->info.size = fileInfo.uncompressed_size;
+
+	pFindData->info.writeTime = MFFileZipFile_DosTimeToFileTime(fileInfo.dosDate);
+	pFindData->info.createTime = pFindData->info.writeTime;
+	pFindData->info.accessTime = pFindData->info.writeTime;
 
 	return true;
 }

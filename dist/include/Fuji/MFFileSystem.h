@@ -11,6 +11,10 @@
 #if !defined(_MFFILESYSTEM_H)
 #define _MFFILESYSTEM_H
 
+// defined in MFSystem.h
+typedef uint64 MFFileTime;
+
+
 /**
  * @struct MFFile
  * Represents a Fuji file.
@@ -21,6 +25,20 @@ struct MFFile;
  * Represents a Fuji FileSystem.
  */
 typedef int MFFileSystemHandle;
+
+/**
+ * File attributes.
+ * These are a set of file attributes.
+ */
+enum MFFileAttributes
+{
+	MFFA_Directory = MFBIT(0),	/**< File is a directory */
+	MFFA_SymLink = MFBIT(1),	/**< File is a symbolic link */
+	MFFA_Hidden = MFBIT(2),		/**< File is hidden */
+	MFFA_ReadOnly = MFBIT(3),	/**< File is read only */
+
+	MFFA_ForceInt = 0x7FFFFFFF	/**< Force MFFileAttributes to an int type */
+};
 
 /**
  * File open flags.
@@ -98,18 +116,13 @@ struct MFOpenData
 	uint32 openFlags;	/**< Open file flags, this can be values from the MFOpenFlags enum */
 };
 
-struct MFFileTime
-{
-	uint64 ticks;
-};
-
 struct MFFileInfo
 {
-	uint64 size;
-	uint32 attributes;
-	MFFileTime createTime;
-	MFFileTime writeTime;
-	MFFileTime accessTime;
+	uint64 size;			/**< The files size */
+	uint32 attributes;		/**< The files attributes */
+	MFFileTime createTime;	/**< Time the file was created */
+	MFFileTime writeTime;	/**< Last time the file was written */
+	MFFileTime accessTime;	/**< Last time the file was accessed */
 };
 
 /**
@@ -285,29 +298,15 @@ enum MFMountPriority
 };
 
 /**
- * File attributes.
- * These are a set of file attributes.
- */
-enum MFFileAttributes
-{
-	MFFA_Directory = MFBIT(0),	/**< File is a directory */
-	MFFA_SymLink = MFBIT(1),	/**< File is a symbolic link */
-	MFFA_Hidden = MFBIT(2),		/**< File is hidden */
-	MFFA_ReadOnly = MFBIT(3),	/**< File is read only */
-
-	MFFA_ForceInt = 0x7FFFFFFF	/**< Force MFFileAttributes to an int type */
-};
-
-/**
  * Mount data base structure.
  * Base structure for mount data.
  */
 struct MFMountData
 {
-	int cbSize;					/**< Size of the structure */
+	uint16 cbSize;				/**< Size of the structure */
+	int16 priority;				/**< Filsystem priority when searching for files */
 	uint32 flags;				/**< Mount flags, this can be values from the MFMountFlags enum */
 	const char *pMountpoint;	/**< The mountpoint string (the volume name) */
-	int priority;				/**< Filsystem priority when searching for files */
 };
 
 /**
@@ -337,11 +336,7 @@ struct MFFindData
 {
 	char pFilename[224];	/**< The files filename */
 	char pSystemPath[260];	/**< The system path to the file */
-	uint32 attributes;		/**< The files attributes */
-	uint64 fileSize;		/**< The files size */
-	MFFileTime createTime;	/**< Time the file was created */
-	MFFileTime writeTime;	/**< Last time the file was written */
-	MFFileTime accessTime;	/**< Last time the file was accessed */
+	MFFileInfo info;		/**< File info struct */
 };
 
 /**

@@ -228,12 +228,12 @@ bool MFFileNative_FindFirst(MFFind *pFind, const char *pSearchPattern, MFFindDat
 		return false;
 
 	pFindData->attributes = ((fd.attrib & _A_SUBDIR) ? MFFA_Directory : 0) |
-							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
-							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
+	                        ((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
+	                        ((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
-	pFindData->createTime.ticks = (uint64)fd.time_write;
-	pFindData->writeTime.ticks = (uint64)fd.time_write;
-	pFindData->accessTime.ticks = (uint64)fd.time_access;
+	pFindData->createTime = (uint64)fd.time_write;
+	pFindData->writeTime = (uint64)fd.time_write;
+	pFindData->accessTime = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);
 
 	MFString_CopyCat(pFindData->pSystemPath, (char*)pFind->pMount->pFilesysData, pSearchPattern);
@@ -264,12 +264,12 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 	MFDebug_Assert(more == 0, "Something's not quite right here.. You have a bad CRT.");
 
 	pFindData->attributes = ((fd.attrib & _A_SUBDIR) ? MFFA_Directory : 0) |
-							((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
-							((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
+	                        ((fd.attrib & _A_HIDDEN) ? MFFA_Hidden : 0) |
+	                        ((fd.attrib & _A_RDONLY) ? MFFA_ReadOnly : 0);
 	pFindData->fileSize = fd.size;
-	pFindData->createTime.ticks = (uint64)fd.time_write;
-	pFindData->writeTime.ticks = (uint64)fd.time_write;
-	pFindData->accessTime.ticks = (uint64)fd.time_access;
+	pFindData->createTime = (uint64)fd.time_write;
+	pFindData->writeTime = (uint64)fd.time_write;
+	pFindData->accessTime = (uint64)fd.time_access;
 	MFString_Copy((char*)pFindData->pFilename, fd.name);
 
 	return true;

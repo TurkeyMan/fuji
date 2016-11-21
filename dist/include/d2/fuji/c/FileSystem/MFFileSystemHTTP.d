@@ -71,7 +71,7 @@ struct MFOpenDataHTTP
  */
 struct MFMountDataHTTP
 {
-	MFMountData base = MFMountData(typeof(this).sizeof, MFMountData.init.flags, MFMountData.init.pMountpoint, MFMountData.init.priority);
+	MFMountData base = MFMountData(typeof(this).sizeof, MFMountData.init.priority, MFMountData.init.flags, MFMountData.init.pMountpoint);
 	alias base this;
 }
 

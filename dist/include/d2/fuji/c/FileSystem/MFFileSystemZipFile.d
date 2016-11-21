@@ -24,7 +24,7 @@ struct MFOpenDataZipFile
  */
 struct MFMountDataZipFile
 {
-	MFMountData base = MFMountData(typeof(this).sizeof, MFMountData.init.flags, MFMountData.init.pMountpoint, MFMountData.init.priority);
+	MFMountData base = MFMountData(typeof(this).sizeof, MFMountData.init.priority, MFMountData.init.flags, MFMountData.init.pMountpoint);
 	alias base this;
 
 	MFFile* pZipArchive;	/**< The MFFile handle to an open zip file. This handle can exist in any other filesystem that supports seeking. */

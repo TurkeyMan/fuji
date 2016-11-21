@@ -291,13 +291,13 @@ bool MFFileNative_FindNext(MFFind *pFind, MFFindData *pFindData)
 		return false;
 
 	pFindData->attributes = (S_ISDIR(statbuf.st_mode) ? MFFA_Directory : 0) |
-							(S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0) |
-							(pDir->d_name[0] == '.' ? MFFA_Hidden : 0);
-							// TODO: Set MFFA_ReadOnly from write privileges
+	                        (S_ISLNK(statbuf.st_mode) ? MFFA_SymLink : 0) |
+	                        (pDir->d_name[0] == '.' ? MFFA_Hidden : 0);
+	                        // TODO: Set MFFA_ReadOnly from write privileges
 	pFindData->fileSize = statbuf.st_size;
-	pFindData->createTime.ticks = (uint64)statbuf.st_mtime;
-	pFindData->writeTime.ticks = (uint64)statbuf.st_mtime;
-	pFindData->accessTime.ticks = (uint64)statbuf.st_atime;
+	pFindData->createTime = (uint64)statbuf.st_mtime;
+	pFindData->writeTime = (uint64)statbuf.st_mtime;
+	pFindData->accessTime = (uint64)statbuf.st_atime;
 	MFString_Copy((char*)pFindData->pFilename, pDir->d_name);
 
 	return true;

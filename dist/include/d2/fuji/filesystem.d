@@ -55,12 +55,12 @@ nothrow:
 
 		systemPath = fd.systemPath.idup;
 
-		size = fd.fileSize;
-		attributes = fd.attributes;
+		size = fd.info.size;
+		attributes = fd.info.attributes;
 
-		createTime = fd.createTime;
-		writeTime = fd.writeTime;
-		accessTime = fd.accessTime;
+		createTime = fd.info.createTime;
+		writeTime = fd.info.writeTime;
+		accessTime = fd.info.accessTime;
 	}
 
 @nogc:
@@ -361,4 +361,11 @@ alias MFFileSystem_FindNext = fuji.c.MFFileSystem.MFFileSystem_FindNext;
 bool MFFileSystem_FindNext(MFFind* pFind, out MFFindData findData)
 {
 	return MFFileSystem_FindNext(pFind, &findData);
+}
+
+alias MFFileSystem_ResolveSystemPath = fuji.c.MFFileSystem.MFFileSystem_ResolveSystemPath;
+const(char)[] MFFileSystem_ResolveSystemPath(const(char)[] filename, bool bAbsolute = false)
+{
+	auto s = Stringz!()(filename);
+	return MFFileSystem_ResolveSystemPath(s, bAbsolute).toDStr;
 }

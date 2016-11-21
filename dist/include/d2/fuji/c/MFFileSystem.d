@@ -1,5 +1,6 @@
 module fuji.c.MFFileSystem;
 
+public import fuji.c.MFSystem : MFFileTime;
 import fuji.c.Fuji;
 import core.stdc.config;
 
@@ -92,23 +93,13 @@ struct MFOpenData
 	uint openFlags;						/**< Open file flags, this can be values from the MFOpenFlags enum */
 }
 
-struct MFFileTime
-{
-	ulong ticks;
-
-nothrow:
-@nogc:
-	bool opEquals(MFFileTime other) const pure	{ return ticks == other.ticks; }
-	long opCmp(MFFileTime other) const pure		{ return cast(long)ticks - cast(long)other.ticks; }
-}
-
 struct MFFileInfo
 {
-	ulong size;
-	uint attributes;
-	MFFileTime createTime;
-	MFFileTime writeTime;
-	MFFileTime accessTime;
+	ulong size;				/**< The files size */
+	uint attributes;		/**< The files attributes */
+	MFFileTime createTime;	/**< Time the file was created */
+	MFFileTime writeTime;	/**< Last time the file was written */
+	MFFileTime accessTime;	/**< Last time the file was accessed */
 }
 
 /**
@@ -298,10 +289,10 @@ enum MFFileAttributes : uint
 */
 struct MFMountData
 {
-	int cbSize = typeof(this).sizeof;		/**< Size of the structure */
-	uint flags;								/**< Mount flags, this can be values from the MFMountFlags enum */
-	const(char)* pMountpoint;				/**< The mountpoint string (the volume name) */
-	int priority = MFMountPriority.Normal;	/**< Filsystem priority when searching for files */
+	ushort cbSize = typeof(this).sizeof;		/**< Size of the structure */
+	short priority = MFMountPriority.Normal;	/**< Filsystem priority when searching for files */
+	uint flags;									/**< Mount flags, this can be values from the MFMountFlags enum */
+	const(char)* pMountpoint;					/**< The mountpoint string (the volume name) */
 }
 
 /**
@@ -328,11 +319,7 @@ struct MFFindData
 {
 	char[224] pFilename = void;		/**< The files filename */
 	char[260] pSystemPath = void;	/**< The system path to the file */
-	uint attributes;				/**< The files attributes */
-	ulong fileSize;					/**< The files size */
-	MFFileTime createTime;			/**< Time the file was created */
-	MFFileTime writeTime;			/**< Last time the file was written */
-	MFFileTime accessTime;			/**< Last time the file was accessed */
+	MFFileInfo info;				/**< File info struct */
 
 nothrow: @nogc:
 	@property const(char)[] filename() const pure	{ return pFilename.ptr.toDStr; }
@@ -438,6 +425,15 @@ extern (C) bool MFFileSystem_Exists(const(char)* pFilename);
 extern (C) bool MFFileSystem_Stat(const(char)* pPath, MFFileInfo* pFileInfo);
 extern (C) bool MFFileSystem_CreateDirectory(const(char)* pPath);
 extern (C) bool MFFileSystem_Delete(const(char)* pPath, bool bRecursive);
+
+/**
+* Resolve the system path to a file.
+* Attempts to resolve the path to a given file on the native filesystem.
+* @param pFilename The filename to resolve.
+* @param bAbsolute Convert to an absolute path.
+* @return The system path to the given file, or NULL if the file doesn't reside on the native filesystem.
+*/
+extern (C) const(char)* MFFileSystem_ResolveSystemPath(const(char)* pFilename, bool bAbsolute = false);
 
 /**
 * Get number of available volumes.

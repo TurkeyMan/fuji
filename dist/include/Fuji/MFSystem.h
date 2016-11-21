@@ -11,7 +11,6 @@
 #define _MFSYSTEM_H
 
 class MFIniLine;
-struct MFFileTime;
 
 enum MFMonth
 {
@@ -31,7 +30,7 @@ enum MFMonth
 
 enum MFDayOfWeek
 {
-	Sunday,
+	Sunday = 0,
 	Monday,
 	Tuesday,
 	Wednesday,
@@ -42,15 +41,20 @@ enum MFDayOfWeek
 
 struct MFSystemTime
 {
-	uint16 year;
-	uint16 month;
-	uint16 dayOfWeek;
-	uint16 day;
-	uint16 hour;
-	uint16 minute;
-	uint16 second;
-	uint16 tenthMillisecond; // ie, 100 microseconds
+	uint32 year : 15;			/** Absolute year; eg, 2016 */
+	uint32 month : 4;			/** 1-12 */
+	uint32 dayOfWeek : 3;		/** 0-6 */
+	uint32 day : 5;				/** 1-31 */
+	uint32 hour : 5;			/** 0-23 */
+	uint32 minute : 6;			/** 0-59 */
+	uint32 second : 6;			/** 0-60 */
+	uint32 microsecond : 20;	/** 0-999999 */
 };
+
+/**
+* MFFileTime stores a time stamp in a way that can be ordered and compared.
+*/
+typedef uint64 MFFileTime;
 
 /**
  * Fuji Defaults structure.
@@ -363,10 +367,17 @@ MF_API const char * MFSystem_GetSystemName();
 MF_API MFEndian MFSystem_GetPlatformEndian(int platform);
 
 MF_API void MFSystem_SystemTime(MFSystemTime *pSystemTime);
-MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime);
-MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime);
+MF_API void MFSystem_LocalTime(MFSystemTime *pLocalTime);
+MF_API void MFSystem_FileTime(MFFileTime *pFileTime);
+
 MF_API void MFSystem_SystemTimeToLocalTime(const MFSystemTime *pSystemTime, MFSystemTime *pLocalTime);
+MF_API void MFSystem_SystemTimeToFileTime(const MFSystemTime *pSystemTime, MFFileTime *pFileTime);
+
 MF_API void MFSystem_LocalTimeToSystemTime(const MFSystemTime *pLocalTime, MFSystemTime *pSystemTime);
+MF_API void MFSystem_LocalTimeToFileTime(const MFSystemTime *pLocalTime, MFFileTime *pFileTime);
+
+MF_API void MFSystem_FileTimeToSystemTime(const MFFileTime *pFileTime, MFSystemTime *pSystemTime);
+MF_API void MFSystem_FileTimeToLocalTime(const MFFileTime *pFileTime, MFSystemTime *pLocalTime);
 
 /**
  * Read the time stamp counter.

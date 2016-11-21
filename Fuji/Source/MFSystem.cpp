@@ -506,3 +506,30 @@ MF_API uint32 MFSystem_GetFrameCounter()
 {
 	return gpEngineInstance->frameCount;
 }
+
+MF_API void MFSystem_LocalTime(MFSystemTime *pLocalTime)
+{
+	MFSystem_SystemTime(pLocalTime);
+	MFSystem_SystemTimeToLocalTime(pLocalTime, pLocalTime);
+}
+
+MF_API void MFSystem_FileTime(MFFileTime *pFileTime)
+{
+	MFSystemTime sys;
+	MFSystem_SystemTime(&sys);
+	MFSystem_SystemTimeToFileTime(&sys, pFileTime);
+}
+
+MF_API void MFSystem_LocalTimeToFileTime(const MFSystemTime *pLocalTime, MFFileTime *pFileTime)
+{
+	MFSystemTime sys;
+	MFSystem_LocalTimeToSystemTime(pLocalTime, &sys);
+	MFSystem_SystemTimeToFileTime(&sys, pFileTime);
+}
+
+MF_API void MFSystem_FileTimeToLocalTime(const MFFileTime *pFileTime, MFSystemTime *pLocalTime)
+{
+	MFSystemTime sys;
+	MFSystem_FileTimeToSystemTime(pFileTime, &sys);
+	MFSystem_SystemTimeToLocalTime(&sys, pLocalTime);
+}

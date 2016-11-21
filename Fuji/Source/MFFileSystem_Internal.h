@@ -96,23 +96,16 @@ struct MFJob
 
 // mounted filesystem management
 
-enum MFTOCFlags
-{
-	MFTF_Directory = 1,
-	MFTF_SymbolicLink = 2,
-	MFTF_Hidden = 4
-};
-
 struct MFTOCEntry
 {
-	MFTOCEntry *pChild;
-	MFTOCEntry *pParent;
-
+	MFFileInfo info;
 	char *pName;
-	uint32 flags;
+
+	MFTOCEntry *pParent;
+	MFTOCEntry *pChildren;
+	uint32 numChildren;
 
 	void *pFilesysData;
-	uint32 size;
 };
 
 struct MFMount
