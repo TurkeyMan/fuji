@@ -71,7 +71,8 @@ int MFFileSystemNative_Mount(MFMount *pMount, MFMountData *pMountData)
 
 int MFFileSystemNative_Dismount(MFMount *pMount)
 {
-	MFFileSystem_ReleaseToc(pMount->pEntries, pMount->numFiles);
+	if (pMount->pEntries)
+		MFFileSystem_ReleaseToc(pMount->pEntries, pMount->numFiles);
 	MFHeap_Free(pMount->pFilesysData);
 	return 0;
 }

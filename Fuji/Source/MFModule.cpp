@@ -119,6 +119,9 @@ MF_API uint64 MFModule_GetModuleMask(const char **ppModuleNames)
 
 uint64 MFModule_RegisterCoreModules()
 {
+	if (gpEngineInstance->coreModules != 0)
+		return gpEngineInstance->coreModules;
+
 	gpEngineInstance->builtinModuleIDs[MFBIM_MFUtil] = (char)MFModule_RegisterModule("MFUtil", MFUtil_InitModule, NULL, 0);
 	gpEngineInstance->coreModules = MFModule_GetBuiltinModuleMask(MFBIM_MFUtil);
 
@@ -139,6 +142,8 @@ uint64 MFModule_RegisterCoreModules()
 
 	// register the filesystems
 	gpEngineInstance->coreModules |= MFFileSystem_RegisterFilesystemModules(fs);
+
+	gpEngineInstance->bIsInitialised = false;
 
 	return gpEngineInstance->coreModules;
 }
@@ -251,6 +256,8 @@ uint64 MFModule_RegisterEngineModules()
 	MFSystemCallbackFunction pCallback = MFSystem_GetSystemCallback(MFCB_RegisterModules, &pUserData);
 	if(pCallback)
 		pCallback(pUserData);
+
+	gpEngineInstance->bIsInitialised = false;
 
 	return modules;
 }
