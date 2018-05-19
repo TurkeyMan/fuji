@@ -19,7 +19,7 @@ MFStateBlock *pDefaultStates = NULL;
 
 /**** Functions ****/
 
-void Game_InitFilesystem()
+void Game_InitFilesystem(void *pUserData)
 {
 	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
@@ -36,10 +36,10 @@ void Game_InitFilesystem()
 	MFFileSystem_Mount(hNative, &mountData);
 
 	if(pInitFujiFS)
-		pInitFujiFS();
+		pInitFujiFS(pUserData);
 }
 
-void Game_Init()
+void Game_Init(void *pUserData)
 {
 	// create the renderer with a single layer that clears before rendering
 	MFRenderLayerDescription layers[] = { { "Scene" } };
@@ -61,7 +61,7 @@ void Game_Init()
 #define CHK_BUTTON(x) \
      if (MFInput_Read(x, IDD_Gamepad)!=0.0f)  MFDebug_Message(#x);
 
-void Game_Update()
+void Game_Update(void *pUserData)
 {
 	MFDebug_Message(MFStr("Time is %f- %f FPS\t", gSystemTimer.GetSecondsF(), gSystemTimer.GetFPS()));
 	MFDebug_Message(MFStr("Left (%1.4f, %1.4f) ", MFInput_Read(Axis_LX, IDD_Gamepad), MFInput_Read(Axis_LY, IDD_Gamepad)));
@@ -89,7 +89,7 @@ void Game_Update()
 	CHK_BUTTON(Button_DRight);
 }
 
-void Game_Draw()
+void Game_Draw(void *pUserData)
 {
 	// set orthographic projection
 	MFView_SetOrtho();
@@ -98,7 +98,7 @@ void Game_Draw()
 	MFFont_DrawText2(MFFont_GetDebugFont(), 200.f, 200.f, 50.f, MFVector::one, "Hello World!");
 }
 
-void Game_Deinit()
+void Game_Deinit(void *pUserData)
 {
 	MFRenderer_Destroy(pRenderer);
 }

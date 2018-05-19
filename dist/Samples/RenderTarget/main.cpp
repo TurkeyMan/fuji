@@ -34,7 +34,7 @@ MFStateBlock *pBoxStateBlock = NULL;
 
 /**** Functions ****/
 
-void Game_InitFilesystem()
+void Game_InitFilesystem(void *pUserData)
 {
 	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
@@ -51,10 +51,10 @@ void Game_InitFilesystem()
 	MFFileSystem_Mount(hNative, &mountData);
 
 	if(pInitFujiFS)
-		pInitFujiFS();
+		pInitFujiFS(pUserData);
 }
 
-void Game_Init()
+void Game_Init(void *pUserData)
 {
 	// create the renderer with a single layer that clears before rendering
 	MFRenderLayerDescription layers[] = { { "Prism" }, { "Box" } };
@@ -92,7 +92,7 @@ void Game_Init()
 	pBoxStateBlock = MFStateBlock_Create(128);
 }
 
-void Game_Update()
+void Game_Update(void *pUserData)
 {
 	static float rotation = 0.0f;
 	rotation += MFSystem_GetTimeDelta();
@@ -109,7 +109,7 @@ void Game_Update()
 	MFStateBlock_SetMatrix(pBoxStateBlock, MFSCM_World, world);
 }
 
-void Game_Draw()
+void Game_Draw(void *pUserData)
 {
 	// render the prism
 	MFView_SetAspectRatio(1.f);
@@ -126,7 +126,7 @@ void Game_Draw()
 	MFRenderLayer_AddVertices(pLayer, pBoxMeshStateBlock, 0, 3*12, MFPT_TriangleList, pPrismRenderTarget, pBoxStateBlock, NULL, MFView_GetViewState());
 }
 
-void Game_Deinit()
+void Game_Deinit(void *pUserData)
 {
 	MFStateBlock_Destroy(pPrismStateBlock);
 	MFStateBlock_Destroy(pPrismMeshStateBlock);

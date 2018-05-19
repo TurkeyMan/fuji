@@ -271,7 +271,7 @@ void HKUserInterface::OnInputEvent(HKInputManager &manager, const HKInputManager
 	}
 }
 
-void HKUserInterface::ResizeCallback()
+void HKUserInterface::ResizeCallback(void *pUserData)
 {
 	HKUserInterface &ui = HKUserInterface::Get();
 	if(&ui)
@@ -284,5 +284,5 @@ void HKUserInterface::ResizeCallback()
 	}
 
 	if(pChainResizeCallback)
-		pChainResizeCallback();
+		pChainResizeCallback(pUserData);
 }

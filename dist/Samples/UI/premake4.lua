@@ -7,7 +7,7 @@ project "UI"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "WinMain", "StaticRuntime" }
+	staticruntime "On"
 	warnings "Extra"
 	exceptionhandling "Off"
 	rtti "Off"
@@ -18,4 +18,5 @@ project "UI"
 	dofile "../../Project/hakuconfig.lua"
 
 	configuration { "windows" }
+		entrypoint "WinMainCRTStartup"
 		links { "FujiMiddleware.lib" }

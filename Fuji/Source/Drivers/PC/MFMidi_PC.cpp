@@ -280,7 +280,7 @@ void MFMidi_UpdateInternal()
 {
 	// copy notes into lastNotes
 	size_t numInputDevices = MFDevice_GetNumDevices(MFDT_MidiInput);
-	for (int i = 0; i < numInputDevices; ++i)
+	for (size_t i = 0; i < numInputDevices; ++i)
 	{
 		MFDevice *pDevice = MFDevice_GetDeviceByIndex(MFDT_MidiInput, i);
 		if (pDevice->state == MFDevState_Active)

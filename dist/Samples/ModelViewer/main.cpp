@@ -62,7 +62,7 @@ const char* ppFormats[] =
 
 /**** Functions ****/
 
-void Game_InitFilesystem()
+void Game_InitFilesystem(void *pUserData)
 {
 	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
@@ -87,7 +87,7 @@ void Game_InitFilesystem()
 	MFFileSystem_Mount(hNative, &mountData);
 
 	if(pInitFujiFS)
-		pInitFujiFS();
+		pInitFujiFS(pUserData);
 }
 
 void Scan(MFString path)
@@ -98,7 +98,7 @@ void Scan(MFString path)
 	{
 		do
 		{
-			if(fd.attributes & MFFA_Directory)
+			if(fd.info.attributes & MFFA_Directory)
 			{
 				Scan(MFString::Format("%s%s/", path.CStr(), fd.pFilename).CStr());
 			}
@@ -115,7 +115,7 @@ void Scan(MFString path)
 	}
 }
 
-void Game_Init()
+void Game_Init(void *pUserData)
 {
 	// create the renderer with a single layer that clears before rendering
 	MFRenderLayerDescription layers[] = { { "Scene" } };
@@ -136,7 +136,7 @@ void Game_Init()
 	Scan("data:");
 }
 
-void Game_Update()
+void Game_Update(void *pUserData)
 {
 	if(!bShowModel)
 	{
@@ -209,7 +209,7 @@ void Game_Update()
 	}
 }
 
-void Game_Draw()
+void Game_Draw(void *pUserData)
 {
 	if(!bShowModel)
 	{
@@ -248,7 +248,7 @@ void Game_Draw()
 	}
 }
 
-void Game_Deinit()
+void Game_Deinit(void *pUserData)
 {
 	if(pModel)
 		MFModel_Release(pModel);

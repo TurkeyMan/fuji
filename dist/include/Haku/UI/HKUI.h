@@ -64,7 +64,7 @@ protected:
 	void OnInputEvent(HKInputManager &manager, const HKInputManager::EventInfo &ev);
 
 	static MFSystemCallbackFunction pChainResizeCallback;
-	static void ResizeCallback();
+	static void ResizeCallback(void *pUserData);
 };
 
 #endif

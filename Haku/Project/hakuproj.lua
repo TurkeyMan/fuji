@@ -16,9 +16,10 @@ project (projName)
 			-- linux shared libs append the version number AFTER the extension
 			targetextension(".so." .. fujiVersion)
 		end
-		flags { "StaticRuntime" }
+		staticruntime "On"
 	else
 		kind "StaticLib"
+		staticruntime "On"
 		flags { "OmitDefaultLibrary" }
 	end
 

@@ -45,7 +45,7 @@ configuration { }
 includedirs { "../include/" }
 importdirs { "../include/d2/" }
 
-if os.get() == "windows" then
+if os.target() == "windows" then
 	separator = "_"
 else
 	separator = "-"
@@ -55,27 +55,27 @@ configuration { "Debug" }
 	defines { "DEBUG", "_DEBUG" }
 	symbols "On"
 	optimize "Off"
-	boundschecking "On"
+	boundscheck "On"
 	targetsuffix (separator .. configNames.Debug)
 
 configuration { "DebugOpt" }
 	defines { "DEBUG", "_DEBUG" }
 	symbols "On"
 	optimize "On"
-	boundschecking "On"
+	boundscheck "On"
 	targetsuffix (separator .. configNames.DebugOpt)
 
 configuration { "Release" }
 	defines { "NDEBUG", "_RELEASE" }
 	optimize "Full"
-	boundschecking "Off"
+	boundscheck "Off"
 	configuration { "Release", "not linux" }
 		targetsuffix (separator .. configNames.Release)	-- Note: Maybe this should be Retail instead?
 
 configuration { "Retail" }
 	defines { "NDEBUG", "_RETAIL" }
 	optimize "Full"
-	boundschecking "Off"
+	boundscheck "Off"
 	targetsuffix (separator .. configNames.Retail)
 
 

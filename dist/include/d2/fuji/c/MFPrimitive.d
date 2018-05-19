@@ -3,7 +3,7 @@ module fuji.c.MFPrimitive;
 import fuji.c.MFTypes;
 import fuji.c.MFMaterial;
 import fuji.c.MFMatrix;
-import fuji.c.MFRenderer: MFStateBlock;
+import fuji.c.MFRenderState: MFStateBlock;
 
 nothrow:
 @nogc:

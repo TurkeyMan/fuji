@@ -43,7 +43,7 @@ static const char* pSource = ""
 //---------------------------------------------------------------------------------------------------------------------
 /**** Functions ****/
 //---------------------------------------------------------------------------------------------------------------------
-void Game_Init()
+void Game_Init(void *pUserData)
 {
 	MFCALLSTACK;
 
@@ -79,7 +79,7 @@ void Game_Init()
 	MFCompute_ReadBuffer(pBufferR, sizeof(float) * BUFFER_SIZE, pBufferMemX);
 }
 //---------------------------------------------------------------------------------------------------------------------
-void Game_Deinit()
+void Game_Deinit(void *pUserData)
 {
 	MFCALLSTACK;
 
@@ -96,12 +96,12 @@ void Game_Deinit()
 	MFHeap_Free(pBufferMemR); pBufferMemR = NULL;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void Game_Update()
+void Game_Update(void *pUserData)
 {
 	MFCALLSTACK;
 }
 //---------------------------------------------------------------------------------------------------------------------
-void Game_Draw()
+void Game_Draw(void *pUserData)
 {
 	MFCALLSTACK;
 

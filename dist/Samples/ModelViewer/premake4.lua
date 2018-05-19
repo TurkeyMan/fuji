@@ -7,7 +7,7 @@ project "ModelViewer"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "WinMain", "StaticRuntime" }
+	staticruntime "On"
 	warnings "Extra"
 	exceptionhandling "Off"
 	rtti "Off"
@@ -17,4 +17,5 @@ project "ModelViewer"
 	dofile "../../Project/fujiconfig.lua"
 
 	configuration { "windows" }
+		entrypoint "WinMainCRTStartup"
 		links { "FujiMiddleware.lib" }

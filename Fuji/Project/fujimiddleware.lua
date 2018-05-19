@@ -4,12 +4,12 @@ project ("FujiMiddleware")
 	language "C++"
 	kind "SharedLib"
 	defines { "MF_MIDDLEWARE", "MF_SHAREDLIB" }
-	if os.get() == "linux" then
+	if os.target() == "linux" then
 		-- linux shared libs append the version number AFTER the extension
 		targetextension(".so." .. fujiVersion)
 	end
 
-	-- setup paths --
+	-- setup paths --symbol
 	includedirs { "../Source", "../../dist/include", "../../dist/include/Fuji" }
 	objdir "../Build"
 
@@ -19,7 +19,7 @@ project ("FujiMiddleware")
 	includedirs { "../Middleware/" }
 
 	-- project configuration --
-	flags { "StaticRuntime" }
+	staticruntime "On"
 	warnings "Extra"
 	exceptionhandling "Off"
 	rtti "Off"
@@ -27,12 +27,12 @@ project ("FujiMiddleware")
 	-- configure standard fuji stuff --
 	configuration { "Debug" }
 		defines { "DEBUG", "_DEBUG" }
-		flags { "Symbols" }
+		symbols "On"
 		optimize "Debug"
 
 	configuration { "DebugOpt" }
 		defines { "DEBUG", "_DEBUG" }
-		flags { "Symbols" }
+		symbols "On"
 		optimize "On"
 
 	configuration { "Release" }

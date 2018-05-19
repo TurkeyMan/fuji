@@ -7,7 +7,7 @@ project "RenderTarget"
 	objdir "Build/"
 	targetdir "./"
 
-	flags { "WinMain", "StaticRuntime" }
+	staticruntime "On"
 	warnings "Extra"
 	exceptionhandling "Off"
 	rtti "Off"
@@ -17,4 +17,5 @@ project "RenderTarget"
 	dofile "../../Project/fujiconfig.lua"
 
 	configuration { "windows" }
+		entrypoint "WinMainCRTStartup"
 		links { "FujiMiddleware.lib" }

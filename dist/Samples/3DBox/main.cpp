@@ -30,7 +30,7 @@ MFStateBlock *pEntityStateBlock = NULL;
 
 /**** Functions ****/
 
-void Game_InitFilesystem()
+void Game_InitFilesystem(void *pUserData)
 {
 	// mount the sample assets directory
 	MFFileSystemHandle hNative = MFFileSystem_GetInternalFileSystemHandle(MFFSH_NativeFileSystem);
@@ -47,10 +47,10 @@ void Game_InitFilesystem()
 	MFFileSystem_Mount(hNative, &mountData);
 
 	if(pInitFujiFS)
-		pInitFujiFS();
+		pInitFujiFS(pUserData);
 }
 
-void Game_Init()
+void Game_Init(void *pUserData)
 {
 	// create the renderer with a single layer that clears before rendering
 	MFRenderLayerDescription layers[] = { { "Scene" } };
@@ -78,7 +78,7 @@ void Game_Init()
 	pEntityStateBlock = MFStateBlock_Create(128);
 }
 
-void Game_Update()
+void Game_Update(void *pUserData)
 {
 	// calculate a spinning world matrix
 	MFMatrix world;
@@ -92,7 +92,7 @@ void Game_Update()
 	MFStateBlock_SetMatrix(pEntityStateBlock, MFSCM_World, world);
 }
 
-void Game_Draw()
+void Game_Draw(void *pUserData)
 {
 	// set projection
 	MFView_SetAspectRatio(MFDisplay_GetAspectRatio());
@@ -102,7 +102,7 @@ void Game_Draw()
 	MFRenderer_AddVertices(pMeshStateBlock, 0, 3*12, MFPT_TriangleList, pMaterial, pEntityStateBlock, NULL, MFView_GetViewState());
 }
 
-void Game_Deinit()
+void Game_Deinit(void *pUserData)
 {
 	MFStateBlock_Destroy(pEntityStateBlock);
 

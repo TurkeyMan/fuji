@@ -12,7 +12,7 @@ project (projName)
 		kind "SharedLib"
 		targetname "Fuji"
 		defines { "MF_SHAREDLIB" }
-		if os.is("linux") then
+		if os.istarget("linux") then
 			-- linux shared libs append the version number AFTER the extension
 			targetextension(".so." .. fujiVersion)
 		end
@@ -37,7 +37,7 @@ project (projName)
 	configuration { "not linux" }
 		includedirs { "../Middleware/vorbis/include/", "../Middleware/libmad/" }
 
-	if os.get() ~= "linux" then
+	if os.target() ~= "linux" then
 		configuration { "not linux", "not macosx", "not Android" }
 			files { "../Middleware/zlib/*.h", "../Middleware/zlib/*.c" }
 			includedirs { "../Middleware/zlib" }
@@ -51,7 +51,7 @@ project (projName)
 	configuration { }
 
 	-- project configuration --
-	flags { "StaticRuntime" }
+	staticruntime "On"
 	warnings "Extra"
 	exceptionhandling "Off"
 	rtti "Off"

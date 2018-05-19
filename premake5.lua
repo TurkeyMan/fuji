@@ -77,7 +77,7 @@ solution "Fuji"
 		configurations { "Debug", "DebugOpt", "Release", "Retail" }
 	end
 
-	if os.get() == "windows" then
+	if os.target() == "windows" then
 		platforms { "x32", "x64" }
 	end
 
@@ -94,7 +94,7 @@ solution "Fuji"
 	-- D bindings
 	dofile "Fuji/Project/fujidproj.lua"
 
-if os.is("windows") then
+if os.target("windows") then
 	solution "FujiMiddleware"
 		platforms { "x32", "x64" }
 		if _ACTION == "gmake" then

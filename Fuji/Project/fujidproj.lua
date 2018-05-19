@@ -3,7 +3,7 @@ fujiVersion = "0.7.1"
 project ("FujiD")
 	language "C++"
 	kind "StaticLib"
-	flags { "StaticRuntime" }
+	staticruntime "On"
 --	flags { "OmitDefaultLibrary" }
 
 	-- setup paths --

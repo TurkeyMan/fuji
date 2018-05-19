@@ -741,13 +741,13 @@ bool MFCollision_PlaneTriTest(const MFVector& plane, const MFVector& p0,  const 
 }
 
 /* sort so that a<=b */
-#define SORT(a,b)       \
-             if(a>b)    \
-             {          \
-               float c; \
-               c=a;     \
-               a=b;     \
-               b=c;     \
+#define SORT(a,b)         \
+             if(a>b)      \
+             {            \
+               float __c; \
+               __c=a;     \
+               a=b;       \
+               b=__c;     \
              }
 
 /* this edge to edge test is based on Franlin Antonio's gem:

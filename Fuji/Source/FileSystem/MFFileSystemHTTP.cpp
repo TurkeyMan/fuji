@@ -432,7 +432,7 @@ size_t MFFileHTTP_Read(MFFile* fileHandle, void *pBuffer, size_t bytes)
 	while(numNewlines == 1);
 
 	MFDebug_Assert(dataStart == fileHandle->offset, "Offset is wrong..");
-	MFDebug_Assert(contentLength == bytes, "Length is wrong..");
+	MFDebug_Assert(contentLength == (int)bytes, "Length is wrong..");
 
 	size_t numBytes = MFMin(bufferLen - (pT - temp), bytes);
 	if(numBytes)
